@@ -130,9 +130,8 @@ void EnzoBoundary::enforce_reflecting_precision_
   int ix,iy,iz,ig;
   T sign;
 
-  if (face == face_lower && 
-      axis == axis_x) {
-    if (nx > 1) {
+  if (nx > 1) {
+    if (face == face_lower && axis == axis_x) {
       ix = gx;
       sign = vx ? -1.0 : 1.0;
       for (ig=0; ig<gx; ig++) {
@@ -145,9 +144,7 @@ void EnzoBoundary::enforce_reflecting_precision_
 	}
       }
     }
-  } else if (face == face_upper && 
-	     axis == axis_x) {
-    if (nx > 1) {
+    if (face == face_upper &&  axis == axis_x) {
       ix = nx+gx-1;
       sign = vx ? -1.0 : 1.0;
       for (ig=0; ig<gx; ig++) {
@@ -160,9 +157,10 @@ void EnzoBoundary::enforce_reflecting_precision_
 	}
       }
     }
-  } else if (face == face_lower && 
-	     axis == axis_y) {
-    if (ny > 1) {
+  } 
+
+  if (ny > 1) {
+    if (face == face_lower && axis == axis_y) {
       iy = gy;
       sign = vy ? -1.0 : 1.0;
       for (ig=0; ig<gy; ig++) {
@@ -174,10 +172,8 @@ void EnzoBoundary::enforce_reflecting_precision_
 	  }
 	}
       }
-    }
-  } else if (face == face_upper && 
-	     axis == axis_y) {
-    if (ny > 1) {
+    } 
+    if (face == face_upper && axis == axis_y) {
       iy = ny+gy-1;
       sign = vy ? -1.0 : 1.0;
       for (ig=0; ig<gy; ig++) {
@@ -190,9 +186,10 @@ void EnzoBoundary::enforce_reflecting_precision_
 	}
       }
     }
-  } else if (face == face_lower && 
-	     axis == axis_z) {
-    if (nz > 1) {
+  }
+
+  if (nz > 1) {
+    if (face == face_lower && axis == axis_z) {
       iz = gz;
       sign = vz ? -1.0 : 1.0;
       for (ig=0; ig<gz; ig++) {
@@ -205,9 +202,7 @@ void EnzoBoundary::enforce_reflecting_precision_
 	}
       }
     }
-  } else if (face == face_upper && 
-	     axis == axis_z) {
-    if (nz > 1) {
+    if (face == face_upper && axis == axis_z) {
       iz = nz+gz-1;
       sign = vz ? -1.0 : 1.0;
       for (ig=0; ig<gz; ig++) {
@@ -220,7 +215,9 @@ void EnzoBoundary::enforce_reflecting_precision_
 	}
       }
     }
-  } else {
+  }
+
+  if (face == face_all) {
     ERROR("EnzoBoundary::enforce_reflecting_precision_",
 	  "Cannot be called with face_all");
   }

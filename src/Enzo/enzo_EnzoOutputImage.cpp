@@ -236,7 +236,7 @@ void EnzoOutputImage::write
 
 //======================================================================
 
-void EnzoOutputImage::image_set_map_
+void EnzoOutputImage::image_set_map
 (int n, double * map_r, double * map_g, double * map_b) throw()
 {
   map_r_.resize(n);
@@ -277,10 +277,10 @@ void EnzoOutputImage::image_close_ (double min, double max) throw()
 
   // Adjust min and max bounds if needed
 
-  for (int i=0; i<m; i++) {
-    min = MIN(min,image_[i]);
-    max = MAX(max,image_[i]);
-  }
+   for (int i=0; i<m; i++) {
+     min = MIN(min,image_[i]);
+     max = MAX(max,image_[i]);
+   }
 
   // loop over pixels (ix,iy)
 
@@ -292,28 +292,34 @@ void EnzoOutputImage::image_close_ (double min, double max) throw()
 
       double value = image_[i];
 
-      // map v to lower colormap index
-      size_t k = (map_r_.size() - 1)*(value - min) / (max-min);
+      double r = 1.0, g = 0, b = 0;
 
-      // prevent k == map_.size()-1, which happens if value == max
-      if (k > map_r_.size() - 2) k = map_r_.size()-2;
+      if (min <= image_[i] && image_[i] <= max) {
 
-      // linear interpolate colormap values
-      double lo = min +  k   *(max-min)/(map_r_.size()-1);
-      double hi = min + (k+1)*(max-min)/(map_r_.size()-1);
+	// map v to lower colormap index
+	size_t k = (map_r_.size() - 1)*(value - min) / (max-min);
 
-      // should be in bounds, but force if not due to rounding error
-      if (value < lo) value = lo;
-      if (value > hi) value = hi;
+	// prevent k == map_.size()-1, which happens if value == max
+	if (k > map_r_.size() - 2) k = map_r_.size()-2;
 
-      // interpolate colormap
+	// linear interpolate colormap values
+	double lo = min +  k   *(max-min)/(map_r_.size()-1);
+	double hi = min + (k+1)*(max-min)/(map_r_.size()-1);
 
-      double ratio = (value - lo) / (hi-lo);
+	// should be in bounds, but force if not due to rounding error
+	if (value < lo) value = lo;
+	if (value > hi) value = hi;
 
-      double r = (1-ratio)*map_r_[k] + ratio*map_r_[k+1];
-      double g = (1-ratio)*map_g_[k] + ratio*map_g_[k+1];
-      double b = (1-ratio)*map_b_[k] + ratio*map_b_[k+1];
+	// interpolate colormap
 
+	double ratio = (value - lo) / (hi-lo);
+
+	r = (1-ratio)*map_r_[k] + ratio*map_r_[k+1];
+	g = (1-ratio)*map_g_[k] + ratio*map_g_[k+1];
+	b = (1-ratio)*map_b_[k] + ratio*map_b_[k+1];
+      }
+
+      // Plot pixel, red if out of range
       png_->plot(ix+1, iy+1, r,g,b);
     }
   }      
@@ -322,4 +328,6 @@ void EnzoOutputImage::image_close_ (double min, double max) throw()
 
   delete [] image_;
   image_ = 0;
+  delete png_;
+  png_ = 0;
 }

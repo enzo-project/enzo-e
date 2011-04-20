@@ -6,6 +6,8 @@
 /// @date     Mon Feb 28 13:22:26 PST 2011
 /// @todo     Pre-compute count for p_refresh_face()
 /// @todo     Reduce repeated code between p_refresh() and p_refresh_face()
+/// @todo     Remove floating point comparisons for determining boundary faces
+/// @todo     Remove need for clearing block values before initial conditions (ghost zones accessed but not initialized)
 /// @brief    Implementation of the Block object
 
 #include "cello.hpp"
@@ -189,11 +191,10 @@ void Block::p_initial()
 
   // Apply the initial conditions 
 
-  field_block_[0]->clear(field_descr,1.0);
+  // SHOULD NOT NEED THIS
+  field_block_[0]->clear(field_descr,0.001);
 
-  Initial * initial = simulation->initial();
-
-  initial->compute(field_descr,this);
+  simulation->initial()->compute(field_descr,this);
 
   //  field_block_[0]->print(field_descr,"initial");
 
@@ -258,9 +259,57 @@ void Block::p_refresh (int nbx, int nby, int nbz, double dt)
 
   dt_ = dt; // (should be updated already?)
 
-  CProxy_Block block_array = thisProxy;
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  // Indies of self and neighbors
+  //--------------------------------------------------
+  // Boundary
+  //--------------------------------------------------
+
+  bool xm_boundary = false;
+  bool xp_boundary = false;
+  bool ym_boundary = false;
+  bool yp_boundary = false;
+  bool zm_boundary = false;
+  bool zp_boundary = false;
+
+  int nx,ny,nz;
+  field_block()->size (&nx,&ny,&nz);
+
+  Mesh *             mesh        = simulation->mesh();
+  Boundary *         boundary    = simulation->boundary();
+  const FieldDescr * field_descr = simulation->field_descr();
+
+  double lower[3];
+  mesh->lower(&lower[0],&lower[1],&lower[2]);
+  double upper[3];
+  mesh->upper(&upper[0],&upper[1],&upper[2]);
+
+
+  if ( nx > 1) {
+    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+    xm_boundary = fabs(lower_[0]-lower[0]) < 1e-7;
+    xp_boundary = fabs(upper_[0]-upper[0]) < 1e-7;
+    if ( xm_boundary ) boundary->enforce(field_descr,this,face_lower,axis_x);
+    if ( xp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_x);
+  }
+  if ( ny > 1) {
+    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+    ym_boundary = fabs(lower_[1]-lower[1]) < 1e-7;
+    yp_boundary = fabs(upper_[1]-upper[1]) < 1e-7;
+    if ( ym_boundary ) boundary->enforce(field_descr,this,face_lower,axis_y);
+    if ( yp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_y);
+  }
+  if ( nz > 1) {
+    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+    zm_boundary = fabs(lower_[2]-lower[2]) < 1e-7;
+    zp_boundary = fabs(upper_[2]-upper[2]) < 1e-7;
+    if ( zm_boundary ) boundary->enforce(field_descr,this,face_lower,axis_z);
+    if ( zp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_z);
+  }
+
+  //--------------------------------------------------
+  // Refresh
+  //--------------------------------------------------
 
   int ix = thisIndex.x;
   int iy = thisIndex.y;
@@ -273,114 +322,48 @@ void Block::p_refresh (int nbx, int nby, int nbz, double dt)
   int iyp = (iy + 1) % nby;
   int izp = (iz + 1) % nbz;
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  // Get domain lower and upper
-
-  Mesh * mesh = simulation->mesh();
-
-  double lower[3];
-  mesh->lower(&lower[0],&lower[1],&lower[2]);
-  double upper[3];
-  mesh->upper(&upper[0],&upper[1],&upper[2]);
-
-  // Field block size
-
-  int nx,ny,nz;
-  field_block()->size (&nx,&ny,&nz);
-
-  Boundary * boundary = simulation->boundary();
-  const FieldDescr * field_descr = simulation->field_descr();
-
   FieldFace field_face;
-
-  field_block()->print (field_descr,"refresh");
-  
-  //--------------------------------------------------
-  // X-axis Boundary
-  //--------------------------------------------------
 
   bool periodic = boundary->is_periodic();
 
+  CProxy_Block block_array = thisProxy;
+
   if ( nx > 1) {
-
-    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-
-    bool xm_boundary = fabs(lower_[0]-lower[0]) < 1e-7;
-    bool xp_boundary = fabs(upper_[0]-upper[0]) < 1e-7;
-
-    // Boundary
-    if ( xm_boundary ) boundary->enforce(field_descr,this,face_lower,axis_x);
-    if ( xp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_x);
-
-    // Refresh xp <<< xm
+    // xp <<< xm
     if ( ! xm_boundary || periodic ) {
       field_face.load (field_descr, field_block(), axis_x, face_lower);
       block_array(ixm,iy,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_x, face_upper);
     }
-
-    // Refresh xp >>> xm
+    // xp >>> xm
     if ( ! xp_boundary || periodic ) {
       field_face.load (field_descr, field_block(), axis_x, face_upper);
       block_array(ixp,iy,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_x, face_lower);
     }
-
   }
-
-  //--------------------------------------------------
-  // Y-axis Boundary
-  //--------------------------------------------------
-
   if ( ny > 1) {
-
-    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-
-    bool ym_boundary = fabs(lower_[1]-lower[1]) < 1e-7;
-    bool yp_boundary = fabs(upper_[1]-upper[1]) < 1e-7;
-
-    if ( ym_boundary ) boundary->enforce(field_descr, this, face_lower, axis_y);
-    if ( yp_boundary ) boundary->enforce(field_descr, this, face_upper, axis_y);
-
-    // Refresh yp <<< ym
+    // yp <<< ym
     if ( ! ym_boundary || periodic ) {
       field_face.load (field_descr, field_block(), axis_y, face_lower);
       block_array(ix,iym,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_y, face_upper);
     }
-
-    // Refresh yp >>> ym
+    // yp >>> ym
     if ( ! yp_boundary || periodic ) {
       field_face.load (field_descr, field_block(), axis_y, face_upper);
       block_array(ix,iyp,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_y, face_lower);
     }
-
   }
-
-  //--------------------------------------------------
-  // Z-axis Boundary
-  //--------------------------------------------------
-
   if ( nz > 1) {
-
-    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-
-    bool zm_boundary = fabs(lower_[2]-lower[2]) < 1e-7;
-    bool zp_boundary = fabs(upper_[2]-upper[2]) < 1e-7;
-
-    if ( zm_boundary ) boundary->enforce(field_descr, this, face_lower, axis_z);
-    if ( zp_boundary ) boundary->enforce(field_descr, this, face_upper, axis_z);
-
-    // Refresh zp <<< zm
+    // zp <<< zm
     if ( ! zm_boundary || periodic ) {
       field_face.load (field_descr, field_block(), axis_z, face_lower);
       block_array(ix,iy,izm).p_refresh_face 
 	( field_face.size(), field_face.array(), axis_z, face_upper);
     }
-
-    // Refresh zp >>> zm
+    // zp >>> zm
     if ( ! zp_boundary || periodic ) {
       field_face.load (field_descr, field_block(), axis_z, face_upper);
       block_array(ix,iy,izp).p_refresh_face 
@@ -476,14 +459,19 @@ void Block::compute()
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   // DEBUG
-  //  FieldDescr * field_descr = simulation->field_descr();
-  //  field_block()->print(field_descr,"refresh");
+  // if (cycle_ == 1) {
+  //   FieldDescr * field_descr = simulation->field_descr();
+  //   field_block()->print(field_descr,"compute",lower_,upper_);
+  //   field_block()->image(field_descr,"compute",cycle_,
+  // 			 thisIndex.x,thisIndex.y,thisIndex.z);
+  // }
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
 
     simulation->method(i) -> compute_block (this,time_,dt_);
 
   }
+
 
   // Update cycle and time
 

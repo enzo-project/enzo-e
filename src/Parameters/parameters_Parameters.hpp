@@ -14,7 +14,8 @@
 /// @todo     Add "check()" function to check individual parameters, or all
 /// @todo     Move Group and subgroup to parameter lists at end with "" default
 /// @todo     Convert current_group_ to std::stack<std::string>
-/// @bug      Evaluating logical expressions with parentheses seg-faults
+/// @bug      "x - 0.5" broken since intepreted as "x (-0.5)"; workaround "x - (0.5)"
+/// @bug      Evaluating logical expressions with parentheses seg-faults (fixed?)
 /// @brief    [\ref Parameters] Declaration for the Parameters class
 
 /// @def      MAX_PARAMETER_FILE_WIDTH

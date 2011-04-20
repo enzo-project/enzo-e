@@ -263,7 +263,7 @@ size_t FieldFace::load_precision_
     }
   }
 
-  return (sizeof(T) * (nd3[iax] * nd3[iay]) * ng3[axis]);
+  return (sizeof(T) * nd3[iax] * nd3[iay] * ng3[axis]);
 }
 
 //----------------------------------------------------------------------
@@ -278,7 +278,7 @@ size_t FieldFace::store_precision_
  int       ng3[3],
  axis_enum axis,
  face_enum face 
-) throw()
+ ) throw()
 {
   int iax=(axis+1) % 3;
   int iay=(axis+2) % 3;
@@ -296,7 +296,7 @@ size_t FieldFace::store_precision_
     }
   }
 
-  return (sizeof(T) * (nd3[iax] * nd3[iay]) * ng3[axis]);
+  return (sizeof(T) * nd3[iax] * nd3[iay] * ng3[axis]);
 }
 
 //----------------------------------------------------------------------

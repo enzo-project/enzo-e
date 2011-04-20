@@ -71,11 +71,11 @@ public: // virtual functions
     double min, double max     // Limits for color map
     ) throw();
 
-private:
-
   // Set the image colormap
-  void image_set_map_
+  void image_set_map
   (int n, double * map_r, double * map_g, double * map_b) throw();
+
+private:
 
   /// Generate a PNG image of an array
   void image_open_ (std::string filename, 
@@ -155,7 +155,7 @@ protected: // attributes
    // Loop over array subsection
 
    // image x-axis
-  
+
    for (int index_array_x=0; index_array_x<npx; index_array_x++) {
 
      int index_image_x = npx0 + index_array_x;
@@ -167,6 +167,12 @@ protected: // attributes
        int index_image_y = npy0 + index_array_y;
 
        int index_image = index_image_x + image_size_x_*index_image_y;
+
+       if ( ! ( ( index_image_x < image_size_x_) &&
+		 (index_image_y < image_size_y_)) ) {
+	 printf ("Invalid Access axis %d index(%d %d)  image(%d %d)\n",
+		 axis, index_image_x, index_image_y, image_size_x_,image_size_y_);
+       }
 
        double & pixel_value = image_ [index_image];
 

@@ -45,8 +45,6 @@ EnzoSimulationCharm::~EnzoSimulationCharm() throw()
 void EnzoSimulationCharm::run() throw()
 {
   
-  performance_->start();
-
   //--------------------------------------------------
   // Initial [block]
   //--------------------------------------------------

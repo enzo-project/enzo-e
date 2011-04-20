@@ -8,7 +8,7 @@
 /// @brief    Implementation of the FieldBlock class
 
 #include "cello.hpp"
-
+#include "enzo.hpp"
 #include "field.hpp"
 
 //----------------------------------------------------------------------
@@ -481,14 +481,17 @@ int FieldBlock::field_size
 //----------------------------------------------------------------------
 
 void FieldBlock::print (const FieldDescr * field_descr,
-			const char * message) const throw()
+			const char * message,
+			double lower[3],
+			double upper[3]) const throw()
 {
   PARALLEL_PRINTF("%s FieldBlock %p  field_count = %d\n",
 		  message ? message : "",this,field_descr->field_count());
   if ( ! array_allocated() ) {
     PARALLEL_PRINTF("%s FieldBlock %p not allocated\n");
   } else {
-    for (int index_field=0; index_field<field_descr->field_count(); index_field++) {
+    int field_count = field_descr->field_count();
+    for (int index_field=0; index_field<field_count; index_field++) {
       int nxd,nyd,nzd;
       field_size(field_descr,index_field,&nxd,&nyd,&nzd);
       int gx,gy,gz;
@@ -507,9 +510,14 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  float sum = 0.0;
 	  float sum2 = 0.0;
 	  for (int iz=0; iz<nz; iz++) {
+	    double z = lower[2] + iz*(upper[2]-lower[2])/nz;
 	    for (int iy=0; iy<ny; iy++) {
+	      double y = lower[1] + iy*(upper[1]-lower[1])/ny;
 	      for (int ix=0; ix<nx; ix++) {
+		double x = lower[0] + ix*(upper[0]-lower[0])/nx;
 		int i = ix + nxd*(iy + nyd*iz);
+		printf ("%s %d %g %g %g %22.14g \n",
+			message,index_field,x,y,z,field[i]);
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
@@ -531,9 +539,14 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  double sum = 0.0;
 	  double sum2 = 0.0;
 	  for (int iz=0; iz<nz; iz++) {
+	    double z = lower[2] + iz*(upper[2]-lower[2])/nz;
 	    for (int iy=0; iy<ny; iy++) {
+	      double y = lower[1] + iy*(upper[1]-lower[1])/ny;
 	      for (int ix=0; ix<nx; ix++) {
+		double x = lower[0] + ix*(upper[0]-lower[0])/nx;
 		int i = ix + nxd*(iy + nyd*iz);
+		printf ("%s %d %g %g %g %22.14g \n",
+			message,index_field,x,y,z,field[i]);
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
@@ -556,9 +569,14 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  long double sum = 0.0;
 	  long double sum2 = 0.0;
 	  for (int iz=0; iz<nz; iz++) {
+	    double z = lower[2] + iz*(upper[2]-lower[2])/nz;
 	    for (int iy=0; iy<ny; iy++) {
+	      double y = lower[1] + iy*(upper[1]-lower[1])/ny;
 	      for (int ix=0; ix<nx; ix++) {
+		double x = lower[0] + ix*(upper[0]-lower[0])/nx;
 		int i = ix + nxd*(iy + nyd*iz);
+		printf ("%s %d %g %g %g %22.14g \n",
+			message,index_field,x,y,z,field[i]);
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
@@ -584,10 +602,61 @@ void FieldBlock::print (const FieldDescr * field_descr,
 void FieldBlock::image 
 (
  const FieldDescr * field_descr,
- const char * filename
+ const char * prefix,
+ int cycle,
+ int ibx, int iby, int ibz
  ) const throw()
 {
-  PARALLEL_PRINTF("FieldBlock::image(%s)\n",filename);
+  INCOMPLETE("FieldBlock::image");
+
+  int field_count = field_descr->field_count();
+  for (int index_field=0; index_field<field_count; index_field++) {
+
+    int nxd,nyd,nzd;
+    field_size(field_descr,index_field,&nxd,&nyd,&nzd);
+
+    int nd3[3] = {nxd,nyd,nzd};
+    for (int axis=0; axis<3; axis++) {
+
+      EnzoOutputImage * output = new EnzoOutputImage;
+      double r[] = {1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0 };
+      double g[] = {0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0 };
+      double b[] = {0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0 };
+
+      output->image_set_map(7,r,g,b);
+
+      char axis_name[3] = {'x','y','z'};
+      char filename[80];
+      int ix = (axis+1) % 3;
+      int iy = (axis+2) % 3;
+
+      sprintf (filename,"%s-%s-%d-%c-%d%d%d.png",
+	       prefix,field_descr->field_name(index_field).c_str(),
+	       cycle,axis_name[axis],ibx,iby,ibz);
+  
+      switch (field_descr->precision(index_field)) {
+      case precision_single:
+	output->image
+	  (filename,nd3[ix],nd3[iy],
+	   (float *) field_values_[index_field],
+	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
+	break;
+      case precision_double:
+	output->image
+	  (filename,nd3[ix],nd3[iy],(double *) field_values_[index_field],
+	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
+	break;
+      case precision_quadruple:
+	output->image
+	  (filename,nd3[ix],nd3[iy],(long double *) field_values_[index_field],
+	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
+	break;
+      }
+
+      delete output;
+
+    }
+  }
 }
 
 //----------------------------------------------------------------------

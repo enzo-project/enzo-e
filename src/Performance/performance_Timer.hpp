@@ -109,7 +109,7 @@ inline void Timer::print() const throw()
 {
   Monitor * monitor = Monitor::instance();
 
-  monitor->print ("[Performance] real time = %f\n",value());
+  monitor->print ("[Performance] real time = %f",value());
 
 }
 

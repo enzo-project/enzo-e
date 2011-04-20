@@ -68,6 +68,8 @@ Simulation::~Simulation() throw()
 void Simulation::initialize() throw()
 {
 
+  performance_->start();
+
   // Initialize parameters
 
   initialize_simulation_();
@@ -743,8 +745,11 @@ void Simulation::p_refresh
   //--------------------------------------------------
 
   if (stop) {
-    int count = CkNumPes();
-    proxy_main.p_exit(count);
+
+    performance_->stop();
+    performance_->print();
+    proxy_main.p_exit(CkNumPes());
+
   } else {
 
     //--------------------------------------------------

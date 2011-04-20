@@ -129,11 +129,13 @@ public: // interface
 
   /// Print basic field characteristics for debugging
   void print (const FieldDescr * field_descr,
-	      const char * message = 0) const throw();
+	      const char * message,
+	      double lower[3], double upper[3]) const throw();
 
   /// Write a block to disk as a png image
   void image (const FieldDescr * field_descr,
-	      const char * filename) const throw();
+	      const char * prefix,
+	      int cycle, int ibx, int iby, int ibz) const throw();
 
 private: // functions
 
