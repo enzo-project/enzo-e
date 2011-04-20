@@ -20,7 +20,8 @@ public: // interface
 
   /// Create a new Block  [abstract factory design pattern]
   virtual Block * create_block
-  (int ix, int iy, int iz,
+  (int ibx, int iby, int ibz,
+   int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,

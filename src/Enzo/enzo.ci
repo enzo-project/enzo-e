@@ -60,7 +60,8 @@ mainmodule enzo {
   array[3D] Block {
 
     entry Block
-      (int nx, int ny, int nz,
+      (int nbx, int nby, int nbz,
+       int nx, int ny, int nz,	
        double xm, double ym, double zm,
        double hx, double hy, double hz,
        int num_field_blocks);
@@ -68,7 +69,7 @@ mainmodule enzo {
 
     entry void p_initial();
     entry void p_output();
-    entry void p_refresh(int nbx, int nby, int nbz, double dt);
+    entry void p_refresh(double dt);
     entry void p_refresh_face(int n, char buffer[n], int axis, int face);
 
     //     void p_next();
@@ -80,7 +81,8 @@ mainmodule enzo {
   array[3D] EnzoBlock {
 
     entry EnzoBlock
-      (int nx, int ny, int nz,
+      (int nbx, int nby, int nbz,
+       int nx, int ny, int nz,
        double xm, double ym, double zm,
        double hx, double hy, double hz,
        int num_field_blocks);

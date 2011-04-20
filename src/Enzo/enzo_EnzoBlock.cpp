@@ -12,23 +12,22 @@
 
 //======================================================================
 
-#ifdef CONFIG_USE_CHARM
 
-EnzoBlock::EnzoBlock(int nx, int ny, int nz,
-		     double xm, double ym, double zm,
-		     double xp, double yp, double zp,
-		     int num_field_blocks) throw()
-  : Block(nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
-#else
-
-EnzoBlock::EnzoBlock(int ix, int iy, int iz,
-		     int nx, int ny, int nz,
-		     double xm, double ym, double zm,
-		     double xp, double yp, double zp,
-		     int num_field_blocks) throw()
-    : Block(ix,iy,iz,
-	    nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
+EnzoBlock::EnzoBlock
+(
+#ifndef CONFIG_USE_CHARM
+ int ix, int iy, int iz,
 #endif
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xm, double ym, double zm,
+ double xp, double yp, double zp,
+ int num_field_blocks) throw()
+  : Block (
+#ifndef CONFIG_USE_CHARM
+	   ix,iy,iz,
+#endif
+	   nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
     CycleNumber(0),
     Time(0),
     OldTime(0),

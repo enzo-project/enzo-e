@@ -33,12 +33,13 @@ public: // interface
   Block
   (
 #ifndef CONFIG_USE_CHARM
-   int ix, int iy, int iz,
+   int ibx, int iby, int ibz,
 #endif
-    int nx, int ny, int nz,
-    double xmp, double ymp, double zmp,
-    double xb, double yb, double zb,
-    int num_field_blocks) throw();
+   int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   double xmp, double ymp, double zmp,
+   double xb, double yb, double zb,
+   int num_field_blocks) throw();
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize an empty Block
@@ -56,7 +57,7 @@ public: // interface
   void p_output();
 
   /// Refresh ghost zones and apply boundary conditions
-  void p_refresh(int nbx, int nby, int nbz, double dt);
+  void p_refresh(double dt);
 
   /// Refresh a FieldFace
   void p_refresh_face(int n, char buffer[], int axis, int face);
@@ -103,6 +104,9 @@ public: // interface
   /// [tested in test_Patch]
   void index_patch (int * ix, int * iy, int * iz) const throw();
 
+  /// Return the size the containing Patch
+  void size_patch (int * nx, int * ny, int * nz) const throw();
+
   /// Return the neighboring block in the given direction
   /// [tested in test_Patch]
   Block * neighbor (axis_enum axis, face_enum face) const throw();
@@ -136,6 +140,9 @@ protected: // attributes
 
   /// Index into Patch [redundant with CHARM thisIndex.x .y .z]
   int index_[3];
+
+  /// Size of Patch
+  int size_[3];
 
   /// Lower extent of the box associated with the block [computable from Patch]
   double lower_[3];

@@ -23,23 +23,17 @@ class EnzoBlock : public Block
 
 public: // interface
 
-#ifdef CONFIG_USE_CHARM
   /// Initialize the EnzoBlock chare array
   EnzoBlock
-  ( int nx, int ny, int nz,
-    double xm, double ym, double zm,
-    double hx, double hy, double hz,
-    int num_field_blocks) throw();
-#else
-  /// Initialize the BlockBlock object
-  EnzoBlock
-  ( int ix, int iy, int iz,
-    int nx, int ny, int nz,
-    double xm, double ym, double zm,
-    double hx, double hy, double hz,
-    int num_field_blocks) throw();
+  (
+#ifndef CONFIG_USE_CHARM
+   int ix, int iy, int iz,
 #endif
-
+   int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   double xm, double ym, double zm,
+   double hx, double hy, double hz,
+   int num_field_blocks) throw();
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize a migrated Block
@@ -47,8 +41,6 @@ public: // interface
 
   /// Initialize an empty Block
   EnzoBlock() {TRACE("Oops")};
-
-
 #endif
 
   // /// Initialize the EnzoBlock object

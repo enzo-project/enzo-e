@@ -19,8 +19,9 @@
 Block::Block
 (
 #ifndef CONFIG_USE_CHARM
- int ix, int iy, int iz,
+ int ibx, int iby, int ibz,
 #endif
+ int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
  double xb, double yb, double zb, // Block width
@@ -34,6 +35,10 @@ Block::Block
     dt_(0)
 
 { 
+#ifndef CONFIG_LOAD_BALANCE
+  usesAtSync = CmiTrue;
+#endif
+
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);
   for (size_t i=0; i<field_block_.size(); i++) {
@@ -43,24 +48,28 @@ Block::Block
   // Initialize indices into parent patch
 
 #ifdef CONFIG_USE_CHARM
-  int ix = thisIndex.x;
-  int iy = thisIndex.y;
-  int iz = thisIndex.z;
+  int ibx = thisIndex.x;
+  int iby = thisIndex.y;
+  int ibz = thisIndex.z;
 #endif
 
-  index_[0] = ix;
-  index_[1] = iy;
-  index_[2] = iz;
+  size_[0] = nbx;
+  size_[1] = nby;
+  size_[2] = nbz;
+
+  index_[0] = ibx;
+  index_[1] = iby;
+  index_[2] = ibz;
 
   // Initialize extent 
 
-  lower_[axis_x] = xpm + ix*xb;
-  lower_[axis_y] = ypm + iy*yb;
-  lower_[axis_z] = zpm + iz*zb;
+  lower_[axis_x] = xpm + ibx*xb;
+  lower_[axis_y] = ypm + iby*yb;
+  lower_[axis_z] = zpm + ibz*zb;
 
-  upper_[axis_x] = xpm + (ix+1)*xb;
-  upper_[axis_y] = ypm + (iy+1)*yb;
-  upper_[axis_z] = zpm + (iz+1)*zb;
+  upper_[axis_x] = xpm + (ibx+1)*xb;
+  upper_[axis_y] = ypm + (iby+1)*yb;
+  upper_[axis_z] = zpm + (ibz+1)*zb;
 }
 
 //----------------------------------------------------------------------
@@ -154,6 +163,15 @@ void Block::index_patch (int * ix=0, int * iy=0, int * iz=0) const throw ()
 
 //----------------------------------------------------------------------
 
+void Block::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
+{
+  if (nx) (*nx)=size_[0]; 
+  if (ny) (*ny)=size_[1]; 
+  if (nz) (*nz)=size_[2]; 
+}
+
+//----------------------------------------------------------------------
+
 Block * Block::neighbor (axis_enum axis, face_enum face) const throw()
 {
   return NULL;
@@ -237,7 +255,27 @@ void Block::prepare()
 
   int num_blocks = simulation->mesh()->patch(0)->num_blocks();
 
+  //@@@@@ BYPASS REDUCTION
+
+#undef BYPASS_REDUCTION
+
+#ifdef BYPASS_REDUCTION
+  if (stop_block) {
+    simulation->monitor()-> print("[Simulation %d] cycle %04d time %15.12f", 
+				  simulation->index(),cycle_,time_);
+    simulation->performance()->stop();
+    simulation->performance()->print();
+    proxy_main.p_exit(num_blocks);
+  }    
+
+  thisProxy.p_refresh (dt_block)  ;
+#else
   proxy_main.p_prepare(num_blocks, cycle_, time_, dt_block, stop_block);
+#endif
+
+  
+  //@@@@@ BYPASS REDUCTION
+
 
 }
 
@@ -250,7 +288,7 @@ void Block::p_output ()
 
 //----------------------------------------------------------------------
 
-void Block::p_refresh (int nbx, int nby, int nbz, double dt)
+void Block::p_refresh (double dt)
 {
 
   TRACE("Block::p_refresh");
@@ -315,6 +353,10 @@ void Block::p_refresh (int nbx, int nby, int nbz, double dt)
   int iy = thisIndex.y;
   int iz = thisIndex.z;
 
+  int nbx = size_[0];
+  int nby = size_[1];
+  int nbz = size_[2];
+  
   int ixm = (ix - 1 + nbx) % nbx;
   int iym = (iy - 1 + nby) % nby;
   int izm = (iz - 1 + nbz) % nbz;

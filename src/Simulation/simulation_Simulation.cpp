@@ -760,9 +760,7 @@ void Simulation::p_refresh
     Patch * patch;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
-	int nbx,nby,nbz;
-	patch->blocking(&nbx,&nby,&nbz);
-	patch->blocks().p_refresh(nbx,nby,nbz,dt);
+	patch->blocks().p_refresh(dt);
       }
     }
   }

@@ -12,7 +12,8 @@
 
 Block * EnzoFactory::create_block
 (
- int ix, int iy, int iz,
+ int ibx, int iby, int ibz,
+ int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double hx, double hy, double hz,
@@ -27,7 +28,8 @@ Block * EnzoFactory::create_block
 
 #else
 
-  return new EnzoBlock (ix,iy,iz, 
+  return new EnzoBlock (ibx,iby,ibz, 
+			nbx,nby,nbz,
 			nx,ny,nz,
 			xm,ym,zm, 
 			hx,hy,hz, 

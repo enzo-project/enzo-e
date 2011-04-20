@@ -5,6 +5,9 @@ import sys
 # CONFIGURATION
 #----------------------------------------------------------------------
 
+balance         = 0
+trace           = 0
+
 use_papi        = 0
 use_valgrind    = 0
 use_projections = 1
@@ -61,6 +64,8 @@ define_double = ['CONFIG_PRECISION_DOUBLE']
 define_hdf5  =  ['CONFIG_USE_HDF5','H5_USE_16_API'];
 define_png   =  ['NO_FREETYPE'];
 define_papi  =  ['CONFIG_USE_PAPI'];
+define_trace =  ['CELLO_TRACE'];
+define_balance =  ['CONFIG_LOAD_BALANCE'];
 
 defines     = []
 defines_xlc = ""
@@ -150,6 +155,17 @@ if (use_papi != 0):
      defines     = defines             + define_papi
      defines_xlc = defines_xlc + ' -D' + define_papi[0]
      defines_xlf = defines_xlf + ' -WF,-D' + define_papi[0]
+
+if (trace != 0):
+     defines = defines + define_trace
+     defines_xlc = defines_xlc + ' -D' + define_trace[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_trace[0]
+
+if (balance != 0):
+     defines = defines + define_balance
+     defines_xlc = defines_xlc + ' -D' + define_balance[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_balance[0]
+
 #--------------------------------------------------
 
 defines     = defines     +         define_hdf5
