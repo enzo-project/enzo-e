@@ -1,0 +1,89 @@
+
+   Domain { 
+      lower = [0.0, 0.0, 0.0];
+      upper = [1.0, 1.0, 1.0];
+   } 
+
+   Mesh { 
+      root_size      = [96,96,96];
+      block_size     = [ 2, 2, 2];
+   }
+
+   Field {
+
+      ghosts = 3;
+
+      fields = [
+	"density",	
+	"velocity_x",
+	"velocity_y",
+	"velocity_z",
+	"total_energy"
+      ] ;
+
+      courant   = 0.8;
+
+      padding   = 0;
+      alignment = 8;    
+
+   }
+
+   Method {
+
+      sequence = ["ppm"];
+
+      ppm {
+
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+
+         dual_energy = false;
+     }
+   }
+
+   Physics {
+
+      dimensions = 3;
+
+      gamma = 1.4;
+
+   }
+
+   Initial {
+       density       { value = [ 0.125,   (x-(0.5))*(x-(0.5))
+                                        + (y-(0.5))*(y-(0.5))
+                                        + (z-(0.5))*(z-(0.5)) < 0.3*0.3,
+                                 1.0 ]; };
+       total_energy  { value = [ 0.14 / (0.4 * 0.125),
+                                          (x-(0.5))*(x-(0.5))
+                                        + (y-(0.5))*(y-(0.5))
+                                        + (z-(0.5))*(z-(0.5)) < 0.3*0.3,
+	                         1.0  / (0.4 * 1.0) ]; };
+       velocity_x    { value = [0.0]; };
+       velocity_y    { value = [0.0]; }
+   }
+
+   Boundary { type = "reflecting" }
+
+   Stopping {
+
+      time  = 2.5;
+      cycle = 10;
+
+      # redshift
+   }
+
+#   Output { 
+#
+#      groups = ["cycle_step_test"];
+#
+#      cycle_step_test {
+#        file_name      = "enzo-p_1-%06d";
+#	type           = "image";
+#	cycle_interval = 100;
+#      };
+#
+#
+#   }
+ 
