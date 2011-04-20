@@ -17,6 +17,7 @@
 	"density",	
 	"velocity_x",
 	"velocity_y",
+	"velocity_z",
 	"total_energy"
       ] ;
 
