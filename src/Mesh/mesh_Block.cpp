@@ -492,7 +492,7 @@ void Block::compute()
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   // DEBUG
-  if (cycle_ % 100 = 0) {
+  if (cycle_ % 100 == 0) {
     FieldDescr * field_descr = simulation->field_descr();
   //   field_block()->print(field_descr,"compute",lower_,upper_);
     field_block()->image(field_descr,"compute",cycle_,
