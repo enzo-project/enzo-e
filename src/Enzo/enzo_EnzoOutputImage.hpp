@@ -253,12 +253,16 @@ void EnzoOutputImage::image
 */
 {
 
+  // Return if image is degenerate
+  if (mx <= 1 || my <= 1) return;
+
   // n array size
   // m image size
 
   // k colormap index
 
   // Open the image
+
 
   image_open_(filename,mx,my);
 

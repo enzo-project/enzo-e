@@ -619,6 +619,7 @@ void FieldBlock::image
     for (int axis=0; axis<3; axis++) {
 
       EnzoOutputImage * output = new EnzoOutputImage;
+
       double r[] = {1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0 };
       double g[] = {0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0 };
       double b[] = {0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0 };
@@ -637,8 +638,7 @@ void FieldBlock::image
       switch (field_descr->precision(index_field)) {
       case precision_single:
 	output->image
-	  (filename,nd3[ix],nd3[iy],
-	   (float *) field_values_[index_field],
+	  (filename,nd3[ix],nd3[iy], (float *) field_values_[index_field],
 	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
 	break;
       case precision_double:
