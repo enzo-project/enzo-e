@@ -248,6 +248,14 @@ void Block::prepare()
   //--------------------------------------------------
 
   int stop_block = simulation->stopping()->complete(cycle_,time_);
+  // DEBUG
+  if (stop_block) {
+    FieldDescr * field_descr = simulation->field_descr();
+  //   field_block()->print(field_descr,"compute",lower_,upper_);
+    field_block()->image(field_descr,"final",cycle_,
+			 thisIndex.x,thisIndex.y,thisIndex.z);
+  }
+
 
   //--------------------------------------------------
   // Main::p_prepare()
@@ -490,14 +498,6 @@ void Block::compute()
 
   TRACE("Block::compute");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  // DEBUG
-  if (cycle_ % 100 == 0) {
-    FieldDescr * field_descr = simulation->field_descr();
-  //   field_block()->print(field_descr,"compute",lower_,upper_);
-    field_block()->image(field_descr,"compute",cycle_,
-			 thisIndex.x,thisIndex.y,thisIndex.z);
-  }
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
 
