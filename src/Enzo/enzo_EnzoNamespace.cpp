@@ -382,18 +382,9 @@ namespace enzo {
       }
     }
 
-    //--------------------------------------------------
-    // parameter: Mesh::block_size
-    //--------------------------------------------------
-
-    int nx = parameters->list_value_integer(0,"Mesh:block_size",1);
-    int ny = parameters->list_value_integer(1,"Mesh:block_size",1);
-    int nz = parameters->list_value_integer(2,"Mesh:block_size",1);
-
-
-    BoundaryDimension[0] = nx + 2*ghost_depth[0];
-    BoundaryDimension[1] = ny + 2*ghost_depth[1];
-    BoundaryDimension[2] = nz + 2*ghost_depth[2];
+    // BoundaryDimension[0] = nx + 2*ghost_depth[0];
+    // BoundaryDimension[1] = ny + 2*ghost_depth[1];
+    // BoundaryDimension[2] = nz + 2*ghost_depth[2];
 
     //--------------------------------------------------
     // parameter: Domain::lower

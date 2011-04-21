@@ -198,7 +198,9 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 #ifdef CONFIG_USE_CHARM
 
   if (CkMyPe() == 0) {
-    TRACE("Allocating block array");
+    char buffer[80];
+    sprintf (buffer,"Allocating block array %d %d %d",mbx,mby,mbz);
+    TRACE(buffer);
     block_ = CProxy_EnzoBlock::ckNew
       (nbx,nby,nbz,
        mbx,mby,mbz,
