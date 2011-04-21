@@ -145,6 +145,11 @@ void Patch::upper(double * xp, double * yp, double * zp) const throw ()
 
 //======================================================================
 
+#ifdef CONFIG_USE_CHARM
+extern CProxy_Main proxy_main;
+extern CProxy_Simulation proxy_simulation;
+#endif
+
 void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 {
 
@@ -200,6 +205,9 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
        lower_[0],lower_[1],lower_[2],
        xb,yb,zb, 1,
        nbx,nby,nbz);
+    block_.ckSetReductionClient 
+      (new CkCallback(CkIndex_Simulation::p_done(NULL),
+		      proxy_main));
     block_exists_ = true;
   }
 

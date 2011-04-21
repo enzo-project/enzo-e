@@ -78,6 +78,10 @@ public: // interface
   // Monitor, test Stopping, update Boundary and ghost zones
   void p_refresh (int cycle, double time, double dt, int stopping) throw();
 
+  /// default reduction callback
+  void p_done (CkReductionMsg * m)
+  {    printf ("done(%g)\n",(double *)m->getData());  delete m; }
+
 #endif
 
   //----------------------------------------------------------------------

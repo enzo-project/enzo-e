@@ -40,6 +40,7 @@ mainmodule enzo {
        int index_simulation);
 
     entry void p_refresh (int cycle, double time, double dt, int stopping);
+    entry void p_done(CkReductionMsg*);
 
   };
 
@@ -71,7 +72,6 @@ mainmodule enzo {
     entry void p_output();
     entry void p_refresh(double dt);
     entry void p_refresh_face(int n, char buffer[n], int axis, int face);
-
     //     void p_next();
     //     void p_prepare();
     //     void p_compute();

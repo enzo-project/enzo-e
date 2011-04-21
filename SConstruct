@@ -5,7 +5,7 @@ import sys
 # CONFIGURATION
 #----------------------------------------------------------------------
 
-balance         = 0
+balance         = 1
 trace           = 0
 
 use_papi        = 0

@@ -255,26 +255,15 @@ void Block::prepare()
 
   int num_blocks = simulation->mesh()->patch(0)->num_blocks();
 
-  //@@@@@ BYPASS REDUCTION
 
-#undef BYPASS_REDUCTION
+#define CHARM_REDUCTION
 
-#ifdef BYPASS_REDUCTION
-  if (stop_block) {
-    simulation->monitor()-> print("[Simulation %d] cycle %04d time %15.12f", 
-				  simulation->index(),cycle_,time_);
-    simulation->performance()->stop();
-    simulation->performance()->print();
-    proxy_main.p_exit(num_blocks);
-  }    
-
-  thisProxy.p_refresh (dt_block)  ;
+#ifdef CHARM_REDUCTION
+  printf ("contribute(%g)\n",dt_block);
+  contribute (sizeof(double),&dt_block,CkReduction::min_double);
 #else
   proxy_main.p_prepare(num_blocks, cycle_, time_, dt_block, stop_block);
 #endif
-
-  
-  //@@@@@ BYPASS REDUCTION
 
 
 }
