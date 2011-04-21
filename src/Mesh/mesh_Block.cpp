@@ -243,6 +243,17 @@ void Block::prepare()
 
   double dt_block = simulation->timestep()->compute(field_descr,this);
 
+  // Reduce timestep to coincide with scheduled output if needed
+
+  for (size_t i=0; i<simulation->num_output(); i++) {
+    Output * output = simulation->output(i);
+    dt_block = output->update_timestep(time_,dt_block);
+  }
+
+  // Reduce timestep to coincide with end of simulation if needed
+
+  dt_block = MIN (dt_block, (simulation->stopping()->stop_time() - time_));
+
   //--------------------------------------------------
   // Stopping [block]
   //--------------------------------------------------
@@ -504,7 +515,6 @@ void Block::compute()
     simulation->method(i) -> compute_block (this,time_,dt_);
 
   }
-
 
   // Update cycle and time
 
