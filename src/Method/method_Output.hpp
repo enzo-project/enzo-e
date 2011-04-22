@@ -83,6 +83,8 @@ public: // functions
 
   std::string expand_file_name (int cycle, double time) const throw();
 
+  int process_write () const throw () { return process_write_; };
+
 public: // virtual functions
 
 #ifdef CONFIG_USE_CHARM

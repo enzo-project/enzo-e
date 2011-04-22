@@ -11,7 +11,8 @@
 #include "simulation.hpp"
 
 #ifdef CONFIG_USE_CHARM
-extern CProxy_Main proxy_main;
+extern CProxy_Main       proxy_main;
+extern CProxy_Simulation proxy_simulation;
 #endif
 
 Simulation::Simulation
@@ -35,6 +36,8 @@ Simulation::Simulation
     dimension_(0),
     cycle_(0),
     time_(0.0),
+    dt_(0),
+    stop_(false),
     index_(index),
     performance_(0),
     monitor_(0),
@@ -726,16 +729,109 @@ Method * Simulation::create_method_ (std::string name) throw ()
 
 #ifdef CONFIG_USE_CHARM
 
-//----------------------------------------------------------------------
-
-void Simulation::p_refresh 
-( int cycle, double time, double dt, int stop ) throw()
-{
-
   // Update Simulation cycle and time from reduction to main
 
+void Simulation::p_output 
+( int cycle, double time, double dt, bool stop ) throw()
+{
   cycle_ = cycle;
   time_  = time;
+  dt_    = dt;
+  stop_  = stop;
+
+  output_reset();
+  output_next();
+}
+
+
+//----------------------------------------------------------------------
+
+void Simulation::output_reset() throw()
+{
+  index_output_ = 0;
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::output_next() throw()
+{
+
+  // find next output
+  while (index_output_ < num_output() && 
+	 ! output(index_output_)->write_this_cycle(cycle_, time_))
+    ++index_output_;
+
+  // output if any scheduled, else proceed with refresh
+
+  if (index_output_ < num_output()) {
+
+    // Open the file(s)
+    output(index_output_)->open(cycle_,time_);
+
+    // Call blocks to contribute their data
+    ItPatch it_patch(mesh_);
+    Patch * patch;
+    while (( patch = ++it_patch )) {
+      if (patch->blocks_allocated()) {
+	patch->blocks().p_output_accum (index_output_);
+      }
+    }
+  } else {
+    refresh();
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::p_output_reduce() throw()
+{
+  INCOMPLETE("Simulation::p_output_reduce");
+
+  int ip       = CkMyPe();
+  int ip_write = output(index_output_)->process_write();
+
+  // Even self calls this to avoid hanging if case np == 1
+  const char * message = "1234567890";
+  proxy_simulation[ip - (ip % ip_write)].p_output_write (10, message);
+
+  if (ip % ip_write != 0) {
+    // non-writers continue; writers call output_next() from p_output_write()
+    output_next();
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::p_output_write (int n, char * buffer) throw()
+{
+  INCOMPLETE("Simulation::p_output_write");
+
+  int ip       = CkMyPe();
+  int ip_write = output(index_output_)->process_write();
+
+#error
+
+  //@@@ COUNT TO ip_write (including self) before writing and contiuning
+  //@@@ so we know processes [ip : ip+ip_write) are done contributing 
+  if (ip % ip_write != 0) {
+    ERROR("Simulation::p_output_write",
+	  "Must be called by writing processes only");
+  } else {
+    // contribute self
+    // write
+    // close
+    output_next();
+  }
+
+#error
+  // @@@ CALL output_next() on procs [ip : ip+ip_write) to synchronize
+  // @@@ (p_output_next()
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::refresh() throw()
+{
 
   //--------------------------------------------------
   // Monitor
@@ -758,7 +854,7 @@ void Simulation::p_refresh
   // Stopping
   //--------------------------------------------------
 
-  if (stop) {
+  if (stop_) {
 
     performance_->stop();
     performance_->print();
@@ -774,38 +870,10 @@ void Simulation::p_refresh
     Patch * patch;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
-	patch->blocks().p_refresh(dt);
+	patch->blocks().p_refresh(dt_);
       }
     }
   }
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::output_reset() throw()
-{
-  index_output_ = 0;
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::output_next() throw()
-{
-  INCOMPLETE("Simulation::output_next()");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::p_output_reduce() throw()
-{
-  INCOMPLETE("Simulation::p_output_reduce()");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::p_output_write (int n, char * buffer) throw()
-{
-  INCOMPLETE("Simulation::p_output_write()");
 }
 
 //----------------------------------------------------------------------

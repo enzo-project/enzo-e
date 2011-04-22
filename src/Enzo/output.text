@@ -1,5 +1,5 @@
 
-Simulation::caller()
+Simulation::output()
     output_reset()
     output_next()
     [return]
@@ -20,8 +20,9 @@ Simulation::output_next()
    // output (and return) if any, else proceed
    if (index_output_ < num_output)  
        output(index_output_).open()
+       Blocks::p_output_accumulate(this)
    else 
-       simulation_proceed()
+       [ simulation proceed() ]
 
 --------------------------------------------------
 
@@ -31,7 +32,6 @@ Output::open()
        prepare writer data
        open file
    }
-   Blocks::p_output_accumulate(this)
 
 --------------------------------------------------
 
@@ -54,6 +54,7 @@ Main::p_output_reduce(count)
 --------------------------------------------------
 
 Simulation::p_output_reduce()
+   NEW accumulate, then count to ip_write before writing and continuing
    if (ip % ip_write != 0) {
      p_output_write[ip - (ip % ip_write)] (process data);
      output_next();  // ip%ip_write == 0 called from p_output_write()

@@ -75,12 +75,15 @@ public: // interface
   /// Request all Mesh blocks to send output to main::p_output_close()
   //  void p_output(int index, int cycle, double time) throw();
 
+  // Output
+  void p_output (int cycle, double time, double dt, bool stopping) throw();
+
   // Monitor, test Stopping, update Boundary and ghost zones
-  void p_refresh (int cycle, double time, double dt, int stopping) throw();
+  void refresh () throw();
 
   /// default reduction callback
   void p_done (CkReductionMsg * m)
-  {    printf ("done(%g)\n",(double *)m->getData());  delete m; }
+  {    printf ("done(%g)\n",*((double *)m->getData()));  delete m; }
 
   //--------------------------------------------------
   // Output
@@ -160,8 +163,14 @@ public: // interface
   /// Return the current time
   double time() const throw() {return time_;};
 
+  /// Return the current dt (stored from main)
+  double dt() const throw() {return dt_;};
+
+  /// Return the currint stopping criteria (stored from main reduction)
+  bool stop() const throw() {return stop_; };
+
   /// Return the Simulation index
-  int index() const throw() {return index_; };
+  size_t index() const throw() {return index_; };
 
 public: // virtual functions
 
@@ -263,12 +272,18 @@ protected: // attributes
   /// Current time
   double time_;
 
+  /// Current timestep
+  double dt_;
+
+  /// Current stopping criteria
+  bool stop_;
+
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
 
   /// Index of this simulation in an ensemble
-  int index_;
+  size_t index_;
 
   /// Performance object
   Performance * performance_;
@@ -308,7 +323,7 @@ protected: // attributes
 #ifdef CONFIG_USE_CHARM
 
   /// Index of currently active output object
-  int index_output_;
+  size_t index_output_;
 
 #endif
 

@@ -172,9 +172,9 @@ void p_prepare(int count, int cycle, double time,
   if (++count_prepare_ >= count) {
 
     //--------------------------------------------------
-    // Simulation::p_refresh()
+    // Simulation::p_output()
     //--------------------------------------------------
-    proxy_simulation.p_refresh(cycle, time, dt_mesh_, stop_mesh_);
+    proxy_simulation.p_output(cycle, time, dt_mesh_, stop_mesh_);
 
     // Reset pool
     count_prepare_ = 0;
@@ -192,6 +192,7 @@ void p_output_reduce(int count)
 {
   if (++count_output_ >= count) {
     INCOMPLETE("Main::p_output_reduce()");
+    proxy_simulation.p_output_reduce();
     count_output_ = 0;
   }
 };

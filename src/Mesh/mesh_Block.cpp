@@ -502,6 +502,13 @@ void Block::p_output_accum (int index_output)
   char buffer[80];
   sprintf (buffer,"Block::p_output_accum(%d)",index_output);
   INCOMPLETE(buffer);
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  simulation->output(index_output)->accum_block(this);
+
+  // Synchronize via main chare before writing
+  int num_blocks = simulation->mesh()->patch(0)->num_blocks();
+  proxy_main.p_output_reduce (num_blocks);
 }
 
 //----------------------------------------------------------------------

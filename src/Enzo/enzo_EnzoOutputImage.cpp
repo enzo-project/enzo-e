@@ -29,6 +29,9 @@ EnzoOutputImage::EnzoOutputImage() throw ()
     map_r_[1] = 1.0;
     map_g_[1] = 1.0;
     map_b_[1] = 1.0;
+
+    // Only root process writes
+    process_write_ = std::numeric_limits<int>::max();
 }
 
 //----------------------------------------------------------------------
@@ -41,14 +44,22 @@ EnzoOutputImage::~EnzoOutputImage() throw ()
 
 void EnzoOutputImage::open (int cycle, double time) throw()
 {
-  INCOMPLETE("EnzoOutputImage::open()");
+  INCOMPLETE("EnzoOutputImage::open");
+
+  // prepare process reduction data
+
+  if (CkMyPe() % process_write_ == 0) {
+    //  prepare writer data
+    //  open file
+  }
 }
 
 //----------------------------------------------------------------------
 
 void EnzoOutputImage::accum_block (const Block * block) throw()
 {
-  INCOMPLETE("EnzoOutputImage::accum_block()");
+  INCOMPLETE("EnzoOutputImage::accum_block");
+  //   incorporate block data into process data
 }
 
 //----------------------------------------------------------------------

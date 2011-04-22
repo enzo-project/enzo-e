@@ -37,7 +37,8 @@ mainmodule enzo {
        const Factory & factory,
        int index_simulation);
 
-    entry void p_refresh (int cycle, double time, double dt, int stopping);
+    entry void p_output (int cycle, double time, double dt, bool stopping);
+//    entry void refresh ();
     entry void p_done(CkReductionMsg*);
 
     entry void p_output_reduce();
