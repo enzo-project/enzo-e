@@ -43,6 +43,7 @@ mainmodule enzo {
 
     entry void p_output_reduce();
     entry void p_output_write(int n, char buffer[n]);
+    entry void p_output_next ();
 
   };
 

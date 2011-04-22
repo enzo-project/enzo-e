@@ -85,6 +85,17 @@ public: // functions
 
   int process_write () const throw () { return process_write_; };
 
+#ifdef CONFIG_USE_CHARM
+  int count_reduce() 
+  { 
+    count_reduce_++; 
+    PARALLEL_PRINTF ("Output:count_reduce %d\n",count_reduce_);
+    if (count_reduce_>=process_write_) {count_reduce_ = 0;}
+    return (count_reduce_ == 0);
+  }
+
+#endif
+
 public: // virtual functions
 
 #ifdef CONFIG_USE_CHARM
@@ -124,6 +135,11 @@ protected: // attributes
   /// Only processes with id's divisible by process_write_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
   int process_write_;
+
+#ifdef CONFIG_USE_CHARM
+  /// counter for reduction of data from non-writers to writers
+  int count_reduce_;
+#endif
 
   /// Name of the file to write, including printf-type format
   std::string file_name_;

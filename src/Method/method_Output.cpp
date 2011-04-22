@@ -13,6 +13,9 @@
 
 Output::Output () throw()
   : process_write_(0),
+#ifdef CONFIG_USE_CHARM
+    count_reduce_(0),
+#endif
     file_name_(""),
     active_(false),
     output_schedule_(output_schedule_unknown),

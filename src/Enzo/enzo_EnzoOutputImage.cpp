@@ -31,7 +31,9 @@ EnzoOutputImage::EnzoOutputImage() throw ()
     map_b_[1] = 1.0;
 
     // Only root process writes
-    process_write_ = std::numeric_limits<int>::max();
+#ifdef CONFIG_USE_CHARM
+    process_write_ = CkNumPes();
+#endif
 }
 
 //----------------------------------------------------------------------

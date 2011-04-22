@@ -740,7 +740,7 @@ void Simulation::p_output
   stop_  = stop;
 
   output_reset();
-  output_next();
+  p_output_next();
 }
 
 
@@ -753,7 +753,7 @@ void Simulation::output_reset() throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::output_next() throw()
+void Simulation::p_output_next() throw()
 {
 
   // find next output
@@ -788,16 +788,17 @@ void Simulation::p_output_reduce() throw()
   INCOMPLETE("Simulation::p_output_reduce");
 
   int ip       = CkMyPe();
-  int ip_write = output(index_output_)->process_write();
+  int ip_write = ip - (ip % output(index_output_)->process_write());
 
   // Even self calls this to avoid hanging if case np == 1
-  const char * message = "1234567890";
-  proxy_simulation[ip - (ip % ip_write)].p_output_write (10, message);
-
-  if (ip % ip_write != 0) {
-    // non-writers continue; writers call output_next() from p_output_write()
-    output_next();
+  char buffer[20];
+  sprintf(buffer,"%02d > %02d send",ip,ip_write);
+  if (ip != ip_write) {
+    proxy_simulation[ip_write].p_output_write (strlen(buffer),buffer);
+  } else {
+    p_output_write(strlen(buffer),buffer);
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -806,26 +807,25 @@ void Simulation::p_output_write (int n, char * buffer) throw()
 {
   INCOMPLETE("Simulation::p_output_write");
 
+  Output * out = output(index_output_);
   int ip       = CkMyPe();
-  int ip_write = output(index_output_)->process_write();
+  int ip_write = ip - (ip % out->process_write());
 
-#error
-
-  //@@@ COUNT TO ip_write (including self) before writing and contiuning
-  //@@@ so we know processes [ip : ip+ip_write) are done contributing 
-  if (ip % ip_write != 0) {
+  if (ip != ip_write) {
     ERROR("Simulation::p_output_write",
 	  "Must be called by writing processes only");
   } else {
-    // contribute self
-    // write
-    // close
-    output_next();
+    PARALLEL_PRINTF("%s\n",buffer);
+    if (out->count_reduce()) {
+      // write
+      // close
+      for (int i=ip; i<ip+out->process_write(); i++) {
+	PARALLEL_PRINTF("calling p_output_next() %d\n",i);
+	proxy_simulation[i].p_output_next();
+      }
+    }
   }
 
-#error
-  // @@@ CALL output_next() on procs [ip : ip+ip_write) to synchronize
-  // @@@ (p_output_next()
 }
 
 //----------------------------------------------------------------------
