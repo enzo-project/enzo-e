@@ -23,6 +23,9 @@ EnzoSimulationCharm::EnzoSimulationCharm
  int        index) throw ()
   : EnzoSimulation(parameter_file, n, index)
 {
+#ifdef CONFIG_USE_PROJECTIONS
+  traceRegisterUserEvent("Compute",10);
+#endif
   // Monitor output from root pe only
   monitor_->set_active(CkMyPe() == 0);
 

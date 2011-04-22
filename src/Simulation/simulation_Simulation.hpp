@@ -82,6 +82,23 @@ public: // interface
   void p_done (CkReductionMsg * m)
   {    printf ("done(%g)\n",(double *)m->getData());  delete m; }
 
+  //--------------------------------------------------
+  // Output
+  //--------------------------------------------------
+
+  /// reset output index to 0
+  void output_reset() throw();
+
+  /// Process the next output object if any, else proceed with simulation
+  void output_next() throw();
+
+  /// Reduce output, using p_output_write to send data to writing processes
+  void p_output_reduce() throw();
+
+  /// Receive data from non-writing process, write to disk, close, and
+  /// proceed with next output
+  void p_output_write (int n, char * buffer) throw();
+
 #endif
 
   //----------------------------------------------------------------------
@@ -282,6 +299,18 @@ protected: // attributes
 
   /// List of method objects
   std::vector<Method *> method_list_;
+
+
+  //--------------------------------------------------
+  // Output
+  //--------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+  /// Index of currently active output object
+  int index_output_;
+
+#endif
 
 };
 

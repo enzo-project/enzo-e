@@ -8,6 +8,7 @@ import sys
 balance         = 1
 trace           = 0
 
+use_gprof       = 0
 use_papi        = 0
 use_valgrind    = 0
 use_projections = 1
@@ -66,6 +67,7 @@ define_png   =  ['NO_FREETYPE'];
 define_papi  =  ['CONFIG_USE_PAPI'];
 define_trace =  ['CELLO_TRACE'];
 define_balance =  ['CONFIG_LOAD_BALANCE'];
+define_projections =  ['CONFIG_USE_PROJECTIONS']
 
 defines     = []
 defines_xlc = ""
@@ -107,11 +109,15 @@ linkflags_perf    = ''
 
 if (use_projections):
      charm_perf = '-tracemode projections'
-#     cxxflags_perf     = '-tracemode projections '
-#     cflags_perf       = '-tracemode projections '
-#     fortranflags_perf = '-tracemode projections '
-#     linkflags_perf    = '-tracemode projections '
+     defines     = defines              + define_projections
+     defines_xlc = defines_xlc + ' -D'  + define_projections[0]
+     defines_xlf = defines_xlf + ' -WF,-D'  + define_projections[0]
 
+flags_gprof = ''
+
+if (use_gprof):
+     flags_gprof = '-pg '
+     
 #--------------------------------------------------
 
 if (prec == 'single'):
@@ -442,12 +448,14 @@ cxxflags = \
     cxxflags_prec  + ' ' + \
     cxxflags_perf  + ' ' + \
     cxxflags_warn  + ' ' + \
+    flags_gprof    + \
     cxxflags_define
 
 cflags = \
     cflags_debug + ' ' + \
     cflags_opt   + ' ' + \
     cflags_prec  + ' ' + \
+    flags_gprof  + \
     cflags_warn
 
 fortranflags = \
@@ -455,6 +463,7 @@ fortranflags = \
     fortranflags_opt   + ' ' + \
     fortranflags_prec  + ' ' + \
     fortranflags_warn  + ' ' + \
+    flags_gprof        + \
     fortranflags_define
 
 linkflags = \
@@ -463,6 +472,7 @@ linkflags = \
     linkflags_opt   + ' ' + \
     linkflags_perf  + ' ' + \
     linkflags_prec  + ' ' + \
+    flags_gprof     + \
     linkflags_warn
 
 env = Environment (

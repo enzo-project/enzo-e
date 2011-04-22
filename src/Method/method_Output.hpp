@@ -85,6 +85,17 @@ public: // functions
 
 public: // virtual functions
 
+#ifdef CONFIG_USE_CHARM
+
+  /// Open file for writing
+  virtual void open (int cycle, double time) throw() = 0;
+
+  /// Accumulate block-local data
+  virtual void accum_block (const Block * block) throw() = 0;
+
+#endif
+
+
   /// Write mesh data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
@@ -107,6 +118,10 @@ public: // virtual functions
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
 protected: // attributes
+
+  /// Only processes with id's divisible by process_write_ writes
+  /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
+  int process_write_;
 
   /// Name of the file to write, including printf-type format
   std::string file_name_;

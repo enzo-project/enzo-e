@@ -20,15 +20,13 @@ mainmodule enzo {
 
     //  --- Open image file and and initialize image data ---
 
-    //  --- Accumulate block output contributions and write output to disk ---
-
-    entry void p_output_close (int count_blocks);
-
     //  --- Monitor, Output, Timestep, Stopping ---
     //  ---  [forward from Block to Simulation]
 
     entry void p_prepare (int count_blocks, int cycle, double time,
 			  double dt_block, int stop_block);
+
+    entry void p_output_reduce (int count_blocks);
 
   };
 
@@ -41,6 +39,9 @@ mainmodule enzo {
 
     entry void p_refresh (int cycle, double time, double dt, int stopping);
     entry void p_done(CkReductionMsg*);
+
+    entry void p_output_reduce();
+    entry void p_output_write(int n, char buffer[n]);
 
   };
 
@@ -69,9 +70,10 @@ mainmodule enzo {
 
 
     entry void p_initial();
-    entry void p_output();
     entry void p_refresh(double dt);
     entry void p_refresh_face(int n, char buffer[n], int axis, int face);
+    entry void p_output_accum (int index_output);
+ 
     //     void p_next();
     //     void p_prepare();
     //     void p_compute();

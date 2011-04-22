@@ -67,12 +67,9 @@ PARALLEL_MAIN_BEGIN
   proxy_main     = thishandle;
 
   // Clear counts
-  count_exit_        = 0;
-  count_prepare_        = 0;
-  for (int i=0; i<MAX_OUTPUT; i++) {
-    count_output_open_[i]  = 0;
-    count_output_close_[i] = 0;
-  }
+  count_exit_    = 0;
+  count_prepare_ = 0;
+  count_output_  = 0;
   dt_mesh_ = std::numeric_limits<double>::max();
   stop_mesh_ = true;
   
@@ -153,27 +150,6 @@ void p_exit(int count)
 
 //----------------------------------------------------------------------
 
-//  --- Open output file and and initialize output data ---
-
-void output_open(int cycle, double time)
-{
-  const Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  for (int index=0; index<simulation->num_output(); index++) {
-
-    Output * output = simulation->output(index);
-
-    if (output->write_this_cycle(cycle,time)) {
-      INCOMPLETE("Main::output_open")
-      // CkPrintf ("%s:%d Main::output_open(%d,%g) output %d\n",
-      // 		__FILE__,__LINE__,cycle,time,index);
-    }
-  }
-  
-};
-
-//----------------------------------------------------------------------
-
 void p_prepare(int count, int cycle, double time,
 	       double dt_block, int stop_block)
 {
@@ -196,12 +172,6 @@ void p_prepare(int count, int cycle, double time,
   if (++count_prepare_ >= count) {
 
     //--------------------------------------------------
-    // Output
-    //--------------------------------------------------
-
-    output_open (cycle,time);
-
-    //--------------------------------------------------
     // Simulation::p_refresh()
     //--------------------------------------------------
     proxy_simulation.p_refresh(cycle, time, dt_mesh_, stop_mesh_);
@@ -218,8 +188,12 @@ void p_prepare(int count, int cycle, double time,
 
 //  --- Accumulate block output contributions and write output to disk ---
 
-void p_output_close(int count)
+void p_output_reduce(int count)
 {
+  if (++count_output_ >= count) {
+    INCOMPLETE("Main::p_output_reduce()");
+    count_output_ = 0;
+  }
 };
 
 //----------------------------------------------------------------------
@@ -228,8 +202,7 @@ private:
 
 int count_exit_;
 int count_prepare_;
-int count_output_open_[MAX_OUTPUT];
-int count_output_close_[MAX_OUTPUT];
+int count_output_;
 
 // Reduction variables
 int stop_mesh_;

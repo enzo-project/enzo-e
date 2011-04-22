@@ -77,46 +77,6 @@ Main::p_exit(count)
  [count -> 1]
  CkExit()
 }
-======================================================================
-
-Main::output_open()
-
-   open file
-   Simulation::p_output_open()
-    
-Simulation::p_output_open()
-
-   open file [P==0]
-   create empty images
-   Block.p_output() [P's with Patch]
-
-Block::p_output()
-
-   contribute to output image
-   Main::p_output_close(# blocks) 
-     [ prefer Simulation::p_output_reduce(# local blocks) ]
-
-Main::p_output_call_reduce()
-
-   [ NB -> 1 ]
-   [ overkill reduction--prefer Simulation ]
-   Simulation::p_output_reduce()
-
-Simulation::p_output_reduce()
-
-   Main::p_output_reduce(Main)
-
-Main::p_output_reduce
-
-   Add incoming proc image to main image
-   [ NP -> 1]
-   write file
-   close file
-   output_next()
-
-Main::output_next()
-
-   increment output counter
 
 ======================================================================
 

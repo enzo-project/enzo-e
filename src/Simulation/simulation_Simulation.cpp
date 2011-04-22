@@ -427,6 +427,10 @@ void Simulation::initialize_output_() throw()
 
   for (int index_group=0; index_group < num_groups; index_group++) {
 
+    //--------------------------------------------------
+    parameters_->set_group(0,"Output");
+    //--------------------------------------------------
+
     std::string group = parameters_->list_value_string
       (index_group,"groups","unknown");
 
@@ -741,6 +745,16 @@ void Simulation::p_refresh
 		   index_,cycle_,time_);
 
   //--------------------------------------------------
+  // Output
+  //--------------------------------------------------
+
+  for (size_t index_output=0; index_output<num_output(); index_output++) {
+    if (output(index_output)->write_this_cycle(cycle_, time_)) {
+      // output_open(index_output);
+    }
+  }
+
+  //--------------------------------------------------
   // Stopping
   //--------------------------------------------------
 
@@ -764,6 +778,34 @@ void Simulation::p_refresh
       }
     }
   }
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::output_reset() throw()
+{
+  index_output_ = 0;
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::output_next() throw()
+{
+  INCOMPLETE("Simulation::output_next()");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::p_output_reduce() throw()
+{
+  INCOMPLETE("Simulation::p_output_reduce()");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::p_output_write (int n, char * buffer) throw()
+{
+  INCOMPLETE("Simulation::p_output_write()");
 }
 
 //----------------------------------------------------------------------

@@ -289,13 +289,6 @@ void Block::prepare()
 
 //----------------------------------------------------------------------
 
-void Block::p_output ()
-{
-  TRACE("Block::p_output");
-}
-
-//----------------------------------------------------------------------
-
 void Block::p_refresh (double dt)
 {
 
@@ -504,11 +497,24 @@ void Block::p_refresh_face (int n, char * buffer,
 
 //----------------------------------------------------------------------
 
+void Block::p_output_accum (int index_output)
+{
+  char buffer[80];
+  sprintf (buffer,"Block::p_output_accum(%d)",index_output);
+  INCOMPLETE(buffer);
+}
+
+//----------------------------------------------------------------------
+
 void Block::compute()
 {
 
   TRACE("Block::compute");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+#ifdef CONFIG_USE_PROJECTIONS
+  double time_start = CmiWallTimer();
+#endif
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
 
@@ -516,6 +522,9 @@ void Block::compute()
 
   }
 
+#ifdef CONFIG_USE_PROJECTIONS
+  traceUserBracketEvent(10,time_start, CmiWallTimer());
+#endif
   // Update cycle and time
 
   time_ += dt_;

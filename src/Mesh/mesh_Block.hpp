@@ -53,14 +53,16 @@ public: // interface
   /// Initialize block for the simulation.
   void p_initial();
 
-  /// Accumulate block-local contributions to an output dump
-  void p_output();
-
   /// Refresh ghost zones and apply boundary conditions
   void p_refresh(double dt);
 
   /// Refresh a FieldFace
   void p_refresh_face(int n, char buffer[], int axis, int face);
+
+  //--------------------------------------------------
+
+  /// Contribute block data to ith output object in the simulation
+  void p_output_accum (int index_output);
 
   //--------------------------------------------------
 

@@ -39,6 +39,20 @@ EnzoOutputImage::~EnzoOutputImage() throw ()
 
 //======================================================================
 
+void EnzoOutputImage::open (int cycle, double time) throw()
+{
+  INCOMPLETE("EnzoOutputImage::open()");
+}
+
+//----------------------------------------------------------------------
+
+void EnzoOutputImage::accum_block (const Block * block) throw()
+{
+  INCOMPLETE("EnzoOutputImage::accum_block()");
+}
+
+//----------------------------------------------------------------------
+
 void EnzoOutputImage::write
 (
  const FieldDescr * field_descr,

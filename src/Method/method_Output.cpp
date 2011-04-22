@@ -3,6 +3,7 @@
 
 /// @file     method_Output.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @bug      time interval scheduling gets confused if multiple outputs scheduled per timestep
 /// @date     Wed Mar 16 09:53:31 PDT 2011
 /// @brief    Implementation of the Output class
 
@@ -11,7 +12,8 @@
 //----------------------------------------------------------------------
 
 Output::Output () throw()
-  : file_name_(""),
+  : process_write_(0),
+    file_name_(""),
     active_(false),
     output_schedule_(output_schedule_unknown),
     cycle_interval_(),

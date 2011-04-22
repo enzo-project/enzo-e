@@ -36,6 +36,16 @@ public: // functions
 
 public: // virtual functions
 
+#ifdef CONFIG_USE_CHARM
+
+  /// Open file for writing
+  virtual void open (int cycle, double time) throw();
+
+  /// Accumulate block-local data
+  virtual void accum_block (const Block * block) throw();
+
+#endif
+
   /// Write mesh-related data to disk
   virtual void write 
   ( const FieldDescr * field_descr,

@@ -1,0 +1,71 @@
+
+Simulation::caller()
+    output_reset()
+    output_next()
+    [return]
+
+--------------------------------------------------
+
+Simulation::output_reset()
+   index_output_ = 0;
+
+--------------------------------------------------
+
+Simulation::output_next()
+
+   // find next output
+   while (index_output_ < num_output && !output(index_output_).scheduled())
+     ++index_output_;
+
+   // output (and return) if any, else proceed
+   if (index_output_ < num_output)  
+       output(index_output_).open()
+   else 
+       simulation_proceed()
+
+--------------------------------------------------
+
+Output::open()
+   prepare process data
+   if (ip % ip_write == 0) {
+       prepare writer data
+       open file
+   }
+   Blocks::p_output_accumulate(this)
+
+--------------------------------------------------
+
+Block::p_output_accumulate(output)
+
+   output.accumulate_block(this)
+   main::p_output_reduce(NB)
+
+--------------------------------------------------
+
+Output::accumulate_block(block)
+   incorporate block data into process data
+
+--------------------------------------------------
+
+Main::p_output_reduce(count)
+   ++counter >= count
+      Simulation::p_output_reduce()
+
+--------------------------------------------------
+
+Simulation::p_output_reduce()
+   if (ip % ip_write != 0) {
+     p_output_write[ip - (ip % ip_write)] (process data);
+     output_next();  // ip%ip_write == 0 called from p_output_write()
+   }
+
+--------------------------------------------------
+
+Simulation::p_output_write(process_data)
+   assert (ip % ip_write == 0) {
+      reduce write_data <-- process_data
+      write write_data
+      close write_data
+      output_next()
+   }
+   

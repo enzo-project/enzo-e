@@ -607,7 +607,6 @@ void FieldBlock::image
  int ibx, int iby, int ibz
  ) const throw()
 {
-  INCOMPLETE("FieldBlock::image");
 
   int field_count = field_descr->field_count();
   for (int index_field=0; index_field<field_count; index_field++) {
