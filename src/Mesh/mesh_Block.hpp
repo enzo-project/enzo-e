@@ -54,10 +54,10 @@ public: // interface
   void p_initial();
 
   /// Refresh ghost zones and apply boundary conditions
-  void p_refresh(double dt);
+  void p_refresh(double dt, int axis_set);
 
   /// Refresh a FieldFace
-  void p_refresh_face(int n, char buffer[], int axis, int face);
+  void p_refresh_face(int n, char buffer[], int axis, int face, int axis_set);
 
   //--------------------------------------------------
 

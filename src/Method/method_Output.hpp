@@ -101,7 +101,7 @@ public: // virtual functions
 #ifdef CONFIG_USE_CHARM
 
   /// Open file for writing
-  virtual void open (int cycle, double time) throw() = 0;
+  virtual void open (const Mesh * mesh, int cycle, double time) throw() = 0;
 
   /// Accumulate block-local data
   virtual void accum_block (const Block * block) throw() = 0;

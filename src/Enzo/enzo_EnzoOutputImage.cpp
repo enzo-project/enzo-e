@@ -17,7 +17,8 @@ EnzoOutputImage::EnzoOutputImage() throw ()
     image_(0),
     image_size_x_(0),
     image_size_y_(0),
-    png_(0)
+    png_(0),
+    fp_(0)
 
 {
     map_r_.resize(2);
@@ -44,13 +45,30 @@ EnzoOutputImage::~EnzoOutputImage() throw ()
 
 //======================================================================
 
-void EnzoOutputImage::open (int cycle, double time) throw()
+#ifdef CONFIG_USE_CHARM
+
+void EnzoOutputImage::open (const Mesh * mesh, int cycle, double time) throw()
 {
   INCOMPLETE("EnzoOutputImage::open");
 
-  // prepare process reduction data
+  // create process image and clear it
+
+  int nxm,nym,nzm;
+  mesh->patch(0)->size (&nxm, &nym, &nzm);
+
+  image_create_(nxm,nym);
 
   if (CkMyPe() % process_write_ == 0) {
+    ASSERT("EnzoOutputImage::open","File already open",fp_ == 0);
+  } else {
+
+    // Open the file
+    std::string file_name = expand_file_name(cycle,time) + ".png";
+    fp_ = fopen (file_name.c_str(),"w");
+
+    // Create png object
+    png_open_(file_name,nxm,nym);
+
     //  prepare writer data
     //  open file
   }
@@ -63,6 +81,8 @@ void EnzoOutputImage::accum_block (const Block * block) throw()
   INCOMPLETE("EnzoOutputImage::accum_block");
   //   incorporate block data into process data
 }
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -100,8 +120,12 @@ void EnzoOutputImage::write
     // Get mesh size
     int nxm,nym,nzm;
     mesh->patch(0)->size (&nxm, &nym, &nzm);
+
     // Create image 
-    image_open_(file_name,nxm,nym);
+    image_create_(nxm,nym);
+
+    // create png
+    png_open_(file_name,nxm,nym);
   }
 
   ItPatch it_patch (mesh);
@@ -159,8 +183,11 @@ void EnzoOutputImage::write
     int nxp, nyp;
     patch->size (&nxp, &nyp);
 
+    // create png
+    png_open_(file_name,nxp,nyp);
+
     // Create image 
-    image_open_(file_name,nxp,nyp);
+    image_create_(nxp,nyp);
   }
 
 #ifdef CONFIG_USE_CHARM
@@ -232,10 +259,16 @@ void EnzoOutputImage::write
   ndz=nz+2*gz;
 
   if (root_call) {
+
+    // create image
+    image_create_(nx,ny);
+
     // Open file if writing a single block
     std::string field_name = field_descr->field_name(index);
     std::string file_name = file_prefix + "-" + field_name + ".png";
-    image_open_(file_name,nx,ny);
+
+    // create png
+    png_open_(file_name,nx,ny);
 
     // Monitor output
     Monitor::instance()->print ("[Output] writing block image %s", 
@@ -279,10 +312,18 @@ void EnzoOutputImage::image_set_map
 
 //----------------------------------------------------------------------
 
-void EnzoOutputImage::image_open_ (std::string filename, int mx, int my) throw()
+void EnzoOutputImage::png_open_ (std::string filename, int mx, int my) throw()
 {
-  png_ = new pngwriter(mx,my,0,filename.c_str());
+  image_size_x_ = mx;
+  image_size_y_ = my;
 
+  png_ = new pngwriter(mx,my,0,filename.c_str());
+}
+
+//----------------------------------------------------------------------
+
+void EnzoOutputImage::image_create_ (int mx, int my) throw()
+{
   image_size_x_ = mx;
   image_size_y_ = my;
 

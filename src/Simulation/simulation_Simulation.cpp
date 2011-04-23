@@ -766,7 +766,7 @@ void Simulation::p_output_next() throw()
   if (index_output_ < num_output()) {
 
     // Open the file(s)
-    output(index_output_)->open(cycle_,time_);
+    output(index_output_)->open(mesh_,cycle_,time_);
 
     // Call blocks to contribute their data
     ItPatch it_patch(mesh_);
@@ -870,7 +870,7 @@ void Simulation::refresh() throw()
     Patch * patch;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
-	patch->blocks().p_refresh(dt_);
+	patch->blocks().p_refresh(dt_,axis_x);
       }
     }
   }

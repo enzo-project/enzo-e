@@ -210,13 +210,13 @@ void Block::p_initial()
   // Apply the initial conditions 
 
   // SHOULD NOT NEED THIS
-  field_block_[0]->clear(field_descr,0.001);
+  field_block_[0]->clear(field_descr,10.0);
 
   simulation->initial()->compute(field_descr,this);
 
-  //  field_block_[0]->print(field_descr,"initial");
-
   initialize(simulation->cycle(), simulation->time());
+
+  field_block()->print(field_descr,"initial",lower_,upper_);
 
   // Prepare for the first cycle: perform and disk Output, user
   // Monitoring, apply Stopping criteria [reduction], and compute the
@@ -262,10 +262,10 @@ void Block::prepare()
   // DEBUG
   if (stop_block) {
     FieldDescr * field_descr = simulation->field_descr();
-  //   field_block()->print(field_descr,"compute",lower_,upper_);
-    field_block()->image(field_descr,"final",cycle_,
-			 thisIndex.x,thisIndex.y,thisIndex.z);
-  }
+    field_block()->print(field_descr,"final",lower_,upper_);
+    field_block()->image(field_descr,"cycle",cycle_,
+      			 thisIndex.x,thisIndex.y,thisIndex.z);
+   }
 
 
   //--------------------------------------------------
@@ -289,14 +289,16 @@ void Block::prepare()
 
 //----------------------------------------------------------------------
 
-void Block::p_refresh (double dt)
+void Block::p_refresh (double dt, int axis_set)
 {
 
   TRACE("Block::p_refresh");
 
   // Update dt_ from Simulation
 
-  dt_ = dt; // (should be updated already?)
+   // (should be updated already?)
+  // -1 test due to p_refresh_face() calling p_refresh with axis_set != axis_all
+  if (dt != -1) dt_ = dt;
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -326,21 +328,25 @@ void Block::p_refresh (double dt)
   mesh->upper(&upper[0],&upper[1],&upper[2]);
 
 
-  if ( nx > 1) {
+  bool ax = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
+  bool ay = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
+  bool az = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+
+  if ( ax ) {
     // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
     boundary_face[axis_x][face_lower] = fabs(lower_[0]-lower[0]) < 1e-7;
     boundary_face[axis_x][face_upper] = fabs(upper_[0]-upper[0]) < 1e-7;
     if ( boundary_face[axis_x][face_lower] ) boundary->enforce(field_descr,this,face_lower,axis_x);
     if ( boundary_face[axis_x][face_upper] ) boundary->enforce(field_descr,this,face_upper,axis_x);
   }
-  if ( ny > 1) {
+  if ( ay ) {
     // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
     boundary_face[axis_y][face_lower] = fabs(lower_[1]-lower[1]) < 1e-7;
     boundary_face[axis_y][face_upper] = fabs(upper_[1]-upper[1]) < 1e-7;
     if ( boundary_face[axis_y][face_lower] ) boundary->enforce(field_descr,this,face_lower,axis_y);
     if ( boundary_face[axis_y][face_upper] ) boundary->enforce(field_descr,this,face_upper,axis_y);
   }
-  if ( nz > 1) {
+  if ( az ) {
     // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
     boundary_face[axis_z][face_lower] = fabs(lower_[2]-lower[2]) < 1e-7;
     boundary_face[axis_z][face_upper] = fabs(upper_[2]-upper[2]) < 1e-7;
@@ -373,46 +379,46 @@ void Block::p_refresh (double dt)
 
   CProxy_Block block_array = thisProxy;
 
-  if ( nx > 1) {
+  if ( ax ) {
     // xp <<< xm
     if ( ! boundary_face[axis_x][face_lower] || periodic ) {
       field_face.load (field_descr, field_block(), axis_x, face_lower);
       block_array(ixm,iy,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_x, face_upper);
+	(field_face.size(), field_face.array(), axis_x, face_upper, axis_set);
     }
     // xp >>> xm
     if ( ! boundary_face[axis_x][face_upper] || periodic ) {
       field_face.load (field_descr, field_block(), axis_x, face_upper);
       block_array(ixp,iy,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_x, face_lower);
+	(field_face.size(), field_face.array(), axis_x, face_lower, axis_set);
     }
   }
-  if ( ny > 1) {
+  if ( ay ) {
     // yp <<< ym
     if ( ! boundary_face[axis_y][face_lower] || periodic ) {
       field_face.load (field_descr, field_block(), axis_y, face_lower);
       block_array(ix,iym,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_y, face_upper);
+	(field_face.size(), field_face.array(), axis_y, face_upper, axis_set);
     }
     // yp >>> ym
     if ( ! boundary_face[axis_y][face_upper] || periodic ) {
       field_face.load (field_descr, field_block(), axis_y, face_upper);
       block_array(ix,iyp,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_y, face_lower);
+	(field_face.size(), field_face.array(), axis_y, face_lower, axis_set);
     }
   }
-  if ( nz > 1) {
+  if ( az ) {
     // zp <<< zm
     if ( ! boundary_face[axis_z][face_lower] || periodic ) {
       field_face.load (field_descr, field_block(), axis_z, face_lower);
       block_array(ix,iy,izm).p_refresh_face 
-	( field_face.size(), field_face.array(), axis_z, face_upper);
+	( field_face.size(), field_face.array(), axis_z, face_upper, axis_set);
     }
     // zp >>> zm
     if ( ! boundary_face[axis_z][face_upper] || periodic ) {
       field_face.load (field_descr, field_block(), axis_z, face_upper);
       block_array(ix,iy,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_z, face_lower);
+	(field_face.size(), field_face.array(), axis_z, face_lower, axis_set);
     }
   }
 
@@ -420,17 +426,18 @@ void Block::p_refresh (double dt)
   // it will never get called.  So every block also calls
   // p_refresh_face() itself with a null array
 
-  p_refresh_face (0,0,0,0);
+  p_refresh_face (0,0,0,0, axis_set);
 
 }
 
 //----------------------------------------------------------------------
 
 void Block::p_refresh_face (int n, char * buffer,
-			    int axis, int face)
+			    int axis, int face, int axis_set)
 {
 
   TRACE("Block::p_refresh_face");
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   if ( n != 0) {
@@ -461,26 +468,30 @@ void Block::p_refresh_face (int n, char * buffer,
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
 
+  bool ax = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
+  bool ay = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
+  bool az = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+
   // Determine expected number of incoming Faces
   // (should be function, and possibly precomputed and stored since constant )
 
-  int count = 6 + 1;  // potentially 6 faces + 1 for self
+  int count = 1;  // self
 
-  if (nx==1) count -= 2; // 0D??
-  if (ny==1) count -= 2; // 1D
-  if (nz==1) count -= 2; // 2D
+  if (ax ) count +=2;
+  if (ay ) count +=2;
+  if (az ) count +=2;
 
   bool periodic = simulation->boundary()->is_periodic();
 
-  if (! periodic && nx > 1) {
+  if (! periodic && ax ) {
     if (fabs(lower_[0]-lower[0]) < 1e-7) --count;
     if (fabs(upper_[0]-upper[0]) < 1e-7) --count;
   }
-  if (! periodic && ny > 1) {
+  if (! periodic && ay ) {
     if (fabs(lower_[1]-lower[1]) < 1e-7) --count;
     if (fabs(upper_[1]-upper[1]) < 1e-7) --count;
   }
-  if (! periodic && nz > 1) {
+  if (! periodic && az ) {
     if (fabs(lower_[2]-lower[2]) < 1e-7) --count;
     if (fabs(upper_[2]-upper[2]) < 1e-7) --count;
   }
@@ -491,7 +502,18 @@ void Block::p_refresh_face (int n, char * buffer,
 
   if (++count_refresh_face_ >= count) {
     count_refresh_face_ = 0;
-    compute();
+    switch (axis_set) {
+    case axis_x:
+      p_refresh (-1,axis_y);
+      break;
+    case axis_y:
+      p_refresh (-1,axis_z);
+      break;
+    case axis_z:
+    case axis_all:
+      compute();
+      break;
+    }
   }
 }
 
@@ -499,11 +521,9 @@ void Block::p_refresh_face (int n, char * buffer,
 
 void Block::p_output_accum (int index_output)
 {
-  char buffer[80];
-  sprintf (buffer,"Block::p_output_accum(%d)",index_output);
-  INCOMPLETE(buffer);
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
+
   simulation->output(index_output)->accum_block(this);
 
   // Synchronize via main chare before writing
@@ -523,11 +543,19 @@ void Block::compute()
   double time_start = CmiWallTimer();
 #endif
 
+  FieldDescr * field_descr = simulation->field_descr();
+
+  // field_block()->image(field_descr,"compute-pre",cycle_,
+  // 		       thisIndex.x,thisIndex.y,thisIndex.z);
+
   for (size_t i = 0; i < simulation->num_method(); i++) {
 
     simulation->method(i) -> compute_block (this,time_,dt_);
 
   }
+
+  // field_block()->image(field_descr,"compute-post",cycle_,
+  // 		       thisIndex.x,thisIndex.y,thisIndex.z);
 
 #ifdef CONFIG_USE_PROJECTIONS
   traceUserBracketEvent(10,time_start, CmiWallTimer());

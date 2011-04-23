@@ -39,7 +39,7 @@ public: // virtual functions
 #ifdef CONFIG_USE_CHARM
 
   /// Open file for writing
-  virtual void open (int cycle, double time) throw();
+  virtual void open (const Mesh * mesh, int cycle, double time) throw();
 
   /// Accumulate block-local data
   virtual void accum_block (const Block * block) throw();
@@ -87,9 +87,12 @@ public: // virtual functions
 
 private:
 
-  /// Generate a PNG image of an array
-  void image_open_ (std::string filename, 
-		    int image_size_x,  int image_size_y) throw();
+  /// Create the png file object
+  void png_open_ (std::string filename, 
+		  int image_size_x,  int image_size_y) throw();
+
+  /// Create the image data object
+  void image_create_ (int image_size_x,  int image_size_y) throw();
 
   /// Generate PNG image, using given min and max for colormap
   void image_close_ (double min, double max) throw();
@@ -121,6 +124,9 @@ protected: // attributes
 
   /// Current pngwriter
   pngwriter * png_;
+
+  /// Current file
+  FILE * fp_;
 
 
 };
@@ -274,7 +280,9 @@ void EnzoOutputImage::image
   // Open the image
 
 
-  image_open_(filename,mx,my);
+  png_open_ (filename,mx,my);
+
+  image_create_(mx,my);
 
   image_reduce_(array,
 	       nxd,nyd,nzd,

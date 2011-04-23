@@ -496,98 +496,84 @@ void FieldBlock::print (const FieldDescr * field_descr,
       field_size(field_descr,index_field,&nxd,&nyd,&nzd);
       int gx,gy,gz;
       field_descr->ghosts(index_field,&gx,&gy,&gz);
-      int nx = nxd - 2*gx;
-      int ny = nyd - 2*gy;
-      int nz = nzd - 2*gz;
+      int nx = nxd;// - 2*gx;
+      int ny = nyd;// - 2*gy;
+      int nz = nzd;//- 2*gz;
 
 
       switch (field_descr->precision(index_field)) {
       case precision_single:
 	{
-	  float * field = (float * ) field_unknowns(field_descr,index_field);
+	  float * field = (float * ) field_values(index_field);
 	  float min = std::numeric_limits<float>::max();
 	  float max = std::numeric_limits<float>::min();
-	  float sum = 0.0;
-	  float sum2 = 0.0;
+	  double sum = 0.0;
 	  for (int iz=0; iz<nz; iz++) {
-	    double z = lower[2] + iz*(upper[2]-lower[2])/nz;
 	    for (int iy=0; iy<ny; iy++) {
-	      double y = lower[1] + iy*(upper[1]-lower[1])/ny;
 	      for (int ix=0; ix<nx; ix++) {
-		double x = lower[0] + ix*(upper[0]-lower[0])/nx;
 		int i = ix + nxd*(iy + nyd*iz);
-		printf ("%s %d %g %g %g %22.14g \n",
-			message,index_field,x,y,z,field[i]);
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
-		sum2 += field[i]*field[i];
 	      }
 	    }
 	  }
-	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g]  %g %g\n",
-			  message ? message : "",this,
-			  field_descr->field_name(index_field).c_str(),
-			  nx,ny,nz,min,max,sum,sum2);
+	  double avg = sum / (nx*ny*nz);
+	  PARALLEL_PRINTF
+	    ("%s FieldBlock[%p,%s] (%d %d %d) [%22.14g %22.14g %22.14g]\n",
+	     message ? message : "",this,
+	     field_descr->field_name(index_field).c_str(),
+	     nx,ny,nz,min,avg,max);
+
 	}
 	break;
       case precision_double:
 	{
-	  double * field = (double * ) field_unknowns(field_descr,index_field);
+	  double * field = (double * ) field_values(index_field);
 	  double min = std::numeric_limits<double>::max();
 	  double max = std::numeric_limits<double>::min();
-	  double sum = 0.0;
-	  double sum2 = 0.0;
+	  long double sum = 0.0;
 	  for (int iz=0; iz<nz; iz++) {
-	    double z = lower[2] + iz*(upper[2]-lower[2])/nz;
 	    for (int iy=0; iy<ny; iy++) {
-	      double y = lower[1] + iy*(upper[1]-lower[1])/ny;
 	      for (int ix=0; ix<nx; ix++) {
-		double x = lower[0] + ix*(upper[0]-lower[0])/nx;
 		int i = ix + nxd*(iy + nyd*iz);
-		printf ("%s %d %g %g %g %22.14g \n",
-			message,index_field,x,y,z,field[i]);
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
-		sum2 += field[i]*field[i];
 	      }
 	    }
 	  }
-	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g]  %g %g\n",
-			  message ? message : "",this,
-			  field_descr->field_name(index_field).c_str(),
-			  nx,ny,nz,min,max,sum,sum2);
+	  long double avg = sum / (nx*ny*nz);
+	  PARALLEL_PRINTF
+	    ("%s FieldBlock[%p,%s] (%d %d %d) [%22.14g %22.14g %22.14g]\n",
+	     message ? message : "",this,
+	     field_descr->field_name(index_field).c_str(),
+	     nx,ny,nz,min,avg,max);
 	}
 	break;
       case precision_quadruple:
 	{
 	  long double * field = 
-	    (long double * ) field_unknowns(field_descr,index_field);
+	    (long double * ) field_values(index_field);
 	  long double min = std::numeric_limits<long double>::max();
 	  long double max = std::numeric_limits<long double>::min();
 	  long double sum = 0.0;
-	  long double sum2 = 0.0;
 	  for (int iz=0; iz<nz; iz++) {
-	    double z = lower[2] + iz*(upper[2]-lower[2])/nz;
 	    for (int iy=0; iy<ny; iy++) {
-	      double y = lower[1] + iy*(upper[1]-lower[1])/ny;
 	      for (int ix=0; ix<nx; ix++) {
-		double x = lower[0] + ix*(upper[0]-lower[0])/nx;
 		int i = ix + nxd*(iy + nyd*iz);
-		printf ("%s %d %g %g %g %22.14g \n",
-			message,index_field,x,y,z,field[i]);
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
-		sum2 += field[i]*field[i];
 	      }
 	    }
 	  }
-	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g]  %g %g\n",
-			  message ? message : "",this,
-			  field_descr->field_name(index_field).c_str(),
-			  nx,ny,nz,min,max,sum,sum2);
+	  long double avg = sum / (nx*ny*nz);
+	  PARALLEL_PRINTF
+	    ("%s FieldBlock[%p,%s] (%d %d %d) [%22.14g %22.14g %22.14g]\n",
+	     message ? message : "",this,
+	     field_descr->field_name(index_field).c_str(),
+	     nx,ny,nz,min,avg,max);
 	}
 	break;
       default:
