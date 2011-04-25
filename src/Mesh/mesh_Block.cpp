@@ -29,6 +29,9 @@ Block::Block
   : field_block_(),
 #ifdef CONFIG_USE_CHARM
     count_refresh_face_(0),
+    count_refresh_face_x_(0),
+    count_refresh_face_y_(0),
+    count_refresh_face_z_(0),
 #endif
     cycle_(0),
     time_(0),
@@ -327,7 +330,6 @@ void Block::p_refresh (double dt, int axis_set)
   double upper[3];
   mesh->upper(&upper[0],&upper[1],&upper[2]);
 
-
   bool ax = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
   bool ay = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
   bool az = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
@@ -500,18 +502,21 @@ void Block::p_refresh_face (int n, char * buffer,
   // Compute
   //--------------------------------------------------
 
-  if (++count_refresh_face_ >= count) {
-    count_refresh_face_ = 0;
+  if (axis_set == axis_all) {
+    if (++count_refresh_face_ >= count) {
+      count_refresh_face_ = 0;
+      compute();
+    }
+  } else {
     switch (axis_set) {
     case axis_x:
-      p_refresh (-1,axis_y);
+      if (++count_refresh_face_x_ >= count) p_refresh (-1,axis_y);
       break;
     case axis_y:
-      p_refresh (-1,axis_z);
+      if (++count_refresh_face_y_ >= count) p_refresh (-1,axis_z);
       break;
     case axis_z:
-    case axis_all:
-      compute();
+      if (++count_refresh_face_z_ >= count) compute();
       break;
     }
   }

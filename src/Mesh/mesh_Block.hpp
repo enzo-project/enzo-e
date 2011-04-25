@@ -156,6 +156,9 @@ protected: // attributes
 
 #ifdef CONFIG_USE_CHARM
   int count_refresh_face_;
+  int count_refresh_face_x_;
+  int count_refresh_face_y_;
+  int count_refresh_face_z_;
 #endif
 
   //--------------------------------------------------
