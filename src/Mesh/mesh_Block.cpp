@@ -213,6 +213,7 @@ void Block::p_initial()
   // Apply the initial conditions 
 
   // SHOULD NOT NEED THIS
+  // std::numeric_limits<double>::min()
   field_block_[0]->clear(field_descr,10.0);
 
   simulation->initial()->compute(field_descr,this);
