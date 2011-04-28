@@ -263,11 +263,11 @@ elif (arch == "ncsa-bd"):
 
      cxx_serial = cxx_path + '/bin/xlC_r'
      cxx_mpi    = 'mpCC'
-     cxx_charm  = charm_path + '/bin/charmc -language charm++ '
+     cxx_charm  = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
 
      cc_serial  = cc_path + '/bin/xlc_r'
      cc_mpi     = 'mpcc'
-     cc_charm   = charm_path + '/bin/charmc -language charm++ '
+     cc_charm   = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
 
 # defines moved to flags since xlf_r expects -WF,-Dblah but xlC expects -Dblah
 
@@ -327,11 +327,11 @@ elif (arch == "sdsc-triton"):
 
      cxx_serial = 'pgCC'
      cxx_mpi    = 'mpicxx'
-     cxx_charm  = charm_path + '/bin/charmc -language charm++ '
+     cxx_charm  = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
 
      cc_serial  = 'pgcc'
      cc_mpi     = 'mpicc'
-     cc_charm   = 'pgcc'
+     cc_charm  = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
 
      cppdefines = defines
      cxxflags_define     = ''

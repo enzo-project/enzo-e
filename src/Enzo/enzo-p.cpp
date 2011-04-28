@@ -42,12 +42,13 @@ PARALLEL_MAIN_BEGIN
 
 #ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;
+#else
+  Monitor * monitor_ = Monitor::instance();
+#endif
+
   monitor_->set_active (true);
   monitor_->header();
   monitor_->print ("BEGIN ENZO-P");
-#else
-  Monitor::instance()->print ("BEGIN ENZO-P");
-#endif
 
   // open parameter file, calling usage() if invalid
 
