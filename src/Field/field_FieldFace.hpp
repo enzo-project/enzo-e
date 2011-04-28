@@ -24,8 +24,13 @@ public: // interface
   /// Constructor
   FieldFace(int n, char * array) throw()
     : array_()
-  { array_.resize(n);
+  {
+    TRACE("FieldFace");
+    array_.resize(n);
+    TRACE("FieldFace");
+    printf("n=%d %g\n",n,*((float *)(&array_[0])));
     for (int i=0; i<n; i++) array_[i] = array[i]; 
+    TRACE("FieldFace");
   };
 
   //----------------------------------------------------------------------
@@ -48,7 +53,7 @@ public: // interface
 	    const FieldBlock * field_block,
 	    axis_enum          axis,
 	    face_enum          face,
-	    bool               full = true) throw();
+	    bool               full) throw();
 
 
   /// Store to field's ghost data
@@ -56,7 +61,7 @@ public: // interface
 	     FieldBlock *       field_block,
 	     axis_enum          axis,
 	     face_enum          face,
-	     bool               full = true) throw();
+	     bool               full) throw();
 
   /// Return the size of the array
   size_t size() const throw() { return array_.size(); };
@@ -76,7 +81,7 @@ private: // functions
   void allocate_(const FieldDescr * field_descr,
 		 const FieldBlock * field_block,
 		 axis_enum          axis,
-		 bool               full = true) throw();
+		 bool               full) throw();
 
   /// Deallocate array_ storage
   void deallocate_() throw();
@@ -87,7 +92,7 @@ private: // functions
   size_t load_precision_
   (T * array_face, const T * field_face,
    int n[3], int nd[3], int ng[3],
-   axis_enum axis, face_enum face, bool full = true ) throw();
+   axis_enum axis, face_enum face, bool full ) throw();
 
   /// Precision-agnostic function for copying the field_face array into
   /// the field block ghosts; returns number of bytes copied
@@ -95,7 +100,7 @@ private: // functions
   size_t store_precision_
   (T * field_ghosts, const T * array_ghosts, 
    int n[3], int nd[3], int ng[3],
-   axis_enum axis, face_enum face, bool full = true ) throw();
+   axis_enum axis, face_enum face, bool full ) throw();
 
 private: // attributes
 

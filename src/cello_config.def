@@ -7,4 +7,5 @@
 #define CONFIG_USE_MEMORY
 
 
+#define CONFIG_FACE_FULL false
 

@@ -15,12 +15,14 @@
 FieldFace::FieldFace() throw()
   : array_()
 {
+  TRACE("FieldFace");
 }
 
 //----------------------------------------------------------------------
 
 FieldFace::~FieldFace() throw ()
 {
+  TRACE("~FieldFace");
   deallocate_();
 }
 
@@ -55,8 +57,8 @@ void FieldFace::load
  bool               full
  ) throw()
 {
-
-  allocate_(field_descr,field_block,axis);
+  TRACE("load enter");
+  allocate_(field_descr,field_block,axis,full);
 
   size_t num_fields = field_descr->field_count();
 
@@ -108,6 +110,7 @@ void FieldFace::load
       ERROR("FieldFace::load", "Unsupported precision");
     }
   }
+  TRACE("load exit");
 
 }
 
@@ -123,6 +126,7 @@ void FieldFace::store
  ) throw()
 {
 
+  TRACE("save enter");
   size_t num_fields = field_descr->field_count();
 
   size_t index = 0;
@@ -175,6 +179,7 @@ void FieldFace::store
   }
 
   deallocate_();
+  TRACE("save exit");
 }
 
 //----------------------------------------------------------------------
@@ -188,6 +193,7 @@ void FieldFace::allocate_
  ) throw()
 {
 
+  TRACE("allocate_ enter");
   size_t num_fields = field_descr->field_count();
 
   int array_size = 0;
@@ -211,9 +217,22 @@ void FieldFace::allocate_
     int ng3[3];
     field_descr->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
+    // Adjust if not storing ghost zones
+    if (! full) {
+      int no = nd3[0]*nd3[1]*nd3[2];
+      field_bytes /= no;
+      int nn = (nd3[0]-2*ng3[0]) 
+	*      (nd3[1]-2*ng3[1])
+	*      (nd3[2]-2*ng3[2]);
+      field_bytes *= nn;
+      nd3[0] -= 2*ng3[0];
+      nd3[1] -= 2*ng3[1];
+      nd3[2] -= 2*ng3[2];
+    }
+
     // Get size of one face for given axis
 
-    int face_bytes = ng3[axis] * field_bytes / nd3 [axis];
+    int face_bytes = field_bytes * ng3[axis] / nd3 [axis];
 
     face_bytes += 
       field_block->adjust_alignment_(face_bytes,bytes_per_element);
@@ -225,7 +244,11 @@ void FieldFace::allocate_
   }
 
   // Allocate the array
+
+  PARALLEL_PRINTF ("array_size = %d\n",array_size);
+
   array_.resize(array_size);
+  TRACE("allocate_ exit");
 
 }
 
@@ -233,7 +256,9 @@ void FieldFace::allocate_
 
 void FieldFace::deallocate_() throw()
 {
+  TRACE("deallocate 1");
   array_.clear();
+  TRACE("deallocate 2");
 }
 
 //----------------------------------------------------------------------
@@ -256,13 +281,24 @@ size_t FieldFace::load_precision_
 
   int iz0 = (face == face_lower) ? ng3[axis] : nd3[axis]-2*ng3[axis];
 
-  for (int iz = 0; iz <ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
-    for (int iy=0; iy < nd3[iay]; iy++) {
-      for (int ix=0; ix < nd3[iax]; ix++) {
+  // Loop limits
+
+  int ix0,nx,iy0,ny;
+
+  ix0 = full ? 0 : ng3[iax];
+  iy0 = full ? 0 : ng3[iay];
+  nx  = full ? nd3[iax] : nd3[iax] - 2*ng3[iax];
+  ny  = full ? nd3[iay] : nd3[iay] - 2*ng3[iay];
+
+  for (int iz=0; iz <ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
+    for (int iy=0; iy < ny; iy++) {
+      for (int ix=0; ix < nx; ix++) {
 	int index_array_face  = iz + ng3[axis]*(ix + nd3[iax]*iy);
-	int index_field_face = ix*md3[iax] + iy*md3[iay] + (iz0+iz)*md3[axis];
-	array_face[index_array_face] = 
-	  field_face[index_field_face];
+	int index_field_face = 
+	  (ix0+ix)*md3[iax] + 
+	  (iy0+iy)*md3[iay] + 
+	  (iz0+iz)*md3[axis];
+	array_face[index_array_face] = field_face[index_field_face];
       }
     }
   }
@@ -290,13 +326,23 @@ size_t FieldFace::store_precision_
 
   int iz0 = (face == face_lower) ? 0 : nd3[axis]-ng3[axis];
 
-  for (int iz = 0; iz <ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
-    for (int iy=0; iy < nd3[iay]; iy++) {
-      for (int ix=0; ix < nd3[iax]; ix++) {
-	int index_field_ghost = ix*md3[iax] + iy*md3[iay] + (iz0+iz)*md3[axis];
+  // Loop limits
+
+  int ix0,nx,iy0,ny;
+  ix0 = full ? 0 : ng3[iax];
+  iy0 = full ? 0 : ng3[iay];
+  nx  = full ? nd3[iax] : nd3[iax] - 2*ng3[iax];
+  ny  = full ? nd3[iay] : nd3[iay] - 2*ng3[iay];
+
+  for (int iz=0; iz < ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
+    for (int iy=0; iy < ny; iy++) {
+      for (int ix=0; ix < nx; ix++) {
+	int index_field_ghost = 
+	  (ix0+ix)*md3[iax] + 
+	  (iy0+iy)*md3[iay] + 
+	  (iz0+iz)*md3[axis];
 	int index_array_ghost  = iz + ng3[axis]*(ix + nd3[iax]*iy);
-	field_ghost[index_field_ghost] = 
-	  array_ghost[index_array_ghost];
+	field_ghost[index_field_ghost] = array_ghost[index_array_ghost];
       }
     }
   }

@@ -870,7 +870,7 @@ void Simulation::refresh() throw()
     Patch * patch;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
-	patch->blocks().p_refresh(dt_,axis_x);
+	patch->blocks().p_refresh(dt_,CONFIG_FACE_FULL);
       }
     }
   }
