@@ -334,9 +334,9 @@ void Block::p_refresh (double dt, int axis_set)
   mesh->upper(&upper[0],&upper[1],&upper[2]);
 
   PARALLEL_PRINTF ("axis_set = %d\n",axis_set);
-  bool ax = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
-  bool ay = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
-  bool az = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+  bool ax = ((axis_set == axis_all) || (axis_set == axis_x)) && nx > 1;
+  bool ay = ((axis_set == axis_all) || (axis_set == axis_y)) && ny > 1;
+  bool az = ((axis_set == axis_all) || (axis_set == axis_z)) && nz > 1;
 
   if ( ax ) {
     // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
@@ -385,12 +385,20 @@ void Block::p_refresh (double dt, int axis_set)
 
   CProxy_Block block_array = thisProxy;
 
+  PARALLEL_PRINTF ("ax ay az = %d %d %d\n",ax,ay,az);
   if ( ax ) {
     // xp <<< xm
     if ( ! boundary_face[axis_x][face_lower] || periodic ) {
       TRACE("load xp<xm");
       field_face.load (field_descr, field_block(), axis_x, face_lower, CONFIG_FACE_FULL);
       TRACE("load xp<xm");
+      
+      PARALLEL_PRINTF ("size %d\n",field_face.size());
+      PARALLEL_PRINTF ("array %d\n",*field_face.array());
+      PARALLEL_PRINTF ("array %d\n",*(field_face.array()+field_face.size()-1));
+      PARALLEL_PRINTF ("axis_x %d\n", axis_x);
+      PARALLEL_PRINTF ("face_upper %d\n", face_upper);
+      PARALLEL_PRINTF ("axis_set %d\n", axis_set);
       block_array(ixm,iy,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_x, face_upper, axis_set);
       TRACE("load xp<xm");

@@ -868,9 +868,15 @@ void Simulation::refresh() throw()
 
     ItPatch it_patch(mesh_);
     Patch * patch;
+    axis_enum axis;
+    if (CONFIG_FACE_FULL) {
+      axis = axis_all;
+    } else {
+      axis = axis_x;
+    }
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
-	patch->blocks().p_refresh(dt_,CONFIG_FACE_FULL);
+	patch->blocks().p_refresh(dt_,axis);
       }
     }
   }

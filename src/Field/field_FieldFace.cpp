@@ -248,6 +248,7 @@ void FieldFace::allocate_
   PARALLEL_PRINTF ("array_size = %d\n",array_size);
 
   array_.resize(array_size);
+  for (int i=0; i<array_size; i++) array_[i] = 0;
   TRACE("allocate_ exit");
 
 }
