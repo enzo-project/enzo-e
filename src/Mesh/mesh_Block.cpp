@@ -79,13 +79,11 @@ Block::Block
 
 Block::~Block() throw ()
 { 
-  TRACE("~Block() 1");
   // Deallocate field_block_[]
   for (size_t i=0; i<field_block_.size(); i++) {
     delete field_block_[i];
     field_block_[i] = 0;
   }
-  TRACE("~Block() 2");
 }
 
 //----------------------------------------------------------------------
@@ -201,7 +199,6 @@ extern CProxy_Main proxy_main;
 
 void Block::p_initial()
 {
-  TRACE("Block::p_initial");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -237,8 +234,6 @@ void Block::p_initial()
 
 void Block::prepare()
 {
-
-  TRACE("Block::prepare");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
@@ -295,10 +290,81 @@ void Block::prepare()
 
 //----------------------------------------------------------------------
 
+void Block::refresh_axis (axis_enum axis)
+{
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  //--------------------------------------------------
+  // Boundary
+  //--------------------------------------------------
+
+  bool boundary_face[2];
+  
+  boundary_face[face_lower] = false;
+  boundary_face[face_upper] = false;
+
+  int n3[3];
+  field_block()->size (&n3[0],&n3[1],&n3[2]);
+
+  Mesh *             mesh        = simulation->mesh();
+  Boundary *         boundary    = simulation->boundary();
+  const FieldDescr * field_descr = simulation->field_descr();
+
+  double lower[3];
+  mesh->lower(&lower[0],&lower[1],&lower[2]);
+  double upper[3];
+  mesh->upper(&upper[0],&upper[1],&upper[2]);
+
+  bool is_active = n3[axis] > 1;
+
+  if ( is_active ) {
+    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+    boundary_face[face_lower] = fabs(lower_[axis]-lower[axis]) < 1e-7;
+    boundary_face[face_upper] = fabs(upper_[axis]-upper[axis]) < 1e-7;
+    if ( boundary_face[face_lower] ) boundary->enforce(field_descr,this,face_lower,axis);
+    if ( boundary_face[face_upper] ) boundary->enforce(field_descr,this,face_upper,axis);
+  }
+
+  //--------------------------------------------------
+  // Refresh
+  //--------------------------------------------------
+
+  int i3[3]  = { thisIndex.x, thisIndex.y, thisIndex.z};
+  int im3[3] = { thisIndex.x, thisIndex.y, thisIndex.z};
+  int ip3[3] = { thisIndex.x, thisIndex.y, thisIndex.z};
+  int nb3[3] = { size_[0], size_[1], size_[2]};
+
+  im3[axis] = (i3[axis] - 1 + nb3[axis]) % nb3[axis];
+  ip3[axis] = (i3[axis] + 1 + nb3[axis]) % nb3[axis];
+
+  FieldFace field_face;
+
+  bool periodic = boundary->is_periodic();
+
+  CProxy_Block block_array = thisProxy;
+
+  bool temp_update_all  = simulation->temp_update_all();
+  bool temp_update_full = simulation->temp_update_full();
+
+  if ( is_active ) {
+    if ( ! boundary_face[face_lower] || periodic ) {
+      field_face.load (field_descr, field_block(), axis, face_lower, temp_update_full);
+      block_array(im3[0],im3[1],im3[2]).p_refresh_face 
+	(field_face.size(), field_face.array(), axis, face_upper, axis);
+
+    }
+    if ( ! boundary_face[face_upper] || periodic ) {
+      field_face.load (field_descr, field_block(), axis, face_upper, temp_update_full);
+      block_array(ip3[0],ip3[1],ip3[2]).p_refresh_face 
+	(field_face.size(), field_face.array(), axis, face_lower, axis);
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void Block::p_refresh (double dt, int axis_set)
 {
-
-  TRACE("Block::p_refresh %d enter");
 
   // Update dt_ from Simulation
 
@@ -333,7 +399,6 @@ void Block::p_refresh (double dt, int axis_set)
   double upper[3];
   mesh->upper(&upper[0],&upper[1],&upper[2]);
 
-  PARALLEL_PRINTF ("axis_set = %d\n",axis_set);
   bool ax = ((axis_set == axis_all) || (axis_set == axis_x)) && nx > 1;
   bool ay = ((axis_set == axis_all) || (axis_set == axis_y)) && ny > 1;
   bool az = ((axis_set == axis_all) || (axis_set == axis_z)) && nz > 1;
@@ -385,49 +450,33 @@ void Block::p_refresh (double dt, int axis_set)
 
   CProxy_Block block_array = thisProxy;
 
-  PARALLEL_PRINTF ("ax ay az = %d %d %d\n",ax,ay,az);
+  bool temp_update_full = simulation->temp_update_full();
+
   if ( ax ) {
     // xp <<< xm
     if ( ! boundary_face[axis_x][face_lower] || periodic ) {
-      TRACE("load xp<xm");
-      field_face.load (field_descr, field_block(), axis_x, face_lower, CONFIG_FACE_FULL);
-      TRACE("load xp<xm");
-      
-      PARALLEL_PRINTF ("size %d\n",field_face.size());
-      PARALLEL_PRINTF ("array %d\n",*field_face.array());
-      PARALLEL_PRINTF ("array %d\n",*(field_face.array()+field_face.size()-1));
-      PARALLEL_PRINTF ("axis_x %d\n", axis_x);
-      PARALLEL_PRINTF ("face_upper %d\n", face_upper);
-      PARALLEL_PRINTF ("axis_set %d\n", axis_set);
+      field_face.load (field_descr, field_block(), axis_x, face_lower, temp_update_full);
       block_array(ixm,iy,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_x, face_upper, axis_set);
-      TRACE("load xp<xm");
+
     }
     // xp >>> xm
     if ( ! boundary_face[axis_x][face_upper] || periodic ) {
-      TRACE("load xp>xm");
-      field_face.load (field_descr, field_block(), axis_x, face_upper, CONFIG_FACE_FULL);
-      TRACE("load xp>xm");
+      field_face.load (field_descr, field_block(), axis_x, face_upper, temp_update_full);
       block_array(ixp,iy,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_x, face_lower, axis_set);
-      TRACE("load xp>xm");
     }
   }
   if ( ay ) {
     // yp <<< ym
     if ( ! boundary_face[axis_y][face_lower] || periodic ) {
-      TRACE("load yp<ym");
-      field_face.load (field_descr, field_block(), axis_y, face_lower, CONFIG_FACE_FULL);
-      TRACE("load yp<ym");
+      field_face.load (field_descr, field_block(), axis_y, face_lower, temp_update_full);
       block_array(ix,iym,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_y, face_upper, axis_set);
-      TRACE("load yp<ym");
     }
     // yp >>> ym
     if ( ! boundary_face[axis_y][face_upper] || periodic ) {
-      TRACE("load yp>ym");
-      field_face.load (field_descr, field_block(), axis_y, face_upper, CONFIG_FACE_FULL);
-      TRACE("load yp>ym");
+      field_face.load (field_descr, field_block(), axis_y, face_upper, temp_update_full);
       block_array(ix,iyp,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_y, face_lower, axis_set);
     }
@@ -435,21 +484,15 @@ void Block::p_refresh (double dt, int axis_set)
   if ( az ) {
     // zp <<< zm
     if ( ! boundary_face[axis_z][face_lower] || periodic ) {
-      TRACE("load zp<zm");
-      field_face.load (field_descr, field_block(), axis_z, face_lower, CONFIG_FACE_FULL);
-      TRACE("load zp<zm");
+      field_face.load (field_descr, field_block(), axis_z, face_lower, temp_update_full);
       block_array(ix,iy,izm).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_z, face_upper, axis_set);
-      TRACE("load zp<zm");
     }
     // zp >>> zm
     if ( ! boundary_face[axis_z][face_upper] || periodic ) {
-      TRACE("load zp>zm");
-      field_face.load (field_descr, field_block(), axis_z, face_upper, CONFIG_FACE_FULL);
-      TRACE("load zp>zm");
+      field_face.load (field_descr, field_block(), axis_z, face_upper, temp_update_full);
       block_array(ix,iy,izp).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_z, face_lower, axis_set);
-      TRACE("load zp>zm");
     }
   }
 
@@ -457,11 +500,8 @@ void Block::p_refresh (double dt, int axis_set)
   // it will never get called.  So every block also calls
   // p_refresh_face() itself with a null array
 
-  PARALLEL_PRINTF ("%d %d %d  %d\n",ax,ay,az,axis_set);
   p_refresh_face (0,0,0,0, axis_set);
-  PARALLEL_PRINTF ("%d %d %d  %d\n",ax,ay,az,axis_set);
 
-  TRACE("Block::p_refresh exit");
 }
 
 //----------------------------------------------------------------------
@@ -469,8 +509,6 @@ void Block::p_refresh (double dt, int axis_set)
 void Block::p_refresh_face (int n, char * buffer,
 			    int axis, int face, int axis_set)
 {
-  TRACE("Block::p_refresh_face enter");
-
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   if ( n != 0) {
@@ -480,15 +518,12 @@ void Block::p_refresh_face (int n, char * buffer,
 
     FieldFace field_face(n, buffer);
 
-    TRACE("Block::p_refresh_face");
     field_face.store(simulation->field_descr(),
 		     field_block(), 
 		     axis_enum(axis), 
-		     face_enum(face), CONFIG_FACE_FULL);
-    TRACE("Block::p_refresh_face");
-
+		     face_enum(face), 
+		     simulation->temp_update_full());
   }
-  TRACE("Block::p_refresh_face");
 
   //--------------------------------------------------
   // Count incoming faces
@@ -545,28 +580,24 @@ void Block::p_refresh_face (int n, char * buffer,
     switch (axis_set) {
     case axis_x:
       if (++count_refresh_face_x_ >= count) {
-	TRACE("Block::p_refresh_face x");
 	count_refresh_face_x_ = 0;
 	p_refresh (-1,axis_y);
       }
       break;
     case axis_y:
       if (++count_refresh_face_y_ >= count) {
-	TRACE("Block::p_refresh_face y");
 	count_refresh_face_y_ = 0;
 	p_refresh (-1,axis_z);
       }
       break;
     case axis_z:
       if (++count_refresh_face_z_ >= count) {
-	TRACE("Block::p_refresh_face z");
 	count_refresh_face_z_ = 0;
 	compute();
       }
       break;
     }
   }
-  TRACE("Block::p_refresh_face exit");
 }
 
 //----------------------------------------------------------------------
@@ -588,7 +619,6 @@ void Block::p_output_accum (int index_output)
 void Block::compute()
 {
 
-  TRACE("Block::compute");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
 #ifdef CONFIG_USE_PROJECTIONS

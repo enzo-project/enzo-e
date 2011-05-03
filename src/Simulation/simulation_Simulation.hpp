@@ -172,6 +172,12 @@ public: // interface
   /// Return the Simulation index
   size_t index() const throw() {return index_; };
 
+  /// Return whether to update all faces at once or axis-by-axis
+  bool temp_update_all() const throw() { return temp_update_all_; };
+
+  /// Return whether to include orthogonal ghosts in updates
+  bool temp_update_full() const throw() { return temp_update_full_; };
+
 public: // virtual functions
 
   /// initialize the Simulation given a parameter file
@@ -218,6 +224,9 @@ protected: // functions
 
   /// Initialize the method objects
   void initialize_method_  () throw();
+
+  /// Initialize parallelism-related parameters
+  void initialize_parallel_  () throw();
 
   void deallocate_() throw();
 
@@ -277,6 +286,12 @@ protected: // attributes
 
   /// Current stopping criteria
   bool stop_;
+
+  /// [TEMPORARY: DEBUGGING] Whether to update all faces at once or axis-by-axis
+  bool temp_update_all_;
+
+  /// [TEMPORARY: DEBUGGING] Whether to include orthogonal ghosts in updates
+  bool temp_update_full_;
 
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS

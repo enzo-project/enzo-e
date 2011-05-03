@@ -38,6 +38,8 @@ Simulation::Simulation
     time_(0.0),
     dt_(0),
     stop_(false),
+    temp_update_all_(true),
+    temp_update_full_(true),
     index_(index),
     performance_(0),
     monitor_(0),
@@ -87,6 +89,7 @@ void Simulation::initialize() throw()
   initialize_boundary_();
   initialize_output_();
   initialize_method_();
+  initialize_parallel_();
 
 }
 
@@ -670,6 +673,17 @@ void Simulation::initialize_method_() throw()
 
 //----------------------------------------------------------------------
 
+void Simulation::initialize_parallel_() throw()
+{
+  //--------------------------------------------------
+  // parameter: parallel::temp_update_all
+  // parameter: parallel::temp_update_full
+  //--------------------------------------------------
+  temp_update_all_  = parameters_->value_logical("Parallel:temp_update_all",true);
+  temp_update_full_ = parameters_->value_logical("Parallel:temp_update_full",true);
+}
+//----------------------------------------------------------------------
+
 void Simulation::deallocate_() throw()
 {
   delete performance_;
@@ -869,11 +883,7 @@ void Simulation::refresh() throw()
     ItPatch it_patch(mesh_);
     Patch * patch;
     axis_enum axis;
-    if (CONFIG_FACE_FULL) {
-      axis = axis_all;
-    } else {
-      axis = axis_x;
-    }
+    axis = (temp_update_all_) ? axis_all : axis_x;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
 	patch->blocks().p_refresh(dt_,axis);

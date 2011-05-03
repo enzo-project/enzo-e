@@ -71,6 +71,10 @@ public: // interface
 
   /// Boundary and Method
   void compute();
+
+  /// Refresh ghost zones and apply boundary conditions along a specific axis
+  void refresh_axis(axis_enum axis);
+
   //==================================================
 
 #endif

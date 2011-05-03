@@ -25,12 +25,8 @@ public: // interface
   FieldFace(int n, char * array) throw()
     : array_()
   {
-    TRACE("FieldFace");
     array_.resize(n);
-    TRACE("FieldFace");
-    printf("n=%d %g\n",n,*((float *)(&array_[0])));
     for (int i=0; i<n; i++) array_[i] = array[i]; 
-    TRACE("FieldFace");
   };
 
   //----------------------------------------------------------------------

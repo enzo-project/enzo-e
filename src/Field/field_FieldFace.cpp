@@ -15,14 +15,12 @@
 FieldFace::FieldFace() throw()
   : array_()
 {
-  TRACE("FieldFace");
 }
 
 //----------------------------------------------------------------------
 
 FieldFace::~FieldFace() throw ()
 {
-  TRACE("~FieldFace");
   deallocate_();
 }
 
@@ -57,7 +55,6 @@ void FieldFace::load
  bool               full
  ) throw()
 {
-  TRACE("load enter");
   allocate_(field_descr,field_block,axis,full);
 
   size_t num_fields = field_descr->field_count();
@@ -110,7 +107,6 @@ void FieldFace::load
       ERROR("FieldFace::load", "Unsupported precision");
     }
   }
-  TRACE("load exit");
 
 }
 
@@ -126,7 +122,6 @@ void FieldFace::store
  ) throw()
 {
 
-  TRACE("save enter");
   size_t num_fields = field_descr->field_count();
 
   size_t index = 0;
@@ -179,7 +174,6 @@ void FieldFace::store
   }
 
   deallocate_();
-  TRACE("save exit");
 }
 
 //----------------------------------------------------------------------
@@ -193,7 +187,6 @@ void FieldFace::allocate_
  ) throw()
 {
 
-  TRACE("allocate_ enter");
   size_t num_fields = field_descr->field_count();
 
   int array_size = 0;
@@ -245,11 +238,8 @@ void FieldFace::allocate_
 
   // Allocate the array
 
-  PARALLEL_PRINTF ("array_size = %d\n",array_size);
-
   array_.resize(array_size);
   for (int i=0; i<array_size; i++) array_[i] = 0;
-  TRACE("allocate_ exit");
 
 }
 
@@ -257,9 +247,7 @@ void FieldFace::allocate_
 
 void FieldFace::deallocate_() throw()
 {
-  TRACE("deallocate 1");
   array_.clear();
-  TRACE("deallocate 2");
 }
 
 //----------------------------------------------------------------------
