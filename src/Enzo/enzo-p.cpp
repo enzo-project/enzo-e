@@ -154,7 +154,6 @@ void p_exit(int count)
 void p_prepare(int count, int cycle, double time,
 	       double dt_block, int stop_block)
 {
-  TRACE("Main::p_prepare");
   // Assumes cycle and time are the same for all "incoming" blocks;
   // only use the last one
 

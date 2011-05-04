@@ -219,7 +219,7 @@ void Block::p_initial()
 
   initialize(simulation->cycle(), simulation->time());
 
-  field_block()->print(field_descr,"initial",lower_,upper_);
+  //  field_block()->print(field_descr,"initial",lower_,upper_);
 
   // Prepare for the first cycle: perform and disk Output, user
   // Monitoring, apply Stopping criteria [reduction], and compute the
@@ -263,7 +263,7 @@ void Block::prepare()
   // DEBUG
   if (stop_block) {
     FieldDescr * field_descr = simulation->field_descr();
-    field_block()->print(field_descr,"final",lower_,upper_);
+    //    field_block()->print(field_descr,"final",lower_,upper_);
     field_block()->image(field_descr,"cycle",cycle_,
       			 thisIndex.x,thisIndex.y,thisIndex.z);
    }
