@@ -175,8 +175,8 @@ if (balance != 0):
 #--------------------------------------------------
 
 defines     = defines     +         define_hdf5
-defines_xlc = defines_xlc + ' -D' + define_hdf5[0]+ ' -D' + define_hdf5[1]
-defines_xlf = defines_xlf + ' -WF,-D' + define_hdf5[0]+ ' -WF,-D' + define_hdf5[1]
+defines_xlc = defines_xlc + ' -D' + define_hdf5[0] 
+defines_xlf = defines_xlf + ' -WF,-D' + define_hdf5[0] 
 
 #--------------------------------------------------
 
