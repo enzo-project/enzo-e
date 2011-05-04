@@ -15,7 +15,7 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error','memory','monitor', 'parallel', 'field', 'cello']
+components = ['error','memory','monitor', 'parallel', 'field', 'cello', 'enzo', 'method']
 libraries  = ['png']
 
 #------------------------------

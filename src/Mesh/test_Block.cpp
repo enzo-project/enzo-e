@@ -11,6 +11,8 @@
 
 #include "mesh.hpp"
 
+#include PARALLEL_CHARM_INCLUDE(test.decl.h)
+
 PARALLEL_MAIN_BEGIN
 {
 

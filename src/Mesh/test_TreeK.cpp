@@ -34,6 +34,8 @@ void print_usage(int, char**);
 //----------------------------------------------------------------------
 
 
+#include PARALLEL_CHARM_INCLUDE(test.decl.h)
+
 PARALLEL_MAIN_BEGIN
 
 {

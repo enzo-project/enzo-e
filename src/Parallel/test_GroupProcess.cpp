@@ -45,6 +45,8 @@ bool test_array(double * array, int length, int rank, int value)
 
 //======================================================================
 
+#include PARALLEL_CHARM_INCLUDE(test.decl.h)
+
 PARALLEL_MAIN_BEGIN
 {
 

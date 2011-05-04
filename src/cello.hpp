@@ -49,6 +49,18 @@ enum axis_enum {
   axis_all
 };
 
+//----------------------------------------------------------------------
+/// @enum     reduce_enum
+/// @brief    Reduction operator, used for image projections
+
+enum reduce_enum {
+  reduce_unknown, /// Unknown reduction
+  reduce_min,     /// Minimal value along the axis
+  reduce_max,     /// Maximal value along the axis
+  reduce_avg,     /// Average value along the axis
+  reduce_sum      /// Sum of values along the axis
+};
+
 /*********************************************************************
  * COMPONENTS
  **********************************************************************/

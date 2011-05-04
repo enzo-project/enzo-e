@@ -131,6 +131,7 @@ PARALLEL_MAIN_BEGIN
 
   // exit
 
+    PARALLEL_PRINTF ("UNIT TEST END\n");
   PARALLEL_EXIT;
 #endif
   //--------------------------------------------------

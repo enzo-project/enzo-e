@@ -24,6 +24,8 @@ struct field_info_type {
   bool cx, cy, cz;
 };
 
+#include PARALLEL_CHARM_INCLUDE(test.decl.h)
+
 PARALLEL_MAIN_BEGIN
 {
 

@@ -49,7 +49,7 @@ Block * Factory::create_block
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xm, double ym, double zm,
- double hx, double hy, double hz,
+ double xb, double yb, double zb,
  int num_field_blocks
  ) const throw()
 {
@@ -65,7 +65,7 @@ Block * Factory::create_block
 		    nbx,nby,nbz,
 		    nx,ny,nz,
 		    xm,ym,zm, 
-		    hx,hy,hz, 
+		    xb,yb,zb, 
 		    num_field_blocks);
 #endif
 }

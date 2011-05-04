@@ -11,6 +11,8 @@
 #include "performance.hpp" /* for Timer */
 #include "memory.hpp"
 
+#include PARALLEL_CHARM_INCLUDE(test.decl.h)
+
 PARALLEL_MAIN_BEGIN
 {
 

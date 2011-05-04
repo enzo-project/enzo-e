@@ -40,7 +40,7 @@ public: // interface
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
-   double hx, double hy, double hz,
+   double xb, double yb, double zb,
    int num_field_blocks = 1) const throw();
 
 };

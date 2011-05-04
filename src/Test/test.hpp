@@ -25,8 +25,6 @@
 #include "error.hpp"
 #include "monitor.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
-
 //----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------
