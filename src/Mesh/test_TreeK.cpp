@@ -10,8 +10,6 @@
 
 #include "mesh.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test_TreeK.decl.h)
-
 #define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
 
 const bool debug    = false;
@@ -359,4 +357,4 @@ void create_tree
 
 }
 
-#include PARALLEL_CHARM_INCLUDE(test_TreeK.def.h)
+#include PARALLEL_CHARM_INCLUDE(test.def.h)

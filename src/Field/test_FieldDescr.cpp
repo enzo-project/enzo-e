@@ -24,9 +24,6 @@ struct field_info_type {
   bool cx, cy, cz;
 };
 
-#include "parallel.def"
-#include PARALLEL_CHARM_INCLUDE(test_FieldDescr.decl.h)
-
 PARALLEL_MAIN_BEGIN
 {
 
@@ -484,4 +481,4 @@ PARALLEL_MAIN_BEGIN
 }
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_FieldDescr.def.h)
+#include PARALLEL_CHARM_INCLUDE(test.def.h)

@@ -24,8 +24,6 @@ FileHdf5::FileHdf5()
   dataset_name_(),
   dataspace_(0)
 {
-#ifdef CONFIG_USE_HDF5
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -39,7 +37,6 @@ int FileHdf5::open_file  (std::string name, std::string mode)
  * @return      True iff opening the file was successful
  */
 {
-#ifdef CONFIG_USE_HDF5
 
   if (is_file_open_) {
 
@@ -74,9 +71,6 @@ int FileHdf5::open_file  (std::string name, std::string mode)
   }
 
   return is_file_open_;
-#else
-  return 0;
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -85,8 +79,6 @@ void FileHdf5::close_file ()
 /**
  */
 {
-#ifdef CONFIG_USE_HDF5
-
   if (! is_file_open_) {
     char warning_message[ERROR_LENGTH];
     sprintf (warning_message,
@@ -105,7 +97,6 @@ void FileHdf5::close_file ()
       WARNING("FileHdf5::close_file",warning_message);
     }
   }
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -114,9 +105,7 @@ void FileHdf5::open_group (std::string name)
 /**
  */
 {
-#ifdef CONFIG_USE_HDF5
   INCOMPLETE("FileHdf5::open_group");
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -125,9 +114,7 @@ void FileHdf5::close_group ()
 /**
  */
 {
-#ifdef CONFIG_USE_HDF5
   INCOMPLETE("FileHdf5::open_group");
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -139,7 +126,6 @@ void FileHdf5::open_dataset
  int nx,  int ny,  int nz
 )
 {
-#ifdef CONFIG_USE_HDF5
   if (file_mode_ != "w") {
 
     char error_message[ERROR_LENGTH];
@@ -185,7 +171,6 @@ void FileHdf5::open_dataset
       WARNING("FileHdf5::open_dataset",warning_message);
     }
   }
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -200,7 +185,6 @@ void FileHdf5::open_dataset
 /**
  */
 {
-#ifdef CONFIG_USE_HDF5
   if (file_mode_ != "r") {
 
     char error_message[ERROR_LENGTH];
@@ -250,7 +234,6 @@ void FileHdf5::open_dataset
       WARNING("FileHdf5::open_dataset",warning_message);
     }
   }
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -269,9 +252,7 @@ void FileHdf5::close_dataset ()
 /**
  */
 {
-#ifdef CONFIG_USE_HDF5
   H5Dclose( dataset_);
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -281,9 +262,7 @@ void FileHdf5::read  (char              * buffer,
 /**
  */
 {
-#ifdef CONFIG_USE_HDF5
   H5Dread (dataset_, datatype_(precision), dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -293,9 +272,7 @@ void FileHdf5::write (char              * buffer,
 /**
  */
 {
-#ifdef CONFIG_USE_HDF5
   H5Dwrite (dataset_, datatype_(precision), dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
-#endif
 }
 
 
@@ -306,7 +283,6 @@ int FileHdf5::datatype_(enum precision_enum precision)
   // (*) NATIVE    -   FLOAT DOUBLE LDOUBLE
   // ( ) IEEE      -   F32BE F64BE     -
   // ( ) STD     B16BE B32BE B64BE     -
-#ifdef CONFIG_USE_HDF5
   switch (precision) {
   case precision_unknown:
     ERROR("FileHdf5::datatype_",
@@ -339,7 +315,4 @@ int FileHdf5::datatype_(enum precision_enum precision)
     return 0;
     break;
   }
-#else
-  return 0;
-#endif
 }

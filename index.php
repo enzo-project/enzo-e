@@ -323,7 +323,7 @@ test_summary("Disk",array("FileHdf5","FileIfrit"),
 		    array("test_FileHdf5","test_FileIfrit")); 
 test_summary("Error",array("Error"),
 		    array("test_Error")); 
-test_summary("Enzo",array("ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion","enzo-p_1","enzo-p_2"),array("enzo-p","test_ppm","test_ppml")); 
+test_summary("Enzo",array("enzo-p_1","enzo-p_2"),array("enzo-p")); 
 test_summary("Field",array("FieldBlock","FieldDescr","FieldFace"),
 		    array("test_FieldBlock","test_FieldDescr","test_FieldFace")); 
 test_summary("Memory",array("Memory"),
@@ -437,100 +437,6 @@ component("Enzo");
 </table>
 
 
-
-<h4>test_ppm ppm_image</h4>
-
-<?php tests("Enzo/ppm","test_ppm","test_ppm_image"); ?>
-
-<table>
-<tr><th>cycle = 0</th><th>cycle=10</th><th>cycle=30</th></tr>
-<tr>
-<td><img width=320 src="slice-ppm-image-000000.png"></img></td>
-<td><img width=320  src="slice-ppm-image-000010.png"></img></td>
-<td><img width=320  src="slice-ppm-image-000030.png"></img></td>
-</tr>
-</table>
-
-<h4>test_ppm ppm_implosion</h4>
-
-<?php tests("Enzo/ppm","test_ppm","test_ppm_implosion"); ?>
-
-<table>
-<tr><th>cycle = 0</th><th>cycle=10</th></tr>
-<tr>
-<td><img width=320 src="slice-ppm-implosion-000000.png"></img></td>
-<td><img width=320 src="slice-ppm-implosion-000010.png"></img></td>
-</tr>
-</table>
-
-<h4>test_ppm ppm_implosion3</h4>
-
-<?php tests("Enzo/ppm","test_ppm","test_ppm_implosion3"); ?>
-
-<table>
-<tr>
-<th>cycle = 0 project = X</th>
-<th>cycle = 0 project = Y</th>
-<th>cycle = 0 project = Z</th>
-<th>cycle = 10 project = X</th>
-<th>cycle = 10 project = Y</th>
-<th>cycle = 10 project = Z</th>
-</tr>
-<tr>
-<td><img width=200 src="project-ppm-implosion3-000000-x.png"></img></td>
-<td><img width=200 src="project-ppm-implosion3-000000-y.png"></img></td>
-<td><img width=200 src="project-ppm-implosion3-000000-z.png"></img></td>
-<td><img width=200 src="project-ppm-implosion3-000010-x.png"></img></td>
-<td><img width=200 src="project-ppm-implosion3-000010-y.png"></img></td>
-<td><img width=200 src="project-ppm-implosion3-000010-z.png"></img></td>
-</tr>
-</table>
-
-<h3>test_ppml ppml_blast</h3>
-
-<?php tests("Enzo/ppml","test_ppml","test_ppml_blast"); ?>
-
-<table>
-<tr>
-<th>cycle = 0 project = X</th>
-<th>cycle = 0 project = Y</th>
-<th>cycle = 0 project = Z</th>
-<th>cycle = 10 project = X</th>
-<th>cycle = 10 project = Y</th>
-<th>cycle = 10 project = Z</th>
-</tr>
-<tr>
-<td><img width=200 src="project-ppml-blast-000000-x.png"></img></td>
-<td><img width=200 src="project-ppml-blast-000000-y.png"></img></td>
-<td><img width=200 src="project-ppml-blast-000000-z.png"></img></td>
-<td><img width=200 src="project-ppml-blast-000010-x.png"></img></td>
-<td><img width=200 src="project-ppml-blast-000010-y.png"></img></td>
-<td><img width=200 src="project-ppml-blast-000010-z.png"></img></td>
-</tr>
-</table>
-
-<h3>test_ppml ppml_implosion</h3>
-
-<?php tests("Enzo/ppml","test_ppml","test_ppml_implosion"); ?>
-
-<table>
-<tr>
-<th>cycle = 0 project = X</th>
-<th>cycle = 0 project = Y</th>
-<th>cycle = 0 project = Z</th>
-<th>cycle = 10 project = X</th>
-<th>cycle = 10 project = Y</th>
-<th>cycle = 10 project = Z</th>
-</tr>
-<tr>
-<td><img width=200 src="project-ppml-implosion3-000000-x.png"></img></td>
-<td><img width=200 src="project-ppml-implosion3-000000-y.png"></img></td>
-<td><img width=200 src="project-ppml-implosion3-000000-z.png"></img></td>
-<td><img width=200 src="project-ppml-implosion3-000010-x.png"></img></td>
-<td><img width=200 src="project-ppml-implosion3-000010-y.png"></img></td>
-<td><img width=200 src="project-ppml-implosion3-000010-z.png"></img></td>
-</tr>
-</table>
 
 <h3>TreeK-D2-R2-L?</h3>
 

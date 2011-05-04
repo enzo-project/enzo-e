@@ -31,11 +31,6 @@ sources  = [Glob('memory*cpp')]
 libraries = env.Library ('memory', [sources])
 binaries  = env.Program (['test_Memory.cpp', sources])
 
-if (type == "charm"):
-	test = 'test_Memory'
-	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
-
 #------------------------------
 # INSTALL
 #------------------------------

@@ -3,6 +3,7 @@
 #------------------------------
 
 Import('env')
+Import('type')
 
 #------------------------------
 # DEPENDENCIES
@@ -21,6 +22,9 @@ includes = [Glob('*hpp')]
 #------------------------------
 # TARGETS
 #------------------------------
+
+if (type == "charm"):
+    env.CharmBuilder('test.decl.h','test.ci',ARG = 'test')
 
 #------------------------------
 # INSTALL

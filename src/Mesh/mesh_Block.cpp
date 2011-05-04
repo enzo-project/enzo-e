@@ -627,8 +627,10 @@ void Block::compute()
 
   FieldDescr * field_descr = simulation->field_descr();
 
-  // field_block()->image(field_descr,"compute-pre",cycle_,
-  // 		       thisIndex.x,thisIndex.y,thisIndex.z);
+  if (cycle_ == 0) {
+  field_block()->image(field_descr,"compute-pre",cycle_,
+		       thisIndex.x,thisIndex.y,thisIndex.z);
+  }
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
 

@@ -10,8 +10,6 @@
 
 #include "disk.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test_FileIfrit.decl.h)
-
 PARALLEL_MAIN_BEGIN
 
 {
@@ -77,4 +75,4 @@ PARALLEL_MAIN_BEGIN
 }
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_FileIfrit.def.h)
+#include PARALLEL_CHARM_INCLUDE(test.def.h)

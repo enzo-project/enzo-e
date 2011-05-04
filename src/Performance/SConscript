@@ -36,20 +36,8 @@ sources  = [Glob('performance*cpp')]
 libraries        = env.Library ('performance', [sources])
 test_performance = env.Program(['test_Performance.cpp', sources])
 test_papi        = env.Program(['test_Papi.cpp', sources])
-time_matvec      = env.Program(['time_matvec.cpp',      sources])
 
-binaries = [test_performance,test_papi,time_matvec]
-
-if (type == "charm"):
-	test = 'test_Performance'
-	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
-	test = 'time_matvec'
-	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
-	test = 'test_Papi'
-	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
+binaries = [test_performance,test_papi]
 
 #------------------------------
 # INSTALL

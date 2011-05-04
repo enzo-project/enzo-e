@@ -1,5 +1,0 @@
-module GroupProcessCharm {
-   group GroupProcessCharm {
-      entry GroupProcessCharm (int process_first, int process_last_plus);
-   };
-}

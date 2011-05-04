@@ -11,13 +11,6 @@
 
 #include "disk.hpp"
 
-// #include "error.hpp"
-// #include "test.hpp"
-// #include "disk.hpp"
-
-// #include "parallel.def"
-
-#include PARALLEL_CHARM_INCLUDE(test_FileHdf5.decl.h)
 
 PARALLEL_MAIN_BEGIN
 
@@ -86,4 +79,4 @@ PARALLEL_MAIN_BEGIN
 }
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_FileHdf5.def.h)
+#include PARALLEL_CHARM_INCLUDE(test.def.h)

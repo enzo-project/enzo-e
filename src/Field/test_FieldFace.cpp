@@ -10,8 +10,6 @@
 
 #include "field.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(enzo.decl.h)
-
 //----------------------------------------------------------------------
 
 bool is_ghost(int ix,int iy,int iz,
@@ -370,4 +368,4 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(enzo.def.h)
+#include PARALLEL_CHARM_INCLUDE(test.def.h)

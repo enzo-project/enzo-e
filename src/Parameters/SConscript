@@ -32,14 +32,6 @@ sources  = ['parse.tab.c', 'lex.yy.c', Glob('parameters*cpp') ]
 # env.CFile(target = ['parse.tab.c', 'parse.tab.h'], source = 'parse.y', YACCFLAGS='-d -t')
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-if (type == "charm"):
-	test = 'test_Parameters'
-	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
-	test = 'test_Parse'
-	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
-
 #------------------------------
 # TARGETS
 #------------------------------

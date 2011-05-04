@@ -189,26 +189,27 @@ Clean(env.RunSerial
 #        '#/bin/test_TreeK', ARGS='3 4 8'),
 #       Glob('../TreeK-D=3-R=4-L=8*png'))
 
-Clean(env.RunSerial
-      (type_path + 'test_ppml_implosion.unit',
-       '#/bin/test_ppml', ARGS='ppml-implosion3  20 10 10'),
-      Glob('../*-ppml-implosion3-*png'))
-Clean(env.RunSerial
-      (type_path + 'test_ppml_blast.unit',
-       '#/bin/test_ppml', ARGS='ppml-blast       20 10 10'),
-      Glob('../*-ppml-blast-*png'))
-Clean(env.RunSerial
-      (type_path + 'test_ppm_image.unit',
-       '#/bin/test_ppm', ARGS='ppm-image       100 30 10'),
-      Glob('../*-ppm-image-*png'))
-Clean(env.RunSerial
-      (type_path + 'test_ppm_implosion.unit',
-       '#/bin/test_ppm', ARGS='ppm-implosion   64 10 10'),
-      Glob('../*-ppm-implosion-*png'))
-Clean(env.RunSerial
-      (type_path + 'test_ppm_implosion3.unit',
-       '#/bin/test_ppm', ARGS='ppm-implosion3   24 10 10'),
-      Glob('../*-ppm-implosion3-*png'))
+# Clean(env.RunSerial
+#       (type_path + 'test_ppml_implosion.unit',
+#        '#/bin/test_ppml', ARGS='ppml-implosion3  20 10 10'),
+#       Glob('../*-ppml-implosion3-*png'))
+# Clean(env.RunSerial
+#       (type_path + 'test_ppml_blast.unit',
+#        '#/bin/test_ppml', ARGS='ppml-blast       20 10 10'),
+#       Glob('../*-ppml-blast-*png'))
+# Clean(env.RunSerial
+#       (type_path + 'test_ppm_image.unit',
+#        '#/bin/test_ppm', ARGS='ppm-image       100 30 10'),
+#       Glob('../*-ppm-image-*png'))
+# Clean(env.RunSerial
+#       (type_path + 'test_ppm_implosion.unit',
+#        '#/bin/test_ppm', ARGS='ppm-implosion   64 10 10'),
+#       Glob('../*-ppm-implosion-*png'))
+# Clean(env.RunSerial
+#       (type_path + 'test_ppm_implosion3.unit',
+#        '#/bin/test_ppm', ARGS='ppm-implosion3   24 10 10'),
+#       Glob('../*-ppm-implosion3-*png'))
+
 Clean(env.RunSerial
       (type_path + 'test_Monitor.unit',
        '#/bin/test_Monitor'),

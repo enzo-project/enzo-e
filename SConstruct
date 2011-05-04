@@ -11,7 +11,7 @@ trace           = 1
 use_gprof       = 0
 use_papi        = 0
 use_valgrind    = 0
-use_projections = 1
+use_projections = 0
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS
@@ -62,7 +62,7 @@ define_charm  =  ['CONFIG_USE_CHARM']
 define_single = ['CONFIG_PRECISION_SINGLE']
 define_double = ['CONFIG_PRECISION_DOUBLE']
 
-define_hdf5  =  ['CONFIG_USE_HDF5','H5_USE_16_API'];
+define_hdf5  =  ['H5_USE_16_API'];
 define_png   =  ['NO_FREETYPE'];
 define_papi  =  ['CONFIG_USE_PAPI'];
 define_trace =  ['CELLO_TRACE'];
@@ -495,6 +495,8 @@ env = Environment (
 #======================================================================
 
 if (type == "charm"):
+     # include files moved to include here since they are generated in
+     # top-level directory
      charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
      env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 

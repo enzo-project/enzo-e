@@ -7,10 +7,12 @@
 /// @brief    Program implementing unit tests for the Parameters class
 //----------------------------------------------------------------------
 
+#include <fstream>
+
 #include "test.hpp"
 
 #include "parameters.hpp"
-#include <fstream>
+
 //----------------------------------------------------------------------
 
 /// @def      CLOSE
@@ -105,8 +107,6 @@ void generate_input()
 }
 
 //======================================================================
-
-#include PARALLEL_CHARM_INCLUDE(test_Parameters.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
@@ -471,5 +471,5 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_Parameters.def.h)
+#include PARALLEL_CHARM_INCLUDE(test.def.h)
 

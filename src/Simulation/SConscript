@@ -38,11 +38,6 @@ libraries       = env.Library ('simulation', [sources])
 # test_simulation = env.Program (['test_Simulation.cpp',sources])
 #binaries        = [test_simulation];
 
-# if (type == "charm"):
-# 	test = 'test_Simulation'
-# 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-# 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
-
 #------------------------------
 # INSTALL
 #------------------------------

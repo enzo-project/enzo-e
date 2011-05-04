@@ -11,8 +11,6 @@
 
 #include "performance.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test_Performance.decl.h)
-
 PARALLEL_MAIN_BEGIN
 {
 
@@ -230,4 +228,4 @@ PARALLEL_MAIN_BEGIN
 }
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_Performance.def.h)
+#include PARALLEL_CHARM_INCLUDE(test.def.h)

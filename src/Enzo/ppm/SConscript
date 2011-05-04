@@ -43,18 +43,10 @@ sources  = [Glob('initialize*cpp'),
 # TARGETS
 #------------------------------
 
-binaries = [env.Program (['test_ppm.cpp',      sources])]
 libraries = env.Library ('enzo-ppm', sources)
-
-if (type == "charm"):
-	test = 'test_ppm'
-	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
 #------------------------------
 # INSTALL
 #------------------------------
 
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))

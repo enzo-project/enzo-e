@@ -10,9 +10,7 @@
 /// @todo     Move "size" to Block's, since that's Field-centric
 /// @brief    [\ref Mesh] Declaration of the interface for the Patch class
 
-#ifdef CONFIG_USE_CHARM
-#   include "enzo.decl.h"
-#endif
+#include PARALLEL_CHARM_INCLUDE(enzo.decl.h)
 
 class Patch
 {

@@ -10,8 +10,6 @@
 
 #include "parallel.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test_Layout.decl.h)
-
 PARALLEL_MAIN_BEGIN
 {
 
@@ -338,4 +336,4 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_Layout.def.h)
+#include PARALLEL_CHARM_INCLUDE(test.def.h)

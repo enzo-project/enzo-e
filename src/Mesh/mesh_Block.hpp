@@ -15,8 +15,9 @@ class FieldDescr;
 class FieldBlock;
 class Patch;
 
+#include PARALLEL_CHARM_INCLUDE(enzo.decl.h)
+
 #ifdef CONFIG_USE_CHARM
-#include "enzo.decl.h"
 class Block : public CBase_Block
 #else
 class Block

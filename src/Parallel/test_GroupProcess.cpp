@@ -45,8 +45,6 @@ bool test_array(double * array, int length, int rank, int value)
 
 //======================================================================
 
-#include PARALLEL_CHARM_INCLUDE(test_GroupProcess.decl.h)
-
 PARALLEL_MAIN_BEGIN
 {
 
@@ -237,4 +235,4 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_GroupProcess.def.h)
+#include PARALLEL_CHARM_INCLUDE(test.def.h)

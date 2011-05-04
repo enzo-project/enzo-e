@@ -52,20 +52,12 @@ sources = [
 #------------------------------
 
 libraries = env.Library ('enzo-ppml', sources)
-binaries  = [env.Program (['test_ppml.cpp',      sources])]
-
-if (type == "charm"):
-	test = 'test_ppml'
-	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
 #------------------------------
 # INSTALL
 #------------------------------
 
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
 
 
 

@@ -33,11 +33,6 @@ sources    = [Glob('monitor*cpp'), Glob('png*cpp')]
 libraries  = env.Library ('monitor', [sources])
 binaries   = env.Program (['test_Monitor.cpp', sources])
 
-if (type == "charm"):
-	test = 'test_Monitor'
-	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
-
 #------------------------------
 # INSTALL
 #------------------------------
