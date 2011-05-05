@@ -2,8 +2,6 @@
 # DIRECTORIES
 #------------------------------
 
-# SConscript('tree/SConscript')
-
 #------------------------------
 # IMPORTS
 #------------------------------
@@ -15,7 +13,7 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error','memory','monitor', 'parallel', 'field', 'cello', 'enzo', 'method']
+components = ['error','memory','monitor', 'parallel', 'field', 'cello']
 libraries  = ['png']
 
 #------------------------------
@@ -30,6 +28,7 @@ env = env.Clone(LIBS=[components,libraries])
 
 includes = [Glob('mesh*hpp')]
 sources  = [Glob('mesh*cpp')]
+sources_tree = [Glob('mesh*Node*cpp'), Glob('mesh*Tree*cpp')]
 
 #------------------------------
 # TARGETS
@@ -40,7 +39,8 @@ libraries = env.Library ('mesh', [sources])
 test_mesh  = env.Program (['test_Mesh.cpp',  sources])
 test_patch = env.Program (['test_Patch.cpp', sources])
 test_block = env.Program (['test_Block.cpp', sources])
-test_tree  = env.Program (['test_TreeK.cpp', sources])
+
+test_tree  = env.Program (['test_TreeK.cpp', sources_tree])
 
 binaries = [test_mesh, test_patch, test_block, test_tree ];
 

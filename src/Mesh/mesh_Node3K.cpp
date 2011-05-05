@@ -6,9 +6,7 @@
 /// @date     2009-10-29
 /// @brief    Implementation of the Node3K class
 
-#include "cello.hpp"
-
-#include "mesh.hpp"
+#include "mesh_tree.hpp"
 
 //----------------------------------------------------------------------
 

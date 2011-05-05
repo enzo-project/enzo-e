@@ -6,9 +6,8 @@
 /// @date     2009-10-28
 /// @brief    Test program for Tree2K and Tree3K classes
 
+#include "mesh_tree.hpp"
 #include "test.hpp"
-
-#include "mesh.hpp"
 
 #define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
 

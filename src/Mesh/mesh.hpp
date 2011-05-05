@@ -33,11 +33,7 @@
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "mesh_Node2K.hpp"
-#include "mesh_Node3K.hpp"
-#include "mesh_TreeK.hpp"
-#include "mesh_Tree2K.hpp"
-#include "mesh_Tree3K.hpp"
+#include "mesh_tree.hpp"
 
 class Factory;
 #include "mesh_Block.hpp"

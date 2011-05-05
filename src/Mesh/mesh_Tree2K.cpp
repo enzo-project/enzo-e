@@ -6,9 +6,7 @@
 /// @date     2009-10-27
 /// @brief    Implementation of Tree2K class for K^2-trees
 
-#include "cello.hpp"
-
-#include "mesh.hpp"
+#include "mesh_tree.hpp"
 
 //----------------------------------------------------------------------
 
