@@ -40,6 +40,10 @@ libraries = env.Library ('parameters', [sources])
 test_parameters = env.Program (['test_Parameters.cpp', sources])
 test_parse      = env.Program (['test_Parse.cpp', sources])
 
+if (type == "charm"):
+   env.Depends('test_Parameters.o', '../Test/test.decl.h')
+   env.Depends('test_Parse.o',      '../Test/test.decl.h')
+
 binaries = [test_parameters, test_parse]
 
 #------------------------------

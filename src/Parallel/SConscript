@@ -6,7 +6,6 @@
 Import('env')
 Import('type')
 
-
 #------------------------------
 # DIRECTORIES
 #------------------------------
@@ -49,6 +48,10 @@ if (type == "mpi"):
 
 # test_ParallelAffinity = env.Program (['test_ParallelAffinity.cpp', sources])
 test_Layout   = env.Program (['test_Layout.cpp',   sources])
+
+if (type == "charm"):
+   env.Depends('test_GroupProcess.o', '../Test/test.decl.h')
+   env.Depends('test_Layout.o',       '../Test/test.decl.h')
 
 binaries.append(test_Layout)
 
