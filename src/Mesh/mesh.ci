@@ -1,0 +1,32 @@
+// $Id: mesh.ci 1696 2010-08-04 05:56:36Z bordner $
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     mesh.ci
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-05-09
+/// @brief    CHARM++ Mesh process group
+
+
+module mesh {
+  array[3D] Block {
+
+    entry Block
+      (int nbx, int nby, int nbz,
+       int nx, int ny, int nz,	
+       double xm, double ym, double zm,
+       double hx, double hy, double hz,
+       int num_field_blocks);
+
+
+    entry void p_initial();
+    entry void p_refresh(double dt, int axis_set);
+    entry void p_refresh_face(int n, char buffer[n], int axis, int face, int axis_face);
+    entry void p_output_accum (int index_output);
+ 
+    //     void p_next();
+    //     void p_prepare();
+    //     void p_compute();
+
+  };
+}
+

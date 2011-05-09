@@ -6,8 +6,9 @@
 /// @date     2011-05-09
 /// @brief    CHARM++ Simulation process group
 
-mainmodule simulation {
+module simulation {
 
+  class Factory;
   group Simulation {
 
     entry Simulation
