@@ -1,10 +1,10 @@
-// $Id: simulation.ci 1696 2010-08-04 05:56:36Z bordner $
+// $Id: enzo.ci 1696 2010-08-04 05:56:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo.ci
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-03-24
-/// @brief    EnzoSimulationCharm CHARM++ Simulation process group
+/// @brief    CHARM++ Enzo process group
 
 mainmodule enzo {
 
@@ -27,23 +27,6 @@ mainmodule enzo {
 			  double dt_block, int stop_block);
 
     entry void p_output_reduce (int count_blocks);
-
-  };
-
-  group Simulation {
-
-    entry Simulation
-      (const char filename[n], int n, 
-       const Factory & factory,
-       int index_simulation);
-
-    entry void p_output (int cycle, double time, double dt, bool stopping);
-//    entry void refresh ();
-    entry void p_done(CkReductionMsg*);
-
-    entry void p_output_reduce();
-    entry void p_output_write(int n, char buffer[n]);
-    entry void p_output_next ();
 
   };
 

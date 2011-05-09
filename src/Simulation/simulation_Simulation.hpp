@@ -27,7 +27,7 @@ class Stopping;
 class Timestep;
 
 
-#include PARALLEL_CHARM_INCLUDE(enzo.decl.h)
+#include PARALLEL_CHARM_INCLUDE(simulation.decl.h)
 
 #ifdef CONFIG_USE_CHARM
 class Simulation : public CBase_Simulation {

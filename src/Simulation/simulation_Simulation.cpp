@@ -215,8 +215,6 @@ void Simulation::initialize_data_() throw()
 
   // Define default ghost zone depth for all fields, default value of 1
 
-  // @@@ WARNING: REPEATED CODE: SEE enzo_EnzoBlock.cpp
-
   //--------------------------------------------------
   // parameter: Field::ghosts
   //--------------------------------------------------
