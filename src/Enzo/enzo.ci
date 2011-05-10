@@ -30,6 +30,22 @@ mainmodule enzo {
 
   };
 
+  group Simulation {
+
+    entry Simulation
+      (const char filename[n], int n, 
+       const Factory & factory,
+       int index_simulation);
+
+    entry void p_output (int cycle, double time, double dt, bool stopping);
+    entry void p_done(CkReductionMsg*);
+
+    entry void p_output_reduce();
+    entry void p_output_write(int n, char buffer[n]);
+    entry void p_output_next ();
+
+  };
+
   group EnzoSimulation : Simulation {
     entry EnzoSimulation
       (const char filename[n], int n, 

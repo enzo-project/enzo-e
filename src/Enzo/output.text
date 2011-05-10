@@ -1,8 +1,92 @@
+Output of data, images, etc. requires several levels of parallelism.
 
-Simulation::output()
+Output is performed by every "process_write" processes.  For example,
+if (process_write == 1), then every process writes, and if
+(process_write == CkNumPes()), then only the root process writes.
+However, "process_write" may be any integer in between 1 and
+CkNumPes(), depending on the type of data being output.  For global
+images, process_write is hard-coded to be CkNumPes().
+
+The output proceedure begins by calling Simulation::p_output(),
+which initiates looping through each output object in the Simulation.
+Object migration is also turned off until the output procedure is
+complete, to ensure each Block is processed exactly once per active
+output object.
+
+This looping is controlled by Simulation::output_reset() and
+Simulation::p_output_next().  output_reset() sets the output counter
+to the first output object; p_output_next() finds the next active
+output object this cycle, and either initiates the output for that
+object, or proceeds with the simulation if all output objects have
+been processed.  If migration was turned off before the output
+procedure, it is turned on before the simulation proceeds.
+
+If Simulation::p_output_next() determines that a given output object
+is scheduled to write this cycle, it calls Output::open() to open the
+file(s), then Block::p_output_accum() on each block owned by the
+Simulation.
+
+Block::p_output_accum() accumulates the block data in the active
+output object owned by the process Block's process.  This is done by
+having each Block call the (non-entry) Output::accum_block() function
+on itself, which performs the actual data accumulation.  This may
+involve reducing block data to a process-local image, or storing
+information needed for subsequent output, e.g. the list of blocks
+assigned to the process.  After each block calls Output::accum_block()
+on itself, it calls Main::p_output_reduce() to synchronize.
+
+Main::p_output_reduce() ensures that all Blocks data within a process
+have been accumulated before data between processes are accumulated
+and written.  This reduction to the main chare may be overkill, since
+inter-process reductions are only needed every "process_write"
+processes, which may not require a global reduction.
+Main::p_output_reduce() terminates the loop over all blocks, then
+calls Simulation::p_output_reduce().
+
+Simulation::p_output_reduce() calls the p_output_write() entry method
+on the chare process group element that is assigned to perform the
+actual write for data on this chare process group element.  After this
+call, it then calls Simulation::output_next to continue the loop over
+active output objects.  Note that output_next() is called by
+non-writers in p_output_reduce(), but writers in p_output_write().
+
+p_output_write() accumulates data between processes to be written.
+Only writing processes should have this function called--if not it's
+an error.  The process accumulates the data passed in the
+p_output_write() argument list, and writes the data to disk.
+p_output_write() is called "process_write" - 1 times--at the last
+call, the processes's own data is written, the file is closed, and
+Simulation::output_next() is called to continue the loop over active
+output objects.  Note that output_next() is called by non-writers in
+p_output_reduce(), but by writers in p_output_write().
+
+========================================================================
+OUTPUT FUNCTION LIST
+========================================================================
+
+Block::p_output_accum(index_output)
+
+Main::p_output_reduce(count)
+
+Output::accum_block(block)
+Output::open()
+
+Simulation::output_reset()
+Simulation::p_output()
+Simulation::p_output_next()
+Simulation::p_output_reduce()
+Simulation::p_output_write(process_data)
+
+========================================================================
+OUTPUT FUNCTION CODE
+========================================================================
+
+Simulation::p_output()
     output_reset()
-    output_next()
-    [return]
+    [ save migration ]
+    [ turn off migration ]
+    p_output_next()
+    [ return ]
 
 --------------------------------------------------
 
@@ -11,18 +95,23 @@ Simulation::output_reset()
 
 --------------------------------------------------
 
-Simulation::output_next()
+Simulation::p_output_next()
 
    // find next output
+
    while (index_output_ < num_output && !output(index_output_).scheduled())
      ++index_output_;
 
-   // output (and return) if any, else proceed
+   // apply next output, else proceed
+
    if (index_output_ < num_output)  
        output(index_output_).open()
-       Blocks::p_output_accumulate(this)
+       for (patch in simulation)
+          for (block in patch)
+               block.p_output_accum()
    else 
-       [ simulation proceed() ]
+       [ restore migration ]
+       [ simulation proceed ]
 
 --------------------------------------------------
 
@@ -35,21 +124,21 @@ Output::open()
 
 --------------------------------------------------
 
-Block::p_output_accumulate(output)
+Block::p_output_accum(index_output)
 
-   output.accumulate_block(this)
-   main::p_output_reduce(NB)
+   output[index_output].accum_block(this)
+   main.p_output_reduce(NB)
 
 --------------------------------------------------
 
-Output::accumulate_block(block)
+Output::accum_block(block)
    incorporate block data into process data
 
 --------------------------------------------------
 
 Main::p_output_reduce(count)
    ++counter >= count
-      Simulation::p_output_reduce()
+      Simulation.p_output_reduce()
 
 --------------------------------------------------
 
@@ -70,3 +159,4 @@ Simulation::p_output_write(process_data)
       output_next()
    }
    
+========================================================================

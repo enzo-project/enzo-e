@@ -59,8 +59,8 @@ void EnzoOutputImage::open (const Mesh * mesh, int cycle, double time) throw()
   image_create_(nxm,nym);
 
   if (CkMyPe() % process_write_ == 0) {
+
     ASSERT("EnzoOutputImage::open","File already open",fp_ == 0);
-  } else {
 
     // Open the file
     std::string file_name = expand_file_name(cycle,time) + ".png";

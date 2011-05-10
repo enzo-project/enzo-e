@@ -677,8 +677,12 @@ void Simulation::initialize_parallel_() throw()
   // parameter: parallel::temp_update_all
   // parameter: parallel::temp_update_full
   //--------------------------------------------------
-  temp_update_all_  = parameters_->value_logical("Parallel:temp_update_all",true);
-  temp_update_full_ = parameters_->value_logical("Parallel:temp_update_full",true);
+
+  temp_update_all_  = 
+    parameters_->value_logical ("Parallel:temp_update_all",true);
+  temp_update_full_ = 
+    parameters_->value_logical ("Parallel:temp_update_full",true);
+
 }
 //----------------------------------------------------------------------
 
@@ -741,17 +745,21 @@ Method * Simulation::create_method_ (std::string name) throw ()
 
 #ifdef CONFIG_USE_CHARM
 
-  // Update Simulation cycle and time from reduction to main
-
 void Simulation::p_output 
 ( int cycle, double time, double dt, bool stop ) throw()
 {
+  TRACE("Simulation::p_output");
+  // Update Simulation cycle and time from reduction to main
+  
   cycle_ = cycle;
   time_  = time;
   dt_    = dt;
   stop_  = stop;
 
+  // reset output "loop" over output objects
   output_reset();
+
+  // process first output object, which continues with refresh() if done
   p_output_next();
 }
 
@@ -760,6 +768,7 @@ void Simulation::p_output
 
 void Simulation::output_reset() throw()
 {
+  TRACE("Simulation::output_reset()");
   index_output_ = 0;
 }
 
@@ -768,7 +777,10 @@ void Simulation::output_reset() throw()
 void Simulation::p_output_next() throw()
 {
 
+  TRACE("Simulation::p_output_next()");
+
   // find next output
+
   while (index_output_ < num_output() && 
 	 ! output(index_output_)->write_this_cycle(cycle_, time_))
     ++index_output_;
@@ -797,7 +809,7 @@ void Simulation::p_output_next() throw()
 
 void Simulation::p_output_reduce() throw()
 {
-  INCOMPLETE("Simulation::p_output_reduce");
+  TRACE("Simulation::p_output_reduce");
 
   int ip       = CkMyPe();
   int ip_write = ip - (ip % output(index_output_)->process_write());
@@ -817,7 +829,7 @@ void Simulation::p_output_reduce() throw()
 
 void Simulation::p_output_write (int n, char * buffer) throw()
 {
-  INCOMPLETE("Simulation::p_output_write");
+  TRACE("Simulation::p_output_write");
 
   Output * out = output(index_output_);
   int ip       = CkMyPe();
@@ -845,6 +857,7 @@ void Simulation::p_output_write (int n, char * buffer) throw()
 void Simulation::refresh() throw()
 {
 
+  TRACE("Simulation::refresh");
   //--------------------------------------------------
   // Monitor
   //--------------------------------------------------

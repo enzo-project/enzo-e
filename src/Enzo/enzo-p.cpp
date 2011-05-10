@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------
 
 // #include "test.hpp"
+
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
@@ -145,6 +146,7 @@ PARALLEL_MAIN_BEGIN
 
 void p_exit(int count)
 {
+  TRACE("Main::p_exit");
   count_exit_++;
   if (count_exit_ >= count) {
     count_exit_ = 0;
@@ -162,6 +164,7 @@ void p_exit(int count)
 void p_prepare(int count, int cycle, double time,
 	       double dt_block, int stop_block)
 {
+  TRACE("Main::p_prepare");
   // Assumes cycle and time are the same for all "incoming" blocks;
   // only use the last one
 
@@ -198,6 +201,7 @@ void p_prepare(int count, int cycle, double time,
 
 void p_output_reduce(int count)
 {
+  TRACE("Main::p_output_reduce");
   if (++count_output_ >= count) {
     INCOMPLETE("Main::p_output_reduce()");
     proxy_simulation.p_output_reduce();

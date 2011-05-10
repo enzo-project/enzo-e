@@ -673,9 +673,14 @@ void Parameters::monitor_access_
     // a list element
     param = list_element_(parameter,index);
   }
-  std::string value = param ? 
-    param->value_to_string().c_str() : 
-    std::string("[" + deflt_string + "]");
+
+  std::string value;
+
+  if ( param != NULL ) {
+    value = param->value_to_string().c_str();
+  } else {
+    value = deflt_string + " [default]";
+  }
 
   char index_string [MAX_PARAMETER_FILE_WIDTH] = "";
 

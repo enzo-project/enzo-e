@@ -35,12 +35,6 @@ sources  = [Glob("simulation*cpp")]
 #------------------------------
 
 libraries       = env.Library ('simulation', [sources])
-# test_simulation = env.Program (['test_Simulation.cpp',sources])
-#binaries        = [test_simulation];
-
-if (type == "charm"):
-   env.CharmBuilder('simulation.decl.h','simulation.ci',ARG = 'simulation')
-   env.Depends('simulation_Simulation.o', 'simulation.decl.h')
 
 #------------------------------
 # INSTALL
@@ -48,8 +42,6 @@ if (type == "charm"):
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
-# env.Alias('install-bin',env.Install ('#/bin',    binaries))
-# env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
 
 
 

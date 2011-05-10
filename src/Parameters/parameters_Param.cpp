@@ -97,7 +97,7 @@ std::string Param::value_to_string ()
   char string_buffer[80];
   switch (type_) {
   case parameter_string: 
-    sprintf (string_buffer,"%s",value_string_);
+    sprintf (string_buffer,"\"%s\"",value_string_);
     break;
   case parameter_list:
     sprintf (string_buffer,"LIST\n");

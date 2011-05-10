@@ -52,10 +52,11 @@ void FieldFace::load
  const FieldBlock * field_block,
  axis_enum          axis,
  face_enum          face,
- bool               full
+ bool               full_x,
+ bool               full_y
  ) throw()
 {
-  allocate_(field_descr,field_block,axis,full);
+  allocate_(field_descr,field_block,axis,full_x,full_y);
 
   size_t num_fields = field_descr->field_count();
 
@@ -89,19 +90,19 @@ void FieldFace::load
       index += load_precision_
 	( (float * )      (array_face),
 	  (const float * )(field_face),
-	  nd3,md3,ng3,axis,face,full);
+	  nd3,md3,ng3,axis,face,full_x,full_y);
       break;
     case precision_double:
       index += load_precision_
 	((double * )      (array_face),
 	 (const double * )(field_face),
-	 nd3,md3,ng3,axis,face,full);
+	 nd3,md3,ng3,axis,face,full_x,full_y);
       break;
     case precision_quadruple:
       index += load_precision_
 	((long double * )      (array_face),
 	 (const long double * )(field_face),
-	 nd3,md3,ng3,axis,face,full);
+	 nd3,md3,ng3,axis,face,full_x,full_y);
       break;
     default:
       ERROR("FieldFace::load", "Unsupported precision");
@@ -118,7 +119,8 @@ void FieldFace::store
  FieldBlock *       field_block,
  axis_enum          axis,
  face_enum          face,
- bool               full
+ bool               full_x,
+ bool               full_y
  ) throw()
 {
 
@@ -154,19 +156,19 @@ void FieldFace::store
       index += store_precision_
 	((float * )      (field_ghost),
 	 (const float * )(array_ghost),
-	 nd3,md3,ng3,axis,face,full);
+	 nd3,md3,ng3,axis,face,full_x,full_y);
       break;
     case precision_double:
       index += store_precision_
 	((double * )      (field_ghost),
 	 (const double * )(array_ghost),
-	 nd3,md3,ng3,axis,face,full);
+	 nd3,md3,ng3,axis,face,full_x,full_y);
       break;
     case precision_quadruple:
       index += store_precision_
 	((long double * )      (field_ghost),
 	 (const long double * )(array_ghost),
-	 nd3,md3,ng3,axis,face,full);
+	 nd3,md3,ng3,axis,face,full_x,full_y);
       break;
     default:
       ERROR("FieldFace::store", "Unsupported precision");
@@ -183,13 +185,17 @@ void FieldFace::allocate_
  const FieldDescr * field_descr,
  const FieldBlock * field_block,
  axis_enum          axis,
- bool               full
+ bool               full_x,
+ bool               full_y
  ) throw()
 {
 
   size_t num_fields = field_descr->field_count();
 
   int array_size = 0;
+
+  int iax=(axis+1) % 3;
+  int iay=(axis+2) % 3;
 
   for (size_t index_field = 0; index_field < num_fields; index_field++) {
 
@@ -211,17 +217,17 @@ void FieldFace::allocate_
     field_descr->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     // Adjust if not storing ghost zones
-    if (! full) {
-      int no = nd3[0]*nd3[1]*nd3[2];
-      field_bytes /= no;
-      int nn = (nd3[0]-2*ng3[0]) 
-	*      (nd3[1]-2*ng3[1])
-	*      (nd3[2]-2*ng3[2]);
-      field_bytes *= nn;
-      nd3[0] -= 2*ng3[0];
-      nd3[1] -= 2*ng3[1];
-      nd3[2] -= 2*ng3[2];
-    }
+
+    
+    int n_old = nd3[0]*nd3[1]*nd3[2];
+
+    if (! full_x) nd3[iax] -= 2*ng3[iax];
+    if (! full_y) nd3[iay] -= 2*ng3[iay];
+
+    int n_new = nd3[0]*nd3[1]*nd3[2];
+
+    field_bytes /= n_old;
+    field_bytes *= n_new;
 
     // Get size of one face for given axis
 
@@ -262,7 +268,8 @@ size_t FieldFace::load_precision_
  int       ng3[3],
  axis_enum axis, 
  face_enum face,
- bool      full
+ bool      full_x,
+ bool      full_y
 ) throw()
 {
   int iax=(axis+1) % 3;
@@ -274,10 +281,10 @@ size_t FieldFace::load_precision_
 
   int ix0,nx,iy0,ny;
 
-  ix0 = full ? 0 : ng3[iax];
-  iy0 = full ? 0 : ng3[iay];
-  nx  = full ? nd3[iax] : nd3[iax] - 2*ng3[iax];
-  ny  = full ? nd3[iay] : nd3[iay] - 2*ng3[iay];
+  ix0 = full_x ? 0 : ng3[iax];
+  iy0 = full_y ? 0 : ng3[iay];
+  nx  = full_x ? nd3[iax] : nd3[iax] - 2*ng3[iax];
+  ny  = full_y ? nd3[iay] : nd3[iay] - 2*ng3[iay];
 
   for (int iz=0; iz <ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
     for (int iy=0; iy < ny; iy++) {
@@ -292,7 +299,7 @@ size_t FieldFace::load_precision_
     }
   }
 
-  return (sizeof(T) * nd3[iax] * nd3[iay] * ng3[axis]);
+  return (sizeof(T) * nx * ny * ng3[axis]);
 }
 
 //----------------------------------------------------------------------
@@ -307,7 +314,8 @@ size_t FieldFace::store_precision_
  int       ng3[3],
  axis_enum axis,
  face_enum face,
- bool      full
+ bool      full_x,
+ bool      full_y
  ) throw()
 {
   int iax=(axis+1) % 3;
@@ -318,10 +326,10 @@ size_t FieldFace::store_precision_
   // Loop limits
 
   int ix0,nx,iy0,ny;
-  ix0 = full ? 0 : ng3[iax];
-  iy0 = full ? 0 : ng3[iay];
-  nx  = full ? nd3[iax] : nd3[iax] - 2*ng3[iax];
-  ny  = full ? nd3[iay] : nd3[iay] - 2*ng3[iay];
+  ix0 = full_x ? 0 : ng3[iax];
+  iy0 = full_y ? 0 : ng3[iay];
+  nx  = full_x ? nd3[iax] : nd3[iax] - 2*ng3[iax];
+  ny  = full_y ? nd3[iay] : nd3[iay] - 2*ng3[iay];
 
   for (int iz=0; iz < ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
     for (int iy=0; iy < ny; iy++) {
@@ -336,7 +344,7 @@ size_t FieldFace::store_precision_
     }
   }
 
-  return (sizeof(T) * nd3[iax] * nd3[iay] * ng3[axis]);
+  return (sizeof(T) * nx * ny * ng3[axis]);
 }
 
 //----------------------------------------------------------------------

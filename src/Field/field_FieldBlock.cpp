@@ -616,7 +616,7 @@ void FieldBlock::image
       int ix = (axis+1) % 3;
       int iy = (axis+2) % 3;
 
-      sprintf (filename,"%s-%s-%d-%c-%d%d%d.png",
+      sprintf (filename,"%s-%s-%04d-%c-%d%d%d.png",
 	       prefix,field_descr->field_name(index_field).c_str(),
 	       cycle,axis_name[axis],ibx,iby,ibz);
   

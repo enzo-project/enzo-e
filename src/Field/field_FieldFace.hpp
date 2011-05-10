@@ -49,7 +49,8 @@ public: // interface
 	    const FieldBlock * field_block,
 	    axis_enum          axis,
 	    face_enum          face,
-	    bool               full) throw();
+	    bool               full_x,
+	    bool               full_y) throw();
 
 
   /// Store to field's ghost data
@@ -57,7 +58,8 @@ public: // interface
 	     FieldBlock *       field_block,
 	     axis_enum          axis,
 	     face_enum          face,
-	     bool               full) throw();
+	     bool               full_x,
+	     bool               full_y) throw();
 
   /// Return the size of the array
   size_t size() const throw() { return array_.size(); };
@@ -77,7 +79,8 @@ private: // functions
   void allocate_(const FieldDescr * field_descr,
 		 const FieldBlock * field_block,
 		 axis_enum          axis,
-		 bool               full) throw();
+		 bool               full_x,
+		 bool               full_y) throw();
 
   /// Deallocate array_ storage
   void deallocate_() throw();
@@ -85,18 +88,28 @@ private: // functions
   /// Precision-agnostic function for loading field block face into
   /// the field_face array; returns number of bytes copied
   template<class T>
-  size_t load_precision_
-  (T * array_face, const T * field_face,
-   int n[3], int nd[3], int ng[3],
-   axis_enum axis, face_enum face, bool full ) throw();
+  size_t load_precision_ (T *       array_face, 
+			  const T * field_face,
+			  int       n[3], 
+			  int       nd[3], 
+			  int       ng[3],
+			  axis_enum axis, 
+			  face_enum face, 
+			  bool      full_x,
+			  bool      full_y ) throw();
 
   /// Precision-agnostic function for copying the field_face array into
   /// the field block ghosts; returns number of bytes copied
   template<class T>
-  size_t store_precision_
-  (T * field_ghosts, const T * array_ghosts, 
-   int n[3], int nd[3], int ng[3],
-   axis_enum axis, face_enum face, bool full ) throw();
+  size_t store_precision_ (T *       field_ghosts, 
+			   const T * array_ghosts, 
+			  int       n[3], 
+			  int       nd[3], 
+			  int       ng[3],
+			  axis_enum axis, 
+			  face_enum face, 
+			  bool      full_x,
+			  bool      full_y ) throw();
 
 private: // attributes
 
