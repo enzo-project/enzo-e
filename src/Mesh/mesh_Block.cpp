@@ -612,14 +612,14 @@ void Block::p_refresh_face (int n, char * buffer,
 
 //----------------------------------------------------------------------
 
-void Block::p_output_accum (int index_output)
+void Block::p_output (int index_output)
 {
 
-  TRACE("Block::p_output_accum");
+  TRACE("Block::p_output");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  simulation->output(index_output)->accum_block(this);
+  simulation->output(index_output)->block(this);
 
   // Synchronize via main chare before writing
   int num_blocks = simulation->mesh()->patch(0)->num_blocks();

@@ -91,10 +91,10 @@ public: // interface
   //--------------------------------------------------
 
   /// reset output index to 0
-  void output_reset() throw();
+  void output_first() throw();
 
   /// Process the next output object if any, else proceed with simulation
-  void p_output_next() throw();
+  void output_next() throw();
 
   /// Reduce output, using p_output_write to send data to writing processes
   void p_output_reduce() throw();

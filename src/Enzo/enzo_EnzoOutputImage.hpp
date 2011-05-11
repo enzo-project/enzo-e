@@ -30,11 +30,14 @@ public: // virtual functions
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Open file for writing
+  /// Open file before writing
   virtual void open (const Mesh * mesh, int cycle, double time) throw();
 
   /// Accumulate block-local data
-  virtual void accum_block (const Block * block) throw();
+  virtual void block (const Block * block) throw();
+
+  /// Close file after writing
+  virtual void close () throw();
 
 #endif
 

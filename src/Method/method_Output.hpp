@@ -83,15 +83,19 @@ public: // functions
 
   std::string expand_file_name (int cycle, double time) const throw();
 
-  int process_write () const throw () { return process_write_; };
+  int process_write () const throw () 
+  { return process_write_; };
+
+  bool is_writer (int ip) const throw () 
+  { return (ip % process_write_ == 0); };
 
 #ifdef CONFIG_USE_CHARM
-  int count_reduce() 
+  int counter() 
   { 
+    if (count_reduce_ >= process_write_) {count_reduce_ = 0;}
     count_reduce_++; 
-    PARALLEL_PRINTF ("Output:count_reduce %d\n",count_reduce_);
-    if (count_reduce_>=process_write_) {count_reduce_ = 0;}
-    return (count_reduce_ == 0);
+    PARALLEL_PRINTF ("Output:counter(%d)\n",count_reduce_);
+    return (count_reduce_);
   }
 
 #endif
@@ -100,11 +104,14 @@ public: // virtual functions
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Open file for writing
+  /// Open file before writing
   virtual void open (const Mesh * mesh, int cycle, double time) throw() = 0;
 
   /// Accumulate block-local data
-  virtual void accum_block (const Block * block) throw() = 0;
+  virtual void block (const Block * block) throw() = 0;
+
+  /// Close file after writing
+  virtual void close () throw() = 0;
 
 #endif
 

@@ -63,7 +63,7 @@ public: // interface
   //--------------------------------------------------
 
   /// Contribute block data to ith output object in the simulation
-  void p_output_accum (int index_output);
+  void p_output (int index_output);
 
   //--------------------------------------------------
 

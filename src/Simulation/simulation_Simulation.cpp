@@ -5,6 +5,7 @@
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      2010-11-10
 /// @brief     Implementation of the Simulation class
+/// @todo      Move dt / cycle update to separate function from p_output()
 
 #include "cello.hpp"
 
@@ -748,7 +749,9 @@ Method * Simulation::create_method_ (std::string name) throw ()
 void Simulation::p_output 
 ( int cycle, double time, double dt, bool stop ) throw()
 {
+
   TRACE("Simulation::p_output");
+
   // Update Simulation cycle and time from reduction to main
   
   cycle_ = cycle;
@@ -757,27 +760,27 @@ void Simulation::p_output
   stop_  = stop;
 
   // reset output "loop" over output objects
-  output_reset();
+  output_first();
 
   // process first output object, which continues with refresh() if done
-  p_output_next();
+  output_next();
 }
 
 
 //----------------------------------------------------------------------
 
-void Simulation::output_reset() throw()
+void Simulation::output_first() throw()
 {
-  TRACE("Simulation::output_reset()");
+  TRACE("Simulation::output_first()");
   index_output_ = 0;
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::p_output_next() throw()
+void Simulation::output_next() throw()
 {
 
-  TRACE("Simulation::p_output_next()");
+  TRACE("Simulation::output_next()");
 
   // find next output
 
@@ -797,10 +800,14 @@ void Simulation::p_output_next() throw()
     Patch * patch;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
-	patch->blocks().p_output_accum (index_output_);
+	patch->blocks().p_output (index_output_);
       }
     }
+
+    PARALLEL_PRINTF ("output::next() exiting()\n");
+
   } else {
+    PARALLEL_PRINTF ("output::next() calling refresh()\n");
     refresh();
   }
 }
@@ -818,9 +825,12 @@ void Simulation::p_output_reduce() throw()
   char buffer[20];
   sprintf(buffer,"%02d > %02d send",ip,ip_write);
   if (ip != ip_write) {
+    PARALLEL_PRINTF("%d -> %d calling p_output_write()\n",ip,ip_write);
     proxy_simulation[ip_write].p_output_write (strlen(buffer),buffer);
+    output_next();
   } else {
-    p_output_write(strlen(buffer),buffer);
+    PARALLEL_PRINTF("%d -> %d calling p_output_write()\n",ip,ip_write);
+    proxy_simulation[ip].p_output_write(0,0);
   }
 
 }
@@ -834,21 +844,33 @@ void Simulation::p_output_write (int n, char * buffer) throw()
   Output * out = output(index_output_);
   int ip       = CkMyPe();
   int ip_write = ip - (ip % out->process_write());
+  PARALLEL_PRINTF ("%d %d  %d  %d\n",ip,ip_write,CkMyPe(),out->process_write());
 
-  if (ip != ip_write) {
-    ERROR("Simulation::p_output_write",
-	  "Must be called by writing processes only");
-  } else {
-    PARALLEL_PRINTF("%s\n",buffer);
-    if (out->count_reduce()) {
-      // write
-      // close
-      for (int i=ip; i<ip+out->process_write(); i++) {
-	PARALLEL_PRINTF("calling p_output_next() %d\n",i);
-	proxy_simulation[i].p_output_next();
-      }
-    }
+  int count = out->counter();
+
+  if (count == 0) {
+    PARALLEL_PRINTF("Initialize writer\n");
   }
+  if (n == 0) {
+    PARALLEL_PRINTF ("Process reduce this %d\n",ip);
+  } else {
+    PARALLEL_PRINTF ("Process reduce that\n");
+  }
+  
+  if (count == out->process_write()) {
+
+    PARALLEL_PRINTF ("File write / close / next\n");
+
+    // write
+    // close
+    out->close();
+
+    // next
+
+
+    output_next();
+  }
+
 
 }
 

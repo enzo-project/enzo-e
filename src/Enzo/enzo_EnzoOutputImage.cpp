@@ -58,7 +58,9 @@ void EnzoOutputImage::open (const Mesh * mesh, int cycle, double time) throw()
 
   image_create_(nxm,nym);
 
-  if (CkMyPe() % process_write_ == 0) {
+  int ip = CkMyPe();
+
+  if (is_writer(ip)) {
 
     ASSERT("EnzoOutputImage::open","File already open",fp_ == 0);
 
@@ -76,9 +78,18 @@ void EnzoOutputImage::open (const Mesh * mesh, int cycle, double time) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoOutputImage::accum_block (const Block * block) throw()
+void EnzoOutputImage::close () throw()
 {
-  INCOMPLETE("EnzoOutputImage::accum_block");
+  INCOMPLETE("EnzoOutputImage::close");
+  fclose (fp_);
+  fp_ = 0;
+}
+
+//----------------------------------------------------------------------
+
+void EnzoOutputImage::block (const Block * block) throw()
+{
+  INCOMPLETE("EnzoOutputImage::block");
   //   incorporate block data into process data
 }
 
