@@ -485,8 +485,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
 			double lower[3],
 			double upper[3]) const throw()
 {
-  PARALLEL_PRINTF("%s FieldBlock %p  field_count = %d\n",
-		  message ? message : "",this,field_descr->field_count());
   if ( ! array_allocated() ) {
     PARALLEL_PRINTF("%s FieldBlock %p not allocated\n");
   } else {
@@ -551,16 +549,16 @@ void FieldBlock::print (const FieldDescr * field_descr,
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
-		//		printf ("f %d p %d  %f %f %f  %22.14g\n",index_field,CkMyPe(),x,y,z,field[i]);
+		//		printf ("%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
 	      }
 	    }
 	  }
 	  double avg = sum / (nx*ny*nz);
 	  PARALLEL_PRINTF
-	    ("%s FieldBlock[%p,%s] (%d %d %d) [%22.14g %22.14g %22.14g]\n",
-	     message ? message : "",this,
+	    ("%s [%s] %18.14g\n",
+	     message ? message : "",
 	     field_descr->field_name(index_field).c_str(),
-	     nx,ny,nz,min,avg,max);
+	     avg);
 
 	}
 	break;
@@ -580,13 +578,13 @@ void FieldBlock::print (const FieldDescr * field_descr,
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
-		//		printf ("f %d p %d  %f %f %f  %22.14g\n",index_field,CkMyPe(),x,y,z,field[i]);
+		//		printf ("f %d p %d  %f %f %f  %18.14g\n",index_field,CkMyPe(),x,y,z,field[i]);
 	      }
 	    }
 	  }
 	  long double avg = sum / (nx*ny*nz);
 	  PARALLEL_PRINTF
-	    ("%s FieldBlock[%p,%s] (%d %d %d) [%22.14g %22.14g %22.14g]\n",
+	    ("%s FieldBlock[%p,%s] (%d %d %d) [%18.14g %18.14g %18.14g]\n",
 	     message ? message : "",this,
 	     field_descr->field_name(index_field).c_str(),
 	     nx,ny,nz,min,avg,max);
@@ -611,7 +609,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  }
 	  long double avg = sum / (nx*ny*nz);
 	  PARALLEL_PRINTF
-	    ("%s FieldBlock[%p,%s] (%d %d %d) [%22.14g %22.14g %22.14g]\n",
+	    ("%s FieldBlock[%p,%s] (%d %d %d) [%18.14g %18.14g %18.14g]\n",
 	     message ? message : "",this,
 	     field_descr->field_name(index_field).c_str(),
 	     nx,ny,nz,min,avg,max);

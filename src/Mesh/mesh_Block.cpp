@@ -641,9 +641,11 @@ void Block::compute()
   FieldDescr * field_descr = simulation->field_descr();
 
   //  if (cycle_ == 0) {
-  field_block()->print(field_descr,"field",lower_,upper_);
-  //  field_block()->image(field_descr,"image",cycle_,
-  //		       thisIndex.x,thisIndex.y,thisIndex.z);
+  char buffer[10];
+  sprintf (buffer,"%03d A",cycle_);
+  field_block()->print(field_descr,buffer,lower_,upper_);
+  field_block()->image(field_descr,"A",cycle_,
+		       thisIndex.x,thisIndex.y,thisIndex.z);
     //  }
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
@@ -651,6 +653,11 @@ void Block::compute()
     simulation->method(i) -> compute_block (this,time_,dt_);
 
   }
+
+  sprintf (buffer,"%03d B",cycle_);
+  field_block()->print(field_descr,buffer,lower_,upper_);
+  field_block()->image(field_descr,"B",cycle_,
+		       thisIndex.x,thisIndex.y,thisIndex.z);
 
 #ifdef CONFIG_USE_PROJECTIONS
   traceUserBracketEvent(10,time_start, CmiWallTimer());

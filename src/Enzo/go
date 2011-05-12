@@ -1,0 +1,50 @@
+#!/bin/csh -f
+
+# DEBUG SCRIPT
+#
+# uses sum.c executable "s"
+# directories $dir[], with corresponding block count $nb[]
+#
+# outputs field sums for $prefix FieldBlock::print()
+
+set run = 0
+
+set suffix=""
+
+set dir = (implosion.11 implosion.12 implosion.21 implosion.22 implosion.14 implosion.41 implosion.44)
+set  nb = (1 2 2 4 4 4 16)
+
+if ($run == 1) then 
+   set i = 1
+   while ($i <= $#dir)
+      echo $dir[$i]
+      cd $dir[$i]
+   
+      ../enzo-p in.enzo-p > out$suffix
+   
+      cd ..
+      @ i = $i + 1
+   end
+
+endif
+
+set i = 1
+while ($i <= $#dir)
+
+   cd $dir[$i]
+   foreach prefix ("001 B")
+      awk "/$prefix "'\[density\]/     {print $4}' out$suffix > d
+      awk "/$prefix "'\[velocity_x\]/  {print $4}' out$suffix > vx
+      awk "/$prefix "'\[velocity_y\]/  {print $4}' out$suffix > vy
+      awk "/$prefix "'\[total_energy\]/{print $4}' out$suffix > te
+
+      echo "$dir[$i] $prefix " \
+           "`../s $nb[$i] <d`" \
+           "`../s $nb[$i] <vx`" \
+           "`../s $nb[$i] <vy`" \
+           "`../s $nb[$i] <te`"
+   end
+   cd ..
+   @ i = $i + 1
+end
+
