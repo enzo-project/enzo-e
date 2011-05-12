@@ -261,7 +261,7 @@ void FieldFace::deallocate_() throw()
 template<class T>
 size_t FieldFace::load_precision_
 (
- T *       array_face, 
+ T *       array, 
  const T * field_face,
  int       nd3[3], 
  int       md3[3], 
@@ -289,12 +289,12 @@ size_t FieldFace::load_precision_
   for (int iz=0; iz <ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
     for (int iy=0; iy < ny; iy++) {
       for (int ix=0; ix < nx; ix++) {
-	int index_array_face  = iz + ng3[axis]*(ix + nd3[iax]*iy);
+	int index_array  = iz + ng3[axis]*(ix + nx*iy);
 	int index_field_face = 
 	  (ix0+ix)*md3[iax] + 
 	  (iy0+iy)*md3[iay] + 
 	  (iz0+iz)*md3[axis];
-	array_face[index_array_face] = field_face[index_field_face];
+	array[index_array] = field_face[index_field_face];
       }
     }
   }
@@ -308,7 +308,7 @@ template<class T>
 size_t FieldFace::store_precision_
 (
  T *       field_ghost,
- const T * array_ghost,
+ const T * array,
  int       nd3[3],
  int       md3[3],
  int       ng3[3],
@@ -338,8 +338,8 @@ size_t FieldFace::store_precision_
 	  (ix0+ix)*md3[iax] + 
 	  (iy0+iy)*md3[iay] + 
 	  (iz0+iz)*md3[axis];
-	int index_array_ghost  = iz + ng3[axis]*(ix + nd3[iax]*iy);
-	field_ghost[index_field_ghost] = array_ghost[index_array_ghost];
+	int index_array  = iz + ng3[axis]*(ix + nx*iy);
+	field_ghost[index_field_ghost] = array[index_array];
       }
     }
   }

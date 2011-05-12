@@ -492,14 +492,47 @@ void FieldBlock::print (const FieldDescr * field_descr,
   } else {
     int field_count = field_descr->field_count();
     for (int index_field=0; index_field<field_count; index_field++) {
+
       int nxd,nyd,nzd;
       field_size(field_descr,index_field,&nxd,&nyd,&nzd);
       int gx,gy,gz;
       field_descr->ghosts(index_field,&gx,&gy,&gz);
-      int nx = nxd;// - 2*gx;
-      int ny = nyd;// - 2*gy;
-      int nz = nzd;//- 2*gz;
 
+      int ixm,iym,izm;
+      int ixp,iyp,izp;
+
+      // Exclude ghost zones
+
+       ixm = gx;
+       iym = gy;
+       izm = gz;
+
+       ixp = nxd - gx;
+       iyp = nyd - gy;
+       izp = nzd - gz;
+
+      // Include ghost zones
+
+       // ixm = 0;
+       // iym = 0;
+       // izm = 0;
+
+       // ixp = nxd;
+       // iyp = nyd;
+       // izp = nzd;
+
+
+      int nx,ny,nz;
+
+      nx = (ixp-ixm);
+      ny = (iyp-iym);
+      nz = (izp-izm);
+
+      double hx,hy,hz;
+
+      hx = (upper[0]-lower[0])/(nxd-2*gx);
+      hy = (upper[1]-lower[1])/(nyd-2*gy);
+      hz = (upper[2]-lower[2])/(nzd-2*gz);
 
       switch (field_descr->precision(index_field)) {
       case precision_single:
@@ -508,13 +541,17 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  float min = std::numeric_limits<float>::max();
 	  float max = std::numeric_limits<float>::min();
 	  double sum = 0.0;
-	  for (int iz=0; iz<nz; iz++) {
-	    for (int iy=0; iy<ny; iy++) {
-	      for (int ix=0; ix<nx; ix++) {
+	  for (int iz=izm; iz<izp; iz++) {
+	    double z = hz*(iz-gz) + lower[axis_z];
+	    for (int iy=iym; iy<iyp; iy++) {
+	      double y = hy*(iy-gy) + lower[axis_y];
+	      for (int ix=ixm; ix<ixp; ix++) {
+		double x = hx*(ix-gx) + lower[axis_x];
 		int i = ix + nxd*(iy + nyd*iz);
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
+		//		printf ("f %d p %d  %f %f %f  %22.14g\n",index_field,CkMyPe(),x,y,z,field[i]);
 	      }
 	    }
 	  }
@@ -533,13 +570,17 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  double min = std::numeric_limits<double>::max();
 	  double max = std::numeric_limits<double>::min();
 	  long double sum = 0.0;
-	  for (int iz=0; iz<nz; iz++) {
-	    for (int iy=0; iy<ny; iy++) {
-	      for (int ix=0; ix<nx; ix++) {
+	  for (int iz=izm; iz<izp; iz++) {
+	    double z = hz*(iz-gz) + lower[axis_z];
+	    for (int iy=iym; iy<iyp; iy++) {
+	      double y = hy*(iy-gy) + lower[axis_y];
+	      for (int ix=ixm; ix<ixp; ix++) {
+		double x = hx*(ix-gx) + lower[axis_x];
 		int i = ix + nxd*(iy + nyd*iz);
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
+		//		printf ("f %d p %d  %f %f %f  %22.14g\n",index_field,CkMyPe(),x,y,z,field[i]);
 	      }
 	    }
 	  }
@@ -558,9 +599,9 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  long double min = std::numeric_limits<long double>::max();
 	  long double max = std::numeric_limits<long double>::min();
 	  long double sum = 0.0;
-	  for (int iz=0; iz<nz; iz++) {
-	    for (int iy=0; iy<ny; iy++) {
-	      for (int ix=0; ix<nx; ix++) {
+	  for (int iz=izm; iz<izp; iz++) {
+	    for (int iy=iym; iy<iyp; iy++) {
+	      for (int ix=ixm; ix<ixp; ix++) {
 		int i = ix + nxd*(iy + nyd*iz);
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);

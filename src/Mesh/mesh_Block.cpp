@@ -263,7 +263,7 @@ void Block::prepare()
   // DEBUG
   if (stop_block) {
     FieldDescr * field_descr = simulation->field_descr();
-    //    field_block()->print(field_descr,"final",lower_,upper_);
+    // field_block()->print(field_descr,"final",lower_,upper_);
     field_block()->image(field_descr,"cycle",cycle_,
       			 thisIndex.x,thisIndex.y,thisIndex.z);
    }
@@ -640,10 +640,11 @@ void Block::compute()
 
   FieldDescr * field_descr = simulation->field_descr();
 
-  if (cycle_ == 0) {
-    field_block()->image(field_descr,"compute-pre",cycle_,
-			 thisIndex.x,thisIndex.y,thisIndex.z);
-  }
+  //  if (cycle_ == 0) {
+  field_block()->print(field_descr,"field",lower_,upper_);
+  //  field_block()->image(field_descr,"image",cycle_,
+  //		       thisIndex.x,thisIndex.y,thisIndex.z);
+    //  }
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
 

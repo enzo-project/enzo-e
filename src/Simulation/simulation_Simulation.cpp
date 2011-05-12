@@ -804,11 +804,10 @@ void Simulation::output_next() throw()
       }
     }
 
-    PARALLEL_PRINTF ("output::next() exiting()\n");
-
   } else {
-    PARALLEL_PRINTF ("output::next() calling refresh()\n");
+
     refresh();
+
   }
 }
 
@@ -884,8 +883,8 @@ void Simulation::refresh() throw()
   // Monitor
   //--------------------------------------------------
 
-  monitor_-> print("[Simulation %d] cycle %04d time %15.12f", 
-		   index_,cycle_,time_);
+  monitor_-> print("[Simulation %d] cycle %04d time %15.12f dt %15.12g", 
+		   index_,cycle_,time_,dt_);
 
   //--------------------------------------------------
   // Output

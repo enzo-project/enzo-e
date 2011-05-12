@@ -11,7 +11,7 @@ trace           = 0
 use_gprof       = 0
 use_papi        = 0
 use_valgrind    = 0
-use_projections = 0
+use_projections = 1
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS
