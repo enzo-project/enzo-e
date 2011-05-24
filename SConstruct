@@ -13,7 +13,7 @@ use_papi        = 0
 use_valgrind    = 0
 use_projections = 0
 
-original_refresh = 0
+original_refresh = 1
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS

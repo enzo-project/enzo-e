@@ -240,6 +240,8 @@ void Block::p_initial()
 void Block::prepare()
 {
 
+  TRACE("Block::prepare");
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -392,6 +394,8 @@ void Block::p_refresh (double dt, int axis_set)
 
 void Block::refresh (int axis_set)
 {
+
+  TRACE("Block::refresh");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
