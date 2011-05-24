@@ -54,13 +54,14 @@ public: // interface
   /// Initialize block for the simulation.
   void p_initial();
 
+  /// Apply the numerical methods on the block
+  void p_compute(double dt, int axis_set);
+
   /// Refresh ghost zones and apply boundary conditions
   void p_refresh(double dt, int axis_set);
 
   /// Refresh a FieldFace
   void p_refresh_face(int n, char buffer[], int axis, int face, int axis_set);
-
-  //--------------------------------------------------
 
   /// Contribute block data to ith output object in the simulation
   void p_output (int index_output);
@@ -70,8 +71,11 @@ public: // interface
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
   void prepare();
 
+  /// Implementation of refresh
+  void refresh(int axis_set);
+
   /// Boundary and Method
-  void compute();
+  void compute(int axis_set);
 
   /// Refresh ghost zones and apply boundary conditions along a specific axis
   void refresh_axis(axis_enum axis);

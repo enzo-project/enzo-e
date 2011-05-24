@@ -70,13 +70,13 @@ mainmodule enzo {
 
 
     entry void p_initial();
+    entry void p_compute(double dt, int axis_set);
     entry void p_refresh(double dt, int axis_set);
     entry void p_refresh_face(int n, char buffer[n], int axis, int face, int axis_face);
     entry void p_output (int index_output);
  
     //     void p_next();
     //     void p_prepare();
-    //     void p_compute();
 
   };
 

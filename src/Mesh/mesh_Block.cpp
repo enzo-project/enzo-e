@@ -227,7 +227,12 @@ void Block::p_initial()
 
   // prepare for first cycle: Timestep, Stopping, Monitor, Output
 
+#ifdef ORIGINAL_REFRESH  
   prepare();
+#else
+  axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
+  refresh(axis_set);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -364,14 +369,29 @@ void Block::refresh_axis (axis_enum axis)
 
 //----------------------------------------------------------------------
 
+void Block::p_compute (double dt, int axis_set)
+{
+  if (dt != -1) dt_ = dt;
+  compute(axis_set);
+}
+
+//----------------------------------------------------------------------
+
 void Block::p_refresh (double dt, int axis_set)
 {
-
   // Update dt_ from Simulation
 
    // (should be updated already?)
   // -1 test due to p_refresh_face() calling p_refresh with axis_set != axis_all
   if (dt != -1) dt_ = dt;
+
+  refresh(axis_set);
+}
+
+//----------------------------------------------------------------------
+
+void Block::refresh (int axis_set)
+{
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -584,7 +604,11 @@ void Block::p_refresh_face (int n, char * buffer,
   if (axis_set == axis_all) {
     if (++count_refresh_face_ >= count) {
       count_refresh_face_ = 0;
-      compute();
+#ifdef ORIGINAL_REFRESH  
+      compute(axis_set);
+#else
+      prepare();
+#endif
     }
   } else {
     switch (axis_set) {
@@ -603,7 +627,11 @@ void Block::p_refresh_face (int n, char * buffer,
     case axis_z:
       if (++count_refresh_face_z_ >= count) {
 	count_refresh_face_z_ = 0;
-	compute();
+#ifdef ORIGINAL_REFRESH  
+	compute(axis_set); // axis_set ignored--used when compute() calls refresh()
+#else
+	prepare();
+#endif
       }
       break;
     }
@@ -628,7 +656,7 @@ void Block::p_output (int index_output)
 
 //----------------------------------------------------------------------
 
-void Block::compute()
+void Block::compute(int axis_set)
 {
 
   TRACE("Block::compute");
@@ -638,14 +666,14 @@ void Block::compute()
   double time_start = CmiWallTimer();
 #endif
 
-  FieldDescr * field_descr = simulation->field_descr();
+  // FieldDescr * field_descr = simulation->field_descr();
 
   //  if (cycle_ == 0) {
-  char buffer[10];
-  sprintf (buffer,"%03d A",cycle_);
-  field_block()->print(field_descr,buffer,lower_,upper_);
-  field_block()->image(field_descr,"A",cycle_,
-		       thisIndex.x,thisIndex.y,thisIndex.z);
+  // char buffer[10];
+  // sprintf (buffer,"%03d A",cycle_);
+  // field_block()->print(field_descr,buffer,lower_,upper_);
+  // field_block()->image(field_descr,"A",cycle_,
+  // 		       thisIndex.x,thisIndex.y,thisIndex.z);
     //  }
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
@@ -654,10 +682,10 @@ void Block::compute()
 
   }
 
-  sprintf (buffer,"%03d B",cycle_);
-  field_block()->print(field_descr,buffer,lower_,upper_);
-  field_block()->image(field_descr,"B",cycle_,
-		       thisIndex.x,thisIndex.y,thisIndex.z);
+  // sprintf (buffer,"%03d B",cycle_);
+  // field_block()->print(field_descr,buffer,lower_,upper_);
+  // field_block()->image(field_descr,"B",cycle_,
+  // 		       thisIndex.x,thisIndex.y,thisIndex.z);
 
 #ifdef CONFIG_USE_PROJECTIONS
   traceUserBracketEvent(10,time_start, CmiWallTimer());
@@ -670,7 +698,11 @@ void Block::compute()
 
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 
+#ifdef ORIGINAL_REFRESH  
   prepare();
+#else
+  refresh(axis_set);
+#endif
 
 }
 

@@ -6,12 +6,14 @@ import sys
 #----------------------------------------------------------------------
 
 balance         = 1
-trace           = 0
+trace           = 1
 
 use_gprof       = 0
 use_papi        = 0
 use_valgrind    = 0
-use_projections = 1
+use_projections = 0
+
+original_refresh = 0
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS
@@ -68,6 +70,7 @@ define_papi  =  ['CONFIG_USE_PAPI'];
 define_trace =  ['CELLO_TRACE'];
 define_balance =  ['CONFIG_LOAD_BALANCE'];
 define_projections =  ['CONFIG_USE_PROJECTIONS']
+define_original_refresh = ['ORIGINAL_REFRESH']
 
 defines     = []
 defines_xlc = ""
@@ -107,7 +110,7 @@ cflags_perf       = ''
 fortranflags_perf = ''
 linkflags_perf    = ''
 
-if (use_projections):
+if (use_projections == 1):
      charm_perf = '-tracemode projections'
      defines     = defines              + define_projections
      defines_xlc = defines_xlc + ' -D'  + define_projections[0]
@@ -115,7 +118,7 @@ if (use_projections):
 
 flags_gprof = ''
 
-if (use_gprof):
+if (use_gprof == 1):
      flags_gprof = '-pg '
      
 #--------------------------------------------------
@@ -140,6 +143,12 @@ else:
 print defines
 print defines_xlc
 print defines_xlf
+
+#-----------------------------------------------------------------------
+if (original_refresh == 1):
+     defines = defines + define_original_refresh
+     defines_xlc = defines_xlc + ' -D' + define_original_refresh[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_original_refresh[0]
 
 #-----------------------------------------------------------------------
 # Display configuration settings

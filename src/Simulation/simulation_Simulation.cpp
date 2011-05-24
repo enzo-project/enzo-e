@@ -766,7 +766,6 @@ void Simulation::p_output
   output_next();
 }
 
-
 //----------------------------------------------------------------------
 
 void Simulation::output_first() throw()
@@ -879,6 +878,7 @@ void Simulation::refresh() throw()
 {
 
   TRACE("Simulation::refresh");
+
   //--------------------------------------------------
   // Monitor
   //--------------------------------------------------
@@ -914,11 +914,16 @@ void Simulation::refresh() throw()
 
     ItPatch it_patch(mesh_);
     Patch * patch;
-    axis_enum axis;
-    axis = (temp_update_all_) ? axis_all : axis_x;
+    axis_enum axis = (temp_update_all_) ? axis_all : axis_x;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
+#ifdef ORIGINAL_REFRESH
+	printf ("ORIGINAL_REFRESH = true\n");
 	patch->blocks().p_refresh(dt_,axis);
+#else
+	printf ("ORIGINAL_REFRESH = false\n");
+	patch->blocks().p_compute(dt_,axis);
+#endif
       }
     }
   }
