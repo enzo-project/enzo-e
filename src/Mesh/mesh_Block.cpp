@@ -213,7 +213,8 @@ void Block::p_initial()
 
   // SHOULD NOT NEED THIS
   // std::numeric_limits<double>::min()
-  field_block_[0]->clear(field_descr,10.0);
+  WARNING("Block::p_initial","Clearing field block values to 0.1");
+  field_block_[0]->clear(field_descr,0.1);
 
   simulation->initial()->compute(field_descr,this);
 
