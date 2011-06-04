@@ -918,10 +918,8 @@ void Simulation::refresh() throw()
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
 #ifdef ORIGINAL_REFRESH
-	printf ("ORIGINAL_REFRESH = true\n");
 	patch->blocks().p_refresh(dt_,axis);
 #else
-	printf ("ORIGINAL_REFRESH = false\n");
 	patch->blocks().p_compute(dt_,axis);
 #endif
       }

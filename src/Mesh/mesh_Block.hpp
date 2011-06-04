@@ -66,6 +66,9 @@ public: // interface
   /// Contribute block data to ith output object in the simulation
   void p_output (int index_output);
 
+  /// Function called if TEMP_SKIP_REDUCE defined for skipping global reduction
+  void skip_reduce(int cycle, int time, double dt_block, double stop_block);
+
   //--------------------------------------------------
 
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]

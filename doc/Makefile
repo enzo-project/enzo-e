@@ -12,6 +12,7 @@ DOCS = \
       manual-user \
       paper-tree \
       parallelism \
+      performance \
       report-nsf \
       talk-2009-09 \
       talk-2010-06 \
@@ -42,6 +43,10 @@ parallelism:
 	cd parallelism;  ln -sf ../Makefile.1 makefile
 	cd parallelism;  ln -sf ../papers.bib .
 	$(MAKE) -C parallelism
+performance:
+	cd performance;  ln -sf ../Makefile.1 makefile
+	cd performance;  ln -sf ../papers.bib .
+	$(MAKE) -C performance
 devel-requirements: 
 	cd devel-requirements; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C devel-requirements

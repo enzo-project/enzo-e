@@ -5,15 +5,20 @@ import sys
 # CONFIGURATION
 #----------------------------------------------------------------------
 
+trace           = 0
+debug           = 0
+debug_verbose   = 0
+
 balance         = 1
-trace           = 1
 
 use_gprof       = 0
 use_papi        = 0
 use_valgrind    = 0
-use_projections = 0
+use_projections = 1
 
+# temporary code variations
 original_refresh = 1
+skip_reduce      = 1
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS
@@ -69,8 +74,12 @@ define_png   =  ['NO_FREETYPE'];
 define_papi  =  ['CONFIG_USE_PAPI'];
 define_trace =  ['CELLO_TRACE'];
 define_balance =  ['CONFIG_LOAD_BALANCE'];
+define_debug =  ['CELLO_DEBUG'];
+define_debug_verbose =  ['CELLO_DEBUG_VERBOSE'];
 define_projections =  ['CONFIG_USE_PROJECTIONS']
 define_original_refresh = ['ORIGINAL_REFRESH']
+
+define_skip_reduce = ['TEMP_SKIP_REDUCE']
 
 defines     = []
 defines_xlc = ""
@@ -150,6 +159,11 @@ if (original_refresh == 1):
      defines_xlc = defines_xlc + ' -D' + define_original_refresh[0]
      defines_xlf = defines_xlf + ' -WF,-D' + define_original_refresh[0]
 
+if (skip_reduce == 1):
+     defines = defines + define_skip_reduce
+     defines_xlc = defines_xlc + ' -D' + define_skip_reduce[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_skip_reduce[0]
+
 #-----------------------------------------------------------------------
 # Display configuration settings
 #-----------------------------------------------------------------------
@@ -175,6 +189,16 @@ if (trace != 0):
      defines = defines + define_trace
      defines_xlc = defines_xlc + ' -D' + define_trace[0]
      defines_xlf = defines_xlf + ' -WF,-D' + define_trace[0]
+
+if (debug != 0):
+     defines = defines + define_debug
+     defines_xlc = defines_xlc + ' -D' + define_debug[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_debug[0]
+
+if (debug_verbose != 0):
+     defines = defines + define_debug_verbose
+     defines_xlc = defines_xlc + ' -D' + define_debug_verbose[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_debug_verbose[0]
 
 if (balance != 0):
      defines = defines + define_balance
@@ -231,7 +255,8 @@ if (arch == "linux"):
      hdf5_lib = (hdf5_path + '/lib')
 
      flags_debug = '-g'
-     flags_opt   = '-O3'
+#     flags_opt   = '-O3'
+     flags_opt   = ''
      flags_prec  = '-m128bit-long-double'
      flags_warn  = '-Wall'
 

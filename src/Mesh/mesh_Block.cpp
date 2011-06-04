@@ -10,6 +10,8 @@
 /// @todo     Remove need for clearing block values before initial conditions (ghost zones accessed but not initialized)
 /// @brief    Implementation of the Block object
 
+#define TEMP_CLEAR_VALUE std::numeric_limits<float>::min() /* in field_FieldBlock.cpp and  mesh_Block.cpp */
+
 #include "cello.hpp"
 
 #include "mesh.hpp"
@@ -213,8 +215,8 @@ void Block::p_initial()
 
   // SHOULD NOT NEED THIS
   // std::numeric_limits<double>::min()
-  WARNING("Block::p_initial","Clearing field block values to 0.1");
-  field_block_[0]->clear(field_descr,0.1);
+  WARNING("Block::p_initial","Clearing field block values to non-zero");
+  field_block_[0]->clear(field_descr,TEMP_CLEAR_VALUE);
 
   simulation->initial()->compute(field_descr,this);
 
@@ -250,7 +252,13 @@ void Block::prepare()
   // Timestep [block]
   //--------------------------------------------------
 
-  double dt_block = simulation->timestep()->compute(field_descr,this);
+  double dt_block;
+#ifdef TEMP_SKIP_REDUCE
+  dt_block = 8e-5;
+  dt_ = dt_block;
+#else
+  dt_block = simulation->timestep()->compute(field_descr,this);
+#endif
 
   // Reduce timestep to coincide with scheduled output if needed
 
@@ -269,30 +277,26 @@ void Block::prepare()
 
   int stop_block = simulation->stopping()->complete(cycle_,time_);
   // DEBUG
+  int num_blocks = simulation->mesh()->patch(0)->num_blocks();
   if (stop_block) {
     FieldDescr * field_descr = simulation->field_descr();
-    // field_block()->print(field_descr,"final",lower_,upper_);
+    field_block()->print(field_descr,"final",lower_,upper_);
     field_block()->image(field_descr,"cycle",cycle_,
-      			 thisIndex.x,thisIndex.y,thisIndex.z);
+			 thisIndex.x,thisIndex.y,thisIndex.z);
+#ifdef TEMP_SKIP_REDUCE
+    proxy_main.p_exit(num_blocks);
+#endif
    }
-
 
   //--------------------------------------------------
   // Main::p_prepare()
   //--------------------------------------------------
 
-  int num_blocks = simulation->mesh()->patch(0)->num_blocks();
-
-
-#undef CHARM_REDUCTION
-
-#ifdef CHARM_REDUCTION
-  printf ("contribute(%g)\n",dt_block);
-  contribute (sizeof(double),&dt_block,CkReduction::min_double);
+#ifdef TEMP_SKIP_REDUCE
+  skip_reduce (cycle_,time_,dt_block,stop_block);
 #else
   proxy_main.p_prepare(num_blocks, cycle_, time_, dt_block, stop_block);
 #endif
-
 
 }
 
@@ -661,6 +665,22 @@ void Block::p_output (int index_output)
 
 //----------------------------------------------------------------------
 
+void Block::skip_reduce(int cycle, int time, double dt_block, double stop_block)
+{
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  simulation->update_cycle(cycle,time,dt_block,stop_block);
+  
+  axis_enum axis = (simulation->temp_update_all()) ? axis_all : axis_x;
+#ifdef ORIGINAL_REFRESH
+  refresh(axis);
+#else
+  compute(axis);
+#endif
+}
+
+//----------------------------------------------------------------------
+
 void Block::compute(int axis_set)
 {
 
@@ -672,25 +692,20 @@ void Block::compute(int axis_set)
 #endif
 
   // FieldDescr * field_descr = simulation->field_descr();
-
-  //  if (cycle_ == 0) {
   // char buffer[10];
-  // sprintf (buffer,"%03d A",cycle_);
+  // sprintf (buffer,"%03d-A",cycle_);
   // field_block()->print(field_descr,buffer,lower_,upper_);
   // field_block()->image(field_descr,"A",cycle_,
-  // 		       thisIndex.x,thisIndex.y,thisIndex.z);
-    //  }
+  // 			 thisIndex.x,thisIndex.y,thisIndex.z);
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
-
     simulation->method(i) -> compute_block (this,time_,dt_);
-
   }
 
-  // sprintf (buffer,"%03d B",cycle_);
-  // field_block()->print(field_descr,buffer,lower_,upper_);
-  // field_block()->image(field_descr,"B",cycle_,
-  // 		       thisIndex.x,thisIndex.y,thisIndex.z);
+   // sprintf (buffer,"%03d-B",cycle_);
+   // field_block()->print(field_descr,buffer,lower_,upper_);
+   // field_block()->image(field_descr,"B",cycle_,
+   // 		       thisIndex.x,thisIndex.y,thisIndex.z);
 
 #ifdef CONFIG_USE_PROJECTIONS
   traceUserBracketEvent(10,time_start, CmiWallTimer());

@@ -179,6 +179,13 @@ public: // interface
   /// Return whether to include orthogonal ghosts in updates
   bool temp_update_full() const throw() { return temp_update_full_; };
 
+  void update_cycle(int cycle, int time, double dt, double stop) {
+    cycle_ = cycle;
+    time_  = time;
+    dt_    = dt;
+    stop_  = stop;
+  };
+
 public: // virtual functions
 
   /// initialize the Simulation given a parameter file

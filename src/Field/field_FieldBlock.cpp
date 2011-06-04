@@ -11,6 +11,8 @@
 #include "enzo.hpp"
 #include "field.hpp"
 
+#define TEMP_CLEAR_VALUE std::numeric_limits<float>::max() /* in field_FieldBlock.cpp and  mesh_Block.cpp */
+
 //----------------------------------------------------------------------
 
 FieldBlock::FieldBlock ( int nx, int ny, int nz ) throw()
@@ -485,6 +487,10 @@ void FieldBlock::print (const FieldDescr * field_descr,
 			double lower[3],
 			double upper[3]) const throw()
 {
+#ifndef CELLO_DEBUG
+  return;
+#endif
+
   if ( ! array_allocated() ) {
     PARALLEL_PRINTF("%s FieldBlock %p not allocated\n");
   } else {
@@ -511,13 +517,13 @@ void FieldBlock::print (const FieldDescr * field_descr,
 
       // Include ghost zones
 
-       // ixm = 0;
-       // iym = 0;
-       // izm = 0;
+      // ixm = 0;
+      // iym = 0;
+      // izm = 0;
 
-       // ixp = nxd;
-       // iyp = nyd;
-       // izp = nzd;
+      // ixp = nxd;
+      // iyp = nyd;
+      // izp = nzd;
 
 
       int nx,ny,nz;
@@ -549,7 +555,13 @@ void FieldBlock::print (const FieldDescr * field_descr,
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
-		//		printf ("%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
+		if (field[i]==TEMP_CLEAR_VALUE) {
+		  printf ("TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
+			  message,index_field,x,y,z,ix,iy,iz);
+		}
+#ifdef CELLO_DEBUG_VERBOSE
+		printf ("%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
+#endif
 	      }
 	    }
 	  }
@@ -567,7 +579,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  double * field = (double * ) field_values(index_field);
 	  double min = std::numeric_limits<double>::max();
 	  double max = std::numeric_limits<double>::min();
-	  long double sum = 0.0;
+	  double sum = 0.0;
 	  for (int iz=izm; iz<izp; iz++) {
 	    double z = hz*(iz-gz) + lower[axis_z];
 	    for (int iy=iym; iy<iyp; iy++) {
@@ -578,16 +590,23 @@ void FieldBlock::print (const FieldDescr * field_descr,
 		min = MIN(min,field[i]);
 		max = MAX(max,field[i]);
 		sum += field[i];
-		//		printf ("f %d p %d  %f %f %f  %18.14g\n",index_field,CkMyPe(),x,y,z,field[i]);
+		sum += field[i];
+		if (field[i]==TEMP_CLEAR_VALUE) {
+		  printf ("TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
+			  message,index_field,x,y,z,ix,iy,iz);
+		}
+#ifdef CELLO_DEBUG_VERBOSE
+		printf ("%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
+#endif
 	      }
 	    }
 	  }
-	  long double avg = sum / (nx*ny*nz);
+	  double avg = sum / (nx*ny*nz);
 	  PARALLEL_PRINTF
-	    ("%s FieldBlock[%p,%s] (%d %d %d) [%18.14g %18.14g %18.14g]\n",
-	     message ? message : "",this,
+	    ("%s [%s] %18.14g\n",
+	     message ? message : "",
 	     field_descr->field_name(index_field).c_str(),
-	     nx,ny,nz,min,avg,max);
+	     avg);
 	}
 	break;
       case precision_quadruple:
