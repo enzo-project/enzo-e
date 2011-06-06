@@ -5,8 +5,8 @@
    } 
 
    Mesh { 
-      root_size      = [96,96,96];
-      root_blocks    = [ 2, 2, 2];
+      root_size      = [128,128,128];
+      root_blocks    = [  1,  1,  1];
    }
 
    Field {
@@ -61,7 +61,8 @@
                                         + (z-(0.5))*(z-(0.5)) < 0.3*0.3,
 	                         1.0  / (0.4 * 1.0) ]; };
        velocity_x    { value = [0.0]; };
-       velocity_y    { value = [0.0]; }
+       velocity_y    { value = [0.0]; };
+       velocity_z    { value = [0.0]; }
    }
 
    Boundary { type = "reflecting" }

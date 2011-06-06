@@ -10,6 +10,7 @@ debug           = 0
 debug_verbose   = 0
 
 balance         = 1
+trace           = 0
 
 use_gprof       = 0
 use_papi        = 0
@@ -315,7 +316,7 @@ elif (arch == "ncsa-bd"):
      papi_inc = (papi_path + '/include')
      papi_lib = (papi_path + '/lib64')
 
-     hdf5_path = '/home/bordner'
+     hdf5_path = '/opt/hdf5-1.8.4-patch1-64bit'
      hdf5_inc = (hdf5_path + '/include')
      hdf5_lib = (hdf5_path + '/lib')
 
@@ -349,7 +350,7 @@ elif (arch == "ncsa-bd"):
 elif (arch == "sdsc-triton"):
 #----------------------------------------------------------------------
 
-     charm_path = '/home/jobordner/charm/charm'
+     charm_path = '/home/jobordner/public/charm/charm'
 
      fc_path  = '/opt/openmpi/pgi/mx'
      cc_path  = '/opt/openmpi/pgi/mx'
