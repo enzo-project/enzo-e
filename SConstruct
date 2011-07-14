@@ -19,7 +19,7 @@ use_projections = 1
 
 # temporary code variations
 original_refresh = 1
-skip_reduce      = 1
+skip_reduce      = 0
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS

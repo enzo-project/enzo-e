@@ -1,4 +1,4 @@
-// $Id$
+// $Id: performance.hpp 2102 2011-03-13 08:42:08Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef PERFORMANCE_HPP
@@ -16,6 +16,8 @@
 #include <vector>
 #include <string>
 #include <sys/time.h>
+#include <sys/resource.h>
+
 #ifdef __linux__
 #   include <unistd.h>
 #endif

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: performance_Performance.hpp 2130 2011-03-20 01:00:25Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef PERFORMANCE_PERFORMANCE_HPP
@@ -124,6 +124,8 @@ public: // interface
 private: // functions
 
   void deallocate_ () throw ();
+
+  void print_rusage_ () const throw ();
 
   type_counter time_real_ () const
   {

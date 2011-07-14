@@ -1,4 +1,4 @@
-// $Id$
+// $Id: performance_Performance.cpp 2130 2011-03-20 01:00:25Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file      performance_Performance.cpp
@@ -69,6 +69,7 @@ void Performance::print () const throw ()
 {
   timer.print();
   papi.print();
+  print_rusage_();
 }
 
 //----------------------------------------------------------------------
@@ -247,4 +248,39 @@ void Performance::deallocate_() throw()
   for (unsigned i=0; i<counters_.size(); i++) {
     delete counters_.at(i);
   }
+}
+
+//----------------------------------------------------------------------
+
+void Performance::print_rusage_() const throw()
+{
+  struct rusage r;
+  getrusage(RUSAGE_SELF, &r);
+
+  printf ("utime = %f\n",
+   	  r.ru_utime.tv_sec + 
+	  r.ru_utime.tv_usec * 1e-6);
+  printf ("stime = %f\n",
+   	  r.ru_stime.tv_sec + 
+	  r.ru_stime.tv_usec * 1e-6);
+
+  if (r.ru_maxrss) printf (" maximum resident set size: %ld\n",  
+			   1024 * r.ru_maxrss);
+  if (r.ru_ixrss) printf (" integral shared memory size: %ld\n",  r.ru_ixrss);
+  if (r.ru_idrss) printf (" integral unshared data size: %ld\n",  r.ru_idrss);
+  if (r.ru_isrss) printf (" integral unshared stack size: %ld\n",  r.ru_isrss);
+  if (r.ru_minflt) printf (" page reclaims (soft page faults): %ld\n",  r.ru_minflt);
+  if (r.ru_majflt) printf (" page faults (hard page faults): %ld\n",  r.ru_majflt);
+  if (r.ru_nswap) printf (" swaps: %ld\n",  r.ru_nswap);
+  if (r.ru_inblock) printf (" block input operations: %ld\n",  r.ru_inblock);
+  if (r.ru_oublock) printf (" block output operations: %ld\n",  r.ru_oublock);
+  if (r.ru_msgsnd) printf (" IPC messages sent: %ld\n",  r.ru_msgsnd);
+  if (r.ru_msgrcv) printf (" IPC messages received: %ld\n",  r.ru_msgrcv);
+  if (r.ru_nsignals) printf (" signals received: %ld\n",  r.ru_nsignals);
+  if (r.ru_nvcsw) printf (" voluntary context switches: %ld\n",  r.ru_nvcsw);
+  if (r.ru_nivcsw) printf (" involuntary context switches: %ld\n",  r.ru_nivcsw);
+
+
+  printf ("hostid = %ld\n",gethostid());
+
 }
