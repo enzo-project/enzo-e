@@ -17,9 +17,9 @@ use_papi        = 0
 use_valgrind    = 0
 use_projections = 1
 
-# temporary code variations
+# temporary code variations for testing
 original_refresh = 1
-skip_reduce      = 0
+skip_reduce      = 0  # constant dt, which is currently hard-coded!
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS

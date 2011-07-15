@@ -41,10 +41,10 @@ public: // interface
   ~Performance();
 
   /// Copy constructor
-  Performance(const Performance & classname) throw();
+  Performance(const Performance & performance) throw();
 
   /// Assignment operator
-  Performance & operator= (const Performance & classname) throw();
+  Performance & operator= (const Performance & performance) throw();
 
   //--------------------------------------------------
 
@@ -55,7 +55,7 @@ public: // interface
   void stop () throw ();
 
   /// Display timers and counters using monitor
-  void print () const throw ();
+  void print (const Monitor * monitor) const throw ();
 
   //--------------------------------------------------
 
@@ -125,7 +125,7 @@ private: // functions
 
   void deallocate_ () throw ();
 
-  void print_rusage_ () const throw ();
+  void print_rusage_ (const Monitor * monitor) const throw ();
 
   type_counter time_real_ () const
   {

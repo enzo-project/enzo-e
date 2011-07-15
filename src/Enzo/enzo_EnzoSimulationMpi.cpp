@@ -248,7 +248,7 @@ void EnzoSimulationMpi::run() throw()
 
   performance.stop();
 
-  performance.print();
+  performance.print(monitor_);
 
 }
 
