@@ -18,6 +18,26 @@ Monitor * Monitor::instance_ = 0; // (singleton design pattern)
 // extern CProxy_EnzoSimulationCharm proxy_simulation;
 // #endif
 
+Monitor::Monitor()
+  : timer_(new Timer),
+    active_(true),
+    image_(0),
+    image_size_x_(0),
+    image_size_y_(0),
+    png_(0)
+{ 
+  timer_->start();
+
+  map_r_.resize(2);
+  map_g_.resize(2);
+  map_b_.resize(2);
+  map_r_[0] = 0.0;
+  map_g_[0] = 0.0;
+  map_b_[0] = 0.0;
+  map_r_[1] = 1.0;
+  map_g_[1] = 1.0;
+  map_b_[1] = 1.0;
+}
 //----------------------------------------------------------------------
 
 // Monitor * Monitor::instance()
@@ -32,6 +52,16 @@ Monitor * Monitor::instance_ = 0; // (singleton design pattern)
 //   return instance_;
 // #endif
 // };
+
+//----------------------------------------------------------------------
+
+Monitor::~Monitor()
+{
+  delete timer_;
+  timer_ = 0;
+  delete instance_;
+  instance_ = 0;
+}
 
 //----------------------------------------------------------------------
 
@@ -54,6 +84,25 @@ void Monitor::header () const
   print ("        San Diego Supercomputer Center");
   print ("     University of California, San Diego");
   print ("");  
+
+  // Get date text
+
+  char buffer_date[MONITOR_LENGTH];
+
+  time_t rawtime;
+  struct tm * t;
+  time(&rawtime);
+  t = localtime (&rawtime);
+  const char * month[] = 
+    {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+  sprintf (buffer_date,"%s %02d %02d:%02d:%02d",
+	   month[t->tm_mon],
+	   t->tm_mday,
+	   t->tm_hour,
+	   t->tm_min,
+	   t->tm_sec);
+
+  print ("BEGIN CELLO: %s",buffer_date);  
 
   char c_single = ' ';
   char c_double = ' ';
@@ -124,23 +173,6 @@ void Monitor::print (const char * message, ...) const
     vsnprintf (buffer_message,MONITOR_LENGTH, message,fargs);
     va_end(fargs);
     
-    // Get date text
-
-    char buffer_date[MONITOR_LENGTH];
-
-    time_t rawtime;
-    struct tm * t;
-    time(&rawtime);
-    t = localtime (&rawtime);
-    const char * month[] = 
-      {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
-    sprintf (buffer_date,"%s %02d %02d:%02d:%02d",
-		     month[t->tm_mon],
-		     t->tm_mday,
-		     t->tm_hour,
-		     t->tm_min,
-	     t->tm_sec);
-
     // Get parallel process text
 
     char buffer_process[MONITOR_LENGTH] = "";
@@ -151,10 +183,17 @@ void Monitor::print (const char * message, ...) const
     sprintf (buffer_process,"%0d",Mpi::rank());
 #endif
 
+    // Get time (INCOMPLETE)
+
+    char buffer_time[10];
+
+    snprintf (buffer_time,10,"%08.2f",timer_->value());
+
     // Print 
+
     PARALLEL_PRINTF ("%s %s %s\n",
 		     buffer_process,
-		     buffer_date,
+		     buffer_time,
 		     buffer_message);
   }
 }

@@ -18,19 +18,19 @@ class Timer {
 public: // interface
 
   /// Create the Timer object
-  inline Timer();
+  Timer() throw();
 
   /// Start the timer
-  inline void start();
+  void start() throw();
 
   /// Stop the timer
-  inline float stop();
+  float stop() throw();
 
   /// Clear the timer
-  inline void clear();
+  void clear() throw();
 
   /// Return the value of the timer
-  inline float value() const;
+  float value() const throw();
 
   /// Display the timer information
   void print () const throw();
@@ -49,69 +49,69 @@ private: // attributes
 
 //======================================================================
 
-/// Create the Timer object
-inline Timer::Timer () 
-  : time_(0),
-    is_running_(false)
-{
-}
+// /// Create the Timer object
+// inline Timer::Timer () throw()
+//   : time_(0),
+//     is_running_(false)
+// {
+// }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-/// Start the timer
-inline void Timer::start() 
-{ 
-  is_running_ = true;
-  gettimeofday(&t1_, &tz_);
-}
+// /// Start the timer
+// inline void Timer::start() throw()
+// { 
+//   is_running_ = true;
+//   gettimeofday(&t1_, &tz_);
+// }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-/// Stop the timer
-inline float Timer::stop() 
-{ 
-  if (is_running_) {
-    gettimeofday(&t2_, &tz_);
-    time_ += (t2_.tv_sec-t1_.tv_sec) + 1e-6*(t2_.tv_usec-t1_.tv_usec);
-    is_running_ = false;
-  }
-  return time_;
-}
+// /// Stop the timer
+// inline float Timer::stop() throw()
+// { 
+//   if (is_running_) {
+//     gettimeofday(&t2_, &tz_);
+//     time_ += (t2_.tv_sec-t1_.tv_sec) + 1e-6*(t2_.tv_usec-t1_.tv_usec);
+//     is_running_ = false;
+//   }
+//   return time_;
+// }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-/// Clear the timer
-inline void Timer::clear() 
-{ 
-  stop();
-  gettimeofday(&t1_, &tz_);
-  time_ = 0.0;
-}
+// /// Clear the timer
+// inline void Timer::clear() throw()
+// { 
+//   stop();
+//   gettimeofday(&t1_, &tz_);
+//   time_ = 0.0;
+// }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-/// Return the value of the timer
-inline float Timer::value() const 
-{
-  if (is_running_) {
-    gettimeofday((struct timeval *)&t2_, (struct timezone *)&tz_);
-    return time_ + 
-      (t2_.tv_sec-t1_.tv_sec) + 1e-6*(t2_.tv_usec-t1_.tv_usec);
-  } else {
-    return time_;
-  }
-}
+// /// Return the value of the timer
+// inline float Timer::value() const throw()
+// {
+//   if (is_running_) {
+//     gettimeofday((struct timeval *)&t2_, (struct timezone *)&tz_);
+//     return time_ + 
+//       (t2_.tv_sec-t1_.tv_sec) + 1e-6*(t2_.tv_usec-t1_.tv_usec);
+//   } else {
+//     return time_;
+//   }
+// }
 
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-inline void Timer::print() const throw()
-{
-  Monitor * monitor = Monitor::instance();
+// inline void Timer::print() const throw()
+// {
+//   Monitor * monitor = Monitor::instance();
 
-  monitor->print ("[Performance] real time = %f",value());
+//   monitor->print ("[Performance] real time = %f",value());
 
-}
+// }
 
 #endif /* PERFORMANCE_TIMER_HPP */
 
