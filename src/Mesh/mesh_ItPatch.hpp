@@ -1,4 +1,3 @@
-// $Id: mesh_ItPatch.hpp 1942 2011-01-20 00:53:45Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef MESH_IT_PATCH_HPP

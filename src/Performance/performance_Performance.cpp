@@ -1,4 +1,3 @@
-// $Id: performance_Performance.cpp 2130 2011-03-20 01:00:25Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file      performance_Performance.cpp

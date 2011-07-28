@@ -1,4 +1,3 @@
-// $Id: enzo_EnzoInitialImplosion2.cpp 1877 2010-11-30 01:20:27Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoInitialImplosion2.cpp

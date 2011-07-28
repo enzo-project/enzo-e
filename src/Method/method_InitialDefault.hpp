@@ -1,4 +1,3 @@
-// $Id: method_InitialDefault.hpp 1877 2010-11-30 01:20:27Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef METHOD_INITIAL_DEFAULT_HPP

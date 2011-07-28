@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef PARALLEL_GROUP_THREAD_HPP

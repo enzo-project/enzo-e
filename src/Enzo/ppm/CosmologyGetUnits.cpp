@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_ENZO file for license and copyright information
 
 /// @file      CosmologyGetUnits.cpp

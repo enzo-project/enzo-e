@@ -1,4 +1,3 @@
-// $Id: enzo_EnzoSimulationCharm.hpp 2115 2011-03-17 19:59:55Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef ENZO_ENZO_SIMULATION_CHARM_HPP

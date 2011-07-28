@@ -1,4 +1,3 @@
-// $Id: enzo_EnzoBoundary.cpp 2085 2011-03-10 01:16:42Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoBoundary.cpp

@@ -1,4 +1,3 @@
-// $Id: test_FieldFace.cpp 2179 2011-04-06 22:40:24Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_FieldFace.cpp

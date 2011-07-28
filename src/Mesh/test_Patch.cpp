@@ -1,4 +1,3 @@
-// $Id: test_Patch.cpp 1791 2010-10-29 22:54:06Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_Patch.cpp

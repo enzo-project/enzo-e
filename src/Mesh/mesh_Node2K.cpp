@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     mesh_Node2K.cpp

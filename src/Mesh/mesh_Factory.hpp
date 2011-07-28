@@ -1,4 +1,3 @@
-// $Id: mesh_Factory.hpp 2009 2011-02-22 19:43:07Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef MESH_FACTORY_HPP

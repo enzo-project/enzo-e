@@ -1,4 +1,3 @@
-// $Id: mesh_ItBlockLocal.cpp 1954 2011-01-25 19:54:37Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 //----------------------------------------------------------------------

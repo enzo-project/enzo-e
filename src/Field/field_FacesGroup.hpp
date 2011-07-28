@@ -1,4 +1,3 @@
-// $Id: field_FacesGroup.hpp 1688 2010-08-03 22:34:22Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef FIELD_FACESGROUP_HPP

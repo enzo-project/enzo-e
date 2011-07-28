@@ -1,4 +1,3 @@
-// $Id: test_Block.cpp 1696 2010-08-04 05:56:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_Block.cpp

@@ -1,4 +1,3 @@
-// $Id: enzo_EnzoBlock.cpp 2035 2011-02-28 23:47:31Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoBlock.cpp

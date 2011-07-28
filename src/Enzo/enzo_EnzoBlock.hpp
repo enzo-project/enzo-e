@@ -1,4 +1,3 @@
-// $Id: enzo_EnzoBlock.hpp 2009 2011-02-22 19:43:07Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef ENZO_ENZO_BLOCK_HPP

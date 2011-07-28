@@ -1,4 +1,3 @@
-// $Id: enzo_EnzoSimulationCharm.cpp 2116 2011-03-17 22:11:13Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoSimulationCharm.cpp
