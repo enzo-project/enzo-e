@@ -22,6 +22,7 @@ enum item_enum {
   item_region
 };
 
+class Monitor;
 class Performance {
 
   /// @class    Performance
