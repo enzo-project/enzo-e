@@ -13,7 +13,7 @@ class Factory {
 
   /// @class    Factory
   /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] Abstract class for creating concrete Mesh, Mesh, Patch, and Block objects
+  /// @brief    [\ref Mesh] Abstract class for creating concrete Mesh, Patch, and Block objects
 
 public: // interface
 

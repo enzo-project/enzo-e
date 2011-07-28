@@ -293,7 +293,7 @@ elif (arch == "ncsa-bd"):
      cxx_path = '/opt/ibmcmp/vacpp/11.1'
 
      fortran_serial = fc_path + '/bin/xlf_r'
-     fortran_mpi    = 'mpfort'
+     fortran_mpi    = fc_path + '/bin/xlf_r'
      fortran_charm  = fc_path + '/bin/xlf_r'
 
      cxx_serial = cxx_path + '/bin/xlC_r'

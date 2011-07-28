@@ -67,9 +67,8 @@ enum reduce_enum {
 
 enum component_enum {
   component_undefined,
-  component_enzop,
-  component_first = component_enzop,
   component_disk,
+  component_first = component_disk,
   component_error,
   component_field,
   component_memory,

@@ -201,6 +201,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
     char buffer[80];
     sprintf (buffer,"Allocating block array %d %d %d",mbx,mby,mbz);
     TRACE(buffer);
+    // @@@@ ENZO DEPENDENCY!!! @@@
     block_ = CProxy_EnzoBlock::ckNew
       (nbx,nby,nbz,
        mbx,mby,mbz,

@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file      monitor_Monitor.cpp
@@ -11,12 +10,9 @@
 
 #include "monitor.hpp" 
 
+//----------------------------------------------------------------------
 Monitor * Monitor::instance_ = 0; // (singleton design pattern)
-
-// #ifdef CONFIG_USE_CHARM
-// #include "enzo.hpp"
-// extern CProxy_EnzoSimulationCharm proxy_simulation;
-// #endif
+//----------------------------------------------------------------------
 
 Monitor::Monitor()
   : timer_(new Timer),
