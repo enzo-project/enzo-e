@@ -316,7 +316,7 @@ elif (arch == "ncsa-bd"):
      papi_inc = (papi_path + '/include')
      papi_lib = (papi_path + '/lib64')
 
-     hdf5_path = '/opt/hdf5-1.8.4-patch1-64bit'
+     hdf5_path = '/home/bordner'
      hdf5_inc = (hdf5_path + '/include')
      hdf5_lib = (hdf5_path + '/lib')
 
