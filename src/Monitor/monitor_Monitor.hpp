@@ -16,7 +16,9 @@
 
 #define MONITOR_LENGTH 255
    
+#include "performance.hpp"
 //----------------------------------------------------------------------
+class Timer; 
 
 class Monitor {
 
@@ -34,41 +36,24 @@ class Monitor {
   /// a correctly-running simulation: anomalous errors or warnings are
   /// output by the Error component.
 
+  //----------------------------------------------------------------------
+
 public: // interface
 
   /// Private constructor of the Monitor object [singleton design pattern]
-  Monitor() 
-    : active_(true),
-      image_(0),
-      image_size_x_(0),
-      image_size_y_(0),
-      png_(0)
-  { 
-    map_r_.resize(2);
-    map_g_.resize(2);
-    map_b_.resize(2);
-    map_r_[0] = 0.0;
-    map_g_[0] = 0.0;
-    map_b_[0] = 0.0;
-    map_r_[1] = 1.0;
-    map_g_[1] = 1.0;
-    map_b_[1] = 1.0;
-  }
+  Monitor();
 
   /// Private destructor  of the Monitor object [singleton design pattern]
-  ~Monitor()
-  {
-    delete instance_;
-    instance_ = 0;
-  }
+  ~Monitor();
 
 //----------------------------------------------------------------------
 
   /// Return an instance of a Monitor object
   static Monitor * instance()
   { 
-    if ( instance_ == NULL ) 
+    if ( instance_ == NULL )
       instance_ = new Monitor;
+
     return instance_;
   };
 
@@ -117,12 +102,20 @@ public: // interface
   void image_set_map 
   (int n, double * map_r, double * map_g, double * map_b) throw();
 
+  //----------------------------------------------------------------------
+
 private: // functions
 
 
+  //----------------------------------------------------------------------
+
 private: // attributes
 
-  bool   active_;  // Whether monitoring is activated.  Used for e.g. ip != 0.
+  /// Timer for keeping track of time for output
+  Timer * timer_; 
+
+  /// Whether monitoring is activated.  Used for e.g. ip != 0.
+  bool active_;
 
   /// Color map
   std::vector<double> map_r_;
@@ -139,12 +132,16 @@ private: // attributes
   /// Current pngwriter
   pngwriter * png_;
 
+  //----------------------------------------------------------------------
+
+private: // static attributes
+
   /// Single instance of the Monitor object [singleton design pattern]
   static Monitor * instance_;
 
 };
 
- //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
  template<class T>
  void Monitor::image_reduce

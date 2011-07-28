@@ -57,7 +57,7 @@ class GroupProcess
   virtual void barrier() throw() { };
 
   /// Synchronize between two compute elements in the GroupProcess
-  virtual void sync(int rank) throw() { };
+  virtual void sync(int rank, int tag=0) throw() { };
 
   //--------------------------------------------------
 

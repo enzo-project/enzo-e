@@ -50,7 +50,7 @@ public: // interface (Group)
   (int rank_source, void * buffer, int size, int tag=0) throw()
   {
     buffer = buffer_[(long int)tag];
-    return (void *) tag;
+    return (void *) buffer;
   };
 
   /// Clean up after receiving an array
