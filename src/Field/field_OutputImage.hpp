@@ -8,10 +8,6 @@
 #ifndef FIELD_OUTPUT_IMAGE_HPP
 #define FIELD_OUTPUT_IMAGE_HPP
 
-//----------------------------------------------------------------------
-/// @enum     reduce_enum
-/// @brief    Reduction operator, used for image projections
-
 class OutputImage : public Output {
 
   /// @class    OutputImage

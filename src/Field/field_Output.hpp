@@ -9,6 +9,10 @@
 #ifndef FIELD_OUTPUT_HPP
 #define FIELD_OUTPUT_HPP
 
+//----------------------------------------------------------------------
+/// @enum     output_schedule_enum
+/// @brief    Scheduling types
+
 enum output_schedule_enum {
   output_schedule_unknown,
   output_schedule_cycle_interval,
@@ -16,6 +20,9 @@ enum output_schedule_enum {
   output_schedule_time_interval,
   output_schedule_time_list
 };
+
+class Mesh;
+class Patch;
 
 class Output {
 

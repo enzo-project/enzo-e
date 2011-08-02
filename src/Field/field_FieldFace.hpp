@@ -48,8 +48,8 @@ public: // interface
 	    const FieldBlock * field_block,
 	    axis_enum          axis,
 	    face_enum          face,
-	    bool               full_x,
-	    bool               full_y) throw();
+	    bool               full_x = true,
+	    bool               full_y = true) throw();
 
 
   /// Store to field's ghost data
@@ -57,8 +57,8 @@ public: // interface
 	     FieldBlock *       field_block,
 	     axis_enum          axis,
 	     face_enum          face,
-	     bool               full_x,
-	     bool               full_y) throw();
+	     bool               full_x = true,
+	     bool               full_y = true) throw();
 
   /// Return the size of the array
   size_t size() const throw() { return array_.size(); };
@@ -78,8 +78,8 @@ private: // functions
   void allocate_(const FieldDescr * field_descr,
 		 const FieldBlock * field_block,
 		 axis_enum          axis,
-		 bool               full_x,
-		 bool               full_y) throw();
+		 bool               full_x = true,
+		 bool               full_y = true) throw();
 
   /// Deallocate array_ storage
   void deallocate_() throw();
@@ -94,8 +94,8 @@ private: // functions
 			  int       ng[3],
 			  axis_enum axis, 
 			  face_enum face, 
-			  bool      full_x,
-			  bool      full_y ) throw();
+			  bool      full_x = true,
+			  bool      full_y = true) throw();
 
   /// Precision-agnostic function for copying the field_face array into
   /// the field block ghosts; returns number of bytes copied
@@ -107,8 +107,8 @@ private: // functions
 			  int       ng[3],
 			  axis_enum axis, 
 			  face_enum face, 
-			  bool      full_x,
-			  bool      full_y ) throw();
+			  bool      full_x = true,
+			  bool      full_y = true) throw();
 
 private: // attributes
 
