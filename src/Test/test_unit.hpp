@@ -121,4 +121,4 @@ bool unit_assert_ (int result, const char * file, int line, bool quiet=false)
   return result;
 }
 
-#endif
+#endif /* TEST_UNIT_HPP */

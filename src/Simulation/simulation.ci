@@ -8,7 +8,10 @@
 
 module simulation {
 
-  class Factory;
+  extern module main;
+
+//  class Factory;
+
   group Simulation {
 
     entry Simulation
@@ -17,13 +20,10 @@ module simulation {
        int index_simulation);
 
     entry void p_output (int cycle, double time, double dt, bool stopping);
-//    entry void refresh ();
     entry void p_done(CkReductionMsg*);
 
     entry void p_output_reduce();
     entry void p_output_write(int n, char buffer[n]);
-    entry void p_output_next ();
 
   };
-
 }

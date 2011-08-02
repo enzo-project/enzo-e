@@ -59,4 +59,4 @@ private: // attributes
   Node2K * root_;
 };
 
-#endif /* TREE_K_HPP */
+#endif /* MESH_TREE2K_HPP */

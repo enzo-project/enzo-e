@@ -35,7 +35,6 @@ binaries = [test_parallel_jacobi];
 if (type == "charm"):
 	test = 'test_parallel_jacobi'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
 #------------------------------
 # INSTALL

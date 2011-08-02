@@ -63,4 +63,4 @@ private: // attributes
   Node3K * root_;
 };
 
-#endif /* TREE_K_HPP */
+#endif /* MESH_TREE3K_HPP */

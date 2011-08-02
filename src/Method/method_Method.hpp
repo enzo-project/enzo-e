@@ -34,4 +34,4 @@ protected: // attributes
 
 };
 
-#endif /* METHOD_METHOD_METHOD_HPP */
+#endif /* METHOD_METHOD_HPP */

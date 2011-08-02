@@ -19,7 +19,6 @@
 #define MAX_OUTPUT 10 /* Maximum number of outputs going on at a time */
 
 #ifdef CONFIG_USE_CHARM
-CProxy_Main                proxy_main;
 CProxy_EnzoSimulationCharm proxy_simulation;
 #endif
 
@@ -224,5 +223,7 @@ PARALLEL_MAIN_END
 
 
 //======================================================================
-#include PARALLEL_CHARM_INCLUDE(enzo.def.h)
+#ifdef CONFIG_USE_CHARM
+#  include "enzo.def.h"
+#endif
 //======================================================================

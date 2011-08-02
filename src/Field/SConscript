@@ -11,14 +11,14 @@ Import('type')
 
 # (uses Mesh for test_FieldBlock, which requires DataBlock)
 
-components = ['mesh','cello','error']
+components = ['mesh','cello','error','monitor','performance','parallel']
+libraries  = ['png']
 
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
 
-env = env.Clone(LIBS=components)
-
+env = env.Clone(LIBS=[components,libraries])
 #------------------------------
 # SOURCE
 #------------------------------
@@ -35,11 +35,6 @@ libraries        = env.Library ('field', [sources])
 test_field_block = env.Program (['test_FieldBlock.cpp',  sources])
 test_field_descr = env.Program (['test_FieldDescr.cpp',  sources])
 test_field_face  = env.Program (['test_FieldFace.cpp',  sources])
-
-if (type == "charm"):
-   env.Depends('test_FieldBlock.o', '../Test/test.decl.h')
-   env.Depends('test_FieldDescr.o', '../Test/test.decl.h')
-   env.Depends('test_FieldFace.o',  '../Test/test.decl.h')
 
 binaries = [test_field_block, test_field_descr, test_field_face]
 

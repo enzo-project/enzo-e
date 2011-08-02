@@ -375,7 +375,7 @@ void EnzoBlock::image_dump
   // slice
   sprintf (filename,"slice-%s-%06d.png",file_root,cycle);
 
-  EnzoOutputImage * output = new EnzoOutputImage;
+  OutputImage * output = new OutputImage;
 
   if (nz == 1) {
     // 2D: "reduce" along z

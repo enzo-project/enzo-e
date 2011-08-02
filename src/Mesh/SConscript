@@ -13,7 +13,7 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error','memory','monitor', 'parallel', 'field', 'cello']
+components = ['field', 'error','memory','monitor', 'performance', 'parallel', 'method', 'cello']
 libraries  = ['png']
 
 #------------------------------
@@ -36,16 +36,15 @@ sources_tree = [Glob('mesh*Node*cpp'), Glob('mesh*Tree*cpp')]
 
 libraries = env.Library ('mesh', [sources])
 
+test_block = env.Program (['test_Block.cpp', sources])
 test_mesh  = env.Program (['test_Mesh.cpp',  sources])
 test_patch = env.Program (['test_Patch.cpp', sources])
-test_block = env.Program (['test_Block.cpp', sources])
 test_tree  = env.Program (['test_TreeK.cpp', sources_tree])
 
 if (type == "charm"):
-   env.Depends('test_Mesh.o',  '../Test/test.decl.h')
-   env.Depends('test_Patch.o', '../Test/test.decl.h')
-   env.Depends('test_Block.o', '../Test/test.decl.h')
-   env.Depends('test_TreeK.o', '../Test/test.decl.h')
+   env.CharmBuilder('mesh.decl.h','mesh.ci',ARG = 'mesh')
+   env.CharmBuilder('mesh.def.h', 'mesh.ci',ARG = 'mesh')
+   includes = includes + ['mesh.decl.h','mesh.def.h']
 
 binaries = [test_mesh, test_patch, test_block, test_tree ];
 

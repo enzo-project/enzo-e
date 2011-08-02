@@ -24,7 +24,7 @@
 #ifdef CONFIG_PRECISION_DOUBLE
 #   define ETA_TOLERANCE 1.0e-10
 #endif
-#ifdef CONFIG_PRECISION_QUADRUPLE
+#ifdef CONFIG_PRECISION_QUAD
 #   define ETA_TOLERANCE 1.0e-20
 #endif
 
@@ -82,7 +82,6 @@ struct fluxes
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
-#include "enzo_EnzoOutputImage.hpp"
 
 #endif /* ENZO_HPP */
 

@@ -113,7 +113,7 @@ void Monitor::header () const
 #ifdef CONFIG_PRECISION_DOUBLE
   c_double = '*';
 #endif
-#ifdef CONFIG_PRECISION_QUADRUPLE
+#ifdef CONFIG_PRECISION_QUAD
   c_quad = '*';
 #endif
 #ifdef CONFIG_USE_CHARM

@@ -1,3 +1,6 @@
+#ifndef ENZO_FORTRAN_HPP
+#define ENZO_FORTRAN_HPP
+
 extern "C" void FORTRAN_NAME(calc_dt)
   (int *rank, int *idim, int *jdim, int *kdim,
    int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
@@ -51,3 +54,5 @@ extern "C" void FORTRAN_NAME(ppml)
    enzo_float *standard, int dnindex[], 
    int vxindex[], int vyindex[], int vzindex[],
    int bxindex[], int byindex[], int bzindex[]);
+
+#endif /* ENZO_FORTRAN_HPP */

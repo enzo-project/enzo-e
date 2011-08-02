@@ -5,8 +5,8 @@
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
 /// @brief    [\ref Method] Declaration for the Timestep component
 
-#ifndef METHOD_METHOD_TIMESTEP_HPP
-#define METHOD_METHOD_TIMESTEP_HPP
+#ifndef METHOD_TIMESTEP_HPP
+#define METHOD_TIMESTEP_HPP
 
 
 class Timestep {
@@ -30,4 +30,4 @@ public: // virtual functions
 
 };
 
-#endif /* METHOD_METHOD_TIMESTEP_HPP */
+#endif /* METHOD_TIMESTEP_HPP */

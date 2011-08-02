@@ -12,6 +12,6 @@
 #  define ENZO_REAL real*8
 #endif
 
-#ifdef CONFIG_PRECISION_QUADRUPLE
+#ifdef CONFIG_PRECISION_QUAD
 #  define ENZO_REAL real*16
 #endif

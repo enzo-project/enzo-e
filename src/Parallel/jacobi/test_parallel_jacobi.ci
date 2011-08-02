@@ -1,6 +1,6 @@
 mainmodule test_parallel_jacobi {
 
-  readonly CProxy_Main mainProxy;
+  readonly CProxy_Main proxy_main;
 
   mainchare Main {
     entry Main(CkArgMsg *m);

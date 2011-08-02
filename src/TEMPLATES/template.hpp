@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef TEMPLATE_HPP
-#define TEMPLATE_HPP
+#ifndef GROUPNAME_CLASSNAME_HPP
+#define GROUPNAME_CLASSNAME_HPP
 
-/// @file     template.hpp
+/// @file     groupname_Classname.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    [\ref Groupname] Brief description of file template.hpp
+/// @brief    [\ref Groupname] Brief description of file groupname_Classname.hpp
 
 class Classname {
 
@@ -40,5 +40,5 @@ private: // attributes
 
 };
 
-#endif /* TEMPLATE_HPP */
+#endif /* GROUPNAME_CLASSNAME_HPP */
 

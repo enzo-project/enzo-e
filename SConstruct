@@ -532,7 +532,7 @@ env = Environment (
 if (type == "charm"):
      # include files moved to include here since they are generated in
      # top-level directory
-     charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
+     charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h `dirname $SOURCE`")
      env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 
 Export('env')

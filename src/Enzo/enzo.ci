@@ -6,44 +6,14 @@
 /// @date     2011-03-24
 /// @brief    CHARM++ Enzo process group
 
-mainmodule enzo {
+module enzo {
 
-  readonly CProxy_Main                 proxy_main;
-  readonly CProxy_Main                 mainProxy;
+  extern module main;
+  extern module mesh;
+  extern module simulation;
+
+//  readonly CProxy_Main                 proxy_main;
   readonly CProxy_EnzoSimulationCharm  proxy_simulation;
-
-  mainchare Main {
-
-    entry Main(CkArgMsg *m);
-
-    entry void p_exit   (int count_blocks);
-
-    //  --- Open image file and and initialize image data ---
-
-    //  --- Monitor, Output, Timestep, Stopping ---
-    //  ---  [forward from Block to Simulation]
-
-    entry void p_prepare (int count_blocks, int cycle, double time,
-			  double dt_block, int stop_block);
-
-    entry void p_output_reduce (int count_blocks);
-
-  };
-
-  group Simulation {
-
-    entry Simulation
-      (const char filename[n], int n, 
-       const Factory & factory,
-       int index_simulation);
-
-    entry void p_output (int cycle, double time, double dt, bool stopping);
-    entry void p_done(CkReductionMsg*);
-
-    entry void p_output_reduce();
-    entry void p_output_write(int n, char buffer[n]);
-
-  };
 
   group EnzoSimulation : Simulation {
     entry EnzoSimulation
@@ -58,27 +28,6 @@ mainmodule enzo {
        int index_simulation);
 
   }
-
-  array[3D] Block {
-
-    entry Block
-      (int nbx, int nby, int nbz,
-       int nx, int ny, int nz,	
-       double xm, double ym, double zm,
-       double hx, double hy, double hz,
-       int num_field_blocks);
-
-
-    entry void p_initial();
-    entry void p_compute(double dt, int axis_set);
-    entry void p_refresh(double dt, int axis_set);
-    entry void p_refresh_face(int n, char buffer[n], int axis, int face, int axis_face);
-    entry void p_output (int index_output);
- 
-    //     void p_next();
-    //     void p_prepare();
-
-  };
 
   array[3D] EnzoBlock {
 

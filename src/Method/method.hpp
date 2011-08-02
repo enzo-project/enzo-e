@@ -54,11 +54,10 @@ class FieldBlock;
 #include "method_Stopping.hpp"
 #include "method_Timestep.hpp"
 #include "method_Initial.hpp"
-#   include "method_InitialDefault.hpp"
+#include "method_InitialDefault.hpp"
 #include "method_Boundary.hpp"
 #include "method_Method.hpp"
-#   include "method_Hyperbolic.hpp"
-#include "method_Output.hpp"
+#include "method_Hyperbolic.hpp"
 
 #endif /* METHOD_HPP */
 

@@ -58,5 +58,5 @@ private: // attributes
 
 };
 
-#endif /* METHOD_METHOD_INITIAL_DEFAULT_HPP */
+#endif /* METHOD_INITIAL_DEFAULT_HPP */
 

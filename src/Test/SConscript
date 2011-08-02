@@ -24,7 +24,9 @@ includes = [Glob('*hpp')]
 #------------------------------
 
 if (type == "charm"):
-    env.CharmBuilder('test.decl.h','test.ci',ARG = 'test')
+    env.CharmBuilder('main.decl.h','main.ci',ARG = 'main')
+    env.CharmBuilder('main.def.h','main.ci',ARG = 'main')
+    includes = includes + ['main.decl.h','main.def.h'] 
 
 #------------------------------
 # INSTALL

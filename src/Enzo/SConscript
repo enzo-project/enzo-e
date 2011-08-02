@@ -45,7 +45,9 @@ test_enzo_p   = env.Program (['enzo-p.cpp', sources])
 binaries = [test_enzo_p]
 
 if (type == "charm"):
-	env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
+   env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
+   env.CharmBuilder('enzo.def.h', 'enzo.ci',ARG = 'enzo')
+   includes = includes + ['enzo.decl.h','enzo.def.h']
 
 #------------------------------
 # INSTALL

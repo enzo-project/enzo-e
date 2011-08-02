@@ -36,6 +36,11 @@ sources  = [Glob("simulation*cpp")]
 
 libraries       = env.Library ('simulation', [sources])
 
+if (type == "charm"):
+   env.CharmBuilder('simulation.decl.h','simulation.ci',ARG='simulation')
+   env.CharmBuilder('simulation.def.h', 'simulation.ci',ARG='simulation')
+   includes = includes + ['simulation.decl.h','simulation.def.h'];
+
 #------------------------------
 # INSTALL
 #------------------------------

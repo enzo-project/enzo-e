@@ -1,7 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef MESH_IT_BLOCKS_HPP
-#define MESH_IT_BLOCKS_HPP
+#ifndef MESH_IT_BLOCK_LOCAL_HPP
+#define MESH_IT_BLOCK_LOCAL_HPP
 
 /// @file     mesh_ItBlockLocal.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -15,7 +15,7 @@ class ItBlockLocal {
 
   /// @class    ItBlockLocal
   /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] Iterator over local Blocks! in a Patch
+  /// @brief    [\ref Mesh] Iterator over local Blocks in a Patch
 
 public: // interface
 
@@ -43,4 +43,4 @@ private: // attributes
 
 #endif
 
-#endif /* MESH_IT_BLOCKS_HPP */
+#endif /* MESH_IT_BLOCK_LOCAL_HPP */

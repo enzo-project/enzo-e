@@ -7,7 +7,6 @@
 /// @brief    Implementation of the FieldBlock class
 
 #include "cello.hpp"
-#include "enzo.hpp"
 #include "field.hpp"
 
 #define TEMP_CLEAR_VALUE std::numeric_limits<float>::max() /* in field_FieldBlock.cpp and  mesh_Block.cpp */
@@ -660,7 +659,7 @@ void FieldBlock::image
     int nd3[3] = {nxd,nyd,nzd};
     for (int axis=0; axis<3; axis++) {
 
-      EnzoOutputImage * output = new EnzoOutputImage;
+      OutputImage * output = new OutputImage;
 
       double r[] = {1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0 };
       double g[] = {0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0 };

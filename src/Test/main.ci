@@ -1,0 +1,22 @@
+mainmodule main {
+
+  readonly CProxy_Main proxy_main;
+
+  mainchare Main {
+    entry Main(CkArgMsg *m);
+
+    entry void p_exit   (int count_blocks);
+
+    //  --- Open image file and and initialize image data ---
+
+    //  --- Monitor, Output, Timestep, Stopping ---
+    //  ---  [forward from Block to Simulation]
+
+    entry void p_prepare (int count_blocks, int cycle, double time,
+			  double dt_block, int stop_block);
+
+    entry void p_output_reduce (int count_blocks);
+
+  };
+
+};

@@ -11,7 +11,9 @@
 
 #include "mesh.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
+#ifdef CONFIG_USE_CHARM
+#   include "main.decl.h"
+#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -124,14 +126,14 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert(patch->num_local_blocks()==(size_t)nbx*nby*nbz);
 
-  ItBlockLocal itBlocks (patch);
+  ItBlockLocal itBlock (patch);
 
   Block *  block = 0;
   FieldBlock * field_block = 0;
 
   size_t block_counter = 0;
 
-  while ((block = ++itBlocks)) {
+  while ((block = ++itBlock)) {
 
   //--------------------------------------------------
 
@@ -224,7 +226,7 @@ PARALLEL_MAIN_BEGIN
   int i;
   for (i=0; i<nbx*nby*nbz; i++) b[i]=0;
 
-  while ((block = ++itBlocks)) {
+  while ((block = ++itBlock)) {
     int ibx,iby,ibz;
     block->index_patch(&ibx,&iby,&ibz);
     b[ibx + nbx*(iby + nby*ibz)] = 1;
@@ -262,4 +264,6 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test.def.h)
+#ifdef CONFIG_USE_CHARM
+#   include "main.def.h"
+#endif

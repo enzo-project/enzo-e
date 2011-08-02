@@ -9,7 +9,9 @@
 
 #include "parameters.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
+#ifdef CONFIG_USE_CHARM
+#   include "main.decl.h"
+#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -20,5 +22,7 @@ PARALLEL_MAIN_BEGIN
 }
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test.def.h)
+#ifdef CONFIG_USE_CHARM
+#   include "main.def.h"
+#endif
 

@@ -74,4 +74,4 @@ protected: // attributes
 
 };
 
-#endif /* TREE_K_HPP */
+#endif /* MESH_TREE_K_HPP */

@@ -9,13 +9,14 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error']
+components = ['error','performance','monitor']
+libraries = ['png']
 
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
 
-env = env.Clone(LIBS=[components])
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # SOURCE
@@ -30,9 +31,6 @@ sources  = [Glob('memory*cpp')]
 
 libraries = env.Library ('memory', [sources])
 binaries  = env.Program (['test_Memory.cpp', sources])
-
-if (type == "charm"):
-   env.Depends('test_Memory.o', '../Test/test.decl.h')
 
 #------------------------------
 # INSTALL

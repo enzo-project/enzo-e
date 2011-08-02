@@ -9,7 +9,9 @@
 
 #include "field.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
+#ifdef CONFIG_USE_CHARM
+#   include "main.decl.h"
+#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -79,10 +81,13 @@ PARALLEL_MAIN_BEGIN
   xb = (xpp-xpm);
   yb = (ypp-ypm);
   zb = (zpp-zpm);
-  Block * block = new Block (ix,iy,iz, 
-			     nx,ny,nz,
-			     xpm,ypm,zpm,
-			     xb,yb,zb,  1);
+  Factory factory;
+  Block * block = factory.create_block
+    (ix,iy,iz, 
+     1,1,1,
+     nx,ny,nz,
+     xpm,ypm,zpm,
+     xb,yb,zb,  1);
 
   FieldBlock * field_block = block->field_block();
 
@@ -525,4 +530,6 @@ PARALLEL_MAIN_BEGIN
 }
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test.def.h)
+#ifdef CONFIG_USE_CHARM
+#   include "main.def.h"
+#endif

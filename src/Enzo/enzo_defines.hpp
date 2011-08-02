@@ -42,5 +42,4 @@
 #define HDIDensity       18
 #define Metallicity      19
 
-#endif
-
+#endif /* ENZO_DEFINES_HPP */

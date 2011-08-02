@@ -13,7 +13,7 @@
 
 // ------------------------------ MAIN ------------------------------
 
-CProxy_Main mainProxy;
+CProxy_Main proxy_main;
 
 class Main : public CBase_Main {
 

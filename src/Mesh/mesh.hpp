@@ -23,10 +23,13 @@
 
 #include "cello.hpp"
 
-#include "field.hpp"
 #include "parallel.hpp"
 #include "memory.hpp"
 #include "simulation.hpp"
+/* NOTE: field.hpp currently includes method.hpp: can get rid of
+   dependency, but only if field.hpp include is moved after Component
+   class includes */
+#include "field.hpp" 
 
 //----------------------------------------------------------------------
 // Component class includes
@@ -43,7 +46,6 @@ class Factory;
 
 #include "mesh_ItPatch.hpp"
 #include "mesh_ItBlockLocal.hpp"
-
 
 #endif /* MESH_HPP */
 

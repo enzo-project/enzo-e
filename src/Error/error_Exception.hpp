@@ -38,5 +38,5 @@ class ExceptionMemoryBadGroupHandle : public Exception {};
 /// @brief    [\ref Error] Parameters exception class for bad parameter type
 class ExceptionParametersBadType    : public Exception {};
 
-#endif /* EXCEPTION_HPP */
+#endif /* ERROR_EXCEPTION_HPP */
 

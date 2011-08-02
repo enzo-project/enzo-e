@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_EnzoOutputImage.cpp
+/// @file     test_OutputImage.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
-/// @brief    Test program for the EnzoOutputImage class
+/// @brief    Test program for the OutputImage class
 
 #include "test.hpp"
 
@@ -16,11 +16,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
-  unit_class("EnzoOutputImage");
+  unit_class("OutputImage");
 
-  EnzoOutputImage * output = new EnzoOutputImage;
+  OutputImage * output = new OutputImage;
 
-  unit_func ("EnzoOutputImaged");
+  unit_func ("OutputImaged");
 
   unit_assert (output != NULL)
 

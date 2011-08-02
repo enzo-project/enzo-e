@@ -1,7 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ENZO_ENZO_DESCR_HPP
-#define ENZO_ENZO_DESCR_HPP
+#ifndef ENZO_ENZO_NAMESPACE_HPP
+#define ENZO_ENZO_NAMESPACE_HPP
 
 /// @file     enzo_EnzoNamespace.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -145,5 +145,5 @@ namespace enzo {
 
 using namespace enzo;
 
-#endif /* ENZO_ENZO_DESCR_HPP */
+#endif /* ENZO_ENZO_NAMESPACE_HPP */
 

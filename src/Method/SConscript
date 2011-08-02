@@ -9,7 +9,8 @@ Import('env')
 #------------------------------
 
 components = ['method', 'mesh', 'field', 'error','parallel', 'monitor', 'parameters', 'memory', 'cello']
-libraries  = ['png', '$FORTRANLIBS']
+# libraries  = ['$FORTRANLIBS']
+libraries  = []
 
 #------------------------------
 # ENVIRONMENTS

@@ -1,17 +1,17 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoOutputImage.cpp
+/// @file     field_OutputImage.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Mar 17 11:14:18 PDT 2011
-/// @brief    Implementation of the EnzoOutputImage class
+/// @brief    Implementation of the OutputImage class
 
 #include "cello.hpp"
 
-#include "enzo.hpp"
+#include "field.hpp"
 
 //----------------------------------------------------------------------
 
-EnzoOutputImage::EnzoOutputImage() throw ()
+OutputImage::OutputImage() throw ()
   : Output(),
     image_(0),
     image_size_x_(0),
@@ -38,7 +38,7 @@ EnzoOutputImage::EnzoOutputImage() throw ()
 
 //----------------------------------------------------------------------
 
-EnzoOutputImage::~EnzoOutputImage() throw ()
+OutputImage::~OutputImage() throw ()
 {
 }
 
@@ -46,9 +46,9 @@ EnzoOutputImage::~EnzoOutputImage() throw ()
 
 #ifdef CONFIG_USE_CHARM
 
-void EnzoOutputImage::open (const Mesh * mesh, int cycle, double time) throw()
+void OutputImage::open (const Mesh * mesh, int cycle, double time) throw()
 {
-  INCOMPLETE("EnzoOutputImage::open");
+  INCOMPLETE("OutputImage::open");
 
   // create process image and clear it
 
@@ -61,7 +61,7 @@ void EnzoOutputImage::open (const Mesh * mesh, int cycle, double time) throw()
 
   if (is_writer(ip)) {
 
-    ASSERT("EnzoOutputImage::open","File already open",fp_ == 0);
+    ASSERT("OutputImage::open","File already open",fp_ == 0);
 
     // Open the file
     std::string file_name = expand_file_name(cycle,time) + ".png";
@@ -77,18 +77,18 @@ void EnzoOutputImage::open (const Mesh * mesh, int cycle, double time) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoOutputImage::close () throw()
+void OutputImage::close () throw()
 {
-  INCOMPLETE("EnzoOutputImage::close");
+  INCOMPLETE("OutputImage::close");
   fclose (fp_);
   fp_ = 0;
 }
 
 //----------------------------------------------------------------------
 
-void EnzoOutputImage::block (const Block * block) throw()
+void OutputImage::block (const Block * block) throw()
 {
-  INCOMPLETE("EnzoOutputImage::block");
+  INCOMPLETE("OutputImage::block");
   //   incorporate block data into process data
 }
 
@@ -96,7 +96,7 @@ void EnzoOutputImage::block (const Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoOutputImage::write
+void OutputImage::write
 (
  const FieldDescr * field_descr,
  int index,
@@ -111,8 +111,8 @@ void EnzoOutputImage::write
 {
 
   if (mesh->dimension() <= 1) {
-    WARNING("EnzoOutputImage::write[Mesh]",
-	    "EnzoOutputImage only supports 2D and 3D problems");
+    WARNING("OutputImage::write[Mesh]",
+	    "OutputImage only supports 2D and 3D problems");
   }
 
   // Open file if writing a single block
@@ -158,7 +158,7 @@ void EnzoOutputImage::write
 
 //----------------------------------------------------------------------
 
-void EnzoOutputImage::write
+void OutputImage::write
 (
  const FieldDescr * field_descr,
  int index,
@@ -173,8 +173,8 @@ void EnzoOutputImage::write
  ) throw()
 {
   if (mesh->dimension() <= 1) {
-    WARNING("EnzoOutputImage::write[Patch]",
-	    "EnzoOutputImage only supports 2D and 3D problems");
+    WARNING("OutputImage::write[Patch]",
+	    "OutputImage only supports 2D and 3D problems");
   }
 
   // Open file if writing a single block
@@ -235,7 +235,7 @@ void EnzoOutputImage::write
 
 //----------------------------------------------------------------------
 
-void EnzoOutputImage::write
+void OutputImage::write
 (
  const FieldDescr * field_descr,
  int index,
@@ -306,7 +306,7 @@ void EnzoOutputImage::write
 
 //======================================================================
 
-void EnzoOutputImage::image_set_map
+void OutputImage::image_set_map
 (int n, double * map_r, double * map_g, double * map_b) throw()
 {
   map_r_.resize(n);
@@ -322,7 +322,7 @@ void EnzoOutputImage::image_set_map
 
 //----------------------------------------------------------------------
 
-void EnzoOutputImage::png_open_ (std::string filename, int mx, int my) throw()
+void OutputImage::png_open_ (std::string filename, int mx, int my) throw()
 {
   image_size_x_ = mx;
   image_size_y_ = my;
@@ -332,7 +332,7 @@ void EnzoOutputImage::png_open_ (std::string filename, int mx, int my) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoOutputImage::image_create_ (int mx, int my) throw()
+void OutputImage::image_create_ (int mx, int my) throw()
 {
   image_size_x_ = mx;
   image_size_y_ = my;
@@ -344,7 +344,7 @@ void EnzoOutputImage::image_create_ (int mx, int my) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoOutputImage::image_close_ (double min, double max) throw()
+void OutputImage::image_close_ (double min, double max) throw()
 {
 
   // simplified variable names

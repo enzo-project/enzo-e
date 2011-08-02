@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_Output.hpp 
+/// @file     field_Output.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
 /// @todo     Create and use Schedule object for scheduling output
-/// @brief    [\ref Method] Declaration for the Output component
+/// @brief    [\ref Field] Declaration for the Output component
 
-#ifndef METHOD_OUTPUT_HPP
-#define METHOD_OUTPUT_HPP
+#ifndef FIELD_OUTPUT_HPP
+#define FIELD_OUTPUT_HPP
 
 enum output_schedule_enum {
   output_schedule_unknown,
@@ -20,8 +20,8 @@ enum output_schedule_enum {
 class Output {
 
   /// @class    Output
-  /// @ingroup  Method
-  /// @brief    [\ref Method] define interface for various types of simulation output
+  /// @ingroup  Field
+  /// @brief    [\ref Field] define interface for various types of simulation output
 
 public: // functions
 
@@ -179,4 +179,4 @@ protected: // attributes
 
 };
 
-#endif /* METHOD_OUTPUT_HPP */
+#endif /* FIELD_OUTPUT_HPP */

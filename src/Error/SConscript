@@ -25,9 +25,6 @@ sources  = [Glob('error*cpp')]
 libraries  = env.Library ('error', [sources])
 test_error = env.Program (['test_Error.cpp',  sources])
 
-if (type == "charm"):
-   env.Depends('test_Error.o', '../Test/test.decl.h')
-
 binaries = [test_error]
 
 #------------------------------

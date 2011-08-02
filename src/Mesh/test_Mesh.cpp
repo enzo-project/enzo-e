@@ -9,7 +9,10 @@
 
 #include "mesh.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
+#ifdef CONFIG_USE_CHARM
+#   include "mesh.decl.h"
+#   include "main.decl.h"
+#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -35,4 +38,7 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test.def.h)
+#ifdef CONFIG_USE_CHARM
+#   include "mesh.def.h"
+#   include "main.def.h"
+#endif

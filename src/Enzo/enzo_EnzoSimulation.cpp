@@ -196,7 +196,7 @@ Output * EnzoSimulation::create_output_ ( std::string type ) throw ()
   Output * output = 0;
 
   if (type == "image") {
-    output = new EnzoOutputImage ();
+    output = new OutputImage ();
   }
 
   if (output == 0) {

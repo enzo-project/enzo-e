@@ -10,7 +10,9 @@
 
 #include "mesh.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
+#ifdef CONFIG_USE_CHARM
+#   include "main.decl.h"
+#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -22,9 +24,11 @@ PARALLEL_MAIN_BEGIN
   unit_class("Block");
 
   Block * block = new Block (0,0,0, 
+			     1,1,1,
 			     3,4,5,
 			     -1.0,-2.0,-3.0,
-			     1.0,2.0,3.0,1);
+			     1.0,2.0,3.0,
+			     1);
 
   unit_func("Block");
   unit_assert (block != NULL);
@@ -54,4 +58,6 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test.def.h)
+#ifdef CONFIG_USE_CHARM
+#   include "main.def.h"
+#endif
