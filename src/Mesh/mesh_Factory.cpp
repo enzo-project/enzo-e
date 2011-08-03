@@ -42,6 +42,8 @@ Patch * Factory::create_patch
 
 //----------------------------------------------------------------------
 
+#ifndef CONFIG_USE_CHARM
+
 Block * Factory::create_block
 (
  int ibx, int iby, int ibz,
@@ -52,13 +54,6 @@ Block * Factory::create_block
  int num_field_blocks
  ) const throw()
 {
-#ifdef CONFIG_USE_CHARM
-
-  ERROR("Factor::create_block",
-	"This function should not be called");
-  return 0;
-
-#else
 
   return new Block (ibx,iby,ibz, 
 		    nbx,nby,nbz,
@@ -66,6 +61,29 @@ Block * Factory::create_block
 		    xm,ym,zm, 
 		    xb,yb,zb, 
 		    num_field_blocks);
-#endif
 }
+#endif
+
+//----------------------------------------------------------------------
+#ifdef CONFIG_USE_CHARM
+
+CProxy_Block Factory::create_block_array
+(
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xm, double ym, double zm,
+ double xb, double yb, double zb,
+ int num_field_blocks
+ ) const throw()
+{
+  return CProxy_Block::ckNew
+    (
+     nbx,nby,nbz,
+     nx,ny,nz,
+     xm,ym,zm, 
+     xb,yb,zb, 
+     num_field_blocks,
+     nbx,nby,nbz);
+}
+#endif
 

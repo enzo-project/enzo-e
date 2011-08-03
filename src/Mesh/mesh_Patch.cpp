@@ -201,12 +201,11 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
     sprintf (buffer,"Allocating block array %d %d %d",mbx,mby,mbz);
     TRACE(buffer);
     // @@@@ ENZO DEPENDENCY!!! @@@
-    block_ = CProxy_EnzoBlock::ckNew
+    block_ = factory_->create_block_array
       (nbx,nby,nbz,
        mbx,mby,mbz,
        lower_[0],lower_[1],lower_[2],
-       xb,yb,zb, 1,
-       nbx,nby,nbz);
+       xb,yb,zb, 1);
 
     // Use built-ine CHARM++ Reduction instead of hand-rolling
     // 
