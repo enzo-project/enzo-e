@@ -198,6 +198,12 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 extern CProxy_Simulation proxy_simulation;
 extern CProxy_Main proxy_main;
 
+#endif /* CONFIG_USE_CHARM */
+
+//======================================================================
+
+#ifdef CONFIG_USE_CHARM
+
 void Block::p_initial()
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -237,7 +243,11 @@ void Block::p_initial()
 #endif
 }
 
+#endif /* CONFIG_USE_CHARM */
+
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::prepare()
 {
@@ -298,8 +308,11 @@ void Block::prepare()
 #endif
 
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::refresh_axis (axis_enum axis)
 {
@@ -372,16 +385,22 @@ void Block::refresh_axis (axis_enum axis)
     }
   }
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::p_compute (double dt, int axis_set)
 {
   if (dt != -1) dt_ = dt;
   compute(axis_set);
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::p_refresh (double dt, int axis_set)
 {
@@ -393,8 +412,11 @@ void Block::p_refresh (double dt, int axis_set)
 
   refresh(axis_set);
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::refresh (int axis_set)
 {
@@ -538,8 +560,11 @@ void Block::refresh (int axis_set)
   p_refresh_face (0,0,0,0, axis_set);
 
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::p_refresh_face (int n, char * buffer,
 			    int axis, int face, int axis_set)
@@ -645,8 +670,11 @@ void Block::p_refresh_face (int n, char * buffer,
     }
   }
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::p_output (int index_output)
 {
@@ -661,8 +689,11 @@ void Block::p_output (int index_output)
   int num_blocks = simulation->mesh()->patch(0)->num_blocks();
   proxy_main.p_output_reduce (num_blocks);
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::skip_reduce(int cycle, int time, double dt_block, double stop_block)
 {
@@ -677,8 +708,11 @@ void Block::skip_reduce(int cycle, int time, double dt_block, double stop_block)
   compute(axis);
 #endif
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::compute(int axis_set)
 {
@@ -724,10 +758,10 @@ void Block::compute(int axis_set)
 #endif
 
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
-#endif /* CONFIG_USE_CHARM */
 
 //======================================================================
 

@@ -17,7 +17,6 @@ class EnzoFactory : public Factory {
 
 public: // interface
 
-#ifndef CONFIG_USE_CHARM
   /// Create a new Block  [abstract factory design pattern]
   virtual Block * create_block
   (int ibx, int iby, int ibz,
@@ -26,7 +25,6 @@ public: // interface
    double xm, double ym, double zm,
    double hx, double hy, double hz,
    int num_field_blocks = 1) const throw();
-#endif
 
 #ifdef CONFIG_USE_CHARM
   /// Create a new CHARM++ Block array [abstract factory design pattern]

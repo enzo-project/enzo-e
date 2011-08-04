@@ -8,7 +8,7 @@
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
-#ifndef CONFIG_USE_CHARM
+
 Block * EnzoFactory::create_block
 (
  int ibx, int iby, int ibz,
@@ -28,9 +28,9 @@ Block * EnzoFactory::create_block
      hx,hy,hz, 
      num_field_blocks);
 }
-#endif
 
 //----------------------------------------------------------------------
+
 #ifdef CONFIG_USE_CHARM
 CProxy_Block EnzoFactory::create_block_array
 (

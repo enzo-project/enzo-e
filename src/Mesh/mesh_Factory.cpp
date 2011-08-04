@@ -42,8 +42,6 @@ Patch * Factory::create_patch
 
 //----------------------------------------------------------------------
 
-#ifndef CONFIG_USE_CHARM
-
 Block * Factory::create_block
 (
  int ibx, int iby, int ibz,
@@ -62,7 +60,6 @@ Block * Factory::create_block
 		    xb,yb,zb, 
 		    num_field_blocks);
 }
-#endif
 
 //----------------------------------------------------------------------
 #ifdef CONFIG_USE_CHARM

@@ -8,11 +8,23 @@
 
 module enzo {
 
-  extern module main;
   extern module mesh;
   extern module simulation;
 
-//  readonly CProxy_Main                 proxy_main;
+  readonly CProxy_Main proxy_main;
+
+  mainchare Main {
+
+    entry Main(CkArgMsg *m);
+    entry void p_exit   (int count_blocks);
+
+    entry void p_prepare (int count_blocks, int cycle, double time,
+			  double dt_block, int stop_block);
+
+    entry void p_output_reduce (int count_blocks);
+  }
+
+
   readonly CProxy_EnzoSimulationCharm  proxy_simulation;
 
   group EnzoSimulation : Simulation {
