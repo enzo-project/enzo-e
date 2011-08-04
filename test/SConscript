@@ -235,12 +235,12 @@ env.RunParse(type_path + 'test_parse_shock-pool.unit', '#/bin/test_Parse', ARGS=
 Clean(env.RunParallel (type_path + 'test_enzo-p_1.unit',
 		'#/bin/enzo-p', 
 		ARGS='input/test_enzo-p_1.in'),
-      [Glob('../enzo-p-??????.?.png'),type_path + 'test_enzo-p_1.unit'])
+      [Glob('../enzo-p_1-??????-*.png'),type_path + 'test_enzo-p_1.unit'])
 
 Clean(env.RunParallel (type_path + 'test_enzo-p_2.unit',
 		'#/bin/enzo-p', 
 		ARGS='input/test_enzo-p_2.in'),
-      [Glob('../enzo-p_2-??????.?.png'),type_path + 'test_enzo-p_2.unit'])
+      [Glob('../enzo-p_2-??????-*.png'),type_path + 'test_enzo-p_2.unit'])
 
 
 if (type == "mpi"):
