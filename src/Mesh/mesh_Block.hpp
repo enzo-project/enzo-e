@@ -12,7 +12,7 @@
 
 class FieldDescr;
 class FieldBlock;
-class Patch;
+// class Patch;
 
 #ifdef CONFIG_USE_CHARM
 #  include "mesh.decl.h"
@@ -34,14 +34,23 @@ public: // interface
   /// size, and number of field blocks
   Block
   (
-#ifndef CONFIG_USE_CHARM
    int ibx, int iby, int ibz,
-#endif
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
    int num_field_blocks) throw();
+
+#ifdef CONFIG_USE_CHARM
+  /// For CHARM Block arrays
+  Block
+  (
+   int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   double xmp, double ymp, double zmp,
+   double xb, double yb, double zb,
+   int num_field_blocks) throw();
+#endif
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize an empty Block
@@ -136,7 +145,9 @@ public: // interface
   /// Return the current time
   double time() const throw() { return time_; };
 
-  /// Call application [i.e. Enzo] specific initialization
+public: // virtual functions
+
+  /// Call application-specific initialization
   virtual void initialize (int cycle_start, double time_start) throw()
   { 
     time_ = time_start;

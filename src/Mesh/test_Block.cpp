@@ -24,14 +24,7 @@ PARALLEL_MAIN_BEGIN
   unit_class("Block");
 
   Factory factory;
-#ifdef CONFIG_USE_CHARM  
-  CProxy_Block block = factory.create_block_array
-    (1,1,1,
-     3,4,5,
-     -1.0,-2.0,-3.0,
-     1.0,2.0,3.0,
-     1);
-#else
+
   Block * block = factory.create_block 
     (0,0,0, 
      1,1,1,
@@ -39,7 +32,6 @@ PARALLEL_MAIN_BEGIN
      -1.0,-2.0,-3.0,
      1.0,2.0,3.0,
      1);
-#endif
 
   unit_func("Block");
   unit_assert (block != NULL);

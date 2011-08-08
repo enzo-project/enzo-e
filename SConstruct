@@ -9,7 +9,7 @@ trace           = 0
 debug           = 0
 debug_verbose   = 0
 
-balance         = 1
+atsync          = 0 # CHARM++: only load balance when AtSync() called
 trace           = 0
 
 use_gprof       = 0
@@ -74,7 +74,7 @@ define_hdf5  =  ['H5_USE_16_API'];
 define_png   =  ['NO_FREETYPE'];
 define_papi  =  ['CONFIG_USE_PAPI'];
 define_trace =  ['CELLO_TRACE'];
-define_balance =  ['CONFIG_LOAD_BALANCE'];
+define_atsync =  ['CONFIG_CHARM_ATSYNC'];
 define_debug =  ['CELLO_DEBUG'];
 define_debug_verbose =  ['CELLO_DEBUG_VERBOSE'];
 define_projections =  ['CONFIG_USE_PROJECTIONS']
@@ -201,10 +201,10 @@ if (debug_verbose != 0):
      defines_xlc = defines_xlc + ' -D' + define_debug_verbose[0]
      defines_xlf = defines_xlf + ' -WF,-D' + define_debug_verbose[0]
 
-if (balance != 0):
-     defines = defines + define_balance
-     defines_xlc = defines_xlc + ' -D' + define_balance[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_balance[0]
+if (atsync != 0):
+     defines = defines + define_atsync
+     defines_xlc = defines_xlc + ' -D' + define_atsync[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_atsync[0]
 
 #--------------------------------------------------
 

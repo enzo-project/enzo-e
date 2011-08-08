@@ -19,9 +19,7 @@
 
 Block::Block
 (
-#ifndef CONFIG_USE_CHARM
  int ibx, int iby, int ibz,
-#endif
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
@@ -39,7 +37,7 @@ Block::Block
     dt_(0)
 
 { 
-#ifndef CONFIG_LOAD_BALANCE
+#ifdef CONFIG_CHARM_ATSYNC
   usesAtSync = CmiTrue;
 #endif
 
@@ -52,9 +50,10 @@ Block::Block
   // Initialize indices into parent patch
 
 #ifdef CONFIG_USE_CHARM
-  int ibx = thisIndex.x;
-  int iby = thisIndex.y;
-  int ibz = thisIndex.z;
+  // WARNING: this constructor should only be called by test code
+  ibx = 0;
+  iby = 0;
+  ibz = 0;
 #endif
 
   size_[0] = nbx;
@@ -75,6 +74,63 @@ Block::Block
   upper_[axis_y] = ypm + (iby+1)*yb;
   upper_[axis_z] = zpm + (ibz+1)*zb;
 }
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+Block::Block
+(
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xpm, double ypm, double zpm, // Patch begin
+ double xb, double yb, double zb, // Block width
+ int num_field_blocks) throw ()
+  : field_block_(),
+    count_refresh_face_(0),
+    count_refresh_face_x_(0),
+    count_refresh_face_y_(0),
+    count_refresh_face_z_(0),
+    cycle_(0),
+    time_(0),
+    dt_(0)
+
+{ 
+#ifdef CONFIG_CHARM_ATSYNC
+  usesAtSync = CmiTrue;
+#endif
+
+  // Initialize field_block_[]
+  field_block_.resize(num_field_blocks);
+  for (size_t i=0; i<field_block_.size(); i++) {
+    field_block_[i] = new FieldBlock (nx,ny,nz);
+  }
+
+  // Initialize indices into parent patch
+
+  int ibx = thisIndex.x;
+  int iby = thisIndex.y;
+  int ibz = thisIndex.z;
+
+  size_[0] = nbx;
+  size_[1] = nby;
+  size_[2] = nbz;
+
+  index_[0] = ibx;
+  index_[1] = iby;
+  index_[2] = ibz;
+
+  // Initialize extent 
+
+  lower_[axis_x] = xpm + ibx*xb;
+  lower_[axis_y] = ypm + iby*yb;
+  lower_[axis_z] = zpm + ibz*zb;
+
+  upper_[axis_x] = xpm + (ibx+1)*xb;
+  upper_[axis_y] = ypm + (iby+1)*yb;
+  upper_[axis_z] = zpm + (ibz+1)*zb;
+}
+#endif
 
 //----------------------------------------------------------------------
 
@@ -140,24 +196,6 @@ void Block::upper(double * x, double * y, double * z) const throw ()
 
 //----------------------------------------------------------------------
 
-// void Block::set_lower(double x, double y, double z) throw ()
-// {
-//   lower_[0] = x;
-//   lower_[1] = y;
-//   lower_[2] = z;
-// }
-
-// //----------------------------------------------------------------------
-
-// void Block::set_upper(double x, double y, double z) throw ()
-// {
-//   upper_[0] = x;
-//   upper_[1] = y;
-//   upper_[2] = z;
-// }
-
-//----------------------------------------------------------------------
-
 void Block::index_patch (int * ix=0, int * iy=0, int * iz=0) const throw ()
 {
   if (ix) (*ix)=index_[0]; 
@@ -209,17 +247,15 @@ void Block::p_initial()
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
 
-  // field_block allocation Was in mesh_Patch() for MPI
+  // Allocate FieldBlock arrays
 
   for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[0]->allocate_array(field_descr);
-    field_block_[0]->allocate_ghosts(field_descr);
+    field_block_[i]->allocate_array(field_descr);
+    field_block_[i]->allocate_ghosts(field_descr);
   }
 
   // Apply the initial conditions 
 
-  // SHOULD NOT NEED THIS
-  // std::numeric_limits<double>::min()
   WARNING("Block::p_initial","Clearing field block values to non-zero");
   field_block_[0]->clear(field_descr,TEMP_CLEAR_VALUE);
 
@@ -227,17 +263,15 @@ void Block::p_initial()
 
   initialize(simulation->cycle(), simulation->time());
 
-  //  field_block()->print(field_descr,"initial",lower_,upper_);
-
-  // Prepare for the first cycle: perform and disk Output, user
-  // Monitoring, apply Stopping criteria [reduction], and compute the
-  // next Timestep [reduction]
-
-  // prepare for first cycle: Timestep, Stopping, Monitor, Output
-
 #ifdef ORIGINAL_REFRESH  
+
+  // Prepare for first cycle: Timestep, Stopping, Monitor, Output
+
   prepare();
+
 #else
+
+  // Refresh before prepare()
   axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
   refresh(axis_set);
 #endif

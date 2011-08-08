@@ -10,6 +10,8 @@
 
 //----------------------------------------------------------------------
 
+#include "test.hpp"
+
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
@@ -27,14 +29,12 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-  // Fake unit_init() for index.php (test.hpp is not included since
-  // enzo.ci and test.ci conflict)
-  PARALLEL_PRINTF ("UNIT TEST BEGIN\n");
-
   // Create global parallel process group object
   GroupProcess * group_process = GroupProcess::create();
 
   // initialize unit testing
+
+  unit_init(group_process->rank(),group_process->size());
 
 #ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;
@@ -119,11 +119,10 @@ PARALLEL_MAIN_BEGIN
 
   // finalize unit testing
 
-  //  unit_finalize();
+  unit_finalize();
 
   // exit
 
-    PARALLEL_PRINTF ("UNIT TEST END\n");
   PARALLEL_EXIT;
 #endif
   //--------------------------------------------------

@@ -144,11 +144,6 @@ void Patch::upper(double * xp, double * yp, double * zp) const throw ()
 
 //======================================================================
 
-#ifdef CONFIG_USE_CHARM
-//extern CProxy_Main proxy_main;
-//extern CProxy_Simulation proxy_simulation;
-#endif
-
 void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 {
 
@@ -196,11 +191,13 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
 #ifdef CONFIG_USE_CHARM
 
+  // WARNING: assumes patch is on Pe 0
   if (CkMyPe() == 0) {
+
     char buffer[80];
     sprintf (buffer,"Allocating block array %d %d %d",mbx,mby,mbz);
     TRACE(buffer);
-    // @@@@ ENZO DEPENDENCY!!! @@@
+
     block_ = factory_->create_block_array
       (nbx,nby,nbz,
        mbx,mby,mbz,
