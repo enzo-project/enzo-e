@@ -1,5 +1,11 @@
 ----------------------------------------------------------------------
 
+Enzo::Main()
+
+   Simulation::Simulation()
+
+----------------------------------------------------------------------
+
 Simulation::Simulation()
 
    initialize()
@@ -14,17 +20,15 @@ Simulation::run()
 ----------------------------------------------------------------------
 
 Block::p_initial()
+
    FieldBlock::allocate_array()
    FieldBlock::allocate_ghosts()
-   FieldBlock::clear() [ should not be needed ]
    Initial::compute(this)
-   initialize(cycle,time) [Enzo variables]
+   initialize(cycle,time)
    prepare()
 
-----------------------------------------------------------------------
-
+========================================================================
 {
-|
 |   Block::prepare()
 |      Timestep::compute(this)
 |      Stopping::complete()
@@ -69,7 +73,6 @@ Block::p_initial()
 |   Block::compute()
 |      Method::compute_block (this,time,dt)
 |      prepare()
-|
 }
 
 Main::p_exit(count)
