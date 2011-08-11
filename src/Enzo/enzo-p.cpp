@@ -34,7 +34,10 @@ PARALLEL_MAIN_BEGIN
 
   // initialize unit testing
 
-  unit_init(group_process->rank(),group_process->size());
+  int ip = group_process->rank();
+  int np = group_process->size();
+
+  unit_init(ip,np);
 
 #ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;

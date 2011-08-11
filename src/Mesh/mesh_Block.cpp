@@ -252,12 +252,11 @@ void Block::p_initial()
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i]->allocate_array(field_descr);
     field_block_[i]->allocate_ghosts(field_descr);
+    WARNING("Block::p_initial","Clearing field block values to non-zero");
+    field_block_[i]->clear(field_descr,TEMP_CLEAR_VALUE);
   }
 
   // Apply the initial conditions 
-
-  WARNING("Block::p_initial","Clearing field block values to non-zero");
-  field_block_[0]->clear(field_descr,TEMP_CLEAR_VALUE);
 
   simulation->initial()->compute(field_descr,this);
 
@@ -299,6 +298,7 @@ void Block::prepare()
 #ifdef TEMP_SKIP_REDUCE
   dt_block = 8e-5;
   dt_ = dt_block;
+  WARNING("Block::prepare","Temporary test code: HARD CODED TIMESTEP dt");
 #else
   dt_block = simulation->timestep()->compute(field_descr,this);
 #endif
@@ -306,26 +306,32 @@ void Block::prepare()
   // Reduce timestep to coincide with scheduled output if needed
 
   for (size_t i=0; i<simulation->num_output(); i++) {
-    Output * output = simulation->output(i);
-    dt_block = output->update_timestep(time_,dt_block);
+    dt_block = simulation->output(i)->update_timestep(time_,dt_block);
   }
 
-  // Reduce timestep to coincide with end of simulation if needed
+  // Reduce timestep to not overshoot final time from stopping criteria
 
-  dt_block = MIN (dt_block, (simulation->stopping()->stop_time() - time_));
+  double time_stop = simulation->stopping()->stop_time();
+  double time_curr = time_;
+
+  dt_block = MIN (dt_block, (time_stop - time_curr));
 
   //--------------------------------------------------
   // Stopping [block]
   //--------------------------------------------------
 
   int stop_block = simulation->stopping()->complete(cycle_,time_);
-  // DEBUG
+
+
   int num_blocks = simulation->mesh()->patch(0)->num_blocks();
   if (stop_block) {
     FieldDescr * field_descr = simulation->field_descr();
+
+    // DEBUG CODE: print field block info and dump image
     field_block()->print(field_descr,"final",lower_,upper_);
     field_block()->image(field_descr,"cycle",cycle_,
 			 thisIndex.x,thisIndex.y,thisIndex.z);
+
 #ifdef TEMP_SKIP_REDUCE
     proxy_main.p_exit(num_blocks);
 #endif
