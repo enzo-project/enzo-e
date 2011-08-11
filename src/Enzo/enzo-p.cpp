@@ -45,7 +45,7 @@ PARALLEL_MAIN_BEGIN
   Monitor * monitor_ = Monitor::instance();
 #endif
 
-  monitor_->set_active (true);
+  monitor_->set_active (group_process->is_root());
   monitor_->header();
   monitor_->print ("BEGIN ENZO-P");
 
