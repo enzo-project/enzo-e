@@ -7,9 +7,9 @@
 
 mainmodule main {
 
-//  extern module simulation;
-//  extern module enzo;
-//  extern module mesh;
+  extern module simulation;
+  extern module enzo;
+  extern module mesh;
 
   readonly CProxy_Main proxy_main;
 

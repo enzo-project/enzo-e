@@ -32,14 +32,13 @@ libraries  = ['png', '$FORTRANLIBS','m']
 
 env = env.Clone(LIBS=[components,libraries])
 
-includes = [Glob('cello*hpp'), Glob('cello*def'), Glob('test*hpp')]
-sources  = [Glob('cello*cpp')]
+includes = [Glob('cello*hpp'), Glob('cello*def'), Glob('test*hpp'), 'main.hpp']
+sources  = [Glob('cello*cpp'), 'main.cpp']
 
 if (type == "charm"):
    env.CharmBuilder('main.decl.h','main.ci',ARG = 'main')
    env.CharmBuilder('main.def.h', 'main.ci',ARG = 'main')
-   includes = includes + ['main.decl.h','main.def.h','main.hpp']
-   sources  = sources + ['main.cpp']
+   includes = includes + ['main.decl.h','main.def.h']
 
 libraries = env.Library ('cello', [sources])
 
