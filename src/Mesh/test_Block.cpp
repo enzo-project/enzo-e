@@ -6,13 +6,10 @@
 /// @todo     Create CHARM version of test_Block
 /// @brief    Test program for the Block class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "mesh.hpp"
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -60,7 +57,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif

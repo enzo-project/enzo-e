@@ -7,13 +7,10 @@
 /// @todo     Add parallel Patch tests
 /// @brief    Program implementing unit tests for the Patch class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "mesh.hpp"
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -122,11 +119,15 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+  unit_assert(patch->num_blocks() == (size_t)nbx*nby*nbz);
+#else
   unit_func("num_local_blocks");
 
   unit_assert(patch->num_local_blocks()==(size_t)nbx*nby*nbz);
+#endif
 
-  ItBlockLocal itBlock (patch);
+  ItBlock itBlock (patch);
 
   Block *  block = 0;
   FieldBlock * field_block = 0;
@@ -263,7 +264,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif

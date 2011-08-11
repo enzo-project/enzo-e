@@ -5,14 +5,11 @@
 /// @date     2010-05-06
 /// @brief    Program implementing unit tests for the Mesh class
 
+#include "main.hpp"
 #include "test.hpp"
-
 #include "mesh.hpp"
 
-#ifdef CONFIG_USE_CHARM
-#   include "mesh.decl.h"
-#   include "main.decl.h"
-#endif
+#include "mesh_charm.hpp"
 
 PARALLEL_MAIN_BEGIN
 {
@@ -37,8 +34,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "mesh.def.h"
-#   include "main.def.h"
-#endif

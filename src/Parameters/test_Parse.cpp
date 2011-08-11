@@ -5,13 +5,10 @@
 /// @date     2009-10-06
 /// @brief    Test program for reading in parameters then displaying them
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "parameters.hpp"
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -21,8 +18,3 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_EXIT;
 }
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif
-

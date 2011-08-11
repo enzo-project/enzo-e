@@ -5,14 +5,10 @@
 /// @date     Thu Feb 21 16:47:35 PST 2008
 /// @brief    Program implementing unit tests for the FileIfrit class
  
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "disk.hpp"
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
-
 PARALLEL_MAIN_BEGIN
 
 {
@@ -77,7 +73,3 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_EXIT;
 }
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif

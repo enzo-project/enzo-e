@@ -5,6 +5,7 @@
 /// @date     Fri Apr  2 11:29:22 PDT 2010
 /// @brief    Program implementing unit tests for the Mpi class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "parallel.hpp"

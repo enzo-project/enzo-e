@@ -5,13 +5,10 @@
 /// @date     2009-11-18
 /// @brief    Program implementing unit tests for the Monitor class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "monitor.hpp"
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -36,7 +33,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif

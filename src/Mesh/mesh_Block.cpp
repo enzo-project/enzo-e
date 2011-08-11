@@ -14,6 +14,7 @@
 #include "cello.hpp"
 
 #include "mesh.hpp"
+#include "main.hpp"
 
 //----------------------------------------------------------------------
 
@@ -233,8 +234,9 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 
 #ifdef CONFIG_USE_CHARM
 
-extern CProxy_Simulation proxy_simulation;
-extern CProxy_Main proxy_main;
+extern CProxy_Simulation  proxy_simulation;
+extern CProxy_Main        proxy_main;
+extern CProxy_BlockReduce proxy_block_reduce;
 
 #endif /* CONFIG_USE_CHARM */
 
@@ -344,7 +346,7 @@ void Block::prepare()
 #ifdef TEMP_SKIP_REDUCE
   skip_reduce (cycle_,time_,dt_block,stop_block);
 #else
-  proxy_main.p_prepare(num_blocks, cycle_, time_, dt_block, stop_block);
+  proxy_block_reduce.p_prepare(num_blocks, cycle_, time_, dt_block, stop_block);
 #endif
 
 }
@@ -727,7 +729,7 @@ void Block::p_output (int index_output)
 
   // Synchronize via main chare before writing
   int num_blocks = simulation->mesh()->patch(0)->num_blocks();
-  proxy_main.p_output_reduce (num_blocks);
+  proxy_block_reduce.p_output_reduce (num_blocks);
 }
 #endif /* CONFIG_USE_CHARM */
 

@@ -7,6 +7,7 @@
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Parallel class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "parallel.hpp"
@@ -43,10 +44,6 @@ bool test_array(double * array, int length, int rank, int value)
 }
 
 //======================================================================
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -237,7 +234,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#  include "main.def.h"
-#endif

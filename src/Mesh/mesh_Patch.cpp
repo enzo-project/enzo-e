@@ -22,6 +22,7 @@ Patch::Patch
 ) throw()
   :
 #ifdef CONFIG_USE_CHARM
+  block_array_(0),
   block_exists_(false),
 #endif
   factory_(factory),
@@ -148,11 +149,13 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 {
 
 #ifndef CONFIG_USE_CHARM
+
   // determine local block count nb
   int nb = num_local_blocks();
 
   // create local blocks
   block_.resize(nb);
+
 #endif
 
   // Get number of blocks in the patch
@@ -198,7 +201,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
     sprintf (buffer,"Allocating block array %d %d %d",mbx,mby,mbz);
     TRACE(buffer);
 
-    block_ = factory_->create_block_array
+    block_array_ = factory_->create_block_array
       (nbx,nby,nbz,
        mbx,mby,mbz,
        lower_[0],lower_[1],lower_[2],
@@ -206,7 +209,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
     // Use built-ine CHARM++ Reduction instead of hand-rolling
     // 
-    // block_.ckSetReductionClient 
+    // block_array_.ckSetReductionClient 
     //   (new CkCallback(CkIndex_Simulation::p_done(NULL),
     // 		      proxy_main));
 
@@ -255,7 +258,7 @@ void Patch::deallocate_blocks() throw()
 
 #ifdef CONFIG_USE_CHARM
 
-  block_.ckDestroy();
+  block_array_.ckDestroy();
   block_exists_ = false;
 
 #else

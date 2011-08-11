@@ -25,12 +25,8 @@ class Performance;
 class Stopping;
 class Timestep;
 
-
 #ifdef CONFIG_USE_CHARM
-#  include "simulation.decl.h"
-#endif
-
-#ifdef CONFIG_USE_CHARM
+#include "simulation.decl.h"
 class Simulation : public CBase_Simulation {
 #else
 class Simulation {

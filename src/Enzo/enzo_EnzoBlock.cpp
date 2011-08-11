@@ -14,18 +14,13 @@
 
 EnzoBlock::EnzoBlock
 (
-#ifndef CONFIG_USE_CHARM
  int ix, int iy, int iz,
-#endif
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xp, double yp, double zp,
  int num_field_blocks) throw()
-  : Block (
-#ifndef CONFIG_USE_CHARM
-	   ix,iy,iz,
-#endif
+  : Block (ix,iy,iz,
 	   nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
     CycleNumber(0),
     Time(0),
@@ -56,6 +51,48 @@ EnzoBlock::EnzoBlock
   // CANNOT BE INITIALIZED HERE SINCE IT REQUIRES EXTENTS
   //  initialize();
 }
+
+#ifdef CONFIG_USE_CHARM
+
+EnzoBlock::EnzoBlock
+(
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xm, double ym, double zm,
+ double xp, double yp, double zp,
+ int num_field_blocks) throw()
+  : Block (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
+    CycleNumber(0),
+    Time(0),
+    OldTime(0),
+    dt(0),
+    SubgridFluxes(0)
+{
+  int i,j;
+
+  for (i=0; i<MAX_DIMENSION; i++) {
+    AccelerationField[i] = 0;
+
+    for (i=0; i<MAX_DIMENSION; i++) {
+      AccelerationField[i] = 0;
+      GridLeftEdge[i] = 0;
+      GridDimension[i] = 0;
+      GridStartIndex[i] = 0;
+      GridEndIndex[i] = 0;
+      CellWidth[i] = 0;
+    }
+
+    for (j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
+      BaryonField[j] = 0;
+      OldBaryonField[j] = 0;
+    }
+
+  }
+  // CANNOT BE INITIALIZED HERE SINCE IT REQUIRES EXTENTS
+  //  initialize();
+}
+
+#endif
 
 //----------------------------------------------------------------------
 

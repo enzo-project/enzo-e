@@ -74,14 +74,15 @@ class Patch
 #endif
   }
 
-#ifdef CONFIG_USE_CHARM
   /// Return the number of blocks
   size_t num_blocks() const throw()
-  { return blocking_[0]*blocking_[1]*blocking_[2] ; };
+  { return blocking_[0]*blocking_[1]*blocking_[2]; };
 
+#ifdef CONFIG_USE_CHARM
   /// Return the block CHARM++ chare array
-  CProxy_Block blocks() throw()
-  { return block_; }
+  CProxy_Block block_array() throw()
+  { return block_array_; }
+
 #else
     
   /// Return the total number of local blocks
@@ -89,8 +90,8 @@ class Patch
 
   /// Return the ith local block
   Block * local_block(size_t i) const throw();
-#endif
 
+#endif
   /// Deallocate local blocks
   void deallocate_blocks() throw();
 
@@ -98,8 +99,8 @@ protected: // attributes
 
   /// Array of blocks ib associated with this process
 #ifdef CONFIG_USE_CHARM
-  CProxy_Block block_;
-  bool block_exists_;
+  CProxy_Block block_array_;
+  bool         block_exists_;
 #else
   std::vector<Block * > block_;
 #endif
@@ -125,8 +126,6 @@ protected: // attributes
 
   /// Upper extent of the patch
   double upper_[3];
-
-  /// block_[] defined in PatchCharm or PatchMpi
 
 };
 

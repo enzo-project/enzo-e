@@ -5,13 +5,10 @@
 /// @date     2010-04-02
 /// @brief    Test program for the Classname class
 
+#include "main.hpp"
 #include "test.hpp"
 
 #include "component.hpp"
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -35,6 +32,3 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif

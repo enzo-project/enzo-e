@@ -5,6 +5,7 @@
 /// @date     2010-04-02
 /// @brief    Test program for the OutputImage class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "component.hpp"

@@ -8,9 +8,20 @@ Import('type')
 #------------------------------
 # DEPENDENCIES
 #------------------------------
+
+components = ['cello']
+libraries  = []
+
+if (type == "charm"):
+   components = components + ['monitor','performance']
+   libraries  = libraries  + ['png']
+
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
+
 #------------------------------
 # SOURCE
 #------------------------------

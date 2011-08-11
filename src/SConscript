@@ -35,6 +35,12 @@ env = env.Clone(LIBS=[components,libraries])
 includes = [Glob('cello*hpp'), Glob('cello*def'), Glob('test*hpp')]
 sources  = [Glob('cello*cpp')]
 
+if (type == "charm"):
+   env.CharmBuilder('main.decl.h','main.ci',ARG = 'main')
+   env.CharmBuilder('main.def.h', 'main.ci',ARG = 'main')
+   includes = includes + ['main.decl.h','main.def.h','main.hpp']
+   sources  = sources + ['main.cpp']
+
 libraries = env.Library ('cello', [sources])
 
 env.Alias('install-lib', env.Install ('#/lib',    libraries))

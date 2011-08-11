@@ -8,12 +8,11 @@
 
 #include "cello.hpp"
 
-#include "simulation.hpp"
+class Factory;
+#include "main.hpp"
 
-#ifdef CONFIG_USE_CHARM
-extern CProxy_Main       proxy_main;
-extern CProxy_Simulation proxy_simulation;
-#endif
+#include "simulation.hpp"
+#include "simulation_charm.hpp"
 
 Simulation::Simulation
 (
@@ -765,7 +764,11 @@ void Simulation::p_output
   output_next();
 }
 
+#endif
+
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Simulation::output_first() throw()
 {
@@ -773,7 +776,11 @@ void Simulation::output_first() throw()
   index_output_ = 0;
 }
 
+#endif
+
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Simulation::output_next() throw()
 {
@@ -798,7 +805,7 @@ void Simulation::output_next() throw()
     Patch * patch;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
-	patch->blocks().p_output (index_output_);
+	patch->block_array().p_output (index_output_);
       }
     }
 
@@ -809,7 +816,11 @@ void Simulation::output_next() throw()
   }
 }
 
+#endif
+
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Simulation::p_output_reduce() throw()
 {
@@ -832,7 +843,11 @@ void Simulation::p_output_reduce() throw()
 
 }
 
+#endif
+
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Simulation::p_output_write (int n, char * buffer) throw()
 {
@@ -871,7 +886,11 @@ void Simulation::p_output_write (int n, char * buffer) throw()
 
 }
 
+#endif
+
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Simulation::refresh() throw()
 {
@@ -917,16 +936,22 @@ void Simulation::refresh() throw()
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
 #ifdef ORIGINAL_REFRESH
-	patch->blocks().p_refresh(dt_,axis);
+	patch->block_array().p_refresh(dt_,axis);
 #else
-	patch->blocks().p_compute(dt_,axis);
+	patch->block_array().p_compute(dt_,axis);
 #endif
       }
     }
   }
 }
 
+#endif
+
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+#  include "simulation.def.h"
 
 #endif /* CONFIG_USE_CHARM */
 
