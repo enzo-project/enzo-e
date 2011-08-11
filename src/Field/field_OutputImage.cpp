@@ -207,7 +207,7 @@ void OutputImage::write
   }
     
 #else
-  ItBlockLocal it_block (patch);
+  ItBlock it_block (patch);
   while (Block * block = ++it_block) {
     // Get block size
     int nxb,nyb,nzb;

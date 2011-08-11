@@ -5,6 +5,7 @@
 /// @date     2008-02-20
 /// @brief    Unit tests for the FieldFace class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "field.hpp"
@@ -247,11 +248,6 @@ bool test_fields
 }
 
 //======================================================================
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
-
 PARALLEL_MAIN_BEGIN
 {
 
@@ -370,8 +366,4 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#ifdef USE_CONFIG_CHARM
-#  include "main.def.h"
-#endif
 

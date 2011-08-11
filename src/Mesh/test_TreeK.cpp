@@ -5,6 +5,7 @@
 /// @date     2009-10-28
 /// @brief    Test program for Tree2K and Tree3K classes
 
+#include "main.hpp" 
 #include "mesh_tree.hpp"
 #include "test.hpp"
 
@@ -30,11 +31,6 @@ void create_tree (int * level_array, int nx, int ny, int nz, int k,  int d,
 		   std::string name, int max_level);
 void print_usage(int, char**);
 //----------------------------------------------------------------------
-
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 
@@ -358,7 +354,3 @@ void create_tree
   delete tree;
 
 }
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif

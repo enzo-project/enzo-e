@@ -9,16 +9,17 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error']
+components = ['error','cello']
+libraries  = ['hdf5']
 
-components = components + ['hdf5']
-
-
+if (type == "charm"):
+   components = components + ['monitor','performance']
+   libraries  = libraries  + ['png']
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
 
-env = env.Clone(LIBS=[components])
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # SOURCE

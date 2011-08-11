@@ -17,13 +17,14 @@ if (type == "charm"):
 # DEPENDENCIES
 #------------------------------
 
+components = ['cello']
 libraries  = ['error','png']
 
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
 
-env = env.Clone(LIBS=[libraries])
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # SOURCE

@@ -5,7 +5,7 @@ import sys
 # CONFIGURATION
 #----------------------------------------------------------------------
 
-trace           = 0
+trace           = 1
 debug           = 0
 debug_verbose   = 0
 
@@ -467,9 +467,9 @@ libpath = libpath + [fortranpath_lib]
 #======================================================================
 
 if (use_valgrind):
-     valgrind = "valgrind --leakcheck=full"
+     valgrind = "valgrind --leak-check=full"
      parallel_run = parallel_run + " " + valgrind
-     serial_run   = vagrind + " " + serial_run
+     serial_run   = valgrind + " " + serial_run
 
 #======================================================================
 # ENVIRONMENT

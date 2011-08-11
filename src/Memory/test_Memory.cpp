@@ -5,14 +5,11 @@
 /// @date      Thu Sep  3 16:37:24 PDT 2009
 /// @brief     Program implementing unit tests for the Memory component
  
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "performance.hpp" /* for Timer */
 #include "memory.hpp"
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -241,8 +238,4 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif
 

@@ -10,11 +10,6 @@
 
 #ifdef CONFIG_USE_CHARM
 
-#ifdef CONFIG_USE_CHARM
-#  include "simulation.decl.h"
-#  include "enzo.decl.h"
-#endif
-
 class EnzoSimulationCharm : public EnzoSimulation
 			    
 {

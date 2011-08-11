@@ -6,13 +6,10 @@
 /// @todo     Multiple datasets with different precisions
 /// @brief    Program implementing unit tests for the FileHdf5 class
  
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "disk.hpp"
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 
@@ -80,7 +77,3 @@ PARALLEL_MAIN_BEGIN
 
 }
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif

@@ -24,12 +24,12 @@
 #  define PARALLEL_ARGC      main->argc
 #  define PARALLEL_ARGV      main->argv
 
-#  define PARALLEL_MAIN_BEGIN  \
-      CProxy_Main proxy_main; \
-         class Main : public CBase_Main { \
-            public:\
-               Main(CkArgMsg* main)
-#  define PARALLEL_MAIN_END };
+#  define PARALLEL_MAIN_BEGIN			\
+  Main::Main(CkArgMsg* main) 			\
+    : count_exit_(0),				\
+      monitor_(NULL) 				\
+
+#  define PARALLEL_MAIN_END 
 
 #  define PARALLEL_CLASS_DECL(CLASS) class CLASS : public CBase_##CLASS
 #  define PARALLEL_PROXY(CLASS) CProxy_##CLASS

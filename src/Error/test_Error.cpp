@@ -5,14 +5,10 @@
 /// @date      Wed Aug 20 11:24:14 PDT 2008
 /// @brief     Program implementing unit tests for error classes
  
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "error.hpp"
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
-
 
 PARALLEL_MAIN_BEGIN
 
@@ -48,8 +44,4 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif
 

@@ -8,6 +8,7 @@
 
 #include <fstream>
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "parameters.hpp"
@@ -106,10 +107,6 @@ void generate_input()
 }
 
 //======================================================================
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -473,8 +470,4 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif
 

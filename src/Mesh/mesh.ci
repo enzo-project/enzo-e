@@ -7,6 +7,17 @@
 
 module mesh {
 
+//  extern module simulation;
+//  extern module main;
+
+  chare BlockReduce {
+    entry BlockReduce();
+    entry void p_prepare (int count_blocks, int cycle, double time,
+			  double dt_block, int stop_block);
+
+    entry void p_output_reduce (int count_blocks);
+  };
+
   array[3D] Block {
 
     entry Block

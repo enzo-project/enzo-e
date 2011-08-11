@@ -51,7 +51,7 @@ void EnzoSimulationMpi::run() throw()
 
   while ((patch = ++it_patch)) {
 
-    ItBlockLocal it_block(patch);
+    ItBlock it_block(patch);
     Block * block;
 
     while ((block = ++it_block)) {
@@ -82,7 +82,7 @@ void EnzoSimulationMpi::run() throw()
 
     int    stop_patch  = true;
 
-    ItBlockLocal it_block(patch);
+    ItBlock it_block(patch);
     Block * block;
 
     while ((block = ++it_block)) {
@@ -122,7 +122,7 @@ void EnzoSimulationMpi::run() throw()
 
       double dt_patch = std::numeric_limits<double>::max();
 
-      ItBlockLocal it_block(patch);
+      ItBlock it_block(patch);
       Block * block;
 
       // Accumulate Block-local timesteps
@@ -170,7 +170,7 @@ void EnzoSimulationMpi::run() throw()
 
       int stop_patch = true;
 
-      ItBlockLocal it_block(patch);
+      ItBlock it_block(patch);
       Block * block;
 
       while ((block = ++it_block)) {

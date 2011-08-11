@@ -7,11 +7,17 @@
 
 mainmodule main {
 
+//  extern module simulation;
+//  extern module enzo;
+//  extern module mesh;
+
   readonly CProxy_Main proxy_main;
 
   mainchare Main {
 
-    entry Main(CkArgMsg *m);
+     entry Main(CkArgMsg *m);
+
+     entry void p_exit (int count_blocks);
 
   };
 

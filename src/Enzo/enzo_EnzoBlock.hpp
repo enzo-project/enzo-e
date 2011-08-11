@@ -25,9 +25,7 @@ public: // interface
   /// Initialize the EnzoBlock chare array
   EnzoBlock
   (
-#ifndef CONFIG_USE_CHARM
    int ix, int iy, int iz,
-#endif
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
@@ -38,8 +36,15 @@ public: // interface
   /// Initialize a migrated Block
   EnzoBlock (CkMigrateMessage *m) {TRACE("Oops")};
 
-  /// Initialize an empty Block
-  EnzoBlock() {TRACE("Oops")};
+  /// Initialize the EnzoBlock chare array
+  EnzoBlock
+  (
+   int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   double xm, double ym, double zm,
+   double hx, double hy, double hz,
+   int num_field_blocks) throw();
+
 #endif
 
   // /// Initialize the EnzoBlock object

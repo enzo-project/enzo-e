@@ -5,14 +5,11 @@
 /// @date      Wed Apr 23 12:25:18 PDT 2008
 /// @todo      Move Timer tests into test_Timer.cpp
 /// @brief     Program implementing unit tests for performance classes
- 
+
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "performance.hpp"
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -230,7 +227,3 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_EXIT;
 }
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif

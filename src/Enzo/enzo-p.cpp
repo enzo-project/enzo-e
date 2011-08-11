@@ -10,16 +10,20 @@
 
 //----------------------------------------------------------------------
 
+class Factory;
+#include "main.hpp"
 #include "test.hpp"
 
 #include "enzo.hpp"
+
+#include "enzo_charm.hpp"
 
 //----------------------------------------------------------------------
 
 #define MAX_OUTPUT 10 /* Maximum number of outputs going on at a time */
 
 #ifdef CONFIG_USE_CHARM
-CProxy_EnzoSimulationCharm proxy_simulation;
+extern CProxy_EnzoSimulationCharm proxy_simulation;
 #endif
 
 PARALLEL_MAIN_BEGIN
@@ -63,13 +67,6 @@ PARALLEL_MAIN_BEGIN
 #ifdef CONFIG_USE_CHARM
   proxy_main     = thishandle;
 
-  // Clear counts
-  count_exit_    = 0;
-  count_prepare_ = 0;
-  count_output_  = 0;
-  dt_mesh_ = std::numeric_limits<double>::max();
-  stop_mesh_ = true;
-  
 #endif
   //--------------------------------------------------
      
@@ -81,8 +78,12 @@ PARALLEL_MAIN_BEGIN
 
   // If using CHARM, create the EnzoSimulationCharm groups
 
+  PARALLEL_PRINTF ("%s:%d  DEBUG\n",__FILE__,__LINE__);
+
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
     (parameter_file, strlen(parameter_file)+1, 0);
+
+  PARALLEL_PRINTF ("%s:%d  DEBUG\n",__FILE__,__LINE__);
 
   //--------------------------------------------------
 
@@ -126,95 +127,7 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_EXIT;
 #endif
   //--------------------------------------------------
-
-};
-
-//--------------------------------------------------
-#ifdef CONFIG_USE_CHARM
-
-//----------------------------------------------------------------------
-
-void p_exit(int count)
-{
-  TRACE("Main::p_exit");
-  count_exit_++;
-  if (count_exit_ >= count) {
-    count_exit_ = 0;
-    monitor_->print ("END ENZO-P");
-    //    unit_finalize();
-    // Fake unit_init() for index.php (test.hpp is not included since
-    // enzo.ci and test.ci conflict)
-    PARALLEL_PRINTF ("UNIT TEST END\n");
-    PARALLEL_EXIT;
-  }
-};
-
-//----------------------------------------------------------------------
-
-void p_prepare(int count, int cycle, double time,
-	       double dt_block, int stop_block)
-{
-  TRACE("Main::p_prepare");
-  // Assumes cycle and time are the same for all "incoming" blocks;
-  // only use the last one
-
-  //--------------------------------------------------
-  // Timestep
-  //--------------------------------------------------
-
-  dt_mesh_   = MIN(dt_mesh_, dt_block);
-
-  //--------------------------------------------------
-  // Stopping
-  //--------------------------------------------------
-
-  stop_mesh_ = stop_mesh_ && stop_block;
-
-  if (++count_prepare_ >= count) {
-
-    //--------------------------------------------------
-    // Simulation::p_output()
-    //--------------------------------------------------
-    proxy_simulation.p_output(cycle, time, dt_mesh_, stop_mesh_);
-
-    // Reset pool
-    count_prepare_ = 0;
-    dt_mesh_ = std::numeric_limits<double>::max();
-    stop_mesh_ = true;
-
-  }
-};
-
-//----------------------------------------------------------------------
-
-//  --- Accumulate block output contributions and write output to disk ---
-
-void p_output_reduce(int count)
-{
-  TRACE("Main::p_output_reduce");
-  if (++count_output_ >= count) {
-    INCOMPLETE("Main::p_output_reduce()");
-    proxy_simulation.p_output_reduce();
-    count_output_ = 0;
-  }
-};
-
-//----------------------------------------------------------------------
-
-private:
-
-int count_exit_;
-int count_prepare_;
-int count_output_;
-
-// Reduction variables
-int stop_mesh_;
-double dt_mesh_;
-
-Monitor * monitor_;
-
-#endif
-//--------------------------------------------------
+}
 
 PARALLEL_MAIN_END
 

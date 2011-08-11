@@ -5,13 +5,10 @@
 /// @date     2010-04-19
 /// @brief    Unit tests for the Layout class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "parallel.hpp"
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.decl.h"
-#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -338,7 +335,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#ifdef CONFIG_USE_CHARM
-#   include "main.def.h"
-#endif

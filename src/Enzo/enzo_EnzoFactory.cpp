@@ -7,6 +7,7 @@
 
 #include "enzo.hpp"
 
+#include "enzo_charm.hpp"
 //----------------------------------------------------------------------
 
 Block * EnzoFactory::create_block

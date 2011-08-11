@@ -9,6 +9,8 @@
 
 #include "mesh.hpp"
 
+#include "mesh_charm.hpp"
+
 //----------------------------------------------------------------------
 
 Mesh::Mesh
@@ -220,4 +222,6 @@ void Mesh::insert_patch(Patch * patch) throw()
 
 //----------------------------------------------------------------------
 
-
+#ifdef CONFIG_USE_CHARM
+#  include "mesh.def.h"
+#endif

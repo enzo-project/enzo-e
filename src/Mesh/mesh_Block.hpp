@@ -15,10 +15,7 @@ class FieldBlock;
 // class Patch;
 
 #ifdef CONFIG_USE_CHARM
-#  include "mesh.decl.h"
-#endif
-
-#ifdef CONFIG_USE_CHARM
+#include "mesh.decl.h"
 class Block : public CBase_Block
 #else
 class Block
