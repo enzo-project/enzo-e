@@ -16,6 +16,8 @@ Import('type')
 components = ['simulation','field', 'error','memory','monitor', 'performance', 'parallel', 'method', 'parameters','cello']
 libraries  = ['png']
 
+if (type == "charm"):
+   components = components + ['enzo']
 
 #------------------------------
 # ENVIRONMENTS

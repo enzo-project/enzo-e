@@ -21,15 +21,14 @@ Patch::Patch
  double xp, double yp, double zp
 ) throw()
   :
- #ifdef CONFIG_USE_CHARM
+#ifdef CONFIG_USE_CHARM
   block_exists_(false),
- #endif
+#endif
   factory_(factory),
- #ifdef CONFIG_USE_CHARM
-   group_process_(group_process),
- #endif
-   layout_(new Layout (nbx,nby,nbz))
-
+#ifdef CONFIG_USE_CHARM
+  group_process_(group_process),
+#endif
+  layout_(new Layout (nbx,nby,nbz))
 {
   PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
   // Check 

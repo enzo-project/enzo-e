@@ -11,6 +11,7 @@
 
 #include "mesh.hpp"
 
+#include "enzo.hpp"
 PARALLEL_MAIN_BEGIN
 {
 

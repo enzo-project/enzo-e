@@ -10,7 +10,7 @@ module mesh {
 //  extern module simulation;
 //  extern module main;
 
-  readonly CProxy_BlockReduce  proxy_block_reduce;
+//  readonly CProxy_BlockReduce  proxy_block_reduce;
   
   chare BlockReduce {
     entry BlockReduce();

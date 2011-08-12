@@ -245,7 +245,6 @@ extern CProxy_Main        proxy_main;
 
 void Block::p_initial()
 {
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -267,18 +266,15 @@ void Block::p_initial()
 #ifdef ORIGINAL_REFRESH  
 
   // Prepare for first cycle: Timestep, Stopping, Monitor, Output
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 
   prepare();
 
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 #else
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 
   // Refresh before prepare()
   axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
   refresh(axis_set);
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
+
 #endif
 }
 
@@ -291,7 +287,6 @@ void Block::p_initial()
 void Block::prepare()
 {
 
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
   TRACE("Block::prepare");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -335,7 +330,6 @@ void Block::prepare()
   if (stop_block) {
     FieldDescr * field_descr = simulation->field_descr();
 
-    // DEBUG CODE: print field block info and dump image
     field_block()->print(field_descr,"final",lower_,upper_);
     field_block()->image(field_descr,"cycle",cycle_,
 			 thisIndex.x,thisIndex.y,thisIndex.z);
@@ -352,12 +346,10 @@ void Block::prepare()
 #ifdef TEMP_SKIP_REDUCE
   skip_reduce (cycle_,time_,dt_block,stop_block);
 #else
-  PARALLEL_EXIT;
-  simulation->proxy_block_reduce().p_prepare(num_blocks, cycle_, time_, dt_block, stop_block);
-  PARALLEL_EXIT;
+  simulation->proxy_block_reduce().p_prepare
+    (num_blocks, cycle_, time_, dt_block, stop_block);
 #endif
 
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -367,7 +359,6 @@ void Block::prepare()
 
 void Block::refresh_axis (axis_enum axis)
 {
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   //--------------------------------------------------
@@ -436,7 +427,6 @@ void Block::refresh_axis (axis_enum axis)
 	(field_face.size(), field_face.array(), axis, face_lower, axis);
     }
   }
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -474,7 +464,6 @@ void Block::p_refresh (double dt, int axis_set)
 void Block::refresh (int axis_set)
 {
 
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
   TRACE("Block::refresh");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -612,7 +601,6 @@ void Block::refresh (int axis_set)
   // p_refresh_face() itself with a null array
 
   p_refresh_face (0,0,0,0, axis_set);
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 
 }
 #endif /* CONFIG_USE_CHARM */
@@ -624,7 +612,6 @@ void Block::refresh (int axis_set)
 void Block::p_refresh_face (int n, char * buffer,
 			    int axis, int face, int axis_set)
 {
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   if ( n != 0) {
@@ -725,7 +712,6 @@ void Block::p_refresh_face (int n, char * buffer,
       break;
     }
   }
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -736,7 +722,6 @@ void Block::p_refresh_face (int n, char * buffer,
 void Block::p_output (int index_output)
 {
 
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
   TRACE("Block::p_output");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -746,7 +731,6 @@ void Block::p_output (int index_output)
   // Synchronize via main chare before writing
   int num_blocks = simulation->mesh()->patch(0)->num_blocks();
   simulation->proxy_block_reduce().p_output_reduce (num_blocks);
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -756,7 +740,6 @@ void Block::p_output (int index_output)
 
 void Block::skip_reduce(int cycle, int time, double dt_block, double stop_block)
 {
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   simulation->update_cycle(cycle,time,dt_block,stop_block);
@@ -767,7 +750,6 @@ void Block::skip_reduce(int cycle, int time, double dt_block, double stop_block)
 #else
   compute(axis);
 #endif
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -778,7 +760,6 @@ void Block::skip_reduce(int cycle, int time, double dt_block, double stop_block)
 void Block::compute(int axis_set)
 {
 
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
   TRACE("Block::compute");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -818,7 +799,6 @@ void Block::compute(int axis_set)
 #else
   refresh(axis_set);
 #endif
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 
 }
 #endif /* CONFIG_USE_CHARM */
