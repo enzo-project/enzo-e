@@ -29,10 +29,10 @@ BlockReduce::BlockReduce()
 //----------------------------------------------------------------------
 
 void BlockReduce::p_prepare(int    count, 
-				 int    cycle, 
-				 double time,
-				 double dt_block, 
-				 int    stop_block)
+			    int    cycle, 
+			    double time,
+			    double dt_block, 
+			    int    stop_block)
 {
   TRACE("BlockReduce::p_prepare");
   // Assumes cycle and time are the same for all "incoming" blocks;

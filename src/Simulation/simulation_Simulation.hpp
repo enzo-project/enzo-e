@@ -26,6 +26,7 @@ class Stopping;
 class Timestep;
 
 #ifdef CONFIG_USE_CHARM
+#include "mesh.decl.h"
 #include "simulation.decl.h"
 class Simulation : public CBase_Simulation {
 #else
@@ -182,6 +183,11 @@ public: // interface
     dt_    = dt;
     stop_  = stop;
   };
+
+#ifdef CONFIG_USE_CHARM
+  CProxy_BlockReduce proxy_block_reduce() 
+  { return   proxy_block_reduce_; }
+#endif
 
 public: // virtual functions
 
@@ -341,6 +347,8 @@ protected: // attributes
   //--------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
+
+  CProxy_BlockReduce  proxy_block_reduce_;
 
   /// Index of currently active output object
   size_t index_output_;

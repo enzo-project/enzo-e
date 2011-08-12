@@ -81,7 +81,7 @@ class Patch
 #ifdef CONFIG_USE_CHARM
   /// Return the block CHARM++ chare array
   CProxy_Block block_array() throw()
-  { return block_array_; }
+  { if (block_exists_) return block_array_; else return 0;}
 
 #else
     

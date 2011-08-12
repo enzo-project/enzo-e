@@ -23,7 +23,7 @@ class Factory;
 #define MAX_OUTPUT 10 /* Maximum number of outputs going on at a time */
 
 #ifdef CONFIG_USE_CHARM
-extern CProxy_EnzoSimulationCharm proxy_simulation;
+extern CProxy_Simulation proxy_simulation;
 #endif
 
 PARALLEL_MAIN_BEGIN

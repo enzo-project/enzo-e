@@ -21,15 +21,17 @@ Patch::Patch
  double xp, double yp, double zp
 ) throw()
   :
-#ifdef CONFIG_USE_CHARM
-  block_array_(0),
+ #ifdef CONFIG_USE_CHARM
   block_exists_(false),
-#endif
+ #endif
   factory_(factory),
-  group_process_(group_process),
-  layout_(new Layout (nbx,nby,nbz))
+ #ifdef CONFIG_USE_CHARM
+   group_process_(group_process),
+ #endif
+   layout_(new Layout (nbx,nby,nbz))
 
 {
+  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
   // Check 
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
     char buffer[ERROR_LENGTH];
@@ -258,8 +260,10 @@ void Patch::deallocate_blocks() throw()
 
 #ifdef CONFIG_USE_CHARM
 
-  block_array_.ckDestroy();
-  block_exists_ = false;
+  if (block_exists_) {
+    block_array_.ckDestroy();
+    block_exists_ = false;
+  }
 
 #else
 

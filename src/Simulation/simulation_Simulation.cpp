@@ -54,6 +54,7 @@ Simulation::Simulation
   performance_ = new Performance;
 #ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;
+  proxy_block_reduce_ = CProxy_BlockReduce::ckNew();
 #else
   monitor_ = Monitor::instance();
 #endif
@@ -89,7 +90,6 @@ void Simulation::initialize() throw()
   initialize_output_();
   initialize_method_();
   initialize_parallel_();
-
 }
 
 //----------------------------------------------------------------------

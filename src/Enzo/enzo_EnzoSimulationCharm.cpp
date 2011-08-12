@@ -51,6 +51,8 @@ void EnzoSimulationCharm::run() throw()
   // Initial [block]
   //--------------------------------------------------
 
+  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
+
   ItPatch it_patch(mesh_);
   Patch * patch;
   while (( patch = ++it_patch )) {
@@ -59,6 +61,7 @@ void EnzoSimulationCharm::run() throw()
     }
   }
 
+  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 }
 
 //======================================================================
