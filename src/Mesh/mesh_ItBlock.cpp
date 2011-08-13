@@ -7,8 +7,6 @@
 /// @brief    Implementation of ItBlock
 //----------------------------------------------------------------------
 
-#ifndef CONFIG_USE_CHARM
-
 #include "cello.hpp"
 
 #include "mesh.hpp"
@@ -29,16 +27,38 @@ ItBlock::~ItBlock ( ) throw ()
 
 Block * ItBlock::operator++ () throw()
 {
+#ifdef CONFIG_USE_CHARM
+  //
+  Block * block;
+  int nb,nbx,nby,nbz;
+  nb = patch_->num_blocks(&nbx,&nby,&nbz);
+  do {
+    index1_++;
+    int ibx = (index1_ - 1) % nbx;
+    int iby = (((index1_-1) - ibx)/nbx) % nby;
+    int ibz = (index1_-1)/(nbx*nby);
+    CProxy_Block block_array = patch_->block_array();
+    block = block_array(ibx,iby,ibz).ckLocal();
+  } while (block==NULL && index1_ <= nb);
+  // assert: (block != NULL) or (index1_ > nb)
+  if (index1_ > nb) index1_ = 0;
+  // assert: index1_ != 0 implies (block != NULL)
+  return index1_ ? block : NULL;
+#else
   index1_ ++;
   if (index1_ > patch_->num_local_blocks()) index1_ = 0;
-  return index1_ ? patch_->local_block(index1_ - 1) : 0;
+  return index1_ ? patch_->local_block(index1_ - 1) : NULL;
+#endif
 }
 
 //----------------------------------------------------------------------
 
 bool ItBlock::done () const throw()
 {
+#ifdef CONFIG_USE_CHARM
+  return index1_ >= patch_->num_blocks();
+#else
   return index1_ >= patch_->num_local_blocks();
+#endif
 }
 
-#endif

@@ -25,9 +25,7 @@ Patch::Patch
   block_exists_(false),
 #endif
   factory_(factory),
-#ifndef CONFIG_USE_CHARM
   group_process_(group_process),
-#endif
   layout_(new Layout (nbx,nby,nbz))
 {
   PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);

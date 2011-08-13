@@ -23,24 +23,20 @@ GroupProcessCharm::GroupProcessCharm
     process_first_    (process_first),
     process_last_plus_(process_last_plus)
 {
-  INCOMPLETE("GroupProcessCharm::GroupProcessCharm");
   size_ = CkNumPes();
   rank_ = CkMyPe();
-
 }
 
 //----------------------------------------------------------------------
 
 void GroupProcessCharm::barrier()  throw()
 { 
-  INCOMPLETE("GroupProcessCharm::barrier");
 };
 
 //----------------------------------------------------------------------
 
 void GroupProcessCharm::sync (int rank, int tag) throw()
 {
-  INCOMPLETE("GroupProcessCharm::sync");
 }
 
 //----------------------------------------------------------------------
@@ -48,7 +44,6 @@ void GroupProcessCharm::sync (int rank, int tag) throw()
 void * GroupProcessCharm::send_begin 
 (int rank_dest, void * buffer, int size, int tag) throw()
 {
-  INCOMPLETE("GroupProcessCharm::send_begin");
   return NULL;
 }
 
@@ -56,7 +51,6 @@ void * GroupProcessCharm::send_begin
 
 void GroupProcessCharm::send_end (void * handle) throw()
 {
-  INCOMPLETE("GroupProcessCharm::send_end");
 }
 
 //----------------------------------------------------------------------
@@ -64,7 +58,6 @@ void GroupProcessCharm::send_end (void * handle) throw()
 void * GroupProcessCharm::recv_begin 
 (int rank_source, void * buffer, int size, int tag) throw()
 {
-  INCOMPLETE("GroupProcessCharm::recv_begin");
   return NULL;
 }
 
@@ -72,14 +65,12 @@ void * GroupProcessCharm::recv_begin
 
 void GroupProcessCharm::recv_end (void * handle) throw()
 {
-  INCOMPLETE("GroupProcessCharm::recv_end");
 }
 
 //----------------------------------------------------------------------
 
 bool GroupProcessCharm::test (void * handle) throw()
 {
-  INCOMPLETE("GroupProcessCharm::test");
   return false;
 }
 
@@ -87,7 +78,6 @@ bool GroupProcessCharm::test (void * handle) throw()
 
 void GroupProcessCharm::wait (void * handle) throw()
 {
-  INCOMPLETE("GroupProcessCharm::wait");
 }
 
 //----------------------------------------------------------------------
@@ -101,14 +91,12 @@ Reduce * GroupProcessCharm::create_reduce () throw ()
 
 void GroupProcessCharm::bulk_send_add(int rank_dest, void * buffer, int size, int tag) throw()
 {
-  INCOMPLETE("GroupProcessCharm::bulk_send_add");
 }
 
 //----------------------------------------------------------------------
 
 void * GroupProcessCharm::bulk_send() throw()
 {
-  INCOMPLETE("GroupProcessCharm::bulk_send");
   return 0;
 }
 
@@ -116,14 +104,12 @@ void * GroupProcessCharm::bulk_send() throw()
 
 void GroupProcessCharm::bulk_recv_add(int rank_source, void * buffer, int size, int tag) throw()
 {
-  INCOMPLETE("GroupProcessCharm::bulk_recv_add");
 }
 
 //----------------------------------------------------------------------
 
 void * GroupProcessCharm::bulk_recv() throw()
 {
-  INCOMPLETE("GroupProcessCharm::bulk_recv");
   return 0;
 }
 
@@ -131,7 +117,6 @@ void * GroupProcessCharm::bulk_recv() throw()
 
 void GroupProcessCharm::bulk_wait(void * handle) throw()
 {
-  INCOMPLETE("GroupProcessCharm::bulk_wait");
 }
 
 //======================================================================

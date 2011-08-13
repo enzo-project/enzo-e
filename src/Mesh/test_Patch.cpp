@@ -120,10 +120,10 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
+  unit_func("num_blocks");
   unit_assert(patch->num_blocks() == (size_t)nbx*nby*nbz);
 #else
   unit_func("num_local_blocks");
-
   unit_assert(patch->num_local_blocks()==(size_t)nbx*nby*nbz);
 #endif
 
@@ -240,8 +240,10 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
+#ifndef CONFIG_USE_CHARM
   unit_func("num_local_blocks");
   unit_assert(block_counter == patch->num_local_blocks());
+#endif
 
   //--------------------------------------------------
 

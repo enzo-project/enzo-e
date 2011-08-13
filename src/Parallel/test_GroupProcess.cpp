@@ -50,7 +50,7 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-  int np;
+  int np = 0;
   if (PARALLEL_ARGC != 2) {
     PARALLEL_PRINTF ("Usage: %s <num-procs>\n",PARALLEL_ARGV[0]);
     PARALLEL_EXIT;
@@ -137,11 +137,16 @@ PARALLEL_MAIN_BEGIN
       // MPI_Isend MPI_Recv
       // MPI_Send  MPI_Irecv
       // MPI_Send  MPI_Recv
-      unit_func("test");
 
+      unit_func("test_array");
+
+#ifdef CONFIG_USE_MPI
       init_array(array_source,n+1,rank);
       init_array(array_dest,  n+1,rank);
       unit_assert(test_array(array_source,n+1,rank,rank));
+#else
+      unit_assert(unit_incomplete);
+#endif
 
 #ifdef CONFIG_USE_MPI
 
@@ -153,7 +158,11 @@ PARALLEL_MAIN_BEGIN
       group_process_mpi->set_send_blocking(blocking_send);
       group_process_mpi->set_recv_blocking(blocking_recv);
 
+#else
+      unit_assert(unit_incomplete);
 #endif
+
+#ifndef CONFIG_USE_CHARM
 
       int rank_source = (rank+1)%size;
       int rank_dest   = (rank-1+size)%size;
@@ -176,8 +185,15 @@ PARALLEL_MAIN_BEGIN
       group_process->send_end(handle_send);
       group_process->recv_end(handle_recv);
 
+      unit_func("send " blocking_send ? "[blocking]" : "[nonblocking]");
+
       unit_assert(test_array(array_source,n+1,rank,rank));
+
+      unit_func("recv " blocking_recv ? "[blocking]" : "[nonblocking]");
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
+#else
+      unit_assert(unit_incomplete);
+#endif
 
     }
   }

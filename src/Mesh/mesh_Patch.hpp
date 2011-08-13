@@ -75,8 +75,15 @@ class Patch
   }
 
   /// Return the number of blocks
-  size_t num_blocks() const throw()
-  { return blocking_[0]*blocking_[1]*blocking_[2]; };
+  size_t num_blocks(int * nbx = 0, 
+		    int * nby = 0,
+		    int * nbz = 0) const throw()
+  { 
+    if (nbx) *nbx = blocking_[0];
+    if (nby) *nby = blocking_[1];
+    if (nbz) *nbz = blocking_[2];
+    return blocking_[0]*blocking_[1]*blocking_[2]; 
+  };
 
 #ifdef CONFIG_USE_CHARM
   /// Return the block CHARM++ chare array

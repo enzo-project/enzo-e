@@ -18,7 +18,7 @@ if (type == "charm"):
 #------------------------------
 
 components = ['cello']
-libraries  = ['error','png']
+libraries  = ['error','monitor','performance','png']
 
 #------------------------------
 # ENVIRONMENTS
