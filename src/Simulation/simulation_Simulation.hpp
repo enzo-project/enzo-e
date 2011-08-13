@@ -47,15 +47,16 @@ public: // interface
 
   /// Initialize the Simulation object
   Simulation
-  ( const char *   parameter_file,
+  ( const char *       parameter_file,
 #ifdef CONFIG_USE_CHARM
-    int            n,
-    const Factory & factory,
+    int                n,
+    const Factory &    factory,
+    CProxy_BlockReduce proxy_block_reduce, 
 #else
-    const Factory & factory,
-    GroupProcess * group_process = 0,
+    const Factory &    factory,
+    GroupProcess *     group_process = 0,
 #endif
-    int            index = 0
+    int                index = 0
     ) throw();
 
   //==================================================
@@ -335,17 +336,6 @@ protected: // attributes
   /// Boundary conditions object
   Boundary * boundary_;
 
-  /// Output objects
-  std::vector<Output *> output_list_;
-
-  /// List of method objects
-  std::vector<Method *> method_list_;
-
-
-  //--------------------------------------------------
-  // Output
-  //--------------------------------------------------
-
 #ifdef CONFIG_USE_CHARM
 
   CProxy_BlockReduce  proxy_block_reduce_;
@@ -354,6 +344,12 @@ protected: // attributes
   size_t index_output_;
 
 #endif
+
+  /// Output objects
+  std::vector<Output *> output_list_;
+
+  /// List of method objects
+  std::vector<Method *> method_list_;
 
 };
 

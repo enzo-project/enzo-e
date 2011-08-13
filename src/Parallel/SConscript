@@ -40,7 +40,11 @@ sources    = [Glob('parallel*cpp')]
 libraries = env.Library ('parallel', [sources])
 binaries = []
 
+if (type == "charm"):
+	sources = sources + ["../main.cpp"]
+
 test_GroupProcess  =  env.Program (['test_GroupProcess.cpp',    sources])
+
 binaries.append(test_GroupProcess)
 
 if (type == "mpi"):

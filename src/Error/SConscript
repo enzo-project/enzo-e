@@ -34,6 +34,10 @@ sources  = [Glob('error*cpp')]
 #------------------------------
 
 libraries  = env.Library ('error', [sources])
+
+if (type == "charm"):
+   sources = sources + ['../main.cpp']
+
 test_error = env.Program (['test_Error.cpp',  sources])
 
 binaries = [test_error]

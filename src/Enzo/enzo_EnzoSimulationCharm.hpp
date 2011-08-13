@@ -22,7 +22,9 @@ public: // functions
 
   /// CHARM++ Constructor
   EnzoSimulationCharm
-  ( const char parameter_file[], int n, int index = 0) throw();
+  ( const char parameter_file[], int n, 
+    CProxy_BlockReduce proxy_block_reduce, 
+    int index = 0) throw();
 
   /// Destructor
   ~EnzoSimulationCharm() throw();

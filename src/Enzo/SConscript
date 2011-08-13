@@ -40,7 +40,11 @@ sources  = [Glob('enzo_*cpp')]
 #------------------------------
 
 libraries     = env.Library ('enzo', sources)
-test_enzo_p   = env.Program (['enzo-p.cpp', sources])
+
+if (type == 'charm'):
+	sources = sources + ['../main_enzo.cpp']
+
+test_enzo_p = env.Program (['enzo-p.cpp', sources])
 
 binaries = [test_enzo_p]
 

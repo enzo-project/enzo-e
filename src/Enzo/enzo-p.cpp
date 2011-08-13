@@ -10,8 +10,9 @@
 
 //----------------------------------------------------------------------
 
-class Factory;
+#define CHARM_ENZO
 #include "main.hpp"
+
 #include "test.hpp"
 
 #include "enzo.hpp"
@@ -83,8 +84,11 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_PRINTF ("%s:%d  DEBUG\n",__FILE__,__LINE__);
 
+  CProxy_BlockReduce proxy_block_reduce = 
+    CProxy_BlockReduce::ckNew();
+
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
-    (parameter_file, strlen(parameter_file)+1, 0);
+    (parameter_file, strlen(parameter_file)+1, proxy_block_reduce, 0);
 
   PARALLEL_PRINTF ("%s:%d  DEBUG\n",__FILE__,__LINE__);
 

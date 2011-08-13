@@ -3,7 +3,7 @@
 /// @file     main.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file main.cpp
+/// @brief    Definition of Main functions excluding Main::Main()
 
 #ifdef CONFIG_USE_CHARM
 
@@ -11,8 +11,6 @@
 
 #include "parallel.hpp"
 #include "monitor.hpp"
-
-#include "main.hpp"
 
 //----------------------------------------------------------------------
 
@@ -32,16 +30,5 @@ void Main::p_exit(int count)
     PARALLEL_EXIT;
   }
 }
-
-
-#if defined(CHARM_ENZO)
-#  include "main_enzo.def.h"
-#elif defined(CHARM_SIMULATION)
-#  include "main_simulation.def.h"
-#elif defined(CHARM_MESH)
-#  include "main_mesh.def.h"
-#else
-#  include "main.def.h"
-#endif
 
 #endif

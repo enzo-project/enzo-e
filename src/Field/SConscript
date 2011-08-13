@@ -11,7 +11,12 @@ Import('type')
 
 # (uses Mesh for test_FieldBlock, which requires DataBlock)
 
-components = ['mesh','cello','error','monitor','performance','parallel']
+if (type == "charm"):
+    components = ['simulation','method','mesh','error',
+                  'monitor','performance','parallel','parameters','cello']
+else:
+    components = ['mesh','error','monitor','performance','parallel','cello']
+
 libraries  = ['png']
 
 #------------------------------
@@ -31,6 +36,9 @@ sources  = [Glob('field*cpp')]
 #------------------------------
 
 libraries        = env.Library ('field', [sources])
+
+if (type == "charm"):
+	sources = sources + ["../main_simulation.cpp"]
 
 test_field_block = env.Program (['test_FieldBlock.cpp',  sources])
 test_field_descr = env.Program (['test_FieldDescr.cpp',  sources])

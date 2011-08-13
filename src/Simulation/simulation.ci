@@ -8,13 +8,14 @@
 module simulation {
 
 //  extern module main;
-//  extern module mesh;
+  extern module mesh;
 
   group Simulation {
 
     entry Simulation
       (const char filename[n], int n, 
        const Factory & factory,
+       CProxy_BlockReduce proxy_block_reduce,
        int index_simulation);
 
     entry void p_output (int cycle, double time, double dt, bool stopping);

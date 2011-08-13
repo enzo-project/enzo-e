@@ -34,6 +34,9 @@ sources  = [Glob('disk*cpp')]
 
 libraries  = env.Library ('disk', sources)
 
+if (type == "charm"):
+	sources = sources + ['../main.cpp']
+
 test_FileHdf5  = env.Program (['test_FileHdf5.cpp', sources])
 test_FileIfrit = env.Program (['test_FileIfrit.cpp', sources])
 

@@ -30,6 +30,10 @@ sources  = [Glob('memory*cpp')]
 #------------------------------
 
 libraries = env.Library ('memory', [sources])
+
+if (type == "charm"):
+	sources = sources + ["../main.cpp"]
+
 binaries  = env.Program (['test_Memory.cpp', sources])
 
 #------------------------------

@@ -11,7 +11,8 @@
 
 #include "mesh.hpp"
 
-#include "enzo.hpp"
+// #include "enzo.hpp"
+// #include "enzo_charm.hpp"
 PARALLEL_MAIN_BEGIN
 {
 
@@ -56,5 +57,9 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_EXIT;
 }
+
+// #ifdef CONFIG_USE_CHARM
+// #  include "enzo.def.h"
+// #endif
 
 PARALLEL_MAIN_END

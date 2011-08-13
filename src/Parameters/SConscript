@@ -37,8 +37,12 @@ sources  = ['parse.tab.c', 'lex.yy.c', Glob('parameters*cpp') ]
 #------------------------------
 
 libraries = env.Library ('parameters', [sources])
+
+if (type == "charm"):
+	sources = sources + ["../main.cpp"]
+
 test_parameters = env.Program (['test_Parameters.cpp', sources])
-test_parse      = env.Program (['test_Parse.cpp', sources])
+test_parse      = env.Program (['test_Parse.cpp',      sources])
 
 binaries = [test_parameters, test_parse]
 

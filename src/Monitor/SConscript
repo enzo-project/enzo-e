@@ -31,6 +31,10 @@ sources    = [Glob('monitor*cpp'), Glob('png*cpp')]
 #------------------------------
 
 libraries  = env.Library ('monitor', [sources])
+
+if (type == "charm"):
+	sources = sources + ["../main.cpp"]
+
 binaries   = env.Program (['test_Monitor.cpp', sources])
 
 #------------------------------

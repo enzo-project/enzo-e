@@ -3,9 +3,7 @@
 /// @file     main.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file main.cpp
-///
-/// Detailed description of file main.cpp
+/// @brief    Declaration of the Main CHARM++ chare
 
 #ifdef CONFIG_USE_CHARM
 
@@ -15,7 +13,16 @@
 #include "monitor.hpp"
 
 class Factory;
-#include "main.decl.h"
+#if defined(CHARM_ENZO)
+#  include "main_enzo.decl.h"
+#elif defined(CHARM_SIMULATION)
+#  include "main_simulation.decl.h"
+#elif defined(CHARM_MESH)
+#  include "main_mesh.decl.h"
+#else
+#  include "main.decl.h"
+#endif
+
 extern CProxy_Main proxy_main;
 
 //----------------------------------------------------------------------

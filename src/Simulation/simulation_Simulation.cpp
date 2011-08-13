@@ -20,6 +20,7 @@ Simulation::Simulation
 #ifdef CONFIG_USE_CHARM
  int n,
  const Factory & factory,
+ CProxy_BlockReduce proxy_block_reduce,
 #else
  const Factory & factory,
  GroupProcess * group_process,
@@ -48,13 +49,16 @@ Simulation::Simulation
     timestep_(0),
     initial_(0),
     boundary_(0),
+#ifdef CONFIG_USE_CHARM
+    proxy_block_reduce_(proxy_block_reduce),
+    index_output_(0),
+#endif
     output_list_(),
     method_list_()
 {
   performance_ = new Performance;
 #ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;
-  proxy_block_reduce_ = CProxy_BlockReduce::ckNew();
 #else
   monitor_ = Monitor::instance();
 #endif

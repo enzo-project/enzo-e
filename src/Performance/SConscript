@@ -34,8 +34,12 @@ sources  = [Glob('performance*cpp')]
 #------------------------------
 
 libraries        = env.Library ('performance', [sources])
+
+if (type == "charm"):
+	sources = sources + ["../main.cpp"]
+
 test_performance = env.Program(['test_Performance.cpp', sources])
-test_papi        = env.Program(['test_Papi.cpp', sources])
+test_papi        = env.Program(['test_Papi.cpp',        sources])
 
 binaries = [test_performance,test_papi]
 
