@@ -3,7 +3,7 @@
 /// @file     field_Output.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
-/// @todo     Create and use Schedule object for scheduling output
+/// @todo     Extract Schedule object for scheduling output
 /// @brief    [\ref Field] Declaration for the Output component
 
 #ifndef FIELD_OUTPUT_HPP

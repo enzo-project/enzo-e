@@ -319,8 +319,8 @@ void Simulation::initialize_mesh_() throw()
   double upper[3];
 
   for (int i=0; i<3; i++) {
-    lower[i] = parameters_->list_value_scalar(i, "Domain:lower", 0.0);
-    upper[i] = parameters_->list_value_scalar(i, "Domain:upper", 0.0);
+    lower[i] = parameters_->list_value_float(i, "Domain:lower", 0.0);
+    upper[i] = parameters_->list_value_float(i, "Domain:upper", 0.0);
     ASSERT ("Simulation::initialize_simulation_",
 	    "Domain:lower may not be greater than Domain:upper",
 	    lower[i] <= upper[i]);
@@ -585,8 +585,8 @@ void Simulation::initialize_output_() throw()
       double time_start = 0;
       double time_step = 0;
       double time_stop = max_double;
-      if (parameters_->type("time_interval") == parameter_scalar) {
-	time_step = parameters_->value_scalar("time_interval",1);
+      if (parameters_->type("time_interval") == parameter_float) {
+	time_step = parameters_->value_float("time_interval",1);
       } else if (parameters_->type("time_interval") == parameter_list) {
 	if (parameters_->list_length("time_interval") != 3) {
 	  ERROR("Simulation::initialize_output_",
@@ -594,11 +594,11 @@ void Simulation::initialize_output_() throw()
 		"[time_start, time_step, time_stop");
 	}
 	time_start = 
-	  parameters_->list_value_scalar (0,"time_interval",0);
+	  parameters_->list_value_float (0,"time_interval",0);
 	time_step  = 
-	  parameters_->list_value_scalar (1,"time_interval",1);
+	  parameters_->list_value_float (1,"time_interval",1);
 	time_stop  = 
-	  parameters_->list_value_scalar (2,"time_interval",max_double);
+	  parameters_->list_value_float (2,"time_interval",max_double);
       } else {
 	ERROR("Simulation::initialize_output_",
 	      "Output time_interval is of the wrong type");
@@ -609,15 +609,15 @@ void Simulation::initialize_output_() throw()
 
       std::vector<double> list;
 
-      if (parameters_->type("time_list") == parameter_scalar) {
-	list.push_back (parameters_->value_scalar("time_list",0));
+      if (parameters_->type("time_list") == parameter_float) {
+	list.push_back (parameters_->value_float("time_list",0));
       } else if (parameters_->type("time_list") == parameter_list) {
 	for (int i=0; i<parameters_->list_length("time_list"); i++) {
-	  double value = parameters_->list_value_scalar(i,"time_list",0.0);
+	  double value = parameters_->list_value_float(i,"time_list",0.0);
 	  list.push_back (value);
 	  // check monotonicity
 	  if (i > 0) {
-	    double value_prev = parameters_->list_value_scalar(i-1,"time_list",0);
+	    double value_prev = parameters_->list_value_float(i-1,"time_list",0);
 	    ASSERT("Simulation::initialize_output_",
 		   "Output time_list must be monotonically increasing",
 		   value_prev < value);

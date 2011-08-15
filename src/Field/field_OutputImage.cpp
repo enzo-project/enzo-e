@@ -288,13 +288,21 @@ void OutputImage::write
 
   // Add block contribution to image
 
-  Scalar * field_unknowns = (Scalar *)field_block->field_unknowns(field_descr,index);
+  char * field_unknowns = field_block->field_unknowns(field_descr,index);
     
-  image_reduce_ (field_unknowns, 
-		 ndx,ndy,ndz, 
-		 nx,ny,nz,
-		 ix0,iy0,iz0,
-		 axis_z, reduce_sum);
+  if (field_descr->precision(index) == precision_single) {
+    image_reduce_ (((float *) field_unknowns),
+		   ndx,ndy,ndz, 
+		   nx,ny,nz,
+		   ix0,iy0,iz0,
+		   axis_z, reduce_sum);
+  } else {
+    image_reduce_ (((double *) field_unknowns),
+		   ndx,ndy,ndz, 
+		   nx,ny,nz,
+		   ix0,iy0,iz0,
+		   axis_z, reduce_sum);
+  }
 
   if (root_call) {
     // Complete geterating image if writing a single block

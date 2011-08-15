@@ -34,11 +34,11 @@ void generate_input()
   //  List
   //  Logical::
   //  Logical_expr::var_logical_1
-  //  Scalar::
-  //  Scalar::const_scalar_1
-  //  Scalar::const_scalar_2
-  //  Scalar_expr::var_scalar_1
-  //  Scalar_expr::var_scalar_2
+  //  Float::
+  //  Float::const_float_1
+  //  Float::const_float_2
+  //  Float_expr::var_float_1
+  //  Float_expr::var_float_2
   //  String
 
   fp << "Logical {\n";
@@ -51,19 +51,19 @@ void generate_input()
   fp << "  test_neg_37 = -37;\n";
   fp << "}\n";
 
-  fp << "Scalar {\n";
+  fp << "Float {\n";
   fp << "  test_1_5 = 1.5;\n";
   fp << "  test_neg_37_25 = -37.25;\n";
   fp << "}\n";
 
-  fp << "Scalar {\n";
-  fp << "  const_scalar_1 {\n";
+  fp << "Float {\n";
+  fp << "  const_float_1 {\n";
   fp << "    num1 = 24.5 + 6.125;\n";
   fp << "    num2 = 24.5 - 6.125;\n";
   fp << "    num3 = 24.5 * 6.125;\n";
   fp << "    num4 = 24.5 / 6.125;\n";
   fp << "  };\n";
-  fp << "  const_scalar_2 {\n";
+  fp << "  const_float_2 {\n";
   fp << "    num1 = 24.5 + 6.125*2.0;\n";
   fp << "    num2 = 24.5*3.0 - 6.125;\n";
   fp << "    num3 = (24.5 + 6.125*2.0 - (24.5*3.0 - 6.125));\n";
@@ -75,16 +75,16 @@ void generate_input()
   fp << "  str2 = \"one\";\n";
   fp << "}\n";
 
-  fp << "Scalar_expr {\n";
-  fp << "  var_scalar_1 {\n";
+  fp << "Float_expr {\n";
+  fp << "  var_float_1 {\n";
   fp << "    num1 = x;\n";
   fp << "    num2 = x + 3.0;\n";
   fp << "    num3 = x+y+z+t;\n";
   fp << "  }\n";
   fp << "}\n";
 
-  fp << " Scalar_expr {\n";
-  fp << "    var_scalar_2 {\n";
+  fp << " Float_expr {\n";
+  fp << "    var_float_2 {\n";
   fp << "       num1 = sin(x);\n";
   fp << "       num2 = atan(y/3.0+3.0*t);\n";
   fp << "     }\n";
@@ -251,59 +251,59 @@ PARALLEL_MAIN_BEGIN
   unit_assert (parameters->value_integer("none2") == 4);
 
 
-  // value_scalar()
+  // value_float()
   
-  unit_func("value_scalar");
+  unit_func("value_float");
 
-  parameters->set_group(0,"Scalar");
+  parameters->set_group(0,"Float");
   
-  unit_assert (parameters->value_scalar("test_1_5")  == 1.5);
-  unit_assert (parameters->value_scalar("test_neg_37_25") == -37.25);
-  unit_assert (parameters->value_scalar("none",58.75) == 58.75);
+  unit_assert (parameters->value_float("test_1_5")  == 1.5);
+  unit_assert (parameters->value_float("test_neg_37_25") == -37.25);
+  unit_assert (parameters->value_float("none",58.75) == 58.75);
 
   // double d,dd;
   
-  // parameters->value("test_1_5",parameter_scalar,&d);
+  // parameters->value("test_1_5",parameter_float,&d);
   // unit_assert (d  == 1.5);
-  // parameters->value("test_37_25",parameter_scalar,&d);
+  // parameters->value("test_37_25",parameter_float,&d);
   // unit_assert (d == 37.25);
   // dd = 58.75;
-  // parameters->value("none",parameter_scalar,&d,&dd);
+  // parameters->value("none",parameter_float,&d,&dd);
   // unit_assert (d == dd);
   // PARALLEL_PRINTF ("%g %g\n",d,dd);
 
-  // set_scalar()
+  // set_float()
 
-  unit_func("set_scalar");
+  unit_func("set_float");
 
-  parameters->set_scalar("test_1_5",27.0);
-  unit_assert (parameters->value_scalar("test_1_5") == 27.0);
-  parameters->set_scalar("none_s",1.5);
-  unit_assert (parameters->value_scalar("none_s") == 1.5);
+  parameters->set_float("test_1_5",27.0);
+  unit_assert (parameters->value_float("test_1_5") == 27.0);
+  parameters->set_float("none_s",1.5);
+  unit_assert (parameters->value_float("none_s") == 1.5);
 
-  // Constant scalar expressions
+  // Constant float expressions
   // subgroups
 
-  unit_func("value_scalar");
+  unit_func("value_float");
 
-  parameters->set_group(0,"Scalar");
-  parameters->set_group(1,"const_scalar_1");
+  parameters->set_group(0,"Float");
+  parameters->set_group(1,"const_float_1");
 
-  unit_assert(parameters->value_scalar("num1") == 30.625);
-  unit_assert(parameters->value_scalar("num2") == 18.375);
-  unit_assert(parameters->value_scalar("num3") == 150.0625);
-  unit_assert(parameters->value_scalar("num4") == 4.0000000000);
+  unit_assert(parameters->value_float("num1") == 30.625);
+  unit_assert(parameters->value_float("num2") == 18.375);
+  unit_assert(parameters->value_float("num3") == 150.0625);
+  unit_assert(parameters->value_float("num4") == 4.0000000000);
 
-  unit_assert(parameters->value_scalar("Scalar:const_scalar_1:num1") == 30.625);
-  unit_assert(parameters->value_scalar("Scalar:const_scalar_1:num2") == 18.375);
-  unit_assert(parameters->value_scalar("Scalar:const_scalar_1:num3") == 150.0625);
-  unit_assert(parameters->value_scalar("Scalar:const_scalar_1:num4") == 4.0000000000);
+  unit_assert(parameters->value_float("Float:const_float_1:num1") == 30.625);
+  unit_assert(parameters->value_float("Float:const_float_1:num2") == 18.375);
+  unit_assert(parameters->value_float("Float:const_float_1:num3") == 150.0625);
+  unit_assert(parameters->value_float("Float:const_float_1:num4") == 4.0000000000);
 
-  parameters->set_group(1,"const_scalar_2");
+  parameters->set_group(1,"const_float_2");
 
-  unit_assert(parameters->value_scalar("num1") == 36.750);
-  unit_assert(parameters->value_scalar("num2") == 67.375);
-  unit_assert(parameters->value_scalar("num3") == -30.625);
+  unit_assert(parameters->value_float("num1") == 36.750);
+  unit_assert(parameters->value_float("num2") == 67.375);
+  unit_assert(parameters->value_float("num3") == -30.625);
 
   // Strings
 
@@ -335,47 +335,47 @@ PARALLEL_MAIN_BEGIN
   parameters->set_string("none_str","hello");
   unit_assert (strcmp(parameters->value_string("none_str"),"hello")==0);
 
-  // Variable scalar expressions
+  // Variable float expressions
 
-  unit_func("evaluate_scalar");
+  unit_func("evaluate_float");
 
   double x[] = { 1, 2, 3};
   double y[] = {5 , 4, 3};
   double z[] = {8, 9, 10};
   double t[] = {-1, 2, -7};
-  double values_scalar[] = {0,0,0};
-  double deflts_scalar[] = {-1,-2,-3};
+  double values_float[] = {0,0,0};
+  double deflts_float[] = {-1,-2,-3};
 
-  parameters->set_group(0,"Scalar_expr");
-  parameters->set_group(1,"var_scalar_1");
+  parameters->set_group(0,"Float_expr");
+  parameters->set_group(1,"var_float_1");
 
-  parameters->evaluate_scalar("num1",3,values_scalar,deflts_scalar,x,y,z,t);
-  unit_assert (values_scalar[0]==x[0]);
-  unit_assert (values_scalar[1]==x[1]);
-  unit_assert (values_scalar[2]==x[2]);
+  parameters->evaluate_float("num1",3,values_float,deflts_float,x,y,z,t);
+  unit_assert (values_float[0]==x[0]);
+  unit_assert (values_float[1]==x[1]);
+  unit_assert (values_float[2]==x[2]);
 
   
-  parameters->evaluate_scalar("num2",3,values_scalar,deflts_scalar,x,y,z,t);
-  unit_assert (values_scalar[0]==x[0]+3.0);
-  unit_assert (values_scalar[1]==x[1]+3.0);
-  unit_assert (values_scalar[2]==x[2]+3.0);
+  parameters->evaluate_float("num2",3,values_float,deflts_float,x,y,z,t);
+  unit_assert (values_float[0]==x[0]+3.0);
+  unit_assert (values_float[1]==x[1]+3.0);
+  unit_assert (values_float[2]==x[2]+3.0);
 
-  parameters->evaluate_scalar("num3",3,values_scalar,deflts_scalar,x,y,z,t);
-  unit_assert (values_scalar[0]==x[0]+y[0]+z[0]+t[0]);
-  unit_assert (values_scalar[1]==x[1]+y[1]+z[1]+t[1]);
-  unit_assert (values_scalar[2]==x[2]+y[2]+z[2]+t[2]);
+  parameters->evaluate_float("num3",3,values_float,deflts_float,x,y,z,t);
+  unit_assert (values_float[0]==x[0]+y[0]+z[0]+t[0]);
+  unit_assert (values_float[1]==x[1]+y[1]+z[1]+t[1]);
+  unit_assert (values_float[2]==x[2]+y[2]+z[2]+t[2]);
 
-  parameters->set_group(1,"var_scalar_2");
+  parameters->set_group(1,"var_float_2");
 
-  parameters->evaluate_scalar("num1",3,values_scalar,deflts_scalar,x,y,z,t);
-  unit_assert (CLOSE(values_scalar[0],sin(x[0])));
-  unit_assert (CLOSE(values_scalar[1],sin(x[1])));
-  unit_assert (CLOSE(values_scalar[2],sin(x[2])));
+  parameters->evaluate_float("num1",3,values_float,deflts_float,x,y,z,t);
+  unit_assert (CLOSE(values_float[0],sin(x[0])));
+  unit_assert (CLOSE(values_float[1],sin(x[1])));
+  unit_assert (CLOSE(values_float[2],sin(x[2])));
 
-  parameters->evaluate_scalar("num2",3,values_scalar,deflts_scalar,x,y,z,t);
-  unit_assert (CLOSE(values_scalar[0],atan(y[0]/3.0+3*t[0])));
-  unit_assert (CLOSE(values_scalar[1],atan(y[1]/3.0+3*t[1])));
-  unit_assert (CLOSE(values_scalar[2],atan(y[2]/3.0+3*t[2])));
+  parameters->evaluate_float("num2",3,values_float,deflts_float,x,y,z,t);
+  unit_assert (CLOSE(values_float[0],atan(y[0]/3.0+3*t[0])));
+  unit_assert (CLOSE(values_float[1],atan(y[1]/3.0+3*t[1])));
+  unit_assert (CLOSE(values_float[2],atan(y[2]/3.0+3*t[2])));
 
   // Logical expressions
 
@@ -409,8 +409,8 @@ PARALLEL_MAIN_BEGIN
   unit_func("list_length");
   unit_assert(parameters->list_length("num1") == 6);
 
-  unit_func("list_value_scalar");
-  unit_assert(parameters->list_value_scalar(0,"num1") == 1.0);
+  unit_func("list_value_float");
+  unit_assert(parameters->list_value_float(0,"num1") == 1.0);
 
   unit_func("list_value_logical");
   unit_assert(parameters->list_value_logical(1,"num1") == true);
@@ -421,11 +421,11 @@ PARALLEL_MAIN_BEGIN
   unit_func("list_value_string");
   unit_assert(strcmp(parameters->list_value_string(3,"num1"),"string")==0);
 
-  unit_func("list_evaluate_scalar");
-  parameters->list_evaluate_scalar(4,"num1",3,values_scalar,deflts_scalar,x,y,z,t);
-  unit_assert (values_scalar[0] == (x[0]-y[0]+2.0*z[0]));
-  unit_assert (values_scalar[1] == (x[1]-y[1]+2.0*z[1]));
-  unit_assert (values_scalar[2] == (x[2]-y[2]+2.0*z[2]));
+  unit_func("list_evaluate_float");
+  parameters->list_evaluate_float(4,"num1",3,values_float,deflts_float,x,y,z,t);
+  unit_assert (values_float[0] == (x[0]-y[0]+2.0*z[0]));
+  unit_assert (values_float[1] == (x[1]-y[1]+2.0*z[1]));
+  unit_assert (values_float[2] == (x[2]-y[2]+2.0*z[2]));
 
   unit_func("list_evaluate_logical");
   parameters->list_evaluate_logical(5,"num1",3,values_logical,deflts_logical,x,y,z,t);
@@ -443,8 +443,8 @@ PARALLEL_MAIN_BEGIN
   //  List
   //  Logical
   //  Logical_expr
-  //  Scalar
-  //  Scalar_expr
+  //  Float
+  //  Float_expr
   //  String
   unit_assert (num_groups == 7); 
 
@@ -454,8 +454,8 @@ PARALLEL_MAIN_BEGIN
   num_subgroups["List"]         = 1; // ""
   num_subgroups["Logical"]      = 1; // "var_logical_1"
   num_subgroups["Logical_expr"] = 1; // ""
-  num_subgroups["Scalar"]       = 3; // "","const_scalar_1","const_scalar_2"
-  num_subgroups["Scalar_expr"]  = 2; // "var_scalar_1","var_scalar_2"
+  num_subgroups["Float"]       = 3; // "","const_float_1","const_float_2"
+  num_subgroups["Float_expr"]  = 2; // "var_float_1","var_float_2"
   num_subgroups["String"]       = 1; // ""
 
   for (int i=0; i<num_groups; i++) {

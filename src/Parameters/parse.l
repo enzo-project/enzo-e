@@ -123,9 +123,9 @@ true      { yylval.logical_type = 1; return LOGICAL; }
 ","        { return ','; } /* list element separator */
 "#".*      {  /* ignore comments */ }
 
-{S}{D}+{E}            { yylval.scalar_type = atof (yytext); return SCALAR; }
-{S}{D}*"."{D}+({E})?  { yylval.scalar_type = atof (yytext); return SCALAR; }
-{S}{D}+"."{D}*({E})?  { yylval.scalar_type = atof (yytext); return SCALAR; }
+{S}{D}+{E}            { yylval.float_type = atof (yytext); return FLOAT; }
+{S}{D}*"."{D}+({E})?  { yylval.float_type = atof (yytext); return FLOAT; }
+{S}{D}+"."{D}*({E})?  { yylval.float_type = atof (yytext); return FLOAT; }
 {S}{D}+               { yylval.integer_type = atoi (yytext); return INTEGER; }
 
 \"(\\.|[^\\"])*\"  { yylval.string_type = strdup(yytext+1); /* copy, skipping open quote */

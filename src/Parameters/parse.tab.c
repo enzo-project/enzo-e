@@ -109,7 +109,7 @@ void yylex_destroy();
 const char * node_name[] = {
   "node_unknown",
   "node_operation",
-  "node_scalar",
+  "node_float",
   "node_integer",
   "node_variable",
   "node_function"
@@ -136,12 +136,12 @@ const char * op_name[] = {
     "sentinel",
     "group",
     "integer",
-    "scalar",
+    "float",
     "string",
     "identifier",
     "logical",
     "list",
-    "scalar_expr",
+    "float_expr",
     "logical_expr",
     "function" };
 
@@ -164,12 +164,12 @@ const char * op_name[] = {
     return node;
   }
 
-  struct node_expr * new_node_scalar (double value)
+  struct node_expr * new_node_float (double value)
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type          = enum_node_scalar;
-    node->scalar_value  = value;
+    node->type          = enum_node_float;
+    node->float_value  = value;
     node->left          = NULL;
     node->right         = NULL;
     node->function_name = NULL;
@@ -351,13 +351,13 @@ const char * op_name[] = {
   }
 
 
-  /* New scalar parameter assignment */
+  /* New floating-point parameter assignment */
 
-  void new_param_scalar (double value)
+  void new_param_float (double value)
   {
     struct param_struct * p = new_param();
-    p->type         = enum_parameter_scalar;
-    p->scalar_value = value;
+    p->type         = enum_parameter_float;
+    p->float_value = value;
   }
 
   /* New logical parameter assignment */
@@ -430,8 +430,8 @@ const char * op_name[] = {
      case enum_parameter_integer:
        new_param_integer(yylval.integer_type);
        break;
-     case enum_parameter_scalar:
-       new_param_scalar(yylval.scalar_type);
+     case enum_parameter_float:
+       new_param_float(yylval.float_type);
        break;
      case enum_parameter_string: 
        new_param_string(yylval.string_type);
@@ -441,8 +441,8 @@ const char * op_name[] = {
        break;
      case enum_parameter_list:
        break;
-     case enum_parameter_scalar_expr:
-       new_param_expr(enum_parameter_scalar_expr,yylval.node_type);
+     case enum_parameter_float_expr:
+       new_param_expr(enum_parameter_float_expr,yylval.node_type);
        break;
      case enum_parameter_logical_expr:
        new_param_expr(enum_parameter_logical_expr,yylval.node_type);
@@ -505,7 +505,7 @@ const char * op_name[] = {
      STRING = 258,
      IDENTIFIER = 259,
      VARIABLE = 260,
-     SCALAR = 261,
+     FLOAT = 261,
      INTEGER = 262,
      LOGICAL = 263,
      LE = 264,
@@ -559,7 +559,7 @@ typedef union YYSTYPE
  
   int logical_type;  
   int integer_type; 
-  double scalar_type;  
+  double float_type;  
   char * string_type; 
   char * group_type;
   struct node_expr * node_type;
@@ -966,7 +966,7 @@ static const yytype_uint16 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "STRING", "IDENTIFIER", "VARIABLE",
-  "SCALAR", "INTEGER", "LOGICAL", "LE", "GE", "NE", "EQ", "AND", "OR",
+  "FLOAT", "INTEGER", "LOGICAL", "LE", "GE", "NE", "EQ", "AND", "OR",
   "'<'", "'>'", "'+'", "'-'", "'*'", "'/'", "ACOS", "ACOSH", "ASIN",
   "ASINH", "ATAN", "ATANH", "CBRT", "CEIL", "COS", "COSH", "ERFC", "ERF",
   "EXP", "EXPM1", "FABS", "FLOOR", "J0", "J1", "LGAMMA", "LOG10", "LOG1P",
@@ -2279,7 +2279,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 517 "src/Parameters/parse.y"
-    { current_type = enum_parameter_scalar;       yylval.scalar_type = (yyvsp[(1) - (1)].scalar_type);;}
+    { current_type = enum_parameter_float;       yylval.float_type = (yyvsp[(1) - (1)].float_type);;}
     break;
 
   case 17:
@@ -2293,7 +2293,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 519 "src/Parameters/parse.y"
-    { current_type = enum_parameter_scalar_expr;  yylval.node_type = (yyvsp[(1) - (1)].node_type); ;}
+    { current_type = enum_parameter_float_expr;  yylval.node_type = (yyvsp[(1) - (1)].node_type); ;}
     break;
 
   case 19:
@@ -2375,42 +2375,42 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 548 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) <= (yyvsp[(3) - (3)].scalar_type); ;}
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) <= (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
 #line 549 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) >= (yyvsp[(3) - (3)].scalar_type); ;}
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) >= (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
 #line 550 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) <  (yyvsp[(3) - (3)].scalar_type); ;}
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) <  (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
 #line 551 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) >  (yyvsp[(3) - (3)].scalar_type); ;}
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) >  (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
 #line 552 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) == (yyvsp[(3) - (3)].scalar_type); ;}
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) == (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
 #line 553 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) != (yyvsp[(3) - (3)].scalar_type); ;}
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) != (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 35:
@@ -2438,259 +2438,259 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 560 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(2) - (3)].scalar_type); ;}
+    { (yyval.float_type) = (yyvsp[(2) - (3)].float_type); ;}
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
 #line 561 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(1) - (3)].scalar_type) + (yyvsp[(3) - (3)].scalar_type);;}
+    { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) + (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
 #line 562 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(1) - (3)].scalar_type) - (yyvsp[(3) - (3)].scalar_type);;}
+    { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) - (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
 #line 563 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(1) - (3)].scalar_type) * (yyvsp[(3) - (3)].scalar_type);;}
+    { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) * (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
 #line 564 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(1) - (3)].scalar_type) / (yyvsp[(3) - (3)].scalar_type);;}
+    { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) / (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
 #line 565 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = acos((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = acos((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
 #line 566 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = acosh((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = acosh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
 #line 567 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = asin((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = asin((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
 #line 568 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = asinh((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = asinh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 47:
 
 /* Line 1455 of yacc.c  */
 #line 569 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = atan((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = atan((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
 #line 570 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = atanh((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = atanh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
 #line 571 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = cbrt((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = cbrt((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 50:
 
 /* Line 1455 of yacc.c  */
 #line 572 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = ceil((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = ceil((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 51:
 
 /* Line 1455 of yacc.c  */
 #line 573 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = cos((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = cos((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
 #line 574 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = cosh((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = cosh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
 #line 575 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = erfc((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = erfc((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
 #line 576 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = erf((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = erf((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
 #line 577 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = exp((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = exp((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 56:
 
 /* Line 1455 of yacc.c  */
 #line 578 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = expm1((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = expm1((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 57:
 
 /* Line 1455 of yacc.c  */
 #line 579 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = fabs((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = fabs((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 58:
 
 /* Line 1455 of yacc.c  */
 #line 580 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = floor((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = floor((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 59:
 
 /* Line 1455 of yacc.c  */
 #line 582 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = j0((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = j0((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
 #line 583 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = j1((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = j1((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
 #line 584 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = lgamma((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = lgamma((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 62:
 
 /* Line 1455 of yacc.c  */
 #line 585 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = log10((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = log10((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 63:
 
 /* Line 1455 of yacc.c  */
 #line 586 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = log1p((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = log1p((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 64:
 
 /* Line 1455 of yacc.c  */
 #line 587 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = logb((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = logb((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 65:
 
 /* Line 1455 of yacc.c  */
 #line 588 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = log((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = log((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
 #line 589 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = sin((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = sin((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
 #line 590 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = sinh((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = sinh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
 #line 591 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = sqrt((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = sqrt((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 69:
 
 /* Line 1455 of yacc.c  */
 #line 592 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = tan((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = tan((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
 #line 593 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = tanh((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = tanh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
 #line 594 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = y0((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = y0((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 72:
 
 /* Line 1455 of yacc.c  */
 #line 595 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = y1((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = y1((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
 #line 596 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = rint((yyvsp[(3) - (4)].scalar_type)); ;}
+    { (yyval.float_type) = rint((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
 #line 597 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(1) - (1)].scalar_type);;}
+    { (yyval.float_type) = (yyvsp[(1) - (1)].float_type);;}
     break;
 
   case 75:
@@ -2746,14 +2746,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 611 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_add,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_add,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 83:
 
 /* Line 1455 of yacc.c  */
 #line 612 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_add,(yyvsp[(3) - (3)].node_type)); ;}
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_add,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 84:
@@ -2767,14 +2767,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 614 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_sub,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_sub,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 86:
 
 /* Line 1455 of yacc.c  */
 #line 615 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_sub,(yyvsp[(3) - (3)].node_type)); ;}
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_sub,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 87:
@@ -2788,14 +2788,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 617 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_mul,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_mul,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 89:
 
 /* Line 1455 of yacc.c  */
 #line 618 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_mul,(yyvsp[(3) - (3)].node_type)); ;}
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_mul,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 90:
@@ -2809,14 +2809,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 620 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_div,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_div,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 92:
 
 /* Line 1455 of yacc.c  */
 #line 621 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_div,(yyvsp[(3) - (3)].node_type)); ;}
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_div,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 93:
@@ -3061,14 +3061,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 661 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_le,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_le,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 128:
 
 /* Line 1455 of yacc.c  */
 #line 662 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_le,(yyvsp[(3) - (3)].node_type)); ;}
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_le,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 129:
@@ -3082,14 +3082,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 664 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ge,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ge,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 131:
 
 /* Line 1455 of yacc.c  */
 #line 665 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_ge,(yyvsp[(3) - (3)].node_type)); ;}
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_ge,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 132:
@@ -3103,14 +3103,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 667 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_lt,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_lt,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 134:
 
 /* Line 1455 of yacc.c  */
 #line 668 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_lt,(yyvsp[(3) - (3)].node_type)); ;}
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_lt,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 135:
@@ -3124,14 +3124,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 670 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_gt,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_gt,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 137:
 
 /* Line 1455 of yacc.c  */
 #line 671 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_gt,(yyvsp[(3) - (3)].node_type)); ;}
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_gt,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 138:
@@ -3145,14 +3145,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 673 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_eq,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_eq,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 140:
 
 /* Line 1455 of yacc.c  */
 #line 674 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_eq,(yyvsp[(3) - (3)].node_type)); ;}
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_eq,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 141:
@@ -3166,14 +3166,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 676 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ne,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ne,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 143:
 
 /* Line 1455 of yacc.c  */
 #line 677 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_ne,(yyvsp[(3) - (3)].node_type)); ;}
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_ne,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 144:
@@ -3481,8 +3481,8 @@ void print_expression (struct node_expr * node,
     case enum_node_integer:
       fprintf (fp,"%d",node->integer_value);
       break;
-    case enum_node_scalar:
-      fprintf (fp,"%g",node->scalar_value);
+    case enum_node_float:
+      fprintf (fp,"%g",node->float_value);
       break;
     case enum_node_variable:
       fprintf (fp,"%c",node->var_value);
@@ -3526,8 +3526,8 @@ void sprintf_expression (struct node_expr * node,
       sprintf (buffer,"%d",node->integer_value);
       buffer += strlen(buffer);
       break;
-    case enum_node_scalar:
-      sprintf (buffer,"%g",node->scalar_value);
+    case enum_node_float:
+      sprintf (buffer,"%g",node->float_value);
       buffer += strlen(buffer);
       break;
     case enum_node_variable:
@@ -3589,8 +3589,8 @@ void cello_parameters_print_list(struct param_struct * head, int level)
 	      parameter_name[p->type], p->parameter);
     }
     switch (p->type) {
-    case enum_parameter_scalar:  
-      printf ("%g\n",p->scalar_value);  
+    case enum_parameter_float:  
+      printf ("%g\n",p->float_value);  
       break;
     case enum_parameter_integer: 
       printf ("%d\n",p->integer_value); 
@@ -3615,7 +3615,7 @@ void cello_parameters_print_list(struct param_struct * head, int level)
       indent(level);
       print_expression(p->op_value,stdout); printf ("\n");
       break;
-    case enum_parameter_scalar_expr:
+    case enum_parameter_float_expr:
       indent(level);
       print_expression(p->op_value,stdout); printf ("\n");
       break;

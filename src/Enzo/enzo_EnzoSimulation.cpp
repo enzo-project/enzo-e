@@ -91,7 +91,7 @@ Stopping * EnzoSimulation::create_stopping_ (std::string name) throw ()
 
   int    stop_cycle = parameters_->value_integer
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
-  double stop_time  = parameters_->value_scalar
+  double stop_time  = parameters_->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
 
   return new Stopping(stop_cycle,stop_time);
@@ -123,7 +123,7 @@ Initial * EnzoSimulation::create_initial_ ( std::string name ) throw ()
   //--------------------------------------------------
 
   cycle_  = parameters_->value_integer ("Initial:cycle",0);
-  time_   = parameters_->value_scalar  ("Initial:time",0.0);
+  time_   = parameters_->value_float   ("Initial:time",0.0);
 
   return initial;
 }

@@ -45,7 +45,7 @@ void FileIfrit::read_bin
 ;
   if (bound != 12) WARNING("FileIfrit::read_bin","incorrect format");
 
-  // Read scalar field
+  // Read floating-point field
   int n = (*pnx)*(*pny)*(*pnz);
 
   ASSERT("FileIfrit::read_bin","fread error",
@@ -85,7 +85,7 @@ void FileIfrit::write_bin
   fwrite (&nz,4,1,fp);
   fwrite (&bound,4,1,fp);
 
-  // Write scalar field
+  // Write floating-point field
   bound = 4*nx*ny*nz;
   fwrite (&bound,4,1,fp);
   fwrite (buffer,4,nx*ny*nz,fp);

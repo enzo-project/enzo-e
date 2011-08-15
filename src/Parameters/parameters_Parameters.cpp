@@ -179,24 +179,24 @@ void Parameters::set_integer
 
 //----------------------------------------------------------------------
 
-double Parameters::value_scalar 
+double Parameters::value_float
 ( std::string parameter,
   double      deflt ) throw(ExceptionParametersBadType)
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
-/// @return  Return scalar (double) parameter value if it exists, deflt if not
+/// @return  Return floating point (double) parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
-  if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
+  if (param && ! param->is_float()) throw ExceptionParametersBadType();
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%g",deflt);
   monitor_access_(parameter,deflt_string);
-  return (param != NULL) ? param->get_scalar() : deflt;
+  return (param != NULL) ? param->get_float() : deflt;
 }
 
 //----------------------------------------------------------------------
 
-void Parameters::set_scalar
+void Parameters::set_float
 ( std::string parameter,
   double      value ) throw(ExceptionParametersBadType)
 /// @param   parameter Parameter name
@@ -204,12 +204,12 @@ void Parameters::set_scalar
 {
   Param * param = parameter_(parameter);
   if (param) {
-    if (! param->is_scalar()) throw ExceptionParametersBadType();
+    if (! param->is_float()) throw ExceptionParametersBadType();
   } else {
     param = new Param;
     new_param_ (current_group_,parameter,param);
   }
-  param->set_scalar_(value);
+  param->set_float_(value);
   monitor_write_(parameter);
 }
 
@@ -285,7 +285,7 @@ void Parameters::set_string
 
 //----------------------------------------------------------------------
 
-void Parameters::evaluate_scalar 
+void Parameters::evaluate_float 
   (
    std::string parameter,
    int         n, 
@@ -297,7 +297,7 @@ void Parameters::evaluate_scalar
    double    * t) throw(ExceptionParametersBadType)
 /// @param   parameter Parameter name
 /// @param   n         Length of variable arrays
-/// @param   result    Output array of evaluated scalar parameters values if it exists, or deflt if not
+/// @param   result    Output array of evaluated floating point parameters values if it exists, or deflt if not
 /// @param   deflt     Array of default values
 /// @param   x         Array of X values
 /// @param   y         Array of Y values
@@ -305,9 +305,9 @@ void Parameters::evaluate_scalar
 /// @param   t         Array of T values
 {
   Param * param = parameter_(parameter);
-  if (param && ! param->is_scalar_expr()) throw ExceptionParametersBadType();
+  if (param && ! param->is_float_expr()) throw ExceptionParametersBadType();
   if (param != NULL) {
-    param->evaluate_scalar(param->value_expr_,n,result,x,y,z,t);
+    param->evaluate_float(param->value_expr_,n,result,x,y,z,t);
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
@@ -380,21 +380,21 @@ int Parameters::list_value_integer
 
 //----------------------------------------------------------------------
 
-double Parameters::list_value_scalar 
+double Parameters::list_value_float 
 ( int index,
   std::string parameter,
   double      deflt ) throw(ExceptionParametersBadType)
-/// @param   index     Index of the scalar (double) list parameter element
+/// @param   index     Index of the floating point (double) list parameter element
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
-/// @return  Return scalar (double) list parameter element value if it exists, deflt if not
+/// @return  Return floating point (double) list parameter element value if it exists, deflt if not
 {
   Param * param = list_element_(parameter,index);
-  if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
+  if (param && ! param->is_float()) throw ExceptionParametersBadType();
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%g",deflt);
   monitor_access_(parameter,deflt_string,index);
-  return (param != NULL) ? param->value_scalar_ : deflt;
+  return (param != NULL) ? param->value_float_ : deflt;
 }
 
 //----------------------------------------------------------------------
@@ -435,7 +435,7 @@ const char * Parameters::list_value_string
 
 //----------------------------------------------------------------------
 
-void Parameters::list_evaluate_scalar 
+void Parameters::list_evaluate_float 
 (
  int index,
  std::string parameter,
@@ -450,7 +450,7 @@ void Parameters::list_evaluate_scalar
 /// @param   index     Index into the list
 /// @param   parameter Parameter name
 /// @param   n         Length of variable arrays
-/// @param   result    Output array of evaluated scalar expression list parameter element values if it exists, or deflt if not
+/// @param   result    Output array of evaluated floating point expression list parameter element values if it exists, or deflt if not
 /// @param   deflt     Array of default values
 /// @param   x         Array of X values
 /// @param   y         Array of Y values
@@ -459,9 +459,9 @@ void Parameters::list_evaluate_scalar
 {
 
   Param * param = list_element_(parameter,index);
-  if (param && ! param->is_scalar_expr()) throw ExceptionParametersBadType();
+  if (param && ! param->is_float_expr()) throw ExceptionParametersBadType();
   if (param != NULL) {
-    param->evaluate_scalar(param->value_expr_,n,result,x,y,z,t);
+    param->evaluate_float(param->value_expr_,n,result,x,y,z,t);
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }

@@ -54,9 +54,9 @@ void InitialDefault::compute (const FieldDescr * field_descr,
 
     parameter_enum parameter_type = parameters_->type("value");
 
-    if (parameter_type == parameter_scalar) {
+    if (parameter_type == parameter_float) {
 
-      field_block->clear(field_descr,parameters_->value_scalar("value",0.0), 
+      field_block->clear(field_descr,parameters_->value_float("value",0.0), 
 			 index_field);
 
     } else if (parameter_type == parameter_list) {
@@ -85,7 +85,7 @@ void InitialDefault::compute (const FieldDescr * field_descr,
 
       n = nx*ny*nz;
 
-      evaluate_scalar_ (field_block, list_length-1, field_name, 
+      evaluate_float_ (field_block, list_length-1, field_name, 
 			n, value,vdeflt,x,y,z,t);
 
       for (int i=0; i<n; i++) region[i] = true;
@@ -96,7 +96,7 @@ void InitialDefault::compute (const FieldDescr * field_descr,
 
       for (int index_list=0; index_list < list_length-1; index_list+=2) {
 
-	evaluate_scalar_ (field_block, index_list, field_name, 
+	evaluate_float_ (field_block, index_list, field_name, 
 			  n, value,vdeflt,x,y,z,t);
 
 	evaluate_logical_ (field_block, index_list + 1, field_name, 
@@ -204,7 +204,7 @@ void InitialDefault::copy_values_
  ) throw()
 {
 
-  // Copy the scalar values to the field where logical values are true
+  // Copy the floating-point values to the field where logical values are true
 
   void * field = field_block->field_unknowns(field_descr,index_field);
 
@@ -267,7 +267,7 @@ void InitialDefault::copy_values_
 
 //----------------------------------------------------------------------
 
-void InitialDefault::evaluate_scalar_ 
+void InitialDefault::evaluate_float_ 
 (FieldBlock * field_block, int index_list, std::string field_name, 
  int n, double * value, double * deflt,
  double * x, double * y, double * z, double * t) throw ()
@@ -278,24 +278,24 @@ void InitialDefault::evaluate_scalar_
   parameter_enum value_type = 
     parameters_->list_type(index_list,"value");
 
-  if (value_type != parameter_scalar_expr &&
-      value_type != parameter_scalar) {
+  if (value_type != parameter_float_expr &&
+      value_type != parameter_float) {
 
     char buffer[ERROR_LENGTH];
     sprintf (buffer, 
-	     "Odd-index elements of %s must be scalar expressions",
+	     "Odd-index elements of %s must be floating-point expressions",
 	     field_name.c_str());
 	  	      
-    ERROR("InitialDefault::evaluate_scalar_", buffer);
+    ERROR("InitialDefault::evaluate_float_", buffer);
   }
 
-  // Evaluate the scalar expression
+  // Evaluate the floating-point expression
 
-  if (value_type == parameter_scalar) {
-    double v = parameters_->list_value_scalar(index_list,"value",0.0);
+  if (value_type == parameter_float) {
+    double v = parameters_->list_value_float(index_list,"value",0.0);
     for (int i=0; i<n; i++) value[i] = v;
   } else {
-    parameters_->list_evaluate_scalar
+    parameters_->list_evaluate_float
       (index_list,"value",n,value,deflt,x,y,z,t);
   }
 }

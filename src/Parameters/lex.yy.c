@@ -1172,17 +1172,17 @@ YY_RULE_SETUP
 case 58:
 YY_RULE_SETUP
 #line 126 "src/Parameters/parse.l"
-{ yylval.scalar_type = atof (yytext); return SCALAR; }
+{ yylval.float_type = atof (yytext); return FLOAT; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
 #line 127 "src/Parameters/parse.l"
-{ yylval.scalar_type = atof (yytext); return SCALAR; }
+{ yylval.float_type = atof (yytext); return FLOAT; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
 #line 128 "src/Parameters/parse.l"
-{ yylval.scalar_type = atof (yytext); return SCALAR; }
+{ yylval.float_type = atof (yytext); return FLOAT; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP

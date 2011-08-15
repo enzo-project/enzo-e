@@ -42,7 +42,7 @@
      STRING = 258,
      IDENTIFIER = 259,
      VARIABLE = 260,
-     SCALAR = 261,
+     FLOAT = 261,
      INTEGER = 262,
      LOGICAL = 263,
      LE = 264,
@@ -96,7 +96,7 @@ typedef union YYSTYPE
  
   int logical_type;  
   int integer_type; 
-  double scalar_type;  
+  double float_type;  
   char * string_type; 
   char * group_type;
   struct node_expr * node_type;

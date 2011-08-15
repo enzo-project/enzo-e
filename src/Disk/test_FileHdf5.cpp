@@ -22,7 +22,7 @@ PARALLEL_MAIN_BEGIN
 
   int nx = 100;
   int ny = 50;
-  Scalar * a = new Scalar[nx*ny];
+  double * a = new double[nx*ny];
 
   for (int iy=0; iy<ny; iy++) {
     for (int ix=0; ix<nx; ix++) {
@@ -41,18 +41,17 @@ PARALLEL_MAIN_BEGIN
   my = ny;
   mz = 1;
 
-  hdf5.open_dataset ("dataset",precision_default,mx,my,mz);
-  hdf5.write((char *)a,precision_default);
+  hdf5.open_dataset ("dataset",precision_double,mx,my,mz);
+  hdf5.write((char *)a,precision_double);
   hdf5.close_dataset ();
   hdf5.close_file();
-
 
   hdf5.open_file("open_file_test.h5","r");
   hdf5.open_dataset ("dataset",&mx,&my,&mz);
 
-  Scalar * b = new Scalar[nx*ny];
+  double * b = new double[nx*ny];
   
-  hdf5.read((char *)b,precision_default);
+  hdf5.read((char *)b,precision_double);
   hdf5.close_dataset ();
   hdf5.close_file();
 

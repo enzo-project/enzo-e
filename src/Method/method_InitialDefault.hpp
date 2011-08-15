@@ -41,10 +41,10 @@ private: // functions
 		     int index_field,
 		     int nx, int ny, int nz) throw();
 
-  void evaluate_scalar_ (FieldBlock * field_block, int index_field, 
-			 std::string field_name,
-			 int n, double * value, double * vdeflt,
-			 double * x, double * y, double * z, double * t) throw();
+  void evaluate_float_ (FieldBlock * field_block, int index_field, 
+			std::string field_name,
+			int n, double * value, double * vdeflt,
+			double * x, double * y, double * z, double * t) throw();
 
   void evaluate_logical_ (FieldBlock * field_block, int index_field, 
 			 std::string field_name,

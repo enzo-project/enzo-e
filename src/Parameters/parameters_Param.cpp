@@ -21,8 +21,8 @@ void Param::set (struct param_struct * node)
   case enum_parameter_integer:
     set_integer_(node->integer_value);
     break;
-  case enum_parameter_scalar:
-    set_scalar_(node->scalar_value);
+  case enum_parameter_float:
+    set_float_(node->float_value);
     break;
   case enum_parameter_string:
     set_string_(node->string_value);
@@ -33,8 +33,8 @@ void Param::set (struct param_struct * node)
   case enum_parameter_list:
     set_list_(node->list_value);
     break;
-  case enum_parameter_scalar_expr:
-    set_scalar_expr_(node->op_value);
+  case enum_parameter_float_expr:
+    set_float_expr_(node->op_value);
     break;
   case enum_parameter_logical_expr:
     set_logical_expr_(node->op_value);
@@ -59,12 +59,12 @@ void Param::dealloc_()
     dealloc_list_(value_list_); 
     break;
   case parameter_logical_expr:
-  case parameter_scalar_expr:
+  case parameter_float_expr:
     dealloc_node_expr_(value_expr_);
     break;
   case parameter_unknown:
   case parameter_integer:
-  case parameter_scalar:
+  case parameter_float:
   case parameter_logical:
     break;
   }
@@ -103,14 +103,14 @@ std::string Param::value_to_string ()
     INCOMPLETE("Param::write");
     break;
   case parameter_logical_expr:
-  case parameter_scalar_expr:
+  case parameter_float_expr:
     sprintf_expression(value_expr_,string_buffer);
     break;
   case parameter_integer:
     sprintf (string_buffer,"%d",value_integer_);
     break;
-  case parameter_scalar:
-    sprintf (string_buffer,"%g",value_scalar_);
+  case parameter_float:
+    sprintf (string_buffer,"%g",value_float_);
     break;
   case parameter_logical:
     sprintf (string_buffer,"%s",value_logical_ ? "true" : "false");
@@ -122,7 +122,7 @@ std::string Param::value_to_string ()
   return string_buffer;
 }
  
-void Param::evaluate_scalar
+void Param::evaluate_float
 (struct node_expr * node, 
  int                n, 
  double *           result, 
@@ -130,7 +130,7 @@ void Param::evaluate_scalar
  double *           y, 
  double *           z, 
  double *           t)
-/// @param node Head node of the tree defining the scalar expression
+/// @param node Head node of the tree defining the floating-point expression
 /// @param n Length of the result buffer
 /// @param result Array in which to store the expression evaluations
 /// @param x Array of X spatial values
@@ -145,11 +145,11 @@ void Param::evaluate_scalar
 
   if (node->left) {
     left = new double [n];
-    evaluate_scalar(node->left,n,left,x,y,z,t);
+    evaluate_float(node->left,n,left,x,y,z,t);
   }
   if (node->right) {
     right = new double [n];
-    evaluate_scalar(node->right,n,right,x,y,z,t);
+    evaluate_float(node->right,n,right,x,y,z,t);
   }
       
   int i;
@@ -170,14 +170,14 @@ void Param::evaluate_scalar
     case enum_op_and:
     case enum_op_or:
       char error_message[ERROR_LENGTH];
-      sprintf (error_message,"logical operator %d in scalar expression",
+      sprintf (error_message,"logical operator %d in floating-point expression",
 	       node->op_value);
-      ERROR("Param::evaluate_scalar",error_message);
+      ERROR("Param::evaluate_float",error_message);
       break;
     }
     break;
-  case enum_node_scalar:
-    for (i=0; i<n; i++) result[i] = node->scalar_value;
+  case enum_node_float:
+    for (i=0; i<n; i++) result[i] = node->float_value;
     break;
   case enum_node_integer:
     for (i=0; i<n; i++) result[i] = double(node->integer_value);
@@ -190,9 +190,9 @@ void Param::evaluate_scalar
     case 't':	for (i=0; i<n; i++) result[i] = t[i]; break;
     default:
       char error_message[ERROR_LENGTH];
-      sprintf (error_message,"unknown variable %c in scalar expression",
+      sprintf (error_message,"unknown variable %c in floating-point expression",
 	       node->var_value);
-      ERROR("Param::evaluate_scalar",error_message);
+      ERROR("Param::evaluate_float",error_message);
       break;
     }
     break;
@@ -203,7 +203,7 @@ void Param::evaluate_scalar
   default:
     char error_message[ERROR_LENGTH];
     sprintf (error_message,"unknown expression type %d",node->type);
-    ERROR("Param::evaluate_scalar",error_message);
+    ERROR("Param::evaluate_float",error_message);
     break;
   }
 
@@ -219,7 +219,7 @@ void Param::evaluate_logical
  double *           y, 
  double *           z, 
  double *           t)
-/// @param node Head node of the tree defining the scalar expression
+/// @param node Head node of the tree defining the floating-point expression
 /// @param n Length of the result buffer
 /// @param result Array in which to store the expression evaluations
 /// @param x Array of X spatial values
@@ -227,8 +227,8 @@ void Param::evaluate_logical
 /// @param z Array of Z spatial values
 /// @param t Array of time values
 {
-  double * left_scalar  = NULL;
-  double * right_scalar = NULL;
+  double * left_float  = NULL;
+  double * right_float = NULL;
   bool * left_logical  = NULL;
   bool * right_logical = NULL;
 
@@ -244,14 +244,14 @@ void Param::evaluate_logical
       left_logical = new bool [n];
       evaluate_logical(node->left,n,left_logical,x,y,z,t);
     } else {
-      // left node is a scalar operation
-      left_scalar = new double [n];
-      evaluate_scalar(node->left,n,left_scalar,x,y,z,t);
+      // left node is a floating-point operation
+      left_float = new double [n];
+      evaluate_float(node->left,n,left_float,x,y,z,t);
     }
   } else {
-    // left node is a scalar operation
-    left_scalar = new double [n];
-    evaluate_scalar(node->left,n,left_scalar,x,y,z,t);
+    // left node is a floating-point operation
+    left_float = new double [n];
+    evaluate_float(node->left,n,left_float,x,y,z,t);
   }
 
   // Recurse on left subtree
@@ -265,38 +265,38 @@ void Param::evaluate_logical
       right_logical = new bool [n];
       evaluate_logical(node->right,n,right_logical,x,y,z,t);
     } else {
-      // right node is a scalar operation
-      right_scalar = new double [n];
-      evaluate_scalar(node->right,n,right_scalar,x,y,z,t);
+      // right node is a floating-point operation
+      right_float = new double [n];
+      evaluate_float(node->right,n,right_float,x,y,z,t);
     }
   } else {
-    // right node is a scalar operation
-    right_scalar = new double [n];
-    evaluate_scalar(node->right,n,right_scalar,x,y,z,t);
+    // right node is a floating-point operation
+    right_float = new double [n];
+    evaluate_float(node->right,n,right_float,x,y,z,t);
   }
       
   int i;
   if (node->type == enum_node_operation) {
     switch (node->op_value) {
     case enum_op_le:
-      for (i=0; i<n; i++) result[i] = left_scalar[i] <= right_scalar[i];
+      for (i=0; i<n; i++) result[i] = left_float[i] <= right_float[i];
       break;
     case enum_op_lt:
-      for (i=0; i<n; i++) result[i] = left_scalar[i] <  right_scalar[i];
+      for (i=0; i<n; i++) result[i] = left_float[i] <  right_float[i];
       break;
     case enum_op_ge:
-      for (i=0; i<n; i++) result[i] = left_scalar[i] >= right_scalar[i];
+      for (i=0; i<n; i++) result[i] = left_float[i] >= right_float[i];
       break;
     case enum_op_gt:
-      for (i=0; i<n; i++) result[i] = left_scalar[i] >  right_scalar[i];
+      for (i=0; i<n; i++) result[i] = left_float[i] >  right_float[i];
       break;
     case enum_op_eq:
       // warning: comparing equality of doubles
-      for (i=0; i<n; i++) result[i] = left_scalar[i] == right_scalar[i];
+      for (i=0; i<n; i++) result[i] = left_float[i] == right_float[i];
       break;
     case enum_op_ne:
       // warning: comparing inequality of doubles
-      for (i=0; i<n; i++) result[i] = left_scalar[i] != right_scalar[i];
+      for (i=0; i<n; i++) result[i] = left_float[i] != right_float[i];
       break;
     case enum_op_and:
       for (i=0; i<n; i++) result[i] = left_logical[i] && right_logical[i];
@@ -312,8 +312,8 @@ void Param::evaluate_logical
     }
   }
 
-  delete [] left_scalar;
-  delete [] right_scalar;
+  delete [] left_float;
+  delete [] right_float;
   delete [] left_logical;
   delete [] right_logical;
 }
@@ -332,7 +332,8 @@ void Param::dealloc_list_ (list_type * value)
 }
 
 void Param::dealloc_node_expr_ (struct node_expr * p)
-/// @param p Head node of the tree defining the scalar expression to deallocate
+/// @param p Head node of the tree defining the floating-point 
+/// expression to deallocate
 {
   if (p->left != NULL)  dealloc_node_expr_(p->left);
   if (p->right != NULL) dealloc_node_expr_(p->right);

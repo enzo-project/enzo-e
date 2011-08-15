@@ -7,12 +7,12 @@ enum enum_parameter {
   enum_parameter_sentinel,
   enum_parameter_group,
   enum_parameter_integer,
-  enum_parameter_scalar,
+  enum_parameter_float,
   enum_parameter_string,
   enum_parameter_identifier,
   enum_parameter_logical,
   enum_parameter_list,
-  enum_parameter_scalar_expr,
+  enum_parameter_float_expr,
   enum_parameter_logical_expr,
   enum_parameter_function
 };
@@ -21,7 +21,7 @@ enum enum_parameter {
 enum enum_node {
   enum_node_unknown,
   enum_node_operation,
-  enum_node_scalar,
+  enum_node_float,
   enum_node_integer,
   enum_node_variable,
   enum_node_function
@@ -46,7 +46,7 @@ struct node_expr {
   enum enum_node type;
   union {
     enum enum_op op_value;       /* arthmetic / logical operation */
-    double       scalar_value;   /* floating point number */
+    double       float_value;   /* floating point number */
     int          integer_value;  /* integer / logical constant */
     char         var_value;      /* variable, e.g. x,y,z,t */
     double (*fun_value)(double); /* math.h function */
@@ -63,7 +63,7 @@ struct param_struct {
   union  {
     int                 logical_value; 
     int                 integer_value; 
-    double              scalar_value; 
+    double              float_value; 
     char *              string_value;
     struct param_struct * list_value;
     struct node_expr    * op_value;    /* expression tree */
