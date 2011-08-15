@@ -52,13 +52,26 @@ Block * Factory::create_block
  int num_field_blocks
  ) const throw()
 {
-
-  return new Block (ibx,iby,ibz, 
-		    nbx,nby,nbz,
-		    nx,ny,nz,
-		    xm,ym,zm, 
-		    xb,yb,zb, 
-		    num_field_blocks);
+  Block * block;
+#ifdef CONFIG_USE_CHARM
+  CProxy_Block block_array = CProxy_Block::ckNew
+    (nbx,nby,nbz,
+     nx,ny,nz,
+     xm,ym,zm, 
+     xb,yb,zb, 
+     num_field_blocks,
+     nbx,nby,nbz);
+  block = block_array(ibx,iby,ibz).ckLocal();
+#else
+  block = new Block 
+    (ibx,iby,ibz, 
+     nbx,nby,nbz,
+     nx,ny,nz,
+     xm,ym,zm, 
+     xb,yb,zb, 
+     num_field_blocks);
+#endif
+  return block;
 }
 
 //----------------------------------------------------------------------

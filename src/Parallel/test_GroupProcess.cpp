@@ -185,11 +185,11 @@ PARALLEL_MAIN_BEGIN
       group_process->send_end(handle_send);
       group_process->recv_end(handle_recv);
 
-      unit_func("send " blocking_send ? "[blocking]" : "[nonblocking]");
+      unit_func(blocking_send ? "send [blocking]" : "send [nonblocking]");
 
       unit_assert(test_array(array_source,n+1,rank,rank));
 
-      unit_func("recv " blocking_recv ? "[blocking]" : "[nonblocking]");
+      unit_func(blocking_recv ? "recv [blocking]" : "recv [nonblocking]");
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
 #else
       unit_assert(unit_incomplete);

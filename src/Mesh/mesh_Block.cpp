@@ -26,16 +26,16 @@ Block::Block
  double xpm, double ypm, double zpm, // Patch begin
  double xb, double yb, double zb, // Block width
  int num_field_blocks) throw ()
-  : field_block_(),
+  :  field_block_(),
 #ifdef CONFIG_USE_CHARM
-    count_refresh_face_(0),
-    count_refresh_face_x_(0),
-    count_refresh_face_y_(0),
-    count_refresh_face_z_(0),
+     count_refresh_face_(0),
+     count_refresh_face_x_(0),
+     count_refresh_face_y_(0),
+     count_refresh_face_z_(0),
 #endif
-    cycle_(0),
-    time_(0),
-    dt_(0)
+     cycle_(0),
+     time_(0),
+     dt_(0)
 
 { 
 #ifdef CONFIG_CHARM_ATSYNC
