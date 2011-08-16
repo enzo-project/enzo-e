@@ -3,7 +3,6 @@
 /// @file      disk_FileHdf5.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Feb 21 16:11:36 PST 2008
-/// @todo      parameters: std, native, ieee
 /// @brief     Implementation of the FileHdf5 class
 
 #include "cello.hpp"
@@ -258,10 +257,15 @@ void FileHdf5::close_dataset ()
 
 void FileHdf5::read  (char              * buffer,
 		      enum precision_enum precision)
-/**
- */
+/// @param buffer     Pointer to data buffer
+/// @param precision  Precision of values in data buffer
 {
-  H5Dread (dataset_, datatype_(precision), dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
+  H5Dread (dataset_, 
+	   datatype_(precision), 
+	   dataspace_, 
+	   H5S_ALL, 
+	   H5P_DEFAULT, 
+	   buffer);
 }
 
 //----------------------------------------------------------------------

@@ -12,28 +12,3 @@
 File::File() throw ()
 {
 }
-
-// //----------------------------------------------------------------------
-
-// File::~File() throw ()
-// {
-// }
-
-// //----------------------------------------------------------------------
-
-// File::File(const File & classname) throw ()
-// /// @param     classname  Object being copied
-// {
-// }
-
-// //----------------------------------------------------------------------
-
-// File & File::operator= (const File & classname) throw ()
-// /// @param     classname  Source object of the assignment
-// /// @return    The target assigned object
-// {
-//   return *this;
-// }
-
-//======================================================================
-

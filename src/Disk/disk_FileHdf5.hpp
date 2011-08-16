@@ -7,9 +7,11 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
 /// @todo     Refactor interface to be hdf5-independent (groups, datasets, etc.)
-/// @todo     Add support for relative/absolute directory / group
-/// @todo     Add unit tests for group operations to test_disk_hdf5
+/// @todo     Add support for [relative|absolute] [directories|groups] (?)
+/// @todo     Support multiple float types: std, native, ieee
+/// @todo     Add error handling (see H5E API)
 /// @todo     Add state checks for file open before adding dataset, etc.
+/// @todo     Add support for compression (see H5Z API)
 /// @brief    [\ref Disk] Interface for the FileHdf5 class
 
 class FileHdf5 {
@@ -42,7 +44,6 @@ public: // interface
 		     int * nx, int * ny, int * nz);
 
   /// Open the given dataset with the given size for writing
-  /// @@@ datatype: H5Dcreate
   void open_dataset (std::string name, 
 		     enum precision_enum precision,
 		     int nx, int ny, int nz);
@@ -51,12 +52,10 @@ public: // interface
   void close_dataset ();
 
   /// Read the current dataset into the buffer
-  /// @@@ datatype: H5Dread
   void read  (char              * buffer,
 	      enum precision_enum precision);
 
   /// Write the current dataset from the buffer
-  /// @@@ datatype: H5Dwrite
   void write (char              * buffer,
 	      enum precision_enum precision);
 
