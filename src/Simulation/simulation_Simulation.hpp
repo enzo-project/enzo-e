@@ -102,11 +102,10 @@ public: // interface
   /// proceed with next output
   void p_output_write (int n, char * buffer) throw();
 
-#endif
+  CProxy_BlockReduce proxy_block_reduce() 
+  { return   proxy_block_reduce_; }
 
-  //----------------------------------------------------------------------
-  // Big Three
-  //----------------------------------------------------------------------
+#endif
 
   /// Destructor
   virtual ~Simulation() throw();
@@ -172,12 +171,6 @@ public: // interface
   /// Return the Simulation index
   size_t index() const throw() {return index_; };
 
-  /// Return whether to update all faces at once or axis-by-axis
-  bool temp_update_all() const throw() { return temp_update_all_; };
-
-  /// Return whether to include orthogonal ghosts in updates
-  bool temp_update_full() const throw() { return temp_update_full_; };
-
   void update_cycle(int cycle, int time, double dt, double stop) {
     cycle_ = cycle;
     time_  = time;
@@ -185,10 +178,11 @@ public: // interface
     stop_  = stop;
   };
 
-#ifdef CONFIG_USE_CHARM
-  CProxy_BlockReduce proxy_block_reduce() 
-  { return   proxy_block_reduce_; }
-#endif
+  /// Return whether to update all faces at once or axis-by-axis
+  bool temp_update_all() const throw() { return temp_update_all_; };
+
+  /// Return whether to include orthogonal ghosts in updates
+  bool temp_update_full() const throw() { return temp_update_full_; };
 
 public: // virtual functions
 

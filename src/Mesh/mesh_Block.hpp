@@ -39,6 +39,7 @@ public: // interface
    int num_field_blocks) throw();
 
 #ifdef CONFIG_USE_CHARM
+
   /// For CHARM Block arrays
   Block
   (
@@ -47,16 +48,12 @@ public: // interface
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
    int num_field_blocks) throw();
-#endif
 
-#ifdef CONFIG_USE_CHARM
   /// Initialize an empty Block
   Block() {TRACE("Block()")};
 
   /// Initialize a migrated Block
   Block (CkMigrateMessage *m) {TRACE("Block(msg)")};
-
-  //==================================================
 
   /// Initialize block for the simulation.
   void p_initial();

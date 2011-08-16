@@ -63,6 +63,41 @@ public: // interface
   const Factory * factory () const throw()
   { return factory_; }
 
+  /*
+    @@@@@@@@@@@@@@@@@@@@@@@@@@
+  /// Set max_level
+  void set_max_level(int max_level) throw ();
+
+  /// Return max_level
+  int max_level() const throw ();
+
+  /// Set refinement factor
+  void set_refine_factor(int refine) throw ();
+
+  /// Return refinement factor
+  int refine_factor() const throw ();
+
+  /// Set whether to avoid level jumps
+  void set_balanced(bool balanced) throw ();
+
+  /// Return whether to avoid level jumps
+  bool balanced() const throw ();
+
+  /// Set whether to backfill levels
+  void set_backfill(bool backfill) throw ();
+
+  /// Return whether to backfill levels
+  bool backfill() const throw ();
+
+  /// Set whether to coalesce patches
+  void set_coalesce(bool coalesce) throw ();
+
+  /// Return whether to coalesce patches
+  bool coalesce() const throw ();
+
+    @@@@@@@@@@@@@@@@@@@@@@@@@@
+  */
+
 protected: // attributes
 
   /// Factory for creating Simulations, Meshes, Patches and Blocks
@@ -83,58 +118,31 @@ protected: // attributes
   /// Upper extent of the patch
   double upper_[3];
 
+  /*
+  /// Refinement factor = 2, 4, etc.
+  /// Parameter Mesh::refine
+  int refine_;
+
+  /// Maximum level for the hierarchy (0 = unigrid) assuming r=2
+  /// Parameter Mesh::max_level
+  int max_level_;
+
+  /// Whether the tree is balanced or "full"
+  /// Parameter Mesh::balanced
+  bool balanced_;
+
+  /// Whether to backfill for refine > 2 to regain r == 2 balance
+  /// Parameter Mesh::backfill
+  bool backfill_;
+
+  /// Whether to coalesce small patches into one big one
+  /// Parameter Mesh::coalesce
+  bool coalesce_;
+
+    @@@@@@@@@@@@@@@@@@@@@@@@@@
+  */
+
 };
-
-  // /// Set max_level
-  // void set_max_level(int max_level) throw ();
-
-  // /// Set refinement factor
-  // void set_refine_factor(int refine) throw ();
-
-  // /// Set whether to avoid level jumps
-  // void set_balanced(bool balanced) throw ();
-
-  // /// Set whether to backfill levels
-  // void set_backfill(bool backfill) throw ();
-
-  // /// Set whether to coalesce patches
-  // void set_coalesce(bool coalesce) throw ();
-  // //--------------------------------------------------
-  // /// Return max_level
-  // int max_level() const throw ();
-
-  // /// Return refinement factor
-  // int refine_factor() const throw ();
-
-  // /// Return whether to avoid level jumps
-  // bool balanced() const throw ();
-
-  // /// Return whether to backfill levels
-  // bool backfill() const throw ();
-
-  // /// Return whether to coalesce patches
-  // bool coalesce() const throw ();
-
-  // private:
-  // /// Refinement factor = 2, 4, etc.
-  // /// Parameter Mesh::refine
-  // int refine_;
-
-  // /// Maximum level for the hierarchy (0 = unigrid) assuming r=2
-  // /// Parameter Mesh::max_level
-  // int max_level_;
-
-  // /// Whether the tree is balanced or "full"
-  // /// Parameter Mesh::balanced
-  // bool balanced_;
-
-  // /// Whether to backfill for refine > 2 to regain r == 2 balance
-  // /// Parameter Mesh::backfill
-  // bool backfill_;
-
-  // /// Whether to coalesce small patches into one big one
-  // /// Parameter Mesh::coalesce
-  // bool coalesce_;
 
 #endif /* MESH_MESH_HPP */
 
