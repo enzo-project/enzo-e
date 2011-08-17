@@ -13,7 +13,12 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['simulation','field', 'error','memory','monitor', 'performance', 'parallel', 'method', 'parameters','cello']
+components = ['simulation','method', 
+              'field', 
+              'memory','parallel',
+              'parameters','monitor',
+              'performance', 'error',
+              'cello']
 libraries  = ['png']
 
 #if (type == "charm"):

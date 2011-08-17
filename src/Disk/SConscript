@@ -9,7 +9,8 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error','cello']
+components = ['error',
+              'cello']
 libraries  = ['hdf5']
 
 if (type == "charm"):

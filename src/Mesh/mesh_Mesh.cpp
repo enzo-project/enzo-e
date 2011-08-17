@@ -15,9 +15,7 @@
 
 Mesh::Mesh
 (
- const Factory * factory,
- int nx, int ny, int nz,
- int nbx, int nby, int nbz
+ const Factory * factory
  ) throw ()
   : factory_(factory)
     // tree_(0),
@@ -167,6 +165,63 @@ Patch * Mesh::patch(size_t i) throw()
 Patch * Mesh::patch(size_t i) const throw()
 {
   return ( patch_list_.size()-1 >= i )? patch_list_[i] : 0;
+}
+
+//----------------------------------------------------------------------
+
+void Mesh::create_root_patch 
+(
+ GroupProcess * group_process,
+ FieldDescr   * field_descr,
+ int nx, int ny, int nz,
+ int nbx, int nby, int nbz
+) throw()
+{
+  //--------------------------------------------------
+  // parameters_->set_group (0,"Mesh");
+  //--------------------------------------------------
+  // parameter: Mesh:refine
+  // parameter: Mesh:max_level
+  // parameter: Mesh:balanced
+  // parameter: Mesh:backfill
+  // parameter: Mesh:coalesce
+  //--------------------------------------------------
+
+  // mesh_->set_refine_factor (parameters_->value_integer("refine",    2));
+  // mesh_->set_max_level     (parameters_->value_integer("max_level", 0));
+  // mesh_->set_balanced      (parameters_->value_logical("balanced",  true));
+  // mesh_->set_backfill      (parameters_->value_logical("backfill",  true));
+  // mesh_->set_coalesce      (parameters_->value_logical("coalesce",  true));
+
+  if (patch_list_.size() != 0) {
+    ERROR("Mesh::create_root",
+	  "Creating new root Patch in non-empty Mesh");
+  } else {
+
+    Patch * root_patch = factory()->create_patch
+      (group_process,
+       nx,ny,nz,
+       nbx,nby,nbz,
+       lower_[0], lower_[1], lower_[2],
+       upper_[0], upper_[1], upper_[2]);
+    
+    root_patch->allocate_blocks(field_descr);
+
+    insert_patch(root_patch);
+
+    // Parallel layout of the root patch
+  
+    //--------------------------------------------------
+    // parameter: Mesh:root_process_first
+    // parameter: Mesh:root_process_count
+    //--------------------------------------------------
+
+    // int process_first = parameters_->value_integer("Mesh:root_process_first",0);
+    // int process_count = parameters_->value_integer("Mesh:root_process_count",1);
+
+    // patch(0)->layout()->set_process_range(process_first, process_count);
+
+  }
 }
 
 //----------------------------------------------------------------------

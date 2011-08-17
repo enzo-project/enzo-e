@@ -243,10 +243,10 @@ Clean(env.RunParallel (type_path + 'test_enzo-p_2.unit',
       [Glob('../enzo-p_2-??????-*.png'),type_path + 'test_enzo-p_2.unit'])
 
 
-if (type == "mpi"):
-   env.RunParallel	(type_path + 'test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='4')
-else:
+if (type == "serial"):
    env.RunParallel	(type_path + 'test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='1')
+else:
+   env.RunParallel	(type_path + 'test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='4')
 
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')

@@ -22,9 +22,8 @@ public: // interface
 #endif
 
   /// Create a new Mesh [abstract factory design pattern]
-  virtual Mesh * create_mesh
-  (int nx,  int ny,  int nz,
-   int nbx, int nby, int nbz) const throw ();
+  virtual Mesh * create_mesh () const throw ()
+{ return new Mesh (this); }
 
   /// Create a new Patch [abstract factory design pattern]
   virtual Patch * create_patch

@@ -10,7 +10,12 @@ Import('use_papi')
 # DEPENDENCIES
 #------------------------------
 
-components = ['parallel','mesh', 'field','monitor','method','error','parameters','memory','performance','cello']
+components = ['method',
+	      'mesh', 'field',
+	      'memory','parallel',
+	      'parameters','monitor',
+	      'performance','error',
+	      'cello']
 
 if (use_papi):
 	components = components + ['papi','pfm']

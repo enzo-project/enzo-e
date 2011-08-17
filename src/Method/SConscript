@@ -8,7 +8,12 @@ Import('env')
 # DEPENDENCIES
 #------------------------------
 
-components = ['method', 'mesh', 'field', 'error','parallel', 'monitor', 'parameters', 'memory', 'cello']
+components = ['method', 
+              'mesh', 'field', 
+              'memory', 'parallel', 
+              'parameters', 'monitor',
+              'error',
+              'cello']
 # libraries  = ['$FORTRANLIBS']
 libraries  = []
 

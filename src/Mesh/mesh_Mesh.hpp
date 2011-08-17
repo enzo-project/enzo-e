@@ -19,9 +19,7 @@ class Mesh {
 public: // interface
 
   /// Initialize an Mesh object
-  Mesh(const Factory * factory,
-       int nx,  int ny,  int nz,
-       int nbx, int nby, int nbz) throw ();
+  Mesh(const Factory * factory) throw ();
 
   /// Delete the Mesh object
   virtual ~Mesh() throw ();
@@ -59,9 +57,16 @@ public: // interface
   /// Insert the given Patch into the list of patches
   virtual void insert_patch(Patch *) throw();
 
+  /// Create the initial root patch
+  void create_root_patch (GroupProcess * group_process,
+			  FieldDescr   * field_descr,
+			  int nx, int ny, int nz,
+			  int nbx, int nby, int nbz) throw();
+
   /// Return the factory object associated with the Mesh
   const Factory * factory () const throw()
   { return factory_; }
+
 
   /*
     @@@@@@@@@@@@@@@@@@@@@@@@@@

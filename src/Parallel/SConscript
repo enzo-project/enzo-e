@@ -17,8 +17,10 @@ if (type == "charm"):
 # DEPENDENCIES
 #------------------------------
 
-components = ['cello']
-libraries  = ['error','monitor','performance','png']
+components = ['monitor',
+	      'performance','error',
+	      'cello']
+libraries  = ['png']
 
 #------------------------------
 # ENVIRONMENTS

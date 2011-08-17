@@ -9,19 +9,6 @@
 
 //----------------------------------------------------------------------
 
-Mesh * Factory::create_mesh
-(
- int nx,  int ny,  int nz,
- int nbx, int nby, int nbz
- ) const throw ()
-{
-  return new Mesh (this,
-		   nx,ny,nz,
-		   nbx,nby,nbz);
-}
-
-//----------------------------------------------------------------------
-
 Patch * Factory::create_patch
 (
  GroupProcess * group_process,

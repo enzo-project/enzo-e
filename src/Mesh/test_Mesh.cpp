@@ -15,16 +15,21 @@ PARALLEL_MAIN_BEGIN
 {
 
   PARALLEL_INIT;
-
   unit_init();
 
   unit_class("Mesh");
 
   unit_func("Mesh");
   Factory * factory = new Factory;
-  Mesh * mesh = new Mesh (factory,12,12,12,3,3,3);
+  Mesh * mesh = new Mesh (factory);
   unit_assert(mesh != NULL);
 
+  FieldDescr field_descr;
+  GroupProcess * group_process = GroupProcess::create();
+  mesh->create_root_patch(group_process,&field_descr,12,12,12,3,3,3);
+  unit_assert(mesh->patch(0)!=NULL);
+
+    
   unit_finalize();
 
   delete mesh;

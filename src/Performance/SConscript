@@ -11,7 +11,10 @@ Import('use_papi')
 #------------------------------
 
 
-components = ['error','monitor','cello']
+components = ['monitor',
+	      'error',
+	      'cello']
+
 libraries  = ['png']
 if (use_papi):
 	libraries = libraries + ['papi','pfm']

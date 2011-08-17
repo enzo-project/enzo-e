@@ -275,30 +275,11 @@ void Simulation::initialize_mesh_() throw()
 	 "data must be initialized before mesh",
 	 field_descr_ != NULL);
 
-  //--------------------------------------------------
-  // parameter: Mesh::root_size
-  // parameter: Mesh::root_blocks
-  //--------------------------------------------------
-
-  int root_size[3];
-
-  root_size[0] = parameters_->list_value_integer(0,"Mesh:root_size",1);
-  root_size[1] = parameters_->list_value_integer(1,"Mesh:root_size",1);
-  root_size[2] = parameters_->list_value_integer(2,"Mesh:root_size",1);
-
-  int root_blocks[3];
-
-  root_blocks[0] = parameters_->list_value_integer(0,"Mesh:root_blocks",1);
-  root_blocks[1] = parameters_->list_value_integer(1,"Mesh:root_blocks",1);
-  root_blocks[2] = parameters_->list_value_integer(2,"Mesh:root_blocks",1);
-
   //----------------------------------------------------------------------
   // Create and initialize Mesh
   //----------------------------------------------------------------------
 
-  mesh_ = factory()->create_mesh 
-    (root_size[0],root_size[1],root_size[2],
-     root_blocks[0],root_blocks[1],root_blocks[2]);
+  mesh_ = factory()->create_mesh ();
 
   // Domain extents
 
@@ -329,51 +310,32 @@ void Simulation::initialize_mesh_() throw()
   mesh_->set_lower(lower[0], lower[1], lower[2]);
   mesh_->set_upper(upper[0], upper[1], upper[2]);
 
-  //--------------------------------------------------
-  // parameters_->set_group (0,"Mesh");
-  //--------------------------------------------------
-  // parameter: Mesh:refine
-  // parameter: Mesh:max_level
-  // parameter: Mesh:balanced
-  // parameter: Mesh:backfill
-  // parameter: Mesh:coalesce
-  //--------------------------------------------------
-
-  // mesh_->set_refine_factor (parameters_->value_integer("refine",    2));
-  // mesh_->set_max_level     (parameters_->value_integer("max_level", 0));
-  // mesh_->set_balanced      (parameters_->value_logical("balanced",  true));
-  // mesh_->set_backfill      (parameters_->value_logical("backfill",  true));
-  // mesh_->set_coalesce      (parameters_->value_logical("coalesce",  true));
-
   //----------------------------------------------------------------------
   // Create and initialize root Patch in Mesh
   //----------------------------------------------------------------------
 
-  
-  Patch * root_patch = factory()->create_patch
+  //--------------------------------------------------
+  // parameter: Mesh::root_size
+  // parameter: Mesh::root_blocks
+  //--------------------------------------------------
+
+  int root_size[3];
+
+  root_size[0] = parameters_->list_value_integer(0,"Mesh:root_size",1);
+  root_size[1] = parameters_->list_value_integer(1,"Mesh:root_size",1);
+  root_size[2] = parameters_->list_value_integer(2,"Mesh:root_size",1);
+
+  int root_blocks[3];
+
+  root_blocks[0] = parameters_->list_value_integer(0,"Mesh:root_blocks",1);
+  root_blocks[1] = parameters_->list_value_integer(1,"Mesh:root_blocks",1);
+  root_blocks[2] = parameters_->list_value_integer(2,"Mesh:root_blocks",1);
+
+  mesh_->create_root_patch
     (group_process_,
+     field_descr_,
      root_size[0],root_size[1],root_size[2],
-     root_blocks[0],root_blocks[1],root_blocks[2],
-     lower[0], lower[1], lower[2],
-     upper[0], upper[1], upper[2]);
-
-  mesh_->insert_patch(root_patch);
-
-  root_patch->allocate_blocks(field_descr_);
-
-  // Parallel layout of the root patch
-  
-  Layout * layout = root_patch->layout();
-
-  //--------------------------------------------------
-  // parameter: Mesh:root_process_first
-  // parameter: Mesh:root_process_count
-  //--------------------------------------------------
-
-  int process_first = parameters_->value_integer("Mesh:root_process_first",0);
-  int process_count = parameters_->value_integer("Mesh:root_process_count",1);
-
-  layout->set_process_range(process_first, process_count);
+     root_blocks[0],root_blocks[1],root_blocks[2]);
 
 }
 

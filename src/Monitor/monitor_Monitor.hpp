@@ -15,7 +15,6 @@
 
 #define MONITOR_LENGTH 255
    
-#include "performance.hpp"
 //----------------------------------------------------------------------
 class Timer; 
 
