@@ -209,11 +209,9 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
     unit_func("Block","neighbor");
-    // Block::neighbor()
-    unit_assert(false);
 
-    // TEST BLOCK PROPERTIES
-    //    unit_assert(unit_incomplete);
+    // Block::neighbor()
+    unit_assert(unit_incomplete);
 
     ++block_counter;
 

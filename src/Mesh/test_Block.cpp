@@ -11,8 +11,6 @@
 
 #include "mesh.hpp"
 
-// #include "enzo.hpp"
-// #include "enzo_charm.hpp"
 PARALLEL_MAIN_BEGIN
 {
 
@@ -29,7 +27,7 @@ PARALLEL_MAIN_BEGIN
      1,1,1,
      3,4,5,
      -1.0,-2.0,-3.0,
-     1.0, 2.0, 3.0,
+     2.0,  4.0, 6.0,
      1);
 
   unit_func("Block");
@@ -57,9 +55,5 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_EXIT;
 }
-
-// #ifdef CONFIG_USE_CHARM
-// #  include "enzo.def.h"
-// #endif
 
 PARALLEL_MAIN_END
