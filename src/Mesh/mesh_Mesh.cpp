@@ -17,15 +17,8 @@ Mesh::Mesh
 (
  const Factory * factory
  ) throw ()
-  : factory_(factory)
-    // tree_(0),
-    // dimension_(0),
-    // refine_(0),
-    // max_level_(0),
-    // balanced_(0),
-    // backfill_(0),
-    // coalesce_(0)
-
+  : factory_(factory),
+    tree_(0)
 {
   // Initialize extents
   for (int i=0; i<3; i++) {
