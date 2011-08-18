@@ -24,8 +24,24 @@ SConscript('Simulation/SConscript')
 SConscript('Test/SConscript')
 SConscript('Method/SConscript')
 
+# components = ['enzo-ppm', 'enzo-ppml',
+# 	      'simulation', 'method',
+# 	      'mesh', 'field',
+# 	      'disk','memory','parallel',
+# 	      'parameters', 'monitor',
+# 	      'performance', 'error',
+# 	      'cello']
 
-components = ['error','memory','monitor','parameters','simulation','enzo','parallel','enzo-ppm','enzo-ppml','mesh','method','field','cello']
+components = [
+   'enzo', 'enzo-ppm','enzo-ppml',
+   'simulation','method',
+   'mesh','field',
+   'memory','parallel',
+   'parameters','monitor',
+   'error','cello']
+
+# disk
+# performance
 
 libraries  = ['png', '$FORTRANLIBS','m']
 

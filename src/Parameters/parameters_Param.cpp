@@ -71,23 +71,31 @@ void Param::dealloc_()
 } 
 
 
-void Param::write(FILE * file_pointer,
-		  std::string parameter)
-/// @param file_pointer  File pointer to which the parameter is written
-/// @param parameter     Name of this parameter
+void Param::write
+(
+ FILE *      file_pointer,
+ std::string full_parameter)
+/// @param file_pointer    File pointer to which the parameter is written
+/// @param full_parameter  Name of this parameter including groups
 /// @todo  Writing lists is not implemented yet
 {
 
-  // Write access indicator
-  fprintf (file_pointer, value_accessed_ ? "[*] " : "[ ] ");
+  // Write the parameter assignment
 
-  // Write the parameter name
-  fprintf (file_pointer,"%s ",parameter.c_str());
+  size_t i_group = full_parameter.rfind(":");
+  std::string parameter = (i_group == std::string::npos) ?
+    full_parameter : full_parameter.substr(i_group+1,std::string::npos);
 
-  // Write the parameter value
-  fprintf (file_pointer,"%s", value_to_string().c_str());
+  fprintf (file_pointer,"%s = %s; ",
+	   parameter.c_str(),
+	   value_to_string().c_str());
 
-  fprintf (file_pointer,"\n");
+  // Write comment describing parameter access properties
+  if (value_accessed_) {
+    fprintf (file_pointer," # Input value\n");
+  } else {
+    fprintf (file_pointer," # Default value\n");
+  }
 }
 
 
@@ -99,7 +107,7 @@ std::string Param::value_to_string ()
     sprintf (string_buffer,"\"%s\"",value_string_);
     break;
   case parameter_list:
-    sprintf (string_buffer,"LIST\n");
+    sprintf (string_buffer,"LIST");
     INCOMPLETE("Param::write");
     break;
   case parameter_logical_expr:

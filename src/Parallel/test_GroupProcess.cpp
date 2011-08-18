@@ -125,8 +125,12 @@ PARALLEL_MAIN_BEGIN
       group_process->send_end(handle_send);
       group_process->recv_end(handle_recv);
 
+#ifdef CONFIG_USE_CHARM
+      unit_assert(unit_incomplete);
+#else
       unit_assert(test_array(array_source,n+1,rank,rank));
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
+#endif
 
     }
   }

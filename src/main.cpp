@@ -24,7 +24,7 @@ void Main::p_exit(int count)
   count_exit_++;
   if (count_exit_ >= count) {
     count_exit_ = 0;
-    monitor_->print ("END ENZO-P");
+    monitor_->print ("END CELLO");
     //    unit_finalize();
     // Fake unit_init() for index.php (test.hpp is not included since
     // enzo.ci and test.ci conflict)

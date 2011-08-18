@@ -243,6 +243,8 @@ private: // functions
 		    std::string parameter,
 		    Param * param ) throw();
 
+  size_t extract_groups_( const std::string parameter, std::string * group);
+
 private: // attributes
 
   /// Stack of current grouping

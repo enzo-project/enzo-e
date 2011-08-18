@@ -94,6 +94,11 @@ void Simulation::initialize() throw()
   initialize_output_();
   initialize_method_();
   initialize_parallel_();
+
+  
+  char parameter_file[40];
+  snprintf (parameter_file,40,"cello-%d.%g.out",cycle_,time_);
+  parameters_->write(parameter_file);
 }
 
 //----------------------------------------------------------------------

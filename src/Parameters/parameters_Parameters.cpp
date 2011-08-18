@@ -122,12 +122,64 @@ void Parameters::write ( const char * file_name )
   }
   std::map<std::string,Param *>::iterator it_param;
 
+  // "Previous" groups are empty
+  int n_prev = 0;
+  std::string group_prev[MAX_GROUP_DEPTH];
+
+  // Initialize "current" groups as empty
+  int n_curr = 0;
+  std::string group_curr[MAX_GROUP_DEPTH];
+
+  // Initialize indentation variables
+  const std::string indent_amount = "    ";
+  int indent_size = 4;
+  std::string indent_string = "   ";
+
+  // Loop over parameters
   for (it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
 
+    // Does the current parameter have a value?
     if (it_param->second) {
-      it_param->second->write(file_pointer, it_param->first);
+
+      // Determine groups of the current parameter
+      int n_curr = extract_groups_(it_param->first,group_curr);
+
+      // Determine the first group that differs, if any
+      int i_group;
+      for (i_group = 0; 
+	   i_group < n_prev && i_group < n_curr &&
+	     group_prev[i_group] == group_curr[i_group];
+	   i_group++) {
+	// (Intentionally blank)
+      }
+
+      // End old groups
+
+      for (int i=i_group; i<n_prev; i++) {
+	indent_string = indent_string.substr(indent_size,std::string::npos);
+	fprintf (file_pointer, "%s}\n",indent_string.c_str());
+      }
+
+      // Begin new groups
+
+      for (int i=i_group; i<n_curr; i++) {
+	fprintf (file_pointer,"%s%s {\n",indent_string.c_str(),
+		 group_curr[i].c_str());
+	indent_string = indent_string + indent_amount;
+      }
+
+      // Print parameter
+      fprintf (file_pointer,"%s",indent_string.c_str());
+      it_param->second->write(file_pointer,it_param->first);
+
+      // Copy current groups to previous groups (inefficient)
+      n_prev = n_curr;
+      for (int i=0; i<n_prev; i++) {
+	group_prev[i] = group_curr[i];
+      }
+
     } else {
       char message [ ERROR_LENGTH ];
       sprintf (message, 
@@ -137,9 +189,17 @@ void Parameters::write ( const char * file_name )
     }
   }
 
-  fclose(file_pointer);
+  // End old groups
+
+  for (int i=0; i<n_prev; i++) {
+    indent_string = indent_string.substr(indent_size,std::string::npos);
+    fprintf (file_pointer, "%s}\n",indent_string.c_str());
+  }
+
+  if (file_pointer != stdout) fclose(file_pointer);
 
 }
+
 
 //----------------------------------------------------------------------
 
@@ -770,6 +830,25 @@ Param * Parameters::list_element_ (std::string parameter, int index) throw()
 
 //----------------------------------------------------------------------
 
+size_t Parameters::extract_groups_
+(
+ const std::string parameter, 
+ std::string * group
+)
+{
+  std::string p = parameter;
+  size_t i_group=0;  // group index for group[]
+  int i_stop  = p.find(":");
+  while (i_stop != std::string::npos &&
+	 i_group<MAX_GROUP_DEPTH) {
+    group[i_group++] = p.substr(0,i_stop);
+    p = p.substr(i_stop+1,std::string::npos);
+    i_stop  = p.find(":");
+  }
+  return i_group;
+}
+//----------------------------------------------------------------------
+
 void Parameters::new_param_
 (
  char * group[],
@@ -778,6 +857,7 @@ void Parameters::new_param_
  ) throw()
 {
 
+  // @@@ Move into function: group[i] -> "group[0]:group[1]..."
   std::string full_parameter = "";
   for (int i=0; group[i] != 0 && i < MAX_GROUP_DEPTH; i++) {
     full_parameter = full_parameter + group[i] + ":";

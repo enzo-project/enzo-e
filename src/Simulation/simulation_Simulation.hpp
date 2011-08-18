@@ -7,8 +7,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-10 16:14:57
 /// @brief    Interface file for the Simulation class
-/// @todo Make Simulation same CHARM++ chare type as EnzoSimulation
-/// (p.89 CHARM++ manual)
 /// @note     2010-12-17: code-wiki interface review
 
 class Boundary;
