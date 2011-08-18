@@ -171,7 +171,7 @@ void Mesh::create_root_patch
 ) throw()
 {
   //--------------------------------------------------
-  // parameters_->set_group (0,"Mesh");
+  // parameters_->group_set (0,"Mesh");
   //--------------------------------------------------
   // parameter: Mesh:refine
   // parameter: Mesh:max_level

@@ -119,9 +119,9 @@ int Performance::group(unsigned id_group)
 
 //----------------------------------------------------------------------
 
-void Performance::set_group(unsigned id_group)
+void Performance::group_set(unsigned id_group)
 {
-  INCOMPLETE("Performance::set_group");
+  INCOMPLETE("Performance::group_set");
 }
 
 //----------------------------------------------------------------------

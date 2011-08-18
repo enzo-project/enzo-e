@@ -394,7 +394,7 @@ void Simulation::initialize_output_() throw()
   // Create and initialize an Output object for each Output group
 
   //--------------------------------------------------
-  parameters_->set_group(0,"Output");
+  parameters_->group_set(0,"Output");
   //--------------------------------------------------
 
   int num_groups = parameters_->list_length("groups");
@@ -402,14 +402,14 @@ void Simulation::initialize_output_() throw()
   for (int index_group=0; index_group < num_groups; index_group++) {
 
     //--------------------------------------------------
-    parameters_->set_group(0,"Output");
+    parameters_->group_set(0,"Output");
     //--------------------------------------------------
 
     std::string group = parameters_->list_value_string
       (index_group,"groups","unknown");
 
     //--------------------------------------------------
-    parameters_->set_group(1,group);
+    parameters_->group_set(1,group);
     //--------------------------------------------------
     // parameter: Output:<group>:type
     // parameter: Output:<group>:file_name
@@ -607,7 +607,7 @@ void Simulation::initialize_output_() throw()
 void Simulation::initialize_method_() throw()
 {
   //--------------------------------------------------
-  parameters_->set_group(0,"Method");
+  parameters_->group_set(0,"Method");
   //--------------------------------------------------
 
   int method_count = parameters_->list_length("sequence");

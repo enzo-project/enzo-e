@@ -52,8 +52,10 @@ private: // No copy or assign
 
 public: // interface
 
+  /// Return the node name
+  std::string name() const {return name_;};
 
-  /// Return the number of subgroups for the given node
+  /// Return the number of subgroups
   int size()
   {return subnodes_.size(); }
 

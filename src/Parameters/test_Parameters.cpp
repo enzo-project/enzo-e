@@ -30,34 +30,36 @@ void generate_input()
 
   // Groups
   // 
-  //  Integer::
-  //  List
-  //  Logical::
-  //  Logical_expr::var_logical_1
-  //  Float::
-  //  Float::const_float_1
-  //  Float::const_float_2
-  //  Float_expr::var_float_1
-  //  Float_expr::var_float_2
-  //  String
-
+  // Logical:
+  // Integer:
+  // Float:
+  // Float:const_float_1
+  // Float:const_float_2
+  // String
+  // Float_expr
+  // Float_expr:var_float_1
+  // Float_expr:var_float_2
+  // Logical_expr
+  // Logical_expr:var_logical
+  // List
+  
   fp << "Logical {\n";
-  fp << "  test_true  = true;\n";
-  fp << "  test_false = false;\n";
+  fp << "  logical_1_true  = true;\n";
+  fp << "  logical_2_false = false;\n";
   fp << "}\n";
   fp << "   \n";
   fp << "Integer {\n";
-  fp << "  test_1 = 1;\n";
-  fp << "  test_neg_37 = -37;\n";
+  fp << "  integer_1_1 = 1;\n";
+  fp << "  integer_2_m37 = -37;\n";
   fp << "}\n";
 
   fp << "Float {\n";
-  fp << "  test_1_5 = 1.5;\n";
-  fp << "  test_neg_37_25 = -37.25;\n";
+  fp << "  float_1_1p5 = 1.5;\n";
+  fp << "  test_m37_25 = -37.25;\n";
   fp << "}\n";
 
   fp << "Float {\n";
-  fp << "  const_float_1 {\n";
+  fp << "  group_float_1 {\n";
   fp << "    num1 = 24.5 + 6.125;\n";
   fp << "    num2 = 24.5 - 6.125;\n";
   fp << "    num3 = 24.5 * 6.125;\n";
@@ -91,7 +93,7 @@ void generate_input()
   fp << "  }\n";
 
   fp << " Logical_expr {\n";
-  fp << "  var_logical_1 {\n";
+  fp << "  var_logical {\n";
   fp << "    num1 = x < y;\n";
   fp << "    num2 = x + y >= t + 3.0;\n";
   fp << "    num3 = x == y;\n";
@@ -119,11 +121,13 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Parameters");
 
+  Monitor::instance()->set_active(false);
+
   //----------------------------------------------------------------------
   // test parameter
   //----------------------------------------------------------------------
 
-  Parameters * parameters = new Parameters();
+  Parameters * parameters = new Parameters;
 
   // Generate test.in to make sure it exists
 
@@ -181,22 +185,22 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("value_logical");
 
-  parameters->set_group(0,"Logical");
+  parameters->group_set(0,"Logical");
   
-  unit_assert (parameters->value_logical("test_true")  == true);
-  unit_assert (parameters->value_logical("test_false") == false);
+  unit_assert (parameters->value_logical("logical_1_true")  == true);
+  unit_assert (parameters->value_logical("logical_2_false") == false);
   unit_assert (parameters->value_logical("none",true) == true);
   unit_assert (parameters->value_logical("none",false) == false);
 
-  unit_assert(parameters->value_logical("Logical:test_true") == true);
-  unit_assert(parameters->value_logical("Logical:test_false") == false);
+  unit_assert(parameters->value_logical("Logical:logical_1_true") == true);
+  unit_assert(parameters->value_logical("Logical:logical_2_false") == false);
 
   // bool l,ld;
 
-  // parameters->value("test_true",parameter_logical,&l);
+  // parameters->value("logical_1_true",parameter_logical,&l);
   // unit_assert (l == true);
 
-  // parameters->value("test_false",parameter_logical,&l);
+  // parameters->value("logical_2_false",parameter_logical,&l);
   // unit_assert (l == false);
 
   // ld = true;
@@ -211,8 +215,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("set_logical");
 
-  parameters->set_logical("test_true",false);
-  unit_assert (parameters->value_logical("test_true") == false);
+  parameters->set_logical("logical_1_true",false);
+  unit_assert (parameters->value_logical("logical_1_true") == false);
   parameters->set_logical("none",true);
   unit_assert (parameters->value_logical("none") == true);
   parameters->set_logical("none_l1",true);
@@ -224,14 +228,14 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("value_integer");
 
-  parameters->set_group(0,"Integer");
+  parameters->group_set(0,"Integer");
   
-  unit_assert (parameters->value_integer("test_1")  == 1);
-  unit_assert (parameters->value_integer("test_neg_37") == -37);
+  unit_assert (parameters->value_integer("integer_1_1")  == 1);
+  unit_assert (parameters->value_integer("integer_2_m37") == -37);
   unit_assert (parameters->value_integer("none",58) == 58);
 
   // int i,id;
-  // parameters->value("test_1",parameter_integer,&i);
+  // parameters->value("integer_1_1",parameter_integer,&i);
   // unit_assert (i == 1);
   // parameters->value("test_37",parameter_integer,&i);
   // unit_assert (i == 37);
@@ -243,8 +247,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("set_integer");
 
-  parameters->set_integer("test_1",2);
-  unit_assert (parameters->value_integer("test_1") == 2);
+  parameters->set_integer("integer_1_1",2);
+  unit_assert (parameters->value_integer("integer_1_1") == 2);
   parameters->set_integer("none",3);
   unit_assert (parameters->value_integer("none") == 3);
   parameters->set_integer("none2",4);
@@ -255,29 +259,28 @@ PARALLEL_MAIN_BEGIN
   
   unit_func("value_float");
 
-  parameters->set_group(0,"Float");
+  parameters->group_set(0,"Float");
   
-  unit_assert (parameters->value_float("test_1_5")  == 1.5);
-  unit_assert (parameters->value_float("test_neg_37_25") == -37.25);
+  unit_assert (parameters->value_float("float_1_1p5")  == 1.5);
+  unit_assert (parameters->value_float("test_m37_25") == -37.25);
   unit_assert (parameters->value_float("none",58.75) == 58.75);
 
   // double d,dd;
   
-  // parameters->value("test_1_5",parameter_float,&d);
+  // parameters->value("float_1_1p5",parameter_float,&d);
   // unit_assert (d  == 1.5);
   // parameters->value("test_37_25",parameter_float,&d);
   // unit_assert (d == 37.25);
   // dd = 58.75;
   // parameters->value("none",parameter_float,&d,&dd);
   // unit_assert (d == dd);
-  // PARALLEL_PRINTF ("%g %g\n",d,dd);
 
   // set_float()
 
   unit_func("set_float");
 
-  parameters->set_float("test_1_5",27.0);
-  unit_assert (parameters->value_float("test_1_5") == 27.0);
+  parameters->set_float("float_1_1p5",27.0);
+  unit_assert (parameters->value_float("float_1_1p5") == 27.0);
   parameters->set_float("none_s",1.5);
   unit_assert (parameters->value_float("none_s") == 1.5);
 
@@ -286,20 +289,20 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("value_float");
 
-  parameters->set_group(0,"Float");
-  parameters->set_group(1,"const_float_1");
+  parameters->group_set(0,"Float");
+  parameters->group_set(1,"group_float_1");
 
   unit_assert(parameters->value_float("num1") == 30.625);
   unit_assert(parameters->value_float("num2") == 18.375);
   unit_assert(parameters->value_float("num3") == 150.0625);
   unit_assert(parameters->value_float("num4") == 4.0000000000);
 
-  unit_assert(parameters->value_float("Float:const_float_1:num1") == 30.625);
-  unit_assert(parameters->value_float("Float:const_float_1:num2") == 18.375);
-  unit_assert(parameters->value_float("Float:const_float_1:num3") == 150.0625);
-  unit_assert(parameters->value_float("Float:const_float_1:num4") == 4.0000000000);
+  unit_assert(parameters->value_float("Float:group_float_1:num1") == 30.625);
+  unit_assert(parameters->value_float("Float:group_float_1:num2") == 18.375);
+  unit_assert(parameters->value_float("Float:group_float_1:num3") == 150.0625);
+  unit_assert(parameters->value_float("Float:group_float_1:num4") == 4.0000000000);
 
-  parameters->set_group(1,"const_float_2");
+  parameters->group_set(1,"const_float_2");
 
   unit_assert(parameters->value_float("num1") == 36.750);
   unit_assert(parameters->value_float("num2") == 67.375);
@@ -309,7 +312,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("value_string");
 
-  parameters->set_group(0,"String");
+  parameters->group_set(0,"String");
 
   unit_assert(parameters->group_depth()==1);
   unit_assert(parameters->group(0)=="String");
@@ -346,8 +349,8 @@ PARALLEL_MAIN_BEGIN
   double values_float[] = {0,0,0};
   double deflts_float[] = {-1,-2,-3};
 
-  parameters->set_group(0,"Float_expr");
-  parameters->set_group(1,"var_float_1");
+  parameters->group_set(0,"Float_expr");
+  parameters->group_set(1,"var_float_1");
 
   parameters->evaluate_float("num1",3,values_float,deflts_float,x,y,z,t);
   unit_assert (values_float[0]==x[0]);
@@ -365,7 +368,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert (values_float[1]==x[1]+y[1]+z[1]+t[1]);
   unit_assert (values_float[2]==x[2]+y[2]+z[2]+t[2]);
 
-  parameters->set_group(1,"var_float_2");
+  parameters->group_set(1,"var_float_2");
 
   parameters->evaluate_float("num1",3,values_float,deflts_float,x,y,z,t);
   unit_assert (CLOSE(values_float[0],sin(x[0])));
@@ -384,8 +387,8 @@ PARALLEL_MAIN_BEGIN
   bool values_logical[] = {false, false, false};
   bool deflts_logical[] = {true, false,true};
 
-  parameters->set_group(0,"Logical_expr");
-  parameters->set_group(1,"var_logical_1");
+  parameters->group_set(0,"Logical_expr");
+  parameters->group_set(1,"var_logical");
 
   parameters->evaluate_logical("num1",3,values_logical,deflts_logical,x,y,z,t);
   unit_assert (values_logical[0] == (x[0] < y[0]));
@@ -404,7 +407,7 @@ PARALLEL_MAIN_BEGIN
 
   // Lists
 
-  parameters->set_group(0,"List");
+  parameters->group_set(0,"List");
 
   unit_func("list_length");
   unit_assert(parameters->list_length("num1") == 6);
@@ -435,35 +438,35 @@ PARALLEL_MAIN_BEGIN
 
   // group_count(), group(i)
 
-  unit_func("group_count");
+  unit_func("child_count");
 
+  delete parameters;
+  parameters = new Parameters;
+  parameters->read ("test.in");
+  const int NUM_GROUPS = 7;
+  struct {
+    const char * group;
+    int count;
+  } child_count[NUM_GROUPS] = {
+    {"Float",       4},
+    {"Float_expr",  2},
+    {"Integer",     2},
+    {"List",        1},
+    {"Logical",     2},
+    {"Logical_expr",1},
+    {"String",      2}
+  };
+
+  parameters->group_clear();
   int num_groups = parameters->group_count();
-  // Groups:
-  //  Integer
-  //  List
-  //  Logical
-  //  Logical_expr
-  //  Float
-  //  Float_expr
-  //  String
-  unit_assert (num_groups == 7); 
+  unit_assert (num_groups == NUM_GROUPS);
 
-  unit_func("subgroup_count");
-  std::map <std::string,int> num_subgroups;
-  num_subgroups["Integer"]      = 1; // ""
-  num_subgroups["List"]         = 1; // ""
-  num_subgroups["Logical"]      = 1; // "var_logical_1"
-  num_subgroups["Logical_expr"] = 1; // ""
-  num_subgroups["Float"]       = 3; // "","const_float_1","const_float_2"
-  num_subgroups["Float_expr"]  = 2; // "var_float_1","var_float_2"
-  num_subgroups["String"]       = 1; // ""
-
-  for (int i=0; i<num_groups; i++) {
-    std::string group = parameters->group(i);
-    parameters->set_group(0,group);
-    unit_assert (num_subgroups[group] == parameters->group_count());
+  for (int i=0; i<NUM_GROUPS; i++) {
+    parameters->group_set(0,child_count[i].group);
+    unit_assert (parameters->group_count() == child_count[i].count);
   }
-  
+      
+
   unit_finalize();
 
   PARALLEL_EXIT;

@@ -77,7 +77,7 @@ public: // interface
   int group(unsigned id_group);
 
   /// Assign a value to an group
-  void set_group(unsigned id_group);
+  void group_set(unsigned id_group);
 
   ///  	 Define the start of a group
   void begin_group(unsigned id_group);

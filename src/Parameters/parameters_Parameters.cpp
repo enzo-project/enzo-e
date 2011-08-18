@@ -19,7 +19,7 @@ Parameters::Parameters(Monitor * monitor)
   throw()
   : current_group_depth_(0),
     parameter_map_(),
-    parameter_tree_(new ParamNode("Parameters")),
+    parameter_tree_(new ParamNode("Cello")),
     monitor_(monitor)
 {
   if (! monitor_) monitor_ = Monitor::instance();
@@ -34,7 +34,7 @@ Parameters::Parameters(const char * file_name,
   throw()
   : current_group_depth_(0),
     parameter_map_(),
-    parameter_tree_(new ParamNode("Parameters")),
+    parameter_tree_(new ParamNode("Cello")),
     monitor_(monitor)
 {
   if (! monitor_) monitor_ = Monitor::instance();
@@ -583,13 +583,15 @@ int Parameters::group_depth() const throw()
 
 int Parameters::group_count() const throw()
 {
+  // Find the parameter node for the current list of groups
   ParamNode * param_node = parameter_tree_;
   for (int i=0; i<current_group_depth_; i++) {
     if (param_node->subnode(current_group_[i]) != 0) {
       param_node = param_node->subnode(current_group_[i]);
     }
   }
-  return (param_node) ? param_node->size() : 0;
+  int value = (param_node) ? param_node->size() : 0;
+  return value;
 }
 
 //----------------------------------------------------------------------
@@ -629,13 +631,13 @@ void Parameters::group_pop(std::string group) throw()
 
 //----------------------------------------------------------------------
 
-void Parameters::set_group(int index, std::string group) throw()
+void Parameters::group_set(int index, std::string group) throw()
 {
   if (index >= MAX_GROUP_DEPTH) {
     char message [ ERROR_LENGTH ];
-    sprintf (message, "set_group(%d,%s) index %d exceeds MAX_GROUP_DEPTH = %d",
+    sprintf (message, "group_set(%d,%s) index %d exceeds MAX_GROUP_DEPTH = %d",
 	     index,group.c_str(),index,MAX_GROUP_DEPTH);
-    ERROR("Parameters::set_group",message);
+    ERROR("Parameters::group_set",message);
   }
   for (int i=index; i<current_group_depth_; i++) {
     if (current_group_[i]) {
@@ -649,11 +651,16 @@ void Parameters::set_group(int index, std::string group) throw()
 
 //----------------------------------------------------------------------
 
-// int Parameters::group_count() throw ()
-// {
-//   return parameter_tree_->size();
-// }
-
+void Parameters::group_clear() throw ()
+{
+  for (int i=0; i<current_group_depth_; i++) {
+    if (current_group_[i]) {
+      free (current_group_[i]);
+      current_group_[i] = NULL;
+    }
+  }
+  current_group_depth_ = 0;
+}
 // //----------------------------------------------------------------------
 
 // std::string Parameters::group(int group_index) throw ()

@@ -165,7 +165,7 @@ PARALLEL_MAIN_BEGIN
   unit_func("group");
   unit_assert (unit_incomplete);
 
-  unit_func("set_group");
+  unit_func("group_set");
   unit_assert (unit_incomplete);
 
   unit_func("num_groups");

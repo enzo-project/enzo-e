@@ -187,8 +187,11 @@ public: // interface
   void group_pop(std::string group = "") throw();
 
   /// Set the ith group to specified group, clearing all higher groups
-  void set_group(int, std::string) throw();
+  void group_set(int, std::string) throw();
 
+  /// Clear all groups
+  void group_clear() throw();
+  
   //--------------------------------------------------
 
   /// Return the type of the given parameter
