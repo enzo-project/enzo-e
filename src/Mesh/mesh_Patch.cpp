@@ -198,7 +198,6 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
     char buffer[80];
     sprintf (buffer,"Allocating block array %d %d %d",mbx,mby,mbz);
-    TRACE(buffer);
 
     block_array_ = factory_->create_block_array
       (nbx,nby,nbz,

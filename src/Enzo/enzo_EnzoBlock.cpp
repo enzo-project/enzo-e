@@ -23,7 +23,7 @@ EnzoBlock::EnzoBlock
   : Block (ix,iy,iz,
 	   nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
     CycleNumber(0),
-    Time(0),
+    Time_(0),
     OldTime(0),
     dt(0),
     SubgridFluxes(0)
@@ -63,13 +63,13 @@ EnzoBlock::EnzoBlock
  int num_field_blocks) throw()
   : Block (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
     CycleNumber(0),
-    Time(0),
+    Time_(0),
     OldTime(0),
     dt(0),
     SubgridFluxes(0)
 {
   int i,j;
-
+  TRACE("EnzoBlock::EnzoBlock");
   for (i=0; i<MAX_DIMENSION; i++) {
     AccelerationField[i] = 0;
 
@@ -180,7 +180,7 @@ void EnzoBlock::write(FILE * fp) throw ()
   fprintf (fp,"EnzoBlock: InitialTimeInCodeUnits %g\n",
 	   InitialTimeInCodeUnits);
   fprintf (fp,"EnzoBlock: Time %g\n",
-	   Time);
+	   Time());
   fprintf (fp,"EnzoBlock: OldTime %g\n",
 	   OldTime);
 
@@ -337,13 +337,16 @@ void EnzoBlock::write(FILE * fp) throw ()
 void EnzoBlock::initialize (int cycle_start, double time_start) throw()
 {
 
-  // Call base class initialize
+  // Call base class initialize time_, cycle_, etc
 
   Block::initialize(cycle_start,time_start);
 
+  // Initialize corresponding EnzoBlock variables
+
   CycleNumber = cycle_start;
-  Time        = time_start;
+  Time_       = time_start;
   OldTime     = time_start;
+
 
   double xm,ym,zm;
 

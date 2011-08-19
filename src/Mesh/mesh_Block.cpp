@@ -243,6 +243,28 @@ extern CProxy_Main        proxy_main;
 
 #ifdef CONFIG_USE_CHARM
 
+Block::Block() 
+{
+  TRACE("Block()");
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+Block::Block (CkMigrateMessage *m) 
+{
+  TRACE("Block(msg)");
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
 void Block::p_initial()
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -286,8 +308,6 @@ void Block::p_initial()
 
 void Block::prepare()
 {
-
-  TRACE("Block::prepare");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
@@ -445,13 +465,17 @@ void Block::p_compute (double dt, int axis_set)
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_refresh (double dt, int axis_set)
+void Block::p_refresh (int cycle, double time, double dt, int axis_set)
 {
-  // Update dt_ from Simulation
+  // Update cycle,time,dt from Simulation
 
    // (should be updated already?)
   // -1 test due to p_refresh_face() calling p_refresh with axis_set != axis_all
-  if (dt != -1) dt_ = dt;
+  if (cycle != -1) {
+    cycle_ = cycle;
+    time_  = time;
+    dt_    = dt;
+  }
 
   refresh(axis_set);
 }
@@ -463,8 +487,6 @@ void Block::p_refresh (double dt, int axis_set)
 
 void Block::refresh (int axis_set)
 {
-
-  TRACE("Block::refresh");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -691,13 +713,13 @@ void Block::p_refresh_face (int n, char * buffer,
     case axis_x:
       if (++count_refresh_face_x_ >= count) {
 	count_refresh_face_x_ = 0;
-	p_refresh (-1,axis_y);
+	p_refresh (-1,0,0,axis_y);
       }
       break;
     case axis_y:
       if (++count_refresh_face_y_ >= count) {
 	count_refresh_face_y_ = 0;
-	p_refresh (-1,axis_z);
+	p_refresh (-1,0,0,axis_z);
       }
       break;
     case axis_z:
@@ -721,8 +743,6 @@ void Block::p_refresh_face (int n, char * buffer,
 
 void Block::p_output (int index_output)
 {
-
-  TRACE("Block::p_output");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -760,7 +780,6 @@ void Block::skip_reduce(int cycle, int time, double dt_block, double stop_block)
 void Block::compute(int axis_set)
 {
 
-  TRACE("Block::compute");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
 #ifdef CONFIG_USE_PROJECTIONS

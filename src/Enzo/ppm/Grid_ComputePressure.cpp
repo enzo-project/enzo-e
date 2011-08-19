@@ -25,7 +25,7 @@
  
 int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
 {
- 
+
   /* declarations */
  
   enzo_float density, gas_energy;
@@ -34,7 +34,7 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
  
   /* Error Check */
 
-  if (time < OldTime || time > Time) {
+  if (time < OldTime || time > Time()) {
     fprintf(stderr, "requested time is outside available range.\n");
     return ENZO_FAIL;
   }
@@ -42,8 +42,8 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
   /* Compute interpolation coefficients. */
  
   enzo_float coef, coefold;
-  if (Time - OldTime > 0)
-    coef    = (time - OldTime)/(Time - OldTime);
+  if (Time() - OldTime > 0)
+    coef    = (time - OldTime)/(Time() - OldTime);
   else
     coef    = 1;
  
@@ -68,7 +68,8 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
  
   /* special loop for no interpolate. */
  
-  if (time == Time)
+  // WARNING: floating point comparison
+  if (time == Time())
 
     for (i = 0; i < size; i++) {
  
@@ -148,7 +149,7 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
  
     if (ComovingCoordinates)
       if (CosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
-			    &TimeUnits, &VelocityUnits, Time) == ENZO_FAIL) {
+			    &TimeUnits, &VelocityUnits, Time()) == ENZO_FAIL) {
 	fprintf(stderr, "Error in CosmologyGetUnits.\n");
 	return ENZO_FAIL;
       }

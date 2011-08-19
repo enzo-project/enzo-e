@@ -26,12 +26,29 @@ EnzoSimulation::EnzoSimulation
  ) throw()
   : Simulation
 #ifdef CONFIG_USE_CHARM
-    ( parameter_file, n, *(new EnzoFactory), proxy_block_reduce, index )
+    (parameter_file, n, proxy_block_reduce, index )
 #else
-    ( parameter_file, *(new EnzoFactory), group_process, index )
+    (parameter_file, group_process, index )
 #endif
 {
 }
+
+#ifdef CONFIG_USE_CHARM
+/// Initialize an empty EnzoSimulation
+EnzoSimulation::EnzoSimulation() 
+{
+  TRACE("EnzoSimulation()");
+};
+
+/// Initialize a migrated EnzoSimulation
+EnzoSimulation::EnzoSimulation (CkMigrateMessage *m) 
+{
+  TRACE("EnzoSimulation(msg)");
+};
+
+//==================================================
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -77,6 +94,14 @@ void EnzoSimulation::read() throw()
 void EnzoSimulation::write() const throw()
 {
   INCOMPLETE("EnzoSimulation::write");
+}
+
+//----------------------------------------------------------------------
+
+const Factory & EnzoSimulation::factory() const throw()
+{ 
+  if (factory_ == NULL) factory_ = new EnzoFactory;
+  return *factory_;
 }
 
 //======================================================================

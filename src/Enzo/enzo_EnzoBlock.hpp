@@ -34,7 +34,7 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize a migrated Block
-  EnzoBlock (CkMigrateMessage *m) {TRACE("Oops")};
+  EnzoBlock (CkMigrateMessage *m) {};
 
   /// Initialize the EnzoBlock chare array
   EnzoBlock
@@ -59,6 +59,13 @@ public: // interface
 
   /// Write attributes, e.g. to stdout for debugging
   void write(FILE *fp=stdout) throw ();
+
+  //----------------------------------------------------------------------
+  // Enzo attribute access functions
+  //----------------------------------------------------------------------
+
+  /// When Enzo accesses Time, refresh Cello time_ to Time_
+  double Time() { Time_ = time_; return Time_; };
 
   //----------------------------------------------------------------------
   // Original Enzo functions
@@ -98,9 +105,10 @@ public: // functions (TEMPORARILY PUBLIC)
 
 public: // attributes (YIKES!)
 
+  enzo_float Time_;
+
   int CycleNumber;
 
-  enzo_float Time;
   enzo_float OldTime;
   enzo_float dt;
 

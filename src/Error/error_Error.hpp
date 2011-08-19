@@ -55,7 +55,7 @@
 #ifdef CELLO_TRACE
 #   define TRACE(MESSAGE)						\
   {									\
-    PARALLEL_PRINT ("TRACE %s:%d %s\n",__FILE__,__LINE__,MESSAGE);		\
+    PARALLEL_PRINTF ("TRACE %s:%d %s\n",__FILE__,__LINE__,MESSAGE);		\
     fflush(stdout);						\
   }
 #else

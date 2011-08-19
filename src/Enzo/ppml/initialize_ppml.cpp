@@ -46,7 +46,7 @@ void EnzoBlock::initialize_ppml (int size_param)
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;
   InitialTimeInCodeUnits = 0;
-  Time                   = 0;
+  Time_                  = 0;
   OldTime                = 0;
 
   // Domain

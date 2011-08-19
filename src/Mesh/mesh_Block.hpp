@@ -50,10 +50,10 @@ public: // interface
    int num_field_blocks) throw();
 
   /// Initialize an empty Block
-  Block() {TRACE("Block()")};
+  Block();
 
   /// Initialize a migrated Block
-  Block (CkMigrateMessage *m) {TRACE("Block(msg)")};
+  Block (CkMigrateMessage *m);
 
   /// Initialize block for the simulation.
   void p_initial();
@@ -62,7 +62,7 @@ public: // interface
   void p_compute(double dt, int axis_set);
 
   /// Refresh ghost zones and apply boundary conditions
-  void p_refresh(double dt, int axis_set);
+  void p_refresh(int cycle, double time, double dt, int axis_set);
 
   /// Refresh a FieldFace
   void p_refresh_face(int n, char buffer[], int axis, int face, int axis_set);

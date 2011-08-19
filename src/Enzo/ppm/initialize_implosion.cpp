@@ -36,7 +36,7 @@ void EnzoBlock::initialize_implosion (int size_param)
   CourantSafetyNumber    = 0.6;
   InitialRedshift        = 20;
   InitialTimeInCodeUnits = 0;
-  Time                   = 0;
+  Time_                  = 0;
   OldTime                = 0;
 
   // Domain

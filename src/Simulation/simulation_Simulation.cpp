@@ -8,7 +8,6 @@
 
 #include "cello.hpp"
 
-class Factory;
 #include "main.hpp"
 
 #include "simulation.hpp"
@@ -19,17 +18,15 @@ Simulation::Simulation
  const char *   parameter_file,
 #ifdef CONFIG_USE_CHARM
  int n,
- const Factory & factory,
  CProxy_BlockReduce proxy_block_reduce,
 #else
- const Factory & factory,
  GroupProcess * group_process,
 #endif
  int            index
  ) throw()
 /// Initialize the Simulation object
-  : parameters_(0),
-    factory_(&factory),
+  : factory_(0),
+    parameters_(0),
 #ifndef CONFIG_USE_CHARM
     group_process_(group_process),
 #endif
@@ -183,11 +180,6 @@ size_t Simulation::num_method() const throw()
 Method * Simulation::method(int i) const throw()
 { return method_list_[i]; }
 
-//----------------------------------------------------------------------
-
-const Factory * Simulation::factory () const throw()
-{ return factory_; }
-
 //======================================================================
 
 void Simulation::initialize_simulation_() throw()
@@ -284,7 +276,7 @@ void Simulation::initialize_mesh_() throw()
   // Create and initialize Mesh
   //----------------------------------------------------------------------
 
-  mesh_ = factory()->create_mesh ();
+  mesh_ = factory().create_mesh();
 
   // Domain extents
 
@@ -676,8 +668,6 @@ void Simulation::deallocate_() throw()
   initial_ = 0;
   delete boundary_;
   boundary_ = 0;
-  delete factory_;
-  factory_ = 0;
   for (size_t i=0; i<method_list_.size(); i++) {
     delete method_list_[i];
     method_list_[i] = 0;
@@ -692,6 +682,12 @@ void Simulation::read() throw()
 
 void Simulation::write() const throw()
 { ERROR ("Simulation::write","Implictly abstract function called"); }
+
+const Factory & Simulation::factory() const throw()
+{
+  if (factory_ == NULL) factory_ = new Factory;
+  return *factory_;
+}
 
 Stopping * Simulation::create_stopping_ (std::string name) throw ()
 { ERROR ("Simulation::create_stopping_","Implictly abstract function called"); }
@@ -713,13 +709,34 @@ Method * Simulation::create_method_ (std::string name) throw ()
 
 //======================================================================
 
+
+#ifdef CONFIG_USE_CHARM
+
+Simulation::Simulation() 
+{
+  TRACE("Simulation()");
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+Simulation::Simulation (CkMigrateMessage *m) 
+{
+  TRACE("Simulation(msg)");
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
 #ifdef CONFIG_USE_CHARM
 
 void Simulation::p_output 
 ( int cycle, double time, double dt, bool stop ) throw()
 {
-
-  TRACE("Simulation::p_output");
 
   // Update Simulation cycle and time from reduction to main
   
@@ -743,7 +760,6 @@ void Simulation::p_output
 
 void Simulation::output_first() throw()
 {
-  TRACE("Simulation::output_first()");
   index_output_ = 0;
 }
 
@@ -755,8 +771,6 @@ void Simulation::output_first() throw()
 
 void Simulation::output_next() throw()
 {
-
-  TRACE("Simulation::output_next()");
 
   // find next output
 
@@ -795,8 +809,6 @@ void Simulation::output_next() throw()
 
 void Simulation::p_output_reduce() throw()
 {
-  TRACE("Simulation::p_output_reduce");
-
   int ip       = CkMyPe();
   int ip_write = ip - (ip % output(index_output_)->process_write());
 
@@ -822,8 +834,6 @@ void Simulation::p_output_reduce() throw()
 
 void Simulation::p_output_write (int n, char * buffer) throw()
 {
-  TRACE("Simulation::p_output_write");
-
   Output * out = output(index_output_);
   int ip       = CkMyPe();
   int ip_write = ip - (ip % out->process_write());
@@ -866,8 +876,6 @@ void Simulation::p_output_write (int n, char * buffer) throw()
 void Simulation::refresh() throw()
 {
 
-  TRACE("Simulation::refresh");
-
   //--------------------------------------------------
   // Monitor
   //--------------------------------------------------
@@ -907,7 +915,7 @@ void Simulation::refresh() throw()
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
 #ifdef ORIGINAL_REFRESH
-	patch->block_array().p_refresh(dt_,axis);
+	patch->block_array().p_refresh(cycle_, time_, dt_,axis);
 #else
 	patch->block_array().p_compute(dt_,axis);
 #endif

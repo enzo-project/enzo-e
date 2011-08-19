@@ -62,6 +62,7 @@ struct fluxes
 #include "performance.hpp"
 #include "method.hpp"
 #include "simulation.hpp"
+#include "parallel.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes

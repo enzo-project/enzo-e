@@ -20,7 +20,6 @@ CProxy_Main proxy_main;
 
 void Main::p_exit(int count)
 {
-  TRACE("Main::p_exit");
   count_exit_++;
   if (count_exit_ >= count) {
     count_exit_ = 0;

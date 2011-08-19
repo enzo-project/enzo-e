@@ -23,7 +23,7 @@ public: // interface
 
   /// Reduce block dt and stop, then proceed with cycle
   void p_prepare(int count, int cycle, double time,
-			      double dt_block, int stop_block);
+		 double dt_block, int stop_block);
 
   /// Reduce output from simulation
   void p_output_reduce(int count);

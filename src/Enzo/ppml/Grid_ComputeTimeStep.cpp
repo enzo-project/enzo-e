@@ -50,7 +50,7 @@ enzo_float EnzoBlock::ComputeTimeStep()
  
   enzo_float a = 1, dadt;
   if (ComovingCoordinates)
-    CosmologyComputeExpansionFactor(Time, &a, &dadt);
+    CosmologyComputeExpansionFactor(Time(), &a, &dadt);
 //   enzo_float afloat = enzo_float(a);
  
   /* 1) Compute Courant condition for baryons. */
@@ -73,9 +73,9 @@ enzo_float EnzoBlock::ComputeTimeStep()
  
 //       pressure_field = new enzo_float[size];
 //       if (DualEnergyFormalism)
-// 	result = this->ComputePressureDualEnergyFormalism(Time, pressure_field);
+// 	result = this->ComputePressureDualEnergyFormalism(Time(), pressure_field);
 //       else
-// 	result = this->ComputePressure(Time, pressure_field);
+// 	result = this->ComputePressure(Time(), pressure_field);
  
 //       if (result == ENZO_FAIL) {
 // 	fprintf(stderr, "Error in grid->ComputePressure.\n");
@@ -156,7 +156,7 @@ enzo_float EnzoBlock::ComputeTimeStep()
   /* 3) Find dt from expansion. */
  
   if (ComovingCoordinates)
-    if (CosmologyComputeExpansionTimestep(Time, &dtExpansion) == ENZO_FAIL) {
+    if (CosmologyComputeExpansionTimestep(Time(), &dtExpansion) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
       exit(ENZO_FAIL);
     }

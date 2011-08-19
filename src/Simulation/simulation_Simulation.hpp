@@ -48,10 +48,8 @@ public: // interface
   ( const char *       parameter_file,
 #ifdef CONFIG_USE_CHARM
     int                n,
-    const Factory &    factory,
     CProxy_BlockReduce proxy_block_reduce, 
 #else
-    const Factory &    factory,
     GroupProcess *     group_process = 0,
 #endif
     int                index = 0
@@ -63,10 +61,10 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize an empty Simulation
-  Simulation() {TRACE("Simulation()")};
+  Simulation();
 
   /// Initialize a migrated Simulation
-  Simulation (CkMigrateMessage *m) {TRACE("Simulation(msg)")};
+  Simulation (CkMigrateMessage *m);
 
   //==================================================
 
@@ -151,9 +149,6 @@ public: // interface
   /// Return the ith method object
   Method * method(int i) const throw();
 
-  /// Return the factory object
-  const Factory * factory () const throw();
-
   /// Return the current cycle number
   int cycle() const throw() {return cycle_;};
 
@@ -198,6 +193,9 @@ public: // virtual functions
 
   /// Write a Simulation state to disk
   virtual void write() const throw();
+
+  /// Return a Mesh factory object
+  virtual const Factory & factory () const throw();
 
 protected: // functions
 
@@ -266,12 +264,11 @@ protected: // attributes
   // SIMULATION PARAMETERS
   //----------------------------------------------------------------------
 
+  /// Factory, created on first call to factory()
+  mutable Factory * factory_;
+
   /// Parameters associated with this simulation
   Parameters * parameters_;
-
-  /// Factory for creating related families of Meshes, Patches and Blocks 
-  /// [abstract factory design pattern]
-  const Factory * factory_; 
 
   /// Parallel group for the simulation
   GroupProcess * group_process_;

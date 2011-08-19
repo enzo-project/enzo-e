@@ -14,7 +14,6 @@ module simulation {
 
     entry Simulation
       (const char filename[n], int n, 
-       const Factory & factory,
        CProxy_BlockReduce proxy_block_reduce,
        int index_simulation);
 

@@ -37,13 +37,13 @@ int EnzoBlock::CosmologyGetUnits
 (
  enzo_float *DensityUnits, enzo_float *LengthUnits,
  enzo_float *TemperatureUnits, enzo_float *TimeUnits,
- enzo_float *VelocityUnits, enzo_float Time)
+ enzo_float *VelocityUnits, enzo_float time)
 {
  
   /* From the time, compute the current redshift. */
  
   enzo_float a, dadt;
-  if (CosmologyComputeExpansionFactor(Time, &a, &dadt) == ENZO_FAIL) {
+  if (CosmologyComputeExpansionFactor(time, &a, &dadt) == ENZO_FAIL) {
     fprintf(stderr, "Error in ComputeExpansionFactor.\n");
     return ENZO_FAIL;
   }

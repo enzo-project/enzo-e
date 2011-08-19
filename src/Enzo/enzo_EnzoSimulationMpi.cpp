@@ -89,8 +89,8 @@ void EnzoSimulationMpi::run() throw()
 
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-      int cycle_block   = enzo_block->CycleNumber;
-      double time_block =  enzo_block->Time;
+      int & cycle_block   = enzo_block->CycleNumber;
+      double & time_block =  enzo_block->Time();
 
       int stop_block = stopping_->complete(cycle_block,time_block);
 
@@ -108,6 +108,7 @@ void EnzoSimulationMpi::run() throw()
 
   while (! stop_mesh) {
 
+    TRACE("EnzoSimulationMpi");
     monitor->print("[Simulation %d] cycle %04d time %15.12f", index_, cycle_,time_);
 
     //--------------------------------------------------
@@ -135,7 +136,7 @@ void EnzoSimulationMpi::run() throw()
 
 	// Reduce timestep to coincide with scheduled output if needed
 
-	double time_block = static_cast <EnzoBlock*> (block)->Time;
+	double time_block = static_cast <EnzoBlock*> (block)->Time();
 
 	for (size_t i=0; i<output_list_.size(); i++) {
 	  Output * output = output_list_[i];
@@ -186,7 +187,7 @@ void EnzoSimulationMpi::run() throw()
 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
 	int        & cycle_block    = enzo_block->CycleNumber;
-	enzo_float & time_block     = enzo_block->Time;
+	enzo_float & time_block     = enzo_block->Time();
 	enzo_float & dt_block       = enzo_block->dt;
 	enzo_float & old_time_block = enzo_block->OldTime;
 
@@ -242,6 +243,7 @@ void EnzoSimulationMpi::run() throw()
   // END MAIN LOOP
   //======================================================================
 
+  TRACE("EnzoSimulationMpi");
   monitor->print("[Simulation %d] cycle %04d time %15.12f", 
 		 index_, cycle_, time_);
 

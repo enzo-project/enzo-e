@@ -25,7 +25,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
   /* Error Check */
  
-  if (time < OldTime || time > Time) {
+  if (time < OldTime || time > Time()) {
     fprintf(stderr, "requested time is outside available range.\n");
     return ENZO_FAIL;
   }
@@ -33,8 +33,8 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
   /* Compute interpolation coefficients. */
  
   enzo_float coef, coefold;
-  if (Time - OldTime > 0)
-    coef    = (time - OldTime)/(Time - OldTime);
+  if (Time() - OldTime > 0)
+    coef    = (time - OldTime)/(Time() - OldTime);
   else
     coef    = 1;
  
@@ -59,7 +59,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
   /* special loop for no interpolate. */
  
-  if (time == Time)
+  if (time == Time())
  
     for (i = 0; i < size; i++) {
       pressure[i] = (Gamma - 1.0) * BaryonField[DensNum][i] *
@@ -110,7 +110,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
     if (ComovingCoordinates)
       if (CosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
-			    &TimeUnits, &VelocityUnits, Time) == ENZO_FAIL) {
+			    &TimeUnits, &VelocityUnits, Time()) == ENZO_FAIL) {
 	fprintf(stderr, "Error in CosmologyGetUnits.\n");
 	return ENZO_FAIL;
       }

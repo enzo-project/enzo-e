@@ -7,8 +7,6 @@
 
 #include "parallel.def"
 
-#define _TRACE_   CkPrintf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout);
-
 //----------------------------------------------------------------------
 
 CharmPatch::CharmPatch(int num_blocks, int block_size, int cycle_max,

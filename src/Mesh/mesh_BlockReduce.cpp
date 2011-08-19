@@ -34,7 +34,6 @@ void BlockReduce::p_prepare(int    count,
 			    double dt_block, 
 			    int    stop_block)
 {
-  TRACE("BlockReduce::p_prepare");
   // Assumes cycle and time are the same for all "incoming" blocks;
   // only use the last one
 
@@ -74,7 +73,6 @@ void BlockReduce::p_prepare(int    count,
 
 void BlockReduce::p_output_reduce(int count)
 {
-  TRACE("BlockReduce::p_output_reduce");
   if (++count_output_ >= count) {
     INCOMPLETE("BlockReduce::p_output_reduce()");
     proxy_simulation.p_output_reduce();
