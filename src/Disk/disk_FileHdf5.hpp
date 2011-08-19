@@ -14,7 +14,7 @@
 /// @todo     Add support for compression (see H5Z API)
 /// @brief    [\ref Disk] Interface for the FileHdf5 class
 
-class FileHdf5 : File {
+class FileHdf5 : public File {
 
   /// @class    FileHdf5
   /// @ingroup  Disk

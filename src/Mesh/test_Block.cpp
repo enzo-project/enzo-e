@@ -51,6 +51,29 @@ PARALLEL_MAIN_BEGIN
   unit_assert(upper[1] ==  2.0);
   unit_assert(upper[2] ==  3.0);
 
+  //----------------------------------------------------------------------
+
+  unit_func("write");
+
+  // // Write header data
+  // block->open(file,"block_header.out","w");
+  // block->write(file,file_content_header);
+  // block->close(file);
+
+  // // Read header data
+  // block_read->open(file,"block_header.out","r");
+  // block_read->read(file,file_content_header);
+  // block_read->close(file);
+
+  // Block
+  //   index
+  //   size
+  //   lower
+  //   upper
+  //   cycle
+  //   time
+  //   dt
+
   unit_finalize();
 
   PARALLEL_EXIT;

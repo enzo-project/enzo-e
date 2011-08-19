@@ -536,13 +536,9 @@ PARALLEL_MAIN_BEGIN
 
   // Compare header data written and read
 
-  // index
-  // size
-  // lower
-  // upper
-  // cycle
-  // time
-  // dt
+  // FieldBlock
+  //   size_[]
+  //
 
   unit_assert(false);
 

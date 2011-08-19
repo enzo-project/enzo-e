@@ -14,13 +14,14 @@
 FileHdf5::FileHdf5() throw()
 /**
  */
- :file_(0),
-  file_name_(),
-  file_mode_(),
-  is_file_open_(false),
-  dataset_(0),
-  dataset_name_(),
-  dataspace_(0)
+  :File(),
+   file_(0),
+   file_name_(),
+   file_mode_(),
+   is_file_open_(false),
+   dataset_(0),
+   dataset_name_(),
+   dataspace_(0)
 {
 }
 

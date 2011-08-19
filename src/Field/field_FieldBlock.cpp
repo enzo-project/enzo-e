@@ -395,7 +395,12 @@ FieldBlock * FieldBlock::merge
 
 //----------------------------------------------------------------------
 
-void FieldBlock::open (File * file, const char * file_mode ) const throw()
+void FieldBlock::open 
+(
+ File *       file, 
+ const char * file_name, 
+ const char * file_mode 
+ ) const throw()
 {
   INCOMPLETE("FieldBlock::open");
 }

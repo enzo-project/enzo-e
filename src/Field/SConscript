@@ -14,18 +14,18 @@ Import('type')
 if (type == "charm"):
     components = ['simulation','method',
                   'mesh',
-                  'parallel',
+                  'parallel','disk',
                   'parameters', 'monitor',
                   'performance','error',
                   'cello']
 else:
     components = ['mesh',
-                  'parallel',
+                  'parallel','disk',
                   'monitor',
                   'performance','error',
                   'cello']
 
-libraries  = ['png']
+libraries  = ['png','hdf5']
 
 #------------------------------
 # ENVIRONMENTS
