@@ -89,8 +89,8 @@ void EnzoSimulationMpi::run() throw()
 
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-      int & cycle_block   = enzo_block->CycleNumber;
-      double & time_block =  enzo_block->Time();
+      int & cycle_block = enzo_block->CycleNumber;
+      double time_block =  enzo_block->Time();
 
       int stop_block = stopping_->complete(cycle_block,time_block);
 
@@ -187,7 +187,7 @@ void EnzoSimulationMpi::run() throw()
 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
 	int        & cycle_block    = enzo_block->CycleNumber;
-	enzo_float & time_block     = enzo_block->Time();
+	enzo_float   time_block     = enzo_block->Time();
 	enzo_float & dt_block       = enzo_block->dt;
 	enzo_float & old_time_block = enzo_block->OldTime;
 
