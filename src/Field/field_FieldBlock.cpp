@@ -692,6 +692,9 @@ void FieldBlock::image
 	  (filename,nd3[ix],nd3[iy],(long double *) field_values_[index_field],
 	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
 	break;
+      default:
+	ERROR("FieldBlock::image", "Precision not handled");
+	break;
       }
 
       delete output;
@@ -784,3 +787,19 @@ void FieldBlock::restore_array_
 
   field_values_from.clear();
 }
+
+//----------------------------------------------------------------------
+
+void FieldBlock::read_(File * file) throw ()
+{
+  INCOMPLETE("FieldBlock::read_");
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlock::write_(File * file) const throw ()
+{
+  INCOMPLETE("FieldBlock::write_");
+}
+
+//----------------------------------------------------------------------

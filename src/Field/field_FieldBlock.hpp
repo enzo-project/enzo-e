@@ -159,6 +159,12 @@ private: // functions
 			std::vector<char *> & field_values )
     throw (std::out_of_range);
 
+  /// Read "metadata" associated with the FieldBlock
+  void read_(File * file) throw ();
+
+  /// Write "metadata" associated with the FieldBlock
+  void write_(File * file) const throw ();
+
   //----------------------------------------------------------------------
 
 private: // attributes
