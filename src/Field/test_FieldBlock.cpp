@@ -446,11 +446,6 @@ PARALLEL_MAIN_BEGIN
 
   field_block->cell_width(block,&hx,&hy,&hz);
 
-  printf ("%g %g  %g %g  %g %g\n",
-	  hx, 2.0/nx,
-	  hy, 4.0/ny,
-	  hz, 6.0/nz);
-
   unit_assert(fabs(hx-2.0/nx) < 1e-6);
   unit_assert(fabs(hy-4.0/ny) < 1e-6);
   unit_assert(fabs(hz-6.0/nz) < 1e-6);
@@ -512,12 +507,50 @@ PARALLEL_MAIN_BEGIN
   // unit_func("merge");
   // unit_assert(false);
 	
-  // //----------------------------------------------------------------------
-  // unit_func("read");
-  // unit_assert(false);
-  // //----------------------------------------------------------------------
-  // unit_func("write");
-  // unit_assert(false);
+  //----------------------------------------------------------------------
+  // I/O
+  //----------------------------------------------------------------------
+
+  FileHdf5 * file = new FileHdf5;
+
+  Block * block_read = factory.create_block
+    (ix,iy,iz, 
+     1,1,1,
+     nx,ny,nz,
+     xpm,ypm,zpm,
+     xb,yb,zb,  1);
+
+  FieldBlock * field_block_read = block_read->field_block();
+
+  unit_func("write");
+
+  // Write header data
+  field_block->open(file,"field_block_header.out","w");
+  field_block->write(file,file_content_header);
+  field_block->close(file);
+
+  // Read header data
+  field_block_read->open(file,"field_block_header.out","r");
+  field_block_read->read(file,file_content_header);
+  field_block_read->close(file);
+
+  // Compare header data written and read
+
+  // index
+  // size
+  // lower
+  // upper
+  // cycle
+  // time
+  // dt
+
+  unit_assert(false);
+
+  //----------------------------------------------------------------------
+  unit_func("read");
+
+  delete file;
+  unit_assert(false);
 	
   //----------------------------------------------------------------------
   unit_finalize();

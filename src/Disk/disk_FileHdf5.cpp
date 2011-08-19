@@ -11,7 +11,7 @@
  
 //----------------------------------------------------------------------
 
-FileHdf5::FileHdf5()
+FileHdf5::FileHdf5() throw()
 /**
  */
  :file_(0),
@@ -26,7 +26,7 @@ FileHdf5::FileHdf5()
 
 //----------------------------------------------------------------------
     
-int FileHdf5::open_file  (std::string name, std::string mode)
+int FileHdf5::open_file  (std::string name, std::string mode) throw()
 /**
  * @param name  Name of the file to create or open
  * @param mode  How the file is to be created or opened:
@@ -73,7 +73,7 @@ int FileHdf5::open_file  (std::string name, std::string mode)
 
 //----------------------------------------------------------------------
 
-void FileHdf5::close_file ()
+void FileHdf5::close_file () throw()
 /**
  */
 {
@@ -99,7 +99,7 @@ void FileHdf5::close_file ()
 
 //----------------------------------------------------------------------
 
-void FileHdf5::open_group (std::string name)
+void FileHdf5::open_group (std::string name) throw()
 /**
  */
 {
@@ -108,7 +108,7 @@ void FileHdf5::open_group (std::string name)
 
 //----------------------------------------------------------------------
 
-void FileHdf5::close_group ()
+void FileHdf5::close_group () throw()
 /**
  */
 {
@@ -122,7 +122,7 @@ void FileHdf5::open_dataset
  std::string         name,
  enum precision_enum precision,
  int nx,  int ny,  int nz
-)
+) throw()
 {
   if (file_mode_ != "w") {
 
@@ -179,7 +179,7 @@ void FileHdf5::open_dataset
  int *       nx,
  int *       ny,
  int *       nz
- )
+ ) throw()
 /**
  */
 {
@@ -246,7 +246,7 @@ void FileHdf5::open_dataset
 
 //----------------------------------------------------------------------
 
-void FileHdf5::close_dataset ()
+void FileHdf5::close_dataset () throw()
 /**
  */
 {
@@ -256,7 +256,7 @@ void FileHdf5::close_dataset ()
 //----------------------------------------------------------------------
 
 void FileHdf5::read  (char              * buffer,
-		      enum precision_enum precision)
+		      enum precision_enum precision) throw()
 /// @param buffer     Pointer to data buffer
 /// @param precision  Precision of values in data buffer
 {
@@ -270,8 +270,8 @@ void FileHdf5::read  (char              * buffer,
 
 //----------------------------------------------------------------------
 
-void FileHdf5::write (char              * buffer,
-		      enum precision_enum precision)
+void FileHdf5::write (const char        * buffer,
+		      enum precision_enum precision) throw()
 /**
  */
 {
@@ -281,7 +281,7 @@ void FileHdf5::write (char              * buffer,
 
 //----------------------------------------------------------------------
 
-int FileHdf5::datatype_(enum precision_enum precision)
+int FileHdf5::datatype_(enum precision_enum precision) throw()
 {
   // (*) NATIVE    -   FLOAT DOUBLE LDOUBLE
   // ( ) IEEE      -   F32BE F64BE     -

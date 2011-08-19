@@ -9,7 +9,8 @@
 #include "cello.hpp"
 #include "field.hpp"
 
-#define TEMP_CLEAR_VALUE std::numeric_limits<float>::max() /* in field_FieldBlock.cpp and  mesh_Block.cpp */
+#define TEMP_CLEAR_VALUE std::numeric_limits<float>::max() 
+/* in field_FieldBlock.cpp and  mesh_Block.cpp */
 
 //----------------------------------------------------------------------
 
@@ -18,9 +19,15 @@ FieldBlock::FieldBlock ( int nx, int ny, int nz ) throw()
     field_values_(),
     ghosts_allocated_(false)
 {
-  size_[0] = nx;
-  size_[1] = ny;
-  size_[2] = nz;
+  if (nx != 0) {
+    size_[0] = nx;
+    size_[1] = ny;
+    size_[2] = nz;
+  } else {
+    size_[0] = 0;
+    size_[1] = 0;
+    size_[2] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -387,15 +394,33 @@ FieldBlock * FieldBlock::merge
 }
 
 //----------------------------------------------------------------------
-	
-void FieldBlock::read (File * file) throw ()
+
+void FieldBlock::open (File * file, const char * file_mode ) const throw()
+{
+  INCOMPLETE("FieldBlock::open");
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlock::close (File * file) const throw()
+{
+  INCOMPLETE("FieldBlock::close");
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlock::read
+(
+ File *            file, 
+ file_content_type file_content) throw ()
 {
   INCOMPLETE("FieldBlock::read");
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlock::write (File * file) const throw ()
+void FieldBlock::write
+(File * file, file_content_type file_content) const throw ()
 {
   INCOMPLETE("FieldBlock::write");
 }
@@ -787,19 +812,3 @@ void FieldBlock::restore_array_
 
   field_values_from.clear();
 }
-
-//----------------------------------------------------------------------
-
-void FieldBlock::read_(File * file) throw ()
-{
-  INCOMPLETE("FieldBlock::read_");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::write_(File * file) const throw ()
-{
-  INCOMPLETE("FieldBlock::write_");
-}
-
-//----------------------------------------------------------------------

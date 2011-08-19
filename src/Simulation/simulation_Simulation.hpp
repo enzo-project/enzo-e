@@ -327,6 +327,7 @@ protected: // attributes
 
 #ifdef CONFIG_USE_CHARM
 
+  /// CHARM proxy for global reduction operations on blocks
   CProxy_BlockReduce  proxy_block_reduce_;
 
   /// Index of currently active output object

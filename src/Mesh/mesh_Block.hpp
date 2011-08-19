@@ -139,6 +139,7 @@ public: // interface
   /// Return the current time
   double time() const throw() { return time_; };
 
+  
 public: // virtual functions
 
   /// Call application-specific initialization
@@ -158,8 +159,10 @@ protected: // attributes
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;
 
+#ifndef CONFIG_USE_CHARM
   /// Index into Patch [redundant with CHARM thisIndex.x .y .z]
   int index_[3];
+#endif
 
   /// Size of Patch
   int size_[3];

@@ -20,16 +20,16 @@ public: // interface
   File() throw();
 
   /// Open the given named file
-  void open(std::string filename) throw();
+  virtual int open_file(std::string filename, std::string mode) throw() = 0;
 
   /// Close the file
-  void close() throw();
-
+  virtual void close_file() throw() = 0;
+  
   /// Read data from the file
-  void read() throw();
+  virtual void read(char * buffer, enum precision_enum precision) throw() = 0;
 
   /// Write data to the file
-  void write() throw();
+  virtual void write(const char * buffer, enum precision_enum precision) throw() = 0;
 
 private: // functions
 

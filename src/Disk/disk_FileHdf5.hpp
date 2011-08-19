@@ -14,7 +14,7 @@
 /// @todo     Add support for compression (see H5Z API)
 /// @brief    [\ref Disk] Interface for the FileHdf5 class
 
-class FileHdf5 {
+class FileHdf5 : File {
 
   /// @class    FileHdf5
   /// @ingroup  Disk
@@ -25,44 +25,44 @@ class FileHdf5 {
 public: // interface
 
   /// Initialize the FileHdf5 object
-  FileHdf5();
+  FileHdf5() throw();
 
   /// Open the file with the given mode
-  int open_file  (std::string name, std::string mode);
+  virtual int open_file  (std::string name, std::string mode) throw();
 
   /// Close the file
-  void close_file ();
+  virtual void close_file () throw();
+
+  /// Read the current dataset into the buffer
+  virtual void read  (char              * buffer,
+		      enum precision_enum precision) throw();
+
+  /// Write the current dataset from the buffer
+  virtual void write (const char        * buffer,
+		      enum precision_enum precision) throw();
 
   /// Open the given group
-  void open_group (std::string name);
+  void open_group (std::string name) throw();
 
   /// Close the current group
-  void close_group ();
+  void close_group () throw();
 
   /// Open the given dataset with given size for reading
   void open_dataset (std::string name, 
-		     int * nx, int * ny, int * nz);
+		     int * nx, int * ny, int * nz) throw();
 
   /// Open the given dataset with the given size for writing
   void open_dataset (std::string name, 
 		     enum precision_enum precision,
-		     int nx, int ny, int nz);
+		     int nx, int ny, int nz) throw();
 
   /// Close the current dataset
-  void close_dataset ();
-
-  /// Read the current dataset into the buffer
-  void read  (char              * buffer,
-	      enum precision_enum precision);
-
-  /// Write the current dataset from the buffer
-  void write (char              * buffer,
-	      enum precision_enum precision);
+  void close_dataset () throw();
 
 private: // functions
 
   /// Return the HDF5 datatype for the given precision
-  int datatype_(enum precision_enum precision);
+  int datatype_(enum precision_enum precision) throw();
 
 private: // attributes
 

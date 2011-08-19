@@ -61,9 +61,11 @@ Block::Block
   size_[1] = nby;
   size_[2] = nbz;
 
+#ifndef CONFIG_USE_CHARM
   index_[0] = ibx;
   index_[1] = iby;
   index_[2] = ibz;
+#endif
 
   // Initialize extent 
 
@@ -117,9 +119,11 @@ Block::Block
   size_[1] = nby;
   size_[2] = nbz;
 
+#ifndef CONFIG_USE_CHARM
   index_[0] = ibx;
   index_[1] = iby;
   index_[2] = ibz;
+#endif
 
   // Initialize extent 
 
@@ -199,9 +203,15 @@ void Block::upper(double * x, double * y, double * z) const throw ()
 
 void Block::index_patch (int * ix=0, int * iy=0, int * iz=0) const throw ()
 {
+#ifdef CONFIG_USE_CHARM
+  if (ix) (*ix)=thisIndex.x;
+  if (iy) (*iy)=thisIndex.y;
+  if (iz) (*iz)=thisIndex.z;
+#else
   if (ix) (*ix)=index_[0]; 
   if (iy) (*iy)=index_[1]; 
   if (iz) (*iz)=index_[2]; 
+#endif
 }
 
 //----------------------------------------------------------------------

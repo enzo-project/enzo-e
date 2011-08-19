@@ -16,6 +16,15 @@
 class Block;
 class FieldDescr;
 
+/// @enum  file_content_type
+/// @brief Argument for read() and write() to specify what to read or write
+
+enum file_content_type {
+  file_content_header,
+  file_content_data,
+  file_content_all
+};
+
 class FieldBlock {
 
   /// @class    FieldBlock
@@ -32,7 +41,7 @@ class FieldBlock {
 public: // interface
 
   /// Create a new uninitialized FieldBlock object
-  FieldBlock(int nx, int ny=1, int nz=1) throw();
+  FieldBlock(int nx=0, int ny=1, int nz=1) throw();
 
   /// Deconstructor
   ~FieldBlock() throw();
@@ -110,12 +119,6 @@ public: // interface
   FieldBlock * merge(bool merge_x, bool merge_y, bool merge_z, 
 		     FieldBlock ** field_blocks) throw ();
  
-  /// Read a block from disk
-  void read(File * file) throw ();
-
-  /// Write a block from disk, and optionally associated descriptor
-  void write(File * file) const throw ();
-
   /// Set array values for a given field
   void set_field_values (int id_field, char * values) throw();
 
@@ -135,6 +138,22 @@ public: // interface
   void image (const FieldDescr * field_descr,
 	      const char * prefix,
 	      int cycle, int ibx, int iby, int ibz) const throw();
+
+  //----------------------------------------------------------------------
+  // I/O
+  //----------------------------------------------------------------------
+
+  /// Open a file for the FieldBlock
+  void open (File * file, const char * filename, const char * mode) const throw();
+
+  /// Close a file for the FieldBlock
+  void close (File * file) const throw();
+
+  /// Read "metadata" or field data associated with the FieldBlock
+  void read (File * file, file_content_type file_content) throw ();
+
+  /// Write "metadata" or field data associated with the FieldBlock
+  void write(File * file, file_content_type file_content) const throw ();
 
 private: // functions
 
@@ -158,12 +177,6 @@ private: // functions
   void restore_array_ ( const FieldDescr * field_descr,
 			std::vector<char *> & field_values )
     throw (std::out_of_range);
-
-  /// Read "metadata" associated with the FieldBlock
-  void read_(File * file) throw ();
-
-  /// Write "metadata" associated with the FieldBlock
-  void write_(File * file) const throw ();
 
   //----------------------------------------------------------------------
 
