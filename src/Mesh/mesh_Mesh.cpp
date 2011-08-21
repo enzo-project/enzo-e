@@ -226,6 +226,43 @@ void Mesh::insert_patch(Patch * patch) throw()
   patch_list_[size] = patch;
 }
 
+//----------------------------------------------------------------------
+
+void Mesh::open 
+(
+ File *       file, 
+ const char * file_name, 
+ const char * file_mode 
+ ) const throw()
+{
+  INCOMPLETE("Mesh::open");
+}
+
+//----------------------------------------------------------------------
+
+void Mesh::close (File * file) const throw()
+{
+  INCOMPLETE("Mesh::close");
+}
+
+//----------------------------------------------------------------------
+
+void Mesh::read
+(
+ File *            file, 
+ file_content_type file_content) throw ()
+{
+  INCOMPLETE("Mesh::read");
+}
+
+//----------------------------------------------------------------------
+
+void Mesh::write
+(File * file, file_content_type file_content) const throw ()
+{
+  INCOMPLETE("Mesh::write");
+}
+
 // //----------------------------------------------------------------------
 
 // bool Mesh::balanced() const throw ()

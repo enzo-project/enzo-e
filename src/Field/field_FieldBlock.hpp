@@ -16,15 +16,6 @@
 class Block;
 class FieldDescr;
 
-/// @enum  file_content_type
-/// @brief Argument for read() and write() to specify what to read or write
-
-enum file_content_type {
-  file_content_header,
-  file_content_data,
-  file_content_all
-};
-
 class FieldBlock {
 
   /// @class    FieldBlock

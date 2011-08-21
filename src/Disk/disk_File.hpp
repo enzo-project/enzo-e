@@ -8,6 +8,16 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    [\ref Disk] Declaration of the File class
 
+/// @enum  file_content_type
+/// @brief Argument for read() and write() (in Mesh, Patch, Block,
+/// etc.) to specify what to read or write.
+
+enum file_content_type {
+  file_content_header,
+  file_content_data,
+  file_content_all
+};
+
 class File {
 
   /// @class    File

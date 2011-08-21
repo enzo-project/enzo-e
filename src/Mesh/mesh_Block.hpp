@@ -140,6 +140,22 @@ public: // interface
   double time() const throw() { return time_; };
 
   
+  //----------------------------------------------------------------------
+  // I/O
+  //----------------------------------------------------------------------
+
+  /// Open a file for the Block
+  void open (File * file, const char * filename, const char * mode) const throw();
+
+  /// Close a file for the Block
+  void close (File * file) const throw();
+
+  /// Read "metadata" or field data associated with the Block
+  void read (File * file, file_content_type file_content) throw ();
+
+  /// Write "metadata" or field data associated with the Block
+  void write(File * file, file_content_type file_content) const throw ();
+
 public: // virtual functions
 
   /// Call application-specific initialization

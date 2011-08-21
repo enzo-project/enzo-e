@@ -85,6 +85,9 @@ class Patch
     return blocking_[0]*blocking_[1]*blocking_[2]; 
   };
 
+  /// Deallocate local blocks
+  void deallocate_blocks() throw();
+
 #ifdef CONFIG_USE_CHARM
   /// Return the block CHARM++ chare array
   CProxy_Block block_array() throw()
@@ -99,8 +102,22 @@ class Patch
   Block * local_block(size_t i) const throw();
 
 #endif
-  /// Deallocate local blocks
-  void deallocate_blocks() throw();
+
+  //----------------------------------------------------------------------
+  // I/O
+  //----------------------------------------------------------------------
+
+  /// Open a file for the Patch
+  void open (File * file, const char * filename, const char * mode) const throw();
+
+  /// Close a file for the Patch
+  void close (File * file) const throw();
+
+  /// Read "metadata" or field data associated with the Patch
+  void read (File * file, file_content_type file_content) throw ();
+
+  /// Write "metadata" or field data associated with the Patch
+  void write(File * file, file_content_type file_content) const throw ();
 
 protected: // attributes
 
