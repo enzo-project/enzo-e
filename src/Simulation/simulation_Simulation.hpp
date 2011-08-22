@@ -177,6 +177,22 @@ public: // interface
   /// Return whether to include orthogonal ghosts in updates
   bool temp_update_full() const throw() { return temp_update_full_; };
 
+  //----------------------------------------------------------------------
+  // I/O
+  //----------------------------------------------------------------------
+
+  /// Open a file for the Simulation
+  void open (File * file, const char * name, const char * mode) const throw();
+
+  /// Close a file for the Simulation
+  void close (File * file) const throw();
+
+  /// Read "metadata" or field data associated with the Simulation
+  void read (File * file, file_content_type file_content) throw ();
+
+  /// Write "metadata" or field data associated with the Simulation
+  void write(File * file, file_content_type file_content) const throw ();
+  
 public: // virtual functions
 
   /// initialize the Simulation given a parameter file

@@ -23,6 +23,7 @@ class Factory;
 
 #include "performance.hpp"
 #include "monitor.hpp"
+#include "disk.hpp"
 
 #include "mesh.hpp"
 #include "method.hpp"

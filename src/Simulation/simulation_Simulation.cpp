@@ -180,6 +180,44 @@ size_t Simulation::num_method() const throw()
 Method * Simulation::method(int i) const throw()
 { return method_list_[i]; }
 
+//----------------------------------------------------------------------
+
+void Simulation::open 
+(
+ File *       file, 
+ const char * file_name, 
+ const char * file_mode 
+ ) const throw()
+{
+  INCOMPLETE("Simulation::open");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::close (File * file) const throw()
+{
+  INCOMPLETE("Simulation::close");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::read
+(
+ File *            file, 
+ file_content_type file_content) throw ()
+{
+  INCOMPLETE("Simulation::read");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::write
+(File * file, file_content_type file_content) const throw ()
+{
+  INCOMPLETE("Simulation::write");
+}
+
+
 //======================================================================
 
 void Simulation::initialize_simulation_() throw()

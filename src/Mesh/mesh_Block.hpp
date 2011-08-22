@@ -138,14 +138,13 @@ public: // interface
 
   /// Return the current time
   double time() const throw() { return time_; };
-
-  
+ 
   //----------------------------------------------------------------------
   // I/O
   //----------------------------------------------------------------------
 
   /// Open a file for the Block
-  void open (File * file, const char * filename, const char * mode) const throw();
+  void open (File * file, const char * name, const char * mode) const throw();
 
   /// Close a file for the Block
   void close (File * file) const throw();
