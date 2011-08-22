@@ -54,10 +54,9 @@ binaries = [test_parameters, test_parse]
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
+env.Alias('install-inc',env.Install ('#/include',  includes))
+env.Alias('install-lib',env.Install ('#/lib',      libraries))
+env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))
 
 
 

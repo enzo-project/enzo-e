@@ -190,7 +190,7 @@ function test_summary($component,$test_output,$executables)
     $count_missing = 0;
     for ($test = 0; $test<sizeof($executables); ++$test) {
       $exe = $executables[$test];
-      $bin = "bin-$parallel_type/$exe";
+      $bin = "bin/$parallel_type/$exe";
       if (! file_exists($bin)) {
         ++ $count_missing ;
       }
