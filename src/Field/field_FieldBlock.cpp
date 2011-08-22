@@ -395,6 +395,16 @@ FieldBlock * FieldBlock::merge
 
 //----------------------------------------------------------------------
 
+void FieldBlock::set_field_values 
+(
+ int    id_field, 
+ char * field_values) throw()
+{
+  INCOMPLETE("FieldBlock::set_field_values");
+}
+
+//----------------------------------------------------------------------
+
 void FieldBlock::open 
 (
  File *       file, 
@@ -428,16 +438,6 @@ void FieldBlock::write
 (File * file, file_content_type file_content) const throw ()
 {
   INCOMPLETE("FieldBlock::write");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::set_field_values 
-(
- int    id_field, 
- char * field_values) throw()
-{
-  INCOMPLETE("FieldBlock::set_field_values");
 }
 
 //======================================================================
