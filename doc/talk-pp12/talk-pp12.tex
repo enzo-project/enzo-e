@@ -72,6 +72,8 @@
 
 \frame{
 \centerline{\includegraphics[width=3.5in]{Enzo-P-logo-full-2.png}}
+\centerline{\cello: An Extremely Scalable Adaptive Mesh Refinement Framework}
+
 \centerline{James Bordner}
 \centerline{San Diego Supercomputer Center}
 \centerline{University of California, San Diego} \ \\
@@ -83,8 +85,27 @@
 %========================================================================
 %
 % ABSTRACT
-%
-% We present Cello, a parallel AMR framework currently under development.
+
+ We present {\tt Cello}, a highly-scalable parallel AMR framework currently
+ under development.  Its octree-like distributed data structure
+ includes enhancements to scalability in terms of hierarchy size and
+ depth, and supports both particle and uniform mesh data.  The
+ message-driven parallel programming system used, {\tt CHARM++}, enables
+ overlapping communication and computation, and provides dynamic
+ load-balancing and checkpoint-restart capabilities.  Despite being
+ developed and tested using a specific cosmology
+ application, {\tt Cello} is a general AMR framework usable with other
+ applications.
+
+% and efficient will  CHARM++Parallelization will include CHARM++, 
+% dynamic load balancing and 
+% features of Cello include a modified octree-like
+% data structure supporting both uniform mesh and particle data,
+
+%  Cello will support
+
+
+% ism, pushes the limit on 
 % Features include building extreme scalability at the outset, including
 % processor count, hierarchy size, and hierarchy depth.  Cello will support
 % both ``field'' and ``particle'' data.  Cello is built on CHARM++, with
@@ -92,6 +113,34 @@
 % but Cello is designed as a standalone framework.  We discuss Cello's
 % planned capabilities, data structure features, parallelism approach,
 % current status, and preliminary results.
+
+The driving application area, cosmology and astrophysics, requires extreme
+AMR depth
+to the limit in reso
+
+AMR
+framework
+extreme scaling
+The target driving application, Enzo, is a community cosmology and astrophysics
+code, which continually pushes the limits of existingused for cosmological structure formation, galaxy and star formation, and
+turbulence.
+  and extreme hierarchy depths for galaxy and star formation.
+fully distributed data structures
+several refinement octree enhancements, improving
+hierarchy scalability both in number of grid patches
+and hierarchy depth.
+
+uniform grid patches and particle data,
+process virtualization through CHARM++.
+Support for threaded or GPGPU-based solvers
+
+
+
+
+
+  rapid refinement gradients
+
+
 %
 %========================================================================
 
