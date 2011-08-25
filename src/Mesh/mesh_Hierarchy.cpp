@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_Mesh.cpp
+/// @file     mesh_Hierarchy.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Sep 21 16:12:22 PDT 2010
-/// @brief    Brief description of file mesh_Mesh.cpp
+/// @brief    Brief description of file mesh_Hierarchy.cpp
 
 #include "cello.hpp"
 
@@ -13,7 +13,7 @@
 
 //----------------------------------------------------------------------
 
-Mesh::Mesh
+Hierarchy::Hierarchy
 (
  const Factory * factory
  ) throw ()
@@ -30,7 +30,7 @@ Mesh::Mesh
 
 //----------------------------------------------------------------------
 
-Mesh::~Mesh() throw()
+Hierarchy::~Hierarchy() throw()
 {
   for (size_t i=0; i<patch_list_.size(); i++) {
     delete patch_list_[i];
@@ -41,7 +41,7 @@ Mesh::~Mesh() throw()
 
 //----------------------------------------------------------------------
 
-void Mesh::set_lower(double x, double y, double z) throw ()
+void Hierarchy::set_lower(double x, double y, double z) throw ()
 {
   lower_[0] = x;
   lower_[1] = y;
@@ -50,7 +50,7 @@ void Mesh::set_lower(double x, double y, double z) throw ()
 
 //----------------------------------------------------------------------
 
-void Mesh::set_upper(double x, double y, double z) throw ()
+void Hierarchy::set_upper(double x, double y, double z) throw ()
 {
   upper_[0] = x;
   upper_[1] = y;
@@ -59,21 +59,21 @@ void Mesh::set_upper(double x, double y, double z) throw ()
 
 //----------------------------------------------------------------------
 
-// int Mesh::dimension() const throw ()
+// int Hierarchy::dimension() const throw ()
 // { 
 //   return dimension_; 
 // }
 
 // //----------------------------------------------------------------------
 
-// void Mesh::set_dimension(int dimension) throw ()
+// void Hierarchy::set_dimension(int dimension) throw ()
 // {
 //   dimension_ = dimension; 
 // }
 
 //----------------------------------------------------------------------
 
-int Mesh::dimension() const throw ()
+int Hierarchy::dimension() const throw ()
 {
   if (patch_list_.size() == 0) {
     return 0;
@@ -89,7 +89,7 @@ int Mesh::dimension() const throw ()
 
 //----------------------------------------------------------------------
 
-void Mesh::lower(double * x, double * y, double * z) const throw ()
+void Hierarchy::lower(double * x, double * y, double * z) const throw ()
 {
   if (x) *x = lower_[0];
   if (y) *y = lower_[1];
@@ -98,7 +98,7 @@ void Mesh::lower(double * x, double * y, double * z) const throw ()
 
 //----------------------------------------------------------------------
 
-void Mesh::upper(double * x, double * y, double * z) const throw ()
+void Hierarchy::upper(double * x, double * y, double * z) const throw ()
 {
   if (x) *x = upper_[0];
   if (y) *y = upper_[1];
@@ -106,63 +106,63 @@ void Mesh::upper(double * x, double * y, double * z) const throw ()
 }
 // //----------------------------------------------------------------------
 
-// int Mesh::max_level() const throw ()
+// int Hierarchy::max_level() const throw ()
 // { 
 //   return max_level_; 
 // }
 
 // //----------------------------------------------------------------------
 
-// void Mesh::set_max_level(int max_level) throw ()
+// void Hierarchy::set_max_level(int max_level) throw ()
 // {
 //   max_level_ = max_level; 
 // }
 
 // //----------------------------------------------------------------------
 
-// int Mesh::refine_factor() const throw ()
+// int Hierarchy::refine_factor() const throw ()
 // {
 //   return refine_; 
 // }
 
 // //----------------------------------------------------------------------
 
-// void Mesh::set_refine_factor(int refine) throw ()
+// void Hierarchy::set_refine_factor(int refine) throw ()
 // {
 //   refine_ = refine; 
 // }
 
 //----------------------------------------------------------------------
 
-// Patch * Mesh::root_patch() throw ()
+// Patch * Hierarchy::root_patch() throw ()
 // { 
 //   return (patch_list_.size() > 0) ? patch_list_[0] : NULL; 
 // }
 
 //----------------------------------------------------------------------
 
-size_t Mesh::num_patches() const throw()
+size_t Hierarchy::num_patches() const throw()
 {
   return patch_list_.size();
 }
 
 //----------------------------------------------------------------------
 
-Patch * Mesh::patch(size_t i) throw()
+Patch * Hierarchy::patch(size_t i) throw()
 {
   return ( patch_list_.size()-1 >= i )? patch_list_[i] : 0;
 }
 
 //----------------------------------------------------------------------
 
-Patch * Mesh::patch(size_t i) const throw()
+Patch * Hierarchy::patch(size_t i) const throw()
 {
   return ( patch_list_.size()-1 >= i )? patch_list_[i] : 0;
 }
 
 //----------------------------------------------------------------------
 
-void Mesh::create_root_patch 
+void Hierarchy::create_root_patch 
 (
  GroupProcess * group_process,
  FieldDescr   * field_descr,
@@ -187,8 +187,8 @@ void Mesh::create_root_patch
   // mesh_->set_coalesce      (parameters_->value_logical("coalesce",  true));
 
   if (patch_list_.size() != 0) {
-    ERROR("Mesh::create_root",
-	  "Creating new root Patch in non-empty Mesh");
+    ERROR("Hierarchy::create_root",
+	  "Creating new root Patch in non-empty Hierarchy");
   } else {
 
     Patch * root_patch = factory()->create_patch
@@ -219,7 +219,7 @@ void Mesh::create_root_patch
 
 //----------------------------------------------------------------------
 
-void Mesh::insert_patch(Patch * patch) throw()
+void Hierarchy::insert_patch(Patch * patch) throw()
 {
   int size = patch_list_.size();
   patch_list_.resize(size + 1);
@@ -228,79 +228,79 @@ void Mesh::insert_patch(Patch * patch) throw()
 
 //----------------------------------------------------------------------
 
-void Mesh::open 
+void Hierarchy::open 
 (
  File *       file, 
  const char * file_name, 
  const char * file_mode 
  ) const throw()
 {
-  INCOMPLETE("Mesh::open");
+  INCOMPLETE("Hierarchy::open");
 }
 
 //----------------------------------------------------------------------
 
-void Mesh::close (File * file) const throw()
+void Hierarchy::close (File * file) const throw()
 {
-  INCOMPLETE("Mesh::close");
+  INCOMPLETE("Hierarchy::close");
 }
 
 //----------------------------------------------------------------------
 
-void Mesh::read
+void Hierarchy::read
 (
  File *            file, 
  file_content_type file_content) throw ()
 {
-  INCOMPLETE("Mesh::read");
+  INCOMPLETE("Hierarchy::read");
 }
 
 //----------------------------------------------------------------------
 
-void Mesh::write
+void Hierarchy::write
 (File * file, file_content_type file_content) const throw ()
 {
-  INCOMPLETE("Mesh::write");
+  INCOMPLETE("Hierarchy::write");
 }
 
 // //----------------------------------------------------------------------
 
-// bool Mesh::balanced() const throw ()
+// bool Hierarchy::balanced() const throw ()
 // {
 //   return balanced_; 
 // }
 
 // //----------------------------------------------------------------------
 
-// void Mesh::set_balanced(bool balanced) throw ()
+// void Hierarchy::set_balanced(bool balanced) throw ()
 // { 
 //   balanced_ = balanced; 
 // }
 
 // //----------------------------------------------------------------------
 
-// bool Mesh::backfill() const throw ()
+// bool Hierarchy::backfill() const throw ()
 // {
 //   return backfill_; 
 // }
 
 // //----------------------------------------------------------------------
 
-// void Mesh::set_backfill(bool backfill) throw ()
+// void Hierarchy::set_backfill(bool backfill) throw ()
 // { 
 //   backfill_ = backfill; 
 // }
 
 // //----------------------------------------------------------------------
 
-// bool Mesh::coalesce() const throw ()
+// bool Hierarchy::coalesce() const throw ()
 // {
 //   return coalesce_; 
 // }
 
 // //----------------------------------------------------------------------
 
-// void Mesh::set_coalesce(bool coalesce) throw ()
+// void Hierarchy::set_coalesce(bool coalesce) throw ()
 // { 
 //   coalesce_ = coalesce; 
 // }

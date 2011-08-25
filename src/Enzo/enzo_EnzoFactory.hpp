@@ -12,7 +12,7 @@ class EnzoFactory : public Factory {
 
   /// @class    EnzoFactory
   /// @ingroup  Enzo
-  /// @brief [\ref Enzo] Abstract class for creating concrete Mesh,
+  /// @brief [\ref Enzo] Abstract class for creating concrete Hierarchy,
   /// Patch, and Block objects
 
 public: // interface

@@ -328,8 +328,8 @@ test_summary("Field",array("FieldBlock","FieldDescr","FieldFace"),
 		    array("test_FieldBlock","test_FieldDescr","test_FieldFace")); 
 test_summary("Memory",array("Memory"),
 		    array("test_Memory")); 
-test_summary("Mesh",array("Mesh","Patch","Block"),
-		    array("test_Mesh","test_Patch","test_Block")); 
+test_summary("Mesh",array("Hierarchy","Patch","Block"),
+		    array("test_Hierarchy","test_Patch","test_Block")); 
 test_summary("Monitor",array("Monitor"),
 		    array("test_Monitor")); 
 test_summary("Parallel",array("GroupProcess","Layout"),
@@ -366,7 +366,7 @@ tests("Memory","test_Memory","test_Memory");
 
 component("Mesh");
 
-tests("Mesh","test_Mesh","test_Mesh"); 
+tests("Mesh","test_Hierarchy","test_Hierarchy"); 
 tests("Mesh","test_Patch","test_Patch"); 
 tests("Mesh","test_Block","test_Block"); 
 

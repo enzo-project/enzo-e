@@ -54,7 +54,7 @@ void EnzoSimulationCharm::run() throw()
 
   PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 
-  ItPatch it_patch(mesh_);
+  ItPatch it_patch(hierarchy_);
   Patch * patch;
   while (( patch = ++it_patch )) {
     if (patch->blocks_allocated()) {

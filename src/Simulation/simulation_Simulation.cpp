@@ -40,7 +40,7 @@ Simulation::Simulation
     index_(index),
     performance_(0),
     monitor_(0),
-    mesh_(0),
+    hierarchy_(0),
     field_descr_(0),
     stopping_(0),
     timestep_(0),
@@ -83,7 +83,7 @@ void Simulation::initialize() throw()
   // Initialize simulation components
 
   initialize_data_();
-  initialize_mesh_();
+  initialize_hierarchy_();
   initialize_stopping_();
   initialize_timestep_();
   initialize_initial_();
@@ -114,9 +114,9 @@ int Simulation::dimension() const throw()
 
 //----------------------------------------------------------------------
 
-Mesh * Simulation::mesh() const throw()
+Hierarchy * Simulation::hierarchy() const throw()
 {
-  return mesh_;
+  return hierarchy_;
 }
   
 //----------------------------------------------------------------------
@@ -303,18 +303,18 @@ void Simulation::initialize_data_() throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_mesh_() throw()
+void Simulation::initialize_hierarchy_() throw()
 {
 
-  ASSERT("Simulation::initialize_mesh_",
-	 "data must be initialized before mesh",
+  ASSERT("Simulation::initialize_hierarchy_",
+	 "data must be initialized before hierarchy",
 	 field_descr_ != NULL);
 
   //----------------------------------------------------------------------
-  // Create and initialize Mesh
+  // Create and initialize Hierarchy
   //----------------------------------------------------------------------
 
-  mesh_ = factory().create_mesh();
+  hierarchy_ = factory().create_hierarchy();
 
   // Domain extents
 
@@ -342,11 +342,11 @@ void Simulation::initialize_mesh_() throw()
 	    lower[i] <= upper[i]);
   }
 
-  mesh_->set_lower(lower[0], lower[1], lower[2]);
-  mesh_->set_upper(upper[0], upper[1], upper[2]);
+  hierarchy_->set_lower(lower[0], lower[1], lower[2]);
+  hierarchy_->set_upper(upper[0], upper[1], upper[2]);
 
   //----------------------------------------------------------------------
-  // Create and initialize root Patch in Mesh
+  // Create and initialize root Patch in Hierarchy
   //----------------------------------------------------------------------
 
   //--------------------------------------------------
@@ -366,7 +366,7 @@ void Simulation::initialize_mesh_() throw()
   root_blocks[1] = parameters_->list_value_integer(1,"Mesh:root_blocks",1);
   root_blocks[2] = parameters_->list_value_integer(2,"Mesh:root_blocks",1);
 
-  mesh_->create_root_patch
+  hierarchy_->create_root_patch
     (group_process_,
      field_descr_,
      root_size[0],root_size[1],root_size[2],
@@ -717,8 +717,8 @@ void Simulation::deallocate_() throw()
   delete monitor_;
   monitor_ = 0;
 #endif
-  delete mesh_;
-  mesh_ = 0;
+  delete hierarchy_;
+  hierarchy_ = 0;
   delete field_descr_;
   field_descr_ = 0;
   delete stopping_;
@@ -844,10 +844,10 @@ void Simulation::output_next() throw()
   if (index_output_ < num_output()) {
 
     // Open the file(s)
-    output(index_output_)->open(mesh_,cycle_,time_);
+    output(index_output_)->open(hierarchy_,cycle_,time_);
 
     // Call blocks to contribute their data
-    ItPatch it_patch(mesh_);
+    ItPatch it_patch(hierarchy_);
     Patch * patch;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
@@ -970,7 +970,7 @@ void Simulation::refresh() throw()
     // Boundary
     //--------------------------------------------------
 
-    ItPatch it_patch(mesh_);
+    ItPatch it_patch(hierarchy_);
     Patch * patch;
     axis_enum axis = (temp_update_all_) ? axis_all : axis_x;
     while (( patch = ++it_patch )) {

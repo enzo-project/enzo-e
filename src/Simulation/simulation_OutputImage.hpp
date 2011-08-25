@@ -26,7 +26,7 @@ public: // virtual functions
 #ifdef CONFIG_USE_CHARM
 
   /// Open file before writing
-  virtual void open (const Mesh * mesh, int cycle, double time) throw();
+  virtual void open (const Hierarchy * hierarchy, int cycle, double time) throw();
 
   /// Accumulate block-local data
   virtual void block (const Block * block) throw();
@@ -36,24 +36,24 @@ public: // virtual functions
 
 #endif
 
-  /// Write mesh-related field data
+  /// Write hierarchy-related field data
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Mesh * mesh, 
+    int index, Hierarchy * hierarchy, 
     int cycle, double time,
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
 
-  /// Write patch-related field data; may be called by write (Mesh)
+  /// Write patch-related field data; may be called by write (Hierarchy)
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Patch * patch, Mesh * mesh,
+    int index, Patch * patch, Hierarchy * hierarchy,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
 
   /// Write block-related field data; may be called by write (Patch)
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Block * block, Patch * patch, Mesh * mesh, 
+    int index, Block * block, Patch * patch, Hierarchy * hierarchy, 
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
 

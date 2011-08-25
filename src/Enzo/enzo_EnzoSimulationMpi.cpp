@@ -46,7 +46,7 @@ void EnzoSimulationMpi::run() throw()
   // INITIALIZE FIELDS
   //--------------------------------------------------
 
-  ItPatch it_patch(mesh_);
+  ItPatch it_patch(hierarchy_);
   Patch * patch;
 
   while ((patch = ++it_patch)) {
@@ -69,14 +69,14 @@ void EnzoSimulationMpi::run() throw()
 
   for (size_t i=0; i<output_list_.size(); i++) {
     Output * output = output_list_[i];
-    output->scheduled_write(field_descr_, mesh_,cycle_,time_);
+    output->scheduled_write(field_descr_, hierarchy_,cycle_,time_);
   }
 
   //--------------------------------------------------
   // INITIAL STOPPING CRITERIA TEST
   //--------------------------------------------------
 
-  int stop_mesh = true;
+  int stop_hierarchy = true;
 
   while ((patch = ++it_patch)) {
 
@@ -98,7 +98,7 @@ void EnzoSimulationMpi::run() throw()
 
     }
 
-    stop_mesh = stop_mesh && stop_patch;
+    stop_hierarchy = stop_hierarchy && stop_patch;
 
   }
 
@@ -106,7 +106,7 @@ void EnzoSimulationMpi::run() throw()
   // BEGIN MAIN LOOP
   //======================================================================
 
-  while (! stop_mesh) {
+  while (! stop_hierarchy) {
 
     TRACE("EnzoSimulationMpi");
     monitor->print("[Simulation %d] cycle %04d time %15.12f", index_, cycle_,time_);
@@ -115,7 +115,7 @@ void EnzoSimulationMpi::run() throw()
     // Determine timestep
     //--------------------------------------------------
 
-    double dt_mesh = std::numeric_limits<double>::max();
+    double dt_hierarchy = std::numeric_limits<double>::max();
 
     // Accumulate Patch-local timesteps
 
@@ -153,19 +153,19 @@ void EnzoSimulationMpi::run() throw()
 
       } // ( block = ++it_block )
 
-      // Update mesh-level timestep
+      // Update hierarchy-level timestep
 
-      dt_mesh = MIN(dt_mesh, dt_patch);
+      dt_hierarchy = MIN(dt_hierarchy, dt_patch);
 
     } // ( patch = ++it_patch )
 
-    ASSERT("EnzoSimulation::run", "dt == 0", dt_mesh != 0.0);
+    ASSERT("EnzoSimulation::run", "dt == 0", dt_hierarchy != 0.0);
 
     //--------------------------------------------------
     // Apply the methods
     //--------------------------------------------------
 
-    stop_mesh = true;
+    stop_hierarchy = true;
 
     while ((patch = ++it_patch)) {
 
@@ -191,9 +191,9 @@ void EnzoSimulationMpi::run() throw()
 	enzo_float & dt_block       = enzo_block->dt;
 	enzo_float & old_time_block = enzo_block->OldTime;
 
-	// UNIFORM TIMESTEP OVER ALL BLOCKS IN MESH
+	// UNIFORM TIMESTEP OVER ALL BLOCKS IN HIERARCHY
 
-	dt_block = dt_mesh;
+	dt_block = dt_hierarchy;
 
 	// Loop through methods
 
@@ -221,23 +221,23 @@ void EnzoSimulationMpi::run() throw()
 
       } // (block = ++it_block)
 
-      // Update stopping criteria for mesh
+      // Update stopping criteria for hierarchy
 
-      stop_mesh = stop_mesh && stop_patch;
+      stop_hierarchy = stop_hierarchy && stop_patch;
 
     } // (patch = ++it_patch)
 
     cycle_ ++;
-    time_ += dt_mesh;
+    time_ += dt_hierarchy;
 
     // Perform any scheduled output
 
     for (size_t i=0; i<output_list_.size(); i++) {
       Output * output = output_list_[i];
-      output->scheduled_write(field_descr_, mesh_,cycle_,time_);
+      output->scheduled_write(field_descr_, hierarchy_,cycle_,time_);
     }
 
-  } // while (! stop_mesh)
+  } // while (! stop_hierarchy)
 
   //======================================================================
   // END MAIN LOOP

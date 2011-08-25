@@ -38,7 +38,7 @@ enum access_enum {
 //----------------------------------------------------------------------
 
 class FieldDescr;
-class Mesh;
+class Hierarchy;
 class Patch;
 class Block;
 class FieldBlock;

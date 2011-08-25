@@ -9,7 +9,7 @@
 /// @brief    [\ref Disk] Declaration of the File class
 
 /// @enum  file_content_type
-/// @brief Argument for read() and write() (in Mesh, Patch, Block,
+/// @brief Argument for read() and write() (in Hierarchy, Patch, Block,
 /// etc.) to specify what to read or write.
 
 enum file_content_type {

@@ -46,14 +46,14 @@ OutputImage::~OutputImage() throw ()
 
 #ifdef CONFIG_USE_CHARM
 
-void OutputImage::open (const Mesh * mesh, int cycle, double time) throw()
+void OutputImage::open (const Hierarchy * hierarchy, int cycle, double time) throw()
 {
   INCOMPLETE("OutputImage::open");
 
   // create process image and clear it
 
   int nxm,nym,nzm;
-  mesh->patch(0)->size (&nxm, &nym, &nzm);
+  hierarchy->patch(0)->size (&nxm, &nym, &nzm);
 
   image_create_(nxm,nym);
 
@@ -100,7 +100,7 @@ void OutputImage::write
 (
  const FieldDescr * field_descr,
  int index,
- Mesh * mesh,
+ Hierarchy * hierarchy,
  int cycle,
  double time,
  bool root_call,
@@ -110,8 +110,8 @@ void OutputImage::write
   ) throw()
 {
 
-  if (mesh->dimension() <= 1) {
-    WARNING("OutputImage::write[Mesh]",
+  if (hierarchy->dimension() <= 1) {
+    WARNING("OutputImage::write[Hierarchy]",
 	    "OutputImage only supports 2D and 3D problems");
   }
 
@@ -124,12 +124,12 @@ void OutputImage::write
     std::string file_name = file_prefix + "-" + field_name + ".png";
 
     // Monitor output
-    Monitor::instance()->print ("[Output] writing mesh image %s", 
+    Monitor::instance()->print ("[Output] writing hierarchy image %s", 
 				file_name.c_str());
 
-    // Get mesh size
+    // Get hierarchy size
     int nxm,nym,nzm;
-    mesh->patch(0)->size (&nxm, &nym, &nzm);
+    hierarchy->patch(0)->size (&nxm, &nym, &nzm);
 
     // Create image 
     image_create_(nxm,nym);
@@ -138,12 +138,12 @@ void OutputImage::write
     png_open_(file_name,nxm,nym);
   }
 
-  ItPatch it_patch (mesh);
+  ItPatch it_patch (hierarchy);
   while (Patch * patch = ++it_patch) {
 
     // Write patch contribution 
     // NO OFFSET: ASSUMES ROOT PATCH
-    write (field_descr, index, patch, mesh, cycle,time,false,
+    write (field_descr, index, patch, hierarchy, cycle,time,false,
 	   0,0,0);
   }
 
@@ -163,7 +163,7 @@ void OutputImage::write
  const FieldDescr * field_descr,
  int index,
  Patch * patch,
- Mesh  * mesh,
+ Hierarchy  * hierarchy,
  int cycle,
  double time,
  bool root_call,
@@ -172,7 +172,7 @@ void OutputImage::write
  int iz0
  ) throw()
 {
-  if (mesh->dimension() <= 1) {
+  if (hierarchy->dimension() <= 1) {
     WARNING("OutputImage::write[Patch]",
 	    "OutputImage only supports 2D and 3D problems");
   }
@@ -217,7 +217,7 @@ void OutputImage::write
     int ix,iy,iz;
     block->index_patch(&ix,&iy,&iz);
 
-    write (field_descr, index, block, patch, mesh, cycle,time,false,
+    write (field_descr, index, block, patch, hierarchy, cycle,time,false,
 	   ix0+ix*nxb,
 	   iy0+iy*nyb,
 	   iz0+iz*nzb);
@@ -241,7 +241,7 @@ void OutputImage::write
  int index,
  Block * block,
  Patch * patch,
- Mesh  * mesh,
+ Hierarchy  * hierarchy,
  int cycle,
  double time,
  bool root_call,

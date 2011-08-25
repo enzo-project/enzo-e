@@ -16,7 +16,7 @@ Import('serial_run')
 # X test_FileHdf5.cpp
 # X test_FileIfrit.cpp
 # X test_Memory.cpp
-# X test_Mesh.cpp
+# X test_Hierarchy.cpp
 # X test_Monitor.cpp
 # X test_Parallel.cpp
 # X test_Parameters.cpp
@@ -74,9 +74,9 @@ env.RunSerial(type_path + 'test_Memory.unit',      bin_path + '/test_Memory')
 #----------------------------------------------------------------------
 # MESH COMPONENT          
 #----------------------------------------------------------------------
-env.RunSerial(type_path + 'test_Mesh.unit',   bin_path + '/test_Mesh')
-env.RunSerial(type_path + 'test_Patch.unit',  bin_path + '/test_Patch')
-env.RunSerial(type_path + 'test_Block.unit',  bin_path + '/test_Block')
+env.RunSerial(type_path + 'test_Hierarchy.unit', bin_path + '/test_Hierarchy')
+env.RunSerial(type_path + 'test_Patch.unit',     bin_path + '/test_Patch')
+env.RunSerial(type_path + 'test_Block.unit',     bin_path + '/test_Block')
 #----------------------------------------------------------------------
 # MONITOR COMPONENT       
 #----------------------------------------------------------------------

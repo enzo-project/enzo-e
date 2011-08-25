@@ -21,8 +21,8 @@
 BlockReduce::BlockReduce()
   :  count_output_(0),
      count_prepare_(0),
-     dt_mesh_(std::numeric_limits<double>::max()),
-     stop_mesh_(true)
+     dt_hierarchy_(std::numeric_limits<double>::max()),
+     stop_hierarchy_(true)
 {
 }
 
@@ -41,25 +41,25 @@ void BlockReduce::p_prepare(int    count,
   // Timestep
   //--------------------------------------------------
 
-  dt_mesh_   = MIN(dt_mesh_, dt_block);
+  dt_hierarchy_   = MIN(dt_hierarchy_, dt_block);
 
   //--------------------------------------------------
   // Stopping
   //--------------------------------------------------
 
-  stop_mesh_ = stop_mesh_ && stop_block;
+  stop_hierarchy_ = stop_hierarchy_ && stop_block;
 
   if (++count_prepare_ >= count) {
 
     //--------------------------------------------------
     // Simulation::p_output()
     //--------------------------------------------------
-    proxy_simulation.p_output(cycle, time, dt_mesh_, stop_mesh_);
+    proxy_simulation.p_output(cycle, time, dt_hierarchy_, stop_hierarchy_);
 
     // Reset pool
     count_prepare_ = 0;
-    dt_mesh_ = std::numeric_limits<double>::max();
-    stop_mesh_ = true;
+    dt_hierarchy_ = std::numeric_limits<double>::max();
+    stop_hierarchy_ = true;
 
   }
 }

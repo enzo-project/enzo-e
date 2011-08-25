@@ -40,7 +40,7 @@
 #include "mesh_Block.hpp"
 
 #include "mesh_Patch.hpp"
-#include "mesh_Mesh.hpp"
+#include "mesh_Hierarchy.hpp"
 #include "mesh_Factory.hpp"
 
 #include "mesh_ItPatch.hpp"

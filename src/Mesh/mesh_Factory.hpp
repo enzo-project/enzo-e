@@ -12,7 +12,7 @@ class Factory {
 
   /// @class    Factory
   /// @ingroup  Mesh
-  /// @brief [\ref Mesh] Abstract class for creating concrete Mesh,
+  /// @brief [\ref Mesh] Abstract class for creating concrete Hierarchy,
   /// Patch, and Block objects
 
 public: // interface
@@ -21,9 +21,9 @@ public: // interface
   virtual void pup(PUP::er &) {}
 #endif
 
-  /// Create a new Mesh [abstract factory design pattern]
-  virtual Mesh * create_mesh () const throw ()
-{ return new Mesh (this); }
+  /// Create a new Hierarchy [abstract factory design pattern]
+  virtual Hierarchy * create_hierarchy () const throw ()
+{ return new Hierarchy (this); }
 
   /// Create a new Patch [abstract factory design pattern]
   virtual Patch * create_patch

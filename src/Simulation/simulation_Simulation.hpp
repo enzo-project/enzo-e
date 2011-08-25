@@ -14,7 +14,7 @@ class Factory;
 class FieldDescr;
 class GroupProcess;
 class Initial;
-class Mesh;
+class Hierarchy;
 class Method;
 class Monitor;
 class Output;
@@ -68,7 +68,7 @@ public: // interface
 
   //==================================================
 
-  /// Request all Mesh blocks to send output to main::p_output_close()
+  /// Request all Hierarchy blocks to send output to main::p_output_close()
   //  void p_output(int index, int cycle, double time) throw();
 
   // Output
@@ -113,8 +113,8 @@ public: // interface
   /// Return the dimensionality of the Simulation
   int dimension() const throw();
 
-  /// Return the Mesh
-  Mesh * mesh() const throw();
+  /// Return the Hierarchy
+  Hierarchy * hierarchy() const throw();
   
   /// Return the field descriptor
   FieldDescr * field_descr() const throw();
@@ -210,7 +210,7 @@ public: // virtual functions
   /// Write a Simulation state to disk
   virtual void write() const throw();
 
-  /// Return a Mesh factory object
+  /// Return a Hierarchy factory object
   virtual const Factory & factory () const throw();
 
 protected: // functions
@@ -218,8 +218,8 @@ protected: // functions
   /// Initialize global simulation parameters
   void initialize_simulation_ () throw();
 
-  /// Initialize the mesh object
-  void initialize_mesh_ () throw();
+  /// Initialize the hierarchy object
+  void initialize_hierarchy_ () throw();
 
   /// Initialize the data object
   void initialize_data_ () throw();
@@ -323,8 +323,8 @@ protected: // attributes
   /// Monitor object
   Monitor * monitor_;
 
-  /// AMR mesh
-  Mesh * mesh_;
+  /// AMR hierarchy
+  Hierarchy * hierarchy_;
   
   /// Field descriptor
   FieldDescr * field_descr_;

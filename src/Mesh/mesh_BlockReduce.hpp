@@ -40,8 +40,8 @@ private: // attributes
   int count_prepare_;
 
   /// Prepare reduction variables
-  double dt_mesh_;
-  int stop_mesh_;
+  double dt_hierarchy_;
+  int stop_hierarchy_;
 
 };
 

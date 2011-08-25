@@ -62,7 +62,7 @@
       groups = ["cycle_step"];
 
       cycle_step {
-         file_name      = "implosion2d-code-%04d";
+         name           = "implosion2d-code-%04d";
          type           = "image";
          cycle_interval = 10;
       }

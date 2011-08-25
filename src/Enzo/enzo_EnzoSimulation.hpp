@@ -62,7 +62,7 @@ public: // functions
   /// Write a Simulation state to disk
   virtual void write() const throw();
 
-  /// Return an Enzo Mesh factory object
+  /// Return an Enzo mesh factory object
   const Factory & factory() const throw();
 
 protected: // virtual functions

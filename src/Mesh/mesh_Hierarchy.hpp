@@ -1,28 +1,28 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_Mesh.hpp
+/// @file     mesh_Hierarchy.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Nov 10 15:38:40 PST 2009
-/// @brief    [\ref Mesh] Declaration of the Mesh class
+/// @brief    [\ref Mesh] Declaration of the Hierarchy class
 
-#ifndef MESH_MESH_HPP
-#define MESH_MESH_HPP
+#ifndef MESH_HIERARCHY_HPP
+#define MESH_HIERARCHY_HPP
 
 class Factory;
 
-class Mesh {
+class Hierarchy {
 
-  /// @class    Mesh
+  /// @class    Hierarchy
   /// @ingroup  Mesh
   /// @brief    [\ref Mesh] Adaptive mesh refinement hierarchy
 
 public: // interface
 
-  /// Initialize an Mesh object
-  Mesh(const Factory * factory) throw ();
+  /// Initialize an Hierarchy object
+  Hierarchy(const Factory * factory) throw ();
 
-  /// Delete the Mesh object
-  virtual ~Mesh() throw ();
+  /// Delete the Hierarchy object
+  virtual ~Hierarchy() throw ();
 
   //----------------------------------------------------------------------
 
@@ -63,7 +63,7 @@ public: // interface
 			  int nx, int ny, int nz,
 			  int nbx, int nby, int nbz) throw();
 
-  /// Return the factory object associated with the Mesh
+  /// Return the factory object associated with the Hierarchy
   const Factory * factory () const throw()
   { return factory_; }
 
@@ -107,21 +107,21 @@ public: // interface
   // I/O
   //----------------------------------------------------------------------
 
-  /// Open a file for the Mesh
+  /// Open a file for the Hierarchy
   void open (File * file, const char * filename, const char * mode) const throw();
 
-  /// Close a file for the Mesh
+  /// Close a file for the Hierarchy
   void close (File * file) const throw();
 
-  /// Read "metadata" or field data associated with the Mesh
+  /// Read "metadata" or field data associated with the Hierarchy
   void read (File * file, file_content_type file_content) throw ();
 
-  /// Write "metadata" or field data associated with the Mesh
+  /// Write "metadata" or field data associated with the Hierarchy
   void write(File * file, file_content_type file_content) const throw ();
 
 protected: // attributes
 
-  /// Factory for creating Simulations, Meshes, Patches and Blocks
+  /// Factory for creating Simulations, Hierarchies, Patches and Blocks
   /// [abstract factory design pattern]
   const Factory * factory_;
 
@@ -129,7 +129,7 @@ protected: // attributes
 
   std::vector<Patch *> patch_list_;
 
-  /// Tree defining the MESH hierarchy topology
+  /// Tree defining the mesh hierarchy topology
   //  strict_auto_ptr<TreeK> tree_;
   TreeK * tree_;
 
@@ -141,23 +141,23 @@ protected: // attributes
 
   /*
   /// Refinement factor = 2, 4, etc.
-  /// Parameter Mesh::refine
+  /// Parameter Hierarchy::refine
   int refine_;
 
   /// Maximum level for the hierarchy (0 = unigrid) assuming r=2
-  /// Parameter Mesh::max_level
+  /// Parameter Hierarchy::max_level
   int max_level_;
 
   /// Whether the tree is balanced or "full"
-  /// Parameter Mesh::balanced
+  /// Parameter Hierarchy::balanced
   bool balanced_;
 
   /// Whether to backfill for refine > 2 to regain r == 2 balance
-  /// Parameter Mesh::backfill
+  /// Parameter Hierarchy::backfill
   bool backfill_;
 
   /// Whether to coalesce small patches into one big one
-  /// Parameter Mesh::coalesce
+  /// Parameter Hierarchy::coalesce
   bool coalesce_;
 
     @@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -165,5 +165,5 @@ protected: // attributes
 
 };
 
-#endif /* MESH_MESH_HPP */
+#endif /* MESH_HIERARCHY_HPP */
 

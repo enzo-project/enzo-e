@@ -5,7 +5,7 @@
 
 /// @file     mesh_ItBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @todo     Move creation of iterator to iterated object: Mesh::create_it_block() (factory method)
+/// @todo     Move creation of iterator to iterated object: Hierarchy::create_it_block() (factory method)
 /// @date     Tue Feb  1 16:46:01 PST 2011
 /// @brief    [\ref Mesh] Declaration of the ItBlock iterator
 

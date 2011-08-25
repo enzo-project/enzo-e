@@ -13,8 +13,8 @@
 
 //----------------------------------------------------------------------
 
-ItPatch::ItPatch ( Mesh * mesh ) throw ()
-  : mesh_(mesh),
+ItPatch::ItPatch ( Hierarchy * hierarchy ) throw ()
+  : hierarchy_(hierarchy),
     index1_(0)
 {}
 
@@ -28,15 +28,15 @@ ItPatch::~ItPatch ( ) throw ()
 Patch * ItPatch::operator++ () throw()
 {
   index1_ ++;
-  if (index1_ > mesh_->num_patches()) index1_ = 0;
-  return index1_ ? mesh_->patch(index1_ - 1) : 0;
+  if (index1_ > hierarchy_->num_patches()) index1_ = 0;
+  return index1_ ? hierarchy_->patch(index1_ - 1) : 0;
 }
 
 //----------------------------------------------------------------------
 
 bool ItPatch::done () const throw()
 {
-  return index1_ >= mesh_->num_patches();
+  return index1_ >= hierarchy_->num_patches();
 }
 
 

@@ -357,7 +357,7 @@ void Block::prepare()
 
   // @@@ OK @@@
 
-  int num_blocks = simulation->mesh()->patch(0)->num_blocks();
+  int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
   if (stop_block) {
     FieldDescr * field_descr = simulation->field_descr();
 
@@ -404,14 +404,14 @@ void Block::refresh_axis (axis_enum axis)
   int n3[3];
   field_block()->size (&n3[0],&n3[1],&n3[2]);
 
-  Mesh *             mesh        = simulation->mesh();
+  Hierarchy *        hierarchy   = simulation->hierarchy();
   Boundary *         boundary    = simulation->boundary();
   const FieldDescr * field_descr = simulation->field_descr();
 
   double lower[3];
-  mesh->lower(&lower[0],&lower[1],&lower[2]);
+  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
   double upper[3];
-  mesh->upper(&upper[0],&upper[1],&upper[2]);
+  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
 
   bool is_active = n3[axis] > 1;
 
@@ -517,14 +517,14 @@ void Block::refresh (int axis_set)
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
 
-  Mesh *             mesh        = simulation->mesh();
+  Hierarchy *        hierarchy   = simulation->hierarchy();
   Boundary *         boundary    = simulation->boundary();
   const FieldDescr * field_descr = simulation->field_descr();
 
   double lower[3];
-  mesh->lower(&lower[0],&lower[1],&lower[2]);
+  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
   double upper[3];
-  mesh->upper(&upper[0],&upper[1],&upper[2]);
+  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
 
   bool ax = ((axis_set == axis_all) || (axis_set == axis_x)) && nx > 1;
   bool ay = ((axis_set == axis_all) || (axis_set == axis_y)) && ny > 1;
@@ -668,12 +668,12 @@ void Block::p_refresh_face (int n, char * buffer,
   // Count incoming faces
   //--------------------------------------------------
 
-  Mesh * mesh = simulation->mesh();
+  Hierarchy * hierarchy = simulation->hierarchy();
 
   double lower[3];
-  mesh->lower(&lower[0],&lower[1],&lower[2]);
+  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
   double upper[3];
-  mesh->upper(&upper[0],&upper[1],&upper[2]);
+  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
   
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
@@ -760,7 +760,7 @@ void Block::p_output (int index_output)
   simulation->output(index_output)->block(this);
 
   // Synchronize via main chare before writing
-  int num_blocks = simulation->mesh()->patch(0)->num_blocks();
+  int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
   simulation->proxy_block_reduce().p_output_reduce (num_blocks);
 }
 #endif /* CONFIG_USE_CHARM */

@@ -80,7 +80,7 @@
 #      groups = ["cycle_step_test"];
 #
 #      cycle_step_test {
-#        file_name      = "enzo-p_1-%06d";
+#       name           = "enzo-p_1-%06d";
 #	type           = "image";
 #	cycle_interval = 100;
 #      };

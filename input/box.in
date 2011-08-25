@@ -67,7 +67,7 @@
       groups = ["cycle_step"];
 
       cycle_step {
-         file_name      = "box-%04d";
+         name           = "box-%04d";
          type           = "image";
          cycle_interval = 10;
       }

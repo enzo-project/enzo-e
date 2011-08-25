@@ -9,7 +9,7 @@
 #ifndef SIMULATION_OUTPUT_HPP
 #define SIMULATION_OUTPUT_HPP
 
-class Mesh;
+class Hierarchy;
 class Patch;
 
 class Output {
@@ -43,21 +43,21 @@ public: // functions
   Schedule * schedule() throw() 
   { return &schedule_; };
   
-  /// Write mesh-related data to disk if scheduled
+  /// Write hierarchy-related data to disk if scheduled
   void scheduled_write
   (  const FieldDescr * field_descr,
-     Mesh * mesh, int cycle, double time, bool root_call=true) throw();
+     Hierarchy * hierarchy, int cycle, double time, bool root_call=true) throw();
 
   /// Write a patch-related data to disk if scheduled
   void scheduled_write
   (  const FieldDescr * field_descr,
-     Patch * patch, Mesh * mesh,
+     Patch * patch, Hierarchy * hierarchy,
      int cycle, double time, bool root_call=true) throw();
 
   /// Write a block-related to disk if scheduled
   void scheduled_write
   (  const FieldDescr * field_descr,
-     Block * block, Patch * patch, Mesh * mesh,
+     Block * block, Patch * patch, Hierarchy * hierarchy,
      int cycle, double time, bool root_call=true) throw();
 
   std::string expand_file_name (int cycle, double time) const throw();
@@ -84,7 +84,7 @@ public: // virtual functions
 #ifdef CONFIG_USE_CHARM
 
   /// Open file before writing
-  virtual void open (const Mesh * mesh, int cycle, double time) throw() = 0;
+  virtual void open (const Hierarchy * hierarchy, int cycle, double time) throw() = 0;
 
   /// Accumulate block-local data
   virtual void block (const Block * block) throw() = 0;
@@ -95,24 +95,24 @@ public: // virtual functions
 #endif
 
 
-  /// Write mesh data to disk
+  /// Write hierarchy data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Mesh * mesh, 
+    int index, Hierarchy * hierarchy, 
     int cycle, double time,
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
-  /// Write patch data to disk; may be called by write (Mesh)
+  /// Write patch data to disk; may be called by write (Hierarchy)
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Patch * patch, Mesh * mesh,
+    int index, Patch * patch, Hierarchy * hierarchy,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
   /// Write block data to disk; may be called by write (Patch)
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Block * block, Patch * patch, Mesh * mesh, 
+    int index, Block * block, Patch * patch, Hierarchy * hierarchy, 
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 

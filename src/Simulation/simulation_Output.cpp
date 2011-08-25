@@ -67,16 +67,16 @@ std::string Output::expand_file_name
 void Output::scheduled_write
 (
  const FieldDescr * field_descr,
- Mesh * mesh, 
+ Hierarchy * hierarchy, 
  int cycle, 
  double time, 
  bool root_call
  ) throw()
 {
   if (schedule_.write_this_cycle(cycle, time)) {
-    // Write all Mesh fields
+    // Write all Hierarchy fields
     for (size_t i = 0; i<field_list_.size(); i++) {
-      write (field_descr, i, mesh,cycle,time,root_call); 
+      write (field_descr, i, hierarchy,cycle,time,root_call); 
     }
   }
 }
@@ -87,7 +87,7 @@ void Output::scheduled_write
 (
  const FieldDescr * field_descr,
  Patch * patch, 
- Mesh * mesh, 
+ Hierarchy * hierarchy, 
  int cycle, 
  double time, 
  bool root_call
@@ -96,7 +96,7 @@ void Output::scheduled_write
   if (schedule_.write_this_cycle(cycle, time)) {
     // Write all Patch fields
     for (size_t i = 0; i<field_list_.size(); i++) {
-      write (field_descr, i, patch,mesh,cycle,time,root_call); 
+      write (field_descr, i, patch,hierarchy,cycle,time,root_call); 
     }
   }
 }
@@ -108,7 +108,7 @@ void Output::scheduled_write
  const FieldDescr * field_descr,
  Block * block, 
  Patch * patch, 
- Mesh * mesh, 
+ Hierarchy * hierarchy, 
  int cycle, 
  double time, 
  bool root_call
@@ -117,7 +117,7 @@ void Output::scheduled_write
   if (schedule_.write_this_cycle(cycle, time)) {
     // Write all Block fields
     for (size_t i = 0; i<field_list_.size(); i++) {
-      write (field_descr, i, block, patch, mesh,cycle,time,root_call); 
+      write (field_descr, i, block, patch, hierarchy,cycle,time,root_call); 
     }
   }
 }
