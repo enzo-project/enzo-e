@@ -28,10 +28,10 @@ public: // interface
   FileHdf5() throw();
 
   /// Open the file with the given mode
-  virtual int open_file  (std::string name, std::string mode) throw();
+  virtual int open  (std::string name, std::string mode) throw();
 
   /// Close the file
-  virtual void close_file () throw();
+  virtual void close () throw();
 
   /// Read the current dataset into the buffer
   virtual void read  (char              * buffer,
@@ -76,7 +76,7 @@ private: // attributes
   std::string file_mode_;
 
   /// Whether file is open or closed
-  bool  is_file_open_;
+  bool  is_open_;
 
   /// HDF5 dataset descriptor
   hid_t dataset_;

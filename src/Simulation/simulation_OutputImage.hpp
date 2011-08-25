@@ -1,18 +1,18 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_OutputImage.hpp 
+/// @file     simulation_OutputImage.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
-/// @brief    [\ref Field] Declaration for the OutputImage component
+/// @brief    [\ref Simulation] Declaration for the OutputImage component
 
-#ifndef FIELD_OUTPUT_IMAGE_HPP
-#define FIELD_OUTPUT_IMAGE_HPP
+#ifndef SIMULATION_OUTPUT_IMAGE_HPP
+#define SIMULATION_OUTPUT_IMAGE_HPP
 
 class OutputImage : public Output {
 
   /// @class    OutputImage
-  /// @ingroup  Field
-  /// @brief [\ref Field] class for writing image fields to images
+  /// @ingroup  Simulation
+  /// @brief [\ref Simulation] class for writing images
 
 public: // functions
 
@@ -36,21 +36,21 @@ public: // virtual functions
 
 #endif
 
-  /// Write mesh-related data to field
+  /// Write mesh-related field data
   virtual void write 
   ( const FieldDescr * field_descr,
     int index, Mesh * mesh, 
     int cycle, double time,
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
 
-  /// Write a patch-related data to field; may be called by write (Mesh)
+  /// Write patch-related field data; may be called by write (Mesh)
   virtual void write 
   ( const FieldDescr * field_descr,
     int index, Patch * patch, Mesh * mesh,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
 
-  /// Write a block-related to field; may be called by write (Patch)
+  /// Write block-related field data; may be called by write (Patch)
   virtual void write 
   ( const FieldDescr * field_descr,
     int index, Block * block, Patch * patch, Mesh * mesh, 
@@ -285,4 +285,4 @@ void OutputImage::image
   image_close_(min,max);
 }
 
-#endif /* FIELD_OUTPUT_IMAGE_HPP */
+#endif /* SIMULATION_OUTPUT_IMAGE_HPP */

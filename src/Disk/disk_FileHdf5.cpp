@@ -18,7 +18,7 @@ FileHdf5::FileHdf5() throw()
    file_(0),
    file_name_(),
    file_mode_(),
-   is_file_open_(false),
+   is_open_(false),
    dataset_(0),
    dataset_name_(),
    dataspace_(0)
@@ -27,7 +27,7 @@ FileHdf5::FileHdf5() throw()
 
 //----------------------------------------------------------------------
     
-int FileHdf5::open_file  (std::string name, std::string mode) throw()
+int FileHdf5::open  (std::string name, std::string mode) throw()
 /**
  * @param name  Name of the file to create or open
  * @param mode  How the file is to be created or opened:
@@ -37,11 +37,11 @@ int FileHdf5::open_file  (std::string name, std::string mode) throw()
  */
 {
 
-  if (is_file_open_) {
+  if (is_open_) {
 
     char warning_message[ERROR_LENGTH];
     sprintf (warning_message,"Attempting to open an open file %s",name.c_str());
-    WARNING("FileHdf5::open_file",warning_message);
+    WARNING("FileHdf5::open",warning_message);
 
   } else {
 
@@ -55,45 +55,45 @@ int FileHdf5::open_file  (std::string name, std::string mode) throw()
     } else {
       char error_message[ERROR_LENGTH];
       sprintf (error_message,"Unrecognized mode: %s",mode.c_str());
-      ERROR("FileHdf5::open_file",error_message);
+      ERROR("FileHdf5::open",error_message);
     }
 
     if (file_ >= 0) {
-      is_file_open_ = true;
+      is_open_ = true;
     } else {
       char warning_message[ERROR_LENGTH];
       sprintf (warning_message,
 	       "Return value %d opening file %s",
 	       file_,file_name_.c_str());
-      WARNING("FileHdf5::open_file",warning_message);
+      WARNING("FileHdf5::open",warning_message);
     }
   }
 
-  return is_file_open_;
+  return is_open_;
 }
 
 //----------------------------------------------------------------------
 
-void FileHdf5::close_file () throw()
+void FileHdf5::close () throw()
 /**
  */
 {
-  if (! is_file_open_) {
+  if (! is_open_) {
     char warning_message[ERROR_LENGTH];
     sprintf (warning_message,
 	     "Attempting to close a closed file %s",
 	     this->file_name_.c_str());
-    WARNING("FileHdf5::close_file",warning_message);
+    WARNING("FileHdf5::close",warning_message);
   } else {
     int retval = H5Fclose (file_);
     if (retval >= 0) {
-      is_file_open_ = false;
+      is_open_ = false;
     } else {
       char warning_message[ERROR_LENGTH];
       sprintf (warning_message,
 	       "Return value %d closing file %s",
 	       retval,file_name_.c_str());
-      WARNING("FileHdf5::close_file",warning_message);
+      WARNING("FileHdf5::close",warning_message);
     }
   }
 }

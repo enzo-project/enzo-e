@@ -44,10 +44,10 @@ PARALLEL_MAIN_BEGIN
   // Open a file for writing
   //--------------------------------------------------
 
-  unit_func("open_file");
+  unit_func("open");
 
   int mx,my,mz;
-  hdf5.open_file("open_file_test.h5","w");
+  hdf5.open("open_test.h5","w");
 
   unit_assert(true);
 
@@ -64,13 +64,13 @@ PARALLEL_MAIN_BEGIN
   hdf5.close_dataset ();
 
   // Close the file
-  hdf5.close_file();
+  hdf5.close();
 
   //--------------------------------------------------
   // Open a file for reading
   //--------------------------------------------------
 
-  hdf5.open_file("open_file_test.h5","r");
+  hdf5.open("open_test.h5","r");
 
   // Open a dataset
   hdf5.open_dataset ("dataset",&mx,&my,&mz);
@@ -82,7 +82,7 @@ PARALLEL_MAIN_BEGIN
   hdf5.close_dataset ();
 
   // Close the file
-  hdf5.close_file();
+  hdf5.close();
 
   //--------------------------------------------------
   // Compare data written to data read

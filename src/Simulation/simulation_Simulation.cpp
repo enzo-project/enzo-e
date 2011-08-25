@@ -472,19 +472,42 @@ void Simulation::initialize_output_() throw()
     // ASSUMES GROUP AND SUBGROUP ARE SET BY CALLER
 
     ASSERT("Simulation::initialize_output_",
-	   "Bad type for Output 'file_name' parameter",
-	   parameters_->type("file_name") == parameter_string);
+	   "Bad type for Output 'name' parameter",
+	   parameters_->type("name") == parameter_string);
 
-    // Set the file name
+    // Initialize the file name
 
-    std::string file_name = parameters_->value_string("file_name","unknown");
 
-    // Error if file_name is unspecified
+    std::string file_name = "";
+
+    if (parameters_->type("name") == parameter_string) {
+
+      // CASE 1:  e.g. name = "filename";
+      file_name = parameters_->value_string("name","");
+
+     
+    } else if (parameters_->type("name") == parameter_list) {
+      // CASE 2:  e.g. name = ["filename-cycle-%0d.time-%5.3f", "cycle","time"]
+
+      int list_length = parameters_->list_length("name");
+      if (list_length > 0) {
+	file_name = parameters_->list_value_string(0,"name","");
+	// Add file variable string ("cycle", "time", etc.) to schedule
+	for (int index = 1; index<list_length-1; index++) {
+	  std::string file_var = parameters_->list_value_string(index,"name","");
+	  output->set_file_var(file_var,index-1);
+	}
+      }
+    }
+
+    // Error if name is unspecified
     ASSERT("Simulation::initialize_output_",
-	   "Output 'file_name' must be specified",
-	   file_name != "unknown");
+	   "Output 'name' must be specified",
+	   file_name != "");
 
     output->set_file_name (file_name);
+
+    // Initialize the list of output fields
 
     std::vector<int> field_list;
 
@@ -552,7 +575,7 @@ void Simulation::initialize_output_() throw()
 	ERROR("Simulation::initialize_output_",
 	      "Output cycle_interval is of the wrong type");
       }
-      output->set_cycle_interval(cycle_start,cycle_step,cycle_stop);
+      output->schedule()->set_cycle_interval(cycle_start,cycle_step,cycle_stop);
 
     } else if (cycle_list) {
 
@@ -574,7 +597,7 @@ void Simulation::initialize_output_() throw()
 	}
       }
 
-      output->set_cycle_list(list);
+      output->schedule()->set_cycle_list(list);
 
     } else if (time_interval) {
 
@@ -600,7 +623,7 @@ void Simulation::initialize_output_() throw()
 	ERROR("Simulation::initialize_output_",
 	      "Output time_interval is of the wrong type");
       }
-      output->set_time_interval(time_start,time_step,time_stop);
+      output->schedule()->set_time_interval(time_start,time_step,time_stop);
 
     } else if (time_list) {
 
@@ -622,7 +645,7 @@ void Simulation::initialize_output_() throw()
 	}
       }
 
-      output->set_time_list(list);
+      output->schedule()->set_time_list(list);
 
     }
 
@@ -813,7 +836,7 @@ void Simulation::output_next() throw()
   // find next output
 
   while (index_output_ < num_output() && 
-	 ! output(index_output_)->write_this_cycle(cycle_, time_))
+	 ! output(index_output_)->schedule()->write_this_cycle(cycle_, time_))
     ++index_output_;
 
   // output if any scheduled, else proceed with refresh
@@ -926,7 +949,7 @@ void Simulation::refresh() throw()
   //--------------------------------------------------
 
   for (size_t index_output=0; index_output<num_output(); index_output++) {
-    if (output(index_output)->write_this_cycle(cycle_, time_)) {
+    if (output(index_output)->schedule()->write_this_cycle(cycle_, time_)) {
       // output_open(index_output);
     }
   }

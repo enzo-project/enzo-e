@@ -30,10 +30,10 @@ public: // interface
   File() throw();
 
   /// Open the given named file
-  virtual int open_file(std::string filename, std::string mode) throw() = 0;
+  virtual int open(std::string filename, std::string mode) throw() = 0;
 
   /// Close the file
-  virtual void close_file() throw() = 0;
+  virtual void close() throw() = 0;
   
   /// Read data from the file
   virtual void read(char * buffer, enum precision_enum precision) throw() = 0;

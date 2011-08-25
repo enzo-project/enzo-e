@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_OutputImage.cpp
+/// @file     simulation_OutputImage.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Mar 17 11:14:18 PDT 2011
 /// @brief    Implementation of the OutputImage class
 
 #include "cello.hpp"
 
-#include "field.hpp"
+#include "simulation.hpp"
 
 //----------------------------------------------------------------------
 

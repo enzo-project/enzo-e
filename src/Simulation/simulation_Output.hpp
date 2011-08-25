@@ -1,25 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_Output.hpp 
+/// @file     simulation_Output.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
 /// @todo     Extract Schedule object for scheduling output
-/// @brief    [\ref Field] Declaration for the Output component
+/// @brief    [\ref Simulation] Declaration for the Output component
 
-#ifndef FIELD_OUTPUT_HPP
-#define FIELD_OUTPUT_HPP
-
-//----------------------------------------------------------------------
-/// @enum     output_schedule_enum
-/// @brief    Scheduling types
-
-enum output_schedule_enum {
-  output_schedule_unknown,
-  output_schedule_cycle_interval,
-  output_schedule_cycle_list,
-  output_schedule_time_interval,
-  output_schedule_time_list
-};
+#ifndef SIMULATION_OUTPUT_HPP
+#define SIMULATION_OUTPUT_HPP
 
 class Mesh;
 class Patch;
@@ -27,8 +15,8 @@ class Patch;
 class Output {
 
   /// @class    Output
-  /// @ingroup  Field
-  /// @brief    [\ref Field] define interface for various types of simulation output
+  /// @ingroup  Simulation
+  /// @brief    [\ref Simulation] define interface for various types of simulation output
 
 public: // functions
 
@@ -39,37 +27,22 @@ public: // functions
   void set_file_name (std::string file_name) throw()
   { file_name_ = file_name; };
 
-  /// Set cycle interval (start, step, stop)
-  void set_cycle_interval
-  (int cycle_start, int cycle_step, int cycle_stop) throw();
-
-  /// Set cycle list
-  void set_cycle_list (std::vector<int> cycle_list) throw();
+  /// Set file_vare
+  void set_file_var (std::string file_var, size_t index) throw()
+  { 
+    if ((index >= file_vars_.size())) {
+      file_vars_.resize(index+1);
+    }
+    file_vars_[index] = file_var;
+  }
 
   /// Set field list
   void set_field_list (std::vector<int> field_list) throw();
 
-  /// Set time interval (start, step, stop)
-  void set_time_interval
-  (double time_start, double time_step, double time_stop) throw();
-
-  /// Set time list
-  void set_time_list (std::vector<double> time_list) throw();
-
-  /// Set whether the Output object is active or not
-  void set_active(bool active) throw()
-  { active_ = active; };
-    
-  /// Reduce timestep if next write time is greater than time + dt
-  double update_timestep(double time, double dt) const throw();
-
-  /// Return true if output should be performed this cycle.
-  bool write_this_cycle(int cycle, double time) throw();
-
-  /// Return whether the output object is active
-  bool is_active() const throw()
-  { return active_; };
-
+  /// Return the Schedule object pointer
+  Schedule * schedule() throw() 
+  { return &schedule_; };
+  
   /// Write mesh-related data to disk if scheduled
   void scheduled_write
   (  const FieldDescr * field_descr,
@@ -145,6 +118,8 @@ public: // virtual functions
 
 protected: // attributes
 
+  Schedule schedule_;
+
   /// Only processes with id's divisible by process_write_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
   int process_write_;
@@ -157,33 +132,15 @@ protected: // attributes
   /// Name of the file to write, including printf-type format
   std::string file_name_;
 
-  /// Whether Output is currently active
-  bool active_;
+  /// Format strings for file name, if any ("cycle", "time", etc.)
+  std::vector<std::string> file_vars_;
 
   /// Whether Output is scheduled for next call to scheduled write
   bool scheduled_;
   
-  /// Schedule type of the Output object
-  output_schedule_enum output_schedule_;
-
-  /// cycle start, step, and stop of output
-  std::vector<int> cycle_interval_;
-
-  /// List of cycles to perform output
-  std::vector<int> cycle_list_;
-
-  /// time start, step, and stop of output
-  std::vector<double> time_interval_;
-
-  /// List of times to perform output
-  std::vector<double> time_list_;
-
   /// List of fields to output
   std::vector<int> field_list_;
 
-  /// Index of time or cycle interval or list for next output
-  size_t index_;
-
 };
 
-#endif /* FIELD_OUTPUT_HPP */
+#endif /* SIMULATION_OUTPUT_HPP */

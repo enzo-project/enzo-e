@@ -41,9 +41,6 @@ class FieldFace;
 #include "field_FieldBlock.hpp"
 #include "field_FieldFace.hpp"
 #include "field_FacesGroup.hpp"
-#include "field_Schedule.hpp"
-#include "field_Output.hpp"
-#include "field_OutputImage.hpp"
 
 #endif /* FIELD_HPP */
 

@@ -49,10 +49,16 @@ public: // functions
   /// Set whether the Schedule object is active or not
   void set_active(bool active) throw()
   { active_ = active; };
-    
+
   /// Return whether the output object is active
   bool is_active() const throw()
   { return active_; };
+
+  /// Whether to perform IO this cycle
+  bool write_this_cycle ( int cycle, double time ) throw();
+
+  /// Reduce timestep if next write time is greater than time + dt
+  double update_timestep(double time, double dt) const throw();
 
 protected: // attributes
 
@@ -73,6 +79,10 @@ protected: // attributes
 
   /// List of times to perform schedule
   std::vector<double> time_list_;
+
+  /// Index of time or cycle interval or list for next output
+  size_t index_;
+
 };
 
 #endif /* FIELD_SCHEDULE_HPP */

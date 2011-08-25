@@ -13,8 +13,9 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['simulation','method', 
+components = [ 
               'field', 
+              'simulation','method',  # TEMPORARY: SHOULD NOT NEED simulation OR method
               'memory','parallel',
               'parameters','monitor',
               'performance', 'error',
