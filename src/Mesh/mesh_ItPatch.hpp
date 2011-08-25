@@ -9,7 +9,7 @@
 /// @date     Tue Feb  1 16:46:01 PST 2011
 /// @brief    [\ref Mesh] Declaration of the ItPatch iterator
 
-class ItPatch {
+class ItPatch : public It<Patch> {
 
   /// @class    ItPatch
   /// @ingroup  Mesh

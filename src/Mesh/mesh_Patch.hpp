@@ -103,22 +103,6 @@ class Patch
 
 #endif
 
-  //----------------------------------------------------------------------
-  // I/O
-  //----------------------------------------------------------------------
-
-  /// Open a file for the Patch
-  void open (File * file, const char * filename, const char * mode) const throw();
-
-  /// Close a file for the Patch
-  void close (File * file) const throw();
-
-  /// Read "metadata" or field data associated with the Patch
-  void read (File * file, file_content_type file_content) throw ();
-
-  /// Write "metadata" or field data associated with the Patch
-  void write(File * file, file_content_type file_content) const throw ();
-
 protected: // attributes
 
   /// Array of blocks ib associated with this process

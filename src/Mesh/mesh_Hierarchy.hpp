@@ -107,18 +107,6 @@ public: // interface
   // I/O
   //----------------------------------------------------------------------
 
-  /// Open a file for the Hierarchy
-  void open (File * file, const char * filename, const char * mode) const throw();
-
-  /// Close a file for the Hierarchy
-  void close (File * file) const throw();
-
-  /// Read "metadata" or field data associated with the Hierarchy
-  void read (File * file, file_content_type file_content) throw ();
-
-  /// Write "metadata" or field data associated with the Hierarchy
-  void write(File * file, file_content_type file_content) const throw ();
-
 protected: // attributes
 
   /// Factory for creating Simulations, Hierarchies, Patches and Blocks

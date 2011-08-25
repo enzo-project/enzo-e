@@ -9,7 +9,7 @@
 /// @date     Tue Feb  1 16:46:01 PST 2011
 /// @brief    [\ref Mesh] Declaration of the ItBlock iterator
 
-class ItBlock {
+class ItBlock : public It<Block> {
 
   /// @class    ItBlock
   /// @ingroup  Mesh
@@ -34,9 +34,6 @@ private: // attributes
   /// The Patch being iterated over
   Patch * patch_;
 
-  /// Index of the current local Block plus 1, or 0 if between iterations
-  /// Always in the range 0 <= index1_ <= number of local blocks
-  size_t index1_;
 };
 
 #endif /* MESH_IT_BLOCK__HPP */

@@ -29,6 +29,30 @@ PARALLEL_MAIN_BEGIN
   hierarchy->create_root_patch(group_process,&field_descr,12,12,12,3,3,3);
   unit_assert(hierarchy->patch(0)!=NULL);
 
+  // Extents
+
+  hierarchy->set_lower(-1.0, -2.0, -3.0);
+  double xm,ym,zm;
+  hierarchy->lower(&xm,&ym,&zm);
+  unit_func("lower");
+  unit_assert(xm == -1.0 && ym == -2.0 && zm == -3.0);
+
+  hierarchy->set_upper( 1.0,  2.0,  3.0);
+  double xp,yp,zp;
+  hierarchy->upper(&xp,&yp,&zp);
+  unit_func("upper");
+  unit_assert(xp ==  1.0 && yp ==  2.0 && zp ==  3.0);
+
+  
+  // // Write header data
+  // hierarchy->open(file,"hierarchy_header.out","w");
+  // hierarchy->write(file,file_content_header);
+  // hierarchy->close(file);
+
+  // // Read header data
+  // hierarchy_read->open(file,"hierarchy_header.out","r");
+  // hierarchy_read->read(file,file_content_header);
+  // hierarchy_read->close(file);
     
   unit_finalize();
 

@@ -208,7 +208,8 @@ void OutputImage::write
     
 #else
   ItBlock it_block (patch);
-  while (Block * block = ++it_block) {
+  Block * block;
+  while ((block = ++it_block)) {
     // Get block size
     int nxb,nyb,nzb;
     FieldBlock * field_block = block->field_block();

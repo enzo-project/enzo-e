@@ -226,43 +226,6 @@ void Hierarchy::insert_patch(Patch * patch) throw()
   patch_list_[size] = patch;
 }
 
-//----------------------------------------------------------------------
-
-void Hierarchy::open 
-(
- File *       file, 
- const char * file_name, 
- const char * file_mode 
- ) const throw()
-{
-  INCOMPLETE("Hierarchy::open");
-}
-
-//----------------------------------------------------------------------
-
-void Hierarchy::close (File * file) const throw()
-{
-  INCOMPLETE("Hierarchy::close");
-}
-
-//----------------------------------------------------------------------
-
-void Hierarchy::read
-(
- File *            file, 
- file_content_type file_content) throw ()
-{
-  INCOMPLETE("Hierarchy::read");
-}
-
-//----------------------------------------------------------------------
-
-void Hierarchy::write
-(File * file, file_content_type file_content) const throw ()
-{
-  INCOMPLETE("Hierarchy::write");
-}
-
 // //----------------------------------------------------------------------
 
 // bool Hierarchy::balanced() const throw ()

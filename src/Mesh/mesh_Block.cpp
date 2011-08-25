@@ -833,44 +833,6 @@ void Block::compute(int axis_set)
 }
 #endif /* CONFIG_USE_CHARM */
 
-//----------------------------------------------------------------------
-
-void Block::open 
-(
- File *       file, 
- const char * file_name, 
- const char * file_mode 
- ) const throw()
-{
-  INCOMPLETE("Block::open");
-}
-
-//----------------------------------------------------------------------
-
-void Block::close (File * file) const throw()
-{
-  INCOMPLETE("Block::close");
-}
-
-//----------------------------------------------------------------------
-
-void Block::read
-(
- File *            file, 
- file_content_type file_content) throw ()
-{
-  INCOMPLETE("Block::read");
-}
-
-//----------------------------------------------------------------------
-
-void Block::write
-(File * file, file_content_type file_content) const throw ()
-{
-  INCOMPLETE("Block::write");
-}
-
-
 //======================================================================
 
   void Block::copy_(const Block & block) throw()

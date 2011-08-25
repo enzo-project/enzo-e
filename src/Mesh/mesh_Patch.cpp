@@ -142,43 +142,6 @@ void Patch::upper(double * xp, double * yp, double * zp) const throw ()
   if (zp) (*zp) = upper_[2];
 }
 
-//----------------------------------------------------------------------
-
-void Patch::open 
-(
- File *       file, 
- const char * file_name, 
- const char * file_mode 
- ) const throw()
-{
-  INCOMPLETE("Patch::open");
-}
-
-//----------------------------------------------------------------------
-
-void Patch::close (File * file) const throw()
-{
-  INCOMPLETE("Patch::close");
-}
-
-//----------------------------------------------------------------------
-
-void Patch::read
-(
- File *            file, 
- file_content_type file_content) throw ()
-{
-  INCOMPLETE("Patch::read");
-}
-
-//----------------------------------------------------------------------
-
-void Patch::write
-(File * file, file_content_type file_content) const throw ()
-{
-  INCOMPLETE("Patch::write");
-}
-
 //======================================================================
 
 void Patch::allocate_blocks(FieldDescr * field_descr) throw()

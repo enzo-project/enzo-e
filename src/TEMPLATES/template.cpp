@@ -20,7 +20,7 @@ Classname::Classname() throw ()
 
 Classname::~Classname() throw ()
 {
-  INCOMPLETE("Classname::!Classname");
+  INCOMPLETE("Classname::~Classname");
 }
 
 //----------------------------------------------------------------------

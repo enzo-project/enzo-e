@@ -37,14 +37,19 @@
 
 #include "mesh_tree.hpp"
 
+// Hierarchy and components
 #include "mesh_Block.hpp"
-
 #include "mesh_Patch.hpp"
 #include "mesh_Hierarchy.hpp"
 #include "mesh_Factory.hpp"
 
+// Iterators
+#include "mesh_It.hpp"
 #include "mesh_ItPatch.hpp"
 #include "mesh_ItBlock.hpp"
+
+// I/O Readers/Writers
+#include "mesh_Io.hpp"
 
 #endif /* MESH_HPP */
 
