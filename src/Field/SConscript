@@ -19,7 +19,8 @@ if (type == "charm"):
                   'performance','error',
                   'cello']
 else:
-    components = ['mesh',
+    components = ['simulation','method',
+                  'mesh',
                   'parallel','disk',
                   'monitor',
                   'performance','error',

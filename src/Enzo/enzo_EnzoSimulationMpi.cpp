@@ -139,8 +139,8 @@ void EnzoSimulationMpi::run() throw()
 	double time_block = static_cast <EnzoBlock*> (block)->Time();
 
 	for (size_t i=0; i<output_list_.size(); i++) {
-	  Output * output = output_list_[i];
-	  dt_block = output->update_timestep(time_block,dt_block);
+	  Schedule * schedule = output_list_[i]->schedule();
+	  dt_block = schedule->update_timestep(time_block,dt_block);
 	}
 
 	// Reduce timestep to coincide with end of simulation if needed

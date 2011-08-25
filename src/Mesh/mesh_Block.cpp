@@ -338,7 +338,8 @@ void Block::prepare()
   // Reduce timestep to coincide with scheduled output if needed
 
   for (size_t i=0; i<simulation->num_output(); i++) {
-    dt_block = simulation->output(i)->update_timestep(time_,dt_block);
+    Schedule * schedule = simulation->output(i)->schedule();
+    dt_block = schedule->update_timestep(time_,dt_block);
   }
 
   // Reduce timestep to not overshoot final time from stopping criteria
