@@ -69,8 +69,8 @@
       groups = ["cycle_step"];
 
       cycle_step {
-         name           = "implosion2d-param-%04d";
-         type           = "image";
+         type = "image";
+         name = ["implosion2d-param-%04d","cycle"];
          cycle_interval = 10;
       }
    }

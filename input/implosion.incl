@@ -1,7 +1,7 @@
-# Problem: 2D Implosion problem
-# Author:  James Bordner (jobordner@ucsd.edu)
-#
-# This file is used for developing the Cello / Enzo-P input grammar and syntax
+### Problem: 2D Implosion problem
+### Author:  James Bordner (jobordner@ucsd.edu)
+###
+### This file tests the #include preprocessing command
 
    Domain { 
       lower = [0.0, 0.0];
@@ -48,8 +48,6 @@
 
    }
 
-   Initial { code = "implosion_2d" }
-
    Boundary { type = "reflecting" }
 
    Stopping {
@@ -62,8 +60,8 @@
       groups = ["cycle_step"];
 
       cycle_step {
-         type = "image";
-         name = ["implosion2d-code-%04d","cycle"];
+//         name           = "implosion2d-code-%04d";
+         type           = "image";
          cycle_interval = 10;
       }
    }

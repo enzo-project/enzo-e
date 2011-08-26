@@ -60,14 +60,14 @@
 
    Stopping {
       time  = 2.5;
-      cycle = 1000;
+      cycle = 100;
    }
 
    Output { 
       groups = ["cycle_step"];
 
       cycle_step {
-         name           = "box-%04d";
+         name           = ["box-%04d","cycle"];
          type           = "image";
          cycle_interval = 10;
       }
