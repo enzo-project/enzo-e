@@ -230,13 +230,19 @@ Block * Block::neighbor (axis_enum axis, face_enum face) const throw()
   return NULL;
 }
 
-//----------------------------------------------------------------------
+//======================================================================
+// MPI FUNCTIONS
+//======================================================================
+
+#ifndef CONFIG_USE_CHARM
 
 void Block::refresh_ghosts(const FieldDescr * field_descr,
 			   int index_field_set) throw()
 {
   field_block_[index_field_set]->refresh_ghosts(field_descr);
 }
+
+#endif
 
 //======================================================================
 // CHARM FUNCTIONS

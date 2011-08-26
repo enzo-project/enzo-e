@@ -89,6 +89,11 @@ public: // interface
 
   //==================================================
 
+#else /* ! CONFIG_USE_CHARM */
+
+  /// Refresh ghost data
+  void refresh_ghosts(const FieldDescr * field_descr,
+		      int index_field_set = 0) throw();
 #endif
 
   //----------------------------------------------------------------------
@@ -128,10 +133,6 @@ public: // interface
   /// Return the neighboring block in the given direction
   /// [tested in test_Patch]
   Block * neighbor (axis_enum axis, face_enum face) const throw();
-
-  /// Refresh ghost data
-  void refresh_ghosts(const FieldDescr * field_descr,
-		      int index_field_set = 0) throw();
 
   /// Return the current cycle number
   int cycle() const throw() { return cycle_; };

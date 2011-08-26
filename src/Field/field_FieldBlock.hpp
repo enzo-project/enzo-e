@@ -99,8 +99,13 @@ public: // interface
   /// Deallocate ghost values if allocated
   void deallocate_ghosts(const FieldDescr * field_descr) throw ();
 
+
+#ifndef CONFIG_USE_CHARM /* MPI only */
+
   /// Refresh ghost zones on an internal face
   void refresh_ghosts(const FieldDescr * field_descr) throw();
+
+#endif
 
   /// Split a block into 2, 4, or 8 subblocks; does not delete self
   void split(bool split_x, bool split_y, bool split_z, 

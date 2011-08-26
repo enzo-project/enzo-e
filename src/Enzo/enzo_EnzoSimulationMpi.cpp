@@ -108,7 +108,6 @@ void EnzoSimulationMpi::run() throw()
 
   while (! stop_hierarchy) {
 
-    TRACE("EnzoSimulationMpi");
     monitor->print("[Simulation %d] cycle %04d time %15.12f", index_, cycle_,time_);
 
     //--------------------------------------------------
@@ -243,7 +242,6 @@ void EnzoSimulationMpi::run() throw()
   // END MAIN LOOP
   //======================================================================
 
-  TRACE("EnzoSimulationMpi");
   monitor->print("[Simulation %d] cycle %04d time %15.12f", 
 		 index_, cycle_, time_);
 

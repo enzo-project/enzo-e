@@ -363,6 +363,11 @@ void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 }
 
 //----------------------------------------------------------------------
+// MPI functions
+//----------------------------------------------------------------------
+
+#ifndef CONFIG_USE_CHARM
+
 void FieldBlock::refresh_ghosts(const FieldDescr * field_descr) throw()
 {
   INCOMPLETE("FieldBlock::refresh_ghosts");
@@ -372,6 +377,8 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr) throw()
     allocate_ghosts(field_descr);
   }
 }
+
+#endif
 
 //----------------------------------------------------------------------
 

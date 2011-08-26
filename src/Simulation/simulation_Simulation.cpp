@@ -471,10 +471,6 @@ void Simulation::initialize_output_() throw()
 
     // ASSUMES GROUP AND SUBGROUP ARE SET BY CALLER
 
-    ASSERT("Simulation::initialize_output_",
-	   "Bad type for Output 'name' parameter",
-	   parameters_->type("name") == parameter_string);
-
     // Initialize the file name
 
 
@@ -493,11 +489,14 @@ void Simulation::initialize_output_() throw()
       if (list_length > 0) {
 	file_name = parameters_->list_value_string(0,"name","");
 	// Add file variable string ("cycle", "time", etc.) to schedule
-	for (int index = 1; index<list_length-1; index++) {
+	for (int index = 1; index<list_length; index++) {
 	  std::string file_var = parameters_->list_value_string(index,"name","");
 	  output->set_file_var(file_var,index-1);
 	}
       }
+    } else {
+      ERROR("Simulation::initialize_output_",
+	    "Bad type for Output 'name' parameter");
     }
 
     // Error if name is unspecified
