@@ -59,7 +59,7 @@
 
    Output { 
 
-      groups = ["cycle_step"];
+      file_groups = ["cycle_step"];
 
       cycle_step {
          type = "image";

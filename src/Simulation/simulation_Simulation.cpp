@@ -389,24 +389,24 @@ void Simulation::initialize_output_() throw()
   parameters_->group_set(0,"Output");
   //--------------------------------------------------
 
-  int num_groups = parameters_->list_length("groups");
+  int num_file_groups = parameters_->list_length("file_groups");
 
-  for (int index_group=0; index_group < num_groups; index_group++) {
+  for (int index_file_group=0; index_file_group < num_file_groups; index_file_group++) {
 
     //--------------------------------------------------
     parameters_->group_set(0,"Output");
     //--------------------------------------------------
 
-    std::string group = parameters_->list_value_string
-      (index_group,"groups","unknown");
+    std::string file_group = parameters_->list_value_string
+      (index_file_group,"file_groups","unknown");
 
     //--------------------------------------------------
-    parameters_->group_set(1,group);
+    parameters_->group_set(1,file_group);
     //--------------------------------------------------
-    // parameter: Output:<group>:type
-    // parameter: Output:<group>:file_name
-    // parameter: Output:<group>:field_list
-    // parameter: Output:<group>:schedule
+    // parameter: Output:<file_group>:type
+    // parameter: Output:<file_group>:file_name
+    // parameter: Output:<file_group>:field_list
+    // parameter: Output:<file_group>:schedule
     //--------------------------------------------------
 
     std::string type = parameters_->value_string("type","unknown");
@@ -414,7 +414,7 @@ void Simulation::initialize_output_() throw()
     // Error if Output::type is not defined
     if (type == "unknown") {
       char buffer[ERROR_LENGTH];
-      sprintf (buffer,"Output:%s:type parameter is undefined",group.c_str());
+      sprintf (buffer,"Output:%s:type parameter is undefined",file_group.c_str());
       ERROR("Simulation::initialize_output_",buffer);
     }
 
@@ -424,7 +424,7 @@ void Simulation::initialize_output_() throw()
     if (output == NULL) {
       char buffer[ERROR_LENGTH];
       sprintf (buffer,"Unrecognized parameter value Output:%s:type = %s",
-     	       group.c_str(),type.c_str());
+     	       file_group.c_str(),type.c_str());
       ERROR("Simulation::initialize_output_",buffer);
     }
 
@@ -495,10 +495,10 @@ void Simulation::initialize_output_() throw()
     // Determine scheduling
     //--------------------------------------------------
 
-    // Error if Output:<group>:schedule does not exist
+    // Error if Output:<file_group>:schedule does not exist
 
     ASSERT("Simulation::initialize_output_",
-	   "The 'schedule' parameter must be specified for all Output groups",
+	   "The 'schedule' parameter must be specified for all Output file groups",
 	   parameters_->type("schedule") != parameter_unknown);
 
     // Determine schedule variable ("cycle" or "time")
@@ -614,7 +614,7 @@ void Simulation::initialize_output_() throw()
 
     output_list_.push_back(output); 
 
-  } // (for index_group)
+  } // (for index_file_group)
 
 }
 

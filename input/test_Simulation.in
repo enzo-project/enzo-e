@@ -52,7 +52,7 @@
 
       ghosts = 3;
 
-      # List of user-defined groups, which may be accessed by applications
+      # List of user-defined file_groups, which may be accessed by applications
       # built on Cello to process different groups of fields in different
       # ways.  E.g. "color" fields for Enzo PPM, or "computed" fields that
       # are not permanently stored (like pressure)
@@ -150,7 +150,7 @@
 
    Output { 
 
-      groups = ["cycle_interval_test",
+      file_groups = ["cycle_interval_test",
                 "cycle_list_test",
                 "time_interval_test",
                 "time_list_test",

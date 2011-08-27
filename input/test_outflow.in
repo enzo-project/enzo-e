@@ -145,7 +145,7 @@
 
    Output { 
 
-      groups = ["data","restart"];
+      file_groups = ["data","restart"];
 
       # this section needs more work
 
