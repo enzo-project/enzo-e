@@ -82,7 +82,7 @@
 #      cycle_step_test {
 #       name = ["enzo-p_1-%06d","cycle"];
 #	type = "image";
-#	cycle_interval = 100;
+#	schedule = ["cycle","interval",100];
 #      };
 #
 #

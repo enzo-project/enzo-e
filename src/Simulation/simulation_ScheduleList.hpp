@@ -3,34 +3,21 @@
 /// @file     simulation_Schedule.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
-/// @todo     Extract Schedule object for scheduling output
-/// @brief    [\ref Simulation] Declaration for the Schedule component
+/// @brief    [\ref Simulation] Declaration for the ScheduleList component
 
 #ifndef SIMULATION_SCHEDULE_HPP
 #define SIMULATION_SCHEDULE_HPP
 
-//----------------------------------------------------------------------
-/// @enum     schedule_type
-/// @brief    Scheduling types
+class ScheduleList : public Schedule {
 
-enum schedule_type {
-  schedule_type_unknown,
-  schedule_type_cycle_interval,
-  schedule_type_cycle_list,
-  schedule_type_time_interval,
-  schedule_type_time_list
-};
-
-class Schedule {
-
-  /// @class    Schedule
+  /// @class    ScheduleList
   /// @ingroup  Simulation
   /// @brief    [\ref Simulation] define interface for various types of simulation output
 
 public: // functions
 
-  /// Create an uninitialized Schedule object with the given file_name format
-  Schedule() throw();
+  /// Create an uninitialized ScheduleList object with the given file_name format
+  ScheduleList() throw();
 
   /// Set cycle interval (start, step, stop)
   void set_cycle_interval
@@ -46,7 +33,7 @@ public: // functions
   /// Set time list
   void set_time_list (std::vector<double> time_list) throw();
 
-  /// Set whether the Schedule object is active or not
+  /// Set whether the ScheduleList object is active or not
   void set_active(bool active) throw()
   { active_ = active; };
 
@@ -62,7 +49,7 @@ public: // functions
 
 protected: // attributes
 
-  /// Whether Schedule is currently active
+  /// Whether ScheduleList is currently active
   bool active_;
 
   /// Schedule type of the Schedule object

@@ -27,7 +27,9 @@ public: // interface
 
   /// Constructor
   Io() throw()
-  : path_(""),name_("") {};
+  : file_(0),
+    path_(""),
+    name_("") {};
 
   /// Destructor
   virtual ~Io() throw()
@@ -53,6 +55,7 @@ protected: // functions
 
 protected: // attributes
 
+  File * file_;
   std::string path_;
   std::string name_;
 

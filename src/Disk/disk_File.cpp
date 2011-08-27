@@ -9,6 +9,9 @@
 
 #include "disk.hpp"
 
-File::File() throw ()
+File::File(std::string path, std::string name, std::string mode) throw ()
+  : path_(path),
+    name_(name),
+    mode_(mode)
 {
 }

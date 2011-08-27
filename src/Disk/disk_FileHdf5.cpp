@@ -11,23 +11,24 @@
  
 //----------------------------------------------------------------------
 
-FileHdf5::FileHdf5() throw()
-/**
- */
-  :File(),
-   file_(0),
-   file_name_(),
-   file_mode_(),
-   is_open_(false),
-   dataset_(0),
-   dataset_name_(),
-   dataspace_(0)
+FileHdf5::FileHdf5
+(
+ std::string path,
+ std::string name,
+ std::string mode
+ ) throw()
+  : File(path,name,mode),
+    file_(0),
+    is_open_(false),
+    dataset_(0),
+    dataset_name_(),
+    dataspace_(0)
 {
 }
 
 //----------------------------------------------------------------------
     
-int FileHdf5::open  (std::string name, std::string mode) throw()
+int FileHdf5::open  () throw()
 /**
  * @param name  Name of the file to create or open
  * @param mode  How the file is to be created or opened:
@@ -40,32 +41,46 @@ int FileHdf5::open  (std::string name, std::string mode) throw()
   if (is_open_) {
 
     char warning_message[ERROR_LENGTH];
-    sprintf (warning_message,"Attempting to open an open file %s",name.c_str());
+    sprintf (warning_message,"Attempting to open an open file %s",
+	     name_.c_str());
     WARNING("FileHdf5::open",warning_message);
 
   } else {
 
-    file_name_ = name;
-    file_mode_ = mode;
+    if (mode_ == "r") {
 
-    if (mode == "r") {
-      file_ = H5Fopen(name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-    } else if (mode == "w") {
-      file_ = H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+      file_ = H5Fopen(name_.c_str(), 
+		      H5F_ACC_RDONLY, 
+		      H5P_DEFAULT);
+
+    } else if (mode_ == "w") {
+
+      file_ = H5Fcreate(name_.c_str(), 
+			H5F_ACC_TRUNC, 
+			H5P_DEFAULT, 
+			H5P_DEFAULT);
+
     } else {
+
       char error_message[ERROR_LENGTH];
-      sprintf (error_message,"Unrecognized mode: %s",mode.c_str());
+      sprintf (error_message,"Unrecognized mode: %s",
+	       mode_.c_str());
       ERROR("FileHdf5::open",error_message);
+
     }
 
     if (file_ >= 0) {
+
       is_open_ = true;
+
     } else {
+
       char warning_message[ERROR_LENGTH];
       sprintf (warning_message,
 	       "Return value %d opening file %s",
-	       file_,file_name_.c_str());
+	       file_,name_.c_str());
       WARNING("FileHdf5::open",warning_message);
+
     }
   }
 
@@ -82,7 +97,7 @@ void FileHdf5::close () throw()
     char warning_message[ERROR_LENGTH];
     sprintf (warning_message,
 	     "Attempting to close a closed file %s",
-	     this->file_name_.c_str());
+	     name_.c_str());
     WARNING("FileHdf5::close",warning_message);
   } else {
     int retval = H5Fclose (file_);
@@ -92,7 +107,7 @@ void FileHdf5::close () throw()
       char warning_message[ERROR_LENGTH];
       sprintf (warning_message,
 	       "Return value %d closing file %s",
-	       retval,file_name_.c_str());
+	       retval,name_.c_str());
       WARNING("FileHdf5::close",warning_message);
     }
   }
@@ -100,7 +115,7 @@ void FileHdf5::close () throw()
 
 //----------------------------------------------------------------------
 
-void FileHdf5::open_group (std::string name) throw()
+void FileHdf5::open_group (std::string group) throw()
 /**
  */
 {
@@ -118,14 +133,14 @@ void FileHdf5::close_group () throw()
 
 //----------------------------------------------------------------------
 
-void FileHdf5::open_dataset
+void FileHdf5::open_data
 (
- std::string         name,
+ std::string         data,
  enum precision_enum precision,
  int nx,  int ny,  int nz
 ) throw()
 {
-  if (file_mode_ != "w") {
+  if (mode_ != "w") {
 
     char error_message[ERROR_LENGTH];
     sprintf (error_message, "Expecting open_dataset() call for reading");
@@ -152,21 +167,21 @@ void FileHdf5::open_dataset
     dataspace_ = H5Screate_simple (d,n,0);
     
     dataset_   = H5Dcreate( file_, 
-			    name.c_str(), 
-			    datatype_(precision), 
+			    data.c_str(), 
+			    type_(precision), 
 			    dataspace_,  
 			    H5P_DEFAULT );
 
     if (dataset_ >= 0) {
 
-      dataset_name_ = name;
+      dataset_name_ = data;
       
     } else {
 
       char warning_message[ERROR_LENGTH];
       sprintf (warning_message,
 	       "Return value %d opening dataset %s",
-	       dataset_,name.c_str());
+	       dataset_,data.c_str());
       WARNING("FileHdf5::open_dataset",warning_message);
     }
   }
@@ -174,9 +189,9 @@ void FileHdf5::open_dataset
 
 //----------------------------------------------------------------------
 
-void FileHdf5::open_dataset 
+void FileHdf5::open_data
 (
- std::string name, 
+ std::string data, 
  int *       nx,
  int *       ny,
  int *       nz
@@ -184,7 +199,7 @@ void FileHdf5::open_dataset
 /**
  */
 {
-  if (file_mode_ != "r") {
+  if (mode_ != "r") {
 
     char error_message[ERROR_LENGTH];
     sprintf (error_message, "Expecting dataset_open_write()");
@@ -195,12 +210,12 @@ void FileHdf5::open_dataset
     int d;        // Dataset dimension
     hsize_t n[3]; // Dataset size
 
-    if (file_mode_ == "r") {
+    if (mode_ == "r") {
 
       // Open the dataset for reading
 
       // Open the dataset
-      dataset_ = H5Dopen( file_, name.c_str());
+      dataset_ = H5Dopen( file_, data.c_str());
       // Get the size of dataset
       dataspace_ = H5Dget_space (dataset_);
       d = H5Sget_simple_extent_ndims(dataspace_);
@@ -222,14 +237,14 @@ void FileHdf5::open_dataset
 
     if (dataset_ >= 0) {
 
-      dataset_name_ = name;
+      dataset_name_ = data;
       
     } else {
 
       char warning_message[ERROR_LENGTH];
       sprintf (warning_message,
 	       "Return value %d opening dataset %s",
-	       dataset_,name.c_str());
+	       dataset_,data.c_str());
       WARNING("FileHdf5::open_dataset",warning_message);
     }
   }
@@ -247,12 +262,8 @@ void FileHdf5::open_dataset
 
 //----------------------------------------------------------------------
 
-void FileHdf5::close_dataset () throw()
-/**
- */
-{
-  H5Dclose( dataset_);
-}
+void FileHdf5::close_data () throw()
+{ H5Dclose( dataset_); }
 
 //----------------------------------------------------------------------
 
@@ -262,7 +273,7 @@ void FileHdf5::read  (char              * buffer,
 /// @param precision  Precision of values in data buffer
 {
   H5Dread (dataset_, 
-	   datatype_(precision), 
+	   type_(precision), 
 	   dataspace_, 
 	   H5S_ALL, 
 	   H5P_DEFAULT, 
@@ -276,13 +287,18 @@ void FileHdf5::write (const char        * buffer,
 /**
  */
 {
-  H5Dwrite (dataset_, datatype_(precision), dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
+  H5Dwrite (dataset_, 
+	    type_(precision), 
+	    dataspace_, 
+	    H5S_ALL, 
+	    H5P_DEFAULT, 
+	    buffer);
 }
 
 
 //----------------------------------------------------------------------
 
-int FileHdf5::datatype_(enum precision_enum precision) throw()
+int FileHdf5::type_(enum precision_enum precision) throw()
 {
   // (*) NATIVE    -   FLOAT DOUBLE LDOUBLE
   // ( ) IEEE      -   F32BE F64BE     -
@@ -294,7 +310,7 @@ int FileHdf5::datatype_(enum precision_enum precision) throw()
     return 0;
     break;
   case precision_default:
-    return datatype_(default_precision);
+    return type_(default_precision);
     break;
   case precision_single:
     return H5T_NATIVE_FLOAT;

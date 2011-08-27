@@ -67,8 +67,8 @@
       groups = ["cycle_step"];
 
       cycle_step {
-         name           = ["box-%04d","cycle"];
-         type           = "image";
-         cycle_interval = 10;
+         name     = ["box-%04d","cycle"];
+         type     = "image";
+         schedule = ["cycle","interval",10];
       }
    }

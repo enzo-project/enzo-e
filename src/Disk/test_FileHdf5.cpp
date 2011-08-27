@@ -38,8 +38,6 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  FileHdf5 hdf5;
-
   //--------------------------------------------------
   // Open a file for writing
   //--------------------------------------------------
@@ -47,7 +45,6 @@ PARALLEL_MAIN_BEGIN
   unit_func("open");
 
   int mx,my,mz;
-  hdf5.open("open_test.h5","w");
 
   unit_assert(true);
 
@@ -55,34 +52,46 @@ PARALLEL_MAIN_BEGIN
   mx = nx;
   my = ny;
   mz = 1;
-  hdf5.open_dataset ("dataset",precision_double,mx,my,mz);
 
-  // Write the dataset
-  hdf5.write((char *)a,precision_double);
+  {
+    FileHdf5 hdf5("./","open_test.h5","w");
 
-  // Close the dataset
-  hdf5.close_dataset ();
+    hdf5.open();
 
-  // Close the file
-  hdf5.close();
+    hdf5.open_data ("dataset",precision_double,mx,my,mz);
+
+    // Write the dataset
+    hdf5.write((char *)a,precision_double);
+
+    // Close the dataset
+    hdf5.close_data ();
+
+    // Close the file
+    hdf5.close();
+  }
 
   //--------------------------------------------------
   // Open a file for reading
   //--------------------------------------------------
 
-  hdf5.open("open_test.h5","r");
+  {
+    FileHdf5 hdf5("./","open_test.h5","r");
 
-  // Open a dataset
-  hdf5.open_dataset ("dataset",&mx,&my,&mz);
+    hdf5.open();
 
-  // Read the dataset
-  hdf5.read((char *)b,precision_double);
+    // Open a dataset
+    hdf5.open_data ("dataset",&mx,&my,&mz);
 
-  // Close the dataset
-  hdf5.close_dataset ();
+    // Read the dataset
+    hdf5.read((char *)b,precision_double);
 
-  // Close the file
-  hdf5.close();
+    // Close the dataset
+    hdf5.close_data ();
+
+    // Close the file
+    hdf5.close();
+
+  }
 
   //--------------------------------------------------
   // Compare data written to data read

@@ -64,6 +64,6 @@
       cycle_step {
          type = "image";
          name = ["implosion2d-code-%04d","cycle"];
-         cycle_interval = 10;
+         schedule = ["cycle","interval",10];
       }
    }

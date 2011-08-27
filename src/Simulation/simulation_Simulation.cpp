@@ -180,44 +180,6 @@ size_t Simulation::num_method() const throw()
 Method * Simulation::method(int i) const throw()
 { return method_list_[i]; }
 
-//----------------------------------------------------------------------
-
-void Simulation::open 
-(
- File *       file, 
- const char * file_name, 
- const char * file_mode 
- ) const throw()
-{
-  INCOMPLETE("Simulation::open");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::close (File * file) const throw()
-{
-  INCOMPLETE("Simulation::close");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::read
-(
- File *            file, 
- file_content_type file_content) throw ()
-{
-  INCOMPLETE("Simulation::read");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::write
-(File * file, file_content_type file_content) const throw ()
-{
-  INCOMPLETE("Simulation::write");
-}
-
-
 //======================================================================
 
 void Simulation::initialize_simulation_() throw()
@@ -444,10 +406,7 @@ void Simulation::initialize_output_() throw()
     // parameter: Output:<group>:type
     // parameter: Output:<group>:file_name
     // parameter: Output:<group>:field_list
-    // parameter: Output:<group>:cycle_interval
-    // parameter: Output:<group>:cycle_list
-    // parameter: Output:<group>:time_interval
-    // parameter: Output:<group>:time_list
+    // parameter: Output:<group>:schedule
     //--------------------------------------------------
 
     std::string type = parameters_->value_string("type","unknown");
@@ -536,111 +495,116 @@ void Simulation::initialize_output_() throw()
     // Determine scheduling
     //--------------------------------------------------
 
-    bool cycle_interval,cycle_list,time_interval,time_list;
-
-    cycle_interval = (parameters_->type("cycle_interval") != parameter_unknown);
-    cycle_list     = (parameters_->type("cycle_list")     != parameter_unknown);
-    time_interval  = (parameters_->type("time_interval")  != parameter_unknown);
-    time_list      = (parameters_->type("time_list")      != parameter_unknown);
+    // Error if Output:<group>:schedule does not exist
 
     ASSERT("Simulation::initialize_output_",
-	   "exactly one of [cycle|time]_[interval|list] must be defined for each Output group",
-	   (cycle_interval? 1 : 0 + 
-	    cycle_list?     1 : 0 + 
-	    time_interval?  1 : 0 + 
-	    time_list?      1 : 0) == 1);
+	   "The 'schedule' parameter must be specified for all Output groups",
+	   parameters_->type("schedule") != parameter_unknown);
 
-    if (cycle_interval) {
+    // Determine schedule variable ("cycle" or "time")
+
+    bool var_cycle,var_time;
+    var_cycle = (strcmp(parameters_->list_value_string(0,"schedule"),"cycle")==0);
+    var_time  = (strcmp(parameters_->list_value_string(0,"schedule"),"time")==0);
+
+    printf ("%s\n",parameters_->list_value_string(0,"schedule"));
+
+    // Error if schedule variable is not "cycle" or "time"
+    ASSERT("Simulation::initialize_output_",
+	   "The first 'schedule' parameter list element must be 'cycle' or 'time'",
+	   var_cycle || var_time);
+
+    // Determine schedule type ("interval" or "list")
+
+    bool type_interval,type_list;
+
+    type_interval = (strcmp(parameters_->list_value_string(1,"schedule"),"interval")==0);
+    type_list     = (strcmp(parameters_->list_value_string(1,"schedule"),"list")==0);
+
+    // Error if schedule type is not "interval" or "list"
+
+    ASSERT("Simulation::initialize_output_",
+	   "The second 'schedule' parameter list element "
+	   "must be 'interval' or 'list'",
+	   type_interval || type_list);
+
+    int len = parameters_->list_length("schedule");
+
+    if (var_cycle && type_interval) {
 
       const int max_int = std::numeric_limits<int>::max();
-      int cycle_start = 0;
-      int cycle_step = 0;
-      int cycle_stop = max_int;
-      if (parameters_->type("cycle_interval") == parameter_integer) {
-	cycle_step = parameters_->value_integer("cycle_interval",1);
-      } else if (parameters_->type("cycle_interval") == parameter_list) {
-	if (parameters_->list_length("cycle_interval") != 3) {
-	  ERROR("Simulation::initialize_output_",
-		"Output cycle_interval parameter must be of the form "
-		"[cycle_start, cycle_step, cycle_stop");
-	}
-	cycle_start = 
-	  parameters_->list_value_integer (0,"cycle_interval",0);
-	cycle_step  = 
-	  parameters_->list_value_integer (1,"cycle_interval",1);
-	cycle_stop  = 
-	  parameters_->list_value_integer (2,"cycle_interval",max_int);
+
+      // Set cycle limits
+
+      int start, stop, step;
+
+      if (len == 3) {
+	start = 0;
+	stop  = max_int;
+	step  = parameters_->list_value_integer(2,"schedule");
+      } else if (len == 5) {
+	start = parameters_->list_value_integer(2,"schedule");
+	stop  = parameters_->list_value_integer(3,"schedule");
+	step  = parameters_->list_value_integer(4,"schedule");
       } else {
 	ERROR("Simulation::initialize_output_",
-	      "Output cycle_interval is of the wrong type");
+	      "Output 'schedule' list parameter has wrong number of elements");
       }
-      output->schedule()->set_cycle_interval(cycle_start,cycle_step,cycle_stop);
 
-    } else if (cycle_list) {
+      output->schedule()->set_cycle_interval(start,step,stop);
+
+    } else if (var_cycle && type_list) {
 
       std::vector<int> list;
 
-      if (parameters_->type("cycle_list") == parameter_integer) {
-	list.push_back (parameters_->value_integer("cycle_list",0));
-      } else if (parameters_->type("cycle_list") == parameter_list) {
-	for (int i=0; i<parameters_->list_length("cycle_list"); i++) {
-	  int value = parameters_->list_value_integer(i,"cycle_list",0);
-	  list.push_back (value);
-	  // check monotonicity
-	  if (i > 0) {
-	    int value_prev = parameters_->list_value_integer(i-1,"cycle_list",0);
-	    ASSERT("Simulation::initialize_output_",
-		   "Output cycle_list must be monotonically increasing",
-		   value_prev < value);
-	  }
+      for (int index = 2; index < len; index++) {
+	int value = parameters_->list_value_integer(index,"schedule");
+	list.push_back (value);
+	if (list.size() > 1) {
+	  printf ("%d %d\n",list[list.size()-2],list[list.size()-1]);
+	  ASSERT("Simulation::initialize_output_",
+		 "Output 'schedule' parameter list values must be monotonically increasing",
+		 list[list.size()-2] < list[list.size()-1]);
 	}
       }
 
       output->schedule()->set_cycle_list(list);
 
-    } else if (time_interval) {
+    } else if (var_time && type_interval) {
 
       const double max_double = std::numeric_limits<double>::max();
-      double time_start = 0;
-      double time_step = 0;
-      double time_stop = max_double;
-      if (parameters_->type("time_interval") == parameter_float) {
-	time_step = parameters_->value_float("time_interval",1);
-      } else if (parameters_->type("time_interval") == parameter_list) {
-	if (parameters_->list_length("time_interval") != 3) {
-	  ERROR("Simulation::initialize_output_",
-		"Output time_interval parameter must be of the form "
-		"[time_start, time_step, time_stop");
-	}
-	time_start = 
-	  parameters_->list_value_float (0,"time_interval",0);
-	time_step  = 
-	  parameters_->list_value_float (1,"time_interval",1);
-	time_stop  = 
-	  parameters_->list_value_float (2,"time_interval",max_double);
+
+      // Initialize defaults
+
+      double start, stop, step;
+
+      if (len == 3) {
+	start = 0;
+	stop  = max_double;
+	step  = parameters_->list_value_float(2,"schedule");
+      } else if (len == 5) {
+	start = parameters_->list_value_float(2,"schedule");
+	stop  = parameters_->list_value_float(3,"schedule");
+	step  = parameters_->list_value_float(4,"schedule");
       } else {
 	ERROR("Simulation::initialize_output_",
-	      "Output time_interval is of the wrong type");
+	      "Output 'schedule' list parameter has wrong number of elements");
       }
-      output->schedule()->set_time_interval(time_start,time_step,time_stop);
 
-    } else if (time_list) {
+      output->schedule()->set_time_interval(start,step,stop);
+
+    } else if (var_time && type_list) {
 
       std::vector<double> list;
 
-      if (parameters_->type("time_list") == parameter_float) {
-	list.push_back (parameters_->value_float("time_list",0));
-      } else if (parameters_->type("time_list") == parameter_list) {
-	for (int i=0; i<parameters_->list_length("time_list"); i++) {
-	  double value = parameters_->list_value_float(i,"time_list",0.0);
-	  list.push_back (value);
-	  // check monotonicity
-	  if (i > 0) {
-	    double value_prev = parameters_->list_value_float(i-1,"time_list",0);
-	    ASSERT("Simulation::initialize_output_",
-		   "Output time_list must be monotonically increasing",
-		   value_prev < value);
-	  }
+      for (int index = 2; index < len; index++) {
+	double value = parameters_->list_value_float(index,"schedule");
+	list.push_back (value);
+	if (list.size() > 1) {
+	  ASSERT("Simulation::initialize_output_",
+		 "Output 'schedule' parameter list values must be "
+		 "monotonically increasing",
+		 list[list.size()-2] < list[list.size()-1]);
 	}
       }
 

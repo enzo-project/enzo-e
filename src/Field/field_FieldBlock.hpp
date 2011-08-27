@@ -135,22 +135,6 @@ public: // interface
 	      const char * prefix,
 	      int cycle, int ibx, int iby, int ibz) const throw();
 
-  //----------------------------------------------------------------------
-  // I/O
-  //----------------------------------------------------------------------
-
-  /// Open a file for the FieldBlock
-  void open (File * file, const char * filename, const char * mode) const throw();
-
-  /// Close a file for the FieldBlock
-  void close (File * file) const throw();
-
-  /// Read "metadata" or field data associated with the FieldBlock
-  void read (File * file, file_content_type file_content) throw ();
-
-  /// Write "metadata" or field data associated with the FieldBlock
-  void write(File * file, file_content_type file_content) const throw ();
-
 private: // functions
 
   /// Given field size and padding, compute offset to start of the next field

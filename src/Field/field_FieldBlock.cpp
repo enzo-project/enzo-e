@@ -410,45 +410,7 @@ void FieldBlock::set_field_values
   INCOMPLETE("FieldBlock::set_field_values");
 }
 
-//----------------------------------------------------------------------
-
-void FieldBlock::open 
-(
- File *       file, 
- const char * file_name, 
- const char * file_mode 
- ) const throw()
-{
-  INCOMPLETE("FieldBlock::open");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::close (File * file) const throw()
-{
-  INCOMPLETE("FieldBlock::close");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::read
-(
- File *            file, 
- file_content_type file_content) throw ()
-{
-  INCOMPLETE("FieldBlock::read");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::write
-(File * file, file_content_type file_content) const throw ()
-{
-  INCOMPLETE("FieldBlock::write");
-}
-
 //======================================================================
-
 
 int FieldBlock::adjust_padding_
 (

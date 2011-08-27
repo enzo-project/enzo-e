@@ -25,10 +25,10 @@ class FileHdf5 : public File {
 public: // interface
 
   /// Initialize the FileHdf5 object
-  FileHdf5() throw();
+  FileHdf5(std::string path, std::string name, std::string mode) throw();
 
   /// Open the file with the given mode
-  virtual int open  (std::string name, std::string mode) throw();
+  virtual int open  () throw();
 
   /// Close the file
   virtual void close () throw();
@@ -42,38 +42,32 @@ public: // interface
 		      enum precision_enum precision) throw();
 
   /// Open the given group
-  void open_group (std::string name) throw();
+  void open_group (std::string group) throw();
 
   /// Close the current group
   void close_group () throw();
 
   /// Open the given dataset with given size for reading
-  void open_dataset (std::string name, 
-		     int * nx, int * ny, int * nz) throw();
+  void open_data (std::string data, 
+		  int * nx, int * ny, int * nz) throw();
 
   /// Open the given dataset with the given size for writing
-  void open_dataset (std::string name, 
-		     enum precision_enum precision,
-		     int nx, int ny, int nz) throw();
+  void open_data (std::string data, 
+		  enum precision_enum precision,
+		  int nx, int ny, int nz) throw();
 
   /// Close the current dataset
-  void close_dataset () throw();
+  void close_data () throw();
 
 private: // functions
 
   /// Return the HDF5 datatype for the given precision
-  int datatype_(enum precision_enum precision) throw();
+  int type_(enum precision_enum precision) throw();
 
 private: // attributes
 
   /// HDF5 file descriptor
   hid_t file_;
-
-  /// HDF5 file name
-  std::string file_name_;
-
-  /// HDF5 file mode
-  std::string file_mode_;
 
   /// Whether file is open or closed
   bool  is_open_;
