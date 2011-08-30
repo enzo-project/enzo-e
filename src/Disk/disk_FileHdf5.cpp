@@ -22,10 +22,11 @@ FileHdf5::FileHdf5
     data_set_id_(0),
     data_space_id_(0),
     status_id_(0),
-    is_file_open_(false),
     data_name_(""),
     data_type_(scalar_type_unknown),
-    data_rank_(0)
+    data_rank_(0),
+    is_file_open_(false),
+    is_data_open_(false)
 {
   const int rank_max = 5;
   for (int i=0; i<rank_max; i++) {
@@ -149,11 +150,13 @@ void FileHdf5::data_set
  int n0,  int n1,  int n2, int n3, int n4
  ) throw()
 {
+  if (is_data_open_) data_close_();
+
   if (mode_ != "w") {
 
     char error_message[ERROR_LENGTH];
-    sprintf (error_message, "Expecting open_dataset() call for reading");
-    ERROR("FileHdf5::open_dataset",error_message);
+    sprintf (error_message, "Expecting data_set() call for reading");
+    ERROR("FileHdf5::data_set",error_message);
 
   } else {
 
@@ -169,7 +172,7 @@ void FileHdf5::data_set
     if (n2 == 0) -- data_rank_;
     if (n1 == 0) -- data_rank_;
 
-    ASSERT ("FileHdf5::open_dataset","d is out of range",
+    ASSERT ("FileHdf5::data_set","d is out of range",
 	    (1 <= data_rank_ && data_rank_ <= 5));
 
     if (n0) data_size_[0] = n0;
@@ -197,14 +200,112 @@ void FileHdf5::data_set
       sprintf (warning_message,
 	       "Return value %d opening dataset %s",
 	       data_set_id_,data_name_.c_str());
-      WARNING("FileHdf5::open_dataset",warning_message);
+      WARNING("FileHdf5::data_set",warning_message);
     }
+  }
+
+  data_open_();
+}
+
+//----------------------------------------------------------------------
+
+void FileHdf5::data_get
+(
+ std::string name, 
+ enum scalar_type * type, 
+ int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+{
+  // is file open?
+  // is data open?
+  // return data size
+}
+
+//----------------------------------------------------------------------
+
+void FileHdf5::data_read (void * buffer) throw()
+{
+  if (! is_file_open_) {
+      char error_message[ERROR_LENGTH];
+      sprintf (error_message,
+	       "Trying to read from unopened file %s",
+	       (path_ + name_).c_str());
+      ERROR("FileHdf5::data_read",error_message);
+  }
+  if (! is_data_open_) {
+  }
+  // is file open?
+  // is data open?
+  // read data
+}
+
+//----------------------------------------------------------------------
+
+void FileHdf5::data_write (const void * buffer) throw()
+{
+  // is file open?
+  // is data open?
+  // write data
+}
+
+//======================================================================
+
+int FileHdf5::type_(enum scalar_type type) throw()
+{
+  // (*) NATIVE    -   FLOAT DOUBLE LDOUBLE
+  // ( ) IEEE      -   F32BE F64BE     -
+  // ( ) STD     B16BE B32BE B64BE     -
+  // Types: http://www.hdfgroup.org/HDF5/Tutor/datatypes.html#native-types
+  // char          H5T_NATIVE_CHAR   H5T_STD_I8BE or H5T_STD_I8LE
+  // float         H5T_NATIVE_FLOAT   H5T_IEEE_F32BE or H5T_IEEE_F32LE  
+  // double        H5T_NATIVE_DOUBLE   H5T_IEEE_F64BE or H5T_IEEE_F64LE  
+  // unsigned char H5T_NATIVE_UCHAR   H5T_STD_U8BE or H5T_STD_U8LE
+  // int           H5T_NATIVE_INT   H5T_STD_I32BE or H5T_STD_I32LE
+  // short:        H5T_NATIVE_SHORT   H5T_STD_I16BE or H5T_STD_I16LE
+  // long:         H5T_NATIVE_LONG   H5T_STD_I32BE, H5T_STD_I32LE,
+  //               H5T_STD_I64BE or H5T_STD_I64LE
+  // long long:    H5T_NATIVE_LLONG   H5T_STD_I64BE or H5T_STD_I64LE
+
+  switch (type) {
+  case scalar_type_unknown:
+    ERROR("FileHdf5::type_",
+	  "scalar_type_unknown not implemented");
+    return 0;
+    break;
+  case scalar_type_float:
+    return H5T_NATIVE_FLOAT;
+    break;
+  case scalar_type_double:
+    return H5T_NATIVE_DOUBLE;
+    break;
+  case scalar_type_long_double:
+    return H5T_NATIVE_LDOUBLE;
+    break;
+  case scalar_type_char:
+    return H5T_NATIVE_CHAR;
+    break;
+  scalar_type_int:
+    return H5T_NATIVE_INT;
+    break;
+  scalar_type_long_int:
+    return H5T_NATIVE_LINT;
+    break;
   }
 }
 
 //----------------------------------------------------------------------
 
-#error
+void FileHdf5::data_open_() throw()
+{
+}
+
+//----------------------------------------------------------------------
+
+void FileHdf5::data_close_() throw()
+{
+}
+
+
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void FileHdf5::open_data
 (
@@ -313,43 +414,3 @@ void FileHdf5::write (const char        * buffer,
 }
 
 
-//----------------------------------------------------------------------
-
-int FileHdf5::type_(enum precision_enum precision) throw()
-{
-  // (*) NATIVE    -   FLOAT DOUBLE LDOUBLE
-  // ( ) IEEE      -   F32BE F64BE     -
-  // ( ) STD     B16BE B32BE B64BE     -
-  switch (precision) {
-  case precision_unknown:
-    ERROR("FileHdf5::datatype_",
-	  "precision_unknown not implemented");
-    return 0;
-    break;
-  case precision_default:
-    return type_(default_precision);
-    break;
-  case precision_single:
-    return H5T_NATIVE_FLOAT;
-    break;
-  case precision_double:
-    return H5T_NATIVE_DOUBLE;
-    break;
-  case precision_extended80:
-    ERROR("FileHdf5::datatype_",
-	  "precision_extended80 not implemented");
-    return 0;
-    break;
-  case precision_extended96:
-    ERROR("FileHdf5::datatype_",
-	  "precision_extended96 not implemented");
-    return 0;
-    break;
-  case precision_quadruple:
-    return H5T_NATIVE_LDOUBLE;
-    break;
-  default:
-    return 0;
-    break;
-  }
-}

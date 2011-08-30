@@ -50,10 +50,10 @@ public: // interface
     int n0, int n1=0, int n2=0, int n3=0, int n4=0) throw();
 
   /// Read data from the file
-  virtual void data_read (void * buffer) throw() = 0;
+  virtual void data_read (void * buffer) throw();
 
   /// Write data to the file
-  virtual void data_write (const void * buffer) throw() = 0;
+  virtual void data_write (const void * buffer) throw();
 
   // /// Open the given group
   // void open_group (std::string group) throw();
@@ -65,6 +65,12 @@ private: // functions
 
   /// Convert the scalar type to HDF5 datatype
   int type_(enum scalar_type type) throw();
+
+  /// Open the dataset
+  void data_open_() throw();
+
+  /// Close the dataset
+  void data_close_() throw();
 
 private: // attributes
 
@@ -80,9 +86,6 @@ private: // attributes
   /// HDF5 error satus
   herr_t status_id_;
 
-  /// Whether file is open or closed
-  bool  is_file_open_;
-
   /// HDF5 dataset name
   std::string data_name_;
 
@@ -94,6 +97,12 @@ private: // attributes
 
   /// Dataset size
   hsize_t data_size_[5];
+
+  /// Whether file is open or closed
+  bool  is_file_open_;
+
+  /// Whether dataset is open or closed
+  bool  is_data_open_;
 
 };
 
