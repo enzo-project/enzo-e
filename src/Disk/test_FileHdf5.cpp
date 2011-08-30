@@ -26,15 +26,16 @@ PARALLEL_MAIN_BEGIN
   // Allocate arrays
   int nx = 100;
   int ny = 50;
-  double * a = new double[nx*ny];
-  double * b = new double[nx*ny];
+  double * a_double = new double[nx*ny];
+  double * b_double = new double[nx*ny];
 
-  // Initialize array "a" only
+  // Initialize a, clear b
 
   for (int iy=0; iy<ny; iy++) {
     for (int ix=0; ix<nx; ix++) {
       int i = ix + nx*(iy);
-      a[i] = ix*3 + iy*5;
+      a_double[i] = ix*3 + iy*5;
+      b_double[i] = 0;
     }
   }
 
@@ -44,27 +45,23 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("open");
 
-  int mx,my,mz;
-
-  unit_assert(true);
+  int a_nx, a_ny, a_nz;
 
   // Open a dataset
-  mx = nx;
-  my = ny;
-  mz = 1;
+  a_nx = nx;
+  a_ny = ny;
+  a_nz = 1;
 
   {
-    FileHdf5 hdf5("./","open_test.h5","w");
+    FileHdf5 hdf5("./","disk_double.h5","w");
 
     hdf5.open();
 
-    hdf5.open_data ("dataset",precision_double,mx,my,mz);
+    // Create 1D array of integers
+    hdf5.data_set ("double",scalar_double, a_nx,a_ny,a_nz);
 
-    // Write the dataset
-    hdf5.write((char *)a,precision_double);
-
-    // Close the dataset
-    hdf5.close_data ();
+    // Write the data
+    hdf5.data_write (a_double);
 
     // Close the file
     hdf5.close();
@@ -75,12 +72,22 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
   {
-    FileHdf5 hdf5("./","open_test.h5","r");
+    FileHdf5 hdf5("./","disk_double.h5","r");
 
     hdf5.open();
 
-    // Open a dataset
-    hdf5.open_data ("dataset",&mx,&my,&mz);
+    // Get the dataset size and type
+
+    unit_func("data_get");
+
+    scalar_type b_type;
+    int b_nx,b_ny,b_nz;
+    hdf5.data_get ("double",&b_type, &b_nx, &b_ny, &b_nz);
+
+    unit_assert (b_type == a_type);
+    unit_assert (b_nx == a_nx);
+    unit_assert (b_ny == a_ny);
+    unit_assert (b_nz == a_nz);
 
     // Read the dataset
     hdf5.read((char *)b,precision_double);
