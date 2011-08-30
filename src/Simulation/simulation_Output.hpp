@@ -23,11 +23,11 @@ public: // functions
   /// Create an uninitialized Output object with the given file_name format
   Output() throw();
 
-  /// Set file_name
+  /// Set file name
   void set_file_name (std::string file_name) throw()
   { file_name_ = file_name; };
 
-  /// Set file_vare
+  /// Set file name variable to use
   void set_file_var (std::string file_var, size_t index) throw()
   { 
     if ((index >= file_vars_.size())) {
@@ -117,6 +117,8 @@ public: // virtual functions
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
 protected: // attributes
+
+  IoSimulation io_simulation_;
 
   Schedule schedule_;
 

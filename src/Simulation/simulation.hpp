@@ -35,6 +35,7 @@ class Factory;
 
 #include "simulation_Simulation.hpp"
 #include "simulation_Schedule.hpp"
+#include "simulation_IoSimulation.hpp"
 
 #include "simulation_Output.hpp"
 #include "simulation_OutputImage.hpp"
