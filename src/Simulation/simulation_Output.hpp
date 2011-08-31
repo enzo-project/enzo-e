@@ -41,7 +41,7 @@ public: // functions
 
   /// Return the Schedule object pointer
   Schedule * schedule() throw() 
-  { return &schedule_; };
+  { return schedule_; };
   
   /// Write hierarchy-related data to disk if scheduled
   void scheduled_write
@@ -118,9 +118,9 @@ public: // virtual functions
 
 protected: // attributes
 
-  IoSimulation io_simulation_;
+  IoSimulation * io_simulation_;
 
-  Schedule schedule_;
+  Schedule * schedule_;
 
   /// Only processes with id's divisible by process_write_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)

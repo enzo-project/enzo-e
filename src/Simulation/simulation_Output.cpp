@@ -13,7 +13,9 @@
 //----------------------------------------------------------------------
 
 Output::Output () throw()
-  : process_write_(0),
+  : schedule_(new Schedule),
+    io_simulation_(0),
+    process_write_(0),
 #ifdef CONFIG_USE_CHARM
     count_reduce_(0),
 #endif
@@ -73,7 +75,7 @@ void Output::scheduled_write
  bool root_call
  ) throw()
 {
-  if (schedule_.write_this_cycle(cycle, time)) {
+  if (schedule_->write_this_cycle(cycle, time)) {
     // Write all Hierarchy fields
     for (size_t i = 0; i<field_list_.size(); i++) {
       write (field_descr, i, hierarchy,cycle,time,root_call); 
@@ -93,7 +95,7 @@ void Output::scheduled_write
  bool root_call
  ) throw()
 {
-  if (schedule_.write_this_cycle(cycle, time)) {
+  if (schedule_->write_this_cycle(cycle, time)) {
     // Write all Patch fields
     for (size_t i = 0; i<field_list_.size(); i++) {
       write (field_descr, i, patch,hierarchy,cycle,time,root_call); 
@@ -114,7 +116,7 @@ void Output::scheduled_write
  bool root_call
  ) throw()
 {
-  if (schedule_.write_this_cycle(cycle, time)) {
+  if (schedule_->write_this_cycle(cycle, time)) {
     // Write all Block fields
     for (size_t i = 0; i<field_list_.size(); i++) {
       write (field_descr, i, block, patch, hierarchy,cycle,time,root_call); 

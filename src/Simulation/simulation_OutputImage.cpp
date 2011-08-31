@@ -48,8 +48,6 @@ OutputImage::~OutputImage() throw ()
 
 void OutputImage::open (const Hierarchy * hierarchy, int cycle, double time) throw()
 {
-  INCOMPLETE("OutputImage::open");
-
   // create process image and clear it
 
   int nxm,nym,nzm;
