@@ -1,7 +1,5 @@
 #!/bin/tcsh -f
 
-rm -f out.scons.* fail.scons.*
-
 if ($#argv >= 2) then
   set arch = ($argv[1])
   set types = ($argv[2-])
@@ -45,7 +43,7 @@ foreach type ($types)
 
    touch "running.$arch.$type.$prec"
 
-   set t = `(time scons arch=$arch type=$type -k -j$procs >& out.scons.$type)`
+   set t = `(time scons arch=$arch type=$type -k -j$procs >& test/$type/out.scons)`
    rm -f "running.$arch.$type.$prec"
   
    set secs = `echo $t | awk '{print $3}'`
