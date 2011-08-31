@@ -545,6 +545,10 @@ SConscript('src/SConscript')
 SConscript('test/SConscript',variant_dir='test/' + type)
 Clean('.','test/' + type)
 Clean('.','bin/' + type)
+if (type == 'charm' and use_projections == 1):
+   Clean('.',Glob('bin/charm/*.projrc'))
+   Clean('.',Glob('bin/charm/*.log'))
+   Clean('.',Glob('bin/charm/*.sts'))
 
 # Build tarball
 
