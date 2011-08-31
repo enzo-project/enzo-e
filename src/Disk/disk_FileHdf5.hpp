@@ -25,10 +25,10 @@ public: // interface
   FileHdf5(std::string path, std::string name, std::string mode) throw();
 
   /// Open the file with the given mode
-  virtual void open () throw();
+  virtual void file_open () throw();
 
   /// Close the file
-  virtual void close () throw();
+  virtual void file_close () throw();
 
   // /// Set the current attribute type
   // virtual void set_attr_type 

@@ -70,15 +70,15 @@ PARALLEL_MAIN_BEGIN
 
    FileHdf5 hdf5_a("./","test_disk.h5","w");
 
-   hdf5_a.open();
+   hdf5_a.file_open();
 
-   hdf5_a.data_write (a_char,  "char",scalar_type_char, a_nx,a_ny,a_nz);
-   hdf5_a.data_write (a_int,   "int",scalar_type_int, a_nx,a_ny,a_nz);
-   hdf5_a.data_write (a_long,  "long",scalar_type_long, a_nx,a_ny,a_nz);
-   hdf5_a.data_write (a_float, "float",scalar_type_float, a_nx,a_ny,a_nz);
+   hdf5_a.data_write (a_char,  "char",  scalar_type_char,   a_nx,a_ny,a_nz);
+   hdf5_a.data_write (a_int,   "int",   scalar_type_int,    a_nx,a_ny,a_nz);
+   hdf5_a.data_write (a_long,  "long",  scalar_type_long,   a_nx,a_ny,a_nz);
+   hdf5_a.data_write (a_float, "float", scalar_type_float,  a_nx,a_ny,a_nz);
    hdf5_a.data_write (a_double,"double",scalar_type_double, a_nx,a_ny,a_nz);
 
-   hdf5_a.close();
+   hdf5_a.file_close();
 
   //--------------------------------------------------
   // Open a file for reading
@@ -92,7 +92,7 @@ PARALLEL_MAIN_BEGIN
   unit_func("data_get");
 
   FileHdf5 hdf5_b("./","test_disk.h5","r");
-  hdf5_b.open();
+  hdf5_b.file_open();
 
   //----------------------------------------------------------------------
   unit_func("read double");
@@ -201,7 +201,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert(p_char);
 
 
-  hdf5_b.close();
+  hdf5_b.file_close();
 
   //--------------------------------------------------
   // Finalize

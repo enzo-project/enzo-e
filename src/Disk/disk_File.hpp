@@ -34,10 +34,10 @@ public: // interface
   File (std::string path, std::string name, std::string mode) throw();
 
   /// Open the file
-  virtual void open () throw() = 0;
+  virtual void file_open () throw() = 0;
 
   /// Close the file
-  virtual void close () throw() = 0;
+  virtual void file_close () throw() = 0;
   
   // /// Set the current attribute type
   // virtual void attr_set

@@ -37,7 +37,7 @@ FileHdf5::FileHdf5
 
 //----------------------------------------------------------------------
     
-void FileHdf5::open () throw()
+void FileHdf5::file_open () throw()
 /**
  * @param name  Name of the file to create or open
  * @param mode  How the file is to be created or opened:
@@ -52,7 +52,7 @@ void FileHdf5::open () throw()
     char warning_message[ERROR_LENGTH];
     sprintf (warning_message,"Attempting to open an open file %s",
 	     name_.c_str());
-    WARNING("FileHdf5::open",warning_message);
+    WARNING("FileHdf5::file_open",warning_message);
 
   } else {
 
@@ -76,7 +76,7 @@ void FileHdf5::open () throw()
       char error_message[ERROR_LENGTH];
       sprintf (error_message,"Unrecognized mode: %s",
 	       mode_.c_str());
-      ERROR("FileHdf5::open",error_message);
+      ERROR("FileHdf5::file_open",error_message);
 
     }
 
@@ -90,7 +90,7 @@ void FileHdf5::open () throw()
       sprintf (warning_message,
 	       "Return value %d opening file %s",
 	       file_id_,full_name.c_str());
-      WARNING("FileHdf5::open",warning_message);
+      WARNING("FileHdf5::file_open",warning_message);
 
     }
   }
@@ -98,7 +98,7 @@ void FileHdf5::open () throw()
 
 //----------------------------------------------------------------------
 
-void FileHdf5::close () throw()
+void FileHdf5::file_close () throw()
 /**
  */
 {
@@ -112,7 +112,7 @@ void FileHdf5::close () throw()
       sprintf (warning_message,
 	       "Return value %d closing dataspace %s",
 	       retval,data_name_.c_str());
-      WARNING("FileHdf5::close",warning_message);
+      WARNING("FileHdf5::file_close",warning_message);
     }
     retval = H5Dclose (data_set_id_);
     if (retval >= 0) {
@@ -122,7 +122,7 @@ void FileHdf5::close () throw()
       sprintf (warning_message,
 	       "Return value %d closing dataset %s",
 	       retval,data_name_.c_str());
-      WARNING("FileHdf5::close",warning_message);
+      WARNING("FileHdf5::file_close",warning_message);
     }
   }
   if (is_file_open_) {
@@ -135,7 +135,7 @@ void FileHdf5::close () throw()
       sprintf (warning_message,
 	       "Return value %d closing file %s",
 	       retval,full_name.c_str());
-      WARNING("FileHdf5::close",warning_message);
+      WARNING("FileHdf5::file_close",warning_message);
     }
   }
 }
