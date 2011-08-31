@@ -6,11 +6,8 @@
 /// @file     disk_FileHdf5.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
-/// @todo     Refactor interface to be hdf5-independent (groups, datasets, etc.)
-/// @todo     Add support for [relative|absolute] [directories|groups] (?)
 /// @todo     Support multiple float types: std, native, ieee
 /// @todo     Add error handling (see H5E API)
-/// @todo     Add state checks for file open before adding dataset, etc.
 /// @todo     Add support for compression (see H5Z API)
 /// @brief    [\ref Disk] Interface for the FileHdf5 class
 
@@ -28,61 +25,78 @@ public: // interface
   FileHdf5(std::string path, std::string name, std::string mode) throw();
 
   /// Open the file with the given mode
-  virtual int open  () throw();
+  virtual void open () throw();
 
   /// Close the file
   virtual void close () throw();
 
-  /// Read the current dataset into the buffer
-  virtual void read  (char              * buffer,
-		      enum precision_enum precision) throw();
+  // /// Set the current attribute type
+  // virtual void set_attr_type 
+  // ( enum scalar_type scalar,
+  //   int n0=1, int n1=1, int n2=1, int n3=1, int n4=1);
+			      
+  /// Read attribute from the file
+  // virtual void read_attr(void * buffer) throw() = 0;
 
-  /// Write the current dataset from the buffer
-  virtual void write (const char        * buffer,
-		      enum precision_enum precision) throw();
+  /// Write attribute to the file
+  //  virtual void write_attr(const void * buffer) throw() = 0;
 
-  /// Open the given group
-  void open_group (std::string group) throw();
+  virtual void data_get
+  ( std::string name, enum scalar_type * type, 
+    int * n0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
 
-  /// Close the current group
-  void close_group () throw();
+  virtual void data_set 
+  ( std::string name, enum scalar_type type, 
+    int n0, int n1=0, int n2=0, int n3=0, int n4=0) throw();
 
-  /// Open the given dataset with given size for reading
-  void open_data (std::string data, 
-		  int * nx, int * ny, int * nz) throw();
+  /// Read data from the file
+  virtual void data_read (void * buffer) throw();
 
-  /// Open the given dataset with the given size for writing
-  void open_data (std::string data, 
-		  enum precision_enum precision,
-		  int nx, int ny, int nz) throw();
+  /// Write data to the file
+  virtual void data_write (const void * buffer) throw();
 
-  /// Close the current dataset
-  void close_data () throw();
+  // /// Open the given group
+  // void open_group (std::string group) throw();
+
+  // /// Close the current group
+  // void close_group () throw();
 
 private: // functions
 
-  /// Return the HDF5 datatype for the given precision
-  int type_(enum precision_enum precision) throw();
+  /// Convert the scalar type to HDF5 datatype
+  int hdf5_type_(enum scalar_type type) throw();
 
 private: // attributes
 
   /// HDF5 file descriptor
-  hid_t file_;
-
-  /// Whether file is open or closed
-  bool  is_open_;
+  hid_t file_id_;
 
   /// HDF5 dataset descriptor
-  hid_t dataset_;
-
-  /// HDF5 dataset name
-  std::string dataset_name_;
+  hid_t data_set_id_;
 
   /// HDF5 dataspace descriptor
-  hid_t dataspace_;
+  hid_t data_space_id_;
 
-  /// Last error
-  herr_t      status_;
+  /// HDF5 error satus
+  herr_t status_id_;
+
+  /// HDF5 dataset name
+  std::string data_name_;
+
+  /// Type of data in the HDF5 datatype
+  scalar_type data_type_;
+
+  /// Dataset rank, 0 to 5
+  int data_rank_;
+
+  /// Dataset size
+  hsize_t data_size_[5];
+
+  /// Whether file is open or closed
+  bool  is_file_open_;
+
+  /// Whether dataset is open or closed
+  bool  is_data_open_;
 
 };
 

@@ -542,7 +542,7 @@ Export('serial_run')
 Export('use_papi')
 
 SConscript('src/SConscript')
-SConscript('test/SConscript')
+SConscript('test/SConscript',variant_dir='test/' + type)
 
 # Build tarball
 
