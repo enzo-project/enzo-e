@@ -118,104 +118,104 @@ Clean(env.RunSerial
       ('test_TreeK-D2-R2-L6.unit', 
        bin_path + '/test_TreeK',
        ARGS='2 2 6 input/Enzo-P-2048.png'),
-      Glob('../TreeK-D=2-R=2-L=6*png'))
+      Glob('#/TreeK-D=2-R=2-L=6*png'))
 Clean(env.RunSerial
       ('test_TreeK-D2-R2-L7.unit', 
        bin_path + '/test_TreeK',
        ARGS='2 2 7 input/Enzo-P-2048.png'),
-      Glob('../TreeK-D=2-R=2-L=7*png'))
+      Glob('#/TreeK-D=2-R=2-L=7*png'))
 Clean(env.RunSerial
       ('test_TreeK-D2-R2-L8.unit',
        bin_path + '/test_TreeK',
        ARGS='2 2 8 input/Enzo-P-2048.png'),
-      Glob('../TreeK-D=2-R=2-L=8*png'))
+      Glob('#/TreeK-D=2-R=2-L=8*png'))
 # Clean(env.RunSerial
 #       ('test_TreeK-D2-R2-L9.unit',
 #        bin_path + '/test_TreeK',
 #        ARGS='2 2 9 input/Enzo-P-2048.png'),
-#       Glob('../TreeK-D=2-R=2-L=9*png'))
+#       Glob('#/TreeK-D=2-R=2-L=9*png'))
 # Clean(env.RunSerial
 #       ('test_TreeK-D2-R2-L10.unit',
 #        bin_path + '/test_TreeK',
 #        ARGS='2 2 10 input/Enzo-P-2048.png'),
-#       Glob('../TreeK-D=2-R=2-L=10*png'))
+#       Glob('#/TreeK-D=2-R=2-L=10*png'))
 
 Clean(env.RunSerial
       ('test_TreeK-D2-R4-L6.unit',
        bin_path + '/test_TreeK',
        ARGS='2 4 6 input/Enzo-P-2048.png'),
-      Glob('../TreeK-D=2-R=4-L=6*png'))
+      Glob('#/TreeK-D=2-R=4-L=6*png'))
 Clean(env.RunSerial
       ('test_TreeK-D2-R4-L8.unit',
        bin_path + '/test_TreeK',
        ARGS='2 4 8 input/Enzo-P-2048.png'),
-      Glob('../TreeK-D=2-R=4-L=8*png'))
+      Glob('#/TreeK-D=2-R=4-L=8*png'))
 # Clean(env.RunSerial
 #       ('test_TreeK-D2-R4-L10.unit',
 #        bin_path + '/test_TreeK',
 #        ARGS='2 4 10 input/Enzo-P-2048.png'),
-#       Glob('../TreeK-D=2-R=4-L=10*png'))
+#       Glob('#/TreeK-D=2-R=4-L=10*png'))
 
 Clean(env.RunSerial
       ('test_TreeK-D3-R2-L4.unit',
        bin_path + '/test_TreeK',
        ARGS='3 2 4'),
-      Glob('../TreeK-D=3-R=2-L=4*png'))
+      Glob('#/TreeK-D=3-R=2-L=4*png'))
 Clean(env.RunSerial
       ('test_TreeK-D3-R2-L5.unit',
        bin_path + '/test_TreeK', ARGS='3 2 5'),
-      Glob('../TreeK-D=3-R=2-L=5*png'))
+      Glob('#/TreeK-D=3-R=2-L=5*png'))
 Clean(env.RunSerial
       ('test_TreeK-D3-R2-L6.unit',
        bin_path + '/test_TreeK', ARGS='3 2 6'),
-      Glob('../TreeK-D=3-R=2-L=6*png'))
+      Glob('#/TreeK-D=3-R=2-L=6*png'))
 # Clean(env.RunSerial
 #       ('test_TreeK-D3-R2-L7.unit',
 #        bin_path + '/test_TreeK', ARGS='3 2 7'),
-#       Glob('../TreeK-D=3-R=2-L=7*png'))
+#       Glob('#/TreeK-D=3-R=2-L=7*png'))
 # Clean(env.RunSerial
 #       ('test_TreeK-D3-R2-L8.unit',
 #        bin_path + '/test_TreeK', ARGS='3 2 8'),
-#       Glob('../TreeK-D=3-R=2-L=8*png'))
+#       Glob('#/TreeK-D=3-R=2-L=8*png'))
 
 Clean(env.RunSerial
       ('test_TreeK-D3-R4-L4.unit',
        bin_path + '/test_TreeK', ARGS='3 4 4'),
-      Glob('../TreeK-D=3-R=4-L=4*png'))
+      Glob('#/TreeK-D=3-R=4-L=4*png'))
 Clean(env.RunSerial
       ('test_TreeK-D3-R4-L6.unit',
        bin_path + '/test_TreeK', ARGS='3 4 6'),
-      Glob('../TreeK-D=3-R=4-L=6*png'))
+      Glob('#/TreeK-D=3-R=4-L=6*png'))
 # Clean(env.RunSerial	
 #       ('test_TreeK-D3-R4-L8.unit',
 #        bin_path + '/test_TreeK', ARGS='3 4 8'),
-#       Glob('../TreeK-D=3-R=4-L=8*png'))
+#       Glob('#/TreeK-D=3-R=4-L=8*png'))
 
 # Clean(env.RunSerial
 #       ('test_ppml_implosion.unit',
 #        bin_path + '/test_ppml', ARGS='ppml-implosion3  20 10 10'),
-#       Glob('../*-ppml-implosion3-*png'))
+#       Glob('#/*-ppml-implosion3-*png'))
 # Clean(env.RunSerial
 #       ('test_ppml_blast.unit',
 #        bin_path + '/test_ppml', ARGS='ppml-blast       20 10 10'),
-#       Glob('../*-ppml-blast-*png'))
+#       Glob('#/*-ppml-blast-*png'))
 # Clean(env.RunSerial
 #       ('test_ppm_image.unit',
 #        bin_path + '/test_ppm', ARGS='ppm-image       100 30 10'),
-#       Glob('../*-ppm-image-*png'))
+#       Glob('#/*-ppm-image-*png'))
 # Clean(env.RunSerial
 #       ('test_ppm_implosion.unit',
 #        bin_path + '/test_ppm', ARGS='ppm-implosion   64 10 10'),
-#       Glob('../*-ppm-implosion-*png'))
+#       Glob('#/*-ppm-implosion-*png'))
 # Clean(env.RunSerial
 #       ('test_ppm_implosion3.unit',
 #        bin_path + '/test_ppm', ARGS='ppm-implosion3   24 10 10'),
-#       Glob('../*-ppm-implosion3-*png'))
+#       Glob('#/*-ppm-implosion3-*png'))
 
 Clean(env.RunSerial
       ('test_Monitor.unit',
        bin_path + '/test_Monitor'),
-      Glob('../monitor_image_*png'))
+      Glob('#/monitor_image_*png'))
 
 #----------------------------------------------------------------------
 # TEST INPUT PARAMETER PARSER
@@ -237,12 +237,12 @@ env.RunParse('test_parse_shock-pool.unit', bin_path + '/test_Parse', ARGS='input
 Clean(env.RunParallel ('test_enzo-p_1.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/test_enzo-p_1.in'),
-      [Glob('../enzo-p_1-??????-*.png'),'test_enzo-p_1.unit'])
+      [Glob('#/enzo-p_1-??????-*.png'),'test_enzo-p_1.unit'])
 
 Clean(env.RunParallel ('test_enzo-p_2.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/test_enzo-p_2.in'),
-      [Glob('../enzo-p_2-??????-*.png'),'test_enzo-p_2.unit'])
+      [Glob('#/enzo-p_2-??????-*.png'),'test_enzo-p_2.unit'])
 
 
 if (type == "serial"):
