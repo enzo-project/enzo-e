@@ -286,9 +286,9 @@ function test_summary($component,$test_output,$executables)
   printf ("</tr>\n");
 }
 
-printf ("<a href=out.scons.serial>SERIAL</a></br/>\n");
-printf ("<a href=out.scons.mpi>   MPI</a></br/>\n");
-printf ("<a href=out.scons.charm> CHARM</a></br/>\n");
+printf ("<a href=test/serial/out.scons>SERIAL</a></br/>\n");
+printf ("<a href=test/mpi/out.scons>   MPI</a></br/>\n");
+printf ("<a href=test/charm/out.scons> CHARM</a></br/>\n");
 
 printf ("<table>\n");
 printf ("<tr>\n");

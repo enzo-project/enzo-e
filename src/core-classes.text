@@ -1,0 +1,338 @@
+========================================================================
+Simulation
+========================================================================
+
+  Simulation
+  ( const char *       parameter_file,
+#ifdef CONFIG_USE_CHARM
+    int                n,
+    const Factory &    factory,
+    CProxy_BlockReduce proxy_block_reduce, 
+#else
+    const Factory &    factory,
+    GroupProcess *     group_process = 0,
+#endif
+    int                index = 0
+  ) throw();
+  virtual ~Simulation() throw();
+  int dimension() const throw();
+  Mesh * mesh() const throw();
+  FieldDescr * field_descr() const throw();
+  Performance * performance() const throw();
+  Monitor * monitor() const throw();
+  Stopping *  stopping() const throw();
+  Timestep * timestep() const throw();
+  Initial *  initial() const throw();
+  Boundary * boundary() const throw();
+  size_t num_output() const throw();
+  Output * output(int i) const throw();
+  size_t num_method() const throw();
+  Method * method(int i) const throw();
+  const Factory * factory () const throw();
+  int cycle() const throw();
+  double time() const throw();
+  double dt() const throw();
+  bool stop() const throw();
+  size_t index() const throw();
+  void update_cycle(int cycle, int time, double dt, double stop);
+  bool temp_update_all() const throw();
+  bool temp_update_full() const throw();
+  virtual void initialize() throw();
+  virtual void finalize() throw();
+  virtual void run() throw();
+  virtual void read() throw();
+  virtual void write() const throw();
+#ifdef CONFIG_USE_CHARM
+  Simulation();
+  Simulation (CkMigrateMessage *m);
+  void p_output (int cycle, double time, double dt, bool stopping) throw();
+  void refresh () throw();
+  void p_done (CkReductionMsg * m)
+  void output_first() throw();
+  void output_next() throw();
+  void p_output_reduce() throw();
+  void p_output_write (int n, char * buffer) throw();
+  CProxy_BlockReduce proxy_block_reduce() 
+#endif
+--------------------------------------------------
+  Parameters * parameters_;
+  const Factory * factory_; 
+  GroupProcess * group_process_;
+  int  dimension_; 
+  int cycle_;
+  double time_;
+  double dt_;
+  bool stop_;
+  bool temp_update_all_;
+  bool temp_update_full_;
+  size_t index_;
+  Performance * performance_;
+  Monitor * monitor_;
+  Mesh * mesh_;
+  FieldDescr * field_descr_;
+  Stopping * stopping_;
+  Timestep * timestep_;
+  Initial * initial_;
+  Boundary * boundary_;
+  std::vector<Output *> output_list_;
+  std::vector<Method *> method_list_;
+#ifdef CONFIG_USE_CHARM
+  CProxy_BlockReduce  proxy_block_reduce_;
+  size_t index_output_;
+#endif
+
+========================================================================
+Mesh
+========================================================================
+
+  Mesh(const Factory * factory,
+       int nx,  int ny,  int nz,
+       int nbx, int nby, int nbz);
+  virtual ~Mesh() throw ();
+  void set_lower(double nx, double ny, double nz) throw ();
+  void set_upper(double nx, double ny, double nz) throw ();
+  int dimension() const throw ();
+  void lower(double * nx, double * ny = 0, double * nz = 0) const throw ();
+  void upper(double * nx, double * ny = 0, double * nz = 0) const throw ();
+  size_t num_patches() const throw();
+  Patch * patch(size_t i) throw();
+  Patch * patch(size_t i) const throw();
+  virtual void insert_patch(Patch *) throw();
+  void create_root_patch (Parameters * parameters,
+			  GroupProcess * group_process) throw();
+  const Factory * factory () const throw();
+--------------------------------------------------
+  const Factory * factory_;
+  std::vector<Patch *> patch_list_;
+  TreeK * tree_;
+  double lower_[3];
+  double upper_[3];
+
+========================================================================
+Patch
+========================================================================
+
+  Patch(const Factory * factory,
+	GroupProcess * group_process,
+	int nx,   int ny,  int nz,
+	int nbx,  int nby, int nbz,
+	double xm, double ym, double zm,
+	double xp, double yp, double zp) throw();
+  virtual ~Patch() throw();
+  void size (int * nx, int * ny=0, int * nz=0) const throw();
+  void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
+  Layout * layout () const throw();
+  void lower(double * x, double * y=0, double * z=0) const throw ();
+  void upper(double * x, double * y=0, double * z=0) const throw ();
+  GroupProcess * group()  const throw();
+  void allocate_blocks(FieldDescr * field_descr) throw();
+  bool blocks_allocated() throw()
+  size_t num_blocks(int * nbx = 0, 
+		    int * nby = 0,
+		    int * nbz = 0) const throw()
+  void deallocate_blocks() throw();
+#ifdef CONFIG_USE_CHARM
+  CProxy_Block block_array() throw()
+#else
+  size_t num_local_blocks() const throw();
+  Block * local_block(size_t i) const throw();
+#endif
+--------------------------------------------------
+  const Factory * factory_;
+  GroupProcess * group_process_;
+  Layout * layout_;
+  int size_[3];
+  int blocking_[3];
+  double lower_[3];
+  double upper_[3];
+#ifdef CONFIG_USE_CHARM
+  CProxy_Block block_array_;
+  bool         block_exists_;
+#else
+  std::vector<Block * > block_;
+#endif
+
+========================================================================
+Block
+========================================================================
+
+  Block
+  (int ibx, int iby, int ibz,
+   int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   double xmp, double ymp, double zmp,
+   double xb, double yb, double zb,
+   int num_field_blocks) throw();
+  virtual ~Block() throw();
+  Block(const Block & block) throw();
+  Block & operator= (const Block & block) throw();
+  const FieldBlock * field_block (int i=0) const throw();
+  FieldBlock * field_block (int i=0) throw();
+  void lower(double * x = 0, double * y = 0, double * z = 0) const throw ();
+  void upper(double * x = 0,  double * y = 0, double * z = 0) const throw ();
+  void index_patch (int * ix, int * iy, int * iz) const throw();
+  void size_patch (int * nx, int * ny, int * nz) const throw();
+  Block * neighbor (axis_enum axis, face_enum face) const throw();
+  void refresh_ghosts(const FieldDescr * field_descr,
+                      int index_field_set = 0) throw();
+  int cycle() const throw();
+  double time() const throw();
+  virtual void initialize (int cycle_start, double time_start) throw();
+#ifdef CONFIG_USE_CHARM
+  Block
+  (int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   double xmp, double ymp, double zmp,
+   double xb, double yb, double zb,
+   int num_field_blocks) throw();
+  Block();
+  Block (CkMigrateMessage *m);
+  void p_initial();
+  void p_compute(double dt, int axis_set);
+  void p_refresh(double dt, int axis_set);
+  void p_refresh_face(int n, char buffer[], int axis, int face, int axis_set);
+  void p_output (int index_output);
+  void skip_reduce(int cycle, int time, double dt_block, double stop_block);
+  void prepare();
+  void refresh(int axis_set);
+  void compute(int axis_set);
+  void refresh_axis(axis_enum axis);
+#endif
+--------------------------------------------------
+  std::vector<FieldBlock *> field_block_;
+  int index_[3];
+  int size_[3];
+  double lower_[3];
+  double upper_[3];
+  int cycle_;
+  double time_;
+  double dt_;
+#ifdef CONFIG_USE_CHARM
+  int count_refresh_face_;
+  int count_refresh_face_x_;
+  int count_refresh_face_y_;
+  int count_refresh_face_z_;
+#endif
+
+========================================================================
+EnzoBlock
+========================================================================
+
+  EnzoBlock
+  (
+   int ix, int iy, int iz,
+   int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   double xm, double ym, double zm,
+   double hx, double hy, double hz,
+   int num_field_blocks) throw();
+
+#ifdef CONFIG_USE_CHARM
+  EnzoBlock (CkMigrateMessage *m) {};
+  EnzoBlock
+  (
+   int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   double xm, double ym, double zm,
+   double hx, double hy, double hz,
+   int num_field_blocks) throw();
+#endif
+  virtual ~EnzoBlock() throw();
+  void write(FILE *fp=stdout) throw ();
+  double Time() { Time_ = time_; return Time_; };
+  // ENZO
+  enzo_float ComputeTimeStep();
+  enzo_float sum_field (int field);
+  int ComputeGammaField(enzo_float *GammaField);
+  int ComputePressureDualEnergyFormalism(enzo_float time, enzo_float *pressure);
+  int ComputePressure(enzo_float time, enzo_float *pressure);
+  int ComputeTemperatureField(enzo_float *temperature);
+  int CosmologyComputeExpansionFactor(enzo_float time, enzo_float *a, enzo_float *dadt);
+  int CosmologyComputeExpansionTimestep(enzo_float time, enzo_float *dtExpansion);
+  int CosmologyGetUnits(enzo_float *DensityUnits, enzo_float *LengthUnits, enzo_float *TemperatureUnits, enzo_float *TimeUnits, enzo_float *VelocityUnits, enzo_float Time);
+  int FindField(int field, int farray[], int numfields);
+  int IdentifyPhysicalQuantities(int &DensNum, int &GENum, int &Vel1Num, int &Vel2Num, int &Vel3Num, int &TENum);
+  int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum, int &HeINum, int &HeIINum, int &HeIIINum, int &HMNum, int &H2INum, int &H2IINum, int &DINum, int &DIINum, int &HDINum);
+  int SetExternalBoundaryValues();
+  int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient);
+  int SolveHydroEquations ( int CycleNumber, enzo_float dt);
+  void print_field (int field);
+  int SetExternalBoundary(int FieldRank, int GridDims[], int GridOffset[], int StartIndex[], int EndIndex[], enzo_float *Field, int FieldType);
+  void image_dump(const char * file_root, int cycle, double lower, double upper);
+  void initialize_hydro ();
+  void initialize_image ();
+  void initialize_implosion3 (int size_param);
+  void initialize_implosion (int size_param);
+  void initialize_ppml_implosion3 (int size_param);
+  int SolveMHDEquations( int cycle, enzo_float dt);
+  void initialize_ppml (int size_param);
+  void initialize (int cycle_start, double time_start) throw();
+--------------------------------------------------
+  enzo_float Time_;
+  int CycleNumber;
+  enzo_float OldTime;
+  enzo_float dt;
+  enzo_float *AccelerationField[MAX_DIMENSION]; 
+  fluxes ** SubgridFluxes;
+  enzo_float GridLeftEdge[MAX_DIMENSION]; 
+  int GridDimension[MAX_DIMENSION]; 
+  int GridStartIndex[MAX_DIMENSION]; 
+  int GridEndIndex[MAX_DIMENSION]; 
+  enzo_float CellWidth[MAX_DIMENSION];
+  enzo_float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; 
+  enzo_float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; 
+
+========================================================================
+FieldBlock
+========================================================================
+
+  FieldBlock(int nx=0, int ny=1, int nz=1) throw();
+  ~FieldBlock() throw();
+  FieldBlock(const FieldBlock & field_block) throw ();
+  FieldBlock & operator= (const FieldBlock & field_block) throw ();
+  void size(int * nx, int * ny, int * nz) const throw();
+  char * field_values (int id_field) throw (std::out_of_range);
+  const char * field_values (int id_field) const throw (std::out_of_range);
+  char * field_unknowns ( const FieldDescr * field_descr,
+			  int id_field) throw (std::out_of_range);
+  const char * field_unknowns ( const FieldDescr * field_descr,
+				int id_field) const throw (std::out_of_range);
+  const char * array ()  const throw () 
+  { return array_; };
+  void cell_width(Block * block,
+		  double * hx, double * hy, double * hz) const throw ();
+  void clear ( const FieldDescr * field_descr,
+	       float value = 0.0, 
+	       int id_field_first = -1, 
+	       int id_field_last  = -1) throw();
+  bool array_allocated() const throw();
+  void allocate_array(const FieldDescr * field_descr) throw();
+  void deallocate_array() throw();
+  bool ghosts_allocated() const throw ();
+  void allocate_ghosts(const FieldDescr * field_descr) throw ();
+  void deallocate_ghosts(const FieldDescr * field_descr) throw ();
+  void refresh_ghosts(const FieldDescr * field_descr) throw();
+  void split(bool split_x, bool split_y, bool split_z, 
+	     FieldBlock ** field_blocks) throw ();
+  FieldBlock * merge(bool merge_x, bool merge_y, bool merge_z, 
+		     FieldBlock ** field_blocks) throw ();
+  void set_field_values (int id_field, char * values) throw();
+  int field_size (const FieldDescr * field_descr, int id_field, 
+		  int *nx, int *ny, int *nz) const throw();
+  void print (const FieldDescr * field_descr,
+	      const char * message,
+	      double lower[3], double upper[3]) const throw();
+  void image (const FieldDescr * field_descr,
+	      const char * prefix,
+	      int cycle, int ibx, int iby, int ibz) const throw();
+  void open  (File * file, const char * mode) const throw();
+  void close (File * file) const throw();
+  void read (File * file, file_content_type file_content) throw ();
+  void write(File * file, file_content_type file_content) const throw ();
+--------------------------------------------------
+  int size_[3];
+  char * array_;
+  std::vector<char *> field_values_;
+  bool ghosts_allocated_;
+
+
