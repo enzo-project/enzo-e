@@ -64,13 +64,7 @@ public: // interface
 private: // functions
 
   /// Convert the scalar type to HDF5 datatype
-  int type_(enum scalar_type type) throw();
-
-  /// Open the dataset
-  void data_open_() throw();
-
-  /// Close the dataset
-  void data_close_() throw();
+  int hdf5_type_(enum scalar_type type) throw();
 
 private: // attributes
 

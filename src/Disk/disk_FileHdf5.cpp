@@ -9,6 +9,7 @@
 
 #include "disk.hpp"
  
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //----------------------------------------------------------------------
 
 FileHdf5::FileHdf5
@@ -60,15 +61,15 @@ void FileHdf5::open () throw()
     if (mode_ == "r") {
 
       file_id_ = H5Fopen(full_name.c_str(), 
-		      H5F_ACC_RDONLY, 
-		      H5P_DEFAULT);
+			 H5F_ACC_RDONLY, 
+			 H5P_DEFAULT);
 
     } else if (mode_ == "w") {
 
       file_id_ = H5Fcreate(full_name.c_str(), 
-			H5F_ACC_TRUNC, 
-			H5P_DEFAULT, 
-			H5P_DEFAULT);
+			   H5F_ACC_TRUNC, 
+			   H5P_DEFAULT, 
+			   H5P_DEFAULT);
 
     } else {
 
@@ -143,6 +144,90 @@ void FileHdf5::close () throw()
 
 //----------------------------------------------------------------------
 
+void FileHdf5::data_get
+(
+ std::string name, 
+ enum scalar_type * type, 
+ int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+{
+  // Error checking
+
+  if (! is_file_open_) {
+    char error_message[ERROR_LENGTH];
+    sprintf (error_message,
+	     "Trying to read from unopened file %s",
+	     (path_ + name_).c_str());
+    ERROR("FileHdf5::data_read",error_message);
+  }
+
+  data_name_ = name;
+
+  // Open the data set
+  
+  data_set_id_ = H5Dopen( file_id_, name.c_str());
+  is_data_open_ = true;
+
+  // Get dataset size
+
+  data_space_id_ = H5Dget_space (data_set_id_);
+
+  // get rank
+
+  int rank = H5Sget_simple_extent_ndims(data_space_id_);
+
+  if (rank > 5) {
+    char error_message[ERROR_LENGTH];
+    sprintf (error_message, 
+	     "Dataset %s in file %s has unsupported rank %d",
+	     name.c_str(),name_.c_str(),rank);
+    ERROR("FileHdf5::data_get",error_message);
+  }
+
+  // get extents
+
+  hsize_t n[5];
+  H5Sget_simple_extent_dims(data_space_id_,n,0);
+
+  // set output parameters
+
+  if (type) {
+
+    hid_t hdf5_type = H5Dget_type (data_set_id_);
+
+    H5T_class_t hdf5_class = H5Tget_class(hdf5_type);
+    size_t      hdf5_size  = H5Tget_size(hdf5_type);
+
+    if (hdf5_class == H5T_INTEGER && hdf5_size == sizeof(char)) {
+      (*type) = scalar_type_char;
+    } else if (hdf5_class == H5T_INTEGER && hdf5_size == sizeof(int)) {
+      (*type) = scalar_type_int;
+    } else if (hdf5_class == H5T_INTEGER && hdf5_size == sizeof(long)) {
+      (*type) = scalar_type_long;
+    } else if (hdf5_class == H5T_FLOAT && hdf5_size == sizeof(float)) {
+      (*type) = scalar_type_float;
+    } else if (hdf5_class == H5T_FLOAT && hdf5_size == sizeof(double)) {
+      (*type) = scalar_type_double;
+    } else {
+      char error_message[ERROR_LENGTH];
+      sprintf (error_message, 
+	       "Unknown type of class %d and size %d",
+	       hdf5_class, hdf5_size);
+      ERROR("FileHdf5::data_get",error_message);
+    }
+  }
+
+  data_type_ = (*type);
+
+  if (n0) (*n0) = n[0];
+  if (n1) (*n1) = n[1];
+  if (n2) (*n2) = n[2];
+  if (n3) (*n3) = n[3];
+  if (n4) (*n4) = n[4];
+
+}
+
+//----------------------------------------------------------------------
+
 void FileHdf5::data_set
 (
  std::string      name,
@@ -150,7 +235,11 @@ void FileHdf5::data_set
  int n0,  int n1,  int n2, int n3, int n4
  ) throw()
 {
-  if (is_data_open_) data_close_();
+  // Close the previous data set if its open
+  if (is_data_open_) {
+    H5Dclose( data_set_id_);
+    is_data_open_ = false;
+  }
 
   if (mode_ != "w") {
 
@@ -164,6 +253,7 @@ void FileHdf5::data_set
     // ASSUMES ( n[j] == 0 ) implies ( n[i] == 0 for i<j )
 
     data_name_ = name;
+    data_type_ = type;
 
     data_rank_ = 5;
 
@@ -185,39 +275,30 @@ void FileHdf5::data_set
     data_space_id_ = H5Screate_simple (data_rank_, data_size_, NULL);
     
     // Create the dataset
+    printf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout);
     data_set_id_ = H5Dcreate( file_id_, 
-			      data_name_.c_str(), 
-			      type_(type), 
+			      name.c_str(), 
+			      hdf5_type_(type), 
 			      data_space_id_,  
 			      H5P_DEFAULT );
+    printf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout);
 
     if (data_set_id_ < 0) {
-
-     
-    } else {
 
       char warning_message[ERROR_LENGTH];
       sprintf (warning_message,
 	       "Return value %d opening dataset %s",
-	       data_set_id_,data_name_.c_str());
+	       data_set_id_,name.c_str());
       WARNING("FileHdf5::data_set",warning_message);
     }
   }
 
-  data_open_();
-}
+  // Open the data set
 
-//----------------------------------------------------------------------
+  data_set_id_ = H5Dopen( file_id_, name.c_str());
 
-void FileHdf5::data_get
-(
- std::string name, 
- enum scalar_type * type, 
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
-{
-  // is file open?
-  // is data open?
-  // return data size
+  data_type_ = type;
+  is_data_open_ = true;
 }
 
 //----------------------------------------------------------------------
@@ -225,31 +306,70 @@ void FileHdf5::data_get
 void FileHdf5::data_read (void * buffer) throw()
 {
   if (! is_file_open_) {
-      char error_message[ERROR_LENGTH];
-      sprintf (error_message,
-	       "Trying to read from unopened file %s",
-	       (path_ + name_).c_str());
-      ERROR("FileHdf5::data_read",error_message);
+    char error_message[ERROR_LENGTH];
+    sprintf (error_message,
+	     "Trying to read from unopened file %s",
+	     (path_ + name_).c_str());
+    ERROR("FileHdf5::data_read",error_message);
   }
+
   if (! is_data_open_) {
+    char error_message[ERROR_LENGTH];
+    sprintf (error_message,
+	     "Trying to read unopened dataset %s",
+	     data_name_.c_str());
+    ERROR("FileHdf5::data_read",error_message);
   }
-  // is file open?
-  // is data open?
-  // read data
+
+  H5Dread (data_set_id_, 
+ 	   hdf5_type_(data_type_), 
+ 	   data_space_id_, 
+ 	   H5S_ALL, 
+ 	   H5P_DEFAULT, 
+ 	   buffer);
 }
 
 //----------------------------------------------------------------------
 
 void FileHdf5::data_write (const void * buffer) throw()
 {
+  if (! is_file_open_) {
+    char error_message[ERROR_LENGTH];
+    sprintf (error_message,
+	     "Trying to write to unopened file %s",
+	     (path_ + name_).c_str());
+    ERROR("FileHdf5::data_write",error_message);
+  }
+
+  if (! is_data_open_) {
+    char error_message[ERROR_LENGTH];
+    sprintf (error_message,
+	     "Trying to write unopened dataset %s",
+	     data_name_.c_str());
+    ERROR("FileHdf5::data_write",error_message);
+  }
+
   // is file open?
   // is data open?
   // write data
+  H5Dwrite (data_set_id_, 
+   	    hdf5_type_(data_type_), 
+   	    data_space_id_, 
+   	    H5S_ALL, 
+   	    H5P_DEFAULT, 
+   	    buffer);
+
+  // hid_t dataset_id, 
+  //   hid_t mem_type_id, 
+  //   hid_t mem_space_id, 
+  //   hid_t file_space_id, 
+  //   hid_t xfer_plist_id, 
+  //   const void * buf ) 
 }
 
 //======================================================================
 
-int FileHdf5::type_(enum scalar_type type) throw()
+int FileHdf5::hdf5_type_(enum scalar_type type) throw()
 {
   // (*) NATIVE    -   FLOAT DOUBLE LDOUBLE
   // ( ) IEEE      -   F32BE F64BE     -
@@ -265,107 +385,48 @@ int FileHdf5::type_(enum scalar_type type) throw()
   //               H5T_STD_I64BE or H5T_STD_I64LE
   // long long:    H5T_NATIVE_LLONG   H5T_STD_I64BE or H5T_STD_I64LE
 
+  hid_t hdf5_type;
   switch (type) {
   case scalar_type_unknown:
     ERROR("FileHdf5::type_",
 	  "scalar_type_unknown not implemented");
-    return 0;
+    hdf5_type = 0;
     break;
   case scalar_type_float:
-    return H5T_NATIVE_FLOAT;
+    hdf5_type = H5T_NATIVE_FLOAT;
+    //  H5T_IEEE_F32BE 
+    //  H5T_IEEE_F32LE  
     break;
   case scalar_type_double:
-    return H5T_NATIVE_DOUBLE;
+    hdf5_type = H5T_NATIVE_DOUBLE;
+    //  H5T_IEEE_F64BE
+    //  H5T_IEEE_F64LE  
     break;
   case scalar_type_long_double:
-    return H5T_NATIVE_LDOUBLE;
+    ERROR("FileHdf5::type_",
+	  "long double not supported");
+    hdf5_type = 0;
     break;
   case scalar_type_char:
-    return H5T_NATIVE_CHAR;
+    hdf5_type = H5T_NATIVE_CHAR;
+    //  H5T_STD_I8BE
+    //  H5T_STD_I8LE
     break;
-  scalar_type_int:
-    return H5T_NATIVE_INT;
+  case scalar_type_int:
+    hdf5_type = H5T_NATIVE_INT;
+    //  H5T_STD_I32BE 
+    //  H5T_STD_I32LE
     break;
-  scalar_type_long_int:
-    return H5T_NATIVE_LINT;
+  case scalar_type_long:
+    //  H5T_STD_I64BE
+    //  H5T_STD_I64LE
+    hdf5_type = H5T_NATIVE_LONG;
+    break;
+  default:
     break;
   }
-}
-
-//----------------------------------------------------------------------
-
-void FileHdf5::data_open_() throw()
-{
-}
-
-//----------------------------------------------------------------------
-
-void FileHdf5::data_close_() throw()
-{
-}
-
-
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-void FileHdf5::open_data
-(
- std::string data, 
- int *       nx,
- int *       ny,
- int *       nz
- ) throw()
-/**
- */
-{
-  if (mode_ != "r") {
-
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message, "Expecting data_set_id_open_write()");
-    ERROR("FileHdf5::open_dataset",error_message);
-
-  } else {
-
-    int d;        // Dataset dimension
-    hsize_t n[3]; // Dataset size
-
-    if (mode_ == "r") {
-
-      // Open the dataset for reading
-
-      // Open the dataset
-      data_set_id_ = H5Dopen( file_id_, data.c_str());
-      // Get the size of dataset
-      data_space_id_ = H5Dget_space (data_set_id_);
-      d = H5Sget_simple_extent_ndims(data_space_id_);
-      if (d > 3) {
-	char error_message[ERROR_LENGTH];
-	sprintf (error_message, "Dataset has too many dimensions %d",d);
-	ERROR("FileHdf5::open_dataset",error_message);
-      }
-
-      H5Sget_simple_extent_dims(data_space_id_,n,0);
-
-      // Set the array size accordingly
-    
-      *nx = n[0];
-      *ny = (d > 1) ? n[1] : 1;
-      *nz = (d > 2) ? n[2] : 1;
-
-    }
-
-    if (data_set_id_ >= 0) {
-
-      data_name_ = data;
-      
-    } else {
-
-      char warning_message[ERROR_LENGTH];
-      sprintf (warning_message,
-	       "Return value %d opening dataset %s",
-	       data_set_id_,data.c_str());
-      WARNING("FileHdf5::open_dataset",warning_message);
-    }
-  }
+  printf ("%d %d\n",type,hdf5_type);
+  return hdf5_type;
 }
 
 //----------------------------------------------------------------------
@@ -378,39 +439,5 @@ void FileHdf5::open_data
 //     (data_space_id_, H5S_SELECT_SET,  offset, NULL, count, NULL);
 // }
 
-//----------------------------------------------------------------------
-
-void FileHdf5::close_data () throw()
-{ H5Dclose( data_set_id_); }
-
-//----------------------------------------------------------------------
-
-void FileHdf5::read  (char              * buffer,
-		      enum precision_enum precision) throw()
-/// @param buffer     Pointer to data buffer
-/// @param precision  Precision of values in data buffer
-{
-  H5Dread (data_set_id_, 
-	   type_(precision), 
-	   data_space_id_, 
-	   H5S_ALL, 
-	   H5P_DEFAULT, 
-	   buffer);
-}
-
-//----------------------------------------------------------------------
-
-void FileHdf5::write (const char        * buffer,
-		      enum precision_enum precision) throw()
-/**
- */
-{
-  H5Dwrite (data_set_id_, 
-	    type_(precision), 
-	    data_space_id_, 
-	    H5S_ALL, 
-	    H5P_DEFAULT, 
-	    buffer);
-}
 
 

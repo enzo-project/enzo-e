@@ -3,7 +3,6 @@
 /// @file     test_FileHdf5.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:47:35 PST 2008
-/// @todo     Multiple datasets with different precisions
 /// @brief    Program implementing unit tests for the FileHdf5 class
  
 #include "main.hpp" 
@@ -24,8 +23,18 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
   // Allocate arrays
-  int nx = 100;
-  int ny = 50;
+
+  int nx = 17;
+  int ny = 25;
+
+  char * a_char = new char[nx*ny];
+  char * b_char = new char[nx*ny];
+  int * a_int = new int[nx*ny];
+  int * b_int = new int[nx*ny];
+  long * a_long = new long[nx*ny];
+  long * b_long = new long[nx*ny];
+  float * a_float = new float[nx*ny];
+  float * b_float = new float[nx*ny];
   double * a_double = new double[nx*ny];
   double * b_double = new double[nx*ny];
 
@@ -34,98 +43,157 @@ PARALLEL_MAIN_BEGIN
   for (int iy=0; iy<ny; iy++) {
     for (int ix=0; ix<nx; ix++) {
       int i = ix + nx*(iy);
+      a_char[i]   = ix*3 + iy*5;
+      a_int[i]    = ix*3 + iy*5;
+      a_long[i]   = ix*3 + iy*5;
+      a_float[i]  = ix*3 + iy*5;
       a_double[i] = ix*3 + iy*5;
+
+      b_char[i]   = 0;
+      b_int[i]    = 0;
+      b_long[i]   = 0;
+      b_float[i]  = 0;
       b_double[i] = 0;
+
     }
   }
 
   //--------------------------------------------------
-  // Open a file for writing
+  // Open file A for writing
   //--------------------------------------------------
 
   unit_func("open");
 
-  int a_nx, a_ny, a_nz;
+  int a_nx = nx;
+  int a_ny = ny;
+  int a_nz = 1;
 
-  // Open a dataset
-  a_nx = nx;
-  a_ny = ny;
-  a_nz = 1;
+  FileHdf5 hdf5_a("./","test_disk.h5","w");
 
-  {
-    FileHdf5 hdf5("./","disk_double.h5","w");
+  hdf5_a.open();
 
-    hdf5.open();
+  hdf5_a.data_set   ("char",scalar_type_char, a_nx,a_ny,a_nz);
+  hdf5_a.data_write (a_char);
 
-    // Create 1D array of integers
-    hdf5.data_set ("double",scalar_double, a_nx,a_ny,a_nz);
+  hdf5_a.data_set   ("int",scalar_type_int, a_nx,a_ny,a_nz);
+  hdf5_a.data_write (a_int);
 
-    // Write the data
-    hdf5.data_write (a_double);
+  hdf5_a.data_set   ("long",scalar_type_long, a_nx,a_ny,a_nz);
+  hdf5_a.data_write (a_long);
 
-    // Close the file
-    hdf5.close();
-  }
+  hdf5_a.data_set   ("float",scalar_type_float, a_nx,a_ny,a_nz);
+  hdf5_a.data_write (a_float);
+
+  hdf5_a.data_set   ("double",scalar_type_double, a_nx,a_ny,a_nz);
+  hdf5_a.data_write (a_double);
+
+  hdf5_a.close();
 
   //--------------------------------------------------
   // Open a file for reading
   //--------------------------------------------------
 
-  {
-    FileHdf5 hdf5("./","disk_double.h5","r");
 
-    hdf5.open();
+  int b_nx;
+  int b_ny;
+  int b_nz;
+  scalar_type scalar_type;
 
-    // Get the dataset size and type
+  unit_func("data_get");
 
-    unit_func("data_get");
+  FileHdf5 hdf5_b("./","test_disk.h5","r");
 
-    scalar_type b_type;
-    int b_nx,b_ny,b_nz;
-    hdf5.data_get ("double",&b_type, &b_nx, &b_ny, &b_nz);
+  hdf5_b.open();
 
-    unit_assert (b_type == a_type);
-    unit_assert (b_nx == a_nx);
-    unit_assert (b_ny == a_ny);
-    unit_assert (b_nz == a_nz);
+  hdf5_b.data_get  ("double",&scalar_type, &b_nx,&b_ny,&b_nz);
+  unit_assert (a_nx == b_nx);
+  unit_assert (a_ny == b_ny);
+  unit_assert (a_nz == b_nz);
+  unit_assert (scalar_type == scalar_type_double);
+  hdf5_b.data_read (&b_double);
 
-    // Read the dataset
-    hdf5.read((char *)b,precision_double);
+    printf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout);
+  hdf5_b.data_get   ("float",&scalar_type, &b_nx,&b_ny,&b_nz);
+    printf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout);
+  unit_assert (a_nx == b_nx);
+  unit_assert (a_ny == b_ny);
+  unit_assert (a_nz == b_nz);
+  unit_assert (scalar_type == scalar_type_float);
+  hdf5_b.data_read (&b_float);
 
-    // Close the dataset
-    hdf5.close_data ();
+  hdf5_b.data_get   ("long",&scalar_type, &b_nx,&b_ny,&b_nz);
+  unit_assert (a_nx == b_nx);
+  unit_assert (a_ny == b_ny);
+  unit_assert (a_nz == b_nz);
+  unit_assert (scalar_type == scalar_type_long);
+  hdf5_b.data_read (b_long);
 
-    // Close the file
-    hdf5.close();
+  hdf5_b.data_get   ("int",&scalar_type, &b_nx,&b_ny,&b_nz);
+  unit_assert (a_nx == b_nx);
+  unit_assert (a_ny == b_ny);
+  unit_assert (a_nz == b_nz);
+  unit_assert (scalar_type == scalar_type_int);
+  hdf5_b.data_read (&b_int);
 
-  }
+  hdf5_b.data_get   ("char",&scalar_type, &b_nx,&b_ny,&b_nz);
+  unit_assert (a_nx == b_nx);
+  unit_assert (a_ny == b_ny);
+  unit_assert (a_nz == b_nz);
+  unit_assert (scalar_type == scalar_type_char);
+  hdf5_b.data_read (&b_char);
+
+  hdf5_b.close();
 
   //--------------------------------------------------
   // Compare data written to data read
   //--------------------------------------------------
 
-  bool passed = true;
+  bool p_char   = true;
+  bool p_int    = true;
+  bool p_long   = true;
+  bool p_float  = true;
+  bool p_double = true;
 
-  // Compare a with b
-  for (int iy=0; iy<ny && passed; iy++) {
-    for (int ix=0; ix<nx && passed; ix++) {
+  for (int iy=0; iy<ny ; iy++) {
+    for (int ix=0; ix<nx ; ix++) {
       int i = ix + nx*(iy);
-      if (a[i] != b[i]) passed = false;
+      if (a_char[i]   != b_char[i])   p_char   = false;
+      if (a_int[i]    != b_int[i])    p_int    = false;
+      if (a_long[i]   != b_long[i])   p_long   = false;
+      if (a_float[i]  != b_float[i])  p_float  = false;
+      if (a_double[i] != b_double[i]) p_double = false;
     }
   }
 
-  // Report test results
-  unit_func("read");
-  unit_assert(passed);
-  unit_func("write");
-  unit_assert(passed);
+  unit_func("read char");
+  unit_assert(p_char);
+
+  unit_func("read int");
+  unit_assert(p_int);
+
+  unit_func("read long");
+  unit_assert(p_long);
+
+  unit_func("read float");
+  unit_assert(p_float);
+
+  unit_func("read double");
+  unit_assert(p_double);
 
   //--------------------------------------------------
   // Finalize
   //--------------------------------------------------
 
-  delete [] a;
-  delete [] b;
+  delete [] a_char;
+  delete [] a_int;
+  delete [] a_long;
+  delete [] a_float;
+  delete [] a_double;
+  delete [] b_char;
+  delete [] b_int;
+  delete [] b_long;
+  delete [] b_float;
+  delete [] b_double;
 
   unit_finalize();
 
