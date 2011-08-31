@@ -270,6 +270,9 @@ protected: // attributes
   /// Parameters associated with this simulation
   Parameters * parameters_;
 
+  /// Parameter file name
+  std::string parameter_file_;
+
   /// Parallel group for the simulation
   GroupProcess * group_process_;
 

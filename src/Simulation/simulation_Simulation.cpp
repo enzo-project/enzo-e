@@ -27,6 +27,7 @@ Simulation::Simulation
 /// Initialize the Simulation object
   : factory_(0),
     parameters_(0),
+    parameter_file_(parameter_file),
 #ifndef CONFIG_USE_CHARM
     group_process_(group_process),
 #endif
@@ -92,9 +93,8 @@ void Simulation::initialize() throw()
   initialize_method_();
   initialize_parallel_();
 
-  
   char parameter_file[40];
-  snprintf (parameter_file,40,"cello-%d.%g.out",cycle_,time_);
+  snprintf (parameter_file,40,"%s.out",parameter_file_.c_str());
   parameters_->write(parameter_file);
 }
 

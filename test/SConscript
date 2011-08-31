@@ -3,6 +3,12 @@ Import('parallel_run')
 Import('type')
 Import('serial_run')
 
+# ? cello-0.0.out
+# ? out.png
+# ? test.in
+# ? test.out
+#  test/serial/SConscript
+
 # O test_FieldFace.cpp
 # O test_Mpi.cpp
 # O test_ParallelAffinity.cpp
@@ -49,8 +55,13 @@ type_path = type + '/'
 #----------------------------------------------------------------------
 # DISK COMPONENT          
 #----------------------------------------------------------------------
-env.RunSerial('test_FileHdf5.unit',    bin_path + '/test_FileHdf5')
-env.RunSerial('test_FileIfrit.unit',   bin_path + '/test_FileIfrit')
+Clean(env.RunSerial
+      ('test_FileHdf5.unit',  bin_path + '/test_FileHdf5'),
+      '#/test_disk.h5')
+
+Clean(env.RunSerial
+      ('test_FileIfrit.unit', bin_path + '/test_FileIfrit'),
+      '#/FileIfrit_test.bin')
 #----------------------------------------------------------------------
 # ENZO COMPONENT          
 #----------------------------------------------------------------------
@@ -87,7 +98,9 @@ env.RunSerial('test_Layout.unit',      bin_path + '/test_Layout')
 #----------------------------------------------------------------------
 # PARAMETERS COMPONENT    
 #----------------------------------------------------------------------
-env.RunSerial('test_Parameters.unit',  bin_path + '/test_Parameters')
+Clean(env.RunSerial
+      ('test_Parameters.unit',  bin_path + '/test_Parameters'),
+      ['#/test.in','#/test.out'])
 #----------------------------------------------------------------------
 # PARTICLE COMPONENT
 #----------------------------------------------------------------------
@@ -215,7 +228,7 @@ Clean(env.RunSerial
 Clean(env.RunSerial
       ('test_Monitor.unit',
        bin_path + '/test_Monitor'),
-      Glob('#/monitor_image_*png'))
+      Glob('#/out.png'))
 
 #----------------------------------------------------------------------
 # TEST INPUT PARAMETER PARSER
@@ -237,12 +250,16 @@ env.RunParse('test_parse_shock-pool.unit', bin_path + '/test_Parse', ARGS='input
 Clean(env.RunParallel ('test_enzo-p_1.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/test_enzo-p_1.in'),
-      [Glob('#/enzo-p_1-??????-*.png'),'test_enzo-p_1.unit'])
+      [Glob('#/enzo-p_1-??????-*.png'),
+       'test_enzo-p_1.unit',
+       '#/input/test_enzo-p_1.in.out'])
 
 Clean(env.RunParallel ('test_enzo-p_2.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/test_enzo-p_2.in'),
-      [Glob('#/enzo-p_2-??????-*.png'),'test_enzo-p_2.unit'])
+      [Glob('#/enzo-p_2-??????-*.png'),
+       'test_enzo-p_2.unit',
+       '#/input/test_enzo-p_2.in.out'])
 
 
 if (type == "serial"):
