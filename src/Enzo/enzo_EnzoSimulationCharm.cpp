@@ -19,9 +19,8 @@ EnzoSimulationCharm::EnzoSimulationCharm
 (
  const char         parameter_file[],
  int                n,
- CProxy_BlockReduce proxy_block_reduce, 
  int                index) throw ()
-  : EnzoSimulation(parameter_file, n, proxy_block_reduce,index)
+  : EnzoSimulation(parameter_file, n, index)
 {
 #ifdef CONFIG_USE_PROJECTIONS
   traceRegisterUserEvent("Compute",10);

@@ -18,7 +18,6 @@ Simulation::Simulation
  const char *   parameter_file,
 #ifdef CONFIG_USE_CHARM
  int n,
- CProxy_BlockReduce proxy_block_reduce,
 #else
  GroupProcess * group_process,
 #endif
@@ -47,13 +46,14 @@ Simulation::Simulation
     initial_(0),
     boundary_(0),
 #ifdef CONFIG_USE_CHARM
-    proxy_block_reduce_(proxy_block_reduce),
     index_output_(0),
 #endif
     output_list_(),
     method_list_()
 {
   performance_ = new Performance;
+  proxy_block_reduce_ = CProxy_BlockReduce::ckNew();
+
 #ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;
 #else
@@ -391,14 +391,14 @@ void Simulation::initialize_output_() throw()
 
   int num_file_groups = parameters_->list_length("file_groups");
 
-  for (int index_file_group=0; index_file_group < num_file_groups; index_file_group++) {
+  for (int index_group=0; index_group < num_file_groups; index_group++) {
 
     //--------------------------------------------------
     parameters_->group_set(0,"Output");
     //--------------------------------------------------
 
     std::string file_group = parameters_->list_value_string
-      (index_file_group,"file_groups","unknown");
+      (index_group,"file_groups","unknown");
 
     //--------------------------------------------------
     parameters_->group_set(1,file_group);
@@ -428,44 +428,56 @@ void Simulation::initialize_output_() throw()
       ERROR("Simulation::initialize_output_",buffer);
     }
 
-    // ASSUMES GROUP AND SUBGROUP ARE SET BY CALLER
-
+    //--------------------------------------------------
     // Initialize the file name
-
+    //--------------------------------------------------
 
     std::string file_name = "";
 
     if (parameters_->type("name") == parameter_string) {
 
       // CASE 1:  e.g. name = "filename";
+
       file_name = parameters_->value_string("name","");
 
      
     } else if (parameters_->type("name") == parameter_list) {
+
       // CASE 2:  e.g. name = ["filename-cycle-%0d.time-%5.3f", "cycle","time"]
 
       int list_length = parameters_->list_length("name");
+
       if (list_length > 0) {
+
 	file_name = parameters_->list_value_string(0,"name","");
+
 	// Add file variable string ("cycle", "time", etc.) to schedule
+
 	for (int index = 1; index<list_length; index++) {
 	  std::string file_var = parameters_->list_value_string(index,"name","");
 	  output->set_file_var(file_var,index-1);
 	}
+
       }
+
     } else {
+
       ERROR("Simulation::initialize_output_",
 	    "Bad type for Output 'name' parameter");
+
     }
 
-    // Error if name is unspecified
+    // Error if file name is unspecified
+
     ASSERT("Simulation::initialize_output_",
 	   "Output 'name' must be specified",
 	   file_name != "");
 
     output->set_file_name (file_name);
 
+    //--------------------------------------------------
     // Initialize the list of output fields
+    //--------------------------------------------------
 
     std::vector<int> field_list;
 
@@ -614,7 +626,7 @@ void Simulation::initialize_output_() throw()
 
     output_list_.push_back(output); 
 
-  } // (for index_file_group)
+  } // (for index_group)
 
 }
 

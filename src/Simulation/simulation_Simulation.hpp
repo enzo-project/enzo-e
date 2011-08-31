@@ -48,7 +48,6 @@ public: // interface
   ( const char *       parameter_file,
 #ifdef CONFIG_USE_CHARM
     int                n,
-    CProxy_BlockReduce proxy_block_reduce, 
 #else
     GroupProcess *     group_process = 0,
 #endif

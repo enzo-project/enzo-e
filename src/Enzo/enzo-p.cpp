@@ -60,7 +60,7 @@ PARALLEL_MAIN_BEGIN
     // Print usage if wrong number of arguments
     char buffer [ERROR_LENGTH];
     sprintf (buffer,
-	     "\nUsage: %s %s <parameter-file>\n\n", 
+	     "Usage: %s %s <parameter-file>", 
 	     PARALLEL_RUN,PARALLEL_ARGV[0]);
     ERROR("main",buffer);
   }
@@ -84,11 +84,8 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_PRINTF ("%s:%d  DEBUG\n",__FILE__,__LINE__);
 
-  CProxy_BlockReduce proxy_block_reduce = 
-    CProxy_BlockReduce::ckNew();
-
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
-    (parameter_file, strlen(parameter_file)+1, proxy_block_reduce, 0);
+    (parameter_file, strlen(parameter_file)+1, 0);
 
   PARALLEL_PRINTF ("%s:%d  DEBUG\n",__FILE__,__LINE__);
 

@@ -18,7 +18,7 @@ class IoSimulation {
 public: // interface
 
   /// Constructor
-  IoSimulation(Simulation * simulation = 0) throw();
+  IoSimulation(Simulation * simulation) throw();
 
   /// Create a new simulation and read its state from disk
   void read () throw();

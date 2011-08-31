@@ -20,14 +20,17 @@ class Output {
 
 public: // functions
 
-  /// Create an uninitialized Output object with the given file_name format
+  /// Create an Output object
   Output() throw();
+
+  /// Delete an Output object
+  ~Output() throw();
 
   /// Set file name
   void set_file_name (std::string file_name) throw()
   { file_name_ = file_name; };
 
-  /// Set file name variable to use
+  /// Set a file name variable to use
   void set_file_var (std::string file_var, size_t index) throw()
   { 
     if ((index >= file_vars_.size())) {
@@ -36,12 +39,12 @@ public: // functions
     file_vars_[index] = file_var;
   }
 
-  /// Set field list
+  /// Set list of fields to output
   void set_field_list (std::vector<int> field_list) throw();
 
   /// Return the Schedule object pointer
   Schedule * schedule() throw() 
-  { return &schedule_; };
+  { return schedule_; };
   
   /// Write hierarchy-related data to disk if scheduled
   void scheduled_write
@@ -118,9 +121,11 @@ public: // virtual functions
 
 protected: // attributes
 
-  IoSimulation io_simulation_;
+  /// Simulation reader/writer, initialized by specific Output<Type>
+  IoSimulation * io_simulation_;
 
-  Schedule schedule_;
+  /// Scheduler
+  Schedule * schedule_;
 
   /// Only processes with id's divisible by process_write_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
