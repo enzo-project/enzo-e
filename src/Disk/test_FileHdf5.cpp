@@ -72,20 +72,11 @@ PARALLEL_MAIN_BEGIN
 
    hdf5_a.open();
 
-   hdf5_a.data_set   ("char",scalar_type_char, a_nx,a_ny,a_nz);
-   hdf5_a.data_write (a_char);
-
-   hdf5_a.data_set   ("int",scalar_type_int, a_nx,a_ny,a_nz);
-   hdf5_a.data_write (a_int);
-
-   hdf5_a.data_set   ("long",scalar_type_long, a_nx,a_ny,a_nz);
-   hdf5_a.data_write (a_long);
-
-   hdf5_a.data_set   ("float",scalar_type_float, a_nx,a_ny,a_nz);
-   hdf5_a.data_write (a_float);
-
-   hdf5_a.data_set   ("double",scalar_type_double, a_nx,a_ny,a_nz);
-   hdf5_a.data_write (a_double);
+   hdf5_a.data_write (a_char,  "char",scalar_type_char, a_nx,a_ny,a_nz);
+   hdf5_a.data_write (a_int,   "int",scalar_type_int, a_nx,a_ny,a_nz);
+   hdf5_a.data_write (a_long,  "long",scalar_type_long, a_nx,a_ny,a_nz);
+   hdf5_a.data_write (a_float, "float",scalar_type_float, a_nx,a_ny,a_nz);
+   hdf5_a.data_write (a_double,"double",scalar_type_double, a_nx,a_ny,a_nz);
 
    hdf5_a.close();
 
@@ -107,12 +98,12 @@ PARALLEL_MAIN_BEGIN
   unit_func("read double");
   //----------------------------------------------------------------------
 
-  hdf5_b.data_get  ("double",&scalar_type, &b_nx,&b_ny,&b_nz);
+  hdf5_b.data_read (b_double,"double",&scalar_type, &b_nx,&b_ny,&b_nz);
+
   unit_assert (a_nx == b_nx);
   unit_assert (a_ny == b_ny);
   unit_assert (a_nz == b_nz);
   unit_assert (scalar_type == scalar_type_double);
-  hdf5_b.data_read (b_double);
 
   bool p_double = true;
 
@@ -129,12 +120,11 @@ PARALLEL_MAIN_BEGIN
   unit_func("read float");
   //----------------------------------------------------------------------
 
-  hdf5_b.data_get   ("float",&scalar_type, &b_nx,&b_ny,&b_nz);
+  hdf5_b.data_read (b_float,"float",&scalar_type, &b_nx,&b_ny,&b_nz);
   unit_assert (a_nx == b_nx);
   unit_assert (a_ny == b_ny);
   unit_assert (a_nz == b_nz);
   unit_assert (scalar_type == scalar_type_float);
-  hdf5_b.data_read (b_float);
 
   bool p_float  = true;
 
@@ -151,12 +141,11 @@ PARALLEL_MAIN_BEGIN
   unit_func("read long");
   //----------------------------------------------------------------------
 
-  hdf5_b.data_get   ("long",&scalar_type, &b_nx,&b_ny,&b_nz);
+  hdf5_b.data_read (b_long,"long",&scalar_type, &b_nx,&b_ny,&b_nz);
   unit_assert (a_nx == b_nx);
   unit_assert (a_ny == b_ny);
   unit_assert (a_nz == b_nz);
   unit_assert (scalar_type == scalar_type_long);
-  hdf5_b.data_read (b_long);
 
   bool p_long   = true;
 
@@ -173,12 +162,11 @@ PARALLEL_MAIN_BEGIN
   unit_func("read int");
   //----------------------------------------------------------------------
 
-  hdf5_b.data_get   ("int",&scalar_type, &b_nx,&b_ny,&b_nz);
+  hdf5_b.data_read (b_int,"int",&scalar_type, &b_nx,&b_ny,&b_nz);
   unit_assert (a_nx == b_nx);
   unit_assert (a_ny == b_ny);
   unit_assert (a_nz == b_nz);
   unit_assert (scalar_type == scalar_type_int);
-  hdf5_b.data_read (b_int);
 
   bool p_int    = true;
 
@@ -195,12 +183,11 @@ PARALLEL_MAIN_BEGIN
   unit_func("read char");
   //----------------------------------------------------------------------
 
-  hdf5_b.data_get   ("char",&scalar_type, &b_nx,&b_ny,&b_nz);
+  hdf5_b.data_read (b_char,"char",&scalar_type, &b_nx,&b_ny,&b_nz);
   unit_assert (a_nx == b_nx);
   unit_assert (a_ny == b_ny);
   unit_assert (a_nz == b_nz);
   unit_assert (scalar_type == scalar_type_char);
-  hdf5_b.data_read (b_char);
 
   bool p_char   = true;
 

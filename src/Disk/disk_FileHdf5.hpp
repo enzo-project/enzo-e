@@ -41,19 +41,15 @@ public: // interface
   /// Write attribute to the file
   //  virtual void write_attr(const void * buffer) throw() = 0;
 
-  virtual void data_get
-  ( std::string name, enum scalar_type * type, 
+  /// Read data from the file
+  virtual void data_read 
+  ( void * buffer, std::string name, enum scalar_type * type, 
     int * n0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
 
-  virtual void data_set 
-  ( std::string name, enum scalar_type type, 
-    int n0, int n1=0, int n2=0, int n3=0, int n4=0) throw();
-
-  /// Read data from the file
-  virtual void data_read (void * buffer) throw();
-
   /// Write data to the file
-  virtual void data_write (const void * buffer) throw();
+  virtual void data_write 
+  ( const void * buffer, std::string name, enum scalar_type type, 
+    int n0, int n1=0, int n2=0, int n3=0, int n4=0) throw();
 
   // /// Open the given group
   // void open_group (std::string group) throw();
@@ -65,6 +61,20 @@ private: // functions
 
   /// Convert the scalar type to HDF5 datatype
   int hdf5_type_(enum scalar_type type) throw();
+
+  virtual void data_get_
+  ( std::string name, enum scalar_type * type, 
+    int * n0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+
+  virtual void data_set_
+  ( std::string name, enum scalar_type type, 
+    int n0, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+
+  /// Read data from the file
+  virtual void data_read_ (void * buffer) throw();
+
+  /// Write data to the file
+  virtual void data_write_ (const void * buffer) throw();
 
 private: // attributes
 

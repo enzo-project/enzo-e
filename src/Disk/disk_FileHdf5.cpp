@@ -160,7 +160,7 @@ void FileHdf5::close () throw()
 
 //----------------------------------------------------------------------
 
-void FileHdf5::data_get
+void FileHdf5::data_get_
 (
  std::string name, 
  enum scalar_type * type, 
@@ -244,7 +244,7 @@ void FileHdf5::data_get
 
 //----------------------------------------------------------------------
 
-void FileHdf5::data_set
+void FileHdf5::data_set_
 (
  std::string      name,
  enum scalar_type type,
@@ -310,15 +310,27 @@ void FileHdf5::data_set
 
   // Open the data set
 
-  data_set_id_ = H5Dopen( file_id_, name.c_str());
+  // data_set_id_ = H5Dopen( file_id_, name.c_str());
 
   data_type_ = type;
   is_data_open_ = true;
 }
 
 //----------------------------------------------------------------------
+void FileHdf5::data_read
+(
+ void * buffer,
+ std::string name, 
+ enum scalar_type * type, 
+ int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+{
+  data_get_  (name,type,n0,n1,n2,n3,n4);
+  data_read_ (buffer);
+}
 
-void FileHdf5::data_read (void * buffer) throw()
+//----------------------------------------------------------------------
+
+void FileHdf5::data_read_ (void * buffer) throw()
 {
   if (! is_file_open_) {
     char error_message[ERROR_LENGTH];
@@ -346,7 +358,21 @@ void FileHdf5::data_read (void * buffer) throw()
 
 //----------------------------------------------------------------------
 
-void FileHdf5::data_write (const void * buffer) throw()
+void FileHdf5::data_write
+(
+ const void * buffer,
+ std::string      name,
+ enum scalar_type type,
+ int n0,  int n1,  int n2, int n3, int n4
+ ) throw()
+{
+  data_set_   (name,type,n0,n1,n2,n3,n4);
+  data_write_ (buffer);
+}
+
+//----------------------------------------------------------------------
+
+void FileHdf5::data_write_ (const void * buffer) throw()
 {
   if (! is_file_open_) {
     char error_message[ERROR_LENGTH];

@@ -51,19 +51,15 @@ public: // interface
   // /// Write attribute to the file
   // virtual void attr_write(const void * buffer) throw() = 0;
 
-  virtual void data_get
-  ( std::string name,  enum scalar_type * type,
+  /// Read data from the file
+  virtual void data_read
+  ( void * buffer, std::string name,  enum scalar_type * type,
     int * n0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
 
-  virtual void data_set
-  ( std::string name, enum scalar_type type,
-    int n0, int n1=1, int n2=1, int n3=1, int n4=1) throw() = 0;
-			      
-  /// Read data from the file
-  virtual void data_read(void * buffer) throw() = 0;
-
   /// Write data to the file
-  virtual void data_write(const void * buffer) throw() = 0;
+  virtual void data_write
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0, int n1=1, int n2=1, int n3=1, int n4=1) throw() = 0;
 
 protected: // attributes
 
