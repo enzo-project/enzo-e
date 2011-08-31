@@ -12,9 +12,6 @@
 IoSimulation::IoSimulation(Simulation * simulation) throw ()
   : simulation_(simulation)
 {
-  if (!simulation_) {
-    simulation_ = new Simulation;
-  }
 }
 
 //----------------------------------------------------------------------
