@@ -52,10 +52,10 @@ Simulation::Simulation
     method_list_()
 {
   performance_ = new Performance;
-  proxy_block_reduce_ = CProxy_BlockReduce::ckNew();
 
 #ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;
+  proxy_block_reduce_ = CProxy_BlockReduce::ckNew();
 #else
   monitor_ = Monitor::instance();
 #endif
