@@ -102,19 +102,35 @@ void FileHdf5::close () throw()
 /**
  */
 {
-  std::string full_name = path_ + "/" + name_;
-
-  if (! is_file_open_) {
-    char warning_message[ERROR_LENGTH];
-    sprintf (warning_message,
-	     "Attempting to close a closed file %s",
-	     full_name.c_str());
-    WARNING("FileHdf5::close",warning_message);
-  } else {
+  int retval;
+  if (is_data_open_) {
+    retval = H5Sclose (data_space_id_);
+    if (retval >= 0) {
+      is_data_open_ = false;
+    } else {
+      char warning_message[ERROR_LENGTH];
+      sprintf (warning_message,
+	       "Return value %d closing dataspace %s",
+	       retval,data_name_.c_str());
+      WARNING("FileHdf5::close",warning_message);
+    }
+    retval = H5Dclose (data_set_id_);
+    if (retval >= 0) {
+      is_data_open_ = false;
+    } else {
+      char warning_message[ERROR_LENGTH];
+      sprintf (warning_message,
+	       "Return value %d closing dataset %s",
+	       retval,data_name_.c_str());
+      WARNING("FileHdf5::close",warning_message);
+    }
+  }
+  if (is_file_open_) {
     int retval = H5Fclose (file_id_);
     if (retval >= 0) {
       is_file_open_ = false;
     } else {
+      std::string full_name = path_ + "/" + name_;
       char warning_message[ERROR_LENGTH];
       sprintf (warning_message,
 	       "Return value %d closing file %s",
@@ -237,6 +253,7 @@ void FileHdf5::data_set
 {
   // Close the previous data set if its open
   if (is_data_open_) {
+    H5Sclose (data_space_id_);
     H5Dclose( data_set_id_);
     is_data_open_ = false;
   }
@@ -275,13 +292,11 @@ void FileHdf5::data_set
     data_space_id_ = H5Screate_simple (data_rank_, data_size_, NULL);
     
     // Create the dataset
-    printf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout);
     data_set_id_ = H5Dcreate( file_id_, 
 			      name.c_str(), 
 			      hdf5_type_(type), 
 			      data_space_id_,  
 			      H5P_DEFAULT );
-    printf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout);
 
     if (data_set_id_ < 0) {
 
@@ -425,7 +440,6 @@ int FileHdf5::hdf5_type_(enum scalar_type type) throw()
   default:
     break;
   }
-  printf ("%d %d\n",type,hdf5_type);
   return hdf5_type;
 }
 
