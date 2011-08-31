@@ -21,6 +21,7 @@ public: // functions
   ( const char *   parameter_file_name,
 #ifdef CONFIG_USE_CHARM
     int            n,
+    CProxy_BlockReduce proxy_block_reduce,
 #else
     GroupProcess * group_process = 0,
 #endif

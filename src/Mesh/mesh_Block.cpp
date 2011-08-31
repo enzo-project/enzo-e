@@ -24,7 +24,7 @@ Block::Block
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
- double xb, double yb, double zb, // Block width
+ double xb, double yb, double zb,    // Block width
  int num_field_blocks) throw ()
   :  field_block_(),
 #ifdef CONFIG_USE_CHARM
@@ -87,7 +87,7 @@ Block::Block
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
- double xb, double yb, double zb, // Block width
+ double xb, double yb, double zb,    // Block width
  int num_field_blocks) throw ()
   : field_block_(),
     count_refresh_face_(0),

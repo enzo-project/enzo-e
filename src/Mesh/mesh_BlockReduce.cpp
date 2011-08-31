@@ -26,7 +26,11 @@ BlockReduce::BlockReduce()
 {
 }
 
+#endif
+
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void BlockReduce::p_prepare(int    count, 
 			    int    cycle, 
@@ -65,9 +69,8 @@ void BlockReduce::p_prepare(int    count,
 }
 
 #endif
-//----------------------------------------------------------------------
 
-//  --- Accumulate block output contributions and write output to disk ---
+//----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
 
@@ -80,5 +83,6 @@ void BlockReduce::p_output_reduce(int count)
   }
 }
 
-
 #endif
+
+//----------------------------------------------------------------------
