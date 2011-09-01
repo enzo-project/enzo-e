@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef MESH_IO_HPP
-#define MESH_IO_HPP
+#ifndef SIMULATION_IO_HPP
+#define SIMULATION_IO_HPP
 
-/// @file     mesh_Io.hpp
+/// @file     simulation_Io.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Aug 25 14:32:53 PDT 2011
-/// @brief    [\ref Mesh] Declaration of the Io class
+/// @brief    [\ref Simulation] Declaration of the Io class
 
 /// @enum  file_type
 /// @brief Type of file to be read or written
@@ -20,8 +20,10 @@ enum file_type {
 class Io {
 
   /// @class    Io
-  /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] Class for writing Mesh objects, acting as an interface between Hierarchy/Patch/Block objects and Disk File objects
+  /// @ingroup  Simulation
+  /// @brief [\ref Simulation] Class for writing objects to disk,
+  /// acting as an interface between Simulation/Hierarchy/Patch/Block
+  /// objects and Disk File objects
 
 public: // interface
 
@@ -70,5 +72,5 @@ private:   // functions
 
 };
 
-#endif /* MESH_IO_HPP */
+#endif /* SIMULATION_IO_HPP */
 

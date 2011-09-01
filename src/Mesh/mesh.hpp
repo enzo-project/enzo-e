@@ -48,8 +48,5 @@
 #include "mesh_ItPatch.hpp"
 #include "mesh_ItBlock.hpp"
 
-// I/O Readers/Writers
-#include "mesh_Io.hpp"
-
 #endif /* MESH_HPP */
 
