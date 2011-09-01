@@ -1,22 +1,23 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     simulation_Output.hpp 
+/// @file     io_Output.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
 /// @todo     Extract Schedule object for scheduling output
-/// @brief    [\ref Simulation] Declaration for the Output component
+/// @brief    [\ref Io] Declaration for the Output component
 
-#ifndef SIMULATION_OUTPUT_HPP
-#define SIMULATION_OUTPUT_HPP
+#ifndef IO_OUTPUT_HPP
+#define IO_OUTPUT_HPP
 
 class Hierarchy;
 class Patch;
+class Schedule;
 
 class Output {
 
   /// @class    Output
-  /// @ingroup  Simulation
-  /// @brief    [\ref Simulation] define interface for various types of simulation output
+  /// @ingroup  Io
+  /// @brief    [\ref Io] define interface for various types of IO for Simulations
 
 public: // functions
 
@@ -145,4 +146,4 @@ protected: // attributes
 
 };
 
-#endif /* SIMULATION_OUTPUT_HPP */
+#endif /* IO_OUTPUT_HPP */

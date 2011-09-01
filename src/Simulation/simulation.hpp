@@ -24,10 +24,10 @@ class Factory;
 #include "performance.hpp"
 #include "monitor.hpp"
 #include "disk.hpp"
-
 #include "mesh.hpp"
 #include "method.hpp"
 #include "parameters.hpp"
+#include "io.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes
@@ -37,15 +37,6 @@ class Factory;
 
 // Output scheduling class
 #include "simulation_Schedule.hpp"
-
-// I/O Readers/Writers
-#include "simulation_Io.hpp"
-#include "simulation_IoSimulation.hpp"
-
-// Input/Output classes
-#include "simulation_Output.hpp"
-#include "simulation_OutputImage.hpp"
-
 
 
 #endif /* SIMULATION_HPP */

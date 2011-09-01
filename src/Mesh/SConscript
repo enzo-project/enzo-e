@@ -15,12 +15,13 @@ Import('type')
 
 components = [ 
               'field', 
-              'simulation','method',  # TEMPORARY: SHOULD NOT NEED simulation OR method
+              'simulation','method', 'io',
               'memory','parallel',
               'parameters','monitor',
               'performance', 'error',
               'cello']
-libraries  = ['png']
+
+libraries  = ['png'] # used only for test_TreeK(?)
 
 #if (type == "charm"):
 #   components = components + ['enzo']

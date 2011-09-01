@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     simulation_Output.cpp
+/// @file     io_Output.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @bug      time interval scheduling gets confused if multiple outputs scheduled per timestep
 /// @date     Wed Mar 16 09:53:31 PDT 2011
@@ -8,7 +8,7 @@
 
 #include "cello.hpp"
 
-#include "simulation.hpp"
+#include "io.hpp"
 
 //----------------------------------------------------------------------
 

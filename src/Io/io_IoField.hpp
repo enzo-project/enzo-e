@@ -1,24 +1,24 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef MESH_IO_HPP
-#define MESH_IO_HPP
+#ifndef IO_IO_FIELD_HPP
+#define IO_IO_FIELD_HPP
 
-/// @file     mesh_IoField.hpp
+/// @file     io_IoField.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Aug 25 14:32:53 PDT 2011
-/// @brief    [\ref Mesh] Declaration of the IoField class
+/// @brief    [\ref Io] Declaration of the IoField class
 
-class IoField {
+class IoField : Io {
 
   /// @class    IoField
-  /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] Class for writing Mesh objects, acting as an interface between Hierarchy/Patch/Block objects and Disk File objects
+  /// @ingroup  Io
+  /// @brief    [\ref Io] Class for writing Field objects, acting as an interface between Field objects and Disk objects
 
 public: // interface
 
   /// Constructor
   IoField() throw()
-  : path_(""),name_("") {};
+  : Io() {};
 
   /// Destructor
   virtual ~IoField() throw()
@@ -55,5 +55,5 @@ private:   // functions
 
 };
 
-#endif /* MESH_IO_HPP */
+#endif /* IO_IO_FIELD_HPP */
 

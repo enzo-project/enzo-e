@@ -1,18 +1,20 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef SIMULATION_IO_SIMULATION_HPP
-#define SIMULATION_IO_SIMULATION_HPP
+#ifndef IO_IO_SIMULATION_HPP
+#define IO_IO_SIMULATION_HPP
 
-/// @file     simulation_IoSimulation.hpp
+/// @file     io_IoSimulation.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Aug 29 16:53:50 PDT 2011
-/// @brief    [\ref Simulation] Implement disk IO for simulations
+/// @brief    [\ref Io] Implement disk IO for simulations
+
+class Simulation;
 
 class IoSimulation {
 
   /// @class    IoSimulation
-  /// @ingroup  Simulation
-  /// @brief [\ref Simulation] IoSimulation is used for writing and
+  /// @ingroup  Io
+  /// @brief [\ref Io] IoSimulation is used for writing and
   /// reading Simulation data to and from disk
 
 public: // interface
@@ -36,5 +38,5 @@ private: // attributes
 
 };
 
-#endif /* SIMULATION_IO_SIMULATION_HPP */
+#endif /* IO_IO_SIMULATION_HPP */
 

@@ -8,7 +8,7 @@
 #include "main.hpp" 
 #include "test.hpp"
 
-#include "component.hpp"
+#include "io.hpp"
 
 PARALLEL_MAIN_BEGIN
 {

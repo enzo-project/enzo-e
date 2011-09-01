@@ -1,18 +1,18 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     simulation_OutputImage.hpp 
+/// @file     io_OutputImage.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
-/// @brief    [\ref Simulation] Declaration for the OutputImage component
+/// @brief    [\ref Io] Declaration for the OutputImage component
 
-#ifndef SIMULATION_OUTPUT_IMAGE_HPP
-#define SIMULATION_OUTPUT_IMAGE_HPP
+#ifndef IO_OUTPUT_IMAGE_HPP
+#define IO_OUTPUT_IMAGE_HPP
 
 class OutputImage : public Output {
 
   /// @class    OutputImage
-  /// @ingroup  Simulation
-  /// @brief [\ref Simulation] class for writing images
+  /// @ingroup  Io
+  /// @brief [\ref Io] class for writing images
 
 public: // functions
 
@@ -285,4 +285,4 @@ void OutputImage::image
   image_close_(min,max);
 }
 
-#endif /* SIMULATION_OUTPUT_IMAGE_HPP */
+#endif /* IO_OUTPUT_IMAGE_HPP */

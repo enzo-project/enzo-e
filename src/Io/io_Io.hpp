@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef SIMULATION_IO_HPP
-#define SIMULATION_IO_HPP
+#ifndef IO_IO_HPP
+#define IO_IO_HPP
 
-/// @file     simulation_Io.hpp
+/// @file     io_Io.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Aug 25 14:32:53 PDT 2011
-/// @brief    [\ref Simulation] Declaration of the Io class
+/// @brief    [\ref Io] Declaration of the Io class
 
 /// @enum  file_type
 /// @brief Type of file to be read or written
@@ -20,8 +20,8 @@ enum file_type {
 class Io {
 
   /// @class    Io
-  /// @ingroup  Simulation
-  /// @brief [\ref Simulation] Class for writing objects to disk,
+  /// @ingroup  Io
+  /// @brief [\ref Io] Class for writing objects to disk,
   /// acting as an interface between Simulation/Hierarchy/Patch/Block
   /// objects and Disk File objects
 
@@ -72,5 +72,5 @@ private:   // functions
 
 };
 
-#endif /* SIMULATION_IO_HPP */
+#endif /* IO_IO_HPP */
 
