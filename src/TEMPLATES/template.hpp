@@ -5,14 +5,15 @@
 
 /// @file     groupname_Classname.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    [\ref Groupname] Brief description of file groupname_Classname.hpp
+/// @date     yyyy-mm-dd
+/// @brief    [\ref Groupname] Declaration of the Classname class
+///
 
 class Classname {
 
   /// @class    Classname
   /// @ingroup  Groupname
-  /// @brief    [\ref Groupname] Brief description of class Classname.
+  /// @brief    [\ref Groupname] 
 
 public: // interface
 

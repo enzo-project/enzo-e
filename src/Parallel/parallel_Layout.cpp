@@ -2,7 +2,7 @@
 
 /// @file     parallel_Layout.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2010-04-19
 /// @todo     Refactor initialize_mpi_()
 /// @todo     Fix MPI: add process first / count or mpi_comm to constructor
 /// @brief    Implementation of the Layout class

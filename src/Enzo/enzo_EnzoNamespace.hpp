@@ -5,7 +5,7 @@
 
 /// @file     enzo_EnzoNamespace.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2011-07-31
 /// @todo     Comment Enzo functions / attributes
 /// @todo     Move boundary functionality to Block
 /// @brief    [\ref Enzo] "Global" data for Enzo

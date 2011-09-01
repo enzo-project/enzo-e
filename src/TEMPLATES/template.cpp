@@ -2,10 +2,10 @@
 
 /// @file     component_Classname.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file component_Classname.cpp
+/// @date     yyyy-mm-dd
+/// @brief    
 ///
-/// Detailed description of file component_Classname.cpp
+/// 
 
 #include "component.hpp"
 

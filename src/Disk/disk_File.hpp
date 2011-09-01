@@ -5,7 +5,7 @@
 
 /// @file     disk_File.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2010-05-26
 /// @brief    [\ref Disk] Declaration of the File class
 
 /// @enum scalar_type
