@@ -25,10 +25,14 @@
 
 #include "parallel.hpp"
 #include "memory.hpp"
-#include "simulation.hpp"
-/* NOTE: field.hpp currently includes method.hpp: can get rid of
-   dependency, but only if field.hpp include is moved after Component
-   class includes */
+
+#ifdef CONFIG_USE_CHARM
+#  include "simulation.hpp"
+#endif
+
+// NOTE: field.hpp currently includes method.hpp: can get rid of
+// dependency, but only if field.hpp include is moved after Component
+// class includes
 #include "field.hpp" 
 
 //----------------------------------------------------------------------

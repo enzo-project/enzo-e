@@ -368,8 +368,8 @@ void Block::prepare()
     FieldDescr * field_descr = simulation->field_descr();
 
     field_block()->print(field_descr,"final",lower_,upper_);
-    field_block()->image(field_descr,"cycle",cycle_,
-			 thisIndex.x,thisIndex.y,thisIndex.z);
+    // field_block()->image(field_descr,"cycle",cycle_,
+    // 			 thisIndex.x,thisIndex.y,thisIndex.z);
 
 #ifdef TEMP_SKIP_REDUCE
     proxy_main.p_exit(num_blocks);
