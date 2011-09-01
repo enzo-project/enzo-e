@@ -549,6 +549,7 @@ if (type == 'charm' and use_projections == 1):
    Clean('.',Glob('bin/charm/*.projrc'))
    Clean('.',Glob('bin/charm/*.log'))
    Clean('.',Glob('bin/charm/*.sts'))
+   Clean('.','charmrun')
 
 # Build tarball
 
