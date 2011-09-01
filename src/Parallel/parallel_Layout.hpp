@@ -2,7 +2,7 @@
 
 /// @file     parallel_Layout.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2010-04-19
 /// @brief    [\ref Parallel] Declaration of the Layout class
 
 #ifndef PARALLEL_LAYOUT_HPP

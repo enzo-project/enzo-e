@@ -7,7 +7,7 @@
 /// @file     error_Error.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @bug      exit() is called instead of MPI_Abort(), etc.
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2011-04-07
 /// @brief    Declaration of the Error class
 //----------------------------------------------------------------------
 

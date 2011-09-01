@@ -5,7 +5,7 @@
 
 /// @file     mesh_Patch.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2011-05-10
 /// @todo     Move "size" to Block's, since that's Field-centric
 /// @brief    [\ref Mesh] Declaration of the interface for the Patch class
 

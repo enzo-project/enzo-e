@@ -2,7 +2,7 @@
 
 /// @file     performance_Papi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2010-12-02
 /// @brief    Implementation of Papi class
 ///
 /// Wrapper functions for PAPI

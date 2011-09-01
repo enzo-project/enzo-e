@@ -2,8 +2,8 @@
 
 /// @file     main.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file main.cpp
+/// @date     2011-08-10
+/// @brief    Implementation of main-level CHARM entry functions in main.ci
 
 #ifdef CONFIG_USE_CHARM
 

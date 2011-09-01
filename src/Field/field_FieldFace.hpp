@@ -5,7 +5,7 @@
 
 /// @file     field_FieldFace.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2011-04-12
 /// @brief    [\ref Field] Interface for the FieldFace class
 
 class FieldFace {
