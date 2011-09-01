@@ -1,0 +1,40 @@
+#------------------------------
+# DIRECTORIES
+#------------------------------
+#------------------------------
+# IMPORTS
+#------------------------------
+Import('env')
+Import('type')
+#------------------------------
+# DEPENDENCIES
+#------------------------------
+components = [ 
+              'field', 
+              'simulation','method',
+              'memory','parallel',
+              'parameters','monitor',
+              'performance', 'error',
+              'cello']
+libraries  = ['png']
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+env = env.Clone(LIBS=[components,libraries])
+#------------------------------
+# SOURCE
+#------------------------------
+includes = [Glob('io*hpp')]
+sources  = [Glob('io*cpp')]
+#------------------------------
+# TARGETS
+#------------------------------
+
+libraries = env.Library ('io', [sources])
+
+#------------------------------
+# INSTALL
+#------------------------------
+
+env.Alias('install-inc',env.Install ('#/include',  includes))
+env.Alias('install-lib',env.Install ('#/lib',      libraries))
