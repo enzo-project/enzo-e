@@ -28,6 +28,8 @@ BlockReduce::BlockReduce()
 
 //----------------------------------------------------------------------
 
+// See Simulation/simulation_charm_output.cpp for BlockReduce::p_prepare()
+
 #ifdef CONFIG_USE_CHARM
 
 void BlockReduce::p_prepare(int    count, 
@@ -53,15 +55,17 @@ void BlockReduce::p_prepare(int    count,
 
   if (++count_prepare_ >= count) {
 
-    //--------------------------------------------------
-    // Simulation::p_output()
-    //--------------------------------------------------
-    proxy_simulation.p_output(cycle, time, dt_hierarchy_, stop_hierarchy_);
-
     // Reset pool
+
     count_prepare_ = 0;
     dt_hierarchy_ = std::numeric_limits<double>::max();
     stop_hierarchy_ = true;
+
+    //--------------------------------------------------
+    // Simulation::p_output()
+    //--------------------------------------------------
+
+    proxy_simulation.p_output(cycle, time, dt_hierarchy_, stop_hierarchy_);
 
   }
 }
@@ -70,17 +74,7 @@ void BlockReduce::p_prepare(int    count,
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
-void BlockReduce::p_output_reduce(int count)
-{
-  if (++count_output_ >= count) {
-    INCOMPLETE("BlockReduce::p_output_reduce()");
-    proxy_simulation.p_output_reduce();
-    count_output_ = 0;
-  }
-}
-
-#endif
+// SEE simulation_charm_output.cpp for
+// BlockReduce::p_output_reduce()
 
 //----------------------------------------------------------------------

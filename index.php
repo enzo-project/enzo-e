@@ -99,12 +99,26 @@ function tests($component,$testrun,$output) {
 
      echo "<tr>\n";
      //--------------------------------------------------
+     echo "<th>Incomplete</th>";
+     //--------------------------------------------------
+     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+       $output_file = "test/$parallel_types[$i]/$output.unit";
+       if (file_exists($output_file)) {
+	 system("grep 0/ $output_file | awk 'BEGIN{c=0}; /incomplete/ {c=c+1}; END {if (c!=0) print\"<td class=incomplete>\",c,\"</td>\"; if (c==0) print \"<td class=pass>0</td>\"}'");
+       } else {
+	 echo "<td class=pass></td>";
+       }
+     }
+     echo "</tr>\n";
+
+     echo "<tr>\n";
+     //--------------------------------------------------
      echo "<th>Failed</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
        $output_file = "test/$parallel_types[$i]/$output.unit";
        if (file_exists($output_file)) {
-	 system("grep 0/ $output_file | awk 'BEGIN{c=0}; /FAIL/ {c=c+1}; END {if (c!=0) print\"<td class=fail>\",c,\"</td>\"; if (c==0) print \"<td class=pass></td>\"}'");
+	 system("grep 0/ $output_file | awk 'BEGIN{c=0}; /FAIL/ {c=c+1}; END {if (c!=0) print\"<td class=fail>\",c,\"</td>\"; if (c==0) print \"<td class=pass>0</td>\"}'");
        } else {
 	 echo "<td class=pass></td>";
        }
@@ -265,7 +279,7 @@ function test_summary($component,$test_output,$executables)
       $output_files = "$output_files $output";
     }
 
-    system("grep '0/' $output_files | awk 'BEGIN {c=0}; /incomplete/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=yellow>\",c,\"</td>\";}} '");
+    system("grep '0/' $output_files | awk 'BEGIN {c=0}; /incomplete/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=incomplete>\",c,\"</td>\";}} '");
   }
   printf ("<th></th>");
 
@@ -301,11 +315,11 @@ printf ("<tr>\n");
      printf ("<th></th>");
      printf ( "<th colspan=3 class=fail>Missing</br/>Output</th>");
      printf ("<th></th>");
-     printf ( "<th colspan=3 class=fail>Incomplete</br/>Output</th>");
+     printf ( "<th colspan=3 class=fail>Partial</br/>Output</th>");
      printf ("<th></th>");
      printf ( "<th colspan=3 class=fail>Failed Tests</th>");
      printf ("<th></th>");
-     printf ( "<th colspan=3 class=fail>Incomplete</br/>Tests</th>");
+     printf ( "<th colspan=3 class=incomplete>Incomplete</br/>Tests</th>");
      printf ("<th></th>");
      printf ( "<th colspan=3 class=pass>Passed Tests</th>");
      printf ("<th></th>");

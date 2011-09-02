@@ -756,20 +756,7 @@ void Block::p_refresh_face (int n, char * buffer,
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
-void Block::p_output (int index_output)
-{
-
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  simulation->output(index_output)->block(this);
-
-  // Synchronize via main chare before writing
-  int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
-  simulation->proxy_block_reduce().p_output_reduce (num_blocks);
-}
-#endif /* CONFIG_USE_CHARM */
+// SEE Simulation/simulation_CharmOutput.cpp for Block::p_output(int)
 
 //----------------------------------------------------------------------
 
