@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     simulation_charm.cpp
+/// @file     simulation_charm_output.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-01
 /// @brief    Functions implementing CHARM++ output-related functions
