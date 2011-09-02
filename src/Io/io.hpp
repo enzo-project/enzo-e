@@ -32,8 +32,15 @@
 //----------------------------------------------------------------------
 
 #include "io_Io.hpp"
+
 #include "io_IoSimulation.hpp"
 #include "io_IoField.hpp"
+
+#include "io_Type.hpp"
+#include "io_TypeImage.hpp"
+#include "io_TypeRestart.hpp"
+#include "io_TypeData.hpp"
+
 #include "io_Output.hpp"
 #include "io_OutputImage.hpp"
 
