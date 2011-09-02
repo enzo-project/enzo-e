@@ -37,13 +37,6 @@ FileHdf5::FileHdf5
 //----------------------------------------------------------------------
     
 void FileHdf5::file_open () throw()
-/**
- * @param name  Name of the file to create or open
- * @param mode  How the file is to be created or opened:
- *              - "r": read-only: file must exist.
- *              - "w": write-only: any existing file will be truncated.
- * @return      True iff opening the file was successful
- */
 {
 
   if (is_file_open_) {

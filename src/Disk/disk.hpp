@@ -27,6 +27,7 @@
 
 #include "disk_File.hpp"
 #include "disk_FileHdf5.hpp"
+#include "disk_FilePng.hpp"
 #include "disk_FileIfrit.hpp"
 
 #endif /* DISK_HPP */
