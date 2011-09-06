@@ -14,9 +14,8 @@
 FilePng::FilePng
 (
  std::string path,
- std::string name,
- std::string mode
- ) throw() : File(path,name,mode) 
+ std::string name
+ ) throw() : File(path,name) 
 {
   INCOMPLETE("FilePng::FilePng");
 }

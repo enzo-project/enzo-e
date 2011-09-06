@@ -17,9 +17,9 @@ class FilePng : public File {
 public: // interface
 
   /// Initialize the FilePng object
-  FilePng(std::string path, std::string name, std::string mode) throw();
+  FilePng(std::string path, std::string name) throw();
 
-  /// Open the file with the given mode
+  /// open the file
   virtual void file_open () throw();
 
   /// Close the file

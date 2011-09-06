@@ -21,60 +21,85 @@ class FileHdf5 : public File {
 
 public: // interface
 
-  /// Initialize the FileHdf5 object
-  FileHdf5(std::string path, std::string name, std::string mode) throw();
+  /// Create an HDF5 file with the given path and filename
 
-  /// Open the file with the given mode
+  FileHdf5 (std::string path, std::string name) throw();
+
+  //--------------------------------------------------
+  // Files
+  //--------------------------------------------------
+
+  /// Open an existing file
+
   virtual void file_open () throw();
 
+  /// Create a new file
+
+  virtual void file_create () throw();
+
   /// Close the file
+
   virtual void file_close () throw();
+  
+  /// Read a metadata item associated with the file
 
-  // /// Set the current attribute type
-  // virtual void set_attr_type 
-  // ( enum scalar_type scalar,
-  //   int n0=1, int n1=1, int n2=1, int n3=1, int n4=1);
-			      
-  /// Read attribute from the file
-  // virtual void read_attr(void * buffer) throw() = 0;
+  virtual void file_meta_read
+  ( void * buffer, std::string name,  enum scalar_type * s_type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+  
+  /// Write a metadata item associated with the file
 
-  /// Write attribute to the file
-  //  virtual void write_attr(const void * buffer) throw() = 0;
+  virtual void file_meta_write
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+  
+  //--------------------------------------------------
+  // Datasets
+  //--------------------------------------------------
 
-  /// Read data from the file
-  virtual void data_read 
-  ( void * buffer, std::string name, enum scalar_type * type, 
-    int * n0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+  /// Open an existing dataset for reading
 
-  /// Write data to the file
-  virtual void data_write 
-  ( const void * buffer, std::string name, enum scalar_type type, 
-    int n0, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+  virtual void data_open
+  ( std::string name,  enum scalar_type * type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
 
-  // /// Open the given group
-  // void open_group (std::string group) throw();
+  /// Create a new dataset for writing (and open it)
 
-  // /// Close the current group
-  // void close_group () throw();
+  virtual void data_create
+  ( std::string name,  enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
 
+  /// Read from the opened dataset
+
+  virtual void data_read (void * buffer) throw();
+
+  /// Write to the opened dataset
+
+  virtual void data_write (const void * buffer) throw();
+
+  /// Close the opened dataset
+
+  virtual void data_close () throw();
+
+  /// Read a metadata item associated with the opened dataset
+
+  virtual void data_meta_read
+  ( void * buffer, std::string name,  enum scalar_type * s_type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+  
+  /// Write a metadata item associated with the opened dataset
+
+  virtual void data_meta_write
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+  
 private: // functions
 
   /// Convert the scalar type to HDF5 datatype
-  int hdf5_type_(enum scalar_type type) throw();
+  int scalar_to_hdf5_(enum scalar_type type) const throw();
 
-  virtual void data_get_
-  ( std::string name, enum scalar_type * type, 
-    int * n0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
-
-  virtual void data_set_
-  ( std::string name, enum scalar_type type, 
-    int n0, int n1=0, int n2=0, int n3=0, int n4=0) throw();
-
-  /// Read data from the file
-  virtual void data_read_ (void * buffer) throw();
-
-  /// Write data to the file
-  virtual void data_write_ (const void * buffer) throw();
+  /// Convert the scalar type to an HDF5 datatype
+  enum scalar_type hdf5_to_scalar_(int type) const throw();
 
 private: // attributes
 
@@ -86,6 +111,9 @@ private: // attributes
 
   /// HDF5 dataspace descriptor
   hid_t data_space_id_;
+
+  /// HDF5 attribute descriptor
+  hid_t attribute_id_;
 
   /// HDF5 error satus
   herr_t status_id_;
