@@ -363,6 +363,11 @@ void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 }
 
 //----------------------------------------------------------------------
+// MPI functions
+//----------------------------------------------------------------------
+
+#ifndef CONFIG_USE_CHARM
+
 void FieldBlock::refresh_ghosts(const FieldDescr * field_descr) throw()
 {
   INCOMPLETE("FieldBlock::refresh_ghosts");
@@ -372,6 +377,8 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr) throw()
     allocate_ghosts(field_descr);
   }
 }
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -403,45 +410,7 @@ void FieldBlock::set_field_values
   INCOMPLETE("FieldBlock::set_field_values");
 }
 
-//----------------------------------------------------------------------
-
-void FieldBlock::open 
-(
- File *       file, 
- const char * file_name, 
- const char * file_mode 
- ) const throw()
-{
-  INCOMPLETE("FieldBlock::open");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::close (File * file) const throw()
-{
-  INCOMPLETE("FieldBlock::close");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::read
-(
- File *            file, 
- file_content_type file_content) throw ()
-{
-  INCOMPLETE("FieldBlock::read");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::write
-(File * file, file_content_type file_content) const throw ()
-{
-  INCOMPLETE("FieldBlock::write");
-}
-
 //======================================================================
-
 
 int FieldBlock::adjust_padding_
 (
@@ -671,67 +640,69 @@ void FieldBlock::print (const FieldDescr * field_descr,
 
 //----------------------------------------------------------------------
 
-void FieldBlock::image 
-(
- const FieldDescr * field_descr,
- const char * prefix,
- int cycle,
- int ibx, int iby, int ibz
- ) const throw()
-{
+// void FieldBlock::image 
+// (
+//  const FieldDescr * field_descr,
+//  const char * prefix,
+//  int cycle,
+//  int ibx, int iby, int ibz
+//  ) const throw()
+// {
+// #ifndef CELLO_DEBUG
+//   return;
+// #endif
+//   int field_count = field_descr->field_count();
+//   for (int index_field=0; index_field<field_count; index_field++) {
 
-  int field_count = field_descr->field_count();
-  for (int index_field=0; index_field<field_count; index_field++) {
+//     int nxd,nyd,nzd;
+//     field_size(field_descr,index_field,&nxd,&nyd,&nzd);
 
-    int nxd,nyd,nzd;
-    field_size(field_descr,index_field,&nxd,&nyd,&nzd);
+//     int nd3[3] = {nxd,nyd,nzd};
+//     for (int axis=0; axis<3; axis++) {
 
-    int nd3[3] = {nxd,nyd,nzd};
-    for (int axis=0; axis<3; axis++) {
+//       OutputImage * output = new OutputImage;
 
-      OutputImage * output = new OutputImage;
+//       double r[] = {1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0 };
+//       double g[] = {0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0 };
+//       double b[] = {0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0 };
 
-      double r[] = {1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0 };
-      double g[] = {0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0 };
-      double b[] = {0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0 };
+//       output->image_set_map(7,r,g,b);
 
-      output->image_set_map(7,r,g,b);
+//       char axis_name[3] = {'x','y','z'};
+//       char filename[80];
+//       int ix = (axis+1) % 3;
+//       int iy = (axis+2) % 3;
 
-      char axis_name[3] = {'x','y','z'};
-      char filename[80];
-      int ix = (axis+1) % 3;
-      int iy = (axis+2) % 3;
-
-      sprintf (filename,"%s-%s-%04d-%c-%d%d%d.png",
-	       prefix,field_descr->field_name(index_field).c_str(),
-	       cycle,axis_name[axis],ibx,iby,ibz);
+//       sprintf (filename,"%s-%s-%04d-%c-%d%d%d.png",
+// 	       prefix,field_descr->field_name(index_field).c_str(),
+// 	       cycle,axis_name[axis],ibx,iby,ibz);
   
-      switch (field_descr->precision(index_field)) {
-      case precision_single:
-	output->image
-	  (filename,nd3[ix],nd3[iy], (float *) field_values_[index_field],
-	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
-	break;
-      case precision_double:
-	output->image
-	  (filename,nd3[ix],nd3[iy],(double *) field_values_[index_field],
-	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
-	break;
-      case precision_quadruple:
-	output->image
-	  (filename,nd3[ix],nd3[iy],(long double *) field_values_[index_field],
-	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
-	break;
-      default:
-	ERROR("FieldBlock::image", "Precision not handled");
-	break;
-      }
+//       switch (field_descr->precision(index_field)) {
+//       case precision_single:
+// 	output->image
+// 	  (filename,nd3[ix],nd3[iy], (float *) field_values_[index_field],
+// 	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
+// 	break;
+//       case precision_double:
+// 	output->image
+// 	  (filename,nd3[ix],nd3[iy],(double *) field_values_[index_field],
+// 	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
+// 	break;
+//       case precision_quadruple:
+// 	output->image
+// 	  (filename,nd3[ix],nd3[iy],(long double *) field_values_[index_field],
+// 	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
+// 	break;
+//       default:
+// 	ERROR("FieldBlock::image", "Precision not handled");
+// 	break;
+//       }
 
-      delete output;
+//       delete output;
 
-    }
-  }
-}
+//     }
+//   }
+// }
 
 //----------------------------------------------------------------------
 

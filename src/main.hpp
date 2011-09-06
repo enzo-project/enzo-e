@@ -2,7 +2,7 @@
 
 /// @file     main.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2011-08-10
 /// @brief    Declaration of the Main CHARM++ chare
 
 #ifdef CONFIG_USE_CHARM

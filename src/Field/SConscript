@@ -12,14 +12,14 @@ Import('type')
 # (uses Mesh for test_FieldBlock, which requires DataBlock)
 
 if (type == "charm"):
-    components = ['simulation','method',
+    components = ['simulation','method','io',
                   'mesh',
                   'parallel','disk',
                   'parameters', 'monitor',
                   'performance','error',
                   'cello']
 else:
-    components = ['simulation','method',
+    components = ['simulation','method','io',
                   'mesh',
                   'parallel','disk',
                   'monitor',

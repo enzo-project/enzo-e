@@ -25,7 +25,6 @@
 
    Mesh { 
       root_size      = [400,400];
-      block_size     = [8,8];
       max_level      = 0; 
 
       # remaining mesh parameters are ignored if max_level == 0
@@ -147,7 +146,7 @@
 
    Output { 
 
-      groups = ["data","restart"];
+      file_groups = ["data","restart"];
 
       # subgroup specifies the subdirectory / file name
       data {

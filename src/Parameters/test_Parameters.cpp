@@ -3,6 +3,7 @@
 /// @file     test_Parameters.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:04:03 PST 2008
+/// @todo     Implement write() test
 /// @brief    Program implementing unit tests for the Parameters class
 //----------------------------------------------------------------------
 
@@ -133,17 +134,35 @@ PARALLEL_MAIN_BEGIN
 
   generate_input();
 
+  //--------------------------------------------------
   unit_func("read");
+  //--------------------------------------------------
 
   parameters->read ( "test.in" );
   unit_assert(true);
 
+  // Parameters write()
+
+  //--------------------------------------------------
   unit_func("write");
+  //--------------------------------------------------
+
+  // TODO
+  //
+  // read test.out
+  // compare all parameters between test.in & test.out
+  // loop parameters1
+  //    test p1 subset p2
+  // loop parameters2
+  //    test p2 subset p1
+  // pass iff p1 subset p2 && p2 subset p1
 
   parameters->write ( "test.out" );
-  unit_assert(unit_incomplete);
+  unit_assert(false);
 
+  //--------------------------------------------------
   unit_func("group_push");
+  //--------------------------------------------------
 
   parameters->group_push("Group");
 
@@ -156,7 +175,9 @@ PARALLEL_MAIN_BEGIN
   unit_assert(parameters->group(0) == "Group");
   unit_assert(parameters->group(1) == "subgroup_1");
 
+  //--------------------------------------------------
   unit_func("group_pop");
+  //--------------------------------------------------
 
   parameters->group_pop("subgroup_1");
 
@@ -181,9 +202,9 @@ PARALLEL_MAIN_BEGIN
 
   parameters->group_pop();
 
-  // value_logical()
-
+  //--------------------------------------------------
   unit_func("value_logical");
+  //--------------------------------------------------
 
   parameters->group_set(0,"Logical");
   
@@ -211,9 +232,9 @@ PARALLEL_MAIN_BEGIN
   // parameters->value("none",parameter_logical,&l,&ld);
   // unit_assert (l == ld);
 
-  // set_logical()
-
+  //--------------------------------------------------
   unit_func("set_logical");
+  //--------------------------------------------------
 
   parameters->set_logical("logical_1_true",false);
   unit_assert (parameters->value_logical("logical_1_true") == false);
@@ -224,9 +245,9 @@ PARALLEL_MAIN_BEGIN
   parameters->set_logical("none_l2",false);
   unit_assert (parameters->value_logical("none_l2") == false);
 
-  // value_integer()
-
+  //--------------------------------------------------
   unit_func("value_integer");
+  //--------------------------------------------------
 
   parameters->group_set(0,"Integer");
   
@@ -243,9 +264,9 @@ PARALLEL_MAIN_BEGIN
   // parameters->value("none",parameter_integer,&i,&id);
   // unit_assert (i == id);
 
-  // set_integer()
-
+  //--------------------------------------------------
   unit_func("set_integer");
+  //--------------------------------------------------
 
   parameters->set_integer("integer_1_1",2);
   unit_assert (parameters->value_integer("integer_1_1") == 2);
@@ -254,10 +275,9 @@ PARALLEL_MAIN_BEGIN
   parameters->set_integer("none2",4);
   unit_assert (parameters->value_integer("none2") == 4);
 
-
-  // value_float()
-  
+  //--------------------------------------------------
   unit_func("value_float");
+  //--------------------------------------------------
 
   parameters->group_set(0,"Float");
   
@@ -277,7 +297,9 @@ PARALLEL_MAIN_BEGIN
 
   // set_float()
 
+  //--------------------------------------------------
   unit_func("set_float");
+  //--------------------------------------------------
 
   parameters->set_float("float_1_1p5",27.0);
   unit_assert (parameters->value_float("float_1_1p5") == 27.0);
@@ -287,7 +309,9 @@ PARALLEL_MAIN_BEGIN
   // Constant float expressions
   // subgroups
 
+  //--------------------------------------------------
   unit_func("value_float");
+  //--------------------------------------------------
 
   parameters->group_set(0,"Float");
   parameters->group_set(1,"group_float_1");
@@ -295,12 +319,12 @@ PARALLEL_MAIN_BEGIN
   unit_assert(parameters->value_float("num1") == 30.625);
   unit_assert(parameters->value_float("num2") == 18.375);
   unit_assert(parameters->value_float("num3") == 150.0625);
-  unit_assert(parameters->value_float("num4") == 4.0000000000);
+  unit_assert(parameters->value_float("num4") == 4.0);
 
   unit_assert(parameters->value_float("Float:group_float_1:num1") == 30.625);
   unit_assert(parameters->value_float("Float:group_float_1:num2") == 18.375);
   unit_assert(parameters->value_float("Float:group_float_1:num3") == 150.0625);
-  unit_assert(parameters->value_float("Float:group_float_1:num4") == 4.0000000000);
+  unit_assert(parameters->value_float("Float:group_float_1:num4") == 4.0);
 
   parameters->group_set(1,"const_float_2");
 
@@ -308,9 +332,9 @@ PARALLEL_MAIN_BEGIN
   unit_assert(parameters->value_float("num2") == 67.375);
   unit_assert(parameters->value_float("num3") == -30.625);
 
-  // Strings
-
+  //--------------------------------------------------
   unit_func("value_string");
+  //--------------------------------------------------
 
   parameters->group_set(0,"String");
 
@@ -331,16 +355,18 @@ PARALLEL_MAIN_BEGIN
 
   // set_string()
 
+  //--------------------------------------------------
   unit_func("set_string");
+  //--------------------------------------------------
 
   parameters->set_string("str1","yahoo");
   unit_assert (strcmp(parameters->value_string("str1"),"yahoo")==0);
   parameters->set_string("none_str","hello");
   unit_assert (strcmp(parameters->value_string("none_str"),"hello")==0);
 
-  // Variable float expressions
-
+  //--------------------------------------------------
   unit_func("evaluate_float");
+  //--------------------------------------------------
 
   double x[] = { 1, 2, 3};
   double y[] = {5 , 4, 3};
@@ -380,9 +406,9 @@ PARALLEL_MAIN_BEGIN
   unit_assert (CLOSE(values_float[1],atan(y[1]/3.0+3*t[1])));
   unit_assert (CLOSE(values_float[2],atan(y[2]/3.0+3*t[2])));
 
-  // Logical expressions
-
+  //--------------------------------------------------
   unit_func("evaluate_logical");
+  //--------------------------------------------------
 
   bool values_logical[] = {false, false, false};
   bool deflts_logical[] = {true, false,true};
@@ -409,36 +435,59 @@ PARALLEL_MAIN_BEGIN
 
   parameters->group_set(0,"List");
 
+  //--------------------------------------------------
   unit_func("list_length");
+  //--------------------------------------------------
+
   unit_assert(parameters->list_length("num1") == 6);
 
+  //--------------------------------------------------
   unit_func("list_value_float");
+  //--------------------------------------------------
+
   unit_assert(parameters->list_value_float(0,"num1") == 1.0);
 
+  //--------------------------------------------------
   unit_func("list_value_logical");
+  //--------------------------------------------------
+
   unit_assert(parameters->list_value_logical(1,"num1") == true);
 
+  //--------------------------------------------------
   unit_func("list_value_integer");
+  //--------------------------------------------------
+
   unit_assert(parameters->list_value_integer(2,"num1") == -37);
 
+  //--------------------------------------------------
   unit_func("list_value_string");
+  //--------------------------------------------------
+
   unit_assert(strcmp(parameters->list_value_string(3,"num1"),"string")==0);
 
+  //--------------------------------------------------
   unit_func("list_evaluate_float");
-  parameters->list_evaluate_float(4,"num1",3,values_float,deflts_float,x,y,z,t);
+  //--------------------------------------------------
+
+  parameters->list_evaluate_float
+    (4,"num1",3,values_float, deflts_float,x,y,z,t);
   unit_assert (values_float[0] == (x[0]-y[0]+2.0*z[0]));
   unit_assert (values_float[1] == (x[1]-y[1]+2.0*z[1]));
   unit_assert (values_float[2] == (x[2]-y[2]+2.0*z[2]));
 
+  //--------------------------------------------------
   unit_func("list_evaluate_logical");
-  parameters->list_evaluate_logical(5,"num1",3,values_logical,deflts_logical,x,y,z,t);
+  //--------------------------------------------------
+
+  parameters->list_evaluate_logical
+    (5,"num1",3,values_logical, deflts_logical,x,y,z,t);
   unit_assert (values_logical[0] == (x[0]+y[0]+t[0] > 0 ));
   unit_assert (values_logical[1] == (x[1]+y[1]+t[1] > 0 ));
   unit_assert (values_logical[2] == (x[2]+y[2]+t[2] > 0 ));
 
-  // group_count(), group(i)
-
-  unit_func("child_count");
+  //--------------------------------------------------
+  unit_func("group_count");
+  //--------------------------------------------------
 
   delete parameters;
   parameters = new Parameters;

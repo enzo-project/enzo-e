@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_Schedule.hpp 
+/// @file     simulation_Schedule.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
 /// @todo     Extract Schedule object for scheduling output
-/// @brief    [\ref Field] Declaration for the Schedule component
+/// @brief    [\ref Simulation] Declaration for the Schedule component
 
-#ifndef FIELD_SCHEDULE_HPP
-#define FIELD_SCHEDULE_HPP
+#ifndef SIMULATION_SCHEDULE_HPP
+#define SIMULATION_SCHEDULE_HPP
 
 //----------------------------------------------------------------------
 /// @enum     schedule_type
@@ -24,8 +24,8 @@ enum schedule_type {
 class Schedule {
 
   /// @class    Schedule
-  /// @ingroup  Field
-  /// @brief    [\ref Field] define interface for various types of simulation output
+  /// @ingroup  Simulation
+  /// @brief    [\ref Simulation] define interface for various types of simulation output
 
 public: // functions
 
@@ -85,4 +85,4 @@ protected: // attributes
 
 };
 
-#endif /* FIELD_SCHEDULE_HPP */
+#endif /* SIMULATION_SCHEDULE_HPP */

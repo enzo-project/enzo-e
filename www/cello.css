@@ -41,11 +41,11 @@ th {
     text-align: center;
 }
 td.pass {  color: #00f;  background-color: #fff; }
-td.FAIL {  color: #f00;   background-color: #faa; color: black;}
-td.yellow {  color: #000;   background-color: #ffa; }
 th.pass {  color: #00f;  background-color: #fff; }
+td.incomplete {  color: #000;   background-color: #ffa; }
+th.incomplete {  color: #000;   background-color: #ffa; }
+td.FAIL {  color: #f00;   background-color: #faa; color: black;}
 th.FAIL {  color: #f00;   background-color: #fff; }
-th.yellow {  color: #000;   background-color: #ffa; }
 td.inverse {  color: #fff;   background-color: #000; }
 strong.pass {  color: #00f;  background-color: #fff; }
 strong.FAIL {  color: #f00;   background-color: #fff; }

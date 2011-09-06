@@ -4,7 +4,6 @@
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      2010-11-10
 /// @brief     Implementation of the Simulation class
-/// @todo      Move dt / cycle update to separate function from p_output()
 
 #include "cello.hpp"
 
@@ -27,6 +26,7 @@ Simulation::Simulation
 /// Initialize the Simulation object
   : factory_(0),
     parameters_(0),
+    parameter_file_(parameter_file),
 #ifndef CONFIG_USE_CHARM
     group_process_(group_process),
 #endif
@@ -59,7 +59,7 @@ Simulation::Simulation
 #else
   monitor_ = Monitor::instance();
 #endif
-  parameters_  = new Parameters(parameter_file,monitor_);
+  parameters_ = new Parameters(parameter_file,monitor_);
 }
 
 //----------------------------------------------------------------------
@@ -92,9 +92,8 @@ void Simulation::initialize() throw()
   initialize_method_();
   initialize_parallel_();
 
-  
   char parameter_file[40];
-  snprintf (parameter_file,40,"cello-%d.%g.out",cycle_,time_);
+  snprintf (parameter_file,40,"%s.out",parameter_file_.c_str());
   parameters_->write(parameter_file);
 }
 
@@ -179,44 +178,6 @@ size_t Simulation::num_method() const throw()
 
 Method * Simulation::method(int i) const throw()
 { return method_list_[i]; }
-
-//----------------------------------------------------------------------
-
-void Simulation::open 
-(
- File *       file, 
- const char * file_name, 
- const char * file_mode 
- ) const throw()
-{
-  INCOMPLETE("Simulation::open");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::close (File * file) const throw()
-{
-  INCOMPLETE("Simulation::close");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::read
-(
- File *            file, 
- file_content_type file_content) throw ()
-{
-  INCOMPLETE("Simulation::read");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::write
-(File * file, file_content_type file_content) const throw ()
-{
-  INCOMPLETE("Simulation::write");
-}
-
 
 //======================================================================
 
@@ -427,27 +388,24 @@ void Simulation::initialize_output_() throw()
   parameters_->group_set(0,"Output");
   //--------------------------------------------------
 
-  int num_groups = parameters_->list_length("groups");
+  int num_file_groups = parameters_->list_length("file_groups");
 
-  for (int index_group=0; index_group < num_groups; index_group++) {
+  for (int index_file_group=0; index_file_group < num_file_groups; index_file_group++) {
 
     //--------------------------------------------------
     parameters_->group_set(0,"Output");
     //--------------------------------------------------
 
-    std::string group = parameters_->list_value_string
-      (index_group,"groups","unknown");
+    std::string file_group = parameters_->list_value_string
+      (index_file_group,"file_groups","unknown");
 
     //--------------------------------------------------
-    parameters_->group_set(1,group);
+    parameters_->group_set(1,file_group);
     //--------------------------------------------------
-    // parameter: Output:<group>:type
-    // parameter: Output:<group>:file_name
-    // parameter: Output:<group>:field_list
-    // parameter: Output:<group>:cycle_interval
-    // parameter: Output:<group>:cycle_list
-    // parameter: Output:<group>:time_interval
-    // parameter: Output:<group>:time_list
+    // parameter: Output:<file_group>:type
+    // parameter: Output:<file_group>:file_name
+    // parameter: Output:<file_group>:field_list
+    // parameter: Output:<file_group>:schedule
     //--------------------------------------------------
 
     std::string type = parameters_->value_string("type","unknown");
@@ -455,7 +413,7 @@ void Simulation::initialize_output_() throw()
     // Error if Output::type is not defined
     if (type == "unknown") {
       char buffer[ERROR_LENGTH];
-      sprintf (buffer,"Output:%s:type parameter is undefined",group.c_str());
+      sprintf (buffer,"Output:%s:type parameter is undefined",file_group.c_str());
       ERROR("Simulation::initialize_output_",buffer);
     }
 
@@ -465,15 +423,11 @@ void Simulation::initialize_output_() throw()
     if (output == NULL) {
       char buffer[ERROR_LENGTH];
       sprintf (buffer,"Unrecognized parameter value Output:%s:type = %s",
-     	       group.c_str(),type.c_str());
+     	       file_group.c_str(),type.c_str());
       ERROR("Simulation::initialize_output_",buffer);
     }
 
     // ASSUMES GROUP AND SUBGROUP ARE SET BY CALLER
-
-    ASSERT("Simulation::initialize_output_",
-	   "Bad type for Output 'name' parameter",
-	   parameters_->type("name") == parameter_string);
 
     // Initialize the file name
 
@@ -493,11 +447,14 @@ void Simulation::initialize_output_() throw()
       if (list_length > 0) {
 	file_name = parameters_->list_value_string(0,"name","");
 	// Add file variable string ("cycle", "time", etc.) to schedule
-	for (int index = 1; index<list_length-1; index++) {
+	for (int index = 1; index<list_length; index++) {
 	  std::string file_var = parameters_->list_value_string(index,"name","");
 	  output->set_file_var(file_var,index-1);
 	}
       }
+    } else {
+      ERROR("Simulation::initialize_output_",
+	    "Bad type for Output 'name' parameter");
     }
 
     // Error if name is unspecified
@@ -537,111 +494,116 @@ void Simulation::initialize_output_() throw()
     // Determine scheduling
     //--------------------------------------------------
 
-    bool cycle_interval,cycle_list,time_interval,time_list;
-
-    cycle_interval = (parameters_->type("cycle_interval") != parameter_unknown);
-    cycle_list     = (parameters_->type("cycle_list")     != parameter_unknown);
-    time_interval  = (parameters_->type("time_interval")  != parameter_unknown);
-    time_list      = (parameters_->type("time_list")      != parameter_unknown);
+    // Error if Output:<file_group>:schedule does not exist
 
     ASSERT("Simulation::initialize_output_",
-	   "exactly one of [cycle|time]_[interval|list] must be defined for each Output group",
-	   (cycle_interval? 1 : 0 + 
-	    cycle_list?     1 : 0 + 
-	    time_interval?  1 : 0 + 
-	    time_list?      1 : 0) == 1);
+	   "The 'schedule' parameter must be specified for all Output file groups",
+	   parameters_->type("schedule") != parameter_unknown);
 
-    if (cycle_interval) {
+    // Determine schedule variable ("cycle" or "time")
+
+    bool var_cycle,var_time;
+    var_cycle = (strcmp(parameters_->list_value_string(0,"schedule"),"cycle")==0);
+    var_time  = (strcmp(parameters_->list_value_string(0,"schedule"),"time")==0);
+
+    printf ("%s\n",parameters_->list_value_string(0,"schedule"));
+
+    // Error if schedule variable is not "cycle" or "time"
+    ASSERT("Simulation::initialize_output_",
+	   "The first 'schedule' parameter list element must be 'cycle' or 'time'",
+	   var_cycle || var_time);
+
+    // Determine schedule type ("interval" or "list")
+
+    bool type_interval,type_list;
+
+    type_interval = (strcmp(parameters_->list_value_string(1,"schedule"),"interval")==0);
+    type_list     = (strcmp(parameters_->list_value_string(1,"schedule"),"list")==0);
+
+    // Error if schedule type is not "interval" or "list"
+
+    ASSERT("Simulation::initialize_output_",
+	   "The second 'schedule' parameter list element "
+	   "must be 'interval' or 'list'",
+	   type_interval || type_list);
+
+    int len = parameters_->list_length("schedule");
+
+    if (var_cycle && type_interval) {
 
       const int max_int = std::numeric_limits<int>::max();
-      int cycle_start = 0;
-      int cycle_step = 0;
-      int cycle_stop = max_int;
-      if (parameters_->type("cycle_interval") == parameter_integer) {
-	cycle_step = parameters_->value_integer("cycle_interval",1);
-      } else if (parameters_->type("cycle_interval") == parameter_list) {
-	if (parameters_->list_length("cycle_interval") != 3) {
-	  ERROR("Simulation::initialize_output_",
-		"Output cycle_interval parameter must be of the form "
-		"[cycle_start, cycle_step, cycle_stop");
-	}
-	cycle_start = 
-	  parameters_->list_value_integer (0,"cycle_interval",0);
-	cycle_step  = 
-	  parameters_->list_value_integer (1,"cycle_interval",1);
-	cycle_stop  = 
-	  parameters_->list_value_integer (2,"cycle_interval",max_int);
+
+      // Set cycle limits
+
+      int start, stop, step;
+
+      if (len == 3) {
+	start = 0;
+	stop  = max_int;
+	step  = parameters_->list_value_integer(2,"schedule");
+      } else if (len == 5) {
+	start = parameters_->list_value_integer(2,"schedule");
+	stop  = parameters_->list_value_integer(3,"schedule");
+	step  = parameters_->list_value_integer(4,"schedule");
       } else {
 	ERROR("Simulation::initialize_output_",
-	      "Output cycle_interval is of the wrong type");
+	      "Output 'schedule' list parameter has wrong number of elements");
       }
-      output->schedule()->set_cycle_interval(cycle_start,cycle_step,cycle_stop);
 
-    } else if (cycle_list) {
+      output->schedule()->set_cycle_interval(start,step,stop);
+
+    } else if (var_cycle && type_list) {
 
       std::vector<int> list;
 
-      if (parameters_->type("cycle_list") == parameter_integer) {
-	list.push_back (parameters_->value_integer("cycle_list",0));
-      } else if (parameters_->type("cycle_list") == parameter_list) {
-	for (int i=0; i<parameters_->list_length("cycle_list"); i++) {
-	  int value = parameters_->list_value_integer(i,"cycle_list",0);
-	  list.push_back (value);
-	  // check monotonicity
-	  if (i > 0) {
-	    int value_prev = parameters_->list_value_integer(i-1,"cycle_list",0);
-	    ASSERT("Simulation::initialize_output_",
-		   "Output cycle_list must be monotonically increasing",
-		   value_prev < value);
-	  }
+      for (int index = 2; index < len; index++) {
+	int value = parameters_->list_value_integer(index,"schedule");
+	list.push_back (value);
+	if (list.size() > 1) {
+	  printf ("%d %d\n",list[list.size()-2],list[list.size()-1]);
+	  ASSERT("Simulation::initialize_output_",
+		 "Output 'schedule' parameter list values must be monotonically increasing",
+		 list[list.size()-2] < list[list.size()-1]);
 	}
       }
 
       output->schedule()->set_cycle_list(list);
 
-    } else if (time_interval) {
+    } else if (var_time && type_interval) {
 
       const double max_double = std::numeric_limits<double>::max();
-      double time_start = 0;
-      double time_step = 0;
-      double time_stop = max_double;
-      if (parameters_->type("time_interval") == parameter_float) {
-	time_step = parameters_->value_float("time_interval",1);
-      } else if (parameters_->type("time_interval") == parameter_list) {
-	if (parameters_->list_length("time_interval") != 3) {
-	  ERROR("Simulation::initialize_output_",
-		"Output time_interval parameter must be of the form "
-		"[time_start, time_step, time_stop");
-	}
-	time_start = 
-	  parameters_->list_value_float (0,"time_interval",0);
-	time_step  = 
-	  parameters_->list_value_float (1,"time_interval",1);
-	time_stop  = 
-	  parameters_->list_value_float (2,"time_interval",max_double);
+
+      // Initialize defaults
+
+      double start, stop, step;
+
+      if (len == 3) {
+	start = 0;
+	stop  = max_double;
+	step  = parameters_->list_value_float(2,"schedule");
+      } else if (len == 5) {
+	start = parameters_->list_value_float(2,"schedule");
+	stop  = parameters_->list_value_float(3,"schedule");
+	step  = parameters_->list_value_float(4,"schedule");
       } else {
 	ERROR("Simulation::initialize_output_",
-	      "Output time_interval is of the wrong type");
+	      "Output 'schedule' list parameter has wrong number of elements");
       }
-      output->schedule()->set_time_interval(time_start,time_step,time_stop);
 
-    } else if (time_list) {
+      output->schedule()->set_time_interval(start,step,stop);
+
+    } else if (var_time && type_list) {
 
       std::vector<double> list;
 
-      if (parameters_->type("time_list") == parameter_float) {
-	list.push_back (parameters_->value_float("time_list",0));
-      } else if (parameters_->type("time_list") == parameter_list) {
-	for (int i=0; i<parameters_->list_length("time_list"); i++) {
-	  double value = parameters_->list_value_float(i,"time_list",0.0);
-	  list.push_back (value);
-	  // check monotonicity
-	  if (i > 0) {
-	    double value_prev = parameters_->list_value_float(i-1,"time_list",0);
-	    ASSERT("Simulation::initialize_output_",
-		   "Output time_list must be monotonically increasing",
-		   value_prev < value);
-	  }
+      for (int index = 2; index < len; index++) {
+	double value = parameters_->list_value_float(index,"schedule");
+	list.push_back (value);
+	if (list.size() > 1) {
+	  ASSERT("Simulation::initialize_output_",
+		 "Output 'schedule' parameter list values must be "
+		 "monotonically increasing",
+		 list[list.size()-2] < list[list.size()-1]);
 	}
       }
 
@@ -651,7 +613,7 @@ void Simulation::initialize_output_() throw()
 
     output_list_.push_back(output); 
 
-  } // (for index_group)
+  } // (for index_file_group)
 
 }
 
@@ -787,145 +749,6 @@ Simulation::Simulation()
 Simulation::Simulation (CkMigrateMessage *m) 
 {
   TRACE("Simulation(msg)");
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Simulation::p_output 
-( int cycle, double time, double dt, bool stop ) throw()
-{
-
-  // Update Simulation cycle and time from reduction to main
-  
-  cycle_ = cycle;
-  time_  = time;
-  dt_    = dt;
-  stop_  = stop;
-
-  // reset output "loop" over output objects
-  output_first();
-
-  // process first output object, which continues with refresh() if done
-  output_next();
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Simulation::output_first() throw()
-{
-  index_output_ = 0;
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Simulation::output_next() throw()
-{
-
-  // find next output
-
-  while (index_output_ < num_output() && 
-	 ! output(index_output_)->schedule()->write_this_cycle(cycle_, time_))
-    ++index_output_;
-
-  // output if any scheduled, else proceed with refresh
-
-  if (index_output_ < num_output()) {
-
-    // Open the file(s)
-    output(index_output_)->open(hierarchy_,cycle_,time_);
-
-    // Call blocks to contribute their data
-    ItPatch it_patch(hierarchy_);
-    Patch * patch;
-    while (( patch = ++it_patch )) {
-      if (patch->blocks_allocated()) {
-	patch->block_array().p_output (index_output_);
-      }
-    }
-
-  } else {
-
-    refresh();
-
-  }
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Simulation::p_output_reduce() throw()
-{
-  int ip       = CkMyPe();
-  int ip_write = ip - (ip % output(index_output_)->process_write());
-
-  // Even self calls this to avoid hanging if case np == 1
-  char buffer[20];
-  sprintf(buffer,"%02d > %02d send",ip,ip_write);
-  if (ip != ip_write) {
-    PARALLEL_PRINTF("%d -> %d calling p_output_write()\n",ip,ip_write);
-    proxy_simulation[ip_write].p_output_write (strlen(buffer),buffer);
-    output_next();
-  } else {
-    PARALLEL_PRINTF("%d -> %d calling p_output_write()\n",ip,ip_write);
-    proxy_simulation[ip].p_output_write(0,0);
-  }
-
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Simulation::p_output_write (int n, char * buffer) throw()
-{
-  Output * out = output(index_output_);
-  int ip       = CkMyPe();
-  int ip_write = ip - (ip % out->process_write());
-  PARALLEL_PRINTF ("%d %d  %d  %d\n",ip,ip_write,CkMyPe(),out->process_write());
-
-  int count = out->counter();
-
-  if (count == 0) {
-    PARALLEL_PRINTF("Initialize writer\n");
-  }
-  if (n == 0) {
-    PARALLEL_PRINTF ("Process reduce this %d\n",ip);
-  } else {
-    PARALLEL_PRINTF ("Process reduce that\n");
-  }
-  
-  if (count == out->process_write()) {
-
-    PARALLEL_PRINTF ("File write / close / next\n");
-
-    // write
-    // close
-    out->close();
-
-    // next
-
-
-    output_next();
-  }
-
-
 }
 
 #endif

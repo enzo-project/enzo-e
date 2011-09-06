@@ -3,7 +3,7 @@
 /// @file     mesh_Hierarchy.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Sep 21 16:12:22 PDT 2010
-/// @brief    Brief description of file mesh_Hierarchy.cpp
+/// @brief    Implementation of the Hierarchy class
 
 #include "cello.hpp"
 

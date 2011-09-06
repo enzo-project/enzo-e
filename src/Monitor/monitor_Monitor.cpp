@@ -179,7 +179,7 @@ void Monitor::print (const char * message, ...) const
     sprintf (buffer_process,"%0d",Mpi::rank());
 #endif
 
-    // Get time (INCOMPLETE)
+    // Get time
 
     char buffer_time[10];
 

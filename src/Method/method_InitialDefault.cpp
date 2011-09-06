@@ -2,7 +2,7 @@
 
 /// @file     method_InitialDefault.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2011-02-16
 /// @todo     Add image mask for field initialization
 /// @todo     Parse initialization parameters once per Simulation rather than once per Block
 /// @brief    Implementation of the InitialDefault class

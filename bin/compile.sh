@@ -1,18 +1,12 @@
 #!/bin/tcsh -f
 
-rm -f out.scons.* fail.scons.*
-
-if ($#argv >= 2) then
-  set arch = ($argv[1])
-  set types = ($argv[2-])
-else if ($#argv == 1) then
-  set arch = $CELLO_ARCH
+if ($#argv >= 1) then
   set types = ($argv)
 else
-  set arch = $CELLO_ARCH
   set types = (serial mpi charm )
 endif
 
+set arch = $CELLO_ARCH
 set prec = $CELLO_PREC
 
 echo
@@ -20,20 +14,22 @@ echo "arch  = $arch"
 echo "types = ( $types )"
 echo "prec  = $prec"
 echo
+
 set procs = 1
 
-rm running.*.*.*
+rm -f "test/*/running.$arch.$prec"
 
 foreach type ($types)
 
+   set dir = test/$type
    set platform = $arch-$type
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
    printf "$d %-14s %-14s" "${platform}" "cleaning..."
    scons arch=$arch type=$type -c >& /dev/null
-   rm -f test/$type/*unit >& /dev/null
-   rm -f bin-$type/* >& /dev/null
+   rm -f $dir/*unit >& /dev/null
+   rm -f bin/$type/* >& /dev/null
    printf "done\n"
 
 
@@ -43,10 +39,12 @@ foreach type ($types)
 
    printf "$d %-14s %-14s" "${platform}" "compiling..."
 
-   touch "running.$arch.$type.$prec"
+   if (! -d $dir) mkdir $dir
 
-   set t = `(time scons arch=$arch type=$type -k -j$procs >& out.scons.$type)`
-   rm -f "running.$arch.$type.$prec"
+   touch "$dir/running.$arch.$prec"
+
+   set t = `(time scons arch=$arch type=$type -k -j$procs >& $dir/out.scons)`
+   rm -f "$dir/running.$arch.$prec"
   
    set secs = `echo $t | awk '{print $3}'`
 
@@ -54,12 +52,12 @@ foreach type ($types)
 
    # count crashes
 
-   cat test/$type/*unit | grep FAIL | grep "0/" | sort > fail.$platform
-   cat test/$type/*unit | grep incomplete | grep "0/" | sort > incomplete.$platform
-   cat test/$type/*unit | grep pass | grep "0/" | sort > pass.$platform
-   set f = `cat fail.$platform | wc -l`
-   set i = `cat incomplete.$platform | wc -l`
-   set p = `cat pass.$platform | wc -l`
+   cat $dir/*unit |grep FAIL      | grep "0/" | sort > $dir/fail.$platform
+   cat $dir/*unit |grep incomplete| grep "0/" | sort > $dir/incomplete.$platform
+   cat $dir/*unit |grep pass      | grep "0/" | sort > $dir/pass.$platform
+   set f = `cat $dir/fail.$platform | wc -l`
+   set i = `cat $dir/incomplete.$platform | wc -l`
+   set p = `cat $dir/pass.$platform | wc -l`
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
@@ -73,12 +71,12 @@ foreach type ($types)
 
    # check if any tests didn't finish
 
-   set crash = `grep "UNIT TEST" test/$type/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
+   set crash = `grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
 
    if ($crash != 0) then
       printf "CRASH: $crash"
       if ($crash != 0) then
-         grep "UNIT TEST" test/$type/*unit | sed 's/BEGIN/END/' | uniq -u | sed 's/:/ /' | awk '{print "   ", $1}'
+         grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | sed 's/:/ /' | awk '{print "   ", $1}'
       endif
    endif
 

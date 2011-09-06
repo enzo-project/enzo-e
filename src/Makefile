@@ -15,10 +15,12 @@ clean:
 
 #=======================================================================
 
-.PHONY: doc doc-html doc-latex
-doc: doc-html doc-latex
+.PHONY: doc doc-html doc-latex doc-xml
+doc: doc-html doc-latex doc-xml
 doc-html:
 	doxygen Doxyfile-html
+doc-xml:
+	doxygen Doxyfile-xml
 doc-latex:
 	doxygen Doxyfile-latex
 	@echo;echo "SEE Makefile FOR MANUAL UPDATES TO latex/refman.tex"; echo

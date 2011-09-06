@@ -14,7 +14,7 @@ Import('use_papi')
 #------------------------------
 
 components = ['enzo-ppm', 'enzo-ppml',
-	      'simulation', 'method',
+	      'simulation', 'method', 'io',
 	      'mesh', 'field',
 	      'disk','memory','parallel',
 	      'parameters', 'monitor',

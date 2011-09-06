@@ -2,13 +2,15 @@
 
 /// @file     disk_File.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2010-05-26
 /// @brief    Implementation of the File class
 
 #include "cello.hpp"
 
 #include "disk.hpp"
 
-File::File() throw ()
+File::File(std::string path, std::string name) throw ()
+  : path_(path),
+    name_(name)
 {
 }

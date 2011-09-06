@@ -5,18 +5,22 @@
 
 /// @file     disk_File.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2010-05-26
 /// @brief    [\ref Disk] Declaration of the File class
 
-/// @enum  file_content_type
-/// @brief Argument for read() and write() (in Hierarchy, Patch, Block,
-/// etc.) to specify what to read or write.
-
-enum file_content_type {
-  file_content_header,
-  file_content_data,
-  file_content_all
+/// @enum scalar_type
+/// @brief Simple scalar data type, e.g. scalar_int, scalar_float, etc.
+enum scalar_type {
+  scalar_type_unknown,
+  scalar_type_char,        // Used for string data, with size + 1 for \0 
+  scalar_type_int,
+  scalar_type_long,
+  scalar_type_float,
+  scalar_type_double,
+  scalar_type_long_double
 };
+
+#define MAX_DISK_ARRAY_RANK 5
 
 class File {
 
@@ -26,26 +30,85 @@ class File {
 
 public: // interface
 
-  /// Constructor
-  File() throw();
+  /// Create a file with the given path and filename
 
-  /// Open the given named file
-  virtual int open(std::string filename, std::string mode) throw() = 0;
+  File (std::string path, std::string name) throw();
+
+  //--------------------------------------------------
+  // Files
+  //--------------------------------------------------
+
+  /// Open an existing file
+
+  virtual void file_open () throw() = 0;
+
+  /// Create a new file
+
+  virtual void file_create () throw() = 0;
 
   /// Close the file
-  virtual void close() throw() = 0;
+
+  virtual void file_close () throw() = 0;
   
-  /// Read data from the file
-  virtual void read(char * buffer, enum precision_enum precision) throw() = 0;
+  /// Read a metadata item associated with the file
 
-  /// Write data to the file
-  virtual void write(const char * buffer, enum precision_enum precision) throw() = 0;
+  virtual void file_meta_read
+  ( void * buffer, std::string name,  enum scalar_type * s_type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
+  
+  /// Write a metadata item associated with the file
 
-private: // functions
+  virtual void file_meta_write
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw() = 0;
+  
+  //--------------------------------------------------
+  // Datasets
+  //--------------------------------------------------
 
+  /// Open an existing dataset for reading
 
-private: // attributes
+  virtual void data_open
+  ( std::string name,  enum scalar_type * type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
 
+  /// Create a new dataset for writing (and open it)
+
+  virtual void data_create
+  ( std::string name,  enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw() = 0;
+
+  /// Read from the opened dataset
+
+  virtual void data_read (void * buffer) throw() = 0;
+
+  /// Write to the opened dataset
+
+  virtual void data_write (const void * buffer) throw() = 0;
+
+  /// Close the opened dataset
+
+  virtual void data_close () throw() = 0;
+
+  /// Read a metadata item associated with the opened dataset
+
+  virtual void data_meta_read
+  ( void * buffer, std::string name,  enum scalar_type * s_type,
+    int * n0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
+  
+  /// Write a metadata item associated with the opened dataset
+
+  virtual void data_meta_write
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw() = 0;
+  
+protected: // attributes
+
+  /// Path to the file
+  std::string path_;
+
+  /// Name of the file
+  std::string name_;
 
 };
 

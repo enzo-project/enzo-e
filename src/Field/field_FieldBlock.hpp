@@ -99,8 +99,13 @@ public: // interface
   /// Deallocate ghost values if allocated
   void deallocate_ghosts(const FieldDescr * field_descr) throw ();
 
+
+#ifndef CONFIG_USE_CHARM /* MPI only */
+
   /// Refresh ghost zones on an internal face
   void refresh_ghosts(const FieldDescr * field_descr) throw();
+
+#endif
 
   /// Split a block into 2, 4, or 8 subblocks; does not delete self
   void split(bool split_x, bool split_y, bool split_z, 
@@ -125,26 +130,10 @@ public: // interface
 	      const char * message,
 	      double lower[3], double upper[3]) const throw();
 
-  /// Write a block to disk as a png image
-  void image (const FieldDescr * field_descr,
-	      const char * prefix,
-	      int cycle, int ibx, int iby, int ibz) const throw();
-
-  //----------------------------------------------------------------------
-  // I/O
-  //----------------------------------------------------------------------
-
-  /// Open a file for the FieldBlock
-  void open (File * file, const char * filename, const char * mode) const throw();
-
-  /// Close a file for the FieldBlock
-  void close (File * file) const throw();
-
-  /// Read "metadata" or field data associated with the FieldBlock
-  void read (File * file, file_content_type file_content) throw ();
-
-  /// Write "metadata" or field data associated with the FieldBlock
-  void write(File * file, file_content_type file_content) const throw ();
+  // /// Write a block to disk as a png image
+  // void image (const FieldDescr * field_descr,
+  // 	      const char * prefix,
+  // 	      int cycle, int ibx, int iby, int ibz) const throw();
 
 private: // functions
 

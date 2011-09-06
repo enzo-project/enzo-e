@@ -1,0 +1,66 @@
+### Problem: 2D Implosion problem
+### Author:  James Bordner (jobordner@ucsd.edu)
+###
+### This file tests the #include preprocessing command
+
+   Domain { 
+      lower = [0.0, 0.0];
+      upper = [0.3, 0.3];
+   } 
+
+   Mesh { 
+      root_size      = [400,400];
+   }
+
+   Field {
+
+      ghosts = 3;
+
+      fields = [
+        "density",
+        "velocity_x",
+        "velocity_y",
+        "total_energy",
+        "internal_energy"
+      ] ;
+
+      courant   = 0.8;
+
+   }
+
+   Method {
+
+      sequence = ["ppm"];
+
+      ppm {
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+         dual_energy = false;
+     }
+   }
+
+   Physics {
+
+      dimensions = 2;
+      gamma = 1.4;
+
+   }
+
+   Boundary { type = "reflecting" }
+
+   Stopping {
+      time  = 2.5;
+      cycle = 100000;
+   }
+
+   Output { 
+
+      groups = ["cycle_step"];
+
+      cycle_step {
+//         name           = "implosion2d-code-%04d";
+         type           = "image";
+         cycle_interval = 10;
+      }
+   }

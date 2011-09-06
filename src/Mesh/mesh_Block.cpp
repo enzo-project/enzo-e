@@ -24,7 +24,7 @@ Block::Block
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
- double xb, double yb, double zb, // Block width
+ double xb, double yb, double zb,    // Block width
  int num_field_blocks) throw ()
   :  field_block_(),
 #ifdef CONFIG_USE_CHARM
@@ -87,7 +87,7 @@ Block::Block
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
- double xb, double yb, double zb, // Block width
+ double xb, double yb, double zb,    // Block width
  int num_field_blocks) throw ()
   : field_block_(),
     count_refresh_face_(0),
@@ -230,13 +230,19 @@ Block * Block::neighbor (axis_enum axis, face_enum face) const throw()
   return NULL;
 }
 
-//----------------------------------------------------------------------
+//======================================================================
+// MPI FUNCTIONS
+//======================================================================
+
+#ifndef CONFIG_USE_CHARM
 
 void Block::refresh_ghosts(const FieldDescr * field_descr,
 			   int index_field_set) throw()
 {
   field_block_[index_field_set]->refresh_ghosts(field_descr);
 }
+
+#endif
 
 //======================================================================
 // CHARM FUNCTIONS
@@ -362,8 +368,8 @@ void Block::prepare()
     FieldDescr * field_descr = simulation->field_descr();
 
     field_block()->print(field_descr,"final",lower_,upper_);
-    field_block()->image(field_descr,"cycle",cycle_,
-			 thisIndex.x,thisIndex.y,thisIndex.z);
+    // field_block()->image(field_descr,"cycle",cycle_,
+    // 			 thisIndex.x,thisIndex.y,thisIndex.z);
 
 #ifdef TEMP_SKIP_REDUCE
     proxy_main.p_exit(num_blocks);
@@ -750,20 +756,7 @@ void Block::p_refresh_face (int n, char * buffer,
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
-void Block::p_output (int index_output)
-{
-
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  simulation->output(index_output)->block(this);
-
-  // Synchronize via main chare before writing
-  int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
-  simulation->proxy_block_reduce().p_output_reduce (num_blocks);
-}
-#endif /* CONFIG_USE_CHARM */
+// SEE Simulation/simulation_CharmOutput.cpp for Block::p_output(int)
 
 //----------------------------------------------------------------------
 

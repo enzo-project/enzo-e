@@ -25,7 +25,6 @@
 
    Mesh { 
       root_size      = [400,400];
-      block_size     = [400,400];
       max_level      = 0; 
 
       # remaining mesh parameters are ignored if max_level == 0
@@ -52,7 +51,7 @@
 
       ghosts = 3;
 
-      # List of user-defined groups, which may be accessed by applications
+      # List of user-defined file_groups, which may be accessed by applications
       # built on Cello to process different groups of fields in different
       # ways.  E.g. "color" fields for Enzo PPM, or "computed" fields that
       # are not permanently stored (like pressure)
@@ -144,13 +143,13 @@
 
    Stopping {
       time  = 2.5;
-      cycle = 1;
+      cycle = 100;
       # redshift
    }
 
    Output { 
 
-      groups = ["cycle_interval_test",
+      file_groups = ["cycle_interval_test",
                 "cycle_list_test",
                 "time_interval_test",
                 "time_list_test",
@@ -158,39 +157,39 @@
                 "time_step_test" ];
 
       cycle_interval_test {
-        name      = "test_Simulation-image_cycle_interval-%04d";
-	type           = "image";
-	cycle_interval = [10,2,20];
+	type = "image";
+        name = ["image_cycle_interval-%04d", "cycle"];
+	schedule = ["cycle","interval", 10,20,2];
       };
 
       cycle_list_test {
-        name      = "test_Simulation-image_cycle_list-%04d";
-	type           = "image";
-	cycle_list     = [2,3,5,7,11];
+	type = "image";
+        name = ["image_cycle_list-%04d","cycle"];
+	schedule = ["cycle","list",2,3,5,7,11];
       };
 
       time_interval_test {
-        name      = "test_Simulation-image_time_interval-%013.8f";
-	type           = "image";
-	time_interval  = [0.1,0.02,0.2];
+	type = "image";
+        name = ["image_time_interval-%013.8f","time"];
+	schedule = ["time","interval",0.1,0.2,0.02];
       };
 
       time_list_test {
-        name      = "test_Simulation-image_time_list-%013.8f";
-	type           = "image";
-	time_list      = [0.11, 0.13, 0.15, 0.17];
+	type = "image";
+        name = ["image_time_list-%013.8f","time"];
+	schedule = ["time","list",0.11, 0.13, 0.15, 0.17];
       };
 
       cycle_step_test {
-        name      = "test_Simulation-image_cycle_step-%04d";
-	type           = "image";
-	cycle_interval = 11;
+	type = "image";
+        name = ["image_cycle_step-%04d","cycle"];
+	schedule = ["cycle","interval",11];
       };
 
       time_step_test {
-        name           = "test_Simulation-image_time_step-%013.8f";
-	type           = "image";
-	time_interval  = 0.042;
+	type = "image";
+        name = ["image_time_step-%013.8f","time"];
+	schedule = ["time","interval",0.042];
       };
 
    }

@@ -7,7 +7,7 @@
 /// @file     error_Error.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @bug      exit() is called instead of MPI_Abort(), etc.
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2011-04-07
 /// @brief    Declaration of the Error class
 //----------------------------------------------------------------------
 
@@ -79,7 +79,7 @@
 /// @brief write the given error, warning, etc. message
 #define message_(FP,TYPE,FILE,LINE,FUNCTION,MESSAGE)		\
   {								\
-    fprintf (FP,"\n");						\
+    fprintf (FP,"\n");			\
     fprintf (FP,"     %10s  %s:%d\n",TYPE,FILE,LINE);	\
     if (strcmp(FUNCTION,"") != 0)				\
       fprintf (FP,"     %10s  %s()\n", TYPE,FUNCTION);	\

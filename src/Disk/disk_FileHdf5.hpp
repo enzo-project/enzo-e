@@ -6,11 +6,8 @@
 /// @file     disk_FileHdf5.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
-/// @todo     Refactor interface to be hdf5-independent (groups, datasets, etc.)
-/// @todo     Add support for [relative|absolute] [directories|groups] (?)
 /// @todo     Support multiple float types: std, native, ieee
 /// @todo     Add error handling (see H5E API)
-/// @todo     Add state checks for file open before adding dataset, etc.
 /// @todo     Add support for compression (see H5Z API)
 /// @brief    [\ref Disk] Interface for the FileHdf5 class
 
@@ -24,71 +21,120 @@ class FileHdf5 : public File {
 
 public: // interface
 
-  /// Initialize the FileHdf5 object
-  FileHdf5() throw();
+  /// Create an HDF5 file with the given path and filename
 
-  /// Open the file with the given mode
-  virtual int open  (std::string name, std::string mode) throw();
+  FileHdf5 (std::string path, std::string name) throw();
+
+  //--------------------------------------------------
+  // Files
+  //--------------------------------------------------
+
+  /// Open an existing file
+
+  virtual void file_open () throw();
+
+  /// Create a new file
+
+  virtual void file_create () throw();
 
   /// Close the file
-  virtual void close () throw();
 
-  /// Read the current dataset into the buffer
-  virtual void read  (char              * buffer,
-		      enum precision_enum precision) throw();
+  virtual void file_close () throw();
+  
+  /// Read a metadata item associated with the file
 
-  /// Write the current dataset from the buffer
-  virtual void write (const char        * buffer,
-		      enum precision_enum precision) throw();
+  virtual void file_meta_read
+  ( void * buffer, std::string name,  enum scalar_type * s_type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+  
+  /// Write a metadata item associated with the file
 
-  /// Open the given group
-  void open_group (std::string name) throw();
+  virtual void file_meta_write
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+  
+  //--------------------------------------------------
+  // Datasets
+  //--------------------------------------------------
 
-  /// Close the current group
-  void close_group () throw();
+  /// Open an existing dataset for reading
 
-  /// Open the given dataset with given size for reading
-  void open_dataset (std::string name, 
-		     int * nx, int * ny, int * nz) throw();
+  virtual void data_open
+  ( std::string name,  enum scalar_type * type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
 
-  /// Open the given dataset with the given size for writing
-  void open_dataset (std::string name, 
-		     enum precision_enum precision,
-		     int nx, int ny, int nz) throw();
+  /// Create a new dataset for writing (and open it)
 
-  /// Close the current dataset
-  void close_dataset () throw();
+  virtual void data_create
+  ( std::string name,  enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
 
+  /// Read from the opened dataset
+
+  virtual void data_read (void * buffer) throw();
+
+  /// Write to the opened dataset
+
+  virtual void data_write (const void * buffer) throw();
+
+  /// Close the opened dataset
+
+  virtual void data_close () throw();
+
+  /// Read a metadata item associated with the opened dataset
+
+  virtual void data_meta_read
+  ( void * buffer, std::string name,  enum scalar_type * s_type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+  
+  /// Write a metadata item associated with the opened dataset
+
+  virtual void data_meta_write
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+  
 private: // functions
 
-  /// Return the HDF5 datatype for the given precision
-  int datatype_(enum precision_enum precision) throw();
+  /// Convert the scalar type to HDF5 datatype
+  int scalar_to_hdf5_(enum scalar_type type) const throw();
+
+  /// Convert the scalar type to an HDF5 datatype
+  enum scalar_type hdf5_to_scalar_(int type) const throw();
 
 private: // attributes
 
   /// HDF5 file descriptor
-  hid_t file_;
-
-  /// HDF5 file name
-  std::string file_name_;
-
-  /// HDF5 file mode
-  std::string file_mode_;
-
-  /// Whether file is open or closed
-  bool  is_open_;
+  hid_t file_id_;
 
   /// HDF5 dataset descriptor
-  hid_t dataset_;
-
-  /// HDF5 dataset name
-  std::string dataset_name_;
+  hid_t data_set_id_;
 
   /// HDF5 dataspace descriptor
-  hid_t dataspace_;
+  hid_t data_space_id_;
 
-  /// Last error
-  herr_t      status_;
+  /// HDF5 attribute descriptor
+  hid_t attribute_id_;
+
+  /// HDF5 error satus
+  herr_t status_id_;
+
+  /// HDF5 dataset name
+  std::string data_name_;
+
+  /// Type of data in the HDF5 datatype
+  scalar_type data_type_;
+
+  /// Dataset rank, 0 to 5
+  int data_rank_;
+
+  /// Dataset size
+  hsize_t data_size_[5];
+
+  /// Whether file is open or closed
+  bool  is_file_open_;
+
+  /// Whether dataset is open or closed
+  bool  is_data_open_;
 
 };
 

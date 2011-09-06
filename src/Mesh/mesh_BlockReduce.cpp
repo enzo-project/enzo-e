@@ -2,10 +2,8 @@
 
 /// @file     mesh_BlockReduce.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file mesh_BlockReduce.cpp
-///
-/// Detailed description of file mesh_BlockReduce.cpp
+/// @date     2011-08-10
+/// @brief    Implementation of the BlockReduce class
 
 #include "cello.hpp"
 
@@ -26,7 +24,13 @@ BlockReduce::BlockReduce()
 {
 }
 
+#endif
+
 //----------------------------------------------------------------------
+
+// See Simulation/simulation_charm_output.cpp for BlockReduce::p_prepare()
+
+#ifdef CONFIG_USE_CHARM
 
 void BlockReduce::p_prepare(int    count, 
 			    int    cycle, 
@@ -51,34 +55,26 @@ void BlockReduce::p_prepare(int    count,
 
   if (++count_prepare_ >= count) {
 
-    //--------------------------------------------------
-    // Simulation::p_output()
-    //--------------------------------------------------
-    proxy_simulation.p_output(cycle, time, dt_hierarchy_, stop_hierarchy_);
-
     // Reset pool
+
     count_prepare_ = 0;
     dt_hierarchy_ = std::numeric_limits<double>::max();
     stop_hierarchy_ = true;
 
+    //--------------------------------------------------
+    // Simulation::p_output()
+    //--------------------------------------------------
+
+    proxy_simulation.p_output(cycle, time, dt_hierarchy_, stop_hierarchy_);
+
   }
 }
 
 #endif
+
 //----------------------------------------------------------------------
 
-//  --- Accumulate block output contributions and write output to disk ---
+// SEE simulation_charm_output.cpp for
+// BlockReduce::p_output_reduce()
 
-#ifdef CONFIG_USE_CHARM
-
-void BlockReduce::p_output_reduce(int count)
-{
-  if (++count_output_ >= count) {
-    INCOMPLETE("BlockReduce::p_output_reduce()");
-    proxy_simulation.p_output_reduce();
-    count_output_ = 0;
-  }
-}
-
-
-#endif
+//----------------------------------------------------------------------

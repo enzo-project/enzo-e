@@ -8,6 +8,7 @@
 /// @date     2009-11-10 16:14:57
 /// @brief    Interface file for the Simulation class
 /// @note     2010-12-17: code-wiki interface review
+/// @todo     subclass Simulation for MPI and CHARM
 
 class Boundary;
 class Factory;
@@ -177,22 +178,6 @@ public: // interface
   /// Return whether to include orthogonal ghosts in updates
   bool temp_update_full() const throw() { return temp_update_full_; };
 
-  //----------------------------------------------------------------------
-  // I/O
-  //----------------------------------------------------------------------
-
-  /// Open a file for the Simulation
-  void open (File * file, const char * name, const char * mode) const throw();
-
-  /// Close a file for the Simulation
-  void close (File * file) const throw();
-
-  /// Read "metadata" or field data associated with the Simulation
-  void read (File * file, file_content_type file_content) throw ();
-
-  /// Write "metadata" or field data associated with the Simulation
-  void write(File * file, file_content_type file_content) const throw ();
-  
 public: // virtual functions
 
   /// initialize the Simulation given a parameter file
@@ -285,6 +270,9 @@ protected: // attributes
 
   /// Parameters associated with this simulation
   Parameters * parameters_;
+
+  /// Parameter file name
+  std::string parameter_file_;
 
   /// Parallel group for the simulation
   GroupProcess * group_process_;
