@@ -228,16 +228,12 @@ PARALLEL_MAIN_BEGIN
   nb1 = (char *)v2 - (char *)v1;
   nb2 = (char *)v3 - (char *)v2;
   nb3 = (char *)v4 - (char *)v3;
-  nb4 = (char *)v5-(char *)v4;
+  nb4 = (char *)v5 - (char *)v4;
 
-  unit_assert (nb1    == 
-	       sizeof (float) * nv1);
-  unit_assert (nb2 == 
-	       sizeof (double)* nv2);
-  unit_assert (nb3 == 
-	       sizeof (double)* nv3);
-  unit_assert (nb4 == 
-	       sizeof (double)* nv4);
+  unit_assert (nb1 == sizeof (float)  * nv1);
+  unit_assert (nb2 == sizeof (double) * nv2);
+  unit_assert (nb3 == sizeof (double) * nv3);
+  unit_assert (nb4 == sizeof (double) * nv4);
 
   unit_func("field_unknowns");  // with ghosts
 
