@@ -25,7 +25,6 @@
 
    Mesh { 
       root_size      = [400,400];
-      block_size     = [400,400];
       max_level      = 0; 
 
       # remaining mesh parameters are ignored if max_level == 0

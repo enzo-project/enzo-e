@@ -10,7 +10,6 @@
 
    Mesh { 
       root_size      = [400,400];
-      block_size     = [8,8];
    }
 
    Field {

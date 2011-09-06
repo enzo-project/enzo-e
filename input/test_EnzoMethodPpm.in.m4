@@ -9,7 +9,6 @@ Stopping {
 Mesh {
    root_size  = [N, N];  # N x N
    patch_size = [N, N];  # N <= mp <= N
-   block_size = [N, N];  # N <= mb <= N
 }
 Field {
    ghosts = [3,3];

@@ -59,7 +59,7 @@ Simulation::Simulation
 #else
   monitor_ = Monitor::instance();
 #endif
-  parameters_  = new Parameters(parameter_file,monitor_);
+  parameters_ = new Parameters(parameter_file,monitor_);
 }
 
 //----------------------------------------------------------------------

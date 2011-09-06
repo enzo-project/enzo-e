@@ -35,3 +35,21 @@ void FilePng::file_close () throw()
   INCOMPLETE("FilePng::file_close");
 }
 
+//----------------------------------------------------------------------
+
+void FilePng::data_read 
+( void * buffer, std::string name, enum scalar_type * type, 
+  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+{
+  INCOMPLETE("FilePng::data_read");
+}
+
+//----------------------------------------------------------------------
+
+void FilePng::data_write 
+( const void * buffer, std::string name, enum scalar_type type, 
+  int n0, int n1, int n2, int n3, int n4) throw()
+{
+  INCOMPLETE("FilePng::data_read");
+}
+

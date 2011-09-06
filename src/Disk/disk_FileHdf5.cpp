@@ -91,8 +91,6 @@ void FileHdf5::file_open () throw()
 //----------------------------------------------------------------------
 
 void FileHdf5::file_close () throw()
-/**
- */
 {
   int retval;
   if (is_data_open_) {
@@ -134,7 +132,7 @@ void FileHdf5::file_close () throw()
 
 // //----------------------------------------------------------------------
 
-// void FileHdf5::open_group (std::string group) throw()
+// void FileHdf5::group_open (std::string group) throw()
 // /**
 //  */
 // {
@@ -143,7 +141,7 @@ void FileHdf5::file_close () throw()
 
 // //----------------------------------------------------------------------
 
-// void FileHdf5::close_group () throw()
+// void FileHdf5::group_close () throw()
 // /**
 //  */
 // {
@@ -205,26 +203,34 @@ void FileHdf5::data_get_
     H5T_class_t hdf5_class = H5Tget_class(hdf5_type);
     size_t      hdf5_size  = H5Tget_size(hdf5_type);
 
-    if (hdf5_class == H5T_INTEGER && hdf5_size == sizeof(char)) {
-      (*type) = scalar_type_char;
-    } else if (hdf5_class == H5T_INTEGER && hdf5_size == sizeof(int)) {
-      (*type) = scalar_type_int;
-    } else if (hdf5_class == H5T_INTEGER && hdf5_size == sizeof(long)) {
-      (*type) = scalar_type_long;
-    } else if (hdf5_class == H5T_FLOAT && hdf5_size == sizeof(float)) {
-      (*type) = scalar_type_float;
-    } else if (hdf5_class == H5T_FLOAT && hdf5_size == sizeof(double)) {
-      (*type) = scalar_type_double;
+    if (hdf5_class == H5T_INTEGER) {
+
+      if (hdf5_size == sizeof(char))   (*type) = scalar_type_char;
+      if (hdf5_size == sizeof(int))    (*type) = scalar_type_int;
+      if (hdf5_size == sizeof(long))   (*type) = scalar_type_long;
+
+    } else if (hdf5_class == H5T_FLOAT) {
+
+      if (hdf5_size == sizeof(float))  (*type) = scalar_type_float;
+      if (hdf5_size == sizeof(double)) (*type) = scalar_type_double;
+
     } else {
+
       char error_message[ERROR_LENGTH];
       sprintf (error_message, 
 	       "Unknown type of class %d and size %d",
 	       hdf5_class, hdf5_size);
       ERROR("FileHdf5::data_get",error_message);
     }
+
+    data_type_ = (*type);
+
+  } else {
+
+    ERROR("FileHdf5::data_get","Argument 'type' is NULL");
+
   }
 
-  data_type_ = (*type);
 
   if (n0) (*n0) = n[0];
   if (n1) (*n1) = n[1];
