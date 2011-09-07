@@ -100,7 +100,7 @@ env.RunSerial('test_Layout.unit',      bin_path + '/test_Layout')
 #----------------------------------------------------------------------
 Clean(env.RunSerial
       ('test_Parameters.unit',  bin_path + '/test_Parameters'),
-      ['#/test.in','#/test.out'])
+      ['#/test.in','#/test1.out','#/test2.out'])
 #----------------------------------------------------------------------
 # PARTICLE COMPONENT
 #----------------------------------------------------------------------
