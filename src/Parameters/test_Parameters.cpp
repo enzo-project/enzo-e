@@ -81,7 +81,7 @@ void generate_input()
   fp << "Float_expr {\n";
   fp << "  var_float_1 {\n";
   fp << "    num1 = x;\n";
-  fp << "    num2 = x + 3.0;\n";
+  fp << "    num2 = x - 3.0;\n";
   fp << "    num3 = x+y+z+t;\n";
   fp << "  }\n";
   fp << "}\n";
@@ -109,57 +109,8 @@ void generate_input()
 
 }
 
-//======================================================================
-
-PARALLEL_MAIN_BEGIN
+void check_parameters(Parameters * parameters)
 {
-
-  PARALLEL_INIT;
-
-  GroupProcess * parallel = GroupProcess::create();
-
-  unit_init (parallel->rank(), parallel->size());
-
-  unit_class("Parameters");
-
-  Monitor::instance()->set_active(false);
-
-  //----------------------------------------------------------------------
-  // test parameter
-  //----------------------------------------------------------------------
-
-  Parameters * parameters = new Parameters;
-
-  // Generate test.in to make sure it exists
-
-  generate_input();
-
-  //--------------------------------------------------
-  unit_func("read");
-  //--------------------------------------------------
-
-  parameters->read ( "test.in" );
-  unit_assert(true);
-
-  // Parameters write()
-
-  //--------------------------------------------------
-  unit_func("write");
-  //--------------------------------------------------
-
-  // TODO
-  //
-  // read test.out
-  // compare all parameters between test.in & test.out
-  // loop parameters1
-  //    test p1 subset p2
-  // loop parameters2
-  //    test p2 subset p1
-  // pass iff p1 subset p2 && p2 subset p1
-
-  parameters->write ( "test.out" );
-  unit_assert(false);
-
   //--------------------------------------------------
   unit_func("group_push");
   //--------------------------------------------------
@@ -238,10 +189,12 @@ PARALLEL_MAIN_BEGIN
 
   parameters->set_logical("logical_1_true",false);
   unit_assert (parameters->value_logical("logical_1_true") == false);
-  parameters->set_logical("none",true);
-  unit_assert (parameters->value_logical("none") == true);
+  parameters->set_logical("logical_1_true",true);
+
+
   parameters->set_logical("none_l1",true);
   unit_assert (parameters->value_logical("none_l1") == true);
+
   parameters->set_logical("none_l2",false);
   unit_assert (parameters->value_logical("none_l2") == false);
 
@@ -270,8 +223,11 @@ PARALLEL_MAIN_BEGIN
 
   parameters->set_integer("integer_1_1",2);
   unit_assert (parameters->value_integer("integer_1_1") == 2);
-  parameters->set_integer("none",3);
-  unit_assert (parameters->value_integer("none") == 3);
+  parameters->set_integer("integer_1_1",1);
+
+  parameters->set_integer("none1",3);
+  unit_assert (parameters->value_integer("none1") == 3);
+
   parameters->set_integer("none2",4);
   unit_assert (parameters->value_integer("none2") == 4);
 
@@ -303,6 +259,8 @@ PARALLEL_MAIN_BEGIN
 
   parameters->set_float("float_1_1p5",27.0);
   unit_assert (parameters->value_float("float_1_1p5") == 27.0);
+  parameters->set_float("float_1_1p5",1.5);
+
   parameters->set_float("none_s",1.5);
   unit_assert (parameters->value_float("none_s") == 1.5);
 
@@ -316,15 +274,15 @@ PARALLEL_MAIN_BEGIN
   parameters->group_set(0,"Float");
   parameters->group_set(1,"group_float_1");
 
-  unit_assert(parameters->value_float("num1") == 30.625);
-  unit_assert(parameters->value_float("num2") == 18.375);
-  unit_assert(parameters->value_float("num3") == 150.0625);
-  unit_assert(parameters->value_float("num4") == 4.0);
+  unit_assert(parameters->value_float("num1") == 24.5+6.125);
+  unit_assert(parameters->value_float("num2") == 24.5-6.125);
+  unit_assert(parameters->value_float("num3") == 24.5*6.125);
+  unit_assert(parameters->value_float("num4") == 24.5/6.125);
 
-  unit_assert(parameters->value_float("Float:group_float_1:num1") == 30.625);
-  unit_assert(parameters->value_float("Float:group_float_1:num2") == 18.375);
-  unit_assert(parameters->value_float("Float:group_float_1:num3") == 150.0625);
-  unit_assert(parameters->value_float("Float:group_float_1:num4") == 4.0);
+  unit_assert(parameters->value_float("Float:group_float_1:num1") == 24.5+6.125);
+  unit_assert(parameters->value_float("Float:group_float_1:num2") == 24.5-6.125);
+  unit_assert(parameters->value_float("Float:group_float_1:num3") == 24.5*6.125);
+  unit_assert(parameters->value_float("Float:group_float_1:num4") == 24.5/6.125);
 
   parameters->group_set(1,"const_float_2");
 
@@ -361,6 +319,8 @@ PARALLEL_MAIN_BEGIN
 
   parameters->set_string("str1","yahoo");
   unit_assert (strcmp(parameters->value_string("str1"),"yahoo")==0);
+  parameters->set_string("str1","testing");
+
   parameters->set_string("none_str","hello");
   unit_assert (strcmp(parameters->value_string("none_str"),"hello")==0);
 
@@ -385,9 +345,9 @@ PARALLEL_MAIN_BEGIN
 
   
   parameters->evaluate_float("num2",3,values_float,deflts_float,x,y,z,t);
-  unit_assert (values_float[0]==x[0]+3.0);
-  unit_assert (values_float[1]==x[1]+3.0);
-  unit_assert (values_float[2]==x[2]+3.0);
+  unit_assert (values_float[0]==x[0]-3.0);
+  unit_assert (values_float[1]==x[1]-3.0);
+  unit_assert (values_float[2]==x[2]-3.0);
 
   parameters->evaluate_float("num3",3,values_float,deflts_float,x,y,z,t);
   unit_assert (values_float[0]==x[0]+y[0]+z[0]+t[0]);
@@ -489,21 +449,21 @@ PARALLEL_MAIN_BEGIN
   unit_func("group_count");
   //--------------------------------------------------
 
-  delete parameters;
-  parameters = new Parameters;
-  parameters->read ("test.in");
+  // delete parameters;
+  // parameters = new Parameters;
+  // parameters->read ("test.in");
   const int NUM_GROUPS = 7;
   struct {
     const char * group;
     int count;
   } child_count[NUM_GROUPS] = {
-    {"Float",       4},
+    {"Float",       4 + 1},
     {"Float_expr",  2},
-    {"Integer",     2},
+    {"Integer",     2 + 2},
     {"List",        1},
-    {"Logical",     2},
+    {"Logical",     2 + 2},
     {"Logical_expr",1},
-    {"String",      2}
+    {"String",      2 + 1}
   };
 
   parameters->group_clear();
@@ -513,13 +473,81 @@ PARALLEL_MAIN_BEGIN
   for (int i=0; i<NUM_GROUPS; i++) {
     parameters->group_set(0,child_count[i].group);
     unit_assert (parameters->group_count() == child_count[i].count);
+    printf ("%d: %d %d\n",i, parameters->group_count() , child_count[i].count);
   }
       
+  //--------------------------------------------------
+  unit_func("write");
+  //--------------------------------------------------
+
+  // TODO
+  //
+  // read test.out
+  // compare all parameters between test.in & test.out
+  // loop parameters1
+  //    test p1 subset p2
+  // loop parameters2
+  //    test p2 subset p1
+  // pass iff p1 subset p2 && p2 subset p1
+
+}
+
+//======================================================================
+
+PARALLEL_MAIN_BEGIN
+{
+
+  PARALLEL_INIT;
+
+  GroupProcess * parallel = GroupProcess::create();
+
+  unit_init (parallel->rank(), parallel->size());
+
+  unit_class("Parameters");
+
+  Monitor::instance()->set_active(false);
+
+  //----------------------------------------------------------------------
+  // test parameter
+  //----------------------------------------------------------------------
+
+  Parameters * parameters1 = new Parameters;
+  Parameters * parameters2 = new Parameters;
+  Parameters * parameters3 = new Parameters;
+
+  generate_input();
+
+  //--------------------------------------------------
+  unit_func("read");
+  //--------------------------------------------------
+
+  parameters1->read ( "test.in" );
+
+  check_parameters(parameters1);
+
+  parameters1->write ( "test1.out" );
+
+
+  parameters2->read("test1.out");
+
+  check_parameters(parameters2);
+
+  parameters2->write ("test2.out");
+
+  parameters3->read("test2.out");
+
+  check_parameters(parameters3);
+
+  delete parameters3;
+  delete parameters2;
+  delete parameters1;
 
   unit_finalize();
 
   PARALLEL_EXIT;
 }
+
+
 
 PARALLEL_MAIN_END
 

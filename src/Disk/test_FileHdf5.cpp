@@ -94,6 +94,8 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
+  printf ("%d %d %d %d %d %d\n",ma_int[0],ma_int[1],ma_int[2],ma_int[3],ma_int[4],ma_int[5]);
+
 
   //--------------------------------------------------
   // Create a file
@@ -318,6 +320,7 @@ PARALLEL_MAIN_BEGIN
 
   scalar_type = scalar_type_unknown;
   hdf5_b.data_meta_read (&mb_int, "meta_int", &scalar_type, &b_mx, &b_my);
+  printf ("%d %d %d %d %d %d\n",ma_int[0],ma_int[1],ma_int[2],ma_int[3],ma_int[4],ma_int[5]);
 
   unit_assert (a_mx == b_mx);
   unit_assert (a_my == b_my);

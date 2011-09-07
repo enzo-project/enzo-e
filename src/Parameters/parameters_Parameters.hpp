@@ -6,12 +6,9 @@
 /// @file     parameters_Parameters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:44:21 PDT 2009
-/// @todo     Add output support for individual parameters, e.g. for Monitor output
 /// @todo     set_list(), etc functions for lists and expressions
-/// @todo     set_value() using string values for all types
 /// @todo     assert_required() to make given parameter required (don't exit since more than one required parameter may be missing)
 /// @todo     Add "check()" function to check individual parameters, or all
-/// @todo     Move Group and subgroup to parameter lists at end with "" default
 /// @todo     Convert current_group_ to std::stack<std::string>
 /// @bug      "x - 0.5" broken since intepreted as "x (-0.5)"; workaround "x - (0.5)"
 /// @bug      Evaluating logical expressions with parentheses seg-faults (fixed?)

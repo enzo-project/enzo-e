@@ -77,7 +77,7 @@ void Param::write
  std::string full_parameter)
 /// @param file_pointer    File pointer to which the parameter is written
 /// @param full_parameter  Name of this parameter including groups
-/// @todo  Writing lists is not implemented yet
+/// @bug                   value_accessed_ is incorrect
 {
 
   // Write the parameter assignment
@@ -86,45 +86,55 @@ void Param::write
   std::string parameter = (i_group == std::string::npos) ?
     full_parameter : full_parameter.substr(i_group+1,std::string::npos);
 
-  fprintf (file_pointer,"%s = %s; ",
+  fprintf (file_pointer,"%s = %s;\n ",
 	   parameter.c_str(),
 	   value_to_string().c_str());
 
   // Write comment describing parameter access properties
-  if (value_accessed_) {
-    fprintf (file_pointer," # Input value\n");
-  } else {
-    fprintf (file_pointer," # Default value\n");
-  }
+  // if (value_accessed_) {
+  //   fprintf (file_pointer," # Accessed\n");
+  // } else {
+  //   fprintf (file_pointer," # Not accessed\n");
+  // }
 }
 
 
 std::string Param::value_to_string ()
 {
-  char string_buffer[80];
+  std::string string_buffer;
+  char char_buffer[1024];
+
   switch (type_) {
   case parameter_string: 
-    sprintf (string_buffer,"\"%s\"",value_string_);
+    string_buffer = std::string("\"") + value_string_ + "\"";
     break;
   case parameter_list:
-    sprintf (string_buffer,"LIST");
-    INCOMPLETE("Param::write");
+    string_buffer = "[ ";
+    for (int i=0; i<value_list_->size(); i++) {
+      if ( i > 0 ) string_buffer += ", ";
+      string_buffer += (*value_list_)[i]->value_to_string();
+    }
+    string_buffer += " ]";
     break;
   case parameter_logical_expr:
   case parameter_float_expr:
-    sprintf_expression(value_expr_,string_buffer);
+    sprintf_expression(value_expr_,char_buffer);
+    string_buffer = char_buffer;
     break;
   case parameter_integer:
-    sprintf (string_buffer,"%d",value_integer_);
+    sprintf (char_buffer,"%d",value_integer_);
+    string_buffer = char_buffer;
     break;
   case parameter_float:
-    sprintf (string_buffer,"%g",value_float_);
+    // '#' format character forces a decimal point
+    sprintf (char_buffer,"%#.15g",value_float_);
+    string_buffer =  char_buffer;
     break;
   case parameter_logical:
-    sprintf (string_buffer,"%s",value_logical_ ? "true" : "false");
+    string_buffer = value_logical_ ? "true" : "false";
     break;
   case parameter_unknown:
-    sprintf (string_buffer,"UNKNOWN\n");
+    string_buffer = "UNKNOWN";
     break;
   }  
   return string_buffer;

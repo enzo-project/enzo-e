@@ -8,6 +8,7 @@
 
 Import('env')
 Import('type')
+Import('use_papi')
 
 #------------------------------
 # DEPENDENCIES
@@ -20,6 +21,9 @@ components = [
               'parameters','monitor',
               'performance', 'error',
               'cello']
+
+if (use_papi):
+	components = components + ['papi','pfm']
 
 libraries  = ['png'] # used only for test_TreeK(?)
 

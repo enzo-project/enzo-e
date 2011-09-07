@@ -1152,7 +1152,7 @@ YY_RULE_SETUP
 case 54:
 YY_RULE_SETUP
 #line 121 "src/Parameters/parse.l"
-{ return '}'; } /* end group ( and end assignment ) */
+{ return '}'; } /* end group */
 	YY_BREAK
 case 55:
 YY_RULE_SETUP

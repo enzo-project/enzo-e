@@ -1,19 +1,19 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef GROUPNAME_CLASSNAME_HPP
-#define GROUPNAME_CLASSNAME_HPP
+#ifndef COMPONENT_CLASSNAME_HPP
+#define COMPONENT_CLASSNAME_HPP
 
-/// @file     groupname_Classname.hpp
+/// @file     component_Classname.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     yyyy-mm-dd
-/// @brief    [\ref Groupname] Declaration of the Classname class
+/// @brief    [\ref Component] Declaration of the Classname class
 ///
 
 class Classname {
 
   /// @class    Classname
-  /// @ingroup  Groupname
-  /// @brief    [\ref Groupname] 
+  /// @ingroup  Component
+  /// @brief    [\ref Component] 
 
 public: // interface
 
@@ -41,5 +41,5 @@ private: // attributes
 
 };
 
-#endif /* GROUPNAME_CLASSNAME_HPP */
+#endif /* COMPONENT_CLASSNAME_HPP */
 

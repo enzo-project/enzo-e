@@ -16,35 +16,46 @@ class IoField : Io {
 
 public: // interface
 
-  /// Constructor
-  IoField() throw()
-  : Io() {};
+  /// Constructor when creating a new File
+  IoField(std::string           directory, 
+	  std::string           filename, 
+	  enum file_format_type format) throw();
+
+  /// Constructor when accessing an existing File
+  IoField(File & file) throw();
 
   /// Destructor
-  virtual ~IoField() throw()
-  {};
+  virtual ~IoField() throw();
 
-  /// Create a File of the given type
-  virtual void create (file_type type) throw();
+  /// Create a new file 
+  virtual void create () throw();
 
-  /// Open a file
-  virtual void open (const char * name, 
-		     const char * mode) throw();
+  /// Open an existing file
+  virtual void open () throw();
 
-  /// Close a file
+  /// Close the file
   virtual void close () throw();
 
-  /// Write header for the associated object
+  /// Write the header for the associated Field
   virtual void write_header() throw ();
 
-  /// Write data for the associated object
+  /// Write the data for the associated Field
   virtual void write_data() throw ();
+
+  /// Read the header for the associated Field
+  virtual void read_header() throw ();
+
+  /// Read the data for the associated Field
+  virtual void read_data() throw ();
 
 protected: // functions
 
 protected: // attributes
 
 private:   // functions
+
+  /// Prohibit default constructor
+  IoField() throw();
 
   /// Prohibit copying 
   IoField(const IoField & io_field) throw();

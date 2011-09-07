@@ -118,7 +118,7 @@ true      { yylval.logical_type = 1; return LOGICAL; }
 "["        { return '['; } /* begin list */
 "]"        { return ']'; } /* end list */
 "{"        { return '{'; } /* begin group */
-"}"        { return '}'; } /* end group ( and end assignment ) */
+"}"        { return '}'; } /* end group */
 ";"        { return ';'; } /* parameter assignment separator */
 ","        { return ','; } /* list element separator */
 "#".*      {  /* ignore comments */ }

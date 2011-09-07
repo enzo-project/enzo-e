@@ -328,7 +328,7 @@ for ($k = 0; $k < 6; $k ++) {
  }
 
 test_summary("Disk",array("FileHdf5","FileIfrit"),
-		    array("test_FileHdf5","test_FileIfrit")); 
+		    array("test_FileIfrit","test_FileHdf5")); 
 test_summary("Error",array("Error"),
 		    array("test_Error")); 
 test_summary("Enzo",array("enzo-p_1","enzo-p_2"),array("enzo-p")); 
@@ -344,8 +344,8 @@ test_summary("Parallel",array("GroupProcess","Layout"),
 		    array("test_GroupProcess","test_Layout")); 
 test_summary("Parameters",array("Parameters"),
 		    array("test_Parameters")); 
-test_summary("Performance",array("Performance"),
-		    array("test_Performance")); 
+test_summary("Performance",array("Papi", "Performance"),
+		    array("test_Papi","test_Performance")); 
 // test_summary("Distribute",array("")); 
 // test_summary("Method",array("")); 
 // test_summary("Particles",array("")); 

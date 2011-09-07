@@ -10,11 +10,12 @@
 
 /// @enum  file_type
 /// @brief Type of file to be read or written
-enum file_type {
-  file_type_hdf5,
-  file_type_ifrit,
-  file_type_png,
-  file_type_adios
+
+enum file_format_type {
+  file_format_hdf5,
+  file_format_ifrit,
+  file_format_png,
+  file_format_adios
 };
 
 class Io {
@@ -27,48 +28,60 @@ class Io {
 
 public: // interface
 
-  /// Constructor
-  Io() throw()
-  : file_(0),
-    path_(""),
-    name_("") {};
+  /// Constructor when creating a new File
+  Io(std::string directory, 
+     std::string filename, 
+     enum file_format_type file_format) throw();
+
+  /// Constructor when accessing an existing File
+  Io(File & file) throw();
 
   /// Destructor
-  virtual ~Io() throw()
-  {};
+  virtual ~Io() throw();
 
-  /// Create a File of the given type
-  virtual void create (file_type type) throw() = 0;
+  /// Create a new file
+  virtual void create () throw() = 0;
 
-  /// Open a file
-  virtual void open (const char * name, 
-		     const char * mode) throw() = 0;
+  /// Open an existing file
+  virtual void open () throw() = 0;
 
-  /// Close a file
+  /// Close the file
   virtual void close () throw() = 0;
 
-  /// Write header for the associated object
+  /// Write the header for the associated object
   virtual void write_header() throw () = 0;
 
-  /// Write data for the associated object
+  /// Write the data for the associated object
   virtual void write_data() throw () = 0;
+
+  /// Read the header for the associated object
+  virtual void read_header() throw () = 0;
+
+  /// Read the data for the associated object
+  virtual void read_data() throw () = 0;
 
 protected: // functions
 
-protected: // attributes
-
-  File * file_;
-  std::string path_;
-  std::string name_;
-
-private:   // functions
+  /// Prohibit default constructor
+  Io() throw();
 
   /// Prohibit copying 
   Io(const Io & io) throw();
 
   /// Prohibit assignment
-  Io & operator= (const Io & io) throw();
+  Io & operator= (const Io & io) throw() ;
 
+protected: // attributes
+
+  /// File object
+  File * file_;
+
+  /// Whether the file is new or pre-existing
+  bool is_file_new_;
+
+  //  Iter * iter_;
+
+  //  Type * type_;
 
 };
 

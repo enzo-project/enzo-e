@@ -383,24 +383,6 @@ const char * op_name[] = {
      }
   }
 
-  char * strcat3 (const char * s1,const char * s2,const char * s3)
-  {
-    char * s = malloc (strlen(s1) + strlen(s2) + strlen(s3) + 1);
-
-    strcpy(s,s1);
-    strcpy(s+strlen(s1),s2);
-    strcpy(s+strlen(s1)+strlen(s2),s3);
-    return s;
-  }
-
-  char * ftoa (double f)
-    { 
-      char * a = malloc(25); 
-
-      sprintf (a,"%24.16e",f);
-      return a;
-    }
-
 %}
 
 
@@ -491,8 +473,8 @@ group:
 group_name parameter_group  {  }
 
 parameter_group :
-'{' parameter_list '}'          { current_group[--current_group_level] = 0; }
-| '{' parameter_list ';' '}'    { current_group[--current_group_level] = 0; }
+   '{' parameter_list '}'        { current_group[--current_group_level] = 0; }
+ | '{' parameter_list ';' '}'    { current_group[--current_group_level] = 0; }
 
 parameter_list : 
                       parameter_assignment  {  }
@@ -727,7 +709,8 @@ void print_expression (struct node_expr * node,
       fprintf (fp,"%d",node->integer_value);
       break;
     case enum_node_float:
-      fprintf (fp,"%g",node->float_value);
+      /* '#' format character forces a decimal point */
+      fprintf (fp,"%#.15g",node->float_value);
       break;
     case enum_node_variable:
       fprintf (fp,"%c",node->var_value);
@@ -772,7 +755,8 @@ void sprintf_expression (struct node_expr * node,
       buffer += strlen(buffer);
       break;
     case enum_node_float:
-      sprintf (buffer,"%g",node->float_value);
+      /* '#' format character forces a decimal point */
+      sprintf (buffer,"%#.15g",node->float_value);
       buffer += strlen(buffer);
       break;
     case enum_node_variable:
@@ -835,7 +819,8 @@ void cello_parameters_print_list(struct param_struct * head, int level)
     }
     switch (p->type) {
     case enum_parameter_float:  
-      printf ("%g\n",p->float_value);  
+      /* '#' format character forces a decimal point */
+      printf ("%#.15g\n",p->float_value);  
       break;
     case enum_parameter_integer: 
       printf ("%d\n",p->integer_value); 

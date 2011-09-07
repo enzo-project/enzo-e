@@ -12,7 +12,7 @@ debug_verbose   = 0
 atsync          = 0 # CHARM++: only load balance when AtSync() called
 
 use_gprof       = 0
-use_papi        = 0
+use_papi        = 1
 use_valgrind    = 0
 use_projections = 1
 

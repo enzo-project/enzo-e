@@ -5,6 +5,7 @@
 /// @date     Thu Jul  9 15:38:43 PDT 2009
 /// @bug      Probable memory leaks
 /// @todo     Add more info to Exception messages, e.g. parameter, expected type and actual type
+/// @todo     Fix idiosynchratic ';' usage: currently must not be between top level groups, but must be between subgroups
 /// @brief    Read in a parameter file and access parameter values
 
 #include "cello.hpp"
@@ -134,6 +135,7 @@ void Parameters::write ( const char * file_name )
   const std::string indent_amount = "    ";
   int indent_size = 4;
   std::string indent_string = "   ";
+  int group_depth = 0;
 
   // Loop over parameters
   for (it_param =  parameter_map_.begin();
@@ -158,8 +160,10 @@ void Parameters::write ( const char * file_name )
       // End old groups
 
       for (int i=i_group; i<n_prev; i++) {
+	--group_depth;
 	indent_string = indent_string.substr(indent_size,std::string::npos);
-	fprintf (file_pointer, "%s}\n",indent_string.c_str());
+	fprintf (file_pointer, "%s}%c\n",indent_string.c_str(),
+		 (group_depth==0) ? ' ' : ';' );
       }
 
       // Begin new groups
@@ -168,6 +172,7 @@ void Parameters::write ( const char * file_name )
 	fprintf (file_pointer,"%s%s {\n",indent_string.c_str(),
 		 group_curr[i].c_str());
 	indent_string = indent_string + indent_amount;
+	++group_depth;
       }
 
       // Print parameter
@@ -194,6 +199,7 @@ void Parameters::write ( const char * file_name )
   for (int i=0; i<n_prev; i++) {
     indent_string = indent_string.substr(indent_size,std::string::npos);
     fprintf (file_pointer, "%s}\n",indent_string.c_str());
+    --group_depth;
   }
 
   if (file_pointer != stdout) fclose(file_pointer);
@@ -249,7 +255,8 @@ double Parameters::value_float
   Param * param = parameter_(parameter);
   if (param && ! param->is_float()) throw ExceptionParametersBadType();
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  sprintf (deflt_string,"%g",deflt);
+  // '#' format character forces a decimal point
+  sprintf (deflt_string,"%#.15g",deflt);
   monitor_access_(parameter,deflt_string);
   return (param != NULL) ? param->get_float() : deflt;
 }
@@ -452,7 +459,8 @@ double Parameters::list_value_float
   Param * param = list_element_(parameter,index);
   if (param && ! param->is_float()) throw ExceptionParametersBadType();
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  sprintf (deflt_string,"%g",deflt);
+  // '#' format character forces a decimal point
+  sprintf (deflt_string,"%#.15g",deflt);
   monitor_access_(parameter,deflt_string,index);
   return (param != NULL) ? param->value_float_ : deflt;
 }

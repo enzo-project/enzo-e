@@ -13,8 +13,8 @@
 //----------------------------------------------------------------------
 
 Output::Output () throw()
-  : schedule_(new Schedule),
-    io_simulation_(0),
+  : io_simulation_(0),
+    schedule_(new Schedule),
     process_write_(0),
 #ifdef CONFIG_USE_CHARM
     count_reduce_(0),
@@ -48,7 +48,7 @@ std::string Output::expand_file_name
   strcpy (buffer_curr,file_name_.c_str());
 
   // loop through file_vars_[] and replace cycle or time variables
-  for (int i=0; i<file_vars_.size(); i++) {
+  for (size_t i=0; i<file_vars_.size(); i++) {
     if (file_vars_[i] == "cycle") {
       sprintf (buffer_next,buffer_curr, cycle);
     } else if (file_vars_[i] == "time") {
