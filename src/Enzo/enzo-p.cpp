@@ -67,30 +67,21 @@ PARALLEL_MAIN_BEGIN
 
   // Read in parameters
 
-  //--------------------------------------------------
-#ifdef CONFIG_USE_CHARM
-  proxy_main     = thishandle;
-
-#endif
-  //--------------------------------------------------
-     
   char * parameter_file = PARALLEL_ARGV[1];
 
   //--------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
 
-  // If using CHARM, create the EnzoSimulationCharm groups
+  proxy_main     = thishandle;
 
-  PARALLEL_PRINTF ("%s:%d  DEBUG\n",__FILE__,__LINE__);
+  // If using CHARM, create the EnzoSimulationCharm groups
 
   CProxy_BlockReduce proxy_block_reduce = 
     CProxy_BlockReduce::ckNew();
 
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
     (parameter_file, strlen(parameter_file)+1, proxy_block_reduce, 0);
-
-  PARALLEL_PRINTF ("%s:%d  DEBUG\n",__FILE__,__LINE__);
 
   //--------------------------------------------------
 
@@ -113,10 +104,6 @@ PARALLEL_MAIN_BEGIN
 
   delete simulation;
       
-#endif
-
-  //--------------------------------------------------
-#ifndef CONFIG_USE_CHARM    
   // display footer text
 
   Monitor::instance()->print ("END ENZO-P");
@@ -132,6 +119,7 @@ PARALLEL_MAIN_BEGIN
   // exit
 
   PARALLEL_EXIT;
+
 #endif
   //--------------------------------------------------
 }
