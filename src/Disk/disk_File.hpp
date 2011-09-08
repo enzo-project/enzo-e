@@ -31,7 +31,6 @@ class File {
 public: // interface
 
   /// Create a file with the given path and filename
-
   File (std::string path, std::string name) throw();
 
   //--------------------------------------------------
@@ -39,69 +38,69 @@ public: // interface
   //--------------------------------------------------
 
   /// Open an existing file
-
   virtual void file_open () throw() = 0;
 
   /// Create a new file
-
   virtual void file_create () throw() = 0;
 
   /// Close the file
-
   virtual void file_close () throw() = 0;
   
   /// Read a metadata item associated with the file
-
   virtual void file_meta_read
   ( void * buffer, std::string name,  enum scalar_type * s_type,
     int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
   
   /// Write a metadata item associated with the file
-
   virtual void file_meta_write
   ( const void * buffer, std::string name, enum scalar_type type,
     int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw() = 0;
   
-  //--------------------------------------------------
+
   // Datasets
-  //--------------------------------------------------
 
   /// Open an existing dataset for reading
-
   virtual void data_open
   ( std::string name,  enum scalar_type * type,
     int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
 
   /// Create a new dataset for writing (and open it)
-
   virtual void data_create
   ( std::string name,  enum scalar_type type,
     int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw() = 0;
 
   /// Read from the opened dataset
-
   virtual void data_read (void * buffer) throw() = 0;
 
   /// Write to the opened dataset
-
   virtual void data_write (const void * buffer) throw() = 0;
 
   /// Close the opened dataset
-
   virtual void data_close () throw() = 0;
 
-  /// Read a metadata item associated with the opened dataset
 
+  // Metadata (attributes)
+
+  /// Read a metadata item associated with the opened dataset
   virtual void data_meta_read
   ( void * buffer, std::string name,  enum scalar_type * s_type,
     int * n0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
   
   /// Write a metadata item associated with the opened dataset
-
   virtual void data_meta_write
   ( const void * buffer, std::string name, enum scalar_type type,
     int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw() = 0;
-  
+
+
+  // Groups
+
+  /// Change to the specified group
+  virtual void group_change (std::string name) throw() = 0;
+
+  /// Get the current group
+  virtual std::string get_group () const throw() = 0;
+
+
 protected: // attributes
 
   /// Path to the file

@@ -21,7 +21,7 @@
 /// @brief    Handle a (non-lethal) warning message
 #define WARNING(FUNCTION,MESSAGE)					\
   {									\
-    message_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
+    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
   }
 
 //----------------------------------------------------------------------
@@ -29,7 +29,7 @@
 /// @brief    Handle a (non-lethal) untested message
 #define UNTESTED(FUNCTION)					\
   {								\
-    message_(stdout,"UNTESTED",__FILE__,__LINE__,FUNCTION,"");	\
+    message2_(stdout,"UNTESTED",__FILE__,__LINE__,FUNCTION,"");	\
   }
 
 //----------------------------------------------------------------------
@@ -37,7 +37,12 @@
 /// @brief    Handle a (lethal) error message
 #define ERROR(FUNCTION,MESSAGE)						\
   {									\
-    message_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
+    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
+    exit(1);								\
+  }
+#define ERROR2(FUNCTION,MESSAGE,ARG1)					\
+  {									\
+    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1);	\
     exit(1);								\
   }
 
@@ -46,7 +51,7 @@
 /// @brief    Placeholder for code that is incomplete
 #define INCOMPLETE(FUNCTION)					\
   {									\
-    message_(stdout,"INCOMPLETE",__FILE__,__LINE__,FUNCTION,"");	\
+    message2_(stdout,"INCOMPLETE",__FILE__,__LINE__,FUNCTION,"");	\
   }
 
 //----------------------------------------------------------------------
@@ -68,7 +73,7 @@
 #define ASSERT(FUNCTION,MESSAGE,ASSERTION)				\
   {									\
     if (!(ASSERTION)) {							\
-      message_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
+      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
       exit(1); /* VIOLATES PARALLEL_EXIT() */                           \
     }									\
   }
@@ -87,6 +92,15 @@
       fprintf (FP,"     %10s  %s\n",   TYPE,MESSAGE);	\
     fprintf (FP,"\n");						\
   }
+
+extern void message2_
+(FILE * fp,
+ const char * type, 
+ const char * file, 
+ int line, 
+ const char * function, 
+ const char * message,
+ ...);
 
 #endif /* ERROR_ERROR_HPP */
 

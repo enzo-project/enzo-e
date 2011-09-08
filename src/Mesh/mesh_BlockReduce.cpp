@@ -55,17 +55,17 @@ void BlockReduce::p_prepare(int    count,
 
   if (++count_prepare_ >= count) {
 
-    // Reset pool
-
-    count_prepare_ = 0;
-    dt_hierarchy_ = std::numeric_limits<double>::max();
-    stop_hierarchy_ = true;
-
     //--------------------------------------------------
     // Simulation::p_output()
     //--------------------------------------------------
 
     proxy_simulation.p_output(cycle, time, dt_hierarchy_, stop_hierarchy_);
+
+    // Reset pool
+
+    count_prepare_ = 0;
+    dt_hierarchy_ = std::numeric_limits<double>::max();
+    stop_hierarchy_ = true;
 
   }
 }

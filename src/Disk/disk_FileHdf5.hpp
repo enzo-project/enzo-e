@@ -25,73 +25,72 @@ public: // interface
 
   FileHdf5 (std::string path, std::string name) throw();
 
-  //--------------------------------------------------
+
   // Files
-  //--------------------------------------------------
 
   /// Open an existing file
-
   virtual void file_open () throw();
 
   /// Create a new file
-
   virtual void file_create () throw();
 
   /// Close the file
-
   virtual void file_close () throw();
   
   /// Read a metadata item associated with the file
-
   virtual void file_meta_read
   ( void * buffer, std::string name,  enum scalar_type * s_type,
     int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
   
   /// Write a metadata item associated with the file
-
   virtual void file_meta_write
   ( const void * buffer, std::string name, enum scalar_type type,
     int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
   
-  //--------------------------------------------------
+
   // Datasets
-  //--------------------------------------------------
 
   /// Open an existing dataset for reading
-
   virtual void data_open
   ( std::string name,  enum scalar_type * type,
     int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
 
   /// Create a new dataset for writing (and open it)
-
   virtual void data_create
   ( std::string name,  enum scalar_type type,
     int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
 
   /// Read from the opened dataset
-
   virtual void data_read (void * buffer) throw();
 
   /// Write to the opened dataset
-
   virtual void data_write (const void * buffer) throw();
 
   /// Close the opened dataset
-
   virtual void data_close () throw();
 
-  /// Read a metadata item associated with the opened dataset
 
+  // Metadata (attributes)
+
+  /// Read a metadata item associated with the opened dataset
   virtual void data_meta_read
   ( void * buffer, std::string name,  enum scalar_type * s_type,
     int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
   
   /// Write a metadata item associated with the opened dataset
-
   virtual void data_meta_write
   ( const void * buffer, std::string name, enum scalar_type type,
     int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+
+
+  // Groups
+
+  /// Change to the specified group
+  virtual void group_change (std::string name) throw();
+
+  /// Get the current group
+  virtual std::string get_group () const throw();
+
   
 private: // functions
 
@@ -106,17 +105,23 @@ private: // attributes
   /// HDF5 file descriptor
   hid_t file_id_;
 
+  /// Whether file is open or closed
+  bool  is_file_open_;
+
+
   /// HDF5 dataset descriptor
   hid_t data_set_id_;
 
   /// HDF5 dataspace descriptor
   hid_t data_space_id_;
 
+
   /// HDF5 attribute descriptor
   hid_t attribute_id_;
 
-  /// HDF5 error satus
-  herr_t status_id_;
+
+  /// HDF4 group descriptor
+  hid_t group_id_;
 
   /// HDF5 dataset name
   std::string data_name_;
@@ -129,9 +134,6 @@ private: // attributes
 
   /// Dataset size
   hsize_t data_size_[5];
-
-  /// Whether file is open or closed
-  bool  is_file_open_;
 
   /// Whether dataset is open or closed
   bool  is_data_open_;

@@ -12,6 +12,8 @@
 // System includes
 //----------------------------------------------------------------------
 
+#include <cstdarg>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

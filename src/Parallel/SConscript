@@ -18,7 +18,7 @@ if (type == "charm"):
 #------------------------------
 
 components = ['monitor',
-	      'performance','error',
+	      'error','performance',
 	      'cello']
 libraries  = ['png']
 
