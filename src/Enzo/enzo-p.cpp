@@ -111,7 +111,7 @@ PARALLEL_MAIN_BEGIN
     monitor_->print ("cycle:  %d",simulation->cycle());
   }
 
-  double time_final  = parameters->value_integer("Testing:time_final",0.0);
+  double time_final  = parameters->value_float("Testing:time_final",0.0);
 
   if (time_final != 0.0) {
     unit_assert (simulation->time()==time_final);
