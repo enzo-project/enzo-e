@@ -44,11 +44,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(ip,np);
 
-#ifdef CONFIG_USE_CHARM
-  monitor_ = new Monitor;
-#else
+ #ifdef CONFIG_USE_CHARM
+   monitor_ = Monitor::instance();
+ #else
   Monitor * monitor_ = Monitor::instance();
-#endif
+ #endif
 
   monitor_->set_active (group_process->is_root());
   monitor_->header();
@@ -99,6 +99,24 @@ PARALLEL_MAIN_BEGIN
   // Run the simulation
 
   simulation->run();
+
+  // Test results: DUPLICATE CODE IN src/main.cpp !!!
+
+  Parameters * parameters = simulation->parameters();
+
+  int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
+
+  if (cycle_final != 0) {
+    unit_assert (simulation->cycle()==cycle_final);
+    monitor_->print ("cycle:  %d",simulation->cycle());
+  }
+
+  double time_final  = parameters->value_integer("Testing:time_final",0.0);
+
+  if (time_final != 0.0) {
+    unit_assert (simulation->time()==time_final);
+    monitor_->print ("time:  %g",simulation->time());
+  }
 
   // Delete the simulation
 

@@ -120,6 +120,13 @@ Hierarchy * Simulation::hierarchy() const throw()
   
 //----------------------------------------------------------------------
 
+Parameters * Simulation::parameters() const throw()
+{
+  return parameters_;
+}
+  
+//----------------------------------------------------------------------
+
 FieldDescr * Simulation::field_descr() const throw()
 {
   return field_descr_;

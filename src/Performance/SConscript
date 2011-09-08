@@ -13,7 +13,7 @@ Import('use_papi')
 
 components = ['monitor',
 	      'error',
-	      'cello']
+	      'test','cello']
 
 libraries  = ['png']
 if (use_papi):

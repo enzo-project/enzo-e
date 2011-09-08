@@ -18,14 +18,14 @@ if (type == "charm"):
                   'parallel','disk',
                   'parameters', 'monitor',
                   'performance','error',
-                  'cello']
+                  'test','cello']
 else:
     components = ['simulation','method','io',
                   'mesh',
                   'parallel','disk',
                   'monitor',
                   'performance','error',
-                  'cello']
+                  'test','cello']
 if (use_papi):
 	components = components + ['papi','pfm']
 

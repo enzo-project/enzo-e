@@ -9,25 +9,34 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
+libraries = []
+components = []
+
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # SOURCE
 #------------------------------
 
 includes = [Glob('*hpp')]
+sources  = [Glob('test*cpp')]
 
 #------------------------------
 # TARGETS
 #------------------------------
+
+libraries  = env.Library ('test', [sources])
 
 #------------------------------
 # INSTALL
 #------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
 
 
 

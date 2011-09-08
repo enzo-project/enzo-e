@@ -117,6 +117,9 @@ public: // interface
   /// Return the Hierarchy
   Hierarchy * hierarchy() const throw();
   
+  /// Return the Parameters
+  Parameters * parameters() const throw();
+  
   /// Return the field descriptor
   FieldDescr * field_descr() const throw();
 

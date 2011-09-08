@@ -11,7 +11,7 @@ Import('type')
 
 components = ['performance','error',
 	      'monitor',
-	      'cello']
+	      'test','cello']
 libraries = ['png']
 
 #------------------------------

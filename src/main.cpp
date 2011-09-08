@@ -9,7 +9,7 @@
 #ifdef CONFIG_USE_CHARM
 
 #include "cello.hpp"
-
+#include "test.hpp"
 #include "parallel.hpp"
 #include "monitor.hpp"
 
@@ -30,14 +30,26 @@ void Main::p_exit(int count)
   if (count_exit_ >= count) {
     count_exit_ = 0;
 #ifdef CHARM_ENZO
-    Simulation * simulation = proxy_simulation.ckLocalBranch();
-    monitor_->print ("cycle: %d",simulation->cycle());
-    monitor_->print ("time:  %g",simulation->time());
-    monitor_->print ("dt:    %d",simulation->dt());
 
-    // int cycle_stop = simulation->parameters()->value_integer("Stopping:cycle",0);
-    // printf ("%d\n",cycle_stop);
-    // unit_assert(simulation->cycle() == cycle_stop);
+    // DUPLICATE CODE IN src/enzo-p.cpp !!!
+
+    Simulation * simulation = proxy_simulation.ckLocalBranch();
+    Parameters * parameters = simulation->parameters();
+
+    int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
+
+    if (cycle_final != 0) {
+      unit_assert (simulation->cycle()==cycle_final);
+      monitor_->print ("cycle:  %d",simulation->cycle());
+    }
+
+    double time_final  = parameters->value_integer("Testing:time_final",0.0);
+
+    if (time_final != 0.0) {
+      unit_assert (simulation->time()==time_final);
+      monitor_->print ("time:  %g",simulation->time());
+    }
+
 #endif
 
     monitor_->print ("END CELLO");

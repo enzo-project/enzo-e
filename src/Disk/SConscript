@@ -10,7 +10,7 @@ Import('type')
 #------------------------------
 
 components = ['error',
-              'cello']
+              'test','cello']
 libraries  = ['hdf5']
 
 if (type == "charm"):

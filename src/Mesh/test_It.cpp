@@ -15,11 +15,9 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-  PARALLEL_INIT;
-
   GroupProcess * group_process = GroupProcess::create();
 
-  unit_init();
+  unit_init(0,1);
 
   // Create Hierarchy over which to iterate
 

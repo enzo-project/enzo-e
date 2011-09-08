@@ -28,7 +28,7 @@
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "test_unit.hpp"
+#include "test_Unit.hpp"
 
 #endif /* TEST_HPP */
 

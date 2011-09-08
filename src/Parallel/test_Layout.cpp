@@ -320,7 +320,8 @@ PARALLEL_MAIN_BEGIN
   unit_assert(layout->is_local(7, -1,0,0) == false);
   unit_assert(layout->is_local(7, ibx,iby,ibz) == false);
 
-  unit_func("layout","global_index");
+  unit_class("Layout");
+  unit_func("global_index");
   for (int i=0; i<layout->local_count(0); i++) {
     unit_assert_quiet(layout->global_index(7, i) == i+7);
   }

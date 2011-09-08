@@ -38,7 +38,7 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-  unit_init();
+  unit_init(0,1);
 
   // Parse command line
 

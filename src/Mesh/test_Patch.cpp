@@ -19,7 +19,7 @@ PARALLEL_MAIN_BEGIN
 
   GroupProcess * group_process = GroupProcess::create();
 
-  unit_init();
+  unit_init(0,1);
 
   unit_class("Patch");
 
@@ -143,7 +143,8 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-    unit_func("Block","field_block");
+    unit_class("Block");
+    unit_func("field_block");
 
     field_block = block ? block->field_block() : NULL;
 
@@ -153,7 +154,8 @@ PARALLEL_MAIN_BEGIN
 
       //--------------------------------------------------
 
-      unit_func("FieldBlock","size");
+      unit_class("FieldBlock");
+      unit_func("size");
 
       int nfx, nfy, nfz;
 
@@ -173,7 +175,8 @@ PARALLEL_MAIN_BEGIN
 
       //--------------------------------------------------
 
-      unit_func("Layout","block_indices");
+      unit_class("Layout");
+      unit_func("block_indices");
 
       int ibx,iby,ibz;
       layout->block_indices(index_global,&ibx,&iby,&ibz);
@@ -190,13 +193,15 @@ PARALLEL_MAIN_BEGIN
       double xpb,ypb,zpb;
       block->upper (&xpb,&ypb,&zpb);
 
-      unit_func("Block","lower");
+      unit_class("Block");
+      unit_func("lower");
 
       unit_assert(cello::err_abs(xm + ibx*(xpb-xmb) , xmb) < 1e-6);
       unit_assert(cello::err_abs(ym + iby*(ypb-ymb) , ymb) < 1e-6);
       unit_assert(cello::err_abs(zm + ibz*(zpb-zmb) , zmb) < 1e-6);
 
-      unit_func("Block","upper");
+      unit_class("Block");
+      unit_func("upper");
 
       unit_assert(cello::err_abs(xm + (ibx+1)*(xpb-xmb) , xpb) < 1e-6);
       unit_assert(cello::err_abs(ym + (iby+1)*(ypb-ymb) , ypb) < 1e-6);
@@ -208,7 +213,8 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-    unit_func("Block","neighbor");
+    unit_class("Block");
+    unit_func("neighbor");
 
     // Block::neighbor()
     unit_assert(unit_incomplete);
@@ -219,7 +225,8 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  unit_func("Block","index_patch");
+  unit_class("Block");
+  unit_func("index_patch");
 
   int * b = new int [nbx*nby*nbz];
   int i;

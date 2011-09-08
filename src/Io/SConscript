@@ -15,7 +15,7 @@ components = [
               'memory','parallel',
               'parameters','monitor',
               'performance', 'error',
-              'cello']
+              'test','cello']
 libraries  = ['png']
 #------------------------------
 # ENVIRONMENTS

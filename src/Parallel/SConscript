@@ -19,7 +19,7 @@ if (type == "charm"):
 
 components = ['monitor',
 	      'error','performance',
-	      'cello']
+	      'test','cello']
 libraries  = ['png']
 
 #------------------------------

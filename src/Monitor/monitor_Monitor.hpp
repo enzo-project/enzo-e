@@ -36,7 +36,9 @@ class Monitor {
 
   //----------------------------------------------------------------------
 
-public: // interface
+private:
+
+  friend class Simulation;
 
   /// Private constructor of the Monitor object [singleton design pattern]
   Monitor();
@@ -45,6 +47,8 @@ public: // interface
   ~Monitor();
 
 //----------------------------------------------------------------------
+
+public: // interface
 
   /// Return an instance of a Monitor object
   static Monitor * instance()

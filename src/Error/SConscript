@@ -9,7 +9,7 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['cello']
+components = ['test','cello']
 libraries  = []
 
 if (type == "charm"):
