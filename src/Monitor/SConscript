@@ -9,17 +9,16 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error',
-	      'performance',
+components = ['parallel',
+	      'performance','error',
 	      'cello']
-testing    = ['parallel']
 libraries  = ['png']
 
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
 
-env        = env.Clone(LIBS=[components,libraries,testing])
+env        = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # SOURCE

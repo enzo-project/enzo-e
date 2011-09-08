@@ -4,6 +4,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-08-10
 /// @brief    Implementation of main-level CHARM entry functions in main.ci
+/// @todo     Add callback function for cleanup, including UNIT TEST END, etc.
 
 #ifdef CONFIG_USE_CHARM
 
@@ -18,11 +19,27 @@
 
 CProxy_Main proxy_main;
 
+#ifdef CHARM_ENZO
+#include "simulation.hpp"
+extern CProxy_Simulation proxy_simulation;
+#endif
+
 void Main::p_exit(int count)
 {
   count_exit_++;
   if (count_exit_ >= count) {
     count_exit_ = 0;
+#ifdef CHARM_ENZO
+    Simulation * simulation = proxy_simulation.ckLocalBranch();
+    monitor_->print ("cycle: %d",simulation->cycle());
+    monitor_->print ("time:  %g",simulation->time());
+    monitor_->print ("dt:    %d",simulation->dt());
+
+    // int cycle_stop = simulation->parameters()->value_integer("Stopping:cycle",0);
+    // printf ("%d\n",cycle_stop);
+    // unit_assert(simulation->cycle() == cycle_stop);
+#endif
+
     monitor_->print ("END CELLO");
     //    unit_finalize();
     // Fake unit_init() for index.php (test.hpp is not included since
