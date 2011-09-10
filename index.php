@@ -24,7 +24,7 @@ function tests($component,$testrun,$output) {
    $source_file = "src/$component/$testrun.cpp";
    $source_html = "<a href=\"$source_file\">$testrun.cpp</a>";
 
-   echo "<h3>Test: $source_html</h3>\n";
+   echo "<h3>Code: $source_html</br>Test: $output</h3>\n";
    if (! file_exists($source_file)) {
      echo "<p><strong class=fail>$source_file does not exist</strong></p>";
    } else {
@@ -412,7 +412,8 @@ component("Enzo");
 
 <h4>enzo-p</h4>
 
-<?php tests("Enzo","enzo-p","test_enzo-p_1","test_enzo-p_2"); ?>
+<?php tests("Enzo","enzo-p","test_enzo-p_1"); ?>
+<?php tests("Enzo","enzo-p","test_enzo-p_2"); ?>
 
 <table>
 <tr>

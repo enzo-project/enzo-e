@@ -38,16 +38,26 @@ void Main::p_exit(int count)
 
     int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
 
+    unit_class ("Enzo-P");
+    unit_func  ("final cycle");
     if (cycle_final != 0) {
       unit_assert (simulation->cycle()==cycle_final);
-      monitor_->print ("cycle:  %d",simulation->cycle());
+      monitor_->print ("[Testing] actual   cycle:  %d",simulation->cycle());
+      monitor_->print ("[Testing] expected cycle:  %d",cycle_final);
     }
 
     double time_final  = parameters->value_float("Testing:time_final",0.0);
 
+    unit_class ("Enzo-P");
+    unit_func  ("final time");
     if (time_final != 0.0) {
-      unit_assert (simulation->time()==time_final);
-      monitor_->print ("time:  %g",simulation->time());
+      double err_rel = cello::err_rel(simulation->time(),time_final);
+      double mach_eps = cello::machine_epsilon(precision_default);
+      unit_assert ( err_rel < mach_eps*100);
+      monitor_->print ("[Testing] actual   time:  %.15g",simulation->time());
+      monitor_->print ("[Testing] expected time:  %.15g",time_final);
+      monitor_->print ("[Testing] relative error: %g",err_rel);
+      monitor_->print ("[Testing] mach_eps*100:   %g",mach_eps*100);
     }
 
 #endif

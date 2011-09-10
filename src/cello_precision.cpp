@@ -88,7 +88,7 @@ namespace cello {
       return 0;
       break;
     case precision_default:
-      return is_precision_supported(default_precision);
+      return machine_epsilon(default_precision);
       break;
     case precision_single: // 32-bit
       return 5.96e-08; // http://en.wikipedia.org/wiki/Machine_epsilon

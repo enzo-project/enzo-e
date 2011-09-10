@@ -98,11 +98,10 @@
 	schedule = ["cycle","interval", 100];
       };
 
-
    }
 
    Testing
    {
-      time_final  = 0.389745501429;
+      time_final  = 0.389745501428842;
       cycle_final = 200;
    }
