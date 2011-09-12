@@ -3,10 +3,10 @@
 /// @file      disk_FileHdf5.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Feb 21 16:11:36 PST 2008
-/// @todo      Factor out common code from file_meta_read() and data_meta_read()
-/// @todo      Factor out common code from file_meta_write() and data_meta_write()
-/// @todo      Factor out common code from file_meta_read() and data_open(), data_read()
-/// @todo      Factor out common code from file_meta_write() and data_create(), data_write()
+/// @todo      Factor out common code from file_read_meta() and data_read_meta()
+/// @todo      Factor out common code from file_write_meta() and data_write_meta()
+/// @todo      Factor out common code from file_read_meta() and data_open(), data_read()
+/// @todo      Factor out common code from file_write_meta() and data_create(), data_write()
 /// @brief     Implementation of the FileHdf5 class
 
 #include "cello.hpp"
@@ -16,12 +16,16 @@
 FileHdf5::FileHdf5 (std::string path, std::string name) throw()
   : File(path,name),
     file_id_(0),
+    is_file_open_(false),
     data_set_id_(0),
     data_space_id_(0),
+    attribute_id_(0),
+    group_id_(0),
+    group_name_("/"),
+    is_group_open_(false),
     data_name_(""),
     data_type_(scalar_type_unknown),
     data_rank_(0),
-    is_file_open_(false),
     is_data_open_(false)
 {
   const int rank_max = 5;
@@ -185,7 +189,9 @@ void FileHdf5::data_open
 
   // Open the data set
   
-  data_set_id_ = H5Dopen( file_id_, name.c_str());
+  hid_t group = (is_group_open_) ? group_id_ : file_id_;
+
+  data_set_id_ = H5Dopen( group, name.c_str());
 
   // error check
 
@@ -274,7 +280,9 @@ void FileHdf5::data_create
 
   // Create the new dataset
 
-  data_set_id_ = H5Dcreate( file_id_,
+  hid_t group = (is_group_open_) ? group_id_ : file_id_;
+
+  data_set_id_ = H5Dcreate( group,
 			    name.c_str(),
 			    scalar_to_hdf5_(type),
 			    data_space_id_,
@@ -382,7 +390,7 @@ void FileHdf5::data_close() throw()
 
 //----------------------------------------------------------------------
 
-void FileHdf5::file_meta_read
+void FileHdf5::file_read_meta
   ( void * buffer, std::string name,  enum scalar_type * type,
     int * n0, int * n1, int * n2, int * n3, int * n4) throw()
 {
@@ -391,7 +399,7 @@ void FileHdf5::file_meta_read
     sprintf (error_message,
 	     "Trying to read metadata from the unopened file %s",
 	     (path_ + name_).c_str());
-    ERROR("FileHdf5::file_meta_read",error_message);
+    ERROR("FileHdf5::file_read_meta",error_message);
   }
 
   hid_t meta_id = H5Aopen_name(file_id_, name.c_str());
@@ -404,7 +412,7 @@ void FileHdf5::file_meta_read
     sprintf (warning_message,
 	     "H5Aopen_name() returned %d when opening attribute %s in file %s",
 	     meta_id, name.c_str(),full_name.c_str());
-    ERROR("FileHdf5::file_meta_read",warning_message);
+    ERROR("FileHdf5::file_read_meta",warning_message);
   }
 
   // Get attribute size
@@ -420,7 +428,7 @@ void FileHdf5::file_meta_read
     sprintf (error_message, 
 	     "Attribute %s in file %s has unsupported rank %d",
 	     name.c_str(),name_.c_str(),rank);
-    ERROR("FileHdf5::file_meta_read",error_message);
+    ERROR("FileHdf5::file_read_meta",error_message);
   }
 
   // set output parameters
@@ -446,7 +454,7 @@ void FileHdf5::file_meta_read
 
 //----------------------------------------------------------------------
 
-void FileHdf5::file_meta_write
+void FileHdf5::file_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
     int n0, int n1, int n2, int n3, int n4) throw()
 {
@@ -455,7 +463,7 @@ void FileHdf5::file_meta_write
     sprintf (error_message,
 	     "Trying to write metadata to the unopened file %s",
 	     (path_ + name_).c_str());
-    ERROR("FileHdf5::file_meta_write",error_message);
+    ERROR("FileHdf5::file_write_meta",error_message);
   }
 
   // Determine the attribute rank
@@ -497,7 +505,7 @@ void FileHdf5::file_meta_write
 
 //----------------------------------------------------------------------
 
-void FileHdf5::data_meta_read
+void FileHdf5::data_read_meta
   ( void * buffer, std::string name,  enum scalar_type * type,
     int * n0, int * n1, int * n2, int * n3, int * n4) throw()
 {
@@ -508,7 +516,7 @@ void FileHdf5::data_meta_read
     sprintf (error_message,
 	     "Trying to read attribute from the unopened file %s",
 	     (path_ + name_).c_str());
-    ERROR("FileHdf5::data_meta_read",error_message);
+    ERROR("FileHdf5::data_read_meta",error_message);
   }
 
   // error check dataset open
@@ -518,7 +526,7 @@ void FileHdf5::data_meta_read
     sprintf (error_message,
              "Trying to read attribute from unopened dataset %s",
              data_name_.c_str());
-    ERROR("FileHdf5::data_meta_read",error_message);
+    ERROR("FileHdf5::data_read_meta",error_message);
   }
 
   hid_t meta_id = H5Aopen_name(data_set_id_, name.c_str());
@@ -531,7 +539,7 @@ void FileHdf5::data_meta_read
     sprintf (warning_message,
 	     "H5Aopen_name() returned %d when opening attribute %s in file %s",
 	     meta_id, name.c_str(),full_name.c_str());
-    ERROR("FileHdf5::data_meta_read",warning_message);
+    ERROR("FileHdf5::data_read_meta",warning_message);
   }
 
   // Get attribute size
@@ -547,7 +555,7 @@ void FileHdf5::data_meta_read
     sprintf (error_message, 
 	     "Attribute %s in file %s has unsupported rank %d",
 	     name.c_str(),name_.c_str(),rank);
-    ERROR("FileHdf5::data_meta_read",error_message);
+    ERROR("FileHdf5::data_read_meta",error_message);
   }
 
   // set output parameters
@@ -573,7 +581,7 @@ void FileHdf5::data_meta_read
 
 //----------------------------------------------------------------------
 
-void FileHdf5::data_meta_write
+void FileHdf5::data_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
     int n0, int n1, int n2, int n3, int n4) throw()
 {
@@ -584,7 +592,7 @@ void FileHdf5::data_meta_write
     sprintf (error_message,
 	     "Trying to write metadata to the unopened file %s",
 	     (path_ + name_).c_str());
-    ERROR("FileHdf5::data_meta_write",error_message);
+    ERROR("FileHdf5::data_write_meta",error_message);
   }
 
   // error check dataset open
@@ -594,7 +602,7 @@ void FileHdf5::data_meta_write
     sprintf (error_message,
              "Trying to read attribute from unopened dataset %s",
              data_name_.c_str());
-    ERROR("FileHdf5::data_meta_write",error_message);
+    ERROR("FileHdf5::data_write_meta",error_message);
   }
 
   // Determine the attribute rank
@@ -634,17 +642,118 @@ void FileHdf5::data_meta_write
   H5Aclose(meta_id);
 }  
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-void FileHdf5::group_change (std::string name) throw()
+void FileHdf5::group_open (std::string name) throw()
 {
+  // Close current group if open
+  group_close();
+  
+  // Error if not an absolute path name
+  if (name[0] != '/') {
+
+    ERROR1("FileHdf5::data_write_meta",
+	  "Group name '%s' must begin with '/'", name.c_str());
+  }
+  
+  group_id_ = H5Gopen(file_id_, name.c_str());
+
+  is_group_open_ = true;
+  
 }
 
 //----------------------------------------------------------------------
 
-std::string FileHdf5::get_group () const throw()
+void FileHdf5::group_create (std::string group_path) throw()
 {
-  return ("");
+  // Close current group if open
+  group_close();
+
+  // Error if not an absolute path name
+  if (group_path[0] != '/') {
+
+    ERROR1("FileHdf5::data_write_meta",
+	  "Group name '%s' must begin with '/'", group_path.c_str());
+  }
+
+
+  // Start at root group
+  
+  std::string group_full = "/";
+  std::string group_rest = group_path;
+  group_rest.erase(0,1);
+
+  group_id_ = H5Gopen(file_id_,group_full.c_str());
+
+  // Loop through ancestor groups, creating if needed
+
+  size_t pos;
+
+  bool done = false;
+  while ( ! done ) {
+
+    pos = group_rest.find("/",0);
+
+    // Get the next subgroup name
+
+    std::string group = group_rest.substr(0,pos);
+    group_rest.erase(0,pos+1);
+
+    // Loop through children to find if subgroup exists
+
+    H5G_info_t group_info;
+    H5Gget_info_by_name (file_id_, group_full.c_str(), &group_info, H5P_DEFAULT);
+
+    bool group_exists = false;
+    for (int i=0; i<group_info.nlinks; i++) {
+      char group_name[80];
+      H5Lget_name_by_idx (file_id_, group_full.c_str(),
+			  H5_INDEX_NAME,
+			  H5_ITER_NATIVE,i,
+			  group_name,80,H5P_DEFAULT);
+      if (group == group_name) {
+	group_exists = true;
+	break;
+      }
+    }
+
+    group_full = group_full + group + "/" ;
+
+    //  Open or create next group in path
+
+    hid_t group_new;
+
+    if (group_exists) {
+      group_new= H5Gopen(file_id_,group_full.c_str());
+    } else {
+      group_new = H5Gcreate (file_id_,group_full.c_str(), H5P_DEFAULT);
+    }
+
+    // Close parent group
+
+    H5Gclose (group_id_);
+
+    // Update group id
+
+    group_id_ = group_new;
+    
+    done = (pos == std::string::npos);
+
+  }
+
+  is_group_open_ = true;
+}
+
+//----------------------------------------------------------------------
+
+void FileHdf5::group_close () throw()
+{
+  herr_t status;
+  if (is_group_open_) {
+    //
+    status = H5Gclose(group_id_);
+  }
+  is_group_open_ = false;
 }
 
 //======================================================================
@@ -703,7 +812,7 @@ int FileHdf5::scalar_to_hdf5_ (enum scalar_type type) const throw()
     hdf5_type = H5T_NATIVE_LONG;
     break;
   default:
-    ERROR2("FileHdf5::type_", "unsupported type %d", type);
+    ERROR1("FileHdf5::type_", "unsupported type %d", type);
     hdf5_type = 0;
     break;
   }

@@ -47,12 +47,12 @@ public: // interface
   virtual void file_close () throw() = 0;
   
   /// Read a metadata item associated with the file
-  virtual void file_meta_read
+  virtual void file_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
     int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
   
   /// Write a metadata item associated with the file
-  virtual void file_meta_write
+  virtual void file_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
     int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw() = 0;
   
@@ -82,24 +82,26 @@ public: // interface
   // Metadata (attributes)
 
   /// Read a metadata item associated with the opened dataset
-  virtual void data_meta_read
+  virtual void data_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
     int * n0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
   
   /// Write a metadata item associated with the opened dataset
-  virtual void data_meta_write
+  virtual void data_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
     int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw() = 0;
 
 
   // Groups
 
-  /// Change to the specified group
-  virtual void group_change (std::string name) throw() = 0;
+  /// Open an existing group
+  virtual void group_open (std::string name) throw() = 0;
+
+  /// Create a new group (and open it)
+  virtual void group_create (std::string name) throw() = 0;
 
   /// Get the current group
-  virtual std::string get_group () const throw() = 0;
-
+  virtual void group_close () throw() = 0;
 
 protected: // attributes
 

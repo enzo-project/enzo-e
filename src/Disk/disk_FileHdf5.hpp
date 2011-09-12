@@ -38,12 +38,12 @@ public: // interface
   virtual void file_close () throw();
   
   /// Read a metadata item associated with the file
-  virtual void file_meta_read
+  virtual void file_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
     int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
   
   /// Write a metadata item associated with the file
-  virtual void file_meta_write
+  virtual void file_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
     int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
   
@@ -73,24 +73,26 @@ public: // interface
   // Metadata (attributes)
 
   /// Read a metadata item associated with the opened dataset
-  virtual void data_meta_read
+  virtual void data_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
     int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
   
   /// Write a metadata item associated with the opened dataset
-  virtual void data_meta_write
+  virtual void data_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
     int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
 
 
   // Groups
 
-  /// Change to the specified group
-  virtual void group_change (std::string name) throw();
+  /// Open an existing group
+  virtual void group_open (std::string name) throw();
+
+  /// Create a new group (and open it)
+  virtual void group_create (std::string name) throw();
 
   /// Get the current group
-  virtual std::string get_group () const throw();
-
+  virtual void group_close () throw();
   
 private: // functions
 
@@ -123,6 +125,12 @@ private: // attributes
   /// HDF4 group descriptor
   hid_t group_id_;
 
+  /// Group name 
+  std::string group_name_;
+
+  /// Whether a group is open or closed
+  bool is_group_open_;
+
   /// HDF5 dataset name
   std::string data_name_;
 
@@ -135,7 +143,7 @@ private: // attributes
   /// Dataset size
   hsize_t data_size_[5];
 
-  /// Whether dataset is open or closed
+  /// Whether a dataset is open or closed
   bool  is_data_open_;
 
 };

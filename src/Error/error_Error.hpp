@@ -40,7 +40,7 @@
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
     exit(1);								\
   }
-#define ERROR2(FUNCTION,MESSAGE,ARG1)					\
+#define ERROR1(FUNCTION,MESSAGE,ARG1)					\
   {									\
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1);	\
     exit(1);								\
