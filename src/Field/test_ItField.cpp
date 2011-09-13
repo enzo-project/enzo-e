@@ -74,6 +74,26 @@ PARALLEL_MAIN_BEGIN
     ++i;
   }
   
+  //--------------------------------------------------
+  unit_class("ItFieldRange");
+  //--------------------------------------------------
+
+  ItField * it_field_range = new ItFieldRange (3,9);
+
+  s = 0;
+  for (it_field_range->first(); ! it_field_range->done(); it_field_range->next()) {
+    s += it_field_range->value();
+  }
+
+  unit_assert (s == 3+4+5+6+7+8+9);
+  
+  s = 0;
+  for (it_field_range->first(); ! it_field_range->done(); it_field_range->next()) {
+    s += it_field_range->value();
+  }
+
+  unit_assert (s == 3+4+5+6+7+8+9);
+  
   unit_finalize();
   
   PARALLEL_EXIT;
