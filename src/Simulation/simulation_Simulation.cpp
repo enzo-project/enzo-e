@@ -440,24 +440,27 @@ void Simulation::initialize_output_() throw()
 
 
     std::string file_name = "";
+    std::vector<std::string> file_args;
 
     if (parameters_->type("name") == parameter_string) {
 
-      // CASE 1:  e.g. name = "filename";
+      // CASE 1: string e.g. name = "filename";
+
       file_name = parameters_->value_string("name","");
 
      
     } else if (parameters_->type("name") == parameter_list) {
-      // CASE 2:  e.g. name = ["filename-cycle-%0d.time-%5.3f", "cycle","time"]
+      // CASE 2: list e.g. name = ["filename-cycle-%0d.time-%5.3f", "cycle","time"]
 
       int list_length = parameters_->list_length("name");
+
+      // file name
       if (list_length > 0) {
 	file_name = parameters_->list_value_string(0,"name","");
-	// Add file variable string ("cycle", "time", etc.) to schedule
-	for (int index = 1; index<list_length; index++) {
-	  std::string file_var = parameters_->list_value_string(index,"name","");
-	  output->set_file_var(file_var,index-1);
-	}
+      }
+      // file args ("cycle", "time", etc.) to schedule
+      for (int index = 1; index<list_length; index++) {
+	file_args.push_back(parameters_->list_value_string(index,"name",""));
       }
     } else {
       ERROR("Simulation::initialize_output_",
@@ -465,11 +468,12 @@ void Simulation::initialize_output_() throw()
     }
 
     // Error if name is unspecified
-    ASSERT("Simulation::initialize_output_",
-	   "Output 'name' must be specified",
+    ASSERT1("Simulation::initialize_output_",
+	   "Output 'name' must be specified for file group %s",
+	   file_group.c_str(),
 	   file_name != "");
 
-    output->set_file_name (file_name);
+    output->set_filename (file_name,file_args);
 
     // Initialize the list of output fields
 
@@ -862,12 +866,15 @@ void Simulation::refresh() throw()
 
 #ifndef CONFIG_USE_CHARM
 
-void Simulation::output()
+void Simulation::scheduled_output()
 
 {
   for (size_t i=0; i<output_list_.size(); i++) {
     Output * output = output_list_[i];
-    output->scheduled_write(field_descr_, hierarchy_,cycle_,time_);
+    bool is_scheduled = output->schedule()->write_this_cycle(cycle_,time_);
+    if (is_scheduled) {
+      output->scheduled_write(field_descr_, hierarchy_,cycle_,time_);
+    }
   }
 }
 

@@ -55,8 +55,9 @@ if (type == "charm"):
 test_field_block = env.Program (['test_FieldBlock.cpp',  sources])
 test_field_descr = env.Program (['test_FieldDescr.cpp',  sources])
 test_field_face  = env.Program (['test_FieldFace.cpp',  sources])
+test_it_field    = env.Program (['test_ItField.cpp',  sources])
 
-binaries = [test_field_block, test_field_descr, test_field_face]
+binaries = [test_field_block, test_field_descr, test_field_face, test_it_field]
 
 #------------------------------
 # INSTALL

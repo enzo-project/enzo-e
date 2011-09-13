@@ -105,7 +105,7 @@ public: // interface
 #else
 
   /// Perform scheduled output for this cycle_ and time_
-  void output();
+  void scheduled_output();
 
 #endif
 

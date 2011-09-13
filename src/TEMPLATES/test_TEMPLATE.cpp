@@ -23,7 +23,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func ("function");
 
-  unit_assert (classname != NULL)
+  unit_assert (classname != NULL);
 
   unit_finalize();
 

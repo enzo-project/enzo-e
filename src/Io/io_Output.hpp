@@ -24,18 +24,22 @@ public: // functions
   /// Create an uninitialized Output object with the given file_name format
   Output() throw();
 
-  /// Set file name
-  void set_file_name (std::string file_name) throw()
-  { file_name_ = file_name; };
+   /// Set file name
+  void set_filename (std::string filename,
+		      std::vector<std::string> fileargs) throw()
+   {
+     file_name_ = filename; 
+     file_args_ = fileargs;
+   };
 
-  /// Set file name variable to use
-  void set_file_var (std::string file_var, size_t index) throw()
-  { 
-    if ((index >= file_vars_.size())) {
-      file_vars_.resize(index+1);
-    }
-    file_vars_[index] = file_var;
-  }
+  // /// Set file name variable to use
+  // void set_file_var (std::string file_var, size_t index) throw()
+  // { 
+  //   if ((index >= file_args_.size())) {
+  //     file_args_.resize(index+1);
+  //   }
+  //   file_args_[index] = file_var;
+  // }
 
   /// Set field list
   void set_field_list (std::vector<int> field_list) throw();
@@ -136,7 +140,7 @@ protected: // attributes
   std::string file_name_;
 
   /// Format strings for file name, if any ("cycle", "time", etc.)
-  std::vector<std::string> file_vars_;
+  std::vector<std::string> file_args_;
 
   /// Whether Output is scheduled for next call to scheduled write
   bool scheduled_;

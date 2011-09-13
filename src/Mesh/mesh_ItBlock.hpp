@@ -36,4 +36,4 @@ private: // attributes
 
 };
 
-#endif /* MESH_IT_BLOCK__HPP */
+#endif /* MESH_IT_BLOCK_HPP */

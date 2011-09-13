@@ -20,7 +20,7 @@ Output::Output () throw()
     count_reduce_(0),
 #endif
     file_name_(""),
-    file_vars_(),
+    file_args_(),
     field_list_()
 {
 }
@@ -47,16 +47,16 @@ std::string Output::expand_file_name
 
   strcpy (buffer_curr,file_name_.c_str());
 
-  // loop through file_vars_[] and replace cycle or time variables
-  for (size_t i=0; i<file_vars_.size(); i++) {
-    if (file_vars_[i] == "cycle") {
+  // loop through file_args_[] and replace cycle or time variables
+  for (size_t i=0; i<file_args_.size(); i++) {
+    if (file_args_[i] == "cycle") {
       sprintf (buffer_next,buffer_curr, cycle);
-    } else if (file_vars_[i] == "time") {
+    } else if (file_args_[i] == "time") {
       sprintf (buffer_next,buffer_curr, time);
     } else {
       char buffer[CELLO_STRING_LENGTH];
       sprintf (buffer,"Unknown file variable #%d '%s' for file '%s'",
-	       i,file_vars_[i].c_str(),file_name_.c_str());
+	       i,file_args_[i].c_str(),file_name_.c_str());
       ERROR("Output::expand_file_name",buffer);
     }
     strcpy (buffer_curr, buffer_next);
@@ -75,11 +75,8 @@ void Output::scheduled_write
  bool root_call
  ) throw()
 {
-  if (schedule_->write_this_cycle(cycle, time)) {
-    // Write all Hierarchy fields
-    for (size_t i = 0; i<field_list_.size(); i++) {
-      write (field_descr, i, hierarchy,cycle,time,root_call); 
-    }
+  for (size_t i = 0; i<field_list_.size(); i++) {
+    write (field_descr, i, hierarchy,cycle,time,root_call); 
   }
 }
 
@@ -95,11 +92,8 @@ void Output::scheduled_write
  bool root_call
  ) throw()
 {
-  if (schedule_->write_this_cycle(cycle, time)) {
-    // Write all Patch fields
-    for (size_t i = 0; i<field_list_.size(); i++) {
-      write (field_descr, i, patch,hierarchy,cycle,time,root_call); 
-    }
+  for (size_t i = 0; i<field_list_.size(); i++) {
+    write (field_descr, i, patch,hierarchy,cycle,time,root_call); 
   }
 }
 
@@ -116,11 +110,8 @@ void Output::scheduled_write
  bool root_call
  ) throw()
 {
-  if (schedule_->write_this_cycle(cycle, time)) {
-    // Write all Block fields
-    for (size_t i = 0; i<field_list_.size(); i++) {
-      write (field_descr, i, block, patch, hierarchy,cycle,time,root_call); 
-    }
+  for (size_t i = 0; i<field_list_.size(); i++) {
+    write (field_descr, i, block, patch, hierarchy,cycle,time,root_call); 
   }
 }
 

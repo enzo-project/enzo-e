@@ -66,8 +66,8 @@ void EnzoSimulationMpi::run() throw()
   }
 
   // Perform any scheduled output
-
-  output();
+  
+  scheduled_output();
   
   //--------------------------------------------------
   // INITIAL STOPPING CRITERIA TEST
@@ -228,10 +228,7 @@ void EnzoSimulationMpi::run() throw()
 
     // Perform any scheduled output
 
-    for (size_t i=0; i<output_list_.size(); i++) {
-      Output * output = output_list_[i];
-      output->scheduled_write(field_descr_, hierarchy_,cycle_,time_);
-    }
+    scheduled_output();
 
   } // while (! stop_hierarchy)
 
