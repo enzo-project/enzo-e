@@ -176,7 +176,8 @@ protected: // attributes
 
        if ( ! ( ( index_image_x < image_size_x_) &&
 		 (index_image_y < image_size_y_)) ) {
-	 printf ("Invalid Access axis %d index(%d %d)  image(%d %d)\n",
+	 ERROR5 ("OutputImage::image_reduce_",
+		 "Invalid Access axis %d index(%d %d)  image(%d %d)\n",
 		 axis, index_image_x, index_image_y, image_size_x_,image_size_y_);
        }
 

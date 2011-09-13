@@ -291,7 +291,7 @@ void Block::p_initial()
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i]->allocate_array(field_descr);
     field_block_[i]->allocate_ghosts(field_descr);
-    WARNING("Block::p_initial","Clearing field block values to non-zero");
+    WARNING1("Block::p_initial","Clearing field block values to %g",TEMP_CLEAR_VALUE);
     field_block_[i]->clear(field_descr,TEMP_CLEAR_VALUE);
   }
 

@@ -43,7 +43,7 @@ std::string Output::expand_file_name
   char buffer_curr[CELLO_STRING_LENGTH];
   char buffer_next[CELLO_STRING_LENGTH];
 
-  // copy file name (which may contain printf format strings) to buffer
+  // copy file name (including format strings) to buffer
 
   strcpy (buffer_curr,file_name_.c_str());
 

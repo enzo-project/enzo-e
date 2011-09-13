@@ -32,9 +32,11 @@ PARALLEL_MAIN_BEGIN
 
   FieldDescr * field_descr = new FieldDescr;
 
-  // Set Patch size (12,12,12)
+  // Set Patch size, offset, and blocking
 
   int patch_size[] = {12,12,12};
+
+  int patch_offset[] = {5, 2, 9};
 
   int patch_blocking[] = {3,3,3};
 
@@ -48,6 +50,7 @@ PARALLEL_MAIN_BEGIN
   Patch * patch = factory->create_patch 
     (group_process,
      patch_size[0],     patch_size[1],     patch_size[2],
+     patch_offset[0],   patch_offset[1],   patch_offset[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2],
      domain_lower[0],   domain_lower[1],   domain_lower[2],
      domain_upper[0],   domain_upper[1],   domain_upper[2]);
@@ -55,9 +58,8 @@ PARALLEL_MAIN_BEGIN
   unit_assert(patch != NULL);
 
   //--------------------------------------------------
-  unit_func("size");
 
-  // Test that patch size is correct
+  unit_func("size");
 
   int npx,npy,npz;
 
@@ -66,6 +68,18 @@ PARALLEL_MAIN_BEGIN
   unit_assert(patch_size[0]==npx && 
 	      patch_size[1]==npy && 
 	      patch_size[2]==npz);
+
+  //--------------------------------------------------
+
+  unit_func("offset");
+
+  int nx0,ny0,nz0;
+
+  patch->offset(&nx0,&ny0,&nz0);
+
+  unit_assert(patch_offset[0]==nx0 && 
+	      patch_offset[1]==ny0 && 
+	      patch_offset[2]==nz0);
 
   //--------------------------------------------------
 

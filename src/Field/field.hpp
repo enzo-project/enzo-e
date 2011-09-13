@@ -37,6 +37,7 @@
 class FieldBlock;
 class FieldFace;
 
+#include "field_ItField.hpp"
 #include "field_FieldDescr.hpp"
 #include "field_FieldBlock.hpp"
 #include "field_FieldFace.hpp"

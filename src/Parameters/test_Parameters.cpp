@@ -473,7 +473,6 @@ void check_parameters(Parameters * parameters)
   for (int i=0; i<NUM_GROUPS; i++) {
     parameters->group_set(0,child_count[i].group);
     unit_assert (parameters->group_count() == child_count[i].count);
-    printf ("%d: %d %d\n",i, parameters->group_count() , child_count[i].count);
   }
       
   //--------------------------------------------------

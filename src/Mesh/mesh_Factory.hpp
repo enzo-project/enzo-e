@@ -29,6 +29,7 @@ public: // interface
   virtual Patch * create_patch
   (GroupProcess * group_process,
    int nx,   int ny,  int nz,
+   int nx0,  int ny0, int nz0,
    int nbx,  int nby, int nbz,
    double xm, double ym, double zm,
    double xp, double yp, double zp) const throw();

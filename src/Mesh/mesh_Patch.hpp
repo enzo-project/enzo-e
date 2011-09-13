@@ -25,6 +25,7 @@ class Patch
   Patch(const Factory * factory,
 	GroupProcess * group_process,
 	int nx,   int ny,  int nz,
+	int nx0,  int ny0, int nz0,
 	int nbx,  int nby, int nbz,
 	double xm, double ym, double zm,
 	double xp, double yp, double zp) throw();
@@ -42,6 +43,9 @@ class Patch
 
   /// Return the size of the patch in number of grid cells
   void size (int * nx, int * ny=0, int * nz=0) const throw();
+
+  /// Return the offset of the patch relative to its parent patch
+  void offset (int * nx0, int * ny0=0, int * nz0=0) const throw();
 
   /// Return the number of blocks along each dimension
   void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
@@ -127,6 +131,9 @@ protected: // attributes
 
   /// Size of the patch
   int size_[3];
+
+  /// Offset of the patch relative to its parent patch 
+  int offset_[3];
 
   /// How the Patch is distributed into Blocks
   int blocking_[3];

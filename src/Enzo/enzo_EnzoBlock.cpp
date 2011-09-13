@@ -69,7 +69,6 @@ EnzoBlock::EnzoBlock
     SubgridFluxes(0)
 {
   int i,j;
-  TRACE("EnzoBlock::EnzoBlock");
   for (i=0; i<MAX_DIMENSION; i++) {
     AccelerationField[i] = 0;
 

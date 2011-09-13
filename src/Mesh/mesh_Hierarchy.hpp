@@ -67,46 +67,6 @@ public: // interface
   const Factory * factory () const throw()
   { return factory_; }
 
-
-  /*
-    @@@@@@@@@@@@@@@@@@@@@@@@@@
-  /// Set max_level
-  void set_max_level(int max_level) throw ();
-
-  /// Return max_level
-  int max_level() const throw ();
-
-  /// Set refinement factor
-  void set_refine_factor(int refine) throw ();
-
-  /// Return refinement factor
-  int refine_factor() const throw ();
-
-  /// Set whether to avoid level jumps
-  void set_balanced(bool balanced) throw ();
-
-  /// Return whether to avoid level jumps
-  bool balanced() const throw ();
-
-  /// Set whether to backfill levels
-  void set_backfill(bool backfill) throw ();
-
-  /// Return whether to backfill levels
-  bool backfill() const throw ();
-
-  /// Set whether to coalesce patches
-  void set_coalesce(bool coalesce) throw ();
-
-  /// Return whether to coalesce patches
-  bool coalesce() const throw ();
-
-    @@@@@@@@@@@@@@@@@@@@@@@@@@
-  */
-
-  //----------------------------------------------------------------------
-  // I/O
-  //----------------------------------------------------------------------
-
 protected: // attributes
 
   /// Factory for creating Simulations, Hierarchies, Patches and Blocks
@@ -121,35 +81,11 @@ protected: // attributes
   //  strict_auto_ptr<TreeK> tree_;
   TreeK * tree_;
 
-  /// Lower extent of the patch
+  /// Lower extent of the hierarchy
   double lower_[3];
 
-  /// Upper extent of the patch
+  /// Upper extent of the hierarchy
   double upper_[3];
-
-  /*
-  /// Refinement factor = 2, 4, etc.
-  /// Parameter Hierarchy::refine
-  int refine_;
-
-  /// Maximum level for the hierarchy (0 = unigrid) assuming r=2
-  /// Parameter Hierarchy::max_level
-  int max_level_;
-
-  /// Whether the tree is balanced or "full"
-  /// Parameter Hierarchy::balanced
-  bool balanced_;
-
-  /// Whether to backfill for refine > 2 to regain r == 2 balance
-  /// Parameter Hierarchy::backfill
-  bool backfill_;
-
-  /// Whether to coalesce small patches into one big one
-  /// Parameter Hierarchy::coalesce
-  bool coalesce_;
-
-    @@@@@@@@@@@@@@@@@@@@@@@@@@
-  */
 
 };
 

@@ -19,6 +19,7 @@
 
 #include "cello.hpp"
 
+#include "error.hpp"
 #include "parallel.hpp"
 #include "memory.hpp"
 

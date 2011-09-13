@@ -132,7 +132,7 @@ protected: // attributes
   int count_reduce_;
 #endif
 
-  /// Name of the file to write, including printf-type format
+  /// Name of the file to write, including format arguments
   std::string file_name_;
 
   /// Format strings for file name, if any ("cycle", "time", etc.)

@@ -219,13 +219,19 @@ Output * EnzoSimulation::create_output_ ( std::string type ) throw ()
 /// @param filename   File name format for the output object
 {
 
-  Output * output = 0;
+  Output * output = NULL;
 
-  if (type == "image") {
-    output = new OutputImage ();
+  // Create Enzo-specific output types
+
+  // ...
+
+  // Create a Cello output type using base class
+
+  if (output == NULL) {
+    output = Simulation::create_output_(type);
   }
 
-  if (output == 0) {
+  if (output == NULL) {
     char buffer[ERROR_LENGTH];
     sprintf (buffer,"Cannot create Output type '%s'",type.c_str());
     ERROR("EnzoSimulation::create_output_", buffer);

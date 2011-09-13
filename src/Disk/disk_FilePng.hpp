@@ -35,12 +35,6 @@ public: // interface
   ( const void * buffer, std::string name, enum scalar_type type, 
     int n0, int n1=0, int n2=0, int n3=0, int n4=0) throw();
 
-  // /// Open the given group
-  // void open_group (std::string group) throw();
-
-  // /// Close the current group
-  // void close_group () throw();
-
 private: // functions
 
 private: // attributes

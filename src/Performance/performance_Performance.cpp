@@ -131,12 +131,11 @@ void Performance::begin_group(unsigned group_id)
   
   if ( current_group_ ) {
     // begin_group() called when another group is already active
-    char message [ ERROR_LENGTH ];
-    sprintf (message, 
-	     "Mismatch between begin_group(%s) and begin_group(%s)",
+	     
+    WARNING2("Performance::begin_group",
+	     "begin_group(%s) called before end_group(%s)",
 	     group_names_.at(current_group_).c_str(),
 	     group_names_.at(group_id).c_str());
-    WARNING("Performance::begin_group",message);
 
     // End the mistakenly active group
     end_group(current_group_);
@@ -153,11 +152,10 @@ void Performance::end_group(unsigned id_group)
 {
   if (id_group != current_group_) {
     // end_group() called with an inactive one
-    char message [ ERROR_LENGTH ];
-    sprintf (message, "Mismatch between begin_group(%s) and end_group(%s)",
+    WARNING2("Performance::end_group",
+	     "Mismatch between begin_group(%s) and end_group(%s)",
 	     group_names_[current_group_].c_str(),
 	     group_names_[id_group].c_str());
-    WARNING("Performance::end_group",message);
   }
 
   current_group_ = 0;

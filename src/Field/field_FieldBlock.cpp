@@ -553,11 +553,12 @@ void FieldBlock::print (const FieldDescr * field_descr,
 		max = MAX(max,field[i]);
 		sum += field[i];
 		if (field[i]==TEMP_CLEAR_VALUE) {
-		  printf ("TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
+		  ERROR8 ("FieldBlock::print",
+			  "TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
 			  message,index_field,x,y,z,ix,iy,iz);
 		}
 #ifdef CELLO_DEBUG_VERBOSE
-		printf ("%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
+		PARALLEL_PRINTF ("%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
 #endif
 	      }
 	    }
@@ -589,11 +590,12 @@ void FieldBlock::print (const FieldDescr * field_descr,
 		sum += field[i];
 		sum += field[i];
 		if (field[i]==TEMP_CLEAR_VALUE) {
-		  printf ("TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
+		  ERROR8("FieldBlock::print",
+			 "TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
 			  message,index_field,x,y,z,ix,iy,iz);
 		}
 #ifdef CELLO_DEBUG_VERBOSE
-		printf ("%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
+		PARALLEL_PRINTF ("%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
 #endif
 	      }
 	    }

@@ -34,20 +34,6 @@ Monitor::Monitor()
   map_g_[1] = 1.0;
   map_b_[1] = 1.0;
 }
-//----------------------------------------------------------------------
-
-// Monitor * Monitor::instance()
-// { 
-// #ifdef CONFIG_USE_CHARM
-//   printf ("proxy_simulation = %d\n",proxy_simulation);
-
-//   return proxy_simulation.ckLocalBranch()->monitor();
-// #else
-//   if ( instance_ == NULL ) 
-//     instance_ = new Monitor;
-//   return instance_;
-// #endif
-// };
 
 //----------------------------------------------------------------------
 
@@ -91,14 +77,13 @@ void Monitor::header () const
   t = localtime (&rawtime);
   const char * month[] = 
     {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
-  sprintf (buffer_date,"%s %02d %02d:%02d:%02d",
-	   month[t->tm_mon],
-	   t->tm_mday,
-	   t->tm_hour,
-	   t->tm_min,
-	   t->tm_sec);
 
-  print ("BEGIN CELLO: %s",buffer_date);  
+  print ("BEGIN CELLO: %s %02d %02d:%02d:%02d",
+	 month[t->tm_mon],
+	 t->tm_mday,
+	 t->tm_hour,
+	 t->tm_min,
+	 t->tm_sec);
 
   char c_single = ' ';
   char c_double = ' ';

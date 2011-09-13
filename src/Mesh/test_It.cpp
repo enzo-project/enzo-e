@@ -27,15 +27,18 @@ PARALLEL_MAIN_BEGIN
 
   FieldDescr field_descr;
   GroupProcess * group_process = GroupProcess::create();
-  hierarchy->create_root_patch(group_process,&field_descr,12,12,12,3,3,3);
+  hierarchy->create_root_patch(group_process,&field_descr,
+			       12,12,12,   // size
+			       0,0,0,      // offset
+			       3,3,3);     // blocking
   unit_assert(hierarchy->patch(0)!=NULL);
 
 
   FieldDescr * field_descr = new FieldDescr;
 
-  // Set Patch size (12,12,12)
-
   int patch_size[] = {12,12,12};
+
+  int patch_offset[] = {5, 2, 9};
 
   int patch_blocking[] = {3,3,3};
 
@@ -47,6 +50,7 @@ PARALLEL_MAIN_BEGIN
   Patch * patch = factory->create_patch 
     (group_process,
      patch_size[0],     patch_size[1],     patch_size[2],
+     patch_offset[0],   patch_offset[1],   patch_offset[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2],
      domain_lower[0],   domain_lower[1],   domain_lower[2],
      domain_upper[0],   domain_upper[1],   domain_upper[2]);

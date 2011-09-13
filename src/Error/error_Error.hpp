@@ -24,6 +24,16 @@
     message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
   }
 
+#define WARNING1(FUNCTION,MESSAGE,ARG1)					\
+  {									\
+    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1); \
+  }
+
+#define WARNING2(FUNCTION,MESSAGE,ARG1,ARG2)				\
+  {									\
+    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1,ARG2); \
+  }
+
 //----------------------------------------------------------------------
 /// @def      UNTESTED
 /// @brief    Handle a (non-lethal) untested message
@@ -45,11 +55,40 @@
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1);	\
     exit(1);								\
   }
+#define ERROR2(FUNCTION,MESSAGE,ARG1,ARG2)				\
+  {									\
+    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1,ARG2); \
+    exit(1);								\
+  }
+#define ERROR4(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4)			\
+  {									\
+    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+	      ARG1,ARG2,ARG3,ARG4);					\
+    exit(1);								\
+  }
+#define ERROR5(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5)		\
+  {									\
+    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+	      ARG1,ARG2,ARG3,ARG4,ARG5);				\
+    exit(1);								\
+  }
+#define ERROR6(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)		\
+  {									\
+    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+	      ARG1,ARG2,ARG3,ARG4,ARG5,ARG6);				\
+    exit(1);								\
+  }
+#define ERROR8(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8) \
+  {									\
+    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+	      ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8);			\
+    exit(1);								\
+  }
 
 //----------------------------------------------------------------------
 /// @def      INCOMPLETE
 /// @brief    Placeholder for code that is incomplete
-#define INCOMPLETE(FUNCTION)					\
+#define INCOMPLETE(FUNCTION)						\
   {									\
     message2_(stdout,"INCOMPLETE",__FILE__,__LINE__,FUNCTION,"");	\
   }
@@ -58,13 +97,49 @@
 /// @def      TRACE
 /// @brief    Trace file name and location to stdout
 #ifdef CELLO_TRACE
-#   define TRACE(MESSAGE)						\
-  {									\
-    PARALLEL_PRINTF ("TRACE %s:%d %s\n",__FILE__,__LINE__,MESSAGE);		\
+
+#   define TRACE(MESSAGE)				\
+  {							\
+    PARALLEL_PRINTF ("TRACE %s:%d %s\n",		\
+		     __FILE__,__LINE__,MESSAGE);	\
+    fflush(stdout);					\
+  }
+
+#   define TRACE1(MESSAGE,ARG1)				\
+  {							\
+  PARALLEL_PRINTF ("TRACE %s:%d %s\n",			\
+		   __FILE__,__LINE__,MESSAGE,ARG1);	\
+  fflush(stdout);					\
+}
+
+#   define TRACE2(MESSAGE,ARG1,ARG2)				\
+  {								\
+    PARALLEL_PRINTF ("TRACE %s:%d %s\n",			\
+		     __FILE__,__LINE__,MESSAGE,ARG1,ARG2);	\
     fflush(stdout);						\
   }
+
+#   define TRACE3(MESSAGE,ARG1,ARG2,ARG3)			\
+  {								\
+    PARALLEL_PRINTF ("TRACE %s:%d %s\n",			\
+		     __FILE__,__LINE__,MESSAGE,ARG1,ARG2,ARG3);	\
+    fflush(stdout);						\
+  }
+
+#   define TRACE4(MESSAGE,ARG1,ARG2,ARG3,ARG4)				\
+  {									\
+    PARALLEL_PRINTF ("TRACE %s:%d %s\n",				\
+		     __FILE__,__LINE__,MESSAGE,ARG1,ARG2,ARG3,ARG4);	\
+    fflush(stdout);							\
+  }
 #else
+
 #   define TRACE(MESSAGE) /* This space intentionally left blank */
+#   define TRACE1(MESSAGE) /* This space intentionally left blank */
+#   define TRACE2(MESSAGE) /* This space intentionally left blank */
+#   define TRACE3(MESSAGE) /* This space intentionally left blank */
+#   define TRACE4(MESSAGE) /* This space intentionally left blank */
+
 #endif
 
 //----------------------------------------------------------------------
@@ -74,7 +149,21 @@
   {									\
     if (!(ASSERTION)) {							\
       message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
-      exit(1); /* VIOLATES PARALLEL_EXIT() */                           \
+      exit(1);								\
+    }									\
+  }
+#define ASSERT1(FUNCTION,MESSAGE,ARG1,ASSERTION)			\
+  {									\
+    if (!(ASSERTION)) {							\
+      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1); \
+      exit(1);								\
+    }									\
+  }
+#define ASSERT2(FUNCTION,MESSAGE,ARG1,ARG2,ASSERTION)			\
+  {									\
+    if (!(ASSERTION)) {							\
+      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1,ARG2); \
+      exit(1);								\
     }									\
   }
 
@@ -82,15 +171,15 @@
 //----------------------------------------------------------------------
 /// @def message_
 /// @brief write the given error, warning, etc. message
-#define message_(FP,TYPE,FILE,LINE,FUNCTION,MESSAGE)		\
-  {								\
-    fprintf (FP,"\n");			\
+#define message_(FP,TYPE,FILE,LINE,FUNCTION,MESSAGE)	\
+  {							\
+    fprintf (FP,"\n");					\
     fprintf (FP,"     %10s  %s:%d\n",TYPE,FILE,LINE);	\
-    if (strcmp(FUNCTION,"") != 0)				\
+    if (strcmp(FUNCTION,"") != 0)			\
       fprintf (FP,"     %10s  %s()\n", TYPE,FUNCTION);	\
-    if (strcmp(MESSAGE,"") != 0)				\
+    if (strcmp(MESSAGE,"") != 0)			\
       fprintf (FP,"     %10s  %s\n",   TYPE,MESSAGE);	\
-    fprintf (FP,"\n");						\
+    fprintf (FP,"\n");					\
   }
 
 extern void message2_

@@ -419,19 +419,19 @@ void Simulation::initialize_output_() throw()
 
     // Error if Output::type is not defined
     if (type == "unknown") {
-      char buffer[ERROR_LENGTH];
-      sprintf (buffer,"Output:%s:type parameter is undefined",file_group.c_str());
-      ERROR("Simulation::initialize_output_",buffer);
+      ERROR1("Simulation::initialize_output_",
+	     "Output:%s:type parameter is undefined",
+	     file_group.c_str());
     }
 
     Output * output = create_output_(type);
 
     // Error if output type was not recognized
     if (output == NULL) {
-      char buffer[ERROR_LENGTH];
-      sprintf (buffer,"Unrecognized parameter value Output:%s:type = %s",
-     	       file_group.c_str(),type.c_str());
-      ERROR("Simulation::initialize_output_",buffer);
+      ERROR2("Simulation::initialize_output_",
+	     "Unrecognized parameter value Output:%s:type = %s",
+	     file_group.c_str(),
+	     type.c_str());
     }
 
     // ASSUMES GROUP AND SUBGROUP ARE SET BY CALLER
@@ -513,8 +513,6 @@ void Simulation::initialize_output_() throw()
     var_cycle = (strcmp(parameters_->list_value_string(0,"schedule"),"cycle")==0);
     var_time  = (strcmp(parameters_->list_value_string(0,"schedule"),"time")==0);
 
-    printf ("%s\n",parameters_->list_value_string(0,"schedule"));
-
     // Error if schedule variable is not "cycle" or "time"
     ASSERT("Simulation::initialize_output_",
 	   "The first 'schedule' parameter list element must be 'cycle' or 'time'",
@@ -567,9 +565,9 @@ void Simulation::initialize_output_() throw()
 	int value = parameters_->list_value_integer(index,"schedule");
 	list.push_back (value);
 	if (list.size() > 1) {
-	  printf ("%d %d\n",list[list.size()-2],list[list.size()-1]);
-	  ASSERT("Simulation::initialize_output_",
-		 "Output 'schedule' parameter list values must be monotonically increasing",
+	  ASSERT2("Simulation::initialize_output_",
+		 "Output 'schedule' parameter list values %g and %g not monotonically increasing",
+		 list[list.size()-2] , list[list.size()-1],
 		 list[list.size()-2] < list[list.size()-1]);
 	}
       }
@@ -636,7 +634,8 @@ void Simulation::initialize_method_() throw()
 
   if (method_count == 0) {
     ERROR ("Simulation::initialize_method_",
-	   "List parameter 'Method sequence' must have length greater than zero");
+	   "List parameter 'Method sequence' must have length "
+	   "greater than zero");
   }
 
   for (int i=0; i<method_count; i++) {
@@ -653,10 +652,8 @@ void Simulation::initialize_method_() throw()
       method_list_.push_back(method); 
 
     } else {
-      char error_message[ERROR_LENGTH];
-      sprintf (error_message,"Unknown Method %s",method_name.c_str());
-      ERROR ("Simulation::initialize_method_",
-		     error_message);
+      ERROR1("Simulation::initialize_method_",
+	     "Unknown Method %s",method_name.c_str());
     }
   }
 }
@@ -704,14 +701,28 @@ void Simulation::deallocate_() throw()
   }
 }
 
+//----------------------------------------------------------------------
+
 void Simulation::run() throw()
-{ ERROR ("Simulation::run","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::run","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
 
 void Simulation::read() throw()
-{ ERROR ("Simulation::read","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::read","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
 
 void Simulation::write() const throw()
-{ ERROR ("Simulation::write","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::write","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
 
 const Factory & Simulation::factory() const throw()
 {
@@ -719,23 +730,51 @@ const Factory & Simulation::factory() const throw()
   return *factory_;
 }
 
+//----------------------------------------------------------------------
+
 Stopping * Simulation::create_stopping_ (std::string name) throw ()
-{ ERROR ("Simulation::create_stopping_","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::create_stopping_","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
 
 Timestep * Simulation::create_timestep_ (std::string name) throw ()
-{ ERROR ("Simulation::create_timestep_","Implictly abstract function called"); }
+{ 
+  ERROR ("Simulation::create_timestep_","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
 
 Initial * Simulation::create_initial_ (std::string name) throw ()
-{ ERROR ("Simulation::create_initial_","Implictly abstract function called"); }
+{ 
+  ERROR ("Simulation::create_initial_","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
 
 Boundary * Simulation::create_boundary_ (std::string name) throw ()
-{ ERROR ("Simulation::create_boundary_","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::create_boundary_","Implictly abstract function called");
+}
 
-Output * Simulation::create_output_ (std::string name) throw ()
-{ ERROR ("Simulation::create_output_","Implictly abstract function called"); }
+//----------------------------------------------------------------------
+
+Output * Simulation::create_output_ (std::string type) throw ()
+{ 
+  Output * output = NULL;
+  if (type == "image") {
+    output = new OutputImage ();
+  }
+  return output;
+}
+
+//----------------------------------------------------------------------
 
 Method * Simulation::create_method_ (std::string name) throw ()
-{ ERROR ("Simulation::create_method_","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::create_method_","Implictly abstract function called");
+}
 
 //======================================================================
 
@@ -812,6 +851,23 @@ void Simulation::refresh() throw()
 #endif
       }
     }
+  }
+}
+
+#endif
+
+//----------------------------------------------------------------------
+// NOT CHARM
+//----------------------------------------------------------------------
+
+#ifndef CONFIG_USE_CHARM
+
+void Simulation::output()
+
+{
+  for (size_t i=0; i<output_list_.size(); i++) {
+    Output * output = output_list_[i];
+    output->scheduled_write(field_descr_, hierarchy_,cycle_,time_);
   }
 }
 

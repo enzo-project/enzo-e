@@ -193,8 +193,9 @@ void Hierarchy::create_root_patch
 
     Patch * root_patch = factory()->create_patch
       (group_process,
-       nx,ny,nz,
-       nbx,nby,nbz,
+       nx,ny,nz,    // size
+       0,0,0,       // offset
+       nbx,nby,nbz, // blocking
        lower_[0], lower_[1], lower_[2],
        upper_[0], upper_[1], upper_[2]);
     

@@ -63,14 +63,12 @@ void InitialDefault::compute (const FieldDescr * field_descr,
 
       // Check parameter length
 
-      char buffer[ERROR_LENGTH];
-
-      sprintf (buffer, "Length of list parameter Initial:%s:value must be odd",
-	       field_name.c_str());
       int list_length = parameters_->list_length("value");
-      ASSERT("InitialDefault::compute",
-	     buffer,
-	     list_length % 2 == 1);
+
+      ASSERT1("InitialDefault::compute",
+	     "Length of list parameter Initial:%s:value must be odd",
+	     field_name.c_str(),
+	     (list_length % 2) == 1);
 
       // Allocate arrays if needed
       if (value == NULL) {
@@ -107,16 +105,14 @@ void InitialDefault::compute (const FieldDescr * field_descr,
       }
 
     } else if (parameter_type == parameter_unknown) {
-      char buffer [ERROR_LENGTH];
-      sprintf (buffer,"Uninitialized field %s", field_name.c_str());
-      WARNING ("InitialDefault::compute",  buffer);
+      WARNING1("InitialDefault::compute",  
+	       "Uninitialized field %s",
+	       field_name.c_str());
       
     } else {
-      char buffer [ERROR_LENGTH];
-      sprintf (buffer,"Illegal parameter type %s when initializing field %s",
-	       parameter_type_name[parameter_type],field_name.c_str());
-	ERROR ("InitialDefault::compute",
-	      buffer);
+      ERROR2("InitialDefault::compute",
+	     "Illegal parameter type %s when initializing field %s",
+	     parameter_type_name[parameter_type],field_name.c_str());
     }
   }
   // Deallocate arrays if needed
@@ -280,13 +276,10 @@ void InitialDefault::evaluate_float_
 
   if (value_type != parameter_float_expr &&
       value_type != parameter_float) {
-
-    char buffer[ERROR_LENGTH];
-    sprintf (buffer, 
-	     "Odd-index elements of %s must be floating-point expressions",
-	     field_name.c_str());
 	  	      
-    ERROR("InitialDefault::evaluate_float_", buffer);
+    ERROR1("InitialDefault::evaluate_float_", 
+	   "Odd-index elements of %s must be floating-point expressions",
+	   field_name.c_str());
   }
 
   // Evaluate the floating-point expression
@@ -316,12 +309,9 @@ void InitialDefault::evaluate_logical_
   if (value_type != parameter_logical_expr &&
       value_type != parameter_logical) {
 
-    char buffer[ERROR_LENGTH];
-    sprintf (buffer, 
-	     "Even-index elements of %s must be logical expressions",
-	     field_name.c_str());
-	  	      
-    ERROR("InitialDefault::evaluate_logical", buffer);
+    ERROR1("InitialDefault::evaluate_logical",
+	   "Even-index elements of %s must be logical expressions",
+	   field_name.c_str());
   }
 
   // Evaluate the logical expression

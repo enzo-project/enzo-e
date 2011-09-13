@@ -22,32 +22,7 @@ Papi::Papi() throw()
     flop_count_(0)
       
 {
-  INCOMPLETE("Papi::Papi");
 }
-//----------------------------------------------------------------------
-
-// Papi::~Papi() throw ()
-// {
-//   INCOMPLETE("Papi::!Papi");
-// }
-
-//----------------------------------------------------------------------
-
-// Papi::Papi(const Papi & papi) throw ()
-// /// @param     papi  Object being copied
-// {
-//   INCOMPLETE("Papi::Papi(Papi)");
-// }
-
-//----------------------------------------------------------------------
-
-// Papi & Papi::operator= (const Papi & papi) throw ()
-// /// @param     papi  Source object of the assignment
-// /// @return    The target assigned object
-// {
-//   INCOMPLETE("Papi::operator=");
-//   return *this;
-// }
 
 //======================================================================
 

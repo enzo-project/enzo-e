@@ -22,8 +22,32 @@ public: // interface
   /// Constructor
   TypeImage() throw();
 
+  /// Initialize this file Type
+
+  virtual void initialize(Simulation * simulatio,
+			  File * file);
+
+  /// Finalize this file Type
+
+  virtual void finalize();
+
+  /// Read the specified block from a File
+
+  virtual void read(Hierarchy * hierarchy,
+		    Patch     * patch,
+		    Block     * block,
+		    int         field_id);
+  
+  /// Write the specified block to a File
+
+  virtual void write(const Hierarchy * hierarchy,
+		     const Patch     * patch,
+		     const Block     * block,
+		     int               field_id);
+
 private: // functions
 
+    
 
 private: // attributes
 

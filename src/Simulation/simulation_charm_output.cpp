@@ -126,11 +126,11 @@ void Simulation::p_output_reduce() throw()
   char buffer[20];
   sprintf(buffer,"%02d > %02d send",ip,ip_write);
   if (ip != ip_write) {
-    PARALLEL_PRINTF("%d -> %d calling p_output_write()\n",ip,ip_write);
+    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_write);
     proxy_simulation[ip_write].p_output_write (strlen(buffer),buffer);
     output_next();
   } else {
-    PARALLEL_PRINTF("%d -> %d calling p_output_write()\n",ip,ip_write);
+    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_write);
     proxy_simulation[ip].p_output_write(0,0);
   }
 
@@ -140,29 +140,29 @@ void Simulation::p_output_reduce() throw()
 
 void Simulation::p_output_write (int n, char * buffer) throw()
 {
-  Output * out = output(index_output_);
+  Output * output = Simulation::output(index_output_);
   int ip       = CkMyPe();
-  int ip_write = ip - (ip % out->process_write());
-  PARALLEL_PRINTF ("%d %d  %d  %d\n",ip,ip_write,CkMyPe(),out->process_write());
+  int ip_write = ip - (ip % output->process_write());
+  TRACE4("%d %d  %d  %d\n",ip,ip_write,CkMyPe(),output->process_write());
 
-  int count = out->counter();
+  int count = output->counter();
 
   if (count == 0) {
-    PARALLEL_PRINTF("Initialize writer\n");
+    TRACE("Initialize writer\n");
   }
   if (n == 0) {
-    PARALLEL_PRINTF ("Process reduce this %d\n",ip);
+    TRACE1 ("Process reduce this %d\n",ip);
   } else {
-    PARALLEL_PRINTF ("Process reduce that\n");
+    TRACE ("Process reduce that\n");
   }
   
-  if (count == out->process_write()) {
+  if (count == output->process_write()) {
 
-    PARALLEL_PRINTF ("File write / close / next\n");
+    TRACE ("File write / close / next\n");
 
     // write
     // close
-    out->close();
+    output->close();
 
     // next
 

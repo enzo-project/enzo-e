@@ -68,9 +68,9 @@ void Parameters::read ( const char * file_name )
   FILE * file_pointer = fopen(file_name,"r");
 
   if ( file_pointer == NULL ) {
-    char buffer[ERROR_LENGTH];
-    sprintf (buffer,"Error opening parameter file '%s' for reading",file_name);
-    ERROR("Parameters::read",buffer);
+    ERROR1("Parameters::read",
+	   "Error opening parameter file '%s' for reading",
+	   file_name);
   }
   
   struct param_struct * parameter_list = cello_parameters_read(file_pointer);
@@ -117,10 +117,11 @@ void Parameters::write ( const char * file_name )
   FILE * file_pointer = fopen(file_name,"w");
 
   if ( file_pointer == NULL ) {
-    char buffer[ERROR_LENGTH];
-    sprintf (buffer,"Error opening parameter file '%s' for writing",file_name);
-    ERROR("Parameters::writing",buffer);
+    ERROR1("Parameters::writing",
+	   "Error opening parameter file '%s' for writing",
+	   file_name);
   }
+
   std::map<std::string,Param *>::iterator it_param;
 
   // "Previous" groups are empty
@@ -186,11 +187,10 @@ void Parameters::write ( const char * file_name )
       }
 
     } else {
-      char message [ ERROR_LENGTH ];
-      sprintf (message, 
-	       "uninitialized parameter %s accessed",
-	       it_param->first.c_str());
-      WARNING("Parameters::write",message);
+      // OK--just means parameter default was used
+      // WARNING1("Parameters::write",
+      // 	       "uninitialized parameter %s accessed",
+      // 	       it_param->first.c_str());
     }
   }
 
@@ -609,11 +609,9 @@ void Parameters::group_push(std::string str) throw()
   if (current_group_depth_ < MAX_GROUP_DEPTH - 1) {
     current_group_[current_group_depth_++] = strdup(str.c_str());
   } else {
-    char message [ ERROR_LENGTH ];
-    sprintf (message, 
-	     "Parameter grouping depth %d exceeds MAX_GROUP_DEPTH = %d",
-	     current_group_depth_,MAX_GROUP_DEPTH);
-    ERROR("Parameters::group_push",message);
+    ERROR2("Parameters::group_push",
+	   "Parameter grouping depth %d exceeds MAX_GROUP_DEPTH = %d",
+	   current_group_depth_,MAX_GROUP_DEPTH);
   }
 }
 
@@ -623,10 +621,9 @@ void Parameters::group_pop(std::string group) throw()
 {
   if (current_group_depth_ > 0) {
     if (group != "" && group != current_group_[current_group_depth_-1]) {
-      char message [ ERROR_LENGTH ];
-      sprintf (message, "group_pop(%s) does not match group_push(%s)",
+      WARNING2("Parameters::group_pop",
+	      "group_pop(%s) does not match group_push(%s)",
 	       group.c_str(),current_group_[current_group_depth_-1]);
-      WARNING("Parameters::group_pop",message);
     }
     --current_group_depth_;
     free (current_group_[current_group_depth_]);
@@ -642,10 +639,9 @@ void Parameters::group_pop(std::string group) throw()
 void Parameters::group_set(int index, std::string group) throw()
 {
   if (index >= MAX_GROUP_DEPTH) {
-    char message [ ERROR_LENGTH ];
-    sprintf (message, "group_set(%d,%s) index %d exceeds MAX_GROUP_DEPTH = %d",
-	     index,group.c_str(),index,MAX_GROUP_DEPTH);
-    ERROR("Parameters::group_set",message);
+    ERROR4("Parameters::group_set",
+	   "group_set(%d,%s) index %d exceeds MAX_GROUP_DEPTH = %d",
+	   index,group.c_str(),index,MAX_GROUP_DEPTH);
   }
   for (int i=index; i<current_group_depth_; i++) {
     if (current_group_[i]) {

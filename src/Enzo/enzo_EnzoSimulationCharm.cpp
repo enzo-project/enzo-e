@@ -52,8 +52,6 @@ void EnzoSimulationCharm::run() throw()
   // Initial [block]
   //--------------------------------------------------
 
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
-
   ItPatch it_patch(hierarchy_);
   Patch * patch;
   while (( patch = ++it_patch )) {
@@ -61,8 +59,6 @@ void EnzoSimulationCharm::run() throw()
       patch->block_array().p_initial();
     }
   }
-
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
 }
 
 //======================================================================

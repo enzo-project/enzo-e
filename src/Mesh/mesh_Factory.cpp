@@ -13,6 +13,7 @@ Patch * Factory::create_patch
 (
  GroupProcess * group_process,
  int nx,   int ny,  int nz,
+ int nx0,  int ny0, int nz0,
  int nbx,  int nby, int nbz,
  double xm, double ym, double zm,
  double xp, double yp, double zp
@@ -21,6 +22,7 @@ Patch * Factory::create_patch
   return new Patch
     (this,group_process,
      nx,ny,nz,
+     nx0,ny0,nz0,
      nbx,nby,nbz,
      xm,ym,zm,
      xp,yp,zp);

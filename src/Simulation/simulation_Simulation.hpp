@@ -80,7 +80,7 @@ public: // interface
 
   /// default reduction callback
   void p_done (CkReductionMsg * m)
-  {    printf ("done(%g)\n",*((double *)m->getData()));  delete m; }
+  {    TRACE1 ("done(%g)\n",*((double *)m->getData()));  delete m; }
 
   //--------------------------------------------------
   // Output
@@ -101,6 +101,11 @@ public: // interface
 
   CProxy_BlockReduce proxy_block_reduce() 
   { return   proxy_block_reduce_; }
+
+#else
+
+  /// Perform scheduled output for this cycle_ and time_
+  void output();
 
 #endif
 

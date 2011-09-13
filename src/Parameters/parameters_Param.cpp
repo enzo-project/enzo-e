@@ -187,10 +187,9 @@ void Param::evaluate_float
     case enum_op_ne:
     case enum_op_and:
     case enum_op_or:
-      char error_message[ERROR_LENGTH];
-      sprintf (error_message,"logical operator %d in floating-point expression",
-	       node->op_value);
-      ERROR("Param::evaluate_float",error_message);
+      ERROR1("Param::evaluate_float",
+	     "logical operator %d in floating-point expression",
+	     node->op_value);
       break;
     }
     break;
@@ -207,10 +206,9 @@ void Param::evaluate_float
     case 'z':	for (i=0; i<n; i++) result[i] = z[i]; break;
     case 't':	for (i=0; i<n; i++) result[i] = t[i]; break;
     default:
-      char error_message[ERROR_LENGTH];
-      sprintf (error_message,"unknown variable %c in floating-point expression",
-	       node->var_value);
-      ERROR("Param::evaluate_float",error_message);
+      ERROR1("Param::evaluate_float",
+	     "unknown variable %c in floating-point expression",
+	     node->var_value);
       break;
     }
     break;
@@ -219,9 +217,9 @@ void Param::evaluate_float
     break;
   case enum_node_unknown:
   default:
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,"unknown expression type %d",node->type);
-    ERROR("Param::evaluate_float",error_message);
+    ERROR1("Param::evaluate_float",
+	   "unknown expression type %d",
+	   node->type);
     break;
   }
 
@@ -323,9 +321,9 @@ void Param::evaluate_logical
       for (i=0; i<n; i++) result[i] = left_logical[i] || right_logical[i];
       break;
     default:
-      char error_message[ERROR_LENGTH];
-      sprintf (error_message,"unknown expression type %d",node->type);
-      ERROR("Param::evaluate_logical",error_message);
+      ERROR1("Param::evaluate_logical",
+	     "unknown expression type %d",
+	     node->type);
       break;
     }
   }

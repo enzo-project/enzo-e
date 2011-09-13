@@ -3,6 +3,7 @@
 /// @file     mesh_Patch.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-05-10
+/// @todo     Use CHARM++ reduction support from Blocks to Patch
 /// @brief    Implementation of the Patch class
 
 #include "cello.hpp"
@@ -16,6 +17,7 @@ Patch::Patch
  const Factory * factory, 
  GroupProcess * group_process,
  int nx,  int ny,  int nz,
+ int nx0, int ny0, int nz0,
  int nbx, int nby, int nbz,
  double xm, double ym, double zm,
  double xp, double yp, double zp
@@ -28,19 +30,23 @@ Patch::Patch
   group_process_(group_process),
   layout_(new Layout (nbx,nby,nbz))
 {
-  PARALLEL_PRINTF ("%s:%d DEBUG\n",__FILE__,__LINE__);
+
   // Check 
+
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
-    char buffer[ERROR_LENGTH];
-    sprintf (buffer,
-	     "Patch size (%d,%d,%d) must be larger than blocking (%d,%d,%d)",
-	     nx,ny,nz,nbx,nby,nbz);
-    ERROR("Patch::Patch", buffer);
+	     
+    ERROR6("Patch::Patch", 
+	   "Patch size (%d,%d,%d) must be larger than blocking (%d,%d,%d)",
+	   nx,ny,nz,nbx,nby,nbz);
   }
 
   size_[0] = nx;
   size_[1] = ny;
   size_[2] = nz;
+
+  offset_[0] = nx0;
+  offset_[1] = ny0;
+  offset_[2] = nz0;
 
   blocking_[0] = nbx;
   blocking_[1] = nby;
@@ -66,47 +72,20 @@ Patch::~Patch() throw()
 
 //----------------------------------------------------------------------
 
-// Patch::Patch(const Patch & patch,
-// 	     FieldDescr *  field_descr) throw()
-// {
-//   deallocate_blocks();
-
-//   allocate_blocks(field_descr);
-// }
-
-//----------------------------------------------------------------------
-
-// void Patch::set_lower(double xm, double ym, double zm) throw ()
-// {
-//   lower_[0] = xm;
-//   lower_[1] = ym;
-//   lower_[2] = zm;
-// };
-
-// //----------------------------------------------------------------------
-// void Patch::set_upper(double xp, double yp, double zp) throw ()
-// {
-//   upper_[0] = xp;
-//   upper_[1] = yp;
-//   upper_[2] = zp;
-// };
-
-// //----------------------------------------------------------------------
-
-// Patch & Patch::operator= (const Patch & patch) throw()
-// {
-//   deallocate_blocks();
-//   allocate_blocks();
-//   return *this;
-// }
-
-//----------------------------------------------------------------------
-
 void Patch::size (int * npx, int * npy, int * npz) const throw()
 {
   if (npx) (*npx) = size_[0];
   if (npy) (*npy) = size_[1];
   if (npz) (*npz) = size_[2];
+}
+
+//----------------------------------------------------------------------
+
+void Patch::offset (int * nx0, int * ny0, int * nz0) const throw()
+{
+  if (nx0) (*nx0) = offset_[0];
+  if (ny0) (*ny0) = offset_[1];
+  if (nz0) (*nz0) = offset_[2];
 }
 
 //----------------------------------------------------------------------
@@ -172,15 +151,11 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 	 (nby*mby == size_[1]) &&
 	 (nbz*mbz == size_[2]))) {
 
-    char buffer[ERROR_LENGTH];
-
-    sprintf (buffer,
-	     "Blocks must evenly subdivide Patch: "
-	     "patch size = (%d %d %d)  block count = (%d %d %d)",
-	     size_[0],size_[1],size_[2],
-	     nbx,nby,nbz);
-
-    ERROR("Patch::allocate_blocks",  buffer);
+    ERROR6("Patch::allocate_blocks",  
+	   "Blocks must evenly subdivide Patch: "
+	   "patch size = (%d %d %d)  block count = (%d %d %d)",
+	   size_[0],size_[1],size_[2],
+	   nbx,nby,nbz);
       
   }
 
@@ -193,11 +168,9 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
 #ifdef CONFIG_USE_CHARM
 
-  // WARNING: assumes patch is on Pe 0
-  if (CkMyPe() == 0) {
+  // WARNING: assumes patch is on Pe 0!!! (OK for unigrid)
 
-    char buffer[80];
-    sprintf (buffer,"Allocating block array %d %d %d",mbx,mby,mbz);
+  if (CkMyPe() == 0) {
 
     block_array_ = factory_->create_block_array
       (nbx,nby,nbz,
@@ -205,7 +178,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
        lower_[0],lower_[1],lower_[2],
        xb,yb,zb, 1);
 
-    // Use built-ine CHARM++ Reduction instead of hand-rolling
+    // Use built-in CHARM++ Reduction instead of hand-rolling
     // 
     // block_array_.ckSetReductionClient 
     //   (new CkCallback(CkIndex_Simulation::p_done(NULL),
@@ -218,7 +191,8 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
   for (int ib=0; ib<nb; ib++) {
 
-    // Get index of this block in the patch
+    // Get index of block ib in the patch
+
     int ibx,iby,ibz;
     layout_->block_indices (ib, &ibx, &iby, &ibz);
 
@@ -231,7 +205,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
        lower_[0],lower_[1],lower_[2],
        xb,yb,zb);
 
-    // Store the data block
+    // Store the data block in the block array
     block_[ib] = block;
 
     // INITIALIZE FIELD BLOCK
@@ -279,14 +253,6 @@ size_t Patch::num_local_blocks() const  throw()
   return layout_->local_count(rank);
 }
 #endif
-
-// #ifdef CONFIG_USE_CHARM
-//   if (block_exists_) {
-//     return num_blocks();
-//   } else {
-//     return 0;
-//   }
-// #else
 
 //----------------------------------------------------------------------
 
