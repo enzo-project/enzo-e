@@ -13,9 +13,8 @@ class TypeImage {
 
   /// @class    TypeImage
   /// @ingroup  Io
-  /// @brief [\ref Io] Class for defining the "image" type of
-  /// output files.  Builds processor-local image then reduces to global
-  /// data for subsequent output.
+  /// @brief [\ref Io] Class for handling the image-specific requirements
+  /// of file IO.
 
 public: // interface
 
@@ -24,7 +23,7 @@ public: // interface
 
   /// Initialize this file Type
 
-  virtual void initialize(Simulation * simulatio,
+  virtual void initialize(Simulation * simulation,
 			  File * file);
 
   /// Finalize this file Type
@@ -52,6 +51,7 @@ private: // functions
 private: // attributes
 
 
+  double * values_;
 };
 
 #endif /* IO_TYPE_IMAGE_HPP */

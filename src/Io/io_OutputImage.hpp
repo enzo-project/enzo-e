@@ -8,6 +8,8 @@
 #ifndef IO_OUTPUT_IMAGE_HPP
 #define IO_OUTPUT_IMAGE_HPP
 
+class ItField;
+
 class OutputImage : public Output {
 
   /// @class    OutputImage
@@ -39,21 +41,21 @@ public: // virtual functions
   /// Write hierarchy-related field data
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Hierarchy * hierarchy, 
+    ItField * it_field, Hierarchy * hierarchy, 
     int cycle, double time,
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
 
   /// Write patch-related field data; may be called by write (Hierarchy)
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Patch * patch, Hierarchy * hierarchy,
+    ItField * it_field, Patch * patch, Hierarchy * hierarchy,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
 
   /// Write block-related field data; may be called by write (Patch)
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Block * block, Patch * patch, Hierarchy * hierarchy, 
+    ItField * it_field, Block * block, Patch * patch, Hierarchy * hierarchy, 
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
 

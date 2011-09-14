@@ -17,28 +17,37 @@ class ItFieldList : public ItField {
 public: // interface
 
   /// Create an iterator over integers 0 to count-1
-  ItFieldList ( size_t count ) throw ()
-    : ItField (count), values_()
-  { values_.reserve(count); }
+  ItFieldList () throw ()
+    : ItField (), values_()
+  { }
 
   /// Append a value to the list of values
   void append (int value) 
   { values_.push_back(value); }
 
+
+  /// Go to the first value
+  virtual void first () throw()
+  { index_ = 0; }
+
   /// Go to the next value
   virtual void next () throw()
-  { if (index1_ < values_.size()) index1_++; }
+  { if (index_ < values_.size()) index_++; }
 
-  /// Return the current value
+  /// Return the current value.  Should not be called if done() == true
   virtual int value () const throw()
-  { return values_[index1_]; }
+  { return values_[index_]; }
 
   /// Return whether iterating is complete
   virtual bool done () const throw()
-  { return (index1_ >= values_.size()); }
+  { return (index_ >= values_.size()); }
 
-  private: // attributes
+private: // attributes
 
+  /// Index of the current value
+  size_t index_;
+
+  /// List of values
   std::vector <int> values_;
 };
 

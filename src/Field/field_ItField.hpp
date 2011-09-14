@@ -6,47 +6,33 @@
 /// @file     field_ItField.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-12
-/// @brief    [\ref Field] Declaration of the ItField iterator class
+/// @brief    [\ref Field] Declaration of the ItField abstract iterator base class
 
 class ItField {
 
   /// @class    ItField
   /// @ingroup  Field
-  /// @brief    [\ref Field] Iterator over Fields in a Block
+  /// @brief    [\ref Field] Abstract iterator base class for Field indices
 
 public: // interface
 
   /// Create an iterator over integers 0 to count-1
-  ItField ( size_t count ) throw ()
-    : index1_(0), count_ (count)
+  ItField () throw ()
   { }
 
   /// Go to the first value
-  virtual void first () throw()
-  { index1_ = 0; }
+  virtual void first () throw() = 0;
 
   /// Go to the next value
-  virtual void next () throw()
-  { if (index1_ < count_) index1_++; }
+  virtual void next () throw() = 0;
 
   /// Return the current value
-  virtual int value () const throw()
-  { return int(index1_); }
+  virtual int value () const throw() = 0;
 
   /// Return whether iterating is complete
-  virtual bool done () const throw()
-  { return (index1_ >= count_); }
+  virtual bool done () const throw() = 0;
 
 protected: // attributes
-
-  /// Current index plus one
-
-  size_t index1_;
-
-private: // attributes
-
-  /// Maximum count
-  size_t count_;
 
 };
 

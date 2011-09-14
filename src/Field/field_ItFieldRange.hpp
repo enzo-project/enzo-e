@@ -16,28 +16,36 @@ class ItFieldRange : public ItField {
 
 public: // interface
 
-  /// Create an iterator over integers 0 to count-1
+  /// Create an iterator over integers first to last
   ItFieldRange ( size_t first, size_t last ) throw ()
-    : ItField(0), first_(first), last_(last)
+    : ItField(), first_(first), last_(last)
+  { }
+
+  /// Create an iterator over integers 0 to count - 1first to last
+  ItFieldRange ( size_t count ) throw ()
+    : ItField(), first_(0), last_(count - 1)
   { }
 
   /// Go to the first value
   virtual void first () throw()
-  { index1_ = first_; }
+  { index_ = first_; }
 
   /// Go to the next value
   virtual void next () throw()
-  { if (index1_ <= last_) index1_++; }
+  { if (index_ <= last_) index_++; }
 
   /// Return the current value
   virtual int value () const throw()
-  { return int(index1_); }
+  { return int(index_); }
 
   /// Return whether iterating is complete
   virtual bool done () const throw()
-  { return (index1_ > last_); }
+  { return (index_ > last_); }
 
 private: // attributes
+
+  /// Index of the current value
+  size_t index_;
 
   /// First value
   size_t first_;

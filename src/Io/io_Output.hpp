@@ -13,6 +13,8 @@ class Hierarchy;
 class Patch;
 class Schedule;
 
+class ItField;
+
 class Output {
 
   /// @class    Output
@@ -48,23 +50,6 @@ public: // functions
   Schedule * schedule() throw() 
   { return schedule_; };
   
-  /// Write hierarchy-related data to disk if scheduled
-  void scheduled_write
-  (  const FieldDescr * field_descr,
-     Hierarchy * hierarchy, int cycle, double time, bool root_call=true) throw();
-
-  /// Write a patch-related data to disk if scheduled
-  void scheduled_write
-  (  const FieldDescr * field_descr,
-     Patch * patch, Hierarchy * hierarchy,
-     int cycle, double time, bool root_call=true) throw();
-
-  /// Write a block-related to disk if scheduled
-  void scheduled_write
-  (  const FieldDescr * field_descr,
-     Block * block, Patch * patch, Hierarchy * hierarchy,
-     int cycle, double time, bool root_call=true) throw();
-
   std::string expand_file_name (int cycle, double time) const throw();
 
   int process_write () const throw () 
@@ -100,24 +85,45 @@ public: // virtual functions
 #endif
 
 
+  /// Write hierarchy-related data to disk if scheduled
+  void scheduled_write
+  (  const FieldDescr * field_descr,
+     Hierarchy * hierarchy, int cycle, double time, bool root_call=true) throw();
+
   /// Write hierarchy data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Hierarchy * hierarchy, 
+    ItField * it_field, Hierarchy * hierarchy, 
     int cycle, double time,
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
+
+
+
+  /// Write a patch-related data to disk if scheduled
+  void scheduled_write
+  (  const FieldDescr * field_descr,
+     Patch * patch, Hierarchy * hierarchy,
+     int cycle, double time, bool root_call=true) throw();
 
   /// Write patch data to disk; may be called by write (Hierarchy)
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Patch * patch, Hierarchy * hierarchy,
+    ItField * it_field, Patch * patch, Hierarchy * hierarchy,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
+
+
+
+  /// Write a block-related to disk if scheduled
+  void scheduled_write
+  (  const FieldDescr * field_descr,
+     Block * block, Patch * patch, Hierarchy * hierarchy,
+     int cycle, double time, bool root_call=true) throw();
 
   /// Write block data to disk; may be called by write (Patch)
   virtual void write 
   ( const FieldDescr * field_descr,
-    int index, Block * block, Patch * patch, Hierarchy * hierarchy, 
+    ItField * it_field, Block * block, Patch * patch, Hierarchy * hierarchy, 
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 

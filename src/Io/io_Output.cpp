@@ -56,7 +56,7 @@ std::string Output::expand_file_name
     } else {
       char buffer[CELLO_STRING_LENGTH];
       sprintf (buffer,"Unknown file variable #%d '%s' for file '%s'",
-	       i,file_args_[i].c_str(),file_name_.c_str());
+	       int(i),file_args_[i].c_str(),file_name_.c_str());
       ERROR("Output::expand_file_name",buffer);
     }
     strcpy (buffer_curr, buffer_next);
@@ -76,7 +76,8 @@ void Output::scheduled_write
  ) throw()
 {
   for (size_t i = 0; i<field_list_.size(); i++) {
-    write (field_descr, i, hierarchy,cycle,time,root_call); 
+    ItFieldRange it_field(i,i);
+    write (field_descr, &it_field, hierarchy,cycle,time,root_call); 
   }
 }
 
@@ -93,7 +94,8 @@ void Output::scheduled_write
  ) throw()
 {
   for (size_t i = 0; i<field_list_.size(); i++) {
-    write (field_descr, i, patch,hierarchy,cycle,time,root_call); 
+    ItFieldRange it_field(i,i);
+    write (field_descr, &it_field, patch,hierarchy,cycle,time,root_call); 
   }
 }
 
@@ -111,7 +113,8 @@ void Output::scheduled_write
  ) throw()
 {
   for (size_t i = 0; i<field_list_.size(); i++) {
-    write (field_descr, i, block, patch, hierarchy,cycle,time,root_call); 
+    ItFieldRange it_field(i,i);
+    write (field_descr, &it_field, block, patch, hierarchy,cycle,time,root_call); 
   }
 }
 

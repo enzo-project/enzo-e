@@ -97,7 +97,7 @@ void OutputImage::block (const Block * block) throw()
 void OutputImage::write
 (
  const FieldDescr * field_descr,
- int index,
+ ItField * it_field,
  Hierarchy * hierarchy,
  int cycle,
  double time,
@@ -115,6 +115,10 @@ void OutputImage::write
 
   // Open file if writing a single block
   if (root_call) {
+
+    // Index of (only) field to write
+    it_field->first();
+    int index = it_field->value();
 
     // Get file name
     std::string file_prefix = expand_file_name (cycle,time);
@@ -134,6 +138,7 @@ void OutputImage::write
 
     // create png
     png_open_(file_name,nxm,nym);
+
   }
 
   ItPatch it_patch (hierarchy);
@@ -141,7 +146,7 @@ void OutputImage::write
 
     // Write patch contribution 
     // NO OFFSET: ASSUMES ROOT PATCH
-    write (field_descr, index, patch, hierarchy, cycle,time,false,
+    write (field_descr, it_field, patch, hierarchy, cycle,time,false,
 	   0,0,0);
   }
 
@@ -159,7 +164,7 @@ void OutputImage::write
 void OutputImage::write
 (
  const FieldDescr * field_descr,
- int index,
+ ItField * it_field,
  Patch * patch,
  Hierarchy  * hierarchy,
  int cycle,
@@ -177,6 +182,10 @@ void OutputImage::write
 
   // Open file if writing a single block
   if (root_call) {
+
+    // Index of (only) field to write
+    it_field->first();
+    int index = it_field->value();
 
     // Get file name
     std::string file_prefix = expand_file_name (cycle,time);
@@ -196,6 +205,7 @@ void OutputImage::write
 
     // Create image 
     image_create_(nxp,nyp);
+
   }
 
 #ifdef CONFIG_USE_CHARM
@@ -216,7 +226,7 @@ void OutputImage::write
     int ix,iy,iz;
     block->index_patch(&ix,&iy,&iz);
 
-    write (field_descr, index, block, patch, hierarchy, cycle,time,false,
+    write (field_descr, it_field, block, patch, hierarchy, cycle,time,false,
 	   ix0+ix*nxb,
 	   iy0+iy*nyb,
 	   iz0+iz*nzb);
@@ -237,7 +247,7 @@ void OutputImage::write
 void OutputImage::write
 (
  const FieldDescr * field_descr,
- int index,
+ ItField * it_field,
  Block * block,
  Patch * patch,
  Hierarchy  * hierarchy,
@@ -257,7 +267,12 @@ void OutputImage::write
 
   std::string file_prefix = expand_file_name (cycle,time);
 
-  // Get ghost depth
+  // Index of (only) field to write
+  it_field->first();
+  int index = it_field->value();
+
+    // Get ghost depth
+
   int gx,gy,gz;
   field_descr->ghosts(index,&gx,&gy,&gz);
 
