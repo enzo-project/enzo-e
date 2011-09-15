@@ -13,23 +13,24 @@
 //----------------------------------------------------------------------
 
 Output::Output () throw()
-  : io_simulation_(0),
-    schedule_(new Schedule),
-    process_write_(0),
+  : schedule_(new Schedule),
 #ifdef CONFIG_USE_CHARM
+    process_stride_(0),
     count_reduce_(0),
 #endif
     file_name_(""),
     file_args_(),
-    field_list_()
+    it_field_(0)
 {
 }
 
 //----------------------------------------------------------------------
 
-void Output::set_field_list (std::vector<int> field_list) throw()
+void Output::set_filename (std::string filename,
+		   std::vector<std::string> fileargs) throw()
 {
-  field_list_ = field_list;
+  file_name_ = filename; 
+  file_args_ = fileargs;
 }
 
 //----------------------------------------------------------------------
@@ -75,10 +76,7 @@ void Output::scheduled_write
  bool root_call
  ) throw()
 {
-  for (size_t i = 0; i<field_list_.size(); i++) {
-    ItFieldRange it_field(i,i);
-    write (field_descr, &it_field, hierarchy,cycle,time,root_call); 
-  }
+  write (field_descr, hierarchy,cycle,time,root_call); 
 }
 
 //----------------------------------------------------------------------
@@ -93,10 +91,7 @@ void Output::scheduled_write
  bool root_call
  ) throw()
 {
-  for (size_t i = 0; i<field_list_.size(); i++) {
-    ItFieldRange it_field(i,i);
-    write (field_descr, &it_field, patch,hierarchy,cycle,time,root_call); 
-  }
+  write (field_descr, patch,hierarchy,cycle,time,root_call); 
 }
 
 //----------------------------------------------------------------------
@@ -112,9 +107,6 @@ void Output::scheduled_write
  bool root_call
  ) throw()
 {
-  for (size_t i = 0; i<field_list_.size(); i++) {
-    ItFieldRange it_field(i,i);
-    write (field_descr, &it_field, block, patch, hierarchy,cycle,time,root_call); 
-  }
+  write (field_descr, block, patch, hierarchy,cycle,time,root_call); 
 }
 

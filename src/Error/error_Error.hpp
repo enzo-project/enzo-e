@@ -31,7 +31,8 @@
 
 #define WARNING2(FUNCTION,MESSAGE,ARG1,ARG2)				\
   {									\
-    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1,ARG2); \
+    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+	      ARG1,ARG2);						\
   }
 
 //----------------------------------------------------------------------
@@ -58,6 +59,12 @@
 #define ERROR2(FUNCTION,MESSAGE,ARG1,ARG2)				\
   {									\
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1,ARG2); \
+    exit(1);								\
+  }
+#define ERROR3(FUNCTION,MESSAGE,ARG1,ARG2,ARG3)				\
+  {									\
+    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+	      ARG1,ARG2,ARG3);						\
     exit(1);								\
   }
 #define ERROR4(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4)			\

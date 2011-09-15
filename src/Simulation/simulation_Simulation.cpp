@@ -104,88 +104,6 @@ void Simulation::finalize() throw()
   deallocate_();
 }
 
-//----------------------------------------------------------------------
-
-int Simulation::dimension() const throw()
-{
-  return dimension_;
-}
-
-//----------------------------------------------------------------------
-
-Hierarchy * Simulation::hierarchy() const throw()
-{
-  return hierarchy_;
-}
-  
-//----------------------------------------------------------------------
-
-Parameters * Simulation::parameters() const throw()
-{
-  return parameters_;
-}
-  
-//----------------------------------------------------------------------
-
-FieldDescr * Simulation::field_descr() const throw()
-{
-  return field_descr_;
-}
-
-//----------------------------------------------------------------------
-
-Performance * Simulation::performance() const throw()
-{
-  return performance_;
-}
-
-//----------------------------------------------------------------------
-
-Monitor * Simulation::monitor() const throw()
-{
-  return monitor_;
-}
-
-//----------------------------------------------------------------------
-
-Stopping * Simulation::stopping() const throw() 
-{ return stopping_; }
-
-//----------------------------------------------------------------------
-
-Timestep * Simulation::timestep() const throw() 
-{ return timestep_; }
-
-//----------------------------------------------------------------------
-
-Initial * Simulation::initial() const throw() 
-{ return initial_; }
-
-//----------------------------------------------------------------------
-
-Boundary * Simulation::boundary() const throw() 
-{ return boundary_; }
-
-//----------------------------------------------------------------------
-
-size_t Simulation::num_output() const throw()
-{ return output_list_.size(); }
-
-//----------------------------------------------------------------------
-
-Output * Simulation::output(int i) const throw()
-{ return output_list_[i]; }
-
-//----------------------------------------------------------------------
-
-size_t Simulation::num_method() const throw()
-{ return method_list_.size(); }
-
-//----------------------------------------------------------------------
-
-Method * Simulation::method(int i) const throw()
-{ return method_list_[i]; }
-
 //======================================================================
 
 void Simulation::initialize_simulation_() throw()
@@ -477,28 +395,40 @@ void Simulation::initialize_output_() throw()
 
     // Initialize the list of output fields
 
-    std::vector<int> field_list;
-
+    TRACE("field_list 0");
     if (parameters_->type("field_list") != parameter_unknown) {
+
+      TRACE("field_list 1");
       // Set field list to specified field list
+
       if (parameters_->type("field_list") == parameter_list) {
+
+	ItFieldList * it_field = new ItFieldList;
+
 	int length = parameters_->list_length("field_list");
 	for (int i=0; i<length; i++) {
 	  int field_index = parameters_->list_value_integer(i,"field_list",0);
-	  field_list.push_back(field_index);
+	  it_field->append(field_index);
 	}
-	output->set_field_list(field_list);
+	
+	output->set_it_field(it_field);
+
       } else {
+
 	ERROR("Simulation::initialize_output_",
 	      "Bad type for Output 'field_list' parameter");
+
       }
+
     } else {
-      // Set field list to default of all fields
+
+      TRACE("field_list 2");
+      // field_list not defined: default to all fields
       int field_count = field_descr_->field_count();
-      for (int i=0;  i<field_count; i++) {
-	field_list.push_back(i);
-      }
-      output->set_field_list(field_list);
+      ItFieldRange * it_field = new ItFieldRange(field_count);
+
+      output->set_it_field(it_field);
+
     }
 
     //--------------------------------------------------

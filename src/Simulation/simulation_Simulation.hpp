@@ -117,61 +117,137 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Return the dimensionality of the Simulation
-  int dimension() const throw();
+  int dimension() const throw()
+{ return dimension_; }
+
+//----------------------------------------------------------------------
+
+// int Simulation::dimension() const throw()
+
+// //----------------------------------------------------------------------
+
+// Hierarchy * Simulation::hierarchy() const throw()
+  
+// //----------------------------------------------------------------------
+
+// Parameters * Simulation::parameters() const throw()
+  
+// //----------------------------------------------------------------------
+
+// FieldDescr * Simulation::field_descr() const throw()
+
+// //----------------------------------------------------------------------
+
+// Performance * Simulation::performance() const throw()
+
+// //----------------------------------------------------------------------
+
+// Monitor * Simulation::monitor() const throw()
+
+// //----------------------------------------------------------------------
+
+// Stopping * Simulation::stopping() const throw() 
+
+// //----------------------------------------------------------------------
+
+// Timestep * Simulation::timestep() const throw() 
+
+// //----------------------------------------------------------------------
+
+// Initial * Simulation::initial() const throw() 
+
+// //----------------------------------------------------------------------
+
+// Boundary * Simulation::boundary() const throw() 
+
+// //----------------------------------------------------------------------
+
+// size_t Simulation::num_output() const throw()
+
+// //----------------------------------------------------------------------
+
+// Output * Simulation::output(int i) const throw()
+
+// //----------------------------------------------------------------------
+
+// size_t Simulation::num_method() const throw()
+
+// //----------------------------------------------------------------------
+
+// Method * Simulation::method(int i) const throw()
+
 
   /// Return the Hierarchy
-  Hierarchy * hierarchy() const throw();
+  Hierarchy * hierarchy() const throw()
+  { return hierarchy_; }
   
   /// Return the Parameters
-  Parameters * parameters() const throw();
+  Parameters * parameters() const throw()
+  { return parameters_; }
   
   /// Return the field descriptor
-  FieldDescr * field_descr() const throw();
+  FieldDescr * field_descr() const throw()
+  { return field_descr_; }
 
   /// Return the performance object
-  Performance * performance() const throw();
+  Performance * performance() const throw()
+  { return performance_; }
 
   /// Return the monitor object
-  Monitor * monitor() const throw();
+  Monitor * monitor() const throw()
+  { return monitor_; }
 
   /// Return the stopping object, if any
-  Stopping *  stopping() const throw();
+  Stopping *  stopping() const throw()
+  { return stopping_; }
   
   /// Return the time-stepping object, if any
-  Timestep * timestep() const throw();
+  Timestep * timestep() const throw()
+  { return timestep_; }
 
   /// Return the initialization object, if any
-  Initial *  initial() const throw();
+  Initial *  initial() const throw()
+  { return initial_; }
 
   /// Return the boundary object, if any
-  Boundary * boundary() const throw();
+  Boundary * boundary() const throw()
+  { return boundary_; }
 
   /// Return the number of output objects
-  size_t num_output() const throw();
+  size_t num_output() const throw()
+  { return output_list_.size(); }
 
   /// Return the ith output object
-  Output * output(int i) const throw();
+  Output * output(int i) const throw()
+  { return output_list_[i]; }
 
   /// Return the number of methods
-  size_t num_method() const throw();
+  size_t num_method() const throw()
+  { return method_list_.size(); }
 
   /// Return the ith method object
-  Method * method(int i) const throw();
+  Method * method(int i) const throw()
+  { return method_list_[i]; }
 
   /// Return the current cycle number
-  int cycle() const throw() {return cycle_;};
+  int cycle() const throw() 
+  { return cycle_; };
 
   /// Return the current time
-  double time() const throw() {return time_;};
+  double time() const throw() 
+  { return time_; };
 
   /// Return the current dt (stored from main)
-  double dt() const throw() {return dt_;};
+  double dt() const throw() 
+  { return dt_; };
 
   /// Return the currint stopping criteria (stored from main reduction)
-  bool stop() const throw() {return stop_; };
+  bool stop() const throw() 
+  { return stop_; };
 
   /// Return the Simulation index
-  size_t index() const throw() {return index_; };
+  size_t index() const throw() 
+  { return index_; };
 
   void update_cycle(int cycle, int time, double dt, double stop) {
     cycle_ = cycle;

@@ -120,17 +120,17 @@ void BlockReduce::p_output_reduce(int count)
 void Simulation::p_output_reduce() throw()
 {
   int ip       = CkMyPe();
-  int ip_write = ip - (ip % output(index_output_)->process_write());
+  int ip_stride = ip - (ip % output(index_output_)->process_stride());
 
   // Even self calls this to avoid hanging if case np == 1
   char buffer[20];
-  sprintf(buffer,"%02d > %02d send",ip,ip_write);
-  if (ip != ip_write) {
-    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_write);
-    proxy_simulation[ip_write].p_output_write (strlen(buffer),buffer);
+  sprintf(buffer,"%02d > %02d send",ip,ip_stride);
+  if (ip != ip_stride) {
+    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_stride);
+    proxy_simulation[ip_stride].p_output_write (strlen(buffer),buffer);
     output_next();
   } else {
-    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_write);
+    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_stride);
     proxy_simulation[ip].p_output_write(0,0);
   }
 
@@ -142,8 +142,8 @@ void Simulation::p_output_write (int n, char * buffer) throw()
 {
   Output * output = Simulation::output(index_output_);
   int ip       = CkMyPe();
-  int ip_write = ip - (ip % output->process_write());
-  TRACE4("%d %d  %d  %d\n",ip,ip_write,CkMyPe(),output->process_write());
+  int ip_stride = ip - (ip % output->process_stride());
+  TRACE4("%d %d  %d  %d\n",ip,ip_stride,CkMyPe(),output->process_stride());
 
   int count = output->counter();
 
@@ -156,7 +156,7 @@ void Simulation::p_output_write (int n, char * buffer) throw()
     TRACE ("Process reduce that\n");
   }
   
-  if (count == output->process_write()) {
+  if (count == output->process_stride()) {
 
     TRACE ("File write / close / next\n");
 

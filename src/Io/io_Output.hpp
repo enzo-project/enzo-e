@@ -26,42 +26,31 @@ public: // functions
   /// Create an uninitialized Output object with the given file_name format
   Output() throw();
 
-   /// Set file name
+  /// Set file name
   void set_filename (std::string filename,
-		      std::vector<std::string> fileargs) throw()
-   {
-     file_name_ = filename; 
-     file_args_ = fileargs;
-   };
+		     std::vector<std::string> fileargs) throw();
 
-  // /// Set file name variable to use
-  // void set_file_var (std::string file_var, size_t index) throw()
-  // { 
-  //   if ((index >= file_args_.size())) {
-  //     file_args_.resize(index+1);
-  //   }
-  //   file_args_[index] = file_var;
-  // }
-
-  /// Set field list
-  void set_field_list (std::vector<int> field_list) throw();
+  /// Set field iterator
+  void set_it_field (ItField * it_field) throw()
+  { it_field_ = it_field; }
+  
 
   /// Return the Schedule object pointer
   Schedule * schedule() throw() 
   { return schedule_; };
-  
+
+  /// Return the filename for the file format and given arguments
   std::string expand_file_name (int cycle, double time) const throw();
 
-  int process_write () const throw () 
-  { return process_write_; };
-
-  bool is_writer (int ip) const throw () 
-  { return (ip % process_write_ == 0); };
 
 #ifdef CONFIG_USE_CHARM
+
+  int process_stride () const throw () 
+  { return process_stride_; };
+
   int counter() 
   { 
-    if (count_reduce_ >= process_write_) {count_reduce_ = 0;}
+    if (count_reduce_ >= process_stride_) {count_reduce_ = 0;}
     count_reduce_++; 
     PARALLEL_PRINTF ("Output:counter(%d)\n",count_reduce_);
     return (count_reduce_);
@@ -93,7 +82,7 @@ public: // virtual functions
   /// Write hierarchy data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
-    ItField * it_field, Hierarchy * hierarchy, 
+    Hierarchy * hierarchy, 
     int cycle, double time,
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
@@ -108,7 +97,7 @@ public: // virtual functions
   /// Write patch data to disk; may be called by write (Hierarchy)
   virtual void write 
   ( const FieldDescr * field_descr,
-    ItField * it_field, Patch * patch, Hierarchy * hierarchy,
+    Patch * patch, Hierarchy * hierarchy,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
@@ -123,23 +112,31 @@ public: // virtual functions
   /// Write block data to disk; may be called by write (Patch)
   virtual void write 
   ( const FieldDescr * field_descr,
-    ItField * it_field, Block * block, Patch * patch, Hierarchy * hierarchy, 
+    Block * block, Patch * patch, Hierarchy * hierarchy, 
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
-protected: // attributes
+protected: // functions
 
-  IoSimulation * io_simulation_;
+#ifdef CONFIG_USE_CHARM
+  bool is_writer_ (int ip) const throw () 
+  { return (ip % process_stride_ == 0); };
+#endif
+
+protected: // attributes
 
   Schedule * schedule_;
 
-  /// Only processes with id's divisible by process_write_ writes
-  /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
-  int process_write_;
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Only processes with id's divisible by process_stride_ writes
+  /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
+  int process_stride_;
+
   /// counter for reduction of data from non-writers to writers
   int count_reduce_;
+
 #endif
 
   /// Name of the file to write, including format arguments
@@ -148,11 +145,9 @@ protected: // attributes
   /// Format strings for file name, if any ("cycle", "time", etc.)
   std::vector<std::string> file_args_;
 
-  /// Whether Output is scheduled for next call to scheduled write
-  bool scheduled_;
-  
-  /// List of fields to output
-  std::vector<int> field_list_;
+  /// Iterator over field id's
+  ItField * it_field_;
+
 
 };
 

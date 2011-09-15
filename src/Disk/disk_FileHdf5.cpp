@@ -12,6 +12,8 @@
 #include "cello.hpp"
 
 #include "disk.hpp"
+
+//----------------------------------------------------------------------
  
 FileHdf5::FileHdf5 (std::string path, std::string name) throw()
   : File(path,name),
@@ -40,10 +42,9 @@ void FileHdf5::file_open () throw()
 {
   if (is_file_open_) {
 
-    char warning_message[ERROR_LENGTH];
-    sprintf (warning_message,"Attempting to reopen an opened file %s",
+    WARNING1("FileHdf5::file_open",
+	     "Attempting to reopen an opened file %s",
 	     name_.c_str());
-    WARNING("FileHdf5::file_open",warning_message);
 
   } else {
 
@@ -61,11 +62,9 @@ void FileHdf5::file_open () throw()
 
     } else {
 
-      char warning_message[ERROR_LENGTH];
-      sprintf (warning_message,
+      WARNING2("FileHdf5::file_open",
 	       "Return value %d opening file %s",
 	       file_id_,full_name.c_str());
-      WARNING("FileHdf5::file_open",warning_message);
 
     }
   }
@@ -91,11 +90,9 @@ void FileHdf5::file_create () throw()
 
   } else {
 
-    char warning_message[ERROR_LENGTH];
-    sprintf (warning_message,
-	     "Return value %d opening file %s",
-	     file_id_,full_name.c_str());
-    WARNING("FileHdf5::file_create",warning_message);
+    WARNING2("FileHdf5::file_create",
+	    "Return value %d opening file %s",
+	    file_id_,full_name.c_str());
 
   }
 }
@@ -116,13 +113,15 @@ void FileHdf5::file_close () throw()
     // error check
 
     if (retval >= 0) {
+
       is_data_open_ = false;
+
     } else {
-      char warning_message[ERROR_LENGTH];
-      sprintf (warning_message,
-	       "Return value %d closing dataspace %s",
-	       retval,data_name_.c_str());
-      WARNING("FileHdf5::file_close",warning_message);
+
+      WARNING2("FileHdf5::file_close",
+	      "Return value %d closing dataspace %s",
+	      retval,data_name_.c_str());
+
     }
 
     // Close dataset
@@ -132,41 +131,40 @@ void FileHdf5::file_close () throw()
     // error check
 
     if (retval >= 0) {
+
       is_data_open_ = false;
+
     } else {
-      char warning_message[ERROR_LENGTH];
-      sprintf (warning_message,
-	       "Return value %d closing dataset %s",
-	       retval,data_name_.c_str());
-      WARNING("FileHdf5::file_close",warning_message);
+
+      WARNING2("FileHdf5::file_close",
+	      "Return value %d closing dataset %s",
+	      retval,data_name_.c_str());
     }
 
   }
 
   if (is_file_open_) {
+
     int retval = H5Fclose (file_id_);
+
     if (retval >= 0) {
+
       is_file_open_ = false;
+
     } else {
-      std::string full_name = path_ + "/" + name_;
-      char warning_message[ERROR_LENGTH];
-      sprintf (warning_message,
-	       "Return value %d closing file %s",
-	       retval,full_name.c_str());
-      WARNING("FileHdf5::file_close",warning_message);
+
+      WARNING2("FileHdf5::file_close",
+	      "Return value %d closing file %s",
+	       retval,(path_ + "/" + name_).c_str());
     }
 
   } else {
 
     // error check
 
-    std::string full_name = path_ + "/" + name_;
-
-    char warning_message[ERROR_LENGTH];
-    sprintf (warning_message,
-	     "Closing an already closed file %s",
-	     full_name.c_str());
-    WARNING("FileHdf5::file_close",warning_message);
+    WARNING1("FileHdf5::file_close",
+	    "Closing an already closed file %s",
+	     (path_ + "/" + name_).c_str());
   }
 }
 
@@ -180,11 +178,10 @@ void FileHdf5::data_open
  // Error checking
 
   if (! is_file_open_) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,
-	     "Trying to read from unopened file %s",
-	     (path_ + name_).c_str());
-    ERROR("FileHdf5::data_read",error_message);
+
+    ERROR1("FileHdf5::data_read",
+	  "Trying to read from unopened file %s",
+	  (path_ + name_).c_str());
   }
 
   // Open the data set
@@ -197,13 +194,9 @@ void FileHdf5::data_open
 
   if (data_set_id_ < 0) {
 
-    std::string full_name = path_ + "/" + name_;
-
-    char warning_message[ERROR_LENGTH];
-    sprintf (warning_message,
-	     "H5Dopen() returned %d when opening dataset %s in file %s",
-	     data_set_id_,name.c_str(),full_name.c_str());
-    ERROR("FileHdf5::data_open",warning_message);
+    ERROR3("FileHdf5::data_open",
+	   "H5Dopen() returned %d when opening dataset %s in file %s",
+	   data_set_id_,name.c_str(),(path_ + name_).c_str());
   }
 
   is_data_open_ = true;
@@ -217,11 +210,10 @@ void FileHdf5::data_open
   int rank = H5Sget_simple_extent_ndims(data_space_id_);
 
   if (rank > 5) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message, 
-	     "Dataset %s in file %s has unsupported rank %d",
-	     name.c_str(),name_.c_str(),rank);
-    ERROR("FileHdf5::data_get",error_message);
+
+    ERROR3("FileHdf5::data_get",
+	  "Dataset %s in file %s has unsupported rank %d",
+	  name.c_str(),name_.c_str(),rank);
   }
 
   // get extents
@@ -292,11 +284,9 @@ void FileHdf5::data_create
 
   if (data_set_id_ < 0) {
 
-    char warning_message[ERROR_LENGTH];
-    sprintf (warning_message,
-	     "Return value %d opening dataset %s",
-	     data_set_id_,name.c_str());
-    WARNING("FileHdf5::data_set",warning_message);
+    WARNING2("FileHdf5::data_set",
+	    "Return value %d opening dataset %s",
+	    data_set_id_,name.c_str());
   }
 
   // Update data state
@@ -316,21 +306,19 @@ void FileHdf5::data_read
   // error check file open
 
   if (! is_file_open_) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,
-             "Trying to read from unopened file %s",
-             (path_ + name_).c_str());
-    ERROR("FileHdf5::data_read",error_message);
+
+    ERROR1("FileHdf5::data_read",
+	  "Trying to read from unopened file %s",
+	  (path_ + name_).c_str());
   }
 
   // error check dataset open
 
   if (! is_data_open_) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,
-             "Trying to read unopened dataset %s",
-             data_name_.c_str());
-    ERROR("FileHdf5::data_read",error_message);
+
+    ERROR1("FileHdf5::data_read",
+	  "Trying to read unopened dataset %s",
+	  data_name_.c_str());
   }
 
   // read data
@@ -352,21 +340,19 @@ void FileHdf5::data_write
   // error check file open
 
   if (! is_file_open_) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,
-             "Trying to write to unopened file %s",
-             (path_ + name_).c_str());
-    ERROR("FileHdf5::data_write",error_message);
+
+    ERROR1("FileHdf5::data_write",
+	  "Trying to write to unopened file %s",
+	  (path_ + name_).c_str());
   }
 
   // error check dataset open
 
   if (! is_data_open_) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,
-             "Trying to write unopened dataset %s",
-             data_name_.c_str());
-    ERROR("FileHdf5::data_write",error_message);
+
+    ERROR1("FileHdf5::data_write",
+	  "Trying to write unopened dataset %s",
+	  data_name_.c_str());
   }
 
   H5Dwrite (data_set_id_,
@@ -395,24 +381,19 @@ void FileHdf5::file_read_meta
     int * n0, int * n1, int * n2, int * n3, int * n4) throw()
 {
   if ( ! is_file_open_) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,
-	     "Trying to read metadata from the unopened file %s",
-	     (path_ + name_).c_str());
-    ERROR("FileHdf5::file_read_meta",error_message);
+
+    ERROR1("FileHdf5::file_read_meta",
+	  "Trying to read metadata from the unopened file %s",
+	  (path_ + name_).c_str());
   }
 
   hid_t meta_id = H5Aopen_name(file_id_, name.c_str());
 
   if (meta_id < 0) {
 
-    std::string full_name = path_ + "/" + name_;
-
-    char warning_message[ERROR_LENGTH];
-    sprintf (warning_message,
-	     "H5Aopen_name() returned %d when opening attribute %s in file %s",
-	     meta_id, name.c_str(),full_name.c_str());
-    ERROR("FileHdf5::file_read_meta",warning_message);
+    ERROR3("FileHdf5::file_read_meta",
+	  "H5Aopen_name() returned %d when opening attribute %s in file %s",
+	  meta_id, name.c_str(),(path_ + name_).c_str());
   }
 
   // Get attribute size
@@ -424,11 +405,9 @@ void FileHdf5::file_read_meta
   int rank = H5Sget_simple_extent_ndims(meta_space_id);
 
   if (rank > 5) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message, 
-	     "Attribute %s in file %s has unsupported rank %d",
-	     name.c_str(),name_.c_str(),rank);
-    ERROR("FileHdf5::file_read_meta",error_message);
+    ERROR3("FileHdf5::file_read_meta",
+	  "Attribute %s in file %s has unsupported rank %d",
+	  name.c_str(),name_.c_str(),rank);
   }
 
   // set output parameters
@@ -459,11 +438,9 @@ void FileHdf5::file_write_meta
     int n0, int n1, int n2, int n3, int n4) throw()
 {
   if ( ! is_file_open_) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,
-	     "Trying to write metadata to the unopened file %s",
-	     (path_ + name_).c_str());
-    ERROR("FileHdf5::file_write_meta",error_message);
+    ERROR1("FileHdf5::file_write_meta",
+	  "Trying to write metadata to the unopened file %s",
+	  (path_ + name_).c_str());
   }
 
   // Determine the attribute rank
@@ -512,34 +489,28 @@ void FileHdf5::data_read_meta
   // error check file open
 
   if ( ! is_file_open_) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,
-	     "Trying to read attribute from the unopened file %s",
-	     (path_ + name_).c_str());
-    ERROR("FileHdf5::data_read_meta",error_message);
+
+    ERROR1("FileHdf5::data_read_meta",
+	  "Trying to read attribute from the unopened file %s",
+	  (path_ + name_).c_str());
   }
 
   // error check dataset open
 
   if (! is_data_open_) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,
-             "Trying to read attribute from unopened dataset %s",
-             data_name_.c_str());
-    ERROR("FileHdf5::data_read_meta",error_message);
+
+    ERROR1("FileHdf5::data_read_meta",
+	  "Trying to read attribute from unopened dataset %s",
+	  data_name_.c_str());
   }
 
   hid_t meta_id = H5Aopen_name(data_set_id_, name.c_str());
 
   if (meta_id < 0) {
 
-    std::string full_name = path_ + "/" + name_;
-
-    char warning_message[ERROR_LENGTH];
-    sprintf (warning_message,
-	     "H5Aopen_name() returned %d when opening attribute %s in file %s",
-	     meta_id, name.c_str(),full_name.c_str());
-    ERROR("FileHdf5::data_read_meta",warning_message);
+    ERROR3("FileHdf5::data_read_meta",
+	  "H5Aopen_name() returned %d when opening attribute %s in file %s",
+	  meta_id, name.c_str(),(path_ + name_).c_str());
   }
 
   // Get attribute size
@@ -551,11 +522,10 @@ void FileHdf5::data_read_meta
   int rank = H5Sget_simple_extent_ndims(meta_space_id);
 
   if (rank > 5) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message, 
-	     "Attribute %s in file %s has unsupported rank %d",
-	     name.c_str(),name_.c_str(),rank);
-    ERROR("FileHdf5::data_read_meta",error_message);
+
+    ERROR3("FileHdf5::data_read_meta",
+	  "Attribute %s in file %s has unsupported rank %d",
+	  name.c_str(),name_.c_str(),rank);
   }
 
   // set output parameters
@@ -588,21 +558,19 @@ void FileHdf5::data_write_meta
   // error check file open
 
   if ( ! is_file_open_) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,
-	     "Trying to write metadata to the unopened file %s",
-	     (path_ + name_).c_str());
-    ERROR("FileHdf5::data_write_meta",error_message);
+
+    ERROR1("FileHdf5::data_write_meta",
+	  "Trying to write metadata to the unopened file %s",
+	  (path_ + name_).c_str());
   }
 
   // error check dataset open
 
   if (! is_data_open_) {
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message,
-             "Trying to read attribute from unopened dataset %s",
-             data_name_.c_str());
-    ERROR("FileHdf5::data_write_meta",error_message);
+
+    ERROR1("FileHdf5::data_write_meta",
+	  "Trying to read attribute from unopened dataset %s",
+	  data_name_.c_str());
   }
 
   // Determine the attribute rank
@@ -842,11 +810,9 @@ enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
 
   } else {
 
-    char error_message[ERROR_LENGTH];
-    sprintf (error_message, 
-	     "Unknown type of class %d and size %d",
-	     hdf5_class, int(hdf5_size));
-    ERROR("FileHdf5::data_get",error_message);
+    ERROR2("FileHdf5::data_get",
+	  "Unknown type of class %d and size %d",
+	  hdf5_class, int(hdf5_size));
   }
 
   return type;

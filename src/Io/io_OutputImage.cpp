@@ -32,7 +32,7 @@ OutputImage::OutputImage() throw ()
 
     // Only root process writes
 #ifdef CONFIG_USE_CHARM
-    process_write_ = CkNumPes();
+    process_stride_ = CkNumPes();
 #endif
 }
 
@@ -57,7 +57,7 @@ void OutputImage::open (const Hierarchy * hierarchy, int cycle, double time) thr
 
   int ip = CkMyPe();
 
-  if (is_writer(ip)) {
+  if (is_writer_(ip)) {
 
     ASSERT("OutputImage::open","File already open",fp_ == 0);
 
@@ -97,7 +97,6 @@ void OutputImage::block (const Block * block) throw()
 void OutputImage::write
 (
  const FieldDescr * field_descr,
- ItField * it_field,
  Hierarchy * hierarchy,
  int cycle,
  double time,
@@ -117,8 +116,8 @@ void OutputImage::write
   if (root_call) {
 
     // Index of (only) field to write
-    it_field->first();
-    int index = it_field->value();
+    it_field_->first();
+    int index = it_field_->value();
 
     // Get file name
     std::string file_prefix = expand_file_name (cycle,time);
@@ -146,8 +145,7 @@ void OutputImage::write
 
     // Write patch contribution 
     // NO OFFSET: ASSUMES ROOT PATCH
-    write (field_descr, it_field, patch, hierarchy, cycle,time,false,
-	   0,0,0);
+    write (field_descr, patch, hierarchy, cycle,time, false,  0,0,0);
   }
 
   if (root_call) {
@@ -164,7 +162,6 @@ void OutputImage::write
 void OutputImage::write
 (
  const FieldDescr * field_descr,
- ItField * it_field,
  Patch * patch,
  Hierarchy  * hierarchy,
  int cycle,
@@ -184,8 +181,8 @@ void OutputImage::write
   if (root_call) {
 
     // Index of (only) field to write
-    it_field->first();
-    int index = it_field->value();
+    it_field_->first();
+    int index = it_field_->value();
 
     // Get file name
     std::string file_prefix = expand_file_name (cycle,time);
@@ -226,7 +223,7 @@ void OutputImage::write
     int ix,iy,iz;
     block->index_patch(&ix,&iy,&iz);
 
-    write (field_descr, it_field, block, patch, hierarchy, cycle,time,false,
+    write (field_descr, block, patch, hierarchy, cycle,time,false,
 	   ix0+ix*nxb,
 	   iy0+iy*nyb,
 	   iz0+iz*nzb);
@@ -247,7 +244,6 @@ void OutputImage::write
 void OutputImage::write
 (
  const FieldDescr * field_descr,
- ItField * it_field,
  Block * block,
  Patch * patch,
  Hierarchy  * hierarchy,
@@ -268,8 +264,8 @@ void OutputImage::write
   std::string file_prefix = expand_file_name (cycle,time);
 
   // Index of (only) field to write
-  it_field->first();
-  int index = it_field->value();
+  it_field_->first();
+  int index = it_field_->value();
 
     // Get ghost depth
 
