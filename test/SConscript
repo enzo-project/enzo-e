@@ -5,14 +5,15 @@ Import('serial_run')
 
 bin_path = '#/bin/'+type
 
+env['COPY'] = ''
+
 # Define a test for running unit tests
 
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_parse    = Builder(action = serial_run   +  "$SOURCE < $ARGS >  $TARGET 2>&1")
-run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1")
+run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1")
 run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS 2>&1")
-run_tree     = Builder(action = serial_run   + " $SOURCE $ARGS > $OUT 2>&1")
 make_movie   = Builder(action = "convert ${ARGS} $TARGET; chmod a+r $TARGET; rm ${ARGS}")
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
@@ -20,17 +21,14 @@ env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
 env.Append(BUILDERS = { 'RunParse'    : run_parse } )
 env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 env.Append(BUILDERS = { 'RunMethod'   : run_method } )
-env.Append(BUILDERS = { 'RunTree'     : run_tree } )
-
-type_path = type + '/'
 
 #----------------------------------------------------------------------
 # DISK COMPONENT          
 #----------------------------------------------------------------------
 Clean(env.RunSerial
       ('test_FileHdf5.unit',  bin_path + '/test_FileHdf5'),
-      '#/test_disk.h5')
-
+      '#test_disk.h5')
+       
 Clean(env.RunSerial
       ('test_FileIfrit.unit', bin_path + '/test_FileIfrit'),
       '#/FileIfrit_test.bin')
@@ -100,82 +98,59 @@ env.RunSerial('test_Papi.unit',        bin_path + '/test_Papi')
 #----------------------------------------------------------------------
 # MESH PROTOTYPE
 #----------------------------------------------------------------------
-Clean(env.RunSerial
+
+
+env_mv_png = env.Clone(COPY = 'mv *.png test/' + type)
+
+Clean(env_mv_png.RunSerial
       ('test_TreeK-D2-R2-L6.unit', 
        bin_path + '/test_TreeK',
        ARGS='2 2 6 input/Enzo-P-2048.png'),
       Glob('#/TreeK-D=2-R=2-L=6*png'))
-Clean(env.RunSerial
+Clean(env_mv_png.RunSerial
       ('test_TreeK-D2-R2-L7.unit', 
        bin_path + '/test_TreeK',
        ARGS='2 2 7 input/Enzo-P-2048.png'),
       Glob('#/TreeK-D=2-R=2-L=7*png'))
-Clean(env.RunSerial
+Clean(env_mv_png.RunSerial
       ('test_TreeK-D2-R2-L8.unit',
        bin_path + '/test_TreeK',
        ARGS='2 2 8 input/Enzo-P-2048.png'),
       Glob('#/TreeK-D=2-R=2-L=8*png'))
-# Clean(env.RunSerial
-#       ('test_TreeK-D2-R2-L9.unit',
-#        bin_path + '/test_TreeK',
-#        ARGS='2 2 9 input/Enzo-P-2048.png'),
-#       Glob('#/TreeK-D=2-R=2-L=9*png'))
-# Clean(env.RunSerial
-#       ('test_TreeK-D2-R2-L10.unit',
-#        bin_path + '/test_TreeK',
-#        ARGS='2 2 10 input/Enzo-P-2048.png'),
-#       Glob('#/TreeK-D=2-R=2-L=10*png'))
 
-Clean(env.RunSerial
+Clean(env_mv_png.RunSerial
       ('test_TreeK-D2-R4-L6.unit',
        bin_path + '/test_TreeK',
        ARGS='2 4 6 input/Enzo-P-2048.png'),
       Glob('#/TreeK-D=2-R=4-L=6*png'))
-Clean(env.RunSerial
+Clean(env_mv_png.RunSerial
       ('test_TreeK-D2-R4-L8.unit',
        bin_path + '/test_TreeK',
        ARGS='2 4 8 input/Enzo-P-2048.png'),
       Glob('#/TreeK-D=2-R=4-L=8*png'))
-# Clean(env.RunSerial
-#       ('test_TreeK-D2-R4-L10.unit',
-#        bin_path + '/test_TreeK',
-#        ARGS='2 4 10 input/Enzo-P-2048.png'),
-#       Glob('#/TreeK-D=2-R=4-L=10*png'))
 
-Clean(env.RunSerial
+Clean(env_mv_png.RunSerial
       ('test_TreeK-D3-R2-L4.unit',
        bin_path + '/test_TreeK',
        ARGS='3 2 4'),
       Glob('#/TreeK-D=3-R=2-L=4*png'))
-Clean(env.RunSerial
+Clean(env_mv_png.RunSerial
       ('test_TreeK-D3-R2-L5.unit',
        bin_path + '/test_TreeK', ARGS='3 2 5'),
       Glob('#/TreeK-D=3-R=2-L=5*png'))
-Clean(env.RunSerial
+Clean(env_mv_png.RunSerial
       ('test_TreeK-D3-R2-L6.unit',
        bin_path + '/test_TreeK', ARGS='3 2 6'),
       Glob('#/TreeK-D=3-R=2-L=6*png'))
-# Clean(env.RunSerial
-#       ('test_TreeK-D3-R2-L7.unit',
-#        bin_path + '/test_TreeK', ARGS='3 2 7'),
-#       Glob('#/TreeK-D=3-R=2-L=7*png'))
-# Clean(env.RunSerial
-#       ('test_TreeK-D3-R2-L8.unit',
-#        bin_path + '/test_TreeK', ARGS='3 2 8'),
-#       Glob('#/TreeK-D=3-R=2-L=8*png'))
 
-Clean(env.RunSerial
+Clean(env_mv_png.RunSerial
       ('test_TreeK-D3-R4-L4.unit',
        bin_path + '/test_TreeK', ARGS='3 4 4'),
       Glob('#/TreeK-D=3-R=4-L=4*png'))
-Clean(env.RunSerial
+Clean(env_mv_png.RunSerial
       ('test_TreeK-D3-R4-L6.unit',
        bin_path + '/test_TreeK', ARGS='3 4 6'),
       Glob('#/TreeK-D=3-R=4-L=6*png'))
-# Clean(env.RunSerial	
-#       ('test_TreeK-D3-R4-L8.unit',
-#        bin_path + '/test_TreeK', ARGS='3 4 8'),
-#       Glob('#/TreeK-D=3-R=4-L=8*png'))
 
 # Clean(env.RunSerial
 #       ('test_ppml_implosion.unit',
@@ -197,7 +172,7 @@ Clean(env.RunSerial
 #       ('test_ppm_implosion3.unit',
 #        bin_path + '/test_ppm', ARGS='ppm-implosion3   24 10 10'),
 #       Glob('#/*-ppm-implosion3-*png'))
-
+ 
 Clean(env.RunSerial
       ('test_Monitor.unit',
        bin_path + '/test_Monitor'),

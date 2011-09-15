@@ -120,9 +120,7 @@ void OutputImage::write
     int index = it_field_->value();
 
     // Get file name
-    std::string file_prefix = expand_file_name (cycle,time);
-    std::string field_name  = field_descr->field_name(index);
-    std::string file_name = file_prefix + "-" + field_name + ".png";
+    std::string file_name = expand_file_name (cycle,time);
 
     // Monitor output
     Monitor::instance()->print ("[Output] writing hierarchy image %s", 
@@ -185,9 +183,8 @@ void OutputImage::write
     int index = it_field_->value();
 
     // Get file name
-    std::string file_prefix = expand_file_name (cycle,time);
-    std::string field_name = field_descr->field_name(index);
-    std::string file_name = file_prefix + "-" + field_name + ".png";
+    std::string file_name = expand_file_name(cycle,time) + ".png";
+    fp_ = fopen (file_name.c_str(),"w");
 
     // Monitor output
     Monitor::instance()->print ("[Output] writing patch image %s", 
@@ -261,8 +258,6 @@ void OutputImage::write
   int nx,ny,nz;
   field_block->size(&nx,&ny,&nz);
 
-  std::string file_prefix = expand_file_name (cycle,time);
-
   // Index of (only) field to write
   it_field_->first();
   int index = it_field_->value();
@@ -284,8 +279,8 @@ void OutputImage::write
     image_create_(nx,ny);
 
     // Open file if writing a single block
-    std::string field_name = field_descr->field_name(index);
-    std::string file_name = file_prefix + "-" + field_name + ".png";
+    std::string file_name = expand_file_name(cycle,time) + ".png";
+    fp_ = fopen (file_name.c_str(),"w");
 
     // create png
     png_open_(file_name,nx,ny);

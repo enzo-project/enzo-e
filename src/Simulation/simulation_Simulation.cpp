@@ -395,10 +395,8 @@ void Simulation::initialize_output_() throw()
 
     // Initialize the list of output fields
 
-    TRACE("field_list 0");
     if (parameters_->type("field_list") != parameter_unknown) {
 
-      TRACE("field_list 1");
       // Set field list to specified field list
 
       if (parameters_->type("field_list") == parameter_list) {
@@ -407,7 +405,9 @@ void Simulation::initialize_output_() throw()
 
 	int length = parameters_->list_length("field_list");
 	for (int i=0; i<length; i++) {
-	  int field_index = parameters_->list_value_integer(i,"field_list",0);
+	  std::string field_name = 
+	    parameters_->list_value_string(i,"field_list","");
+	  int field_index = field_descr_->field_id(field_name);
 	  it_field->append(field_index);
 	}
 	
@@ -422,7 +422,6 @@ void Simulation::initialize_output_() throw()
 
     } else {
 
-      TRACE("field_list 2");
       // field_list not defined: default to all fields
       int field_count = field_descr_->field_count();
       ItFieldRange * it_field = new ItFieldRange(field_count);

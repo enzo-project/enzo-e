@@ -418,31 +418,45 @@ component("Enzo");
 
 <table>
 <tr>
-<th></th>
-<th>density</th>
-<th>velocity_x</th>
-<th>velocity_y</th>
-<th>total_energy</th></tr>
+  <th></th>
+  <th colspan=2>serial</th>
+  <th colspan=2>mpi</th>
+  <th colspan=2>charm</th>
+<tr>
+  <th></th>
+  <th>density</th>
+  <th>total_energy</th>
+  <th>density</th>
+  <th>total_energy</th>
+  <th>density</th>
+  <th>total_energy</th>
+</tr>
 <tr>
 <th>initial</th>
-<td><img width=200 src="enzo-p_1-000000-density.png"></img></td>
-<td><img width=200 src="enzo-p_1-000000-velocity_x.png"></img></td>
-<td><img width=200 src="enzo-p_1-000000-velocity_y.png"></img></td>
-<td><img width=200 src="enzo-p_1-000000-total_energy.png"></img></td>
+<td><img width=200 src="test/serial/enzo-p_1-d-000000.png"></img></td>
+<td><img width=200 src="test/serial/enzo-p_1-te-000000.png"></img></td>
+<td><img width=200 src="test/mpi/enzo-p_1-d-000000.png"></img></td>
+<td><img width=200 src="test/mpi/enzo-p_1-te-000000.png"></img></td>
+<td><img width=200 src="test/charm/enzo-p_1-d-000000.png"></img></td>
+<td><img width=200 src="test/charm/enzo-p_1-te-000000.png"></img></td>
 </tr>
 <tr>
 <th>1 block</th>
-<td><img width=200 src="enzo-p_1-000100-density.png"></img></td>
-<td><img width=200 src="enzo-p_1-000100-velocity_x.png"></img></td>
-<td><img width=200 src="enzo-p_1-000100-velocity_y.png"></img></td>
-<td><img width=200 src="enzo-p_1-000100-total_energy.png"></img></td>
+<td><img width=200 src="test/serial/enzo-p_1-d-000100.png"></img></td>
+<td><img width=200 src="test/serial/enzo-p_1-te-000100.png"></img></td>
+<td><img width=200 src="test/mpi/enzo-p_1-d-000100.png"></img></td>
+<td><img width=200 src="test/mpi/enzo-p_1-te-000100.png"></img></td>
+<td><img width=200 src="test/charm/enzo-p_1-d-000100.png"></img></td>
+<td><img width=200 src="test/charm/enzo-p_1-te-000100.png"></img></td>
 </tr>
 <tr>
 <th>4 blocks</th>
-<td><img width=200 src="enzo-p_2-000100-density.png"></img></td>
-<td><img width=200 src="enzo-p_2-000100-velocity_x.png"></img></td>
-<td><img width=200 src="enzo-p_2-000100-velocity_y.png"></img></td>
-<td><img width=200 src="enzo-p_2-000100-total_energy.png"></img></td>
+<td><img width=200 src="test/serial/enzo-p_2-d-000100.png"></img></td>
+<td><img width=200 src="test/serial/enzo-p_2-te-000100.png"></img></td>
+<td><img width=200 src="test/mpi/enzo-p_2-d-000100.png"></img></td>
+<td><img width=200 src="test/mpi/enzo-p_2-te-000100.png"></img></td>
+<td><img width=200 src="test/charm/enzo-p_2-d-000100.png"></img></td>
+<td><img width=200 src="test/charm/enzo-p_2-te-000100.png"></img></td>
 </tr>
 </table>
 
