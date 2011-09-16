@@ -78,7 +78,15 @@ public: // virtual functions
   void image_set_map
   (int n, double * map_r, double * map_g, double * map_b) throw();
 
-private:
+private: // functions
+
+  /// Create the file
+  void create_ (std::string write_level, 
+		int nx, int ny,
+		int cycle, double time) throw();
+
+  /// Close the file
+  void close_ () throw();
 
   /// Create the png file object
   void png_open_ (std::string filename, 
@@ -117,10 +125,6 @@ protected: // attributes
 
   /// Current pngwriter
   pngwriter * png_;
-
-  /// Current file
-  FILE * fp_;
-
 
 };
 

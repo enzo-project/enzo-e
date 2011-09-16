@@ -143,9 +143,9 @@ void Papi::print () const throw()
 {
 #ifdef CONFIG_USE_PAPI
   Monitor * monitor = Monitor::instance();
-  monitor->print ("PAPI Time real   = %f",time_real());
-  monitor->print ("PAPI Time proc   = %f",time_proc());
-  monitor->print ("PAPI GFlop count = %f",flop_count()*1e-9);
-  monitor->print ("PAPI GFlop rate  = %f",flop_count()*1e-9 / time_real());
+  monitor->print ("[Performance] PAPI Time real   = %f",time_real());
+  monitor->print ("[Performance] PAPI Time proc   = %f",time_proc());
+  monitor->print ("[Performance] PAPI GFlop count = %f",flop_count()*1e-9);
+  monitor->print ("[Performance] PAPI GFlop rate  = %f",flop_count()*1e-9 / time_real());
 #endif
 };

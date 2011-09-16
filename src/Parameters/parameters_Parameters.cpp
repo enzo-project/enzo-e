@@ -105,7 +105,7 @@ void Parameters::read ( const char * file_name )
 
   fclose(file_pointer);
 
-  monitor_->print ("[Parameter] read in %s",file_name);
+  monitor_->print ("[Parameters] read in %s",file_name);
 }
 
 //----------------------------------------------------------------------
@@ -129,7 +129,6 @@ void Parameters::write ( const char * file_name )
   std::string group_prev[MAX_GROUP_DEPTH];
 
   // Initialize "current" groups as empty
-  int n_curr = 0;
   std::string group_curr[MAX_GROUP_DEPTH];
 
   // Initialize indentation variables
@@ -758,7 +757,7 @@ void Parameters::monitor_access_
     sprintf (index_string,"[%d]",index);
   }
 
-  monitor_->print("[Parameter] accessed %s%s %s",
+  monitor_->print("[Parameters] accessed %s%s %s",
 		 parameter_name_(parameter).c_str(),
 		 index_string,
 		 value.c_str());
@@ -849,7 +848,7 @@ size_t Parameters::extract_groups_
 {
   std::string p = parameter;
   size_t i_group=0;  // group index for group[]
-  int i_stop  = p.find(":");
+  size_t i_stop  = p.find(":");
   while (i_stop != std::string::npos &&
 	 i_group<MAX_GROUP_DEPTH) {
     group[i_group++] = p.substr(0,i_stop);

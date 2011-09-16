@@ -16,8 +16,7 @@ OutputImage::OutputImage() throw ()
     image_(0),
     image_size_x_(0),
     image_size_y_(0),
-    png_(0),
-    fp_(0)
+    png_(0)
 
 {
     map_r_.resize(2);
@@ -59,11 +58,8 @@ void OutputImage::open (const Hierarchy * hierarchy, int cycle, double time) thr
 
   if (is_writer_(ip)) {
 
-    ASSERT("OutputImage::open","File already open",fp_ == 0);
-
     // Open the file
     std::string file_name = expand_file_name(cycle,time) + ".png";
-    fp_ = fopen (file_name.c_str(),"w");
 
     // Create png object
     png_open_(file_name,nxm,nym);
@@ -78,8 +74,6 @@ void OutputImage::open (const Hierarchy * hierarchy, int cycle, double time) thr
 void OutputImage::close () throw()
 {
   INCOMPLETE("OutputImage::close");
-  fclose (fp_);
-  fp_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -107,35 +101,21 @@ void OutputImage::write
   ) throw()
 {
 
+  // Check that we're not writing a 1D image
+
   if (hierarchy->dimension() <= 1) {
-    WARNING("OutputImage::write[Hierarchy]",
+    ERROR("OutputImage::write[Hierarchy]",
 	    "OutputImage only supports 2D and 3D problems");
   }
 
-  // Open file if writing a single block
+  // Open file if needed
+
   if (root_call) {
 
-    // Index of (only) field to write
-    it_field_->first();
-    int index = it_field_->value();
-
-    // Get file name
-    std::string file_name = expand_file_name (cycle,time);
-
-    // Monitor output
-    Monitor::instance()->print ("[Output] writing hierarchy image %s", 
-				file_name.c_str());
-
-    // Get hierarchy size
     int nxm,nym,nzm;
     hierarchy->patch(0)->size (&nxm, &nym, &nzm);
 
-    // Create image 
-    image_create_(nxm,nym);
-
-    // create png
-    png_open_(file_name,nxm,nym);
-
+    create_("hierarchy",nxm, nym, cycle,time);
   }
 
   ItPatch it_patch (hierarchy);
@@ -146,12 +126,7 @@ void OutputImage::write
     write (field_descr, patch, hierarchy, cycle,time, false,  0,0,0);
   }
 
-  if (root_call) {
-    // Complete geterating image if writing a single block
-    double min=0.0;
-    double max=1.0;
-    if (root_call) image_close_(min,max);
-  }
+  if (root_call) close_();
 
 }
 
@@ -175,31 +150,13 @@ void OutputImage::write
 	    "OutputImage only supports 2D and 3D problems");
   }
 
-  // Open file if writing a single block
+  // Open file if needed
+
+
   if (root_call) {
-
-    // Index of (only) field to write
-    it_field_->first();
-    int index = it_field_->value();
-
-    // Get file name
-    std::string file_name = expand_file_name(cycle,time) + ".png";
-    fp_ = fopen (file_name.c_str(),"w");
-
-    // Monitor output
-    Monitor::instance()->print ("[Output] writing patch image %s", 
-				file_name.c_str());
-
-    // Get patch size
     int nxp, nyp;
     patch->size (&nxp, &nyp);
-
-    // create png
-    png_open_(file_name,nxp,nyp);
-
-    // Create image 
-    image_create_(nxp,nyp);
-
+    create_("patch",nxp,nyp,cycle,time);
   }
 
 #ifdef CONFIG_USE_CHARM
@@ -227,12 +184,8 @@ void OutputImage::write
   }
 #endif
 
-  if (root_call) {
-    // Complete geterating image if writing a single block
-    double min=0.0;
-    double max=1.0;
-    if (root_call) image_close_(min,max);
-  }
+  // close file if needed
+  if (root_call) close_();
 
 }
 
@@ -273,23 +226,7 @@ void OutputImage::write
   ndy=ny+2*gy;
   ndz=nz+2*gz;
 
-  if (root_call) {
-
-    // create image
-    image_create_(nx,ny);
-
-    // Open file if writing a single block
-    std::string file_name = expand_file_name(cycle,time) + ".png";
-    fp_ = fopen (file_name.c_str(),"w");
-
-    // create png
-    png_open_(file_name,nx,ny);
-
-    // Monitor output
-    Monitor::instance()->print ("[Output] writing block image %s", 
-				file_name.c_str());
-
-  }
+  if (root_call) create_("block",nx,ny,cycle,time);
 
   // Add block contribution to image
 
@@ -309,12 +246,8 @@ void OutputImage::write
 		   axis_z, reduce_sum);
   }
 
-  if (root_call) {
-    // Complete geterating image if writing a single block
-    double min=0.0;
-    double max=1.0;
-    if (root_call) image_close_(min,max);
-  }
+  if (root_call) close_();
+
 }
 
 //======================================================================
@@ -421,4 +354,38 @@ void OutputImage::image_close_ (double min, double max) throw()
   image_ = 0;
   delete png_;
   png_ = 0;
+}
+
+//----------------------------------------------------------------------
+
+void OutputImage::create_ 
+(
+ std::string write_level,
+ int nx, int ny,
+ int cycle,
+ double time
+ ) throw()
+{
+  // Open file if writing a single block
+  std::string file_name = expand_file_name(cycle,time) + ".png";
+
+  // create png
+  png_open_(file_name,nx,ny);
+
+  // Create image 
+  image_create_(nx,ny);
+
+
+  Monitor::instance()->print ("[Output] writing %s image file %s", 
+			      write_level.c_str(),file_name.c_str());
+  
+}
+
+//----------------------------------------------------------------------
+
+void OutputImage::close_ () throw()
+{
+  double min=0.0;
+  double max=1.0;
+  image_close_(min,max);
 }

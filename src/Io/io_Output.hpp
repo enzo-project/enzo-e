@@ -73,12 +73,6 @@ public: // virtual functions
 
 #endif
 
-
-  /// Write hierarchy-related data to disk if scheduled
-  void scheduled_write
-  (  const FieldDescr * field_descr,
-     Hierarchy * hierarchy, int cycle, double time, bool root_call=true) throw();
-
   /// Write hierarchy data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
@@ -86,30 +80,14 @@ public: // virtual functions
     int cycle, double time,
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
-
-
-  /// Write a patch-related data to disk if scheduled
-  void scheduled_write
-  (  const FieldDescr * field_descr,
-     Patch * patch, Hierarchy * hierarchy,
-     int cycle, double time, bool root_call=true) throw();
-
-  /// Write patch data to disk; may be called by write (Hierarchy)
+  /// Write patch data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
     Patch * patch, Hierarchy * hierarchy,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
-
-
-  /// Write a block-related to disk if scheduled
-  void scheduled_write
-  (  const FieldDescr * field_descr,
-     Block * block, Patch * patch, Hierarchy * hierarchy,
-     int cycle, double time, bool root_call=true) throw();
-
-  /// Write block data to disk; may be called by write (Patch)
+  /// Write block data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
     Block * block, Patch * patch, Hierarchy * hierarchy, 

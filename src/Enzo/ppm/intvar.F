@@ -5,7 +5,7 @@ c     See LICENSE_ENZO file for license and copyright information
 c=======================================================================
 c///////////////////////  SUBROUTINE INTVAR  \\\\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine intvar(qslice, idim, i1, i2, isteep, steepen, iflatten, 
+      subroutine intvar(qslice, idim, i1, i2, isteep, steepen, iflatten,
      &                  flatten, c1, c2, c3, c4, c5, c6, char1, char2,
      &                  c0, dq, ql, qr, q6, qla, qra, ql0, qr0)
 c

@@ -228,7 +228,7 @@ c
      &            tmp1, tmp2, tmp3, tmp4, gela, gera, gel0, ger0)
 c
       do ic=1,ncolor
-        call intvar(colslice(1,j,ic), idim, i1,i2, 0, steepen, iflatten, 
+        call intvar(colslice(1,j,ic), idim, i1,i2, 0, steepen, iflatten,
      &            flatten, c1, c2, c3, c4, c5, c6, char1, char2, c0,
      &            tmp1, tmp2, tmp3, tmp4, colla(1,ic), colra(1,ic),
      &            coll0(1,ic), colr0(1,ic))

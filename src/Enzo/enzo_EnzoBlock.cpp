@@ -22,8 +22,8 @@ EnzoBlock::EnzoBlock
  int num_field_blocks) throw()
   : Block (ix,iy,iz,
 	   nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
-    CycleNumber(0),
     Time_(0),
+    CycleNumber(0),
     OldTime(0),
     dt(0),
     SubgridFluxes(0)

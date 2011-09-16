@@ -673,7 +673,7 @@ void FileHdf5::group_create (std::string group_path) throw()
     H5Gget_info_by_name (file_id_, group_full.c_str(), &group_info, H5P_DEFAULT);
 
     bool group_exists = false;
-    for (int i=0; i<group_info.nlinks; i++) {
+    for (size_t i=0; i<group_info.nlinks; i++) {
       char group_name[80];
       H5Lget_name_by_idx (file_id_, group_full.c_str(),
 			  H5_INDEX_NAME,

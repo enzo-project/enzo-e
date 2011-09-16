@@ -24,7 +24,8 @@ PARALLEL_MAIN_BEGIN
   unit_class("Monitor");
 
   unit_func("Monitor");
-  unit_assert(true);
+
+  unit_assert(monitor != NULL);
 
 
   unit_finalize();

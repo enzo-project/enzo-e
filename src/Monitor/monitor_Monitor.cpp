@@ -69,8 +69,6 @@ void Monitor::header () const
 
   // Get date text
 
-  char buffer_date[MONITOR_LENGTH];
-
   time_t rawtime;
   struct tm * t;
   time(&rawtime);

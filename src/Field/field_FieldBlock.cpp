@@ -40,12 +40,16 @@ FieldBlock::~FieldBlock() throw()
 //----------------------------------------------------------------------
 
 FieldBlock::FieldBlock ( const FieldBlock & field_block ) throw ()
-{  INCOMPLETE("FieldBlock::FieldBlock"); }
+{
+  
+  INCOMPLETE("FieldBlock::FieldBlock"); 
+}
 
 //----------------------------------------------------------------------
 
 FieldBlock & FieldBlock::operator= ( const FieldBlock & field_block ) throw ()
-{  INCOMPLETE("FieldBlock::operator=");
+{  
+  INCOMPLETE("FieldBlock::operator=");
   return *this;
 }
 
@@ -370,7 +374,9 @@ void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 
 void FieldBlock::refresh_ghosts(const FieldDescr * field_descr) throw()
 {
-  INCOMPLETE("FieldBlock::refresh_ghosts");
+
+  // INCOMPLETE
+
   if ( ! ghosts_allocated() ) {
     WARNING("FieldBlock::refresh_ghosts",
 	    "Called with ghosts not allocated: allocating ghosts");
@@ -489,7 +495,8 @@ void FieldBlock::print (const FieldDescr * field_descr,
 #endif
 
   if ( ! array_allocated() ) {
-    PARALLEL_PRINTF("%s FieldBlock %p not allocated\n");
+    ERROR("FieldBlock::print",
+	  "FieldBlocks not allocated");
   } else {
     int field_count = field_descr->field_count();
     for (int index_field=0; index_field<field_count; index_field++) {
@@ -627,8 +634,8 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  }
 	  long double avg = sum / (nx*ny*nz);
 	  PARALLEL_PRINTF
-	    ("%s FieldBlock[%p,%s] (%d %d %d) [%18.14g %18.14g %18.14g]\n",
-	     message ? message : "",this,
+	    ("%s FieldBlock[%p,%s] (%d %d %d) [%18.14Lf %18.14Lf %18.14Lf]\n",
+	     (message ? message : "")  ,this,
 	     field_descr->field_name(index_field).c_str(),
 	     nx,ny,nz,min,avg,max);
 	}

@@ -110,7 +110,7 @@ std::string Param::value_to_string ()
     break;
   case parameter_list:
     string_buffer = "[ ";
-    for (int i=0; i<value_list_->size(); i++) {
+    for (size_t i=0; i<value_list_->size(); i++) {
       if ( i > 0 ) string_buffer += ", ";
       string_buffer += (*value_list_)[i]->value_to_string();
     }

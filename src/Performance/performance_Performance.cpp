@@ -11,13 +11,13 @@
 
 Performance::Performance ()
   : counters_(),
-    attribute_names_           (NULL),
-    counter_names_             (NULL),
-    group_names_               (NULL),
-    region_names_              (NULL),
-    attribute_monotonic_       (NULL),
-    current_group_             (0),
-    current_region_            (0)
+    attribute_names_     (),
+    counter_names_       (),
+    group_names_         (),
+    region_names_        (),
+    attribute_monotonic_ (),
+    current_group_       (0),
+    current_region_      (0)
 {
   // Create initial Counters object
 

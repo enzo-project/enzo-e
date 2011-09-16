@@ -374,9 +374,6 @@ void FieldFace::print
     int nd3[3];
     field_block->field_size(field_descr,index_field,&nd3[0],&nd3[1],&nd3[2]);
 
-    // Compute multipliers for index calculations
-    int md3[3] = {1, nd3[0], nd3[0]*nd3[1]};
-
     // Get ghost depth
     int ng3[3];
     field_descr->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);

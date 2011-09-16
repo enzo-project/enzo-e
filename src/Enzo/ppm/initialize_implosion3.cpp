@@ -98,7 +98,6 @@ void EnzoBlock::initialize_implosion3 (int size_param)
 
   int ndx = GridDimension[0];
   int ndy = GridDimension[1];
-  int ndz = GridDimension[2];
 
   enzo_float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
   enzo_float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
