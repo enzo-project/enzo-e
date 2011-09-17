@@ -22,7 +22,7 @@ PARALLEL_MAIN_BEGIN
   int n1 = 64;
   int n2 = 64;
 
-  const char filename[] = "FileIfrit_test.bin";
+  const char filename[] = "test_disk.bin";
   int n = n0*n1*n2;
 
   float * a = new float[n];
