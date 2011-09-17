@@ -118,7 +118,7 @@ public: // interface
 
   /// Return the dimensionality of the Simulation
   int dimension() const throw()
-{ return dimension_; }
+  { return dimension_; }
 
 //----------------------------------------------------------------------
 

@@ -19,6 +19,8 @@ set procs = 1
 
 rm -f "test/*/running.$arch.$prec"
 
+set d = `date +"%Y-%m-%d %H:%M:%S"`
+echo "$d BEGIN"
 foreach type ($types)
 
    set dir = test/$type
@@ -86,10 +88,7 @@ foreach type ($types)
 end
 
 set d = `date +"%Y-%m-%d %H:%M:%S"`
-echo "$d"
+echo "$d END"
 
-grep Segmentation out.*
-
-echo
 
 

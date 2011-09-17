@@ -44,19 +44,19 @@ public: // virtual functions
   ( const FieldDescr * field_descr,
     Hierarchy * hierarchy, 
     int cycle, double time,
-    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
+    bool root_call=true) throw();
 
   /// Write patch-related field data; may be called by write (Hierarchy)
   virtual void write 
   ( const FieldDescr * field_descr,
-    Patch * patch, Hierarchy * hierarchy,
+    Patch * patch,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
 
   /// Write block-related field data; may be called by write (Patch)
   virtual void write 
   ( const FieldDescr * field_descr,
-    Block * block, Patch * patch, Hierarchy * hierarchy, 
+    Block * block,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
 
@@ -89,8 +89,11 @@ private: // functions
   void close_ () throw();
 
   /// Create the png file object
-  void png_open_ (std::string filename, 
-		  int image_size_x,  int image_size_y) throw();
+  void png_create_ (std::string filename,
+		    int image_size_x,  int image_size_y) throw();
+
+  /// Delete the png object
+  void png_close_() throw();
 
   /// Create the image data object
   void image_create_ (int image_size_x,  int image_size_y) throw();
@@ -278,7 +281,7 @@ void OutputImage::image
   // Open the image
 
 
-  png_open_ (filename,mx,my);
+  png_create_ (filename,mx,my);
 
   image_create_(mx,my);
 

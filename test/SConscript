@@ -22,6 +22,9 @@ env.Append(BUILDERS = { 'RunParse'    : run_parse } )
 env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 env.Append(BUILDERS = { 'RunMethod'   : run_method } )
 
+env_mv_png  = env.Clone(COPY = 'mv *.png test/' + type)
+env_mv_test = env.Clone(COPY = 'mv test*out test*in test/' + type)
+
 #----------------------------------------------------------------------
 # DISK COMPONENT          
 #----------------------------------------------------------------------
@@ -69,7 +72,7 @@ env.RunSerial('test_Layout.unit',      bin_path + '/test_Layout')
 #----------------------------------------------------------------------
 # PARAMETERS COMPONENT    
 #----------------------------------------------------------------------
-Clean(env.RunSerial
+Clean(env_mv_test.RunSerial
       ('test_Parameters.unit',  bin_path + '/test_Parameters'),
       ['#/test.in','#/test1.out','#/test2.out'])
 #----------------------------------------------------------------------
@@ -99,8 +102,6 @@ env.RunSerial('test_Papi.unit',        bin_path + '/test_Papi')
 # MESH PROTOTYPE
 #----------------------------------------------------------------------
 
-
-env_mv_png = env.Clone(COPY = 'mv *.png test/' + type)
 
 Clean(env_mv_png.RunSerial
       ('test_TreeK-D2-R2-L6.unit', 

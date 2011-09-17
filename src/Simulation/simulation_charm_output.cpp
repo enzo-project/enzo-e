@@ -160,7 +160,8 @@ void Simulation::p_output_write (int n, char * buffer) throw()
 
     TRACE ("File write / close / next\n");
 
-    // write
+    // write to disk
+
     // close
     output->close();
 

@@ -78,19 +78,19 @@ public: // virtual functions
   ( const FieldDescr * field_descr,
     Hierarchy * hierarchy, 
     int cycle, double time,
-    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
+    bool root_call=true) throw() = 0;
 
   /// Write patch data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
-    Patch * patch, Hierarchy * hierarchy,
+    Patch * patch,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
   /// Write block data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
-    Block * block, Patch * patch, Hierarchy * hierarchy, 
+    Block * block,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
