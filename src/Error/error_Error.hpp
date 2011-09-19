@@ -107,36 +107,36 @@
 
 #   define TRACE(MESSAGE)				\
   {							\
-    PARALLEL_PRINTF ("TRACE %s:%d %s\n",		\
-		     __FILE__,__LINE__,MESSAGE);	\
+    message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
+	      MESSAGE);					\
     fflush(stdout);					\
   }
 
 #   define TRACE1(MESSAGE,ARG1)				\
   {							\
-  PARALLEL_PRINTF ("TRACE %s:%d %s\n",			\
-		   __FILE__,__LINE__,MESSAGE,ARG1);	\
-  fflush(stdout);					\
-}
-
-#   define TRACE2(MESSAGE,ARG1,ARG2)				\
-  {								\
-    PARALLEL_PRINTF ("TRACE %s:%d %s\n",			\
-		     __FILE__,__LINE__,MESSAGE,ARG1,ARG2);	\
-    fflush(stdout);						\
+    message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
+	      MESSAGE,ARG1);				\
+    fflush(stdout);					\
   }
 
-#   define TRACE3(MESSAGE,ARG1,ARG2,ARG3)			\
-  {								\
-    PARALLEL_PRINTF ("TRACE %s:%d %s\n",			\
-		     __FILE__,__LINE__,MESSAGE,ARG1,ARG2,ARG3);	\
-    fflush(stdout);						\
+#   define TRACE2(MESSAGE,ARG1,ARG2)			\
+  {							\
+    message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
+	      MESSAGE,ARG1,ARG2);			\
+    fflush(stdout);					\
+  }
+
+#   define TRACE3(MESSAGE,ARG1,ARG2,ARG3)		\
+  {							\
+    message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
+	      MESSAGE,ARG1,ARG2,ARG3);			\
+    fflush(stdout);					\
   }
 
 #   define TRACE4(MESSAGE,ARG1,ARG2,ARG3,ARG4)				\
   {									\
-    PARALLEL_PRINTF ("TRACE %s:%d %s\n",				\
-		     __FILE__,__LINE__,MESSAGE,ARG1,ARG2,ARG3,ARG4);	\
+    message2_(stdout,"TRACE",__FILE__,__LINE__,"",			\
+	      MESSAGE,ARG1,ARG2,ARG3,ARG4);				\
     fflush(stdout);							\
   }
 #else
