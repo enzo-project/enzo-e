@@ -26,6 +26,8 @@ void Simulation::p_output
 ( int cycle, double time, double dt, bool stop ) throw()
 {
 
+  TRACE("Simulation::p_output()");
+
   // Update Simulation cycle and time from reduction to main
   
   cycle_ = cycle;
@@ -44,6 +46,7 @@ void Simulation::p_output
 
 void Simulation::output_first() throw()
 {
+  TRACE("Simulation::output_first()");
   index_output_ = 0;
 }
 
@@ -51,6 +54,8 @@ void Simulation::output_first() throw()
 
 void Simulation::output_next() throw()
 {
+
+  TRACE("Simulation::output_next");
 
   // find next output
 
@@ -91,6 +96,8 @@ void Simulation::output_next() throw()
 void Block::p_output (int index_output)
 {
 
+  TRACE("Block::p_output");
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   simulation->output(index_output)->block(this);
@@ -108,6 +115,8 @@ void Block::p_output (int index_output)
 
 void BlockReduce::p_output_reduce(int count)
 {
+  TRACE("BlockReduce::p_output_reduce");
+
   if (++count_output_ >= count) {
     INCOMPLETE("BlockReduce::p_output_reduce()");
     proxy_simulation.p_output_reduce();
@@ -119,6 +128,8 @@ void BlockReduce::p_output_reduce(int count)
 
 void Simulation::p_output_reduce() throw()
 {
+  TRACE("Simulation::p_output_reduce()");
+
   int ip       = CkMyPe();
   int ip_stride = ip - (ip % output(index_output_)->process_stride());
 
@@ -140,6 +151,8 @@ void Simulation::p_output_reduce() throw()
 
 void Simulation::p_output_write (int n, char * buffer) throw()
 {
+  TRACE("Simulation::p_output_write()");
+
   Output * output = Simulation::output(index_output_);
   int ip       = CkMyPe();
   int ip_stride = ip - (ip % output->process_stride());
