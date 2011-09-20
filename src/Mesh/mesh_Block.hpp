@@ -176,10 +176,18 @@ protected: // attributes
   //--------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Number of field blocks: used for CHARM++ PUP::er
+  int num_field_blocks_;
+
+  /// Counter when refreshing 6 faces at once
   int count_refresh_face_;
+
+  /// Counter when refreshing x-, y-, and z-axes sequentially
   int count_refresh_face_x_;
   int count_refresh_face_y_;
   int count_refresh_face_z_;
+
 #endif
 
   //--------------------------------------------------
@@ -192,6 +200,50 @@ protected: // attributes
 
   /// Current timestep
   double dt_;
+
+#ifdef CONFIG_USE_CHARM
+
+public: // CHARM++ PUPer
+
+  /// Pack / unpack the Block in a CHARM++ program
+  void pup(PUP::er &p)
+  {
+    p | num_field_blocks_;
+
+    // allocate field_block_[] vector first if unpacking
+    if (p.isUnpacking()) {
+      field_block_.resize(num_field_blocks_);
+    }
+
+    for (int i=0; i<num_field_blocks_; i++) {
+      p | *field_block_[i];
+    }
+
+#ifndef CONFIG_USE_CHARM
+    // (never called: included for completeness)
+    PUParray(p,index_,3);
+#endif
+
+    PUParray(p,size_,3);
+
+    PUParray(p,lower_,3);
+
+    PUParray(p,upper_,3);
+
+#ifdef CONFIG_USE_CHARM
+    p | count_refresh_face_;
+    p | count_refresh_face_x_;
+    p | count_refresh_face_y_;
+    p | count_refresh_face_z_;
+#endif
+
+    p | cycle_;
+    p | time_;
+    p | dt_;
+  }
+
+#endif
+
 
 };
 

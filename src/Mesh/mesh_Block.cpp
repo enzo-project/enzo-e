@@ -28,6 +28,7 @@ Block::Block
  int num_field_blocks) throw ()
   :  field_block_(),
 #ifdef CONFIG_USE_CHARM
+     num_field_blocks_(num_field_blocks),
      count_refresh_face_(0),
      count_refresh_face_x_(0),
      count_refresh_face_y_(0),
@@ -90,6 +91,7 @@ Block::Block
  double xb, double yb, double zb,    // Block width
  int num_field_blocks) throw ()
   : field_block_(),
+    num_field_blocks_(num_field_blocks),
     count_refresh_face_(0),
     count_refresh_face_x_(0),
     count_refresh_face_y_(0),
@@ -146,6 +148,9 @@ Block::~Block() throw ()
     delete field_block_[i];
     field_block_[i] = 0;
   }
+#ifdef CONFIG_USE_CHARM
+  num_field_blocks_ = 0;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -276,6 +281,8 @@ Block::Block (CkMigrateMessage *m)
 }
 
 #endif
+
+//----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
 
@@ -836,6 +843,9 @@ void Block::compute(int axis_set)
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i] = new FieldBlock (*(block.field_block_[i]));
   }
+#ifdef CONFIG_USE_CHARM
+  num_field_blocks_ = block.num_field_blocks_;
+#endif
 }
 
 //----------------------------------------------------------------------

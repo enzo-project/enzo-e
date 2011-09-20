@@ -24,6 +24,10 @@ public: // functions
   /// OutputImage destructor: free allocated image data
   virtual ~OutputImage() throw();
 
+  // Set the image colormap
+  void image_set_map
+  (int n, double * map_r, double * map_g, double * map_b) throw();
+
 public: // virtual functions
 
   /// Prepare for accumulating block data
@@ -36,39 +40,23 @@ public: // virtual functions
   virtual void close () throw();
 
   /// Write hierarchy-related field data
-  virtual void write 
+  virtual void write_hierarchy
   ( const FieldDescr * field_descr,
     Hierarchy * hierarchy) throw();
 
   /// Write patch-related field data; may be called by write (Hierarchy)
-  virtual void write 
+  virtual void write_patch
   ( const FieldDescr * field_descr,
     Patch * patch,
     int ix0=0, int iy0=0, int iz0=0) throw();
 
   /// Write block-related field data; may be called by write (Patch)
-  virtual void write 
+  virtual void write_block
   ( const FieldDescr * field_descr,
     Block * block,
     int ix0=0, int iy0=0, int iz0=0) throw();
 
-  /// Generate a PNG image of an array
-  template<class T>
-  void image
-  ( std::string name, 
-    int mx, int my,             // image size
-    T * array,
-    int nxd, int nyd, int nzd,   // Array dimensions
-    int nx,  int ny,  int nz,   // Array size
-    int nx0, int ny0, int nz0,  // Array offset into image
-    axis_enum   axis,           // Axis along which to project
-    reduce_enum op_reduce,      // Reduction operation along axis
-    double min, double max     // Limits for color map
-    ) throw();
-
-  // Set the image colormap
-  void image_set_map
-  (int n, double * map_r, double * map_g, double * map_b) throw();
+  virtual void update_remote  ( int n, char * buffer) throw();
 
 private: // functions
 
@@ -98,8 +86,7 @@ private: // functions
      axis_enum   axis,           // Axis along which to project
      reduce_enum op_reduce) throw();
 
-
-protected: // attributes
+private: // attributes
 
   /// Color map
   std::vector<double> map_r_;
@@ -115,6 +102,7 @@ protected: // attributes
 
   /// Current pngwriter
   pngwriter * png_;
+
 
 };
 
@@ -234,66 +222,5 @@ protected: // attributes
    TRACE2 ("OutputImage::image_reduce_ min=%f max=%f",
 	   min,max);
  }
-
-//======================================================================
-
-template<class T>
-void OutputImage::image
-(std::string filename, 
- int mx, int my,
- T * array, 
- int nxd,  int nyd,  int nzd,
- int nx,   int ny,   int nz,
- int nx0, int ny0,   int nz0,
- axis_enum axis, reduce_enum op_reduce,
- double min, double max) throw()
-
-/**
-*********************************************************************
-*
-* @param  filename     File name
-* @param  mx,my        Size of the image
-* @param  array        Array of values to plot
-* @param  nxd,nyd,nzd  Dimension of the array
-* @param  nx,ny,nz     Size of the array
-* @param  nx0,ny0,nz0  Starting index of the array in the image
-* @param  axis         Which axis to reduce
-* @param  op_reduce    Reduction operator
-* @param  min,max      Bounds for color map values
-*
-* Plot an array as a png file
-*
-*********************************************************************
-*/
-{
-
-  // Return if image is degenerate
-  if (mx <= 1 || my <= 1) return;
-
-  // n array size
-  // m image size
-
-  // k colormap index
-
-  // Open the image
-
-
-  png_create_ (filename,mx,my);
-
-  image_create_(mx,my);
-
-  image_reduce_(array,
-	       nxd,nyd,nzd,
-	       nx,ny,nz,
-	       nx0,ny0,nz0,
-	       axis,op_reduce);
-
-  // write the image
-
-  image_write_(min,max);
-
-  // delete the image
-  image_close_();
-}
 
 #endif /* IO_OUTPUT_IMAGE_HPP */

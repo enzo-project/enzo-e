@@ -61,13 +61,11 @@ public: // functions
 
 #ifdef CONFIG_USE_CHARM
 
-  int counter() 
-  { 
-    if (count_reduce_ >= process_stride_) {count_reduce_ = 0;}
-    count_reduce_++; 
-    PARALLEL_PRINTF ("Output:counter(%d)\n",count_reduce_);
-    return (count_reduce_);
-  }
+  void counter_increment() { count_reduce_++;  }
+
+  int counter_value() { return (count_reduce_); }
+
+  void counter_reset() { count_reduce_=0; }
 
 #endif
 
@@ -82,22 +80,25 @@ public: // virtual functions
   /// Close file for IO
   virtual void close () throw() = 0;
 
-  /// Write hierarchy data to disk
-  virtual void write 
+  /// Write local hierarchy data to disk
+  virtual void write_hierarchy
   ( const FieldDescr * field_descr,
     Hierarchy * hierarchy ) throw() = 0;
 
-  /// Write patch data to disk
-  virtual void write 
+  /// Write local patch data to disk
+  virtual void write_patch
   ( const FieldDescr * field_descr,
     Patch * patch,
     int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
-  /// Write block data to disk
-  virtual void write 
+  /// Write local block data to disk
+  virtual void write_block
   ( const FieldDescr * field_descr,
     Block * block,
     int ix0=0, int iy0=0, int iz0=0) throw() = 0;
+
+  /// Accumulate and write data from remote processes
+  virtual void update_remote  ( int n, char * buffer) throw() = 0;
 
 protected: // attributes
 

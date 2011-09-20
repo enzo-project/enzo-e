@@ -104,7 +104,7 @@ void Block::p_output (int index_output)
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
-  simulation->output(index_output)->write(field_descr,this);
+  simulation->output(index_output)->write_block(field_descr,this);
 
   // Synchronize via main chare before writing
   int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
@@ -113,7 +113,7 @@ void Block::p_output (int index_output)
 
 //----------------------------------------------------------------------
 
-// Output::write(block)
+// Output::write_block()
 
 //----------------------------------------------------------------------
 
@@ -162,18 +162,19 @@ void Simulation::p_output_write (int n, char * buffer) throw()
   int ip_stride = ip - (ip % output->process_stride());
   TRACE4("%d %d  %d  %d\n",ip,ip_stride,CkMyPe(),output->process_stride());
 
-  int count = output->counter();
 
-  if (count == 0) {
-    TRACE("Simulation::p_output_write: initialize");
-  }
-  if (n == 0) {
-    TRACE("Simulation::p_output_write: process reduce remote");
-  } else {
+  if (n != 0) {
     TRACE("Simulation::p_output_write: process reduce local");
+    output->update_remote(n, buffer);
   }
   
+  output->counter_increment();
+
+  int count = output->counter_value();
+
   if (count == output->process_stride()) {
+
+    output->counter_reset();
 
     // write to disk
     TRACE("Simulation::p_output_write: finalize");

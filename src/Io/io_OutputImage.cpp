@@ -36,6 +36,23 @@ OutputImage::~OutputImage() throw ()
 {
 }
 
+//----------------------------------------------------------------------
+
+void OutputImage::image_set_map
+(int n, double * map_r, double * map_g, double * map_b) throw()
+{
+  TRACE("OutputImage::image_set_map");
+  map_r_.resize(n);
+  map_g_.resize(n);
+  map_b_.resize(n);
+
+  for (int i=0; i<n; i++) {
+    map_r_[i] = map_r[i];
+    map_g_[i] = map_g[i];
+    map_b_[i] = map_b[i];
+  }
+}
+
 //======================================================================
 
 void OutputImage::init () throw()
@@ -84,26 +101,26 @@ void OutputImage::close () throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::write
+void OutputImage::write_hierarchy
 (
  const FieldDescr * field_descr,
  Hierarchy * hierarchy
   ) throw()
 {
 
-  TRACE("OutputImage::write(hierarchy)");
+  TRACE("OutputImage::write_hierarchy()");
 
   ItPatch it_patch (hierarchy);
   while (Patch * patch = ++it_patch) {
     // NO OFFSET: ASSUMES ROOT PATCH
-    write (field_descr, patch,  0,0,0);
+    write_patch (field_descr, patch,  0,0,0);
   }
 
 }
 
 //----------------------------------------------------------------------
 
-void OutputImage::write
+void OutputImage::write_patch
 (
  const FieldDescr * field_descr,
  Patch * patch,
@@ -113,7 +130,7 @@ void OutputImage::write
  ) throw()
 {
 
-  TRACE("OutputImage::write(patch)");
+  TRACE("OutputImage::write_patch()");
 
 #ifdef CONFIG_USE_CHARM
 
@@ -135,10 +152,10 @@ void OutputImage::write
     int ix,iy,iz;
     block->index_patch(&ix,&iy,&iz);
 
-    write (field_descr, block,
-	   ix0+ix*nxb,
-	   iy0+iy*nyb,
-	   iz0+iz*nzb);
+    write_block (field_descr, block,
+		 ix0+ix*nxb,
+		 iy0+iy*nyb,
+		 iz0+iz*nzb);
   }
 
 #endif
@@ -147,7 +164,7 @@ void OutputImage::write
 
 //----------------------------------------------------------------------
 
-void OutputImage::write
+void OutputImage::write_block
 (
  const FieldDescr * field_descr,
  Block * block,
@@ -156,7 +173,7 @@ void OutputImage::write
  int iz0
 ) throw()
 {
-  TRACE("OutputImage::write(block)");
+  TRACE("OutputImage::write_block()");
   FieldBlock * field_block = block->field_block();
 
   // Get block size
@@ -198,24 +215,14 @@ void OutputImage::write
 
 }
 
-//======================================================================
+//----------------------------------------------------------------------
 
-void OutputImage::image_set_map
-(int n, double * map_r, double * map_g, double * map_b) throw()
+void OutputImage::update_remote  (int n, char * buffer) throw()
 {
-  TRACE("OutputImage::image_set_map");
-  map_r_.resize(n);
-  map_g_.resize(n);
-  map_b_.resize(n);
-
-  for (int i=0; i<n; i++) {
-    map_r_[i] = map_r[i];
-    map_g_[i] = map_g[i];
-    map_b_[i] = map_b[i];
-  }
+  TRACE("OutputImage::png_create_");
 }
 
-//----------------------------------------------------------------------
+//======================================================================
 
 void OutputImage::png_create_ (std::string filename, int mx, int my) throw()
 {

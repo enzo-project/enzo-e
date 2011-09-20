@@ -803,7 +803,7 @@ void Simulation::scheduled_output()
     if (output->is_scheduled(cycle_,time_)) {
       output->init();
       output->open();
-      output->write(field_descr_, hierarchy_);
+      output->write_hierarchy(field_descr_, hierarchy_);
       output->close();
     }
   }

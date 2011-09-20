@@ -178,6 +178,17 @@ private: // attributes
   /// directionally split?)
   bool ghosts_allocated_;
 
+#ifdef CONFIG_USE_CHARM
+
+public: // CHARM++ PUPer
+
+  void pup(PUP::er &p) 
+  {
+    INCOMPLETE("FieldBlock::pup()");
+  }
+
+#endif
+
 };   
 
 #endif /* FIELD_FIELD_BLOCK_HPP */
