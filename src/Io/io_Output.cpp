@@ -12,22 +12,31 @@
 
 //----------------------------------------------------------------------
 
-Output::Output () throw()
-  : schedule_(new Schedule),
+Output::Output (Simulation * simulation) throw()
+  : simulation_(simulation),
+    file_(0),           // Initialization deferred
+    schedule_(new Schedule),
+    process_stride_(1), // default one file per process
 #ifdef CONFIG_USE_CHARM
-    process_stride_(0),
     count_reduce_(0),
 #endif
-    file_name_(""),
-    file_args_(),
-    it_field_(0)
+    process_(0),        // initialization below
+    cycle_(0),
+    time_(0),
+    file_name_(""),     // set_filename()
+    file_args_(),       // set_filename()
+    it_field_(0)        // set_it_field()
 {
+
+  GroupProcess * group_process = GroupProcess::create();
+  process_  = group_process->rank();
+  delete group_process;
 }
 
 //----------------------------------------------------------------------
 
 void Output::set_filename (std::string filename,
-		   std::vector<std::string> fileargs) throw()
+			   std::vector<std::string> fileargs) throw()
 {
   file_name_ = filename; 
   file_args_ = fileargs;
@@ -35,11 +44,7 @@ void Output::set_filename (std::string filename,
 
 //----------------------------------------------------------------------
 
-std::string Output::expand_file_name 
-(
- int cycle,
- double time
-) const throw()
+std::string Output::expand_file_name () const throw()
 {
   char buffer_curr[CELLO_STRING_LENGTH];
   char buffer_next[CELLO_STRING_LENGTH];
@@ -51,9 +56,9 @@ std::string Output::expand_file_name
   // loop through file_args_[] and replace cycle or time variables
   for (size_t i=0; i<file_args_.size(); i++) {
     if (file_args_[i] == "cycle") {
-      sprintf (buffer_next,buffer_curr, cycle);
+      sprintf (buffer_next,buffer_curr, cycle_);
     } else if (file_args_[i] == "time") {
-      sprintf (buffer_next,buffer_curr, time);
+      sprintf (buffer_next,buffer_curr, time_);
     } else {
       char buffer[CELLO_STRING_LENGTH];
       sprintf (buffer,"Unknown file variable #%d '%s' for file '%s'",
@@ -64,3 +69,21 @@ std::string Output::expand_file_name
   }
   return std::string(buffer_curr);
 }
+
+//----------------------------------------------------------------------
+
+bool Output::is_scheduled (int cycle, double time)
+{
+  cycle_ = cycle;
+  time_  = time;
+  return schedule()->write_this_cycle(cycle_,time_);
+}
+
+//----------------------------------------------------------------------
+
+double Output::update_timestep (double time, double dt) const
+{
+  return schedule_->update_timestep(time,dt); 
+}
+
+//----------------------------------------------------------------------

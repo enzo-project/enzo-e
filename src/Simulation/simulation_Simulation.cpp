@@ -697,7 +697,7 @@ Output * Simulation::create_output_ (std::string type) throw ()
 { 
   Output * output = NULL;
   if (type == "image") {
-    output = new OutputImage ();
+    output = new OutputImage (this);
   }
   return output;
 }
@@ -800,10 +800,11 @@ void Simulation::scheduled_output()
 {
   for (size_t i=0; i<output_list_.size(); i++) {
     Output * output = output_list_[i];
-    Schedule * schedule = output->schedule();
-    bool is_scheduled = schedule->write_this_cycle(cycle_,time_);
-    if (is_scheduled) {
-      output->write(field_descr_, hierarchy_,cycle_,time_);
+    if (output->is_scheduled(cycle_,time_)) {
+      output->init();
+      output->open();
+      output->write(field_descr_, hierarchy_);
+      output->close();
     }
   }
 }

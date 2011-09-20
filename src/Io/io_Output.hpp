@@ -4,7 +4,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
 /// @todo     Extract Schedule object for scheduling output
-/// @brief    [\ref Io] Declaration for the Output component
+/// @brief    [\ref Io] Declaration of the Output class
 
 #ifndef IO_OUTPUT_HPP
 #define IO_OUTPUT_HPP
@@ -19,12 +19,13 @@ class Output {
 
   /// @class    Output
   /// @ingroup  Io
-  /// @brief    [\ref Io] define interface for various types of IO for Simulations
+  /// @brief [\ref Io] define interface for various types of IO for
+  /// Simulations
 
 public: // functions
 
-  /// Create an uninitialized Output object with the given file_name format
-  Output() throw();
+  /// Create an uninitialized Output object
+  Output(Simulation * simulation ) throw();
 
   /// Set file name
   void set_filename (std::string filename,
@@ -35,18 +36,30 @@ public: // functions
   { it_field_ = it_field; }
   
 
+  /// Return the File object pointer
+  File * file() throw() 
+  { return file_; };
+
   /// Return the Schedule object pointer
   Schedule * schedule() throw() 
   { return schedule_; };
 
   /// Return the filename for the file format and given arguments
-  std::string expand_file_name (int cycle, double time) const throw();
-
-
-#ifdef CONFIG_USE_CHARM
+  std::string expand_file_name () const throw();
 
   int process_stride () const throw () 
   { return process_stride_; };
+
+  /// Return whether output is scheduled for this cycle
+  bool is_scheduled (int cycle, double time);
+
+  /// Return whether this process is a writer
+  bool is_writer () const throw () 
+  { return (process_ % process_stride_ == 0); };
+
+  double update_timestep (double time, double dt) const;
+
+#ifdef CONFIG_USE_CHARM
 
   int counter() 
   { 
@@ -60,62 +73,62 @@ public: // functions
 
 public: // virtual functions
 
-#ifdef CONFIG_USE_CHARM
+  /// prepare for accumulating block data
+  virtual void init () throw() = 0;
 
-  /// Open file before writing
-  virtual void open (const Hierarchy * hierarchy, int cycle, double time) throw() = 0;
+  /// Open (or create) a file for IO
+  virtual void open () throw() = 0;
 
-  /// Accumulate block-local data
-  virtual void block (const Block * block) throw() = 0;
-
-  /// Close file after writing
+  /// Close file for IO
   virtual void close () throw() = 0;
-
-#endif
 
   /// Write hierarchy data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
-    Hierarchy * hierarchy, 
-    int cycle, double time,
-    bool root_call=true) throw() = 0;
+    Hierarchy * hierarchy ) throw() = 0;
 
   /// Write patch data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
     Patch * patch,
-    int cycle, double time, 
-    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
+    int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
   /// Write block data to disk
   virtual void write 
   ( const FieldDescr * field_descr,
     Block * block,
-    int cycle, double time, 
-    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
-
-protected: // functions
-
-#ifdef CONFIG_USE_CHARM
-  bool is_writer_ (int ip) const throw () 
-  { return (ip % process_stride_ == 0); };
-#endif
+    int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
 protected: // attributes
 
+  /// Parent simulation (for accessing Hierarchy, etc.)
+  Simulation * simulation_;
+
+  /// File object for output
+  File * file_;
+
+  /// Scheduler for this output
   Schedule * schedule_;
-
-
-#ifdef CONFIG_USE_CHARM
 
   /// Only processes with id's divisible by process_stride_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
   int process_stride_;
 
+  /// ID of this process
+  int process_;
+
+#ifdef CONFIG_USE_CHARM
+
   /// counter for reduction of data from non-writers to writers
   int count_reduce_;
 
 #endif
+
+  /// Simulation cycle for next IO
+  int cycle_;
+
+  /// Simulation time for next IO
+  double time_;
 
   /// Name of the file to write, including format arguments
   std::string file_name_;

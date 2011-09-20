@@ -11,8 +11,8 @@
 
 //----------------------------------------------------------------------
 
-OutputImage::OutputImage() throw ()
-  : Output(),
+OutputImage::OutputImage(Simulation * simulation) throw ()
+  : Output(simulation),
     image_(0),
     image_size_x_(0),
     image_size_y_(0),
@@ -28,11 +28,6 @@ OutputImage::OutputImage() throw ()
     map_r_[1] = 1.0;
     map_g_[1] = 1.0;
     map_b_[1] = 1.0;
-
-    // Only root process writes
-#ifdef CONFIG_USE_CHARM
-    process_stride_ = CkNumPes();
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -43,68 +38,66 @@ OutputImage::~OutputImage() throw ()
 
 //======================================================================
 
-#ifdef CONFIG_USE_CHARM
-
-void OutputImage::open (const Hierarchy * hierarchy, int cycle, double time) throw()
+void OutputImage::init () throw()
 {
+  TRACE("OutputImage::init()");
+
   // create process image and clear it
 
   int nxm,nym,nzm;
-  hierarchy->patch(0)->size (&nxm, &nym, &nzm);
+  simulation_->hierarchy()->patch(0)->size (&nxm, &nym, &nzm);
 
   image_create_(nxm,nym);
 
-  int ip = CkMyPe();
+}
 
-  if (is_writer_(ip)) create_("hierarchy",nxm,nym,cycle,time);
+//----------------------------------------------------------------------
 
+void OutputImage::open () throw()
+{
+  TRACE("OutputImage::open()");
+
+  // Open file if writing a single block
+  std::string file_name = expand_file_name();
+
+  if (is_writer()) {
+    int nxm,nym,nzm;
+    simulation_->hierarchy()->patch(0)->size (&nxm, &nym, &nzm);
+    // Create png object
+    Monitor::instance()->print ("[Output] opening image file %s", 
+			      file_name.c_str());
+    png_create_(file_name,nxm,nym);
+  }
 }
 
 //----------------------------------------------------------------------
 
 void OutputImage::close () throw()
 {
-  close_();
+  TRACE("OutputImage::close()");
+  double min=0.0;
+  double max=1.0;
+  image_write_(min,max);
+  image_close_();
+  png_close_();
 }
-
-//----------------------------------------------------------------------
-
-void OutputImage::block (const Block * block) throw()
-{
-  //  write(block,
-  
-  //   incorporate block data into process data
-}
-
-#endif
 
 //----------------------------------------------------------------------
 
 void OutputImage::write
 (
  const FieldDescr * field_descr,
- Hierarchy * hierarchy,
- int cycle,
- double time,
- bool root_call
+ Hierarchy * hierarchy
   ) throw()
 {
 
-  if (root_call) {
-
-    int nxm,nym,nzm;
-    hierarchy->patch(0)->size (&nxm, &nym, &nzm);
-
-    create_("hierarchy",nxm, nym, cycle,time);
-  }
+  TRACE("OutputImage::write(hierarchy)");
 
   ItPatch it_patch (hierarchy);
   while (Patch * patch = ++it_patch) {
     // NO OFFSET: ASSUMES ROOT PATCH
-    write (field_descr, patch, cycle,time, false,  0,0,0);
+    write (field_descr, patch,  0,0,0);
   }
-
-  if (root_call) close_();
 
 }
 
@@ -114,19 +107,13 @@ void OutputImage::write
 (
  const FieldDescr * field_descr,
  Patch * patch,
- int cycle,
- double time,
- bool root_call,
  int ix0,
  int iy0,
  int iz0
  ) throw()
 {
-  if (root_call) {
-    int nxp, nyp;
-    patch->size (&nxp, &nyp);
-    create_("patch",nxp,nyp,cycle,time);
-  }
+
+  TRACE("OutputImage::write(patch)");
 
 #ifdef CONFIG_USE_CHARM
 
@@ -138,9 +125,7 @@ void OutputImage::write
 #else
 
   ItBlock it_block (patch);
-  Block * block;
-
-  while ((block = ++it_block)) {
+  while (Block * block = ++it_block) {
 
     FieldBlock * field_block = block->field_block();
 
@@ -150,15 +135,13 @@ void OutputImage::write
     int ix,iy,iz;
     block->index_patch(&ix,&iy,&iz);
 
-    write (field_descr, block, cycle,time,false,
+    write (field_descr, block,
 	   ix0+ix*nxb,
 	   iy0+iy*nyb,
 	   iz0+iz*nzb);
   }
 
 #endif
-
-  if (root_call) close_();
 
 }
 
@@ -168,14 +151,12 @@ void OutputImage::write
 (
  const FieldDescr * field_descr,
  Block * block,
- int cycle,
- double time,
- bool root_call,
  int ix0,
  int iy0,
  int iz0
 ) throw()
 {
+  TRACE("OutputImage::write(block)");
   FieldBlock * field_block = block->field_block();
 
   // Get block size
@@ -197,8 +178,6 @@ void OutputImage::write
   ndy=ny+2*gy;
   ndz=nz+2*gz;
 
-  if (root_call) create_("block",nx,ny,cycle,time);
-
   // Add block contribution to image
 
   char * field_unknowns = field_block->field_unknowns(field_descr,index);
@@ -217,8 +196,6 @@ void OutputImage::write
 		   axis_z, reduce_sum);
   }
 
-  if (root_call) close_();
-
 }
 
 //======================================================================
@@ -226,6 +203,7 @@ void OutputImage::write
 void OutputImage::image_set_map
 (int n, double * map_r, double * map_g, double * map_b) throw()
 {
+  TRACE("OutputImage::image_set_map");
   map_r_.resize(n);
   map_g_.resize(n);
   map_b_.resize(n);
@@ -241,6 +219,7 @@ void OutputImage::image_set_map
 
 void OutputImage::png_create_ (std::string filename, int mx, int my) throw()
 {
+  TRACE("OutputImage::png_create_");
   png_ = new pngwriter(mx,my,0,filename.c_str());
 }
 
@@ -248,6 +227,7 @@ void OutputImage::png_create_ (std::string filename, int mx, int my) throw()
 
 void OutputImage::png_close_ () throw()
 {
+  TRACE("OutputImage::png_close_");
   png_->close();
   delete png_;
   png_ = 0;
@@ -257,8 +237,14 @@ void OutputImage::png_close_ () throw()
 
 void OutputImage::image_create_ (int mx, int my) throw()
 {
+  TRACE("OutputImage::image_create");
+
   image_size_x_ = mx;
   image_size_y_ = my;
+
+  ASSERT("OutputImage::image_create_",
+	 "image_ already created",
+	 image_ == NULL);
 
   image_ = new double [mx*my];
 
@@ -267,9 +253,10 @@ void OutputImage::image_create_ (int mx, int my) throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::image_close_ (double min, double max) throw()
+void OutputImage::image_write_ (double min, double max) throw()
 {
 
+  TRACE("OutputImage::image_write_");
   // simplified variable names
 
   int mx = image_size_x_;
@@ -283,9 +270,11 @@ void OutputImage::image_close_ (double min, double max) throw()
      max = MAX(max,image_[i]);
    }
 
-  // loop over pixels (ix,iy)
+   // loop over pixels (ix,iy)
 
-  for (int ix = 0; ix<mx; ix++) {
+   //   TRACE2("OutputImage::image_write_ (%d %d)",mx,my);
+
+   for (int ix = 0; ix<mx; ix++) {
 
     for (int iy = 0; iy<my; iy++) {
 
@@ -320,45 +309,23 @@ void OutputImage::image_close_ (double min, double max) throw()
 	b = (1-ratio)*map_b_[k] + ratio*map_b_[k+1];
       }
 
+      //      TRACE5("OutputImage::image_write_( %d %d  %g %g %g )",ix,iy,r,g,b);
       // Plot pixel, red if out of range
       png_->plot(ix+1, iy+1, r,g,b);
     }
   }      
 
+}
+
+//----------------------------------------------------------------------
+
+void OutputImage::image_close_ () throw()
+{
+  TRACE("OutputImage::image_close_");
+  ASSERT("OutputImage::image_create_",
+	 "image_ already created",
+	 image_ != NULL);
   delete [] image_;
   image_ = 0;
 }
 
-//----------------------------------------------------------------------
-
-void OutputImage::create_ 
-(
- std::string write_level,
- int nx, int ny,
- int cycle,
- double time
- ) throw()
-{
-  // Open file if writing a single block
-  std::string file_name = expand_file_name(cycle,time);
-
-  // Create image 
-  image_create_(nx,ny);
-
-  // Create png object
-  png_create_(file_name,nx,ny);
-
-  Monitor::instance()->print ("[Output] writing %s image file %s", 
-			      write_level.c_str(),file_name.c_str());
-  
-}
-
-//----------------------------------------------------------------------
-
-void OutputImage::close_ () throw()
-{
-  double min=0.0;
-  double max=1.0;
-  image_close_(min,max);
-  png_close_();
-}

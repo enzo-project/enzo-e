@@ -19,46 +19,38 @@ class OutputImage : public Output {
 public: // functions
 
   /// Create an uninitialized OutputImage object
-  OutputImage() throw();
+  OutputImage(Simulation * simulation) throw();
 
+  /// OutputImage destructor: free allocated image data
   virtual ~OutputImage() throw();
 
 public: // virtual functions
 
-#ifdef CONFIG_USE_CHARM
+  /// Prepare for accumulating block data
+  virtual void init () throw();
 
-  /// Open file before writing
-  virtual void open 
-  (const Hierarchy * hierarchy, int cycle, double time) throw();
+  /// Open (or create) a file for IO
+  virtual void open () throw();
 
-  /// Accumulate block-local data
-  virtual void block (const Block * block) throw();
-
-  /// Close file after writing
+  /// Close file for IO
   virtual void close () throw();
-
-#endif
 
   /// Write hierarchy-related field data
   virtual void write 
   ( const FieldDescr * field_descr,
-    Hierarchy * hierarchy, 
-    int cycle, double time,
-    bool root_call=true) throw();
+    Hierarchy * hierarchy) throw();
 
   /// Write patch-related field data; may be called by write (Hierarchy)
   virtual void write 
   ( const FieldDescr * field_descr,
     Patch * patch,
-    int cycle, double time, 
-    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
+    int ix0=0, int iy0=0, int iz0=0) throw();
 
   /// Write block-related field data; may be called by write (Patch)
   virtual void write 
   ( const FieldDescr * field_descr,
     Block * block,
-    int cycle, double time, 
-    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
+    int ix0=0, int iy0=0, int iz0=0) throw();
 
   /// Generate a PNG image of an array
   template<class T>
@@ -80,14 +72,6 @@ public: // virtual functions
 
 private: // functions
 
-  /// Create the file
-  void create_ (std::string write_level, 
-		int nx, int ny,
-		int cycle, double time) throw();
-
-  /// Close the file
-  void close_ () throw();
-
   /// Create the png file object
   void png_create_ (std::string filename,
 		    int image_size_x,  int image_size_y) throw();
@@ -99,7 +83,10 @@ private: // functions
   void image_create_ (int image_size_x,  int image_size_y) throw();
 
   /// Generate PNG image, using given min and max for colormap
-  void image_close_ (double min, double max) throw();
+  void image_write_ (double min, double max) throw();
+
+  /// Close the image data
+  void image_close_ () throw();
 
    /// Generate a PNG image of an array
    template<class T>
@@ -172,6 +159,11 @@ protected: // attributes
 
    // image x-axis
 
+   TRACE3("OutputImage::image_reduce_ [%d %d] %d",
+	  npx,npy,npz);
+   double min=std::numeric_limits<double>::max();
+   double max=std::numeric_limits<double>::min();
+
    for (int index_array_x=0; index_array_x<npx; index_array_x++) {
 
      int index_image_x = npx0 + index_array_x;
@@ -234,8 +226,13 @@ protected: // attributes
 	 }
        }
        if (op_reduce == reduce_avg) pixel_value /= npz;
+       min=MIN(pixel_value,min);
+       max=MAX(pixel_value,max);
+
      }
    }
+   TRACE2 ("OutputImage::image_reduce_ min=%f max=%f",
+	   min,max);
  }
 
 //======================================================================
@@ -291,9 +288,12 @@ void OutputImage::image
 	       nx0,ny0,nz0,
 	       axis,op_reduce);
 
-  // close the image
+  // write the image
 
-  image_close_(min,max);
+  image_write_(min,max);
+
+  // delete the image
+  image_close_();
 }
 
 #endif /* IO_OUTPUT_IMAGE_HPP */

@@ -12,7 +12,7 @@ env['COPY'] = ''
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_parse    = Builder(action = serial_run   +  "$SOURCE < $ARGS >  $TARGET 2>&1")
 run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1; $COPY")
-run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1")
+run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS 2>&1")
 make_movie   = Builder(action = "convert ${ARGS} $TARGET; chmod a+r $TARGET; rm ${ARGS}")
 
@@ -196,7 +196,7 @@ env.RunParse('test_parse_shock-pool.unit', bin_path + '/test_Parse', ARGS='input
 #----------------------------------------------------------------------
 
 
-Clean(env_mv_png.RunParallel ('test_enzo-p_1.unit',
+Clean(env_mv_png.RunSerial ('test_enzo-p_1.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/test_enzo-p_1.in'),
       [Glob('#/enzo-p_1-??????-*.png'),  # field added in non-charm

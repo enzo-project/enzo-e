@@ -1,7 +1,7 @@
 c     $Id$
 c     See LICENSE_CELLO file for license and copyright information
 
-#include "fortran.def"
+#include "fortran.h"
 
       SUBROUTINE VECTLRx(QU,QL,QR,U)
       Implicit NONE

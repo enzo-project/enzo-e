@@ -88,7 +88,7 @@ public: // interface
   int SolveHydroEquations ( int CycleNumber, enzo_float dt);
   void print_field (int field);
   int SetExternalBoundary(int FieldRank, int GridDims[], int GridOffset[], int StartIndex[], int EndIndex[], enzo_float *Field, int FieldType);
-  void image_dump(const char * file_root, int cycle, double lower, double upper);
+  // void image_dump(const char * file_root, int cycle, double lower, double upper);
 
   void initialize_hydro ();
   void initialize_image ();

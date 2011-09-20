@@ -1,7 +1,7 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
-#include "fortran.def"
+#include "fortran.h"
 
       Subroutine POTOKz(Nx,Dx,Dt,Qlx,Qrx,Qpm,Qdx,Qdy,Qrp,Fm)
       Implicit NONE

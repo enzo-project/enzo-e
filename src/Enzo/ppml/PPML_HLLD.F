@@ -1,7 +1,7 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
-#include "fortran.def"
+#include "fortran.h"
 
       Subroutine HLLDx(UL,UR,F,U) !SL and SR from min/max
       Implicit NONE

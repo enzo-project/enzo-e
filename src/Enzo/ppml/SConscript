@@ -32,6 +32,7 @@ env = env.Clone(LIBS = [components,libraries])
 # SOURCE
 #------------------------------
 
+includes   = ['fortran.h']
 sources = [
         Glob('Cosmology*cpp'),
         Glob('Grid_*cpp'),
@@ -57,6 +58,7 @@ libraries = env.Library ('enzo-ppml', sources)
 # INSTALL
 #------------------------------
 
+env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
 
 

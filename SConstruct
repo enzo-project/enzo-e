@@ -541,7 +541,7 @@ Export('serial_run')
 
 Export('use_papi')
 
-SConscript('src/SConscript')
+SConscript('src/SConscript',variant_dir='build/' + type)
 SConscript('test/SConscript',variant_dir='test/' + type)
 Clean('.','test/' + type)
 Clean('.','bin/' + type)

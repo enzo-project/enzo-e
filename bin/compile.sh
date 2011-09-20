@@ -29,7 +29,7 @@ foreach type ($types)
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
    printf "$d %-14s %-14s" "${platform}" "cleaning..."
-   scons arch=$arch type=$type -c >& /dev/null
+#     scons arch=$arch type=$type -c >& /dev/null
    rm -f $dir/*unit >& /dev/null
    rm -f bin/$type/* >& /dev/null
    printf "done\n"

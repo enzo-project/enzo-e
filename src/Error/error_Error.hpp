@@ -139,13 +139,20 @@
 	      MESSAGE,ARG1,ARG2,ARG3,ARG4);				\
     fflush(stdout);							\
   }
+#   define TRACE5(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5)				\
+  {									\
+    message2_(stdout,"TRACE",__FILE__,__LINE__,"",			\
+	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5);				\
+    fflush(stdout);							\
+  }
 #else
 
 #   define TRACE(MESSAGE) /* This space intentionally left blank */
-#   define TRACE1(MESSAGE) /* This space intentionally left blank */
-#   define TRACE2(MESSAGE) /* This space intentionally left blank */
-#   define TRACE3(MESSAGE) /* This space intentionally left blank */
-#   define TRACE4(MESSAGE) /* This space intentionally left blank */
+#   define TRACE1(MESSAGE,ARG1) /* This space intentionally left blank */
+#   define TRACE2(MESSAGE,ARG1,ARG2) /* This space intentionally left blank */
+#   define TRACE3(MESSAGE,ARG1,ARG2,ARG3) /* This space intentionally left blank */
+#   define TRACE4(MESSAGE,ARG1,ARG2,ARG3,ARG4) /* This space intentionally left blank */
+#   define TRACE5(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5) /* This space intentionally left blank */
 
 #endif
 

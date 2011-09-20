@@ -62,8 +62,8 @@ EnzoBlock::EnzoBlock
  double xp, double yp, double zp,
  int num_field_blocks) throw()
   : Block (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
-    CycleNumber(0),
     Time_(0),
+    CycleNumber(0),
     OldTime(0),
     dt(0),
     SubgridFluxes(0)
@@ -397,67 +397,67 @@ void EnzoBlock::initialize (int cycle_start, double time_start) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::image_dump
-(
- const char * file_root, 
- int cycle, 
- double lower, 
- double upper)
-{ 
+// void EnzoBlock::image_dump
+// (
+//  const char * file_root, 
+//  int cycle, 
+//  double lower, 
+//  double upper)
+// { 
 
-  int nx = GridDimension[0];
-  int ny = GridDimension[1];
-  int nz = GridDimension[2];
+//   int nx = GridDimension[0];
+//   int ny = GridDimension[1];
+//   int nz = GridDimension[2];
 
-  char filename[80];
+//   char filename[80];
 
-  // slice
-  sprintf (filename,"slice-%s-%06d.png",file_root,cycle);
+//   // slice
+//   sprintf (filename,"slice-%s-%06d.png",file_root,cycle);
 
-  OutputImage * output = new OutputImage;
+//   OutputImage * output = new OutputImage;
 
-  if (nz == 1) {
-    // 2D: "reduce" along z
-    output->image(filename,
-		   nx,ny,
-		   BaryonField[field_density],
-		   nx,ny,nz,
-		   nx,ny,nz,
-		   0,0,0,
-		   //		3,3,0,nx-3,ny-3,1,
-		   axis_z,reduce_sum, lower/nx, upper/nx);
-  } else {
-    // 3D projection
-    sprintf (filename,"project-%s-%06d-x.png",file_root,cycle);
-    output->image(filename,
-		   ny,nz,
-		   BaryonField[field_density],
-		   nx,ny,nz,
-		   nx,ny,nz,
-		   0,0,0,
-		   //		  3,3,3,nx-3,ny-3,nz-3,
-		   axis_x,reduce_sum,lower, upper);
-    sprintf (filename,"project-%s-%06d-y.png",file_root,cycle);
-    output->image(filename,
-		   nz,nx,
-		   BaryonField[field_density],
-		   nx,ny,nz,
-		   nx,ny,nz,
-		   0,0,0,
-		   //		  3,3,3,nx-3,ny-3,nz-3,
-		   axis_y,reduce_sum,lower, upper);
-    sprintf (filename,"project-%s-%06d-z.png",file_root,cycle);
-    output->image(filename,
-		   nx,ny,
-		   BaryonField[field_density],
-		   nx,ny,nz,
-		   nx,ny,nz,
-		   0,0,0,
-		   //		  3,3,3,nx-3,ny-3,nz-3,
-		   axis_z,reduce_sum,lower, upper);
-  }
+//   if (nz == 1) {
+//     // 2D: "reduce" along z
+//     output->image(filename,
+// 		   nx,ny,
+// 		   BaryonField[field_density],
+// 		   nx,ny,nz,
+// 		   nx,ny,nz,
+// 		   0,0,0,
+// 		   //		3,3,0,nx-3,ny-3,1,
+// 		   axis_z,reduce_sum, lower/nx, upper/nx);
+//   } else {
+//     // 3D projection
+//     sprintf (filename,"project-%s-%06d-x.png",file_root,cycle);
+//     output->image(filename,
+// 		   ny,nz,
+// 		   BaryonField[field_density],
+// 		   nx,ny,nz,
+// 		   nx,ny,nz,
+// 		   0,0,0,
+// 		   //		  3,3,3,nx-3,ny-3,nz-3,
+// 		   axis_x,reduce_sum,lower, upper);
+//     sprintf (filename,"project-%s-%06d-y.png",file_root,cycle);
+//     output->image(filename,
+// 		   nz,nx,
+// 		   BaryonField[field_density],
+// 		   nx,ny,nz,
+// 		   nx,ny,nz,
+// 		   0,0,0,
+// 		   //		  3,3,3,nx-3,ny-3,nz-3,
+// 		   axis_y,reduce_sum,lower, upper);
+//     sprintf (filename,"project-%s-%06d-z.png",file_root,cycle);
+//     output->image(filename,
+// 		   nx,ny,
+// 		   BaryonField[field_density],
+// 		   nx,ny,nz,
+// 		   nx,ny,nz,
+// 		   0,0,0,
+// 		   //		  3,3,3,nx-3,ny-3,nz-3,
+// 		   axis_z,reduce_sum,lower, upper);
+//   }
 
-}
+// }
 
 //----------------------------------------------------------------------
 

@@ -81,8 +81,6 @@ protected: // attributes
 
   //  Iter * iter_;
 
-  //  Type * type_;
-
 };
 
 #endif /* IO_IO_HPP */

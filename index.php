@@ -433,30 +433,46 @@ component("Enzo");
 </tr>
 <tr>
 <th>initial</th>
-<td><img width=200 src="test/serial/enzo-p_1-d-000000.png"></img></td>
-<td><img width=200 src="test/mpi/enzo-p_1-d-000000.png"></img></td>
-<td><img width=200 src="test/charm/enzo-p_1-d-000000.png"></img></td>
-<td><img width=200 src="test/serial/enzo-p_1-te-000000.png"></img></td>
-<td><img width=200 src="test/mpi/enzo-p_1-te-000000.png"></img></td>
-<td><img width=200 src="test/charm/enzo-p_1-te-000000.png"></img></td>
+<td><img width=96 src="test/serial/enzo-p_1-d-000000.png"></img></td>
+<td><img width=96 src="test/mpi/enzo-p_1-d-000000.png"></img></td>
+<td><img width=96 src="test/charm/enzo-p_1-d-000000.png"></img></td>
+<td><img width=96 src="test/serial/enzo-p_1-te-000000.png"></img></td>
+<td><img width=96 src="test/mpi/enzo-p_1-te-000000.png"></img></td>
+<td><img width=96 src="test/charm/enzo-p_1-te-000000.png"></img></td>
 </tr>
 <tr>
-<th>1 block</th>
-<td><img width=200 src="test/serial/enzo-p_1-d-000100.png"></img></td>
-<td><img width=200 src="test/mpi/enzo-p_1-d-000100.png"></img></td>
-<td><img width=200 src="test/charm/enzo-p_1-d-000100.png"></img></td>
-<td><img width=200 src="test/serial/enzo-p_1-te-000100.png"></img></td>
-<td><img width=200 src="test/mpi/enzo-p_1-te-000100.png"></img></td>
-<td><img width=200 src="test/charm/enzo-p_1-te-000100.png"></img></td>
+<th>1 block cycle 100</th>
+<td><img width=96 src="test/serial/enzo-p_1-d-000100.png"></img></td>
+<td><img width=96 src="test/mpi/enzo-p_1-d-000100.png"></img></td>
+<td><img width=96 src="test/charm/enzo-p_1-d-000100.png"></img></td>
+<td><img width=96 src="test/serial/enzo-p_1-te-000100.png"></img></td>
+<td><img width=96 src="test/mpi/enzo-p_1-te-000100.png"></img></td>
+<td><img width=96 src="test/charm/enzo-p_1-te-000100.png"></img></td>
+</tr>
+<th>1 block cycle 200</th>
+<td><img width=96 src="test/serial/enzo-p_1-d-000200.png"></img></td>
+<td><img width=96 src="test/mpi/enzo-p_1-d-000200.png"></img></td>
+<td><img width=96 src="test/charm/enzo-p_1-d-000200.png"></img></td>
+<td><img width=96 src="test/serial/enzo-p_1-te-000200.png"></img></td>
+<td><img width=96 src="test/mpi/enzo-p_1-te-000200.png"></img></td>
+<td><img width=96 src="test/charm/enzo-p_1-te-000200.png"></img></td>
 </tr>
 <tr>
-<th>4 blocks</th>
-<td><img width=200 src="test/serial/enzo-p_2-d-000100.png"></img></td>
-<td><img width=200 src="test/mpi/enzo-p_2-d-000100.png"></img></td>
-<td><img width=200 src="test/charm/enzo-p_2-d-000100.png"></img></td>
-<td><img width=200 src="test/serial/enzo-p_2-te-000100.png"></img></td>
-<td><img width=200 src="test/mpi/enzo-p_2-te-000100.png"></img></td>
-<td><img width=200 src="test/charm/enzo-p_2-te-000100.png"></img></td>
+<th>4 blocks cycle 100</th>
+<td><img width=96 src="test/serial/enzo-p_2-d-000100.png"></img></td>
+<td><img width=96 src="test/mpi/enzo-p_2-d-000100.png"></img></td>
+<td><img width=96 src="test/charm/enzo-p_2-d-000100.png"></img></td>
+<td><img width=96 src="test/serial/enzo-p_2-te-000100.png"></img></td>
+<td><img width=96 src="test/mpi/enzo-p_2-te-000100.png"></img></td>
+<td><img width=96 src="test/charm/enzo-p_2-te-000100.png"></img></td>
+</tr>
+<th>4 blocks cycle 200</th>
+<td><img width=96 src="test/serial/enzo-p_2-d-000200.png"></img></td>
+<td><img width=96 src="test/mpi/enzo-p_2-d-000200.png"></img></td>
+<td><img width=96 src="test/charm/enzo-p_2-d-000200.png"></img></td>
+<td><img width=96 src="test/serial/enzo-p_2-te-000200.png"></img></td>
+<td><img width=96 src="test/mpi/enzo-p_2-te-000200.png"></img></td>
+<td><img width=96 src="test/charm/enzo-p_2-te-000200.png"></img></td>
 </tr>
 </table>
 

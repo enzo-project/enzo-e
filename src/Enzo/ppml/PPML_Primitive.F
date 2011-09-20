@@ -1,7 +1,7 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
-#include "fortran.def"
+#include "fortran.h"
 
       Subroutine Primitiv(nx,ny,nz,qu1,qu2,qu3,qu4,qu5,qu6,qu7,
      &                   dn,vx,vy,vz,bx,by,bz)

@@ -60,15 +60,18 @@ void Simulation::output_next() throw()
   // find next output
 
   while (index_output_ < num_output() && 
-	 ! output(index_output_)->schedule()->write_this_cycle(cycle_, time_))
+	 ! output(index_output_)->is_scheduled(cycle_, time_))
     ++index_output_;
 
   // output if any scheduled, else proceed with refresh
 
   if (index_output_ < num_output()) {
 
-    // Open the file(s)
-    output(index_output_)->open(hierarchy_,cycle_,time_);
+    // Prepare for IO
+    output(index_output_)->init();
+
+    // Open files
+    output(index_output_)->open();
 
     // Loop over Patches in the Hierarchy
     ItPatch it_patch(hierarchy_);
@@ -89,7 +92,7 @@ void Simulation::output_next() throw()
 
 //----------------------------------------------------------------------
 
-// Output::open()
+// Output::init()
 
 //----------------------------------------------------------------------
 
@@ -100,7 +103,8 @@ void Block::p_output (int index_output)
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  simulation->output(index_output)->block(this);
+  FieldDescr * field_descr = simulation->field_descr();
+  simulation->output(index_output)->write(field_descr,this);
 
   // Synchronize via main chare before writing
   int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
@@ -109,7 +113,7 @@ void Block::p_output (int index_output)
 
 //----------------------------------------------------------------------
 
-// Output::block()
+// Output::write(block)
 
 //----------------------------------------------------------------------
 
@@ -161,19 +165,18 @@ void Simulation::p_output_write (int n, char * buffer) throw()
   int count = output->counter();
 
   if (count == 0) {
-    TRACE("Initialize writer\n");
+    TRACE("Simulation::p_output_write: initialize");
   }
   if (n == 0) {
-    TRACE1 ("Process reduce this %d\n",ip);
+    TRACE("Simulation::p_output_write: process reduce remote");
   } else {
-    TRACE ("Process reduce that\n");
+    TRACE("Simulation::p_output_write: process reduce local");
   }
   
   if (count == output->process_stride()) {
 
-    TRACE ("File write / close / next\n");
-
     // write to disk
+    TRACE("Simulation::p_output_write: finalize");
 
     // close
     output->close();
