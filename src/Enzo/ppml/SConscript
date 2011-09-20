@@ -46,7 +46,8 @@ sources = [
 	'PPML_potokz.F',
 	'PPML_Primitive.F',
 	'PPML_sub.F',
-	'PPML_TimeStep.F']
+	'PPML_TimeStep.F',
+        'fortran.h']
 
 #------------------------------
 # TARGETS

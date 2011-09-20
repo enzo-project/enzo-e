@@ -38,7 +38,8 @@ sources  = [Glob('initialize*cpp'),
             Glob('Grid_*cpp'),
             Glob('*.F'),
 	    'FindField.cpp',
-	    'sum_field.cpp']
+	    'sum_field.cpp',
+            'fortran.h']
 
 #------------------------------
 # TARGETS
