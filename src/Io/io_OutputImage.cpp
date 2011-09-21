@@ -45,7 +45,6 @@ OutputImage::~OutputImage() throw ()
 void OutputImage::image_set_map
 (int n, double * map_r, double * map_g, double * map_b) throw()
 {
-  TRACE("OutputImage::image_set_map");
   map_r_.resize(n);
   map_g_.resize(n);
   map_b_.resize(n);
@@ -61,8 +60,6 @@ void OutputImage::image_set_map
 
 void OutputImage::init () throw()
 {
-  TRACE("OutputImage::init()");
-
   // create process image and clear it
 
   int nxm,nym,nzm;
@@ -76,8 +73,6 @@ void OutputImage::init () throw()
 
 void OutputImage::open () throw()
 {
-  TRACE("OutputImage::open()");
-
   // Open file if writing a single block
   std::string file_name = expand_file_name();
 
@@ -95,10 +90,9 @@ void OutputImage::open () throw()
 
 void OutputImage::close () throw()
 {
-  TRACE("OutputImage::close()");
   double min=0.0;
   double max=1.0;
-  image_write_(min,max);
+  if (is_writer()) image_write_(min,max);
   image_close_();
   png_close_();
 }
@@ -111,13 +105,12 @@ void OutputImage::write_hierarchy
  Hierarchy * hierarchy
   ) throw()
 {
-
-  TRACE("OutputImage::write_hierarchy()");
-
   ItPatch it_patch (hierarchy);
   while (Patch * patch = ++it_patch) {
+
     // NO OFFSET: ASSUMES ROOT PATCH
     write_patch (field_descr, patch,  0,0,0);
+
   }
 
 }
@@ -134,24 +127,11 @@ void OutputImage::write_patch
  ) throw()
 {
 
-  TRACE("OutputImage::write_patch()");
-
-#ifdef CONFIG_USE_CHARM
-
-  if (patch->blocks_allocated()) {
-    CkPrintf ("%s:%d Output blocks in Patch %p\n",__FILE__,__LINE__,patch);
-    //    patch->blocks()
-  }
-    
-#else
-
   ItBlock it_block (patch);
   while (Block * block = ++it_block) {
 
     write_block (field_descr, block, ixp0,iyp0,izp0);
   }
-
-#endif
 
 }
 
@@ -178,8 +158,6 @@ void OutputImage::write_block
   int ixb0 = ixp0+ix*nxb;
   int iyb0 = iyp0+iy*nyb;
   int izb0 = izp0+iz*nzb;
-
-  TRACE("OutputImage::write_block()");
 
   // Index of (only) field to write
   it_field_->first();
@@ -220,7 +198,7 @@ void OutputImage::write_block
 
 void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 {
-  TRACE("OutputImage::prepare_remote()");
+
   int size = 0;
   int nx = image_size_x_;
   int ny = image_size_y_;
@@ -229,18 +207,23 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 
   size += nx*ny*sizeof(double);
   size += 2*sizeof(int);
+  (*n) = size;
 
   // Allocate buffer (deallocated in cleanup_remote())
-  buffer = new char *[ size ];
+  (*buffer) = new char [ size ];
 
-  char ** p = buffer;
+  union {
+    char   * c;
+    double * d;
+    int    * i;
+  } p ;
 
-  *((int*)p++)= nx;
-  *((int*)p++)= ny;
+  p.c = (*buffer);
 
-  for (int k=0; k<nx*ny; k++) {
-    *((double*)(p++)) = image_[k];
-  }
+  *p.i++= nx;
+  *p.i++= ny;
+
+  for (int k=0; k<nx*ny; k++) *p.d++ = image_[k];
   
 }
 
@@ -248,20 +231,25 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 
 void OutputImage::update_remote  ( int n, char * buffer) throw()
 {
-  TRACE("OutputImage::update_remote()");
-  char * p = buffer;
-  int nx = *((int*)p++);
-  int ny = *((int*)p++);
-  for (int k=0; k<nx*ny; k++) {
-    image_[k] += *((double*)p++);
-  }
+
+  union {
+    char   * c;
+    double * d;
+    int    * i;
+  } p ;
+
+  p.c = buffer;
+
+  int nx = *p.i++;
+  int ny = *p.i++;
+  for (int k=0; k<nx*ny; k++) image_[k] += *p.d++;
+
 }
 
 //----------------------------------------------------------------------
 
 void OutputImage::cleanup_remote  ( int * n, char ** buffer) throw()
 {
-  TRACE("OutputImage::cleanup_remote()");
   delete [] (*buffer);
   (*buffer) = NULL;
 }
@@ -271,26 +259,26 @@ void OutputImage::cleanup_remote  ( int * n, char ** buffer) throw()
 
 void OutputImage::png_create_ (std::string filename, int mx, int my) throw()
 {
-  TRACE("OutputImage::png_create_");
-  png_ = new pngwriter(mx,my,0,filename.c_str());
+  if (is_writer()) {
+    png_ = new pngwriter(mx,my,0,filename.c_str());
+  }
 }
 
 //----------------------------------------------------------------------
 
 void OutputImage::png_close_ () throw()
 {
-  TRACE("OutputImage::png_close_");
-  png_->close();
-  delete png_;
-  png_ = 0;
+  if (is_writer()) {
+    png_->close();
+    delete png_;
+    png_ = 0;
+  }
 }
 
 //----------------------------------------------------------------------
 
 void OutputImage::image_create_ (int mx, int my) throw()
 {
-  TRACE("OutputImage::image_create");
-
   image_size_x_ = mx;
   image_size_y_ = my;
 
@@ -308,7 +296,6 @@ void OutputImage::image_create_ (int mx, int my) throw()
 void OutputImage::image_write_ (double min, double max) throw()
 {
 
-  TRACE("OutputImage::image_write_");
   // simplified variable names
 
   int mx = image_size_x_;
@@ -323,8 +310,6 @@ void OutputImage::image_write_ (double min, double max) throw()
    }
 
    // loop over pixels (ix,iy)
-
-   //   TRACE2("OutputImage::image_write_ (%d %d)",mx,my);
 
    for (int ix = 0; ix<mx; ix++) {
 
@@ -361,9 +346,8 @@ void OutputImage::image_write_ (double min, double max) throw()
 	b = (1-ratio)*map_b_[k] + ratio*map_b_[k+1];
       }
 
-      //      TRACE5("OutputImage::image_write_( %d %d  %g %g %g )",ix,iy,r,g,b);
       // Plot pixel, red if out of range
-      png_->plot(ix+1, iy+1, r,g,b);
+      if (is_writer()) png_->plot(ix+1, iy+1, r,g,b);
     }
   }      
 
@@ -373,7 +357,6 @@ void OutputImage::image_write_ (double min, double max) throw()
 
 void OutputImage::image_close_ () throw()
 {
-  TRACE("OutputImage::image_close_");
   ASSERT("OutputImage::image_create_",
 	 "image_ already created",
 	 image_ != NULL);

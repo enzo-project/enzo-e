@@ -38,5 +38,7 @@ extern void message2_
   if (strcmp(message,"") != 0)
     fprintf (fp,"     %10s  %s\n",   type,buffer);
   fprintf (fp,"\n");
+
+  fflush(fp);
 }
 

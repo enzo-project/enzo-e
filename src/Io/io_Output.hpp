@@ -89,7 +89,7 @@ public: // virtual functions
 
   /// Finalize output
   virtual void finalize () throw ()
-  { count_ ++; }
+  { count_output_ ++; }
 
   /// Write local hierarchy data to disk
   virtual void write_hierarchy
@@ -106,7 +106,7 @@ public: // virtual functions
   virtual void write_block
   ( const FieldDescr * field_descr,
     Block * block,
-    int ixp0=0, int iyp0=0, int izp0=0) throw() = 0;
+    int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
   /// Prepare local array with data to be sent to remote chare for processing
   virtual void prepare_remote (int * n, char ** buffer) throw() = 0;
@@ -146,7 +146,7 @@ protected: // attributes
   int cycle_;
 
   /// Output counter
-  int count_;
+  int count_output_;
 
   /// Simulation time for next IO
   double time_;

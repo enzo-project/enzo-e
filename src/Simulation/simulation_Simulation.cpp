@@ -718,7 +718,6 @@ Method * Simulation::create_method_ (std::string name) throw ()
 
 Simulation::Simulation() 
 {
-  TRACE("Simulation()");
 }
 
 #endif
@@ -729,7 +728,6 @@ Simulation::Simulation()
 
 Simulation::Simulation (CkMigrateMessage *m) 
 {
-  TRACE("Simulation(msg)");
 }
 
 #endif

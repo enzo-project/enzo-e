@@ -26,8 +26,6 @@ void Simulation::p_output
 ( int cycle, double time, double dt, bool stop ) throw()
 {
 
-  TRACE("Simulation::p_output()");
-
   // Update Simulation cycle and time from reduction to main
   
   cycle_ = cycle;
@@ -46,7 +44,6 @@ void Simulation::p_output
 
 void Simulation::output_first() throw()
 {
-  TRACE("Simulation::output_first()");
   index_output_ = 0;
 }
 
@@ -54,8 +51,6 @@ void Simulation::output_first() throw()
 
 void Simulation::output_next() throw()
 {
-
-  TRACE("Simulation::output_next");
 
   // find next output
 
@@ -99,8 +94,6 @@ void Simulation::output_next() throw()
 void Block::p_output (int index_output)
 {
 
-  TRACE("Block::p_output");
-
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -119,8 +112,6 @@ void Block::p_output (int index_output)
 
 void BlockReduce::p_output_reduce(int count)
 {
-  TRACE("BlockReduce::p_output_reduce");
-
   if (++count_output_ >= count) {
     INCOMPLETE("BlockReduce::p_output_reduce()");
     proxy_simulation.p_output_reduce();
@@ -132,16 +123,13 @@ void BlockReduce::p_output_reduce(int count)
 
 void Simulation::p_output_reduce() throw()
 {
-  TRACE("Simulation::p_output_reduce()");
-
   Output * output = Simulation::output(index_output_);
   int ip       = CkMyPe();
   int ip_writer = output->process_writer();
 
   if (ip != ip_writer) {
-    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_writer);
 
-    int n;  char * buffer;
+    int n=1;  char * buffer = 0;
 
     // Copy / alias buffer array of data to send
     output->prepare_remote(&n,&buffer);
@@ -149,12 +137,19 @@ void Simulation::p_output_reduce() throw()
     // Remote call to receive data
     proxy_simulation[ip_writer].p_output_write (n, buffer);
 
+    // Close up file
+    output->close();
+
+    // Clean up and prepare for next output
+    output->finalize();
+
     // Continue with next output object if any
     output_next();
 
   } else {
-    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_writer);
+
     proxy_simulation[ip].p_output_write(0,0);
+
   }
 
 }
@@ -163,20 +158,14 @@ void Simulation::p_output_reduce() throw()
 
 void Simulation::p_output_write (int n, char * buffer) throw()
 {
-  TRACE("Simulation::p_output_write()");
-
   Output * output = Simulation::output(index_output_);
   int ip       = CkMyPe();
   int ip_writer = output->process_writer();
 
-  TRACE4("%d %d  %d  %d\n",ip,ip_writer,CkMyPe(),output->process_stride());
-
-
   if (n != 0) {
-    TRACE("Simulation::p_output_write: process reduce local");
     output->update_remote(n, buffer);
   }
-  
+
   output->counter_increment();
 
   int count = output->counter_value();
@@ -185,15 +174,12 @@ void Simulation::p_output_write (int n, char * buffer) throw()
 
     output->counter_reset();
 
-    // write to disk
-    TRACE("Simulation::p_output_write: finalize");
-
-    // close
+    // Close up file
     output->close();
 
+    // Clean up and prepare for next output
     output->finalize();
 
-    // next
 
 
     output_next();

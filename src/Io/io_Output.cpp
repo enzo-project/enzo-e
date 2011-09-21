@@ -22,7 +22,7 @@ Output::Output (Simulation * simulation) throw()
 #endif
     process_(0),        // initialization below
     cycle_(0),
-    count_(0),
+    count_output_(0),
     time_(0),
     file_name_(""),     // set_filename()
     file_args_(),       // set_filename()
@@ -61,7 +61,7 @@ std::string Output::expand_file_name () const throw()
     } else if (file_args_[i] == "time") {
       sprintf (buffer_next,buffer_curr, time_);
     } else if (file_args_[i] == "count") {
-      sprintf (buffer_next,buffer_curr, count_);
+      sprintf (buffer_next,buffer_curr, count_output_);
     } else if (file_args_[i] == "proc") {
       sprintf (buffer_next,buffer_curr, process_);
     } else {
