@@ -17,6 +17,9 @@
 FieldBlock::FieldBlock ( int nx, int ny, int nz ) throw()
   : array_(0),
     field_values_(),
+#ifdef CONFIG_USE_CHARM
+    num_fields_(),
+#endif
     ghosts_allocated_(false)
 {
   if (nx != 0) {
@@ -249,6 +252,9 @@ void FieldBlock::allocate_array(const FieldDescr * field_descr) throw()
     int field_offset = 0;
 
     field_values_.reserve(field_descr->field_count());
+#ifdef CONFIG_USE_CHARM
+    num_fields_ = field_descr->field_count();
+#endif
 
     for (int id_field=0; id_field<field_descr->field_count(); id_field++) {
 
@@ -287,7 +293,9 @@ void FieldBlock::deallocate_array () throw()
     delete [] array_;
     array_ = 0;
     field_values_.clear();
-
+#ifdef CONFIG_USE_CHARM
+    num_fields_ = 0;
+#endif
   }
   // if (field_faces_ != 0) {
   //   delete field_faces_;
@@ -725,6 +733,9 @@ void FieldBlock::backup_array_
     old_field_values.push_back(field_values_[i]);
   }
   field_values_.clear();
+#ifdef CONFIG_USE_CHARM
+  num_fields_ = 0;
+#endif
 
 }
 
@@ -780,7 +791,7 @@ void FieldBlock::restore_array_
     char * array1 = field_values_from.at(id_field) + offset1;
     char * array2 = field_values_.at(id_field)     + offset2;
 
-    // copy values
+    // copy values (use memcopy?)
 
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {

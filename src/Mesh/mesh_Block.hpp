@@ -208,6 +208,8 @@ public: // CHARM++ PUPer
   /// Pack / unpack the Block in a CHARM++ program
   void pup(PUP::er &p)
   {
+    TRACE1("Block::pup() %s", p.isUnpacking() ? "unpacking":"packing" );
+
     p | num_field_blocks_;
 
     // allocate field_block_[] vector first if unpacking

@@ -55,8 +55,15 @@ public: // functions
 
   /// Return whether this process is a writer
   bool is_writer () const throw () 
-  { return (process_ % process_stride_ == 0); };
+  { return (process_ == process_writer()); };
 
+  /// Return the process id of the writer for this process id
+  int process_writer() const throw()
+  {
+    return process_ - (process_ % process_stride_);
+  }
+
+  /// Return the updated timestep if time + dt goes past a scheduled output
   double update_timestep (double time, double dt) const;
 
 #ifdef CONFIG_USE_CHARM
@@ -80,6 +87,10 @@ public: // virtual functions
   /// Close file for IO
   virtual void close () throw() = 0;
 
+  /// Finalize output
+  virtual void finalize () throw ()
+  { count_ ++; }
+
   /// Write local hierarchy data to disk
   virtual void write_hierarchy
   ( const FieldDescr * field_descr,
@@ -89,16 +100,22 @@ public: // virtual functions
   virtual void write_patch
   ( const FieldDescr * field_descr,
     Patch * patch,
-    int ix0=0, int iy0=0, int iz0=0) throw() = 0;
+    int ixp0=0, int iyp0=0, int izp0=0) throw() = 0;
 
   /// Write local block data to disk
   virtual void write_block
   ( const FieldDescr * field_descr,
     Block * block,
-    int ix0=0, int iy0=0, int iz0=0) throw() = 0;
+    int ixp0=0, int iyp0=0, int izp0=0) throw() = 0;
 
-  /// Accumulate and write data from remote processes
+  /// Prepare local array with data to be sent to remote chare for processing
+  virtual void prepare_remote (int * n, char ** buffer) throw() = 0;
+
+  /// Accumulate and write data sent from a remote processes
   virtual void update_remote  ( int n, char * buffer) throw() = 0;
+
+  /// Free local array if allocated; NOP if not
+  virtual void cleanup_remote (int * n, char ** buffer) throw() = 0;
 
 protected: // attributes
 
@@ -127,6 +144,9 @@ protected: // attributes
 
   /// Simulation cycle for next IO
   int cycle_;
+
+  /// Output counter
+  int count_;
 
   /// Simulation time for next IO
   double time_;

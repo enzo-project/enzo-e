@@ -19,15 +19,19 @@ OutputImage::OutputImage(Simulation * simulation) throw ()
     png_(0)
 
 {
-    map_r_.resize(2);
-    map_g_.resize(2);
-    map_b_.resize(2);
-    map_r_[0] = 0.0;
-    map_g_[0] = 0.0;
-    map_b_[0] = 0.0;
-    map_r_[1] = 1.0;
-    map_g_[1] = 1.0;
-    map_b_[1] = 1.0;
+  // Override process_stride_: only root writes
+
+  process_stride_ = simulation->group_process()->size();
+
+  map_r_.resize(2);
+  map_g_.resize(2);
+  map_b_.resize(2);
+  map_r_[0] = 0.0;
+  map_g_[0] = 0.0;
+  map_b_[0] = 0.0;
+  map_r_[1] = 1.0;
+  map_g_[1] = 1.0;
+  map_b_[1] = 1.0;
 }
 
 //----------------------------------------------------------------------
@@ -124,9 +128,9 @@ void OutputImage::write_patch
 (
  const FieldDescr * field_descr,
  Patch * patch,
- int ix0,
- int iy0,
- int iz0
+ int ixp0,
+ int iyp0,
+ int izp0
  ) throw()
 {
 
@@ -144,18 +148,7 @@ void OutputImage::write_patch
   ItBlock it_block (patch);
   while (Block * block = ++it_block) {
 
-    FieldBlock * field_block = block->field_block();
-
-    int nxb,nyb,nzb;
-    field_block->size(&nxb,&nyb,&nzb);
-
-    int ix,iy,iz;
-    block->index_patch(&ix,&iy,&iz);
-
-    write_block (field_descr, block,
-		 ix0+ix*nxb,
-		 iy0+iy*nyb,
-		 iz0+iz*nzb);
+    write_block (field_descr, block, ixp0,iyp0,izp0);
   }
 
 #endif
@@ -168,17 +161,25 @@ void OutputImage::write_block
 (
  const FieldDescr * field_descr,
  Block * block,
- int ix0,
- int iy0,
- int iz0
+ int ixp0,
+ int iyp0,
+ int izp0
 ) throw()
 {
-  TRACE("OutputImage::write_block()");
-  FieldBlock * field_block = block->field_block();
 
-  // Get block size
-  int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  FieldBlock * field_block = block->field_block();
+  
+  int nxb,nyb,nzb;
+  field_block->size(&nxb,&nyb,&nzb);
+
+  int ix,iy,iz;
+  block->index_patch(&ix,&iy,&iz);
+
+  int ixb0 = ixp0+ix*nxb;
+  int iyb0 = iyp0+iy*nyb;
+  int izb0 = izp0+iz*nzb;
+
+  TRACE("OutputImage::write_block()");
 
   // Index of (only) field to write
   it_field_->first();
@@ -191,9 +192,9 @@ void OutputImage::write_block
 
   // Get array dimensions
   int ndx,ndy,ndz;
-  ndx=nx+2*gx;
-  ndy=ny+2*gy;
-  ndz=nz+2*gz;
+  ndx=nxb+2*gx;
+  ndy=nyb+2*gy;
+  ndz=nzb+2*gz;
 
   // Add block contribution to image
 
@@ -202,14 +203,14 @@ void OutputImage::write_block
   if (field_descr->precision(index) == precision_single) {
     image_reduce_ (((float *) field_unknowns),
 		   ndx,ndy,ndz, 
-		   nx,ny,nz,
-		   ix0,iy0,iz0,
+		   nxb,nyb,nzb,
+		   ixb0,iyb0,izb0,
 		   axis_z, reduce_sum);
   } else {
     image_reduce_ (((double *) field_unknowns),
 		   ndx,ndy,ndz, 
-		   nx,ny,nz,
-		   ix0,iy0,iz0,
+		   nxb,nyb,nzb,
+		   ixb0,iyb0,izb0,
 		   axis_z, reduce_sum);
   }
 
@@ -217,10 +218,54 @@ void OutputImage::write_block
 
 //----------------------------------------------------------------------
 
-void OutputImage::update_remote  (int n, char * buffer) throw()
+void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 {
-  TRACE("OutputImage::png_create_");
+  TRACE("OutputImage::prepare_remote()");
+  int size = 0;
+  int nx = image_size_x_;
+  int ny = image_size_y_;
+
+  // Determine buffer size
+
+  size += nx*ny*sizeof(double);
+  size += 2*sizeof(int);
+
+  // Allocate buffer (deallocated in cleanup_remote())
+  buffer = new char *[ size ];
+
+  char ** p = buffer;
+
+  *((int*)p++)= nx;
+  *((int*)p++)= ny;
+
+  for (int k=0; k<nx*ny; k++) {
+    *((double*)(p++)) = image_[k];
+  }
+  
 }
+
+//----------------------------------------------------------------------
+
+void OutputImage::update_remote  ( int n, char * buffer) throw()
+{
+  TRACE("OutputImage::update_remote()");
+  char * p = buffer;
+  int nx = *((int*)p++);
+  int ny = *((int*)p++);
+  for (int k=0; k<nx*ny; k++) {
+    image_[k] += *((double*)p++);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void OutputImage::cleanup_remote  ( int * n, char ** buffer) throw()
+{
+  TRACE("OutputImage::cleanup_remote()");
+  delete [] (*buffer);
+  (*buffer) = NULL;
+}
+
 
 //======================================================================
 

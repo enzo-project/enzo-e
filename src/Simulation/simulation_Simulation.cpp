@@ -27,7 +27,9 @@ Simulation::Simulation
   : factory_(0),
     parameters_(0),
     parameter_file_(parameter_file),
-#ifndef CONFIG_USE_CHARM
+#ifdef CONFIG_USE_CHARM
+    group_process_(GroupProcess::create()),
+#else
     group_process_(group_process),
 #endif
     dimension_(0),
@@ -805,6 +807,7 @@ void Simulation::scheduled_output()
       output->open();
       output->write_hierarchy(field_descr_, hierarchy_);
       output->close();
+      output->finalize();
     }
   }
 }

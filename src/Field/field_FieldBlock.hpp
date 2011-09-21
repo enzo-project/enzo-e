@@ -170,7 +170,12 @@ private: // attributes
 
   /// Allocated array of field values
   char * array_;
-  
+
+#ifdef CONFIG_USE_CHARM
+  /// Redundant size of the field_values_ vector
+  int num_fields_;
+#endif
+
   /// Pointers into values_ of the first element of each field
   std::vector<char *> field_values_;
 
@@ -185,6 +190,28 @@ public: // CHARM++ PUPer
   void pup(PUP::er &p) 
   {
     INCOMPLETE("FieldBlock::pup()");
+
+    TRACE1("FieldBlock::pup() %s", p.isUnpacking() ? "unpacking":"packing");
+
+    PUParray(p,size_,3);
+
+    int n = size_[0]*size_[1]*size_[2];
+
+    // Allocate array if unpacking
+    if (p.isUnpacking()) array_ = new char[n];
+
+    PUParray(p,array_,n);
+  
+    p | num_fields_;
+
+  /// Pointers into values_ of the first element of each field
+    if (p.isUnpacking()) field_values_.resize(num_fields_);
+
+    for (int i=0; i<num_fields_; i++) {
+      p | *field_values_[i];
+    }
+
+    p | ghosts_allocated_;
   }
 
 #endif

@@ -104,7 +104,7 @@ void Block::p_output (int index_output)
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
-  simulation->output(index_output)->write_block(field_descr,this);
+  simulation->output(index_output)->write_block(field_descr,this,0,0,0);
 
   // Synchronize via main chare before writing
   int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
@@ -134,18 +134,26 @@ void Simulation::p_output_reduce() throw()
 {
   TRACE("Simulation::p_output_reduce()");
 
+  Output * output = Simulation::output(index_output_);
   int ip       = CkMyPe();
-  int ip_stride = ip - (ip % output(index_output_)->process_stride());
+  int ip_writer = output->process_writer();
 
-  // Even self calls this to avoid hanging if case np == 1
-  char buffer[20];
-  sprintf(buffer,"%02d > %02d send",ip,ip_stride);
-  if (ip != ip_stride) {
-    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_stride);
-    proxy_simulation[ip_stride].p_output_write (strlen(buffer),buffer);
+  if (ip != ip_writer) {
+    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_writer);
+
+    int n;  char * buffer;
+
+    // Copy / alias buffer array of data to send
+    output->prepare_remote(&n,&buffer);
+
+    // Remote call to receive data
+    proxy_simulation[ip_writer].p_output_write (n, buffer);
+
+    // Continue with next output object if any
     output_next();
+
   } else {
-    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_stride);
+    TRACE2("%d -> %d calling p_output_write()\n",ip,ip_writer);
     proxy_simulation[ip].p_output_write(0,0);
   }
 
@@ -159,8 +167,9 @@ void Simulation::p_output_write (int n, char * buffer) throw()
 
   Output * output = Simulation::output(index_output_);
   int ip       = CkMyPe();
-  int ip_stride = ip - (ip % output->process_stride());
-  TRACE4("%d %d  %d  %d\n",ip,ip_stride,CkMyPe(),output->process_stride());
+  int ip_writer = output->process_writer();
+
+  TRACE4("%d %d  %d  %d\n",ip,ip_writer,CkMyPe(),output->process_stride());
 
 
   if (n != 0) {
@@ -181,6 +190,8 @@ void Simulation::p_output_write (int n, char * buffer) throw()
 
     // close
     output->close();
+
+    output->finalize();
 
     // next
 

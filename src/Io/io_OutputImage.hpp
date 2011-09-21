@@ -48,15 +48,22 @@ public: // virtual functions
   virtual void write_patch
   ( const FieldDescr * field_descr,
     Patch * patch,
-    int ix0=0, int iy0=0, int iz0=0) throw();
+    int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write block-related field data; may be called by write (Patch)
   virtual void write_block
   ( const FieldDescr * field_descr,
     Block * block,
-    int ix0=0, int iy0=0, int iz0=0) throw();
+    int ixp0=0, int iyp0=0, int izp0=0) throw();
 
+  /// Prepare local array with data to be sent to remote chare for processing
+  virtual void prepare_remote (int * n, char ** buffer) throw();
+
+  /// Accumulate and write data sent from a remote processes
   virtual void update_remote  ( int n, char * buffer) throw();
+
+  /// Free local array if allocated; NOP if not
+  virtual void cleanup_remote (int * n, char ** buffer) throw();
 
 private: // functions
 

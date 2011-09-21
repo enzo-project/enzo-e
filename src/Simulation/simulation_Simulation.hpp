@@ -120,63 +120,6 @@ public: // interface
   int dimension() const throw()
   { return dimension_; }
 
-//----------------------------------------------------------------------
-
-// int Simulation::dimension() const throw()
-
-// //----------------------------------------------------------------------
-
-// Hierarchy * Simulation::hierarchy() const throw()
-  
-// //----------------------------------------------------------------------
-
-// Parameters * Simulation::parameters() const throw()
-  
-// //----------------------------------------------------------------------
-
-// FieldDescr * Simulation::field_descr() const throw()
-
-// //----------------------------------------------------------------------
-
-// Performance * Simulation::performance() const throw()
-
-// //----------------------------------------------------------------------
-
-// Monitor * Simulation::monitor() const throw()
-
-// //----------------------------------------------------------------------
-
-// Stopping * Simulation::stopping() const throw() 
-
-// //----------------------------------------------------------------------
-
-// Timestep * Simulation::timestep() const throw() 
-
-// //----------------------------------------------------------------------
-
-// Initial * Simulation::initial() const throw() 
-
-// //----------------------------------------------------------------------
-
-// Boundary * Simulation::boundary() const throw() 
-
-// //----------------------------------------------------------------------
-
-// size_t Simulation::num_output() const throw()
-
-// //----------------------------------------------------------------------
-
-// Output * Simulation::output(int i) const throw()
-
-// //----------------------------------------------------------------------
-
-// size_t Simulation::num_method() const throw()
-
-// //----------------------------------------------------------------------
-
-// Method * Simulation::method(int i) const throw()
-
-
   /// Return the Hierarchy
   Hierarchy * hierarchy() const throw()
   { return hierarchy_; }
@@ -192,6 +135,10 @@ public: // interface
   /// Return the performance object
   Performance * performance() const throw()
   { return performance_; }
+
+  /// Return the group process object
+  GroupProcess * group_process() const throw()
+  { return group_process_; }
 
   /// Return the monitor object
   Monitor * monitor() const throw()
