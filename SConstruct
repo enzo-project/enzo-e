@@ -12,7 +12,7 @@ debug_verbose   = 0
 atsync          = 0 # CHARM++: only load balance when AtSync() called
 
 use_gprof       = 0
-use_papi        = 1
+use_papi        = 0
 use_valgrind    = 0
 use_projections = 1
 
@@ -381,8 +381,9 @@ elif (arch == "sdsc-triton"):
      hdf5_inc = (hdf5_path + '/include')
      hdf5_lib = (hdf5_path + '/lib')
 
-     flags_debug = ''
-     flags_opt   = '-fast'
+     flags_debug = '-g'
+#     flags_opt   = '-fast'
+     flags_opt   = ''
      flags_prec  = ''
      flags_warn  = ''
 
