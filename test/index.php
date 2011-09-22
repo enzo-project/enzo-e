@@ -21,7 +21,7 @@ function tests($component,$testrun,$output) {
 
    $parallel_types = array("serial","mpi","charm");
 
-   $source_file = "src/$component/$testrun.cpp";
+   $source_file = "../src/$component/$testrun.cpp";
    $source_html = "<a href=\"$source_file\">$testrun.cpp</a>";
 
    echo "<h3>Code: $source_html</br>Test: $output</h3>\n";
