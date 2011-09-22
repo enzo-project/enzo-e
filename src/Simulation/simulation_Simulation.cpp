@@ -75,7 +75,6 @@ Simulation::~Simulation() throw()
 
 void Simulation::initialize() throw()
 {
-
   performance_->start();
 
   // Initialize parameters
@@ -103,6 +102,7 @@ void Simulation::initialize() throw()
 
 void Simulation::finalize() throw()
 {
+  performance_->stop();
   deallocate_();
 }
 

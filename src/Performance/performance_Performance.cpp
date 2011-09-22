@@ -50,24 +50,24 @@ Performance & Performance::operator= (const Performance & classname) throw()
 
 void Performance::start () throw ()
 {
-  timer.start();
-  papi.start();
+  timer_.start();
+  papi_.start();
 }
 
 //----------------------------------------------------------------------
 
 void Performance::stop () throw ()
 {
-  timer.stop();
-  papi.stop();
+  timer_.stop();
+  papi_.stop();
 }
 
 //----------------------------------------------------------------------
 
 void Performance::print (const Monitor * monitor) const throw ()
 {
-  timer.print();
-  papi.print();
+  timer_.print();
+  papi_.print();
   print_rusage_(monitor);
 }
 

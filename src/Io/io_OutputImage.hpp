@@ -154,8 +154,6 @@ private: // attributes
 
    // image x-axis
 
-   TRACE3("OutputImage::image_reduce_ [%d %d] %d",
-	  npx,npy,npz);
    double min=std::numeric_limits<double>::max();
    double max=std::numeric_limits<double>::min();
 
@@ -226,8 +224,6 @@ private: // attributes
 
      }
    }
-   TRACE2 ("OutputImage::image_reduce_ min=%f max=%f",
-	   min,max);
  }
 
 #endif /* IO_OUTPUT_IMAGE_HPP */

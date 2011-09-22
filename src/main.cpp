@@ -36,6 +36,8 @@ void Main::p_exit(int count)
     Simulation * simulation = proxy_simulation.ckLocalBranch();
     Parameters * parameters = simulation->parameters();
 
+    simulation->finalize();
+
     int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
 
     unit_class ("Enzo-P");

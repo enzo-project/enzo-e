@@ -102,6 +102,8 @@ PARALLEL_MAIN_BEGIN
 
   // Test results: DUPLICATE CODE IN src/main.cpp !!!
 
+  simulation->finalize();
+
   Parameters * parameters = simulation->parameters();
 
   int    cycle_final = parameters->value_integer("Testing:cycle_final",0);

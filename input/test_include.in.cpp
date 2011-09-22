@@ -1,4 +1,4 @@
-#include "implosion-common.incl"
+#include "implosion.incl"
 
    Initial { code = "implosion_2d" }
 

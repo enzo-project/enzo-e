@@ -105,6 +105,11 @@ void generate_input()
   fp << "  num1 = [1.0, true, -37, \"string\", x-y+2.0*z, x+y+t > 0.0 ];\n";
   fp << "}\n";
 
+  fp << " Duplicate {\n";
+  fp << "  duplicate = 1.0;\n";
+  fp << "  duplicate = 2.0;\n";
+  fp << "}\n";
+
   fp.close();
 
 }
@@ -452,7 +457,7 @@ void check_parameters(Parameters * parameters)
   // delete parameters;
   // parameters = new Parameters;
   // parameters->read ("test.in");
-  const int NUM_GROUPS = 7;
+  const int NUM_GROUPS = 8;
   struct {
     const char * group;
     int count;
@@ -463,7 +468,8 @@ void check_parameters(Parameters * parameters)
     {"List",        1},
     {"Logical",     2 + 2},
     {"Logical_expr",1},
-    {"String",      2 + 1}
+    {"String",      2 + 1},
+    {"Duplicate",   1}
   };
 
   parameters->group_clear();
@@ -475,6 +481,14 @@ void check_parameters(Parameters * parameters)
     unit_assert (parameters->group_count() == child_count[i].count);
   }
       
+  // Duplicate assignments should take latter value
+
+  unit_func ("duplicates");
+
+  parameters->group_set(0,"Duplicate");
+
+  unit_assert (parameters->value_float ("duplicate",0.0) == 2.0);
+
   //--------------------------------------------------
   unit_func("write");
   //--------------------------------------------------

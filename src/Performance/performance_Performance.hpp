@@ -159,10 +159,10 @@ private: // functions
 private: // attributes
 
   /// Global timer
-  Timer timer;
+  Timer timer_;
 
   /// PAPI counters, if available
-  Papi papi;
+  Papi papi_;
 
   /// Array of counters for regions
   std::vector<Counters *> counters_;
