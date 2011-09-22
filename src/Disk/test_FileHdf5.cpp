@@ -42,7 +42,7 @@ PARALLEL_MAIN_BEGIN
   for (int iy=0; iy<ny; iy++) {
     for (int ix=0; ix<nx; ix++) {
 
-      int i = ix + nx*(iy);
+      int i = ix + nx*iy;
 
       a_char[i]   = ix*3 + iy*5;
       a_int[i]    = ix*3 + iy*5;
@@ -78,7 +78,7 @@ PARALLEL_MAIN_BEGIN
 
   for (int iy=0; iy<my; iy++) {
     for (int ix=0; ix<mx; ix++) {
-      int i = ix + mx*(iy);
+      int i = ix + mx*iy;
       ma_char[i]   = ix*5 - iy*13;
       ma_int[i]    = ix*5 - iy*13;
       ma_long[i]   = ix*5 - iy*13;
@@ -93,7 +93,6 @@ PARALLEL_MAIN_BEGIN
 
     }
   }
-  printf ("%d DEBUG %d\n",__LINE__,ma_char[0]);
 
   //--------------------------------------------------
   // Create a file
@@ -117,9 +116,7 @@ PARALLEL_MAIN_BEGIN
 
   hdf5_a.group_create ("/test");
   hdf5_a.data_create ("char", scalar_type_char, a_nx,a_ny,a_nz);
-  printf ("%d DEBUG %d\n",__LINE__,ma_char[0]);
   hdf5_a.data_write_meta(&ma_char, "meta_char", scalar_type_char, a_mx, a_my);
-  printf ("%d DEBUG %d\n",__LINE__,ma_char[0]);
   hdf5_a.data_write (a_char);
   hdf5_a.data_close ();
   hdf5_a.group_close ();
@@ -225,7 +222,7 @@ PARALLEL_MAIN_BEGIN
 
   for (int iy=0; iy<ny ; iy++) {
     for (int ix=0; ix<nx ; ix++) {
-      int i = ix + nx*(iy);
+      int i = ix + nx*iy;
       p_double = p_double && (a_double[i] == b_double[i]);
     }
   }
@@ -240,7 +237,7 @@ PARALLEL_MAIN_BEGIN
 
   for (int iy=0; iy<my ; iy++) {
     for (int ix=0; ix<mx ; ix++) {
-      int i = ix + mx*(iy);
+      int i = ix + mx*iy;
       mp_double = mp_double && (ma_double[i] == mb_double[i]);
     }
   }
@@ -289,7 +286,7 @@ PARALLEL_MAIN_BEGIN
 
   for (int iy=0; iy<ny ; iy++) {
     for (int ix=0; ix<nx ; ix++) {
-      int i = ix + nx*(iy);
+      int i = ix + nx*iy;
       p_char = p_char && (a_char[i] == b_char[i]);
     }
   }
@@ -302,10 +299,9 @@ PARALLEL_MAIN_BEGIN
 
   bool mp_char = true;
 
-  printf ("%d DEBUG %d\n",__LINE__,ma_char[0]);
   for (int iy=0; iy<my ; iy++) {
     for (int ix=0; ix<mx ; ix++) {
-      int i = ix + mx*(iy);
+      int i = ix + mx*iy;
       if ( ! (ma_char[i] == mb_char[i]) ) {
 	printf ("%d %d  %d %d\n",ix,iy,ma_char[i],mb_char[i]);
       }
@@ -359,7 +355,7 @@ PARALLEL_MAIN_BEGIN
 
   for (int iy=0; iy<ny ; iy++) {
     for (int ix=0; ix<nx ; ix++) {
-      int i = ix + nx*(iy);
+      int i = ix + nx*iy;
       p_int = p_int && (a_int[i] == b_int[i]);
     }
   }
@@ -374,7 +370,7 @@ PARALLEL_MAIN_BEGIN
 
   for (int iy=0; iy<my ; iy++) {
     for (int ix=0; ix<mx ; ix++) {
-      int i = ix + mx*(iy);
+      int i = ix + mx*iy;
       if ( ! (ma_int[i] == mb_int[i]) ) {
 	printf ("%d %d  %d %d\n",ix,iy,ma_int[i],mb_int[i]);
       }
@@ -427,7 +423,7 @@ PARALLEL_MAIN_BEGIN
 
   for (int iy=0; iy<ny ; iy++) {
     for (int ix=0; ix<nx ; ix++) {
-      int i = ix + nx*(iy);
+      int i = ix + nx*iy;
       p_float = p_float && (a_float[i] == b_float[i]);
     }
   }
@@ -444,7 +440,7 @@ PARALLEL_MAIN_BEGIN
 
   for (int iy=0; iy<my ; iy++) {
     for (int ix=0; ix<mx ; ix++) {
-      int i = ix + mx*(iy);
+      int i = ix + mx*iy;
       if ( ! (ma_float[i] == mb_float[i]) ) {
 	printf ("%d %d  %d %d\n",ix,iy,ma_float[i],mb_float[i]);
       }
@@ -496,7 +492,7 @@ PARALLEL_MAIN_BEGIN
 
   for (int iy=0; iy<ny ; iy++) {
     for (int ix=0; ix<nx ; ix++) {
-      int i = ix + nx*(iy);
+      int i = ix + nx*iy;
       p_long = p_long && (a_long[i] == b_long[i]);
     }
   }
@@ -514,7 +510,7 @@ PARALLEL_MAIN_BEGIN
 
   for (int iy=0; iy<my ; iy++) {
     for (int ix=0; ix<mx ; ix++) {
-      int i = ix + mx*(iy);
+      int i = ix + mx*iy;
       if ( ! (ma_long[i] == mb_long[i]) ) {
 	printf ("%d %d  %d %d\n",ix,iy,ma_long[i],mb_long[i]);
       }
