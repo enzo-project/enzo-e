@@ -220,8 +220,8 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 
   p.c = (*buffer);
 
-  *p.i++= nx;
-  *p.i++= ny;
+  *p.i++ = nx;
+  *p.i++ = ny;
 
   for (int k=0; k<nx*ny; k++) *p.d++ = image_[k];
   
@@ -242,6 +242,7 @@ void OutputImage::update_remote  ( int n, char * buffer) throw()
 
   int nx = *p.i++;
   int ny = *p.i++;
+
   for (int k=0; k<nx*ny; k++) image_[k] += *p.d++;
 
 }

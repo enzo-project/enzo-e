@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>Cello Unit Tests</title>
-    <link href="www/cello.css" rel="stylesheet" type="text/css">
+    <link href="cello.css" rel="stylesheet" type="text/css">
   </head>
 <body>
   <h1>Cello Unit Tests</h1>
