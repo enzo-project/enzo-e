@@ -113,7 +113,6 @@ void Block::p_output (int index_output)
 void BlockReduce::p_output_reduce(int count)
 {
   if (++count_output_ >= count) {
-    INCOMPLETE("BlockReduce::p_output_reduce()");
     proxy_simulation.p_output_reduce();
     count_output_ = 0;
   }

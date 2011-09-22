@@ -3,6 +3,7 @@
 /// @file     enzo_EnzoInitialImplosion2.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Jan  4 19:30:35 PST 2011
+/// @bug      Broken for multiple blocks: need global block offsets
 /// @brief    Implementation of Enzo 2D Implosion problem initialization
 
 #include "cello.hpp"
