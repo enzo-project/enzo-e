@@ -336,12 +336,13 @@ for ($k = 0; $k < 6; $k ++) {
   printf ("<th> </th>");
  }
 
-test_summary("Disk",array("FileHdf5","FileIfrit"),
-		    array("test_FileIfrit","test_FileHdf5")); 
-test_summary("Error",array("Error"),
+test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
+		    array("test_FileHdf5","test_FileIfrit")); 
+test_summary("Error",array(    "Error"),
 		    array("test_Error")); 
-test_summary("Enzo",array("enzo-p_1","enzo-p_2"),array("enzo-p")); 
-test_summary("Field",array("FieldBlock","FieldDescr","FieldFace","ItField"),
+test_summary("Enzo",array("enzo-p_1","enzo-p_2"),
+                    array("enzo-p",  "enzo-p")); 
+test_summary("Field",array(    "FieldBlock",     "FieldDescr",     "FieldFace",     "ItField"),
 		    array("test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField")); 
 test_summary("Memory",array("Memory"),
 		    array("test_Memory")); 

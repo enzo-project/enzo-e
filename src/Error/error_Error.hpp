@@ -186,6 +186,20 @@
       exit(1);								\
     }									\
   }
+#define ASSERT3(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ASSERTION)			\
+  {									\
+    if (!(ASSERTION)) {							\
+      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1,ARG2,ARG3); \
+      exit(1);								\
+    }									\
+  }
+#define ASSERT4(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ASSERTION)		\
+  {									\
+    if (!(ASSERTION)) {							\
+      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4); \
+      exit(1);								\
+    }									\
+  }
 
 
 //----------------------------------------------------------------------
