@@ -125,6 +125,11 @@ void OutputImage::write_patch
  int iyp0,
  int izp0
  ) throw()
+// @param field_descr  Field descriptor
+// @param patch        Patch to output
+// @param ixp0  offset of the patch relative to the parent patch along x-axis 
+// @param iyp0  offset of the patch relative to the parent patch along y-axis
+// @param izp0  offset of the patch relative to the parent patch along z-axis
 {
 
   ItBlock it_block (patch);
@@ -145,6 +150,11 @@ void OutputImage::write_block
  int iyp0,
  int izp0
 ) throw()
+// @param field_descr  Field descriptor
+// @param patch        Patch to output
+// @param ixp0  offset of the parent patch relative to its parent along x-axis 
+// @param iyp0  offset of the parent patch relative to its parent along y-axis 
+// @param izp0  offset of the parent patch relative to its parent along z-axis 
 {
 
   FieldBlock * field_block = block->field_block();
@@ -155,12 +165,14 @@ void OutputImage::write_block
   int ix,iy,iz;
   block->index_patch(&ix,&iy,&iz);
 
-  int ixb0 = ixp0+ix*nxb;
-  int iyb0 = iyp0+iy*nyb;
-  int izb0 = izp0+iz*nzb;
+  int ixb0 = ixp0 + ix*nxb;
+  int iyb0 = iyp0 + iy*nyb;
+  int izb0 = izp0 + iz*nzb;
 
-  // Index of (only) field to write
+  // Index of (single) field to write
+
   it_field_->first();
+
   int index = it_field_->value();
 
     // Get ghost depth
@@ -169,27 +181,43 @@ void OutputImage::write_block
   field_descr->ghosts(index,&gx,&gy,&gz);
 
   // Get array dimensions
+
   int ndx,ndy,ndz;
-  ndx=nxb+2*gx;
-  ndy=nyb+2*gy;
-  ndz=nzb+2*gz;
+  ndx = nxb + 2*gx;
+  ndy = nyb + 2*gy;
+  ndz = nzb + 2*gz;
 
   // Add block contribution to image
 
   char * field_unknowns = field_block->field_unknowns(field_descr,index);
-    
-  if (field_descr->precision(index) == precision_single) {
+
+  switch (field_descr->precision(index)) {
+
+  case precision_single:
+
     image_reduce_ (((float *) field_unknowns),
 		   ndx,ndy,ndz, 
 		   nxb,nyb,nzb,
 		   ixb0,iyb0,izb0,
 		   axis_z, reduce_sum);
-  } else {
+    break;
+
+  case precision_double:
+
     image_reduce_ (((double *) field_unknowns),
 		   ndx,ndy,ndz, 
 		   nxb,nyb,nzb,
 		   ixb0,iyb0,izb0,
 		   axis_z, reduce_sum);
+    break;
+
+  default:
+
+    WARNING1 ("OutputImage::write_block",
+	     "Unsupported Field precision %d",
+	      field_descr->precision(index));
+    break;
+
   }
 
 }
