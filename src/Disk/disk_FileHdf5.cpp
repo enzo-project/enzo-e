@@ -3,10 +3,6 @@
 /// @file      disk_FileHdf5.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Feb 21 16:11:36 PST 2008
-/// @todo      Factor out common code from file_read_meta() and data_read_meta()
-/// @todo      Factor out common code from file_write_meta() and data_write_meta()
-/// @todo      Factor out common code from file_read_meta() and data_open(), data_read()
-/// @todo      Factor out common code from file_write_meta() and data_create(), data_write()
 /// @brief     Implementation of the FileHdf5 class
 
 #include "cello.hpp"
@@ -44,23 +40,21 @@ FileHdf5::FileHdf5 (std::string path, std::string name) throw()
 void FileHdf5::file_open () throw()
 {
 
-  ASSERT1("FileHdf5::file_open",
-	  "Attempting to reopen an opened file %s",
-	  name_.c_str(),
-	  ! is_file_open_);
+  // check file closed
 
-  std::string full_name = path_ + "/" + name_;
+  std::string file_name = path_ + "/" + name_;
 
-  file_id_ = H5Fopen(full_name.c_str(), 
-		     H5F_ACC_RDONLY, 
-		     H5P_DEFAULT);
+  ASSERT1("FileHdf5::file_open", "Attempting to reopen an opened file %s",
+	  file_name.c_str(), ! is_file_open_);
 
-  // error check
+  // open file
 
-  ASSERT2("FileHdf5::file_open",
-	 "Return value %d opening file %s",
-	 file_id_,full_name.c_str(),
-	 file_id_ >= 0);
+  file_id_ = H5Fopen(file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+
+  // error check file opened
+
+  ASSERT2("FileHdf5::file_open", "Return value %d opening file %s",
+	 file_id_,file_name.c_str(), file_id_ >= 0);
 
   // update file state
 
@@ -73,19 +67,16 @@ void FileHdf5::file_open () throw()
 void FileHdf5::file_create () throw()
 {
 
-  std::string full_name = path_ + "/" + name_;
+  // create file
 
-  file_id_ = H5Fcreate(full_name.c_str(), 
-		       H5F_ACC_TRUNC, 
-		       H5P_DEFAULT, 
-		       H5P_DEFAULT);
+  std::string file_name = path_ + "/" + name_;
 
-  // error check
+  file_id_ = H5Fcreate(file_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-  ASSERT2("FileHdf5::file_create",
-	  "Return value %d opening file %s",
-	  file_id_,full_name.c_str(),
-	  file_id_ >= 0);
+  // error check file created
+
+  ASSERT2("FileHdf5::file_create",  "Return value %d opening file %s",
+	  file_id_,file_name.c_str(), file_id_ >= 0);
 
   // update file state
 
@@ -98,38 +89,24 @@ void FileHdf5::file_create () throw()
 void FileHdf5::file_close () throw()
 {
 
+  // error check file open
+
+  std::string file_name = path_ + "/" + name_;
+
+  ASSERT1("FileHdf5::file_close", "Closing an already closed file %s",
+	  file_name.c_str(), (is_file_open_));
+
+  // close dataset if opened
+
   int retval;
-
-  // Error check file open
-
-  ASSERT1("FileHdf5::file_close",
-	  "Closing an already closed file %s",
-	  (path_ + "/" + name_).c_str(),
-	  (is_file_open_));
 
   if (is_data_open_) {
 
-    // Close dataspace
-
-    retval = H5Sclose (data_space_id_);
-
-    // Error check H5Sclose 
-
-    ASSERT2("FileHdf5::file_close",
-	    "Return value %d closing dataspace %s",
-	    retval,data_name_.c_str(),
-	    (retval >= 0));
+    close_dataspace_ (data_space_id_);
 
     // Close dataset
 
-    retval = H5Dclose (data_set_id_);
-
-    // error check H5Dclose
-
-    ASSERT2("FileHdf5::file_close",
-	    "Return value %d closing dataset %s",
-	    retval,data_name_.c_str(),
-	    (retval >= 0));
+    close_dataset_ ();
 
     // update dataset state
 
@@ -142,10 +119,8 @@ void FileHdf5::file_close () throw()
 
   // error check H5Fclose
 
-  ASSERT2("FileHdf5::file_close",
-	  "Return value %d closing file %s",
-	  retval,(path_ + "/" + name_).c_str(),
-	  (retval >= 0));
+  ASSERT2("FileHdf5::file_close", "Return value %d closing file %s",
+	  retval,file_name.c_str(), (retval >= 0));
 
   // update file state
 
@@ -161,43 +136,26 @@ void FileHdf5::data_open
 
  // error check file closed
 
-  ASSERT1("FileHdf5::data_read",
-	  "Trying to read from unopened file %s",
-	  (path_ + name_).c_str(),
-	  is_file_open_ );
+  std::string file_name = path_ + "/" + name_;
+
+  ASSERT1("FileHdf5::data_read", "Trying to read from unopened file %s",
+	  file_name.c_str(), is_file_open_ );
 
   // Open the data set
   
   hid_t group = (is_group_open_) ? group_id_ : file_id_;
 
-  data_set_id_ = H5Dopen( group, name.c_str());
-
-  // error check H5Dopen
-
-  ASSERT3("FileHdf5::data_open",
-	  "H5Dopen() returned %d when opening dataset %s in file %s",
-	  data_set_id_,name.c_str(),(path_ + name_).c_str(),
-	  data_set_id_ >= 0);
+  data_set_id_ = open_dataset_(group,name);
 
   is_data_open_ = true;
 
   // Get dataset size
 
-  data_space_id_ = H5Dget_space (data_set_id_);
+  data_space_id_ = get_data_space_(data_set_id_, name);
 
-  // error check rank
+  // set output extents
 
-  int rank = H5Sget_simple_extent_ndims(data_space_id_);
-
-  ASSERT3("FileHdf5::data_get",
-	  "Dataset %s in file %s has unsupported rank %d",
-	  name.c_str(),name_.c_str(),rank,
-	  1 <= rank && rank <= MAX_DATA_RANK);
-
-  // get extents
-
-  hsize_t n[MAX_DATA_RANK];
-  H5Sget_simple_extent_dims(data_space_id_,n,0);
+  set_output_extents_(data_space_id_,n0,n1,n2,n3,n4);
 
   // Initialize name and type
 
@@ -207,12 +165,6 @@ void FileHdf5::data_open
   // set output parameters
 
   if (type) (*type) = data_type_;
-
-  if (n0) (*n0) = n[0];
-  if (n1) (*n1) = n[1];
-  if (n2) (*n2) = n[2];
-  if (n3) (*n3) = n[3];
-  if (n4) (*n4) = n[4];
 
 }
 
@@ -227,18 +179,7 @@ void FileHdf5::data_create
 
   data_name_ = name;
   data_type_ = type;
-
-  data_rank_ = MAX_DATA_RANK;
-
-  if (n4 == 0) -- data_rank_;
-  if (n3 == 0) -- data_rank_;
-  if (n2 == 0) -- data_rank_;
-  if (n1 == 0) -- data_rank_;
-
-  // error check rank
-
-  ASSERT ("FileHdf5::data_set","d is out of range",
-	  (1 <= data_rank_ && data_rank_ <= MAX_DATA_RANK));
+  data_rank_ = determine_rank_(n0,n1,n2,n3,n4);
 
   data_size_[0] = n0;
   data_size_[1] = n1;
@@ -262,10 +203,8 @@ void FileHdf5::data_create
 
   // error check H5Dcreate
 
-  ASSERT2("FileHdf5::data_set",
-	  "Return value %d opening dataset %s",
-	  data_set_id_,name.c_str(),
-	  data_set_id_ >= 0);
+  ASSERT2("FileHdf5::data_set", "Return value %d opening dataset %s",
+	  data_set_id_,name.c_str(), data_set_id_ >= 0);
 
   // update data state
 
@@ -283,17 +222,15 @@ void FileHdf5::data_read
 
   // error check file open
 
-  ASSERT1("FileHdf5::data_read",
-	  "Trying to read from unopened file %s",
-	  (path_ + name_).c_str(),
-	  is_file_open_);
+  std::string file_name = path_ + "/" + name_;
+
+  ASSERT1("FileHdf5::data_read", "Trying to read from unopened file %s",
+	  file_name.c_str(), is_file_open_);
 
   // error check dataset open
 
-  ASSERT1("FileHdf5::data_read",
-	  "Trying to read unopened dataset %s",
-	  data_name_.c_str(),
-	  is_data_open_);
+  ASSERT1("FileHdf5::data_read", "Trying to read unopened dataset %s",
+	  data_name_.c_str(), is_data_open_);
 
   // read data
 
@@ -318,17 +255,15 @@ void FileHdf5::data_write
 {
   // error check file open
 
-  ASSERT1("FileHdf5::data_write",
-	  "Trying to write to unopened file %s",
-	  (path_ + name_).c_str(),
-	  is_file_open_);
+  std::string file_name = path_ + "/" + name_;
+
+  ASSERT1("FileHdf5::data_write", "Trying to write to unopened file %s",
+	  file_name.c_str(), is_file_open_);
 
   // error check dataset open
 
-  ASSERT1("FileHdf5::data_write",
-	  "Trying to write unopened dataset %s",
-	   data_name_.c_str(),
-	   (is_data_open_));
+  ASSERT1("FileHdf5::data_write", "Trying to write unopened dataset %s",
+	   data_name_.c_str(), (is_data_open_));
 
   // Write dataset to the file
 
@@ -354,11 +289,11 @@ void FileHdf5::data_close() throw()
 
     // close the dataspace
 
-    H5Sclose (data_space_id_);
+    close_dataspace_(data_space_id_);
 
     // close the dataset
 
-    H5Dclose( data_set_id_);
+    close_dataset_ ();
 
     // update dataset state
 
@@ -373,30 +308,26 @@ void FileHdf5::file_read_meta
     int * n0, int * n1, int * n2, int * n3, int * n4) throw()
 {
 
+  std::string file_name = path_ + "/" + name_;
+
   ASSERT1("FileHdf5::file_read_meta",
 	  "Trying to read metadata from the unopened file %s",
-	  (path_ + name_).c_str(),
-	  is_file_open_);
+	  file_name.c_str(), is_file_open_);
 
   hid_t meta_id = H5Aopen_name(file_id_, name.c_str());
 
   ASSERT3("FileHdf5::file_read_meta",
-	  "H5Aopen_name() returned %d when opening attribute %s in file %s",
-	  meta_id, name.c_str(),(path_ + name_).c_str(),
+	  "H5Aopen_name() returned %d opening %s in file %s",
+	  meta_id, name.c_str(),file_name.c_str(),
 	  (meta_id >= 0));
 
-  // Get attribute size
+  // get dataspace
 
-  hid_t meta_space_id = H5Aget_space (meta_id);
+  hid_t meta_space_id = get_attr_space_(meta_id,name);
 
-  // error check rank
+  // set output extents
 
-  int rank = H5Sget_simple_extent_ndims(meta_space_id);
-
-  ASSERT3("FileHdf5::file_read_meta",
-	  "Attribute %s in file %s has unsupported rank %d",
-	  name.c_str(),name_.c_str(),rank,
-	  1 <= rank && rank <= MAX_DATA_RANK);
+  set_output_extents_(meta_space_id,n0,n1,n2,n3,n4);
 
   // set output parameters
 
@@ -404,14 +335,6 @@ void FileHdf5::file_read_meta
 
   if (type) (*type) = scalar_type;
 
-  hsize_t n[MAX_DATA_RANK];
-  H5Sget_simple_extent_dims(meta_space_id,n,0);
-
-  if (n0) (*n0) = n[0];
-  if (n1) (*n1) = n[1];
-  if (n2) (*n2) = n[2];
-  if (n3) (*n3) = n[3];
-  if (n4) (*n4) = n[4];
 
   // Read the attribute
 
@@ -432,25 +355,16 @@ void FileHdf5::file_write_meta
 {
   // error check file open
 
+  std::string file_name = path_ + "/" + name_;
+
   ASSERT1("FileHdf5::file_write_meta",
 	  "Trying to write metadata to the unopened file %s",
-	  (path_ + name_).c_str(),
+	  file_name.c_str(),
 	  is_file_open_);
 
   // Determine the attribute rank
 
-  hsize_t meta_rank = MAX_DATA_RANK;
-
-  if (n4 == 0) -- meta_rank;
-  if (n3 == 0) -- meta_rank;
-  if (n2 == 0) -- meta_rank;
-  if (n1 == 0) -- meta_rank;
-
-  // error check rank
-
-  ASSERT ("FileHdf5::data_set","d is out of range",
-	  (1 <= meta_rank && meta_rank <= MAX_DATA_RANK));
-
+  hsize_t meta_rank = determine_rank_(n0,n1,n2,n3,n4);
 
   hsize_t meta_size[MAX_DATA_RANK];
 
@@ -484,12 +398,13 @@ void FileHdf5::file_write_meta
 
   // Close the attribute dataspace
 
-  H5Sclose(meta_space_id);
+  close_dataspace_(meta_space_id);
 
   // Close the attribute
 
   H5Aclose(meta_id);
 }
+
 
 //----------------------------------------------------------------------
 
@@ -499,10 +414,12 @@ void FileHdf5::data_read_meta
 {
   // error check file open
 
+  std::string file_name = path_ + "/" + name_;
+
   ASSERT1("FileHdf5::data_read_meta",
 	 "Trying to read attribute from the unopened file %s",
-	 (path_ + name_).c_str(),
-	 is_file_open_);
+	  file_name.c_str(),
+	  is_file_open_);
 
   // error check dataset open
 
@@ -515,36 +432,22 @@ void FileHdf5::data_read_meta
 
   ASSERT3("FileHdf5::data_read_meta",
 	  "H5Aopen_name() returned %d when opening attribute %s in file %s",
-	   meta_id, name.c_str(),(path_ + name_).c_str(),
+	   meta_id, name.c_str(),file_name.c_str(),
 	   (meta_id >= 0));
 
   // Get attribute size
 
-  hid_t meta_space_id = H5Aget_space (meta_id);
+  hid_t meta_space_id = get_attr_space_ (meta_id,name);
 
-  // error check rank
+  // set output extents
 
-  int rank = H5Sget_simple_extent_ndims(meta_space_id);
-
-  ASSERT3("FileHdf5::data_read_meta",
-	  "Attribute %s in file %s has unsupported rank %d",
-	  name.c_str(),name_.c_str(),rank,
-	  1 <= rank && rank <= MAX_DATA_RANK);
+  set_output_extents_(meta_space_id,n0,n1,n2,n3,n4);
 
   // set output parameters
 
   scalar_type scalar_type = hdf5_to_scalar_(H5Aget_type (meta_id));
 
   if (type) (*type) = scalar_type;
-
-  hsize_t n[MAX_DATA_RANK];
-  H5Sget_simple_extent_dims(meta_space_id,n,0);
-
-  if (n0) (*n0) = n[0];
-  if (n1) (*n1) = n[1];
-  if (n2) (*n2) = n[2];
-  if (n3) (*n3) = n[3];
-  if (n4) (*n4) = n[4];
 
   // Read the attribute
 
@@ -566,9 +469,11 @@ void FileHdf5::data_write_meta
 
   if ( ! is_file_open_) {
 
+    std::string file_name = path_ + "/" + name_;
+
     ERROR1("FileHdf5::data_write_meta",
 	  "Trying to write metadata to the unopened file %s",
-	  (path_ + name_).c_str());
+	   file_name.c_str());
   }
 
   // error check dataset open
@@ -582,16 +487,7 @@ void FileHdf5::data_write_meta
 
   // Determine the attribute rank
 
-  hsize_t meta_rank = MAX_DATA_RANK;
-
-  if (n4 == 0) -- meta_rank;
-  if (n3 == 0) -- meta_rank;
-  if (n2 == 0) -- meta_rank;
-  if (n1 == 0) -- meta_rank;
-
-  ASSERT ("FileHdf5::data_set","d is out of range",
-	  (1 <= meta_rank && meta_rank <= MAX_DATA_RANK));
-
+  hsize_t meta_rank = determine_rank_(n0,n1,n2,n3,n4);
 
   hsize_t meta_size[MAX_DATA_RANK];
 
@@ -613,7 +509,7 @@ void FileHdf5::data_write_meta
 
   H5Awrite (meta_id, scalar_to_hdf5_(type), buffer);
 
-  H5Sclose(meta_space_id);
+  close_dataspace_(meta_space_id);
   H5Aclose(meta_id);
 }  
 
@@ -826,3 +722,119 @@ enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
 
 }
 
+//----------------------------------------------------------------------
+
+void FileHdf5::set_output_extents_
+( hid_t space_id, int * n0, int * n1, int * n2, int * n3, int *n4) throw ()
+{
+
+   hsize_t n[MAX_DATA_RANK];
+   H5Sget_simple_extent_dims(space_id,n,0);
+
+   if (n0) (*n0) = n[0];
+   if (n1) (*n1) = n[1];
+   if (n2) (*n2) = n[2];
+   if (n3) (*n3) = n[3];
+   if (n4) (*n4) = n[4];
+}
+
+//----------------------------------------------------------------------
+
+hsize_t FileHdf5::determine_rank_(int n0,int n1,int n2,int n3,int n4) throw ()
+{
+
+  hsize_t rank = MAX_DATA_RANK;
+
+  if (n4 == 0) -- rank;
+  if (n3 == 0) -- rank;
+  if (n2 == 0) -- rank;
+  if (n1 == 0) -- rank;
+
+  // error check rank
+
+  ASSERT1("FileHdf5::determine_rank_","rank %d is out of range",
+	  rank, (1 <= rank && rank <= MAX_DATA_RANK));
+
+  return rank;
+}
+
+//----------------------------------------------------------------------
+
+void FileHdf5::close_dataspace_ (hid_t space_id) throw()
+{
+  // Close dataspace
+
+  int retval = H5Sclose (space_id);
+
+  // Error check H5Sclose 
+
+  ASSERT1("FileHdf5::close_dataspace_", "Return value %d",
+	  retval,(retval >= 0));
+}
+
+//----------------------------------------------------------------------
+
+hid_t FileHdf5::open_dataset_ (hid_t group, std::string name) throw()
+{
+  hid_t dataset_id = H5Dopen( group, name.c_str());
+
+  // error check H5Dopen
+
+  ASSERT3("FileHdf5::open_dataset_", 
+	  "H5Dopen() returned %d opening %s in file %s",
+	  dataset_id,name.c_str(),(path_ + "/" + name_).c_str(), 
+	  data_set_id_ >= 0);
+
+  return dataset_id;
+
+}
+//----------------------------------------------------------------------
+
+void FileHdf5::close_dataset_ () throw()
+{
+  int retval = H5Dclose (data_set_id_);
+
+  // error check H5Dclose
+
+  ASSERT2("FileHdf5::close_dataset_", "Return value %d closing dataset %s",
+	  retval,data_name_.c_str(), (retval >= 0));
+}
+
+//----------------------------------------------------------------------
+
+hid_t FileHdf5::get_data_space_(hid_t data_id, std::string name) throw ()
+{
+
+  hid_t space_id = H5Dget_space (data_id);
+
+  // error check rank
+
+  int rank = H5Sget_simple_extent_ndims(space_id);
+
+  ASSERT3("FileHdf5::get_data_space_", 
+	  "Dataset %s in file %s has unsupported rank %d",
+	  name.c_str(),(path_ + "/" + name_).c_str(),rank,
+	  (1 <= rank && rank <= MAX_DATA_RANK));
+
+  return space_id;
+
+}
+//----------------------------------------------------------------------
+
+hid_t FileHdf5::get_attr_space_(hid_t attr_id, std::string name) throw ()
+{
+
+  hid_t space_id = H5Aget_space (attr_id);
+
+  // error check rank
+
+  int rank = H5Sget_simple_extent_ndims(space_id);
+
+  ASSERT3("FileHdf5::get_attr_space_",
+	  "Attribute %s in file %s has unsupported rank %d",
+	  name.c_str(),(path_ + "/" + name_).c_str(),rank,
+	  (1 <= rank && rank <= MAX_DATA_RANK));
+
+  return space_id;
+
+}

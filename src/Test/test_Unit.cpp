@@ -35,14 +35,20 @@ void Unit::init (int rank , int size )
   comm_rank_ = rank;
   comm_size_ = size;
 
-  if (is_active_) PARALLEL_PRINTF ("UNIT TEST BEGIN\n");
+  if (is_active_) {
+    PARALLEL_PRINTF ("UNIT TEST BEGIN\n");
+    fflush(stdout);
+  }
 }
 
 //----------------------------------------------------------------------
 
 void Unit::finalize ()
 {
-  if (is_active_)  PARALLEL_PRINTF ("UNIT TEST END\n");
+  if (is_active_)  {
+    PARALLEL_PRINTF ("UNIT TEST END\n");
+    fflush(stdout);
+  }
 }
 
 //----------------------------------------------------------------------

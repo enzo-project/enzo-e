@@ -102,6 +102,28 @@ private: // functions
   /// Convert the scalar type to an HDF5 datatype
   enum scalar_type hdf5_to_scalar_(int type) const throw();
 
+  /// Set output extents n0 through n4
+  void set_output_extents_
+  ( hid_t space_id, int * n0, int * n1, int * n2, int * n3, int *n4) throw();
+
+  /// Determine rank from n0 through n4
+  hsize_t determine_rank_(int n0,int n1,int n2,int n3,int n4) throw();
+
+  /// Close the given dataspace
+  void close_dataspace_ (hid_t space_id) throw();
+
+  /// Open the dataset
+  hid_t open_dataset_ (hid_t group, std::string name) throw();
+
+  /// Close the dataset
+  void close_dataset_ () throw();
+
+  /// Return the space for the given dataset
+  hid_t get_data_space_(hid_t dataset_id, std::string name) throw ();
+
+  /// Return the space for the given attribute
+  hid_t get_attr_space_(hid_t dataset_id, std::string name) throw ();
+  
 private: // attributes
 
   /// HDF5 file descriptor
