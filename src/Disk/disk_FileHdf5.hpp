@@ -107,7 +107,8 @@ private: // functions
   ( hid_t space_id, int * n0, int * n1, int * n2, int * n3, int *n4) throw();
 
   /// Determine rank from n0 through n4
-  hsize_t determine_rank_(int n0,int n1,int n2,int n3,int n4) throw();
+  hid_t create_dataspace_(int n0,int n1,int n2,int n3,int n4,
+			  hsize_t * data_size) throw();
 
   /// Close the given dataspace
   void close_dataspace_ (hid_t space_id) throw();
