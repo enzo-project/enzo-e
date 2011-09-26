@@ -1,21 +1,18 @@
 #------------------------------
 # DIRECTORIES
 #------------------------------
+
 #------------------------------
 # IMPORTS
 #------------------------------
+
 Import('env')
 Import('type')
+
 #------------------------------
 # DEPENDENCIES
 #------------------------------
-# components = [ 
-#               'mesh','field', 
-#               'simulation','method',
-#               'disk','memory','parallel',
-#               'parameters','monitor',
-#               'performance', 'error',
-#               'test','cello']
+
 components = ['mesh', 'field',
               'simulation', 'method', 'io',
               'disk','memory','parallel',
@@ -26,14 +23,18 @@ components = ['mesh', 'field',
 libraries  = ['png','hdf5']
 
 #------------------------------
-# ENVIRONMENTS
-#------------------------------
-env = env.Clone(LIBS=[components,libraries])
-#------------------------------
 # SOURCE
 #------------------------------
+
 includes = [Glob('io*hpp')]
 sources  = [Glob('io*cpp')]
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
+
 #------------------------------
 # TARGETS
 #------------------------------

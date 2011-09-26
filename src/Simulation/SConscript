@@ -23,17 +23,17 @@ if (use_papi):
 libraries = ['png','$FORTRANLIBS']
 
 #------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[components,libraries])
-
-#------------------------------
 # SOURCE
 #------------------------------
 
 includes = [Glob('simulation*hpp')]
 sources  = [Glob("simulation*cpp")]
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # TARGETS

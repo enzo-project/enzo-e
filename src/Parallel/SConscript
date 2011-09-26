@@ -23,17 +23,17 @@ components = ['monitor',
 libraries  = ['png']
 
 #------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[components,libraries])
-
-#------------------------------
 # SOURCE
 #------------------------------
 
 includes   = [Glob('parallel*hpp'),'parallel.def']
 sources    = [Glob('parallel*cpp')]
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # TARGETS

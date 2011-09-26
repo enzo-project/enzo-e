@@ -15,22 +15,28 @@ components = ['method',
               'parameters', 'monitor',
               'error',
               'cello']
-# libraries  = ['$FORTRANLIBS']
+
 libraries  = []
+
+#------------------------------
+# SOURCE
+#------------------------------
+
+includes = [Glob('method*hpp'), Glob('*.h')]
+sources  = [Glob('method*cpp')]
 
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
+
 env = env.Clone(LIBS=[components,libraries])
-#------------------------------
-# SOURCE
-#------------------------------
-includes = [Glob('method*hpp'), Glob('*.h')]
-sources  = [Glob('method*cpp')]
+
 #------------------------------
 # TARGETS
 #------------------------------
+
 libraries = env.Library ('method', sources)
+
 #------------------------------
 # INSTALL
 #------------------------------

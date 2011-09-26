@@ -32,25 +32,25 @@ if (use_papi):
 libraries  = ['png','hdf5']
 
 #------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[components,libraries])
-#------------------------------
 # SOURCE
 #------------------------------
 
 includes = [Glob('field*hpp')]
 sources  = [Glob('field*cpp')]
+if (type == "charm"):
+	sources = sources + ["../main_simulation.cpp"]
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # TARGETS
 #------------------------------
 
 libraries        = env.Library ('field', [sources])
-
-if (type == "charm"):
-	sources = sources + ["../main_simulation.cpp"]
 
 test_field_block = env.Program (['test_FieldBlock.cpp',  sources])
 test_field_descr = env.Program (['test_FieldDescr.cpp',  sources])

@@ -13,17 +13,17 @@ libraries = []
 components = []
 
 #------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[components,libraries])
-
-#------------------------------
 # SOURCE
 #------------------------------
 
 includes = [Glob('*hpp')]
 sources  = [Glob('test*cpp')]
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # TARGETS

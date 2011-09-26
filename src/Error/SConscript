@@ -17,17 +17,17 @@ if (type == "charm"):
    libraries  = libraries  + ['png']
 
 #------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[components,libraries])
-
-#------------------------------
 # SOURCE
 #------------------------------
 
 includes = [Glob('*hpp')]
 sources  = [Glob('error*cpp')]
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # TARGETS

@@ -31,18 +31,18 @@ libraries  = ['png'] # used only for test_TreeK(?)
 #   components = components + ['enzo']
 
 #------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[components,libraries])
-
-#------------------------------
 # SOURCE
 #------------------------------
 
 includes = [Glob('mesh*hpp')]
 sources  = [Glob('mesh*cpp')]
 sources_tree = [Glob('mesh*Node*cpp'), Glob('mesh*Tree*cpp')]
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # TARGETS

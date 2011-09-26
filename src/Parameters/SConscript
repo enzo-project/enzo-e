@@ -17,12 +17,6 @@ components = ['parallel',
 libraries  = ['png']
 
 #------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[components,libraries])
-
-#------------------------------
 # SOURCE
 #------------------------------
 
@@ -35,6 +29,12 @@ sources  = ['parse.tab.c', 'lex.yy.c', Glob('parameters*cpp') ]
 # env.CFile(target = 'lex.yy.c', source = 'parse.l')
 # env.CFile(target = ['parse.tab.c', 'parse.tab.h'], source = 'parse.y', YACCFLAGS='-d -t')
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # TARGETS
