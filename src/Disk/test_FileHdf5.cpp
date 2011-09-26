@@ -65,16 +65,16 @@ PARALLEL_MAIN_BEGIN
   const int my = 2;
 
   char ma_char   [mx*my];
-  char ma_int    [mx*my];
-  char ma_long   [mx*my];
-  char ma_float  [mx*my];
-  char ma_double [mx*my];
+  int  ma_int    [mx*my];
+  long ma_long   [mx*my];
+  float ma_float  [mx*my];
+  double ma_double [mx*my];
 
   char mb_char   [mx*my];
-  char mb_int    [mx*my];
-  char mb_long   [mx*my];
-  char mb_float  [mx*my];
-  char mb_double [mx*my];
+  int mb_int    [mx*my];
+  long mb_long   [mx*my];
+  float mb_float  [mx*my];
+  double mb_double [mx*my];
 
   for (int iy=0; iy<my; iy++) {
     for (int ix=0; ix<mx; ix++) {
