@@ -494,19 +494,28 @@ void FileHdf5::data_write_meta
 
 //----------------------------------------------------------------------
 
-void FileHdf5::group_open (std::string name) throw()
+void FileHdf5::group_open (std::string group_path) throw()
 {
-  // Close current group if open
+  // close current group if open
+
   group_close();
   
-  // Error if not an absolute path name
-  if (name[0] != '/') {
+  // error check not absolute path name
 
-    ERROR1("FileHdf5::group_open",
-	  "Group name '%s' must begin with '/'", name.c_str());
-  }
-  
-  group_id_ = H5Gopen(file_id_, name.c_str());
+  ASSERT1("FileHdf5::group_open",
+	  "Group name '%s' must begin with '/'", group_path.c_str(),
+	  group_path[0] == '/');
+
+  // open group
+
+  group_id_ = H5Gopen(file_id_, group_path.c_str());
+
+  // error check H5Gopen()
+
+  ASSERT1("FileHdf5::group_open()", "H5Gopen() returned %d", 
+	  group_id_,group_id_>=0);
+
+  // update group state
 
   is_group_open_ = true;
   
@@ -516,18 +525,17 @@ void FileHdf5::group_open (std::string name) throw()
 
 void FileHdf5::group_create (std::string group_path) throw()
 {
-  // Close current group if open
+  // close current group if open
+
   group_close();
 
-  // Error if not an absolute path name
-  if (group_path[0] != '/') {
+  // error check not absolute path name
 
-    ERROR1("FileHdf5::group_create",
-	  "Group name '%s' must begin with '/'", group_path.c_str());
-  }
+  ASSERT1("FileHdf5::group_open",
+	  "Group name '%s' must begin with '/'", group_path.c_str(),
+	  group_path[0] == '/');
 
-
-  // Start at root group
+  // Create ancestor groups beginning at root '/'
   
   std::string group_full = "/";
   std::string group_rest = group_path;
@@ -535,7 +543,7 @@ void FileHdf5::group_create (std::string group_path) throw()
 
   group_id_ = H5Gopen(file_id_,group_full.c_str());
 
-  // Loop through ancestor groups, creating if needed
+  // loop through ancestor groups
 
   size_t pos;
 
@@ -668,10 +676,10 @@ enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
 
   enum scalar_type type;
  
-  printf ("class = %d  size = %d\n",hdf5_class,hdf5_size);
+  printf ("class = %d  size = %d\n",int(hdf5_class),int(hdf5_size));
   printf ("class int = %d float = %d\n",H5T_INTEGER,H5T_FLOAT);
   printf ("sizeof(char) = %d  sizeof(int) = %d  sizeof(long) = %d\n",
-	  sizeof(char),sizeof(int),sizeof(long));
+	  int(sizeof(char)),int(sizeof(int)),int(sizeof(long)));
   if (hdf5_class == H5T_INTEGER) {
 
     if (hdf5_size == sizeof(char)) {
@@ -685,7 +693,7 @@ enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
   } else if (hdf5_class == H5T_FLOAT) {
 
   printf ("sizeof(float) = %d  sizeof(double) = %d\n",
-	  sizeof(float),sizeof(double));
+	  int(sizeof(float)),int(sizeof(double)));
     if (hdf5_size == sizeof(float)) {
       type = scalar_type_float;
     } else if (hdf5_size == sizeof(double)) {
