@@ -102,6 +102,8 @@ void FileHdf5::file_close () throw()
 
   if (is_data_open_) {
 
+    // close dataspace
+
     close_dataspace_ (data_space_id_);
 
     // Close dataset
@@ -141,7 +143,7 @@ void FileHdf5::data_open
   ASSERT1("FileHdf5::data_open", "Trying to read from unopened file %s",
 	  file_name.c_str(), is_file_open_ );
 
-  // Open the data set
+  // Open the dataset
   
   hid_t group = (is_group_open_) ? group_id_ : file_id_;
 
@@ -149,7 +151,7 @@ void FileHdf5::data_open
 
   is_data_open_ = true;
 
-  // Get dataset size
+  // Get the dataspace
 
   data_space_id_ = get_data_space_(data_set_id_, name);
 
@@ -202,7 +204,7 @@ void FileHdf5::data_create
   ASSERT2("FileHdf5::data_create", "Return value %d opening dataset %s",
 	  data_set_id_,name.c_str(), data_set_id_ >= 0);
 
-  // update data state
+  // update dataset state
 
   data_type_ = type;
   is_data_open_ = true;
@@ -306,11 +308,15 @@ void FileHdf5::file_read_meta
 
   std::string file_name = path_ + "/" + name_;
 
+  // error check file open
+
   ASSERT1("FileHdf5::file_read_meta",
 	  "Trying to read metadata from the unopened file %s",
 	  file_name.c_str(), is_file_open_);
 
   hid_t meta_id = H5Aopen_name(file_id_, name.c_str());
+
+  // error check H5Aopen_name
 
   ASSERT3("FileHdf5::file_read_meta",
 	  "H5Aopen_name() returned %d opening %s in file %s",
@@ -325,12 +331,11 @@ void FileHdf5::file_read_meta
 
   set_output_extents_(meta_space_id,n0,n1,n2,n3,n4);
 
-  // set output parameters
+  // set output type
 
   scalar_type scalar_type = hdf5_to_scalar_(H5Aget_type (meta_id));
 
   if (type) (*type) = scalar_type;
-
 
   // Read the attribute
 
@@ -451,24 +456,17 @@ void FileHdf5::data_write_meta
 {
   // error check file open
 
-  if ( ! is_file_open_) {
+  std::string file_name = path_ + "/" + name_;
 
-    std::string file_name = path_ + "/" + name_;
-
-    ERROR1("FileHdf5::data_write_meta",
+  ASSERT1("FileHdf5::data_write_meta",
 	  "Trying to write metadata to the unopened file %s",
-	   file_name.c_str());
-  }
+	  file_name.c_str(), is_file_open_);
 
   // error check dataset open
 
-  if (! is_data_open_) {
-
-    ERROR1("FileHdf5::data_write_meta",
+  ASSERT1("FileHdf5::data_write_meta",
 	  "Trying to read attribute from unopened dataset %s",
-	  data_name_.c_str());
-  }
-
+	   data_name_.c_str(),is_data_open_);
 
   // Create the attribute data size
 
@@ -487,7 +485,11 @@ void FileHdf5::data_write_meta
   H5Awrite (meta_id, scalar_to_hdf5_(type), buffer);
 
   close_dataspace_(meta_space_id);
-  H5Aclose(meta_id);
+
+  int retval = H5Aclose(meta_id);
+
+  ASSERT1("FileHdf5::data_write_meta",
+	  "H5Aclose() returned %d",retval,(retval >= 0));
 }  
 
 //----------------------------------------------------------------------
@@ -665,17 +667,30 @@ enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
   size_t      hdf5_size  = H5Tget_size (hdf5_type);
 
   enum scalar_type type;
-
+ 
+  printf ("class = %d  size = %d\n",hdf5_class,hdf5_size);
+  printf ("class int = %d float = %d\n",H5T_INTEGER,H5T_FLOAT);
+  printf ("sizeof(char) = %d  sizeof(int) = %d  sizeof(long) = %d\n",
+	  sizeof(char),sizeof(int),sizeof(long));
   if (hdf5_class == H5T_INTEGER) {
 
-    if (hdf5_size == sizeof(char))   type = scalar_type_char;
-    if (hdf5_size == sizeof(int))    type = scalar_type_int;
-    if (hdf5_size == sizeof(long))   type = scalar_type_long;
+    if (hdf5_size == sizeof(char)) {
+      type = scalar_type_char;
+    } else if (hdf5_size == sizeof(int)) {
+      type = scalar_type_int;
+    } else if (hdf5_size == sizeof(long)) {
+      type = scalar_type_long;
+    } else ASSERT("","",0);
 
   } else if (hdf5_class == H5T_FLOAT) {
 
-    if (hdf5_size == sizeof(float))  type = scalar_type_float;
-    if (hdf5_size == sizeof(double)) type = scalar_type_double;
+  printf ("sizeof(float) = %d  sizeof(double) = %d\n",
+	  sizeof(float),sizeof(double));
+    if (hdf5_size == sizeof(float)) {
+      type = scalar_type_float;
+    } else if (hdf5_size == sizeof(double)) {
+      type = scalar_type_double;
+    } else ASSERT("","",0);
 
   } else {
 
@@ -684,6 +699,7 @@ enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
 	  hdf5_class, int(hdf5_size));
   }
 
+  printf ("type = %d\n",type);
   return type;
 
 }

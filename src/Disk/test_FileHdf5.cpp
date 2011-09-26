@@ -24,8 +24,8 @@ PARALLEL_MAIN_BEGIN
 
   // data arrays
 
-  const int nx = 17;
-  const int ny = 25;
+  const int nx = 7;
+  const int ny = 5;
 
   char   * a_char   = new char  [nx*ny];
   int    * a_int    = new int   [nx*ny];
@@ -177,7 +177,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert (a_mx == b_mx);
   unit_assert (scalar_type == scalar_type_int);
-
   scalar_type = scalar_type_unknown;
   hdf5_b.file_read_meta(&b_my, "my", &scalar_type);
 
@@ -372,7 +371,7 @@ PARALLEL_MAIN_BEGIN
     for (int ix=0; ix<mx ; ix++) {
       int i = ix + mx*iy;
       if ( ! (ma_int[i] == mb_int[i]) ) {
-	printf ("%d %d  %d %d\n",ix,iy,ma_int[i],mb_int[i]);
+	printf ("MISMATCH %d %d  %d %d\n",ix,iy,ma_int[i],mb_int[i]);
       }
       mp_int = mp_int && (ma_int[i] == mb_int[i]);
     }
