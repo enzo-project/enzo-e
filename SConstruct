@@ -439,7 +439,7 @@ elif (type == "charm"):
 
 cpppath     = ['#/include'];
 fortranpath = ['#/include'];
-libpath     = ['#/lib'];
+libpath     = ['#/lib/'+type];
 
 #----------------------------------------------------------------------
 # PAPI PATHS

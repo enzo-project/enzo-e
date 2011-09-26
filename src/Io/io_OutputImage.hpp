@@ -3,7 +3,7 @@
 /// @file     io_OutputImage.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
-/// @brief    [\ref Io] Declaration for the OutputImage component
+/// @brief    [\ref Io] Declaration for the OutputImage class
 
 #ifndef IO_OUTPUT_IMAGE_HPP
 #define IO_OUTPUT_IMAGE_HPP
@@ -44,13 +44,13 @@ public: // virtual functions
   ( const FieldDescr * field_descr,
     Hierarchy * hierarchy) throw();
 
-  /// Write patch-related field data; may be called by write (Hierarchy)
+  /// Write patch-related field data; may be called by write_hierarchy
   virtual void write_patch
   ( const FieldDescr * field_descr,
     Patch * patch,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
-  /// Write block-related field data; may be called by write (Patch)
+  /// Write block-related field data; may be called by write_patch
   virtual void write_block
   ( const FieldDescr * field_descr,
     Block * block,
@@ -103,9 +103,11 @@ private: // attributes
   /// Current image
   double * image_;
 
-  /// Current image size
-  int image_size_x_;
-  int image_size_y_;
+  /// Current image columns
+  int nix_;
+
+  /// Current image rows
+  int niy_;
 
   /// Current pngwriter
   pngwriter * png_;
@@ -133,60 +135,59 @@ private: // attributes
    int n[3]  = {nx,  ny,  nz};
    int n0[3] = {nx0, ny0, nz0};
 
-   // Remap array axes to image axes iax,iay
+   // Remap array axes to image axes axis_x,axis_y
 
-   int iax = (axis+1) % 3;  // image x axis
-   int iay = (axis+2) % 3;  // image y-axis
-   int iaz = axis;          // reduction axis
+   int axis_x = (axis+1) % 3;  // image x axis
+   int axis_y = (axis+2) % 3;  // image y-axis
 
    // Array size permuted to match image
 
-   int npx = n[iax];
-   int npy = n[iay];
-   int npz = n[iaz];
+   int npx = n[axis_x];
+   int npy = n[axis_y];
+   int npz = n[axis];
 
    // Array start permuted to match image
 
-   int npx0 = n0[iax];
-   int npy0 = n0[iay];
+   int npx0 = n0[axis_x];
+   int npy0 = n0[axis_y];
 
    // Loop over array subsection
 
    // image x-axis
 
-   double min=std::numeric_limits<double>::max();
-   double max=std::numeric_limits<double>::min();
+   for (int iax=0; iax<npx; iax++) {
 
-   for (int index_array_x=0; index_array_x<npx; index_array_x++) {
-
-     int index_image_x = npx0 + index_array_x;
+     int iix = npx0 + iax;
 
      // image y-axis
 
-     for (int index_array_y=0; index_array_y<npy; index_array_y++) {
+     for (int iay=0; iay<npy; iay++) {
       
-       int index_image_y = npy0 + index_array_y;
+       int iiy = npy0 + iay;
 
-       int index_image = index_image_x + image_size_x_*index_image_y;
+       int index_image = iix + nix_*iiy;
 
-       if ( ! ( ( index_image_x < image_size_x_) &&
-		 (index_image_y < image_size_y_)) ) {
+       if ( ! ( ( iix < nix_) &&
+		 (iiy < niy_)) ) {
 	 ERROR5 ("OutputImage::image_reduce_",
 		 "Invalid Access axis %d index(%d %d)  image(%d %d)\n",
-		 axis, index_image_x, index_image_y, image_size_x_,image_size_y_);
+		 axis, iix, iiy, nix_,niy_);
        }
 
        double & pixel_value = image_ [index_image];
+
+       double min = std::numeric_limits<double>::max();
+       double max = std::numeric_limits<double>::min();
 
        // reduction axis
 
        // initialize reduction
        switch (op_reduce) {
        case reduce_min: 
-	 pixel_value = std::numeric_limits<double>::max();
+	 pixel_value = max;
 	 break;
        case reduce_max: 
-	 pixel_value = std::numeric_limits<double>::min();
+	 pixel_value = min;
 	 break;
        case reduce_avg: 
        case reduce_sum: 
@@ -198,11 +199,11 @@ private: // attributes
        for (int iz=0; iz<npz; iz++) {
 	
 	 int index_array = 
-	   nd3[iax]*index_array_x + 
-	   nd3[iay]*index_array_y + 
-	   nd3[iaz]*iz;
+	   nd3[axis_x]*iax + 
+	   nd3[axis_y]*iay + 
+	   nd3[axis]*iz;
 
-	 // reduce along iaz axis
+	 // reduce along z axis
 
 	 switch (op_reduce) {
 	 case reduce_min: 
@@ -218,11 +219,11 @@ private: // attributes
 	   break;
 	 }
        }
+
        if (op_reduce == reduce_avg) pixel_value /= npz;
-       min=MIN(pixel_value,min);
-       max=MAX(pixel_value,max);
 
      }
+
    }
  }
 

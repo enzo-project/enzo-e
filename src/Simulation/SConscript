@@ -51,7 +51,7 @@ if (type == "charm"):
 #------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
 
 
 

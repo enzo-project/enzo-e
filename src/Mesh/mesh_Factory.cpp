@@ -8,6 +8,12 @@
 #include "mesh.hpp"
 
 //----------------------------------------------------------------------
+Hierarchy * Factory::create_hierarchy () const throw ()
+{
+  return new Hierarchy (this); 
+}
+
+//----------------------------------------------------------------------
 
 Patch * Factory::create_patch
 (

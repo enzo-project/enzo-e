@@ -58,7 +58,7 @@ libraries = env.Library ('enzo-ppml', sources)
 # INSTALL
 #------------------------------
 
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
 
 
 

@@ -9,14 +9,22 @@ Import('type')
 #------------------------------
 # DEPENDENCIES
 #------------------------------
-components = [ 
-              'field', 
-              'simulation','method',
-              'memory','parallel',
-              'parameters','monitor',
-              'performance', 'error',
-              'test','cello']
-libraries  = ['png']
+# components = [ 
+#               'mesh','field', 
+#               'simulation','method',
+#               'disk','memory','parallel',
+#               'parameters','monitor',
+#               'performance', 'error',
+#               'test','cello']
+components = ['mesh', 'field',
+              'simulation', 'method', 'io',
+              'disk','memory','parallel',
+              'parameters', 'error',
+              'test','cello',
+              'monitor','performance' ]
+
+libraries  = ['png','hdf5']
+
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
@@ -32,9 +40,12 @@ sources  = [Glob('io*cpp')]
 
 libraries = env.Library ('io', [sources])
 
+binaries = [env.Program (['test_ItReduce.cpp'])]
+
 #------------------------------
 # INSTALL
 #------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',  includes))
-env.Alias('install-lib',env.Install ('#/lib',      libraries))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
+env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))

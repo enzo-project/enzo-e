@@ -17,13 +17,12 @@ class Factory {
 
 public: // interface
 
-#ifdef CONFIG_USE_CHARM
-  virtual void pup(PUP::er &) {}
-#endif
+// #ifdef CONFIG_USE_CHARM
+//   virtual void pup(PUP::er &) {}
+// #endif
 
   /// Create a new Hierarchy [abstract factory design pattern]
-  virtual Hierarchy * create_hierarchy () const throw ()
-{ return new Hierarchy (this); }
+  virtual Hierarchy * create_hierarchy () const throw ();
 
   /// Create a new Patch [abstract factory design pattern]
   virtual Patch * create_patch

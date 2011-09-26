@@ -344,6 +344,8 @@ test_summary("Enzo",array("enzo-p_1","enzo-p_2"),
                     array("enzo-p",  "enzo-p")); 
 test_summary("Field",array(    "FieldBlock",     "FieldDescr",     "FieldFace",     "ItField"),
 		    array("test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField")); 
+test_summary("Io",array("ItReduce"),
+		    array("test_ItReduce")); 
 test_summary("Memory",array("Memory"),
 		    array("test_Memory")); 
 test_summary("Mesh",array("Hierarchy","Patch","Block"),
@@ -378,6 +380,9 @@ tests("Field","test_FieldDescr","test_FieldDescr");
 tests("Field","test_FieldBlock","test_FieldBlock");
 tests("Field","test_FieldFace","test_FieldFace");
 tests("Field","test_ItField","test_ItField");
+
+component("Io");
+tests("Io","test_ItReduce", "test_ItReduce");
 
 component("Memory");
 tests("Memory","test_Memory","test_Memory");

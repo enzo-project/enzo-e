@@ -14,8 +14,8 @@
 OutputImage::OutputImage(Simulation * simulation) throw ()
   : Output(simulation),
     image_(0),
-    image_size_x_(0),
-    image_size_y_(0),
+    nix_(0),
+    niy_(0),
     png_(0)
 
 {
@@ -228,8 +228,8 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 {
 
   int size = 0;
-  int nx = image_size_x_;
-  int ny = image_size_y_;
+  int nx = nix_;
+  int ny = niy_;
 
   // Determine buffer size
 
@@ -308,8 +308,8 @@ void OutputImage::png_close_ () throw()
 
 void OutputImage::image_create_ (int mx, int my) throw()
 {
-  image_size_x_ = mx;
-  image_size_y_ = my;
+  nix_ = mx;
+  niy_ = my;
 
   ASSERT("OutputImage::image_create_",
 	 "image_ already created",
@@ -327,8 +327,8 @@ void OutputImage::image_write_ (double min, double max) throw()
 
   // simplified variable names
 
-  int mx = image_size_x_;
-  int my = image_size_y_;
+  int mx = nix_;
+  int my = niy_;
   int m  = mx*my;
 
   // Adjust min and max bounds if needed

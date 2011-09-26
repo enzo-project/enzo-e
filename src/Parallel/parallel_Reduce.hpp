@@ -8,8 +8,6 @@
 /// @date     Fri Mar 11 12:07:34 PST 2011
 /// @brief    [\ref Parallel] Interface for the Reduce class
 
-#include "error.hpp"
-
 class Reduce {
 
   /// @class    Reduce
