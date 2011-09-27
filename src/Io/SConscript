@@ -13,8 +13,8 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['mesh', 'field',
-              'simulation', 'method', 'io',
+components = ['simulation', 'method', 'io',
+              'mesh', 'field',
               'disk','memory','parallel',
               'parameters', 'error',
               'test','cello',
