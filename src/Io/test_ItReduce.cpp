@@ -17,30 +17,119 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
-  unit_class("ItReduceAvg");
+  {
+    //--------------------------------------------------
+    unit_class("ItReduceAvg");
+    //--------------------------------------------------
 
-  ItReduce * it_reduce = ItReduce::create(reduce_avg);
+    ItReduce * it_reduce = ItReduce::create(reduce_avg);
 
-  unit_func ("create");
+    unit_func ("create");
 
-  unit_assert (it_reduce != NULL);
+    unit_assert (it_reduce != NULL);
 
-  it_reduce->next(1.0);
-  it_reduce->next(2.0);
-  it_reduce->next(3.0);
-  it_reduce->next(4.0);
-  it_reduce->next(5.0);
+    it_reduce->next(1.0);
+    it_reduce->next(2.0);
+    it_reduce->next(3.0);
+    it_reduce->next(4.0);
+    it_reduce->next(5.0);
 
-  unit_func ("value");
-  unit_assert (it_reduce->value() == 3.0);
+    unit_func ("value");
+    unit_assert (it_reduce->value() == 3.0);
 
-  unit_func ("first");
-  it_reduce->first();
+    unit_func ("first");
+    it_reduce->first();
 
-  it_reduce->next(5.0);
-  it_reduce->next(3.0);
-  unit_assert (it_reduce->value() == 4.0);
+    it_reduce->next(5.0);
+    it_reduce->next(3.0);
+    unit_assert (it_reduce->value() == 4.0);
+  }
 
+  {
+    //--------------------------------------------------
+    unit_class("ItReduceSum");
+    //--------------------------------------------------
+
+    ItReduce * it_reduce = ItReduce::create(reduce_sum);
+
+    unit_func ("create");
+
+    unit_assert (it_reduce != NULL);
+
+    it_reduce->next(1.0);
+    it_reduce->next(2.0);
+    it_reduce->next(3.0);
+    it_reduce->next(4.0);
+    it_reduce->next(5.0);
+
+    unit_func ("value");
+    unit_assert (it_reduce->value() == 15.0);
+
+    unit_func ("first");
+    it_reduce->first();
+
+    it_reduce->next(5.0);
+    it_reduce->next(3.0);
+    unit_assert (it_reduce->value() == 8.0);
+
+  }
+
+  {
+    //--------------------------------------------------
+    unit_class("ItReduceMin");
+    //--------------------------------------------------
+
+    ItReduce * it_reduce = ItReduce::create(reduce_min);
+
+    unit_func ("create");
+
+    unit_assert (it_reduce != NULL);
+
+    it_reduce->next(4.0);
+    it_reduce->next(2.0);
+    it_reduce->next(1.0);
+    it_reduce->next(3.0);
+    it_reduce->next(5.0);
+
+    unit_func ("value");
+    unit_assert (it_reduce->value() == 1.0);
+
+    unit_func ("first");
+    it_reduce->first();
+
+    it_reduce->next(5.0);
+    it_reduce->next(3.0);
+    unit_assert (it_reduce->value() == 3.0);
+  }
+
+  {
+    //--------------------------------------------------
+    unit_class("ItReduceMax");
+    //--------------------------------------------------
+
+    ItReduce * it_reduce = ItReduce::create(reduce_max);
+
+    unit_func ("create");
+
+    unit_assert (it_reduce != NULL);
+
+    it_reduce->next(4.0);
+    it_reduce->next(2.0);
+    it_reduce->next(1.0);
+    it_reduce->next(3.0);
+    it_reduce->next(5.0);
+
+    unit_func ("value");
+    unit_assert (it_reduce->value() == 5.0);
+
+    unit_func ("first");
+    it_reduce->first();
+
+    it_reduce->next(4.0);
+    it_reduce->next(3.0);
+    unit_assert (it_reduce->value() == 4.0);
+  }
+  
   unit_finalize();
 
   PARALLEL_EXIT;

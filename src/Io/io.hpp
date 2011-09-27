@@ -39,6 +39,9 @@
 
 #include "io_ItReduce.hpp"
 #include "io_ItReduceAvg.hpp"
+#include "io_ItReduceSum.hpp"
+#include "io_ItReduceMin.hpp"
+#include "io_ItReduceMax.hpp"
 
 #include "io_Output.hpp"
 #include "io_OutputImage.hpp"
