@@ -448,46 +448,46 @@ component("Enzo");
 </tr>
 <tr>
 <th>initial</th>
-<td><img width=96 src="../test/serial/enzo-p_1-d-000000.png"></img></td>
-<td><img width=96 src="../test/mpi/enzo-p_1-d-000000.png"></img></td>
-<td><img width=96 src="../test/charm/enzo-p_1-d-000000.png"></img></td>
-<td><img width=96 src="../test/serial/enzo-p_1-te-000000.png"></img></td>
-<td><img width=96 src="../test/mpi/enzo-p_1-te-000000.png"></img></td>
-<td><img width=96 src="../test/charm/enzo-p_1-te-000000.png"></img></td>
+<td><img width=96 src="serial/enzo-p_1-d-000000.png"></img></td>
+<td><img width=96 src="mpi/enzo-p_1-d-000000.png"></img></td>
+<td><img width=96 src="charm/enzo-p_1-d-000000.png"></img></td>
+<td><img width=96 src="serial/enzo-p_1-te-000000.png"></img></td>
+<td><img width=96 src="mpi/enzo-p_1-te-000000.png"></img></td>
+<td><img width=96 src="charm/enzo-p_1-te-000000.png"></img></td>
 </tr>
 <tr>
 <th>1 block cycle 100</th>
-<td><img width=96 src="../test/serial/enzo-p_1-d-000100.png"></img></td>
-<td><img width=96 src="../test/mpi/enzo-p_1-d-000100.png"></img></td>
-<td><img width=96 src="../test/charm/enzo-p_1-d-000100.png"></img></td>
-<td><img width=96 src="../test/serial/enzo-p_1-te-000100.png"></img></td>
-<td><img width=96 src="../test/mpi/enzo-p_1-te-000100.png"></img></td>
-<td><img width=96 src="../test/charm/enzo-p_1-te-000100.png"></img></td>
+<td><img width=96 src="serial/enzo-p_1-d-000100.png"></img></td>
+<td><img width=96 src="mpi/enzo-p_1-d-000100.png"></img></td>
+<td><img width=96 src="charm/enzo-p_1-d-000100.png"></img></td>
+<td><img width=96 src="serial/enzo-p_1-te-000100.png"></img></td>
+<td><img width=96 src="mpi/enzo-p_1-te-000100.png"></img></td>
+<td><img width=96 src="charm/enzo-p_1-te-000100.png"></img></td>
 </tr>
 <th>1 block cycle 200</th>
-<td><img width=96 src="../test/serial/enzo-p_1-d-000200.png"></img></td>
-<td><img width=96 src="../test/mpi/enzo-p_1-d-000200.png"></img></td>
-<td><img width=96 src="../test/charm/enzo-p_1-d-000200.png"></img></td>
-<td><img width=96 src="../test/serial/enzo-p_1-te-000200.png"></img></td>
-<td><img width=96 src="../test/mpi/enzo-p_1-te-000200.png"></img></td>
-<td><img width=96 src="../test/charm/enzo-p_1-te-000200.png"></img></td>
+<td><img width=96 src="serial/enzo-p_1-d-000200.png"></img></td>
+<td><img width=96 src="mpi/enzo-p_1-d-000200.png"></img></td>
+<td><img width=96 src="charm/enzo-p_1-d-000200.png"></img></td>
+<td><img width=96 src="serial/enzo-p_1-te-000200.png"></img></td>
+<td><img width=96 src="mpi/enzo-p_1-te-000200.png"></img></td>
+<td><img width=96 src="charm/enzo-p_1-te-000200.png"></img></td>
 </tr>
 <tr>
 <th>4 blocks cycle 100</th>
-<td><img width=96 src="../test/serial/enzo-p_2-d-000100.png"></img></td>
-<td><img width=96 src="../test/mpi/enzo-p_2-d-000100.png"></img></td>
-<td><img width=96 src="../test/charm/enzo-p_2-d-000100.png"></img></td>
-<td><img width=96 src="../test/serial/enzo-p_2-te-000100.png"></img></td>
-<td><img width=96 src="../test/mpi/enzo-p_2-te-000100.png"></img></td>
-<td><img width=96 src="../test/charm/enzo-p_2-te-000100.png"></img></td>
+<td><img width=96 src="serial/enzo-p_2-d-000100.png"></img></td>
+<td><img width=96 src="mpi/enzo-p_2-d-000100.png"></img></td>
+<td><img width=96 src="charm/enzo-p_2-d-000100.png"></img></td>
+<td><img width=96 src="serial/enzo-p_2-te-000100.png"></img></td>
+<td><img width=96 src="mpi/enzo-p_2-te-000100.png"></img></td>
+<td><img width=96 src="charm/enzo-p_2-te-000100.png"></img></td>
 </tr>
 <th>4 blocks cycle 200</th>
-<td><img width=96 src="../test/serial/enzo-p_2-d-000200.png"></img></td>
-<td><img width=96 src="../test/mpi/enzo-p_2-d-000200.png"></img></td>
-<td><img width=96 src="../test/charm/enzo-p_2-d-000200.png"></img></td>
-<td><img width=96 src="../test/serial/enzo-p_2-te-000200.png"></img></td>
-<td><img width=96 src="../test/mpi/enzo-p_2-te-000200.png"></img></td>
-<td><img width=96 src="../test/charm/enzo-p_2-te-000200.png"></img></td>
+<td><img width=96 src="serial/enzo-p_2-d-000200.png"></img></td>
+<td><img width=96 src="mpi/enzo-p_2-d-000200.png"></img></td>
+<td><img width=96 src="charm/enzo-p_2-d-000200.png"></img></td>
+<td><img width=96 src="serial/enzo-p_2-te-000200.png"></img></td>
+<td><img width=96 src="mpi/enzo-p_2-te-000200.png"></img></td>
+<td><img width=96 src="charm/enzo-p_2-te-000200.png"></img></td>
 </tr>
 </table>
 
@@ -512,19 +512,19 @@ component("Enzo");
 </tr>
 <tr>
 <th>false</th>
-<td><img width=257 src="../test/serial/TreeK-D=2-R=2-L=6-0.png"></img></td>
-<td><img width=257 src="../test/serial/TreeK-D=2-R=2-L=7-0.png"></img></td>
-<td><img width=257 src="../test/serial/TreeK-D=2-R=2-L=8-0.png"></img></td>
-<!-- <td><img width=257 src="../test/serial/TreeK-D=2-R=2-L=9-0.png"></img></td> -->
-<!-- <td><img width=257 src="../test/serial/TreeK-D=2-R=2-L=10-0.png"></img></td> -->
+<td><img width=257 src="serial/TreeK-D=2-R=2-L=6-0.png"></img></td>
+<td><img width=257 src="serial/TreeK-D=2-R=2-L=7-0.png"></img></td>
+<td><img width=257 src="serial/TreeK-D=2-R=2-L=8-0.png"></img></td>
+<!-- <td><img width=257 src="serial/TreeK-D=2-R=2-L=9-0.png"></img></td> -->
+<!-- <td><img width=257 src="serial/TreeK-D=2-R=2-L=10-0.png"></img></td> -->
 </tr>
 <tr>
 <th>true</th>
-<td><img width=257 src="../test/serial/TreeK-D=2-R=2-L=6-1.png"></img></td>
-<td><img width=257 src="../test/serial/TreeK-D=2-R=2-L=7-1.png"></img></td>
-<td><img width=257 src="../test/serial/TreeK-D=2-R=2-L=8-1.png"></img></td>
-<!-- <td><img width=257 src="../test/serial/TreeK-D=2-R=2-L=9-1.png"></img></td> -->
-<!-- <td><img width=257 src="../test/serial/TreeK-D=2-R=2-L=10-1.png"></img></td> -->
+<td><img width=257 src="serial/TreeK-D=2-R=2-L=6-1.png"></img></td>
+<td><img width=257 src="serial/TreeK-D=2-R=2-L=7-1.png"></img></td>
+<td><img width=257 src="serial/TreeK-D=2-R=2-L=8-1.png"></img></td>
+<!-- <td><img width=257 src="serial/TreeK-D=2-R=2-L=9-1.png"></img></td> -->
+<!-- <td><img width=257 src="serial/TreeK-D=2-R=2-L=10-1.png"></img></td> -->
 </tr>
 </table>
 
@@ -543,15 +543,15 @@ component("Enzo");
 </tr>
 <tr>
 <th>false</th>
-<td><img width=257 src="../test/serial/TreeK-D=2-R=4-L=6-0.png"></img></td>
-<td><img width=257 src="../test/serial/TreeK-D=2-R=4-L=8-0.png"></img></td>
-<!-- <td><img width=257 src="../test/serial/TreeK-D=2-R=4-L=10-0.png"></img></td> -->
+<td><img width=257 src="serial/TreeK-D=2-R=4-L=6-0.png"></img></td>
+<td><img width=257 src="serial/TreeK-D=2-R=4-L=8-0.png"></img></td>
+<!-- <td><img width=257 src="serial/TreeK-D=2-R=4-L=10-0.png"></img></td> -->
 </tr>
 <tr>
 <th>true</th>
-<td><img width=257 src="../test/serial/TreeK-D=2-R=4-L=6-1.png"></img></td>
-<td><img width=257 src="../test/serial/TreeK-D=2-R=4-L=8-1.png"></img></td>
-<!-- <td><img width=257 src="../test/serial/TreeK-D=2-R=4-L=10-1.png"></img></td> -->
+<td><img width=257 src="serial/TreeK-D=2-R=4-L=6-1.png"></img></td>
+<td><img width=257 src="serial/TreeK-D=2-R=4-L=8-1.png"></img></td>
+<!-- <td><img width=257 src="serial/TreeK-D=2-R=4-L=10-1.png"></img></td> -->
 </tr>
 </table>
 
@@ -574,27 +574,27 @@ component("Enzo");
 </tr>
 <tr>
 <th>project = X</th>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=4-x-0.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=5-x-0.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=6-x-0.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=7-x-0.png"></img></td> -->
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=8-x-0.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=4-x-0.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=5-x-0.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=6-x-0.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-x-0.png"></img></td> -->
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-x-0.png"></img></td> -->
 </tr>
 <tr>
 <th>project = Y</th>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=4-y-0.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=5-y-0.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=6-y-0.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=7-y-0.png"></img></td> -->
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=8-y-0.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=4-y-0.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=5-y-0.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=6-y-0.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-y-0.png"></img></td> -->
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-y-0.png"></img></td> -->
 </tr>
 <tr>
 <th>project = Z</th>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=4-z-0.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=5-z-0.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=6-z-0.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=7-z-0.png"></img></td> -->
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=8-z-0.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=4-z-0.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=5-z-0.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=6-z-0.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-z-0.png"></img></td> -->
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-z-0.png"></img></td> -->
 </tr>
 </table>
 
@@ -611,27 +611,27 @@ component("Enzo");
 </tr>
 <tr>
 <th>project = X</th>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=4-x-1.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=5-x-1.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=6-x-1.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=7-x-1.png"></img></td> -->
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=8-x-1.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=4-x-1.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=5-x-1.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=6-x-1.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-x-1.png"></img></td> -->
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-x-1.png"></img></td> -->
 </tr>
 <tr>
 <th>project = Y</th>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=4-y-1.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=5-y-1.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=6-y-1.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=7-y-1.png"></img></td> -->
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=8-y-1.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=4-y-1.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=5-y-1.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=6-y-1.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-y-1.png"></img></td> -->
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-y-1.png"></img></td> -->
 </tr>
 <tr>
 <th>project = Z</th>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=4-z-1.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=5-z-1.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=6-z-1.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=7-z-1.png"></img></td> -->
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=2-L=8-z-1.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=4-z-1.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=5-z-1.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=2-L=6-z-1.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-z-1.png"></img></td> -->
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-z-1.png"></img></td> -->
 </tr>
 </table>
 
@@ -659,30 +659,30 @@ component("Enzo");
 </tr>
 <tr>
 <th>project = X</th>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=4-x-0.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=6-x-0.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=8-x-0.png"></img></td> -->
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=4-x-1.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=6-x-1.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=8-x-1.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=4-x-0.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=6-x-0.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-x-0.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=4-x-1.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=6-x-1.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-x-1.png"></img></td> -->
 </tr>
 <tr>
 <th>project =  Y</th>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=4-y-0.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=6-y-0.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=8-y-0.png"></img></td> -->
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=4-y-1.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=6-y-1.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=8-y-1.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=4-y-0.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=6-y-0.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-y-0.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=4-y-1.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=6-y-1.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-y-1.png"></img></td> -->
 </tr>
 <tr>
 <th>project = Z</th>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=4-z-0.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=6-z-0.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=8-z-0.png"></img></td> -->
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=4-z-1.png"></img></td>
-<td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=6-z-1.png"></img></td>
-<!-- <td><img width=129 src="../test/serial/TreeK-D=3-R=4-L=8-z-1.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=4-z-0.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=6-z-0.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-z-0.png"></img></td> -->
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=4-z-1.png"></img></td>
+<td><img width=129 src="serial/TreeK-D=3-R=4-L=6-z-1.png"></img></td>
+<!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-z-1.png"></img></td> -->
 </br/>
 </body>
 </html>
