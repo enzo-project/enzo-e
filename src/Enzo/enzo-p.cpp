@@ -100,11 +100,12 @@ PARALLEL_MAIN_BEGIN
 
   simulation->run();
 
-  // Test results: DUPLICATE CODE IN src/main.cpp !!!
 
   simulation->finalize();
 
   Parameters * parameters = simulation->parameters();
+
+  // Test results: DUPLICATE CODE IN src/main.cpp !!!
 
   int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
 
@@ -123,10 +124,11 @@ PARALLEL_MAIN_BEGIN
   if (time_final != 0.0) {
     double err_rel = cello::err_rel(simulation->time(),time_final);
     double mach_eps = cello::machine_epsilon(precision_default);
-    unit_assert ( err_rel < mach_eps*100);
+    unit_assert ( err_rel < 100*mach_eps);
     monitor_->print ("[Testing] actual   time:  %.15g",simulation->time());
     monitor_->print ("[Testing] expected time:  %.15g",time_final);
     monitor_->print ("[Testing] relative error: %g",err_rel);
+    monitor_->print ("[Testing] 100*mach_eps:   %g",100*mach_eps);
   }
 
   // Delete the simulation

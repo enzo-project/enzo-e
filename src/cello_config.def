@@ -4,4 +4,7 @@
 
 /* Either uncomment or comment the following define: */
 
-#define CONFIG_USE_MEMORY
+/* MOVED TO SCONSTRUCT */
+/* #define CONFIG_USE_MEMORY */
+
+

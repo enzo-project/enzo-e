@@ -31,12 +31,12 @@ void Main::p_exit(int count)
     count_exit_ = 0;
 #ifdef CHARM_ENZO
 
-    // DUPLICATE CODE IN src/enzo-p.cpp !!!
-
     Simulation * simulation = proxy_simulation.ckLocalBranch();
     Parameters * parameters = simulation->parameters();
 
     simulation->finalize();
+
+    // Test results: DUPLICATE CODE IN src/Enzo/enzo-p.cpp !!!
 
     int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
 
@@ -55,11 +55,11 @@ void Main::p_exit(int count)
     if (time_final != 0.0) {
       double err_rel = cello::err_rel(simulation->time(),time_final);
       double mach_eps = cello::machine_epsilon(precision_default);
-      unit_assert ( err_rel < mach_eps*100);
+      unit_assert ( err_rel < 100*mach_eps);
       monitor_->print ("[Testing] actual   time:  %.15g",simulation->time());
       monitor_->print ("[Testing] expected time:  %.15g",time_final);
       monitor_->print ("[Testing] relative error: %g",err_rel);
-      monitor_->print ("[Testing] mach_eps*100:   %g",mach_eps*100);
+      monitor_->print ("[Testing] 100*mach_eps:   %g",100*mach_eps);
     }
 
 #endif

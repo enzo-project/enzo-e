@@ -1,5 +1,7 @@
 %option noyywrap
 
+%x IFILE
+
 D [0-9]
 LN [A-Za-z0-9_]
 LL [a-z]
@@ -29,6 +31,21 @@ S [-]?
 
  int    lineno       = 1;
 
+
+
+  struct bufstack {
+    /* Adopted from "flex & bison", John Levine, O'Reilly Pub,  pp.28-30 */
+    struct bufstack * prev;
+    YY_BUFFER_STATE bs;
+    int lineno;
+    char *filename;
+    FILE *fp;
+  } * curbs = 0;
+
+  char * curfilename;
+  int cello_new_file (char *);
+  int cello_pop_file ();
+    
 
 %}
 
@@ -121,7 +138,28 @@ true      { yylval.logical_type = 1; return LOGICAL; }
 "}"        { return '}'; } /* end group */
 ";"        { return ';'; } /* parameter assignment separator */
 ","        { return ','; } /* list element separator */
+
+INCLUDE[ \t]*[\"<] { BEGIN IFILE; }
 "#".*      {  /* ignore comments */ }
+<IFILE>[^>\"]+ {
+  { 
+    printf ("Include\n");
+    int c;
+    while ((c = input()) && c != '\n');
+  }
+  cello_new_file (strdup(yytext));
+  BEGIN INITIAL;
+ }
+<IFILE>.|\n {
+  fprintf (stderr, "%s:%d bad include line\n",
+	   curfilename, yylineno);
+  BEGIN INITIAL;
+ }
+<<EOF>> {
+  if (!cello_pop_file()) yyterminate(); 
+  }
+
+
 
 {S}{D}+{E}            { yylval.float_type = atof (yytext); return FLOAT; }
 {S}{D}*"."{D}+({E})?  { yylval.float_type = atof (yytext); return FLOAT; }
@@ -147,3 +185,49 @@ void yyerror(char *s)
   fprintf(stderr, "\n\nERROR: %s in line %d\n\n\n", s,lineno);
   exit(1);
 }
+
+int cello_new_file(char * filename)
+/* Adopted from "flex & bison", John Levine, O'Reilly Pub,  pp.28-30 */
+{
+  FILE * fp = fopen (filename, "r");
+  struct bufstack * bs = malloc (sizeof(struct bufstack));
+
+  if (fp == NULL) {
+    printf ("%s:%d Parse Error: cannot open file %s\n",
+	    __FILE__,__LINE__,filename);
+    exit(1);
+  }
+
+  if (curbs != NULL) curbs->lineno = yylineno;
+  bs->prev = curbs;
+  bs->bs = yy_create_buffer(fp,YY_BUF_SIZE);
+  bs->fp = fp;
+  bs->filename = filename;
+  yy_switch_to_buffer(bs->bs);
+  curbs = bs;
+  yylineno = 1;
+  curfilename = filename;
+  return 1;
+}
+
+int cello_pop_file ()
+/* Adopted from "flex & bison", John Levine, O'Reilly Pub,  pp.28-30 */
+{
+  struct bufstack * bs = curbs;
+  struct bufstack * prevbs;
+
+  if (bs == NULL) return 0;
+  fclose (bs->fp);
+  yy_delete_buffer(bs->bs);
+  prevbs = bs->prev;
+  free(bs);
+
+  if (prevbs == 0) return 0;
+
+  yy_switch_to_buffer(prevbs->bs);
+  curbs = prevbs;
+  yylineno = curbs->lineno;
+  curfilename = curbs->filename;
+  return 1;
+}
+

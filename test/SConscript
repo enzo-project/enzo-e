@@ -195,6 +195,7 @@ env.RunParse('test_parse_logical.unit',    bin_path + '/test_Parse', ARGS='input
 env.RunParse('test_parse_scalar.unit',     bin_path + '/test_Parse', ARGS='input/parse_scalar.in')
 env.RunParse('test_parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/parse_implosion.in')
 env.RunParse('test_parse_shock-pool.unit', bin_path + '/test_Parse', ARGS='input/parse_shock-pool.in')
+env.RunParse('test_parse_include.unit',    bin_path + '/test_Parse', ARGS='input/parse_include.in')
 
 #----------------------------------------------------------------------
 # TEST FULL APPLICATIONS

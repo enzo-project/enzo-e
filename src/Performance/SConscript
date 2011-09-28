@@ -11,7 +11,7 @@ Import('use_papi')
 #------------------------------
 
 
-components = ['monitor',
+components = ['monitor', 'memory',
 	      'error',
 	      'test','cello']
 

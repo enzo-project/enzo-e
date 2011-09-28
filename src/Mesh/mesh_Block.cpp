@@ -547,22 +547,28 @@ void Block::refresh (int axis_set)
     // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
     boundary_face[axis_x][face_lower] = fabs(lower_[0]-lower[0]) < 1e-7;
     boundary_face[axis_x][face_upper] = fabs(upper_[0]-upper[0]) < 1e-7;
-    if ( boundary_face[axis_x][face_lower] ) boundary->enforce(field_descr,this,face_lower,axis_x);
-    if ( boundary_face[axis_x][face_upper] ) boundary->enforce(field_descr,this,face_upper,axis_x);
+    if ( boundary_face[axis_x][face_lower] ) 
+      boundary->enforce(field_descr,this,face_lower,axis_x);
+    if ( boundary_face[axis_x][face_upper] ) 
+      boundary->enforce(field_descr,this,face_upper,axis_x);
   }
   if ( ay ) {
     // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
     boundary_face[axis_y][face_lower] = fabs(lower_[1]-lower[1]) < 1e-7;
     boundary_face[axis_y][face_upper] = fabs(upper_[1]-upper[1]) < 1e-7;
-    if ( boundary_face[axis_y][face_lower] ) boundary->enforce(field_descr,this,face_lower,axis_y);
-    if ( boundary_face[axis_y][face_upper] ) boundary->enforce(field_descr,this,face_upper,axis_y);
+    if ( boundary_face[axis_y][face_lower] ) 
+      boundary->enforce(field_descr,this,face_lower,axis_y);
+    if ( boundary_face[axis_y][face_upper] ) 
+      boundary->enforce(field_descr,this,face_upper,axis_y);
   }
   if ( az ) {
     // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
     boundary_face[axis_z][face_lower] = fabs(lower_[2]-lower[2]) < 1e-7;
     boundary_face[axis_z][face_upper] = fabs(upper_[2]-upper[2]) < 1e-7;
-    if ( boundary_face[axis_z][face_lower] ) boundary->enforce(field_descr,this,face_lower,axis_z);
-    if ( boundary_face[axis_z][face_upper] ) boundary->enforce(field_descr,this,face_upper,axis_z);
+    if ( boundary_face[axis_z][face_lower] ) 
+      boundary->enforce(field_descr,this,face_lower,axis_z);
+    if ( boundary_face[axis_z][face_upper] ) 
+      boundary->enforce(field_descr,this,face_upper,axis_z);
   }
 
   //--------------------------------------------------

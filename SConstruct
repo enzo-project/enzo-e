@@ -8,6 +8,7 @@ import sys
 trace           = 1
 debug           = 0
 debug_verbose   = 0
+memory          = 1
 
 atsync          = 0 # CHARM++: only load balance when AtSync() called
 
@@ -76,6 +77,7 @@ define_trace =  ['CELLO_TRACE'];
 define_atsync =  ['CONFIG_CHARM_ATSYNC'];
 define_debug =  ['CELLO_DEBUG'];
 define_debug_verbose =  ['CELLO_DEBUG_VERBOSE'];
+define_memory =  ['CONFIG_USE_MEMORY'];
 define_projections =  ['CONFIG_USE_PROJECTIONS']
 define_original_refresh = ['ORIGINAL_REFRESH']
 
@@ -200,6 +202,11 @@ if (debug_verbose != 0):
      defines_xlc = defines_xlc + ' -D' + define_debug_verbose[0]
      defines_xlf = defines_xlf + ' -WF,-D' + define_debug_verbose[0]
 
+if (memory != 0):
+     defines = defines + define_memory
+     defines_xlc = defines_xlc + ' -D' + define_memory[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_memory[0]
+
 if (atsync != 0):
      defines = defines + define_atsync
      defines_xlc = defines_xlc + ' -D' + define_atsync[0]
@@ -255,8 +262,8 @@ if (arch == "linux"):
      hdf5_lib = (hdf5_path + '/lib')
 
      flags_debug = '-g'
-     flags_opt   = '-O3'
-#     flags_opt   = ''
+#     flags_opt   = '-O3'
+     flags_opt   = ''
      flags_prec  = '-m128bit-long-double'
      flags_warn  = '-Wall'
 

@@ -612,27 +612,24 @@ void Simulation::initialize_parallel_() throw()
 
 void Simulation::deallocate_() throw()
 {
-  delete performance_;
-  performance_ = 0;
+  delete factory_;       factory_     = 0;
+  delete parameters_;    parameters_  = 0;
+  delete performance_;   performance_ = 0;
 #ifdef CONFIG_USE_CHARM
-  delete monitor_;
-  monitor_ = 0;
+  delete monitor_;       monitor_ = 0;
+  delete group_process_; group_process_ = 0;
 #endif
-  delete hierarchy_;
-  hierarchy_ = 0;
-  delete field_descr_;
-  field_descr_ = 0;
-  delete stopping_;
-  stopping_ = 0;
-  delete timestep_;
-  timestep_ = 0;
-  delete initial_;
-  initial_ = 0;
-  delete boundary_;
-  boundary_ = 0;
+  delete hierarchy_;     hierarchy_ = 0;
+  delete field_descr_;   field_descr_ = 0;
+  delete stopping_;      stopping_ = 0;
+  delete timestep_;      timestep_ = 0;
+  delete initial_;       initial_ = 0;
+  delete boundary_;      boundary_ = 0;
+  for (size_t i=0; i<output_list_.size(); i++) {
+    delete output_list_[i];    output_list_[i] = 0;
+  }
   for (size_t i=0; i<method_list_.size(); i++) {
-    delete method_list_[i];
-    method_list_[i] = 0;
+    delete method_list_[i];    method_list_[i] = 0;
   }
 }
 

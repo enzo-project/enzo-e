@@ -66,6 +66,7 @@ void Performance::stop () throw ()
 
 void Performance::print (const Monitor * monitor) const throw ()
 {
+  Memory::instance()->print();
   timer_.print();
   papi_.print();
   print_rusage_(monitor);

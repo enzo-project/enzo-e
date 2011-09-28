@@ -7,7 +7,6 @@
 /// @author  James Bordner (jobordner@ucsd.edu)
 /// @date    Thu Nov 11 17:08:38 PST 2010
 /// @todo    Need face_axis_enum?
-/// @todo    Move boundary enum to Boundary class after b.c. removed from Field
 /// @brief   Include Cello global configuration settings
 
 #include "cello_config.def"
