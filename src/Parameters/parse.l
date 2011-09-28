@@ -139,11 +139,10 @@ true      { yylval.logical_type = 1; return LOGICAL; }
 ";"        { return ';'; } /* parameter assignment separator */
 ","        { return ','; } /* list element separator */
 
-INCLUDE[ \t]*[\"<] { BEGIN IFILE; }
+include[ \t]*[\"<] { BEGIN IFILE; }
 "#".*      {  /* ignore comments */ }
 <IFILE>[^>\"]+ {
   { 
-    printf ("Include\n");
     int c;
     while ((c = input()) && c != '\n');
   }

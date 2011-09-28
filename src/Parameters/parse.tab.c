@@ -68,7 +68,7 @@
 /* Copy the first part of user declarations.  */
 
 /* Line 189 of yacc.c  */
-#line 1 "src/Parameters/parse.y"
+#line 1 "build/serial/Parameters/parse.y"
 
 /*
  * ENZO: THE NEXT GENERATION
@@ -450,14 +450,14 @@ const char * op_name[] = {
     default:
        printf ("%s:%d Parse Error: unknown type %d\n",
 	       __FILE__,__LINE__,current_type);
+       exit(1);
        break;
      }
   }
 
 
-
 /* Line 189 of yacc.c  */
-#line 461 "src/Parameters/parse.tab.c"
+#line 461 "build/serial/Parameters/parse.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -537,7 +537,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 389 "src/Parameters/parse.y"
+#line 389 "build/serial/Parameters/parse.y"
  
   int logical_type;  
   int integer_type; 
@@ -549,7 +549,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 553 "src/Parameters/parse.tab.c"
+#line 553 "build/serial/Parameters/parse.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -561,7 +561,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 565 "src/Parameters/parse.tab.c"
+#line 565 "build/serial/Parameters/parse.tab.c"
 
 #ifdef short
 # undef short
@@ -923,22 +923,22 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   468,   468,   469,   473,   476,   477,   480,   481,   482,
-     483,   487,   490,   493,   497,   498,   499,   500,   501,   502,
-     503,   506,   507,   510,   517,   521,   522,   522,   529,   530,
-     531,   532,   533,   534,   535,   536,   537,   538,   542,   543,
-     544,   545,   546,   547,   548,   549,   550,   551,   552,   553,
-     554,   555,   556,   557,   558,   559,   560,   561,   562,   564,
-     565,   566,   567,   568,   569,   570,   571,   572,   573,   574,
-     575,   576,   577,   578,   579,   583,   584,   585,   586,   587,
-     588,   592,   593,   594,   595,   596,   597,   598,   599,   600,
-     601,   602,   603,   604,   605,   606,   607,   608,   609,   610,
-     611,   612,   613,   614,   615,   616,   617,   618,   619,   620,
-     622,   623,   624,   625,   626,   627,   628,   629,   630,   631,
-     632,   633,   634,   635,   636,   637,   642,   643,   644,   645,
-     646,   647,   648,   649,   650,   651,   652,   653,   654,   655,
-     656,   657,   658,   659,   660,   661,   662,   663,   664,   665,
-     666
+       0,   469,   469,   470,   474,   477,   478,   481,   482,   483,
+     484,   488,   491,   494,   498,   499,   500,   501,   502,   503,
+     504,   507,   508,   511,   518,   522,   523,   523,   530,   531,
+     532,   533,   534,   535,   536,   537,   538,   539,   543,   544,
+     545,   546,   547,   548,   549,   550,   551,   552,   553,   554,
+     555,   556,   557,   558,   559,   560,   561,   562,   563,   565,
+     566,   567,   568,   569,   570,   571,   572,   573,   574,   575,
+     576,   577,   578,   579,   580,   584,   585,   586,   587,   588,
+     589,   593,   594,   595,   596,   597,   598,   599,   600,   601,
+     602,   603,   604,   605,   606,   607,   608,   609,   610,   611,
+     612,   613,   614,   615,   616,   617,   618,   619,   620,   621,
+     623,   624,   625,   626,   627,   628,   629,   630,   631,   632,
+     633,   634,   635,   636,   637,   638,   643,   644,   645,   646,
+     647,   648,   649,   650,   651,   652,   653,   654,   655,   656,
+     657,   658,   659,   660,   661,   662,   663,   664,   665,   666,
+     667
 };
 #endif
 
@@ -2169,147 +2169,147 @@ yyreduce:
         case 3:
 
 /* Line 1455 of yacc.c  */
-#line 469 "src/Parameters/parse.y"
+#line 470 "build/serial/Parameters/parse.y"
     { ;}
     break;
 
   case 4:
 
 /* Line 1455 of yacc.c  */
-#line 473 "src/Parameters/parse.y"
+#line 474 "build/serial/Parameters/parse.y"
     {  ;}
     break;
 
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 476 "src/Parameters/parse.y"
+#line 477 "build/serial/Parameters/parse.y"
     { current_group[--current_group_level] = 0; ;}
     break;
 
   case 6:
 
 /* Line 1455 of yacc.c  */
-#line 477 "src/Parameters/parse.y"
+#line 478 "build/serial/Parameters/parse.y"
     { current_group[--current_group_level] = 0; ;}
     break;
 
   case 7:
 
 /* Line 1455 of yacc.c  */
-#line 480 "src/Parameters/parse.y"
+#line 481 "build/serial/Parameters/parse.y"
     {  ;}
     break;
 
   case 8:
 
 /* Line 1455 of yacc.c  */
-#line 481 "src/Parameters/parse.y"
+#line 482 "build/serial/Parameters/parse.y"
     {  ;}
     break;
 
   case 9:
 
 /* Line 1455 of yacc.c  */
-#line 482 "src/Parameters/parse.y"
+#line 483 "build/serial/Parameters/parse.y"
     {  ;}
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 483 "src/Parameters/parse.y"
+#line 484 "build/serial/Parameters/parse.y"
     {  ;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 487 "src/Parameters/parse.y"
+#line 488 "build/serial/Parameters/parse.y"
     { current_group[current_group_level++] = (yyvsp[(1) - (1)].string_type); ;}
     break;
 
   case 12:
 
 /* Line 1455 of yacc.c  */
-#line 490 "src/Parameters/parse.y"
+#line 491 "build/serial/Parameters/parse.y"
     { current_parameter = (yyvsp[(1) - (1)].string_type);;}
     break;
 
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 493 "src/Parameters/parse.y"
+#line 494 "build/serial/Parameters/parse.y"
     { new_parameter(); ;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 497 "src/Parameters/parse.y"
+#line 498 "build/serial/Parameters/parse.y"
     { current_type = enum_parameter_string;       yylval.string_type = (yyvsp[(1) - (1)].string_type); ;}
     break;
 
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 498 "src/Parameters/parse.y"
+#line 499 "build/serial/Parameters/parse.y"
     { current_type = enum_parameter_integer;      yylval.integer_type = (yyvsp[(1) - (1)].integer_type);;}
     break;
 
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 499 "src/Parameters/parse.y"
+#line 500 "build/serial/Parameters/parse.y"
     { current_type = enum_parameter_float;       yylval.float_type = (yyvsp[(1) - (1)].float_type);;}
     break;
 
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 500 "src/Parameters/parse.y"
+#line 501 "build/serial/Parameters/parse.y"
     { current_type = enum_parameter_logical;      yylval.logical_type = (yyvsp[(1) - (1)].logical_type); ;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 501 "src/Parameters/parse.y"
+#line 502 "build/serial/Parameters/parse.y"
     { current_type = enum_parameter_float_expr;  yylval.node_type = (yyvsp[(1) - (1)].node_type); ;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 502 "src/Parameters/parse.y"
+#line 503 "build/serial/Parameters/parse.y"
     { current_type = enum_parameter_logical_expr; yylval.node_type = (yyvsp[(1) - (1)].node_type); ;}
     break;
 
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 503 "src/Parameters/parse.y"
+#line 504 "build/serial/Parameters/parse.y"
     { current_type = enum_parameter_list; ;}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 506 "src/Parameters/parse.y"
+#line 507 "build/serial/Parameters/parse.y"
     {  ;}
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 507 "src/Parameters/parse.y"
+#line 508 "build/serial/Parameters/parse.y"
     {  ;}
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 510 "src/Parameters/parse.y"
+#line 511 "build/serial/Parameters/parse.y"
     { 
    struct param_struct * p = new_param_sentinel();
    p->list_value = param_curr;
@@ -2321,896 +2321,896 @@ yyreduce:
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 517 "src/Parameters/parse.y"
+#line 518 "build/serial/Parameters/parse.y"
     { param_curr = param_curr->list_value; ;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 521 "src/Parameters/parse.y"
+#line 522 "build/serial/Parameters/parse.y"
     { new_parameter(); ;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 522 "src/Parameters/parse.y"
+#line 523 "build/serial/Parameters/parse.y"
     { new_parameter(); ;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 524 "src/Parameters/parse.y"
+#line 525 "build/serial/Parameters/parse.y"
     { ;}
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 529 "src/Parameters/parse.y"
+#line 530 "build/serial/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(2) - (3)].logical_type); ;}
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 530 "src/Parameters/parse.y"
+#line 531 "build/serial/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) <= (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 531 "src/Parameters/parse.y"
+#line 532 "build/serial/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) >= (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 532 "src/Parameters/parse.y"
+#line 533 "build/serial/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) <  (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 533 "src/Parameters/parse.y"
+#line 534 "build/serial/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) >  (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 534 "src/Parameters/parse.y"
+#line 535 "build/serial/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) == (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 535 "src/Parameters/parse.y"
+#line 536 "build/serial/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) != (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 536 "src/Parameters/parse.y"
+#line 537 "build/serial/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (3)].logical_type) || (yyvsp[(3) - (3)].logical_type); ;}
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 537 "src/Parameters/parse.y"
+#line 538 "build/serial/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (3)].logical_type) && (yyvsp[(3) - (3)].logical_type); ;}
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 538 "src/Parameters/parse.y"
+#line 539 "build/serial/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (1)].logical_type); ;}
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 542 "src/Parameters/parse.y"
+#line 543 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = (yyvsp[(2) - (3)].float_type); ;}
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 543 "src/Parameters/parse.y"
+#line 544 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) + (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 544 "src/Parameters/parse.y"
+#line 545 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) - (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 545 "src/Parameters/parse.y"
+#line 546 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) * (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 546 "src/Parameters/parse.y"
+#line 547 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) / (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 547 "src/Parameters/parse.y"
+#line 548 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = acos((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 548 "src/Parameters/parse.y"
+#line 549 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = acosh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 549 "src/Parameters/parse.y"
+#line 550 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = asin((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 550 "src/Parameters/parse.y"
+#line 551 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = asinh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 551 "src/Parameters/parse.y"
+#line 552 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = atan((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 552 "src/Parameters/parse.y"
+#line 553 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = atanh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 553 "src/Parameters/parse.y"
+#line 554 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = cbrt((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 554 "src/Parameters/parse.y"
+#line 555 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = ceil((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 555 "src/Parameters/parse.y"
+#line 556 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = cos((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 556 "src/Parameters/parse.y"
+#line 557 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = cosh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
-#line 557 "src/Parameters/parse.y"
+#line 558 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = erfc((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 558 "src/Parameters/parse.y"
+#line 559 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = erf((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
-#line 559 "src/Parameters/parse.y"
+#line 560 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = exp((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 560 "src/Parameters/parse.y"
+#line 561 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = expm1((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 57:
 
 /* Line 1455 of yacc.c  */
-#line 561 "src/Parameters/parse.y"
+#line 562 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = fabs((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 58:
 
 /* Line 1455 of yacc.c  */
-#line 562 "src/Parameters/parse.y"
+#line 563 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = floor((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 59:
 
 /* Line 1455 of yacc.c  */
-#line 564 "src/Parameters/parse.y"
+#line 565 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = j0((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
-#line 565 "src/Parameters/parse.y"
+#line 566 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = j1((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
-#line 566 "src/Parameters/parse.y"
+#line 567 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = lgamma((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 62:
 
 /* Line 1455 of yacc.c  */
-#line 567 "src/Parameters/parse.y"
+#line 568 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = log10((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 63:
 
 /* Line 1455 of yacc.c  */
-#line 568 "src/Parameters/parse.y"
+#line 569 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = log1p((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 64:
 
 /* Line 1455 of yacc.c  */
-#line 569 "src/Parameters/parse.y"
+#line 570 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = logb((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 65:
 
 /* Line 1455 of yacc.c  */
-#line 570 "src/Parameters/parse.y"
+#line 571 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = log((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
-#line 571 "src/Parameters/parse.y"
+#line 572 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = sin((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
-#line 572 "src/Parameters/parse.y"
+#line 573 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = sinh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
-#line 573 "src/Parameters/parse.y"
+#line 574 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = sqrt((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 69:
 
 /* Line 1455 of yacc.c  */
-#line 574 "src/Parameters/parse.y"
+#line 575 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = tan((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
-#line 575 "src/Parameters/parse.y"
+#line 576 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = tanh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
-#line 576 "src/Parameters/parse.y"
+#line 577 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = y0((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 72:
 
 /* Line 1455 of yacc.c  */
-#line 577 "src/Parameters/parse.y"
+#line 578 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = y1((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
-#line 578 "src/Parameters/parse.y"
+#line 579 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = rint((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
-#line 579 "src/Parameters/parse.y"
+#line 580 "build/serial/Parameters/parse.y"
     { (yyval.float_type) = (yyvsp[(1) - (1)].float_type);;}
     break;
 
   case 75:
 
 /* Line 1455 of yacc.c  */
-#line 583 "src/Parameters/parse.y"
+#line 584 "build/serial/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(2) - (3)].integer_type); ;}
     break;
 
   case 76:
 
 /* Line 1455 of yacc.c  */
-#line 584 "src/Parameters/parse.y"
+#line 585 "build/serial/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(1) - (3)].integer_type) + (yyvsp[(3) - (3)].integer_type);;}
     break;
 
   case 77:
 
 /* Line 1455 of yacc.c  */
-#line 585 "src/Parameters/parse.y"
+#line 586 "build/serial/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(1) - (3)].integer_type) - (yyvsp[(3) - (3)].integer_type);;}
     break;
 
   case 78:
 
 /* Line 1455 of yacc.c  */
-#line 586 "src/Parameters/parse.y"
+#line 587 "build/serial/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(1) - (3)].integer_type) * (yyvsp[(3) - (3)].integer_type);;}
     break;
 
   case 79:
 
 /* Line 1455 of yacc.c  */
-#line 587 "src/Parameters/parse.y"
+#line 588 "build/serial/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(1) - (3)].integer_type) / (yyvsp[(3) - (3)].integer_type);;}
     break;
 
   case 80:
 
 /* Line 1455 of yacc.c  */
-#line 588 "src/Parameters/parse.y"
+#line 589 "build/serial/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(1) - (1)].integer_type);;}
     break;
 
   case 81:
 
 /* Line 1455 of yacc.c  */
-#line 592 "src/Parameters/parse.y"
+#line 593 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = (yyvsp[(2) - (3)].node_type); ;}
     break;
 
   case 82:
 
 /* Line 1455 of yacc.c  */
-#line 593 "src/Parameters/parse.y"
+#line 594 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_add,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 83:
 
 /* Line 1455 of yacc.c  */
-#line 594 "src/Parameters/parse.y"
+#line 595 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_add,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 84:
 
 /* Line 1455 of yacc.c  */
-#line 595 "src/Parameters/parse.y"
+#line 596 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_add,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 85:
 
 /* Line 1455 of yacc.c  */
-#line 596 "src/Parameters/parse.y"
+#line 597 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_sub,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 86:
 
 /* Line 1455 of yacc.c  */
-#line 597 "src/Parameters/parse.y"
+#line 598 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_sub,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 87:
 
 /* Line 1455 of yacc.c  */
-#line 598 "src/Parameters/parse.y"
+#line 599 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_sub,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 88:
 
 /* Line 1455 of yacc.c  */
-#line 599 "src/Parameters/parse.y"
+#line 600 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_mul,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 89:
 
 /* Line 1455 of yacc.c  */
-#line 600 "src/Parameters/parse.y"
+#line 601 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_mul,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 90:
 
 /* Line 1455 of yacc.c  */
-#line 601 "src/Parameters/parse.y"
+#line 602 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_mul,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 91:
 
 /* Line 1455 of yacc.c  */
-#line 602 "src/Parameters/parse.y"
+#line 603 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_div,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 92:
 
 /* Line 1455 of yacc.c  */
-#line 603 "src/Parameters/parse.y"
+#line 604 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_div,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 93:
 
 /* Line 1455 of yacc.c  */
-#line 604 "src/Parameters/parse.y"
+#line 605 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_div,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 94:
 
 /* Line 1455 of yacc.c  */
-#line 605 "src/Parameters/parse.y"
+#line 606 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( acos, "acos", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 95:
 
 /* Line 1455 of yacc.c  */
-#line 606 "src/Parameters/parse.y"
+#line 607 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( acosh, "acosh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 96:
 
 /* Line 1455 of yacc.c  */
-#line 607 "src/Parameters/parse.y"
+#line 608 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( asin, "asin", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 97:
 
 /* Line 1455 of yacc.c  */
-#line 608 "src/Parameters/parse.y"
+#line 609 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( asinh, "asinh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 98:
 
 /* Line 1455 of yacc.c  */
-#line 609 "src/Parameters/parse.y"
+#line 610 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( atan, "atan", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 99:
 
 /* Line 1455 of yacc.c  */
-#line 610 "src/Parameters/parse.y"
+#line 611 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( atanh, "atanh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 100:
 
 /* Line 1455 of yacc.c  */
-#line 611 "src/Parameters/parse.y"
+#line 612 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( cbrt, "cbrt", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 101:
 
 /* Line 1455 of yacc.c  */
-#line 612 "src/Parameters/parse.y"
+#line 613 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( ceil, "ceil", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 102:
 
 /* Line 1455 of yacc.c  */
-#line 613 "src/Parameters/parse.y"
+#line 614 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( cos, "cos", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 103:
 
 /* Line 1455 of yacc.c  */
-#line 614 "src/Parameters/parse.y"
+#line 615 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( cosh, "cosh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 104:
 
 /* Line 1455 of yacc.c  */
-#line 615 "src/Parameters/parse.y"
+#line 616 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( erfc, "erfc", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 105:
 
 /* Line 1455 of yacc.c  */
-#line 616 "src/Parameters/parse.y"
+#line 617 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( erf, "erf", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 106:
 
 /* Line 1455 of yacc.c  */
-#line 617 "src/Parameters/parse.y"
+#line 618 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( exp, "exp", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 107:
 
 /* Line 1455 of yacc.c  */
-#line 618 "src/Parameters/parse.y"
+#line 619 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( expm1, "expm1", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 108:
 
 /* Line 1455 of yacc.c  */
-#line 619 "src/Parameters/parse.y"
+#line 620 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( fabs, "fabs", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 109:
 
 /* Line 1455 of yacc.c  */
-#line 620 "src/Parameters/parse.y"
+#line 621 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( floor, "floor", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 110:
 
 /* Line 1455 of yacc.c  */
-#line 622 "src/Parameters/parse.y"
+#line 623 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( j0, "j0", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 111:
 
 /* Line 1455 of yacc.c  */
-#line 623 "src/Parameters/parse.y"
+#line 624 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( j1, "j1", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 112:
 
 /* Line 1455 of yacc.c  */
-#line 624 "src/Parameters/parse.y"
+#line 625 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( lgamma, "lgamma", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 113:
 
 /* Line 1455 of yacc.c  */
-#line 625 "src/Parameters/parse.y"
+#line 626 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( log10, "log10", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 114:
 
 /* Line 1455 of yacc.c  */
-#line 626 "src/Parameters/parse.y"
+#line 627 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( log1p, "log1p", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 115:
 
 /* Line 1455 of yacc.c  */
-#line 627 "src/Parameters/parse.y"
+#line 628 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( logb, "logb", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 116:
 
 /* Line 1455 of yacc.c  */
-#line 628 "src/Parameters/parse.y"
+#line 629 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( log, "log", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 117:
 
 /* Line 1455 of yacc.c  */
-#line 629 "src/Parameters/parse.y"
+#line 630 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( sin, "sin", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 118:
 
 /* Line 1455 of yacc.c  */
-#line 630 "src/Parameters/parse.y"
+#line 631 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( sinh, "sinh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 119:
 
 /* Line 1455 of yacc.c  */
-#line 631 "src/Parameters/parse.y"
+#line 632 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( sqrt, "sqrt", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 120:
 
 /* Line 1455 of yacc.c  */
-#line 632 "src/Parameters/parse.y"
+#line 633 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( tan, "tan", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 121:
 
 /* Line 1455 of yacc.c  */
-#line 633 "src/Parameters/parse.y"
+#line 634 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( tanh, "tanh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 122:
 
 /* Line 1455 of yacc.c  */
-#line 634 "src/Parameters/parse.y"
+#line 635 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( y0, "y0", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 123:
 
 /* Line 1455 of yacc.c  */
-#line 635 "src/Parameters/parse.y"
+#line 636 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( y1, "y1", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 124:
 
 /* Line 1455 of yacc.c  */
-#line 636 "src/Parameters/parse.y"
+#line 637 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( rint, "rint", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 125:
 
 /* Line 1455 of yacc.c  */
-#line 637 "src/Parameters/parse.y"
+#line 638 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_variable ((yyvsp[(1) - (1)].string_type));  ;}
     break;
 
   case 126:
 
 /* Line 1455 of yacc.c  */
-#line 642 "src/Parameters/parse.y"
+#line 643 "build/serial/Parameters/parse.y"
     { ;}
     break;
 
   case 127:
 
 /* Line 1455 of yacc.c  */
-#line 643 "src/Parameters/parse.y"
+#line 644 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_le,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 128:
 
 /* Line 1455 of yacc.c  */
-#line 644 "src/Parameters/parse.y"
+#line 645 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_le,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 129:
 
 /* Line 1455 of yacc.c  */
-#line 645 "src/Parameters/parse.y"
+#line 646 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_le,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 130:
 
 /* Line 1455 of yacc.c  */
-#line 646 "src/Parameters/parse.y"
+#line 647 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ge,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 131:
 
 /* Line 1455 of yacc.c  */
-#line 647 "src/Parameters/parse.y"
+#line 648 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_ge,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 132:
 
 /* Line 1455 of yacc.c  */
-#line 648 "src/Parameters/parse.y"
+#line 649 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ge,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 133:
 
 /* Line 1455 of yacc.c  */
-#line 649 "src/Parameters/parse.y"
+#line 650 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_lt,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 134:
 
 /* Line 1455 of yacc.c  */
-#line 650 "src/Parameters/parse.y"
+#line 651 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_lt,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 135:
 
 /* Line 1455 of yacc.c  */
-#line 651 "src/Parameters/parse.y"
+#line 652 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_lt,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 136:
 
 /* Line 1455 of yacc.c  */
-#line 652 "src/Parameters/parse.y"
+#line 653 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_gt,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 137:
 
 /* Line 1455 of yacc.c  */
-#line 653 "src/Parameters/parse.y"
+#line 654 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_gt,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 138:
 
 /* Line 1455 of yacc.c  */
-#line 654 "src/Parameters/parse.y"
+#line 655 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_gt,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 139:
 
 /* Line 1455 of yacc.c  */
-#line 655 "src/Parameters/parse.y"
+#line 656 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_eq,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 140:
 
 /* Line 1455 of yacc.c  */
-#line 656 "src/Parameters/parse.y"
+#line 657 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_eq,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 141:
 
 /* Line 1455 of yacc.c  */
-#line 657 "src/Parameters/parse.y"
+#line 658 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_eq,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 142:
 
 /* Line 1455 of yacc.c  */
-#line 658 "src/Parameters/parse.y"
+#line 659 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ne,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 143:
 
 /* Line 1455 of yacc.c  */
-#line 659 "src/Parameters/parse.y"
+#line 660 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_ne,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 144:
 
 /* Line 1455 of yacc.c  */
-#line 660 "src/Parameters/parse.y"
+#line 661 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ne,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 145:
 
 /* Line 1455 of yacc.c  */
-#line 661 "src/Parameters/parse.y"
+#line 662 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_or,new_node_logical((yyvsp[(3) - (3)].logical_type))); ;}
     break;
 
   case 146:
 
 /* Line 1455 of yacc.c  */
-#line 662 "src/Parameters/parse.y"
+#line 663 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_logical((yyvsp[(1) - (3)].logical_type)), enum_op_or,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 147:
 
 /* Line 1455 of yacc.c  */
-#line 663 "src/Parameters/parse.y"
+#line 664 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_or,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 148:
 
 /* Line 1455 of yacc.c  */
-#line 664 "src/Parameters/parse.y"
+#line 665 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_and,new_node_logical((yyvsp[(3) - (3)].logical_type))); ;}
     break;
 
   case 149:
 
 /* Line 1455 of yacc.c  */
-#line 665 "src/Parameters/parse.y"
+#line 666 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_logical((yyvsp[(1) - (3)].logical_type)), enum_op_and,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 150:
 
 /* Line 1455 of yacc.c  */
-#line 666 "src/Parameters/parse.y"
+#line 667 "build/serial/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_and,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 3214 "src/Parameters/parse.tab.c"
+#line 3214 "build/serial/Parameters/parse.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3422,7 +3422,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 671 "src/Parameters/parse.y"
+#line 670 "build/serial/Parameters/parse.y"
 
 
 struct param_struct * 

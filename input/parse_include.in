@@ -1,4 +1,6 @@
-INCLUDE "implosion.incl"
+
+
+include "implosion.incl"
 
    Initial { code = "implosion_2d" }
 
