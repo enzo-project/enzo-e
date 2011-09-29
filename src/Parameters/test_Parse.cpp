@@ -13,7 +13,12 @@
 PARALLEL_MAIN_BEGIN
 {
   PARALLEL_INIT;
-  cello_parameters_read(stdin);
+  for (int i=1; i<PARALLEL_ARGC; i++) {
+    const char * filename = PARALLEL_ARGV[i];
+    FILE * fp = fopen (filename,"r");
+    cello_parameters_read(filename,fp);
+  }
+    
   cello_parameters_print();
   PARALLEL_EXIT;
 }

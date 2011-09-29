@@ -3426,7 +3426,7 @@ yyreturn:
 
 
 struct param_struct * 
-cello_parameters_read(FILE * fp)
+cello_parameters_read(const char * filename, FILE * fp)
 {
   clear_groups(current_group);
 
@@ -3434,7 +3434,9 @@ cello_parameters_read(FILE * fp)
   param_head = param_curr = new_param_sentinel();
 
   /*   yydebug=1; */
-  
+
+  cello_new_file (filename);
+
   yyrestart(fp);
 
   yyparse();

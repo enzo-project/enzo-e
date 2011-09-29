@@ -56,7 +56,7 @@
       # ways.  E.g. "color" fields for Enzo PPM, or "computed" fields that
       # are not permanently stored (like pressure)
 
-      groups = ["computed", "color"];
+      file_groups = ["computed", "color"];
 
       # courant condition for fields
 

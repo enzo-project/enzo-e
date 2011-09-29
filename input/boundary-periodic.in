@@ -1,0 +1,5 @@
+
+include "implosion.incl"
+
+Boundary { type = "periodic" }
+Output   { cycle_step { name = "boundary-reflecting-%04d"; } }

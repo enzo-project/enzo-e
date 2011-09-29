@@ -10,7 +10,6 @@ env['COPY'] = ''
 # Define a test for running unit tests
 
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
-run_parse    = Builder(action = serial_run   +  "$SOURCE < $ARGS >  $TARGET 2>&1")
 run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS 2>&1")
@@ -18,7 +17,6 @@ make_movie   = Builder(action = "convert ${ARGS} $TARGET; chmod a+r $TARGET; rm 
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
 env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
-env.Append(BUILDERS = { 'RunParse'    : run_parse } )
 env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 env.Append(BUILDERS = { 'RunMethod'   : run_method } )
 
@@ -188,14 +186,14 @@ Clean(env.RunSerial
 # TEST INPUT PARAMETER PARSER
 #----------------------------------------------------------------------
 
-env.RunParse('test_parse_groups.unit',     bin_path + '/test_Parse', ARGS='input/parse_groups.in')
-env.RunParse('test_parse_integer.unit',    bin_path + '/test_Parse', ARGS='input/parse_integer.in')
-env.RunParse('test_parse_list.unit',       bin_path + '/test_Parse', ARGS='input/parse_list.in')
-env.RunParse('test_parse_logical.unit',    bin_path + '/test_Parse', ARGS='input/parse_logical.in')
-env.RunParse('test_parse_scalar.unit',     bin_path + '/test_Parse', ARGS='input/parse_scalar.in')
-env.RunParse('test_parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/parse_implosion.in')
-env.RunParse('test_parse_shock-pool.unit', bin_path + '/test_Parse', ARGS='input/parse_shock-pool.in')
-env.RunParse('test_parse_include.unit',    bin_path + '/test_Parse', ARGS='input/parse_include.in')
+env.RunSerial('test_parse_groups.unit',     bin_path + '/test_Parse', ARGS='input/parse_groups.in')
+env.RunSerial('test_parse_integer.unit',    bin_path + '/test_Parse', ARGS='input/parse_integer.in')
+env.RunSerial('test_parse_list.unit',       bin_path + '/test_Parse', ARGS='input/parse_list.in')
+env.RunSerial('test_parse_logical.unit',    bin_path + '/test_Parse', ARGS='input/parse_logical.in')
+env.RunSerial('test_parse_scalar.unit',     bin_path + '/test_Parse', ARGS='input/parse_scalar.in')
+env.RunSerial('test_parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/parse_implosion.in')
+env.RunSerial('test_parse_shock-pool.unit', bin_path + '/test_Parse', ARGS='input/parse_shock-pool.in')
+env.RunSerial('test_parse_include.unit',    bin_path + '/test_Parse', ARGS='input/parse_include.in')
 
 #----------------------------------------------------------------------
 # TEST FULL APPLICATIONS

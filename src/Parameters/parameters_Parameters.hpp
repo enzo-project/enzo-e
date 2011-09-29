@@ -267,7 +267,7 @@ private: // attributes
 
 extern "C" { 
   /// C function for reading parameters from a file
-  struct param_struct * cello_parameters_read(FILE *);
+  struct param_struct * cello_parameters_read(const char *, FILE *);
   /// C function for printing parameters to stdout
   void cello_parameters_print();
 }

@@ -383,8 +383,8 @@ void Simulation::initialize_output_() throw()
 	file_args.push_back(parameters_->list_value_string(index,"name",""));
       }
     } else {
-      ERROR("Simulation::initialize_output_",
-	    "Bad type for Output 'name' parameter");
+      ERROR1("Simulation::initialize_output_",
+	     "Bad type %d for Output 'name' parameter",parameters_->type("name"));
     }
 
     // Error if name is unspecified

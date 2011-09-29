@@ -1,0 +1,9 @@
+
+Boundary { type = "periodic" }
+
+Output   { 
+    cycle_step { 
+         name = ["three-%04d.png","cycle"]; 
+    }
+}
+include "implosion.incl"

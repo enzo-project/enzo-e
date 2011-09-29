@@ -73,7 +73,8 @@ void Parameters::read ( const char * file_name )
 	   file_name);
   }
   
-  struct param_struct * parameter_list = cello_parameters_read(file_pointer);
+  struct param_struct * parameter_list = 
+    cello_parameters_read(file_name,file_pointer);
 
   struct param_struct * node = parameter_list -> next; // skip sentinel
   struct param_struct * prev = node;
