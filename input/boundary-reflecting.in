@@ -1,9 +1,10 @@
+include "input/implosion.incl"
 
-Boundary { type = "periodic" }
+Boundary { type = "reflecting" }
 
-Output   { 
-    cycle_step { 
-         name = ["three-%04d.png","cycle"]; 
-    }
+Output { 
+   cycle_step {  
+      name = ["boundary-reflecting-%04d.png","cycle"]; 
+   } 
 }
-include "implosion.incl"
+

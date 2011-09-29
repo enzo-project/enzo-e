@@ -1,0 +1,10 @@
+include "input/implosion.incl"
+
+Boundary { type = "inflow" }
+
+Output { 
+   cycle_step {  
+      name = ["boundary-inflow-%04d.png","cycle"]; 
+   } 
+}
+

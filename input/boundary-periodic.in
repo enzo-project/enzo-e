@@ -1,5 +1,9 @@
-
-include "implosion.incl"
+include "input/implosion.incl"
 
 Boundary { type = "periodic" }
-Output   { cycle_step { name = "boundary-reflecting-%04d"; } }
+
+Output { 
+   cycle_step {  
+      name = ["boundary-periodic-%04d.png","cycle"]; 
+   } 
+}
