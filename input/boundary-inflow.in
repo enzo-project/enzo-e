@@ -1,4 +1,4 @@
-include "input/implosion.incl"
+include "input/circle.incl"
 
 Boundary { type = "inflow" }
 
