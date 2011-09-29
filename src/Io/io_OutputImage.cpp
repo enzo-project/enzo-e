@@ -13,7 +13,7 @@
 
 OutputImage::OutputImage(Simulation * simulation) throw ()
   : Output(simulation),
-    image_(0),
+    image_(),
     nix_(0),
     niy_(0),
     png_(0)

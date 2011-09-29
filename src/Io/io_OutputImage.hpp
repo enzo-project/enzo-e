@@ -101,13 +101,16 @@ private: // attributes
   std::vector<double> map_b_;
 
   /// Current image
-  double * image_;
+  double * data_;
 
   /// Current image columns
   int nix_;
 
   /// Current image rows
   int niy_;
+
+  /// Image object replacing map_?_, data_, nix_, niy_
+  Image image_;
 
   /// Current pngwriter
   pngwriter * png_;
@@ -174,7 +177,7 @@ private: // attributes
 		 axis, iix, iiy, nix_,niy_);
        }
 
-       double & pixel_value = image_ [index_image];
+       double & pixel_value = data_ [index_image];
 
        double min = std::numeric_limits<double>::max();
        double max = std::numeric_limits<double>::min();
