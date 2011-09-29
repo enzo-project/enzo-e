@@ -34,6 +34,8 @@
 
 #include "io_Io.hpp"
 
+#include "io_Image.hpp"
+
 #include "io_IoSimulation.hpp"
 #include "io_IoField.hpp"
 
