@@ -5,7 +5,7 @@
 /// @date     2011-09-26
 /// @brief    Implementation of the Image class
 
-#include "image.hpp"
+#include "io.hpp"
 
 //----------------------------------------------------------------------
 
@@ -104,7 +104,7 @@ void Image::write (pngwriter * png, double min, double max) throw()
       }
 
       // Plot pixel, red if out of range
-      if (is_writer()) png->plot(ix+1, iy+1, r,g,b);
+      png->plot(ix+1, iy+1, r,g,b);
     }
   }      
 

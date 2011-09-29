@@ -20,6 +20,10 @@ public: // interface
   /// Constructor
   Image() throw();
 
+  // Set the image colormap
+  void set_map
+  (int n, double * map_r, double * map_g, double * map_b) throw();
+
   /// Create the image data object
   void create (int image_size_x,  int image_size_y) throw();
 
@@ -63,7 +67,7 @@ private: // attributes
 //----------------------------------------------------------------------
 
 template<class T>
-void OutputImage::image_reduce_
+void Image::image_reduce_
 (T * array, 
  int nxd, int nyd, int nzd,
  int nx,  int ny,  int nz,

@@ -13,7 +13,7 @@
 
 OutputImage::OutputImage(Simulation * simulation) throw ()
   : Output(simulation),
-    image_(),
+    data_(),
     nix_(0),
     niy_(0),
     png_(0)
@@ -251,7 +251,7 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
   *p.i++ = nx;
   *p.i++ = ny;
 
-  for (int k=0; k<nx*ny; k++) *p.d++ = image_[k];
+  for (int k=0; k<nx*ny; k++) *p.d++ = data_[k];
   
 }
 
@@ -271,7 +271,7 @@ void OutputImage::update_remote  ( int n, char * buffer) throw()
   int nx = *p.i++;
   int ny = *p.i++;
 
-  for (int k=0; k<nx*ny; k++) image_[k] += *p.d++;
+  for (int k=0; k<nx*ny; k++) data_[k] += *p.d++;
 
 }
 
@@ -313,11 +313,11 @@ void OutputImage::image_create_ (int mx, int my) throw()
 
   ASSERT("OutputImage::image_create_",
 	 "image_ already created",
-	 image_ == NULL);
+	 data_ == NULL);
 
-  image_ = new double [mx*my];
+  data_ = new double [mx*my];
 
-  for (int i=0; i<mx*my; i++) image_[i] = 0.0;
+  for (int i=0; i<mx*my; i++) data_[i] = 0.0;
 }
 
 //----------------------------------------------------------------------
@@ -334,8 +334,8 @@ void OutputImage::image_write_ (double min, double max) throw()
   // Adjust min and max bounds if needed
 
    for (int i=0; i<m; i++) {
-     min = MIN(min,image_[i]);
-     max = MAX(max,image_[i]);
+     min = MIN(min,data_[i]);
+     max = MAX(max,data_[i]);
    }
 
    // loop over pixels (ix,iy)
@@ -346,11 +346,11 @@ void OutputImage::image_write_ (double min, double max) throw()
 
       int i = ix + mx*iy;
 
-      double value = image_[i];
+      double value = data_[i];
 
       double r = 1.0, g = 0, b = 0;
 
-      if (min <= image_[i] && image_[i] <= max) {
+      if (min <= value && value <= max) {
 
 	// map v to lower colormap index
 	size_t k = (map_r_.size() - 1)*(value - min) / (max-min);
@@ -388,8 +388,8 @@ void OutputImage::image_close_ () throw()
 {
   ASSERT("OutputImage::image_create_",
 	 "image_ already created",
-	 image_ != NULL);
-  delete [] image_;
-  image_ = 0;
+	 data_ != NULL);
+  delete [] data_;
+  data_ = 0;
 }
 
