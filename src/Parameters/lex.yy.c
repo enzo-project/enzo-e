@@ -1256,7 +1256,7 @@ case 65:
 /* rule 65 can match eol */
 YY_RULE_SETUP
 #line 168 "build/serial/Parameters/parse.l"
-{ yylval.string_type = strdup(yytext+1); /* copy, skipping open quote */
+{ yylval.string_type = strdup(yytext+1); /* copy, skipping open quote " */
                      yylval.string_type [yyleng-2] = '\0';   /* remove close quote */
                      return STRING; }
 	YY_BREAK
@@ -2336,10 +2336,11 @@ int cello_pop_file ()
   prevbs = bs->prev;
   free(bs);
 
+  curbs = prevbs;
+
   if (prevbs == 0) return 0;
 
   yy_switch_to_buffer(prevbs->bs);
-  curbs = prevbs;
   yylineno = curbs->lineno;
   curfilename = curbs->filename;
   return 1;

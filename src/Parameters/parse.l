@@ -165,7 +165,7 @@ include[ \t]*[\"<] { BEGIN IFILE; }
 {S}{D}+"."{D}*({E})?  { yylval.float_type = atof (yytext); return FLOAT; }
 {S}{D}+               { yylval.integer_type = atoi (yytext); return INTEGER; }
 
-\"(\\.|[^\\"])*\"  { yylval.string_type = strdup(yytext+1); /* copy, skipping open quote */
+\"(\\.|[^\\"])*\"  { yylval.string_type = strdup(yytext+1); /* copy, skipping open quote " */
                      yylval.string_type [yyleng-2] = '\0';   /* remove close quote */
                      return STRING; }
 
@@ -221,10 +221,13 @@ int cello_pop_file ()
   prevbs = bs->prev;
   free(bs);
 
+  /* BUG FIX: moved curbs assignment before conditional return */
+
+  curbs = prevbs;
+
   if (prevbs == 0) return 0;
 
   yy_switch_to_buffer(prevbs->bs);
-  curbs = prevbs;
   yylineno = curbs->lineno;
   curfilename = curbs->filename;
   return 1;
