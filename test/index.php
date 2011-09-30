@@ -492,7 +492,11 @@ component("Enzo");
 </table>
 
 <h3> Boundary conditions </h3>
-<?php tests("Enzo","enzo-p","test_boundary-reflecting"); ?>
+
+<?php tests("Enzo","enzo-p","test_boundary-reflecting-2d"); ?>
+<?php tests("Enzo","enzo-p","test_boundary-periodic-2d"); ?>
+<?php tests("Enzo","enzo-p","test_boundary-inflow-2d"); ?>
+<?php tests("Enzo","enzo-p","test_boundary-outflow-2d"); ?>
 
 <h4>2D Reflecting Boundary Conditions</h4>
 <table>
@@ -707,6 +711,11 @@ component("Enzo");
 <td><img width=96 src="charm/boundary-outflow-2d-0800.png"></img></td>
 </tr>
 </table>
+
+<?php tests("Enzo","enzo-p","test_boundary-reflecting-3d"); ?>
+<?php tests("Enzo","enzo-p","test_boundary-periodic-3d"); ?>
+<?php tests("Enzo","enzo-p","test_boundary-inflow-3d"); ?>
+<?php tests("Enzo","enzo-p","test_boundary-outflow-3d"); ?>
 
 <h4>3D Reflecting Boundary Conditions</h4>
 <table>
