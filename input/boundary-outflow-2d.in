@@ -4,7 +4,7 @@ Boundary { type = "outflow" }
 
 Output { 
    cycle_step {  
-      name = ["boundary-outflow-%04d.png","cycle"]; 
+      name = ["boundary-outflow-2d-%04d.png","cycle"]; 
    } 
 }
 
