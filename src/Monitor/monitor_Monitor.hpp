@@ -63,11 +63,17 @@ public: // interface
   /// parallel, e.g. "monitor->set_active(parallel->is_root())"
   void set_active(bool active) { active_ = active; };
 
+  /// Return whether monitoring is active
+  bool is_active() const throw () { return active_; };
+
   /// Print the Cello header 
   void header () const;
 
   /// Print a message to stdout
   void print (const char * buffer, ...) const;
+
+  /// Write a message to disk
+  void write (FILE * fp, const char * buffer, ...) const;
 
   /// Generate a PNG image of an array
   void image_open (std::string filename, 
