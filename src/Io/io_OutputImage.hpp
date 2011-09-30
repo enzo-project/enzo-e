@@ -25,8 +25,13 @@ public: // functions
   virtual ~OutputImage() throw();
 
   // Set the image colormap
-  void image_set_map
+  void set_colormap
   (int n, double * map_r, double * map_g, double * map_b) throw();
+
+  // Set the axis for projecting
+  void set_axis (axis_enum axis) throw()
+  { axis_ = axis; };
+
 
 public: // virtual functions
 
@@ -102,6 +107,9 @@ private: // attributes
 
   /// Current image
   double * data_;
+
+  /// Axis along which to reduce
+  axis_enum axis_;
 
   /// Current image columns
   int nix_;

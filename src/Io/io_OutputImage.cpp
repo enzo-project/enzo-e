@@ -13,6 +13,7 @@
 
 OutputImage::OutputImage(Simulation * simulation) throw ()
   : Output(simulation),
+    axis_(axis_z),
     data_(),
     nix_(0),
     niy_(0),
@@ -42,7 +43,7 @@ OutputImage::~OutputImage() throw ()
 
 //----------------------------------------------------------------------
 
-void OutputImage::image_set_map
+void OutputImage::set_colormap
 (int n, double * map_r, double * map_g, double * map_b) throw()
 {
   map_r_.resize(n);
@@ -199,7 +200,7 @@ void OutputImage::write_block
 		   ndx,ndy,ndz, 
 		   nxb,nyb,nzb,
 		   ixb0,iyb0,izb0,
-		   axis_z, reduce_sum);
+		   axis_, reduce_sum);
     break;
 
   case precision_double:
@@ -208,7 +209,7 @@ void OutputImage::write_block
 		   ndx,ndy,ndz, 
 		   nxb,nyb,nzb,
 		   ixb0,iyb0,izb0,
-		   axis_z, reduce_sum);
+		   axis_, reduce_sum);
     break;
 
   default:

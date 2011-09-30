@@ -86,8 +86,9 @@ foreach type ($types)
       endif
    endif
 
-   endif
    printf "\n"
+
+   endif
 
 
 end

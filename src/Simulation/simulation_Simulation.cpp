@@ -335,6 +335,10 @@ void Simulation::initialize_output_() throw()
     // parameter: Output:<file_group>:schedule
     //--------------------------------------------------
 
+    //--------------------------------------------------
+    // File type parameter
+    //--------------------------------------------------
+
     std::string type = parameters_->value_string("type","unknown");
 
     // Error if Output::type is not defined
@@ -343,6 +347,8 @@ void Simulation::initialize_output_() throw()
 	     "Output:%s:type parameter is undefined",
 	     file_group.c_str());
     }
+
+    // Create output object
 
     Output * output = create_output_(type);
 
@@ -354,48 +360,56 @@ void Simulation::initialize_output_() throw()
 	     type.c_str());
     }
 
-    // ASSUMES GROUP AND SUBGROUP ARE SET BY CALLER
-
-    // Initialize the file name
-
+    //--------------------------------------------------
+    // File name parameter
+    //--------------------------------------------------
 
     std::string file_name = "";
     std::vector<std::string> file_args;
 
     if (parameters_->type("name") == parameter_string) {
 
-      // CASE 1: string e.g. name = "filename";
+      // Case 1: string e.g. name = "filename";
 
       file_name = parameters_->value_string("name","");
 
      
     } else if (parameters_->type("name") == parameter_list) {
-      // CASE 2: list e.g. name = ["filename-cycle-%0d.time-%5.3f", "cycle","time"]
+      // Case 2: list e.g. name = ["filename-cycle-%0d.time-%5.3f", "cycle","time"]
 
       int list_length = parameters_->list_length("name");
 
-      // file name
+      // get file name
       if (list_length > 0) {
 	file_name = parameters_->list_value_string(0,"name","");
       }
-      // file args ("cycle", "time", etc.) to schedule
+
+      // get file args ("cycle", "time", etc.) to schedule
       for (int index = 1; index<list_length; index++) {
 	file_args.push_back(parameters_->list_value_string(index,"name",""));
       }
+
     } else {
+
       ERROR1("Simulation::initialize_output_",
 	     "Bad type %d for Output 'name' parameter",parameters_->type("name"));
+
     }
 
-    // Error if name is unspecified
+    // Error check name specified
+
     ASSERT1("Simulation::initialize_output_",
 	   "Output 'name' must be specified for file group %s",
 	   file_group.c_str(),
 	   file_name != "");
 
+    // Set the output object file name and arguments
+
     output->set_filename (file_name,file_args);
 
-    // Initialize the list of output fields
+    //--------------------------------------------------
+    // Field_list parameter
+    //--------------------------------------------------
 
     if (parameters_->type("field_list") != parameter_unknown) {
 
@@ -433,34 +447,35 @@ void Simulation::initialize_output_() throw()
     }
 
     //--------------------------------------------------
-    // Determine scheduling
+    // Scheduling parameters
     //--------------------------------------------------
 
-    // Error if Output:<file_group>:schedule does not exist
+    // error check schedule parameter exists
 
     ASSERT("Simulation::initialize_output_",
 	   "The 'schedule' parameter must be specified for all Output file groups",
 	   parameters_->type("schedule") != parameter_unknown);
 
-    // Determine schedule variable ("cycle" or "time")
+    // get schedule variable ("cycle" or "time")
 
     bool var_cycle,var_time;
     var_cycle = (strcmp(parameters_->list_value_string(0,"schedule"),"cycle")==0);
     var_time  = (strcmp(parameters_->list_value_string(0,"schedule"),"time")==0);
 
-    // Error if schedule variable is not "cycle" or "time"
+    // error check variable name
+
     ASSERT("Simulation::initialize_output_",
 	   "The first 'schedule' parameter list element must be 'cycle' or 'time'",
 	   var_cycle || var_time);
 
-    // Determine schedule type ("interval" or "list")
+    // get schedule type (interval or list)
 
     bool type_interval,type_list;
 
     type_interval = (strcmp(parameters_->list_value_string(1,"schedule"),"interval")==0);
     type_list     = (strcmp(parameters_->list_value_string(1,"schedule"),"list")==0);
 
-    // Error if schedule type is not "interval" or "list"
+    // error check schedule type
 
     ASSERT("Simulation::initialize_output_",
 	   "The second 'schedule' parameter list element "
@@ -471,85 +486,262 @@ void Simulation::initialize_output_() throw()
 
     if (var_cycle && type_interval) {
 
+      // get cycle interval schedule
+
       const int max_int = std::numeric_limits<int>::max();
 
-      // Set cycle limits
+      // Set time limits
 
       int start, stop, step;
 
-      if (len == 3) {
+      if (len == 3) { 
+
+	// schedule = [ "cycle", "interval",  <step> ];
+
 	start = 0;
 	stop  = max_int;
 	step  = parameters_->list_value_integer(2,"schedule");
+
       } else if (len == 5) {
+
+	// schedule = [ "cycle", "interval",  <start>, <stop>, <step> ]
+
 	start = parameters_->list_value_integer(2,"schedule");
 	stop  = parameters_->list_value_integer(3,"schedule");
 	step  = parameters_->list_value_integer(4,"schedule");
+
       } else {
+
+	// error check schedule parameter list length
+
 	ERROR("Simulation::initialize_output_",
 	      "Output 'schedule' list parameter has wrong number of elements");
+
       }
+
+      // Set cycle interval output schedule 
 
       output->schedule()->set_cycle_interval(start,step,stop);
 
     } else if (var_cycle && type_list) {
 
+      // get cycle list schedule
+
       std::vector<int> list;
 
       for (int index = 2; index < len; index++) {
+
 	int value = parameters_->list_value_integer(index,"schedule");
+
 	list.push_back (value);
+
 	if (list.size() > 1) {
-	  ASSERT2("Simulation::initialize_output_",
-		 "Output 'schedule' parameter list values %g and %g not monotonically increasing",
-		 list[list.size()-2] , list[list.size()-1],
-		 list[list.size()-2] < list[list.size()-1]);
+
+	  // error check monotonicity
+
+	  ASSERT("Simulation::initialize_output_",
+		 "Output 'schedule' parameter list values must be monotonically increasing",
+		 (list[list.size()-2] < list[list.size()-1]));
+
 	}
       }
 
+      // Set cycle list output schedule 
+      
       output->schedule()->set_cycle_list(list);
 
     } else if (var_time && type_interval) {
 
+      // get time interval schedule
+
       const double max_double = std::numeric_limits<double>::max();
 
-      // Initialize defaults
+      // set time limits
 
       double start, stop, step;
 
       if (len == 3) {
+
+	// schedule = [ "time", "interval",  <step> ];
+
 	start = 0;
 	stop  = max_double;
 	step  = parameters_->list_value_float(2,"schedule");
+
       } else if (len == 5) {
+
+	// schedule = [ "time", "interval",  <start>, <stop>, <step> ]
+
 	start = parameters_->list_value_float(2,"schedule");
 	stop  = parameters_->list_value_float(3,"schedule");
 	step  = parameters_->list_value_float(4,"schedule");
+
       } else {
+
+	// error check schedule parameter list length
+
 	ERROR("Simulation::initialize_output_",
 	      "Output 'schedule' list parameter has wrong number of elements");
+
       }
+
+      // Set time interval output schedule 
 
       output->schedule()->set_time_interval(start,step,stop);
 
     } else if (var_time && type_list) {
 
+      // get time list schedule
+
       std::vector<double> list;
 
       for (int index = 2; index < len; index++) {
+
 	double value = parameters_->list_value_float(index,"schedule");
+
 	list.push_back (value);
+
 	if (list.size() > 1) {
+
+	  // error check monotonicity
+
 	  ASSERT("Simulation::initialize_output_",
 		 "Output 'schedule' parameter list values must be "
 		 "monotonically increasing",
-		 list[list.size()-2] < list[list.size()-1]);
+		 (list[list.size()-2] < list[list.size()-1]));
 	}
       }
+
+      // Set time list output schedule 
 
       output->schedule()->set_time_list(list);
 
     }
+
+    //--------------------------------------------------
+    // Image parameters
+    //--------------------------------------------------
+
+    OutputImage * output_image = dynamic_cast<OutputImage *> (output);
+
+    if (output != NULL) {
+
+      // Parse image-specific parameters
+
+      parameter_enum type = parameter_unknown;
+
+      // position parameter
+
+      type = parameters_->type("position");
+
+      if ( type != parameter_unknown) {
+
+	// error check position type
+
+	ASSERT1("Simulation::initialize_output_",
+	       "Output %s position must be a float",
+		file_group.c_str(),
+		type == parameter_float);
+
+	INCOMPLETE("Simulation::initialize_output_(): image position not implemented");
+
+      }
+
+      // axis parameter
+
+      type = parameters_->type("axis");
+
+      if (type != parameter_unknown) {
+
+	// error check position type
+
+	ASSERT1("Simulation::initialize_output_",
+	       "Output %s axis must be a string",
+	       file_group.c_str(), type == parameter_string);
+
+	std::string axis = parameters_->value_string("axis");
+
+	// set the output axis
+
+	if (axis == "x") output_image->set_axis(axis_x);
+	if (axis == "y") output_image->set_axis(axis_y);
+	if (axis == "z") output_image->set_axis(axis_z);
+
+	// error check axis
+
+	ASSERT2("Simulation::initialize_output_",
+	      "Output %s axis %d must be \"x\", \"y\", or \"z\"",
+		file_group.c_str(), axis.c_str(),
+		axis=="x" || axis=="y" || axis=="z");
+
+
+      }
+
+      // colormap parameter
+
+      type = parameters_->type("colormap");
+
+      if (type != parameter_unknown) {
+
+	// error check colormap list type
+
+	ASSERT1("Simulation::initialize_output_",
+	       "Output %s colormap must be a list",
+	       file_group.c_str(), type == parameter_list);
+
+	int n = parameters_->list_length("colormap");
+
+	// error check colormap list length
+
+	ASSERT1("Simulation::initialize_output_",
+		"Output %s colormap list length must be divisible by 3",
+		file_group.c_str(), n % 3 == 0);
+
+	n /= 3;
+
+	// allocate arrays
+
+	double * r = new double [n];
+	double * g = new double [n];
+	double * b = new double [n];
+
+	for (int i=0; i<n; i++) {
+
+
+	  int ir=3*i+0;
+	  int ig=3*i+1;
+	  int ib=3*i+2;
+
+	  // error check colormap value types
+
+	  ASSERT1("Simulation::initialize_output_",
+		  "Output %s colormap list must only contain floats",
+		  file_group.c_str(), 
+		  ((parameters_->list_type(ir,"colormap") == parameter_float) &&
+		   (parameters_->list_type(ig,"colormap") == parameter_float) &&
+		   (parameters_->list_type(ib,"colormap") == parameter_float)));
+
+	  // get next colormap r[i] g[i], b[i]
+	  r[i] = parameters_->list_value_float (ir, "colormap",0.0);
+	  g[i] = parameters_->list_value_float (ig, "colormap",0.0);
+	  b[i] = parameters_->list_value_float (ib, "colormap",0.0);
+
+	}
+
+	// set the colormap
+
+	output_image->set_colormap(n,r,g,b);
+
+	// deallocate arrays
+
+	delete r;
+	delete g;
+	delete b;
+
+      }
+    }
+
+    // Add the initialized Output object to the Simulation's list of output objects
 
     output_list_.push_back(output); 
 
