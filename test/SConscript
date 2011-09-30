@@ -218,33 +218,65 @@ Clean(env_mv_png.RunParallel ('test_enzo-p_2.unit',
 # BOUNDARY CONDITIONS
 #----------------------------------------------------------------------
 
-Clean(env_mv_png.RunParallel ('test_boundary-reflecting.unit',
-		bin_path + '/enzo-p', 
-		ARGS='input/boundary-reflecting.in'),
-      [Glob('#/boundary-reflecting.png'),
-       'test_boundary-reflecting.unit',
-       '#/input/boundary-reflecting.in.out'])
+# 2D
 
-Clean(env_mv_png.RunParallel ('test_boundary-periodic.unit',
+Clean(env_mv_png.RunParallel ('test_boundary-reflecting-2d.unit',
 		bin_path + '/enzo-p', 
-		ARGS='input/boundary-periodic.in'),
-      [Glob('#/boundary-periodic.png'),
-       'test_boundary-periodic.unit',
-       '#/input/boundary-periodic.in.out'])
+		ARGS='input/boundary-reflecting-2d.in'),
+      [Glob('#/boundary-reflecting-2d.png'),
+       'test_boundary-reflecting-2d.unit',
+       '#/input/boundary-reflecting-2d.in.out'])
 
-Clean(env_mv_png.RunParallel ('test_boundary-inflow.unit',
+Clean(env_mv_png.RunParallel ('test_boundary-periodic-2d.unit',
 		bin_path + '/enzo-p', 
-		ARGS='input/boundary-inflow.in'),
-      [Glob('#/boundary-inflow.png'),
-       'test_boundary-inflow.unit',
-       '#/input/boundary-inflow.in.out'])
+		ARGS='input/boundary-periodic-2d.in'),
+      [Glob('#/boundary-periodic-2d.png'),
+       'test_boundary-periodic-2d.unit',
+       '#/input/boundary-periodic-2d.in.out'])
 
-Clean(env_mv_png.RunParallel ('test_boundary-outflow.unit',
+Clean(env_mv_png.RunParallel ('test_boundary-inflow-2d.unit',
 		bin_path + '/enzo-p', 
-		ARGS='input/boundary-outflow.in'),
-      [Glob('#/boundary-outflow.png'),
-       'test_boundary-outflow.unit',
-       '#/input/boundary-outflow.in.out'])
+		ARGS='input/boundary-inflow-2d.in'),
+      [Glob('#/boundary-inflow-2d.png'),
+       'test_boundary-inflow-2d.unit',
+       '#/input/boundary-inflow-2d.in.out'])
+
+Clean(env_mv_png.RunParallel ('test_boundary-outflow-2d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/boundary-outflow-2d.in'),
+      [Glob('#/boundary-outflow-2d.png'),
+       'test_boundary-outflow-2d.unit',
+       '#/input/boundary-outflow-2d.in.out'])
+
+# 3D
+
+Clean(env_mv_png.RunParallel ('test_boundary-reflecting-3d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/boundary-reflecting-3d.in'),
+      [Glob('#/boundary-reflecting-3d.png'),
+       'test_boundary-reflecting-3d.unit',
+       '#/input/boundary-reflecting-3d.in.out'])
+
+Clean(env_mv_png.RunParallel ('test_boundary-periodic-3d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/boundary-periodic-3d.in'),
+      [Glob('#/boundary-periodic-3d.png'),
+       'test_boundary-periodic-3d.unit',
+       '#/input/boundary-periodic-3d.in.out'])
+
+Clean(env_mv_png.RunParallel ('test_boundary-inflow-3d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/boundary-inflow-3d.in'),
+      [Glob('#/boundary-inflow-3d.png'),
+       'test_boundary-inflow-3d.unit',
+       '#/input/boundary-inflow-3d.in.out'])
+
+Clean(env_mv_png.RunParallel ('test_boundary-outflow-3d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/boundary-outflow-3d.in'),
+      [Glob('#/boundary-outflow-3d.png'),
+       'test_boundary-outflow-3d.unit',
+       '#/input/boundary-outflow-3d.in.out'])
 
 if (type == "serial"):
    env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS='1')

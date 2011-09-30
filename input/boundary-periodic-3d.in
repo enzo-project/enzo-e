@@ -1,0 +1,9 @@
+include "input/sphere.incl"
+
+Boundary { type = "periodic" }
+
+Output { 
+   cycle_step {  
+      name = ["boundary-periodic-3d-%04d.png","cycle"]; 
+   } 
+}

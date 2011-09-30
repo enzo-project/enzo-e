@@ -340,8 +340,8 @@ test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
 		    array("test_FileHdf5","test_FileIfrit")); 
 test_summary("Error",array(    "Error"),
 		    array("test_Error")); 
-test_summary("Enzo",array("enzo-p_1","enzo-p_2","boundary-reflecting","boundary-periodic","boundary-inflow","boundary-outflow"),
-                    array("enzo-p",  "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p")); 
+test_summary("Enzo",array("enzo-p_1","enzo-p_2","boundary-reflecting-2d","boundary-periodic-2d","boundary-inflow-2d","boundary-outflow-2d","boundary-reflecting-3d","boundary-periodic-3d","boundary-inflow-3d","boundary-outflow-3d"),
+                    array("enzo-p",  "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p")); 
 test_summary("Field",array(    "FieldBlock",     "FieldDescr",     "FieldFace",     "ItField"),
 		    array("test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField")); 
 test_summary("Io",array("ItReduce"),

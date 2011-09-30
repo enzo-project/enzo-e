@@ -71,7 +71,7 @@
 
    Stopping {
       time  = 2.5;
-      cycle = 1000;
+      cycle = 100;
    }
 
    Output { 
