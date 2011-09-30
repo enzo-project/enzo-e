@@ -83,7 +83,7 @@ private: // functions
   void image_create_ (int image_size_x,  int image_size_y) throw();
 
   /// Generate PNG image, using given min and max for colormap
-  void image_write_ (double min, double max) throw();
+  void image_write_ (double min=0.0, double max=0.0) throw();
 
   /// Close the image data
   void image_close_ () throw();

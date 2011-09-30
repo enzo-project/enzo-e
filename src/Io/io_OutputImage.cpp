@@ -91,9 +91,7 @@ void OutputImage::open () throw()
 
 void OutputImage::close () throw()
 {
-  double min=0.0;
-  double max=1.0;
-  if (is_writer()) image_write_(min,max);
+  if (is_writer()) image_write_();
   image_close_();
   png_close_();
 }
@@ -326,22 +324,37 @@ void OutputImage::image_create_ (int mx, int my) throw()
 void OutputImage::image_write_ (double min, double max) throw()
 {
 
+  // error check min <= max
+
+  ASSERT2("OutputImage::image_write_",
+	 "min %g is greater than max %g",
+	 min,max, (min <= max));
+
   // simplified variable names
 
   int mx = nix_;
   int my = niy_;
   int m  = mx*my;
 
-  // Adjust min and max bounds if needed
+  // Scale by data if min == max (default)
 
-   for (int i=0; i<m; i++) {
-     min = MIN(min,data_[i]);
-     max = MAX(max,data_[i]);
-   }
+  if (min == max) {
+    min = std::numeric_limits<double>::max();
+    max = std::numeric_limits<double>::min();
+  }
 
-   // loop over pixels (ix,iy)
+  // Ensure min and max fully enclose data
+  for (int i=0; i<m; i++) {
+    min = MIN(min,data_[i]);
+    max = MAX(max,data_[i]);
+  }
 
-   for (int ix = 0; ix<mx; ix++) {
+  // Adjust min and max bounds to match data
+
+
+  // loop over pixels (ix,iy)
+
+  for (int ix = 0; ix<mx; ix++) {
 
     for (int iy = 0; iy<my; iy++) {
 
@@ -349,7 +362,7 @@ void OutputImage::image_write_ (double min, double max) throw()
 
       double value = data_[i];
 
-      double r = 1.0, g = 0, b = 0;
+      double r,g,b;
 
       if (min <= value && value <= max) {
 
