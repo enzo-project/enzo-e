@@ -91,13 +91,13 @@ public: // interface
   // void image_dump(const char * file_root, int cycle, double lower, double upper);
 
   void initialize_hydro ();
-  void initialize_image ();
-  void initialize_implosion3 (int size_param);
-  void initialize_implosion (int size_param);
-  void initialize_ppml_implosion3 (int size_param);
+  // void initialize_image ();
+  // void initialize_implosion3 (int size_param);
+  // void initialize_implosion (int size_param);
+  // void initialize_ppml_implosion3 (int size_param);
 
   int SolveMHDEquations( int cycle, enzo_float dt);
-  void initialize_ppml (int size_param);
+  // void initialize_ppml (int size_param);
 
 public: // functions (TEMPORARILY PUBLIC)
 

@@ -35,7 +35,7 @@ env = env.Clone(LIBS = [components,libraries])
 sources = [
         Glob('Cosmology*cpp'),
         Glob('Grid_*cpp'),
-        Glob('initialize_*cpp'),
+#        Glob('initialize_*cpp'),
 	'PPML_Conservative.F',
 	'PPML_HLLD.F',
 	'PPML_MAIN.F',
