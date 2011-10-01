@@ -1,183 +1,163 @@
 <html>
-  <head>
-    <title>Cello Unit Tests</title>
-    <link href="cello.css" rel="stylesheet" type="text/css">
-  </head>
-<body>
-  <h1>Cello Unit Tests</h1>
+<head>
+<title>Enzo-P / Cello Unit Tests</title>
+<link href="cello.css" rel="stylesheet" type="text/css">
+   </head>
+   <body>
+   <h1>Enzo-P / Cello Unit Tests</h1>
+
 
 <?php
 
-function component($component) {
-   printf ("<hr><h2>$component Component Unit Tests</h2><a name=\"$component\">");
-}
-
-function tests($component,$testrun,$output) {
-
-   $parallel_types = array("serial","mpi","charm");
-
-   $source_file = "../src/$component/$testrun.cpp";
-   $source_html = "<a href=\"$source_file\">$testrun.cpp</a>";
-
-   echo "<h3>Code: $source_html</br>Test: $output</h3>\n";
-   if (! file_exists($source_file)) {
-     echo "<p><strong class=fail>$source_file does not exist</strong></p>";
-   } else {
-     echo "<table>\n";
-     echo "<tr>\n";
-     echo "<th></th>";
-     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       echo "<th>$parallel_types[$i]</th>";
-     }
-     echo "</tr>\n";
-
-     echo "<tr>\n";
-     //--------------------------------------------------
-     echo "<th>Output</th>";
-     //--------------------------------------------------
-     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "$parallel_types[$i]/$output.unit";
-       if (file_exists($output_file)) {
-	 $output_html = "<a href=\"$output_file\">$output.unit</a>";
-	 system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$output_file'>incomplete</a></td>\"; if (c!=0) print \"<td class=pass><a href='$output_file'>complete</a></td>\"}' < $output_file");
-       } else {
-	 echo "<td></td>";
-       }
-     }
-     echo "</tr>\n";
-
-     echo "<tr>\n";
-     //--------------------------------------------------
-     echo "<th>Date</th>";
-     //--------------------------------------------------
-     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "../test/$parallel_types[$i]/$output.unit";
-       if (file_exists($output_file)) {
-	 $output_html = date ("Y-m-d", filemtime($output_file));
-	 echo "<td class=pass>$output_html</td>";
-       } else {
-	 echo "<td class=pass></td>";
-       }
-     }
-     echo "</tr>\n";
-
-     echo "<tr>\n";
-     //--------------------------------------------------
-     echo "<th>Time</th>";
-     //--------------------------------------------------
-     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "../test/$parallel_types[$i]/$output.unit";
-       if (file_exists($output_file)) {
-	 $output_html = date ("H:i:s", filemtime($output_file));
-	 echo "<td class=pass>$output_html</td>";
-       } else {
-	 echo "<td class=pass></td>";
-       }
-     }
-     echo "</tr>\n";
-
-     echo "<tr>\n";
-     //--------------------------------------------------
-     echo "<th>Passed</th>";
-     //--------------------------------------------------
-     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "../test/$parallel_types[$i]/$output.unit";
-       if (file_exists($output_file)) {
-	 echo "<td class=pass>";
-	 system("cat $output_file | grep pass | grep '0/' | wc -l");
-	 echo "</td>";
-       } else {
-	 echo "<td class=pass></td>";
-       }
-     }
-     echo "</tr>\n";
-
-     echo "<tr>\n";
-     //--------------------------------------------------
-     echo "<th>Incomplete</th>";
-     //--------------------------------------------------
-     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "../test/$parallel_types[$i]/$output.unit";
-       if (file_exists($output_file)) {
-	 system("grep 0/ $output_file | awk 'BEGIN{c=0}; /incomplete/ {c=c+1}; END {if (c!=0) print\"<td class=incomplete>\",c,\"</td>\"; if (c==0) print \"<td class=pass>0</td>\"}'");
-       } else {
-	 echo "<td class=pass></td>";
-       }
-     }
-     echo "</tr>\n";
-
-     echo "<tr>\n";
-     //--------------------------------------------------
-     echo "<th>Failed</th>";
-     //--------------------------------------------------
-     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "../test/$parallel_types[$i]/$output.unit";
-       if (file_exists($output_file)) {
-	 system("grep 0/ $output_file | awk 'BEGIN{c=0}; /FAIL/ {c=c+1}; END {if (c!=0) print\"<td class=fail>\",c,\"</td>\"; if (c==0) print \"<td class=pass>0</td>\"}'");
-       } else {
-	 echo "<td class=pass></td>";
-       }
-     }
-     echo "</tr>\n";
-
-     echo "</tr></table></br/>\n";
-
-     echo "<table><tr>";
-     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $parallel_type = $parallel_types[$i];
-       $output_file = "../test/$parallel_type/$output.unit";
-       if (file_exists($output_file)) {
-	 test($parallel_type,$testrun,"FAIL");
-       }
-     }
-     echo "</tr></table></br/>";
+   function test_group($testgroup) {
+      printf ("<hr><h2>$testgroup Tests</h2><a name=\"$testgroup\">");
    }
- };
 
-function test($parallel_type,$testrun,$type) {
+   function tests($component,$testrun,$output) {
+
+     $parallel_types = array("serial","mpi","charm");
+
+     $source_file = "../src/$component/$testrun.cpp";
+     $source_html = "<a href=\"$source_file\">$testrun.cpp</a>";
+
+     echo "<h3>Code: $source_html</br>Test: $output</h3>\n";
+     if (! file_exists($source_file)) {
+       echo "<p><strong class=fail>$source_file does not exist</strong></p>";
+     } else {
+       echo "<table>\n";
+
+
+       echo "<tr>\n";
+       echo "   <th></th>";
+       echo "   <th>Output</th>";
+       echo "   <th>Date</th>";
+       echo "   <th>Time</th>";
+       echo "   <th>Passed</th>";
+       echo "   <th>Incomplete</th>";
+       echo "   <th>Failed</th>";
+       echo "</tr>\n";
+
+       //--------------------------------------------------
+       for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+
+	 echo "<tr>\n";
+
+	 echo "<th> $parallel_types[$i] </th>";
+
+	 $output_file = "$parallel_types[$i]/$output.unit";
+	 if (file_exists($output_file)) {
+	   $output_html = "<a href=\"$output_file\">$output.unit</a>";
+	   system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$output_file'>incomplete</a></td>\"; if (c!=0) print \"<td class=pass><a href='$output_file'>complete</a></td>\"}' < $output_file");
+	 } else {
+	   echo "<td></td>";
+	 }
+
+	 //     }
+	 //     echo "</tr><tr>\n";
+	 //--------------------------------------------------
+	 // Date
+	 //--------------------------------------------------
+	 //     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+
+	 $output_file = "../test/$parallel_types[$i]/$output.unit";
+	 if (file_exists($output_file)) {
+	   $output_html = date ("Y-m-d", filemtime($output_file));
+	   echo "<td class=pass>$output_html</td>";
+	 } else {
+	   echo "<td class=pass></td>";
+	 }
+
+	 //     }
+	 //     echo "</tr<tr>\n";
+	 //--------------------------------------------------
+	 //   // Time
+	 //--------------------------------------------------
+	 //     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+	 $output_file = "../test/$parallel_types[$i]/$output.unit";
+	 if (file_exists($output_file)) {
+	   $output_html = date ("H:i:s", filemtime($output_file));
+	   echo "<td class=pass>$output_html</td>";
+	 } else {
+	   echo "<td class=pass></td>";
+	 }
+  
+	 //     }
+	 //     echo "</tr><tr>\n";
+	 //--------------------------------------------------
+	 //   // Passed
+	 //--------------------------------------------------
+	 //     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+	 $output_file = "../test/$parallel_types[$i]/$output.unit";
+	 if (file_exists($output_file)) {
+	   echo "<td class=pass>";
+	   system("cat $output_file | grep pass | grep '0/' | wc -l");
+	   echo "</td>";
+	 } else {
+	   echo "<td class=pass></td>";
+	 }
+
+	 //     }
+	 //     echo "</tr><tr>\n";
+	 //--------------------------------------------------
+	 //   // Incomplete
+	 //--------------------------------------------------
+	 //     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+	 $output_file = "../test/$parallel_types[$i]/$output.unit";
+	 if (file_exists($output_file)) {
+	   system("grep 0/ $output_file | awk 'BEGIN{c=0}; /incomplete/ {c=c+1}; END {if (c!=0) print\"<td class=incomplete>\",c,\"</td>\"; if (c==0) print \"<td class=pass>0</td>\"}'");
+	 } else {
+	   echo "<td class=pass></td>";
+	 }
+	 //     }
+	 //     echo "</tr><tr>\n";
+	 //--------------------------------------------------
+	 //   // Failed
+	 //--------------------------------------------------
+	 //     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+	 $output_file = "../test/$parallel_types[$i]/$output.unit";
+	 if (file_exists($output_file)) {
+	   system("grep 0/ $output_file | awk 'BEGIN{c=0}; /FAIL/ {c=c+1}; END {if (c!=0) print\"<td class=fail>\",c,\"</td>\"; if (c==0) print \"<td class=pass>0</td>\"}'");
+	 } else {
+	   echo "<td class=pass></td>";
+	 }
+	 echo "</tr>\n";
+       }
+
+
+
+       echo "</tr></table></br/>\n";
+
+       echo "<table><tr>";
+       for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+	 $type = $parallel_types[$i];
+	 $output_file = "../test/$type/$output.unit";
+	 if (file_exists($output_file)) {
+	   test($type,$testrun,"FAIL");
+	 }
+       }
+       echo "</tr></table></br/>";
+     }
+   };
+
+function test($type,$testrun,$type) {
   $ltype = strtolower($type);
 
   $cols = "$4,$6,$7,$8,$9,$10";
   $rowtext = "</tr><tr>";
 
-  $output = "../test/$parallel_type/$testrun.unit";
+  $output = "../test/$type/$testrun.unit";
   $count = exec("cat $output | grep $type | grep '0/' | wc -l");
   if ($count == 0) {
-#     echo "<strong >no ${ltype}ed tests</strong></br/>";
+    #     echo "<strong >no ${ltype}ed tests</strong></br/>";
   } else {
-     echo "<th class=$type><strong>$parallel_type ${ltype}ed</strong></th> ";
-     system ("grep '0/' $output | sort | uniq | awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}'");
-     echo "</tr><tr></tr>";
+    echo "<th class=$type><strong>$type ${ltype}ed</strong></th> ";
+    system ("grep '0/' $output | sort | uniq | awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}'");
+    echo "</tr><tr></tr>";
   }
      
 };
 
 ?>
-
-<!-- <?php 
-   if (file_exists('CELLO_PLATFORM')) {
-     echo "<h2>Platform tested: ";
-     system ("cat 'CELLO_PLATFORM'");
-     echo "</h2>\n";
-   } else {
-     echo "<h2>Unknown platform</h2>\n";
-   }
-?> -->
-
-<p>
-Test data shown on this page are automatically generated
-whenever <code>Enzo-P / Cello</code> is recompiled on the main
-development platform.  There are currently three compile-time
-code configurations:
-
-<ul>
-<li><code>"serial"</code>: MPI code with MPI calls ifdef'd out</li>
-<li><code>"mpi"</code>  MPI configuration (CONFIG_USE_MPI is defined)</li>
-<li><code>"charm"</code> CHARM++ configuration (CONFIG_USE_CHARM is
-defined).
-</ul>
-
-</p>
 
 <ul>
   <li><a href="http://lca.ucsd.edu/projects/cello/">Cello User Site</a></li>
@@ -188,7 +168,7 @@ defined).
 
 <hr>
 
-<h2>Unit Test Results</h2>
+<h2>Test Summary</h2>
 
 <?php
 
@@ -203,11 +183,11 @@ function test_summary($component,$test_output,$executables)
 
   for ($i = 0; $i<sizeof($parallel_types); ++$i) {
 
-    $parallel_type = $parallel_types[$i];
+    $type = $parallel_types[$i];
     $count_missing = 0;
     for ($test = 0; $test<sizeof($executables); ++$test) {
       $exe = $executables[$test];
-      $bin = "../bin/$parallel_type/$exe";
+      $bin = "../bin/$type/$exe";
       if (! file_exists($bin)) {
         ++ $count_missing ;
       }
@@ -303,9 +283,13 @@ function test_summary($component,$test_output,$executables)
   printf ("</tr>\n");
 }
 
+
+
 printf ("<a href=serial/out.scons>SERIAL</a></br/>\n");
 printf ("<a href=mpi/out.scons>   MPI</a></br/>\n");
 printf ("<a href=charm/out.scons> CHARM</a></br/>\n");
+
+   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 printf ("<table>\n");
 printf ("<tr>\n");
@@ -336,6 +320,38 @@ for ($k = 0; $k < 6; $k ++) {
   printf ("<th> </th>");
  }
 
+
+test_summary("Enzo-PPM",
+	     array("enzo-p_1",
+		   "enzo-p_2"),
+	     array("enzo-p",  "enzo-p"));
+
+test_summary("Enzo-BC-2D", 
+	     array("boundary-reflecting-2d",
+		   "boundary-periodic-2d",
+		   "boundary-inflow-2d",
+		   "boundary-outflow-2d"),
+	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
+
+test_summary("Enzo-BC-3D",
+	     array("boundary-reflecting-3d",
+		   "boundary-periodic-3d",
+		   "boundary-inflow-3d",
+		   "boundary-outflow-3d"),
+	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
+
+// Print row divider
+
+printf ("<tr><th></th>");
+for ($k = 0; $k < 6; $k ++) {
+  for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
+    printf ("<th> </th>");
+  }
+  printf ("<th></th>");
+}
+printf ("</tr>\n");
+
+
 test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
 		    array("test_FileHdf5","test_FileIfrit")); 
 test_summary("Error",array(    "Error"),
@@ -358,70 +374,66 @@ test_summary("Parameters",array("Parameters"),
 		    array("test_Parameters")); 
 test_summary("Performance",array("Papi", "Performance"),
 		    array("test_Papi","test_Performance")); 
-// test_summary("Distribute",array("")); 
-// test_summary("Method",array("")); 
-// test_summary("Particles",array("")); 
-// test_summary("Portal",array("")); 
+
 printf ("</tr></table>\n");
 
-system ("svn info | awk '{print $0,\"</br/>\"}'");
 
-component("Disk");
+test_group("Disk");
 
 tests("Disk","test_FileHdf5", "test_FileHdf5");
 tests("Disk","test_FileIfrit","test_FileIfrit");
 
-component("Error");
+test_group("Error");
 tests("Error","test_Error","test_Error");
 
 
-component("Field");
+test_group("Field");
 tests("Field","test_FieldDescr","test_FieldDescr");
 tests("Field","test_FieldBlock","test_FieldBlock");
 tests("Field","test_FieldFace","test_FieldFace");
 tests("Field","test_ItField","test_ItField");
 
-component("Io");
+test_group("Io");
 tests("Io","test_ItReduce", "test_ItReduce");
 
-component("Memory");
+test_group("Memory");
 tests("Memory","test_Memory","test_Memory");
 
 
-component("Mesh");
+test_group("Mesh");
 
 tests("Mesh","test_Hierarchy","test_Hierarchy"); 
 tests("Mesh","test_Patch","test_Patch"); 
 tests("Mesh","test_Block","test_Block"); 
 
-component("Method");
+test_group("Method");
 
-component("Monitor");
+test_group("Monitor");
 tests("Monitor","test_Monitor","test_Monitor");
 printf ("<img src=\"monitor_image_1.png\"></img>\n");
 printf ("<img src=\"monitor_image_2.png\"></img>\n");
 printf ("<img src=\"monitor_image_3.png\"></img>\n");
 printf ("<img src=\"monitor_image_4.png\"></img>\n");
 
-component("Parallel");
+test_group("Parallel");
 tests("Parallel","test_GroupProcess","test_GroupProcess");
 tests("Parallel","test_Layout","test_Layout");
 
 
-component("Parameters");
+test_group("Parameters");
 tests("Parameters","test_Parameters","test_Parameters");
 
-component("Particles");
+test_group("Particles");
 
-component("Performance");
+test_group("Performance");
 tests("Performance","test_Performance","test_Performance");
 tests("Performance","test_Papi",       "test_Papi");
 
-component("Portal");
+test_group("Portal");
 
-component("Test");
+test_group("Test");
 
-component("Enzo");
+test_group("Enzo");
 
 ?>
 
