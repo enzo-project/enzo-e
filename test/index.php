@@ -491,14 +491,14 @@ component("Enzo");
 </tr>
 </table>
 
-<h3> Boundary conditions </h3>
+<h3> 2D Boundary conditions </h3>
 
 <?php tests("Enzo","enzo-p","test_boundary-reflecting-2d"); ?>
 <?php tests("Enzo","enzo-p","test_boundary-periodic-2d"); ?>
 <?php tests("Enzo","enzo-p","test_boundary-inflow-2d"); ?>
 <?php tests("Enzo","enzo-p","test_boundary-outflow-2d"); ?>
 
-<h4>2D Reflecting Boundary Conditions</h4>
+<h4>2D Serial</h4>
 <table>
 <tr>
   <th></th>
@@ -508,51 +508,46 @@ component("Enzo");
   <th>300</th>
   <th>400</th>
   <th>500</th>
-  <th>600</th>
-  <th>700</th>
-  <th>800</th>
 </tr>
 <tr>
-<th>serial</th>
-<td><img width=96 src="serial/boundary-reflecting-2d-0000.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-2d-0100.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-2d-0200.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-2d-0300.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-2d-0400.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-2d-0500.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-2d-0600.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-2d-0700.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-2d-0800.png"></img></td>
+<th>reflecting</th>
+<td><img width=160 src="serial/boundary-reflecting-2d-0000.png"></img></td>
+<td><img width=160 src="serial/boundary-reflecting-2d-0100.png"></img></td>
+<td><img width=160 src="serial/boundary-reflecting-2d-0200.png"></img></td>
+<td><img width=160 src="serial/boundary-reflecting-2d-0300.png"></img></td>
+<td><img width=160 src="serial/boundary-reflecting-2d-0400.png"></img></td>
+<td><img width=160 src="serial/boundary-reflecting-2d-0500.png"></img></td>
 </tr>
 <tr>
-<th>mpi</th>
-<td><img width=96 src="mpi/boundary-reflecting-2d-0000.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-2d-0100.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-2d-0200.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-2d-0300.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-2d-0400.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-2d-0500.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-2d-0600.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-2d-0700.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-2d-0800.png"></img></td>
+<th>periodic</th>
+<td><img width=160 src="serial/boundary-periodic-2d-0000.png"></img></td>
+<td><img width=160 src="serial/boundary-periodic-2d-0100.png"></img></td>
+<td><img width=160 src="serial/boundary-periodic-2d-0200.png"></img></td>
+<td><img width=160 src="serial/boundary-periodic-2d-0300.png"></img></td>
+<td><img width=160 src="serial/boundary-periodic-2d-0400.png"></img></td>
+<td><img width=160 src="serial/boundary-periodic-2d-0500.png"></img></td>
 </tr>
 <tr>
-<th>charm</th>
-<td><img width=96 src="charm/boundary-reflecting-2d-0000.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-2d-0100.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-2d-0200.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-2d-0300.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-2d-0400.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-2d-0500.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-2d-0600.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-2d-0700.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-2d-0800.png"></img></td>
+<th>inflow</th>
+<td><img width=160 src="serial/boundary-inflow-2d-0000.png"></img></td>
+<td><img width=160 src="serial/boundary-inflow-2d-0100.png"></img></td>
+<td><img width=160 src="serial/boundary-inflow-2d-0200.png"></img></td>
+<td><img width=160 src="serial/boundary-inflow-2d-0300.png"></img></td>
+<td><img width=160 src="serial/boundary-inflow-2d-0400.png"></img></td>
+<td><img width=160 src="serial/boundary-inflow-2d-0500.png"></img></td>
+</tr>
+<tr>
+<th>outflow</th>
+<td><img width=160 src="serial/boundary-outflow-2d-0000.png"></img></td>
+<td><img width=160 src="serial/boundary-outflow-2d-0100.png"></img></td>
+<td><img width=160 src="serial/boundary-outflow-2d-0200.png"></img></td>
+<td><img width=160 src="serial/boundary-outflow-2d-0300.png"></img></td>
+<td><img width=160 src="serial/boundary-outflow-2d-0400.png"></img></td>
+<td><img width=160 src="serial/boundary-outflow-2d-0500.png"></img></td>
 </tr>
 </table>
 
-
-
-<h4>2D Periodic Boundary Conditions</h4>
+<h4>2D MPI</h4>
 <table>
 <tr>
   <th></th>
@@ -562,51 +557,46 @@ component("Enzo");
   <th>300</th>
   <th>400</th>
   <th>500</th>
-  <th>600</th>
-  <th>700</th>
-  <th>800</th>
 </tr>
 <tr>
-<th>serial</th>
-<td><img width=96 src="serial/boundary-periodic-2d-0000.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-2d-0100.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-2d-0200.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-2d-0300.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-2d-0400.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-2d-0500.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-2d-0600.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-2d-0700.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-2d-0800.png"></img></td>
+<th>reflecting</th>
+<td><img width=160 src="mpi/boundary-reflecting-2d-0000.png"></img></td>
+<td><img width=160 src="mpi/boundary-reflecting-2d-0100.png"></img></td>
+<td><img width=160 src="mpi/boundary-reflecting-2d-0200.png"></img></td>
+<td><img width=160 src="mpi/boundary-reflecting-2d-0300.png"></img></td>
+<td><img width=160 src="mpi/boundary-reflecting-2d-0400.png"></img></td>
+<td><img width=160 src="mpi/boundary-reflecting-2d-0500.png"></img></td>
 </tr>
 <tr>
-<th>mpi</th>
-<td><img width=96 src="mpi/boundary-periodic-2d-0000.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-2d-0100.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-2d-0200.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-2d-0300.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-2d-0400.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-2d-0500.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-2d-0600.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-2d-0700.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-2d-0800.png"></img></td>
+<th>periodic</th>
+<td><img width=160 src="mpi/boundary-periodic-2d-0000.png"></img></td>
+<td><img width=160 src="mpi/boundary-periodic-2d-0100.png"></img></td>
+<td><img width=160 src="mpi/boundary-periodic-2d-0200.png"></img></td>
+<td><img width=160 src="mpi/boundary-periodic-2d-0300.png"></img></td>
+<td><img width=160 src="mpi/boundary-periodic-2d-0400.png"></img></td>
+<td><img width=160 src="mpi/boundary-periodic-2d-0500.png"></img></td>
 </tr>
 <tr>
-<th>charm</th>
-<td><img width=96 src="charm/boundary-periodic-2d-0000.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-2d-0100.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-2d-0200.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-2d-0300.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-2d-0400.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-2d-0500.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-2d-0600.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-2d-0700.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-2d-0800.png"></img></td>
+<th>inflow</th>
+<td><img width=160 src="mpi/boundary-inflow-2d-0000.png"></img></td>
+<td><img width=160 src="mpi/boundary-inflow-2d-0100.png"></img></td>
+<td><img width=160 src="mpi/boundary-inflow-2d-0200.png"></img></td>
+<td><img width=160 src="mpi/boundary-inflow-2d-0300.png"></img></td>
+<td><img width=160 src="mpi/boundary-inflow-2d-0400.png"></img></td>
+<td><img width=160 src="mpi/boundary-inflow-2d-0500.png"></img></td>
+</tr>
+<tr>
+<th>outflow</th>
+<td><img width=160 src="mpi/boundary-outflow-2d-0000.png"></img></td>
+<td><img width=160 src="mpi/boundary-outflow-2d-0100.png"></img></td>
+<td><img width=160 src="mpi/boundary-outflow-2d-0200.png"></img></td>
+<td><img width=160 src="mpi/boundary-outflow-2d-0300.png"></img></td>
+<td><img width=160 src="mpi/boundary-outflow-2d-0400.png"></img></td>
+<td><img width=160 src="mpi/boundary-outflow-2d-0500.png"></img></td>
 </tr>
 </table>
 
-
-
-<h4>2D Inflow Boundary Conditions</h4>
+<h4>2D CHARM++</h4>
 <table>
 <tr>
   <th></th>
@@ -616,318 +606,184 @@ component("Enzo");
   <th>300</th>
   <th>400</th>
   <th>500</th>
-  <th>600</th>
-  <th>700</th>
-  <th>800</th>
 </tr>
 <tr>
-<th>serial</th>
-<td><img width=96 src="serial/boundary-inflow-2d-0000.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-2d-0100.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-2d-0200.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-2d-0300.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-2d-0400.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-2d-0500.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-2d-0600.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-2d-0700.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-2d-0800.png"></img></td>
+<th>reflecting</th>
+<td><img width=160 src="charm/boundary-reflecting-2d-0000.png"></img></td>
+<td><img width=160 src="charm/boundary-reflecting-2d-0100.png"></img></td>
+<td><img width=160 src="charm/boundary-reflecting-2d-0200.png"></img></td>
+<td><img width=160 src="charm/boundary-reflecting-2d-0300.png"></img></td>
+<td><img width=160 src="charm/boundary-reflecting-2d-0400.png"></img></td>
+<td><img width=160 src="charm/boundary-reflecting-2d-0500.png"></img></td>
 </tr>
 <tr>
-<th>mpi</th>
-<td><img width=96 src="mpi/boundary-inflow-2d-0000.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-2d-0100.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-2d-0200.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-2d-0300.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-2d-0400.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-2d-0500.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-2d-0600.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-2d-0700.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-2d-0800.png"></img></td>
+<th>periodic</th>
+<td><img width=160 src="charm/boundary-periodic-2d-0000.png"></img></td>
+<td><img width=160 src="charm/boundary-periodic-2d-0100.png"></img></td>
+<td><img width=160 src="charm/boundary-periodic-2d-0200.png"></img></td>
+<td><img width=160 src="charm/boundary-periodic-2d-0300.png"></img></td>
+<td><img width=160 src="charm/boundary-periodic-2d-0400.png"></img></td>
+<td><img width=160 src="charm/boundary-periodic-2d-0500.png"></img></td>
 </tr>
 <tr>
-<th>charm</th>
-<td><img width=96 src="charm/boundary-inflow-2d-0000.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-2d-0100.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-2d-0200.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-2d-0300.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-2d-0400.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-2d-0500.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-2d-0600.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-2d-0700.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-2d-0800.png"></img></td>
+<th>inflow</th>
+<td><img width=160 src="charm/boundary-inflow-2d-0000.png"></img></td>
+<td><img width=160 src="charm/boundary-inflow-2d-0100.png"></img></td>
+<td><img width=160 src="charm/boundary-inflow-2d-0200.png"></img></td>
+<td><img width=160 src="charm/boundary-inflow-2d-0300.png"></img></td>
+<td><img width=160 src="charm/boundary-inflow-2d-0400.png"></img></td>
+<td><img width=160 src="charm/boundary-inflow-2d-0500.png"></img></td>
+</tr>
+<tr>
+<th>outflow</th>
+<td><img width=160 src="charm/boundary-outflow-2d-0000.png"></img></td>
+<td><img width=160 src="charm/boundary-outflow-2d-0100.png"></img></td>
+<td><img width=160 src="charm/boundary-outflow-2d-0200.png"></img></td>
+<td><img width=160 src="charm/boundary-outflow-2d-0300.png"></img></td>
+<td><img width=160 src="charm/boundary-outflow-2d-0400.png"></img></td>
+<td><img width=160 src="charm/boundary-outflow-2d-0500.png"></img></td>
 </tr>
 </table>
 
 
-
-<h4>2D Outflow Boundary Conditions</h4>
-<table>
-<tr>
-  <th></th>
-  <th>000</th>
-  <th>100</th>
-  <th>200</th>
-  <th>300</th>
-  <th>400</th>
-  <th>500</th>
-  <th>600</th>
-  <th>700</th>
-  <th>800</th>
-</tr>
-<tr>
-<th>serial</th>
-<td><img width=96 src="serial/boundary-outflow-2d-0000.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-2d-0100.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-2d-0200.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-2d-0300.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-2d-0400.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-2d-0500.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-2d-0600.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-2d-0700.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-2d-0800.png"></img></td>
-</tr>
-<tr>
-<th>mpi</th>
-<td><img width=96 src="mpi/boundary-outflow-2d-0000.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-2d-0100.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-2d-0200.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-2d-0300.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-2d-0400.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-2d-0500.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-2d-0600.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-2d-0700.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-2d-0800.png"></img></td>
-</tr>
-<tr>
-<th>charm</th>
-<td><img width=96 src="charm/boundary-outflow-2d-0000.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-2d-0100.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-2d-0200.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-2d-0300.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-2d-0400.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-2d-0500.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-2d-0600.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-2d-0700.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-2d-0800.png"></img></td>
-</tr>
-</table>
+<h3> 3D Boundary conditions </h3>
 
 <?php tests("Enzo","enzo-p","test_boundary-reflecting-3d"); ?>
 <?php tests("Enzo","enzo-p","test_boundary-periodic-3d"); ?>
 <?php tests("Enzo","enzo-p","test_boundary-inflow-3d"); ?>
 <?php tests("Enzo","enzo-p","test_boundary-outflow-3d"); ?>
 
-<h4>3D Reflecting Boundary Conditions</h4>
-<table>
-<tr>
-  <th></th>
-  <th>000</th>
-  <th>10</th>
-  <th>20</th>
-  <th>30</th>
-  <th>40</th>
-  <th>50</th>
-  <th>60</th>
-  <th>70</th>
-  <th>80</th>
-</tr>
-<tr>
-<th>serial</th>
-<td><img width=96 src="serial/boundary-reflecting-3d-0000.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-3d-0010.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-3d-0020.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-3d-0030.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-3d-0040.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-3d-0050.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-3d-0060.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-3d-0070.png"></img></td>
-<td><img width=96 src="serial/boundary-reflecting-3d-0080.png"></img></td>
-</tr>
-<tr>
-<th>mpi</th>
-<td><img width=96 src="mpi/boundary-reflecting-3d-0000.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-3d-0010.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-3d-0020.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-3d-0030.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-3d-0040.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-3d-0050.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-3d-0060.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-3d-0070.png"></img></td>
-<td><img width=96 src="mpi/boundary-reflecting-3d-0080.png"></img></td>
-</tr>
-<tr>
-<th>charm</th>
-<td><img width=96 src="charm/boundary-reflecting-3d-0000.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-3d-0010.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-3d-0020.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-3d-0030.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-3d-0040.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-3d-0050.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-3d-0060.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-3d-0070.png"></img></td>
-<td><img width=96 src="charm/boundary-reflecting-3d-0080.png"></img></td>
-</tr>
-</table>
-
-
-
-<h4>3D Periodic Boundary Conditions</h4>
+<h4>3D Serial</h4>
 <table>
 <tr>
   <th></th>
   <th>00</th>
-  <th>100</th>
   <th>20</th>
-  <th>30</th>
   <th>40</th>
-  <th>50</th>
   <th>60</th>
-  <th>70</th>
   <th>80</th>
 </tr>
 <tr>
-<th>serial</th>
-<td><img width=96 src="serial/boundary-periodic-3d-0000.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-3d-0010.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-3d-0020.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-3d-0030.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-3d-0040.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-3d-0050.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-3d-0060.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-3d-0070.png"></img></td>
-<td><img width=96 src="serial/boundary-periodic-3d-0080.png"></img></td>
+<th>reflecting</th>
+<td><img width=192 src="serial/boundary-reflecting-3d-0000.png"></img></td>
+<td><img width=192 src="serial/boundary-reflecting-3d-0020.png"></img></td>
+<td><img width=192 src="serial/boundary-reflecting-3d-0040.png"></img></td>
+<td><img width=192 src="serial/boundary-reflecting-3d-0060.png"></img></td>
+<td><img width=192 src="serial/boundary-reflecting-3d-0080.png"></img></td>
 </tr>
 <tr>
-<th>mpi</th>
-<td><img width=96 src="mpi/boundary-periodic-3d-0000.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-3d-0010.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-3d-0020.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-3d-0030.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-3d-0040.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-3d-0050.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-3d-0060.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-3d-0070.png"></img></td>
-<td><img width=96 src="mpi/boundary-periodic-3d-0080.png"></img></td>
+<th>periodic</th>
+<td><img width=192 src="serial/boundary-periodic-3d-0000.png"></img></td>
+<td><img width=192 src="serial/boundary-periodic-3d-0020.png"></img></td>
+<td><img width=192 src="serial/boundary-periodic-3d-0040.png"></img></td>
+<td><img width=192 src="serial/boundary-periodic-3d-0060.png"></img></td>
+<td><img width=192 src="serial/boundary-periodic-3d-0080.png"></img></td>
 </tr>
 <tr>
-<th>charm</th>
-<td><img width=96 src="charm/boundary-periodic-3d-0000.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-3d-0010.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-3d-0020.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-3d-0030.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-3d-0040.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-3d-0050.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-3d-0060.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-3d-0070.png"></img></td>
-<td><img width=96 src="charm/boundary-periodic-3d-0080.png"></img></td>
+<th>inflow</th>
+<td><img width=192 src="serial/boundary-inflow-3d-0000.png"></img></td>
+<td><img width=192 src="serial/boundary-inflow-3d-0020.png"></img></td>
+<td><img width=192 src="serial/boundary-inflow-3d-0040.png"></img></td>
+<td><img width=192 src="serial/boundary-inflow-3d-0060.png"></img></td>
+<td><img width=192 src="serial/boundary-inflow-3d-0080.png"></img></td>
+</tr>
+<tr>
+<th>outflow</th>
+<td><img width=192 src="serial/boundary-outflow-3d-0000.png"></img></td>
+<td><img width=192 src="serial/boundary-outflow-3d-0020.png"></img></td>
+<td><img width=192 src="serial/boundary-outflow-3d-0040.png"></img></td>
+<td><img width=192 src="serial/boundary-outflow-3d-0060.png"></img></td>
+<td><img width=192 src="serial/boundary-outflow-3d-0080.png"></img></td>
 </tr>
 </table>
 
 
-
-<h4>3D Inflow Boundary Conditions</h4>
+<h4>3D MPI</h4>
 <table>
 <tr>
   <th></th>
   <th>00</th>
-  <th>100</th>
   <th>20</th>
-  <th>30</th>
   <th>40</th>
-  <th>50</th>
   <th>60</th>
-  <th>70</th>
   <th>80</th>
 </tr>
 <tr>
-<th>serial</th>
-<td><img width=96 src="serial/boundary-inflow-3d-0000.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-3d-0010.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-3d-0020.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-3d-0030.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-3d-0040.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-3d-0050.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-3d-0060.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-3d-0070.png"></img></td>
-<td><img width=96 src="serial/boundary-inflow-3d-0080.png"></img></td>
+<th>reflecting</th>
+<td><img width=192 src="mpi/boundary-reflecting-3d-0000.png"></img></td>
+<td><img width=192 src="mpi/boundary-reflecting-3d-0020.png"></img></td>
+<td><img width=192 src="mpi/boundary-reflecting-3d-0040.png"></img></td>
+<td><img width=192 src="mpi/boundary-reflecting-3d-0060.png"></img></td>
+<td><img width=192 src="mpi/boundary-reflecting-3d-0080.png"></img></td>
 </tr>
 <tr>
-<th>mpi</th>
-<td><img width=96 src="mpi/boundary-inflow-3d-0000.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-3d-0010.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-3d-0020.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-3d-0030.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-3d-0040.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-3d-0050.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-3d-0060.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-3d-0070.png"></img></td>
-<td><img width=96 src="mpi/boundary-inflow-3d-0080.png"></img></td>
+<th>periodic</th>
+<td><img width=192 src="mpi/boundary-periodic-3d-0000.png"></img></td>
+<td><img width=192 src="mpi/boundary-periodic-3d-0020.png"></img></td>
+<td><img width=192 src="mpi/boundary-periodic-3d-0040.png"></img></td>
+<td><img width=192 src="mpi/boundary-periodic-3d-0060.png"></img></td>
+<td><img width=192 src="mpi/boundary-periodic-3d-0080.png"></img></td>
 </tr>
 <tr>
-<th>charm</th>
-<td><img width=96 src="charm/boundary-inflow-3d-0000.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-3d-0010.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-3d-0020.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-3d-0030.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-3d-0040.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-3d-0050.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-3d-0060.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-3d-0070.png"></img></td>
-<td><img width=96 src="charm/boundary-inflow-3d-0080.png"></img></td>
+<th>inflow</th>
+<td><img width=192 src="mpi/boundary-inflow-3d-0000.png"></img></td>
+<td><img width=192 src="mpi/boundary-inflow-3d-0020.png"></img></td>
+<td><img width=192 src="mpi/boundary-inflow-3d-0040.png"></img></td>
+<td><img width=192 src="mpi/boundary-inflow-3d-0060.png"></img></td>
+<td><img width=192 src="mpi/boundary-inflow-3d-0080.png"></img></td>
+</tr>
+<tr>
+<th>outflow</th>
+<td><img width=192 src="mpi/boundary-outflow-3d-0000.png"></img></td>
+<td><img width=192 src="mpi/boundary-outflow-3d-0020.png"></img></td>
+<td><img width=192 src="mpi/boundary-outflow-3d-0040.png"></img></td>
+<td><img width=192 src="mpi/boundary-outflow-3d-0060.png"></img></td>
+<td><img width=192 src="mpi/boundary-outflow-3d-0080.png"></img></td>
 </tr>
 </table>
 
 
-
-<h4>3D Outflow Boundary Conditions</h4>
+<h4>3D CHARM++</h4>
 <table>
 <tr>
   <th></th>
   <th>00</th>
-  <th>10</th>
   <th>20</th>
-  <th>30</th>
   <th>40</th>
-  <th>50</th>
   <th>60</th>
-  <th>70</th>
   <th>80</th>
 </tr>
 <tr>
-<th>serial</th>
-<td><img width=96 src="serial/boundary-outflow-3d-0000.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-3d-0010.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-3d-0020.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-3d-0030.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-3d-0040.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-3d-0050.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-3d-0060.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-3d-0070.png"></img></td>
-<td><img width=96 src="serial/boundary-outflow-3d-0080.png"></img></td>
+<th>reflecting</th>
+<td><img width=192 src="charm/boundary-reflecting-3d-0000.png"></img></td>
+<td><img width=192 src="charm/boundary-reflecting-3d-0020.png"></img></td>
+<td><img width=192 src="charm/boundary-reflecting-3d-0040.png"></img></td>
+<td><img width=192 src="charm/boundary-reflecting-3d-0060.png"></img></td>
+<td><img width=192 src="charm/boundary-reflecting-3d-0080.png"></img></td>
 </tr>
 <tr>
-<th>mpi</th>
-<td><img width=96 src="mpi/boundary-outflow-3d-0000.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-3d-0010.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-3d-0020.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-3d-0030.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-3d-0040.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-3d-0050.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-3d-0060.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-3d-0070.png"></img></td>
-<td><img width=96 src="mpi/boundary-outflow-3d-0080.png"></img></td>
+<th>periodic</th>
+<td><img width=192 src="charm/boundary-periodic-3d-0000.png"></img></td>
+<td><img width=192 src="charm/boundary-periodic-3d-0020.png"></img></td>
+<td><img width=192 src="charm/boundary-periodic-3d-0040.png"></img></td>
+<td><img width=192 src="charm/boundary-periodic-3d-0060.png"></img></td>
+<td><img width=192 src="charm/boundary-periodic-3d-0080.png"></img></td>
 </tr>
 <tr>
-<th>charm</th>
-<td><img width=96 src="charm/boundary-outflow-3d-0000.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-3d-0010.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-3d-0020.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-3d-0030.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-3d-0040.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-3d-0050.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-3d-0060.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-3d-0070.png"></img></td>
-<td><img width=96 src="charm/boundary-outflow-3d-0080.png"></img></td>
+<th>inflow</th>
+<td><img width=192 src="charm/boundary-inflow-3d-0000.png"></img></td>
+<td><img width=192 src="charm/boundary-inflow-3d-0020.png"></img></td>
+<td><img width=192 src="charm/boundary-inflow-3d-0040.png"></img></td>
+<td><img width=192 src="charm/boundary-inflow-3d-0060.png"></img></td>
+<td><img width=192 src="charm/boundary-inflow-3d-0080.png"></img></td>
+</tr>
+<tr>
+<th>outflow</th>
+<td><img width=192 src="charm/boundary-outflow-3d-0000.png"></img></td>
+<td><img width=192 src="charm/boundary-outflow-3d-0020.png"></img></td>
+<td><img width=192 src="charm/boundary-outflow-3d-0040.png"></img></td>
+<td><img width=192 src="charm/boundary-outflow-3d-0060.png"></img></td>
+<td><img width=192 src="charm/boundary-outflow-3d-0080.png"></img></td>
 </tr>
 </table>
 
