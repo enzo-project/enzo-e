@@ -40,17 +40,21 @@ th {
     padding: 2px 3px;   
     text-align: center;
 }
-td.pass {  color: #00f;  background-color: #fff; }
-th.pass {  color: #00f;  background-color: #fff; }
-td.incomplete {  color: #000;   background-color: #ffa; }
-th.incomplete {  color: #000;   background-color: #ffa; }
-td.FAIL {  color: #f00;   background-color: #faa; color: black;}
-th.FAIL {  color: #f00;   background-color: #fff; }
-td.inverse {  color: #fff;   background-color: #000; }
-strong.pass {  color: #00f;  background-color: #fff; }
-strong.FAIL {  color: #f00;   background-color: #fff; }
+
+td.pass       {  color: #00f;  background-color: #fff; }
+th.pass       {  color: #00f;  background-color: #fff; }
+td.incomplete {  color: #000;  background-color: #ffa; }
+th.incomplete {  color: #000;  background-color: #ffa; }
+td.unfinished {  color: #070;  background-color: #fff; }
+th.unfinished {  color: #070;  background-color: #fff; }
+td.FAIL       {  color: #000;  background-color: #f77;}
+th.FAIL       {  color: #f00;  background-color: #fff; }
+td.inverse    {  color: #fff;  background-color: #000; }
 
 
+/* strong.pass   {  color: #00f;  background-color: #fff; }
+strong.FAIL   {  color: #f00;  background-color: #fff; }
+ */
 
 /* A:link    { color: #7f7; } */
 /* A:visited { color: #ff7; } */
