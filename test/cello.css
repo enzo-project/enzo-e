@@ -6,9 +6,9 @@
 
 BODY {
 /*  background: #c1520a;  */
-/*  color: #faa; */
+background: #ccc;
 /*  background-image: url("cello-tile.png"); */
-  background-image: url("cello-bg-1.png"); 
+/*  background-image: url("cello-bg-1.png");  */
 /*  background-attachment:fixed; */
 
 /*   font-family: "Gill sans", sans-serif;  */
@@ -20,8 +20,9 @@ BODY {
 } */
 
 
-hr {background: #fff url(cello-hr.png); height: 6px}
+/* hr {background: #fff url(cello-hr.png); height: 6px} */
 
+h1 { text-align: center; }
 tr {
     background-color: #aaa;
     border: solid;
@@ -41,17 +42,17 @@ th {
     text-align: center;
 }
 
-td.pass       {  color: #00f;  background-color: #fff; }
-th.pass       {  color: #00f;  background-color: #fff; }
-td.incomplete {  color: #000;  background-color: #ffa; }
-th.incomplete {  color: #000;  background-color: #ffa; }
+td.pass       {  color: #007;  background-color: #fff; }
+/* th.pass       {  color: #007;  background-color: #fff; }
+ */td.incomplete {  color: #000;  background-color: #fff; }
+/* th.incomplete {  color: #000;  background-color: #fff; } */
 td.unfinished {  color: #070;  background-color: #fff; }
-th.unfinished {  color: #070;  background-color: #fff; }
+/* th.unfinished {  color: #070;  background-color: #fff; } */
 td.FAIL       {  color: #000;  background-color: #f77;}
-th.FAIL       {  color: #f00;  background-color: #fff; }
+/* th.FAIL       {  color: #000;  background-color: #f77; } */
 td.inverse    {  color: #fff;  background-color: #000; }
 
-
+th.compiling { background-color: #7f7; color: #000; }
 /* strong.pass   {  color: #00f;  background-color: #fff; }
 strong.FAIL   {  color: #f00;  background-color: #fff; }
  */

@@ -1,5 +1,7 @@
 #!/bin/tcsh -f
 
+touch "test/COMPILING"
+
 if ($#argv >= 1) then
   set types = ($argv)
 else
@@ -98,3 +100,4 @@ echo "$d END"
 
 
 
+rm -f test/COMPILING

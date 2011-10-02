@@ -1,10 +1,15 @@
 <html>
 <head>
-<title>Enzo-P / Cello Unit Tests</title>
+<title>Enzo-P / Cello Test Results</title>
 <link href="cello.css" rel="stylesheet" type="text/css">
+<?php
+if (file_exists("COMPILING")) {
+  echo "<meta http-equiv=\"refresh\" content=15>";
+}
+?>
    </head>
    <body>
-   <h1>Enzo-P / Cello Unit Tests</h1>
+   <h1>Enzo-P / Cello Test Results</h1>
 
 
    <?php
@@ -12,7 +17,7 @@
    //----------------------------------------------------------------------
 
    function test_group($testgroup) {
-   printf ("<hr><h2>$testgroup Tests</h2><a name=\"$testgroup\">");
+   printf ("<hr><a name=\"$testgroup\"><h2>$testgroup Tests</h2>");
  }
 
    //----------------------------------------------------------------------
@@ -82,28 +87,34 @@ function test_failed ($output_file) {
 
    //----------------------------------------------------------------------
 
-function tests($component,$testrun,$output) {
+function tests($component,$testrun,$output,$test_name) {
 
   $parallel_types = array("serial","mpi","charm");
 
   $source_file = "../src/$component/$testrun.cpp";
   $source_html = "<a href=\"$source_file\">$testrun.cpp</a>";
 
-  echo "<h3>Code: $source_html</br>Test: $output</h3>\n";
   if (! file_exists($source_file)) {
     echo "<p><strong class=fail>$source_file does not exist</strong></p>";
   } else {
     echo "<table>\n";
 
+    echo "<tr>\n";
+    if ($test_name != "") {
+      echo "<th colspan=7>$source_html ($test_name)</th>";
+    } else {
+      echo "<th colspan=7>$source_html</th>";
+    }
+    echo "</tr>\n";
 
     echo "<tr>\n";
     echo "   <th></th>";
     echo "   <th>Output</th>";
     echo "   <th>Date</th>";
     echo "   <th>Time</th>";
-    echo "   <th>Passed</th>";
-    echo "   <th>Unfinished</th>";
     echo "   <th>Failed</th>";
+    echo "   <th>Unfinished</th>";
+    echo "   <th>Passed</th>";
     echo "</tr>\n";
 
     //--------------------------------------------------
@@ -119,9 +130,9 @@ function tests($component,$testrun,$output) {
       test_output     ($output_file);
       test_date       ($output_file);
       test_time       ($output_file);
-      test_passed     ($output_file);
-      test_unfinished ($output_file);
       test_failed     ($output_file);
+      test_unfinished ($output_file);
+      test_passed     ($output_file);
 
       echo "</tr>\n";
     }
@@ -164,12 +175,8 @@ function test($type,$testrun,$type) {
 
 ?>
 
-<ul>
-<li><a href="http://lca.ucsd.edu/projects/cello/">Cello User Site</a></li>
-  <li><a href="http://client65-77.sdsc.edu/cello/">Cello Developer Site</a></li>
-
-  </ul>
-
+This page contains the current status of Enzo-P / Cello unit tests, as run
+on the main development platform.
 
   <hr>
 
@@ -318,17 +325,21 @@ function summary_passed_tests ($parallel_types, $test_output, $executables)
 
 
 
-printf ("<a href=serial/out.scons>SERIAL</a></br/>\n");
-printf ("<a href=mpi/out.scons>   MPI</a></br/>\n");
-printf ("<a href=charm/out.scons> CHARM</a></br/>\n");
+printf ("<p>Compile output: <a href=serial/out.scons>SERIAL</a>\n");
+printf ("<a href=mpi/out.scons>   MPI</a>\n");
+printf ("<a href=charm/out.scons> CHARM</a></P>\n");
 
 printf ("<table>\n");
 printf ("<tr>\n");
-printf ( "<th rowspan=2>");
-printf ("<strong>");
-system("ls running.* | sed 's/running\.//g' | sed 's/\./\<\/br\/\> /g'");
-printf ("</strong>");
-printf ("</th>");
+
+  if (file_exists("COMPILING"))  {
+    printf ( "<th rowspan=2 class=compiling>");
+    printf ("<strong> COMPILING </strong>\n");
+    printf ("</th>");
+  } else { 
+    printf ("<th rowspan=2></th>\n"); 
+  }
+  
 printf ( "<th colspan=3 class=fail>Missing Executable</th>");
 printf ("<th></th>");
 printf ( "<th colspan=3 class=fail>Missing Output</th>");
@@ -408,72 +419,88 @@ test_summary("Performance",array("Papi", "Performance"),
 
 printf ("</tr></table>\n");
 
+   //----------------------------------------------------------------------
 
 test_group("Disk");
 
-tests("Disk","test_FileHdf5", "test_FileHdf5");
-tests("Disk","test_FileIfrit","test_FileIfrit");
+tests("Disk","test_FileHdf5", "test_FileHdf5","");
+tests("Disk","test_FileIfrit","test_FileIfrit","");
+
+   //----------------------------------------------------------------------
 
 test_group("Error");
-tests("Error","test_Error","test_Error");
 
+tests("Error","test_Error","test_Error","");
+
+
+   //----------------------------------------------------------------------
 
 test_group("Field");
-tests("Field","test_FieldDescr","test_FieldDescr");
-tests("Field","test_FieldBlock","test_FieldBlock");
-tests("Field","test_FieldFace","test_FieldFace");
-tests("Field","test_ItField","test_ItField");
+
+tests("Field","test_FieldDescr","test_FieldDescr","");
+tests("Field","test_FieldBlock","test_FieldBlock","");
+tests("Field","test_FieldFace","test_FieldFace","");
+tests("Field","test_ItField","test_ItField","");
+
+   //----------------------------------------------------------------------
 
 test_group("Io");
-tests("Io","test_ItReduce", "test_ItReduce");
+
+tests("Io","test_ItReduce", "test_ItReduce","");
+
+   //----------------------------------------------------------------------
 
 test_group("Memory");
-tests("Memory","test_Memory","test_Memory");
 
+tests("Memory","test_Memory","test_Memory","");
+
+
+   //----------------------------------------------------------------------
 
 test_group("Mesh");
 
-tests("Mesh","test_Hierarchy","test_Hierarchy"); 
-tests("Mesh","test_Patch","test_Patch"); 
-tests("Mesh","test_Block","test_Block"); 
+tests("Mesh","test_Hierarchy","test_Hierarchy",""); 
+tests("Mesh","test_Patch","test_Patch",""); 
+tests("Mesh","test_Block","test_Block",""); 
 
-test_group("Method");
+   //----------------------------------------------------------------------
 
 test_group("Monitor");
-tests("Monitor","test_Monitor","test_Monitor");
+
+tests("Monitor","test_Monitor","test_Monitor","");
 printf ("<img src=\"monitor_image_1.png\"></img>\n");
 printf ("<img src=\"monitor_image_2.png\"></img>\n");
 printf ("<img src=\"monitor_image_3.png\"></img>\n");
 printf ("<img src=\"monitor_image_4.png\"></img>\n");
 
-test_group("Parallel");
-tests("Parallel","test_GroupProcess","test_GroupProcess");
-tests("Parallel","test_Layout","test_Layout");
+   //----------------------------------------------------------------------
 
+test_group("Parallel");
+
+tests("Parallel","test_GroupProcess","test_GroupProcess","");
+tests("Parallel","test_Layout","test_Layout","");
+
+   //----------------------------------------------------------------------
 
 test_group("Parameters");
-tests("Parameters","test_Parameters","test_Parameters");
 
-test_group("Particles");
+tests("Parameters","test_Parameters","test_Parameters","");
+
+   //----------------------------------------------------------------------
 
 test_group("Performance");
-tests("Performance","test_Performance","test_Performance");
-tests("Performance","test_Papi",       "test_Papi");
 
-test_group("Portal");
+tests("Performance","test_Performance","test_Performance","");
+tests("Performance","test_Papi",       "test_Papi","");
 
-test_group("Test");
+   //----------------------------------------------------------------------
 
-test_group("Enzo");
+test_group("Enzo-PPM");
 
+
+tests("Enzo","enzo-p","test_enzo-p_1","PPM 1 block");
+tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
 ?>
-
-
-<h4>enzo-p</h4>
-
-<?php tests("Enzo","enzo-p","test_enzo-p_1"); ?>
-<?php tests("Enzo","enzo-p","test_enzo-p_2"); ?>
-
 <table>
 <tr>
 <th></th>
@@ -534,12 +561,16 @@ test_group("Enzo");
   </tr>
   </table>
 
-  <h3> 2D Boundary conditions </h3>
+  <?php
 
-  <?php tests("Enzo","enzo-p","test_boundary-reflecting-2d"); ?>
-  <?php tests("Enzo","enzo-p","test_boundary-periodic-2d"); ?>
-  <?php tests("Enzo","enzo-p","test_boundary-inflow-2d"); ?>
-  <?php tests("Enzo","enzo-p","test_boundary-outflow-2d"); ?>
+  //  <h3> 2D Boundary conditions </h3>
+  test_group("Enzo-BC-2D");
+
+  tests("Enzo","enzo-p","test_boundary-reflecting-2d","Reflecting 2D");
+  tests("Enzo","enzo-p","test_boundary-periodic-2d","Periodic 2D");
+  tests("Enzo","enzo-p","test_boundary-inflow-2d","Inflow 2D");
+  tests("Enzo","enzo-p","test_boundary-outflow-2d","Outflow 2D");
+  ?>
 
   <h4>2D Serial</h4>
   <table>
@@ -688,13 +719,15 @@ test_group("Enzo");
   </tr>
   </table>
 
+  <?php
 
-  <h3> 3D Boundary conditions </h3>
+  test_group("Enzo-BC-3D");
 
-  <?php tests("Enzo","enzo-p","test_boundary-reflecting-3d"); ?>
-  <?php tests("Enzo","enzo-p","test_boundary-periodic-3d"); ?>
-  <?php tests("Enzo","enzo-p","test_boundary-inflow-3d"); ?>
-  <?php tests("Enzo","enzo-p","test_boundary-outflow-3d"); ?>
+  tests("Enzo","enzo-p","test_boundary-reflecting-3d","Reflecting 3D");
+  tests("Enzo","enzo-p","test_boundary-periodic-3d","Periodic 3D");
+  tests("Enzo","enzo-p","test_boundary-inflow-3d","Inflow 3D");
+  tests("Enzo","enzo-p","test_boundary-outflow-3d","Outflow 3D");
+  ?>
 
   <h4>3D Serial</h4>
   <table>
@@ -833,11 +866,11 @@ test_group("Enzo");
 
   <h3>TreeK-D2-R2-L?</h3>
 
-  <?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L6"); ?>
-  <?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L7"); ?>
-  <?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L8"); ?>
-  <!--<?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L9"); ?> -->
-<!--<?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L10"); ?> -->
+  <?php
+  tests("Mesh","test_TreeK","test_TreeK-D2-R2-L6", "2D L=6 r=2");
+  tests("Mesh","test_TreeK","test_TreeK-D2-R2-L7", "2D L=7 r=2");
+  tests("Mesh","test_TreeK","test_TreeK-D2-R2-L8", "2D L=8 r=2");
+  ?>
 
 <table>
 <tr>
@@ -845,32 +878,27 @@ test_group("Enzo");
 <th>levels = 6</th>
   <th>levels = 7</th>
   <th>levels = 8</th>
-  <!-- <th>levels = 9</th> -->
-  <!-- <th>levels = 10</th> -->
   </tr>
   <tr>
   <th>false</th>
   <td><img width=257 src="serial/TreeK-D=2-R=2-L=6-0.png"></img></td>
   <td><img width=257 src="serial/TreeK-D=2-R=2-L=7-0.png"></img></td>
   <td><img width=257 src="serial/TreeK-D=2-R=2-L=8-0.png"></img></td>
-  <!-- <td><img width=257 src="serial/TreeK-D=2-R=2-L=9-0.png"></img></td> -->
-  <!-- <td><img width=257 src="serial/TreeK-D=2-R=2-L=10-0.png"></img></td> -->
   </tr>
   <tr>
   <th>true</th>
   <td><img width=257 src="serial/TreeK-D=2-R=2-L=6-1.png"></img></td>
   <td><img width=257 src="serial/TreeK-D=2-R=2-L=7-1.png"></img></td>
   <td><img width=257 src="serial/TreeK-D=2-R=2-L=8-1.png"></img></td>
-  <!-- <td><img width=257 src="serial/TreeK-D=2-R=2-L=9-1.png"></img></td> -->
-  <!-- <td><img width=257 src="serial/TreeK-D=2-R=2-L=10-1.png"></img></td> -->
   </tr>
   </table>
 
   <h3>TreeK-D2-R4-L?</h3>
 
-  <?php tests("Mesh","test_TreeK","test_TreeK-D2-R4-L6"); ?>
-  <?php tests("Mesh","test_TreeK","test_TreeK-D2-R4-L8"); ?>
-  <!-- <?php tests("Mesh","test_TreeK","test_TreeK-D2-R4-L10"); ?> -->
+  <?php
+  tests("Mesh","test_TreeK","test_TreeK-D2-R4-L6", "2D L=6 r=4");
+  tests("Mesh","test_TreeK","test_TreeK-D2-R4-L8", "2D L=8 r=4");
+  ?>
 
 <table>
 <tr>
@@ -895,11 +923,11 @@ test_group("Enzo");
 
   <h3>TreeK-D3-R2-L?</h3>
 
-  <?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L4"); ?>
-  <?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L5"); ?>
-  <?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L6"); ?>
-  <!-- <?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L7"); ?> -->
-<!-- <?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L8"); ?> -->
+  <?php
+  tests("Mesh","test_TreeK","test_TreeK-D3-R2-L4", "3D L=4 r=2");
+  tests("Mesh","test_TreeK","test_TreeK-D3-R2-L5", "3D L=5 r=2");
+  tests("Mesh","test_TreeK","test_TreeK-D3-R2-L6", "3D L=6 r=2");
+   ?>
 
 <table>
 <tr>
@@ -976,9 +1004,10 @@ test_group("Enzo");
 
   <h3>TreeK-D3-R4-L?</h3>
 
-  <?php tests("Mesh","test_TreeK","test_TreeK-D3-R4-L4"); ?>
-  <?php tests("Mesh","test_TreeK","test_TreeK-D3-R4-L6"); ?>
-  <!-- <?php tests("Mesh","test_TreeK","test_TreeK-D3-R4-L8"); ?> -->
+  <?php
+  tests("Mesh","test_TreeK","test_TreeK-D3-R4-L4", "3D L=4 r=4");
+  tests("Mesh","test_TreeK","test_TreeK-D3-R4-L6", "3D L=6 r=4");
+  ?>
 
 <table>
 <tr>
