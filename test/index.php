@@ -398,8 +398,6 @@ test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
 	     array("test_FileHdf5","test_FileIfrit")); 
 test_summary("Error",array(    "Error"),
 	     array("test_Error")); 
-test_summary("Enzo",array("enzo-p_1","enzo-p_2","boundary-reflecting-2d","boundary-periodic-2d","boundary-inflow-2d","boundary-outflow-2d","boundary-reflecting-3d","boundary-periodic-3d","boundary-inflow-3d","boundary-outflow-3d"),
-	     array("enzo-p",  "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p")); 
 test_summary("Field",array(    "FieldBlock",     "FieldDescr",     "FieldFace",     "ItField"),
 	     array("test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField")); 
 test_summary("Io",array("ItReduce"),
@@ -417,7 +415,7 @@ test_summary("Parameters",array("Parameters"),
 test_summary("Performance",array("Papi", "Performance"),
 	     array("test_Papi","test_Performance")); 
 
-printf ("</tr></table>\n");
+printf ("</tr></table></br>\n");
 
    //----------------------------------------------------------------------
 
@@ -559,20 +557,16 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <td><img width=96 src="mpi/enzo-p_2-te-000200.png"></img></td>
   <td><img width=96 src="charm/enzo-p_2-te-000200.png"></img></td>
   </tr>
-  </table>
+  </table></br>
 
   <?php
 
-  //  <h3> 2D Boundary conditions </h3>
-  test_group("Enzo-BC-2D");
+  test_group("Enzo-BC-2D"); ?>
 
-  tests("Enzo","enzo-p","test_boundary-reflecting-2d","Reflecting 2D");
-  tests("Enzo","enzo-p","test_boundary-periodic-2d","Periodic 2D");
-  tests("Enzo","enzo-p","test_boundary-inflow-2d","Inflow 2D");
-  tests("Enzo","enzo-p","test_boundary-outflow-2d","Outflow 2D");
-  ?>
+  <?php tests("Enzo","enzo-p","test_boundary-reflecting-2d","Reflecting 2D"); ?>
+  
 
-  <h4>2D Serial</h4>
+  <h4>2D Reflecting</h4>
   <table>
   <tr>
   <th></th>
@@ -584,7 +578,7 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <th>500</th>
   </tr>
   <tr>
-  <th>reflecting</th>
+  <th>serial</th>
   <td><img width=160 src="serial/boundary-reflecting-2d-0000.png"></img></td>
   <td><img width=160 src="serial/boundary-reflecting-2d-0100.png"></img></td>
   <td><img width=160 src="serial/boundary-reflecting-2d-0200.png"></img></td>
@@ -593,47 +587,7 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <td><img width=160 src="serial/boundary-reflecting-2d-0500.png"></img></td>
   </tr>
   <tr>
-  <th>periodic</th>
-  <td><img width=160 src="serial/boundary-periodic-2d-0000.png"></img></td>
-  <td><img width=160 src="serial/boundary-periodic-2d-0100.png"></img></td>
-  <td><img width=160 src="serial/boundary-periodic-2d-0200.png"></img></td>
-  <td><img width=160 src="serial/boundary-periodic-2d-0300.png"></img></td>
-  <td><img width=160 src="serial/boundary-periodic-2d-0400.png"></img></td>
-  <td><img width=160 src="serial/boundary-periodic-2d-0500.png"></img></td>
-  </tr>
-  <tr>
-  <th>inflow</th>
-  <td><img width=160 src="serial/boundary-inflow-2d-0000.png"></img></td>
-  <td><img width=160 src="serial/boundary-inflow-2d-0100.png"></img></td>
-  <td><img width=160 src="serial/boundary-inflow-2d-0200.png"></img></td>
-  <td><img width=160 src="serial/boundary-inflow-2d-0300.png"></img></td>
-  <td><img width=160 src="serial/boundary-inflow-2d-0400.png"></img></td>
-  <td><img width=160 src="serial/boundary-inflow-2d-0500.png"></img></td>
-  </tr>
-  <tr>
-  <th>outflow</th>
-  <td><img width=160 src="serial/boundary-outflow-2d-0000.png"></img></td>
-  <td><img width=160 src="serial/boundary-outflow-2d-0100.png"></img></td>
-  <td><img width=160 src="serial/boundary-outflow-2d-0200.png"></img></td>
-  <td><img width=160 src="serial/boundary-outflow-2d-0300.png"></img></td>
-  <td><img width=160 src="serial/boundary-outflow-2d-0400.png"></img></td>
-  <td><img width=160 src="serial/boundary-outflow-2d-0500.png"></img></td>
-  </tr>
-  </table>
-
-  <h4>2D MPI</h4>
-  <table>
-  <tr>
-  <th></th>
-  <th>000</th>
-  <th>100</th>
-  <th>200</th>
-  <th>300</th>
-  <th>400</th>
-  <th>500</th>
-  </tr>
-  <tr>
-  <th>reflecting</th>
+  <th>mpi</th>
   <td><img width=160 src="mpi/boundary-reflecting-2d-0000.png"></img></td>
   <td><img width=160 src="mpi/boundary-reflecting-2d-0100.png"></img></td>
   <td><img width=160 src="mpi/boundary-reflecting-2d-0200.png"></img></td>
@@ -642,35 +596,20 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <td><img width=160 src="mpi/boundary-reflecting-2d-0500.png"></img></td>
   </tr>
   <tr>
-  <th>periodic</th>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0000.png"></img></td>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0100.png"></img></td>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0200.png"></img></td>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0300.png"></img></td>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0400.png"></img></td>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0500.png"></img></td>
+  <th>charm</th>
+  <td><img width=160 src="charm/boundary-reflecting-2d-0000.png"></img></td>
+  <td><img width=160 src="charm/boundary-reflecting-2d-0100.png"></img></td>
+  <td><img width=160 src="charm/boundary-reflecting-2d-0200.png"></img></td>
+  <td><img width=160 src="charm/boundary-reflecting-2d-0300.png"></img></td>
+  <td><img width=160 src="charm/boundary-reflecting-2d-0400.png"></img></td>
+  <td><img width=160 src="charm/boundary-reflecting-2d-0500.png"></img></td>
   </tr>
-  <tr>
-  <th>inflow</th>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0000.png"></img></td>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0100.png"></img></td>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0200.png"></img></td>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0300.png"></img></td>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0400.png"></img></td>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0500.png"></img></td>
-  </tr>
-  <tr>
-  <th>outflow</th>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0000.png"></img></td>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0100.png"></img></td>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0200.png"></img></td>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0300.png"></img></td>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0400.png"></img></td>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0500.png"></img></td>
-  </tr>
-  </table>
+  </table></br>
 
-  <h4>2D CHARM++</h4>
+  <h4>2D Periodic</h4>
+
+  <?php tests("Enzo","enzo-p","test_boundary-periodic-2d","Periodic 2D"); ?>
+
   <table>
   <tr>
   <th></th>
@@ -682,16 +621,25 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <th>500</th>
   </tr>
   <tr>
-  <th>reflecting</th>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0000.png"></img></td>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0100.png"></img></td>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0200.png"></img></td>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0300.png"></img></td>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0400.png"></img></td>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0500.png"></img></td>
+  <th>serial</th>
+  <td><img width=160 src="serial/boundary-periodic-2d-0000.png"></img></td>
+  <td><img width=160 src="serial/boundary-periodic-2d-0100.png"></img></td>
+  <td><img width=160 src="serial/boundary-periodic-2d-0200.png"></img></td>
+  <td><img width=160 src="serial/boundary-periodic-2d-0300.png"></img></td>
+  <td><img width=160 src="serial/boundary-periodic-2d-0400.png"></img></td>
+  <td><img width=160 src="serial/boundary-periodic-2d-0500.png"></img></td>
   </tr>
   <tr>
-  <th>periodic</th>
+  <th>mpi</th>
+  <td><img width=160 src="mpi/boundary-periodic-2d-0000.png"></img></td>
+  <td><img width=160 src="mpi/boundary-periodic-2d-0100.png"></img></td>
+  <td><img width=160 src="mpi/boundary-periodic-2d-0200.png"></img></td>
+  <td><img width=160 src="mpi/boundary-periodic-2d-0300.png"></img></td>
+  <td><img width=160 src="mpi/boundary-periodic-2d-0400.png"></img></td>
+  <td><img width=160 src="mpi/boundary-periodic-2d-0500.png"></img></td>
+  </tr>
+  <tr>
+  <th>charm</th>
   <td><img width=160 src="charm/boundary-periodic-2d-0000.png"></img></td>
   <td><img width=160 src="charm/boundary-periodic-2d-0100.png"></img></td>
   <td><img width=160 src="charm/boundary-periodic-2d-0200.png"></img></td>
@@ -699,8 +647,42 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <td><img width=160 src="charm/boundary-periodic-2d-0400.png"></img></td>
   <td><img width=160 src="charm/boundary-periodic-2d-0500.png"></img></td>
   </tr>
+  </table></br>
+
+  <h4>2D Inflow</h4>
+
+  <?php tests("Enzo","enzo-p","test_boundary-inflow-2d","Inflow 2D"); ?>
+
+  <table>
   <tr>
-  <th>inflow</th>
+  <th></th>
+  <th>000</th>
+  <th>100</th>
+  <th>200</th>
+  <th>300</th>
+  <th>400</th>
+  <th>500</th>
+  </tr>
+  <tr>
+  <th>serial</th>
+  <td><img width=160 src="serial/boundary-inflow-2d-0000.png"></img></td>
+  <td><img width=160 src="serial/boundary-inflow-2d-0100.png"></img></td>
+  <td><img width=160 src="serial/boundary-inflow-2d-0200.png"></img></td>
+  <td><img width=160 src="serial/boundary-inflow-2d-0300.png"></img></td>
+  <td><img width=160 src="serial/boundary-inflow-2d-0400.png"></img></td>
+  <td><img width=160 src="serial/boundary-inflow-2d-0500.png"></img></td>
+  </tr>
+  <tr>
+  <th>mpi</th>
+  <td><img width=160 src="mpi/boundary-inflow-2d-0000.png"></img></td>
+  <td><img width=160 src="mpi/boundary-inflow-2d-0100.png"></img></td>
+  <td><img width=160 src="mpi/boundary-inflow-2d-0200.png"></img></td>
+  <td><img width=160 src="mpi/boundary-inflow-2d-0300.png"></img></td>
+  <td><img width=160 src="mpi/boundary-inflow-2d-0400.png"></img></td>
+  <td><img width=160 src="mpi/boundary-inflow-2d-0500.png"></img></td>
+  </tr>
+  <tr>
+  <th>charm</th>
   <td><img width=160 src="charm/boundary-inflow-2d-0000.png"></img></td>
   <td><img width=160 src="charm/boundary-inflow-2d-0100.png"></img></td>
   <td><img width=160 src="charm/boundary-inflow-2d-0200.png"></img></td>
@@ -708,8 +690,42 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <td><img width=160 src="charm/boundary-inflow-2d-0400.png"></img></td>
   <td><img width=160 src="charm/boundary-inflow-2d-0500.png"></img></td>
   </tr>
+  </table></br>
+
+  <h4>2D Outflow</h4>
+  
+  <?php tests("Enzo","enzo-p","test_boundary-outflow-2d","Outflow 2D"); ?>
+
+  <table>
   <tr>
-  <th>outflow</th>
+  <th></th>
+  <th>000</th>
+  <th>100</th>
+  <th>200</th>
+  <th>300</th>
+  <th>400</th>
+  <th>500</th>
+  </tr>
+  <tr>
+  <th>serial</th>
+  <td><img width=160 src="serial/boundary-outflow-2d-0000.png"></img></td>
+  <td><img width=160 src="serial/boundary-outflow-2d-0100.png"></img></td>
+  <td><img width=160 src="serial/boundary-outflow-2d-0200.png"></img></td>
+  <td><img width=160 src="serial/boundary-outflow-2d-0300.png"></img></td>
+  <td><img width=160 src="serial/boundary-outflow-2d-0400.png"></img></td>
+  <td><img width=160 src="serial/boundary-outflow-2d-0500.png"></img></td>
+  </tr>
+  <tr>
+  <th>mpi</th>
+  <td><img width=160 src="mpi/boundary-outflow-2d-0000.png"></img></td>
+  <td><img width=160 src="mpi/boundary-outflow-2d-0100.png"></img></td>
+  <td><img width=160 src="mpi/boundary-outflow-2d-0200.png"></img></td>
+  <td><img width=160 src="mpi/boundary-outflow-2d-0300.png"></img></td>
+  <td><img width=160 src="mpi/boundary-outflow-2d-0400.png"></img></td>
+  <td><img width=160 src="mpi/boundary-outflow-2d-0500.png"></img></td>
+  </tr>
+  <tr>
+  <th>charm</th>
   <td><img width=160 src="charm/boundary-outflow-2d-0000.png"></img></td>
   <td><img width=160 src="charm/boundary-outflow-2d-0100.png"></img></td>
   <td><img width=160 src="charm/boundary-outflow-2d-0200.png"></img></td>
@@ -717,19 +733,19 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <td><img width=160 src="charm/boundary-outflow-2d-0400.png"></img></td>
   <td><img width=160 src="charm/boundary-outflow-2d-0500.png"></img></td>
   </tr>
-  </table>
+  </table></br>
+
 
   <?php
 
   test_group("Enzo-BC-3D");
-
-  tests("Enzo","enzo-p","test_boundary-reflecting-3d","Reflecting 3D");
-  tests("Enzo","enzo-p","test_boundary-periodic-3d","Periodic 3D");
-  tests("Enzo","enzo-p","test_boundary-inflow-3d","Inflow 3D");
-  tests("Enzo","enzo-p","test_boundary-outflow-3d","Outflow 3D");
   ?>
 
-  <h4>3D Serial</h4>
+  <h4>3D Reflecting</h4>
+
+  <?php tests("Enzo","enzo-p","test_boundary-reflecting-3d","Reflecting 3D"); ?>
+
+
   <table>
   <tr>
   <th></th>
@@ -740,41 +756,35 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <th>80</th>
   </tr>
   <tr>
-  <th>reflecting</th>
-  <td><img width=192 src="serial/boundary-reflecting-3d-0000.png"></img></td>
-  <td><img width=192 src="serial/boundary-reflecting-3d-0020.png"></img></td>
-  <td><img width=192 src="serial/boundary-reflecting-3d-0040.png"></img></td>
-  <td><img width=192 src="serial/boundary-reflecting-3d-0060.png"></img></td>
-  <td><img width=192 src="serial/boundary-reflecting-3d-0080.png"></img></td>
+  <th>serial</th>
+  <td><img width=128 src="serial/boundary-reflecting-3d-0000.png"></img></td>
+  <td><img width=128 src="serial/boundary-reflecting-3d-0020.png"></img></td>
+  <td><img width=128 src="serial/boundary-reflecting-3d-0040.png"></img></td>
+  <td><img width=128 src="serial/boundary-reflecting-3d-0060.png"></img></td>
+  <td><img width=128 src="serial/boundary-reflecting-3d-0080.png"></img></td>
   </tr>
   <tr>
-  <th>periodic</th>
-  <td><img width=192 src="serial/boundary-periodic-3d-0000.png"></img></td>
-  <td><img width=192 src="serial/boundary-periodic-3d-0020.png"></img></td>
-  <td><img width=192 src="serial/boundary-periodic-3d-0040.png"></img></td>
-  <td><img width=192 src="serial/boundary-periodic-3d-0060.png"></img></td>
-  <td><img width=192 src="serial/boundary-periodic-3d-0080.png"></img></td>
+  <th>mpi</th>
+  <td><img width=128 src="mpi/boundary-reflecting-3d-0000.png"></img></td>
+  <td><img width=128 src="mpi/boundary-reflecting-3d-0020.png"></img></td>
+  <td><img width=128 src="mpi/boundary-reflecting-3d-0040.png"></img></td>
+  <td><img width=128 src="mpi/boundary-reflecting-3d-0060.png"></img></td>
+  <td><img width=128 src="mpi/boundary-reflecting-3d-0080.png"></img></td>
   </tr>
   <tr>
-  <th>inflow</th>
-  <td><img width=192 src="serial/boundary-inflow-3d-0000.png"></img></td>
-  <td><img width=192 src="serial/boundary-inflow-3d-0020.png"></img></td>
-  <td><img width=192 src="serial/boundary-inflow-3d-0040.png"></img></td>
-  <td><img width=192 src="serial/boundary-inflow-3d-0060.png"></img></td>
-  <td><img width=192 src="serial/boundary-inflow-3d-0080.png"></img></td>
+  <th>charm</th>
+  <td><img width=128 src="charm/boundary-reflecting-3d-0000.png"></img></td>
+  <td><img width=128 src="charm/boundary-reflecting-3d-0020.png"></img></td>
+  <td><img width=128 src="charm/boundary-reflecting-3d-0040.png"></img></td>
+  <td><img width=128 src="charm/boundary-reflecting-3d-0060.png"></img></td>
+  <td><img width=128 src="charm/boundary-reflecting-3d-0080.png"></img></td>
   </tr>
-  <tr>
-  <th>outflow</th>
-  <td><img width=192 src="serial/boundary-outflow-3d-0000.png"></img></td>
-  <td><img width=192 src="serial/boundary-outflow-3d-0020.png"></img></td>
-  <td><img width=192 src="serial/boundary-outflow-3d-0040.png"></img></td>
-  <td><img width=192 src="serial/boundary-outflow-3d-0060.png"></img></td>
-  <td><img width=192 src="serial/boundary-outflow-3d-0080.png"></img></td>
-  </tr>
-  </table>
+  </table></br>
 
+  <h4>3D Periodic</h4>
 
-  <h4>3D MPI</h4>
+  <?php tests("Enzo","enzo-p","test_boundary-periodic-3d","Periodic 3D"); ?>
+
   <table>
   <tr>
   <th></th>
@@ -785,41 +795,35 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <th>80</th>
   </tr>
   <tr>
-  <th>reflecting</th>
-  <td><img width=192 src="mpi/boundary-reflecting-3d-0000.png"></img></td>
-  <td><img width=192 src="mpi/boundary-reflecting-3d-0020.png"></img></td>
-  <td><img width=192 src="mpi/boundary-reflecting-3d-0040.png"></img></td>
-  <td><img width=192 src="mpi/boundary-reflecting-3d-0060.png"></img></td>
-  <td><img width=192 src="mpi/boundary-reflecting-3d-0080.png"></img></td>
+  <th>serial</th>
+  <td><img width=128 src="serial/boundary-periodic-3d-0000.png"></img></td>
+  <td><img width=128 src="serial/boundary-periodic-3d-0020.png"></img></td>
+  <td><img width=128 src="serial/boundary-periodic-3d-0040.png"></img></td>
+  <td><img width=128 src="serial/boundary-periodic-3d-0060.png"></img></td>
+  <td><img width=128 src="serial/boundary-periodic-3d-0080.png"></img></td>
   </tr>
   <tr>
-  <th>periodic</th>
-  <td><img width=192 src="mpi/boundary-periodic-3d-0000.png"></img></td>
-  <td><img width=192 src="mpi/boundary-periodic-3d-0020.png"></img></td>
-  <td><img width=192 src="mpi/boundary-periodic-3d-0040.png"></img></td>
-  <td><img width=192 src="mpi/boundary-periodic-3d-0060.png"></img></td>
-  <td><img width=192 src="mpi/boundary-periodic-3d-0080.png"></img></td>
+  <th>mpi</th>
+  <td><img width=128 src="mpi/boundary-periodic-3d-0000.png"></img></td>
+  <td><img width=128 src="mpi/boundary-periodic-3d-0020.png"></img></td>
+  <td><img width=128 src="mpi/boundary-periodic-3d-0040.png"></img></td>
+  <td><img width=128 src="mpi/boundary-periodic-3d-0060.png"></img></td>
+  <td><img width=128 src="mpi/boundary-periodic-3d-0080.png"></img></td>
   </tr>
   <tr>
-  <th>inflow</th>
-  <td><img width=192 src="mpi/boundary-inflow-3d-0000.png"></img></td>
-  <td><img width=192 src="mpi/boundary-inflow-3d-0020.png"></img></td>
-  <td><img width=192 src="mpi/boundary-inflow-3d-0040.png"></img></td>
-  <td><img width=192 src="mpi/boundary-inflow-3d-0060.png"></img></td>
-  <td><img width=192 src="mpi/boundary-inflow-3d-0080.png"></img></td>
+  <th>charm</th>
+  <td><img width=128 src="charm/boundary-periodic-3d-0000.png"></img></td>
+  <td><img width=128 src="charm/boundary-periodic-3d-0020.png"></img></td>
+  <td><img width=128 src="charm/boundary-periodic-3d-0040.png"></img></td>
+  <td><img width=128 src="charm/boundary-periodic-3d-0060.png"></img></td>
+  <td><img width=128 src="charm/boundary-periodic-3d-0080.png"></img></td>
   </tr>
-  <tr>
-  <th>outflow</th>
-  <td><img width=192 src="mpi/boundary-outflow-3d-0000.png"></img></td>
-  <td><img width=192 src="mpi/boundary-outflow-3d-0020.png"></img></td>
-  <td><img width=192 src="mpi/boundary-outflow-3d-0040.png"></img></td>
-  <td><img width=192 src="mpi/boundary-outflow-3d-0060.png"></img></td>
-  <td><img width=192 src="mpi/boundary-outflow-3d-0080.png"></img></td>
-  </tr>
-  </table>
+  </table></br>
 
+  <h4>3D Inflow</h4>
 
-  <h4>3D CHARM++</h4>
+  <?php tests("Enzo","enzo-p","test_boundary-inflow-3d","Inflow 3D"); ?>
+
   <table>
   <tr>
   <th></th>
@@ -830,38 +834,69 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <th>80</th>
   </tr>
   <tr>
-  <th>reflecting</th>
-  <td><img width=192 src="charm/boundary-reflecting-3d-0000.png"></img></td>
-  <td><img width=192 src="charm/boundary-reflecting-3d-0020.png"></img></td>
-  <td><img width=192 src="charm/boundary-reflecting-3d-0040.png"></img></td>
-  <td><img width=192 src="charm/boundary-reflecting-3d-0060.png"></img></td>
-  <td><img width=192 src="charm/boundary-reflecting-3d-0080.png"></img></td>
+  <th>serial</th>
+  <td><img width=128 src="serial/boundary-inflow-3d-0000.png"></img></td>
+  <td><img width=128 src="serial/boundary-inflow-3d-0020.png"></img></td>
+  <td><img width=128 src="serial/boundary-inflow-3d-0040.png"></img></td>
+  <td><img width=128 src="serial/boundary-inflow-3d-0060.png"></img></td>
+  <td><img width=128 src="serial/boundary-inflow-3d-0080.png"></img></td>
   </tr>
   <tr>
-  <th>periodic</th>
-  <td><img width=192 src="charm/boundary-periodic-3d-0000.png"></img></td>
-  <td><img width=192 src="charm/boundary-periodic-3d-0020.png"></img></td>
-  <td><img width=192 src="charm/boundary-periodic-3d-0040.png"></img></td>
-  <td><img width=192 src="charm/boundary-periodic-3d-0060.png"></img></td>
-  <td><img width=192 src="charm/boundary-periodic-3d-0080.png"></img></td>
+  <th>mpi</th>
+  <td><img width=128 src="mpi/boundary-inflow-3d-0000.png"></img></td>
+  <td><img width=128 src="mpi/boundary-inflow-3d-0020.png"></img></td>
+  <td><img width=128 src="mpi/boundary-inflow-3d-0040.png"></img></td>
+  <td><img width=128 src="mpi/boundary-inflow-3d-0060.png"></img></td>
+  <td><img width=128 src="mpi/boundary-inflow-3d-0080.png"></img></td>
   </tr>
   <tr>
-  <th>inflow</th>
-  <td><img width=192 src="charm/boundary-inflow-3d-0000.png"></img></td>
-  <td><img width=192 src="charm/boundary-inflow-3d-0020.png"></img></td>
-  <td><img width=192 src="charm/boundary-inflow-3d-0040.png"></img></td>
-  <td><img width=192 src="charm/boundary-inflow-3d-0060.png"></img></td>
-  <td><img width=192 src="charm/boundary-inflow-3d-0080.png"></img></td>
+  <th>charm</th>
+  <td><img width=128 src="charm/boundary-inflow-3d-0000.png"></img></td>
+  <td><img width=128 src="charm/boundary-inflow-3d-0020.png"></img></td>
+  <td><img width=128 src="charm/boundary-inflow-3d-0040.png"></img></td>
+  <td><img width=128 src="charm/boundary-inflow-3d-0060.png"></img></td>
+  <td><img width=128 src="charm/boundary-inflow-3d-0080.png"></img></td>
+  </tr>
+  </table></br>
+
+  <h4>3D Outflow</h4>
+
+  <?php tests("Enzo","enzo-p","test_boundary-outflow-3d","Outflow 3D"); ?>
+
+  <table>
+  <tr>
+  <th></th>
+  <th>00</th>
+  <th>20</th>
+  <th>40</th>
+  <th>60</th>
+  <th>80</th>
   </tr>
   <tr>
-  <th>outflow</th>
-  <td><img width=192 src="charm/boundary-outflow-3d-0000.png"></img></td>
-  <td><img width=192 src="charm/boundary-outflow-3d-0020.png"></img></td>
-  <td><img width=192 src="charm/boundary-outflow-3d-0040.png"></img></td>
-  <td><img width=192 src="charm/boundary-outflow-3d-0060.png"></img></td>
-  <td><img width=192 src="charm/boundary-outflow-3d-0080.png"></img></td>
+  <th>serial</th>
+  <td><img width=128 src="serial/boundary-outflow-3d-0000.png"></img></td>
+  <td><img width=128 src="serial/boundary-outflow-3d-0020.png"></img></td>
+  <td><img width=128 src="serial/boundary-outflow-3d-0040.png"></img></td>
+  <td><img width=128 src="serial/boundary-outflow-3d-0060.png"></img></td>
+  <td><img width=128 src="serial/boundary-outflow-3d-0080.png"></img></td>
   </tr>
-  </table>
+  <tr>
+  <th>mpi</th>
+  <td><img width=128 src="mpi/boundary-outflow-3d-0000.png"></img></td>
+  <td><img width=128 src="mpi/boundary-outflow-3d-0020.png"></img></td>
+  <td><img width=128 src="mpi/boundary-outflow-3d-0040.png"></img></td>
+  <td><img width=128 src="mpi/boundary-outflow-3d-0060.png"></img></td>
+  <td><img width=128 src="mpi/boundary-outflow-3d-0080.png"></img></td>
+  </tr>
+  <tr>
+  <th>charm</th>
+  <td><img width=128 src="charm/boundary-outflow-3d-0000.png"></img></td>
+  <td><img width=128 src="charm/boundary-outflow-3d-0020.png"></img></td>
+  <td><img width=128 src="charm/boundary-outflow-3d-0040.png"></img></td>
+  <td><img width=128 src="charm/boundary-outflow-3d-0060.png"></img></td>
+  <td><img width=128 src="charm/boundary-outflow-3d-0080.png"></img></td>
+  </tr>
+  </table></br>
 
 
   <h3>TreeK-D2-R2-L?</h3>
@@ -891,7 +926,7 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <td><img width=257 src="serial/TreeK-D=2-R=2-L=7-1.png"></img></td>
   <td><img width=257 src="serial/TreeK-D=2-R=2-L=8-1.png"></img></td>
   </tr>
-  </table>
+  </table></br>
 
   <h3>TreeK-D2-R4-L?</h3>
 
@@ -919,7 +954,7 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <td><img width=257 src="serial/TreeK-D=2-R=4-L=8-1.png"></img></td>
   <!-- <td><img width=257 src="serial/TreeK-D=2-R=4-L=10-1.png"></img></td> -->
   </tr>
-  </table>
+  </table></br>
 
   <h3>TreeK-D3-R2-L?</h3>
 
@@ -962,9 +997,8 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-z-0.png"></img></td> -->
   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-z-0.png"></img></td> -->
   </tr>
-  </table>
+  </table></br>
 
-  <p>
 
   <table>
   <tr>
@@ -999,7 +1033,7 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-z-1.png"></img></td> -->
   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-z-1.png"></img></td> -->
   </tr>
-  </table>
+  </table></br>
 
 
   <h3>TreeK-D3-R4-L?</h3>

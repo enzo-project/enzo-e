@@ -9,7 +9,7 @@
    } 
 
    Mesh { 
-      root_size      = [64,64,64];
+      root_size      = [32,32,32];
       root_blocks    = [2,2,2];
    }
 
