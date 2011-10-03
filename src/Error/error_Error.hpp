@@ -26,7 +26,8 @@
 
 #define WARNING1(FUNCTION,MESSAGE,ARG1)					\
   {									\
-    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1); \
+    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+	      ARG1);							\
   }
 
 #define WARNING2(FUNCTION,MESSAGE,ARG1,ARG2)				\
@@ -53,12 +54,14 @@
   }
 #define ERROR1(FUNCTION,MESSAGE,ARG1)					\
   {									\
-    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1);	\
+    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+	      ARG1);							\
     exit(1);								\
   }
 #define ERROR2(FUNCTION,MESSAGE,ARG1,ARG2)				\
   {									\
-    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1,ARG2); \
+    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE, \
+	      ARG1,ARG2);						\
     exit(1);								\
   }
 #define ERROR3(FUNCTION,MESSAGE,ARG1,ARG2,ARG3)				\
@@ -105,15 +108,15 @@
 /// @brief    Trace file name and location to stdout
 #ifdef CELLO_TRACE
 
-#   define TRACE0					\
-  {							\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"", "");	\
-  }
-
 #   define TRACE(MESSAGE)				\
   {							\
     message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
 	      MESSAGE);					\
+  }
+
+#   define TRACE0					\
+  {							\
+    message2_(stdout,"TRACE",__FILE__,__LINE__,"", "");	\
   }
 
 #   define TRACE1(MESSAGE,ARG1)				\
@@ -145,9 +148,9 @@
 	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5);	\
   }
 #   define TRACE6(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)	\
-  {							\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
-	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6);	\
+  {								\
+    message2_(stdout,"TRACE",__FILE__,__LINE__,"",		\
+	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6);		\
   }
 #else
 
@@ -175,45 +178,34 @@
 #define ASSERT1(FUNCTION,MESSAGE,ARG1,ASSERTION)			\
   {									\
     if (!(ASSERTION)) {							\
-      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1); \
+      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+		ARG1);							\
       exit(1);								\
     }									\
   }
 #define ASSERT2(FUNCTION,MESSAGE,ARG1,ARG2,ASSERTION)			\
   {									\
     if (!(ASSERTION)) {							\
-      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1,ARG2); \
+      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+		ARG1,ARG2);						\
       exit(1);								\
     }									\
   }
-#define ASSERT3(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ASSERTION)			\
+#define ASSERT3(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ASSERTION)		\
   {									\
     if (!(ASSERTION)) {							\
-      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1,ARG2,ARG3); \
+      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+		ARG1,ARG2,ARG3);					\
       exit(1);								\
     }									\
   }
 #define ASSERT4(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ASSERTION)		\
   {									\
     if (!(ASSERTION)) {							\
-      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4); \
+      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
+		ARG1,ARG2,ARG3,ARG4);					\
       exit(1);								\
     }									\
-  }
-
-
-//----------------------------------------------------------------------
-/// @def message_
-/// @brief write the given error, warning, etc. message
-#define message_(FP,TYPE,FILE,LINE,FUNCTION,MESSAGE)	\
-  {							\
-    fprintf (FP,"\n");					\
-    fprintf (FP,"     %10s  %s:%d\n",TYPE,FILE,LINE);	\
-    if (strcmp(FUNCTION,"") != 0)			\
-      fprintf (FP,"     %10s  %s()\n", TYPE,FUNCTION);	\
-    if (strcmp(MESSAGE,"") != 0)			\
-      fprintf (FP,"     %10s  %s\n",   TYPE,MESSAGE);	\
-    fprintf (FP,"\n");					\
   }
 
 extern void message2_

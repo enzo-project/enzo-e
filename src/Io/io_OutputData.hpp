@@ -30,36 +30,45 @@ public: // functions
 
 public: // virtual functions
 
-#ifdef CONFIG_USE_CHARM
+  /// Initialize next output
+  virtual void init () throw();
 
-  /// Prepare for accumulating block data
-  virtual void init (const Hierarchy * hierarchy, int cycle, double time) throw();
+  /// Open (or create) a file for IO
+  virtual void open () throw();
 
-  /// Accumulate block-local data
-  virtual void block (const Block * block) throw();
+  /// Close file for IO
+  virtual void close () throw();
 
-#endif
+  /// Finalize output
+  virtual void finalize () throw ();
+
 
   /// Write hierarchy data to disk
-  virtual void write 
+  virtual void write_hierarchy
   ( const FieldDescr * field_descr,
-    Hierarchy * hierarchy, 
-    int cycle, double time,
-    bool root_call=true) throw();
+    Hierarchy * hierarchy ) throw();
 
   /// Write patch data to disk
-  virtual void write 
+  virtual void write_patch
   ( const FieldDescr * field_descr,
     Patch * patch,
-    int cycle, double time, 
-    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
+    int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write block data to disk
-  virtual void write 
+  virtual void write_block
   ( const FieldDescr * field_descr,
     Block * block,
-    int cycle, double time, 
-    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw();
+    int ixp0=0, int iyp0=0, int izp0=0) throw();
+
+  /// Prepare local array with data to be sent to remote chare for processing
+  virtual void prepare_remote (int * n, char ** buffer) throw();
+
+  /// Accumulate and write data sent from a remote processes
+  virtual void update_remote  ( int n, char * buffer) throw();
+
+  /// Free local array if allocated; NOP if not
+  virtual void cleanup_remote (int * n, char ** buffer) throw();
+
 
 };
 

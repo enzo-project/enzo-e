@@ -81,7 +81,7 @@ void OutputImage::open () throw()
     int nxm,nym,nzm;
     simulation_->hierarchy()->patch(0)->size (&nxm, &nym, &nzm);
     // Create png object
-    Monitor::instance()->print ("[Output] opening image file %s", 
+    Monitor::instance()->print ("[Output] writing image file %s", 
 			      file_name.c_str());
     png_create_(file_name,nxm,nym);
   }
@@ -95,6 +95,15 @@ void OutputImage::close () throw()
   image_close_();
   png_close_();
 }
+
+//----------------------------------------------------------------------
+
+void OutputImage::finalize () throw()
+{
+  TRACE("OutputImage::finalize()");
+  Output::finalize();
+}
+
 
 //----------------------------------------------------------------------
 

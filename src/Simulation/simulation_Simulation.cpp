@@ -889,6 +889,8 @@ Output * Simulation::create_output_ (std::string type) throw ()
   Output * output = NULL;
   if (type == "image") {
     output = new OutputImage (this);
+  } else if (type == "data") {
+    output = new OutputData (this);
   }
   return output;
 }

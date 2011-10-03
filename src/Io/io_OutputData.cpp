@@ -24,99 +24,112 @@ OutputData::~OutputData() throw ()
 
 //======================================================================
 
-#ifdef CONFIG_USE_CHARM
-
-void OutputData::init 
-(
- const Hierarchy * hierarchy,
- int cycle,
- double time
- ) throw()
+void OutputData::init () throw()
 {
-  INCOMPLETE("OutputData::init()");
+  TRACE("OutputData::init ()");
+  std::string file_name = expand_file_name();
+  file_ = new FileHdf5 (".",file_name);
 }
 
 //----------------------------------------------------------------------
 
-void OutputData::block (const Block * block) throw()
+void OutputData::open () throw()
 {
-  INCOMPLETE("OutputData::block()");
-}
+  TRACE("OutputData::open()");
+  std::string file_name = expand_file_name();
 
-#endif
+  Monitor::instance()->print ("[Output] writing data file %s", 
+			      file_name.c_str());
+
+  file_->file_create();
+
+}
 
 //----------------------------------------------------------------------
 
-void OutputData::write
+void OutputData::close () throw()
+{
+  TRACE("OutputData::close ()");
+  file_->file_close();
+
+  delete file_;
+  file_ = 0;
+}
+
+//----------------------------------------------------------------------
+
+void OutputData::finalize () throw ()
+{
+  TRACE("OutputData::finalize ()");
+  Output::finalize();
+}
+
+//----------------------------------------------------------------------
+
+void OutputData::write_hierarchy 
 (
  const FieldDescr * field_descr,
- Hierarchy * hierarchy,
- int cycle,
- double time,
- bool root_call
-  ) throw()
+ Hierarchy * hierarchy 
+ ) throw()
 {
-
-  if (root_call) {
-  }
+  TRACE("OutputData::write_hierarchy ()");
+  TRACE("()");
 
   ItPatch it_patch (hierarchy);
   while (Patch * patch = ++it_patch) {
-    write (field_descr, patch, cycle,time, false,  0,0,0);
-  }
-
-  if (root_call) {
+    write_patch (field_descr, patch,  0,0,0);
   }
 
 }
 
 //----------------------------------------------------------------------
 
-void OutputData::write
+void OutputData::write_patch 
 (
  const FieldDescr * field_descr,
  Patch * patch,
- int cycle,
- double time,
- bool root_call,
- int ix0,
- int iy0,
- int iz0
+ int ixp0, int iyp0, int izp0
  ) throw()
 {
-  if (root_call) {
-  }
+  TRACE("OutputData::write_patch ()");
 
   ItBlock it_block (patch);
   while (Block * block = ++it_block) {
-    write (field_descr, block, cycle,time, false,  0,0,0);
-  }
-
-  if (root_call) {
+    write_block (field_descr, block, 0,0,0);
   }
 
 }
 
 //----------------------------------------------------------------------
 
-void OutputData::write
-(
- const FieldDescr * field_descr,
- Block * block,
- int cycle,
- double time,
- bool root_call,
- int ix0,
- int iy0,
- int iz0
-) throw()
+void OutputData::write_block ( const FieldDescr * field_descr,
+  Block * block,
+  int ixp0, int iyp0, int izp0) throw()
 {
-  if (root_call) {
-  }
+  TRACE("OutputData::write_block ()");
 
-  if (root_call){
-  }
+}
 
+//----------------------------------------------------------------------
+
+void OutputData::prepare_remote (int * n, char ** buffer) throw()
+{
+  TRACE("OutputData::prepare_remote ()");
+}
+
+//----------------------------------------------------------------------
+
+void OutputData::update_remote  ( int n, char * buffer) throw()
+{
+  TRACE("OutputData::update_remote  ()");
+}
+
+//----------------------------------------------------------------------
+
+
+void OutputData::cleanup_remote (int * n, char ** buffer) throw()
+{
+  TRACE("OutputData::cleanup_remote ()");
 }
 
 //======================================================================

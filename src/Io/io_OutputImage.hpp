@@ -44,6 +44,9 @@ public: // virtual functions
   /// Close file for IO
   virtual void close () throw();
 
+  /// Cleanup after output
+  virtual void finalize () throw();
+
   /// Write hierarchy-related field data
   virtual void write_hierarchy
   ( const FieldDescr * field_descr,

@@ -9,6 +9,7 @@
 #ifndef IO_OUTPUT_HPP
 #define IO_OUTPUT_HPP
 
+class Simulation;
 class Hierarchy;
 class Patch;
 class Schedule;
@@ -78,7 +79,7 @@ public: // functions
 
 public: // virtual functions
 
-  /// prepare for accumulating block data
+  /// Initialize next output
   virtual void init () throw() = 0;
 
   /// Open (or create) a file for IO
@@ -106,7 +107,7 @@ public: // virtual functions
   virtual void write_block
   ( const FieldDescr * field_descr,
     Block * block,
-    int ix0=0, int iy0=0, int iz0=0) throw() = 0;
+    int ixp0=0, int iyp0=0, int izp0=0) throw() = 0;
 
   /// Prepare local array with data to be sent to remote chare for processing
   virtual void prepare_remote (int * n, char ** buffer) throw() = 0;
