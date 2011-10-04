@@ -35,6 +35,9 @@ private: // functions
 
 private: // attributes
 
+  /// Output counters
+  int count_output_;
+
   /// Prepare counters
   int count_prepare_;
 

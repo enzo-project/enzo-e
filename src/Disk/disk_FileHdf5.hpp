@@ -25,6 +25,9 @@ public: // interface
 
   FileHdf5 (std::string path, std::string name) throw();
 
+  /// Destructor
+  ~FileHdf5 () throw()
+  {}
 
   // Files
 

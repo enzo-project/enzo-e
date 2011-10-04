@@ -4,7 +4,7 @@
 <link href="cello.css" rel="stylesheet" type="text/css">
 <?php
 if (file_exists("COMPILING")) {
-  echo "<meta http-equiv=\"refresh\" content=15>";
+  echo "<meta http-equiv=\"refresh\" content=60>";
 }
 ?>
    </head>
@@ -323,12 +323,6 @@ function summary_passed_tests ($parallel_types, $test_output, $executables)
   printf ("</tr>\n");
 }
 
-
-
-printf ("<p>Compile output: <a href=serial/out.scons>SERIAL</a>\n");
-printf ("<a href=mpi/out.scons>   MPI</a>\n");
-printf ("<a href=charm/out.scons> CHARM</a></P>\n");
-
 printf ("<table>\n");
 printf ("<tr>\n");
 
@@ -357,7 +351,7 @@ printf ( "</tr><tr>\n");
 $parallel_labels = array("serial","mpi","charm");
 for ($k = 0; $k < 6; $k ++) {
   for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
-    printf ("<th> $parallel_labels[$i] </th>");
+    printf ("<th> <a href=serial/out.scons>$parallel_labels[$i]</a> </th>");
   }
   printf ("<th> </th>");
 }

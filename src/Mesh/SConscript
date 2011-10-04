@@ -17,7 +17,7 @@ Import('use_papi')
 components = [ 
               'field', 
               'simulation','method', 'io',
-              'memory','parallel',
+              'disk','memory','parallel',
               'parameters','monitor',
               'performance', 'error',
               'test','cello']
@@ -25,7 +25,7 @@ components = [
 if (use_papi):
 	components = components + ['papi','pfm']
 
-libraries  = ['png'] # used only for test_TreeK(?)
+libraries  = ['hdf5','png'] # used only for test_TreeK(?)
 
 #if (type == "charm"):
 #   components = components + ['enzo']

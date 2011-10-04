@@ -19,6 +19,10 @@ public: // interface
   /// Initialize the FilePng object
   FilePng(std::string path, std::string name) throw();
 
+  /// Destructor
+  ~FilePng() throw()
+  {}
+
   /// open the file
   virtual void file_open () throw();
 

@@ -13,13 +13,18 @@
 PARALLEL_MAIN_BEGIN
 {
   PARALLEL_INIT;
+  unit_init (0, 1);
+  unit_class("Parameters");
   for (int i=1; i<PARALLEL_ARGC; i++) {
     const char * filename = PARALLEL_ARGV[i];
+    unit_func("parse");
     FILE * fp = fopen (filename,"r");
     cello_parameters_read(filename,fp);
+    unit_assert(true);
   }
     
   cello_parameters_print();
+  unit_finalize();
   PARALLEL_EXIT;
 }
 PARALLEL_MAIN_END

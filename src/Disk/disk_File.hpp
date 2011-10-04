@@ -33,6 +33,10 @@ public: // interface
   /// Create a file with the given path and filename
   File (std::string path, std::string name) throw();
 
+  /// Create a file with the given path and filename
+  virtual ~File () throw()
+  {}
+
   //--------------------------------------------------
   // Files
   //--------------------------------------------------
