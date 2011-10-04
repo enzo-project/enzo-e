@@ -118,13 +118,15 @@ void OutputImage::write_hierarchy
   while (Patch * patch = ++it_patch) {
 
       if (patch->blocks_allocated()) {
+#ifdef CONFIG_USE_CHARM
 	patch->block_array().p_write (index_output);
+#else
+	// NO OFFSET: ASSUMES ROOT PATCH
+	write_patch (field_descr, patch,  0,0,0);
+#endif
       }
-
-    // // NO OFFSET: ASSUMES ROOT PATCH
-    // write_patch (field_descr, patch,  0,0,0);
-
   }
+
 }
 
 //----------------------------------------------------------------------
