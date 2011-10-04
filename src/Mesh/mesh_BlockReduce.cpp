@@ -38,20 +38,14 @@ void BlockReduce::p_prepare(int    count,
 			    double dt_block, 
 			    int    stop_block)
 {
-  // Assumes cycle and time are the same for all "incoming" blocks;
-  // only use the last one
 
-  //--------------------------------------------------
-  // Timestep
-  //--------------------------------------------------
+  // Parallel reduction of dt and stopping criteria 
 
   dt_hierarchy_   = MIN(dt_hierarchy_, dt_block);
-
-  //--------------------------------------------------
-  // Stopping
-  //--------------------------------------------------
-
   stop_hierarchy_ = stop_hierarchy_ && stop_block;
+
+  // Assumes cycle and time are the same for all "incoming" blocks;
+  // only use the last one
 
   if (++count_prepare_ >= count) {
 

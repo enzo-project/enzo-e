@@ -28,6 +28,9 @@ public: // functions
   /// Create an uninitialized Output object
   Output(Simulation * simulation ) throw();
 
+  /// Delete an Output object
+  ~Output() throw();
+
   /// Set file name
   void set_filename (std::string filename,
 		     std::vector<std::string> fileargs) throw();
@@ -95,7 +98,8 @@ public: // virtual functions
   /// Write local hierarchy data to disk
   virtual void write_hierarchy
   ( const FieldDescr * field_descr,
-    Hierarchy * hierarchy ) throw() = 0;
+    Hierarchy * hierarchy,
+    int index_output_charm = 0) throw() = 0;
 
   /// Write local patch data to disk
   virtual void write_patch

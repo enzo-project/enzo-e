@@ -68,7 +68,7 @@ public: // interface
   void p_refresh_face(int n, char buffer[], int axis, int face, int axis_set);
 
   /// Contribute block data to ith output object in the simulation
-  void p_output (int index_output);
+  void p_write (int index_output);
 
   /// Function called if TEMP_SKIP_REDUCE defined for skipping global reduction
   void skip_reduce(int cycle, int time, double dt_block, double stop_block);

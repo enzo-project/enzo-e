@@ -769,7 +769,7 @@ void Block::p_refresh_face (int n, char * buffer,
 
 //----------------------------------------------------------------------
 
-// SEE Simulation/simulation_CharmOutput.cpp for Block::p_output(int)
+// SEE Simulation/simulation_charm_output.cpp for Block::p_write(int)
 
 //----------------------------------------------------------------------
 

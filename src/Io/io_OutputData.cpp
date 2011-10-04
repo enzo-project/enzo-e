@@ -69,7 +69,8 @@ void OutputData::finalize () throw ()
 void OutputData::write_hierarchy 
 (
  const FieldDescr * field_descr,
- Hierarchy * hierarchy 
+ Hierarchy * hierarchy,
+ int index_output_charm
  ) throw()
 {
   TRACE("OutputData::write_hierarchy ()");

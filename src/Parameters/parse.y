@@ -261,6 +261,9 @@ const char * op_name[] = {
 
      p->parameter = (current_parameter) ? strdup(current_parameter) : 0;
 
+     free (current_parameter);
+     current_parameter = 0;
+
      current_type = enum_parameter_unknown;
 
      insert_param(param_curr,p);

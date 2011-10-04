@@ -36,6 +36,15 @@ Output::Output (Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
+Output::~Output () throw()
+{
+  delete schedule_;
+  schedule_ = 0;
+  delete file_;
+  file_ = 0;
+}
+//----------------------------------------------------------------------
+
 void Output::set_filename (std::string filename,
 			   std::vector<std::string> fileargs) throw()
 {

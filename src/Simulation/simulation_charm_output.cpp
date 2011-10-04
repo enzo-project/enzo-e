@@ -52,6 +52,9 @@ void Simulation::output_first() throw()
 void Simulation::output_next() throw()
 {
 
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+
   // find next output
 
   while (index_output_ < num_output() && 
@@ -68,15 +71,9 @@ void Simulation::output_next() throw()
     // Open files
     output(index_output_)->open();
 
-    // Loop over Patches in the Hierarchy
-    ItPatch it_patch(hierarchy_);
-    Patch * patch;
-    while (( patch = ++it_patch )) {
-      // If Patch is local, call output on block chare array
-      if (patch->blocks_allocated()) {
-	patch->block_array().p_output (index_output_);
-      }
-    }
+    // Write hierarchy
+    output(index_output_)->write_hierarchy(field_descr, hierarchy_,index_output_);
+
 
   } else {
 
@@ -91,7 +88,7 @@ void Simulation::output_next() throw()
 
 //----------------------------------------------------------------------
 
-void Block::p_output (int index_output)
+void Block::p_write (int index_output)
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
