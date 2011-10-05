@@ -10,7 +10,7 @@ Import('type')
 #------------------------------
 
 components = ['parallel',
-	      'performance','error',
+	      'error','monitor','performance',
 	      'test','cello']
 libraries  = ['png']
 

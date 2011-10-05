@@ -9,12 +9,10 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['test','cello']
-libraries  = []
+components = ['test','cello',
+              'monitor', 'performance']
 
-if (type == "charm"):
-   components = components + ['monitor','performance']
-   libraries  = libraries  + ['png']
+libraries  = ['png']
 
 #------------------------------
 # SOURCE

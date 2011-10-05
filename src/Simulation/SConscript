@@ -13,8 +13,8 @@ Import('use_papi')
 components = ['method',
 	      'mesh', 'field',
 	      'memory','parallel',
-	      'parameters','monitor',
-	      'performance','error',
+	      'parameters',
+	      'error','monitor','performance',
 	      'cello']
 
 if (use_papi):

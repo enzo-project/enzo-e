@@ -13,8 +13,8 @@
 
 OutputImage::OutputImage(Simulation * simulation) throw ()
   : Output(simulation),
-    axis_(axis_z),
     data_(),
+    axis_(axis_z),
     nix_(0),
     niy_(0),
     png_(0)

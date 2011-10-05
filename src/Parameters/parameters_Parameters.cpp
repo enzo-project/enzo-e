@@ -57,6 +57,10 @@ Parameters::~Parameters()
     delete it_param->second;
   }
   delete parameter_tree_;
+  for (int i=0; i<current_group_depth_; i++) {
+    free (current_group_[i]);
+    current_group_[i] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -211,13 +215,15 @@ void Parameters::write ( const char * file_name )
 
 int Parameters::value_integer 
 ( std::string parameter,
-  int         deflt ) throw(ExceptionParametersBadType)
+  int         deflt ) throw()
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
 /// @return  Return integer parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
-  if (param && ! param->is_integer()) throw ExceptionParametersBadType();
+  ASSERT1 ("Parameters::value_integer",
+	   "Parameter %s is not an integer", parameter.c_str(),
+	   ( ! param || param->is_integer()));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%d",deflt);
   monitor_access_(parameter,deflt_string);
@@ -228,13 +234,15 @@ int Parameters::value_integer
 
 void Parameters::set_integer 
 ( std::string parameter,
-  int         value ) throw(ExceptionParametersBadType)
+  int         value ) throw()
 /// @param   parameter Parameter name
 /// @param   value     Value to set the parameter
 {
   Param * param = parameter_(parameter);
   if (param) {
-    if (! param->is_integer()) throw ExceptionParametersBadType();
+    ASSERT1 ("Parameters::set_integer",
+	     "Parameter %s is not an integer", parameter.c_str(),
+	     (param->is_integer()));
   } else {
     param = new Param;
     new_param_ (current_group_,parameter,param);
@@ -247,13 +255,15 @@ void Parameters::set_integer
 
 double Parameters::value_float
 ( std::string parameter,
-  double      deflt ) throw(ExceptionParametersBadType)
+  double      deflt ) throw()
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
 /// @return  Return floating point (double) parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
-  if (param && ! param->is_float()) throw ExceptionParametersBadType();
+  ASSERT1 ("Parameters::value_float",
+	   "Parameter %s is not an float", parameter.c_str(),
+	   ( ! param || param->is_float()));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // '#' format character forces a decimal point
   sprintf (deflt_string,"%#.15g",deflt);
@@ -265,13 +275,15 @@ double Parameters::value_float
 
 void Parameters::set_float
 ( std::string parameter,
-  double      value ) throw(ExceptionParametersBadType)
+  double      value ) throw()
 /// @param   parameter Parameter name
 /// @param   value     Value to set the parameter
 {
   Param * param = parameter_(parameter);
   if (param) {
-    if (! param->is_float()) throw ExceptionParametersBadType();
+    ASSERT1 ("Parameters::set_float",
+	     "Parameter %s is not a float", parameter.c_str(),
+	     (param->is_float()));
   } else {
     param = new Param;
     new_param_ (current_group_,parameter,param);
@@ -284,13 +296,15 @@ void Parameters::set_float
 
 bool Parameters::value_logical 
 ( std::string parameter,
-  bool        deflt ) throw(ExceptionParametersBadType)
+  bool        deflt ) throw()
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
 /// @return  Return logical parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
-  if (param && ! param->is_logical()) throw ExceptionParametersBadType();
+  ASSERT1 ("Parameters::value_logical",
+	   "Parameter %s is not an logical", parameter.c_str(),
+	   ( ! param || param->is_logical()));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%s",deflt ? "true" : "false");
   monitor_access_(parameter,deflt_string);
@@ -301,13 +315,15 @@ bool Parameters::value_logical
 
 void Parameters::set_logical
 ( std::string parameter,
-  bool        value ) throw(ExceptionParametersBadType)
+  bool        value ) throw()
 /// @param   parameter Parameter name
 /// @param   value     Value to set the parameter
 {
   Param * param = parameter_(parameter);
   if (param) {
-    if (! param->is_logical()) throw ExceptionParametersBadType();
+    ASSERT1 ("Parameters::set_logical",
+	     "Parameter %s is not logical", parameter.c_str(),
+	     (param->is_logical()));
   } else {
     param = new Param;
     new_param_ (current_group_,parameter,param);
@@ -320,13 +336,15 @@ void Parameters::set_logical
 
 const char * Parameters::value_string 
 ( std::string  parameter,
-  const char * deflt ) throw(ExceptionParametersBadType)
+  const char * deflt ) throw()
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
 /// @return  Return string parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
-  if (param && ! param->is_string()) throw ExceptionParametersBadType();
+  ASSERT1 ("Parameters::value_string",
+	   "Parameter %s is not a string", parameter.c_str(),
+	   ( ! param || param->is_string()));
   monitor_access_(parameter,deflt);
   return (param != NULL) ? param->get_string() : deflt;
 }
@@ -335,13 +353,15 @@ const char * Parameters::value_string
 
 void Parameters::set_string
 ( std::string  parameter,
-  const char * value ) throw(ExceptionParametersBadType)
+  const char * value ) throw()
 /// @param   parameter Parameter name
 /// @param   value     Value to set the parameter
 {
   Param * param = parameter_(parameter);
   if (param) {
-    if (! param->is_string()) throw ExceptionParametersBadType();
+    ASSERT1 ("Parameters::value_integer",
+	     "Parameter %s is not an integer", parameter.c_str(),
+	     (param->is_string()));
   } else {
     param = new Param;
     new_param_ (current_group_,parameter,param);
@@ -353,15 +373,15 @@ void Parameters::set_string
 //----------------------------------------------------------------------
 
 void Parameters::evaluate_float 
-  (
-   std::string parameter,
-   int         n, 
-   double    * result, 
-   double    * deflt,
-   double    * x, 
-   double    * y, 
-   double    * z, 
-   double    * t) throw(ExceptionParametersBadType)
+(
+ std::string parameter,
+ int         n, 
+ double    * result, 
+ double    * deflt,
+ double    * x, 
+ double    * y, 
+ double    * z, 
+ double    * t) throw()
 /// @param   parameter Parameter name
 /// @param   n         Length of variable arrays
 /// @param   result    Output array of evaluated floating point parameters values if it exists, or deflt if not
@@ -372,7 +392,9 @@ void Parameters::evaluate_float
 /// @param   t         Array of T values
 {
   Param * param = parameter_(parameter);
-  if (param && ! param->is_float_expr()) throw ExceptionParametersBadType();
+  ASSERT1 ("Parameters::evaluate_float",
+	   "Parameter %s is not a floating-point expression", parameter.c_str(),
+	   ( ! param || param->is_float_expr()));
   if (param != NULL) {
     param->evaluate_float(param->value_expr_,n,result,x,y,z,t);
   } else {
@@ -386,15 +408,15 @@ void Parameters::evaluate_float
 //----------------------------------------------------------------------
 
 void Parameters::evaluate_logical 
-  (
-   std::string parameter,
-   int         n, 
-   bool      * result, 
-   bool      * deflt,
-   double    * x, 
-   double    * y, 
-   double    * z, 
-   double    * t) throw(ExceptionParametersBadType)
+(
+ std::string parameter,
+ int         n, 
+ bool      * result, 
+ bool      * deflt,
+ double    * x, 
+ double    * y, 
+ double    * z, 
+ double    * t) throw()
 /// @param   parameter Parameter name
 /// @param   n         Length of variable arrays
 /// @param   result    Output array of evaluated logical parameters values if it exists, or deflt if not
@@ -405,7 +427,9 @@ void Parameters::evaluate_logical
 /// @param   t         Array of T values
 {
   Param * param = parameter_(parameter);
-  if (param && ! param->is_logical_expr()) throw ExceptionParametersBadType();
+  ASSERT1 ("Parameters::evaluate_logical",
+	   "Parameter %s is not a logical expression", parameter.c_str(),
+	   (! param || param->is_logical_expr()));
   if (param != NULL) {
     param->evaluate_logical(param->value_expr_,n,result,x,y,z,t);
   } else {
@@ -422,7 +446,9 @@ int Parameters::list_length(std::string parameter)
 /// @param   parameter Parameter name
 {
   Param * param = parameter_(parameter);
-  if (param && ! param->is_list()) throw ExceptionParametersBadType();
+  ASSERT1 ("Parameters::list_length",
+	   "Parameter %s is not a list", parameter.c_str(),
+	   ( ! param || param->is_list()));
   return (param != NULL) ? (param->value_list_)->size() : 0;
 }
 
@@ -431,14 +457,17 @@ int Parameters::list_length(std::string parameter)
 int Parameters::list_value_integer 
 ( int index,
   std::string parameter,
-  int         deflt ) throw(ExceptionParametersBadType)
+  int         deflt ) throw()
 /// @param   index     Index of the integer list parameter element
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
 /// @return  Return integer list parameter element value if it exists, deflt if not
 {
   Param * param = list_element_(parameter,index);
-  if (param && ! param->is_integer()) throw ExceptionParametersBadType();
+  ASSERT2 ("Parameters::list_value_integer",
+	   "Parameter %s[%d] is not an integer", 
+	   parameter.c_str(),index,
+	   ( ! param || param->is_integer()));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%d",deflt);
   monitor_access_(parameter,deflt_string,index);
@@ -450,14 +479,17 @@ int Parameters::list_value_integer
 double Parameters::list_value_float 
 ( int index,
   std::string parameter,
-  double      deflt ) throw(ExceptionParametersBadType)
+  double      deflt ) throw()
 /// @param   index     Index of the floating point (double) list parameter element
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
 /// @return  Return floating point (double) list parameter element value if it exists, deflt if not
 {
   Param * param = list_element_(parameter,index);
-  if (param && ! param->is_float()) throw ExceptionParametersBadType();
+  ASSERT2 ("Parameters::list_value_float",
+	   "Parameter %s[%d] is not a float", 
+	   parameter.c_str(),index,
+	   ( ! param || param->is_float()));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // '#' format character forces a decimal point
   sprintf (deflt_string,"%#.15g",deflt);
@@ -470,14 +502,17 @@ double Parameters::list_value_float
 bool Parameters::list_value_logical 
 ( int index,
   std::string parameter,
-  bool        deflt ) throw(ExceptionParametersBadType)
+  bool        deflt ) throw()
 /// @param   index     Index of the logical list parameter element
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
 /// @return  Return logical list parameter element value if it exists, deflt if not
 {
   Param * param = list_element_(parameter,index);
-  if (param && ! param->is_logical()) throw ExceptionParametersBadType();
+  ASSERT2 ("Parameters::list_value_logical",
+	   "Parameter %s[%d] is not logical", 
+	   parameter.c_str(),index,
+	   ( ! param || param->is_logical()));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%s",deflt ? "true" : "false");
   monitor_access_(parameter,deflt_string,index);
@@ -489,14 +524,17 @@ bool Parameters::list_value_logical
 const char * Parameters::list_value_string 
 ( int index,
   std::string   parameter,
-  const char *  deflt ) throw(ExceptionParametersBadType)
+  const char *  deflt ) throw()
 /// @param   index     Index of the string list parameter element
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
 /// @return  Return string list parameter element value if it exists, deflt if not
 {
   Param * param = list_element_ (parameter,index);
-  if (param && ! param->is_string()) throw (ExceptionParametersBadType());
+  ASSERT2 ("Parameters::list_value_string",
+	   "Parameter %s[%d] is not a string",
+	   parameter.c_str(),index,
+	   ( ! param || param->is_string()));
   monitor_access_(parameter,deflt,index);
   return (param != NULL) ? param->value_string_ : deflt;
 }
@@ -514,7 +552,7 @@ void Parameters::list_evaluate_float
  double    * y, 
  double    * z, 
  double    * t
- ) throw(ExceptionParametersBadType)
+ ) throw()
 /// @param   index     Index into the list
 /// @param   parameter Parameter name
 /// @param   n         Length of variable arrays
@@ -527,7 +565,10 @@ void Parameters::list_evaluate_float
 {
 
   Param * param = list_element_(parameter,index);
-  if (param && ! param->is_float_expr()) throw ExceptionParametersBadType();
+  ASSERT2 ("Parameters::list_evaluate_float",
+	   "Parameter %s[%d] is not a floating-point expression",
+	   parameter.c_str(),index,
+	   ( ! param || param->is_float_expr()));
   if (param != NULL) {
     param->evaluate_float(param->value_expr_,n,result,x,y,z,t);
   } else {
@@ -541,16 +582,16 @@ void Parameters::list_evaluate_float
 //----------------------------------------------------------------------
 
 void Parameters::list_evaluate_logical 
-  (
-   int index,
-   std::string parameter,
-   int         n, 
-   bool      * result, 
-   bool      * deflt,
-   double    * x, 
-   double    * y, 
-   double    * z, 
-   double    * t) throw(ExceptionParametersBadType)
+(
+ int index,
+ std::string parameter,
+ int         n, 
+ bool      * result, 
+ bool      * deflt,
+ double    * x, 
+ double    * y, 
+ double    * z, 
+ double    * t) throw()
 /// @param   index     Index into the list
 /// @param   parameter Parameter name
 /// @param   n         Length of variable arrays
@@ -562,7 +603,10 @@ void Parameters::list_evaluate_logical
 /// @param   t         Array of T values
 {
   Param * param = list_element_(parameter,index);
-  if (param && ! param->is_logical_expr()) throw ExceptionParametersBadType();
+  ASSERT2 ("Parameters::list_evaluate_logical",
+	   "Parameter %s[%d] is not logical",
+	   parameter.c_str(),index,
+	   ( ! param || param->is_logical_expr()));
   if (param != NULL) {
     param->evaluate_logical(param->value_expr_,n,result,x,y,z,t);
   } else {
@@ -622,7 +666,7 @@ void Parameters::group_pop(std::string group) throw()
   if (current_group_depth_ > 0) {
     if (group != "" && group != current_group_[current_group_depth_-1]) {
       WARNING2("Parameters::group_pop",
-	      "group_pop(%s) does not match group_push(%s)",
+	       "group_pop(%s) does not match group_push(%s)",
 	       group.c_str(),current_group_[current_group_depth_-1]);
     }
     --current_group_depth_;
@@ -709,7 +753,7 @@ parameter_enum Parameters::list_type
 ( 
  int index,
  std::string  parameter
- ) throw()
+  ) throw()
 /// @param   index Index into the list
 /// @param   parameter Parameter name
 /// @return  Return type of the given parameter
@@ -732,7 +776,7 @@ void Parameters::monitor_access_
  std::string parameter,
  std::string deflt_string,
  int index
-) throw()
+ ) throw()
 {
   Param * param = 0;
 
@@ -759,9 +803,9 @@ void Parameters::monitor_access_
   }
 
   monitor_->print("[Parameters] accessed %s%s %s",
-		 parameter_name_(parameter).c_str(),
-		 index_string,
-		 value.c_str());
+		  parameter_name_(parameter).c_str(),
+		  index_string,
+		  value.c_str());
 }
 
 //----------------------------------------------------------------------
@@ -810,9 +854,9 @@ int Parameters::readline_
 
   // Check for buffer overrun
 
-  if (i+1 >= buffer_length-1) {
-    throw "Input file line too long";
-  }
+  ASSERT ("Parameters::readline_",
+	  "Input file line is too long",
+	  (i+1 >= buffer_length-1));
 
   // Convert the buffer into a C string
 
@@ -845,7 +889,7 @@ size_t Parameters::extract_groups_
 (
  const std::string parameter, 
  std::string * group
-)
+ )
 {
   std::string p = parameter;
   size_t i_group=0;  // group index for group[]

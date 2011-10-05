@@ -18,8 +18,8 @@ components = [
               'field', 
               'simulation','method', 'io',
               'disk','memory','parallel',
-              'parameters','monitor',
-              'performance', 'error',
+              'parameters',
+              'error','monitor','performance', 
               'test','cello']
 
 if (use_papi):

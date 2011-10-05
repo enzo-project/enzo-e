@@ -69,10 +69,11 @@ public:
   /// Return an instance of a Unit object
   static Unit * instance()
   { 
-    if ( instance_ == NULL )
-      instance_ = new Unit;
+    // if ( instance_ == NULL )
+    //   instance_ = new Unit;
 
-    return instance_ ? instance_ : (instance_ = new Unit);
+    // return instance_ ? instance_ : (instance_ = new Unit);
+    return & instance_;
   };
 
   /// Initialize unit testing
@@ -96,7 +97,7 @@ public:
 private:
 
   /// Singleton instance of the Unit object
-  static Unit * instance_;
+  static Unit instance_;
 
   /// Name of the current class being tested
   char class_name_ [UNIT_MAX_NAME_LEN];

@@ -17,8 +17,7 @@ if (type == "charm"):
 # DEPENDENCIES
 #------------------------------
 
-components = ['monitor',
-	      'error','performance',
+components = ['error','monitor','performance',
 	      'test','cello']
 libraries  = ['png']
 

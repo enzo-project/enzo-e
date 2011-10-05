@@ -9,8 +9,7 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['performance','error',
-	      'monitor',
+components = ['error','monitor','performance',
 	      'test','cello']
 libraries = ['png']
 

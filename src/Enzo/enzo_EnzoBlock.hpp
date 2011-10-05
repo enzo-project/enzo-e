@@ -47,13 +47,6 @@ public: // interface
 
 #endif
 
-  // /// Initialize the EnzoBlock object
-  // EnzoBlock(int ix, int iy, int iz,
-  // 	    int nx, int ny, int nz,
-  // 	    double xm, double ym, double zm,
-  // 	    double xp, double yp, double zp,
-  // 	    int num_field_blocks) throw();
-
   /// Destructor
   virtual ~EnzoBlock() throw();
 
@@ -89,12 +82,6 @@ public: // interface
   void print_field (int field);
   int SetExternalBoundary(int FieldRank, int GridDims[], int GridOffset[], int StartIndex[], int EndIndex[], enzo_float *Field, int FieldType);
   // void image_dump(const char * file_root, int cycle, double lower, double upper);
-
-  void initialize_hydro ();
-  // void initialize_image ();
-  // void initialize_implosion3 (int size_param);
-  // void initialize_implosion (int size_param);
-  // void initialize_ppml_implosion3 (int size_param);
 
   int SolveMHDEquations( int cycle, enzo_float dt);
   // void initialize_ppml (int size_param);

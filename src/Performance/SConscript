@@ -11,8 +11,8 @@ Import('use_papi')
 #------------------------------
 
 
-components = ['monitor', 'memory',
-	      'error',
+components = ['memory',
+	      'error','monitor', 
 	      'test','cello']
 
 libraries  = ['png']

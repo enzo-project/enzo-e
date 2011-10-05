@@ -17,8 +17,8 @@ components = ['enzo-ppm', 'enzo-ppml',
 	      'simulation', 'method', 'io',
 	      'mesh', 'field',
 	      'disk','memory','parallel',
-	      'parameters', 'monitor',
-	      'performance', 'error',
+	      'parameters', 
+	      'error', 'monitor', 'performance', 
 	      'test','cello']
 
 if (use_papi):

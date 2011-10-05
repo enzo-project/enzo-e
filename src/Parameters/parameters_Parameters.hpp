@@ -51,36 +51,34 @@ public: // interface
   void write (const char * file_name);
 
   /// Return the integer-valued parameter
-  int value_integer (std::string , int deflt = 0) 
-    throw(ExceptionParametersBadType);
+  int value_integer (std::string , int deflt = 0) throw();
 
   /// Assign a value to the integer-valued parameter
-  void set_integer ( std::string parameter, int value ) 
-    throw(ExceptionParametersBadType);
+  void set_integer ( std::string parameter, int value ) throw();
 
   /// Return the floating-point valued parameter
   double value_float (std::string, double deflt = 0.0) 
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Assign a value to the floating-point valued parameter
   void set_float ( std::string parameter, double value ) 
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Return the logical-valued parameter
   bool value_logical (std::string , bool deflt = false) 
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Assign a value to the logical-valued parameter
   void set_logical ( std::string parameter, bool value ) 
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Return the string-valued parameter
   const char * value_string ( std::string , const char * deflt = "") 
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Assign a value to the string-valued parameter
   void set_string ( std::string parameter, const char * value ) 
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Evaluate the floating-point valued parameter expression
   void evaluate_float 
@@ -93,7 +91,7 @@ public: // interface
    double    * y, 
    double    * z, 
    double    * t)
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Evaluate the logical-valued parameter expression
   void evaluate_logical 
@@ -106,26 +104,26 @@ public: // interface
    double    * y, 
    double    * z, 
    double    * t)
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Return the length of the list parameter
   int list_length (std::string parameter);
 
   /// Access an integer list element
   int list_value_integer (int , std::string , int deflt = 0)    
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Access a floating point list element
   double list_value_float (int , std::string , double deflt = 0.0)    
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Access a logical list element
   bool list_value_logical (int ,std::string , bool deflt = false)    
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Access a string list element
   const char * list_value_string (int ,std::string , const char * deflt = "")    
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Evaluate the floating-point valued list element expression
   void list_evaluate_float 
@@ -140,7 +138,7 @@ public: // interface
    double    * z, 
    double    * t
    )    
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Evaluate the logical-valued list element expression
   void list_evaluate_logical
@@ -155,7 +153,7 @@ public: // interface
    double    * z, 
    double    * t
    )    
-    throw(ExceptionParametersBadType);
+    throw();
 
   //--------------------------------------------------
   // PARAMETER GROUPS

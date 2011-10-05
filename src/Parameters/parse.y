@@ -163,9 +163,11 @@ const char * op_name[] = {
     }
   };
 
+/
   void copy_groups (char * group_dest[], char * group_src[]) {
     int i;
     for (i=0; i<MAX_GROUP_DEPTH; i++) {
+      /* MEMORY LEAK */
       group_dest[i] = (group_src[i]) ? strdup(group_src[i]) : 0;
     }
   };

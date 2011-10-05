@@ -11,7 +11,8 @@
 #include "monitor.hpp" 
 
 //----------------------------------------------------------------------
-Monitor * Monitor::instance_ = 0; // (singleton design pattern)
+// Monitor * Monitor::instance_ = 0; // (singleton design pattern)
+Monitor Monitor::instance_; // singleton design pattern)
 //----------------------------------------------------------------------
 
 Monitor::Monitor()
@@ -41,8 +42,8 @@ Monitor::~Monitor()
 {
   delete timer_;
   timer_ = 0;
-  delete instance_;
-  instance_ = 0;
+  // delete instance_;
+  // instance_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -138,7 +139,7 @@ void Monitor::header () const
 
 //----------------------------------------------------------------------
 
-void Monitor::print (const char * message, ...) const
+void Monitor::write (FILE * fp, const char * message, ...) const
 {
   if (active_) {
 
@@ -170,10 +171,34 @@ void Monitor::print (const char * message, ...) const
 
     // Print 
 
-    PARALLEL_PRINTF ("%s %s %s\n",
-		     buffer_process,
-		     buffer_time,
-		     buffer_message);
+    if (fp == stdout) {
+      PARALLEL_PRINTF 
+	("%s %s %s\n", buffer_process, buffer_time, buffer_message);
+    } else {
+      fprintf 
+	(fp,"%s %s %s\n", buffer_process, buffer_time, buffer_message);
+    }
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+void Monitor::print (const char * message, ...) const
+{
+  if (active_) {
+
+    va_list fargs;
+
+    // Process any input arguments
+
+    char buffer_message[MONITOR_LENGTH+1];
+
+    va_start(fargs,message);
+    vsnprintf (buffer_message,MONITOR_LENGTH, message,fargs);
+    va_end(fargs);
+
+    write (stdout, buffer_message);
   }
 }
 

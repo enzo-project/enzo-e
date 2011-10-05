@@ -12,8 +12,8 @@ Import('type')
 components = ['method', 
               'mesh', 'field', 
               'memory', 'parallel', 
-              'parameters', 'monitor',
-              'error',
+              'parameters', 
+              'error','monitor',
               'cello']
 
 libraries  = []

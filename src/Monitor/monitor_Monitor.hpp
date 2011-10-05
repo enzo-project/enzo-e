@@ -53,10 +53,11 @@ public: // interface
   /// Return an instance of a Monitor object
   static Monitor * instance()
   { 
-    if ( instance_ == NULL )
-      instance_ = new Monitor;
+    return & instance_;
+    // if ( instance_ == NULL )
+    //   instance_ = new Monitor;
 
-    return instance_;
+    // return instance_;
   };
 
   /// Set whether the monitor is active for text output.  Useful for
@@ -72,7 +73,7 @@ public: // interface
   /// Print a message to stdout
   void print (const char * buffer, ...) const;
 
-  /// Write a message to disk
+  /// Write a message to file
   void write (FILE * fp, const char * buffer, ...) const;
 
   /// Generate a PNG image of an array
@@ -145,7 +146,8 @@ private: // attributes
 private: // static attributes
 
   /// Single instance of the Monitor object [singleton design pattern]
-  static Monitor * instance_;
+  // static Monitor * instance_;
+  static Monitor instance_;
 
 };
 

@@ -11,6 +11,9 @@
 
 namespace enzo {
 
+  /// @namespace  enzo
+  /// @brief      Namespace for Enzo functions and global variables
+
   /// Boundary
 
   int  BoundaryRank;

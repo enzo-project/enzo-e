@@ -31,14 +31,17 @@ extern void message2_
   vsnprintf (buffer,ERROR_LENGTH, message,fargs);
   va_end(fargs);
 
-  fprintf (fp,"\n");
-  fprintf (fp,"     %10s  %s:%d\n",type,file,line);
-  if (strcmp(function,"") != 0)
-    fprintf (fp,"     %10s  %s()\n", type,function);
-  if (strcmp(message,"") != 0)
-    fprintf (fp,"     %10s  %s\n",   type,buffer);
-  fprintf (fp,"\n");
+  Monitor * monitor = Monitor::instance();
 
-  fflush(fp);
+  monitor->write (fp,"[error] %s  %s:%d  %s  %s",
+		  type,file,line,function,buffer);
+  // monitor->write (fp,"     %10s  %s:%d\n",type,file,line);
+  // if (strcmp(function,"") != 0)
+  //   monitor->write (fp,"     %10s  %s()\n", type,function);
+  // if (strcmp(message,"") != 0)
+  //   monitor->write (fp,"     %10s  %s\n",   type,buffer);
+  // monitor->write (fp,"\n");
+
+  //  fflush(fp);
 }
 

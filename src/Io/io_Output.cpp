@@ -42,6 +42,8 @@ Output::~Output () throw()
   schedule_ = 0;
   delete file_;
   file_ = 0;
+  delete it_field_;
+  it_field_ = 0;
 }
 //----------------------------------------------------------------------
 

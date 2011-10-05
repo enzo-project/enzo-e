@@ -22,13 +22,13 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
-// Error should not depend on anything
+#include "monitor.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "error_Exception.hpp"
+// #include "error_Exception.hpp"
 #include "error_Error.hpp"
 
 #endif /* ERROR_HPP */

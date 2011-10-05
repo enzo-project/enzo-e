@@ -16,9 +16,9 @@ Import('type')
 components = ['simulation', 'method', 'io',
               'mesh', 'field',
               'disk','memory','parallel',
-              'parameters', 'error',
+              'parameters', 
               'test','cello',
-              'monitor','performance' ]
+              'error','monitor','performance' ]
 
 libraries  = ['png','hdf5']
 

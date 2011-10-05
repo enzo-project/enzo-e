@@ -9,13 +9,9 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error',
+components = ['error', 'monitor', 'performance',
               'test','cello']
-libraries  = ['hdf5']
-
-if (type == "charm"):
-   components = components + ['monitor','performance']
-   libraries  = libraries  + ['png']
+libraries  = ['hdf5', 'png']
 
 #------------------------------
 # SOURCE

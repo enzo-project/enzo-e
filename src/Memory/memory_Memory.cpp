@@ -17,6 +17,16 @@ Memory Memory::instance_; // (singleton design pattern)
 // FUNCTIONS
 //======================================================================
  
+Memory::~Memory() throw ()
+{
+  // for (int i=0; i<MEMORY_MAX_NUM_GROUPS +1; i++) {
+  //   free (group_names_[i]);
+  //   group_names_[i] = 0;
+  // }
+}
+
+//======================================================================
+
 void Memory::initialize_() throw ()
 {
 #ifdef CONFIG_USE_MEMORY
@@ -52,7 +62,7 @@ void Memory::finalize_() throw ()
 
 //----------------------------------------------------------------------
 
-void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
+void * Memory::allocate ( size_t bytes ) throw ()
 /// @param  bytes   Number of bytes to allocate
 /// @return        Pointer to the allocated memory
 {
@@ -60,7 +70,9 @@ void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
   int * buffer = (int *)(malloc(bytes + 2*sizeof(int)));
 
 
-  if (buffer==0) throw ExceptionMemoryBadAllocate();
+  ASSERT("Memory::allocate",
+	 "Cannot allocate buffer: out of memory",
+	 buffer);
 
   if (is_active_) {
     buffer[0] = bytes;
@@ -90,8 +102,7 @@ void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
 
 //----------------------------------------------------------------------
 
-void Memory::deallocate ( void * pointer )
-  throw (ExceptionMemoryBadDeallocate())
+void Memory::deallocate ( void * pointer ) throw()
 {
 #ifdef CONFIG_USE_MEMORY
   int *buffer = (int *)(pointer) - 2;
@@ -351,5 +362,17 @@ void Memory::reset() throw()
     new_calls_   [i] = 0;
     delete_calls_[i] = 0;
   }
+#endif
+}
+
+//----------------------------------------------------------------------
+
+void Memory::check_handle_(memory_group_handle group_handle) throw ()
+{  
+#ifdef CONFIG_USE_MEMORY
+  ASSERT2 ("Memory::check_handle_",
+	   "group_handle %d is out of range [0:%d]",
+	   int(group_handle), MEMORY_MAX_NUM_GROUPS,
+	   0 <= group_handle && group_handle <= MEMORY_MAX_NUM_GROUPS);
 #endif
 }

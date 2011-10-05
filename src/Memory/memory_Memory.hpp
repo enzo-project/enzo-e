@@ -48,17 +48,15 @@ private: // interface
   Memory & operator = (const Memory & memory);
 
   /// Delete the Memory object
-  ~Memory() throw () { };
+  ~Memory() throw ();
 
 public: // interface
 
   /// Allocate memory
-  void * allocate ( size_t size ) 
-    throw (ExceptionMemoryBadAllocate());
+  void * allocate ( size_t size ) throw ();
 
   /// De-allocate memory
-  void deallocate ( void * pointer ) 
-    throw (ExceptionMemoryBadDeallocate());
+  void deallocate ( void * pointer ) throw ();
 
   /// Assign a name to a group
   void new_group ( memory_group_handle group_id, 
@@ -121,16 +119,8 @@ private: // functions
   /// Finalize the memory component
   void finalize_() throw ();
 
-  ///  Check the group handle, and throw an exception if bad
-  void check_handle_(memory_group_handle group_handle) 
-    throw (ExceptionMemoryBadGroupHandle())
-  {  
-#ifdef CONFIG_USE_MEMORY
-    if ( 0 > group_handle || group_handle > MEMORY_MAX_NUM_GROUPS) {
-      throw (ExceptionMemoryBadGroupHandle());
-    }
-#endif
-  }
+  ///  Check the group handle
+  void check_handle_(memory_group_handle group_handle) throw ();
   
 private: // attributes
 
