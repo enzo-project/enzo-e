@@ -15,7 +15,7 @@ atsync          = 0 # CHARM++: only load balance when AtSync() called
 use_gprof       = 0
 use_papi        = 0
 use_valgrind    = 0
-use_projections = 1
+use_projections = 0
 
 # temporary code variations for testing
 original_refresh = 1

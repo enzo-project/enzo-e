@@ -74,13 +74,36 @@ void OutputData::write_hierarchy
  ) throw()
 {
   TRACE("OutputData::write_hierarchy ()");
-  TRACE("()");
+
+  INCOMPLETE("OutputData::write_hierarchy(): write hierarchy metadata");
+
+  // ( )  const Factory * factory_;
+  // ( )  std::vector<Patch *> patch_list_;
+  // ( )  TreeK * tree_;
+
+  // (*)  double lower_[3];
+  double lower[3];
+  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
+  file_->file_write_meta(lower,"lower",scalar_type_double,3);
+
+  // (*)  double upper_[3];
+  double upper[3];
+  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
+  file_->file_write_meta(upper,"upper",scalar_type_double,3);
 
   ItPatch it_patch (hierarchy);
-  while (Patch * patch = ++it_patch) {
-    write_patch (field_descr, patch,  0,0,0);
-  }
 
+  while (Patch * patch = ++it_patch) {
+
+      if (patch->blocks_allocated()) {
+#ifdef CONFIG_USE_CHARM
+	patch->block_array().p_write (index_output_charm);
+#else
+	// NO OFFSET: ASSUMES ROOT PATCH
+	write_patch (field_descr, patch,  0,0,0);
+#endif
+      }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -94,9 +117,13 @@ void OutputData::write_patch
 {
   TRACE("OutputData::write_patch ()");
 
+  INCOMPLETE("OutputData::write_patch(): write patch metadata");
+
   ItBlock it_block (patch);
   while (Block * block = ++it_block) {
+
     write_block (field_descr, block, 0,0,0);
+
   }
 
 }
@@ -108,6 +135,9 @@ void OutputData::write_block ( const FieldDescr * field_descr,
   int ixp0, int iyp0, int izp0) throw()
 {
   TRACE("OutputData::write_block ()");
+
+  INCOMPLETE("OutputData::write_block(): write block metadata");
+  INCOMPLETE("OutputData::write_block(): write block fields");
 
 }
 

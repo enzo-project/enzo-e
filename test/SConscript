@@ -13,7 +13,7 @@ copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS 2>&1")
-make_movie   = Builder(action = "convert ${ARGS} $TARGET; chmod a+r $TARGET; rm ${ARGS}")
+make_movie   = Builder(action = "convert ${ARGS} $TARGET")
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
 env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
@@ -199,6 +199,11 @@ Clean(env_mv_png.RunParallel ('test_enzo-p_2.unit',
 
 # 2D
 
+MakeMovie ("boundary-reflecting-2d-????.png","boundary-reflecting-2d.gif");
+MakeMovie ("boundary-periodic-2d-????.png","boundary-periodic-2d.gif");
+MakeMovie ("boundary-inflow-2d-????.png","boundary-inflow-2d.gif");
+MakeMovie ("boundary-outflow-2d-????.png","boundary-outflow-2d.gif");
+
 Clean(env_mv_png.RunParallel ('test_boundary-reflecting-2d.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/boundary-reflecting-2d.in'),
@@ -228,6 +233,12 @@ Clean(env_mv_png.RunParallel ('test_boundary-outflow-2d.unit',
        '#/input/boundary-outflow-2d.in.out'])
 
 # 3D
+
+
+MakeMovie ("boundary-reflecting-3d-????.png","boundary-reflecting-3d.gif");
+MakeMovie ("boundary-periodic-3d-????.png","boundary-periodic-3d.gif");
+MakeMovie ("boundary-inflow-3d-????.png","boundary-inflow-3d.gif");
+MakeMovie ("boundary-outflow-3d-????.png","boundary-outflow-3d.gif");
 
 Clean(env_mv_png.RunParallel ('test_boundary-reflecting-3d.unit',
 		bin_path + '/enzo-p', 
