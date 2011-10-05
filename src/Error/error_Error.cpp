@@ -33,8 +33,10 @@ extern void message2_
 
   Monitor * monitor = Monitor::instance();
 
-  monitor->write (fp,"[error] %s  %s:%d  %s  %s",
-		  type,file,line,function,buffer);
+  monitor->write (fp,"[%s] %s:%d", type,file,line);
+  if (function != "" || buffer != "") {
+    monitor->write (fp,"[%s] %s %s",type,function,buffer);
+  }
   // monitor->write (fp,"     %10s  %s:%d\n",type,file,line);
   // if (strcmp(function,"") != 0)
   //   monitor->write (fp,"     %10s  %s()\n", type,function);
