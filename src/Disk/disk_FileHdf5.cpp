@@ -633,6 +633,7 @@ int FileHdf5::scalar_to_hdf5_ (enum scalar_type type) const throw()
   // long long:    H5T_NATIVE_LLONG   H5T_STD_I64BE or H5T_STD_I64LE
 
   hid_t hdf5_type;
+
   switch (type) {
   case scalar_type_unknown:
     ERROR("FileHdf5::scalar_to_hdf5_",
@@ -656,7 +657,13 @@ int FileHdf5::scalar_to_hdf5_ (enum scalar_type type) const throw()
     hdf5_type = H5T_NATIVE_INT;
     break;
   case scalar_type_long:
-    hdf5_type = H5T_NATIVE_LONG;
+    // use H5T_NATIVE_INT for long if same size: so inverse exists
+    hdf5_type = (sizeof(long) == sizeof(int)) 
+      ? H5T_NATIVE_INT : H5T_NATIVE_LONG;
+    break;
+  case scalar_type_long_long:
+    hdf5_type = (sizeof(long long) == sizeof(long)) 
+      ? H5T_NATIVE_LONG : H5T_NATIVE_LLONG;
     break;
   default:
     ERROR1("FileHdf5::scalar_to_hdf5_", "unsupported type %d", type);
@@ -676,10 +683,6 @@ enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
 
   enum scalar_type type;
  
-  printf ("class = %d  size = %d\n",int(hdf5_class),int(hdf5_size));
-  printf ("class int = %d float = %d\n",H5T_INTEGER,H5T_FLOAT);
-  printf ("sizeof(char) = %d  sizeof(int) = %d  sizeof(long) = %d\n",
-	  int(sizeof(char)),int(sizeof(int)),int(sizeof(long)));
   if (hdf5_class == H5T_INTEGER) {
 
     if (hdf5_size == sizeof(char)) {
@@ -688,12 +691,12 @@ enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
       type = scalar_type_int;
     } else if (hdf5_size == sizeof(long)) {
       type = scalar_type_long;
+    } else if (hdf5_size == sizeof(long long)) {
+      type = scalar_type_long_long;
     } else ASSERT("","",0);
 
   } else if (hdf5_class == H5T_FLOAT) {
 
-  printf ("sizeof(float) = %d  sizeof(double) = %d\n",
-	  int(sizeof(float)),int(sizeof(double)));
     if (hdf5_size == sizeof(float)) {
       type = scalar_type_float;
     } else if (hdf5_size == sizeof(double)) {
@@ -707,7 +710,6 @@ enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
 	  hdf5_class, int(hdf5_size));
   }
 
-  printf ("type = %d\n",type);
   return type;
 
 }

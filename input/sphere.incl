@@ -82,7 +82,7 @@
          name      = ["DEFERRED"];
          field_list = ["density"];
          type     = "image";
-         schedule = ["cycle", "interval", 10];
+         schedule = ["cycle", "interval", 1];
          colormap = [0.00, 0.00, 0.00,  
                      0.00, 0.00, 0.25, 
                      0.00, 0.50, 0.00, 

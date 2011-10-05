@@ -15,6 +15,7 @@ enum scalar_type {
   scalar_type_char,        // Used for string data, with size + 1 for \0 
   scalar_type_int,
   scalar_type_long,
+  scalar_type_long_long,
   scalar_type_float,
   scalar_type_double,
   scalar_type_long_double
