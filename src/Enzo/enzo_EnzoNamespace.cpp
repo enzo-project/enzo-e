@@ -217,9 +217,9 @@ namespace enzo {
     }
 
     //--------------------------------------------------
-    // parameter: Physics::cosmology
-    // parameter: Physics::gamma
-    // parameter: Physics::dimensions
+    // parameter: Physics : cosmology
+    // parameter: Physics : gamma
+    // parameter: Physics : dimensions
     //--------------------------------------------------
 
     ComovingCoordinates = parameters->value_logical ("Physics:cosmology",false);

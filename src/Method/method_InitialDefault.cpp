@@ -50,7 +50,7 @@ void InitialDefault::compute (const FieldDescr * field_descr,
 
     // If Initial:<field_name>:value is a list, try parsing it
 
-    // parameter: Initial:[field]:value
+    // parameter: Initial : <field> : value
 
     parameter_enum parameter_type = parameters_->type("value");
 

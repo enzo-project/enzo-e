@@ -110,8 +110,8 @@ Stopping * EnzoSimulation::create_stopping_ (std::string name) throw ()
 /// @param name   Name of the stopping method to create (ignored)
 {
   //--------------------------------------------------
-  // parameter: Stopping::cycle
-  // parameter: Stopping::time
+  // parameter: Stopping : cycle
+  // parameter: Stopping : time
   //--------------------------------------------------
 
   int    stop_cycle = parameters_->value_integer
@@ -143,8 +143,8 @@ Initial * EnzoSimulation::create_initial_ ( std::string name ) throw ()
   }
 
   //--------------------------------------------------
-  // parameter: Initial::cycle
-  // parameter: Initial::time
+  // parameter: Initial : cycle
+  // parameter: Initial : time
   //--------------------------------------------------
 
   cycle_  = parameters_->value_integer ("Initial:cycle",0);

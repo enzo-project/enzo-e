@@ -107,6 +107,8 @@ PARALLEL_MAIN_BEGIN
 
   // Test results: DUPLICATE CODE IN src/main.cpp !!!
 
+  // parameter: Testing : cycle_final
+
   int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
 
   unit_class ("Enzo-P");
@@ -116,6 +118,8 @@ PARALLEL_MAIN_BEGIN
     monitor_->print ("[Testing] actual   cycle:  %d",simulation->cycle());
     monitor_->print ("[Testing] expected cycle:  %d",cycle_final);
   }
+
+  // parameter: Testing : cycle_final
 
   double time_final  = parameters->value_float("Testing:time_final",0.0);
 

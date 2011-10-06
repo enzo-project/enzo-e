@@ -112,7 +112,7 @@ void Simulation::initialize_simulation_() throw()
 {
 
   //--------------------------------------------------
-  // parameter: Physics::dimensions
+  // parameter: Physics : dimensions
   //--------------------------------------------------
 
   dimension_ = parameters_->value_integer("Physics:dimensions",0);
@@ -128,7 +128,7 @@ void Simulation::initialize_data_() throw()
   field_descr_ = new FieldDescr;
 
   //--------------------------------------------------
-  // parameter: Field::fields
+  // parameter: Field : fields
   //--------------------------------------------------
 
   // Add data fields
@@ -142,7 +142,7 @@ void Simulation::initialize_data_() throw()
   // Define default ghost zone depth for all fields, default value of 1
 
   //--------------------------------------------------
-  // parameter: Field::ghosts
+  // parameter: Field : ghosts
   //--------------------------------------------------
 
   int gx = 1;
@@ -162,27 +162,32 @@ void Simulation::initialize_data_() throw()
 
   for (i=0; i<field_descr_->field_count(); i++) {
     field_descr_->set_ghosts(i,gx,gy,gz);
-    int gx2,gy2,gz2;
-    field_descr_->ghosts(i,&gx2,&gy2,&gz2);
   }
 
   // Set precision
 
   //--------------------------------------------------
-  // parameter: Field::precision
+  // parameter: Field : precision
   //--------------------------------------------------
 
   std::string precision_str = 
     parameters_->value_string("Field:precision","default");
 
-  precision_enum precision = precision_default;
+  precision_enum precision;
 
-  if (precision_str == "single")
+  if (precision_str == "default")
+    precision = precision_default;
+  else if (precision_str == "single")
     precision = precision_single;
   else if (precision_str == "double")
     precision = precision_double;
   else if (precision_str == "quadruple")
     precision = precision_quadruple;
+  else {
+    ERROR1 ("Simulation::initialize_data_()", 
+	    "Unknown precision %s",
+	    precision_str.c_str());
+  }
 
   for (i=0; i<field_descr_->field_count(); i++) {
     field_descr_->set_precision(i,precision);
@@ -207,8 +212,8 @@ void Simulation::initialize_hierarchy_() throw()
   // Domain extents
 
   //--------------------------------------------------
-  // parameter: Domain::lower
-  // parameter: Domain::upper
+  // parameter: Domain : lower
+  // parameter: Domain : upper
   //--------------------------------------------------
 
   ASSERT ("Simulation::initialize_simulation_",
@@ -224,7 +229,7 @@ void Simulation::initialize_hierarchy_() throw()
 
   for (int i=0; i<3; i++) {
     lower[i] = parameters_->list_value_float(i, "Domain:lower", 0.0);
-    upper[i] = parameters_->list_value_float(i, "Domain:upper", 0.0);
+    upper[i] = parameters_->list_value_float(i, "Domain:upper", 1.0);
     ASSERT ("Simulation::initialize_simulation_",
 	    "Domain:lower may not be greater than Domain:upper",
 	    lower[i] <= upper[i]);
@@ -238,8 +243,8 @@ void Simulation::initialize_hierarchy_() throw()
   //----------------------------------------------------------------------
 
   //--------------------------------------------------
-  // parameter: Mesh::root_size
-  // parameter: Mesh::root_blocks
+  // parameter: Mesh : root_size
+  // parameter: Mesh : root_blocks
   //--------------------------------------------------
 
   int root_size[3];
@@ -281,7 +286,7 @@ void Simulation::initialize_timestep_() throw()
 void Simulation::initialize_initial_() throw()
 {
   //--------------------------------------------------
-  // parameter: Initial::code
+  // parameter: Initial : code
   //--------------------------------------------------
 
   std::string name = parameters_->value_string("Initial:code","default");
@@ -298,7 +303,7 @@ void Simulation::initialize_initial_() throw()
 void Simulation::initialize_boundary_() throw()
 {
   //--------------------------------------------------
-  // parameter: Boundary::name
+  // parameter: Boundary : name
   //--------------------------------------------------
 
   std::string name = parameters_->value_string("Boundary:name","");
@@ -312,10 +317,15 @@ void Simulation::initialize_output_() throw()
   // Create and initialize an Output object for each Output group
 
   //--------------------------------------------------
+  // parameter: Output : file_groups
+  //--------------------------------------------------
+
+  //--------------------------------------------------
   parameters_->group_set(0,"Output");
   //--------------------------------------------------
 
   int num_file_groups = parameters_->list_length("file_groups");
+
 
   for (int index_file_group=0; index_file_group < num_file_groups; index_file_group++) {
 
@@ -328,15 +338,13 @@ void Simulation::initialize_output_() throw()
 
     //--------------------------------------------------
     parameters_->group_set(1,file_group);
-    //--------------------------------------------------
-    // parameter: Output:<file_group>:type
-    // parameter: Output:<file_group>:file_name
-    // parameter: Output:<file_group>:field_list
-    // parameter: Output:<file_group>:schedule
-    //--------------------------------------------------
 
     //--------------------------------------------------
     // File type parameter
+    //--------------------------------------------------
+
+    //--------------------------------------------------
+    // parameter: Output : <file_group> : type
     //--------------------------------------------------
 
     std::string type = parameters_->value_string("type","unknown");
@@ -366,6 +374,10 @@ void Simulation::initialize_output_() throw()
 
     std::string file_name = "";
     std::vector<std::string> file_args;
+
+    //--------------------------------------------------
+    // parameter: Output : <file_group> : name
+    //--------------------------------------------------
 
     if (parameters_->type("name") == parameter_string) {
 
@@ -411,6 +423,10 @@ void Simulation::initialize_output_() throw()
     // Field_list parameter
     //--------------------------------------------------
 
+    //--------------------------------------------------
+    // parameter: Output : <file_group> : field_list
+    //--------------------------------------------------
+
     if (parameters_->type("field_list") != parameter_unknown) {
 
       // Set field list to specified field list
@@ -448,6 +464,10 @@ void Simulation::initialize_output_() throw()
 
     //--------------------------------------------------
     // Scheduling parameters
+    //--------------------------------------------------
+
+    //--------------------------------------------------
+    // parameter: Output : <file_group> : schedule
     //--------------------------------------------------
 
     // error check schedule parameter exists
@@ -651,6 +671,10 @@ void Simulation::initialize_output_() throw()
 
       type = parameters_->type("axis");
 
+      //--------------------------------------------------
+      // parameter: Output : <file_group> : axis
+      //--------------------------------------------------
+
       if (type != parameter_unknown) {
 
 	// error check position type
@@ -705,6 +729,10 @@ void Simulation::initialize_output_() throw()
 	double * g = new double [n];
 	double * b = new double [n];
 
+	//--------------------------------------------------
+	// parameter: Output : <file_group> : colormap
+	//--------------------------------------------------
+
 	for (int i=0; i<n; i++) {
 
 
@@ -753,6 +781,7 @@ void Simulation::initialize_output_() throw()
 
 void Simulation::initialize_method_() throw()
 {
+
   //--------------------------------------------------
   parameters_->group_set(0,"Method");
   //--------------------------------------------------
@@ -768,7 +797,7 @@ void Simulation::initialize_method_() throw()
   for (int i=0; i<method_count; i++) {
 
     //--------------------------------------------------
-    // parameter: Method:sequence
+    // parameter: Method : sequence
     //--------------------------------------------------
 
     std::string method_name = parameters_->list_value_string(i,"sequence");
@@ -790,8 +819,8 @@ void Simulation::initialize_method_() throw()
 void Simulation::initialize_parallel_() throw()
 {
   //--------------------------------------------------
-  // parameter: parallel::temp_update_all
-  // parameter: parallel::temp_update_full
+  // parameter: parallel : temp_update_all
+  // parameter: parallel : temp_update_full
   //--------------------------------------------------
 
   temp_update_all_  = 

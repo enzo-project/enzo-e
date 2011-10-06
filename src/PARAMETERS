@@ -1,0 +1,205 @@
+
+Parameter:    Physics : dimensions
+Function:     Simulation::initialize_simulation_()
+Class:        Simulation
+Location:     simulation_Simulation.cpp:118
+Type:         integer
+Default:      0
+
+Parameter:    Field : fields
+Function:     Simulation::initialize_data_()
+Class:        FieldDescr
+Location:     simulation_Simulation.cpp:136
+Type:         list ( string )
+Default:      none
+
+Parameter:    Field : ghosts
+Function:     Simulation::initialize_data_()
+Class:        FieldDescr
+Location:     simulation_Simulation.cpp:152
+Type:         integer | list ( integer )
+Default:      1 for active dimensions, 0 for inactive dimensions
+
+Parameter:    Field : precision
+Function:     Simulation::initialize_data_()
+Class:        FieldDescr
+Location:     simulation_Simulation.cpp:173
+Type:         ["default", "single", "double", "quadruple"]
+Default:      "default"
+
+Parameter:    Domain : lower
+Function:     Simulation::initialize_hierarchy_()
+Class:        Hierarchy
+Location:     simulation_Simulation.cpp:231
+Type:         list ( int )
+Default:      [0.0, 0.0, 0.0];
+
+Parameter:    Domain : upper
+Function:     Simulation::initialize_hierarchy_()
+Class:        Hierarchy
+Location:     simulation_Simulation.cpp:232
+Type:         list ( int )
+Default:      [1.0, 1.0, 1.0];
+
+Parameter:    Mesh : root_size
+Function:     Simulation::initialize_hierarchy_()
+Class:        Hierarchy
+Location:     simulation_Simulation.cpp:251
+Type:         list ( int )
+Default:      [1, 1, 1];
+
+Parameter:    Mesh : root_blocks
+Function:     Simulation::initialize_hierarchy_()
+Class:        Hierarchy
+Location:     simulation_Simulation.cpp:257
+Type:         list ( int )
+Default:      [1, 1, 1];
+
+Parameter:    Initial : code
+Function:     Simulation::initialize_initial_()
+Class:        Initial
+Location:     simulation_Simulation.cpp:291
+Type:         string
+Default:      "default"
+
+Parameter:    Boundary : name
+Function:     Simulation::initialize_boundary_()
+Class:        Boundary
+Location:     simulation_Simulation.cpp:309
+Type:         string
+Default:      ""
+
+Parameter:    Output : file_groups
+Function:     Simulation::initialize_output_()
+Class:        Output
+Location:     simulation_Simulation.cpp:335
+Type:         list ( string )
+Default:      []
+
+Parameter:    Output : <file_group> : type
+Function:     Simulation::initialize_output_()
+Class:        Output
+Location:     simulation_Simulation.cpp:351
+Type:         string
+Default:      unknown
+
+Parameter:    Output : <file_group> : name
+Function:     Simulation::initialize_output_()
+Class:        Output
+Location:     simulation_Simulation.cpp:383
+Type:         string | list ( string )
+Default:      ""
+
+Parameter:    Output : <file_group> : field_list
+Function:     Simulation::initialize_output_()
+Class:        Output
+Location:     simulation_Simulation.cpp:440
+Type:         list ( string )
+Default:      []  (all fields)
+
+Parameter:    Output : <file_group> : schedule
+Function:     Simulation::initialize_output_()
+Class:        Output:Schedule
+Location:     simulation_Simulation.cpp:481
+Type:         [ "cycle" | "time", "interval", <step>]
+Type:         [ "cycle" | "time", "interval", <start>, <stop>, <step>]
+Type:         [ "cycle" | "time", "list", <value1>, ...]
+Default:      none
+
+Parameter:    Output : <file_group> : axis
+Function:     Simulation::initialize_output_()
+Class:        OutputImage
+Location:     simulation_Simulation.cpp:685
+Type:         string ("x" | "y" | "z")
+Default:      none
+
+Parameter:    Output : <file_group> : colormap
+Function:     Simulation::initialize_output_()
+Class:        OutputImage
+Location:     simulation_Simulation.cpp:744
+Type:         list ( float, ... )
+Default:      [ 0.0, 0.0, 0.0, 1.0, 1.0, 1.0 ] (set in OutputImage)
+
+Parameter:    Output : method
+Function:     Simulation::initialize_method_()
+Class:        Method
+Location:     simulation_Simulation.cpp:803
+Type:         list ( string )
+Default:      none
+
+Parameter:    Parallel : temp_update_all
+Function:     Simulation::initialize_parallel_()
+Class:        Simulation
+Location:     simulation_Simulation.cpp:825
+Type:         logical
+Default:      true
+
+Parameter:    Parallel : temp_update_full
+Function:     Simulation::initialize_parallel_()
+Class:        Simulation
+Location:     simulation_Simulation.cpp:827
+Type:         logical
+Default:      true
+
+Parameter:    Initial : <field> : value
+Function:     InitialDefault::compute()
+Class:        InitialDefault
+Location:     method_InitialDefault.cpp:58
+Type:         list ( float_expr, [ logical_expr, float_expr [ ... ] ] )
+Default:      0.0
+
+Parameter:    Testing : cycle_final
+Function:     main()
+Class:        [enzo-p]
+Location:     enzo-p.cpp:111
+Type:         integer
+Default:      0
+
+Parameter:    Testing : time_final
+Function:     main()
+Class:        [enzo-p]
+Location:     enzo-p.cpp:123
+Type:         float
+Default:      0
+
+Parameter:    Stopping : cycle
+Function:     create_stopping_
+Class:        EnzoSimulation
+Location:     enzo_EnzoSimulation.cpp:116
+Type:         integer
+Default:      std::numeric_limits<int>::max()
+
+Parameter:    Stopping : time
+Function:     create_stopping_
+Class:        EnzoSimulation
+Location:     enzo_EnzoSimulation.cpp:118
+Type:         float
+Default:      std::numeric_limits<double>::max()
+
+Parameter:    Initial : cycle
+Function:     create_initial_
+Class:        EnzoSimulation
+Location:     enzo_EnzoSimulation.cpp:149
+Type:         integer
+Default:      0
+
+Parameter:    Initial : time
+Function:     create_initial_
+Class:        EnzoSimulation
+Location:     enzo_EnzoSimulation.cpp:150
+Type:         float
+Default:      0.0
+
+Parameter:    Boundary : type
+Function:     create_boundary_
+Class:        EnzoSimulation
+Location:     enzo_EnzoSimulation.cpp:166
+Type:         string ("reflecting", "outflow", "inflow", "periodic", "file", "code")
+Default:      "undefined"
+
+
+
+
+
+
+

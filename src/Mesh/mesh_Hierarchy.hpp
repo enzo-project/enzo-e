@@ -18,7 +18,7 @@ class Hierarchy {
 
 public: // interface
 
-  /// Initialize an Hierarchy object
+  /// Initialize a Hierarchy object
   Hierarchy(const Factory * factory) throw ();
 
   /// Delete the Hierarchy object
