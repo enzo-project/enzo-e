@@ -105,7 +105,9 @@ void EnzoSimulationMpi::run() throw()
 
   while (! stop_hierarchy) {
 
-    monitor->print("[Simulation %d] cycle %04d time %15.12f", index_, cycle_,time_);
+    monitor->print("Simulation",
+		   "cycle %04d time %15.12f",
+		   index_, cycle_,time_);
 
     //--------------------------------------------------
     // Determine timestep
@@ -235,7 +237,8 @@ void EnzoSimulationMpi::run() throw()
   // END MAIN LOOP
   //======================================================================
 
-  monitor->print("[Simulation %d] cycle %04d time %15.12f", 
+  monitor->print("Simulation",
+		 "cycle %04d time %15.12f", 
 		 index_, cycle_, time_);
 
   performance.stop();

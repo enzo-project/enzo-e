@@ -28,18 +28,15 @@ OutputData::~OutputData() throw ()
 
 void OutputData::init () throw()
 {
-  TRACE("OutputData::init ()");
 }
 
 //----------------------------------------------------------------------
 
 void OutputData::open () throw()
 {
-  TRACE("OutputData::open()");
-
   std::string file_name = expand_file_name();
 
-  Monitor::instance()->print ("[Output] writing data file %s", 
+  Monitor::instance()->print ("Output","writing data file %s", 
 			      file_name.c_str());
 
   delete file_;
@@ -53,7 +50,6 @@ void OutputData::open () throw()
 
 void OutputData::close () throw()
 {
-  TRACE("OutputData::close ()");
   file_->file_close();
 
   delete file_;
@@ -64,7 +60,6 @@ void OutputData::close () throw()
 
 void OutputData::finalize () throw ()
 {
-  TRACE("OutputData::finalize ()");
   Output::finalize();
 }
 
@@ -76,46 +71,27 @@ void OutputData::write_hierarchy
  Hierarchy * hierarchy
  ) throw()
 {
-  TRACE("ENTER OutputData::write_hierarchy ()");
 
-  // (*)  write meta factory_
+  // Loop over metadata items in Hierarchy
 
-  /* initialized in constructor */
+  IoHierarchy io_hierarchy(hierarchy);
 
-  // (*)  write meta patch_list_
+  for (int i=0; i<io_hierarchy.meta_count(); i++) {
 
-  int patch_count = hierarchy->num_patches();
-  file_->file_write_meta(&patch_count,"patch_count",scalar_type_int);
-  
-  // (*)  write meta tree_
+    const char * name;
+    scalar_type type;
+    void * buffer;
+    int i0,i1,i2,i3,i4;
 
-  /* @@@ */
+    // Get ith Hierarchy metadata
+    io_hierarchy.meta_value(i,& buffer, &name, &type, &i0,&i1,&i2,&i3,&i4);
 
-  // (*)  write meta lower_[];
-
-  double lower[3];
-  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
-  file_->file_write_meta(lower,"domain_lower",scalar_type_double,3);
-
-  // (*)  double meta upper_[3];
-
-  double upper[3];
-  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
-  file_->file_write_meta(upper,"domain_upper",scalar_type_double,3);
-
-  ItPatch it_patch (hierarchy);
-
-  // (*) write data patch_list_
-
-  while (Patch * patch = ++it_patch) {
-
-    // NO OFFSET: ASSUMES ROOT PATCH
-    write_patch (field_descr, patch,  0,0,0);
-
+    // Write ith Hierarchy metadata
+    file_->file_write_meta(buffer,name,type,i0,i1,i2,i3,i4);
   }
 
-  // ( ) write data meta tree_
-  TRACE("EXIT OutputData::write_hierarchy ()");
+  // Call write_patch() on component patches
+  Output::write_hierarchy (field_descr,hierarchy);
 
 }
 
@@ -128,13 +104,37 @@ void OutputData::write_patch
  int ixp0, int iyp0, int izp0
  ) throw()
 {
-  TRACE("ENTER OutputData::write_patch ()");
 
-  INCOMPLETE("OutputData::write_patch(): write patch metadata");
+  // Create file group for patch
+
+  char buffer[40];
+  int ib = patch->index();
+  sprintf (buffer,"/patch_%d",ib);
+  file_->group_create(buffer);
+
+  // Loop over metadata items in Hierarchy
+
+  IoPatch io_patch(patch);
+
+  for (int i=0; i<io_patch.meta_count(); i++) {
+
+    void * buffer;
+    const char * name;
+    scalar_type type;
+    int i0,i1,i2,i3,i4;
+
+    // Get ith Patch metadata
+    io_patch.meta_value(i,& buffer, &name, &type, &i0,&i1,&i2,&i3,&i4);
+
+    // Write ith Patch metadata
+    file_->group_write_meta(buffer,name,type,i0,i1,i2,i3,i4);
+  }
+
+  // Call write_block() on component blocks
 
   Output::write_patch(field_descr,patch,ixp0,iyp0,izp0);
-  
-  TRACE("EXIT OutputData::write_patch ()");
+
+  file_->group_close();
 
 }
 
@@ -144,23 +144,31 @@ void OutputData::write_block ( const FieldDescr * field_descr,
   Block * block,
   int ixp0, int iyp0, int izp0) throw()
 {
-  // Get block index
-
-  int ib = block->index();
+  // Create file group for block
 
   char buffer[40];
-  sprintf (buffer,"/block-%d",ib);
-
-  TRACE1 ("OutputData::write_block() %s",buffer);
+  int ib = block->index();
+  sprintf (buffer,"/block_%d",ib);
   file_->group_create(buffer);
 
-  file_->group_write_meta(&ib,"block_index",scalar_type_int);
+  // Write block meta data
 
-  TRACE("ENTER OutputData::write_block ()");
+  IoBlock io_block(block);
 
-  INCOMPLETE("OutputData::write_block(): write block metadata");
-  INCOMPLETE("OutputData::write_block(): write block fields");
-  TRACE("EXIT OutputData::write_block ()");
+  for (int i=0; i<io_block.meta_count(); i++) {
+
+    void * buffer;
+    const char * name;
+    scalar_type type;
+    int i0,i1,i2,i3,i4;
+
+    // Get ith Block metadata
+    io_block.meta_value(i,& buffer, &name, &type, &i0,&i1,&i2,&i3,&i4);
+
+    // Write ith Block metadata
+    file_->group_write_meta(buffer,name,type,i0,i1,i2,i3,i4);
+  }
+
   file_->group_close();
 
 }

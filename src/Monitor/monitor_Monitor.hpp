@@ -71,10 +71,11 @@ public: // interface
   void header () const;
 
   /// Print a message to stdout
-  void print (const char * buffer, ...) const;
+  void print (const char * component, const char * buffer, ...) const;
 
   /// Write a message to file
-  void write (FILE * fp, const char * buffer, ...) const;
+  void write (FILE * fp, 
+	      const char * component, const char * buffer, ...) const;
 
   /// Generate a PNG image of an array
   void image_open (std::string filename, 

@@ -19,6 +19,8 @@ class Patch
   /// @brief [\ref Mesh] Represent a distributed box of uniform
   /// (non-adaptive) data
 
+  friend class IoPatch;
+
  public: // interface
 
   /// Constructor for given Patch size and blocking count
@@ -59,11 +61,13 @@ class Patch
   /// Return domain upper extent
   void upper(double * x, double * y=0, double * z=0) const throw ();
 
+  /// Return the index of this Patch in the containing Hierarchy
+  int index () const throw();
+
   //--------------------------------------------------
 
   GroupProcess * group()  const throw()
   { return group_process_; };
-
 
   //--------------------------------------------------
 

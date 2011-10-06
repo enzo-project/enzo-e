@@ -18,7 +18,8 @@ Hierarchy::Hierarchy
  const Factory * factory
  ) throw ()
   : factory_(factory),
-    tree_(0)
+    tree_(0),
+    patch_count_(0)
 {
   // Initialize extents
   for (int i=0; i<3; i++) {
@@ -36,6 +37,7 @@ Hierarchy::~Hierarchy() throw()
     delete patch_list_[i];
     patch_list_[i] = 0;
   }
+  patch_count_ = 0;
   delete tree_;
 }
 
@@ -150,7 +152,7 @@ size_t Hierarchy::num_patches() const throw()
 
 Patch * Hierarchy::patch(size_t i) throw()
 {
-  return ( patch_list_.size()-1 >= i )? patch_list_[i] : 0;
+  return ( patch_list_.size()-1 >= i ) ? patch_list_[i] : 0;
 }
 
 //----------------------------------------------------------------------
@@ -225,6 +227,7 @@ void Hierarchy::insert_patch(Patch * patch) throw()
   int size = patch_list_.size();
   patch_list_.resize(size + 1);
   patch_list_[size] = patch;
+  ++ patch_count_;
 }
 
 // //----------------------------------------------------------------------

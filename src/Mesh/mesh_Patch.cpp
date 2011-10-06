@@ -121,6 +121,13 @@ void Patch::upper(double * xp, double * yp, double * zp) const throw ()
   if (zp) (*zp) = upper_[2];
 }
 
+//----------------------------------------------------------------------
+int Patch::index() const throw ()
+{
+  // ASSUMES ROOT PATCH
+  return 0;
+}
+
 //======================================================================
 
 void Patch::allocate_blocks(FieldDescr * field_descr) throw()

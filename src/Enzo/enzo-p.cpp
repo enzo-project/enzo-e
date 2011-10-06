@@ -52,7 +52,7 @@ PARALLEL_MAIN_BEGIN
 
   monitor_->set_active (group_process->is_root());
   monitor_->header();
-  monitor_->print ("BEGIN ENZO-P");
+  monitor_->print ("","BEGIN ENZO-P");
 
   // open parameter file, calling usage() if invalid
 
@@ -115,8 +115,8 @@ PARALLEL_MAIN_BEGIN
   unit_func  ("final cycle");
   if (cycle_final != 0) {
     unit_assert (simulation->cycle()==cycle_final);
-    monitor_->print ("[Testing] actual   cycle:  %d",simulation->cycle());
-    monitor_->print ("[Testing] expected cycle:  %d",cycle_final);
+    monitor_->print ("Testing","actual   cycle:  %d",simulation->cycle());
+    monitor_->print ("Testing","expected cycle:  %d",cycle_final);
   }
 
   // parameter: Testing : cycle_final
@@ -129,10 +129,10 @@ PARALLEL_MAIN_BEGIN
     double err_rel = cello::err_rel(simulation->time(),time_final);
     double mach_eps = cello::machine_epsilon(precision_default);
     unit_assert ( err_rel < 100*mach_eps);
-    monitor_->print ("[Testing] actual   time:  %.15g",simulation->time());
-    monitor_->print ("[Testing] expected time:  %.15g",time_final);
-    monitor_->print ("[Testing] relative error: %g",err_rel);
-    monitor_->print ("[Testing] 100*mach_eps:   %g",100*mach_eps);
+    monitor_->print ("Testing","actual   time:  %.15g",simulation->time());
+    monitor_->print ("Testing","expected time:  %.15g",time_final);
+    monitor_->print ("Testing","relative error: %g",err_rel);
+    monitor_->print ("Testing","100*mach_eps:   %g",100*mach_eps);
   }
 
   // Delete the simulation

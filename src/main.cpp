@@ -44,8 +44,8 @@ void Main::p_exit(int count)
     unit_func  ("final cycle");
     if (cycle_final != 0) {
       unit_assert (simulation->cycle()==cycle_final);
-      monitor_->print ("[Testing] actual   cycle:  %d",simulation->cycle());
-      monitor_->print ("[Testing] expected cycle:  %d",cycle_final);
+      monitor_->print ("Testing","actual   cycle:  %d",simulation->cycle());
+      monitor_->print ("Testing","expected cycle:  %d",cycle_final);
     }
 
     double time_final  = parameters->value_float("Testing:time_final",0.0);
@@ -56,15 +56,15 @@ void Main::p_exit(int count)
       double err_rel = cello::err_rel(simulation->time(),time_final);
       double mach_eps = cello::machine_epsilon(precision_default);
       unit_assert ( err_rel < 100*mach_eps);
-      monitor_->print ("[Testing] actual   time:  %.15g",simulation->time());
-      monitor_->print ("[Testing] expected time:  %.15g",time_final);
-      monitor_->print ("[Testing] relative error: %g",err_rel);
-      monitor_->print ("[Testing] 100*mach_eps:   %g",100*mach_eps);
+      monitor_->print ("Testing","actual   time:  %.15g",simulation->time());
+      monitor_->print ("Testing","expected time:  %.15g",time_final);
+      monitor_->print ("Testing","relative error: %g",err_rel);
+      monitor_->print ("Testing","100*mach_eps:   %g",100*mach_eps);
     }
 
 #endif
 
-    monitor_->print ("END CELLO");
+    monitor_->print ("","END CELLO");
     //    unit_finalize();
     // Fake unit_init() for index.php (test.hpp is not included since
     // enzo.ci and test.ci conflict)

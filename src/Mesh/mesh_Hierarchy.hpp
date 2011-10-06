@@ -16,6 +16,8 @@ class Hierarchy {
   /// @ingroup  Mesh
   /// @brief    [\ref Mesh] Adaptive mesh refinement hierarchy
 
+  friend class IoHierarchy;
+
 public: // interface
 
   /// Initialize a Hierarchy object
@@ -73,8 +75,10 @@ protected: // attributes
   /// [abstract factory design pattern]
   const Factory * factory_;
 
-  /// List of local patchs
+  /// Number of patches (redundant with patch_list_, but used in IoHierarchy)
+  int patch_count_;
 
+  /// List of local patches
   std::vector<Patch *> patch_list_;
 
   /// Tree defining the mesh hierarchy topology
@@ -88,6 +92,7 @@ protected: // attributes
   double upper_[3];
 
 };
+
 
 #endif /* MESH_HIERARCHY_HPP */
 

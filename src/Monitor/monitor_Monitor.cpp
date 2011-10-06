@@ -11,7 +11,6 @@
 #include "monitor.hpp" 
 
 //----------------------------------------------------------------------
-// Monitor * Monitor::instance_ = 0; // (singleton design pattern)
 Monitor Monitor::instance_; // singleton design pattern)
 //----------------------------------------------------------------------
 
@@ -42,31 +41,29 @@ Monitor::~Monitor()
 {
   delete timer_;
   timer_ = 0;
-  // delete instance_;
-  // instance_ = 0;
 }
 
 //----------------------------------------------------------------------
 
 void Monitor::header () const
 {
-  print ("==============================================");
-  print ("");
-  print ("  .oooooo.             oooo  oooo            ");
-  print (" d8P'  `Y8b            `888  `888            ");
-  print ("888           .ooooo.   888   888   .ooooo.  ");
-  print ("888          d88' `88b  888   888  d88' `88b ");
-  print ("888          888ooo888  888   888  888   888 ");
-  print ("`88b    ooo  888    .o  888   888  888   888 ");
-  print (" `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P' ");
-  print ("");
-  print ("A Parallel Adaptive Mesh Refinement Framework");
-  print ("");  
-  print ("                James Bordner");
-  print ("  Laboratory for Computational Astrophysics");
-  print ("        San Diego Supercomputer Center");
-  print ("     University of California, San Diego");
-  print ("");  
+  print ("","==============================================");
+  print ("","");
+  print ("","  .oooooo.             oooo  oooo            ");
+  print (""," d8P'  `Y8b            `888  `888            ");
+  print ("","888           .ooooo.   888   888   .ooooo.  ");
+  print ("","888          d88' `88b  888   888  d88' `88b ");
+  print ("","888          888ooo888  888   888  888   888 ");
+  print ("","`88b    ooo  888    .o  888   888  888   888 ");
+  print (""," `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P' ");
+  print ("","");
+  print ("","A Parallel Adaptive Mesh Refinement Framework");
+  print ("","");  
+  print ("","                James Bordner");
+  print ("","  Laboratory for Computational Astrophysics");
+  print ("","        San Diego Supercomputer Center");
+  print ("","     University of California, San Diego");
+  print ("","");  
 
   // Get date text
 
@@ -77,7 +74,7 @@ void Monitor::header () const
   const char * month[] = 
     {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
-  print ("BEGIN CELLO: %s %02d %02d:%02d:%02d",
+  print ("","BEGIN CELLO: %s %02d %02d:%02d:%02d",
 	 month[t->tm_mon],
 	 t->tm_mday,
 	 t->tm_hour,
@@ -124,22 +121,28 @@ void Monitor::header () const
   sprintf (s_mpi,   "(%c) CONFIG_USE_MPI",         c_mpi);
   sprintf (s_papi,  "[%c] CONFIG_USE_PAPI",        c_papi);
 
-  print ("==============================================");
-  print (s_single);
-  print (s_double);
-  print (s_quad);
-  print ("");
-  print (s_charm);
-  print (s_mpi);
-  print ("");
-  print (s_papi);
-  print ("==============================================");
+  print ("","==============================================");
+  print ("",s_single);
+  print ("",s_double);
+  print ("",s_quad);
+  print ("","");
+  print ("",s_charm);
+  print ("",s_mpi);
+  print ("","");
+  print ("",s_papi);
+  print ("","==============================================");
 
 }
 
 //----------------------------------------------------------------------
 
-void Monitor::write (FILE * fp, const char * message, ...) const
+void Monitor::write 
+(
+ FILE * fp,
+ const char * component,
+ const char * message,
+  ...
+ ) const
 {
   if (active_) {
 
@@ -169,14 +172,25 @@ void Monitor::write (FILE * fp, const char * message, ...) const
 
     snprintf (buffer_time,10,"%08.2f",timer_->value());
 
+    // get Component if any
+    char buffer_component[20];
+
+    if (strlen(component)>0) {
+      snprintf (buffer_component,20," %-10s ",component);
+    } else {
+      buffer_component[0] = 0;
+    }
+
     // Print 
 
     if (fp == stdout) {
       PARALLEL_PRINTF 
-	("%s %s %s\n", buffer_process, buffer_time, buffer_message);
+	("%s %s %s %s\n",
+	 buffer_process, buffer_time, buffer_component, buffer_message);
     } else {
       fprintf 
-	(fp,"%s %s %s\n", buffer_process, buffer_time, buffer_message);
+	(fp,"%s %s %s %s\n",
+	 buffer_process, buffer_time, buffer_component, buffer_message);
     }
   }
 
@@ -184,7 +198,7 @@ void Monitor::write (FILE * fp, const char * message, ...) const
 
 //----------------------------------------------------------------------
 
-void Monitor::print (const char * message, ...) const
+void Monitor::print (const char * component, const char * message, ...) const
 {
   if (active_) {
 
@@ -198,7 +212,7 @@ void Monitor::print (const char * message, ...) const
     vsnprintf (buffer_message,MONITOR_LENGTH, message,fargs);
     va_end(fargs);
 
-    write (stdout, buffer_message);
+    write (stdout, component, buffer_message);
   }
 }
 

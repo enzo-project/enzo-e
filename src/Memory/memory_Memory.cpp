@@ -335,13 +335,14 @@ void Memory::print () throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   for (memory_group_handle i=0; i<= MEMORY_MAX_NUM_GROUPS; i++) {
+    Monitor * monitor = Monitor::instance();
     if (i == 0 || group_names_[i] != NULL) {
-      PARALLEL_PRINTF ("Group %s\n",i ? group_names_[i]: "Total");
-      PARALLEL_PRINTF ("   limit        = %ld\n",long(limit_[i]));
-      PARALLEL_PRINTF ("   bytes        = %ld\n",long(bytes_[i]));
-      PARALLEL_PRINTF ("   bytes_high   = %ld\n",long(bytes_high_[i]));
-      PARALLEL_PRINTF ("   new_calls    = %ld\n",long(new_calls_[i]));
-      PARALLEL_PRINTF ("   delete_calls = %ld\n",long(delete_calls_[i]));
+      monitor->print ("Memory","Group %s",i ? group_names_[i]: "Total");
+      monitor->print ("Memory","  limit        = %ld",long(limit_[i]));
+      monitor->print ("Memory","  bytes        = %ld",long(bytes_[i]));
+      monitor->print ("Memory","  bytes_high   = %ld",long(bytes_high_[i]));
+      monitor->print ("Memory","  new_calls    = %ld",long(new_calls_[i]));
+      monitor->print ("Memory","  delete_calls = %ld",long(delete_calls_[i]));
     }
   }
 #endif

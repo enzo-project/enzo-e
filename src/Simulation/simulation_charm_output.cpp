@@ -90,7 +90,6 @@ void Simulation::output_next() throw()
 
 void Block::p_write (int index_output)
 {
-  TRACE("ENTER Block::p_write()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -99,7 +98,6 @@ void Block::p_write (int index_output)
   // Synchronize via main chare before writing
   int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
   simulation->proxy_block_reduce().p_output_reduce (num_blocks);
-  TRACE("EXIT Block::p_write()");
 }
 
 //----------------------------------------------------------------------

@@ -110,7 +110,7 @@ void Parameters::read ( const char * file_name )
 
   fclose(file_pointer);
 
-  monitor_->print ("[Parameters] read in %s",file_name);
+  monitor_->print ("Parameters","read in %s",file_name);
 }
 
 //----------------------------------------------------------------------
@@ -802,7 +802,7 @@ void Parameters::monitor_access_
     sprintf (index_string,"[%d]",index);
   }
 
-  monitor_->print("[Parameters] accessed %s%s %s",
+  monitor_->print("Parameters","accessed %s%s %s",
 		  parameter_name_(parameter).c_str(),
 		  index_string,
 		  value.c_str());
@@ -818,7 +818,7 @@ void Parameters::monitor_write_ (std::string parameter) throw()
 	   parameter_name_(parameter).c_str(),
 	   param ? param->value_to_string().c_str() : "[undefined]");
 
-  monitor_->print(buffer);
+  monitor_->print("Parameters",buffer);
 }
 
 //----------------------------------------------------------------------

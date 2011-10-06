@@ -25,6 +25,8 @@ class Block
   /// @ingroup  Mesh
   /// @brief    [\ref Mesh] Basic serial block of mesh data
 
+  friend class IoBlock;
+
 public: // interface
 
   /// create a Block with the given block count, lower PATCH extent, block
