@@ -123,9 +123,11 @@ public: // interface
   /// Return domain upper extent
   void upper(double * x = 0,  double * y = 0, double * z = 0) const throw ();
 
-  /// Return the index of this Block in the containing Patch 
-  /// [tested in test_Patch]
+  /// Return the position of this Block in the containing Patch 
   void index_patch (int * ix, int * iy, int * iz) const throw();
+
+  /// Return the index of this Block in the containing Patch 
+  int index () const throw();
 
   /// Return the size the containing Patch
   void size_patch (int * nx, int * ny, int * nz) const throw();

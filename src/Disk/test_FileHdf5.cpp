@@ -123,6 +123,10 @@ PARALLEL_MAIN_BEGIN
   hdf5_a.file_write_meta(&my, "my", scalar_type_int);
 
   hdf5_a.group_create ("/test");
+
+  hdf5_a.group_write_meta(&a_nx,"nx",scalar_type_int);
+  hdf5_a.group_write_meta(&a_ny,"ny",scalar_type_int);
+
   hdf5_a.data_create ("char", scalar_type_char, a_nx,a_ny,a_nz);
   hdf5_a.data_write_meta(&ma_char, "meta_char", scalar_type_char, a_mx, a_my);
   hdf5_a.data_write (a_char);
@@ -275,6 +279,17 @@ PARALLEL_MAIN_BEGIN
   hdf5_b.data_open ("char",&type, &b_nx,&b_ny,&b_nz);
 
   unit_assert (type == scalar_type_char);
+
+  unit_func("char group_read_meta()");
+
+  int g_nx,g_ny;
+
+  type = scalar_type_unknown;
+  hdf5_b.group_read_meta(&g_nx,"nx",&type);
+  hdf5_b.group_read_meta(&g_ny,"ny",&type);
+  unit_assert (a_nx == g_nx);
+  unit_assert (a_ny == g_ny);
+  unit_assert (type == scalar_type_int);
 
   //----------------------------------------------------------------------
   unit_func("char data_read_meta()");

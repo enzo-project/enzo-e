@@ -769,9 +769,18 @@ void Simulation::initialize_output_() throw()
       }
     }
 
-    // Add the initialized Output object to the Simulation's list of output objects
+    // Initialize index of Output object in Simulation for CHARM
+    // Output read()/write() callback by Hierarchy, Patch or Block
+
+#ifdef CONFIG_USE_CHARM
+    output->set_index_charm(output_list_.size());
+#endif
+
+    // Add the initialized Output object to the Simulation's list of
+    // output objects
 
     output_list_.push_back(output); 
+
 
   } // (for index_file_group)
 

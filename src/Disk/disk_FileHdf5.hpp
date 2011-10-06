@@ -72,9 +72,6 @@ public: // interface
   /// Close the opened dataset
   virtual void data_close () throw();
 
-
-  // Metadata (attributes)
-
   /// Read a metadata item associated with the opened dataset
   virtual void data_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
@@ -97,6 +94,16 @@ public: // interface
   /// Get the current group
   virtual void group_close () throw();
   
+  /// Read a metadata item associated with the opened group
+  virtual void group_read_meta
+  ( void * buffer, std::string name,  enum scalar_type * s_type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+  
+  /// Write a metadata item associated with the opened group
+  virtual void group_write_meta
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+
 private: // functions
 
   /// Convert the scalar type to HDF5 datatype

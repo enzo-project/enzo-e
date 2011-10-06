@@ -74,9 +74,11 @@ public: // functions
 
   void counter_increment() { count_reduce_++;  }
 
-  int counter_value() { return (count_reduce_); }
+  int counter_value() const { return (count_reduce_); }
 
-  void counter_reset() { count_reduce_=0; }
+  void counter_reset() { count_reduce_ = 0; }
+
+  void set_index_charm(int index_charm) { index_charm_ = index_charm; }
 
 #endif
 
@@ -98,8 +100,7 @@ public: // virtual functions
   /// Write local hierarchy data to disk
   virtual void write_hierarchy
   ( const FieldDescr * field_descr,
-    Hierarchy * hierarchy,
-    int index_output_charm = 0) throw() = 0;
+    Hierarchy * hierarchy) throw() = 0;
 
   /// Write local patch data to disk
   virtual void write_patch
@@ -165,6 +166,10 @@ protected: // attributes
   /// Iterator over field id's
   ItField * it_field_;
 
+#ifdef CONFIG_USE_CHARM
+  /// Index of this Output object in Simulation
+  size_t index_charm_;
+#endif
 
 };
 

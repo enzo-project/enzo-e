@@ -110,21 +110,13 @@ void OutputImage::finalize () throw()
 void OutputImage::write_hierarchy
 (
  const FieldDescr * field_descr,
- Hierarchy * hierarchy,
- int index_output
-  ) throw()
+ Hierarchy * hierarchy
+ ) throw()
 {
   ItPatch it_patch (hierarchy);
   while (Patch * patch = ++it_patch) {
-
-      if (patch->blocks_allocated()) {
-#ifdef CONFIG_USE_CHARM
-	patch->block_array().p_write (index_output);
-#else
-	// NO OFFSET: ASSUMES ROOT PATCH
-	write_patch (field_descr, patch,  0,0,0);
-#endif
-      }
+    // NO OFFSET: ASSUMES ROOT PATCH
+    write_patch (field_descr, patch,  0,0,0);
   }
 
 }
@@ -146,11 +138,8 @@ void OutputImage::write_patch
 // @param izp0  offset of the patch relative to the parent patch along z-axis
 {
 
-  ItBlock it_block (patch);
-  while (Block * block = ++it_block) {
-
-    write_block (field_descr, block, ixp0,iyp0,izp0);
-  }
+  /// Call write_patch() on parent Output class
+  Output::write_patch(field_descr,patch,ixp0,iyp0,izp0);
 
 }
 

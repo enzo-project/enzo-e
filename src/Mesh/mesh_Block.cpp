@@ -206,6 +206,17 @@ void Block::upper(double * x, double * y, double * z) const throw ()
 
 //----------------------------------------------------------------------
 
+int Block::index () const throw ()
+{
+#ifdef CONFIG_USE_CHARM
+  return thisIndex.x + size_[0] * (thisIndex.y + size_[1] * thisIndex.z);
+#else
+  return index_[0] + size_[0] * (index_[1] + size_[1] * index_[2]);
+#endif
+}
+
+//----------------------------------------------------------------------
+
 void Block::index_patch (int * ix=0, int * iy=0, int * iz=0) const throw ()
 {
 #ifdef CONFIG_USE_CHARM

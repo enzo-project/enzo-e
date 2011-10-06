@@ -22,6 +22,7 @@ BlockReduce::BlockReduce()
      dt_hierarchy_(std::numeric_limits<double>::max()),
      stop_hierarchy_(true)
 {
+  TRACE("BlockReduce()");
 }
 
 #endif
@@ -39,6 +40,7 @@ void BlockReduce::p_prepare(int    count,
 			    int    stop_block)
 {
 
+  TRACE1("BlockReduce::p_prepare(%d)",count);
   // Parallel reduction of dt and stopping criteria 
 
   dt_hierarchy_   = MIN(dt_hierarchy_, dt_block);
@@ -53,6 +55,7 @@ void BlockReduce::p_prepare(int    count,
     // Simulation::p_output()
     //--------------------------------------------------
 
+    TRACE1("BlockReduce::p_prepare(%d) calling Simulation::p_output()",count);
     proxy_simulation.p_output(cycle, time, dt_hierarchy_, stop_hierarchy_);
 
     // Reset pool

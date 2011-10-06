@@ -3,6 +3,8 @@
 /// @file     io_OutputData.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Mar 17 11:14:18 PDT 2011
+/// @todo     Move write_hierarchy() call to write_patch() etc. to parent
+///           Output::write_hierarchy()
 /// @brief    Implementation of the OutputData class
 
 #include "cello.hpp"
@@ -27,8 +29,6 @@ OutputData::~OutputData() throw ()
 void OutputData::init () throw()
 {
   TRACE("OutputData::init ()");
-  std::string file_name = expand_file_name();
-  file_ = new FileHdf5 (".",file_name);
 }
 
 //----------------------------------------------------------------------
@@ -36,13 +36,17 @@ void OutputData::init () throw()
 void OutputData::open () throw()
 {
   TRACE("OutputData::open()");
+
   std::string file_name = expand_file_name();
 
   Monitor::instance()->print ("[Output] writing data file %s", 
 			      file_name.c_str());
 
-  file_->file_create();
+  delete file_;
 
+  file_ = new FileHdf5 (".",file_name);
+
+  file_->file_create();
 }
 
 //----------------------------------------------------------------------
@@ -69,41 +73,50 @@ void OutputData::finalize () throw ()
 void OutputData::write_hierarchy 
 (
  const FieldDescr * field_descr,
- Hierarchy * hierarchy,
- int index_output_charm
+ Hierarchy * hierarchy
  ) throw()
 {
-  TRACE("OutputData::write_hierarchy ()");
+  TRACE("ENTER OutputData::write_hierarchy ()");
 
-  INCOMPLETE("OutputData::write_hierarchy(): write hierarchy metadata");
+  // (*)  write meta factory_
 
-  // ( )  const Factory * factory_;
-  // ( )  std::vector<Patch *> patch_list_;
-  // ( )  TreeK * tree_;
+  /* initialized in constructor */
 
-  // (*)  double lower_[3];
+  // (*)  write meta patch_list_
+
+  int patch_count = hierarchy->num_patches();
+  file_->file_write_meta(&patch_count,"patch_count",scalar_type_int);
+  
+  // (*)  write meta tree_
+
+  /* @@@ */
+
+  // (*)  write meta lower_[];
+
   double lower[3];
   hierarchy->lower(&lower[0],&lower[1],&lower[2]);
-  file_->file_write_meta(lower,"lower",scalar_type_double,3);
+  file_->file_write_meta(lower,"domain_lower",scalar_type_double,3);
 
-  // (*)  double upper_[3];
+  // (*)  double meta upper_[3];
+
   double upper[3];
   hierarchy->upper(&upper[0],&upper[1],&upper[2]);
-  file_->file_write_meta(upper,"upper",scalar_type_double,3);
+  file_->file_write_meta(upper,"domain_upper",scalar_type_double,3);
 
   ItPatch it_patch (hierarchy);
 
+  // (*) write data patch_list_
+
   while (Patch * patch = ++it_patch) {
 
-      if (patch->blocks_allocated()) {
-#ifdef CONFIG_USE_CHARM
-	patch->block_array().p_write (index_output_charm);
-#else
-	// NO OFFSET: ASSUMES ROOT PATCH
-	write_patch (field_descr, patch,  0,0,0);
-#endif
-      }
+    // NO OFFSET: ASSUMES ROOT PATCH
+    write_patch (field_descr, patch,  0,0,0);
+
   }
+
+  // ( ) write data meta tree_
+  TRACE("EXIT OutputData::write_hierarchy ()");
+
 }
 
 //----------------------------------------------------------------------
@@ -115,16 +128,13 @@ void OutputData::write_patch
  int ixp0, int iyp0, int izp0
  ) throw()
 {
-  TRACE("OutputData::write_patch ()");
+  TRACE("ENTER OutputData::write_patch ()");
 
   INCOMPLETE("OutputData::write_patch(): write patch metadata");
 
-  ItBlock it_block (patch);
-  while (Block * block = ++it_block) {
-
-    write_block (field_descr, block, 0,0,0);
-
-  }
+  Output::write_patch(field_descr,patch,ixp0,iyp0,izp0);
+  
+  TRACE("EXIT OutputData::write_patch ()");
 
 }
 
@@ -134,10 +144,24 @@ void OutputData::write_block ( const FieldDescr * field_descr,
   Block * block,
   int ixp0, int iyp0, int izp0) throw()
 {
-  TRACE("OutputData::write_block ()");
+  // Get block index
+
+  int ib = block->index();
+
+  char buffer[40];
+  sprintf (buffer,"/block-%d",ib);
+
+  TRACE1 ("OutputData::write_block() %s",buffer);
+  file_->group_create(buffer);
+
+  file_->group_write_meta(&ib,"block_index",scalar_type_int);
+
+  TRACE("ENTER OutputData::write_block ()");
 
   INCOMPLETE("OutputData::write_block(): write block metadata");
   INCOMPLETE("OutputData::write_block(): write block fields");
+  TRACE("EXIT OutputData::write_block ()");
+  file_->group_close();
 
 }
 

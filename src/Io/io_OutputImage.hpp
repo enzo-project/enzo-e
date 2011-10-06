@@ -50,8 +50,7 @@ public: // virtual functions
   /// Write hierarchy-related field data
   virtual void write_hierarchy
   ( const FieldDescr * field_descr,
-    Hierarchy * hierarchy,
-    int index_output_charm) throw();
+    Hierarchy * hierarchy) throw();
 
   /// Write patch-related field data; may be called by write_hierarchy
   virtual void write_patch

@@ -197,6 +197,7 @@ Location:     enzo_EnzoSimulation.cpp:166
 Type:         string ("reflecting", "outflow", "inflow", "periodic", "file", "code")
 Default:      "undefined"
 
+enzo_EnzoNamespace.cpp
 
 
 

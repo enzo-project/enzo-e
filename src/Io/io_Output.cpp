@@ -94,6 +94,7 @@ std::string Output::expand_file_name () const throw()
   std::string file_middle = "";
   std::string file_right = "";
 
+  printf ("process_ = %d\n",process_);
   for (size_t i=0; i<file_args_.size(); i++) {
 
     // visit variables from right to left
@@ -114,6 +115,7 @@ std::string Output::expand_file_name () const throw()
     } else if (file_arg == "count") {
       sprintf (buffer_next,buffer_curr, count_output_);
     } else if (file_arg == "proc") {
+      TRACE("process");
       sprintf (buffer_next,buffer_curr, process_);
     } else {
       char buffer[CELLO_STRING_LENGTH];
@@ -146,3 +148,34 @@ double Output::update_timestep (double time, double dt) const
 }
 
 //----------------------------------------------------------------------
+
+void Output::write_patch 
+(
+ const FieldDescr * field_descr,
+ Patch * patch,
+ int ixp0, int iyp0, int izp0
+ ) throw()
+
+{
+
+#ifdef CONFIG_USE_CHARM
+
+  // CHARM++ Block callback for write_block()
+
+  TRACE1("Output::write_patch(%d)",index_charm_);
+
+  if (patch->blocks_allocated()) {
+    patch->block_array().p_write (index_charm_);
+  }
+
+#else
+
+  ItBlock it_block (patch);
+  while (Block * block = ++it_block) {
+
+    // NO OFFSET: ASSUMES ROOT PATCH
+    write_block (field_descr, block, 0,0,0);
+
+  }
+#endif
+}

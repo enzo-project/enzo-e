@@ -378,8 +378,8 @@ void FileHdf5::file_write_meta
 
   // error check H5Acreate
 
-  ASSERT1("FileHdf5::file_write_meta","H5Acreate() returned %d",
-	 meta_id,(meta_id>=0));
+  ASSERT2("FileHdf5::file_write_meta","H5Acreate(%s) returned %d",
+	  name.c_str(),meta_id,(meta_id>=0));
 
   // Write the attribute 
 
@@ -613,6 +613,103 @@ void FileHdf5::group_close () throw()
   }
   is_group_open_ = false;
 }
+
+//----------------------------------------------------------------------
+
+void FileHdf5::group_read_meta
+  ( void * buffer, std::string name,  enum scalar_type * type,
+    int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+{
+  // error check file open
+
+  std::string file_name = path_ + "/" + name_;
+
+  ASSERT1("FileHdf5::group_read_meta",
+	 "Trying to read attribute from the unopened file %s",
+	  file_name.c_str(),
+	  is_file_open_);
+
+  // error check group open
+
+  ASSERT1("FileHdf5::group_read_meta",
+	  "Trying to read attribute from unopened group %s",
+	  group_name_.c_str(),
+	  is_group_open_);
+
+  hid_t meta_id = H5Aopen_name(group_id_, name.c_str());
+
+  ASSERT3("FileHdf5::group_read_meta",
+	  "H5Aopen_name() returned %d when opening attribute %s in file %s",
+	   meta_id, name.c_str(),file_name.c_str(),
+	   (meta_id >= 0));
+
+  // Get attribute size
+
+  hid_t meta_space_id = get_attr_space_ (meta_id,name);
+
+  // set output extents
+
+  set_output_extents_(meta_space_id,n0,n1,n2,n3,n4);
+
+  // set output parameters
+
+  scalar_type scalar_type = hdf5_to_scalar_(H5Aget_type (meta_id));
+
+  if (type) (*type) = scalar_type;
+
+  // Read the attribute
+
+  int retval = H5Aread
+    (meta_id, scalar_to_hdf5_(scalar_type), buffer);
+
+  // error check H5Aread
+
+  ASSERT1("FileHdf5::group_read_meta","H5Aread returned %d",retval,(retval>=0));
+}
+
+//----------------------------------------------------------------------
+
+void FileHdf5::group_write_meta
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0, int n1, int n2, int n3, int n4) throw()
+{
+  // error check file open
+
+  std::string file_name = path_ + "/" + name_;
+
+  ASSERT1("FileHdf5::group_write_meta",
+	  "Trying to write metadata to the unopened file %s",
+	  file_name.c_str(), is_file_open_);
+
+  // error check group open
+
+  ASSERT1("FileHdf5::group_write_meta",
+	  "Trying to read attribute from unopened group %s",
+	   group_name_.c_str(),is_group_open_);
+
+  // Create the attribute group size
+
+  hsize_t meta_size[MAX_DATA_RANK];
+
+  hid_t meta_space_id = create_dataspace_(n0,n1,n2,n3,n4,meta_size);
+
+  // Create the attribute
+
+  hid_t meta_id = H5Acreate ( group_id_,
+			      name.c_str(),
+			      scalar_to_hdf5_(type),
+			      meta_space_id,
+			      H5P_DEFAULT);
+
+  H5Awrite (meta_id, scalar_to_hdf5_(type), buffer);
+
+  close_dataspace_(meta_space_id);
+
+  int retval = H5Aclose(meta_id);
+
+  ASSERT1("FileHdf5::group_write_meta",
+	  "H5Aclose() returned %d",retval,(retval >= 0));
+}  
 
 //======================================================================
 

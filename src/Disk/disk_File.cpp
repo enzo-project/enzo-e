@@ -83,3 +83,21 @@ void File::group_close () throw()
 
 //----------------------------------------------------------------------
 
+void File::group_read_meta
+( void * buffer, std::string name,  enum scalar_type * s_type,
+  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+{
+  WARNING("File::group_read_meta",
+	  "Operation not supported by object");
+}
+
+//----------------------------------------------------------------------
+  
+void File::group_write_meta
+( const void * buffer, std::string name, enum scalar_type type,
+  int n0, int n1, int n2, int n3, int n4) throw()
+{
+  WARNING("File::group_write_meta",
+	  "Operation not supported by object");
+}
+
