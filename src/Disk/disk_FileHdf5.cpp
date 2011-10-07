@@ -18,8 +18,8 @@ FileHdf5::FileHdf5 (std::string path, std::string name) throw()
   : File(path,name),
     file_id_(0),
     is_file_open_(false),
-    data_set_id_(0),
-    data_space_id_(0),
+    data_id_(0),
+    space_id_(0),
     attribute_id_(0),
     group_id_(0),
     group_name_("/"),
@@ -104,7 +104,7 @@ void FileHdf5::file_close () throw()
 
     // close dataspace
 
-    close_dataspace_ (data_space_id_);
+    close_dataspace_ (space_id_);
 
     // Close dataset
 
@@ -147,22 +147,22 @@ void FileHdf5::data_open
   
   hid_t group = (is_group_open_) ? group_id_ : file_id_;
 
-  data_set_id_ = open_dataset_(group,name);
+  data_id_ = open_dataset_(group,name);
 
   is_data_open_ = true;
 
   // Get the dataspace
 
-  data_space_id_ = get_data_space_(data_set_id_, name);
+  space_id_ = get_data_space_(data_id_, name);
 
   // set output extents
 
-  set_output_extents_(data_space_id_,n0,n1,n2,n3,n4);
+  set_output_extents_(space_id_,n0,n1,n2,n3,n4);
 
   // Initialize name and type
 
   data_name_ = name;
-  data_type_ = hdf5_to_scalar_(H5Dget_type (data_set_id_));
+  data_type_ = hdf5_to_scalar_(H5Dget_type (data_id_));
 
   // set output parameters
 
@@ -189,20 +189,20 @@ void FileHdf5::data_create
 
   // Create dataspace
 
-  data_space_id_ = create_dataspace_(n0,n1,n2,n3,n4,data_size_);
+  space_id_ = create_dataspace_(n0,n1,n2,n3,n4,data_size_);
 
   // Create the new dataset
 
-  data_set_id_ = H5Dcreate( group,
+  data_id_ = H5Dcreate( group,
 			    name.c_str(),
 			    scalar_to_hdf5_(type),
-			    data_space_id_,
+			    space_id_,
 			    H5P_DEFAULT );
 
   // error check H5Dcreate
 
   ASSERT2("FileHdf5::data_create", "Return value %d opening dataset %s",
-	  data_set_id_,name.c_str(), data_set_id_ >= 0);
+	  data_id_,name.c_str(), data_id_ >= 0);
 
   // update dataset state
 
@@ -233,9 +233,9 @@ void FileHdf5::data_read
   // read data
 
   int retval = 
-    H5Dread (data_set_id_,
+    H5Dread (data_id_,
 	     scalar_to_hdf5_(data_type_),
-	     data_space_id_,
+	     space_id_,
 	     H5S_ALL,
 	     H5P_DEFAULT,
 	     buffer);
@@ -266,9 +266,9 @@ void FileHdf5::data_write
   // Write dataset to the file
 
   int retval = 
-    H5Dwrite (data_set_id_,
+    H5Dwrite (data_id_,
 	      scalar_to_hdf5_(data_type_),
-	      data_space_id_,
+	      space_id_,
 	      H5S_ALL,
 	      H5P_DEFAULT,
 	      buffer);
@@ -287,7 +287,7 @@ void FileHdf5::data_close() throw()
 
     // close the dataspace
 
-    close_dataspace_(data_space_id_);
+    close_dataspace_(space_id_);
 
     // close the dataset
 
@@ -417,7 +417,7 @@ void FileHdf5::data_read_meta
 	  data_name_.c_str(),
 	  is_data_open_);
 
-  hid_t meta_id = H5Aopen_name(data_set_id_, name.c_str());
+  hid_t meta_id = H5Aopen_name(data_id_, name.c_str());
 
   ASSERT3("FileHdf5::data_read_meta",
 	  "H5Aopen_name() returned %d when opening attribute %s in file %s",
@@ -476,7 +476,7 @@ void FileHdf5::data_write_meta
 
   // Create the attribute
 
-  hid_t meta_id = H5Acreate ( data_set_id_,
+  hid_t meta_id = H5Acreate ( data_id_,
 			      name.c_str(),
 			      scalar_to_hdf5_(type),
 			      meta_space_id,
@@ -859,7 +859,7 @@ hid_t FileHdf5::create_dataspace_(int n0,int n1,int n2,int n3,int n4,
 
   ASSERT1("FileHdf5::create_dataspace_",
 	  "h5Screate_simple returned %d",
-	  data_space_id_,
+	  space_id_,
 	  (data_space_id>=0));
 
   return data_space_id;
@@ -890,7 +890,7 @@ hid_t FileHdf5::open_dataset_ (hid_t group, std::string name) throw()
   ASSERT3("FileHdf5::open_dataset_", 
 	  "H5Dopen() returned %d opening %s in file %s",
 	  dataset_id,name.c_str(),(path_ + "/" + name_).c_str(), 
-	  data_set_id_ >= 0);
+	  data_id_ >= 0);
 
   return dataset_id;
 
@@ -899,7 +899,7 @@ hid_t FileHdf5::open_dataset_ (hid_t group, std::string name) throw()
 
 void FileHdf5::close_dataset_ () throw()
 {
-  int retval = H5Dclose (data_set_id_);
+  int retval = H5Dclose (data_id_);
 
   // error check H5Dclose
 

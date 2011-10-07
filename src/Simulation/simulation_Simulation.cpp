@@ -972,8 +972,7 @@ void Simulation::refresh() throw()
   // Monitor
   //--------------------------------------------------
 
-  monitor_-> print("Simulation", "cycle %04d time %15.12f dt %15.12g", 
-		   cycle_,time_,dt_);
+  monitor_output();
 
   //--------------------------------------------------
   // Output

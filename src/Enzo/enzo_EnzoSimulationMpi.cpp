@@ -105,9 +105,7 @@ void EnzoSimulationMpi::run() throw()
 
   while (! stop_hierarchy) {
 
-    monitor->print("Simulation",
-		   "cycle %04d time %15.12f",
-		   index_, cycle_,time_);
+    monitor_output();
 
     //--------------------------------------------------
     // Determine timestep
@@ -156,6 +154,7 @@ void EnzoSimulationMpi::run() throw()
 
     } // ( patch = ++it_patch )
 
+    dt_ = dt_hierarchy;
     ASSERT("EnzoSimulation::run", "dt == 0", dt_hierarchy != 0.0);
 
     //--------------------------------------------------
@@ -237,9 +236,7 @@ void EnzoSimulationMpi::run() throw()
   // END MAIN LOOP
   //======================================================================
 
-  monitor->print("Simulation",
-		 "cycle %04d time %15.12f", 
-		 index_, cycle_, time_);
+  monitor_output();
 
   performance.stop();
 

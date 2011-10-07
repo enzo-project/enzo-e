@@ -209,6 +209,11 @@ public: // interface
   /// Return whether to include orthogonal ghosts in updates
   bool temp_update_full() const throw() { return temp_update_full_; };
 
+  void monitor_output() const {
+    monitor_-> print("Simulation", "cycle %04d time %15.12f dt %15.12g", 
+		     cycle_,time_,dt_);
+  }
+
 public: // virtual functions
 
   /// initialize the Simulation given a parameter file

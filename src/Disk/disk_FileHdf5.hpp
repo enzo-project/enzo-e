@@ -145,10 +145,10 @@ private: // attributes
 
 
   /// HDF5 dataset descriptor
-  hid_t data_set_id_;
+  hid_t data_id_;
 
   /// HDF5 dataspace descriptor
-  hid_t data_space_id_;
+  hid_t space_id_;
 
 
   /// HDF5 attribute descriptor

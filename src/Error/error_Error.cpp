@@ -33,10 +33,20 @@ extern void message2_
 
   Monitor * monitor = Monitor::instance();
 
-  monitor->write (fp,type,"%s:%d", file,line);
-  if (function != "" || buffer != "") {
-    monitor->write (fp,type,"%s %s",function,buffer);
+  std::string file_str = file;
+  if (strlen(file)>0) {
+    // Only print file name not full path
+    file_str = file_str.substr(file_str.rfind("/")+1,std::string::npos);
   }
+
+  if (strlen(message) > 0) {
+    monitor->write (fp,type,"%s:%d  %s %s",file_str.c_str(),line,function,buffer);
+  } else if (strlen(function) > 0) {
+    monitor->write (fp,type,"%s:%d  %s",file_str.c_str(),line,function);
+  } else {
+    monitor->write (fp,type,"%s:%d",file_str.c_str(),line);
+  }
+
   fflush (fp);
 }
 
