@@ -3,7 +3,7 @@
 if ($#argv >= 1) then
   set types = ($argv)
 else
-  set types = (serial mpi charm )
+  set types = ( charm )
 endif
 
 set arch = $CELLO_ARCH
