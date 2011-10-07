@@ -10,9 +10,6 @@ Import('type')
 # DIRECTORIES
 #------------------------------
 
-if (type == "charm"):
-	SConscript('jacobi/SConscript')
-
 #------------------------------
 # DEPENDENCIES
 #------------------------------
