@@ -8,7 +8,6 @@
 /// @brief    Implementation of the OutputData class
 
 #include "cello.hpp"
-#include "enzo.hpp"
 #include "io.hpp"
 
 //----------------------------------------------------------------------
@@ -153,9 +152,9 @@ void OutputData::write_block ( const FieldDescr * field_descr,
 
   // Write block meta data
 
-  IoEnzoBlock io_block(dynamic_cast<EnzoBlock *>(block));
-  TRACE1("io_block meta_count = %d",io_block.meta_count());
-  for (int i=0; i<io_block.meta_count(); i++) {
+  io_block()->set_block(block);
+
+  for (int i=0; i<io_block()->meta_count(); i++) {
 
     void * buffer;
     const char * name;
@@ -163,7 +162,7 @@ void OutputData::write_block ( const FieldDescr * field_descr,
     int i0,i1,i2,i3,i4;
 
     // Get ith Block metadata
-    io_block.meta_value(i,& buffer, &name, &type, &i0,&i1,&i2,&i3,&i4);
+    io_block()->meta_value(i,& buffer, &name, &type, &i0,&i1,&i2,&i3,&i4);
 
     // Write ith Block metadata
     file_->group_write_meta(buffer,name,type,i0,i1,i2,i3,i4);
@@ -177,14 +176,12 @@ void OutputData::write_block ( const FieldDescr * field_descr,
 
 void OutputData::prepare_remote (int * n, char ** buffer) throw()
 {
-  TRACE("OutputData::prepare_remote ()");
 }
 
 //----------------------------------------------------------------------
 
 void OutputData::update_remote  ( int n, char * buffer) throw()
 {
-  TRACE("OutputData::update_remote  ()");
 }
 
 //----------------------------------------------------------------------
@@ -192,7 +189,6 @@ void OutputData::update_remote  ( int n, char * buffer) throw()
 
 void OutputData::cleanup_remote (int * n, char ** buffer) throw()
 {
-  TRACE("OutputData::cleanup_remote ()");
 }
 
 //======================================================================

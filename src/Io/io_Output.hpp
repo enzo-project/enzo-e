@@ -39,6 +39,8 @@ public: // functions
   void set_it_field (ItField * it_field) throw()
   { it_field_ = it_field; }
   
+  /// Return the IoBlock object
+  IoBlock * io_block () const throw() { return io_block_; }
 
   /// Return the File object pointer
   File * file() throw() 
@@ -165,6 +167,9 @@ protected: // attributes
 
   /// Iterator over field id's
   ItField * it_field_;
+
+  /// I/O Block data accessor
+  IoBlock * io_block_;
 
 #ifdef CONFIG_USE_CHARM
   /// Index of this Output object in Simulation

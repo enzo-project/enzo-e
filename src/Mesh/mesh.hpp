@@ -29,6 +29,7 @@
 
 #include "parallel.hpp"
 #include "memory.hpp"
+#include "io.hpp"
 
 #ifdef CONFIG_USE_CHARM
 #  include "simulation.hpp"

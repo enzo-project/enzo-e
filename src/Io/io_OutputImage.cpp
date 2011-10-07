@@ -100,7 +100,6 @@ void OutputImage::close () throw()
 
 void OutputImage::finalize () throw()
 {
-  TRACE("OutputImage::finalize()");
   Output::finalize();
 }
 

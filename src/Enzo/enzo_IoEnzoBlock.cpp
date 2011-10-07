@@ -9,8 +9,8 @@
 
 //----------------------------------------------------------------------
 
-IoEnzoBlock::IoEnzoBlock(const EnzoBlock * enzo_block) throw ()
-  : IoBlock((Block *)enzo_block)
+IoEnzoBlock::IoEnzoBlock() throw ()
+  : IoBlock()
 {
   meta_count_enzo_ = 9;
   meta_count_ += meta_count_enzo_;

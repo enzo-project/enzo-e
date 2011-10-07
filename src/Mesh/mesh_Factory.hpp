@@ -8,6 +8,11 @@
 /// @date     Tue Mar 15 15:29:56 PDT 2011
 /// @brief    [\ref Mesh] Declaration of the Factory class
 
+class Hierarchy;
+class Patch;
+class GroupProcess;
+class IoBlock;
+
 class Factory {
 
   /// @class    Factory
@@ -32,6 +37,9 @@ public: // interface
    int nbx,  int nby, int nbz,
    double xm, double ym, double zm,
    double xp, double yp, double zp) const throw();
+
+  /// Create an Input / Output accessor object for Block
+  virtual IoBlock * create_io_block ( ) const throw();
 
   /// Create a new Block [abstract factory design pattern]
   virtual Block * create_block

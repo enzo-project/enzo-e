@@ -9,6 +9,8 @@
 /// @brief    [\ref Io] Declaration of the IoPatch class
 ///
 
+class Patch;
+
 class IoPatch : public Io {
 
   /// @class    IoPatch

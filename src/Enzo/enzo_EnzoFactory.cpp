@@ -32,6 +32,13 @@ Block * EnzoFactory::create_block
 
 //----------------------------------------------------------------------
 
+IoBlock * EnzoFactory::create_io_block () const throw()
+{
+  return new IoEnzoBlock ();
+}
+
+//----------------------------------------------------------------------
+
 #ifdef CONFIG_USE_CHARM
 CProxy_Block EnzoFactory::create_block_array
 (

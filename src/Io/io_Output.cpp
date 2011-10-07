@@ -26,12 +26,15 @@ Output::Output (Simulation * simulation) throw()
     time_(0),
     file_name_(""),     // set_filename()
     file_args_(),       // set_filename()
-    it_field_(0)        // set_it_field()
+    it_field_(0),        // set_it_field()
+    io_block_(0)        // set_it_field()
 {
 
   GroupProcess * group_process = GroupProcess::create();
   process_  = group_process->rank();
   delete group_process;
+
+  io_block_ = simulation_->factory().create_io_block();
 }
 
 //----------------------------------------------------------------------
@@ -44,6 +47,8 @@ Output::~Output () throw()
   file_ = 0;
   delete it_field_;
   it_field_ = 0;
+  delete io_block_;
+  io_block_ = 0;
 }
 //----------------------------------------------------------------------
 

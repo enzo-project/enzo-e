@@ -9,6 +9,8 @@
 /// @brief    [\ref Io] Declaration of the IoEnzoBlock class
 ///
 
+class EnzoBlock;
+
 class IoEnzoBlock : public IoBlock {
 
   /// @class    IoEnzoBlock
@@ -18,7 +20,7 @@ class IoEnzoBlock : public IoBlock {
 public: // interface
 
   /// Constructor
-  IoEnzoBlock(const EnzoBlock * block) throw();
+  IoEnzoBlock() throw();
 
   /// Return the ith metadata item associated with the EnzoBlock object
   void meta_value 

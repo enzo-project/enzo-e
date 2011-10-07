@@ -9,6 +9,8 @@
 /// @brief    [\ref Io] Declaration of the IoHierarchy class
 ///
 
+class Hierarchy;
+
 class IoHierarchy : public Io {
 
   /// @class    IoHierarchy

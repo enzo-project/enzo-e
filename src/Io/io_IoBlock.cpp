@@ -9,9 +9,9 @@
 
 //----------------------------------------------------------------------
 
-IoBlock::IoBlock(const Block * block) throw ()
+IoBlock::IoBlock() throw ()
   : Io(7,0),
-    block_(block)
+    block_(0)
 {
   meta_name_.push_back("size");
   meta_name_.push_back("lower");

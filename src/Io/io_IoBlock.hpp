@@ -9,6 +9,8 @@
 /// @brief    [\ref Io] Declaration of the IoBlock class
 ///
 
+class Block;
+
 class IoBlock : public Io {
 
   /// @class    IoBlock
@@ -18,7 +20,11 @@ class IoBlock : public Io {
 public: // interface
 
   /// Constructor
-  IoBlock(const Block * block) throw();
+  IoBlock() throw();
+
+  /// Set block
+  void set_block (const Block * block) throw()
+  { block_ = block; };
 
   /// Return the ith metadata item associated with the Block object
   void meta_value 

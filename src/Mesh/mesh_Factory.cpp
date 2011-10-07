@@ -37,6 +37,13 @@ Patch * Factory::create_patch
 
 //----------------------------------------------------------------------
 
+IoBlock * Factory::create_io_block () const throw()
+{
+  return new IoBlock ();
+}
+
+//----------------------------------------------------------------------
+
 Block * Factory::create_block
 (
  int ibx, int iby, int ibz,

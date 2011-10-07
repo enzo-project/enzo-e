@@ -17,6 +17,9 @@ class EnzoFactory : public Factory {
 
 public: // interface
 
+  /// Create the Input / Output accessor object for EnzoBlock
+  virtual IoBlock * create_io_block () const throw();
+
   /// Create a new Block  [abstract factory design pattern]
   virtual Block * create_block
   (int ibx, int iby, int ibz,
