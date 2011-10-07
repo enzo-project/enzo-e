@@ -352,7 +352,16 @@ printf ( "</tr><tr>\n");
 $parallel_labels = array("serial","mpi","charm");
 for ($k = 0; $k < 5; $k ++) {
   for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
-    printf ("<th> <a href=serial/out.scons>$parallel_labels[$i]</a> </th>");
+     $type_active = "";
+     if (file_exists("COMPILING"))  {
+        $type_active = file_get_contents("COMPILING");
+     }
+     if ($type_active == $parallel_labels[$i]) {
+        printf ("<th class=compiling>");
+     } else {
+        printf ("<th> ");
+     }
+     printf (" <a href=$parallel_labels[$i]/out.scons>$parallel_labels[$i]</a> </th>");
   }
   printf ("<th> </th>");
 }

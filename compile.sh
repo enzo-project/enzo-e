@@ -1,7 +1,5 @@
 #!/bin/tcsh -f
 
-touch "test/COMPILING"
-
 if ($#argv >= 1) then
   set types = ($argv)
 else
@@ -39,7 +37,10 @@ foreach type ($types)
      rm -f $dir/*unit >& /dev/null
      rm -f bin/$type/* >& /dev/null
      printf "done\n"
+
    else
+
+   printf "$type" > test/COMPILING
 
    # COMPILE
 
@@ -90,6 +91,8 @@ foreach type ($types)
 
    printf "\n"
 
+   rm -f test/COMPILING
+
    endif
 
 
@@ -100,4 +103,3 @@ echo "$d END"
 
 
 
-rm -f test/COMPILING

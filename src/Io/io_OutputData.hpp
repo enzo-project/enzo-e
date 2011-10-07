@@ -69,7 +69,10 @@ public: // virtual functions
   /// Free local array if allocated; NOP if not
   virtual void cleanup_remote (int * n, char ** buffer) throw();
 
+protected:
 
+  /// Interface object to access Block data for reading and writing
+  IoBlock * io_block_;
 };
 
 #endif /* IO_OUTPUT_DATA_HPP */

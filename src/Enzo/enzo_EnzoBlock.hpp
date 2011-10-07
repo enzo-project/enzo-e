@@ -20,6 +20,8 @@ class EnzoBlock : public Block
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] An EnzoBlock is a Block with Enzo data
 
+  friend class IoEnzoBlock;
+
 public: // interface
 
   /// Initialize the EnzoBlock chare array

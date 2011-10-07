@@ -78,6 +78,8 @@ struct fluxes
 
 #include "enzo_EnzoBlock.hpp"
 
+#include "enzo_IoEnzoBlock.hpp"
+
 #include "enzo_EnzoTimestep.hpp"
 #include "enzo_EnzoBoundary.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"

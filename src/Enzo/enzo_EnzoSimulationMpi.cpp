@@ -36,8 +36,6 @@ EnzoSimulationMpi::~EnzoSimulationMpi() throw()
 void EnzoSimulationMpi::run() throw()
 {
   
-  Monitor * monitor = Monitor::instance();
-
   Performance performance;
 
   performance.start();

@@ -8,7 +8,7 @@
 /// @brief    Implementation of the OutputData class
 
 #include "cello.hpp"
-
+#include "enzo.hpp"
 #include "io.hpp"
 
 //----------------------------------------------------------------------
@@ -153,8 +153,8 @@ void OutputData::write_block ( const FieldDescr * field_descr,
 
   // Write block meta data
 
-  IoBlock io_block(block);
-
+  IoEnzoBlock io_block(dynamic_cast<EnzoBlock *>(block));
+  TRACE1("io_block meta_count = %d",io_block.meta_count());
   for (int i=0; i<io_block.meta_count(); i++) {
 
     void * buffer;
