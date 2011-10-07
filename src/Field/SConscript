@@ -12,8 +12,8 @@ Import('use_papi')
 
 # (uses Mesh for test_FieldBlock, which requires DataBlock)
 
-components = ['simulation','method','io',
-              'mesh',
+components = ['simulation','method',
+              'mesh','io',
               'parallel','disk',
               'parameters', 
               'error', 'monitor','performance','memory',

@@ -87,10 +87,12 @@ function test_failed ($output_file) {
 
    //----------------------------------------------------------------------
 
-function tests($component,$testrun,$output,$test_name) {
-
   $parallel_types = array("serial","mpi","charm");
 
+    function tests($component,$testrun,$output,$test_name) {
+
+  global $parallel_types;
+    
   $source_file = "../src/$component/$testrun.cpp";
   $source_link = "../cello-src/src/$component/$testrun.cpp";
   $source_html = "<a href=\"$source_link\">$testrun.cpp</a>";
@@ -310,7 +312,7 @@ function summary_passed_tests ($parallel_types, $test_output, $executables)
 {
   printf ("<tr><th><a href=\"#$component\">$component</a></th>\n");
 
-  $parallel_types  = array("serial","mpi","charm");
+  global $parallel_types;
 
   // Missing executable
 
@@ -349,19 +351,18 @@ printf ( "<th colspan=3 class=pass>Passed Tests</th>");
 printf ("<th></th>");
 printf ( "</tr><tr>\n");
 
-$parallel_labels = array("serial","mpi","charm");
 for ($k = 0; $k < 5; $k ++) {
-  for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
+  for ($i = 0; $i < sizeof($parallel_types); ++$i) {
      $type_active = "";
      if (file_exists("COMPILING"))  {
         $type_active = file_get_contents("COMPILING");
      }
-     if ($type_active == $parallel_labels[$i]) {
+     if ($type_active == $parallel_types[$i]) {
         printf ("<th class=compiling>");
      } else {
         printf ("<th> ");
      }
-     printf (" <a href=$parallel_labels[$i]/out.scons>$parallel_labels[$i]</a> </th>");
+     printf (" <a href=$parallel_types[$i]/out.scons>$parallel_types[$i]</a> </th>");
   }
   printf ("<th> </th>");
 }
@@ -390,7 +391,7 @@ test_summary("Enzo-BC-3D",
 
 printf ("<tr><th></th>");
 for ($k = 0; $k < 5; $k ++) {
-  for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
+  for ($i = 0; $i < sizeof($parallel_types); ++$i) {
     printf ("<th> </th>");
   }
   printf ("<th></th>");
@@ -419,81 +420,10 @@ test_summary("Parameters",array("Parameters"),
 test_summary("Performance",array("Papi", "Performance"),
 	     array("test_Papi","test_Performance")); 
 
+
 printf ("</tr></table></br>\n");
 
    //----------------------------------------------------------------------
-
-test_group("Disk");
-
-tests("Disk","test_FileHdf5", "test_FileHdf5","");
-tests("Disk","test_FileIfrit","test_FileIfrit","");
-
-   //----------------------------------------------------------------------
-
-test_group("Error");
-
-tests("Error","test_Error","test_Error","");
-
-
-   //----------------------------------------------------------------------
-
-test_group("Field");
-
-tests("Field","test_FieldDescr","test_FieldDescr","");
-tests("Field","test_FieldBlock","test_FieldBlock","");
-tests("Field","test_FieldFace","test_FieldFace","");
-tests("Field","test_ItField","test_ItField","");
-
-   //----------------------------------------------------------------------
-
-test_group("Io");
-
-tests("Io","test_ItReduce", "test_ItReduce","");
-
-   //----------------------------------------------------------------------
-
-test_group("Memory");
-
-tests("Memory","test_Memory","test_Memory","");
-
-
-   //----------------------------------------------------------------------
-
-test_group("Mesh");
-
-tests("Mesh","test_Hierarchy","test_Hierarchy",""); 
-tests("Mesh","test_Patch","test_Patch",""); 
-tests("Mesh","test_Block","test_Block",""); 
-
-   //----------------------------------------------------------------------
-
-test_group("Monitor");
-
-tests("Monitor","test_Monitor","test_Monitor","");
-printf ("<img src=\"monitor_image_1.png\"></img>\n");
-printf ("<img src=\"monitor_image_2.png\"></img>\n");
-printf ("<img src=\"monitor_image_3.png\"></img>\n");
-printf ("<img src=\"monitor_image_4.png\"></img>\n");
-
-   //----------------------------------------------------------------------
-
-test_group("Parallel");
-
-tests("Parallel","test_GroupProcess","test_GroupProcess","");
-tests("Parallel","test_Layout","test_Layout","");
-
-   //----------------------------------------------------------------------
-
-test_group("Parameters");
-
-tests("Parameters","test_Parameters","test_Parameters","");
-
-   //----------------------------------------------------------------------
-
-test_group("Performance");
-
-tests("Performance","test_Performance","test_Performance","");
-tests("Performance","test_Papi",       "test_Papi","");
 
    //----------------------------------------------------------------------
 
@@ -503,6 +433,7 @@ test_group("Enzo-PPM");
 tests("Enzo","enzo-p","test_enzo-p_1","PPM 1 block");
 tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
 ?>
+
 <table>
 <tr>
 <th></th>
@@ -563,9 +494,7 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   </tr>
   </table></br>
 
-  <?php
-
-  test_group("Enzo-BC-2D"); ?>
+  <?php test_group("Enzo-BC-2D"); ?>
 
   <?php tests("Enzo","enzo-p","test_boundary-reflecting-2d","Reflecting 2D"); ?>
   
@@ -756,7 +685,79 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   </table></br>
 
 
-  <?php
+<?php
+test_group("Disk");
+
+tests("Disk","test_FileHdf5", "test_FileHdf5","");
+tests("Disk","test_FileIfrit","test_FileIfrit","");
+
+   //----------------------------------------------------------------------
+
+test_group("Error");
+
+tests("Error","test_Error","test_Error","");
+
+
+   //----------------------------------------------------------------------
+
+test_group("Field");
+
+tests("Field","test_FieldDescr","test_FieldDescr","");
+tests("Field","test_FieldBlock","test_FieldBlock","");
+tests("Field","test_FieldFace","test_FieldFace","");
+tests("Field","test_ItField","test_ItField","");
+
+   //----------------------------------------------------------------------
+
+test_group("Io");
+
+tests("Io","test_ItReduce", "test_ItReduce","");
+
+   //----------------------------------------------------------------------
+
+test_group("Memory");
+
+tests("Memory","test_Memory","test_Memory","");
+
+
+   //----------------------------------------------------------------------
+
+test_group("Mesh");
+
+tests("Mesh","test_Hierarchy","test_Hierarchy",""); 
+tests("Mesh","test_Patch","test_Patch",""); 
+tests("Mesh","test_Block","test_Block",""); 
+
+   //----------------------------------------------------------------------
+
+test_group("Monitor");
+
+tests("Monitor","test_Monitor","test_Monitor","");
+printf ("<img src=\"monitor_image_1.png\"></img>\n");
+printf ("<img src=\"monitor_image_2.png\"></img>\n");
+printf ("<img src=\"monitor_image_3.png\"></img>\n");
+printf ("<img src=\"monitor_image_4.png\"></img>\n");
+
+   //----------------------------------------------------------------------
+
+test_group("Parallel");
+
+tests("Parallel","test_GroupProcess","test_GroupProcess","");
+tests("Parallel","test_Layout","test_Layout","");
+
+   //----------------------------------------------------------------------
+
+test_group("Parameters");
+
+tests("Parameters","test_Parameters","test_Parameters","");
+
+   //----------------------------------------------------------------------
+
+test_group("Performance");
+
+tests("Performance","test_Performance","test_Performance","");
+tests("Performance","test_Papi",       "test_Papi","");
+
 
   test_group("Enzo-BC-3D");
   ?>
