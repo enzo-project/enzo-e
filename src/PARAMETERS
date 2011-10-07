@@ -1,4 +1,3 @@
-
 Parameter:    Physics : dimensions
 Function:     Simulation::initialize_simulation_()
 Class:        Simulation
@@ -120,10 +119,10 @@ Location:     simulation_Simulation.cpp:744
 Type:         list ( float, ... )
 Default:      [ 0.0, 0.0, 0.0, 1.0, 1.0, 1.0 ] (set in OutputImage)
 
-Parameter:    Output : method
+Parameter:    Method : sequence
 Function:     Simulation::initialize_method_()
 Class:        Method
-Location:     simulation_Simulation.cpp:803
+Location:     simulation_Simulation.cpp:812
 Type:         list ( string )
 Default:      none
 
@@ -232,7 +231,7 @@ Location:     enzo_EnzoNamespace.cpp:257
 Type:         float
 Default:      0.701
 
-Parameter:    Physics : cosmology : omega_lamda_now
+Parameter:    Physics : cosmology : omega_lambda_now
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:260
@@ -260,111 +259,138 @@ Location:     enzo_EnzoNamespace.cpp:269
 Type:         float
 Default:      64.0
 
-Parameter:    Physics : ppm : pressure_free
+Parameter:    Method : ppm : pressure_free
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:288
 Type:         logical
 Default:      false
 
-Parameter:    Physics : ppm : use_minimum_pressure_support
+Parameter:    Method : ppm : use_minimum_pressure_support
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:291
 Type:         logical
 Default:      false
 
-Parameter:    Physics : ppm : minimum_pressure_support_parameter
+Parameter:    Method : ppm : minimum_pressure_support_parameter
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:294
 Type:         integer
 Default:      100
 
-Parameter:    Physics : ppm : flattening
+Parameter:    Method : ppm : flattening
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:297
 Type:         integer
 Default:      3
 
-Parameter:    Physics : ppm : diffusion
+Parameter:    Method : ppm : diffusion
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:300
 Type:         logical
 Default:      false
 
-Parameter:    Physics : ppm : steepening
+Parameter:    Method : ppm : steepening
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:303
 Type:         logical
 Default:      false
 
-Parameter:    Physics : ppm : pressure_floor
+Parameter:    Method : ppm : pressure_floor
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:308
 Type:         float
 Default:      1e-6
 
-Parameter:    Physics : ppm : density_floor
+Parameter:    Method : ppm : density_floor
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:311
 Type:         float
 Default:      1e-6
 
-Parameter:    Physics : ppm : temperature_floor
+Parameter:    Method : ppm : temperature_floor
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:314
 Type:         float
 Default:      1e-6
 
-Parameter:    Physics : ppm : number_density_floor
+Parameter:    Method : ppm : number_density_floor
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:317
 Type:         float
 Default:      1e-6
 
-Parameter:    Physics : ppm : dual_energy
+Parameter:    Method : ppm : dual_energy
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:320
 Type:         logical
 Default:      false
 
-Parameter:    Physics : ppm : dual_energy_eta_1
+Parameter:    Method : ppm : dual_energy_eta_1
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:323
 Type:         float
 Default:      0.001
 
-Parameter:    Physics : ppm : dual_energy_eta_2
+Parameter:    Method : ppm : dual_energy_eta_2
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:326
 Type:         float
 Default:      0.1
 
-Field : ghosts
-Field : fields
+Parameter:    Field : ghosts
+Function:     enzo::initialize()
+Class:        enzo
+Location:     enzo_EnzoNamespace.cpp:338
+Type:         list ( integer )
+Default:      [ 1, 1, 1 ]
 
-Domain : lower
-Domain : upper
+Parameter:    Field : fields
+Function:     enzo::initialize()
+Class:        enzo
+Location:     enzo_EnzoNamespace.cpp:372
+Type:         list ( string )
+Default:      none
 
-Field : courant
+Parameter:    Domain : lower
+Function:     enzo::initialize()
+Class:        enzo
+Location:     enzo_EnzoNamespace.cpp:413
+Type:         list ( float )
+Default:      [ 0.0, 0.0, 0.0 ]
 
-Initial : time
+Parameter:    Domain : upper
+Function:     enzo::initialize()
+Class:        enzo
+Location:     enzo_EnzoNamespace.cpp:417
+Type:         list ( float )
+Default:      [ 1.0, 1.0, 1.0 ]
 
+Parameter:    Field : courant
+Function:     enzo::initialize()
+Class:        enzo
+Location:     enzo_EnzoNamespace.cpp:425
+Type:         float
+Default:      0.6
 
-
-
-
+Parameter:    Initial : time
+Function:     enzo::initialize()
+Class:        enzo
+Location:     enzo_EnzoNamespace.cpp:431
+Type:         float
+Default:      0.0
 
 
 

@@ -92,7 +92,8 @@ function tests($component,$testrun,$output,$test_name) {
   $parallel_types = array("serial","mpi","charm");
 
   $source_file = "../src/$component/$testrun.cpp";
-  $source_html = "<a href=\"$source_file\">$testrun.cpp</a>";
+  $source_link = "../cello-src/src/$component/$testrun.cpp";
+  $source_html = "<a href=\"$source_link\">$testrun.cpp</a>";
 
   if (! file_exists($source_file)) {
     echo "<p><strong class=fail>$source_file does not exist</strong></p>";
@@ -314,7 +315,7 @@ function summary_passed_tests ($parallel_types, $test_output, $executables)
   // Missing executable
 
   summary_missing_executable ($parallel_types,$test_output, $executables);
-  summary_missing_output     ($parallel_types,$test_output, $executables);
+//  summary_missing_output     ($parallel_types,$test_output, $executables);
   summary_incomplete_output     ($parallel_types,$test_output, $executables);
   summary_failed_tests      ($parallel_types,$test_output, $executables);
   summary_unfinished_tests ($parallel_types,$test_output, $executables);
@@ -336,9 +337,9 @@ printf ("<tr>\n");
   
 printf ( "<th colspan=3 class=fail>Missing Executable</th>");
 printf ("<th></th>");
-printf ( "<th colspan=3 class=fail>Missing Output</th>");
-printf ("<th></th>");
-printf ( "<th colspan=3 class=fail>Partial Output</th>");
+// printf ( "<th colspan=3 class=fail>Missing Output</th>");
+// printf ("<th></th>");
+printf ( "<th colspan=3 class=fail>Crashed Runs</th>");
 printf ("<th></th>");
 printf ( "<th colspan=3 class=fail>Failed Tests</th>");
 printf ("<th></th>");
@@ -349,7 +350,7 @@ printf ("<th></th>");
 printf ( "</tr><tr>\n");
 
 $parallel_labels = array("serial","mpi","charm");
-for ($k = 0; $k < 6; $k ++) {
+for ($k = 0; $k < 5; $k ++) {
   for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
     printf ("<th> <a href=serial/out.scons>$parallel_labels[$i]</a> </th>");
   }
@@ -379,7 +380,7 @@ test_summary("Enzo-BC-3D",
 // Print row divider
 
 printf ("<tr><th></th>");
-for ($k = 0; $k < 6; $k ++) {
+for ($k = 0; $k < 5; $k ++) {
   for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
     printf ("<th> </th>");
   }

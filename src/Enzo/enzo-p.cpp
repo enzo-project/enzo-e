@@ -119,7 +119,7 @@ PARALLEL_MAIN_BEGIN
     monitor_->print ("Testing","expected cycle:  %d",cycle_final);
   }
 
-  // parameter: Testing : cycle_final
+  // parameter: Testing : time_final
 
   double time_final  = parameters->value_float("Testing:time_final",0.0);
 
@@ -141,7 +141,7 @@ PARALLEL_MAIN_BEGIN
       
   // display footer text
 
-  Monitor::instance()->print ("END ENZO-P");
+  Monitor::instance()->print ("","END ENZO-P");
 
   // clean up
 

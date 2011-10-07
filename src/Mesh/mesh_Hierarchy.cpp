@@ -175,12 +175,6 @@ void Hierarchy::create_root_patch
   //--------------------------------------------------
   // parameters_->group_set (0,"Mesh");
   //--------------------------------------------------
-  // parameter: Mesh:refine
-  // parameter: Mesh:max_level
-  // parameter: Mesh:balanced
-  // parameter: Mesh:backfill
-  // parameter: Mesh:coalesce
-  //--------------------------------------------------
 
   // mesh_->set_refine_factor (parameters_->value_integer("refine",    2));
   // mesh_->set_max_level     (parameters_->value_integer("max_level", 0));
@@ -207,11 +201,6 @@ void Hierarchy::create_root_patch
 
     // Parallel layout of the root patch
   
-    //--------------------------------------------------
-    // parameter: Mesh:root_process_first
-    // parameter: Mesh:root_process_count
-    //--------------------------------------------------
-
     // int process_first = parameters_->value_integer("Mesh:root_process_first",0);
     // int process_count = parameters_->value_integer("Mesh:root_process_count",1);
 

@@ -269,7 +269,7 @@ void InitialDefault::evaluate_float_
  double * x, double * y, double * z, double * t) throw ()
 {
 
-  // parameter: Initial:[field]:value
+  // parameter: Initial : <field> : value
 
   parameter_enum value_type = 
     parameters_->list_type(index_list,"value");
@@ -301,7 +301,7 @@ void InitialDefault::evaluate_logical_
  double * x, double * y, double * z, double * t) throw ()
 {
 
-  // parameter: Initial:[field]:value
+  // parameter: Initial : <field> : value
 
   parameter_enum value_type = 
     parameters_->list_type(index_list,"value");

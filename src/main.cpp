@@ -38,6 +38,8 @@ void Main::p_exit(int count)
 
     // Test results: DUPLICATE CODE IN src/Enzo/enzo-p.cpp !!!
 
+    // parameter: Testing : cycle_final
+    
     int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
 
     unit_class ("Enzo-P");
@@ -47,6 +49,8 @@ void Main::p_exit(int count)
       monitor_->print ("Testing","actual   cycle:  %d",simulation->cycle());
       monitor_->print ("Testing","expected cycle:  %d",cycle_final);
     }
+
+    // parameter: Testing : time_final
 
     double time_final  = parameters->value_float("Testing:time_final",0.0);
 

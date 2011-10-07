@@ -243,12 +243,12 @@ namespace enzo {
     // PPM parameters
 
     //--------------------------------------------------
-    // parameter: Physics:cosmology:initial_redshift
-    // parameter: Physics:cosmology:hubble_constant_now
-    // parameter: Physics:cosmology:omega_lambda_now
-    // parameter: Physics:cosmology:omega_matter_now
-    // parameter: Physics:cosmology:max_expansion_rate
-    // parameter: Physics:cosmology:comoving_box_size
+    // parameter: Physics : cosmology : initial_redshift
+    // parameter: Physics : cosmology : hubble_constant_now
+    // parameter: Physics : cosmology : omega_lambda_now
+    // parameter: Physics : cosmology : omega_matter_now
+    // parameter: Physics : cosmology : max_expansion_rate
+    // parameter: Physics : cosmology : comoving_box_size
     //--------------------------------------------------
 
     InitialRedshift   = parameters->value_float
@@ -270,19 +270,19 @@ namespace enzo {
       ("Physics:cosmology:comoving_box_size", 64.0);
 
     //--------------------------------------------------
-    // parameter: Method:ppm:pressure_free
-    // parameter: Method:ppm:use_minimum_pressure_support
-    // parameter: Method:ppm:minimum_pressure_support_parameter
-    // parameter: Method:ppm:flattening
-    // parameter: Method:ppm:diffusion
-    // parameter: Method:ppm:steepening
-    // parameter: Method:ppm:pressure_floor
-    // parameter: Method:ppm:density_floor
-    // parameter: Method:ppm:temperature_floor
-    // parameter: Method:ppm:number_density_floor
-    // parameter: Method:ppm:dual_energy
-    // parameter: Method:ppm:dual_energy_eta_1
-    // parameter: Method:ppm:dual_energy_eta_2
+    // parameter: Method : ppm : pressure_free
+    // parameter: Method : ppm : use_minimum_pressure_support
+    // parameter: Method : ppm : minimum_pressure_support_parameter
+    // parameter: Method : ppm : flattening
+    // parameter: Method : ppm : diffusion
+    // parameter: Method : ppm : steepening
+    // parameter: Method : ppm : pressure_floor
+    // parameter: Method : ppm : density_floor
+    // parameter: Method : ppm : temperature_floor
+    // parameter: Method : ppm : number_density_floor
+    // parameter: Method : ppm : dual_energy
+    // parameter: Method : ppm : dual_energy_eta_1
+    // parameter: Method : ppm : dual_energy_eta_2
     //--------------------------------------------------
 
     PressureFree = parameters->value_logical
@@ -327,8 +327,8 @@ namespace enzo {
       ("Method:ppm:dual_energy_eta_2", 0.1);
 
     //--------------------------------------------------
-    // parameter: Field::ghosts
-    // parameter: Field::fields
+    // parameter: Field : ghosts
+    // parameter: Field : fields
     //--------------------------------------------------
 
     int gx = 1;
@@ -404,8 +404,8 @@ namespace enzo {
     // BoundaryDimension[2] = nz + 2*ghost_depth[2];
 
     //--------------------------------------------------
-    // parameter: Domain::lower
-    // parameter: Domain::upper
+    // parameter: Domain : lower
+    // parameter: Domain : upper
     //--------------------------------------------------
   
     // (ALREADY READ BY Simulation::initialize_simulation_())
@@ -419,13 +419,13 @@ namespace enzo {
     DomainRightEdge[2] = parameters->list_value_float (2,"Domain:upper",1.0);
 
     //--------------------------------------------------
-    // parameter: Field::courant
+    // parameter: Field : courant
     //--------------------------------------------------
 
     CourantSafetyNumber = parameters->value_float  ("Field:courant",0.6);
 
     //--------------------------------------------------
-    // parameter: Initial::time
+    // parameter: Initial : time
     //--------------------------------------------------
 
     double time  = parameters->value_float  ("Initial:time",0.0);

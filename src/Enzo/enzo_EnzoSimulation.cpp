@@ -159,7 +159,7 @@ Boundary * EnzoSimulation::create_boundary_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   //--------------------------------------------------
-  // parameter: Boundary::type
+  // parameter: Boundary : type
   //--------------------------------------------------
 
   boundary_type_enum boundary_type = boundary_type_undefined;

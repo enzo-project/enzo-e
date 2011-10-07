@@ -828,8 +828,8 @@ void Simulation::initialize_method_() throw()
 void Simulation::initialize_parallel_() throw()
 {
   //--------------------------------------------------
-  // parameter: parallel : temp_update_all
-  // parameter: parallel : temp_update_full
+  // parameter: Parallel : temp_update_all
+  // parameter: Parallel : temp_update_full
   //--------------------------------------------------
 
   temp_update_all_  = 
