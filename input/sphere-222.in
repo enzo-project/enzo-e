@@ -32,6 +32,10 @@
 
       sequence = ["ppm"];
 
+   }
+
+   Enzo {
+
       ppm {
 
          diffusion   = true;

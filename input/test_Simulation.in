@@ -112,6 +112,10 @@
  
       sequence = ["ppm"];
 
+   }
+
+   Enzo {
+
       ppm {
 
          # method-specific parameters.  Note this is Enzo-P not Cello 

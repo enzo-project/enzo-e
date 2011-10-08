@@ -270,61 +270,61 @@ namespace enzo {
       ("Physics:cosmology:comoving_box_size", 64.0);
 
     //--------------------------------------------------
-    // parameter: Method : ppm : pressure_free
-    // parameter: Method : ppm : use_minimum_pressure_support
-    // parameter: Method : ppm : minimum_pressure_support_parameter
-    // parameter: Method : ppm : flattening
-    // parameter: Method : ppm : diffusion
-    // parameter: Method : ppm : steepening
-    // parameter: Method : ppm : pressure_floor
-    // parameter: Method : ppm : density_floor
-    // parameter: Method : ppm : temperature_floor
-    // parameter: Method : ppm : number_density_floor
-    // parameter: Method : ppm : dual_energy
-    // parameter: Method : ppm : dual_energy_eta_1
-    // parameter: Method : ppm : dual_energy_eta_2
+    // parameter: Enzo : ppm : pressure_free
+    // parameter: Enzo : ppm : use_minimum_pressure_support
+    // parameter: Enzo : ppm : minimum_pressure_support_parameter
+    // parameter: Enzo : ppm : flattening
+    // parameter: Enzo : ppm : diffusion
+    // parameter: Enzo : ppm : steepening
+    // parameter: Enzo : ppm : pressure_floor
+    // parameter: Enzo : ppm : density_floor
+    // parameter: Enzo : ppm : temperature_floor
+    // parameter: Enzo : ppm : number_density_floor
+    // parameter: Enzo : ppm : dual_energy
+    // parameter: Enzo : ppm : dual_energy_eta_1
+    // parameter: Enzo : ppm : dual_energy_eta_2
     //--------------------------------------------------
 
     PressureFree = parameters->value_logical
-      ("Method:ppm:pressure_free",false);
+      ("Enzo:ppm:pressure_free",false);
 
     UseMinimumPressureSupport = parameters->value_logical
-      ("Method:ppm:use_minimum_pressure_support",false);
+      ("Enzo:ppm:use_minimum_pressure_support",false);
 
     MinimumPressureSupportParameter = parameters->value_integer
-      ("Method:ppm:minimum_pressure_support_parameter",100);
+      ("Enzo:ppm:minimum_pressure_support_parameter",100);
 
     PPMFlatteningParameter = parameters->value_integer
-      ("Method:ppm:flattening", 3);
+      ("Enzo:ppm:flattening", 3);
 
     PPMDiffusionParameter  = parameters->value_logical 
-      ("Method:ppm:diffusion",  false);
+      ("Enzo:ppm:diffusion",  false);
 
     PPMSteepeningParameter = parameters->value_logical 
-      ("Method:ppm:steepening", false);
+      ("Enzo:ppm:steepening", false);
 
     double floor_default = 1e-6;
 
     pressure_floor       = parameters->value_float
-      ("Method:ppm:pressure_floor", floor_default);
+      ("Enzo:ppm:pressure_floor", floor_default);
 
     density_floor        = parameters->value_float
-      ("Method:ppm:density_floor",  floor_default);
+      ("Enzo:ppm:density_floor",  floor_default);
 
     temperature_floor    = parameters->value_float
-      ("Method:ppm:temperature_floor", floor_default);
+      ("Enzo:ppm:temperature_floor", floor_default);
 
     number_density_floor = parameters->value_float
-      ("Method:ppm:number_density_floor", floor_default);
+      ("Enzo:ppm:number_density_floor", floor_default);
 
     DualEnergyFormalism     = parameters->value_logical 
-      ("Method:ppm:dual_energy",false);
+      ("Enzo:ppm:dual_energy",false);
 
     DualEnergyFormalismEta1 = parameters->value_float
-      ("Method:ppm:dual_energy_eta_1", 0.001);
+      ("Enzo:ppm:dual_energy_eta_1", 0.001);
 
     DualEnergyFormalismEta2 = parameters->value_float
-      ("Method:ppm:dual_energy_eta_2", 0.1);
+      ("Enzo:ppm:dual_energy_eta_2", 0.1);
 
     //--------------------------------------------------
     // parameter: Field : ghosts

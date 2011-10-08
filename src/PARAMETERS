@@ -259,91 +259,91 @@ Location:     enzo_EnzoNamespace.cpp:269
 Type:         float
 Default:      64.0
 
-Parameter:    Method : ppm : pressure_free
+Parameter:    Enzo : ppm : pressure_free
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:288
 Type:         logical
 Default:      false
 
-Parameter:    Method : ppm : use_minimum_pressure_support
+Parameter:    Enzo : ppm : use_minimum_pressure_support
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:291
 Type:         logical
 Default:      false
 
-Parameter:    Method : ppm : minimum_pressure_support_parameter
+Parameter:    Enzo : ppm : minimum_pressure_support_parameter
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:294
 Type:         integer
 Default:      100
 
-Parameter:    Method : ppm : flattening
+Parameter:    Enzo : ppm : flattening
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:297
 Type:         integer
 Default:      3
 
-Parameter:    Method : ppm : diffusion
+Parameter:    Enzo : ppm : diffusion
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:300
 Type:         logical
 Default:      false
 
-Parameter:    Method : ppm : steepening
+Parameter:    Enzo : ppm : steepening
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:303
 Type:         logical
 Default:      false
 
-Parameter:    Method : ppm : pressure_floor
+Parameter:    Enzo : ppm : pressure_floor
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:308
 Type:         float
 Default:      1e-6
 
-Parameter:    Method : ppm : density_floor
+Parameter:    Enzo : ppm : density_floor
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:311
 Type:         float
 Default:      1e-6
 
-Parameter:    Method : ppm : temperature_floor
+Parameter:    Enzo : ppm : temperature_floor
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:314
 Type:         float
 Default:      1e-6
 
-Parameter:    Method : ppm : number_density_floor
+Parameter:    Enzo : ppm : number_density_floor
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:317
 Type:         float
 Default:      1e-6
 
-Parameter:    Method : ppm : dual_energy
+Parameter:    Enzo : ppm : dual_energy
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:320
 Type:         logical
 Default:      false
 
-Parameter:    Method : ppm : dual_energy_eta_1
+Parameter:    Enzo : ppm : dual_energy_eta_1
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:323
 Type:         float
 Default:      0.001
 
-Parameter:    Method : ppm : dual_energy_eta_2
+Parameter:    Enzo : ppm : dual_energy_eta_2
 Function:     enzo::initialize()
 Class:        enzo
 Location:     enzo_EnzoNamespace.cpp:326
