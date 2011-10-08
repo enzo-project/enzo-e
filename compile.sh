@@ -6,6 +6,10 @@ else
   set types = ( charm )
 endif
 
+if ( $types[1] == "all" ) then
+   set types = (charm mpi serial)
+endif
+
 set arch = $CELLO_ARCH
 set prec = $CELLO_PREC
 
