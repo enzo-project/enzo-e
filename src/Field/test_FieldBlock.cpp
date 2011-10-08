@@ -39,12 +39,14 @@ PARALLEL_MAIN_BEGIN
 
   unit_class ("Cello");
 
-  unit_func ("sizeof(float)");
+  unit_func ("32-bit floating-point");
   unit_assert (sizeof(float)       == 4);
-  unit_func ("sizeof(double)");
+  unit_func ("64-bit floating-point");
   unit_assert (sizeof(double)      == 8);
-  unit_func ("sizeof(long-double)");
+  unit_func ("128-bit floating-point");
   unit_assert (sizeof(long double) == 16);
+
+  bool is_quad_supported = sizeof(long double) == 16;
 
   // set ghosts
 
@@ -275,7 +277,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert (nb1 == sizeof (float) * nv1 + ng2 - ng1);
   unit_assert (nb2 == sizeof (double)* nv2 + ng3 - ng2);
   unit_assert (nb3 == sizeof (double)* nv3 + ng4 - ng3);
-  unit_assert (nb4 == sizeof (double)* nv4 + ng5 - ng4);
+  if (is_quad_supported) unit_assert (nb4 == sizeof (double)* nv4 + ng5 - ng4);
 
   bool passed;
 
@@ -419,7 +421,7 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  unit_assert(passed);
+  if (is_quad_supported) unit_assert(passed);
 
   //--------------------------------------------------
 
