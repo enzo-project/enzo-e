@@ -1,4 +1,3 @@
-c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
@@ -58,7 +57,7 @@ c     Locals
 c
       integer i,j,k
       ENZO_REAL cs, dt1
-      ENZO_REAL dmax,dmin,pmax,pmin,umax,umin,vmax,vmin
+C      ENZO_REAL dmax,dmin,pmax,pmin,umax,umin,vmax,vmin
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////
 c=======================================================================
@@ -79,27 +78,27 @@ C      print*, 'v(i1+1,j1+1,1) = ', v(i1+1,j1+1,1)
 C      print*, 'v(i2+1,j2+1,1) = ', v(i2+1,j2+1,1)
 C      print*, dt
 
-      dmax=-huge
-      pmax=-huge
-      umax=-huge
-      vmax=-huge
-      dmin=huge
-      pmin=huge
-      umin=huge
-      vmin=huge
-      do j = j1+1, j2+1
-         do i = i1+1, i2+1
-            dmin = min(dmin,d(i,j,1))
-            pmin = min(pmin,p(i,j,1))
-            umin = min(umin,u(i,j,1))
-            vmin = min(vmin,v(i,j,1))
-            dmax = max(dmax,d(i,j,1))
-            pmax = max(pmax,p(i,j,1))
-            umax = max(umax,u(i,j,1))
-            vmax = max(vmax,v(i,j,1))
-         end do
-      end do
-
+C      dmax=-huge
+C      pmax=-huge
+C      umax=-huge
+C      vmax=-huge
+C      dmin=huge
+C      pmin=huge
+C      umin=huge
+C      vmin=huge
+C      do j = j1+1, j2+1
+C         do i = i1+1, i2+1
+C            dmin = min(dmin,d(i,j,1))
+C            pmin = min(pmin,p(i,j,1))
+C            umin = min(umin,u(i,j,1))
+C            vmin = min(vmin,v(i,j,1))
+C            dmax = max(dmax,d(i,j,1))
+C            pmax = max(pmax,p(i,j,1))
+C            umax = max(umax,u(i,j,1))
+C            vmax = max(vmax,v(i,j,1))
+C         end do
+C      end do
+C
 C      print*, 'dmin = ',dmin
 C      print*, 'pmin = ',pmin
 C      print*, 'umin = ',umin
