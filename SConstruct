@@ -5,7 +5,7 @@ import sys
 # CONFIGURATION
 #----------------------------------------------------------------------
 
-trace           = 1
+trace           = 0
 debug           = 0
 debug_verbose   = 0
 memory          = 1
@@ -15,11 +15,11 @@ atsync          = 0 # CHARM++: only load balance when AtSync() called
 use_gprof       = 0
 use_papi        = 0
 use_valgrind    = 0
-use_projections = 0
+use_projections = 1
 
 # temporary code variations for testing
+
 original_refresh = 1 # 0 crashes
-skip_reduce      = 0  # constant dt, which is currently hard-coded!
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS
@@ -80,8 +80,6 @@ define_debug_verbose =  ['CELLO_DEBUG_VERBOSE'];
 define_memory =  ['CONFIG_USE_MEMORY'];
 define_projections =  ['CONFIG_USE_PROJECTIONS']
 define_original_refresh = ['ORIGINAL_REFRESH']
-
-define_skip_reduce = ['TEMP_SKIP_REDUCE']
 
 defines     = []
 defines_xlc = ""
@@ -160,11 +158,6 @@ if (original_refresh == 1):
      defines = defines + define_original_refresh
      defines_xlc = defines_xlc + ' -D' + define_original_refresh[0]
      defines_xlf = defines_xlf + ' -WF,-D' + define_original_refresh[0]
-
-if (skip_reduce == 1):
-     defines = defines + define_skip_reduce
-     defines_xlc = defines_xlc + ' -D' + define_skip_reduce[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_skip_reduce[0]
 
 #-----------------------------------------------------------------------
 # Display configuration settings
