@@ -144,10 +144,14 @@ Initial * EnzoSimulation::create_initial_ ( std::string name ) throw ()
 
   //--------------------------------------------------
   // parameter: Initial : cycle
-  // parameter: Initial : time
   //--------------------------------------------------
 
   cycle_  = parameters_->value_integer ("Initial:cycle",0);
+
+  //--------------------------------------------------
+  // parameter: Initial : time
+  //--------------------------------------------------
+
   time_   = parameters_->value_float   ("Initial:time",0.0);
 
   return initial;
@@ -156,35 +160,23 @@ Initial * EnzoSimulation::create_initial_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Boundary * EnzoSimulation::create_boundary_ ( std::string name ) throw ()
-/// @param name   Name of the initialization method to create
+/// @param name   Name of boundary condition to use
 {
-  //--------------------------------------------------
-  // parameter: Boundary : type
-  //--------------------------------------------------
 
   boundary_type_enum boundary_type = boundary_type_undefined;
 
-  std::string boundary_param = 
-    parameters_->value_string ("Boundary:type", "undefined");
-
-  if (       boundary_param ==   "reflecting") {
+  if (       name == "reflecting") {
     boundary_type = boundary_type_reflecting;
-  } else if (boundary_param ==   "outflow") {
+  } else if (name == "outflow") {
     boundary_type = boundary_type_outflow;
-  } else if (boundary_param ==   "inflow") {
+  } else if (name == "inflow") {
     boundary_type = boundary_type_inflow;
-  } else if (boundary_param ==   "periodic") {
+  } else if (name == "periodic") {
     boundary_type = boundary_type_periodic;
-  } else if (boundary_param ==   "file") {
-    boundary_type = boundary_type_file;
-  } else if (boundary_param ==   "code") {
-    boundary_type = boundary_type_code;
   } else {
-    char buffer[ERROR_LENGTH];
-    sprintf (buffer,"Illegal parameter Boundary::type '%s'",
-	     boundary_param.c_str());
-    ERROR("EnzoSimulation::create_boundary_",
-	  buffer);
+    ERROR1("EnzoSimulation::create_boundary_",
+	   "Unrecognized parameter Boundary : type '%s'",
+	   boundary_param.c_str());
   }
 	     
   return new EnzoBoundary (boundary_type);

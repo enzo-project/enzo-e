@@ -306,7 +306,7 @@ void Simulation::initialize_boundary_() throw()
   // parameter: Boundary : name
   //--------------------------------------------------
 
-  std::string name = parameters_->value_string("Boundary:name","");
+  std::string name = parameters_->value_string("Boundary:type","");
   boundary_ = create_boundary_(name);
 }
 
