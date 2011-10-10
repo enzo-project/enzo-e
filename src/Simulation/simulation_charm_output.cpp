@@ -135,7 +135,10 @@ void Simulation::p_output_reduce() throw()
     // Close up file
     output->close();
 
-    // Clean up and prepare for next output
+    // Deallocate from prepare_remote()
+    output->cleanup_remote(&n,&buffer);
+
+    // Prepare for next output
     output->finalize();
 
     // Continue with next output object if any
@@ -179,7 +182,6 @@ void Simulation::p_output_write (int n, char * buffer) throw()
 
     output_next();
   }
-
 
 }
 

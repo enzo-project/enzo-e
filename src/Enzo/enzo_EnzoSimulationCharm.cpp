@@ -11,7 +11,11 @@
 
 #include "cello.hpp"
 
+#include "simulation.hpp"
 #include "enzo.hpp"
+
+#include "simulation_charm.hpp"
+#include "mesh_charm.hpp"
 
 //----------------------------------------------------------------------
 
@@ -60,6 +64,7 @@ void EnzoSimulationCharm::run() throw()
     }
   }
 }
+
 
 //======================================================================
 

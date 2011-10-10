@@ -1013,6 +1013,7 @@ void Simulation::refresh() throw()
       }
     }
   }
+
 }
 
 #endif

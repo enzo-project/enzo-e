@@ -60,7 +60,7 @@ public: // interface
 
   /// Assign a name to a group
   void new_group ( memory_group_handle group_id, 
-			  const char *        group_name ) throw ();
+		   const char *        group_name ) throw ();
 
   /// Begin allocating memory associated with the specified group
   void begin_group ( memory_group_handle group_id ) throw ();
@@ -78,7 +78,7 @@ public: // interface
   float efficiency ( memory_group_handle group_handle = 0 ) throw ();
 
   /// Maximum number of bytes allocated
-  long long highest ( memory_group_handle group_handle = 0 ) throw ();
+  long long bytes_high ( memory_group_handle group_handle = 0 ) throw ();
 
   /// Specify the maximum number of bytes to use
   void set_limit ( long long           size, 
@@ -130,9 +130,12 @@ private: // attributes
 #endif
 
 #ifdef CONFIG_USE_MEMORY
-
+  
   /// Whether keeping track of memory statistics is active or not
   bool is_active_;
+
+  /// The highest active group index
+  int max_group_id_;
 
   /// The current group index, or 0 if none
   std::stack<memory_group_handle> curr_group_;

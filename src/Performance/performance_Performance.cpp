@@ -66,9 +66,13 @@ void Performance::stop () throw ()
 
 void Performance::print (const Monitor * monitor) const throw ()
 {
+#ifdef CONFIG_USE_MEMORY
   Memory::instance()->print();
+#endif
   timer_.print();
+#ifdef CONFIG_USE_PAPI
   papi_.print();
+#endif
   print_rusage_(monitor);
 }
 

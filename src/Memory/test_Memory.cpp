@@ -211,11 +211,11 @@ PARALLEL_MAIN_BEGIN
   delete [] temp_1;
   del_count++;
 
-  // highest()
-  unit_func ("highest()");
+  // bytes_high()
+  unit_func ("bytes_high()");
 
-  unit_assert(memory->highest() == 10000);
-  unit_assert(memory->highest(1) == 1000);
+  unit_assert(memory->bytes_high() == 10000);
+  unit_assert(memory->bytes_high(1) == 1000);
 
   // num_new()
   unit_func ("num_new()");

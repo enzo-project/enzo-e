@@ -128,6 +128,7 @@ double EnzoTimestep::compute ( const FieldDescr * field_descr,
  
   /* 5) calculate minimum timestep */
 
+
   FORTRAN_NAME(calc_dt)(&enzo::GridRank, enzo_block->GridDimension, enzo_block->GridDimension+1,
 			enzo_block->GridDimension+2,
 			enzo_block->GridStartIndex, enzo_block->GridEndIndex,
@@ -144,6 +145,7 @@ double EnzoTimestep::compute ( const FieldDescr * field_descr,
 			&dtBaryons);
 
   dtBaryons *= enzo::CourantSafetyNumber;
+  //  TRACE1("dt = %24.15f",dtBaryons);
  
   double dt = dtBaryons;
   //  dt = MIN(dtBaryons, dtParticles);

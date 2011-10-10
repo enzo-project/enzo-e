@@ -152,6 +152,7 @@ enzo_float EnzoBlock::ComputeTimeStep()
   /* 5) calculate minimum timestep */
  
   double dt = dtBaryons;
+  TRACE1("dt = %f",dt);
   //  dt = MIN(dtBaryons, dtParticles);
   //  dt = MIN(dt, dtViscous);
 //   dt = MIN(dt, dtAcceleration);

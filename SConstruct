@@ -18,7 +18,7 @@ use_valgrind    = 0
 use_projections = 0
 
 # temporary code variations for testing
-original_refresh = 1
+original_refresh = 1 # 0 crashes
 skip_reduce      = 0  # constant dt, which is currently hard-coded!
 
 #-----------------------------------------------------------------------

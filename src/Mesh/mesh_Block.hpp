@@ -52,10 +52,10 @@ public: // interface
    int num_field_blocks) throw();
 
   /// Initialize an empty Block
-  Block();
+  Block() { };
 
   /// Initialize a migrated Block
-  Block (CkMigrateMessage *m);
+  Block (CkMigrateMessage *m) { };
 
   /// Initialize block for the simulation.
   void p_initial();
@@ -71,9 +71,6 @@ public: // interface
 
   /// Contribute block data to ith output object in the simulation
   void p_write (int index_output);
-
-  /// Function called if TEMP_SKIP_REDUCE defined for skipping global reduction
-  void skip_reduce(int cycle, int time, double dt_block, double stop_block);
 
   //--------------------------------------------------
 

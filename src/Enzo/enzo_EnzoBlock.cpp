@@ -346,7 +346,6 @@ void EnzoBlock::initialize (int cycle_start, double time_start) throw()
   Time_       = time_start;
   OldTime     = time_start;
 
-
   double xm,ym,zm;
 
   lower(&xm,&ym,&zm);
@@ -653,7 +652,7 @@ int EnzoBlock::CosmologyComputeExpansionFactor
 {
  
   /* Error check. */
-  using namespace enzo;
+
   if (InitialTimeInCodeUnits == 0) {
     
     char error_message[ERROR_LENGTH];

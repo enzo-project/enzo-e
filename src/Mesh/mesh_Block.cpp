@@ -9,12 +9,14 @@
 /// @todo     Remove need for clearing block values before initial conditions (ghost zones accessed but not initialized)
 /// @brief    Implementation of the Block object
 
-#define TEMP_CLEAR_VALUE std::numeric_limits<float>::min() /* in field_FieldBlock.cpp and  mesh_Block.cpp */
-
 #include "cello.hpp"
 
 #include "mesh.hpp"
 #include "main.hpp"
+
+//----------------------------------------------------------------------
+
+#define TEMP_CLEAR_VALUE std::numeric_limits<float>::min() /* in field_FieldBlock.cpp and  mesh_Block.cpp */
 
 //----------------------------------------------------------------------
 
@@ -220,13 +222,13 @@ int Block::index () const throw ()
 void Block::index_patch (int * ix=0, int * iy=0, int * iz=0) const throw ()
 {
 #ifdef CONFIG_USE_CHARM
-  if (ix) (*ix)=thisIndex.x;
-  if (iy) (*iy)=thisIndex.y;
-  if (iz) (*iz)=thisIndex.z;
+  if (ix) (*ix) = thisIndex.x;
+  if (iy) (*iy) = thisIndex.y;
+  if (iz) (*iz) = thisIndex.z;
 #else
-  if (ix) (*ix)=index_[0]; 
-  if (iy) (*iy)=index_[1]; 
-  if (iz) (*iz)=index_[2]; 
+  if (ix) (*ix) = index_[0]; 
+  if (iy) (*iy) = index_[1]; 
+  if (iz) (*iz) = index_[2]; 
 #endif
 }
 
@@ -273,28 +275,6 @@ extern CProxy_Main        proxy_main;
 
 //======================================================================
 
-#ifdef CONFIG_USE_CHARM
-
-Block::Block() 
-{
-  TRACE("Block()");
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-Block::Block (CkMigrateMessage *m) 
-{
-  TRACE("Block(msg)");
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
@@ -313,11 +293,15 @@ void Block::p_initial()
     field_block_[i]->clear(field_descr,TEMP_CLEAR_VALUE);
   }
 
-  // Apply the initial conditions 
-
-  simulation->initial()->compute(field_descr,this);
+  // Initialize the block
 
   initialize(simulation->cycle(), simulation->time());
+
+  // Apply the initial conditions 
+
+  Initial * initial = simulation->initial();
+
+  initial->compute(field_descr,this);
 
 #ifdef ORIGINAL_REFRESH  
 
@@ -334,7 +318,7 @@ void Block::p_initial()
 #endif
 }
 
-#endif /* CONFIG_USE_CHARM */
+#endif
 
 //----------------------------------------------------------------------
 
@@ -351,13 +335,7 @@ void Block::prepare()
   //--------------------------------------------------
 
   double dt_block;
-#ifdef TEMP_SKIP_REDUCE
-  dt_block = 8e-5;
-  dt_ = dt_block;
-  WARNING("Block::prepare","Temporary test code: HARD CODED TIMESTEP dt");
-#else
   dt_block = simulation->timestep()->compute(field_descr,this);
-#endif
 
   // Reduce timestep to coincide with scheduled output if needed
 
@@ -389,21 +367,14 @@ void Block::prepare()
     // field_block()->image(field_descr,"cycle",cycle_,
     // 			 thisIndex.x,thisIndex.y,thisIndex.z);
 
-#ifdef TEMP_SKIP_REDUCE
-    proxy_main.p_exit(num_blocks);
-#endif
    }
 
   //--------------------------------------------------
   // Main::p_prepare()
   //--------------------------------------------------
 
-#ifdef TEMP_SKIP_REDUCE
-  skip_reduce (cycle_,time_,dt_block,stop_block);
-#else
   simulation->proxy_block_reduce().p_prepare
     (num_blocks, cycle_, time_, dt_block, stop_block);
-#endif
 
 }
 #endif /* CONFIG_USE_CHARM */
@@ -781,25 +752,6 @@ void Block::p_refresh_face (int n, char * buffer,
 //----------------------------------------------------------------------
 
 // SEE Simulation/simulation_charm_output.cpp for Block::p_write(int)
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Block::skip_reduce(int cycle, int time, double dt_block, double stop_block)
-{
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  simulation->update_cycle(cycle,time,dt_block,stop_block);
-  
-  axis_enum axis = (simulation->temp_update_all()) ? axis_all : axis_x;
-#ifdef ORIGINAL_REFRESH
-  refresh(axis);
-#else
-  compute(axis);
-#endif
-}
-#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 

@@ -279,7 +279,7 @@ void OutputImage::update_remote  ( int n, char * buffer) throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::cleanup_remote  ( int * n, char ** buffer) throw()
+void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 {
   delete [] (*buffer);
   (*buffer) = NULL;

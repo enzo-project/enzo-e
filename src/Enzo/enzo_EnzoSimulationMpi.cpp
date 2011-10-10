@@ -64,7 +64,7 @@ void EnzoSimulationMpi::run() throw()
   }
 
   // Perform any scheduled output
-  
+
   scheduled_output();
   
   //--------------------------------------------------
@@ -102,8 +102,6 @@ void EnzoSimulationMpi::run() throw()
   //======================================================================
 
   while (! stop_hierarchy) {
-
-    monitor_output();
 
     //--------------------------------------------------
     // Determine timestep
@@ -153,7 +151,10 @@ void EnzoSimulationMpi::run() throw()
     } // ( patch = ++it_patch )
 
     dt_ = dt_hierarchy;
+
     ASSERT("EnzoSimulation::run", "dt == 0", dt_hierarchy != 0.0);
+
+    monitor_output();
 
     //--------------------------------------------------
     // Apply the methods
