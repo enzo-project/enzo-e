@@ -358,10 +358,21 @@ void Memory::reset() throw()
   curr_group_.push(0);
 
   for (int i=0; i<max_group_id_ + 1; i++) {
-    //    bytes_       [i] = 0;
+    bytes_       [i] = 0;
     bytes_high_  [i] = 0;
-    //    new_calls_   [i] = 0;
-    //    delete_calls_[i] = 0;
+    new_calls_   [i] = 0;
+    delete_calls_[i] = 0;
+  }
+#endif
+}
+
+//----------------------------------------------------------------------
+
+void Memory::reset_high() throw()
+{
+#ifdef CONFIG_USE_MEMORY
+  for (int i=0; i<max_group_id_ + 1; i++) {
+    bytes_high_ [i] = bytes_[i];
   }
 #endif
 }

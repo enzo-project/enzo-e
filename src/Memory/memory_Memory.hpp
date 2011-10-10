@@ -103,6 +103,9 @@ public: // interface
   /// Reset memory counters for the current group
   void reset () throw ();
 
+  /// Reset bytes_high to current
+  void reset_high () throw ();
+
   /// Set whether memory tracking is active or not
   void set_active (bool is_active) throw ()
 #ifdef CONFIG_USE_MEMORY

@@ -403,8 +403,9 @@ void Simulation::initialize_output_() throw()
 
     } else {
 
-      ERROR1("Simulation::initialize_output_",
-	     "Bad type %d for Output 'name' parameter",parameters_->type("name"));
+      ERROR2("Simulation::initialize_output_",
+	     "Bad type %d for 'Output : %s : name' parameter",
+	     parameters_->type("name"),file_group.c_str());
 
     }
 

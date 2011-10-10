@@ -3,7 +3,12 @@
 
 include "input/enzo-p.incl"
 
-Mesh { root_blocks    = [2,2]; }
+Mesh { root_blocks    = [2,2]; 
+     root_size = [400,400];}
 
 Output { density      { name = ["enzo-p_2-d-%06d.png",  "cycle"]; } }
 Output { total_energy { name = ["enzo-p_2-te-%06d.png", "cycle"]; } }
+
+Stopping {
+   cycle = 10000;
+}

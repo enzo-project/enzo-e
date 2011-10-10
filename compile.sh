@@ -3,10 +3,6 @@
 if ($#argv >= 1) then
   set types = ($argv)
 else
-  set types = ( charm )
-endif
-
-if ( $types[1] == "all" ) then
    set types = (charm mpi serial)
 endif
 
