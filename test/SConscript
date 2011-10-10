@@ -13,7 +13,7 @@ copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS 2>&1")
-make_movie   = Builder(action = "convert ${ARGS} $TARGET")
+make_movie   = Builder(action = "png2swf -r 20 -o $TARGET ${ARGS} ")
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
 env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
@@ -230,13 +230,13 @@ Clean(env_mv_png.RunParallel ('test_boundary-outflow-2d.unit',
 
 # NOTE: dependencies don't work with running tests: need to specify run output)
 
-env.MakeMovie ("boundary-reflecting-2d.gif", "test_boundary-reflecting-2d.unit", \
+env.MakeMovie ("boundary-reflecting-2d.swf", "test_boundary-reflecting-2d.unit", \
                 ARGS="test/" + type + "/boundary-reflecting-2d-????.png");
-env.MakeMovie ("boundary-periodic-2d.gif","test_boundary-periodic-2d.unit", \
+env.MakeMovie ("boundary-periodic-2d.swf","test_boundary-periodic-2d.unit", \
                 ARGS="test/" + type + "/boundary-periodic-2d-????.png");
-env.MakeMovie ("boundary-inflow-2d.gif","test_boundary-inflow-2d.unit", \
+env.MakeMovie ("boundary-inflow-2d.swf","test_boundary-inflow-2d.unit", \
                 ARGS="test/" + type + "/boundary-inflow-2d-????.png");
-env.MakeMovie ("boundary-outflow-2d.gif","test_boundary-outflow-2d.unit", \
+env.MakeMovie ("boundary-outflow-2d.swf","test_boundary-outflow-2d.unit", \
                 ARGS="test/" + type + "/boundary-outflow-2d-????.png");
 # 3D
 
@@ -269,13 +269,13 @@ Clean(env_mv_png.RunParallel ('test_boundary-outflow-3d.unit',
        'test_boundary-outflow-3d.unit',
        '#/input/boundary-outflow-3d.in.out'])
 
-env.MakeMovie ("boundary-reflecting-3d.gif","test_boundary-reflecting-3d.unit",
+env.MakeMovie ("boundary-reflecting-3d.swf","test_boundary-reflecting-3d.unit",
                 ARGS="test/" + type + "/boundary-reflecting-3d-????.png");
-env.MakeMovie ("boundary-periodic-3d.gif","test_boundary-periodic-3d.unit", \
+env.MakeMovie ("boundary-periodic-3d.swf","test_boundary-periodic-3d.unit", \
                 ARGS="test/" + type + "/boundary-periodic-3d-????.png");
-env.MakeMovie ("boundary-inflow-3d.gif","test_boundary-inflow-3d.unit", \
+env.MakeMovie ("boundary-inflow-3d.swf","test_boundary-inflow-3d.unit", \
                 ARGS="test/" + type + "/boundary-inflow-3d-????.png");
-env.MakeMovie ("boundary-outflow-3d.gif","test_boundary-outflow-3d.unit", \
+env.MakeMovie ("boundary-outflow-3d.swf","test_boundary-outflow-3d.unit", \
                 ARGS="test/" + type + "/boundary-outflow-3d-????.png");
 
 

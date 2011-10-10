@@ -175,8 +175,8 @@ Boundary * EnzoSimulation::create_boundary_ ( std::string name ) throw ()
     boundary_type = boundary_type_periodic;
   } else {
     ERROR1("EnzoSimulation::create_boundary_",
-	   "Unrecognized parameter Boundary : type '%s'",
-	   boundary_param.c_str());
+	   "Unrecognized boundary type '%s'",
+	   name.c_str());
   }
 	     
   return new EnzoBoundary (boundary_type);
