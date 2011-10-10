@@ -30,12 +30,14 @@ foreach type ($types)
 
    if ($type == "clean") then
 
+
      printf "$d %-14s %-14s" "${platform}" "cleaning..."
      scons arch=$arch type=serial -c >& /dev/null
      scons arch=$arch type=mpi    -c >& /dev/null
      scons arch=$arch type=charm  -c >& /dev/null
      rm -f $dir/*unit >& /dev/null
      rm -f bin/$type/* >& /dev/null
+     rm -f test/COMPILING
      printf "done\n"
 
    else
