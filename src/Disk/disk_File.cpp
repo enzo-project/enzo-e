@@ -59,7 +59,15 @@ void File::data_write_meta
 
 //----------------------------------------------------------------------
 
-void File::group_open (std::string name) throw()
+void File::group_chdir (std::string group) throw()
+{
+  WARNING("File::group_chdir",
+	  "Operation not supported by object");
+}
+
+//----------------------------------------------------------------------
+
+void File::group_open () throw()
 {
   WARNING("File::group_open",
 	  "Operation not supported by object");
@@ -67,7 +75,7 @@ void File::group_open (std::string name) throw()
 
 //----------------------------------------------------------------------
 
-void File::group_create (std::string name) throw()
+void File::group_create () throw()
 {
   WARNING("File::group_create",
 	  "Operation not supported by object");

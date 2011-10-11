@@ -494,26 +494,42 @@ void FileHdf5::data_write_meta
 
 //----------------------------------------------------------------------
 
-void FileHdf5::group_open (std::string group_path) throw()
+void FileHdf5::group_chdir (std::string group_path) throw()
+{
+  // convert to absolute path if it is relative
+
+  if (group_path[0] != '/') {
+    group_path = relative_to_absolute_(group_path, group_name_);
+  }
+
+  // update the stored group name
+
+  group_name_ = group_path;
+
+  // error check group name
+
+  ASSERT1("FileHdf5::group_chdir",
+	  "Group name '%s' must begin with '/'", group_path.c_str(),
+	  group_path[0] == '/');
+
+}
+
+//----------------------------------------------------------------------
+
+void FileHdf5::group_open () throw()
 {
   // close current group if open
 
   group_close();
   
-  // error check not absolute path name
-
-  ASSERT1("FileHdf5::group_open",
-	  "Group name '%s' must begin with '/'", group_path.c_str(),
-	  group_path[0] == '/');
-
   // open group
 
-  group_id_ = H5Gopen(file_id_, group_path.c_str());
+  group_id_ = H5Gopen(file_id_, group_name_.c_str());
 
   // error check H5Gopen()
 
-  ASSERT1("FileHdf5::group_open()", "H5Gopen() returned %d", 
-	  group_id_,group_id_>=0);
+  ASSERT2("FileHdf5::group_open()", "H5Gopen(%s) returned %d", 
+	  group_id_,group_name_.c_str(),group_id_>=0);
 
   // update group state
 
@@ -523,22 +539,16 @@ void FileHdf5::group_open (std::string group_path) throw()
 
 //----------------------------------------------------------------------
 
-void FileHdf5::group_create (std::string group_path) throw()
+void FileHdf5::group_create () throw()
 {
   // close current group if open
 
   group_close();
 
-  // error check not absolute path name
-
-  ASSERT1("FileHdf5::group_open",
-	  "Group name '%s' must begin with '/'", group_path.c_str(),
-	  group_path[0] == '/');
-
   // Create ancestor groups beginning at root '/'
   
   std::string group_full = "/";
-  std::string group_rest = group_path;
+  std::string group_rest = group_name_;
   group_rest.erase(0,1);
 
   group_id_ = H5Gopen(file_id_,group_full.c_str());
@@ -809,6 +819,63 @@ enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
 
   return type;
 
+}
+
+//----------------------------------------------------------------------
+
+std::string FileHdf5::relative_to_absolute_  
+(
+ std::string path_relative, 
+ std::string path_absolute
+ ) const throw()
+{
+  // First add trailing "/" if needed
+
+  if (path_absolute[path_absolute.size()-1] != '/') {
+    path_absolute = path_absolute + "/";
+  }
+    
+  // Return "relative" path if it's already absolute
+
+  if (path_relative[0] == '/') return path_relative;
+
+  // Start with existing absolute path, and construct new absolute path
+  // given relative path
+
+  std::string path_dir;
+  
+  int p_left_slash=path_relative.find("/");
+
+  while (p_left_slash != std::string::npos) {
+
+    path_dir      = path_relative.substr(0,p_left_slash);
+    path_relative = path_relative.substr(p_left_slash+1,std::string::npos);
+
+    if (path_dir == "..") {
+      int len= path_absolute.size();
+      int p_right_slash = path_absolute.rfind ("/",len-2);
+      path_absolute = path_absolute.substr (0,p_right_slash+1);
+    } else {
+      path_absolute = path_absolute + path_dir + "/";
+    }
+
+    p_left_slash=path_relative.find("/");
+
+  }
+  path_dir = path_relative;
+  if (path_dir == "..") {
+    int len= path_absolute.size();
+    int p_right_slash = path_absolute.rfind ("/",len-2);
+    path_absolute = path_absolute.substr (0,p_right_slash+1);
+  } else {
+    path_absolute = path_absolute + path_dir + "/";
+  }
+  
+  // remove trailing "/" if needed
+  if (path_absolute.size() > 1) {
+    path_absolute = path_absolute.substr(0,path_absolute.size()-1);
+  }
+  return path_absolute;
 }
 
 //----------------------------------------------------------------------

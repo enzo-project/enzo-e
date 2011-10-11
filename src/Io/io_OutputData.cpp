@@ -108,8 +108,10 @@ void OutputData::write_patch
 
   char buffer[40];
   int ib = patch->index();
-  sprintf (buffer,"/patch_%d",ib);
-  file_->group_create(buffer);
+  sprintf (buffer,"patch_%d",ib);
+  file_->group_chdir(buffer);
+
+  file_->group_create();
 
   // Loop over metadata items in Hierarchy
 
@@ -134,6 +136,7 @@ void OutputData::write_patch
   Output::write_patch(field_descr,patch,ixp0,iyp0,izp0);
 
   file_->group_close();
+  file_->group_chdir("..");
 
 }
 
@@ -147,8 +150,9 @@ void OutputData::write_block ( const FieldDescr * field_descr,
 
   char buffer[40];
   int ib = block->index();
-  sprintf (buffer,"/block_%d",ib);
-  file_->group_create(buffer);
+  sprintf (buffer,"block_%d",ib);
+  file_->group_chdir(buffer);
+  file_->group_create();
 
   // Write block meta data
 
@@ -169,6 +173,7 @@ void OutputData::write_block ( const FieldDescr * field_descr,
   }
 
   file_->group_close();
+  file_->group_chdir("..");
 
 }
 

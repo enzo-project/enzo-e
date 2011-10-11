@@ -114,21 +114,24 @@ PARALLEL_MAIN_BEGIN
   hdf5_a.file_write_meta(&mx, "mx", scalar_type_int);
   hdf5_a.file_write_meta(&my, "my", scalar_type_int);
 
-  hdf5_a.group_create ("/test");
+  hdf5_a.group_chdir ("/test");
+  hdf5_a.group_create ();
   hdf5_a.data_create ("char", scalar_type_char, a_nx,a_ny,a_nz);
   hdf5_a.data_write_meta(&ma_char, "meta_char", scalar_type_char, a_mx, a_my);
   hdf5_a.data_write (a_char);
   hdf5_a.data_close ();
   hdf5_a.group_close ();
 
-  hdf5_a.group_create ("/test/int");
+  hdf5_a.group_chdir ("/test/int");
+  hdf5_a.group_create ();
   hdf5_a.data_create ("int", scalar_type_int, a_nx,a_ny,a_nz);
   hdf5_a.data_write_meta(&ma_int, "meta_int", scalar_type_int, a_mx, a_my);
   hdf5_a.data_write (a_int);
   hdf5_a.data_close ();
   hdf5_a.group_close();
 
-  hdf5_a.group_create ("/test2/scalar/long/group");
+  hdf5_a.group_chdir ("/test2/scalar/long/group");
+  hdf5_a.group_create ();
 
   hdf5_a.data_create ("long", scalar_type_long, a_nx,a_ny,a_nz);
   hdf5_a.data_write_meta(&ma_long, "meta_long", scalar_type_long, a_mx, a_my);
@@ -250,7 +253,8 @@ PARALLEL_MAIN_BEGIN
   unit_func("char data_open()");
   //======================================================================
 
-  hdf5_b.group_open ("/test");
+  hdf5_b.group_chdir ("/test");
+  hdf5_b.group_open ();
 
   scalar_type = scalar_type_unknown;
   hdf5_b.data_open ("char",&scalar_type, &b_nx,&b_ny,&b_nz);
@@ -316,7 +320,8 @@ PARALLEL_MAIN_BEGIN
   unit_func("int data_open()");
   //======================================================================
 
-  hdf5_b.group_open ("/test/int");
+  hdf5_b.group_chdir ("/test/int");
+  hdf5_b.group_open ();
 
   scalar_type = scalar_type_unknown;
   hdf5_b.data_open ("int",&scalar_type, &b_nx,&b_ny,&b_nz);
@@ -381,7 +386,8 @@ PARALLEL_MAIN_BEGIN
   unit_func("float data_open()");
   //======================================================================
 
-  hdf5_b.group_open ("/test2/scalar/long/group");
+  hdf5_b.group_chdir ("/test2/scalar/long/group");
+  hdf5_b.group_open ();
 
   scalar_type = scalar_type_unknown;
   hdf5_b.data_open ("float",&scalar_type, &b_nx,&b_ny,&b_nz);
@@ -447,7 +453,8 @@ PARALLEL_MAIN_BEGIN
   unit_func("long data_open()");
   //======================================================================
 
-  hdf5_b.group_open ("/test2/scalar/long/group");
+  hdf5_b.group_chdir ("/test2/scalar/long/group");
+  hdf5_b.group_open ();
   
   scalar_type = scalar_type_unknown;
   hdf5_b.data_open ("long",&scalar_type, &b_nx,&b_ny,&b_nz);

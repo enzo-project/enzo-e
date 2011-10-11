@@ -96,11 +96,14 @@ public: // interface
 
   // Groups
 
-  /// Open an existing group
-  virtual void group_open (std::string name) throw();
+  /// Change group name for subsequent open or create
+  virtual void group_chdir (std::string name) throw();
 
-  /// Create a new group (and open it)
-  virtual void group_create (std::string name) throw();
+  /// Open the existing group from current group name
+  virtual void group_open () throw();
+
+  /// Create a new group from current group name (and open it)
+  virtual void group_create () throw();
 
   /// Get the current group
   virtual void group_close () throw();

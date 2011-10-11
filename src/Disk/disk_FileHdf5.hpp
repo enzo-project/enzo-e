@@ -85,11 +85,14 @@ public: // interface
 
   // Groups
 
-  /// Open an existing group
-  virtual void group_open (std::string name) throw();
+  /// Change to the named group
+  virtual void group_chdir (std::string name) throw();
 
-  /// Create a new group (and open it)
-  virtual void group_create (std::string name) throw();
+  /// Open an existing group named buy group_chdir()
+  virtual void group_open () throw();
+
+  /// Create a new group named by group_chdir() (and open it)
+  virtual void group_create () throw();
 
   /// Get the current group
   virtual void group_close () throw();
@@ -111,6 +114,10 @@ private: // functions
 
   /// Convert the scalar type to an HDF5 datatype
   enum scalar_type hdf5_to_scalar_(int type) const throw();
+
+  /// Convert a relative path to an absolute path
+  std::string relative_to_absolute_
+  (std::string path_relative, std::string path_current) const throw();
 
   /// Set output extents n0 through n4
   void set_output_extents_
