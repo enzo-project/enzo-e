@@ -3,8 +3,7 @@
 /// @file     parallel_Layout.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-19
-/// @todo     Refactor initialize_mpi_()
-/// @todo     Fix MPI: add process first / count or mpi_comm to constructor
+/// @todo     Clean up interface
 /// @brief    Implementation of the Layout class
 
 //----------------------------------------------------------------------
@@ -102,6 +101,13 @@ int Layout::process (int ib)  throw()
   }
 }
 
+//----------------------------------------------------------------------
+
+int Layout::process (int ibx, int iby, int ibz)  throw()
+{
+  int nb = block_index (ibx,iby,ibz);
+  return process(nb);
+}
 //----------------------------------------------------------------------
 
 int Layout::block_index (int ibx, int iby, int ibz) throw()

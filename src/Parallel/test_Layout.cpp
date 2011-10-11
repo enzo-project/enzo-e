@@ -189,6 +189,16 @@ PARALLEL_MAIN_BEGIN
   unit_assert(layout->process (layout->block_index(0,0,0))       == 0);
   unit_assert(layout->process (layout->block_index(5-1,3-1,2-1)) == 30-1);
 
+  unit_assert(layout->process (0,0,0) == 0);
+  unit_assert(layout->process (5-1,3-1,2-1) == 30-1);
+
+  unit_assert(layout->process (1,0,0)-
+	      layout->process (0,0,0) == 1);
+  unit_assert(layout->process (0,1,0)-
+	      layout->process (0,0,0) == 5);
+  unit_assert(layout->process (0,0,1)-
+	      layout->process (0,0,0) == 5*3);
+
   unit_assert(layout->process (-1) == PROCESS_NULL);
   unit_assert(layout->process (nb) == PROCESS_NULL);
 

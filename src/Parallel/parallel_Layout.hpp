@@ -42,6 +42,9 @@ public: // interface
   /// Return the process id assigned to the given block
   int process (int ib)  throw();
 
+  /// Return the process id assigned to the given block
+  int process (int ibx, int iby, int ibz)  throw();
+
   /// Return the 3D indices for the given global block 1D index
   void block_indices (int ib, int * ibx, int * iby, int * ibz) throw();
 
