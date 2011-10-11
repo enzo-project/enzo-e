@@ -168,8 +168,6 @@ else:
      sys.exit(1)
 
 print defines
-print defines_xlc
-print defines_xlf
 
 #-----------------------------------------------------------------------
 if (original_refresh == 1):
@@ -181,11 +179,10 @@ if (original_refresh == 1):
 # Display configuration settings
 #-----------------------------------------------------------------------
 
-print "CONFIGURATION"
 print 
-print "    CELLO_ARCH: scons arch=",arch
-print "    CELLO_TYPE: scons type=",type
-print "    CELLO_PREC: scons prec=",prec
+print "    CELLO_ARCH scons arch=",arch
+print "    CELLO_TYPE scons type=",type
+print "    CELLO_PREC scons prec=",prec
 print 
 
 #==================================================
