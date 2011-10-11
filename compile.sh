@@ -38,63 +38,63 @@ foreach type ($types)
      rm -f $dir/*unit >& /dev/null
      rm -f bin/$type/* >& /dev/null
      rm -f test/COMPILING
-     rm -f build
+     rm -rf build
      printf "done\n"
 
    else
 
-   printf "$type" > test/COMPILING
+      printf "$type" > test/COMPILING
 
-   # COMPILE
+      # COMPILE
 
-   set d = `date +"%Y-%m-%d %H:%M:%S"`
+      set d = `date +"%Y-%m-%d %H:%M:%S"`
 
-   printf "$d %-14s %-14s" "${platform}" "compiling..."
+      printf "$d %-14s %-14s" "${platform}" "compiling..."
 
-   if (! -d $dir) mkdir $dir
+      if (! -d $dir) mkdir $dir
 
-   touch "$dir/running.$arch.$prec"
+      touch "$dir/running.$arch.$prec"
 
-   set t = `(time scons arch=$arch type=$type -k -j$procs >& $dir/out.scons)`
-   rm -f "$dir/running.$arch.$prec"
+      set t = `(time scons arch=$arch type=$type -k -j$procs >& $dir/out.scons)`
+      rm -f "$dir/running.$arch.$prec"
   
-   set secs = `echo $t | awk '{print $3}'`
+      set secs = `echo $t | awk '{print $3}'`
 
-   printf "done (%4s s)\n" $secs
+      printf "done (%4s s)\n" $secs
 
-   # count crashes
+      # count crashes
 
-   cat $dir/*unit |grep FAIL      | grep "0/" | sort > $dir/fail.$platform
-   cat $dir/*unit |grep incomplete| grep "0/" | sort > $dir/incomplete.$platform
-   cat $dir/*unit |grep pass      | grep "0/" | sort > $dir/pass.$platform
-   set f = `cat $dir/fail.$platform | wc -l`
-   set i = `cat $dir/incomplete.$platform | wc -l`
-   set p = `cat $dir/pass.$platform | wc -l`
+      cat $dir/*unit |grep FAIL      | grep "0/" | sort > $dir/fail.$platform
+      cat $dir/*unit |grep incomplete| grep "0/" | sort > $dir/incomplete.$platform
+      cat $dir/*unit |grep pass      | grep "0/" | sort > $dir/pass.$platform
+      set f = `cat $dir/fail.$platform | wc -l`
+      set i = `cat $dir/incomplete.$platform | wc -l`
+      set p = `cat $dir/pass.$platform | wc -l`
 
-   set d = `date +"%Y-%m-%d %H:%M:%S"`
+      set d = `date +"%Y-%m-%d %H:%M:%S"`
 
-   printf "$d %-14s " ${platform} 
+      printf "$d %-14s " ${platform} 
 
-   printf "FAIL: $f "
+      printf "FAIL: $f "
 
-   printf "Incomplete: $i "
+      printf "Incomplete: $i "
 
-   printf "Pass: $p "
+      printf "Pass: $p "
 
-   # check if any tests didn't finish
+      # check if any tests didn't finish
 
-   set crash = `grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
+      set crash = `grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
 
-   if ($crash != 0) then
-      printf "CRASH: $crash"
       if ($crash != 0) then
-         grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | sed 's/:/ /' | awk '{print "   ", $1}'
+         printf "CRASH: $crash"
+         if ($crash != 0) then
+            grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | sed 's/:/ /' | awk '{print "   ", $1         }'
+         endif
       endif
-   endif
 
-   printf "\n"
+      printf "\n"
 
-   rm -f test/COMPILING
+      rm -f test/COMPILING
 
    endif
 
