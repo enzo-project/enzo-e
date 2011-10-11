@@ -131,7 +131,7 @@ void OutputData::write_patch
     file_->group_write_meta(buffer,name,type,i0,i1,i2,i3,i4);
   }
 
-  // Call write_block() on component blocks
+  // Call write_patch() on base Output object
 
   Output::write_patch(field_descr,patch,ixp0,iyp0,izp0);
 
@@ -170,10 +170,51 @@ void OutputData::write_block ( const FieldDescr * field_descr,
 
     // Write ith Block metadata
     file_->group_write_meta(buffer,name,type,i0,i1,i2,i3,i4);
+
   }
+
+  // Call write_block() on base Output object
+
+  Output::write_block(field_descr,block,ixp0,iyp0,izp0);
 
   file_->group_close();
   file_->group_chdir("..");
+
+}
+
+//----------------------------------------------------------------------
+
+void OutputData::write_field
+( const FieldDescr * field_descr,
+  FieldBlock * field_block,
+  int field_index) throw()
+{
+  TRACE1("OutputData::write_field(%d)",field_index);
+
+  io_field_block()->set_field_descr(field_descr);
+  io_field_block()->set_field_block(field_block);
+  io_field_block()->set_field_index(field_index);
+
+  for (int i=0; i<io_field_block()->data_count(); i++) {
+
+    void * buffer;
+    const char * name;
+    scalar_type type;
+    int i0,i1,i2,i3,i4;
+
+    // Get ith FieldBlock data
+    io_field_block()->data_value(i,& buffer, &name, &type, &i0,&i1,&i2,&i3,&i4);
+    // Write ith FieldBlock data
+    if (i2 != 0) {
+      file_->data_create(name,type,i0,i1,i2);
+    } else if (i1 != 0) {
+      file_->data_create(name,type,i0,i1);
+    } else {
+      file_->data_create(name,type,i0);
+    }
+    file_->data_write(buffer);
+    file_->data_close();
+  }
 
 }
 

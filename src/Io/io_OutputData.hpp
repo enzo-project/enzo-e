@@ -60,6 +60,11 @@ public: // virtual functions
     Block * block,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
+  /// Write local field to disk
+  virtual void write_field
+  ( const FieldDescr * field_descr,
+    FieldBlock * field_block, int field_index) throw();
+
   /// Prepare local array with data to be sent to remote chare for processing
   virtual void prepare_remote (int * n, char ** buffer) throw();
 

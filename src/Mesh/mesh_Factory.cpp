@@ -44,6 +44,13 @@ IoBlock * Factory::create_io_block () const throw()
 
 //----------------------------------------------------------------------
 
+IoFieldBlock * Factory::create_io_field_block () const throw()
+{
+  return new IoFieldBlock;
+}
+
+//----------------------------------------------------------------------
+
 Block * Factory::create_block
 (
  int ibx, int iby, int ibz,

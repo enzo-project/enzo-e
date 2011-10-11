@@ -27,14 +27,16 @@ Output::Output (Simulation * simulation) throw()
     file_name_(""),     // set_filename()
     file_args_(),       // set_filename()
     it_field_(0),        // set_it_field()
-    io_block_(0)        // set_it_field()
+    io_block_(0),
+    io_field_block_(0)
 {
 
   GroupProcess * group_process = GroupProcess::create();
   process_  = group_process->rank();
   delete group_process;
 
-  io_block_ = simulation_->factory().create_io_block();
+  io_block_       = simulation_->factory().create_io_block();
+  io_field_block_ = simulation_->factory().create_io_field_block();
 }
 
 //----------------------------------------------------------------------
@@ -199,3 +201,21 @@ void Output::write_patch
   }
 #endif
 }
+
+//----------------------------------------------------------------------
+
+void Output::write_block
+(
+ const FieldDescr * field_descr,
+ Block * block,
+ int ixp0, int iyp0, int izp0
+ ) throw()
+{
+  // Write fields
+
+  for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
+    int field_index = it_field_->value();
+    write_field (field_descr, block->field_block(), field_index);
+  }
+}
+

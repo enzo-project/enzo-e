@@ -42,6 +42,9 @@ public: // functions
   /// Return the IoBlock object
   IoBlock * io_block () const throw() { return io_block_; }
 
+  /// Return the IoFieldBlock object
+  IoFieldBlock * io_field_block () const throw() { return io_field_block_; }
+
   /// Return the File object pointer
   File * file() throw() 
   { return file_; };
@@ -116,6 +119,11 @@ public: // virtual functions
     Block * block,
     int ixp0=0, int iyp0=0, int izp0=0) throw() = 0;
 
+  /// Write local field to disk
+  virtual void write_field
+  ( const FieldDescr * field_descr,
+    FieldBlock * field_block, int field_index) throw() = 0;
+
   /// Prepare local array with data to be sent to remote chare for processing
   virtual void prepare_remote (int * n, char ** buffer) throw() = 0;
 
@@ -170,6 +178,9 @@ protected: // attributes
 
   /// I/O Block data accessor
   IoBlock * io_block_;
+
+  /// I/O FieldBlock data accessor
+  IoFieldBlock * io_field_block_;
 
 #ifdef CONFIG_USE_CHARM
   /// Index of this Output object in Simulation

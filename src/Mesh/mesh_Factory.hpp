@@ -12,6 +12,7 @@ class Hierarchy;
 class Patch;
 class GroupProcess;
 class IoBlock;
+class IoFieldBlock;
 
 class Factory {
 
@@ -40,6 +41,9 @@ public: // interface
 
   /// Create an Input / Output accessor object for Block
   virtual IoBlock * create_io_block ( ) const throw();
+
+  /// Create an Input / Output accessor object for a FieldBlock
+  virtual IoFieldBlock * create_io_field_block ( ) const throw();
 
   /// Create a new Block [abstract factory design pattern]
   virtual Block * create_block

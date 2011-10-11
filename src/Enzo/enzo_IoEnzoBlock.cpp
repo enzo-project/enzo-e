@@ -37,9 +37,6 @@ void IoEnzoBlock::meta_value
 
   int index_block = meta_count_ - meta_count_enzo_;
 
-  TRACE1("index = %d",index);
-  TRACE1("index_block = %d",index_block);
-
   if (index < index_block) {
 
     // First return Block attributes

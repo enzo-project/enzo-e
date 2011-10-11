@@ -226,6 +226,16 @@ void OutputImage::write_block
 
 //----------------------------------------------------------------------
 
+void OutputImage::write_field
+  ( const FieldDescr * field_descr,
+    FieldBlock * Fieldblock, int field_index) throw()
+{
+  WARNING("OutputImage::write_field()",
+	  "This function should not be called");
+}
+
+//----------------------------------------------------------------------
+
 void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 {
 
