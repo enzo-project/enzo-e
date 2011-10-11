@@ -5,7 +5,10 @@ import sys
 # AUTOR CONFIGURATION
 #----------------------------------------------------------------------
 
+use_papi = 0
+
 env = Environment()
+
 if not env.GetOption('clean'):
 
      conf = Configure(env)

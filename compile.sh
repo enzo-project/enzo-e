@@ -38,6 +38,7 @@ foreach type ($types)
      rm -f $dir/*unit >& /dev/null
      rm -f bin/$type/* >& /dev/null
      rm -f test/COMPILING
+     rm -f build
      printf "done\n"
 
    else
