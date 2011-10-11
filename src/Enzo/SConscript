@@ -36,7 +36,7 @@ includes = [Glob('enzo*hpp')]
 sources  = [Glob('enzo_*cpp')]
 if (type == 'charm'):
    includes = includes + ['enzo.decl.h','enzo.def.h']
-#   sources = sources + ['../main_enzo.cpp']
+   sources = sources + ['../main_enzo.cpp']
 
 #------------------------------
 # ENVIRONMENTS

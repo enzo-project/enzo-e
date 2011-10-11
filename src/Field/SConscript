@@ -42,8 +42,8 @@ env = env.Clone(LIBS=[components,libraries])
 #------------------------------
 
 libraries        = env.Library ('field', [sources])
-# if (type == "charm"):
-# 	sources = sources + ["../main_simulation.cpp"]
+if (type == "charm"):
+	sources = sources + ["../main_simulation.cpp"]
 
 test_field_block = env.Program (['test_FieldBlock.cpp',  sources])
 test_field_descr = env.Program (['test_FieldDescr.cpp',  sources])
