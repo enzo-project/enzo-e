@@ -60,9 +60,9 @@ FieldBlock & FieldBlock::operator= ( const FieldBlock & field_block ) throw ()
 
 void FieldBlock::size( int * nx, int * ny, int * nz ) const throw()
 {
-  *nx = size_[0];
-  *ny = size_[1];
-  *nz = size_[2];
+  if (nx) (*nx) = size_[0];
+  if (ny) (*ny) = size_[1];
+  if (nz) (*nz) = size_[2];
 }
 
 //----------------------------------------------------------------------
@@ -484,15 +484,21 @@ int FieldBlock::field_size
 
   // Compute array size
 
-  *nx = size_[0] + (1-cx) + 2*gx;
-  *ny = size_[1] + (1-cy) + 2*gy;
-  *nz = size_[2] + (1-cz) + 2*gz;
+  if (nx) (*nx) = size_[0] + (1-cx) + 2*gx;
+  if (ny) (*ny) = size_[1] + (1-cy) + 2*gy;
+  if (nz) (*nz) = size_[2] + (1-cz) + 2*gz;
 
   // Return array size in bytes
 
   precision_enum precision = field_descr->precision(id_field);
   int bytes_per_element = cello::sizeof_precision (precision);
-  return (*nx) * (*ny) * (*nz) * bytes_per_element;
+  if (nz) {
+    return (*nx) * (*ny) * (*nz) * bytes_per_element;
+  } else if (ny) {
+    return (*nx) * (*ny) * bytes_per_element;
+  } else {
+    return (*nx) * bytes_per_element;
+  }
 }
 
 //----------------------------------------------------------------------

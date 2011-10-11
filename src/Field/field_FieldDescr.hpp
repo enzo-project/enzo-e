@@ -125,11 +125,11 @@ public: // functions
   double courant() const throw();
 
   /// centering of given field
-  void centering(int id_field, bool * cx, bool * cy, bool * cz) const 
+  void centering(int id_field, bool * cx, bool * cy = 0, bool * cz = 0) const 
     throw(std::out_of_range);
 
   /// depth of ghost zones of given field
-  void ghosts(int id_field, int * gx, int * gy, int * gz) const 
+  void ghosts(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
     throw(std::out_of_range);
 
   /// precision of given field

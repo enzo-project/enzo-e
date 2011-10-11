@@ -219,7 +219,7 @@ int Block::index () const throw ()
 
 //----------------------------------------------------------------------
 
-void Block::index_patch (int * ix=0, int * iy=0, int * iz=0) const throw ()
+void Block::index_patch (int * ix, int * iy, int * iz) const throw ()
 {
 #ifdef CONFIG_USE_CHARM
   if (ix) (*ix) = thisIndex.x;

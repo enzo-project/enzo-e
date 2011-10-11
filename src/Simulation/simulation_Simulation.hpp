@@ -213,7 +213,7 @@ public: // interface
     monitor_-> print("Simulation", "cycle %04d time %15.12f dt %15.12g", 
 		     cycle_,time_,dt_);
     Memory * memory = Memory::instance();
-    monitor_->print("Memory","cycle %04d bytes %lld bytes_high %lld",
+    monitor_->print("Memory","           bytes %lld bytes_high %lld",
 		    cycle_,memory->bytes(), memory->bytes_high());
     memory->reset_high();
   }

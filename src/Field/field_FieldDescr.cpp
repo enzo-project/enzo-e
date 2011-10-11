@@ -169,9 +169,9 @@ void FieldDescr::centering
  bool * cz
 ) const throw(std::out_of_range)
 {
-  *cx = centering_.at(id_field)[0];
-  *cy = centering_.at(id_field)[1];
-  *cz = centering_.at(id_field)[2];
+  if (cx) (*cx) = centering_.at(id_field)[0];
+  if (cy) (*cy) = centering_.at(id_field)[1];
+  if (cz) (*cz) = centering_.at(id_field)[2];
 }
 
 //----------------------------------------------------------------------
@@ -184,9 +184,9 @@ void FieldDescr::ghosts
  int * gz
 ) const throw(std::out_of_range)
 {
-  *gx = ghosts_.at(id_field)[0];
-  *gy = ghosts_.at(id_field)[1];
-  *gz = ghosts_.at(id_field)[2];
+  if (gx) (*gx) = ghosts_.at(id_field)[0];
+  if (gy) (*gy) = ghosts_.at(id_field)[1];
+  if (gz) (*gz) = ghosts_.at(id_field)[2];
 }
 
 //----------------------------------------------------------------------

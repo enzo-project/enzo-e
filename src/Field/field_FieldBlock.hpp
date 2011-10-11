@@ -44,7 +44,7 @@ public: // interface
   FieldBlock & operator= (const FieldBlock & field_block) throw ();
 
   /// Return size of fields on the block, assuming centered
-  void size(int * nx, int * ny, int * nz) const throw();
+  void size(int * nx = 0, int * ny = 0, int * nz = 0) const throw();
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
@@ -70,7 +70,9 @@ public: // interface
 
   /// Return width of cells along each dimension
   void cell_width(Block * block,
-		  double * hx, double * hy, double * hz) const throw ();
+		  double * hx = 0, 
+		  double * hy = 0, 
+		  double * hz = 0) const throw ();
 
   // /// Return the associated field faces object
   // FieldFaces * field_faces(const FieldDescr * field_descr) throw ();
@@ -122,7 +124,7 @@ public: // interface
   /// Return the number of elements (nx,ny,nz) along each axis, and total
   /// number of bytes n
   int field_size (const FieldDescr * field_descr, int id_field, 
-		  int *nx, int *ny, int *nz) const throw();
+		  int *nx = 0, int *ny = 0, int *nz = 0) const throw();
 
   //----------------------------------------------------------------------
 

@@ -5,6 +5,16 @@
 /// @date     Thu Mar 17 11:14:18 PDT 2011
 /// @todo     Move write_hierarchy() call to write_patch() etc. to parent
 ///           Output::write_hierarchy()
+//
+/// @bug in CHARM++ write_patch() calls block_array().p_write() with
+///           write_block() as a callback (instead of write_block()
+///           directly), so it returns immediately.  The result is the
+///           subsequent group_chdir() gets called before the block
+///           data are output, resulting in the block HDF5 groups
+///           being in the same level as the parent patch group.
+///           Synchronization is needed so that group_chdir() is
+///           called only after all block data have been written.
+///
 /// @brief    Implementation of the OutputData class
 
 #include "cello.hpp"
@@ -103,7 +113,6 @@ void OutputData::write_patch
  int ixp0, int iyp0, int izp0
  ) throw()
 {
-
   // Create file group for patch
 
   char buffer[40];
@@ -131,7 +140,7 @@ void OutputData::write_patch
     file_->group_write_meta(buffer,name,type,i0,i1,i2,i3,i4);
   }
 
-  // Call write_patch() on base Output object
+  // Call write_patch() with base Output object
 
   Output::write_patch(field_descr,patch,ixp0,iyp0,izp0);
 
@@ -146,6 +155,7 @@ void OutputData::write_block ( const FieldDescr * field_descr,
   Block * block,
   int ixp0, int iyp0, int izp0) throw()
 {
+
   // Create file group for block
 
   char buffer[40];
@@ -189,8 +199,6 @@ void OutputData::write_field
   FieldBlock * field_block,
   int field_index) throw()
 {
-  TRACE1("OutputData::write_field(%d)",field_index);
-
   io_field_block()->set_field_descr(field_descr);
   io_field_block()->set_field_block(field_block);
   io_field_block()->set_field_index(field_index);

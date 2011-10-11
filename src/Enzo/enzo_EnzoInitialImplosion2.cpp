@@ -47,14 +47,22 @@ void EnzoInitialImplosion2::compute
   enzo_float * vy = (enzo_float *) field_block->field_values(index_velocity_y);
   enzo_float * te = (enzo_float *) field_block->field_values(index_total_energy);
 
-  int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  // Block size (excluding ghosts)
+  int nx,ny;
+  field_block->size(&nx,&ny);
 
-  double hx,hy,hz;
-  field_block->cell_width(enzo_block,&hx,&hy,&hz);
+  // Cell widths
+  double hx,hy;
+  field_block->cell_width(enzo_block,&hx,&hy);
 
-  int gx,gy,gz;
-  field_descr->ghosts(index_density,&gx,&gy,&gz);
+  // Ghost depths
+  int gx,gy;
+  field_descr->ghosts(index_density,&gx,&gy);
+
+  // Left edges
+  double x0, y0;
+  block->lower(&x0,&y0);
+  printf ("x0=%g y0=%g\n",x0,y0);
 
   // WARNING("EnzoInitialImplosion2",
   // 		  "Assumes same ghost zone depth for all fields");
@@ -63,9 +71,9 @@ void EnzoInitialImplosion2::compute
   int ngy = ny + 2*gy;
 
   for (int iy=gy; iy<ny+gy; iy++) {
-    double y = (iy - gy + 0.5)*hy;
+    double y = y0 + (iy - gy + 0.5)*hy;
     for (int ix=gy; ix<nx+gx; ix++) {
-      double x = (ix - gx + 0.5)*hx;
+      double x = x0 + (ix - gx + 0.5)*hx;
       int i = INDEX(ix,iy,0,ngx,ngy);
       if (x + y < 0.1517) {
 	d[i]  = 0.125;
