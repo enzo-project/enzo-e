@@ -706,82 +706,7 @@ tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
   </tr>
   </table></br>
 
-
-<?php
-test_group("Disk");
-
-tests("Disk","test_FileHdf5", "test_FileHdf5","");
-tests("Disk","test_FileIfrit","test_FileIfrit","");
-
-   //----------------------------------------------------------------------
-
-test_group("Error");
-
-tests("Error","test_Error","test_Error","");
-
-
-   //----------------------------------------------------------------------
-
-test_group("Field");
-
-tests("Field","test_FieldDescr","test_FieldDescr","");
-tests("Field","test_FieldBlock","test_FieldBlock","");
-tests("Field","test_FieldFace","test_FieldFace","");
-tests("Field","test_ItField","test_ItField","");
-
-   //----------------------------------------------------------------------
-
-test_group("Io");
-
-tests("Io","test_ItReduce", "test_ItReduce","");
-
-   //----------------------------------------------------------------------
-
-test_group("Memory");
-
-tests("Memory","test_Memory","test_Memory","");
-
-
-   //----------------------------------------------------------------------
-
-test_group("Mesh");
-
-tests("Mesh","test_Hierarchy","test_Hierarchy",""); 
-tests("Mesh","test_Patch","test_Patch",""); 
-tests("Mesh","test_Block","test_Block",""); 
-
-   //----------------------------------------------------------------------
-
-test_group("Monitor");
-
-tests("Monitor","test_Monitor","test_Monitor","");
-printf ("<img src=\"monitor_image_1.png\"></img>\n");
-printf ("<img src=\"monitor_image_2.png\"></img>\n");
-printf ("<img src=\"monitor_image_3.png\"></img>\n");
-printf ("<img src=\"monitor_image_4.png\"></img>\n");
-
-   //----------------------------------------------------------------------
-
-test_group("Parallel");
-
-tests("Parallel","test_GroupProcess","test_GroupProcess","");
-tests("Parallel","test_Layout","test_Layout","");
-
-   //----------------------------------------------------------------------
-
-test_group("Parameters");
-
-tests("Parameters","test_Parameters","test_Parameters","");
-
-   //----------------------------------------------------------------------
-
-test_group("Performance");
-
-tests("Performance","test_Performance","test_Performance","");
-tests("Performance","test_Papi",       "test_Papi","");
-
-
-  test_group("Enzo-BC-3D");
+<?php  test_group("Enzo-BC-3D");
   ?>
 
   <h4>3D Reflecting</h4>
@@ -956,6 +881,81 @@ tests("Performance","test_Papi",       "test_Papi","");
   <td><img width=128 src="charm/boundary-outflow-3d-0080.png"></img></td>
   </tr>
   </table></br>
+
+<?php
+test_group("Disk");
+
+tests("Disk","test_FileHdf5", "test_FileHdf5","");
+tests("Disk","test_FileIfrit","test_FileIfrit","");
+
+   //----------------------------------------------------------------------
+
+test_group("Error");
+
+tests("Error","test_Error","test_Error","");
+
+
+   //----------------------------------------------------------------------
+
+test_group("Field");
+
+tests("Field","test_FieldDescr","test_FieldDescr","");
+tests("Field","test_FieldBlock","test_FieldBlock","");
+tests("Field","test_FieldFace","test_FieldFace","");
+tests("Field","test_ItField","test_ItField","");
+
+   //----------------------------------------------------------------------
+
+test_group("Io");
+
+tests("Io","test_ItReduce", "test_ItReduce","");
+
+   //----------------------------------------------------------------------
+
+test_group("Memory");
+
+tests("Memory","test_Memory","test_Memory","");
+
+
+   //----------------------------------------------------------------------
+
+test_group("Mesh");
+
+tests("Mesh","test_Hierarchy","test_Hierarchy",""); 
+tests("Mesh","test_Patch","test_Patch",""); 
+tests("Mesh","test_Block","test_Block",""); 
+
+   //----------------------------------------------------------------------
+
+test_group("Monitor");
+
+tests("Monitor","test_Monitor","test_Monitor","");
+printf ("<img src=\"monitor_image_1.png\"></img>\n");
+printf ("<img src=\"monitor_image_2.png\"></img>\n");
+printf ("<img src=\"monitor_image_3.png\"></img>\n");
+printf ("<img src=\"monitor_image_4.png\"></img>\n");
+
+   //----------------------------------------------------------------------
+
+test_group("Parallel");
+
+tests("Parallel","test_GroupProcess","test_GroupProcess","");
+tests("Parallel","test_Layout","test_Layout","");
+
+   //----------------------------------------------------------------------
+
+test_group("Parameters");
+
+tests("Parameters","test_Parameters","test_Parameters","");
+
+   //----------------------------------------------------------------------
+
+test_group("Performance");
+
+tests("Performance","test_Performance","test_Performance","");
+tests("Performance","test_Papi",       "test_Papi","");
+?>
+
 
 
   <h3>TreeK-D2-R2-L?</h3>
