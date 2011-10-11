@@ -103,7 +103,8 @@ public: // interface
 #ifndef CONFIG_USE_CHARM /* MPI only */
 
   /// Refresh ghost zones on an internal face
-  void refresh_ghosts(const FieldDescr * field_descr) throw();
+  void refresh_ghosts(const FieldDescr * field_descr,
+		      GroupProcess * group_process) throw();
 
 #endif
 

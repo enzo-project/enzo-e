@@ -255,9 +255,10 @@ Block * Block::neighbor (axis_enum axis, face_enum face) const throw()
 #ifndef CONFIG_USE_CHARM
 
 void Block::refresh_ghosts(const FieldDescr * field_descr,
+			   GroupProcess * group_process,
 			   int index_field_set) throw()
 {
-  field_block_[index_field_set]->refresh_ghosts(field_descr);
+  field_block_[index_field_set]->refresh_ghosts(field_descr,group_process);
 }
 
 #endif

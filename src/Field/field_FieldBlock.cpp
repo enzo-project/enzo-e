@@ -380,7 +380,8 @@ void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 
 #ifndef CONFIG_USE_CHARM
 
-void FieldBlock::refresh_ghosts(const FieldDescr * field_descr) throw()
+void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
+				GroupProcess * group_proceess) throw()
 {
 
   // INCOMPLETE
@@ -390,6 +391,9 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr) throw()
 	    "Called with ghosts not allocated: allocating ghosts");
     allocate_ghosts(field_descr);
   }
+
+  // Refresh X-faces
+
 }
 
 #endif

@@ -92,6 +92,7 @@ public: // interface
 
   /// Refresh ghost data
   void refresh_ghosts(const FieldDescr * field_descr,
+		      GroupProcess * group_process,
 		      int index_field_set = 0) throw();
 #endif
 

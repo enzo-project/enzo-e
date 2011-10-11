@@ -177,7 +177,7 @@ void EnzoSimulationMpi::run() throw()
 
 	// Refresh ghosts
 
-	block->refresh_ghosts(field_descr_);
+	block->refresh_ghosts(field_descr_,group_process_);
 
 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 

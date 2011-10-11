@@ -26,7 +26,7 @@ if not env.GetOption('clean'):
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
-trace           = 0
+trace           = 1
 debug           = 0
 debug_verbose   = 0
 memory          = 1
