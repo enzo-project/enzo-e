@@ -2,7 +2,25 @@ import os
 import sys
 
 #----------------------------------------------------------------------
-# CONFIGURATION
+# AUTOR CONFIGURATION
+#----------------------------------------------------------------------
+
+env = Environment()
+if not env.GetOption('clean'):
+
+     conf = Configure(env)
+
+     if not conf.CheckCHeader('papi.h'):
+          print 'PAPI not installed'
+          use_papi = 0
+     else:
+          print 'PAPI installed'
+          use_papi = 1
+
+     env = conf.Finish()
+
+#----------------------------------------------------------------------
+# USER CONFIGURATION
 #----------------------------------------------------------------------
 
 trace           = 0
@@ -13,9 +31,9 @@ memory          = 1
 atsync          = 0 # CHARM++: only load balance when AtSync() called
 
 use_gprof       = 0
-use_papi        = 0
 use_valgrind    = 0
 use_projections = 1
+# use_papi        = 0 # override auto configuration
 
 # temporary code variations for testing
 
