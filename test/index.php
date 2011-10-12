@@ -94,8 +94,11 @@ function test_failed ($output_file) {
   global $parallel_types;
 
   $input_file  = "../input/$output.in";
+  $input_link  = "../cello/input/$output.in";
+  $input_html = "<a href=\"$input_link\">$output.in</a>";
+
   $source_file = "../src/$component/$testrun.cpp";
-  $source_link = "../cello-src/src/$component/$testrun.cpp";
+  $source_link = "../cello/src/$component/$testrun.cpp";
   $source_html = "<a href=\"$source_link\">$testrun.cpp</a>";
 
   if (! file_exists($source_file)) {
@@ -108,7 +111,7 @@ function test_failed ($output_file) {
       echo "($test_name)";
     }
     if (file_exists($input_file)) {
-      echo "<a href=$input_file>$input_file</a>";
+      echo " $input_html";
     }
     echo "</th></tr>\n";
     echo "<tr>\n";
@@ -397,17 +400,17 @@ test_summary("Enzo-PPM",
 	     array("enzo-p",  "enzo-p"));
 
 test_summary("Enzo-BC-2D", 
-	     array("test_boundary-reflecting-2d",
-		   "test_boundary-periodic-2d",
-		   "test_boundary-inflow-2d",
-		   "test_boundary-outflow-2d"),
+	     array("boundary-reflecting-2d",
+		   "boundary-periodic-2d",
+		   "boundary-inflow-2d",
+		   "boundary-outflow-2d"),
 	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
 
 test_summary("Enzo-BC-3D",
-	     array("test_boundary-reflecting-3d",
-		   "test_boundary-periodic-3d",
-		   "test_boundary-inflow-3d",
-		   "test_boundary-outflow-3d"),
+	     array("boundary-reflecting-3d",
+		   "boundary-periodic-3d",
+		   "boundary-inflow-3d",
+		   "boundary-outflow-3d"),
 	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
 
 // Print row divider
