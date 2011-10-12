@@ -54,6 +54,13 @@ PARALLEL_MAIN_BEGIN
   monitor_->header();
   monitor_->print ("","BEGIN ENZO-P");
 
+  // Print initial baseline memory usage
+
+  Memory * memory = Memory::instance();
+  monitor_->print("Memory","           bytes %lld bytes_high %lld",
+		    memory->bytes(), memory->bytes_high());
+
+
   // open parameter file, calling usage() if invalid
 
   if (PARALLEL_ARGC != 2) {
@@ -82,6 +89,8 @@ PARALLEL_MAIN_BEGIN
 
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
     (parameter_file, strlen(parameter_file)+1, proxy_block_reduce, 0);
+
+  
 
   //--------------------------------------------------
 

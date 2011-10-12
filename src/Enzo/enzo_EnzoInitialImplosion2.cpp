@@ -62,7 +62,6 @@ void EnzoInitialImplosion2::compute
   // Left edges
   double x0, y0;
   block->lower(&x0,&y0);
-  printf ("x0=%g y0=%g\n",x0,y0);
 
   // WARNING("EnzoInitialImplosion2",
   // 		  "Assumes same ghost zone depth for all fields");

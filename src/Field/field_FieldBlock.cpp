@@ -381,7 +381,7 @@ void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 #ifndef CONFIG_USE_CHARM
 
 void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
-				GroupProcess * group_proceess) throw()
+				const Patch * patch) throw()
 {
 
   // INCOMPLETE
@@ -392,8 +392,23 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
     allocate_ghosts(field_descr);
   }
 
-  // Refresh X-faces
+  // Copy to faces
+  FieldFace face_send[3][2];
+  face_send[axis_x][face_lower].load(field_descr,this,axis_x,face_lower);
+  face_send[axis_y][face_lower].load(field_descr,this,axis_y,face_lower);
+  face_send[axis_z][face_lower].load(field_descr,this,axis_z,face_lower);
+  face_send[axis_x][face_upper].load(field_descr,this,axis_x,face_upper);
+  face_send[axis_y][face_upper].load(field_descr,this,axis_y,face_upper);
+  face_send[axis_z][face_upper].load(field_descr,this,axis_z,face_upper);
 
+  GroupProcess * group_process = patch->group_process();
+  Layout * layout = patch->layout();
+  // Send faces
+  
+  // Receive ghosts
+
+  // Copy from ghosts
+  INCOMPLETE("FieldBlock::refresh_ghosts()");
 }
 
 #endif

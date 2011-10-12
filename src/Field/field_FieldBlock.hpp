@@ -13,6 +13,7 @@
 /// @todo     Clean allocate_array() and allocate_ghosts() usage
 /// @brief    [\ref Field] Fortran-style array class.
 
+class Patch;
 class Block;
 class FieldDescr;
 
@@ -106,7 +107,7 @@ public: // interface
 
   /// Refresh ghost zones on an internal face
   void refresh_ghosts(const FieldDescr * field_descr,
-		      GroupProcess * group_process) throw();
+		      const Patch * patch) throw();
 
 #endif
 

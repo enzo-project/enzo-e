@@ -179,10 +179,10 @@ PARALLEL_MAIN_BEGIN
       unit_assert_quiet (nfy == patch_size[1] / patch_blocking[1]);
       unit_assert_quiet (nfz == patch_size[2] / patch_blocking[2]);
 
-      GroupProcess * group = patch->group();
+      GroupProcess * group_process = patch->group_process();
       Layout      * layout = patch->layout();
 
-      int ip = group->rank();
+      int ip = group_process->rank();
 
       int index_local = block_counter;
       int index_global = layout->global_index(ip,index_local);

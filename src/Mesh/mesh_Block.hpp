@@ -15,7 +15,7 @@
 
 class FieldDescr;
 class FieldBlock;
-// class Patch;
+class Patch;
 
 #ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
@@ -95,7 +95,7 @@ public: // interface
 
   /// Refresh ghost data
   void refresh_ghosts(const FieldDescr * field_descr,
-		      GroupProcess * group_process,
+		      const Patch * patch,
 		      int index_field_set = 0) throw();
 #endif
 

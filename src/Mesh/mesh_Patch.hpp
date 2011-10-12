@@ -66,7 +66,7 @@ class Patch
 
   //--------------------------------------------------
 
-  GroupProcess * group()  const throw()
+  GroupProcess * group_process()  const throw()
   { return group_process_; };
 
   //--------------------------------------------------

@@ -214,7 +214,7 @@ public: // interface
 		     cycle_,time_,dt_);
     Memory * memory = Memory::instance();
     monitor_->print("Memory","           bytes %lld bytes_high %lld",
-		    cycle_,memory->bytes(), memory->bytes_high());
+		    memory->bytes(), memory->bytes_high());
     memory->reset_high();
   }
 
