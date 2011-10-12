@@ -57,7 +57,6 @@ class FieldBlock;
 #include "method_InitialDefault.hpp"
 #include "method_Boundary.hpp"
 #include "method_Method.hpp"
-#include "method_Hyperbolic.hpp"
 
 #endif /* METHOD_HPP */
 

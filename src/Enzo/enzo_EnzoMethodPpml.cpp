@@ -14,7 +14,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodPpml::EnzoMethodPpml( Parameters * parameters )
-  : Hyperbolic(parameters)
+  : Method(parameters)
 {
 }
 

@@ -8,7 +8,7 @@
 #ifndef ENZO_ENZO_METHOD_PPML_HPP
 #define ENZO_ENZO_METHOD_PPML_HPP
 
-class EnzoMethodPpml : public Hyperbolic {
+class EnzoMethodPpml : public Method {
 
 /// @class    EnzoMethodPpml
 /// @ingroup  Enzo

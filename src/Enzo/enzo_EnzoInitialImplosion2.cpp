@@ -3,7 +3,6 @@
 /// @file     enzo_EnzoInitialImplosion2.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Jan  4 19:30:35 PST 2011
-/// @bug      Broken for multiple blocks: need global block offsets
 /// @brief    Implementation of Enzo 2D Implosion problem initialization
 
 #include "cello.hpp"
@@ -28,7 +27,11 @@ void EnzoInitialImplosion2::compute
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  FieldBlock * field_block       = enzo_block->field_block();
+  ASSERT("EnzoInitialImplosion2",
+	 "Expecting an EnzoBlock",
+	 enzo_block != NULL);
+
+  FieldBlock * field_block = enzo_block->field_block();
 
   ASSERT("EnzoInitialImplosion2",
 	 "Insufficient number of fields",
