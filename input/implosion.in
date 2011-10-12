@@ -1,0 +1,14 @@
+include "input/implosion.incl"
+
+Mesh {
+    root_size = [400,400];
+    root_blocks = [2,2];
+}
+
+Stopping {
+   cycle = 1000;
+}
+Initial {
+   code = "implosion_2d";
+}
+
