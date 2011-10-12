@@ -163,7 +163,7 @@ const char * op_name[] = {
     }
   };
 
-/
+
   void copy_groups (char * group_dest[], char * group_src[]) {
     int i;
     for (i=0; i<MAX_GROUP_DEPTH; i++) {
@@ -645,7 +645,7 @@ vse:
 
 
 vle: 
- '(' vle ')' { }
+ '(' vle ')' { $$ = $2; }
  | vse LE cse  { $$ = new_node_operation ($1, enum_op_le,new_node_float($3)); }
  | cse LE vse  { $$ = new_node_operation (new_node_float($1), enum_op_le,$3); }
  | vse LE vse  { $$ = new_node_operation ($1, enum_op_le,$3); }

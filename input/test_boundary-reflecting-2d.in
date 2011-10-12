@@ -1,4 +1,4 @@
-include "input/circle.incl"
+include "input/E.incl"
 
 Boundary { type = "reflecting" }
 

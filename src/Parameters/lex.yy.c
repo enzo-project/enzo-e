@@ -577,9 +577,9 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "build/serial/Parameters/parse.l"
+#line 1 "build/charm/Parameters/parse.l"
 
-#line 14 "build/serial/Parameters/parse.l"
+#line 14 "build/charm/Parameters/parse.l"
 
 /*
  * ENZO: THE NEXT GENERATION
@@ -822,7 +822,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 74 "build/serial/Parameters/parse.l"
+#line 74 "build/charm/Parameters/parse.l"
 
 
 
@@ -912,300 +912,300 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 77 "build/serial/Parameters/parse.l"
+#line 77 "build/charm/Parameters/parse.l"
 { return ACOS; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 78 "build/serial/Parameters/parse.l"
+#line 78 "build/charm/Parameters/parse.l"
 { return ACOSH; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 79 "build/serial/Parameters/parse.l"
+#line 79 "build/charm/Parameters/parse.l"
 { return ASIN; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 80 "build/serial/Parameters/parse.l"
+#line 80 "build/charm/Parameters/parse.l"
 { return ASINH; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 81 "build/serial/Parameters/parse.l"
+#line 81 "build/charm/Parameters/parse.l"
 { return ATAN; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 82 "build/serial/Parameters/parse.l"
+#line 82 "build/charm/Parameters/parse.l"
 { return ATANH; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 83 "build/serial/Parameters/parse.l"
+#line 83 "build/charm/Parameters/parse.l"
 { return CBRT; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 84 "build/serial/Parameters/parse.l"
+#line 84 "build/charm/Parameters/parse.l"
 { return CEIL; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 85 "build/serial/Parameters/parse.l"
+#line 85 "build/charm/Parameters/parse.l"
 { return COS; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 86 "build/serial/Parameters/parse.l"
+#line 86 "build/charm/Parameters/parse.l"
 { return COSH; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 87 "build/serial/Parameters/parse.l"
+#line 87 "build/charm/Parameters/parse.l"
 { return ERFC; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 88 "build/serial/Parameters/parse.l"
+#line 88 "build/charm/Parameters/parse.l"
 { return ERF; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 89 "build/serial/Parameters/parse.l"
+#line 89 "build/charm/Parameters/parse.l"
 { return EXP; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 90 "build/serial/Parameters/parse.l"
+#line 90 "build/charm/Parameters/parse.l"
 { return EXPM1; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 91 "build/serial/Parameters/parse.l"
+#line 91 "build/charm/Parameters/parse.l"
 { return FABS; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 92 "build/serial/Parameters/parse.l"
+#line 92 "build/charm/Parameters/parse.l"
 { return FLOOR; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 93 "build/serial/Parameters/parse.l"
+#line 93 "build/charm/Parameters/parse.l"
 { return J0; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 94 "build/serial/Parameters/parse.l"
+#line 94 "build/charm/Parameters/parse.l"
 { return J1; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 95 "build/serial/Parameters/parse.l"
+#line 95 "build/charm/Parameters/parse.l"
 { return LGAMMA; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 96 "build/serial/Parameters/parse.l"
+#line 96 "build/charm/Parameters/parse.l"
 { return LOG10; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 97 "build/serial/Parameters/parse.l"
+#line 97 "build/charm/Parameters/parse.l"
 { return LOG1P; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 98 "build/serial/Parameters/parse.l"
+#line 98 "build/charm/Parameters/parse.l"
 { return LOGB; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 99 "build/serial/Parameters/parse.l"
+#line 99 "build/charm/Parameters/parse.l"
 { return LOG; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 100 "build/serial/Parameters/parse.l"
+#line 100 "build/charm/Parameters/parse.l"
 { return SIN; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 101 "build/serial/Parameters/parse.l"
+#line 101 "build/charm/Parameters/parse.l"
 { return SINH; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 102 "build/serial/Parameters/parse.l"
+#line 102 "build/charm/Parameters/parse.l"
 { return SQRT; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 103 "build/serial/Parameters/parse.l"
+#line 103 "build/charm/Parameters/parse.l"
 { return TAN; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 104 "build/serial/Parameters/parse.l"
+#line 104 "build/charm/Parameters/parse.l"
 { return TANH; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 105 "build/serial/Parameters/parse.l"
+#line 105 "build/charm/Parameters/parse.l"
 { return Y0; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 106 "build/serial/Parameters/parse.l"
+#line 106 "build/charm/Parameters/parse.l"
 { return Y1; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 107 "build/serial/Parameters/parse.l"
+#line 107 "build/charm/Parameters/parse.l"
 { return RINT; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 109 "build/serial/Parameters/parse.l"
+#line 109 "build/charm/Parameters/parse.l"
 { yylval.logical_type = 0; return LOGICAL; } 
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 110 "build/serial/Parameters/parse.l"
+#line 110 "build/charm/Parameters/parse.l"
 { yylval.logical_type = 1; return LOGICAL; } 
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 111 "build/serial/Parameters/parse.l"
+#line 111 "build/charm/Parameters/parse.l"
 { yylval.string_type = strdup (yytext);
             return VARIABLE; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 114 "build/serial/Parameters/parse.l"
+#line 114 "build/charm/Parameters/parse.l"
 { yylval.string_type = strdup (yytext);
             return IDENTIFIER; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 117 "build/serial/Parameters/parse.l"
+#line 117 "build/charm/Parameters/parse.l"
 { return '='; }         /* = */
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 119 "build/serial/Parameters/parse.l"
+#line 119 "build/charm/Parameters/parse.l"
 { return '*'; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 120 "build/serial/Parameters/parse.l"
+#line 120 "build/charm/Parameters/parse.l"
 { return '/'; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 121 "build/serial/Parameters/parse.l"
+#line 121 "build/charm/Parameters/parse.l"
 { return '+'; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 122 "build/serial/Parameters/parse.l"
+#line 122 "build/charm/Parameters/parse.l"
 { return '-'; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 124 "build/serial/Parameters/parse.l"
+#line 124 "build/charm/Parameters/parse.l"
 { return '<'; }         /* = */
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 125 "build/serial/Parameters/parse.l"
+#line 125 "build/charm/Parameters/parse.l"
 { return '>'; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 126 "build/serial/Parameters/parse.l"
+#line 126 "build/charm/Parameters/parse.l"
 { return LE; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 127 "build/serial/Parameters/parse.l"
+#line 127 "build/charm/Parameters/parse.l"
 { return GE; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 128 "build/serial/Parameters/parse.l"
+#line 128 "build/charm/Parameters/parse.l"
 { return EQ; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 129 "build/serial/Parameters/parse.l"
+#line 129 "build/charm/Parameters/parse.l"
 { return NE; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 130 "build/serial/Parameters/parse.l"
+#line 130 "build/charm/Parameters/parse.l"
 { return AND; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 131 "build/serial/Parameters/parse.l"
+#line 131 "build/charm/Parameters/parse.l"
 { return OR; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 132 "build/serial/Parameters/parse.l"
+#line 132 "build/charm/Parameters/parse.l"
 { return '('; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 133 "build/serial/Parameters/parse.l"
+#line 133 "build/charm/Parameters/parse.l"
 { return ')'; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 135 "build/serial/Parameters/parse.l"
+#line 135 "build/charm/Parameters/parse.l"
 { return '['; } /* begin list */
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 136 "build/serial/Parameters/parse.l"
+#line 136 "build/charm/Parameters/parse.l"
 { return ']'; } /* end list */
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 137 "build/serial/Parameters/parse.l"
+#line 137 "build/charm/Parameters/parse.l"
 { return '{'; } /* begin group */
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 138 "build/serial/Parameters/parse.l"
+#line 138 "build/charm/Parameters/parse.l"
 { return '}'; } /* end group */
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 139 "build/serial/Parameters/parse.l"
+#line 139 "build/charm/Parameters/parse.l"
 { return ';'; } /* parameter assignment separator */
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 140 "build/serial/Parameters/parse.l"
+#line 140 "build/charm/Parameters/parse.l"
 { return ','; } /* list element separator */
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 142 "build/serial/Parameters/parse.l"
+#line 142 "build/charm/Parameters/parse.l"
 { BEGIN IFILE; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 143 "build/serial/Parameters/parse.l"
+#line 143 "build/charm/Parameters/parse.l"
 {  /* ignore comments */ }
 	YY_BREAK
 case 59:
 /* rule 59 can match eol */
 YY_RULE_SETUP
-#line 144 "build/serial/Parameters/parse.l"
+#line 144 "build/charm/Parameters/parse.l"
 {
   { 
     int c;
@@ -1218,7 +1218,7 @@ YY_RULE_SETUP
 case 60:
 /* rule 60 can match eol */
 YY_RULE_SETUP
-#line 152 "build/serial/Parameters/parse.l"
+#line 152 "build/charm/Parameters/parse.l"
 {
   fprintf (stderr, "%s:%d bad include line\n",
 	   curfilename, yylineno);
@@ -1227,68 +1227,68 @@ YY_RULE_SETUP
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(IFILE):
-#line 157 "build/serial/Parameters/parse.l"
+#line 157 "build/charm/Parameters/parse.l"
 {
   if (!cello_pop_file()) yyterminate(); 
   }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 163 "build/serial/Parameters/parse.l"
+#line 163 "build/charm/Parameters/parse.l"
 { yylval.float_type = atof (yytext); return FLOAT; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 164 "build/serial/Parameters/parse.l"
+#line 164 "build/charm/Parameters/parse.l"
 { yylval.float_type = atof (yytext); return FLOAT; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 165 "build/serial/Parameters/parse.l"
+#line 165 "build/charm/Parameters/parse.l"
 { yylval.float_type = atof (yytext); return FLOAT; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 166 "build/serial/Parameters/parse.l"
+#line 166 "build/charm/Parameters/parse.l"
 { yylval.integer_type = atoi (yytext); return INTEGER; }
 	YY_BREAK
 case 65:
 /* rule 65 can match eol */
 YY_RULE_SETUP
-#line 168 "build/serial/Parameters/parse.l"
+#line 168 "build/charm/Parameters/parse.l"
 { yylval.string_type = strdup(yytext+1); /* copy, skipping open quote " */
                      yylval.string_type [yyleng-2] = '\0';   /* remove close quote */
                      return STRING; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 172 "build/serial/Parameters/parse.l"
+#line 172 "build/charm/Parameters/parse.l"
 {  }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 173 "build/serial/Parameters/parse.l"
+#line 173 "build/charm/Parameters/parse.l"
 {  }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 175 "build/serial/Parameters/parse.l"
+#line 175 "build/charm/Parameters/parse.l"
 { /* ignore white space */ }
 	YY_BREAK
 case 69:
 /* rule 69 can match eol */
 YY_RULE_SETUP
-#line 176 "build/serial/Parameters/parse.l"
+#line 176 "build/charm/Parameters/parse.l"
 { lineno++; }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 178 "build/serial/Parameters/parse.l"
+#line 178 "build/charm/Parameters/parse.l"
 {  }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 180 "build/serial/Parameters/parse.l"
+#line 180 "build/charm/Parameters/parse.l"
 ECHO;
 	YY_BREAK
 #line 1295 "<stdout>"
@@ -2290,7 +2290,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 180 "build/serial/Parameters/parse.l"
+#line 180 "build/charm/Parameters/parse.l"
 
 
 
@@ -2335,6 +2335,8 @@ int cello_pop_file ()
   yy_delete_buffer(bs->bs);
   prevbs = bs->prev;
   free(bs);
+
+  /* BUG FIX: moved curbs assignment before conditional return */
 
   curbs = prevbs;
 
