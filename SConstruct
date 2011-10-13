@@ -443,13 +443,13 @@ elif (type == "mpi"):
      cc           = cc_mpi
      fortran      = fortran_mpi
      serial_run   = ""
-     parallel_run = "mpirun -np 4"
+     parallel_run = "mpirun -np 8"
 elif (type == "charm"):
      cxx          = cxx_charm
      cc           = cc_charm
      fortran      = fortran_charm
      serial_run   = ""
-     parallel_run = charm_path + "/bin/charmrun +p4 "
+     parallel_run = charm_path + "/bin/charmrun +p8 "
 
 #======================================================================
 # CELLO PATHS
