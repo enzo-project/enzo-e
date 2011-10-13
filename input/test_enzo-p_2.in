@@ -3,7 +3,7 @@
 
 include "input/enzo-p.incl"
 
-Mesh { root_blocks    = [2,2]; }
+Mesh { root_blocks    = [2,4]; }
 
 
 Output { density      { name = ["enzo-p_2-d-%06d.png",  "cycle"]; } }
