@@ -11,7 +11,6 @@ if (file_exists("COMPILING")) {
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
 
-
    <?php
 
    //----------------------------------------------------------------------
@@ -87,11 +86,13 @@ function test_failed ($output_file) {
 
    //----------------------------------------------------------------------
 
-  $parallel_types = array("serial","mpi","charm");
+$types = array("mpi","charm");
+  $num_types = sizeof($types);
 
   function tests($component,$testrun,$output,$test_name) {
 
-  global $parallel_types;
+  global $types;
+  global $num_types;
 
   $input_file  = "../input/$output.in";
   $input_link  = "../cello/input/$output.in";
@@ -126,13 +127,13 @@ function test_failed ($output_file) {
 
     //--------------------------------------------------
 
-    for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+    for ($i = 0; $i<$num_types; ++$i) {
 
       echo "<tr>\n";
 
-      echo "<th> $parallel_types[$i] </th>";
+      echo "<th> $types[$i] </th>";
 
-      $output_file = "$parallel_types[$i]/$output.unit";
+      $output_file = "$types[$i]/$output.unit";
 
       test_output     ($output_file);
       test_date       ($output_file);
@@ -148,8 +149,8 @@ function test_failed ($output_file) {
 
     echo "<table><tr>";
 
-    for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-      $type = $parallel_types[$i];
+    for ($i = 0; $i<$num_types; ++$i) {
+      $type = $types[$i];
       $output_file = "../test/$type/$output.unit";
       if (file_exists($output_file)) {
 	test($type,$testrun,"FAIL");
@@ -193,11 +194,14 @@ on the main development platform.
 
    //----------------------------------------------------------------------
 
-  function summary_missing_executable ($parallel_types, $test_output, $executables)
+  function summary_missing_executable ($test_output, $executables)
 {
-  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+  global $types;
+  global $num_types;
 
-    $type = $parallel_types[$i];
+    for ($i = 0; $i<$num_types; ++$i) {
+
+    $type = $types[$i];
 
     $count_missing = 0;
 
@@ -220,13 +224,16 @@ on the main development platform.
 
    //----------------------------------------------------------------------
 
-function summary_missing_output ($parallel_types, $test_output, $executables)
+function summary_missing_output ($test_output, $executables)
 {
-  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+  global $types;
+  global $num_types;
+
+  for ($i = 0; $i<$num_types; ++$i) {
 
     $count_missing = 0;
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/$parallel_types[$i]/test_$test_output[$test].unit";
+      $output = "../test/$types[$i]/test_$test_output[$test].unit";
       if (! file_exists($output)) {
 	++ $count_missing;
       }
@@ -242,14 +249,17 @@ function summary_missing_output ($parallel_types, $test_output, $executables)
 
    //----------------------------------------------------------------------
 
-function summary_incomplete_output ($parallel_types, $test_output, $executables)
+function summary_incomplete_output ( $test_output, $executables)
 {
-  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+  global $types;
+  global $num_types;
+
+  for ($i = 0; $i<$num_types; ++$i) {
 
     $output_files = "";
     $num_output_files = 0;
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/$parallel_types[$i]/test_$test_output[$test].unit";
+      $output = "../test/$types[$i]/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
       ++$num_output_files;
     }
@@ -260,13 +270,16 @@ function summary_incomplete_output ($parallel_types, $test_output, $executables)
 
    //----------------------------------------------------------------------
 
-function summary_failed_tests ($parallel_types, $test_output, $executables)
+function summary_failed_tests ($test_output, $executables)
 {
-  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+  global $types;
+  global $num_types;
+
+  for ($i = 0; $i<$num_types; ++$i) {
 
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/$parallel_types[$i]/test_$test_output[$test].unit";
+      $output = "../test/$types[$i]/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
     }
 
@@ -277,13 +290,16 @@ function summary_failed_tests ($parallel_types, $test_output, $executables)
 
    //----------------------------------------------------------------------
 
-function summary_unfinished_tests ($parallel_types, $test_output, $executables)
+function summary_unfinished_tests ($test_output, $executables)
 {
-  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+  global $types;
+  global $num_types;
+
+  for ($i = 0; $i<$num_types; ++$i) {
 
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/$parallel_types[$i]/test_$test_output[$test].unit";
+      $output = "../test/$types[$i]/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
     }
 
@@ -294,15 +310,18 @@ function summary_unfinished_tests ($parallel_types, $test_output, $executables)
 
    //----------------------------------------------------------------------
 
-function summary_passed_tests ($parallel_types, $test_output, $executables)
+function summary_passed_tests ($test_output, $executables)
 {
 
-  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+  global $types;
+  global $num_types;
+
+  for ($i = 0; $i<$num_types; ++$i) {
 
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
       $output = $test_output[$test];
-      $output_files = "$output_files ../test/$parallel_types[$i]/test_$output.unit";
+      $output_files = "$output_files ../test/$types[$i]/test_$output.unit";
     }
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
 
@@ -316,22 +335,59 @@ function summary_passed_tests ($parallel_types, $test_output, $executables)
 {
   printf ("<tr><th><a href=\"#$component\">$component</a></th>\n");
 
-  global $parallel_types;
+  global $types;
 
   // Missing executable
 
-  summary_missing_executable ($parallel_types,$test_output, $executables);
-//  summary_missing_output     ($parallel_types,$test_output, $executables);
-  summary_incomplete_output     ($parallel_types,$test_output, $executables);
-  summary_failed_tests      ($parallel_types,$test_output, $executables);
-  summary_unfinished_tests ($parallel_types,$test_output, $executables);
-  summary_passed_tests ($parallel_types,$test_output, $executables);
+  summary_missing_executable ($test_output, $executables);
+//  summary_missing_output     ($test_output, $executables);
+  summary_incomplete_output     ($test_output, $executables);
+  summary_failed_tests      ($test_output, $executables);
+  summary_unfinished_tests ($test_output, $executables);
+  summary_passed_tests ($test_output, $executables);
 
   printf ("</tr>\n");
 }
 
-  function swf_image ($filename, $image_size)
+function test_table ($file_root,$size_array, $types)
+{
+  echo "<table>";
+  echo "<tr>";
+    echo "<th>$file_root</th>  <th>movie</th>";
+    for ($j = 0; $j < sizeof($size_array); ++$j) {
+      $size = $size_array[$j];
+      printf ("<th>$size</th>\n");
+    }
+    echo "</tr>";
+    for ($i = 0; $i < sizeof($types); ++$i) {
+      echo "<tr>";
+      $type = $types[$i];
+     	printf ("<th>$type</th>\n"); 
+	// Show movie file if available
+	echo "<td>";
+         $swf_file = "$type/$file_root.swf"; 
+	 $size_last = $size_array[sizeof($size_array)-1]; 
+	 $png_file_last = "$type/$file_root-$size_last.png"; 
+	 swf_movie($swf_file, 
+     	   	  $png_file_last, 
+     	   	  160); 
+	echo "</td>";
+	// Show available image frames
+	for ($j = 0; $j < sizeof($size_array); ++$j) {
+	  $size = $size_array[$j];
+          $png_file = "$type/$file_root-$size.png"; 
+
+     	   printf ("<td><img width=160 src=$png_file></img></td>\n");  
+     	 }  
+     	 echo "</tr>";  
+    }
+    echo "</table></br>";
+}
+  function swf_movie ($filename, $last_image, $image_size)
   {
+    global $types;
+    global $num_types;
+if (file_exists($last_image)) {
   printf ("<OBJECT classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\"\n");
   printf ("codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0\"\n");
   printf ("WIDTH=\"$image_size\" HEIGHT=\"$image_size\"\n");
@@ -349,7 +405,7 @@ printf ("          TYPE=\"application/x-shockwave-flash\"\n");
 printf ("          PLUGINSPAGE=\"http://www.macromedia.com/go/getflashplayer\">\n");
 printf ("       </EMBED>\n");
 printf ("      </OBJECT> \n");
-  
+}  
   }
 
 printf ("<table>\n");
@@ -363,32 +419,32 @@ printf ("<tr>\n");
     printf ("<th rowspan=2></th>\n"); 
   }
   
-printf ( "<th colspan=3 class=fail>Missing Executable</th>");
+printf ( "<th colspan=$num_types class=fail>Missing Executable</th>");
 printf ("<th></th>");
-// printf ( "<th colspan=3 class=fail>Missing Output</th>");
+// printf ( "<th colspan=$num_types class=fail>Missing Output</th>");
 // printf ("<th></th>");
-printf ( "<th colspan=3 class=fail>Crashed Runs</th>");
+printf ( "<th colspan=$num_types class=fail>Crashed Runs</th>");
 printf ("<th></th>");
-printf ( "<th colspan=3 class=fail>Failed Tests</th>");
+printf ( "<th colspan=$num_types class=fail>Failed Tests</th>");
 printf ("<th></th>");
-printf ( "<th colspan=3 class=unfinished>Unfinished Tests</th>");
+printf ( "<th colspan=$num_types class=unfinished>Unfinished Tests</th>");
 printf ("<th></th>");
-printf ( "<th colspan=3 class=pass>Passed Tests</th>");
+printf ( "<th colspan=$num_types class=pass>Passed Tests</th>");
 printf ("<th></th>");
 printf ( "</tr><tr>\n");
 
 for ($k = 0; $k < 5; $k ++) {
-  for ($i = 0; $i < sizeof($parallel_types); ++$i) {
+  for ($i = 0; $i < $num_types; ++$i) {
      $type_active = "";
      if (file_exists("COMPILING"))  {
         $type_active = file_get_contents("COMPILING");
      }
-     if ($type_active == $parallel_types[$i]) {
+     if ($type_active == $types[$i]) {
         printf ("<th class=compiling>");
      } else {
         printf ("<th> ");
      }
-     printf (" <a href=$parallel_types[$i]/out.scons>$parallel_types[$i]</a> </th>");
+     printf (" <a href=$types[$i]/out.scons>$types[$i]</a> </th>");
   }
   printf ("<th> </th>");
 }
@@ -417,7 +473,7 @@ test_summary("Enzo-BC-3D",
 
 printf ("<tr><th></th>");
 for ($k = 0; $k < 5; $k ++) {
-  for ($i = 0; $i < sizeof($parallel_types); ++$i) {
+  for ($i = 0; $i < $num_types; ++$i) {
     printf ("<th> </th>");
   }
   printf ("<th></th>");
@@ -449,444 +505,105 @@ test_summary("Performance",array("Papi", "Performance"),
 
 printf ("</tr></table></br>\n");
 
-   //----------------------------------------------------------------------
-
-   //----------------------------------------------------------------------
+//======================================================================
 
 test_group("Enzo-PPM");
 
+echo "<h3>1 Block Implosion-2D</h3>";
 
 tests("Enzo","enzo-p","test_enzo-p_1","PPM 1 block");
+
+test_table ("enzo-p_1-d",
+	    array("000000","000100","000200"), $types);
+
+//----------------------------------------------------------------------
+
+echo "<h3>2 x 4 Block Implosion-2D</h3>";
+
 tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
-?>
 
-<table>
-<tr>
-<th></th>
-<th colspan=3>density</th>
-  <th colspan=3>total_energy</th>
-  </tr>
-  <tr>
-  <th></th>
-  <th>serial</th>
-  <th>mpi</th>
-  <th>charm</th>
-  <th>serial</th>
-  <th>mpi</th>
-  <th>charm</th>
-  </tr>
-  <tr>
-  <th>initial</th>
-  <td><img width=96 src="serial/enzo-p_1-d-000000.png"></img></td>
-  <td><img width=96 src="mpi/enzo-p_1-d-000000.png"></img></td>
-  <td><img width=96 src="charm/enzo-p_1-d-000000.png"></img></td>
-  <td><img width=96 src="serial/enzo-p_1-te-000000.png"></img></td>
-  <td><img width=96 src="mpi/enzo-p_1-te-000000.png"></img></td>
-  <td><img width=96 src="charm/enzo-p_1-te-000000.png"></img></td>
-  </tr>
-  <tr>
-  <th>1 block cycle 100</th>
-  <td><img width=96 src="serial/enzo-p_1-d-000100.png"></img></td>
-  <td><img width=96 src="mpi/enzo-p_1-d-000100.png"></img></td>
-  <td><img width=96 src="charm/enzo-p_1-d-000100.png"></img></td>
-  <td><img width=96 src="serial/enzo-p_1-te-000100.png"></img></td>
-  <td><img width=96 src="mpi/enzo-p_1-te-000100.png"></img></td>
-  <td><img width=96 src="charm/enzo-p_1-te-000100.png"></img></td>
-  </tr>
-  <th>1 block cycle 200</th>
-  <td><img width=96 src="serial/enzo-p_1-d-000200.png"></img></td>
-  <td><img width=96 src="mpi/enzo-p_1-d-000200.png"></img></td>
-  <td><img width=96 src="charm/enzo-p_1-d-000200.png"></img></td>
-  <td><img width=96 src="serial/enzo-p_1-te-000200.png"></img></td>
-  <td><img width=96 src="mpi/enzo-p_1-te-000200.png"></img></td>
-  <td><img width=96 src="charm/enzo-p_1-te-000200.png"></img></td>
-  </tr>
-  <tr>
-  <th>4 blocks cycle 100</th>
-  <td><img width=96 src="serial/enzo-p_2-d-000100.png"></img></td>
-  <td><img width=96 src="mpi/enzo-p_2-d-000100.png"></img></td>
-  <td><img width=96 src="charm/enzo-p_2-d-000100.png"></img></td>
-  <td><img width=96 src="serial/enzo-p_2-te-000100.png"></img></td>
-  <td><img width=96 src="mpi/enzo-p_2-te-000100.png"></img></td>
-  <td><img width=96 src="charm/enzo-p_2-te-000100.png"></img></td>
-  </tr>
-  <th>4 blocks cycle 200</th>
-  <td><img width=96 src="serial/enzo-p_2-d-000200.png"></img></td>
-  <td><img width=96 src="mpi/enzo-p_2-d-000200.png"></img></td>
-  <td><img width=96 src="charm/enzo-p_2-d-000200.png"></img></td>
-  <td><img width=96 src="serial/enzo-p_2-te-000200.png"></img></td>
-  <td><img width=96 src="mpi/enzo-p_2-te-000200.png"></img></td>
-  <td><img width=96 src="charm/enzo-p_2-te-000200.png"></img></td>
-  </tr>
-  </table></br>
+test_table ("enzo-p_2-te",
+	    array("000000","000100","000200"), $types);
 
-  <?php test_group("Enzo-BC-2D"); ?>
 
-  <?php tests("Enzo","enzo-p","test_boundary-reflecting-2d","Reflecting 2D"); ?>
+//======================================================================
+
+  test_group("Enzo-BC-2D");
+
+tests("Enzo","enzo-p","test_boundary-reflecting-2d","Reflecting 2D");
+echo "<h3>2D Reflecting</h3>";
+
+test_table ("boundary-reflecting-2d",
+	    array("0000","0100","0200","0300","0400","0500"), $types);
+
+//----------------------------------------------------------------------
+
+echo "<h3>2D Periodic</h3>";
+
+tests("Enzo","enzo-p","test_boundary-periodic-2d","Periodic 2D");
+
+test_table ("boundary-periodic-2d",
+	    array("0000","0100","0200","0300","0400","0500"), $types);
+
+//----------------------------------------------------------------------
+
+echo "<h3>2D Inflow</h3>";
+
+tests("Enzo","enzo-p","test_boundary-inflow-2d","Inflow 2D");
+
+test_table ("boundary-inflow-2d",
+	    array("0000","0100","0200","0300","0400","0500"), $types);
+
+//----------------------------------------------------------------------
+
+echo "<h3>2D Outflow</h3>";
   
+tests("Enzo","enzo-p","test_boundary-outflow-2d","Outflow 2D");
 
-  <h4>2D Reflecting</h4>
-  <table>
-  <tr>
-  <th></th>
-  <th></th>
-  <th>000</th>
-  <th>100</th>
-  <th>200</th>
-  <th>300</th>
-  <th>400</th>
-  <th>500</th>
-  </tr>
-  <tr>
-  <th>serial</th>
-  <td><?php swf_image("serial/boundary-reflecting-2d.swf",160); ?></td>
-  <td><img width=160 src="serial/boundary-reflecting-2d-0000.png"></img></td>
-  <td><img width=160 src="serial/boundary-reflecting-2d-0100.png"></img></td>
-  <td><img width=160 src="serial/boundary-reflecting-2d-0200.png"></img></td>
-  <td><img width=160 src="serial/boundary-reflecting-2d-0300.png"></img></td>
-  <td><img width=160 src="serial/boundary-reflecting-2d-0400.png"></img></td>
-  <td><img width=160 src="serial/boundary-reflecting-2d-0500.png"></img></td>
-  </tr>
-  <tr>
-  <th>mpi</th>
-  <td><?php swf_image("mpi/boundary-reflecting-2d.swf",160); ?></img></td>
-  <td><img width=160 src="mpi/boundary-reflecting-2d-0000.png"></img></td>
-  <td><img width=160 src="mpi/boundary-reflecting-2d-0100.png"></img></td>
-  <td><img width=160 src="mpi/boundary-reflecting-2d-0200.png"></img></td>
-  <td><img width=160 src="mpi/boundary-reflecting-2d-0300.png"></img></td>
-  <td><img width=160 src="mpi/boundary-reflecting-2d-0400.png"></img></td>
-  <td><img width=160 src="mpi/boundary-reflecting-2d-0500.png"></img></td>
-  </tr>
-  <tr>
-  <th>charm</th>
-  <td><?php swf_image("charm/boundary-reflecting-2d.swf",160); ?></img></td>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0000.png"></img></td>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0100.png"></img></td>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0200.png"></img></td>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0300.png"></img></td>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0400.png"></img></td>
-  <td><img width=160 src="charm/boundary-reflecting-2d-0500.png"></img></td>
-  </tr>
-  </table></br>
+test_table ("boundary-outflow-2d",
+	    array("0000","0100","0200","0300","0400","0500"), $types);
 
-  <h4>2D Periodic</h4>
+//======================================================================
 
-  <?php tests("Enzo","enzo-p","test_boundary-periodic-2d","Periodic 2D"); ?>
-
-  <table>
-  <tr>
-  <th></th>
-  <th></th>
-  <th>000</th>
-  <th>100</th>
-  <th>200</th>
-  <th>300</th>
-  <th>400</th>
-  <th>500</th>
-  </tr>
-  <tr>
-  <th>serial</th>
-  <td><?php swf_image("serial/boundary-periodic-2d.swf",160); ?></img></td>
-  <td><img width=160 src="serial/boundary-periodic-2d-0000.png"></img></td>
-  <td><img width=160 src="serial/boundary-periodic-2d-0100.png"></img></td>
-  <td><img width=160 src="serial/boundary-periodic-2d-0200.png"></img></td>
-  <td><img width=160 src="serial/boundary-periodic-2d-0300.png"></img></td>
-  <td><img width=160 src="serial/boundary-periodic-2d-0400.png"></img></td>
-  <td><img width=160 src="serial/boundary-periodic-2d-0500.png"></img></td>
-  </tr>
-  <tr>
-  <th>mpi</th>
-  <td><?php swf_image("mpi/boundary-periodic-2d.swf",160); ?></img></td>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0000.png"></img></td>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0100.png"></img></td>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0200.png"></img></td>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0300.png"></img></td>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0400.png"></img></td>
-  <td><img width=160 src="mpi/boundary-periodic-2d-0500.png"></img></td>
-  </tr>
-  <tr>
-  <th>charm</th>
-  <td><?php swf_image("charm/boundary-periodic-2d.swf",160); ?></img></td>
-  <td><img width=160 src="charm/boundary-periodic-2d-0000.png"></img></td>
-  <td><img width=160 src="charm/boundary-periodic-2d-0100.png"></img></td>
-  <td><img width=160 src="charm/boundary-periodic-2d-0200.png"></img></td>
-  <td><img width=160 src="charm/boundary-periodic-2d-0300.png"></img></td>
-  <td><img width=160 src="charm/boundary-periodic-2d-0400.png"></img></td>
-  <td><img width=160 src="charm/boundary-periodic-2d-0500.png"></img></td>
-  </tr>
-  </table></br>
-
-  <h4>2D Inflow</h4>
-
-  <?php tests("Enzo","enzo-p","test_boundary-inflow-2d","Inflow 2D"); ?>
-
-  <table>
-  <tr>
-  <th></th>
-  <th></th>
-  <th>000</th>
-  <th>100</th>
-  <th>200</th>
-  <th>300</th>
-  <th>400</th>
-  <th>500</th>
-  </tr>
-  <tr>
-  <th>serial</th>
-  <td><?php swf_image("serial/boundary-inflow-2d.swf",160); ?></img></td>
-  <td><img width=160 src="serial/boundary-inflow-2d-0000.png"></img></td>
-  <td><img width=160 src="serial/boundary-inflow-2d-0100.png"></img></td>
-  <td><img width=160 src="serial/boundary-inflow-2d-0200.png"></img></td>
-  <td><img width=160 src="serial/boundary-inflow-2d-0300.png"></img></td>
-  <td><img width=160 src="serial/boundary-inflow-2d-0400.png"></img></td>
-  <td><img width=160 src="serial/boundary-inflow-2d-0500.png"></img></td>
-  </tr>
-  <tr>
-  <th>mpi</th>
-  <td><?php swf_image("mpi/boundary-inflow-2d.swf",160); ?></img></td>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0000.png"></img></td>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0100.png"></img></td>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0200.png"></img></td>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0300.png"></img></td>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0400.png"></img></td>
-  <td><img width=160 src="mpi/boundary-inflow-2d-0500.png"></img></td>
-  </tr>
-  <tr>
-  <th>charm</th>
-  <td><?php swf_image("charm/boundary-inflow-2d.swf",160); ?></img></td>
-  <td><img width=160 src="charm/boundary-inflow-2d-0000.png"></img></td>
-  <td><img width=160 src="charm/boundary-inflow-2d-0100.png"></img></td>
-  <td><img width=160 src="charm/boundary-inflow-2d-0200.png"></img></td>
-  <td><img width=160 src="charm/boundary-inflow-2d-0300.png"></img></td>
-  <td><img width=160 src="charm/boundary-inflow-2d-0400.png"></img></td>
-  <td><img width=160 src="charm/boundary-inflow-2d-0500.png"></img></td>
-  </tr>
-  </table></br>
-
-  <h4>2D Outflow</h4>
-  
-  <?php tests("Enzo","enzo-p","test_boundary-outflow-2d","Outflow 2D"); ?>
-
-  <table>
-  <tr>
-  <th></th>
-  <th></th>
-  <th>000</th>
-  <th>100</th>
-  <th>200</th>
-  <th>300</th>
-  <th>400</th>
-  <th>500</th>
-  </tr>
-  <tr>
-  <th>serial</th>
-  <td><?php swf_image("serial/boundary-outflow-2d.swf",160); ?></img></td>
-  <td><img width=160 src="serial/boundary-outflow-2d-0000.png"></img></td>
-  <td><img width=160 src="serial/boundary-outflow-2d-0100.png"></img></td>
-  <td><img width=160 src="serial/boundary-outflow-2d-0200.png"></img></td>
-  <td><img width=160 src="serial/boundary-outflow-2d-0300.png"></img></td>
-  <td><img width=160 src="serial/boundary-outflow-2d-0400.png"></img></td>
-  <td><img width=160 src="serial/boundary-outflow-2d-0500.png"></img></td>
-  </tr>
-  <tr>
-  <th>mpi</th>
-  <td><?php swf_image("mpi/boundary-outflow-2d.swf",160); ?></img></td>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0000.png"></img></td>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0100.png"></img></td>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0200.png"></img></td>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0300.png"></img></td>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0400.png"></img></td>
-  <td><img width=160 src="mpi/boundary-outflow-2d-0500.png"></img></td>
-  </tr>
-  <tr>
-  <th>charm</th>
-  <td><?php swf_image("charm/boundary-outflow-2d.swf",160); ?></img></td>
-  <td><img width=160 src="charm/boundary-outflow-2d-0000.png"></img></td>
-  <td><img width=160 src="charm/boundary-outflow-2d-0100.png"></img></td>
-  <td><img width=160 src="charm/boundary-outflow-2d-0200.png"></img></td>
-  <td><img width=160 src="charm/boundary-outflow-2d-0300.png"></img></td>
-  <td><img width=160 src="charm/boundary-outflow-2d-0400.png"></img></td>
-  <td><img width=160 src="charm/boundary-outflow-2d-0500.png"></img></td>
-  </tr>
-  </table></br>
-
-<?php  test_group("Enzo-BC-3D");
-  ?>
-
-  <h4>3D Reflecting</h4>
-
-  <?php tests("Enzo","enzo-p","test_boundary-reflecting-3d","Reflecting 3D"); ?>
+test_group("Enzo-BC-3D");
 
 
-  <table>
-  <tr>
-  <th></th>
-  <th></th>
-  <th>00</th>
-  <th>20</th>
-  <th>40</th>
-  <th>60</th>
-  <th>80</th>
-  </tr>
-  <tr>
-  <th>serial</th>
-  <td><?php swf_image("serial/boundary-reflecting-3d.swf",128); ?></img></td>
-  <td><img width=128 src="serial/boundary-reflecting-3d-0000.png"></img></td>
-  <td><img width=128 src="serial/boundary-reflecting-3d-0020.png"></img></td>
-  <td><img width=128 src="serial/boundary-reflecting-3d-0040.png"></img></td>
-  <td><img width=128 src="serial/boundary-reflecting-3d-0060.png"></img></td>
-  <td><img width=128 src="serial/boundary-reflecting-3d-0080.png"></img></td>
-  </tr>
-  <tr>
-  <th>mpi</th>
-  <td><?php swf_image("mpi/boundary-reflecting-3d.swf",128); ?></img></td>
-  <td><img width=128 src="mpi/boundary-reflecting-3d-0000.png"></img></td>
-  <td><img width=128 src="mpi/boundary-reflecting-3d-0020.png"></img></td>
-  <td><img width=128 src="mpi/boundary-reflecting-3d-0040.png"></img></td>
-  <td><img width=128 src="mpi/boundary-reflecting-3d-0060.png"></img></td>
-  <td><img width=128 src="mpi/boundary-reflecting-3d-0080.png"></img></td>
-  </tr>
-  <tr>
-  <th>charm</th>
-  <td><?php swf_image("charm/boundary-reflecting-3d.swf",128); ?></img></td>
-  <td><img width=128 src="charm/boundary-reflecting-3d-0000.png"></img></td>
-  <td><img width=128 src="charm/boundary-reflecting-3d-0020.png"></img></td>
-  <td><img width=128 src="charm/boundary-reflecting-3d-0040.png"></img></td>
-  <td><img width=128 src="charm/boundary-reflecting-3d-0060.png"></img></td>
-  <td><img width=128 src="charm/boundary-reflecting-3d-0080.png"></img></td>
-  </tr>
-  </table></br>
+echo "<h3>3D Reflecting</h3>";
 
-  <h4>3D Periodic</h4>
+tests("Enzo","enzo-p","test_boundary-reflecting-3d","Reflecting 3D");
 
-  <?php tests("Enzo","enzo-p","test_boundary-periodic-3d","Periodic 3D"); ?>
+test_table ("boundary-reflecting-3d",
+	    array("0000","0020","0040","0060","0080"), $types);
 
-  <table>
-  <tr>
-  <th></th>
-  <th></th>
-  <th>00</th>
-  <th>20</th>
-  <th>40</th>
-  <th>60</th>
-  <th>80</th>
-  </tr>
-  <tr>
-  <th>serial</th>
-  <td><?php swf_image("serial/boundary-periodic-3d.swf",128); ?></img></td>
-  <td><img width=128 src="serial/boundary-periodic-3d-0000.png"></img></td>
-  <td><img width=128 src="serial/boundary-periodic-3d-0020.png"></img></td>
-  <td><img width=128 src="serial/boundary-periodic-3d-0040.png"></img></td>
-  <td><img width=128 src="serial/boundary-periodic-3d-0060.png"></img></td>
-  <td><img width=128 src="serial/boundary-periodic-3d-0080.png"></img></td>
-  </tr>
-  <tr>
-  <th>mpi</th>
-  <td><?php swf_image("mpi/boundary-periodic-3d.swf",128); ?></img></td>
-  <td><img width=128 src="mpi/boundary-periodic-3d-0000.png"></img></td>
-  <td><img width=128 src="mpi/boundary-periodic-3d-0020.png"></img></td>
-  <td><img width=128 src="mpi/boundary-periodic-3d-0040.png"></img></td>
-  <td><img width=128 src="mpi/boundary-periodic-3d-0060.png"></img></td>
-  <td><img width=128 src="mpi/boundary-periodic-3d-0080.png"></img></td>
-  </tr>
-  <tr>
-  <th>charm</th>
-  <td><?php swf_image("charm/boundary-periodic-3d.swf",128); ?></img></td>
-  <td><img width=128 src="charm/boundary-periodic-3d-0000.png"></img></td>
-  <td><img width=128 src="charm/boundary-periodic-3d-0020.png"></img></td>
-  <td><img width=128 src="charm/boundary-periodic-3d-0040.png"></img></td>
-  <td><img width=128 src="charm/boundary-periodic-3d-0060.png"></img></td>
-  <td><img width=128 src="charm/boundary-periodic-3d-0080.png"></img></td>
-  </tr>
-  </table></br>
+//----------------------------------------------------------------------
 
-  <h4>3D Inflow</h4>
+echo "<h3>3D Periodic</h3>";
 
-  <?php tests("Enzo","enzo-p","test_boundary-inflow-3d","Inflow 3D"); ?>
+tests("Enzo", "enzo-p","test_boundary-periodic-3d","Periodic 3D");
 
-  <table>
-  <tr>
-  <th></th>
-  <th></th>
-  <th>00</th>
-  <th>20</th>
-  <th>40</th>
-  <th>60</th>
-  <th>80</th>
-  </tr>
-  <tr>
-  <th>serial</th>
-  <td><?php swf_image("serial/boundary-inflow-3d.swf",128); ?></img></td>
-  <td><img width=128 src="serial/boundary-inflow-3d-0000.png"></img></td>
-  <td><img width=128 src="serial/boundary-inflow-3d-0020.png"></img></td>
-  <td><img width=128 src="serial/boundary-inflow-3d-0040.png"></img></td>
-  <td><img width=128 src="serial/boundary-inflow-3d-0060.png"></img></td>
-  <td><img width=128 src="serial/boundary-inflow-3d-0080.png"></img></td>
-  </tr>
-  <tr>
-  <th>mpi</th>
-  <td><?php swf_image("mpi/boundary-inflow-3d.swf",128); ?></img></td>
-  <td><img width=128 src="mpi/boundary-inflow-3d-0000.png"></img></td>
-  <td><img width=128 src="mpi/boundary-inflow-3d-0020.png"></img></td>
-  <td><img width=128 src="mpi/boundary-inflow-3d-0040.png"></img></td>
-  <td><img width=128 src="mpi/boundary-inflow-3d-0060.png"></img></td>
-  <td><img width=128 src="mpi/boundary-inflow-3d-0080.png"></img></td>
-  </tr>
-  <tr>
-  <th>charm</th>
-  <td><?php swf_image("charm/boundary-inflow-3d.swf",128); ?></img></td>
-  <td><img width=128 src="charm/boundary-inflow-3d-0000.png"></img></td>
-  <td><img width=128 src="charm/boundary-inflow-3d-0020.png"></img></td>
-  <td><img width=128 src="charm/boundary-inflow-3d-0040.png"></img></td>
-  <td><img width=128 src="charm/boundary-inflow-3d-0060.png"></img></td>
-  <td><img width=128 src="charm/boundary-inflow-3d-0080.png"></img></td>
-  </tr>
-  </table></br>
+test_table ("boundary-periodic-3d",
+	    array("0000","0020","0040","0060","0080"), $types);
 
-  <h4>3D Outflow</h4>
+//----------------------------------------------------------------------
 
-  <?php tests("Enzo","enzo-p","test_boundary-outflow-3d","Outflow 3D"); ?>
+echo "<h3>3D Inflow</h3>";
 
-  <table>
-  <tr>
-  <th></th>
-  <th></th>
-  <th>00</th>
-  <th>20</th>
-  <th>40</th>
-  <th>60</th>
-  <th>80</th>
-  </tr>
-  <tr>
-  <th>serial</th>
-  <td><?php swf_image("serial/boundary-outflow-3d.swf",128); ?></img></td>
-  <td><img width=128 src="serial/boundary-outflow-3d-0000.png"></img></td>
-  <td><img width=128 src="serial/boundary-outflow-3d-0020.png"></img></td>
-  <td><img width=128 src="serial/boundary-outflow-3d-0040.png"></img></td>
-  <td><img width=128 src="serial/boundary-outflow-3d-0060.png"></img></td>
-  <td><img width=128 src="serial/boundary-outflow-3d-0080.png"></img></td>
-  </tr>
-  <tr>
-  <th>mpi</th>
-  <td><?php swf_image("mpi/boundary-outflow-3d.swf",128); ?></img></td>
-  <td><img width=128 src="mpi/boundary-outflow-3d-0000.png"></img></td>
-  <td><img width=128 src="mpi/boundary-outflow-3d-0020.png"></img></td>
-  <td><img width=128 src="mpi/boundary-outflow-3d-0040.png"></img></td>
-  <td><img width=128 src="mpi/boundary-outflow-3d-0060.png"></img></td>
-  <td><img width=128 src="mpi/boundary-outflow-3d-0080.png"></img></td>
-  </tr>
-  <tr>
-  <th>charm</th>
-  <td><?php swf_image("charm/boundary-outflow-3d.swf",128); ?></img></td>
-  <td><img width=128 src="charm/boundary-outflow-3d-0000.png"></img></td>
-  <td><img width=128 src="charm/boundary-outflow-3d-0020.png"></img></td>
-  <td><img width=128 src="charm/boundary-outflow-3d-0040.png"></img></td>
-  <td><img width=128 src="charm/boundary-outflow-3d-0060.png"></img></td>
-  <td><img width=128 src="charm/boundary-outflow-3d-0080.png"></img></td>
-  </tr>
-  </table></br>
+tests("Enzo","enzo-p","test_boundary-inflow-3d","Inflow 3D");
 
-<?php
+test_table ("boundary-inflow-3d",
+	    array("0000","0020","0040","0060","0080"), $types);
+
+//----------------------------------------------------------------------
+
+echo "<h3>3D Outflow</h3>";
+
+tests("Enzo","enzo-p","test_boundary-outflow-3d","Outflow 3D");
+
+test_table ("boundary-outflow-3d",
+	    array("0000","0020","0040","0060","0080"), $types);
+
+   //======================================================================
+
 test_group("Disk");
 
 tests("Disk","test_FileHdf5", "test_FileHdf5","");
