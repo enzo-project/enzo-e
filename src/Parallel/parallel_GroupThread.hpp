@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARALLEL_GROUP_THREAD_HPP
-#define PARALLEL_GROUP_THREAD_HPP
-
 /// @file     parallel_GroupThread.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul 22 12:36:17 PDT 2010
 /// @brief    [\ref Parallel] Declaration of the GroupThread class
+
+#ifndef PARALLEL_GROUP_THREAD_HPP
+#define PARALLEL_GROUP_THREAD_HPP
 
 class GroupThread {
 

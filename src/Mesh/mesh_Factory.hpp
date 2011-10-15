@@ -1,18 +1,18 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef MESH_FACTORY_HPP
-#define MESH_FACTORY_HPP
-
 /// @file     mesh_Factory.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Mar 15 15:29:56 PDT 2011
 /// @brief    [\ref Mesh] Declaration of the Factory class
 
-class Hierarchy;
-class Patch;
+#ifndef MESH_FACTORY_HPP
+#define MESH_FACTORY_HPP
+
 class GroupProcess;
+class Hierarchy;
 class IoBlock;
 class IoFieldBlock;
+class Patch;
 
 class Factory {
 

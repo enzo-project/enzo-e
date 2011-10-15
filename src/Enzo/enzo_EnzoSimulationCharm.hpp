@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ENZO_ENZO_SIMULATION_CHARM_HPP
-#define ENZO_ENZO_SIMULATION_CHARM_HPP
-
 /// @file     enzo_EnzoSimulationCharm.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-03-17
 /// @brief    [\ref Enzo] Declaration of the EnzoSimulationCharm class
+
+#ifndef ENZO_ENZO_SIMULATION_CHARM_HPP
+#define ENZO_ENZO_SIMULATION_CHARM_HPP
 
 #ifdef CONFIG_USE_CHARM
 

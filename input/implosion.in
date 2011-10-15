@@ -6,7 +6,7 @@ Mesh {
 }
 
 Stopping {
-   cycle = 1000;
+   cycle = 100000;
 }
 Initial {
    code = "implosion_2d";

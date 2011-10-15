@@ -256,9 +256,14 @@ Block * Block::neighbor (axis_enum axis, face_enum face) const throw()
 
 void Block::refresh_ghosts(const FieldDescr * field_descr,
 			   const Patch * patch,
+			   face_enum face,
+			   axis_enum axis,
 			   int index_field_set) throw()
 {
-  field_block_[index_field_set]->refresh_ghosts(field_descr,patch);
+  int ibx,iby,ibz;
+  index_patch(&ibx,&iby,&ibz);
+  field_block_[index_field_set]
+    -> refresh_ghosts (field_descr,patch, ibx,iby,ibz, face,axis);
 }
 
 #endif
@@ -358,21 +363,11 @@ void Block::prepare()
 
   int stop_block = simulation->stopping()->complete(cycle_,time_);
 
-  // @@@ OK @@@
-
-  int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
-  if (stop_block) {
-    FieldDescr * field_descr = simulation->field_descr();
-
-    field_block()->print(field_descr,"final",lower_,upper_);
-    // field_block()->image(field_descr,"cycle",cycle_,
-    // 			 thisIndex.x,thisIndex.y,thisIndex.z);
-
-   }
-
   //--------------------------------------------------
   // Main::p_prepare()
   //--------------------------------------------------
+
+  int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
 
   simulation->proxy_block_reduce().p_prepare
     (num_blocks, cycle_, time_, dt_block, stop_block);

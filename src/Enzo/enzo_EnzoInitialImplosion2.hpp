@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ENZO_ENZO_INITIAL_IMPLOSION2_HPP
-#define ENZO_ENZO_INITIAL_IMPLOSION2_HPP
-
 /// @file     enzo_EnzoInitialImplosion2.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Jan  4 19:26:38 PST 2011
 /// @brief    [\ref Enzo] Initialization routine for 2D implosion problem
+
+#ifndef ENZO_ENZO_INITIAL_IMPLOSION2_HPP
+#define ENZO_ENZO_INITIAL_IMPLOSION2_HPP
 
 class EnzoInitialImplosion2 : public Initial {
 

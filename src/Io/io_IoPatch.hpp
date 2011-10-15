@@ -1,13 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef IO_IO_PATCH_HPP
-#define IO_IO_PATCH_HPP
-
 /// @file     io_IoPatch.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-10-06
 /// @brief    [\ref Io] Declaration of the IoPatch class
-///
+
+#ifndef IO_IO_PATCH_HPP
+#define IO_IO_PATCH_HPP
 
 class Patch;
 

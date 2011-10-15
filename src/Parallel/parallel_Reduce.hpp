@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARALLEL_REDUCE_HPP
-#define PARALLEL_REDUCE_HPP
-
 /// @file     parallel_Reduce.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Mar 11 12:07:34 PST 2011
 /// @brief    [\ref Parallel] Interface for the Reduce class
+
+#ifndef PARALLEL_REDUCE_HPP
+#define PARALLEL_REDUCE_HPP
 
 class Reduce {
 

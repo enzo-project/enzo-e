@@ -1,14 +1,14 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARAMETERS_PARAM_HPP
-#define PARAMETERS_PARAM_HPP
-
 /// @file     parameters_Param.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Sun Oct 11 14:55:25 PDT 2009
 /// @todo     Rename print_expression to match cello_parameters_print_list
 /// @todo     Keep track of unaccessed parameters
 /// @brief    [\ref Parameters] Interface for the Param class
+
+#ifndef PARAMETERS_PARAM_HPP
+#define PARAMETERS_PARAM_HPP
 
 //----------------------------------------------------------------------
 

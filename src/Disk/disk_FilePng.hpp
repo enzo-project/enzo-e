@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef DISK_FILE_PNG_HPP
-#define DISK_FILE_PNG_HPP
-
 /// @file     disk_FilePng.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-02
 /// @brief    [\ref Disk] Interface for the FilePng class
+
+#ifndef DISK_FILE_PNG_HPP
+#define DISK_FILE_PNG_HPP
 
 class FilePng : public File {
 

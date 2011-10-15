@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef COMPONENT_CLASSNAME_HPP
-#define COMPONENT_CLASSNAME_HPP
-
 /// @file     component_Classname.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     yyyy-mm-dd
 /// @brief    [\ref Component] Declaration of the Classname class
 ///
+
+#ifndef COMPONENT_CLASSNAME_HPP
+#define COMPONENT_CLASSNAME_HPP
 
 class Classname {
 

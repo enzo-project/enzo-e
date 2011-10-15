@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef FIELD_IT_FIELD_LIST_HPP
-#define FIELD_IT_FIELD_LIST_HPP
-
 /// @file     field_ItFieldList.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-12
 /// @brief    [\ref Field] Declaration of the ItFieldList iterator class
+
+#ifndef FIELD_IT_FIELD_LIST_HPP
+#define FIELD_IT_FIELD_LIST_HPP
 
 class ItFieldList : public ItField {
 

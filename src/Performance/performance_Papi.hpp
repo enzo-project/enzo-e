@@ -1,13 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PERFORMANCE_PAPI_HPP
-#define PERFORMANCE_PAPI_HPP
-
 /// @file     performance_Papi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Dec  2 11:22:30 PST 2010
 /// @brief    [\ref Performance] Interface to the PAPI library
 
+#ifndef PERFORMANCE_PAPI_HPP
+#define PERFORMANCE_PAPI_HPP
 
 class Papi {
 

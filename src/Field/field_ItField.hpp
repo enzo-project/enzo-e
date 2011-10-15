@@ -1,12 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef FIELD_IT_FIELD_HPP
-#define FIELD_IT_FIELD_HPP
-
 /// @file     field_ItField.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-12
-/// @brief    [\ref Field] Declaration of the ItField abstract iterator base class
+/// @brief [\ref Field] Declaration of the ItField abstract iterator
+/// base class
+
+#ifndef FIELD_IT_FIELD_HPP
+#define FIELD_IT_FIELD_HPP
 
 class ItField {
 

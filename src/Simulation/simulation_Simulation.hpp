@@ -1,14 +1,14 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef SIMULATION_SIMULATION_HPP
-#define SIMULATION_SIMULATION_HPP
-
 /// @file     simulation_Simulation.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-10 16:14:57
 /// @brief    Interface file for the Simulation class
 /// @note     2010-12-17: code-wiki interface review
 /// @todo     subclass Simulation for MPI and CHARM
+
+#ifndef SIMULATION_SIMULATION_HPP
+#define SIMULATION_SIMULATION_HPP
 
 class Boundary;
 class Factory;

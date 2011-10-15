@@ -55,12 +55,15 @@ Simulation::Simulation
     output_list_(),
     method_list_()
 {
+
   performance_ = new Performance;
+
 #ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;
 #else
   monitor_ = Monitor::instance();
 #endif
+
   parameters_ = new Parameters(parameter_file,monitor_);
 }
 
@@ -645,6 +648,9 @@ void Simulation::initialize_output_() throw()
 
     OutputImage * output_image = dynamic_cast<OutputImage *> (output);
 
+    // WARNING("Simulation::initialize_output()",
+    // 	    "Temporarily setting output_image ghosts");
+    //    output_image->set_ghosts(3,3,0);
     if (output != NULL) {
 
       // Parse image-specific parameters
@@ -1009,6 +1015,7 @@ void Simulation::refresh() throw()
 #ifdef ORIGINAL_REFRESH
 	patch->block_array().p_refresh(cycle_, time_, dt_,axis);
 #else
+	#error crashes
 	patch->block_array().p_compute(dt_,axis);
 #endif
       }
@@ -1031,9 +1038,71 @@ void Simulation::scheduled_output()
   for (size_t i=0; i<output_list_.size(); i++) {
     Output * output = output_list_[i];
     if (output->is_scheduled(cycle_,time_)) {
+
       output->init();
+
       output->open();
+
       output->write_hierarchy(field_descr_, hierarchy_);
+
+      //--------------------------------------------------
+      int ip       = group_process_->rank();
+      int ip_writer = output->process_writer();
+
+      int n=1;  char * buffer = 0;
+
+      if (ip == ip_writer) { // process is writer
+	int ip1 = ip+1;
+	int ip2 = ip_writer+output->process_stride();
+	for (int ip_remote=ip+1; ip_remote<ip2; ip_remote++) {
+
+	  // receive size
+
+	  void * handle_recv;
+	  handle_recv = group_process_->recv_begin(ip_remote,&n,sizeof(n));
+	  group_process_->wait(handle_recv);
+	  group_process_->send_end(handle_recv);
+
+	  // allocate buffer
+
+	  buffer = new char [n];
+
+	  // receive buffer
+
+	  handle_recv = group_process_->recv_begin(ip_remote,buffer,n);
+	  group_process_->wait(handle_recv);
+	  group_process_->recv_end(handle_recv);
+	  
+	  // update
+
+	  output->update_remote(n,buffer);
+
+	  // deallocate
+	  output->cleanup_remote(&n,&buffer);
+	}
+      } else { // process is not writer
+
+	// send data to writer
+
+	output->prepare_remote(&n,&buffer);
+
+	// send size
+
+	void * handle_send;
+
+	handle_send = group_process_->send_begin(ip_writer,&n,sizeof(n));
+	group_process_->wait(handle_send);
+	group_process_->send_end(handle_send);
+
+	// send buffer
+
+	handle_send = group_process_->send_begin(ip_writer,buffer,n);
+	group_process_->wait(handle_send);
+	group_process_->send_end(handle_send);
+
+      }
+      //--------------------------------------------------
+
       output->close();
       output->finalize();
     }

@@ -31,7 +31,7 @@ Patch::Patch
   layout_(new Layout (nbx,nby,nbz))
 {
 
-  // Check 
+ // Check 
 
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
 	     
@@ -39,6 +39,9 @@ Patch::Patch
 	   "Patch size (%d,%d,%d) must be larger than blocking (%d,%d,%d)",
 	   nx,ny,nz,nbx,nby,nbz);
   }
+
+  // set layout process range
+  layout_ -> set_process_range(0,group_process->size());
 
   size_[0] = nx;
   size_[1] = ny;
@@ -196,12 +199,14 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
 #else
 
+  int ip = group_process_->rank();
+
   for (int ib=0; ib<nb; ib++) {
 
     // Get index of block ib in the patch
 
     int ibx,iby,ibz;
-    layout_->block_indices (ib, &ibx, &iby, &ibz);
+    layout_->block_indices (ip,ib, &ibx, &iby, &ibz);
 
     // create a new data block
 

@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARALLEL_REDUCE_CHARM_HPP
-#define PARALLEL_REDUCE_CHARM_HPP
-
 /// @file     parallel_Reduce.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Mar 11 12:07:45 PST 2011
 /// @brief    [\ref Parallel] Declaration and implementation of ReduceCharm
+
+#ifndef PARALLEL_REDUCE_CHARM_HPP
+#define PARALLEL_REDUCE_CHARM_HPP
 
 #include "error.hpp"
 

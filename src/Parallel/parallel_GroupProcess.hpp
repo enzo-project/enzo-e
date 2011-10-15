@@ -1,17 +1,16 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARALLEL_GROUP_PROCESS_HPP
-#define PARALLEL_GROUP_PROCESS_HPP
-
 /// @file     parallel_GroupProcess.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul 22 12:36:38 PDT 2010
 /// @brief    [\ref Parallel] Declaration of the GroupProcess class
 
+#ifndef PARALLEL_GROUP_PROCESS_HPP
+#define PARALLEL_GROUP_PROCESS_HPP
+
 class Reduce;
 
 class GroupProcess
-
 {
 
   /// @class    GroupProcess

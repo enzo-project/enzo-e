@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef METHOD_INITIAL_DEFAULT_HPP
-#define METHOD_INITIAL_DEFAULT_HPP
-
 /// @file     method_InitialDefault.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Jan  4 19:26:38 PST 2011
 /// @brief    [\ref Method] Default initialization method
+
+#ifndef METHOD_INITIAL_DEFAULT_HPP
+#define METHOD_INITIAL_DEFAULT_HPP
 
 class InitialDefault : public Initial {
 

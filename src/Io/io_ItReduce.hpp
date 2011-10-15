@@ -1,13 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef IO_IT_REDUCE_HPP
-#define IO_IT_REDUCE_HPP
-
 /// @file     io_ItReduce.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-26
 /// @brief    [\ref Reduce] Base iterator class for reduction operators ItReduceMax, ItReduceSum, etc.
 
+#ifndef IO_IT_REDUCE_HPP
+#define IO_IT_REDUCE_HPP
 
 class ItReduce  {
 

@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARALLEL_COUNTER_HPP
-#define PARALLEL_COUNTER_HPP
-
 /// @file     parallel_Counter.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-10-04
 /// @brief    [\ref Parallel] Declaration of the Counter class
 ///
+
+#ifndef PARALLEL_COUNTER_HPP
+#define PARALLEL_COUNTER_HPP
 
 class Counter {
 

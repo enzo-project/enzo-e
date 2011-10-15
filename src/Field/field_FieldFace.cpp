@@ -121,6 +121,8 @@ void FieldFace::store
  ) throw()
 {
 
+  int ibx,iby;
+
   size_t num_fields = field_descr->field_count();
 
   size_t index = 0;

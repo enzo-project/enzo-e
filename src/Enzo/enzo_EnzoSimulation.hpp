@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ENZO_ENZO_SIMULATION_HPP
-#define ENZO_ENZO_SIMULATION_HPP
-
 /// @file     enzo_EnzoSimulation.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
 /// @brief    [\ref Enzo] Declaration of the EnzoSimulation class
+
+#ifndef ENZO_ENZO_SIMULATION_HPP
+#define ENZO_ENZO_SIMULATION_HPP
 
 class EnzoSimulation : public Simulation {
 

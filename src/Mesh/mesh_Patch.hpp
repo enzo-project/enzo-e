@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef MESH_PATCH_HPP
-#define MESH_PATCH_HPP
-
 /// @file     mesh_Patch.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-05-10
 /// @todo     Move "size" to Block's, since that's Field-centric
 /// @brief    [\ref Mesh] Declaration of the interface for the Patch class
+
+#ifndef MESH_PATCH_HPP
+#define MESH_PATCH_HPP
 
 class Factory;
 

@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef IO_HPP
-#define IO_HPP
-
 /// @file     io.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-11-01
 /// @brief    Include file for the \ref Io component 
+
+#ifndef IO_HPP
+#define IO_HPP
 
 //----------------------------------------------------------------------
 // System includes

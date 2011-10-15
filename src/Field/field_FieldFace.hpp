@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef FIELD_FIELD_FACE_HPP
-#define FIELD_FIELD_FACE_HPP
-
 /// @file     field_FieldFace.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-04-12
 /// @brief    [\ref Field] Interface for the FieldFace class
+
+#ifndef FIELD_FIELD_FACE_HPP
+#define FIELD_FIELD_FACE_HPP
 
 class FieldFace {
 

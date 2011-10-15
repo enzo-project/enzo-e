@@ -56,12 +56,11 @@ foreach type ($types)
 
       touch "$dir/running.$arch.$prec"
 
-      set t = `(time scons arch=$arch type=$type -k -j$procs >& $dir/out.scons)`
+      scons arch=$arch type=$type -k -j8 bin/$type/enzo-p >>& $dir/out.scons
+      scons arch=$arch type=$type -k -j$procs >>& $dir/out.scons
       rm -f "$dir/running.$arch.$prec"
   
-      set secs = `echo $t | awk '{print $3}'`
-
-      printf "done (%4s s)\n" $secs
+      printf "done\n"
 
       # count crashes
 

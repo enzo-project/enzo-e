@@ -509,7 +509,7 @@ printf ("</tr></table></br>\n");
 
 test_group("Enzo-PPM");
 
-echo "<h3>1 Block Implosion-2D</h3>";
+echo "<h3>Implosion2D (serial) </h3>";
 
 tests("Enzo","enzo-p","test_enzo-p_1","PPM 1 block");
 
@@ -518,11 +518,11 @@ test_table ("enzo-p_1-d",
 
 //----------------------------------------------------------------------
 
-echo "<h3>2 x 4 Block Implosion-2D</h3>";
+echo "<h3>Implosion2D (parallel) </h3>";
 
-tests("Enzo","enzo-p","test_enzo-p_2","PPM 4 blocks");
+tests("Enzo","enzo-p","test_enzo-p_2","PPM 8 blocks");
 
-test_table ("enzo-p_2-te",
+test_table ("enzo-p_2-d",
 	    array("000000","000100","000200"), $types);
 
 

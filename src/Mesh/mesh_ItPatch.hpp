@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef MESH_IT_PATCH_HPP
-#define MESH_IT_PATCH_HPP
-
 /// @file     mesh_ItPatch.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Move creation of iterator to iterated object: Hierarchy::create_iter() (factor method)
 /// @date     Tue Feb  1 16:46:01 PST 2011
 /// @brief    [\ref Mesh] Declaration of the ItPatch iterator
+
+#ifndef MESH_IT_PATCH_HPP
+#define MESH_IT_PATCH_HPP
 
 class ItPatch : public It<Patch> {
 

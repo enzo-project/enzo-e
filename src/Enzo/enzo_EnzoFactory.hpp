@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ENZO_ENZO_FACTORY_HPP
-#define ENZO_ENZO_FACTORY_HPP
-
 /// @file     enzo_EnzoFactory.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Mar 15 15:29:56 PDT 2011
 /// @brief    [\ref Enzo] Declaration of the EnzoFactory class
+
+#ifndef ENZO_ENZO_FACTORY_HPP
+#define ENZO_ENZO_FACTORY_HPP
 
 class EnzoFactory : public Factory {
 

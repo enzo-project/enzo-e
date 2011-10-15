@@ -1,8 +1,5 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef DISK_FILE_HDF5_HPP
-#define DISK_FILE_HDF5_HPP
-
 /// @file     disk_FileHdf5.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
@@ -10,6 +7,9 @@
 /// @todo     Add error handling (see H5E API)
 /// @todo     Add support for compression (see H5Z API)
 /// @brief    [\ref Disk] Interface for the FileHdf5 class
+
+#ifndef DISK_FILE_HDF5_HPP
+#define DISK_FILE_HDF5_HPP
 
 class FileHdf5 : public File {
 

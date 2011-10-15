@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef DISK_FILE_HPP
-#define DISK_FILE_HPP
-
 /// @file     disk_File.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-26
 /// @brief    [\ref Disk] Declaration of the File class
+
+#ifndef DISK_FILE_HPP
+#define DISK_FILE_HPP
 
 /// @enum scalar_type
 /// @brief Simple scalar data type, e.g. scalar_int, scalar_float, etc.

@@ -1,13 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef IO_IT_REDUCE_AVG_HPP
-#define IO_IT_REDUCE_AVG_HPP
-
 /// @file     io_ItReduceAvg.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-26
 /// @brief    [\ref Reduce] Iterator class for averaging
 
+#ifndef IO_IT_REDUCE_AVG_HPP
+#define IO_IT_REDUCE_AVG_HPP
 
 class ItReduceAvg : public ItReduce {
 

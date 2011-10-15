@@ -1,8 +1,5 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef MEMORY_MEMORY_HPP
-#define MEMORY_MEMORY_HPP
-
 /// @file     memory_Memory.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Sep  3 16:29:56 PDT 2009 
@@ -10,6 +7,9 @@
 /// @todo     Add Memory Parameters
 /// @brief    [\ref Memory] Interface for the Memory class.  Uses the
 /// Singleton design pattern.
+
+#ifndef MEMORY_MEMORY_HPP
+#define MEMORY_MEMORY_HPP
 
 /// @def      MEMORY_MAX_NUM_GROUPS
 /// @brief    Maximum number of groups for memory allocation tracking

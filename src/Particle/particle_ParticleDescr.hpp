@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARTICLE_PARTICLE_DESCR_HPP
-#define PARTICLE_PARTICLE_DESCR_HPP
-
 /// @file     particle_ParticleDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-17
 /// @brief    [\ref Particle] Declaration for the ParticleDescr class
+
+#ifndef PARTICLE_PARTICLE_DESCR_HPP
+#define PARTICLE_PARTICLE_DESCR_HPP
 
 class ParticleDescr {
 

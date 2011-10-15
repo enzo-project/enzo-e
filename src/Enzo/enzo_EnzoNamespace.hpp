@@ -1,14 +1,14 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ENZO_ENZO_NAMESPACE_HPP
-#define ENZO_ENZO_NAMESPACE_HPP
-
 /// @file     enzo_EnzoNamespace.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-07-31
 /// @todo     Comment Enzo functions / attributes
 /// @todo     Move boundary functionality to Block
 /// @brief    [\ref Enzo] "Global" data for Enzo
+
+#ifndef ENZO_ENZO_NAMESPACE_HPP
+#define ENZO_ENZO_NAMESPACE_HPP
 
 enum bc_enum 
   { // explicitly enumerated to match what Enzo expects

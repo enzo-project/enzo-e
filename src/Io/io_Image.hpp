@@ -1,13 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef IO_IMAGE_HPP
-#define IO_IMAGE_HPP
-
 /// @file     io_Image.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-26
 /// @brief    [\ref Io] Declaration of the Image class
-///
+
+#ifndef IO_IMAGE_HPP
+#define IO_IMAGE_HPP
 
 class Image {
 

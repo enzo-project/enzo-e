@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARALLEL_PARALLEL_AFFINITY_HPP
-#define PARALLEL_PARALLEL_AFFINITY_HPP
-
 /// @file     parallel_ParallelAffinity.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 16:40:35 PDT 2010
 /// @todo     Make abstract base class
 /// @brief    [\ref Parallel] Declaration of the ParallelAffinity class
+
+#ifndef PARALLEL_PARALLEL_AFFINITY_HPP
+#define PARALLEL_PARALLEL_AFFINITY_HPP
 
 class ParallelAffinity {
 

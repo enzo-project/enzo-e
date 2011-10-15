@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef DISK_IFRIT_HPP
-#define DISK_IFRIT_HPP
-
 /// @file     disk_FileIfrit.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
 /// @brief    [\ref Disk] Interface for the FileIfrit class
  
+#ifndef DISK_IFRIT_HPP
+#define DISK_IFRIT_HPP
+
 class FileIfrit {
 
   /// @class    FileIfrit

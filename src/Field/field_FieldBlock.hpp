@@ -1,8 +1,5 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef FIELD_FIELD_BLOCK_HPP
-#define FIELD_FIELD_BLOCK_HPP
-
 /// @file     field_FieldBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Oct 12 14:38:21 PDT 2009
@@ -12,6 +9,9 @@
 /// design pattern to create FieldBlocks read from a file?
 /// @todo     Clean allocate_array() and allocate_ghosts() usage
 /// @brief    [\ref Field] Fortran-style array class.
+
+#ifndef FIELD_FIELD_BLOCK_HPP
+#define FIELD_FIELD_BLOCK_HPP
 
 class Patch;
 class Block;
@@ -107,7 +107,10 @@ public: // interface
 
   /// Refresh ghost zones on an internal face
   void refresh_ghosts(const FieldDescr * field_descr,
-		      const Patch * patch) throw();
+		      const Patch * patch,
+		      int ibx, int iby, int ibz,
+		      face_enum face,
+		      axis_enum axis) throw();
 
 #endif
 
@@ -132,7 +135,8 @@ public: // interface
   /// Print basic field characteristics for debugging
   void print (const FieldDescr * field_descr,
 	      const char * message,
-	      double lower[3], double upper[3]) const throw();
+	      double lower[3], double upper[3],
+	      bool use_file = false) const throw();
 
   // /// Write a block to disk as a png image
   // void image (const FieldDescr * field_descr,

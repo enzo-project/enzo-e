@@ -8,7 +8,6 @@
 #ifndef METHOD_TIMESTEP_HPP
 #define METHOD_TIMESTEP_HPP
 
-
 class Timestep {
 
   /// @class    Timestep

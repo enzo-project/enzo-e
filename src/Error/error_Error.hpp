@@ -1,8 +1,5 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ERROR_ERROR_HPP
-#define ERROR_ERROR_HPP
-
 //----------------------------------------------------------------------
 /// @file     error_Error.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -10,6 +7,9 @@
 /// @date     2011-04-07
 /// @brief    Declaration of the Error class
 //----------------------------------------------------------------------
+
+#ifndef ERROR_ERROR_HPP
+#define ERROR_ERROR_HPP
 
 //----------------------------------------------------------------------
 /// @def      ERROR_LENGTH

@@ -46,8 +46,8 @@ int Layout::block_count (int *nbx, int *nby, int *nbz) throw()
 
 void Layout::process_range(int * process_first, int * process_count) throw()
 {
-  *process_first = process_first_;
-  *process_count = process_count_;
+  if (process_first) (*process_first) = process_first_;
+  if (process_count) (*process_count) = process_count_;
 }
 
 //----------------------------------------------------------------------
@@ -103,7 +103,7 @@ int Layout::process (int ib)  throw()
 
 //----------------------------------------------------------------------
 
-int Layout::process (int ibx, int iby, int ibz)  throw()
+int Layout::process3 (int ibx, int iby, int ibz)  throw()
 {
   int nb = block_index (ibx,iby,ibz);
   return process(nb);
@@ -119,7 +119,15 @@ int Layout::block_index (int ibx, int iby, int ibz) throw()
 
 void Layout::block_indices (int ib, int * ibx, int * iby, int * ibz) throw()
 {
-  *ibx = ib % block_count_[0];
-  *iby = (ib / block_count_[0]) % block_count_[1];
-  *ibz = ib / (block_count_[0]*block_count_[1]);
+  if (ibx) (*ibx) = ib % block_count_[0];
+  if (iby) (*iby) = (ib / block_count_[0]) % block_count_[1];
+  if (ibz) (*ibz) = ib / (block_count_[0]*block_count_[1]);
+}
+
+//----------------------------------------------------------------------
+
+void Layout::block_indices (int ip, int ibl, int * ibx, int * iby, int * ibz) throw()
+{
+  int ibg = global_index(ip,ibl);
+  block_indices(ibg,ibx,iby,ibz);
 }

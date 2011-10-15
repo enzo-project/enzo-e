@@ -1,8 +1,5 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARAMETERS_PARAMETERS_HPP
-#define PARAMETERS_PARAMETERS_HPP
-
 /// @file     parameters_Parameters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:44:21 PDT 2009
@@ -13,6 +10,9 @@
 /// @bug      "x - 0.5" broken since intepreted as "x (-0.5)"; workaround "x - (0.5)"
 /// @bug      Evaluating logical expressions with parentheses seg-faults (fixed?)
 /// @brief    [\ref Parameters] Declaration for the Parameters class
+
+#ifndef PARAMETERS_PARAMETERS_HPP
+#define PARAMETERS_PARAMETERS_HPP
 
 /// @def      MAX_PARAMETER_FILE_WIDTH
 /// @brief    Maximum allowed width of a line in a parameter file

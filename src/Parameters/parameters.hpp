@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARAMETERS_HPP
-#define PARAMETERS_HPP
-
 /// @file     parameters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:44:21 PDT 2009
 /// @todo     rename parameter_enum parameter_type_enum, etc.
 /// @brief    Include file for the \ref Parameters component
+
+#ifndef PARAMETERS_HPP
+#define PARAMETERS_HPP
 
 /// @enum     parameter_enum
 /// @brief    Parameter data type

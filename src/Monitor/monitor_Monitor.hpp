@@ -6,6 +6,7 @@
 /// @date     2009-10-05
 /// @brief    [\ref Monitor] Declaration of the Monitor class
 //----------------------------------------------------------------------
+
 #ifndef MONITOR_MONITOR_HPP
 #define MONITOR_MONITOR_HPP
 

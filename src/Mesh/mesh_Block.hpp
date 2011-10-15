@@ -96,6 +96,8 @@ public: // interface
   /// Refresh ghost data
   void refresh_ghosts(const FieldDescr * field_descr,
 		      const Patch * patch,
+		      face_enum face,
+		      axis_enum axis,
 		      int index_field_set = 0) throw();
 #endif
 
