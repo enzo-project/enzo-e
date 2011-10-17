@@ -12,7 +12,7 @@
 
 class ReduceSerial : public Reduce {
 
-  /// @class    Reduce
+  /// @class    ReduceSerial
   /// @ingroup  Parallel
   /// @brief    [\ref Parallel] Implementation of ReduceSerial
 
