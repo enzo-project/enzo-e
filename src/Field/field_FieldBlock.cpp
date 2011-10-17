@@ -429,22 +429,24 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
 	  "axis_all not handled");
   }
 
-void * handle_send = 
-  group_process->send_begin (ip_remote, face_send.array(),face_send.size());
+// void * handle_send = 
+//   group_process->send_begin (ip_remote, face_send.array(),face_send.size());
 
-  group_process->wait(handle_send);
+//   group_process->wait(handle_send);
 
-  group_process->send_end (handle_send);
+//   group_process->send_end (handle_send);
 
   // Receive ghosts
 
-  void * handle_recv = 
-    group_process->recv_begin (ip_remote, face_send.array(),face_send.size());
+  // void * handle_recv = 
+  //   group_process->recv_begin (ip_remote, face_send.array(),face_send.size());
 
-  group_process->wait(handle_recv);
+  // group_process->wait(handle_recv);
 
-  group_process->recv_end (handle_recv);
-  
+  // group_process->recv_end (handle_recv);
+
+  group_process->send_recv (ip_remote, face_send.array(), face_send.size());
+
   // Copy from ghosts
 
   face_send.store(field_descr,this,axis,face);

@@ -180,6 +180,17 @@ void GroupProcessMpi::recv_end (void * handle) throw()
 
 //----------------------------------------------------------------------
 
+void GroupProcessMpi::send_recv 
+(int rank, void * buffer, int size, int tag) throw()
+{
+  MPI_Request * handle = 0;
+  call_mpi_(__FILE__,__LINE__,"MPI_Sendrecv_replace",MPI_Sendrecv_replace
+	    (buffer, size, MPI_BYTE, rank, tag, rank, tag,
+	     comm_, MPI_STATUS_IGNORE));
+}
+
+//----------------------------------------------------------------------
+
 bool GroupProcessMpi::test (void * handle) throw()
 {
   int result = 1;

@@ -73,6 +73,10 @@ class GroupProcess
   /// Clean up after receiving an array
   virtual void recv_end(void * handle) throw() = 0;
 
+  /// Send and receive data between two processes
+  virtual void send_recv
+  (int rank, void * buffer, int size, int tag=0) throw() = 0;
+
   /// Wait until the send or receive operation completes
   virtual void wait(void * handle) throw() = 0;
 
