@@ -39,6 +39,14 @@ void GroupProcessSerial::recv_end(void * handle) throw()
 
 //----------------------------------------------------------------------
 
+void GroupProcessCharm::send_recv (int rank, void * buffer, int size, int tag)
+  throw()
+{
+  return;
+}
+
+//----------------------------------------------------------------------
+
 Reduce * GroupProcessSerial::create_reduce () throw ()
 {
   return new ReduceSerial (this);

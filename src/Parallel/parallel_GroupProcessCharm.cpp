@@ -69,6 +69,13 @@ void GroupProcessCharm::recv_end (void * handle) throw()
 
 //----------------------------------------------------------------------
 
+void GroupProcessCharm::send_recv (int rank, void * buffer, int size, int tag)
+  throw()
+{
+}
+
+//----------------------------------------------------------------------
+
 bool GroupProcessCharm::test (void * handle) throw()
 {
   return false;
