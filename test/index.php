@@ -95,11 +95,11 @@ $types = array("mpi","charm");
   global $num_types;
 
   $input_file  = "../input/$output.in";
-  $input_link  = "../cello/input/$output.in";
+  $input_link  = "../cello-src/input/$output.in";
   $input_html = "<a href=\"$input_link\">$output.in</a>";
 
   $source_file = "../src/$component/$testrun.cpp";
-  $source_link = "../cello/src/$component/$testrun.cpp";
+  $source_link = "../cello-src/src/$component/$testrun.cpp";
   $source_html = "<a href=\"$source_link\">$testrun.cpp</a>";
 
   if (! file_exists($source_file)) {

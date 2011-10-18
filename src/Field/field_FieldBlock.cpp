@@ -411,41 +411,41 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
   switch (axis) {
   case axis_x:
     ip_remote = (face == face_lower) ?
-      layout->block_index(ibx-1,iby,ibz) :
-      layout->block_index(ibx+1,iby,ibz);
+      layout->process3(ibx-1,iby,ibz) :
+      layout->process3(ibx+1,iby,ibz);
     break;
   case axis_y:
     ip_remote = (face == face_lower) ?
-      layout->block_index(ibx,iby-1,ibz) :
-      layout->block_index(ibx,iby+1,ibz);
+      layout->process3(ibx,iby-1,ibz) :
+      layout->process3(ibx,iby+1,ibz);
     break;
   case axis_z:
     ip_remote = (face == face_lower) ?
-      layout->block_index(ibx,iby,ibz-1) :
-      layout->block_index(ibx,iby,ibz+1);
+      layout->process3(ibx,iby,ibz-1) :
+      layout->process3(ibx,iby,ibz+1);
     break;
   default:
     ERROR("FieldBlock::refresh_ghosts",
 	  "axis_all not handled");
   }
 
-// void * handle_send = 
-//   group_process->send_begin (ip_remote, face_send.array(),face_send.size());
+ void * handle_send = 
+   group_process->send_begin (ip_remote, face_send.array(),face_send.size());
 
-//   group_process->wait(handle_send);
+   group_process->wait(handle_send);
 
-//   group_process->send_end (handle_send);
+   group_process->send_end (handle_send);
 
   // Receive ghosts
 
-  // void * handle_recv = 
-  //   group_process->recv_begin (ip_remote, face_send.array(),face_send.size());
+   void * handle_recv = 
+     group_process->recv_begin (ip_remote, face_send.array(),face_send.size());
 
-  // group_process->wait(handle_recv);
+   group_process->wait(handle_recv);
 
-  // group_process->recv_end (handle_recv);
+   group_process->recv_end (handle_recv);
 
-  group_process->send_recv (ip_remote, face_send.array(), face_send.size());
+  //  group_process->send_recv (ip_remote, face_send.array(), face_send.size());
 
   // Copy from ghosts
 

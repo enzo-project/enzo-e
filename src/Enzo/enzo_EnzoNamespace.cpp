@@ -359,11 +359,9 @@ namespace enzo {
       ERROR ("EnzoBlock::initialize",
 	     "List parameter 'Field fields' must have length greater than zero");
     } else if (NumberOfBaryonFields > MAX_NUMBER_OF_BARYON_FIELDS) {
-      char buffer[ERROR_LENGTH];
-      sprintf (buffer,
-	       "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
-	       NumberOfBaryonFields,NumberOfBaryonFields );
-      ERROR ("EnzoBlock::initialize",  buffer);
+      ERROR2 ("EnzoBlock::initialize",
+	     "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
+	      MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields );
     }
 
     for (int field_index=0; field_index<NumberOfBaryonFields; field_index++) {
@@ -393,9 +391,10 @@ namespace enzo {
 	field_color            = field_index;
 	FieldType[field_index] = ElectronDensity;
       } else {
-	char error_message[ERROR_LENGTH];
-	sprintf (error_message,"Unknown field '%s'",name.c_str());
-	ERROR ("EnzoBlock::EnzoBlock", error_message);
+	FieldType[field_index] = 0;
+	WARNING1 ("EnzoBlock::EnzoBlock", 
+		 "Unknown field type for field %s",
+		 name.c_str());
       }
     }
 

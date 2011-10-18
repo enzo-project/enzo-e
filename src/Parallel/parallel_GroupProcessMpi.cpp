@@ -28,6 +28,7 @@ GroupProcessMpi::GroupProcessMpi(int process_first,
     recv_blocking_    (true)
 {
   int size = Mpi::size();
+  process_rank_ = Mpi::rank();
 
   // Check range of process_first_
 
@@ -183,10 +184,11 @@ void GroupProcessMpi::recv_end (void * handle) throw()
 void GroupProcessMpi::send_recv 
 (int rank, void * buffer, int size, int tag) throw()
 {
-  MPI_Request * handle = 0;
-  call_mpi_(__FILE__,__LINE__,"MPI_Sendrecv_replace",MPI_Sendrecv_replace
-	    (buffer, size, MPI_BYTE, rank, tag, rank, tag,
-	     comm_, MPI_STATUS_IGNORE));
+  if (rank != process_rank_) {
+    call_mpi_(__FILE__,__LINE__,"MPI_Sendrecv_replace",MPI_Sendrecv_replace
+	      (buffer, size, MPI_BYTE, rank, tag, rank, tag,
+	       comm_, MPI_STATUS_IGNORE));
+  }
 }
 
 //----------------------------------------------------------------------

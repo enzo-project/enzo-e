@@ -389,11 +389,6 @@ void Block::refresh_axis (axis_enum axis)
 
   // WARNING similar code to EnzoSimulationMpi::run() for MPI
 
-  bool boundary_face[2];
-  
-  boundary_face[face_lower] = false;
-  boundary_face[face_upper] = false;
-
   int n3[3];
   field_block()->size (&n3[0],&n3[1],&n3[2]);
 
@@ -401,19 +396,20 @@ void Block::refresh_axis (axis_enum axis)
   Boundary *         boundary    = simulation->boundary();
   const FieldDescr * field_descr = simulation->field_descr();
 
-  double lower[3];
-  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
-  double upper[3];
-  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
+  bool boundary_face[3][2];
+  
+  double lower_h[3];
+  hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
+  double upper_h[3];
+  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
+
+  is_on_boundary(lower_h,upper_h,boundary_face);
 
   bool is_active = n3[axis] > 1;
 
   if ( is_active ) {
-    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-    boundary_face[face_lower] = fabs(lower_[axis]-lower[axis]) < 1e-7;
-    boundary_face[face_upper] = fabs(upper_[axis]-upper[axis]) < 1e-7;
-    if ( boundary_face[face_lower] ) boundary->enforce(field_descr,this,face_lower,axis);
-    if ( boundary_face[face_upper] ) boundary->enforce(field_descr,this,face_upper,axis);
+    if ( boundary_face[axis][face_lower] ) boundary->enforce(field_descr,this,face_lower,axis);
+    if ( boundary_face[axis][face_upper] ) boundary->enforce(field_descr,this,face_upper,axis);
   }
 
   //--------------------------------------------------
@@ -437,14 +433,14 @@ void Block::refresh_axis (axis_enum axis)
   bool update_full = simulation->temp_update_full();
 
   if ( is_active ) {
-    if ( ! boundary_face[face_lower] || periodic ) {
+    if ( ! boundary_face[axis][face_lower] || periodic ) {
       field_face.load (field_descr, field_block(), axis, face_lower, 
 		       update_full,update_full);
       block_array(im3[0],im3[1],im3[2]).p_refresh_face 
 	(field_face.size(), field_face.array(), axis, face_upper, axis);
 
     }
-    if ( ! boundary_face[face_upper] || periodic ) {
+    if ( ! boundary_face[axis][face_upper] || periodic ) {
       field_face.load (field_descr, field_block(), axis, face_upper, 
 		       update_full,update_full);
       block_array(ip3[0],ip3[1],ip3[2]).p_refresh_face 
@@ -514,37 +510,30 @@ void Block::refresh (int axis_set)
   Boundary *         boundary    = simulation->boundary();
   const FieldDescr * field_descr = simulation->field_descr();
 
-  double lower[3];
-  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
-  double upper[3];
-  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
+  double lower_h[3];
+  hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
+  double upper_h[3];
+  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
 
   bool ax = ((axis_set == axis_all) || (axis_set == axis_x)) && nx > 1;
   bool ay = ((axis_set == axis_all) || (axis_set == axis_y)) && ny > 1;
   bool az = ((axis_set == axis_all) || (axis_set == axis_z)) && nz > 1;
 
+  is_on_boundary(lower_h,upper_h,boundary_face);
+
   if ( ax ) {
-    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-    boundary_face[axis_x][face_lower] = fabs(lower_[0]-lower[0]) < 1e-7;
-    boundary_face[axis_x][face_upper] = fabs(upper_[0]-upper[0]) < 1e-7;
     if ( boundary_face[axis_x][face_lower] ) 
       boundary->enforce(field_descr,this,face_lower,axis_x);
     if ( boundary_face[axis_x][face_upper] ) 
       boundary->enforce(field_descr,this,face_upper,axis_x);
   }
   if ( ay ) {
-    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-    boundary_face[axis_y][face_lower] = fabs(lower_[1]-lower[1]) < 1e-7;
-    boundary_face[axis_y][face_upper] = fabs(upper_[1]-upper[1]) < 1e-7;
     if ( boundary_face[axis_y][face_lower] ) 
       boundary->enforce(field_descr,this,face_lower,axis_y);
     if ( boundary_face[axis_y][face_upper] ) 
       boundary->enforce(field_descr,this,face_upper,axis_y);
   }
   if ( az ) {
-    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-    boundary_face[axis_z][face_lower] = fabs(lower_[2]-lower[2]) < 1e-7;
-    boundary_face[axis_z][face_upper] = fabs(upper_[2]-upper[2]) < 1e-7;
     if ( boundary_face[axis_z][face_lower] ) 
       boundary->enforce(field_descr,this,face_lower,axis_z);
     if ( boundary_face[axis_z][face_upper] ) 
@@ -671,8 +660,8 @@ void Block::p_refresh_face (int n, char * buffer,
 
   double lower[3];
   hierarchy->lower(&lower[0],&lower[1],&lower[2]);
-  double upper[3];
-  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
+  double upper_h[3];
+  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
   
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
@@ -694,15 +683,15 @@ void Block::p_refresh_face (int n, char * buffer,
 
   if (! periodic && ax ) {
     if (fabs(lower_[0]-lower[0]) < 1e-7) --count;
-    if (fabs(upper_[0]-upper[0]) < 1e-7) --count;
+    if (fabs(upper_[0]-upper_h[0]) < 1e-7) --count;
   }
   if (! periodic && ay ) {
     if (fabs(lower_[1]-lower[1]) < 1e-7) --count;
-    if (fabs(upper_[1]-upper[1]) < 1e-7) --count;
+    if (fabs(upper_[1]-upper_h[1]) < 1e-7) --count;
   }
   if (! periodic && az ) {
     if (fabs(lower_[2]-lower[2]) < 1e-7) --count;
-    if (fabs(upper_[2]-upper[2]) < 1e-7) --count;
+    if (fabs(upper_[2]-upper_h[2]) < 1e-7) --count;
   }
 
   //--------------------------------------------------
@@ -815,4 +804,26 @@ void Block::compute(int axis_set)
 #endif
 }
 
+//----------------------------------------------------------------------
+
+void Block::is_on_boundary (double lower[3], double upper_h[3],
+			     bool boundary[3][2]) throw()
+{
+  // Enforce boundary conditions ; refresh ghost zones
+
+  // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+  boundary[axis_x][face_lower] = 
+    (cello::err_rel(lower_[axis_x],lower[axis_x]) < 1e-7);
+  boundary[axis_y][face_lower] = 
+    (cello::err_rel(lower_[axis_y],lower[axis_y]) < 1e-7);
+  boundary[axis_z][face_lower] = 
+    (cello::err_rel(lower_[axis_z],lower[axis_z]) < 1e-7);
+  boundary[axis_x][face_upper] = 
+    (cello::err_rel(upper_[axis_x],upper_h[axis_x]) < 1e-7);
+  boundary[axis_y][face_upper] = 
+    (cello::err_rel(upper_[axis_y],upper_h[axis_y]) < 1e-7);
+  boundary[axis_z][face_upper] = 
+    (cello::err_rel(upper_[axis_z],upper_h[axis_z]) < 1e-7);
+
+}
 //----------------------------------------------------------------------

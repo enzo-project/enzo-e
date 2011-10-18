@@ -39,7 +39,7 @@ void GroupProcessSerial::recv_end(void * handle) throw()
 
 //----------------------------------------------------------------------
 
-void GroupProcessCharm::send_recv (int rank, void * buffer, int size, int tag)
+void GroupProcessSerial::send_recv (int rank, void * buffer, int size, int tag)
   throw()
 {
   return;

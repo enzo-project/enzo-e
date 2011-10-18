@@ -105,6 +105,13 @@ int Layout::process (int ib)  throw()
 
 int Layout::process3 (int ibx, int iby, int ibz)  throw()
 {
+  // Force block indices to be in range for periodic b.c.
+  while (ibx >= block_count_[0]) ibx -= block_count_[0];
+  while (ibx < 0)                ibx += block_count_[0];
+  while (iby >= block_count_[1]) iby -= block_count_[1];
+  while (iby < 0)                iby += block_count_[1];
+  while (ibz >= block_count_[2]) ibz -= block_count_[2];
+  while (ibz < 0)                ibz += block_count_[2];
   int nb = block_index (ibx,iby,ibz);
   return process(nb);
 }

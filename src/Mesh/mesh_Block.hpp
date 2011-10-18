@@ -147,6 +147,10 @@ public: // interface
   /// Return the current time
   double time() const throw() { return time_; };
  
+  /// Return which block faces lie along the given lower[] and upper[] boundaries
+  void is_on_boundary (double lower[3], double upper[3],
+		       bool boundary[3][2]) throw();
+
 public: // virtual functions
 
   /// Call application-specific initialization

@@ -47,6 +47,12 @@ void EnzoSimulationMpi::run() throw()
 
   performance.start();
   
+   double lower[3];
+   hierarchy_->lower(&lower[0], &lower[1], &lower[2]);
+
+   double upper[3];
+   hierarchy_->upper(&upper[0], &upper[1], &upper[2]);
+
   //--------------------------------------------------
   // INITIALIZE FIELDS
   //--------------------------------------------------
@@ -70,17 +76,6 @@ void EnzoSimulationMpi::run() throw()
     }
   }
 
-
-  double lower_hierarchy[3];
-  hierarchy_->lower(&lower_hierarchy[0],
-		    &lower_hierarchy[1],
-		    &lower_hierarchy[2]);
-
-  double upper_hierarchy[3];
-  hierarchy_->upper(&upper_hierarchy[0],
-		    &upper_hierarchy[1],
-		    &upper_hierarchy[2]);
-
   while ((patch = ++it_patch)) {
 
     ItBlock it_block(patch);
@@ -88,57 +83,15 @@ void EnzoSimulationMpi::run() throw()
 
     while ((block = ++it_block)) {
 
-	double lower_block[3];
-	block->lower(&lower_block[axis_x],
-		     &lower_block[axis_y],
-		     &lower_block[axis_z]);
-	double upper_block[3];
-	block->upper(&upper_block[axis_x],
-		     &upper_block[axis_y],
-		     &upper_block[axis_z]);
+      bool boundary [3][2];
 
-	int ix,iy,iz;
-	block->index_patch(&ix,&iy,&iz);
-	bool lower_x = 
-	  (cello::err_rel(lower_block[axis_x],lower_hierarchy[axis_x]) < 1e-7);
-	bool lower_y = 
-	  (cello::err_rel(lower_block[axis_y],lower_hierarchy[axis_y]) < 1e-7);
-	bool lower_z = 
-	  (cello::err_rel(lower_block[axis_z],lower_hierarchy[axis_z]) < 1e-7);
-	bool upper_x = 
-	  (cello::err_rel(upper_block[axis_x],upper_hierarchy[axis_x]) < 1e-7);
-	bool upper_y = 
-	  (cello::err_rel(upper_block[axis_y],upper_hierarchy[axis_y]) < 1e-7);
-	bool upper_z = 
-	  (cello::err_rel(upper_block[axis_z],upper_hierarchy[axis_z]) < 1e-7);
+      // is_block_on_boundary_ (block,boundary);
+      block->is_on_boundary (lower,upper,boundary);
 
-	if (dimension_ >= 1) {
-	  if (lower_x) boundary_->enforce(field_descr_,block,face_lower,axis_x);
-	  if (upper_x) boundary_->enforce(field_descr_,block,face_upper,axis_x);
-	}
-	if (dimension_ >= 2) {
-	  if (lower_y) boundary_->enforce(field_descr_,block,face_lower,axis_y);
-	  if (upper_y) boundary_->enforce(field_descr_,block,face_upper,axis_y);
-	}
-	if (dimension_ >= 3) {
-	  if (lower_z) boundary_->enforce(field_descr_,block,face_lower,axis_z);
-	  if (upper_z) boundary_->enforce(field_descr_,block,face_upper,axis_z);
-	}
+      update_boundary_(block,boundary);
 
-	// Refresh ghost zones
+      refresh_ghost_(block,patch,boundary);
 
-	if (dimension_ >= 1) {
-	  if (! lower_x) block->refresh_ghosts(field_descr_,patch,face_lower,axis_x);
-	  if (! upper_x) block->refresh_ghosts(field_descr_,patch,face_upper,axis_x);
-	}
-	if (dimension_ >= 2) {
-	  if (! lower_y) block->refresh_ghosts(field_descr_,patch,face_lower,axis_y);
-	  if (! upper_y) block->refresh_ghosts(field_descr_,patch,face_upper,axis_y);
-	}
-	if (dimension_ >= 3) {
-	  if (! lower_z) block->refresh_ghosts(field_descr_,patch,face_lower,axis_z);
-	  if (! upper_z) block->refresh_ghosts(field_descr_,patch,face_upper,axis_z);
-	}
     }
   }
   // Perform any scheduled output
@@ -250,69 +203,18 @@ void EnzoSimulationMpi::run() throw()
 
     while ((patch = ++it_patch)) {
 
-      int stop_patch = true;
-
       ItBlock it_block(patch);
       Block * block;
 
       while ((block = ++it_block)) {
 
-	// Enforce boundary conditions ; refresh ghost zones
+	bool boundary [3][2];
 
-	double lower_block[3];
-	block->lower(&lower_block[axis_x],
-		     &lower_block[axis_y],
-		     &lower_block[axis_z]);
-	double upper_block[3];
-	block->upper(&upper_block[axis_x],
-		     &upper_block[axis_y],
-		     &upper_block[axis_z]);
+	block->is_on_boundary (lower,upper,boundary);
 
-	int ix,iy,iz;
-	block->index_patch(&ix,&iy,&iz);
-	bool lower_x = 
-	  (cello::err_rel(lower_block[axis_x],lower_hierarchy[axis_x]) < 1e-7);
-	bool lower_y = 
-	  (cello::err_rel(lower_block[axis_y],lower_hierarchy[axis_y]) < 1e-7);
-	bool lower_z = 
-	  (cello::err_rel(lower_block[axis_z],lower_hierarchy[axis_z]) < 1e-7);
-	bool upper_x = 
-	  (cello::err_rel(upper_block[axis_x],upper_hierarchy[axis_x]) < 1e-7);
-	bool upper_y = 
-	  (cello::err_rel(upper_block[axis_y],upper_hierarchy[axis_y]) < 1e-7);
-	bool upper_z = 
-	  (cello::err_rel(upper_block[axis_z],upper_hierarchy[axis_z]) < 1e-7);
+	update_boundary_(block,boundary);
 
-	// Update boundary conditions
-
-	if (dimension_ >= 1) {
-	  if (lower_x) boundary_->enforce(field_descr_,block,face_lower,axis_x);
-	  if (upper_x) boundary_->enforce(field_descr_,block,face_upper,axis_x);
-	}
-	if (dimension_ >= 2) {
-	  if (lower_y) boundary_->enforce(field_descr_,block,face_lower,axis_y);
-	  if (upper_y) boundary_->enforce(field_descr_,block,face_upper,axis_y);
-	}
-	if (dimension_ >= 3) {
-	  if (lower_z) boundary_->enforce(field_descr_,block,face_lower,axis_z);
-	  if (upper_z) boundary_->enforce(field_descr_,block,face_upper,axis_z);
-	}
-
-	// Refresh ghost zones
-
-	if (dimension_ >= 1) {
-	  if (! lower_x) block->refresh_ghosts(field_descr_,patch,face_lower,axis_x);
-	  if (! upper_x) block->refresh_ghosts(field_descr_,patch,face_upper,axis_x);
-	}
-	if (dimension_ >= 2) {
-	  if (! lower_y) block->refresh_ghosts(field_descr_,patch,face_lower,axis_y);
-	  if (! upper_y) block->refresh_ghosts(field_descr_,patch,face_upper,axis_y);
-	}
-	if (dimension_ >= 3) {
-	  if (! lower_z) block->refresh_ghosts(field_descr_,patch,face_lower,axis_z);
-	  if (! upper_z) block->refresh_ghosts(field_descr_,patch,face_upper,axis_z);
-	}
-
+	refresh_ghost_(block,patch,boundary);
 
       }
     }
@@ -404,5 +306,125 @@ void EnzoSimulationMpi::run() throw()
   performance.print(monitor_);
 
 }
+
+//----------------------------------------------------------------------
+
+void EnzoSimulationMpi::update_boundary_ (Block * block, bool boundary[3][2]) throw()
+{
+  // Update boundary conditions
+
+  if (dimension_ >= 1) {
+    if (boundary[axis_x][face_lower]) 
+      boundary_->enforce(field_descr_,block,face_lower,axis_x);
+    if (boundary[axis_x][face_upper]) 
+      boundary_->enforce(field_descr_,block,face_upper,axis_x);
+  }
+  if (dimension_ >= 2) {
+    if (boundary[axis_y][face_lower]) 
+      boundary_->enforce(field_descr_,block,face_lower,axis_y);
+    if (boundary[axis_y][face_upper]) 
+      boundary_->enforce(field_descr_,block,face_upper,axis_y);
+  }
+  if (dimension_ >= 3) {
+    if (boundary[axis_z][face_lower]) 
+      boundary_->enforce(field_descr_,block,face_lower,axis_z);
+    if (boundary[axis_z][face_upper]) 
+      boundary_->enforce(field_descr_,block,face_upper,axis_z);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulationMpi::refresh_ghost_   (Block * block, Patch * patch, bool boundary[3][2]) throw()
+{
+  // Refresh ghost zones
+
+  int ibx,iby,ibz;
+  block->index_patch(&ibx,&iby,&ibz);
+
+  bool periodic = boundary_->is_periodic();
+
+  if (dimension_ >= 1) {
+    if (ibx % 2 == 0) {
+      if (! boundary[axis_x][face_lower] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_lower,axis_x);
+      if (! boundary[axis_x][face_upper] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_upper,axis_x);
+    } else {
+      if (! boundary[axis_x][face_upper] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_upper,axis_x);
+      if (! boundary[axis_x][face_lower] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_lower,axis_x);
+    }
+  }
+  if (dimension_ >= 2) {
+    if (iby % 2 == 0) {
+      if (! boundary[axis_y][face_lower] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_lower,axis_y);
+      if (! boundary[axis_y][face_upper] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_upper,axis_y);
+    } else {
+      if (! boundary[axis_y][face_upper] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_upper,axis_y);
+      if (! boundary[axis_y][face_lower] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_lower,axis_y);
+    }
+
+  }
+  if (dimension_ >= 3) {
+    if (ibz % 2 == 0) {
+      if (! boundary[axis_z][face_lower] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_lower,axis_z);
+      if (! boundary[axis_z][face_upper] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_upper,axis_z);
+    } else {
+      if (! boundary[axis_z][face_upper] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_upper,axis_z);
+      if (! boundary[axis_z][face_lower] || periodic) 
+	block->refresh_ghosts(field_descr_,patch,face_lower,axis_z);
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+// void EnzoSimulationMpi::is_block_on_boundary_ (Block * block, bool boundary[3][2]) throw()
+// {
+//   // Enforce boundary conditions ; refresh ghost zones
+
+//   double lower_hierarchy[3];
+//   hierarchy_->lower(&lower_hierarchy[0],
+// 		    &lower_hierarchy[1],
+// 		    &lower_hierarchy[2]);
+
+//   double upper_hierarchy[3];
+//   hierarchy_->upper(&upper_hierarchy[0],
+// 		    &upper_hierarchy[1],
+// 		    &upper_hierarchy[2]);
+
+//   double lower_block[3];
+//   block->lower(&lower_block[axis_x],
+// 	       &lower_block[axis_y],
+// 	       &lower_block[axis_z]);
+//   double upper_block[3];
+//   block->upper(&upper_block[axis_x],
+// 	       &upper_block[axis_y],
+// 	       &upper_block[axis_z]);
+
+//   // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+//   boundary[axis_x][face_lower] = 
+//     (cello::err_rel(lower_block[axis_x],lower_hierarchy[axis_x]) < 1e-7);
+//   boundary[axis_y][face_lower] = 
+//     (cello::err_rel(lower_block[axis_y],lower_hierarchy[axis_y]) < 1e-7);
+//   boundary[axis_z][face_lower] = 
+//     (cello::err_rel(lower_block[axis_z],lower_hierarchy[axis_z]) < 1e-7);
+//   boundary[axis_x][face_upper] = 
+//     (cello::err_rel(upper_block[axis_x],upper_hierarchy[axis_x]) < 1e-7);
+//   boundary[axis_y][face_upper] = 
+//     (cello::err_rel(upper_block[axis_y],upper_hierarchy[axis_y]) < 1e-7);
+//   boundary[axis_z][face_upper] = 
+//     (cello::err_rel(upper_block[axis_z],upper_hierarchy[axis_z]) < 1e-7);
+
+// }
 
 #endif /* ! CONFIG_USE_CHARM */

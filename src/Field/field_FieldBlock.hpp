@@ -138,11 +138,6 @@ public: // interface
 	      double lower[3], double upper[3],
 	      bool use_file = false) const throw();
 
-  // /// Write a block to disk as a png image
-  // void image (const FieldDescr * field_descr,
-  // 	      const char * prefix,
-  // 	      int cycle, int ibx, int iby, int ibz) const throw();
-
 private: // functions
 
   /// Given field size and padding, compute offset to start of the next field

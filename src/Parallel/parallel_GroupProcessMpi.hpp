@@ -129,6 +129,9 @@ private: // attributes
   /// Communicator for the group
   MPI_Comm comm_;
 
+  /// This process rank
+  int process_rank_;
+
   /// First process in the group
   int process_first_;
 
