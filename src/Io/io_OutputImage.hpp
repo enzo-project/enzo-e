@@ -26,7 +26,7 @@ public: // functions
 
   // Set the image colormap
   void set_colormap
-  (int n, double * map_r, double * map_g, double * map_b) throw();
+  (int n, double * map_r, double * map_g, double * map_b, double * map_a=0) throw();
 
   // Set the axis for projecting
   void set_axis (axis_enum axis) throw()
@@ -112,6 +112,7 @@ private: // attributes
   std::vector<double> map_r_;
   std::vector<double> map_g_;
   std::vector<double> map_b_;
+  std::vector<double> map_a_;
 
   /// Current image
   double * data_;

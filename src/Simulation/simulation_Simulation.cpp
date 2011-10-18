@@ -687,8 +687,8 @@ void Simulation::initialize_output_() throw()
 	// error check position type
 
 	ASSERT1("Simulation::initialize_output_",
-	       "Output %s axis must be a string",
-	       file_group.c_str(), type == parameter_string);
+		"Output %s axis must be a string",
+		file_group.c_str(), type == parameter_string);
 
 	std::string axis = parameters_->value_string("axis");
 
@@ -701,14 +701,16 @@ void Simulation::initialize_output_() throw()
 	// error check axis
 
 	ASSERT2("Simulation::initialize_output_",
-	      "Output %s axis %d must be \"x\", \"y\", or \"z\"",
+		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
 		file_group.c_str(), axis.c_str(),
 		axis=="x" || axis=="y" || axis=="z");
 
 
       }
 
-      // colormap parameter
+      //--------------------------------------------------
+      // parameter: Output : <file_group> : colormap
+      //--------------------------------------------------
 
       type = parameters_->type("colormap");
 
@@ -717,8 +719,8 @@ void Simulation::initialize_output_() throw()
 	// error check colormap list type
 
 	ASSERT1("Simulation::initialize_output_",
-	       "Output %s colormap must be a list",
-	       file_group.c_str(), type == parameter_list);
+		"Output %s colormap must be a list",
+		file_group.c_str(), type == parameter_list);
 
 	int n = parameters_->list_length("colormap");
 
@@ -736,9 +738,6 @@ void Simulation::initialize_output_() throw()
 	double * g = new double [n];
 	double * b = new double [n];
 
-	//--------------------------------------------------
-	// parameter: Output : <file_group> : colormap
-	//--------------------------------------------------
 
 	for (int i=0; i<n; i++) {
 
@@ -774,6 +773,78 @@ void Simulation::initialize_output_() throw()
 	delete b;
 
       }
+
+      //--------------------------------------------------
+      // parameter: Output : <file_group> : colormap_alpha
+      //--------------------------------------------------
+
+      type = parameters_->type("colormap_alpha");
+
+      if (type != parameter_unknown) {
+
+	// error check colormap_alpha list type
+
+	ASSERT1("Simulation::initialize_output_",
+		"Output %s colormap_alpha must be a list",
+		file_group.c_str(), type == parameter_list);
+
+	int n = parameters_->list_length("colormap_alpha");
+
+	// error check colormap_alpha list length
+
+	ASSERT1("Simulation::initialize_output_",
+		"Output %s colormap_alpha list length must be divisible by 4",
+		file_group.c_str(), n % 4 == 0);
+
+	n /= 4;
+
+	// allocate arrays
+
+	double * r = new double [n];
+	double * g = new double [n];
+	double * b = new double [n];
+	double * a = new double [n];
+
+	for (int i=0; i<n; i++) {
+
+
+	  int ir=4*i+0;
+	  int ig=4*i+1;
+	  int ib=4*i+2;
+	  int ia=4*i+3;
+
+	  // error check colormap_alpha value types
+
+	  ASSERT1("Simulation::initialize_output_",
+		  "Output %s colormap_alpha list must only contain floats",
+		  file_group.c_str(), 
+		  ((parameters_->list_type(ir,"colormap_alpha") == parameter_float) &&
+		   (parameters_->list_type(ig,"colormap_alpha") == parameter_float) &&
+		   (parameters_->list_type(ib,"colormap_alpha") == parameter_float) &&
+		   (parameters_->list_type(ia,"colormap_alpha") == parameter_float)));
+
+	  // get next colormap r[i] g[i], b[i]
+	  r[i] = parameters_->list_value_float (ir, "colormap_alpha",0.0);
+	  g[i] = parameters_->list_value_float (ig, "colormap_alpha",0.0);
+	  b[i] = parameters_->list_value_float (ib, "colormap_alpha",0.0);
+	  a[i] = parameters_->list_value_float (ia, "colormap_alpha",0.0);
+
+	}
+
+	// set the colormap
+
+	output_image->set_colormap(n,r,g,b,a);
+
+	// deallocate arrays
+
+	delete r;
+	delete g;
+	delete b;
+	delete a;
+
+      }
+
+
     }
 
     // Initialize index of Output object in Simulation for CHARM

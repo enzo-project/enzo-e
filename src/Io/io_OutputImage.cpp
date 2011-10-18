@@ -27,12 +27,17 @@ OutputImage::OutputImage(Simulation * simulation) throw ()
   map_r_.resize(2);
   map_g_.resize(2);
   map_b_.resize(2);
+  map_a_.resize(2);
+
   map_r_[0] = 0.0;
   map_g_[0] = 0.0;
   map_b_[0] = 0.0;
+  map_a_[0] = 1.0;
+
   map_r_[1] = 1.0;
   map_g_[1] = 1.0;
   map_b_[1] = 1.0;
+  map_a_[1] = 1.0;
 }
 
 //----------------------------------------------------------------------
@@ -44,8 +49,10 @@ OutputImage::~OutputImage() throw ()
 //----------------------------------------------------------------------
 
 void OutputImage::set_colormap
-(int n, double * map_r, double * map_g, double * map_b) throw()
+(int n, double * map_r, double * map_g, double * map_b, double * map_a) throw()
 {
+  // Copy rbg lists
+
   map_r_.resize(n);
   map_g_.resize(n);
   map_b_.resize(n);
@@ -54,6 +61,15 @@ void OutputImage::set_colormap
     map_r_[i] = map_r[i];
     map_g_[i] = map_g[i];
     map_b_[i] = map_b[i];
+  }
+
+  // Copy alpha list if it exists
+
+  if (map_a) {
+    map_a_.resize(n);
+    for (int i=0; i<n; i++) {
+      map_a_[i] = map_a[i];
+    }
   }
 }
 
@@ -362,8 +378,7 @@ void OutputImage::image_write_ (double min, double max) throw()
     max = MAX(max,data_[i]);
   }
 
-  // Adjust min and max bounds to match data
-
+  int n = map_r_.size();
 
   // loop over pixels (ix,iy)
 
@@ -375,19 +390,20 @@ void OutputImage::image_write_ (double min, double max) throw()
 
       double value = data_[i];
 
-      double r,g,b;
+      double r,g,b,a;
 
       if (min <= value && value <= max) {
 
 	// map v to lower colormap index
-	size_t k = (map_r_.size() - 1)*(value - min) / (max-min);
+	size_t k = (n - 1)*(value - min) / (max-min);
 
 	// prevent k == map_.size()-1, which happens if value == max
-	if (k > map_r_.size() - 2) k = map_r_.size()-2;
+
+	if (k > n - 2) k = n-2;
 
 	// linear interpolate colormap values
-	double lo = min +  k   *(max-min)/(map_r_.size()-1);
-	double hi = min + (k+1)*(max-min)/(map_r_.size()-1);
+	double lo = min +  k   *(max-min)/(n-1);
+	double hi = min + (k+1)*(max-min)/(n-1);
 
 	// should be in bounds, but force if not due to rounding error
 	if (value < lo) value = lo;
@@ -400,10 +416,12 @@ void OutputImage::image_write_ (double min, double max) throw()
 	r = (1-ratio)*map_r_[k] + ratio*map_r_[k+1];
 	g = (1-ratio)*map_g_[k] + ratio*map_g_[k+1];
 	b = (1-ratio)*map_b_[k] + ratio*map_b_[k+1];
+	a = (1-ratio)*map_a_[k] + ratio*map_a_[k+1];
       }
 
       // Plot pixel, red if out of range
-      if (is_writer()) png_->plot(ix+1, iy+1, r,g,b);
+      if (is_writer()) png_->plot(ix+1, iy+1, 0.0, 0.0, 0.0);
+      if (is_writer()) png_->plot_blend(ix+1, iy+1, a, r,g,b);
     }
   }      
 

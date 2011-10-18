@@ -11,7 +11,7 @@
    # The computational mesh is a single uniform grid
 
    Mesh { 
-      root_size      = [96,96];
+      root_size      = [80,80];
    }
 
    Parallel {
@@ -86,7 +86,7 @@
    Stopping {
 
       time  = 2.5;
-      cycle = 200;
+      cycle = 400;
 
       # redshift
    }
@@ -98,7 +98,7 @@
       density {
         field_list = ["density"];
 	type     = "image";
-	schedule = ["cycle","interval", 100];
+	schedule = ["cycle","interval", 10];
         colormap = [0.00, 0.00, 0.50,  
                     0.00, 1.00, 0.00, 
                     1.00, 1.00, 0.00, 
