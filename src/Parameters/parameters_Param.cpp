@@ -102,7 +102,7 @@ void Param::write
 std::string Param::value_to_string ()
 {
   std::string string_buffer;
-  char char_buffer[1024];
+  char char_buffer[MAX_BUFFER_LENGTH];
 
   switch (type_) {
   case parameter_string: 

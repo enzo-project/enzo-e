@@ -21,7 +21,8 @@ public: // interface
 
   /// Initialize the block
 
-  virtual void compute (const FieldDescr * field_descr,
+  virtual void compute (const Hierarchy * hierarchy,
+			const FieldDescr * field_descr,
 			Block * block) throw();
 
 };

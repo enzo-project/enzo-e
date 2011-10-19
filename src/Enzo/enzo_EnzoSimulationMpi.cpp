@@ -67,7 +67,7 @@ void EnzoSimulationMpi::run() throw()
 
     while ((block = ++it_block)) {
 
-      initial_->compute(field_descr_,block);
+      initial_->compute(hierarchy_,field_descr_,block);
 
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 

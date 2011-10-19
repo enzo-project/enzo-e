@@ -23,7 +23,8 @@ public: // interface
 public: // virtual functions
 
   /// Perform the initialization of the given Block
-  virtual void compute (const FieldDescr * field_descr,
+  virtual void compute (const Hierarchy * hierarchy,
+			const FieldDescr * field_descr,
 			Block * block) throw() = 0;
 
 protected: // attributes

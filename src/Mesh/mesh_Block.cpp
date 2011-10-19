@@ -307,7 +307,7 @@ void Block::p_initial()
 
   Initial * initial = simulation->initial();
 
-  initial->compute(field_descr,this);
+  initial->compute(simulation->hierarchy(),field_descr,this);
 
 #ifdef ORIGINAL_REFRESH  
 

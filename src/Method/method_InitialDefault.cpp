@@ -23,8 +23,12 @@ InitialDefault::InitialDefault(Parameters * parameters) throw ()
 
 //----------------------------------------------------------------------
 
-void InitialDefault::compute (const FieldDescr * field_descr,
-			      Block * block) throw()
+void InitialDefault::compute 
+(
+ const Hierarchy  * hierarchy,
+ const FieldDescr * field_descr,
+ Block            * block
+ ) throw()
 {
   // Initialize Fields according to parameters
 
@@ -35,7 +39,7 @@ void InitialDefault::compute (const FieldDescr * field_descr,
   FieldBlock *       field_block = block->field_block();
 
   double *value=0, *vdeflt=0, *x=0, *y=0, *z=0, *t=0;
-  bool * region=0, *rdeflt=0;
+  bool * mask=0, *rdeflt=0;
   int n, nx=0,ny=0,nz=0;
 
   for (int index_field = 0;
@@ -75,7 +79,7 @@ void InitialDefault::compute (const FieldDescr * field_descr,
 	allocate_xyzt_(block,index_field,
 		       &nx,&ny,&nz,
 		       &value, &vdeflt,
-		       &region,&rdeflt,
+		       &mask,&rdeflt,
 		       &x,&y,&z,&t);
       }
 
@@ -86,9 +90,9 @@ void InitialDefault::compute (const FieldDescr * field_descr,
       evaluate_float_ (field_block, list_length-1, field_name, 
 			n, value,vdeflt,x,y,z,t);
 
-      for (int i=0; i<n; i++) region[i] = true;
+      for (int i=0; i<n; i++) mask[i] = true;
 
-      copy_values_ (field_descr,field_block,value, region,index_field,nx,ny,nz);
+      copy_values_ (field_descr,field_block,value, mask,index_field,nx,ny,nz);
 
       // Evaluate conditional equations in list
 
@@ -97,10 +101,10 @@ void InitialDefault::compute (const FieldDescr * field_descr,
 	evaluate_float_ (field_block, index_list, field_name, 
 			  n, value,vdeflt,x,y,z,t);
 
-	evaluate_logical_ (field_block, index_list + 1, field_name, 
-			  n, region,rdeflt,x,y,z,t);
+	evaluate_logical_ (hierarchy,block,field_block, index_list + 1, field_name, 
+			  n, mask,rdeflt,x,y,z,t);
 
-	copy_values_ (field_descr,field_block,value, region,index_field,nx,ny,nz);
+	copy_values_ (field_descr,field_block,value, mask,index_field,nx,ny,nz);
 
       }
 
@@ -119,7 +123,7 @@ void InitialDefault::compute (const FieldDescr * field_descr,
   if (value != NULL) {
     delete [] value;
     delete [] vdeflt;
-    delete [] region;
+    delete [] mask;
     delete [] rdeflt;
     delete [] x;
     delete [] y;
@@ -136,7 +140,7 @@ void InitialDefault::allocate_xyzt_
  int index_field,
  int * nx, int * ny, int * nz,
  double ** value, double ** vdeflt,
- bool   ** region,bool   ** rdeflt,
+ bool   ** mask,bool   ** rdeflt,
  double ** x, double ** y, double ** z, double ** t
  ) throw()
 {
@@ -153,7 +157,7 @@ void InitialDefault::allocate_xyzt_
 
   (*value)  = new double [n];
   (*vdeflt) = new double [n];
-  (*region) = new bool [n];
+  (*mask)   = new bool [n];
   (*rdeflt) = new bool [n];
   (*x)      = new double [n];
   (*y)      = new double [n];
@@ -175,7 +179,7 @@ void InitialDefault::allocate_xyzt_
 	int i=ix + (*nx)*(iy + (*ny)*iz);
 	(*value)[i] = 0.0;
 	(*vdeflt)[i]  = 0.0;
-	(*region)[i] = false;
+	(*mask)[i] = false;
 	(*rdeflt)[i]  = false;
 	(*x)[i] = xm + ix*hx;
 	(*y)[i] = ym + iy*hy;
@@ -194,7 +198,7 @@ void InitialDefault::copy_values_
  const FieldDescr * field_descr,
  FieldBlock *       field_block,
  double *           value, 
- bool *             region,
+ bool *             mask,
  int                index_field,
  int nx, int ny, int nz
  ) throw()
@@ -229,7 +233,7 @@ void InitialDefault::copy_values_
 	for (int ix = 0; ix<nx; ix++) {
 	  int in=ix + nx*(iy + ny*iz);
 	  int im=ix + mx*(iy + my*iz);
-	  if (region[in]) ((float *) field)[im] = (float) value[in];
+	  if (mask[in]) ((float *) field)[im] = (float) value[in];
 	}
       }
     }
@@ -240,7 +244,7 @@ void InitialDefault::copy_values_
 	for (int ix = 0; ix<nx; ix++) {
 	  int in=ix + nx*(iy + ny*iz);
 	  int im=ix + mx*(iy + my*iz);
-	  if (region[in]) ((double *) field)[im] = (double) value[in];
+	  if (mask[in]) ((double *) field)[im] = (double) value[in];
 	}
       }
     }
@@ -251,7 +255,7 @@ void InitialDefault::copy_values_
 	for (int ix = 0; ix<nx; ix++) {
 	  int in=ix + nx*(iy + ny*iz);
 	  int im=ix + mx*(iy + my*iz);
-	  if (region[in]) ((long double *) field)[im] = (long double) value[in];
+	  if (mask[in]) ((long double *) field)[im] = (long double) value[in];
 	}
       }
     }
@@ -296,8 +300,10 @@ void InitialDefault::evaluate_float_
 //----------------------------------------------------------------------
 
 void InitialDefault::evaluate_logical_ 
-(FieldBlock * field_block, int index_list, std::string field_name, 
- int n, bool * value, bool * deflt,
+(const Hierarchy * hierarchy,
+ const Block * block,
+ FieldBlock * field_block, int index_list, std::string field_name, 
+ int n, bool * mask, bool * deflt,
  double * x, double * y, double * z, double * t) throw ()
 {
 
@@ -306,22 +312,115 @@ void InitialDefault::evaluate_logical_
   parameter_enum value_type = 
     parameters_->list_type(index_list,"value");
 
-  if (value_type != parameter_logical_expr &&
-      value_type != parameter_logical) {
+  bool v;
+  const char * file;
+  int nxb,nyb,nzb;
+  int nx,ny;
 
-    ERROR1("InitialDefault::evaluate_logical",
-	   "Even-index elements of %s must be logical expressions",
-	   field_name.c_str());
-  }
-
-  // Evaluate the logical expression
-
-  if (value_type == parameter_logical) {
-    double v = parameters_->list_value_logical(index_list,"value",0.0);
-    for (int i=0; i<n; i++) value[i] = v;
-  } else {
+  switch (value_type) {
+  case parameter_logical:
+    v = parameters_->list_value_logical(index_list,"value",false);
+    for (int i=0; i<n; i++) mask[i] = v;
+    break;
+  case parameter_logical_expr:
     parameters_->list_evaluate_logical
-      (index_list,"value",n,value,deflt,x,y,z,t);
+      (index_list,"value",n,mask,deflt,x,y,z,t);
+    break;
+  case parameter_string:
+    field_block->size(&nxb,&nyb,&nzb);
+    ASSERT1("InitialDefault::evaluate_logical",
+	   "mask file %s requires problem to be 2D",
+	    field_name.c_str(),
+	    nzb == 1);
+    file = parameters_->list_value_string(index_list,"value","default");
+    create_png_mask_(mask,hierarchy,block,file,nxb,nyb,&nx,&ny);
+    break;
+  default:
+    ERROR3("InitialDefault::evaluate_logical",
+	   "Even-index element %d of %s is of illegal type %d",
+	   index_list,field_name.c_str(),value_type);
+    break;
+  }
+}
+
+
+void InitialDefault::create_png_mask_
+(
+ bool            * mask,
+ const Hierarchy * hierarchy,
+ const Block     * block,
+ const char      * pngfile,
+ int               nxb,
+ int               nyb,
+ int             * nx,
+ int             * ny
+ )
+{
+  pngwriter png;
+
+  // Open the PNG file
+
+  png.readfromfile(pngfile);
+
+  // Get the PNG file size
+
+  (*nx) = png.getwidth();
+  (*ny) = png.getheight();
+
+  // Clear the block mask
+
+  int nb = nxb*nyb;
+  for (int i=0; i<nb; i++) mask[i] = false;
+
+  // Get the hierarchy's lower and upper extents
+
+  double lower_h[2];
+  hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
+  double upper_h[2];
+  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
+
+  // Get the hierarchy's size
+
+  double size_h[2];
+  size_h[0] = upper_h[0]-lower_h[0];
+  size_h[1] = upper_h[1]-lower_h[1];
+
+  // Get the block's lower and upper extents
+
+  double lower_b[2];
+  block->lower(&lower_b[0],&lower_b[1],&lower_b[2]);
+
+  double upper_b[2];
+  block->upper(&upper_b[0],&upper_b[1],&upper_b[2]);
+
+  // get the offset between the block and the hierarchy
+
+  double offset_b[2];
+  offset_b[0] = lower_b[0]-lower_h[0];
+  offset_b[1] = lower_b[1]-lower_h[1];
+
+  // get the block's cell width
+
+  double hb[2];
+  block->field_block()->cell_width(block,&hb[0],&hb[1]);
+
+  // Compute the block mask from the image pixel values
+
+  for (int iy_b=0; iy_b<nyb; iy_b++) {
+    int iy_h = (*ny)*(iy_b*hb[1]+offset_b[1])/(size_h[1]);
+    for (int ix_b=0; ix_b<nxb; ix_b++) {
+      int ix_h = (*nx)*(ix_b*hb[0]+offset_b[0])/(size_h[0]);
+
+      int i_b = ix_b + nxb*iy_b;
+
+      int r = png.read(ix_h+1,iy_h+1,1);
+      int g = png.read(ix_h+1,iy_h+1,2);
+      int b = png.read(ix_h+1,iy_h+1,3);
+      mask[i_b] = (r+g+b > 0.5/3.0*65535);
+
+    }
   }
 
+  png.close();
+  return;
 }

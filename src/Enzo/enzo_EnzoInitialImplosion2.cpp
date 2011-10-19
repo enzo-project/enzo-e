@@ -19,6 +19,7 @@ EnzoInitialImplosion2::EnzoInitialImplosion2 () throw ()
 
 void EnzoInitialImplosion2::compute 
 (
+ const Hierarchy  * hierarchy,
  const FieldDescr * field_descr,
  Block * block
  ) throw()

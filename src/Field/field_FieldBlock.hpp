@@ -70,7 +70,7 @@ public: // interface
   { return array_; };
 
   /// Return width of cells along each dimension
-  void cell_width(Block * block,
+  void cell_width(const Block * block,
 		  double * hx = 0, 
 		  double * hy = 0, 
 		  double * hz = 0) const throw ();

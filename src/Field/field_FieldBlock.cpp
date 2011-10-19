@@ -131,7 +131,7 @@ char * FieldBlock::field_unknowns
 
 //----------------------------------------------------------------------
 
-void FieldBlock::cell_width(Block * block,
+void FieldBlock::cell_width(const Block * block,
 			    double * hx, double * hy, double * hz ) const throw ()
 {
   double xm,xp,ym,yp,zm,zp;
