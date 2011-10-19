@@ -258,7 +258,7 @@ void EnzoSimulationMpi::run() throw()
 
 	  Method * method = method_list_[i];
 
-	  method -> compute_block (block,time_block,dt_block);
+	  method -> compute_block (field_descr_,block,time_block,dt_block);
 
 	}
 

@@ -5,6 +5,7 @@
 /// @date     2011-07-31
 /// @todo     Comment Enzo functions / attributes
 /// @todo     Move boundary functionality to Block
+/// @todo     Make EnzoNamespace a static EnzoDescr
 /// @brief    [\ref Enzo] "Global" data for Enzo
 
 #ifndef ENZO_ENZO_NAMESPACE_HPP
@@ -24,7 +25,7 @@ namespace enzo {
   //----------------------------------------------------------------------
   // functions
 
-  extern void initialize (Parameters * parameters);
+  extern void initialize (Parameters * parameters, FieldDescr *);
 
   //----------------------------------------------------------------------
   // variables

@@ -23,6 +23,7 @@
 
 int EnzoBlock::SolveMHDEquations
 (
+ FieldDescr * field_descr,
  int cycle,
  enzo_float dt
  )
@@ -50,7 +51,8 @@ int EnzoBlock::SolveMHDEquations
     /* Get easy to handle pointers for each variable. */
  
 
-    enzo_float *density    = BaryonField[ 0];
+    enzo_float *density    = (enzo_float *)
+      field_block()->field_values (field_density);
     enzo_float *velox      = BaryonField[ 1];
     enzo_float *veloy      = BaryonField[ 2];
     enzo_float *veloz      = BaryonField[ 3];

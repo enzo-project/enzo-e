@@ -85,7 +85,7 @@ public: // interface
   int SetExternalBoundary(int FieldRank, int GridDims[], int GridOffset[], int StartIndex[], int EndIndex[], enzo_float *Field, int FieldType);
   // void image_dump(const char * file_root, int cycle, double lower, double upper);
 
-  int SolveMHDEquations( int cycle, enzo_float dt);
+  int SolveMHDEquations(FieldDescr *,  int cycle, enzo_float dt);
   // void initialize_ppml (int size_param);
 
 public: // functions (TEMPORARILY PUBLIC)

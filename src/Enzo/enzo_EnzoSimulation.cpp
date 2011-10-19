@@ -64,7 +64,7 @@ void EnzoSimulation::initialize() throw()
   Simulation::initialize();
 
   // Initialize enzo namespace variables
-  enzo::initialize(parameters_);
+  enzo::initialize(parameters_,field_descr());
 
 }
 

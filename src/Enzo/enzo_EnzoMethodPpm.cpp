@@ -22,6 +22,7 @@ EnzoMethodPpm::EnzoMethodPpm ( Parameters * parameters )
 
 void EnzoMethodPpm::compute_block
 (
+ FieldDescr * field_descr,
  Block * block,
  double t,
  double dt

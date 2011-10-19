@@ -753,15 +753,16 @@ void Block::compute(int axis_set)
   double time_start = CmiWallTimer();
 #endif
 
-  // FieldDescr * field_descr = simulation->field_descr();
   // char buffer[10];
   // sprintf (buffer,"%03d-A",cycle_);
   // field_block()->print(field_descr,buffer,lower_,upper_);
   // field_block()->image(field_descr,"A",cycle_,
   // 			 thisIndex.x,thisIndex.y,thisIndex.z);
 
+  FieldDescr * field_descr = simulation->field_descr();
+
   for (size_t i = 0; i < simulation->num_method(); i++) {
-    simulation->method(i) -> compute_block (this,time_,dt_);
+    simulation->method(i) -> compute_block (field_descr,this,time_,dt_);
   }
 
    // sprintf (buffer,"%03d-B",cycle_);

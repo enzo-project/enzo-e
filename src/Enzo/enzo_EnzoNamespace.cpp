@@ -126,7 +126,8 @@ namespace enzo {
 
   int FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
-  void initialize(Parameters * parameters)
+  void initialize(Parameters * parameters,
+		  FieldDescr * field_descr)
 
   {
 
@@ -369,10 +370,13 @@ namespace enzo {
       std::string name = 
 	parameters->list_value_string(field_index,"Field:fields");
 
-      if        (name == "density") {
-	field_density          = field_index;
-	FieldType[field_index] = Density;
-      } else if (name == "velocity_x") {
+      field_density = field_descr->field_id("density");
+      FieldType[field_density] = Density;
+      // if        (name == "density") {
+      // 	field_density          = field_index;
+      // 	FieldType[field_index] = Density;
+      // } else
+	if (name == "velocity_x") {
 	field_velocity_x       = field_index;
 	FieldType[field_index] = Velocity1;
       } else if (name == "velocity_y") {
