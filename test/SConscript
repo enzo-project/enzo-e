@@ -195,6 +195,8 @@ Clean(env_mv_png.RunParallel ('test_enzo-p_2.unit',
 
 env.MakeMovie ("enzo-p_1-d.swf", "test_enzo-p_1.unit", \
                 ARGS="test/" + type + "/enzo-p_1-d-??????.png");
+env.MakeMovie ("enzo-p_2-d.swf", "test_enzo-p_2.unit", \
+                ARGS="test/" + type + "/enzo-p_2-d-??????.png");
 
 #----------------------------------------------------------------------
 # BOUNDARY CONDITIONS
