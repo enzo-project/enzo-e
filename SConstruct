@@ -40,11 +40,11 @@ use_valgrind    = 0
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
 
-use_projections = 1
+use_projections = 0
 
-# Temporary code variations for testing purposes.  Changing values may
-# result in the code hanging, crashing, or producing incorrect
-# results.
+# Temporary code variations for testing purposes.  Changing values
+# below may result in the code hanging, crashing, or producing
+# incorrect results.
 
 original_refresh = 1
 
@@ -72,27 +72,8 @@ if not env.GetOption('clean'):
      env = conf.Finish()
 
 #-----------------------------------------------------------------------
-# PARSE COMMAND-LINE ARGUMENTS
+# COMMAND-LINE ARGUMENTS
 #-----------------------------------------------------------------------
-
-#--------------------------------------------------
-#    arch=<arch> (CELLO_ARCH)
-#
-#      linux         generic linux box
-#      ncsa-bd       NCSA's IBM blue-drop
-#      sdsc-triton   SDSC's Triton
-#--------------------------------------------------
-#    type=<type> (CELLO_TYPE)
-#
-#      serial        Compile without parallelism
-#      charm         Compile with CHARM++ parallelism
-#      mpi           Compile with MPI parallelism
-#--------------------------------------------------
-#    prec=<prec> (CELLO_PREC)
-#
-#      single        Compile Enzo-P for single precision
-#      double        Compile Enzo-P for double precision
-#--------------------------------------------------
 
 # scons command line (overrides CELLO_* environment variables)
 
@@ -100,7 +81,7 @@ arch = ARGUMENTS.get('arch','unknown')
 type = ARGUMENTS.get('type','unknown')
 prec = ARGUMENTS.get('prec','unknown')
 
-# environment variable (default if scons command line not provided)
+# use environment variable if scons command line not provided
 
 if (arch == 'unknown' and "CELLO_ARCH" in os.environ):
      arch = os.environ["CELLO_ARCH"]
@@ -109,46 +90,67 @@ if (type == 'unknown' and "CELLO_TYPE" in os.environ):
 if (prec == 'unknown' and "CELLO_PREC" in os.environ):
      prec = os.environ["CELLO_PREC"]
 
+print 
+print "    CELLO_ARCH scons arch=",arch
+print "    CELLO_TYPE scons type=",type
+print "    CELLO_PREC scons prec=",prec
+print 
+
 #----------------------------------------------------------------------
-# DEFINES
+# CONFIGURATION DEFINES
 #----------------------------------------------------------------------
 
-define_serial =  [];
-define_mpi    =  ['CONFIG_USE_MPI'];
-define_charm  =  ['CONFIG_USE_CHARM']
+# Parallel type defines
+define = {}
 
-define_single = ['CONFIG_PRECISION_SINGLE']
-define_double = ['CONFIG_PRECISION_DOUBLE']
+define["serial"] =        []
+define["mpi"]    =        ['CONFIG_USE_MPI']
+define["charm"]  =        ['CONFIG_USE_CHARM']
 
-define_hdf5  =  ['H5_USE_16_API'];
-define_png   =  ['NO_FREETYPE'];
-define_papi  =  ['CONFIG_USE_PAPI'];
-define_trace =  ['CELLO_TRACE'];
-define_atsync =  ['CONFIG_CHARM_ATSYNC'];
-define_debug =  ['CELLO_DEBUG'];
-define_debug_verbose =  ['CELLO_DEBUG_VERBOSE'];
-define_memory =  ['CONFIG_USE_MEMORY'];
-define_projections =  ['CONFIG_USE_PROJECTIONS']
+# Precision defines
+define["single"] =        ['CONFIG_PRECISION_SINGLE']
+define["double"] =        ['CONFIG_PRECISION_DOUBLE']
+
+# Library defines
+define_hdf5  =            ['H5_USE_16_API']
+define_png   =            ['NO_FREETYPE']
+define_papi  =            ['CONFIG_USE_PAPI']
+
+# Debugging defines
+define_trace =            ['CELLO_TRACE']
+define_debug =            ['CELLO_DEBUG']
+define_debug_verbose =    ['CELLO_DEBUG_VERBOSE']
+
+# Performance defines
+define_atsync =           ['CONFIG_CHARM_ATSYNC']
+define_memory =           ['CONFIG_USE_MEMORY']
+define_projections =      ['CONFIG_USE_PROJECTIONS']
+
+# Experimental code defines
 define_original_refresh = ['ORIGINAL_REFRESH']
 
 defines     = []
 defines_xlc = ""
 defines_xlf = ""
 
-#--------------------------------------------------
-# PARALLEL DEFINES
-#--------------------------------------------------
+#----------------------------------------------------------------------
+# ASSEMBLE DEFINES
+#----------------------------------------------------------------------
+
+# IBM's inconsistent -D defines for C and Fortran can break scons: DC
+# and DF are workarounds
+
+DC = ' -D'
+DF = ' -WF,-D'
+
+# Parallel type
 
 if (type == 'serial'):
      defines = defines
-elif (type == 'mpi'):
-     defines     = defines              + define_mpi
-     defines_xlc = defines_xlc + ' -D'  + define_mpi[0]
-     defines_xlf = defines_xlf + ' -WF,-D'  + define_mpi[0]
-elif (type == 'charm'):
-     defines     = defines              + define_charm
-     defines_xlc = defines_xlc + ' -D'  + define_charm[0]
-     defines_xlf = defines_xlf + ' -WF,-D'  + define_charm[0]
+elif (type == 'mpi' or type == 'charm'):
+     defines     = defines                 + define[type]
+     defines_xlc = defines_xlc + DC     + define[type][0]
+     defines_xlf = defines_xlf + DF + define[type][0]
 else:
      print "Unrecognized parallel type ",type
      print
@@ -158,38 +160,12 @@ else:
      print "or by using 'scons type=<type>"
      sys.exit(1)
 
-#======================================================================
-# CHARM++ PROJECTIONS
-#======================================================================
+# Precision
 
-
-charm_perf        = ''
-cxxflags_perf     = ''
-cflags_perf       = ''
-fortranflags_perf = ''
-linkflags_perf    = ''
-
-if (use_projections == 1):
-     charm_perf = '-tracemode projections'
-     defines     = defines              + define_projections
-     defines_xlc = defines_xlc + ' -D'  + define_projections[0]
-     defines_xlf = defines_xlf + ' -WF,-D'  + define_projections[0]
-
-flags_gprof = ''
-
-if (use_gprof == 1):
-     flags_gprof = '-pg '
-     
-#--------------------------------------------------
-
-if (prec == 'single'):
-     defines = defines + define_single
-     defines_xlc = defines_xlc + ' -D' + define_single[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_single[0]
-elif (prec == 'double'):
-     defines = defines + define_double
-     defines_xlc = defines_xlc + ' -D' + define_double[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_double[0]
+if (prec == 'single' or prec == 'double'):
+     defines     = defines                 + define[prec]
+     defines_xlc = defines_xlc + DC     + define[prec][0]
+     defines_xlf = defines_xlf + DF + define[prec][0]
 else:
      print "Unrecognized precision ",prec
      print
@@ -199,74 +175,93 @@ else:
      print "or by using 'scons prec=<precision>"
      sys.exit(1)
 
-print defines
+# CHARM++ Projections
 
-#-----------------------------------------------------------------------
+charm_perf = ''
+
+if (use_projections == 1):
+     charm_perf = '-tracemode projections'
+     defines     = defines          + define_projections
+     defines_xlc = defines_xlc + DC + define_projections[0]
+     defines_xlf = defines_xlf + DF + define_projections[0]
+
+# GProf flags
+
+flags_gprof = ''
+
+if (use_gprof == 1):
+     flags_gprof = '-pg '
+     
+# Experimental defines
+
 if (original_refresh == 1):
-     defines = defines + define_original_refresh
-     defines_xlc = defines_xlc + ' -D' + define_original_refresh[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_original_refresh[0]
+     defines    =  defines          + define_original_refresh
+     defines_xlc = defines_xlc + DC + define_original_refresh[0]
+     defines_xlf = defines_xlf + DF + define_original_refresh[0]
 
-#-----------------------------------------------------------------------
-# Display configuration settings
-#-----------------------------------------------------------------------
-
-print 
-print "    CELLO_ARCH scons arch=",arch
-print "    CELLO_TYPE scons type=",type
-print "    CELLO_PREC scons prec=",prec
-print 
-
-#==================================================
-# Initialize environment according to configuration
-#==================================================
-#--------------------------------------------------
+# PAPI defines
 
 if (use_papi != 0): 
-     defines     = defines             + define_papi
-     defines_xlc = defines_xlc + ' -D' + define_papi[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_papi[0]
+     defines     = defines          + define_papi
+     defines_xlc = defines_xlc + DC + define_papi[0]
+     defines_xlf = defines_xlf + DF + define_papi[0]
+
+# TRACE defines
 
 if (trace != 0):
-     defines = defines + define_trace
-     defines_xlc = defines_xlc + ' -D' + define_trace[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_trace[0]
+     defines     = defines          + define_trace
+     defines_xlc = defines_xlc + DC + define_trace[0]
+     defines_xlf = defines_xlf + DF + define_trace[0]
+
+# Debug defines
 
 if (debug != 0):
-     defines = defines + define_debug
-     defines_xlc = defines_xlc + ' -D' + define_debug[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_debug[0]
+     defines     = defines          + define_debug
+     defines_xlc = defines_xlc + DC + define_debug[0]
+     defines_xlf = defines_xlf + DF + define_debug[0]
+
+# debug_verbose defines
 
 if (debug_verbose != 0):
-     defines = defines + define_debug_verbose
-     defines_xlc = defines_xlc + ' -D' + define_debug_verbose[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_debug_verbose[0]
+     defines     = defines          + define_debug_verbose
+     defines_xlc = defines_xlc + DC + define_debug_verbose[0]
+     defines_xlf = defines_xlf + DF + define_debug_verbose[0]
+
+# memory defines
 
 if (memory != 0):
-     defines = defines + define_memory
-     defines_xlc = defines_xlc + ' -D' + define_memory[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_memory[0]
+     defines     = defines          + define_memory
+     defines_xlc = defines_xlc + DC + define_memory[0]
+     defines_xlf = defines_xlf + DF + define_memory[0]
+
+# atsync defines
 
 if (atsync != 0):
-     defines = defines + define_atsync
-     defines_xlc = defines_xlc + ' -D' + define_atsync[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_atsync[0]
+     defines     = defines          + define_atsync
+     defines_xlc = defines_xlc + DC + define_atsync[0]
+     defines_xlf = defines_xlf + DF + define_atsync[0]
 
-#--------------------------------------------------
+# HDF5 library defines
 
 defines     = defines     +         define_hdf5
-defines_xlc = defines_xlc + ' -D' + define_hdf5[0] 
-defines_xlf = defines_xlf + ' -WF,-D' + define_hdf5[0] 
+defines_xlc = defines_xlc + DC + define_hdf5[0] 
+defines_xlf = defines_xlf + DF + define_hdf5[0] 
 
-#--------------------------------------------------
+# PNG library defines
 
-defines     = defines             + define_png;
-defines_xlc = defines_xlc + ' -D' + define_png[0]
-defines_xlf = defines_xlf + ' -WF,-D' + define_png[0]
+defines     = defines             + define_png
+defines_xlc = defines_xlc + DC + define_png[0]
+defines_xlf = defines_xlf + DF + define_png[0]
 
 #======================================================================
 # ARCHITECTURE SETTINGS
 #======================================================================
+
+fortran = {}
+cxx     = {}
+cc      = {}
+
+path_list = []
 
 #----------------------------------------------------------------------
 if (arch == "linux"):
@@ -274,59 +269,44 @@ if (arch == "linux"):
 
      charm_path = '/home/bordner/charm/charm'  # arch
 
-     fortran_serial = 'gfortran'
-     fortran_mpi    = 'gfortran'
-     fortran_charm  = 'gfortran'
+     fortran['serial'] = 'gfortran'
+     fortran['mpi']    = 'gfortran'
+     fortran['charm']  = 'gfortran'
 
-     cxx_serial = 'g++'
-     cxx_mpi    = 'mpic++'
-     cxx_charm  = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
+     charmc = charm_path + '/bin/charmc -language charm++ '
 
-     cc_serial  = 'gcc'
-     cc_mpi     = 'mpicc'
-     cc_charm   = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
+     cxx['serial'] = 'g++'
+     cxx['mpi']    = 'mpic++'
+     cxx['charm']  = charmc + charm_perf + ' '
 
-     cppdefines = defines
-     cxxflags_define     = ''
-     fortranflags_define = ''
-     fortranpath_lib = ''
-     fortranlibs = ['gfortran']
+     cc['serial']  = 'gcc'
+     cc['mpi']     = 'mpicc'
+     cc['charm']   = charmc + charm_perf + ' '
 
+# for architecture-dependent defines
+
+     cppdefines        = defines
+
+     cflags_arch       = ''
+     cxxflags_arch     = ''
+     fortranflags_arch = ''
+
+# for extra Fortran libraries
+
+     libpath_fortran = ''
+     libs_fortran    = ['gfortran']
+     fortranlinkflags_arch  = ''
+
+# PAPI path (optional)
      papi_path = '/usr/local'
-     papi_inc = (papi_path + '/include')
-     papi_lib = (papi_path + '/lib')
-
-
+# HDF5 path
      hdf5_path = '/usr'
-     hdf5_inc = (hdf5_path + '/include')
-     hdf5_lib = (hdf5_path + '/lib')
-
+# Optional debugging flags
      flags_debug = '-g'
-#     flags_opt   = '-O3'
+# Optional optimization flags
      flags_opt   = ''
-     flags_prec  = '-m128bit-long-double'
+# Optional warnings-level flags
      flags_warn  = '-Wall'
-
-     cxxflags_debug = flags_debug
-     cxxflags_opt   = flags_opt
-     cxxflags_prec  = flags_prec
-     cxxflags_warn  = flags_warn
-
-     cflags_debug = flags_debug
-     cflags_opt   = flags_opt
-     cflags_prec  = flags_prec
-     cflags_warn  = flags_warn
-
-     fortranflags_debug = flags_debug
-     fortranflags_opt   = flags_opt
-     fortranflags_prec  = flags_prec
-     fortranflags_warn  = flags_warn
-
-     linkflags_arch = ''
-     linkflags_debug = flags_debug
-     linkflags_opt   = flags_opt
-     linkflags_prec  = flags_prec
-     linkflags_warn  = flags_warn
 
 #----------------------------------------------------------------------
 elif (arch == "ncsa-bd"):
@@ -338,59 +318,44 @@ elif (arch == "ncsa-bd"):
      cc_path  = '/opt/ibmcmp/vac/11.1'
      cxx_path = '/opt/ibmcmp/vacpp/11.1'
 
-     fortran_serial = fc_path + '/bin/xlf_r'
-     fortran_mpi    = fc_path + '/bin/xlf_r'
-     fortran_charm  = fc_path + '/bin/xlf_r'
+     fortran['serial'] = fc_path + '/bin/xlf_r'
+     fortran['mpi']    = fc_path + '/bin/xlf_r'
+     fortran['charm']  = fc_path + '/bin/xlf_r'
 
-     cxx_serial = cxx_path + '/bin/xlC_r'
-     cxx_mpi    = 'mpCC'
-     cxx_charm  = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
+     charmc = charm_path + '/bin/charmc -language charm++ '
 
-     cc_serial  = cc_path + '/bin/xlc_r'
-     cc_mpi     = 'mpcc'
-     cc_charm   = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
+     cxx['serial'] = cxx_path + '/bin/xlC_r'
+     cxx['mpi']    = 'mpCC'
+     cxx['charm']  = charmc + charm_perf + ' '
 
-# defines moved to flags since xlf_r expects -WF,-Dblah but xlC expects -Dblah
+     cc['serial']  = cc_path + '/bin/xlc_r'
+     cc['mpi']     = 'mpcc'
+     cc['charm']   = charmc + charm_perf + ' '
 
-     cppdefines = ''
-     cxxflags_define     = defines_xlc
-     fortranflags_define = defines_xlf
-     fortranpath_lib = fc_path + '/lib64'
-     fortranlibs = ['xlf90','xlfmath','xl']
+# Architecture-dependent flags
 
+     cppdefines        = ''
+
+     cflags_arch       = defines_xlc
+     cxxflags_arch     = defines_xlc
+     fortranflags_arch = defines_xlf + '-qextname'
+
+# Extra fortran libraries
+
+     libpath_fortran = fc_path + '/lib64'
+     libs_fortran    = ['xlf90','xlfmath','xl']
+     fortranlinkflags_arch  = ''
+
+# PAPI path (optional)
      papi_path = '/opt/usersoft/papi/4.1.0'
-     papi_inc = (papi_path + '/include')
-     papi_lib = (papi_path + '/lib64')
-
+# HDF5 path
      hdf5_path = '/home/bordner'
-     hdf5_inc = (hdf5_path + '/include')
-     hdf5_lib = (hdf5_path + '/lib')
-
+# Optional debugging flags
      flags_debug = ''
+# Optional optimization flags
      flags_opt   = '-O3 -qhot -q64'
-     flags_prec  = ''
+# Optional warnings-level flags
      flags_warn  = ''
-
-     cxxflags_debug = flags_debug
-     cxxflags_opt   = flags_opt
-     cxxflags_prec  = flags_prec
-     cxxflags_warn  = flags_warn
-
-     cflags_debug = flags_debug
-     cflags_opt   = flags_opt
-     cflags_prec  = flags_prec
-     cflags_warn  = flags_warn
-
-     fortranflags_debug = flags_debug + ' -qextname'
-     fortranflags_opt   = flags_opt
-     fortranflags_prec  = flags_prec
-     fortranflags_warn  = flags_warn
-
-     linkflags_arch = ''
-     linkflags_debug = flags_debug
-     linkflags_opt   = flags_opt
-     linkflags_prec  = flags_prec
-     linkflags_warn  = flags_warn
 
 #----------------------------------------------------------------------
 elif (arch == "sdsc-triton"):
@@ -398,125 +363,98 @@ elif (arch == "sdsc-triton"):
 
      charm_path = '/home/jobordner/public/charm/charm'
 
+
      fc_path  = '/opt/openmpi/pgi/mx'
      cc_path  = '/opt/openmpi/pgi/mx'
      cxx_path = '/opt/openmpi/pgi/mx'
 
-     fortran_serial = 'pgf90'
-     fortran_mpi    = 'pgf90'
-     fortran_charm  = 'pgf90'
+     fortran['serial'] = 'pgf90'
+     fortran['mpi']    = 'pgf90'
+     fortran['charm']  = 'pgf90'
 
-     cxx_serial = 'pgCC'
-     cxx_mpi    = 'mpicxx'
-     cxx_charm  = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
+     charmc = charm_path + '/bin/charmc -language charm++ '
 
-     cc_serial  = 'pgcc'
-     cc_mpi     = 'mpicc'
-     cc_charm  = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
+     cxx['serial'] = 'pgCC'
+     cxx['mpi']    = 'mpicxx'
+     cxx['charm']  = charmc + charm_perf + ' '
 
-     cppdefines = defines
-     cxxflags_define     = ''
-     fortranflags_define = ''
-     fortranpath_lib = ''
-     fortranlibs = []
+     cc['serial']  = 'pgcc'
+     cc['mpi']     = 'mpicc'
+     cc['charm']  = charmc + charm_perf + ' '
 
+# Architecture-dependent defines
+
+     cppdefines        = defines
+
+     cflags_arch       = ''
+     cxxflags_arch     = ''
+     fortranflags_arch = ''
+
+# For extra fortran libraries
+
+     libpath_fortran = ''
+     libs_fortran    = []
+     fortranlinkflags_arch  = '-pgf90libs'
+
+# PAPI path (optional)
      papi_path = ''
-     papi_inc = (papi_path + '/include')
-     papi_lib = (papi_path + '/lib')
-
+# HDF5 path
      hdf5_path = '/opt/hdf5/pgi'
-     hdf5_inc = (hdf5_path + '/include')
-     hdf5_lib = (hdf5_path + '/lib')
-
+# Optional debugging flags
      flags_debug = '-g'
+# Optional optimization flags
 #     flags_opt   = '-fast'
      flags_opt   = ''
-     flags_prec  = ''
+# Optional warnings-level flags
      flags_warn  = ''
 
-     cxxflags_debug = flags_debug
-     cxxflags_opt   = flags_opt
-     cxxflags_prec  = flags_prec
-     cxxflags_warn  = flags_warn
-
-     cflags_debug = flags_debug
-     cflags_opt   = flags_opt
-     cflags_prec  = flags_prec
-     cflags_warn  = flags_warn
-
-     fortranflags_debug = flags_debug
-     fortranflags_opt   = flags_opt
-     fortranflags_prec  = flags_prec
-     fortranflags_warn  = flags_warn
-
-     linkflags_arch = '-pgf90libs'
-     linkflags_debug = flags_debug
-     linkflags_opt   = flags_opt
-     linkflags_prec  = flags_prec
-     linkflags_warn  = flags_warn
-
-
-
 #======================================================================
-# PARALLELISM SETTINGS
+# UNIT TEST SETTINGS
 #======================================================================
 
 if (type == "serial"):
-     cxx          = cxx_serial
-     cc           = cc_serial
-     fortran      = fortran_serial
      serial_run   = ""
      parallel_run = ""
 elif (type == "mpi"):
-     cxx          = cxx_mpi
-     cc           = cc_mpi
-     fortran      = fortran_mpi
      serial_run   = ""
      parallel_run = "mpirun -np 8"
 elif (type == "charm"):
-     cxx          = cxx_charm
-     cc           = cc_charm
-     fortran      = fortran_charm
      serial_run   = ""
      parallel_run = charm_path + "/bin/charmrun +p8 "
+
+if (use_valgrind):
+     valgrind = "valgrind --leak-check=full"
+     parallel_run = parallel_run + " " + valgrind
+     serial_run   = valgrind + " " + serial_run
 
 #======================================================================
 # CELLO PATHS
 #======================================================================
 
-cpppath     = ['#/include'];
-fortranpath = ['#/include'];
-libpath     = ['#/lib/'+type];
+cpppath     = ['#/include']
+fortranpath = ['#/include']
+libpath     = ['#/lib/'+type]
 
 #----------------------------------------------------------------------
 # PAPI PATHS
 #----------------------------------------------------------------------
 
 if (use_papi):
-     cpppath = cpppath + [papi_inc]
-     libpath = libpath + [papi_lib]
+     cpppath = cpppath + [papi_path + '/include']
+     libpath = libpath + [papi_path + '/lib']
 
 #----------------------------------------------------------------------
 # HDF5 PATHS
 #----------------------------------------------------------------------
 
-cpppath = cpppath + [hdf5_inc]
-libpath = libpath + [hdf5_lib]
+cpppath = cpppath + [hdf5_path + '/include']
+libpath = libpath + [hdf5_path + '/lib']
 
 #----------------------------------------------------------------------
 # FORTRAN LINK PATH
 #----------------------------------------------------------------------
 
-libpath = libpath + [fortranpath_lib]
-
-#======================================================================
-# VALGRIND SETTINGS
-#======================================================================
-
-if (use_valgrind):
-     valgrind = "valgrind --leak-check=full"
-     parallel_run = parallel_run + " " + valgrind
-     serial_run   = valgrind + " " + serial_run
+libpath = libpath + [libpath_fortran]
 
 #======================================================================
 # ENVIRONMENT
@@ -525,49 +463,44 @@ if (use_valgrind):
 environ  = os.environ
 
 cxxflags = \
-    cxxflags_debug + ' ' + \
-    cxxflags_opt   + ' ' + \
-    cxxflags_prec  + ' ' + \
-    cxxflags_perf  + ' ' + \
-    cxxflags_warn  + ' ' + \
-    flags_gprof    + \
-    cxxflags_define
+    cxxflags_arch + ' ' + \
+    flags_debug + ' ' + \
+    flags_opt   + ' ' + \
+    flags_warn  + ' ' + \
+    flags_gprof
 
 cflags = \
-    cflags_debug + ' ' + \
-    cflags_opt   + ' ' + \
-    cflags_prec  + ' ' + \
+    cflags_arch + ' ' + \
+    flags_debug + ' ' + \
+    flags_opt   + ' ' + \
     flags_gprof  + \
-    cflags_warn
+    flags_warn
 
 fortranflags = \
-    fortranflags_debug + ' ' + \
-    fortranflags_opt   + ' ' + \
-    fortranflags_prec  + ' ' + \
-    fortranflags_warn  + ' ' + \
-    flags_gprof        + \
-    fortranflags_define
+    fortranflags_arch + ' ' + \
+    flags_debug + ' ' + \
+    flags_opt   + ' ' + \
+    flags_warn  + ' ' + \
+    flags_gprof
 
 linkflags = \
-    linkflags_arch  + ' ' + \
-    linkflags_debug + ' ' + \
-    linkflags_opt   + ' ' + \
-    linkflags_perf  + ' ' + \
-    linkflags_prec  + ' ' + \
+    fortranlinkflags_arch  + ' ' + \
+    flags_debug + ' ' + \
+    flags_opt   + ' ' + \
     flags_gprof     + \
-    linkflags_warn
+    flags_warn
 
 env = Environment (
-     CC           = cc,	
+     CC           = cc[type],	
      CFLAGS       = cflags,
      CPPDEFINES   = cppdefines,
      CPPPATH      = cpppath,
-     CXX          = cxx,	
+     CXX          = cxx[type],	
      CXXFLAGS     = cxxflags,
      ENV          = environ,
      FORTRANFLAGS = fortranflags,
-     FORTRAN      = fortran,
-     FORTRANLIBS  = fortranlibs,
+     FORTRAN      = fortran[type],
+     FORTRANLIBS  = libs_fortran,
      FORTRANPATH  = fortranpath,
      LIBPATH      = libpath,
      LINKFLAGS    = linkflags )
@@ -586,31 +519,35 @@ Export('env')
 Export('type')
 Export('parallel_run')
 Export('serial_run')
-
 Export('use_papi')
 
-SConscript('src/SConscript',variant_dir='build/' + type)
-SConscript('test/SConscript',variant_dir='test/' + type)
+SConscript( 'src/SConscript',variant_dir='build/' + type )
+SConscript('test/SConscript',variant_dir='test/'  + type )
+
+#======================================================================
+# CLEANING
+#======================================================================
+
 Clean('.','test/' + type)
 Clean('.','bin/' + type)
+
 if (type == 'charm' and use_projections == 1):
    Clean('.',Glob('bin/charm/*.projrc'))
    Clean('.',Glob('bin/charm/*.log'))
    Clean('.',Glob('bin/charm/*.sts'))
    Clean('.','charmrun')
 
-# Build tarball
-
-# creates cello-#.#.#.tar.gz with (bin include lib)
+#======================================================================
+# PACKAGING
+#======================================================================
 
 # env = Environment(tools=['default', 'packaging'])
 # title = 'Enzo-P / Cello Extreme AMR Astrophysics and Cosmology'
 # env.Package( NAME           = 'cello',
-#              VERSION        = '0.1.0',
+#              VERSION        = '0.5.0',
 #              PACKAGEVERSION = 0,
 #              PACKAGETYPE    = 'targz',
 #              LICENSE        = 'New BSD',
 #              SUMMARY        = title,
 #              DESCRIPTION    = title
 #         )
-

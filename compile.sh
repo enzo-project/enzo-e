@@ -10,9 +10,9 @@ set arch = $CELLO_ARCH
 set prec = $CELLO_PREC
 
 echo
-echo "arch  = $arch"
-echo "types = ( $types )"
-echo "prec  = $prec"
+echo "arch = $arch"
+echo "type = ( $types )"
+echo "prec = $prec"
 echo
 
 set procs = 1
