@@ -83,12 +83,12 @@
 
    Boundary { type = "reflecting" }
 
-   Stopping {
+   Stopping {        cycle = 400;   }
+   Testing {   cycle_final = 400; }
 
-      time  = 2.5;
-      cycle = 400;
-
-      # redshift
+   Testing
+   {
+      time_final  = 1.03693807162344;
    }
 
    Output { 
@@ -118,8 +118,3 @@
 
    }
 
-   Testing
-   {
-      time_final  = 0.389745501428842;
-      cycle_final = 200;
-   }
