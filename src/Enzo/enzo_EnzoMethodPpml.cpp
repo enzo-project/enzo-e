@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoMethodPpml.cpp
@@ -15,7 +14,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodPpml::EnzoMethodPpml( Parameters * parameters )
-  : Hyperbolic(parameters)
+  : Method(parameters)
 {
 }
 

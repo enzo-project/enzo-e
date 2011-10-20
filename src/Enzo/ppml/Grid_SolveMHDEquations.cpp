@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_ENZO file for license and copyright information
 
 /***********************************************************************
@@ -82,6 +81,39 @@ int EnzoBlock::SolveMHDEquations
     enzo_float *bfieldx_rz = BaryonField[25];
     enzo_float *bfieldy_rz = BaryonField[26];
     enzo_float *bfieldz_rz = BaryonField[27];
+
+
+    // enzo_float *density    = BaryonField[ 0];
+    // enzo_float *velox      = BaryonField[ 1];
+    // enzo_float *veloy      = BaryonField[ 2];
+    // enzo_float *veloz      = BaryonField[ 3];
+    // enzo_float *bfieldx    = BaryonField[ 4];
+    // enzo_float *bfieldy    = BaryonField[ 5];
+    // enzo_float *bfieldz    = BaryonField[ 6];
+
+    // enzo_float *dens_rx    = BaryonField[ 7];
+    // enzo_float *velox_rx   = BaryonField[ 8];
+    // enzo_float *veloy_rx   = BaryonField[ 9];
+    // enzo_float *veloz_rx   = BaryonField[10];
+    // enzo_float *bfieldx_rx = BaryonField[11];
+    // enzo_float *bfieldy_rx = BaryonField[12];
+    // enzo_float *bfieldz_rx = BaryonField[13];
+
+    // enzo_float *dens_ry    = BaryonField[14];
+    // enzo_float *velox_ry   = BaryonField[15];
+    // enzo_float *veloy_ry   = BaryonField[16];
+    // enzo_float *veloz_ry   = BaryonField[17];
+    // enzo_float *bfieldx_ry = BaryonField[18];
+    // enzo_float *bfieldy_ry = BaryonField[19];
+    // enzo_float *bfieldz_ry = BaryonField[20];
+
+    // enzo_float *dens_rz    = BaryonField[21];
+    // enzo_float *velox_rz   = BaryonField[22];
+    // enzo_float *veloy_rz   = BaryonField[23];
+    // enzo_float *veloz_rz   = BaryonField[24];
+    // enzo_float *bfieldx_rz = BaryonField[25];
+    // enzo_float *bfieldy_rz = BaryonField[26];
+    // enzo_float *bfieldz_rz = BaryonField[27];
 
     /* allocate space for fluxes */
  

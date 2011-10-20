@@ -1,14 +1,13 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef MESH_TREE3K_HPP
-#define MESH_TREE3K_HPP
 
 /// @file     mesh_Tree3K.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-29
 /// @todo     Decide on either k or r as refinement factor variable name
 /// @brief    [\ref Mesh] Interface for the Tree3K class
+
+#ifndef MESH_TREE3K_HPP
+#define MESH_TREE3K_HPP
 
 class Tree3K : public TreeK {
 
@@ -64,4 +63,4 @@ private: // attributes
   Node3K * root_;
 };
 
-#endif /* TREE_K_HPP */
+#endif /* MESH_TREE3K_HPP */

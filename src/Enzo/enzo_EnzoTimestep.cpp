@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoTimestep.cpp
@@ -42,7 +41,7 @@ double EnzoTimestep::compute ( const FieldDescr * field_descr,
 
   enzo_float a = 1, dadt;
   if (enzo::ComovingCoordinates)
-    enzo_block->CosmologyComputeExpansionFactor(enzo_block->Time, &a, &dadt);
+    enzo_block->CosmologyComputeExpansionFactor(enzo_block->Time(), &a, &dadt);
   //  enzo_float dt, dtTemp;
   enzo_float dtBaryons      = HUGE_VALF;
   //  enzo_float dtViscous      = HUGE_VALF;
@@ -70,12 +69,14 @@ double EnzoTimestep::compute ( const FieldDescr * field_descr,
   for (int i=0; i<size; i++) pressure_field[i] = 0;
 
   int  result;
-  if (enzo::DualEnergyFormalism)
+  if (enzo::DualEnergyFormalism) {
     result = enzo_block->ComputePressureDualEnergyFormalism
-      (enzo_block->Time, pressure_field);
-  else
+      (enzo_block->Time(), pressure_field);
+  }
+  else {
     result = enzo_block->ComputePressure
-      (enzo_block->Time, pressure_field);
+      (enzo_block->Time(), pressure_field);
+  }
  
   if (result == ENZO_FAIL) {
     fprintf(stderr, "Error in grid->ComputePressure.\n");
@@ -106,7 +107,7 @@ double EnzoTimestep::compute ( const FieldDescr * field_descr,
   /* 3) Find dt from expansion. */
  
   if (enzo::ComovingCoordinates)
-    if (enzo_block->CosmologyComputeExpansionTimestep(enzo_block->Time, &dtExpansion) == ENZO_FAIL) {
+    if (enzo_block->CosmologyComputeExpansionTimestep(enzo_block->Time(), &dtExpansion) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
       exit(ENZO_FAIL);
     }
@@ -127,6 +128,7 @@ double EnzoTimestep::compute ( const FieldDescr * field_descr,
  
   /* 5) calculate minimum timestep */
 
+
   FORTRAN_NAME(calc_dt)(&enzo::GridRank, enzo_block->GridDimension, enzo_block->GridDimension+1,
 			enzo_block->GridDimension+2,
 			enzo_block->GridStartIndex, enzo_block->GridEndIndex,
@@ -143,6 +145,7 @@ double EnzoTimestep::compute ( const FieldDescr * field_descr,
 			&dtBaryons);
 
   dtBaryons *= enzo::CourantSafetyNumber;
+  //  TRACE1("dt = %24.15f",dtBaryons);
  
   double dt = dtBaryons;
   //  dt = MIN(dtBaryons, dtParticles);

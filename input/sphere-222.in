@@ -32,6 +32,10 @@
 
       sequence = ["ppm"];
 
+   }
+
+   Enzo {
+
       ppm {
 
          diffusion   = true;
@@ -77,12 +81,12 @@
 
 #   Output { 
 #
-#      groups = ["cycle_step_test"];
+#      file_groups = ["cycle_step_test"];
 #
 #      cycle_step_test {
-#        file_name      = "enzo-p_1-%06d";
-#	type           = "image";
-#	cycle_interval = 100;
+#       name = ["enzo-p_1-%06d","cycle"];
+#	type = "image";
+#	schedule = ["cycle","interval",100];
 #      };
 #
 #

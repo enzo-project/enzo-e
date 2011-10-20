@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_FieldBlock.cpp
@@ -6,11 +5,10 @@
 /// @date     2008-02-20
 /// @brief    Unit tests for the FieldBlock class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "field.hpp"
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
@@ -19,7 +17,7 @@ PARALLEL_MAIN_BEGIN
 
 
   //----------------------------------------------------------------------
-  unit_init();
+  unit_init(0,1);
   //----------------------------------------------------------------------
 
   FieldDescr * field_descr = new FieldDescr;
@@ -41,12 +39,14 @@ PARALLEL_MAIN_BEGIN
 
   unit_class ("Cello");
 
-  unit_func ("sizeof(float)");
+  unit_func ("32-bit floating-point");
   unit_assert (sizeof(float)       == 4);
-  unit_func ("sizeof(double)");
+  unit_func ("64-bit floating-point");
   unit_assert (sizeof(double)      == 8);
-  unit_func ("sizeof(long-double)");
+  unit_func ("128-bit floating-point");
   unit_assert (sizeof(long double) == 16);
+
+  bool is_quad_supported = sizeof(long double) == 16;
 
   // set ghosts
 
@@ -80,10 +80,13 @@ PARALLEL_MAIN_BEGIN
   xb = (xpp-xpm);
   yb = (ypp-ypm);
   zb = (zpp-zpm);
-  Block * block = new Block (ix,iy,iz, 
-			     nx,ny,nz,
-			     xpm,ypm,zpm,
-			     xb,yb,zb,  1);
+  Factory factory;
+  Block * block = factory.create_block
+    (ix,iy,iz, 
+     1,1,1,
+     nx,ny,nz,
+     xpm,ypm,zpm,
+     xb,yb,zb,  1);
 
   FieldBlock * field_block = block->field_block();
 
@@ -227,16 +230,12 @@ PARALLEL_MAIN_BEGIN
   nb1 = (char *)v2 - (char *)v1;
   nb2 = (char *)v3 - (char *)v2;
   nb3 = (char *)v4 - (char *)v3;
-  nb4 = (char *)v5-(char *)v4;
+  nb4 = (char *)v5 - (char *)v4;
 
-  unit_assert (nb1    == 
-	       sizeof (float) * nv1);
-  unit_assert (nb2 == 
-	       sizeof (double)* nv2);
-  unit_assert (nb3 == 
-	       sizeof (double)* nv3);
-  unit_assert (nb4 == 
-	       sizeof (double)* nv4);
+  unit_assert (nb1 == sizeof (float)  * nv1);
+  unit_assert (nb2 == sizeof (double) * nv2);
+  unit_assert (nb3 == sizeof (double) * nv3);
+  unit_assert (nb4 == sizeof (double) * nv4);
 
   unit_func("field_unknowns");  // with ghosts
 
@@ -278,7 +277,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert (nb1 == sizeof (float) * nv1 + ng2 - ng1);
   unit_assert (nb2 == sizeof (double)* nv2 + ng3 - ng2);
   unit_assert (nb3 == sizeof (double)* nv3 + ng4 - ng3);
-  unit_assert (nb4 == sizeof (double)* nv4 + ng5 - ng4);
+  if (is_quad_supported) unit_assert (nb4 == sizeof (double)* nv4 + ng5 - ng4);
 
   bool passed;
 
@@ -422,7 +421,7 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  unit_assert(passed);
+  if (is_quad_supported) unit_assert(passed);
 
   //--------------------------------------------------
 
@@ -444,11 +443,6 @@ PARALLEL_MAIN_BEGIN
   double hx=0,hy=0,hz=0;
 
   field_block->cell_width(block,&hx,&hy,&hz);
-
-  printf ("%g %g  %g %g  %g %g\n",
-	  hx, 2.0/nx,
-	  hy, 4.0/ny,
-	  hz, 6.0/nz);
 
   unit_assert(fabs(hx-2.0/nx) < 1e-6);
   unit_assert(fabs(hy-4.0/ny) < 1e-6);
@@ -511,11 +505,45 @@ PARALLEL_MAIN_BEGIN
   // unit_func("merge");
   // unit_assert(false);
 	
+  //----------------------------------------------------------------------
+  // I/O
+  //----------------------------------------------------------------------
+
+  // FileHdf5 * file = new FileHdf5;
+
+  // Block * block_read = factory.create_block
+  //   (ix,iy,iz, 
+  //    1,1,1,
+  //    nx,ny,nz,
+  //    xpm,ypm,zpm,
+  //    xb,yb,zb,  1);
+
+  // FieldBlock * field_block_read = block_read->field_block();
+
+  // unit_func("write");
+
+  // // Write header data
+  // field_block->open(file,"field_block_header.out","w");
+  // field_block->write(file,file_content_header);
+  // field_block->close(file);
+
+  // // Read header data
+  // field_block_read->open(file,"field_block_header.out","r");
+  // field_block_read->read(file,file_content_header);
+  // field_block_read->close(file);
+
+  // // Compare header data written and read
+
+  // // FieldBlock
+  // //   size_[]
+  // //
+
+  // unit_assert(false);
+
   // //----------------------------------------------------------------------
   // unit_func("read");
-  // unit_assert(false);
-  // //----------------------------------------------------------------------
-  // unit_func("write");
+
+  // delete file;
   // unit_assert(false);
 	
   //----------------------------------------------------------------------
@@ -525,5 +553,3 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_EXIT;
 }
 PARALLEL_MAIN_END
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

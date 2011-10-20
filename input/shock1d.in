@@ -1,0 +1,78 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+#
+# This file is used for developing the Cello / Enzo-P input grammar and syntax
+
+   Domain { 
+      lower = [0.0];
+      upper = [1.0];
+   } 
+
+   Mesh { 
+      root_size      = [1024];
+   }
+
+   Field {
+
+      ghosts = 3;
+
+      fields = [
+        "density",
+        "velocity_x",
+        "total_energy",
+        "internal_energy"
+      ] ;
+
+      courant   = 0.8;
+   }
+
+   Method {
+
+      sequence = ["ppm"];
+
+   }
+
+   Enzo {
+
+      ppm {
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+         dual_energy = false;
+     }
+   }
+
+   Physics {
+
+      dimensions = 1;
+      gamma = 1.4;
+
+   }
+
+   Initial {
+       density       { value = [ 0.125,                x < 0.5, 
+                                 1.0 ]; };
+
+       total_energy  { value = [ 0.14 / (0.4 * 0.125), x < 0.5,
+                                 1.00 / (0.4 * 1.000) ]; };
+
+       velocity_x    { value = 0.0; };
+       velocity_y    { value = 0.0; }
+   }
+
+   Boundary { type = "reflecting" }
+
+   Stopping {
+      time  = 2.5;
+      cycle = 1000;
+   }
+
+#   Output { 
+#      file_groups = ["cycle_step"];
+#
+#      cycle_step {
+#         type = "image";
+#         name = ["implosion2d-param-%04d","cycle"];
+#         schedule = ["cycle","interval",10];
+#      }
+#   }

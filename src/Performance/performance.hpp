@@ -1,13 +1,12 @@
-// $Id: performance.hpp 2102 2011-03-13 08:42:08Z bordner $
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef PERFORMANCE_HPP
-#define PERFORMANCE_HPP
 
 /// @file     performance.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Oct 14 23:40:13 PDT 2009
 /// @brief    Include file for the \ref Performance component
+
+#ifndef PERFORMANCE_HPP
+#define PERFORMANCE_HPP
 
 //----------------------------------------------------------------------
 // System includes
@@ -87,6 +86,7 @@ enum function_enum {
 //----------------------------------------------------------------------
 
 #include "monitor.hpp"
+#include "memory.hpp"
 #include "error.hpp"
 
 //----------------------------------------------------------------------

@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_Group.cpp
@@ -7,6 +6,7 @@
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Group hierarchy of classes
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "parallel.hpp"

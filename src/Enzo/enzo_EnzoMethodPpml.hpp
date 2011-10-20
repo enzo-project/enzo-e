@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoMethodPpml.hpp
@@ -9,7 +8,7 @@
 #ifndef ENZO_ENZO_METHOD_PPML_HPP
 #define ENZO_ENZO_METHOD_PPML_HPP
 
-class EnzoMethodPpml : public Hyperbolic {
+class EnzoMethodPpml : public Method {
 
 /// @class    EnzoMethodPpml
 /// @ingroup  Enzo

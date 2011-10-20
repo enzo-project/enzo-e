@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 //----------------------------------------------------------------------
@@ -7,6 +6,7 @@
 /// @date     2009-10-05
 /// @brief    [\ref Monitor] Declaration of the Monitor class
 //----------------------------------------------------------------------
+
 #ifndef MONITOR_MONITOR_HPP
 #define MONITOR_MONITOR_HPP
 
@@ -16,7 +16,6 @@
 
 #define MONITOR_LENGTH 255
    
-#include "performance.hpp"
 //----------------------------------------------------------------------
 class Timer; 
 
@@ -38,7 +37,9 @@ class Monitor {
 
   //----------------------------------------------------------------------
 
-public: // interface
+private:
+
+  friend class Simulation;
 
   /// Private constructor of the Monitor object [singleton design pattern]
   Monitor();
@@ -48,24 +49,34 @@ public: // interface
 
 //----------------------------------------------------------------------
 
+public: // interface
+
   /// Return an instance of a Monitor object
   static Monitor * instance()
   { 
-    if ( instance_ == NULL )
-      instance_ = new Monitor;
+    return & instance_;
+    // if ( instance_ == NULL )
+    //   instance_ = new Monitor;
 
-    return instance_;
+    // return instance_;
   };
 
   /// Set whether the monitor is active for text output.  Useful for
   /// parallel, e.g. "monitor->set_active(parallel->is_root())"
   void set_active(bool active) { active_ = active; };
 
+  /// Return whether monitoring is active
+  bool is_active() const throw () { return active_; };
+
   /// Print the Cello header 
   void header () const;
 
   /// Print a message to stdout
-  void print (const char * buffer, ...) const;
+  void print (const char * component, const char * buffer, ...) const;
+
+  /// Write a message to file
+  void write (FILE * fp, 
+	      const char * component, const char * buffer, ...) const;
 
   /// Generate a PNG image of an array
   void image_open (std::string filename, 
@@ -137,7 +148,8 @@ private: // attributes
 private: // static attributes
 
   /// Single instance of the Monitor object [singleton design pattern]
-  static Monitor * instance_;
+  // static Monitor * instance_;
+  static Monitor instance_;
 
 };
 

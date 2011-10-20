@@ -8,19 +8,27 @@
 
 Import('env')
 Import('type')
+Import('use_papi')
 
 #------------------------------
 # DEPENDENCIES
 #------------------------------
 
-components = ['error','memory','monitor', 'parallel', 'field', 'cello']
-libraries  = ['png']
+components = [ 
+              'field', 
+              'simulation','method', 'io',
+              'disk','memory','parallel',
+              'parameters',
+              'error','monitor','performance', 
+              'test','cello']
 
-#------------------------------
-# ENVIRONMENTS
-#------------------------------
+if (use_papi):
+	components = components + ['papi','pfm']
 
-env = env.Clone(LIBS=[components,libraries])
+libraries  = ['hdf5','png'] # used only for test_TreeK(?)
+
+#if (type == "charm"):
+#   components = components + ['enzo']
 
 #------------------------------
 # SOURCE
@@ -31,29 +39,36 @@ sources  = [Glob('mesh*cpp')]
 sources_tree = [Glob('mesh*Node*cpp'), Glob('mesh*Tree*cpp')]
 
 #------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
+
+#------------------------------
 # TARGETS
 #------------------------------
 
 libraries = env.Library ('mesh', [sources])
 
-test_mesh  = env.Program (['test_Mesh.cpp',  sources])
-test_patch = env.Program (['test_Patch.cpp', sources])
-test_block = env.Program (['test_Block.cpp', sources])
-test_tree  = env.Program (['test_TreeK.cpp', sources_tree])
+if (type == "charm"):
+   sources = sources + ['../main_mesh.cpp']
+
+test_block     = env.Program (['test_Block.cpp', sources])
+test_hierarchy = env.Program (['test_Hierarchy.cpp',  sources])
+test_patch     = env.Program (['test_Patch.cpp', sources])
+test_tree      = env.Program (['test_TreeK.cpp', sources_tree])
 
 if (type == "charm"):
-   env.Depends('test_Mesh.o',  '../Test/test.decl.h')
-   env.Depends('test_Patch.o', '../Test/test.decl.h')
-   env.Depends('test_Block.o', '../Test/test.decl.h')
-   env.Depends('test_TreeK.o', '../Test/test.decl.h')
+   env.CharmBuilder('mesh.decl.h','mesh.ci',ARG = 'mesh')
+   env.CharmBuilder('mesh.def.h', 'mesh.ci',ARG = 'mesh')
+   includes = includes + ['mesh.decl.h','mesh.def.h']
 
-binaries = [test_mesh, test_patch, test_block, test_tree ];
+binaries = [test_hierarchy, test_patch, test_block, test_tree ];
 
 #------------------------------
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
+env.Alias('install-inc',env.Install ('#/include',  includes))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
+env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))

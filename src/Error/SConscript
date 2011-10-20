@@ -8,9 +8,12 @@ Import('type')
 #------------------------------
 # DEPENDENCIES
 #------------------------------
-#------------------------------
-# ENVIRONMENTS
-#------------------------------
+
+components = ['test','cello',
+              'monitor', 'performance']
+
+libraries  = ['png']
+
 #------------------------------
 # SOURCE
 #------------------------------
@@ -19,14 +22,21 @@ includes = [Glob('*hpp')]
 sources  = [Glob('error*cpp')]
 
 #------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
+
+#------------------------------
 # TARGETS
 #------------------------------
 
 libraries  = env.Library ('error', [sources])
-test_error = env.Program (['test_Error.cpp',  sources])
 
 if (type == "charm"):
-   env.Depends('test_Error.o', '../Test/test.decl.h')
+   sources = sources + ['../main.cpp']
+
+test_error = env.Program (['test_Error.cpp',  sources])
 
 binaries = [test_error]
 
@@ -34,10 +44,9 @@ binaries = [test_error]
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin', env.Install ('#/bin',   binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
+env.Alias('install-inc',env.Install ('#/include',  includes))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
+env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))
 
 
 

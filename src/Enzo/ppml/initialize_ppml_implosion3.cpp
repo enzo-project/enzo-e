@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     initialize_ppml_implosion3.cpp
@@ -36,7 +35,7 @@ void EnzoBlock::initialize_ppml_implosion3 (int size_param)
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;
   InitialTimeInCodeUnits = 0;
-  Time                   = 0;
+  Time_                  = 0;
   OldTime                = 0;
 
   // Domain
@@ -124,7 +123,6 @@ void EnzoBlock::initialize_ppml_implosion3 (int size_param)
 
   int ndx = GridDimension[0];
   int ndy = GridDimension[1];
-  int ndz = GridDimension[2];
 
   enzo_float hx = CellWidth[0];
   enzo_float hy = CellWidth[1];

@@ -1,0 +1,10 @@
+include "input/dots.incl"
+
+Boundary { type = "reflecting" }
+
+Output { 
+   cycle_step {  
+      name = ["boundary-reflecting-2d-%04d.png","cycle"]; 
+   } 
+}
+

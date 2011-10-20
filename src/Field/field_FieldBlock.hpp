@@ -1,8 +1,4 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef FIELD_FIELD_BLOCK_HPP
-#define FIELD_FIELD_BLOCK_HPP
 
 /// @file     field_FieldBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -14,6 +10,10 @@
 /// @todo     Clean allocate_array() and allocate_ghosts() usage
 /// @brief    [\ref Field] Fortran-style array class.
 
+#ifndef FIELD_FIELD_BLOCK_HPP
+#define FIELD_FIELD_BLOCK_HPP
+
+class Patch;
 class Block;
 class FieldDescr;
 
@@ -33,7 +33,7 @@ class FieldBlock {
 public: // interface
 
   /// Create a new uninitialized FieldBlock object
-  FieldBlock(int nx, int ny=1, int nz=1) throw();
+  FieldBlock(int nx=0, int ny=1, int nz=1) throw();
 
   /// Deconstructor
   ~FieldBlock() throw();
@@ -45,7 +45,7 @@ public: // interface
   FieldBlock & operator= (const FieldBlock & field_block) throw ();
 
   /// Return size of fields on the block, assuming centered
-  void size(int * nx, int * ny, int * nz) const throw();
+  void size(int * nx = 0, int * ny = 0, int * nz = 0) const throw();
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
@@ -70,8 +70,10 @@ public: // interface
   { return array_; };
 
   /// Return width of cells along each dimension
-  void cell_width(Block * block,
-		  double * hx, double * hy, double * hz) const throw ();
+  void cell_width(const Block * block,
+		  double * hx = 0, 
+		  double * hy = 0, 
+		  double * hz = 0) const throw ();
 
   // /// Return the associated field faces object
   // FieldFaces * field_faces(const FieldDescr * field_descr) throw ();
@@ -100,8 +102,17 @@ public: // interface
   /// Deallocate ghost values if allocated
   void deallocate_ghosts(const FieldDescr * field_descr) throw ();
 
+
+#ifndef CONFIG_USE_CHARM /* MPI only */
+
   /// Refresh ghost zones on an internal face
-  void refresh_ghosts(const FieldDescr * field_descr) throw();
+  void refresh_ghosts(const FieldDescr * field_descr,
+		      const Patch * patch,
+		      int ibx, int iby, int ibz,
+		      face_enum face,
+		      axis_enum axis) throw();
+
+#endif
 
   /// Split a block into 2, 4, or 8 subblocks; does not delete self
   void split(bool split_x, bool split_y, bool split_z, 
@@ -111,31 +122,21 @@ public: // interface
   FieldBlock * merge(bool merge_x, bool merge_y, bool merge_z, 
 		     FieldBlock ** field_blocks) throw ();
  
-  /// Read a block from disk
-  void read(File * file) throw ();
-
-  /// Write a block from disk, and optionally associated descriptor
-  void write(File * file) const throw ();
-
   /// Set array values for a given field
   void set_field_values (int id_field, char * values) throw();
 
   /// Return the number of elements (nx,ny,nz) along each axis, and total
   /// number of bytes n
   int field_size (const FieldDescr * field_descr, int id_field, 
-		  int *nx, int *ny, int *nz) const throw();
+		  int *nx = 0, int *ny = 0, int *nz = 0) const throw();
 
   //----------------------------------------------------------------------
 
   /// Print basic field characteristics for debugging
   void print (const FieldDescr * field_descr,
 	      const char * message,
-	      double lower[3], double upper[3]) const throw();
-
-  /// Write a block to disk as a png image
-  void image (const FieldDescr * field_descr,
-	      const char * prefix,
-	      int cycle, int ibx, int iby, int ibz) const throw();
+	      double lower[3], double upper[3],
+	      bool use_file = false) const throw();
 
 private: // functions
 
@@ -172,13 +173,51 @@ private: // attributes
 
   /// Allocated array of field values
   char * array_;
-  
+
+#ifdef CONFIG_USE_CHARM
+  /// Redundant size of the field_values_ vector
+  int num_fields_;
+#endif
+
   /// Pointers into values_ of the first element of each field
   std::vector<char *> field_values_;
 
   /// Whether ghost values are allocated or not (make [3] for
   /// directionally split?)
   bool ghosts_allocated_;
+
+#ifdef CONFIG_USE_CHARM
+
+public: // CHARM++ PUPer
+
+  void pup(PUP::er &p) 
+  {
+    INCOMPLETE("FieldBlock::pup()");
+
+    TRACE1("FieldBlock::pup() %s", p.isUnpacking() ? "unpacking":"packing");
+
+    PUParray(p,size_,3);
+
+    int n = size_[0]*size_[1]*size_[2];
+
+    // Allocate array if unpacking
+    if (p.isUnpacking()) array_ = new char[n];
+
+    PUParray(p,array_,n);
+  
+    p | num_fields_;
+
+  /// Pointers into values_ of the first element of each field
+    if (p.isUnpacking()) field_values_.resize(num_fields_);
+
+    for (int i=0; i<num_fields_; i++) {
+      p | *field_values_[i];
+    }
+
+    p | ghosts_allocated_;
+  }
+
+#endif
 
 };   
 

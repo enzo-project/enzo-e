@@ -1,8 +1,4 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef PARAMETERS_HPP
-#define PARAMETERS_HPP
 
 /// @file     parameters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -10,18 +6,23 @@
 /// @todo     rename parameter_enum parameter_type_enum, etc.
 /// @brief    Include file for the \ref Parameters component
 
+#ifndef PARAMETERS_HPP
+#define PARAMETERS_HPP
+
 /// @enum     parameter_enum
 /// @brief    Parameter data type
 enum parameter_enum {
   parameter_unknown,
   parameter_integer,
-  parameter_scalar,
+  parameter_float,
   parameter_string,
   parameter_logical,
   parameter_list,
-  parameter_scalar_expr,
+  parameter_float_expr,
   parameter_logical_expr
 };
+
+#define MAX_BUFFER_LENGTH 10000
 
 extern const char * parameter_type_name [];
 

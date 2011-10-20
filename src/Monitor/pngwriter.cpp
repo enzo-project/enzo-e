@@ -1,3 +1,4 @@
+#define BIT_DEPTH 8
 //**********  pngwriter.cc   **********************************************
 //  Author:                    Paul Blackburn
 //
@@ -68,7 +69,7 @@ pngwriter::pngwriter()
 
    int kkkk;
 
-   bit_depth_ = 16; //Default bit depth for new images
+   bit_depth_ = BIT_DEPTH;// jb:  16; //Default bit depth for new images
    colortype_=2;
    screengamma_ = 2.2;
 
@@ -220,7 +221,7 @@ pngwriter::pngwriter(int x, int y, int backgroundcolour, char * filename)
 
    int kkkk;
 
-   bit_depth_ = 16; //Default bit depth for new images
+   bit_depth_ = BIT_DEPTH;// jb:  16; //Default bit depth for new images
    colortype_=2;
    screengamma_ = 2.2;
 
@@ -306,7 +307,7 @@ pngwriter::pngwriter(int x, int y, double backgroundcolour, char * filename)
 
    int kkkk;
 
-   bit_depth_ = 16; //Default bit depth for new images
+   bit_depth_ = BIT_DEPTH;// jb:  16; //Default bit depth for new images
    colortype_=2;
    screengamma_ = 2.2;
 
@@ -406,7 +407,7 @@ pngwriter::pngwriter(int x, int y, int backgroundcolour, const char * filename)
 
    int kkkk;
 
-   bit_depth_ = 16; //Default bit depth for new images
+   bit_depth_ = BIT_DEPTH;// jb:  16; //Default bit depth for new images
    colortype_=2;
    screengamma_ = 2.2;
 
@@ -492,7 +493,7 @@ pngwriter::pngwriter(int x, int y, double backgroundcolour, const char * filenam
 
    int kkkk;
 
-   bit_depth_ = 16; //Default bit depth for new images
+   bit_depth_ = BIT_DEPTH;// jb:  16; //Default bit depth for new images
    colortype_=2;
    screengamma_ = 2.2;
 

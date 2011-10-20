@@ -1,23 +1,21 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef SIMULATION_SIMULATION_HPP
-#define SIMULATION_SIMULATION_HPP
 
 /// @file     simulation_Simulation.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-10 16:14:57
 /// @brief    Interface file for the Simulation class
-/// @todo Make Simulation same CHARM++ chare type as EnzoSimulation
-/// (p.89 CHARM++ manual)
 /// @note     2010-12-17: code-wiki interface review
+/// @todo     subclass Simulation for MPI and CHARM
+
+#ifndef SIMULATION_SIMULATION_HPP
+#define SIMULATION_SIMULATION_HPP
 
 class Boundary;
 class Factory;
 class FieldDescr;
 class GroupProcess;
 class Initial;
-class Mesh;
+class Hierarchy;
 class Method;
 class Monitor;
 class Output;
@@ -26,10 +24,9 @@ class Performance;
 class Stopping;
 class Timestep;
 
-
-#include PARALLEL_CHARM_INCLUDE(enzo.decl.h)
-
 #ifdef CONFIG_USE_CHARM
+#include "mesh.decl.h"
+#include "simulation.decl.h"
 class Simulation : public CBase_Simulation {
 #else
 class Simulation {
@@ -49,15 +46,14 @@ public: // interface
 
   /// Initialize the Simulation object
   Simulation
-  ( const char *   parameter_file,
+  ( const char *       parameter_file,
 #ifdef CONFIG_USE_CHARM
-    int            n,
-    const Factory & factory,
+    int                n,
+    CProxy_BlockReduce proxy_block_reduce, 
 #else
-    const Factory & factory,
-    GroupProcess * group_process = 0,
+    GroupProcess *     group_process = 0,
 #endif
-    int            index = 0
+    int                index = 0
     ) throw();
 
   //==================================================
@@ -66,14 +62,14 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize an empty Simulation
-  Simulation() {TRACE("Simulation()")};
+  Simulation();
 
   /// Initialize a migrated Simulation
-  Simulation (CkMigrateMessage *m) {TRACE("Simulation(msg)")};
+  Simulation (CkMigrateMessage *m);
 
   //==================================================
 
-  /// Request all Mesh blocks to send output to main::p_output_close()
+  /// Request all Hierarchy blocks to send output to main::p_output_close()
   //  void p_output(int index, int cycle, double time) throw();
 
   // Output
@@ -84,7 +80,7 @@ public: // interface
 
   /// default reduction callback
   void p_done (CkReductionMsg * m)
-  {    printf ("done(%g)\n",*((double *)m->getData()));  delete m; }
+  {    TRACE1 ("done(%g)\n",*((double *)m->getData()));  delete m; }
 
   //--------------------------------------------------
   // Output
@@ -103,11 +99,15 @@ public: // interface
   /// proceed with next output
   void p_output_write (int n, char * buffer) throw();
 
-#endif
+  CProxy_BlockReduce proxy_block_reduce() 
+  { return   proxy_block_reduce_; }
 
-  //----------------------------------------------------------------------
-  // Big Three
-  //----------------------------------------------------------------------
+#else
+
+  /// Perform scheduled output for this cycle_ and time_
+  void scheduled_output();
+
+#endif
 
   /// Destructor
   virtual ~Simulation() throw();
@@ -117,67 +117,84 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Return the dimensionality of the Simulation
-  int dimension() const throw();
+  int dimension() const throw()
+  { return dimension_; }
 
-  /// Return the Mesh
-  Mesh * mesh() const throw();
+  /// Return the Hierarchy
+  Hierarchy * hierarchy() const throw()
+  { return hierarchy_; }
+  
+  /// Return the Parameters
+  Parameters * parameters() const throw()
+  { return parameters_; }
   
   /// Return the field descriptor
-  FieldDescr * field_descr() const throw();
+  FieldDescr * field_descr() const throw()
+  { return field_descr_; }
 
   /// Return the performance object
-  Performance * performance() const throw();
+  Performance * performance() const throw()
+  { return performance_; }
+
+  /// Return the group process object
+  GroupProcess * group_process() const throw()
+  { return group_process_; }
 
   /// Return the monitor object
-  Monitor * monitor() const throw();
+  Monitor * monitor() const throw()
+  { return monitor_; }
 
   /// Return the stopping object, if any
-  Stopping *  stopping() const throw();
+  Stopping *  stopping() const throw()
+  { return stopping_; }
   
   /// Return the time-stepping object, if any
-  Timestep * timestep() const throw();
+  Timestep * timestep() const throw()
+  { return timestep_; }
 
   /// Return the initialization object, if any
-  Initial *  initial() const throw();
+  Initial *  initial() const throw()
+  { return initial_; }
 
   /// Return the boundary object, if any
-  Boundary * boundary() const throw();
+  Boundary * boundary() const throw()
+  { return boundary_; }
 
   /// Return the number of output objects
-  size_t num_output() const throw();
+  size_t num_output() const throw()
+  { return output_list_.size(); }
 
   /// Return the ith output object
-  Output * output(int i) const throw();
+  Output * output(int i) const throw()
+  { return output_list_[i]; }
 
   /// Return the number of methods
-  size_t num_method() const throw();
+  size_t num_method() const throw()
+  { return method_list_.size(); }
 
   /// Return the ith method object
-  Method * method(int i) const throw();
-
-  /// Return the factory object
-  const Factory * factory () const throw();
+  Method * method(int i) const throw()
+  { return method_list_[i]; }
 
   /// Return the current cycle number
-  int cycle() const throw() {return cycle_;};
+  int cycle() const throw() 
+  { return cycle_; };
 
   /// Return the current time
-  double time() const throw() {return time_;};
+  double time() const throw() 
+  { return time_; };
 
   /// Return the current dt (stored from main)
-  double dt() const throw() {return dt_;};
+  double dt() const throw() 
+  { return dt_; };
 
   /// Return the currint stopping criteria (stored from main reduction)
-  bool stop() const throw() {return stop_; };
+  bool stop() const throw() 
+  { return stop_; };
 
   /// Return the Simulation index
-  size_t index() const throw() {return index_; };
-
-  /// Return whether to update all faces at once or axis-by-axis
-  bool temp_update_all() const throw() { return temp_update_all_; };
-
-  /// Return whether to include orthogonal ghosts in updates
-  bool temp_update_full() const throw() { return temp_update_full_; };
+  size_t index() const throw() 
+  { return index_; };
 
   void update_cycle(int cycle, int time, double dt, double stop) {
     cycle_ = cycle;
@@ -185,6 +202,21 @@ public: // interface
     dt_    = dt;
     stop_  = stop;
   };
+
+  /// Return whether to update all faces at once or axis-by-axis
+  bool temp_update_all() const throw() { return temp_update_all_; };
+
+  /// Return whether to include orthogonal ghosts in updates
+  bool temp_update_full() const throw() { return temp_update_full_; };
+
+  void monitor_output() const {
+    monitor_-> print("Simulation", "cycle %04d time %15.12f dt %15.12g", 
+		     cycle_,time_,dt_);
+    Memory * memory = Memory::instance();
+    monitor_->print("Memory","           bytes %lld bytes_high %lld",
+		    memory->bytes(), memory->bytes_high());
+    memory->reset_high();
+  }
 
 public: // virtual functions
 
@@ -203,13 +235,16 @@ public: // virtual functions
   /// Write a Simulation state to disk
   virtual void write() const throw();
 
+  /// Return a Hierarchy factory object
+  virtual const Factory & factory () const throw();
+
 protected: // functions
 
   /// Initialize global simulation parameters
   void initialize_simulation_ () throw();
 
-  /// Initialize the mesh object
-  void initialize_mesh_ () throw();
+  /// Initialize the hierarchy object
+  void initialize_hierarchy_ () throw();
 
   /// Initialize the data object
   void initialize_data_ () throw();
@@ -270,12 +305,14 @@ protected: // attributes
   // SIMULATION PARAMETERS
   //----------------------------------------------------------------------
 
+  /// Factory, created on first call to factory()
+  mutable Factory * factory_;
+
   /// Parameters associated with this simulation
   Parameters * parameters_;
 
-  /// Factory for creating related families of Meshes, Patches and Blocks 
-  /// [abstract factory design pattern]
-  const Factory * factory_; 
+  /// Parameter file name
+  std::string parameter_file_;
 
   /// Parallel group for the simulation
   GroupProcess * group_process_;
@@ -314,8 +351,8 @@ protected: // attributes
   /// Monitor object
   Monitor * monitor_;
 
-  /// AMR mesh
-  Mesh * mesh_;
+  /// AMR hierarchy
+  Hierarchy * hierarchy_;
   
   /// Field descriptor
   FieldDescr * field_descr_;
@@ -332,23 +369,21 @@ protected: // attributes
   /// Boundary conditions object
   Boundary * boundary_;
 
-  /// Output objects
-  std::vector<Output *> output_list_;
-
-  /// List of method objects
-  std::vector<Method *> method_list_;
-
-
-  //--------------------------------------------------
-  // Output
-  //--------------------------------------------------
-
 #ifdef CONFIG_USE_CHARM
+
+  /// CHARM proxy for global reduction operations on blocks
+  CProxy_BlockReduce  proxy_block_reduce_;
 
   /// Index of currently active output object
   size_t index_output_;
 
 #endif
+
+  /// Output objects
+  std::vector<Output *> output_list_;
+
+  /// List of method objects
+  std::vector<Method *> method_list_;
 
 };
 

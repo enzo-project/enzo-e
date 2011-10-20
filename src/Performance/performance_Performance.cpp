@@ -1,4 +1,3 @@
-// $Id: performance_Performance.cpp 2130 2011-03-20 01:00:25Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file      performance_Performance.cpp
@@ -12,13 +11,13 @@
 
 Performance::Performance ()
   : counters_(),
-    attribute_names_           (NULL),
-    counter_names_             (NULL),
-    group_names_               (NULL),
-    region_names_              (NULL),
-    attribute_monotonic_       (NULL),
-    current_group_             (0),
-    current_region_            (0)
+    attribute_names_     (),
+    counter_names_       (),
+    group_names_         (),
+    region_names_        (),
+    attribute_monotonic_ (),
+    current_group_       (0),
+    current_region_      (0)
 {
   // Create initial Counters object
 
@@ -51,24 +50,29 @@ Performance & Performance::operator= (const Performance & classname) throw()
 
 void Performance::start () throw ()
 {
-  timer.start();
-  papi.start();
+  timer_.start();
+  papi_.start();
 }
 
 //----------------------------------------------------------------------
 
 void Performance::stop () throw ()
 {
-  timer.stop();
-  papi.stop();
+  timer_.stop();
+  papi_.stop();
 }
 
 //----------------------------------------------------------------------
 
 void Performance::print (const Monitor * monitor) const throw ()
 {
-  timer.print();
-  papi.print();
+#ifdef CONFIG_USE_MEMORY
+  Memory::instance()->print();
+#endif
+  timer_.print();
+#ifdef CONFIG_USE_PAPI
+  papi_.print();
+#endif
   print_rusage_(monitor);
 }
 
@@ -120,9 +124,9 @@ int Performance::group(unsigned id_group)
 
 //----------------------------------------------------------------------
 
-void Performance::set_group(unsigned id_group)
+void Performance::group_set(unsigned id_group)
 {
-  INCOMPLETE("Performance::set_group");
+  INCOMPLETE("Performance::group_set");
 }
 
 //----------------------------------------------------------------------
@@ -132,12 +136,11 @@ void Performance::begin_group(unsigned group_id)
   
   if ( current_group_ ) {
     // begin_group() called when another group is already active
-    char message [ ERROR_LENGTH ];
-    sprintf (message, 
-	     "Mismatch between begin_group(%s) and begin_group(%s)",
+	     
+    WARNING2("Performance::begin_group",
+	     "begin_group(%s) called before end_group(%s)",
 	     group_names_.at(current_group_).c_str(),
 	     group_names_.at(group_id).c_str());
-    WARNING("Performance::begin_group",message);
 
     // End the mistakenly active group
     end_group(current_group_);
@@ -154,11 +157,10 @@ void Performance::end_group(unsigned id_group)
 {
   if (id_group != current_group_) {
     // end_group() called with an inactive one
-    char message [ ERROR_LENGTH ];
-    sprintf (message, "Mismatch between begin_group(%s) and end_group(%s)",
+    WARNING2("Performance::end_group",
+	     "Mismatch between begin_group(%s) and end_group(%s)",
 	     group_names_[current_group_].c_str(),
 	     group_names_[id_group].c_str());
-    WARNING("Performance::end_group",message);
   }
 
   current_group_ = 0;
@@ -257,30 +259,30 @@ void Performance::print_rusage_(const Monitor * monitor) const throw()
   struct rusage r;
   getrusage(RUSAGE_SELF, &r);
 
-  monitor->print ("[Performance] utime = %f",
+  monitor->print ("Performance","utime = %f",
    	  r.ru_utime.tv_sec + 
 	  r.ru_utime.tv_usec * 1e-6);
-  monitor->print ("[Performance] stime = %f",
+  monitor->print ("Performance","stime = %f",
    	  r.ru_stime.tv_sec + 
 	  r.ru_stime.tv_usec * 1e-6);
 
-  if (r.ru_maxrss) monitor->print ("[Performance]  maximum resident set size: %ld",  
+  if (r.ru_maxrss) monitor->print ("Performance"," maximum resident set size: %ld",  
 			   1024 * r.ru_maxrss);
-  if (r.ru_ixrss) monitor->print ("[Performance]  integral shared memory size: %ld",  r.ru_ixrss);
-  if (r.ru_idrss) monitor->print ("[Performance]  integral unshared data size: %ld",  r.ru_idrss);
-  if (r.ru_isrss) monitor->print ("[Performance]  integral unshared stack size: %ld",  r.ru_isrss);
-  if (r.ru_minflt) monitor->print ("[Performance]  page reclaims (soft page faults): %ld",  r.ru_minflt);
-  if (r.ru_majflt) monitor->print ("[Performance]  page faults (hard page faults): %ld",  r.ru_majflt);
-  if (r.ru_nswap) monitor->print ("[Performance]  swaps: %ld",  r.ru_nswap);
-  if (r.ru_inblock) monitor->print ("[Performance]  block input operations: %ld",  r.ru_inblock);
-  if (r.ru_oublock) monitor->print ("[Performance]  block output operations: %ld",  r.ru_oublock);
-  if (r.ru_msgsnd) monitor->print ("[Performance]  IPC messages sent: %ld",  r.ru_msgsnd);
-  if (r.ru_msgrcv) monitor->print ("[Performance]  IPC messages received: %ld",  r.ru_msgrcv);
-  if (r.ru_nsignals) monitor->print ("[Performance]  signals received: %ld",  r.ru_nsignals);
-  if (r.ru_nvcsw) monitor->print ("[Performance]  voluntary context switches: %ld",  r.ru_nvcsw);
-  if (r.ru_nivcsw) monitor->print ("[Performance]  involuntary context switches: %ld",  r.ru_nivcsw);
+  if (r.ru_ixrss) monitor->print ("Performance"," integral shared memory size: %ld",  r.ru_ixrss);
+  if (r.ru_idrss) monitor->print ("Performance"," integral unshared data size: %ld",  r.ru_idrss);
+  if (r.ru_isrss) monitor->print ("Performance"," integral unshared stack size: %ld",  r.ru_isrss);
+  if (r.ru_minflt) monitor->print ("Performance"," page reclaims (soft page faults): %ld",  r.ru_minflt);
+  if (r.ru_majflt) monitor->print ("Performance"," page faults (hard page faults): %ld",  r.ru_majflt);
+  if (r.ru_nswap) monitor->print ("Performance"," swaps: %ld",  r.ru_nswap);
+  if (r.ru_inblock) monitor->print ("Performance"," block input operations: %ld",  r.ru_inblock);
+  if (r.ru_oublock) monitor->print ("Performance"," block output operations: %ld",  r.ru_oublock);
+  if (r.ru_msgsnd) monitor->print ("Performance"," IPC messages sent: %ld",  r.ru_msgsnd);
+  if (r.ru_msgrcv) monitor->print ("Performance"," IPC messages received: %ld",  r.ru_msgrcv);
+  if (r.ru_nsignals) monitor->print ("Performance"," signals received: %ld",  r.ru_nsignals);
+  if (r.ru_nvcsw) monitor->print ("Performance"," voluntary context switches: %ld",  r.ru_nvcsw);
+  if (r.ru_nivcsw) monitor->print ("Performance"," involuntary context switches: %ld",  r.ru_nivcsw);
 
 
-  monitor->print ("[Performance] hostid = %ld",gethostid());
+  monitor->print ("Performance","hostid = %ld",gethostid());
 
 }

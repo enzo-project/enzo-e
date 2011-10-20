@@ -1,4 +1,3 @@
-// $Id: test_Classname.cpp 1696 2010-08-04 05:56:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_Classname.cpp
@@ -6,18 +5,17 @@
 /// @date     2010-04-02
 /// @brief    Test program for the Classname class
 
+#include "main.hpp"
 #include "test.hpp"
 
 #include "component.hpp"
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
 
   PARALLEL_INIT;
 
-  unit_init();
+  unit_init(0,1);
 
   unit_class("Classname");
 
@@ -25,7 +23,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func ("function");
 
-  unit_assert (classname != NULL)
+  unit_assert (classname != NULL);
 
   unit_finalize();
 
@@ -34,4 +32,3 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

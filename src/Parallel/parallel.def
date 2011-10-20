@@ -1,4 +1,3 @@
-// $Id: parallel.def 1711 2010-08-16 18:51:52Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef PARALLEL_DEF
@@ -25,14 +24,12 @@
 #  define PARALLEL_ARGC      main->argc
 #  define PARALLEL_ARGV      main->argv
 
-#  define PARALLEL_MAIN_BEGIN  \
-      CProxy_Main mainProxy; \
-         class Main : public CBase_Main { \
-            public:\
-               Main(CkArgMsg* main)
-#  define PARALLEL_MAIN_END };
+#  define PARALLEL_MAIN_BEGIN			\
+  Main::Main(CkArgMsg* main) 			\
+    : count_exit_(0),				\
+      monitor_(NULL) 				\
 
-#  define PARALLEL_CHARM_INCLUDE(FILE) #FILE
+#  define PARALLEL_MAIN_END 
 
 #  define PARALLEL_CLASS_DECL(CLASS) class CLASS : public CBase_##CLASS
 #  define PARALLEL_PROXY(CLASS) CProxy_##CLASS
@@ -77,8 +74,6 @@
 
 #  define PARALLEL_MAIN_BEGIN int main(int argc, char ** argv)
 #  define PARALLEL_MAIN_END   /* BLANK */
-
-#  define PARALLEL_CHARM_INCLUDE(FILE) <stdio.h> /* dummy include */
 
 #  define PARALLEL_CLASS_DECL(CLASS) class CLASS 
 #  define PARALLEL_PROXY(CLASS) CLASS 

@@ -1,13 +1,12 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef ENZO_ENZO_SIMULATION_HPP
-#define ENZO_ENZO_SIMULATION_HPP
 
 /// @file     enzo_EnzoSimulation.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
 /// @brief    [\ref Enzo] Declaration of the EnzoSimulation class
+
+#ifndef ENZO_ENZO_SIMULATION_HPP
+#define ENZO_ENZO_SIMULATION_HPP
 
 class EnzoSimulation : public Simulation {
 
@@ -22,6 +21,7 @@ public: // functions
   ( const char *   parameter_file_name,
 #ifdef CONFIG_USE_CHARM
     int            n,
+    CProxy_BlockReduce proxy_block_reduce,
 #else
     GroupProcess * group_process = 0,
 #endif
@@ -35,10 +35,10 @@ public: // functions
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize an empty EnzoSimulation
-  EnzoSimulation() {TRACE("EnzoSimulation()")};
+  EnzoSimulation();
 
   /// Initialize a migrated EnzoSimulation
-  EnzoSimulation (CkMigrateMessage *m) {TRACE("EnzoSimulation(msg)")};
+  EnzoSimulation (CkMigrateMessage *m);
 
   //==================================================
 
@@ -61,6 +61,9 @@ public: // functions
 
   /// Write a Simulation state to disk
   virtual void write() const throw();
+
+  /// Return an Enzo mesh factory object
+  const Factory & factory() const throw();
 
 protected: // virtual functions
 

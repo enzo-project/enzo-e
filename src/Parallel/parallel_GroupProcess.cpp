@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     parallel_GroupProcess.cpp
@@ -25,7 +24,7 @@ GroupProcess * GroupProcess::create (int process_first,
 
 #elif defined(CONFIG_USE_CHARM)
 
-  group = new GroupProcessSerial;
+  group = new GroupProcessCharm;
 
 #else
 

@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoNamespace.cpp
@@ -11,14 +10,17 @@
 #include "enzo.hpp"
 
 namespace enzo {
- 
+
+  /// @namespace  enzo
+  /// @brief      Namespace for Enzo functions and global variables
+
   /// Boundary
 
   int  BoundaryRank;
   int  BoundaryDimension[MAX_DIMENSION];
   int  BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
   bc_enum *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
-  enzo_float *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2]; 
+  enzo_float *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
 
   int ComovingCoordinates;
   int UseMinimumPressureSupport;
@@ -205,7 +207,7 @@ namespace enzo {
 	  BoundaryDimension[i]=0;
 	  BoundaryFieldType[j] = 0;
 	  BoundaryType[j][i][k] = 0;
-	  BoundaryValue[j][i][k]= 0; 
+	  BoundaryValue[j][i][k]= 0;
 	}
       }
     }
@@ -215,13 +217,13 @@ namespace enzo {
     }
 
     //--------------------------------------------------
-    // parameter: Physics::cosmology
-    // parameter: Physics::gamma
-    // parameter: Physics::dimensions
+    // parameter: Physics : cosmology
+    // parameter: Physics : gamma
+    // parameter: Physics : dimensions
     //--------------------------------------------------
 
     ComovingCoordinates = parameters->value_logical ("Physics:cosmology",false);
-    Gamma               = parameters->value_scalar  ("Physics:gamma",5.0/3.0);
+    Gamma               = parameters->value_float   ("Physics:gamma",5.0/3.0);
     GridRank            = parameters->value_integer ("Physics:dimensions",0);
     BoundaryRank = GridRank;
 
@@ -241,77 +243,92 @@ namespace enzo {
     // PPM parameters
 
     //--------------------------------------------------
-    // parameter: Physics:cosmology:initial_redshift
-    // parameter: Physics:cosmology:hubble_constant_now
-    // parameter: Physics:cosmology:omega_lambda_now
-    // parameter: Physics:cosmology:omega_matter_now
-    // parameter: Physics:cosmology:max_expansion_rate
-    // parameter: Physics:cosmology:comoving_box_size
+    // parameter: Physics : cosmology : initial_redshift
+    // parameter: Physics : cosmology : hubble_constant_now
+    // parameter: Physics : cosmology : omega_lambda_now
+    // parameter: Physics : cosmology : omega_matter_now
+    // parameter: Physics : cosmology : max_expansion_rate
+    // parameter: Physics : cosmology : comoving_box_size
     //--------------------------------------------------
 
-    InitialRedshift   = parameters->value_scalar 
+    InitialRedshift   = parameters->value_float
       ("Physics:cosmology:initial_redshift",  20.0);
-    HubbleConstantNow = parameters->value_scalar 
+
+    HubbleConstantNow = parameters->value_float
       ("Physics:cosmology:hubble_constant_now",0.701);
-    OmegaLambdaNow    = parameters->value_scalar 
+
+    OmegaLambdaNow    = parameters->value_float
       ("Physics:cosmology:omega_lambda_now",   0.721);
-    OmegaMatterNow    = parameters->value_scalar 
+
+    OmegaMatterNow    = parameters->value_float
       ("Physics:cosmology:omega_matter_now",   0.279);
-    MaxExpansionRate  = parameters->value_scalar 
+
+    MaxExpansionRate  = parameters->value_float
       ("Physics:cosmology:max_expansion_rate", 0.01);
-    ComovingBoxSize   = parameters->value_scalar 
+
+    ComovingBoxSize   = parameters->value_float
       ("Physics:cosmology:comoving_box_size", 64.0);
 
     //--------------------------------------------------
-    // parameter: Method:ppm:pressure_free
-    // parameter: Method:ppm:use_minimum_pressure_support
-    // parameter: Method:ppm:minimum_pressure_support_parameter
-    // parameter: Method:ppm:flattening
-    // parameter: Method:ppm:diffusion
-    // parameter: Method:ppm:steepening
-    // parameter: Method:ppm:pressure_floor
-    // parameter: Method:ppm:density_floor
-    // parameter: Method:ppm:temperature_floor
-    // parameter: Method:ppm:number_density_floor
-    // parameter: Method:ppm:dual_energy
-    // parameter: Method:ppm:dual_energy_eta_1
-    // parameter: Method:ppm:dual_energy_eta_2
+    // parameter: Enzo : ppm : pressure_free
+    // parameter: Enzo : ppm : use_minimum_pressure_support
+    // parameter: Enzo : ppm : minimum_pressure_support_parameter
+    // parameter: Enzo : ppm : flattening
+    // parameter: Enzo : ppm : diffusion
+    // parameter: Enzo : ppm : steepening
+    // parameter: Enzo : ppm : pressure_floor
+    // parameter: Enzo : ppm : density_floor
+    // parameter: Enzo : ppm : temperature_floor
+    // parameter: Enzo : ppm : number_density_floor
+    // parameter: Enzo : ppm : dual_energy
+    // parameter: Enzo : ppm : dual_energy_eta_1
+    // parameter: Enzo : ppm : dual_energy_eta_2
     //--------------------------------------------------
 
     PressureFree = parameters->value_logical
-      ("Method:ppm:pressure_free",false);
-    UseMinimumPressureSupport = parameters->value_logical
-      ("Method:ppm:use_minimum_pressure_support",false);
-    MinimumPressureSupportParameter = parameters->value_integer
-      ("Method:ppm:minimum_pressure_support_parameter",100);
+      ("Enzo:ppm:pressure_free",false);
 
-    PPMFlatteningParameter = parameters->value_integer 
-      ("Method:ppm:flattening", 3);
+    UseMinimumPressureSupport = parameters->value_logical
+      ("Enzo:ppm:use_minimum_pressure_support",false);
+
+    MinimumPressureSupportParameter = parameters->value_integer
+      ("Enzo:ppm:minimum_pressure_support_parameter",100);
+
+    PPMFlatteningParameter = parameters->value_integer
+      ("Enzo:ppm:flattening", 3);
+
     PPMDiffusionParameter  = parameters->value_logical 
-      ("Method:ppm:diffusion",  false);
+      ("Enzo:ppm:diffusion",  false);
+
     PPMSteepeningParameter = parameters->value_logical 
-      ("Method:ppm:steepening", false);
+      ("Enzo:ppm:steepening", false);
 
     double floor_default = 1e-6;
-    pressure_floor       = parameters->value_scalar
-      ("Method:ppm:pressure_floor", floor_default);
-    density_floor        = parameters->value_scalar
-      ("Method:ppm:density_floor",  floor_default);
-    temperature_floor    = parameters->value_scalar
-      ("Method:ppm:temperature_floor", floor_default);
-    number_density_floor = parameters->value_scalar
-      ("Method:ppm:number_density_floor", floor_default);
+
+    pressure_floor       = parameters->value_float
+      ("Enzo:ppm:pressure_floor", floor_default);
+
+    density_floor        = parameters->value_float
+      ("Enzo:ppm:density_floor",  floor_default);
+
+    temperature_floor    = parameters->value_float
+      ("Enzo:ppm:temperature_floor", floor_default);
+
+    number_density_floor = parameters->value_float
+      ("Enzo:ppm:number_density_floor", floor_default);
 
     DualEnergyFormalism     = parameters->value_logical 
-      ("Method:ppm:dual_energy",false);
-    DualEnergyFormalismEta1 = parameters->value_scalar  
-      ("Method:ppm:dual_energy_eta_1", 0.001);
-    DualEnergyFormalismEta2 = parameters->value_scalar  
-      ("Method:ppm:dual_energy_eta_2", 0.1);
+      ("Enzo:ppm:dual_energy",false);
+
+    DualEnergyFormalismEta1 = parameters->value_float
+      ("Enzo:ppm:dual_energy_eta_1", 0.001);
+
+    DualEnergyFormalismEta2 = parameters->value_float
+      ("Enzo:ppm:dual_energy_eta_2", 0.1);
 
     //--------------------------------------------------
-    // parameter: Field::ghosts
-    // parameter: Field::fields
+    // parameter: Field : ghosts
+    // parameter: Field : fields
     //--------------------------------------------------
 
     int gx = 1;
@@ -342,11 +359,9 @@ namespace enzo {
       ERROR ("EnzoBlock::initialize",
 	     "List parameter 'Field fields' must have length greater than zero");
     } else if (NumberOfBaryonFields > MAX_NUMBER_OF_BARYON_FIELDS) {
-      char buffer[ERROR_LENGTH];
-      sprintf (buffer,
-	       "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
-	       NumberOfBaryonFields,NumberOfBaryonFields );
-      ERROR ("EnzoBlock::initialize",  buffer);
+      ERROR2 ("EnzoBlock::initialize",
+	     "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
+	      MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields );
     }
 
     for (int field_index=0; field_index<NumberOfBaryonFields; field_index++) {
@@ -376,9 +391,10 @@ namespace enzo {
 	field_color            = field_index;
 	FieldType[field_index] = ElectronDensity;
       } else {
-	char error_message[ERROR_LENGTH];
-	sprintf (error_message,"Unknown field '%s'",name.c_str());
-	ERROR ("EnzoBlock::EnzoBlock", error_message);
+	FieldType[field_index] = 0;
+	WARNING1 ("EnzoBlock::EnzoBlock", 
+		 "Unknown field type for field %s",
+		 name.c_str());
       }
     }
 
@@ -387,31 +403,31 @@ namespace enzo {
     // BoundaryDimension[2] = nz + 2*ghost_depth[2];
 
     //--------------------------------------------------
-    // parameter: Domain::lower
-    // parameter: Domain::upper
+    // parameter: Domain : lower
+    // parameter: Domain : upper
     //--------------------------------------------------
   
     // (ALREADY READ BY Simulation::initialize_simulation_())
 
-    DomainLeftEdge [0] = parameters->list_value_scalar(0,"Domain:lower",0.0);
-    DomainLeftEdge [1] = parameters->list_value_scalar(1,"Domain:lower",0.0);
-    DomainLeftEdge [2] = parameters->list_value_scalar(2,"Domain:lower",0.0);
+    DomainLeftEdge [0] = parameters->list_value_float (0,"Domain:lower",0.0);
+    DomainLeftEdge [1] = parameters->list_value_float (1,"Domain:lower",0.0);
+    DomainLeftEdge [2] = parameters->list_value_float (2,"Domain:lower",0.0);
 
-    DomainRightEdge[0] = parameters->list_value_scalar(0,"Domain:upper",1.0);
-    DomainRightEdge[1] = parameters->list_value_scalar(1,"Domain:upper",1.0);
-    DomainRightEdge[2] = parameters->list_value_scalar(2,"Domain:upper",1.0);
-
-    //--------------------------------------------------
-    // parameter: Field::courant
-    //--------------------------------------------------
-
-    CourantSafetyNumber = parameters->value_scalar ("Field:courant",0.6);
+    DomainRightEdge[0] = parameters->list_value_float (0,"Domain:upper",1.0);
+    DomainRightEdge[1] = parameters->list_value_float (1,"Domain:upper",1.0);
+    DomainRightEdge[2] = parameters->list_value_float (2,"Domain:upper",1.0);
 
     //--------------------------------------------------
-    // parameter: Initial::time
+    // parameter: Field : courant
     //--------------------------------------------------
 
-    double time  = parameters->value_scalar ("Initial:time",0.0);
+    CourantSafetyNumber = parameters->value_float  ("Field:courant",0.6);
+
+    //--------------------------------------------------
+    // parameter: Initial : time
+    //--------------------------------------------------
+
+    double time  = parameters->value_float  ("Initial:time",0.0);
 
     InitialTimeInCodeUnits = time;
 

@@ -1,4 +1,3 @@
-// $Id: mesh.ci 1696 2010-08-04 05:56:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     mesh.ci
@@ -6,8 +5,21 @@
 /// @date     2011-05-09
 /// @brief    CHARM++ Mesh process group
 
-
 module mesh {
+
+//  extern module simulation;
+//  extern module main;
+
+//  readonly CProxy_BlockReduce  proxy_block_reduce;
+  
+  chare BlockReduce {
+    entry BlockReduce();
+    entry void p_prepare (int count_blocks, int cycle, double time,
+			  double dt_block, int stop_block);
+
+    entry void p_output_reduce (int count_blocks);
+  };
+
   array[3D] Block {
 
     entry Block
@@ -17,15 +29,14 @@ module mesh {
        double hx, double hy, double hz,
        int num_field_blocks);
 
-
     entry void p_initial();
-    entry void p_refresh(double dt, int axis_set);
+    entry void p_compute(double dt, int axis_set);
+    entry void p_refresh(int cycle, double time, double dt, int axis_set);
     entry void p_refresh_face(int n, char buffer[n], int axis, int face, int axis_face);
-    entry void p_output_accum (int index_output);
+    entry void p_write (int index_output);
  
     //     void p_next();
     //     void p_prepare();
-    //     void p_compute();
 
   };
 }

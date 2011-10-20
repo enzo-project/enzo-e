@@ -1,7 +1,7 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
-#include "fortran.def"
+#include "fortran.h"
 
 c=======================================================================
 c//////////////////////////  SUBROUTINE EULER  \\\\\\\\\\\\\\\\\\\\\\\\\
@@ -103,10 +103,12 @@ c  local declarations
 c
       integer i, j, n
 c     NOT ACCESSED: alpha, dele, delu, eta2, uadvect, uleft, uright
-c     RAREFACTION1 only: cb
 c     GRAVITY_SECOND_ORDER_CORRECTION only: dadx, dddx
 c     UNUSED only: eta1
-      ENZO_REAL    c0(ijkn),    cb,  cbar(ijkn),
+#ifdef GRAVITY_SECOND_ORDER_CORRECTION
+      ENZO_REAL    dadx(ijkn), dddx(ijkn)
+#endif
+      ENZO_REAL    c0(ijkn),    cbar(ijkn),
      &             d0(ijkn),    db(ijkn),  dbar(ijkn),   dnu(ijkn),
      &            dub(ijkn),  duub(ijkn),  duvb(ijkn),  duwb(ijkn),
      &           dueb(ijkn),    eb(ijkn),    l0(ijkn),  lbar(ijkn),
@@ -115,8 +117,8 @@ c     UNUSED only: eta1
      &             u0(ijkn),    ub(ijkn),   upb(ijkn),    vb(ijkn),
      &             wb(ijkn),    z0(ijkn),
      &           uold(ijkn), pcent(ijkn),eratio(ijkn),  frac      ,
-     &           dadx(ijkn),  dddx(ijkn), colb(ijkn,MAX_COLOR)
-      ENZO_REAL dele, delu, uleft, uright, uadvect, eold, tempu
+     &           colb(ijkn,MAX_COLOR)
+      ENZO_REAL eold, tempu
       ENZO_REAL one
       parameter (one = 1.0)
 c
@@ -470,7 +472,7 @@ c     &      qc*(dueb(i)-dueb(i+1)+upb(i)-upb(i+1)) .lt. 0.0) then
              write (6,*) 'e8', geslice(i-1,j), geslice(i,j), 
      &                         geslice(i+1,j)
              write (6,*) 'e9', eslice(i-1,j), eslice(i,j), eslice(i+1,j)
-             write (6,*) 'e0', geslice(i-1,j)*dslice(i-1,j)*(gamma-1.0), 
+             write (6,*) 'e0', geslice(i-1,j)*dslice(i-1,j)*(gamma-1.0),
      &                   geslice(i  ,j)*dslice(i  ,j)*(gamma-1.0), 
      &                   geslice(i+1,j)*dslice(i+1,j)*(gamma-1.0)
              write (6,*) 'e1', ub(i),db(i),diffcoef(i,j)

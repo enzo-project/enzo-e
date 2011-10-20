@@ -1,0 +1,9 @@
+include "input/dots.incl"
+
+Boundary { type = "periodic" }
+
+Output { 
+   cycle_step {  
+      name = ["boundary-periodic-2d-%04d.png","cycle"]; 
+   } 
+}

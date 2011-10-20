@@ -1,0 +1,13 @@
+
+
+include "input/parse_include.incl"
+
+   Group1 {
+      new = "new";
+   }
+
+   Group1 {
+      override = "override"; 
+   }
+
+

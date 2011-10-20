@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_ENZO file for license and copyright information
 
 /***********************************************************************
@@ -44,9 +43,9 @@ int EnzoBlock::ComputeTemperatureField(enzo_float *temperature)
 
 //   if(GadgetEquilibriumCooling){
 //     if(DualEnergyFormalism)
-//       result = this->GadgetComputeTemperatureDEF(Time, temperature);
+//       result = this->GadgetComputeTemperatureDEF(Time(), temperature);
 //     else
-//       result = this->GadgetComputeTemperature(Time,temperature);
+//       result = this->GadgetComputeTemperature(Time(),temperature);
 
 //     if(result == ENZO_FAIL) {
 //       fprintf(stderr, "Error in grid->ComputePressure: Gadget.\n");
@@ -58,9 +57,9 @@ int EnzoBlock::ComputeTemperatureField(enzo_float *temperature)
   /* Compute the pressure first. */
  
   if (DualEnergyFormalism)
-    result = ComputePressureDualEnergyFormalism(Time, temperature);
+    result = ComputePressureDualEnergyFormalism(Time(), temperature);
   else
-    result = ComputePressure(Time, temperature);
+    result = ComputePressure(Time(), temperature);
  
   if (result == ENZO_FAIL) {
     fprintf(stderr, "Error in grid->ComputePressure.\n");
@@ -99,7 +98,7 @@ int EnzoBlock::ComputeTemperatureField(enzo_float *temperature)
  
   if (ComovingCoordinates)
     if (CosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
-			  &TimeUnits, &VelocityUnits, Time) == ENZO_FAIL) {
+			  &TimeUnits, &VelocityUnits, Time()) == ENZO_FAIL) {
       fprintf(stderr, "Error in CosmologyGetUnits.\n");
       return ENZO_FAIL;
     }

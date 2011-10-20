@@ -1,13 +1,12 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef PERFORMANCE_COUNTERS_HPP
-#define PERFORMANCE_COUNTERS_HPP
 
 /// @file     performance_Counters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-19 12:55:54
 /// @brief    [\ref Performance] Interface for the Counters class
+
+#ifndef PERFORMANCE_COUNTERS_HPP
+#define PERFORMANCE_COUNTERS_HPP
 
 class Counters {
 
@@ -41,13 +40,11 @@ public: // interface
   /// Copy constructor
   Counters(const Counters & classname) throw()
   {
-    INCOMPLETE("Counters::Counters");
   }
 
   /// Assignment operator
   Counters & operator= (const Counters & classname) throw()
   {
-    INCOMPLETE("Counters::operator =");
     return *this;
   }
 

@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file      test_Performance.cpp
@@ -6,19 +5,18 @@
 /// @date      Wed Apr 23 12:25:18 PDT 2008
 /// @todo      Move Timer tests into test_Timer.cpp
 /// @brief     Program implementing unit tests for performance classes
- 
+
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "performance.hpp"
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
 
   PARALLEL_INIT;
 
-  unit_init();
+  unit_init(0,1);
 
   unit_class("Timer");
 
@@ -60,72 +58,72 @@ PARALLEL_MAIN_BEGIN
 
   // Add attributes
 
-  bool is_monotonic;
-  int attribute_cycle =
-    performance->new_attribute("cycle", is_monotonic=true);
-  int attribute_level = 
-    performance->new_attribute("level", is_monotonic=false);
+  // bool is_monotonic;
+  // int attribute_cycle =
+  //   performance->new_attribute("cycle", is_monotonic=true);
+  // int attribute_level = 
+  //   performance->new_attribute("level", is_monotonic=false);
   
-  // Add counters
+  // // Add counters
 
-  int counter_time_real = 
-    performance->new_counter("time_real");
-  int counter_time_sim = 
-    performance->new_counter("time_sim");
-  int counter_mem_curr_bytes = 
-    performance->new_counter("mem_curr_bytes");
-  int counter_mem_high_bytes = 
-    performance->new_counter("mem_high_bytes");
-  int counter_mem_new_count = 
-    performance->new_counter("mem_new_count");
-  int counter_mem_delete_count = 
-    performance->new_counter("mem_delete_count");
-  int counter_mem_new_bytes = 
-    performance->new_counter("mem_new_bytes");
-  int counter_mem_delete_bytes = 
-    performance->new_counter("mem_delete_bytes");
-  int counter_disk_read_bytes = 
-    performance->new_counter("disk_read_bytes");
-  int counter_disk_write_bytes = 
-    performance->new_counter("disk_write_bytes");
-  int counter_disk_read_time = 
-    performance->new_counter("disk_read_time");
-  int counter_disk_write_time = 
-    performance->new_counter("disk_write_time");
-  int counter_user_patch_count = 
-    performance->new_counter("user_patch_count");
-  int counter_user_cell_count = 
-    performance->new_counter("user_cell_count");
-  int counter_user_particle_count = 
-    performance->new_counter("user_particle_count");
-  int counter_comm_send_bytes = 
-    performance->new_counter("comm_send_bytes");
-  int counter_comm_recv_bytes = 
-    performance->new_counter("comm_recv_bytes");
-  int counter_comm_send_time = 
-    performance->new_counter("comm_send_time");
-  int counter_comm_recv_time = 
-    performance->new_counter("comm_recv_time");
-  int counter_comm_global_time = 
-    performance->new_counter("comm_global_time");
-  int counter_comm_send_count = 
-    performance->new_counter("comm_send_count");
-  int counter_comm_recv_count = 
-    performance->new_counter("comm_recv_count");
-  int counter_comm_global_count = 
-    performance->new_counter("comm_global_count");
+  // int counter_time_real = 
+  //   performance->new_counter("time_real");
+  // int counter_time_sim = 
+  //   performance->new_counter("time_sim");
+  // int counter_mem_curr_bytes = 
+  //   performance->new_counter("mem_curr_bytes");
+  // int counter_mem_high_bytes = 
+  //   performance->new_counter("mem_high_bytes");
+  // int counter_mem_new_count = 
+  //   performance->new_counter("mem_new_count");
+  // int counter_mem_delete_count = 
+  //   performance->new_counter("mem_delete_count");
+  // int counter_mem_new_bytes = 
+  //   performance->new_counter("mem_new_bytes");
+  // int counter_mem_delete_bytes = 
+  //   performance->new_counter("mem_delete_bytes");
+  // int counter_disk_read_bytes = 
+  //   performance->new_counter("disk_read_bytes");
+  // int counter_disk_write_bytes = 
+  //   performance->new_counter("disk_write_bytes");
+  // int counter_disk_read_time = 
+  //   performance->new_counter("disk_read_time");
+  // int counter_disk_write_time = 
+  //   performance->new_counter("disk_write_time");
+  // int counter_user_patch_count = 
+  //   performance->new_counter("user_patch_count");
+  // int counter_user_cell_count = 
+  //   performance->new_counter("user_cell_count");
+  // int counter_user_particle_count = 
+  //   performance->new_counter("user_particle_count");
+  // int counter_comm_send_bytes = 
+  //   performance->new_counter("comm_send_bytes");
+  // int counter_comm_recv_bytes = 
+  //   performance->new_counter("comm_recv_bytes");
+  // int counter_comm_send_time = 
+  //   performance->new_counter("comm_send_time");
+  // int counter_comm_recv_time = 
+  //   performance->new_counter("comm_recv_time");
+  // int counter_comm_global_time = 
+  //   performance->new_counter("comm_global_time");
+  // int counter_comm_send_count = 
+  //   performance->new_counter("comm_send_count");
+  // int counter_comm_recv_count = 
+  //   performance->new_counter("comm_recv_count");
+  // int counter_comm_global_count = 
+  //   performance->new_counter("comm_global_count");
 
-  // Add groups
+  // // Add groups
 
-  int group_1 = performance->new_group("Group 1");
-  int group_2 = performance->new_group("Group 2");
-  int group_3 = performance->new_group("Group 3");
+  // int group_1 = performance->new_group("Group 1");
+  // int group_2 = performance->new_group("Group 2");
+  // int group_3 = performance->new_group("Group 3");
   
-  // Add functions
+  // // Add functions
 
-  int region_1 = performance->new_region("function_1");
-  int region_2 = performance->new_region("function_2");
-  int region_3 = performance->new_region("function_3");
+  // int region_1 = performance->new_region("function_1");
+  // int region_2 = performance->new_region("function_2");
+  // int region_3 = performance->new_region("function_3");
 
   // Initialize counters that are non-zero at start
 
@@ -167,7 +165,7 @@ PARALLEL_MAIN_BEGIN
   unit_func("group");
   unit_assert (unit_incomplete);
 
-  unit_func("set_group");
+  unit_func("group_set");
   unit_assert (unit_incomplete);
 
   unit_func("num_groups");
@@ -229,5 +227,3 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_EXIT;
 }
 PARALLEL_MAIN_END
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

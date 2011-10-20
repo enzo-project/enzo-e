@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_FieldDescr.cpp
@@ -6,6 +5,7 @@
 /// @date     2010-05-11
 /// @brief    Test program for the FieldDescr class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "field.hpp"
@@ -24,15 +24,13 @@ struct field_info_type {
   bool cx, cy, cz;
 };
 
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
-
 PARALLEL_MAIN_BEGIN
 {
 
   PARALLEL_INIT;
 
   //----------------------------------------------------------------------
-  unit_init();
+  unit_init(0,1);
   //----------------------------------------------------------------------
 
   unit_class("FieldDescr");
@@ -482,5 +480,3 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_EXIT;
 }
 PARALLEL_MAIN_END
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

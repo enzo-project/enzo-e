@@ -1,4 +1,3 @@
-// $Id: mesh_Block.cpp 2009 2011-02-22 19:43:07Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     mesh_Block.cpp
@@ -10,37 +9,39 @@
 /// @todo     Remove need for clearing block values before initial conditions (ghost zones accessed but not initialized)
 /// @brief    Implementation of the Block object
 
-#define TEMP_CLEAR_VALUE std::numeric_limits<float>::min() /* in field_FieldBlock.cpp and  mesh_Block.cpp */
-
 #include "cello.hpp"
 
 #include "mesh.hpp"
+#include "main.hpp"
+
+//----------------------------------------------------------------------
+
+#define TEMP_CLEAR_VALUE std::numeric_limits<float>::min() /* in field_FieldBlock.cpp and  mesh_Block.cpp */
 
 //----------------------------------------------------------------------
 
 Block::Block
 (
-#ifndef CONFIG_USE_CHARM
  int ibx, int iby, int ibz,
-#endif
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
- double xb, double yb, double zb, // Block width
+ double xb, double yb, double zb,    // Block width
  int num_field_blocks) throw ()
-  : field_block_(),
+  :  field_block_(),
 #ifdef CONFIG_USE_CHARM
-    count_refresh_face_(0),
-    count_refresh_face_x_(0),
-    count_refresh_face_y_(0),
-    count_refresh_face_z_(0),
+     num_field_blocks_(num_field_blocks),
+     count_refresh_face_(0),
+     count_refresh_face_x_(0),
+     count_refresh_face_y_(0),
+     count_refresh_face_z_(0),
 #endif
-    cycle_(0),
-    time_(0),
-    dt_(0)
+     cycle_(0),
+     time_(0),
+     dt_(0)
 
 { 
-#ifndef CONFIG_LOAD_BALANCE
+#ifdef CONFIG_CHARM_ATSYNC
   usesAtSync = CmiTrue;
 #endif
 
@@ -53,18 +54,21 @@ Block::Block
   // Initialize indices into parent patch
 
 #ifdef CONFIG_USE_CHARM
-  int ibx = thisIndex.x;
-  int iby = thisIndex.y;
-  int ibz = thisIndex.z;
+  // WARNING: this constructor should only be called by test code
+  ibx = 0;
+  iby = 0;
+  ibz = 0;
 #endif
 
   size_[0] = nbx;
   size_[1] = nby;
   size_[2] = nbz;
 
+#ifndef CONFIG_USE_CHARM
   index_[0] = ibx;
   index_[1] = iby;
   index_[2] = ibz;
+#endif
 
   // Initialize extent 
 
@@ -79,6 +83,66 @@ Block::Block
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+
+Block::Block
+(
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xpm, double ypm, double zpm, // Patch begin
+ double xb, double yb, double zb,    // Block width
+ int num_field_blocks) throw ()
+  : field_block_(),
+    num_field_blocks_(num_field_blocks),
+    count_refresh_face_(0),
+    count_refresh_face_x_(0),
+    count_refresh_face_y_(0),
+    count_refresh_face_z_(0),
+    cycle_(0),
+    time_(0),
+    dt_(0)
+
+{ 
+#ifdef CONFIG_CHARM_ATSYNC
+  usesAtSync = CmiTrue;
+#endif
+
+  // Initialize field_block_[]
+  field_block_.resize(num_field_blocks);
+  for (size_t i=0; i<field_block_.size(); i++) {
+    field_block_[i] = new FieldBlock (nx,ny,nz);
+  }
+
+  // Initialize indices into parent patch
+
+  int ibx = thisIndex.x;
+  int iby = thisIndex.y;
+  int ibz = thisIndex.z;
+
+  size_[0] = nbx;
+  size_[1] = nby;
+  size_[2] = nbz;
+
+#ifndef CONFIG_USE_CHARM
+  index_[0] = ibx;
+  index_[1] = iby;
+  index_[2] = ibz;
+#endif
+
+  // Initialize extent 
+
+  lower_[axis_x] = xpm + ibx*xb;
+  lower_[axis_y] = ypm + iby*yb;
+  lower_[axis_z] = zpm + ibz*zb;
+
+  upper_[axis_x] = xpm + (ibx+1)*xb;
+  upper_[axis_y] = ypm + (iby+1)*yb;
+  upper_[axis_z] = zpm + (ibz+1)*zb;
+}
+#endif
+
+//----------------------------------------------------------------------
+
 Block::~Block() throw ()
 { 
   // Deallocate field_block_[]
@@ -86,6 +150,9 @@ Block::~Block() throw ()
     delete field_block_[i];
     field_block_[i] = 0;
   }
+#ifdef CONFIG_USE_CHARM
+  num_field_blocks_ = 0;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -141,29 +208,28 @@ void Block::upper(double * x, double * y, double * z) const throw ()
 
 //----------------------------------------------------------------------
 
-// void Block::set_lower(double x, double y, double z) throw ()
-// {
-//   lower_[0] = x;
-//   lower_[1] = y;
-//   lower_[2] = z;
-// }
-
-// //----------------------------------------------------------------------
-
-// void Block::set_upper(double x, double y, double z) throw ()
-// {
-//   upper_[0] = x;
-//   upper_[1] = y;
-//   upper_[2] = z;
-// }
+int Block::index () const throw ()
+{
+#ifdef CONFIG_USE_CHARM
+  return thisIndex.x + size_[0] * (thisIndex.y + size_[1] * thisIndex.z);
+#else
+  return index_[0] + size_[0] * (index_[1] + size_[1] * index_[2]);
+#endif
+}
 
 //----------------------------------------------------------------------
 
-void Block::index_patch (int * ix=0, int * iy=0, int * iz=0) const throw ()
+void Block::index_patch (int * ix, int * iy, int * iz) const throw ()
 {
-  if (ix) (*ix)=index_[0]; 
-  if (iy) (*iy)=index_[1]; 
-  if (iz) (*iz)=index_[2]; 
+#ifdef CONFIG_USE_CHARM
+  if (ix) (*ix) = thisIndex.x;
+  if (iy) (*iy) = thisIndex.y;
+  if (iz) (*iz) = thisIndex.z;
+#else
+  if (ix) (*ix) = index_[0]; 
+  if (iy) (*iy) = index_[1]; 
+  if (iz) (*iz) = index_[2]; 
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -182,13 +248,25 @@ Block * Block::neighbor (axis_enum axis, face_enum face) const throw()
   return NULL;
 }
 
-//----------------------------------------------------------------------
+//======================================================================
+// MPI FUNCTIONS
+//======================================================================
+
+#ifndef CONFIG_USE_CHARM
 
 void Block::refresh_ghosts(const FieldDescr * field_descr,
+			   const Patch * patch,
+			   face_enum face,
+			   axis_enum axis,
 			   int index_field_set) throw()
 {
-  field_block_[index_field_set]->refresh_ghosts(field_descr);
+  int ibx,iby,ibz;
+  index_patch(&ibx,&iby,&ibz);
+  field_block_[index_field_set]
+    -> refresh_ghosts (field_descr,patch, ibx,iby,ibz, face,axis);
 }
+
+#endif
 
 //======================================================================
 // CHARM FUNCTIONS
@@ -196,54 +274,64 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 
 #ifdef CONFIG_USE_CHARM
 
-extern CProxy_Simulation proxy_simulation;
-extern CProxy_Main proxy_main;
+extern CProxy_Simulation  proxy_simulation;
+extern CProxy_Main        proxy_main;
+
+#endif /* CONFIG_USE_CHARM */
+
+//======================================================================
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::p_initial()
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
 
-  // field_block allocation Was in mesh_Patch() for MPI
+  // Allocate FieldBlock arrays
 
   for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[0]->allocate_array(field_descr);
-    field_block_[0]->allocate_ghosts(field_descr);
+    field_block_[i]->allocate_array(field_descr);
+    field_block_[i]->allocate_ghosts(field_descr);
+    WARNING1("Block::p_initial","Clearing field block values to %g",TEMP_CLEAR_VALUE);
+    field_block_[i]->clear(field_descr,TEMP_CLEAR_VALUE);
   }
 
-  // Apply the initial conditions 
-
-  // SHOULD NOT NEED THIS
-  // std::numeric_limits<double>::min()
-  WARNING("Block::p_initial","Clearing field block values to non-zero");
-  field_block_[0]->clear(field_descr,TEMP_CLEAR_VALUE);
-
-  simulation->initial()->compute(field_descr,this);
+  // Initialize the block
 
   initialize(simulation->cycle(), simulation->time());
 
-  //  field_block()->print(field_descr,"initial",lower_,upper_);
+  // Apply the initial conditions 
 
-  // Prepare for the first cycle: perform and disk Output, user
-  // Monitoring, apply Stopping criteria [reduction], and compute the
-  // next Timestep [reduction]
+  Initial * initial = simulation->initial();
 
-  // prepare for first cycle: Timestep, Stopping, Monitor, Output
+  initial->compute(simulation->hierarchy(),field_descr,this);
 
 #ifdef ORIGINAL_REFRESH  
+
+  // Prepare for first cycle: Timestep, Stopping, Monitor, Output
+
   prepare();
+
 #else
+
+  // Refresh before prepare()
   axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
   refresh(axis_set);
+
 #endif
 }
 
+#endif
+
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::prepare()
 {
-
-  TRACE("Block::prepare");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
@@ -253,54 +341,43 @@ void Block::prepare()
   //--------------------------------------------------
 
   double dt_block;
-#ifdef TEMP_SKIP_REDUCE
-  dt_block = 8e-5;
-  dt_ = dt_block;
-#else
   dt_block = simulation->timestep()->compute(field_descr,this);
-#endif
 
   // Reduce timestep to coincide with scheduled output if needed
 
   for (size_t i=0; i<simulation->num_output(); i++) {
-    Output * output = simulation->output(i);
-    dt_block = output->update_timestep(time_,dt_block);
+    Schedule * schedule = simulation->output(i)->schedule();
+    dt_block = schedule->update_timestep(time_,dt_block);
   }
 
-  // Reduce timestep to coincide with end of simulation if needed
+  // Reduce timestep to not overshoot final time from stopping criteria
 
-  dt_block = MIN (dt_block, (simulation->stopping()->stop_time() - time_));
+  double time_stop = simulation->stopping()->stop_time();
+  double time_curr = time_;
+
+  dt_block = MIN (dt_block, (time_stop - time_curr));
 
   //--------------------------------------------------
   // Stopping [block]
   //--------------------------------------------------
 
   int stop_block = simulation->stopping()->complete(cycle_,time_);
-  // DEBUG
-  int num_blocks = simulation->mesh()->patch(0)->num_blocks();
-  if (stop_block) {
-    FieldDescr * field_descr = simulation->field_descr();
-    field_block()->print(field_descr,"final",lower_,upper_);
-    field_block()->image(field_descr,"cycle",cycle_,
-			 thisIndex.x,thisIndex.y,thisIndex.z);
-#ifdef TEMP_SKIP_REDUCE
-    proxy_main.p_exit(num_blocks);
-#endif
-   }
 
   //--------------------------------------------------
   // Main::p_prepare()
   //--------------------------------------------------
 
-#ifdef TEMP_SKIP_REDUCE
-  skip_reduce (cycle_,time_,dt_block,stop_block);
-#else
-  proxy_main.p_prepare(num_blocks, cycle_, time_, dt_block, stop_block);
-#endif
+  int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
+
+  simulation->proxy_block_reduce().p_prepare
+    (num_blocks, cycle_, time_, dt_block, stop_block);
 
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::refresh_axis (axis_enum axis)
 {
@@ -310,31 +387,29 @@ void Block::refresh_axis (axis_enum axis)
   // Boundary
   //--------------------------------------------------
 
-  bool boundary_face[2];
-  
-  boundary_face[face_lower] = false;
-  boundary_face[face_upper] = false;
+  // WARNING similar code to EnzoSimulationMpi::run() for MPI
 
   int n3[3];
   field_block()->size (&n3[0],&n3[1],&n3[2]);
 
-  Mesh *             mesh        = simulation->mesh();
+  Hierarchy *        hierarchy   = simulation->hierarchy();
   Boundary *         boundary    = simulation->boundary();
   const FieldDescr * field_descr = simulation->field_descr();
 
-  double lower[3];
-  mesh->lower(&lower[0],&lower[1],&lower[2]);
-  double upper[3];
-  mesh->upper(&upper[0],&upper[1],&upper[2]);
+  bool boundary_face[3][2];
+  
+  double lower_h[3];
+  hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
+  double upper_h[3];
+  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
+
+  is_on_boundary(lower_h,upper_h,boundary_face);
 
   bool is_active = n3[axis] > 1;
 
   if ( is_active ) {
-    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-    boundary_face[face_lower] = fabs(lower_[axis]-lower[axis]) < 1e-7;
-    boundary_face[face_upper] = fabs(upper_[axis]-upper[axis]) < 1e-7;
-    if ( boundary_face[face_lower] ) boundary->enforce(field_descr,this,face_lower,axis);
-    if ( boundary_face[face_upper] ) boundary->enforce(field_descr,this,face_upper,axis);
+    if ( boundary_face[axis][face_lower] ) boundary->enforce(field_descr,this,face_lower,axis);
+    if ( boundary_face[axis][face_upper] ) boundary->enforce(field_descr,this,face_upper,axis);
   }
 
   //--------------------------------------------------
@@ -358,14 +433,14 @@ void Block::refresh_axis (axis_enum axis)
   bool update_full = simulation->temp_update_full();
 
   if ( is_active ) {
-    if ( ! boundary_face[face_lower] || periodic ) {
+    if ( ! boundary_face[axis][face_lower] || periodic ) {
       field_face.load (field_descr, field_block(), axis, face_lower, 
 		       update_full,update_full);
       block_array(im3[0],im3[1],im3[2]).p_refresh_face 
 	(field_face.size(), field_face.array(), axis, face_upper, axis);
 
     }
-    if ( ! boundary_face[face_upper] || periodic ) {
+    if ( ! boundary_face[axis][face_upper] || periodic ) {
       field_face.load (field_descr, field_block(), axis, face_upper, 
 		       update_full,update_full);
       block_array(ip3[0],ip3[1],ip3[2]).p_refresh_face 
@@ -373,34 +448,45 @@ void Block::refresh_axis (axis_enum axis)
     }
   }
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::p_compute (double dt, int axis_set)
 {
   if (dt != -1) dt_ = dt;
   compute(axis_set);
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
-void Block::p_refresh (double dt, int axis_set)
+#ifdef CONFIG_USE_CHARM
+
+void Block::p_refresh (int cycle, double time, double dt, int axis_set)
 {
-  // Update dt_ from Simulation
+  // Update cycle,time,dt from Simulation
 
    // (should be updated already?)
   // -1 test due to p_refresh_face() calling p_refresh with axis_set != axis_all
-  if (dt != -1) dt_ = dt;
+  if (cycle != -1) {
+    cycle_ = cycle;
+    time_  = time;
+    dt_    = dt;
+  }
 
   refresh(axis_set);
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+
 void Block::refresh (int axis_set)
 {
-
-  TRACE("Block::refresh");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -420,39 +506,38 @@ void Block::refresh (int axis_set)
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
 
-  Mesh *             mesh        = simulation->mesh();
+  Hierarchy *        hierarchy   = simulation->hierarchy();
   Boundary *         boundary    = simulation->boundary();
   const FieldDescr * field_descr = simulation->field_descr();
 
-  double lower[3];
-  mesh->lower(&lower[0],&lower[1],&lower[2]);
-  double upper[3];
-  mesh->upper(&upper[0],&upper[1],&upper[2]);
+  double lower_h[3];
+  hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
+  double upper_h[3];
+  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
 
   bool ax = ((axis_set == axis_all) || (axis_set == axis_x)) && nx > 1;
   bool ay = ((axis_set == axis_all) || (axis_set == axis_y)) && ny > 1;
   bool az = ((axis_set == axis_all) || (axis_set == axis_z)) && nz > 1;
 
+  is_on_boundary(lower_h,upper_h,boundary_face);
+
   if ( ax ) {
-    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-    boundary_face[axis_x][face_lower] = fabs(lower_[0]-lower[0]) < 1e-7;
-    boundary_face[axis_x][face_upper] = fabs(upper_[0]-upper[0]) < 1e-7;
-    if ( boundary_face[axis_x][face_lower] ) boundary->enforce(field_descr,this,face_lower,axis_x);
-    if ( boundary_face[axis_x][face_upper] ) boundary->enforce(field_descr,this,face_upper,axis_x);
+    if ( boundary_face[axis_x][face_lower] ) 
+      boundary->enforce(field_descr,this,face_lower,axis_x);
+    if ( boundary_face[axis_x][face_upper] ) 
+      boundary->enforce(field_descr,this,face_upper,axis_x);
   }
   if ( ay ) {
-    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-    boundary_face[axis_y][face_lower] = fabs(lower_[1]-lower[1]) < 1e-7;
-    boundary_face[axis_y][face_upper] = fabs(upper_[1]-upper[1]) < 1e-7;
-    if ( boundary_face[axis_y][face_lower] ) boundary->enforce(field_descr,this,face_lower,axis_y);
-    if ( boundary_face[axis_y][face_upper] ) boundary->enforce(field_descr,this,face_upper,axis_y);
+    if ( boundary_face[axis_y][face_lower] ) 
+      boundary->enforce(field_descr,this,face_lower,axis_y);
+    if ( boundary_face[axis_y][face_upper] ) 
+      boundary->enforce(field_descr,this,face_upper,axis_y);
   }
   if ( az ) {
-    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-    boundary_face[axis_z][face_lower] = fabs(lower_[2]-lower[2]) < 1e-7;
-    boundary_face[axis_z][face_upper] = fabs(upper_[2]-upper[2]) < 1e-7;
-    if ( boundary_face[axis_z][face_lower] ) boundary->enforce(field_descr,this,face_lower,axis_z);
-    if ( boundary_face[axis_z][face_upper] ) boundary->enforce(field_descr,this,face_upper,axis_z);
+    if ( boundary_face[axis_z][face_lower] ) 
+      boundary->enforce(field_descr,this,face_lower,axis_z);
+    if ( boundary_face[axis_z][face_upper] ) 
+      boundary->enforce(field_descr,this,face_upper,axis_z);
   }
 
   //--------------------------------------------------
@@ -539,8 +624,11 @@ void Block::refresh (int axis_set)
   p_refresh_face (0,0,0,0, axis_set);
 
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 void Block::p_refresh_face (int n, char * buffer,
 			    int axis, int face, int axis_set)
@@ -568,12 +656,12 @@ void Block::p_refresh_face (int n, char * buffer,
   // Count incoming faces
   //--------------------------------------------------
 
-  Mesh * mesh = simulation->mesh();
+  Hierarchy * hierarchy = simulation->hierarchy();
 
   double lower[3];
-  mesh->lower(&lower[0],&lower[1],&lower[2]);
-  double upper[3];
-  mesh->upper(&upper[0],&upper[1],&upper[2]);
+  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
+  double upper_h[3];
+  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
   
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
@@ -595,15 +683,15 @@ void Block::p_refresh_face (int n, char * buffer,
 
   if (! periodic && ax ) {
     if (fabs(lower_[0]-lower[0]) < 1e-7) --count;
-    if (fabs(upper_[0]-upper[0]) < 1e-7) --count;
+    if (fabs(upper_[0]-upper_h[0]) < 1e-7) --count;
   }
   if (! periodic && ay ) {
     if (fabs(lower_[1]-lower[1]) < 1e-7) --count;
-    if (fabs(upper_[1]-upper[1]) < 1e-7) --count;
+    if (fabs(upper_[1]-upper_h[1]) < 1e-7) --count;
   }
   if (! periodic && az ) {
     if (fabs(lower_[2]-lower[2]) < 1e-7) --count;
-    if (fabs(upper_[2]-upper[2]) < 1e-7) --count;
+    if (fabs(upper_[2]-upper_h[2]) < 1e-7) --count;
   }
 
   //--------------------------------------------------
@@ -624,13 +712,13 @@ void Block::p_refresh_face (int n, char * buffer,
     case axis_x:
       if (++count_refresh_face_x_ >= count) {
 	count_refresh_face_x_ = 0;
-	p_refresh (-1,axis_y);
+	p_refresh (-1,0,0,axis_y);
       }
       break;
     case axis_y:
       if (++count_refresh_face_y_ >= count) {
 	count_refresh_face_y_ = 0;
-	p_refresh (-1,axis_z);
+	p_refresh (-1,0,0,axis_z);
       }
       break;
     case axis_z:
@@ -646,45 +734,19 @@ void Block::p_refresh_face (int n, char * buffer,
     }
   }
 }
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
-void Block::p_output (int index_output)
-{
-
-  TRACE("Block::p_output");
-
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  simulation->output(index_output)->block(this);
-
-  // Synchronize via main chare before writing
-  int num_blocks = simulation->mesh()->patch(0)->num_blocks();
-  proxy_main.p_output_reduce (num_blocks);
-}
+// SEE Simulation/simulation_charm_output.cpp for Block::p_write(int)
 
 //----------------------------------------------------------------------
 
-void Block::skip_reduce(int cycle, int time, double dt_block, double stop_block)
-{
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  simulation->update_cycle(cycle,time,dt_block,stop_block);
-  
-  axis_enum axis = (simulation->temp_update_all()) ? axis_all : axis_x;
-#ifdef ORIGINAL_REFRESH
-  refresh(axis);
-#else
-  compute(axis);
-#endif
-}
-
-//----------------------------------------------------------------------
+#ifdef CONFIG_USE_CHARM
 
 void Block::compute(int axis_set)
 {
 
-  TRACE("Block::compute");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
 #ifdef CONFIG_USE_PROJECTIONS
@@ -725,9 +787,6 @@ void Block::compute(int axis_set)
 #endif
 
 }
-
-//----------------------------------------------------------------------
-
 #endif /* CONFIG_USE_CHARM */
 
 //======================================================================
@@ -740,6 +799,31 @@ void Block::compute(int axis_set)
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i] = new FieldBlock (*(block.field_block_[i]));
   }
+#ifdef CONFIG_USE_CHARM
+  num_field_blocks_ = block.num_field_blocks_;
+#endif
 }
 
+//----------------------------------------------------------------------
+
+void Block::is_on_boundary (double lower[3], double upper_h[3],
+			     bool boundary[3][2]) throw()
+{
+  // Enforce boundary conditions ; refresh ghost zones
+
+  // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+  boundary[axis_x][face_lower] = 
+    (cello::err_rel(lower_[axis_x],lower[axis_x]) < 1e-7);
+  boundary[axis_y][face_lower] = 
+    (cello::err_rel(lower_[axis_y],lower[axis_y]) < 1e-7);
+  boundary[axis_z][face_lower] = 
+    (cello::err_rel(lower_[axis_z],lower[axis_z]) < 1e-7);
+  boundary[axis_x][face_upper] = 
+    (cello::err_rel(upper_[axis_x],upper_h[axis_x]) < 1e-7);
+  boundary[axis_y][face_upper] = 
+    (cello::err_rel(upper_[axis_y],upper_h[axis_y]) < 1e-7);
+  boundary[axis_z][face_upper] = 
+    (cello::err_rel(upper_[axis_z],upper_h[axis_z]) < 1e-7);
+
+}
 //----------------------------------------------------------------------

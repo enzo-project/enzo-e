@@ -1,4 +1,3 @@
-// $Id: simulation.ci 1696 2010-08-04 05:56:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     simulation.ci
@@ -8,21 +7,22 @@
 
 module simulation {
 
-  class Factory;
+//  extern module main;
+  extern module mesh;
+
   group Simulation {
 
     entry Simulation
       (const char filename[n], int n, 
-       const Factory & factory,
+       CProxy_BlockReduce proxy_block_reduce,
        int index_simulation);
 
     entry void p_output (int cycle, double time, double dt, bool stopping);
-//    entry void refresh ();
-    entry void p_done(CkReductionMsg*);
-
     entry void p_output_reduce();
     entry void p_output_write(int n, char buffer[n]);
-    entry void p_output_next ();
+
+    entry void p_done(CkReductionMsg*);
+
 
   };
 

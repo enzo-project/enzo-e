@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_FileIfrit.cpp
@@ -6,18 +5,16 @@
 /// @date     Thu Feb 21 16:47:35 PST 2008
 /// @brief    Program implementing unit tests for the FileIfrit class
  
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "disk.hpp"
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
-
 PARALLEL_MAIN_BEGIN
 
 {
   PARALLEL_INIT;
 
-  unit_init();
+  unit_init(0,1);
 
   unit_class("FileIfrit");
 
@@ -25,7 +22,7 @@ PARALLEL_MAIN_BEGIN
   int n1 = 64;
   int n2 = 64;
 
-  const char filename[] = "FileIfrit_test.bin";
+  const char filename[] = "test_disk.bin";
   int n = n0*n1*n2;
 
   float * a = new float[n];
@@ -76,5 +73,3 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_EXIT;
 }
 PARALLEL_MAIN_END
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

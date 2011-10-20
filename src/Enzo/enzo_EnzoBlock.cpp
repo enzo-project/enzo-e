@@ -1,4 +1,3 @@
-// $Id: enzo_EnzoBlock.cpp 2035 2011-02-28 23:47:31Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoBlock.cpp
@@ -15,21 +14,16 @@
 
 EnzoBlock::EnzoBlock
 (
-#ifndef CONFIG_USE_CHARM
  int ix, int iy, int iz,
-#endif
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xp, double yp, double zp,
  int num_field_blocks) throw()
-  : Block (
-#ifndef CONFIG_USE_CHARM
-	   ix,iy,iz,
-#endif
+  : Block (ix,iy,iz,
 	   nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
+    Time_(0),
     CycleNumber(0),
-    Time(0),
     OldTime(0),
     dt(0),
     SubgridFluxes(0)
@@ -57,6 +51,47 @@ EnzoBlock::EnzoBlock
   // CANNOT BE INITIALIZED HERE SINCE IT REQUIRES EXTENTS
   //  initialize();
 }
+
+#ifdef CONFIG_USE_CHARM
+
+EnzoBlock::EnzoBlock
+(
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xm, double ym, double zm,
+ double xp, double yp, double zp,
+ int num_field_blocks) throw()
+  : Block (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
+    Time_(0),
+    CycleNumber(0),
+    OldTime(0),
+    dt(0),
+    SubgridFluxes(0)
+{
+  int i,j;
+  for (i=0; i<MAX_DIMENSION; i++) {
+    AccelerationField[i] = 0;
+
+    for (i=0; i<MAX_DIMENSION; i++) {
+      AccelerationField[i] = 0;
+      GridLeftEdge[i] = 0;
+      GridDimension[i] = 0;
+      GridStartIndex[i] = 0;
+      GridEndIndex[i] = 0;
+      CellWidth[i] = 0;
+    }
+
+    for (j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
+      BaryonField[j] = 0;
+      OldBaryonField[j] = 0;
+    }
+
+  }
+  // CANNOT BE INITIALIZED HERE SINCE IT REQUIRES EXTENTS
+  //  initialize();
+}
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -144,7 +179,7 @@ void EnzoBlock::write(FILE * fp) throw ()
   fprintf (fp,"EnzoBlock: InitialTimeInCodeUnits %g\n",
 	   InitialTimeInCodeUnits);
   fprintf (fp,"EnzoBlock: Time %g\n",
-	   Time);
+	   Time());
   fprintf (fp,"EnzoBlock: OldTime %g\n",
 	   OldTime);
 
@@ -301,12 +336,14 @@ void EnzoBlock::write(FILE * fp) throw ()
 void EnzoBlock::initialize (int cycle_start, double time_start) throw()
 {
 
-  // Call base class initialize
+  // Call base class initialize time_, cycle_, etc
 
   Block::initialize(cycle_start,time_start);
 
+  // Initialize corresponding EnzoBlock variables
+
   CycleNumber = cycle_start;
-  Time        = time_start;
+  Time_       = time_start;
   OldTime     = time_start;
 
   double xm,ym,zm;
@@ -357,143 +394,6 @@ void EnzoBlock::initialize (int cycle_start, double time_start) throw()
 
 }
 
-//----------------------------------------------------------------------
-
-void EnzoBlock::image_dump
-(
- const char * file_root, 
- int cycle, 
- double lower, 
- double upper)
-{ 
-
-  int nx = GridDimension[0];
-  int ny = GridDimension[1];
-  int nz = GridDimension[2];
-
-  char filename[80];
-
-  // slice
-  sprintf (filename,"slice-%s-%06d.png",file_root,cycle);
-
-  EnzoOutputImage * output = new EnzoOutputImage;
-
-  if (nz == 1) {
-    // 2D: "reduce" along z
-    output->image(filename,
-		   nx,ny,
-		   BaryonField[field_density],
-		   nx,ny,nz,
-		   nx,ny,nz,
-		   0,0,0,
-		   //		3,3,0,nx-3,ny-3,1,
-		   axis_z,reduce_sum, lower/nx, upper/nx);
-  } else {
-    // 3D projection
-    sprintf (filename,"project-%s-%06d-x.png",file_root,cycle);
-    output->image(filename,
-		   ny,nz,
-		   BaryonField[field_density],
-		   nx,ny,nz,
-		   nx,ny,nz,
-		   0,0,0,
-		   //		  3,3,3,nx-3,ny-3,nz-3,
-		   axis_x,reduce_sum,lower, upper);
-    sprintf (filename,"project-%s-%06d-y.png",file_root,cycle);
-    output->image(filename,
-		   nz,nx,
-		   BaryonField[field_density],
-		   nx,ny,nz,
-		   nx,ny,nz,
-		   0,0,0,
-		   //		  3,3,3,nx-3,ny-3,nz-3,
-		   axis_y,reduce_sum,lower, upper);
-    sprintf (filename,"project-%s-%06d-z.png",file_root,cycle);
-    output->image(filename,
-		   nx,ny,
-		   BaryonField[field_density],
-		   nx,ny,nz,
-		   nx,ny,nz,
-		   0,0,0,
-		   //		  3,3,3,nx-3,ny-3,nz-3,
-		   axis_z,reduce_sum,lower, upper);
-  }
-
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::initialize_hydro ()
-
-{
-
-  // Cosmology
-
-  ComovingCoordinates             = 0;    // Physics: Cosmology
-  UseMinimumPressureSupport       = 0;    // call UseMinimumPressureSupport() ?
-  MinimumPressureSupportParameter = 100;  // SetMinimumSupport() Enzo parameter
-  ComovingBoxSize                 = 64;   // Physics cosmology: Mpc/h at z=0
-  HubbleConstantNow               = 0.5;  // Physics: cosmology parameter
-  OmegaLambdaNow                  = 0.0;  // Physics: cosmology parameter
-  OmegaMatterNow                  = 1.0;  // Physics: cosmology parameter
-  MaxExpansionRate                = 0.01; // Cosmology timestep constraint
-
-  // Chemistry
-
-  MultiSpecies                    = 0;    // 0:0 1:6 2:9 3:12
-
-  // Gravity
-
-  GravityOn                       = 0;    // Whether gravity is included
-  AccelerationField[0]            = NULL;
-  AccelerationField[1]            = NULL;
-  AccelerationField[2]            = NULL;
-
-  // Physics
-
-  PressureFree                    = 0;    // Physics: passed into ppm_de
-  Gamma                           = 5.0/3.0; // Physics: ideal gas law constant
-  GravitationalConstant           = 1.0;  // used only in SetMinimumSupport()
-
-  // Problem-specific
-
-  ProblemType                     = 0;    //  7 (sedov) or 60 61 (turbulence)
-
-  // Method PPM
-
-  PPMFlatteningParameter          = 0;
-  PPMDiffusionParameter           = 0;
-  PPMSteepeningParameter          = 0;
-
-  // Numerics
-
-  DualEnergyFormalism             = 0;    // Method: PPM parameter
-  DualEnergyFormalismEta1         = 0.001;// Method: PPM parameter
-  DualEnergyFormalismEta2         = 0.1;  // Method: PPM parameter
-  pressure_floor                  = 1e-20; // Was "tiny_number"
-  number_density_floor            = 1e-20; // Was "tiny_number"
-  density_floor                   = 1e-20; // Was "tiny_number"
-  temperature_floor               = 1e-20; // Was "tiny_number"
-
-  // Boundary
-
-  BoundaryRank         = 0;
-  BoundaryDimension[0] = 1;
-  BoundaryDimension[1] = 1;
-  BoundaryDimension[2] = 1;
- 
-  /* Clear BoundaryType and BoundaryValue pointers. */
- 
-  for (int field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
-    for (int dim = 0; dim < MAX_DIMENSION; dim++) {
-      for (int i = 0; i < 2; i++) {
-	BoundaryType[field][dim][i] = NULL;
-	BoundaryValue[field][dim][i] = NULL;
-      }
-    }
-  }
-}
-    
 //----------------------------------------------------------------------
 
 //
@@ -752,7 +652,7 @@ int EnzoBlock::CosmologyComputeExpansionFactor
 {
  
   /* Error check. */
-  using namespace enzo;
+
   if (InitialTimeInCodeUnits == 0) {
     
     char error_message[ERROR_LENGTH];

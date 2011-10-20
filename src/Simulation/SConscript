@@ -10,18 +10,17 @@ Import('use_papi')
 # DEPENDENCIES
 #------------------------------
 
-components = ['parallel','mesh', 'field','monitor','method','error','parameters','memory','performance','cello']
+components = ['method',
+	      'mesh', 'field',
+	      'memory','parallel',
+	      'parameters',
+	      'error','monitor','performance',
+	      'cello']
 
 if (use_papi):
 	components = components + ['papi','pfm']
 
 libraries = ['png','$FORTRANLIBS']
-
-#------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # SOURCE
@@ -31,17 +30,28 @@ includes = [Glob('simulation*hpp')]
 sources  = [Glob("simulation*cpp")]
 
 #------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
+
+#------------------------------
 # TARGETS
 #------------------------------
 
 libraries       = env.Library ('simulation', [sources])
+
+if (type == "charm"):
+   env.CharmBuilder('simulation.decl.h','simulation.ci',ARG='simulation')
+   env.CharmBuilder('simulation.def.h', 'simulation.ci',ARG='simulation')
+   includes = includes + ['simulation.decl.h','simulation.def.h'];
 
 #------------------------------
 # INSTALL
 #------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
 
 
 

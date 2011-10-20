@@ -1,12 +1,9 @@
-// $Id: field_FieldFace.cpp 2191 2011-04-11 04:25:18Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     field_FieldFace.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file field_FieldFace.cpp
-///
-/// Detailed description of file field_FieldFace.cpp
+/// @date     2011-04-12
+/// @brief    Implementation of the FieldFace class
 
 #include "cello.hpp"
 
@@ -123,6 +120,8 @@ void FieldFace::store
  bool               full_y
  ) throw()
 {
+
+  int ibx,iby;
 
   size_t num_fields = field_descr->field_count();
 
@@ -376,9 +375,6 @@ void FieldFace::print
     // Get field dimensions
     int nd3[3];
     field_block->field_size(field_descr,index_field,&nd3[0],&nd3[1],&nd3[2]);
-
-    // Compute multipliers for index calculations
-    int md3[3] = {1, nd3[0], nd3[0]*nd3[1]};
 
     // Get ghost depth
     int ng3[3];

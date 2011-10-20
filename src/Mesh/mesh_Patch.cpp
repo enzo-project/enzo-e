@@ -1,9 +1,9 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     mesh_Patch.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2011-05-10
+/// @todo     Use CHARM++ reduction support from Blocks to Patch
 /// @brief    Implementation of the Patch class
 
 #include "cello.hpp"
@@ -17,6 +17,7 @@ Patch::Patch
  const Factory * factory, 
  GroupProcess * group_process,
  int nx,  int ny,  int nz,
+ int nx0, int ny0, int nz0,
  int nbx, int nby, int nbz,
  double xm, double ym, double zm,
  double xp, double yp, double zp
@@ -28,20 +29,27 @@ Patch::Patch
   factory_(factory),
   group_process_(group_process),
   layout_(new Layout (nbx,nby,nbz))
-
 {
-  // Check 
+
+ // Check 
+
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
-    char buffer[ERROR_LENGTH];
-    sprintf (buffer,
-	     "Patch size (%d,%d,%d) must be larger than blocking (%d,%d,%d)",
-	     nx,ny,nz,nbx,nby,nbz);
-    ERROR("Patch::Patch", buffer);
+	     
+    ERROR6("Patch::Patch", 
+	   "Patch size (%d,%d,%d) must be larger than blocking (%d,%d,%d)",
+	   nx,ny,nz,nbx,nby,nbz);
   }
+
+  // set layout process range
+  layout_ -> set_process_range(0,group_process->size());
 
   size_[0] = nx;
   size_[1] = ny;
   size_[2] = nz;
+
+  offset_[0] = nx0;
+  offset_[1] = ny0;
+  offset_[2] = nz0;
 
   blocking_[0] = nbx;
   blocking_[1] = nby;
@@ -67,47 +75,20 @@ Patch::~Patch() throw()
 
 //----------------------------------------------------------------------
 
-// Patch::Patch(const Patch & patch,
-// 	     FieldDescr *  field_descr) throw()
-// {
-//   deallocate_blocks();
-
-//   allocate_blocks(field_descr);
-// }
-
-//----------------------------------------------------------------------
-
-// void Patch::set_lower(double xm, double ym, double zm) throw ()
-// {
-//   lower_[0] = xm;
-//   lower_[1] = ym;
-//   lower_[2] = zm;
-// };
-
-// //----------------------------------------------------------------------
-// void Patch::set_upper(double xp, double yp, double zp) throw ()
-// {
-//   upper_[0] = xp;
-//   upper_[1] = yp;
-//   upper_[2] = zp;
-// };
-
-// //----------------------------------------------------------------------
-
-// Patch & Patch::operator= (const Patch & patch) throw()
-// {
-//   deallocate_blocks();
-//   allocate_blocks();
-//   return *this;
-// }
-
-//----------------------------------------------------------------------
-
 void Patch::size (int * npx, int * npy, int * npz) const throw()
 {
   if (npx) (*npx) = size_[0];
   if (npy) (*npy) = size_[1];
   if (npz) (*npz) = size_[2];
+}
+
+//----------------------------------------------------------------------
+
+void Patch::offset (int * nx0, int * ny0, int * nz0) const throw()
+{
+  if (nx0) (*nx0) = offset_[0];
+  if (ny0) (*ny0) = offset_[1];
+  if (nz0) (*nz0) = offset_[2];
 }
 
 //----------------------------------------------------------------------
@@ -143,22 +124,26 @@ void Patch::upper(double * xp, double * yp, double * zp) const throw ()
   if (zp) (*zp) = upper_[2];
 }
 
-//======================================================================
+//----------------------------------------------------------------------
+int Patch::index() const throw ()
+{
+  // ASSUMES ROOT PATCH
+  return 0;
+}
 
-#ifdef CONFIG_USE_CHARM
-extern CProxy_Main proxy_main;
-extern CProxy_Simulation proxy_simulation;
-#endif
+//======================================================================
 
 void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 {
 
 #ifndef CONFIG_USE_CHARM
+
   // determine local block count nb
   int nb = num_local_blocks();
 
   // create local blocks
   block_.resize(nb);
+
 #endif
 
   // Get number of blocks in the patch
@@ -176,15 +161,11 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 	 (nby*mby == size_[1]) &&
 	 (nbz*mbz == size_[2]))) {
 
-    char buffer[ERROR_LENGTH];
-
-    sprintf (buffer,
-	     "Blocks must evenly subdivide Patch: "
-	     "patch size = (%d %d %d)  block count = (%d %d %d)",
-	     size_[0],size_[1],size_[2],
-	     nbx,nby,nbz);
-
-    ERROR("Patch::allocate_blocks",  buffer);
+    ERROR6("Patch::allocate_blocks",  
+	   "Blocks must evenly subdivide Patch: "
+	   "patch size = (%d %d %d)  block count = (%d %d %d)",
+	   size_[0],size_[1],size_[2],
+	   nbx,nby,nbz);
       
   }
 
@@ -197,29 +178,35 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
 #ifdef CONFIG_USE_CHARM
 
+  // WARNING: assumes patch is on Pe 0!!! (OK for unigrid)
+
   if (CkMyPe() == 0) {
-    char buffer[80];
-    sprintf (buffer,"Allocating block array %d %d %d",mbx,mby,mbz);
-    TRACE(buffer);
-    block_ = CProxy_EnzoBlock::ckNew
+
+    block_array_ = factory_->create_block_array
       (nbx,nby,nbz,
        mbx,mby,mbz,
        lower_[0],lower_[1],lower_[2],
-       xb,yb,zb, 1,
-       nbx,nby,nbz);
-    block_.ckSetReductionClient 
-      (new CkCallback(CkIndex_Simulation::p_done(NULL),
-		      proxy_main));
+       xb,yb,zb, 1);
+
+    // Use built-in CHARM++ Reduction instead of hand-rolling
+    // 
+    // block_array_.ckSetReductionClient 
+    //   (new CkCallback(CkIndex_Simulation::p_done(NULL),
+    // 		      proxy_main));
+
     block_exists_ = true;
   }
 
 #else
 
+  int ip = group_process_->rank();
+
   for (int ib=0; ib<nb; ib++) {
 
-    // Get index of this block in the patch
+    // Get index of block ib in the patch
+
     int ibx,iby,ibz;
-    layout_->block_indices (ib, &ibx, &iby, &ibz);
+    layout_->block_indices (ip,ib, &ibx, &iby, &ibz);
 
     // create a new data block
 
@@ -230,7 +217,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
        lower_[0],lower_[1],lower_[2],
        xb,yb,zb);
 
-    // Store the data block
+    // Store the data block in the block array
     block_[ib] = block;
 
     // INITIALIZE FIELD BLOCK
@@ -255,8 +242,10 @@ void Patch::deallocate_blocks() throw()
 
 #ifdef CONFIG_USE_CHARM
 
-  block_.ckDestroy();
-  block_exists_ = false;
+  if (block_exists_) {
+    block_array_.ckDestroy();
+    block_exists_ = false;
+  }
 
 #else
 
@@ -276,14 +265,6 @@ size_t Patch::num_local_blocks() const  throw()
   return layout_->local_count(rank);
 }
 #endif
-
-// #ifdef CONFIG_USE_CHARM
-//   if (block_exists_) {
-//     return num_blocks();
-//   } else {
-//     return 0;
-//   }
-// #else
 
 //----------------------------------------------------------------------
 

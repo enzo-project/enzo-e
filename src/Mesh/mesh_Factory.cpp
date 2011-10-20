@@ -1,4 +1,3 @@
-// $Id: mesh_Factory.hpp 2009 2011-02-22 19:43:07Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     mesh_Factory.hpp
@@ -9,16 +8,9 @@
 #include "mesh.hpp"
 
 //----------------------------------------------------------------------
-
-Mesh * Factory::create_mesh
-(
- int nx,  int ny,  int nz,
- int nbx, int nby, int nbz
- ) const throw ()
+Hierarchy * Factory::create_hierarchy () const throw ()
 {
-  return new Mesh (this,
-		   nx,ny,nz,
-		   nbx,nby,nbz);
+  return new Hierarchy (this); 
 }
 
 //----------------------------------------------------------------------
@@ -27,6 +19,7 @@ Patch * Factory::create_patch
 (
  GroupProcess * group_process,
  int nx,   int ny,  int nz,
+ int nx0,  int ny0, int nz0,
  int nbx,  int nby, int nbz,
  double xm, double ym, double zm,
  double xp, double yp, double zp
@@ -35,10 +28,25 @@ Patch * Factory::create_patch
   return new Patch
     (this,group_process,
      nx,ny,nz,
+     nx0,ny0,nz0,
      nbx,nby,nbz,
      xm,ym,zm,
      xp,yp,zp);
 
+}
+
+//----------------------------------------------------------------------
+
+IoBlock * Factory::create_io_block () const throw()
+{
+  return new IoBlock;
+}
+
+//----------------------------------------------------------------------
+
+IoFieldBlock * Factory::create_io_field_block () const throw()
+{
+  return new IoFieldBlock;
 }
 
 //----------------------------------------------------------------------
@@ -53,20 +61,48 @@ Block * Factory::create_block
  int num_field_blocks
  ) const throw()
 {
+  Block * block;
+#ifdef CONFIG_USE_CHARM
+  CProxy_Block block_array = CProxy_Block::ckNew
+    (nbx,nby,nbz,
+     nx,ny,nz,
+     xm,ym,zm, 
+     xb,yb,zb, 
+     num_field_blocks,
+     nbx,nby,nbz);
+  block = block_array(ibx,iby,ibz).ckLocal();
+#else
+  block = new Block 
+    (ibx,iby,ibz, 
+     nbx,nby,nbz,
+     nx,ny,nz,
+     xm,ym,zm, 
+     xb,yb,zb, 
+     num_field_blocks);
+#endif
+  return block;
+}
+
+//----------------------------------------------------------------------
 #ifdef CONFIG_USE_CHARM
 
-  ERROR("Factor::create_block",
-	"This function should not be called");
-  return 0;
-
-#else
-
-  return new Block (ibx,iby,ibz, 
-		    nbx,nby,nbz,
-		    nx,ny,nz,
-		    xm,ym,zm, 
-		    xb,yb,zb, 
-		    num_field_blocks);
-#endif
+CProxy_Block Factory::create_block_array
+(
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xm, double ym, double zm,
+ double xb, double yb, double zb,
+ int num_field_blocks
+ ) const throw()
+{
+  return CProxy_Block::ckNew
+    (
+     nbx,nby,nbz,
+     nx,ny,nz,
+     xm,ym,zm, 
+     xb,yb,zb, 
+     num_field_blocks,
+     nbx,nby,nbz);
 }
+#endif
 

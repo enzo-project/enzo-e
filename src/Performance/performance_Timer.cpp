@@ -1,12 +1,9 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     performance_Timer.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file performance_Timer.cpp
-///
-/// Detailed description of file performance_Timer.cpp
+/// @date     2008-04-24
+/// @brief    Implementation of the Timer class
 
 #include "performance.hpp"
 
@@ -102,7 +99,7 @@ void Timer::print() const throw()
 {
   Monitor * monitor = Monitor::instance();
 
-  monitor->print ("[Performance] real time = %f",value());
+  monitor->print ("Performance","real time = %f",value());
 
 }
 

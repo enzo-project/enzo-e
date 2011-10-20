@@ -9,16 +9,9 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error']
-
-components = components + ['hdf5']
-
-
-#------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[components])
+components = ['error', 'monitor', 'performance',
+              'test','cello']
+libraries  = ['hdf5', 'png']
 
 #------------------------------
 # SOURCE
@@ -28,30 +21,32 @@ includes = [Glob('disk*hpp')]
 sources  = [Glob('disk*cpp')]
 
 #------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
+
+#------------------------------
 # TARGETS
 #------------------------------
 
 libraries  = env.Library ('disk', sources)
 
+if (type == "charm"):
+	sources = sources + ['../main.cpp']
+
 test_FileHdf5  = env.Program (['test_FileHdf5.cpp', sources])
 test_FileIfrit = env.Program (['test_FileIfrit.cpp', sources])
 
-if (type == "charm"):
-   env.Depends('test_FileHdf5.o', '../Test/test.decl.h')
-   env.Depends('test_FileIfrit.o','../Test/test.decl.h')
-
 binaries = [test_FileHdf5,test_FileIfrit]
-
-env.Depends(test_FileHdf5,'include/test.decl.h')
 
 #------------------------------
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
+env.Alias('install-inc',env.Install ('#/include',  includes))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
+env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))
 
 
 

@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file      test_Error.cpp
@@ -6,11 +5,10 @@
 /// @date      Wed Aug 20 11:24:14 PDT 2008
 /// @brief     Program implementing unit tests for error classes
  
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "error.hpp"
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
 
 PARALLEL_MAIN_BEGIN
 
@@ -18,7 +16,7 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-  unit_init();
+  unit_init(0,1);
 
   unit_class("Error");
   //----------------------------------------------------------------------
@@ -47,4 +45,3 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

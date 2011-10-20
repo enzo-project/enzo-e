@@ -1,0 +1,22 @@
+
+include "input/circle.incl"
+
+Mesh {
+  root_blocks = [2,2];
+}
+
+Output { 
+   file_groups = ["cycle_dump"];
+
+   cycle_dump {  
+      type = "data";            
+      schedule = ["cycle","interval", 10];
+      name = ["output-data-p%02d-c%04d.h5","proc","cycle"]; 
+   } ;
+
+}
+
+Stopping {
+   cycle = 20;
+}
+

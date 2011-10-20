@@ -1,13 +1,12 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef MESH_NODE2K_HPP
-#define MESH_NODE2K_HPP
 
 /// @file     mesh_Node2K.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Oct 27 12:32:07 PDT 2009
 /// @brief    [\ref Mesh] Interface for Node2K class
+
+#ifndef MESH_NODE2K_HPP
+#define MESH_NODE2K_HPP
 
 class Tree2K;
 

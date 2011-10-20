@@ -1,4 +1,3 @@
-// $Id: test_Papi.cpp 1696 2010-08-04 05:56:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_TEMPLATE.cpp
@@ -6,18 +5,17 @@
 /// @date     2010-04-02
 /// @brief    Test program for the Papi class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "performance.hpp"
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
 
   PARALLEL_INIT;
 
-  unit_init();
+  unit_init(0,1);
 
   unit_class("Papi");
 
@@ -51,5 +49,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

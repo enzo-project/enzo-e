@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file      test_Memory.cpp
@@ -6,19 +5,18 @@
 /// @date      Thu Sep  3 16:37:24 PDT 2009
 /// @brief     Program implementing unit tests for the Memory component
  
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "performance.hpp" /* for Timer */
 #include "memory.hpp"
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
 
   PARALLEL_INIT;
 
-  unit_init();
+  unit_init(0,1);
 
   unit_class("Memory");
 
@@ -213,11 +211,11 @@ PARALLEL_MAIN_BEGIN
   delete [] temp_1;
   del_count++;
 
-  // highest()
-  unit_func ("highest()");
+  // bytes_high()
+  unit_func ("bytes_high()");
 
-  unit_assert(memory->highest() == 10000);
-  unit_assert(memory->highest(1) == 1000);
+  unit_assert(memory->bytes_high() == 10000);
+  unit_assert(memory->bytes_high(1) == 1000);
 
   // num_new()
   unit_func ("num_new()");
@@ -240,6 +238,4 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)
 

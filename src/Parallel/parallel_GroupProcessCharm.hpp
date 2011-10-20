@@ -1,4 +1,3 @@
-// $Id: parallel_GroupProcessCharm.hpp 2093 2011-03-12 01:17:05Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     parallel_GroupProcessCharm.hpp
@@ -46,6 +45,10 @@ public: // interface (Group)
 
   /// Clean up after receiving an array
   void recv_end(void * handle) throw();
+
+  /// Send and receive data between two processes
+  void send_recv
+  (int rank, void * buffer, int size, int tag=0) throw();
 
   /// Complete sending or receiving an array
   void wait(void * handle) throw();

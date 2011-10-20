@@ -12,6 +12,7 @@ SConscript('Enzo/SConscript')
 SConscript('Disk/SConscript')
 SConscript('Error/SConscript')
 SConscript('Field/SConscript')
+SConscript('Io/SConscript')
 SConscript('Memory/SConscript')
 SConscript('Mesh/SConscript')
 SConscript('Monitor/SConscript')
@@ -24,18 +25,51 @@ SConscript('Simulation/SConscript')
 SConscript('Test/SConscript')
 SConscript('Method/SConscript')
 
+# components = ['enzo-ppm', 'enzo-ppml',
+# 	      'simulation', 'method',
+# 	      'mesh', 'field',
+# 	      'disk','memory','parallel',
+# 	      'parameters', 'monitor',
+# 	      'performance', 'error',
+# 	      'cello']
 
-components = ['error','memory','monitor','parameters','simulation','enzo','parallel','enzo-ppm','enzo-ppml','mesh','method','field','cello']
+components = [
+   'enzo', 'enzo-ppm','enzo-ppml',
+   'simulation','method',
+   'mesh','field',
+   'memory','parallel',
+   'parameters','monitor',
+   'error','cello']
+
+# disk
+# performance
 
 libraries  = ['png', '$FORTRANLIBS','m']
 
 
 env = env.Clone(LIBS=[components,libraries])
 
-includes = [Glob('cello*hpp'), Glob('cello*def'), Glob('test*hpp')]
-sources  = [Glob('cello*cpp')]
+includes = [Glob('cello*hpp'), Glob('cello*def'), Glob('test*hpp'), 'main.hpp']
+sources  = [Glob('cello*cpp'),Glob('main*cpp')]
+
+if (type == "charm"):
+   env.CharmBuilder('main.decl.h','main.ci',ARG = 'main')
+   env.CharmBuilder('main.def.h', 'main.ci',ARG = 'main')
+   includes = includes + ['main.decl.h','main.def.h']
+
+   env.CharmBuilder('main_enzo.decl.h','main_enzo.ci',ARG = 'main_enzo')
+   env.CharmBuilder('main_enzo.def.h', 'main_enzo.ci',ARG = 'main_enzo')
+   includes = includes + ['main_enzo.decl.h','main_enzo.def.h']
+
+   env.CharmBuilder ('main_simulation.decl.h','main_simulation.ci',ARG = 'main_simulation')
+   env.CharmBuilder ('main_simulation.def.h', 'main_simulation.ci',ARG = 'main_simulation')
+   includes = includes + ['main_simulation.decl.h','main_simulation.def.h']
+
+   env.CharmBuilder('main_mesh.decl.h','main_mesh.ci',ARG = 'main_mesh')
+   env.CharmBuilder('main_mesh.def.h', 'main_mesh.ci',ARG = 'main_mesh')
+   includes = includes + ['main_mesh.decl.h','main_mesh.def.h']
 
 libraries = env.Library ('cello', [sources])
 
-env.Alias('install-lib', env.Install ('#/lib',    libraries))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
 env.Alias('install-inc', env.Install ('#/include',includes))

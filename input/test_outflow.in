@@ -57,7 +57,7 @@
       # ways.  E.g. "color" fields for Enzo PPM, or "computed" fields that
       # are not permanently stored (like pressure)
 
-      groups = ["computed", "color"];
+      file_groups = ["computed", "color"];
 
       # courant condition for fields
 
@@ -100,6 +100,10 @@
       # list of methods to apply and in what order
  
       sequence = ["ppm"];
+
+   }
+
+   Enzo {
 
       ppm {
 
@@ -145,7 +149,7 @@
 
    Output { 
 
-      groups = ["data","restart"];
+      file_groups = ["data","restart"];
 
       # this section needs more work
 

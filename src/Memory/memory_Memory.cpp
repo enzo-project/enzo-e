@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file      memory_Memory.cpp
@@ -18,10 +17,21 @@ Memory Memory::instance_; // (singleton design pattern)
 // FUNCTIONS
 //======================================================================
  
+Memory::~Memory() throw ()
+{
+  // for (int i=0; i<max_group_id_ +1; i++) {
+  //   free (group_names_[i]);
+  //   group_names_[i] = 0;
+  // }
+}
+
+//======================================================================
+
 void Memory::initialize_() throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   curr_group_.push(0);
+  max_group_id_ = 0;
   is_active_ = true;
 
   for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
@@ -53,7 +63,7 @@ void Memory::finalize_() throw ()
 
 //----------------------------------------------------------------------
 
-void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
+void * Memory::allocate ( size_t bytes ) throw ()
 /// @param  bytes   Number of bytes to allocate
 /// @return        Pointer to the allocated memory
 {
@@ -61,7 +71,9 @@ void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
   int * buffer = (int *)(malloc(bytes + 2*sizeof(int)));
 
 
-  if (buffer==0) throw ExceptionMemoryBadAllocate();
+  ASSERT("Memory::allocate",
+	 "Cannot allocate buffer: out of memory",
+	 buffer);
 
   if (is_active_) {
     buffer[0] = bytes;
@@ -91,8 +103,7 @@ void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
 
 //----------------------------------------------------------------------
 
-void Memory::deallocate ( void * pointer )
-  throw (ExceptionMemoryBadDeallocate())
+void Memory::deallocate ( void * pointer ) throw()
 {
 #ifdef CONFIG_USE_MEMORY
   int *buffer = (int *)(pointer) - 2;
@@ -120,15 +131,14 @@ void Memory::new_group ( memory_group_handle group_id, const char * group_name )
 /// @param  group_name  Name of the group
 {
 #ifdef CONFIG_USE_MEMORY
-  if (group_id == 0 || group_id > MEMORY_MAX_NUM_GROUPS) {
 
-    WARNING("Memory::new_group()","group_id out of range");
+  ASSERT ("Memory::new_group()","group_id out of range",
+	  1 <= group_id && group_id <= MEMORY_MAX_NUM_GROUPS);
 
-  } else {
+  group_names_[group_id] = strdup(group_name);
 
-    group_names_[group_id] = strdup(group_name);
+  max_group_id_  = MAX(max_group_id_, group_id);
 
-  }
 #endif
 }
 
@@ -143,7 +153,7 @@ void  Memory::begin_group ( memory_group_handle group_id ) throw ()
 #ifdef CONFIG_USE_MEMORY
   // check for whether we have already called begin_group before
 
-  bool in_range = (group_id <= MEMORY_MAX_NUM_GROUPS);
+  bool in_range = (group_id <= max_group_id_);
 
   if ( in_range ) {
 
@@ -151,12 +161,9 @@ void  Memory::begin_group ( memory_group_handle group_id ) throw ()
 
   } else { // curr_group_ out of range
 
-    char warning_message [ ERROR_LENGTH ];
-
-    sprintf (warning_message, "Group %d is out of range [1,%d]\n",
-	     group_id, MEMORY_MAX_NUM_GROUPS);
-
-    WARNING("Memory::begin_group()",warning_message);
+    WARNING2("Memory::begin_group()",
+	     "Group %d is out of range [1,%d]\n",
+	     group_id, max_group_id_);
 
   }
 #endif
@@ -168,40 +175,34 @@ void Memory::end_group ( memory_group_handle group_id ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
 
-  char warning_message [ ERROR_LENGTH ];
-
-  bool in_range = (group_id <= MEMORY_MAX_NUM_GROUPS);
+  bool in_range = (group_id <= max_group_id_);
 
   if ( in_range ) {
 
     if (curr_group_.size() > 0) {
 
       if (curr_group_.top() != group_id) {
-	sprintf (warning_message, 
-		 "Mismatch between end_group(%d) and group stack top %d\n",
-		 group_id,curr_group_.top());
 
-	WARNING("Memory::end_group",warning_message);
+	WARNING2("Memory::end_group",
+		"Mismatch between end_group(%d) and group stack top %d\n",
+		 group_id,curr_group_.top());
       }
 
       curr_group_.pop();
 
     } else {
 
-      sprintf (warning_message, 
+      WARNING1("Memory::end_group",
 	       "end_group(%d) called with empty group stack\n",
 	       group_id);
-
-      WARNING("Memory::end_group",warning_message);
       
     }
 
   } else { // curr_group_ out of range
 
-    sprintf (warning_message, "Group %d is out of range [1,%d]\n",
-	     group_id, MEMORY_MAX_NUM_GROUPS);
-
-    WARNING("Memory::end_group",warning_message);
+    WARNING2("Memory::end_group",
+	     "Group %d is out of range [1,%d]\n",
+	     group_id, max_group_id_);
   }
 #endif
 }
@@ -276,7 +277,7 @@ float Memory::efficiency ( memory_group_handle group_handle ) throw ()
 
 //----------------------------------------------------------------------
 
-long long Memory::highest ( memory_group_handle group_handle ) throw ()
+long long Memory::bytes_high ( memory_group_handle group_handle ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   return bytes_high_[group_handle];
@@ -333,14 +334,15 @@ int Memory::num_delete ( memory_group_handle group_handle ) throw ()
 void Memory::print () throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  for (memory_group_handle i=0; i<= MEMORY_MAX_NUM_GROUPS; i++) {
+  for (memory_group_handle i=0; i<= max_group_id_; i++) {
+    Monitor * monitor = Monitor::instance();
     if (i == 0 || group_names_[i] != NULL) {
-      PARALLEL_PRINTF ("Group %s\n",i ? group_names_[i]: "Total");
-      PARALLEL_PRINTF ("   limit        = %ld\n",long(limit_[i]));
-      PARALLEL_PRINTF ("   bytes        = %ld\n",long(bytes_[i]));
-      PARALLEL_PRINTF ("   bytes_high   = %ld\n",long(bytes_high_[i]));
-      PARALLEL_PRINTF ("   new_calls    = %ld\n",long(new_calls_[i]));
-      PARALLEL_PRINTF ("   delete_calls = %ld\n",long(delete_calls_[i]));
+      monitor->print ("Memory","Group %s",i ? group_names_[i]: "Total");
+      monitor->print ("Memory","  limit        = %ld",long(limit_[i]));
+      monitor->print ("Memory","  bytes        = %ld",long(bytes_[i]));
+      monitor->print ("Memory","  bytes_high   = %ld",long(bytes_high_[i]));
+      monitor->print ("Memory","  new_calls    = %ld",long(new_calls_[i]));
+      monitor->print ("Memory","  delete_calls = %ld",long(delete_calls_[i]));
     }
   }
 #endif
@@ -355,11 +357,34 @@ void Memory::reset() throw()
 
   curr_group_.push(0);
 
-  for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
+  for (int i=0; i<max_group_id_ + 1; i++) {
     bytes_       [i] = 0;
     bytes_high_  [i] = 0;
     new_calls_   [i] = 0;
     delete_calls_[i] = 0;
   }
+#endif
+}
+
+//----------------------------------------------------------------------
+
+void Memory::reset_high() throw()
+{
+#ifdef CONFIG_USE_MEMORY
+  for (int i=0; i<max_group_id_ + 1; i++) {
+    bytes_high_ [i] = bytes_[i];
+  }
+#endif
+}
+
+//----------------------------------------------------------------------
+
+void Memory::check_handle_(memory_group_handle group_handle) throw ()
+{  
+#ifdef CONFIG_USE_MEMORY
+  ASSERT2 ("Memory::check_handle_",
+	   "group_handle %d is out of range [0:%d]",
+	   int(group_handle), max_group_id_,
+	   0 <= group_handle && group_handle <= max_group_id_);
 #endif
 }

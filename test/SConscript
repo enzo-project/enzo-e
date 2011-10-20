@@ -3,97 +3,89 @@ Import('parallel_run')
 Import('type')
 Import('serial_run')
 
-# O test_FieldFace.cpp
-# O test_Mpi.cpp
-# O test_ParallelAffinity.cpp
-# O test_ParallelGroup.cpp
-# O test_Layout.cpp
-# O test_tree.cpp
+bin_path = '#/bin/'+type
 
-# X test_Error.cpp
-# X test_FieldBlock.cpp
-# X test_FieldDescr.cpp
-# X test_FileHdf5.cpp
-# X test_FileIfrit.cpp
-# X test_Memory.cpp
-# X test_Mesh.cpp
-# X test_Monitor.cpp
-# X test_Parallel.cpp
-# X test_Parameters.cpp
-# X test_Parse.cpp
-# X test_Performance.cpp
-# X test_ppml.cpp
-# X test_TreeK.cpp
+env['COPY'] = ''
 
 # Define a test for running unit tests
 
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
-run_parse    = Builder(action = serial_run   +  "$SOURCE < $ARGS >  $TARGET 2>&1")
-run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1")
-run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1")
+run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1; $COPY")
+run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS 2>&1")
-run_tree     = Builder(action = serial_run   + " $SOURCE $ARGS > $OUT 2>&1")
-make_movie   = Builder(action = "convert ${ARGS} $TARGET; chmod a+r $TARGET; rm ${ARGS}")
+make_movie   = Builder(action = "png2swf -r 20 -o $TARGET ${ARGS} ")
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
 env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
-env.Append(BUILDERS = { 'RunParse'    : run_parse } )
 env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 env.Append(BUILDERS = { 'RunMethod'   : run_method } )
-env.Append(BUILDERS = { 'RunTree'     : run_tree } )
 
-type_path = type + '/'
+env_mv_png  = env.Clone(COPY = 'mv *.png test/' + type)
+env_mv_test = env.Clone(COPY = 'mv test*out test*in test/' + type)
 
 #----------------------------------------------------------------------
 # DISK COMPONENT          
 #----------------------------------------------------------------------
-env.RunSerial(type_path + 'test_FileHdf5.unit',    '#/bin/test_FileHdf5')
-env.RunSerial(type_path + 'test_FileIfrit.unit',   '#/bin/test_FileIfrit')
+Clean(env.RunSerial
+      ('test_FileHdf5.unit',  bin_path + '/test_FileHdf5'),
+      '#test_disk.h5')
+       
+Clean(env.RunSerial
+      ('test_FileIfrit.unit', bin_path + '/test_FileIfrit'),
+      '#/FileIfrit_test.bin')
 #----------------------------------------------------------------------
 # ENZO COMPONENT          
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # ERROR COMPONENT         
 #----------------------------------------------------------------------
-env.RunSerial(type_path + 'test_Error.unit',       '#/bin/test_Error')
+env.RunSerial('test_Error.unit',       bin_path + '/test_Error')
 #----------------------------------------------------------------------
 # FIELD COMPONENT         
 #----------------------------------------------------------------------
-env.RunSerial(type_path + 'test_FieldBlock.unit','#/bin/test_FieldBlock')
-env.RunSerial(type_path + 'test_FieldDescr.unit','#/bin/test_FieldDescr')
-env.RunSerial(type_path + 'test_FieldFace.unit', '#/bin/test_FieldFace')
+env.RunSerial('test_FieldBlock.unit',bin_path + '/test_FieldBlock')
+env.RunSerial('test_FieldDescr.unit',bin_path + '/test_FieldDescr')
+env.RunSerial('test_FieldFace.unit', bin_path + '/test_FieldFace')
+env.RunSerial('test_ItField.unit',   bin_path + '/test_ItField')
+#----------------------------------------------------------------------
+# IO COMPONENT        
+#----------------------------------------------------------------------
+env.RunSerial('test_ItReduce.unit',      bin_path + '/test_ItReduce')
+#----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # MEMORY COMPONENT        
 #----------------------------------------------------------------------
-env.RunSerial(type_path + 'test_Memory.unit',      '#/bin/test_Memory')
+env.RunSerial('test_Memory.unit',      bin_path + '/test_Memory')
 #----------------------------------------------------------------------
 # METHOD COMPONENT
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # MESH COMPONENT          
 #----------------------------------------------------------------------
-env.RunSerial(type_path + 'test_Mesh.unit',   '#/bin/test_Mesh')
-env.RunSerial(type_path + 'test_Patch.unit',  '#/bin/test_Patch')
-env.RunSerial(type_path + 'test_Block.unit',  '#/bin/test_Block')
+env.RunSerial('test_Hierarchy.unit', bin_path + '/test_Hierarchy')
+env.RunSerial('test_Patch.unit',     bin_path + '/test_Patch')
+env.RunSerial('test_Block.unit',     bin_path + '/test_Block')
 #----------------------------------------------------------------------
 # MONITOR COMPONENT       
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # PARALLEL COMPONENT      
 #----------------------------------------------------------------------
-env.RunSerial(type_path + 'test_Layout.unit',      '#/bin/test_Layout')
+env.RunSerial('test_Layout.unit',      bin_path + '/test_Layout')
 #----------------------------------------------------------------------
 # PARAMETERS COMPONENT    
 #----------------------------------------------------------------------
-env.RunSerial(type_path + 'test_Parameters.unit',  '#/bin/test_Parameters')
+Clean(env_mv_test.RunSerial
+      ('test_Parameters.unit',  bin_path + '/test_Parameters'),
+      ['#/test.in','#/test1.out','#/test2.out'])
 #----------------------------------------------------------------------
 # PARTICLE COMPONENT
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # PERFORMANCE COMPONENT   
 #----------------------------------------------------------------------
-env.RunSerial(type_path + 'test_Performance.unit', '#/bin/test_Performance')
-env.RunSerial(type_path + 'test_Papi.unit',        '#/bin/test_Papi')
+env.RunSerial('test_Performance.unit', bin_path + '/test_Performance')
+env.RunSerial('test_Papi.unit',        bin_path + '/test_Papi')
 #----------------------------------------------------------------------
 # PORTAL COMPONENT        
 #----------------------------------------------------------------------
@@ -112,156 +104,203 @@ env.RunSerial(type_path + 'test_Papi.unit',        '#/bin/test_Papi')
 #----------------------------------------------------------------------
 # MESH PROTOTYPE
 #----------------------------------------------------------------------
-Clean(env.RunSerial
-      (type_path + 'test_TreeK-D2-R2-L6.unit', 
-       '#/bin/test_TreeK',
+
+
+Clean(env_mv_png.RunSerial
+      ('test_TreeK-D2-R2-L6.unit', 
+       bin_path + '/test_TreeK',
        ARGS='2 2 6 input/Enzo-P-2048.png'),
-      Glob('../TreeK-D=2-R=2-L=6*png'))
-Clean(env.RunSerial
-      (type_path + 'test_TreeK-D2-R2-L7.unit', 
-       '#/bin/test_TreeK',
+      Glob('#/test/' + type + '/TreeK-D=2-R=2-L=6*png'))
+Clean(env_mv_png.RunSerial
+      ('test_TreeK-D2-R2-L7.unit', 
+       bin_path + '/test_TreeK',
        ARGS='2 2 7 input/Enzo-P-2048.png'),
-      Glob('../TreeK-D=2-R=2-L=7*png'))
-Clean(env.RunSerial
-      (type_path + 'test_TreeK-D2-R2-L8.unit',
-       '#/bin/test_TreeK',
+      Glob('#/test/' + type + '/TreeK-D=2-R=2-L=7*png'))
+Clean(env_mv_png.RunSerial
+      ('test_TreeK-D2-R2-L8.unit',
+       bin_path + '/test_TreeK',
        ARGS='2 2 8 input/Enzo-P-2048.png'),
-      Glob('../TreeK-D=2-R=2-L=8*png'))
-# Clean(env.RunSerial
-#       (type_path + 'test_TreeK-D2-R2-L9.unit',
-#        '#/bin/test_TreeK',
-#        ARGS='2 2 9 input/Enzo-P-2048.png'),
-#       Glob('../TreeK-D=2-R=2-L=9*png'))
-# Clean(env.RunSerial
-#       (type_path + 'test_TreeK-D2-R2-L10.unit',
-#        '#/bin/test_TreeK',
-#        ARGS='2 2 10 input/Enzo-P-2048.png'),
-#       Glob('../TreeK-D=2-R=2-L=10*png'))
+      Glob('#/test/' + type + '/TreeK-D=2-R=2-L=8*png'))
 
-Clean(env.RunSerial
-      (type_path + 'test_TreeK-D2-R4-L6.unit',
-       '#/bin/test_TreeK',
+Clean(env_mv_png.RunSerial
+      ('test_TreeK-D2-R4-L6.unit',
+       bin_path + '/test_TreeK',
        ARGS='2 4 6 input/Enzo-P-2048.png'),
-      Glob('../TreeK-D=2-R=4-L=6*png'))
-Clean(env.RunSerial
-      (type_path + 'test_TreeK-D2-R4-L8.unit',
-       '#/bin/test_TreeK',
+      Glob('#/test/' + type + '/TreeK-D=2-R=4-L=6*png'))
+Clean(env_mv_png.RunSerial
+      ('test_TreeK-D2-R4-L8.unit',
+       bin_path + '/test_TreeK',
        ARGS='2 4 8 input/Enzo-P-2048.png'),
-      Glob('../TreeK-D=2-R=4-L=8*png'))
-# Clean(env.RunSerial
-#       (type_path + 'test_TreeK-D2-R4-L10.unit',
-#        '#/bin/test_TreeK',
-#        ARGS='2 4 10 input/Enzo-P-2048.png'),
-#       Glob('../TreeK-D=2-R=4-L=10*png'))
+      Glob('#/test/' + type + '/TreeK-D=2-R=4-L=8*png'))
 
-Clean(env.RunSerial
-      (type_path + 'test_TreeK-D3-R2-L4.unit',
-       '#/bin/test_TreeK',
+Clean(env_mv_png.RunSerial
+      ('test_TreeK-D3-R2-L4.unit',
+       bin_path + '/test_TreeK',
        ARGS='3 2 4'),
-      Glob('../TreeK-D=3-R=2-L=4*png'))
-Clean(env.RunSerial
-      (type_path + 'test_TreeK-D3-R2-L5.unit',
-       '#/bin/test_TreeK', ARGS='3 2 5'),
-      Glob('../TreeK-D=3-R=2-L=5*png'))
-Clean(env.RunSerial
-      (type_path + 'test_TreeK-D3-R2-L6.unit',
-       '#/bin/test_TreeK', ARGS='3 2 6'),
-      Glob('../TreeK-D=3-R=2-L=6*png'))
-# Clean(env.RunSerial
-#       (type_path + 'test_TreeK-D3-R2-L7.unit',
-#        '#/bin/test_TreeK', ARGS='3 2 7'),
-#       Glob('../TreeK-D=3-R=2-L=7*png'))
-# Clean(env.RunSerial
-#       (type_path + 'test_TreeK-D3-R2-L8.unit',
-#        '#/bin/test_TreeK', ARGS='3 2 8'),
-#       Glob('../TreeK-D=3-R=2-L=8*png'))
+      Glob('#/test/' + type + '/TreeK-D=3-R=2-L=4*png'))
+Clean(env_mv_png.RunSerial
+      ('test_TreeK-D3-R2-L5.unit',
+       bin_path + '/test_TreeK', ARGS='3 2 5'),
+      Glob('#/test/' + type + '/TreeK-D=3-R=2-L=5*png'))
+Clean(env_mv_png.RunSerial
+      ('test_TreeK-D3-R2-L6.unit',
+       bin_path + '/test_TreeK', ARGS='3 2 6'),
+      Glob('#/test/' + type + '/TreeK-D=3-R=2-L=6*png'))
+
+Clean(env_mv_png.RunSerial
+      ('test_TreeK-D3-R4-L4.unit',
+       bin_path + '/test_TreeK', ARGS='3 4 4'),
+      Glob('#/test/' + type + '/TreeK-D=3-R=4-L=4*png'))
+Clean(env_mv_png.RunSerial
+      ('test_TreeK-D3-R4-L6.unit',
+       bin_path + '/test_TreeK', ARGS='3 4 6'),
+      Glob('#/test/' + type + '/TreeK-D=3-R=4-L=6*png'))
 
 Clean(env.RunSerial
-      (type_path + 'test_TreeK-D3-R4-L4.unit',
-       '#/bin/test_TreeK', ARGS='3 4 4'),
-      Glob('../TreeK-D=3-R=4-L=4*png'))
-Clean(env.RunSerial
-      (type_path + 'test_TreeK-D3-R4-L6.unit',
-       '#/bin/test_TreeK', ARGS='3 4 6'),
-      Glob('../TreeK-D=3-R=4-L=6*png'))
-# Clean(env.RunSerial	
-#       (type_path + 'test_TreeK-D3-R4-L8.unit',
-#        '#/bin/test_TreeK', ARGS='3 4 8'),
-#       Glob('../TreeK-D=3-R=4-L=8*png'))
-
-# Clean(env.RunSerial
-#       (type_path + 'test_ppml_implosion.unit',
-#        '#/bin/test_ppml', ARGS='ppml-implosion3  20 10 10'),
-#       Glob('../*-ppml-implosion3-*png'))
-# Clean(env.RunSerial
-#       (type_path + 'test_ppml_blast.unit',
-#        '#/bin/test_ppml', ARGS='ppml-blast       20 10 10'),
-#       Glob('../*-ppml-blast-*png'))
-# Clean(env.RunSerial
-#       (type_path + 'test_ppm_image.unit',
-#        '#/bin/test_ppm', ARGS='ppm-image       100 30 10'),
-#       Glob('../*-ppm-image-*png'))
-# Clean(env.RunSerial
-#       (type_path + 'test_ppm_implosion.unit',
-#        '#/bin/test_ppm', ARGS='ppm-implosion   64 10 10'),
-#       Glob('../*-ppm-implosion-*png'))
-# Clean(env.RunSerial
-#       (type_path + 'test_ppm_implosion3.unit',
-#        '#/bin/test_ppm', ARGS='ppm-implosion3   24 10 10'),
-#       Glob('../*-ppm-implosion3-*png'))
-
-Clean(env.RunSerial
-      (type_path + 'test_Monitor.unit',
-       '#/bin/test_Monitor'),
-      Glob('../monitor_image_*png'))
+      ('test_Monitor.unit',
+       bin_path + '/test_Monitor'),
+      Glob('#/test/' + type + '/out.png'))
 
 #----------------------------------------------------------------------
 # TEST INPUT PARAMETER PARSER
 #----------------------------------------------------------------------
 
-env.RunParse(type_path + 'test_parse_groups.unit',     '#/bin/test_Parse', ARGS='input/parse_groups.in')
-env.RunParse(type_path + 'test_parse_integer.unit',    '#/bin/test_Parse', ARGS='input/parse_integer.in')
-env.RunParse(type_path + 'test_parse_list.unit',       '#/bin/test_Parse', ARGS='input/parse_list.in')
-env.RunParse(type_path + 'test_parse_logical.unit',    '#/bin/test_Parse', ARGS='input/parse_logical.in')
-env.RunParse(type_path + 'test_parse_scalar.unit',     '#/bin/test_Parse', ARGS='input/parse_scalar.in')
-env.RunParse(type_path + 'test_parse_implosion.unit',  '#/bin/test_Parse', ARGS='input/parse_implosion.in')
-env.RunParse(type_path + 'test_parse_shock-pool.unit', '#/bin/test_Parse', ARGS='input/parse_shock-pool.in')
+env.RunSerial('test_parse_groups.unit',     bin_path + '/test_Parse', ARGS='input/parse_groups.in')
+env.RunSerial('test_parse_integer.unit',    bin_path + '/test_Parse', ARGS='input/parse_integer.in')
+env.RunSerial('test_parse_list.unit',       bin_path + '/test_Parse', ARGS='input/parse_list.in')
+env.RunSerial('test_parse_logical.unit',    bin_path + '/test_Parse', ARGS='input/parse_logical.in')
+env.RunSerial('test_parse_scalar.unit',     bin_path + '/test_Parse', ARGS='input/parse_scalar.in')
+env.RunSerial('test_parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/parse_implosion.in')
+env.RunSerial('test_parse_shock-pool.unit', bin_path + '/test_Parse', ARGS='input/parse_shock-pool.in')
+env.RunSerial('test_parse_include.unit',    bin_path + '/test_Parse', ARGS='input/parse_include.in')
 
 #----------------------------------------------------------------------
-# TEST FULL APPLICATIONS
+# TEST FULL APPLICATION
 #----------------------------------------------------------------------
 
-
-Clean(env.RunParallel (type_path + 'test_enzo-p_1.unit',
-		'#/bin/enzo-p', 
+Clean(env_mv_png.RunSerial ('test_enzo-p_1.unit',
+		bin_path + '/enzo-p', 
 		ARGS='input/test_enzo-p_1.in'),
-      [Glob('../enzo-p-??????.?.png'),type_path + 'test_enzo-p_1.unit'])
+      [Glob('#/test/' + type + '/enzo-p_1-??????-*.png'),  # field added in non-charm
+       'test_enzo-p_1.unit',
+       '#/input/test_enzo-p_1.in.out'])
 
-Clean(env.RunParallel (type_path + 'test_enzo-p_2.unit',
-		'#/bin/enzo-p', 
+Clean(env_mv_png.RunParallel ('test_enzo-p_2.unit',
+		bin_path + '/enzo-p', 
 		ARGS='input/test_enzo-p_2.in'),
-      [Glob('../enzo-p_2-??????.?.png'),type_path + 'test_enzo-p_2.unit'])
+      [Glob('#/test/' + type + '/enzo-p_2-??????-*.png'),  # field added in non-charm
+       Glob('#/test/' + type + '/enzo-p_2-??????.png'),    # field not added in charm
+       'test_enzo-p_2.unit',
+       '#/input/test_enzo-p_2.in.out'])
+
+env.MakeMovie ("enzo-p_1-d.swf", "test_enzo-p_1.unit", \
+                ARGS="test/" + type + "/enzo-p_1-d-??????.png");
+
+#----------------------------------------------------------------------
+# BOUNDARY CONDITIONS
+#----------------------------------------------------------------------
+
+# 2D
 
 
-if (type == "mpi"):
-   env.RunParallel	(type_path + 'test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='4')
+Clean(env_mv_png.RunParallel ('test_boundary-reflecting-2d.unit',
+                bin_path + '/enzo-p', 
+                ARGS='input/test_boundary-reflecting-2d.in'),
+      [Glob('#/test/' + type + '/boundary-reflecting-2d.png'),
+       'test_boundary-reflecting-2d.unit',
+       '#/input/test_boundary-reflecting-2d.in.out'])
+
+Clean(env_mv_png.RunParallel ('test_boundary-periodic-2d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/test_boundary-periodic-2d.in'),
+      [Glob('#/test/' + type + '/boundary-periodic-2d.png'),
+       'test_boundary-periodic-2d.unit',
+       '#/input/test_boundary-periodic-2d.in.out'])
+
+Clean(env_mv_png.RunParallel ('test_boundary-inflow-2d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/test_boundary-inflow-2d.in'),
+      [Glob('#/test/' + type + '/boundary-inflow-2d.png'),
+       'test_boundary-inflow-2d.unit',
+       '#/input/test_boundary-inflow-2d.in.out'])
+
+Clean(env_mv_png.RunParallel ('test_boundary-outflow-2d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/test_boundary-outflow-2d.in'),
+      [Glob('#/test/' + type + '/boundary-outflow-2d.png'),
+       'test_boundary-outflow-2d.unit',
+       '#/input/test_boundary-outflow-2d.in.out'])
+
+# NOTE: dependencies don't work with running tests: need to specify run output)
+
+env.MakeMovie ("boundary-reflecting-2d.swf", "test_boundary-reflecting-2d.unit", \
+                ARGS="test/" + type + "/boundary-reflecting-2d-????.png");
+env.MakeMovie ("boundary-periodic-2d.swf","test_boundary-periodic-2d.unit", \
+                ARGS="test/" + type + "/boundary-periodic-2d-????.png");
+env.MakeMovie ("boundary-inflow-2d.swf","test_boundary-inflow-2d.unit", \
+                ARGS="test/" + type + "/boundary-inflow-2d-????.png");
+env.MakeMovie ("boundary-outflow-2d.swf","test_boundary-outflow-2d.unit", \
+                ARGS="test/" + type + "/boundary-outflow-2d-????.png");
+# 3D
+
+
+Clean(env_mv_png.RunParallel ('test_boundary-reflecting-3d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/test_boundary-reflecting-3d.in'),
+      [Glob('#/test/' + type + '/boundary-reflecting-3d.png'),
+       'test_boundary-reflecting-3d.unit',
+       '#/input/test_boundary-reflecting-3d.in.out'])
+
+Clean(env_mv_png.RunParallel ('test_boundary-periodic-3d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/test_boundary-periodic-3d.in'),
+      [Glob('#/test/' + type + '/boundary-periodic-3d.png'),
+       'test_boundary-periodic-3d.unit',
+       '#/input/test_boundary-periodic-3d.in.out'])
+
+Clean(env_mv_png.RunParallel ('test_boundary-inflow-3d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/test_boundary-inflow-3d.in'),
+      [Glob('#/test/' + type + '/boundary-inflow-3d.png'),
+       'test_boundary-inflow-3d.unit',
+       '#/input/test_boundary-inflow-3d.in.out'])
+
+Clean(env_mv_png.RunParallel ('test_boundary-outflow-3d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/test_boundary-outflow-3d.in'),
+      [Glob('#/test/' + type + '/boundary-outflow-3d.png'),
+       'test_boundary-outflow-3d.unit',
+       '#/input/test_boundary-outflow-3d.in.out'])
+
+env.MakeMovie ("boundary-reflecting-3d.swf","test_boundary-reflecting-3d.unit",
+                ARGS="test/" + type + "/boundary-reflecting-3d-????.png");
+env.MakeMovie ("boundary-periodic-3d.swf","test_boundary-periodic-3d.unit", \
+                ARGS="test/" + type + "/boundary-periodic-3d-????.png");
+env.MakeMovie ("boundary-inflow-3d.swf","test_boundary-inflow-3d.unit", \
+                ARGS="test/" + type + "/boundary-inflow-3d-????.png");
+env.MakeMovie ("boundary-outflow-3d.swf","test_boundary-outflow-3d.unit", \
+                ARGS="test/" + type + "/boundary-outflow-3d-????.png");
+
+
+if (type == "serial"):
+   env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS='1')
 else:
-   env.RunParallel	(type_path + 'test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='1')
+   env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS='8')
 
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
 
-# env.RunParallel(type_path + 'test_affinity.unit',   '#/bin/test_Affinity')
+# env.RunParallel('test_affinity.unit',   bin_path + '/test_Affinity')
 
-	# env.RunParallel(type_path + 'test_mpi.unit',        '#/bin/test_Mpi')
-# env.RunParallel(type_path + 'test_jacobi.unit',        '#/bin/test_jacobi')
+	# env.RunParallel('test_mpi.unit',        bin_path + '/test_Mpi')
+# env.RunParallel('test_jacobi.unit',        bin_path + '/test_jacobi')
 
 # Prevent concurrent running of parallel jobs
 
 SideEffect('log.txt', 
-     [ type_path + 'test_GroupProcess.unit', 
-       type_path + 'test_enzo-p_1.unit',
-       type_path + 'test_enzo-p_2.unit'])
+     [ 'test_GroupProcess.unit', 
+       'test_enzo-p_1.unit',
+       'test_enzo-p_2.unit'])
 
 
 

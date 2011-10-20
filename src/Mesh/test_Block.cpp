@@ -1,4 +1,3 @@
-// $Id: test_Block.cpp 1696 2010-08-04 05:56:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_Block.cpp
@@ -7,25 +6,29 @@
 /// @todo     Create CHARM version of test_Block
 /// @brief    Test program for the Block class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "mesh.hpp"
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
 
   PARALLEL_INIT;
 
-  unit_init();
+  unit_init(0,1);
 
   unit_class("Block");
 
-  Block * block = new Block (0,0,0, 
-			     3,4,5,
-			     -1.0,-2.0,-3.0,
-			     1.0,2.0,3.0,1);
+  Factory factory;
+
+  Block * block = factory.create_block 
+    (0,0,0, 
+     1,1,1,
+     3,4,5,
+     -1.0,-2.0,-3.0,
+     2.0,  4.0, 6.0,
+     1);
 
   unit_func("Block");
   unit_assert (block != NULL);
@@ -48,11 +51,23 @@ PARALLEL_MAIN_BEGIN
   unit_assert(upper[1] ==  2.0);
   unit_assert(upper[2] ==  3.0);
 
+  //----------------------------------------------------------------------
+
+  unit_func("write");
+
+
+  // Block
+  //   index
+  //   size
+  //   lower
+  //   upper
+  //   cycle
+  //   time
+  //   dt
+
   unit_finalize();
 
   PARALLEL_EXIT;
 }
 
 PARALLEL_MAIN_END
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

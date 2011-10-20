@@ -1,0 +1,23 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     main_simulation.ci
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-08-03
+/// @brief    CHARM++ mainchare for Simulation programs
+
+mainmodule main_simulation {
+
+  extern module simulation;
+  extern module mesh;
+
+  readonly CProxy_Main proxy_main;
+
+  mainchare Main {
+
+     entry Main(CkArgMsg *m);
+
+     entry void p_exit (int count_blocks);
+
+  };
+
+};

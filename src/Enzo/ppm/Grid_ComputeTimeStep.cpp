@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_ENZO file for license and copyright information
 
 /***********************************************************************
@@ -49,7 +48,7 @@ enzo_float EnzoBlock::ComputeTimeStep()
  
   enzo_float a = 1, dadt;
   if (ComovingCoordinates)
-    CosmologyComputeExpansionFactor(Time, &a, &dadt);
+    CosmologyComputeExpansionFactor(Time(), &a, &dadt);
   enzo_float afloat = enzo_float(a);
 
   /* 1) Compute Courant condition for baryons. */
@@ -66,12 +65,12 @@ enzo_float EnzoBlock::ComputeTimeStep()
     }
  
     /* Compute the pressure. */
- 
+
     enzo_float *pressure_field = new enzo_float[size];
     if (DualEnergyFormalism)
-      result = ComputePressureDualEnergyFormalism(Time, pressure_field);
+      result = ComputePressureDualEnergyFormalism(Time(), pressure_field);
     else
-      result = ComputePressure(Time, pressure_field);
+      result = ComputePressure(Time(), pressure_field);
  
     if (result == ENZO_FAIL) {
       fprintf(stderr, "Error in grid->ComputePressure.\n");
@@ -131,7 +130,7 @@ enzo_float EnzoBlock::ComputeTimeStep()
   /* 3) Find dt from expansion. */
  
   if (ComovingCoordinates)
-    if (CosmologyComputeExpansionTimestep(Time, &dtExpansion) == ENZO_FAIL) {
+    if (CosmologyComputeExpansionTimestep(Time(), &dtExpansion) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
       exit(ENZO_FAIL);
     }
@@ -153,6 +152,7 @@ enzo_float EnzoBlock::ComputeTimeStep()
   /* 5) calculate minimum timestep */
  
   double dt = dtBaryons;
+  TRACE1("dt = %f",dt);
   //  dt = MIN(dtBaryons, dtParticles);
   //  dt = MIN(dt, dtViscous);
 //   dt = MIN(dt, dtAcceleration);

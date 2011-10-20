@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_Layout.cpp
@@ -6,11 +5,10 @@
 /// @date     2010-04-19
 /// @brief    Unit tests for the Layout class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "parallel.hpp"
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
@@ -191,6 +189,16 @@ PARALLEL_MAIN_BEGIN
   unit_assert(layout->process (layout->block_index(0,0,0))       == 0);
   unit_assert(layout->process (layout->block_index(5-1,3-1,2-1)) == 30-1);
 
+  unit_assert(layout->process3 (0,0,0) == 0);
+  unit_assert(layout->process3 (5-1,3-1,2-1) == 30-1);
+
+  unit_assert(layout->process3 (1,0,0)-
+	      layout->process3 (0,0,0) == 1);
+  unit_assert(layout->process3 (0,1,0)-
+	      layout->process3 (0,0,0) == 5);
+  unit_assert(layout->process3 (0,0,1)-
+	      layout->process3 (0,0,0) == 5*3);
+
   unit_assert(layout->process (-1) == PROCESS_NULL);
   unit_assert(layout->process (nb) == PROCESS_NULL);
 
@@ -322,7 +330,8 @@ PARALLEL_MAIN_BEGIN
   unit_assert(layout->is_local(7, -1,0,0) == false);
   unit_assert(layout->is_local(7, ibx,iby,ibz) == false);
 
-  unit_func("layout","global_index");
+  unit_class("Layout");
+  unit_func("global_index");
   for (int i=0; i<layout->local_count(0); i++) {
     unit_assert_quiet(layout->global_index(7, i) == i+7);
   }
@@ -337,5 +346,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

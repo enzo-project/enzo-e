@@ -1,4 +1,3 @@
-// $Id: parallel_GroupProcessSerial.cpp 2035 2011-02-28 23:47:31Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     parallel_GroupProcessSerial.cpp
@@ -36,6 +35,14 @@ void GroupProcessSerial::recv_end(void * handle) throw()
     WARNING("recv_end",
 	    "receive with no corresponding send");
   }
+}
+
+//----------------------------------------------------------------------
+
+void GroupProcessSerial::send_recv (int rank, void * buffer, int size, int tag)
+  throw()
+{
+  return;
 }
 
 //----------------------------------------------------------------------

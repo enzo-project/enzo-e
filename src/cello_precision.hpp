@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef CELLO_PRECISION_HPP
@@ -21,28 +20,31 @@ enum precision_enum {
 };
 
 #ifdef CONFIG_PRECISION_SINGLE
+
 #   define default_precision precision_single
-typedef float Scalar;
-#   define SCALAR_SCANF  "%f"
-#   define SCALAR_PRINTF "%e "
-#   define SCALAR_MPI     MPI_FLOAT
+#   define scalar_type_enzo_float scalar_type_float
+
 #   define SCALAR_DEFINED
+
 #endif
 
 #ifdef CONFIG_PRECISION_DOUBLE
+
 #   define default_precision precision_double
-typedef double Scalar;
-#   define SCALAR_SCANF  "%lf"
-#   define SCALAR_PRINTF "%le "
-#   define SCALAR_MPI     MPI_DOUBLE
+#   define scalar_type_enzo_float scalar_type_double
+
 #   ifdef SCALAR_DEFINED
 #      error Both CONFIG_PRECISION_SINGLE and CONFIG_PRECISION_DOUBLE defined
 #   endif
+
 #   define SCALAR_DEFINED
+
 #endif
 
 #ifndef SCALAR_DEFINED
+
 #   error Neither CONFIG_PRECISION_SINGLE nor CONFIG_PRECISION_DOUBLE defined
+
 #endif
 
 namespace cello {

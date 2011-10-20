@@ -1,8 +1,4 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef MEMORY_MEMORY_HPP
-#define MEMORY_MEMORY_HPP
 
 /// @file     memory_Memory.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
@@ -11,6 +7,9 @@
 /// @todo     Add Memory Parameters
 /// @brief    [\ref Memory] Interface for the Memory class.  Uses the
 /// Singleton design pattern.
+
+#ifndef MEMORY_MEMORY_HPP
+#define MEMORY_MEMORY_HPP
 
 /// @def      MEMORY_MAX_NUM_GROUPS
 /// @brief    Maximum number of groups for memory allocation tracking
@@ -49,21 +48,19 @@ private: // interface
   Memory & operator = (const Memory & memory);
 
   /// Delete the Memory object
-  ~Memory() throw () { };
+  ~Memory() throw ();
 
 public: // interface
 
   /// Allocate memory
-  void * allocate ( size_t size ) 
-    throw (ExceptionMemoryBadAllocate());
+  void * allocate ( size_t size ) throw ();
 
   /// De-allocate memory
-  void deallocate ( void * pointer ) 
-    throw (ExceptionMemoryBadDeallocate());
+  void deallocate ( void * pointer ) throw ();
 
   /// Assign a name to a group
   void new_group ( memory_group_handle group_id, 
-			  const char *        group_name ) throw ();
+		   const char *        group_name ) throw ();
 
   /// Begin allocating memory associated with the specified group
   void begin_group ( memory_group_handle group_id ) throw ();
@@ -81,7 +78,7 @@ public: // interface
   float efficiency ( memory_group_handle group_handle = 0 ) throw ();
 
   /// Maximum number of bytes allocated
-  long long highest ( memory_group_handle group_handle = 0 ) throw ();
+  long long bytes_high ( memory_group_handle group_handle = 0 ) throw ();
 
   /// Specify the maximum number of bytes to use
   void set_limit ( long long           size, 
@@ -106,6 +103,9 @@ public: // interface
   /// Reset memory counters for the current group
   void reset () throw ();
 
+  /// Reset bytes_high to current
+  void reset_high () throw ();
+
   /// Set whether memory tracking is active or not
   void set_active (bool is_active) throw ()
 #ifdef CONFIG_USE_MEMORY
@@ -122,16 +122,8 @@ private: // functions
   /// Finalize the memory component
   void finalize_() throw ();
 
-  ///  Check the group handle, and throw an exception if bad
-  void check_handle_(memory_group_handle group_handle) 
-    throw (ExceptionMemoryBadGroupHandle())
-  {  
-#ifdef CONFIG_USE_MEMORY
-    if ( 0 > group_handle || group_handle > MEMORY_MAX_NUM_GROUPS) {
-      throw (ExceptionMemoryBadGroupHandle());
-    }
-#endif
-  }
+  ///  Check the group handle
+  void check_handle_(memory_group_handle group_handle) throw ();
   
 private: // attributes
 
@@ -141,9 +133,12 @@ private: // attributes
 #endif
 
 #ifdef CONFIG_USE_MEMORY
-
+  
   /// Whether keeping track of memory statistics is active or not
   bool is_active_;
+
+  /// The highest active group index
+  int max_group_id_;
 
   /// The current group index, or 0 if none
   std::stack<memory_group_handle> curr_group_;

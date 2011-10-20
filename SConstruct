@@ -2,24 +2,45 @@ import os
 import sys
 
 #----------------------------------------------------------------------
-# CONFIGURATION
+# AUTOR CONFIGURATION
 #----------------------------------------------------------------------
 
-trace           = 0
+use_papi = 0
+
+env = Environment()
+
+if not env.GetOption('clean'):
+
+     conf = Configure(env)
+
+     if not conf.CheckCHeader('papi.h'):
+          print 'PAPI not installed'
+          use_papi = 0
+     else:
+          print 'PAPI installed'
+          use_papi = 1
+
+     env = conf.Finish()
+
+#----------------------------------------------------------------------
+# USER CONFIGURATION
+#----------------------------------------------------------------------
+
+trace           = 1
 debug           = 0
 debug_verbose   = 0
+memory          = 1
 
-balance         = 1
-trace           = 0
+atsync          = 0 # CHARM++: only load balance when AtSync() called
 
 use_gprof       = 0
-use_papi        = 0
 use_valgrind    = 0
 use_projections = 1
+# use_papi        = 0 # override auto configuration
 
 # temporary code variations for testing
-original_refresh = 1
-skip_reduce      = 0  # constant dt, which is currently hard-coded!
+
+original_refresh = 1 # 0 crashes
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS
@@ -74,13 +95,12 @@ define_hdf5  =  ['H5_USE_16_API'];
 define_png   =  ['NO_FREETYPE'];
 define_papi  =  ['CONFIG_USE_PAPI'];
 define_trace =  ['CELLO_TRACE'];
-define_balance =  ['CONFIG_LOAD_BALANCE'];
+define_atsync =  ['CONFIG_CHARM_ATSYNC'];
 define_debug =  ['CELLO_DEBUG'];
 define_debug_verbose =  ['CELLO_DEBUG_VERBOSE'];
+define_memory =  ['CONFIG_USE_MEMORY'];
 define_projections =  ['CONFIG_USE_PROJECTIONS']
 define_original_refresh = ['ORIGINAL_REFRESH']
-
-define_skip_reduce = ['TEMP_SKIP_REDUCE']
 
 defines     = []
 defines_xlc = ""
@@ -151,8 +171,6 @@ else:
      sys.exit(1)
 
 print defines
-print defines_xlc
-print defines_xlf
 
 #-----------------------------------------------------------------------
 if (original_refresh == 1):
@@ -160,20 +178,14 @@ if (original_refresh == 1):
      defines_xlc = defines_xlc + ' -D' + define_original_refresh[0]
      defines_xlf = defines_xlf + ' -WF,-D' + define_original_refresh[0]
 
-if (skip_reduce == 1):
-     defines = defines + define_skip_reduce
-     defines_xlc = defines_xlc + ' -D' + define_skip_reduce[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_skip_reduce[0]
-
 #-----------------------------------------------------------------------
 # Display configuration settings
 #-----------------------------------------------------------------------
 
-print "CONFIGURATION"
 print 
-print "    CELLO_ARCH: scons arch=",arch
-print "    CELLO_TYPE: scons type=",type
-print "    CELLO_PREC: scons prec=",prec
+print "    CELLO_ARCH scons arch=",arch
+print "    CELLO_TYPE scons type=",type
+print "    CELLO_PREC scons prec=",prec
 print 
 
 #==================================================
@@ -201,10 +213,15 @@ if (debug_verbose != 0):
      defines_xlc = defines_xlc + ' -D' + define_debug_verbose[0]
      defines_xlf = defines_xlf + ' -WF,-D' + define_debug_verbose[0]
 
-if (balance != 0):
-     defines = defines + define_balance
-     defines_xlc = defines_xlc + ' -D' + define_balance[0]
-     defines_xlf = defines_xlf + ' -WF,-D' + define_balance[0]
+if (memory != 0):
+     defines = defines + define_memory
+     defines_xlc = defines_xlc + ' -D' + define_memory[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_memory[0]
+
+if (atsync != 0):
+     defines = defines + define_atsync
+     defines_xlc = defines_xlc + ' -D' + define_atsync[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_atsync[0]
 
 #--------------------------------------------------
 
@@ -293,7 +310,7 @@ elif (arch == "ncsa-bd"):
      cxx_path = '/opt/ibmcmp/vacpp/11.1'
 
      fortran_serial = fc_path + '/bin/xlf_r'
-     fortran_mpi    = 'mpfort'
+     fortran_mpi    = fc_path + '/bin/xlf_r'
      fortran_charm  = fc_path + '/bin/xlf_r'
 
      cxx_serial = cxx_path + '/bin/xlC_r'
@@ -382,8 +399,9 @@ elif (arch == "sdsc-triton"):
      hdf5_inc = (hdf5_path + '/include')
      hdf5_lib = (hdf5_path + '/lib')
 
-     flags_debug = ''
-     flags_opt   = '-fast'
+     flags_debug = '-g'
+#     flags_opt   = '-fast'
+     flags_opt   = ''
      flags_prec  = ''
      flags_warn  = ''
 
@@ -425,13 +443,13 @@ elif (type == "mpi"):
      cc           = cc_mpi
      fortran      = fortran_mpi
      serial_run   = ""
-     parallel_run = "mpirun -np 4"
+     parallel_run = "mpirun -np 8"
 elif (type == "charm"):
      cxx          = cxx_charm
      cc           = cc_charm
      fortran      = fortran_charm
      serial_run   = ""
-     parallel_run = charm_path + "/bin/charmrun +p4 "
+     parallel_run = charm_path + "/bin/charmrun +p8 "
 
 #======================================================================
 # CELLO PATHS
@@ -439,7 +457,7 @@ elif (type == "charm"):
 
 cpppath     = ['#/include'];
 fortranpath = ['#/include'];
-libpath     = ['#/lib'];
+libpath     = ['#/lib/'+type];
 
 #----------------------------------------------------------------------
 # PAPI PATHS
@@ -467,9 +485,9 @@ libpath = libpath + [fortranpath_lib]
 #======================================================================
 
 if (use_valgrind):
-     valgrind = "valgrind --leakcheck=full"
+     valgrind = "valgrind --leak-check=full"
      parallel_run = parallel_run + " " + valgrind
-     serial_run   = vagrind + " " + serial_run
+     serial_run   = valgrind + " " + serial_run
 
 #======================================================================
 # ENVIRONMENT
@@ -532,7 +550,7 @@ env = Environment (
 if (type == "charm"):
      # include files moved to include here since they are generated in
      # top-level directory
-     charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
+     charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h `dirname $SOURCE`")
      env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 
 Export('env')
@@ -542,8 +560,15 @@ Export('serial_run')
 
 Export('use_papi')
 
-SConscript('src/SConscript')
-SConscript('test/SConscript')
+SConscript('src/SConscript',variant_dir='build/' + type)
+SConscript('test/SConscript',variant_dir='test/' + type)
+Clean('.','test/' + type)
+Clean('.','bin/' + type)
+if (type == 'charm' and use_projections == 1):
+   Clean('.',Glob('bin/charm/*.projrc'))
+   Clean('.',Glob('bin/charm/*.log'))
+   Clean('.',Glob('bin/charm/*.sts'))
+   Clean('.','charmrun')
 
 # Build tarball
 

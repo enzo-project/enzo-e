@@ -1,22 +1,18 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef PARAMETERS_PARAMETERS_HPP
-#define PARAMETERS_PARAMETERS_HPP
 
 /// @file     parameters_Parameters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:44:21 PDT 2009
-/// @todo     Add output support for individual parameters, e.g. for Monitor output
 /// @todo     set_list(), etc functions for lists and expressions
-/// @todo     set_value() using string values for all types
 /// @todo     assert_required() to make given parameter required (don't exit since more than one required parameter may be missing)
 /// @todo     Add "check()" function to check individual parameters, or all
-/// @todo     Move Group and subgroup to parameter lists at end with "" default
 /// @todo     Convert current_group_ to std::stack<std::string>
 /// @bug      "x - 0.5" broken since intepreted as "x (-0.5)"; workaround "x - (0.5)"
 /// @bug      Evaluating logical expressions with parentheses seg-faults (fixed?)
 /// @brief    [\ref Parameters] Declaration for the Parameters class
+
+#ifndef PARAMETERS_PARAMETERS_HPP
+#define PARAMETERS_PARAMETERS_HPP
 
 /// @def      MAX_PARAMETER_FILE_WIDTH
 /// @brief    Maximum allowed width of a line in a parameter file
@@ -48,51 +44,44 @@ public: // interface
   /// Delete a Parameters object (singleton design pattern)
   ~Parameters();
 
-  /// Get single instance of the Parameters object
-//   static Parameters * instance() throw ()
-//   { return & instance_; }
-
   /// Read in parameters from a file
   void read (const char * file_name);
 
   /// Write parameters to a file
   void write (const char * file_name);
 
-  // /// Return the parameter value of specified type
-  // void value (std::string, parameter_enum type, 
-  // 	      void * value, 
-  // 	      void * deflt = 0);
-
   /// Return the integer-valued parameter
-  int value_integer (std::string , int deflt = 0) 
-    throw(ExceptionParametersBadType);
+  int value_integer (std::string , int deflt = 0) throw();
 
-  void set_integer ( std::string parameter, int value ) 
-    throw(ExceptionParametersBadType);
+  /// Assign a value to the integer-valued parameter
+  void set_integer ( std::string parameter, int value ) throw();
 
-  /// Return the scalar-valued parameter
-  double value_scalar (std::string, double deflt = 0.0) 
-    throw(ExceptionParametersBadType);
+  /// Return the floating-point valued parameter
+  double value_float (std::string, double deflt = 0.0) 
+    throw();
 
-  void set_scalar ( std::string parameter, double value ) 
-    throw(ExceptionParametersBadType);
+  /// Assign a value to the floating-point valued parameter
+  void set_float ( std::string parameter, double value ) 
+    throw();
 
   /// Return the logical-valued parameter
   bool value_logical (std::string , bool deflt = false) 
-    throw(ExceptionParametersBadType);
+    throw();
 
+  /// Assign a value to the logical-valued parameter
   void set_logical ( std::string parameter, bool value ) 
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Return the string-valued parameter
   const char * value_string ( std::string , const char * deflt = "") 
-    throw(ExceptionParametersBadType);
+    throw();
 
+  /// Assign a value to the string-valued parameter
   void set_string ( std::string parameter, const char * value ) 
-    throw(ExceptionParametersBadType);
+    throw();
 
-  /// Evaluate the scalar-valued parameter expression
-  void evaluate_scalar 
+  /// Evaluate the floating-point valued parameter expression
+  void evaluate_float 
   (
    std::string parameter,
    int         n, 
@@ -102,7 +91,7 @@ public: // interface
    double    * y, 
    double    * z, 
    double    * t)
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Evaluate the logical-valued parameter expression
   void evaluate_logical 
@@ -115,29 +104,29 @@ public: // interface
    double    * y, 
    double    * z, 
    double    * t)
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Return the length of the list parameter
   int list_length (std::string parameter);
 
   /// Access an integer list element
   int list_value_integer (int , std::string , int deflt = 0)    
-    throw(ExceptionParametersBadType);
+    throw();
 
-  /// Access a scalar list element
-  double list_value_scalar (int , std::string , double deflt = 0.0)    
-    throw(ExceptionParametersBadType);
+  /// Access a floating point list element
+  double list_value_float (int , std::string , double deflt = 0.0)    
+    throw();
 
   /// Access a logical list element
   bool list_value_logical (int ,std::string , bool deflt = false)    
-    throw(ExceptionParametersBadType);
+    throw();
 
   /// Access a string list element
   const char * list_value_string (int ,std::string , const char * deflt = "")    
-    throw(ExceptionParametersBadType);
+    throw();
 
-  /// Evaluate the scalar-valued list element expression
-  void list_evaluate_scalar 
+  /// Evaluate the floating-point valued list element expression
+  void list_evaluate_float 
   (
    int ,
    std::string parameter,
@@ -149,9 +138,9 @@ public: // interface
    double    * z, 
    double    * t
    )    
-    throw(ExceptionParametersBadType);
+    throw();
 
-  /// Evaluate the scalar-valued list element expression
+  /// Evaluate the logical-valued list element expression
   void list_evaluate_logical
   (
    int ,
@@ -164,7 +153,7 @@ public: // interface
    double    * z, 
    double    * t
    )    
-    throw(ExceptionParametersBadType);
+    throw();
 
   //--------------------------------------------------
   // PARAMETER GROUPS
@@ -193,8 +182,11 @@ public: // interface
   void group_pop(std::string group = "") throw();
 
   /// Set the ith group to specified group, clearing all higher groups
-  void set_group(int, std::string) throw();
+  void group_set(int, std::string) throw();
 
+  /// Clear all groups
+  void group_clear() throw();
+  
   //--------------------------------------------------
 
   /// Return the type of the given parameter
@@ -236,9 +228,12 @@ private: // functions
   /// Return the Param pointer for the specified list parameter element
   Param * list_element_ (std::string parameter, int index) throw();
 
+  /// Display through monitor that a parameter was accessed
   void monitor_access_ (std::string parameter,
-		      std::string deflt_string,
-		      int index=-1) throw();
+			std::string deflt_string,
+			int index=-1) throw();
+
+  /// Display through monitor that a parameter was assigned a value
   void monitor_write_ (std::string parameter) throw();
 
   /// Create a new parameter with the given grouping
@@ -246,10 +241,9 @@ private: // functions
 		    std::string parameter,
 		    Param * param ) throw();
 
-private: // attributes
+  size_t extract_groups_( const std::string parameter, std::string * group);
 
-  /// Single instance of the Parameters object (singleton design pattern)
-//   static Parameters instance_;
+private: // attributes
 
   /// Stack of current grouping
   char * current_group_[MAX_GROUP_DEPTH];
@@ -257,7 +251,10 @@ private: // attributes
   /// Top of the current_group_ stack
   int current_group_depth_;
 
+  /// Map parameter name to Param object
   std::map<std::string, Param *>  parameter_map_;
+
+  /// Parameters represented as a tree
   ParamNode                     * parameter_tree_;
 
   /// Monitor object for parameters
@@ -268,7 +265,7 @@ private: // attributes
 
 extern "C" { 
   /// C function for reading parameters from a file
-  struct param_struct * cello_parameters_read(FILE *);
+  struct param_struct * cello_parameters_read(const char *, FILE *);
   /// C function for printing parameters to stdout
   void cello_parameters_print();
 }

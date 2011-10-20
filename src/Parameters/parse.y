@@ -38,7 +38,7 @@ void yylex_destroy();
 const char * node_name[] = {
   "node_unknown",
   "node_operation",
-  "node_scalar",
+  "node_float",
   "node_integer",
   "node_variable",
   "node_function"
@@ -65,12 +65,12 @@ const char * op_name[] = {
     "sentinel",
     "group",
     "integer",
-    "scalar",
+    "float",
     "string",
     "identifier",
     "logical",
     "list",
-    "scalar_expr",
+    "float_expr",
     "logical_expr",
     "function" };
 
@@ -93,12 +93,12 @@ const char * op_name[] = {
     return node;
   }
 
-  struct node_expr * new_node_scalar (double value)
+  struct node_expr * new_node_float (double value)
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type          = enum_node_scalar;
-    node->scalar_value  = value;
+    node->type          = enum_node_float;
+    node->float_value  = value;
     node->left          = NULL;
     node->right         = NULL;
     node->function_name = NULL;
@@ -163,9 +163,11 @@ const char * op_name[] = {
     }
   };
 
+
   void copy_groups (char * group_dest[], char * group_src[]) {
     int i;
     for (i=0; i<MAX_GROUP_DEPTH; i++) {
+      /* MEMORY LEAK */
       group_dest[i] = (group_src[i]) ? strdup(group_src[i]) : 0;
     }
   };
@@ -261,6 +263,9 @@ const char * op_name[] = {
 
      p->parameter = (current_parameter) ? strdup(current_parameter) : 0;
 
+     free (current_parameter);
+     current_parameter = 0;
+
      current_type = enum_parameter_unknown;
 
      insert_param(param_curr,p);
@@ -280,13 +285,13 @@ const char * op_name[] = {
   }
 
 
-  /* New scalar parameter assignment */
+  /* New floating-point parameter assignment */
 
-  void new_param_scalar (double value)
+  void new_param_float (double value)
   {
     struct param_struct * p = new_param();
-    p->type         = enum_parameter_scalar;
-    p->scalar_value = value;
+    p->type         = enum_parameter_float;
+    p->float_value = value;
   }
 
   /* New logical parameter assignment */
@@ -359,8 +364,8 @@ const char * op_name[] = {
      case enum_parameter_integer:
        new_param_integer(yylval.integer_type);
        break;
-     case enum_parameter_scalar:
-       new_param_scalar(yylval.scalar_type);
+     case enum_parameter_float:
+       new_param_float(yylval.float_type);
        break;
      case enum_parameter_string: 
        new_param_string(yylval.string_type);
@@ -370,8 +375,8 @@ const char * op_name[] = {
        break;
      case enum_parameter_list:
        break;
-     case enum_parameter_scalar_expr:
-       new_param_expr(enum_parameter_scalar_expr,yylval.node_type);
+     case enum_parameter_float_expr:
+       new_param_expr(enum_parameter_float_expr,yylval.node_type);
        break;
      case enum_parameter_logical_expr:
        new_param_expr(enum_parameter_logical_expr,yylval.node_type);
@@ -379,35 +384,17 @@ const char * op_name[] = {
     default:
        printf ("%s:%d Parse Error: unknown type %d\n",
 	       __FILE__,__LINE__,current_type);
+       exit(1);
        break;
      }
   }
-
-  char * strcat3 (const char * s1,const char * s2,const char * s3)
-  {
-    char * s = malloc (strlen(s1) + strlen(s2) + strlen(s3) + 1);
-
-    strcpy(s,s1);
-    strcpy(s+strlen(s1),s2);
-    strcpy(s+strlen(s1)+strlen(s2),s3);
-    return s;
-  }
-
-  char * ftoa (double f)
-    { 
-      char * a = malloc(25); 
-
-      sprintf (a,"%24.16e",f);
-      return a;
-    }
-
 %}
 
 
 %union { 
   int logical_type;  
   int integer_type; 
-  double scalar_type;  
+  double float_type;  
   char * string_type; 
   char * group_type;
   struct node_expr * node_type;
@@ -417,12 +404,12 @@ const char * op_name[] = {
 %token <string_type>  STRING
 %token <string_type>  IDENTIFIER
 %token <string_type> VARIABLE
-%token <scalar_type>  SCALAR
+%token <float_type>  FLOAT
 %token <integer_type> INTEGER
 %token <logical_type> LOGICAL
 
 %type <integer_type> cie
-%type <scalar_type>  cse
+%type <float_type>  cse
 %type <logical_type> cle
 
 %type <node_type>  vse
@@ -483,6 +470,7 @@ const char * op_name[] = {
 
 %%
 
+
 file : /* nothing */
  | file group { }
  ;
@@ -491,8 +479,8 @@ group:
 group_name parameter_group  {  }
 
 parameter_group :
-'{' parameter_list '}'          { current_group[--current_group_level] = 0; }
-| '{' parameter_list ';' '}'    { current_group[--current_group_level] = 0; }
+   '{' parameter_list '}'        { current_group[--current_group_level] = 0; }
+ | '{' parameter_list ';' '}'    { current_group[--current_group_level] = 0; }
 
 parameter_list : 
                       parameter_assignment  {  }
@@ -514,9 +502,9 @@ parameter_assignment :
 parameter_value : 
  STRING { current_type = enum_parameter_string;       yylval.string_type = $1; }
  | cie  { current_type = enum_parameter_integer;      yylval.integer_type = $1;}
- | cse  { current_type = enum_parameter_scalar;       yylval.scalar_type = $1;}
+ | cse  { current_type = enum_parameter_float;       yylval.float_type = $1;}
  | cle  { current_type = enum_parameter_logical;      yylval.logical_type = $1; }
- | vse  { current_type = enum_parameter_scalar_expr;  yylval.node_type = $1; }
+ | vse  { current_type = enum_parameter_float_expr;  yylval.node_type = $1; }
  | vle  { current_type = enum_parameter_logical_expr; yylval.node_type = $1; }
  | list { current_type = enum_parameter_list; }
  ;
@@ -594,7 +582,7 @@ cse:
 | Y0 '(' cse ')' { $$ = y0($3); }
 | Y1 '(' cse ')' { $$ = y1($3); }
 | RINT '(' cse ')' { $$ = rint($3); }
-| SCALAR { $$ = $1;}
+| FLOAT { $$ = $1;}
  ;
 
 cie: 
@@ -608,17 +596,17 @@ cie:
 
 vse: 
 '(' vse ')'    { $$ = $2; }
- | vse '+' cse { $$ = new_node_operation ($1, enum_op_add,new_node_scalar($3)); }
- | cse '+' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_add,$3); }
+ | vse '+' cse { $$ = new_node_operation ($1, enum_op_add,new_node_float($3)); }
+ | cse '+' vse { $$ = new_node_operation (new_node_float($1), enum_op_add,$3); }
  | vse '+' vse { $$ = new_node_operation ($1, enum_op_add,$3); }
- | vse '-' cse { $$ = new_node_operation ($1, enum_op_sub,new_node_scalar($3)); }
- | cse '-' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_sub,$3); }
+ | vse '-' cse { $$ = new_node_operation ($1, enum_op_sub,new_node_float($3)); }
+ | cse '-' vse { $$ = new_node_operation (new_node_float($1), enum_op_sub,$3); }
  | vse '-' vse { $$ = new_node_operation ($1, enum_op_sub,$3); }
- | vse '*' cse { $$ = new_node_operation ($1, enum_op_mul,new_node_scalar($3)); }
- | cse '*' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_mul,$3); }
+ | vse '*' cse { $$ = new_node_operation ($1, enum_op_mul,new_node_float($3)); }
+ | cse '*' vse { $$ = new_node_operation (new_node_float($1), enum_op_mul,$3); }
  | vse '*' vse { $$ = new_node_operation ($1, enum_op_mul,$3); }
- | vse '/' cse { $$ = new_node_operation ($1, enum_op_div,new_node_scalar($3)); }
- | cse '/' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_div,$3); }
+ | vse '/' cse { $$ = new_node_operation ($1, enum_op_div,new_node_float($3)); }
+ | cse '/' vse { $$ = new_node_operation (new_node_float($1), enum_op_div,$3); }
  | vse '/' vse { $$ = new_node_operation ($1, enum_op_div,$3); }
  | ACOS   '(' vse ')' { $$ = new_node_function ( acos, "acos", $3); }
  | ACOSH  '(' vse ')' { $$ = new_node_function ( acosh, "acosh", $3); }
@@ -657,24 +645,24 @@ vse:
 
 
 vle: 
- '(' vle ')' { }
- | vse LE cse  { $$ = new_node_operation ($1, enum_op_le,new_node_scalar($3)); }
- | cse LE vse  { $$ = new_node_operation (new_node_scalar($1), enum_op_le,$3); }
+ '(' vle ')' { $$ = $2; }
+ | vse LE cse  { $$ = new_node_operation ($1, enum_op_le,new_node_float($3)); }
+ | cse LE vse  { $$ = new_node_operation (new_node_float($1), enum_op_le,$3); }
  | vse LE vse  { $$ = new_node_operation ($1, enum_op_le,$3); }
- | vse GE cse  { $$ = new_node_operation ($1, enum_op_ge,new_node_scalar($3)); }
- | cse GE vse  { $$ = new_node_operation (new_node_scalar($1), enum_op_ge,$3); }
+ | vse GE cse  { $$ = new_node_operation ($1, enum_op_ge,new_node_float($3)); }
+ | cse GE vse  { $$ = new_node_operation (new_node_float($1), enum_op_ge,$3); }
  | vse GE vse  { $$ = new_node_operation ($1, enum_op_ge,$3); }
- | vse '<' cse { $$ = new_node_operation ($1, enum_op_lt,new_node_scalar($3)); }
- | cse '<' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_lt,$3); }
+ | vse '<' cse { $$ = new_node_operation ($1, enum_op_lt,new_node_float($3)); }
+ | cse '<' vse { $$ = new_node_operation (new_node_float($1), enum_op_lt,$3); }
  | vse '<' vse { $$ = new_node_operation ($1, enum_op_lt,$3); }
- | vse '>' cse { $$ = new_node_operation ($1, enum_op_gt,new_node_scalar($3)); }
- | cse '>' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_gt,$3); }
+ | vse '>' cse { $$ = new_node_operation ($1, enum_op_gt,new_node_float($3)); }
+ | cse '>' vse { $$ = new_node_operation (new_node_float($1), enum_op_gt,$3); }
  | vse '>' vse { $$ = new_node_operation ($1, enum_op_gt,$3); }
- | vse EQ cse  { $$ = new_node_operation ($1, enum_op_eq,new_node_scalar($3)); }
- | cse EQ vse  { $$ = new_node_operation (new_node_scalar($1), enum_op_eq,$3); }
+ | vse EQ cse  { $$ = new_node_operation ($1, enum_op_eq,new_node_float($3)); }
+ | cse EQ vse  { $$ = new_node_operation (new_node_float($1), enum_op_eq,$3); }
  | vse EQ vse  { $$ = new_node_operation ($1, enum_op_eq,$3); }
- | vse NE cse  { $$ = new_node_operation ($1, enum_op_ne,new_node_scalar($3)); }
- | cse NE vse  { $$ = new_node_operation (new_node_scalar($1), enum_op_ne,$3); }
+ | vse NE cse  { $$ = new_node_operation ($1, enum_op_ne,new_node_float($3)); }
+ | cse NE vse  { $$ = new_node_operation (new_node_float($1), enum_op_ne,$3); }
  | vse NE vse  { $$ = new_node_operation ($1, enum_op_ne,$3); }
  | vle OR cle  { $$ = new_node_operation ($1, enum_op_or,new_node_logical($3)); }
  | cle OR vle  { $$ = new_node_operation (new_node_logical($1), enum_op_or,$3); }
@@ -684,12 +672,10 @@ vle:
  | vle AND vle { $$ = new_node_operation ($1, enum_op_and,$3); }
 ;
 
-
-
 %%
 
 struct param_struct * 
-cello_parameters_read(FILE * fp)
+cello_parameters_read(const char * filename, FILE * fp)
 {
   clear_groups(current_group);
 
@@ -697,7 +683,9 @@ cello_parameters_read(FILE * fp)
   param_head = param_curr = new_param_sentinel();
 
   /*   yydebug=1; */
-  
+
+  cello_new_file (filename);
+
   yyrestart(fp);
 
   yyparse();
@@ -726,8 +714,9 @@ void print_expression (struct node_expr * node,
     case enum_node_integer:
       fprintf (fp,"%d",node->integer_value);
       break;
-    case enum_node_scalar:
-      fprintf (fp,"%g",node->scalar_value);
+    case enum_node_float:
+      /* '#' format character forces a decimal point */
+      fprintf (fp,"%#.15g",node->float_value);
       break;
     case enum_node_variable:
       fprintf (fp,"%c",node->var_value);
@@ -771,8 +760,9 @@ void sprintf_expression (struct node_expr * node,
       sprintf (buffer,"%d",node->integer_value);
       buffer += strlen(buffer);
       break;
-    case enum_node_scalar:
-      sprintf (buffer,"%g",node->scalar_value);
+    case enum_node_float:
+      /* '#' format character forces a decimal point */
+      sprintf (buffer,"%#.15g",node->float_value);
       buffer += strlen(buffer);
       break;
     case enum_node_variable:
@@ -834,8 +824,9 @@ void cello_parameters_print_list(struct param_struct * head, int level)
 	      parameter_name[p->type], p->parameter);
     }
     switch (p->type) {
-    case enum_parameter_scalar:  
-      printf ("%g\n",p->scalar_value);  
+    case enum_parameter_float:  
+      /* '#' format character forces a decimal point */
+      printf ("%#.15g\n",p->float_value);  
       break;
     case enum_parameter_integer: 
       printf ("%d\n",p->integer_value); 
@@ -860,7 +851,7 @@ void cello_parameters_print_list(struct param_struct * head, int level)
       indent(level);
       print_expression(p->op_value,stdout); printf ("\n");
       break;
-    case enum_parameter_scalar_expr:
+    case enum_parameter_float_expr:
       indent(level);
       print_expression(p->op_value,stdout); printf ("\n");
       break;

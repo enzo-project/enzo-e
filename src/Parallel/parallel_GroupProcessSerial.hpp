@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     parallel_GroupProcessSerial.hpp
@@ -55,6 +54,10 @@ public: // interface (Group)
 
   /// Clean up after receiving an array
   void recv_end(void * handle) throw();
+
+  /// Send and receive data between two processes
+  void send_recv
+  (int rank, void * buffer, int size, int tag=0) throw();
 
   /// Complete sending or receiving an array
   void wait(void * handle) throw()

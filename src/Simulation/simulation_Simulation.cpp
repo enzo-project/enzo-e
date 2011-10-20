@@ -1,37 +1,35 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file      simulation_Simulation.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      2010-11-10
 /// @brief     Implementation of the Simulation class
-/// @todo      Move dt / cycle update to separate function from p_output()
 
 #include "cello.hpp"
 
-#include "simulation.hpp"
+#include "main.hpp"
 
-#ifdef CONFIG_USE_CHARM
-extern CProxy_Main       proxy_main;
-extern CProxy_Simulation proxy_simulation;
-#endif
+#include "simulation.hpp"
+#include "simulation_charm.hpp"
 
 Simulation::Simulation
 (
  const char *   parameter_file,
 #ifdef CONFIG_USE_CHARM
  int n,
- const Factory & factory,
+ CProxy_BlockReduce proxy_block_reduce,
 #else
- const Factory & factory,
  GroupProcess * group_process,
 #endif
  int            index
  ) throw()
 /// Initialize the Simulation object
-  : parameters_(0),
-    factory_(&factory),
-#ifndef CONFIG_USE_CHARM
+  : factory_(0),
+    parameters_(0),
+    parameter_file_(parameter_file),
+#ifdef CONFIG_USE_CHARM
+    group_process_(GroupProcess::create()),
+#else
     group_process_(group_process),
 #endif
     dimension_(0),
@@ -44,22 +42,29 @@ Simulation::Simulation
     index_(index),
     performance_(0),
     monitor_(0),
-    mesh_(0),
+    hierarchy_(0),
     field_descr_(0),
     stopping_(0),
     timestep_(0),
     initial_(0),
     boundary_(0),
+#ifdef CONFIG_USE_CHARM
+    proxy_block_reduce_(proxy_block_reduce),
+    index_output_(0),
+#endif
     output_list_(),
     method_list_()
 {
+
   performance_ = new Performance;
+
 #ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;
 #else
   monitor_ = Monitor::instance();
 #endif
-  parameters_  = new Parameters(parameter_file,monitor_);
+
+  parameters_ = new Parameters(parameter_file,monitor_);
 }
 
 //----------------------------------------------------------------------
@@ -73,7 +78,6 @@ Simulation::~Simulation() throw()
 
 void Simulation::initialize() throw()
 {
-
   performance_->start();
 
   // Initialize parameters
@@ -83,7 +87,7 @@ void Simulation::initialize() throw()
   // Initialize simulation components
 
   initialize_data_();
-  initialize_mesh_();
+  initialize_hierarchy_();
   initialize_stopping_();
   initialize_timestep_();
   initialize_initial_();
@@ -92,94 +96,18 @@ void Simulation::initialize() throw()
   initialize_method_();
   initialize_parallel_();
 
+  char parameter_file[40];
+  snprintf (parameter_file,40,"%s.out",parameter_file_.c_str());
+  parameters_->write(parameter_file);
 }
 
 //----------------------------------------------------------------------
 
 void Simulation::finalize() throw()
 {
+  performance_->stop();
   deallocate_();
 }
-
-//----------------------------------------------------------------------
-
-int Simulation::dimension() const throw()
-{
-  return dimension_;
-}
-
-//----------------------------------------------------------------------
-
-Mesh * Simulation::mesh() const throw()
-{
-  return mesh_;
-}
-  
-//----------------------------------------------------------------------
-
-FieldDescr * Simulation::field_descr() const throw()
-{
-  return field_descr_;
-}
-
-//----------------------------------------------------------------------
-
-Performance * Simulation::performance() const throw()
-{
-  return performance_;
-}
-
-//----------------------------------------------------------------------
-
-Monitor * Simulation::monitor() const throw()
-{
-  return monitor_;
-}
-
-//----------------------------------------------------------------------
-
-Stopping * Simulation::stopping() const throw() 
-{ return stopping_; }
-
-//----------------------------------------------------------------------
-
-Timestep * Simulation::timestep() const throw() 
-{ return timestep_; }
-
-//----------------------------------------------------------------------
-
-Initial * Simulation::initial() const throw() 
-{ return initial_; }
-
-//----------------------------------------------------------------------
-
-Boundary * Simulation::boundary() const throw() 
-{ return boundary_; }
-
-//----------------------------------------------------------------------
-
-size_t Simulation::num_output() const throw()
-{ return output_list_.size(); }
-
-//----------------------------------------------------------------------
-
-Output * Simulation::output(int i) const throw()
-{ return output_list_[i]; }
-
-//----------------------------------------------------------------------
-
-size_t Simulation::num_method() const throw()
-{ return method_list_.size(); }
-
-//----------------------------------------------------------------------
-
-Method * Simulation::method(int i) const throw()
-{ return method_list_[i]; }
-
-//----------------------------------------------------------------------
-
-const Factory * Simulation::factory () const throw()
-{ return factory_; }
 
 //======================================================================
 
@@ -187,7 +115,7 @@ void Simulation::initialize_simulation_() throw()
 {
 
   //--------------------------------------------------
-  // parameter: Physics::dimensions
+  // parameter: Physics : dimensions
   //--------------------------------------------------
 
   dimension_ = parameters_->value_integer("Physics:dimensions",0);
@@ -203,7 +131,7 @@ void Simulation::initialize_data_() throw()
   field_descr_ = new FieldDescr;
 
   //--------------------------------------------------
-  // parameter: Field::fields
+  // parameter: Field : fields
   //--------------------------------------------------
 
   // Add data fields
@@ -217,7 +145,7 @@ void Simulation::initialize_data_() throw()
   // Define default ghost zone depth for all fields, default value of 1
 
   //--------------------------------------------------
-  // parameter: Field::ghosts
+  // parameter: Field : ghosts
   //--------------------------------------------------
 
   int gx = 1;
@@ -237,27 +165,32 @@ void Simulation::initialize_data_() throw()
 
   for (i=0; i<field_descr_->field_count(); i++) {
     field_descr_->set_ghosts(i,gx,gy,gz);
-    int gx2,gy2,gz2;
-    field_descr_->ghosts(i,&gx2,&gy2,&gz2);
   }
 
   // Set precision
 
   //--------------------------------------------------
-  // parameter: Field::precision
+  // parameter: Field : precision
   //--------------------------------------------------
 
   std::string precision_str = 
     parameters_->value_string("Field:precision","default");
 
-  precision_enum precision = precision_default;
+  precision_enum precision;
 
-  if (precision_str == "single")
+  if (precision_str == "default")
+    precision = precision_default;
+  else if (precision_str == "single")
     precision = precision_single;
   else if (precision_str == "double")
     precision = precision_double;
   else if (precision_str == "quadruple")
     precision = precision_quadruple;
+  else {
+    ERROR1 ("Simulation::initialize_data_()", 
+	    "Unknown precision %s",
+	    precision_str.c_str());
+  }
 
   for (i=0; i<field_descr_->field_count(); i++) {
     field_descr_->set_precision(i,precision);
@@ -266,43 +199,24 @@ void Simulation::initialize_data_() throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_mesh_() throw()
+void Simulation::initialize_hierarchy_() throw()
 {
 
-  ASSERT("Simulation::initialize_mesh_",
-	 "data must be initialized before mesh",
+  ASSERT("Simulation::initialize_hierarchy_",
+	 "data must be initialized before hierarchy",
 	 field_descr_ != NULL);
 
-  //--------------------------------------------------
-  // parameter: Mesh::root_size
-  // parameter: Mesh::root_blocks
-  //--------------------------------------------------
-
-  int root_size[3];
-
-  root_size[0] = parameters_->list_value_integer(0,"Mesh:root_size",1);
-  root_size[1] = parameters_->list_value_integer(1,"Mesh:root_size",1);
-  root_size[2] = parameters_->list_value_integer(2,"Mesh:root_size",1);
-
-  int root_blocks[3];
-
-  root_blocks[0] = parameters_->list_value_integer(0,"Mesh:root_blocks",1);
-  root_blocks[1] = parameters_->list_value_integer(1,"Mesh:root_blocks",1);
-  root_blocks[2] = parameters_->list_value_integer(2,"Mesh:root_blocks",1);
-
   //----------------------------------------------------------------------
-  // Create and initialize Mesh
+  // Create and initialize Hierarchy
   //----------------------------------------------------------------------
 
-  mesh_ = factory()->create_mesh 
-    (root_size[0],root_size[1],root_size[2],
-     root_blocks[0],root_blocks[1],root_blocks[2]);
+  hierarchy_ = factory().create_hierarchy();
 
   // Domain extents
 
   //--------------------------------------------------
-  // parameter: Domain::lower
-  // parameter: Domain::upper
+  // parameter: Domain : lower
+  // parameter: Domain : upper
   //--------------------------------------------------
 
   ASSERT ("Simulation::initialize_simulation_",
@@ -317,61 +231,42 @@ void Simulation::initialize_mesh_() throw()
   double upper[3];
 
   for (int i=0; i<3; i++) {
-    lower[i] = parameters_->list_value_scalar(i, "Domain:lower", 0.0);
-    upper[i] = parameters_->list_value_scalar(i, "Domain:upper", 0.0);
+    lower[i] = parameters_->list_value_float(i, "Domain:lower", 0.0);
+    upper[i] = parameters_->list_value_float(i, "Domain:upper", 1.0);
     ASSERT ("Simulation::initialize_simulation_",
 	    "Domain:lower may not be greater than Domain:upper",
 	    lower[i] <= upper[i]);
   }
 
-  mesh_->set_lower(lower[0], lower[1], lower[2]);
-  mesh_->set_upper(upper[0], upper[1], upper[2]);
-
-  //--------------------------------------------------
-  // parameters_->set_group (0,"Mesh");
-  //--------------------------------------------------
-  // parameter: Mesh:refine
-  // parameter: Mesh:max_level
-  // parameter: Mesh:balanced
-  // parameter: Mesh:backfill
-  // parameter: Mesh:coalesce
-  //--------------------------------------------------
-
-  // mesh_->set_refine_factor (parameters_->value_integer("refine",    2));
-  // mesh_->set_max_level     (parameters_->value_integer("max_level", 0));
-  // mesh_->set_balanced      (parameters_->value_logical("balanced",  true));
-  // mesh_->set_backfill      (parameters_->value_logical("backfill",  true));
-  // mesh_->set_coalesce      (parameters_->value_logical("coalesce",  true));
+  hierarchy_->set_lower(lower[0], lower[1], lower[2]);
+  hierarchy_->set_upper(upper[0], upper[1], upper[2]);
 
   //----------------------------------------------------------------------
-  // Create and initialize root Patch in Mesh
+  // Create and initialize root Patch in Hierarchy
   //----------------------------------------------------------------------
 
-  
-  Patch * root_patch = factory()->create_patch
+  //--------------------------------------------------
+  // parameter: Mesh : root_size
+  // parameter: Mesh : root_blocks
+  //--------------------------------------------------
+
+  int root_size[3];
+
+  root_size[0] = parameters_->list_value_integer(0,"Mesh:root_size",1);
+  root_size[1] = parameters_->list_value_integer(1,"Mesh:root_size",1);
+  root_size[2] = parameters_->list_value_integer(2,"Mesh:root_size",1);
+
+  int root_blocks[3];
+
+  root_blocks[0] = parameters_->list_value_integer(0,"Mesh:root_blocks",1);
+  root_blocks[1] = parameters_->list_value_integer(1,"Mesh:root_blocks",1);
+  root_blocks[2] = parameters_->list_value_integer(2,"Mesh:root_blocks",1);
+
+  hierarchy_->create_root_patch
     (group_process_,
+     field_descr_,
      root_size[0],root_size[1],root_size[2],
-     root_blocks[0],root_blocks[1],root_blocks[2],
-     lower[0], lower[1], lower[2],
-     upper[0], upper[1], upper[2]);
-
-  mesh_->insert_patch(root_patch);
-
-  root_patch->allocate_blocks(field_descr_);
-
-  // Parallel layout of the root patch
-  
-  Layout * layout = root_patch->layout();
-
-  //--------------------------------------------------
-  // parameter: Mesh:root_process_first
-  // parameter: Mesh:root_process_count
-  //--------------------------------------------------
-
-  int process_first = parameters_->value_integer("Mesh:root_process_first",0);
-  int process_count = parameters_->value_integer("Mesh:root_process_count",1);
-
-  layout->set_process_range(process_first, process_count);
+     root_blocks[0],root_blocks[1],root_blocks[2]);
 
 }
 
@@ -394,7 +289,7 @@ void Simulation::initialize_timestep_() throw()
 void Simulation::initialize_initial_() throw()
 {
   //--------------------------------------------------
-  // parameter: Initial::code
+  // parameter: Initial : code
   //--------------------------------------------------
 
   std::string name = parameters_->value_string("Initial:code","default");
@@ -411,10 +306,10 @@ void Simulation::initialize_initial_() throw()
 void Simulation::initialize_boundary_() throw()
 {
   //--------------------------------------------------
-  // parameter: Boundary::name
+  // parameter: Boundary : name
   //--------------------------------------------------
 
-  std::string name = parameters_->value_string("Boundary:name","");
+  std::string name = parameters_->value_string("Boundary:type","");
   boundary_ = create_boundary_(name);
 }
 
@@ -425,211 +320,547 @@ void Simulation::initialize_output_() throw()
   // Create and initialize an Output object for each Output group
 
   //--------------------------------------------------
-  parameters_->set_group(0,"Output");
+  // parameter: Output : file_groups
   //--------------------------------------------------
 
-  int num_groups = parameters_->list_length("groups");
+  //--------------------------------------------------
+  parameters_->group_set(0,"Output");
+  //--------------------------------------------------
 
-  for (int index_group=0; index_group < num_groups; index_group++) {
+  int num_file_groups = parameters_->list_length("file_groups");
 
-    //--------------------------------------------------
-    parameters_->set_group(0,"Output");
-    //--------------------------------------------------
 
-    std::string group = parameters_->list_value_string
-      (index_group,"groups","unknown");
+  for (int index_file_group=0; index_file_group < num_file_groups; index_file_group++) {
 
     //--------------------------------------------------
-    parameters_->set_group(1,group);
+    parameters_->group_set(0,"Output");
     //--------------------------------------------------
-    // parameter: Output:<group>:type
-    // parameter: Output:<group>:file_name
-    // parameter: Output:<group>:field_list
-    // parameter: Output:<group>:cycle_interval
-    // parameter: Output:<group>:cycle_list
-    // parameter: Output:<group>:time_interval
-    // parameter: Output:<group>:time_list
+
+    std::string file_group = parameters_->list_value_string
+      (index_file_group,"file_groups","unknown");
+
+    //--------------------------------------------------
+    parameters_->group_set(1,file_group);
+
+    //--------------------------------------------------
+    // File type parameter
+    //--------------------------------------------------
+
+    //--------------------------------------------------
+    // parameter: Output : <file_group> : type
     //--------------------------------------------------
 
     std::string type = parameters_->value_string("type","unknown");
 
     // Error if Output::type is not defined
     if (type == "unknown") {
-      char buffer[ERROR_LENGTH];
-      sprintf (buffer,"Output:%s:type parameter is undefined",group.c_str());
-      ERROR("Simulation::initialize_output_",buffer);
+      ERROR1("Simulation::initialize_output_",
+	     "Output:%s:type parameter is undefined",
+	     file_group.c_str());
     }
+
+    // Create output object
 
     Output * output = create_output_(type);
 
     // Error if output type was not recognized
     if (output == NULL) {
-      char buffer[ERROR_LENGTH];
-      sprintf (buffer,"Unrecognized parameter value Output:%s:type = %s",
-     	       group.c_str(),type.c_str());
-      ERROR("Simulation::initialize_output_",buffer);
+      ERROR2("Simulation::initialize_output_",
+	     "Unrecognized parameter value Output:%s:type = %s",
+	     file_group.c_str(),
+	     type.c_str());
     }
 
-    // ASSUMES GROUP AND SUBGROUP ARE SET BY CALLER
+    //--------------------------------------------------
+    // File name parameter
+    //--------------------------------------------------
 
-    ASSERT("Simulation::initialize_output_",
-	   "Bad type for Output 'file_name' parameter",
-	   parameters_->type("file_name") == parameter_string);
+    std::string file_name = "";
+    std::vector<std::string> file_args;
 
-    // Set the file name
+    //--------------------------------------------------
+    // parameter: Output : <file_group> : name
+    //--------------------------------------------------
 
-    std::string file_name = parameters_->value_string("file_name","unknown");
+    if (parameters_->type("name") == parameter_string) {
 
-    // Error if file_name is unspecified
-    ASSERT("Simulation::initialize_output_",
-	   "Output 'file_name' must be specified",
-	   file_name != "unknown");
+      // Case 1: string e.g. name = "filename";
 
-    output->set_file_name (file_name);
+      file_name = parameters_->value_string("name","");
 
-    std::vector<int> field_list;
+     
+    } else if (parameters_->type("name") == parameter_list) {
+      // Case 2: list e.g. name = ["filename-cycle-%0d.time-%5.3f", "cycle","time"]
+
+      int list_length = parameters_->list_length("name");
+
+      // get file name
+      if (list_length > 0) {
+	file_name = parameters_->list_value_string(0,"name","");
+      }
+
+      // get file args ("cycle", "time", etc.) to schedule
+      for (int index = 1; index<list_length; index++) {
+	file_args.push_back(parameters_->list_value_string(index,"name",""));
+      }
+
+    } else {
+
+      ERROR2("Simulation::initialize_output_",
+	     "Bad type %d for 'Output : %s : name' parameter",
+	     parameters_->type("name"),file_group.c_str());
+
+    }
+
+    // Error check name specified
+
+    ASSERT1("Simulation::initialize_output_",
+	   "Output 'name' must be specified for file group %s",
+	   file_group.c_str(),
+	   file_name != "");
+
+    // Set the output object file name and arguments
+
+    output->set_filename (file_name,file_args);
+
+    //--------------------------------------------------
+    // Field_list parameter
+    //--------------------------------------------------
+
+    //--------------------------------------------------
+    // parameter: Output : <file_group> : field_list
+    //--------------------------------------------------
 
     if (parameters_->type("field_list") != parameter_unknown) {
+
       // Set field list to specified field list
+
       if (parameters_->type("field_list") == parameter_list) {
+
+	ItFieldList * it_field = new ItFieldList;
+
 	int length = parameters_->list_length("field_list");
 	for (int i=0; i<length; i++) {
-	  int field_index = parameters_->list_value_integer(i,"field_list",0);
-	  field_list.push_back(field_index);
+	  std::string field_name = 
+	    parameters_->list_value_string(i,"field_list","");
+	  int field_index = field_descr_->field_id(field_name);
+	  it_field->append(field_index);
 	}
-	output->set_field_list(field_list);
+	
+	output->set_it_field(it_field);
+
       } else {
+
 	ERROR("Simulation::initialize_output_",
 	      "Bad type for Output 'field_list' parameter");
+
       }
+
     } else {
-      // Set field list to default of all fields
+
+      // field_list not defined: default to all fields
       int field_count = field_descr_->field_count();
-      for (int i=0;  i<field_count; i++) {
-	field_list.push_back(i);
-      }
-      output->set_field_list(field_list);
+      ItFieldRange * it_field = new ItFieldRange(field_count);
+
+      output->set_it_field(it_field);
+
     }
 
     //--------------------------------------------------
-    // Determine scheduling
+    // Scheduling parameters
     //--------------------------------------------------
 
-    bool cycle_interval,cycle_list,time_interval,time_list;
+    //--------------------------------------------------
+    // parameter: Output : <file_group> : schedule
+    //--------------------------------------------------
 
-    cycle_interval = (parameters_->type("cycle_interval") != parameter_unknown);
-    cycle_list     = (parameters_->type("cycle_list")     != parameter_unknown);
-    time_interval  = (parameters_->type("time_interval")  != parameter_unknown);
-    time_list      = (parameters_->type("time_list")      != parameter_unknown);
+    // error check schedule parameter exists
 
     ASSERT("Simulation::initialize_output_",
-	   "exactly one of [cycle|time]_[interval|list] must be defined for each Output group",
-	   (cycle_interval? 1 : 0 + 
-	    cycle_list?     1 : 0 + 
-	    time_interval?  1 : 0 + 
-	    time_list?      1 : 0) == 1);
+	   "The 'schedule' parameter must be specified for all Output file groups",
+	   parameters_->type("schedule") != parameter_unknown);
 
-    if (cycle_interval) {
+    // get schedule variable ("cycle" or "time")
+
+    bool var_cycle,var_time;
+    var_cycle = (strcmp(parameters_->list_value_string(0,"schedule"),"cycle")==0);
+    var_time  = (strcmp(parameters_->list_value_string(0,"schedule"),"time")==0);
+
+    // error check variable name
+
+    ASSERT("Simulation::initialize_output_",
+	   "The first 'schedule' parameter list element must be 'cycle' or 'time'",
+	   var_cycle || var_time);
+
+    // get schedule type (interval or list)
+
+    bool type_interval,type_list;
+
+    type_interval = (strcmp(parameters_->list_value_string(1,"schedule"),"interval")==0);
+    type_list     = (strcmp(parameters_->list_value_string(1,"schedule"),"list")==0);
+
+    // error check schedule type
+
+    ASSERT("Simulation::initialize_output_",
+	   "The second 'schedule' parameter list element "
+	   "must be 'interval' or 'list'",
+	   type_interval || type_list);
+
+    int len = parameters_->list_length("schedule");
+
+    if (var_cycle && type_interval) {
+
+      // get cycle interval schedule
 
       const int max_int = std::numeric_limits<int>::max();
-      int cycle_start = 0;
-      int cycle_step = 0;
-      int cycle_stop = max_int;
-      if (parameters_->type("cycle_interval") == parameter_integer) {
-	cycle_step = parameters_->value_integer("cycle_interval",1);
-      } else if (parameters_->type("cycle_interval") == parameter_list) {
-	if (parameters_->list_length("cycle_interval") != 3) {
-	  ERROR("Simulation::initialize_output_",
-		"Output cycle_interval parameter must be of the form "
-		"[cycle_start, cycle_step, cycle_stop");
-	}
-	cycle_start = 
-	  parameters_->list_value_integer (0,"cycle_interval",0);
-	cycle_step  = 
-	  parameters_->list_value_integer (1,"cycle_interval",1);
-	cycle_stop  = 
-	  parameters_->list_value_integer (2,"cycle_interval",max_int);
-      } else {
-	ERROR("Simulation::initialize_output_",
-	      "Output cycle_interval is of the wrong type");
-      }
-      output->set_cycle_interval(cycle_start,cycle_step,cycle_stop);
 
-    } else if (cycle_list) {
+      // Set time limits
+
+      int start, stop, step;
+
+      if (len == 3) { 
+
+	// schedule = [ "cycle", "interval",  <step> ];
+
+	start = 0;
+	stop  = max_int;
+	step  = parameters_->list_value_integer(2,"schedule");
+
+      } else if (len == 5) {
+
+	// schedule = [ "cycle", "interval",  <start>, <stop>, <step> ]
+
+	start = parameters_->list_value_integer(2,"schedule");
+	stop  = parameters_->list_value_integer(3,"schedule");
+	step  = parameters_->list_value_integer(4,"schedule");
+
+      } else {
+
+	// error check schedule parameter list length
+
+	ERROR("Simulation::initialize_output_",
+	      "Output 'schedule' list parameter has wrong number of elements");
+
+      }
+
+      // Set cycle interval output schedule 
+
+      output->schedule()->set_cycle_interval(start,step,stop);
+
+    } else if (var_cycle && type_list) {
+
+      // get cycle list schedule
 
       std::vector<int> list;
 
-      if (parameters_->type("cycle_list") == parameter_integer) {
-	list.push_back (parameters_->value_integer("cycle_list",0));
-      } else if (parameters_->type("cycle_list") == parameter_list) {
-	for (int i=0; i<parameters_->list_length("cycle_list"); i++) {
-	  int value = parameters_->list_value_integer(i,"cycle_list",0);
-	  list.push_back (value);
-	  // check monotonicity
-	  if (i > 0) {
-	    int value_prev = parameters_->list_value_integer(i-1,"cycle_list",0);
-	    ASSERT("Simulation::initialize_output_",
-		   "Output cycle_list must be monotonically increasing",
-		   value_prev < value);
-	  }
+      for (int index = 2; index < len; index++) {
+
+	int value = parameters_->list_value_integer(index,"schedule");
+
+	list.push_back (value);
+
+	if (list.size() > 1) {
+
+	  // error check monotonicity
+
+	  ASSERT("Simulation::initialize_output_",
+		 "Output 'schedule' parameter list values must be monotonically increasing",
+		 (list[list.size()-2] < list[list.size()-1]));
+
 	}
       }
 
-      output->set_cycle_list(list);
+      // Set cycle list output schedule 
+      
+      output->schedule()->set_cycle_list(list);
 
-    } else if (time_interval) {
+    } else if (var_time && type_interval) {
+
+      // get time interval schedule
 
       const double max_double = std::numeric_limits<double>::max();
-      double time_start = 0;
-      double time_step = 0;
-      double time_stop = max_double;
-      if (parameters_->type("time_interval") == parameter_scalar) {
-	time_step = parameters_->value_scalar("time_interval",1);
-      } else if (parameters_->type("time_interval") == parameter_list) {
-	if (parameters_->list_length("time_interval") != 3) {
-	  ERROR("Simulation::initialize_output_",
-		"Output time_interval parameter must be of the form "
-		"[time_start, time_step, time_stop");
-	}
-	time_start = 
-	  parameters_->list_value_scalar (0,"time_interval",0);
-	time_step  = 
-	  parameters_->list_value_scalar (1,"time_interval",1);
-	time_stop  = 
-	  parameters_->list_value_scalar (2,"time_interval",max_double);
-      } else {
-	ERROR("Simulation::initialize_output_",
-	      "Output time_interval is of the wrong type");
-      }
-      output->set_time_interval(time_start,time_step,time_stop);
 
-    } else if (time_list) {
+      // set time limits
+
+      double start, stop, step;
+
+      if (len == 3) {
+
+	// schedule = [ "time", "interval",  <step> ];
+
+	start = 0;
+	stop  = max_double;
+	step  = parameters_->list_value_float(2,"schedule");
+
+      } else if (len == 5) {
+
+	// schedule = [ "time", "interval",  <start>, <stop>, <step> ]
+
+	start = parameters_->list_value_float(2,"schedule");
+	stop  = parameters_->list_value_float(3,"schedule");
+	step  = parameters_->list_value_float(4,"schedule");
+
+      } else {
+
+	// error check schedule parameter list length
+
+	ERROR("Simulation::initialize_output_",
+	      "Output 'schedule' list parameter has wrong number of elements");
+
+      }
+
+      // Set time interval output schedule 
+
+      output->schedule()->set_time_interval(start,step,stop);
+
+    } else if (var_time && type_list) {
+
+      // get time list schedule
 
       std::vector<double> list;
 
-      if (parameters_->type("time_list") == parameter_scalar) {
-	list.push_back (parameters_->value_scalar("time_list",0));
-      } else if (parameters_->type("time_list") == parameter_list) {
-	for (int i=0; i<parameters_->list_length("time_list"); i++) {
-	  double value = parameters_->list_value_scalar(i,"time_list",0.0);
-	  list.push_back (value);
-	  // check monotonicity
-	  if (i > 0) {
-	    double value_prev = parameters_->list_value_scalar(i-1,"time_list",0);
-	    ASSERT("Simulation::initialize_output_",
-		   "Output time_list must be monotonically increasing",
-		   value_prev < value);
-	  }
+      for (int index = 2; index < len; index++) {
+
+	double value = parameters_->list_value_float(index,"schedule");
+
+	list.push_back (value);
+
+	if (list.size() > 1) {
+
+	  // error check monotonicity
+
+	  ASSERT("Simulation::initialize_output_",
+		 "Output 'schedule' parameter list values must be "
+		 "monotonically increasing",
+		 (list[list.size()-2] < list[list.size()-1]));
 	}
       }
 
-      output->set_time_list(list);
+      // Set time list output schedule 
+
+      output->schedule()->set_time_list(list);
 
     }
 
+    //--------------------------------------------------
+    // Image parameters
+    //--------------------------------------------------
+
+    OutputImage * output_image = dynamic_cast<OutputImage *> (output);
+
+    // WARNING("Simulation::initialize_output()",
+    // 	    "Temporarily setting output_image ghosts");
+    //    output_image->set_ghosts(3,3,0);
+    if (output != NULL) {
+
+      // Parse image-specific parameters
+
+      parameter_enum type = parameter_unknown;
+
+      // position parameter
+
+      type = parameters_->type("position");
+
+      if ( type != parameter_unknown) {
+
+	// error check position type
+
+	ASSERT1("Simulation::initialize_output_",
+	       "Output %s position must be a float",
+		file_group.c_str(),
+		type == parameter_float);
+
+	INCOMPLETE("Simulation::initialize_output_(): image position not implemented");
+
+      }
+
+      // axis parameter
+
+      type = parameters_->type("axis");
+
+      //--------------------------------------------------
+      // parameter: Output : <file_group> : axis
+      //--------------------------------------------------
+
+      if (type != parameter_unknown) {
+
+	// error check position type
+
+	ASSERT1("Simulation::initialize_output_",
+		"Output %s axis must be a string",
+		file_group.c_str(), type == parameter_string);
+
+	std::string axis = parameters_->value_string("axis");
+
+	// set the output axis
+
+	if (axis == "x") output_image->set_axis(axis_x);
+	if (axis == "y") output_image->set_axis(axis_y);
+	if (axis == "z") output_image->set_axis(axis_z);
+
+	// error check axis
+
+	ASSERT2("Simulation::initialize_output_",
+		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
+		file_group.c_str(), axis.c_str(),
+		axis=="x" || axis=="y" || axis=="z");
+
+
+      }
+
+      //--------------------------------------------------
+      // parameter: Output : <file_group> : colormap
+      //--------------------------------------------------
+
+      type = parameters_->type("colormap");
+
+      if (type != parameter_unknown) {
+
+	// error check colormap list type
+
+	ASSERT1("Simulation::initialize_output_",
+		"Output %s colormap must be a list",
+		file_group.c_str(), type == parameter_list);
+
+	int n = parameters_->list_length("colormap");
+
+	// error check colormap list length
+
+	ASSERT1("Simulation::initialize_output_",
+		"Output %s colormap list length must be divisible by 3",
+		file_group.c_str(), n % 3 == 0);
+
+	n /= 3;
+
+	// allocate arrays
+
+	double * r = new double [n];
+	double * g = new double [n];
+	double * b = new double [n];
+
+
+	for (int i=0; i<n; i++) {
+
+
+	  int ir=3*i+0;
+	  int ig=3*i+1;
+	  int ib=3*i+2;
+
+	  // error check colormap value types
+
+	  ASSERT1("Simulation::initialize_output_",
+		  "Output %s colormap list must only contain floats",
+		  file_group.c_str(), 
+		  ((parameters_->list_type(ir,"colormap") == parameter_float) &&
+		   (parameters_->list_type(ig,"colormap") == parameter_float) &&
+		   (parameters_->list_type(ib,"colormap") == parameter_float)));
+
+	  // get next colormap r[i] g[i], b[i]
+	  r[i] = parameters_->list_value_float (ir, "colormap",0.0);
+	  g[i] = parameters_->list_value_float (ig, "colormap",0.0);
+	  b[i] = parameters_->list_value_float (ib, "colormap",0.0);
+
+	}
+
+	// set the colormap
+
+	output_image->set_colormap(n,r,g,b);
+
+	// deallocate arrays
+
+	delete r;
+	delete g;
+	delete b;
+
+      }
+
+      //--------------------------------------------------
+      // parameter: Output : <file_group> : colormap_alpha
+      //--------------------------------------------------
+
+      type = parameters_->type("colormap_alpha");
+
+      if (type != parameter_unknown) {
+
+	// error check colormap_alpha list type
+
+	ASSERT1("Simulation::initialize_output_",
+		"Output %s colormap_alpha must be a list",
+		file_group.c_str(), type == parameter_list);
+
+	int n = parameters_->list_length("colormap_alpha");
+
+	// error check colormap_alpha list length
+
+	ASSERT1("Simulation::initialize_output_",
+		"Output %s colormap_alpha list length must be divisible by 4",
+		file_group.c_str(), n % 4 == 0);
+
+	n /= 4;
+
+	// allocate arrays
+
+	double * r = new double [n];
+	double * g = new double [n];
+	double * b = new double [n];
+	double * a = new double [n];
+
+	for (int i=0; i<n; i++) {
+
+
+	  int ir=4*i+0;
+	  int ig=4*i+1;
+	  int ib=4*i+2;
+	  int ia=4*i+3;
+
+	  // error check colormap_alpha value types
+
+	  ASSERT1("Simulation::initialize_output_",
+		  "Output %s colormap_alpha list must only contain floats",
+		  file_group.c_str(), 
+		  ((parameters_->list_type(ir,"colormap_alpha") == parameter_float) &&
+		   (parameters_->list_type(ig,"colormap_alpha") == parameter_float) &&
+		   (parameters_->list_type(ib,"colormap_alpha") == parameter_float) &&
+		   (parameters_->list_type(ia,"colormap_alpha") == parameter_float)));
+
+	  // get next colormap r[i] g[i], b[i]
+	  r[i] = parameters_->list_value_float (ir, "colormap_alpha",0.0);
+	  g[i] = parameters_->list_value_float (ig, "colormap_alpha",0.0);
+	  b[i] = parameters_->list_value_float (ib, "colormap_alpha",0.0);
+	  a[i] = parameters_->list_value_float (ia, "colormap_alpha",0.0);
+
+	}
+
+	// set the colormap
+
+	output_image->set_colormap(n,r,g,b,a);
+
+	// deallocate arrays
+
+	delete r;
+	delete g;
+	delete b;
+	delete a;
+
+      }
+
+
+    }
+
+    // Initialize index of Output object in Simulation for CHARM
+    // Output read()/write() callback by Hierarchy, Patch or Block
+
+#ifdef CONFIG_USE_CHARM
+    output->set_index_charm(output_list_.size());
+#endif
+
+    // Add the initialized Output object to the Simulation's list of
+    // output objects
+
     output_list_.push_back(output); 
 
-  } // (for index_group)
+
+  } // (for index_file_group)
 
 }
 
@@ -637,21 +868,23 @@ void Simulation::initialize_output_() throw()
 
 void Simulation::initialize_method_() throw()
 {
+
   //--------------------------------------------------
-  parameters_->set_group(0,"Method");
+  parameters_->group_set(0,"Method");
   //--------------------------------------------------
 
   int method_count = parameters_->list_length("sequence");
 
   if (method_count == 0) {
     ERROR ("Simulation::initialize_method_",
-	   "List parameter 'Method sequence' must have length greater than zero");
+	   "List parameter 'Method sequence' must have length "
+	   "greater than zero");
   }
 
   for (int i=0; i<method_count; i++) {
 
     //--------------------------------------------------
-    // parameter: Method:sequence
+    // parameter: Method : sequence
     //--------------------------------------------------
 
     std::string method_name = parameters_->list_value_string(i,"sequence");
@@ -662,10 +895,8 @@ void Simulation::initialize_method_() throw()
       method_list_.push_back(method); 
 
     } else {
-      char error_message[ERROR_LENGTH];
-      sprintf (error_message,"Unknown Method %s",method_name.c_str());
-      ERROR ("Simulation::initialize_method_",
-		     error_message);
+      ERROR1("Simulation::initialize_method_",
+	     "Unknown Method %s",method_name.c_str());
     }
   }
 }
@@ -675,8 +906,8 @@ void Simulation::initialize_method_() throw()
 void Simulation::initialize_parallel_() throw()
 {
   //--------------------------------------------------
-  // parameter: parallel::temp_update_all
-  // parameter: parallel::temp_update_full
+  // parameter: Parallel : temp_update_all
+  // parameter: Parallel : temp_update_full
   //--------------------------------------------------
 
   temp_update_all_  = 
@@ -689,209 +920,144 @@ void Simulation::initialize_parallel_() throw()
 
 void Simulation::deallocate_() throw()
 {
-  delete performance_;
-  performance_ = 0;
+  delete factory_;       factory_     = 0;
+  delete parameters_;    parameters_  = 0;
+  delete performance_;   performance_ = 0;
 #ifdef CONFIG_USE_CHARM
-  delete monitor_;
-  monitor_ = 0;
+  delete monitor_;       monitor_ = 0;
+  delete group_process_; group_process_ = 0;
 #endif
-  delete mesh_;
-  mesh_ = 0;
-  delete field_descr_;
-  field_descr_ = 0;
-  delete stopping_;
-  stopping_ = 0;
-  delete timestep_;
-  timestep_ = 0;
-  delete initial_;
-  initial_ = 0;
-  delete boundary_;
-  boundary_ = 0;
-  delete factory_;
-  factory_ = 0;
+  delete hierarchy_;     hierarchy_ = 0;
+  delete field_descr_;   field_descr_ = 0;
+  delete stopping_;      stopping_ = 0;
+  delete timestep_;      timestep_ = 0;
+  delete initial_;       initial_ = 0;
+  delete boundary_;      boundary_ = 0;
+  for (size_t i=0; i<output_list_.size(); i++) {
+    delete output_list_[i];    output_list_[i] = 0;
+  }
   for (size_t i=0; i<method_list_.size(); i++) {
-    delete method_list_[i];
-    method_list_[i] = 0;
+    delete method_list_[i];    method_list_[i] = 0;
   }
 }
 
+//----------------------------------------------------------------------
+
 void Simulation::run() throw()
-{ ERROR ("Simulation::run","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::run","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
 
 void Simulation::read() throw()
-{ ERROR ("Simulation::read","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::read","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
 
 void Simulation::write() const throw()
-{ ERROR ("Simulation::write","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::write","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
+
+const Factory & Simulation::factory() const throw()
+{
+  if (factory_ == NULL) factory_ = new Factory;
+  return *factory_;
+}
+
+//----------------------------------------------------------------------
 
 Stopping * Simulation::create_stopping_ (std::string name) throw ()
-{ ERROR ("Simulation::create_stopping_","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::create_stopping_","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
 
 Timestep * Simulation::create_timestep_ (std::string name) throw ()
-{ ERROR ("Simulation::create_timestep_","Implictly abstract function called"); }
+{ 
+  ERROR ("Simulation::create_timestep_","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
 
 Initial * Simulation::create_initial_ (std::string name) throw ()
-{ ERROR ("Simulation::create_initial_","Implictly abstract function called"); }
+{ 
+  ERROR ("Simulation::create_initial_","Implictly abstract function called");
+}
+
+//----------------------------------------------------------------------
 
 Boundary * Simulation::create_boundary_ (std::string name) throw ()
-{ ERROR ("Simulation::create_boundary_","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::create_boundary_","Implictly abstract function called");
+}
 
-Output * Simulation::create_output_ (std::string name) throw ()
-{ ERROR ("Simulation::create_output_","Implictly abstract function called"); }
+//----------------------------------------------------------------------
+
+Output * Simulation::create_output_ (std::string type) throw ()
+{ 
+  Output * output = NULL;
+  if (type == "image") {
+    output = new OutputImage (this);
+  } else if (type == "data") {
+    output = new OutputData (this);
+  }
+  return output;
+}
+
+//----------------------------------------------------------------------
 
 Method * Simulation::create_method_ (std::string name) throw ()
-{ ERROR ("Simulation::create_method_","Implictly abstract function called"); }
+{
+  ERROR ("Simulation::create_method_","Implictly abstract function called");
+}
 
 //======================================================================
 
+
 #ifdef CONFIG_USE_CHARM
 
-void Simulation::p_output 
-( int cycle, double time, double dt, bool stop ) throw()
+Simulation::Simulation() 
 {
-
-  TRACE("Simulation::p_output");
-
-  // Update Simulation cycle and time from reduction to main
-  
-  cycle_ = cycle;
-  time_  = time;
-  dt_    = dt;
-  stop_  = stop;
-
-  // reset output "loop" over output objects
-  output_first();
-
-  // process first output object, which continues with refresh() if done
-  output_next();
 }
+
+#endif
 
 //----------------------------------------------------------------------
 
-void Simulation::output_first() throw()
+#ifdef CONFIG_USE_CHARM
+
+Simulation::Simulation (CkMigrateMessage *m) 
 {
-  TRACE("Simulation::output_first()");
-  index_output_ = 0;
 }
+
+#endif
 
 //----------------------------------------------------------------------
 
-void Simulation::output_next() throw()
-{
-
-  TRACE("Simulation::output_next()");
-
-  // find next output
-
-  while (index_output_ < num_output() && 
-	 ! output(index_output_)->write_this_cycle(cycle_, time_))
-    ++index_output_;
-
-  // output if any scheduled, else proceed with refresh
-
-  if (index_output_ < num_output()) {
-
-    // Open the file(s)
-    output(index_output_)->open(mesh_,cycle_,time_);
-
-    // Call blocks to contribute their data
-    ItPatch it_patch(mesh_);
-    Patch * patch;
-    while (( patch = ++it_patch )) {
-      if (patch->blocks_allocated()) {
-	patch->blocks().p_output (index_output_);
-      }
-    }
-
-  } else {
-
-    refresh();
-
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::p_output_reduce() throw()
-{
-  TRACE("Simulation::p_output_reduce");
-
-  int ip       = CkMyPe();
-  int ip_write = ip - (ip % output(index_output_)->process_write());
-
-  // Even self calls this to avoid hanging if case np == 1
-  char buffer[20];
-  sprintf(buffer,"%02d > %02d send",ip,ip_write);
-  if (ip != ip_write) {
-    PARALLEL_PRINTF("%d -> %d calling p_output_write()\n",ip,ip_write);
-    proxy_simulation[ip_write].p_output_write (strlen(buffer),buffer);
-    output_next();
-  } else {
-    PARALLEL_PRINTF("%d -> %d calling p_output_write()\n",ip,ip_write);
-    proxy_simulation[ip].p_output_write(0,0);
-  }
-
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::p_output_write (int n, char * buffer) throw()
-{
-  TRACE("Simulation::p_output_write");
-
-  Output * out = output(index_output_);
-  int ip       = CkMyPe();
-  int ip_write = ip - (ip % out->process_write());
-  PARALLEL_PRINTF ("%d %d  %d  %d\n",ip,ip_write,CkMyPe(),out->process_write());
-
-  int count = out->counter();
-
-  if (count == 0) {
-    PARALLEL_PRINTF("Initialize writer\n");
-  }
-  if (n == 0) {
-    PARALLEL_PRINTF ("Process reduce this %d\n",ip);
-  } else {
-    PARALLEL_PRINTF ("Process reduce that\n");
-  }
-  
-  if (count == out->process_write()) {
-
-    PARALLEL_PRINTF ("File write / close / next\n");
-
-    // write
-    // close
-    out->close();
-
-    // next
-
-
-    output_next();
-  }
-
-
-}
-
-//----------------------------------------------------------------------
+#ifdef CONFIG_USE_CHARM
 
 void Simulation::refresh() throw()
 {
-
-  TRACE("Simulation::refresh");
 
   //--------------------------------------------------
   // Monitor
   //--------------------------------------------------
 
-  monitor_-> print("[Simulation %d] cycle %04d time %15.12f dt %15.12g", 
-		   index_,cycle_,time_,dt_);
+  monitor_output();
 
   //--------------------------------------------------
   // Output
   //--------------------------------------------------
 
   for (size_t index_output=0; index_output<num_output(); index_output++) {
-    if (output(index_output)->write_this_cycle(cycle_, time_)) {
+    if (output(index_output)->schedule()->write_this_cycle(cycle_, time_)) {
       // output_open(index_output);
     }
   }
@@ -912,22 +1078,115 @@ void Simulation::refresh() throw()
     // Boundary
     //--------------------------------------------------
 
-    ItPatch it_patch(mesh_);
+    ItPatch it_patch(hierarchy_);
     Patch * patch;
     axis_enum axis = (temp_update_all_) ? axis_all : axis_x;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
 #ifdef ORIGINAL_REFRESH
-	patch->blocks().p_refresh(dt_,axis);
+	patch->block_array().p_refresh(cycle_, time_, dt_,axis);
 #else
-	patch->blocks().p_compute(dt_,axis);
+	#error crashes
+	patch->block_array().p_compute(dt_,axis);
 #endif
       }
     }
   }
+
 }
 
+#endif
+
 //----------------------------------------------------------------------
+// NOT CHARM
+//----------------------------------------------------------------------
+
+#ifndef CONFIG_USE_CHARM
+
+void Simulation::scheduled_output()
+
+{
+  for (size_t i=0; i<output_list_.size(); i++) {
+    Output * output = output_list_[i];
+    if (output->is_scheduled(cycle_,time_)) {
+
+      output->init();
+
+      output->open();
+
+      output->write_hierarchy(field_descr_, hierarchy_);
+
+      //--------------------------------------------------
+      int ip       = group_process_->rank();
+      int ip_writer = output->process_writer();
+
+      int n=1;  char * buffer = 0;
+
+      if (ip == ip_writer) { // process is writer
+	int ip1 = ip+1;
+	int ip2 = ip_writer+output->process_stride();
+	for (int ip_remote=ip+1; ip_remote<ip2; ip_remote++) {
+
+	  // receive size
+
+	  void * handle_recv;
+	  handle_recv = group_process_->recv_begin(ip_remote,&n,sizeof(n));
+	  group_process_->wait(handle_recv);
+	  group_process_->send_end(handle_recv);
+
+	  // allocate buffer
+
+	  buffer = new char [n];
+
+	  // receive buffer
+
+	  handle_recv = group_process_->recv_begin(ip_remote,buffer,n);
+	  group_process_->wait(handle_recv);
+	  group_process_->recv_end(handle_recv);
+	  
+	  // update
+
+	  output->update_remote(n,buffer);
+
+	  // deallocate
+	  output->cleanup_remote(&n,&buffer);
+	}
+      } else { // process is not writer
+
+	// send data to writer
+
+	output->prepare_remote(&n,&buffer);
+
+	// send size
+
+	void * handle_send;
+
+	handle_send = group_process_->send_begin(ip_writer,&n,sizeof(n));
+	group_process_->wait(handle_send);
+	group_process_->send_end(handle_send);
+
+	// send buffer
+
+	handle_send = group_process_->send_begin(ip_writer,buffer,n);
+	group_process_->wait(handle_send);
+	group_process_->send_end(handle_send);
+
+      }
+      //--------------------------------------------------
+
+      output->close();
+      output->finalize();
+    }
+  }
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+#  include "simulation.def.h"
 
 #endif /* CONFIG_USE_CHARM */
 

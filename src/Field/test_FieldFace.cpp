@@ -1,4 +1,3 @@
-// $Id: test_FieldFace.cpp 2179 2011-04-06 22:40:24Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_FieldFace.cpp
@@ -6,6 +5,7 @@
 /// @date     2008-02-20
 /// @brief    Unit tests for the FieldFace class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "field.hpp"
@@ -86,9 +86,6 @@ void init_field(T * field_values,
 				     nbx,nby,nbz,
 				     index_field,
 				     MD3,ND3);
-	//	if (index_field==0) printf ("init block %d %d %d field 0 index %d %d %d  value %g\n",ibx,iby,ibz,ix,iy,iz,field_values[i]);
-	// printf ("initial  %g    %p block %d field %d (ix iy iz) (%d/%d %d/%d %d/%d  i %d)\n",
-	// 	  field_values[i],field_values+i,index_block, index_field, ix,mdx,iy,mdy,iz,mdz,i);
       }
     }
   }
@@ -126,12 +123,12 @@ bool test_field(T * field_values,
 	//	printf ("%p test\n",field_values+i);
 	if (field_values[i] != value) {
 	  result = false;
-	  printf ("mismatch block   (%d %d %d)\n",            ibx,iby,ibz);
-	  printf ("mismatch field    %d\n",                   index_field);
-	  printf ("mismatch index   (%d %d %d) %d\n",         ix,iy,iz,i);
-	  printf ("mismatch size    (%d %d %d)\n",            mdx,mdy,mdz);
-	  printf ("mismatch actual   %g\n",  (double) field_values[i]);
-	  printf ("mismatch expected %g\n",  (double) value);
+	  PARALLEL_PRINTF ("mismatch block   (%d %d %d)\n",            ibx,iby,ibz);
+	  PARALLEL_PRINTF ("mismatch field    %d\n",                   index_field);
+	  PARALLEL_PRINTF ("mismatch index   (%d %d %d) %d\n",         ix,iy,iz,i);
+	  PARALLEL_PRINTF ("mismatch size    (%d %d %d)\n",            mdx,mdy,mdz);
+	  PARALLEL_PRINTF ("mismatch actual   %g\n",  (double) field_values[i]);
+	  PARALLEL_PRINTF ("mismatch expected %g\n",  (double) value);
 	}
       }
     }
@@ -248,15 +245,12 @@ bool test_fields
 }
 
 //======================================================================
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
-
 PARALLEL_MAIN_BEGIN
 {
 
   PARALLEL_INIT;
 
-  unit_init();
+  unit_init(0,1);
 
   unit_class("FieldFace");
 
@@ -370,4 +364,3 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

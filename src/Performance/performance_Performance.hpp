@@ -1,14 +1,13 @@
-// $Id: performance_Performance.hpp 2130 2011-03-20 01:00:25Z bordner $
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef PERFORMANCE_PERFORMANCE_HPP
-#define PERFORMANCE_PERFORMANCE_HPP
 
 /// @file     performance_Performance.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Oct 14 23:40:13 PDT 2009
 /// @todo     Complete detailed description of Performance class
 /// @brief    [\ref Performance] Interface for Performance class
+
+#ifndef PERFORMANCE_PERFORMANCE_HPP
+#define PERFORMANCE_PERFORMANCE_HPP
 
 /// @def      type_counter
 /// @brief    Counter value type
@@ -78,7 +77,7 @@ public: // interface
   int group(unsigned id_group);
 
   /// Assign a value to an group
-  void set_group(unsigned id_group);
+  void group_set(unsigned id_group);
 
   ///  	 Define the start of a group
   void begin_group(unsigned id_group);
@@ -160,10 +159,10 @@ private: // functions
 private: // attributes
 
   /// Global timer
-  Timer timer;
+  Timer timer_;
 
   /// PAPI counters, if available
-  Papi papi;
+  Papi papi_;
 
   /// Array of counters for regions
   std::vector<Counters *> counters_;

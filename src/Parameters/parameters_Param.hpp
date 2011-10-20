@@ -1,8 +1,4 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef PARAMETERS_PARAM_HPP
-#define PARAMETERS_PARAM_HPP
 
 /// @file     parameters_Param.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -10,6 +6,9 @@
 /// @todo     Rename print_expression to match cello_parameters_print_list
 /// @todo     Keep track of unaccessed parameters
 /// @brief    [\ref Parameters] Interface for the Param class
+
+#ifndef PARAMETERS_PARAM_HPP
+#define PARAMETERS_PARAM_HPP
 
 //----------------------------------------------------------------------
 
@@ -46,11 +45,11 @@ class Param {
 //   enum param_enum {
 //     param_unknown_,
 //     param_integer_,
-//     param_scalar_,
+//     param_float_,
 //     param_logical_,
 //     param_string_,
 //     param_list_,
-//     param_scalar_expr_,
+//     param_float_expr_,
 //     param_logical_expr_
 //   };
 
@@ -76,8 +75,8 @@ public: // interface
   { INCOMPLETE("Param::operator =");
     return *this; };
 
-  /// Evaluate a scalar expression given vectos x,y,z,t
-  void evaluate_scalar  
+  /// Evaluate a floating-point expression given vectos x,y,z,t
+  void evaluate_float  
   ( struct node_expr * node, 
     int                n, 
     double *           result, 
@@ -106,8 +105,8 @@ public: // interface
   /// Return whether the parameter is an integer
   bool is_integer()      { return type_ == parameter_integer; };
 
-  /// Return whether the parameter is a scalar
-  bool is_scalar()       { return type_ == parameter_scalar; };
+  /// Return whether the parameter is a floating-point number
+  bool is_float()       { return type_ == parameter_float; };
 
   /// Return whether the parameter is a logical
   bool is_logical()      { return type_ == parameter_logical; };
@@ -118,8 +117,8 @@ public: // interface
   /// Return whether the parameter is a list
   bool is_list()         { return type_ == parameter_list; };
 
-  /// Return whether the parameter is a scalar expression
-  bool is_scalar_expr()  { return type_ == parameter_scalar_expr; };
+  /// Return whether the parameter is a floating-point expression
+  bool is_float_expr()  { return type_ == parameter_float_expr; };
 
   /// Return whether the parameter is a logical expression
   bool is_logical_expr() { return type_ == parameter_logical_expr; };
@@ -128,9 +127,9 @@ public: // interface
   int get_integer () 
   { value_accessed_ = true; return value_integer_; }
 
-  /// Get a scalar parameter (note that scalar parameters are doubles)
-  double get_scalar  () 
-  { value_accessed_ = true; return value_scalar_; }
+  /// Get a floating-point parameter (note that floating-point parameters are doubles)
+  double get_float  () 
+  { value_accessed_ = true; return value_float_; }
 
   /// Get a logical parameter
   int get_logical ()    
@@ -160,7 +159,7 @@ private: // attributes
   /// Value of the parameter, with type depending on type_
   union {
     int                value_integer_; 
-    double             value_scalar_; 
+    double             value_float_; 
     bool               value_logical_; 
     char *             value_string_;
     list_type        * value_list_;
@@ -176,11 +175,11 @@ private: // functions
     value_integer_ = value; 
   };
 
-  /// Set a scalar parameter (note that scalar parameters are doubles)
-  void set_scalar_  (double value) 
+  /// Set a floating-point parameter (note that floating-point parameters are doubles)
+  void set_float_  (double value) 
   { 
-    type_ = parameter_scalar; 
-    value_scalar_ = value; 
+    type_ = parameter_float; 
+    value_float_ = value; 
   };
 
   /// Set a logical parameter
@@ -214,10 +213,10 @@ private: // functions
     }
   };
 
-  /// Set a scalar expression parameter
-  void set_scalar_expr_ (struct node_expr * value)
+  /// Set a floating-point expression parameter
+  void set_float_expr_ (struct node_expr * value)
   { 
-    type_ = parameter_scalar_expr;
+    type_ = parameter_float_expr;
     value_expr_     = value; 
   };
 
@@ -241,7 +240,7 @@ private: // functions
   void dealloc_node_expr_ (struct node_expr * p);
 
   ///
-  void write_scalar_expr_(FILE * file_pointer,
+  void write_float_expr_(FILE * file_pointer,
 			  struct node_expr * value_expr_);
 };
 

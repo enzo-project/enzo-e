@@ -25,7 +25,6 @@
 
    Mesh { 
       root_size      = [400,400];
-      block_size     = [8,8];
       max_level      = 0; 
 
       # remaining mesh parameters are ignored if max_level == 0
@@ -57,7 +56,7 @@
       # ways.  E.g. "color" fields for Enzo PPM, or "computed" fields that
       # are not permanently stored (like pressure)
 
-      groups = ["computed", "color"];
+      file_groups = ["computed", "color"];
 
       # courant condition for fields
 
@@ -103,6 +102,10 @@
  
       sequence = ["ppm"];
 
+   }
+
+   Enzo {
+
       ppm {
 
          # method-specific parameters.  Note this is Enzo-P not Cello 
@@ -147,7 +150,7 @@
 
    Output { 
 
-      groups = ["data","restart"];
+      file_groups = ["data","restart"];
 
       # subgroup specifies the subdirectory / file name
       data {

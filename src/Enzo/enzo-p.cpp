@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 //----------------------------------------------------------------------
@@ -11,17 +10,21 @@
 
 //----------------------------------------------------------------------
 
-// #include "test.hpp"
+#define CHARM_ENZO
+#include "main.hpp"
+
+#include "test.hpp"
 
 #include "enzo.hpp"
+
+#include "enzo_charm.hpp"
 
 //----------------------------------------------------------------------
 
 #define MAX_OUTPUT 10 /* Maximum number of outputs going on at a time */
 
 #ifdef CONFIG_USE_CHARM
-CProxy_Main                proxy_main;
-CProxy_EnzoSimulationCharm proxy_simulation;
+extern CProxy_Simulation proxy_simulation;
 #endif
 
 PARALLEL_MAIN_BEGIN
@@ -31,24 +34,32 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-  // Fake unit_init() for index.php (test.hpp is not included since
-  // enzo.ci and test.ci conflict)
-  PARALLEL_PRINTF ("UNIT TEST BEGIN\n");
-
   // Create global parallel process group object
   GroupProcess * group_process = GroupProcess::create();
 
   // initialize unit testing
 
-#ifdef CONFIG_USE_CHARM
-  monitor_ = new Monitor;
-#else
-  Monitor * monitor_ = Monitor::instance();
-#endif
+  int ip = group_process->rank();
+  int np = group_process->size();
 
-  monitor_->set_active (true);
+  unit_init(ip,np);
+
+ #ifdef CONFIG_USE_CHARM
+   monitor_ = Monitor::instance();
+ #else
+  Monitor * monitor_ = Monitor::instance();
+ #endif
+
+  monitor_->set_active (group_process->is_root());
   monitor_->header();
-  monitor_->print ("BEGIN ENZO-P");
+  monitor_->print ("","BEGIN ENZO-P");
+
+  // Print initial baseline memory usage
+
+  Memory * memory = Memory::instance();
+  monitor_->print("Memory","           bytes %lld bytes_high %lld",
+		    memory->bytes(), memory->bytes_high());
+
 
   // open parameter file, calling usage() if invalid
 
@@ -63,30 +74,23 @@ PARALLEL_MAIN_BEGIN
 
   // Read in parameters
 
-  //--------------------------------------------------
-#ifdef CONFIG_USE_CHARM
-  proxy_main     = thishandle;
-
-  // Clear counts
-  count_exit_    = 0;
-  count_prepare_ = 0;
-  count_output_  = 0;
-  dt_mesh_ = std::numeric_limits<double>::max();
-  stop_mesh_ = true;
-  
-#endif
-  //--------------------------------------------------
-     
   char * parameter_file = PARALLEL_ARGV[1];
 
   //--------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
 
+  proxy_main     = thishandle;
+
   // If using CHARM, create the EnzoSimulationCharm groups
 
+  CProxy_BlockReduce proxy_block_reduce = 
+    CProxy_BlockReduce::ckNew();
+
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
-    (parameter_file, strlen(parameter_file)+1, 0);
+    (parameter_file, strlen(parameter_file)+1, proxy_block_reduce, 0);
+
+  
 
   //--------------------------------------------------
 
@@ -105,17 +109,48 @@ PARALLEL_MAIN_BEGIN
 
   simulation->run();
 
+
+  simulation->finalize();
+
+  Parameters * parameters = simulation->parameters();
+
+  // Test results: DUPLICATE CODE IN src/main.cpp !!!
+
+  // parameter: Testing : cycle_final
+
+  int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
+
+  unit_class ("Enzo-P");
+  unit_func  ("final cycle");
+  if (cycle_final != 0) {
+    unit_assert (simulation->cycle()==cycle_final);
+    monitor_->print ("Testing","actual   cycle:  %d",simulation->cycle());
+    monitor_->print ("Testing","expected cycle:  %d",cycle_final);
+  }
+
+  // parameter: Testing : time_final
+
+  double time_final  = parameters->value_float("Testing:time_final",0.0);
+
+  unit_class ("Enzo-P");
+  unit_func  ("final time");
+  if (time_final != 0.0) {
+    double err_rel = cello::err_rel(simulation->time(),time_final);
+    double mach_eps = cello::machine_epsilon(precision_default);
+    unit_assert ( err_rel < 100*mach_eps);
+    monitor_->print ("Testing","actual   time:  %.15g",simulation->time());
+    monitor_->print ("Testing","expected time:  %.15g",time_final);
+    monitor_->print ("Testing","relative error: %g",err_rel);
+    monitor_->print ("Testing","100*mach_eps:   %g",100*mach_eps);
+  }
+
   // Delete the simulation
 
   delete simulation;
       
-#endif
-
-  //--------------------------------------------------
-#ifndef CONFIG_USE_CHARM    
   // display footer text
 
-  Monitor::instance()->print ("END ENZO-P");
+  Monitor::instance()->print ("","END ENZO-P");
 
   // clean up
 
@@ -123,107 +158,21 @@ PARALLEL_MAIN_BEGIN
 
   // finalize unit testing
 
-  //  unit_finalize();
+  unit_finalize();
 
   // exit
 
-    PARALLEL_PRINTF ("UNIT TEST END\n");
   PARALLEL_EXIT;
-#endif
-  //--------------------------------------------------
-
-};
-
-//--------------------------------------------------
-#ifdef CONFIG_USE_CHARM
-
-//----------------------------------------------------------------------
-
-void p_exit(int count)
-{
-  TRACE("Main::p_exit");
-  count_exit_++;
-  if (count_exit_ >= count) {
-    count_exit_ = 0;
-    monitor_->print ("END ENZO-P");
-    //    unit_finalize();
-    // Fake unit_init() for index.php (test.hpp is not included since
-    // enzo.ci and test.ci conflict)
-    PARALLEL_PRINTF ("UNIT TEST END\n");
-    PARALLEL_EXIT;
-  }
-};
-
-//----------------------------------------------------------------------
-
-void p_prepare(int count, int cycle, double time,
-	       double dt_block, int stop_block)
-{
-  TRACE("Main::p_prepare");
-  // Assumes cycle and time are the same for all "incoming" blocks;
-  // only use the last one
-
-  //--------------------------------------------------
-  // Timestep
-  //--------------------------------------------------
-
-  dt_mesh_   = MIN(dt_mesh_, dt_block);
-
-  //--------------------------------------------------
-  // Stopping
-  //--------------------------------------------------
-
-  stop_mesh_ = stop_mesh_ && stop_block;
-
-  if (++count_prepare_ >= count) {
-
-    //--------------------------------------------------
-    // Simulation::p_output()
-    //--------------------------------------------------
-    proxy_simulation.p_output(cycle, time, dt_mesh_, stop_mesh_);
-
-    // Reset pool
-    count_prepare_ = 0;
-    dt_mesh_ = std::numeric_limits<double>::max();
-    stop_mesh_ = true;
-
-  }
-};
-
-//----------------------------------------------------------------------
-
-//  --- Accumulate block output contributions and write output to disk ---
-
-void p_output_reduce(int count)
-{
-  TRACE("Main::p_output_reduce");
-  if (++count_output_ >= count) {
-    INCOMPLETE("Main::p_output_reduce()");
-    proxy_simulation.p_output_reduce();
-    count_output_ = 0;
-  }
-};
-
-//----------------------------------------------------------------------
-
-private:
-
-int count_exit_;
-int count_prepare_;
-int count_output_;
-
-// Reduction variables
-int stop_mesh_;
-double dt_mesh_;
-
-Monitor * monitor_;
 
 #endif
-//--------------------------------------------------
+  //--------------------------------------------------
+}
 
 PARALLEL_MAIN_END
 
 
 //======================================================================
-#include PARALLEL_CHARM_INCLUDE(enzo.def.h)
+#ifdef CONFIG_USE_CHARM
+#  include "enzo.def.h"
+#endif
 //======================================================================

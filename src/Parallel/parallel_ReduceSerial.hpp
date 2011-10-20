@@ -1,19 +1,18 @@
-// $Id: parallel_Reduce.hpp 2009 2011-02-22 19:43:07Z bordner $
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef PARALLEL_REDUCE_SERIAL_HPP
-#define PARALLEL_REDUCE_SERIAL_HPP
 
 /// @file     parallel_Reduce.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Mar 11 12:07:39 PST 2011
 /// @brief    [\ref Parallel] Declaration and implementation of ReduceSerial
 
+#ifndef PARALLEL_REDUCE_SERIAL_HPP
+#define PARALLEL_REDUCE_SERIAL_HPP
+
 #include "error.hpp"
 
 class ReduceSerial : public Reduce {
 
-  /// @class    Reduce
+  /// @class    ReduceSerial
   /// @ingroup  Parallel
   /// @brief    [\ref Parallel] Implementation of ReduceSerial
 

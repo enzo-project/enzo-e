@@ -1,13 +1,13 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef PERFORMANCE_TIMER_HPP
-#define PERFORMANCE_TIMER_HPP
 
 /// @file     performance_Timer.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Apr 23 12:40:04 PDT 2008
-/// @brief    [\ref Performance] Interface and implementation of the Timer class
+/// @brief [\ref Performance] Interface and implementation of the
+/// Timer class
+
+#ifndef PERFORMANCE_TIMER_HPP
+#define PERFORMANCE_TIMER_HPP
 
 class Timer {
 

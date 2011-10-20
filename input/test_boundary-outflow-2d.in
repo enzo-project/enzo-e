@@ -1,0 +1,10 @@
+include "input/dots.incl"
+
+Boundary { type = "outflow" }
+
+Output { 
+   cycle_step {  
+      name = ["boundary-outflow-2d-%04d.png","cycle"]; 
+   } 
+}
+

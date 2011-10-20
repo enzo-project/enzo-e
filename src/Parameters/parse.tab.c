@@ -68,7 +68,7 @@
 /* Copy the first part of user declarations.  */
 
 /* Line 189 of yacc.c  */
-#line 1 "src/Parameters/parse.y"
+#line 1 "build/charm/Parameters/parse.y"
 
 /*
  * ENZO: THE NEXT GENERATION
@@ -109,7 +109,7 @@ void yylex_destroy();
 const char * node_name[] = {
   "node_unknown",
   "node_operation",
-  "node_scalar",
+  "node_float",
   "node_integer",
   "node_variable",
   "node_function"
@@ -136,12 +136,12 @@ const char * op_name[] = {
     "sentinel",
     "group",
     "integer",
-    "scalar",
+    "float",
     "string",
     "identifier",
     "logical",
     "list",
-    "scalar_expr",
+    "float_expr",
     "logical_expr",
     "function" };
 
@@ -164,12 +164,12 @@ const char * op_name[] = {
     return node;
   }
 
-  struct node_expr * new_node_scalar (double value)
+  struct node_expr * new_node_float (double value)
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type          = enum_node_scalar;
-    node->scalar_value  = value;
+    node->type          = enum_node_float;
+    node->float_value  = value;
     node->left          = NULL;
     node->right         = NULL;
     node->function_name = NULL;
@@ -234,9 +234,11 @@ const char * op_name[] = {
     }
   };
 
+
   void copy_groups (char * group_dest[], char * group_src[]) {
     int i;
     for (i=0; i<MAX_GROUP_DEPTH; i++) {
+      /* MEMORY LEAK */
       group_dest[i] = (group_src[i]) ? strdup(group_src[i]) : 0;
     }
   };
@@ -332,6 +334,9 @@ const char * op_name[] = {
 
      p->parameter = (current_parameter) ? strdup(current_parameter) : 0;
 
+     free (current_parameter);
+     current_parameter = 0;
+
      current_type = enum_parameter_unknown;
 
      insert_param(param_curr,p);
@@ -351,13 +356,13 @@ const char * op_name[] = {
   }
 
 
-  /* New scalar parameter assignment */
+  /* New floating-point parameter assignment */
 
-  void new_param_scalar (double value)
+  void new_param_float (double value)
   {
     struct param_struct * p = new_param();
-    p->type         = enum_parameter_scalar;
-    p->scalar_value = value;
+    p->type         = enum_parameter_float;
+    p->float_value = value;
   }
 
   /* New logical parameter assignment */
@@ -430,8 +435,8 @@ const char * op_name[] = {
      case enum_parameter_integer:
        new_param_integer(yylval.integer_type);
        break;
-     case enum_parameter_scalar:
-       new_param_scalar(yylval.scalar_type);
+     case enum_parameter_float:
+       new_param_float(yylval.float_type);
        break;
      case enum_parameter_string: 
        new_param_string(yylval.string_type);
@@ -441,8 +446,8 @@ const char * op_name[] = {
        break;
      case enum_parameter_list:
        break;
-     case enum_parameter_scalar_expr:
-       new_param_expr(enum_parameter_scalar_expr,yylval.node_type);
+     case enum_parameter_float_expr:
+       new_param_expr(enum_parameter_float_expr,yylval.node_type);
        break;
      case enum_parameter_logical_expr:
        new_param_expr(enum_parameter_logical_expr,yylval.node_type);
@@ -450,32 +455,14 @@ const char * op_name[] = {
     default:
        printf ("%s:%d Parse Error: unknown type %d\n",
 	       __FILE__,__LINE__,current_type);
+       exit(1);
        break;
      }
   }
 
-  char * strcat3 (const char * s1,const char * s2,const char * s3)
-  {
-    char * s = malloc (strlen(s1) + strlen(s2) + strlen(s3) + 1);
-
-    strcpy(s,s1);
-    strcpy(s+strlen(s1),s2);
-    strcpy(s+strlen(s1)+strlen(s2),s3);
-    return s;
-  }
-
-  char * ftoa (double f)
-    { 
-      char * a = malloc(25); 
-
-      sprintf (a,"%24.16e",f);
-      return a;
-    }
-
-
 
 /* Line 189 of yacc.c  */
-#line 479 "src/Parameters/parse.tab.c"
+#line 466 "build/charm/Parameters/parse.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -505,7 +492,7 @@ const char * op_name[] = {
      STRING = 258,
      IDENTIFIER = 259,
      VARIABLE = 260,
-     SCALAR = 261,
+     FLOAT = 261,
      INTEGER = 262,
      LOGICAL = 263,
      LE = 264,
@@ -555,11 +542,11 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 407 "src/Parameters/parse.y"
+#line 394 "build/charm/Parameters/parse.y"
  
   int logical_type;  
   int integer_type; 
-  double scalar_type;  
+  double float_type;  
   char * string_type; 
   char * group_type;
   struct node_expr * node_type;
@@ -567,7 +554,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 571 "src/Parameters/parse.tab.c"
+#line 558 "build/charm/Parameters/parse.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -579,7 +566,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 583 "src/Parameters/parse.tab.c"
+#line 570 "build/charm/Parameters/parse.tab.c"
 
 #ifdef short
 # undef short
@@ -941,22 +928,22 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   486,   486,   487,   491,   494,   495,   498,   499,   500,
-     501,   505,   508,   511,   515,   516,   517,   518,   519,   520,
-     521,   524,   525,   528,   535,   539,   540,   540,   547,   548,
-     549,   550,   551,   552,   553,   554,   555,   556,   560,   561,
-     562,   563,   564,   565,   566,   567,   568,   569,   570,   571,
-     572,   573,   574,   575,   576,   577,   578,   579,   580,   582,
-     583,   584,   585,   586,   587,   588,   589,   590,   591,   592,
-     593,   594,   595,   596,   597,   601,   602,   603,   604,   605,
-     606,   610,   611,   612,   613,   614,   615,   616,   617,   618,
-     619,   620,   621,   622,   623,   624,   625,   626,   627,   628,
-     629,   630,   631,   632,   633,   634,   635,   636,   637,   638,
-     640,   641,   642,   643,   644,   645,   646,   647,   648,   649,
-     650,   651,   652,   653,   654,   655,   660,   661,   662,   663,
-     664,   665,   666,   667,   668,   669,   670,   671,   672,   673,
-     674,   675,   676,   677,   678,   679,   680,   681,   682,   683,
-     684
+       0,   474,   474,   475,   479,   482,   483,   486,   487,   488,
+     489,   493,   496,   499,   503,   504,   505,   506,   507,   508,
+     509,   512,   513,   516,   523,   527,   528,   528,   535,   536,
+     537,   538,   539,   540,   541,   542,   543,   544,   548,   549,
+     550,   551,   552,   553,   554,   555,   556,   557,   558,   559,
+     560,   561,   562,   563,   564,   565,   566,   567,   568,   570,
+     571,   572,   573,   574,   575,   576,   577,   578,   579,   580,
+     581,   582,   583,   584,   585,   589,   590,   591,   592,   593,
+     594,   598,   599,   600,   601,   602,   603,   604,   605,   606,
+     607,   608,   609,   610,   611,   612,   613,   614,   615,   616,
+     617,   618,   619,   620,   621,   622,   623,   624,   625,   626,
+     628,   629,   630,   631,   632,   633,   634,   635,   636,   637,
+     638,   639,   640,   641,   642,   643,   648,   649,   650,   651,
+     652,   653,   654,   655,   656,   657,   658,   659,   660,   661,
+     662,   663,   664,   665,   666,   667,   668,   669,   670,   671,
+     672
 };
 #endif
 
@@ -966,7 +953,7 @@ static const yytype_uint16 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "STRING", "IDENTIFIER", "VARIABLE",
-  "SCALAR", "INTEGER", "LOGICAL", "LE", "GE", "NE", "EQ", "AND", "OR",
+  "FLOAT", "INTEGER", "LOGICAL", "LE", "GE", "NE", "EQ", "AND", "OR",
   "'<'", "'>'", "'+'", "'-'", "'*'", "'/'", "ACOS", "ACOSH", "ASIN",
   "ASINH", "ATAN", "ATANH", "CBRT", "CEIL", "COS", "COSH", "ERFC", "ERF",
   "EXP", "EXPM1", "FABS", "FLOOR", "J0", "J1", "LGAMMA", "LOG10", "LOG1P",
@@ -2187,147 +2174,147 @@ yyreduce:
         case 3:
 
 /* Line 1455 of yacc.c  */
-#line 487 "src/Parameters/parse.y"
+#line 475 "build/charm/Parameters/parse.y"
     { ;}
     break;
 
   case 4:
 
 /* Line 1455 of yacc.c  */
-#line 491 "src/Parameters/parse.y"
+#line 479 "build/charm/Parameters/parse.y"
     {  ;}
     break;
 
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 494 "src/Parameters/parse.y"
+#line 482 "build/charm/Parameters/parse.y"
     { current_group[--current_group_level] = 0; ;}
     break;
 
   case 6:
 
 /* Line 1455 of yacc.c  */
-#line 495 "src/Parameters/parse.y"
+#line 483 "build/charm/Parameters/parse.y"
     { current_group[--current_group_level] = 0; ;}
     break;
 
   case 7:
 
 /* Line 1455 of yacc.c  */
-#line 498 "src/Parameters/parse.y"
+#line 486 "build/charm/Parameters/parse.y"
     {  ;}
     break;
 
   case 8:
 
 /* Line 1455 of yacc.c  */
-#line 499 "src/Parameters/parse.y"
+#line 487 "build/charm/Parameters/parse.y"
     {  ;}
     break;
 
   case 9:
 
 /* Line 1455 of yacc.c  */
-#line 500 "src/Parameters/parse.y"
+#line 488 "build/charm/Parameters/parse.y"
     {  ;}
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 501 "src/Parameters/parse.y"
+#line 489 "build/charm/Parameters/parse.y"
     {  ;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 505 "src/Parameters/parse.y"
+#line 493 "build/charm/Parameters/parse.y"
     { current_group[current_group_level++] = (yyvsp[(1) - (1)].string_type); ;}
     break;
 
   case 12:
 
 /* Line 1455 of yacc.c  */
-#line 508 "src/Parameters/parse.y"
+#line 496 "build/charm/Parameters/parse.y"
     { current_parameter = (yyvsp[(1) - (1)].string_type);;}
     break;
 
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 511 "src/Parameters/parse.y"
+#line 499 "build/charm/Parameters/parse.y"
     { new_parameter(); ;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 515 "src/Parameters/parse.y"
+#line 503 "build/charm/Parameters/parse.y"
     { current_type = enum_parameter_string;       yylval.string_type = (yyvsp[(1) - (1)].string_type); ;}
     break;
 
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 516 "src/Parameters/parse.y"
+#line 504 "build/charm/Parameters/parse.y"
     { current_type = enum_parameter_integer;      yylval.integer_type = (yyvsp[(1) - (1)].integer_type);;}
     break;
 
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 517 "src/Parameters/parse.y"
-    { current_type = enum_parameter_scalar;       yylval.scalar_type = (yyvsp[(1) - (1)].scalar_type);;}
+#line 505 "build/charm/Parameters/parse.y"
+    { current_type = enum_parameter_float;       yylval.float_type = (yyvsp[(1) - (1)].float_type);;}
     break;
 
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 518 "src/Parameters/parse.y"
+#line 506 "build/charm/Parameters/parse.y"
     { current_type = enum_parameter_logical;      yylval.logical_type = (yyvsp[(1) - (1)].logical_type); ;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 519 "src/Parameters/parse.y"
-    { current_type = enum_parameter_scalar_expr;  yylval.node_type = (yyvsp[(1) - (1)].node_type); ;}
+#line 507 "build/charm/Parameters/parse.y"
+    { current_type = enum_parameter_float_expr;  yylval.node_type = (yyvsp[(1) - (1)].node_type); ;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 520 "src/Parameters/parse.y"
+#line 508 "build/charm/Parameters/parse.y"
     { current_type = enum_parameter_logical_expr; yylval.node_type = (yyvsp[(1) - (1)].node_type); ;}
     break;
 
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 521 "src/Parameters/parse.y"
+#line 509 "build/charm/Parameters/parse.y"
     { current_type = enum_parameter_list; ;}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 524 "src/Parameters/parse.y"
+#line 512 "build/charm/Parameters/parse.y"
     {  ;}
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 525 "src/Parameters/parse.y"
+#line 513 "build/charm/Parameters/parse.y"
     {  ;}
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 528 "src/Parameters/parse.y"
+#line 516 "build/charm/Parameters/parse.y"
     { 
    struct param_struct * p = new_param_sentinel();
    p->list_value = param_curr;
@@ -2339,896 +2326,896 @@ yyreduce:
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 535 "src/Parameters/parse.y"
+#line 523 "build/charm/Parameters/parse.y"
     { param_curr = param_curr->list_value; ;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 539 "src/Parameters/parse.y"
+#line 527 "build/charm/Parameters/parse.y"
     { new_parameter(); ;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 540 "src/Parameters/parse.y"
+#line 528 "build/charm/Parameters/parse.y"
     { new_parameter(); ;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 542 "src/Parameters/parse.y"
+#line 530 "build/charm/Parameters/parse.y"
     { ;}
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 547 "src/Parameters/parse.y"
+#line 535 "build/charm/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(2) - (3)].logical_type); ;}
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 548 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) <= (yyvsp[(3) - (3)].scalar_type); ;}
+#line 536 "build/charm/Parameters/parse.y"
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) <= (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 549 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) >= (yyvsp[(3) - (3)].scalar_type); ;}
+#line 537 "build/charm/Parameters/parse.y"
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) >= (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 550 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) <  (yyvsp[(3) - (3)].scalar_type); ;}
+#line 538 "build/charm/Parameters/parse.y"
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) <  (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 551 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) >  (yyvsp[(3) - (3)].scalar_type); ;}
+#line 539 "build/charm/Parameters/parse.y"
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) >  (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 552 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) == (yyvsp[(3) - (3)].scalar_type); ;}
+#line 540 "build/charm/Parameters/parse.y"
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) == (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 553 "src/Parameters/parse.y"
-    { (yyval.logical_type) = (yyvsp[(1) - (3)].scalar_type) != (yyvsp[(3) - (3)].scalar_type); ;}
+#line 541 "build/charm/Parameters/parse.y"
+    { (yyval.logical_type) = (yyvsp[(1) - (3)].float_type) != (yyvsp[(3) - (3)].float_type); ;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 554 "src/Parameters/parse.y"
+#line 542 "build/charm/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (3)].logical_type) || (yyvsp[(3) - (3)].logical_type); ;}
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 555 "src/Parameters/parse.y"
+#line 543 "build/charm/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (3)].logical_type) && (yyvsp[(3) - (3)].logical_type); ;}
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 556 "src/Parameters/parse.y"
+#line 544 "build/charm/Parameters/parse.y"
     { (yyval.logical_type) = (yyvsp[(1) - (1)].logical_type); ;}
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 560 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(2) - (3)].scalar_type); ;}
+#line 548 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = (yyvsp[(2) - (3)].float_type); ;}
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 561 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(1) - (3)].scalar_type) + (yyvsp[(3) - (3)].scalar_type);;}
+#line 549 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) + (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 562 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(1) - (3)].scalar_type) - (yyvsp[(3) - (3)].scalar_type);;}
+#line 550 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) - (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 563 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(1) - (3)].scalar_type) * (yyvsp[(3) - (3)].scalar_type);;}
+#line 551 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) * (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 564 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(1) - (3)].scalar_type) / (yyvsp[(3) - (3)].scalar_type);;}
+#line 552 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = (yyvsp[(1) - (3)].float_type) / (yyvsp[(3) - (3)].float_type);;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 565 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = acos((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 553 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = acos((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 566 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = acosh((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 554 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = acosh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 567 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = asin((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 555 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = asin((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 568 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = asinh((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 556 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = asinh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 569 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = atan((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 557 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = atan((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 570 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = atanh((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 558 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = atanh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 571 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = cbrt((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 559 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = cbrt((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 572 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = ceil((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 560 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = ceil((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 573 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = cos((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 561 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = cos((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 574 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = cosh((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 562 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = cosh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
-#line 575 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = erfc((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 563 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = erfc((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 576 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = erf((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 564 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = erf((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
-#line 577 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = exp((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 565 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = exp((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 578 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = expm1((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 566 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = expm1((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 57:
 
 /* Line 1455 of yacc.c  */
-#line 579 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = fabs((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 567 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = fabs((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 58:
 
 /* Line 1455 of yacc.c  */
-#line 580 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = floor((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 568 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = floor((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 59:
 
 /* Line 1455 of yacc.c  */
-#line 582 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = j0((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 570 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = j0((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
-#line 583 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = j1((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 571 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = j1((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
-#line 584 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = lgamma((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 572 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = lgamma((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 62:
 
 /* Line 1455 of yacc.c  */
-#line 585 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = log10((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 573 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = log10((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 63:
 
 /* Line 1455 of yacc.c  */
-#line 586 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = log1p((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 574 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = log1p((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 64:
 
 /* Line 1455 of yacc.c  */
-#line 587 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = logb((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 575 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = logb((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 65:
 
 /* Line 1455 of yacc.c  */
-#line 588 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = log((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 576 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = log((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
-#line 589 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = sin((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 577 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = sin((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
-#line 590 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = sinh((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 578 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = sinh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
-#line 591 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = sqrt((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 579 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = sqrt((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 69:
 
 /* Line 1455 of yacc.c  */
-#line 592 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = tan((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 580 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = tan((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
-#line 593 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = tanh((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 581 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = tanh((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
-#line 594 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = y0((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 582 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = y0((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 72:
 
 /* Line 1455 of yacc.c  */
-#line 595 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = y1((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 583 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = y1((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
-#line 596 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = rint((yyvsp[(3) - (4)].scalar_type)); ;}
+#line 584 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = rint((yyvsp[(3) - (4)].float_type)); ;}
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
-#line 597 "src/Parameters/parse.y"
-    { (yyval.scalar_type) = (yyvsp[(1) - (1)].scalar_type);;}
+#line 585 "build/charm/Parameters/parse.y"
+    { (yyval.float_type) = (yyvsp[(1) - (1)].float_type);;}
     break;
 
   case 75:
 
 /* Line 1455 of yacc.c  */
-#line 601 "src/Parameters/parse.y"
+#line 589 "build/charm/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(2) - (3)].integer_type); ;}
     break;
 
   case 76:
 
 /* Line 1455 of yacc.c  */
-#line 602 "src/Parameters/parse.y"
+#line 590 "build/charm/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(1) - (3)].integer_type) + (yyvsp[(3) - (3)].integer_type);;}
     break;
 
   case 77:
 
 /* Line 1455 of yacc.c  */
-#line 603 "src/Parameters/parse.y"
+#line 591 "build/charm/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(1) - (3)].integer_type) - (yyvsp[(3) - (3)].integer_type);;}
     break;
 
   case 78:
 
 /* Line 1455 of yacc.c  */
-#line 604 "src/Parameters/parse.y"
+#line 592 "build/charm/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(1) - (3)].integer_type) * (yyvsp[(3) - (3)].integer_type);;}
     break;
 
   case 79:
 
 /* Line 1455 of yacc.c  */
-#line 605 "src/Parameters/parse.y"
+#line 593 "build/charm/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(1) - (3)].integer_type) / (yyvsp[(3) - (3)].integer_type);;}
     break;
 
   case 80:
 
 /* Line 1455 of yacc.c  */
-#line 606 "src/Parameters/parse.y"
+#line 594 "build/charm/Parameters/parse.y"
     { (yyval.integer_type) = (yyvsp[(1) - (1)].integer_type);;}
     break;
 
   case 81:
 
 /* Line 1455 of yacc.c  */
-#line 610 "src/Parameters/parse.y"
+#line 598 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = (yyvsp[(2) - (3)].node_type); ;}
     break;
 
   case 82:
 
 /* Line 1455 of yacc.c  */
-#line 611 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_add,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+#line 599 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_add,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 83:
 
 /* Line 1455 of yacc.c  */
-#line 612 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_add,(yyvsp[(3) - (3)].node_type)); ;}
+#line 600 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_add,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 84:
 
 /* Line 1455 of yacc.c  */
-#line 613 "src/Parameters/parse.y"
+#line 601 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_add,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 85:
 
 /* Line 1455 of yacc.c  */
-#line 614 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_sub,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+#line 602 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_sub,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 86:
 
 /* Line 1455 of yacc.c  */
-#line 615 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_sub,(yyvsp[(3) - (3)].node_type)); ;}
+#line 603 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_sub,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 87:
 
 /* Line 1455 of yacc.c  */
-#line 616 "src/Parameters/parse.y"
+#line 604 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_sub,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 88:
 
 /* Line 1455 of yacc.c  */
-#line 617 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_mul,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+#line 605 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_mul,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 89:
 
 /* Line 1455 of yacc.c  */
-#line 618 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_mul,(yyvsp[(3) - (3)].node_type)); ;}
+#line 606 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_mul,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 90:
 
 /* Line 1455 of yacc.c  */
-#line 619 "src/Parameters/parse.y"
+#line 607 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_mul,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 91:
 
 /* Line 1455 of yacc.c  */
-#line 620 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_div,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+#line 608 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_div,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 92:
 
 /* Line 1455 of yacc.c  */
-#line 621 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_div,(yyvsp[(3) - (3)].node_type)); ;}
+#line 609 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_div,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 93:
 
 /* Line 1455 of yacc.c  */
-#line 622 "src/Parameters/parse.y"
+#line 610 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_div,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 94:
 
 /* Line 1455 of yacc.c  */
-#line 623 "src/Parameters/parse.y"
+#line 611 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( acos, "acos", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 95:
 
 /* Line 1455 of yacc.c  */
-#line 624 "src/Parameters/parse.y"
+#line 612 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( acosh, "acosh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 96:
 
 /* Line 1455 of yacc.c  */
-#line 625 "src/Parameters/parse.y"
+#line 613 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( asin, "asin", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 97:
 
 /* Line 1455 of yacc.c  */
-#line 626 "src/Parameters/parse.y"
+#line 614 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( asinh, "asinh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 98:
 
 /* Line 1455 of yacc.c  */
-#line 627 "src/Parameters/parse.y"
+#line 615 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( atan, "atan", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 99:
 
 /* Line 1455 of yacc.c  */
-#line 628 "src/Parameters/parse.y"
+#line 616 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( atanh, "atanh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 100:
 
 /* Line 1455 of yacc.c  */
-#line 629 "src/Parameters/parse.y"
+#line 617 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( cbrt, "cbrt", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 101:
 
 /* Line 1455 of yacc.c  */
-#line 630 "src/Parameters/parse.y"
+#line 618 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( ceil, "ceil", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 102:
 
 /* Line 1455 of yacc.c  */
-#line 631 "src/Parameters/parse.y"
+#line 619 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( cos, "cos", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 103:
 
 /* Line 1455 of yacc.c  */
-#line 632 "src/Parameters/parse.y"
+#line 620 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( cosh, "cosh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 104:
 
 /* Line 1455 of yacc.c  */
-#line 633 "src/Parameters/parse.y"
+#line 621 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( erfc, "erfc", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 105:
 
 /* Line 1455 of yacc.c  */
-#line 634 "src/Parameters/parse.y"
+#line 622 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( erf, "erf", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 106:
 
 /* Line 1455 of yacc.c  */
-#line 635 "src/Parameters/parse.y"
+#line 623 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( exp, "exp", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 107:
 
 /* Line 1455 of yacc.c  */
-#line 636 "src/Parameters/parse.y"
+#line 624 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( expm1, "expm1", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 108:
 
 /* Line 1455 of yacc.c  */
-#line 637 "src/Parameters/parse.y"
+#line 625 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( fabs, "fabs", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 109:
 
 /* Line 1455 of yacc.c  */
-#line 638 "src/Parameters/parse.y"
+#line 626 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( floor, "floor", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 110:
 
 /* Line 1455 of yacc.c  */
-#line 640 "src/Parameters/parse.y"
+#line 628 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( j0, "j0", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 111:
 
 /* Line 1455 of yacc.c  */
-#line 641 "src/Parameters/parse.y"
+#line 629 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( j1, "j1", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 112:
 
 /* Line 1455 of yacc.c  */
-#line 642 "src/Parameters/parse.y"
+#line 630 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( lgamma, "lgamma", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 113:
 
 /* Line 1455 of yacc.c  */
-#line 643 "src/Parameters/parse.y"
+#line 631 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( log10, "log10", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 114:
 
 /* Line 1455 of yacc.c  */
-#line 644 "src/Parameters/parse.y"
+#line 632 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( log1p, "log1p", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 115:
 
 /* Line 1455 of yacc.c  */
-#line 645 "src/Parameters/parse.y"
+#line 633 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( logb, "logb", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 116:
 
 /* Line 1455 of yacc.c  */
-#line 646 "src/Parameters/parse.y"
+#line 634 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( log, "log", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 117:
 
 /* Line 1455 of yacc.c  */
-#line 647 "src/Parameters/parse.y"
+#line 635 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( sin, "sin", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 118:
 
 /* Line 1455 of yacc.c  */
-#line 648 "src/Parameters/parse.y"
+#line 636 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( sinh, "sinh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 119:
 
 /* Line 1455 of yacc.c  */
-#line 649 "src/Parameters/parse.y"
+#line 637 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( sqrt, "sqrt", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 120:
 
 /* Line 1455 of yacc.c  */
-#line 650 "src/Parameters/parse.y"
+#line 638 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( tan, "tan", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 121:
 
 /* Line 1455 of yacc.c  */
-#line 651 "src/Parameters/parse.y"
+#line 639 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( tanh, "tanh", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 122:
 
 /* Line 1455 of yacc.c  */
-#line 652 "src/Parameters/parse.y"
+#line 640 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( y0, "y0", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 123:
 
 /* Line 1455 of yacc.c  */
-#line 653 "src/Parameters/parse.y"
+#line 641 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( y1, "y1", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 124:
 
 /* Line 1455 of yacc.c  */
-#line 654 "src/Parameters/parse.y"
+#line 642 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_function ( rint, "rint", (yyvsp[(3) - (4)].node_type)); ;}
     break;
 
   case 125:
 
 /* Line 1455 of yacc.c  */
-#line 655 "src/Parameters/parse.y"
+#line 643 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_variable ((yyvsp[(1) - (1)].string_type));  ;}
     break;
 
   case 126:
 
 /* Line 1455 of yacc.c  */
-#line 660 "src/Parameters/parse.y"
-    { ;}
+#line 648 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = (yyvsp[(2) - (3)].node_type); ;}
     break;
 
   case 127:
 
 /* Line 1455 of yacc.c  */
-#line 661 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_le,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+#line 649 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_le,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 128:
 
 /* Line 1455 of yacc.c  */
-#line 662 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_le,(yyvsp[(3) - (3)].node_type)); ;}
+#line 650 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_le,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 129:
 
 /* Line 1455 of yacc.c  */
-#line 663 "src/Parameters/parse.y"
+#line 651 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_le,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 130:
 
 /* Line 1455 of yacc.c  */
-#line 664 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ge,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+#line 652 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ge,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 131:
 
 /* Line 1455 of yacc.c  */
-#line 665 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_ge,(yyvsp[(3) - (3)].node_type)); ;}
+#line 653 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_ge,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 132:
 
 /* Line 1455 of yacc.c  */
-#line 666 "src/Parameters/parse.y"
+#line 654 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ge,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 133:
 
 /* Line 1455 of yacc.c  */
-#line 667 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_lt,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+#line 655 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_lt,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 134:
 
 /* Line 1455 of yacc.c  */
-#line 668 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_lt,(yyvsp[(3) - (3)].node_type)); ;}
+#line 656 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_lt,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 135:
 
 /* Line 1455 of yacc.c  */
-#line 669 "src/Parameters/parse.y"
+#line 657 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_lt,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 136:
 
 /* Line 1455 of yacc.c  */
-#line 670 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_gt,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+#line 658 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_gt,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 137:
 
 /* Line 1455 of yacc.c  */
-#line 671 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_gt,(yyvsp[(3) - (3)].node_type)); ;}
+#line 659 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_gt,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 138:
 
 /* Line 1455 of yacc.c  */
-#line 672 "src/Parameters/parse.y"
+#line 660 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_gt,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 139:
 
 /* Line 1455 of yacc.c  */
-#line 673 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_eq,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+#line 661 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_eq,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 140:
 
 /* Line 1455 of yacc.c  */
-#line 674 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_eq,(yyvsp[(3) - (3)].node_type)); ;}
+#line 662 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_eq,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 141:
 
 /* Line 1455 of yacc.c  */
-#line 675 "src/Parameters/parse.y"
+#line 663 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_eq,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 142:
 
 /* Line 1455 of yacc.c  */
-#line 676 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ne,new_node_scalar((yyvsp[(3) - (3)].scalar_type))); ;}
+#line 664 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ne,new_node_float((yyvsp[(3) - (3)].float_type))); ;}
     break;
 
   case 143:
 
 /* Line 1455 of yacc.c  */
-#line 677 "src/Parameters/parse.y"
-    { (yyval.node_type) = new_node_operation (new_node_scalar((yyvsp[(1) - (3)].scalar_type)), enum_op_ne,(yyvsp[(3) - (3)].node_type)); ;}
+#line 665 "build/charm/Parameters/parse.y"
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[(1) - (3)].float_type)), enum_op_ne,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 144:
 
 /* Line 1455 of yacc.c  */
-#line 678 "src/Parameters/parse.y"
+#line 666 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_ne,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 145:
 
 /* Line 1455 of yacc.c  */
-#line 679 "src/Parameters/parse.y"
+#line 667 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_or,new_node_logical((yyvsp[(3) - (3)].logical_type))); ;}
     break;
 
   case 146:
 
 /* Line 1455 of yacc.c  */
-#line 680 "src/Parameters/parse.y"
+#line 668 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_logical((yyvsp[(1) - (3)].logical_type)), enum_op_or,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 147:
 
 /* Line 1455 of yacc.c  */
-#line 681 "src/Parameters/parse.y"
+#line 669 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_or,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 148:
 
 /* Line 1455 of yacc.c  */
-#line 682 "src/Parameters/parse.y"
+#line 670 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_and,new_node_logical((yyvsp[(3) - (3)].logical_type))); ;}
     break;
 
   case 149:
 
 /* Line 1455 of yacc.c  */
-#line 683 "src/Parameters/parse.y"
+#line 671 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation (new_node_logical((yyvsp[(1) - (3)].logical_type)), enum_op_and,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
   case 150:
 
 /* Line 1455 of yacc.c  */
-#line 684 "src/Parameters/parse.y"
+#line 672 "build/charm/Parameters/parse.y"
     { (yyval.node_type) = new_node_operation ((yyvsp[(1) - (3)].node_type), enum_op_and,(yyvsp[(3) - (3)].node_type)); ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 3232 "src/Parameters/parse.tab.c"
+#line 3219 "build/charm/Parameters/parse.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3440,11 +3427,11 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 689 "src/Parameters/parse.y"
+#line 675 "build/charm/Parameters/parse.y"
 
 
 struct param_struct * 
-cello_parameters_read(FILE * fp)
+cello_parameters_read(const char * filename, FILE * fp)
 {
   clear_groups(current_group);
 
@@ -3452,7 +3439,9 @@ cello_parameters_read(FILE * fp)
   param_head = param_curr = new_param_sentinel();
 
   /*   yydebug=1; */
-  
+
+  cello_new_file (filename);
+
   yyrestart(fp);
 
   yyparse();
@@ -3481,8 +3470,9 @@ void print_expression (struct node_expr * node,
     case enum_node_integer:
       fprintf (fp,"%d",node->integer_value);
       break;
-    case enum_node_scalar:
-      fprintf (fp,"%g",node->scalar_value);
+    case enum_node_float:
+      /* '#' format character forces a decimal point */
+      fprintf (fp,"%#.15g",node->float_value);
       break;
     case enum_node_variable:
       fprintf (fp,"%c",node->var_value);
@@ -3526,8 +3516,9 @@ void sprintf_expression (struct node_expr * node,
       sprintf (buffer,"%d",node->integer_value);
       buffer += strlen(buffer);
       break;
-    case enum_node_scalar:
-      sprintf (buffer,"%g",node->scalar_value);
+    case enum_node_float:
+      /* '#' format character forces a decimal point */
+      sprintf (buffer,"%#.15g",node->float_value);
       buffer += strlen(buffer);
       break;
     case enum_node_variable:
@@ -3589,8 +3580,9 @@ void cello_parameters_print_list(struct param_struct * head, int level)
 	      parameter_name[p->type], p->parameter);
     }
     switch (p->type) {
-    case enum_parameter_scalar:  
-      printf ("%g\n",p->scalar_value);  
+    case enum_parameter_float:  
+      /* '#' format character forces a decimal point */
+      printf ("%#.15g\n",p->float_value);  
       break;
     case enum_parameter_integer: 
       printf ("%d\n",p->integer_value); 
@@ -3615,7 +3607,7 @@ void cello_parameters_print_list(struct param_struct * head, int level)
       indent(level);
       print_expression(p->op_value,stdout); printf ("\n");
       break;
-    case enum_parameter_scalar_expr:
+    case enum_parameter_float_expr:
       indent(level);
       print_expression(p->op_value,stdout); printf ("\n");
       break;

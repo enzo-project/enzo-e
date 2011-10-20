@@ -1,4 +1,3 @@
-// $Id: method_Boundary.hpp 1896 2010-12-03 23:54:08Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     method_Boundary.hpp 

@@ -1,19 +1,17 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef DISK_FILE_HDF5_HPP
-#define DISK_FILE_HDF5_HPP
 
 /// @file     disk_FileHdf5.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
-/// @todo     Refactor interface to be hdf5-independent (groups, datasets, etc.)
-/// @todo     Add support for relative/absolute directory / group
-/// @todo     Add unit tests for group operations to test_disk_hdf5
-/// @todo     Add state checks for file open before adding dataset, etc.
+/// @todo     Support multiple float types: std, native, ieee
+/// @todo     Add error handling (see H5E API)
+/// @todo     Add support for compression (see H5Z API)
 /// @brief    [\ref Disk] Interface for the FileHdf5 class
 
-class FileHdf5 {
+#ifndef DISK_FILE_HDF5_HPP
+#define DISK_FILE_HDF5_HPP
+
+class FileHdf5 : public File {
 
   /// @class    FileHdf5
   /// @ingroup  Disk
@@ -23,74 +21,170 @@ class FileHdf5 {
 
 public: // interface
 
-  /// Initialize the FileHdf5 object
-  FileHdf5();
+  /// Create an HDF5 file with the given path and filename
 
-  /// Open the file with the given mode
-  int open_file  (std::string name, std::string mode);
+  FileHdf5 (std::string path, std::string name) throw();
+
+  /// Destructor
+  ~FileHdf5 () throw()
+  {}
+
+  // Files
+
+  /// Open an existing file
+  virtual void file_open () throw();
+
+  /// Create a new file
+  virtual void file_create () throw();
 
   /// Close the file
-  void close_file ();
+  virtual void file_close () throw();
+  
+  /// Read a metadata item associated with the file
+  virtual void file_read_meta
+  ( void * buffer, std::string name,  enum scalar_type * s_type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+  
+  /// Write a metadata item associated with the file
+  virtual void file_write_meta
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+  
 
-  /// Open the given group
-  void open_group (std::string name);
+  // Datasets
 
-  /// Close the current group
-  void close_group ();
+  /// Open an existing dataset for reading
+  virtual void data_open
+  ( std::string name,  enum scalar_type * type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
 
-  /// Open the given dataset with given size for reading
-  void open_dataset (std::string name, 
-		     int * nx, int * ny, int * nz);
+  /// Create a new dataset for writing (and open it)
+  virtual void data_create
+  ( std::string name,  enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
 
-  /// Open the given dataset with the given size for writing
-  /// @@@ datatype: H5Dcreate
-  void open_dataset (std::string name, 
-		     enum precision_enum precision,
-		     int nx, int ny, int nz);
+  /// Read from the opened dataset
+  virtual void data_read (void * buffer) throw();
 
-  /// Close the current dataset
-  void close_dataset ();
+  /// Write to the opened dataset
+  virtual void data_write (const void * buffer) throw();
 
-  /// Read the current dataset into the buffer
-  /// @@@ datatype: H5Dread
-  void read  (char              * buffer,
-	      enum precision_enum precision);
+  /// Close the opened dataset
+  virtual void data_close () throw();
 
-  /// Write the current dataset from the buffer
-  /// @@@ datatype: H5Dwrite
-  void write (char              * buffer,
-	      enum precision_enum precision);
+  /// Read a metadata item associated with the opened dataset
+  virtual void data_read_meta
+  ( void * buffer, std::string name,  enum scalar_type * s_type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+  
+  /// Write a metadata item associated with the opened dataset
+  virtual void data_write_meta
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+
+
+  // Groups
+
+  /// Change to the named group
+  virtual void group_chdir (std::string name) throw();
+
+  /// Open an existing group named buy group_chdir()
+  virtual void group_open () throw();
+
+  /// Create a new group named by group_chdir() (and open it)
+  virtual void group_create () throw();
+
+  /// Get the current group
+  virtual void group_close () throw();
+  
+  /// Read a metadata item associated with the opened group
+  virtual void group_read_meta
+  ( void * buffer, std::string name,  enum scalar_type * s_type,
+    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+  
+  /// Write a metadata item associated with the opened group
+  virtual void group_write_meta
+  ( const void * buffer, std::string name, enum scalar_type type,
+    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
 
 private: // functions
 
-  /// Return the HDF5 datatype for the given precision
-  int datatype_(enum precision_enum precision);
+  /// Convert the scalar type to HDF5 datatype
+  int scalar_to_hdf5_(enum scalar_type type) const throw();
 
+  /// Convert the scalar type to an HDF5 datatype
+  enum scalar_type hdf5_to_scalar_(int type) const throw();
+
+  /// Convert a relative path to an absolute path
+  std::string relative_to_absolute_
+  (std::string path_relative, std::string path_current) const throw();
+
+  /// Set output extents n0 through n4
+  void set_output_extents_
+  ( hid_t space_id, int * n0, int * n1, int * n2, int * n3, int *n4) throw();
+
+  /// Determine rank from n0 through n4
+  hid_t create_dataspace_(int n0,int n1,int n2,int n3,int n4,
+			  hsize_t * data_size) throw();
+
+  /// Close the given dataspace
+  void close_dataspace_ (hid_t space_id) throw();
+
+  /// Open the dataset
+  hid_t open_dataset_ (hid_t group, std::string name) throw();
+
+  /// Close the dataset
+  void close_dataset_ () throw();
+
+  /// Return the space for the given dataset
+  hid_t get_data_space_(hid_t dataset_id, std::string name) throw ();
+
+  /// Return the space for the given attribute
+  hid_t get_attr_space_(hid_t dataset_id, std::string name) throw ();
+  
 private: // attributes
 
   /// HDF5 file descriptor
-  hid_t file_;
-
-  /// HDF5 file name
-  std::string file_name_;
-
-  /// HDF5 file mode
-  std::string file_mode_;
+  hid_t file_id_;
 
   /// Whether file is open or closed
   bool  is_file_open_;
 
-  /// HDF5 dataset descriptor
-  hid_t dataset_;
 
-  /// HDF5 dataset name
-  std::string dataset_name_;
+  /// HDF5 dataset descriptor
+  hid_t data_id_;
 
   /// HDF5 dataspace descriptor
-  hid_t dataspace_;
+  hid_t space_id_;
 
-  /// Last error
-  herr_t      status_;
+
+  /// HDF5 attribute descriptor
+  hid_t attribute_id_;
+
+
+  /// HDF4 group descriptor
+  hid_t group_id_;
+
+  /// Group name 
+  std::string group_name_;
+
+  /// Whether a group is open or closed
+  bool is_group_open_;
+
+  /// HDF5 dataset name
+  std::string data_name_;
+
+  /// Type of data in the HDF5 datatype
+  scalar_type data_type_;
+
+  /// Dataset rank, 0 to 5
+  int data_rank_;
+
+  /// Dataset size
+  hsize_t data_size_[5];
+
+  /// Whether a dataset is open or closed
+  bool  is_data_open_;
 
 };
 

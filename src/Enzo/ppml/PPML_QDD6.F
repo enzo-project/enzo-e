@@ -1,7 +1,7 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
-#include "fortran.def"
+#include "fortran.h"
 
         Subroutine QDD6(Nx,Qvr,Qvl,Qrx,Qlx,Qp)
         Implicit NONE

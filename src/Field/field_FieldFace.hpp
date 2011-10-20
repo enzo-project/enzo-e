@@ -1,13 +1,12 @@
-// $Id: field_FieldFace.hpp 2179 2011-04-06 22:40:24Z bordner $
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef FIELD_FIELD_FACE_HPP
-#define FIELD_FIELD_FACE_HPP
 
 /// @file     field_FieldFace.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2011-04-12
 /// @brief    [\ref Field] Interface for the FieldFace class
+
+#ifndef FIELD_FIELD_FACE_HPP
+#define FIELD_FIELD_FACE_HPP
 
 class FieldFace {
 
@@ -49,8 +48,8 @@ public: // interface
 	    const FieldBlock * field_block,
 	    axis_enum          axis,
 	    face_enum          face,
-	    bool               full_x,
-	    bool               full_y) throw();
+	    bool               full_x = true,
+	    bool               full_y = true) throw();
 
 
   /// Store to field's ghost data
@@ -58,8 +57,8 @@ public: // interface
 	     FieldBlock *       field_block,
 	     axis_enum          axis,
 	     face_enum          face,
-	     bool               full_x,
-	     bool               full_y) throw();
+	     bool               full_x = true,
+	     bool               full_y = true) throw();
 
   /// Return the size of the array
   size_t size() const throw() { return array_.size(); };
@@ -79,8 +78,8 @@ private: // functions
   void allocate_(const FieldDescr * field_descr,
 		 const FieldBlock * field_block,
 		 axis_enum          axis,
-		 bool               full_x,
-		 bool               full_y) throw();
+		 bool               full_x = true,
+		 bool               full_y = true) throw();
 
   /// Deallocate array_ storage
   void deallocate_() throw();
@@ -95,8 +94,8 @@ private: // functions
 			  int       ng[3],
 			  axis_enum axis, 
 			  face_enum face, 
-			  bool      full_x,
-			  bool      full_y ) throw();
+			  bool      full_x = true,
+			  bool      full_y = true) throw();
 
   /// Precision-agnostic function for copying the field_face array into
   /// the field block ghosts; returns number of bytes copied
@@ -108,8 +107,8 @@ private: // functions
 			  int       ng[3],
 			  axis_enum axis, 
 			  face_enum face, 
-			  bool      full_x,
-			  bool      full_y ) throw();
+			  bool      full_x = true,
+			  bool      full_y = true) throw();
 
 private: // attributes
 

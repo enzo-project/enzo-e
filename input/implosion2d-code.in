@@ -10,7 +10,6 @@
 
    Mesh { 
       root_size      = [400,400];
-      block_size     = [8,8];
    }
 
    Field {
@@ -32,6 +31,10 @@
    Method {
 
       sequence = ["ppm"];
+
+   }
+
+   Enzo {
 
       ppm {
          diffusion   = true;
@@ -59,11 +62,11 @@
 
    Output { 
 
-      groups = ["cycle_step"];
+      file_groups = ["cycle_step"];
 
       cycle_step {
-         file_name      = "implosion2d-code-%04d";
-         type           = "image";
-         cycle_interval = 10;
+         type = "image";
+         name = ["implosion2d-code-%04d","cycle"];
+         schedule = ["cycle","interval",10];
       }
    }

@@ -13,7 +13,13 @@ Import('use_papi')
 # DEPENDENCIES
 #------------------------------
 
-components = ['disk','enzo-ppm', 'enzo-ppml', 'error','memory', 'simulation', 'parallel', 'mesh', 'field', 'performance', 'monitor', 'method', 'parameters', 'cello']
+components = ['enzo-ppm', 'enzo-ppml',
+	      'simulation', 'method', 
+	      'mesh', 'field',
+	      'io', 'disk','memory','parallel',
+	      'parameters', 
+	      'error', 'monitor', 'performance', 
+	      'test','cello']
 
 if (use_papi):
 	components = components + ['papi','pfm']
@@ -23,38 +29,42 @@ components = components + ['hdf5']
 libraries  = ['png', '$FORTRANLIBS']
 
 #------------------------------
+# SOURCE
+#------------------------------
+
+includes = [Glob('enzo*hpp')]
+sources  = [Glob('enzo_*cpp')]
+if (type == 'charm'):
+   includes = includes + ['enzo.decl.h','enzo.def.h']
+   sources = sources + ['../main_enzo.cpp']
+
+#------------------------------
 # ENVIRONMENTS
 #------------------------------
 
 env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
-# SOURCE
-#------------------------------
-
-includes = [Glob('enzo*hpp')]
-sources  = [Glob('enzo_*cpp')]
-
-#------------------------------
 # TARGETS
 #------------------------------
 
 libraries     = env.Library ('enzo', sources)
-test_enzo_p   = env.Program (['enzo-p.cpp', sources])
+
+test_enzo_p = env.Program (['enzo-p.cpp', sources])
 
 binaries = [test_enzo_p]
 
 if (type == "charm"):
-	env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
+   env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
+   env.CharmBuilder('enzo.def.h', 'enzo.ci',ARG = 'enzo')
 
 #------------------------------
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
+env.Alias('install-inc',env.Install ('#/include',  includes))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
+env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))
 
 
 

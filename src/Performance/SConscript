@@ -11,16 +11,13 @@ Import('use_papi')
 #------------------------------
 
 
-components = ['error','monitor','cello']
+components = ['memory',
+	      'error','monitor', 
+	      'test','cello']
+
 libraries  = ['png']
 if (use_papi):
 	libraries = libraries + ['papi','pfm']
-
-#------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # SOURCE
@@ -30,12 +27,22 @@ includes = [Glob('performance*hpp')]
 sources  = [Glob('performance*cpp')]
 
 #------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
+
+#------------------------------
 # TARGETS
 #------------------------------
 
 libraries        = env.Library ('performance', [sources])
+
+if (type == "charm"):
+	sources = sources + ["../main.cpp"]
+
 test_performance = env.Program(['test_Performance.cpp', sources])
-test_papi        = env.Program(['test_Papi.cpp', sources])
+test_papi        = env.Program(['test_Papi.cpp',        sources])
 
 binaries = [test_performance,test_papi]
 
@@ -44,9 +51,8 @@ binaries = [test_performance,test_papi]
 #------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
+env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))
 
 
 

@@ -10,20 +10,13 @@ Import('type')
 # DIRECTORIES
 #------------------------------
 
-if (type == "charm"):
-	SConscript('jacobi/SConscript')
-
 #------------------------------
 # DEPENDENCIES
 #------------------------------
 
-libraries  = ['error','png']
-
-#------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[libraries])
+components = ['error','monitor','performance',
+	      'test','cello']
+libraries  = ['png']
 
 #------------------------------
 # SOURCE
@@ -33,13 +26,23 @@ includes   = [Glob('parallel*hpp'),'parallel.def']
 sources    = [Glob('parallel*cpp')]
 
 #------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
+
+#------------------------------
 # TARGETS
 #------------------------------
 
 libraries = env.Library ('parallel', [sources])
 binaries = []
 
+if (type == "charm"):
+	sources = sources + ["../main.cpp"]
+
 test_GroupProcess  =  env.Program (['test_GroupProcess.cpp',    sources])
+
 binaries.append(test_GroupProcess)
 
 if (type == "mpi"):
@@ -49,19 +52,14 @@ if (type == "mpi"):
 # test_ParallelAffinity = env.Program (['test_ParallelAffinity.cpp', sources])
 test_Layout   = env.Program (['test_Layout.cpp',   sources])
 
-if (type == "charm"):
-   env.Depends('test_GroupProcess.o', '../Test/test.decl.h')
-   env.Depends('test_Layout.o',       '../Test/test.decl.h')
-
 binaries.append(test_Layout)
 
 #------------------------------
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
+env.Alias('install-inc',env.Install ('#/include',  includes))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
+env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))
 
 

@@ -1,13 +1,12 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef MESH_TREEK_HPP
-#define MESH_TREEK_HPP
 
 /// @file     mesh_TreeK.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-30
 /// @brief    [\ref Mesh] Include file for mesh_tree[23]k.hpp
+
+#ifndef MESH_TREEK_HPP
+#define MESH_TREEK_HPP
 
 class TreeK {
 
@@ -75,4 +74,4 @@ protected: // attributes
 
 };
 
-#endif /* TREE_K_HPP */
+#endif /* MESH_TREE_K_HPP */

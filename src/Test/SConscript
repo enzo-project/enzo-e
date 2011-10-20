@@ -9,28 +9,34 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-#------------------------------
-# ENVIRONMENTS
-#------------------------------
+libraries = []
+components = []
 
 #------------------------------
 # SOURCE
 #------------------------------
 
 includes = [Glob('*hpp')]
+sources  = [Glob('test*cpp')]
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # TARGETS
 #------------------------------
 
-if (type == "charm"):
-    env.CharmBuilder('test.decl.h','test.ci',ARG = 'test')
+libraries  = env.Library ('test', [sources])
 
 #------------------------------
 # INSTALL
 #------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
 
 
 

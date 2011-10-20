@@ -1,14 +1,13 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef PARAMETERS_PARAM_NODE_HPP
-#define PARAMETERS_PARAM_NODE_HPP
 
 /// @file     parameters_ParamNode.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon May 10 12:43:27 PDT 2010
-/// @brief    [\ref Parameters] Node for representing parameters in a
+/// @brief [\ref Parameters] Node for representing parameters in a
 ///           tree of groups / subgroups /parameters /values
+
+#ifndef PARAMETERS_PARAM_NODE_HPP
+#define PARAMETERS_PARAM_NODE_HPP
 
 class ParamNode {
 
@@ -53,8 +52,10 @@ private: // No copy or assign
 
 public: // interface
 
+  /// Return the node name
+  std::string name() const {return name_;};
 
-  /// Return the number of subgroups for the given node
+  /// Return the number of subgroups
   int size()
   {return subnodes_.size(); }
 

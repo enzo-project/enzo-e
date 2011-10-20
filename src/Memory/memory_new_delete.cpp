@@ -1,4 +1,3 @@
-// $Id: memory_override.cpp 1688 2010-08-03 22:34:22Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     memory_new_delete.cpp

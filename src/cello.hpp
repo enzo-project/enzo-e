@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef CELLO_HPP
@@ -8,7 +7,6 @@
 /// @author  James Bordner (jobordner@ucsd.edu)
 /// @date    Thu Nov 11 17:08:38 PST 2010
 /// @todo    Need face_axis_enum?
-/// @todo    Move boundary enum to Boundary class after b.c. removed from Field
 /// @brief   Include Cello global configuration settings
 
 #include "cello_config.def"
@@ -67,9 +65,8 @@ enum reduce_enum {
 
 enum component_enum {
   component_undefined,
-  component_enzop,
-  component_first = component_enzop,
   component_disk,
+  component_first = component_disk,
   component_error,
   component_field,
   component_memory,

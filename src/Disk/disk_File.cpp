@@ -1,40 +1,111 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     disk_File.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2010-05-26
 /// @brief    Implementation of the File class
 
 #include "cello.hpp"
 
 #include "disk.hpp"
 
-File::File() throw ()
+//----------------------------------------------------------------------
+
+File::File(std::string path, std::string name) throw ()
+  : path_(path),
+    name_(name)
 {
 }
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// File::~File() throw ()
-// {
-// }
+void File::file_read_meta
+( void * buffer, std::string name,  enum scalar_type * s_type,
+  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+{
+  WARNING("File::file_read_meta",
+	  "Operation not supported by object");
+}
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
+  
+void File::file_write_meta
+( const void * buffer, std::string name, enum scalar_type type,
+  int n0, int n1, int n2, int n3, int n4) throw()
+{
+  WARNING("File::file_write_meta",
+	  "Operation not supported by object");
+}
 
-// File::File(const File & classname) throw ()
-// /// @param     classname  Object being copied
-// {
-// }
+//----------------------------------------------------------------------
 
-// //----------------------------------------------------------------------
+void File::data_read_meta
+( void * buffer, std::string name,  enum scalar_type * s_type,
+  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+{
+  WARNING("File::data_read_meta",
+	  "Operation not supported by object");
+}
 
-// File & File::operator= (const File & classname) throw ()
-// /// @param     classname  Source object of the assignment
-// /// @return    The target assigned object
-// {
-//   return *this;
-// }
+//----------------------------------------------------------------------
+  
+void File::data_write_meta
+( const void * buffer, std::string name, enum scalar_type type,
+  int n0, int n1, int n2, int n3, int n4) throw()
+{
+  WARNING("File::data_write_meta",
+	  "Operation not supported by object");
+}
 
-//======================================================================
+//----------------------------------------------------------------------
+
+void File::group_chdir (std::string group) throw()
+{
+  WARNING("File::group_chdir",
+	  "Operation not supported by object");
+}
+
+//----------------------------------------------------------------------
+
+void File::group_open () throw()
+{
+  WARNING("File::group_open",
+	  "Operation not supported by object");
+}
+
+//----------------------------------------------------------------------
+
+void File::group_create () throw()
+{
+  WARNING("File::group_create",
+	  "Operation not supported by object");
+}
+
+//----------------------------------------------------------------------
+
+void File::group_close () throw()
+{
+  WARNING("File::group_close",
+	  "Operation not supported by object");
+}
+
+//----------------------------------------------------------------------
+
+void File::group_read_meta
+( void * buffer, std::string name,  enum scalar_type * s_type,
+  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+{
+  WARNING("File::group_read_meta",
+	  "Operation not supported by object");
+}
+
+//----------------------------------------------------------------------
+  
+void File::group_write_meta
+( const void * buffer, std::string name, enum scalar_type type,
+  int n0, int n1, int n2, int n3, int n4) throw()
+{
+  WARNING("File::group_write_meta",
+	  "Operation not supported by object");
+}
 

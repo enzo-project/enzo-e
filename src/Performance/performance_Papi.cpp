@@ -1,9 +1,8 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     performance_Papi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2010-12-02
 /// @brief    Implementation of Papi class
 ///
 /// Wrapper functions for PAPI
@@ -23,32 +22,7 @@ Papi::Papi() throw()
     flop_count_(0)
       
 {
-  INCOMPLETE("Papi::Papi");
 }
-//----------------------------------------------------------------------
-
-// Papi::~Papi() throw ()
-// {
-//   INCOMPLETE("Papi::!Papi");
-// }
-
-//----------------------------------------------------------------------
-
-// Papi::Papi(const Papi & papi) throw ()
-// /// @param     papi  Object being copied
-// {
-//   INCOMPLETE("Papi::Papi(Papi)");
-// }
-
-//----------------------------------------------------------------------
-
-// Papi & Papi::operator= (const Papi & papi) throw ()
-// /// @param     papi  Source object of the assignment
-// /// @return    The target assigned object
-// {
-//   INCOMPLETE("Papi::operator=");
-//   return *this;
-// }
 
 //======================================================================
 
@@ -169,9 +143,9 @@ void Papi::print () const throw()
 {
 #ifdef CONFIG_USE_PAPI
   Monitor * monitor = Monitor::instance();
-  monitor->print ("PAPI Time real   = %f",time_real());
-  monitor->print ("PAPI Time proc   = %f",time_proc());
-  monitor->print ("PAPI GFlop count = %f",flop_count()*1e-9);
-  monitor->print ("PAPI GFlop rate  = %f",flop_count()*1e-9 / time_real());
+  monitor->print ("Performance","PAPI Time real   = %f",time_real());
+  monitor->print ("Performance","PAPI Time proc   = %f",time_proc());
+  monitor->print ("Performance","PAPI GFlop count = %f",flop_count()*1e-9);
+  monitor->print ("Performance","PAPI GFlop rate  = %f",flop_count()*1e-9 / time_real());
 #endif
 };

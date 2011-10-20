@@ -1,0 +1,87 @@
+/*
+  Copyright (C) 2009
+  Dr. James Bordner
+  University of California, San Diego
+*/
+
+BODY {
+/*  background: #c1520a;  */
+/* background: #ccc; */
+/*  background-image: url("cello-tile.png"); */
+       background-image: url("cello-bg-1.png"); 
+/*  background-attachment:fixed; */
+
+/*   font-family: "Gill sans", sans-serif;  */
+/*  font-family: Times; */
+}
+
+/* header { background: #fff url(cello-hr.png) no-repeat;
+  
+} */
+
+
+hr {background: #fff url(cello-hr.png); height: 6px}
+
+h1 { text-align: center; }
+tr {
+    background-color: #aaa;
+    border: solid;
+    border-width: 2px;
+    padding: 2px 5px;   
+}
+
+td {
+    border: solid;
+    border-width: 2px;
+    background-color: #ccc; 
+    padding: 2px 5px;   
+    text-align: center;
+}
+th {
+    padding: 2px 3px;   
+    text-align: center;
+}
+
+td.pass       {  color: #007;  background-color: #fff; }
+/* th.pass       {  color: #007;  background-color: #fff; }
+ */td.incomplete {  color: #000;  background-color: #fff; }
+/* th.incomplete {  color: #000;  background-color: #fff; } */
+td.unfinished {  color: #070;  background-color: #fff; }
+/* th.unfinished {  color: #070;  background-color: #fff; } */
+td.FAIL       {  color: #000;  background-color: #f77;}
+/* th.FAIL       {  color: #000;  background-color: #f77; } */
+td.inverse    {  color: #fff;  background-color: #000; }
+
+th.compiling { background-color: #ff7; color: #000; }
+/* strong.pass   {  color: #00f;  background-color: #fff; }
+strong.FAIL   {  color: #f00;  background-color: #fff; }
+ */
+
+/* A:link    { color: #7f7; } */
+/* A:visited { color: #ff7; } */
+/* A:active  { color: #fff; } */
+/* A:hover   { color: #77f; } */
+
+/* div.code { */
+/*     background: #fff; */
+/*    color: #000;  */
+/*  } */
+
+/* pre.wiki { */
+/*     background: #fff; */
+/*    color: #000;  */
+/*  } */
+
+/* div.wiki-toc { */
+/*   background: #000; */
+/*    color: #fff;  */
+/*  } */
+
+table {
+  background: #fff;
+}
+
+/* td { */
+/*   background: #000; */
+/* }   */
+

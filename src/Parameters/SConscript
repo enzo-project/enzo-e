@@ -9,14 +9,11 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error','parallel', 'monitor', 'cello']
+components = ['parallel',
+	      'error','monitor','performance', 
+	      'test','cello']
+
 libraries  = ['png']
-
-#------------------------------
-# ENVIRONMENTS
-#------------------------------
-
-env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # SOURCE
@@ -26,23 +23,35 @@ includes = [Glob('parameters*hpp'),'parse.h']
 sources  = ['parse.tab.c', 'lex.yy.c', Glob('parameters*cpp') ]
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# Uncomment when parse.l or parse.y change
+# WHEN parse.y or parse.l change:
+# 1. Uncomment below
+# 2. scons -u type=serial
+# 3. cp ../../build/serial/Parameters/lex.yy.c ../../build/serial/Parameters/parse.tab.? .
+# 4. Recomment below
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 # env.CFile(target = 'lex.yy.c', source = 'parse.l')
 # env.CFile(target = ['parse.tab.c', 'parse.tab.h'], source = 'parse.y', YACCFLAGS='-d -t')
+
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # TARGETS
 #------------------------------
 
 libraries = env.Library ('parameters', [sources])
-test_parameters = env.Program (['test_Parameters.cpp', sources])
-test_parse      = env.Program (['test_Parse.cpp', sources])
 
 if (type == "charm"):
-   env.Depends('test_Parameters.o', '../Test/test.decl.h')
-   env.Depends('test_Parse.o',      '../Test/test.decl.h')
+	sources = sources + ["../main.cpp"]
+
+test_parameters = env.Program (['test_Parameters.cpp', sources])
+test_parse      = env.Program (['test_Parse.cpp',      sources])
 
 binaries = [test_parameters, test_parse]
 
@@ -50,10 +59,9 @@ binaries = [test_parameters, test_parse]
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
+env.Alias('install-inc',env.Install ('#/include',  includes))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
+env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))
 
 
 

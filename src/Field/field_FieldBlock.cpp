@@ -1,28 +1,37 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     field_FieldBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed May 19 18:17:50 PDT 2010
 /// @todo     Remove dependence of velocity field names "velocity_[xyz]"
+/// @bug      MPI seems to hang with single-block periodic or large blocks (e.g. 2048x2048 problem)
 /// @brief    Implementation of the FieldBlock class
 
 #include "cello.hpp"
-#include "enzo.hpp"
 #include "field.hpp"
 
-#define TEMP_CLEAR_VALUE std::numeric_limits<float>::max() /* in field_FieldBlock.cpp and  mesh_Block.cpp */
+#define TEMP_CLEAR_VALUE std::numeric_limits<float>::min() 
+/* in field_FieldBlock.cpp and  mesh_Block.cpp */
 
 //----------------------------------------------------------------------
 
 FieldBlock::FieldBlock ( int nx, int ny, int nz ) throw()
   : array_(0),
     field_values_(),
+#ifdef CONFIG_USE_CHARM
+    num_fields_(),
+#endif
     ghosts_allocated_(false)
 {
-  size_[0] = nx;
-  size_[1] = ny;
-  size_[2] = nz;
+  if (nx != 0) {
+    size_[0] = nx;
+    size_[1] = ny;
+    size_[2] = nz;
+  } else {
+    size_[0] = 0;
+    size_[1] = 0;
+    size_[2] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -35,12 +44,16 @@ FieldBlock::~FieldBlock() throw()
 //----------------------------------------------------------------------
 
 FieldBlock::FieldBlock ( const FieldBlock & field_block ) throw ()
-{  INCOMPLETE("FieldBlock::FieldBlock"); }
+{
+  
+  INCOMPLETE("FieldBlock::FieldBlock"); 
+}
 
 //----------------------------------------------------------------------
 
 FieldBlock & FieldBlock::operator= ( const FieldBlock & field_block ) throw ()
-{  INCOMPLETE("FieldBlock::operator=");
+{  
+  INCOMPLETE("FieldBlock::operator=");
   return *this;
 }
 
@@ -48,9 +61,9 @@ FieldBlock & FieldBlock::operator= ( const FieldBlock & field_block ) throw ()
 
 void FieldBlock::size( int * nx, int * ny, int * nz ) const throw()
 {
-  *nx = size_[0];
-  *ny = size_[1];
-  *nz = size_[2];
+  if (nx) (*nx) = size_[0];
+  if (ny) (*ny) = size_[1];
+  if (nz) (*nz) = size_[2];
 }
 
 //----------------------------------------------------------------------
@@ -119,7 +132,7 @@ char * FieldBlock::field_unknowns
 
 //----------------------------------------------------------------------
 
-void FieldBlock::cell_width(Block * block,
+void FieldBlock::cell_width(const Block * block,
 			    double * hx, double * hy, double * hz ) const throw ()
 {
   double xm,xp,ym,yp,zm,zp;
@@ -240,6 +253,9 @@ void FieldBlock::allocate_array(const FieldDescr * field_descr) throw()
     int field_offset = 0;
 
     field_values_.reserve(field_descr->field_count());
+#ifdef CONFIG_USE_CHARM
+    num_fields_ = field_descr->field_count();
+#endif
 
     for (int id_field=0; id_field<field_descr->field_count(); id_field++) {
 
@@ -278,7 +294,9 @@ void FieldBlock::deallocate_array () throw()
     delete [] array_;
     array_ = 0;
     field_values_.clear();
-
+#ifdef CONFIG_USE_CHARM
+    num_fields_ = 0;
+#endif
   }
   // if (field_faces_ != 0) {
   //   delete field_faces_;
@@ -358,15 +376,85 @@ void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::refresh_ghosts(const FieldDescr * field_descr) throw()
+// MPI functions
+//----------------------------------------------------------------------
+
+#ifndef CONFIG_USE_CHARM
+
+void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
+				const Patch * patch,
+				int ibx, int iby, int ibz,
+				face_enum face,
+				axis_enum axis) throw()
+
 {
-  INCOMPLETE("FieldBlock::refresh_ghosts");
+
+  // INCOMPLETE
+
   if ( ! ghosts_allocated() ) {
     WARNING("FieldBlock::refresh_ghosts",
 	    "Called with ghosts not allocated: allocating ghosts");
     allocate_ghosts(field_descr);
   }
+
+  // Copy to values to face
+
+  FieldFace face_send;
+  face_send.load(field_descr,this,axis, face);
+
+  GroupProcess * group_process = patch->group_process();
+  Layout * layout = patch->layout();
+
+  // Send face
+
+  int ip_remote;
+
+  switch (axis) {
+  case axis_x:
+    ip_remote = (face == face_lower) ?
+      layout->process3(ibx-1,iby,ibz) :
+      layout->process3(ibx+1,iby,ibz);
+    break;
+  case axis_y:
+    ip_remote = (face == face_lower) ?
+      layout->process3(ibx,iby-1,ibz) :
+      layout->process3(ibx,iby+1,ibz);
+    break;
+  case axis_z:
+    ip_remote = (face == face_lower) ?
+      layout->process3(ibx,iby,ibz-1) :
+      layout->process3(ibx,iby,ibz+1);
+    break;
+  default:
+    ERROR("FieldBlock::refresh_ghosts",
+	  "axis_all not handled");
+  }
+
+ void * handle_send = 
+   group_process->send_begin (ip_remote, face_send.array(),face_send.size());
+
+   group_process->wait(handle_send);
+
+   group_process->send_end (handle_send);
+
+  // Receive ghosts
+
+   void * handle_recv = 
+     group_process->recv_begin (ip_remote, face_send.array(),face_send.size());
+
+   group_process->wait(handle_recv);
+
+   group_process->recv_end (handle_recv);
+
+  //  group_process->send_recv (ip_remote, face_send.array(), face_send.size());
+
+  // Copy from ghosts
+
+  face_send.store(field_descr,this,axis,face);
+
 }
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -389,20 +477,6 @@ FieldBlock * FieldBlock::merge
 }
 
 //----------------------------------------------------------------------
-	
-void FieldBlock::read (File * file) throw ()
-{
-  INCOMPLETE("FieldBlock::read");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::write (File * file) const throw ()
-{
-  INCOMPLETE("FieldBlock::write");
-}
-
-//----------------------------------------------------------------------
 
 void FieldBlock::set_field_values 
 (
@@ -413,7 +487,6 @@ void FieldBlock::set_field_values
 }
 
 //======================================================================
-
 
 int FieldBlock::adjust_padding_
 (
@@ -469,15 +542,21 @@ int FieldBlock::field_size
 
   // Compute array size
 
-  *nx = size_[0] + (1-cx) + 2*gx;
-  *ny = size_[1] + (1-cy) + 2*gy;
-  *nz = size_[2] + (1-cz) + 2*gz;
+  if (nx) (*nx) = size_[0] + (1-cx) + 2*gx;
+  if (ny) (*ny) = size_[1] + (1-cy) + 2*gy;
+  if (nz) (*nz) = size_[2] + (1-cz) + 2*gz;
 
   // Return array size in bytes
 
   precision_enum precision = field_descr->precision(id_field);
   int bytes_per_element = cello::sizeof_precision (precision);
-  return (*nx) * (*ny) * (*nz) * bytes_per_element;
+  if (nz) {
+    return (*nx) * (*ny) * (*nz) * bytes_per_element;
+  } else if (ny) {
+    return (*nx) * (*ny) * bytes_per_element;
+  } else {
+    return (*nx) * bytes_per_element;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -485,220 +564,185 @@ int FieldBlock::field_size
 void FieldBlock::print (const FieldDescr * field_descr,
 			const char * message,
 			double lower[3],
-			double upper[3]) const throw()
+			double upper[3],
+			bool use_file) const throw()
 {
 #ifndef CELLO_DEBUG
   return;
 #endif
 
-  if ( ! array_allocated() ) {
-    PARALLEL_PRINTF("%s FieldBlock %p not allocated\n");
-  } else {
-    int field_count = field_descr->field_count();
-    for (int index_field=0; index_field<field_count; index_field++) {
-
-      int nxd,nyd,nzd;
-      field_size(field_descr,index_field,&nxd,&nyd,&nzd);
-      int gx,gy,gz;
-      field_descr->ghosts(index_field,&gx,&gy,&gz);
-
-      int ixm,iym,izm;
-      int ixp,iyp,izp;
-
-      // Exclude ghost zones
-
-       ixm = gx;
-       iym = gy;
-       izm = gz;
-
-       ixp = nxd - gx;
-       iyp = nyd - gy;
-       izp = nzd - gz;
-
-      // Include ghost zones
-
-      // ixm = 0;
-      // iym = 0;
-      // izm = 0;
-
-      // ixp = nxd;
-      // iyp = nyd;
-      // izp = nzd;
-
-
-      int nx,ny,nz;
-
-      nx = (ixp-ixm);
-      ny = (iyp-iym);
-      nz = (izp-izm);
-
-      double hx,hy,hz;
-
-      hx = (upper[0]-lower[0])/(nxd-2*gx);
-      hy = (upper[1]-lower[1])/(nyd-2*gy);
-      hz = (upper[2]-lower[2])/(nzd-2*gz);
-
-      switch (field_descr->precision(index_field)) {
-      case precision_single:
-	{
-	  float * field = (float * ) field_values(index_field);
-	  float min = std::numeric_limits<float>::max();
-	  float max = std::numeric_limits<float>::min();
-	  double sum = 0.0;
-	  for (int iz=izm; iz<izp; iz++) {
-	    double z = hz*(iz-gz) + lower[axis_z];
-	    for (int iy=iym; iy<iyp; iy++) {
-	      double y = hy*(iy-gy) + lower[axis_y];
-	      for (int ix=ixm; ix<ixp; ix++) {
-		double x = hx*(ix-gx) + lower[axis_x];
-		int i = ix + nxd*(iy + nyd*iz);
-		min = MIN(min,field[i]);
-		max = MAX(max,field[i]);
-		sum += field[i];
-		if (field[i]==TEMP_CLEAR_VALUE) {
-		  printf ("TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
-			  message,index_field,x,y,z,ix,iy,iz);
-		}
-#ifdef CELLO_DEBUG_VERBOSE
-		printf ("%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
-#endif
-	      }
-	    }
-	  }
-	  double avg = sum / (nx*ny*nz);
-	  PARALLEL_PRINTF
-	    ("%s [%s] %18.14g\n",
-	     message ? message : "",
-	     field_descr->field_name(index_field).c_str(),
-	     avg);
-
-	}
-	break;
-      case precision_double:
-	{
-	  double * field = (double * ) field_values(index_field);
-	  double min = std::numeric_limits<double>::max();
-	  double max = std::numeric_limits<double>::min();
-	  double sum = 0.0;
-	  for (int iz=izm; iz<izp; iz++) {
-	    double z = hz*(iz-gz) + lower[axis_z];
-	    for (int iy=iym; iy<iyp; iy++) {
-	      double y = hy*(iy-gy) + lower[axis_y];
-	      for (int ix=ixm; ix<ixp; ix++) {
-		double x = hx*(ix-gx) + lower[axis_x];
-		int i = ix + nxd*(iy + nyd*iz);
-		min = MIN(min,field[i]);
-		max = MAX(max,field[i]);
-		sum += field[i];
-		sum += field[i];
-		if (field[i]==TEMP_CLEAR_VALUE) {
-		  printf ("TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
-			  message,index_field,x,y,z,ix,iy,iz);
-		}
-#ifdef CELLO_DEBUG_VERBOSE
-		printf ("%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
-#endif
-	      }
-	    }
-	  }
-	  double avg = sum / (nx*ny*nz);
-	  PARALLEL_PRINTF
-	    ("%s [%s] %18.14g\n",
-	     message ? message : "",
-	     field_descr->field_name(index_field).c_str(),
-	     avg);
-	}
-	break;
-      case precision_quadruple:
-	{
-	  long double * field = 
-	    (long double * ) field_values(index_field);
-	  long double min = std::numeric_limits<long double>::max();
-	  long double max = std::numeric_limits<long double>::min();
-	  long double sum = 0.0;
-	  for (int iz=izm; iz<izp; iz++) {
-	    for (int iy=iym; iy<iyp; iy++) {
-	      for (int ix=ixm; ix<ixp; ix++) {
-		int i = ix + nxd*(iy + nyd*iz);
-		min = MIN(min,field[i]);
-		max = MAX(max,field[i]);
-		sum += field[i];
-	      }
-	    }
-	  }
-	  long double avg = sum / (nx*ny*nz);
-	  PARALLEL_PRINTF
-	    ("%s FieldBlock[%p,%s] (%d %d %d) [%18.14g %18.14g %18.14g]\n",
-	     message ? message : "",this,
-	     field_descr->field_name(index_field).c_str(),
-	     nx,ny,nz,min,avg,max);
-	}
-	break;
-      default:
-	ERROR("FieldBlock::print", "Unsupported precision");
-      }
-    }
+  FILE *fp;
+  if (!use_file) { 
+    fp = stdout;
   }
-}
 
-//----------------------------------------------------------------------
+  // int ip,np;
+  // MPI_Comm_rank (MPI_COMM_WORLD, &ip);
+  // MPI_Comm_size (MPI_COMM_WORLD, &np);
 
-void FieldBlock::image 
-(
- const FieldDescr * field_descr,
- const char * prefix,
- int cycle,
- int ibx, int iby, int ibz
- ) const throw()
-{
+  ASSERT("FieldBlock::print",
+	 "FieldBlocks not allocated",
+	 array_allocated());
 
   int field_count = field_descr->field_count();
   for (int index_field=0; index_field<field_count; index_field++) {
 
+    // FILE * fp;
+    // if (use_file) {
+    //   char file_name[40];
+    //   sprintf (file_name,"%s-%s-%d%d.out",message,field_descr->field_name(index_field).c_str(),ip,np);
+    //   fp = fopen(file_name,"w");
+    // }
+    
+
     int nxd,nyd,nzd;
     field_size(field_descr,index_field,&nxd,&nyd,&nzd);
+    int gx,gy,gz;
+    field_descr->ghosts(index_field,&gx,&gy,&gz);
 
-    int nd3[3] = {nxd,nyd,nzd};
-    for (int axis=0; axis<3; axis++) {
+    int ixm,iym,izm;
+    int ixp,iyp,izp;
 
-      EnzoOutputImage * output = new EnzoOutputImage;
+    // Exclude ghost zones
 
-      double r[] = {1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0 };
-      double g[] = {0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0 };
-      double b[] = {0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0 };
+    // ixm = gx;
+    // iym = gy;
+    // izm = gz;
 
-      output->image_set_map(7,r,g,b);
+    // ixp = nxd - gx;
+    // iyp = nyd - gy;
+    // izp = nzd - gz;
 
-      char axis_name[3] = {'x','y','z'};
-      char filename[80];
-      int ix = (axis+1) % 3;
-      int iy = (axis+2) % 3;
+    // Include ghost zones
 
-      sprintf (filename,"%s-%s-%04d-%c-%d%d%d.png",
-	       prefix,field_descr->field_name(index_field).c_str(),
-	       cycle,axis_name[axis],ibx,iby,ibz);
-  
-      switch (field_descr->precision(index_field)) {
-      case precision_single:
-	output->image
-	  (filename,nd3[ix],nd3[iy], (float *) field_values_[index_field],
-	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
-	break;
-      case precision_double:
-	output->image
-	  (filename,nd3[ix],nd3[iy],(double *) field_values_[index_field],
-	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
-	break;
-      case precision_quadruple:
-	output->image
-	  (filename,nd3[ix],nd3[iy],(long double *) field_values_[index_field],
-	   nxd,nyd,nzd, nxd,nyd,nzd, 0.0,0.0,0.0, axis_enum(axis),reduce_avg,-1.0,1.0);
-	break;
+    ixm = 0;
+    iym = 0;
+    izm = 0;
+
+    ixp = nxd;
+    iyp = nyd;
+    izp = nzd;
+
+
+    // if (np==2) {
+    //   if (ip==0) ixp=nxd-gx;
+    //   if (ip==1) ixm=gx;
+    // }
+    int nx,ny,nz;
+
+    nx = (ixp-ixm);
+    ny = (iyp-iym);
+    nz = (izp-izm);
+
+    double hx,hy,hz;
+
+    hx = (upper[0]-lower[0])/(nxd-2*gx);
+    hy = (upper[1]-lower[1])/(nyd-2*gy);
+    hz = (upper[2]-lower[2])/(nzd-2*gz);
+
+    switch (field_descr->precision(index_field)) {
+    case precision_single:
+      {
+	float * field = (float * ) field_values(index_field);
+	float min = std::numeric_limits<float>::max();
+	float max = std::numeric_limits<float>::min();
+	double sum = 0.0;
+	for (int iz=izm; iz<izp; iz++) {
+	  double z = hz*(iz-gz) + lower[axis_z];
+	  for (int iy=iym; iy<iyp; iy++) {
+	    double y = hy*(iy-gy) + lower[axis_y];
+	    for (int ix=ixm; ix<ixp; ix++) {
+	      double x = hx*(ix-gx) + lower[axis_x];
+	      int i = ix + nxd*(iy + nyd*iz);
+	      min = MIN(min,field[i]);
+	      max = MAX(max,field[i]);
+	      sum += field[i];
+	      if (field[i]==TEMP_CLEAR_VALUE) {
+		ERROR8 ("FieldBlock::print",
+			"TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
+			message,index_field,x,y,z,ix,iy,iz);
+	      }
+#ifdef CELLO_DEBUG_VERBOSE
+	      fprintf (fp,"%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
+#endif
+	    }
+	  }
+	}
+	double avg = sum / (nx*ny*nz);
+	printf
+	  ("%s [%s] %18.14g\n",
+	   message ? message : "",
+	   field_descr->field_name(index_field).c_str(),
+	   avg);
+
       }
-
-      delete output;
-
+      break;
+    case precision_double:
+      {
+	double * field = (double * ) field_values(index_field);
+	double min = std::numeric_limits<double>::max();
+	double max = std::numeric_limits<double>::min();
+	double sum = 0.0;
+		  
+	for (int iz=izm; iz<izp; iz++) {
+	  double z = hz*(iz-gz) + lower[axis_z];
+	  for (int iy=iym; iy<iyp; iy++) {
+	    double y = hy*(iy-gy) + lower[axis_y];
+	    for (int ix=ixm; ix<ixp; ix++) {
+	      double x = hx*(ix-gx) + lower[axis_x];
+	      int i = ix + nxd*(iy + nyd*iz);
+	      min = MIN(min,field[i]);
+	      max = MAX(max,field[i]);
+	      sum += field[i];
+	      sum += field[i];
+	      if (field[i]==TEMP_CLEAR_VALUE) {
+		ERROR8("FieldBlock::print",
+		       "TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
+		       message,index_field,x,y,z,ix,iy,iz);
+	      }
+#ifdef CELLO_DEBUG_VERBOSE
+	      fprintf (fp,"%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
+#endif
+	    }
+	  }
+	}
+	double avg = sum / (nx*ny*nz);
+	printf 
+	  ("%s [%s] %18.14g\n",
+	   message ? message : "",
+	   field_descr->field_name(index_field).c_str(),
+	   avg);
+      }
+      break;
+    case precision_quadruple:
+      {
+	long double * field = 
+	  (long double * ) field_values(index_field);
+	long double min = std::numeric_limits<long double>::max();
+	long double max = std::numeric_limits<long double>::min();
+	long double sum = 0.0;
+	for (int iz=izm; iz<izp; iz++) {
+	  for (int iy=iym; iy<iyp; iy++) {
+	    for (int ix=ixm; ix<ixp; ix++) {
+	      int i = ix + nxd*(iy + nyd*iz);
+	      min = MIN(min,field[i]);
+	      max = MAX(max,field[i]);
+	      sum += field[i];
+	    }
+	  }
+	}
+	long double avg = sum / (nx*ny*nz);
+	fprintf 
+	  (fp,"%s FieldBlock[%p,%s] (%d %d %d) [%18.14Lf %18.14Lf %18.14Lf]\n",
+	   (message ? message : "")  ,this,
+	   field_descr->field_name(index_field).c_str(),
+	   nx,ny,nz,min,avg,max);
+      }
+      break;
+    default:
+      ERROR("FieldBlock::print", "Unsupported precision");
     }
+    fclose(fp);
   }
 }
 
@@ -714,6 +758,9 @@ void FieldBlock::backup_array_
     old_field_values.push_back(field_values_[i]);
   }
   field_values_.clear();
+#ifdef CONFIG_USE_CHARM
+  num_fields_ = 0;
+#endif
 
 }
 
@@ -769,7 +816,7 @@ void FieldBlock::restore_array_
     char * array1 = field_values_from.at(id_field) + offset1;
     char * array2 = field_values_.at(id_field)     + offset2;
 
-    // copy values
+    // copy values (use memcopy?)
 
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {

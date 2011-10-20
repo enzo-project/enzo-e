@@ -1,0 +1,62 @@
+Field {
+   fields = 
+      ["density","velox","veloy","veloz", "bx", "by", "bz",
+       "dens_rx","velox_rx","velox_rx","veloz_rx","bx_rx","by_rx","bz_rx",
+       "dens_ry","velox_ry","veloy_ry","veloz_ry","bx_ry","by_ry","bz_ry",
+       "dens_rz","velox_rz","veloy_rz","veloz_rz","bx_rz","by_rz","bz_rz"];
+}
+
+Initial {
+   density { value = [1.0]; };
+   velox   { value = [0.0]; };
+   veloy { value = [0.0]; };
+   veloz { value = [0.0]; };
+   bx { value = [0.0]; };
+   by { value = [0.0]; };
+   bz { value = [0.0]; };
+       
+   dens_rx { value = [0.0]; };
+   velox_rx { value = [0.0]; };
+   velox_rx { value = [0.0]; };
+   veloz_rx { value = [0.0]; };
+   bx_rx { value = [0.0]; };
+   by_rx { value = [0.0]; };
+   bz_rx { value = [0.0]; };
+       
+   dens_ry { value = [0.0]; };
+   velox_ry { value = [0.0]; };
+   veloy_ry { value = [0.0]; };
+   veloz_ry { value = [0.0]; };
+   bx_ry { value = [0.0]; };
+   by_ry { value = [0.0]; };
+   bz_ry { value = [0.0]; };
+       
+   dens_rz { value = [0.0]; };
+   velox_rz { value = [0.0]; };
+   veloy_rz { value = [0.0]; };
+   veloz_rz { value = [0.0]; };
+   bx_rz { value = [0.0]; };
+   by_rz { value = [0.0]; };
+   bz_rz { value = [0.0]; }
+}
+
+
+Method {
+   sequence = ["ppml"];
+}
+
+Stopping {
+   cycle = 10;
+}
+
+Mesh {
+   root_size = [32,32,32];
+}
+
+Physics {
+   dimension = 3;
+}
+
+Boundary {
+  type = "periodic";
+}

@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoSimulation.cpp
@@ -19,6 +18,7 @@ EnzoSimulation::EnzoSimulation
  const char *   parameter_file,
 #ifdef CONFIG_USE_CHARM
  int n,
+ CProxy_BlockReduce proxy_block_reduce,
 #else
  GroupProcess * group_process,
 #endif
@@ -26,12 +26,29 @@ EnzoSimulation::EnzoSimulation
  ) throw()
   : Simulation
 #ifdef CONFIG_USE_CHARM
-    ( parameter_file, n, *(new EnzoFactory), index )
+    (parameter_file, n, proxy_block_reduce, index )
 #else
-    ( parameter_file, *(new EnzoFactory), group_process, index )
+    (parameter_file, group_process, index )
 #endif
 {
 }
+
+#ifdef CONFIG_USE_CHARM
+/// Initialize an empty EnzoSimulation
+EnzoSimulation::EnzoSimulation() 
+{
+  TRACE("EnzoSimulation()");
+};
+
+/// Initialize a migrated EnzoSimulation
+EnzoSimulation::EnzoSimulation (CkMigrateMessage *m) 
+{
+  TRACE("EnzoSimulation(msg)");
+};
+
+//==================================================
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -79,19 +96,27 @@ void EnzoSimulation::write() const throw()
   INCOMPLETE("EnzoSimulation::write");
 }
 
+//----------------------------------------------------------------------
+
+const Factory & EnzoSimulation::factory() const throw()
+{ 
+  if (factory_ == NULL) factory_ = new EnzoFactory;
+  return *factory_;
+}
+
 //======================================================================
 
 Stopping * EnzoSimulation::create_stopping_ (std::string name) throw ()
 /// @param name   Name of the stopping method to create (ignored)
 {
   //--------------------------------------------------
-  // parameter: Stopping::cycle
-  // parameter: Stopping::time
+  // parameter: Stopping : cycle
+  // parameter: Stopping : time
   //--------------------------------------------------
 
   int    stop_cycle = parameters_->value_integer
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
-  double stop_time  = parameters_->value_scalar
+  double stop_time  = parameters_->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
 
   return new Stopping(stop_cycle,stop_time);
@@ -118,12 +143,16 @@ Initial * EnzoSimulation::create_initial_ ( std::string name ) throw ()
   }
 
   //--------------------------------------------------
-  // parameter: Initial::cycle
-  // parameter: Initial::time
+  // parameter: Initial : cycle
   //--------------------------------------------------
 
   cycle_  = parameters_->value_integer ("Initial:cycle",0);
-  time_   = parameters_->value_scalar  ("Initial:time",0.0);
+
+  //--------------------------------------------------
+  // parameter: Initial : time
+  //--------------------------------------------------
+
+  time_   = parameters_->value_float   ("Initial:time",0.0);
 
   return initial;
 }
@@ -131,35 +160,23 @@ Initial * EnzoSimulation::create_initial_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Boundary * EnzoSimulation::create_boundary_ ( std::string name ) throw ()
-/// @param name   Name of the initialization method to create
+/// @param name   Name of boundary condition to use
 {
-  //--------------------------------------------------
-  // parameter: Boundary::type
-  //--------------------------------------------------
 
   boundary_type_enum boundary_type = boundary_type_undefined;
 
-  std::string boundary_param = 
-    parameters_->value_string ("Boundary:type", "undefined");
-
-  if (       boundary_param ==   "reflecting") {
+  if (       name == "reflecting") {
     boundary_type = boundary_type_reflecting;
-  } else if (boundary_param ==   "outflow") {
+  } else if (name == "outflow") {
     boundary_type = boundary_type_outflow;
-  } else if (boundary_param ==   "inflow") {
+  } else if (name == "inflow") {
     boundary_type = boundary_type_inflow;
-  } else if (boundary_param ==   "periodic") {
+  } else if (name == "periodic") {
     boundary_type = boundary_type_periodic;
-  } else if (boundary_param ==   "file") {
-    boundary_type = boundary_type_file;
-  } else if (boundary_param ==   "code") {
-    boundary_type = boundary_type_code;
   } else {
-    char buffer[ERROR_LENGTH];
-    sprintf (buffer,"Illegal parameter Boundary::type '%s'",
-	     boundary_param.c_str());
-    ERROR("EnzoSimulation::create_boundary_",
-	  buffer);
+    ERROR1("EnzoSimulation::create_boundary_",
+	   "Unrecognized boundary type '%s'",
+	   name.c_str());
   }
 	     
   return new EnzoBoundary (boundary_type);
@@ -194,13 +211,19 @@ Output * EnzoSimulation::create_output_ ( std::string type ) throw ()
 /// @param filename   File name format for the output object
 {
 
-  Output * output = 0;
+  Output * output = NULL;
 
-  if (type == "image") {
-    output = new EnzoOutputImage ();
+  // Create Enzo-specific output types
+
+  // ...
+
+  // Create a Cello output type using base class
+
+  if (output == NULL) {
+    output = Simulation::create_output_(type);
   }
 
-  if (output == 0) {
+  if (output == NULL) {
     char buffer[ERROR_LENGTH];
     sprintf (buffer,"Cannot create Output type '%s'",type.c_str());
     ERROR("EnzoSimulation::create_output_", buffer);

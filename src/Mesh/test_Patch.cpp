@@ -1,4 +1,3 @@
-// $Id: test_Patch.cpp 1791 2010-10-29 22:54:06Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_Patch.cpp
@@ -8,11 +7,10 @@
 /// @todo     Add parallel Patch tests
 /// @brief    Program implementing unit tests for the Patch class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "mesh.hpp"
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
@@ -21,7 +19,7 @@ PARALLEL_MAIN_BEGIN
 
   GroupProcess * group_process = GroupProcess::create();
 
-  unit_init();
+  unit_init(0,1);
 
   unit_class("Patch");
 
@@ -34,9 +32,11 @@ PARALLEL_MAIN_BEGIN
 
   FieldDescr * field_descr = new FieldDescr;
 
-  // Set Patch size (12,12,12)
+  // Set Patch size, offset, and blocking
 
   int patch_size[] = {12,12,12};
+
+  int patch_offset[] = {5, 2, 9};
 
   int patch_blocking[] = {3,3,3};
 
@@ -50,6 +50,7 @@ PARALLEL_MAIN_BEGIN
   Patch * patch = factory->create_patch 
     (group_process,
      patch_size[0],     patch_size[1],     patch_size[2],
+     patch_offset[0],   patch_offset[1],   patch_offset[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2],
      domain_lower[0],   domain_lower[1],   domain_lower[2],
      domain_upper[0],   domain_upper[1],   domain_upper[2]);
@@ -57,9 +58,8 @@ PARALLEL_MAIN_BEGIN
   unit_assert(patch != NULL);
 
   //--------------------------------------------------
-  unit_func("size");
 
-  // Test that patch size is correct
+  unit_func("size");
 
   int npx,npy,npz;
 
@@ -68,6 +68,18 @@ PARALLEL_MAIN_BEGIN
   unit_assert(patch_size[0]==npx && 
 	      patch_size[1]==npy && 
 	      patch_size[2]==npz);
+
+  //--------------------------------------------------
+
+  unit_func("offset");
+
+  int nx0,ny0,nz0;
+
+  patch->offset(&nx0,&ny0,&nz0);
+
+  unit_assert(patch_offset[0]==nx0 && 
+	      patch_offset[1]==ny0 && 
+	      patch_offset[2]==nz0);
 
   //--------------------------------------------------
 
@@ -121,18 +133,22 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+  unit_func("num_blocks");
+  unit_assert(patch->num_blocks() == (size_t)nbx*nby*nbz);
+#else
   unit_func("num_local_blocks");
-
   unit_assert(patch->num_local_blocks()==(size_t)nbx*nby*nbz);
+#endif
 
-  ItBlockLocal itBlocks (patch);
+  ItBlock itBlock (patch);
 
   Block *  block = 0;
   FieldBlock * field_block = 0;
 
   size_t block_counter = 0;
 
-  while ((block = ++itBlocks)) {
+  while ((block = ++itBlock)) {
 
   //--------------------------------------------------
 
@@ -141,7 +157,8 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-    unit_func("Block","field_block");
+    unit_class("Block");
+    unit_func("field_block");
 
     field_block = block ? block->field_block() : NULL;
 
@@ -151,7 +168,8 @@ PARALLEL_MAIN_BEGIN
 
       //--------------------------------------------------
 
-      unit_func("FieldBlock","size");
+      unit_class("FieldBlock");
+      unit_func("size");
 
       int nfx, nfy, nfz;
 
@@ -161,17 +179,18 @@ PARALLEL_MAIN_BEGIN
       unit_assert_quiet (nfy == patch_size[1] / patch_blocking[1]);
       unit_assert_quiet (nfz == patch_size[2] / patch_blocking[2]);
 
-      GroupProcess * group = patch->group();
+      GroupProcess * group_process = patch->group_process();
       Layout      * layout = patch->layout();
 
-      int ip = group->rank();
+      int ip = group_process->rank();
 
       int index_local = block_counter;
       int index_global = layout->global_index(ip,index_local);
 
       //--------------------------------------------------
 
-      unit_func("Layout","block_indices");
+      unit_class("Layout");
+      unit_func("block_indices");
 
       int ibx,iby,ibz;
       layout->block_indices(index_global,&ibx,&iby,&ibz);
@@ -188,13 +207,15 @@ PARALLEL_MAIN_BEGIN
       double xpb,ypb,zpb;
       block->upper (&xpb,&ypb,&zpb);
 
-      unit_func("Block","lower");
+      unit_class("Block");
+      unit_func("lower");
 
       unit_assert(cello::err_abs(xm + ibx*(xpb-xmb) , xmb) < 1e-6);
       unit_assert(cello::err_abs(ym + iby*(ypb-ymb) , ymb) < 1e-6);
       unit_assert(cello::err_abs(zm + ibz*(zpb-zmb) , zmb) < 1e-6);
 
-      unit_func("Block","upper");
+      unit_class("Block");
+      unit_func("upper");
 
       unit_assert(cello::err_abs(xm + (ibx+1)*(xpb-xmb) , xpb) < 1e-6);
       unit_assert(cello::err_abs(ym + (iby+1)*(ypb-ymb) , ypb) < 1e-6);
@@ -206,12 +227,11 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-    unit_func("Block","neighbor");
-    // Block::neighbor()
-    unit_assert(false);
+    unit_class("Block");
+    unit_func("neighbor");
 
-    // TEST BLOCK PROPERTIES
-    //    unit_assert(unit_incomplete);
+    // Block::neighbor()
+    unit_assert(unit_incomplete);
 
     ++block_counter;
 
@@ -219,13 +239,14 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  unit_func("Block","index_patch");
+  unit_class("Block");
+  unit_func("index_patch");
 
   int * b = new int [nbx*nby*nbz];
   int i;
   for (i=0; i<nbx*nby*nbz; i++) b[i]=0;
 
-  while ((block = ++itBlocks)) {
+  while ((block = ++itBlock)) {
     int ibx,iby,ibz;
     block->index_patch(&ibx,&iby,&ibz);
     b[ibx + nbx*(iby + nby*ibz)] = 1;
@@ -238,8 +259,10 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
+#ifndef CONFIG_USE_CHARM
   unit_func("num_local_blocks");
   unit_assert(block_counter == patch->num_local_blocks());
+#endif
 
   //--------------------------------------------------
 
@@ -262,5 +285,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

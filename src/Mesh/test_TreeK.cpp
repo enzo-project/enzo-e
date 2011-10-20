@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_TreeK.cpp
@@ -6,6 +5,7 @@
 /// @date     2009-10-28
 /// @brief    Test program for Tree2K and Tree3K classes
 
+#include "main.hpp" 
 #include "mesh_tree.hpp"
 #include "test.hpp"
 
@@ -32,16 +32,13 @@ void create_tree (int * level_array, int nx, int ny, int nz, int k,  int d,
 void print_usage(int, char**);
 //----------------------------------------------------------------------
 
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
-
 PARALLEL_MAIN_BEGIN
 
 {
 
   PARALLEL_INIT;
 
-  unit_init();
+  unit_init(0,1);
 
   // Parse command line
 
@@ -357,5 +354,3 @@ void create_tree
   delete tree;
 
 }
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

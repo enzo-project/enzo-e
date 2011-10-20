@@ -3,33 +3,46 @@
 #------------------------------
 
 Import('env')
+Import('type')
 
 #------------------------------
 # DEPENDENCIES
 #------------------------------
 
-components = ['method', 'mesh', 'field', 'error','parallel', 'monitor', 'parameters', 'memory', 'cello']
-libraries  = ['png', '$FORTRANLIBS']
+components = ['method', 
+              'mesh', 'field', 
+              'memory', 'parallel', 
+              'parameters', 
+              'error','monitor',
+              'cello']
+
+libraries  = []
+
+#------------------------------
+# SOURCE
+#------------------------------
+
+includes = [Glob('method*hpp'), Glob('*.h')]
+sources  = [Glob('method*cpp')]
 
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
+
 env = env.Clone(LIBS=[components,libraries])
-#------------------------------
-# SOURCE
-#------------------------------
-includes = [Glob('method*hpp'), Glob('*.h')]
-sources  = [Glob('method*cpp')]
+
 #------------------------------
 # TARGETS
 #------------------------------
+
 libraries = env.Library ('method', sources)
+
 #------------------------------
 # INSTALL
 #------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
 
 
 

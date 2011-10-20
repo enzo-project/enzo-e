@@ -35,7 +35,7 @@ env = env.Clone(LIBS = [components,libraries])
 sources = [
         Glob('Cosmology*cpp'),
         Glob('Grid_*cpp'),
-        Glob('initialize_*cpp'),
+#        Glob('initialize_*cpp'),
 	'PPML_Conservative.F',
 	'PPML_HLLD.F',
 	'PPML_MAIN.F',
@@ -45,7 +45,8 @@ sources = [
 	'PPML_potokz.F',
 	'PPML_Primitive.F',
 	'PPML_sub.F',
-	'PPML_TimeStep.F']
+	'PPML_TimeStep.F',
+        'fortran.h']
 
 #------------------------------
 # TARGETS
@@ -57,7 +58,7 @@ libraries = env.Library ('enzo-ppml', sources)
 # INSTALL
 #------------------------------
 
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
 
 
 

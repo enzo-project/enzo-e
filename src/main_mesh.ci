@@ -1,0 +1,22 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     main_mesh.ci
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-08-03
+/// @brief    CHARM++ mainchare for Mesh-level programs
+
+mainmodule main_mesh {
+
+  extern module mesh;
+
+  readonly CProxy_Main proxy_main;
+
+  mainchare Main {
+
+     entry Main(CkArgMsg *m);
+
+     entry void p_exit (int count_blocks);
+
+  };
+
+};

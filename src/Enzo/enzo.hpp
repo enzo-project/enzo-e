@@ -1,21 +1,20 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef ENZO_HPP
-#define ENZO_HPP
 
 /// @file     enzo.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
 /// @brief    Include file for the \ref Enzo component
 
-//----------------------------------------------------------------------
+#ifndef ENZO_HPP
+#define ENZO_HPP
 
+//----------------------------------------------------------------------
 
 #include "enzo_defines.hpp"
 #include "enzo_typedefs.hpp"
 #include "enzo_fortran.hpp"
 
+//----------------------------------------------------------------------
 
 #define OMEGA_TOLERANCE 1.0e-5
  
@@ -25,7 +24,7 @@
 #ifdef CONFIG_PRECISION_DOUBLE
 #   define ETA_TOLERANCE 1.0e-10
 #endif
-#ifdef CONFIG_PRECISION_QUADRUPLE
+#ifdef CONFIG_PRECISION_QUAD
 #   define ETA_TOLERANCE 1.0e-20
 #endif
 
@@ -63,6 +62,7 @@ struct fluxes
 #include "performance.hpp"
 #include "method.hpp"
 #include "simulation.hpp"
+#include "parallel.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes
@@ -78,12 +78,13 @@ struct fluxes
 
 #include "enzo_EnzoBlock.hpp"
 
+#include "enzo_IoEnzoBlock.hpp"
+
 #include "enzo_EnzoTimestep.hpp"
 #include "enzo_EnzoBoundary.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
-#include "enzo_EnzoOutputImage.hpp"
 
 #endif /* ENZO_HPP */
 

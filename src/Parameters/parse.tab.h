@@ -42,7 +42,7 @@
      STRING = 258,
      IDENTIFIER = 259,
      VARIABLE = 260,
-     SCALAR = 261,
+     FLOAT = 261,
      INTEGER = 262,
      LOGICAL = 263,
      LE = 264,
@@ -92,11 +92,11 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 407 "src/Parameters/parse.y"
+#line 394 "build/charm/Parameters/parse.y"
  
   int logical_type;  
   int integer_type; 
-  double scalar_type;  
+  double float_type;  
   char * string_type; 
   char * group_type;
   struct node_expr * node_type;
@@ -104,7 +104,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 108 "src/Parameters/parse.tab.h"
+#line 108 "build/charm/Parameters/parse.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

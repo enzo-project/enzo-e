@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 //----------------------------------------------------------------------
@@ -326,7 +325,7 @@ int main (int argc, char ** argv)
   // Read parameters
   //--------------------------------------------------
 
-  parameters.set_group ("Mpi_array");
+  parameters.group_set ("Mpi_array");
   mpi   = parameters.value_integer ("mpi_enum",0);
   data  = parameters.value_integer ("data_enum",0);
   nx         = parameters.list_value_integer (0,"grid_size",16);

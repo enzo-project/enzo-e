@@ -1,0 +1,121 @@
+### Problem: 2D Implosion problem
+### Author:  James Bordner (jobordner@ucsd.edu)
+###
+### This file tests the #include preprocessing command
+
+   Domain { 
+      lower = [0.0, 0.0];
+      upper = [1.0, 1.0];
+   } 
+
+   Mesh { 
+      root_size      = [80, 80];
+      root_blocks    = [ 2,  4 ];
+   }
+
+   Field {
+
+      ghosts = 3;
+
+      fields = [
+        "density",
+        "velocity_x",
+        "velocity_y",
+        "total_energy",
+        "internal_energy"
+      ] ;
+
+      courant   = 0.8;
+
+   }
+
+   Parallel {
+      temp_update_all  = false;
+      temp_update_full = true;
+   }
+
+   Method {
+
+      sequence = ["ppm"];
+
+   }
+
+   Enzo {
+
+      ppm {
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+         dual_energy = false;
+     }
+   }
+
+   Physics {
+
+      dimensions = 2;
+      gamma = 1.4;
+
+   }
+
+   Initial {
+       density       { value = [ 1.0, 
+       (0.045 < x && x < 0.055 && 0.345 < y && y < 0.355) ||
+       (0.045 < x && x < 0.055 && 0.845 < y && y < 0.855) ||
+       (0.145 < x && x < 0.155 && 0.045 < y && y < 0.055) ||
+       (0.145 < x && x < 0.155 && 0.545 < y && y < 0.555) ||
+       (0.345 < x && x < 0.355 && 0.445 < y && y < 0.455) ||
+       (0.345 < x && x < 0.355 && 0.945 < y && y < 0.955) ||
+       (0.445 < x && x < 0.455 && 0.145 < y && y < 0.155) ||
+       (0.445 < x && x < 0.455 && 0.645 < y && y < 0.655) ||
+       (0.545 < x && x < 0.555 && 0.345 < y && y < 0.355) ||
+       (0.545 < x && x < 0.555 && 0.845 < y && y < 0.855) ||
+       (0.645 < x && x < 0.655 && 0.045 < y && y < 0.055) ||
+       (0.645 < x && x < 0.655 && 0.545 < y && y < 0.555) ||
+       (0.845 < x && x < 0.855 && 0.445 < y && y < 0.455) ||
+       (0.845 < x && x < 0.855 && 0.945 < y && y < 0.955) ||
+       (0.945 < x && x < 0.955 && 0.145 < y && y < 0.155) ||
+       (0.945 < x && x < 0.955 && 0.645 < y && y < 0.655),
+                                 0.125 ]; };
+       total_energy  { value = [ 1.0  / (0.4 * 1.0) ,
+       (0.045 < x && x < 0.055 && 0.345 < y && y < 0.355) ||
+       (0.045 < x && x < 0.055 && 0.845 < y && y < 0.855) ||
+       (0.145 < x && x < 0.155 && 0.045 < y && y < 0.055) ||
+       (0.145 < x && x < 0.155 && 0.545 < y && y < 0.555) ||
+       (0.345 < x && x < 0.355 && 0.445 < y && y < 0.455) ||
+       (0.345 < x && x < 0.355 && 0.945 < y && y < 0.955) ||
+       (0.445 < x && x < 0.455 && 0.145 < y && y < 0.155) ||
+       (0.445 < x && x < 0.455 && 0.645 < y && y < 0.655) ||
+       (0.545 < x && x < 0.555 && 0.345 < y && y < 0.355) ||
+       (0.545 < x && x < 0.555 && 0.845 < y && y < 0.855) ||
+       (0.645 < x && x < 0.655 && 0.045 < y && y < 0.055) ||
+       (0.645 < x && x < 0.655 && 0.545 < y && y < 0.555) ||
+       (0.845 < x && x < 0.855 && 0.445 < y && y < 0.455) ||
+       (0.845 < x && x < 0.855 && 0.945 < y && y < 0.955) ||
+       (0.945 < x && x < 0.955 && 0.145 < y && y < 0.155) ||
+       (0.945 < x && x < 0.955 && 0.645 < y && y < 0.655),
+	                         0.14 / (0.4 * 0.1)]; };
+       velocity_x    { value = [0.0]; };
+       velocity_y    { value = [0.0]; }
+   }
+
+   Boundary { type = "reflecting" }
+
+   Stopping {
+      time  = 2.5;
+      cycle = 500;
+   }
+
+   Output { 
+
+      file_groups = ["cycle_step"];
+
+      cycle_step {
+         field_list = ["density"];
+         type     = "image";
+         schedule = ["cycle","interval", 1];
+        colormap = [0.00, 0.00, 1.00,
+                    0.00, 1.00, 0.00,
+                    1.00, 1.00, 0.00,
+                    1.00, 0.00, 0.00];
+      }
+   }

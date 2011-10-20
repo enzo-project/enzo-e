@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_GroupProcess.cpp
@@ -8,6 +7,7 @@
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Parallel class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "parallel.hpp"
@@ -45,14 +45,12 @@ bool test_array(double * array, int length, int rank, int value)
 
 //======================================================================
 
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
-
 PARALLEL_MAIN_BEGIN
 {
 
   PARALLEL_INIT;
 
-  int np;
+  int np = 0;
   if (PARALLEL_ARGC != 2) {
     PARALLEL_PRINTF ("Usage: %s <num-procs>\n",PARALLEL_ARGV[0]);
     PARALLEL_EXIT;
@@ -127,8 +125,12 @@ PARALLEL_MAIN_BEGIN
       group_process->send_end(handle_send);
       group_process->recv_end(handle_recv);
 
+#ifdef CONFIG_USE_CHARM
+      unit_assert(unit_incomplete);
+#else
       unit_assert(test_array(array_source,n+1,rank,rank));
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
+#endif
 
     }
   }
@@ -139,11 +141,16 @@ PARALLEL_MAIN_BEGIN
       // MPI_Isend MPI_Recv
       // MPI_Send  MPI_Irecv
       // MPI_Send  MPI_Recv
-      unit_func("test");
 
+      unit_func("test_array");
+
+#ifdef CONFIG_USE_MPI
       init_array(array_source,n+1,rank);
       init_array(array_dest,  n+1,rank);
       unit_assert(test_array(array_source,n+1,rank,rank));
+#else
+      unit_assert(unit_incomplete);
+#endif
 
 #ifdef CONFIG_USE_MPI
 
@@ -155,7 +162,11 @@ PARALLEL_MAIN_BEGIN
       group_process_mpi->set_send_blocking(blocking_send);
       group_process_mpi->set_recv_blocking(blocking_recv);
 
+#else
+      unit_assert(unit_incomplete);
 #endif
+
+#ifndef CONFIG_USE_CHARM
 
       int rank_source = (rank+1)%size;
       int rank_dest   = (rank-1+size)%size;
@@ -178,8 +189,15 @@ PARALLEL_MAIN_BEGIN
       group_process->send_end(handle_send);
       group_process->recv_end(handle_recv);
 
+      unit_func(blocking_send ? "send [blocking]" : "send [nonblocking]");
+
       unit_assert(test_array(array_source,n+1,rank,rank));
+
+      unit_func(blocking_recv ? "recv [blocking]" : "recv [nonblocking]");
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
+#else
+      unit_assert(unit_incomplete);
+#endif
 
     }
   }
@@ -236,5 +254,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

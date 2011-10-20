@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_Monitor.cpp
@@ -6,11 +5,10 @@
 /// @date     2009-11-18
 /// @brief    Program implementing unit tests for the Monitor class
 
+#include "main.hpp" 
 #include "test.hpp"
 
 #include "monitor.hpp"
-
-#include PARALLEL_CHARM_INCLUDE(test.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
@@ -26,7 +24,8 @@ PARALLEL_MAIN_BEGIN
   unit_class("Monitor");
 
   unit_func("Monitor");
-  unit_assert(true);
+
+  unit_assert(monitor != NULL);
 
 
   unit_finalize();
@@ -35,5 +34,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-
-#include PARALLEL_CHARM_INCLUDE(test.def.h)

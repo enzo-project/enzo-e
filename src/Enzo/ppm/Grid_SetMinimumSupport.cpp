@@ -1,4 +1,3 @@
-// $Id$
 // See LICENSE_ENZO file for license and copyright information
 
 /// @file      Grid_SetMinimumSupport.cpp
@@ -22,7 +21,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient)
  
     enzo_float a = 1, dadt;
     if (ComovingCoordinates)
-      if (CosmologyComputeExpansionFactor(Time, &a, &dadt) == ENZO_FAIL) {
+      if (CosmologyComputeExpansionFactor(Time(), &a, &dadt) == ENZO_FAIL) {
 	fprintf(stderr, "Error in CosmologyComputeExpansionFactor.\n");
 	return ENZO_FAIL;
       }

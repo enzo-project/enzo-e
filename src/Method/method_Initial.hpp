@@ -1,4 +1,3 @@
-// $Id: method_Initial.hpp 1896 2010-12-03 23:54:08Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     method_Initial.hpp 
@@ -24,7 +23,8 @@ public: // interface
 public: // virtual functions
 
   /// Perform the initialization of the given Block
-  virtual void compute (const FieldDescr * field_descr,
+  virtual void compute (const Hierarchy * hierarchy,
+			const FieldDescr * field_descr,
 			Block * block) throw() = 0;
 
 protected: // attributes

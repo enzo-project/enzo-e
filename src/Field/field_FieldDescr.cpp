@@ -1,9 +1,8 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     field_FieldDescr.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2010-04-14
 /// @todo     Allow id_field == -1 (== e.g. all_fields) for set_*(id_field,...)
 /// @brief    Implementation of the FieldDescr class
 
@@ -170,9 +169,9 @@ void FieldDescr::centering
  bool * cz
 ) const throw(std::out_of_range)
 {
-  *cx = centering_.at(id_field)[0];
-  *cy = centering_.at(id_field)[1];
-  *cz = centering_.at(id_field)[2];
+  if (cx) (*cx) = centering_.at(id_field)[0];
+  if (cy) (*cy) = centering_.at(id_field)[1];
+  if (cz) (*cz) = centering_.at(id_field)[2];
 }
 
 //----------------------------------------------------------------------
@@ -185,9 +184,9 @@ void FieldDescr::ghosts
  int * gz
 ) const throw(std::out_of_range)
 {
-  *gx = ghosts_.at(id_field)[0];
-  *gy = ghosts_.at(id_field)[1];
-  *gz = ghosts_.at(id_field)[2];
+  if (gx) (*gx) = ghosts_.at(id_field)[0];
+  if (gy) (*gy) = ghosts_.at(id_field)[1];
+  if (gz) (*gz) = ghosts_.at(id_field)[2];
 }
 
 //----------------------------------------------------------------------

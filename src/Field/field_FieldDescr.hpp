@@ -1,16 +1,18 @@
-// $Id$
 // See LICENSE_CELLO file for license and copyright information
-
-#ifndef FIELD_FIELD_DESCR_HPP
-#define FIELD_FIELD_DESCR_HPP
 
 /// @file     field_FieldDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-17
-/// @todo     Replace ghosts/centering dynamic allocated arrays with vector to avoid big three
-/// @todo     Split into "global" and "field-specific" attributes to reduce class size
-/// @todo     Support temporary fields, e.g. temperature or gravitational potential
+/// @todo Replace ghosts/centering dynamic allocated arrays with
+/// vector to avoid big three
+/// @todo Split into "global" and "field-specific" attributes to
+/// reduce class size
+/// @todo Support temporary fields, e.g. temperature or gravitational
+/// potential
 /// @brief    [\ref Field] Declaration for the FieldDescr class
+
+#ifndef FIELD_FIELD_DESCR_HPP
+#define FIELD_FIELD_DESCR_HPP
 
 enum field_action_enum {
   field_action_unknown,  // Uninitialized action
@@ -126,11 +128,11 @@ public: // functions
   double courant() const throw();
 
   /// centering of given field
-  void centering(int id_field, bool * cx, bool * cy, bool * cz) const 
+  void centering(int id_field, bool * cx, bool * cy = 0, bool * cz = 0) const 
     throw(std::out_of_range);
 
   /// depth of ghost zones of given field
-  void ghosts(int id_field, int * gx, int * gy, int * gz) const 
+  void ghosts(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
     throw(std::out_of_range);
 
   /// precision of given field
