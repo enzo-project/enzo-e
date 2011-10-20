@@ -3,11 +3,9 @@
 /// @file     method_InitialDefault.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-02-16
-/// @todo     Add image mask for field initialization
+/// @bug      Image mask blank for krummhorn: libpng version? (1.2.44 vs 1.2.46); note out.png is created
 /// @todo     Parse initialization parameters once per Simulation rather than once per Block
 /// @brief    Implementation of the InitialDefault class
-///
-/// Detailed description of file method_InitialDefault.cpp
 
 #include "cello.hpp"
 
@@ -185,7 +183,6 @@ void InitialDefault::allocate_xyzt_
 	(*y)[i] = ym + iy*hy;
 	(*z)[i] = zm + iz*hz;
 	(*t)[i] = 0.0;
-	//	printf ("%d %d %d %g %g %g\n",ix,iy,iz,(*x)[i],(*y)[i],(*z)[i]);
       }
     }
   }
@@ -406,6 +403,7 @@ void InitialDefault::create_png_mask_
 
   // Compute the block mask from the image pixel values
 
+  TRACE("");
   for (int iy_b=0; iy_b<nyb; iy_b++) {
     int iy_h = (*ny)*(iy_b*hb[1]+offset_b[1])/(size_h[1]);
     for (int ix_b=0; ix_b<nxb; ix_b++) {
@@ -416,7 +414,8 @@ void InitialDefault::create_png_mask_
       int r = png.read(ix_h+1,iy_h+1,1);
       int g = png.read(ix_h+1,iy_h+1,2);
       int b = png.read(ix_h+1,iy_h+1,3);
-      mask[i_b] = (r+g+b > 0.5/3.0*65535);
+
+      mask[i_b] = (r+g+b > 0);
 
     }
   }

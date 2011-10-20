@@ -4,6 +4,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed May 19 18:17:50 PDT 2010
 /// @todo     Remove dependence of velocity field names "velocity_[xyz]"
+/// @bug      MPI seems to hang with single-block periodic or large blocks (e.g. 2048x2048 problem)
 /// @brief    Implementation of the FieldBlock class
 
 #include "cello.hpp"
