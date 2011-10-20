@@ -60,6 +60,7 @@ Simulation::Simulation
 
 #ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;
+  monitor_->set_active(CkMyPe() == 0);
 #else
   monitor_ = Monitor::instance();
 #endif
@@ -1086,7 +1087,6 @@ void Simulation::refresh() throw()
 #ifdef ORIGINAL_REFRESH
 	patch->block_array().p_refresh(cycle_, time_, dt_,axis);
 #else
-	#error crashes
 	patch->block_array().p_compute(dt_,axis);
 #endif
       }

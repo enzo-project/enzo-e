@@ -46,12 +46,13 @@ void EnzoSimulationMpi::run() throw()
 #endif
 
   performance.start();
-  
-   double lower[3];
-   hierarchy_->lower(&lower[0], &lower[1], &lower[2]);
 
-   double upper[3];
-   hierarchy_->upper(&upper[0], &upper[1], &upper[2]);
+  // get hierarchy extents for later block boundary checks
+
+  double lower[3];
+  hierarchy_->lower(&lower[0], &lower[1], &lower[2]);
+  double upper[3];
+  hierarchy_->upper(&upper[0], &upper[1], &upper[2]);
 
   //--------------------------------------------------
   // INITIALIZE FIELDS
@@ -71,7 +72,7 @@ void EnzoSimulationMpi::run() throw()
 
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-      enzo_block->initialize(cycle_, time_);
+      enzo_block->update_from_hierarchy(cycle_, time_);
 
     }
   }
@@ -128,9 +129,6 @@ void EnzoSimulationMpi::run() throw()
 
   }
 
-  int ip = group_process_->rank();
-   int np = group_process_->size();
-
   //======================================================================
   // BEGIN MAIN LOOP
   //======================================================================
@@ -158,7 +156,7 @@ void EnzoSimulationMpi::run() throw()
 
 	// Accumulate Block-local dt
 
-	block->initialize(cycle_,time_);
+	block->update_from_hierarchy(cycle_,time_);
 
 	double dt_block = timestep_->compute(field_descr_,block);
 

@@ -48,8 +48,6 @@ EnzoBlock::EnzoBlock
     }
 
   }
-  // CANNOT BE INITIALIZED HERE SINCE IT REQUIRES EXTENTS
-  //  initialize();
 }
 
 #ifdef CONFIG_USE_CHARM
@@ -87,8 +85,6 @@ EnzoBlock::EnzoBlock
     }
 
   }
-  // CANNOT BE INITIALIZED HERE SINCE IT REQUIRES EXTENTS
-  //  initialize();
 }
 
 #endif
@@ -333,12 +329,16 @@ void EnzoBlock::write(FILE * fp) throw ()
 }
 
 //----------------------------------------------------------------------
-void EnzoBlock::initialize (int cycle_start, double time_start) throw()
+void EnzoBlock::update_from_hierarchy
+(
+ int    cycle_start, 
+ double time_start
+ ) throw()
 {
 
   // Call base class initialize time_, cycle_, etc
 
-  Block::initialize(cycle_start,time_start);
+  Block::update_from_hierarchy (cycle_start,time_start);
 
   // Initialize corresponding EnzoBlock variables
 

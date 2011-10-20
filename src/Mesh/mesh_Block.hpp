@@ -153,11 +153,14 @@ public: // interface
 
 public: // virtual functions
 
+  virtual void allocate (FieldDescr * field_descr) throw();
+
   /// Call application-specific initialization
-  virtual void initialize (int cycle_start, double time_start) throw()
-  { 
-    time_ = time_start;
+  virtual void update_from_hierarchy 
+  (int cycle_start, double time_start) throw()
+  {
     cycle_ = cycle_start;
+    time_  = time_start;
   }
 
 protected: // functions

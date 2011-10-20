@@ -30,8 +30,6 @@ EnzoSimulationCharm::EnzoSimulationCharm
 #ifdef CONFIG_USE_PROJECTIONS
   traceRegisterUserEvent("Compute",10);
 #endif
-  // Monitor output from root pe only
-  monitor_->set_active(CkMyPe() == 0);
 
   // Initialize on all processes
   initialize();

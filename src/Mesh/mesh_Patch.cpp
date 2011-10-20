@@ -220,16 +220,9 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
     // Store the data block in the block array
     block_[ib] = block;
 
-    // INITIALIZE FIELD BLOCK
-    // (move into Block constructor?)
-    FieldBlock * field_block = block->field_block();
+    // Allocate data on the block
 
-    // Allocate field data, including ghosts
-    
-    field_block->allocate_array(field_descr);
-    field_block->allocate_ghosts(field_descr);
-
-    // INITIALIZE PARTICLE BLOCK
+    block->allocate(field_descr);
 
   }
 #endif /* ! CONFIG_USE_CHARM */

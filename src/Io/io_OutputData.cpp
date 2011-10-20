@@ -119,7 +119,6 @@ void OutputData::write_patch
   int ib = patch->index();
   sprintf (buffer,"patch_%d",ib);
   file_->group_chdir(buffer);
-
   file_->group_create();
 
   // Loop over metadata items in Hierarchy

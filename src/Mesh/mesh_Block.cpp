@@ -16,7 +16,8 @@
 
 //----------------------------------------------------------------------
 
-#define TEMP_CLEAR_VALUE std::numeric_limits<float>::min() /* in field_FieldBlock.cpp and  mesh_Block.cpp */
+#define TEMP_CLEAR_VALUE (-std::numeric_limits<float>::max())
+ /* in field_FieldBlock.cpp and  mesh_Block.cpp */
 
 //----------------------------------------------------------------------
 
@@ -290,18 +291,11 @@ void Block::p_initial()
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
 
-  // Allocate FieldBlock arrays
-
-  for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i]->allocate_array(field_descr);
-    field_block_[i]->allocate_ghosts(field_descr);
-    WARNING1("Block::p_initial","Clearing field block values to %g",TEMP_CLEAR_VALUE);
-    field_block_[i]->clear(field_descr,TEMP_CLEAR_VALUE);
-  }
-
   // Initialize the block
 
-  initialize(simulation->cycle(), simulation->time());
+  allocate(field_descr);
+
+  update_from_hierarchy(simulation->cycle(), simulation->time());
 
   // Apply the initial conditions 
 
@@ -828,3 +822,18 @@ void Block::is_on_boundary (double lower[3], double upper_h[3],
 
 }
 //----------------------------------------------------------------------
+
+void Block::allocate (FieldDescr * field_descr) throw()
+{ 
+  // Allocate fields
+  for (size_t i=0; i<field_block_.size(); i++) {
+    field_block_[i]->allocate_array(field_descr);
+    field_block_[i]->allocate_ghosts(field_descr);
+    WARNING1("Block::p_initial","Clearing field block values to %g",
+	     TEMP_CLEAR_VALUE);
+    field_block_[i]->clear(field_descr,TEMP_CLEAR_VALUE);
+  }
+}
+
+//----------------------------------------------------------------------
+
