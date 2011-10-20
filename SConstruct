@@ -2,8 +2,57 @@ import os
 import sys
 
 #----------------------------------------------------------------------
-# AUTOR CONFIGURATION
+# USER CONFIGURATION
 #----------------------------------------------------------------------
+
+# Whether to print out messages with the TRACE() statements
+
+trace           = 1
+
+# Whether to periodically print basic statistics about field values.
+# See src/Field/field_FieldBlock.cpp
+
+debug           = 0
+
+# Whether to periodically print all field values.  See
+# src/Field/field_FieldBlock.cpp
+
+debug_verbose   = 0
+
+# Whether to track dynamic memory statistics.  Can be useful, but can
+# cause problems on some systems that also override new [] () / delete [] ()
+
+memory          = 1
+
+# Limit CHARM++ load balancing to only when AtSync() is called.  See
+# src/Mesh/mesh_Block.cpp
+
+atsync          = 0
+
+# Whether to compile with -pg to use gprof for performance profiling
+
+use_gprof       = 0
+
+# Whether to run the test programs using valgrind to check for memory leaks
+
+use_valgrind    = 0
+
+# Whether to compile the CHARM++ version for use with the Projections
+# performance tool.
+
+use_projections = 1
+
+# Temporary code variations for testing purposes.  Changing values may
+# result in the code hanging, crashing, or producing incorrect
+# results.
+
+original_refresh = 1
+
+#----------------------------------------------------------------------
+# AUTO CONFIGURATION
+#----------------------------------------------------------------------
+
+# Whether the system has the PAPI performance API installed
 
 use_papi = 0
 
@@ -22,28 +71,8 @@ if not env.GetOption('clean'):
 
      env = conf.Finish()
 
-#----------------------------------------------------------------------
-# USER CONFIGURATION
-#----------------------------------------------------------------------
-
-trace           = 1
-debug           = 0
-debug_verbose   = 0
-memory          = 1
-
-atsync          = 0 # CHARM++: only load balance when AtSync() called
-
-use_gprof       = 0
-use_valgrind    = 0
-use_projections = 1
-# use_papi        = 0 # override auto configuration
-
-# temporary code variations for testing
-
-original_refresh = 1 # 0 crashes
-
 #-----------------------------------------------------------------------
-# PARSE ARGUMENTS
+# PARSE COMMAND-LINE ARGUMENTS
 #-----------------------------------------------------------------------
 
 #--------------------------------------------------
