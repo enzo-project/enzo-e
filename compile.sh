@@ -11,7 +11,7 @@ set prec = $CELLO_PREC
 
 echo
 echo "arch = $arch"
-echo "type = ( $types )"
+echo "type = $types"
 echo "prec = $prec"
 echo
 
