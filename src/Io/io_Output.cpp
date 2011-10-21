@@ -65,8 +65,10 @@ void Output::set_filename (std::string filename,
 
 std::string Output::expand_file_name () const throw()
 {
-  char buffer_curr[CELLO_STRING_LENGTH];
-  char buffer_next[CELLO_STRING_LENGTH];
+  const int MAX_BUFFER = 255;
+
+  char buffer_curr[MAX_BUFFER];
+  char buffer_next[MAX_BUFFER];
 
   // Error check no \% in file name
 
@@ -123,10 +125,9 @@ std::string Output::expand_file_name () const throw()
     } else if (file_arg == "proc") {
       sprintf (buffer_next,buffer_curr, process_);
     } else {
-      char buffer[CELLO_STRING_LENGTH];
-      sprintf (buffer,"Unknown file variable #%d '%s' for file '%s'",
-	       int(i),file_arg.c_str(),file_name_.c_str());
-      ERROR("Output::expand_file_name",buffer);
+      ERROR3("Output::expand_file_name",
+	     "Unknown file variable #%d '%s' for file '%s'",
+	     int(i),file_arg.c_str(),file_name_.c_str());
     }
 
     file_right = std::string(buffer_next) + file_right;

@@ -10,9 +10,6 @@
 #include "cello.hpp"
 #include "field.hpp"
 
-#define TEMP_CLEAR_VALUE std::numeric_limits<float>::min() 
-/* in field_FieldBlock.cpp and  mesh_Block.cpp */
-
 //----------------------------------------------------------------------
 
 FieldBlock::FieldBlock ( int nx, int ny, int nz ) throw()

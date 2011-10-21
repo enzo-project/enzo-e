@@ -16,11 +16,6 @@
 
 //----------------------------------------------------------------------
 
-#define TEMP_CLEAR_VALUE (-std::numeric_limits<float>::max())
- /* in field_FieldBlock.cpp and  mesh_Block.cpp */
-
-//----------------------------------------------------------------------
-
 Block::Block
 (
  int ibx, int iby, int ibz,

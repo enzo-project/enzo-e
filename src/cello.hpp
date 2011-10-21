@@ -9,13 +9,32 @@
 /// @todo    Need face_axis_enum?
 /// @brief   Include Cello global configuration settings
 
-#include "cello_config.def"
 #include "cello_macros.hpp"
 #include "cello_precision.hpp"
 
-/*********************************************************************
- * PROBLEM DECLARATIONS
- **********************************************************************/
+//----------------------------------------------------------------------
+// COMMON FUNCTIONS
+//----------------------------------------------------------------------
+
+template <class T>
+inline T MIN(const T &a, const T &b) 
+{  return a < b ? a : b; }
+
+template <class T>
+inline T MAX(const T &a, const T &b) 
+{  return a > b ? a : b; }
+
+inline int INDEX(int ix,int iy,int iz,int nx,int ny) 
+{  return ix+nx*(iy+ny*iz); }
+
+//----------------------------------------------------------------------
+// GLOBAL DEFINES
+//----------------------------------------------------------------------
+
+// Value used to initialize new fields for debugging
+
+#define TEMP_CLEAR_VALUE (std::numeric_limits<float>::min())
+
 
 
 /// @enum     face_axis_enum
