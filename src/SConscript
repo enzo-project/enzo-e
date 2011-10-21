@@ -50,7 +50,7 @@ libraries  = ['png', '$FORTRANLIBS','m']
 env = env.Clone(LIBS=[components,libraries])
 
 includes = [Glob('cello*hpp'), Glob('cello*def'), Glob('test*hpp'), 'main.hpp']
-sources  = [Glob('cello*cpp'),Glob('main*cpp')]
+sources  = [Glob('cello*cpp')]
 
 if (type == "charm"):
    env.CharmBuilder('main.decl.h','main.ci',ARG = 'main')
@@ -69,7 +69,8 @@ if (type == "charm"):
    env.CharmBuilder('main_mesh.def.h', 'main_mesh.ci',ARG = 'main_mesh')
    includes = includes + ['main_mesh.decl.h','main_mesh.def.h']
 
-libraries = env.Library ('cello', [sources])
+libraries = [env.Library ('cello', [sources])]
+
 
 env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
 env.Alias('install-inc', env.Install ('#/include',includes))
