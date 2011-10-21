@@ -9,7 +9,7 @@
    } 
 
    Mesh { 
-      root_size      = [100,100];
+      root_size      = [400,400];
    }
 
    Field {

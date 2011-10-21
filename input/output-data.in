@@ -1,5 +1,5 @@
 
-include "input/circle.incl"
+include "input/implosion.incl"
 
 Mesh {
   root_blocks = [2,2];
