@@ -4,6 +4,6 @@ Boundary { type = "inflow" }
 
 Output { 
    cycle_step {  
-      name = ["boundary-inflow-3d-%04d.png","cycle"]; 
+      name = ["boundary_inflow-3d-%04d.png","cycle"]; 
    } 
 }

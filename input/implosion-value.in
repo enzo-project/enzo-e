@@ -1,0 +1,23 @@
+# Problem: 2D Implosion problem using Initial:<field>:value
+# Author:  James Bordner (jobordner@ucsd.edu)
+#
+# This file is used for developing the Cello / Enzo-P input grammar and syntax
+
+   include "implosion.incl"
+
+   Initial {
+       density       { value = [ 0.125,                x + y < 0.1517, 
+                                 1.0 ]; };
+
+       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.1517,
+                                 1.00 / (0.4 * 1.000) ]; };
+
+       velocity_x    { value = 0.0; };
+       velocity_y    { value = 0.0; }
+   }
+
+   Output { 
+      cycle_step {
+         name = ["implosion-value-%05d","cycle"];
+      }
+   }

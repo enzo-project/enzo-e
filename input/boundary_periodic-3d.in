@@ -4,6 +4,6 @@ Boundary { type = "periodic" }
 
 Output { 
    cycle_step {  
-      name = ["boundary-periodic-3d-%04d.png","cycle"]; 
+      name = ["boundary_periodic-3d-%04d.png","cycle"]; 
    } 
 }

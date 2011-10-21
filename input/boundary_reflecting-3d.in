@@ -4,6 +4,6 @@ Boundary { type = "reflecting" }
 
 Output { 
    cycle_step {  
-      name = ["boundary-reflecting-3d-%04d.png","cycle"]; 
+      name = ["boundary_reflecting-3d-%04d.png","cycle"]; 
    } 
 }
