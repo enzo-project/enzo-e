@@ -27,6 +27,7 @@ EnzoSimulationCharm::EnzoSimulationCharm
  int                index) throw ()
   : EnzoSimulation(parameter_file, n, proxy_block_reduce,index)
 {
+
 #ifdef CONFIG_USE_PROJECTIONS
   traceRegisterUserEvent("Compute",10);
 #endif

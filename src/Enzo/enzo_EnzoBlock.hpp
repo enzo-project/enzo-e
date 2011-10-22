@@ -90,8 +90,14 @@ public: // interface
 
 public: // functions (TEMPORARILY PUBLIC)
 
-  /// Additional EnzoBlock specific updates from Hierarchy
-  void update_from_hierarchy (int cycle_start, double time_start) throw();
+  /// Set Block's cycle
+  virtual void set_cycle (int cycle) throw();
+
+  /// Set Block's time
+  virtual void set_time (double time) throw();
+
+  /// Initialize Block
+  virtual void initialize () throw();
 
 public: // attributes (YIKES!)
 

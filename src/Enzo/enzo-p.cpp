@@ -109,6 +109,7 @@ PARALLEL_MAIN_BEGIN
 
   simulation->run();
 
+  // Finalize the simulation
 
   simulation->finalize();
 

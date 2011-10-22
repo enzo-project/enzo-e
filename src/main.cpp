@@ -37,6 +37,7 @@ void Main::p_exit(int count)
     simulation->finalize();
 
     // Test results: DUPLICATE CODE IN src/Enzo/enzo-p.cpp !!!
+    // Move to main::finalize()?
 
     // parameter: Testing : cycle_final
     

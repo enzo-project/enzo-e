@@ -72,7 +72,10 @@ void EnzoSimulationMpi::run() throw()
 
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-      enzo_block->update_from_hierarchy(cycle_, time_);
+      enzo_block->set_cycle(cycle_);
+      enzo_block->set_time(time_);
+
+      enzo_block->initialize();
 
     }
   }
@@ -156,7 +159,8 @@ void EnzoSimulationMpi::run() throw()
 
 	// Accumulate Block-local dt
 
-	block->update_from_hierarchy(cycle_,time_);
+	block->set_cycle(cycle_);
+	block->set_time (time_);
 
 	double dt_block = timestep_->compute(field_descr_,block);
 

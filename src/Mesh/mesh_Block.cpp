@@ -290,7 +290,14 @@ void Block::p_initial()
 
   allocate(field_descr);
 
-  update_from_hierarchy(simulation->cycle(), simulation->time());
+  // Set the Block cycle and time to match Simulation's
+
+  set_cycle(simulation->cycle());
+  set_time (simulation->time());
+
+  // Perform any additional initialization
+
+  initialize ();
 
   // Apply the initial conditions 
 

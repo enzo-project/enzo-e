@@ -155,13 +155,17 @@ public: // virtual functions
 
   virtual void allocate (FieldDescr * field_descr) throw();
 
-  /// Call application-specific initialization
-  virtual void update_from_hierarchy 
-  (int cycle_start, double time_start) throw()
-  {
-    cycle_ = cycle_start;
-    time_  = time_start;
-  }
+  /// Set Block's cycle
+  virtual void set_cycle (int cycle) throw()
+  { cycle_ = cycle;}
+
+  /// Set Block's time
+  virtual void set_time (double time) throw()
+  { time_  = time; }
+
+  /// Initialize Block
+  virtual void initialize () throw()
+  {}
 
 protected: // functions
 
