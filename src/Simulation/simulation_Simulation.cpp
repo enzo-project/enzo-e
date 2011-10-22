@@ -87,7 +87,7 @@ void Simulation::initialize() throw()
 
   // Initialize simulation components
 
-  initialize_data_();
+  initialize_data_descr_();
   initialize_hierarchy_();
   initialize_stopping_();
   initialize_timestep_();
@@ -125,7 +125,7 @@ void Simulation::initialize_simulation_() throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_data_() throw()
+void Simulation::initialize_data_descr_() throw()
 {
 
   /* MEMORY LEAK */
@@ -188,7 +188,7 @@ void Simulation::initialize_data_() throw()
   else if (precision_str == "quadruple")
     precision = precision_quadruple;
   else {
-    ERROR1 ("Simulation::initialize_data_()", 
+    ERROR1 ("Simulation::initialize_data_descr_()", 
 	    "Unknown precision %s",
 	    precision_str.c_str());
   }
@@ -1052,16 +1052,6 @@ void Simulation::refresh() throw()
   //--------------------------------------------------
 
   monitor_output();
-
-  //--------------------------------------------------
-  // Output
-  //--------------------------------------------------
-
-  for (size_t index_output=0; index_output<num_output(); index_output++) {
-    if (output(index_output)->schedule()->write_this_cycle(cycle_, time_)) {
-      // output_open(index_output);
-    }
-  }
 
   //--------------------------------------------------
   // Stopping

@@ -283,7 +283,8 @@ extern CProxy_Main        proxy_main;
 
 void Block::p_initial()
 {
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  Simulation * simulation  = proxy_simulation.ckLocalBranch();
+
   FieldDescr * field_descr = simulation->field_descr();
 
   // Initialize the block
@@ -330,6 +331,7 @@ void Block::prepare()
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
+
   FieldDescr * field_descr = simulation->field_descr();
 
   //--------------------------------------------------
@@ -363,6 +365,7 @@ void Block::prepare()
   // Main::p_prepare()
   //--------------------------------------------------
 
+  // WARNING: assumes single patch
   int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
 
   simulation->proxy_block_reduce().p_prepare

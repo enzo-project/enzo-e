@@ -355,6 +355,8 @@ void EnzoBlock::set_time (double time_start) throw ()
 void EnzoBlock::initialize () throw()
 {
 
+  Block::initialize();
+
   double xm,ym,zm;
 
   lower(&xm,&ym,&zm);

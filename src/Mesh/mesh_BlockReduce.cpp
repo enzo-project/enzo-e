@@ -28,7 +28,7 @@ BlockReduce::BlockReduce()
 
 //----------------------------------------------------------------------
 
-// See Simulation/simulation_charm_output.cpp for BlockReduce::p_prepare()
+// See Simulation/simulation_charm_output.cpp for BlockReduce::p_output()
 
 #ifdef CONFIG_USE_CHARM
 

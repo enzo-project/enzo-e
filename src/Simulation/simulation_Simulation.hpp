@@ -247,7 +247,7 @@ protected: // functions
   void initialize_hierarchy_ () throw();
 
   /// Initialize the data object
-  void initialize_data_ () throw();
+  void initialize_data_descr_ () throw();
 
 
   /// Initialize the stopping object
