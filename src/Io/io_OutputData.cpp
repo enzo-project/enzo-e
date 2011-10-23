@@ -207,17 +207,18 @@ void OutputData::write_field
     void * buffer;
     const char * name;
     scalar_type type;
-    int i0,i1,i2,i3,i4;
+    int n0,n1,n2;
 
     // Get ith FieldBlock data
-    io_field_block()->data_value(i,& buffer, &name, &type, &i0,&i1,&i2,&i3,&i4);
+    io_field_block()->data_value(i,& buffer, &name, &type, &n0,&n1,&n2);
+
     // Write ith FieldBlock data
-    if (i2 != 0) {
-      file_->data_create(name,type,i0,i1,i2);
-    } else if (i1 != 0) {
-      file_->data_create(name,type,i0,i1);
+    if (n2 != 0) {
+      file_->data_create(name,type,n0,n1,n2);
+    } else if (n1 != 0) {
+      file_->data_create(name,type,n0,n1);
     } else {
-      file_->data_create(name,type,i0);
+      file_->data_create(name,type,n0);
     }
     file_->data_write(buffer);
     file_->data_close();

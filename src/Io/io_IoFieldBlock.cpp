@@ -54,9 +54,15 @@ void IoFieldBlock::data_value
   }
   int nbx,nby,nbz;
   field_block_->size(&nbx,&nby,&nbz);
-  if (n0) (*n0) = nbx;
-  if (n1) (*n1) = nby;
-  if (n2) (*n2) = nbz;
+  int ngx=0,ngy=0,ngz=0;
+
+  // UNCOMMENT TO INCLUDE GHOST ZONES
+  // field_descr_->ghosts(field_index_,&ngx,&ngy,&ngz);
+
+  if (n0) (*n0) = nbx + 2*ngx;
+  if (n1) (*n1) = nby + 2*ngy;
+  if (n2) (*n2) = nbz + 2*ngz;
+
 }
 
 //----------------------------------------------------------------------

@@ -474,6 +474,8 @@ void Block::p_refresh (int cycle, double time, double dt, int axis_set)
     cycle_ = cycle;
     time_  = time;
     dt_    = dt;
+    set_time(time);
+    set_cycle(cycle);
   }
 
   refresh(axis_set);
