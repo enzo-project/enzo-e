@@ -1,4 +1,4 @@
-include "input/E.incl"
+include "input/dots.incl"
 
 Boundary { type = "periodic" }
 
