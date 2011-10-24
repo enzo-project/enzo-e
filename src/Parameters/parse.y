@@ -674,6 +674,8 @@ vle:
 
 %%
 
+int cello_new_file(char * filename);
+
 struct param_struct * 
 cello_parameters_read(const char * filename, FILE * fp)
 {
