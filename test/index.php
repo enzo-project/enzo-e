@@ -651,10 +651,11 @@ tests("Mesh","test_Block","test_Block","");
 test_group("Monitor");
 
 tests("Monitor","test_Monitor","test_Monitor","");
-printf ("<img src=\"monitor_image_1.png\"></img>\n");
-printf ("<img src=\"monitor_image_2.png\"></img>\n");
-printf ("<img src=\"monitor_image_3.png\"></img>\n");
-printf ("<img src=\"monitor_image_4.png\"></img>\n");
+
+// printf ("<img src=\"monitor_image_1.png\"></img>\n");
+// printf ("<img src=\"monitor_image_2.png\"></img>\n");
+// printf ("<img src=\"monitor_image_3.png\"></img>\n");
+// printf ("<img src=\"monitor_image_4.png\"></img>\n");
 
    //----------------------------------------------------------------------
 

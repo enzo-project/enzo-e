@@ -9,9 +9,6 @@
 /// @todo    Need face_axis_enum?
 /// @brief   Include Cello global configuration settings
 
-#include "cello_macros.hpp"
-#include "cello_precision.hpp"
-
 //----------------------------------------------------------------------
 // COMMON FUNCTIONS
 //----------------------------------------------------------------------
@@ -66,10 +63,8 @@ enum axis_enum {
   axis_all
 };
 
-//----------------------------------------------------------------------
 /// @enum     reduce_enum
 /// @brief    Reduction operator, used for image projections
-
 enum reduce_enum {
   reduce_unknown, /// Unknown reduction
   reduce_min,     /// Minimal value along the axis
@@ -78,9 +73,9 @@ enum reduce_enum {
   reduce_sum      /// Sum of values along the axis
 };
 
-/*********************************************************************
- * COMPONENTS
- **********************************************************************/
+//======================================================================
+// COMPONENTS
+//======================================================================
 
 enum component_enum {
   component_undefined,
@@ -102,5 +97,65 @@ enum component_enum {
 };
 
 extern const char * component_name [];
+
+//======================================================================
+// PRECISION
+//======================================================================
+
+enum precision_enum {
+  // @@@ KEEP IN SYNCH WITH precision_name in cello_precision.cpp
+  precision_unknown,     //  unknown precision
+  precision_default,     //  default precision
+  precision_single,      //  32-bit field data
+  precision_double,      //  64-bit field data
+  precision_extended80,  //  80-bit field data
+  precision_extended96,  //  96-bit field data
+  precision_quadruple,   // 128-bit field data
+};
+
+#ifdef CONFIG_PRECISION_SINGLE
+
+#   define default_precision precision_single
+#   define scalar_type_enzo_float scalar_type_float
+
+#   define SCALAR_DEFINED
+
+#endif
+
+#ifdef CONFIG_PRECISION_DOUBLE
+
+#   define default_precision precision_double
+#   define scalar_type_enzo_float scalar_type_double
+
+#   ifdef SCALAR_DEFINED
+#      error Both CONFIG_PRECISION_SINGLE and CONFIG_PRECISION_DOUBLE defined
+#   endif
+
+#   define SCALAR_DEFINED
+
+#endif
+
+#ifndef SCALAR_DEFINED
+
+#   error Neither CONFIG_PRECISION_SINGLE nor CONFIG_PRECISION_DOUBLE defined
+
+#endif
+
+namespace cello {
+
+  int sizeof_precision       (enum precision_enum);
+  int is_precision_supported (enum precision_enum);
+  double machine_epsilon     (enum precision_enum);
+  extern const char * precision_name[7];
+
+  template <class T>
+  T err_rel (T a, T b)
+  {  return (a != 0.0) ? fabs((a - b) / a) : fabs(a-b);  }
+
+  template <class T>
+  T err_abs (T a, T b)
+  {  return fabs(a-b);  };
+
+};
 
 #endif /* CELLO_HPP */

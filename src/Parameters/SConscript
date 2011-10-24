@@ -48,7 +48,7 @@ env = env.Clone(LIBS=[components,libraries])
 libraries = env.Library ('parameters', [sources])
 
 if (type == "charm"):
-	sources = sources + ["../main.cpp"]
+	sources = sources + ["../Main/main.cpp"]
 
 test_parameters = env.Program (['test_Parameters.cpp', sources])
 test_parse      = env.Program (['test_Parse.cpp',      sources])

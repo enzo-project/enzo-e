@@ -23,9 +23,9 @@ class Factory {
 
 public: // interface
 
-// #ifdef CONFIG_USE_CHARM
-//   virtual void pup(PUP::er &) {}
-// #endif
+  /// Destructor (must be present to avoid possible vtable link errors)
+  virtual ~Factory() throw()
+  {}
 
   /// Create a new Hierarchy [abstract factory design pattern]
   virtual Hierarchy * create_hierarchy () const throw ();

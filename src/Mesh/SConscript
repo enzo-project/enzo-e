@@ -51,7 +51,8 @@ env = env.Clone(LIBS=[components,libraries])
 libraries = env.Library ('mesh', [sources])
 
 if (type == "charm"):
-   sources = sources + ['../main_mesh.cpp']
+   sources      = sources      + ['../Main/main_mesh.cpp']
+#   sources_tree = sources_tree + ['../Main/main.cpp']
 
 test_block     = env.Program (['test_Block.cpp', sources])
 test_hierarchy = env.Program (['test_Hierarchy.cpp',  sources])

@@ -33,7 +33,7 @@ env = env.Clone(LIBS=[components,libraries])
 libraries = env.Library ('memory', [sources])
 
 if (type == "charm"):
-	sources = sources + ["../main.cpp"]
+	sources = sources + ["../Main/main.cpp"]
 
 binaries  = env.Program (['test_Memory.cpp', sources])
 

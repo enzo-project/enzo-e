@@ -39,7 +39,7 @@ env = env.Clone(LIBS=[components,libraries])
 libraries        = env.Library ('performance', [sources])
 
 if (type == "charm"):
-	sources = sources + ["../main.cpp"]
+	sources = sources + ["../Main/main.cpp"]
 
 test_performance = env.Program(['test_Performance.cpp', sources])
 test_papi        = env.Program(['test_Papi.cpp',        sources])

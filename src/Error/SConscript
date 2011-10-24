@@ -34,7 +34,7 @@ env = env.Clone(LIBS=[components,libraries])
 libraries  = env.Library ('error', [sources])
 
 if (type == "charm"):
-   sources = sources + ['../main.cpp']
+   sources = sources + ['../Main/main.cpp']
 
 test_error = env.Program (['test_Error.cpp',  sources])
 

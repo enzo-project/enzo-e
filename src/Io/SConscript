@@ -8,17 +8,21 @@
 
 Import('env')
 Import('type')
+Import('use_papi')
 
 #------------------------------
 # DEPENDENCIES
 #------------------------------
 
-components = ['simulation', 'method', 'io',
-              'mesh', 'field',
+components = [ 'io',
+              'simulation', 'method',
+               'mesh', 'field',
               'disk','memory','parallel',
               'parameters', 
               'test','cello',
               'error','monitor','performance' ]
+if (use_papi):
+    components = components + ['papi','pfm']
 
 libraries  = ['png','hdf5']
 
@@ -41,7 +45,10 @@ env = env.Clone(LIBS=[components,libraries])
 
 libraries = env.Library ('io', [sources])
 
-binaries = [env.Program (['test_ItReduce.cpp'])]
+if (type == "charm"):
+	sources = sources + ['../Main/main_simulation.cpp']
+
+binaries = [env.Program (['test_ItReduce.cpp',sources])]
 
 #------------------------------
 # INSTALL
