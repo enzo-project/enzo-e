@@ -510,6 +510,24 @@ test_group("Enzo-PPM");
 
 echo "<h3>Implosion2D (serial) </h3>";
 
+?>
+
+Enzo-PPM tests serve to test basic PPM functionality in Enzo-P.  A
+small implosion problem is run for 400 cycles, first with
+one block (1,1) then eight blocks (2,4).
+
+</p>
+
+Currently, "serial" results are incorrect for multiple blocks, which
+is to be expected.  There are errors in parallel CHARM++ and MPI with
+eight blocks because the final time after 400 cycles does not exactly
+match the time for the serial runs.  The results look qualitatively
+correct however, even at time 2.5 for 400<sup>2</sup>(over 13000
+cycles).
+</p>
+
+<?php
+
 tests("Enzo","enzo-p","test_enzo-p_1","PPM 1 block");
 
 test_table ("enzo-p_1-d",
