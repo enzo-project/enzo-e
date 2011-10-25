@@ -80,19 +80,20 @@ enum parallel_enum {
 #   include "parallel_GroupProcessMpi.hpp"
 #   include "parallel_GroupProcessCharm.hpp"
 #   include "parallel_GroupProcessSerial.hpp"
-#include "parallel_GroupThread.hpp"
+
+//#include "parallel_GroupThread.hpp"
 
 #include "parallel_Reduce.hpp"
 #   include "parallel_ReduceSerial.hpp"
 #   include "parallel_ReduceMpi.hpp"
 #   include "parallel_ReduceCharm.hpp"
 
-#include "parallel_Parallel.hpp"
+// #include "parallel_Parallel.hpp"
 
 #include "parallel_Layout.hpp"
 
 
-#include "parallel_ParallelAffinity.hpp"
+//#include "parallel_ParallelAffinity.hpp"
 
 #endif /* PARALLEL_HPP */
 
