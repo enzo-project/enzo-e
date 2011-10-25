@@ -30,8 +30,8 @@ libraries  = ['png','hdf5']
 # SOURCE
 #------------------------------
 
-includes = [Glob('io*hpp')]
-sources  = [Glob('io*cpp')]
+includes = [Glob('io*hpp'),Glob('png*h')]
+sources  = [Glob('io*cpp'),Glob('png*cpp')]
 
 #------------------------------
 # ENVIRONMENTS

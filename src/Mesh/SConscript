@@ -17,7 +17,7 @@ Import('use_papi')
 components = [ 
               'field', 
               'simulation','method', 'io',
-              'disk','memory','parallel',
+	      'disk','memory','parallel',
               'parameters',
               'error','monitor','performance', 
               'test','cello']
@@ -25,10 +25,7 @@ components = [
 if (use_papi):
 	components = components + ['papi','pfm']
 
-libraries  = ['hdf5','png']
-
-#if (type == "charm"):
-#   components = components + ['enzo']
+libraries = ['png','hdf5']
 
 #------------------------------
 # SOURCE

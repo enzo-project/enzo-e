@@ -12,20 +12,19 @@ Import('type')
 components = ['parallel',
 	      'error','monitor','performance',
 	      'test','cello']
-libraries  = ['png']
 
 #------------------------------
 # SOURCE
 #------------------------------
 
-includes   = [Glob('monitor*hpp'), Glob('png*h')]
-sources    = [Glob('monitor*cpp'), Glob('png*cpp')]
+includes   = [Glob('monitor*hpp')]
+sources    = [Glob('monitor*cpp')]
 
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
 
-env        = env.Clone(LIBS=[components,libraries])
+env        = env.Clone(LIBS=[components])
 
 #------------------------------
 # TARGETS
