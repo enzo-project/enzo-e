@@ -3,7 +3,7 @@
 /// @file     io_Io.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-10-06
-/// @brief    [\ref Io] Declaration of the Io abstract base class
+/// @brief    [\ref Io] Abstract base class for providing access to class data for Output classes
 
 #ifndef IO_IO_HPP
 #define IO_IO_HPP

@@ -14,7 +14,7 @@ class IoHierarchy : public Io {
 
   /// @class    IoHierarchy
   /// @ingroup  Io
-  /// @brief    [\ref Io] Declaration of the IoHierarchy class
+  /// @brief    [\ref Io] Class for linking between Hierarchy and Output classes
 
 public: // interface
 

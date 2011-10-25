@@ -14,7 +14,7 @@ class IoFieldBlock : public Io {
 
   /// @class    IoFieldBlock
   /// @ingroup  Io
-  /// @brief    [\ref Io] Declaration of the IoFieldBlock class
+  /// @brief    [\ref Io] Class for linking between FieldBlock and Output classes
 
 public: // interface
 

@@ -14,7 +14,7 @@ class IoBlock : public Io {
 
   /// @class    IoBlock
   /// @ingroup  Io
-  /// @brief    [\ref Io] Declaration of the IoBlock class
+  /// @brief    [\ref Io] Class for linking between Block and Output classes
 
 public: // interface
 

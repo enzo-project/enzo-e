@@ -57,7 +57,8 @@ foreach type ($types)
       touch "$dir/running.$arch.$prec"
 
       scons arch=$arch type=$type -k -j8 bin/$type/enzo-p >>& $dir/out.scons
-      scons arch=$arch type=$type -k -j$procs >>& $dir/out.scons
+      scons arch=$arch type=$type -k -j$procs             >>& $dir/out.scons
+      scons arch=$arch type=$type -k -j$procs             >>& $dir/out.scons
       rm -f "$dir/running.$arch.$prec"
   
       printf "done\n"

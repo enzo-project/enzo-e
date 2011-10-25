@@ -14,7 +14,7 @@ class IoPatch : public Io {
 
   /// @class    IoPatch
   /// @ingroup  Io
-  /// @brief    [\ref Io] Declaration of the IoPatch class
+  /// @brief    [\ref Io] Class for interfacing between Patch and Output classes
 
 public: // interface
 

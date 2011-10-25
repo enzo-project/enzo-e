@@ -3,7 +3,7 @@
 /// @file     io_IoEnzoBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-10-06
-/// @brief    [\ref Io] Declaration of the IoEnzoBlock class
+/// @brief    [\ref Enzo] Declaration of the IoEnzoBlock class
 
 #ifndef IO_IO_ENZO_BLOCK_HPP
 #define IO_IO_ENZO_BLOCK_HPP
@@ -13,8 +13,8 @@ class EnzoBlock;
 class IoEnzoBlock : public IoBlock {
 
   /// @class    IoEnzoBlock
-  /// @ingroup  Io
-  /// @brief    [\ref Io] 
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Class for interfacing between EnzoBlock and Output objects
 
 public: // interface
 
