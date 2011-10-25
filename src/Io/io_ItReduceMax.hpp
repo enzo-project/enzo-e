@@ -16,22 +16,31 @@ class ItReduceMax : public ItReduce {
 
 public: //
 
-  /// Prohibit creating new ItReduceMaxs directly: require ItReduceMax::create()
-  ItReduceMax () throw ();
+  /// Prohibit creating new ItReduceMaxs directly: require
+  /// ItReduceMax::create()
+  ItReduceMax () throw ()
+  : ItReduce(std::numeric_limits<double>::min())
+  { }
+
 
 public: // interface
 
   /// Delete the ItReduceMax object
-  virtual ~ItReduceMax () throw ();
+  virtual ~ItReduceMax () throw ()
+  { }
   
   /// Reduce another value
-  virtual void next (double value) throw();
+  virtual void next (double value) throw()
+  { value_ = MAX(value,value_); }
 
   /// Reset the Iterator to the beginning
-  virtual void first() throw();
+  virtual void first() throw()
+  { value_ = std::numeric_limits<double>::min(); }
+
 
   /// Return the current value of the reduction operator
-  virtual double value() const throw();
+  virtual double value() const throw()
+  { return value_; }
 
 private: // attributes
 

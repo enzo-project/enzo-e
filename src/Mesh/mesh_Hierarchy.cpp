@@ -18,8 +18,7 @@ Hierarchy::Hierarchy
  const Factory * factory
  ) throw ()
   : factory_(factory),
-    patch_count_(0),
-    tree_(0)
+    patch_count_(0)
 {
   // Initialize extents
   for (int i=0; i<3; i++) {
@@ -38,7 +37,6 @@ Hierarchy::~Hierarchy() throw()
     patch_list_[i] = 0;
   }
   patch_count_ = 0;
-  delete tree_;
 }
 
 //----------------------------------------------------------------------

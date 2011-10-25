@@ -17,21 +17,27 @@ class ItReduceSum : public ItReduce {
 public: //
 
   /// Prohibit creating new ItReduceSums directly: require ItReduceSum::create()
-  ItReduceSum () throw ();
+  ItReduceSum () throw ()
+  : ItReduce(0.0)
+  {}
 
 public: // interface
 
   /// Delete the ItReduceSum object
-  virtual ~ItReduceSum () throw ();
+  virtual ~ItReduceSum () throw ()
+  {}
   
   /// Reduce another value
-  virtual void next (double value) throw();
+  virtual void next (double value) throw()
+  { value_ += value; }
 
   /// Reset the Iterator to the beginning
-  virtual void first() throw();
+  virtual void first() throw()
+  { value_ = 0.0; }
 
   /// Return the current value of the reduction operator
-  virtual double value() const throw();
+  virtual double value() const throw()
+  { return value_; }
 
 private: // attributes
 

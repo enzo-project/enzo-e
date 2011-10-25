@@ -92,76 +92,10 @@ env.RunSerial('test_Papi.unit',        bin_path + '/test_Papi')
 #----------------------------------------------------------------------
 # SIMULATION COMPONENT    
 #----------------------------------------------------------------------
+
 # (test_Simulation removed since supplanted by enzo-p)
-#----------------------------------------------------------------------
-# TASK COMPONENT          
-#----------------------------------------------------------------------
 
-
-
-
-
-#----------------------------------------------------------------------
-# MESH PROTOTYPE
-#----------------------------------------------------------------------
-
-
-Clean(env_mv_png.RunSerial
-      ('test_TreeK-D2-R2-L6.unit', 
-       bin_path + '/test_TreeK',
-       ARGS='2 2 6 input/Cello.png'),
-      Glob('#/test/' + type + '/TreeK-D=2-R=2-L=6*png'))
-Clean(env_mv_png.RunSerial
-      ('test_TreeK-D2-R2-L7.unit', 
-       bin_path + '/test_TreeK',
-       ARGS='2 2 7 input/Cello.png'),
-      Glob('#/test/' + type + '/TreeK-D=2-R=2-L=7*png'))
-Clean(env_mv_png.RunSerial
-      ('test_TreeK-D2-R2-L8.unit',
-       bin_path + '/test_TreeK',
-       ARGS='2 2 8 input/Cello.png'),
-      Glob('#/test/' + type + '/TreeK-D=2-R=2-L=8*png'))
-
-Clean(env_mv_png.RunSerial
-      ('test_TreeK-D2-R4-L6.unit',
-       bin_path + '/test_TreeK',
-       ARGS='2 4 6 input/Cello.png'),
-      Glob('#/test/' + type + '/TreeK-D=2-R=4-L=6*png'))
-Clean(env_mv_png.RunSerial
-      ('test_TreeK-D2-R4-L8.unit',
-       bin_path + '/test_TreeK',
-       ARGS='2 4 8 input/Cello.png'),
-      Glob('#/test/' + type + '/TreeK-D=2-R=4-L=8*png'))
-
-Clean(env_mv_png.RunSerial
-      ('test_TreeK-D3-R2-L4.unit',
-       bin_path + '/test_TreeK',
-       ARGS='3 2 4'),
-      Glob('#/test/' + type + '/TreeK-D=3-R=2-L=4*png'))
-Clean(env_mv_png.RunSerial
-      ('test_TreeK-D3-R2-L5.unit',
-       bin_path + '/test_TreeK', ARGS='3 2 5'),
-      Glob('#/test/' + type + '/TreeK-D=3-R=2-L=5*png'))
-Clean(env_mv_png.RunSerial
-      ('test_TreeK-D3-R2-L6.unit',
-       bin_path + '/test_TreeK', ARGS='3 2 6'),
-      Glob('#/test/' + type + '/TreeK-D=3-R=2-L=6*png'))
-
-Clean(env_mv_png.RunSerial
-      ('test_TreeK-D3-R4-L4.unit',
-       bin_path + '/test_TreeK', ARGS='3 4 4'),
-      Glob('#/test/' + type + '/TreeK-D=3-R=4-L=4*png'))
-Clean(env_mv_png.RunSerial
-      ('test_TreeK-D3-R4-L6.unit',
-       bin_path + '/test_TreeK', ARGS='3 4 6'),
-      Glob('#/test/' + type + '/TreeK-D=3-R=4-L=6*png'))
-
-Clean(env.RunSerial
-      ('test_Monitor.unit',
-       bin_path + '/test_Monitor'),
-      Glob('#/test/' + type + '/out.png'))
-
-#----------------------------------------------------------------------
+----------------------------------------------------------------------
 # TEST INPUT PARAMETER PARSER
 #----------------------------------------------------------------------
 

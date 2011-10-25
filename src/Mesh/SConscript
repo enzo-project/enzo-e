@@ -25,7 +25,7 @@ components = [
 if (use_papi):
 	components = components + ['papi','pfm']
 
-libraries  = ['hdf5','png'] # used only for test_TreeK(?)
+libraries  = ['hdf5','png']
 
 #if (type == "charm"):
 #   components = components + ['enzo']
@@ -36,7 +36,6 @@ libraries  = ['hdf5','png'] # used only for test_TreeK(?)
 
 includes = [Glob('mesh*hpp')]
 sources  = [Glob('mesh*cpp')]
-sources_tree = [Glob('mesh*Node*cpp'), Glob('mesh*Tree*cpp')]
 
 #------------------------------
 # ENVIRONMENTS
@@ -52,19 +51,17 @@ libraries = env.Library ('mesh', [sources])
 
 if (type == "charm"):
    sources      = sources      + ['../Main/main_mesh.cpp']
-   sources_tree = sources_tree + ['../Main/main.cpp']
 
 test_block     = env.Program (['test_Block.cpp', sources])
 test_hierarchy = env.Program (['test_Hierarchy.cpp',  sources])
 test_patch     = env.Program (['test_Patch.cpp', sources])
-test_tree      = env.Program (['test_TreeK.cpp', sources_tree])
 
 if (type == "charm"):
    env.CharmBuilder('mesh.decl.h','mesh.ci',ARG = 'mesh')
    env.CharmBuilder('mesh.def.h', 'mesh.ci',ARG = 'mesh')
    includes = includes + ['mesh.decl.h','mesh.def.h']
 
-binaries = [test_hierarchy, test_patch, test_block, test_tree ];
+binaries = [test_hierarchy, test_patch, test_block ];
 
 #------------------------------
 # INSTALL

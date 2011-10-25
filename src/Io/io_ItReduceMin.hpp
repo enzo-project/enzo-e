@@ -17,21 +17,29 @@ class ItReduceMin : public ItReduce {
 public: //
 
   /// Prohibit creating new ItReduceMins directly: require ItReduceMin::create()
-  ItReduceMin () throw ();
+  ItReduceMin () throw ()
+  : ItReduce(std::numeric_limits<double>::max())
+  { }
+
 
 public: // interface
 
   /// Delete the ItReduceMin object
-  virtual ~ItReduceMin () throw ();
+  virtual ~ItReduceMin () throw ()
+  { }
   
   /// Reduce another value
-  virtual void next (double value) throw();
+  virtual void next (double value) throw()
+  { value_ = MIN(value,value_); }
 
   /// Reset the Iterator to the beginning
-  virtual void first() throw();
+  virtual void first() throw()
+  { value_ = std::numeric_limits<double>::max(); }
+
 
   /// Return the current value of the reduction operator
-  virtual double value() const throw();
+  virtual double value() const throw()
+  { return value_; }
 
 private: // attributes
 

@@ -44,8 +44,6 @@
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "mesh_tree.hpp"
-
 // Hierarchy and components
 #include "mesh_Block.hpp"
 #include "mesh_Patch.hpp"

@@ -17,21 +17,33 @@ class ItReduceAvg : public ItReduce {
 public: //
 
   /// Prohibit creating new ItReduceAvgs directly: require ItReduceAvg::create()
-  ItReduceAvg () throw ();
+  ItReduceAvg () throw ()
+  : ItReduce(0.0)
+  { }
 
 public: // interface
 
   /// Delete the ItReduceAvg object
-  virtual ~ItReduceAvg () throw ();
+  virtual ~ItReduceAvg () throw ()
+  { }
   
   /// Reduce another value
-  virtual void next (double value) throw();
+  virtual void next (double value) throw()
+  {
+    count_++;
+    value_ += value;
+  }
 
   /// Reset the Iterator to the beginning
-  virtual void first() throw();
+  virtual void first() throw()
+  {
+    count_=0;
+    value_ = 0.0;
+  }
 
   /// Return the current value of the reduction operator
-  virtual double value() const throw();
+  virtual double value() const throw()
+  { return value_ / count_; }
 
 private: // attributes
 

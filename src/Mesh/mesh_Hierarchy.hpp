@@ -81,10 +81,6 @@ protected: // attributes
   /// List of local patches
   std::vector<Patch *> patch_list_;
 
-  /// Tree defining the mesh hierarchy topology
-  //  strict_auto_ptr<TreeK> tree_;
-  TreeK * tree_;
-
   /// Lower extent of the hierarchy
   double lower_[3];
 
