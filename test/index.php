@@ -552,7 +552,7 @@ echo "<h3>2D Reflecting</h3>";
 tests("Enzo","enzo-p","test_boundary_reflecting-2d","Reflecting 2D");
 
 test_table ("boundary_reflecting-2d",
-	    array("0000","0100","0200","0300","0400","0500"), $types);
+	    array("0000","0100","0200","0300","0400"), $types);
 
 //----------------------------------------------------------------------
 
@@ -561,7 +561,7 @@ echo "<h3>2D Periodic</h3>";
 tests("Enzo","enzo-p","test_boundary_periodic-2d","Periodic 2D");
 
 test_table ("boundary_periodic-2d",
-	    array("0000","0100","0200","0300","0400","0500"), $types);
+	    array("0000","0100","0200","0300","0400"), $types);
 
 //----------------------------------------------------------------------
 
@@ -570,7 +570,7 @@ echo "<h3>2D Inflow</h3>";
 tests("Enzo","enzo-p","test_boundary_inflow-2d","Inflow 2D");
 
 test_table ("boundary_inflow-2d",
-	    array("0000","0100","0200","0300","0400","0500"), $types);
+	    array("0000","0100","0200","0300","0400"), $types);
 
 //----------------------------------------------------------------------
 
@@ -579,7 +579,7 @@ echo "<h3>2D Outflow</h3>";
 tests("Enzo","enzo-p","test_boundary_outflow-2d","Outflow 2D");
 
 test_table ("boundary_outflow-2d",
-	    array("0000","0100","0200","0300","0400","0500"), $types);
+	    array("0000","0100","0200","0300","0400"), $types);
 
 //======================================================================
 

@@ -102,7 +102,7 @@
 
    Stopping {
       time  = 2.5;
-      cycle = 500;
+      cycle = 400;
    }
 
    Output { 
@@ -112,7 +112,7 @@
       cycle_step {
          field_list = ["density"];
          type     = "image";
-         schedule = ["cycle","interval", 1];
+         schedule = ["cycle","interval", 10];
         colormap = [0.00, 0.00, 1.00,
                     0.00, 1.00, 0.00,
                     1.00, 1.00, 0.00,
