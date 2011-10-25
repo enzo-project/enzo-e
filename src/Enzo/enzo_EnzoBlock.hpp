@@ -66,26 +66,87 @@ public: // interface
   // Original Enzo functions
   //----------------------------------------------------------------------
 
-  enzo_float ComputeTimeStep();
-  int ComputeGammaField(enzo_float *GammaField);
-  int ComputePressureDualEnergyFormalism(enzo_float time, enzo_float *pressure);
-  int ComputePressure(enzo_float time, enzo_float *pressure);
-  int ComputeTemperatureField(enzo_float *temperature);
-  int CosmologyComputeExpansionFactor(enzo_float time, enzo_float *a, enzo_float *dadt);
-  int CosmologyComputeExpansionTimestep(enzo_float time, enzo_float *dtExpansion);
-  int CosmologyGetUnits(enzo_float *DensityUnits, enzo_float *LengthUnits, enzo_float *TemperatureUnits, enzo_float *TimeUnits, enzo_float *VelocityUnits, enzo_float Time);
-  int FindField(int field, int farray[], int numfields);
-  int IdentifyPhysicalQuantities(int &DensNum, int &GENum, int &Vel1Num, int &Vel2Num, int &Vel3Num, int &TENum);
-  int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum, int &HeINum, int &HeIINum, int &HeIIINum, int &HMNum, int &H2INum, int &H2IINum, int &DINum, int &DIINum, int &HDINum);
-  int SetExternalBoundaryValues();
-  int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient);
-  int SolveHydroEquations ( int CycleNumber, enzo_float dt);
-  void print_field (int field);
-  int SetExternalBoundary(int FieldRank, int GridDims[], int GridOffset[], int StartIndex[], int EndIndex[], enzo_float *Field, int FieldType);
-  // void image_dump(const char * file_root, int cycle, double lower, double upper);
+  //  enzo_float ComputeTimeStep();
 
+  /// Compute the ratio of specific heats
+  int ComputeGammaField(enzo_float *GammaField);
+
+  /// Compute the pressure field at the given time) - dual energy
+  int ComputePressureDualEnergyFormalism
+  ( enzo_float time, enzo_float *pressure );
+
+  /// Compute the pressure field at the given time
+  int ComputePressure(enzo_float time, enzo_float *pressure);
+
+  /// Compute the temperature field
+  int ComputeTemperatureField(enzo_float *temperature);
+
+  /// Computes the expansion factors (a & dadt) at the requested time
+  int CosmologyComputeExpansionFactor
+  (enzo_float time, enzo_float *a, enzo_float *dadt);
+
+  /// Computes the maximum allowed expansion timestep at given time
+  int CosmologyComputeExpansionTimestep
+  (enzo_float time, enzo_float *dtExpansion);
+
+  /// Compute and return the cosmology units
+  int CosmologyGetUnits
+  ( enzo_float *DensityUnits, 
+    enzo_float *LengthUnits, 
+    enzo_float *TemperatureUnits, 
+    enzo_float *TimeUnits, 
+    enzo_float *VelocityUnits, 
+    enzo_float Time);
+
+  /// Find field type field in array field_type, returning the index
+  /// into the field array or -1 if it is not there
+  int FindField(int field, int farray[], int numfields);
+
+  /// Identify certain commonly used variables from the list
+  int IdentifyPhysicalQuantities
+  ( int &DensNum, 
+    int &GENum, 
+    int &Vel1Num, 
+    int &Vel2Num, 
+    int &Vel3Num, 
+    int &TENum);
+
+  /// Identify the multi-species fields
+  int IdentifySpeciesFields
+  ( int &DeNum, 
+    int &HINum, 
+    int &HIINum, 
+    int &HeINum, 
+    int &HeIINum, 
+    int &HeIIINum, 
+    int &HMNum, 
+    int &H2INum, 
+    int &H2IINum, 
+    int &DINum, 
+    int &DIINum, 
+    int &HDINum);
+
+  /// Copy the current baryon fields to the old baryon fields
+  int SetExternalBoundaryValues();
+
+  /// Set the energy to provide minimal pressure support
+  int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient);
+
+  /// Solve the hydro equations, saving subgrid fluxes
+  int SolveHydroEquations ( int CycleNumber, enzo_float dt);
+
+  /// Set external boundary values
+  int SetExternalBoundary
+  ( int FieldRank, 
+    int GridDims[], 
+    int GridOffset[], 
+    int StartIndex[], 
+    int EndIndex[], 
+    enzo_float *Field, 
+    int FieldType);
+
+  /// Solve the mhd equations (with ppml), saving subgrid fluxes
   int SolveMHDEquations(FieldDescr *,  int cycle, enzo_float dt);
-  // void initialize_ppml (int size_param);
 
 public: // functions (TEMPORARILY PUBLIC)
 

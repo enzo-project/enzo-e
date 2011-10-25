@@ -89,11 +89,14 @@ foreach type ($types)
       if ($crash != 0) then
          printf "CRASH: $crash"
          if ($crash != 0) then
-            grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | sed 's/:/ /' | awk '{print "   ", $1         }'
+            grep "UNIT TEST" $dir/*unit \
+             | sed 's/BEGIN/END/ ; s/:/ /' \
+             | uniq -u \
+             | awk '{print "   ", $1}'
          endif
+      else 
+         printf "\n"
       endif
-
-      printf "\n"
 
       rm -f test/COMPILING
 

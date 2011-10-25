@@ -3,6 +3,8 @@
 /// @file     enzo_EnzoBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Mar  3 23:02:02 PST 2011
+/// @todo     Move all Enzo code back into original Enzo files: incorrect license!
+/// @todo     Restore missing Enzo comments
 /// @brief    Implementation of the EnzoBlock class
 
 #include "cello.hpp"
