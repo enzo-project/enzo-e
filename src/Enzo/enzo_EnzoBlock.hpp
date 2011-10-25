@@ -67,7 +67,6 @@ public: // interface
   //----------------------------------------------------------------------
 
   enzo_float ComputeTimeStep();
-  enzo_float sum_field (int field);
   int ComputeGammaField(enzo_float *GammaField);
   int ComputePressureDualEnergyFormalism(enzo_float time, enzo_float *pressure);
   int ComputePressure(enzo_float time, enzo_float *pressure);

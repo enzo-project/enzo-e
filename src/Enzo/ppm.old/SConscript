@@ -32,13 +32,13 @@ env = env.Clone (LIBS = [components,libraries])
 # SOURCE
 #------------------------------
 
+includes = ['fortran.h']
 sources  = [# Glob('initialize*cpp'),
             Glob('Cosmology*.cpp'),
             Glob('Grid_*cpp'),
             Glob('*.F'),
 	    'FindField.cpp',
-	    'sum_field.cpp',
-            'fortran.h']
+	    'sum_field.cpp','fortran.h']
 
 #------------------------------
 # TARGETS
@@ -51,3 +51,4 @@ libraries = env.Library ('enzo-ppm', sources)
 #------------------------------
 
 env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
+env.Alias('install-inc',env.Install ('#/include',  includes))

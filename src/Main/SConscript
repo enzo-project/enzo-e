@@ -2,7 +2,7 @@ Import('env')
 Import('type')
 
 components = [
-   'enzo', 'enzo-ppm','enzo-ppml',
+   'enzo',
    'simulation','method',
    'mesh','field',
    'memory','parallel',

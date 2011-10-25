@@ -25,7 +25,7 @@ SConscript('Simulation/SConscript')
 SConscript('Test/SConscript')
 
 components = [
-   'enzo', 'enzo-ppm','enzo-ppml',
+   'enzo', 
    'simulation','method',
    'mesh','field',
    'memory','parallel',

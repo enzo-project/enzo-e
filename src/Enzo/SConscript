@@ -1,5 +1,5 @@
-SConscript('ppm/SConscript')
-SConscript('ppml/SConscript')
+# SConscript('ppm/SConscript')
+# SConscript('ppml/SConscript')
 
 #------------------------------
 # IMPORTS
@@ -13,8 +13,7 @@ Import('use_papi')
 # DEPENDENCIES
 #------------------------------
 
-components = ['enzo-ppm', 'enzo-ppml',
-	      'simulation', 'method', 
+components = ['simulation', 'method', 
 	      'mesh', 'field',
 	      'io', 'disk','memory','parallel',
 	      'parameters', 
@@ -32,8 +31,47 @@ libraries  = ['png', '$FORTRANLIBS']
 # SOURCE
 #------------------------------
 
-includes = [Glob('enzo*hpp')]
-sources  = [Glob('enzo_*cpp')]
+includes = [Glob('enzo*hpp'),'fortran.h']
+sources  = [Glob('enzo_*cpp'), 
+	    'Grid_ComputeGammaField.cpp',
+	    'Grid_ComputePressure.cpp',
+	    'Grid_ComputePressureDualEnergyFormalism.cpp',
+	    'Grid_ComputeTemperatureField.cpp',
+#	    'Grid_ComputeTimeStep_PPM.cpp',
+#	    'Grid_ComputeTimeStep_PPML.cpp',
+	    'Grid_IdentifyPhysicalQuantities.cpp',
+	    'Grid_IdentifySpeciesFields.cpp',
+	    'Grid_SetExternalBoundaryValues.cpp',
+	    'Grid_SetMinimumSupport.cpp',
+	    'Grid_SolveHydroEquations.cpp',
+	    'Grid_SolveMHDEquations.cpp',
+	    'calcdiss.F',
+	    'calc_dt.F',
+	    'euler.F',
+	    'inteuler.F',
+	    'intvar.F',
+	    'pgas2d_dual.F',
+	    'pgas2d.F',
+	    'ppm_de.F',
+	    'twoshock.F',
+	    'xeuler_sweep.F',
+	    'yeuler_sweep.F',
+	    'zeuler_sweep.F',
+	    'CosmologyGetUnits.cpp',
+	    'PPML_Conservative.F',
+	    'PPML_HLLD.F',
+	    'PPML_MAIN.F',
+	    'PPML_monot.F',
+	    'PPML_potokx.F',
+	    'PPML_potoky.F',
+	    'PPML_potokz.F',
+	    'PPML_Primitive.F',
+#	    'PPML_QDD6.F',
+	    'PPML_sub.F',
+	    'PPML_TimeStep.F',
+	    'FindField.cpp']
+
+
 if (type == 'charm'):
    includes = includes + ['enzo.decl.h','enzo.def.h']
    sources = sources + ['../Main/main_enzo.cpp']
