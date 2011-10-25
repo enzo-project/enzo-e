@@ -14,7 +14,7 @@ class IoPatch : public Io {
 
   /// @class    IoPatch
   /// @ingroup  Io
-  /// @brief    [\ref Io] 
+  /// @brief    [\ref Io] Declaration of the IoPatch class
 
 public: // interface
 

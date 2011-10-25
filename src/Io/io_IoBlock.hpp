@@ -14,7 +14,7 @@ class IoBlock : public Io {
 
   /// @class    IoBlock
   /// @ingroup  Io
-  /// @brief    [\ref Io] 
+  /// @brief    [\ref Io] Declaration of the IoBlock class
 
 public: // interface
 

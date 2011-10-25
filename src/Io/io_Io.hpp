@@ -12,7 +12,7 @@ class Io {
 
   /// @class    Io
   /// @ingroup  Io
-  /// @brief    [\ref Io] 
+  /// @brief    [\ref Io] Declaration of the Io base class
 
 public: // interface
 
