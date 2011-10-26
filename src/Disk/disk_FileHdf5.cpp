@@ -844,7 +844,7 @@ std::string FileHdf5::relative_to_absolute_
 
   std::string path_dir;
   
-  int p_left_slash=path_relative.find("/");
+  size_t p_left_slash=path_relative.find("/");
 
   while (p_left_slash != std::string::npos) {
 

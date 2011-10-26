@@ -378,7 +378,7 @@ void OutputImage::image_write_ (double min, double max) throw()
     max = MAX(max,data_[i]);
   }
 
-  int n = map_r_.size();
+  size_t n = map_r_.size();
 
   // loop over pixels (ix,iy)
 
@@ -390,7 +390,7 @@ void OutputImage::image_write_ (double min, double max) throw()
 
       double value = data_[i];
 
-      double r,g,b,a;
+      double r=0.0,g=0.0,b=0.0,a=0.0;
 
       if (min <= value && value <= max) {
 
@@ -419,7 +419,7 @@ void OutputImage::image_write_ (double min, double max) throw()
 	a = (1-ratio)*map_a_[k] + ratio*map_a_[k+1];
       }
 
-      // Plot pixel, red if out of range
+      // Plot pixel
       png_->plot(ix+1, iy+1, 0.0, 0.0, 0.0);
       png_->plot_blend(ix+1, iy+1, a, r,g,b);
     }

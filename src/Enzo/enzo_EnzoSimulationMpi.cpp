@@ -240,9 +240,6 @@ void EnzoSimulationMpi::run() throw()
 		     &upper_block[axis_z]);
 	FieldBlock * field_block = block -> field_block();
 
-	double * values = (double * ) 
-	       field_block->field_unknowns(field_descr_, 0);
-
 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
 	int        & cycle_block    = enzo_block->CycleNumber;

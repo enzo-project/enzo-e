@@ -1115,7 +1115,7 @@ void Simulation::scheduled_output()
       if (ip == ip_writer) { // process is writer
 	int ip1 = ip+1;
 	int ip2 = ip_writer+output->process_stride();
-	for (int ip_remote=ip+1; ip_remote<ip2; ip_remote++) {
+	for (int ip_remote=ip1; ip_remote<ip2; ip_remote++) {
 
 	  // receive size
 

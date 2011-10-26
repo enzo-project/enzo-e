@@ -12,9 +12,9 @@
 
 IoFieldBlock::IoFieldBlock() throw ()
   : Io(0,1),
-    field_index_(0),
+    field_descr_(0),
     field_block_(0),
-    field_descr_(0)
+    field_index_(0)
 
 {
 }

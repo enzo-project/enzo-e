@@ -612,7 +612,7 @@ char *yytext;
   } * curbs = 0;
 
   char * curfilename;
-  int cello_new_file (char *);
+  int cello_new_file (const char *);
   int cello_pop_file ();
     
 
@@ -2300,7 +2300,7 @@ void yyerror(char *s)
   exit(1);
 }
 
-int cello_new_file(char * filename)
+int cello_new_file(const char * filename)
 /* Adopted from "flex & bison", John Levine, O'Reilly Pub,  pp.28-30 */
 {
   FILE * fp = fopen (filename, "r");
