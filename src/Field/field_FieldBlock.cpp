@@ -394,14 +394,6 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
     allocate_ghosts(field_descr);
   }
 
-  // Copy to values to face
-
-  FieldFace face_send;
-
-  face_send.allocate(field_descr,this,axis);
-
-  face_send.load(field_descr,this,axis, face);
-
   GroupProcess * group_process = patch->group_process();
   Layout * layout = patch->layout();
 
@@ -430,29 +422,55 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
 	  "axis_all not handled");
   }
 
- void * handle_send = 
-   group_process->send_begin (ip_remote, face_send.array(),face_send.size());
+  // Transfer face data via FieldFace objects
 
-   group_process->wait(handle_send);
+  FieldFace face_send;
+  FieldFace face_recv;
 
-   group_process->send_end (handle_send);
+  face_send.allocate(field_descr,this,axis);
+  face_recv.allocate(field_descr,this,axis);
 
-  // Receive ghosts
+  face_send.load(field_descr,this,axis, face);
 
-   void * handle_recv = 
-     group_process->recv_begin (ip_remote, face_send.array(),face_send.size());
+  int ip = group_process->rank();
 
-   group_process->wait(handle_recv);
+  void * handle_send;
+  void * handle_recv;
+  if (ip < ip_remote) { // send then receive
 
-   group_process->recv_end (handle_recv);
+    // send 
+    handle_send = group_process->send_begin 
+      (ip_remote, face_send.array(),face_send.size());
+    group_process->wait(handle_send);
+    group_process->send_end (handle_send);
 
-  //  group_process->send_recv (ip_remote, face_send.array(), face_send.size());
+    // receive
 
-  // Copy from ghosts
+    handle_recv = group_process->recv_begin 
+      (ip_remote, face_recv.array(),face_recv.size());
+    group_process->wait(handle_recv);
+    group_process->recv_end (handle_recv);
 
-  face_send.store(field_descr,this,axis,face);
+  } else {  // receive then send
+
+    // receive
+
+    handle_recv = group_process->recv_begin 
+      (ip_remote, face_recv.array(),face_recv.size());
+    group_process->wait(handle_recv);
+    group_process->recv_end (handle_recv);
+
+    // send 
+    handle_send = group_process->send_begin 
+      (ip_remote, face_send.array(),face_send.size());
+    group_process->wait(handle_send);
+    group_process->send_end (handle_send);
+
+  }
+  face_recv.store(field_descr,this,axis,face);
 
   face_send.deallocate();
+  face_recv.deallocate();
 
 }
 
@@ -569,9 +587,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
 			double upper[3],
 			bool use_file) const throw()
 {
-#ifndef CELLO_DEBUG
-  return;
-#endif
 
   FILE *fp;
   if (!use_file) { 
