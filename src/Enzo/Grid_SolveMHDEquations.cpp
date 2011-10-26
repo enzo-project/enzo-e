@@ -226,8 +226,8 @@ int EnzoBlock::SolveMHDEquations
                            for dim = 1, the plane is dims 0,2
                            for dim = 2, the plane is dims 0,1 */
  
-	idim = (dim == 0) ? 1 : 0;
-	jdim = (dim == 2) ? 1 : 2;
+// 	idim = (dim == 0) ? 1 : 0;
+// 	jdim = (dim == 2) ? 1 : 2;
  
         /* Set the index (along the dimension perpindicular to the flux
            plane) of the left and right flux planes.  The index is zero
