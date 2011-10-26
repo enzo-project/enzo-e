@@ -397,6 +397,9 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
   // Copy to values to face
 
   FieldFace face_send;
+
+  face_send.allocate(field_descr,this,axis);
+
   face_send.load(field_descr,this,axis, face);
 
   GroupProcess * group_process = patch->group_process();
@@ -448,6 +451,8 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
   // Copy from ghosts
 
   face_send.store(field_descr,this,axis,face);
+
+  face_send.deallocate();
 
 }
 

@@ -309,11 +309,13 @@ PARALLEL_MAIN_BEGIN
 
 	  FieldBlock * field_upper = field_block[index_upper];
 
-	  face.load  (field_descr, field_lower, axis, face_upper);
-	  face.store (field_descr, field_upper, axis, face_lower);
+	  face.allocate   (field_descr, field_lower, axis);
+	  face.load       (field_descr, field_lower, axis, face_upper);
+	  face.store      (field_descr, field_upper, axis, face_lower);
 
-	  face.load  (field_descr, field_upper, axis, face_lower);
-	  face.store (field_descr, field_lower, axis, face_upper);
+	  face.load       (field_descr, field_upper, axis, face_lower);
+	  face.store      (field_descr, field_lower, axis, face_upper);
+	  face.deallocate ();
 
 	}
       }

@@ -194,12 +194,12 @@ Clean(env_mv_png.RunParallel ('test_boundary_periodic-3d.unit',
        'test_boundary_periodic-3d.unit',
        '#/input/boundary_periodic-3d.in.out'])
 
-Clean(env_mv_png.RunParallel ('test_boundary_inflow-3d.unit',
-		bin_path + '/enzo-p', 
-		ARGS='input/boundary_inflow-3d.in'),
-      [Glob('#/test/' + type + '/boundary_inflow-3d.png'),
-       'test_boundary_inflow-3d.unit',
-       '#/input/boundary_inflow-3d.in.out'])
+# Clean(env_mv_png.RunParallel ('test_boundary_inflow-3d.unit',
+# 		bin_path + '/enzo-p', 
+# 		ARGS='input/boundary_inflow-3d.in'),
+#       [Glob('#/test/' + type + '/boundary_inflow-3d.png'),
+#        'test_boundary_inflow-3d.unit',
+#        '#/input/boundary_inflow-3d.in.out'])
 
 Clean(env_mv_png.RunParallel ('test_boundary_outflow-3d.unit',
 		bin_path + '/enzo-p', 
@@ -212,8 +212,8 @@ env.MakeMovie ("boundary_reflecting-3d.swf","test_boundary_reflecting-3d.unit",
                 ARGS="test/" + type + "/boundary_reflecting-3d-????.png");
 env.MakeMovie ("boundary_periodic-3d.swf","test_boundary_periodic-3d.unit", \
                 ARGS="test/" + type + "/boundary_periodic-3d-????.png");
-env.MakeMovie ("boundary_inflow-3d.swf","test_boundary_inflow-3d.unit", \
-                ARGS="test/" + type + "/boundary_inflow-3d-????.png");
+# env.MakeMovie ("boundary_inflow-3d.swf","test_boundary_inflow-3d.unit", \
+#                 ARGS="test/" + type + "/boundary_inflow-3d-????.png");
 env.MakeMovie ("boundary_outflow-3d.swf","test_boundary_outflow-3d.unit", \
                 ARGS="test/" + type + "/boundary_outflow-3d-????.png");
 

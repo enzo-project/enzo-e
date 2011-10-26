@@ -18,7 +18,7 @@ FieldFace::FieldFace() throw()
 
 FieldFace::~FieldFace() throw ()
 {
-  deallocate_();
+  deallocate();
 }
 
 //----------------------------------------------------------------------
@@ -53,7 +53,7 @@ void FieldFace::load
  bool               full_y
  ) throw()
 {
-  allocate_(field_descr,field_block,axis,full_x,full_y);
+  //  allocate (field_descr,field_block,axis,full_x,full_y);
 
   size_t num_fields = field_descr->field_count();
 
@@ -174,12 +174,12 @@ void FieldFace::store
     }
   }
 
-  deallocate_();
+  //  deallocate();
 }
 
 //----------------------------------------------------------------------
 
-void FieldFace::allocate_
+void FieldFace::allocate
 (
  const FieldDescr * field_descr,
  const FieldBlock * field_block,
@@ -250,7 +250,7 @@ void FieldFace::allocate_
 
 //----------------------------------------------------------------------
 
-void FieldFace::deallocate_() throw()
+void FieldFace::deallocate() throw()
 {
   array_.clear();
 }

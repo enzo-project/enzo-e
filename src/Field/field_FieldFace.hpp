@@ -60,6 +60,16 @@ public: // interface
 	     bool               full_x = true,
 	     bool               full_y = true) throw();
 
+  /// Allocate array_ storage
+  void allocate(const FieldDescr * field_descr,
+		const FieldBlock * field_block,
+		axis_enum          axis,
+		bool               full_x = true,
+		bool               full_y = true) throw();
+
+  /// Deallocate array_ storage
+  void deallocate() throw();
+
   /// Return the size of the array
   size_t size() const throw() { return array_.size(); };
 
@@ -74,15 +84,6 @@ public: // interface
 
 private: // functions
 
-  /// Allocate array_ storage
-  void allocate_(const FieldDescr * field_descr,
-		 const FieldBlock * field_block,
-		 axis_enum          axis,
-		 bool               full_x = true,
-		 bool               full_y = true) throw();
-
-  /// Deallocate array_ storage
-  void deallocate_() throw();
 
   /// Precision-agnostic function for loading field block face into
   /// the field_face array; returns number of bytes copied
