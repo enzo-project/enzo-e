@@ -53,7 +53,9 @@ void FieldFace::load
  bool               full_y
  ) throw()
 {
-  //  allocate (field_descr,field_block,axis,full_x,full_y);
+  if (array_.size() == 0) {
+      allocate (field_descr,field_block,axis,full_x,full_y);
+  }
 
   size_t num_fields = field_descr->field_count();
 
@@ -172,7 +174,7 @@ void FieldFace::store
     }
   }
 
-  //  deallocate();
+  deallocate();
 }
 
 //----------------------------------------------------------------------

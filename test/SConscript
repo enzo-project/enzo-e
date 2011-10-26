@@ -13,7 +13,7 @@ copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS 2>&1")
-make_movie   = Builder(action = "png2swf -r 20 -o $TARGET ${ARGS} ")
+make_movie   = Builder(action = "png2swf -r 5 -o $TARGET ${ARGS} ")
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
 env.Append(BUILDERS = { 'RunParallel' : run_parallel } )

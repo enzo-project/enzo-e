@@ -86,7 +86,7 @@ function test_failed ($output_file) {
 
    //----------------------------------------------------------------------
 
-$types = array("mpi","charm");
+$types = array("charm","mpi");
   $num_types = sizeof($types);
 
   function tests($component,$testrun,$output,$test_name) {
@@ -694,196 +694,196 @@ test_group("Performance");
 
 tests("Performance","test_Performance","test_Performance","");
 tests("Performance","test_Papi",       "test_Papi","");
+
+/* <hr> */
+/* <h2>Mesh Tests (Prototype Code)</h2> */
+
+/*   <h3>TreeK-D2-R2-L?</h3> */
+
+/*   <?php */
+/*   tests("Mesh","test_TreeK","test_TreeK-D2-R2-L6", "2D L=6 r=2"); */
+/*   tests("Mesh","test_TreeK","test_TreeK-D2-R2-L7", "2D L=7 r=2"); */
+/*   tests("Mesh","test_TreeK","test_TreeK-D2-R2-L8", "2D L=8 r=2"); */
+/*   ?> */
+
+/* <table> */
+/* <tr> */
+/* <th>coalesce</th> */
+/* <th>levels = 6</th> */
+/*   <th>levels = 7</th> */
+/*   <th>levels = 8</th> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>false</th> */
+/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=6-0.png"></img></td> */
+/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=7-0.png"></img></td> */
+/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=8-0.png"></img></td> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>true</th> */
+/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=6-1.png"></img></td> */
+/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=7-1.png"></img></td> */
+/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=8-1.png"></img></td> */
+/*   </tr> */
+/*   </table></br> */
+
+/*   <h3>TreeK-D2-R4-L?</h3> */
+
+/*   <?php */
+/*   tests("Mesh","test_TreeK","test_TreeK-D2-R4-L6", "2D L=6 r=4"); */
+/*   tests("Mesh","test_TreeK","test_TreeK-D2-R4-L8", "2D L=8 r=4"); */
+/*   ?> */
+
+/* <table> */
+/* <tr> */
+/* <th>coalesce</th> */
+/* <th>levels = 6</th> */
+/*   <th>levels = 8</th> */
+/*   <!-- <th>levels = 10</th> --> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>false</th> */
+/*   <td><img width=257 src="serial/TreeK-D=2-R=4-L=6-0.png"></img></td> */
+/*   <td><img width=257 src="serial/TreeK-D=2-R=4-L=8-0.png"></img></td> */
+/*   <!-- <td><img width=257 src="serial/TreeK-D=2-R=4-L=10-0.png"></img></td> --> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>true</th> */
+/*   <td><img width=257 src="serial/TreeK-D=2-R=4-L=6-1.png"></img></td> */
+/*   <td><img width=257 src="serial/TreeK-D=2-R=4-L=8-1.png"></img></td> */
+/*   <!-- <td><img width=257 src="serial/TreeK-D=2-R=4-L=10-1.png"></img></td> --> */
+/*   </tr> */
+/*   </table></br> */
+
+/*   <h3>TreeK-D3-R2-L?</h3> */
+
+/*   <?php */
+/*   tests("Mesh","test_TreeK","test_TreeK-D3-R2-L4", "3D L=4 r=2"); */
+/*   tests("Mesh","test_TreeK","test_TreeK-D3-R2-L5", "3D L=5 r=2"); */
+/*   tests("Mesh","test_TreeK","test_TreeK-D3-R2-L6", "3D L=6 r=2"); */
+/*    ?> */
+
+/* <table> */
+/* <tr> */
+/* <th>coalesce = false</th> */
+/*   <th>levels = 4</th> */
+/*   <th>levels = 5</th> */
+/*   <th>levels = 6</th> */
+/*   <!-- <th>levels = 7</th> --> */
+/*   <!-- <th>levels = 8</th> --> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>project = X</th> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-x-0.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-x-0.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-x-0.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-x-0.png"></img></td> --> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-x-0.png"></img></td> --> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>project = Y</th> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-y-0.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-y-0.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-y-0.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-y-0.png"></img></td> --> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-y-0.png"></img></td> --> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>project = Z</th> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-z-0.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-z-0.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-z-0.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-z-0.png"></img></td> --> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-z-0.png"></img></td> --> */
+/*   </tr> */
+/*   </table></br> */
+
+
+/*   <table> */
+/*   <tr> */
+/*   <th>coalesce = true</th> */
+/*   <th>levels = 4</th> */
+/*   <th>levels = 5</th> */
+/*   <th>levels = 6</th> */
+/*   <!-- <th>levels = 7</th> --> */
+/*   <!-- <th>levels = 8</th> --> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>project = X</th> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-x-1.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-x-1.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-x-1.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-x-1.png"></img></td> --> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-x-1.png"></img></td> --> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>project = Y</th> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-y-1.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-y-1.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-y-1.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-y-1.png"></img></td> --> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-y-1.png"></img></td> --> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>project = Z</th> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-z-1.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-z-1.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-z-1.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-z-1.png"></img></td> --> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-z-1.png"></img></td> --> */
+/*   </tr> */
+/*   </table></br> */
+
+
+/*   <h3>TreeK-D3-R4-L?</h3> */
+
+/*   <?php */
+/*   tests("Mesh","test_TreeK","test_TreeK-D3-R4-L4", "3D L=4 r=4"); */
+/*   tests("Mesh","test_TreeK","test_TreeK-D3-R4-L6", "3D L=6 r=4"); */
+/*   ?> */
+
+/* <table> */
+/* <tr> */
+/* <th></th> */
+/* <th colspan=2>coalesce = false</th> */
+/*   <th colspan=2>coalesce = true</th> */
+/*   </tr> */
+/*   <tr> */
+/*   <th></th> */
+/*   <th>levels = 4</th> */
+/*   <th>levels = 6</th> */
+/*   <!-- <th>levels = 8</th> --> */
+/*   <th>levels = 4</th> */
+/*   <th>levels = 6</th> */
+/*   <!-- <th>levels = 8</th> --> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>project = X</th> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-x-0.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-x-0.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-x-0.png"></img></td> --> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-x-1.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-x-1.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-x-1.png"></img></td> --> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>project =  Y</th> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-y-0.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-y-0.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-y-0.png"></img></td> --> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-y-1.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-y-1.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-y-1.png"></img></td> --> */
+/*   </tr> */
+/*   <tr> */
+/*   <th>project = Z</th> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-z-0.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-z-0.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-z-0.png"></img></td> --> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-z-1.png"></img></td> */
+/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-z-1.png"></img></td> */
+/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-z-1.png"></img></td> --> */
 ?>
-
-<hr>
-<h2>Mesh Tests (Prototype Code)</h2>
-
-  <h3>TreeK-D2-R2-L?</h3>
-
-  <?php
-  tests("Mesh","test_TreeK","test_TreeK-D2-R2-L6", "2D L=6 r=2");
-  tests("Mesh","test_TreeK","test_TreeK-D2-R2-L7", "2D L=7 r=2");
-  tests("Mesh","test_TreeK","test_TreeK-D2-R2-L8", "2D L=8 r=2");
-  ?>
-
-<table>
-<tr>
-<th>coalesce</th>
-<th>levels = 6</th>
-  <th>levels = 7</th>
-  <th>levels = 8</th>
-  </tr>
-  <tr>
-  <th>false</th>
-  <td><img width=257 src="serial/TreeK-D=2-R=2-L=6-0.png"></img></td>
-  <td><img width=257 src="serial/TreeK-D=2-R=2-L=7-0.png"></img></td>
-  <td><img width=257 src="serial/TreeK-D=2-R=2-L=8-0.png"></img></td>
-  </tr>
-  <tr>
-  <th>true</th>
-  <td><img width=257 src="serial/TreeK-D=2-R=2-L=6-1.png"></img></td>
-  <td><img width=257 src="serial/TreeK-D=2-R=2-L=7-1.png"></img></td>
-  <td><img width=257 src="serial/TreeK-D=2-R=2-L=8-1.png"></img></td>
-  </tr>
-  </table></br>
-
-  <h3>TreeK-D2-R4-L?</h3>
-
-  <?php
-  tests("Mesh","test_TreeK","test_TreeK-D2-R4-L6", "2D L=6 r=4");
-  tests("Mesh","test_TreeK","test_TreeK-D2-R4-L8", "2D L=8 r=4");
-  ?>
-
-<table>
-<tr>
-<th>coalesce</th>
-<th>levels = 6</th>
-  <th>levels = 8</th>
-  <!-- <th>levels = 10</th> -->
-  </tr>
-  <tr>
-  <th>false</th>
-  <td><img width=257 src="serial/TreeK-D=2-R=4-L=6-0.png"></img></td>
-  <td><img width=257 src="serial/TreeK-D=2-R=4-L=8-0.png"></img></td>
-  <!-- <td><img width=257 src="serial/TreeK-D=2-R=4-L=10-0.png"></img></td> -->
-  </tr>
-  <tr>
-  <th>true</th>
-  <td><img width=257 src="serial/TreeK-D=2-R=4-L=6-1.png"></img></td>
-  <td><img width=257 src="serial/TreeK-D=2-R=4-L=8-1.png"></img></td>
-  <!-- <td><img width=257 src="serial/TreeK-D=2-R=4-L=10-1.png"></img></td> -->
-  </tr>
-  </table></br>
-
-  <h3>TreeK-D3-R2-L?</h3>
-
-  <?php
-  tests("Mesh","test_TreeK","test_TreeK-D3-R2-L4", "3D L=4 r=2");
-  tests("Mesh","test_TreeK","test_TreeK-D3-R2-L5", "3D L=5 r=2");
-  tests("Mesh","test_TreeK","test_TreeK-D3-R2-L6", "3D L=6 r=2");
-   ?>
-
-<table>
-<tr>
-<th>coalesce = false</th>
-  <th>levels = 4</th>
-  <th>levels = 5</th>
-  <th>levels = 6</th>
-  <!-- <th>levels = 7</th> -->
-  <!-- <th>levels = 8</th> -->
-  </tr>
-  <tr>
-  <th>project = X</th>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-x-0.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-x-0.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-x-0.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-x-0.png"></img></td> -->
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-x-0.png"></img></td> -->
-  </tr>
-  <tr>
-  <th>project = Y</th>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-y-0.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-y-0.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-y-0.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-y-0.png"></img></td> -->
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-y-0.png"></img></td> -->
-  </tr>
-  <tr>
-  <th>project = Z</th>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-z-0.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-z-0.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-z-0.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-z-0.png"></img></td> -->
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-z-0.png"></img></td> -->
-  </tr>
-  </table></br>
-
-
-  <table>
-  <tr>
-  <th>coalesce = true</th>
-  <th>levels = 4</th>
-  <th>levels = 5</th>
-  <th>levels = 6</th>
-  <!-- <th>levels = 7</th> -->
-  <!-- <th>levels = 8</th> -->
-  </tr>
-  <tr>
-  <th>project = X</th>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-x-1.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-x-1.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-x-1.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-x-1.png"></img></td> -->
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-x-1.png"></img></td> -->
-  </tr>
-  <tr>
-  <th>project = Y</th>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-y-1.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-y-1.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-y-1.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-y-1.png"></img></td> -->
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-y-1.png"></img></td> -->
-  </tr>
-  <tr>
-  <th>project = Z</th>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-z-1.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-z-1.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-z-1.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-z-1.png"></img></td> -->
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-z-1.png"></img></td> -->
-  </tr>
-  </table></br>
-
-
-  <h3>TreeK-D3-R4-L?</h3>
-
-  <?php
-  tests("Mesh","test_TreeK","test_TreeK-D3-R4-L4", "3D L=4 r=4");
-  tests("Mesh","test_TreeK","test_TreeK-D3-R4-L6", "3D L=6 r=4");
-  ?>
-
-<table>
-<tr>
-<th></th>
-<th colspan=2>coalesce = false</th>
-  <th colspan=2>coalesce = true</th>
-  </tr>
-  <tr>
-  <th></th>
-  <th>levels = 4</th>
-  <th>levels = 6</th>
-  <!-- <th>levels = 8</th> -->
-  <th>levels = 4</th>
-  <th>levels = 6</th>
-  <!-- <th>levels = 8</th> -->
-  </tr>
-  <tr>
-  <th>project = X</th>
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-x-0.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-x-0.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-x-0.png"></img></td> -->
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-x-1.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-x-1.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-x-1.png"></img></td> -->
-  </tr>
-  <tr>
-  <th>project =  Y</th>
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-y-0.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-y-0.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-y-0.png"></img></td> -->
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-y-1.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-y-1.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-y-1.png"></img></td> -->
-  </tr>
-  <tr>
-  <th>project = Z</th>
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-z-0.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-z-0.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-z-0.png"></img></td> -->
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-z-1.png"></img></td>
-  <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-z-1.png"></img></td>
-  <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-z-1.png"></img></td> -->
   </br/>
   </body>
   </html>

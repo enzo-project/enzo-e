@@ -172,10 +172,10 @@ int EnzoBlock::SolveMHDEquations
     /* compute global start index for left edge of entire grid
        (including boundary zones) */
  
-    for (dim = 0; dim < GridRank; dim++)
-      GridGlobalStart[dim] =
-	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/CellWidth[dim]) -
-	GridStartIndex[dim];
+     for (dim = 0; dim < GridRank; dim++)
+       GridGlobalStart[dim] =
+     	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/CellWidth[dim]) -
+     	GridStartIndex[dim];
  
     /* fix grid quantities so they are defined to at least 3 dims */
  
@@ -233,12 +233,12 @@ int EnzoBlock::SolveMHDEquations
            plane) of the left and right flux planes.  The index is zero
            based from the left side of the entire grid. */
  
-// 	leftface[subgrid*3+dim] =
-// 	  SubgridFluxes[subgrid]->LeftFluxStartGlobalIndex[dim][dim] -
-// 	    GridGlobalStart[dim];
-// 	rightface[subgrid*3+dim] =
-// 	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][dim] -
-// 	    GridGlobalStart[dim];   // (+1 done by fortran code)
+ 	leftface[subgrid*3+dim] =
+ 	  SubgridFluxes[subgrid]->LeftFluxStartGlobalIndex[dim][dim] -
+ 	    GridGlobalStart[dim];
+ 	rightface[subgrid*3+dim] =
+ 	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][dim] -
+ 	    GridGlobalStart[dim];   // (+1 done by fortran code)
  
         /* set the start and end indicies (zero based on entire grid)
            of the 2d flux plane. */
