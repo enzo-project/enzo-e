@@ -2,7 +2,7 @@ include "input/E.incl"
 
    Mesh { 
       root_size      = [160, 160];
-      root_blocks    = [  2,   2 ];
+      root_blocks    = [  1,   1 ];
    }
 
    Output { 
