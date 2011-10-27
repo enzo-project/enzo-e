@@ -261,10 +261,14 @@ fortran = {}
 cxx     = {}
 cc      = {}
 
+cflags_arch       = ''
+cxxflags_arch     = ''
+fortranflags_arch = ''
+
 path_list = []
 
 #----------------------------------------------------------------------
-if (arch == "linux"):
+if (arch == "linux-gnu"):
 #----------------------------------------------------------------------
 
      charm_path = '/home/bordner/charm/charm'  # arch
@@ -273,23 +277,15 @@ if (arch == "linux"):
      fortran['mpi']    = 'gfortran'
      fortran['charm']  = 'gfortran'
 
-     charmc = charm_path + '/bin/charmc -language charm++ '
-
      cxx['serial'] = 'g++'
      cxx['mpi']    = 'mpic++'
-     cxx['charm']  = charmc + charm_perf + ' '
 
      cc['serial']  = 'gcc'
      cc['mpi']     = 'mpicc'
-     cc['charm']   = charmc + charm_perf + ' '
 
 # for architecture-dependent defines
 
      cppdefines        = defines
-
-     cflags_arch       = ''
-     cxxflags_arch     = ''
-     fortranflags_arch = ''
 
 # for extra Fortran libraries
 
@@ -322,19 +318,13 @@ elif (arch == "ncsa-bd"):
      fortran['mpi']    = fc_path + '/bin/xlf_r'
      fortran['charm']  = fc_path + '/bin/xlf_r'
 
-     charmc = charm_path + '/bin/charmc -language charm++ '
-
      cxx['serial'] = cxx_path + '/bin/xlC_r'
      cxx['mpi']    = 'mpCC'
-     cxx['charm']  = charmc + charm_perf + ' '
 
      cc['serial']  = cc_path + '/bin/xlc_r'
      cc['mpi']     = 'mpcc'
-     cc['charm']   = charmc + charm_perf + ' '
 
 # Architecture-dependent flags
-
-     cppdefines        = ''
 
      cflags_arch       = defines_xlc
      cxxflags_arch     = defines_xlc
@@ -358,37 +348,26 @@ elif (arch == "ncsa-bd"):
      flags_warn  = ''
 
 #----------------------------------------------------------------------
-elif (arch == "sdsc-triton"):
+elif (arch == "triton-pgi"):
 #----------------------------------------------------------------------
 
-     charm_path = '/home/jobordner/public/charm/charm'
+     # Requires modules pgi, mpich_mx
 
-
-     fc_path  = '/opt/openmpi/pgi/mx'
-     cc_path  = '/opt/openmpi/pgi/mx'
-     cxx_path = '/opt/openmpi/pgi/mx'
+     charm_path = '/home/jobordner/public/charm/charm-mpich-pgi'
 
      fortran['serial'] = 'pgf90'
      fortran['mpi']    = 'pgf90'
      fortran['charm']  = 'pgf90'
 
-     charmc = charm_path + '/bin/charmc -language charm++ '
-
      cxx['serial'] = 'pgCC'
      cxx['mpi']    = 'mpicxx'
-     cxx['charm']  = charmc + charm_perf + ' '
 
      cc['serial']  = 'pgcc'
      cc['mpi']     = 'mpicc'
-     cc['charm']  = charmc + charm_perf + ' '
 
 # Architecture-dependent defines
 
      cppdefines        = defines
-
-     cflags_arch       = ''
-     cxxflags_arch     = ''
-     fortranflags_arch = ''
 
 # For extra fortran libraries
 
@@ -407,6 +386,99 @@ elif (arch == "sdsc-triton"):
      flags_opt   = ''
 # Optional warnings-level flags
      flags_warn  = ''
+
+#----------------------------------------------------------------------
+elif (arch == "triton-intel"):
+#----------------------------------------------------------------------
+
+     # Requires modules intel mpich_mx
+
+     charm_path = '/home/jobordner/public/charm/charm-mpich-intel'
+
+     fortran['serial'] = 'ifort'
+     fortran['mpi']    = 'ifort'
+     fortran['charm']  = 'ifort'
+
+     cxx['serial'] = 'icc'
+     cxx['mpi']    = 'mpicxx'
+
+     cc['serial']  = 'icc'
+     cc['mpi']     = 'mpicc'
+
+# Architecture-dependent defines
+
+     cppdefines        = defines
+
+# For extra fortran libraries
+
+     libpath_fortran = ''
+     libs_fortran    = ['imf','ifcore','ifport','stdc++']
+     fortranlinkflags_arch  = ''
+
+# PAPI path (optional)
+     papi_path = ''
+# HDF5 path
+     hdf5_path = '/opt/hdf5/intel'
+# Optional debugging flags
+     flags_debug = '-g'
+# Optional optimization flags
+#     flags_opt   = '-fast'
+     flags_opt   = ''
+# Optional warnings-level flags
+     flags_warn  = ''
+
+#----------------------------------------------------------------------
+elif (arch == "triton-gnu"):
+#----------------------------------------------------------------------
+
+     # Requires modules gnu, mpich_mx
+
+     charm_path = '/home/jobordner/public/charm/charm-mpich-gnu'
+
+     fortran['serial'] = 'gfortran'
+     fortran['mpi']    = 'gfortran'
+     fortran['charm']  = 'gfortran'
+
+     cxx['serial'] = 'g++'
+     cxx['mpi']    = 'mpic++'
+
+     cc['serial']  = 'gcc'
+     cc['mpi']     = 'mpicc'
+
+# Architecture-dependent defines
+
+     cppdefines        = defines
+
+# For extra fortran libraries
+
+     libpath_fortran = ''
+     libs_fortran    = ['gfortran']
+     fortranlinkflags_arch  = '-limf -lifcore -lifport -lstdc++'
+
+# PAPI path (optional)
+     papi_path = ''
+# HDF5 path
+     hdf5_path = '/opt/hdf5/gnu'
+# Optional debugging flags
+     flags_debug = '-g'
+# Optional optimization flags
+#     flags_opt   = '-O3'
+     flags_opt   = ''
+# Optional warnings-level flags
+     flags_warn  = ''
+
+#======================================================================
+# END OF ARCHITECTURE SETTINGS
+#======================================================================
+
+#======================================================================
+# FINAL CHARM SETUP
+#======================================================================
+
+charmc = charm_path + '/bin/charmc -language charm++ '
+
+cxx['charm']  = charmc + charm_perf + ' '
+cc ['charm']  = charmc + charm_perf + ' '
 
 #======================================================================
 # UNIT TEST SETTINGS

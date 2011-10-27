@@ -10,6 +10,7 @@
 
 //----------------------------------------------------------------------
 
+#include "fortran.h" /* included so scons knowns to install fortran.h */
 #include "enzo_defines.hpp"
 #include "enzo_typedefs.hpp"
 #include "enzo_fortran.hpp"
