@@ -1,8 +1,13 @@
 #!/bin/tcsh -f
 
 set ARCH = $CELLO_ARCH
-set TYPE = (charm mpi)
-set PREC = (double)
+set TYPE = $CELLO_TYPE
+set PREC = $CELLO_PREC
+
+set proc = 8
+
+# set TYPE = (mpi charm serial)
+# set PREC = (single double)
 
 if ($#argv >= 1) then
    if ($argv[1] == "clean") then
@@ -36,13 +41,13 @@ foreach prec ($PREC)
 
    rm -f "test/*/running.$arch.$prec"
 
-   set dir = test/$type
    set configure = $arch-$type-$prec
-
-   set d = `date +"%Y-%m-%d %H:%M:%S"`
 
 
    printf "$type" > test/COMPILING
+
+   # clean
+  scons arch=$arch type=$type prec=$prec -c >& /dev/null
 
    # COMPILE
 
@@ -50,12 +55,14 @@ foreach prec ($PREC)
 
    printf "$d %-14s %-14s" "$arch $type $prec" "compiling..."
 
+   set dir = test/$type
+
    if (! -d $dir) mkdir $dir
 
    touch "$dir/running.$arch.$prec"
 
-   scons arch=$arch type=$type prec=$prec -k -j8 bin/$type/enzo-p >>& $dir/out.scons
-   scons arch=$arch type=$type prec=$prec -k >>& $dir/out.scons
+   # compile
+   scons arch=$arch type=$type prec=$prec -j$proc -k >>& $dir/out.scons
    rm -f "$dir/running.$arch.$prec"
   
    printf "done\n"
