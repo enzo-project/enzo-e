@@ -20,7 +20,7 @@ if ($arch == "triton-gnu") then
     module add gnu mpich_mx
 else if ($arch == "triton-pgi") then
     module remove gnu intel
-    module add gpi mpich_mx
+    module add pgi mpich_mx
 else if ($arch == "triton-intel") then
     module remove pgi gnu
     module add intel mpich_mx
