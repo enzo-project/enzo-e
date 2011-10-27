@@ -1,104 +1,13 @@
-### Problem: Hello World
-### Summary: Evolve high-pressure region shaped as text Hello World
-###          using the accompanying HelloWorld.png mask file
-###    Date: 2011-10-18
-###  Author: James Bordner (jobordner@ucsd.edu)
+include "input/E.incl"
 
-# Define the problem domain to be 0.0 < x,y < 1.0
-
-Domain { 
-   lower = [ 0.0, 0.0 ];
-   upper = [ 1.0, 1.0 ];
-} 
-
-# Define the computational domain to be a 100 x 100 grid
-# partitioned into 4 blocks
-
-Mesh { 
-   root_size   = [ 512,512 ];
-   root_blocks = [   1,  1 ];
-}
-
-# Declare fields, ghost zone depth, and CFL condition
-
-Field {
-
-   ghosts  = 3;
-   courant = 0.8;
-
-   fields = [ 
-      "density",
-      "velocity_x",
-      "velocity_y",
-      "total_energy",
-      "internal_energy"
-    ];
-}
-
-# Define sequence of numerical methods
-
-Method {
-
-   sequence = [ "ppm" ];
-
-}
-
-# Initialize Enzo-P method parameters
-
-Enzo {
-
-   ppm {
-      diffusion   = true;
-      flattening  = 3;
-      steepening  = true;
-      dual_energy = false;
+   Mesh { 
+      root_size      = [160, 160];
+      root_blocks    = [  2,   2 ];
    }
-}
 
-# Set physical constants 
+   Output { 
 
-Physics {
-
-   dimensions = 2;
-   gamma = 1.4;
-
-}
-
-# Define initial conditions
-
-Initial {
-   density       { value = [  1.0, "HelloWorld.png", 
-                              0.1 ]; };
-   total_energy  { value = [  0.14 / (0.4 * 0.1), "HelloWorld.png",
-                              1.0  / (0.4 * 1.0)  ]; };
-   velocity_x    { value = [ 0.0 ]; };
-   velocity_y    { value = [ 0.0 ]; }
-}
-
-# Define boundary conditions
-
-Boundary { type = "reflecting" }
-
-# Define stopping criteria
-
-Stopping {
-   cycle = 100;
-}
-
-# Output image dumps every 10 cycles
-
-Output { 
-
-   file_groups = [ "cycle_group" ];
-
-   cycle_group {
-      field_list = [ "density" ];
-      type       = "image";
-      name       = [ "Hello-%05d.png","cycle" ];
-      schedule   = [ "cycle","interval", 10 ];
-      colormap = [0.00, 0.00, 1.00,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00];
+      cycle_step {
+         name       = ["E-%03d.png","cycle"];
+      }
    }
-}
