@@ -1,0 +1,12 @@
+Version 0.5b2  2011-10-27
+
+  * New:     added REVISIONS
+  * Change:  modified support Triton GNU, Intel, and PGI compilers
+  * Change:  removed enzo.h
+  * Fix:     changed HelloWorld.in to avoid buggy pngwriter PNG image masks
+
+Version 0.5b1  2011-10-26
+
+  * Initial unigrid beta release
+
+
