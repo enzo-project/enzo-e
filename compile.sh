@@ -1,17 +1,17 @@
-#!/bin/tcsh -f
+#!/bin/tcsh
 
-if ($#argv >= 1) then
-  set types = ($argv)
-else
-   set types = (charm mpi serial)
+if ($#argv != 3) then
+   echo "\n  Usage: $0 <arch> <type> <prec>\n"
+   exit
+else 
+   set arch = $argv[1]
+   set type = $argv[2]
+   set prec = $argv[3]
 endif
-
-set arch = $CELLO_ARCH
-set prec = $CELLO_PREC
 
 echo
 echo "arch = $arch"
-echo "type = $types"
+echo "type = $type"
 echo "prec = $prec"
 echo
 
@@ -32,7 +32,6 @@ rm -f "test/*/running.$arch.$prec"
 
 set d = `date +"%Y-%m-%d %H:%M:%S"`
 echo "$d BEGIN"
-foreach type ($types)
 
    set dir = test/$type
    set platform = $arch-$type
@@ -113,8 +112,6 @@ foreach type ($types)
 
    endif
 
-
-end
 
 set d = `date +"%Y-%m-%d %H:%M:%S"`
 echo "$d END"
