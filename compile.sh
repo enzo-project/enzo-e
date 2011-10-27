@@ -1,7 +1,7 @@
 #!/bin/tcsh -f
 
 set ARCH = $CELLO_ARCH
-set TYPE = (charm)
+set TYPE = (charm mpi)
 set PREC = (double)
 
 if ($#argv >= 1) then
@@ -23,17 +23,14 @@ if ($#argv >= 1) then
    endif
 endif
 
+echo "ARCH = $ARCH"
 echo "TYPE = $TYPE"
 echo "PREC = $PREC"
 
-   set d = `date +"%Y-%m-%d %H:%M:%S"`
-   echo "$d BEGIN"
+set d = `date +"%Y-%m-%d %H:%M:%S"`
+echo "$d BEGIN"
 
 foreach arch ($ARCH)
-
-   set procs = 1
-
-
 foreach type ($TYPE)
 foreach prec ($PREC)
 
