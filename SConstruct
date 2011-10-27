@@ -353,7 +353,7 @@ elif (arch == "triton-pgi"):
 
      # Requires modules pgi, mpich_mx
 
-     charm_path = '/home/jobordner/public/charm/charm-mpich-pgi'
+     charm_path = '/home/jobordner/public/charm/charm-mpich2-pgi'
 
      fortran['serial'] = 'pgf90'
      fortran['mpi']    = 'pgf90'
@@ -393,7 +393,7 @@ elif (arch == "triton-intel"):
 
      # Requires modules intel mpich_mx
 
-     charm_path = '/home/jobordner/public/charm/charm-mpich-intel'
+     charm_path = '/home/jobordner/public/charm/charm-mpich2-intel'
 
      fortran['serial'] = 'ifort'
      fortran['mpi']    = 'ifort'
@@ -433,7 +433,7 @@ elif (arch == "triton-gnu"):
 
      # Requires modules gnu, mpich_mx
 
-     charm_path = '/home/jobordner/public/charm/charm-mpich-gnu'
+     charm_path = '/home/jobordner/public/charm/charm-mpich2-gnu'
 
      fortran['serial'] = 'gfortran'
      fortran['mpi']    = 'gfortran'

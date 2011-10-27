@@ -1,120 +1,99 @@
-#!/bin/tcsh
+#!/bin/tcsh -f
 
-if ($#argv != 3) then
-   echo "\n  Usage: $0 <arch> <type> <prec>\n"
-   exit
-else 
-   set arch = $argv[1]
-   set type = $argv[2]
-   set prec = $argv[3]
+set ARCH = $CELLO_ARCH
+set TYPE = (charm)
+set PREC = (double)
+
+if ($#argv >= 1) then
+   if ($argv[1] == "clean") then
+      set d = `date +"%Y-%m-%d %H:%M:%S"`
+      printf "$d %-14s" "cleaning..."
+      foreach type (serial mpi charm)
+         scons arch=$ARCH type=$type -c >& /dev/null
+         rm -rf test/$type >& /dev/null
+         rm -rf bin/$type >& /dev/null
+         rm -rf lib/$type >& /dev/null
+      end
+      rm -rf include >& /dev/null
+      rm -f test/COMPILING
+      rm -f input/*.in.out >& /dev/null
+      rm -rf build
+      printf "done\n"
+      exit
+   endif
 endif
 
-echo
-echo "arch = $arch"
-echo "type = $type"
-echo "prec = $prec"
-echo
+echo "TYPE = $TYPE"
+echo "PREC = $PREC"
 
-if ($arch == "triton-gnu") then
-    module remove intel pgi
-    module add gnu
-    module add hdf5 mpich2_mx
-else if ($arch == "triton-pgi") then
-    module remove gnu intel
-    module add pgi
-    module add hdf5 mpich2_mx
-else if ($arch == "triton-intel") then
-    module remove pgi gnu
-    module add intel
-    module add hdf5 mpich2_mx
-endif
+   set d = `date +"%Y-%m-%d %H:%M:%S"`
+   echo "$d BEGIN"
 
-set procs = 1
+foreach arch ($ARCH)
 
-rm -f "test/*/running.$arch.$prec"
+   set procs = 1
 
-set d = `date +"%Y-%m-%d %H:%M:%S"`
-echo "$d BEGIN"
+
+foreach type ($TYPE)
+foreach prec ($PREC)
+
+   rm -f "test/*/running.$arch.$prec"
 
    set dir = test/$type
-   set platform = $arch-$type
+   set configure = $arch-$type-$prec
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
-   if ($type == "clean") then
 
+   printf "$type" > test/COMPILING
 
-     printf "$d %-14s %-14s" "${platform}" "cleaning..."
-     scons arch=$arch type=serial -c >& /dev/null
-     scons arch=$arch type=mpi    -c >& /dev/null
-     scons arch=$arch type=charm  -c >& /dev/null
-     rm -f $dir/*unit >& /dev/null
-     rm -f bin/$type/* >& /dev/null
-     rm -f test/COMPILING
-     rm -f input/*.in.out >& /dev/null
-     rm -rf build
-     printf "done\n"
+   # COMPILE
 
-   else
+   set d = `date +"%Y-%m-%d %H:%M:%S"`
 
-      printf "$type" > test/COMPILING
+   printf "$d %-14s %-14s" "$arch $type $prec" "compiling..."
 
-      # COMPILE
+   if (! -d $dir) mkdir $dir
 
-      set d = `date +"%Y-%m-%d %H:%M:%S"`
+   touch "$dir/running.$arch.$prec"
 
-      printf "$d %-14s %-14s" "${platform}" "compiling..."
-
-      if (! -d $dir) mkdir $dir
-
-      touch "$dir/running.$arch.$prec"
-
-      scons arch=$arch type=$type -k -j8 bin/$type/enzo-p >>& $dir/out.scons
-      scons arch=$arch type=$type -k -j$procs             >>& $dir/out.scons
-      scons arch=$arch type=$type -k -j$procs             >>& $dir/out.scons
-      rm -f "$dir/running.$arch.$prec"
+   scons arch=$arch type=$type prec=$prec -k -j8 bin/$type/enzo-p >>& $dir/out.scons
+   scons arch=$arch type=$type prec=$prec -k >>& $dir/out.scons
+   rm -f "$dir/running.$arch.$prec"
   
-      printf "done\n"
+   printf "done\n"
 
-      # count crashes
+   # count crashes
 
-      cat $dir/*unit |grep FAIL      | grep "0/" | sort > $dir/fail.$platform
-      cat $dir/*unit |grep incomplete| grep "0/" | sort > $dir/incomplete.$platform
-      cat $dir/*unit |grep pass      | grep "0/" | sort > $dir/pass.$platform
-      set f = `cat $dir/fail.$platform | wc -l`
-      set i = `cat $dir/incomplete.$platform | wc -l`
-      set p = `cat $dir/pass.$platform | wc -l`
+   cat $dir/*unit |grep FAIL      | grep "0/" | sort > $dir/fail.$configure
+   cat $dir/*unit |grep incomplete| grep "0/" | sort > $dir/incomplete.$configure
+   cat $dir/*unit |grep pass      | grep "0/" | sort > $dir/pass.$configure
+   set f = `cat $dir/fail.$configure | wc -l`
+   set i = `cat $dir/incomplete.$configure | wc -l`
+   set p = `cat $dir/pass.$configure | wc -l`
 
-      set d = `date +"%Y-%m-%d %H:%M:%S"`
+   set d = `date +"%Y-%m-%d %H:%M:%S"`
 
-      printf "$d %-14s " ${platform} 
+   set line = "$d ${configure} FAIL: $f Incomplete: $i Pass: $p "
 
-      printf "FAIL: $f "
+   set crash = `grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
 
-      printf "Incomplete: $i "
-
-      printf "Pass: $p "
-
-      # check if any tests didn't finish
-
-      set crash = `grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
-
-      if ($crash != 0) then
-         printf "CRASH: $crash"
-         if ($crash != 0) then
-            grep "UNIT TEST" $dir/*unit \
-             | sed 's/BEGIN/END/ ; s/:/ /' \
-             | uniq -u \
-             | awk '{print "   ", $1}'
-         endif
-      else 
-         printf "\n"
-      endif
-
-      rm -f test/COMPILING
-
+   if ($crash != 0) then
+      line = "$line CRASH: $crash"
+      grep "UNIT TEST" $dir/*unit \
+       | sed 's/BEGIN/END/ ; s/:/ /' \
+       | uniq -u \
+       | awk '{print "   ", $1}'
    endif
 
+   echo $line
+   echo $line >> compile.log
+
+   rm -f test/COMPILING
+
+end
+end
+end
 
 set d = `date +"%Y-%m-%d %H:%M:%S"`
 echo "$d END"
