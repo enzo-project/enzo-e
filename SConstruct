@@ -453,7 +453,7 @@ elif (arch == "triton-gnu"):
 
      libpath_fortran = ''
      libs_fortran    = ['gfortran']
-     fortranlinkflags_arch  = '-limf -lifcore -lifport -lstdc++'
+     fortranlinkflags_arch  = ''
 
 # PAPI path (optional)
      papi_path = ''
