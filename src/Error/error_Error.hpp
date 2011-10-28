@@ -152,16 +152,31 @@
     message2_(stdout,"TRACE",__FILE__,__LINE__,"",		\
 	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6);		\
   }
+#   define TRACE7(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)	\
+  {								\
+    message2_(stdout,"TRACE",__FILE__,__LINE__,"",		\
+	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7);	\
+  }
 #else
 
-#   define TRACE0 /* This space intentionally left blank */
-#   define TRACE(MESSAGE) /* This space intentionally left blank */
-#   define TRACE1(MESSAGE,ARG1) /* This space intentionally left blank */
-#   define TRACE2(MESSAGE,ARG1,ARG2) /* This space intentionally left blank */
-#   define TRACE3(MESSAGE,ARG1,ARG2,ARG3) /* This space intentionally left blank */
-#   define TRACE4(MESSAGE,ARG1,ARG2,ARG3,ARG4) /* This space intentionally left blank */
-#   define TRACE5(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5) /* This space intentionally left blank */
-#   define TRACE6(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6) /* This space intentionally left blank */
+#   define TRACE0				\
+  /* This space intentionally left blank */
+#   define TRACE(MESSAGE)			\
+  /* This space intentionally left blank */
+#   define TRACE1(MESSAGE,ARG1)			\
+  /* This space intentionally left blank */
+#   define TRACE2(MESSAGE,ARG1,ARG2)		\
+  /* This space intentionally left blank */
+#   define TRACE3(MESSAGE,ARG1,ARG2,ARG3)	\
+  /* This space intentionally left blank */
+#   define TRACE4(MESSAGE,ARG1,ARG2,ARG3,ARG4)	\
+  /* This space intentionally left blank */
+#   define TRACE5(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5)	\
+  /* This space intentionally left blank */
+#   define TRACE6(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)	\
+  /* This space intentionally left blank */
+#   define TRACE7(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)	\
+  /* This space intentionally left blank */
 
 #endif
 

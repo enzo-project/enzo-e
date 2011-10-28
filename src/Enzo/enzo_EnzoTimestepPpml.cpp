@@ -23,6 +23,8 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
 				   Block * block ) throw()
 {
  
+  TRACE("");
+
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   /* initialize */
@@ -99,6 +101,11 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
     by_field = (enzo_float *)field_block->field_values(enzo::field_bfieldy);
     bz_field = (enzo_float *)field_block->field_values(enzo::field_bfieldz);
 
+    TRACE7("%p %p %p %p %p %p %p",
+	   d_field,
+	   vx_field,vy_field,vz_field,
+	   bx_field,by_field,bz_field);
+	   
     FORTRAN_NAME(calc_dt_ppml)
       (enzo_block->GridDimension, 
        enzo_block->GridDimension+1, 

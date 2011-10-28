@@ -23,6 +23,8 @@ double EnzoTimestep::compute ( const FieldDescr * field_descr,
 			       Block * block ) throw()
 {
 
+  TRACE("");
+
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   FieldBlock * field_block = enzo_block->field_block();

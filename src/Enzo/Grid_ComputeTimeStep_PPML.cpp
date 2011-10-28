@@ -26,7 +26,8 @@
 
 enzo_float EnzoBlock::ComputeTimeStep()
 {
- 
+
+  TRACE("");
   /* initialize */
  
   enzo_float dt;
