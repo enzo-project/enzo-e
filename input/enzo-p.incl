@@ -14,6 +14,11 @@
       root_size      = [80,80];
    }
 
+   Parallel {
+      temp_update_all  = false;
+      temp_update_full = true;
+   }
+
    # Field parameters include those concerning fields as a group, as
    # well as individual fields
    
