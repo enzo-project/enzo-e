@@ -352,7 +352,7 @@ function test_table ($file_root,$size_array, $types)
 {
   echo "<table>";
   echo "<tr>";
-    echo "<th>$file_root</th>  <th>movie</th>";
+    echo "<th>$file_root</th>  <th>animation</th>";
     for ($j = 0; $j < sizeof($size_array); ++$j) {
       $size = $size_array[$j];
       printf ("<th>$size</th>\n");

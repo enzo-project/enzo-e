@@ -1,13 +1,92 @@
-include "input/E.incl"
+    ### Problem: Hello World
+    ### Summary: Evolve high-pressure region shaped as an "E"
+    ###    Date: 2011-10-27
+    ###  Author: James Bordner (jobordner@ucsd.edu)
+
+   Domain { 
+      lower = [0.0, 0.0];
+      upper = [1.0, 1.0];
+   } 
+
 
    Mesh { 
       root_size      = [160, 160];
       root_blocks    = [  1,   1 ];
    }
 
+   Field {
+
+      ghosts  = 3;
+      courant = 0.8;
+
+      fields = [
+        "density",
+        "velocity_x",
+        "velocity_y",
+        "total_energy",
+        "internal_energy"
+      ] ;
+
+   }
+
+   Method {
+
+      sequence = ["ppm"];
+
+   }
+
+   Enzo {
+
+      ppm {
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+         dual_energy = false;
+     }
+   }
+
+   Physics {
+
+      dimensions = 2;
+      gamma = 1.4;
+
+   }
+
+   Initial {
+       density       { value = [ 1.0, 
+       (0.35 < x && x < 0.40 && 0.25 < y && y < 0.70) ||
+       (0.35 < x && x < 0.60 && 0.25 < y && y < 0.30) ||
+       (0.35 < x && x < 0.60 && 0.45 < y && y < 0.50) ||
+       (0.35 < x && x < 0.60 && 0.65 < y && y < 0.70),
+                                 0.125 ]; };
+       total_energy  { value = [ 1.0  / (0.4 * 1.0) ,
+       (0.35 < x && x < 0.40 && 0.25 < y && y < 0.75) ||
+       (0.35 < x && x < 0.60 && 0.25 < y && y < 0.30) ||
+       (0.35 < x && x < 0.60 && 0.45 < y && y < 0.55) ||
+       (0.35 < x && x < 0.60 && 0.65 < y && y < 0.75),
+	                         0.14 / (0.4 * 0.1)]; };
+       velocity_x    { value = [0.0]; };
+       velocity_y    { value = [0.0]; }
+   }
+
+   Boundary { type = "reflecting" }
+
+   Stopping {
+      cycle = 500;
+   }
+
    Output { 
 
+      file_groups = ["cycle_step"];
+
       cycle_step {
+         field_list = ["density"];
+         type     = "image";
          name       = ["E-%03d.png","cycle"];
+         schedule = ["cycle","interval", 10];
+         colormap_alpha = [0.00, 0.00, 1.00, 0.0,
+                           0.00, 1.00, 0.00, 0.33,
+                           1.00, 1.00, 0.00, 0.66, 
+                           1.00, 0.00, 0.00, 1.0];
       }
    }

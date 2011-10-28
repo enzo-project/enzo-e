@@ -61,8 +61,11 @@ foreach prec ($PREC)
 
    touch "$dir/running.$arch.$prec"
 
-   # compile
-   scons arch=$arch type=$type prec=$prec -j$proc -k >>& $dir/out.scons
+   # compile code with -j $proc processors
+   scons arch=$arch type=$type prec=$prec -j$proc -k enzo-p >& $dir/out.scons
+
+   # need to finish running tests with -j 1
+   scons arch=$arch type=$type prec=$prec -k  >>& $dir/out.scons
    rm -f "$dir/running.$arch.$prec"
   
    printf "done\n"

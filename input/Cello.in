@@ -16,7 +16,7 @@ Domain {
 
 Mesh { 
    root_size   = [ 512,512 ];
-   root_blocks = [   1,  1 ];
+   root_blocks = [   2,  4 ];
 }
 
 # Declare fields, ghost zone depth, and CFL condition
