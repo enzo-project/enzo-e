@@ -65,7 +65,7 @@
    }
 
    Initial {
-       density       { value = [ 0.125, x + y < 0.5,  1.0 ]; };
+       density       { value = [ 1.0, (x- 0.5)*(x- 0.5)+(y- 0.5)*(y- 0.5) < 0.1,  1.0 ]; };
        velox { value = 0.0; };
        veloy { value = 0.0; };
        veloz { value = 0.0; };
