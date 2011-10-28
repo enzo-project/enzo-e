@@ -127,7 +127,8 @@ Stopping * EnzoSimulation::create_stopping_ (std::string name) throw ()
 Timestep * EnzoSimulation::create_timestep_ ( std::string name ) throw ()
 /// @param name   Name of the timestep method to create (ignored)
 {
-  return new EnzoTimestep;
+  //  return new EnzoTimestep;
+  return new EnzoTimestepPpml;
 }
 
 //----------------------------------------------------------------------

@@ -5,10 +5,10 @@
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
 /// @brief    [\ref Enzo] Declaration for the EnzoTimestepPpml component
 
-#ifndef ENZO_ENZO_TIMESTEP_HPP
-#define ENZO_ENZO_TIMESTEP_HPP
+#ifndef ENZO_ENZO_TIMESTEP_PPML_HPP
+#define ENZO_ENZO_TIMESTEP_PPML_HPP
 
-class EnzoTimestepPpml : public TimestepPpml {
+class EnzoTimestepPpml : public Timestep {
 
   /// @class    EnzoTimestepPpml
   /// @ingroup  Enzo
@@ -28,4 +28,4 @@ public: // virtual functions
 
 };
 
-#endif /* ENZO_ENZO_TIMESTEP_HPP */
+#endif /* ENZO_ENZO_TIMESTEP_PPML_HPP */

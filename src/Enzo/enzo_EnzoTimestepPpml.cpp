@@ -37,16 +37,17 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
  
   /* Compute the field size. */
  
-  int size = 1;
-  for (dim = 0; dim < GridRank; dim++)
-    size *= GridDimension[dim];
+  // int size = 1;
+  // for (dim = 0; dim < GridRank; dim++)
+  //   size *= GridDimension[dim];
  
   /* If using comoving coordinates, compute the expansion factor a.  Otherwise,
      set it to one. */
  
   enzo_float a = 1, dadt;
   if (enzo::ComovingCoordinates)
-    enzo_block->CosmologyComputeExpansionFactor(enzo_block->Time(), &a, &dadt);
+    enzo_block->CosmologyComputeExpansionFactor
+      (enzo_block->Time(), &a, &dadt);
   float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */
@@ -99,11 +100,18 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
     bz_field = (enzo_float *)field_block->field_values(enzo::field_bfieldz);
 
     FORTRAN_NAME(calc_dt_ppml)
-      (GridDimension, GridDimension+1, GridDimension+2,
-       GridStartIndex, GridEndIndex,
-       GridStartIndex+1, GridEndIndex+1,
-       GridStartIndex+2, GridEndIndex+2,
-       CellWidth[0], CellWidth[1], CellWidth[2],
+      (enzo_block->GridDimension, 
+       enzo_block->GridDimension+1, 
+       enzo_block->GridDimension+2,
+       enzo_block->GridStartIndex, 
+       enzo_block->GridEndIndex,
+       enzo_block->GridStartIndex+1, 
+       enzo_block->GridEndIndex+1,
+       enzo_block->GridStartIndex+2, 
+       enzo_block->GridEndIndex+2,
+       &enzo_block->CellWidth[0], 
+       &enzo_block->CellWidth[1], 
+       &enzo_block->CellWidth[2],
        d_field,
        vx_field, vy_field, vz_field,
        bx_field, by_field, bz_field,
@@ -158,9 +166,10 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
   /* 3) Find dt from expansion. */
  
   if (enzo::ComovingCoordinates)
-    if (CosmologyComputeExpansionTimestep(Time, &dtExpansion) == FAIL) {
+    if (enzo_block->CosmologyComputeExpansionTimestep
+	(enzo_block->Time(), &dtExpansion) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
-      exit(FAIL);
+      exit(EXIT_FAILURE);
     }
  
   /* 4) Calculate minimum dt due to acceleration field (if present). */
@@ -179,7 +188,7 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
  
   /* 5) calculate minimum timestep */
  
-  dt = min(dtBaryons, dtParticles);
+  dt = MIN(dtBaryons, dtParticles);
   // dt = min(dt, dtViscous);
   // dt = min(dt, dtAcceleration);
   // dt = min(dt, dtExpansion);

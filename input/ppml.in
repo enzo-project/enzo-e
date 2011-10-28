@@ -33,8 +33,7 @@
          "bfieldx_ry", "bfieldy_ry", "bfieldz_ry",
             "dens_rz",
            "velox_rz",   "veloy_rz",   "veloz_rz",
-         "bfieldx_rz", "bfieldy_rz", "bfieldz_rz",
-         "total_energy"
+         "bfieldx_rz", "bfieldy_rz", "bfieldz_rz"
       ] ;
 
       # courant condition for fields
@@ -63,40 +62,38 @@
 
    Initial {
        density       { value = [ 0.125, x + y < 0.5,  1.0 ]; };
-       total_energy = 0.0;
-       field_velox = 0.0;
-       field_veloy = 0.0;
-       field_veloz = 0.0;
-       field_bfieldx = 0.0;
-       field_bfieldy = 0.0;
-       field_bfieldz = 0.0;
+       velox { value = 0.0; };
+       veloy { value = 0.0; };
+       veloz { value = 0.0; };
+       bfieldx { value = 0.0; };
+       bfieldy { value = 0.0; };
+       bfieldz { value = 0.0; };
 
-       field_dens_rx = 0.0;
-       field_velox_rx = 0.0;
-       field_veloy_rx = 0.0;
-       field_veloz_rx = 0.0;
-       field_bfieldx_rx = 0.0;
-       field_bfieldy_rx = 0.0;
-       field_bfieldz_rx = 0.0;
+       dens_rx { value = 0.0; };
+       velox_rx { value = 0.0; };
+       veloy_rx { value = 0.0; };
+       veloz_rx { value = 0.0; };
+       bfieldx_rx { value = 0.0; };
+       bfieldy_rx { value = 0.0; };
+       bfieldz_rx { value = 0.0; };
 
-       field_dens_ry = 0.0;
-       field_velox_ry = 0.0;
-       field_veloy_ry = 0.0;
-       field_veloz_ry = 0.0;
-       field_bfieldx_ry = 0.0;
-       field_bfieldy_ry = 0.0;
-       field_bfieldz_ry = 0.0;
+       dens_ry { value = 0.0; };
+       velox_ry { value = 0.0; };
+       veloy_ry { value = 0.0; };
+       veloz_ry { value = 0.0; };
+       bfieldx_ry { value = 0.0; };
+       bfieldy_ry { value = 0.0; };
+       bfieldz_ry { value = 0.0; };
 
-       field_dens_rz = 0.0;
-       field_velox_rz = 0.0;
-       field_veloy_rz = 0.0;
-       field_veloz_rz = 0.0;
-       field_bfieldx_rz = 0.0;
-       field_bfieldy_rz = 0.0;
-       field_bfieldz_rz = 0.0;
+       dens_rz { value = 0.0; };
+       velox_rz { value = 0.0; };
+       veloy_rz { value = 0.0; };
+       veloz_rz { value = 0.0; };
+       bfieldx_rz { value = 0.0; };
+       bfieldy_rz { value = 0.0; };
+       bfieldz_rz { value = 0.0; };
 
-       total_energy = 0.0;
-   }
+   }	
 
    Boundary { type = "reflecting" }
 
