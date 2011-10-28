@@ -1,3 +1,17 @@
+Version 0.5b3  2011-10-28
+
+  * New:     FINISHED PPML MHD
+  * New:     added TimestepPpml
+  * New:     added PPML tests to input/method_ppml*
+  * New:     timestep : type = [ "ppml" | "default" ]
+  * New:     added TimestepPpml class
+  * New:     updated EnzoNamespace field initialization for PPML
+  * Change:  added CELLO_TYPE check to compile.sh 
+  * Change:  modified HelloWorld.in to match documentation
+  * Change:  changed PPML_Timestep.F to use scalar dx,dy,dz rather than arrays
+  * Fix:     re-added Parallel parameters to ppm.incl
+  * Fix:     bug fixes in compile.sh
+
 Version 0.5b2  2011-10-27
 
   * New:     added REVISIONS
