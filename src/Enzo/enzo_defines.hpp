@@ -11,7 +11,7 @@
 #define ISYM         "d"
 
 #define MAX_DIMENSION                3
-#define MAX_NUMBER_OF_BARYON_FIELDS 28
+#define MAX_NUMBER_OF_BARYON_FIELDS 29
 
 #define MAX_COLOR                20
 #define huge                     1.0e+20

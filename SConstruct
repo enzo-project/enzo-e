@@ -267,9 +267,13 @@ fortranflags_arch = ''
 
 path_list = []
 
+is_arch_valid = 0
+
 #----------------------------------------------------------------------
 if (arch == "linux-gnu"):
 #----------------------------------------------------------------------
+
+     is_arch_valid = 1
 
      charm_path = '/home/bordner/charm/charm'  # arch
 
@@ -307,6 +311,8 @@ if (arch == "linux-gnu"):
 #----------------------------------------------------------------------
 elif (arch == "ncsa-bd"):
 #----------------------------------------------------------------------
+
+     is_arch_valid = 1
 
      charm_path = '/home/bordner/charm/charm'
 
@@ -351,6 +357,8 @@ elif (arch == "ncsa-bd"):
 elif (arch == "triton-pgi"):
 #----------------------------------------------------------------------
 
+     is_arch_valid = 1
+
      # Requires modules pgi, mpich_mx
 
      charm_path = '/home/jobordner/public/charm/charm-mpich2-pgi'
@@ -390,6 +398,8 @@ elif (arch == "triton-pgi"):
 #----------------------------------------------------------------------
 elif (arch == "triton-intel"):
 #----------------------------------------------------------------------
+
+     is_arch_valid = 1
 
      # Requires modules intel mpich_mx
 
@@ -431,6 +441,8 @@ elif (arch == "triton-intel"):
 elif (arch == "triton-gnu"):
 #----------------------------------------------------------------------
 
+     is_arch_valid = 1
+
      # Requires modules gnu, mpich_mx
 
      charm_path = '/home/jobordner/public/charm/charm-mpich2-gnu'
@@ -468,8 +480,12 @@ elif (arch == "triton-gnu"):
      flags_warn  = ''
 
 #======================================================================
-# END OF ARCHITECTURE SETTINGS
+# END ARCHITECTURE SETTINGS
 #======================================================================
+
+if (not is_arch_valid):
+   print "Unrecognized architecture type ",arch
+   sys.exit(1)
 
 #======================================================================
 # FINAL CHARM SETUP

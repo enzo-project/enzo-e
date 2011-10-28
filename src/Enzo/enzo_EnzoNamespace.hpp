@@ -95,7 +95,7 @@ namespace enzo {
   extern enzo_float DomainLeftEdge [MAX_DIMENSION];
   extern enzo_float DomainRightEdge[MAX_DIMENSION];
 
-  // Grid
+  // PPM
 
   extern int field_density;
   extern int field_total_energy;
@@ -103,34 +103,42 @@ namespace enzo {
   extern int field_velocity_x;
   extern int field_velocity_y;
   extern int field_velocity_z;
+
   extern int field_color;
-  extern int field_magnetic_x;
-  extern int field_magnetic_y;
-  extern int field_magnetic_z;
 
-  extern int field_density_xp;
-  extern int field_velocity_x_xp;
-  extern int field_velocity_y_xp;
-  extern int field_velocity_z_xp;
-  extern int field_magnetic_x_xp;
-  extern int field_magnetic_y_xp;
-  extern int field_magnetic_z_xp;
+  // PPM
 
-  extern int field_density_yp;
-  extern int field_velocity_x_yp;
-  extern int field_velocity_y_yp;
-  extern int field_velocity_z_yp;
-  extern int field_magnetic_x_yp;
-  extern int field_magnetic_y_yp;
-  extern int field_magnetic_z_yp;
+  extern int field_velox;
+  extern int field_veloy;
+  extern int field_veloz;
+  extern int field_bfieldx;
+  extern int field_bfieldy;
+  extern int field_bfieldz;
 
-  extern int field_density_zp;
-  extern int field_velocity_x_zp;
-  extern int field_velocity_y_zp;
-  extern int field_velocity_z_zp;
-  extern int field_magnetic_x_zp;
-  extern int field_magnetic_y_zp;
-  extern int field_magnetic_z_zp;
+  extern int field_dens_rx;
+  extern int field_velox_rx;
+  extern int field_veloy_rx;
+  extern int field_veloz_rx;
+  extern int field_bfieldx_rx;
+  extern int field_bfieldy_rx;
+  extern int field_bfieldz_rx;
+
+  extern int field_dens_ry;
+  extern int field_velox_ry;
+  extern int field_veloy_ry;
+  extern int field_veloz_ry;
+  extern int field_bfieldx_ry;
+  extern int field_bfieldy_ry;
+  extern int field_bfieldz_ry;
+
+  extern int field_dens_rz;
+  extern int field_velox_rz;
+  extern int field_veloy_rz;
+  extern int field_veloz_rz;
+  extern int field_bfieldx_rz;
+  extern int field_bfieldy_rz;
+  extern int field_bfieldz_rz;
+
 
   extern int GridRank;
 

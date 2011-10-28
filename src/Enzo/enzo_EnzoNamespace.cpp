@@ -79,7 +79,7 @@ namespace enzo {
   enzo_float DomainLeftEdge [MAX_DIMENSION];
   enzo_float DomainRightEdge[MAX_DIMENSION];
 
-  // Grid
+  // PPM
 
   int field_density;
   int field_total_energy;
@@ -87,34 +87,41 @@ namespace enzo {
   int field_velocity_x;
   int field_velocity_y;
   int field_velocity_z;
+
   int field_color;
-  int field_magnetic_x;
-  int field_magnetic_y;
-  int field_magnetic_z;
 
-  int field_density_xp;
-  int field_velocity_x_xp;
-  int field_velocity_y_xp;
-  int field_velocity_z_xp;
-  int field_magnetic_x_xp;
-  int field_magnetic_y_xp;
-  int field_magnetic_z_xp;
+  // PPM
 
-  int field_density_yp;
-  int field_velocity_x_yp;
-  int field_velocity_y_yp;
-  int field_velocity_z_yp;
-  int field_magnetic_x_yp;
-  int field_magnetic_y_yp;
-  int field_magnetic_z_yp;
+  int field_velox;
+  int field_veloy;
+  int field_veloz;
+  int field_bfieldx;
+  int field_bfieldy;
+  int field_bfieldz;
 
-  int field_density_zp;
-  int field_velocity_x_zp;
-  int field_velocity_y_zp;
-  int field_velocity_z_zp;
-  int field_magnetic_x_zp;
-  int field_magnetic_y_zp;
-  int field_magnetic_z_zp;
+  int field_dens_rx;
+  int field_velox_rx;
+  int field_veloy_rx;
+  int field_veloz_rx;
+  int field_bfieldx_rx;
+  int field_bfieldy_rx;
+  int field_bfieldz_rx;
+
+  int field_dens_ry;
+  int field_velox_ry;
+  int field_veloy_ry;
+  int field_veloz_ry;
+  int field_bfieldx_ry;
+  int field_bfieldy_ry;
+  int field_bfieldz_ry;
+
+  int field_dens_rz;
+  int field_velox_rz;
+  int field_veloy_rz;
+  int field_veloz_rz;
+  int field_bfieldx_rz;
+  int field_bfieldy_rz;
+  int field_bfieldz_rz;
 
   int GridRank;
 
@@ -160,39 +167,54 @@ namespace enzo {
     CourantSafetyNumber = 0;
     InitialRedshift = 0;
     InitialTimeInCodeUnits = 0;
+
     //    Time = 0;
     //    OldTime = 0;
+
+    // PPM
+
     field_density = -1;
     field_total_energy = -1;
     field_internal_energy = -1;
     field_velocity_x = -1;
     field_velocity_y = -1;
     field_velocity_z = -1;
+
     field_color = -1;
-    field_magnetic_x = -1;
-    field_magnetic_y = -1;
-    field_magnetic_z = -1;
-    field_density_xp = -1;
-    field_velocity_x_xp = -1;
-    field_velocity_y_xp = -1;
-    field_velocity_z_xp = -1;
-    field_magnetic_x_xp = -1;
-    field_magnetic_y_xp = -1;
-    field_magnetic_z_xp = -1;
-    field_density_yp = -1;
-    field_velocity_x_yp = -1;
-    field_velocity_y_yp = -1;
-    field_velocity_z_yp = -1;
-    field_magnetic_x_yp = -1;
-    field_magnetic_y_yp = -1;
-    field_magnetic_z_yp = -1;
-    field_density_zp = -1;
-    field_velocity_x_zp = -1;
-    field_velocity_y_zp = -1;
-    field_velocity_z_zp = -1;
-    field_magnetic_x_zp = -1;
-    field_magnetic_y_zp = -1;
-    field_magnetic_z_zp = -1;
+
+    // PPML
+
+    field_velox = -1;
+    field_veloy = -1;
+    field_veloz = -1;
+    field_bfieldx = -1;
+    field_bfieldy = -1;
+    field_bfieldz = -1;
+
+    field_dens_rx = -1;
+    field_velox_rx = -1;
+    field_veloy_rx = -1;
+    field_veloz_rx = -1;
+    field_bfieldx_rx = -1;
+    field_bfieldy_rx = -1;
+    field_bfieldz_rx = -1;
+    field_dens_ry = -1;
+
+    field_velox_ry = -1;
+    field_veloy_ry = -1;
+    field_veloz_ry = -1;
+    field_bfieldx_ry = -1;
+    field_bfieldy_ry = -1;
+    field_bfieldz_ry = -1;
+
+    field_dens_rz = -1;
+    field_velox_rz = -1;
+    field_veloy_rz = -1;
+    field_veloz_rz = -1;
+    field_bfieldx_rz = -1;
+    field_bfieldy_rz = -1;
+    field_bfieldz_rz = -1;
+
     GridRank = 0;
     NumberOfBaryonFields = 0;
 

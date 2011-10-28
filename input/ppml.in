@@ -1,0 +1,127 @@
+# Problem: PPML test program
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+   # Domain is the two dimensional box 0 < x,y < 1.0
+
+   Domain { 
+      lower = [0.0, 0.0, 0.0];
+      upper = [1.0, 1.0, 0.0];
+   } 
+
+   # The computational mesh is a single uniform grid
+
+   Mesh { 
+      root_size      = [32,32,32];
+   }
+
+   # Field parameters include those concerning fields as a group, as
+   # well as individual fields
+   
+   Field {
+
+      ghosts = 3;
+
+      fields = [
+         "density", 
+           "velox", "veloy", "veloz",
+         "bfieldx", "bfieldy", "bfieldz",
+            "dens_rx",
+           "velox_rx",   "veloy_rx",    "veloz_rx",
+         "bfieldx_rx", "bfieldy_rx", "bfieldz_rx",
+            "dens_ry",
+           "velox_ry",   "veloy_ry",   "veloz_ry",
+         "bfieldx_ry", "bfieldy_ry", "bfieldz_ry",
+            "dens_rz",
+           "velox_rz",   "veloy_rz",   "veloz_rz",
+         "bfieldx_rz", "bfieldy_rz", "bfieldz_rz",
+         "total_energy"
+      ] ;
+
+      # courant condition for fields
+
+      courant   = 0.8;
+
+      padding   = 0;
+      alignment = 8;    
+   }
+
+   Method {
+
+      # list of methods to apply and in what order
+ 
+      sequence = ["ppml"];
+
+   }
+
+   Physics {
+
+      dimensions = 3;
+
+      gamma = 1.4;
+
+   }
+
+   Initial {
+       density       { value = [ 0.125, x + y < 0.5,  1.0 ]; };
+       total_energy = 0.0;
+       field_velox = 0.0;
+       field_veloy = 0.0;
+       field_veloz = 0.0;
+       field_bfieldx = 0.0;
+       field_bfieldy = 0.0;
+       field_bfieldz = 0.0;
+
+       field_dens_rx = 0.0;
+       field_velox_rx = 0.0;
+       field_veloy_rx = 0.0;
+       field_veloz_rx = 0.0;
+       field_bfieldx_rx = 0.0;
+       field_bfieldy_rx = 0.0;
+       field_bfieldz_rx = 0.0;
+
+       field_dens_ry = 0.0;
+       field_velox_ry = 0.0;
+       field_veloy_ry = 0.0;
+       field_veloz_ry = 0.0;
+       field_bfieldx_ry = 0.0;
+       field_bfieldy_ry = 0.0;
+       field_bfieldz_ry = 0.0;
+
+       field_dens_rz = 0.0;
+       field_velox_rz = 0.0;
+       field_veloy_rz = 0.0;
+       field_veloz_rz = 0.0;
+       field_bfieldx_rz = 0.0;
+       field_bfieldy_rz = 0.0;
+       field_bfieldz_rz = 0.0;
+
+       total_energy = 0.0;
+   }
+
+   Boundary { type = "reflecting" }
+
+   Stopping {        cycle = 400;   }
+   Testing {   cycle_final = 400; }
+
+   Testing
+   {
+      time_final  = 1.03693807162344;
+   }
+
+   Output { 
+
+      file_groups = ["density"];
+
+      density {
+        field_list = ["density"];
+	type     = "image";
+	name     = ["ppml-%04d.png","cycle"];
+	schedule = ["cycle","interval", 10];
+        colormap = [0.00, 0.00, 0.50,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00];
+        
+      };
+   }
+

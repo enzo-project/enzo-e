@@ -49,40 +49,67 @@ int EnzoBlock::SolveMHDEquations
       size *= GridDimension[dim];
  
     /* Get easy to handle pointers for each variable. */
- 
 
+    
     enzo_float *density    = (enzo_float *)
       field_block()->field_values (field_density);
-    enzo_float *velox      = BaryonField[ 1];
-    enzo_float *veloy      = BaryonField[ 2];
-    enzo_float *veloz      = BaryonField[ 3];
-    enzo_float *bfieldx    = BaryonField[ 4];
-    enzo_float *bfieldy    = BaryonField[ 5];
-    enzo_float *bfieldz    = BaryonField[ 6];
+    enzo_float *velox      = (enzo_float *)
+      field_block()->field_values (field_velox);
+    enzo_float *veloy      = (enzo_float *)
+      field_block()->field_values (field_veloy);
+    enzo_float *veloz      = (enzo_float *)
+      field_block()->field_values (field_veloz);
+    enzo_float *bfieldx    = (enzo_float *)
+      field_block()->field_values (field_bfieldx);
+    enzo_float *bfieldy    = (enzo_float *)
+      field_block()->field_values (field_bfieldy);
+    enzo_float *bfieldz    = (enzo_float *)
+      field_block()->field_values (field_bfieldz);
 
-    enzo_float *dens_rx    = BaryonField[ 7];
-    enzo_float *velox_rx   = BaryonField[ 8];
-    enzo_float *veloy_rx   = BaryonField[ 9];
-    enzo_float *veloz_rx   = BaryonField[10];
-    enzo_float *bfieldx_rx = BaryonField[11];
-    enzo_float *bfieldy_rx = BaryonField[12];
-    enzo_float *bfieldz_rx = BaryonField[13];
+    enzo_float *dens_rx    = (enzo_float *)
+      field_block()->field_values (field_dens_rx);
+    enzo_float *velox_rx   = (enzo_float *)
+      field_block()->field_values (field_velox_rx);
+    enzo_float *veloy_rx   = (enzo_float *)
+      field_block()->field_values (field_veloy_rx);
+    enzo_float *veloz_rx   = (enzo_float *)
+      field_block()->field_values (field_veloz_rx);
+    enzo_float *bfieldx_rx = (enzo_float *)
+      field_block()->field_values (field_bfieldx_rx);
+    enzo_float *bfieldy_rx = (enzo_float *)
+      field_block()->field_values (field_bfieldy_rx);
+    enzo_float *bfieldz_rx = (enzo_float *)
+      field_block()->field_values (field_bfieldz_rx);
 
-    enzo_float *dens_ry    = BaryonField[14];
-    enzo_float *velox_ry   = BaryonField[15];
-    enzo_float *veloy_ry   = BaryonField[16];
-    enzo_float *veloz_ry   = BaryonField[17];
-    enzo_float *bfieldx_ry = BaryonField[18];
-    enzo_float *bfieldy_ry = BaryonField[19];
-    enzo_float *bfieldz_ry = BaryonField[20];
+    enzo_float *dens_ry    = (enzo_float *)
+      field_block()->field_values (field_dens_ry);
+    enzo_float *velox_ry   = (enzo_float *)
+      field_block()->field_values (field_velox_ry);
+    enzo_float *veloy_ry   = (enzo_float *)
+      field_block()->field_values (field_veloy_ry);
+    enzo_float *veloz_ry   = (enzo_float *)
+      field_block()->field_values (field_veloz_ry);
+    enzo_float *bfieldx_ry = (enzo_float *)
+      field_block()->field_values (field_bfieldx_ry);
+    enzo_float *bfieldy_ry = (enzo_float *)
+      field_block()->field_values (field_bfieldy_ry);
+    enzo_float *bfieldz_ry = (enzo_float *)
+      field_block()->field_values (field_bfieldz_ry);
 
-    enzo_float *dens_rz    = BaryonField[21];
-    enzo_float *velox_rz   = BaryonField[22];
-    enzo_float *veloy_rz   = BaryonField[23];
-    enzo_float *veloz_rz   = BaryonField[24];
-    enzo_float *bfieldx_rz = BaryonField[25];
-    enzo_float *bfieldy_rz = BaryonField[26];
-    enzo_float *bfieldz_rz = BaryonField[27];
+    enzo_float *dens_rz    = (enzo_float *)
+      field_block()->field_values (field_dens_rz);
+    enzo_float *velox_rz   = (enzo_float *)
+      field_block()->field_values (field_velox_rz);
+    enzo_float *veloy_rz   = (enzo_float *)
+      field_block()->field_values (field_veloy_rz);
+    enzo_float *veloz_rz   = (enzo_float *)
+      field_block()->field_values (field_veloz_rz);
+    enzo_float *bfieldx_rz = (enzo_float *)
+      field_block()->field_values (field_bfieldx_rz);
+    enzo_float *bfieldy_rz = (enzo_float *)
+      field_block()->field_values (field_bfieldy_rz);
+    enzo_float *bfieldz_rz = (enzo_float *)
+      field_block()->field_values (field_bfieldz_rz);
 
 
     // enzo_float *density    = BaryonField[ 0];

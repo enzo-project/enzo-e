@@ -205,57 +205,63 @@ void EnzoBlock::write(FILE * fp) throw ()
   if (field_color != -1) 
     fprintf (fp,"EnzoBlock: field_color %d\n", field_color);
 
-  if (field_magnetic_x != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_x %d\n", field_magnetic_x);
-  if (field_magnetic_y != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_y %d\n", field_magnetic_y);
-  if (field_magnetic_z != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_z %d\n", field_magnetic_z);
+  if (field_velox != -1)
+    fprintf (fp,"EnzoBlock: field_velox %d\n", field_velox);
+  if (field_veloy != -1)
+    fprintf (fp,"EnzoBlock: field_veloy %d\n", field_veloy);
+  if (field_veloz != -1)
+    fprintf (fp,"EnzoBlock: field_veloz %d\n", field_veloz);
+  if (field_bfieldx != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldx %d\n", field_bfieldx);
+  if (field_bfieldy != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldy %d\n", field_bfieldy);
+  if (field_bfieldz != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldz %d\n", field_bfieldz);
 
-  if (field_density_xp != -1) 
-    fprintf (fp,"EnzoBlock: field_density_xp %d\n", field_density_xp);
-  if (field_velocity_x_xp != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_x_xp %d\n", field_velocity_x_xp);
-  if (field_velocity_y_xp != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_y_xp %d\n", field_velocity_y_xp);
-  if (field_velocity_z_xp != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_z_xp %d\n", field_velocity_z_xp);
-  if (field_magnetic_x_xp != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_x_xp %d\n", field_magnetic_x_xp);
-  if (field_magnetic_y_xp != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_y_xp %d\n", field_magnetic_y_xp);
-  if (field_magnetic_z_xp != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_z_xp %d\n", field_magnetic_z_xp);
+  if (field_dens_rx != -1)
+    fprintf (fp,"EnzoBlock: field_dens_rx %d\n", field_dens_rx);
+  if (field_velox_rx != -1)
+    fprintf (fp,"EnzoBlock: field_velox_rx %d\n", field_velox_rx);
+  if (field_veloy_rx != -1)
+    fprintf (fp,"EnzoBlock: field_veloy_rx %d\n", field_veloy_rx);
+  if (field_veloz_rx != -1)
+    fprintf (fp,"EnzoBlock: field_veloz_rx %d\n", field_veloz_rx);
+  if (field_bfieldx_rx != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldx_rx %d\n", field_bfieldx_rx);
+  if (field_bfieldy_rx != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldy_rx %d\n", field_bfieldy_rx);
+  if (field_bfieldz_rx != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldz_rx %d\n", field_bfieldz_rx);
 
-  if (field_density_yp != -1) 
-    fprintf (fp,"EnzoBlock: field_density_yp %d\n", field_density_yp);
-  if (field_velocity_x_yp != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_x_yp %d\n", field_velocity_x_yp);
-  if (field_velocity_y_yp != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_y_yp %d\n", field_velocity_y_yp);
-  if (field_velocity_z_yp != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_z_yp %d\n", field_velocity_z_yp);
-  if (field_magnetic_x_yp != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_x_yp %d\n", field_magnetic_x_yp);
-  if (field_magnetic_y_yp != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_y_yp %d\n", field_magnetic_y_yp);
-  if (field_magnetic_z_yp != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_z_yp %d\n", field_magnetic_z_yp);
+  if (field_dens_ry != -1)
+    fprintf (fp,"EnzoBlock: field_dens_ry %d\n", field_dens_ry);
+  if (field_velox_ry != -1)
+    fprintf (fp,"EnzoBlock: field_velox_ry %d\n", field_velox_ry);
+  if (field_veloy_ry != -1)
+    fprintf (fp,"EnzoBlock: field_veloy_ry %d\n", field_veloy_ry);
+  if (field_veloz_ry != -1)
+    fprintf (fp,"EnzoBlock: field_veloz_ry %d\n", field_veloz_ry);
+  if (field_bfieldx_ry != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldx_ry %d\n", field_bfieldx_ry);
+  if (field_bfieldy_ry != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldy_ry %d\n", field_bfieldy_ry);
+  if (field_bfieldz_ry != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldz_ry %d\n", field_bfieldz_ry);
 
-  if (field_density_zp != -1) 
-    fprintf (fp,"EnzoBlock: field_density_zp %d\n", field_density_zp);
-  if (field_velocity_x_zp != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_x_zp %d\n", field_velocity_x_zp);
-  if (field_velocity_y_zp != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_y_zp %d\n", field_velocity_y_zp);
-  if (field_velocity_z_zp != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_z_zp %d\n", field_velocity_z_zp);
-  if (field_magnetic_x_zp != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_x_zp %d\n", field_magnetic_x_zp);
-  if (field_magnetic_y_zp != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_y_zp %d\n", field_magnetic_y_zp);
-  if (field_magnetic_z_zp != -1) 
-    fprintf (fp,"EnzoBlock: field_magnetic_z_zp %d\n", field_magnetic_z_zp);
+  if (field_dens_rz != -1)
+    fprintf (fp,"EnzoBlock: field_dens_rz %d\n", field_dens_rz);
+  if (field_velox_rz != -1)
+    fprintf (fp,"EnzoBlock: field_velox_rz %d\n", field_velox_rz);
+  if (field_veloy_rz != -1)
+    fprintf (fp,"EnzoBlock: field_veloy_rz %d\n", field_veloy_rz);
+  if (field_veloz_rz != -1)
+    fprintf (fp,"EnzoBlock: field_veloz_rz %d\n", field_veloz_rz);
+  if (field_bfieldx_rz != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldx_rz %d\n", field_bfieldx_rz);
+  if (field_bfieldy_rz != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldy_rz %d\n", field_bfieldy_rz);
+  if (field_bfieldz_rz != -1)
+    fprintf (fp,"EnzoBlock: field_bfieldz_rz %d\n", field_bfieldz_rz);
 
   // Grid
 
