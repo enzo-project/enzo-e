@@ -27,12 +27,12 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
 
   /* initialize */
  
-  float dt, dtTemp;
-  float dtBaryons      = HUGE_VAL;
-  float dtViscous      = HUGE_VAL;
-  float dtParticles    = HUGE_VAL;
-  float dtExpansion    = HUGE_VAL;
-  float dtAcceleration = HUGE_VAL;
+  enzo_float dt, dtTemp;
+  enzo_float dtBaryons      = HUGE_VAL;
+  enzo_float dtViscous      = HUGE_VAL;
+  enzo_float dtParticles    = HUGE_VAL;
+  enzo_float dtExpansion    = HUGE_VAL;
+  enzo_float dtAcceleration = HUGE_VAL;
   int dim, i, result;
  
   /* Compute the field size. */
@@ -48,7 +48,7 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
   if (enzo::ComovingCoordinates)
     enzo_block->CosmologyComputeExpansionFactor
       (enzo_block->Time(), &a, &dadt);
-  float afloat = float(a);
+  //  float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */
  
