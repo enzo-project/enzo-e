@@ -94,7 +94,7 @@
 
    Output { 
 
-      file_groups = ["density", "total_energy"];
+      file_groups = ["density"];
 
       density {
         field_list = ["density"];
@@ -105,16 +105,6 @@
                     1.00, 1.00, 0.00, 
                     1.00, 0.00, 0.00];
         
-      };
-
-      total_energy {
-        field_list = ["total_energy"];
-	type     = "image";
-	schedule = ["cycle","interval", 100];
-        colormap = [0.00, 0.00, 0.50,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00];
       };
 
    }

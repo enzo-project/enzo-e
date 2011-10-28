@@ -1,9 +1,0 @@
-# Problem: 2D Implosion problem
-# Author:  James Bordner (jobordner@ucsd.edu)
-
-include "input/enzo-p.incl"
-
-Mesh { root_blocks    = [1,1]; }
-
-Output { density      { name = ["enzo-p_1-d-%06d.png",  "cycle"]; } }
-Output { total_energy { name = ["enzo-p_1-te-%06d.png", "cycle"]; } }

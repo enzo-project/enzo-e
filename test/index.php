@@ -450,8 +450,13 @@ for ($k = 0; $k < 5; $k ++) {
 
 
 test_summary("Enzo-PPM",
-	     array("enzo-p_1",
-		   "enzo-p_2"),
+	     array("method_ppm-1",
+		   "method_ppm-8"),
+	     array("enzo-p",  "enzo-p"));
+
+test_summary("Enzo-PPML",
+	     array("method_ppml-1",
+		   "method_ppml-8"),
 	     array("enzo-p",  "enzo-p"));
 
 test_summary("Enzo-BC-2D", 
@@ -508,8 +513,6 @@ printf ("</tr></table></br>\n");
 
 test_group("Enzo-PPM");
 
-echo "<h3>Implosion2D (serial) </h3>";
-
 ?>
 
 Enzo-PPM tests serve to test basic PPM functionality in Enzo-P.  A
@@ -528,19 +531,48 @@ cycles).
 
 <?php
 
-tests("Enzo","enzo-p","test_enzo-p_1","PPM 1 block");
 
-test_table ("enzo-p_1-d",
+echo "<h3>PPM (serial) </h3>";
+
+tests("Enzo","enzo-p","test_method_ppm-1","PPM 1 block");
+
+test_table ("method_ppm-1",
 	    array("000000","000200","000400"), $types);
 
 //----------------------------------------------------------------------
 
-echo "<h3>Implosion2D (parallel) </h3>";
+echo "<h3>PPM (parallel) </h3>";
 
-tests("Enzo","enzo-p","test_enzo-p_2","PPM 8 blocks");
+tests("Enzo","enzo-p","test_method_ppm-8","PPM 8 blocks");
 
-test_table ("enzo-p_2-d",
+test_table ("method_ppm-8",
 	    array("000000","000200","000400"), $types);
+
+//======================================================================
+
+test_group("Enzo-PPML");
+
+?>
+
+Enzo-PPML tests serve to test basic PPML functionality in Enzo-P.  A
+small high-density sphere is run for 50 cycles, first with
+  one block (1,1,1) then eight blocks (2,2,2).
+
+<?php
+
+echo "<h3>PPML (serial) </h3>";
+
+tests("Enzo","enzo-p","test_method_ppml-1","PPML 1 block");
+
+test_table ("method_ppml-1",
+	    array("0000","0010","0020","0030","0040"), $types);
+
+echo "<h3>PPML (parallel) </h3>";
+
+tests("Enzo","enzo-p","test_method_ppml-8","PPML 8 blocks");
+
+test_table ("method_ppml-8",
+	    array("0000","0010","0020","0030","0040"), $types);
 
 
 //======================================================================

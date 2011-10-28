@@ -1,0 +1,9 @@
+# Problem: PPML test program
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/ppml.incl"
+
+Mesh { root_blocks = [1,1,1]; }
+
+Output { density { name = ["method_ppml-1-%04d.png", "cycle"]; } }
+

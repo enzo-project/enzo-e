@@ -112,25 +112,37 @@ env.RunSerial('parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/pro
 # TEST FULL APPLICATION
 #----------------------------------------------------------------------
 
-Clean(env_mv_png.RunSerial ('test_enzo-p_1.unit',
-		bin_path + '/enzo-p', 
-		ARGS='input/test_enzo-p_1.in'),
-      [Glob('#/test/' + type + '/enzo-p_1-??????-*.png'),  # field added in non-charm
-       'test_enzo-p_1.unit',
-       '#/input/test_enzo-p_1.in.out'])
+Clean(env_mv_png.RunSerial ('test_method_ppm-1.unit',bin_path + '/enzo-p', 
+		ARGS='input/method_ppm-1.in'),
+      [Glob('#/test/' + type + '/method_ppm-1-??????-*.png'),
+       'test_method_ppm-1.unit', '#/input/method_ppm-1.in.out'])
 
-Clean(env_mv_png.RunParallel ('test_enzo-p_2.unit',
-		bin_path + '/enzo-p', 
-		ARGS='input/test_enzo-p_2.in'),
-      [Glob('#/test/' + type + '/enzo-p_2-??????-*.png'),  # field added in non-charm
-       Glob('#/test/' + type + '/enzo-p_2-??????.png'),    # field not added in charm
-       'test_enzo-p_2.unit',
-       '#/input/test_enzo-p_2.in.out'])
+env.MakeMovie ("ppm-1.swf", "test_method_ppm-1.unit", \
+                ARGS="test/" + type + "/method_ppm-1-??????.png");
 
-env.MakeMovie ("enzo-p_1-d.swf", "test_enzo-p_1.unit", \
-                ARGS="test/" + type + "/enzo-p_1-d-??????.png");
-env.MakeMovie ("enzo-p_2-d.swf", "test_enzo-p_2.unit", \
-                ARGS="test/" + type + "/enzo-p_2-d-??????.png");
+Clean(env_mv_png.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-p', 
+		ARGS='input/method_ppm-8.in'),
+      [Glob('#/test/' + type + '/method_ppm-8-??????-*.png'),
+       'test_method_ppm-8.unit', '#/input/method_ppm-8.in.out'])
+
+env.MakeMovie ("ppm-8.swf", "test_method_ppm-8.unit", \
+                ARGS="test/" + type + "/method_ppm-8-??????.png");
+
+Clean(env_mv_png.RunSerial ('test_method_ppml-1.unit',bin_path + '/enzo-p', 
+		ARGS='input/method_ppml-1.in'),
+      [Glob('#/test/' + type + '/method_ppml-1-????-*.png'),
+       'test_method_ppml-1.unit', '#/input/method_ppml-1.in.out'])
+
+env.MakeMovie ("ppml-1.swf", "test_method_ppml-1.unit", \
+                ARGS="test/" + type + "/method_ppml-1-????.png");
+
+Clean(env_mv_png.RunParallel ('test_method_ppml-8.unit',bin_path + '/enzo-p', 
+		ARGS='input/method_ppml-8.in'),
+      [Glob('#/test/' + type + '/method_ppml-8-????-*.png'),
+       'test_method_ppml-8.unit', '#/input/method_ppml-8.in.out'])
+
+env.MakeMovie ("ppml-8.swf", "test_method_ppml-8.unit", \
+                ARGS="test/" + type + "/method_ppml-8-????.png");
 
 #----------------------------------------------------------------------
 # BOUNDARY CONDITIONS
@@ -236,8 +248,8 @@ else:
 
 SideEffect('log.txt', 
      [ 'test_GroupProcess.unit', 
-       'test_enzo-p_1.unit',
-       'test_enzo-p_2.unit'])
+       'method_ppm-1.unit',
+       'method_ppm-8.unit'])
 
 
 

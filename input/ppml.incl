@@ -5,7 +5,7 @@
 
    Domain { 
       lower = [0.0, 0.0, 0.0];
-      upper = [1.0, 1.0, 0.0];
+      upper = [1.0, 1.0, 1.0];
    } 
 
    # The computational mesh is a single uniform grid
@@ -65,7 +65,8 @@
    }
 
    Initial {
-       density       { value = [ 1.0, (x- 0.5)*(x- 0.5)+(y- 0.5)*(y- 0.5) < 0.1,  1.0 ]; };
+       density { 
+         value = [ 1.0, (x- 0.5)*(x- 0.5)+(y- 0.5)*(y- 0.5)+(z- 0.5)*(z- 0.5) < 0.05,  0.1 ]; };
        velox { value = 0.0; };
        veloy { value = 0.0; };
        veloz { value = 0.0; };
@@ -101,12 +102,12 @@
 
    Boundary { type = "reflecting" }
 
-   Stopping {        cycle = 400;   }
-   Testing {   cycle_final = 400; }
+   Stopping {        cycle = 40;   }
+   Testing {   cycle_final = 40; }
 
    Testing
    {
-      time_final  = 1.03693807162344;
+      time_final  = 0.128116791369393;  # 40 cycles
    }
 
    Output { 
@@ -116,7 +117,6 @@
       density {
         field_list = ["density"];
 	type     = "image";
-	name     = ["ppml-%04d.png","cycle"];
 	schedule = ["cycle","interval", 10];
         colormap = [0.00, 0.00, 0.50,  
                     0.00, 1.00, 0.00, 
