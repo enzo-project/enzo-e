@@ -84,9 +84,8 @@ foreach prec ($PREC)
    set line = "$d ${configure} FAIL: $f Incomplete: $i Pass: $p "
 
    set crash = `grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
-
    if ($crash != 0) then
-      line = "$line CRASH: $crash"
+      set line = "$line CRASH: $crash"
       grep "UNIT TEST" $dir/*unit \
        | sed 's/BEGIN/END/ ; s/:/ /' \
        | uniq -u \
