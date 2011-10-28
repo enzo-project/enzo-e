@@ -282,7 +282,13 @@ void Simulation::initialize_stopping_() throw()
 
 void Simulation::initialize_timestep_() throw()
 {
-  timestep_ = create_timestep_("ignored");
+  //--------------------------------------------------
+  // parameter: Timestep : type
+  //--------------------------------------------------
+
+  std::string name = parameters_->value_string("Timestep:type","default");
+
+  timestep_ = create_timestep_(name);
 }
 
 //----------------------------------------------------------------------
