@@ -3,6 +3,7 @@
 /// @file     enzo_EnzoNamespace.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Aug 31 15:38:36 PDT 2010
+/// @todo     Redo loop in FieldType[] initialization
 /// @brief    "Global" Enzo data
 
 #include "cello.hpp"
@@ -387,18 +388,17 @@ namespace enzo {
 	      MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields );
     }
 
+    // [ Ideally this should not be a loop ]
+
     for (int field_index=0; field_index<NumberOfBaryonFields; field_index++) {
 
       std::string name = 
 	parameters->list_value_string(field_index,"Field:fields");
 
-      field_density = field_descr->field_id("density");
-      FieldType[field_density] = Density;
-      // if        (name == "density") {
-      // 	field_density          = field_index;
-      // 	FieldType[field_index] = Density;
-      // } else
-	if (name == "velocity_x") {
+       if        (name == "density") {
+       	field_density          = field_index;
+       	FieldType[field_index] = Density;
+       } else if (name == "velocity_x") {
 	field_velocity_x       = field_index;
 	FieldType[field_index] = Velocity1;
       } else if (name == "velocity_y") {
@@ -416,7 +416,88 @@ namespace enzo {
       } else if (name == "electron_density") {
 	field_color            = field_index;
 	FieldType[field_index] = ElectronDensity;
-      } else {
+       } else if (name == "velox") {
+	field_velox            = field_index;
+	FieldType[field_index] = ElectronDensity;
+       } else if (name == "veloy") {
+	 field_veloy           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "veloz") {
+	 field_veloz           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldx") {
+	 field_bfieldx           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldy") {
+	 field_bfieldy           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldz") {
+	 field_bfieldz           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "dens_rx") {
+	 field_dens_rx           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "velox_rx") {
+	 field_velox_rx           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "veloy_rx") {
+	 field_veloy_rx           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "veloz_rx") {
+	 field_veloz_rx           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldx_rx") {
+	 field_bfieldx_rx           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldy_rx") {
+	 field_bfieldy_rx           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldz_rx") {
+	 field_bfieldz_rx           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "dens_ry") {
+	 field_dens_ry           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "velox_ry") {
+	 field_velox_ry           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "veloy_ry") {
+	 field_veloy_ry           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "veloz_ry") {
+	 field_veloz_ry           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldx_ry") {
+	 field_bfieldx_ry           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldy_ry") {
+	 field_bfieldy_ry           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldz_ry") {
+	 field_bfieldz_ry           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "dens_rz") {
+	 field_dens_rz           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "velox_rz") {
+	 field_velox_rz           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "veloy_rz") {
+	 field_veloy_rz           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "veloz_rz") {
+	 field_veloz_rz           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldx_rz") {
+	 field_bfieldx_rz           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldy_rz") {
+	 field_bfieldy_rz           = field_index;
+	 FieldType[field_index] = 0;
+       } else if (name == "bfieldz_rz") {
+	 field_bfieldz_rz           = field_index;
+	 FieldType[field_index] = 0;
+       } else {
 	FieldType[field_index] = 0;
 	WARNING1 ("EnzoBlock::EnzoBlock", 
 		 "Unknown field type for field %s",

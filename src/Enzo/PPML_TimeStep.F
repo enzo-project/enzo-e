@@ -20,23 +20,27 @@ c     See LICENSE_ENZO file for license and copyright information
       
       ENZO_REAL dtmx,dtmy,dtmz,rr0,bkb,vah,vax,vay,vaz,cg,a2
       ENZO_REAL cga,dsc,cfsx,cgs,taux,cfsy,tauy,cfsz,tauz,c0,dt          
-      ENZO_REAL dx(nx),dy(ny),dz(nz)
+!      ENZO_REAL dx(nx),dy(ny),dz(nz)
+      ENZO_REAL dx,dy,dz
 
-C      print*, 'nx,ny,nz=',nx,ny,nz
-C      print*, 'i1,i2=',i1,i2
-C      print*, 'j1,j2=',j1,j2
-C      print*, 'k1,k2=',k1,k2
-C      print*, 'dx(i1)=',dx(1)
-C      print*, 'dy(j1)=',dy(1)
-C      print*, 'dz(k1)=',dz(1)
-C      print*, 'dn(10,10,1)=',dn(10,10,1)
-C      print*, 'vx(10,10,1)=',vx(10,10,1)
-C      print*, 'vy(10,10,1)=',vy(10,10,1)
-C      print*, 'vz(10,10,1)=',vz(10,10,1)
-C      print*, 'bx(10,10,1)=',bx(10,10,1)
-C      print*, 'by(10,10,1)=',by(10,10,1)
-C      print*, 'bz(10,10,1)=',bz(10,10,1)
-C      print*, 'dt=',dt
+!      print*, 'nx,ny,nz=',nx,ny,nz
+!      print*, 'i1,i2=',i1,i2
+!      print*, 'j1,j2=',j1,j2
+!      print*, 'k1,k2=',k1,k2
+!!      print*, 'dx(i1)=',dx(1)
+!!      print*, 'dy(j1)=',dy(1)
+!!      print*, 'dz(k1)=',dz(1)
+!      print*, 'dx=',dx
+!      print*, 'dy=',dy
+!      print*, 'dz=',dz
+!      print*, 'dn(10,10,1)=',dn(10,10,1)
+!      print*, 'vx(10,10,1)=',vx(10,10,1)
+!      print*, 'vy(10,10,1)=',vy(10,10,1)
+!      print*, 'vz(10,10,1)=',vz(10,10,1)
+!      print*, 'bx(10,10,1)=',bx(10,10,1)
+!      print*, 'by(10,10,1)=',by(10,10,1)
+!      print*, 'bz(10,10,1)=',bz(10,10,1)
+!      print*, 'dt=',dt
 
       DTMX=1.E+10
       DTMY=1.E+10
@@ -61,27 +65,30 @@ C      print*, 'dt=',dt
                IF(DSC.LT.0.) DSC=0.
                CFSX=sqrt(DSC)
                CGS=sqrt((CGA+CFSX)/2.d0)
-               TAUX=DX(i1)/(abs(vx(I,J,K))+CGS)
+!               TAUX=DX(i1)/(abs(vx(I,J,K))+CGS)
+               TAUX=DX/(abs(vx(I,J,K))+CGS)
                DSC=CGA**2-4.d0*VAY*CG
                IF(DSC.LT.0.) DSC=0.
                CFSY=sqrt(DSC)
                CGS=sqrt((CGA+CFSY)/2.d0)
-               TAUY=DY(j1)/(abs(vy(I,J,K))+CGS)
+!               TAUY=DY(j1)/(abs(vy(I,J,K))+CGS)
+               TAUY=DY/(abs(vy(I,J,K))+CGS)
                DSC=CGA**2-4.d0*VAZ*CG
                IF(DSC.LT.0.) DSC=0.
                CFSZ=sqrt(DSC)
                CGS=sqrt((CGA+CFSZ)/2.d0)
-               TAUZ=DZ(k1)/(abs(vz(I,J,K))+CGS)
+!               TAUZ=DZ(k1)/(abs(vz(I,J,K))+CGS)
+               TAUZ=DZ/(abs(vz(I,J,K))+CGS)
 
                DTMX=MIN(DTMX,TAUX)
                DTMY=MIN(DTMY,TAUY)
                DTMZ=MIN(DTMZ,TAUZ)
-
             ENDDO
          ENDDO
       ENDDO
 
       DT=C0/(1.D0/DTMX+1.D0/DTMY+1.D0/DTMZ)
-      
+!     dt Inf
+!         
       Return
       End
