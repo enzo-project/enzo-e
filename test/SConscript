@@ -117,7 +117,7 @@ Clean(env_mv_png.RunSerial ('test_method_ppm-1.unit',bin_path + '/enzo-p',
       [Glob('#/test/' + type + '/method_ppm-1-??????-*.png'),
        'test_method_ppm-1.unit', '#/input/method_ppm-1.in.out'])
 
-env.MakeMovie ("ppm-1.swf", "test_method_ppm-1.unit", \
+env.MakeMovie ("method_ppm-1.swf", "test_method_ppm-1.unit", \
                 ARGS="test/" + type + "/method_ppm-1-??????.png");
 
 Clean(env_mv_png.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-p', 
@@ -125,7 +125,7 @@ Clean(env_mv_png.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-p',
       [Glob('#/test/' + type + '/method_ppm-8-??????-*.png'),
        'test_method_ppm-8.unit', '#/input/method_ppm-8.in.out'])
 
-env.MakeMovie ("ppm-8.swf", "test_method_ppm-8.unit", \
+env.MakeMovie ("method_ppm-8.swf", "test_method_ppm-8.unit", \
                 ARGS="test/" + type + "/method_ppm-8-??????.png");
 
 Clean(env_mv_png.RunSerial ('test_method_ppml-1.unit',bin_path + '/enzo-p', 
@@ -133,7 +133,7 @@ Clean(env_mv_png.RunSerial ('test_method_ppml-1.unit',bin_path + '/enzo-p',
       [Glob('#/test/' + type + '/method_ppml-1-????-*.png'),
        'test_method_ppml-1.unit', '#/input/method_ppml-1.in.out'])
 
-env.MakeMovie ("ppml-1.swf", "test_method_ppml-1.unit", \
+env.MakeMovie ("method_ppml-1.swf", "test_method_ppml-1.unit", \
                 ARGS="test/" + type + "/method_ppml-1-????.png");
 
 Clean(env_mv_png.RunParallel ('test_method_ppml-8.unit',bin_path + '/enzo-p', 
@@ -141,7 +141,7 @@ Clean(env_mv_png.RunParallel ('test_method_ppml-8.unit',bin_path + '/enzo-p',
       [Glob('#/test/' + type + '/method_ppml-8-????-*.png'),
        'test_method_ppml-8.unit', '#/input/method_ppml-8.in.out'])
 
-env.MakeMovie ("ppml-8.swf", "test_method_ppml-8.unit", \
+env.MakeMovie ("method_ppml-8.swf", "test_method_ppml-8.unit", \
                 ARGS="test/" + type + "/method_ppml-8-????.png");
 
 #----------------------------------------------------------------------
@@ -207,12 +207,12 @@ Clean(env_mv_png.RunParallel ('test_boundary_periodic-3d.unit',
        'test_boundary_periodic-3d.unit',
        '#/input/boundary_periodic-3d.in.out'])
 
-# Clean(env_mv_png.RunParallel ('test_boundary_inflow-3d.unit',
-# 		bin_path + '/enzo-p', 
-# 		ARGS='input/boundary_inflow-3d.in'),
-#       [Glob('#/test/' + type + '/boundary_inflow-3d.png'),
-#        'test_boundary_inflow-3d.unit',
-#        '#/input/boundary_inflow-3d.in.out'])
+Clean(env_mv_png.RunParallel ('test_boundary_inflow-3d.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/boundary_inflow-3d.in'),
+      [Glob('#/test/' + type + '/boundary_inflow-3d.png'),
+       'test_boundary_inflow-3d.unit',
+       '#/input/boundary_inflow-3d.in.out'])
 
 Clean(env_mv_png.RunParallel ('test_boundary_outflow-3d.unit',
 		bin_path + '/enzo-p', 
