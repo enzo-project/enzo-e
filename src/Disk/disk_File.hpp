@@ -54,12 +54,12 @@ public: // interface
   /// Read a metadata item associated with the file
   virtual void file_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
-    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+    int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the file
   virtual void file_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+    int nx=1, int ny=0, int nz=0) throw();
   
 
   // Datasets
@@ -67,12 +67,12 @@ public: // interface
   /// Open an existing dataset for reading
   virtual void data_open
   ( std::string name,  enum scalar_type * type,
-    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
+    int * nx=0, int * ny=0, int * nz=0) throw() = 0;
 
   /// Create a new dataset for writing (and open it)
   virtual void data_create
   ( std::string name,  enum scalar_type type,
-    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw() = 0;
+    int nx=1, int ny=0, int nz=0) throw() = 0;
 
   /// Read from the opened dataset
   virtual void data_read (void * buffer) throw() = 0;
@@ -86,12 +86,12 @@ public: // interface
   /// Read a metadata item associated with the opened dataset
   virtual void data_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
-    int * n0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+    int * nx, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the opened dataset
   virtual void data_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+    int nx=1, int ny=0, int nz=0) throw();
 
 
   // Groups
@@ -111,12 +111,12 @@ public: // interface
   /// Read a metadata item associated with the opened group
   virtual void group_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
-    int * n0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+    int * nx, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the opened group
   virtual void group_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+    int nx=1, int ny=0, int nz=0) throw();
 
 protected: // attributes
 

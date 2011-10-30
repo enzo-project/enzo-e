@@ -21,7 +21,7 @@ File::File(std::string path, std::string name) throw ()
 
 void File::file_read_meta
 ( void * buffer, std::string name,  enum scalar_type * s_type,
-  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+  int * nx, int * ny, int * nz) throw()
 {
   WARNING("File::file_read_meta",
 	  "Operation not supported by object");
@@ -31,7 +31,7 @@ void File::file_read_meta
   
 void File::file_write_meta
 ( const void * buffer, std::string name, enum scalar_type type,
-  int n0, int n1, int n2, int n3, int n4) throw()
+  int nx, int ny, int nz) throw()
 {
   WARNING("File::file_write_meta",
 	  "Operation not supported by object");
@@ -41,7 +41,7 @@ void File::file_write_meta
 
 void File::data_read_meta
 ( void * buffer, std::string name,  enum scalar_type * s_type,
-  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+  int * nx, int * ny, int * nz) throw()
 {
   WARNING("File::data_read_meta",
 	  "Operation not supported by object");
@@ -51,7 +51,7 @@ void File::data_read_meta
   
 void File::data_write_meta
 ( const void * buffer, std::string name, enum scalar_type type,
-  int n0, int n1, int n2, int n3, int n4) throw()
+  int nx, int ny, int nz) throw()
 {
   WARNING("File::data_write_meta",
 	  "Operation not supported by object");
@@ -93,7 +93,7 @@ void File::group_close () throw()
 
 void File::group_read_meta
 ( void * buffer, std::string name,  enum scalar_type * s_type,
-  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+  int * nx, int * ny, int * nz) throw()
 {
   WARNING("File::group_read_meta",
 	  "Operation not supported by object");
@@ -103,7 +103,7 @@ void File::group_read_meta
   
 void File::group_write_meta
 ( const void * buffer, std::string name, enum scalar_type type,
-  int n0, int n1, int n2, int n3, int n4) throw()
+  int nx, int ny, int nz) throw()
 {
   WARNING("File::group_write_meta",
 	  "Operation not supported by object");

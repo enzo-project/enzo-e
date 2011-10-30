@@ -9,8 +9,8 @@
 
 #include "disk.hpp"
 
-#define MAX_DATA_RANK 5
-#define MAX_ATTR_RANK 5
+#define MAX_DATA_RANK 3
+#define MAX_ATTR_RANK 3
 
 //----------------------------------------------------------------------
  
@@ -133,7 +133,7 @@ void FileHdf5::file_close () throw()
 
 void FileHdf5::data_open
 ( std::string name,  enum scalar_type * type,
-  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+  int * nx, int * ny, int * nz) throw()
 {
 
  // error check file closed
@@ -157,7 +157,7 @@ void FileHdf5::data_open
 
   // set output extents
 
-  set_output_extents_(space_id_,n0,n1,n2,n3,n4);
+  get_output_extents_(space_id_,nx,ny,nz);
 
   // Initialize name and type
 
@@ -174,7 +174,7 @@ void FileHdf5::data_open
 
 void FileHdf5::data_create
 ( std::string name,  enum scalar_type type,
-  int n0, int n1, int n2, int n3, int n4) throw()
+  int nx, int ny, int nz) throw()
 {
 
   // Initialize data attributes
@@ -189,15 +189,15 @@ void FileHdf5::data_create
 
   // Create dataspace
 
-  space_id_ = create_dataspace_(n0,n1,n2,n3,n4,data_size_);
+  space_id_ = create_dataspace_(nx,ny,nz,data_size_);
 
   // Create the new dataset
 
   data_id_ = H5Dcreate( group,
-			    name.c_str(),
-			    scalar_to_hdf5_(type),
-			    space_id_,
-			    H5P_DEFAULT );
+			name.c_str(),
+			scalar_to_hdf5_(type),
+			space_id_,
+			H5P_DEFAULT );
 
   // error check H5Dcreate
 
@@ -303,7 +303,7 @@ void FileHdf5::data_close() throw()
 
 void FileHdf5::file_read_meta
   ( void * buffer, std::string name,  enum scalar_type * type,
-    int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+    int * nx, int * ny, int * nz) throw()
 {
 
   std::string file_name = path_ + "/" + name_;
@@ -329,7 +329,7 @@ void FileHdf5::file_read_meta
 
   // set output extents
 
-  set_output_extents_(meta_space_id,n0,n1,n2,n3,n4);
+  get_output_extents_(meta_space_id,nx,ny,nz);
 
   // set output type
 
@@ -353,7 +353,7 @@ void FileHdf5::file_read_meta
 
 void FileHdf5::file_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int n0, int n1, int n2, int n3, int n4) throw()
+    int nx, int ny, int nz) throw()
 {
   // error check file open
 
@@ -368,7 +368,9 @@ void FileHdf5::file_write_meta
 
   hsize_t meta_size[MAX_DATA_RANK];
 
-  hid_t meta_space_id = create_dataspace_(n0,n1,n2,n3,n4,meta_size);
+  // Create data space
+
+  hid_t meta_space_id = create_dataspace_(nx,ny,nz,meta_size);
 
   hid_t meta_id = H5Acreate ( file_id_,
 			      name.c_str(),
@@ -399,7 +401,7 @@ void FileHdf5::file_write_meta
 
 void FileHdf5::data_read_meta
   ( void * buffer, std::string name,  enum scalar_type * type,
-    int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+    int * nx, int * ny, int * nz) throw()
 {
   // error check file open
 
@@ -430,7 +432,7 @@ void FileHdf5::data_read_meta
 
   // set output extents
 
-  set_output_extents_(meta_space_id,n0,n1,n2,n3,n4);
+  get_output_extents_(meta_space_id,nx,ny,nz);
 
   // set output parameters
 
@@ -452,7 +454,7 @@ void FileHdf5::data_read_meta
 
 void FileHdf5::data_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int n0, int n1, int n2, int n3, int n4) throw()
+    int nx, int ny, int nz) throw()
 {
   // error check file open
 
@@ -472,7 +474,9 @@ void FileHdf5::data_write_meta
 
   hsize_t meta_size[MAX_DATA_RANK];
 
-  hid_t meta_space_id = create_dataspace_(n0,n1,n2,n3,n4,meta_size);
+  // Create the data space
+
+  hid_t meta_space_id = create_dataspace_(nx,ny,nz,meta_size);
 
   // Create the attribute
 
@@ -628,7 +632,7 @@ void FileHdf5::group_close () throw()
 
 void FileHdf5::group_read_meta
   ( void * buffer, std::string name,  enum scalar_type * type,
-    int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+    int * nx, int * ny, int * nz) throw()
 {
   // error check file open
 
@@ -659,7 +663,7 @@ void FileHdf5::group_read_meta
 
   // set output extents
 
-  set_output_extents_(meta_space_id,n0,n1,n2,n3,n4);
+  get_output_extents_(meta_space_id,nx,ny,nz);
 
   // set output parameters
 
@@ -681,7 +685,7 @@ void FileHdf5::group_read_meta
 
 void FileHdf5::group_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int n0, int n1, int n2, int n3, int n4) throw()
+    int nx, int ny, int nz) throw()
 {
   // error check file open
 
@@ -701,7 +705,9 @@ void FileHdf5::group_write_meta
 
   hsize_t meta_size[MAX_DATA_RANK];
 
-  hid_t meta_space_id = create_dataspace_(n0,n1,n2,n3,n4,meta_size);
+  // Create data space
+
+  hid_t meta_space_id = create_dataspace_(nx,ny,nz,meta_size);
 
   // Create the attribute
 
@@ -880,45 +886,64 @@ std::string FileHdf5::relative_to_absolute_
 
 //----------------------------------------------------------------------
 
-void FileHdf5::set_output_extents_
-( hid_t space_id, int * n0, int * n1, int * n2, int * n3, int *n4) throw ()
+void FileHdf5::get_output_extents_
+( hid_t space_id, int * nx, int * ny, int * nz) throw ()
 {
 
-   hsize_t n[MAX_DATA_RANK];
-   H5Sget_simple_extent_dims(space_id,n,0);
+   hsize_t data_size[MAX_DATA_RANK];
+   int rank = H5Sget_simple_extent_dims(space_id,data_size,0);
 
-   if (n0) (*n0) = n[0];
-   if (n1) (*n1) = n[1];
-   if (n2) (*n2) = n[2];
-   if (n3) (*n3) = n[3];
-   if (n4) (*n4) = n[4];
+  // error check rank
+
+  ASSERT1("FileHdf5::get_output_extents_","rank %d is out of range",
+	  rank, (1 <= rank && rank <= MAX_DATA_RANK));
+
+   // Get data size: NOTE REVERSED AXES
+
+  if (rank == 1) {
+    if (nx) (*nx) = data_size[0];
+  }
+  if (rank == 2) {
+    if (nx) (*nx) = data_size[1];
+    if (ny) (*ny) = data_size[0];
+  }
+  if (rank == 3) {
+    if (nx) (*nx) = data_size[2];
+    if (ny) (*ny) = data_size[1];
+    if (nz) (*nz) = data_size[0];
+  }
 }
 
 //----------------------------------------------------------------------
 
-hid_t FileHdf5::create_dataspace_(int n0,int n1,int n2,int n3,int n4,
-				    hsize_t * data_size) throw ()
+hid_t FileHdf5::create_dataspace_(int nx,int ny,int nz,
+				  hsize_t * data_size) throw ()
 {
 
   hsize_t rank = MAX_DATA_RANK;
 
-  if (n4 == 0) -- rank;
-  if (n3 == 0) -- rank;
-  if (n2 == 0) -- rank;
-  if (n1 == 0) -- rank;
+  if (nz == 0 || nz == 1) -- rank;
+  if (ny == 0 || ny == 1) -- rank;
 
   // error check rank
 
   ASSERT1("FileHdf5::create_dataspace_","rank %d is out of range",
 	  rank, (1 <= rank && rank <= MAX_DATA_RANK));
 
-  data_size[0] = n0;
-  data_size[1] = n1;
-  data_size[2] = n2;
-  data_size[3] = n3;
-  data_size[4] = n4;
+  // Define the dataspace: NOTE REVERSED AXES
 
-  // Define the dataspace                                                      
+  if (rank == 1) {
+    data_size[0] = nx;
+  }
+  if (rank == 2) {
+    data_size[1] = nx;
+    data_size[0] = ny;
+  }
+  if (rank == 3) {
+    data_size[2] = nx;
+    data_size[1] = ny;
+    data_size[0] = nz;
+  }
 
   hid_t data_space_id = H5Screate_simple (rank, data_size, NULL);
 

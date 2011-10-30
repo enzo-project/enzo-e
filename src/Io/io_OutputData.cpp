@@ -90,13 +90,13 @@ void OutputData::write_hierarchy
     const char * name;
     scalar_type type;
     void * buffer;
-    int i0,i1,i2,i3,i4;
+    int nx,ny,nz;
 
     // Get ith Hierarchy metadata
-    io_hierarchy.meta_value(i,& buffer, &name, &type, &i0,&i1,&i2,&i3,&i4);
+    io_hierarchy.meta_value(i,& buffer, &name, &type, &nx,&ny,&nz);
 
     // Write ith Hierarchy metadata
-    file_->file_write_meta(buffer,name,type,i0,i1,i2,i3,i4);
+    file_->file_write_meta(buffer,name,type,nx,ny,nz);
   }
 
   // Call write_patch() on component patches
@@ -130,13 +130,13 @@ void OutputData::write_patch
     void * buffer;
     const char * name;
     scalar_type type;
-    int i0,i1,i2,i3,i4;
+    int nx,ny,nz;
 
     // Get ith Patch metadata
-    io_patch.meta_value(i,& buffer, &name, &type, &i0,&i1,&i2,&i3,&i4);
+    io_patch.meta_value(i,& buffer, &name, &type, &nx,&ny,&nz);
 
     // Write ith Patch metadata
-    file_->group_write_meta(buffer,name,type,i0,i1,i2,i3,i4);
+    file_->group_write_meta(buffer,name,type,nx,ny,nz);
   }
 
   // Call write_patch() with base Output object
@@ -172,13 +172,13 @@ void OutputData::write_block ( const FieldDescr * field_descr,
     void * buffer;
     const char * name;
     scalar_type type;
-    int i0,i1,i2,i3,i4;
+    int nx,ny,nz;
 
     // Get ith Block metadata
-    io_block()->meta_value(i,& buffer, &name, &type, &i0,&i1,&i2,&i3,&i4);
+    io_block()->meta_value(i,& buffer, &name, &type, &nx,&ny,&nz);
 
     // Write ith Block metadata
-    file_->group_write_meta(buffer,name,type,i0,i1,i2,i3,i4);
+    file_->group_write_meta(buffer,name,type,nx,ny,nz);
 
   }
 
@@ -207,19 +207,14 @@ void OutputData::write_field
     void * buffer;
     const char * name;
     scalar_type type;
-    int n0,n1,n2;
+    int nx,ny,nz;
 
     // Get ith FieldBlock data
-    io_field_block()->data_value(i,& buffer, &name, &type, &n0,&n1,&n2);
+    io_field_block()->data_value(i, &buffer, &name, &type, &nx,&ny,&nz);
 
     // Write ith FieldBlock data
-    if (n2 != 0) {
-      file_->data_create(name,type,n0,n1,n2);
-    } else if (n1 != 0) {
-      file_->data_create(name,type,n0,n1);
-    } else {
-      file_->data_create(name,type,n0);
-    }
+
+    file_->data_create(name,type,nx,ny,nz);
     file_->data_write(buffer);
     file_->data_close();
   }

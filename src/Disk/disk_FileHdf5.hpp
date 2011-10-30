@@ -43,12 +43,12 @@ public: // interface
   /// Read a metadata item associated with the file
   virtual void file_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
-    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+    int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the file
   virtual void file_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+    int nx=1, int ny=0, int nz=0) throw();
   
 
   // Datasets
@@ -56,12 +56,12 @@ public: // interface
   /// Open an existing dataset for reading
   virtual void data_open
   ( std::string name,  enum scalar_type * type,
-    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+    int * nx=0, int * ny=0, int * nz=0) throw();
 
   /// Create a new dataset for writing (and open it)
   virtual void data_create
   ( std::string name,  enum scalar_type type,
-    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+    int nx=1, int ny=0, int nz=0) throw();
 
   /// Read from the opened dataset
   virtual void data_read (void * buffer) throw();
@@ -75,12 +75,12 @@ public: // interface
   /// Read a metadata item associated with the opened dataset
   virtual void data_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
-    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+    int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the opened dataset
   virtual void data_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+    int nx=1, int ny=0, int nz=0) throw();
 
 
   // Groups
@@ -100,12 +100,12 @@ public: // interface
   /// Read a metadata item associated with the opened group
   virtual void group_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
-    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+    int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the opened group
   virtual void group_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int n0=1, int n1=0, int n2=0, int n3=0, int n4=0) throw();
+    int nx=1, int ny=0, int nz=0) throw();
 
 private: // functions
 
@@ -119,13 +119,12 @@ private: // functions
   std::string relative_to_absolute_
   (std::string path_relative, std::string path_current) const throw();
 
-  /// Set output extents n0 through n4
-  void set_output_extents_
-  ( hid_t space_id, int * n0, int * n1, int * n2, int * n3, int *n4) throw();
+  /// Get output extents
+  void get_output_extents_
+  ( hid_t space_id, int * nx, int * ny, int * nz) throw();
 
-  /// Determine rank from n0 through n4
-  hid_t create_dataspace_(int n0,int n1,int n2,int n3,int n4,
-			  hsize_t * data_size) throw();
+  /// Determine rank
+  hid_t create_dataspace_(int nx,int ny,int nz, hsize_t * data_size) throw();
 
   /// Close the given dataspace
   void close_dataspace_ (hid_t space_id) throw();
