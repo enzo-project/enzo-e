@@ -902,10 +902,13 @@ void FileHdf5::get_output_extents_
 
   if (rank == 1) {
     if (nx) (*nx) = data_size[0];
+    if (ny) (*ny) = 1;
+    if (nz) (*nz) = 1;
   }
   if (rank == 2) {
     if (nx) (*nx) = data_size[1];
     if (ny) (*ny) = data_size[0];
+    if (nz) (*nz) = 1;
   }
   if (rank == 3) {
     if (nx) (*nx) = data_size[2];
