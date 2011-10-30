@@ -409,7 +409,7 @@ elif (arch == "triton-intel"):
      fortran['mpi']    = 'ifort'
      fortran['charm']  = 'ifort'
 
-     cxx['serial'] = 'icc'
+     cxx['serial'] = 'icpc'
      cxx['mpi']    = 'mpicxx'
 
      cc['serial']  = 'icc'
