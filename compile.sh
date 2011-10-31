@@ -42,6 +42,7 @@ foreach prec ($PREC)
    rm -f "test/*/running.$arch.$prec"
 
    set configure = $arch-$type-$prec
+   set configure_print = `printf "%s %s %s" $arch $type $prec`
 
 
    printf "$type" > test/COMPILING
@@ -81,7 +82,7 @@ foreach prec ($PREC)
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
-   set line = "$d ${configure} FAIL: $f Incomplete: $i Pass: $p "
+   set line = "$d ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
 
    set crash = `grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
    if ($crash != 0) then
@@ -92,8 +93,8 @@ foreach prec ($PREC)
        | awk '{print "   ", $1}'
    endif
 
-   echo $line
-   echo $line >> compile.log
+   printf "%s %s %-12s %-6s %-6s %s %s %s %s %s %s %s %s\n" $line
+   printf "%s %s %-12s %-6s %-6s %s %s %s %s %s %s %s %s\n" $line >> compile.log
 
    rm -f test/COMPILING
 
