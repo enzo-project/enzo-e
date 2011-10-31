@@ -66,11 +66,14 @@
 
    Initial {
        density { 
-         value = [ 1.0, (x- 0.5)*(x- 0.5)+(y- 0.5)*(y- 0.5)+(z- 0.5)*(z- 0.5) < 0.05,  0.1 ]; };
+         value = [ 1.0, (x- 0.5)*(x- 0.5) + 
+                        (y- 0.5)*(y- 0.5) +
+                        (z- 0.5)*(z- 0.5) < 0.05,  
+                  0.1 ]; };
        velox { value = 0.0; };
        veloy { value = 0.0; };
        veloz { value = 0.0; };
-       bfieldx { value = 0.0; };
+       bfieldx { value = 0.1; };
        bfieldy { value = 0.0; };
        bfieldz { value = 0.0; };
 
@@ -102,7 +105,7 @@
 
    Boundary { type = "reflecting" }
 
-   Stopping {        cycle = 40;   }
+   Stopping {        cycle = 12;   }
    Testing {   cycle_final = 40; }
 
    Testing
@@ -112,17 +115,44 @@
 
    Output { 
 
-      file_groups = ["density"];
+      file_groups = ["d_x","d_y","d_z","dump"];
 
-      density {
+      dump {
         field_list = ["density"];
-	type     = "image";
+	type = "data";
+        name = ["data-p%02d-%04d.h5","proc","cycle"];
+	schedule = ["cycle","list", 0,1];
+      };
+
+      d_x {
+        field_list = ["density"];
+	type = "image";
+        axis = "x";
 	schedule = ["cycle","interval", 2];
         colormap = [0.00, 0.00, 0.50,  
                     0.00, 1.00, 0.00, 
                     1.00, 1.00, 0.00, 
                     1.00, 0.00, 0.00];
-        
+      };
+      d_y {
+        field_list = ["density"];
+	type = "image";
+        axis = "y";
+	schedule = ["cycle","interval", 2];
+        colormap = [0.00, 0.00, 0.50,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00];
+      };
+      d_z {
+        field_list = ["density"];
+	type = "image";
+        axis = "z";
+	schedule = ["cycle","interval", 2];
+        colormap = [0.00, 0.00, 0.50,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00];
       };
    }
 

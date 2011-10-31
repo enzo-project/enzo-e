@@ -30,5 +30,5 @@ int EnzoBlock::FindField(int field, int farray[], int numfields)
  
   /* not found */
  
-  return -1;
+  return field_undefined;
 }

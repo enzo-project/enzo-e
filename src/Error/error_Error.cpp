@@ -50,3 +50,21 @@ extern void message2_
   fflush (fp);
 }
 
+//----------------------------------------------------------------------
+
+void terminate()
+{
+  const int buffer_size = 64;
+
+  void * buffer[buffer_size];
+  
+  int num_symbols = backtrace (buffer,buffer_size);
+
+  char ** symbols = backtrace_symbols(buffer,num_symbols);
+
+  for (int i=0; i<num_symbols; i++) {
+    message2_(stderr,"EXIT","",0,"",symbols[i]);
+  }
+  
+  PARALLEL_EXIT;
+}

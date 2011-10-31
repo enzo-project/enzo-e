@@ -94,7 +94,7 @@
 
    Output { 
 
-      file_groups = ["density"];
+      file_groups = ["density","data"];
 
       density {
         field_list = ["density"];
@@ -105,6 +105,12 @@
                     1.00, 1.00, 0.00, 
                     1.00, 0.00, 0.00];
         
+      };
+
+      data {
+        field_list = ["density"];
+	type     = "data";
+	schedule = ["cycle","interval", 10];
       };
 
    }

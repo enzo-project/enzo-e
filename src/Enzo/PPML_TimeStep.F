@@ -22,7 +22,9 @@ c     See LICENSE_ENZO file for license and copyright information
       ENZO_REAL cga,dsc,cfsx,cgs,taux,cfsy,tauy,cfsz,tauz,c0,dt          
 !      ENZO_REAL dx(nx),dy(ny),dz(nz)
       ENZO_REAL dx,dy,dz
-
+      ENZO_REAL dmin,dmax
+      ENZO_REAL vxmin,vxmax,vymin,vymax,vzmin,vzmax
+      ENZO_REAL bxmin,bxmax,bymin,bymax,bzmin,bzmax
 !      print*, 'nx,ny,nz=',nx,ny,nz
 !      print*, 'i1,i2=',i1,i2
 !      print*, 'j1,j2=',j1,j2
@@ -49,9 +51,39 @@ c     See LICENSE_ENZO file for license and copyright information
       c0=0.8d0
       a2=1.0d0
 
+      dmin = 1.e36
+      dmax = -1e36
+      vxmin = 1.e36
+      vxmax = -1e36
+      vymin = 1.e36
+      vymax = -1e36
+      vzmin = 1.e36
+      vzmax = -1e36
+      bxmin = 1.e36
+      bxmax = -1e36
+      bymin = 1.e36
+      bymax = -1e36
+      bzmin = 1.e36
+      bzmax = -1e36
+
       DO K=k1,k2
          DO J=j1,j2
             DO I=i1,i2
+
+               dmin = MIN(dmin,dn(i,j,k))
+               dmax = MAX(dmin,dn(i,j,k))
+               vxmin = MIN(vxmin,vx(i,j,k))
+               vxmax = MAX(vxmax,vx(i,j,k))
+               vymin = MIN(vymin,vy(i,j,k))
+               vymax = MAX(vymax,vy(i,j,k))
+               vzmin = MIN(vzmin,vz(i,j,k))
+               vzmax = MAX(vzmax,vz(i,j,k))
+               bxmin = MIN(bxmin,bx(i,j,k))
+               bxmax = MAX(bxmax,bx(i,j,k))
+               bymin = MIN(bymin,by(i,j,k))
+               bymax = MAX(bymax,by(i,j,k))
+               bzmin = MIN(bzmin,bz(i,j,k))
+               bzmax = MAX(bzmax,bz(i,j,k))
 
                RR0=dn(I,J,K)
                BKB=bx(I,J,K)**2+by(I,J,K)**2+bz(I,J,K)**2
@@ -88,7 +120,23 @@ c     See LICENSE_ENZO file for license and copyright information
       ENDDO
 
       DT=C0/(1.D0/DTMX+1.D0/DTMY+1.D0/DTMZ)
-!     dt Inf
+      PRINT*, 'dt=',DT,C0,DTMX,DTMY,DTMZ
+      PRINT*, 'ijk=',i1,i2,j1,j2,k1,k2
+      PRINT*, 'dx=',dx,dy,dz
+      PRINT*, 'dmin=',dmin
+      PRINT*, 'dmax=',dmax
+      PRINT*, 'vxmin=',vxmin
+      PRINT*, 'vxmax=',vxmax
+      PRINT*, 'vymin=',vymin
+      PRINT*, 'vymax=',vymax
+      PRINT*, 'vzmin=',vzmin
+      PRINT*, 'vzmax=',vzmax
+      PRINT*, 'bxmin=',bxmin
+      PRINT*, 'bxmax=',bxmax
+      PRINT*, 'bymin=',bymin
+      PRINT*, 'bymax=',bymax
+      PRINT*, 'bzmin=',bzmin
+      PRINT*, 'bzmax=',bzmax
 !         
       Return
       End

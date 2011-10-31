@@ -24,6 +24,8 @@ namespace enzo {
 
   //----------------------------------------------------------------------
   // functions
+  const int field_undefined = -1;
+
 
   extern void initialize (Parameters * parameters, FieldDescr *);
 

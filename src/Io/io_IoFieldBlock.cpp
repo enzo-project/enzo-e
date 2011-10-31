@@ -60,9 +60,9 @@ void IoFieldBlock::data_value
   // CURRENTLY MUST INCLUDE GHOSTS IN DATA OUTPUT
   field_descr_->ghosts(field_index_,&ngx,&ngy,&ngz);
 
-  if (n0) (*n0) = nbx + 2*ngx;
-  if (n1) (*n1) = nby + 2*ngy;
-  if (n2) (*n2) = nbz + 2*ngz;
+   if (n0) (*n0) = nbx + 2*ngx;
+   if (n1) (*n1) = nby + 2*ngy;
+   if (n2) (*n2) = nbz + 2*ngz;
 
 }
 

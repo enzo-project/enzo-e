@@ -10,6 +10,8 @@
 #define ENZO_FLOAT_UNDEFINED  -99999.0
 #define ISYM         "d"
 
+#define ENZO_INDEX_UNDEFINED -1
+
 #define MAX_DIMENSION                3
 #define MAX_NUMBER_OF_BARYON_FIELDS 29
 

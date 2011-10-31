@@ -23,23 +23,33 @@ double EnzoTimestep::compute ( const FieldDescr * field_descr,
 			       Block * block ) throw()
 {
 
-  TRACE("");
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-
   FieldBlock * field_block = enzo_block->field_block();
   enzo_float * density_field    = 0;
   enzo_float * velocity_x_field = 0;
   enzo_float * velocity_y_field = 0;
   enzo_float * velocity_z_field = 0;
 
+    double lower[3] = {0,0,0};
+    double upper[3] = {1,1,1};
+    enzo_block->field_block()->print (field_descr,"dump",lower,upper);
+
   density_field = (enzo_float *)field_block->field_values(enzo::field_density);
-  if (enzo::GridRank >= 1)   velocity_x_field = 
-    (enzo_float *)field_block->field_values(enzo::field_velocity_x);
-  if (enzo::GridRank >= 2) velocity_y_field = 
-    (enzo_float *)field_block->field_values(enzo::field_velocity_y);
-  if (enzo::GridRank >= 3) velocity_z_field = 
-    (enzo_float *)field_block->field_values(enzo::field_velocity_z);
+
+  if (enzo::GridRank >= 1) {
+    velocity_x_field = (enzo_float *)
+      field_block->field_values(enzo::field_velocity_x);
+  }
+
+  if (enzo::GridRank >= 2) {
+    velocity_y_field = (enzo_float *)
+      field_block->field_values(enzo::field_velocity_y);
+  }
+  if (enzo::GridRank >= 3){
+    velocity_z_field = (enzo_float *)
+      field_block->field_values(enzo::field_velocity_z);
+  }
 
   enzo_float a = 1, dadt;
   if (enzo::ComovingCoordinates)
@@ -147,7 +157,6 @@ double EnzoTimestep::compute ( const FieldDescr * field_descr,
 			&dtBaryons);
 
   dtBaryons *= enzo::CourantSafetyNumber;
-  //  TRACE1("dt = %24.15f",dtBaryons);
  
   double dt = dtBaryons;
   //  dt = MIN(dtBaryons, dtParticles);

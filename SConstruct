@@ -295,7 +295,8 @@ if (arch == "linux-gnu"):
 
      libpath_fortran = ''
      libs_fortran    = ['gfortran']
-     fortranlinkflags_arch  = ''
+     # -rdynamic is to include symbols in backtrace
+     fortranlinkflags_arch  = '-rdynamic'
 
 # PAPI path (optional)
      papi_path = '/usr/local'
@@ -381,7 +382,8 @@ elif (arch == "triton-pgi"):
 
      libpath_fortran = ''
      libs_fortran    = []
-     fortranlinkflags_arch  = '-pgf90libs'
+     # -rdynamic is to include symbols in backtrace
+     fortranlinkflags_arch  = '-pgf90libs -rdynamic'
 
 # PAPI path (optional)
      papi_path = ''

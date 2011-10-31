@@ -174,47 +174,47 @@ namespace enzo {
 
     // PPM
 
-    field_density = -1;
-    field_total_energy = -1;
-    field_internal_energy = -1;
-    field_velocity_x = -1;
-    field_velocity_y = -1;
-    field_velocity_z = -1;
+    field_density = field_undefined;
+    field_total_energy = field_undefined;
+    field_internal_energy = field_undefined;
+    field_velocity_x = field_undefined;
+    field_velocity_y = field_undefined;
+    field_velocity_z = field_undefined;
 
-    field_color = -1;
+    field_color = field_undefined;
 
     // PPML
 
-    field_velox = -1;
-    field_veloy = -1;
-    field_veloz = -1;
-    field_bfieldx = -1;
-    field_bfieldy = -1;
-    field_bfieldz = -1;
+    field_velox = field_undefined;
+    field_veloy = field_undefined;
+    field_veloz = field_undefined;
+    field_bfieldx = field_undefined;
+    field_bfieldy = field_undefined;
+    field_bfieldz = field_undefined;
 
-    field_dens_rx = -1;
-    field_velox_rx = -1;
-    field_veloy_rx = -1;
-    field_veloz_rx = -1;
-    field_bfieldx_rx = -1;
-    field_bfieldy_rx = -1;
-    field_bfieldz_rx = -1;
-    field_dens_ry = -1;
+    field_dens_rx = field_undefined;
+    field_velox_rx = field_undefined;
+    field_veloy_rx = field_undefined;
+    field_veloz_rx = field_undefined;
+    field_bfieldx_rx = field_undefined;
+    field_bfieldy_rx = field_undefined;
+    field_bfieldz_rx = field_undefined;
+    field_dens_ry = field_undefined;
 
-    field_velox_ry = -1;
-    field_veloy_ry = -1;
-    field_veloz_ry = -1;
-    field_bfieldx_ry = -1;
-    field_bfieldy_ry = -1;
-    field_bfieldz_ry = -1;
+    field_velox_ry = field_undefined;
+    field_veloy_ry = field_undefined;
+    field_veloz_ry = field_undefined;
+    field_bfieldx_ry = field_undefined;
+    field_bfieldy_ry = field_undefined;
+    field_bfieldz_ry = field_undefined;
 
-    field_dens_rz = -1;
-    field_velox_rz = -1;
-    field_veloy_rz = -1;
-    field_veloz_rz = -1;
-    field_bfieldx_rz = -1;
-    field_bfieldy_rz = -1;
-    field_bfieldz_rz = -1;
+    field_dens_rz = field_undefined;
+    field_velox_rz = field_undefined;
+    field_veloy_rz = field_undefined;
+    field_veloz_rz = field_undefined;
+    field_bfieldx_rz = field_undefined;
+    field_bfieldy_rz = field_undefined;
+    field_bfieldz_rz = field_undefined;
 
     GridRank = 0;
     NumberOfBaryonFields = 0;

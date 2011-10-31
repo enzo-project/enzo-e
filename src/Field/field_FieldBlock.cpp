@@ -68,8 +68,15 @@ void FieldBlock::size( int * nx, int * ny, int * nz ) const throw()
 char * FieldBlock::field_values ( int id_field ) 
   throw (std::out_of_range)
 {
-  return (unsigned(id_field) < field_values_.size()) ? 
-    field_values_.at(id_field) : NULL;
+  char * field = 0;
+  if (unsigned(id_field) < field_values_.size()) {
+    field = field_values_.at(id_field);
+  }
+  ASSERT1 ("FieldBlock::field_values()",
+	   "Trying to access invalid field id %d",
+	   id_field,
+	   field != NULL);
+  return field;
 }
 
 //----------------------------------------------------------------------
@@ -622,23 +629,23 @@ void FieldBlock::print (const FieldDescr * field_descr,
 
     // Exclude ghost zones
 
-    // ixm = gx;
-    // iym = gy;
-    // izm = gz;
+     ixm = gx;
+     iym = gy;
+     izm = gz;
 
-    // ixp = nxd - gx;
-    // iyp = nyd - gy;
-    // izp = nzd - gz;
+     ixp = nxd - gx;
+     iyp = nyd - gy;
+     izp = nzd - gz;
 
     // Include ghost zones
 
-    ixm = 0;
-    iym = 0;
-    izm = 0;
+    // ixm = 0;
+    // iym = 0;
+    // izm = 0;
 
-    ixp = nxd;
-    iyp = nyd;
-    izp = nzd;
+    // ixp = nxd;
+    // iyp = nyd;
+    // izp = nzd;
 
 
     // if (np==2) {
@@ -675,7 +682,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	      max = MAX(max,field[i]);
 	      sum += field[i];
 	      if (field[i]==TEMP_CLEAR_VALUE) {
-		ERROR8 ("FieldBlock::print",
+		WARNING8 ("FieldBlock::print",
 			"TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
 			message,index_field,x,y,z,ix,iy,iz);
 	      }
@@ -687,10 +694,10 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	}
 	double avg = sum / (nx*ny*nz);
 	printf
-	  ("%s [%s] %18.14g\n",
+	  ("%s [%s] %18.14g %18.14g %18.14g\n",
 	   message ? message : "",
 	   field_descr->field_name(index_field).c_str(),
-	   avg);
+	   min,avg,max);
 
       }
       break;
@@ -713,7 +720,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	      sum += field[i];
 	      sum += field[i];
 	      if (field[i]==TEMP_CLEAR_VALUE) {
-		ERROR8("FieldBlock::print",
+		WARNING8("FieldBlock::print",
 		       "TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
 		       message,index_field,x,y,z,ix,iy,iz);
 	      }
@@ -725,10 +732,10 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	}
 	double avg = sum / (nx*ny*nz);
 	printf 
-	  ("%s [%s] %18.14g\n",
+	  ("%s [%s] %18.14g %18.14g %18.14g\n",
 	   message ? message : "",
 	   field_descr->field_name(index_field).c_str(),
-	   avg);
+	   min,avg,max);
       }
       break;
     case precision_quadruple:
@@ -759,7 +766,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
     default:
       ERROR("FieldBlock::print", "Unsupported precision");
     }
-    fclose(fp);
   }
 }
 

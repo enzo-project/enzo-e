@@ -17,12 +17,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <execinfo.h>
 
 //----------------------------------------------------------------------
 // Component dependencies
 //----------------------------------------------------------------------
 
 #include "monitor.hpp"
+#include "parallel.def"
 
 //----------------------------------------------------------------------
 // Component class includes

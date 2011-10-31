@@ -564,14 +564,22 @@ echo "<h3>PPML (serial) </h3>";
 
 tests("Enzo","enzo-p","test_method_ppml-1","PPML 1 block");
 
-test_table ("method_ppml-1",
+test_table ("method_ppml-1-x",
+	    array("0000","0010","0020","0030","0040"), $types);
+test_table ("method_ppml-1-y",
+	    array("0000","0010","0020","0030","0040"), $types);
+test_table ("method_ppml-1-z",
 	    array("0000","0010","0020","0030","0040"), $types);
 
 echo "<h3>PPML (parallel) </h3>";
 
 tests("Enzo","enzo-p","test_method_ppml-8","PPML 8 blocks");
 
-test_table ("method_ppml-8",
+test_table ("method_ppml-8-x",
+	    array("0000","0010","0020","0030","0040"), $types);
+test_table ("method_ppml-8-y",
+	    array("0000","0010","0020","0030","0040"), $types);
+test_table ("method_ppml-8-z",
 	    array("0000","0010","0020","0030","0040"), $types);
 
 

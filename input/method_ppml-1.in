@@ -5,5 +5,7 @@ include "input/ppml.incl"
 
 Mesh { root_blocks = [1,1,1]; }
 
-Output { density { name = ["method_ppml-1-%04d.png", "cycle"]; } }
+Output { d_x { name = ["method_ppml-1-x-%04d.png", "cycle"]; } }
+Output { d_y { name = ["method_ppml-1-y-%04d.png", "cycle"]; } }
+Output { d_z { name = ["method_ppml-1-z-%04d.png", "cycle"]; } }
 

@@ -6,3 +6,4 @@ include "input/ppm.incl"
 Mesh { root_blocks    = [2,4]; }
 
 Output { density      { name = ["method_ppm-8-%06d.png", "cycle"]; } }
+Output { data { name = ["method_ppm-8-%02d-%06d.h5", "proc","cycle"]; } }
