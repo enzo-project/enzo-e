@@ -684,7 +684,12 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	      sum += field[i];
 	      if ( isnan(field[i])) {
 		WARNING8("FieldBlock::print",
-			 "NAN match: %s %s (%g %g %g) (%d %d %d)\n",
+			 "NAN: %s %s (%g %g %g) (%d %d %d)\n",
+			 message,field_name,x,y,z,ix,iy,iz);
+	      }
+	      if (field[i] == TEMP_CLEAR_VALUE) {
+		WARNING8("FieldBlock::print",
+			 "NOT INITIALIZED: %s %s (%g %g %g) (%d %d %d)\n",
 			 message,field_name,x,y,z,ix,iy,iz);
 	      }
 #ifdef CELLO_DEBUG_VERBOSE
@@ -722,6 +727,11 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	      if (isnan(field[i])) {
 		WARNING8("FieldBlock::print",
 			 "NAN match: %s %s (%g %g %g) (%d %d %d)\n",
+			 message,field_name,x,y,z,ix,iy,iz);
+	      }
+	      if (field[i] == TEMP_CLEAR_VALUE) {
+		WARNING8("FieldBlock::print",
+			 "NOT INITIALIZED: %s %s (%g %g %g) (%d %d %d)\n",
 			 message,field_name,x,y,z,ix,iy,iz);
 	      }
 #ifdef CELLO_DEBUG_VERBOSE
