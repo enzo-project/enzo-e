@@ -836,8 +836,6 @@ void Block::allocate (FieldDescr * field_descr) throw()
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i]->allocate_array(field_descr);
     field_block_[i]->allocate_ghosts(field_descr);
-    WARNING1("Block::p_initial","Clearing field block values to %g",
-	     TEMP_CLEAR_VALUE);
     field_block_[i]->clear(field_descr,TEMP_CLEAR_VALUE);
   }
 }
