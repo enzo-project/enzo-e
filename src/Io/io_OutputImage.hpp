@@ -127,7 +127,7 @@ private: // attributes
   int niy_;
 
   /// Image object replacing map_?_, data_, nix_, niy_
-  Image image_;
+  // Image image_;
 
   /// Current pngwriter
   pngwriter * png_;

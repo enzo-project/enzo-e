@@ -33,9 +33,6 @@
 // Component class includes
 //----------------------------------------------------------------------
 
-
-#include "io_Image.hpp"
-
 #include "io_Io.hpp"
 #include "io_IoHierarchy.hpp"
 #include "io_IoPatch.hpp"
