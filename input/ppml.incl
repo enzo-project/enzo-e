@@ -3,6 +3,10 @@
 
    # Domain is the two dimensional box 0 < x,y < 1.0
 
+   Parallel {
+      temp_update_all  = false;
+      temp_update_full = true;
+   }
    Domain { 
       lower = [0.0, 0.0, 0.0];
       upper = [1.0, 1.0, 1.0];
@@ -73,7 +77,7 @@
        velox { value = 0.0; };
        veloy { value = 0.0; };
        veloz { value = 0.0; };
-       bfieldx { value = 0.1; };
+       bfieldx { value = 100.0; };
        bfieldy { value = 0.0; };
        bfieldz { value = 0.0; };
 
@@ -105,7 +109,7 @@
 
    Boundary { type = "reflecting" }
 
-   Stopping {        cycle = 12;   }
+   Stopping {        cycle = 40;   }
    Testing {   cycle_final = 40; }
 
    Testing
