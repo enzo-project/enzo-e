@@ -100,9 +100,10 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
     bz_field = (enzo_float *)field_block->field_values(enzo::field_bfieldz);
 
 
-    double lower[3] = {0,0,0};
-    double upper[3] = {1,1,1};
-    enzo_block->field_block()->print (field_descr,"dump",lower,upper);
+    // DEBUG
+    // double lower[3] = {0,0,0};
+    // double upper[3] = {1,1,1};
+    // enzo_block->field_block()->print (field_descr,"dump",lower,upper);
 
     FORTRAN_NAME(calc_dt_ppml)
       (enzo_block->GridDimension, 

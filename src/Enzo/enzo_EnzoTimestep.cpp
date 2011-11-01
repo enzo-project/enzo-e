@@ -31,9 +31,10 @@ double EnzoTimestep::compute ( const FieldDescr * field_descr,
   enzo_float * velocity_y_field = 0;
   enzo_float * velocity_z_field = 0;
 
-    double lower[3] = {0,0,0};
-    double upper[3] = {1,1,1};
-    enzo_block->field_block()->print (field_descr,"dump",lower,upper);
+  // DEBUG
+    // double lower[3] = {0,0,0};
+    // double upper[3] = {1,1,1};
+    // enzo_block->field_block()->print (field_descr,"dump",lower,upper);
 
   density_field = (enzo_float *)field_block->field_values(enzo::field_density);
 
