@@ -611,10 +611,11 @@ void FieldBlock::print (const FieldDescr * field_descr,
   int field_count = field_descr->field_count();
   for (int index_field=0; index_field<field_count; index_field++) {
 
+    const char * field_name = field_descr->field_name(index_field).c_str();
     // FILE * fp;
     // if (use_file) {
     //   char file_name[40];
-    //   sprintf (file_name,"%s-%s-%d%d.out",message,field_descr->field_name(index_field).c_str(),ip,np);
+    //   sprintf (file_name,"%s-%s-%d%d.out",field_name,ip,np);
     //   fp = fopen(file_name,"w");
     // }
     
@@ -629,23 +630,23 @@ void FieldBlock::print (const FieldDescr * field_descr,
 
     // Exclude ghost zones
 
-     ixm = gx;
-     iym = gy;
-     izm = gz;
+     // ixm = gx;
+     // iym = gy;
+     // izm = gz;
 
-     ixp = nxd - gx;
-     iyp = nyd - gy;
-     izp = nzd - gz;
+     // ixp = nxd - gx;
+     // iyp = nyd - gy;
+     // izp = nzd - gz;
 
     // Include ghost zones
 
-    // ixm = 0;
-    // iym = 0;
-    // izm = 0;
+     ixm = 0;
+     iym = 0;
+     izm = 0;
 
-    // ixp = nxd;
-    // iyp = nyd;
-    // izp = nzd;
+     ixp = nxd;
+     iyp = nyd;
+     izp = nzd;
 
 
     // if (np==2) {
@@ -681,13 +682,14 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	      min = MIN(min,field[i]);
 	      max = MAX(max,field[i]);
 	      sum += field[i];
-	      if (field[i]==TEMP_CLEAR_VALUE) {
-		WARNING8 ("FieldBlock::print",
-			"TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
-			message,index_field,x,y,z,ix,iy,iz);
+	      if ( isnan(field[i])) {
+		WARNING8("FieldBlock::print",
+			 "NAN match: %s %s (%g %g %g) (%d %d %d)\n",
+			 message,field_name,x,y,z,ix,iy,iz);
 	      }
 #ifdef CELLO_DEBUG_VERBOSE
-	      fprintf (fp,"%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
+	      fprintf (fp,"%s %d  %f %f %f  %18.14g\n",
+		       message,index_field,x,y,z,field[i]);
 #endif
 	    }
 	  }
@@ -695,9 +697,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	double avg = sum / (nx*ny*nz);
 	printf
 	  ("%s [%s] %18.14g %18.14g %18.14g\n",
-	   message ? message : "",
-	   field_descr->field_name(index_field).c_str(),
-	   min,avg,max);
+	   message ? message : "", field_name, min,avg,max);
 
       }
       break;
@@ -719,10 +719,10 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	      max = MAX(max,field[i]);
 	      sum += field[i];
 	      sum += field[i];
-	      if (field[i]==TEMP_CLEAR_VALUE) {
+	      if (isnan(field[i])) {
 		WARNING8("FieldBlock::print",
-		       "TEMP_CLEAR_VALUE match: %s %d (%g %g %g) (%d %d %d)\n",
-		       message,index_field,x,y,z,ix,iy,iz);
+			 "NAN match: %s %s (%g %g %g) (%d %d %d)\n",
+			 message,field_name,x,y,z,ix,iy,iz);
 	      }
 #ifdef CELLO_DEBUG_VERBOSE
 	      fprintf (fp,"%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
@@ -733,9 +733,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	double avg = sum / (nx*ny*nz);
 	printf 
 	  ("%s [%s] %18.14g %18.14g %18.14g\n",
-	   message ? message : "",
-	   field_descr->field_name(index_field).c_str(),
-	   min,avg,max);
+	   message ? message : "",field_name,min,avg,max);
       }
       break;
     case precision_quadruple:
@@ -758,8 +756,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	long double avg = sum / (nx*ny*nz);
 	fprintf 
 	  (fp,"%s FieldBlock[%p,%s] (%d %d %d) [%18.14Lf %18.14Lf %18.14Lf]\n",
-	   (message ? message : "")  ,this,
-	   field_descr->field_name(index_field).c_str(),
+	   (message ? message : "")  ,this, field_name, 
 	   nx,ny,nz,min,avg,max);
       }
       break;
