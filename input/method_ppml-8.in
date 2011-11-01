@@ -5,6 +5,8 @@ include "input/ppml.incl"
 
 Mesh { root_blocks = [2,2,2]; }
 
+Output { dump { name = ["method_ppml-8-%02d-%04d.h5", "proc","cycle"]; } }
+
 Output { d_x { name = ["method_ppml-8-x-%04d.png", "cycle"]; } }
 Output { d_y { name = ["method_ppml-8-y-%04d.png", "cycle"]; } }
 Output { d_z { name = ["method_ppml-8-z-%04d.png", "cycle"]; } }

@@ -395,7 +395,7 @@ void OutputImage::image_write_ (double min, double max) throw()
       if (min <= value && value <= max) {
 
 	// map v to lower colormap index
-	size_t k = (n - 1)*(value - min) / (max-min);
+	size_t k = size_t((n - 1)*(value - min) / (max-min));
 
 	// prevent k == map_.size()-1, which happens if value == max
 

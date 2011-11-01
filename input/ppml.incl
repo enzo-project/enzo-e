@@ -124,15 +124,14 @@
       dump {
         field_list = ["density"];
 	type = "data";
-        name = ["data-p%02d-%04d.h5","proc","cycle"];
 	schedule = ["cycle","list", 0,1];
       };
 
       d_x {
         field_list = ["density"];
 	type = "image";
-        axis = "x";
 	schedule = ["cycle","interval", 2];
+        axis = "x";
         colormap = [0.00, 0.00, 0.50,  
                     0.00, 1.00, 0.00, 
                     1.00, 1.00, 0.00, 
@@ -141,8 +140,8 @@
       d_y {
         field_list = ["density"];
 	type = "image";
-        axis = "y";
 	schedule = ["cycle","interval", 2];
+        axis = "y";
         colormap = [0.00, 0.00, 0.50,  
                     0.00, 1.00, 0.00, 
                     1.00, 1.00, 0.00, 
@@ -151,8 +150,8 @@
       d_z {
         field_list = ["density"];
 	type = "image";
-        axis = "z";
 	schedule = ["cycle","interval", 2];
+        axis = "z";
         colormap = [0.00, 0.00, 0.50,  
                     0.00, 1.00, 0.00, 
                     1.00, 1.00, 0.00, 

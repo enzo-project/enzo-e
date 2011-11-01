@@ -405,9 +405,9 @@ void InitialDefault::create_png_mask_
 
   TRACE("");
   for (int iy_b=0; iy_b<nyb; iy_b++) {
-    int iy_h = (*ny)*(iy_b*hb[1]+offset_b[1])/(size_h[1]);
+    int iy_h = int((*ny)*(iy_b*hb[1]+offset_b[1])/(size_h[1]));
     for (int ix_b=0; ix_b<nxb; ix_b++) {
-      int ix_h = (*nx)*(ix_b*hb[0]+offset_b[0])/(size_h[0]);
+      int ix_h = int((*nx)*(ix_b*hb[0]+offset_b[0])/(size_h[0]));
 
       int i_b = ix_b + nxb*iy_b;
 

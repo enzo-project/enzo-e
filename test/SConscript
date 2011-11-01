@@ -115,6 +115,7 @@ env.RunSerial('parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/pro
 Clean(env_mv_png.RunSerial ('test_method_ppm-1.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppm-1.in'),
       [Glob('#/test/' + type + '/method_ppm-1-??????-*.png'),
+       Glob('#/test/' + type + '/method_ppm-1-??-??????-*.h5'),
        'test_method_ppm-1.unit', '#/input/method_ppm-1.in.out'])
 
 env.MakeMovie ("method_ppm-1.swf", "test_method_ppm-1.unit", \
@@ -123,6 +124,7 @@ env.MakeMovie ("method_ppm-1.swf", "test_method_ppm-1.unit", \
 Clean(env_mv_png.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppm-8.in'),
       [Glob('#/test/' + type + '/method_ppm-8-??????-*.png'),
+      Glob('#/test/' + type + '/method_ppm-8-??-??????-*.h5'),
        'test_method_ppm-8.unit', '#/input/method_ppm-8.in.out'])
 
 env.MakeMovie ("method_ppm-8.swf", "test_method_ppm-8.unit", \
@@ -131,6 +133,7 @@ env.MakeMovie ("method_ppm-8.swf", "test_method_ppm-8.unit", \
 Clean(env_mv_png.RunSerial ('test_method_ppml-1.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppml-1.in'),
       [Glob('#/test/' + type + '/method_ppml-1-?-????-*.png'),
+       Glob('#/test/' + type + '/method_ppml-1-??-????-*.h5'),
        'test_method_ppml-1.unit', '#/input/method_ppml-1.in.out'])
 
 env.MakeMovie ("method_ppml-1-x.swf", "test_method_ppml-1.unit", \
@@ -143,6 +146,7 @@ env.MakeMovie ("method_ppml-1-z.swf", "test_method_ppml-1.unit", \
 Clean(env_mv_png.RunParallel ('test_method_ppml-8.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppml-8.in'),
       [Glob('#/test/' + type + '/method_ppml-8-?-????-*.png'),
+       Glob('#/test/' + type + '/method_ppml-8-??-????-*.h5'),
        'test_method_ppml-8.unit', '#/input/method_ppml-8.in.out'])
 
 env.MakeMovie ("method_ppml-8-x.swf", "test_method_ppml-8.unit", \
