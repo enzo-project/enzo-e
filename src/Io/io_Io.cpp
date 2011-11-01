@@ -22,14 +22,14 @@ Io::Io(int meta_count, int data_count) throw()
 
 void Io::meta_value 
 (int index, 
- void ** buffer, const char ** name, enum scalar_type * type,
+ void ** buffer, std::string * name, enum scalar_type * type,
  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
 {
-   ASSERT1 ("Io::meta_value()",
+  ASSERT1 ("Io::meta_value()",
    	   "index %d out of range", index,
    	   0 <= index && index < meta_count_);
 
-  if (name) (*name) = meta_name_[index].c_str();
+  if (name) (*name) = meta_name_[index];
   if (n0) (*n0) = 1;
   if (n1) (*n1) = 0;
   if (n2) (*n2) = 0;

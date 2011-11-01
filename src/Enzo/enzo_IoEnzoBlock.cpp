@@ -31,7 +31,7 @@ IoEnzoBlock::IoEnzoBlock() throw ()
 
 void IoEnzoBlock::meta_value
 (int index,
- void ** buffer, const char ** name, enum scalar_type * type,
+ void ** buffer,  std::string * name, enum scalar_type * type,
  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
 {
 
@@ -52,7 +52,6 @@ void IoEnzoBlock::meta_value
 
     index -= index_block;
 
-    TRACE1 ("Time_ = %g",enzo_block->Time_);
     if (index == 0) {
 
       *buffer = (void *) & enzo_block->Time_;
@@ -110,7 +109,7 @@ void IoEnzoBlock::meta_value
 
 void IoEnzoBlock::data_value
 (int index,
- void ** buffer, const char ** name, enum scalar_type * type,
+ void ** buffer, std::string * name, enum scalar_type * type,
  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
 {
 }

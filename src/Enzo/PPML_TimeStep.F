@@ -120,23 +120,6 @@ c     See LICENSE_ENZO file for license and copyright information
       ENDDO
 
       DT=C0/(1.D0/DTMX+1.D0/DTMY+1.D0/DTMZ)
-      PRINT*, 'dt=',DT,C0,DTMX,DTMY,DTMZ
-      PRINT*, 'ijk=',i1,i2,j1,j2,k1,k2
-      PRINT*, 'dx=',dx,dy,dz
-      PRINT*, 'dmin=',dmin
-      PRINT*, 'dmax=',dmax
-      PRINT*, 'vxmin=',vxmin
-      PRINT*, 'vxmax=',vxmax
-      PRINT*, 'vymin=',vymin
-      PRINT*, 'vymax=',vymax
-      PRINT*, 'vzmin=',vzmin
-      PRINT*, 'vzmax=',vzmax
-      PRINT*, 'bxmin=',bxmin
-      PRINT*, 'bxmax=',bxmax
-      PRINT*, 'bymin=',bymin
-      PRINT*, 'bymax=',bymax
-      PRINT*, 'bzmin=',bzmin
-      PRINT*, 'bzmax=',bzmax
 !         
       Return
       End

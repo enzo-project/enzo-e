@@ -87,7 +87,7 @@ void OutputData::write_hierarchy
 
   for (int i=0; i<io_hierarchy.meta_count(); i++) {
 
-    const char * name;
+    std::string name;
     scalar_type type;
     void * buffer;
     int nx,ny,nz;
@@ -96,7 +96,7 @@ void OutputData::write_hierarchy
     io_hierarchy.meta_value(i,& buffer, &name, &type, &nx,&ny,&nz);
 
     // Write ith Hierarchy metadata
-    file_->file_write_meta(buffer,name,type,nx,ny,nz);
+    file_->file_write_meta(buffer,name.c_str(),type,nx,ny,nz);
   }
 
   // Call write_patch() on component patches
@@ -128,7 +128,7 @@ void OutputData::write_patch
   for (int i=0; i<io_patch.meta_count(); i++) {
 
     void * buffer;
-    const char * name;
+    std::string name;
     scalar_type type;
     int nx,ny,nz;
 
@@ -136,7 +136,7 @@ void OutputData::write_patch
     io_patch.meta_value(i,& buffer, &name, &type, &nx,&ny,&nz);
 
     // Write ith Patch metadata
-    file_->group_write_meta(buffer,name,type,nx,ny,nz);
+    file_->group_write_meta(buffer,name.c_str(),type,nx,ny,nz);
   }
 
   // Call write_patch() with base Output object
@@ -170,7 +170,7 @@ void OutputData::write_block ( const FieldDescr * field_descr,
   for (int i=0; i<io_block()->meta_count(); i++) {
 
     void * buffer;
-    const char * name;
+    std::string name;
     scalar_type type;
     int nx,ny,nz;
 
@@ -178,7 +178,7 @@ void OutputData::write_block ( const FieldDescr * field_descr,
     io_block()->meta_value(i,& buffer, &name, &type, &nx,&ny,&nz);
 
     // Write ith Block metadata
-    file_->group_write_meta(buffer,name,type,nx,ny,nz);
+    file_->group_write_meta(buffer,name.c_str(),type,nx,ny,nz);
 
   }
 
@@ -205,7 +205,7 @@ void OutputData::write_field
   for (int i=0; i<io_field_block()->data_count(); i++) {
 
     void * buffer;
-    const char * name;
+    std::string name;
     scalar_type type;
     int nx,ny,nz;
 
@@ -214,7 +214,7 @@ void OutputData::write_field
 
     // Write ith FieldBlock data
 
-    file_->data_create(name,type,nx,ny,nz);
+    file_->data_create(name.c_str(),type,nx,ny,nz);
     file_->data_write(buffer);
     file_->data_close();
   }

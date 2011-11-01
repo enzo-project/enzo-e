@@ -24,7 +24,7 @@ IoFieldBlock::IoFieldBlock() throw ()
 
 void IoFieldBlock::meta_value
 (int index,
- void ** buffer, const char ** name, enum scalar_type * type,
+ void ** buffer, std::string * name, enum scalar_type * type,
  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
 {
 }
@@ -33,11 +33,11 @@ void IoFieldBlock::meta_value
 
 void IoFieldBlock::data_value
 (int index,
- void ** buffer, const char ** name, enum scalar_type * type,
+ void ** buffer, std::string * name, enum scalar_type * type,
  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
 {
   if (buffer) (*buffer) = (void * )field_block_->field_values(field_index_);
-  if (name)   (*name)   = field_descr_->field_name(field_index_).c_str();
+  if (name)   (*name)   = field_descr_->field_name(field_index_);
   if (type) {
 
     precision_enum precision = field_descr_->precision(field_index_);

@@ -31,7 +31,7 @@ IoBlock::IoBlock() throw ()
 
 void IoBlock::meta_value
 (int index,
- void ** buffer, const char ** name, enum scalar_type * type,
+ void ** buffer, std::string * name, enum scalar_type * type,
  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
 {
   Io::meta_value(index,buffer,name,type,n0,n1,n2,n3,n4);
@@ -90,7 +90,7 @@ void IoBlock::meta_value
 
 void IoBlock::data_value
 (int index,
- void ** buffer, const char ** name, enum scalar_type * type,
+ void ** buffer, std::string * name, enum scalar_type * type,
  int * n0, int * n1, int * n2, int * n3, int * n4) throw()
 {
 }
