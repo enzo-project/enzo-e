@@ -80,49 +80,49 @@
 #define ERROR(FUNCTION,MESSAGE)						\
   {									\
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
-    terminate();							\
+    terminate_();							\
   }
 #define ERROR1(FUNCTION,MESSAGE,ARG1)					\
   {									\
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
 	      ARG1);							\
-    terminate();							\
+    terminate_();							\
   }
 #define ERROR2(FUNCTION,MESSAGE,ARG1,ARG2)				\
   {									\
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
 	      ARG1,ARG2);						\
-    terminate();							\
+    terminate_();							\
   }
 #define ERROR3(FUNCTION,MESSAGE,ARG1,ARG2,ARG3)				\
   {									\
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
 	      ARG1,ARG2,ARG3);						\
-    terminate();							\
+    terminate_();							\
   }
 #define ERROR4(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4)			\
   {									\
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
 	      ARG1,ARG2,ARG3,ARG4);					\
-    terminate();							\
+    terminate_();							\
   }
 #define ERROR5(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5)		\
   {									\
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
 	      ARG1,ARG2,ARG3,ARG4,ARG5);				\
-    terminate();							\
+    terminate_();							\
   }
 #define ERROR6(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)		\
   {									\
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
 	      ARG1,ARG2,ARG3,ARG4,ARG5,ARG6);				\
-    terminate();							\
+    terminate_();							\
   }
 #define ERROR8(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8) \
   {									\
     message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
 	      ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8);			\
-    terminate();							\
+    terminate_();							\
   }
 
 //----------------------------------------------------------------------
@@ -217,7 +217,7 @@
   {									\
     if (!(ASSERTION)) {							\
       message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
-      terminate();							\
+      terminate_();							\
     }									\
   }
 #define ASSERT1(FUNCTION,MESSAGE,ARG1,ASSERTION)			\
@@ -225,7 +225,7 @@
     if (!(ASSERTION)) {							\
       message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
 		ARG1);							\
-      terminate();							\
+      terminate_();							\
     }									\
   }
 #define ASSERT2(FUNCTION,MESSAGE,ARG1,ARG2,ASSERTION)			\
@@ -233,7 +233,7 @@
     if (!(ASSERTION)) {							\
       message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
 		ARG1,ARG2);						\
-      terminate();							\
+      terminate_();							\
     }									\
   }
 #define ASSERT3(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ASSERTION)		\
@@ -241,7 +241,7 @@
     if (!(ASSERTION)) {							\
       message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
 		ARG1,ARG2,ARG3);					\
-      terminate();							\
+      terminate_();							\
     }									\
   }
 #define ASSERT4(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ASSERTION)		\
@@ -249,7 +249,7 @@
     if (!(ASSERTION)) {							\
       message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
 		ARG1,ARG2,ARG3,ARG4);					\
-      terminate();							\
+      terminate_();							\
     }									\
   }
 
@@ -262,7 +262,7 @@ extern void message2_
  const char * message,
  ...);
 
-void terminate();
+void terminate_();
 
 #endif /* ERROR_ERROR_HPP */
 

@@ -52,7 +52,7 @@ extern void message2_
 
 //----------------------------------------------------------------------
 
-void terminate()
+void terminate_()
 {
   const int buffer_size = 64;
 
