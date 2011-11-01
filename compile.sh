@@ -93,8 +93,8 @@ foreach prec ($PREC)
        | awk '{print "   ", $1}'
    endif
 
-   printf "%s %s %-12s %-6s %-6s %s %s %s %s %s %s %s %s\n" $line
-   printf "%s %s %-12s %-6s %-6s %s %s %s %s %s %s %s %s\n" $line >> compile.log
+   printf "%s %s %-12s %-6s %-6s %s %s %s %s %s %s %s %s\n" "$line"
+   printf "%s %s %-12s %-6s %-6s %s %s %s %s %s %s %s %s\n" "$line" >> compile.log
 
    rm -f test/COMPILING
 
