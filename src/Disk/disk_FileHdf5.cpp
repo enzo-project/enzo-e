@@ -201,7 +201,7 @@ void FileHdf5::data_create
 
   // error check H5Dcreate
 
-  ASSERT2("FileHdf5::data_create", "Return value %d opening dataset %s",
+  ASSERT2("FileHdf5::data_create", "Return value %d creating dataset %s",
 	  data_id_,name.c_str(), data_id_ >= 0);
 
   // update dataset state
