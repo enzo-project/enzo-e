@@ -479,7 +479,7 @@ elif (arch == "triton-gnu"):
 #     flags_opt   = '-O3'
      flags_opt   = ''
 # Optional warnings-level flags
-     flags_warn  = ''
+     flags_warn  = '-Wall'
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
