@@ -21,6 +21,10 @@ public: // interface
   /// Constructor
   IoPatch(const Patch * patch) throw();
 
+  /// Destructor
+  virtual ~IoPatch() throw()
+  {}
+
   /// Return the ith metadata item associated with the Patch object
   void meta_value 
   (int index, 

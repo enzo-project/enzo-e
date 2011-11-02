@@ -26,6 +26,10 @@ public: // interface
     : ItField(), first_(0), last_(count - 1)
   { }
 
+  /// Virtual destructor
+  virtual ~ItFieldRange () throw ()
+  {}
+
   /// Go to the first value
   virtual void first () throw()
   { index_ = first_; }

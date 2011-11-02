@@ -620,10 +620,13 @@ void FileHdf5::group_create () throw()
 
 void FileHdf5::group_close () throw()
 {
-  herr_t status;
   if (is_group_open_) {
-    //
-    status = H5Gclose(group_id_);
+    
+    herr_t retval = H5Gclose(group_id_);
+
+    ASSERT2("FileHdf5::group_close", "Return value %d closing group %s",
+	    retval,group_name_.c_str(), (retval >= 0));
+
   }
   is_group_open_ = false;
 }
@@ -794,7 +797,7 @@ enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
   H5T_class_t hdf5_class = H5Tget_class(hdf5_type);
   size_t      hdf5_size  = H5Tget_size (hdf5_type);
 
-  enum scalar_type type;
+  enum scalar_type type = scalar_type_unknown;
  
   if (hdf5_class == H5T_INTEGER) {
 

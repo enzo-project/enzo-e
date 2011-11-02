@@ -21,6 +21,10 @@ public: // interface
     : ItField (), values_()
   { }
 
+  /// Virtual destructor
+  virtual ~ItFieldList () throw()
+  { }
+
   /// Append a value to the list of values
   void append (int value) 
   { values_.push_back(value); }

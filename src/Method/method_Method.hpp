@@ -20,6 +20,10 @@ public: // interface
   Method(Parameters * parameters) throw()
   {};
 
+  /// Destructor
+  virtual ~Method() throw()
+  {}
+
 public: // virtual functions
 
   /// Apply the method to advance a block one timestep 

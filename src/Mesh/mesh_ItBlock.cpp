@@ -29,8 +29,8 @@ Block * ItBlock::operator++ () throw()
 #ifdef CONFIG_USE_CHARM
   //
   Block * block;
-  int nb,nbx,nby,nbz;
-  nb = patch_->num_blocks(&nbx,&nby,&nbz);
+  int nbx,nby,nbz;
+  size_t nb = patch_->num_blocks(&nbx,&nby,&nbz);
   do {
     index1_++;
     int ibx = (index1_ - 1) % nbx;

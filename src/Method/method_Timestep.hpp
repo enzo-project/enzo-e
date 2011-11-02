@@ -20,6 +20,10 @@ public: // interface
   Timestep() throw()
   {};
 
+  /// Destructor
+  virtual ~Timestep() throw()
+  {}
+
 public: // virtual functions
 
   /// Compute the timestep for the block

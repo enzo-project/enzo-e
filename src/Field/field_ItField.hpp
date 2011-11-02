@@ -21,6 +21,10 @@ public: // interface
   ItField () throw ()
   { }
 
+  /// Virtual destructor
+  virtual ~ItField () throw()
+  { }
+
   /// Go to the first value
   virtual void first () throw() = 0;
 

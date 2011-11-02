@@ -23,7 +23,7 @@ public: // interface
   { /* EMPTY */ };
     
   /// Destructor
-  ~Reduce() throw()
+  virtual ~Reduce() throw()
   { /* EMPTY */ };
 
   /// Parallel int reduction of the stored local value

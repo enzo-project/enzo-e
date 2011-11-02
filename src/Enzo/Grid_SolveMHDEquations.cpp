@@ -39,7 +39,8 @@ int EnzoBlock::SolveMHDEquations
  
     /* initialize */
  
-    int dim, i, idim,  jdim,  size, subgrid;
+    int dim, i,  size;
+    //    int idim,  jdim, subgrid;
     Elong_int GridGlobalStart[MAX_DIMENSION];
  
     /* Compute size (in floats) of the current grid. */

@@ -21,6 +21,10 @@ public: // interface
   /// Constructor
   IoBlock() throw();
 
+  /// Destructor
+  virtual ~IoBlock() throw()
+  {}
+
   /// Set block
   void set_block (const Block * block) throw()
   { block_ = block; };

@@ -19,6 +19,10 @@ public: // interface
   /// Constructor
   InitialDefault(Parameters * parameters) throw();
 
+  /// Destructor
+  virtual ~InitialDefault() throw()
+  {}
+
   /// Read initialization from Initial group in parameter file
 
   virtual void compute (const Hierarchy * hierarchy,

@@ -23,6 +23,10 @@ public: // interface
       stop_time_ (stop_time)
   {}
 
+  /// Destructor
+  virtual ~Stopping()
+  {}
+
   /// Return whether the simulation is done
   virtual bool complete (int    curr_cycle,
 			 double curr_time) const throw()

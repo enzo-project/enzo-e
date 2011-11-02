@@ -20,6 +20,10 @@ public: // interface
   Initial() throw()
   {};
 
+  /// Destructor
+  virtual ~Initial() throw()
+  {}
+
 public: // virtual functions
 
   /// Perform the initialization of the given Block

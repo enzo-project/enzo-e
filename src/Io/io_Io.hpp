@@ -19,6 +19,10 @@ public: // interface
   /// Constructor
   Io(int meta_count, int data_count) throw();
 
+  /// Destructor
+  virtual ~Io () throw ()
+  {}
+
   /// Return the ith metadata item associated with the associated object
 
   virtual void meta_value 

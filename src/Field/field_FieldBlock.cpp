@@ -14,10 +14,10 @@
 
 FieldBlock::FieldBlock ( int nx, int ny, int nz ) throw()
   : array_(0),
-    field_values_(),
 #ifdef CONFIG_USE_CHARM
     num_fields_(),
 #endif
+    field_values_(),
     ghosts_allocated_(false)
 {
   if (nx != 0) {
@@ -406,7 +406,7 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
 
   // Send face
 
-  int ip_remote;
+  int ip_remote = false;
 
   switch (axis) {
   case axis_x:
@@ -595,11 +595,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
 			bool use_file) const throw()
 {
 
-  FILE *fp;
-  if (!use_file) { 
-    fp = stdout;
-  }
-
   // int ip,np;
   // MPI_Comm_rank (MPI_COMM_WORLD, &ip);
   // MPI_Comm_size (MPI_COMM_WORLD, &np);
@@ -612,13 +607,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
   for (int index_field=0; index_field<field_count; index_field++) {
 
     const char * field_name = field_descr->field_name(index_field).c_str();
-    // FILE * fp;
-    // if (use_file) {
-    //   char file_name[40];
-    //   sprintf (file_name,"%s-%s-%d%d.out",field_name,ip,np);
-    //   fp = fopen(file_name,"w");
-    // }
-    
 
     int nxd,nyd,nzd;
     field_size(field_descr,index_field,&nxd,&nyd,&nzd);
@@ -692,10 +680,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
 			 "NOT INITIALIZED: %s %s (%g %g %g) (%d %d %d)\n",
 			 message,field_name,x,y,z,ix,iy,iz);
 	      }
-#ifdef CELLO_DEBUG_VERBOSE
-	      fprintf (fp,"%s %d  %f %f %f  %18.14g\n",
-		       message,index_field,x,y,z,field[i]);
-#endif
 	    }
 	  }
 	}
@@ -734,9 +718,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
 			 "NOT INITIALIZED: %s %s (%g %g %g) (%d %d %d)\n",
 			 message,field_name,x,y,z,ix,iy,iz);
 	      }
-#ifdef CELLO_DEBUG_VERBOSE
-	      fprintf (fp,"%s %d  %f %f %f  %18.14g\n",message,index_field,x,y,z,field[i]);
-#endif
 	    }
 	  }
 	}
@@ -764,10 +745,9 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  }
 	}
 	long double avg = sum / (nx*ny*nz);
-	fprintf 
-	  (fp,"%s FieldBlock[%p,%s] (%d %d %d) [%18.14Lf %18.14Lf %18.14Lf]\n",
-	   (message ? message : "")  ,this, field_name, 
-	   nx,ny,nz,min,avg,max);
+	printf 
+	  ("%s [%s] %18.14Lf %18.14Lf %18.14Lf\n",
+	   message ? message : "",field_name,min,avg,max);
       }
       break;
     default:

@@ -20,6 +20,10 @@ public: // interface
   Boundary() throw()
   {};
 
+  /// Destructor
+  virtual ~Boundary() throw()
+  {}
+
 public: // virtual functions
 
   /// Enforce boundary conditions

@@ -21,12 +21,15 @@
  
 #ifdef CONFIG_PRECISION_SINGLE
 #   define ETA_TOLERANCE 1.0e-5
+#   define ENZO_HUGE_VAL HUGE_VALF
 #endif
 #ifdef CONFIG_PRECISION_DOUBLE
 #   define ETA_TOLERANCE 1.0e-10
+#   define ENZO_HUGE_VAL HUGE_VAL
 #endif
 #ifdef CONFIG_PRECISION_QUAD
 #   define ETA_TOLERANCE 1.0e-20
+#   define ENZO_HUGE_VAL HUGE_VALL
 #endif
 
 //----------------------------------------------------------------------

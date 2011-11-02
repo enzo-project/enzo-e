@@ -31,8 +31,11 @@ class GroupProcess
     rank_(rank)
     {  }
 
-
  public: // interface
+
+  /// Destructor
+  virtual ~GroupProcess() throw()
+  {}
 
   //--------------------------------------------------
   // Shared with GroupThread, but removed from deleted common "Group"

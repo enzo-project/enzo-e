@@ -32,11 +32,11 @@ enzo_float EnzoBlock::ComputeTimeStep()
  
   enzo_float dt;
 //   enzo_float dtTemp;
-  enzo_float dtBaryons      = HUGE_VAL;
-  enzo_float dtViscous      = HUGE_VAL;
-  enzo_float dtParticles    = HUGE_VAL;
-  enzo_float dtExpansion    = HUGE_VAL;
-  enzo_float dtAcceleration = HUGE_VAL;
+  enzo_float dtBaryons      = ENZO_HUGE_VAL;
+  enzo_float dtViscous      = ENZO_HUGE_VAL;
+  enzo_float dtParticles    = ENZO_HUGE_VAL;
+  enzo_float dtExpansion    = ENZO_HUGE_VAL;
+  enzo_float dtAcceleration = ENZO_HUGE_VAL;
   int dim;
 //   int i, result;
  
@@ -172,7 +172,7 @@ enzo_float EnzoBlock::ComputeTimeStep()
 // 			fabs(AccelerationField[dim][i])+tiny_number);
 // 	  dtAcceleration = MIN(dtAcceleration, dtTemp);
 // 	}
-//     if (dtAcceleration != HUGE_VAL)
+//     if (dtAcceleration != ENZO_HUGE_VAL)
 //       dtAcceleration *= 0.5;
 //   }
  
@@ -193,7 +193,7 @@ enzo_float EnzoBlock::ComputeTimeStep()
 // //       printf("Vis = %"FSYM" ", dtViscous);
 //     if (ComovingCoordinates)
 //       printf("Exp = %"FSYM" ", dtExpansion);
-//     if (dtAcceleration != HUGE_VAL)
+//     if (dtAcceleration != ENZO_HUGE_VAL)
 //       printf("Acc = %"FSYM" ", dtAcceleration);
 //     if (NumberOfParticles)
 //       printf("Part = %"FSYM" ", dtParticles);

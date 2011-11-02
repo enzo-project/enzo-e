@@ -22,6 +22,10 @@ public: // interface
   GroupProcessSerial() throw()
   {};
 
+  /// Destructor
+  virtual ~GroupProcessSerial() throw()
+  {}
+
 public: // interface (Group)
 
   /// Synchronize between all compute elements in the Group

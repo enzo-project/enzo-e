@@ -4,10 +4,13 @@ set ARCH = $CELLO_ARCH
 set TYPE = $CELLO_TYPE
 set PREC = $CELLO_PREC
 
-set proc = 8
+set proc = 1
 
 # set TYPE = (mpi charm serial)
 # set PREC = (single double)
+
+# set default target
+set target = "compile"
 
 if ($#argv >= 1) then
    if ($argv[1] == "clean") then
@@ -25,6 +28,15 @@ if ($#argv >= 1) then
       rm -rf build
       printf "done\n"
       exit
+   else if ($argv[1] == "enzo-p") then
+     set target = bin/$type/enzo-p
+   else if ($argv[1] == "compile") then
+     set target = install-bin
+   else if ($argv[1] == "test") then
+     set target = ""
+   else
+     echo "Usage: $0 [clean|compile|test|enzo-p]"
+     exit(1)
    endif
 endif
 
@@ -50,52 +62,55 @@ foreach prec ($PREC)
    # clean
   scons arch=$arch type=$type prec=$prec -c >& /dev/null
 
+   # make output directory for compilation and tests
+
+   set dir = test/$type
+   if (! -d $dir) mkdir $dir
+
    # COMPILE
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
    printf "$d %-14s %-14s" "$arch $type $prec" "compiling..."
 
-   set dir = test/$type
-
-   if (! -d $dir) mkdir $dir
-
    touch "$dir/running.$arch.$prec"
 
-   # compile code with -j $proc processors
-   scons arch=$arch type=$type prec=$prec -j$proc -k enzo-p >& $dir/out.scons
+   scons arch=$arch type=$type prec=$prec -j$proc -k $target >& $dir/out.scons
 
-   # need to finish running tests with -j 1
-   scons arch=$arch type=$type prec=$prec -k  >>& $dir/out.scons
    rm -f "$dir/running.$arch.$prec"
-  
+
    printf "done\n"
 
-   # count crashes
+   # TESTS
 
-   cat $dir/*unit |grep FAIL      | grep "0/" | sort > $dir/fail.$configure
-   cat $dir/*unit |grep incomplete| grep "0/" | sort > $dir/incomplete.$configure
-   cat $dir/*unit |grep pass      | grep "0/" | sort > $dir/pass.$configure
-   set f = `cat $dir/fail.$configure | wc -l`
-   set i = `cat $dir/incomplete.$configure | wc -l`
-   set p = `cat $dir/pass.$configure | wc -l`
+   if ($target == "") then
+  
+      # count crashes
 
-   set d = `date +"%Y-%m-%d %H:%M:%S"`
+      cat $dir/*unit |grep FAIL      | grep "0/" | sort > $dir/fail.$configure
+      cat $dir/*unit |grep incomplete| grep "0/" | sort > $dir/incomplete.$configure
+      cat $dir/*unit |grep pass      | grep "0/" | sort > $dir/pass.$configure
+      set f = `cat $dir/fail.$configure | wc -l`
+      set i = `cat $dir/incomplete.$configure | wc -l`
+      set p = `cat $dir/pass.$configure | wc -l`
 
-   set line = "$d ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
+      set d = `date +"%Y-%m-%d %H:%M:%S"`
 
-   set crash = `grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
-   if ($crash != 0) then
-      set line = "$line CRASH: $crash"
-      grep "UNIT TEST" $dir/*unit \
-       | sed 's/BEGIN/END/ ; s/:/ /' \
-       | uniq -u \
-       | awk '{print "   ", $1}'
+      set line = "$d ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
+
+      set crash = `grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
+      if ($crash != 0) then
+         set line = "$line CRASH: $crash"
+         grep "UNIT TEST" $dir/*unit \
+          | sed 's/BEGIN/END/ ; s/:/ /' \
+          | uniq -u \
+          | awk '{print "   ", $1}'
+      endif
+
+      printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" $line
+      printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" $line >> compile.log
+
    endif
-
-   printf "%s %s %-12s %-6s %-6s %s %s %s %s %s %s %s %s\n" "$line"
-   printf "%s %s %-12s %-6s %-6s %s %s %s %s %s %s %s %s\n" "$line" >> compile.log
-
    rm -f test/COMPILING
 
 end

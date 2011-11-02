@@ -29,7 +29,7 @@ public: // functions
   Output(Simulation * simulation ) throw();
 
   /// Delete an Output object
-  ~Output() throw();
+  virtual ~Output() throw();
 
   /// Set file name
   void set_filename (std::string filename,

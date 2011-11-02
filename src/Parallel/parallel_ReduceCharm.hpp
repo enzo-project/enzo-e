@@ -24,7 +24,7 @@ public: // interface
   { /* EMPTY */ };
     
   /// Destructor
-  ~ReduceCharm() throw()
+  virtual ~ReduceCharm() throw()
   { /* EMPTY */ };
 
   /// Local reduction of the given value

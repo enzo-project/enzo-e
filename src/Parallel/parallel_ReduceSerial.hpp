@@ -24,7 +24,7 @@ public: // interface
   { /* EMPTY */ };
     
   /// Destructor
-  ~ReduceSerial() throw()
+  virtual ~ReduceSerial() throw()
   { /* EMPTY */ };
 
   /// Parallel reduction of an integer

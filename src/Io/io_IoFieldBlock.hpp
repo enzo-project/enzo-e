@@ -21,6 +21,10 @@ public: // interface
   /// Constructor
   IoFieldBlock() throw();
 
+  /// Destructor
+  virtual ~IoFieldBlock() throw()
+  {}
+
   /// Set FieldIndex
   void set_field_index (int field_index) throw()
   { field_index_ = field_index;};

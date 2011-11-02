@@ -14,12 +14,11 @@
 ItReduce * ItReduce::create (reduce_enum reduce)
 {
   switch (reduce) {
-  case reduce_min: return new ItReduceMin; break;
-  case reduce_max: return new ItReduceMax; break;
-  case reduce_avg: return new ItReduceAvg; break;
-  case reduce_sum: return new ItReduceSum; break;
+  case reduce_min: return new ItReduceMin;
+  case reduce_max: return new ItReduceMax;
+  case reduce_avg: return new ItReduceAvg;
+  case reduce_sum: return new ItReduceSum;
   default: 
     ERROR1("ItReduce::create","Unsupported reduce_enum value %d",reduce); 
-    break;
   }
 }

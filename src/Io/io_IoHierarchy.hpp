@@ -21,6 +21,10 @@ public: // interface
   /// Constructor
   IoHierarchy(const Hierarchy * hierarchy) throw();
 
+  /// Destructor
+  virtual ~IoHierarchy () throw()
+  {}
+
   /// Return the ith metadata item associated with the Hierarchy object
   void meta_value 
   (int index, 

@@ -238,7 +238,6 @@ void EnzoSimulationMpi::run() throw()
 	block->upper(&upper_block[axis_x],
 		     &upper_block[axis_y],
 		     &upper_block[axis_z]);
-	FieldBlock * field_block = block -> field_block();
 
 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 

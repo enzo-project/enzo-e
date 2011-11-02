@@ -21,6 +21,10 @@ public: // interface
   /// It constructor
   It () throw () : index1_(0) {};
 
+  /// It destructor
+  virtual ~It() throw()
+  {}
+
   /// Iterate through entities
   virtual T * operator++ () throw() = 0;
 

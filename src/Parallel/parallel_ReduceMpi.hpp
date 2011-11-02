@@ -24,62 +24,18 @@ public: // interface
   { /* EMPTY */ };
     
   /// Destructor
-  ~ReduceMpi() throw()
+  virtual ~ReduceMpi() throw()
   { /* EMPTY */ };
 
-  /// Local reduction of the given value
+  /// Local reduction of the given integer value
   virtual int reduce_int
   (  int              local,
-     enum_reduce_op   reduce_op )  throw()
-  {
-#ifdef CONFIG_USE_MPI
-    MPI_Datatype mpi_type = MPI_INT;
+     enum_reduce_op   reduce_op )  throw();
 
-    MPI_Op mpi_op;
-    switch (reduce_op) {
-    case (reduce_op_min) :  mpi_op = MPI_MIN; break;
-    case (reduce_op_land) : mpi_op = MPI_LAND; break;
-    }
-    
-    GroupProcessMpi * group_mpi = 
-      dynamic_cast<GroupProcessMpi *>(group_process_);
-
-    int global;
-
-    MPI_Allreduce (&local, &global, 1, mpi_type, mpi_op, group_mpi->comm());
-
-    return global;
-#else
-    return 0;
-#endif
-  }
-
-  /// Local reduction of the given value
+  /// Local reduction of the given double value
   virtual double reduce_double
   (  double              local,
-     enum_reduce_op   reduce_op )  throw()
-  {
-#ifdef CONFIG_USE_MPI
-    MPI_Datatype mpi_type = MPI_DOUBLE;
-
-    MPI_Op mpi_op;
-    switch (reduce_op) {
-    case (reduce_op_min) :  mpi_op = MPI_MIN; break;
-    case (reduce_op_land) : mpi_op = MPI_LAND; break;
-    }
-    
-    double global;
-
-    GroupProcessMpi * group_mpi = 
-      dynamic_cast<GroupProcessMpi *>(group_process_);
-
-    MPI_Allreduce (&local, &global, 1, mpi_type, mpi_op, group_mpi->comm());
-
-    return global;
-#else
-    return 0.0;
-#endif
-  }
+     enum_reduce_op   reduce_op )  throw();
 
 };
 

@@ -32,6 +32,10 @@ public: // interface
   GroupProcessMpi(int process_first     = 0,
 		  int process_last_plus = -1) throw();
 
+  /// Destructor
+  virtual ~GroupProcessMpi() throw()
+  {}
+
 public: // interface (Group)
 
   /// Synchronize between all compute elements in the Group

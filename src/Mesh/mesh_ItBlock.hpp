@@ -21,7 +21,7 @@ public: // interface
   ItBlock (Patch * patch) throw ();
 
   /// Delete the ItBlock object
-  ~ItBlock () throw ();
+  virtual ~ItBlock () throw ();
   
   /// Iterate through all local Blocks in the Patch
   Block * operator++ () throw();

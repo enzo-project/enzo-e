@@ -30,11 +30,11 @@ enzo_float EnzoBlock::ComputeTimeStep()
   /* initialize */
  
   //  enzo_float dt, dtTemp;
-  enzo_float dtBaryons      = HUGE_VALF;
-  //  enzo_float dtViscous      = HUGE_VALF;
-  //  enzo_float dtParticles    = HUGE_VALF;
-  enzo_float dtExpansion    = HUGE_VALF;
-  //  enzo_float dtAcceleration = HUGE_VALF;
+  enzo_float dtBaryons      = ENZO_HUGE_VAL;
+  //  enzo_float dtViscous      = ENZO_HUGE_VAL;
+  //  enzo_float dtParticles    = ENZO_HUGE_VAL;
+  enzo_float dtExpansion    = ENZO_HUGE_VAL;
+  //  enzo_float dtAcceleration = ENZO_HUGE_VAL;
   int dim, result;
  
   /* Compute the field size. */
@@ -145,7 +145,7 @@ enzo_float EnzoBlock::ComputeTimeStep()
 // 			fabs(AccelerationField[dim][i])+tiny_number);
 // 	  dtAcceleration = MIN(dtAcceleration, dtTemp);
 // 	}
-//     if (dtAcceleration != HUGE_VAL)
+//     if (dtAcceleration != ENZO_HUGE_VAL)
 //       dtAcceleration *= 0.5;
 //   }
  

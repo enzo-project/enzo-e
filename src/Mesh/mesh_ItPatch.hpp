@@ -21,7 +21,7 @@ public: // interface
   ItPatch (Hierarchy * hierarchy) throw ();
 
   /// Delete the ItPatch object
-  ~ItPatch () throw ();
+  virtual ~ItPatch () throw ();
   
   /// Iterate through all local Patches in the Hierarchy
   Patch * operator++ () throw();
