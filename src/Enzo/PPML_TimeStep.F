@@ -13,7 +13,9 @@ c     See LICENSE_ENZO file for license and copyright information
       Implicit NONE
 
       Integer nx,ny,nz,i,j,k,i1,j1,k1,i2,j2,k2
-      
+
+      Integer ii1,ii2,jj1,jj2,kk1,kk2
+
       ENZO_REAL dn(nx,ny,nz)           
       ENZO_REAL vx(nx,ny,nz),vy(nx,ny,nz),vz(nx,ny,nz)           
       ENZO_REAL bx(nx,ny,nz),by(nx,ny,nz),bz(nx,ny,nz)           
@@ -66,24 +68,19 @@ c     See LICENSE_ENZO file for license and copyright information
       bzmin = 1.e36
       bzmax = -1e36
 
-      DO K=k1,k2
-         DO J=j1,j2
-            DO I=i1,i2
+!     Adjust array bounds for C / C++
+!     copies since original variables are call by reference
 
-               dmin = MIN(dmin,dn(i,j,k))
-               dmax = MAX(dmin,dn(i,j,k))
-               vxmin = MIN(vxmin,vx(i,j,k))
-               vxmax = MAX(vxmax,vx(i,j,k))
-               vymin = MIN(vymin,vy(i,j,k))
-               vymax = MAX(vymax,vy(i,j,k))
-               vzmin = MIN(vzmin,vz(i,j,k))
-               vzmax = MAX(vzmax,vz(i,j,k))
-               bxmin = MIN(bxmin,bx(i,j,k))
-               bxmax = MAX(bxmax,bx(i,j,k))
-               bymin = MIN(bymin,by(i,j,k))
-               bymax = MAX(bymax,by(i,j,k))
-               bzmin = MIN(bzmin,bz(i,j,k))
-               bzmax = MAX(bzmax,bz(i,j,k))
+      ii1 = i1 + 1
+      ii2 = i2 + 1
+      jj1 = j1 + 1
+      jj2 = j2 + 1
+      kk1 = k1 + 1
+      kk2 = k2 + 1
+
+      DO K=kk1,kk2
+         DO J=jj1,jj2
+            DO I=ii1,ii2
 
                RR0=dn(I,J,K)
                BKB=bx(I,J,K)**2+by(I,J,K)**2+bz(I,J,K)**2
@@ -97,19 +94,19 @@ c     See LICENSE_ENZO file for license and copyright information
                IF(DSC.LT.0.) DSC=0.
                CFSX=sqrt(DSC)
                CGS=sqrt((CGA+CFSX)/2.d0)
-!               TAUX=DX(i1)/(abs(vx(I,J,K))+CGS)
+!               TAUX=DX(ii1)/(abs(vx(I,J,K))+CGS)
                TAUX=DX/(abs(vx(I,J,K))+CGS)
                DSC=CGA**2-4.d0*VAY*CG
                IF(DSC.LT.0.) DSC=0.
                CFSY=sqrt(DSC)
                CGS=sqrt((CGA+CFSY)/2.d0)
-!               TAUY=DY(j1)/(abs(vy(I,J,K))+CGS)
+!               TAUY=DY(jj1)/(abs(vy(I,J,K))+CGS)
                TAUY=DY/(abs(vy(I,J,K))+CGS)
                DSC=CGA**2-4.d0*VAZ*CG
                IF(DSC.LT.0.) DSC=0.
                CFSZ=sqrt(DSC)
                CGS=sqrt((CGA+CFSZ)/2.d0)
-!               TAUZ=DZ(k1)/(abs(vz(I,J,K))+CGS)
+!               TAUZ=DZ(kk1)/(abs(vz(I,J,K))+CGS)
                TAUZ=DZ/(abs(vz(I,J,K))+CGS)
 
                DTMX=MIN(DTMX,TAUX)
