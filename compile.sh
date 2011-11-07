@@ -4,7 +4,7 @@ set ARCH = $CELLO_ARCH
 set TYPE = $CELLO_TYPE
 set PREC = $CELLO_PREC
 
-set proc = 1
+set proc = 8
 
 # set TYPE = (mpi charm serial)
 # set PREC = (single double)
@@ -43,6 +43,7 @@ endif
 echo "ARCH = $ARCH"
 echo "TYPE = $TYPE"
 echo "PREC = $PREC"
+echo "target = $target"
 
 set d = `date +"%Y-%m-%d %H:%M:%S"`
 echo "$d BEGIN"
@@ -60,7 +61,7 @@ foreach prec ($PREC)
    printf "$type" > test/COMPILING
 
    # clean
-  scons arch=$arch type=$type prec=$prec -c >& /dev/null
+#  scons arch=$arch type=$type prec=$prec -c >& /dev/null
 
    # make output directory for compilation and tests
 
@@ -75,7 +76,8 @@ foreach prec ($PREC)
 
    touch "$dir/running.$arch.$prec"
 
-   scons arch=$arch type=$type prec=$prec -j$proc -k $target >& $dir/out.scons
+   scons arch=$arch type=$type prec=$prec -k -j$proc install-bin >& $dir/out.scons
+   scons arch=$arch type=$type prec=$prec -k         $target    >>& $dir/out.scons
 
    rm -f "$dir/running.$arch.$prec"
 
