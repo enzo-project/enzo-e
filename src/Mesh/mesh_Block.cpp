@@ -404,6 +404,14 @@ void Block::refresh_axis (axis_enum axis)
 
   is_on_boundary(lower_h,upper_h,boundary_face);
 
+  TRACE3("lower boundary_face(%d %d %d)",
+	 boundary_face[axis_x][face_lower],
+	 boundary_face[axis_y][face_lower],
+	 boundary_face[axis_z][face_lower]);
+  TRACE3("upper boundary_face(%d %d %d)",
+	 boundary_face[axis_x][face_upper],
+	 boundary_face[axis_y][face_upper],
+	 boundary_face[axis_z][face_upper]);
   bool is_active = n3[axis] > 1;
 
   if ( is_active ) {
@@ -521,6 +529,15 @@ void Block::refresh (int axis_set)
   bool az = ((axis_set == axis_all) || (axis_set == axis_z)) && nz > 1;
 
   is_on_boundary(lower_h,upper_h,boundary_face);
+
+  TRACE3("lower boundary_face(%d %d %d)",
+	 boundary_face[axis_x][face_lower],
+	 boundary_face[axis_y][face_lower],
+	 boundary_face[axis_z][face_lower]);
+  TRACE3("upper boundary_face(%d %d %d)",
+	 boundary_face[axis_x][face_upper],
+	 boundary_face[axis_y][face_upper],
+	 boundary_face[axis_z][face_upper]);
 
   if ( ax ) {
     if ( boundary_face[axis_x][face_lower] ) 
@@ -659,11 +676,6 @@ void Block::p_refresh_face (int n, char * buffer,
 
   Hierarchy * hierarchy = simulation->hierarchy();
 
-  double lower[3];
-  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
-  double upper_h[3];
-  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
-  
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
 
@@ -682,17 +694,25 @@ void Block::p_refresh_face (int n, char * buffer,
 
   bool periodic = simulation->boundary()->is_periodic();
 
+  double lower[3];
+  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
+  double upper[3];
+  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
+  
+  bool boundary[3][2];
+  is_on_boundary (lower,upper,boundary);
+
   if (! periodic && ax ) {
-    if (fabs(lower_[0]-lower[0]) < 1e-7) --count;
-    if (fabs(upper_[0]-upper_h[0]) < 1e-7) --count;
+    if (boundary[axis_x][face_lower]) --count;
+    if (boundary[axis_x][face_upper]) --count;
   }
   if (! periodic && ay ) {
-    if (fabs(lower_[1]-lower[1]) < 1e-7) --count;
-    if (fabs(upper_[1]-upper_h[1]) < 1e-7) --count;
+    if (boundary[axis_y][face_lower]) --count;
+    if (boundary[axis_y][face_upper]) --count;
   }
   if (! periodic && az ) {
-    if (fabs(lower_[2]-lower[2]) < 1e-7) --count;
-    if (fabs(upper_[2]-upper_h[2]) < 1e-7) --count;
+    if (boundary[axis_z][face_lower]) --count;
+    if (boundary[axis_z][face_upper]) --count;
   }
 
   //--------------------------------------------------
@@ -754,22 +774,18 @@ void Block::compute(int axis_set)
   double time_start = CmiWallTimer();
 #endif
 
-  // char buffer[10];
-  // sprintf (buffer,"%03d-A",cycle_);
-  // field_block()->print(field_descr,buffer,lower_,upper_);
-  // field_block()->image(field_descr,"A",cycle_,
-  // 			 thisIndex.x,thisIndex.y,thisIndex.z);
-
   FieldDescr * field_descr = simulation->field_descr();
+
+   char buffer[10];
+   sprintf (buffer,"%03d-A",cycle_);
+   field_block()->print(field_descr,buffer,lower_,upper_);
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
     simulation->method(i) -> compute_block (field_descr,this,time_,dt_);
   }
 
-   // sprintf (buffer,"%03d-B",cycle_);
-   // field_block()->print(field_descr,buffer,lower_,upper_);
-   // field_block()->image(field_descr,"B",cycle_,
-   // 		       thisIndex.x,thisIndex.y,thisIndex.z);
+  sprintf (buffer,"%03d-B",cycle_);
+  field_block()->print(field_descr,buffer,lower_,upper_);
 
 #ifdef CONFIG_USE_PROJECTIONS
   traceUserBracketEvent(10,time_start, CmiWallTimer());
@@ -808,25 +824,24 @@ void Block::compute(int axis_set)
 
 //----------------------------------------------------------------------
 
-void Block::is_on_boundary (double lower[3], double upper_h[3],
+void Block::is_on_boundary (double lower[3], double upper[3],
 			     bool boundary[3][2]) throw()
 {
   // Enforce boundary conditions ; refresh ghost zones
 
   // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
   boundary[axis_x][face_lower] = 
-    (cello::err_rel(lower_[axis_x],lower[axis_x]) < 1e-7);
+    (cello::err_abs(lower_[axis_x],lower[axis_x]) < 1e-6);
   boundary[axis_y][face_lower] = 
-    (cello::err_rel(lower_[axis_y],lower[axis_y]) < 1e-7);
+    (cello::err_abs(lower_[axis_y],lower[axis_y]) < 1e-6);
   boundary[axis_z][face_lower] = 
-    (cello::err_rel(lower_[axis_z],lower[axis_z]) < 1e-7);
+    (cello::err_abs(lower_[axis_z],lower[axis_z]) < 1e-6);
   boundary[axis_x][face_upper] = 
-    (cello::err_rel(upper_[axis_x],upper_h[axis_x]) < 1e-7);
+    (cello::err_abs(upper_[axis_x],upper[axis_x]) < 1e-6);
   boundary[axis_y][face_upper] = 
-    (cello::err_rel(upper_[axis_y],upper_h[axis_y]) < 1e-7);
+    (cello::err_abs(upper_[axis_y],upper[axis_y]) < 1e-6);
   boundary[axis_z][face_upper] = 
-    (cello::err_rel(upper_[axis_z],upper_h[axis_z]) < 1e-7);
-
+    (cello::err_abs(upper_[axis_z],upper[axis_z]) < 1e-6);
 }
 //----------------------------------------------------------------------
 

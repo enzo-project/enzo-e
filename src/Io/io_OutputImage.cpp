@@ -56,21 +56,15 @@ void OutputImage::set_colormap
   map_r_.resize(n);
   map_g_.resize(n);
   map_b_.resize(n);
+  map_a_.resize(n);
 
   for (int i=0; i<n; i++) {
     map_r_[i] = map_r[i];
     map_g_[i] = map_g[i];
     map_b_[i] = map_b[i];
+    map_a_[i] = map_a ? map_a[i] : 1.0;
   }
 
-  // Copy alpha list if it exists
-
-  if (map_a) {
-    map_a_.resize(n);
-    for (int i=0; i<n; i++) {
-      map_a_[i] = map_a[i];
-    }
-  }
 }
 
 //======================================================================
