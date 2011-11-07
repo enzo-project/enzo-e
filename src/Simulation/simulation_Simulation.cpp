@@ -882,11 +882,10 @@ void Simulation::initialize_method_() throw()
 
   int method_count = parameters_->list_length("sequence");
 
-  if (method_count == 0) {
-    ERROR ("Simulation::initialize_method_",
-	   "List parameter 'Method sequence' must have length "
-	   "greater than zero");
-  }
+//   ASSERT ("Simulation::initialize_method_",
+// 	  "List parameter 'Method sequence' must have length "
+// 	  "greater than zero",
+// 	  (method_count > 0));
 
   for (int i=0; i<method_count; i++) {
 
