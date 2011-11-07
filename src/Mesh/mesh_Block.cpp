@@ -776,16 +776,17 @@ void Block::compute(int axis_set)
 
   FieldDescr * field_descr = simulation->field_descr();
 
-   char buffer[10];
-   sprintf (buffer,"%03d-A",cycle_);
-   field_block()->print(field_descr,buffer,lower_,upper_);
+  char buffer[10];
+
+  //   sprintf (buffer,"%03d-A",cycle_);
+  //   field_block()->print(field_descr,buffer,lower_,upper_);
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
     simulation->method(i) -> compute_block (field_descr,this,time_,dt_);
   }
 
-  sprintf (buffer,"%03d-B",cycle_);
-  field_block()->print(field_descr,buffer,lower_,upper_);
+  //  sprintf (buffer,"%03d-B",cycle_);
+  //  field_block()->print(field_descr,buffer,lower_,upper_);
 
 #ifdef CONFIG_USE_PROJECTIONS
   traceUserBracketEvent(10,time_start, CmiWallTimer());
