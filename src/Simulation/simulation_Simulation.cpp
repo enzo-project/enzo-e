@@ -981,6 +981,7 @@ const Factory & Simulation::factory() const throw()
 Stopping * Simulation::create_stopping_ (std::string name) throw ()
 {
   ERROR ("Simulation::create_stopping_","Implictly abstract function called");
+  return NULL;
 }
 
 //----------------------------------------------------------------------
@@ -988,6 +989,7 @@ Stopping * Simulation::create_stopping_ (std::string name) throw ()
 Timestep * Simulation::create_timestep_ (std::string name) throw ()
 { 
   ERROR ("Simulation::create_timestep_","Implictly abstract function called");
+  return NULL;
 }
 
 //----------------------------------------------------------------------
@@ -995,6 +997,7 @@ Timestep * Simulation::create_timestep_ (std::string name) throw ()
 Initial * Simulation::create_initial_ (std::string name) throw ()
 { 
   ERROR ("Simulation::create_initial_","Implictly abstract function called");
+  return NULL;
 }
 
 //----------------------------------------------------------------------
@@ -1002,6 +1005,7 @@ Initial * Simulation::create_initial_ (std::string name) throw ()
 Boundary * Simulation::create_boundary_ (std::string name) throw ()
 {
   ERROR ("Simulation::create_boundary_","Implictly abstract function called");
+  return NULL;
 }
 
 //----------------------------------------------------------------------
@@ -1021,7 +1025,9 @@ Output * Simulation::create_output_ (std::string type) throw ()
 
 Method * Simulation::create_method_ (std::string name) throw ()
 {
-  ERROR ("Simulation::create_method_","Implictly abstract function called");
+  ERROR ("Simulation::create_method_",
+	 "Implictly abstract function called");
+  return NULL;
 }
 
 //======================================================================

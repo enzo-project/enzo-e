@@ -13,7 +13,7 @@ Import('use_papi')
 # DEPENDENCIES
 #------------------------------
 
-components = ['simulation', 'method', 
+components = ['enzo','simulation', 'method', 
 	      'mesh', 'field',
 	      'io', 'disk','memory','parallel',
 	      'parameters', 
@@ -72,9 +72,10 @@ sources  = [Glob('enzo_*cpp'),
 	    'FindField.cpp']
 
 
+charm_main = []
 if (type == 'charm'):
    includes = includes + ['enzo.decl.h','enzo.def.h']
-   sources = sources + ['../Main/main_enzo.cpp']
+   charm_main = ['../Main/main_enzo.cpp']
 
 #------------------------------
 # ENVIRONMENTS
@@ -88,7 +89,7 @@ env = env.Clone(LIBS=[components,libraries])
 
 libraries     = env.Library ('enzo', sources)
 
-test_enzo_p = env.Program (['enzo-p.cpp', sources])
+test_enzo_p = env.Program (['enzo-p.cpp', charm_main])
 
 binaries = [test_enzo_p]
 

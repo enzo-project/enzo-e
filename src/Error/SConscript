@@ -9,7 +9,7 @@ Import('type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['test','cello',
+components = ['test','cello','error',
               'monitor', 'performance']
 
 libraries  = ['png']
@@ -33,10 +33,11 @@ env = env.Clone(LIBS=[components,libraries])
 
 libraries  = env.Library ('error', [sources])
 
+charm_main = []
 if (type == "charm"):
-   sources = sources + ['../Main/main.cpp']
+   charm_main = ['../Main/main.cpp']
 
-test_error = env.Program (['test_Error.cpp',  sources])
+test_error = env.Program (['test_Error.cpp', charm_main])
 
 binaries = [test_error]
 

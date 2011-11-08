@@ -10,7 +10,7 @@ Import('use_papi')
 # DEPENDENCIES
 #------------------------------
 
-components = ['method',
+components = ['simulation','method',
 	      'mesh', 'field',
 	      'memory','parallel',
 	      'parameters',
@@ -39,7 +39,7 @@ env = env.Clone(LIBS=[components,libraries])
 # TARGETS
 #------------------------------
 
-libraries       = env.Library ('simulation', [sources])
+libraries = env.Library ('simulation', [sources])
 
 if (type == "charm"):
    env.CharmBuilder('simulation.decl.h','simulation.ci',ARG='simulation')

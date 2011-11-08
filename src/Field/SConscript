@@ -13,7 +13,7 @@ Import('use_papi')
 # (uses Mesh for test_FieldBlock, which requires DataBlock)
 
 components = ['simulation','method',
-              'mesh','io',
+              'mesh','field','io',
               'parallel','disk',
               'parameters', 
               'error', 'monitor','performance','memory',
@@ -41,14 +41,16 @@ env = env.Clone(LIBS=[components,libraries])
 # TARGETS
 #------------------------------
 
-libraries        = env.Library ('field', [sources])
-if (type == "charm"):
-	sources = sources + ["../Main/main_simulation.cpp"]
+libraries = env.Library ('field', [sources])
 
-test_field_block = env.Program (['test_FieldBlock.cpp',  sources])
-test_field_descr = env.Program (['test_FieldDescr.cpp',  sources])
-test_field_face  = env.Program (['test_FieldFace.cpp',  sources])
-test_it_field    = env.Program (['test_ItField.cpp',  sources])
+charm_main = []
+if (type == "charm"):
+	charm_main = ["../Main/main_simulation.cpp"]
+
+test_field_block = env.Program (['test_FieldBlock.cpp',  charm_main])
+test_field_descr = env.Program (['test_FieldDescr.cpp',  charm_main])
+test_field_face  = env.Program (['test_FieldFace.cpp',  charm_main])
+test_it_field    = env.Program (['test_ItField.cpp',  charm_main])
 
 binaries = [test_field_block, test_field_descr, test_field_face, test_it_field]
 
