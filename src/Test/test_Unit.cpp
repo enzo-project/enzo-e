@@ -98,6 +98,7 @@ bool Unit::assert (int result, const char * file, int line, bool quiet)
       } else {
 	result_string = incomplete_string_;
       }
+      printf ("%s:%d %d %d\n",__FILE__,__LINE__,is_active_,result);
       PARALLEL_PRINTF ("%s %d/%d %s %d %s %s\n",
 		       result_string,
 		       comm_rank_, 
