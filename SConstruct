@@ -390,9 +390,8 @@ elif (arch == "triton-pgi"):
 # HDF5 path
      hdf5_path = '/opt/hdf5/pgi'
 # Optional debugging flags
-     flags_debug = '-g'
+     flags_debug = '-Ktrap=fp -g'
 # Optional optimization flags
-#     flags_opt   = '-fast'
      flags_opt   = ''
 # Optional warnings-level flags
      flags_warn  = ''
@@ -434,7 +433,6 @@ elif (arch == "triton-intel"):
 # Optional debugging flags
      flags_debug = '-g'
 # Optional optimization flags
-#     flags_opt   = '-fast'
      flags_opt   = ''
 # Optional warnings-level flags
      flags_warn  = ''
