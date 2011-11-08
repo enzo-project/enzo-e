@@ -68,6 +68,7 @@
        velocity_x    { value = [0.0]; };
        velocity_y    { value = [0.0]; };
        velocity_z    { value = [0.0]; };
+       internal_energy { value = [0.0]; };
 
    }
 
