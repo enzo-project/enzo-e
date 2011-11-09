@@ -382,6 +382,7 @@ void Block::p_refresh (int cycle, double time, double dt, int axis_set)
   dt_    = dt;
   set_time(time);
   set_cycle(cycle);
+>>>>>>> /tmp/mesh_Block.cpp~other.S4dTN0
 
   refresh(axis_set);
 }
@@ -394,55 +395,57 @@ void Block::p_refresh (int cycle, double time, double dt, int axis_set)
 void Block::refresh (int axis_set)
 {
 
+  TRACE2("axis_set[%d] = %d",CkMyPe(),axis_set);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   //--------------------------------------------------
   // Boundary
   //--------------------------------------------------
 
-  bool boundary_face[3][2];
+  bool is_boundary[3][2];
   
-  boundary_face[axis_x][face_lower] = false;
-  boundary_face[axis_x][face_upper] = false;
-  boundary_face[axis_y][face_lower] = false;
-  boundary_face[axis_y][face_upper] = false;
-  boundary_face[axis_z][face_lower] = false;
-  boundary_face[axis_z][face_upper] = false;
+  is_boundary[axis_x][face_lower] = false;
+  is_boundary[axis_x][face_upper] = false;
+  is_boundary[axis_y][face_lower] = false;
+  is_boundary[axis_y][face_upper] = false;
+  is_boundary[axis_z][face_lower] = false;
+  is_boundary[axis_z][face_upper] = false;
 
-  int nx,ny,nz;
-  field_block()->size (&nx,&ny,&nz);
-
-  Hierarchy *        hierarchy   = simulation->hierarchy();
-  Boundary *         boundary    = simulation->boundary();
-  const FieldDescr * field_descr = simulation->field_descr();
+  Hierarchy * hierarchy   = simulation->hierarchy();
 
   double lower_h[3];
   hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
   double upper_h[3];
   hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
 
+  is_on_boundary(lower_h,upper_h,is_boundary);
+
+  Boundary * boundary = simulation->boundary();
+  const FieldDescr * field_descr = simulation->field_descr();
+
+  int nx,ny,nz;
+  field_block()->size (&nx,&ny,&nz);
+
   bool ax = ((axis_set == axis_all) || (axis_set == axis_x)) && nx > 1;
   bool ay = ((axis_set == axis_all) || (axis_set == axis_y)) && ny > 1;
   bool az = ((axis_set == axis_all) || (axis_set == axis_z)) && nz > 1;
 
-  is_on_boundary(lower_h,upper_h,boundary_face);
-
   if ( ax ) {
-    if ( boundary_face[axis_x][face_lower] ) 
+    if ( is_boundary[axis_x][face_lower] ) 
       boundary->enforce(field_descr,this,face_lower,axis_x);
-    if ( boundary_face[axis_x][face_upper] ) 
+    if ( is_boundary[axis_x][face_upper] ) 
       boundary->enforce(field_descr,this,face_upper,axis_x);
   }
   if ( ay ) {
-    if ( boundary_face[axis_y][face_lower] ) 
+    if ( is_boundary[axis_y][face_lower] ) 
       boundary->enforce(field_descr,this,face_lower,axis_y);
-    if ( boundary_face[axis_y][face_upper] ) 
+    if ( is_boundary[axis_y][face_upper] ) 
       boundary->enforce(field_descr,this,face_upper,axis_y);
   }
   if ( az ) {
-    if ( boundary_face[axis_z][face_lower] ) 
+    if ( is_boundary[axis_z][face_lower] ) 
       boundary->enforce(field_descr,this,face_lower,axis_z);
-    if ( boundary_face[axis_z][face_upper] ) 
+    if ( is_boundary[axis_z][face_upper] ) 
       boundary->enforce(field_descr,this,face_upper,axis_z);
   }
 
@@ -475,7 +478,7 @@ void Block::refresh (int axis_set)
 
   if ( ax ) {
     // xp <<< xm
-    if ( ! boundary_face[axis_x][face_lower] || periodic ) {
+    if ( ! is_boundary[axis_x][face_lower] || periodic ) {
       field_face.load (field_descr, field_block(), axis_x, face_lower, 
 		       update_full,update_full);
       block_array(ixm,iy,iz).p_refresh_face 
@@ -483,7 +486,7 @@ void Block::refresh (int axis_set)
 
     }
     // xp >>> xm
-    if ( ! boundary_face[axis_x][face_upper] || periodic ) {
+    if ( ! is_boundary[axis_x][face_upper] || periodic ) {
       field_face.load (field_descr, field_block(), axis_x, face_upper, 
 		       update_full,update_full);
       block_array(ixp,iy,iz).p_refresh_face 
@@ -492,14 +495,14 @@ void Block::refresh (int axis_set)
   }
   if ( ay ) {
     // yp <<< ym
-    if ( ! boundary_face[axis_y][face_lower] || periodic ) {
+    if ( ! is_boundary[axis_y][face_lower] || periodic ) {
       field_face.load (field_descr, field_block(), axis_y, face_lower, 
 		       update_full,update_full);
       block_array(ix,iym,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_y, face_upper, axis_set);
     }
     // yp >>> ym
-    if ( ! boundary_face[axis_y][face_upper] || periodic ) {
+    if ( ! is_boundary[axis_y][face_upper] || periodic ) {
       field_face.load (field_descr, field_block(), axis_y, face_upper, 
 		       update_full,update_full);
       block_array(ix,iyp,iz).p_refresh_face 
@@ -508,14 +511,14 @@ void Block::refresh (int axis_set)
   }
   if ( az ) {
     // zp <<< zm
-    if ( ! boundary_face[axis_z][face_lower] || periodic ) {
+    if ( ! is_boundary[axis_z][face_lower] || periodic ) {
       field_face.load (field_descr, field_block(), axis_z, face_lower, 
 		       update_full,update_full);
       block_array(ix,iy,izm).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_z, face_upper, axis_set);
     }
     // zp >>> zm
-    if ( ! boundary_face[axis_z][face_upper] || periodic ) {
+    if ( ! is_boundary[axis_z][face_upper] || periodic ) {
       field_face.load (field_descr, field_block(), axis_z, face_upper, 
 		       update_full,update_full);
       block_array(ix,iy,izp).p_refresh_face 
@@ -664,17 +667,17 @@ void Block::compute(int axis_set)
 
   FieldDescr * field_descr = simulation->field_descr();
 
-  // char buffer[10];
+//   char buffer[10];
 
-  // sprintf (buffer,"%03d-A",cycle_);
-  // field_block()->print(field_descr,buffer,lower_,upper_);
+//   sprintf (buffer,"%03d-A",cycle_);
+//   field_block()->print(field_descr,buffer,lower_,upper_);
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
     simulation->method(i) -> compute_block (field_descr,this,time_,dt_);
   }
 
-  // sprintf (buffer,"%03d-B",cycle_);
-  // field_block()->print(field_descr,buffer,lower_,upper_);
+//   sprintf (buffer,"%03d-B",cycle_);
+//   field_block()->print(field_descr,buffer,lower_,upper_);
 
 #ifdef CONFIG_USE_PROJECTIONS
   traceUserBracketEvent(10,time_start, CmiWallTimer());

@@ -664,7 +664,9 @@ void FieldBlock::print (const FieldDescr * field_descr,
      hx = (upper[0]-lower[0])/(nxd-2*gx);
      hy = (upper[1]-lower[1])/(nyd-2*gy);
      hz = (upper[2]-lower[2])/(nzd-2*gz);
-
+#ifdef CELLO_DEBUG_VERBOSE
+     TRACE("CELLO_DEBUG_VERBOSE");
+#endif
      switch (field_descr->precision(index_field)) {
      case precision_single:
        {
@@ -673,15 +675,16 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	 float max = std::numeric_limits<float>::min();
 	 double sum = 0.0;
 	 for (int iz=izm; iz<izp; iz++) {
-	   double z = hz*(iz-gz) + lower[axis_z];
 	   for (int iy=iym; iy<iyp; iy++) {
-	     double y = hy*(iy-gy) + lower[axis_y];
 	     for (int ix=ixm; ix<ixp; ix++) {
-	       double x = hx*(ix-gx) + lower[axis_x];
 	       int i = ix + nxd*(iy + nyd*iz);
 	       min = MIN(min,field[i]);
 	       max = MAX(max,field[i]);
 	       sum += field[i];
+#ifdef CELLO_DEBUG_VERBOSE
+	       double x = hx*(ix-gx) + lower[axis_x];
+	       double y = hy*(iy-gy) + lower[axis_y];
+	       double z = hz*(iz-gz) + lower[axis_z];
 	       if (isnan(field[i])) {
 		 fprintf(fp,"NAN match: %s %s  %g %g %g  %d %d %d\n",
 			 message,field_name,x,y,z,ix,iy,iz);
@@ -690,6 +693,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
 		 fprintf(fp,"NOT INITIALIZED: %s %s  %g %g %g  %d %d %d\n",
 			 message,field_name,x,y,z,ix,iy,iz);
 	       }
+#endif
 	     }
 	   }
 	 }
@@ -708,15 +712,16 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	 double sum = 0.0;
 		  
 	 for (int iz=izm; iz<izp; iz++) {
-	   double z = hz*(iz-gz) + lower[axis_z];
 	   for (int iy=iym; iy<iyp; iy++) {
-	     double y = hy*(iy-gy) + lower[axis_y];
 	     for (int ix=ixm; ix<ixp; ix++) {
-	       double x = hx*(ix-gx) + lower[axis_x];
 	       int i = ix + nxd*(iy + nyd*iz);
 	       min = MIN(min,field[i]);
 	       max = MAX(max,field[i]);
 	       sum += field[i];
+#ifdef CELLO_DEBUG_VERBOSE
+	       double x = hx*(ix-gx) + lower[axis_x];
+	       double y = hy*(iy-gy) + lower[axis_y];
+	       double z = hz*(iz-gz) + lower[axis_z];
  	       if (isnan(field[i])) {
  		 fprintf(fp,"NAN match: %s %s  %g %g %g  %d %d %d\n",
  			 message,field_name,x,y,z,ix,iy,iz);
@@ -725,6 +730,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
  		 fprintf(fp,"not initialized: %s %s  %g %g %g  %d %d %d\n",
  			 message,field_name,x,y,z,ix,iy,iz);
  	       }
+#endif
 	     }
 	   }
 	 }
@@ -748,6 +754,19 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	       min = MIN(min,field[i]);
 	       max = MAX(max,field[i]);
 	       sum += field[i];
+#ifdef CELLO_DEBUG_VERBOSE
+	       double x = hx*(ix-gx) + lower[axis_x];
+	       double y = hy*(iy-gy) + lower[axis_y];
+	       double z = hz*(iz-gz) + lower[axis_z];
+ 	       if (isnan(field[i])) {
+ 		 fprintf(fp,"NAN match: %s %s  %Lf %Lf %Lf  %d %d %d\n",
+ 			 message,field_name,x,y,z,ix,iy,iz);
+ 	       }
+ 	       if (field[i] == TEMP_CLEAR_VALUE) {
+ 		 fprintf(fp,"not initialized: %s %s  %Lf %Lf %Lf  %d %d %d\n",
+ 			 message,field_name,x,y,z,ix,iy,iz);
+ 	       }
+#endif
 	     }
 	   }
 	 }

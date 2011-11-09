@@ -6,7 +6,7 @@
 /// @file    cello.hpp
 /// @author  James Bordner (jobordner@ucsd.edu)
 /// @date    Thu Nov 11 17:08:38 PST 2010
-/// @todo    Need face_axis_enum?
+/// @todo    Move TEMP_CLEAR_VALUE to Memory parameter
 /// @brief   Include Cello global configuration settings
 
 //----------------------------------------------------------------------
@@ -31,20 +31,6 @@ inline int INDEX(int ix,int iy,int iz,int nx,int ny)
 // Value used to initialize new fields for debugging
 
 #define TEMP_CLEAR_VALUE (std::numeric_limits<float>::min())
-
-
-
-/// @enum     face_axis_enum
-/// @brief    Face [lower|upper][x|y|z]
-enum face_axis_enum {
-  face_lower_axis_x = 0,
-  face_upper_axis_x = 1,
-  face_lower_axis_y = 2,
-  face_upper_axis_y = 3,
-  face_lower_axis_z = 4,
-  face_upper_axis_z = 5,
-  face_axis_all
-};
 
 /// @enum     face_enum
 /// @brief    Face [lower|upper]

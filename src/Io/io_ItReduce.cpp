@@ -20,5 +20,6 @@ ItReduce * ItReduce::create (reduce_enum reduce)
   case reduce_sum: return new ItReduceSum;
   default: 
     ERROR1("ItReduce::create","Unsupported reduce_enum value %d",reduce); 
+    return 0;
   }
 }
