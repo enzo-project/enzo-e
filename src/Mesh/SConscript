@@ -10,6 +10,10 @@ Import('env')
 Import('type')
 Import('use_papi')
 
+Import('bin_path')
+Import('inc_path')
+Import('lib_path')
+
 #------------------------------
 # DEPENDENCIES
 #------------------------------
@@ -64,6 +68,6 @@ binaries = [test_hierarchy, test_patch, test_block ];
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',  includes))
-env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
-env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))
+env.Alias('install-bin',env.Install (bin_path,binaries))
+env.Alias('install-inc',env.Install (inc_path,includes))
+env.Alias('install-lib',env.Install (lib_path,libraries))
