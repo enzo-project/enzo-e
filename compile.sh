@@ -6,10 +6,6 @@ set PREC = $CELLO_PREC
 
 set proc = 8
 
-# set TYPE = (mpi charm serial)
-# set PREC = (single double)
-
-# set default target
 set target = "install-bin"
 
 if ($#argv >= 1) then
