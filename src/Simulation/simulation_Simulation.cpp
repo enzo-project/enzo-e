@@ -523,7 +523,7 @@ void Simulation::initialize_output_() throw()
 
       // Set time limits
 
-      int start, stop, step;
+      int start = 0, stop = 0, step = 0;
 
       if (len == 3) { 
 

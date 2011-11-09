@@ -12,12 +12,20 @@ Import('use_papi')
 
 # (uses Mesh for test_FieldBlock, which requires DataBlock)
 
-components = ['simulation','method',
-              'field','mesh','io',
-              'parallel','disk',
-              'parameters', 
-              'memory','error', 'monitor','performance',
-              'test','cello']
+if (type == 'charm'):
+   components = ['simulation','method',
+		 'mesh','field','io',
+		 'parallel','disk',
+		 'parameters', 
+		 'memory','error', 'monitor','performance',
+		 'test','cello']
+else:
+   components = ['simulation','method',
+		 'field','mesh','io',
+		 'parallel','disk',
+		 'parameters', 
+		 'memory','error', 'monitor','performance',
+		 'test','cello']
 
 if (use_papi):
 	components = components + ['papi','pfm']

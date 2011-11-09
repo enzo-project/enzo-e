@@ -186,24 +186,6 @@ FieldBlock * Block::field_block (int i) throw()
 
 //----------------------------------------------------------------------
 
-void Block::lower(double * x, double * y, double * z) const throw ()
-{
-  if (x) *x = lower_[0];
-  if (y) *y = lower_[1];
-  if (z) *z = lower_[2];
-}
-
-//----------------------------------------------------------------------
-
-void Block::upper(double * x, double * y, double * z) const throw ()
-{
-  if (x) *x = upper_[0];
-  if (y) *y = upper_[1];
-  if (z) *z = upper_[2];
-}
-
-//----------------------------------------------------------------------
-
 int Block::index () const throw ()
 {
 #ifdef CONFIG_USE_CHARM
@@ -378,89 +360,6 @@ void Block::prepare()
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::refresh_axis (axis_enum axis)
-{
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  //--------------------------------------------------
-  // Boundary
-  //--------------------------------------------------
-
-  // WARNING similar code to EnzoSimulationMpi::run() for MPI
-
-  int n3[3];
-  field_block()->size (&n3[0],&n3[1],&n3[2]);
-
-  Hierarchy *        hierarchy   = simulation->hierarchy();
-  Boundary *         boundary    = simulation->boundary();
-  const FieldDescr * field_descr = simulation->field_descr();
-
-  bool boundary_face[3][2];
-  
-  double lower_h[3];
-  hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
-  double upper_h[3];
-  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
-
-  is_on_boundary(lower_h,upper_h,boundary_face);
-
-  TRACE3("lower boundary_face(%d %d %d)",
-	 boundary_face[axis_x][face_lower],
-	 boundary_face[axis_y][face_lower],
-	 boundary_face[axis_z][face_lower]);
-  TRACE3("upper boundary_face(%d %d %d)",
-	 boundary_face[axis_x][face_upper],
-	 boundary_face[axis_y][face_upper],
-	 boundary_face[axis_z][face_upper]);
-  bool is_active = n3[axis] > 1;
-
-  if ( is_active ) {
-    if ( boundary_face[axis][face_lower] ) boundary->enforce(field_descr,this,face_lower,axis);
-    if ( boundary_face[axis][face_upper] ) boundary->enforce(field_descr,this,face_upper,axis);
-  }
-
-  //--------------------------------------------------
-  // Refresh
-  //--------------------------------------------------
-
-  int i3[3]  = { thisIndex.x, thisIndex.y, thisIndex.z};
-  int im3[3] = { thisIndex.x, thisIndex.y, thisIndex.z};
-  int ip3[3] = { thisIndex.x, thisIndex.y, thisIndex.z};
-  int nb3[3] = { size_[0], size_[1], size_[2]};
-
-  im3[axis] = (i3[axis] - 1 + nb3[axis]) % nb3[axis];
-  ip3[axis] = (i3[axis] + 1 + nb3[axis]) % nb3[axis];
-
-  FieldFace field_face;
-
-  bool periodic = boundary->is_periodic();
-
-  CProxy_Block block_array = thisProxy;
-
-  bool update_full = simulation->temp_update_full();
-
-  if ( is_active ) {
-    if ( ! boundary_face[axis][face_lower] || periodic ) {
-      field_face.load (field_descr, field_block(), axis, face_lower, 
-		       update_full,update_full);
-      block_array(im3[0],im3[1],im3[2]).p_refresh_face 
-	(field_face.size(), field_face.array(), axis, face_upper, axis);
-
-    }
-    if ( ! boundary_face[axis][face_upper] || periodic ) {
-      field_face.load (field_descr, field_block(), axis, face_upper, 
-		       update_full,update_full);
-      block_array(ip3[0],ip3[1],ip3[2]).p_refresh_face 
-	(field_face.size(), field_face.array(), axis, face_lower, axis);
-    }
-  }
-}
-#endif /* CONFIG_USE_CHARM */
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
 void Block::p_compute (double dt, int axis_set)
 {
   if (dt != -1) dt_ = dt;
@@ -478,13 +377,11 @@ void Block::p_refresh (int cycle, double time, double dt, int axis_set)
 
    // (should be updated already?)
   // -1 test due to p_refresh_face() calling p_refresh with axis_set != axis_all
-  if (cycle != -1) {
-    cycle_ = cycle;
-    time_  = time;
-    dt_    = dt;
-    set_time(time);
-    set_cycle(cycle);
-  }
+  cycle_ = cycle;
+  time_  = time;
+  dt_    = dt;
+  set_time(time);
+  set_cycle(cycle);
 
   refresh(axis_set);
 }
@@ -529,15 +426,6 @@ void Block::refresh (int axis_set)
   bool az = ((axis_set == axis_all) || (axis_set == axis_z)) && nz > 1;
 
   is_on_boundary(lower_h,upper_h,boundary_face);
-
-  TRACE3("lower boundary_face(%d %d %d)",
-	 boundary_face[axis_x][face_lower],
-	 boundary_face[axis_y][face_lower],
-	 boundary_face[axis_z][face_lower]);
-  TRACE3("upper boundary_face(%d %d %d)",
-	 boundary_face[axis_x][face_upper],
-	 boundary_face[axis_y][face_upper],
-	 boundary_face[axis_z][face_upper]);
 
   if ( ax ) {
     if ( boundary_face[axis_x][face_lower] ) 
@@ -651,6 +539,7 @@ void Block::refresh (int axis_set)
 void Block::p_refresh_face (int n, char * buffer,
 			    int axis, int face, int axis_set)
 {
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   if ( n != 0) {
@@ -719,7 +608,30 @@ void Block::p_refresh_face (int n, char * buffer,
   // Compute
   //--------------------------------------------------
 
-  if (axis_set == axis_all) {
+  switch (axis_set) {
+  case axis_x:
+    if (++count_refresh_face_x_ >= count) {
+      count_refresh_face_x_ = 0;
+      refresh (axis_y);
+    }
+    break;
+  case axis_y:
+    if (++count_refresh_face_y_ >= count) {
+      count_refresh_face_y_ = 0;
+      refresh (axis_z);
+    }
+    break;
+  case axis_z:
+    if (++count_refresh_face_z_ >= count) {
+      count_refresh_face_z_ = 0;
+#ifdef ORIGINAL_REFRESH  
+      compute(axis_set); // axis_set ignored--used when compute() calls refresh()
+#else
+      prepare();
+#endif
+    }
+    break;
+  case axis_all:
     if (++count_refresh_face_ >= count) {
       count_refresh_face_ = 0;
 #ifdef ORIGINAL_REFRESH  
@@ -728,31 +640,7 @@ void Block::p_refresh_face (int n, char * buffer,
       prepare();
 #endif
     }
-  } else {
-    switch (axis_set) {
-    case axis_x:
-      if (++count_refresh_face_x_ >= count) {
-	count_refresh_face_x_ = 0;
-	p_refresh (-1,0,0,axis_y);
-      }
-      break;
-    case axis_y:
-      if (++count_refresh_face_y_ >= count) {
-	count_refresh_face_y_ = 0;
-	p_refresh (-1,0,0,axis_z);
-      }
-      break;
-    case axis_z:
-      if (++count_refresh_face_z_ >= count) {
-	count_refresh_face_z_ = 0;
-#ifdef ORIGINAL_REFRESH  
-	compute(axis_set); // axis_set ignored--used when compute() calls refresh()
-#else
-	prepare();
-#endif
-      }
-      break;
-    }
+    break;
   }
 }
 #endif /* CONFIG_USE_CHARM */

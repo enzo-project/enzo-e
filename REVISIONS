@@ -1,6 +1,14 @@
+Version 0.5b4  2011-10-28
+
+  * FIX:     Fixed axis-reversal OutputData bug for Cello vs HDF5
+  * Change:  Supplemented test 3D projections with x,y,z axes
+  * Fix:     Fixed Intel serial link bug
+  * Fix:     Added Parallel:temp_update_all = false parameter to ppml.incl
+  * Change:  FieldBlock::print() debug function outputs nan locations
+
 Version 0.5b3  2011-10-28
 
-  * New:     FINISHED PPML MHD
+  * NEW:     FINISHED PPML MHD
   * New:     added TimestepPpml
   * New:     added PPML tests to input/method_ppml*
   * New:     timestep : type = [ "ppml" | "default" ]

@@ -86,9 +86,6 @@ public: // interface
   /// Boundary and Method
   void compute(int axis_set);
 
-  /// Refresh ghost zones and apply boundary conditions along a specific axis
-  void refresh_axis(axis_enum axis);
-
   //==================================================
 
 #else /* ! CONFIG_USE_CHARM */
@@ -122,11 +119,29 @@ public: // interface
   /// Return the ith Field block
   FieldBlock * field_block (int i=0) throw();
 
+//----------------------------------------------------------------------
+
   /// Return domain lower extent
-  void lower(double * x = 0, double * y = 0, double * z = 0) const throw ();
+  inline void lower(double * x, 
+		    double * y = 0,
+		    double * z = 0) const throw ()
+  {
+    if (x) *x = lower_[0];
+    if (y) *y = lower_[1];
+    if (z) *z = lower_[2];
+  }
+
+//----------------------------------------------------------------------
 
   /// Return domain upper extent
-  void upper(double * x = 0,  double * y = 0, double * z = 0) const throw ();
+  inline void upper(double * x,
+		    double * y = 0,
+		    double * z = 0) const throw ()
+  {
+    if (x) *x = upper_[0];
+    if (y) *y = upper_[1];
+    if (z) *z = upper_[2];
+  }
 
   /// Return the position of this Block in the containing Patch 
   void index_patch (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
