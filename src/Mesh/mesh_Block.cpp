@@ -375,14 +375,12 @@ void Block::p_refresh (int cycle, double time, double dt, int axis_set)
 {
   // Update cycle,time,dt from Simulation
 
-   // (should be updated already?)
-  // -1 test due to p_refresh_face() calling p_refresh with axis_set != axis_all
   cycle_ = cycle;
   time_  = time;
   dt_    = dt;
+
   set_time(time);
   set_cycle(cycle);
->>>>>>> /tmp/mesh_Block.cpp~other.S4dTN0
 
   refresh(axis_set);
 }
@@ -395,7 +393,6 @@ void Block::p_refresh (int cycle, double time, double dt, int axis_set)
 void Block::refresh (int axis_set)
 {
 
-  TRACE2("axis_set[%d] = %d",CkMyPe(),axis_set);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   //--------------------------------------------------
@@ -479,16 +476,14 @@ void Block::refresh (int axis_set)
   if ( ax ) {
     // xp <<< xm
     if ( ! is_boundary[axis_x][face_lower] || periodic ) {
-      field_face.load (field_descr, field_block(), axis_x, face_lower, 
-		       update_full,update_full);
+      field_face.load (field_descr, field_block(), -1, 0, 0);
       block_array(ixm,iy,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_x, face_upper, axis_set);
 
     }
     // xp >>> xm
     if ( ! is_boundary[axis_x][face_upper] || periodic ) {
-      field_face.load (field_descr, field_block(), axis_x, face_upper, 
-		       update_full,update_full);
+      field_face.load (field_descr, field_block(), +1, 0, 0);
       block_array(ixp,iy,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_x, face_lower, axis_set);
     }
@@ -496,15 +491,13 @@ void Block::refresh (int axis_set)
   if ( ay ) {
     // yp <<< ym
     if ( ! is_boundary[axis_y][face_lower] || periodic ) {
-      field_face.load (field_descr, field_block(), axis_y, face_lower, 
-		       update_full,update_full);
+      field_face.load (field_descr, field_block(), 0, -1, 0);
       block_array(ix,iym,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_y, face_upper, axis_set);
     }
     // yp >>> ym
     if ( ! is_boundary[axis_y][face_upper] || periodic ) {
-      field_face.load (field_descr, field_block(), axis_y, face_upper, 
-		       update_full,update_full);
+      field_face.load (field_descr, field_block(), 0, +1, 0);
       block_array(ix,iyp,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_y, face_lower, axis_set);
     }
@@ -512,15 +505,13 @@ void Block::refresh (int axis_set)
   if ( az ) {
     // zp <<< zm
     if ( ! is_boundary[axis_z][face_lower] || periodic ) {
-      field_face.load (field_descr, field_block(), axis_z, face_lower, 
-		       update_full,update_full);
+      field_face.load (field_descr, field_block(), 0, 0, -1);
       block_array(ix,iy,izm).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_z, face_upper, axis_set);
     }
     // zp >>> zm
     if ( ! is_boundary[axis_z][face_upper] || periodic ) {
-      field_face.load (field_descr, field_block(), axis_z, face_upper, 
-		       update_full,update_full);
+      field_face.load (field_descr, field_block(), 0, 0, +1);
       block_array(ix,iy,izp).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_z, face_lower, axis_set);
     }
@@ -554,12 +545,13 @@ void Block::p_refresh_face (int n, char * buffer,
 
     bool update_full = simulation->temp_update_full();
 
-    field_face.store(simulation->field_descr(),
-		     field_block(), 
-		     axis_enum(axis), 
-		     face_enum(face), 
-		     update_full,
-		     update_full);
+    int ix=0, iy=0, iz=0;
+    if (axis==axis_x) ix = (face==face_lower) ? -1 : +1;
+    if (axis==axis_y) iy = (face==face_lower) ? -1 : +1;
+    if (axis==axis_z) iz = (face==face_lower) ? -1 : +1;
+
+    field_face.store
+      (simulation->field_descr(), field_block(), ix, iy, iz);
   }
 
   //--------------------------------------------------

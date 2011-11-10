@@ -393,8 +393,6 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
 
 {
 
-  // INCOMPLETE
-
   if ( ! ghosts_allocated() ) {
     WARNING("FieldBlock::refresh_ghosts",
 	    "Called with ghosts not allocated: allocating ghosts");
@@ -434,10 +432,18 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
   FieldFace face_send;
   FieldFace face_recv;
 
-  face_send.allocate(field_descr,this,axis);
-  face_recv.allocate(field_descr,this,axis);
+  // Convert axis, face to ix,iy,iz receive and send
+  int ix=0,iy=0,iz=0;
 
-  face_send.load(field_descr,this,axis, face);
+  int send_dir = (face == face_lower) ? -1 : +1;
+  if (axis==axis_x) ix=send_dir;
+  if (axis==axis_y) iy=send_dir;
+  if (axis==axis_z) iz=send_dir;
+
+  face_send.allocate(field_descr,this,ix,iy,iz);
+  face_recv.allocate(field_descr,this,ix,iy,iz);
+
+  face_send.load(field_descr,this,ix,iy,iz);
 
   int ip = group_process->rank();
 
@@ -446,6 +452,7 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
   if (ip < ip_remote) { // send then receive
 
     // send 
+
     handle_send = group_process->send_begin 
       (ip_remote, face_send.array(),face_send.size());
     group_process->wait(handle_send);
@@ -474,7 +481,8 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
     group_process->send_end (handle_send);
 
   }
-  face_recv.store(field_descr,this,axis,face);
+
+  face_recv.store(field_descr,this,ix,iy,iz);
 
   face_send.deallocate();
   face_recv.deallocate();

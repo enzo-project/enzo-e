@@ -114,7 +114,7 @@
 
    Testing
    {
-      time_final  = 0.123972607676478;  # 40 cycles
+      time_final  = 0.112986755795767;  # 40 cycles
    }
 
    Output { 
