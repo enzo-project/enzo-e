@@ -20,17 +20,10 @@ public: // interface
   /// Constructor
   FieldFace() throw();
 
+#ifdef CONFIG_USE_CHARM
   /// Constructor
-  FieldFace(int n, char * array) throw()
-    : array_()
-  {
-    array_.resize(n);
-    for (int i=0; i<n; i++) array_[i] = array[i]; 
-  };
-
-  //----------------------------------------------------------------------
-  // Big Three
-  //----------------------------------------------------------------------
+  FieldFace(int n, char * array) throw();
+#endif
 
   /// Destructor
   ~FieldFace() throw();
@@ -44,7 +37,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Set whether or not to include ghost zones along each axis
-  inline void include_ghosts (bool gx = true, bool gy = true, bool gz = true)
+  inline void include_ghosts (bool gx, bool gy = true, bool gz = true)
   {
     full_[axis_x] = gx;
     full_[axis_y] = gy;
@@ -81,14 +74,6 @@ public: // interface
 
   /// Return a pointer to the array
   char * array () throw() { return &array_[0]; };
-
-  // /// Print basic field characteristics for debugging
-  // void print (const FieldDescr * field_descr,
-  // 	      const FieldBlock * field_block,
-  // 	      int                fx,
-  // 	      int                fy = 0,
-  // 	      int                fz = 0,
-  // 	      const char * message = 0) const throw();
 
 private: // functions
 

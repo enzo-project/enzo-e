@@ -19,6 +19,20 @@ FieldFace::FieldFace() throw()
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+FieldFace::FieldFace(int n, char * array) throw()
+  : array_()
+{
+  full_[axis_x] = true;
+  full_[axis_y] = true;
+  full_[axis_z] = true;
+  array_.resize(n);
+  for (int i=0; i<n; i++) array_[i] = array[i]; 
+};
+#endif
+
+//----------------------------------------------------------------------
+
 FieldFace::~FieldFace() throw ()
 {
   deallocate();
@@ -30,7 +44,10 @@ FieldFace::FieldFace(const FieldFace & field_face) throw ()
   : array_()
 /// @param     FieldFace  Object being copied
 {
-  array_ = field_face.array_;
+  array_        = field_face.array_;
+  full_[axis_x] = field_face.full_[axis_x];
+  full_[axis_y] = field_face.full_[axis_y];
+  full_[axis_z] = field_face.full_[axis_z];
 }
 
 //----------------------------------------------------------------------
@@ -41,6 +58,9 @@ FieldFace & FieldFace::operator= (const FieldFace & field_face) throw ()
 /// @return    The target assigned object
 {
   array_ = field_face.array_;
+  full_[axis_x] = field_face.full_[axis_x];
+  full_[axis_y] = field_face.full_[axis_y];
+  full_[axis_z] = field_face.full_[axis_z];
   return *this;
 }
 
@@ -269,9 +289,18 @@ void FieldFace::loop_limits
  )
 {
 
-  if (fx ==  0) {  (*nx) = nd3[0]; (*ix0) = 0;    }
-  if (fy ==  0) {  (*ny) = nd3[1]; (*iy0) = 0;    }
-  if (fz ==  0) {  (*nz) = nd3[2]; (*iz0) = 0;    }
+  if (fx == 0) {
+    if (full_[0]) { (*ix0) = 0;      (*nx) = nd3[0]; }
+    else          { (*ix0) = ng3[0]; (*nx) = nd3[0]-2*ng3[0]; }
+  }
+  if (fy == 0) {
+    if (full_[1]) { (*iy0) = 0;      (*ny) = nd3[1]; } 
+    else          { (*iy0) = ng3[1]; (*ny) = nd3[1]-2*ng3[1]; }
+  }
+  if (fz == 0) {
+    if (full_[2]) { (*iz0) = 0;      (*nz) = nd3[2]; }
+    else          { (*iz0) = ng3[2]; (*nz) = nd3[2]-2*ng3[2];  }
+  }
 
   if (load) {
     // load faces
@@ -380,124 +409,3 @@ size_t FieldFace::store_precision_
 
   return (sizeof(T) * nx * ny * nz);
 }
-
-// //----------------------------------------------------------------------
-
-// void FieldFace::print 
-// (
-//  const FieldDescr * field_descr,
-//  const FieldBlock * field_block,
-//  int                fx,
-//  int                fy,
-//  int                fz
-//  const char *       message
-//  ) const throw()
-// {
-//   size_t num_fields = field_descr->field_count();
-
-//   size_t index = 0;
-
-//   int iax=(axis+1) % 3;
-//   int iay=(axis+2) % 3;
-
-//   for (size_t index_field=0; index_field<num_fields; index_field++) {
-
-//     // Get precision
-//     precision_enum precision = field_descr->precision(index_field);
-
-//     // Get chunk of array for this field
-//     const char * values  = &array_[index];
-
-//     // Get field dimensions
-//     int nd3[3];
-//     field_block->field_size(field_descr,index_field,&nd3[0],&nd3[1],&nd3[2]);
-
-//     // Get ghost depth
-//     int ng3[3];
-//     field_descr->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
-
-//     // Compute permutation indices
-//     switch (precision) {
-//     case precision_single:
-//       {
-// 	float min = std::numeric_limits<float>::max();
-// 	float max = std::numeric_limits<float>::min();
-// 	float sum = 0.0;
-
-// 	for (int iz = 0; iz <ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
-// 	  for (int iy=0; iy < nd3[iay]; iy++) {
-// 	    for (int ix=0; ix < nd3[iax]; ix++) {
-// 	      int index = iz + ng3[axis]*(ix + nd3[iax]*iy);
-// 	      float value = ((float *)(values))[index];
-// 	      min = MIN(min,value);
-// 	      max = MAX(max,value);
-// 	      sum += value;
-// 	    }
-// 	  }
-// 	}
-// 	PARALLEL_PRINTF
-// 	  ("%s FieldFace[%p,%s] axis %d face %d (x%d y%d g%d) [%g %g %g]\n",
-// 	   message ? message : "",this,
-// 	   field_descr->field_name(index_field).c_str(),
-// 	   axis,face,
-// 	   nd3[iax],nd3[iay],ng3[axis],min,sum/(nd3[iax]*nd3[iay]*ng3[axis]),max);
-// 	index += sizeof(float) * (nd3[iax] * nd3[iay]) * ng3[axis];
-//     }
-//     break;
-//   case precision_double:
-//     {
-//       double min = std::numeric_limits<double>::max();
-//       double max = std::numeric_limits<double>::min();
-//       double sum = 0.0;
-
-//       for (int iz = 0; iz <ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
-// 	for (int iy=0; iy < nd3[iay]; iy++) {
-// 	  for (int ix=0; ix < nd3[iax]; ix++) {
-// 	    int index = iz + ng3[axis]*(ix + nd3[iax]*iy);
-// 	    double value = ((double *)(values))[index];
-// 	    min = MIN(min,value);
-// 	    max = MAX(max,value);
-// 	    sum += value;
-// 	  }
-// 	}
-//       }
-//       PARALLEL_PRINTF
-// 	("%s FieldFace[%p,%s] axis %d face %d (x%d y%d g%d) [%lg %lg %lg]\n",
-// 	 message ? message : "",this,
-// 	 field_descr->field_name(index_field).c_str(),
-// 	 axis,face,
-// 	 nd3[iax],nd3[iay],ng3[axis],min,sum/(nd3[iax]*nd3[iay]*ng3[axis]),max);
-//       index += sizeof(double) * (nd3[iax] * nd3[iay]) * ng3[axis];
-//   }
-//   break;
-//  case precision_quadruple:
-//    {
-//      double min = std::numeric_limits<double>::max();
-//      double max = std::numeric_limits<double>::min();
-//      double sum = 0.0;
-
-//      for (int iz = 0; iz <ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
-//        for (int iy=0; iy < nd3[iay]; iy++) {
-// 	 for (int ix=0; ix < nd3[iax]; ix++) {
-// 	   int index = iz + ng3[axis]*(ix + nd3[iax]*iy);
-// 	   long double value = ((long double *)(values))[index];
-// 	   min = MIN(min,(double)value);
-// 	   max = MAX(max,(double)value);
-// 	   sum += value;
-// 	 }
-//        }
-//      }
-//      PARALLEL_PRINTF
-//        ("%s FieldFace[%p,%s] axis %d face %d (x%d y%d g%d) [%lg %lg %lg]\n",
-// 	message ? message : "",this,
-// 	field_descr->field_name(index_field).c_str(),
-// 	axis,face,
-// 	nd3[iax],nd3[iay],ng3[axis],min,sum/(nd3[iax]*nd3[iay]*ng3[axis]),max);
-//      index += sizeof(long double) * (nd3[iax] * nd3[iay]) * ng3[axis];
-// }
-// break;
-//     default:
-//       break;
-//     }
-//   }
-// }

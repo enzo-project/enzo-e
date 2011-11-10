@@ -388,8 +388,7 @@ void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
 				const Patch * patch,
 				int ibx, int iby, int ibz,
-				face_enum face,
-				axis_enum axis) throw()
+				int fx, int fy, int fz) throw()
 
 {
 
@@ -404,46 +403,17 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
 
   // Send face
 
-  int ip_remote = false;
-
-  switch (axis) {
-  case axis_x:
-    ip_remote = (face == face_lower) ?
-      layout->process3(ibx-1,iby,ibz) :
-      layout->process3(ibx+1,iby,ibz);
-    break;
-  case axis_y:
-    ip_remote = (face == face_lower) ?
-      layout->process3(ibx,iby-1,ibz) :
-      layout->process3(ibx,iby+1,ibz);
-    break;
-  case axis_z:
-    ip_remote = (face == face_lower) ?
-      layout->process3(ibx,iby,ibz-1) :
-      layout->process3(ibx,iby,ibz+1);
-    break;
-  default:
-    ERROR("FieldBlock::refresh_ghosts",
-	  "axis_all not handled");
-  }
+  int ip_remote = layout->process3((ibx+fx),(iby+fy),(ibz+fz));
 
   // Transfer face data via FieldFace objects
 
   FieldFace face_send;
   FieldFace face_recv;
 
-  // Convert axis, face to ix,iy,iz receive and send
-  int ix=0,iy=0,iz=0;
+  face_send.allocate(field_descr,this,fx,fy,fz);
+  face_recv.allocate(field_descr,this,fx,fy,fz);
 
-  int send_dir = (face == face_lower) ? -1 : +1;
-  if (axis==axis_x) ix=send_dir;
-  if (axis==axis_y) iy=send_dir;
-  if (axis==axis_z) iz=send_dir;
-
-  face_send.allocate(field_descr,this,ix,iy,iz);
-  face_recv.allocate(field_descr,this,ix,iy,iz);
-
-  face_send.load(field_descr,this,ix,iy,iz);
+  face_send.load(field_descr,this,fx,fy,fz);
 
   int ip = group_process->rank();
 
@@ -482,7 +452,7 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
 
   }
 
-  face_recv.store(field_descr,this,ix,iy,iz);
+  face_recv.store(field_descr,this,fx,fy,fz);
 
   face_send.deallocate();
   face_recv.deallocate();

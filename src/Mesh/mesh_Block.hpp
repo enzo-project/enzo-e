@@ -70,7 +70,8 @@ public: // interface
   void p_refresh(int cycle, double time, double dt, int axis_set);
 
   /// Refresh a FieldFace
-  void p_refresh_face(int n, char buffer[], int axis, int face, int axis_set);
+  void p_refresh_face(int n, char buffer[], int axis_set,
+		      int fx, int fy, int fz);
 
   /// Contribute block data to ith output object in the simulation
   void p_write (int index_output);
@@ -93,8 +94,7 @@ public: // interface
   /// Refresh ghost data
   void refresh_ghosts(const FieldDescr * field_descr,
 		      const Patch * patch,
-		      face_enum face,
-		      axis_enum axis,
+		      int fx, int fy, int fz,
 		      int index_field_set = 0) throw();
 #endif
 
@@ -151,10 +151,6 @@ public: // interface
 
   /// Return the size the containing Patch
   void size_patch (int * nx, int * ny, int * nz) const throw();
-
-  /// Return the neighboring block in the given direction
-  /// [tested in test_Patch]
-  Block * neighbor (axis_enum axis, face_enum face) const throw();
 
   /// Return the current cycle number
   int cycle() const throw() { return cycle_; };

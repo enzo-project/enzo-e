@@ -219,13 +219,6 @@ void Block::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
   if (nz) (*nz)=size_[2]; 
 }
 
-//----------------------------------------------------------------------
-
-Block * Block::neighbor (axis_enum axis, face_enum face) const throw()
-{
-  return NULL;
-}
-
 //======================================================================
 // MPI FUNCTIONS
 //======================================================================
@@ -234,14 +227,13 @@ Block * Block::neighbor (axis_enum axis, face_enum face) const throw()
 
 void Block::refresh_ghosts(const FieldDescr * field_descr,
 			   const Patch * patch,
-			   face_enum face,
-			   axis_enum axis,
+			   int fx, int fy, int fz,
 			   int index_field_set) throw()
 {
   int ibx,iby,ibz;
   index_patch(&ibx,&iby,&ibz);
   field_block_[index_field_set]
-    -> refresh_ghosts (field_descr,patch, ibx,iby,ibz, face,axis);
+    -> refresh_ghosts (field_descr,patch, ibx,iby,ibz, fx,fy,fz);
 }
 
 #endif
@@ -410,9 +402,8 @@ void Block::refresh (int axis_set)
 
   Hierarchy * hierarchy   = simulation->hierarchy();
 
-  double lower_h[3];
+  double lower_h[3], upper_h[3];
   hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
-  double upper_h[3];
   hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
 
   is_on_boundary(lower_h,upper_h,is_boundary);
@@ -473,19 +464,21 @@ void Block::refresh (int axis_set)
 
   bool update_full = simulation->temp_update_full();
 
+  // Refresh face ghost zones
+
   if ( ax ) {
     // xp <<< xm
     if ( ! is_boundary[axis_x][face_lower] || periodic ) {
       field_face.load (field_descr, field_block(), -1, 0, 0);
       block_array(ixm,iy,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_x, face_upper, axis_set);
+	(field_face.size(), field_face.array(), axis_set, +1, 0, 0);
 
     }
     // xp >>> xm
     if ( ! is_boundary[axis_x][face_upper] || periodic ) {
       field_face.load (field_descr, field_block(), +1, 0, 0);
       block_array(ixp,iy,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_x, face_lower, axis_set);
+	(field_face.size(), field_face.array(), axis_set, -1, 0, 0);
     }
   }
   if ( ay ) {
@@ -493,13 +486,13 @@ void Block::refresh (int axis_set)
     if ( ! is_boundary[axis_y][face_lower] || periodic ) {
       field_face.load (field_descr, field_block(), 0, -1, 0);
       block_array(ix,iym,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_y, face_upper, axis_set);
+	(field_face.size(), field_face.array(), axis_set, 0, +1, 0);
     }
     // yp >>> ym
     if ( ! is_boundary[axis_y][face_upper] || periodic ) {
       field_face.load (field_descr, field_block(), 0, +1, 0);
       block_array(ix,iyp,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_y, face_lower, axis_set);
+	(field_face.size(), field_face.array(), axis_set, 0, -1, 0);
     }
   }
   if ( az ) {
@@ -507,21 +500,24 @@ void Block::refresh (int axis_set)
     if ( ! is_boundary[axis_z][face_lower] || periodic ) {
       field_face.load (field_descr, field_block(), 0, 0, -1);
       block_array(ix,iy,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_z, face_upper, axis_set);
+	(field_face.size(), field_face.array(), axis_set, 0, 0, +1);
     }
     // zp >>> zm
     if ( ! is_boundary[axis_z][face_upper] || periodic ) {
       field_face.load (field_descr, field_block(), 0, 0, +1);
       block_array(ix,iy,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_z, face_lower, axis_set);
+	(field_face.size(), field_face.array(), axis_set, 0, 0, -1);
     }
   }
+
+  // Refresh edge ghost zones
+  // Refresh corner ghost zones
 
   // NOTE: p_refresh_face() calls compute, but if no incoming faces
   // it will never get called.  So every block also calls
   // p_refresh_face() itself with a null array
 
-  p_refresh_face (0,0,0,0, axis_set);
+  p_refresh_face (0,0,axis_set, 0, 0, 0);
 
 }
 #endif /* CONFIG_USE_CHARM */
@@ -530,8 +526,8 @@ void Block::refresh (int axis_set)
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_refresh_face (int n, char * buffer,
-			    int axis, int face, int axis_set)
+void Block::p_refresh_face (int n, char * buffer, int axis_set, 
+			    int fx, int fy, int fz)
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -545,13 +541,8 @@ void Block::p_refresh_face (int n, char * buffer,
 
     bool update_full = simulation->temp_update_full();
 
-    int ix=0, iy=0, iz=0;
-    if (axis==axis_x) ix = (face==face_lower) ? -1 : +1;
-    if (axis==axis_y) iy = (face==face_lower) ? -1 : +1;
-    if (axis==axis_z) iz = (face==face_lower) ? -1 : +1;
-
     field_face.store
-      (simulation->field_descr(), field_block(), ix, iy, iz);
+      (simulation->field_descr(), field_block(), fx, fy, fz);
   }
 
   //--------------------------------------------------

@@ -350,41 +350,41 @@ void EnzoSimulationMpi::refresh_ghost_
   if (dimension_ >= 1) {
     if (ibx % 2 == 0) {
       if (! boundary[axis_x][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_x);
+	block->refresh_ghosts(field_descr_,patch,-1,0,0);
       if (! boundary[axis_x][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_x);
+	block->refresh_ghosts(field_descr_,patch,+1,0,0);
     } else {
       if (! boundary[axis_x][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_x);
+	block->refresh_ghosts(field_descr_,patch,+1,0,0);
       if (! boundary[axis_x][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_x);
+	block->refresh_ghosts(field_descr_,patch,-1,0,0);
     }
   }
   if (dimension_ >= 2) {
     if (iby % 2 == 0) {
       if (! boundary[axis_y][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_y);
+	block->refresh_ghosts(field_descr_,patch,0,-1,0);
       if (! boundary[axis_y][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_y);
+	block->refresh_ghosts(field_descr_,patch,0,+1,0);
     } else {
       if (! boundary[axis_y][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_y);
+	block->refresh_ghosts(field_descr_,patch,0,+1,0);
       if (! boundary[axis_y][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_y);
+	block->refresh_ghosts(field_descr_,patch,0,-1,0);
     }
 
   }
   if (dimension_ >= 3) {
     if (ibz % 2 == 0) {
       if (! boundary[axis_z][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_z);
+	block->refresh_ghosts(field_descr_,patch,0,0,-1);
       if (! boundary[axis_z][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_z);
+	block->refresh_ghosts(field_descr_,patch,0,0,+1);
     } else {
       if (! boundary[axis_z][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_z);
+	block->refresh_ghosts(field_descr_,patch,0,0,+1);
       if (! boundary[axis_z][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_z);
+	block->refresh_ghosts(field_descr_,patch,0,0,-1);
     }
   }
 }
