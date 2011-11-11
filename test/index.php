@@ -249,7 +249,7 @@ function summary_missing_output ($test_output, $executables)
 
    //----------------------------------------------------------------------
 
-function summary_crashed_runs ( $test_output, $executables)
+function summary_incomplete_output ( $test_output, $executables)
 {
   global $types;
   global $num_types;
@@ -340,7 +340,7 @@ function summary_passed_tests ($test_output, $executables)
   // Missing executable
 
   summary_missing_executable ($test_output, $executables);
-  summary_crashed_runs       ($test_output, $executables);
+  summary_incomplete_output  ($test_output, $executables);
   summary_failed_tests       ($test_output, $executables);
   summary_unfinished_tests   ($test_output, $executables);
   summary_passed_tests       ($test_output, $executables);
@@ -422,7 +422,7 @@ printf ( "<th colspan=$num_types class=fail>Missing Executable</th>");
 printf ("<th></th>");
 // printf ( "<th colspan=$num_types class=fail>Missing Output</th>");
 // printf ("<th></th>");
-printf ( "<th colspan=$num_types class=fail>Crashed Runs</th>");
+printf ( "<th colspan=$num_types class=fail>Incomplete Output</th>");
 printf ("<th></th>");
 printf ( "<th colspan=$num_types class=fail>Failed Tests</th>");
 printf ("<th></th>");
