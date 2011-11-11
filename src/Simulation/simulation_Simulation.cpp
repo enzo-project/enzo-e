@@ -128,7 +128,6 @@ void Simulation::initialize_simulation_() throw()
 void Simulation::initialize_data_descr_() throw()
 {
 
-  /* MEMORY LEAK */
   field_descr_ = new FieldDescr;
 
   //--------------------------------------------------
@@ -168,6 +167,29 @@ void Simulation::initialize_data_descr_() throw()
     field_descr_->set_ghosts(i,gx,gy,gz);
   }
 
+  // Set face dimensions to refresh
+
+  //--------------------------------------------------
+  // parameter: Field : refresh_edges
+  // parameter: Field : refresh_corners
+  //--------------------------------------------------
+
+  field_descr_->set_refresh_face(2, dimension_ - 1);
+
+  // Refresh ghost edges explicitly
+  if (parameters_->type("Field:refresh_edges") == parameter_logical) {
+    bool refresh_edges = 
+      parameters_->value_logical ("Field:refresh:edges",false);
+    field_descr_->set_refresh_face(1,refresh_edges);
+  }
+
+  // Refresh ghost corners explicitly
+  if (parameters_->type("Field:refresh_corners") == parameter_logical) {
+    bool refresh_corners = 
+      parameters_->value_logical ("Field:refresh:corners",false);
+    field_descr_->set_refresh_face(0,refresh_corners);
+  }
+  
   // Set precision
 
   //--------------------------------------------------
