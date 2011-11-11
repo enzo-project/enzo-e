@@ -66,6 +66,12 @@ public: // functions
   void set_ghosts(int id_field, int gx, int gy, int gz) 
     throw(std::out_of_range);
 
+  /// Set whether to update the k-D ghosts (corners=0, edges=1, faces=2)
+  void set_refresh_face(int face, bool value) throw();
+
+  /// Return whether to update the k-D ghosts (corners=0, edges=1, faces=2)
+  bool refresh_face(int face) const throw();
+
   /// Set precision for a field
   void set_precision(int id_field, precision_enum precision) 
     throw(std::out_of_range);
@@ -135,6 +141,7 @@ public: // functions
   void ghosts(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
     throw(std::out_of_range);
 
+  /// Set 
   /// precision of given field
   precision_enum precision(int id_field) const 
     throw(std::out_of_range);
@@ -178,7 +185,6 @@ private: // attributes
   /// Set of groups containing each field.  field_in_group_[field][group]
   std::vector<int_set_type> field_in_group_;
 
-
   /// alignment of start of each field in bytes
   int alignment_;
 
@@ -197,6 +203,8 @@ private: // attributes
   /// Ghost depth of each field
   std::vector<int *> ghosts_;
 
+  /// Whether to update the k-D ghosts (corners, edges, faces)
+  bool refresh_face_[2];
 
   /// minimum allowed value for each field
   std::vector<double> min_value_;

@@ -25,11 +25,16 @@ FieldDescr::FieldDescr ()
     precision_(),
     centering_(),
     ghosts_(),
+
     min_value_(),
     max_value_(),
     min_action_(),
     max_action_()
 {
+  refresh_face_[0]=false;
+  refresh_face_[1]=false;
+  refresh_face_[2]=true;
+
 }
 
 //----------------------------------------------------------------------
@@ -360,6 +365,20 @@ void FieldDescr::set_ghosts(int id_field, int gx, int gy, int gz)
   ghosts_.at(id_field)[0] = gx;
   ghosts_.at(id_field)[1] = gy;
   ghosts_.at(id_field)[2] = gz;
+}
+
+//----------------------------------------------------------------------
+
+void FieldDescr::set_refresh_face(int face, bool value) throw()
+{
+  refresh_face_[face] = value;
+}
+
+//----------------------------------------------------------------------
+
+bool FieldDescr::refresh_face(int face) const throw()
+{
+  return refresh_face_[face];
 }
 
 //----------------------------------------------------------------------

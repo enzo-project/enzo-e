@@ -414,27 +414,30 @@ void Block::refresh (int axis_set)
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
 
-  bool ax = ((axis_set == axis_all) || (axis_set == axis_x)) && nx > 1;
-  bool ay = ((axis_set == axis_all) || (axis_set == axis_y)) && ny > 1;
-  bool az = ((axis_set == axis_all) || (axis_set == axis_z)) && nz > 1;
+  bool axm = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
+  bool aym = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
+  bool azm = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+  bool axp = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
+  bool ayp = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
+  bool azp = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
 
-  if ( ax ) {
-    if ( is_boundary[axis_x][face_lower] ) 
-      boundary->enforce(field_descr,this,face_lower,axis_x);
-    if ( is_boundary[axis_x][face_upper] ) 
-      boundary->enforce(field_descr,this,face_upper,axis_x);
+  if ( axm && is_boundary[axis_x][face_lower] ) {
+    boundary->enforce(field_descr,this,face_lower,axis_x);
   }
-  if ( ay ) {
-    if ( is_boundary[axis_y][face_lower] ) 
-      boundary->enforce(field_descr,this,face_lower,axis_y);
-    if ( is_boundary[axis_y][face_upper] ) 
-      boundary->enforce(field_descr,this,face_upper,axis_y);
+  if ( axp && is_boundary[axis_x][face_upper] ) {
+    boundary->enforce(field_descr,this,face_upper,axis_x);
   }
-  if ( az ) {
-    if ( is_boundary[axis_z][face_lower] ) 
-      boundary->enforce(field_descr,this,face_lower,axis_z);
-    if ( is_boundary[axis_z][face_upper] ) 
-      boundary->enforce(field_descr,this,face_upper,axis_z);
+  if ( aym && is_boundary[axis_y][face_lower] ) {
+    boundary->enforce(field_descr,this,face_lower,axis_y);
+  }
+  if ( ayp && is_boundary[axis_y][face_upper] ) {
+    boundary->enforce(field_descr,this,face_upper,axis_y);
+  }
+  if ( azm && is_boundary[axis_z][face_lower] ) {
+    boundary->enforce(field_descr,this,face_lower,axis_z);
+  }
+  if ( azp && is_boundary[axis_z][face_upper] ) {
+    boundary->enforce(field_descr,this,face_upper,axis_z);
   }
 
   //--------------------------------------------------
@@ -462,48 +465,42 @@ void Block::refresh (int axis_set)
 
   CProxy_Block block_array = thisProxy;
 
-  bool update_full = simulation->temp_update_full();
+  axm = axm && (periodic || ! is_boundary[axis_x][face_lower]);
+  axp = axp && (periodic || ! is_boundary[axis_x][face_upper]);
+  aym = aym && (periodic || ! is_boundary[axis_y][face_lower]);
+  ayp = ayp && (periodic || ! is_boundary[axis_y][face_upper]);
+  azm = azm && (periodic || ! is_boundary[axis_z][face_lower]);
+  azp = azp && (periodic || ! is_boundary[axis_z][face_upper]);
 
   // Refresh face ghost zones
 
-  if ( ax ) {
-    // xp <<< xm
-    if ( ! is_boundary[axis_x][face_lower] || periodic ) {
+  if (field_descr->refresh_face(2)) {
+    if ( axm ) {
       field_face.load (field_descr, field_block(), -1, 0, 0);
       block_array(ixm,iy,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_set, +1, 0, 0);
-
     }
-    // xp >>> xm
-    if ( ! is_boundary[axis_x][face_upper] || periodic ) {
+    if ( axp ) {
       field_face.load (field_descr, field_block(), +1, 0, 0);
       block_array(ixp,iy,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_set, -1, 0, 0);
     }
-  }
-  if ( ay ) {
-    // yp <<< ym
-    if ( ! is_boundary[axis_y][face_lower] || periodic ) {
+    if ( aym ) {
       field_face.load (field_descr, field_block(), 0, -1, 0);
       block_array(ix,iym,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_set, 0, +1, 0);
     }
-    // yp >>> ym
-    if ( ! is_boundary[axis_y][face_upper] || periodic ) {
+    if ( ayp ) {
       field_face.load (field_descr, field_block(), 0, +1, 0);
       block_array(ix,iyp,iz).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_set, 0, -1, 0);
     }
-  }
-  if ( az ) {
-    // zp <<< zm
-    if ( ! is_boundary[axis_z][face_lower] || periodic ) {
+    if ( azm ) {
       field_face.load (field_descr, field_block(), 0, 0, -1);
       block_array(ix,iy,izm).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_set, 0, 0, +1);
     }
-    // zp >>> zm
-    if ( ! is_boundary[axis_z][face_upper] || periodic ) {
+    if ( azp ) {
       field_face.load (field_descr, field_block(), 0, 0, +1);
       block_array(ix,iy,izp).p_refresh_face 
 	(field_face.size(), field_face.array(), axis_set, 0, 0, -1);
@@ -511,7 +508,118 @@ void Block::refresh (int axis_set)
   }
 
   // Refresh edge ghost zones
+
+  if (field_descr->refresh_face(1)) {
+    ERROR("Block::refresh()","refresh_face(1) != false");
+    if ( axm && aym ) {
+      field_face.load (field_descr, field_block(), -1, -1, 0);
+      block_array(ixm,iym,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, +1, 0);
+    }
+    if ( axm && ayp ) {
+      field_face.load (field_descr, field_block(), -1, +1, 0);
+      block_array(ixm,iyp,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, -1, 0);
+    }
+    if ( axp && aym ) {
+      field_face.load (field_descr, field_block(), +1, -1, 0);
+      block_array(ixp,iym,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, +1, 0);
+    }
+    if ( axp && ayp ) {
+      field_face.load (field_descr, field_block(), +1, +1, 0);
+      block_array(ixp,iyp,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, -1, 0);
+    }
+
+    if ( aym && azm ) {
+      field_face.load (field_descr, field_block(), 0, -1, -1);
+      block_array(ix,iym,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, +1, +1);
+    }
+    if ( aym && azp ) {
+      field_face.load (field_descr, field_block(), 0, -1, +1);
+      block_array(ix,iym,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, +1, -1);
+    }
+    if ( ayp && azm ) {
+      field_face.load (field_descr, field_block(), 0, +1, -1);
+      block_array(ix,iyp,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, -1, +1);
+    }
+    if ( ayp && azp ) {
+      field_face.load (field_descr, field_block(), 0, +1, +1);
+      block_array(ix,iyp,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, -1, -1);
+    }
+
+    if ( axm && azm ) {
+      field_face.load (field_descr, field_block(), -1, 0, -1);
+      block_array(ixm,iy,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, 0, +1);
+    }
+    if ( axp && azm ) {
+      field_face.load (field_descr, field_block(), +1, 0, -1);
+      block_array(ixp,iy,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, 0, +1);
+    }
+    if ( axm && azp ) {
+      field_face.load (field_descr, field_block(), -1, 0, +1);
+      block_array(ixm,iy,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, 0, -1);
+    }
+    if ( axp && azp ) {
+      field_face.load (field_descr, field_block(), +1, 0, +1);
+      block_array(ixp,iy,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, 0, -1);
+    }
+  }
+
   // Refresh corner ghost zones
+
+  if (field_descr->refresh_face(0)) {
+    ERROR("Block::refresh()","refresh_face(0) != false");
+    if ( axm && aym && azm ) {
+      field_face.load (field_descr, field_block(), -1, -1, -1);
+      block_array(ixm,iym,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, +1, +1);
+    }
+    if ( axm && aym && azp ) {
+      field_face.load (field_descr, field_block(), -1, -1, +1);
+      block_array(ixm,iym,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, +1, -1);
+    }
+    if ( axm && ayp && azm ) {
+      field_face.load (field_descr, field_block(), -1, +1, -1);
+      block_array(ixm,iyp,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, -1, +1);
+    }
+    if ( axm && ayp && azp ) {
+      field_face.load (field_descr, field_block(), -1, +1, +1);
+      block_array(ixm,iyp,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, -1, -1);
+    }
+    if ( axp && aym && azm ) {
+      field_face.load (field_descr, field_block(), +1, -1, -1);
+      block_array(ixp,iym,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, +1, +1);
+    }
+    if ( axp && aym && azp ) {
+      field_face.load (field_descr, field_block(), +1, -1, +1);
+      block_array(ixp,iym,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, +1, -1);
+    }
+    if ( axp && ayp && azm ) {
+      field_face.load (field_descr, field_block(), +1, +1, -1);
+      block_array(ixp,iyp,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, -1, +1);
+    }
+    if ( axp && ayp && azp ) {
+      field_face.load (field_descr, field_block(), +1, +1, +1);
+      block_array(ixp,iyp,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, -1, -1);
+    }
+  }
 
   // NOTE: p_refresh_face() calls compute, but if no incoming faces
   // it will never get called.  So every block also calls
@@ -532,62 +640,101 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
+  FieldDescr * field_descr = simulation->field_descr();
+
   if ( n != 0) {
 
-    // n == 0 is the "default" call from self to ensure p_refresh_face()
-    // gets called at least once--required for subsequent compute() call
+    // n == 0 is the call from self to ensure p_refresh_face()
+    // always gets called at least once
 
     FieldFace field_face(n, buffer);
 
-    bool update_full = simulation->temp_update_full();
-
-    field_face.store
-      (simulation->field_descr(), field_block(), fx, fy, fz);
+    field_face.store (field_descr, field_block(), fx, fy, fz);
   }
 
   //--------------------------------------------------
   // Count incoming faces
   //--------------------------------------------------
 
-  Hierarchy * hierarchy = simulation->hierarchy();
-
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
 
-  bool ax = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
-  bool ay = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
-  bool az = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+  // Determine axes that may be neighbors
 
-  // Determine expected number of incoming Faces
-  // (should be function, and possibly precomputed and stored since constant )
+  bool axm = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
+  bool aym = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
+  bool azm = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+  bool axp = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
+  bool ayp = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
+  bool azp = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
 
-  int count = 1;  // self
-
-  if (ax ) count +=2;
-  if (ay ) count +=2;
-  if (az ) count +=2;
+  // Adjust for boundary faces
 
   bool periodic = simulation->boundary()->is_periodic();
 
-  double lower[3];
-  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
-  double upper[3];
-  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
-  
-  bool boundary[3][2];
-  is_on_boundary (lower,upper,boundary);
+  Hierarchy * hierarchy = simulation->hierarchy();
 
-  if (! periodic && ax ) {
-    if (boundary[axis_x][face_lower]) --count;
-    if (boundary[axis_x][face_upper]) --count;
+  double lower[3], upper[3];
+  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
+  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
+
+  bool is_boundary[3][2];
+  is_on_boundary (lower,upper,is_boundary);
+
+  axm = axm && (periodic || ! is_boundary[axis_x][face_lower]);
+  axp = axp && (periodic || ! is_boundary[axis_x][face_upper]);
+  aym = aym && (periodic || ! is_boundary[axis_y][face_lower]);
+  ayp = ayp && (periodic || ! is_boundary[axis_y][face_upper]);
+  azm = azm && (periodic || ! is_boundary[axis_z][face_lower]);
+  azp = azp && (periodic || ! is_boundary[axis_z][face_upper]);
+
+  // Count total expected number of incoming faces
+
+  // self
+
+  int count = 1;
+
+  // faces
+
+  if (field_descr->refresh_face(2)) {
+    if ( axm ) ++count;
+    if ( axp ) ++count;
+    if ( aym ) ++count;
+    if ( ayp ) ++count;
+    if ( azm ) ++count;
+    if ( azp ) ++count;
   }
-  if (! periodic && ay ) {
-    if (boundary[axis_y][face_lower]) --count;
-    if (boundary[axis_y][face_upper]) --count;
+
+  // edges
+
+  if (field_descr->refresh_face(1)) {
+    ERROR("Block::refresh()","refresh_face(1) != false");
+    if ( axm && aym ) ++count;
+    if ( axm && ayp ) ++count;
+    if ( axp && aym ) ++count;
+    if ( axp && ayp ) ++count;
+    if ( aym && azm ) ++count;
+    if ( aym && azp ) ++count;
+    if ( ayp && azm ) ++count;
+    if ( ayp && azp ) ++count;
+    if ( azm && axm ) ++count;
+    if ( azm && axp ) ++count;
+    if ( azp && axm ) ++count;
+    if ( azp && axp ) ++count;
   }
-  if (! periodic && az ) {
-    if (boundary[axis_z][face_lower]) --count;
-    if (boundary[axis_z][face_upper]) --count;
+
+  // corners
+
+  if (field_descr->refresh_face(0)) {
+    ERROR("Block::refresh()","refresh_face(0) != false");
+    if ( axm && aym && azm ) ++count;
+    if ( axm && aym && azp ) ++count;
+    if ( axm && ayp && azm ) ++count;
+    if ( axm && ayp && azp ) ++count;
+    if ( axp && aym && azm ) ++count;
+    if ( axp && aym && azp ) ++count;
+    if ( axp && ayp && azm ) ++count;
+    if ( axp && ayp && azp ) ++count;
   }
 
   //--------------------------------------------------
@@ -700,22 +847,22 @@ void Block::compute(int axis_set)
 //----------------------------------------------------------------------
 
 void Block::is_on_boundary (double lower[3], double upper[3],
-			     bool boundary[3][2]) throw()
+			     bool is_boundary[3][2]) throw()
 {
-  // Enforce boundary conditions ; refresh ghost zones
 
   // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-  boundary[axis_x][face_lower] = 
+
+  is_boundary[axis_x][face_lower] = 
     (cello::err_abs(lower_[axis_x],lower[axis_x]) < 1e-6);
-  boundary[axis_y][face_lower] = 
+  is_boundary[axis_y][face_lower] = 
     (cello::err_abs(lower_[axis_y],lower[axis_y]) < 1e-6);
-  boundary[axis_z][face_lower] = 
+  is_boundary[axis_z][face_lower] = 
     (cello::err_abs(lower_[axis_z],lower[axis_z]) < 1e-6);
-  boundary[axis_x][face_upper] = 
+  is_boundary[axis_x][face_upper] = 
     (cello::err_abs(upper_[axis_x],upper[axis_x]) < 1e-6);
-  boundary[axis_y][face_upper] = 
+  is_boundary[axis_y][face_upper] = 
     (cello::err_abs(upper_[axis_y],upper[axis_y]) < 1e-6);
-  boundary[axis_z][face_upper] = 
+  is_boundary[axis_z][face_upper] = 
     (cello::err_abs(upper_[axis_z],upper[axis_z]) < 1e-6);
 }
 //----------------------------------------------------------------------
