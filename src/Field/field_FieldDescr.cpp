@@ -31,8 +31,8 @@ FieldDescr::FieldDescr ()
     min_action_(),
     max_action_()
 {
-  refresh_face_[0]=false;
-  refresh_face_[1]=false;
+  refresh_face_[0]=true;
+  refresh_face_[1]=true;
   refresh_face_[2]=true;
 
 }

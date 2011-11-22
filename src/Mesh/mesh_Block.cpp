@@ -510,7 +510,6 @@ void Block::refresh (int axis_set)
   // Refresh edge ghost zones
 
   if (field_descr->refresh_face(1)) {
-    ERROR("Block::refresh()","refresh_face(1) != false");
     if ( axm && aym ) {
       field_face.load (field_descr, field_block(), -1, -1, 0);
       block_array(ixm,iym,iz).p_refresh_face 
@@ -578,7 +577,7 @@ void Block::refresh (int axis_set)
   // Refresh corner ghost zones
 
   if (field_descr->refresh_face(0)) {
-    ERROR("Block::refresh()","refresh_face(0) != false");
+
     if ( axm && aym && azm ) {
       field_face.load (field_descr, field_block(), -1, -1, -1);
       block_array(ixm,iym,izm).p_refresh_face 
@@ -708,7 +707,6 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
   // edges
 
   if (field_descr->refresh_face(1)) {
-    ERROR("Block::refresh()","refresh_face(1) != false");
     if ( axm && aym ) ++count;
     if ( axm && ayp ) ++count;
     if ( axp && aym ) ++count;
@@ -726,7 +724,6 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
   // corners
 
   if (field_descr->refresh_face(0)) {
-    ERROR("Block::refresh()","refresh_face(0) != false");
     if ( axm && aym && azm ) ++count;
     if ( axm && aym && azp ) ++count;
     if ( axm && ayp && azm ) ++count;
