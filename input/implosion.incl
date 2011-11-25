@@ -29,7 +29,7 @@
    }
 
    Parallel {
-      temp_update_all  = true;
+      temp_update_all  = false;
       temp_update_full = true;
    }
 
