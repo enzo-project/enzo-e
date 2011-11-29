@@ -595,6 +595,10 @@ void FieldBlock::print (const FieldDescr * field_descr,
 			bool use_file) const throw()
 {
 
+#ifndef CELLO_DEBUG
+  return;
+#endif
+
   // int ip,np;
   // MPI_Comm_rank (MPI_COMM_WORLD, &ip);
   // MPI_Comm_size (MPI_COMM_WORLD, &np);
@@ -670,6 +674,10 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	      min = MIN(min,field[i]);
 	      max = MAX(max,field[i]);
 	      sum += field[i];
+#ifdef CELLO_DEBUG_VERBOSE
+	      printf ("DEBUG %s %s (%g %g %g) (%d %d %d)  %g\n",
+		      message,field_name,x,y,z,ix,iy,iz,field[i]);
+#endif
 	      if ( isnan(field[i])) {
 		WARNING8("FieldBlock::print",
 			 "NAN: %s %s (%g %g %g) (%d %d %d)\n",
@@ -708,6 +716,10 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	      max = MAX(max,field[i]);
 	      sum += field[i];
 	      sum += field[i];
+#ifdef CELLO_DEBUG_VERBOSE
+	      printf ("DEBUG %s %s (%g %g %g) (%d %d %d)  %g\n",
+		      message,field_name,x,y,z,ix,iy,iz,field[i]);
+#endif
 	      if (isnan(field[i])) {
 		WARNING8("FieldBlock::print",
 			 "NAN match: %s %s (%g %g %g) (%d %d %d)\n",
