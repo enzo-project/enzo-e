@@ -6,11 +6,15 @@ Import('env')
 Import('type')
 Import('use_papi')
 
+Import('bin_path')
+Import('inc_path')
+Import('lib_path')
+
 #------------------------------
 # DEPENDENCIES
 #------------------------------
 
-components = ['method',
+components = ['simulation','method',
 	      'mesh', 'field',
 	      'memory','parallel',
 	      'parameters',
@@ -39,7 +43,7 @@ env = env.Clone(LIBS=[components,libraries])
 # TARGETS
 #------------------------------
 
-libraries       = env.Library ('simulation', [sources])
+libraries = env.Library ('simulation', [sources])
 
 if (type == "charm"):
    env.CharmBuilder('simulation.decl.h','simulation.ci',ARG='simulation')
@@ -50,8 +54,8 @@ if (type == "charm"):
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
+env.Alias('install-inc',env.Install (inc_path,includes))
+env.Alias('install-lib',env.Install (lib_path,libraries))
 
 
 

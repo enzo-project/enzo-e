@@ -20,17 +20,10 @@ public: // interface
   /// Constructor
   FieldFace() throw();
 
+#ifdef CONFIG_USE_CHARM
   /// Constructor
-  FieldFace(int n, char * array) throw()
-    : array_()
-  {
-    array_.resize(n);
-    for (int i=0; i<n; i++) array_[i] = array[i]; 
-  };
-
-  //----------------------------------------------------------------------
-  // Big Three
-  //----------------------------------------------------------------------
+  FieldFace(int n, char * array) throw();
+#endif
 
   /// Destructor
   ~FieldFace() throw();
@@ -43,29 +36,35 @@ public: // interface
 
   //----------------------------------------------------------------------
 
+  /// Set whether or not to include ghost zones along each axis
+  inline void include_ghosts (bool gx, bool gy = true, bool gz = true)
+  {
+    full_[axis_x] = gx;
+    full_[axis_y] = gy;
+    full_[axis_z] = gz;
+  }
+  
   /// Load from field's face data
   void load(const FieldDescr * field_descr,
 	    const FieldBlock * field_block,
-	    axis_enum          axis,
-	    face_enum          face,
-	    bool               full_x = true,
-	    bool               full_y = true) throw();
+	    int                fx,
+	    int                fy = 0,
+	    int                fz = 0) throw();
 
 
   /// Store to field's ghost data
   void store(const FieldDescr * field_descr,
 	     FieldBlock *       field_block,
-	     axis_enum          axis,
-	     face_enum          face,
-	     bool               full_x = true,
-	     bool               full_y = true) throw();
+	     int                fx,
+	     int                fy = 0,
+	     int                fz = 0) throw();
 
   /// Allocate array_ storage
   void allocate(const FieldDescr * field_descr,
 		const FieldBlock * field_block,
-		axis_enum          axis,
-		bool               full_x = true,
-		bool               full_y = true) throw();
+		int                fx,
+		int                fy = 0,
+		int                fz = 0) throw();
 
   /// Deallocate array_ storage
   void deallocate() throw();
@@ -76,13 +75,15 @@ public: // interface
   /// Return a pointer to the array
   char * array () throw() { return &array_[0]; };
 
-  /// Print basic field characteristics for debugging
-  void print (const FieldDescr * field_descr,
-	      const FieldBlock * field_block,
-	      axis_enum axis, face_enum face,
-	      const char * message = 0) const throw();
-
 private: // functions
+
+  /// Compute loop limits for load_precision_ and store_precision_
+  void loop_limits
+  (int *ix0, int *iy0, int *iz0,
+   int *nx,  int *ny,  int *nz,
+   int nd3[3], int ng3[3],
+   int  fx, int  fy, int  fz,
+   bool load);
 
 
   /// Precision-agnostic function for loading field block face into
@@ -90,31 +91,30 @@ private: // functions
   template<class T>
   size_t load_precision_ (T *       array_face, 
 			  const T * field_face,
-			  int       n[3], 
-			  int       nd[3], 
-			  int       ng[3],
-			  axis_enum axis, 
-			  face_enum face, 
-			  bool      full_x = true,
-			  bool      full_y = true) throw();
+			  int       nd3[3], 
+			  int       ng3[3],
+			  int       fx,
+			  int       fy = 0,
+			  int       fz = 0) throw();
 
   /// Precision-agnostic function for copying the field_face array into
   /// the field block ghosts; returns number of bytes copied
   template<class T>
   size_t store_precision_ (T *       field_ghosts, 
 			   const T * array_ghosts, 
-			  int       n[3], 
-			  int       nd[3], 
-			  int       ng[3],
-			  axis_enum axis, 
-			  face_enum face, 
-			  bool      full_x = true,
-			  bool      full_y = true) throw();
+			   int       nd3[3], 
+			   int       ng3[3],
+			   int       fx,
+			   int       fy = 0,
+			   int       fz = 0) throw();
 
 private: // attributes
 
   /// Allocated array used for storing all ghosts and face
   std::vector<char> array_;
+
+  /// Whether to include ghost zones along x,y,z axes
+  bool full_[3];
 
 };
 

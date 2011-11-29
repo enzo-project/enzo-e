@@ -1,6 +1,3 @@
-# SConscript('ppm/SConscript')
-# SConscript('ppml/SConscript')
-
 #------------------------------
 # IMPORTS
 #------------------------------
@@ -9,11 +6,15 @@ Import('env')
 Import('type')
 Import('use_papi')
 
+Import('bin_path')
+Import('inc_path')
+Import('lib_path')
+
 #------------------------------
 # DEPENDENCIES
 #------------------------------
 
-components = ['simulation', 'method', 
+components = ['enzo','simulation', 'method', 
 	      'mesh', 'field',
 	      'io', 'disk','memory','parallel',
 	      'parameters', 
@@ -72,9 +73,10 @@ sources  = [Glob('enzo_*cpp'),
 	    'FindField.cpp']
 
 
+charm_main = []
 if (type == 'charm'):
    includes = includes + ['enzo.decl.h','enzo.def.h']
-   sources = sources + ['../Main/main_enzo.cpp']
+   charm_main = ['../Main/main_enzo.cpp']
 
 #------------------------------
 # ENVIRONMENTS
@@ -88,7 +90,7 @@ env = env.Clone(LIBS=[components,libraries])
 
 libraries     = env.Library ('enzo', sources)
 
-test_enzo_p = env.Program (['enzo-p.cpp', sources])
+test_enzo_p = env.Program (['enzo-p.cpp', charm_main])
 
 binaries = [test_enzo_p]
 
@@ -100,9 +102,9 @@ if (type == "charm"):
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',  includes))
-env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
-env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))
+env.Alias('install-bin',env.Install (bin_path,binaries))
+env.Alias('install-inc',env.Install (inc_path,includes))
+env.Alias('install-lib',env.Install (lib_path,libraries))
 
 
 

@@ -128,7 +128,6 @@ void Simulation::initialize_simulation_() throw()
 void Simulation::initialize_data_descr_() throw()
 {
 
-  /* MEMORY LEAK */
   field_descr_ = new FieldDescr;
 
   //--------------------------------------------------
@@ -168,6 +167,29 @@ void Simulation::initialize_data_descr_() throw()
     field_descr_->set_ghosts(i,gx,gy,gz);
   }
 
+  // Set face dimensions to refresh
+
+  //--------------------------------------------------
+  // parameter: Field : refresh_edges
+  // parameter: Field : refresh_corners
+  //--------------------------------------------------
+
+  field_descr_->set_refresh_face(2, dimension_ - 1);
+
+  // Refresh ghost edges explicitly
+  if (parameters_->type("Field:refresh_edges") == parameter_logical) {
+    bool refresh_edges = 
+      parameters_->value_logical ("Field:refresh:edges",false);
+    field_descr_->set_refresh_face(1,refresh_edges);
+  }
+
+  // Refresh ghost corners explicitly
+  if (parameters_->type("Field:refresh_corners") == parameter_logical) {
+    bool refresh_corners = 
+      parameters_->value_logical ("Field:refresh:corners",false);
+    field_descr_->set_refresh_face(0,refresh_corners);
+  }
+  
   // Set precision
 
   //--------------------------------------------------
@@ -523,7 +545,7 @@ void Simulation::initialize_output_() throw()
 
       // Set time limits
 
-      int start, stop, step;
+      int start = 0, stop = 0, step = 0;
 
       if (len == 3) { 
 
@@ -882,11 +904,10 @@ void Simulation::initialize_method_() throw()
 
   int method_count = parameters_->list_length("sequence");
 
-  if (method_count == 0) {
-    ERROR ("Simulation::initialize_method_",
-	   "List parameter 'Method sequence' must have length "
-	   "greater than zero");
-  }
+//   ASSERT ("Simulation::initialize_method_",
+// 	  "List parameter 'Method sequence' must have length "
+// 	  "greater than zero",
+// 	  (method_count > 0));
 
   for (int i=0; i<method_count; i++) {
 
@@ -982,6 +1003,7 @@ const Factory & Simulation::factory() const throw()
 Stopping * Simulation::create_stopping_ (std::string name) throw ()
 {
   ERROR ("Simulation::create_stopping_","Implictly abstract function called");
+  return NULL;
 }
 
 //----------------------------------------------------------------------
@@ -989,6 +1011,7 @@ Stopping * Simulation::create_stopping_ (std::string name) throw ()
 Timestep * Simulation::create_timestep_ (std::string name) throw ()
 { 
   ERROR ("Simulation::create_timestep_","Implictly abstract function called");
+  return NULL;
 }
 
 //----------------------------------------------------------------------
@@ -996,6 +1019,7 @@ Timestep * Simulation::create_timestep_ (std::string name) throw ()
 Initial * Simulation::create_initial_ (std::string name) throw ()
 { 
   ERROR ("Simulation::create_initial_","Implictly abstract function called");
+  return NULL;
 }
 
 //----------------------------------------------------------------------
@@ -1003,6 +1027,7 @@ Initial * Simulation::create_initial_ (std::string name) throw ()
 Boundary * Simulation::create_boundary_ (std::string name) throw ()
 {
   ERROR ("Simulation::create_boundary_","Implictly abstract function called");
+  return NULL;
 }
 
 //----------------------------------------------------------------------
@@ -1022,7 +1047,9 @@ Output * Simulation::create_output_ (std::string type) throw ()
 
 Method * Simulation::create_method_ (std::string name) throw ()
 {
-  ERROR ("Simulation::create_method_","Implictly abstract function called");
+  ERROR ("Simulation::create_method_",
+	 "Implictly abstract function called");
+  return NULL;
 }
 
 //======================================================================

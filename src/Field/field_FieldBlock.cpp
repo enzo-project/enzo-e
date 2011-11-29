@@ -388,12 +388,9 @@ void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
 				const Patch * patch,
 				int ibx, int iby, int ibz,
-				face_enum face,
-				axis_enum axis) throw()
+				int fx, int fy, int fz) throw()
 
 {
-
-  // INCOMPLETE
 
   if ( ! ghosts_allocated() ) {
     WARNING("FieldBlock::refresh_ghosts",
@@ -406,38 +403,17 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
 
   // Send face
 
-  int ip_remote = false;
-
-  switch (axis) {
-  case axis_x:
-    ip_remote = (face == face_lower) ?
-      layout->process3(ibx-1,iby,ibz) :
-      layout->process3(ibx+1,iby,ibz);
-    break;
-  case axis_y:
-    ip_remote = (face == face_lower) ?
-      layout->process3(ibx,iby-1,ibz) :
-      layout->process3(ibx,iby+1,ibz);
-    break;
-  case axis_z:
-    ip_remote = (face == face_lower) ?
-      layout->process3(ibx,iby,ibz-1) :
-      layout->process3(ibx,iby,ibz+1);
-    break;
-  default:
-    ERROR("FieldBlock::refresh_ghosts",
-	  "axis_all not handled");
-  }
+  int ip_remote = layout->process3((ibx+fx),(iby+fy),(ibz+fz));
 
   // Transfer face data via FieldFace objects
 
   FieldFace face_send;
   FieldFace face_recv;
 
-  face_send.allocate(field_descr,this,axis);
-  face_recv.allocate(field_descr,this,axis);
+  face_send.allocate(field_descr,this,fx,fy,fz);
+  face_recv.allocate(field_descr,this,fx,fy,fz);
 
-  face_send.load(field_descr,this,axis, face);
+  face_send.load(field_descr,this,fx,fy,fz);
 
   int ip = group_process->rank();
 
@@ -446,6 +422,7 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
   if (ip < ip_remote) { // send then receive
 
     // send 
+
     handle_send = group_process->send_begin 
       (ip_remote, face_send.array(),face_send.size());
     group_process->wait(handle_send);
@@ -474,7 +451,8 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
     group_process->send_end (handle_send);
 
   }
-  face_recv.store(field_descr,this,axis,face);
+
+  face_recv.store(field_descr,this,fx,fy,fz);
 
   face_send.deallocate();
   face_recv.deallocate();
@@ -595,32 +573,40 @@ void FieldBlock::print (const FieldDescr * field_descr,
 			bool use_file) const throw()
 {
 
-#ifndef CELLO_DEBUG
-  return;
+   int ip=0,np=1;
+#ifdef CONFIG_USE_CHARM
+   ip=CkMyPe();
+   np=CkNumPes();
 #endif
-
-  // int ip,np;
+#ifdef CONFIG_USE_MPI
+   MPI_Comm_rank(MPI_COMM_WORLD,&ip);
+   MPI_Comm_size(MPI_COMM_WORLD,&np);
+#endif
+   char filename [40];
+   sprintf (filename,"%s-%d.debug",message,ip);
+   FILE * fp = fopen (filename,"w");
   // MPI_Comm_rank (MPI_COMM_WORLD, &ip);
   // MPI_Comm_size (MPI_COMM_WORLD, &np);
 
-  ASSERT("FieldBlock::print",
-	 "FieldBlocks not allocated",
-	 array_allocated());
+   ASSERT("FieldBlock::print",
+	  "FieldBlocks not allocated",
+	  array_allocated());
 
-  int field_count = field_descr->field_count();
-  for (int index_field=0; index_field<field_count; index_field++) {
+   int field_count = field_descr->field_count();
+   for (int index_field=0; index_field<field_count; index_field++) {
 
-    const char * field_name = field_descr->field_name(index_field).c_str();
+     // WARNING: not copying string works on some compilers but not others
+     const char * field_name = strdup(field_descr->field_name(index_field).c_str());
 
-    int nxd,nyd,nzd;
-    field_size(field_descr,index_field,&nxd,&nyd,&nzd);
-    int gx,gy,gz;
-    field_descr->ghosts(index_field,&gx,&gy,&gz);
+     int nxd,nyd,nzd;
+     field_size(field_descr,index_field,&nxd,&nyd,&nzd);
+     int gx,gy,gz;
+     field_descr->ghosts(index_field,&gx,&gy,&gz);
 
-    int ixm,iym,izm;
-    int ixp,iyp,izp;
+     int ixm,iym,izm;
+     int ixp,iyp,izp;
 
-    // Exclude ghost zones
+     // Exclude ghost zones
 
      // ixm = gx;
      // iym = gy;
@@ -630,7 +616,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
      // iyp = nyd - gy;
      // izp = nzd - gz;
 
-    // Include ghost zones
+     // Include ghost zones
 
      ixm = 0;
      iym = 0;
@@ -641,131 +627,139 @@ void FieldBlock::print (const FieldDescr * field_descr,
      izp = nzd;
 
 
-    // if (np==2) {
-    //   if (ip==0) ixp=nxd-gx;
-    //   if (ip==1) ixm=gx;
-    // }
-    int nx,ny,nz;
+     // if (np==2) {
+     //   if (ip==0) ixp=nxd-gx;
+     //   if (ip==1) ixm=gx;
+     // }
+     int nx,ny,nz;
 
-    nx = (ixp-ixm);
-    ny = (iyp-iym);
-    nz = (izp-izm);
+     nx = (ixp-ixm);
+     ny = (iyp-iym);
+     nz = (izp-izm);
 
-    double hx,hy,hz;
+     double hx,hy,hz;
 
-    hx = (upper[0]-lower[0])/(nxd-2*gx);
-    hy = (upper[1]-lower[1])/(nyd-2*gy);
-    hz = (upper[2]-lower[2])/(nzd-2*gz);
-
-    switch (field_descr->precision(index_field)) {
-    case precision_single:
-      {
-	float * field = (float * ) field_values(index_field);
-	float min = std::numeric_limits<float>::max();
-	float max = std::numeric_limits<float>::min();
-	double sum = 0.0;
-	for (int iz=izm; iz<izp; iz++) {
-	  double z = hz*(iz-gz) + lower[axis_z];
-	  for (int iy=iym; iy<iyp; iy++) {
-	    double y = hy*(iy-gy) + lower[axis_y];
-	    for (int ix=ixm; ix<ixp; ix++) {
-	      double x = hx*(ix-gx) + lower[axis_x];
-	      int i = ix + nxd*(iy + nyd*iz);
-	      min = MIN(min,field[i]);
-	      max = MAX(max,field[i]);
-	      sum += field[i];
+     hx = (upper[0]-lower[0])/(nxd-2*gx);
+     hy = (upper[1]-lower[1])/(nyd-2*gy);
+     hz = (upper[2]-lower[2])/(nzd-2*gz);
 #ifdef CELLO_DEBUG_VERBOSE
-	      printf ("DEBUG %s %s (%g %g %g) (%d %d %d)  %g\n",
-		      message,field_name,x,y,z,ix,iy,iz,field[i]);
+     TRACE("CELLO_DEBUG_VERBOSE");
 #endif
-	      if ( isnan(field[i])) {
-		WARNING8("FieldBlock::print",
-			 "NAN: %s %s (%g %g %g) (%d %d %d)\n",
+     switch (field_descr->precision(index_field)) {
+     case precision_single:
+       {
+	 float * field = (float * ) field_values(index_field);
+	 float min = std::numeric_limits<float>::max();
+	 float max = std::numeric_limits<float>::min();
+	 double sum = 0.0;
+	 for (int iz=izm; iz<izp; iz++) {
+	   for (int iy=iym; iy<iyp; iy++) {
+	     for (int ix=ixm; ix<ixp; ix++) {
+	       int i = ix + nxd*(iy + nyd*iz);
+	       min = MIN(min,field[i]);
+	       max = MAX(max,field[i]);
+	       sum += field[i];
+#ifdef CELLO_DEBUG_VERBOSE
+	       double x = hx*(ix-gx) + lower[axis_x];
+	       double y = hy*(iy-gy) + lower[axis_y];
+	       double z = hz*(iz-gz) + lower[axis_z];
+	       if (isnan(field[i])) {
+		 fprintf(fp,"NAN match: %s %s  %g %g %g  %d %d %d\n",
 			 message,field_name,x,y,z,ix,iy,iz);
-	      }
-	      if (field[i] == TEMP_CLEAR_VALUE) {
-		WARNING8("FieldBlock::print",
-			 "NOT INITIALIZED: %s %s (%g %g %g) (%d %d %d)\n",
+	       }
+	       if (field[i] == TEMP_CLEAR_VALUE) {
+		 fprintf(fp,"NOT INITIALIZED: %s %s  %g %g %g  %d %d %d\n",
 			 message,field_name,x,y,z,ix,iy,iz);
-	      }
-	    }
-	  }
-	}
-	double avg = sum / (nx*ny*nz);
-	printf
-	  ("%s [%s] %18.14g %18.14g %18.14g\n",
-	   message ? message : "", field_name, min,avg,max);
+	       }
+#endif
+	     }
+	   }
+	 }
+	 double avg = sum / (nx*ny*nz);
+	 fprintf
+	   (fp,"%s [%s] %18.14g %18.14g %18.14g\n",
+	    message ? message : "", field_name, min,avg,max);
 
-      }
-      break;
-    case precision_double:
-      {
-	double * field = (double * ) field_values(index_field);
-	double min = std::numeric_limits<double>::max();
-	double max = std::numeric_limits<double>::min();
-	double sum = 0.0;
+       }
+       break;
+     case precision_double:
+       {
+	 double * field = (double * ) field_values(index_field);
+	 double min = std::numeric_limits<double>::max();
+	 double max = std::numeric_limits<double>::min();
+	 double sum = 0.0;
 		  
-	for (int iz=izm; iz<izp; iz++) {
-	  double z = hz*(iz-gz) + lower[axis_z];
-	  for (int iy=iym; iy<iyp; iy++) {
-	    double y = hy*(iy-gy) + lower[axis_y];
-	    for (int ix=ixm; ix<ixp; ix++) {
-	      double x = hx*(ix-gx) + lower[axis_x];
-	      int i = ix + nxd*(iy + nyd*iz);
-	      min = MIN(min,field[i]);
-	      max = MAX(max,field[i]);
-	      sum += field[i];
-	      sum += field[i];
+	 for (int iz=izm; iz<izp; iz++) {
+	   for (int iy=iym; iy<iyp; iy++) {
+	     for (int ix=ixm; ix<ixp; ix++) {
+	       int i = ix + nxd*(iy + nyd*iz);
+	       min = MIN(min,field[i]);
+	       max = MAX(max,field[i]);
+	       sum += field[i];
 #ifdef CELLO_DEBUG_VERBOSE
-	      printf ("DEBUG %s %s (%g %g %g) (%d %d %d)  %g\n",
-		      message,field_name,x,y,z,ix,iy,iz,field[i]);
+	       double x = hx*(ix-gx) + lower[axis_x];
+	       double y = hy*(iy-gy) + lower[axis_y];
+	       double z = hz*(iz-gz) + lower[axis_z];
+ 	       if (isnan(field[i])) {
+ 		 fprintf(fp,"NAN match: %s %s  %g %g %g  %d %d %d\n",
+ 			 message,field_name,x,y,z,ix,iy,iz);
+ 	       }
+ 	       if (field[i] == TEMP_CLEAR_VALUE) {
+ 		 fprintf(fp,"not initialized: %s %s  %g %g %g  %d %d %d\n",
+ 			 message,field_name,x,y,z,ix,iy,iz);
+ 	       }
 #endif
-	      if (isnan(field[i])) {
-		WARNING8("FieldBlock::print",
-			 "NAN match: %s %s (%g %g %g) (%d %d %d)\n",
-			 message,field_name,x,y,z,ix,iy,iz);
-	      }
-	      if (field[i] == TEMP_CLEAR_VALUE) {
-		WARNING8("FieldBlock::print",
-			 "NOT INITIALIZED: %s %s (%g %g %g) (%d %d %d)\n",
-			 message,field_name,x,y,z,ix,iy,iz);
-	      }
-	    }
-	  }
-	}
-	double avg = sum / (nx*ny*nz);
-	printf 
-	  ("%s [%s] %18.14g %18.14g %18.14g\n",
-	   message ? message : "",field_name,min,avg,max);
-      }
-      break;
-    case precision_quadruple:
-      {
-	long double * field = 
-	  (long double * ) field_values(index_field);
-	long double min = std::numeric_limits<long double>::max();
-	long double max = std::numeric_limits<long double>::min();
-	long double sum = 0.0;
-	for (int iz=izm; iz<izp; iz++) {
-	  for (int iy=iym; iy<iyp; iy++) {
-	    for (int ix=ixm; ix<ixp; ix++) {
-	      int i = ix + nxd*(iy + nyd*iz);
-	      min = MIN(min,field[i]);
-	      max = MAX(max,field[i]);
-	      sum += field[i];
-	    }
-	  }
-	}
-	long double avg = sum / (nx*ny*nz);
-	printf 
-	  ("%s [%s] %18.14Lf %18.14Lf %18.14Lf\n",
-	   message ? message : "",field_name,min,avg,max);
-      }
-      break;
-    default:
-      ERROR("FieldBlock::print", "Unsupported precision");
-    }
-  }
+	     }
+	   }
+	 }
+	 double avg = sum / (nx*ny*nz);
+	 fprintf 
+	   (fp,"%s [%s] %18.14g %18.14g %18.14g\n",
+	    message ? message : "",field_name,min,avg,max);
+       }
+       break;
+     case precision_quadruple:
+       {
+	 long double * field = 
+	   (long double * ) field_values(index_field);
+	 long double min = std::numeric_limits<long double>::max();
+	 long double max = std::numeric_limits<long double>::min();
+	 long double sum = 0.0;
+	 for (int iz=izm; iz<izp; iz++) {
+	   for (int iy=iym; iy<iyp; iy++) {
+	     for (int ix=ixm; ix<ixp; ix++) {
+	       int i = ix + nxd*(iy + nyd*iz);
+	       min = MIN(min,field[i]);
+	       max = MAX(max,field[i]);
+	       sum += field[i];
+#ifdef CELLO_DEBUG_VERBOSE
+	       double x = hx*(ix-gx) + lower[axis_x];
+	       double y = hy*(iy-gy) + lower[axis_y];
+	       double z = hz*(iz-gz) + lower[axis_z];
+ 	       if (isnan(field[i])) {
+ 		 fprintf(fp,"NAN match: %s %s  %Lf %Lf %Lf  %d %d %d\n",
+ 			 message,field_name,x,y,z,ix,iy,iz);
+ 	       }
+ 	       if (field[i] == TEMP_CLEAR_VALUE) {
+ 		 fprintf(fp,"not initialized: %s %s  %Lf %Lf %Lf  %d %d %d\n",
+ 			 message,field_name,x,y,z,ix,iy,iz);
+ 	       }
+#endif
+	     }
+	   }
+	 }
+	 long double avg = sum / (nx*ny*nz);
+	 fprintf 
+	   (fp,"%s [%s] %18.14Lf %18.14Lf %18.14Lf\n",
+	    message ? message : "",field_name,min,avg,max);
+       }
+       break;
+     default:
+       ERROR("FieldBlock::print", "Unsupported precision");
+     }
+
+     free ((void *)field_name);
+   }
 }
 
 //----------------------------------------------------------------------

@@ -70,7 +70,8 @@ public: // interface
   void p_refresh(int cycle, double time, double dt, int axis_set);
 
   /// Refresh a FieldFace
-  void p_refresh_face(int n, char buffer[], int axis, int face, int axis_set);
+  void p_refresh_face(int n, char buffer[], int axis_set,
+		      int fx, int fy, int fz);
 
   /// Contribute block data to ith output object in the simulation
   void p_write (int index_output);
@@ -86,9 +87,6 @@ public: // interface
   /// Boundary and Method
   void compute(int axis_set);
 
-  /// Refresh ghost zones and apply boundary conditions along a specific axis
-  void refresh_axis(axis_enum axis);
-
   //==================================================
 
 #else /* ! CONFIG_USE_CHARM */
@@ -96,8 +94,7 @@ public: // interface
   /// Refresh ghost data
   void refresh_ghosts(const FieldDescr * field_descr,
 		      const Patch * patch,
-		      face_enum face,
-		      axis_enum axis,
+		      int fx, int fy, int fz,
 		      int index_field_set = 0) throw();
 #endif
 
@@ -122,11 +119,29 @@ public: // interface
   /// Return the ith Field block
   FieldBlock * field_block (int i=0) throw();
 
+//----------------------------------------------------------------------
+
   /// Return domain lower extent
-  void lower(double * x = 0, double * y = 0, double * z = 0) const throw ();
+  inline void lower(double * x, 
+		    double * y = 0,
+		    double * z = 0) const throw ()
+  {
+    if (x) *x = lower_[0];
+    if (y) *y = lower_[1];
+    if (z) *z = lower_[2];
+  }
+
+//----------------------------------------------------------------------
 
   /// Return domain upper extent
-  void upper(double * x = 0,  double * y = 0, double * z = 0) const throw ();
+  inline void upper(double * x,
+		    double * y = 0,
+		    double * z = 0) const throw ()
+  {
+    if (x) *x = upper_[0];
+    if (y) *y = upper_[1];
+    if (z) *z = upper_[2];
+  }
 
   /// Return the position of this Block in the containing Patch 
   void index_patch (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
@@ -136,10 +151,6 @@ public: // interface
 
   /// Return the size the containing Patch
   void size_patch (int * nx, int * ny, int * nz) const throw();
-
-  /// Return the neighboring block in the given direction
-  /// [tested in test_Patch]
-  Block * neighbor (axis_enum axis, face_enum face) const throw();
 
   /// Return the current cycle number
   int cycle() const throw() { return cycle_; };

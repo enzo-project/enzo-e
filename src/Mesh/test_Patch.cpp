@@ -225,13 +225,7 @@ PARALLEL_MAIN_BEGIN
 
     }
 
-  //--------------------------------------------------
-
-    unit_class("Block");
-    unit_func("neighbor");
-
-    // Block::neighbor()
-    unit_assert(unit_incomplete);
+    //--------------------------------------------------
 
     ++block_counter;
 

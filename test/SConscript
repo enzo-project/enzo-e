@@ -3,7 +3,8 @@ Import('parallel_run')
 Import('type')
 Import('serial_run')
 
-bin_path = '#/bin/'+type
+Import('bin_path')
+Import('test_path')
 
 env['COPY'] = ''
 
@@ -20,8 +21,8 @@ env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
 env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 env.Append(BUILDERS = { 'RunMethod'   : run_method } )
 
-env_mv_png  = env.Clone(COPY = 'mv *.png test/' + type)
-env_mv_test = env.Clone(COPY = 'mv test*out test*in test/' + type)
+env_mv_png  = env.Clone(COPY = 'mv *.png ' + test_path)
+env_mv_test = env.Clone(COPY = 'mv test*out test*in ' + test_path)
 
 #----------------------------------------------------------------------
 # DISK COMPONENT          
@@ -114,48 +115,48 @@ env.RunSerial('parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/pro
 
 Clean(env_mv_png.RunSerial ('test_method_ppm-1.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppm-1.in'),
-      [Glob('#/test/' + type + '/method_ppm-1-??????-*.png'),
-       Glob('#/test/' + type + '/method_ppm-1-??-??????.h5'),
+      [Glob('#/' + test_path + '/method_ppm-1-??????-*.png'),
+       Glob('#/' + test_path + '/method_ppm-1-??-??????.h5'),
        'test_method_ppm-1.unit', '#/input/method_ppm-1.in.out'])
 
 env.MakeMovie ("method_ppm-1.swf", "test_method_ppm-1.unit", \
-                ARGS="test/" + type + "/method_ppm-1-??????.png");
+                ARGS= test_path + "/method_ppm-1-??????.png");
 
 
 Clean(env_mv_png.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppm-8.in'),
-      [Glob('#/test/' + type + '/method_ppm-8-??????-*.png'),
-      Glob('#/test/' + type + '/method_ppm-8-??-??????.h5'),
+      [Glob('#/' + test_path + '/method_ppm-8-??????-*.png'),
+      Glob('#/' + test_path + '/method_ppm-8-??-??????.h5'),
        'test_method_ppm-8.unit', '#/input/method_ppm-8.in.out'])
 
 env.MakeMovie ("method_ppm-8.swf", "test_method_ppm-8.unit", \
-                ARGS="test/" + type + "/method_ppm-8-??????.png");
+                ARGS= test_path + "/method_ppm-8-??????.png");
 
 Clean(env_mv_png.RunSerial ('test_method_ppml-1.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppml-1.in'),
-      [Glob('#/test/' + type + '/method_ppml-1-?-????-*.png'),
-       Glob('#/test/' + type + '/method_ppml-1-??-????-*.h5'),
+      [Glob('#/' + test_path + '/method_ppml-1-?-????-*.png'),
+       Glob('#/' + test_path + '/method_ppml-1-??-????-*.h5'),
        'test_method_ppml-1.unit', '#/input/method_ppml-1.in.out'])
 
 env.MakeMovie ("method_ppml-1-x.swf", "test_method_ppml-1.unit", \
-                ARGS="test/" + type + "/method_ppml-1-x-????.png");
+                ARGS= test_path + "/method_ppml-1-x-????.png");
 env.MakeMovie ("method_ppml-1-y.swf", "test_method_ppml-1.unit", \
-                ARGS="test/" + type + "/method_ppml-1-y-????.png");
+                ARGS= test_path + "/method_ppml-1-y-????.png");
 env.MakeMovie ("method_ppml-1-z.swf", "test_method_ppml-1.unit", \
-                ARGS="test/" + type + "/method_ppml-1-z-????.png");
+                ARGS= test_path + "/method_ppml-1-z-????.png");
 
 Clean(env_mv_png.RunParallel ('test_method_ppml-8.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppml-8.in'),
-      [Glob('#/test/' + type + '/method_ppml-8-?-????-*.png'),
-       Glob('#/test/' + type + '/method_ppml-8-??-????-*.h5'),
+      [Glob('#/' + test_path + '/method_ppml-8-?-????-*.png'),
+       Glob('#/' + test_path + '/method_ppml-8-??-????-*.h5'),
        'test_method_ppml-8.unit', '#/input/method_ppml-8.in.out'])
 
 env.MakeMovie ("method_ppml-8-x.swf", "test_method_ppml-8.unit", \
-                ARGS="test/" + type + "/method_ppml-8-x-????.png");
+                ARGS= test_path + "/method_ppml-8-x-????.png");
 env.MakeMovie ("method_ppml-8-y.swf", "test_method_ppml-8.unit", \
-                ARGS="test/" + type + "/method_ppml-8-y-????.png");
+                ARGS= test_path + "/method_ppml-8-y-????.png");
 env.MakeMovie ("method_ppml-8-z.swf", "test_method_ppml-8.unit", \
-                ARGS="test/" + type + "/method_ppml-8-z-????.png");
+                ARGS= test_path + "/method_ppml-8-z-????.png");
 
 #----------------------------------------------------------------------
 # BOUNDARY CONDITIONS
@@ -167,28 +168,28 @@ env.MakeMovie ("method_ppml-8-z.swf", "test_method_ppml-8.unit", \
 Clean(env_mv_png.RunParallel ('test_boundary_reflecting-2d.unit',
                 bin_path + '/enzo-p', 
                 ARGS='input/boundary_reflecting-2d.in'),
-      [Glob('#/test/' + type + '/boundary_reflecting-2d.png'),
+      [Glob('#/' + test_path + '/boundary_reflecting-2d.png'),
        'test_boundary_reflecting-2d.unit',
        '#/input/boundary_reflecting-2d.in.out'])
 
 Clean(env_mv_png.RunParallel ('test_boundary_periodic-2d.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/boundary_periodic-2d.in'),
-      [Glob('#/test/' + type + '/boundary_periodic-2d.png'),
+      [Glob('#/' + test_path + '/boundary_periodic-2d.png'),
        'test_boundary_periodic-2d.unit',
        '#/input/boundary_periodic-2d.in.out'])
 
 Clean(env_mv_png.RunParallel ('test_boundary_inflow-2d.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/boundary_inflow-2d.in'),
-      [Glob('#/test/' + type + '/boundary_inflow-2d.png'),
+      [Glob('#/' + test_path + '/boundary_inflow-2d.png'),
        'test_boundary_inflow-2d.unit',
        '#/input/boundary_inflow-2d.in.out'])
 
 Clean(env_mv_png.RunParallel ('test_boundary_outflow-2d.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/boundary_outflow-2d.in'),
-      [Glob('#/test/' + type + '/boundary_outflow-2d.png'),
+      [Glob('#/' + test_path + '/boundary_outflow-2d.png'),
        'test_boundary_outflow-2d.unit',
        '#/input/boundary_outflow-2d.in.out'])
 
@@ -196,52 +197,52 @@ Clean(env_mv_png.RunParallel ('test_boundary_outflow-2d.unit',
 
 env.MakeMovie ("boundary_reflecting-2d.swf", 
                "test_boundary_reflecting-2d.unit", \
-                ARGS="test/" + type + "/boundary_reflecting-2d-????.png");
+                ARGS= test_path + "/boundary_reflecting-2d-????.png");
 env.MakeMovie ("boundary_periodic-2d.swf","test_boundary_periodic-2d.unit", \
-                ARGS="test/" + type + "/boundary_periodic-2d-????.png");
+                ARGS= test_path + "/boundary_periodic-2d-????.png");
 env.MakeMovie ("boundary_inflow-2d.swf","test_boundary_inflow-2d.unit", \
-                ARGS="test/" + type + "/boundary_inflow-2d-????.png");
+                ARGS= test_path + "/boundary_inflow-2d-????.png");
 env.MakeMovie ("boundary_outflow-2d.swf","test_boundary_outflow-2d.unit", \
-                ARGS="test/" + type + "/boundary_outflow-2d-????.png");
+                ARGS= test_path + "/boundary_outflow-2d-????.png");
 # 3D
 
 
 Clean(env_mv_png.RunParallel ('test_boundary_reflecting-3d.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/boundary_reflecting-3d.in'),
-      [Glob('#/test/' + type + '/boundary_reflecting-3d.png'),
+      [Glob('#/' + test_path + '/boundary_reflecting-3d.png'),
        'test_boundary_reflecting-3d.unit',
        '#/input/boundary_reflecting-3d.in.out'])
 
 Clean(env_mv_png.RunParallel ('test_boundary_periodic-3d.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/boundary_periodic-3d.in'),
-      [Glob('#/test/' + type + '/boundary_periodic-3d.png'),
+      [Glob('#/' + test_path + '/boundary_periodic-3d.png'),
        'test_boundary_periodic-3d.unit',
        '#/input/boundary_periodic-3d.in.out'])
 
 Clean(env_mv_png.RunParallel ('test_boundary_inflow-3d.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/boundary_inflow-3d.in'),
-      [Glob('#/test/' + type + '/boundary_inflow-3d.png'),
+      [Glob('#/' + test_path + '/boundary_inflow-3d.png'),
        'test_boundary_inflow-3d.unit',
        '#/input/boundary_inflow-3d.in.out'])
 
 Clean(env_mv_png.RunParallel ('test_boundary_outflow-3d.unit',
 		bin_path + '/enzo-p', 
 		ARGS='input/boundary_outflow-3d.in'),
-      [Glob('#/test/' + type + '/boundary_outflow-3d.png'),
+      [Glob('#/' + test_path + '/boundary_outflow-3d.png'),
        'test_boundary_outflow-3d.unit',
        '#/input/boundary_outflow-3d.in.out'])
 
 env.MakeMovie ("boundary_reflecting-3d.swf","test_boundary_reflecting-3d.unit",
-                ARGS="test/" + type + "/boundary_reflecting-3d-????.png");
+                ARGS= test_path + "/boundary_reflecting-3d-????.png");
 env.MakeMovie ("boundary_periodic-3d.swf","test_boundary_periodic-3d.unit", \
-                ARGS="test/" + type + "/boundary_periodic-3d-????.png");
+                ARGS= test_path + "/boundary_periodic-3d-????.png");
 # env.MakeMovie ("boundary_inflow-3d.swf","test_boundary_inflow-3d.unit", \
-#                 ARGS="test/" + type + "/boundary_inflow-3d-????.png");
+#                 ARGS= test_path + "/boundary_inflow-3d-????.png");
 env.MakeMovie ("boundary_outflow-3d.swf","test_boundary_outflow-3d.unit", \
-                ARGS="test/" + type + "/boundary_outflow-3d-????.png");
+                ARGS= test_path + "/boundary_outflow-3d-????.png");
 
 
 if (type == "serial"):

@@ -333,7 +333,12 @@ void EnzoSimulationMpi::update_boundary_ (Block * block, bool boundary[3][2]) th
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationMpi::refresh_ghost_   (Block * block, Patch * patch, bool boundary[3][2]) throw()
+void EnzoSimulationMpi::refresh_ghost_ 
+(
+ Block * block, 
+ Patch * patch, 
+ bool    boundary[3][2]
+ ) throw()
 {
   // Refresh ghost zones
 
@@ -345,84 +350,43 @@ void EnzoSimulationMpi::refresh_ghost_   (Block * block, Patch * patch, bool bou
   if (dimension_ >= 1) {
     if (ibx % 2 == 0) {
       if (! boundary[axis_x][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_x);
+	block->refresh_ghosts(field_descr_,patch,-1,0,0);
       if (! boundary[axis_x][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_x);
+	block->refresh_ghosts(field_descr_,patch,+1,0,0);
     } else {
       if (! boundary[axis_x][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_x);
+	block->refresh_ghosts(field_descr_,patch,+1,0,0);
       if (! boundary[axis_x][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_x);
+	block->refresh_ghosts(field_descr_,patch,-1,0,0);
     }
   }
   if (dimension_ >= 2) {
     if (iby % 2 == 0) {
       if (! boundary[axis_y][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_y);
+	block->refresh_ghosts(field_descr_,patch,0,-1,0);
       if (! boundary[axis_y][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_y);
+	block->refresh_ghosts(field_descr_,patch,0,+1,0);
     } else {
       if (! boundary[axis_y][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_y);
+	block->refresh_ghosts(field_descr_,patch,0,+1,0);
       if (! boundary[axis_y][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_y);
+	block->refresh_ghosts(field_descr_,patch,0,-1,0);
     }
 
   }
   if (dimension_ >= 3) {
     if (ibz % 2 == 0) {
       if (! boundary[axis_z][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_z);
+	block->refresh_ghosts(field_descr_,patch,0,0,-1);
       if (! boundary[axis_z][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_z);
+	block->refresh_ghosts(field_descr_,patch,0,0,+1);
     } else {
       if (! boundary[axis_z][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_upper,axis_z);
+	block->refresh_ghosts(field_descr_,patch,0,0,+1);
       if (! boundary[axis_z][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,face_lower,axis_z);
+	block->refresh_ghosts(field_descr_,patch,0,0,-1);
     }
   }
 }
-
-//----------------------------------------------------------------------
-
-// void EnzoSimulationMpi::is_block_on_boundary_ (Block * block, bool boundary[3][2]) throw()
-// {
-//   // Enforce boundary conditions ; refresh ghost zones
-
-//   double lower_hierarchy[3];
-//   hierarchy_->lower(&lower_hierarchy[0],
-// 		    &lower_hierarchy[1],
-// 		    &lower_hierarchy[2]);
-
-//   double upper_hierarchy[3];
-//   hierarchy_->upper(&upper_hierarchy[0],
-// 		    &upper_hierarchy[1],
-// 		    &upper_hierarchy[2]);
-
-//   double lower_block[3];
-//   block->lower(&lower_block[axis_x],
-// 	       &lower_block[axis_y],
-// 	       &lower_block[axis_z]);
-//   double upper_block[3];
-//   block->upper(&upper_block[axis_x],
-// 	       &upper_block[axis_y],
-// 	       &upper_block[axis_z]);
-
-//   // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-//   boundary[axis_x][face_lower] = 
-//     (cello::err_rel(lower_block[axis_x],lower_hierarchy[axis_x]) < 1e-7);
-//   boundary[axis_y][face_lower] = 
-//     (cello::err_rel(lower_block[axis_y],lower_hierarchy[axis_y]) < 1e-7);
-//   boundary[axis_z][face_lower] = 
-//     (cello::err_rel(lower_block[axis_z],lower_hierarchy[axis_z]) < 1e-7);
-//   boundary[axis_x][face_upper] = 
-//     (cello::err_rel(upper_block[axis_x],upper_hierarchy[axis_x]) < 1e-7);
-//   boundary[axis_y][face_upper] = 
-//     (cello::err_rel(upper_block[axis_y],upper_hierarchy[axis_y]) < 1e-7);
-//   boundary[axis_z][face_upper] = 
-//     (cello::err_rel(upper_block[axis_z],upper_hierarchy[axis_z]) < 1e-7);
-
-// }
 
 #endif /* ! CONFIG_USE_CHARM */

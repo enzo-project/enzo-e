@@ -120,7 +120,7 @@ c     enddo
                vx5=u5(m)
 
 C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
-               DELTA = 1.0d-20
+               DELTA = ENZO_TINY
                
                WS1 = 0.1E0
                WS2 = 0.6E0

@@ -40,7 +40,7 @@ double test_value (int ix, int iy, int iz,
   double xg = (ibx*mx + ix + NX) % NX;
   double yg = (iby*my + iy + NY) % NY;
   double zg = (ibz*mz + iz + NZ) % NZ;
-  double value = xg + 3*yg + 5*zg;
+  double value = xg + 100*(yg + 100*zg);
   return value;
 }
 
@@ -121,18 +121,31 @@ bool test_field(T * field_values,
 				  index_field,
 				  MD3,ND3);
 	//	printf ("%p test\n",field_values+i);
-	if (field_values[i] != value) {
-	  result = false;
-	  PARALLEL_PRINTF ("mismatch block   (%d %d %d)\n",            ibx,iby,ibz);
-	  PARALLEL_PRINTF ("mismatch field    %d\n",                   index_field);
-	  PARALLEL_PRINTF ("mismatch index   (%d %d %d) %d\n",         ix,iy,iz,i);
-	  PARALLEL_PRINTF ("mismatch size    (%d %d %d)\n",            mdx,mdy,mdz);
-	  PARALLEL_PRINTF ("mismatch actual   %g\n",  (double) field_values[i]);
-	  PARALLEL_PRINTF ("mismatch expected %g\n",  (double) value);
+	if (field_values[i] != value) result = false;
+      }
+    }
+  }
+  if (! result) {
+    PARALLEL_PRINTF ("mismatch block   (%d %d %d)\n", ibx,iby,ibz);
+    PARALLEL_PRINTF ("mismatch field    %d\n",        index_field);
+    PARALLEL_PRINTF ("mismatch size    (%d %d %d)\n", mdx,mdy,mdz);
+    for (int iz = 0; iz < mdz; iz++) {
+      for (int iy = 0; iy < mdy; iy++) {
+	for (int ix = 0; ix < mdx; ix++) {
+	  int i = ix + mdx * (iy + mdy * iz);
+	  double value = test_value(ix,iy,iz,
+				    gx,gy,gz,
+				    mdx,mdy,mdz,
+				    ibx,iby,ibz,
+				    nbx,nby,nbz,
+				    index_field,
+				    MD3,ND3);
+	  printf ("%d %d %d  %07g %07g\n",ix,iy,iz,double(field_values[i]),value);
 	}
       }
     }
   }
+
   return result;
 }
 
@@ -309,12 +322,21 @@ PARALLEL_MAIN_BEGIN
 
 	  FieldBlock * field_upper = field_block[index_upper];
 
-	  face.allocate   (field_descr, field_lower, axis);
-	  face.load       (field_descr, field_lower, axis, face_upper);
-	  face.store      (field_descr, field_upper, axis, face_lower);
+	  int ixm=0,iym=0,izm=0;
+	  int ixp=0,iyp=0,izp=0;
 
-	  face.load       (field_descr, field_upper, axis, face_lower);
-	  face.store      (field_descr, field_lower, axis, face_upper);
+	  if (axis==axis_x) {ixm=-1; ixp=+1; }
+	  if (axis==axis_y) {iym=-1; iyp=+1; }
+	  if (axis==axis_z) {izm=-1; izp=+1; }
+
+	  face.allocate   (field_descr,field_lower,ixm,iym,izm);
+
+	  face.load       (field_descr, field_lower, ixp,iyp,izp);
+	  face.store      (field_descr, field_upper, ixm,iym,izm);
+
+	  face.load       (field_descr, field_upper, ixm,iym,izm);
+	  face.store      (field_descr, field_lower, ixp,iyp,izp);
+
 	  face.deallocate ();
 
 	}

@@ -4,23 +4,22 @@ set ARCH = $CELLO_ARCH
 set TYPE = $CELLO_TYPE
 set PREC = $CELLO_PREC
 
-set proc = 1
+set proc = 8
 
-# set TYPE = (mpi charm serial)
-# set PREC = (single double)
-
-# set default target
-set target = "compile"
+set target = "install-bin"
 
 if ($#argv >= 1) then
    if ($argv[1] == "clean") then
       set d = `date +"%Y-%m-%d %H:%M:%S"`
       printf "$d %-14s" "cleaning..."
       foreach type (serial mpi charm)
+      foreach prec (single double)
+         set conf = $type
          scons arch=$ARCH type=$type -c >& /dev/null
-         rm -rf test/$type >& /dev/null
-         rm -rf bin/$type >& /dev/null
-         rm -rf lib/$type >& /dev/null
+         rm -rf test/$conf >& /dev/null
+         rm -rf bin/$conf >& /dev/null
+         rm -rf lib/$conf >& /dev/null
+      end
       end
       rm -rf include >& /dev/null
       rm -f test/COMPILING
@@ -29,7 +28,8 @@ if ($#argv >= 1) then
       printf "done\n"
       exit
    else if ($argv[1] == "enzo-p") then
-     set target = bin/$type/enzo-p
+     set conf = $type
+     set target = bin/$conf/enzo-p
    else if ($argv[1] == "compile") then
      set target = install-bin
    else if ($argv[1] == "test") then
@@ -43,6 +43,7 @@ endif
 echo "ARCH = $ARCH"
 echo "TYPE = $TYPE"
 echo "PREC = $PREC"
+echo "target = $target"
 
 set d = `date +"%Y-%m-%d %H:%M:%S"`
 echo "$d BEGIN"
@@ -51,20 +52,22 @@ foreach arch ($ARCH)
 foreach type ($TYPE)
 foreach prec ($PREC)
 
+   set conf = $type
+
    rm -f "test/*/running.$arch.$prec"
 
    set configure = $arch-$type-$prec
    set configure_print = `printf "%s %s %s" $arch $type $prec`
 
 
-   printf "$type" > test/COMPILING
+   printf "$configure" > test/COMPILING
 
    # clean
-  scons arch=$arch type=$type prec=$prec -c >& /dev/null
+#  scons arch=$arch type=$type prec=$prec -c >& /dev/null
 
    # make output directory for compilation and tests
 
-   set dir = test/$type
+   set dir = test/$conf
    if (! -d $dir) mkdir $dir
 
    # COMPILE
@@ -75,7 +78,8 @@ foreach prec ($PREC)
 
    touch "$dir/running.$arch.$prec"
 
-   scons arch=$arch type=$type prec=$prec -j$proc -k $target >& $dir/out.scons
+   scons arch=$arch type=$type prec=$prec -k -j$proc install-bin >& $dir/out.scons
+   scons arch=$arch type=$type prec=$prec -k         $target    >>& $dir/out.scons
 
    rm -f "$dir/running.$arch.$prec"
 

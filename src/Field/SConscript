@@ -6,18 +6,30 @@ Import('env')
 Import('type')
 Import('use_papi')
 
+Import('bin_path')
+Import('inc_path')
+Import('lib_path')
+
 #------------------------------
 # DEPENDENCIES
 #------------------------------
 
 # (uses Mesh for test_FieldBlock, which requires DataBlock)
 
-components = ['simulation','method',
-              'mesh','io',
-              'parallel','disk',
-              'parameters', 
-              'error', 'monitor','performance','memory',
-              'test','cello']
+if (type == 'charm'):
+   components = ['simulation','method',
+		 'mesh','field','io',
+		 'parallel','disk',
+		 'parameters', 
+		 'memory','error', 'monitor','performance',
+		 'test','cello']
+else:
+   components = ['simulation','method',
+		 'field','mesh','io',
+		 'parallel','disk',
+		 'parameters', 
+		 'memory','error', 'monitor','performance',
+		 'test','cello']
 
 if (use_papi):
 	components = components + ['papi','pfm']
@@ -41,14 +53,16 @@ env = env.Clone(LIBS=[components,libraries])
 # TARGETS
 #------------------------------
 
-libraries        = env.Library ('field', [sources])
-if (type == "charm"):
-	sources = sources + ["../Main/main_simulation.cpp"]
+libraries = env.Library ('field', [sources])
 
-test_field_block = env.Program (['test_FieldBlock.cpp',  sources])
-test_field_descr = env.Program (['test_FieldDescr.cpp',  sources])
-test_field_face  = env.Program (['test_FieldFace.cpp',  sources])
-test_it_field    = env.Program (['test_ItField.cpp',  sources])
+charm_main = []
+if (type == "charm"):
+	charm_main = ["../Main/main_simulation.cpp"]
+
+test_field_block = env.Program (['test_FieldBlock.cpp',  charm_main])
+test_field_descr = env.Program (['test_FieldDescr.cpp',  charm_main])
+test_field_face  = env.Program (['test_FieldFace.cpp',  charm_main])
+test_it_field    = env.Program (['test_ItField.cpp',  charm_main])
 
 binaries = [test_field_block, test_field_descr, test_field_face, test_it_field]
 
@@ -56,9 +70,9 @@ binaries = [test_field_block, test_field_descr, test_field_face, test_it_field]
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',  includes))
-env.Alias('install-lib',env.Install ('#/lib/'+type,libraries))
-env.Alias('install-bin',env.Install ('#/bin/'+type,binaries))
+env.Alias('install-bin',env.Install (bin_path,binaries))
+env.Alias('install-inc',env.Install (inc_path,includes))
+env.Alias('install-lib',env.Install (lib_path,libraries))
 
 
 

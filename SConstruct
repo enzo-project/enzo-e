@@ -42,11 +42,15 @@ use_valgrind    = 0
 
 use_projections = 0
 
-# Temporary code variations for testing purposes.  Changing values
+# Temporary code variation for testing purposes.  Changing the value
 # below may result in the code hanging, crashing, or producing
 # incorrect results.
 
 original_refresh = 1
+
+# Triton MPI type (openmpi or mpich2)
+
+mpi_type = 'mpich2'
 
 #----------------------------------------------------------------------
 # AUTO CONFIGURATION
@@ -148,8 +152,8 @@ DF = ' -WF,-D'
 if (type == 'serial'):
      defines = defines
 elif (type == 'mpi' or type == 'charm'):
-     defines     = defines                 + define[type]
-     defines_xlc = defines_xlc + DC     + define[type][0]
+     defines     = defines          + define[type]
+     defines_xlc = defines_xlc + DC + define[type][0]
      defines_xlf = defines_xlf + DF + define[type][0]
 else:
      print "Unrecognized parallel type ",type
@@ -362,7 +366,7 @@ elif (arch == "triton-pgi"):
 
      # Requires modules pgi, mpich_mx
 
-     charm_path = '/home/jobordner/public/charm/charm-mpich2-pgi'
+     charm_path = '/home/jobordner/public/charm/charm-' + mpi_type + '-pgi'
 
      fortran['serial'] = 'pgf90'
      fortran['mpi']    = 'pgf90'
@@ -390,9 +394,8 @@ elif (arch == "triton-pgi"):
 # HDF5 path
      hdf5_path = '/opt/hdf5/pgi'
 # Optional debugging flags
-     flags_debug = '-g'
+     flags_debug = '-Ktrap=fp -g'
 # Optional optimization flags
-#     flags_opt   = '-fast'
      flags_opt   = ''
 # Optional warnings-level flags
      flags_warn  = ''
@@ -405,7 +408,7 @@ elif (arch == "triton-intel"):
 
      # Requires modules intel mpich_mx
 
-     charm_path = '/home/jobordner/public/charm/charm-mpich2-intel'
+     charm_path = '/home/jobordner/public/charm/charm-' + mpi_type + '-intel'
 
      fortran['serial'] = 'ifort'
      fortran['mpi']    = 'ifort'
@@ -434,7 +437,6 @@ elif (arch == "triton-intel"):
 # Optional debugging flags
      flags_debug = '-g'
 # Optional optimization flags
-#     flags_opt   = '-fast'
      flags_opt   = ''
 # Optional warnings-level flags
      flags_warn  = ''
@@ -447,7 +449,7 @@ elif (arch == "triton-gnu"):
 
      # Requires modules gnu, mpich_mx
 
-     charm_path = '/home/jobordner/public/charm/charm-mpich2-gnu'
+     charm_path = '/home/jobordner/public/charm/charm-' + mpi_type + '-gnu'
 
      fortran['serial'] = 'gfortran'
      fortran['mpi']    = 'gfortran'
@@ -521,9 +523,22 @@ if (use_valgrind):
 # CELLO PATHS
 #======================================================================
 
-cpppath     = ['#/include']
-fortranpath = ['#/include']
-libpath     = ['#/lib/'+type]
+config = type
+
+bin_path = '#/bin/'+config
+lib_path = '#/lib/'+config
+inc_path = '#/include'
+test_path= 'test/'+config
+
+Export('bin_path')
+Export('lib_path')
+Export('inc_path')
+Export('test_path')
+
+
+cpppath     = [inc_path]
+fortranpath = [inc_path]
+libpath     = [lib_path]
 
 #----------------------------------------------------------------------
 # PAPI PATHS
@@ -545,6 +560,8 @@ libpath = libpath + [hdf5_path + '/lib']
 #----------------------------------------------------------------------
 
 libpath = libpath + [libpath_fortran]
+
+# set the Cello binary and library paths
 
 #======================================================================
 # ENVIRONMENT
@@ -611,15 +628,16 @@ Export('parallel_run')
 Export('serial_run')
 Export('use_papi')
 
-SConscript( 'src/SConscript',variant_dir='build/' + type )
-SConscript('test/SConscript',variant_dir='test/'  + type )
+SConscript( 'src/SConscript',variant_dir='build/' + config )
+SConscript('test/SConscript',variant_dir = test_path )
 
 #======================================================================
 # CLEANING
 #======================================================================
 
-Clean('.','test/' + type)
-Clean('.','bin/' + type)
+Clean('.','test/' + type + '-' + prec)
+Clean('.','bin/'  + type + '-' + prec)
+Clean('.','lib/'  + type + '-' + prec)
 
 if (type == 'charm' and use_projections == 1):
    Clean('.',Glob('bin/charm/*.projrc'))
