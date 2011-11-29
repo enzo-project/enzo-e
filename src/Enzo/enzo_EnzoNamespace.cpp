@@ -418,13 +418,13 @@ namespace enzo {
 	FieldType[field_index] = ElectronDensity;
        } else if (name == "velox") {
 	field_velox            = field_index;
-	FieldType[field_index] = ElectronDensity;
+	FieldType[field_index] = Velocity1;
        } else if (name == "veloy") {
 	 field_veloy           = field_index;
-	 FieldType[field_index] = 0;
+	 FieldType[field_index] = Velocity2;
        } else if (name == "veloz") {
 	 field_veloz           = field_index;
-	 FieldType[field_index] = 0;
+	 FieldType[field_index] = Velocity3;
        } else if (name == "bfieldx") {
 	 field_bfieldx           = field_index;
 	 FieldType[field_index] = 0;

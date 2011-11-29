@@ -791,7 +791,7 @@ void Parameters::monitor_access_
   std::string value;
 
   if ( param != NULL ) {
-    value = param->value_to_string().c_str();
+    value = param->value_to_string();
   } else {
     value = deflt_string + " [default]";
   }
