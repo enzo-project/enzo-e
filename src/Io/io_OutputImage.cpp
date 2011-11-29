@@ -317,7 +317,9 @@ void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 void OutputImage::png_create_ (std::string filename, int mx, int my) throw()
 {
   if (is_writer()) {
-    png_ = new pngwriter(mx,my,0,filename.c_str());
+    const char * file_name = strdup(filename.c_str());
+    png_ = new pngwriter(mx,my,0,file_name);
+    free ((void *)file_name);
   }
 }
 
