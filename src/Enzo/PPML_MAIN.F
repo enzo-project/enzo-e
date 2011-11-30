@@ -4,18 +4,23 @@ c     See LICENSE_ENZO file for license and copyright information
 #include "fortran.h"
 
       Subroutine PPML(dn,vx,vy,vz,bx,by,bz,
-     &       dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,         
-     &       dnry,vxry,vyry,vzry,bxry,byry,bzry,         
-     &       dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz,
-     &       dt, dx,dy,dz,
-     &       nx, ny, nz,
-     &       GridStartIndex, GridEndIndex,
-     &       nsubgrids, lface, rface,
-     &       fistart, fiend, fjstart, fjend,
-     &       array, dnindex,
-     &       vxindex, vyindex, vzindex,
-     &       bxindex, byindex, bzindex)         
-
+     &     dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,         
+     &     dnry,vxry,vyry,vzry,bxry,byry,bzry,         
+     &     dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz,
+     &     dt, dx,dy,dz,
+     &     nx, ny, nz,
+     &     GridStartIndex, GridEndIndex,
+     &     nsubgrids, lface, rface,
+     &     fistart, fiend, fjstart, fjend,
+     &     array, dnindex,
+     &     vxindex, vyindex, vzindex,
+     &     bxindex, byindex, bzindex,
+     &     f1,f2,f3,f4,f5,f6,f7,
+     &     g1,g2,g3,g4,g5,g6,g7,
+     &     h1,h2,h3,h4,h5,h6,h7,
+     &     ex,ey,ez,
+     &     qu1,qu2,qu3,qu4,qu5,qu6,qu7)
+      
       Implicit NONE
 
 c     i1,j1,k1                           - initial point of grid

@@ -215,15 +215,45 @@ int EnzoBlock::SolveMHDEquations
       GridGlobalStart[i] = 0;
     }
  
-    /* allocate temporary space for solver (enough to fit 31 of the largest
-       possible 2d slices plus 4*NumberOfColours). */
-    // no colours here for now !AK 
+    /* allocate temporary space for solver */
 
-    int tempsize = MAX(MAX(GridDimension[0]*GridDimension[1],
-                           GridDimension[1]*GridDimension[2]),
-		           GridDimension[2]*GridDimension[0]  );
-    enzo_float *temp = new enzo_float[tempsize*(31)];
- 
+    int k = 0;
+    enzo_float *temp = new enzo_float[size*(31)];
+    enzo_float *f1 = &temp[k*size];  k++;
+    enzo_float *f2 = &temp[k*size];  k++;
+    enzo_float *f3 = &temp[k*size];  k++;
+    enzo_float *f4 = &temp[k*size];  k++;
+    enzo_float *f5 = &temp[k*size];  k++;
+    enzo_float *f6 = &temp[k*size];  k++;
+    enzo_float *f7 = &temp[k*size];  k++;
+    enzo_float *g1 = &temp[k*size];  k++;
+    enzo_float *g2 = &temp[k*size];  k++;
+    enzo_float *g3 = &temp[k*size];  k++;
+    enzo_float *g4 = &temp[k*size];  k++;
+    enzo_float *g5 = &temp[k*size];  k++;
+    enzo_float *g6 = &temp[k*size];  k++;
+    enzo_float *g7 = &temp[k*size];  k++;
+    enzo_float *h1 = &temp[k*size];  k++;
+    enzo_float *h2 = &temp[k*size];  k++;
+    enzo_float *h3 = &temp[k*size];  k++;
+    enzo_float *h4 = &temp[k*size];  k++;
+    enzo_float *h5 = &temp[k*size];  k++;
+    enzo_float *h6 = &temp[k*size];  k++;
+    enzo_float *h7 = &temp[k*size];  k++;
+    enzo_float *ex = &temp[k*size];  k++;
+    enzo_float *ey = &temp[k*size];  k++;
+    enzo_float *ez = &temp[k*size];  k++;
+    enzo_float *qu1 = &temp[k*size];  k++;
+    enzo_float *qu2 = &temp[k*size];  k++;
+    enzo_float *qu3 = &temp[k*size];  k++;
+    enzo_float *qu4 = &temp[k*size];  k++;
+    enzo_float *qu5 = &temp[k*size];  k++;
+    enzo_float *qu6 = &temp[k*size];  k++;
+    enzo_float *qu7 = &temp[k*size];  k++;
+
+    ASSERT ("EnzoBlock::SolveMHDEquations",
+	    "Insufficient temporary storage",
+	    k <= 31);
     /* create and fill in arrays which are easiler for the solver to
        understand. */
 
@@ -366,8 +396,12 @@ int EnzoBlock::SolveMHDEquations
 	 istart, iend, jstart, jend,
 	 standard, dnindex,
 	 vxindex, vyindex, vzindex,
-	 bxindex, byindex, bzindex);
-
+	 bxindex, byindex, bzindex,
+	 f1,f2,f3,f4,f5,f6,f7,
+	 g1,g2,g3,g4,g5,g6,g7,
+	 h1,h2,h3,h4,h5,h6,h7,
+	 ex,ey,ez,
+	 qu1,qu2,qu3,qu4,qu5,qu6,qu7);
     /* deallocate temporary space for solver */
  
     delete [] temp;

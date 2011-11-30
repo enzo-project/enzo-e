@@ -53,6 +53,15 @@ extern "C" void FORTRAN_NAME(ppml)
    int istart[], int iend[], int jstart[], int jend[],
    enzo_float *standard, int dnindex[], 
    int vxindex[], int vyindex[], int vzindex[],
-   int bxindex[], int byindex[], int bzindex[]);
+   int bxindex[], int byindex[], int bzindex[],
+   enzo_float *f1,enzo_float *f2,enzo_float *f3,enzo_float *f4,
+   enzo_float *f5,enzo_float *f6,enzo_float *f7,
+   enzo_float *g1,enzo_float *g2,enzo_float *g3,enzo_float *g4,
+   enzo_float *g5,enzo_float *g6,enzo_float *g7,
+   enzo_float *h1,enzo_float *h2,enzo_float *h3,enzo_float *h4,
+   enzo_float *h5,enzo_float *h6,enzo_float *h7,
+   enzo_float *ex,enzo_float *ey,enzo_float *ez,
+   enzo_float *qu1,enzo_float *qu2,enzo_float *qu3,enzo_float *qu4,
+   enzo_float *qu5,enzo_float *qu6,enzo_float *qu7);
 
 #endif /* ENZO_FORTRAN_HPP */
