@@ -642,9 +642,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
      hx = (upper[0]-lower[0])/(nxd-2*gx);
      hy = (upper[1]-lower[1])/(nyd-2*gy);
      hz = (upper[2]-lower[2])/(nzd-2*gz);
-#ifdef CELLO_DEBUG_VERBOSE
-     TRACE("CELLO_DEBUG_VERBOSE");
-#endif
+
      switch (field_descr->precision(index_field)) {
      case precision_single:
        {
@@ -664,12 +662,14 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	       double y = hy*(iy-gy) + lower[axis_y];
 	       double z = hz*(iz-gz) + lower[axis_z];
 	       if (isnan(field[i])) {
-		 fprintf(fp,"NAN match: %s %s  %g %g %g  %d %d %d\n",
+		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
 			 message,field_name,x,y,z,ix,iy,iz);
-	       }
-	       if (field[i] == TEMP_CLEAR_VALUE) {
-		 fprintf(fp,"NOT INITIALIZED: %s %s  %g %g %g  %d %d %d\n",
+	       } else if (field[i] == TEMP_CLEAR_VALUE) {
+		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d UNINITIALIZED\n",
 			 message,field_name,x,y,z,ix,iy,iz);
+	       } else {
+		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %g\n",
+			 message,field_name,x,y,z,ix,iy,iz,field[i]);
 	       }
 #endif
 	     }
@@ -700,14 +700,16 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	       double x = hx*(ix-gx) + lower[axis_x];
 	       double y = hy*(iy-gy) + lower[axis_y];
 	       double z = hz*(iz-gz) + lower[axis_z];
- 	       if (isnan(field[i])) {
- 		 fprintf(fp,"NAN match: %s %s  %g %g %g  %d %d %d\n",
- 			 message,field_name,x,y,z,ix,iy,iz);
- 	       }
- 	       if (field[i] == TEMP_CLEAR_VALUE) {
- 		 fprintf(fp,"not initialized: %s %s  %g %g %g  %d %d %d\n",
- 			 message,field_name,x,y,z,ix,iy,iz);
- 	       }
+	       if (isnan(field[i])) {
+		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
+			 message,field_name,x,y,z,ix,iy,iz);
+	       } else if (field[i] == TEMP_CLEAR_VALUE) {
+		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d UNINITIALIZED\n",
+			 message,field_name,x,y,z,ix,iy,iz);
+	       } else {
+		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %g\n",
+			 message,field_name,x,y,z,ix,iy,iz,field[i]);
+	       }
 #endif
 	     }
 	   }
@@ -736,14 +738,16 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	       double x = hx*(ix-gx) + lower[axis_x];
 	       double y = hy*(iy-gy) + lower[axis_y];
 	       double z = hz*(iz-gz) + lower[axis_z];
- 	       if (isnan(field[i])) {
- 		 fprintf(fp,"NAN match: %s %s  %Lf %Lf %Lf  %d %d %d\n",
- 			 message,field_name,x,y,z,ix,iy,iz);
- 	       }
- 	       if (field[i] == TEMP_CLEAR_VALUE) {
- 		 fprintf(fp,"not initialized: %s %s  %Lf %Lf %Lf  %d %d %d\n",
- 			 message,field_name,x,y,z,ix,iy,iz);
- 	       }
+	       if (isnan(field[i])) {
+		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
+			 message,field_name,x,y,z,ix,iy,iz);
+	       } else if (field[i] == TEMP_CLEAR_VALUE) {
+		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d UNINITIALIZED\n",
+			 message,field_name,x,y,z,ix,iy,iz);
+	       } else {
+		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %Lf\n",
+			 message,field_name,x,y,z,ix,iy,iz,field[i]);
+	       }
 #endif
 	     }
 	   }

@@ -406,6 +406,8 @@ void Block::refresh (int axis_set)
   hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
   hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
 
+  // return is_boundary[] array of faces on domain boundary
+
   is_on_boundary(lower_h,upper_h,is_boundary);
 
   Boundary * boundary = simulation->boundary();
@@ -414,12 +416,16 @@ void Block::refresh (int axis_set)
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
 
+  // Determine in which directions we need to communicate or update boundary
+
   bool axm = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
   bool aym = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
   bool azm = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
   bool axp = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
   bool ayp = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
   bool azp = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+
+  // Update boundaries
 
   if ( axm && is_boundary[axis_x][face_lower] ) {
     boundary->enforce(field_descr,this,face_lower,axis_x);
@@ -638,6 +644,7 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
+  //  TRACE5("%d refresh_face %d %d %d  %d",CkMyPe(),fx,fy,fz,cycle_);
 
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -794,17 +801,17 @@ void Block::compute(int axis_set)
 
   FieldDescr * field_descr = simulation->field_descr();
 
-//   char buffer[10];
+   char buffer[10];
 
-//   sprintf (buffer,"%03d-A",cycle_);
-//   field_block()->print(field_descr,buffer,lower_,upper_);
+   sprintf (buffer,"%03d-A",cycle_);
+   field_block()->print(field_descr,buffer,lower_,upper_);
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
     simulation->method(i) -> compute_block (field_descr,this,time_,dt_);
   }
 
-//   sprintf (buffer,"%03d-B",cycle_);
-//   field_block()->print(field_descr,buffer,lower_,upper_);
+   // sprintf (buffer,"%03d-B",cycle_);
+   // field_block()->print(field_descr,buffer,lower_,upper_);
 
 #ifdef CONFIG_USE_PROJECTIONS
   traceUserBracketEvent(10,time_start, CmiWallTimer());
