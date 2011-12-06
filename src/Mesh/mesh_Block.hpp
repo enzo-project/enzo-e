@@ -69,12 +69,20 @@ public: // interface
   /// Apply the numerical methods on the block
   void p_compute(int cycle, double time, double dt, int axis_set);
 
+  ///
+
   /// Refresh a FieldFace
   void p_refresh_face(int n, char buffer[], int axis_set,
 		      int fx, int fy, int fz);
 
   /// Contribute block data to ith output object in the simulation
   void p_write (int index_output);
+
+  /// Entry function after barrier to call refresh()
+  void p_call_refresh();
+
+  /// Entry function after barrier to call refresh()
+  void p_call_prepare();
 
   //--------------------------------------------------
 

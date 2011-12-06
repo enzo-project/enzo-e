@@ -35,7 +35,10 @@ module mesh {
     entry void p_refresh_face
       (int n, char buffer[n], int axis_set, int fx, int fy, int fz);
     entry void p_write (int index_output);
- 
+
+    entry void p_call_refresh();
+    entry void p_call_prepare();
+
     //     void p_next();
     //     void p_prepare();
 

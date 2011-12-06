@@ -284,22 +284,24 @@ void Block::p_initial()
 
   initial->enforce(simulation->hierarchy(),field_descr,this);
 
-  // CHARM++ Barrier to prevent race conditions where Block::p_refresh_face()
-  // is called before Block::p_initial()
   
-  //  contribute();
-
   axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
 
 #ifdef ORIGINAL_REFRESH  
 
+  // NOTE: CHARM++ contribute() barrier is to prevent race conditions
+  // where Block::p_refresh_face() is called before Block::p_initial()
+
   // Prepare for first cycle: Timestep, Stopping, Monitor, Output
-  prepare(axis_set);
+  contribute( CkCallback(CkIndex_Block::p_call_prepare(), thisProxy) );
 
 #else
 
+  // NOTE: CHARM++ contribute() barrier is to prevent race conditions
+  // where Block::p_refresh_face() is called before Block::p_initial()
+
   // Refresh before prepare()
-  refresh(axis_set);
+  contribute( CkCallback(CkIndex_Block::p_call_refresh(), thisProxy) );
 
 #endif
 }
@@ -309,6 +311,15 @@ void Block::p_initial()
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
+
+void Block::p_call_prepare()
+{
+  Simulation * simulation  = proxy_simulation.ckLocalBranch();
+  axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
+  prepare(axis_set);
+}
+
+//--------------------------------------------------
 
 void Block::prepare(int axis_set)
 {
@@ -399,6 +410,15 @@ void Block::p_compute (int cycle, double time, double dt, int axis_set)
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
+
+void Block::p_call_refresh()
+{
+  Simulation * simulation  = proxy_simulation.ckLocalBranch();
+  axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
+  refresh(axis_set);
+}
+
+//--------------------------------------------------
 
 void Block::refresh (int axis_set)
 {
