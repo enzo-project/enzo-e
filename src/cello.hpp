@@ -30,7 +30,7 @@ inline int INDEX(int ix,int iy,int iz,int nx,int ny)
 
 // Value used to initialize new fields for debugging
 
-#define TEMP_CLEAR_VALUE -314159.0
+#define TEMP_CLEAR_VALUE (-std::numeric_limits<float>::max())
 
 // (std::numeric_limits<float>::max())
 

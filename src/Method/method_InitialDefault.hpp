@@ -23,9 +23,9 @@ public: // interface
   virtual ~InitialDefault() throw()
   {}
 
-  /// Read initialization from Initial group in parameter file
+  /// Read initialization values from Initial group in parameter file
 
-  virtual void compute (const Hierarchy * hierarchy,
+  virtual void enforce (const Hierarchy * hierarchy,
 			const FieldDescr * field_descr,
 			Block * block) throw();
 

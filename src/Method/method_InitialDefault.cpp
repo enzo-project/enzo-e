@@ -21,7 +21,7 @@ InitialDefault::InitialDefault(Parameters * parameters) throw ()
 
 //----------------------------------------------------------------------
 
-void InitialDefault::compute 
+void InitialDefault::enforce
 (
  const Hierarchy  * hierarchy,
  const FieldDescr * field_descr,
@@ -67,7 +67,7 @@ void InitialDefault::compute
 
       int list_length = parameters_->list_length("value");
 
-      ASSERT1("InitialDefault::compute",
+      ASSERT1("InitialDefault::enforce",
 	     "Length of list parameter Initial:%s:value must be odd",
 	     field_name.c_str(),
 	     (list_length % 2) == 1);
@@ -107,12 +107,12 @@ void InitialDefault::compute
       }
 
     } else if (parameter_type == parameter_unknown) {
-      WARNING1("InitialDefault::compute",  
+      WARNING1("InitialDefault::enforce",  
 	       "Uninitialized field %s",
 	       field_name.c_str());
       
     } else {
-      ERROR2("InitialDefault::compute",
+      ERROR2("InitialDefault::enforce",
 	     "Illegal parameter type %s when initializing field %s",
 	     parameter_type_name[parameter_type],field_name.c_str());
     }
@@ -403,7 +403,6 @@ void InitialDefault::create_png_mask_
 
   // Compute the block mask from the image pixel values
 
-  TRACE("");
   for (int iy_b=0; iy_b<nyb; iy_b++) {
     int iy_h = int((*ny)*(iy_b*hb[1]+offset_b[1])/(size_h[1]));
     for (int ix_b=0; ix_b<nxb; ix_b++) {

@@ -63,11 +63,11 @@ public: // interface
   /// Initialize block for the simulation.
   void p_initial();
 
-  /// Apply the numerical methods on the block
-  void p_compute(double dt, int axis_set);
-
   /// Refresh ghost zones and apply boundary conditions
   void p_refresh(int cycle, double time, double dt, int axis_set);
+
+  /// Apply the numerical methods on the block
+  void p_compute(int cycle, double time, double dt, int axis_set);
 
   /// Refresh a FieldFace
   void p_refresh_face(int n, char buffer[], int axis_set,
@@ -79,7 +79,7 @@ public: // interface
   //--------------------------------------------------
 
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
-  void prepare();
+  void prepare(int axis_set);
 
   /// Implementation of refresh
   void refresh(int axis_set);
@@ -182,6 +182,34 @@ protected: // functions
 
   /// Allocate and copy in attributes from give Block
   void copy_(const Block & block) throw();
+
+#ifdef CONFIG_USE_CHARM
+
+  /// Determine which faces require boundary updates or communication
+  void determine_boundary_
+  (
+   bool is_boundary[3][2],
+   bool * axm,
+   bool * axp,
+   bool * aym,
+   bool * ayp,
+   bool * azm,
+   bool * azp,
+   int axis_set
+   );
+
+  void update_boundary_ 
+  (
+   bool is_boundary[3][2],
+   bool axm,
+   bool axp,
+   bool aym,
+   bool ayp,
+   bool azm,
+   bool azp,
+   int axis_set);
+
+#endif
 
 protected: // attributes
 

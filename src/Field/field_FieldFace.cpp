@@ -288,39 +288,62 @@ void FieldFace::loop_limits
  bool load
  )
 {
+  // offset (ix0,iy0,iz0)
 
   if (fx == 0) {
-    if (full_[0]) { (*ix0) = 0;      (*nx) = nd3[0]; }
-    else          { (*ix0) = ng3[0]; (*nx) = nd3[0]-2*ng3[0]; }
+    (*ix0) = (full_[0]) ? 0 : ng3[0];
+  } else {
+    if (load) {
+      if (fx == -1) (*ix0) = ng3[0];   
+      if (fx == +1) (*ix0) = nd3[0] - 2*ng3[0];
+    } else {
+      if (fx == -1) (*ix0) = 0;
+      if (fx == +1) (*ix0) = nd3[0] - ng3[0];
+    }
   }
   if (fy == 0) {
-    if (full_[1]) { (*iy0) = 0;      (*ny) = nd3[1]; } 
-    else          { (*iy0) = ng3[1]; (*ny) = nd3[1]-2*ng3[1]; }
-  }
-  if (fz == 0) {
-    if (full_[2]) { (*iz0) = 0;      (*nz) = nd3[2]; }
-    else          { (*iz0) = ng3[2]; (*nz) = nd3[2]-2*ng3[2];  }
-  }
-
-  if (load) {
-    // load faces
-    if (fx == -1) {  (*nx) = ng3[0]; (*ix0) = ng3[0];   }
-    if (fy == -1) {  (*ny) = ng3[1]; (*iy0) = ng3[1];   }
-    if (fz == -1) {  (*nz) = ng3[2]; (*iz0) = ng3[2];   }
-
-    if (fx == +1) {  (*nx) = ng3[0]; (*ix0) = nd3[0] - 2*ng3[0]; }
-    if (fy == +1) {  (*ny) = ng3[1]; (*iy0) = nd3[1] - 2*ng3[1]; }
-    if (fz == +1) {  (*nz) = ng3[2]; (*iz0) = nd3[2] - 2*ng3[2]; }
+    (*iy0) = (full_[1]) ? 0 : ng3[1];
   } else {
-    // store ghosts
-    if (fx == -1) {  (*nx) = ng3[0]; (*ix0) = 0;   }
-    if (fy == -1) {  (*ny) = ng3[1]; (*iy0) = 0;   }
-    if (fz == -1) {  (*nz) = ng3[2]; (*iz0) = 0;   }
-
-    if (fx == +1) {  (*nx) = ng3[0]; (*ix0) = nd3[0] - ng3[0]; }
-    if (fy == +1) {  (*ny) = ng3[1]; (*iy0) = nd3[1] - ng3[1]; }
-    if (fz == +1) {  (*nz) = ng3[2]; (*iz0) = nd3[2] - ng3[2]; }
+    if (load) {
+      if (fy == -1) (*iy0) = ng3[1];
+      if (fy == +1) (*iy0) = nd3[1] - 2*ng3[1];
+    } else {
+      if (fy == -1) (*iy0) = 0;
+      if (fy == +1) (*iy0) = nd3[1] - ng3[1];
+    }
   }
+
+  if (fz == 0) {
+    (*iz0) = (full_[2]) ? 0 : ng3[2];
+  } else {
+    if (load) {
+      if (fz == -1) (*iz0) = ng3[2];
+      if (fz == +1) (*iz0) = nd3[2] - 2*ng3[2];
+    } else {
+      if (fz == -1) (*iz0) = 0;
+      if (fz == +1) (*iz0) = nd3[2] - ng3[2];
+    }
+  }
+
+
+  if (fx == 0) {
+    (*nx) = (full_[0]) ? nd3[0] : nd3[0]-2*ng3[0];
+  } else {
+    (*nx) = ng3[0]; 
+  }
+
+  if (fy == 0) {
+    (*ny) = (full_[1]) ? nd3[1] : nd3[1]-2*ng3[1];
+  } else {
+    (*ny) = ng3[1]; 
+  }
+
+  if (fz == 0) {
+    (*nz) = (full_[2]) ? nd3[2] : nd3[2]-2*ng3[2];
+  } else {
+    (*nz) = ng3[2]; 
+  }
+
 }
 
 //----------------------------------------------------------------------
@@ -345,11 +368,11 @@ size_t FieldFace::load_precision_
 
   loop_limits(&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, fx,fy,fz,load=true);
 
-  // printf ("load fx,fy,fz = %d %d %d\n",fx,fy,fz);
-  // printf ("load nd3      = %d %d %d\n",nd3[0],nd3[1],nd3[2]); 
-  // printf ("load ng3      = %d %d %d\n",ng3[0],ng3[1],ng3[2]); 
-  // printf ("load i0       = %d %d %d\n",ix0,iy0,iz0);
-  // printf ("load n        = %d %d %d\n",nx,ny,nz);
+  // TRACE3 (" load fx,fy,fz = %d %d %d",fx,fy,fz);
+  // TRACE3 (" load nd3      = %d %d %d",nd3[0],nd3[1],nd3[2]); 
+  // TRACE3 (" load ng3      = %d %d %d",ng3[0],ng3[1],ng3[2]); 
+  // TRACE3 (" load i0       = %d %d %d",ix0,iy0,iz0);
+  // TRACE3 (" load n        = %d %d %d",nx,ny,nz);
   for (int iz=0; iz <nz; iz++)  {
     int kz = iz+iz0;
     for (int iy=0; iy < ny; iy++) {
@@ -389,11 +412,11 @@ size_t FieldFace::store_precision_
 
   loop_limits(&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, fx,fy,fz,load=false);
 
-  // printf ("load fx,fy,fz = %d %d %d\n",fx,fy,fz);
-  // printf ("load nd3      = %d %d %d\n",nd3[0],nd3[1],nd3[2]); 
-  // printf ("load ng3      = %d %d %d\n",ng3[0],ng3[1],ng3[2]); 
-  // printf ("load i0       = %d %d %d\n",ix0,iy0,iz0);
-  // printf ("load n        = %d %d %d\n",nx,ny,nz);
+  // TRACE3 (" store fx,fy,fz = %d %d %d",fx,fy,fz);
+  // TRACE3 (" store nd3      = %d %d %d",nd3[0],nd3[1],nd3[2]); 
+  // TRACE3 (" store ng3      = %d %d %d",ng3[0],ng3[1],ng3[2]); 
+  // TRACE3 (" store i0       = %d %d %d",ix0,iy0,iz0);
+  // TRACE3 (" store n        = %d %d %d",nx,ny,nz);
   for (int iz=0; iz <nz; iz++)  {
     int kz = iz+iz0;
     for (int iy=0; iy < ny; iy++) {

@@ -46,7 +46,7 @@ use_projections = 0
 # below may result in the code hanging, crashing, or producing
 # incorrect results.
 
-original_refresh = 1
+original_refresh = 0
 
 # Triton MPI type (openmpi or mpich2)
 

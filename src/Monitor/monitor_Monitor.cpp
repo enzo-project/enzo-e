@@ -72,6 +72,7 @@ void Monitor::header () const
   char c_charm  = ' ';
   char c_mpi    = ' ';
   char c_papi   = ' ';
+  char c_refresh = ' ';
 
 #ifdef CONFIG_PRECISION_SINGLE
   c_single = '*';
@@ -91,6 +92,9 @@ void Monitor::header () const
 #ifdef CONFIG_USE_PAPI
   c_papi = '*';
 #endif
+#ifdef ORIGINAL_REFRESH
+  c_refresh = '*';
+#endif
 
   char s_single[80];
   char s_double[80];
@@ -98,6 +102,7 @@ void Monitor::header () const
   char s_charm [80];
   char s_mpi   [80];
   char s_papi  [80];
+  char s_refresh[80];
 
   sprintf (s_single,"(%c) CONFIG_PRECISION_SINGLE",c_single);
   sprintf (s_double,"(%c) CONFIG_PRECISION_DOUBLE",c_double);
@@ -105,6 +110,8 @@ void Monitor::header () const
   sprintf (s_charm, "(%c) CONFIG_USE_CHARM",       c_charm);
   sprintf (s_mpi,   "(%c) CONFIG_USE_MPI",         c_mpi);
   sprintf (s_papi,  "[%c] CONFIG_USE_PAPI",        c_papi);
+
+  sprintf (s_refresh,"[%c] ORIGINAL_REFRESH",      c_refresh);
 
   print ("","==============================================");
   print ("",s_single);
@@ -115,6 +122,8 @@ void Monitor::header () const
   print ("",s_mpi);
   print ("","");
   print ("",s_papi);
+  print ("","");
+  print ("",s_refresh);
   print ("","==============================================");
 
 }

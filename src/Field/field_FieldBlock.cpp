@@ -72,9 +72,9 @@ char * FieldBlock::field_values ( int id_field )
   if (unsigned(id_field) < field_values_.size()) {
     field = field_values_.at(id_field);
   }
-  ASSERT1 ("FieldBlock::field_values()",
-	   "Trying to access invalid field id %d",
-	   id_field,
+  ASSERT3 ("FieldBlock::field_values()",
+	   "Trying to access invalid field id %d out of %d in FieldBlock %p",
+	   id_field,field_values_.size(),this,
 	   field != NULL);
   return field;
 }
@@ -479,16 +479,6 @@ FieldBlock * FieldBlock::merge
 {
   FieldBlock * new_field_block = 0;
   return new_field_block;
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::set_field_values 
-(
- int    id_field, 
- char * field_values) throw()
-{
-  INCOMPLETE("FieldBlock::set_field_values");
 }
 
 //======================================================================

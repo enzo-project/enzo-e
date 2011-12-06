@@ -17,10 +17,10 @@
 #ifdef CONFIG_USE_CHARM
 
 BlockReduce::BlockReduce()
-  :  count_output_(0),
-     count_prepare_(0),
-     dt_hierarchy_(std::numeric_limits<double>::max()),
-     stop_hierarchy_(true)
+  : count_prepare_(0),
+    count_output_(0),
+    dt_hierarchy_(std::numeric_limits<double>::max()),
+    stop_hierarchy_(true)
 {
 }
 
@@ -68,5 +68,3 @@ void BlockReduce::p_prepare(int    count,
 
 // SEE simulation_charm_output.cpp for
 // BlockReduce::p_output_reduce()
-
-//----------------------------------------------------------------------

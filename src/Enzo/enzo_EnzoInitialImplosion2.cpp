@@ -17,7 +17,7 @@ EnzoInitialImplosion2::EnzoInitialImplosion2 () throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoInitialImplosion2::compute 
+void EnzoInitialImplosion2::enforce 
 (
  const Hierarchy  * hierarchy,
  const FieldDescr * field_descr,
@@ -38,7 +38,7 @@ void EnzoInitialImplosion2::compute
 	 "Insufficient number of fields",
 	 field_descr->field_count() >= 4);
 
-  WARNING("EnzoInitialImplosion2::compute",
+  WARNING("EnzoInitialImplosion2::enforce",
 	  "hard-coded field index ordering");
 
   int index_density         = 0;

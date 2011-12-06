@@ -35,11 +35,11 @@ private: // functions
 
 private: // attributes
 
-  /// Output counters
-  int count_output_;
-
   /// Prepare counters
   int count_prepare_;
+
+  /// Output counters
+  int count_output_;
 
   /// Prepare reduction variables
   double dt_hierarchy_;

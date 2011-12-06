@@ -37,8 +37,12 @@ Block::Block
      dt_(0)
 
 { 
+#ifdef CONFIG_USE_CHARM
+
 #ifdef CONFIG_CHARM_ATSYNC
   usesAtSync = CmiTrue;
+#endif
+
 #endif
 
   // Initialize field_block_[]
@@ -278,18 +282,23 @@ void Block::p_initial()
 
   Initial * initial = simulation->initial();
 
-  initial->compute(simulation->hierarchy(),field_descr,this);
+  initial->enforce(simulation->hierarchy(),field_descr,this);
+
+  // CHARM++ Barrier to prevent race conditions where Block::p_refresh_face()
+  // is called before Block::p_initial()
+  
+  //  contribute();
+
+  axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
 
 #ifdef ORIGINAL_REFRESH  
 
   // Prepare for first cycle: Timestep, Stopping, Monitor, Output
-
-  prepare();
+  prepare(axis_set);
 
 #else
 
   // Refresh before prepare()
-  axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
   refresh(axis_set);
 
 #endif
@@ -301,10 +310,19 @@ void Block::p_initial()
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::prepare()
+void Block::prepare(int axis_set)
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+#ifdef ORIGINAL_REFRESH
+  // see compute()
+#else
+  bool is_boundary[3][2];
+  bool axm,axp,aym,ayp,azm,azp;
+  determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp,axis_set);
+  update_boundary_(is_boundary,axm,axp,aym,ayp,azm,azp,axis_set);
+#endif
 
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -336,7 +354,7 @@ void Block::prepare()
   int stop_block = simulation->stopping()->complete(cycle_,time_);
 
   //--------------------------------------------------
-  // Main::p_prepare()
+  // BlockReduce::p_prepare()
   //--------------------------------------------------
 
   // WARNING: assumes single patch
@@ -352,21 +370,8 @@ void Block::prepare()
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_compute (double dt, int axis_set)
-{
-  if (dt != -1) dt_ = dt;
-  compute(axis_set);
-}
-#endif /* CONFIG_USE_CHARM */
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
 void Block::p_refresh (int cycle, double time, double dt, int axis_set)
 {
-  // Update cycle,time,dt from Simulation
-
   cycle_ = cycle;
   time_  = time;
   dt_    = dt;
@@ -375,6 +380,19 @@ void Block::p_refresh (int cycle, double time, double dt, int axis_set)
   set_cycle(cycle);
 
   refresh(axis_set);
+}
+
+//----------------------------------------------------------------------
+void Block::p_compute (int cycle, double time, double dt, int axis_set)
+{
+  cycle_ = cycle;
+  time_  = time;
+  dt_    = dt;
+
+  set_time(time);
+  set_cycle(cycle);
+
+  compute(axis_set);
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -385,20 +403,289 @@ void Block::p_refresh (int cycle, double time, double dt, int axis_set)
 void Block::refresh (int axis_set)
 {
 
+   bool is_boundary[3][2];
+   bool axm,axp,aym,ayp,azm,azp;
+
+    determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp,axis_set);
+
+  //  update_boundary_(is_boundary,axm,axp,aym,ayp,azm,azp,axis_set);
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   //--------------------------------------------------
-  // Boundary
+  // Refresh
   //--------------------------------------------------
 
-  bool is_boundary[3][2];
+  int ix = thisIndex.x;
+  int iy = thisIndex.y;
+  int iz = thisIndex.z;
+
+  int nbx = size_[0];
+  int nby = size_[1];
+  int nbz = size_[2];
   
-  is_boundary[axis_x][face_lower] = false;
-  is_boundary[axis_x][face_upper] = false;
-  is_boundary[axis_y][face_lower] = false;
-  is_boundary[axis_y][face_upper] = false;
-  is_boundary[axis_z][face_lower] = false;
-  is_boundary[axis_z][face_upper] = false;
+  int ixm = (ix - 1 + nbx) % nbx;
+  int iym = (iy - 1 + nby) % nby;
+  int izm = (iz - 1 + nbz) % nbz;
+  int ixp = (ix + 1) % nbx;
+  int iyp = (iy + 1) % nby;
+  int izp = (iz + 1) % nbz;
+
+  bool periodic = simulation->boundary()->is_periodic();
+
+  CProxy_Block block_array = thisProxy;
+
+  axm = axm && (periodic || ! is_boundary[axis_x][face_lower]);
+  axp = axp && (periodic || ! is_boundary[axis_x][face_upper]);
+  aym = aym && (periodic || ! is_boundary[axis_y][face_lower]);
+  ayp = ayp && (periodic || ! is_boundary[axis_y][face_upper]);
+  azm = azm && (periodic || ! is_boundary[axis_z][face_lower]);
+  azp = azp && (periodic || ! is_boundary[axis_z][face_upper]);
+
+  // Refresh face ghost zones
+
+  // TRACE5("%f %f %f face %d %d %d",lower_[0],lower_[1],
+  // 	 field_descr->refresh_face(2),
+  // 	 field_descr->refresh_face(1),
+  // 	 field_descr->refresh_face(0));
+
+  // TRACE5("%f %f %f lower %d %d %d",lower_[0],lower_[1],
+  // 	 axm,aym,azm);
+  // TRACE5("%f %f %f upper %d %d %d",lower_[0],lower_[1],
+  // 	 axp,ayp,azp);
+
+  bool lx,ly,lz;
+  lx = simulation->temp_update_full();
+  ly = simulation->temp_update_full();
+  lz = simulation->temp_update_full();
+
+  FieldDescr * field_descr = simulation->field_descr();
+
+  if (field_descr->refresh_face(2)) {
+    if ( axm ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), -1, 0, 0);
+      block_array(ixm,iy,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, 0, 0);
+    }
+    if ( axp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), +1, 0, 0);
+      block_array(ixp,iy,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, 0, 0);
+    }
+    if ( aym ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), 0, -1, 0);
+      block_array(ix,iym,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, +1, 0);
+    }
+    if ( ayp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), 0, +1, 0);
+      block_array(ix,iyp,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, -1, 0);
+    }
+    if ( azm ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), 0, 0, -1);
+      block_array(ix,iy,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, 0, +1);
+    }
+    if ( azp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), 0, 0, +1);
+      block_array(ix,iy,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, 0, -1);
+    }
+  }
+
+  // Refresh edge ghost zones
+
+  if (field_descr->refresh_face(1)) {
+    if ( axm && aym ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), -1, -1, 0);
+      block_array(ixm,iym,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, +1, 0);
+    }
+    if ( axm && ayp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), -1, +1, 0);
+      block_array(ixm,iyp,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, -1, 0);
+    }
+    if ( axp && aym ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), +1, -1, 0);
+      block_array(ixp,iym,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, +1, 0);
+    }
+    if ( axp && ayp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), +1, +1, 0);
+      block_array(ixp,iyp,iz).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, -1, 0);
+    }
+
+    if ( aym && azm ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), 0, -1, -1);
+      block_array(ix,iym,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, +1, +1);
+    }
+    if ( aym && azp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), 0, -1, +1);
+      block_array(ix,iym,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, +1, -1);
+    }
+    if ( ayp && azm ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), 0, +1, -1);
+      block_array(ix,iyp,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, -1, +1);
+    }
+    if ( ayp && azp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), 0, +1, +1);
+      block_array(ix,iyp,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, 0, -1, -1);
+    }
+
+    if ( axm && azm ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), -1, 0, -1);
+      block_array(ixm,iy,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, 0, +1);
+    }
+    if ( axp && azm ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), +1, 0, -1);
+      block_array(ixp,iy,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, 0, +1);
+    }
+    if ( axm && azp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), -1, 0, +1);
+      block_array(ixm,iy,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, 0, -1);
+    }
+    if ( axp && azp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), +1, 0, +1);
+      block_array(ixp,iy,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, 0, -1);
+    }
+  }
+
+  // Refresh corner ghost zones
+
+  if (field_descr->refresh_face(0)) {
+
+    if ( axm && aym && azm ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), -1, -1, -1);
+      block_array(ixm,iym,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, +1, +1);
+    }
+    if ( axm && aym && azp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), -1, -1, +1);
+      block_array(ixm,iym,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, +1, -1);
+    }
+    if ( axm && ayp && azm ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), -1, +1, -1);
+      block_array(ixm,iyp,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, -1, +1);
+    }
+    if ( axm && ayp && azp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), -1, +1, +1);
+      block_array(ixm,iyp,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, +1, -1, -1);
+    }
+    if ( axp && aym && azm ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), +1, -1, -1);
+      block_array(ixp,iym,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, +1, +1);
+    }
+    if ( axp && aym && azp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), +1, -1, +1);
+      block_array(ixp,iym,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, +1, -1);
+    }
+    if ( axp && ayp && azm ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), +1, +1, -1);
+      block_array(ixp,iyp,izm).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, -1, +1);
+    }
+    if ( axp && ayp && azp ) {
+      FieldFace field_face;
+      field_face.include_ghosts(lx,ly,lz);
+      field_face.load (field_descr, field_block(), +1, +1, +1);
+      block_array(ixp,iyp,izp).p_refresh_face 
+	(field_face.size(), field_face.array(), axis_set, -1, -1, -1);
+    }
+  }
+
+  // NOTE: p_refresh_face() calls compute, but if no incoming faces
+  // it will never get called.  So every block also calls
+  // p_refresh_face() itself with a null array
+
+  p_refresh_face (0,0,axis_set, 0, 0, 0);
+
+}
+#endif /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void Block::determine_boundary_
+(
+ bool is_boundary[3][2],
+ bool * axm,
+ bool * axp,
+ bool * aym,
+ bool * ayp,
+ bool * azm,
+ bool * azp,
+ int axis_set
+ )
+{
+  
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   Hierarchy * hierarchy   = simulation->hierarchy();
 
@@ -410,20 +697,44 @@ void Block::refresh (int axis_set)
 
   is_on_boundary(lower_h,upper_h,is_boundary);
 
-  Boundary * boundary = simulation->boundary();
-  const FieldDescr * field_descr = simulation->field_descr();
-
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
 
   // Determine in which directions we need to communicate or update boundary
 
-  bool axm = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
-  bool aym = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
-  bool azm = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
-  bool axp = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
-  bool ayp = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
-  bool azp = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+  *axm = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
+  *axp = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
+  *aym = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
+  *ayp = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
+  *azm = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+  *azp = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
+
+#ifdef CONFIG_USE_CHARM
+
+void Block::update_boundary_
+(
+ bool is_boundary[3][2],
+ bool axm,
+ bool axp,
+ bool aym,
+ bool ayp,
+ bool azm,
+ bool azp,
+ int axis_set
+)
+{
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  Boundary * boundary = simulation->boundary();
+  const FieldDescr * field_descr = simulation->field_descr();
+
 
   // Update boundaries
 
@@ -445,195 +756,9 @@ void Block::refresh (int axis_set)
   if ( azp && is_boundary[axis_z][face_upper] ) {
     boundary->enforce(field_descr,this,face_upper,axis_z);
   }
-
-  //--------------------------------------------------
-  // Refresh
-  //--------------------------------------------------
-
-  int ix = thisIndex.x;
-  int iy = thisIndex.y;
-  int iz = thisIndex.z;
-
-  int nbx = size_[0];
-  int nby = size_[1];
-  int nbz = size_[2];
-  
-  int ixm = (ix - 1 + nbx) % nbx;
-  int iym = (iy - 1 + nby) % nby;
-  int izm = (iz - 1 + nbz) % nbz;
-  int ixp = (ix + 1) % nbx;
-  int iyp = (iy + 1) % nby;
-  int izp = (iz + 1) % nbz;
-
-  FieldFace field_face;
-
-  bool periodic = boundary->is_periodic();
-
-  CProxy_Block block_array = thisProxy;
-
-  axm = axm && (periodic || ! is_boundary[axis_x][face_lower]);
-  axp = axp && (periodic || ! is_boundary[axis_x][face_upper]);
-  aym = aym && (periodic || ! is_boundary[axis_y][face_lower]);
-  ayp = ayp && (periodic || ! is_boundary[axis_y][face_upper]);
-  azm = azm && (periodic || ! is_boundary[axis_z][face_lower]);
-  azp = azp && (periodic || ! is_boundary[axis_z][face_upper]);
-
-  // Refresh face ghost zones
-
-  if (field_descr->refresh_face(2)) {
-    if ( axm ) {
-      field_face.load (field_descr, field_block(), -1, 0, 0);
-      block_array(ixm,iy,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, 0, 0);
-    }
-    if ( axp ) {
-      field_face.load (field_descr, field_block(), +1, 0, 0);
-      block_array(ixp,iy,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, 0, 0);
-    }
-    if ( aym ) {
-      field_face.load (field_descr, field_block(), 0, -1, 0);
-      block_array(ix,iym,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, +1, 0);
-    }
-    if ( ayp ) {
-      field_face.load (field_descr, field_block(), 0, +1, 0);
-      block_array(ix,iyp,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, -1, 0);
-    }
-    if ( azm ) {
-      field_face.load (field_descr, field_block(), 0, 0, -1);
-      block_array(ix,iy,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, 0, +1);
-    }
-    if ( azp ) {
-      field_face.load (field_descr, field_block(), 0, 0, +1);
-      block_array(ix,iy,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, 0, -1);
-    }
-  }
-
-  // Refresh edge ghost zones
-
-  if (field_descr->refresh_face(1)) {
-    if ( axm && aym ) {
-      field_face.load (field_descr, field_block(), -1, -1, 0);
-      block_array(ixm,iym,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, +1, 0);
-    }
-    if ( axm && ayp ) {
-      field_face.load (field_descr, field_block(), -1, +1, 0);
-      block_array(ixm,iyp,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, -1, 0);
-    }
-    if ( axp && aym ) {
-      field_face.load (field_descr, field_block(), +1, -1, 0);
-      block_array(ixp,iym,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, +1, 0);
-    }
-    if ( axp && ayp ) {
-      field_face.load (field_descr, field_block(), +1, +1, 0);
-      block_array(ixp,iyp,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, -1, 0);
-    }
-
-    if ( aym && azm ) {
-      field_face.load (field_descr, field_block(), 0, -1, -1);
-      block_array(ix,iym,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, +1, +1);
-    }
-    if ( aym && azp ) {
-      field_face.load (field_descr, field_block(), 0, -1, +1);
-      block_array(ix,iym,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, +1, -1);
-    }
-    if ( ayp && azm ) {
-      field_face.load (field_descr, field_block(), 0, +1, -1);
-      block_array(ix,iyp,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, -1, +1);
-    }
-    if ( ayp && azp ) {
-      field_face.load (field_descr, field_block(), 0, +1, +1);
-      block_array(ix,iyp,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, -1, -1);
-    }
-
-    if ( axm && azm ) {
-      field_face.load (field_descr, field_block(), -1, 0, -1);
-      block_array(ixm,iy,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, 0, +1);
-    }
-    if ( axp && azm ) {
-      field_face.load (field_descr, field_block(), +1, 0, -1);
-      block_array(ixp,iy,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, 0, +1);
-    }
-    if ( axm && azp ) {
-      field_face.load (field_descr, field_block(), -1, 0, +1);
-      block_array(ixm,iy,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, 0, -1);
-    }
-    if ( axp && azp ) {
-      field_face.load (field_descr, field_block(), +1, 0, +1);
-      block_array(ixp,iy,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, 0, -1);
-    }
-  }
-
-  // Refresh corner ghost zones
-
-  if (field_descr->refresh_face(0)) {
-
-    if ( axm && aym && azm ) {
-      field_face.load (field_descr, field_block(), -1, -1, -1);
-      block_array(ixm,iym,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, +1, +1);
-    }
-    if ( axm && aym && azp ) {
-      field_face.load (field_descr, field_block(), -1, -1, +1);
-      block_array(ixm,iym,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, +1, -1);
-    }
-    if ( axm && ayp && azm ) {
-      field_face.load (field_descr, field_block(), -1, +1, -1);
-      block_array(ixm,iyp,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, -1, +1);
-    }
-    if ( axm && ayp && azp ) {
-      field_face.load (field_descr, field_block(), -1, +1, +1);
-      block_array(ixm,iyp,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, -1, -1);
-    }
-    if ( axp && aym && azm ) {
-      field_face.load (field_descr, field_block(), +1, -1, -1);
-      block_array(ixp,iym,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, +1, +1);
-    }
-    if ( axp && aym && azp ) {
-      field_face.load (field_descr, field_block(), +1, -1, +1);
-      block_array(ixp,iym,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, +1, -1);
-    }
-    if ( axp && ayp && azm ) {
-      field_face.load (field_descr, field_block(), +1, +1, -1);
-      block_array(ixp,iyp,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, -1, +1);
-    }
-    if ( axp && ayp && azp ) {
-      field_face.load (field_descr, field_block(), +1, +1, +1);
-      block_array(ixp,iyp,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, -1, -1);
-    }
-  }
-
-  // NOTE: p_refresh_face() calls compute, but if no incoming faces
-  // it will never get called.  So every block also calls
-  // p_refresh_face() itself with a null array
-
-  p_refresh_face (0,0,axis_set, 0, 0, 0);
-
 }
-#endif /* CONFIG_USE_CHARM */
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -644,7 +769,6 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
-  //  TRACE5("%d refresh_face %d %d %d  %d",CkMyPe(),fx,fy,fz,cycle_);
 
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -653,13 +777,20 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
     // n == 0 is the call from self to ensure p_refresh_face()
     // always gets called at least once
 
+    bool lx,ly,lz;
+    lx = simulation->temp_update_full();
+    ly = simulation->temp_update_full();
+    lz = simulation->temp_update_full();
+
     FieldFace field_face(n, buffer);
+    field_face.include_ghosts(lx,ly,lz);
 
     field_face.store (field_descr, field_block(), fx, fy, fz);
   }
 
   //--------------------------------------------------
   // Count incoming faces
+  // (SHOULD NOT RECOMPUTE EVERY CALL)
   //--------------------------------------------------
 
   int nx,ny,nz;
@@ -764,7 +895,7 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
 #ifdef ORIGINAL_REFRESH  
       compute(axis_set); // axis_set ignored--used when compute() calls refresh()
 #else
-      prepare();
+      prepare(axis_set);
 #endif
     }
     break;
@@ -774,7 +905,7 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
 #ifdef ORIGINAL_REFRESH  
       compute(axis_set);
 #else
-      prepare();
+      prepare(axis_set);
 #endif
     }
     break;
@@ -795,16 +926,24 @@ void Block::compute(int axis_set)
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
+#ifdef ORIGINAL_REFRESH
+  bool is_boundary[3][2];
+  bool axm,axp,aym,ayp,azm,azp;
+  determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp,axis_set);
+  update_boundary_(is_boundary,axm,axp,aym,ayp,azm,azp,axis_set);
+#else
+  // see prepare()
+#endif
+
 #ifdef CONFIG_USE_PROJECTIONS
   double time_start = CmiWallTimer();
 #endif
 
   FieldDescr * field_descr = simulation->field_descr();
 
-   char buffer[10];
-
-   sprintf (buffer,"%03d-A",cycle_);
-   field_block()->print(field_descr,buffer,lower_,upper_);
+  //   char buffer[10];
+   //   sprintf (buffer,"%03d-A",cycle_);
+   //   field_block()->print(field_descr,buffer,lower_,upper_);
 
   for (size_t i = 0; i < simulation->num_method(); i++) {
     simulation->method(i) -> compute_block (field_descr,this,time_,dt_);
@@ -825,7 +964,7 @@ void Block::compute(int axis_set)
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 
 #ifdef ORIGINAL_REFRESH  
-  prepare();
+  prepare(axis_set);
 #else
   refresh(axis_set);
 #endif

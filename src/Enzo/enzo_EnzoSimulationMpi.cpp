@@ -68,7 +68,7 @@ void EnzoSimulationMpi::run() throw()
 
     while ((block = ++it_block)) {
 
-      initial_->compute(hierarchy_,field_descr_,block);
+      initial_->enforce(hierarchy_,field_descr_,block);
 
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
@@ -196,12 +196,11 @@ void EnzoSimulationMpi::run() throw()
 
     monitor_output();
 
-    //--------------------------------------------------
-    // Apply the methods
-    //--------------------------------------------------
-
     stop_hierarchy = true;
 
+    //--------------------------------------------------
+    // Refresh ghosts and boundary
+    //--------------------------------------------------
 
     while ((patch = ++it_patch)) {
 
@@ -214,12 +213,18 @@ void EnzoSimulationMpi::run() throw()
 
 	block->is_on_boundary (lower,upper,boundary);
 
-	update_boundary_(block,boundary);
-
+	// Refresh ghost zones
 	refresh_ghost_(block,patch,boundary);
+
+	// Update boundary conditions
+	update_boundary_(block,boundary);
 
       }
     }
+
+    //--------------------------------------------------
+    // Apply numerical methods
+    //--------------------------------------------------
 
     while ((patch = ++it_patch)) {
 

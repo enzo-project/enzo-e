@@ -121,9 +121,6 @@ public: // interface
   FieldBlock * merge(bool merge_x, bool merge_y, bool merge_z, 
 		     FieldBlock ** field_blocks) throw ();
  
-  /// Set array values for a given field
-  void set_field_values (int id_field, char * values) throw();
-
   /// Return the number of elements (nx,ny,nz) along each axis, and total
   /// number of bytes n
   int field_size (const FieldDescr * field_descr, int id_field, 

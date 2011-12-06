@@ -363,23 +363,6 @@ PARALLEL_MAIN_BEGIN
 
   delete field_descr;
 
-  // Send all faces
-
-  //   send_init();
-  //   send_begin();
-  //   send_end();
-  //   send_final();
-	
-  //   recv_init();
-  //   recv_begin();
-  //   recv_end();
-  //   recv_final();
-	
-  //   sendrecv_init();
-  //   sendrecv_begin();
-  //   sendrecv_end();
-  //   sendrecv_final();
-
   unit_finalize();
   //----------------------------------------------------------------------
 

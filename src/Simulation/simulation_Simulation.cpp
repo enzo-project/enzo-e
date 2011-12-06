@@ -255,7 +255,7 @@ void Simulation::initialize_hierarchy_() throw()
 
   for (int i=0; i<3; i++) {
     lower[i] = parameters_->list_value_float(i, "Domain:lower", 0.0);
-    upper[i] = parameters_->list_value_float(i, "Domain:upper", 1.0);
+    upper[i] = parameters_->list_value_float(i, "Domain:upper", 0.0);
     ASSERT ("Simulation::initialize_simulation_",
 	    "Domain:lower may not be greater than Domain:upper",
 	    lower[i] <= upper[i]);
@@ -1110,7 +1110,7 @@ void Simulation::refresh() throw()
 #ifdef ORIGINAL_REFRESH
 	patch->block_array().p_refresh(cycle_, time_, dt_,axis);
 #else
-	patch->block_array().p_compute(dt_,axis);
+	patch->block_array().p_compute(cycle_, time_, dt_,axis);
 #endif
       }
     }

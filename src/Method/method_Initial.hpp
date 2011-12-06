@@ -26,8 +26,8 @@ public: // interface
 
 public: // virtual functions
 
-  /// Perform the initialization of the given Block
-  virtual void compute (const Hierarchy * hierarchy,
+  /// Enforce initial conditions on the given Block
+  virtual void enforce (const Hierarchy * hierarchy,
 			const FieldDescr * field_descr,
 			Block * block) throw() = 0;
 

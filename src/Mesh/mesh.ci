@@ -30,8 +30,8 @@ module mesh {
        int num_field_blocks);
 
     entry void p_initial();
-    entry void p_compute(double dt, int axis_set);
     entry void p_refresh(int cycle, double time, double dt, int axis_set);
+    entry void p_compute(int cycle, double time, double dt, int axis_set);
     entry void p_refresh_face
       (int n, char buffer[n], int axis_set, int fx, int fy, int fz);
     entry void p_write (int index_output);
