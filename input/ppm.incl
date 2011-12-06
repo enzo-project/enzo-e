@@ -15,8 +15,8 @@
    }
 
    Parallel {
-      temp_update_all  = false;
-      temp_update_full = true;
+      temp_update_all  = true;
+      temp_update_full = false;
    }
 
    # Field parameters include those concerning fields as a group, as

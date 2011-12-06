@@ -5,7 +5,7 @@
 
    Parallel {
       temp_update_all  = true;
-      temp_update_full = true;
+      temp_update_full = false;
    }
    Domain { 
       lower = [0.0, 0.0, 0.0];
