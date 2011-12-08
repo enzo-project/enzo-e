@@ -1,10 +1,29 @@
-Version 0.5b4  2011-10-28
+------------------------------------------------------------------------
 
-  * FIX:     Fixed axis-reversal OutputData bug for Cello vs HDF5
-  * Change:  Supplemented test 3D projections with x,y,z axes
+Version 0.5b4  2011-12-08
+
+  This update fixes a lot of errors that became apparent when testing
+  on Intel and PGI compilers in addition to GNU.
+
+  * FIX:     Fixed Cello-to-HDF5 axis-reversal OutputData bug
+  * FIX:     Fixed function call sequence so that ghosts are refreshed
+             before boundary conditions are enforced
+  * FIX:     Added barrier after enforcing initial conditions to prevent
+             error due to CHARM++ race conditions
   * Fix:     Fixed Intel serial link bug
-  * Fix:     Added Parallel:temp_update_all = false parameter to ppml.incl
-  * Change:  FieldBlock::print() debug function outputs nan locations
+  * Fix:     Fixed colormap bug
+  * Change:  Initialize field data with -MAX(float)
+  * Change:  Replaced 1e-20 with 1e-10 for single precision to avoid 
+             underflow in PPML_monot.F
+  * Change:  Added support for communicating edge and vertex ghosts as well 
+             as faces
+  * Change:  Added Field:refresh_edges and Field:refresh_corners parameters
+  * Change:  Changed temp_update_all to true and temp_update_full to false in
+             all input files
+  * Change:  Moved PPML temporary array allocation from Fortran stack to 
+             C++ heap to avoid stack overflow in PPML_MAIN.F
+
+------------------------------------------------------------------------
 
 Version 0.5b3  2011-10-28
 
@@ -20,12 +39,16 @@ Version 0.5b3  2011-10-28
   * Fix:     re-added Parallel parameters to ppm.incl
   * Fix:     bug fixes in compile.sh
 
+------------------------------------------------------------------------
+
 Version 0.5b2  2011-10-27
 
   * New:     added REVISIONS
   * Change:  modified support Triton GNU, Intel, and PGI compilers
   * Change:  removed enzo.h
   * Fix:     changed HelloWorld.in to avoid buggy pngwriter PNG image masks
+
+------------------------------------------------------------------------
 
 Version 0.5b1  2011-10-26
 
