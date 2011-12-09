@@ -22,16 +22,8 @@
 
 // (Called from BlockReduce::p_prepare())
 
-void Simulation::p_output 
-( int cycle, double time, double dt, bool stop ) throw()
+void Simulation::p_output () throw()
 {
-
-  // Update Simulation cycle and time from reduction to main
-  
-  cycle_ = cycle;
-  time_  = time;
-  dt_    = dt;
-  stop_  = stop;
 
   // reset output "loop" over output objects
   output_first();

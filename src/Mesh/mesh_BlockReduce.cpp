@@ -17,10 +17,7 @@
 #ifdef CONFIG_USE_CHARM
 
 BlockReduce::BlockReduce()
-  : count_prepare_(0),
-    count_output_(0),
-    dt_hierarchy_(std::numeric_limits<double>::max()),
-    stop_hierarchy_(true)
+  : count_output_(0)
 {
 }
 
@@ -28,43 +25,6 @@ BlockReduce::BlockReduce()
 
 //----------------------------------------------------------------------
 
-// See Simulation/simulation_charm_output.cpp for BlockReduce::p_output()
+// See simulation_charm_output.cpp for BlockReduce::p_output()
 
-#ifdef CONFIG_USE_CHARM
-
-void BlockReduce::p_prepare(int    count, 
-			    int    cycle, 
-			    double time,
-			    double dt_block, 
-			    int    stop_block)
-{
-
-  // Parallel reduction of dt and stopping criteria 
-
-  dt_hierarchy_   = MIN(dt_hierarchy_, dt_block);
-  stop_hierarchy_ = stop_hierarchy_ && stop_block;
-
-  // Assumes cycle and time are the same for all "incoming" blocks;
-  // only use the last one
-
-  if (++count_prepare_ >= count) {
-
-    // Continue with Simulation::p_output()
-
-    proxy_simulation.p_output(cycle, time, dt_hierarchy_, stop_hierarchy_);
-
-    // Reset pool
-
-    count_prepare_ = 0;
-    dt_hierarchy_ = std::numeric_limits<double>::max();
-    stop_hierarchy_ = true;
-
-  }
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-// SEE simulation_charm_output.cpp for
-// BlockReduce::p_output_reduce()
+// See simulation_charm_output.cpp for BlockReduce::p_output_reduce()

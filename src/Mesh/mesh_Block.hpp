@@ -78,11 +78,11 @@ public: // interface
   /// Contribute block data to ith output object in the simulation
   void p_write (int index_output);
 
-  /// Entry function after barrier to call refresh()
+  /// Entry function after initial barrier to call refresh()
   void p_call_refresh();
 
-  /// Entry function after barrier to call refresh()
-  void p_call_prepare();
+  /// Entry function after prepare() to call Simulation::p_output()
+  void p_call_output(CkReductionMsg * msg);
 
   //--------------------------------------------------
 
@@ -286,23 +286,17 @@ public: // CHARM++ PUPer
       p | *field_block_[i];
     }
 
-#ifndef CONFIG_USE_CHARM
-    // (never called: included for completeness)
-    PUParray(p,index_,3);
-#endif
-
     PUParray(p,size_,3);
 
     PUParray(p,lower_,3);
 
     PUParray(p,upper_,3);
 
-#ifdef CONFIG_USE_CHARM
     p | count_refresh_face_;
+
     p | count_refresh_face_x_;
     p | count_refresh_face_y_;
     p | count_refresh_face_z_;
-#endif
 
     p | cycle_;
     p | time_;

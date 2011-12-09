@@ -73,14 +73,14 @@ public: // interface
   //  void p_output(int index, int cycle, double time) throw();
 
   // Output
-  void p_output (int cycle, double time, double dt, bool stopping) throw();
+  void p_output () throw();
 
   // Monitor, test Stopping, update Boundary and ghost zones
   void refresh () throw();
 
   /// default reduction callback
   void p_done (CkReductionMsg * m)
-  {    TRACE1 ("done(%g)\n",*((double *)m->getData()));  delete m; }
+  {  delete m; }
 
   //--------------------------------------------------
   // Output
@@ -196,7 +196,7 @@ public: // interface
   size_t index() const throw() 
   { return index_; };
 
-  void update_cycle(int cycle, int time, double dt, double stop) {
+  void update_cycle(int cycle, double time, double dt, double stop) {
     cycle_ = cycle;
     time_  = time;
     dt_    = dt;

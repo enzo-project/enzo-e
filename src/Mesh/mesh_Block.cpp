@@ -284,9 +284,6 @@ void Block::p_initial()
 
   initial->enforce(simulation->hierarchy(),field_descr,this);
 
-  
-  axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
-
   // NOTE: CHARM++ contribute() barrier is to prevent race conditions
   // where Block::p_refresh_face() is called before Block::p_initial()
 
@@ -301,19 +298,14 @@ void Block::p_initial()
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_call_prepare()
-{
-  Simulation * simulation  = proxy_simulation.ckLocalBranch();
-  axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
-  prepare(axis_set);
-}
-
-//--------------------------------------------------
-
 void Block::prepare(int axis_set)
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  //--------------------------------------------------
+  // Enforce boundary conditions
+  //--------------------------------------------------
 
   bool is_boundary[3][2];
   bool axm,axp,aym,ayp,azm,azp;
@@ -323,7 +315,7 @@ void Block::prepare(int axis_set)
   FieldDescr * field_descr = simulation->field_descr();
 
   //--------------------------------------------------
-  // Timestep [block]
+  // Compute local dt
   //--------------------------------------------------
 
   double dt_block;
@@ -344,21 +336,51 @@ void Block::prepare(int axis_set)
   dt_block = MIN (dt_block, (time_stop - time_curr));
 
   //--------------------------------------------------
-  // Stopping [block]
+  // Evaluate local stopping criteria
   //--------------------------------------------------
 
   int stop_block = simulation->stopping()->complete(cycle_,time_);
 
   //--------------------------------------------------
-  // BlockReduce::p_prepare()
+  // Reduce to find Block array minimum dt and stopping criteria
   //--------------------------------------------------
 
-  // WARNING: assumes single patch
-  int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
+  double min_reduce[2];
 
-  simulation->proxy_block_reduce().p_prepare
-    (num_blocks, cycle_, time_, dt_block, stop_block);
+  min_reduce[0] = dt_block;
+  min_reduce[1] = stop_block ? 1.0 : 0.0;
 
+  CkCallback callback (CkIndex_Block::p_call_output(NULL), thisProxy);
+  contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
+
+}
+#endif /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void Block::p_call_output(CkReductionMsg * msg)
+{
+  double * min_reduce = (double * )msg->getData();
+
+  double dt_patch   = min_reduce[0];
+  bool   stop_patch = min_reduce[1] == 1.0 ? true : false;
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // WARNING: assumes one patch
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  simulation->update_cycle(cycle_,time_,dt_patch,stop_patch);
+
+  // "root" block calls Simulation::p_output()
+  if (index() == 0) {
+    proxy_simulation.p_output();
+  }
+
+  delete msg;
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -448,16 +470,6 @@ void Block::refresh (int axis_set)
   azp = azp && (periodic || ! is_boundary[axis_z][face_upper]);
 
   // Refresh face ghost zones
-
-  // TRACE5("%f %f %f face %d %d %d",lower_[0],lower_[1],
-  // 	 field_descr->refresh_face(2),
-  // 	 field_descr->refresh_face(1),
-  // 	 field_descr->refresh_face(0));
-
-  // TRACE5("%f %f %f lower %d %d %d",lower_[0],lower_[1],
-  // 	 axm,aym,azm);
-  // TRACE5("%f %f %f upper %d %d %d",lower_[0],lower_[1],
-  // 	 axp,ayp,azp);
 
   bool lx,ly,lz;
   lx = simulation->temp_update_full();

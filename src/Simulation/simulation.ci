@@ -17,7 +17,7 @@ module simulation {
        CProxy_BlockReduce proxy_block_reduce,
        int index_simulation);
 
-    entry void p_output (int cycle, double time, double dt, bool stopping);
+    entry void p_output ();
     entry void p_output_reduce();
     entry void p_output_write(int n, char buffer[n]);
 

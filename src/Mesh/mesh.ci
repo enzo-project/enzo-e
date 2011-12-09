@@ -14,9 +14,6 @@ module mesh {
   
   chare BlockReduce {
     entry BlockReduce();
-    entry void p_prepare (int count_blocks, int cycle, double time,
-			  double dt_block, int stop_block);
-
     entry void p_output_reduce (int count_blocks);
   };
 
@@ -37,7 +34,7 @@ module mesh {
     entry void p_write (int index_output);
 
     entry void p_call_refresh();
-    entry void p_call_prepare();
+    entry void p_call_output(CkReductionMsg * msg);
 
     //     void p_next();
     //     void p_prepare();
