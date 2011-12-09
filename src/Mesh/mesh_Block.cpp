@@ -287,23 +287,12 @@ void Block::p_initial()
   
   axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
 
-#ifdef ORIGINAL_REFRESH  
-
-  // NOTE: CHARM++ contribute() barrier is to prevent race conditions
-  // where Block::p_refresh_face() is called before Block::p_initial()
-
-  // Prepare for first cycle: Timestep, Stopping, Monitor, Output
-  contribute( CkCallback(CkIndex_Block::p_call_prepare(), thisProxy) );
-
-#else
-
   // NOTE: CHARM++ contribute() barrier is to prevent race conditions
   // where Block::p_refresh_face() is called before Block::p_initial()
 
   // Refresh before prepare()
   contribute( CkCallback(CkIndex_Block::p_call_refresh(), thisProxy) );
 
-#endif
 }
 
 #endif
@@ -326,14 +315,10 @@ void Block::prepare(int axis_set)
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-#ifdef ORIGINAL_REFRESH
-  // see compute()
-#else
   bool is_boundary[3][2];
   bool axm,axp,aym,ayp,azm,azp;
   determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp,axis_set);
   update_boundary_(is_boundary,axm,axp,aym,ayp,azm,azp,axis_set);
-#endif
 
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -912,21 +897,13 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
   case axis_z:
     if (++count_refresh_face_z_ >= count) {
       count_refresh_face_z_ = 0;
-#ifdef ORIGINAL_REFRESH  
-      compute(axis_set); // axis_set ignored--used when compute() calls refresh()
-#else
       prepare(axis_set);
-#endif
     }
     break;
   case axis_all:
     if (++count_refresh_face_ >= count) {
       count_refresh_face_ = 0;
-#ifdef ORIGINAL_REFRESH  
-      compute(axis_set);
-#else
       prepare(axis_set);
-#endif
     }
     break;
   }
@@ -945,15 +922,6 @@ void Block::compute(int axis_set)
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-#ifdef ORIGINAL_REFRESH
-  bool is_boundary[3][2];
-  bool axm,axp,aym,ayp,azm,azp;
-  determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp,axis_set);
-  update_boundary_(is_boundary,axm,axp,aym,ayp,azm,azp,axis_set);
-#else
-  // see prepare()
-#endif
 
 #ifdef CONFIG_USE_PROJECTIONS
   double time_start = CmiWallTimer();
@@ -983,11 +951,7 @@ void Block::compute(int axis_set)
 
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 
-#ifdef ORIGINAL_REFRESH  
-  prepare(axis_set);
-#else
   refresh(axis_set);
-#endif
 
 }
 #endif /* CONFIG_USE_CHARM */

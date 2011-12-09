@@ -42,12 +42,6 @@ use_valgrind    = 0
 
 use_projections = 0
 
-# Temporary code variation for testing purposes.  Changing the value
-# below may result in the code hanging, crashing, or producing
-# incorrect results.
-
-original_refresh = 0
-
 # Triton MPI type (openmpi or mpich2)
 
 mpi_type = 'mpich2'
@@ -130,8 +124,7 @@ define_atsync =           ['CONFIG_CHARM_ATSYNC']
 define_memory =           ['CONFIG_USE_MEMORY']
 define_projections =      ['CONFIG_USE_PROJECTIONS']
 
-# Experimental code defines
-define_original_refresh = ['ORIGINAL_REFRESH']
+#--------------------------------------------------
 
 defines     = []
 defines_xlc = ""
@@ -196,13 +189,6 @@ flags_gprof = ''
 if (use_gprof == 1):
      flags_gprof = '-pg '
      
-# Experimental defines
-
-if (original_refresh == 1):
-     defines    =  defines          + define_original_refresh
-     defines_xlc = defines_xlc + DC + define_original_refresh[0]
-     defines_xlf = defines_xlf + DF + define_original_refresh[0]
-
 # PAPI defines
 
 if (use_papi != 0): 

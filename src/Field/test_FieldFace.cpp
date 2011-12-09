@@ -40,7 +40,7 @@ double test_value (int ix, int iy, int iz,
   double xg = (ibx*mx + ix + NX) % NX;
   double yg = (iby*my + iy + NY) % NY;
   double zg = (ibz*mz + iz + NZ) % NZ;
-  double value = xg + 100*(yg + 100*zg);
+  double value = xg + 13*(yg + 19*zg);
   return value;
 }
 

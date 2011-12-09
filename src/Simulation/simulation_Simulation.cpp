@@ -1107,11 +1107,7 @@ void Simulation::refresh() throw()
     axis_enum axis = (temp_update_all_) ? axis_all : axis_x;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
-#ifdef ORIGINAL_REFRESH
-	patch->block_array().p_refresh(cycle_, time_, dt_,axis);
-#else
 	patch->block_array().p_compute(cycle_, time_, dt_,axis);
-#endif
       }
     }
   }
