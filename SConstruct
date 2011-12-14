@@ -469,6 +469,48 @@ elif (arch == "triton-gnu"):
 # Optional warnings-level flags
      flags_warn  = '-Wall'
 
+#----------------------------------------------------------------------
+elif (arch == "ncsa-bw"):
+#----------------------------------------------------------------------
+
+     is_arch_valid = 1
+
+     # Requires modules pgi, mpich_mx
+
+     charm_path = '/home/cpv/tra61/charm' + mpi_type
+
+     fortran['serial'] = 'ftn'
+     fortran['mpi']    = 'ftn'
+     fortran['charm']  = 'ftn'
+
+     cxx['serial'] = 'CC -h gnu'
+     cxx['mpi']    = 'CC -h gnu'
+
+     cc['serial']  = 'cc'
+     cc['mpi']     = 'cc'
+
+# Architecture-dependent defines
+
+     cppdefines        = defines
+
+# For extra fortran libraries
+
+     libpath_fortran = ''
+     libs_fortran    = []
+     # -rdynamic is to include symbols in backtrace
+     fortranlinkflags_arch  = ''
+
+# PAPI path (optional)
+     papi_path = ''
+# HDF5 path
+     hdf5_path = '/opt/hdf5/pgi'
+# Optional debugging flags
+     flags_debug = ''
+# Optional optimization flags
+     flags_opt   = ''
+# Optional warnings-level flags
+     flags_warn  = ''
+
 #======================================================================
 # END ARCHITECTURE SETTINGS
 #======================================================================

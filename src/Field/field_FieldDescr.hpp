@@ -204,7 +204,7 @@ private: // attributes
   std::vector<int *> ghosts_;
 
   /// Whether to update the k-D ghosts (corners, edges, faces)
-  bool refresh_face_[2];
+  bool refresh_face_[3];
 
   /// minimum allowed value for each field
   std::vector<double> min_value_;
