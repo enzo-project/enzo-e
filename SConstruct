@@ -305,7 +305,7 @@ elif (arch == "ncsa-bd"):
 
      is_arch_valid = 1
 
-     charm_path = '/home/bordner/charm/charm'
+     charm_path = '/home/bordner/charm'
 
      fc_path  = '/opt/ibmcmp/xlf/13.1'
      cc_path  = '/opt/ibmcmp/vac/11.1'
@@ -483,11 +483,11 @@ elif (arch == "ncsa-bw"):
      fortran['mpi']    = 'ftn'
      fortran['charm']  = 'ftn'
 
-     cxx['serial'] = 'CC -h gnu'
-     cxx['mpi']    = 'CC -h gnu'
+     cxx['serial'] = 'CC'
+     cxx['mpi']    = 'CC'
 
-     cc['serial']  = 'cc'
-     cc['mpi']     = 'cc'
+     cc['serial']  = 'cc -h gnu'
+     cc['mpi']     = 'cc -h gnu'
 
 # Architecture-dependent defines
 
@@ -503,7 +503,7 @@ elif (arch == "ncsa-bw"):
 # PAPI path (optional)
      papi_path = ''
 # HDF5 path
-     hdf5_path = '/opt/hdf5/pgi'
+     hdf5_path = '/home/cpv/tra61'
 # Optional debugging flags
      flags_debug = ''
 # Optional optimization flags
