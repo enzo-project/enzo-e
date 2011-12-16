@@ -233,13 +233,13 @@ if (atsync != 0):
 
 # HDF5 library defines
 
-defines     = defines     +         define_hdf5
+defines     = defines     +      define_hdf5
 defines_xlc = defines_xlc + DC + define_hdf5[0] 
 defines_xlf = defines_xlf + DF + define_hdf5[0] 
 
 # PNG library defines
 
-defines     = defines             + define_png
+defines     = defines          + define_png
 defines_xlc = defines_xlc + DC + define_png[0]
 defines_xlf = defines_xlf + DF + define_png[0]
 
@@ -292,6 +292,8 @@ if (arch == "linux-gnu"):
      papi_path = '/usr/local'
 # HDF5 path
      hdf5_path = '/usr'
+# libpng path
+     libpng_path = ''
 # Optional debugging flags
      flags_debug = '-g'
 # Optional optimization flags
@@ -300,49 +302,51 @@ if (arch == "linux-gnu"):
      flags_warn  = '-Wall'
 
 #----------------------------------------------------------------------
-elif (arch == "ncsa-bd"):
-#----------------------------------------------------------------------
-
-     is_arch_valid = 1
-
-     charm_path = '/home/bordner/charm'
-
-     fc_path  = '/opt/ibmcmp/xlf/13.1'
-     cc_path  = '/opt/ibmcmp/vac/11.1'
-     cxx_path = '/opt/ibmcmp/vacpp/11.1'
-
-     fortran['serial'] = fc_path + '/bin/xlf_r'
-     fortran['mpi']    = fc_path + '/bin/xlf_r'
-     fortran['charm']  = fc_path + '/bin/xlf_r'
-
-     cxx['serial'] = cxx_path + '/bin/xlC_r'
-     cxx['mpi']    = 'mpCC'
-
-     cc['serial']  = cc_path + '/bin/xlc_r'
-     cc['mpi']     = 'mpcc'
-
-# Architecture-dependent flags
-
-     cflags_arch       = defines_xlc
-     cxxflags_arch     = defines_xlc
-     fortranflags_arch = defines_xlf + '-qextname'
-
-# Extra fortran libraries
-
-     libpath_fortran = fc_path + '/lib64'
-     libs_fortran    = ['xlf90','xlfmath','xl']
-     fortranlinkflags_arch  = ''
-
-# PAPI path (optional)
-     papi_path = '/opt/usersoft/papi/4.1.0'
-# HDF5 path
-     hdf5_path = '/home/bordner'
-# Optional debugging flags
-     flags_debug = ''
-# Optional optimization flags
-     flags_opt   = '-O3 -qhot -q64'
-# Optional warnings-level flags
-     flags_warn  = ''
+# elif (arch == "ncsa-bd"):
+# #----------------------------------------------------------------------
+# 
+#      is_arch_valid = 1
+# 
+#      charm_path = '/home/bordner/charm'
+# 
+#      fc_path  = '/opt/ibmcmp/xlf/13.1'
+#      cc_path  = '/opt/ibmcmp/vac/11.1'
+#      cxx_path = '/opt/ibmcmp/vacpp/11.1'
+# 
+#      fortran['serial'] = fc_path + '/bin/xlf_r'
+#      fortran['mpi']    = fc_path + '/bin/xlf_r'
+#      fortran['charm']  = fc_path + '/bin/xlf_r'
+# 
+#      cxx['serial'] = cxx_path + '/bin/xlC_r'
+#      cxx['mpi']    = 'mpCC'
+# 
+#      cc['serial']  = cc_path + '/bin/xlc_r'
+#      cc['mpi']     = 'mpcc'
+# 
+# # Architecture-dependent flags
+# 
+#      cflags_arch       = defines_xlc
+#      cxxflags_arch     = defines_xlc
+#      fortranflags_arch = defines_xlf + '-qextname'
+# 
+# # Extra fortran libraries
+# 
+#      libpath_fortran = fc_path + '/lib64'
+#      libs_fortran    = ['xlf90','xlfmath','xl']
+#      fortranlinkflags_arch  = ''
+# 
+# # PAPI path (optional)
+#      papi_path = '/opt/usersoft/papi/4.1.0'
+# # HDF5 path
+#      hdf5_path = '/home/bordner'
+# # libpng path
+#      libpng_path = ''
+# # Optional debugging flags
+#      flags_debug = ''
+# # Optional optimization flags
+#      flags_opt   = '-O3 -qhot -q64'
+# # Optional warnings-level flags
+#      flags_warn  = ''
 
 #----------------------------------------------------------------------
 elif (arch == "triton-pgi"):
@@ -379,6 +383,8 @@ elif (arch == "triton-pgi"):
      papi_path = ''
 # HDF5 path
      hdf5_path = '/opt/hdf5/pgi'
+# libpng path
+     libpng_path = ''
 # Optional debugging flags
      flags_debug = '-Ktrap=fp -g'
 # Optional optimization flags
@@ -420,6 +426,8 @@ elif (arch == "triton-intel"):
      papi_path = ''
 # HDF5 path
      hdf5_path = '/opt/hdf5/intel'
+# libpng path
+     libpng_path = ''
 # Optional debugging flags
      flags_debug = '-g'
 # Optional optimization flags
@@ -461,6 +469,8 @@ elif (arch == "triton-gnu"):
      papi_path = ''
 # HDF5 path
      hdf5_path = '/opt/hdf5/gnu'
+# libpng path
+     libpng_path = ''
 # Optional debugging flags
      flags_debug = '-g'
 # Optional optimization flags
@@ -473,19 +483,26 @@ elif (arch == "triton-gnu"):
 elif (arch == "ncsa-bw"):
 #----------------------------------------------------------------------
 
+     if (type == "mpi"):
+        parallel_run = "aprun -n 8"
+
      is_arch_valid = 1
 
      # Requires modules pgi, mpich_mx
 
-     charm_path = '/home/cpv/tra61/charm' + mpi_type
+     charm_path = '/home/cpv/tra61/charm'
 
-     fortran['serial'] = 'ftn'
-     fortran['mpi']    = 'ftn'
-     fortran['charm']  = 'ftn'
+     #  Cray feedback: -rm
 
+     fortran['serial'] = 'ftn -rm'
+     fortran['mpi']    = 'ftn -rm'
+     fortran['charm']  = 'ftn -rm'
+
+     # Cray compiler feedback: -h list=a
      cxx['serial'] = 'CC'
      cxx['mpi']    = 'CC'
 
+     # Cray:  -h gnu (for unnamed unions)
      cc['serial']  = 'cc -h gnu'
      cc['mpi']     = 'cc -h gnu'
 
@@ -495,7 +512,7 @@ elif (arch == "ncsa-bw"):
 
 # For extra fortran libraries
 
-     libpath_fortran = ''
+     libpath_fortran = '/home/cpv/tra61/lib'
      libs_fortran    = []
      # -rdynamic is to include symbols in backtrace
      fortranlinkflags_arch  = ''
@@ -503,7 +520,9 @@ elif (arch == "ncsa-bw"):
 # PAPI path (optional)
      papi_path = ''
 # HDF5 path
-     hdf5_path = '/home/cpv/tra61'
+     hdf5_path = '/opt/cray/hdf5/1.8.6/cray/73'
+# libpng path
+     libpng_path = ''
 # Optional debugging flags
      flags_debug = ''
 # Optional optimization flags
@@ -582,6 +601,12 @@ if (use_papi):
 
 cpppath = cpppath + [hdf5_path + '/include']
 libpath = libpath + [hdf5_path + '/lib']
+
+#----------------------------------------------------------------------
+# LIBPNG PATHS
+#----------------------------------------------------------------------
+
+libpath = libpath + [libpng_path + '/lib']
 
 #----------------------------------------------------------------------
 # FORTRAN LINK PATH
