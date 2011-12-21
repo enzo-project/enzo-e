@@ -2,7 +2,6 @@
 
 /// @file     simulation_Schedule.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @bug      time interval scheduling gets confused if multiple outputs scheduled per timestep
 /// @date     Wed Mar 16 09:53:31 PDT 2011
 /// @brief    Implementation of the Schedule class
 

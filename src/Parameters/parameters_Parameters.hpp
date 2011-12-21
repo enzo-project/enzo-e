@@ -8,7 +8,6 @@
 /// @todo     Add "check()" function to check individual parameters, or all
 /// @todo     Convert current_group_ to std::stack<std::string>
 /// @bug      "x - 0.5" broken since intepreted as "x (-0.5)"; workaround "x - (0.5)"
-/// @bug      Evaluating logical expressions with parentheses seg-faults (fixed?)
 /// @brief    [\ref Parameters] Declaration for the Parameters class
 
 #ifndef PARAMETERS_PARAMETERS_HPP
