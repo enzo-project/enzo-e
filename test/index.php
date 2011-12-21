@@ -473,6 +473,9 @@ test_summary("Enzo-BC-3D",
 		   "boundary_outflow-3d"),
 	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
 
+test_summary("Enzo-IC", 
+	     array("initial_png"),
+	     array("enzo-p"));
 // Print row divider
 
 printf ("<tr><th></th>");
@@ -660,6 +663,17 @@ tests("Enzo","enzo-p","test_boundary_outflow-3d","Outflow 3D");
 test_table ("boundary_outflow-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
 
+   //======================================================================
+
+test_group("Enzo-IC");
+
+
+echo "<h3>png mask initial conditions</h3>";
+
+tests("Enzo","enzo-p","test_initial_png","");
+
+test_table ("initial_png",
+	    array("00","10","20","30","40", "50"), $types);
    //======================================================================
 
 test_group("Disk");

@@ -11,11 +11,10 @@ Domain {
    upper = [ 1.0, 1.0 ];
 } 
 
-# Define the computational domain to be a 100 x 100 grid
-# partitioned into 4 blocks
+# Define the computational domain
 
 Mesh { 
-   root_size   = [ 1024,1024 ];
+   root_size   = [ 256,256 ];
    root_blocks = [   2,  4 ];
 }
 
@@ -87,7 +86,12 @@ Boundary { type = "reflecting" }
 # Define stopping criteria
 
 Stopping {
-   cycle = 100;
+   cycle = 50;
+}
+
+Testing {
+   cycle_final = 50;
+   time_final  = 0.0291762159205973;
 }
 
 # Output image dumps every 10 cycles
@@ -99,7 +103,7 @@ Output {
    cycle_group {
       field_list = [ "density" ];
       type       = "image";
-      name       = [ "Cello-%05d.png","cycle" ];
+      name       = [ "initial_png-%02d.png","cycle" ];
       schedule   = [ "cycle","interval", 10 ];
       colormap = [0.00, 0.00, 1.00,  
                     0.00, 1.00, 0.00, 

@@ -245,6 +245,15 @@ env.MakeMovie ("boundary_outflow-3d.swf","test_boundary_outflow-3d.unit", \
                 ARGS= test_path + "/boundary_outflow-3d-????.png");
 
 
+Clean(env_mv_png.RunParallel ('test_initial_png.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/initial_png.in'),
+      [Glob('#/' + test_path + '/initial_png.png'),
+       'test_initial_png.unit',
+       '#/input/initial_png.in.out'])
+env.MakeMovie ("initial_png.swf","test_initial_png.unit", \
+                ARGS= test_path + "/initial_png-????.png");
+
 if (type == "serial"):
    env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS='1')
 else:
