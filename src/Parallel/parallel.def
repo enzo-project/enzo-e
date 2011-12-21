@@ -6,6 +6,7 @@
 /// @file     parallel.def
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Aug 13 2010
+/// @todo     Use Parallel class functions instead of preprocessor macros
 /// @brief    Macro definitions for the Parallel component
 
 
@@ -52,7 +53,7 @@
 #else /* serial */
 
 //--------------------------------------------------
-// NOT USING CHARM NOR MPI
+// USING NEITHER CHARM NOR MPI
 //--------------------------------------------------
 
 #  define PARALLEL_INIT      /* BLANK */

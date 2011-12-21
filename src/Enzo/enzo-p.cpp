@@ -21,8 +21,6 @@
 
 //----------------------------------------------------------------------
 
-#define MAX_OUTPUT 10 /* Maximum number of outputs going on at a time */
-
 #ifdef CONFIG_USE_CHARM
 extern CProxy_Simulation proxy_simulation;
 #endif
@@ -30,7 +28,7 @@ extern CProxy_Simulation proxy_simulation;
 PARALLEL_MAIN_BEGIN
 {
 
-  // initialize parallel
+  // initialize parallelization
 
   PARALLEL_INIT;
 
@@ -44,11 +42,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(ip,np);
 
- #ifdef CONFIG_USE_CHARM
-   monitor_ = Monitor::instance();
- #else
+#ifdef CONFIG_USE_CHARM
+  monitor_ = Monitor::instance();
+#else
   Monitor * monitor_ = Monitor::instance();
- #endif
+#endif
 
   monitor_->set_active (group_process->is_root());
   monitor_->header();

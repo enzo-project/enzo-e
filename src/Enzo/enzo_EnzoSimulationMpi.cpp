@@ -261,7 +261,18 @@ void EnzoSimulationMpi::run() throw()
 
 	  Method * method = method_list_[i];
 
+	  double lower[3];
+	  double upper[3];
+	  block->lower(lower+0,lower+1,lower+2);
+	  block->upper(upper+0,upper+1,upper+2);
+  char buffer[10];
+  sprintf (buffer,"%03d-A",cycle_);
+  block->field_block()->print(field_descr_,buffer,lower,upper);
+
 	  method -> compute_block (field_descr_,block,time_block,dt_block);
+
+  sprintf (buffer,"%03d-B",cycle_);
+  block->field_block()->print(field_descr_,buffer,lower,upper);
 
 	}
 

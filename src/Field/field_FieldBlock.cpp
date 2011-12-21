@@ -563,6 +563,10 @@ void FieldBlock::print (const FieldDescr * field_descr,
 			bool use_file) const throw()
 {
 
+#ifndef CELLO_DEBUG
+  return;
+#endif
+
    int ip=0,np=1;
 #ifdef CONFIG_USE_CHARM
    ip=CkMyPe();

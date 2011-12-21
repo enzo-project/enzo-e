@@ -4,6 +4,17 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-08-10
 /// @brief    Declaration of the Main CHARM++ chare
+///
+/// Different test programs require different subsets of existing chares.
+/// For example, lower-level test programs, e.g. Mesh or Field tests,
+/// don't need to (and shouldn't) include Enzo-specific chare declarations.
+/// main.hpp is an include file used with CHARM.  Four "levels" of
+/// chare's are included:
+///
+///     CHARM_ENZO:       include Enzo, Simulation, and Mesh chare declartions
+///     CHARM_SIMULATION: include Simulation, and Mesh chare declarations
+///     CHARM_MESH:       include Mesh component chare declarations
+///     <default>         don't include any chare declarations
 
 #ifdef CONFIG_USE_CHARM
 
@@ -13,14 +24,23 @@
 #include "monitor.hpp"
 
 class Factory;
+
 #if defined(CHARM_ENZO)
+
 #  include "main_enzo.decl.h"
+
 #elif defined(CHARM_SIMULATION)
+
 #  include "main_simulation.decl.h"
+
 #elif defined(CHARM_MESH)
+
 #  include "main_mesh.decl.h"
+
 #else
+
 #  include "main.decl.h"
+
 #endif
 
 extern CProxy_Main proxy_main;
