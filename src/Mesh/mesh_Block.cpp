@@ -430,10 +430,10 @@ void Block::p_call_refresh()
 void Block::refresh (int axis_set)
 {
 
-   bool is_boundary[3][2];
-   bool axm,axp,aym,ayp,azm,azp;
+  bool is_boundary[3][2];
+  bool axm,axp,aym,ayp,azm,azp;
 
-    determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp,axis_set);
+  determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp,axis_set);
 
   //  update_boundary_(is_boundary,axm,axp,aym,ayp,azm,azp,axis_set);
 

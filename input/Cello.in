@@ -15,7 +15,7 @@ Domain {
 # partitioned into 4 blocks
 
 Mesh { 
-   root_size   = [ 512,512 ];
+   root_size   = [ 1024,1024 ];
    root_blocks = [   2,  4 ];
 }
 
@@ -42,6 +42,11 @@ Method {
    sequence = [ "ppm" ];
 
 }
+
+   Parallel {
+      temp_update_all  = true;
+      temp_update_full = false;
+   }
 
 # Initialize Enzo-P method parameters
 
