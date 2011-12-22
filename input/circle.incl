@@ -29,11 +29,6 @@
 
    }
 
-   Parallel {
-      temp_update_all  = true;
-      temp_update_full = false;
-   }
-
    Method {
 
       sequence = ["ppm"];

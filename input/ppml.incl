@@ -3,10 +3,6 @@
 
    # Domain is the two dimensional box 0 < x,y < 1.0
 
-   Parallel {
-      temp_update_all  = true;
-      temp_update_full = false;
-   }
    Domain { 
       lower = [0.0, 0.0, 0.0];
       upper = [1.0, 1.0, 1.0];

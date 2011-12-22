@@ -421,8 +421,7 @@ void Block::p_compute (int cycle, double time, double dt, int axis_set)
 void Block::p_call_refresh()
 {
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
-  axis_enum axis_set = (simulation->temp_update_all()) ? axis_all : axis_x;
-  refresh(axis_set);
+  refresh(axis_all);
 }
 
 //--------------------------------------------------
@@ -472,9 +471,9 @@ void Block::refresh (int axis_set)
   // Refresh face ghost zones
 
   bool lx,ly,lz;
-  lx = simulation->temp_update_full();
-  ly = simulation->temp_update_full();
-  lz = simulation->temp_update_full();
+  lx = false;
+  ly = false;
+  lz = false;
 
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -795,9 +794,9 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
     // always gets called at least once
 
     bool lx,ly,lz;
-    lx = simulation->temp_update_full();
-    ly = simulation->temp_update_full();
-    lz = simulation->temp_update_full();
+    lx = false;
+    ly = false;
+    lz = false;
 
     FieldFace field_face(n, buffer);
     field_face.include_ghosts(lx,ly,lz);

@@ -203,12 +203,6 @@ public: // interface
     stop_  = stop;
   };
 
-  /// Return whether to update all faces at once or axis-by-axis
-  bool temp_update_all() const throw() { return temp_update_all_; };
-
-  /// Return whether to include orthogonal ghosts in updates
-  bool temp_update_full() const throw() { return temp_update_full_; };
-
   void monitor_output() const {
     monitor_-> print("Simulation", "cycle %04d time %15.12f dt %15.12g", 
 		     cycle_,time_,dt_);
@@ -331,12 +325,6 @@ protected: // attributes
 
   /// Current stopping criteria
   bool stop_;
-
-  /// [TEMPORARY: DEBUGGING] Whether to update all faces at once or axis-by-axis
-  bool temp_update_all_;
-
-  /// [TEMPORARY: DEBUGGING] Whether to include orthogonal ghosts in updates
-  bool temp_update_full_;
 
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS
