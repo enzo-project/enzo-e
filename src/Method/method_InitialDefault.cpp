@@ -371,34 +371,34 @@ void InitialDefault::create_png_mask_
 
   // Get the hierarchy's lower and upper extents
 
-  double lower_h[2];
+  double lower_h[3];
   hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
-  double upper_h[2];
+  double upper_h[3];
   hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
 
   // Get the hierarchy's size
 
-  double size_h[2];
+  double size_h[3];
   size_h[0] = upper_h[0]-lower_h[0];
   size_h[1] = upper_h[1]-lower_h[1];
 
   // Get the block's lower and upper extents
 
-  double lower_b[2];
+  double lower_b[3];
   block->lower(&lower_b[0],&lower_b[1],&lower_b[2]);
 
-  double upper_b[2];
+  double upper_b[3];
   block->upper(&upper_b[0],&upper_b[1],&upper_b[2]);
 
   // get the offset between the block and the hierarchy
 
-  double offset_b[2];
+  double offset_b[3];
   offset_b[0] = lower_b[0]-lower_h[0];
   offset_b[1] = lower_b[1]-lower_h[1];
 
   // get the block's cell width
 
-  double hb[2];
+  double hb[3];
   block->field_block()->cell_width(block,&hb[0],&hb[1]);
 
   // Compute the block mask from the image pixel values
