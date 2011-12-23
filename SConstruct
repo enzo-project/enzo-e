@@ -58,16 +58,16 @@ env = Environment()
 
 if not env.GetOption('clean'):
 
-     conf = Configure(env)
+     configure = Configure(env)
 
-     if not conf.CheckCHeader('papi.h'):
+     if not configure.CheckCHeader('papi.h'):
           print 'PAPI not installed'
           use_papi = 0
      else:
           print 'PAPI installed'
           use_papi = 1
 
-     env = conf.Finish()
+     env = configure.Finish()
 
 #-----------------------------------------------------------------------
 # COMMAND-LINE ARGUMENTS
@@ -191,142 +191,32 @@ path_list = []
 
 is_arch_valid = 0
 
-#----------------------------------------------------------------------
 if (arch == "linux-gnu"):
-#----------------------------------------------------------------------
 
-     is_arch_valid = 1
+   from config_linux_gnu import *
 
-     flags_arch = '-g -Wall'
-     flags_link = '-rdynamic'
-
-     cc['mpi']     = 'mpicc'
-     cc['serial']  = 'gcc'
-     cxx['mpi']    = 'mpic++'
-     cxx['serial'] = 'g++'
-     f90['charm']  = 'gfortran'
-     f90['mpi']    = 'gfortran'
-     f90['serial'] = 'gfortran'
-
-     libpath_fortran = ''
-     libs_fortran    = ['gfortran']
-
-     charm_path  = '/home/bordner/charm/charm'
-     papi_path   = '/usr/local'
-     hdf5_path   = '/usr'
-
-#----------------------------------------------------------------------
 elif (arch == "triton-pgi"):
-#----------------------------------------------------------------------
 
-     is_arch_valid = 1
+   from config_triton_pgi import *
 
-     flags_arch = '-Ktrap=fp -g'
-     flags_link = '-pgf90libs'
-
-     # Requires modules pgi, mpich_mx
-
-     cc['mpi']     = 'mpicc'
-     cc['serial']  = 'pgcc'
-     cxx['mpi']    = 'mpicxx'
-     cxx['serial'] = 'pgCC'
-     f90['charm']  = 'pgf90'
-     f90['mpi']    = 'pgf90'
-     f90['serial'] = 'pgf90'
-
-     libpath_fortran = ''
-     libs_fortran    = []
-
-     charm_path  = '/home/jobordner/public/charm/charm-' + mpi_type + '-pgi'
-     papi_path   = ''
-     hdf5_path   = '/opt/hdf5/pgi'
-
-#----------------------------------------------------------------------
 elif (arch == "triton-intel"):
-#----------------------------------------------------------------------
 
-     is_arch_valid = 1
+   from config_triton_intel import *
 
-     flags_arch = '-g'
-     flags_link  = ''
-
-     # Requires modules intel mpich_mx
-
-     cc['mpi']     = 'mpicc'
-     cc['serial']  = 'icc'
-     cxx['mpi']    = 'mpicxx'
-     cxx['serial'] = 'icpc'
-     f90['charm']  = 'ifort'
-     f90['mpi']    = 'ifort'
-     f90['serial'] = 'ifort'
-
-     libpath_fortran = ''
-     libs_fortran    = ['imf','ifcore','ifport','stdc++']
-
-     charm_path = '/home/jobordner/public/charm/charm-' + mpi_type + '-intel'
-     papi_path = ''
-     hdf5_path = '/opt/hdf5/intel'
-
-#----------------------------------------------------------------------
 elif (arch == "triton-gnu"):
-#----------------------------------------------------------------------
 
-     is_arch_valid = 1
+   from config_triton_gnu import *
 
-     flags_arch = '-g -Wall'
-     flags_link  = '-rdynamic'
-
-     # Requires modules gnu, mpich_mx
-
-     cc['mpi']     = 'mpicc'
-     cc['serial']  = 'gcc'
-     cxx['mpi']    = 'mpic++'
-     cxx['serial'] = 'g++'
-     f90['charm']  = 'gfortran'
-     f90['mpi']    = 'gfortran'
-     f90['serial'] = 'gfortran'
-
-     libpath_fortran = ''
-     libs_fortran    = ['gfortran']
-
-     charm_path = '/home/jobordner/public/charm/charm-' + mpi_type + '-gnu'
-     papi_path  = ''
-     hdf5_path  = '/opt/hdf5/gnu'
-
-#----------------------------------------------------------------------
 elif (arch == "ncsa-bw"):
-#----------------------------------------------------------------------
 
-     is_arch_valid = 1
-
-     flags_arch = ''
-     flags_link  = ''
-
-     cc['mpi']     = 'cc -h gnu'
-     cc['serial']  = 'cc -h gnu'
-     cxx['mpi']    = 'CC'
-     cxx['serial'] = 'CC'
-     f90['charm']  = 'ftn -rm'
-     f90['mpi']    = 'ftn -rm'
-     f90['serial'] = 'ftn -rm'
-
-     libpath_fortran = '/home/cpv/tra61/lib'
-     libs_fortran    = []
-
-     charm_path = '/home/cpv/tra61/charm'
-     papi_path  = ''
-     hdf5_path  = '/opt/cray/hdf5/1.8.6/cray/73'
-
-     if (type == "mpi"):
-        parallel_run = "aprun -n 8"
-
+   from config_ncsa_bw import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
 #======================================================================
 
 if (not is_arch_valid):
-   print "Unrecognized architecture type ",arch
+   print "Unrecognized architecture ",arch
    sys.exit(1)
 
 #======================================================================
