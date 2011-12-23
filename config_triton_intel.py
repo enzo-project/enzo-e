@@ -1,21 +1,23 @@
-     is_arch_valid = 1
+f90 = {}
+cxx = {}
+cc  = {}
 
-     flags_arch = '-g'
-     flags_link  = ''
+is_arch_valid = 1
 
-     # Requires modules intel mpich_mx
+flags_arch = '-g'
+flags_link  = ''
 
-     cc['mpi']     = 'mpicc'
-     cc['serial']  = 'icc'
-     cxx['mpi']    = 'mpicxx'
-     cxx['serial'] = 'icpc'
-     f90['charm']  = 'ifort'
-     f90['mpi']    = 'ifort'
-     f90['serial'] = 'ifort'
+cc['mpi']     = 'mpicc'
+cc['serial']  = 'icc'
+cxx['mpi']    = 'mpicxx'
+cxx['serial'] = 'icpc'
+f90['charm']  = 'ifort'
+f90['mpi']    = 'ifort'
+f90['serial'] = 'ifort'
 
-     libpath_fortran = ''
-     libs_fortran    = ['imf','ifcore','ifport','stdc++']
+libpath_fortran = ''
+libs_fortran    = ['imf','ifcore','ifport','stdc++']
 
-     charm_path = '/home/jobordner/public/charm/charm-' + mpi_type + '-intel'
-     papi_path = ''
-     hdf5_path = '/opt/hdf5/intel'
+charm_path = '/home/jobordner/public/charm/charm-intel'
+papi_path = ''
+hdf5_path = '/opt/hdf5/intel'

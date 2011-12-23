@@ -183,12 +183,6 @@ if (atsync != 0):        defines = defines + define_atsync
 # ARCHITECTURE SETTINGS
 #======================================================================
 
-f90 = {}
-cxx = {}
-cc  = {}
-
-path_list = []
-
 is_arch_valid = 0
 
 if (arch == "linux-gnu"):

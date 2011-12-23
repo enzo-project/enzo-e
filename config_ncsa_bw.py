@@ -1,22 +1,26 @@
-     is_arch_valid = 1
+f90 = {}
+cxx = {}
+cc  = {}
 
-     flags_arch = ''
-     flags_link  = ''
+is_arch_valid = 1
 
-     cc['mpi']     = 'cc -h gnu'
-     cc['serial']  = 'cc -h gnu'
-     cxx['mpi']    = 'CC'
-     cxx['serial'] = 'CC'
-     f90['charm']  = 'ftn -rm'
-     f90['mpi']    = 'ftn -rm'
-     f90['serial'] = 'ftn -rm'
+flags_arch = ''
+flags_link  = ''
 
-     libpath_fortran = '/home/cpv/tra61/lib'
-     libs_fortran    = []
+cc['mpi']     = 'cc -h gnu'
+cc['serial']  = 'cc -h gnu'
+cxx['mpi']    = 'CC'
+cxx['serial'] = 'CC'
+f90['charm']  = 'ftn -rm'
+f90['mpi']    = 'ftn -rm'
+f90['serial'] = 'ftn -rm'
 
-     charm_path = '/home/cpv/tra61/charm'
-     papi_path  = ''
-     hdf5_path  = '/opt/cray/hdf5/1.8.6/cray/73'
+libpath_fortran = '/home/cpv/tra61/lib'
+libs_fortran    = []
 
-     if (type == "mpi"):
-        parallel_run = "aprun -n 8"
+charm_path = '/home/cpv/tra61/charm'
+papi_path  = ''
+hdf5_path  = '/opt/cray/hdf5/1.8.6/cray/73'
+
+if (type == "mpi"):
+   parallel_run = "aprun -n 8"

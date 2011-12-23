@@ -1,21 +1,23 @@
-     is_arch_valid = 1
+f90 = {}
+cxx = {}
+cc  = {}
 
-     flags_arch = '-Ktrap=fp -g'
-     flags_link = '-pgf90libs'
+is_arch_valid = 1
 
-     # Requires modules pgi, mpich_mx
+flags_arch = '-Ktrap=fp -g'
+flags_link = '-pgf90libs'
 
-     cc['mpi']     = 'mpicc'
-     cc['serial']  = 'pgcc'
-     cxx['mpi']    = 'mpicxx'
-     cxx['serial'] = 'pgCC'
-     f90['charm']  = 'pgf90'
-     f90['mpi']    = 'pgf90'
-     f90['serial'] = 'pgf90'
+cc['mpi']     = 'mpicc'
+cc['serial']  = 'pgcc'
+cxx['mpi']    = 'mpicxx'
+cxx['serial'] = 'pgCC'
+f90['charm']  = 'pgf90'
+f90['mpi']    = 'pgf90'
+f90['serial'] = 'pgf90'
 
-     libpath_fortran = ''
-     libs_fortran    = []
+libpath_fortran = ''
+libs_fortran    = []
 
-     charm_path  = '/home/jobordner/public/charm/charm-' + mpi_type + '-pgi'
-     papi_path   = ''
-     hdf5_path   = '/opt/hdf5/pgi'
+charm_path  = '/home/jobordner/public/charm/charm-pgi'
+papi_path   = ''
+hdf5_path   = '/opt/hdf5/pgi'
