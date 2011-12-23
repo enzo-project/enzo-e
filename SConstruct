@@ -124,30 +124,18 @@ define_atsync =           ['CONFIG_CHARM_ATSYNC']
 define_memory =           ['CONFIG_USE_MEMORY']
 define_projections =      ['CONFIG_USE_PROJECTIONS']
 
-#--------------------------------------------------
-
-defines     = []
-defines_xlc = ""
-defines_xlf = ""
-
 #----------------------------------------------------------------------
 # ASSEMBLE DEFINES
 #----------------------------------------------------------------------
 
-# IBM's inconsistent -D defines for C and Fortran can break scons: DC
-# and DF are workarounds
+defines     = []
 
-DC = ' -D'
-DF = ' -WF,-D'
+# Parallel type configuration
 
-# Parallel type
+if (type == 'serial' or type == 'mpi' or type == 'charm'):
 
-if (type == 'serial'):
-     defines = defines
-elif (type == 'mpi' or type == 'charm'):
-     defines     = defines          + define[type]
-     defines_xlc = defines_xlc + DC + define[type][0]
-     defines_xlf = defines_xlf + DF + define[type][0]
+     defines = defines + define[type]
+
 else:
      print "Unrecognized parallel type ",type
      print
@@ -157,12 +145,10 @@ else:
      print "or by using 'scons type=<type>"
      sys.exit(1)
 
-# Precision
+# Precision configuration
 
 if (prec == 'single' or prec == 'double'):
-     defines     = defines                 + define[prec]
-     defines_xlc = defines_xlc + DC     + define[prec][0]
-     defines_xlf = defines_xlf + DF + define[prec][0]
+     defines = defines + define[prec]
 else:
      print "Unrecognized precision ",prec
      print
@@ -172,88 +158,34 @@ else:
      print "or by using 'scons prec=<precision>"
      sys.exit(1)
 
-# CHARM++ Projections
+defines = defines + define_hdf5
+defines = defines + define_png
 
 charm_perf = ''
 
 if (use_projections == 1):
+     defines = defines + define_projections
      charm_perf = '-tracemode projections'
-     defines     = defines          + define_projections
-     defines_xlc = defines_xlc + DC + define_projections[0]
-     defines_xlf = defines_xlf + DF + define_projections[0]
-
-# GProf flags
 
 flags_gprof = ''
 
 if (use_gprof == 1):
      flags_gprof = '-pg '
      
-# PAPI defines
-
-if (use_papi != 0): 
-     defines     = defines          + define_papi
-     defines_xlc = defines_xlc + DC + define_papi[0]
-     defines_xlf = defines_xlf + DF + define_papi[0]
-
-# TRACE defines
-
-if (trace != 0):
-     defines     = defines          + define_trace
-     defines_xlc = defines_xlc + DC + define_trace[0]
-     defines_xlf = defines_xlf + DF + define_trace[0]
-
-# Debug defines
-
-if (debug != 0):
-     defines     = defines          + define_debug
-     defines_xlc = defines_xlc + DC + define_debug[0]
-     defines_xlf = defines_xlf + DF + define_debug[0]
-
-# debug_verbose defines
-
-if (debug_verbose != 0):
-     defines     = defines          + define_debug_verbose
-     defines_xlc = defines_xlc + DC + define_debug_verbose[0]
-     defines_xlf = defines_xlf + DF + define_debug_verbose[0]
-
-# memory defines
-
-if (memory != 0):
-     defines     = defines          + define_memory
-     defines_xlc = defines_xlc + DC + define_memory[0]
-     defines_xlf = defines_xlf + DF + define_memory[0]
-
-# atsync defines
-
-if (atsync != 0):
-     defines     = defines          + define_atsync
-     defines_xlc = defines_xlc + DC + define_atsync[0]
-     defines_xlf = defines_xlf + DF + define_atsync[0]
-
-# HDF5 library defines
-
-defines     = defines     +      define_hdf5
-defines_xlc = defines_xlc + DC + define_hdf5[0] 
-defines_xlf = defines_xlf + DF + define_hdf5[0] 
-
-# PNG library defines
-
-defines     = defines          + define_png
-defines_xlc = defines_xlc + DC + define_png[0]
-defines_xlf = defines_xlf + DF + define_png[0]
+if (use_papi != 0):      defines = defines + define_papi
+if (trace != 0):         defines = defines + define_trace
+if (debug != 0):         defines = defines + define_debug
+if (debug_verbose != 0): defines = defines + define_debug_verbose
+if (memory != 0):        defines = defines + define_memory
+if (atsync != 0):        defines = defines + define_atsync
 
 #======================================================================
 # ARCHITECTURE SETTINGS
 #======================================================================
 
-fortran = {}
-cxx     = {}
-cc      = {}
-
-cflags_arch       = ''
-cxxflags_arch     = ''
-fortranflags_arch = ''
+f90 = {}
+cxx = {}
+cc  = {}
 
 path_list = []
 
@@ -265,88 +197,23 @@ if (arch == "linux-gnu"):
 
      is_arch_valid = 1
 
-     charm_path = '/home/bordner/charm/charm'  # arch
+     flags_arch = '-g -Wall'
+     flags_link = '-rdynamic'
 
-     fortran['serial'] = 'gfortran'
-     fortran['mpi']    = 'gfortran'
-     fortran['charm']  = 'gfortran'
-
-     cxx['serial'] = 'g++'
-     cxx['mpi']    = 'mpic++'
-
-     cc['serial']  = 'gcc'
      cc['mpi']     = 'mpicc'
-
-# for architecture-dependent defines
-
-     cppdefines        = defines
-
-# for extra Fortran libraries
+     cc['serial']  = 'gcc'
+     cxx['mpi']    = 'mpic++'
+     cxx['serial'] = 'g++'
+     f90['charm']  = 'gfortran'
+     f90['mpi']    = 'gfortran'
+     f90['serial'] = 'gfortran'
 
      libpath_fortran = ''
      libs_fortran    = ['gfortran']
-     # -rdynamic is to include symbols in backtrace
-     fortranlinkflags_arch  = '-rdynamic'
 
-# PAPI path (optional)
-     papi_path = '/usr/local'
-# HDF5 path
-     hdf5_path = '/usr'
-# libpng path
-     libpng_path = ''
-# Optional debugging flags
-     flags_debug = '-g'
-# Optional optimization flags
-     flags_opt   = ''
-# Optional warnings-level flags
-     flags_warn  = '-Wall'
-
-#----------------------------------------------------------------------
-# elif (arch == "ncsa-bd"):
-# #----------------------------------------------------------------------
-# 
-#      is_arch_valid = 1
-# 
-#      charm_path = '/home/bordner/charm'
-# 
-#      fc_path  = '/opt/ibmcmp/xlf/13.1'
-#      cc_path  = '/opt/ibmcmp/vac/11.1'
-#      cxx_path = '/opt/ibmcmp/vacpp/11.1'
-# 
-#      fortran['serial'] = fc_path + '/bin/xlf_r'
-#      fortran['mpi']    = fc_path + '/bin/xlf_r'
-#      fortran['charm']  = fc_path + '/bin/xlf_r'
-# 
-#      cxx['serial'] = cxx_path + '/bin/xlC_r'
-#      cxx['mpi']    = 'mpCC'
-# 
-#      cc['serial']  = cc_path + '/bin/xlc_r'
-#      cc['mpi']     = 'mpcc'
-# 
-# # Architecture-dependent flags
-# 
-#      cflags_arch       = defines_xlc
-#      cxxflags_arch     = defines_xlc
-#      fortranflags_arch = defines_xlf + '-qextname'
-# 
-# # Extra fortran libraries
-# 
-#      libpath_fortran = fc_path + '/lib64'
-#      libs_fortran    = ['xlf90','xlfmath','xl']
-#      fortranlinkflags_arch  = ''
-# 
-# # PAPI path (optional)
-#      papi_path = '/opt/usersoft/papi/4.1.0'
-# # HDF5 path
-#      hdf5_path = '/home/bordner'
-# # libpng path
-#      libpng_path = ''
-# # Optional debugging flags
-#      flags_debug = ''
-# # Optional optimization flags
-#      flags_opt   = '-O3 -qhot -q64'
-# # Optional warnings-level flags
-#      flags_warn  = ''
+     charm_path  = '/home/bordner/charm/charm'
+     papi_path   = '/usr/local'
+     hdf5_path   = '/usr'
 
 #----------------------------------------------------------------------
 elif (arch == "triton-pgi"):
@@ -354,43 +221,25 @@ elif (arch == "triton-pgi"):
 
      is_arch_valid = 1
 
+     flags_arch = '-Ktrap=fp -g'
+     flags_link = '-pgf90libs'
+
      # Requires modules pgi, mpich_mx
 
-     charm_path = '/home/jobordner/public/charm/charm-' + mpi_type + '-pgi'
-
-     fortran['serial'] = 'pgf90'
-     fortran['mpi']    = 'pgf90'
-     fortran['charm']  = 'pgf90'
-
-     cxx['serial'] = 'pgCC'
-     cxx['mpi']    = 'mpicxx'
-
-     cc['serial']  = 'pgcc'
      cc['mpi']     = 'mpicc'
-
-# Architecture-dependent defines
-
-     cppdefines        = defines
-
-# For extra fortran libraries
+     cc['serial']  = 'pgcc'
+     cxx['mpi']    = 'mpicxx'
+     cxx['serial'] = 'pgCC'
+     f90['charm']  = 'pgf90'
+     f90['mpi']    = 'pgf90'
+     f90['serial'] = 'pgf90'
 
      libpath_fortran = ''
      libs_fortran    = []
-     # -rdynamic is to include symbols in backtrace
-     fortranlinkflags_arch  = '-pgf90libs'
 
-# PAPI path (optional)
-     papi_path = ''
-# HDF5 path
-     hdf5_path = '/opt/hdf5/pgi'
-# libpng path
-     libpng_path = ''
-# Optional debugging flags
-     flags_debug = '-Ktrap=fp -g'
-# Optional optimization flags
-     flags_opt   = ''
-# Optional warnings-level flags
-     flags_warn  = ''
+     charm_path  = '/home/jobordner/public/charm/charm-' + mpi_type + '-pgi'
+     papi_path   = ''
+     hdf5_path   = '/opt/hdf5/pgi'
 
 #----------------------------------------------------------------------
 elif (arch == "triton-intel"):
@@ -398,42 +247,25 @@ elif (arch == "triton-intel"):
 
      is_arch_valid = 1
 
+     flags_arch = '-g'
+     flags_link  = ''
+
      # Requires modules intel mpich_mx
 
-     charm_path = '/home/jobordner/public/charm/charm-' + mpi_type + '-intel'
-
-     fortran['serial'] = 'ifort'
-     fortran['mpi']    = 'ifort'
-     fortran['charm']  = 'ifort'
-
-     cxx['serial'] = 'icpc'
-     cxx['mpi']    = 'mpicxx'
-
-     cc['serial']  = 'icc'
      cc['mpi']     = 'mpicc'
-
-# Architecture-dependent defines
-
-     cppdefines        = defines
-
-# For extra fortran libraries
+     cc['serial']  = 'icc'
+     cxx['mpi']    = 'mpicxx'
+     cxx['serial'] = 'icpc'
+     f90['charm']  = 'ifort'
+     f90['mpi']    = 'ifort'
+     f90['serial'] = 'ifort'
 
      libpath_fortran = ''
      libs_fortran    = ['imf','ifcore','ifport','stdc++']
-     fortranlinkflags_arch  = ''
 
-# PAPI path (optional)
+     charm_path = '/home/jobordner/public/charm/charm-' + mpi_type + '-intel'
      papi_path = ''
-# HDF5 path
      hdf5_path = '/opt/hdf5/intel'
-# libpng path
-     libpng_path = ''
-# Optional debugging flags
-     flags_debug = '-g'
-# Optional optimization flags
-     flags_opt   = ''
-# Optional warnings-level flags
-     flags_warn  = ''
 
 #----------------------------------------------------------------------
 elif (arch == "triton-gnu"):
@@ -441,94 +273,53 @@ elif (arch == "triton-gnu"):
 
      is_arch_valid = 1
 
+     flags_arch = '-g -Wall'
+     flags_link  = '-rdynamic'
+
      # Requires modules gnu, mpich_mx
 
-     charm_path = '/home/jobordner/public/charm/charm-' + mpi_type + '-gnu'
-
-     fortran['serial'] = 'gfortran'
-     fortran['mpi']    = 'gfortran'
-     fortran['charm']  = 'gfortran'
-
-     cxx['serial'] = 'g++'
-     cxx['mpi']    = 'mpic++'
-
-     cc['serial']  = 'gcc'
      cc['mpi']     = 'mpicc'
-
-# Architecture-dependent defines
-
-     cppdefines        = defines
-
-# For extra fortran libraries
+     cc['serial']  = 'gcc'
+     cxx['mpi']    = 'mpic++'
+     cxx['serial'] = 'g++'
+     f90['charm']  = 'gfortran'
+     f90['mpi']    = 'gfortran'
+     f90['serial'] = 'gfortran'
 
      libpath_fortran = ''
      libs_fortran    = ['gfortran']
-     fortranlinkflags_arch  = '-rdynamic'
 
-# PAPI path (optional)
-     papi_path = ''
-# HDF5 path
-     hdf5_path = '/opt/hdf5/gnu'
-# libpng path
-     libpng_path = ''
-# Optional debugging flags
-     flags_debug = '-g'
-# Optional optimization flags
-#     flags_opt   = '-O3'
-     flags_opt   = ''
-# Optional warnings-level flags
-     flags_warn  = '-Wall'
+     charm_path = '/home/jobordner/public/charm/charm-' + mpi_type + '-gnu'
+     papi_path  = ''
+     hdf5_path  = '/opt/hdf5/gnu'
 
 #----------------------------------------------------------------------
 elif (arch == "ncsa-bw"):
 #----------------------------------------------------------------------
 
-     if (type == "mpi"):
-        parallel_run = "aprun -n 8"
-
      is_arch_valid = 1
 
-     # Requires modules pgi, mpich_mx
+     flags_arch = ''
+     flags_link  = ''
 
-     charm_path = '/home/cpv/tra61/charm'
-
-     #  Cray feedback: -rm
-
-     fortran['serial'] = 'ftn -rm'
-     fortran['mpi']    = 'ftn -rm'
-     fortran['charm']  = 'ftn -rm'
-
-     # Cray compiler feedback: -h list=a
-     cxx['serial'] = 'CC'
-     cxx['mpi']    = 'CC'
-
-     # Cray:  -h gnu (for unnamed unions)
-     cc['serial']  = 'cc -h gnu'
      cc['mpi']     = 'cc -h gnu'
-
-# Architecture-dependent defines
-
-     cppdefines        = defines
-
-# For extra fortran libraries
+     cc['serial']  = 'cc -h gnu'
+     cxx['mpi']    = 'CC'
+     cxx['serial'] = 'CC'
+     f90['charm']  = 'ftn -rm'
+     f90['mpi']    = 'ftn -rm'
+     f90['serial'] = 'ftn -rm'
 
      libpath_fortran = '/home/cpv/tra61/lib'
      libs_fortran    = []
-     # -rdynamic is to include symbols in backtrace
-     fortranlinkflags_arch  = ''
 
-# PAPI path (optional)
-     papi_path = ''
-# HDF5 path
-     hdf5_path = '/opt/cray/hdf5/1.8.6/cray/73'
-# libpng path
-     libpng_path = ''
-# Optional debugging flags
-     flags_debug = ''
-# Optional optimization flags
-     flags_opt   = ''
-# Optional warnings-level flags
-     flags_warn  = ''
+     charm_path = '/home/cpv/tra61/charm'
+     papi_path  = ''
+     hdf5_path  = '/opt/cray/hdf5/1.8.6/cray/73'
+
+     if (type == "mpi"):
+        parallel_run = "aprun -n 8"
+
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
@@ -603,12 +394,6 @@ cpppath = cpppath + [hdf5_path + '/include']
 libpath = libpath + [hdf5_path + '/lib']
 
 #----------------------------------------------------------------------
-# LIBPNG PATHS
-#----------------------------------------------------------------------
-
-libpath = libpath + [libpng_path + '/lib']
-
-#----------------------------------------------------------------------
 # FORTRAN LINK PATH
 #----------------------------------------------------------------------
 
@@ -622,44 +407,21 @@ libpath = libpath + [libpath_fortran]
 
 environ  = os.environ
 
-cxxflags = \
-    cxxflags_arch + ' ' + \
-    flags_debug + ' ' + \
-    flags_opt   + ' ' + \
-    flags_warn  + ' ' + \
-    flags_gprof
-
-cflags = \
-    cflags_arch + ' ' + \
-    flags_debug + ' ' + \
-    flags_opt   + ' ' + \
-    flags_gprof  + \
-    flags_warn
-
-fortranflags = \
-    fortranflags_arch + ' ' + \
-    flags_debug + ' ' + \
-    flags_opt   + ' ' + \
-    flags_warn  + ' ' + \
-    flags_gprof
-
-linkflags = \
-    fortranlinkflags_arch  + ' ' + \
-    flags_debug + ' ' + \
-    flags_opt   + ' ' + \
-    flags_gprof     + \
-    flags_warn
+cxxflags     = flags_arch + ' ' + flags_gprof
+cflags       = flags_arch + ' ' + flags_gprof
+fortranflags = flags_arch + ' ' + flags_gprof
+linkflags    = flags_arch + ' ' + flags_gprof  + ' ' + flags_link
 
 env = Environment (
      CC           = cc[type],	
      CFLAGS       = cflags,
-     CPPDEFINES   = cppdefines,
+     CPPDEFINES   = defines,
      CPPPATH      = cpppath,
      CXX          = cxx[type],	
      CXXFLAGS     = cxxflags,
      ENV          = environ,
      FORTRANFLAGS = fortranflags,
-     FORTRAN      = fortran[type],
+     FORTRAN      = f90[type],
      FORTRANLIBS  = libs_fortran,
      FORTRANPATH  = fortranpath,
      LIBPATH      = libpath,
