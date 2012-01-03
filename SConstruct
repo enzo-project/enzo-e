@@ -185,25 +185,11 @@ if (atsync != 0):        defines = defines + define_atsync
 
 is_arch_valid = 0
 
-if (arch == "linux-gnu"):
-
-   from config_linux_gnu import *
-
-elif (arch == "triton-pgi"):
-
-   from config_triton_pgi import *
-
-elif (arch == "triton-intel"):
-
-   from config_triton_intel import *
-
-elif (arch == "triton-gnu"):
-
-   from config_triton_gnu import *
-
-elif (arch == "ncsa-bw"):
-
-   from config_ncsa_bw import *
+if   (arch == "linux-gnu"):    from config_linux_gnu    import *
+elif (arch == "triton-pgi"):   from config_triton_pgi   import *
+elif (arch == "triton-intel"): from config_triton_intel import *
+elif (arch == "triton-gnu"):   from config_triton_gnu   import *
+elif (arch == "ncsa-bw"):      from config_ncsa_bw      import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS

@@ -607,11 +607,11 @@ char *yytext;
     struct bufstack * prev;
     YY_BUFFER_STATE bs;
     int lineno;
-    char *filename;
+    const char *filename;
     FILE *fp;
   } * curbs = 0;
 
-  char * curfilename;
+  const char * curfilename;
   int cello_new_file (const char *);
   int cello_pop_file ();
     
