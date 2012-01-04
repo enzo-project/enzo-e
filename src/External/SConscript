@@ -1,0 +1,41 @@
+#------------------------------
+# DIRECTORIES
+#------------------------------
+
+#------------------------------
+# IMPORTS
+#------------------------------
+
+Import('env')
+
+Import('inc_path')
+Import('lib_path')
+
+#------------------------------
+# DEPENDENCIES
+#------------------------------
+
+#------------------------------
+# SOURCE
+#------------------------------
+
+includes = [Glob('png*h')]
+sources  = [Glob('png*cpp')]
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+#------------------------------
+# TARGETS
+#------------------------------
+
+libraries = env.Library ('external', sources)
+
+
+#------------------------------
+# INSTALL
+#------------------------------
+
+env.Alias('install-inc',env.Install (inc_path,includes))
+env.Alias('install-lib',env.Install (lib_path,libraries))
