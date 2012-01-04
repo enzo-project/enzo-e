@@ -19,14 +19,14 @@ components = ['enzo','simulation', 'method',
 	      'io', 'disk','memory','parallel',
 	      'parameters', 
 	      'error', 'monitor', 'performance', 
-	      'test','cello']
+	      'test','cello','external']
 
 if (use_papi):
 	components = components + ['papi','pfm']
 
 components = components + ['hdf5']
 
-libraries  = ['png', '$FORTRANLIBS']
+libraries  = ['png','$FORTRANLIBS']
 
 #------------------------------
 # SOURCE

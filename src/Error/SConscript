@@ -16,7 +16,7 @@ Import('lib_path')
 components = ['test','cello','error',
               'monitor', 'performance']
 
-libraries  = ['png']
+libraries  = []
 
 #------------------------------
 # SOURCE

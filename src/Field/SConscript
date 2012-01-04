@@ -34,7 +34,7 @@ else:
 if (use_papi):
 	components = components + ['papi','pfm']
 
-libraries  = ['png','hdf5']
+libraries  = ['hdf5']
 
 #------------------------------
 # SOURCE

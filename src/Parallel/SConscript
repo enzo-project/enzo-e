@@ -20,7 +20,6 @@ Import('lib_path')
 
 components = ['error','monitor','performance',
 	      'test','cello']
-libraries  = ['png']
 
 #------------------------------
 # SOURCE
@@ -33,7 +32,7 @@ sources    = [Glob('parallel*cpp')]
 # ENVIRONMENTS
 #------------------------------
 
-env = env.Clone(LIBS=[components,libraries])
+env = env.Clone(LIBS=[components])
 
 #------------------------------
 # TARGETS

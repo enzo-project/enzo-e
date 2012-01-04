@@ -24,7 +24,7 @@ components = ['simulation','method',
 if (use_papi):
 	components = components + ['papi','pfm']
 
-libraries = ['png','$FORTRANLIBS']
+libraries = ['$FORTRANLIBS']
 
 #------------------------------
 # SOURCE

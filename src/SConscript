@@ -13,11 +13,16 @@ Import('lib_path')
 
 SConscript('Enzo/SConscript')
 
+SConscript('Main/SConscript')
+
+SConscript('External/SConscript')
+
+SConscript('Test/SConscript')
+
 SConscript('Disk/SConscript')
 SConscript('Error/SConscript')
 SConscript('Field/SConscript')
 SConscript('Io/SConscript')
-SConscript('Main/SConscript')
 SConscript('Memory/SConscript')
 SConscript('Mesh/SConscript')
 SConscript('Method/SConscript')
@@ -26,7 +31,6 @@ SConscript('Parallel/SConscript')
 SConscript('Parameters/SConscript')
 SConscript('Performance/SConscript')
 SConscript('Simulation/SConscript')
-SConscript('Test/SConscript')
 
 components = [
    'enzo', 

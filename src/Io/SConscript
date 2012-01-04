@@ -23,7 +23,7 @@ components = [ 'io',
                'mesh', 'field',
               'disk','memory','parallel',
               'parameters', 
-              'test','cello',
+              'test','cello','external',
               'error','monitor','performance' ]
 if (use_papi):
     components = components + ['papi','pfm']
@@ -34,8 +34,8 @@ libraries  = ['png','hdf5']
 # SOURCE
 #------------------------------
 
-includes = [Glob('io*hpp'),Glob('png*h')]
-sources  = [Glob('io*cpp'),Glob('png*cpp')]
+includes = [Glob('io*hpp')]
+sources  = [Glob('io*cpp')]
 
 #------------------------------
 # ENVIRONMENTS

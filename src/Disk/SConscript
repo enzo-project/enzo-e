@@ -16,7 +16,7 @@ Import('lib_path')
 components = ['disk',
               'error', 'monitor', 'performance',
               'test','cello']
-libraries  = ['hdf5', 'png']
+libraries  = ['hdf5']
 
 #------------------------------
 # SOURCE

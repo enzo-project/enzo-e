@@ -19,7 +19,8 @@ components = ['memory',
 	      'error','monitor', 
 	      'test','cello']
 
-libraries  = ['png']
+libraries = []
+
 if (use_papi):
 	libraries = libraries + ['papi','pfm']
 

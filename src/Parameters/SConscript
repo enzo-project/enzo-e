@@ -17,8 +17,6 @@ components = ['parallel',
 	      'error','monitor','performance', 
 	      'test','cello']
 
-libraries  = ['png']
-
 #------------------------------
 # SOURCE
 #------------------------------
@@ -43,7 +41,7 @@ sources  = ['parse.tab.c', 'lex.yy.c', Glob('parameters*cpp') ]
 # ENVIRONMENTS
 #------------------------------
 
-env = env.Clone(LIBS=[components,libraries])
+env = env.Clone(LIBS=[components])
 
 #------------------------------
 # TARGETS
