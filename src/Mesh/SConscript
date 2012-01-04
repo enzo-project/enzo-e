@@ -24,12 +24,12 @@ components = [
 	      'disk','memory','parallel',
               'parameters',
               'error','monitor','performance', 
-              'test','cello']
+              'test','cello','external']
 
 if (use_papi):
 	components = components + ['papi','pfm']
 
-libraries = ['hdf5']
+libraries = ['png','hdf5']
 
 #------------------------------
 # SOURCE
