@@ -30,9 +30,18 @@ Memory::~Memory() throw ()
 void Memory::initialize_() throw ()
 {
 #ifdef CONFIG_USE_MEMORY
+
   curr_group_.push(0);
+
   max_group_id_ = 0;
+
   is_active_ = true;
+
+  do_allocate_fill_    = true; 
+  allocate_fill_value_ = 0xaa;
+
+  do_deallocate_fill_    = true; 
+  deallocate_fill_value_ = 0xdd;
 
   for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
     group_names_ [i] = 0;
@@ -68,16 +77,22 @@ void * Memory::allocate ( size_t bytes ) throw ()
 /// @return        Pointer to the allocated memory
 {
 #ifdef CONFIG_USE_MEMORY
-  int * buffer = (int *)(malloc(bytes + 2*sizeof(int)));
 
+  int * buffer = (int *)(malloc(bytes + 2*sizeof(int)));
 
   ASSERT("Memory::allocate",
 	 "Cannot allocate buffer: out of memory",
 	 buffer);
 
   if (is_active_) {
+
     buffer[0] = bytes;
+
     buffer[1] = curr_group_.top();
+
+    if (do_allocate_fill_) {
+      memset (&buffer[2],allocate_fill_value_,bytes);
+    }
 
     ++ new_calls_[0] ;
     bytes_[0] += bytes;
@@ -106,21 +121,32 @@ void * Memory::allocate ( size_t bytes ) throw ()
 void Memory::deallocate ( void * pointer ) throw()
 {
 #ifdef CONFIG_USE_MEMORY
+
   int *buffer = (int *)(pointer) - 2;
 
+
   if (is_active_) {
+
+    int bytes = buffer[0];
+
     ++ delete_calls_[0] ;
-    bytes_[0] -= buffer[0];
+    bytes_[0] -= bytes;
 
     memory_group_handle current = buffer[1];
 
     if (current != 0) {
       ++ delete_calls_[current] ;
-      bytes_[current] -= buffer[0];
+      bytes_[current] -= bytes;
     }
+
+    if (do_deallocate_fill_) {
+      memset (&buffer[2],deallocate_fill_value_,bytes);
+    }
+
   }
 
   free(buffer);
+
 #endif
 }
 

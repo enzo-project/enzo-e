@@ -6,7 +6,6 @@
 /// @file    cello.hpp
 /// @author  James Bordner (jobordner@ucsd.edu)
 /// @date    Thu Nov 11 17:08:38 PST 2010
-/// @todo    Move TEMP_CLEAR_VALUE to Memory parameter
 /// @brief   Include Cello global configuration settings
 
 //----------------------------------------------------------------------
@@ -27,12 +26,6 @@ inline int INDEX(int ix,int iy,int iz,int nx,int ny)
 //----------------------------------------------------------------------
 // GLOBAL DEFINES
 //----------------------------------------------------------------------
-
-// Value used to initialize new fields for debugging
-
-#define TEMP_CLEAR_VALUE (-std::numeric_limits<float>::max())
-
-// (std::numeric_limits<float>::max())
 
 /// @enum     face_enum
 /// @brief    Face [lower|upper]

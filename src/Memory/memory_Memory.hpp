@@ -137,6 +137,18 @@ private: // attributes
   /// Whether keeping track of memory statistics is active or not
   bool is_active_;
 
+  /// Whether to fill memory after allocation
+  bool do_allocate_fill_; 
+
+  /// allocate clear value
+  char allocate_fill_value_;
+
+  /// Whether to clear memory before deallocate
+  bool do_deallocate_fill_; 
+
+  /// deallocate clear value
+  char deallocate_fill_value_;
+
   /// The highest active group index
   int max_group_id_;
 

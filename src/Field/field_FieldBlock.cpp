@@ -657,9 +657,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	       if (isnan(field[i])) {
 		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
 			 message,field_name,x,y,z,ix,iy,iz);
-	       } else if (field[i] == TEMP_CLEAR_VALUE) {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d UNINITIALIZED\n",
-			 message,field_name,x,y,z,ix,iy,iz);
 	       } else {
 		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %g\n",
 			 message,field_name,x,y,z,ix,iy,iz,field[i]);
@@ -696,9 +693,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	       if (isnan(field[i])) {
 		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
 			 message,field_name,x,y,z,ix,iy,iz);
-	       } else if (field[i] == TEMP_CLEAR_VALUE) {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d UNINITIALIZED\n",
-			 message,field_name,x,y,z,ix,iy,iz);
 	       } else {
 		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %g\n",
 			 message,field_name,x,y,z,ix,iy,iz,field[i]);
@@ -733,9 +727,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	       double z = hz*(iz-gz) + lower[axis_z];
 	       if (isnan(field[i])) {
 		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
-			 message,field_name,x,y,z,ix,iy,iz);
-	       } else if (field[i] == TEMP_CLEAR_VALUE) {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d UNINITIALIZED\n",
 			 message,field_name,x,y,z,ix,iy,iz);
 	       } else {
 		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %Lf\n",
