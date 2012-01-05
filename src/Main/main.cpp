@@ -24,6 +24,8 @@ CProxy_Main proxy_main;
 extern CProxy_Simulation proxy_simulation;
 #endif
 
+//----------------------------------------------------------------------
+
 void Main::p_exit(int count)
 {
   count_exit_++;
@@ -78,6 +80,7 @@ void Main::p_exit(int count)
   }
 }
 
+//----------------------------------------------------------------------
 
 #if defined(CHARM_ENZO)
 #  include "main_enzo.def.h"
@@ -88,5 +91,7 @@ void Main::p_exit(int count)
 #else
 #  include "main.def.h"
 #endif
+
+//----------------------------------------------------------------------
 
 #endif

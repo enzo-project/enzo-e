@@ -3,7 +3,7 @@
 /// @file     main.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-08-10
-/// @brief    Declaration of the Main CHARM++ chare
+/// @brief    [\ref Main] Declaration of the Main CHARM++ chare
 ///
 /// Different test programs require different subsets of existing chares.
 /// For example, lower-level test programs, e.g. Mesh or Field tests,
@@ -48,6 +48,10 @@ extern CProxy_Main proxy_main;
 //----------------------------------------------------------------------
 
 class Main : public CBase_Main {
+
+  /// @class    Main
+  /// @ingroup  Main
+  /// @brief    [\ref Main] CHARM++ main chare
 
 public:
 
