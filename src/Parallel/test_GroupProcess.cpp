@@ -2,7 +2,6 @@
 
 /// @file     test_GroupProcess.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @todo     Remove need for dynamic casts for MPI-specific code
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Parallel class
 

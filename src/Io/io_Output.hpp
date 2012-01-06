@@ -3,7 +3,6 @@
 /// @file     io_Output.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
-/// @todo     Extract Schedule object for scheduling output
 /// @brief    [\ref Io] Declaration of the Output class
 
 #ifndef IO_OUTPUT_HPP

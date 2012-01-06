@@ -3,9 +3,6 @@
 /// @file     enzo_EnzoBoundary.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 12:02:24 PDT 2011
-/// @todo     Create different Boundary objects for each boundary type
-/// @todo Map boundary regions (e.g. lower-x face y + z < 0.5) to
-/// boundary types
 /// @brief    [\ref Enzo] Declaration for the EnzoBoundary component
 
 #ifndef ENZO_ENZO_BOUNDARY_HPP

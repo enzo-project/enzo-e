@@ -3,7 +3,6 @@
 /// @file     parallel_GroupProcessMpi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Jul 23 11:11:07 PDT 2010
-/// @todo     Replace process_last_plus_ with process_count_
 /// @brief    Implementation of the GroupProcessMpi class
 
 

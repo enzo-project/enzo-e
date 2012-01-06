@@ -2,8 +2,6 @@
 
 /// @file     enzo_EnzoSimulation.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @todo     Create specific class for interfacing Cello code with User code
-/// @todo     Move timestep reductions into Timestep object
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of EnzoSimulation user-dependent class member functions
 

@@ -3,7 +3,6 @@
 /// @file     test_Parameters.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:04:03 PST 2008
-/// @todo     Implement write() test
 /// @brief    Program implementing unit tests for the Parameters class
 //----------------------------------------------------------------------
 

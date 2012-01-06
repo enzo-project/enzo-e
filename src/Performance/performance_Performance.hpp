@@ -3,7 +3,6 @@
 /// @file     performance_Performance.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Oct 14 23:40:13 PDT 2009
-/// @todo     Complete detailed description of Performance class
 /// @brief    [\ref Performance] Interface for Performance class
 
 #ifndef PERFORMANCE_PERFORMANCE_HPP

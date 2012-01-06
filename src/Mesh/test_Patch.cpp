@@ -3,8 +3,6 @@
 /// @file     test_Patch.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-06
-/// @todo     Add 1D and 2D Patch tests
-/// @todo     Add parallel Patch tests
 /// @brief    Program implementing unit tests for the Patch class
 
 #include "main.hpp" 

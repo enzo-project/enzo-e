@@ -3,8 +3,6 @@
 /// @file     io_OutputData.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Mar 17 11:14:18 PDT 2011
-/// @todo     Move write_hierarchy() call to write_patch() etc. to parent
-///           Output::write_hierarchy()
 //
 /// @bug in CHARM++ write_patch() calls block_array().p_write() with
 ///           write_block() as a callback (instead of write_block()

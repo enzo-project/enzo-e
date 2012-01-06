@@ -4,7 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-08-10
 /// @brief    Implementation of main-level CHARM entry functions in main.ci
-/// @todo     Add callback function for cleanup, including UNIT TEST END, etc.
 
 #ifdef CONFIG_USE_CHARM
 

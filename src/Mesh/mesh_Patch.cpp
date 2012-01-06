@@ -3,7 +3,6 @@
 /// @file     mesh_Patch.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-05-10
-/// @todo     Use CHARM++ reduction support from Blocks to Patch
 /// @brief    Implementation of the Patch class
 
 #include "cello.hpp"

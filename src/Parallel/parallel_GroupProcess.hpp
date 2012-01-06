@@ -15,7 +15,6 @@ class GroupProcess
 
   /// @class    GroupProcess
   /// @ingroup  Parallel  
-  /// @todo     Support more flexible process subsets
   /// @brief    [\ref Parallel] Group of distributed memory processes
 
  public: // static interface

@@ -3,7 +3,6 @@
 /// @file     enzo_EnzoMethodPpm.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 17:05:23 PDT 2010
-/// @todo     Remove unnecessary enzo_block-related parameters
 /// @brief    Implements the EnzoMethodPpm class
 
 #include "cello.hpp"

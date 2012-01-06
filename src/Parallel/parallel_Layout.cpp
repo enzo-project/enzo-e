@@ -3,7 +3,6 @@
 /// @file     parallel_Layout.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-19
-/// @todo     Clean up interface
 /// @brief    Implementation of the Layout class
 
 //----------------------------------------------------------------------

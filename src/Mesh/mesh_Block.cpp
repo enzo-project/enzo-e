@@ -3,10 +3,6 @@
 /// @file     mesh_Block.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Feb 28 13:22:26 PST 2011
-/// @todo     Pre-compute count for p_refresh_face()
-/// @todo     Reduce repeated code between p_refresh() and p_refresh_face()
-/// @todo     Remove floating point comparisons for determining boundary faces
-/// @todo     Remove need for clearing block values before initial conditions (ghost zones accessed but not initialized)
 /// @brief    Implementation of the Block object
 
 #include "cello.hpp"

@@ -3,9 +3,6 @@
 /// @file     enzo_EnzoNamespace.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-07-31
-/// @todo     Comment Enzo functions / attributes
-/// @todo     Move boundary functionality to Block
-/// @todo     Make EnzoNamespace a static EnzoDescr
 /// @brief    [\ref Enzo] "Global" data for Enzo
 
 #ifndef ENZO_ENZO_NAMESPACE_HPP

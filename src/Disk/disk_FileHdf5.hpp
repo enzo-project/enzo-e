@@ -3,9 +3,6 @@
 /// @file     disk_FileHdf5.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
-/// @todo     Support multiple float types: std, native, ieee
-/// @todo     Add error handling (see H5E API)
-/// @todo     Add support for compression (see H5Z API)
 /// @brief    [\ref Disk] Interface for the FileHdf5 class
 
 #ifndef DISK_FILE_HDF5_HPP

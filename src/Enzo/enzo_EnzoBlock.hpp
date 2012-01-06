@@ -3,8 +3,6 @@
 /// @file     enzo_EnzoBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Mar  3 23:01:51 PST 2011
-/// @todo     Change public attributes to private
-/// @todo     Dynamically allocate arrays
 /// @brief    [\ref Enzo] Declaration of the EnzoBlock class
 
 #ifndef ENZO_ENZO_BLOCK_HPP

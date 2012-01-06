@@ -3,7 +3,6 @@
 /// @file     field_FieldBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed May 19 18:17:50 PDT 2010
-/// @todo     Remove dependence of velocity field names "velocity_[xyz]"
 /// @brief    Implementation of the FieldBlock class
 
 #include "cello.hpp"

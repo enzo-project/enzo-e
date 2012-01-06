@@ -3,7 +3,6 @@
 /// @file     test_Block.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Mar  1 20:42:57 UTC 2011
-/// @todo     Create CHARM version of test_Block
 /// @brief    Test program for the Block class
 
 #include "main.hpp" 

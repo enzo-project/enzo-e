@@ -3,8 +3,6 @@
 /// @file     mesh_BlockReduce.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-08-10
-/// @todo     Change BlockReduce from Block->Mesh to Block->Patch reductions
-/// @todo     Add PatchReduce for Patch->Mesh reductions
 /// @brief    [\ref Mesh] Declaration of the BlockReduce class
 
 #ifndef MESH_BLOCK_REDUCE_HPP

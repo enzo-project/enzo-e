@@ -3,11 +3,6 @@
 /// @file     field_FieldBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Oct 12 14:38:21 PDT 2009
-/// @todo     Implement write()
-/// @todo Re-evaluate read(), since current FieldBlock constructor
-/// requires size: add FieldBlock(FILE*) constructor? add factory
-/// design pattern to create FieldBlocks read from a file?
-/// @todo     Clean allocate_array() and allocate_ghosts() usage
 /// @brief    [\ref Field] Fortran-style array class.
 
 #ifndef FIELD_FIELD_BLOCK_HPP

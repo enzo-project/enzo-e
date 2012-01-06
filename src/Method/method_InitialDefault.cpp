@@ -4,7 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-02-16
 /// @bug      Image mask blank for krummhorn: libpng version? (1.2.44 vs 1.2.46); note out.png is created
-/// @todo     Parse initialization parameters once per Simulation rather than once per Block
 /// @brief    Implementation of the InitialDefault class
 
 #include "cello.hpp"

@@ -3,7 +3,6 @@
 /// @file     Io_IoFieldBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-10-06
-/// @todo     Merge redundant Field precision_enum and Output scalar_type
 /// @brief    Implementation of the IoFieldBlock class
 
 #include "io.hpp"

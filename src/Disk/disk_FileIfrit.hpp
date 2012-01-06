@@ -2,7 +2,6 @@
 
 /// @file     disk_FileIfrit.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @todo     Add OutputIfrit
 /// @date     Thu Feb 21 16:05:34 PST 2008
 /// @brief    [\ref Disk] Interface for the FileIfrit class
  

@@ -3,7 +3,6 @@
 /// @file     enzo_EnzoNamespace.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Aug 31 15:38:36 PDT 2010
-/// @todo     Redo loop in FieldType[] initialization
 /// @brief    "Global" Enzo data
 
 #include "cello.hpp"

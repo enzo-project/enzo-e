@@ -4,7 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Sun Oct 11 15:02:08 PDT 2009
 /// @bug      Minor memory leaks
-/// @todo     Fix buffer overruns if parameter file lines or fields too long
 /// @brief    Implementation of the Param class
 
 #include "cello.hpp"

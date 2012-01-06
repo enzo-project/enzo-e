@@ -4,7 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-01
 /// @brief    Functions implementing CHARM++ output-related functions
-/// @todo      Move dt / cycle update to separate function from p_output()
 ///
 /// This file contains member functions for various CHARM++ chares and
 /// classes used for Output in a CHARM++ simulation.  Functions are

@@ -3,7 +3,6 @@
 /// @file      test_Performance.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Wed Apr 23 12:25:18 PDT 2008
-/// @todo      Move Timer tests into test_Timer.cpp
 /// @brief     Program implementing unit tests for performance classes
 
 #include "main.hpp" 

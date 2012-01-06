@@ -3,7 +3,6 @@
 /// @file     parallel_Reduce.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Mar 11 12:07:34 PST 2011
-/// @todo     Move Reduce functionality into GroupProcess
 /// @brief    [\ref Parallel] Interface for the Reduce class
 
 #ifndef PARALLEL_REDUCE_HPP

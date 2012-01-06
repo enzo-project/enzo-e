@@ -23,9 +23,6 @@ class Monitor {
 
   /// @class    Monitor
   /// @ingroup  Monitor
-  /// @todo     Make calling image() easier
-  /// @todo     Add configuration parameters, e.g. monitoring level, date/time output, format, etc.
-  /// @todo     Add calling component to print
   /// @brief    [\ref Monitor] User monitoring of simulation execution status
   ///
   /// The Monitor component is used to communicate information about

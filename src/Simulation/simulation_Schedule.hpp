@@ -3,7 +3,6 @@
 /// @file     simulation_Schedule.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
-/// @todo     Extract Schedule object for scheduling output
 /// @brief    [\ref Simulation] Declaration for the Schedule component
 
 #ifndef SIMULATION_SCHEDULE_HPP

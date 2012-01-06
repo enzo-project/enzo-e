@@ -5,7 +5,6 @@
 /// @file      enzo-p.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Mon Oct  5 15:10:56 PDT 2009
-/// @todo      support multiple input files
 /// @brief     Cello main
 
 //----------------------------------------------------------------------

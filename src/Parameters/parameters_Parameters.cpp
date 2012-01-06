@@ -3,8 +3,6 @@
 /// @file     parameters_Parameters.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:38:43 PDT 2009
-/// @todo     Add more info to Exception messages, e.g. parameter, expected type and actual type
-/// @todo     Fix idiosynchratic ';' usage: currently must not be between top level groups, but must be between subgroups
 /// @brief    Read in a parameter file and access parameter values
 
 #include "cello.hpp"
