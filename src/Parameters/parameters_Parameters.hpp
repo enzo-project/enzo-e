@@ -3,7 +3,6 @@
 /// @file     parameters_Parameters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:44:21 PDT 2009
-/// @bug      "x - 0.5" broken since intepreted as "x (-0.5)"; workaround "x - (0.5)"
 /// @brief    [\ref Parameters] Declaration for the Parameters class
 
 #ifndef PARAMETERS_PARAMETERS_HPP

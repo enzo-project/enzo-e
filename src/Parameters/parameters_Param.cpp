@@ -3,7 +3,6 @@
 /// @file     parameters_Param.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Sun Oct 11 15:02:08 PDT 2009
-/// @bug      Minor memory leaks
 /// @brief    Implementation of the Param class
 
 #include "cello.hpp"
@@ -76,7 +75,6 @@ void Param::write
  std::string full_parameter)
 /// @param file_pointer    File pointer to which the parameter is written
 /// @param full_parameter  Name of this parameter including groups
-/// @bug                   value_accessed_ is incorrect
 {
 
   // Write the parameter assignment

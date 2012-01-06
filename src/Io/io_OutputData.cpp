@@ -3,16 +3,6 @@
 /// @file     io_OutputData.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Mar 17 11:14:18 PDT 2011
-//
-/// @bug in CHARM++ write_patch() calls block_array().p_write() with
-///           write_block() as a callback (instead of write_block()
-///           directly), so it returns immediately.  The result is the
-///           subsequent group_chdir() gets called before the block
-///           data are output, resulting in the block HDF5 groups
-///           being in the same level as the parent patch group.
-///           Synchronization is needed so that group_chdir() is
-///           called only after all block data have been written.
-///
 /// @brief    Implementation of the OutputData class
 
 #include "cello.hpp"
