@@ -62,11 +62,11 @@ struct fluxes
 // Component dependencies
 //----------------------------------------------------------------------
 
-#include "mesh.hpp"
-#include "performance.hpp"
-#include "method.hpp"
 #include "simulation.hpp"
-#include "parallel.hpp"
+// #include "method.hpp"
+// #include "parallel.hpp"
+// #include "performance.hpp"
+// #include "simulation.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes
