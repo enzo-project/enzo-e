@@ -54,12 +54,12 @@ public: // interface
   /// Read a metadata item associated with the file
   virtual void file_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
-    int * nx=0, int * ny=0, int * nz=0) throw();
+    int * nx=0, int * ny=0, int * nz=0) throw() = 0;
   
   /// Write a metadata item associated with the file
   virtual void file_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int nx=1, int ny=0, int nz=0) throw();
+    int nx=1, int ny=0, int nz=0) throw() = 0;
   
 
   // Datasets
@@ -86,37 +86,37 @@ public: // interface
   /// Read a metadata item associated with the opened dataset
   virtual void data_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
-    int * nx, int * ny=0, int * nz=0) throw();
+    int * nx, int * ny=0, int * nz=0) throw() = 0;
   
   /// Write a metadata item associated with the opened dataset
   virtual void data_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int nx=1, int ny=0, int nz=0) throw();
+    int nx=1, int ny=0, int nz=0) throw() = 0;
 
 
   // Groups
 
   /// Change group name for subsequent open or create
-  virtual void group_chdir (std::string name) throw();
+  virtual void group_chdir (std::string name) throw() = 0;
 
   /// Open the existing group from current group name
-  virtual void group_open () throw();
+  virtual void group_open () throw() = 0;
 
   /// Create a new group from current group name (and open it)
-  virtual void group_create () throw();
+  virtual void group_create () throw() = 0;
 
   /// Get the current group
-  virtual void group_close () throw();
+  virtual void group_close () throw() = 0;
 
   /// Read a metadata item associated with the opened group
   virtual void group_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
-    int * nx, int * ny=0, int * nz=0) throw();
+    int * nx, int * ny=0, int * nz=0) throw() = 0;
   
   /// Write a metadata item associated with the opened group
   virtual void group_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int nx=1, int ny=0, int nz=0) throw();
+    int nx=1, int ny=0, int nz=0) throw() = 0;
 
 protected: // attributes
 
