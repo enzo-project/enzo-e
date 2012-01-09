@@ -40,7 +40,6 @@ public: // interface
   /// return the kth child Node
   Node * child (int k) const;
 
-
 private: // functions
 
 

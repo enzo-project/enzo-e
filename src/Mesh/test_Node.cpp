@@ -27,9 +27,12 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert (root != NULL);
 
+  unit_func("sizeof(Node) <= 16");
+  unit_assert (sizeof(*root) <= 16);
+
   //--------------------------------------------------
 
-  unit_func("set_data");
+  unit_func("set_data()");
 
   double data = 10.0;
   root->set_data(&data);
@@ -38,13 +41,13 @@ PARALLEL_MAIN_BEGIN
   
   //--------------------------------------------------
 
-  unit_func("data");
+  unit_func("data()");
 
   unit_assert (*((double *)(root->data())) == 10.0);
 
   //--------------------------------------------------
 
-  unit_func("refine");
+  unit_func("refine()");
 
   int root_children = 4;
 
@@ -62,7 +65,7 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  unit_func("coarsen");
+  unit_func("coarsen()");
 
   child->coarsen(child_children);
 
@@ -74,7 +77,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert(root->child(0)  == NULL);
 
   //--------------------------------------------------
-  unit_func("child");
+  unit_func("child()");
 
   unit_finalize();
 
