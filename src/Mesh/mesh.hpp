@@ -50,9 +50,9 @@
 #include "mesh_Hierarchy.hpp"
 #include "mesh_Factory.hpp"
 
-// Octree and components
+// Tree and components
 #include "mesh_Node.hpp"
-#include "mesh_Octree.hpp"
+#include "mesh_Tree.hpp"
 
 // Iterators
 #include "mesh_It.hpp"

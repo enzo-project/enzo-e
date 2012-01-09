@@ -53,17 +53,17 @@ libraries = env.Library ('mesh', [sources])
 if (type == "charm"):
    sources      = sources      + ['../Main/main_mesh.cpp']
 
-test_block     = env.Program (['test_Block.cpp', sources])
-test_hierarchy = env.Program (['test_Hierarchy.cpp',  sources])
-test_patch     = env.Program (['test_Patch.cpp', sources])
-test_tree      = env.Program (['test_Tree.cpp', sources])
-
 if (type == "charm"):
    env.CharmBuilder('mesh.decl.h','mesh.ci',ARG = 'mesh')
    env.CharmBuilder('mesh.def.h', 'mesh.ci',ARG = 'mesh')
    includes = includes + ['mesh.decl.h','mesh.def.h']
 
-binaries = [test_hierarchy, test_patch, test_block, test_tree ];
+binaries = []
+binaries = [ binaries,  env.Program (['test_Block.cpp', sources]) ]
+binaries = [ binaries,  env.Program (['test_Hierarchy.cpp', sources]) ]
+binaries = [ binaries,  env.Program (['test_Patch.cpp', sources]) ]
+binaries = [ binaries,  env.Program (['test_Tree.cpp', sources]) ]
+binaries = [ binaries,  env.Program (['test_Node.cpp', sources]) ]
 
 #------------------------------
 # INSTALL

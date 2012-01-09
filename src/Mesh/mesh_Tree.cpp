@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_Octree.cpp
+/// @file     mesh_Tree.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     yyyy-mm-dd
 /// @brief    
@@ -11,33 +11,33 @@
 
 //----------------------------------------------------------------------
 
-Octree::Octree() throw ()
+Tree::Tree(int d, int r) throw ()
+  : d_(d), r_(r), root_(new Node), num_nodes_(1)
 {
-  INCOMPLETE("Octree::Octree");
 }
 
 //----------------------------------------------------------------------
 
-Octree::~Octree() throw ()
+Tree::~Tree() throw ()
 {
-  INCOMPLETE("Octree::~Octree");
+  delete root_;
 }
 
 //----------------------------------------------------------------------
 
-Octree::Octree(const Octree & Octree) throw ()
-/// @param     Octree  Object being copied
+Tree::Tree(const Tree & Tree) throw ()
+/// @param     Tree  Object being copied
 {
-  INCOMPLETE("Octree::Octree(Octree)");
+  INCOMPLETE("Tree::Tree(Tree)");
 }
 
 //----------------------------------------------------------------------
 
-Octree & Octree::operator= (const Octree & Octree) throw ()
-/// @param     Octree  Source object of the assignment
+Tree & Tree::operator= (const Tree & Tree) throw ()
+/// @param     Tree  Source object of the assignment
 /// @return    The target assigned object
 {
-  INCOMPLETE("Octree::operator=");
+  INCOMPLETE("Tree::operator=");
   return *this;
 }
 

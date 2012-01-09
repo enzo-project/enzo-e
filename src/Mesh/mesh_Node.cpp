@@ -12,33 +12,44 @@
 //----------------------------------------------------------------------
 
 Node::Node() throw ()
-{
-  INCOMPLETE("Node::Node");
-}
+  : data_(0),child_(0)
+{}
 
 //----------------------------------------------------------------------
 
 Node::~Node() throw ()
 {
-  INCOMPLETE("Node::~Node");
 }
 
 //----------------------------------------------------------------------
 
-Node::Node(const Node & node) throw ()
-/// @param     node  Object being copied
+void Node::refine (int c)
 {
-  INCOMPLETE("Node::Node(Node)");
+  if (child_ == 0) {
+    child_ = new Node [c];
+  } else {
+    ERROR ("Node::refine","Cannot refine a Node that has already been refined");
+  }
 }
 
 //----------------------------------------------------------------------
 
-Node & Node::operator= (const Node & node) throw ()
-/// @param     node  Source object of the assignment
-/// @return    The target assigned object
+void Node::coarsen (int c)
 {
-  INCOMPLETE("Node::operator=");
-  return *this;
+  if (child_ != 0) {
+    for (int i=0; i<c; i++) {
+      child_[i].coarsen(c);
+    }
+    delete [] child_;
+    child_ = 0;
+  }
+}
+
+//----------------------------------------------------------------------
+
+Node * Node::child (int k) const
+{
+  return (child_ != 0) ? &child_[k] : 0;
 }
 
 //======================================================================

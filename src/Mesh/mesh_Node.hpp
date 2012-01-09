@@ -23,39 +23,22 @@ public: // interface
   /// Destructor
   ~Node() throw();
 
-  /// Copy constructor
-  Node(const Node & node) throw();
+  /// Set the data payload for the Node
+  void set_data(void * data)
+  { data_ = data; }
 
-  /// Assignment operator
-  Node & operator= (const Node & node) throw();
+  /// Return the data for the given Node
+  void * data() const
+  { return data_; }
 
-  /// Refine the Node in its containing Tree
-  void refine ();
+  /// Refine the node into multiple child nodes
+  void refine (int num_children);
 
-  /// Create a copy of this Node
-  void copy ();
+  /// Remove all descendent nodes, if any
+  void coarsen (int num_children);
 
-  /// Balance the Node with respect to its neighbors.  Balancing may
-  /// be with respect to some other level metric, e.g. containing
-  /// Patch refinement level.
-  void balance();
-
-  /// Return the pointer to the contained data, e.g. Patch object.
-  void data();
-
-  /// Find the neighboring node in the specified direction and
-  /// level. Consider including edge and corner neighbors, or sets of
-  /// neighbors. May use NodeInfo to improve performance.
-  void neighbor ();
-
-  /// Return the parent node.
-  void parent ();
-
-  /// Return the child node.
-  void child ();
-
-  /// Return the node containing the given point
-  Node * find_node (double x, double y, double z);
+  /// return the kth child Node
+  Node * child (int k) const;
 
 
 private: // functions
@@ -63,6 +46,11 @@ private: // functions
 
 private: // attributes
 
+  /// Pointer to the data payload for the Node
+  void * data_;
+
+  /// Array of child nodes
+  Node * child_;
 
 };
 
