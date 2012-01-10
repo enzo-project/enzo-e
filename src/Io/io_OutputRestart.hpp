@@ -19,7 +19,7 @@ class OutputRestart : public Output {
 public: // functions
 
   /// Create an uninitialized OutputRestart object
-  OutputRestart(Simulation * simulation) throw();
+  OutputRestart(const Factory * factory) throw();
 
   /// OutputRestart destructor
   virtual ~OutputRestart() throw();

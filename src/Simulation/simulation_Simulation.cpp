@@ -1024,9 +1024,13 @@ Output * Simulation::create_output_ (std::string type) throw ()
 { 
   Output * output = NULL;
   if (type == "image") {
-    output = new OutputImage (this);
+    int np = group_process()->size();
+    int nx,ny,nz;
+    hierarchy()->patch(0)->size (&nx, &ny, &nz);
+    // NOTE: assumes cube for non-z axis images
+    output = new OutputImage (&factory(),np,nx,ny);
   } else if (type == "data") {
-    output = new OutputData (this);
+    output = new OutputData (&factory());
   }
   return output;
 }

@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     simulation_Schedule.cpp
+/// @file     io_Schedule.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Mar 16 09:53:31 PDT 2011
 /// @brief    Implementation of the Schedule class
 
 #include "cello.hpp"
 
-#include "simulation.hpp"
+#include "io.hpp"
 
 //----------------------------------------------------------------------
 

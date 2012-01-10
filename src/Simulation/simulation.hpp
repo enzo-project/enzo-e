@@ -35,9 +35,5 @@ class Factory;
 
 #include "simulation_Simulation.hpp"
 
-// Output scheduling class
-#include "simulation_Schedule.hpp"
-
-
 #endif /* SIMULATION_HPP */
 

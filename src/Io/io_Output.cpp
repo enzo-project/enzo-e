@@ -11,9 +11,8 @@
 
 //----------------------------------------------------------------------
 
-Output::Output (Simulation * simulation) throw()
-  : simulation_(simulation),
-    file_(0),           // Initialization deferred
+Output::Output (const Factory * factory) throw()
+  : file_(0),           // Initialization deferred
     schedule_(new Schedule),
     process_stride_(1), // default one file per process
     process_(0),        // initialization below
@@ -34,22 +33,18 @@ Output::Output (Simulation * simulation) throw()
   process_  = group_process->rank();
   delete group_process;
 
-  io_block_       = simulation_->factory().create_io_block();
-  io_field_block_ = simulation_->factory().create_io_field_block();
+  io_block_       = factory->create_io_block();
+  io_field_block_ = factory->create_io_field_block();
 }
 
 //----------------------------------------------------------------------
 
 Output::~Output () throw()
 {
-  delete schedule_;
-  schedule_ = 0;
-  delete file_;
-  file_ = 0;
-  delete it_field_;
-  it_field_ = 0;
-  delete io_block_;
-  io_block_ = 0;
+  delete schedule_;  schedule_ = 0;
+  delete file_;      file_ = 0;
+  delete it_field_;  it_field_ = 0;
+  delete io_block_;  io_block_ = 0;
 }
 //----------------------------------------------------------------------
 

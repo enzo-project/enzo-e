@@ -8,12 +8,12 @@
 #ifndef IO_OUTPUT_HPP
 #define IO_OUTPUT_HPP
 
-class Simulation;
+class Factory;
+class FieldDescr;
 class Hierarchy;
+class ItField;
 class Patch;
 class Schedule;
-
-class ItField;
 
 class Output {
 
@@ -25,7 +25,7 @@ class Output {
 public: // functions
 
   /// Create an uninitialized Output object
-  Output(Simulation * simulation ) throw();
+  Output(const Factory * factory) throw();
 
   /// Delete an Output object
   virtual ~Output() throw();
@@ -133,9 +133,6 @@ public: // virtual functions
   virtual void cleanup_remote (int * n, char ** buffer) throw() = 0;
 
 protected: // attributes
-
-  /// Parent simulation (for accessing Hierarchy, etc.)
-  Simulation * simulation_;
 
   /// File object for output
   File * file_;

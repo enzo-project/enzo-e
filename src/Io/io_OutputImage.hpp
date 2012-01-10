@@ -8,7 +8,8 @@
 #ifndef IO_OUTPUT_IMAGE_HPP
 #define IO_OUTPUT_IMAGE_HPP
 
-class ItField;
+class Factory;
+class FieldDescr;
 
 class OutputImage : public Output {
 
@@ -19,7 +20,9 @@ class OutputImage : public Output {
 public: // functions
 
   /// Create an uninitialized OutputImage object
-  OutputImage(Simulation * simulation) throw();
+  OutputImage(const Factory * factory,
+	      int process_count,
+	      int nrows, int ncols) throw();
 
   /// OutputImage destructor: free allocated image data
   virtual ~OutputImage() throw();
@@ -81,14 +84,13 @@ public: // virtual functions
 private: // functions
 
   /// Create the png file object
-  void png_create_ (std::string filename,
-		    int image_size_x,  int image_size_y) throw();
+  void png_create_ (std::string filename) throw();
 
   /// Delete the png object
   void png_close_() throw();
 
   /// Create the image data object
-  void image_create_ (int image_size_x,  int image_size_y) throw();
+  void image_create_ () throw();
 
   /// Generate PNG image, using given min and max for colormap
   void image_write_ (double min=0.0, double max=0.0) throw();
@@ -121,13 +123,10 @@ private: // attributes
   axis_enum axis_;
 
   /// Current image columns
-  int nix_;
+  int nrows_;
 
   /// Current image rows
-  int niy_;
-
-  /// Image object replacing map_?_, data_, nix_, niy_
-  // Image image_;
+  int ncols_;
 
   /// Current pngwriter
   pngwriter * png_;

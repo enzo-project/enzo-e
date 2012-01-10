@@ -22,11 +22,9 @@
 
 #include "error.hpp"
 #include "parallel.hpp"
-#include "memory.hpp"
-
-#include "simulation.hpp"
-#include "mesh.hpp"
 #include "disk.hpp"
+
+#include "mesh.hpp"
 #include "field.hpp" 
 
 //----------------------------------------------------------------------
@@ -39,10 +37,6 @@
 #include "io_IoBlock.hpp"
 #include "io_IoFieldBlock.hpp"
 
-//#include "io_Io.hpp"
-// #include "io_IoSimulation.hpp"
-// #include "io_IoField.hpp"
-
 #include "io_ItReduce.hpp"
 #include "io_ItReduceAvg.hpp"
 #include "io_ItReduceSum.hpp"
@@ -52,6 +46,9 @@
 #include "io_Output.hpp"
 #include "io_OutputImage.hpp"
 #include "io_OutputData.hpp"
+
+#include "io_Schedule.hpp"
+
 
 #endif /* IO_HPP */
 

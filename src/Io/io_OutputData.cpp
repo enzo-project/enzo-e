@@ -10,8 +10,8 @@
 
 //----------------------------------------------------------------------
 
-OutputData::OutputData(Simulation * simulation) throw ()
-  : Output(simulation)
+OutputData::OutputData(const Factory * factory) throw ()
+  : Output(factory)
 {
 }
 

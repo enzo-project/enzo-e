@@ -11,18 +11,19 @@
 
 //----------------------------------------------------------------------
 
-OutputImage::OutputImage(Simulation * simulation) throw ()
-  : Output(simulation),
+OutputImage::OutputImage(const Factory * factory,
+			 int process_count,
+			 int nrows, int ncols) throw ()
+  : Output(factory),
     data_(),
     axis_(axis_z),
-    nix_(0),
-    niy_(0),
+    nrows_(nrows),
+    ncols_(ncols),
     png_(0)
 
 {
-  // Override process_stride_: only root writes
-
-  process_stride_ = simulation->group_process()->size();
+  // Override default Output::process_stride_: only root writes
+  process_stride_ = process_count;
 
   map_r_.resize(2);
   map_g_.resize(2);
@@ -71,13 +72,7 @@ void OutputImage::set_colormap
 
 void OutputImage::init () throw()
 {
-  // create process image and clear it
-
-  int nxm,nym,nzm;
-  simulation_->hierarchy()->patch(0)->size (&nxm, &nym, &nzm);
-
-  image_create_(nxm,nym);
-
+  image_create_();
 }
 
 //----------------------------------------------------------------------
@@ -88,12 +83,10 @@ void OutputImage::open () throw()
   std::string file_name = expand_file_name();
 
   if (is_writer()) {
-    int nxm,nym,nzm;
-    simulation_->hierarchy()->patch(0)->size (&nxm, &nym, &nzm);
     // Create png object
     Monitor::instance()->print ("Output","writing image file %s", 
 			      file_name.c_str());
-    png_create_(file_name,nxm,nym);
+    png_create_(file_name);
   }
 }
 
@@ -250,8 +243,8 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 {
 
   int size = 0;
-  int nx = nix_;
-  int ny = niy_;
+  int nx = nrows_;
+  int ny = ncols_;
 
   // Determine buffer size
 
@@ -308,11 +301,11 @@ void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 
 //======================================================================
 
-void OutputImage::png_create_ (std::string filename, int mx, int my) throw()
+void OutputImage::png_create_ (std::string filename) throw()
 {
   if (is_writer()) {
     const char * file_name = strdup(filename.c_str());
-    png_ = new pngwriter(mx,my,0,file_name);
+    png_ = new pngwriter(nrows_, ncols_,0,file_name);
     free ((void *)file_name);
   }
 }
@@ -330,18 +323,16 @@ void OutputImage::png_close_ () throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::image_create_ (int mx, int my) throw()
+void OutputImage::image_create_ () throw()
 {
-  nix_ = mx;
-  niy_ = my;
 
   ASSERT("OutputImage::image_create_",
 	 "image_ already created",
 	 data_ == NULL);
 
-  data_ = new double [mx*my];
+  data_ = new double [nrows_*ncols_];
 
-  for (int i=0; i<mx*my; i++) data_[i] = 0.0;
+  for (int i=0; i<nrows_*ncols_; i++) data_[i] = 0.0;
 }
 
 //----------------------------------------------------------------------
@@ -357,8 +348,8 @@ void OutputImage::image_write_ (double min, double max) throw()
 
   // simplified variable names
 
-  int mx = nix_;
-  int my = niy_;
+  int mx = nrows_;
+  int my = ncols_;
   int m  = mx*my;
 
   // Scale by data if min == max (default)
@@ -484,13 +475,13 @@ void OutputImage::image_reduce_
       
       int iiy = npy0 + iay;
 
-      int index_image = iix + nix_*iiy;
+      int index_image = iix + nrows_*iiy;
 
-      if ( ! ( ( iix < nix_) &&
-	       (iiy < niy_)) ) {
+      if ( ! ( (iix < nrows_) &&
+	       (iiy < ncols_)) ) {
 	ERROR5 ("OutputImage::image_reduce_",
 		"Invalid Access axis %d index(%d %d)  image(%d %d)\n",
-		axis, iix, iiy, nix_,niy_);
+		axis, iix, iiy, nrows_,ncols_);
       }
 
       double & pixel_value = data_ [index_image];

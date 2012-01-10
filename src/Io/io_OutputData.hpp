@@ -8,11 +8,10 @@
 #ifndef IO_OUTPUT_DATA_HPP
 #define IO_OUTPUT_DATA_HPP
 
+class Factory;
 class Hierarchy;
 class Patch;
-class Schedule;
-
-class ItField;
+class FieldDescr;
 
 class OutputData : public Output {
 
@@ -23,7 +22,7 @@ class OutputData : public Output {
 public: // functions
 
   /// Create an uninitialized OutputData object
-  OutputData(Simulation * simulation) throw();
+  OutputData(const Factory * factory) throw();
 
   /// OutputData destructor
   virtual ~OutputData() throw();

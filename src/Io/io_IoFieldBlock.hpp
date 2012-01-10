@@ -9,6 +9,7 @@
 #define IO_IO_FIELD_BLOCK_HPP
 
 class FieldBlock;
+class FieldDescr;
 
 class IoFieldBlock : public Io {
 
