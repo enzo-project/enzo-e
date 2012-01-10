@@ -52,6 +52,7 @@
 
 // Tree and components
 #include "mesh_Node.hpp"
+#include "mesh_NodeInfo.hpp"
 #include "mesh_Tree.hpp"
 
 // Iterators

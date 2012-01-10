@@ -68,6 +68,7 @@ env.RunSerial('test_Patch.unit',     bin_path + '/test_Patch')
 env.RunSerial('test_Block.unit',     bin_path + '/test_Block')
 env.RunSerial('test_Tree.unit',      bin_path + '/test_Tree')
 env.RunSerial('test_Node.unit',      bin_path + '/test_Node')
+env.RunSerial('test_NodeInfo.unit',  bin_path + '/test_NodeInfo')
 #----------------------------------------------------------------------
 # MONITOR COMPONENT       
 #----------------------------------------------------------------------

@@ -30,6 +30,9 @@ PARALLEL_MAIN_BEGIN
   unit_func("sizeof(Node) <= 16");
   unit_assert (sizeof(*root) <= 16);
 
+  unit_func("is_leaf()");
+  unit_assert (root->is_leaf() == true);
+
   //--------------------------------------------------
 
   unit_func("set_data()");
@@ -53,15 +56,31 @@ PARALLEL_MAIN_BEGIN
 
   root->refine(root_children);
 
-  for (int i=0; i<root_children; i++) unit_assert (root->child(i) != NULL);
+  for (int i=0; i<root_children; i++) 
+    unit_assert (root->child(i) != NULL);
 
   Node * child = root->child(root_children-1);
+
+  unit_func("is_leaf()");
+  unit_assert (root->is_leaf()  == false);
+  unit_assert (child->is_leaf() == true);
+
+  unit_func("refine()");
 
   int child_children = 64;
 
   child->refine(child_children);
 
-  for (int i=0; i<child_children; i++) unit_assert (child->child(i) != NULL);
+  for (int i=0; i<child_children; i++) 
+    unit_assert (child->child(i) != NULL);
+
+  //--------------------------------------------------
+
+  unit_func ("is_leaf()");
+
+  unit_assert (root->is_leaf() == false);
+  unit_assert (child->is_leaf() == false);
+  unit_assert (child->child(child_children-1)->is_leaf() == true);
 
   //--------------------------------------------------
 

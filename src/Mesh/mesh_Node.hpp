@@ -40,6 +40,10 @@ public: // interface
   /// return the kth child Node
   Node * child (int k) const;
 
+  /// return whether the node is a leaf node
+  bool is_leaf () const
+  { return (child_ == 0); }
+
 private: // functions
 
 

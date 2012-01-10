@@ -2,8 +2,8 @@
 
 /// @file     mesh_Tree.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
-/// @brief    [\ref Mesh] Declaration of the Tree class
+/// @date     2012-01-06
+/// @brief    [\ref Mesh] Declaration of the Tree class for r^d-trees
 ///
 
 #ifndef MESH_TREE_HPP
@@ -17,39 +17,31 @@ class Tree {
 
 public: // interface
 
-  /// Constructor
+  /// Create a r-way tree in d-dimensions, i.e. Nodes have r^d children
   Tree(int d, int r) throw();
 
   /// Destructor
   ~Tree() throw();
 
-  /// Copy constructor
-  Tree(const Tree & tree) throw();
-
-  /// Assignment operator
-  Tree & operator= (const Tree & tree) throw();
-
   /// Return the dimensionality of the tree
-  int dimension()
+  int dimension() const
   { return d_; }
 
   /// Return the refinement level of the tree
-  int refinement() 
+  int refinement() const
   { return r_; }
 
   /// The number of allocated Nodes in the tree
-  int num_nodes ()
+  int num_nodes () const
   { return num_nodes_; }
 
-  /// Return the number of levels in the Tree
-  void num_levels ();
+  /// Return the maximum Node level in the Tree, with root == 0
+  int max_level () const
+  { return max_level_; }
 
   /// Return the root Node of the tree
-  Node * root_node()
+  Node * root_node() const
   { return root_; }
-
-  /// Find the node containing the given point
-  Node * find_node (double x, double y, double z);
 
   /// Refine the given node
   void refine_node (Node * node);
@@ -61,13 +53,13 @@ public: // interface
   void balance_node (Node * node);
 
   /// Return the neighboring Node in the specified direction
-  Node * node_neighbor (Node * node);
+  Node * node_neighbor (Node * node) const;
 
   /// Return the parent node
-  Node * node_parent (Node * node);
+  Node * node_parent (Node * node) const;
 
   /// Return the specified child Node
-  Node * node_child (Node * node);
+  Node * node_child (Node * node, int k) const;
 
 private: // functions
 
@@ -77,7 +69,7 @@ private: // attributes
   /// Dimensionality of the Tree
   int d_;
 
-  /// Refinement level of the Tree
+  /// Refinement ratio of levels in the Tree
   int r_;
 
   /// Pointer to the root node
@@ -85,6 +77,9 @@ private: // attributes
 
   /// Number of nodes in the tree
   int num_nodes_;
+  
+  /// Maximum levels in the Tree, starting at 0
+  int max_level_;
   
 
 };

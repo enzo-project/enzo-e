@@ -12,7 +12,10 @@
 //----------------------------------------------------------------------
 
 Tree::Tree(int d, int r) throw ()
-  : d_(d), r_(r), root_(new Node), num_nodes_(1)
+  : d_(d), r_(r), 
+    root_(new Node), 
+    num_nodes_(1), 
+    max_level_(0)
 {
 }
 
@@ -25,20 +28,47 @@ Tree::~Tree() throw ()
 
 //----------------------------------------------------------------------
 
-Tree::Tree(const Tree & Tree) throw ()
-/// @param     Tree  Object being copied
+void Tree::refine_node (Node * node)
 {
-  INCOMPLETE("Tree::Tree(Tree)");
+  int r2d = 1;
+  if (d_>=1) r2d *= r_;
+  if (d_>=2) r2d *= r_;
+  if (d_>=3) r2d *= r_;
+  node->refine(r2d);
+  num_nodes_ += r2d;
 }
 
 //----------------------------------------------------------------------
 
-Tree & Tree::operator= (const Tree & Tree) throw ()
-/// @param     Tree  Source object of the assignment
-/// @return    The target assigned object
+void Tree::delete_node (Node * node)
 {
-  INCOMPLETE("Tree::operator=");
-  return *this;
+}
+
+//----------------------------------------------------------------------
+
+void Tree::balance_node (Node * node)
+{
+}
+
+//----------------------------------------------------------------------
+
+Node * Tree::node_neighbor (Node * node) const
+{
+  return NULL;
+}
+
+//----------------------------------------------------------------------
+
+Node * Tree::node_parent (Node * node) const
+{
+  return NULL;
+}
+
+//----------------------------------------------------------------------
+
+Node * Tree::node_child (Node * node, int k) const
+{
+  return NULL;
 }
 
 //======================================================================

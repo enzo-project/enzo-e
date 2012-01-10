@@ -1,14 +1,14 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_Classname.cpp
+/// @file     test_NodeInfo.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
-/// @brief    Test program for the Classname class
+/// @brief    Test program for the NodeInfo class
 
 #include "main.hpp"
 #include "test.hpp"
 
-#include "component.hpp"
+#include "mesh.hpp"
 
 PARALLEL_MAIN_BEGIN
 {
@@ -17,15 +17,18 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
-  unit_class("Classname");
+  unit_class("NodeInfo");
 
-  Classname * classname = new Classname;
+  int d = 3;
+  int r = 2;
+  //  NodeInfo * NodeInfo = new NodeInfo (d,r);
+  NodeInfo * node_info = new NodeInfo (d,r);
 
-  unit_assert (classname != NULL);
+  unit_assert (node_info != NULL);
 
   //--------------------------------------------------
 
-  unit_func ("function()");
+  unit_func ("trace()");
 
   unit_assert (false);
 
