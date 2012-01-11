@@ -47,7 +47,7 @@ Node * NodeInfo::trace (Node * node, int ix, int iy, int iz)
 
 //----------------------------------------------------------------------
 
-void NodeInfo::reverse_trace()
+void NodeInfo::finalize_trace()
 {
   unsigned long long ecart[3] = {0,0,0};
   char *tr[3], *rt[3];
@@ -58,7 +58,7 @@ void NodeInfo::reverse_trace()
   tr[2]=(char *)&trace_[2];
   rt[2]=(char *)&ecart[2];
 
-  // Reverse bits in trace_[], e.g. trace_[0] = ...00001101 becomes 10110000...
+  // Finalize bits in trace_[], e.g. trace_[0] = ...00001101 becomes 10110000...
 
   *(rt[0]+0) = ((*(tr[0]+7) * 0x80200802ULL) & 0x0884422110ULL) * 0x0101010101ULL >> 32;
   *(rt[0]+1) = ((*(tr[0]+6) * 0x80200802ULL) & 0x0884422110ULL) * 0x0101010101ULL >> 32;

@@ -36,9 +36,13 @@ public: // interface
     trace_[1]=0; 
     trace_[2]=0; };
 
-  /// Reverse the trace_[] bit values after they're accumulated so that they can be used
-  void reverse_trace();
+  /// Finalize (reverse) the trace_[] bit values after they're
+  /// accumulated so that they can be used
+  void finalize_trace();
 
+  /// Return the current values of the bit trace
+  void trace(const unsigned long long ** trace) const
+  { *trace = trace_; };
 
 private: // functions
 
