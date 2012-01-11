@@ -609,7 +609,7 @@ void Simulation::initialize_output_() throw()
 
       // set time limits
 
-      double start, stop, step;
+      double start = 0, stop = -1, step = 1;
 
       if (len == 3) {
 

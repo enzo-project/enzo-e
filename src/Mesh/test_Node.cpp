@@ -96,7 +96,10 @@ PARALLEL_MAIN_BEGIN
   unit_assert(root->child(0)  == NULL);
 
   //--------------------------------------------------
-  unit_func("child()");
+
+  unit_func("~Node()");
+  delete (root);
+  unit_assert (true);
 
   unit_finalize();
 

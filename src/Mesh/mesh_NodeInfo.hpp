@@ -28,7 +28,19 @@ public: // interface
 
   /// Trace one level down the Tree according to the provided x,y,z indices from
   /// the given Node; return true when we've reached a leaf node
-  bool trace (Node * node, int ix, int iy, int iz);
+  Node * trace (Node * node, int ix, int iy=0, int iz=0);
+
+  /// Reset the trace variables for the next trace
+  void reset_trace() 
+  { trace_[0]=0;
+    trace_[1]=0; 
+    trace_[2]=0; };
+
+  /// Reverse the trace_[] bit values after they're accumulated so that they can be used
+  void reverse_trace();
+
+
+private: // functions
 
 private: // attributes
 
@@ -41,11 +53,12 @@ private: // attributes
   /// Level of the node in the Tree, with Tree's root being level 0
   int level_;
 
-  /// Number of bits used per level (1 for octree, 2 for 4^3-tree, etc.)
+  /// Number of bits used per level (1 for octree, 2 for 3^2-tree or
+  /// 4^2-tree, etc.)
   int bits_;
 
-  /// bit trace from Tree root, enough for 3D Tree's of depth sizeof(int)
-  int trace_[3]; 
+  /// bit trace from Tree root, enough for 3D Tree's of at least 64 levels
+  unsigned long long trace_[3]; 
 
 };
 

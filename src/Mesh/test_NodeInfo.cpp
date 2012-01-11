@@ -19,18 +19,88 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("NodeInfo");
 
-  int d = 3;
-  int r = 2;
-  //  NodeInfo * NodeInfo = new NodeInfo (d,r);
-  NodeInfo * node_info = new NodeInfo (d,r);
+  // Create hierarchy
 
+  int d = 2;
+  int r = 2;
+  int r2d = 4;
+  unit_func("Node setup");
+
+  Node *node0, *node1, *node2, *node3, *node4;
+
+  node0 = new Node;
+  node0->refine(r2d);
+  node1 = node0->child(0);   // position (0,0)
+  node1->refine(r2d);
+  node2 = node1->child(1);   // position (1,0)
+  node2->refine(r2d);
+  node3 = node2->child(2);   // position (0,1)
+  node3->refine(r2d);
+  node4 = node3->child(3);   // position (1,1)
+
+  unit_assert (! node0 -> is_leaf());
+  unit_assert (! node1 -> is_leaf());
+  unit_assert (! node2 -> is_leaf());
+  unit_assert (! node3 -> is_leaf());
+  unit_assert (  node4 -> is_leaf());
+
+  //  NodeInfo * NodeInfo = new NodeInfo (d,r);
+
+  unit_func ("NodeInfo");
+
+  NodeInfo * node_info = new NodeInfo (d,r);
   unit_assert (node_info != NULL);
 
   //--------------------------------------------------
 
   unit_func ("trace()");
 
-  unit_assert (false);
+  unit_assert(node_info->trace(node0,0,0) == node1);
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node0,1,0)->is_leaf());
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node0,0,1)->is_leaf());
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node0,1,1)->is_leaf());
+  node_info->reset_trace();
+
+  unit_assert(node_info->trace(node1,0,0)->is_leaf());
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node1,1,0) == node2);
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node1,0,1)->is_leaf());
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node1,1,1)->is_leaf());
+  node_info->reset_trace();
+
+  unit_assert(node_info->trace(node2,0,0)->is_leaf());
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node2,1,0)->is_leaf());
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node2,0,1) == node3);
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node2,1,1)->is_leaf());
+  node_info->reset_trace();
+
+  unit_assert(node_info->trace(node3,0,0)->is_leaf());
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node3,1,0)->is_leaf());
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node3,0,1)->is_leaf());
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node3,1,1) == node4); // FAILS
+  node_info->reset_trace();
+
+  unit_assert(node_info->trace(node4,0,0) == 0);
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node4,1,0) == 0);
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node4,0,1) == 0);
+  node_info->reset_trace();
+  unit_assert(node_info->trace(node4,1,1) == 0);
+  node_info->reset_trace();
+
+  
 
   //--------------------------------------------------
 
