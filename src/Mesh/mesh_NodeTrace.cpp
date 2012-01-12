@@ -9,81 +9,92 @@
 
 //----------------------------------------------------------------------
 
-NodeTrace::NodeTrace(int d, int r) throw ()
-  : d_(d), r_(r), level_(0), bits_(0)
+NodeTrace::NodeTrace(Node * root, int max_levels) throw ()
+  : max_levels_(max_levels),
+    level_(0)
 {
-
-  if      (r >= 16) bits_ = 4;
-  else if (r >= 8)  bits_ = 3;
-  else if (r >= 4)  bits_ = 2;
-  else if (r >= 2)  bits_ = 1;
-
-  trace_[0] = 0;
-  trace_[1] = 0;
-  trace_[2] = 0;
+  TRACE1("max_levels = %d",max_levels_);
+  index_ = new int  [ max_levels ];
+  index_[0] = -1;
+  node_  = new Node * [ max_levels ];
+  node_[0] = root;
 }
 
 //----------------------------------------------------------------------
 
-Node * NodeTrace::trace (Node * node, int ix, int iy, int iz)
+NodeTrace::~NodeTrace() throw ()
+{
+  delete index_;
+  delete node_;
+}
+
+//----------------------------------------------------------------------
+
+Node * NodeTrace::push (int index)
 /// @param node   The node we're tracing from
-/// @param ix,iy,iz direction of the child to trace to
-/// @return       The child Node we traced to, or NULL if done
+/// @param index  Index of the node's child we're tracing to
+/// @return       The child Node we traced to, or NULL if node is a leaf
 {
 
-  int index_child = ix + r_*(iy + r_*iz);
+  ASSERT1 ("NodeTrace::push",
+	   "Trying to push more nodes than the %d allowed",
+	   max_levels_,
+	   level_ < max_levels_ - 1);
 
-  Node * child = node->child(index_child);
+  Node * child = node_[level_]->child(index);
 
   if (child != NULL) {
-    trace_[0] = (trace_[0] << bits_) + ix;
-    trace_[1] = (trace_[1] << bits_) + iy;
-    trace_[2] = (trace_[2] << bits_) + iz;
+    ++level_;
+    index_[level_] = index;
+    node_[level_]  = child;
   }
-
 
   return child;
 }
 
 //----------------------------------------------------------------------
 
-void NodeInfo::finalize_trace()
+Node * NodeTrace::pop ()
 {
-  unsigned long long ecart[3] = {0,0,0};
-
-  // Finalize bits in trace_[], e.g. trace_[0] = ...00001101 becomes 10110000...
-
-  for (int i=0; i<d_; i++) {
-
-    // Reverse bits byte-by-byte
-
-    char *tr = (char *)&trace_[i];
-    char *rt = (char *)&ecart [i];
-
-    *(rt+0) = ((*(tr+7) * 0x80200802ULL) & 0x0884422110ULL) 
-      * 0x0101010101ULL >> 32;
-    *(rt+1) = ((*(tr+6) * 0x80200802ULL) & 0x0884422110ULL) 
-      * 0x0101010101ULL >> 32;
-    *(rt+2) = ((*(tr+5) * 0x80200802ULL) & 0x0884422110ULL) 
-      * 0x0101010101ULL >> 32;
-    *(rt+3) = ((*(tr+4) * 0x80200802ULL) & 0x0884422110ULL)
-      * 0x0101010101ULL >> 32;
-    *(rt+4) = ((*(tr+3) * 0x80200802ULL) & 0x0884422110ULL) 
-      * 0x0101010101ULL >> 32;
-    *(rt+5) = ((*(tr+2) * 0x80200802ULL) & 0x0884422110ULL) 
-      * 0x0101010101ULL >> 32;
-    *(rt+6) = ((*(tr+1) * 0x80200802ULL) & 0x0884422110ULL) 
-      * 0x0101010101ULL >> 32;
-    *(rt+7) = ((*(tr+0) * 0x80200802ULL) & 0x0884422110ULL)
-      * 0x0101010101ULL >> 32;
-
-    ecart[i] = ecart[i] >> 64-level_;
-
-
-    trace_[i] = ecart[i];
-  }
-
-  
+  ASSERT ("NodeTrace::pop", 
+	  "Trying to pop with level_ == 0", 
+	  level_ > 0);
+  --level_;
+  return node_[level_];
 }
 
+//----------------------------------------------------------------------
 
+Node * NodeTrace::node() const
+{ 
+  return node_[level_];
+};
+
+//----------------------------------------------------------------------
+
+Node * NodeTrace::node_level(int level) const
+{ 
+  ASSERT2 ("NodeTrace::node", 
+	   "input level = %d is not between 0 and node level %d",
+	   level,level_,
+	   0 <= level && level <= level_);
+  return node_[level];
+};
+
+//----------------------------------------------------------------------
+
+int NodeTrace::index() const
+{
+  return index_[level_];
+}
+
+//----------------------------------------------------------------------
+
+int NodeTrace::index_level(int level) const
+{
+  ASSERT2 ("NodeTrace::index",
+	   "input level = %d is not between 0 and node level %d",
+	   level,level_,
+	   0 <= level && level <= level_);
+  return index_[level];
+}

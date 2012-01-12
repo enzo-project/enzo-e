@@ -18,7 +18,7 @@ class ItNode : public It<Node> {
 public: // interface
 
   /// Constructor
-  ItNode(Tree * tree) throw();
+  ItNode(Tree * tree, int max_depth) throw();
 
   /// Destructor
   virtual ~ItNode() throw();

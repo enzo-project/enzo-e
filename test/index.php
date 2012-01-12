@@ -492,14 +492,15 @@ test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
 	     array("test_FileHdf5","test_FileIfrit")); 
 test_summary("Error",array(    "Error"),
 	     array("test_Error")); 
-test_summary("Field",array(    "FieldBlock",     "FieldDescr",     "FieldFace",     "ItField"),
+test_summary("Field",array("FieldBlock","FieldDescr","FieldFace","ItField"),
 	     array("test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField")); 
 test_summary("Io",array("ItReduce"),
 	     array("test_ItReduce")); 
 test_summary("Memory",array("Memory"),
 	     array("test_Memory")); 
-test_summary("Mesh",array("Hierarchy","Patch","Block","Tree","Node","NodeTrace"),
-	     array("test_Hierarchy","test_Patch","test_Block","test_Tree","test_Node","test_NodeTrace")); 
+test_summary("Mesh",
+	     array("Hierarchy","Patch","Block","Tree","Node","NodeTrace","ItNode"),
+	     array("test_Hierarchy","test_Patch","test_Block","test_Tree","test_Node","test_NodeTrace","test_ItNode")); 
 test_summary("Monitor",array("Monitor"),
 	     array("test_Monitor")); 
 test_summary("Parallel",array("GroupProcess","Layout"),
@@ -720,6 +721,7 @@ tests("Mesh","test_Block","test_Block","");
 tests("Mesh","test_Tree","test_Tree",""); 
 tests("Mesh","test_Node","test_Node",""); 
 tests("Mesh","test_NodeTrace","test_NodeTrace",""); 
+tests("Mesh","test_ItNode","test_ItNode",""); 
 
    //----------------------------------------------------------------------
 

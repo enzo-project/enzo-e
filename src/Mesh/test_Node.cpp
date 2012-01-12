@@ -2,7 +2,7 @@
 
 /// @file     test_Node.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2010-04-02
+/// @date     2012-01-09
 /// @brief    Test program for the Node class
 
 #include "main.hpp"

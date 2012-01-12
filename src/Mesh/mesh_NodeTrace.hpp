@@ -5,13 +5,19 @@
 /// @date     2012-01-09
 /// @brief    [\ref Mesh] Declaration of the NodeTrace class
 ///
-/// The NodeTrace class is used for storing information about
-/// the location of a Node in a Tree, and provides functions
-/// for generating and accessing a NodeTrace.  Traces are limited
-/// to Tree's with at most 64 levels.
+/// The NodeTrace class is used for storing information about the
+/// location of a Node in a Tree with respect to the root node.  It
+/// functions like a stack, with operations for "pushing" down to
+/// child nodes, and "popping" back up to the parent.  Child indexing
+/// is the same as how Nodes are stored (Morton- or Z-ordering).
+/// Other orderings such as Hilbert or Moore space-filling curves are
+/// implemented at a higher level in the ItNode class hierarchy.
 
 #ifndef MESH_NODE_TRACE_HPP
 #define MESH_NODE_TRACE_HPP
+
+class Tree;
+class Node;
 
 class NodeTrace {
 
@@ -22,45 +28,53 @@ class NodeTrace {
 public: // interface
 
   /// Constructor
-  NodeTrace(int d, int r) throw();
+  NodeTrace(Node * root, int max_levels) throw();
 
-  /// Trace one level down the Tree according to the provided x,y,z indices from
-  /// the given Node; return true when we've reached a leaf node
-  Node * trace (Node * node, int ix, int iy=0, int iz=0);
+  /// Destructor
+  ~NodeTrace () throw();
 
-  /// Reset the trace variables for the next trace
-  void reset_trace() 
-  { trace_[0]=0;
-    trace_[1]=0; 
-    trace_[2]=0; };
+  /// Move one level "up" the Tree to the specified child (Z-ordering)
+  Node * push (int index);
 
-  /// Finalize (reverse) the trace_[] bit values after they're
-  /// accumulated so that they can be used
-  void finalize_trace();
+  /// Move one level "down" the Tree to the parent
+  Node * pop ();
 
-  /// Return the current values of the bit trace
-  void trace(const unsigned long long ** trace) const
-  { *trace = trace_; };
+  /// Reset the node trace to the root
+  void reset()
+  { level_ = 0; };
+
+  /// Return the level of the traced node
+  int level() const
+  { return level_; }
+
+  /// Return the last node in the trace
+  Node * node() const;
+
+  /// Return the node in the node trace at the specified level
+  Node * node_level(int level) const;
+
+  /// Return the parent's child index of the last node in the trace
+  int index() const;
+
+  /// Return the parent's child index of the node in the node trace at the
+  /// specified level.  Root parent's child index is undefined.
+  int index_level(int level) const;
 
 private: // functions
 
 private: // attributes
 
-  /// Dimensionality of the Tree the Node is contained in
-  int d_;
+  /// Maximum number of levels in the Tree being traced
+  int max_levels_;
 
-  /// Refinement amout of the Tree the Node is contained in
-  int r_;
-
-  /// Level of the node in the Tree, with Tree's root being level 0
+  /// Level of the current Node in the Tree, with Tree's root being level 0
   int level_;
 
-  /// Number of bits used per level (1 for octree, 2 for 3^2-tree or
-  /// 4^2-tree, etc.)
-  int bits_;
+  /// Trace of child node indices
+  int * index_;
 
-  /// bit trace from Tree root, enough for 3D Tree's of at least 64 levels
-  unsigned long long trace_[3]; 
+  /// Trace of node pointers
+  Node ** node_;
 
 };
 

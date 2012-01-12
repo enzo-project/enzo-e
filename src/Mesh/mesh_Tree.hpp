@@ -35,31 +35,27 @@ public: // interface
   int num_nodes () const
   { return num_nodes_; }
 
-  /// Return the maximum Node level in the Tree, with root == 0
-  int max_level () const
-  { return max_level_; }
-
   /// Return the root Node of the tree
   Node * root_node() const
   { return root_; }
 
   /// Refine the given node
-  void refine_node (Node * node);
+  void refine_node (NodeTrace *);
 
   /// Delete the given node and all its children from the tree
-  void delete_node (Node * node);
+  void delete_node (NodeTrace *);
 
   /// Balance the Node with respect to its neighbors
-  void balance_node (Node * node);
+  void balance_node (NodeTrace *);
 
   /// Return the neighboring Node in the specified direction
-  Node * node_neighbor (Node * node) const;
+  NodeTrace * node_neighbor (NodeTrace *) const;
 
   /// Return the parent node
-  Node * node_parent (Node * node) const;
+  NodeTrace * node_parent (NodeTrace *) const;
 
   /// Return the specified child Node
-  Node * node_child (Node * node, int k) const;
+  NodeTrace * node_child (NodeTrace *, int k) const;
 
 private: // functions
 
@@ -77,10 +73,6 @@ private: // attributes
 
   /// Number of nodes in the tree
   int num_nodes_;
-  
-  /// Maximum levels in the Tree, starting at 0
-  int max_level_;
-  
 
 };
 

@@ -14,8 +14,7 @@
 Tree::Tree(int d, int r) throw ()
   : d_(d), r_(r), 
     root_(new Node), 
-    num_nodes_(1), 
-    max_level_(0)
+    num_nodes_(1)
 {
 }
 
@@ -28,45 +27,49 @@ Tree::~Tree() throw ()
 
 //----------------------------------------------------------------------
 
-void Tree::refine_node (Node * node)
+void Tree::refine_node (NodeTrace * node_trace)
 {
+  int    level = node_trace->level();
+  Node * node  = node_trace->node();
+
   int r2d = 1;
   if (d_>=1) r2d *= r_;
   if (d_>=2) r2d *= r_;
   if (d_>=3) r2d *= r_;
   node->refine(r2d);
+  
   num_nodes_ += r2d;
 }
 
 //----------------------------------------------------------------------
 
-void Tree::delete_node (Node * node)
+void Tree::delete_node (NodeTrace * node_trace)
 {
 }
 
 //----------------------------------------------------------------------
 
-void Tree::balance_node (Node * node)
+void Tree::balance_node (NodeTrace * node_trace)
 {
 }
 
 //----------------------------------------------------------------------
 
-Node * Tree::node_neighbor (Node * node) const
-{
-  return NULL;
-}
-
-//----------------------------------------------------------------------
-
-Node * Tree::node_parent (Node * node) const
+NodeTrace * Tree::node_neighbor (NodeTrace * node_trace) const
 {
   return NULL;
 }
 
 //----------------------------------------------------------------------
 
-Node * Tree::node_child (Node * node, int k) const
+NodeTrace * Tree::node_parent (NodeTrace * node_trace) const
+{
+  return NULL;
+}
+
+//----------------------------------------------------------------------
+
+NodeTrace * Tree::node_child (NodeTrace * node_trace, int k) const
 {
   return NULL;
 }

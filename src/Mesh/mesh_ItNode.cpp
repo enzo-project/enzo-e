@@ -12,10 +12,10 @@
 
 //----------------------------------------------------------------------
 
-ItNode::ItNode( Tree * tree ) throw ()
+ItNode::ItNode( Tree * tree , int max_depth) throw ()
   : tree_(tree),
     node_(0),
-    node_trace_(new NodeTrace(tree->dimension(),tree->refinement()))
+    node_trace_(new NodeTrace(tree->root_node(),max_depth))
 {
 }
 
@@ -31,7 +31,18 @@ ItNode::~ItNode() throw ()
 Node * ItNode::operator++ () throw()
 {
   if (node_ == 0) {
+    node_ = tree_->root_node();
+    node_trace_->reset();
+  } else {
+    // if node is not a leaf, 
+    if (! node_->is_leaf()) {
+      
+      
+    } else {
+    }
+
   }
+  return node_;
 }
 //----------------------------------------------------------------------
 
