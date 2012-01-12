@@ -498,8 +498,8 @@ test_summary("Io",array("ItReduce"),
 	     array("test_ItReduce")); 
 test_summary("Memory",array("Memory"),
 	     array("test_Memory")); 
-test_summary("Mesh",array("Hierarchy","Patch","Block","Tree","Node","NodeInfo"),
-	     array("test_Hierarchy","test_Patch","test_Block","test_Tree","test_Node","test_NodeInfo")); 
+test_summary("Mesh",array("Hierarchy","Patch","Block","Tree","Node","NodeTrace"),
+	     array("test_Hierarchy","test_Patch","test_Block","test_Tree","test_Node","test_NodeTrace")); 
 test_summary("Monitor",array("Monitor"),
 	     array("test_Monitor")); 
 test_summary("Parallel",array("GroupProcess","Layout"),
@@ -719,7 +719,7 @@ tests("Mesh","test_Patch","test_Patch","");
 tests("Mesh","test_Block","test_Block",""); 
 tests("Mesh","test_Tree","test_Tree",""); 
 tests("Mesh","test_Node","test_Node",""); 
-tests("Mesh","test_NodeInfo","test_NodeInfo",""); 
+tests("Mesh","test_NodeTrace","test_NodeTrace",""); 
 
    //----------------------------------------------------------------------
 

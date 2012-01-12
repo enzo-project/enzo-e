@@ -1,30 +1,28 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_NodeInfo.hpp
+/// @file     mesh_NodeTrace.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-01-09
-/// @brief    [\ref Mesh] Declaration of the NodeInfo class
+/// @brief    [\ref Mesh] Declaration of the NodeTrace class
 ///
-/// The NodeInfo class is used for storing information about a Node
-/// that isn't stored in the Node class itself, but computable given
-/// the Tree.  This may include node level, hierarchy refinement level
-/// (which may be different from Tree node level), Node trace from
-/// Tree root, etc.  Some information may be computed on an as-needed
-/// basis.
+/// The NodeTrace class is used for storing information about
+/// the location of a Node in a Tree, and provides functions
+/// for generating and accessing a NodeTrace.  Traces are limited
+/// to Tree's with at most 64 levels.
 
-#ifndef MESH_NODE_INFO_HPP
-#define MESH_NODE_INFO_HPP
+#ifndef MESH_NODE_TRACE_HPP
+#define MESH_NODE_TRACE_HPP
 
-class NodeInfo {
+class NodeTrace {
 
-  /// @class    NodeInfo
+  /// @class    NodeTrace
   /// @ingroup  Mesh
   /// @brief    [\ref Mesh] 
 
 public: // interface
 
   /// Constructor
-  NodeInfo(int d, int r) throw();
+  NodeTrace(int d, int r) throw();
 
   /// Trace one level down the Tree according to the provided x,y,z indices from
   /// the given Node; return true when we've reached a leaf node
@@ -36,9 +34,12 @@ public: // interface
     trace_[1]=0; 
     trace_[2]=0; };
 
-  /// Reverse the trace_[] bit values after they're accumulated so that they can be used
+  /// Reverse the trace_[] bit values after they're accumulated so
+  /// that they can be used
   void reverse_trace();
 
+  unsigned long long trace(axis_enum axis) const
+  { return trace_[axis]; }
 
 private: // functions
 
@@ -62,5 +63,5 @@ private: // attributes
 
 };
 
-#endif /* MESH_NODE_INFO_HPP */
+#endif /* MESH_NODE_TRACE_HPP */
 

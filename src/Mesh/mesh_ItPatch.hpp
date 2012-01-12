@@ -12,7 +12,7 @@ class ItPatch : public It<Patch> {
 
   /// @class    ItPatch
   /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] Iterator over Patchs in a Patch
+  /// @brief    [\ref Mesh] Iterator over Patches in a Hierarchy
 
 public: // interface
 
@@ -27,7 +27,6 @@ public: // interface
 
   /// Return whether the iteration is complete
   bool done() const throw();
-
 
 private: // attributes
 

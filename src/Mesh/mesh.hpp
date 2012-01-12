@@ -52,13 +52,14 @@
 
 // Tree and components
 #include "mesh_Node.hpp"
-#include "mesh_NodeInfo.hpp"
+#include "mesh_NodeTrace.hpp"
 #include "mesh_Tree.hpp"
 
 // Iterators
 #include "mesh_It.hpp"
 #include "mesh_ItPatch.hpp"
 #include "mesh_ItBlock.hpp"
+#include "mesh_ItNode.hpp"
 
 #endif /* MESH_HPP */
 

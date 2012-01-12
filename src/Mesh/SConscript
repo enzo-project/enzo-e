@@ -64,7 +64,7 @@ binaries = [ binaries,  env.Program (['test_Hierarchy.cpp', sources]) ]
 binaries = [ binaries,  env.Program (['test_Patch.cpp', sources]) ]
 binaries = [ binaries,  env.Program (['test_Tree.cpp', sources]) ]
 binaries = [ binaries,  env.Program (['test_Node.cpp', sources]) ]
-binaries = [ binaries,  env.Program (['test_NodeInfo.cpp', sources]) ]
+binaries = [ binaries,  env.Program (['test_NodeTrace.cpp', sources]) ]
 
 #------------------------------
 # INSTALL
