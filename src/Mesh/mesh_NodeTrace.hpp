@@ -34,12 +34,13 @@ public: // interface
     trace_[1]=0; 
     trace_[2]=0; };
 
-  /// Reverse the trace_[] bit values after they're accumulated so
-  /// that they can be used
-  void reverse_trace();
+  /// Finalize (reverse) the trace_[] bit values after they're
+  /// accumulated so that they can be used
+  void finalize_trace();
 
-  unsigned long long trace(axis_enum axis) const
-  { return trace_[axis]; }
+  /// Return the current values of the bit trace
+  void trace(const unsigned long long ** trace) const
+  { *trace = trace_; };
 
 private: // functions
 

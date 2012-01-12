@@ -47,11 +47,11 @@ Node * NodeTrace::trace (Node * node, int ix, int iy, int iz)
 
 //----------------------------------------------------------------------
 
-void NodeTrace::reverse_trace()
+void NodeInfo::finalize_trace()
 {
   unsigned long long ecart[3] = {0,0,0};
 
-  // Reverse bits in trace_[], e.g. trace_[0] = ...00001101 becomes 10110000...
+  // Finalize bits in trace_[], e.g. trace_[0] = ...00001101 becomes 10110000...
 
   for (int i=0; i<d_; i++) {
 

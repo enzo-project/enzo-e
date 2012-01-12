@@ -100,8 +100,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(node_trace->trace(node4,1,1) == 0);
   node_trace->reset_trace();
 
-  
-
   //--------------------------------------------------
 
   unit_finalize();
