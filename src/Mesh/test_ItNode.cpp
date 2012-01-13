@@ -20,72 +20,216 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("ItNode");
 
-  // Setup Tree
+  //--------------------------------------------------
+  // Tree (2,2)
+  //--------------------------------------------------
 
-  Tree * tree = test_tree_22();
-  int max_depth = 4;
+  {
+    Tree * tree = test_tree_22();
+    int max_depth = 4;
 
-  // Test ItNode depth-first Morton ordering
+    // Test ItNode depth-first Morton ordering
 
-  ItNode it_node(tree, max_depth);
+    ItNode it_node(tree, max_depth);
 
-  Node * root = tree->root_node();
+    Node * root = tree->root_node();
 
-  for (int count = 0; count < 2; count ++) {
-    unit_assert (++it_node == root->child(0)->child(0));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(0)->child(1)->child(0));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(0)->child(1)->child(1));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(0)->child(1)->child(2));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(0)->child(1)->child(3));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(0)->child(2)->child(0));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(0)->child(2)->child(1));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(0)->child(2)->child(2));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(0)->child(2)->child(3));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(0)->child(3));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(1)->child(0));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(1)->child(1));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(1)->child(2));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(1)->child(3));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(2));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(3)->child(0)->child(0));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(3)->child(0)->child(1));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(3)->child(0)->child(2));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(3)->child(0)->child(3));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(3)->child(1));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(3)->child(2));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(3)->child(3)->child(0));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(3)->child(3)->child(1));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(3)->child(3)->child(2));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == root->child(3)->child(3)->child(3));
-    unit_assert (it_node.done()==false);
-    unit_assert (++it_node == 0);
-    unit_assert (it_node.done()==true);
+    for (int count = 0; count < 2; count ++) {
+      unit_assert (++it_node == root->child(0)->child(0));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(0)->child(1)->child(0));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(0)->child(1)->child(1));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(0)->child(1)->child(2));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(0)->child(1)->child(3));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(0)->child(2)->child(0));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(0)->child(2)->child(1));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(0)->child(2)->child(2));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(0)->child(2)->child(3));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(0)->child(3));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(1)->child(0));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(1)->child(1));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(1)->child(2));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(1)->child(3));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(2));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(3)->child(0)->child(0));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(3)->child(0)->child(1));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(3)->child(0)->child(2));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(3)->child(0)->child(3));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(3)->child(1));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(3)->child(2));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(3)->child(3)->child(0));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(3)->child(3)->child(1));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(3)->child(3)->child(2));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == root->child(3)->child(3)->child(3));
+      unit_assert (it_node.done()==false);
+      unit_assert (++it_node == 0);
+      unit_assert (it_node.done()==true);
+    }
   }
 
+  //--------------------------------------------------
+  // Tree (3,2)
+  //--------------------------------------------------
+
+  {
+
+    Tree * tree = test_tree_32();
+    int max_depth = 4;
+
+    // Test ItNode depth-first Morton ordering
+
+    ItNode it_node(tree, max_depth);
+
+    Node * root = tree->root_node();
+
+    for (int count = 0; count < 2; count ++) {
+      unit_assert (++it_node == root->child(0)->child(0));
+      unit_assert (++it_node == root->child(0)->child(1));
+      unit_assert (++it_node == root->child(0)->child(2));
+      unit_assert (++it_node == root->child(0)->child(3));
+      unit_assert (++it_node == root->child(0)->child(4));
+      unit_assert (++it_node == root->child(0)->child(5));
+      unit_assert (++it_node == root->child(0)->child(6));
+      unit_assert (++it_node == root->child(0)->child(7)->child(0));
+      unit_assert (++it_node == root->child(0)->child(7)->child(1));
+      unit_assert (++it_node == root->child(0)->child(7)->child(2));
+      unit_assert (++it_node == root->child(0)->child(7)->child(3));
+      unit_assert (++it_node == root->child(0)->child(7)->child(4));
+      unit_assert (++it_node == root->child(0)->child(7)->child(5));
+      unit_assert (++it_node == root->child(0)->child(7)->child(6));
+      unit_assert (++it_node == root->child(0)->child(7)->child(7));
+      unit_assert (++it_node == root->child(1)->child(0));
+      unit_assert (++it_node == root->child(1)->child(1));
+      unit_assert (++it_node == root->child(1)->child(2));
+      unit_assert (++it_node == root->child(1)->child(3));
+      unit_assert (++it_node == root->child(1)->child(4));
+      unit_assert (++it_node == root->child(1)->child(5));
+      unit_assert (++it_node == root->child(1)->child(6)->child(0));
+      unit_assert (++it_node == root->child(1)->child(6)->child(1));
+      unit_assert (++it_node == root->child(1)->child(6)->child(2));
+      unit_assert (++it_node == root->child(1)->child(6)->child(3));
+      unit_assert (++it_node == root->child(1)->child(6)->child(4));
+      unit_assert (++it_node == root->child(1)->child(6)->child(5));
+      unit_assert (++it_node == root->child(1)->child(6)->child(6));
+      unit_assert (++it_node == root->child(1)->child(6)->child(7));
+      unit_assert (++it_node == root->child(1)->child(7));
+      unit_assert (++it_node == root->child(2)->child(0));
+      unit_assert (++it_node == root->child(2)->child(1));
+      unit_assert (++it_node == root->child(2)->child(2));
+      unit_assert (++it_node == root->child(2)->child(3));
+      unit_assert (++it_node == root->child(2)->child(4));
+      unit_assert (++it_node == root->child(2)->child(5)->child(0));
+      unit_assert (++it_node == root->child(2)->child(5)->child(1));
+      unit_assert (++it_node == root->child(2)->child(5)->child(2));
+      unit_assert (++it_node == root->child(2)->child(5)->child(3));
+      unit_assert (++it_node == root->child(2)->child(5)->child(4));
+      unit_assert (++it_node == root->child(2)->child(5)->child(5));
+      unit_assert (++it_node == root->child(2)->child(5)->child(6));
+      unit_assert (++it_node == root->child(2)->child(5)->child(7));
+      unit_assert (++it_node == root->child(2)->child(6));
+      unit_assert (++it_node == root->child(2)->child(7));
+      unit_assert (++it_node == root->child(3)->child(0));
+      unit_assert (++it_node == root->child(3)->child(1));
+      unit_assert (++it_node == root->child(3)->child(2));
+      unit_assert (++it_node == root->child(3)->child(3));
+      unit_assert (++it_node == root->child(3)->child(4)->child(0));
+      unit_assert (++it_node == root->child(3)->child(4)->child(1));
+      unit_assert (++it_node == root->child(3)->child(4)->child(2));
+      unit_assert (++it_node == root->child(3)->child(4)->child(3));
+      unit_assert (++it_node == root->child(3)->child(4)->child(4));
+      unit_assert (++it_node == root->child(3)->child(4)->child(5));
+      unit_assert (++it_node == root->child(3)->child(4)->child(6));
+      unit_assert (++it_node == root->child(3)->child(4)->child(7));
+      unit_assert (++it_node == root->child(3)->child(5));
+      unit_assert (++it_node == root->child(3)->child(6));
+      unit_assert (++it_node == root->child(3)->child(7));
+      unit_assert (++it_node == root->child(4)->child(0));
+      unit_assert (++it_node == root->child(4)->child(1));
+      unit_assert (++it_node == root->child(4)->child(2));
+      unit_assert (++it_node == root->child(4)->child(3)->child(0));
+      unit_assert (++it_node == root->child(4)->child(3)->child(1));
+      unit_assert (++it_node == root->child(4)->child(3)->child(2));
+      unit_assert (++it_node == root->child(4)->child(3)->child(3));
+      unit_assert (++it_node == root->child(4)->child(3)->child(4));
+      unit_assert (++it_node == root->child(4)->child(3)->child(5));
+      unit_assert (++it_node == root->child(4)->child(3)->child(6));
+      unit_assert (++it_node == root->child(4)->child(3)->child(7));
+      unit_assert (++it_node == root->child(4)->child(4));
+      unit_assert (++it_node == root->child(4)->child(5));
+      unit_assert (++it_node == root->child(4)->child(6));
+      unit_assert (++it_node == root->child(4)->child(7));
+      unit_assert (++it_node == root->child(5)->child(0));
+      unit_assert (++it_node == root->child(5)->child(1));
+      unit_assert (++it_node == root->child(5)->child(2)->child(0));
+      unit_assert (++it_node == root->child(5)->child(2)->child(1));
+      unit_assert (++it_node == root->child(5)->child(2)->child(2));
+      unit_assert (++it_node == root->child(5)->child(2)->child(3));
+      unit_assert (++it_node == root->child(5)->child(2)->child(4));
+      unit_assert (++it_node == root->child(5)->child(2)->child(5));
+      unit_assert (++it_node == root->child(5)->child(2)->child(6));
+      unit_assert (++it_node == root->child(5)->child(2)->child(7));
+      unit_assert (++it_node == root->child(5)->child(3));
+      unit_assert (++it_node == root->child(5)->child(4));
+      unit_assert (++it_node == root->child(5)->child(5));
+      unit_assert (++it_node == root->child(5)->child(6));
+      unit_assert (++it_node == root->child(5)->child(7));
+      unit_assert (++it_node == root->child(6)->child(0));
+      unit_assert (++it_node == root->child(6)->child(1)->child(0));
+      unit_assert (++it_node == root->child(6)->child(1)->child(1));
+      unit_assert (++it_node == root->child(6)->child(1)->child(2));
+      unit_assert (++it_node == root->child(6)->child(1)->child(3));
+      unit_assert (++it_node == root->child(6)->child(1)->child(4));
+      unit_assert (++it_node == root->child(6)->child(1)->child(5));
+      unit_assert (++it_node == root->child(6)->child(1)->child(6));
+      unit_assert (++it_node == root->child(6)->child(1)->child(7));
+      unit_assert (++it_node == root->child(6)->child(2));
+      unit_assert (++it_node == root->child(6)->child(3));
+      unit_assert (++it_node == root->child(6)->child(4));
+      unit_assert (++it_node == root->child(6)->child(5));
+      unit_assert (++it_node == root->child(6)->child(6));
+      unit_assert (++it_node == root->child(6)->child(7));
+      unit_assert (++it_node == root->child(7)->child(0)->child(0));
+      unit_assert (++it_node == root->child(7)->child(0)->child(1));
+      unit_assert (++it_node == root->child(7)->child(0)->child(2));
+      unit_assert (++it_node == root->child(7)->child(0)->child(3));
+      unit_assert (++it_node == root->child(7)->child(0)->child(4));
+      unit_assert (++it_node == root->child(7)->child(0)->child(5));
+      unit_assert (++it_node == root->child(7)->child(0)->child(6));
+      unit_assert (++it_node == root->child(7)->child(0)->child(7));
+      unit_assert (++it_node == root->child(7)->child(1));
+      unit_assert (++it_node == root->child(7)->child(2));
+      unit_assert (++it_node == root->child(7)->child(3));
+      unit_assert (++it_node == root->child(7)->child(4));
+      unit_assert (++it_node == root->child(7)->child(5));
+      unit_assert (++it_node == root->child(7)->child(6));
+      unit_assert (++it_node == root->child(7)->child(7));
+      unit_assert (++it_node == 0);
+      unit_assert (it_node.done()==true);
+    }
+  }
   //--------------------------------------------------
 
   unit_finalize();
