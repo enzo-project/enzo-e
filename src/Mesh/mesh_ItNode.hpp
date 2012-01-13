@@ -9,6 +9,10 @@
 #ifndef MESH_IT_NODE_HPP
 #define MESH_IT_NODE_HPP
 
+class Tree;
+class NodeTrace;
+class Node;
+
 class ItNode : public It<Node> {
 
   /// @class    ItNode
@@ -34,11 +38,11 @@ private: // attributes
   /// The Tree being iterated over
   Tree * tree_;
 
-  /// The current Node
-  Node * node_;
-
   /// The trace of the current Node
-  NodeTrace * node_trace_;
+  NodeTrace node_trace_;
+
+  /// Signal we've reached the last Node
+  bool reset_;
 
 };
 

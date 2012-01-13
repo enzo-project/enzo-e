@@ -13,7 +13,6 @@ NodeTrace::NodeTrace(Node * root, int max_levels) throw ()
   : max_levels_(max_levels),
     level_(0)
 {
-  TRACE1("max_levels = %d",max_levels_);
   index_ = new int  [ max_levels ];
   index_[0] = -1;
   node_  = new Node * [ max_levels ];

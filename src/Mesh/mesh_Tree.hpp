@@ -31,6 +31,10 @@ public: // interface
   int refinement() const
   { return r_; }
 
+  /// Return the number of child nodes in each node (d**r)
+  int num_children() const
+  { return c_; }
+
   /// The number of allocated Nodes in the tree
   int num_nodes () const
   { return num_nodes_; }
@@ -67,6 +71,9 @@ private: // attributes
 
   /// Refinement ratio of levels in the Tree
   int r_;
+
+  /// Number of children per node
+  int c_;
 
   /// Pointer to the root node
   Node * root_;

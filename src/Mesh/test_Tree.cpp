@@ -36,6 +36,10 @@ PARALLEL_MAIN_BEGIN
   unit_assert (tree->refinement() == 2);
 
   //--------------------------------------------------
+  unit_func("num_children()");
+  unit_assert (tree->num_children() == 4);
+
+  //--------------------------------------------------
   unit_func("num_nodes ()");
   unit_assert (tree->num_nodes() == 33);
   printf ("tree->num_nodes()=%d\n",tree->num_nodes());

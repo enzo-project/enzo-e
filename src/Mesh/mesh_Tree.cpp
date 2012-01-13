@@ -16,6 +16,10 @@ Tree::Tree(int d, int r) throw ()
     root_(new Node), 
     num_nodes_(1)
 {
+  c_ = 1;
+  if (d_>=1) c_ *= r_;
+  if (d_>=2) c_ *= r_;
+  if (d_>=3) c_ *= r_;
 }
 
 //----------------------------------------------------------------------
@@ -29,16 +33,9 @@ Tree::~Tree() throw ()
 
 void Tree::refine_node (NodeTrace * node_trace)
 {
-  int    level = node_trace->level();
-  Node * node  = node_trace->node();
-
-  int r2d = 1;
-  if (d_>=1) r2d *= r_;
-  if (d_>=2) r2d *= r_;
-  if (d_>=3) r2d *= r_;
-  node->refine(r2d);
+  node_trace->node()->refine(c_);
   
-  num_nodes_ += r2d;
+  num_nodes_ += c_;
 }
 
 //----------------------------------------------------------------------

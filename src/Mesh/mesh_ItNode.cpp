@@ -14,8 +14,8 @@
 
 ItNode::ItNode( Tree * tree , int max_depth) throw ()
   : tree_(tree),
-    node_(0),
-    node_trace_(new NodeTrace(tree->root_node(),max_depth))
+    node_trace_(tree->root_node(),max_depth),
+    reset_(true)
 {
 }
 
@@ -23,30 +23,51 @@ ItNode::ItNode( Tree * tree , int max_depth) throw ()
 
 ItNode::~ItNode() throw ()
 {
-  delete node_trace_;
 }
 
 //======================================================================
 
 Node * ItNode::operator++ () throw()
 {
-  if (node_ == 0) {
-    node_ = tree_->root_node();
-    node_trace_->reset();
-  } else {
-    // if node is not a leaf, 
-    if (! node_->is_leaf()) {
-      
-      
-    } else {
+  // if previous was reset, go to first node
+
+  if (reset_) {
+    reset_ = false;
+    node_trace_.reset();
+    while ( ! node_trace_.node()->is_leaf() ) {
+      node_trace_.push(0);
     }
 
+  } else {
+
+    while ((node_trace_.level() > 0) && 
+	   (node_trace_.index() + 1 == tree_->num_children()) ) {
+      node_trace_.pop();
+    }
+
+    if (node_trace_.level() == 0) {
+
+      reset_ = true;
+      return 0;
+
+    } else {
+
+      int index = node_trace_.index();
+      node_trace_.pop();
+      node_trace_.push(index + 1);
+      while ( ! node_trace_.node()->is_leaf() ) {
+	node_trace_.push(0);
+      }
+    }
   }
-  return node_;
+
+  return node_trace_.node();
+
 }
 //----------------------------------------------------------------------
 
 bool ItNode::done () const throw()
 {
+  return reset_;
 }
 //----------------------------------------------------------------------
