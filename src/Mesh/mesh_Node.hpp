@@ -31,11 +31,12 @@ public: // interface
   void * data() const
   { return data_; }
 
-  /// Refine the node into multiple child nodes
-  void refine (int num_children);
+  /// Refine the node into multiple child nodes, and return the number
+  /// of new nodes created
+  int refine (int num_children);
 
-  /// Remove all descendent nodes, if any
-  void coarsen (int num_children);
+  /// Remove all descendent nodes, and return the number of nodes deleted
+  int coarsen (int num_children);
 
   /// return the kth child Node
   Node * child (int k) const;

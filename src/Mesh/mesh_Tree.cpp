@@ -33,15 +33,19 @@ Tree::~Tree() throw ()
 
 void Tree::refine_node (NodeTrace * node_trace)
 {
-  node_trace->node()->refine(c_);
+  int count =  node_trace->node()->refine(c_);
   
-  num_nodes_ += c_;
+  num_nodes_ += count;
 }
 
 //----------------------------------------------------------------------
 
 void Tree::delete_node (NodeTrace * node_trace)
 {
+
+  int count = node_trace->node()->coarsen(c_);
+
+  num_nodes_ -= count;
 }
 
 //----------------------------------------------------------------------

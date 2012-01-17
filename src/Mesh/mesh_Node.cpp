@@ -23,26 +23,30 @@ Node::~Node() throw ()
 
 //----------------------------------------------------------------------
 
-void Node::refine (int c)
+int Node::refine (int c)
 {
   if (child_ == 0) {
     child_ = new Node [c];
   } else {
     ERROR ("Node::refine","Cannot refine a Node that has already been refined");
   }
+  return c;
 }
 
 //----------------------------------------------------------------------
 
-void Node::coarsen (int c)
+int Node::coarsen (int c)
 {
+  int count = 0;
   if (child_ != 0) {
     for (int i=0; i<c; i++) {
-      child_[i].coarsen(c);
+      count += child_[i].coarsen(c);
     }
     delete [] child_;
     child_ = 0;
+    count += c;
   }
+  return count;
 }
 
 //----------------------------------------------------------------------

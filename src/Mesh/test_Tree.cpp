@@ -42,21 +42,41 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
   unit_func("num_nodes ()");
   unit_assert (tree->num_nodes() == 33);
-  printf ("tree->num_nodes()=%d\n",tree->num_nodes());
 
   //--------------------------------------------------
   unit_func("root_node()");
   unit_assert (tree->root_node() != 0);
 
   //--------------------------------------------------
-  unit_func("refine_node ()");
-  unit_assert (false);
+  unit_func("refine_node () (tested in test_ItNode)");
+  unit_assert (true);
 
   //--------------------------------------------------
   unit_func("delete_node ()");
-  unit_assert (false);
 
+  unit_assert(tree->root_node()->child(1)->is_leaf() == false);
+
+  const int max_depth = 4;
+  NodeTrace node_trace (tree->root_node(), max_depth);
+  
+  node_trace.push(1);
+
+  tree->delete_node(&node_trace);
+
+  unit_assert(tree->num_nodes()==29);
+  unit_assert(tree->root_node()->child(1)->is_leaf() == true);
+
+  unit_assert(tree->root_node()->child(0)->is_leaf() == false);
+
+  node_trace.pop();
+  node_trace.push(0);
+  tree->delete_node(&node_trace);
+
+  unit_assert(tree->num_nodes()==17);
+  unit_assert(tree->root_node()->child(0)->is_leaf() == true);
+  
   //--------------------------------------------------
+
   unit_func("balance_node ()");
   unit_assert (false);
 
