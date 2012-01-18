@@ -28,6 +28,8 @@ PARALLEL_MAIN_BEGIN
     Tree * tree = test_tree_22();
     int max_depth = 4;
 
+    create_image_from_tree (tree, "test_ItNode.png",512,512,max_depth);
+
     // Test ItNode depth-first Morton ordering
 
     ItNode it_node(tree, max_depth);

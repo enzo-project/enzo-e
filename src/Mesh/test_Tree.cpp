@@ -77,8 +77,55 @@ PARALLEL_MAIN_BEGIN
   
   //--------------------------------------------------
 
+  delete tree;
+
+  tree = new Tree (2,2);
+
   unit_func("balance_node ()");
-  unit_assert (false);
+
+  int nx,ny;
+  int * levels = create_levels_from_image ("test_balance.png",&nx,&ny,max_depth);
+
+  int counter=0;
+  for (int ix=0; ix<nx; ix++) {
+    for (int iy=0; iy<ny; iy++) {
+      int i = ix + nx*iy;
+      double x = 1.0*ix / nx;
+      double y = 1.0*iy / ny;
+      NodeTrace node_trace (tree->root_node(), max_depth);
+      int a = levels[i];
+      while (--a > 0) {
+	int rx = x > 0.5;
+	int ry = y > 0.5;
+	int r = rx + 2*ry;
+	Node * node = node_trace.node();
+	if (node->is_leaf()) {
+	  tree->refine_node (&node_trace);
+	}
+	node_trace.push(r);
+
+	int * d = new int;
+	*d = counter++;
+	node_trace.node()->set_data (d);
+
+	rx *= 2.0;
+	ry *= 2.0;
+	if (rx > 1.0) rx -= 1.0;
+	if (ry > 1.0) ry -= 1.0;
+      }
+    }
+  }
+
+  create_image_from_tree (tree, "test_balance_out.png",512,512,max_depth);
+
+  printf ("counter = %d\n",counter);
+  printf ("tree num_nodes = %d\n",tree->num_nodes());
+
+  ItNode it_node(tree, max_depth);
+  while (Node * node = ++it_node) {
+    int * d = (int *)node->data();
+    if (d) printf ("d=%d\n",*d);
+  }
 
   //--------------------------------------------------
   unit_func("node_neighbor ()");

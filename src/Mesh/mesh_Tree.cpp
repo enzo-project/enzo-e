@@ -52,6 +52,7 @@ void Tree::delete_node (NodeTrace * node_trace)
 
 void Tree::balance_node (NodeTrace * node_trace)
 {
+
 }
 
 //----------------------------------------------------------------------
@@ -65,14 +66,16 @@ NodeTrace * Tree::node_neighbor (NodeTrace * node_trace) const
 
 NodeTrace * Tree::node_parent (NodeTrace * node_trace) const
 {
-  return NULL;
+  node_trace->pop();
+  return node_trace;
 }
 
 //----------------------------------------------------------------------
 
-NodeTrace * Tree::node_child (NodeTrace * node_trace, int k) const
+NodeTrace * Tree::node_child (NodeTrace * node_trace, int index) const
 {
-  return NULL;
+  node_trace->push(index);
+  return node_trace;
 }
 
 //======================================================================

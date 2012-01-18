@@ -33,6 +33,10 @@ public: // interface
   /// Return whether the iteration is complete
   bool done() const throw();
 
+  /// Return the nodeTrace corresponding to the current Node
+  const NodeTrace * node_trace() const
+  { return & node_trace_; };
+
 private: // attributes
 
   /// The Tree being iterated over
