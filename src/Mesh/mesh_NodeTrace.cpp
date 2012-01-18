@@ -29,41 +29,6 @@ NodeTrace::~NodeTrace() throw ()
 
 //----------------------------------------------------------------------
 
-Node * NodeTrace::push (int index)
-/// @param node   The node we're tracing from
-/// @param index  Index of the node's child we're tracing to
-/// @return       The child Node we traced to, or NULL if node is a leaf
-{
-
-  ASSERT1 ("NodeTrace::push",
-	   "Trying to push more nodes than the %d allowed",
-	   max_levels_,
-	   level_ < max_levels_ - 1);
-
-  Node * child = node_[level_]->child(index);
-
-  if (child != NULL) {
-    ++level_;
-    index_[level_] = index;
-    node_[level_]  = child;
-  }
-
-  return child;
-}
-
-//----------------------------------------------------------------------
-
-Node * NodeTrace::pop ()
-{
-  ASSERT ("NodeTrace::pop", 
-	  "Trying to pop with level_ == 0", 
-	  level_ > 0);
-  --level_;
-  return node_[level_];
-}
-
-//----------------------------------------------------------------------
-
 Node * NodeTrace::node() const
 { 
   return node_[level_];

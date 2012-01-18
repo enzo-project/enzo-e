@@ -34,10 +34,26 @@ public: // interface
   ~NodeTrace () throw();
 
   /// Move one level "up" the Tree to the specified child (Z-ordering)
-  Node * push (int index);
+  inline Node * push (int index) 
+  {
+    Node * child = node_[level_]->child(index);
+
+    if (child != NULL) {
+      ++level_;
+      index_[level_] = index;
+      node_[level_]  = child;
+    }
+
+    return child;
+  };
 
   /// Move one level "down" the Tree to the parent
-  Node * pop ();
+  inline Node * pop ()
+  {
+    --level_;
+    return node_[level_];
+  };
+
 
   /// Reset the node trace to the root
   void reset()

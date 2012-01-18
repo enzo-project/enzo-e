@@ -219,7 +219,6 @@ int * create_image_from_tree (Tree * tree, const char * filename,
     double h = 0.5;
     int level = node_trace->level();
     // determine node boundaries scaled by [0:1,0:1]
-    printf ("level = %d\n",level);
     for (i=1; i<=level; i++) {
       int index_curr = node_trace->index_level(i);
       switch (index_curr) {
@@ -265,6 +264,5 @@ int * create_image_from_tree (Tree * tree, const char * filename,
     }
 
   }
-  printf ("%d %d   %d %d\n",xmn,xmx,ymn,ymx);
   png.close();
 }
