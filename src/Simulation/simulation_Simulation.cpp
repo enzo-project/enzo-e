@@ -284,7 +284,7 @@ void Simulation::initialize_hierarchy_() throw()
   root_blocks[2] = parameters_->list_value_integer(2,"Mesh:root_blocks",1);
 
   hierarchy_->create_root_patch
-    (group_process_,
+    (group_process_,dimension_,
      field_descr_,
      root_size[0],root_size[1],root_size[2],
      root_blocks[0],root_blocks[1],root_blocks[2]);

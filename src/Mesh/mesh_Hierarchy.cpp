@@ -18,7 +18,8 @@ Hierarchy::Hierarchy
  const Factory * factory
  ) throw ()
   : factory_(factory),
-    patch_count_(0)
+    patch_count_(0),
+    patch_tree_(0)
 {
   // Initialize extents
   for (int i=0; i<3; i++) {
@@ -32,10 +33,13 @@ Hierarchy::Hierarchy
 
 Hierarchy::~Hierarchy() throw()
 {
-  for (size_t i=0; i<patch_list_.size(); i++) {
-    delete patch_list_[i];
-    patch_list_[i] = 0;
+  ItNode it_node (patch_tree_);
+  while (Node * node = ++it_node) {
+    Patch * patch = (Patch *)node->data();
+    delete patch;
+    patch = 0;
   }
+  delete patch_tree_;
   patch_count_ = 0;
 }
 
@@ -75,11 +79,12 @@ void Hierarchy::set_upper(double x, double y, double z) throw ()
 
 int Hierarchy::dimension() const throw ()
 {
-  if (patch_list_.size() == 0) {
+  Patch * root = (Patch * )patch_tree_->root_node();
+  if (root == 0) {
     return 0;
   } else {
     int nx,ny,nz;
-    patch_list_[0]->size(&nx,&ny,&nz);
+    root->size(&nx,&ny,&nz);
     if (nz != 1) return 3;
     if (ny != 1) return 2;
     if (nx != 1) return 1;
@@ -143,21 +148,21 @@ void Hierarchy::upper(double * x, double * y, double * z) const throw ()
 
 size_t Hierarchy::num_patches() const throw()
 {
-  return patch_list_.size();
+  return patch_tree_->num_nodes();
 }
 
 //----------------------------------------------------------------------
 
 Patch * Hierarchy::patch(size_t i) throw()
 {
-  return ( patch_list_.size()-1 >= i ) ? patch_list_[i] : 0;
+  return (Patch * ) patch_tree_->root_node()->data();
 }
 
 //----------------------------------------------------------------------
 
 Patch * Hierarchy::patch(size_t i) const throw()
 {
-  return ( patch_list_.size()-1 >= i )? patch_list_[i] : 0;
+  return (Patch * ) patch_tree_->root_node()->data();
 }
 
 //----------------------------------------------------------------------
@@ -165,6 +170,7 @@ Patch * Hierarchy::patch(size_t i) const throw()
 void Hierarchy::create_root_patch 
 (
  GroupProcess * group_process,
+ int dimension,
  FieldDescr   * field_descr,
  int nx, int ny, int nz,
  int nbx, int nby, int nbz
@@ -180,41 +186,21 @@ void Hierarchy::create_root_patch
   // mesh_->set_backfill      (parameters_->value_logical("backfill",  true));
   // mesh_->set_coalesce      (parameters_->value_logical("coalesce",  true));
 
-  if (patch_list_.size() != 0) {
-    ERROR("Hierarchy::create_root",
-	  "Creating new root Patch in non-empty Hierarchy");
-  } else {
+  patch_tree_ = new Tree (dimension,2);
 
-    Patch * root_patch = factory()->create_patch
-      (group_process,
-       nx,ny,nz,    // size
-       0,0,0,       // offset
-       nbx,nby,nbz, // blocking
-       lower_[0], lower_[1], lower_[2],
-       upper_[0], upper_[1], upper_[2]);
+  Patch * root_patch = factory()->create_patch
+    (group_process,
+     nx,ny,nz,    // size
+     0,0,0,       // offset
+     nbx,nby,nbz, // blocking
+     lower_[0], lower_[1], lower_[2],
+     upper_[0], upper_[1], upper_[2]);
+
     
-    root_patch->allocate_blocks(field_descr);
+  root_patch->allocate_blocks(field_descr);
 
-    insert_patch(root_patch);
+  patch_tree_->root_node()->set_data(root_patch);
 
-    // Parallel layout of the root patch
-  
-    // int process_first = parameters_->value_integer("Mesh:root_process_first",0);
-    // int process_count = parameters_->value_integer("Mesh:root_process_count",1);
-
-    // patch(0)->layout()->set_process_range(process_first, process_count);
-
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Hierarchy::insert_patch(Patch * patch) throw()
-{
-  int size = patch_list_.size();
-  patch_list_.resize(size + 1);
-  patch_list_[size] = patch;
-  ++ patch_count_;
 }
 
 //----------------------------------------------------------------------

@@ -26,7 +26,9 @@ PARALLEL_MAIN_BEGIN
 
   FieldDescr field_descr;
   GroupProcess * group_process = GroupProcess::create();
-  hierarchy->create_root_patch(group_process,&field_descr,12,12,12,3,3,3);
+  int dimensions = 3;
+  hierarchy->create_root_patch(group_process,dimensions,
+			       &field_descr,12,12,12,3,3,3);
   unit_assert(hierarchy->patch(0)!=NULL);
 
   // Extents

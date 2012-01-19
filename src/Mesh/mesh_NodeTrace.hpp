@@ -28,7 +28,7 @@ class NodeTrace {
 public: // interface
 
   /// Constructor
-  NodeTrace(Node * root, int max_levels) throw();
+  NodeTrace(Node * root) throw();
 
   /// Copy constructor
   NodeTrace(const NodeTrace &) throw();
@@ -46,8 +46,8 @@ public: // interface
 
     if (child != NULL) {
       ++level_;
-      index_[level_] = index;
-      node_[level_]  = child;
+      index_.push_back(index);
+      node_.push_back(child);
     }
 
     return child;
@@ -57,20 +57,26 @@ public: // interface
   inline Node * pop ()
   {
     --level_;
+    node_.pop_back();
+    index_.pop_back();
     return node_[level_];
   };
 
 
   /// Reset the node trace to the root
   void reset()
-  { level_ = 0; };
+  { level_ = 0; 
+    node_.resize(1);
+    index_.resize(1);
+  };
 
   /// Return the level of the traced node
   int level() const
   { return level_; }
 
   /// Return the last node in the trace
-  Node * node() const;
+  Node * node() const
+  { return node_[level_]; }
 
   /// Return the node in the node trace at the specified level
   Node * node_level(int level) const;
@@ -90,17 +96,14 @@ private: // functions
 
 private: // attributes
 
-  /// Maximum number of levels in the Tree being traced
-  int max_levels_;
-
   /// Level of the current Node in the Tree, with Tree's root being level 0
   int level_;
 
   /// Trace of child node indices
-  int * index_;
+  std::vector<int> index_;
 
   /// Trace of node pointers
-  Node ** node_;
+  std::vector<Node *> node_;
 
 };
 

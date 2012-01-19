@@ -22,7 +22,7 @@ class ItNode : public It<Node> {
 public: // interface
 
   /// Constructor
-  ItNode(Tree * tree, int max_depth) throw();
+  ItNode(Tree * tree) throw();
 
   /// Destructor
   virtual ~ItNode() throw();

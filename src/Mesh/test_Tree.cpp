@@ -58,8 +58,7 @@ PARALLEL_MAIN_BEGIN
 
     unit_assert(tree->root_node()->child(1)->is_leaf() == false);
 
-    const int max_depth = 4;
-    NodeTrace node_trace (tree->root_node(), max_depth);
+    NodeTrace node_trace (tree->root_node());
   
     node_trace.push(1);
 
@@ -86,8 +85,7 @@ PARALLEL_MAIN_BEGIN
   {
     tree = test_tree_22();
 
-    const int max_depth = 4;
-    NodeTrace node_trace (tree->root_node(), max_depth);
+    NodeTrace node_trace (tree->root_node());
 
     int * data;
 
@@ -153,9 +151,9 @@ PARALLEL_MAIN_BEGIN
     int * levels = create_levels_from_image 
       ("input/test_balance.png",&nx,&ny,max_depth);
 
-    create_tree_from_levels (tree, max_depth, levels, nx, ny);
+    create_tree_from_levels (tree, levels, nx, ny);
 
-    create_image_from_tree (tree, "test_balance_out.png",2048,2048,max_depth);
+    create_image_from_tree (tree, "test_balance_out.png",2048,2048);
 
     printf ("tree num_nodes = %d\n",tree->num_nodes());
 

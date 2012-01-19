@@ -56,11 +56,9 @@ public: // interface
   /// Return the ith patch
   Patch * patch(size_t i) const throw();
 
-  /// Insert the given Patch into the list of patches
-  virtual void insert_patch(Patch *) throw();
-
   /// Create the initial root patch
   void create_root_patch (GroupProcess * group_process,
+			  int dimension,
 			  FieldDescr   * field_descr,
 			  int nx, int ny, int nz,
 			  int nbx, int nby, int nbz) throw();
@@ -75,11 +73,11 @@ protected: // attributes
   /// [abstract factory design pattern]
   const Factory * factory_;
 
-  /// Number of patches (redundant with patch_list_, but used in IoHierarchy)
+  /// Number of patches (redundant with patch_tree_)
   int patch_count_;
 
   /// List of local patches
-  std::vector<Patch *> patch_list_;
+  Tree * patch_tree_;
 
   /// Lower extent of the hierarchy
   double lower_[3];

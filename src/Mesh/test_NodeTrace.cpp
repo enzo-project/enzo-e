@@ -22,11 +22,10 @@ PARALLEL_MAIN_BEGIN
   unit_class("NodeTrace");
 
   Tree * tree = test_tree_22();
-  int max_depth = 4;
 
   unit_func ("NodeTrace");
 
-  NodeTrace * node_trace = new NodeTrace (tree->root_node(),max_depth);
+  NodeTrace * node_trace = new NodeTrace (tree->root_node());
 
   unit_assert (node_trace != NULL);
 

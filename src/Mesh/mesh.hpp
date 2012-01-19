@@ -44,16 +44,16 @@
 // Component class includes
 //----------------------------------------------------------------------
 
+// Tree and components
+#include "mesh_Node.hpp"
+#include "mesh_NodeTrace.hpp"
+#include "mesh_Tree.hpp"
+
 // Hierarchy and components
 #include "mesh_Block.hpp"
 #include "mesh_Patch.hpp"
 #include "mesh_Hierarchy.hpp"
 #include "mesh_Factory.hpp"
-
-// Tree and components
-#include "mesh_Node.hpp"
-#include "mesh_NodeTrace.hpp"
-#include "mesh_Tree.hpp"
 
 // Iterators
 #include "mesh_It.hpp"

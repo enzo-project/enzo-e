@@ -64,9 +64,8 @@ Tree * test_tree_22()
   int * a = array;
 
   Tree * tree = new Tree (d,r);
-  int max_levels = 4;
 
-  NodeTrace node_trace (tree->root_node(),max_levels);
+  NodeTrace node_trace (tree->root_node());
   
   Node * node ;
 
@@ -180,9 +179,8 @@ Tree * test_tree_32()
   int r = 2;
 
   Tree * tree = new Tree (d,r);
-  int max_levels = 4;
 
-  NodeTrace node_trace  (tree->root_node(),max_levels);
+  NodeTrace node_trace  (tree->root_node());
 
   // root
   tree->refine_node (node_trace);
@@ -296,7 +294,6 @@ int * create_levels_from_image (const char * pngfile,
 void create_tree_from_levels 
 (
  Tree * tree, 
- int max_depth, 
  int * levels, 
  int nx, int ny
 )
@@ -308,7 +305,7 @@ void create_tree_from_levels
       int i = ix + nx*iy;
       double x = 1.0*ix / nx;
       double y = 1.0*iy / ny;
-      NodeTrace node_trace (tree->root_node(), max_depth);
+      NodeTrace node_trace (tree->root_node());
       int a = levels[i];
       while (--a > 0) {
 	Node * node = node_trace.node();
@@ -333,14 +330,14 @@ void create_tree_from_levels
 //----------------------------------------------------------------------
 
 void create_image_from_tree (Tree * tree, const char * filename, 
-			      int nx, int ny, int max_levels)
+			      int nx, int ny)
 {
 
   pngwriter png (nx+1,ny+1,0,filename);
 
   int i;
 
-  ItNode it_node (tree, max_levels);
+  ItNode it_node (tree);
   int xmn=1000,xmx=-1000;
   int ymn=1000,ymx=-1000;
   while ((++it_node)) {

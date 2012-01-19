@@ -12,9 +12,9 @@
 
 //----------------------------------------------------------------------
 
-ItNode::ItNode( Tree * tree , int max_depth) throw ()
+ItNode::ItNode( Tree * tree) throw ()
   : tree_(tree),
-    node_trace_(tree->root_node(),max_depth),
+    node_trace_(tree->root_node()),
     reset_(true)
 {
 }
