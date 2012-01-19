@@ -52,41 +52,105 @@ PARALLEL_MAIN_BEGIN
   unit_assert (true);
 
   //--------------------------------------------------
-  unit_func("delete_node ()");
+  unit_func("coarsen_node ()");
 
-  unit_assert(tree->root_node()->child(1)->is_leaf() == false);
+  {
 
-  const int max_depth = 4;
-  NodeTrace node_trace (tree->root_node(), max_depth);
+    unit_assert(tree->root_node()->child(1)->is_leaf() == false);
+
+    const int max_depth = 4;
+    NodeTrace node_trace (tree->root_node(), max_depth);
   
-  node_trace.push(1);
+    node_trace.push(1);
 
-  tree->delete_node(&node_trace);
+    tree->coarsen_node(node_trace);
 
-  unit_assert(tree->num_nodes()==29);
-  unit_assert(tree->root_node()->child(1)->is_leaf() == true);
+    unit_assert(tree->num_nodes()==29);
+    unit_assert(tree->root_node()->child(1)->is_leaf() == true);
 
-  unit_assert(tree->root_node()->child(0)->is_leaf() == false);
+    unit_assert(tree->root_node()->child(0)->is_leaf() == false);
 
-  node_trace.pop();
-  node_trace.push(0);
-  tree->delete_node(&node_trace);
+    node_trace.pop();
+    node_trace.push(0);
+    tree->coarsen_node(node_trace);
 
-  unit_assert(tree->num_nodes()==17);
-  unit_assert(tree->root_node()->child(0)->is_leaf() == true);
+    unit_assert(tree->num_nodes()==17);
+    unit_assert(tree->root_node()->child(0)->is_leaf() == true);
   
+    delete tree;
+  }
+
   //--------------------------------------------------
+  unit_func("node_neighbor ()");
 
-  delete tree;
+  {
+    tree = test_tree_22();
+
+    const int max_depth = 4;
+    NodeTrace node_trace (tree->root_node(), max_depth);
+
+    int * data;
+
+    NodeTrace neighbor(node_trace);
+
+    // left neighbor of node 9 is node 5
+    node_trace.push(0);
+    node_trace.push(1);
+    node_trace.push(0);
+
+    unit_assert(tree->node_neighbor(node_trace,&neighbor,-1,0,0) == true);
+    data = (int *)neighbor.node()->data();
+    unit_assert (*data == 5);
+
+    // right neighbor of node 5 is node 6 (which has children at a finer level)
+
+    node_trace.reset();
+
+    node_trace.push(0);
+    node_trace.push(0);
+
+    unit_assert(tree->node_neighbor(node_trace,&neighbor,+1,0,0) == true);
+    data = (int *)neighbor.node()->data();
+    unit_assert (*data == 6);
+
+    // upper neighbor of node 17 is node 19
+
+    node_trace.reset();
+
+    node_trace.push(1);
+    node_trace.push(0);
+
+    data = (int *)node_trace.node()->data();
+    unit_assert(tree->node_neighbor(node_trace,&neighbor,0,+1,0) == true);
+    data = (int *)neighbor.node()->data();
+    unit_assert (*data == 19);
+
+    // lower neighbor of node 26 is node 19
+
+    node_trace.reset();
+
+    node_trace.push(3);
+    node_trace.push(0);
+    node_trace.push(1);
+
+    data = (int *)node_trace.node()->data();
+    unit_assert(tree->node_neighbor(node_trace,&neighbor,0,-1,0) == true);
+    data = (int *)neighbor.node()->data();
+    unit_assert (*data == 19);
+  }
+
+
+  //--------------------------------------------------
+    unit_func("balance_node ()");
 
   {
     tree = new Tree (2,2);
 
     int max_depth=12;
-    unit_func("balance_node ()");
 
     int nx,ny;
-    int * levels = create_levels_from_image ("input/test_balance.png",&nx,&ny,max_depth);
+    int * levels = create_levels_from_image 
+      ("input/test_balance.png",&nx,&ny,max_depth);
 
     int counter=0;
     Timer timer;
@@ -99,10 +163,9 @@ PARALLEL_MAIN_BEGIN
 	NodeTrace node_trace (tree->root_node(), max_depth);
 	int a = levels[i];
 	while (--a > 0) {
-
 	  Node * node = node_trace.node();
 	  if (node->is_leaf()) {
-	    tree->refine_node (&node_trace);
+	    tree->refine_node (node_trace);
 	  }
 
 	  int rx = x > 0.5;
@@ -125,11 +188,8 @@ PARALLEL_MAIN_BEGIN
     printf ("counter = %d\n",counter);
     printf ("tree num_nodes = %d\n",tree->num_nodes());
 
+    delete tree;
   }
-  //--------------------------------------------------
-  unit_func("node_neighbor ()");
-  unit_assert (false);
-
   //--------------------------------------------------
   unit_func("node_parent ()");
   unit_assert (false);

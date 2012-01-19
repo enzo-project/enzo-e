@@ -12,56 +12,150 @@
 Tree * test_tree_22()
 {
 
-  // +-------+---+-+-+
-  // |       |   + + +
-  // |       +-+-+-+-+
-  // |       + + +   |
-  // +-+-+---+-+-+---+
-  // + + +   |   |   |
-  // +-+-+-+-+---+---|
-  // |   + + +   |   |
+  // +-------+---+-+-+  
+  // |       |   +-+-+  
+  // |       +-+-+-+-+  
+  // |       +-+-+   |  
+  // +-+-+---+-+-+---+  
+  // +-+-+   |   |   |  
+  // +-+-+-+-+---+---|  
+  // |   +-+-+   |   |  
   // +---+-+-+-------+
   //
+  // level 0:   level 1:     level 2:
+  // +---+     +---+---+     +---+---+---+---+
+  // | 0 |     | 3 | 4 |     |   |   | 23| 24|
+  // +---+     +---+---+     +---+---+---+---+
+  //           | 1 | 2 |     |   |   | 21| 22|
+  //           +---+---+     +---+---+---+---+
+  //                         | 7 | 8 | 19| 20|
+  //                         +---+---+---+---+
+  //                         | 5 | 6 | 17| 18|
+  //                         +---+---+---+---+
+  // level 3:
+  // +---+---+---+---+---+---+---+---+
+  // |   |   |   |   |   |   | 31| 32|
+  // +---+---+---+---+---+---+---+---+
+  // |   |   |   |   |   |   | 29| 30|
+  // +---+---+---+---+---+---+---+---+
+  // |   |   |   |   | 27| 28|   |   |
+  // +---+---+---+---+---+---+---+---+
+  // |   |   |   |   | 25| 26|   |   |
+  // +---+---+---+---+---+---+---+---+
+  // | 15| 16|   |   |   |   |   |   |
+  // +---+---+---+---+---+---+---+---+
+  // | 13| 14|   |   |   |   |   |   |
+  // +---+---+---+---+---+---+---+---+
+  // |   |   | 11| 12|   |   |   |   |
+  // +---+---+---+---+---+---+---+---+
+  // |   |   | 9 | 10|   |   |   |   |
+  // +---+---+---+---+---+---+---+---+
+
+
+
   // Refined nodes: root, 0 1 3 01 02 30 33
+  // (0 1 2 4 6 7 13 16)
 
   int d = 2;
   int r = 2;
 
+  int * array = new int [33];
+  for (int i=0; i<33; i++) array[i] = i;
+  int * a = array;
+
   Tree * tree = new Tree (d,r);
   int max_levels = 4;
 
-  NodeTrace * node_trace = new NodeTrace (tree->root_node(),max_levels);
+  NodeTrace node_trace (tree->root_node(),max_levels);
   
+  Node * node ;
+
+  tree->root_node()->set_data(((void *) a++));
+
   // root
   tree->refine_node (node_trace);
-  // 0
-  node_trace->push(0);
-  tree->refine_node (node_trace);
-  // 01
-  node_trace->push(1);
-  tree->refine_node (node_trace);
-  // 02
-  node_trace->pop();
-  node_trace->push(2);
-  tree->refine_node (node_trace);
-  // 1
-  node_trace->pop();
-  node_trace->pop();
-  node_trace->push(1);
-  tree->refine_node (node_trace);
-  // 3
-  node_trace->pop();
-  node_trace->push(3);
-  tree->refine_node (node_trace);
-  // 30
-  node_trace->push(0);
-  tree->refine_node (node_trace);
-  // 33
-  node_trace->pop();
-  node_trace->push(3);
-  tree->refine_node (node_trace);
 
-  delete node_trace;
+  node = node_trace.node();
+  node->child(0)->set_data(((void *) a++));
+  node->child(1)->set_data(((void *) a++));
+  node->child(2)->set_data(((void *) a++));
+  node->child(3)->set_data(((void *) a++));
+
+  // 0
+  node_trace.push(0);
+  tree->refine_node (node_trace);
+  node = node_trace.node();
+  
+  node->child(0)->set_data(((void *) a++));
+  node->child(1)->set_data(((void *) a++));
+  node->child(2)->set_data(((void *) a++));
+  node->child(3)->set_data(((void *) a++));
+
+  // 01
+  node_trace.push(1);
+  tree->refine_node (node_trace);
+  node = node_trace.node();
+  
+  node->child(0)->set_data(((void *) a++));
+  node->child(1)->set_data(((void *) a++));
+  node->child(2)->set_data(((void *) a++));
+  node->child(3)->set_data(((void *) a++));
+
+  // 02
+  node_trace.pop();
+  node_trace.push(2);
+  tree->refine_node (node_trace);
+  node = node_trace.node();
+  
+  node->child(0)->set_data(((void *) a++));
+  node->child(1)->set_data(((void *) a++));
+  node->child(2)->set_data(((void *) a++));
+  node->child(3)->set_data(((void *) a++));
+
+  // 1
+  node_trace.pop();
+  node_trace.pop();
+  node_trace.push(1);
+  tree->refine_node (node_trace);
+  node = node_trace.node();
+  
+  node->child(0)->set_data(((void *) a++));
+  node->child(1)->set_data(((void *) a++));
+  node->child(2)->set_data(((void *) a++));
+  node->child(3)->set_data(((void *) a++));
+
+  // 3
+  node_trace.pop();
+  node_trace.push(3);
+  tree->refine_node (node_trace);
+  node = node_trace.node();
+  
+  node->child(0)->set_data(((void *) a++));
+  node->child(1)->set_data(((void *) a++));
+  node->child(2)->set_data(((void *) a++));
+  node->child(3)->set_data(((void *) a++));
+
+  // 30
+  node_trace.push(0);
+  tree->refine_node (node_trace);
+  node = node_trace.node();
+
+  node->child(0)->set_data(((void *) a++));
+  node->child(1)->set_data(((void *) a++));
+  node->child(2)->set_data(((void *) a++));
+  node->child(3)->set_data(((void *) a++));
+
+  // 33
+  node_trace.pop();
+  node_trace.push(3);
+  tree->refine_node (node_trace);
+  node = node_trace.node();
+  
+  node->child(0)->set_data(((void *) a++));
+  node->child(1)->set_data(((void *) a++));
+  node->child(2)->set_data(((void *) a++));
+  node->child(3)->set_data(((void *) a++));
+
 
   return tree;
 }
@@ -88,75 +182,73 @@ Tree * test_tree_32()
   Tree * tree = new Tree (d,r);
   int max_levels = 4;
 
-  NodeTrace * node_trace = new NodeTrace (tree->root_node(),max_levels);
+  NodeTrace node_trace  (tree->root_node(),max_levels);
 
   // root
   tree->refine_node (node_trace);
 
   // 0
-  node_trace->push(0);
+  node_trace.push(0);
   tree->refine_node (node_trace);
   // 07
-  node_trace->push(7);
+  node_trace.push(7);
   tree->refine_node (node_trace);
   // 1
-  node_trace->pop();
-  node_trace->pop();
-  node_trace->push(1);
+  node_trace.pop();
+  node_trace.pop();
+  node_trace.push(1);
   tree->refine_node (node_trace);
   // 16
-  node_trace->push(6);
+  node_trace.push(6);
   tree->refine_node (node_trace);
   // 2
-  node_trace->pop();
-  node_trace->pop();
-  node_trace->push(2);
+  node_trace.pop();
+  node_trace.pop();
+  node_trace.push(2);
   tree->refine_node (node_trace);
   // 25
-  node_trace->push(5);
+  node_trace.push(5);
   tree->refine_node (node_trace);
   // 3
-  node_trace->pop();
-  node_trace->pop();
-  node_trace->push(3);
+  node_trace.pop();
+  node_trace.pop();
+  node_trace.push(3);
   tree->refine_node (node_trace);
   // 34
-  node_trace->push(4);
+  node_trace.push(4);
   tree->refine_node (node_trace);
   // 4
-  node_trace->pop();
-  node_trace->pop();
-  node_trace->push(4);
+  node_trace.pop();
+  node_trace.pop();
+  node_trace.push(4);
   tree->refine_node (node_trace);
   // 43
-  node_trace->push(3);
+  node_trace.push(3);
   tree->refine_node (node_trace);
   // 5
-  node_trace->pop();
-  node_trace->pop();
-  node_trace->push(5);
+  node_trace.pop();
+  node_trace.pop();
+  node_trace.push(5);
   tree->refine_node (node_trace);
   // 52
-  node_trace->push(2);
+  node_trace.push(2);
   tree->refine_node (node_trace);
   // 6
-  node_trace->pop();
-  node_trace->pop();
-  node_trace->push(6);
+  node_trace.pop();
+  node_trace.pop();
+  node_trace.push(6);
   tree->refine_node (node_trace);
   // 61
-  node_trace->push(1);
+  node_trace.push(1);
   tree->refine_node (node_trace);
   // 7
-  node_trace->pop();
-  node_trace->pop();
-  node_trace->push(7);
+  node_trace.pop();
+  node_trace.pop();
+  node_trace.push(7);
   tree->refine_node (node_trace);
   // 70
-  node_trace->push(0);
+  node_trace.push(0);
   tree->refine_node (node_trace);
-
-  delete node_trace;
 
   return tree;
 }
@@ -201,7 +293,7 @@ int * create_levels_from_image (const char * pngfile,
 
 //----------------------------------------------------------------------
 
-int * create_image_from_tree (Tree * tree, const char * filename, 
+void create_image_from_tree (Tree * tree, const char * filename, 
 			      int nx, int ny, int max_levels)
 {
 
@@ -212,7 +304,7 @@ int * create_image_from_tree (Tree * tree, const char * filename,
   ItNode it_node (tree, max_levels);
   int xmn=1000,xmx=-1000;
   int ymn=1000,ymx=-1000;
-  while (Node * node = ++it_node) {
+  while ((++it_node)) {
     const NodeTrace * node_trace  = it_node.node_trace();
     double xmin = 0.0; double xmax = 1.0;
     double ymin = 0.0; double ymax = 1.0;

@@ -44,25 +44,28 @@ public: // interface
   { return root_; }
 
   /// Refine the given node
-  void refine_node (NodeTrace *);
+  void refine_node (const NodeTrace &);
 
-  /// Delete the given node and all its children from the tree
-  void delete_node (NodeTrace *);
-
-  /// Balance the Node with respect to its neighbors
-  void balance_node (NodeTrace *);
+  /// Coarsen the given node so that it has no descendents
+  void coarsen_node (const NodeTrace &);
 
   /// Return the neighboring Node in the specified direction
-  NodeTrace * node_neighbor (NodeTrace *) const;
+  bool node_neighbor (const NodeTrace & node_trace, 
+		      NodeTrace     * node_neighbor,
+		      int ix, int iy=0, int iz=0) const;
+
+  /// Balance the Node with respect to its neighbors
+  void balance_node (const NodeTrace &);
 
   /// Return the parent node
-  NodeTrace * node_parent (NodeTrace *) const;
+  NodeTrace node_parent (const NodeTrace &) const;
 
   /// Return the specified child Node
-  NodeTrace * node_child (NodeTrace *, int k) const;
+  NodeTrace node_child (const NodeTrace &, int k) const;
 
 private: // functions
 
+  void index_(int k, int * kx, int *ky, int *kz) const;
   
 private: // attributes
 
