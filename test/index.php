@@ -719,6 +719,8 @@ tests("Mesh","test_Hierarchy","test_Hierarchy","");
 tests("Mesh","test_Patch","test_Patch",""); 
 tests("Mesh","test_Block","test_Block",""); 
 tests("Mesh","test_Tree","test_Tree",""); 
+printf ("<img width=256 src=\"mpi/test_balance_out.png\"></img>\n");
+
 tests("Mesh","test_Node","test_Node",""); 
 tests("Mesh","test_NodeTrace","test_NodeTrace",""); 
 tests("Mesh","test_ItNode","test_ItNode",""); 
