@@ -293,6 +293,45 @@ int * create_levels_from_image (const char * pngfile,
 
 //----------------------------------------------------------------------
 
+void create_tree_from_levels 
+(
+ Tree * tree, 
+ int max_depth, 
+ int * levels, 
+ int nx, int ny
+)
+{
+  Timer timer;
+  timer.start();
+  for (int ix=0; ix<nx; ix++) {
+    for (int iy=0; iy<ny; iy++) {
+      int i = ix + nx*iy;
+      double x = 1.0*ix / nx;
+      double y = 1.0*iy / ny;
+      NodeTrace node_trace (tree->root_node(), max_depth);
+      int a = levels[i];
+      while (--a > 0) {
+	Node * node = node_trace.node();
+	if (node->is_leaf()) {
+	  tree->refine_node (node_trace);
+	}
+
+	int rx = x > 0.5;
+	int ry = y > 0.5;
+	int r = rx + 2*ry;
+	node_trace.push(r);
+
+	x *= 2.0;
+	y *= 2.0;
+	if (x > 1.0) x -= 1.0;
+	if (y > 1.0) y -= 1.0;
+      }
+    }
+  }
+  printf ("create_tree_from_levels() time = %f s\n",timer.value());
+}
+//----------------------------------------------------------------------
+
 void create_image_from_tree (Tree * tree, const char * filename, 
 			      int nx, int ny, int max_levels)
 {

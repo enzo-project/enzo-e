@@ -217,48 +217,6 @@ void Hierarchy::insert_patch(Patch * patch) throw()
   ++ patch_count_;
 }
 
-// //----------------------------------------------------------------------
-
-// bool Hierarchy::balanced() const throw ()
-// {
-//   return balanced_; 
-// }
-
-// //----------------------------------------------------------------------
-
-// void Hierarchy::set_balanced(bool balanced) throw ()
-// { 
-//   balanced_ = balanced; 
-// }
-
-// //----------------------------------------------------------------------
-
-// bool Hierarchy::backfill() const throw ()
-// {
-//   return backfill_; 
-// }
-
-// //----------------------------------------------------------------------
-
-// void Hierarchy::set_backfill(bool backfill) throw ()
-// { 
-//   backfill_ = backfill; 
-// }
-
-// //----------------------------------------------------------------------
-
-// bool Hierarchy::coalesce() const throw ()
-// {
-//   return coalesce_; 
-// }
-
-// //----------------------------------------------------------------------
-
-// void Hierarchy::set_coalesce(bool coalesce) throw ()
-// { 
-//   coalesce_ = coalesce; 
-// }
-
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
