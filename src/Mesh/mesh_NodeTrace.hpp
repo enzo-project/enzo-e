@@ -30,6 +30,12 @@ public: // interface
   /// Constructor
   NodeTrace(Node * root, int max_levels) throw();
 
+  /// Copy constructor
+  NodeTrace(const NodeTrace &) throw();
+
+  /// assignment operator
+  NodeTrace & operator=(const NodeTrace &) throw();
+
   /// Destructor
   ~NodeTrace () throw();
 
@@ -77,6 +83,10 @@ public: // interface
   int index_level(int level) const;
 
 private: // functions
+
+  /// Copy node_trace into this NodeTrace; called by constructor and
+  /// assignment
+  void copy_ (const NodeTrace & node_trace);
 
 private: // attributes
 

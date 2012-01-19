@@ -21,6 +21,39 @@ NodeTrace::NodeTrace(Node * root, int max_levels) throw ()
 
 //----------------------------------------------------------------------
 
+NodeTrace::NodeTrace(const NodeTrace & node_trace) throw()
+{
+  copy_(node_trace);
+}
+
+//----------------------------------------------------------------------
+
+NodeTrace & NodeTrace::operator=(const NodeTrace &node_trace) throw()
+{
+  if (this != &node_trace) {
+    copy_(node_trace);
+  }
+  return *this;
+}
+
+//----------------------------------------------------------------------
+
+void NodeTrace::copy_(const NodeTrace & node_trace)
+{
+  max_levels_ = node_trace.max_levels_;
+  level_      = node_trace.level_;
+  index_ = new int    [ max_levels_ ];
+  for (int i=0; i<max_levels_; i++) {
+    index_[i] = node_trace.index_[i];
+  }
+  node_  = new Node * [ max_levels_ ];
+  for (int i=0; i<max_levels_; i++) {
+    node_[i] = node_trace.node_[i];
+  }
+}
+
+//----------------------------------------------------------------------
+
 NodeTrace::~NodeTrace() throw ()
 {
   delete index_;
