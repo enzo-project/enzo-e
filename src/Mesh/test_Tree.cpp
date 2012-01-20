@@ -207,7 +207,7 @@ PARALLEL_MAIN_BEGIN
     printf ("unbalanced tree num_nodes = %d\n",tree->num_nodes());
     printf ("unbalanced tree max_level = %d\n",tree->max_level());
 
-    create_image_from_tree (tree, "test_tree_balanced.png",2048,2048);
+    create_image_from_tree (tree, "test_tree_balanced.png",1024,1024);
     
     delete tree;
   }

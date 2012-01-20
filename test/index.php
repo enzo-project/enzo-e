@@ -340,6 +340,7 @@ function summary_passed_tests ($test_output, $executables)
   // Missing executable
 
   summary_missing_executable ($test_output, $executables);
+  summary_missing_output     ($test_output, $executables);
   summary_incomplete_output  ($test_output, $executables);
   summary_failed_tests       ($test_output, $executables);
   summary_unfinished_tests   ($test_output, $executables);
@@ -420,8 +421,8 @@ printf ("<tr>\n");
   
 printf ( "<th colspan=$num_types class=fail>Missing Executable</th>");
 printf ("<th></th>");
-// printf ( "<th colspan=$num_types class=fail>Missing Output</th>");
-// printf ("<th></th>");
+printf ( "<th colspan=$num_types class=fail>Missing Output</th>");
+printf ("<th></th>");
 printf ( "<th colspan=$num_types class=fail>Incomplete Output</th>");
 printf ("<th></th>");
 printf ( "<th colspan=$num_types class=fail>Failed Tests</th>");
@@ -432,7 +433,7 @@ printf ( "<th colspan=$num_types class=pass>Passed Tests</th>");
 printf ("<th></th>");
 printf ( "</tr><tr>\n");
 
-for ($k = 0; $k < 5; $k ++) {
+for ($k = 0; $k < 6; $k ++) {
   for ($i = 0; $i < $num_types; ++$i) {
      $type_active = "";
      if (file_exists("COMPILING"))  {
@@ -479,7 +480,7 @@ test_summary("Enzo-IC",
 // Print row divider
 
 printf ("<tr><th></th>");
-for ($k = 0; $k < 5; $k ++) {
+for ($k = 0; $k < 6; $k ++) {
   for ($i = 0; $i < $num_types; ++$i) {
     printf ("<th> </th>");
   }
