@@ -37,6 +37,38 @@ public: // interface
   const NodeTrace * node_trace() const
   { return & node_trace_; };
 
+private: // functions
+
+  /// Go to first leaf in the Tree
+  void seek_first_leaf_()
+  {
+    node_trace_.reset();
+    while ( ! node_trace_.node()->is_leaf() ) {
+      node_trace_.push(0);
+    }
+  };
+
+  /// Go to next common ancestor with unvisited children
+  void seek_next_fork_()  //  e.g. 01001111 -> 0100
+  {
+    while ((node_trace_.level() > 0) && 
+	   (node_trace_.index() + 1 == tree_->num_children()) ) {
+      node_trace_.pop();
+    }
+  };
+
+  /// Go to next unvisited leaf in 
+  void seek_next_leaf_()  //  e.g. 0100 -> 0101000
+  {
+    int index = node_trace_.index();
+    node_trace_.pop();
+    node_trace_.push(index + 1);
+    while ( ! node_trace_.node()->is_leaf() ) {
+      node_trace_.push(0);
+    }
+  };
+
+
 private: // attributes
 
   /// The Tree being iterated over

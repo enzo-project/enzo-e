@@ -33,17 +33,11 @@ Node * ItNode::operator++ () throw()
 
   if (reset_) {
     reset_ = false;
-    node_trace_.reset();
-    while ( ! node_trace_.node()->is_leaf() ) {
-      node_trace_.push(0);
-    }
+    seek_first_leaf_();
 
   } else {
 
-    while ((node_trace_.level() > 0) && 
-	   (node_trace_.index() + 1 == tree_->num_children()) ) {
-      node_trace_.pop();
-    }
+    seek_next_fork_();
 
     if (node_trace_.level() == 0) {
 
@@ -52,18 +46,15 @@ Node * ItNode::operator++ () throw()
 
     } else {
 
-      int index = node_trace_.index();
-      node_trace_.pop();
-      node_trace_.push(index + 1);
-      while ( ! node_trace_.node()->is_leaf() ) {
-	node_trace_.push(0);
-      }
+      seek_next_leaf_();
+
     }
   }
 
   return node_trace_.node();
 
 }
+
 //----------------------------------------------------------------------
 
 bool ItNode::done () const throw()
