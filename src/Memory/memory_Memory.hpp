@@ -112,6 +112,20 @@ public: // interface
   { } ;
 #endif
 
+  /// Set whether to fill memory with a value after allocating
+  void set_allocate_fill (bool do_fill, char fill_value = 0)
+  {
+    do_allocate_fill_    = do_fill;
+    allocate_fill_value_ = fill_value;
+  };
+
+  /// Set whether to fill memory with a value before deallocating
+  void set_deallocate_fill (bool do_fill, char fill_value = 0)
+  {
+    do_deallocate_fill_    = do_fill;
+    deallocate_fill_value_ = fill_value;
+  };
+
 private: // functions
 
   /// Initialize the memory component
@@ -122,7 +136,7 @@ private: // functions
 
   ///  Check the group handle
   void check_handle_(memory_group_handle group_handle) throw ();
-  
+
 private: // attributes
 
 #ifdef CONFIG_USE_MEMORY
