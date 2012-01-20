@@ -167,7 +167,7 @@ PARALLEL_MAIN_BEGIN
 
     create_tree_from_levels (tree, levels, nx, ny);
 
-    create_image_from_tree (tree, "test_tree_inital.png",width,height);
+    create_image_from_tree (tree, "test_tree_initial.png",width,height);
 
     int count_level[max_depth];
     for (int level = 0; level < max_depth; level ++)
