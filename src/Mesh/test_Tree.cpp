@@ -92,11 +92,6 @@ PARALLEL_MAIN_BEGIN
     trace16.push(3);
     tree->node_neighbor(trace16,&neighbor16,0,+1);
 
-
-    tree->balance();
-
-    create_image_from_tree (tree, "test_tree_22_balanced.png",512,512);
-
     int * data;
 
     NodeTrace neighbor(node_trace);

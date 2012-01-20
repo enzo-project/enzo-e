@@ -184,7 +184,7 @@ bool Tree::node_neighbor
   //--------------------------------------------------
   } else if (iy == +1) {
     if (ky < r_ - 1) {
-      k += dx;
+      k += dy;
       neighbor_trace->pop();
       neighbor_trace->push(k);
       return true;
