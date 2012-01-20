@@ -86,6 +86,16 @@ PARALLEL_MAIN_BEGIN
     tree = test_tree_22();
 
     NodeTrace node_trace (tree->root_node());
+    NodeTrace trace16(tree->root_node()), neighbor16(tree->root_node());
+    trace16.push(0);
+    trace16.push(2);
+    trace16.push(3);
+    tree->node_neighbor(trace16,&neighbor16,0,+1);
+
+
+    tree->balance();
+
+    create_image_from_tree (tree, "test_tree_22_balanced.png",512,512);
 
     int * data;
 
@@ -142,21 +152,68 @@ PARALLEL_MAIN_BEGIN
     unit_func("balance_node ()");
 
   {
-    tree = new Tree (2,2);
+    int d = 2;
+    int r = 2;
+    tree = new Tree (d,r);
 
     int max_depth=12;
+    int width  = 1024;
+    int height = 1024;
 
-  int nx,ny;
+    int nx,ny;
 
     int * levels = create_levels_from_image 
       ("input/test_balance.png",&nx,&ny,max_depth);
 
     create_tree_from_levels (tree, levels, nx, ny);
 
-    create_image_from_tree (tree, "test_balance_out.png",2048,2048);
+    create_image_from_tree (tree, "test_tree_inital.png",width,height);
 
-    printf ("tree num_nodes = %d\n",tree->num_nodes());
+    int count_level[max_depth];
+    for (int level = 0; level < max_depth; level ++)
+    {
+      count_level[level] = 0;
+      ItNode it_node(tree,level);
+      while (it_node.next_leaf()) {
+	++count_level[level];
+      }
+    }
 
+    int count_tree[max_depth];
+    for (int level = 0; level < max_depth; level ++)
+    {
+      count_tree[level] = 0;
+      ItNode it_node(tree,0,level);
+      while (it_node.next_leaf()) {
+	++count_tree[level];
+      }
+    }
+
+    unit_func("ItNode levels");
+    for (int level=1; level < max_depth; level++) {
+      unit_assert(count_tree[level] - count_tree[level-1] ==
+		  count_level[level]);
+    }
+    unit_assert(count_tree[max_depth-1] - 1 == 
+		(tree->num_nodes() - 1) * 3 / 4);
+
+    printf ("unbalanced tree num_nodes = %d\n",tree->num_nodes());
+    printf ("unbalanced tree max_level = %d\n",tree->max_level());
+
+
+    Timer timer;
+
+    timer.start();
+
+    tree->balance();
+
+    printf ("time to balance = %f s\n",timer.value());
+
+    printf ("unbalanced tree num_nodes = %d\n",tree->num_nodes());
+    printf ("unbalanced tree max_level = %d\n",tree->max_level());
+
+    create_image_from_tree (tree, "test_tree_balanced.png",2048,2048);
+    
     delete tree;
   }
   //--------------------------------------------------

@@ -39,6 +39,11 @@ public: // interface
   int num_nodes () const
   { return num_nodes_; }
 
+  /// The maximum number of level of any Node ever in the tree
+  /// (coarsened Nodes do not effect max_level
+  int max_level () const
+  { return max_level_; }
+
   /// Return the root Node of the tree
   Node * root_node() const
   { return root_; }
@@ -54,14 +59,17 @@ public: // interface
 		      NodeTrace     * node_neighbor,
 		      int ix, int iy=0, int iz=0) const;
 
-  /// Balance the Node with respect to its neighbors
-  void balance_node (const NodeTrace &);
-
   /// Return the parent node
   NodeTrace node_parent (const NodeTrace &) const;
 
   /// Return the specified child Node
   NodeTrace node_child (const NodeTrace &, int k) const;
+
+  /// Balance the Tree
+  void balance ();
+
+  void index(int k, int * kx, int *ky, int *kz) const
+  { index_(k,kx,ky,kz); }
 
 private: // functions
 
@@ -83,6 +91,9 @@ private: // attributes
 
   /// Number of nodes in the tree
   int num_nodes_;
+
+  /// Maximum level of any node in the Tree (will not reflect node coarsenings)
+  int max_level_;
 
 };
 

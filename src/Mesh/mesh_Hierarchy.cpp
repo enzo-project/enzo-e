@@ -34,7 +34,7 @@ Hierarchy::Hierarchy
 Hierarchy::~Hierarchy() throw()
 {
   ItNode it_node (patch_tree_);
-  while (Node * node = ++it_node) {
+  while (Node * node = it_node.next_leaf()) {
     Patch * patch = (Patch *)node->data();
     delete patch;
     patch = 0;

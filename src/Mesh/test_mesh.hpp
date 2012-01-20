@@ -300,28 +300,30 @@ void create_tree_from_levels
 {
   Timer timer;
   timer.start();
+  int r = tree->refinement();
+  double rinv = 1.0/r;
   for (int ix=0; ix<nx; ix++) {
     for (int iy=0; iy<ny; iy++) {
       int i = ix + nx*iy;
       double x = 1.0*ix / nx;
       double y = 1.0*iy / ny;
       NodeTrace node_trace (tree->root_node());
-      int a = levels[i];
-      while (--a > 0) {
+      int level = levels[i];
+      while (--level > 0) {
 	Node * node = node_trace.node();
 	if (node->is_leaf()) {
 	  tree->refine_node (node_trace);
 	}
 
-	int rx = x > 0.5;
-	int ry = y > 0.5;
-	int r = rx + 2*ry;
-	node_trace.push(r);
+	int irx = x * r;
+	int iry = y * r;
+	int ir = irx + r*iry;
+	node_trace.push(ir);
 
-	x *= 2.0;
-	y *= 2.0;
-	if (x > 1.0) x -= 1.0;
-	if (y > 1.0) y -= 1.0;
+	x *= r;
+	y *= r;
+	while (x >= 1.0) x -= 1.0;
+	while (y >= 1.0) y -= 1.0;
       }
     }
   }
@@ -340,23 +342,24 @@ void create_image_from_tree (Tree * tree, const char * filename,
   ItNode it_node (tree);
   int xmn=1000,xmx=-1000;
   int ymn=1000,ymx=-1000;
-  while ((++it_node)) {
+  int r = tree->refinement();
+  double rinv = 1.0/r;
+  while ((it_node.next_leaf())) {
     const NodeTrace * node_trace  = it_node.node_trace();
     double xmin = 0.0; double xmax = 1.0;
     double ymin = 0.0; double ymax = 1.0;
-    double h = 0.5;
+    double h = 1.0 / r;
     int level = node_trace->level();
     // determine node boundaries scaled by [0:1,0:1]
     for (i=1; i<=level; i++) {
       int index_curr = node_trace->index_level(i);
-      switch (index_curr) {
-      case 0:  xmax -= h; ymax -= h; break;
-      case 1:  xmin += h; ymax -= h; break;
-      case 2:  xmax -= h; ymin += h; break;
-      case 3:  xmin += h; ymin += h; break;
-      default: printf ("ERROR index_curr = %d\n",index_curr); exit(1);
-      }
-      h*=0.5;
+      int kx,ky,kz;
+      tree->index(index_curr,&kx,&ky,&kz);
+      xmin += h*kx;
+      ymin += h*ky;
+      xmax = xmin+h;
+      ymax = ymin+h;
+      h*=rinv;
     }
     int ixmin=xmin*nx; int ixmax = xmax*nx;
     int iymin=ymin*ny; int iymax = ymax*ny;

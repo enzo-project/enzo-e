@@ -13,7 +13,7 @@ class Tree;
 class NodeTrace;
 class Node;
 
-class ItNode : public It<Node> {
+class ItNode {
 
   /// @class    ItNode
   /// @ingroup  Mesh
@@ -21,14 +21,20 @@ class ItNode : public It<Node> {
 
 public: // interface
 
-  /// Constructor
+  /// Constructor to iterate over the entire tree
   ItNode(Tree * tree) throw();
+
+  /// Constructor to iterate over one level in the tree
+  ItNode(Tree * tree, int level) throw();
+
+  /// Constructor to iterate between two levels in the tree
+  ItNode(Tree * tree, int level_lower, int level_upper) throw();
 
   /// Destructor
   virtual ~ItNode() throw();
 
-  /// Iterate through all Nodes in the Tree
-  Node * operator++ () throw();
+  /// Iterate through all leaf Nodes in the Tree
+  Node * next_leaf () throw();
 
   /// Return whether the iteration is complete
   bool done() const throw();
@@ -39,37 +45,39 @@ public: // interface
 
 private: // functions
 
-  /// Go to first leaf in the Tree
-  void seek_first_leaf_()
-  {
-    node_trace_.reset();
-    while ( ! node_trace_.node()->is_leaf() ) {
-      node_trace_.push(0);
-    }
-  };
-
-  /// Go to next common ancestor with unvisited children
+  /// Go to next common ancestor that with unvisited siblings
   void seek_next_fork_()  //  e.g. 01001111 -> 0100
   {
-    while ((node_trace_.level() > 0) && 
-	   (node_trace_.index() + 1 == tree_->num_children()) ) {
+    while ((node_trace_.index() + 1 == tree_->num_children()) ) {
       node_trace_.pop();
     }
   };
 
-  /// Go to next unvisited leaf in 
-  void seek_next_leaf_()  //  e.g. 0100 -> 0101000
+  /// Go to next unvisited sibling of the node trace
+  void seek_next_sibling_()  //  e.g. 0100 -> 0101000
   {
     int index = node_trace_.index();
     node_trace_.pop();
     node_trace_.push(index + 1);
-    while ( ! node_trace_.node()->is_leaf() ) {
+  };
+
+  /// Go to next unvisited leaf in the node trace
+  void seek_next_leaf_()  //  e.g. 0100 -> 0101000
+  {
+    while ( ! node_trace_.node()->is_leaf()  &&
+	    node_trace_.level() < upper_level_) {
       node_trace_.push(0);
     }
   };
 
 
 private: // attributes
+
+  /// Do not iterate over nodes in levels lower than lower_level_ (root = 0)
+  int lower_level_;
+
+  /// do not iterate over nodes in levels greater than upper_level_ (root = 0)
+  int upper_level_;
 
   /// The Tree being iterated over
   Tree * tree_;

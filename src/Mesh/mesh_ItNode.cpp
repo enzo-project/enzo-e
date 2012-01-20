@@ -13,7 +13,33 @@
 //----------------------------------------------------------------------
 
 ItNode::ItNode( Tree * tree) throw ()
-  : tree_(tree),
+  : lower_level_(0),
+    upper_level_(std::numeric_limits<int>::max()),
+    tree_(tree),
+    node_trace_(tree->root_node()),
+    reset_(true)
+{
+}
+
+//----------------------------------------------------------------------
+
+ItNode::ItNode( Tree * tree, int level) throw ()
+  : lower_level_(level),
+    upper_level_(level),
+    tree_(tree),
+    node_trace_(tree->root_node()),
+    reset_(true)
+{
+}
+
+//----------------------------------------------------------------------
+
+ItNode::ItNode( Tree * tree,
+		int lower_level,
+		int upper_level) throw ()
+  : lower_level_(lower_level),
+    upper_level_(upper_level),
+    tree_(tree),
     node_trace_(tree->root_node()),
     reset_(true)
 {
@@ -27,29 +53,38 @@ ItNode::~ItNode() throw ()
 
 //======================================================================
 
-Node * ItNode::operator++ () throw()
+Node * ItNode::next_leaf() throw()
 {
   // if previous was reset, go to first node
 
-  if (reset_) {
-    reset_ = false;
-    seek_first_leaf_();
+  bool in_range, is_leaf;
+  do {
+    if (reset_) {
 
-  } else {
-
-    seek_next_fork_();
-
-    if (node_trace_.level() == 0) {
-
-      reset_ = true;
-      return 0;
+      reset_ = false;
+      node_trace_.reset();
+      seek_next_leaf_();
 
     } else {
 
-      seek_next_leaf_();
+      seek_next_fork_();
 
+      if (node_trace_.level() != 0) {
+
+	seek_next_sibling_();
+	seek_next_leaf_();
+
+      } else {
+
+	reset_ = true;
+	return 0;
+
+      }
     }
-  }
+    int level = node_trace_.level();
+    in_range = (lower_level_ <= level) && (level <= upper_level_);
+    is_leaf  = node_trace_.node()->is_leaf();
+  } while ( ! (in_range && is_leaf));
 
   return node_trace_.node();
 

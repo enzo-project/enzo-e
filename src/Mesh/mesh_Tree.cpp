@@ -14,7 +14,8 @@
 Tree::Tree(int d, int r) throw ()
   : d_(d), r_(r), 
     root_(new Node), 
-    num_nodes_(1)
+    num_nodes_(1),
+    max_level_(0)
 {
   c_ = 1;
   if (d_>=1) c_ *= r_;
@@ -35,7 +36,10 @@ void Tree::refine_node (const NodeTrace & node_trace)
 {
   int count =  node_trace.node()->refine(c_);
   
+  int level = node_trace.level() + 1;
   num_nodes_ += count;
+  if (level > max_level_) max_level_ = level;
+
 }
 
 //----------------------------------------------------------------------
@@ -89,124 +93,183 @@ bool Tree::node_neighbor
   int level0 = node_trace.level();
   //--------------------------------------------------
   if        (ix == -1) {
+    if (kx > 0) {
+      k -= dx;
+      neighbor_trace->pop();
+      neighbor_trace->push(k);
+      return true;
+    }
     index_stack.push(k);
-    while ( (level-- >= 0) && (kx == 0) ) 
+    while ( (level-- > 0) && (kx == 0) ) 
       {
 	neighbor_trace->pop();
 	k = neighbor_trace->index();
 	index_(k,&kx,&ky,&kz);
 	index_stack.push(k);
       }
-    neighbor_trace->pop();
+    if (level < 0) return false;
     k -= dx;
+    neighbor_trace->pop();
+    neighbor_trace->push(k);
+    level++;
+    index_stack.pop();
     while ( (level++ < level0) && 
-	    neighbor_trace->node()->child(k) != NULL) 
+	    ! neighbor_trace->node()->is_leaf())
       {
-	neighbor_trace->push(k);
 	k = index_stack.top();
-	k += dx;
 	index_stack.pop();
+	k += dx;
+	neighbor_trace->push(k);
       }
   //--------------------------------------------------
   } else if (ix == +1) {
+    if (kx < r_ - 1) {
+      k += dx;
+      neighbor_trace->pop();
+      neighbor_trace->push(k);
+      return true;
+    }
     index_stack.push(k);
-    while ( (level-- >= 0) && (kx == r_-1) ) 
+    while ( (level-- > 0) && (kx == r_-1) ) 
       {
 	neighbor_trace->pop();
 	k = neighbor_trace->index();
 	index_(k,&kx,&ky,&kz);
 	index_stack.push(k);
       }
-    neighbor_trace->pop();
+    if (level < 0) return false;
     k += dx;
+    neighbor_trace->pop();
+    neighbor_trace->push(k);
+    level++;
+    index_stack.pop();
     while ( (level++ < level0) && 
-	    neighbor_trace->node()->child(k) != NULL) 
+	    ! neighbor_trace->node()->is_leaf())
       {
-	neighbor_trace->push(k);
 	k = index_stack.top();
-	k -= dx;
 	index_stack.pop();
+	k -= dx;
+	neighbor_trace->push(k);
       }
   //--------------------------------------------------
   } else if (iy == -1) {
+    if (ky > 0) {
+      k -= dy;
+      neighbor_trace->pop();
+      neighbor_trace->push(k);
+      return true;
+    }
     index_stack.push(k);
-
-    while ( (level-- >= 0) && (ky == 0) )
+    while ( (level-- > 0) && (ky == 0) ) 
       {
 	neighbor_trace->pop();
 	k = neighbor_trace->index();
 	index_(k,&kx,&ky,&kz);
 	index_stack.push(k);
       }
-    neighbor_trace->pop();
+    if (level < 0) return false;
     k -= dy;
+    neighbor_trace->pop();
+    neighbor_trace->push(k);
+    level++;
+    index_stack.pop();
     while ( (level++ < level0) && 
-	    neighbor_trace->node()->child(k) != NULL) 
+	    ! neighbor_trace->node()->is_leaf())
       {
-	neighbor_trace->push(k);
-	index_stack.pop();
 	k = index_stack.top();
+	index_stack.pop();
 	k += dy;
+	neighbor_trace->push(k);
       }
   //--------------------------------------------------
   } else if (iy == +1) {
+    if (ky < r_ - 1) {
+      k += dx;
+      neighbor_trace->pop();
+      neighbor_trace->push(k);
+      return true;
+    }
     index_stack.push(k);
-    while ( (level-- >= 0) && (ky == r_-1) ) 
+    while ( (level-- > 0) && (ky == r_-1) ) 
       {
 	neighbor_trace->pop();
 	k = neighbor_trace->index();
 	index_(k,&kx,&ky,&kz);
 	index_stack.push(k);
       }
-    neighbor_trace->pop();
+    if (level < 0) return false;
     k += dy;
+    neighbor_trace->pop();
+    neighbor_trace->push(k);
+    level++;
+    index_stack.pop();
     while ( (level++ < level0) && 
-	    neighbor_trace->node()->child(k) != NULL) 
+	    ! neighbor_trace->node()->is_leaf())
       {
-	neighbor_trace->push(k);
 	k = index_stack.top();
-	k -= dy;
 	index_stack.pop();
+	k -= dy;
+	neighbor_trace->push(k);
       }
   //--------------------------------------------------
   } else if (iz == -1) {
+    if (kz > 0) {
+      k -= dz;
+      neighbor_trace->pop();
+      neighbor_trace->push(k);
+      return true;
+    }
     index_stack.push(k);
-    while ( (level-- >= 0) && (kz == 0) ) 
+    while ( (level-- > 0) && (kz == 0) ) 
       {
 	neighbor_trace->pop();
 	k = neighbor_trace->index();
 	index_(k,&kx,&ky,&kz);
 	index_stack.push(k);
       }
-    neighbor_trace->pop();
+    if (level < 0) return false;
     k -= dz;
+    neighbor_trace->pop();
+    neighbor_trace->push(k);
+    level++;
+    index_stack.pop();
     while ( (level++ < level0) && 
-	    neighbor_trace->node()->child(k) != NULL) 
+	    ! neighbor_trace->node()->is_leaf())
       {
-	neighbor_trace->push(k);
 	k = index_stack.top();
-	k += dz;
 	index_stack.pop();
+	k += dz;
+	neighbor_trace->push(k);
       }
   //--------------------------------------------------
   } else if (iz == +1) {
+    if (kz < r_ - 1) {
+      k += dz;
+      neighbor_trace->pop();
+      neighbor_trace->push(k);
+      return true;
+    }
     index_stack.push(k);
-    while ( (level-- >= 0) && (kz == r_-1) ) 
+    while ( (level-- > 0) && (kz == r_-1) ) 
       {
 	neighbor_trace->pop();
 	k = neighbor_trace->index();
 	index_(k,&kx,&ky,&kz);
 	index_stack.push(k);
       }
-    neighbor_trace->pop();
+    if (level < 0) return false;
     k += dz;
+    neighbor_trace->pop();
+    neighbor_trace->push(k);
+    level++;
+    index_stack.pop();
     while ( (level++ < level0) && 
-	    neighbor_trace->node()->child(k) != NULL) 
+	    ! neighbor_trace->node()->is_leaf())
       {
-	neighbor_trace->push(k);
 	k = index_stack.top();
-	k -= dz;
 	index_stack.pop();
+	k -= dz;
+	neighbor_trace->push(k);
       }
   }
 
@@ -232,13 +295,6 @@ void Tree::index_(int k, int * kx, int *ky, int *kz) const
 
 //----------------------------------------------------------------------
 
-void Tree::balance_node (const NodeTrace & node_trace)
-{
-
-}
-
-//----------------------------------------------------------------------
-
 NodeTrace Tree::node_parent (const NodeTrace & node_trace) const
 {
   NodeTrace parent_trace (node_trace);
@@ -253,6 +309,39 @@ NodeTrace Tree::node_child (const NodeTrace & node_trace, int index) const
   NodeTrace child_trace (node_trace);
   child_trace.push(index);
   return child_trace;
+}
+
+//----------------------------------------------------------------------
+
+void Tree::balance ()
+{
+  int dx[] = {-1, +1,  0,  0,  0,  0};
+  int dy[] = { 0,  0, -1, +1,  0,  0};
+  int dz[] = { 0,  0,  0,  0, -1, +1};
+
+  for (int level = max_level(); level >= 0; --level) {
+    ItNode it_node (this,level);
+    while (it_node.next_leaf()) {
+      const NodeTrace * node_trace = it_node.node_trace();
+      NodeTrace neighbor_trace (root_);
+      bool is_neighbor;
+
+      for (int i = 0; i < 2*dimension(); i++) {
+	bool do_refine;
+	do {
+	  is_neighbor = 
+	    node_neighbor(*node_trace,&neighbor_trace,dx[i],dy[i],dz[i]);
+	  do_refine = is_neighbor &&
+	    neighbor_trace.level() < node_trace->level() - 1;
+	  if (do_refine) {
+	    refine_node(neighbor_trace);
+	  }
+	} while (do_refine);
+      }
+      
+    }
+    
+  }
 }
 
 //======================================================================
