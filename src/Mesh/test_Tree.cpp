@@ -48,6 +48,103 @@ PARALLEL_MAIN_BEGIN
   unit_assert (tree->root_node() != 0);
 
   //--------------------------------------------------
+  unit_func("node_child ()");
+
+  NodeTrace node_trace (tree->root_node());
+
+  NodeTrace child_trace (tree->node_child(node_trace,0));
+  unit_assert(*((int *)child_trace.node()->data()) == 1);
+
+  child_trace = tree->node_child(node_trace,1);
+  unit_assert(*((int *)child_trace.node()->data()) == 2);
+
+  child_trace = tree->node_child(node_trace,2);
+  unit_assert(*((int *)child_trace.node()->data()) == 3);
+
+  child_trace = tree->node_child(node_trace,3);
+  unit_assert(*((int *)child_trace.node()->data()) == 4);
+
+  child_trace =  tree->node_child(tree->node_child(node_trace,0),0);
+  unit_assert(*((int *)child_trace.node()->data()) == 5);
+
+  child_trace =  tree->node_child(tree->node_child(node_trace,0),1);
+  unit_assert(*((int *)child_trace.node()->data()) == 6);
+
+  child_trace =  tree->node_child(tree->node_child(node_trace,0),2);
+  unit_assert(*((int *)child_trace.node()->data()) == 7);
+
+  child_trace =  tree->node_child(tree->node_child(node_trace,0),3);
+  unit_assert(*((int *)child_trace.node()->data()) == 8);
+
+  child_trace =  
+    tree->node_child 
+    ( tree->node_child 
+      ( tree->node_child ( node_trace, 3), 0), 2);
+
+  unit_assert(*((int *)child_trace.node()->data()) == 27);
+
+  //--------------------------------------------------
+
+  unit_func("node_parent ()");
+
+  NodeTrace parent_trace (node_trace);
+
+  child_trace = tree->node_child(node_trace,0);
+  parent_trace = tree->node_parent(child_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 0);
+
+  child_trace = tree->node_child(node_trace,1);
+  parent_trace = tree->node_parent(child_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 0);
+
+  child_trace = tree->node_child(node_trace,2);
+  parent_trace = tree->node_parent(child_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 0);
+
+  child_trace = tree->node_child(node_trace,3);
+  parent_trace = tree->node_parent(child_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 0);
+
+  child_trace =  tree->node_child(tree->node_child(node_trace,0),0);
+  parent_trace = tree->node_parent(child_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 1);
+  parent_trace = tree->node_parent(parent_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 0);
+
+  child_trace =  tree->node_child(tree->node_child(node_trace,0),1);
+  parent_trace = tree->node_parent(child_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 1);
+  parent_trace = tree->node_parent(parent_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 0);
+
+  child_trace =  tree->node_child(tree->node_child(node_trace,0),2);
+  parent_trace = tree->node_parent(child_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 1);
+  parent_trace = tree->node_parent(parent_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 0);
+
+  child_trace =  tree->node_child(tree->node_child(node_trace,0),3);
+  parent_trace = tree->node_parent(child_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 1);
+  parent_trace = tree->node_parent(parent_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 0);
+
+  child_trace =  
+    tree->node_child 
+    ( tree->node_child 
+      ( tree->node_child ( node_trace, 3), 0), 2);
+
+  parent_trace = tree->node_parent(child_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 21);
+  parent_trace = tree->node_parent(parent_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 4);
+  parent_trace = tree->node_parent(parent_trace);
+  unit_assert(*((int *)parent_trace.node()->data()) == 0);
+  
+
+
+  //--------------------------------------------------
+  //--------------------------------------------------
   unit_func("refine_node () (tested in test_ItNode)");
   unit_assert (true);
 
@@ -211,15 +308,6 @@ PARALLEL_MAIN_BEGIN
     
     delete tree;
   }
-  //--------------------------------------------------
-  unit_func("node_parent ()");
-  unit_assert (false);
-
-  //--------------------------------------------------
-  unit_func("node_child ()");
-  unit_assert (false);
-
-  //--------------------------------------------------
 
   unit_finalize();
 

@@ -301,7 +301,6 @@ void create_tree_from_levels
   Timer timer;
   timer.start();
   int r = tree->refinement();
-  double rinv = 1.0/r;
   for (int ix=0; ix<nx; ix++) {
     for (int iy=0; iy<ny; iy++) {
       int i = ix + nx*iy;
