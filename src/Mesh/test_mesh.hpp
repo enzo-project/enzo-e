@@ -7,6 +7,8 @@
 
 #include "mesh.hpp"
 
+#include <assert.h>
+
 //----------------------------------------------------------------------
 
 Tree * test_tree_22()
@@ -404,6 +406,31 @@ void create_image_from_tree (Tree * tree, const char * filename,
 
   int i;
 
+    // determine color
+
+    //    magenta   blue   cyan   green   yellow   red
+
+    //    r  1.0                            1.0    1.0 
+    //    g                 0.5    1.0      1.0    0
+    //    b  1.0      1     0.5                    0
+    
+  const int num_colors = 7;
+  const double rc[] = {1, 0, 0, 0, 1, 1, 1};
+  const double gc[] = {0, 0, 1, 1, 1, 0, 1};
+  const double bc[] = {1, 1, 1, 0, 0, 0, 1};
+  int num_levels = tree->max_level() + 1;
+  double * ra = new double [num_levels];
+  double * ga = new double [num_levels];
+  double * ba = new double [num_levels];
+  for (int i=0; i<num_levels; i++) {
+    double ci = double(i)/num_levels;
+    int ic = ci * (num_colors-1);
+    double a = ci *(num_colors-1) - ic;
+    ra[i] = (1-a)*rc[ic] + a*rc[ic+1];
+    ga[i] = (1-a)*gc[ic] + a*gc[ic+1];
+    ba[i] = (1-a)*bc[ic] + a*bc[ic+1];
+  }
+
   ItNode it_node (tree,level_lower,level_upper);
   int r = tree->refinement();
   double rinv = 1.0/r;
@@ -470,46 +497,38 @@ void create_image_from_tree (Tree * tree, const char * filename,
 
     // plot cube
 
-    double a = 1.0*(node_trace->level()+1) / (tree->max_level()+1);
-
     // opacity proportional to level
 
-    double o = a;
+    double o = 1.0*(node_trace->level()+1) / (num_levels);
+    double o000 = o*0.5*(1+z000);
+    double o001 = o*0.5*(1+z001);
+    double o010 = o*0.5*(1+z010);
+    double o011 = o*0.5*(1+z011);
+    double o100 = o*0.5*(1+z100);
+    double o101 = o*0.5*(1+z101);
+    double o110 = o*0.5*(1+z110);
+    double o111 = o*0.5*(1+z111);
+    int k = node_trace->level();
 
-    // determine color
+    png.line_blend(int(x000),int(y000),int(x001),int(y001),o000,ra[k],ga[k],ba[k]);
+    png.line_blend(int(x010),int(y010),int(x011),int(y011),o010,ra[k],ga[k],ba[k]);
+    png.line_blend(int(x100),int(y100),int(x101),int(y101),o100,ra[k],ga[k],ba[k]);
+    png.line_blend(int(x110),int(y110),int(x111),int(y111),o110,ra[k],ga[k],ba[k]);
 
-    //    magenta   blue   cyan   green   yellow   red
+    png.line_blend(int(x000),int(y000),int(x010),int(y010),o000,ra[k],ga[k],ba[k]);
+    png.line_blend(int(x001),int(y001),int(x011),int(y011),o001,ra[k],ga[k],ba[k]);
+    png.line_blend(int(x100),int(y100),int(x110),int(y110),o100,ra[k],ga[k],ba[k]);
+    png.line_blend(int(x101),int(y101),int(x111),int(y111),o101,ra[k],ga[k],ba[k]);
 
-    //    r  1.0                            1.0    1.0 
-    //    g                 0.5    1.0      1.0    0
-    //    b  1.0      1     0.5                    0
-    
-    int num_colors = 6;
-    int i = num_colors*(node_trace->level() / tree->max_level()+1);
-    double ra[] = {1, 0, 0, 0, 1, 1};
-    double ga[] = {0, 0, 1, 1, 1, 0};
-    double ba[] = {1, 1, 1, 0, 0, 0};
-
-    double r = ra[i];
-    double g = ga[i];
-    double b = ba[i];
-
-    png.line_blend(int(x000),int(y000),int(x001),int(y001),o,r,g,b);
-    png.line_blend(int(x010),int(y010),int(x011),int(y011),o,r,g,b);
-    png.line_blend(int(x100),int(y100),int(x101),int(y101),o,r,g,b);
-    png.line_blend(int(x110),int(y110),int(x111),int(y111),o,r,g,b);
-
-    png.line_blend(int(x000),int(y000),int(x010),int(y010),o,r,g,b);
-    png.line_blend(int(x001),int(y001),int(x011),int(y011),o,r,g,b);
-    png.line_blend(int(x100),int(y100),int(x110),int(y110),o,r,g,b);
-    png.line_blend(int(x101),int(y101),int(x111),int(y111),o,r,g,b);
-
-    png.line_blend(int(x000),int(y000),int(x100),int(y100),o,r,g,b);
-    png.line_blend(int(x001),int(y001),int(x101),int(y101),o,r,g,b);
-    png.line_blend(int(x010),int(y010),int(x110),int(y110),o,r,g,b);
-    png.line_blend(int(x011),int(y011),int(x111),int(y111),o,r,g,b);
+    png.line_blend(int(x000),int(y000),int(x100),int(y100),o000,ra[k],ga[k],ba[k]);
+    png.line_blend(int(x001),int(y001),int(x101),int(y101),o001,ra[k],ga[k],ba[k]);
+    png.line_blend(int(x010),int(y010),int(x110),int(y110),o010,ra[k],ga[k],ba[k]);
+    png.line_blend(int(x011),int(y011),int(x111),int(y111),o011,ra[k],ga[k],ba[k]);
 
   }
+  delete [] ra;
+  delete [] ga;
+  delete [] ba;
   png.close();
 }
 

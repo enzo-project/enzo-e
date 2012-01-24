@@ -82,7 +82,7 @@ void Unit::set_func (const char * class_name, const char * func_name)
 
 //----------------------------------------------------------------------
 
-bool Unit::assert (int result, const char * file, int line, bool quiet)
+bool Unit::assertion (int result, const char * file, int line, bool quiet)
 {
   // Only print Pass on local process
 

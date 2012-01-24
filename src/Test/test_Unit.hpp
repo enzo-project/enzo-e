@@ -20,12 +20,12 @@
 /// @def   unit_assert
 /// @brief Assert result of test
 #define unit_assert(RESULT)				\
-  Unit::instance()->assert(RESULT, __FILE__,__LINE__)
+  Unit::instance()->assertion(RESULT, __FILE__,__LINE__)
 
 /// @def   unit_assert_quiet
 /// @brief Assert result of test, only output for FAIL
 #define unit_assert_quiet(RESULT)				\
-  Unit::instance()->assert(RESULT, __FILE__,__LINE__,true);
+  Unit::instance()->assertion(RESULT, __FILE__,__LINE__,true);
 
 /// @def   unit_init
 #define unit_init(RANK, SIZE)			\
@@ -89,7 +89,7 @@ public:
   void set_func (const char * class_name, const char * func_name);
 
   /// Assert result of test macro; called by unit_assert macro
-  bool assert (int result, const char * file, int line, bool quiet=false);
+  bool assertion (int result, const char * file, int line, bool quiet=false);
 
 private:
 
