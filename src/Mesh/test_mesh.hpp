@@ -295,7 +295,7 @@ void create_tree_from_levels
 (
  Tree * tree, 
  int * levels, 
- int nx, int ny
+ int nx, int ny, int nz=1
 )
 {
   Timer timer;
@@ -303,26 +303,32 @@ void create_tree_from_levels
   int r = tree->refinement();
   for (int ix=0; ix<nx; ix++) {
     for (int iy=0; iy<ny; iy++) {
-      int i = ix + nx*iy;
-      double x = 1.0*ix / nx;
-      double y = 1.0*iy / ny;
-      NodeTrace node_trace (tree->root_node());
-      int level = levels[i];
-      while (--level > 0) {
-	Node * node = node_trace.node();
-	if (node->is_leaf()) {
-	  tree->refine_node (node_trace);
+      for (int iz=0; iz<nz; iz++) {
+	int i = ix + nx*(iy + ny*iz);
+	double x = 1.0*ix / nx;
+	double y = 1.0*iy / ny;
+	double z = 1.0*iz / nz;
+	NodeTrace node_trace (tree->root_node());
+	int level = levels[i];
+	while (--level > 0) {
+	  Node * node = node_trace.node();
+	  if (node->is_leaf()) {
+	    tree->refine_node (node_trace);
+	  }
+
+	  int irx = x * r;
+	  int iry = y * r;
+	  int irz = z * r;
+	  int ir = irx + r*(iry + r*irz);
+	  node_trace.push(ir);
+
+	  x *= r;
+	  y *= r;
+	  z *= r;
+	  while (x >= 1.0) x -= 1.0;
+	  while (y >= 1.0) y -= 1.0;
+	  while (z >= 1.0) z -= 1.0;
 	}
-
-	int irx = x * r;
-	int iry = y * r;
-	int ir = irx + r*iry;
-	node_trace.push(ir);
-
-	x *= r;
-	y *= r;
-	while (x >= 1.0) x -= 1.0;
-	while (y >= 1.0) y -= 1.0;
       }
     }
   }
@@ -330,23 +336,82 @@ void create_tree_from_levels
 }
 //----------------------------------------------------------------------
 
+inline void rotate
+(double *xr, double *yr, double *zr,
+ double x, double y, double z,
+ double theta, double phi, double psi,
+ bool ortho)
+{
+  double cph = cos(phi);
+  double cps = cos(psi);
+  double cth = cos(theta);
+  double sph = sin(phi);
+  double sps = sin(psi);
+  double sth = sin(theta);
+
+  x -= 0.5;
+  y -= 0.5;
+  z -= 0.5;
+
+  double r11 = cps*cth*cph-sps*sph;
+  double r12 = cps*cth*sph+sps*cph;
+  double r13 = -cps*sth;
+
+  double r21 = -sps*cth*cph-cps*sph;
+  double r22 = -sps*cth*sph+cps*cph;
+  double r23 = sps*sth;
+
+  double r31 = sth*cph;
+  double r32 = sth*sph;
+  double r33 = cth;
+    
+  if (xr) (*xr) = r11*x + r12*y + r13*z;
+  if (yr) (*yr) = r21*x + r22*y + r23*z;
+  if (zr) (*zr) = r31*x + r32*y + r33*z;
+
+  if (ortho && zr) {
+    const double distance     = 3.0;
+    const double focal_length = 3.0;
+    double scale = focal_length / (distance - (*zr));
+    if (xr) (*xr) *= scale;
+    if (yr) (*yr) *= scale;
+    if (zr) (*zr) *= scale;
+  }
+
+  if (xr) (*xr) += 0.5;
+  if (yr) (*yr) += 0.5;
+  if (zr) (*zr) += 0.5;
+
+}
+
 void create_image_from_tree (Tree * tree, const char * filename, 
-			      int nx, int ny)
+			     int nx, int ny,
+			     int level_lower=0, int level_upper=1000,
+			     double theta=0.0, double phi=0.0, double psi=0.0,
+			     double scale=1.0, bool ortho=true)
+/// @brief Generate a PNG image of a tree
+///
+/// @param tree is the 2D or 3D tree from which to generate the image
+/// @param filename is the name of the image file, including extension
+/// @param nx,ny are the size of the image
+/// @param thx,thy,thz   are the rotation angles around x, y, and z axes
+/// @param scale is the scaling factor of the image
+/// @param ortho determines whether to generate an orthographic or
+/// perspective projection
 {
 
   pngwriter png (nx+1,ny+1,0,filename);
 
   int i;
 
-  ItNode it_node (tree);
-  int xmn=1000,xmx=-1000;
-  int ymn=1000,ymx=-1000;
+  ItNode it_node (tree,level_lower,level_upper);
   int r = tree->refinement();
   double rinv = 1.0/r;
   while ((it_node.next_leaf())) {
     const NodeTrace * node_trace  = it_node.node_trace();
     double xmin = 0.0; double xmax = 1.0;
     double ymin = 0.0; double ymax = 1.0;
+    double zmin = 0.0; double zmax = 1.0;
     double h = 1.0 / r;
     int level = node_trace->level();
     // determine node boundaries scaled by [0:1,0:1]
@@ -356,43 +421,95 @@ void create_image_from_tree (Tree * tree, const char * filename,
       tree->index(index_curr,&kx,&ky,&kz);
       xmin += h*kx;
       ymin += h*ky;
+      zmin += h*kz;
       xmax = xmin+h;
       ymax = ymin+h;
+      zmax = zmin+h;
       h*=rinv;
     }
-    int ixmin=xmin*nx; int ixmax = xmax*nx;
-    int iymin=ymin*ny; int iymax = ymax*ny;
+    // Compute the rotated points
+    double x000,y000,z000;
+    double x001,y001,z001;
+    double x010,y010,z010;
+    double x011,y011,z011;
+    double x100,y100,z100;
+    double x101,y101,z101;
+    double x110,y110,z110;
+    double x111,y111,z111;
 
-    int ix,iy;
-    for (ix=ixmin; ix<=ixmax; ix++) {
-      iy = iymin;      
-      if (ix+1<xmn) xmn=ix+1;
-      if (iy+1<ymn) ymn=iy+1;
-      if (ix+1>xmx) xmx=ix+1;
-      if (iy+1>ymx) ymx=iy+1;
-      png.plot(ix+1, iy+1, 1.0, 1.0, 1.0);
-      iy = iymax;      
-      if (ix+1<xmn) xmn=ix+1;
-      if (iy+1<ymn) ymn=iy+1;
-      if (ix+1>xmx) xmx=ix+1;
-      if (iy+1>ymx) ymx=iy+1;
-      png.plot(ix+1, iy+1, 1.0, 1.0, 1.0);
-    }
-    for (iy=iymin; iy<=iymax; iy++) {
-      ix = ixmin;      
-      if (ix+1<xmn) xmn=ix+1;
-      if (iy+1<ymn) ymn=iy+1;
-      if (ix+1>xmx) xmx=ix+1;
-      if (iy+1<ymx) ymx=iy+1;
-      png.plot(ix+1, iy+1, 1.0, 1.0, 1.0);
-      ix = ixmax;      
-      if (ix+1<xmn) xmn=ix+1;
-      if (iy+1<ymn) ymn=iy+1;
-      if (ix+1>xmx) xmx=ix+1;
-      if (iy+1>ymx) ymx=iy+1;
-      png.plot(ix+1, iy+1, 1.0, 1.0, 1.0);
-    }
+    rotate(&x000,&y000,&z000, xmin,ymin,zmin, theta,phi,psi,ortho);
+    rotate(&x001,&y001,&z001, xmin,ymin,zmax, theta,phi,psi,ortho);
+    rotate(&x010,&y010,&z010, xmin,ymax,zmin, theta,phi,psi,ortho);
+    rotate(&x011,&y011,&z011, xmin,ymax,zmax, theta,phi,psi,ortho);
+    rotate(&x100,&y100,&z100, xmax,ymin,zmin, theta,phi,psi,ortho);
+    rotate(&x101,&y101,&z101, xmax,ymin,zmax, theta,phi,psi,ortho);
+    rotate(&x110,&y110,&z110, xmax,ymax,zmin, theta,phi,psi,ortho);
+    rotate(&x111,&y111,&z111, xmax,ymax,zmax, theta,phi,psi,ortho);
+
+    // scale points
+    
+    double amin = MIN (nx,ny);
+
+    x000 = amin * ((x000-0.5)*scale + 0.5) + 0.5*(nx - amin);
+    x001 = amin * ((x001-0.5)*scale + 0.5) + 0.5*(nx - amin);
+    x010 = amin * ((x010-0.5)*scale + 0.5) + 0.5*(nx - amin);
+    x011 = amin * ((x011-0.5)*scale + 0.5) + 0.5*(nx - amin);
+    x100 = amin * ((x100-0.5)*scale + 0.5) + 0.5*(nx - amin);
+    x101 = amin * ((x101-0.5)*scale + 0.5) + 0.5*(nx - amin);
+    x110 = amin * ((x110-0.5)*scale + 0.5) + 0.5*(nx - amin);
+    x111 = amin * ((x111-0.5)*scale + 0.5) + 0.5*(nx - amin);
+
+    y000 = amin * ((y000-0.5)*scale + 0.5) + 0.5*(ny - amin);
+    y001 = amin * ((y001-0.5)*scale + 0.5) + 0.5*(ny - amin);
+    y010 = amin * ((y010-0.5)*scale + 0.5) + 0.5*(ny - amin);
+    y011 = amin * ((y011-0.5)*scale + 0.5) + 0.5*(ny - amin);
+    y100 = amin * ((y100-0.5)*scale + 0.5) + 0.5*(ny - amin);
+    y101 = amin * ((y101-0.5)*scale + 0.5) + 0.5*(ny - amin);
+    y110 = amin * ((y110-0.5)*scale + 0.5) + 0.5*(ny - amin);
+    y111 = amin * ((y111-0.5)*scale + 0.5) + 0.5*(ny - amin);
+
+    // plot cube
+
+    double a = 1.0*(node_trace->level()+1) / (tree->max_level()+1);
+
+    // opacity proportional to level
+
+    double o = a;
+
+    // determine color
+
+    //    magenta   blue   cyan   green   yellow   red
+
+    //    r  1.0                            1.0    1.0 
+    //    g                 0.5    1.0      1.0    0
+    //    b  1.0      1     0.5                    0
+    
+    int num_colors = 6;
+    int i = num_colors*(node_trace->level() / tree->max_level()+1);
+    double ra[] = {1, 0, 0, 0, 1, 1};
+    double ga[] = {0, 0, 1, 1, 1, 0};
+    double ba[] = {1, 1, 1, 0, 0, 0};
+
+    double r = ra[i];
+    double g = ga[i];
+    double b = ba[i];
+
+    png.line_blend(int(x000),int(y000),int(x001),int(y001),o,r,g,b);
+    png.line_blend(int(x010),int(y010),int(x011),int(y011),o,r,g,b);
+    png.line_blend(int(x100),int(y100),int(x101),int(y101),o,r,g,b);
+    png.line_blend(int(x110),int(y110),int(x111),int(y111),o,r,g,b);
+
+    png.line_blend(int(x000),int(y000),int(x010),int(y010),o,r,g,b);
+    png.line_blend(int(x001),int(y001),int(x011),int(y011),o,r,g,b);
+    png.line_blend(int(x100),int(y100),int(x110),int(y110),o,r,g,b);
+    png.line_blend(int(x101),int(y101),int(x111),int(y111),o,r,g,b);
+
+    png.line_blend(int(x000),int(y000),int(x100),int(y100),o,r,g,b);
+    png.line_blend(int(x001),int(y001),int(x101),int(y101),o,r,g,b);
+    png.line_blend(int(x010),int(y010),int(x110),int(y110),o,r,g,b);
+    png.line_blend(int(x011),int(y011),int(x111),int(y111),o,r,g,b);
 
   }
   png.close();
 }
+
