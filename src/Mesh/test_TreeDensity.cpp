@@ -25,12 +25,14 @@ PARALLEL_MAIN_BEGIN
 
   FileHdf5 file_density ("input","density_512.h5");
 
+  const char * field_name = "Density";
+
   file_density.file_open();
 
   // H5T_IEEE_F32BE
   int nx,ny,nz;
   scalar_type type = scalar_type_unknown;
-  file_density.data_open ("Density",&type,&nx,&ny,&nz);
+  file_density.data_open (field_name,&type,&nx,&ny,&nz);
 
   float * density = new float [nx*ny*nz];
   file_density.data_read(density);
@@ -42,9 +44,9 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
   int d=3;
-  int r=2;
+  int r=4;
   int min_level = 0;
-  int max_level = 10;
+  int max_level = 10*2/r;
   Tree tree (d,r);
 
   // find the min and max
