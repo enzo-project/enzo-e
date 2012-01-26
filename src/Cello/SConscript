@@ -1,0 +1,342 @@
+#------------------------------
+# DIRECTORIES
+#------------------------------
+
+#------------------------------
+# IMPORTS
+#------------------------------
+
+Import('env')
+Import('type')
+
+Import('bin_path')
+Import('inc_path')
+Import('lib_path')
+
+Import('use_papi')
+
+#------------------------------
+# DEPENDENCIES
+#------------------------------
+
+
+components_cello = ['enzo','external','cello']
+
+components_disk = ['disk','error','monitor','performance','test','cello']
+
+components_error = ['test','cello','error','monitor','performance']
+
+components_io = ['io','simulation','method','mesh','field','disk','memory',
+                 'parallel','parameters','test','cello','external',
+                 'error','monitor','performance' ]
+components_main = ['enzo','simulation','method','mesh','field','memory',
+                   'parallel','parameters','monitor','error','cello']
+components_memory = ['error','monitor','performance',
+	      'test','cello']
+
+components_mesh = ['field','simulation','method','io','disk','memory',
+                   'parallel','parameters','error','monitor','performance', 
+                   'test','cello','external']
+components_method = ['method','mesh','field','memory','parallel','parameters',
+                     'error','monitor','cello']
+
+components_monitor = ['parallel','error','monitor','performance',
+                      'test','cello']
+
+components_parallel = ['error','monitor','performance','test','cello']
+
+components_parameters = ['parallel','error','monitor','performance',
+                         'test','cello']
+
+components_performance = ['memory','error','monitor', 'test','cello']
+
+components_simulation = ['simulation','method','mesh','field','memory',
+                         'parallel','parameters','error','monitor',
+                         'performance','cello']
+components_test = []
+
+
+if (type == 'charm'):
+   components_field = ['simulation','method','mesh','field','io','parallel',
+                       'disk','parameters', 'memory','error','monitor',
+                       'performance','test','cello','external']
+else:
+   components_field = ['simulation','method','field','mesh','io','parallel',
+                       'disk','parameters','memory','error','monitor',
+                       'performance','test','cello']
+
+if (use_papi):
+    components_field = components_field + ['papi','pfm']
+    components_io    = components_io    + ['papi','pfm']
+    components_mesh = components_mesh + ['papi','pfm']
+    components_performance = components_performance + ['papi','pfm']
+    components_simulation = components_simulation + ['papi','pfm']
+
+
+libraries_cello  = ['png','$FORTRANLIBS','m']
+libraries_disk  = ['hdf5']
+libraries_error  = []
+libraries_field  = ['png','hdf5']
+libraries_io  = ['png','hdf5']
+libraries_memory = []
+libraries_mesh = ['png','hdf5']
+libraries_method  = []
+libraries_performance = []
+libraries_simulation = ['$FORTRANLIBS']
+libraries_test = []
+
+
+#------------------------------
+# SOURCE
+#------------------------------
+
+includes_cello = [Glob('cello*hpp')]
+sources_cello  = [Glob('cello*cpp')]
+
+includes_disk  = [Glob('disk*hpp')]
+sources_disk   = [Glob('disk*cpp')]
+
+includes_error = [Glob('*hpp')]
+sources_error  = [Glob('error*cpp')]
+
+includes_field = [Glob('field*hpp')]
+sources_field  = [Glob('field*cpp')]
+
+includes_io = [Glob('io*hpp')]
+sources_io  = [Glob('io*cpp')]
+
+includes_main = ['main.hpp']
+sources_main  = [Glob('main*cpp')]
+
+includes_memory = [Glob('*hpp')]
+sources_memory  = [Glob('memory*cpp')]
+
+includes_mesh = [Glob('mesh*hpp')]
+sources_mesh  = [Glob('mesh*cpp')]
+
+includes_method = [Glob('method*hpp')]
+sources_method  = [Glob('method*cpp')]
+
+includes_monitor   = [Glob('monitor*hpp')]
+sources_monitor    = [Glob('monitor*cpp')]
+
+includes_parallel   = [Glob('parallel*hpp'),'parallel.def']
+sources_parallel    = [Glob('parallel*cpp')]
+
+includes_parameters = [Glob('parameters*hpp'),'parse.h']
+sources_parameters  = ['parse.tab.c', 'lex.yy.c', Glob('parameters*cpp') ]
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# WHEN parse.y or parse.l change:
+# 1. Uncomment below
+# 2. scons -u type=serial
+# 3. cp ../../build/serial/Cello/lex.yy.c .
+# 4. cp ../../build/serial/Cello/parse.tab.? .
+# 5. Recomment below
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# env.CFile(target = 'lex.yy.c', source = 'parse.l')
+# env.CFile(target = ['parse.tab.c', 'parse.tab.h'], source = 'parse.y', YACCFLAGS='-d -t')
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+includes_performance = [Glob('performance*hpp')]
+sources_performance  = [Glob('performance*cpp')]
+
+includes_simulation = [Glob('simulation*hpp')]
+sources_simulation  = [Glob("simulation*cpp")]
+
+includes_test = [Glob('test_Unit*hpp')]
+sources_test  = [Glob('test_Unit*cpp')]
+
+if (type == "charm"):
+   env.CharmBuilder('main_enzo.decl.h','main_enzo.ci',ARG = 'main_enzo')
+   env.CharmBuilder('main_enzo.def.h', 'main_enzo.ci',ARG = 'main_enzo')
+   includes_main = includes_main + ['main_enzo.decl.h','main_enzo.def.h']
+
+   env.CharmBuilder('main.decl.h','main.ci',ARG = 'main')
+   env.CharmBuilder('main.def.h', 'main.ci',ARG = 'main')
+   includes_main = includes_main + ['main.decl.h','main.def.h']
+
+   env.CharmBuilder ('main_simulation.decl.h','main_simulation.ci',
+                     ARG = 'main_simulation')
+   env.CharmBuilder ('main_simulation.def.h', 'main_simulation.ci',
+                     ARG = 'main_simulation')
+   includes_main = includes_main + [
+       'main_simulation.decl.h','main_simulation.def.h']
+
+   env.CharmBuilder('main_mesh.decl.h','main_mesh.ci',ARG = 'main_mesh')
+   env.CharmBuilder('main_mesh.def.h', 'main_mesh.ci',ARG = 'main_mesh')
+   includes_main = includes_main + ['main_mesh.decl.h','main_mesh.def.h']
+
+   env.CharmBuilder('mesh.decl.h','mesh.ci',ARG = 'mesh')
+   env.CharmBuilder('mesh.def.h', 'mesh.ci',ARG = 'mesh')
+   includes_mesh = includes_mesh + ['mesh.decl.h','mesh.def.h']
+
+   env.CharmBuilder('simulation.decl.h','simulation.ci',ARG='simulation')
+   env.CharmBuilder('simulation.def.h', 'simulation.ci',ARG='simulation')
+   includes_simulation = includes_simulation + ['simulation.decl.h','simulation.def.h'];
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env_cello  = env.Clone(LIBS=[components_cello, libraries_cello])
+env_disk   = env.Clone(LIBS=[components_disk,  libraries_disk])
+env_error  = env.Clone(LIBS=[components_error, libraries_error])
+env_field  = env.Clone(LIBS=[components_field, libraries_field])
+env_io     = env.Clone(LIBS=[components_io,    libraries_io])
+env_main   = env.Clone(LIBS=[components_main])
+env_memory = env.Clone(LIBS=[components_memory,libraries_memory])
+env_mesh   = env.Clone(LIBS=[components_mesh,libraries_mesh])
+env_method = env.Clone(LIBS=[components_method,libraries_method])
+env_monitor = env.Clone(LIBS=[components_monitor])
+env_parallel = env.Clone(LIBS=[components_parallel])
+env_parameters = env.Clone(LIBS=[components_parameters])
+env_performance = env.Clone(LIBS=[components_performance,libraries_performance])
+env_simulation = env.Clone(LIBS=[components_simulation,libraries_simulation])
+env_test = env.Clone(LIBS=[components_test,libraries_test])
+
+#------------------------------
+# TARGETS
+#------------------------------
+
+
+if (type == "charm"):
+   sources_disk = sources_disk + ['main.cpp']
+   sources_error = sources_error + ['main.cpp']
+   sources_field = sources_field + ['main_simulation.cpp']
+   sources_io     = sources_io     + ['main_simulation.cpp']
+   sources_memory = sources_memory + ["main.cpp"]
+   sources_mesh   = sources_mesh   + ['main_mesh.cpp']
+   sources_monitor = sources_monitor + ["main.cpp"]
+   sources_parameters = sources_parameters + ["main.cpp"]
+   sources_performance = sources_performance + ["main.cpp"]
+
+test_FileHdf5  = env_disk.Program (['test_FileHdf5.cpp',  sources_disk])
+test_FileIfrit = env_disk.Program (['test_FileIfrit.cpp', sources_disk])
+test_error     = env_error.Program (['test_Error.cpp',     sources_error])
+test_field_block = env_field.Program (['test_FieldBlock.cpp', sources_field])
+test_field_descr = env_field.Program (['test_FieldDescr.cpp', sources_field])
+test_field_face  = env_field.Program (['test_FieldFace.cpp',  sources_field])
+test_it_field    = env_field.Program (['test_ItField.cpp',    sources_field])
+test_GroupProcess  =  env_parallel.Program (['test_GroupProcess.cpp', sources_parallel])
+test_Layout   = env_parallel.Program (['test_Layout.cpp',   sources_parallel])
+if (type == "mpi"):
+	test_Mpi = env_parallel.Program (['test_Mpi.cpp', sources_parallel])
+test_parameters = env_parameters.Program (['test_Parameters.cpp', sources_parameters])
+test_parse      = env_parameters.Program (['test_Parse.cpp',      sources_parameters])
+test_performance = env_performance.Program(['test_Performance.cpp', sources_performance])
+test_papi        = env_performance.Program(['test_Papi.cpp',        sources_performance])
+
+
+libraries_disk   = env_disk.Library   ('disk',  sources_disk)
+libraries_error  = env_error.Library  ('error', [sources_error])
+libraries_field  = env_field.Library  ('field', [sources_field])
+libraries_io     = env_io.Library     ('io',    [sources_io])
+libraries_main   = [env_main.Library  ('main', [sources_main])]
+libraries_memory = env_memory.Library ('memory', [sources_memory])
+libraries_mesh   = env_mesh.Library   ('mesh', [sources_mesh])
+libraries_method = env_method.Library ('method', sources_method)
+libraries_monitor  = env_monitor.Library ('monitor', [sources_monitor])
+libraries_parallel = env_parallel.Library ('parallel', [sources_parallel])
+libraries_parameters = env_parameters.Library ('parameters', [sources_parameters])
+libraries_performance = env_performance.Library ('performance', [sources_performance])
+libraries_simulation = env_simulation.Library ('simulation', [sources_simulation])
+libraries_test  = env_test.Library ('test', [sources_test])
+
+
+
+binaries_disk  = [test_FileHdf5,
+                  test_FileIfrit]
+binaries_error = [test_error]
+binaries_field = [test_field_block,
+                  test_field_descr,
+                  test_field_face,
+                  test_it_field]
+binaries_io    = [env_io.Program (['test_ItReduce.cpp',sources_io])]
+binaries_memory  = env_memory.Program (['test_Memory.cpp', sources_memory])
+
+
+binaries_mesh = []
+binaries_mesh = [ binaries_mesh,env_mesh.Program (['test_Block.cpp', sources_mesh]) ]
+binaries_mesh = [ binaries_mesh,env_mesh.Program (['test_Hierarchy.cpp', sources_mesh]) ]
+binaries_mesh = [ binaries_mesh,env_mesh.Program (['test_Patch.cpp', sources_mesh]) ]
+binaries_mesh = [ binaries_mesh,env_mesh.Program (['test_Tree.cpp', sources_mesh]) ]
+binaries_mesh = [ binaries_mesh,env_mesh.Program (['test_TreeDensity.cpp', sources_mesh]) ]
+binaries_mesh = [ binaries_mesh,env_mesh.Program (['test_Node.cpp', sources_mesh]) ]
+binaries_mesh = [ binaries_mesh,env_mesh.Program (['test_NodeTrace.cpp', sources_mesh]) ]
+binaries_mesh = [ binaries_mesh,  env_mesh.Program (['test_ItNode.cpp', sources_mesh]) ]
+binaries_monitor = env_monitor.Program (['test_Monitor.cpp', sources_monitor])
+binaries_parallel = []
+binaries_parallel.append(test_GroupProcess)
+if (type == "mpi"):
+	binaries_parallel.append(test_Mpi)
+if (type == "charm"):
+	sources_parallel = sources_parallel + ["main.cpp"]
+binaries_parallel.append(test_Layout)
+binaries_parameters = [test_parameters, test_parse]
+binaries_performance = [test_performance,test_papi]
+
+#------------------------------
+# INSTALL
+#------------------------------
+
+libraries_cello = [env_cello.Library ('cello', [sources_cello])]
+libraries_disk  = env_disk.Library ('disk', sources_disk)
+
+env_cello.Alias('install-inc',env_cello.Install (inc_path,includes_cello))
+env_cello.Alias('install-lib',env_cello.Install (lib_path,libraries_cello))
+
+env_disk.Alias('install-bin',env_disk.Install (bin_path,binaries_disk))
+env_disk.Alias('install-inc',env_disk.Install (inc_path,includes_disk))
+env_disk.Alias('install-lib',env_disk.Install (lib_path,libraries_disk))
+
+env_error.Alias('install-bin',env_error.Install (bin_path,binaries_error))
+env_error.Alias('install-inc',env_error.Install (inc_path,includes_error))
+env_error.Alias('install-lib',env_error.Install (lib_path,libraries_error))
+
+env_field.Alias('install-bin',env_field.Install (bin_path,binaries_field))
+env_field.Alias('install-inc',env_field.Install (inc_path,includes_field))
+env_field.Alias('install-lib',env_field.Install (lib_path,libraries_field))
+
+env_io.Alias('install-bin',env_io.Install (bin_path,binaries_io))
+env_io.Alias('install-inc',env_io.Install (inc_path,includes_io))
+env_io.Alias('install-lib',env_io.Install (lib_path,libraries_io))
+
+env_main.Alias('install-inc',env_main.Install (inc_path,includes_main))
+env_main.Alias('install-lib',env_main.Install (lib_path,libraries_main))
+
+env_memory.Alias('install-bin',env_memory.Install (bin_path,binaries_memory))
+env_memory.Alias('install-inc',env_memory.Install (inc_path,includes_memory))
+env_memory.Alias('install-lib',env_memory.Install (lib_path,libraries_memory))
+
+env_mesh.Alias('install-bin',env_mesh.Install (bin_path,binaries_mesh))
+env_mesh.Alias('install-inc',env_mesh.Install (inc_path,includes_mesh))
+env_mesh.Alias('install-lib',env_mesh.Install (lib_path,libraries_mesh))
+
+env_method.Alias('install-inc',env_method.Install (inc_path,includes_method))
+env_method.Alias('install-lib',env_method.Install (lib_path,libraries_method))
+
+
+env_monitor.Alias('install-bin',env_monitor.Install (bin_path,binaries_monitor))
+env_monitor.Alias('install-inc',env_monitor.Install (inc_path,includes_monitor))
+env_monitor.Alias('install-lib',env_monitor.Install (lib_path,libraries_monitor))
+
+env_parallel.Alias('install-bin',env_parallel.Install (bin_path,binaries_parallel))
+env_parallel.Alias('install-inc',env_parallel.Install (inc_path,includes_parallel))
+env_parallel.Alias('install-lib',env_parallel.Install (lib_path,libraries_parallel))
+
+env_parameters.Alias('install-bin',env_parameters.Install (bin_path,binaries_parameters))
+env_parameters.Alias('install-inc',env_parameters.Install (inc_path,includes_parameters))
+env_parameters.Alias('install-lib',env_parameters.Install (lib_path,libraries_parameters))
+
+
+env_performance.Alias('install-bin',env_performance.Install (bin_path,binaries_performance))
+env_performance.Alias('install-inc',env_performance.Install (inc_path,includes_performance))
+env_performance.Alias('install-lib',env_performance.Install (lib_path,libraries_performance))
+
+
+env_simulation.Alias('install-inc',env_simulation.Install (inc_path,includes_simulation))
+env_simulation.Alias('install-lib',env_simulation.Install (lib_path,libraries_simulation))
+
+env_test.Alias('install-inc',env_test.Install (inc_path,includes_test))
+env_test.Alias('install-lib',env_test.Install (lib_path,libraries_test))
