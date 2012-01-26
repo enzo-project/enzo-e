@@ -20,36 +20,43 @@ PARALLEL_MAIN_BEGIN
   unit_init(0,1);
 
   //--------------------------------------------------
-  // Read density_512.h5 file into density[] array
+  // Read input HDF5 into density[] array
   //--------------------------------------------------
 
-  FileHdf5 file_density ("input","density_512.h5");
+  
+  if (PARALLEL_ARGC != 3) {
+    PARALLEL_PRINTF("Usage: %s <file_name> <field_name>\n\n",PARALLEL_ARGV[0]);
+    unit_assert(false);
+    PARALLEL_EXIT(1);
+  }
 
-  const char * field_name = "Density";
+  const char * file_name  = PARALLEL_ARGV[1];
+  const char * field_name = PARALLEL_ARGV[2];
 
-  file_density.file_open();
+  FileHdf5 file ("./",file_name);
+
+  file.file_open();
 
   // H5T_IEEE_F32BE
   int nx,ny,nz;
   scalar_type type = scalar_type_unknown;
-  file_density.data_open (field_name,&type,&nx,&ny,&nz);
+  file.data_open (field_name,&type,&nx,&ny,&nz);
 
   float * density = new float [nx*ny*nz];
-  file_density.data_read(density);
-
-  unit_assert (false);
+  file.data_read(density);
 
   //--------------------------------------------------
   // Refine on density
   //--------------------------------------------------
 
   int d=3;
-  int r=4;
+  int r=2;
   int min_level = 0;
   int max_level = 10*2/r;
   Tree tree (d,r);
+  TRACE1("max_level=%d",max_level);
 
-  // find the min and max
+  // find the min and max density
   float dmin   =1.0e37;
   float dmax = -1.0e37;
 
@@ -64,7 +71,9 @@ PARALLEL_MAIN_BEGIN
   }
   TRACE2 ("min = %f  max = %f",dmin,dmax);
 
+  //--------------------------------------------------
   // create level array from density
+  //--------------------------------------------------
 
   int * levels = new int [nx*ny*nz];
 
@@ -89,33 +98,80 @@ PARALLEL_MAIN_BEGIN
   }
   TRACE3 ("%d %d %d ",imn,imx,c);
 
+  // --------------------------------------------------
+  // Create tree from level array
+  // --------------------------------------------------
+
   Timer timer;
   timer.start();
   create_tree_from_levels (&tree, levels,nx,ny,nz);
 
-  TRACE1 ("Tree create time = %f",timer.value());
-  TRACE1 ("Tree (unbalanced) nodes = %d",tree.num_nodes());
+  TRACE1 ("Tree initial time = %f",timer.value());
+  TRACE1 ("Tree initial nodes = %d",tree.num_nodes());
 
-  //  int mx=2048,my=2048;
-  int mx=2048,my=2048;
+
+  // --------------------------------------------------
+  // Write tree to file
+  // --------------------------------------------------
+
+  int mx=1024,my=1024;
   double th= 0.3*M_PI; // spin
-  double ph= 0.2*M_PI;
-  double ps= 0.0*M_PI;
+  double ph= 0.1*M_PI;
+  double ps= -0.06*M_PI;
+  int falloff = 3;
+  create_image_from_tree (&tree,"density_3d_1-initial.png",
+			  mx,my, 0,max_level, th,ph,ps, 0.5, false, falloff);
 
-  create_image_from_tree (&tree,"density.png",
-			  mx,my, 0,max_level, th,ph,ps, 0.5, true);
+  create_image_from_tree (&tree,"density_x_1-nitial.png",
+			  mx,my, 0,max_level, 0.0,0.0,0.0, 0.5, true,0);
+
+  // --------------------------------------------------
+  // Balance tree
+  // --------------------------------------------------
 
   timer.clear();
   timer.start();
 
   tree.balance();
   
-  TRACE1 ("Tree balance time = %f",timer.value());
-  TRACE1 ("Tree (balanced) nodes = %d",tree.num_nodes());
+  TRACE1 ("Tree balanced time = %f",timer.value());
+  TRACE1 ("Tree balanced nodes = %d",tree.num_nodes());
 
 
-  create_image_from_tree (&tree,"density_balanced.png",
-			  mx,my,  0,max_level, th,ph,ps, 0.5, true);
+  // --------------------------------------------------
+  // Write tree to file
+  // --------------------------------------------------
+
+  create_image_from_tree (&tree,"density_3d_2-balanced.png",
+			  mx,my,  0,max_level, th,ph,ps, 0.5, false, falloff);
+
+  create_image_from_tree (&tree,"density_x_2-balanced.png",
+			  mx,my, 0,max_level, 0.0,0.0,0.0, 0.5, true,0);
+
+  // --------------------------------------------------
+  // Patch coalescing
+  // --------------------------------------------------
+
+  timer.clear();
+  timer.start();
+
+
+  tree.coalesce();
+
+  TRACE1 ("Tree coalesced time = %f",timer.value());
+  TRACE1 ("Tree coalesced nodes = %d",tree.num_nodes());
+
+  // --------------------------------------------------
+  // Write tree to file
+  // --------------------------------------------------
+
+  create_image_from_tree (&tree,"density_3d_3-coalesced.png",
+			  mx,my,  0,max_level, th,ph,ps, 0.5, false, falloff);
+
+  create_image_from_tree (&tree,"density_x_3-coalesced.png",
+			  mx,my, 0,max_level, 0.0,0.0,0.0, 0.5, true,0);
+
+  // --------------------------------------------------
 
   unit_finalize();
 

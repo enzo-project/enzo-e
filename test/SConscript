@@ -67,8 +67,9 @@ env.RunSerial('test_Hierarchy.unit', bin_path + '/test_Hierarchy')
 env.RunSerial('test_Patch.unit',     bin_path + '/test_Patch')
 env.RunSerial('test_Block.unit',     bin_path + '/test_Block')
 Clean(env_mv_test.RunSerial('test_Tree.unit',      bin_path + '/test_Tree'),
-      ['#/test_tree_initial.png',
-       '#/test_tree_balanced.png'])
+      ['#/test_tree_initial.png', '#/test_tree_balanced.png'])
+Clean(env_mv_test.RunSerial('test_TreeDensity.unit',      bin_path + '/test_Tree'),
+      ['#/test_tree_initial.png', '#/test_tree_balanced.png'])
 env.RunSerial('test_Node.unit',      bin_path + '/test_Node')
 env.RunSerial('test_NodeTrace.unit', bin_path + '/test_NodeTrace')
 env.RunSerial('test_ItNode.unit',    bin_path + '/test_ItNode')

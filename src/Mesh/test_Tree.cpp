@@ -289,10 +289,13 @@ PARALLEL_MAIN_BEGIN
     unit_assert(count_tree[max_depth-1] - 1 == 
 		(tree->num_nodes() - 1) * 3 / 4);
 
-    printf ("unbalanced tree num_nodes = %d\n",tree->num_nodes());
-    printf ("unbalanced tree max_level = %d\n",tree->max_level());
+    printf ("tree initial num_nodes = %d\n",tree->num_nodes());
+    printf ("tree initial max_level = %d\n",tree->max_level());
 
 
+    //--------------------------------------------------
+    // Balance tree
+    //--------------------------------------------------
     Timer timer;
 
     timer.start();
@@ -301,11 +304,26 @@ PARALLEL_MAIN_BEGIN
 
     printf ("time to balance = %f s\n",timer.value());
 
-    printf ("unbalanced tree num_nodes = %d\n",tree->num_nodes());
-    printf ("unbalanced tree max_level = %d\n",tree->max_level());
+    printf ("tree balanced num_nodes = %d\n",tree->num_nodes());
+    printf ("tree balanced max_level = %d\n",tree->max_level());
 
-    create_image_from_tree (tree, "test_tree_balanced.png",1024,1024);
+    create_image_from_tree (tree, "test_tree_balanced.png",width,height);
     
+    //--------------------------------------------------
+    // Coalesce tree nodes
+    //--------------------------------------------------
+
+    timer.clear();
+    timer.start();
+    tree->coalesce();
+
+    printf ("time to coalesce = %f s\n",timer.value());
+
+    printf ("tree coalesced num_nodes = %d\n",tree->num_nodes());
+    printf ("tree coalesced max_level = %d\n",tree->max_level());
+
+    create_image_from_tree (tree, "test_tree_coalesced.png",width,height);
+
     delete tree;
   }
 

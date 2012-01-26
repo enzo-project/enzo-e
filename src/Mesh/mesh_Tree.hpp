@@ -65,11 +65,14 @@ public: // interface
   /// Return the specified child Node
   NodeTrace node_child (const NodeTrace &, int k) const;
 
+  void index(int k, int * kx, int *ky, int *kz) const
+  { index_(k,kx,ky,kz); }
+
   /// Balance the Tree
   void balance ();
 
-  void index(int k, int * kx, int *ky, int *kz) const
-  { index_(k,kx,ky,kz); }
+  /// Coalesce nodes in the Tree
+  void coalesce ();
 
 private: // functions
 

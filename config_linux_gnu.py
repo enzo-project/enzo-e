@@ -4,7 +4,7 @@ cc  = {}
 
 is_arch_valid = 1
 
-flags_arch = '-g -Wall'
+flags_arch = '-g -Wall -O'
 flags_link = '-rdynamic'
 
 cc['mpi']     = 'mpicc'

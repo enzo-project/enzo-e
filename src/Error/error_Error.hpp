@@ -186,6 +186,11 @@
     message2_(stdout,"TRACE",__FILE__,__LINE__,"",		\
 	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7);	\
   }
+#   define TRACE8(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8)	\
+  {								\
+    message2_(stdout,"TRACE",__FILE__,__LINE__,"",		\
+	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8);	\
+  }
 #else
 
 #   define TRACE0				\
@@ -205,6 +210,8 @@
 #   define TRACE6(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)	\
   /* This space intentionally left blank */
 #   define TRACE7(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)	\
+  /* This space intentionally left blank */
+#   define TRACE8(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8)	\
   /* This space intentionally left blank */
 
 #endif
