@@ -419,17 +419,17 @@ printf ("<tr>\n");
     printf ("<th rowspan=2></th>\n"); 
   }
   
-printf ( "<th colspan=$num_types class=fail>Missing Executable</th>");
+printf ( "<th colspan=$num_types class=fail>Missing</br>Executable</th>");
 printf ("<th></th>");
-printf ( "<th colspan=$num_types class=fail>Missing Output</th>");
+printf ( "<th colspan=$num_types class=fail>Missing</br>Output</th>");
 printf ("<th></th>");
-printf ( "<th colspan=$num_types class=fail>Incomplete Output</th>");
+printf ( "<th colspan=$num_types class=fail>Incomplete</br>Output</th>");
 printf ("<th></th>");
-printf ( "<th colspan=$num_types class=fail>Failed Tests</th>");
+printf ( "<th colspan=$num_types class=fail>Failed</br>Tests</th>");
 printf ("<th></th>");
-printf ( "<th colspan=$num_types class=unfinished>Unfinished Tests</th>");
+printf ( "<th colspan=$num_types class=unfinished>Unfinished</br>Tests</th>");
 printf ("<th></th>");
-printf ( "<th colspan=$num_types class=pass>Passed Tests</th>");
+printf ( "<th colspan=$num_types class=pass>Passed</br>Tests</th>");
 printf ("<th></th>");
 printf ( "</tr><tr>\n");
 

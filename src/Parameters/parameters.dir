@@ -1,6 +1,0 @@
-// See LICENSE_CELLO file for license and copyright information
-
-/// @file     parameters.dir
-/// @brief    Input, parse, store, and access run-time parameters
-/// @defgroup Parameters Parameters
-/// @brief    Input, parse, store, and access run-time parameters

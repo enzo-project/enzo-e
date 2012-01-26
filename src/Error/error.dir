@@ -1,6 +1,0 @@
-// See LICENSE_CELLO file for license and copyright information
-
-/// @file     error.dir
-/// @brief    Error prevention (including check-pointing), error detection and recovery 
-/// @defgroup Error Error
-/// @brief    Error prevention (including check-pointing), error detection and recovery 

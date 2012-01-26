@@ -5,50 +5,6 @@ Import('bin_path')
 Import('inc_path')
 Import('lib_path')
 
-# Define tests for running cccc
-
-# cccc      = Builder(action = "cccc --outdir=$TARGET `find src -name '*.cpp'`")
-# env = Environment(BUILDERS = {'Cccc': cccc})
-# env.Cccc("cccc");
-
 SConscript('Enzo/SConscript')
-
-SConscript('Main/SConscript')
-
 SConscript('External/SConscript')
-
-SConscript('Test/SConscript')
-
-SConscript('Disk/SConscript')
-SConscript('Error/SConscript')
-SConscript('Field/SConscript')
-SConscript('Io/SConscript')
-SConscript('Memory/SConscript')
-SConscript('Mesh/SConscript')
-SConscript('Method/SConscript')
-SConscript('Monitor/SConscript')
-SConscript('Parallel/SConscript')
-SConscript('Parameters/SConscript')
-SConscript('Performance/SConscript')
-SConscript('Simulation/SConscript')
-
-components = [
-   'enzo', 
-   'simulation','method',
-   'mesh','field',
-   'memory','parallel',
-   'parameters','monitor',
-   'error','cello']
-
-libraries  = ['png', '$FORTRANLIBS','m']
-
-
-env = env.Clone(LIBS=[components,libraries])
-
-includes = [Glob('cello*hpp')]
-sources  = [Glob('cello*cpp')]
-
-libraries = [env.Library ('cello', [sources])]
-
-env.Alias('install-inc',env.Install (inc_path,includes))
-env.Alias('install-lib',env.Install (lib_path,libraries))
+SConscript('Cello/SConscript')

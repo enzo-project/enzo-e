@@ -1,6 +1,0 @@
-// See LICENSE_CELLO file for license and copyright information
-
-/// @file     disk.dir
-/// @brief    Provides functions for writing and reading data to and from disk storage
-/// @defgroup Disk Disk
-/// @brief    Provides functions for writing and reading data to and from disk storage

@@ -33,6 +33,7 @@ libraries  = ['png','$FORTRANLIBS']
 #------------------------------
 
 includes = [Glob('enzo*hpp'),'fortran.h']
+
 sources  = [Glob('enzo_*cpp'), 
 	    'Grid_ComputeGammaField.cpp',
 	    'Grid_ComputePressure.cpp',
@@ -76,7 +77,7 @@ sources  = [Glob('enzo_*cpp'),
 charm_main = []
 if (type == 'charm'):
    includes = includes + ['enzo.decl.h','enzo.def.h']
-   charm_main = ['../Main/main_enzo.cpp']
+   charm_main = ['../Cello/main_enzo.cpp']
 
 #------------------------------
 # ENVIRONMENTS

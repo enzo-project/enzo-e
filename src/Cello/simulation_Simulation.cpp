@@ -242,33 +242,35 @@ void Simulation::initialize_data_descr_() throw()
     std::string param_name = 
       std::string("Field:") + field_name + ":centering";
     
-    bool valid = parameters_->type(param_name) == parameter_list;
-    valid = valid && parameters_->list_length(param_name) == dimension_;
-    for (int i=0; i<dimension_; i++) {
-      valid = valid && 
-	(parameters_->list_type(i,param_name) == parameter_logical);
-    }
+    if (parameters_->type(param_name) != parameter_unknown) {
+
+      bool valid = parameters_->type(param_name) == parameter_list;
+      valid = valid && parameters_->list_length(param_name) == dimension_;
+      for (int i=0; i<dimension_; i++) {
+	valid = valid && 
+	  (parameters_->list_type(i,param_name) == parameter_logical);
+      }
       
-    ASSERT2 ("Simulation::initialize_data_descr_()",
-	     "Parameter %s must be a list of logical values with length %d",
-	     param_name.c_str(), dimension_, valid);
+      ASSERT2 ("Simulation::initialize_data_descr_()",
+	       "Parameter %s must be a list of logical values with length %d",
+	       param_name.c_str(), dimension_, valid);
 
-    int id_field = field_descr_->field_id(field_name);
+      int id_field = field_descr_->field_id(field_name);
 
-    bool cx,cy,cz;
+      bool cx,cy,cz;
 
-    cx = (dimension_ >= 1) ? 
-      parameters_->list_value_logical(0,param_name,true) : true;
-    cy = (dimension_ >= 2) ? 
-      parameters_->list_value_logical(1,param_name,true) : true;
-    cz = (dimension_ >= 3) ? 
-      parameters_->list_value_logical(2,param_name,true) : true;
+      cx = (dimension_ >= 1) ? 
+	parameters_->list_value_logical(0,param_name,true) : true;
+      cy = (dimension_ >= 2) ? 
+	parameters_->list_value_logical(1,param_name,true) : true;
+      cz = (dimension_ >= 3) ? 
+	parameters_->list_value_logical(2,param_name,true) : true;
 
-    field_descr_->set_centering (id_field, cx,cy,cz);
+      field_descr_->set_centering (id_field, cx,cy,cz);
 
+    }
   }
 }
-
 //----------------------------------------------------------------------
 
 void Simulation::initialize_hierarchy_() throw()
