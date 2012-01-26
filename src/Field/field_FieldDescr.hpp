@@ -53,11 +53,11 @@ public: // functions
   void set_courant(double courant) throw();
 
   /// Set centering for a field
-  void set_centering(int id_field, bool cx, bool cy, bool cz) 
+  void set_centering(int id_field, bool cx, bool cy=true, bool cz=true) 
     throw(std::out_of_range);
 
   /// Set ghosts for a field
-  void set_ghosts(int id_field, int gx, int gy, int gz) 
+  void set_ghosts(int id_field, int gx, int gy=0, int gz=0) 
     throw(std::out_of_range);
 
   /// Set whether to update the k-D ghosts (corners=0, edges=1, faces=2)
