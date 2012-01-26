@@ -421,10 +421,10 @@ void create_image_from_tree (Tree * tree, const char * filename,
     //    g                 0.5    1.0      1.0    0
     //    b  1.0      1     0.5                    0
     
-  const int num_colors = 7;
-  const double rc[] = {1, 0, 0, 0, 1, 1, 1};
-  const double gc[] = {0, 0, 1, 1, 1, 0, 1};
-  const double bc[] = {1, 1, 1, 0, 0, 0, 1};
+  const int num_colors = 6;
+  const double rc[] = {1, 0, 0, 0, 1, 1};
+  const double gc[] = {0, 0, 1, 1, 1, 0};
+  const double bc[] = {1, 1, 1, 0, 0, 0};
   int num_levels = tree->max_level() + 1;
   double * ra = new double [num_levels];
   double * ga = new double [num_levels];

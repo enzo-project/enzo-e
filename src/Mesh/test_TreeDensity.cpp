@@ -27,7 +27,7 @@ PARALLEL_MAIN_BEGIN
   if (PARALLEL_ARGC != 3) {
     PARALLEL_PRINTF("Usage: %s <file_name> <field_name>\n\n",PARALLEL_ARGV[0]);
     unit_assert(false);
-    PARALLEL_EXIT(1);
+    PARALLEL_EXIT;
   }
 
   const char * file_name  = PARALLEL_ARGV[1];
@@ -122,8 +122,8 @@ PARALLEL_MAIN_BEGIN
   create_image_from_tree (&tree,"density_3d_1-initial.png",
 			  mx,my, 0,max_level, th,ph,ps, 0.5, false, falloff);
 
-  create_image_from_tree (&tree,"density_x_1-nitial.png",
-			  mx,my, 0,max_level, 0.0,0.0,0.0, 0.5, true,0);
+  create_image_from_tree (&tree,"density_x_1-initial.png",
+			  mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
 
   // --------------------------------------------------
   // Balance tree
@@ -146,7 +146,7 @@ PARALLEL_MAIN_BEGIN
 			  mx,my,  0,max_level, th,ph,ps, 0.5, false, falloff);
 
   create_image_from_tree (&tree,"density_x_2-balanced.png",
-			  mx,my, 0,max_level, 0.0,0.0,0.0, 0.5, true,0);
+			  mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
 
   // --------------------------------------------------
   // Patch coalescing
@@ -169,7 +169,7 @@ PARALLEL_MAIN_BEGIN
 			  mx,my,  0,max_level, th,ph,ps, 0.5, false, falloff);
 
   create_image_from_tree (&tree,"density_x_3-coalesced.png",
-			  mx,my, 0,max_level, 0.0,0.0,0.0, 0.5, true,0);
+			  mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
 
   // --------------------------------------------------
 

@@ -501,7 +501,8 @@ test_summary("Memory",array("Memory"),
 	     array("test_Memory")); 
 test_summary("Mesh",
 	     array("Hierarchy","Patch","Block","Tree","Node","NodeTrace","ItNode"),
-	     array("test_Hierarchy","test_Patch","test_Block","test_Tree","test_Node","test_NodeTrace","test_ItNode")); 
+	     array("test_Hierarchy","test_Patch","test_Block","test_Tree","test_TreeDensity",
+		   "test_Node","test_NodeTrace","test_ItNode")); 
 test_summary("Monitor",array("Monitor"),
 	     array("test_Monitor")); 
 test_summary("Parallel",array("GroupProcess","Layout"),
@@ -721,10 +722,19 @@ tests("Mesh","test_Patch","test_Patch","");
 tests("Mesh","test_Block","test_Block",""); 
 tests("Mesh","test_Tree","test_Tree",""); 
 
-printf ("<img width=256 src=\"mpi/test_tree_initial.png\"></img>\n");
-printf ("<img width=256 src=\"mpi/test_tree_balanced.png\"></img></br>\n");
+printf ("<img width=257 src=\"mpi/test_tree_initial.png\"></img>\n");
+printf ("<img width=257 src=\"mpi/test_tree_balanced.png\"></img>\n");
+printf ("<img width=257 src=\"mpi/test_tree_coalesced.png\"></img></br>\n");
 
+tests("Mesh","test_TreeDensity","test_TreeDensity",""); 
 
+printf ("<img width=257 src=\"mpi/density_x_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"mpi/density_x_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"mpi/density_x_3-coalesced.png\"></img></br>\n");
+
+printf ("<img width=257 src=\"mpi/density_3d_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"mpi/density_3d_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"mpi/density_3d_3-coalesced.png\"></img></br>\n");
 
 tests("Mesh","test_Node","test_Node",""); 
 tests("Mesh","test_NodeTrace","test_NodeTrace",""); 

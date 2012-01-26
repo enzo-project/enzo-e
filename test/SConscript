@@ -66,10 +66,17 @@ env.RunSerial('test_Memory.unit',      bin_path + '/test_Memory')
 env.RunSerial('test_Hierarchy.unit', bin_path + '/test_Hierarchy')
 env.RunSerial('test_Patch.unit',     bin_path + '/test_Patch')
 env.RunSerial('test_Block.unit',     bin_path + '/test_Block')
-Clean(env_mv_test.RunSerial('test_Tree.unit',      bin_path + '/test_Tree'),
+Clean(env_mv_png.RunSerial('test_Tree.unit',      bin_path + '/test_Tree'),
       ['#/test_tree_initial.png', '#/test_tree_balanced.png'])
-Clean(env_mv_test.RunSerial('test_TreeDensity.unit',      bin_path + '/test_Tree'),
-      ['#/test_tree_initial.png', '#/test_tree_balanced.png'])
+Clean(env_mv_png.RunSerial('test_TreeDensity.unit',      bin_path + '/test_TreeDensity',
+                            ARGS='input/density_128.h5 Density'),
+      ['#/density_3d_1-initial.png',
+       '#/density_x_1-initial.png',
+       '#/density_3d_2-balanced.png',
+       '#/density_x_2-balanced.png',
+       '#/density_3d_3-coalesced.png',
+       '#/density_x_3-coalesced.png'])
+
 env.RunSerial('test_Node.unit',      bin_path + '/test_Node')
 env.RunSerial('test_NodeTrace.unit', bin_path + '/test_NodeTrace')
 env.RunSerial('test_ItNode.unit',    bin_path + '/test_ItNode')
