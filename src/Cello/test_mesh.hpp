@@ -255,8 +255,8 @@ Tree * test_tree_32()
 
 //----------------------------------------------------------------------
 
-int * create_levels_from_image (const char * pngfile, 
-			  int * nx, int * ny, int max_levels)
+int * create_levels_from_image (std::string pngfile, 
+				int * nx, int * ny, int max_levels)
 // return an array of integer values between [0 and max_levels)
 // corresponding to the grayscale values of the input png file,
 // indexed by ix + nx*iy
@@ -264,7 +264,7 @@ int * create_levels_from_image (const char * pngfile,
 
   pngwriter png;
 
-  png.readfromfile(pngfile);
+  png.readfromfile(pngfile.c_str());
 
   (*nx) = png.getwidth();
   (*ny) = png.getheight();
@@ -304,21 +304,39 @@ void create_tree_from_levels
 
   int r = tree->refinement();
 
-  // Determine size of finest tree level
-  //  int n=1;
-  //  for (int i=0; i<max_level; i++) n*=r;
+  // max_level
 
-  //  n = nx;
-  // Create tree
-  for (int ix=0; ix<nx; ix++) {
-    for (int iy=0; iy<ny; iy++) {
-      for (int iz=0; iz<nz; iz++) {
+  int max_level = 0;
+  for (int i=0; i<nx*ny*nz; i++) {
+    if (levels[i] > max_level) max_level = levels[i];
+  }  
+  //size of finest tree level m
+  int m=1;
+  for (int i=0; i<max_level; i++) m*=r;
+
+  // loop bounds mx,my,mz
+  int mx = (tree->dimension() >= 1) ? m : 1;
+  int my = (tree->dimension() >= 2) ? m : 1;
+  int mz = (tree->dimension() >= 3) ? m : 1;
+
+  // create tree
+  for (int jz=0; jz<mz; jz++) {
+    int iz=jz*nz/mz;
+    for (int jy=0; jy<my; jy++) {
+      int iy=jy*ny/my;
+      for (int jx=0; jx<mx; jx++) {
+	int ix=jx*nx/mx;
+	
 	int i = ix + nx*(iy + ny*iz);
+	int j = jx + mx*(jy + my*jz);
+
+	
+	assert (0 <= i && i < nx*ny*nz);
 	int level = levels[i];
 
-	double x = 1.0*ix / nx;
-	double y = 1.0*iy / ny;
-	double z = 1.0*iz / nz;
+	double x = 1.0*jx / mx;
+	double y = 1.0*jy / my;
+	double z = 1.0*jz / mz;
 	NodeTrace node_trace (tree->root_node());
 	while (--level > 0) {
 	  if (node_trace.node()->is_leaf()) {
@@ -391,7 +409,7 @@ inline void rotate
 
 }
 
-void create_image_from_tree (Tree * tree, const char * filename, 
+void create_image_from_tree (Tree * tree, std::string filename, 
 			     int nx, int ny,
 			     int level_lower=0, int level_upper=1000,
 			     double theta=0.0, double phi=0.0, double psi=0.0,
@@ -409,7 +427,7 @@ void create_image_from_tree (Tree * tree, const char * filename,
 /// @param falloff refers to color blending with respect to levels: (level) ^ (-falloff)
 {
 
-  pngwriter png (nx+1,ny+1,0,filename);
+  pngwriter png (nx+1,ny+1,0,filename.c_str());
 
   int i;
 
@@ -488,23 +506,23 @@ void create_image_from_tree (Tree * tree, const char * filename,
     
     double amin = MIN (nx,ny);
 
-    x000 = amin * ((x000-0.5)*scale + 0.5) + 0.5*(nx - amin);
-    x001 = amin * ((x001-0.5)*scale + 0.5) + 0.5*(nx - amin);
-    x010 = amin * ((x010-0.5)*scale + 0.5) + 0.5*(nx - amin);
-    x011 = amin * ((x011-0.5)*scale + 0.5) + 0.5*(nx - amin);
-    x100 = amin * ((x100-0.5)*scale + 0.5) + 0.5*(nx - amin);
-    x101 = amin * ((x101-0.5)*scale + 0.5) + 0.5*(nx - amin);
-    x110 = amin * ((x110-0.5)*scale + 0.5) + 0.5*(nx - amin);
-    x111 = amin * ((x111-0.5)*scale + 0.5) + 0.5*(nx - amin);
+    x000 = amin * ((x000-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x001 = amin * ((x001-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x010 = amin * ((x010-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x011 = amin * ((x011-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x100 = amin * ((x100-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x101 = amin * ((x101-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x110 = amin * ((x110-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x111 = amin * ((x111-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
 
-    y000 = amin * ((y000-0.5)*scale + 0.5) + 0.5*(ny - amin);
-    y001 = amin * ((y001-0.5)*scale + 0.5) + 0.5*(ny - amin);
-    y010 = amin * ((y010-0.5)*scale + 0.5) + 0.5*(ny - amin);
-    y011 = amin * ((y011-0.5)*scale + 0.5) + 0.5*(ny - amin);
-    y100 = amin * ((y100-0.5)*scale + 0.5) + 0.5*(ny - amin);
-    y101 = amin * ((y101-0.5)*scale + 0.5) + 0.5*(ny - amin);
-    y110 = amin * ((y110-0.5)*scale + 0.5) + 0.5*(ny - amin);
-    y111 = amin * ((y111-0.5)*scale + 0.5) + 0.5*(ny - amin);
+    y000 = amin * ((y000-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y001 = amin * ((y001-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y010 = amin * ((y010-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y011 = amin * ((y011-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y100 = amin * ((y100-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y101 = amin * ((y101-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y110 = amin * ((y110-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y111 = amin * ((y111-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
 
     // plot cube
 
