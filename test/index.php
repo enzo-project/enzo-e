@@ -4,7 +4,7 @@
 <link href="cello.css" rel="stylesheet" type="text/css">
 <?php
 if (file_exists("COMPILING")) {
-  echo "<meta http-equiv=\"refresh\" content=60>";
+  echo "<meta http-equiv=\"refresh\" content=20>";
 }
 ?>
    </head>
