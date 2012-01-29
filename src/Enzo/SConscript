@@ -39,8 +39,6 @@ sources  = [Glob('enzo_*cpp'),
 	    'Grid_ComputePressure.cpp',
 	    'Grid_ComputePressureDualEnergyFormalism.cpp',
 	    'Grid_ComputeTemperatureField.cpp',
-#	    'Grid_ComputeTimeStep_PPM.cpp',
-#	    'Grid_ComputeTimeStep_PPML.cpp',
 	    'Grid_IdentifyPhysicalQuantities.cpp',
 	    'Grid_IdentifySpeciesFields.cpp',
 	    'Grid_SetExternalBoundaryValues.cpp',
@@ -68,7 +66,6 @@ sources  = [Glob('enzo_*cpp'),
 	    'PPML_potoky.F',
 	    'PPML_potokz.F',
 	    'PPML_Primitive.F',
-#	    'PPML_QDD6.F',
 	    'PPML_sub.F',
 	    'PPML_TimeStep.F',
 	    'FindField.cpp']
@@ -89,7 +86,7 @@ env = env.Clone(LIBS=[components,libraries])
 # TARGETS
 #------------------------------
 
-libraries     = env.Library ('enzo', sources)
+libraries   = env.Library ('enzo', sources)
 
 test_enzo_p = env.Program (['enzo-p.cpp', charm_main])
 
