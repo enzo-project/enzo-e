@@ -73,12 +73,12 @@ Node * ItNode::next_leaf() throw()
 
 	seek_next_sibling_();
 	seek_next_leaf_();
-
+	  
       } else {
-
+	  
 	reset_ = true;
 	return 0;
-
+	  
       }
     }
     int level = node_trace_.level();
@@ -88,6 +88,46 @@ Node * ItNode::next_leaf() throw()
 
   return node_trace_.node();
 
+}
+
+//----------------------------------------------------------------------
+
+Node * ItNode::next_node() throw()
+{
+
+  bool in_range, is_leaf;
+  do {
+    if (reset_) {
+
+      reset_ = false;
+      node_trace_.reset();
+
+    } else {
+
+      if (node_trace_.node()->is_leaf()) {
+
+	seek_next_fork_();
+
+	if (node_trace_.level() != 0) {
+
+	  seek_next_sibling_();
+
+	} else {
+
+	  reset_ = true;
+	  return 0;
+
+	}
+      } else {
+	node_trace_.push(0);
+      }
+    }
+    int level = node_trace_.level();
+    in_range = (lower_level_ <= level) && (level <= upper_level_);
+    //    is_leaf  = node_trace_.node()->is_leaf();
+  } while ( ! (in_range ));
+
+  return node_trace_.node();
 }
 
 //----------------------------------------------------------------------

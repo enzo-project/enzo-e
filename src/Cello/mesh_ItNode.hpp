@@ -36,6 +36,9 @@ public: // interface
   /// Iterate through all leaf Nodes in the Tree
   Node * next_leaf () throw();
 
+  /// Iterate through all Nodes in the Tree
+  Node * next_node () throw();
+
   /// Return whether the iteration is complete
   bool done() const throw();
 
