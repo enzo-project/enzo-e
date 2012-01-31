@@ -20,7 +20,7 @@ PARALLEL_MAIN_BEGIN
   unit_init(0,1);
 
   //--------------------------------------------------
-  // Read input HDF5 into density[] array
+  // Read input HDF5 field into level array
   //--------------------------------------------------
 
   
@@ -34,79 +34,20 @@ PARALLEL_MAIN_BEGIN
   const char * field_name = PARALLEL_ARGV[2];
   int max_level = atoi(PARALLEL_ARGV[3]);
 
-  FileHdf5 file ("./",file_name);
-
-  file.file_open();
-
-  // H5T_IEEE_F32BE
   int nx,ny,nz;
-  scalar_type type = scalar_type_unknown;
-  file.data_open (field_name,&type,&nx,&ny,&nz);
+  int * levels = create_levels_from_hdf5 (file_name, field_name,
+					  &nx, &ny, &nz,  max_level);
 
-  float * density = new float [nx*ny*nz];
-  file.data_read(density);
-
-  //--------------------------------------------------
-  // Refine on density
-  //--------------------------------------------------
-
-  int d=3;
-  int r=2;
-  int min_level = 0;
-  Tree tree (d,r);
-  TRACE1("max_level=%d",max_level);
-
-  // find the min and max density
-  float dmin   =1.0e37;
-  float dmax = -1.0e37;
-
-  for (int iz=0; iz<nz; iz++) {
-    for (int iy=0; iy<ny; iy++) {
-      for (int ix=0; ix<nx; ix++) {
-	int i = ix + nx*(iy + ny*iz);
-	if (density[i] < dmin) dmin = density[i];
-	if (density[i] > dmax) dmax = density[i];
-      }
-    }
-  }
-  TRACE2 ("min = %f  max = %f",dmin,dmax);
-
-  //--------------------------------------------------
-  // create level array from density
-  //--------------------------------------------------
-
-  int * levels = new int [nx*ny*nz];
-
-  // linear interpolate log density between minimum level and maximum level
-
-  float lg_dmin = log(dmin);
-  float lg_dmax = log(dmax);
-
-  double hl = 1.0 / (max_level - min_level);
-  double hd = 1.0 / (lg_dmax - lg_dmin);
-
-  TRACE2 ("hl = %f  hd = %f",hl,hd);
-
-  int imx = -1000, imn=1000;
-  for (int iz=0; iz<nz; iz++) {
-    for (int iy=0; iy<ny; iy++) {
-      for (int ix=0; ix<nx; ix++) {
-	int i = ix + nx*(iy + ny*iz);
-	float d = log (density[i]) - lg_dmin;
-	levels[i] = min_level + (d+0.5) * hd / hl;
-	if (levels[i] < imn) imn = levels[i];
-	if (levels[i] > imx) imx = levels[i];
-      }
-    }
-  }
-  TRACE2 ("min level %d max level %d",imn,imx);
-
+			  
   // --------------------------------------------------
   // Create tree from level array
   // --------------------------------------------------
 
   Timer timer;
   timer.start();
+  int d=3;
+  int r=2;
+  Tree tree (d,r);
   create_tree_from_levels (&tree, levels,nx,ny,nz);
 
   TRACE1 ("Tree initial time = %f",timer.value());
@@ -118,22 +59,33 @@ PARALLEL_MAIN_BEGIN
   // Write tree to file
   // --------------------------------------------------
 
-  int mx=1024,my=1024;
+  int mx=2048,my=2048;
   double th= 0.3*M_PI; // spin
   double ph= 0.1*M_PI;
   double ps= -0.06*M_PI;
   int falloff = 3;
-  create_image_from_tree (&tree,"density_3d_1-initial.png",
-			  mx,my, 0,max_level, th,ph,ps, 0.5, false, falloff);
 
-  create_image_from_tree (&tree,"density_x_1-initial.png",
+  create_image_from_hdf5 (file_name,field_name,
+			  "density_field.png",
+			  mx,my, 0,max_level, ph,th,ps, 0.5, false, falloff);
+
+  create_image_from_tree (&tree,"density_3d_1-initial.png",
+			  mx,my, 0,max_level, ph,th,ps, 0.5, false, falloff);
+
+  for (int i=0; i<=tree.max_level(); i++) {
+    char filename[40];
+    sprintf (filename,"density_3d_1-initial-L%d.png",i);
+    create_image_from_tree (&tree,filename,
+			  mx,my, i,i, ph,th,ps, 0.5, false, falloff);
+  }
+
+  double a90 = 0.5*M_PI;
+  create_image_from_tree (&tree,"density_xy_1-initial.png",
 			  mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
-  // create_image_from_tree (&tree,"density_2-initial.png",
-  // 			  mx,my, 0,max_level, 0.5*M_PI,0.0,0.0, 1.0, true,0);
-  // create_image_from_tree (&tree,"density_3-initial.png",
-  // 			  mx,my, 0,max_level, 0.0,0.5*M_PI,0.0, 1.0, true,0);
-  // create_image_from_tree (&tree,"density_4-initial.png",
-  // 			  mx,my, 0,max_level, 0.0,0.0,0.5*M_PI, 1.0, true,0);
+  create_image_from_tree (&tree,"density_yz_1-initial.png",
+			  mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
+  create_image_from_tree (&tree,"density_zx_1-initial.png",
+			  mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
 
   // --------------------------------------------------
   // Balance tree
@@ -154,10 +106,14 @@ PARALLEL_MAIN_BEGIN
   // --------------------------------------------------
 
   create_image_from_tree (&tree,"density_3d_2-balanced.png",
-			  mx,my,  0,max_level, th,ph,ps, 0.5, false, falloff);
+			  mx,my,  0,max_level, ph,th,ps, 0.5, false, falloff);
 
-  create_image_from_tree (&tree,"density_x_2-balanced.png",
+  create_image_from_tree (&tree,"density_xy_2-balanced.png",
 			  mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
+  create_image_from_tree (&tree,"density_yz_2-balanced.png",
+			  mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
+  create_image_from_tree (&tree,"density_zx_2-balanced.png",
+			  mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
 
   // --------------------------------------------------
   // Patch coalescing
@@ -178,17 +134,20 @@ PARALLEL_MAIN_BEGIN
   // --------------------------------------------------
 
   create_image_from_tree (&tree,"density_3d_3-coalesced.png",
-			  mx,my,  0,max_level, th,ph,ps, 0.5, false, falloff);
+			  mx,my,  0,max_level, ph,th,ps, 0.5, false, falloff);
 
-  create_image_from_tree (&tree,"density_x_3-coalesced.png",
+  create_image_from_tree (&tree,"density_xy_3-coalesced.png",
 			  mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
+  create_image_from_tree (&tree,"density_yz_3-coalesced.png",
+			  mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
+  create_image_from_tree (&tree,"density_zx_3-coalesced.png",
+			  mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
 
   // --------------------------------------------------
 
   unit_finalize();
 
   delete [] levels;
-  delete [] density;
 
   PARALLEL_EXIT;
 }

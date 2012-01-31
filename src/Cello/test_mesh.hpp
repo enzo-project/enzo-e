@@ -320,7 +320,6 @@ void create_tree_from_levels
   int * m3 = new int [ max_level+1];
   m3[0] = 1;
   for (int i=1; i<=max_level; i++) m3[i]=r*m3[i-1];
-  int m=m3[max_level-1];
   // create tree
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
@@ -339,9 +338,6 @@ void create_tree_from_levels
 	  for (int jy = jy1; jy<jy2; jy++) {
 	    for (int jx = jx1; jx<jx2; jx++) {
 
-	      int j = jx + ml*(jy + ml*jz);
-
-	
 	      assert (0 <= i && i < nx*ny*nz);
 
 	      double x = 1.0*jx / ml;
@@ -385,8 +381,9 @@ void create_tree_from_levels
 inline void rotate
 (double *xr, double *yr, double *zr,
  double x, double y, double z,
- double theta, double phi, double psi,
+ double phi, double theta, double psi,
  bool ortho)
+// Rotate Z(phi) then Y(theta) then Z(psi)
 {
   double cph = cos(phi);
   double cps = cos(psi);
@@ -410,7 +407,7 @@ inline void rotate
   double r31 = sth*cph;
   double r32 = sth*sph;
   double r33 = cth;
-    
+
   if (xr) (*xr) = r11*x + r12*y + r13*z;
   if (yr) (*yr) = r21*x + r22*y + r23*z;
   if (zr) (*zr) = r31*x + r32*y + r33*z;
@@ -450,15 +447,13 @@ void create_image_from_tree (Tree * tree, std::string filename,
 
   pngwriter png (nx+1,ny+1,0,filename.c_str());
 
-  int i;
+  // determine color
 
-    // determine color
+  //    magenta   blue   cyan   green   yellow   red
 
-    //    magenta   blue   cyan   green   yellow   red
-
-    //    r  1.0                            1.0    1.0 
-    //    g                 0.5    1.0      1.0    0
-    //    b  1.0      1     0.5                    0
+  //    r  1.0                            1.0    1.0 
+  //    g                 0.5    1.0      1.0    0
+  //    b  1.0      1     0.5                    0
     
   const int num_colors = 6;
   const double rc[] = {1, 0, 0, 0, 1, 1};
@@ -477,6 +472,8 @@ void create_image_from_tree (Tree * tree, std::string filename,
     ba[i] = (1-a)*bc[ic] + a*bc[ic+1];
   }
 
+  double amin = MIN (nx,ny);
+
   ItNode it_node (tree,level_lower,level_upper);
   int r = tree->refinement();
   int d = tree->dimension();
@@ -491,7 +488,7 @@ void create_image_from_tree (Tree * tree, std::string filename,
     double h = 1.0 / r;
     int level = node_trace->level();
     // determine node boundaries scaled by [0:1,0:1]
-    for (i=1; i<=level; i++) {
+    for (int i=1; i<=level; i++) {
       int index_curr = node_trace->index_level(i);
       int kx,ky,kz;
       tree->index(index_curr,&kx,&ky,&kz);
@@ -525,8 +522,6 @@ void create_image_from_tree (Tree * tree, std::string filename,
 
     // scale points
     
-    double amin = MIN (nx,ny);
-
     x000 = amin * ((x000-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
     x001 = amin * ((x001-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
     x010 = amin * ((x010-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
@@ -558,7 +553,7 @@ void create_image_from_tree (Tree * tree, std::string filename,
     double o100 = o*0.5*(1+z100);
     double o101 = o*0.5*(1+z101);
     double o110 = o*0.5*(1+z110);
-    double o111 = o*0.5*(1+z111);
+
     int k = node_trace->level();
 
     png.line_blend(int(x000),int(y000),int(x001),int(y001),o000,ra[k],ga[k],ba[k]);
@@ -583,3 +578,174 @@ void create_image_from_tree (Tree * tree, std::string filename,
   png.close();
 }
 
+//------------------------------------------------------------------------
+
+int * create_levels_from_hdf5 
+(
+ std::string file_name,
+ std::string field_name,
+ int * nx, int * ny, int * nz,
+ int max_level
+ )
+{
+			      
+  FileHdf5 file ("./",file_name.c_str());
+
+  file.file_open();
+
+  // H5T_IEEE_F32BE
+
+  scalar_type type = scalar_type_unknown;
+  file.data_open (field_name,&type,nx,ny,nz);
+
+  float * density = new float [(*nx)*(*ny)*(*nz)];
+  file.data_read(density);
+
+  //--------------------------------------------------
+  // Refine on density
+  //--------------------------------------------------
+
+  // find the min and max density
+  float dmin   =1.0e37;
+  float dmax = -1.0e37;
+
+  for (int iz=0; iz<*nz; iz++) {
+    for (int iy=0; iy<*ny; iy++) {
+      for (int ix=0; ix<*nx; ix++) {
+	int i = ix + (*nx)*(iy + (*ny)*iz);
+	if (density[i] < dmin) dmin = density[i];
+	if (density[i] > dmax) dmax = density[i];
+      }
+    }
+  }
+
+  //--------------------------------------------------
+  // create level array from density
+  //--------------------------------------------------
+
+  int * levels = new int [(*nx)*(*ny)*(*nz)];
+
+  // linear interpolate log density between minimum level and maximum level
+
+  float lg_dmin = log(dmin);
+  float lg_dmax = log(dmax);
+
+  double hl = 1.0 / max_level;
+  double hd = 1.0 / (lg_dmax - lg_dmin);
+
+  int imx = -1000, imn=1000;
+  for (int iz=0; iz<(*nz); iz++) {
+    for (int iy=0; iy<(*ny); iy++) {
+      for (int ix=0; ix<(*nx); ix++) {
+	int i = ix + (*nx)*(iy + (*ny)*iz);
+	float d = log (density[i]) - lg_dmin;
+	levels[i] = (d+0.5) * hd / hl;
+	if (levels[i] < imn) imn = levels[i];
+	if (levels[i] > imx) imx = levels[i];
+      }
+    }
+  }
+
+  delete [] density;
+  return levels;
+}
+
+//------------------------------------------------------------------------
+
+void create_image_from_hdf5 
+(
+ std::string file_hdf5,
+ std::string field_name,
+ std::string file_png, 
+ int nx, int ny,
+ int level_lower=0, int level_upper=1000,
+ double theta=0.0, double phi=0.0, double psi=0.0,
+ double scale=1.0, bool ortho=true,
+ int falloff=0)
+{
+  FileHdf5 file ("./",file_hdf5.c_str());
+
+  file.file_open();
+  // H5T_IEEE_F32BE
+
+  scalar_type type = scalar_type_unknown;
+  int mx, my, mz;
+  file.data_open (field_name,&type,&mx,&my,&mz);
+
+  float * field = new float [mx*my*mz];
+  file.data_read(field);
+
+  pngwriter png (nx+1,ny+1,0,file_png.c_str());
+
+
+  // Determine field min and max
+  double fmin=1e37;
+  double fmax=-1e37;
+  for (int iz=0; iz<mz; iz++) {
+    for (int iy=0; iy<my; iy++) {
+      for (int ix=0; ix<mx; ix++) {
+	int i=ix + mx*(iy + my*iz);
+	if (field[i] < fmin) fmin = field[i];
+	if (field[i] > fmax) fmax = field[i];
+      }
+    }
+  }
+
+  fmin = log(fmin);
+  fmax = log(fmax);
+
+  // Colormap
+  const int num_colors = 6;
+  const double rc[] = {1, 0, 0, 0, 1, 1};
+  const double gc[] = {0, 0, 1, 1, 1, 0};
+  const double bc[] = {1, 1, 1, 0, 0, 0};
+
+    double amin = MIN (nx,ny);
+
+  for (int iz=0; iz<mz; iz++) {
+    double z = (1.0*iz / mz);
+    for (int iy=0; iy<my; iy++) {
+      double y = (1.0*iy / my);
+      for (int ix=0; ix<mx; ix++) {
+	double x = (1.0*ix / mx);
+
+	int i=ix + mx*(iy + my*iz);
+
+	double xr,yr,zr;
+
+	rotate(&xr,&yr,&zr, x,y,z, theta,phi,psi,ortho);
+
+	// scale
+	int ixr = amin * ((xr-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+	int iyr = amin * ((yr-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+
+
+	double ci = (log(field[i]) - fmin)/(fmax-fmin);
+
+	double o0 = 1.0* pow(ci, falloff+1);
+
+	int ic = ci * (num_colors-1);
+	double a = ci *(num_colors-1) - ic;
+
+	double r = (1-a)*rc[ic] + a*rc[ic+1];
+	double g = (1-a)*gc[ic] + a*gc[ic+1];
+	double b = (1-a)*bc[ic] + a*bc[ic+1];
+
+	for (int ky=-0; ky<=0; ky++) {
+	  for (int kx=-0; kx<=0; kx++) {
+	    double o = o0*pow(0.5,abs(kx)+abs(ky));
+	    png.plot_blend(ixr+kx,iyr+ky, o,r,g,b);
+	  }
+	}
+
+      }
+    }
+
+
+  }
+
+  png.close();
+
+
+
+}
