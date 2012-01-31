@@ -24,14 +24,15 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
   
-  if (PARALLEL_ARGC != 3) {
-    PARALLEL_PRINTF("Usage: %s <file_name> <field_name>\n\n",PARALLEL_ARGV[0]);
+  if (PARALLEL_ARGC != 4) {
+    PARALLEL_PRINTF("Usage: %s <file_name> <field_name> <max_level>\n\n",PARALLEL_ARGV[0]);
     unit_assert(false);
     PARALLEL_EXIT;
   }
 
   const char * file_name  = PARALLEL_ARGV[1];
   const char * field_name = PARALLEL_ARGV[2];
+  int max_level = atoi(PARALLEL_ARGV[3]);
 
   FileHdf5 file ("./",file_name);
 
@@ -52,7 +53,6 @@ PARALLEL_MAIN_BEGIN
   int d=3;
   int r=2;
   int min_level = 0;
-  int max_level = 10*2/r;
   Tree tree (d,r);
   TRACE1("max_level=%d",max_level);
 
@@ -81,22 +81,25 @@ PARALLEL_MAIN_BEGIN
 
   float lg_dmin = log(dmin);
   float lg_dmax = log(dmax);
-  float mult = 1.0*(max_level - min_level) / (lg_dmax - lg_dmin);
 
-  int c=0;
+  double hl = 1.0 / (max_level - min_level);
+  double hd = 1.0 / (lg_dmax - lg_dmin);
+
+  TRACE2 ("hl = %f  hd = %f",hl,hd);
+
   int imx = -1000, imn=1000;
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
       for (int ix=0; ix<nx; ix++) {
 	int i = ix + nx*(iy + ny*iz);
-	float lg_d = log (density[i]);
-	levels[i] = min_level + (lg_d - lg_dmin) * mult;
+	float d = log (density[i]) - lg_dmin;
+	levels[i] = min_level + (d+0.5) * hd / hl;
 	if (levels[i] < imn) imn = levels[i];
 	if (levels[i] > imx) imx = levels[i];
       }
     }
   }
-  TRACE3 ("%d %d %d ",imn,imx,c);
+  TRACE2 ("min level %d max level %d",imn,imx);
 
   // --------------------------------------------------
   // Create tree from level array
@@ -108,6 +111,7 @@ PARALLEL_MAIN_BEGIN
 
   TRACE1 ("Tree initial time = %f",timer.value());
   TRACE1 ("Tree initial nodes = %d",tree.num_nodes());
+  TRACE1 ("Tree initial depth = %d",tree.max_level());
 
 
   // --------------------------------------------------
@@ -124,6 +128,12 @@ PARALLEL_MAIN_BEGIN
 
   create_image_from_tree (&tree,"density_x_1-initial.png",
 			  mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
+  // create_image_from_tree (&tree,"density_2-initial.png",
+  // 			  mx,my, 0,max_level, 0.5*M_PI,0.0,0.0, 1.0, true,0);
+  // create_image_from_tree (&tree,"density_3-initial.png",
+  // 			  mx,my, 0,max_level, 0.0,0.5*M_PI,0.0, 1.0, true,0);
+  // create_image_from_tree (&tree,"density_4-initial.png",
+  // 			  mx,my, 0,max_level, 0.0,0.0,0.5*M_PI, 1.0, true,0);
 
   // --------------------------------------------------
   // Balance tree
@@ -136,6 +146,7 @@ PARALLEL_MAIN_BEGIN
   
   TRACE1 ("Tree balanced time = %f",timer.value());
   TRACE1 ("Tree balanced nodes = %d",tree.num_nodes());
+  TRACE1 ("Tree balanced depth = %d",tree.max_level());
 
 
   // --------------------------------------------------
@@ -160,6 +171,7 @@ PARALLEL_MAIN_BEGIN
 
   TRACE1 ("Tree coalesced time = %f",timer.value());
   TRACE1 ("Tree coalesced nodes = %d",tree.num_nodes());
+  TRACE1 ("Tree coalesced depth = %d",tree.max_level());
 
   // --------------------------------------------------
   // Write tree to file

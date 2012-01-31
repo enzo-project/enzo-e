@@ -115,15 +115,19 @@ public: // interface
   /// Set whether to fill memory with a value after allocating
   void set_allocate_fill (bool do_fill, char fill_value = 0)
   {
+#ifdef CONFIG_USE_MEMORY
     do_allocate_fill_    = do_fill;
     allocate_fill_value_ = fill_value;
+#endif
   };
 
   /// Set whether to fill memory with a value before deallocating
   void set_deallocate_fill (bool do_fill, char fill_value = 0)
   {
+#ifdef CONFIG_USE_MEMORY
     do_deallocate_fill_    = do_fill;
     deallocate_fill_value_ = fill_value;
+#endif
   };
 
 private: // functions

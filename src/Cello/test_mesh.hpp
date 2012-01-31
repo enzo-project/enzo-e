@@ -275,12 +275,13 @@ int * create_levels_from_image (std::string pngfile,
 
   for (int i=0; i<size; i++) level_array[i] = 0;
 
-
+  double h=1.0/256;
   for (int iy=0; iy<*ny; iy++) {
     for (int ix=0; ix<*nx; ix++) {
       int pixel = png.read(ix+1,iy+1);
       int i = ix + (*nx)*iy;
-      level_array[i] = max_levels * 1.0*pixel / 256;
+
+      level_array[i] = max_levels * h*(pixel+0.5);
     }
   }
 
@@ -303,6 +304,11 @@ void create_tree_from_levels
   timer.start();
 
   int r = tree->refinement();
+  int d = tree->dimension();
+  int r2d=r;
+  if (d>1) r2d *= r;
+  if (d>2) r2d *= r;
+  
 
   // max_level
 
@@ -310,53 +316,68 @@ void create_tree_from_levels
   for (int i=0; i<nx*ny*nz; i++) {
     if (levels[i] > max_level) max_level = levels[i];
   }  
-  //size of finest tree level m
-  int m=1;
-  for (int i=0; i<max_level; i++) m*=r;
-
-  // loop bounds mx,my,mz
-  int mx = (tree->dimension() >= 1) ? m : 1;
-  int my = (tree->dimension() >= 2) ? m : 1;
-  int mz = (tree->dimension() >= 3) ? m : 1;
-
+  // array of finest tree levels m
+  int * m3 = new int [ max_level+1];
+  m3[0] = 1;
+  for (int i=1; i<=max_level; i++) m3[i]=r*m3[i-1];
+  int m=m3[max_level-1];
   // create tree
-  for (int jz=0; jz<mz; jz++) {
-    int iz=jz*nz/mz;
-    for (int jy=0; jy<my; jy++) {
-      int iy=jy*ny/my;
-      for (int jx=0; jx<mx; jx++) {
-	int ix=jx*nx/mx;
-	
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
 	int i = ix + nx*(iy + ny*iz);
-	int j = jx + mx*(jy + my*jz);
+	int level = levels[i];
+	int ml = m3[level];
+	int jx1=ml*ix/nx; int jx2=ml*(ix+1)/nx;
+	int jy1=ml*iy/ny; int jy2=ml*(iy+1)/ny;
+	int jz1=ml*iz/nz; int jz2=ml*(iz+1)/nz;
+	if (nz==1) jz2=1;
+	jx2 = MAX(jx2,jx1+1);
+	jy2 = MAX(jy2,jy1+1);
+	jz2 = MAX(jz2,jz1+1);
+	for (int jz = jz1; jz<jz2; jz++) {
+	  for (int jy = jy1; jy<jy2; jy++) {
+	    for (int jx = jx1; jx<jx2; jx++) {
+
+	      int j = jx + ml*(jy + ml*jz);
 
 	
-	assert (0 <= i && i < nx*ny*nz);
-	int level = levels[i];
+	      assert (0 <= i && i < nx*ny*nz);
 
-	double x = 1.0*jx / mx;
-	double y = 1.0*jy / my;
-	double z = 1.0*jz / mz;
-	NodeTrace node_trace (tree->root_node());
-	while (--level > 0) {
-	  if (node_trace.node()->is_leaf()) {
-	    tree->refine_node (node_trace);
-	  }
-	  int irx = x * r;
-	  int iry = y * r;
-	  int irz = z * r;
-	  int ir = irx + r*(iry + r*irz);
+	      double x = 1.0*jx / ml;
+	      double y = 1.0*jy / ml;
+	      double z = 1.0*jz / ml;
+	      assert (0 <= x && x <= 1);
+	      assert (0 <= y && y <= 1);
+	      assert (0 <= z && z <= 1);
+	      NodeTrace node_trace (tree->root_node());
+	      int level_node = level;
+	      assert (0 <= level_node && level_node <= 20);
+	      while (level_node-- > 0) {
 
-	  node_trace.push(ir);
+		if (node_trace.node()->is_leaf()) {
+		  tree->refine_node (node_trace);
+		}
+		int irx = x * r;
+		int iry = y * r;
+		int irz = z * r;
+		int ir = irx + r*(iry + r*irz);
 
-	  x *= r; while (x >= 1.0) x -= 1.0;
-	  y *= r; while (y >= 1.0) y -= 1.0;
-	  z *= r; while (z >= 1.0) z -= 1.0;
-	  
+		assert (0 <= ir && ir < r2d);
+		node_trace.push(ir);
+
+		x *= r; while (x >= 1.0) x -= 1.0;
+		y *= r; while (y >= 1.0) y -= 1.0;
+		z *= r; while (z >= 1.0) z -= 1.0;
+
+	      }	  
+	    }	  
+	  }	  
 	}
       }
     }
   }
+  delete [] m3;
   printf ("create_tree_from_levels() time = %f s\n",timer.value());
 }
 //----------------------------------------------------------------------
@@ -448,7 +469,7 @@ void create_image_from_tree (Tree * tree, std::string filename,
   double * ga = new double [num_levels];
   double * ba = new double [num_levels];
   for (int i=0; i<num_levels; i++) {
-    double ci = double(i)/num_levels;
+    double ci = double(i)/(num_levels-1);
     int ic = ci * (num_colors-1);
     double a = ci *(num_colors-1) - ic;
     ra[i] = (1-a)*rc[ic] + a*rc[ic+1];

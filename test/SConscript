@@ -69,7 +69,7 @@ env.RunSerial('test_Block.unit',     bin_path + '/test_Block')
 Clean(env_mv_out.RunSerial('test_Tree.unit',      bin_path + '/test_Tree'),
       ['#/test_tree_initial.png', '#/test_tree_balanced.png'])
 Clean(env_mv_out.RunSerial('test_TreeDensity.unit',      bin_path + '/test_TreeDensity',
-                            ARGS='input/density_128.h5 Density'),
+                            ARGS='input/density_128.h5 Density 10'),
       ['#/density_3d_1-initial.png',
        '#/density_x_1-initial.png',
        '#/density_3d_2-balanced.png',
