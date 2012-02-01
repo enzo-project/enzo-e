@@ -40,6 +40,29 @@ PARALLEL_MAIN_BEGIN
 
 			  
   // --------------------------------------------------
+  // Write count of tagged zones in each level
+  // --------------------------------------------------
+
+  int * sum_field = new int [max_level+1];
+
+  for (int i=0; i<=max_level; i++) sum_field[i]=0;
+
+  for (int i=0; i<nx*ny*nz; i++) {
+    sum_field[levels[i]]++;
+  }
+
+  int * zones_per_block = new int [max_level+1];
+  // compute number of zones in a block at each level
+
+  int n=nx*ny*nz;
+  for (int i=0; i<=max_level; i++) {
+    zones_per_block[i]=n;
+    n/=8;
+  }
+
+  for (int i=0; i<=max_level; i++) TRACE2("Level %d  zones %d\n",i,sum_field[i]);
+
+  // --------------------------------------------------
   // Create tree from level array
   // --------------------------------------------------
 
@@ -50,10 +73,21 @@ PARALLEL_MAIN_BEGIN
   Tree tree (d,r);
   create_tree_from_levels (&tree, levels,nx,ny,nz);
 
-  TRACE1 ("Tree initial time = %f",timer.value());
-  TRACE1 ("Tree initial nodes = %d",tree.num_nodes());
-  TRACE1 ("Tree initial depth = %d",tree.max_level());
+  TRACE1 ("Initial time = %f",timer.value());
+  TRACE1 ("Initial nodes = %d",tree.num_nodes());
+  TRACE1 ("Initial depth = %d",tree.max_level());
 
+  int * sum_mesh = new int [max_level+1];
+
+  {
+    for (int i=0; i<=tree.max_level(); i++) sum_mesh[i]=0;
+    ItNode it_node(&tree);
+    while (it_node.next_leaf()) {
+      ++sum_mesh[it_node.node_trace()->level()];
+    }
+    for (int i=0; i<=max_level; i++) TRACE2("Initial level %d  blocks %d\n",i,sum_mesh[i]);
+    for (int i=0; i<=max_level; i++) TRACE2("Initial level %d  zones %d\n",i,zones_per_block[i]*sum_mesh[i]);
+  }
 
   // --------------------------------------------------
   // Write tree to file
@@ -96,11 +130,19 @@ PARALLEL_MAIN_BEGIN
 
   tree.balance();
   
-  TRACE1 ("Tree balanced time = %f",timer.value());
-  TRACE1 ("Tree balanced nodes = %d",tree.num_nodes());
-  TRACE1 ("Tree balanced depth = %d",tree.max_level());
+  TRACE1 ("Balanced time = %f",timer.value());
+  TRACE1 ("Balanced nodes = %d",tree.num_nodes());
+  TRACE1 ("Balanced depth = %d",tree.max_level());
 
-
+  {
+    for (int i=0; i<=tree.max_level(); i++) sum_mesh[i]=0;
+    ItNode it_node(&tree);
+    while (it_node.next_leaf()) {
+      ++sum_mesh[it_node.node_trace()->level()];
+    }
+    for (int i=0; i<=max_level; i++) TRACE2("Balanced level %d  blocks %d\n",i,sum_mesh[i]);
+    for (int i=0; i<=max_level; i++) TRACE2("Balanced level %d  zones %d\n",i,zones_per_block[i]*sum_mesh[i]);
+  }
   // --------------------------------------------------
   // Write tree to file
   // --------------------------------------------------
@@ -125,9 +167,19 @@ PARALLEL_MAIN_BEGIN
 
   tree.coalesce();
 
-  TRACE1 ("Tree coalesced time = %f",timer.value());
-  TRACE1 ("Tree coalesced nodes = %d",tree.num_nodes());
-  TRACE1 ("Tree coalesced depth = %d",tree.max_level());
+  TRACE1 ("Coalesced time = %f",timer.value());
+  TRACE1 ("Coalesced nodes = %d",tree.num_nodes());
+  TRACE1 ("Coalesced depth = %d",tree.max_level());
+
+  {
+    for (int i=0; i<=tree.max_level(); i++) sum_mesh[i]=0;
+    ItNode it_node(&tree);
+    while (it_node.next_leaf()) {
+      ++sum_mesh[it_node.node_trace()->level()];
+    }
+    for (int i=0; i<=max_level; i++) TRACE2("Coalesced level %d  blocks %d\n",i,sum_mesh[i]);
+    for (int i=0; i<=max_level; i++) TRACE2("Coalesced level %d  zones %d\n",i,zones_per_block[i]*sum_mesh[i]);
+  }
 
   // --------------------------------------------------
   // Write tree to file
@@ -144,10 +196,56 @@ PARALLEL_MAIN_BEGIN
 			  mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
 
   // --------------------------------------------------
+  // --------------------------------------------------
+  // Create 4-tree from level array
+  // --------------------------------------------------
+
+  {
+    Timer timer;
+    timer.start();
+    int d=3;
+    int r=4;
+    Tree tree (d,r);
+    create_tree_from_levels (&tree, levels,nx,ny,nz);
+
+    TRACE1 ("Targeted time = %f",timer.value());
+    TRACE1 ("Targeted nodes = %d",tree.num_nodes());
+    TRACE1 ("Targeted depth = %d",tree.max_level());
+
+    int * sum_mesh = new int [max_level+1];
+
+    {
+      for (int i=0; i<=tree.max_level(); i++) sum_mesh[i]=0;
+      ItNode it_node(&tree);
+      while (it_node.next_leaf()) {
+	++sum_mesh[it_node.node_trace()->level()];
+      }
+      for (int i=0; i<=max_level; i++) TRACE2("Targeted level %d  blocks %d\n",i,sum_mesh[i]);
+      for (int i=0; i<=max_level; i++) TRACE2("Targeted level %d  zones %d\n",i,zones_per_block[i]*sum_mesh[i]);
+    }
+
+    // --------------------------------------------------
+    // Write tree to file
+    // --------------------------------------------------
+
+    create_image_from_tree (&tree,"density_3d_3-targeted.png",
+			    mx,my,  0,max_level, ph,th,ps, 0.5, false, falloff);
+
+    create_image_from_tree (&tree,"density_xy_3-targeted.png",
+			    mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
+    create_image_from_tree (&tree,"density_yz_3-targeted.png",
+			    mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
+    create_image_from_tree (&tree,"density_zx_3-targeted.png",
+			    mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
+
+    // --------------------------------------------------
+  }
 
   unit_finalize();
 
   delete [] levels;
+  delete [] sum_field;
+  delete [] sum_mesh;
 
   PARALLEL_EXIT;
 }

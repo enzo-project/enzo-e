@@ -18,6 +18,12 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
+  std::string file_name = "input/test_balance.png";
+  if (PARALLEL_ARGC == 2) {
+    file_name = PARALLEL_ARGV[1];
+  }
+    
+
   unit_class("Tree");
 
   Tree * tree = test_tree_22();
@@ -252,12 +258,11 @@ PARALLEL_MAIN_BEGIN
     int width  = 1024;
     int height = 1024;
 
-    const char * file_name = "input/test_balance.png";
     std::string file_root = "test_tree";
     int nx,ny;
 
     int * levels = create_levels_from_image 
-      (file_name,&nx,&ny,max_depth);
+      (file_name.c_str(),&nx,&ny,max_depth);
 
     create_tree_from_levels (tree, levels, nx, ny);
 

@@ -316,16 +316,19 @@ void create_tree_from_levels
   for (int i=0; i<nx*ny*nz; i++) {
     if (levels[i] > max_level) max_level = levels[i];
   }  
+
+
   // array of finest tree levels m
   int * m3 = new int [ max_level+1];
   m3[0] = 1;
   for (int i=1; i<=max_level; i++) m3[i]=r*m3[i-1];
+
   // create tree
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
       for (int ix=0; ix<nx; ix++) {
 	int i = ix + nx*(iy + ny*iz);
-	int level = levels[i];
+	int level = levels[i] / (r/2);
 	int ml = m3[level];
 	int jx1=ml*ix/nx; int jx2=ml*(ix+1)/nx;
 	int jy1=ml*iy/ny; int jy2=ml*(iy+1)/ny;
@@ -445,6 +448,8 @@ void create_image_from_tree (Tree * tree, std::string filename,
 /// @param falloff refers to color blending with respect to levels: (level) ^ (-falloff)
 {
 
+  bool fill_blocks = (theta==0.0 && phi==0.0 && psi==0 && tree->dimension()==2);
+    
   pngwriter png (nx+1,ny+1,0,filename.c_str());
 
   // determine color
@@ -556,6 +561,14 @@ void create_image_from_tree (Tree * tree, std::string filename,
 
     int k = node_trace->level();
 
+    if (fill_blocks) {
+      png.filledsquare_blend(int(x000),int(y000),int(x110),int(y110),o000,ra[k],ga[k],ba[k]);
+      png.line(int(x000),int(y000),int(x100),int(y100),1.0,1.0,1.0);
+      png.line(int(x100),int(y100),int(x110),int(y110),1.0,1.0,1.0);
+      png.line(int(x110),int(y110),int(x010),int(y010),1.0,1.0,1.0);
+      png.line(int(x010),int(y010),int(x000),int(y000),1.0,1.0,1.0);
+    } else {
+
     png.line_blend(int(x000),int(y000),int(x001),int(y001),o000,ra[k],ga[k],ba[k]);
     png.line_blend(int(x010),int(y010),int(x011),int(y011),o010,ra[k],ga[k],ba[k]);
     png.line_blend(int(x100),int(y100),int(x101),int(y101),o100,ra[k],ga[k],ba[k]);
@@ -570,7 +583,7 @@ void create_image_from_tree (Tree * tree, std::string filename,
     png.line_blend(int(x001),int(y001),int(x101),int(y101),o001,ra[k],ga[k],ba[k]);
     png.line_blend(int(x010),int(y010),int(x110),int(y110),o010,ra[k],ga[k],ba[k]);
     png.line_blend(int(x011),int(y011),int(x111),int(y111),o011,ra[k],ga[k],ba[k]);
-
+    }
   }
   delete [] ra;
   delete [] ga;
@@ -619,6 +632,7 @@ int * create_levels_from_hdf5
     }
   }
 
+  // @@@@@@@
   //--------------------------------------------------
   // create level array from density
   //--------------------------------------------------
@@ -630,21 +644,21 @@ int * create_levels_from_hdf5
   float lg_dmin = log(dmin);
   float lg_dmax = log(dmax);
 
-  double hl = 1.0 / max_level;
   double hd = 1.0 / (lg_dmax - lg_dmin);
 
-  int imx = -1000, imn=1000;
+  int mn=1000; int mx=-1000;
   for (int iz=0; iz<(*nz); iz++) {
     for (int iy=0; iy<(*ny); iy++) {
       for (int ix=0; ix<(*nx); ix++) {
 	int i = ix + (*nx)*(iy + (*ny)*iz);
-	float d = log (density[i]) - lg_dmin;
-	levels[i] = (d+0.5) * hd / hl;
-	if (levels[i] < imn) imn = levels[i];
-	if (levels[i] > imx) imx = levels[i];
+	float d = hd*(log (density[i]) - lg_dmin); // normalize between 0 and 1
+	levels[i] = d*max_level+0.5; 
+	if (mn > levels[i]) mn=levels[i];
+	if (mx < levels[i]) mx=levels[i];
       }
     }
   }
+  printf ("%d %d\n",mn,mx);
 
   delete [] density;
   return levels;
