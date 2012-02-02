@@ -596,7 +596,7 @@ void create_image_from_tree (Tree * tree, std::string filename,
 //------------------------------------------------------------------------
 
 enum refine_type {
-  refine_log_value
+  refine_log_value,
   refine_log_slope
 };
 
@@ -618,14 +618,14 @@ int * create_levels_from_hdf5
   scalar_type type = scalar_type_unknown;
   file.data_open (field_name,&type,nx,ny,nz);
 
-  float * density = new float [(*nx)*(*ny)*(*nz)];
-  file.data_read(density);
+  float * field = new float [(*nx)*(*ny)*(*nz)];
+  file.data_read(field);
 
   //--------------------------------------------------
-  // Refine on density
+  // Refine
   //--------------------------------------------------
 
-  // find the min and max density
+  // find the min and max field value
   float dmin   =1.0e37;
   float dmax = -1.0e37;
 
@@ -633,41 +633,43 @@ int * create_levels_from_hdf5
     for (int iy=0; iy<*ny; iy++) {
       for (int ix=0; ix<*nx; ix++) {
 	int i = ix + (*nx)*(iy + (*ny)*iz);
-	if (density[i] < dmin) dmin = density[i];
-	if (density[i] > dmax) dmax = density[i];
+	if (field[i] < dmin) dmin = field[i];
+	if (field[i] > dmax) dmax = field[i];
       }
     }
   }
 
-  // @@@@@@@
   //--------------------------------------------------
-  // create level array from density
+  // create level array from field using refine type
   //--------------------------------------------------
 
   int * levels = new int [(*nx)*(*ny)*(*nz)];
 
-  // linear interpolate log density between minimum level and maximum level
+  // linear interpolate log field between minimum level and maximum level
 
   float lg_dmin = log(dmin);
   float lg_dmax = log(dmax);
 
   double hd = 1.0 / (lg_dmax - lg_dmin);
 
-  int mn=1000; int mx=-1000;
-  for (int iz=0; iz<(*nz); iz++) {
-    for (int iy=0; iy<(*ny); iy++) {
-      for (int ix=0; ix<(*nx); ix++) {
-	int i = ix + (*nx)*(iy + (*ny)*iz);
-	float d = hd*(log (density[i]) - lg_dmin); // normalize between 0 and 1
-	levels[i] = d*max_level+0.5; 
-	if (mn > levels[i]) mn=levels[i];
-	if (mx < levels[i]) mx=levels[i];
+  switch (refine) {
+  case refine_log_value:
+    for (int iz=0; iz<(*nz); iz++) {
+      for (int iy=0; iy<(*ny); iy++) {
+	for (int ix=0; ix<(*nx); ix++) {
+	  int i = ix + (*nx)*(iy + (*ny)*iz);
+	  float d = hd*(log (field[i]) - lg_dmin); // normalize between 0 and 1
+	  levels[i] = d*max_level+0.5; 
+	}
       }
     }
+    break;
+  case refine_log_slope:
+    exit(1);
+    break;
   }
-  printf ("%d %d\n",mn,mx);
 
-  delete [] density;
+  delete [] field;
   return levels;
 }
 
