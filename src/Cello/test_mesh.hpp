@@ -161,6 +161,8 @@ Tree * test_tree_22()
   return tree;
 }
 
+// ----------------------------------------------------------------------
+
 Tree * test_tree_32()
 {
 
@@ -593,12 +595,17 @@ void create_image_from_tree (Tree * tree, std::string filename,
 
 //------------------------------------------------------------------------
 
+enum refine_type {
+  refine_log_value
+  refine_log_slope
+};
+
 int * create_levels_from_hdf5 
 (
  std::string file_name,
  std::string field_name,
  int * nx, int * ny, int * nz,
- int max_level
+ int max_level, refine_type refine = refine_log_value
  )
 {
 			      
@@ -736,7 +743,7 @@ void create_image_from_hdf5
 
 	double ci = (log(field[i]) - fmin)/(fmax-fmin);
 
-	double o0 = 1.0* pow(ci, falloff+1);
+	double o0 = 1.0* pow(ci, falloff);
 
 	int ic = ci * (num_colors-1);
 	double a = ci *(num_colors-1) - ic;
@@ -745,8 +752,9 @@ void create_image_from_hdf5
 	double g = (1-a)*gc[ic] + a*gc[ic+1];
 	double b = (1-a)*bc[ic] + a*bc[ic+1];
 
-	for (int ky=-0; ky<=0; ky++) {
-	  for (int kx=-0; kx<=0; kx++) {
+	for (int ky=-1; ky<=1; ky++) {
+	  for (int kx=-1; kx<=1; kx++) {
+	    //double o=o0;
 	    double o = o0*pow(0.5,abs(kx)+abs(ky));
 	    png.plot_blend(ixr+kx,iyr+ky, o,r,g,b);
 	  }

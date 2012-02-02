@@ -93,7 +93,7 @@ PARALLEL_MAIN_BEGIN
   // Write tree to file
   // --------------------------------------------------
 
-  int mx=2048,my=2048;
+  int mx=1024,my=1024;
   double th= 0.3*M_PI; // spin
   double ph= 0.1*M_PI;
   double ps= -0.06*M_PI;
