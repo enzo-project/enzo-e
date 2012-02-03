@@ -14,6 +14,7 @@ class Hierarchy;
 class ItField;
 class Patch;
 class Schedule;
+class Simulation;
 
 class Output {
 
@@ -100,6 +101,15 @@ public: // virtual functions
   /// Finalize output
   virtual void finalize () throw ()
   { count_output_ ++; }
+
+  /// Write an entire simulation to disk
+  virtual void write_simulation
+  (
+   Factory    * factory,
+   FieldDescr * field_descr,
+   Hierarchy  * hierarchy,
+   Simulation * simulation
+   ) throw();
 
   /// Write local hierarchy data to disk
   virtual void write_hierarchy

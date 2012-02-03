@@ -147,6 +147,21 @@ double Output::update_timestep (double time, double dt) const
   return schedule_->update_timestep(time,dt); 
 }
 
+
+//----------------------------------------------------------------------
+
+void Output::write_simulation
+(
+ Factory    * factory,
+ FieldDescr * field_descr,
+ Hierarchy  * hierarchy,
+ Simulation * simulation
+ ) throw()
+{
+  WARNING("Output::write_simulation()",
+	  "This function should not be called");
+}
+
 //----------------------------------------------------------------------
 
 void Output::write_hierarchy

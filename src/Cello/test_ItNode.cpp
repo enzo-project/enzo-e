@@ -27,7 +27,7 @@ PARALLEL_MAIN_BEGIN
   {
     Tree * tree = test_tree_22();
 
-    create_image_from_tree (tree, "test_ItNode.png",512,512);
+    tree_to_png (tree, "test_ItNode.png",512,512);
 
     // Test ItNode depth-first Morton ordering
 

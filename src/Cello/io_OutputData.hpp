@@ -41,7 +41,6 @@ public: // virtual functions
   /// Finalize output
   virtual void finalize () throw ();
 
-
   /// Write hierarchy data to disk
   virtual void write_hierarchy
   ( const FieldDescr * field_descr,

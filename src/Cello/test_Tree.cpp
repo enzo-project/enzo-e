@@ -261,12 +261,12 @@ PARALLEL_MAIN_BEGIN
     std::string file_root = "test_tree";
     int nx,ny;
 
-    int * levels = create_levels_from_image 
+    int * levels = png_to_levels
       (file_name.c_str(),&nx,&ny,max_depth);
 
-    create_tree_from_levels (tree, levels, nx, ny);
+    levels_to_tree (tree, levels, nx, ny);
 
-    create_image_from_tree (tree, file_root + "_initial.png",width,height);
+    tree_to_png (tree, file_root + "_initial.png",width,height);
 
     int count_level[max_depth];
     for (int level = 0; level < max_depth; level ++)
@@ -314,7 +314,7 @@ PARALLEL_MAIN_BEGIN
     printf ("tree balanced num_nodes = %d\n",tree->num_nodes());
     printf ("tree balanced max_level = %d\n",tree->max_level());
 
-    create_image_from_tree (tree, file_root + "_balanced.png",width,height);
+    tree_to_png (tree, file_root + "_balanced.png",width,height);
     
     //--------------------------------------------------
     // Coalesce tree nodes
@@ -329,7 +329,7 @@ PARALLEL_MAIN_BEGIN
     printf ("tree coalesced num_nodes = %d\n",tree->num_nodes());
     printf ("tree coalesced max_level = %d\n",tree->max_level());
 
-    create_image_from_tree (tree, file_root + "_coalesced.png",width,height);
+    tree_to_png (tree, file_root + "_coalesced.png",width,height);
 
     delete tree;
   }

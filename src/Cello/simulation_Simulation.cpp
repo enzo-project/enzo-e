@@ -1084,6 +1084,8 @@ Output * Simulation::create_output_ (std::string type) throw ()
     output = new OutputImage (&factory(),np,nx,ny);
   } else if (type == "data") {
     output = new OutputData (&factory());
+  } else if (type == "restart") {
+    output = new OutputRestart (&factory());
   }
   return output;
 }

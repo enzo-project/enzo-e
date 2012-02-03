@@ -46,6 +46,7 @@
 #include "io_Output.hpp"
 #include "io_OutputImage.hpp"
 #include "io_OutputData.hpp"
+#include "io_OutputRestart.hpp"
 
 #include "io_Schedule.hpp"
 
