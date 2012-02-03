@@ -5,7 +5,7 @@ cc  = {}
 is_arch_valid = 1
 
 flags_arch = '-g -Wall -O3'
-flags_link = '-rdynamic'
+flags_link = '-rdynamic -lpthread'
 
 cc['mpi']     = 'mpicc'
 cc['serial']  = 'gcc'

@@ -24,21 +24,34 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
   
-  if (PARALLEL_ARGC != 4) {
-    PARALLEL_PRINTF("Usage: %s <file_name> <field_name> <max_level>\n\n",PARALLEL_ARGV[0]);
+  if (!(PARALLEL_ARGC == 4 || PARALLEL_ARGC == 5)) {
+    PARALLEL_PRINTF("Usage: %s <file_name> [ <group_name> ] <field_name> <max_level>\n\n",PARALLEL_ARGV[0]);
     unit_assert(false);
     PARALLEL_EXIT;
   }
 
-  const char * file_name  = PARALLEL_ARGV[1];
-  const char * field_name = PARALLEL_ARGV[2];
-  int max_level = atoi(PARALLEL_ARGV[3]);
+  char * file_name = 0;
+  char * group_name = 0;
+  char * field_name = 0;
+  int max_level;
+
+  int arg=1;
+  file_name = PARALLEL_ARGV[arg++];
+  if (PARALLEL_ARGC == 5) {
+    group_name = PARALLEL_ARGV[arg++];
+  } else {
+    group_name = strdup("");
+  }
+  field_name = PARALLEL_ARGV[arg++];
+  max_level = atoi(PARALLEL_ARGV[arg++]);
 
   int nx,ny,nz;
-  int * levels = create_levels_from_hdf5 (file_name, field_name,
-					  &nx, &ny, &nz,  max_level);
+  int * levels = hdf5_to_levels
+    (file_name, group_name, field_name, &nx, &ny, &nz, max_level);
 
-			  
+  int dimension = nz==1?2:3;
+  int refinement=2;
+
   // --------------------------------------------------
   // Write count of tagged zones in each level
   // --------------------------------------------------
@@ -47,20 +60,19 @@ PARALLEL_MAIN_BEGIN
 
   for (int i=0; i<=max_level; i++) sum_field[i]=0;
 
-  for (int i=0; i<nx*ny*nz; i++) {
+  int n=nx*ny*nz;
+  for (int i=0; i<n; i++) {
     sum_field[levels[i]]++;
   }
 
   int * zones_per_block = new int [max_level+1];
   // compute number of zones in a block at each level
 
-  int n=nx*ny*nz;
   for (int i=0; i<=max_level; i++) {
     zones_per_block[i]=n;
     n/=8;
   }
 
-  for (int i=0; i<=max_level; i++) TRACE2("Level %d  zones %d\n",i,sum_field[i]);
 
   // --------------------------------------------------
   // Create tree from level array
@@ -68,14 +80,16 @@ PARALLEL_MAIN_BEGIN
 
   Timer timer;
   timer.start();
-  int d=3;
-  int r=2;
-  Tree tree (d,r);
-  create_tree_from_levels (&tree, levels,nx,ny,nz);
+  Tree tree (dimension,refinement);
 
-  TRACE1 ("Initial time = %f",timer.value());
-  TRACE1 ("Initial nodes = %d",tree.num_nodes());
-  TRACE1 ("Initial depth = %d",tree.max_level());
+  levels_to_tree (&tree, levels,nx,ny,nz);
+
+  timer.stop();
+
+  printf ("tree initial time      = %f\n",timer.value());
+  printf ("tree initial num_nodes = %d\n",tree.num_nodes());
+  printf ("tree initial max_level = %d\n",tree.max_level());
+
 
   int * sum_mesh = new int [max_level+1];
 
@@ -85,8 +99,6 @@ PARALLEL_MAIN_BEGIN
     while (it_node.next_leaf()) {
       ++sum_mesh[it_node.node_trace()->level()];
     }
-    for (int i=0; i<=max_level; i++) TRACE2("Initial level %d  blocks %d\n",i,sum_mesh[i]);
-    for (int i=0; i<=max_level; i++) TRACE2("Initial level %d  zones %d\n",i,zones_per_block[i]*sum_mesh[i]);
   }
 
   // --------------------------------------------------
@@ -98,28 +110,34 @@ PARALLEL_MAIN_BEGIN
   double ph= 0.1*M_PI;
   double ps= -0.06*M_PI;
   int falloff = 3;
+  double scale = 0.6;
+  if (nz == 1) {
+    tree_to_png (&tree,"density_2d_1-initial.png",
+		 mx,my, 0,max_level, 0.0,0.0,0.0, scale, true, falloff);
+  } else  {
+    tree_to_png (&tree,"density_3d_1-initial.png",
+		 mx,my, 0,max_level, ph,th,ps, scale, false, falloff);
+  }
+  hdf5_to_png (file_name,field_name,
+	       "density_field.png",
+	       mx,my, 0,max_level, ph,th,ps, scale, false, falloff);
 
-  create_image_from_hdf5 (file_name,field_name,
-			  "density_field.png",
-			  mx,my, 0,max_level, ph,th,ps, 0.5, false, falloff);
-
-  create_image_from_tree (&tree,"density_3d_1-initial.png",
-			  mx,my, 0,max_level, ph,th,ps, 0.5, false, falloff);
 
   for (int i=0; i<=tree.max_level(); i++) {
     char filename[40];
     sprintf (filename,"density_3d_1-initial-L%d.png",i);
-    create_image_from_tree (&tree,filename,
-			  mx,my, i,i, ph,th,ps, 0.5, false, falloff);
+    tree_to_png (&tree,filename,
+		 mx,my, i,i, ph,th,ps, scale, false, falloff);
   }
 
   double a90 = 0.5*M_PI;
-  create_image_from_tree (&tree,"density_xy_1-initial.png",
-			  mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
-  create_image_from_tree (&tree,"density_yz_1-initial.png",
-			  mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
-  create_image_from_tree (&tree,"density_zx_1-initial.png",
-			  mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
+  tree_to_png (&tree,"density_xy_1-initial.png",
+	       mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
+  tree_to_png (&tree,"density_yz_1-initial.png",
+	       mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
+  tree_to_png (&tree,"density_zx_1-initial.png",
+	       mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
+
 
   // --------------------------------------------------
   // Balance tree
@@ -130,9 +148,11 @@ PARALLEL_MAIN_BEGIN
 
   tree.balance();
   
-  TRACE1 ("Balanced time = %f",timer.value());
-  TRACE1 ("Balanced nodes = %d",tree.num_nodes());
-  TRACE1 ("Balanced depth = %d",tree.max_level());
+  timer.stop();
+
+  printf ("tree balanced time      = %f\n",timer.value());
+  printf ("tree balanced num_nodes = %d\n",tree.num_nodes());
+  printf ("tree balanced max_level = %d\n",tree.max_level());
 
   {
     for (int i=0; i<=tree.max_level(); i++) sum_mesh[i]=0;
@@ -140,22 +160,20 @@ PARALLEL_MAIN_BEGIN
     while (it_node.next_leaf()) {
       ++sum_mesh[it_node.node_trace()->level()];
     }
-    for (int i=0; i<=max_level; i++) TRACE2("Balanced level %d  blocks %d\n",i,sum_mesh[i]);
-    for (int i=0; i<=max_level; i++) TRACE2("Balanced level %d  zones %d\n",i,zones_per_block[i]*sum_mesh[i]);
   }
   // --------------------------------------------------
   // Write tree to file
   // --------------------------------------------------
 
-  create_image_from_tree (&tree,"density_3d_2-balanced.png",
-			  mx,my,  0,max_level, ph,th,ps, 0.5, false, falloff);
+  tree_to_png (&tree,"density_3d_2-balanced.png",
+	       mx,my,  0,max_level, ph,th,ps, scale, false, falloff);
 
-  create_image_from_tree (&tree,"density_xy_2-balanced.png",
-			  mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
-  create_image_from_tree (&tree,"density_yz_2-balanced.png",
-			  mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
-  create_image_from_tree (&tree,"density_zx_2-balanced.png",
-			  mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
+  tree_to_png (&tree,"density_xy_2-balanced.png",
+	       mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
+  tree_to_png (&tree,"density_yz_2-balanced.png",
+	       mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
+  tree_to_png (&tree,"density_zx_2-balanced.png",
+	       mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
 
   // --------------------------------------------------
   // Patch coalescing
@@ -166,10 +184,7 @@ PARALLEL_MAIN_BEGIN
 
 
   tree.coalesce();
-
-  TRACE1 ("Coalesced time = %f",timer.value());
-  TRACE1 ("Coalesced nodes = %d",tree.num_nodes());
-  TRACE1 ("Coalesced depth = %d",tree.max_level());
+  timer.stop();
 
   {
     for (int i=0; i<=tree.max_level(); i++) sum_mesh[i]=0;
@@ -177,23 +192,25 @@ PARALLEL_MAIN_BEGIN
     while (it_node.next_leaf()) {
       ++sum_mesh[it_node.node_trace()->level()];
     }
-    for (int i=0; i<=max_level; i++) TRACE2("Coalesced level %d  blocks %d\n",i,sum_mesh[i]);
-    for (int i=0; i<=max_level; i++) TRACE2("Coalesced level %d  zones %d\n",i,zones_per_block[i]*sum_mesh[i]);
   }
+
+  printf ("tree merged time      = %f\n",timer.value());
+  printf ("tree merged num_nodes = %d\n",tree.num_nodes());
+  printf ("tree merged max_level = %d\n",tree.max_level());
 
   // --------------------------------------------------
   // Write tree to file
   // --------------------------------------------------
 
-  create_image_from_tree (&tree,"density_3d_3-coalesced.png",
-			  mx,my,  0,max_level, ph,th,ps, 0.5, false, falloff);
+  tree_to_png (&tree,"density_3d_3-coalesced.png",
+	       mx,my,  0,max_level, ph,th,ps, scale, false, falloff);
 
-  create_image_from_tree (&tree,"density_xy_3-coalesced.png",
-			  mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
-  create_image_from_tree (&tree,"density_yz_3-coalesced.png",
-			  mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
-  create_image_from_tree (&tree,"density_zx_3-coalesced.png",
-			  mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
+  tree_to_png (&tree,"density_xy_3-coalesced.png",
+	       mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
+  tree_to_png (&tree,"density_yz_3-coalesced.png",
+	       mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
+  tree_to_png (&tree,"density_zx_3-coalesced.png",
+	       mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
 
   // --------------------------------------------------
   // --------------------------------------------------
@@ -206,11 +223,8 @@ PARALLEL_MAIN_BEGIN
     int d=3;
     int r=4;
     Tree tree (d,r);
-    create_tree_from_levels (&tree, levels,nx,ny,nz);
+    levels_to_tree (&tree, levels,nx,ny,nz);
 
-    TRACE1 ("Targeted time = %f",timer.value());
-    TRACE1 ("Targeted nodes = %d",tree.num_nodes());
-    TRACE1 ("Targeted depth = %d",tree.max_level());
 
     int * sum_mesh = new int [max_level+1];
 
@@ -220,23 +234,21 @@ PARALLEL_MAIN_BEGIN
       while (it_node.next_leaf()) {
 	++sum_mesh[it_node.node_trace()->level()];
       }
-      for (int i=0; i<=max_level; i++) TRACE2("Targeted level %d  blocks %d\n",i,sum_mesh[i]);
-      for (int i=0; i<=max_level; i++) TRACE2("Targeted level %d  zones %d\n",i,zones_per_block[i]*sum_mesh[i]);
     }
 
     // --------------------------------------------------
     // Write tree to file
     // --------------------------------------------------
 
-    create_image_from_tree (&tree,"density_3d_3-targeted.png",
-			    mx,my,  0,max_level, ph,th,ps, 0.5, false, falloff);
+    tree_to_png (&tree,"density_3d_3-targeted.png",
+		 mx,my,  0,max_level, ph,th,ps, scale, false, falloff);
 
-    create_image_from_tree (&tree,"density_xy_3-targeted.png",
-			    mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
-    create_image_from_tree (&tree,"density_yz_3-targeted.png",
-			    mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
-    create_image_from_tree (&tree,"density_zx_3-targeted.png",
-			    mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
+    tree_to_png (&tree,"density_xy_3-targeted.png",
+		 mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
+    tree_to_png (&tree,"density_yz_3-targeted.png",
+		 mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
+    tree_to_png (&tree,"density_zx_3-targeted.png",
+		 mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
 
     // --------------------------------------------------
   }

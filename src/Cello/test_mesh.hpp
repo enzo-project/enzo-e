@@ -257,8 +257,8 @@ Tree * test_tree_32()
 
 //----------------------------------------------------------------------
 
-int * create_levels_from_image (std::string pngfile, 
-				int * nx, int * ny, int max_levels)
+int * png_to_levels (std::string pngfile, 
+		     int * nx, int * ny, int max_levels)
 // return an array of integer values between [0 and max_levels)
 // corresponding to the grayscale values of the input png file,
 // indexed by ix + nx*iy
@@ -294,12 +294,12 @@ int * create_levels_from_image (std::string pngfile,
 
 //----------------------------------------------------------------------
 
-void create_tree_from_levels 
+void levels_to_tree
 (
  Tree * tree, 
  int * levels, 
  int nx, int ny, int nz=1
-)
+ )
 {
 
   Timer timer;
@@ -379,7 +379,7 @@ void create_tree_from_levels
     }
   }
   delete [] m3;
-  printf ("create_tree_from_levels() time = %f s\n",timer.value());
+  printf ("levels_to_tree() time = %f s\n",timer.value());
 }
 //----------------------------------------------------------------------
 
@@ -432,12 +432,14 @@ inline void rotate
 
 }
 
-void create_image_from_tree (Tree * tree, std::string filename, 
-			     int nx, int ny,
-			     int level_lower=0, int level_upper=1000,
-			     double theta=0.0, double phi=0.0, double psi=0.0,
-			     double scale=1.0, bool ortho=true,
-			     int falloff=0)
+//----------------------------------------------------------------------
+
+void tree_to_png (Tree * tree, std::string filename, 
+		  int nx, int ny,
+		  int level_lower=0, int level_upper=1000,
+		  double theta=0.0, double phi=0.0, double psi=0.0,
+		  double scale=1.0, bool ortho=true,
+		  int falloff=0)
 /// @brief Generate a PNG image of a tree
 ///
 /// @param tree is the 2D or 3D tree from which to generate the image
@@ -454,14 +456,11 @@ void create_image_from_tree (Tree * tree, std::string filename,
     
   pngwriter png (nx+1,ny+1,0,filename.c_str());
 
-  // determine color
+  // background 
+  //  png.filledsquare(1,1,nx+1,ny+1,1.0,1.0,1.0);
 
-  //    magenta   blue   cyan   green   yellow   red
 
-  //    r  1.0                            1.0    1.0 
-  //    g                 0.5    1.0      1.0    0
-  //    b  1.0      1     0.5                    0
-    
+  // determine color table
   const int num_colors = 6;
   const double rc[] = {1, 0, 0, 0, 1, 1};
   const double gc[] = {0, 0, 1, 1, 1, 0};
@@ -571,20 +570,20 @@ void create_image_from_tree (Tree * tree, std::string filename,
       png.line(int(x010),int(y010),int(x000),int(y000),1.0,1.0,1.0);
     } else {
 
-    png.line_blend(int(x000),int(y000),int(x001),int(y001),o000,ra[k],ga[k],ba[k]);
-    png.line_blend(int(x010),int(y010),int(x011),int(y011),o010,ra[k],ga[k],ba[k]);
-    png.line_blend(int(x100),int(y100),int(x101),int(y101),o100,ra[k],ga[k],ba[k]);
-    png.line_blend(int(x110),int(y110),int(x111),int(y111),o110,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x000),int(y000),int(x001),int(y001),o000,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x010),int(y010),int(x011),int(y011),o010,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x100),int(y100),int(x101),int(y101),o100,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x110),int(y110),int(x111),int(y111),o110,ra[k],ga[k],ba[k]);
 
-    png.line_blend(int(x000),int(y000),int(x010),int(y010),o000,ra[k],ga[k],ba[k]);
-    png.line_blend(int(x001),int(y001),int(x011),int(y011),o001,ra[k],ga[k],ba[k]);
-    png.line_blend(int(x100),int(y100),int(x110),int(y110),o100,ra[k],ga[k],ba[k]);
-    png.line_blend(int(x101),int(y101),int(x111),int(y111),o101,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x000),int(y000),int(x010),int(y010),o000,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x001),int(y001),int(x011),int(y011),o001,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x100),int(y100),int(x110),int(y110),o100,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x101),int(y101),int(x111),int(y111),o101,ra[k],ga[k],ba[k]);
 
-    png.line_blend(int(x000),int(y000),int(x100),int(y100),o000,ra[k],ga[k],ba[k]);
-    png.line_blend(int(x001),int(y001),int(x101),int(y101),o001,ra[k],ga[k],ba[k]);
-    png.line_blend(int(x010),int(y010),int(x110),int(y110),o010,ra[k],ga[k],ba[k]);
-    png.line_blend(int(x011),int(y011),int(x111),int(y111),o011,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x000),int(y000),int(x100),int(y100),o000,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x001),int(y001),int(x101),int(y101),o001,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x010),int(y010),int(x110),int(y110),o010,ra[k],ga[k],ba[k]);
+      png.line_blend(int(x011),int(y011),int(x111),int(y111),o011,ra[k],ga[k],ba[k]);
     }
   }
   delete [] ra;
@@ -600,9 +599,10 @@ enum refine_type {
   refine_log_slope
 };
 
-int * create_levels_from_hdf5 
+int * hdf5_to_levels
 (
  std::string file_name,
+ std::string group_name,
  std::string field_name,
  int * nx, int * ny, int * nz,
  int max_level, refine_type refine = refine_log_value
@@ -613,13 +613,30 @@ int * create_levels_from_hdf5
 
   file.file_open();
 
-  // H5T_IEEE_F32BE
-
+  if (group_name != "") {
+    file.group_chdir(group_name);
+    file.group_open();
+  }
   scalar_type type = scalar_type_unknown;
-  file.data_open (field_name,&type,nx,ny,nz);
+  if (nz) {
+    file.data_open (field_name,&type,nx,ny,nz);
+  } else {
+    file.data_open (field_name,&type,nx,ny);
+  }
 
-  float * field = new float [(*nx)*(*ny)*(*nz)];
+  int mx=*nx;
+  int my=*ny;
+  int mz=nz?(*nz):1;
+
+  TRACE3("%d %d %d",mx,my,mz);
+  float * field = new float [mx*my*mz];
   file.data_read(field);
+  TRACE0;
+
+  file.data_close();
+  file.group_close();
+  file.file_close();
+
 
   //--------------------------------------------------
   // Refine
@@ -629,10 +646,10 @@ int * create_levels_from_hdf5
   float dmin   =1.0e37;
   float dmax = -1.0e37;
 
-  for (int iz=0; iz<*nz; iz++) {
-    for (int iy=0; iy<*ny; iy++) {
-      for (int ix=0; ix<*nx; ix++) {
-	int i = ix + (*nx)*(iy + (*ny)*iz);
+  for (int iz=0; iz<mz; iz++) {
+    for (int iy=0; iy<my; iy++) {
+      for (int ix=0; ix<mx; ix++) {
+	int i = ix + mx*(iy + my*iz);
 	if (field[i] < dmin) dmin = field[i];
 	if (field[i] > dmax) dmax = field[i];
       }
@@ -643,7 +660,7 @@ int * create_levels_from_hdf5
   // create level array from field using refine type
   //--------------------------------------------------
 
-  int * levels = new int [(*nx)*(*ny)*(*nz)];
+  int * levels = new int [mx*my*mz];
 
   // linear interpolate log field between minimum level and maximum level
 
@@ -654,10 +671,10 @@ int * create_levels_from_hdf5
 
   switch (refine) {
   case refine_log_value:
-    for (int iz=0; iz<(*nz); iz++) {
-      for (int iy=0; iy<(*ny); iy++) {
-	for (int ix=0; ix<(*nx); ix++) {
-	  int i = ix + (*nx)*(iy + (*ny)*iz);
+    for (int iz=0; iz<mz; iz++) {
+      for (int iy=0; iy<my; iy++) {
+	for (int ix=0; ix<mx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
 	  float d = hd*(log (field[i]) - lg_dmin); // normalize between 0 and 1
 	  levels[i] = d*max_level+0.5; 
 	}
@@ -669,13 +686,19 @@ int * create_levels_from_hdf5
     break;
   }
 
+  int max=-1e37;
+  for (int i=0; i<mx*my*mz; i++) {
+    if (levels[i] > max) max = levels[i];
+  }
+  
+
   delete [] field;
   return levels;
 }
 
 //------------------------------------------------------------------------
 
-void create_image_from_hdf5 
+void hdf5_to_png
 (
  std::string file_hdf5,
  std::string field_name,
@@ -698,7 +721,13 @@ void create_image_from_hdf5
   float * field = new float [mx*my*mz];
   file.data_read(field);
 
+  file.data_close();
+  file.file_close();
+
   pngwriter png (nx+1,ny+1,0,file_png.c_str());
+
+  // background color
+  //  png.filledsquare(1,1,nx+1,ny+1,1.0,1.0,1.0);
 
 
   // Determine field min and max
@@ -723,7 +752,7 @@ void create_image_from_hdf5
   const double gc[] = {0, 0, 1, 1, 1, 0};
   const double bc[] = {1, 1, 1, 0, 0, 0};
 
-    double amin = MIN (nx,ny);
+  double amin = MIN (nx,ny);
 
   for (int iz=0; iz<mz; iz++) {
     double z = (1.0*iz / mz);
@@ -754,10 +783,10 @@ void create_image_from_hdf5
 	double g = (1-a)*gc[ic] + a*gc[ic+1];
 	double b = (1-a)*bc[ic] + a*bc[ic+1];
 
-	for (int ky=-1; ky<=1; ky++) {
-	  for (int kx=-1; kx<=1; kx++) {
+	for (int ky=-2; ky<=2; ky++) {
+	  for (int kx=-2; kx<=2; kx++) {
 	    //double o=o0;
-	    double o = o0*pow(0.5,abs(kx)+abs(ky));
+	    double o = o0*pow(0.5,1+abs(kx)+abs(ky));
 	    png.plot_blend(ixr+kx,iyr+ky, o,r,g,b);
 	  }
 	}
@@ -769,7 +798,4 @@ void create_image_from_hdf5
   }
 
   png.close();
-
-
-
 }
