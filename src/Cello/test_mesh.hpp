@@ -315,10 +315,12 @@ void levels_to_tree
   // max_level
 
   int max_level = 0;
+  long long sum_level = 0;
   for (int i=0; i<nx*ny*nz; i++) {
+    sum_level += levels[i];
     if (levels[i] > max_level) max_level = levels[i];
+    
   }  
-
 
   // array of finest tree levels m
   int * m3 = new int [ max_level+1];
@@ -379,7 +381,6 @@ void levels_to_tree
     }
   }
   delete [] m3;
-  printf ("levels_to_tree() time = %f s\n",timer.value());
 }
 //----------------------------------------------------------------------
 
@@ -595,8 +596,8 @@ void tree_to_png (Tree * tree, std::string filename,
 //------------------------------------------------------------------------
 
 enum refine_type {
-  refine_log_value,
-  refine_log_slope
+  refine_log,
+  refine_slope
 };
 
 int * hdf5_to_levels
@@ -605,10 +606,12 @@ int * hdf5_to_levels
  std::string group_name,
  std::string field_name,
  int * nx, int * ny, int * nz,
- int max_level, refine_type refine = refine_log_value
+ int min_level, int max_level,
+ refine_type refine = refine_log,
+ double tol = 1e-6
  )
 {
-			      
+	
   FileHdf5 file ("./",file_name.c_str());
 
   file.file_open();
@@ -628,10 +631,8 @@ int * hdf5_to_levels
   int my=*ny;
   int mz=nz?(*nz):1;
 
-  TRACE3("%d %d %d",mx,my,mz);
   float * field = new float [mx*my*mz];
   file.data_read(field);
-  TRACE0;
 
   file.data_close();
   file.group_close();
@@ -660,7 +661,9 @@ int * hdf5_to_levels
   // create level array from field using refine type
   //--------------------------------------------------
 
-  int * levels = new int [mx*my*mz];
+  int m = mx*my*mz;
+  int * levels = new int [m];
+  for (int i=0; i<m; i++) levels[i] = min_level;
 
   // linear interpolate log field between minimum level and maximum level
 
@@ -669,28 +672,65 @@ int * hdf5_to_levels
 
   double hd = 1.0 / (lg_dmax - lg_dmin);
 
+  int dx = 1;
+  int dy = mx;
+  int dz = mx*my;
+
   switch (refine) {
-  case refine_log_value:
+  case refine_log:
     for (int iz=0; iz<mz; iz++) {
       for (int iy=0; iy<my; iy++) {
 	for (int ix=0; ix<mx; ix++) {
 	  int i = ix + mx*(iy + my*iz);
 	  float d = hd*(log (field[i]) - lg_dmin); // normalize between 0 and 1
-	  levels[i] = d*max_level+0.5; 
+	  levels[i] = min_level + d*(max_level-min_level)+0.5; 
 	}
       }
     }
     break;
-  case refine_log_slope:
-    exit(1);
+  case refine_slope:
+    for (int level = min_level; level<=max_level; level++) {
+      for (int iz=0; iz<mz; iz++) {
+	for (int iy=0; iy<my; iy++) {
+	  for (int ix=0; ix<mx; ix++) {
+
+	    int i = ix + mx*(iy + my*iz);
+	    double a = (field[i] > 1e-8) ? field[i] : 1e-6;
+
+	    bool refine = false;
+
+	    if (ix+1 < mx) {
+	      double ap = field[i+dx];
+	      refine = refine || abs(((ap - a)/a)) > tol;
+	    }
+	    if (ix-1 > 0) {
+	      double am = field[i-dx];
+	      refine = refine || abs(((a - am)/a)) > tol;
+	    }
+	    if (iy+1 < my) {
+	      double ap = field[i+dy];
+	      refine = refine || abs(((ap - a)/a)) > tol;
+	    }
+	    if (iy-1 > 0) {
+	      double am = field[i-dy];
+	      refine = refine || abs(((a - am)/a)) > tol;
+	    }
+	    if (iz+1 < mz) {
+	      double ap = field[i+dz];
+	      refine = refine || abs(((ap - a)/a)) > tol;
+	    }
+	    if (iz-1 > 0) {
+	      double am = field[i-dz];
+	      refine = refine || abs(((a - am)/a)) > tol;
+	    }
+
+	    if (refine) levels[i] = level;
+	  }
+	}
+      }
+    }
     break;
   }
-
-  int max=-1e37;
-  for (int i=0; i<mx*my*mz; i++) {
-    if (levels[i] > max) max = levels[i];
-  }
-  
 
   delete [] field;
   return levels;
@@ -700,7 +740,8 @@ int * hdf5_to_levels
 
 void hdf5_to_png
 (
- std::string file_hdf5,
+ std::string file_name,
+ std::string group_name,
  std::string field_name,
  std::string file_png, 
  int nx, int ny,
@@ -709,10 +750,14 @@ void hdf5_to_png
  double scale=1.0, bool ortho=true,
  int falloff=0)
 {
-  FileHdf5 file ("./",file_hdf5.c_str());
+  FileHdf5 file ("./",file_name.c_str());
 
   file.file_open();
-  // H5T_IEEE_F32BE
+
+  if (group_name != "") {
+    file.group_chdir(group_name);
+    file.group_open();
+  }
 
   scalar_type type = scalar_type_unknown;
   int mx, my, mz;
@@ -722,6 +767,7 @@ void hdf5_to_png
   file.data_read(field);
 
   file.data_close();
+  file.group_close();
   file.file_close();
 
   pngwriter png (nx+1,ny+1,0,file_png.c_str());
@@ -783,9 +829,9 @@ void hdf5_to_png
 	double g = (1-a)*gc[ic] + a*gc[ic+1];
 	double b = (1-a)*bc[ic] + a*bc[ic+1];
 
-	for (int ky=-2; ky<=2; ky++) {
-	  for (int kx=-2; kx<=2; kx++) {
-	    //double o=o0;
+	for (int ky=-1; ky<=1; ky++) {
+	  for (int kx=-1; kx<=1; kx++) {
+	    //	    double o=o0;
 	    double o = o0*pow(0.5,1+abs(kx)+abs(ky));
 	    png.plot_blend(ixr+kx,iyr+ky, o,r,g,b);
 	  }

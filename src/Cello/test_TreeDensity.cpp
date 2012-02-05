@@ -24,8 +24,8 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
   
-  if (!(PARALLEL_ARGC == 4 || PARALLEL_ARGC == 5)) {
-    PARALLEL_PRINTF("Usage: %s <file_name> [ <group_name> ] <field_name> <max_level>\n\n",PARALLEL_ARGV[0]);
+  if (!(PARALLEL_ARGC == 5 || PARALLEL_ARGC == 6)) {
+    PARALLEL_PRINTF("Usage: %s <file_name> [ <group_name> ] <field_name> <max_level> <min_level>\n\n",PARALLEL_ARGV[0]);
     unit_assert(false);
     PARALLEL_EXIT;
   }
@@ -33,21 +33,26 @@ PARALLEL_MAIN_BEGIN
   char * file_name = 0;
   char * group_name = 0;
   char * field_name = 0;
-  int max_level;
+  int min_level = 0;
+  int max_level = 0;
 
   int arg=1;
   file_name = PARALLEL_ARGV[arg++];
-  if (PARALLEL_ARGC == 5) {
+  if (PARALLEL_ARGC == 6) {
     group_name = PARALLEL_ARGV[arg++];
   } else {
     group_name = strdup("");
   }
   field_name = PARALLEL_ARGV[arg++];
+  min_level = atoi(PARALLEL_ARGV[arg++]);
   max_level = atoi(PARALLEL_ARGV[arg++]);
 
   int nx,ny,nz;
+  double tol = 0.4;
+  refine_type refine = refine_log;
   int * levels = hdf5_to_levels
-    (file_name, group_name, field_name, &nx, &ny, &nz, max_level);
+    (file_name, group_name, field_name, &nx, &ny, &nz, min_level,max_level,
+     refine,tol);
 
   int dimension = nz==1?2:3;
   int refinement=2;
@@ -68,11 +73,11 @@ PARALLEL_MAIN_BEGIN
   int * zones_per_block = new int [max_level+1];
   // compute number of zones in a block at each level
 
+  int r2d = (dimension == 2) ? 4 : 8;
   for (int i=0; i<=max_level; i++) {
     zones_per_block[i]=n;
-    n/=8;
+    n/=r2d;
   }
-
 
   // --------------------------------------------------
   // Create tree from level array
@@ -111,32 +116,65 @@ PARALLEL_MAIN_BEGIN
   double ps= -0.06*M_PI;
   int falloff = 3;
   double scale = 0.6;
-  if (nz == 1) {
+  double a90 = 0.5*M_PI;
+
+  if (dimension == 2) {
+    timer.clear();  timer.start();
     tree_to_png (&tree,"density_2d_1-initial.png",
-		 mx,my, 0,max_level, 0.0,0.0,0.0, scale, true, falloff);
+		 mx,my, min_level,max_level, 0.0,0.0,0.0, scale, true, falloff);
+    TRACE1 ("Time = %f",timer.value());
   } else  {
+    timer.clear();  timer.start();
     tree_to_png (&tree,"density_3d_1-initial.png",
-		 mx,my, 0,max_level, ph,th,ps, scale, false, falloff);
+		 mx,my, min_level,max_level, ph,th,ps, scale, false, falloff);
+    TRACE1 ("Time = %f",timer.value());
   }
-  hdf5_to_png (file_name,field_name,
-	       "density_field.png",
-	       mx,my, 0,max_level, ph,th,ps, scale, false, falloff);
+
+    timer.clear();  timer.start();
+  hdf5_to_png (file_name,group_name,field_name,"density_xy_field.png",
+	       mx,my, min_level,max_level, 0.0,0.0,0.0, 1.0, true,falloff);
+    TRACE1 ("Time = %f",timer.value());
+
+  if (dimension == 3) {
+    timer.clear();  timer.start();
+    hdf5_to_png (file_name,group_name,field_name,"density_field.png",
+		 mx,my, min_level,max_level, ph,th,ps, scale, false, falloff);
+    TRACE1 ("Time = %f",timer.value());
+
+    timer.clear();  timer.start();
+    hdf5_to_png (file_name,group_name,field_name,"density_yz_field.png",
+		 mx,my, min_level,max_level, 0.0,-a90,a90, 1.0, true,falloff);
+    TRACE1 ("Time = %f",timer.value());
+    timer.clear();  timer.start();
+    hdf5_to_png (file_name,group_name,field_name,"density_zx_field.png",
+		 mx,my, min_level,max_level, a90,a90,0.0, 1.0, true,falloff);
+    TRACE1 ("Time = %f",timer.value());
+  }
 
 
   for (int i=0; i<=tree.max_level(); i++) {
     char filename[40];
     sprintf (filename,"density_3d_1-initial-L%d.png",i);
+    timer.clear();  timer.start();
     tree_to_png (&tree,filename,
 		 mx,my, i,i, ph,th,ps, scale, false, falloff);
+    TRACE1 ("Time = %f",timer.value());
   }
 
-  double a90 = 0.5*M_PI;
+    timer.clear();  timer.start();
   tree_to_png (&tree,"density_xy_1-initial.png",
-	       mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
-  tree_to_png (&tree,"density_yz_1-initial.png",
-	       mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
-  tree_to_png (&tree,"density_zx_1-initial.png",
-	       mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
+	       mx,my, min_level,max_level, 0.0,0.0,0.0, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
+  if (dimension == 3) {
+    timer.clear();  timer.start();
+    tree_to_png (&tree,"density_yz_1-initial.png",
+		 mx,my, min_level,max_level, 0.0,-a90,a90, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
+    timer.clear();  timer.start();
+    tree_to_png (&tree,"density_zx_1-initial.png",
+		 mx,my, min_level,max_level, a90,a90,0.0, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
+  }
 
 
   // --------------------------------------------------
@@ -165,15 +203,23 @@ PARALLEL_MAIN_BEGIN
   // Write tree to file
   // --------------------------------------------------
 
+    timer.clear();  timer.start();
   tree_to_png (&tree,"density_3d_2-balanced.png",
-	       mx,my,  0,max_level, ph,th,ps, scale, false, falloff);
+	       mx,my,  min_level,max_level, ph,th,ps, scale, false, falloff);
+    TRACE1 ("Time = %f",timer.value());
 
+    timer.clear();  timer.start();
   tree_to_png (&tree,"density_xy_2-balanced.png",
-	       mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
+	       mx,my, min_level,max_level, 0.0,0.0,0.0, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
+    timer.clear();  timer.start();
   tree_to_png (&tree,"density_yz_2-balanced.png",
-	       mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
+	       mx,my, min_level,max_level, 0.0,-a90,a90, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
+    timer.clear();  timer.start();
   tree_to_png (&tree,"density_zx_2-balanced.png",
-	       mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
+	       mx,my, min_level,max_level, a90,a90,0.0, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
 
   // --------------------------------------------------
   // Patch coalescing
@@ -202,15 +248,27 @@ PARALLEL_MAIN_BEGIN
   // Write tree to file
   // --------------------------------------------------
 
-  tree_to_png (&tree,"density_3d_3-coalesced.png",
-	       mx,my,  0,max_level, ph,th,ps, scale, false, falloff);
-
+    timer.clear();  timer.start();
   tree_to_png (&tree,"density_xy_3-coalesced.png",
-	       mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
-  tree_to_png (&tree,"density_yz_3-coalesced.png",
-	       mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
-  tree_to_png (&tree,"density_zx_3-coalesced.png",
-	       mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
+	       mx,my, min_level,max_level, 0.0,0.0,0.0, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
+
+  if (dimension == 3) {
+    timer.clear();  timer.start();
+    tree_to_png (&tree,"density_yz_3-coalesced.png",
+		 mx,my, min_level,max_level, 0.0,-a90,a90, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
+    timer.clear();  timer.start();
+    tree_to_png (&tree,"density_zx_3-coalesced.png",
+		 mx,my, min_level,max_level, a90,a90,0.0, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
+
+    timer.clear();  timer.start();
+    tree_to_png (&tree,"density_3d_3-coalesced.png",
+		 mx,my,  min_level,max_level, ph,th,ps, scale, false, falloff);
+    TRACE1 ("Time = %f",timer.value());
+  }
+
 
   // --------------------------------------------------
   // --------------------------------------------------
@@ -223,7 +281,9 @@ PARALLEL_MAIN_BEGIN
     int d=3;
     int r=4;
     Tree tree (d,r);
+    timer.clear();  timer.start();
     levels_to_tree (&tree, levels,nx,ny,nz);
+    TRACE1 ("Time = %f",timer.value());
 
 
     int * sum_mesh = new int [max_level+1];
@@ -240,16 +300,26 @@ PARALLEL_MAIN_BEGIN
     // Write tree to file
     // --------------------------------------------------
 
-    tree_to_png (&tree,"density_3d_3-targeted.png",
-		 mx,my,  0,max_level, ph,th,ps, scale, false, falloff);
-
+    timer.clear();  timer.start();
     tree_to_png (&tree,"density_xy_3-targeted.png",
-		 mx,my, 0,max_level, 0.0,0.0,0.0, 1.0, true,0);
-    tree_to_png (&tree,"density_yz_3-targeted.png",
-		 mx,my, 0,max_level, 0.0,-a90,a90, 1.0, true,0);
-    tree_to_png (&tree,"density_zx_3-targeted.png",
-		 mx,my, 0,max_level, a90,a90,0.0, 1.0, true,0);
+		 mx,my, min_level,max_level, 0.0,0.0,0.0, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
 
+    if (dimension == 3) {
+    timer.clear();  timer.start();
+      tree_to_png (&tree,"density_yz_3-targeted.png",
+		   mx,my, min_level,max_level, 0.0,-a90,a90, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
+    timer.clear();  timer.start();
+      tree_to_png (&tree,"density_zx_3-targeted.png",
+		   mx,my, min_level,max_level, a90,a90,0.0, 1.0, true,0);
+    TRACE1 ("Time = %f",timer.value());
+
+    timer.clear();  timer.start();
+      tree_to_png (&tree,"density_3d_3-targeted.png",
+		   mx,my,  min_level,max_level, ph,th,ps, scale, false, falloff);
+    TRACE1 ("Time = %f",timer.value());
+    }
     // --------------------------------------------------
   }
 
