@@ -64,9 +64,9 @@ libs_test = ['test']
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
 if (type=='charm'):
-   libs_field  = ['simulation','method','mesh','field','io','parallel','disk','parameters','memory','error','monitor','performance','cello','external', 'papi', 'png', 'hdf5']
-   libs_io     = ['io','simulation','method','mesh','field','disk','memory','parallel','parameters','test','cello','external','error','monitor','performance','papi','pfm','png','hdf5']
-   libs_mesh   = ['field','simulation','method','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','papi','pfm','png','hdf5']
+   libs_field  = ['simulation','method','mesh','field','io','parallel','disk','parameters','memory','error','monitor','performance','cello','external', 'png', 'hdf5']
+   libs_io     = ['io','simulation','method','mesh','field','disk','memory','parallel','parameters','test','cello','external','error','monitor','performance','png','hdf5']
+   libs_mesh   = ['field','simulation','method','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5']
 
 if (use_papi):
 #   libs_field.append(['papi','pfm'])
