@@ -38,10 +38,16 @@ Import('use_papi')
 # performance -> monitor [CIRCULAR]
 # test_* -> test
 
+if (use_papi):
+   libs_papi = ['papi','pfm']
+else:
+   libs_papi = []
+
+print libs_papi
 libs_external    = ['external']
-libs_performance = ['performance']
-libs_error       = ['error', 'monitor', 'performance']
-libs_monitor     = ['parallel', 'error', 'monitor', 'performance']
+libs_performance = ['performance'] + libs_papi
+libs_error       = ['error', 'monitor'] + libs_performance
+libs_monitor     = ['parallel', 'error', 'monitor'] + libs_performance
 libs_disk        = ['disk'] +    libs_error +  ['hdf5']
 libs_parallel    = ['parallel'] +libs_error
 libs_field       = ['field', 'mesh', 'io'] + libs_parallel + ['cello']
@@ -52,7 +58,6 @@ libs_mesh        = ['mesh','field','io','disk'] + libs_parallel + libs_external 
 libs_method      = ['method']
 libs_parallel    = ['parallel'] + libs_error
 libs_parameters  = ['parameters'] + libs_error +  ['cello']
-libs_performance = ['performance'] + libs_memory
 # 
 #components_performance = ['memory','error','monitor', 'test','cello']
 
@@ -68,13 +73,6 @@ if (type=='charm'):
    libs_io     = ['io','simulation','method','mesh','field','disk','memory','parallel','parameters','test','cello','external','error','monitor','performance','png','hdf5']
    libs_mesh   = ['field','simulation','method','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5']
 
-if (use_papi):
-#   libs_field.append(['papi','pfm'])
-#   libs_io.append(['papi','pfm'])
-#    components_mesh = components_mesh + ['papi','pfm']
-#    components_performance = components_performance + 
-   libs_performance.append(['papi','pfm'])
-#   libs_simulation.append(['papi','pfm'])
 
 
 

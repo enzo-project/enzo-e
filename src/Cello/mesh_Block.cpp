@@ -358,6 +358,7 @@ void Block::prepare(int axis_set)
 
 void Block::p_call_output(CkReductionMsg * msg)
 {
+  TRACE1("Block::p_call_output(%d)",index());
   double * min_reduce = (double * )msg->getData();
 
   double dt_patch   = min_reduce[0];
@@ -370,7 +371,10 @@ void Block::p_call_output(CkReductionMsg * msg)
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   simulation->update_cycle(cycle_,time_,dt_patch,stop_patch);
-
+ 
+  // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
+  // Simulation::p_output()?  Want last block?
+  
   // "root" block calls Simulation::p_output()
   if (index() == 0) {
     proxy_simulation.p_output();
@@ -416,7 +420,6 @@ void Block::p_compute (int cycle, double time, double dt, int axis_set)
 
 void Block::p_call_refresh()
 {
-  Simulation * simulation  = proxy_simulation.ckLocalBranch();
   refresh(axis_all);
 }
 

@@ -269,13 +269,18 @@ PARALLEL_MAIN_BEGIN
     tree_to_png (tree, file_root + "_initial.png",width,height);
 
     int count_level[max_depth];
+    
     for (int level = 0; level < max_depth; level ++)
     {
+      Timer timer;
+      timer.start();
       count_level[level] = 0;
       ItNode it_node(tree,level);
       while (it_node.next_leaf()) {
 	++count_level[level];
       }
+      printf ("Tree traversal: %d nodes in level %d  in %f s\n",
+	      count_level[level],level,timer.value());
     }
 
     int count_tree[max_depth];

@@ -25,7 +25,7 @@ PARALLEL_MAIN_BEGIN
 
   
   if (!(PARALLEL_ARGC == 5 || PARALLEL_ARGC == 6)) {
-    PARALLEL_PRINTF("Usage: %s <file_name> [ <group_name> ] <field_name> <max_level> <min_level>\n\n",PARALLEL_ARGV[0]);
+    PARALLEL_PRINTF("Usage: %s <file_name> [ <group_name> ] <field_name> <min_level> <max_level>\n\n",PARALLEL_ARGV[0]);
     unit_assert(false);
     PARALLEL_EXIT;
   }
@@ -101,9 +101,14 @@ PARALLEL_MAIN_BEGIN
   {
     for (int i=0; i<=tree.max_level(); i++) sum_mesh[i]=0;
     ItNode it_node(&tree);
+    timer.clear();
+    timer.start();
     while (it_node.next_leaf()) {
       ++sum_mesh[it_node.node_trace()->level()];
     }
+    timer.stop();
+    printf ("traversed %d nodes in %f Mnodes/s\n",tree.num_nodes(),
+	    1e-6*tree.num_nodes()/timer.value());
   }
 
   // --------------------------------------------------
@@ -195,9 +200,14 @@ PARALLEL_MAIN_BEGIN
   {
     for (int i=0; i<=tree.max_level(); i++) sum_mesh[i]=0;
     ItNode it_node(&tree);
+    timer.clear();
+    timer.start();
     while (it_node.next_leaf()) {
       ++sum_mesh[it_node.node_trace()->level()];
     }
+    timer.stop();
+    printf ("traversed %d nodes in %f Mnodes/s\n",tree.num_nodes(),
+	    1e-6*tree.num_nodes()/timer.value());
   }
   // --------------------------------------------------
   // Write tree to file
@@ -271,8 +281,7 @@ PARALLEL_MAIN_BEGIN
 
 
   // --------------------------------------------------
-  // --------------------------------------------------
-  // Create 4-tree from level array
+  // Targeted Refineent
   // --------------------------------------------------
 
   {

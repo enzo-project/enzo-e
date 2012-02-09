@@ -23,7 +23,7 @@
 
 void Simulation::p_output () throw()
 {
-
+  TRACE("p_output");
   // reset output "loop" over output objects
   output_first();
 
@@ -42,7 +42,6 @@ void Simulation::output_first() throw()
 
 void Simulation::output_next() throw()
 {
-
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
 
