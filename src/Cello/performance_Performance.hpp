@@ -53,8 +53,11 @@ public: // interface
   /// Stop timers and counters
   void stop () throw ();
 
-  /// Display timers and counters using monitor
-  void print (const Monitor * monitor) const throw ();
+  double time () throw ()
+  { return timer_.value(); }
+
+  // // /// Display timers and counters using monitor
+  // void print (const Monitor * monitor) const throw ();
 
   //--------------------------------------------------
 
@@ -124,7 +127,7 @@ private: // functions
 
   void deallocate_ () throw ();
 
-  void print_rusage_ (const Monitor * monitor) const throw ();
+  // void print_rusage_ (const Monitor * monitor) const throw ();
 
   type_counter time_real_ () const
   {

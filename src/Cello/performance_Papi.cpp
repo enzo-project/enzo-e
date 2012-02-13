@@ -139,13 +139,13 @@ float Papi::flop_rate() const throw()
 
 //----------------------------------------------------------------------
 
-void Papi::print () const throw()
-{
-#ifdef CONFIG_USE_PAPI
-  Monitor * monitor = Monitor::instance();
-  monitor->print ("Performance","PAPI Time real   = %f",time_real());
-  monitor->print ("Performance","PAPI Time proc   = %f",time_proc());
-  monitor->print ("Performance","PAPI GFlop count = %f",flop_count()*1e-9);
-  monitor->print ("Performance","PAPI GFlop rate  = %f",flop_count()*1e-9 / time_real());
-#endif
-};
+// void Papi::print () const throw()
+// {
+// #ifdef CONFIG_USE_PAPI
+//   Monitor * monitor = Monitor::instance();
+//   monitor->print ("Performance","PAPI Time real   = %f",time_real());
+//   monitor->print ("Performance","PAPI Time proc   = %f",time_proc());
+//   monitor->print ("Performance","PAPI GFlop count = %f",flop_count()*1e-9);
+//   monitor->print ("Performance","PAPI GFlop rate  = %f",flop_count()*1e-9 / time_real());
+// #endif
+// };

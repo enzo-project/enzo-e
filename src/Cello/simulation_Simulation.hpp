@@ -202,7 +202,8 @@ public: // interface
     stop_  = stop;
   };
 
-  void monitor_output() const {
+  void monitor_output() const 
+  {
     monitor_-> print("Simulation", "cycle %04d time %15.12f dt %15.12g", 
 		     cycle_,time_,dt_);
     Memory * memory = Memory::instance();
@@ -211,6 +212,17 @@ public: // interface
     memory->reset_high();
   }
 
+  void performance_output() const 
+  {
+    monitor_->print ("Performance","real time = %s",performance_->time());
+#ifdef CONFIG_USE_PAPI
+    monitor_->print ("Performance","PAPI Time real   = %f",time_real());
+    monitor_->print ("Performance","PAPI Time proc   = %f",time_proc());
+    monitor_->print ("Performance","PAPI GFlop count = %f",flop_count()*1e-9);
+    monitor_->print ("Performance","PAPI GFlop rate  = %f",
+		     flop_count()*1e-9 / time_real());
+#endif
+  }
 public: // virtual functions
 
   /// initialize the Simulation given a parameter file

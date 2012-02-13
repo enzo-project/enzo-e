@@ -722,9 +722,9 @@ tests("Cello","test_Patch","test_Patch","");
 tests("Cello","test_Block","test_Block",""); 
 tests("Cello","test_Tree","test_Tree",""); 
 
-printf ("<img width=257 src=\"mpi/test_tree_initial.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/test_tree_balanced.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/test_tree_coalesced.png\"></img></br>\n");
+printf ("<img width=257 src=\"mpi/test_tree_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"mpi/test_tree_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"mpi/test_tree_3-merged.png\"></img></br>\n");
 
 tests("Cello","test_TreeDensity","test_TreeDensity",""); 
 

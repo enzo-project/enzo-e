@@ -298,9 +298,16 @@ void levels_to_tree
 (
  Tree * tree, 
  int * levels, 
- int nx, int ny, int nz=1
+ int nx, int ny, int nz=1,
+ bool target = false
  )
 {
+
+  if (target) {
+    int * data = new int [1];
+    tree->root_node()->set_data(data);
+    *data = 0;
+  }
 
   Timer timer;
   timer.start();
@@ -345,8 +352,6 @@ void levels_to_tree
 	  for (int jy = jy1; jy<jy2; jy++) {
 	    for (int jx = jx1; jx<jx2; jx++) {
 
-	      assert (0 <= i && i < nx*ny*nz);
-
 	      double x = 1.0*jx / ml;
 	      double y = 1.0*jy / ml;
 	      double z = 1.0*jz / ml;
@@ -355,7 +360,7 @@ void levels_to_tree
 	      assert (0 <= z && z <= 1);
 	      NodeTrace node_trace (tree->root_node());
 	      int level_node = level;
-	      assert (0 <= level_node && level_node <= 20);
+	      assert (0 <= level_node && level_node <= 100);
 	      while (level_node-- > 0) {
 
 		if (node_trace.node()->is_leaf()) {
@@ -368,6 +373,14 @@ void levels_to_tree
 
 		assert (0 <= ir && ir < r2d);
 		node_trace.push(ir);
+
+		if (target) {
+		  if (node_trace.node()->data() == 0) {
+		    int * data = new int [1];
+		    node_trace.node()->set_data(data);
+		    *data = level - level_node;
+		  }
+		}
 
 		x *= r; while (x >= 1.0) x -= 1.0;
 		y *= r; while (y >= 1.0) y -= 1.0;
@@ -538,7 +551,8 @@ void tree_to_png (Tree * tree, std::string filename,
 		  int level_lower=0, int level_upper=1000,
 		  double theta=0.0, double phi=0.0, double psi=0.0,
 		  double scale=1.0, bool ortho=true,
-		  int falloff=0)
+		  int falloff=0,
+		  bool target = false)
 /// @brief Generate a PNG image of a tree
 ///
 /// @param tree is the 2D or 3D tree from which to generate the image
@@ -582,7 +596,19 @@ void tree_to_png (Tree * tree, std::string filename,
   int d = tree->dimension();
   double rinv = 1.0/r;
   int count = 0;
-  while ((it_node.next_leaf())) {
+  bool done = false;
+  while (done || it_node.next_leaf()) {
+    if (target) {
+      while (!it_node.done() && 
+	     it_node.node_trace()->node()->data() == 0) {
+	it_node.next_leaf();
+      }
+      // assert it_node.done() or data != 0
+      if (it_node.done()) {
+	done = true;
+	continue;
+      }
+    }
     count++;
     const NodeTrace * node_trace  = it_node.node_trace();
     double xmin = 0.0; double xmax = 1.0;

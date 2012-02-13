@@ -61,26 +61,26 @@ PARALLEL_MAIN_BEGIN
   int refinement=2;
 
   // --------------------------------------------------
-  // Write count of tagged zones in each level
-  // --------------------------------------------------
+  // // Write count of tagged zones in each level
+  // // --------------------------------------------------
 
-  int * sum_field = new int [max_level+1];
+  // int * sum_field = new int [max_level+1];
 
-  for (int i=0; i<=max_level; i++) sum_field[i]=0;
+  // for (int i=0; i<=max_level; i++) sum_field[i]=0;
 
-  int n=nx*ny*nz;
-  for (int i=0; i<n; i++) {
-    sum_field[levels[i]]++;
-  }
+  // int n=nx*ny*nz;
+  // for (int i=0; i<n; i++) {
+  //   sum_field[levels[i]]++;
+  // }
 
-  int * zones_per_block = new int [max_level+1];
-  // compute number of zones in a block at each level
+  // int * zones_per_block = new int [max_level+1];
+  // // compute number of zones in a block at each level
 
-  int r2d = (dimension == 2) ? 4 : 8;
-  for (int i=0; i<=max_level; i++) {
-    zones_per_block[i]=n;
-    n/=r2d;
-  }
+  // int r2d = (dimension == 2) ? 4 : 8;
+  // for (int i=0; i<=max_level; i++) {
+  //   zones_per_block[i]=n;
+  //   n/=r2d;
+  // }
 
   // --------------------------------------------------
   // Create tree from level array
@@ -248,14 +248,6 @@ PARALLEL_MAIN_BEGIN
   tree.coalesce();
   timer.stop();
 
-  {
-    for (int i=0; i<=tree.max_level(); i++) sum_mesh[i]=0;
-    ItNode it_node(&tree);
-    while (it_node.next_leaf()) {
-      ++sum_mesh[it_node.node_trace()->level()];
-    }
-  }
-
   printf ("tree merged time      = %f\n",timer.value());
   printf ("tree merged num_nodes = %d\n",tree.num_nodes());
   printf ("tree merged max_level = %d\n",tree.max_level());
@@ -294,55 +286,61 @@ PARALLEL_MAIN_BEGIN
     Timer timer;
     timer.start();
     int d=3;
-    int r=4;
+    int r=2;
     Tree tree (d,r);
     timer.clear();  timer.start();
-    levels_to_tree (&tree, levels,nx,ny,nz);
+    bool target = true;
+    levels_to_tree (&tree, levels,nx,ny,nz,target);
     TRACE1 ("Time = %f",timer.value());
-
-
-    int * sum_mesh = new int [max_level+1];
-
-    {
-      for (int i=0; i<=tree.max_level(); i++) sum_mesh[i]=0;
-      ItNode it_node(&tree);
-      while (it_node.next_leaf()) {
-	++sum_mesh[it_node.node_trace()->level()];
-      }
-    }
 
     // --------------------------------------------------
     // Write tree to file
     // --------------------------------------------------
 
     timer.clear();  timer.start();
-    tree_to_png (&tree,"density_xy_3-targeted.png",
-		 mx,my, min_level,max_level, 0.0,0.0,0.0, 1.0, true,0);
-    TRACE1 ("Time = %f",timer.value());
+    tree_to_png (&tree,"density_xy_4-targeted.png",
+		 mx,my, min_level,max_level, 0.0,0.0,0.0, 1.0, true,0,target);
+
 
     if (dimension == 3) {
-    timer.clear();  timer.start();
-      tree_to_png (&tree,"density_yz_3-targeted.png",
+      timer.clear();  timer.start();
+      tree_to_png (&tree,"density_yz_4-targeted.png",
 		   mx,my, min_level,max_level, 0.0,-a90,a90, 1.0, true,0);
-    TRACE1 ("Time = %f",timer.value());
-    timer.clear();  timer.start();
-      tree_to_png (&tree,"density_zx_3-targeted.png",
+      TRACE1 ("Time = %f",timer.value());
+      timer.clear();  timer.start();
+      tree_to_png (&tree,"density_zx_4-targeted.png",
 		   mx,my, min_level,max_level, a90,a90,0.0, 1.0, true,0);
-    TRACE1 ("Time = %f",timer.value());
+      TRACE1 ("Time = %f",timer.value());
 
-    timer.clear();  timer.start();
-      tree_to_png (&tree,"density_3d_3-targeted.png",
+      timer.clear();  timer.start();
+      tree_to_png (&tree,"density_3d_4-targeted.png",
 		   mx,my,  min_level,max_level, th,ph,ps, scale, false, falloff);
-    TRACE1 ("Time = %f",timer.value());
+      TRACE1 ("Time = %f",timer.value());
+
     }
+    ItNode it_node(&tree);
+    int num_nodes = 0;
+    int max_level = 0;
+    int * level_count = new int [tree.max_level()+1];
+    Node * node = 0;
+    while ((node = it_node.next_node())) {
+      if (node->data() != 0) {
+	int level = *((int *)node->data());
+	++ num_nodes;
+	++ level_count[level];
+	if (level > max_level) max_level = level;
+      }
+    }
+    printf ("tree targeted time      = %f\n",timer.value());
+    printf ("tree targeted num_nodes = %d\n",num_nodes);
+    printf ("tree targeted max_level = %d\n",max_level);
+    delete [] level_count;
     // --------------------------------------------------
   }
 
   unit_finalize();
 
   delete [] levels;
-  delete [] sum_field;
-  delete [] sum_mesh;
 
   PARALLEL_EXIT;
 }

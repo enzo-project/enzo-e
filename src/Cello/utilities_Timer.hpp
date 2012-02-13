@@ -1,19 +1,19 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     performance_Timer.hpp
+/// @file     utilities_Timer.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Apr 23 12:40:04 PDT 2008
-/// @brief [\ref Performance] Interface and implementation of the
+/// @brief [\ref Utilities] Interface and implementation of the
 /// Timer class
 
-#ifndef PERFORMANCE_TIMER_HPP
-#define PERFORMANCE_TIMER_HPP
+#ifndef UTILITIES_TIMER_HPP
+#define UTILITIES_TIMER_HPP
 
 class Timer {
 
   /// @class    Timer
-  /// @ingroup  Performance
-  /// @brief    [\ref Performance] Simple class for timing code sections
+  /// @ingroup  Utilities
+  /// @brief    [\ref Utilities] Simple class for timing code sections
 
 public: // interface
 
@@ -32,8 +32,8 @@ public: // interface
   /// Return the value of the timer
   float value() const throw();
 
-  /// Display the timer information
-  void print () const throw();
+  // /// Display the timer information
+  // void print () const throw();
 
 private: // attributes
 
@@ -109,9 +109,9 @@ private: // attributes
 // {
 //   Monitor * monitor = Monitor::instance();
 
-//   monitor->print ("[Performance] real time = %f",value());
+//   monitor->print ("[Utilities] real time = %f",value());
 
 // }
 
-#endif /* PERFORMANCE_TIMER_HPP */
+#endif /* UTILITIES_TIMER_HPP */
 

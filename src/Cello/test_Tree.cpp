@@ -14,6 +14,11 @@
 PARALLEL_MAIN_BEGIN
 {
 
+  int max_depth=12;
+  int width  = 1024;
+  int height = 1024;
+  std::string file_root = "test_tree";
+
   PARALLEL_INIT;
 
   unit_init(0,1);
@@ -254,19 +259,16 @@ PARALLEL_MAIN_BEGIN
     int r = 2;
     tree = new Tree (d,r);
 
-    int max_depth=12;
-    int width  = 1024;
-    int height = 1024;
 
-    std::string file_root = "test_tree";
     int nx,ny;
-
     int * levels = png_to_levels
       (file_name.c_str(),&nx,&ny,max_depth);
 
     levels_to_tree (tree, levels, nx, ny);
 
-    tree_to_png (tree, file_root + "_initial.png",width,height);
+    delete [] levels;
+
+    tree_to_png (tree, file_root + "_1-initial.png",width,height);
 
     int count_level[max_depth];
     
@@ -319,24 +321,61 @@ PARALLEL_MAIN_BEGIN
     printf ("tree balanced num_nodes = %d\n",tree->num_nodes());
     printf ("tree balanced max_level = %d\n",tree->max_level());
 
-    tree_to_png (tree, file_root + "_balanced.png",width,height);
+    tree_to_png (tree, file_root + "_2-balanced.png",width,height);
     
     //--------------------------------------------------
-    // Coalesce tree nodes
+    // Merge tree nodes
     //--------------------------------------------------
 
     timer.clear();
     timer.start();
     tree->coalesce();
 
-    printf ("time to coalesce = %f s\n",timer.value());
+    printf ("time to merge = %f s\n",timer.value());
 
-    printf ("tree coalesced num_nodes = %d\n",tree->num_nodes());
-    printf ("tree coalesced max_level = %d\n",tree->max_level());
+    printf ("tree merged num_nodes = %d\n",tree->num_nodes());
+    printf ("tree merged max_level = %d\n",tree->max_level());
 
-    tree_to_png (tree, file_root + "_coalesced.png",width,height);
+    tree_to_png (tree, file_root + "_3-merged.png",width,height);
 
     delete tree;
+  }
+
+  {
+    int d = 2;
+    int r = 2;
+    tree = new Tree (d,r);
+    int nx,ny;
+    int * levels = png_to_levels
+      (file_name.c_str(),&nx,&ny,max_depth);
+
+    bool target = true;
+    levels_to_tree (tree, levels, nx, ny, 1, target);
+    delete [] levels;
+
+    ItNode it_node(tree);
+    int num_nodes = 0;
+    int max_level = 0;
+    int * level_count = new int [tree->max_level()+1];
+    Node * node = 0;
+    TRACE0;
+    while ((node = it_node.next_node())) {
+      if (node->data() != 0) {
+	int level = *((int *)node->data());
+	++ num_nodes;
+	++ level_count[level];
+	if (level > max_level) max_level = level;
+      }
+    }
+    TRACE0;
+    printf ("tree targeted num_nodes = %d\n",num_nodes);
+    printf ("tree targeted max_level = %d\n",max_level);
+
+    
+    tree_to_png (tree, file_root + "_4-targeted.png",width,height,
+		 0,1000,0.0,0.0,0.0,1.0,true,0,target);
+    delete tree;
+    
   }
 
   unit_finalize();

@@ -32,11 +32,9 @@ Import('use_papi')
 # mesh -> io
 # mesh -> parallel
 # mesh -> simulation (CHARM)
-# monitor -> performance [CIRCULAR]
+# monitor -> utilities
 # parallel -> error
 # parameters -> error
-# performance -> monitor [CIRCULAR] Performance::print()
-# performance -> memory (Memory::print())
 # performance -> error
 # test_* -> test
 
@@ -47,9 +45,9 @@ else:
 
 print libs_papi
 libs_external    = ['external']
-libs_performance = ['performance', 'error', 'monitor', 'memory'] + libs_papi
-libs_error       = ['error', 'monitor'] + libs_performance
-libs_monitor     = ['parallel', 'error', 'monitor'] + libs_performance
+libs_performance = ['performance', 'error', 'monitor', 'utilities'] + libs_papi
+libs_error       = ['error', 'monitor', 'utilities']
+libs_monitor     = ['parallel', 'error', 'monitor', 'utilities']
 libs_disk        = ['disk'] +    libs_error +  ['hdf5']
 libs_parallel    = ['parallel'] +libs_error
 libs_field       = ['field', 'mesh', 'io'] + libs_parallel + ['cello']
@@ -106,6 +104,7 @@ includes_parallel =    [Glob('parallel*hpp'),'parallel.def']
 includes_parameters =  [Glob('parameters*hpp'),'parse.h']
 includes_performance = [Glob('performance*hpp')]
 includes_simulation =  [Glob('simulation*hpp')]
+includes_utilities = [Glob('utilities*hpp')]
 includes_test =        [Glob('test_Unit*hpp'),'test.hpp']
 
 sources_cello =       [Glob('cello*cpp')]
@@ -122,6 +121,7 @@ sources_parallel =    [Glob('parallel*cpp')]
 sources_parameters =  [Glob('parameters*cpp'),'parse.tab.c','lex.yy.c']
 sources_performance = [Glob('performance*cpp')]
 sources_simulation =  [Glob("simulation*cpp")]
+sources_utilities = [Glob('utilities*cpp')]
 sources_test =        [Glob('test_Unit*cpp')]
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -263,8 +263,8 @@ libraries_monitor = env.Library ('monitor', sources_monitor)
 libraries_parallel = env.Library ('parallel', sources_parallel)
 libraries_parameters = env.Library ('parameters', sources_parameters)
 libraries_performance = env.Library ('performance', sources_performance)
-#--------------------------------------------------
 libraries_simulation = env.Library ('simulation', sources_simulation)
+libraries_utilities = env.Library ('utilities', sources_utilities)
 libraries_test  = env.Library ('test', sources_test)
 
 
@@ -348,6 +348,9 @@ env.Alias('install-lib',env.Install (lib_path,libraries_parameters))
 env.Alias('install-bin',env.Install (bin_path,binaries_performance))
 env.Alias('install-inc',env.Install (inc_path,includes_performance))
 env.Alias('install-lib',env.Install (lib_path,libraries_performance))
+
+env.Alias('install-inc',env.Install (inc_path,includes_utilities))
+env.Alias('install-lib',env.Install (lib_path,libraries_utilities))
 
 
 env.Alias('install-inc',env.Install (inc_path,includes_simulation))

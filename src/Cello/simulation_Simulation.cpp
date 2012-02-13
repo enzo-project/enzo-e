@@ -1140,7 +1140,9 @@ void Simulation::refresh() throw()
   if (stop_) {
 
     performance_->stop();
-    performance_->print(monitor_);
+
+    performance_output();
+
     proxy_main.p_exit(CkNumPes());
 
   } else {

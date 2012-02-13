@@ -57,7 +57,7 @@ public: // interface
   /// Return flop rate between start() and stop()
   float flop_rate() const throw();
 
-  void print () const throw();
+  // void print () const throw();
 
 private: // attributes
 

@@ -85,6 +85,7 @@ enum function_enum {
 // Component dependencies
 //----------------------------------------------------------------------
 
+#include "utilities.hpp"
 #include "monitor.hpp"
 #include "memory.hpp"
 #include "error.hpp"
@@ -94,7 +95,6 @@ enum function_enum {
 //----------------------------------------------------------------------
 
 #include "performance_Counters.hpp"
-#include "performance_Timer.hpp"
 #include "performance_Papi.hpp"
 #include "performance_Performance.hpp"
 

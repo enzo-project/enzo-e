@@ -1,33 +1,28 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     monitor.hpp
+/// @file     utilities.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2009-10-05
-/// @brief    Include file for the \ref Monitor component
+/// @date     Wed Oct 14 23:40:13 PDT 2009
+/// @brief    Include file for the \ref Utilities component
 
-#ifndef MONITOR_HPP
-#define MONITOR_HPP
+#ifndef UTILITIES_HPP
+#define UTILITIES_HPP
 
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
 
-#include <string>
-#include <cstdarg>
-#include <time.h>
+#include <sys/time.h>
+
 
 //----------------------------------------------------------------------
 // Component dependencies
 //----------------------------------------------------------------------
 
-#include "utilities.hpp"
-#include "parallel.hpp"
-
 //----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "monitor_Monitor.hpp"
+#include "utilities_Timer.hpp"
 
-#endif /* MONITOR_HPP */
-
+#endif /* UTILITIES_HPP */

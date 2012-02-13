@@ -312,7 +312,7 @@ void EnzoSimulationMpi::run() throw()
 
   performance.stop();
 
-  performance.print(monitor_);
+  performance_output();
 
 }
 
