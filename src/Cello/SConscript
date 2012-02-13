@@ -35,7 +35,9 @@ Import('use_papi')
 # monitor -> performance [CIRCULAR]
 # parallel -> error
 # parameters -> error
-# performance -> monitor [CIRCULAR]
+# performance -> monitor [CIRCULAR] Performance::print()
+# performance -> memory (Memory::print())
+# performance -> error
 # test_* -> test
 
 if (use_papi):
@@ -45,7 +47,7 @@ else:
 
 print libs_papi
 libs_external    = ['external']
-libs_performance = ['performance'] + libs_papi
+libs_performance = ['performance', 'error', 'monitor', 'memory'] + libs_papi
 libs_error       = ['error', 'monitor'] + libs_performance
 libs_monitor     = ['parallel', 'error', 'monitor'] + libs_performance
 libs_disk        = ['disk'] +    libs_error +  ['hdf5']

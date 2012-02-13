@@ -433,6 +433,104 @@ inline void rotate
 
 }
 
+//------------------------------------------------------------------------
+
+void plot_node 
+(
+ int nx, int ny,
+ int level,
+ double xmin, double xmax,
+ double ymin, double ymax,
+ double zmin, double zmax,
+ double theta, double phi, double psi, double ortho, double falloff,
+ double * ra, double * ga, double * ba,
+ double scale,
+ int num_levels,
+ bool fill_blocks,
+ pngwriter * png)
+  
+{
+  double amin = MIN (nx,ny);
+
+    // Compute the rotated points
+    double x000,y000,z000;
+    double x001,y001,z001;
+    double x010,y010,z010;
+    double x011,y011,z011;
+    double x100,y100,z100;
+    double x101,y101,z101;
+    double x110,y110,z110;
+    double x111,y111,z111;
+
+    rotate(&x000,&y000,&z000, xmin,ymin,zmin, theta,phi,psi,ortho);
+    rotate(&x001,&y001,&z001, xmin,ymin,zmax, theta,phi,psi,ortho);
+    rotate(&x010,&y010,&z010, xmin,ymax,zmin, theta,phi,psi,ortho);
+    rotate(&x011,&y011,&z011, xmin,ymax,zmax, theta,phi,psi,ortho);
+    rotate(&x100,&y100,&z100, xmax,ymin,zmin, theta,phi,psi,ortho);
+    rotate(&x101,&y101,&z101, xmax,ymin,zmax, theta,phi,psi,ortho);
+    rotate(&x110,&y110,&z110, xmax,ymax,zmin, theta,phi,psi,ortho);
+    rotate(&x111,&y111,&z111, xmax,ymax,zmax, theta,phi,psi,ortho);
+
+    // scale points
+    
+    x000 = amin * ((x000-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x001 = amin * ((x001-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x010 = amin * ((x010-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x011 = amin * ((x011-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x100 = amin * ((x100-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x101 = amin * ((x101-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x110 = amin * ((x110-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+    x111 = amin * ((x111-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
+
+    y000 = amin * ((y000-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y001 = amin * ((y001-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y010 = amin * ((y010-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y011 = amin * ((y011-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y100 = amin * ((y100-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y101 = amin * ((y101-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y110 = amin * ((y110-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+    y111 = amin * ((y111-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
+
+    // plot cube
+
+    // compute "opacity"
+
+    double o = pow(1.0*(level+1) / (num_levels), falloff);
+
+    double o000 = o*0.5*(1+z000);
+    double o001 = o*0.5*(1+z001);
+    double o010 = o*0.5*(1+z010);
+    double o011 = o*0.5*(1+z011);
+    double o100 = o*0.5*(1+z100);
+    double o101 = o*0.5*(1+z101);
+    double o110 = o*0.5*(1+z110);
+
+    int k = level;
+
+    if (fill_blocks) {
+      png->filledsquare_blend(int(x000),int(y000),int(x110),int(y110),o000,ra[k],ga[k],ba[k]);
+      png->line(int(x000),int(y000),int(x100),int(y100),1.0,1.0,1.0);
+      png->line(int(x100),int(y100),int(x110),int(y110),1.0,1.0,1.0);
+      png->line(int(x110),int(y110),int(x010),int(y010),1.0,1.0,1.0);
+      png->line(int(x010),int(y010),int(x000),int(y000),1.0,1.0,1.0);
+    } else {
+
+      png->line_blend(int(x000),int(y000),int(x001),int(y001),o000,ra[k],ga[k],ba[k]);
+      png->line_blend(int(x010),int(y010),int(x011),int(y011),o010,ra[k],ga[k],ba[k]);
+      png->line_blend(int(x100),int(y100),int(x101),int(y101),o100,ra[k],ga[k],ba[k]);
+      png->line_blend(int(x110),int(y110),int(x111),int(y111),o110,ra[k],ga[k],ba[k]);
+
+      png->line_blend(int(x000),int(y000),int(x010),int(y010),o000,ra[k],ga[k],ba[k]);
+      png->line_blend(int(x001),int(y001),int(x011),int(y011),o001,ra[k],ga[k],ba[k]);
+      png->line_blend(int(x100),int(y100),int(x110),int(y110),o100,ra[k],ga[k],ba[k]);
+      png->line_blend(int(x101),int(y101),int(x111),int(y111),o101,ra[k],ga[k],ba[k]);
+
+      png->line_blend(int(x000),int(y000),int(x100),int(y100),o000,ra[k],ga[k],ba[k]);
+      png->line_blend(int(x001),int(y001),int(x101),int(y101),o001,ra[k],ga[k],ba[k]);
+      png->line_blend(int(x010),int(y010),int(x110),int(y110),o010,ra[k],ga[k],ba[k]);
+      png->line_blend(int(x011),int(y011),int(x111),int(y111),o011,ra[k],ga[k],ba[k]);
+    }
+}
 //----------------------------------------------------------------------
 
 void tree_to_png (Tree * tree, std::string filename, 
@@ -479,8 +577,6 @@ void tree_to_png (Tree * tree, std::string filename,
     ba[i] = (1-a)*bc[ic] + a*bc[ic+1];
   }
 
-  double amin = MIN (nx,ny);
-
   ItNode it_node (tree,level_lower,level_upper);
   int r = tree->refinement();
   int d = tree->dimension();
@@ -508,89 +604,72 @@ void tree_to_png (Tree * tree, std::string filename,
       h*=rinv;
     }
     if (d==2) {zmin=0; zmax=0;}
-    // Compute the rotated points
-    double x000,y000,z000;
-    double x001,y001,z001;
-    double x010,y010,z010;
-    double x011,y011,z011;
-    double x100,y100,z100;
-    double x101,y101,z101;
-    double x110,y110,z110;
-    double x111,y111,z111;
 
-    rotate(&x000,&y000,&z000, xmin,ymin,zmin, theta,phi,psi,ortho);
-    rotate(&x001,&y001,&z001, xmin,ymin,zmax, theta,phi,psi,ortho);
-    rotate(&x010,&y010,&z010, xmin,ymax,zmin, theta,phi,psi,ortho);
-    rotate(&x011,&y011,&z011, xmin,ymax,zmax, theta,phi,psi,ortho);
-    rotate(&x100,&y100,&z100, xmax,ymin,zmin, theta,phi,psi,ortho);
-    rotate(&x101,&y101,&z101, xmax,ymin,zmax, theta,phi,psi,ortho);
-    rotate(&x110,&y110,&z110, xmax,ymax,zmin, theta,phi,psi,ortho);
-    rotate(&x111,&y111,&z111, xmax,ymax,zmax, theta,phi,psi,ortho);
+    plot_node(nx,ny,
+	      node_trace->level(),
+	      xmin,xmax,ymin,ymax,zmin,zmax,
+	      theta,phi,psi,ortho,falloff,
+	      ra,ga,ba,
+	      scale,num_levels,fill_blocks,&png);
 
-    // scale points
-    
-    x000 = amin * ((x000-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
-    x001 = amin * ((x001-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
-    x010 = amin * ((x010-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
-    x011 = amin * ((x011-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
-    x100 = amin * ((x100-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
-    x101 = amin * ((x101-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
-    x110 = amin * ((x110-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
-    x111 = amin * ((x111-0.5)*scale + 0.5) + 0.5*(nx - amin) + 1;
-
-    y000 = amin * ((y000-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
-    y001 = amin * ((y001-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
-    y010 = amin * ((y010-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
-    y011 = amin * ((y011-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
-    y100 = amin * ((y100-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
-    y101 = amin * ((y101-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
-    y110 = amin * ((y110-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
-    y111 = amin * ((y111-0.5)*scale + 0.5) + 0.5*(ny - amin) + 1;
-
-    // plot cube
-
-    // compute "opacity"
-
-    double o = pow(1.0*(node_trace->level()+1) / (num_levels), falloff);
-
-    double o000 = o*0.5*(1+z000);
-    double o001 = o*0.5*(1+z001);
-    double o010 = o*0.5*(1+z010);
-    double o011 = o*0.5*(1+z011);
-    double o100 = o*0.5*(1+z100);
-    double o101 = o*0.5*(1+z101);
-    double o110 = o*0.5*(1+z110);
-
-    int k = node_trace->level();
-
-    if (fill_blocks) {
-      png.filledsquare_blend(int(x000),int(y000),int(x110),int(y110),o000,ra[k],ga[k],ba[k]);
-      png.line(int(x000),int(y000),int(x100),int(y100),1.0,1.0,1.0);
-      png.line(int(x100),int(y100),int(x110),int(y110),1.0,1.0,1.0);
-      png.line(int(x110),int(y110),int(x010),int(y010),1.0,1.0,1.0);
-      png.line(int(x010),int(y010),int(x000),int(y000),1.0,1.0,1.0);
-    } else {
-
-      png.line_blend(int(x000),int(y000),int(x001),int(y001),o000,ra[k],ga[k],ba[k]);
-      png.line_blend(int(x010),int(y010),int(x011),int(y011),o010,ra[k],ga[k],ba[k]);
-      png.line_blend(int(x100),int(y100),int(x101),int(y101),o100,ra[k],ga[k],ba[k]);
-      png.line_blend(int(x110),int(y110),int(x111),int(y111),o110,ra[k],ga[k],ba[k]);
-
-      png.line_blend(int(x000),int(y000),int(x010),int(y010),o000,ra[k],ga[k],ba[k]);
-      png.line_blend(int(x001),int(y001),int(x011),int(y011),o001,ra[k],ga[k],ba[k]);
-      png.line_blend(int(x100),int(y100),int(x110),int(y110),o100,ra[k],ga[k],ba[k]);
-      png.line_blend(int(x101),int(y101),int(x111),int(y111),o101,ra[k],ga[k],ba[k]);
-
-      png.line_blend(int(x000),int(y000),int(x100),int(y100),o000,ra[k],ga[k],ba[k]);
-      png.line_blend(int(x001),int(y001),int(x101),int(y101),o001,ra[k],ga[k],ba[k]);
-      png.line_blend(int(x010),int(y010),int(x110),int(y110),o010,ra[k],ga[k],ba[k]);
-      png.line_blend(int(x011),int(y011),int(x111),int(y111),o011,ra[k],ga[k],ba[k]);
-    }
   }
   delete [] ra;
   delete [] ga;
   delete [] ba;
   png.close();
+}
+
+//----------------------------------------------------------------------
+
+float * read_hdf5 
+(
+ std::string file_name,
+ std::string group_name,
+ std::string field_name,
+ int * nx, int * ny, int * nz,
+ int * mx, int * my, int * mz
+ )
+		    
+{
+  printf ("%s %s %s\n",file_name.c_str(),group_name.c_str(),field_name.c_str());
+  FileHdf5 file ("./",file_name.c_str());
+  file.file_open();
+
+  if (group_name != "") {
+    file.group_chdir(group_name);
+    file.group_open();
+  }
+  scalar_type type = scalar_type_unknown;
+  if (nz) {
+    file.data_open (field_name,&type,nx,ny,nz);
+  } else {
+    file.data_open (field_name,&type,nx,ny);
+  }
+
+  *mx=*nx;
+  *my=*ny;
+  *mz=nz?(*nz):1;
+
+  int n = (*mx)*(*my)*(*mz);
+  float * field = new float [n];
+
+
+  file.data_read(field);
+
+  file.data_close();
+  file.group_close();
+  file.file_close();
+
+  double min_field = 1e37;
+  double max_field = -1e37;
+  for (int i=0; i<n; i++) {
+    if (field[i] < min_field) min_field = field[i];
+    if (field[i] > max_field) max_field = field[i];
+  }
+  TRACE2 ("min = %f  max = %f",min_field,max_field);
+
+
+  return field;
 }
 
 //------------------------------------------------------------------------
@@ -608,36 +687,18 @@ int * hdf5_to_levels
  int * nx, int * ny, int * nz,
  int min_level, int max_level,
  refine_type refine = refine_log,
- double tol = 1e-6
+ double tol = 1e-10
  )
 {
 	
-  FileHdf5 file ("./",file_name.c_str());
 
-  file.file_open();
-
-  if (group_name != "") {
-    file.group_chdir(group_name);
-    file.group_open();
+  int mx,my,mz;
+  float * field = 0;
+  float * field_te = 0;
+  field = read_hdf5(file_name,group_name,field_name,nx,ny,nz,&mx,&my,&mz);
+  if (refine == refine_slope) {
+    field_te = read_hdf5(file_name,group_name,"TotalEnergy",nx,ny,nz,&mx,&my,&mz);
   }
-  scalar_type type = scalar_type_unknown;
-  if (nz) {
-    file.data_open (field_name,&type,nx,ny,nz);
-  } else {
-    file.data_open (field_name,&type,nx,ny);
-  }
-
-  int mx=*nx;
-  int my=*ny;
-  int mz=nz?(*nz):1;
-
-  float * field = new float [mx*my*mz];
-  file.data_read(field);
-
-  file.data_close();
-  file.group_close();
-  file.file_close();
-
 
   //--------------------------------------------------
   // Refine
@@ -689,6 +750,7 @@ int * hdf5_to_levels
     }
     break;
   case refine_slope:
+    printf ("tol = %f\n",tol);
     for (int level = min_level; level<=max_level; level++) {
       for (int iz=0; iz<mz; iz++) {
 	for (int iy=0; iy<my; iy++) {
@@ -724,6 +786,36 @@ int * hdf5_to_levels
 	      refine = refine || abs(((a - am)/a)) > tol;
 	    }
 
+	    if (refine == refine_slope) {
+	      double a = (field_te[i] > 1e-10) ? field_te[i] : 1e-10;
+
+	      //	      bool refine = false;
+
+	      if (ix+1 < mx) {
+		double ap = field_te[i+dx];
+		refine = refine || abs(((ap - a)/a)) > tol;
+	      }
+	      if (ix-1 > 0) {
+		double am = field_te[i-dx];
+		refine = refine || abs(((a - am)/a)) > tol;
+	      }
+	      if (iy+1 < my) {
+		double ap = field_te[i+dy];
+		refine = refine || abs(((ap - a)/a)) > tol;
+	      }
+	      if (iy-1 > 0) {
+		double am = field_te[i-dy];
+		refine = refine || abs(((a - am)/a)) > tol;
+	      }
+	      if (iz+1 < mz) {
+		double ap = field_te[i+dz];
+		refine = refine || abs(((ap - a)/a)) > tol;
+	      }
+	      if (iz-1 > 0) {
+		double am = field_te[i-dz];
+		refine = refine || abs(((a - am)/a)) > tol;
+	      }
+	    }
 	    if (refine) levels[i] = level;
 	  }
 	}

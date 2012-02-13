@@ -681,52 +681,52 @@ test_table ("initial_png",
 
 test_group("Disk");
 
-tests("Disk","test_FileHdf5", "test_FileHdf5","");
-tests("Disk","test_FileIfrit","test_FileIfrit","");
+tests("Cello","test_FileHdf5", "test_FileHdf5","");
+tests("Cello","test_FileIfrit","test_FileIfrit","");
 
    //----------------------------------------------------------------------
 
 test_group("Error");
 
-tests("Error","test_Error","test_Error","");
+tests("Cello","test_Error","test_Error","");
 
 
    //----------------------------------------------------------------------
 
 test_group("Field");
 
-tests("Field","test_FieldDescr","test_FieldDescr","");
-tests("Field","test_FieldBlock","test_FieldBlock","");
-tests("Field","test_FieldFace","test_FieldFace","");
-tests("Field","test_ItField","test_ItField","");
+tests("Cello","test_FieldDescr","test_FieldDescr","");
+tests("Cello","test_FieldBlock","test_FieldBlock","");
+tests("Cello","test_FieldFace","test_FieldFace","");
+tests("Cello","test_ItField","test_ItField","");
 
    //----------------------------------------------------------------------
 
 test_group("Io");
 
-tests("Io","test_ItReduce", "test_ItReduce","");
+tests("Cello","test_ItReduce", "test_ItReduce","");
 
    //----------------------------------------------------------------------
 
 test_group("Memory");
 
-tests("Memory","test_Memory","test_Memory","");
+tests("Cello","test_Memory","test_Memory","");
 
 
    //----------------------------------------------------------------------
 
 test_group("Mesh");
 
-tests("Mesh","test_Hierarchy","test_Hierarchy",""); 
-tests("Mesh","test_Patch","test_Patch",""); 
-tests("Mesh","test_Block","test_Block",""); 
-tests("Mesh","test_Tree","test_Tree",""); 
+tests("Cello","test_Hierarchy","test_Hierarchy",""); 
+tests("Cello","test_Patch","test_Patch",""); 
+tests("Cello","test_Block","test_Block",""); 
+tests("Cello","test_Tree","test_Tree",""); 
 
 printf ("<img width=257 src=\"mpi/test_tree_initial.png\"></img>\n");
 printf ("<img width=257 src=\"mpi/test_tree_balanced.png\"></img>\n");
 printf ("<img width=257 src=\"mpi/test_tree_coalesced.png\"></img></br>\n");
 
-tests("Mesh","test_TreeDensity","test_TreeDensity",""); 
+tests("Cello","test_TreeDensity","test_TreeDensity",""); 
 
 printf ("<img width=257 src=\"mpi/density_x_1-initial.png\"></img>\n");
 printf ("<img width=257 src=\"mpi/density_x_2-balanced.png\"></img>\n");
@@ -736,15 +736,15 @@ printf ("<img width=257 src=\"mpi/density_3d_1-initial.png\"></img>\n");
 printf ("<img width=257 src=\"mpi/density_3d_2-balanced.png\"></img>\n");
 printf ("<img width=257 src=\"mpi/density_3d_3-coalesced.png\"></img></br>\n");
 
-tests("Mesh","test_Node","test_Node",""); 
-tests("Mesh","test_NodeTrace","test_NodeTrace",""); 
-tests("Mesh","test_ItNode","test_ItNode",""); 
+tests("Cello","test_Node","test_Node",""); 
+tests("Cello","test_NodeTrace","test_NodeTrace",""); 
+tests("Cello","test_ItNode","test_ItNode",""); 
 
    //----------------------------------------------------------------------
 
 test_group("Monitor");
 
-tests("Monitor","test_Monitor","test_Monitor","");
+tests("Cello","test_Monitor","test_Monitor","");
 
 // printf ("<img src=\"monitor_image_1.png\"></img>\n");
 // printf ("<img src=\"monitor_image_2.png\"></img>\n");
@@ -755,21 +755,21 @@ tests("Monitor","test_Monitor","test_Monitor","");
 
 test_group("Parallel");
 
-tests("Parallel","test_GroupProcess","test_GroupProcess","");
-tests("Parallel","test_Layout","test_Layout","");
+tests("Cello","test_GroupProcess","test_GroupProcess","");
+tests("Cello","test_Layout","test_Layout","");
 
    //----------------------------------------------------------------------
 
 test_group("Parameters");
 
-tests("Parameters","test_Parameters","test_Parameters","");
+tests("Cello","test_Parameters","test_Parameters","");
 
    //----------------------------------------------------------------------
 
 test_group("Performance");
 
-tests("Performance","test_Performance","test_Performance","");
-tests("Performance","test_Papi",       "test_Papi","");
+tests("Cello","test_Performance","test_Performance","");
+tests("Cello","test_Papi",       "test_Papi","");
 
 /* <hr> */
 /* <h2>Mesh Tests (Prototype Code)</h2> */
@@ -777,9 +777,9 @@ tests("Performance","test_Papi",       "test_Papi","");
 /*   <h3>TreeK-D2-R2-L?</h3> */
 
 /*   <?php */
-/*   tests("Mesh","test_TreeK","test_TreeK-D2-R2-L6", "2D L=6 r=2"); */
-/*   tests("Mesh","test_TreeK","test_TreeK-D2-R2-L7", "2D L=7 r=2"); */
-/*   tests("Mesh","test_TreeK","test_TreeK-D2-R2-L8", "2D L=8 r=2"); */
+/*   tests("Cello","test_TreeK","test_TreeK-D2-R2-L6", "2D L=6 r=2"); */
+/*   tests("Cello","test_TreeK","test_TreeK-D2-R2-L7", "2D L=7 r=2"); */
+/*   tests("Cello","test_TreeK","test_TreeK-D2-R2-L8", "2D L=8 r=2"); */
 /*   ?> */
 
 /* <table> */
@@ -806,8 +806,8 @@ tests("Performance","test_Papi",       "test_Papi","");
 /*   <h3>TreeK-D2-R4-L?</h3> */
 
 /*   <?php */
-/*   tests("Mesh","test_TreeK","test_TreeK-D2-R4-L6", "2D L=6 r=4"); */
-/*   tests("Mesh","test_TreeK","test_TreeK-D2-R4-L8", "2D L=8 r=4"); */
+/*   tests("Cello","test_TreeK","test_TreeK-D2-R4-L6", "2D L=6 r=4"); */
+/*   tests("Cello","test_TreeK","test_TreeK-D2-R4-L8", "2D L=8 r=4"); */
 /*   ?> */
 
 /* <table> */
@@ -834,9 +834,9 @@ tests("Performance","test_Papi",       "test_Papi","");
 /*   <h3>TreeK-D3-R2-L?</h3> */
 
 /*   <?php */
-/*   tests("Mesh","test_TreeK","test_TreeK-D3-R2-L4", "3D L=4 r=2"); */
-/*   tests("Mesh","test_TreeK","test_TreeK-D3-R2-L5", "3D L=5 r=2"); */
-/*   tests("Mesh","test_TreeK","test_TreeK-D3-R2-L6", "3D L=6 r=2"); */
+/*   tests("Cello","test_TreeK","test_TreeK-D3-R2-L4", "3D L=4 r=2"); */
+/*   tests("Cello","test_TreeK","test_TreeK-D3-R2-L5", "3D L=5 r=2"); */
+/*   tests("Cello","test_TreeK","test_TreeK-D3-R2-L6", "3D L=6 r=2"); */
 /*    ?> */
 
 /* <table> */
@@ -914,8 +914,8 @@ tests("Performance","test_Papi",       "test_Papi","");
 /*   <h3>TreeK-D3-R4-L?</h3> */
 
 /*   <?php */
-/*   tests("Mesh","test_TreeK","test_TreeK-D3-R4-L4", "3D L=4 r=4"); */
-/*   tests("Mesh","test_TreeK","test_TreeK-D3-R4-L6", "3D L=6 r=4"); */
+/*   tests("Cello","test_TreeK","test_TreeK-D3-R4-L4", "3D L=4 r=4"); */
+/*   tests("Cello","test_TreeK","test_TreeK-D3-R4-L6", "3D L=6 r=4"); */
 /*   ?> */
 
 /* <table> */

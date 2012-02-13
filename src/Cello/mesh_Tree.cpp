@@ -373,48 +373,57 @@ void Tree::coalesce ()
   int r2d = 1;
   for (int i=0; i<dimension(); i++) r2d *= refinement();
 
-  for (int level = max_level(); level >= 0; --level) {
-    ItNode it_node (this,level);
-    while (it_node.next_leaf()) {
+  int count;
 
-      const NodeTrace * node_trace = it_node.node_trace();
-      // actually want leaf parents, not leaves themselves
-      if (node_trace->index()==0) {
-	int level = node_trace->level();
-	-- level;
-	Node * node = 0;
-	if (level > 0) {
-	  bool do_coarsen = true;
-	  node = node_trace->node_level(level);
-	  // loop over leaf parent's children
-	  int count = 0; // child-child (grandchildren) count
-	  level_data_type * ldt0 = (level_data_type * ) node->child(0)->data();
-	  int level0 = ldt0->mesh_level;
-	  for (int i=0; i<r2d; i++) {
-	    Node * child = node->child(i);
-	    if (child->is_leaf()) {
-	      level_data_type * ldt = (level_data_type * ) child->data();
-	      int level = ldt->mesh_level;
-	      if (level != level0) {
-		do_coarsen = false;
-	      }
-	    } else do_coarsen = false;
-	  }
-	  if (do_coarsen) {
-	    // adjust mesh level 
-	    coarsen_node(node);
-	    level_data_type * ldt = (level_data_type * ) node->data();
-	    if (ldt == NULL) {
-	      node->set_data(&level_data[index_data++]);
-	      ldt = (level_data_type * ) node->data();
+  do {
+
+    count = 0;
+    for (int level = max_level(); level >= 0; --level) {
+      ItNode it_node (this,level);
+      while (it_node.next_leaf()) {
+
+	const NodeTrace * node_trace = it_node.node_trace();
+	// actually want leaf parents, not leaves themselves
+	if (node_trace->index()==0) {
+	  int level = node_trace->level();
+	  -- level;
+	  Node * node = 0;
+	  if (level > 0) {
+	    bool do_coarsen = true;
+	    node = node_trace->node_level(level);
+	    // loop over leaf parent's children
+	    level_data_type * ldt0 = (level_data_type * ) node->child(0)->data();
+	    int level0 = ldt0->mesh_level;
+	    for (int i=0; i<r2d; i++) {
+	      Node * child = node->child(i);
+	      if (child->is_leaf()) {
+		level_data_type * ldt = (level_data_type * ) child->data();
+		int level = ldt->mesh_level;
+		if (level != level0) {
+		  do_coarsen = false;
+		}
+	      } else do_coarsen = false;
 	    }
-	    // @@@ BUG ldt == 0
-	    ldt->mesh_level = ldt0->mesh_level;
+	    if (do_coarsen) {
+	      count ++;
+	      // adjust mesh level 
+	      coarsen_node(node);
+	      level_data_type * ldt = (level_data_type * ) node->data();
+	      if (ldt == NULL) {
+		node->set_data(&level_data[index_data++]);
+		ldt = (level_data_type * ) node->data();
+	      }
+	      // @@@ BUG ldt == 0
+	      ldt->mesh_level = ldt0->mesh_level;
+	    }
 	  }
 	}
-      }
-    }  
-  }
+      }  
+    }
+    passes ++;
+    printf ("Pass %d  Count %d\n",passes,count);
+  } while (count > 0);
+  
   delete [] level_data;
 }
 //----------------------------------------------------------------------
