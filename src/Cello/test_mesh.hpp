@@ -9,6 +9,25 @@
 
 #include <assert.h>
 
+const int num_colors = 6;
+const double rc[] = {1, 0, 0, 0, 1, 1};
+const double gc[] = {0, 0, 1, 1, 1, 0};
+const double bc[] = {1, 1, 1, 0, 0, 0};
+
+
+//----------------------------------------------------------------------
+void get_colors (double * r,
+		 double * g,
+		 double * b,
+		 double c)
+{
+@@@
+    int i = c * (num_colors-1);
+    double a = c *(num_colors-1) - i;
+  double r = (1-a)*rc[ic] + a*rc[ic+1];
+	double g = (1-a)*gc[ic] + a*gc[ic+1];
+	double b = (1-a)*bc[ic] + a*bc[ic+1];
+}
 //----------------------------------------------------------------------
 
 Tree * test_tree_22()
@@ -574,10 +593,6 @@ void tree_to_png (Tree * tree, std::string filename,
 
 
   // determine color table
-  const int num_colors = 6;
-  const double rc[] = {1, 0, 0, 0, 1, 1};
-  const double gc[] = {0, 0, 1, 1, 1, 0};
-  const double bc[] = {1, 1, 1, 0, 0, 0};
   int num_levels = tree->max_level() + 1;
   double * ra = new double [num_levels];
   double * ga = new double [num_levels];
@@ -911,10 +926,6 @@ void hdf5_to_png
   fmax = log(fmax);
 
   // Colormap
-  const int num_colors = 6;
-  const double rc[] = {1, 0, 0, 0, 1, 1};
-  const double gc[] = {0, 0, 1, 1, 1, 0};
-  const double bc[] = {1, 1, 1, 0, 0, 0};
 
   double amin = MIN (nx,ny);
 
@@ -940,12 +951,13 @@ void hdf5_to_png
 
 	double o0 = 1.0* pow(ci, falloff);
 
-	int ic = ci * (num_colors-1);
-	double a = ci *(num_colors-1) - ic;
-
 	double r = (1-a)*rc[ic] + a*rc[ic+1];
 	double g = (1-a)*gc[ic] + a*gc[ic+1];
 	double b = (1-a)*bc[ic] + a*bc[ic+1];
+	get_colors(&r,&g,&b,ci);
+	int ic = ci * (num_colors-1);
+	double a = ci *(num_colors-1) - ic;
+
 
 	for (int ky=-1; ky<=1; ky++) {
 	  for (int kx=-1; kx<=1; kx++) {
