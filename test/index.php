@@ -728,9 +728,9 @@ printf ("<img width=257 src=\"mpi/test_tree_3-merged.png\"></img></br>\n");
 
 tests("Cello","test_TreeDensity","test_TreeDensity",""); 
 
-printf ("<img width=257 src=\"mpi/density_x_1-initial.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/density_x_2-balanced.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/density_x_3-coalesced.png\"></img></br>\n");
+printf ("<img width=257 src=\"mpi/density_xy_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"mpi/density_xy_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"mpi/density_xy_3-coalesced.png\"></img></br>\n");
 
 printf ("<img width=257 src=\"mpi/density_3d_1-initial.png\"></img>\n");
 printf ("<img width=257 src=\"mpi/density_3d_2-balanced.png\"></img>\n");
