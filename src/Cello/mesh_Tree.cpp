@@ -348,10 +348,7 @@ void Tree::balance ()
 
 void Tree::coalesce ()
 {
-  struct level_data_type {
-    int mesh_level;
-    int tree_level;
-  } * level_data = new level_data_type[num_nodes()];
+  int * level_data = new int[num_nodes()];
 
   ItNode it_node (this);
 
@@ -363,7 +360,6 @@ void Tree::coalesce ()
     const NodeTrace * node_trace = it_node.node_trace();
 
     level_data[index_data].mesh_level = node_trace->level();
-    level_data[index_data].tree_level = node_trace->level();
 
     node_trace->node()->set_data(&level_data[index_data++]);
   }
@@ -424,7 +420,6 @@ void Tree::coalesce ()
     printf ("Pass %d  Count %d\n",passes,count);
   } while (count > 0);
   
-  delete [] level_data;
 }
 //----------------------------------------------------------------------
 //======================================================================

@@ -4,6 +4,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Feb 28 13:22:26 PST 2011
 /// @brief    Implementation of the Block object
+/// @todo     Remove hierarchy dependency via Initial--only need domain bounds
 
 #include "cello.hpp"
 
@@ -245,7 +246,7 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 #ifdef CONFIG_USE_CHARM
 
 extern CProxy_Simulation  proxy_simulation;
-extern CProxy_Main        proxy_main;
+// extern CProxy_Main        proxy_main;
 
 #endif /* CONFIG_USE_CHARM */
 
@@ -256,6 +257,11 @@ extern CProxy_Main        proxy_main;
 #ifdef CONFIG_USE_CHARM
 
 void Block::p_initial()
+// dependency: Simulation::field_descr()
+// dependency: Simulation: cycle()
+// dependency: Simulation: time()
+// dependency: Simulation: hierarchy()
+//    todo:remove
 {
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
 

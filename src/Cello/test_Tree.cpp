@@ -14,9 +14,8 @@
 PARALLEL_MAIN_BEGIN
 {
 
-  int max_depth=12;
-  int width  = 1024;
-  int height = 1024;
+  int width  = 512;
+  int height = 512;
   std::string file_root = "test_tree";
 
   PARALLEL_INIT;
@@ -24,9 +23,10 @@ PARALLEL_MAIN_BEGIN
   unit_init(0,1);
 
   std::string file_name = "input/test_balance.png";
-  if (PARALLEL_ARGC == 2) {
-    file_name = PARALLEL_ARGV[1];
-  }
+  int max_depth=12;
+
+  if (PARALLEL_ARGC >= 2) file_name = PARALLEL_ARGV[1];
+  if (PARALLEL_ARGC >= 3) max_depth = atoi(PARALLEL_ARGV[2]);
     
 
   unit_class("Tree");
@@ -341,7 +341,8 @@ PARALLEL_MAIN_BEGIN
     delete tree;
   }
 
-  {
+  bool do_target = false;
+  if (do_target) {
     int d = 2;
     int r = 2;
     tree = new Tree (d,r);

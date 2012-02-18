@@ -21,21 +21,31 @@ Import('use_papi')
 
 # Direct Dependencies
 # disk -> error
+
 # error -> monitor
+
 # field -> error
 # field -> mesh [LOOP]
+
 # io -> error
 # io -> field
+
 # memory -> error
+
 # mesh  -> disk
 # mesh -> field [LOOP]
 # mesh -> io
 # mesh -> parallel
 # mesh -> simulation (CHARM)
+
 # monitor -> utilities
+
 # parallel -> error
+
 # parameters -> error
+
 # performance -> error
+
 # test_* -> test
 
 if (use_papi):

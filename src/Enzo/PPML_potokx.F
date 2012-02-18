@@ -1,4 +1,4 @@
-c     See LICENSE_ENZO file for license and copyright information
+c     See LICENSE_PPML file for license and copyright information
 
 #include "fortran.h"
 

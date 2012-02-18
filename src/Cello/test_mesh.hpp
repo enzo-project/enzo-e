@@ -21,12 +21,11 @@ void get_colors (double * r,
 		 double * b,
 		 double c)
 {
-@@@
-    int i = c * (num_colors-1);
-    double a = c *(num_colors-1) - i;
-  double r = (1-a)*rc[ic] + a*rc[ic+1];
-	double g = (1-a)*gc[ic] + a*gc[ic+1];
-	double b = (1-a)*bc[ic] + a*bc[ic+1];
+  int i = c * (num_colors-1);
+  double a = c *(num_colors-1) - i;
+  *r = (1-a)*rc[i] + a*rc[i+1];
+  *g = (1-a)*gc[i] + a*gc[i+1];
+  *b = (1-a)*bc[i] + a*bc[i+1];
 }
 //----------------------------------------------------------------------
 
@@ -393,12 +392,15 @@ void levels_to_tree
 		assert (0 <= ir && ir < r2d);
 		node_trace.push(ir);
 
+		if (node_trace.node()->data() != 0) {
+		  TRACE0;
+		}
 		if (target) {
 		  if (node_trace.node()->data() == 0) {
 		    int * data = new int [1];
 		    node_trace.node()->set_data(data);
 		    *data = level - level_node;
-		  }
+		  } 
 		}
 
 		x *= r; while (x >= 1.0) x -= 1.0;
@@ -646,8 +648,13 @@ void tree_to_png (Tree * tree, std::string filename,
     }
     if (d==2) {zmin=0; zmax=0;}
 
+    
+    int * level_merge = (int *)node_trace->node()->data();
+    level = level_merge ? *level_merge : node_trace->level();
+    TRACE0;
+    if (level_merge) TRACE0;
     plot_node(nx,ny,
-	      node_trace->level(),
+	      level,
 	      xmin,xmax,ymin,ymax,zmin,zmax,
 	      theta,phi,psi,ortho,falloff,
 	      ra,ga,ba,
@@ -905,10 +912,6 @@ void hdf5_to_png
 
   pngwriter png (nx+1,ny+1,0,file_png.c_str());
 
-  // background color
-  //  png.filledsquare(1,1,nx+1,ny+1,1.0,1.0,1.0);
-
-
   // Determine field min and max
   double fmin=1e37;
   double fmax=-1e37;
@@ -951,13 +954,8 @@ void hdf5_to_png
 
 	double o0 = 1.0* pow(ci, falloff);
 
-	double r = (1-a)*rc[ic] + a*rc[ic+1];
-	double g = (1-a)*gc[ic] + a*gc[ic+1];
-	double b = (1-a)*bc[ic] + a*bc[ic+1];
+	double r,g,b;
 	get_colors(&r,&g,&b,ci);
-	int ic = ci * (num_colors-1);
-	double a = ci *(num_colors-1) - ic;
-
 
 	for (int ky=-1; ky<=1; ky++) {
 	  for (int kx=-1; kx<=1; kx++) {
