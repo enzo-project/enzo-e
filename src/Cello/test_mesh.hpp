@@ -392,9 +392,6 @@ void levels_to_tree
 		assert (0 <= ir && ir < r2d);
 		node_trace.push(ir);
 
-		if (node_trace.node()->data() != 0) {
-		  TRACE0;
-		}
 		if (target) {
 		  if (node_trace.node()->data() == 0) {
 		    int * data = new int [1];
@@ -651,8 +648,6 @@ void tree_to_png (Tree * tree, std::string filename,
     
     int * level_merge = (int *)node_trace->node()->data();
     level = level_merge ? *level_merge : node_trace->level();
-    TRACE0;
-    if (level_merge) TRACE0;
     plot_node(nx,ny,
 	      level,
 	      xmin,xmax,ymin,ymax,zmin,zmax,
@@ -714,8 +709,6 @@ float * read_hdf5
     if (field[i] < min_field) min_field = field[i];
     if (field[i] > max_field) max_field = field[i];
   }
-  TRACE2 ("min = %f  max = %f",min_field,max_field);
-
 
   return field;
 }
