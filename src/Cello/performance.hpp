@@ -14,7 +14,6 @@
 
 #include <vector>
 #include <string>
-#include <sys/time.h>
 #include <sys/resource.h>
 
 #ifdef __linux__
@@ -85,7 +84,6 @@ enum function_enum {
 // Component dependencies
 //----------------------------------------------------------------------
 
-#include "utilities.hpp"
 #include "monitor.hpp"
 #include "memory.hpp"
 #include "error.hpp"
@@ -94,6 +92,7 @@ enum function_enum {
 // Component class includes
 //----------------------------------------------------------------------
 
+#include "performance_Timer.hpp"
 #include "performance_Counters.hpp"
 #include "performance_Papi.hpp"
 #include "performance_Performance.hpp"

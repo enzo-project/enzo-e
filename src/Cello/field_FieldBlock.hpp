@@ -65,10 +65,9 @@ public: // interface
   { return array_; };
 
   /// Return width of cells along each dimension
-  void cell_width(const Block * block,
-		  double * hx = 0, 
-		  double * hy = 0, 
-		  double * hz = 0) const throw ();
+  void cell_width(double xm,   double xp,   double * hx,
+		  double ym=0, double yp=0, double * hy=0,
+		  double zm=0, double zp=0, double * hz=0) const throw ();
 
   // /// Return the associated field faces object
   // FieldFaces * field_faces(const FieldDescr * field_descr) throw ();
@@ -102,7 +101,8 @@ public: // interface
 
   /// Refresh ghost zones on an internal face
   void refresh_ghosts(const FieldDescr * field_descr,
-		      const Patch * patch,
+		      const GroupProcess * group_process,
+		      const Layout * layout,
 		      int ibx, int iby, int ibz,
 		      int fx,  int fy,  int fz) throw();
 

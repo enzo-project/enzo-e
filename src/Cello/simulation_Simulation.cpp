@@ -1164,11 +1164,11 @@ void Simulation::refresh() throw()
 
 #endif
 
+#ifndef CONFIG_USE_CHARM
+
 //----------------------------------------------------------------------
 // NOT CHARM
 //----------------------------------------------------------------------
-
-#ifndef CONFIG_USE_CHARM
 
 void Simulation::scheduled_output()
 
@@ -1248,6 +1248,48 @@ void Simulation::scheduled_output()
 }
 
 #endif
+
+//----------------------------------------------------------------------
+
+void Simulation::update_cycle(int cycle, double time, double dt, double stop) 
+{
+  cycle_ = cycle;
+  time_  = time;
+  dt_    = dt;
+  stop_  = stop;
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::monitor_output() const 
+{
+  monitor_-> print("Simulation", "cycle %04d time %15.12f dt %15.12g", 
+		   cycle_,time_,dt_);
+#ifdef CONFIG_USE_MEMORY
+  Memory * memory = Memory::instance();
+  monitor_->print("Memory","           bytes %lld bytes_high %lld",
+		  memory->bytes(), memory->bytes_high());
+  memory->reset_high();
+#endif
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::performance_output() const 
+{
+  monitor_->print ("Performance","real time = %s",performance_->time());
+#ifdef CONFIG_USE_PAPI
+  monitor_->print ("Performance","PAPI Time real   = %f",
+		   performance_->papi()->time_real());
+  monitor_->print ("Performance","PAPI Time proc   = %f",
+		   performance_->papi()->time_proc());
+  monitor_->print ("Performance","PAPI GFlop count = %f",
+		   performance_->papi()->flop_count()*1e-9);
+  monitor_->print ("Performance","PAPI GFlop rate  = %f",
+		   performance_->papi()->flop_count()*1e-9 
+		   / performance_->papi()->time_real());
+#endif
+}
 
 //----------------------------------------------------------------------
 

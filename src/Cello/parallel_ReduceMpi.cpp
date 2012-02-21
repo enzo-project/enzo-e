@@ -30,8 +30,8 @@ int ReduceMpi::reduce_int
 	  int(reduce_op),
 	  mpi_op != MPI_OP_NULL);
 
-  GroupProcessMpi * group_mpi = 
-    dynamic_cast<GroupProcessMpi *>(group_process_);
+  const GroupProcessMpi * group_mpi = 
+    dynamic_cast<const GroupProcessMpi *>(group_process_);
 
   int global;
 
@@ -67,8 +67,8 @@ double ReduceMpi::reduce_double
 
   double global;
 
-  GroupProcessMpi * group_mpi = 
-    dynamic_cast<GroupProcessMpi *>(group_process_);
+  const GroupProcessMpi * group_mpi = 
+    dynamic_cast<const GroupProcessMpi *>(group_process_);
 
   MPI_Allreduce (&local, &global, 1, mpi_type, mpi_op, group_mpi->comm());
 

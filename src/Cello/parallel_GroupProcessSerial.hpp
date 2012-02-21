@@ -29,11 +29,11 @@ public: // interface
 public: // interface (Group)
 
   /// Synchronize between all compute elements in the Group
-  void barrier()  throw()
+  void barrier() const throw()
   {};
 
   /// Synchronize between two compute elements in the Group
-  void sync (int rank, int tag=0) throw()
+  void sync (int rank, int tag=0) const throw()
   {};
 
   //--------------------------------------------------
@@ -42,63 +42,63 @@ public: // interface (Group)
   void * send_begin (int    rank_dest, 
 		     void * buffer, 
 		     int    size, 
-		     int    tag=0) throw();
+		     int    tag=0) const throw();
 
   /// Clean up after sending an array
-  void send_end(void * handle) throw()
+  void send_end(void * handle) const throw()
   {};
 
   /// Initiate receiving an array
   void * recv_begin
-  (int rank_source, void * buffer, int size, int tag=0) throw()
+  (int rank_source, void * buffer, int size, int tag=0) const throw()
   {
     buffer = buffer_[(long int)tag];
     return (void *) buffer;
   };
 
   /// Clean up after receiving an array
-  void recv_end(void * handle) throw();
+  void recv_end(void * handle) const throw();
 
   /// Send and receive data between two processes
   void send_recv
-  (int rank, void * buffer, int size, int tag=0) throw();
+  (int rank, void * buffer, int size, int tag=0) const throw();
 
   /// Complete sending or receiving an array
-  void wait(void * handle) throw()
+  void wait(void * handle) const throw()
   {}
 
   /// Test completeness of sending or receiving an array
-  bool test (void * handle) throw()
+  bool test (void * handle) const throw()
   {return true;}
 
   //--------------------------------------------------
 
   /// Add an array to a list of arrays to send in bulk
-  void bulk_send_add(int rank_dest, void * buffer, int size, int tag=0) throw()
+  void bulk_send_add(int rank_dest, void * buffer, int size, int tag=0) const throw()
   {};
 
   /// Initiate a bulk send of multiple arrays
-  void * bulk_send() throw()
+  void * bulk_send() const throw()
   {return 0;};
 
   /// Add an array to a list of arrays to receive in bulk
-  void bulk_recv_add(int rank_source, void * buffer, int size, int tag=0) throw()
+  void bulk_recv_add(int rank_source, void * buffer, int size, int tag=0) const throw()
   {};
 
   /// Initiate a bulk receive of multiple arrays
-  void * bulk_recv() throw()
+  void * bulk_recv() const throw()
   {return 0;};
 
   /// Complete a bulk send or receive of multiple arrays
-  void bulk_wait(void * handle) throw()
+  void bulk_wait(void * handle) const throw()
   {};
 
   /// Create a Reduce object for this ProcessGroup
-  Reduce * create_reduce () throw ();
+  Reduce * create_reduce () const throw ();
 
 private: // attributes
 
-  std::map<long int,void *> buffer_;  // Mapping from tag to buffer
+  mutable std::map<long int,void *> buffer_;  // Mapping from tag to buffer
 
 };
 

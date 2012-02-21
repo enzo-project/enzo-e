@@ -8,6 +8,7 @@
 #include "main.hpp" 
 #include "test.hpp"
 
+#include "mesh.hpp"
 #include "field.hpp"
 
 PARALLEL_MAIN_BEGIN
@@ -440,9 +441,15 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
   unit_func("cell_width");
 
+  double xm,ym,zm;
+  block->lower(&xm,&ym,&zm);
+
+  double xp,yp,zp;
+  block->upper(&xp,&yp,&zp);
+
   double hx=0,hy=0,hz=0;
 
-  field_block->cell_width(block,&hx,&hy,&hz);
+  field_block->cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
 
   unit_assert(fabs(hx-2.0/nx) < 1e-6);
   unit_assert(fabs(hy-4.0/ny) < 1e-6);

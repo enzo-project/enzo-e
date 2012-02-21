@@ -234,7 +234,10 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
   int ibx,iby,ibz;
   index_patch(&ibx,&iby,&ibz);
   field_block_[index_field_set]
-    -> refresh_ghosts (field_descr,patch, ibx,iby,ibz, fx,fy,fz);
+    -> refresh_ghosts (field_descr,
+		       patch->group_process(),
+		       patch->layout(),
+		       ibx,iby,ibz, fx,fy,fz);
 }
 
 #endif

@@ -56,8 +56,14 @@ void EnzoInitialImplosion2::enforce
   field_block->size(&nx,&ny);
 
   // Cell widths
+  double xm,ym;
+  block->lower(&xm,&ym);
+
+  double xp,yp;
+  block->upper(&xp,&yp);
+
   double hx,hy;
-  field_block->cell_width(enzo_block,&hx,&hy);
+  field_block->cell_width(xm,xp,&hx,ym,yp,&hy);
 
   // Ghost depths
   int gx,gy;

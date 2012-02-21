@@ -17,7 +17,7 @@ class Reduce {
 public: // interface
 
   /// Constructor
-  Reduce(GroupProcess * group_process) throw()
+  Reduce(const GroupProcess * group_process) throw()
     : group_process_(group_process)
   { /* EMPTY */ };
     
@@ -37,7 +37,7 @@ public: // interface
 
 protected: // attributes
 
-  GroupProcess * group_process_;
+  const GroupProcess * group_process_;
 
 };
 

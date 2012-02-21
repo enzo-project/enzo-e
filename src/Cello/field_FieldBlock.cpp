@@ -134,14 +134,13 @@ char * FieldBlock::field_unknowns
 
 //----------------------------------------------------------------------
 
-void FieldBlock::cell_width(const Block * block,
-			    double * hx, double * hy, double * hz ) const throw ()
+void FieldBlock::cell_width
+(
+ double xm, double xp, double * hx,
+ double ym, double yp, double * hy,
+ double zm, double zp, double * hz
+ ) const throw ()
 {
-  double xm,xp,ym,yp,zm,zp;
-
-  block->lower(&xm,&ym,&zm);
-  block->upper(&xp,&yp,&zp);
-
   if (hx) (*hx) = (xp-xm) / size_[0];
   if (hy) (*hy) = (yp-ym) / size_[1];
   if (hz) (*hz) = (zp-zm) / size_[2];
@@ -383,10 +382,13 @@ void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 
 #ifndef CONFIG_USE_CHARM
 
-void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
-				const Patch * patch,
-				int ibx, int iby, int ibz,
-				int fx, int fy, int fz) throw()
+void FieldBlock::refresh_ghosts
+(
+ const FieldDescr   * field_descr,
+ const GroupProcess * group_process,
+ const Layout       * layout,
+ int ibx, int iby, int ibz,
+ int fx, int fy, int fz) throw()
 
 {
 
@@ -395,9 +397,6 @@ void FieldBlock::refresh_ghosts(const FieldDescr * field_descr,
 	    "Called with ghosts not allocated: allocating ghosts");
     allocate_ghosts(field_descr);
   }
-
-  GroupProcess * group_process = patch->group_process();
-  Layout * layout = patch->layout();
 
   // Send face
 

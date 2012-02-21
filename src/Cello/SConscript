@@ -38,7 +38,7 @@ Import('use_papi')
 # mesh -> parallel
 # mesh -> simulation (CHARM)
 
-# monitor -> utilities
+# monitor -> performance
 
 # parallel -> error
 
@@ -55,18 +55,17 @@ else:
 
 print libs_papi
 libs_external    = ['external']
-libs_performance = ['performance', 'error', 'monitor', 'utilities'] + libs_papi
-libs_error       = ['error', 'monitor', 'utilities']
-libs_monitor     = ['parallel', 'error', 'monitor', 'utilities']
-libs_disk        = ['disk'] +    libs_error +  ['hdf5']
+libs_monitor     = ['monitor']
+libs_error       = ['error'] + libs_monitor
+libs_disk        = ['disk'] + libs_error + ['hdf5']
+libs_performance = ['performance'] + libs_error + libs_papi
 libs_parallel    = ['parallel'] +libs_error
 libs_field       = ['field', 'mesh', 'io'] + libs_parallel + ['cello']
-libs_io          = ['io'] +      libs_error
 libs_main        = ['main']
 libs_memory      = ['memory'] +   libs_error
 libs_mesh        = ['mesh','field','io','disk'] + libs_parallel + libs_external + ['cello','png','hdf5']
+libs_io          = ['io'] + libs_mesh
 libs_method      = ['method']
-libs_parallel    = ['parallel'] + libs_error
 libs_parameters  = ['parameters'] + libs_error +  ['cello']
 # 
 #components_performance = ['memory','error','monitor', 'test','cello']
@@ -75,13 +74,14 @@ libs_simulation = ['simulation']
 #,'method','mesh','field','memory',
 #                         'parallel','parameters','error','monitor',
 #                         'performance','cello']
-libs_test = ['test']
+libs_test = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
 if (type=='charm'):
-   libs_field  = ['simulation','method','mesh','field','io','parallel','disk','parameters','memory','error','monitor','performance','cello','external', 'png', 'hdf5']
-   libs_io     = ['io','simulation','method','mesh','field','disk','memory','parallel','parameters','test','cello','external','error','monitor','performance','png','hdf5']
-   libs_mesh   = ['field','simulation','method','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5']
+   libs_all = ['simulation','method','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
+   libs_field  = libs_all
+   libs_io     = libs_all
+   libs_mesh   = libs_all
 
 
 
@@ -114,7 +114,6 @@ includes_parallel =    [Glob('parallel*hpp'),'parallel.def']
 includes_parameters =  [Glob('parameters*hpp'),'parse.h']
 includes_performance = [Glob('performance*hpp')]
 includes_simulation =  [Glob('simulation*hpp')]
-includes_utilities = [Glob('utilities*hpp')]
 includes_test =        [Glob('test_Unit*hpp'),'test.hpp']
 
 sources_cello =       [Glob('cello*cpp')]
@@ -131,7 +130,6 @@ sources_parallel =    [Glob('parallel*cpp')]
 sources_parameters =  [Glob('parameters*cpp'),'parse.tab.c','lex.yy.c']
 sources_performance = [Glob('performance*cpp')]
 sources_simulation =  [Glob("simulation*cpp")]
-sources_utilities = [Glob('utilities*cpp')]
 sources_test =        [Glob('test_Unit*cpp')]
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -211,54 +209,82 @@ if (type == "charm"):
    sources_parameters = sources_parameters + ["main.cpp"]
    sources_performance = sources_performance + ["main.cpp"]
 
-test_FileHdf5     = env.Program ('test_FileHdf5.cpp',   LIBS=[libs_disk,  'test'])
-test_FileIfrit    = env.Program ('test_FileIfrit.cpp',  LIBS=[libs_disk,  'test'])
-test_error        = env.Program ('test_Error.cpp',      LIBS=[libs_error, 'test'])
+test_FileHdf5     = env.Program ('test_FileHdf5.cpp',   LIBS=[libs_disk,  libs_test])
+test_FileIfrit    = env.Program ('test_FileIfrit.cpp',  LIBS=[libs_disk,  libs_test])
+test_error        = env.Program ('test_Error.cpp',      LIBS=[libs_error, libs_test])
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM++
+# test_FieldBlock -lsimulation -lfield -lmethod -lmesh -lio -lparallel -ldisk -lparameters -lperformance -lmemory -lerror -lcello -ltest -lparallel -lerror -lmonitor -lhdf5 -lexternal -lpng -lpapi
 if (type == 'charm'):
-   test_field_block  = env.Program (['test_FieldBlock.cpp', sources_field],LIBS=[libs_field, 'test'])
-   test_field_descr  = env.Program (['test_FieldDescr.cpp', sources_field], LIBS=[libs_field, 'test'])
-   test_field_face   = env.Program (['test_FieldFace.cpp', sources_field],  LIBS=[libs_field, 'test'])
-   test_it_field     = env.Program (['test_ItField.cpp', sources_field],    LIBS=[libs_field, 'test'])
-   test_it_reduce    = env.Program (['test_ItReduce.cpp', sources_io],   LIBS=[libs_io,     'test']) 
-   test_it_node      = env.Program (['test_ItNode.cpp', sources_mesh],  LIBS=[libs_mesh,     'test'])
-   test_block        = env.Program (['test_Block.cpp', sources_mesh],    LIBS=[libs_mesh,   'test'])
-   test_hierarchy    = env.Program (['test_Hierarchy.cpp',sources_mesh],  LIBS=[libs_mesh,   'test'])
-   test_patch        = env.Program (['test_Patch.cpp',sources_mesh],      LIBS=[libs_mesh,   'test'])
-   test_tree         = env.Program (['test_Tree.cpp',sources_mesh],       LIBS=[libs_mesh,   'test'])
-   test_tree_density = env.Program (['test_TreeDensity.cpp',sources_mesh],LIBS=[libs_mesh,   'test'])
-   test_node         = env.Program (['test_Node.cpp',sources_mesh],       LIBS=[libs_mesh,   'test'])
-   test_node_trace   = env.Program (['test_NodeTrace.cpp',sources_mesh],  LIBS=[libs_mesh,   'test'])
+   test_field_block  = env.Program (['test_FieldBlock.cpp', sources_field],
+                                    LIBS=[libs_field, libs_test])
+   test_field_descr  = env.Program (['test_FieldDescr.cpp', sources_field], 
+                                    LIBS=[libs_field, libs_test])
+   test_field_face   = env.Program (['test_FieldFace.cpp', sources_field],  
+                                    LIBS=[libs_field, libs_test])
+   test_it_field     = env.Program (['test_ItField.cpp', sources_field],    
+                                    LIBS=[libs_field, libs_test])
+   test_it_reduce    = env.Program (['test_ItReduce.cpp', sources_io],
+                                    LIBS=[libs_io,    libs_test]) 
+   test_it_node      = env.Program (['test_ItNode.cpp', sources_mesh],
+                                    LIBS=[libs_mesh,  libs_test])
+   test_block        = env.Program (['test_Block.cpp', sources_mesh],
+                                    LIBS=[libs_mesh,  libs_test])
+   test_hierarchy    = env.Program (['test_Hierarchy.cpp',sources_mesh],
+                                    LIBS=[libs_mesh,  libs_test])
+   test_patch        = env.Program (['test_Patch.cpp',sources_mesh],
+                                    LIBS=[libs_mesh,  libs_test])
+   test_tree         = env.Program (['test_Tree.cpp',sources_mesh],
+                                    LIBS=[libs_mesh,  libs_test])
+   test_tree_density = env.Program (['test_TreeDensity.cpp',sources_mesh],
+                                    LIBS=[libs_mesh,  libs_test])
+   test_node         = env.Program (['test_Node.cpp',sources_mesh],
+                                    LIBS=[libs_mesh,  libs_test])
+   test_node_trace   = env.Program (['test_NodeTrace.cpp',sources_mesh],
+                                    LIBS=[libs_mesh,  libs_test])
 else:
-   test_field_block  = env.Program ('test_FieldBlock.cpp',LIBS=[libs_field, 'test'])
-   test_field_descr  = env.Program ('test_FieldDescr.cpp', LIBS=[libs_field, 'test'])
-   test_field_face   = env.Program ('test_FieldFace.cpp',  LIBS=[libs_field, 'test'])
-   test_it_field     = env.Program ('test_ItField.cpp',    LIBS=[libs_field, 'test']) 
-   test_it_reduce    = env.Program ('test_ItReduce.cpp',   LIBS=[libs_io,     'test'])
-   test_it_node      = env.Program ('test_ItNode.cpp',   LIBS=[libs_mesh,     'test'])
-   test_block        = env.Program ('test_Block.cpp',      LIBS=[libs_mesh,   'test'])
-   test_hierarchy    = env.Program ('test_Hierarchy.cpp',  LIBS=[libs_mesh,   'test'])
-   test_patch        = env.Program ('test_Patch.cpp',      LIBS=[libs_mesh,   'test'])
-   test_tree         = env.Program ('test_Tree.cpp',       LIBS=[libs_mesh,   'test'])
-   test_tree_density = env.Program ('test_TreeDensity.cpp',LIBS=[libs_mesh,   'test'])
-   test_node         = env.Program ('test_Node.cpp',       LIBS=[libs_mesh,   'test'])
-   test_node_trace   = env.Program ('test_NodeTrace.cpp',  LIBS=[libs_mesh,   'test'])
+   test_field_block  = env.Program ('test_FieldBlock.cpp', 
+                                    LIBS=[libs_field, libs_test])
+   test_field_descr  = env.Program ('test_FieldDescr.cpp', 
+                                    LIBS=[libs_field, libs_test])
+   test_field_face   = env.Program ('test_FieldFace.cpp',  
+                                    LIBS=[libs_field, libs_test])
+   test_it_field     = env.Program ('test_ItField.cpp',    
+                                    LIBS=[libs_field, libs_test]) 
+   test_it_reduce    = env.Program ('test_ItReduce.cpp',   
+                                    LIBS=[libs_io,    libs_test])
+   test_it_node      = env.Program ('test_ItNode.cpp',     
+                                    LIBS=[libs_mesh,  libs_test])
+   test_block        = env.Program ('test_Block.cpp',      
+                                    LIBS=[libs_mesh,  libs_test])
+   test_hierarchy    = env.Program ('test_Hierarchy.cpp',  
+                                    LIBS=[libs_mesh,  libs_test])
+   test_patch        = env.Program ('test_Patch.cpp',      
+                                    LIBS=[libs_mesh,  libs_test])
+   test_tree         = env.Program ('test_Tree.cpp',       
+                                    LIBS=[libs_mesh,  libs_test])
+   test_tree_density = env.Program ('test_TreeDensity.cpp',
+                                    LIBS=[libs_mesh,  libs_test])
+   test_node         = env.Program ('test_Node.cpp',       
+                                    LIBS=[libs_mesh,  libs_test])
+   test_node_trace   = env.Program ('test_NodeTrace.cpp',  
+                                    LIBS=[libs_mesh,  libs_test])
 
 
-test_memory       = env.Program ('test_Memory.cpp',     LIBS=[libs_memory, 'test'])
-test_monitor      = env.Program ('test_Monitor.cpp',    LIBS=[libs_monitor,'test','parallel','error'])
-#--------------------------------------------------
-test_group_process = env.Program ('test_GroupProcess.cpp', LIBS=[libs_parallel,'test'])
-test_layout       = env.Program ('test_Layout.cpp',       LIBS=[libs_parallel,'test'])
+test_memory       = env.Program ('test_Memory.cpp',     LIBS=[libs_memory, libs_test])
+test_monitor      = env.Program ('test_Monitor.cpp',    LIBS=[libs_monitor,libs_test])
+
+test_group_process = env.Program ('test_GroupProcess.cpp', LIBS=[libs_parallel,libs_test])
+test_layout       = env.Program ('test_Layout.cpp',       LIBS=[libs_parallel,libs_test])
+
 if (type == "mpi"):
-   test_mpi       = env.Program ('test_Mpi.cpp',          LIBS=[libs_parallel,'test'])
+   test_mpi       = env.Program ('test_Mpi.cpp',          LIBS=[libs_parallel,libs_test])
 
-test_parameters   = env.Program ('test_Parameters.cpp',  LIBS=[libs_parameters,'test','parallel'])
-test_parse        = env.Program ('test_Parse.cpp',       LIBS=[libs_parameters,'test'])
+test_parameters   = env.Program ('test_Parameters.cpp',  LIBS=[libs_parameters,libs_test])
+test_parse        = env.Program ('test_Parse.cpp',       LIBS=[libs_parameters,libs_test])
 
-test_performance = env.Program('test_Performance.cpp',   LIBS=[libs_performance,'test'])
-test_papi        = env.Program('test_Papi.cpp',          LIBS=[libs_performance,'test'])
+test_performance = env.Program('test_Performance.cpp',   LIBS=[libs_performance,libs_test])
+test_papi        = env.Program('test_Papi.cpp',          LIBS=[libs_performance,libs_test])
 
 
 libraries_disk   = env.Library ('disk',   sources_disk)
@@ -274,7 +300,6 @@ libraries_parallel = env.Library ('parallel', sources_parallel)
 libraries_parameters = env.Library ('parameters', sources_parameters)
 libraries_performance = env.Library ('performance', sources_performance)
 libraries_simulation = env.Library ('simulation', sources_simulation)
-libraries_utilities = env.Library ('utilities', sources_utilities)
 libraries_test  = env.Library ('test', sources_test)
 
 
@@ -354,14 +379,9 @@ env.Alias('install-bin',env.Install (bin_path,binaries_parameters))
 env.Alias('install-inc',env.Install (inc_path,includes_parameters))
 env.Alias('install-lib',env.Install (lib_path,libraries_parameters))
 
-
 env.Alias('install-bin',env.Install (bin_path,binaries_performance))
 env.Alias('install-inc',env.Install (inc_path,includes_performance))
 env.Alias('install-lib',env.Install (lib_path,libraries_performance))
-
-env.Alias('install-inc',env.Install (inc_path,includes_utilities))
-env.Alias('install-lib',env.Install (lib_path,libraries_utilities))
-
 
 env.Alias('install-inc',env.Install (inc_path,includes_simulation))
 env.Alias('install-lib',env.Install (lib_path,libraries_simulation))

@@ -195,34 +195,15 @@ public: // interface
   size_t index() const throw() 
   { return index_; };
 
-  void update_cycle(int cycle, double time, double dt, double stop) {
-    cycle_ = cycle;
-    time_  = time;
-    dt_    = dt;
-    stop_  = stop;
-  };
+  /// Update Simulation cycle, time, timestep, and stopping criteria
+  void update_cycle(int cycle, double time, double dt, double stop) ;
 
-  void monitor_output() const 
-  {
-    monitor_-> print("Simulation", "cycle %04d time %15.12f dt %15.12g", 
-		     cycle_,time_,dt_);
-    Memory * memory = Memory::instance();
-    monitor_->print("Memory","           bytes %lld bytes_high %lld",
-		    memory->bytes(), memory->bytes_high());
-    memory->reset_high();
-  }
+  /// Output basic Simulation information
+  void monitor_output() const ;
 
-  void performance_output() const 
-  {
-    monitor_->print ("Performance","real time = %s",performance_->time());
-#ifdef CONFIG_USE_PAPI
-    monitor_->print ("Performance","PAPI Time real   = %f",time_real());
-    monitor_->print ("Performance","PAPI Time proc   = %f",time_proc());
-    monitor_->print ("Performance","PAPI GFlop count = %f",flop_count()*1e-9);
-    monitor_->print ("Performance","PAPI GFlop rate  = %f",
-		     flop_count()*1e-9 / time_real());
-#endif
-  }
+  /// Output performance information
+  void performance_output() const ;
+
 public: // virtual functions
 
   /// initialize the Simulation given a parameter file

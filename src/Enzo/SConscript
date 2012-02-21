@@ -19,7 +19,7 @@ components = ['enzo','simulation', 'method',
 	      'io', 'disk','memory','parallel',
 	      'parameters', 
 	      'error', 'monitor', 'performance', 
-	      'test','utilities','cello','external']
+	      'test','cello','external']
 
 if (use_papi):
 	components = components + ['papi','pfm']

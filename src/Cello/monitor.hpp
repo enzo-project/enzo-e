@@ -20,7 +20,7 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
-#include "utilities.hpp"
+#include "performance_Timer.hpp"
 #include "parallel.hpp"
 
 //----------------------------------------------------------------------

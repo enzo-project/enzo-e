@@ -56,9 +56,16 @@ public: // interface
   double time () throw ()
   { return timer_.value(); }
 
-  // // /// Display timers and counters using monitor
-  // void print (const Monitor * monitor) const throw ();
+  //--------------------------------------------------
 
+  /// Return the Timer object
+  Timer * timer() 
+  { return &timer_; };
+
+  /// Return the Papi object
+  Papi * papi() 
+  { return &papi_; };
+    
   //--------------------------------------------------
 
   ///  	Create a new attribute

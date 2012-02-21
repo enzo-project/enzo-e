@@ -15,7 +15,8 @@ Monitor Monitor::instance_; // singleton design pattern)
 
 Monitor::Monitor()
   : timer_(new Timer),
-    active_(true)
+    active_(true),
+    ip_(0)
 { 
   timer_->start();
 }
@@ -144,12 +145,8 @@ void Monitor::write
     // Get parallel process text
 
     char buffer_process[MONITOR_LENGTH] = "";
-
-#if defined(CONFIG_USE_CHARM)
-    sprintf (buffer_process,"%0d",CkMyPe());
-#elif defined(CONFIG_USE_MPI)
-    sprintf (buffer_process,"%0d",Mpi::rank());
-#endif
+    
+    sprintf (buffer_process,"%0d",ip_);
 
     // Get time
 
