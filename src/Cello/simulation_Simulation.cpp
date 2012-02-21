@@ -1277,7 +1277,7 @@ void Simulation::monitor_output() const
 
 void Simulation::performance_output() const 
 {
-  monitor_->print ("Performance","real time = %s",performance_->time());
+  monitor_->print ("Performance","real time = %f",performance_->time());
 #ifdef CONFIG_USE_PAPI
   monitor_->print ("Performance","PAPI Time real   = %f",
 		   performance_->papi()->time_real());

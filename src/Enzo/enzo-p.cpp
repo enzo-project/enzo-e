@@ -24,6 +24,45 @@
 extern CProxy_Simulation proxy_simulation;
 #endif
 
+#ifdef CONFIG_CHARM
+void Main::enzo_finalize (Simulation * simulation)
+#else
+void enzo_finalize (Simulation * simulation)
+#endif
+{
+
+  Parameters * parameters = simulation->parameters();
+  Monitor * monitor       = simulation->monitor();
+
+  simulation->finalize();
+  
+  int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
+
+  unit_class ("Enzo-P");
+  unit_func  ("final cycle");
+  if (cycle_final != 0) {
+    unit_assert (simulation->cycle()==cycle_final);
+    monitor->print ("Testing","actual   cycle:  %d",simulation->cycle());
+    monitor->print ("Testing","expected cycle:  %d",cycle_final);
+  }
+
+  // parameter: Testing : time_final
+
+  double time_final  = parameters->value_float("Testing:time_final",0.0);
+
+  unit_class ("Enzo-P");
+  unit_func  ("final time");
+  if (time_final != 0.0) {
+    double err_rel = cello::err_rel(simulation->time(),time_final);
+    double mach_eps = cello::machine_epsilon(precision_default);
+    unit_assert ( err_rel < 100*mach_eps);
+    monitor->print ("Testing","actual   time:  %.15g",simulation->time());
+    monitor->print ("Testing","expected time:  %.15g",time_final);
+    monitor->print ("Testing","relative error: %g",err_rel);
+    monitor->print ("Testing","100*mach_eps:   %g",100*mach_eps);
+  }
+}
+
 PARALLEL_MAIN_BEGIN
 {
 
@@ -55,7 +94,7 @@ PARALLEL_MAIN_BEGIN
 
   Memory * memory = Memory::instance();
   monitor_->print("Memory","           bytes %lld bytes_high %lld",
-		    memory->bytes(), memory->bytes_high());
+		  memory->bytes(), memory->bytes_high());
 
 
   // open parameter file, calling usage() if invalid
@@ -106,41 +145,11 @@ PARALLEL_MAIN_BEGIN
 
   simulation->run();
 
-  // Finalize the simulation
+  // Finalize the simulation (separate subroutine for CHARM++)
 
-  simulation->finalize();
+  enzo_finalize(simulation);
 
-  Parameters * parameters = simulation->parameters();
-
-  // Test results: DUPLICATE CODE IN src/main.cpp !!!
-
-  // parameter: Testing : cycle_final
-
-  int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
-
-  unit_class ("Enzo-P");
-  unit_func  ("final cycle");
-  if (cycle_final != 0) {
-    unit_assert (simulation->cycle()==cycle_final);
-    monitor_->print ("Testing","actual   cycle:  %d",simulation->cycle());
-    monitor_->print ("Testing","expected cycle:  %d",cycle_final);
-  }
-
-  // parameter: Testing : time_final
-
-  double time_final  = parameters->value_float("Testing:time_final",0.0);
-
-  unit_class ("Enzo-P");
-  unit_func  ("final time");
-  if (time_final != 0.0) {
-    double err_rel = cello::err_rel(simulation->time(),time_final);
-    double mach_eps = cello::machine_epsilon(precision_default);
-    unit_assert ( err_rel < 100*mach_eps);
-    monitor_->print ("Testing","actual   time:  %.15g",simulation->time());
-    monitor_->print ("Testing","expected time:  %.15g",time_final);
-    monitor_->print ("Testing","relative error: %g",err_rel);
-    monitor_->print ("Testing","100*mach_eps:   %g",100*mach_eps);
-  }
+  monitor_->print ("","END ENZO-P");
 
   // Delete the simulation
 
@@ -148,7 +157,6 @@ PARALLEL_MAIN_BEGIN
       
   // display footer text
 
-  Monitor::instance()->print ("","END ENZO-P");
 
   // clean up
 

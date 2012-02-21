@@ -393,7 +393,7 @@ void Tree::coalesce ()
 	      Node * child = node->child(i);
 	      if (child->is_leaf()) {
 		int * level1 = (int * ) child->data();
-		if (level1 != level0) {
+		if (*level1 != *level0) {
 		  do_coarsen = false;
 		}
 	      } else do_coarsen = false;
