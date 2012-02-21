@@ -51,8 +51,8 @@ PARALLEL_MAIN_BEGIN
 
   int nx,ny,nz;
   double tol = 1e-4;
-  //refine_type refine = refine_log;
-   refine_type refine = refine_slope;
+  refine_type refine = refine_log;
+  // refine_type refine = refine_slope;
   int * levels = hdf5_to_levels
     (file_name, group_name, field_name, &nx, &ny, &nz, min_level,max_level,
      refine,tol);
