@@ -282,7 +282,9 @@ PARALLEL_MAIN_BEGIN
   // Targeted Refineent
   // --------------------------------------------------
 
-  {
+  
+  bool do_target = false;
+  if (do_target) {
     Timer timer;
     timer.start();
     int d=3;
