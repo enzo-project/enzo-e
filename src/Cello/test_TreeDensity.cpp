@@ -119,12 +119,12 @@ PARALLEL_MAIN_BEGIN
   // --------------------------------------------------
 
   //  int mx=1024,my=1024;
-  int mx=512,my=512;
+  int mx=1024,my=1024;
   double th= 0.1*M_PI;
   double ph= 0.3*M_PI; // spin
   double ps= -0.06*M_PI;
   int falloff = 3;
-  double scale = 1.0;
+  double scale = 0.6;
   double a90 = 0.5*M_PI;
 
   if (dimension == 2) {

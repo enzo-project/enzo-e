@@ -84,7 +84,6 @@ enum function_enum {
 // Component dependencies
 //----------------------------------------------------------------------
 
-#include "monitor.hpp"
 #include "memory.hpp"
 #include "error.hpp"
 

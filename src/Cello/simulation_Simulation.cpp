@@ -224,7 +224,7 @@ void Simulation::initialize_data_descr_() throw()
   field_descr_->set_alignment (alignment);
   
   //--------------------------------------------------
-  // parameter: field : padding
+  // parameter: Field : padding
   //--------------------------------------------------
 
   int padding = parameters_->value_integer("Field:padding",0);
@@ -386,7 +386,7 @@ void Simulation::initialize_initial_() throw()
 void Simulation::initialize_boundary_() throw()
 {
   //--------------------------------------------------
-  // parameter: Boundary : name
+  // parameter: Boundary : type
   //--------------------------------------------------
 
   std::string name = parameters_->value_string("Boundary:type","");

@@ -10,6 +10,8 @@ void enzo_finalize (Simulation * simulation)
 
   simulation->finalize();
   
+  // parameter: Testing : cycle_final
+
   int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
 
   unit_class ("Enzo-P");
