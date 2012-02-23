@@ -109,19 +109,19 @@ void OutputImage::finalize () throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::write_hierarchy
-(
- const FieldDescr * field_descr,
- Hierarchy * hierarchy
- ) throw()
-{
-  ItPatch it_patch (hierarchy);
-  while (Patch * patch = ++it_patch) {
-    // NO OFFSET: ASSUMES ROOT PATCH
-    write_patch (field_descr, patch,  0,0,0);
-  }
+// void OutputImage::write_hierarchy
+// (
+//  const FieldDescr * field_descr,
+//  Hierarchy * hierarchy
+//  ) throw()
+// {
+//   ItPatch it_patch (hierarchy);
+//   while (Patch * patch = ++it_patch) {
+//     // NO OFFSET: ASSUMES ROOT PATCH
+//     write_patch (field_descr, patch,  0,0,0);
+//   }
 
-}
+// }
 
 //----------------------------------------------------------------------
 

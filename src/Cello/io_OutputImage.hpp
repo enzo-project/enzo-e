@@ -50,10 +50,10 @@ public: // virtual functions
   /// Cleanup after output
   virtual void finalize () throw();
 
-  /// Write hierarchy-related field data
-  virtual void write_hierarchy
-  ( const FieldDescr * field_descr,
-    Hierarchy * hierarchy) throw();
+  // /// Write hierarchy-related field data
+  // virtual void write_hierarchy
+  // ( const FieldDescr * field_descr,
+  //   Hierarchy * hierarchy) throw();
 
   /// Write patch-related field data; may be called by write_hierarchy
   virtual void write_patch

@@ -87,7 +87,7 @@ void OutputData::write_hierarchy
     file_->file_write_meta(buffer,name.c_str(),type,nx,ny,nz);
   }
 
-  // Call write_patch() on component patches
+  // Call write_patch() on contained patches
   Output::write_hierarchy (field_descr,hierarchy);
 
 }
@@ -127,9 +127,12 @@ void OutputData::write_patch
     file_->group_write_meta(buffer,name.c_str(),type,nx,ny,nz);
   }
 
-  // Call write_patch() with base Output object
-
+  // Call write_block() on contained blocks
   Output::write_patch(field_descr,patch,ixp0,iyp0,izp0);
+
+  // BUG: this is getting executed before remote blocks begin writing
+  // need to add a dependency so that this gets called only after last
+  // block finishes
 
   file_->group_close();
   file_->group_chdir("..");
