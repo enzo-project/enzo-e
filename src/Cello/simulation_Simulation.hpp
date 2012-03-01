@@ -41,9 +41,8 @@ class Simulation {
 
 public: // interface
 
-  /// Constructor for CHARM++
+  /// Simulation constructor
 
-  /// Initialize the Simulation object
   Simulation
   ( const char *       parameter_file,
 #ifdef CONFIG_USE_CHARM

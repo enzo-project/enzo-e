@@ -37,5 +37,8 @@ void enzo_finalize (Simulation * simulation)
     monitor->print ("Testing","relative error: %g",err_rel);
     monitor->print ("Testing","100*mach_eps:   %g",100*mach_eps);
   }
+
+  monitor->print ("","END ENZO-P");
+
 }
 

@@ -58,7 +58,7 @@ PARALLEL_MAIN_BEGIN
   // Print initial baseline memory usage
 
   Memory * memory = Memory::instance();
-  monitor_->print("Memory","           bytes %lld bytes_high %lld",
+  monitor_->print("Memory","bytes %lld bytes_high %lld",
 		  memory->bytes(), memory->bytes_high());
 
 
@@ -67,8 +67,7 @@ PARALLEL_MAIN_BEGIN
   if (PARALLEL_ARGC != 2) {
     // Print usage if wrong number of arguments
     char buffer [ERROR_LENGTH];
-    sprintf (buffer,
-	     "\nUsage: %s %s <parameter-file>\n\n", 
+    sprintf (buffer, "\nUsage: %s %s <parameter-file>\n\n", 
 	     PARALLEL_RUN,PARALLEL_ARGV[0]);
     ERROR("main",buffer);
   }
@@ -83,15 +82,11 @@ PARALLEL_MAIN_BEGIN
 
   proxy_main     = thishandle;
 
-  // If using CHARM, create the EnzoSimulationCharm groups
-
   CProxy_BlockReduce proxy_block_reduce = 
     CProxy_BlockReduce::ckNew();
 
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
     (parameter_file, strlen(parameter_file)+1, proxy_block_reduce, 0);
-
-  
 
   //--------------------------------------------------
 
@@ -100,38 +95,16 @@ PARALLEL_MAIN_BEGIN
   Simulation * simulation = 
     new EnzoSimulationMpi (parameter_file,group_process, 0);
 
-  ASSERT ("main()","Failed to create Simulation object",simulation != 0);
-
-  // Initialize the simulation
-
   simulation->initialize();
-
-  // Run the simulation
 
   simulation->run();
 
-  // Finalize the simulation (separate subroutine for CHARM++)
-
   enzo_finalize(simulation);
 
-  monitor_->print ("","END ENZO-P");
-
-  // Delete the simulation
-
   delete simulation;
-      
-  // display footer text
-
-
-  // clean up
-
   delete group_process;
 
-  // finalize unit testing
-
   unit_finalize();
-
-  // exit
 
   PARALLEL_EXIT;
 

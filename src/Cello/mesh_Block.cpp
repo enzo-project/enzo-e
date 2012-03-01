@@ -367,7 +367,7 @@ void Block::prepare(int axis_set)
 
 void Block::p_call_output(CkReductionMsg * msg)
 {
-  TRACE1("Block::p_call_output(%d)",index());
+
   double * min_reduce = (double * )msg->getData();
 
   double dt_patch   = min_reduce[0];

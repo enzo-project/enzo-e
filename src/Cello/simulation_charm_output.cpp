@@ -23,7 +23,6 @@
 
 void Simulation::p_output () throw()
 {
-  TRACE("p_output");
   // reset output "loop" over output objects
   output_first();
 
