@@ -1140,7 +1140,6 @@ void Simulation::refresh() throw()
   if (stop_) {
 
     performance_->stop();
-
     performance_output();
 
     proxy_main.p_exit(CkNumPes());
@@ -1279,15 +1278,19 @@ void Simulation::performance_output() const
 {
   monitor_->print ("Performance","real time = %f",performance_->time());
 #ifdef CONFIG_USE_PAPI
-  monitor_->print ("Performance","PAPI Time real   = %f",
-		   performance_->papi()->time_real());
-  monitor_->print ("Performance","PAPI Time proc   = %f",
-		   performance_->papi()->time_proc());
-  monitor_->print ("Performance","PAPI GFlop count = %f",
-		   performance_->papi()->flop_count()*1e-9);
-  monitor_->print ("Performance","PAPI GFlop rate  = %f",
-		   performance_->papi()->flop_count()*1e-9 
-		   / performance_->papi()->time_real());
+
+  Papi * papi = performance_->papi();
+
+  double time_real   = papi->time_real();
+  double time_proc   = papi->time_proc();
+  double gflop_count = papi->flop_count()*1e-9;
+  double gflop_rate  = gflop_count / time_real;
+
+  monitor_->print ("Performance","PAPI Time real   = %f", time_real);
+  monitor_->print ("Performance","PAPI Time proc   = %f", time_proc);
+  monitor_->print ("Performance","PAPI GFlop count = %f", gflop_count);
+  monitor_->print ("Performance","PAPI GFlop rate  = %f", gflop_rate);
+
 #endif
 }
 
