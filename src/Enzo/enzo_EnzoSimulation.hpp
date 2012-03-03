@@ -76,7 +76,7 @@ protected: // virtual functions
   virtual Initial * create_initial_ (std::string name) throw ();
 
   /// Create named boundary conditions object
-  virtual Boundary * create_boundary_ (std::string name) throw ();
+  //  virtual Boundary * create_boundary_ (std::string name) throw ();
 
   /// Create named method object
   virtual Method * create_method_ (std::string name) throw ();

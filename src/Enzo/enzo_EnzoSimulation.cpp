@@ -160,29 +160,6 @@ Initial * EnzoSimulation::create_initial_ ( std::string name ) throw ()
 
 //----------------------------------------------------------------------
 
-Boundary * EnzoSimulation::create_boundary_ ( std::string name ) throw ()
-/// @param name   Name of boundary condition to use
-{
-
-  boundary_type_enum boundary_type = boundary_type_undefined;
-
-  if (       name == "reflecting") {
-    boundary_type = boundary_type_reflecting;
-  } else if (name == "outflow") {
-    boundary_type = boundary_type_outflow;
-  } else if (name == "inflow") {
-    boundary_type = boundary_type_inflow;
-  } else if (name == "periodic") {
-    boundary_type = boundary_type_periodic;
-  } else {
-    ERROR1("EnzoSimulation::create_boundary_",
-	   "Unrecognized boundary type '%s'",
-	   name.c_str());
-  }
-	     
-  return new EnzoBoundary (boundary_type);
-}
-
 //----------------------------------------------------------------------
 
 Method * EnzoSimulation::create_method_ ( std::string name ) throw ()

@@ -95,7 +95,7 @@ Node * ItNode::next_leaf() throw()
 Node * ItNode::next_node() throw()
 {
 
-  bool in_range, is_leaf;
+  bool in_range;
   do {
     if (reset_) {
 
@@ -124,7 +124,6 @@ Node * ItNode::next_node() throw()
     }
     int level = node_trace_.level();
     in_range = (lower_level_ <= level) && (level <= upper_level_);
-    //    is_leaf  = node_trace_.node()->is_leaf();
   } while ( ! (in_range ));
 
   return node_trace_.node();

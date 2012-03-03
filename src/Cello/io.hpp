@@ -43,6 +43,8 @@
 #include "io_ItReduceMin.hpp"
 #include "io_ItReduceMax.hpp"
 
+#include "io_Input.hpp"
+
 #include "io_Output.hpp"
 #include "io_OutputImage.hpp"
 #include "io_OutputData.hpp"

@@ -14,7 +14,7 @@ Import('lib_path')
 # DEPENDENCIES
 #------------------------------
 
-components = ['enzo','simulation', 'method', 
+components = ['enzo','simulation', 'problem', 'method', 
 	      'mesh', 'field',
 	      'io', 'disk','memory','parallel',
 	      'parameters', 

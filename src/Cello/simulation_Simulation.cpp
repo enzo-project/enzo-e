@@ -53,6 +53,8 @@ Simulation::Simulation
 
   performance_ = new Performance;
 
+  problem_ = new Problem;
+
 #ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;
   monitor_->set_active(CkMyPe() == 0);
@@ -985,7 +987,7 @@ void Simulation::deallocate_() throw()
   delete stopping_;      stopping_ = 0;
   delete timestep_;      timestep_ = 0;
   delete initial_;       initial_ = 0;
-  problem_->deallocate();
+  delete problem_; problem_ = 0;
   for (size_t i=0; i<output_list_.size(); i++) {
     delete output_list_[i];    output_list_[i] = 0;
   }

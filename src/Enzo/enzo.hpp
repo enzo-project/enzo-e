@@ -63,10 +63,6 @@ struct fluxes
 //----------------------------------------------------------------------
 
 #include "simulation.hpp"
-// #include "method.hpp"
-// #include "parallel.hpp"
-// #include "performance.hpp"
-// #include "simulation.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes
@@ -77,8 +73,10 @@ struct fluxes
 #include "enzo_EnzoFactory.hpp"
 
 #include "enzo_EnzoSimulation.hpp"
-#   include "enzo_EnzoSimulationMpi.hpp"
-#   include "enzo_EnzoSimulationCharm.hpp"
+#include "enzo_EnzoSimulationMpi.hpp"
+#include "enzo_EnzoSimulationCharm.hpp"
+
+#include "enzo_EnzoProblem.hpp"
 
 #include "enzo_EnzoBlock.hpp"
 
