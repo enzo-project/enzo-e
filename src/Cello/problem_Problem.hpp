@@ -104,6 +104,8 @@ private: // functions
   virtual Timestep * create_timestep_ (std::string name) throw ();
 
 
+  void deallocate_() throw();
+
 private: // attributes
 
   /// Boundary conditions object

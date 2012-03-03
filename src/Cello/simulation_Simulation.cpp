@@ -87,7 +87,7 @@ void Simulation::initialize() throw()
   initialize_stopping_();
   initialize_timestep_();
   initialize_initial_();
-  problem->initialize_boundary(parameters_);
+  problem.initialize_boundary(parameters_);
   initialize_output_();
   initialize_method_();
   initialize_parallel_();

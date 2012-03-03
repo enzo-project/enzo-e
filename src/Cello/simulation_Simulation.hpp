@@ -163,11 +163,11 @@ public: // interface
   // { return boundary_; }
 
   /// Return the ith output object
-  Output * output(int i) const throw()
+  Output * output(size_t i) const throw()
   { return (0 <= i && i < output_list_.size()) ? output_list_[i] : NULL; }
 
   /// Return the ith method object
-  Method * method(int i) const throw()
+  Method * method(size_t i) const throw()
   { return (0 <= i && i < method_list_.size()) ? method_list_[i] : NULL; }
 
   /// Return the current cycle number

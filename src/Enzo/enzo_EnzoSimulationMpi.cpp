@@ -78,14 +78,14 @@ void EnzoSimulationMpi::run() throw()
 
     while ((block = ++it_block)) {
 
-      bool boundary [3][2];
+      bool is_boundary [3][2];
 
       // is_block_on_boundary_ (block,boundary);
-      block->is_on_boundary (lower,upper,boundary);
+      block->is_on_boundary (lower,upper,is_boundary);
 
-      update_boundary_(block,boundary);
+      update_boundary_(block,is_boundary);
 
-      refresh_ghost_(block,patch,boundary);
+      refresh_ghost_(block,patch,is_boundary);
 
     }
   }
@@ -200,15 +200,15 @@ void EnzoSimulationMpi::run() throw()
 
       while ((block = ++it_block)) {
 
-	bool boundary [3][2];
+	bool is_boundary [3][2];
 
-	block->is_on_boundary (lower,upper,boundary);
+	block->is_on_boundary (lower,upper,is_boundary);
 
 	// Refresh ghost zones
-	refresh_ghost_(block,patch,boundary);
+	refresh_ghost_(block,patch,is_boundary);
 
 	// Update boundary conditions
-	update_boundary_(block,boundary);
+	update_boundary_(block,is_boundary);
 
       }
     }
@@ -314,27 +314,27 @@ void EnzoSimulationMpi::run() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationMpi::update_boundary_ (Block * block, bool boundary[3][2]) throw()
+void EnzoSimulationMpi::update_boundary_ (Block * block, bool is_boundary[3][2]) throw()
 {
   // Update boundary conditions
 
   if (dimension_ >= 1) {
-    if (boundary[axis_x][face_lower]) 
-      boundary_->enforce(field_descr_,block,face_lower,axis_x);
-    if (boundary[axis_x][face_upper]) 
-      boundary_->enforce(field_descr_,block,face_upper,axis_x);
+    if (is_boundary[axis_x][face_lower]) 
+      problem()->boundary()->enforce(field_descr_,block,face_lower,axis_x);
+    if (is_boundary[axis_x][face_upper]) 
+      problem()->boundary()->enforce(field_descr_,block,face_upper,axis_x);
   }
   if (dimension_ >= 2) {
-    if (boundary[axis_y][face_lower]) 
-      boundary_->enforce(field_descr_,block,face_lower,axis_y);
-    if (boundary[axis_y][face_upper]) 
-      boundary_->enforce(field_descr_,block,face_upper,axis_y);
+    if (is_boundary[axis_y][face_lower]) 
+      problem()->boundary()->enforce(field_descr_,block,face_lower,axis_y);
+    if (is_boundary[axis_y][face_upper]) 
+      problem()->boundary()->enforce(field_descr_,block,face_upper,axis_y);
   }
   if (dimension_ >= 3) {
-    if (boundary[axis_z][face_lower]) 
-      boundary_->enforce(field_descr_,block,face_lower,axis_z);
-    if (boundary[axis_z][face_upper]) 
-      boundary_->enforce(field_descr_,block,face_upper,axis_z);
+    if (is_boundary[axis_z][face_lower]) 
+      problem()->boundary()->enforce(field_descr_,block,face_lower,axis_z);
+    if (is_boundary[axis_z][face_upper]) 
+      problem()->boundary()->enforce(field_descr_,block,face_upper,axis_z);
   }
 }
 
@@ -344,7 +344,7 @@ void EnzoSimulationMpi::refresh_ghost_
 (
  Block * block, 
  Patch * patch, 
- bool    boundary[3][2]
+ bool    is_boundary[3][2]
  ) throw()
 {
   // Refresh ghost zones
@@ -352,45 +352,45 @@ void EnzoSimulationMpi::refresh_ghost_
   int ibx,iby,ibz;
   block->index_patch(&ibx,&iby,&ibz);
 
-  bool periodic = boundary_->is_periodic();
+  bool periodic = problem()->boundary()->is_periodic();
 
   if (dimension_ >= 1) {
     if (ibx % 2 == 0) {
-      if (! boundary[axis_x][face_lower] || periodic) 
+      if (! is_boundary[axis_x][face_lower] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,-1,0,0);
-      if (! boundary[axis_x][face_upper] || periodic) 
+      if (! is_boundary[axis_x][face_upper] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,+1,0,0);
     } else {
-      if (! boundary[axis_x][face_upper] || periodic) 
+      if (! is_boundary[axis_x][face_upper] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,+1,0,0);
-      if (! boundary[axis_x][face_lower] || periodic) 
+      if (! is_boundary[axis_x][face_lower] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,-1,0,0);
     }
   }
   if (dimension_ >= 2) {
     if (iby % 2 == 0) {
-      if (! boundary[axis_y][face_lower] || periodic) 
+      if (! is_boundary[axis_y][face_lower] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,0,-1,0);
-      if (! boundary[axis_y][face_upper] || periodic) 
+      if (! is_boundary[axis_y][face_upper] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,0,+1,0);
     } else {
-      if (! boundary[axis_y][face_upper] || periodic) 
+      if (! is_boundary[axis_y][face_upper] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,0,+1,0);
-      if (! boundary[axis_y][face_lower] || periodic) 
+      if (! is_boundary[axis_y][face_lower] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,0,-1,0);
     }
 
   }
   if (dimension_ >= 3) {
     if (ibz % 2 == 0) {
-      if (! boundary[axis_z][face_lower] || periodic) 
+      if (! is_boundary[axis_z][face_lower] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,0,0,-1);
-      if (! boundary[axis_z][face_upper] || periodic) 
+      if (! is_boundary[axis_z][face_upper] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,0,0,+1);
     } else {
-      if (! boundary[axis_z][face_upper] || periodic) 
+      if (! is_boundary[axis_z][face_upper] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,0,0,+1);
-      if (! boundary[axis_z][face_lower] || periodic) 
+      if (! is_boundary[axis_z][face_lower] || periodic) 
 	block->refresh_ghosts(field_descr_,patch,0,0,-1);
     }
   }
