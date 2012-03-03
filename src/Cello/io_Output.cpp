@@ -224,8 +224,7 @@ void Output::write_block
   // Write fields
 
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
-    int field_index = it_field_->value();
-    write_field (field_descr, block->field_block(), field_index);
+    write_field (field_descr, block->field_block(),  it_field_->value());
   }
 }
 

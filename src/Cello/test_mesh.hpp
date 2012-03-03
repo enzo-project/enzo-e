@@ -9,6 +9,24 @@
 
 #include <assert.h>
 
+const int num_colors = 6;
+const double rc[] = {1, 0, 0, 0, 1, 1};
+const double gc[] = {0, 0, 1, 1, 1, 0};
+const double bc[] = {1, 1, 1, 0, 0, 0};
+
+
+//----------------------------------------------------------------------
+void get_colors (double * r,
+		 double * g,
+		 double * b,
+		 double c)
+{
+  int i = c * (num_colors-1);
+  double a = c *(num_colors-1) - i;
+  *r = (1-a)*rc[i] + a*rc[i+1];
+  *g = (1-a)*gc[i] + a*gc[i+1];
+  *b = (1-a)*bc[i] + a*bc[i+1];
+}
 //----------------------------------------------------------------------
 
 Tree * test_tree_22()
@@ -379,7 +397,7 @@ void levels_to_tree
 		    int * data = new int [1];
 		    node_trace.node()->set_data(data);
 		    *data = level - level_node;
-		  }
+		  } 
 		}
 
 		x *= r; while (x >= 1.0) x -= 1.0;
@@ -574,10 +592,6 @@ void tree_to_png (Tree * tree, std::string filename,
 
 
   // determine color table
-  const int num_colors = 6;
-  const double rc[] = {1, 0, 0, 0, 1, 1};
-  const double gc[] = {0, 0, 1, 1, 1, 0};
-  const double bc[] = {1, 1, 1, 0, 0, 0};
   int num_levels = tree->max_level() + 1;
   double * ra = new double [num_levels];
   double * ga = new double [num_levels];
@@ -631,8 +645,11 @@ void tree_to_png (Tree * tree, std::string filename,
     }
     if (d==2) {zmin=0; zmax=0;}
 
+    
+    int * level_merge = (int *)node_trace->node()->data();
+    level = level_merge ? *level_merge : node_trace->level();
     plot_node(nx,ny,
-	      node_trace->level(),
+	      level,
 	      xmin,xmax,ymin,ymax,zmin,zmax,
 	      theta,phi,psi,ortho,falloff,
 	      ra,ga,ba,
@@ -692,8 +709,6 @@ float * read_hdf5
     if (field[i] < min_field) min_field = field[i];
     if (field[i] > max_field) max_field = field[i];
   }
-  TRACE2 ("min = %f  max = %f",min_field,max_field);
-
 
   return field;
 }
@@ -890,10 +905,6 @@ void hdf5_to_png
 
   pngwriter png (nx+1,ny+1,0,file_png.c_str());
 
-  // background color
-  //  png.filledsquare(1,1,nx+1,ny+1,1.0,1.0,1.0);
-
-
   // Determine field min and max
   double fmin=1e37;
   double fmax=-1e37;
@@ -911,10 +922,6 @@ void hdf5_to_png
   fmax = log(fmax);
 
   // Colormap
-  const int num_colors = 6;
-  const double rc[] = {1, 0, 0, 0, 1, 1};
-  const double gc[] = {0, 0, 1, 1, 1, 0};
-  const double bc[] = {1, 1, 1, 0, 0, 0};
 
   double amin = MIN (nx,ny);
 
@@ -940,12 +947,8 @@ void hdf5_to_png
 
 	double o0 = 1.0* pow(ci, falloff);
 
-	int ic = ci * (num_colors-1);
-	double a = ci *(num_colors-1) - ic;
-
-	double r = (1-a)*rc[ic] + a*rc[ic+1];
-	double g = (1-a)*gc[ic] + a*gc[ic+1];
-	double b = (1-a)*bc[ic] + a*bc[ic+1];
+	double r,g,b;
+	get_colors(&r,&g,&b,ci);
 
 	for (int ky=-1; ky<=1; ky++) {
 	  for (int kx=-1; kx<=1; kx++) {

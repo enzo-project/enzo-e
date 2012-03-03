@@ -28,6 +28,7 @@ class Factory;
 #include "method.hpp"
 #include "parameters.hpp"
 #include "io.hpp"
+#include "problem.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes

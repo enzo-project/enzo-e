@@ -114,19 +114,19 @@ public: // virtual functions
   /// Write local hierarchy data to disk
   virtual void write_hierarchy
   ( const FieldDescr * field_descr,
-    Hierarchy * hierarchy) throw() = 0;
+    Hierarchy * hierarchy) throw();
 
   /// Write local patch data to disk
   virtual void write_patch
   ( const FieldDescr * field_descr,
     Patch * patch,
-    int ixp0=0, int iyp0=0, int izp0=0) throw() = 0;
+    int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write local block data to disk
   virtual void write_block
   ( const FieldDescr * field_descr,
     Block * block,
-    int ixp0=0, int iyp0=0, int izp0=0) throw() = 0;
+    int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write local field to disk
   virtual void write_field

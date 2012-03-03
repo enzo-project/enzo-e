@@ -87,7 +87,7 @@ void OutputRestart::write_hierarchy
  Hierarchy * hierarchy
  ) throw()
 {
-  ERROR("OutputRestart::write_field()",
+  WARNING("OutputRestart::write_field()",
 	"This function is not supported for this output type");
 }
 
@@ -100,7 +100,7 @@ void OutputRestart::write_patch
  int ixp0, int iyp0, int izp0
  ) throw()
 {
-  ERROR("OutputRestart::write_field()",
+  WARNING("OutputRestart::write_field()",
 	"This function is not supported for this output type");
 }
 
@@ -110,7 +110,7 @@ void OutputRestart::write_block ( const FieldDescr * field_descr,
   Block * block,
   int ixp0, int iyp0, int izp0) throw()
 {
-  ERROR("OutputRestart::write_field()",
+  WARNING("OutputRestart::write_field()",
 	"This function is not supported for this output type");
 }
 
@@ -121,7 +121,7 @@ void OutputRestart::write_field
   FieldBlock * field_block,
   int field_index) throw()
 {
-  ERROR("OutputRestart::write_field()",
+  WARNING("OutputRestart::write_field()",
 	"This function is not supported for this output type");
 }
 

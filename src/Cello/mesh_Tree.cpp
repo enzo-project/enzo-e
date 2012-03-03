@@ -348,10 +348,7 @@ void Tree::balance ()
 
 void Tree::coalesce ()
 {
-  struct level_data_type {
-    int mesh_level;
-    int tree_level;
-  } * level_data = new level_data_type[num_nodes()];
+  int * level_data = new int[num_nodes()];
 
   ItNode it_node (this);
 
@@ -362,8 +359,7 @@ void Tree::coalesce ()
 
     const NodeTrace * node_trace = it_node.node_trace();
 
-    level_data[index_data].mesh_level = node_trace->level();
-    level_data[index_data].tree_level = node_trace->level();
+    level_data[index_data] = node_trace->level();
 
     node_trace->node()->set_data(&level_data[index_data++]);
   }
@@ -392,14 +388,12 @@ void Tree::coalesce ()
 	    bool do_coarsen = true;
 	    node = node_trace->node_level(level);
 	    // loop over leaf parent's children
-	    level_data_type * ldt0 = (level_data_type * ) node->child(0)->data();
-	    int level0 = ldt0->mesh_level;
+	    int * level0 = (int *) node->child(0)->data();
 	    for (int i=0; i<r2d; i++) {
 	      Node * child = node->child(i);
 	      if (child->is_leaf()) {
-		level_data_type * ldt = (level_data_type * ) child->data();
-		int level = ldt->mesh_level;
-		if (level != level0) {
+		int * level1 = (int * ) child->data();
+		if (*level1 != *level0) {
 		  do_coarsen = false;
 		}
 	      } else do_coarsen = false;
@@ -408,13 +402,13 @@ void Tree::coalesce ()
 	      count ++;
 	      // adjust mesh level 
 	      coarsen_node(node);
-	      level_data_type * ldt = (level_data_type * ) node->data();
-	      if (ldt == NULL) {
+	      int * level1 = (int * ) node->data();
+	      if (level1 == NULL) {
 		node->set_data(&level_data[index_data++]);
-		ldt = (level_data_type * ) node->data();
+		level1 = (int * ) node->data();
 	      }
 	      // @@@ BUG ldt == 0
-	      ldt->mesh_level = ldt0->mesh_level;
+	      *level1 = *level0;
 	    }
 	  }
 	}
@@ -424,7 +418,6 @@ void Tree::coalesce ()
     printf ("Pass %d  Count %d\n",passes,count);
   } while (count > 0);
   
-  delete [] level_data;
 }
 //----------------------------------------------------------------------
 //======================================================================

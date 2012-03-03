@@ -23,8 +23,9 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
-#include "mesh.hpp"
+// #include "mesh.hpp"
 #include "error.hpp"
+#include "parallel.hpp"
 
 // #include "disk.hpp"
 // #include "method.hpp"

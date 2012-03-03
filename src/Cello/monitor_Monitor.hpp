@@ -58,6 +58,10 @@ public: // interface
     // return instance_;
   };
 
+  /// Set the processor's rank
+  void set_process_rank (int ip)
+  { ip_ = ip; }
+
   /// Set whether the monitor is active for text output.  Useful for
   /// parallel, e.g. "monitor->set_active(parallel->is_root())"
   void set_active(bool active) { active_ = active; };
@@ -87,6 +91,9 @@ private: // attributes
 
   /// Whether monitoring is activated.  Used for e.g. ip != 0.
   bool active_;
+
+  /// Owning processor's rank
+  int ip_;
 
   //----------------------------------------------------------------------
 

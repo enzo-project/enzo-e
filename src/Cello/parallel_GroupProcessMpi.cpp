@@ -110,14 +110,14 @@ GroupProcessMpi::GroupProcessMpi(int process_first,
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::barrier()  throw()
+void GroupProcessMpi::barrier()  const throw()
 { 
   MPI_Barrier (comm_); 
 };
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::sync (int rank, int tag) throw()
+void GroupProcessMpi::sync (int rank, int tag) const throw()
 {
   char buffer = 1;
   if (rank_ < rank) {
@@ -132,7 +132,7 @@ void GroupProcessMpi::sync (int rank, int tag) throw()
 //----------------------------------------------------------------------
 
 void * GroupProcessMpi::send_begin 
-(int rank_dest, void * buffer, int size, int tag) throw()
+(int rank_dest, void * buffer, int size, int tag) const throw()
 {
   MPI_Request * handle = 0;
   if (send_blocking_) {
@@ -148,7 +148,7 @@ void * GroupProcessMpi::send_begin
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::send_end (void * handle) throw()
+void GroupProcessMpi::send_end (void * handle) const throw()
 {
   delete (MPI_Request *) handle;
 }
@@ -156,7 +156,7 @@ void GroupProcessMpi::send_end (void * handle) throw()
 //----------------------------------------------------------------------
 
 void * GroupProcessMpi::recv_begin 
-(int rank_source, void * buffer, int size, int tag) throw()
+(int rank_source, void * buffer, int size, int tag) const throw()
 {
   MPI_Request * handle = 0;
   if (recv_blocking_) {
@@ -173,7 +173,7 @@ void * GroupProcessMpi::recv_begin
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::recv_end (void * handle) throw()
+void GroupProcessMpi::recv_end (void * handle) const throw()
 {
   delete (MPI_Request *) handle;
 }
@@ -181,7 +181,7 @@ void GroupProcessMpi::recv_end (void * handle) throw()
 //----------------------------------------------------------------------
 
 void GroupProcessMpi::send_recv 
-(int rank, void * buffer, int size, int tag) throw()
+(int rank, void * buffer, int size, int tag) const throw()
 {
   if (rank != process_rank_) {
     call_mpi_(__FILE__,__LINE__,"MPI_Sendrecv_replace",MPI_Sendrecv_replace
@@ -192,7 +192,7 @@ void GroupProcessMpi::send_recv
 
 //----------------------------------------------------------------------
 
-bool GroupProcessMpi::test (void * handle) throw()
+bool GroupProcessMpi::test (void * handle) const throw()
 {
   int result = 1;
   if (handle != NULL) {
@@ -204,7 +204,7 @@ bool GroupProcessMpi::test (void * handle) throw()
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::wait (void * handle) throw()
+void GroupProcessMpi::wait (void * handle) const throw()
 {
   if (handle != NULL) {
     call_mpi_(__FILE__,__LINE__,"MPI_Wait",MPI_Wait
@@ -214,21 +214,22 @@ void GroupProcessMpi::wait (void * handle) throw()
 
 //----------------------------------------------------------------------
 
-Reduce * GroupProcessMpi::create_reduce () throw ()
+Reduce * GroupProcessMpi::create_reduce () const throw ()
 {
   return new ReduceMpi (this);
 }
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::bulk_send_add(int rank_dest, void * buffer, int size, int tag) throw()
+void GroupProcessMpi::bulk_send_add
+(int rank_dest, void * buffer, int size, int tag) const throw()
 {
   INCOMPLETE("GroupProcessMpi::bulk_send_add");
 }
 
 //----------------------------------------------------------------------
 
-void * GroupProcessMpi::bulk_send() throw()
+void * GroupProcessMpi::bulk_send() const throw()
 {
   INCOMPLETE("GroupProcessMpi::bulk_send");
   return 0;
@@ -236,14 +237,15 @@ void * GroupProcessMpi::bulk_send() throw()
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::bulk_recv_add(int rank_source, void * buffer, int size, int tag) throw()
+void GroupProcessMpi::bulk_recv_add
+(int rank_source, void * buffer, int size, int tag) const throw()
 {
   INCOMPLETE("GroupProcessMpi::bulk_recv_add");
 }
 
 //----------------------------------------------------------------------
 
-void * GroupProcessMpi::bulk_recv() throw()
+void * GroupProcessMpi::bulk_recv() const throw()
 {
   INCOMPLETE("GroupProcessMpi::bulk_recv");
   return 0;
@@ -251,7 +253,7 @@ void * GroupProcessMpi::bulk_recv() throw()
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::bulk_wait(void * handle) throw()
+void GroupProcessMpi::bulk_wait(void * handle) const throw()
 {
   INCOMPLETE("GroupProcessMpi::bulk_wait");
 }
@@ -264,7 +266,7 @@ void GroupProcessMpi::call_mpi_
  int          line , 
  const char * name, 
  int          ierr
- ) throw()
+ ) const throw()
   {
     if (ierr != MPI_SUCCESS) {
       char message[ERROR_LENGTH];

@@ -166,7 +166,9 @@ void InitialDefault::allocate_xyzt_
   block->upper(&xp,&yp,&zp);
 
   double hx,hy,hz;
-  field_block->cell_width(block,&hx,&hy,&hz);
+  field_block->cell_width(xm,xp,&hx,
+			  ym,yp,&hy,
+			  zm,zp,&hz);
 
   // Initialize arrays
   for (int iz=0; iz<(*nz); iz++) {
@@ -397,7 +399,10 @@ void InitialDefault::create_png_mask_
   // get the block's cell width
 
   double hb[3];
-  block->field_block()->cell_width(block,&hb[0],&hb[1]);
+  block->field_block()->cell_width 
+    (lower_b[0],upper_b[0],&hb[0],
+     lower_b[1],upper_b[1],&hb[1],
+     lower_b[2],upper_b[2],&hb[2]);
 
   // Compute the block mask from the image pixel values
 

@@ -19,6 +19,7 @@ class Method;
 class Monitor;
 class Output;
 class Parameters;
+class Problem;
 class Performance;
 class Stopping;
 class Timestep;
@@ -41,18 +42,16 @@ class Simulation {
 
 public: // interface
 
-  /// Constructor for CHARM++
+  /// Simulation constructor
 
-  /// Initialize the Simulation object
   Simulation
   ( const char *       parameter_file,
 #ifdef CONFIG_USE_CHARM
     int                n,
-    CProxy_BlockReduce proxy_block_reduce, 
+    CProxy_BlockReduce proxy_block_reduce
 #else
-    GroupProcess *     group_process = 0,
+    GroupProcess *     group_process = 0
 #endif
-    int                index = 0
     ) throw();
 
   //==================================================
@@ -115,6 +114,10 @@ public: // interface
   // ACCESSOR FUNCTIONS
   //----------------------------------------------------------------------
 
+  /// Return the Problem container object
+  Problem *  problem() const throw()
+  { return problem_; }
+
   /// Return the dimensionality of the Simulation
   int dimension() const throw()
   { return dimension_; }
@@ -159,21 +162,13 @@ public: // interface
   Boundary * boundary() const throw()
   { return boundary_; }
 
-  /// Return the number of output objects
-  size_t num_output() const throw()
-  { return output_list_.size(); }
-
   /// Return the ith output object
   Output * output(int i) const throw()
-  { return output_list_[i]; }
-
-  /// Return the number of methods
-  size_t num_method() const throw()
-  { return method_list_.size(); }
+  { return (0 <= i && i < output_list_.size()) ? output_list_[i] : NULL; }
 
   /// Return the ith method object
   Method * method(int i) const throw()
-  { return method_list_[i]; }
+  { return (0 <= i && i < method_list_.size()) ? method_list_[i] : NULL; }
 
   /// Return the current cycle number
   int cycle() const throw() 
@@ -191,38 +186,15 @@ public: // interface
   bool stop() const throw() 
   { return stop_; };
 
-  /// Return the Simulation index
-  size_t index() const throw() 
-  { return index_; };
+  /// Update Simulation cycle, time, timestep, and stopping criteria
+  void update_cycle(int cycle, double time, double dt, double stop) ;
 
-  void update_cycle(int cycle, double time, double dt, double stop) {
-    cycle_ = cycle;
-    time_  = time;
-    dt_    = dt;
-    stop_  = stop;
-  };
+  /// Output basic Simulation information
+  void monitor_output() const ;
 
-  void monitor_output() const 
-  {
-    monitor_-> print("Simulation", "cycle %04d time %15.12f dt %15.12g", 
-		     cycle_,time_,dt_);
-    Memory * memory = Memory::instance();
-    monitor_->print("Memory","           bytes %lld bytes_high %lld",
-		    memory->bytes(), memory->bytes_high());
-    memory->reset_high();
-  }
+  /// Output performance information
+  void performance_output() const ;
 
-  void performance_output() const 
-  {
-    monitor_->print ("Performance","real time = %s",performance_->time());
-#ifdef CONFIG_USE_PAPI
-    monitor_->print ("Performance","PAPI Time real   = %f",time_real());
-    monitor_->print ("Performance","PAPI Time proc   = %f",time_proc());
-    monitor_->print ("Performance","PAPI GFlop count = %f",flop_count()*1e-9);
-    monitor_->print ("Performance","PAPI GFlop rate  = %f",
-		     flop_count()*1e-9 / time_real());
-#endif
-  }
 public: // virtual functions
 
   /// initialize the Simulation given a parameter file
@@ -244,6 +216,9 @@ public: // virtual functions
   virtual const Factory & factory () const throw();
 
 protected: // functions
+
+  /// Initialize the Problem object
+  void initialize_problem_ () throw();
 
   /// Initialize global simulation parameters
   void initialize_simulation_ () throw();
@@ -341,8 +316,8 @@ protected: // attributes
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
 
-  /// Index of this simulation in an ensemble
-  size_t index_;
+  /// Problem container object
+  Problem * problem_;
 
   /// Performance object
   Performance * performance_;

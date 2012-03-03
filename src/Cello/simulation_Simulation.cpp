@@ -17,11 +17,10 @@ Simulation::Simulation
  const char *   parameter_file,
 #ifdef CONFIG_USE_CHARM
  int n,
- CProxy_BlockReduce proxy_block_reduce,
+ CProxy_BlockReduce proxy_block_reduce
 #else
- GroupProcess * group_process,
+ GroupProcess * group_process
 #endif
- int            index
  ) throw()
 /// Initialize the Simulation object
   : factory_(0),
@@ -37,7 +36,6 @@ Simulation::Simulation
     time_(0.0),
     dt_(0),
     stop_(false),
-    index_(index),
     performance_(0),
     monitor_(0),
     hierarchy_(0),
@@ -146,20 +144,19 @@ void Simulation::initialize_data_descr_() throw()
   // parameter: Field : ghosts
   //--------------------------------------------------
 
-  int gx = 1;
-  int gy = 1;
-  int gz = 1;
+  int gx = 0;
+  int gy = 0;
+  int gz = 0;
 
   if (parameters_->type("Field:ghosts") == parameter_integer) {
-    gx = gy = gz = parameters_->value_integer("Field:ghosts",1);
+    gx = gy = gz = parameters_->value_integer("Field:ghosts",0);
+    if (dimension_ < 2) gy = 0;
+    if (dimension_ < 3) gz = 0;
   } else if (parameters_->type("Field:ghosts") == parameter_list) {
-    gx = parameters_->list_value_integer(0,"Field:ghosts",1);
-    gy = parameters_->list_value_integer(1,"Field:ghosts",1);
-    gz = parameters_->list_value_integer(2,"Field:ghosts",1);
+    gx = parameters_->list_value_integer(0,"Field:ghosts",0);
+    gy = parameters_->list_value_integer(1,"Field:ghosts",0);
+    gz = parameters_->list_value_integer(2,"Field:ghosts",0);
   }
-
-  if (dimension_ < 2) gy = 0;
-  if (dimension_ < 3) gz = 0;
 
   for (i=0; i<field_descr_->field_count(); i++) {
     field_descr_->set_ghosts(i,gx,gy,gz);
@@ -224,7 +221,7 @@ void Simulation::initialize_data_descr_() throw()
   field_descr_->set_alignment (alignment);
   
   //--------------------------------------------------
-  // parameter: field : padding
+  // parameter: Field : padding
   //--------------------------------------------------
 
   int padding = parameters_->value_integer("Field:padding",0);
@@ -386,7 +383,7 @@ void Simulation::initialize_initial_() throw()
 void Simulation::initialize_boundary_() throw()
 {
   //--------------------------------------------------
-  // parameter: Boundary : name
+  // parameter: Boundary : type
   //--------------------------------------------------
 
   std::string name = parameters_->value_string("Boundary:type","");
@@ -1140,7 +1137,6 @@ void Simulation::refresh() throw()
   if (stop_) {
 
     performance_->stop();
-
     performance_output();
 
     proxy_main.p_exit(CkNumPes());
@@ -1164,11 +1160,11 @@ void Simulation::refresh() throw()
 
 #endif
 
+#ifndef CONFIG_USE_CHARM
+
 //----------------------------------------------------------------------
 // NOT CHARM
 //----------------------------------------------------------------------
-
-#ifndef CONFIG_USE_CHARM
 
 void Simulation::scheduled_output()
 
@@ -1248,6 +1244,52 @@ void Simulation::scheduled_output()
 }
 
 #endif
+
+//----------------------------------------------------------------------
+
+void Simulation::update_cycle(int cycle, double time, double dt, double stop) 
+{
+  cycle_ = cycle;
+  time_  = time;
+  dt_    = dt;
+  stop_  = stop;
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::monitor_output() const 
+{
+  monitor_-> print("Simulation", "cycle %04d time %15.12f dt %15.12g", 
+		   cycle_,time_,dt_);
+#ifdef CONFIG_USE_MEMORY
+  Memory * memory = Memory::instance();
+  monitor_->print("Memory","           bytes %lld bytes_high %lld",
+		  memory->bytes(), memory->bytes_high());
+  memory->reset_high();
+#endif
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::performance_output() const 
+{
+  monitor_->print ("Performance","real time = %f",performance_->time());
+#ifdef CONFIG_USE_PAPI
+
+  Papi * papi = performance_->papi();
+
+  double time_real   = papi->time_real();
+  double time_proc   = papi->time_proc();
+  double gflop_count = papi->flop_count()*1e-9;
+  double gflop_rate  = gflop_count / time_real;
+
+  monitor_->print ("Performance","PAPI Time real   = %f", time_real);
+  monitor_->print ("Performance","PAPI Time proc   = %f", time_proc);
+  monitor_->print ("Performance","PAPI GFlop count = %f", gflop_count);
+  monitor_->print ("Performance","PAPI GFlop rate  = %f", gflop_rate);
+
+#endif
+}
 
 //----------------------------------------------------------------------
 

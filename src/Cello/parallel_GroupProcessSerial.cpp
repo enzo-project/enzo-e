@@ -17,7 +17,7 @@ void * GroupProcessSerial::send_begin
  void * buffer, 
  int    size, 
  int    tag
- ) throw()
+ ) const throw()
 {
   if (buffer_[tag] != 0) {
     WARNING("send_begin",
@@ -29,7 +29,7 @@ void * GroupProcessSerial::send_begin
 
 //----------------------------------------------------------------------
 
-void GroupProcessSerial::recv_end(void * handle) throw()
+void GroupProcessSerial::recv_end(void * handle) const throw()
 {
   if (buffer_[(long int)(handle)] == 0) {
     WARNING("recv_end",
@@ -39,15 +39,15 @@ void GroupProcessSerial::recv_end(void * handle) throw()
 
 //----------------------------------------------------------------------
 
-void GroupProcessSerial::send_recv (int rank, void * buffer, int size, int tag)
-  throw()
+void GroupProcessSerial::send_recv 
+(int rank, void * buffer, int size, int tag) const throw()
 {
   return;
 }
 
 //----------------------------------------------------------------------
 
-Reduce * GroupProcessSerial::create_reduce () throw ()
+Reduce * GroupProcessSerial::create_reduce () const throw ()
 {
   return new ReduceSerial (this);
 }

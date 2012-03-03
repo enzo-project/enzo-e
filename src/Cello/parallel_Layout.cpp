@@ -33,7 +33,7 @@ void Layout::set_process_range(int process_first, int process_count) throw()
 
 //----------------------------------------------------------------------
 
-int Layout::block_count (int *nbx, int *nby, int *nbz) throw()
+int Layout::block_count (int *nbx, int *nby, int *nbz) const throw()
 { 
   *nbx = block_count_[0];
   *nby = block_count_[1];
@@ -43,7 +43,8 @@ int Layout::block_count (int *nbx, int *nby, int *nbz) throw()
 
 //----------------------------------------------------------------------
 
-void Layout::process_range(int * process_first, int * process_count) throw()
+void Layout::process_range
+(int * process_first, int * process_count) const throw()
 {
   if (process_first) (*process_first) = process_first_;
   if (process_count) (*process_count) = process_count_;
@@ -51,7 +52,7 @@ void Layout::process_range(int * process_first, int * process_count) throw()
 
 //----------------------------------------------------------------------
 
-int Layout::local_count (int ip) throw()
+int Layout::local_count (int ip) const throw()
 {
   int ip0 = ip - process_first_;
 
@@ -69,7 +70,7 @@ int Layout::local_count (int ip) throw()
 
 //----------------------------------------------------------------------
 
-bool Layout::is_local (int ip, int ibx, int iby, int ibz) throw()
+bool Layout::is_local (int ip, int ibx, int iby, int ibz) const throw()
 {
   WARNING("Layout::is_local",
 	  "index_first_local is never != for current test code");
@@ -81,7 +82,7 @@ bool Layout::is_local (int ip, int ibx, int iby, int ibz) throw()
 
 //----------------------------------------------------------------------
 
-int Layout::global_index (int ip, int ib) throw()
+int Layout::global_index (int ip, int ib) const throw()
 {
   int block_count = block_count_[0] * block_count_[1] * block_count_[2];
   return ib + (ip-process_first_)*block_count/process_count_;
@@ -89,7 +90,7 @@ int Layout::global_index (int ip, int ib) throw()
 
 //----------------------------------------------------------------------
 
-int Layout::process (int ib)  throw()
+int Layout::process (int ib)  const throw()
 {
   int block_count = block_count_[0] * block_count_[1] * block_count_[2];
   if (0 <= ib && ib < block_count) {
@@ -102,7 +103,7 @@ int Layout::process (int ib)  throw()
 
 //----------------------------------------------------------------------
 
-int Layout::process3 (int ibx, int iby, int ibz)  throw()
+int Layout::process3 (int ibx, int iby, int ibz)  const throw()
 {
   // Force block indices to be in range for periodic b.c.
   while (ibx >= block_count_[0]) ibx -= block_count_[0];
@@ -116,14 +117,15 @@ int Layout::process3 (int ibx, int iby, int ibz)  throw()
 }
 //----------------------------------------------------------------------
 
-int Layout::block_index (int ibx, int iby, int ibz) throw()
+int Layout::block_index (int ibx, int iby, int ibz) const throw()
 {
   return ibx + block_count_[0]*(iby + block_count_[1]*ibz);
 }
 
 //----------------------------------------------------------------------
 
-void Layout::block_indices (int ib, int * ibx, int * iby, int * ibz) throw()
+void Layout::block_indices 
+(int ib, int * ibx, int * iby, int * ibz) const throw()
 {
   if (ibx) (*ibx) = ib % block_count_[0];
   if (iby) (*iby) = (ib / block_count_[0]) % block_count_[1];
@@ -132,7 +134,7 @@ void Layout::block_indices (int ib, int * ibx, int * iby, int * ibz) throw()
 
 //----------------------------------------------------------------------
 
-void Layout::block_indices (int ip, int ibl, int * ibx, int * iby, int * ibz) throw()
+void Layout::block_indices (int ip, int ibl, int * ibx, int * iby, int * ibz) const throw()
 {
   int ibg = global_index(ip,ibl);
   block_indices(ibg,ibx,iby,ibz);

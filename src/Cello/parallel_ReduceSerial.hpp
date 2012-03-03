@@ -19,7 +19,7 @@ class ReduceSerial : public Reduce {
 public: // interface
 
   /// Constructor
-  ReduceSerial(GroupProcess * group_process) throw()
+  ReduceSerial(const GroupProcess * group_process) throw()
     : Reduce (group_process)
   { /* EMPTY */ };
     

@@ -14,8 +14,7 @@ module simulation {
 
     entry Simulation
       (const char filename[n], int n, 
-       CProxy_BlockReduce proxy_block_reduce,
-       int index_simulation);
+       CProxy_BlockReduce proxy_block_reduce);
 
     entry void p_output ();
     entry void p_output_reduce();

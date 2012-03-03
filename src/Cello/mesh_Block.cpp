@@ -4,6 +4,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Feb 28 13:22:26 PST 2011
 /// @brief    Implementation of the Block object
+/// @todo     Remove hierarchy dependency via Initial--only need domain bounds
 
 #include "cello.hpp"
 
@@ -233,7 +234,10 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
   int ibx,iby,ibz;
   index_patch(&ibx,&iby,&ibz);
   field_block_[index_field_set]
-    -> refresh_ghosts (field_descr,patch, ibx,iby,ibz, fx,fy,fz);
+    -> refresh_ghosts (field_descr,
+		       patch->group_process(),
+		       patch->layout(),
+		       ibx,iby,ibz, fx,fy,fz);
 }
 
 #endif
@@ -245,7 +249,7 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 #ifdef CONFIG_USE_CHARM
 
 extern CProxy_Simulation  proxy_simulation;
-extern CProxy_Main        proxy_main;
+// extern CProxy_Main        proxy_main;
 
 #endif /* CONFIG_USE_CHARM */
 
@@ -256,6 +260,11 @@ extern CProxy_Main        proxy_main;
 #ifdef CONFIG_USE_CHARM
 
 void Block::p_initial()
+// dependency: Simulation::field_descr()
+// dependency: Simulation: cycle()
+// dependency: Simulation: time()
+// dependency: Simulation: hierarchy()
+//    todo:remove
 {
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
 
@@ -319,7 +328,7 @@ void Block::prepare(int axis_set)
 
   // Reduce timestep to coincide with scheduled output if needed
 
-  for (size_t i=0; i<simulation->num_output(); i++) {
+  for (int i=0; simulation->output(i) != NULL; i++) {
     Schedule * schedule = simulation->output(i)->schedule();
     dt_block = schedule->update_timestep(time_,dt_block);
   }
@@ -358,7 +367,7 @@ void Block::prepare(int axis_set)
 
 void Block::p_call_output(CkReductionMsg * msg)
 {
-  TRACE1("Block::p_call_output(%d)",index());
+
   double * min_reduce = (double * )msg->getData();
 
   double dt_patch   = min_reduce[0];
@@ -943,7 +952,7 @@ void Block::compute(int axis_set)
   sprintf (buffer,"%03d-A",cycle_);
   field_block()->print(field_descr,buffer,lower_,upper_);
 
-  for (size_t i = 0; i < simulation->num_method(); i++) {
+  for (int i=0; simulation->method(i) != NULL; i++) {
     simulation->method(i) -> compute_block (field_descr,this,time_,dt_);
   }
 

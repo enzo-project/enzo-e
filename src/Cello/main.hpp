@@ -24,6 +24,7 @@
 #include "monitor.hpp"
 
 class Factory;
+class Simulation;
 
 #if defined(CHARM_ENZO)
 
@@ -60,6 +61,9 @@ public:
   
   /// Exit the program
   void p_exit(int count);
+
+  /// Finalize the simulation
+  void enzo_finalize(Simulation * simulation);
 
 private:
 

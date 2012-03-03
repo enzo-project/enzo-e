@@ -42,70 +42,72 @@ class GroupProcess
   //--------------------------------------------------
 
   /// Number of compute elements in the GroupProcess
-  int size() throw()
+  int size() const throw()
   { return size_; };
 
   /// Rank of the compute element in the GroupProcess
-  int rank() throw()
+  int rank() const throw()
   {  return rank_; };
 
   /// True iff rank() is 0
-  bool is_root() throw()
+  bool is_root() const throw()
   {  return rank_==0; };
 
   /// Synchronize between all compute elements in the GroupProcess
-  virtual void barrier() throw() { };
+  virtual void barrier() const throw() { };
 
   /// Synchronize between two compute elements in the GroupProcess
-  virtual void sync(int rank, int tag=0) throw() { };
+  virtual void sync(int rank, int tag=0) const throw() { };
 
   //--------------------------------------------------
 
   /// Initiate sending an array
   virtual void * send_begin
-    (int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
+    (int rank_dest, void * buffer, int size, int tag=0) const throw() = 0;
 
   /// Clean up after sending an array
-  virtual void send_end(void * handle) throw() = 0;
+  virtual void send_end(void * handle) const throw() = 0;
 
   /// Initiate receiving an array
   virtual void * recv_begin
-    (int rank_source, void * buffer, int size, int tag=0) throw() = 0;
+    (int rank_source, void * buffer, int size, int tag=0) const throw() = 0;
 
   /// Clean up after receiving an array
-  virtual void recv_end(void * handle) throw() = 0;
+  virtual void recv_end(void * handle) const throw() = 0;
 
   /// Send and receive data between two processes
   virtual void send_recv
-  (int rank, void * buffer, int size, int tag=0) throw() = 0;
+  (int rank, void * buffer, int size, int tag=0) const throw() = 0;
 
   /// Wait until the send or receive operation completes
-  virtual void wait(void * handle) throw() = 0;
+  virtual void wait(void * handle) const throw() = 0;
 
   /// Test completeness of sending or receiving an array
-  virtual bool test (void * handle) throw() = 0;
+  virtual bool test (void * handle) const throw() = 0;
 
   //--------------------------------------------------
 
   /// Add an array to a list of arrays to send in bulk
-  virtual void bulk_send_add(int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
+  virtual void bulk_send_add
+  (int rank_dest, void * buffer, int size, int tag=0) const throw() = 0;
 
   /// Initiate a bulk send of multiple arrays
-  virtual void * bulk_send() throw() = 0;
+  virtual void * bulk_send() const throw() = 0;
 
   /// Add an array to a list of arrays to receive in bulk
-  virtual void bulk_recv_add(int rank_source, void * buffer, int size, int tag=0) throw() = 0;
+  virtual void bulk_recv_add
+  (int rank_source, void * buffer, int size, int tag=0) const throw() = 0;
 
   /// Initiate a bulk receive of multiple arrays
-  virtual void * bulk_recv() throw() = 0;
+  virtual void * bulk_recv() const throw() = 0;
 
   /// Complete a bulk send or receive of multiple arrays
-  virtual void bulk_wait(void * handle) throw() = 0;
+  virtual void bulk_wait(void * handle) const throw() = 0;
 
   //--------------------------------------------------
 
   /// Create a Reduce object for this GroupProcess
-  virtual Reduce * create_reduce () throw ()= 0;
+  virtual Reduce * create_reduce () const throw ()= 0;
 
  protected: // attributes
 

@@ -16,9 +16,8 @@
 EnzoSimulationMpi::EnzoSimulationMpi
 (
  const char * parameter_file,
- GroupProcess * group_process,
- int index ) throw ()
-  : EnzoSimulation(parameter_file,group_process, index)
+ GroupProcess * group_process ) throw ()
+  : EnzoSimulation(parameter_file,group_process)
 {
 }
 
@@ -33,14 +32,11 @@ EnzoSimulationMpi::~EnzoSimulationMpi() throw()
 void EnzoSimulationMpi::run() throw()
 {
   
-  Performance performance;
 #ifdef CONFIG_USE_MPI
   ReduceMpi    reduce(group_process_);
 #else
   ReduceSerial reduce(group_process_);
 #endif
-
-  performance.start();
 
   // get hierarchy extents for later block boundary checks
 
@@ -310,7 +306,7 @@ void EnzoSimulationMpi::run() throw()
 
   monitor_output();
 
-  performance.stop();
+  performance()->stop();
 
   performance_output();
 

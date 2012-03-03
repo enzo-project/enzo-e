@@ -37,6 +37,8 @@ namespace enzo {
   extern bc_enum *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
   extern enzo_float *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2]; 
 
+  /// Cosmology
+
   extern int ComovingCoordinates;
   extern int UseMinimumPressureSupport;
   extern enzo_float MinimumPressureSupportParameter;

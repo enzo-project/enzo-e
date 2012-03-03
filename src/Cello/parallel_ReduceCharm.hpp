@@ -19,7 +19,7 @@ class ReduceCharm : public Reduce {
 public: // interface
 
   /// Constructor
-  ReduceCharm(GroupProcess * group_process) throw()
+  ReduceCharm(const GroupProcess * group_process) throw()
     : Reduce (group_process)
   { /* EMPTY */ };
     

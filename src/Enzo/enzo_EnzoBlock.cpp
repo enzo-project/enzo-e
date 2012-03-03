@@ -398,8 +398,10 @@ void EnzoBlock::initialize () throw()
 
   // Initialize CellWidth
 
+  double xp,yp,zp;
+  upper(&xp,&yp,&zp);
   double hx,hy,hz;
-  field_block_[0]->cell_width(this,&hx,&hy,&hz);
+  field_block_[0]->cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
 
   CellWidth[0] = hx;
   CellWidth[1] = hy;

@@ -19,7 +19,7 @@ class ReduceMpi : public Reduce {
 public: // interface
 
   /// Constructor
-  ReduceMpi(GroupProcess * group_process) throw()
+  ReduceMpi(const GroupProcess * group_process) throw()
     : Reduce (group_process)
   { /* EMPTY */ };
     
