@@ -86,14 +86,14 @@ PARALLEL_MAIN_BEGIN
     CProxy_BlockReduce::ckNew();
 
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
-    (parameter_file, strlen(parameter_file)+1, proxy_block_reduce, 0);
+    (parameter_file, strlen(parameter_file)+1, proxy_block_reduce);
 
   //--------------------------------------------------
 
 #else /* ! CONFIG_USE_CHARM */
 
   Simulation * simulation = 
-    new EnzoSimulationMpi (parameter_file,group_process, 0);
+    new EnzoSimulationMpi (parameter_file,group_process);
 
   simulation->initialize();
 

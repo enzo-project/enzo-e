@@ -47,11 +47,10 @@ public: // interface
   ( const char *       parameter_file,
 #ifdef CONFIG_USE_CHARM
     int                n,
-    CProxy_BlockReduce proxy_block_reduce, 
+    CProxy_BlockReduce proxy_block_reduce
 #else
-    GroupProcess *     group_process = 0,
+    GroupProcess *     group_process = 0
 #endif
-    int                index = 0
     ) throw();
 
   //==================================================
@@ -158,21 +157,13 @@ public: // interface
   Boundary * boundary() const throw()
   { return boundary_; }
 
-  /// Return the number of output objects
-  size_t num_output() const throw()
-  { return output_list_.size(); }
-
   /// Return the ith output object
   Output * output(int i) const throw()
-  { return output_list_[i]; }
-
-  /// Return the number of methods
-  size_t num_method() const throw()
-  { return method_list_.size(); }
+  { return (0 <= i && i < output_list_.size()) ? output_list_[i] : NULL; }
 
   /// Return the ith method object
   Method * method(int i) const throw()
-  { return method_list_[i]; }
+  { return (0 <= i && i < method_list_.size()) ? method_list_[i] : NULL; }
 
   /// Return the current cycle number
   int cycle() const throw() 
@@ -189,10 +180,6 @@ public: // interface
   /// Return the currint stopping criteria (stored from main reduction)
   bool stop() const throw() 
   { return stop_; };
-
-  /// Return the Simulation index
-  size_t index() const throw() 
-  { return index_; };
 
   /// Update Simulation cycle, time, timestep, and stopping criteria
   void update_cycle(int cycle, double time, double dt, double stop) ;
@@ -320,9 +307,6 @@ protected: // attributes
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
-
-  /// Index of this simulation in an ensemble
-  size_t index_;
 
   /// Performance object
   Performance * performance_;

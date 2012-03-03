@@ -46,13 +46,14 @@ void Simulation::output_next() throw()
 
   // find next output
 
-  while (index_output_ < num_output() && 
-	 ! output(index_output_)->is_scheduled(cycle_, time_))
+  while (output(index_output_) != NULL && 
+	 ! output(index_output_)->is_scheduled(cycle_, time_)) {
     ++index_output_;
+  }
 
   // output if any scheduled, else proceed with refresh
 
-  if (index_output_ < num_output()) {
+  if (output(index_output_) != NULL) {
 
     // Prepare for IO
     output(index_output_)->init();

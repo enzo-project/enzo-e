@@ -328,7 +328,7 @@ void Block::prepare(int axis_set)
 
   // Reduce timestep to coincide with scheduled output if needed
 
-  for (size_t i=0; i<simulation->num_output(); i++) {
+  for (int i=0; simulation->output(i) != NULL; i++) {
     Schedule * schedule = simulation->output(i)->schedule();
     dt_block = schedule->update_timestep(time_,dt_block);
   }
@@ -952,7 +952,7 @@ void Block::compute(int axis_set)
   sprintf (buffer,"%03d-A",cycle_);
   field_block()->print(field_descr,buffer,lower_,upper_);
 
-  for (size_t i = 0; i < simulation->num_method(); i++) {
+  for (int i=0; simulation->method(i) != NULL; i++) {
     simulation->method(i) -> compute_block (field_descr,this,time_,dt_);
   }
 

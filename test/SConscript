@@ -21,7 +21,7 @@ env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
 env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 env.Append(BUILDERS = { 'RunMethod'   : run_method } )
 
-env_mv_out  = env.Clone(COPY = 'mv *.png *.h5 ' + test_path)
+env_mv_out  = env.Clone(COPY = 'mv `ls *.png *.h5` ' + test_path)
 env_mv_test = env.Clone(COPY = 'mv test*out test*in ' + test_path)
 
 #----------------------------------------------------------------------

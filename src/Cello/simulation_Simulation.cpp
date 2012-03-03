@@ -17,11 +17,10 @@ Simulation::Simulation
  const char *   parameter_file,
 #ifdef CONFIG_USE_CHARM
  int n,
- CProxy_BlockReduce proxy_block_reduce,
+ CProxy_BlockReduce proxy_block_reduce
 #else
- GroupProcess * group_process,
+ GroupProcess * group_process
 #endif
- int            index
  ) throw()
 /// Initialize the Simulation object
   : factory_(0),
@@ -37,7 +36,6 @@ Simulation::Simulation
     time_(0.0),
     dt_(0),
     stop_(false),
-    index_(index),
     performance_(0),
     monitor_(0),
     hierarchy_(0),
@@ -146,20 +144,19 @@ void Simulation::initialize_data_descr_() throw()
   // parameter: Field : ghosts
   //--------------------------------------------------
 
-  int gx = 1;
-  int gy = 1;
-  int gz = 1;
+  int gx = 0;
+  int gy = 0;
+  int gz = 0;
 
   if (parameters_->type("Field:ghosts") == parameter_integer) {
-    gx = gy = gz = parameters_->value_integer("Field:ghosts",1);
+    gx = gy = gz = parameters_->value_integer("Field:ghosts",0);
+    if (dimension_ < 2) gy = 0;
+    if (dimension_ < 3) gz = 0;
   } else if (parameters_->type("Field:ghosts") == parameter_list) {
-    gx = parameters_->list_value_integer(0,"Field:ghosts",1);
-    gy = parameters_->list_value_integer(1,"Field:ghosts",1);
-    gz = parameters_->list_value_integer(2,"Field:ghosts",1);
+    gx = parameters_->list_value_integer(0,"Field:ghosts",0);
+    gy = parameters_->list_value_integer(1,"Field:ghosts",0);
+    gz = parameters_->list_value_integer(2,"Field:ghosts",0);
   }
-
-  if (dimension_ < 2) gy = 0;
-  if (dimension_ < 3) gz = 0;
 
   for (i=0; i<field_descr_->field_count(); i++) {
     field_descr_->set_ghosts(i,gx,gy,gz);
