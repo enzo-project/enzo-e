@@ -5,16 +5,16 @@
 /// @date     2012-03-02
 /// @brief    [\ref Problem] Declaration of the Problem class
 ///
-/// This class is used as a container for classes that define
-/// the problem being solved.  These include the following:
+/// This class is used as a container for classes that define the
+/// problem being solved.  These classes include the following:
 ///
-/// Boundary:    Boundary conditions
-/// Initial:     Initial conditions
-/// Method:      List of numerical methods
-/// Output:      List of output functions
-/// Refinement:  How the mesh hierarchy is to be refined
-/// Stopping:    Stopping criteria
-/// Timestep:    Timestepping control
+///    Boundary:    Boundary conditions
+///    Initial:     Initial conditions
+///    Method:      List of numerical methods
+///    Output:      List of output functions
+///    Refinement:  How the mesh hierarchy is to be refined
+///    Stopping:    Stopping criteria
+///    Timestep:    Timestepping control
 
 #ifndef PROBLEM_PROBLEM_HPP
 #define PROBLEM_PROBLEM_HPP
@@ -64,10 +64,10 @@ public: // interface
   /// Return the timestep control object
   Timestep * timestep() const throw()  { return timestep_; }
 
-private: // functions
-
   /// Initialize the boundary conditions object
-  void initialize_boundary_() throw();
+  void initialize_boundary() throw();
+
+private: // functions
 
   /// Initialize the initial conditions object
   void initialize_initial_ () throw();

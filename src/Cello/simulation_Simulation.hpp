@@ -158,9 +158,9 @@ public: // interface
   Initial *  initial() const throw()
   { return initial_; }
 
-  /// Return the boundary object, if any
-  Boundary * boundary() const throw()
-  { return boundary_; }
+  // /// Return the boundary object, if any
+  // Boundary * boundary() const throw()
+  // { return boundary_; }
 
   /// Return the ith output object
   Output * output(int i) const throw()
@@ -239,8 +239,8 @@ protected: // functions
   /// Initialize the initial conditions object
   void initialize_initial_ () throw();
 
-  /// Initialize the boundary conditions object
-  void initialize_boundary_() throw();
+  // /// Initialize the boundary conditions object
+  // void initialize_boundary_() throw();
 
   /// Initialize the output objects
   void initialize_output_  () throw();
@@ -267,9 +267,9 @@ protected: // abstract virtual functions
   virtual Initial * 
   create_initial_ (std::string name) throw ();
 
-  /// Create named boundary object
-  virtual Boundary * 
-  create_boundary_ (std::string name) throw ();
+  // /// Create named boundary object
+  // virtual Boundary * 
+  // create_boundary_ (std::string name) throw ();
 
   /// Create named output object
   virtual Output * 
@@ -340,8 +340,8 @@ protected: // attributes
   /// Initial conditions object
   Initial * initial_;
 
-  /// Boundary conditions object
-  Boundary * boundary_;
+  // /// Boundary conditions object
+  // Boundary * boundary_;
 
 #ifdef CONFIG_USE_CHARM
 

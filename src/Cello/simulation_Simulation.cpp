@@ -43,7 +43,6 @@ Simulation::Simulation
     stopping_(0),
     timestep_(0),
     initial_(0),
-    boundary_(0),
 #ifdef CONFIG_USE_CHARM
     proxy_block_reduce_(proxy_block_reduce),
     index_output_(0),
@@ -88,7 +87,7 @@ void Simulation::initialize() throw()
   initialize_stopping_();
   initialize_timestep_();
   initialize_initial_();
-  initialize_boundary_();
+  problem->initialize_boundary(parameters_);
   initialize_output_();
   initialize_method_();
   initialize_parallel_();
@@ -376,18 +375,6 @@ void Simulation::initialize_initial_() throw()
   if (initial_ == 0) {
     initial_ = new InitialDefault(parameters_);
   }
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::initialize_boundary_() throw()
-{
-  //--------------------------------------------------
-  // parameter: Boundary : type
-  //--------------------------------------------------
-
-  std::string name = parameters_->value_string("Boundary:type","");
-  boundary_ = create_boundary_(name);
 }
 
 //----------------------------------------------------------------------
@@ -998,7 +985,7 @@ void Simulation::deallocate_() throw()
   delete stopping_;      stopping_ = 0;
   delete timestep_;      timestep_ = 0;
   delete initial_;       initial_ = 0;
-  delete boundary_;      boundary_ = 0;
+  problem_->deallocate();
   for (size_t i=0; i<output_list_.size(); i++) {
     delete output_list_[i];    output_list_[i] = 0;
   }
@@ -1057,14 +1044,6 @@ Timestep * Simulation::create_timestep_ (std::string name) throw ()
 Initial * Simulation::create_initial_ (std::string name) throw ()
 { 
   ERROR ("Simulation::create_initial_","Implictly abstract function called");
-  return NULL;
-}
-
-//----------------------------------------------------------------------
-
-Boundary * Simulation::create_boundary_ (std::string name) throw ()
-{
-  ERROR ("Simulation::create_boundary_","Implictly abstract function called");
   return NULL;
 }
 
@@ -1144,7 +1123,7 @@ void Simulation::refresh() throw()
   } else {
 
     //--------------------------------------------------
-    // Boundary
+    // Compute
     //--------------------------------------------------
 
     ItPatch it_patch(hierarchy_);
