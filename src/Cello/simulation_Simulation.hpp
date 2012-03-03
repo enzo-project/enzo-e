@@ -19,6 +19,7 @@ class Method;
 class Monitor;
 class Output;
 class Parameters;
+class Problem;
 class Performance;
 class Stopping;
 class Timestep;
@@ -112,6 +113,10 @@ public: // interface
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
   //----------------------------------------------------------------------
+
+  /// Return the Problem container object
+  Problem *  problem() const throw()
+  { return problem_; }
 
   /// Return the dimensionality of the Simulation
   int dimension() const throw()
@@ -212,6 +217,9 @@ public: // virtual functions
 
 protected: // functions
 
+  /// Initialize the Problem object
+  void initialize_problem_ () throw();
+
   /// Initialize global simulation parameters
   void initialize_simulation_ () throw();
 
@@ -307,6 +315,9 @@ protected: // attributes
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
+
+  /// Problem container object
+  Problem * problem_;
 
   /// Performance object
   Performance * performance_;
