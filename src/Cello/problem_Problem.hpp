@@ -65,7 +65,7 @@ public: // interface
   Timestep * timestep() const throw()  { return timestep_; }
 
   /// Initialize the boundary conditions object
-  void initialize_boundary() throw();
+  void initialize_boundary(Pr) throw();
 
 private: // functions
 
