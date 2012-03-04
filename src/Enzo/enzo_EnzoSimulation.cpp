@@ -28,6 +28,7 @@ EnzoSimulation::EnzoSimulation
     (parameter_file, group_process)
 #endif
 {
+  problem_ = new EnzoProblem;
 }
 
 #ifdef CONFIG_USE_CHARM
@@ -51,6 +52,7 @@ EnzoSimulation::EnzoSimulation (CkMigrateMessage *m)
 
 EnzoSimulation::~EnzoSimulation() throw()
 {
+  delete problem_; problem_ = 0;;
 }
 
 //----------------------------------------------------------------------

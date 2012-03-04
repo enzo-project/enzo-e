@@ -465,7 +465,7 @@ void Block::refresh (int axis_set)
   int iyp = (iy + 1) % nby;
   int izp = (iz + 1) % nbz;
 
-  bool periodic = simulation->boundary()->is_periodic();
+  bool periodic = simulation->problem()->boundary()->is_periodic();
 
   CProxy_Block block_array = thisProxy;
 
@@ -756,7 +756,7 @@ void Block::update_boundary_
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  Boundary * boundary = simulation->boundary();
+  Boundary * boundary = simulation->problem()->boundary();
   const FieldDescr * field_descr = simulation->field_descr();
 
 
@@ -831,7 +831,7 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
 
   // Adjust for boundary faces
 
-  bool periodic = simulation->boundary()->is_periodic();
+  bool periodic = simulation->problem()->boundary()->is_periodic();
 
   Hierarchy * hierarchy = simulation->hierarchy();
 

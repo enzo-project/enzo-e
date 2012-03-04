@@ -9,7 +9,7 @@
 #ifndef ENZO_ENZO_PROBLEM_HPP
 #define ENZO_ENZO_PROBLEM_HPP
 
-class EnzoProblem {
+class EnzoProblem : public Problem {
 
   /// @class    EnzoProblem
   /// @ingroup  Enzo
