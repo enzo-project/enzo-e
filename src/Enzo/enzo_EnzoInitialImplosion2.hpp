@@ -17,7 +17,7 @@ class EnzoInitialImplosion2 : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialImplosion2() throw();
+  EnzoInitialImplosion2(int cycle, double time) throw();
 
   /// Initialize the block
 

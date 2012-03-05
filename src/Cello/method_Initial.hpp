@@ -17,12 +17,19 @@ class Initial {
 public: // interface
 
   /// Create a new Initial
-  Initial() throw()
+  Initial(int cycle, double time) throw()
+    : cycle_(cycle), time_(time)
   {};
 
   /// Destructor
   virtual ~Initial() throw()
   {}
+
+  /// Initial time
+  double time() const throw() { return time_; }
+
+  /// Initial cycle
+  int cycle() const throw() { return cycle_; }
 
 public: // virtual functions
 
@@ -32,6 +39,12 @@ public: // virtual functions
 			Block * block) throw() = 0;
 
 protected: // attributes
+
+  /// Initial cycle number
+  int cycle_;
+
+  /// Initial time
+  double time_;
 
 };
 

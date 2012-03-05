@@ -628,11 +628,13 @@ void FieldBlock::print (const FieldDescr * field_descr,
      ny = (iyp-iym);
      nz = (izp-izm);
 
+#ifdef CELLO_DEBUG_VERBOSE
      double hx,hy,hz;
 
      hx = (upper[0]-lower[0])/(nxd-2*gx);
      hy = (upper[1]-lower[1])/(nyd-2*gy);
      hz = (upper[2]-lower[2])/(nzd-2*gz);
+#endif
 
      switch (field_descr->precision(index_field)) {
      case precision_single:

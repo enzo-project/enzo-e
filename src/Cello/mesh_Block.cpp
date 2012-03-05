@@ -285,7 +285,7 @@ void Block::p_initial()
 
   // Apply the initial conditions 
 
-  Initial * initial = simulation->initial();
+  Initial * initial = simulation->problem()->initial();
 
   initial->enforce(simulation->hierarchy(),field_descr,this);
 
@@ -323,19 +323,26 @@ void Block::prepare(int axis_set)
   // Compute local dt
   //--------------------------------------------------
 
+  Problem * problem = simulation->problem();
+
   double dt_block;
-  dt_block = simulation->timestep()->compute(field_descr,this);
+  Timestep * timestep = problem->timestep();
+
+  dt_block = timestep->compute(field_descr,this);
 
   // Reduce timestep to coincide with scheduled output if needed
 
-  for (int i=0; simulation->output(i) != NULL; i++) {
-    Schedule * schedule = simulation->output(i)->schedule();
+  int index_output=0;
+  while (Output * output = problem->output(index_output++)) {
+    Schedule * schedule = output->schedule();
     dt_block = schedule->update_timestep(time_,dt_block);
   }
 
   // Reduce timestep to not overshoot final time from stopping criteria
 
-  double time_stop = simulation->stopping()->stop_time();
+  Stopping * stopping = problem->stopping();
+
+  double time_stop = stopping->stop_time();
   double time_curr = time_;
 
   dt_block = MIN (dt_block, (time_stop - time_curr));
@@ -344,7 +351,7 @@ void Block::prepare(int axis_set)
   // Evaluate local stopping criteria
   //--------------------------------------------------
 
-  int stop_block = simulation->stopping()->complete(cycle_,time_);
+  int stop_block = stopping->complete(cycle_,time_);
 
   //--------------------------------------------------
   // Reduce to find Block array minimum dt and stopping criteria
@@ -465,7 +472,9 @@ void Block::refresh (int axis_set)
   int iyp = (iy + 1) % nby;
   int izp = (iz + 1) % nbz;
 
-  bool periodic = simulation->problem()->boundary()->is_periodic();
+  Boundary * boundary = simulation->problem()->boundary();
+  
+  bool periodic = boundary->is_periodic();
 
   CProxy_Block block_array = thisProxy;
 
@@ -952,8 +961,9 @@ void Block::compute(int axis_set)
   sprintf (buffer,"%03d-A",cycle_);
   field_block()->print(field_descr,buffer,lower_,upper_);
 
-  for (int i=0; simulation->method(i) != NULL; i++) {
-    simulation->method(i) -> compute_block (field_descr,this,time_,dt_);
+  int index_method = 0;
+  for (Method * method = simulation->problem()->method(index_method==)) {
+    method -> compute_block (field_descr,this,time_,dt_);
   }
 
   sprintf (buffer,"%03d-B",cycle_);

@@ -146,29 +146,29 @@ public: // interface
   Monitor * monitor() const throw()
   { return monitor_; }
 
-  /// Return the stopping object, if any
-  Stopping *  stopping() const throw()
-  { return stopping_; }
+  // /// Return the stopping object, if any
+  // Stopping *  stopping() const throw()
+  // { return stopping_; }
   
-  /// Return the time-stepping object, if any
-  Timestep * timestep() const throw()
-  { return timestep_; }
+  // /// Return the time-stepping object, if any
+  // Timestep * timestep() const throw()
+  // { return timestep_; }
 
-  /// Return the initialization object, if any
-  Initial *  initial() const throw()
-  { return initial_; }
+  // /// Return the initialization object, if any
+  // Initial *  initial() const throw()
+  // { return initial_; }
 
   // /// Return the boundary object, if any
   // Boundary * boundary() const throw()
   // { return boundary_; }
 
   /// Return the ith output object
-  Output * output(size_t i) const throw()
-  { return (0 <= i && i < output_list_.size()) ? output_list_[i] : NULL; }
+  // Output * output(size_t i) const throw()
+  // { return (0 <= i && i < output_list_.size()) ? output_list_[i] : NULL; }
 
   /// Return the ith method object
-  Method * method(size_t i) const throw()
-  { return (0 <= i && i < method_list_.size()) ? method_list_[i] : NULL; }
+  // Method * method(size_t i) const throw()
+  // { return (0 <= i && i < method_list_.size()) ? method_list_[i] : NULL; }
 
   /// Return the current cycle number
   int cycle() const throw() 
@@ -213,7 +213,7 @@ public: // virtual functions
   virtual void write() const throw();
 
   /// Return a Hierarchy factory object
-  virtual const Factory & factory () const throw();
+  virtual const Factory * factory () const throw();
 
 protected: // functions
 
@@ -230,23 +230,23 @@ protected: // functions
   void initialize_data_descr_ () throw();
 
 
-  /// Initialize the stopping object
-  void initialize_stopping_ () throw();
+  // /// Initialize the stopping object
+  // void initialize_stopping_ () throw();
 
-  /// Initialize the timestep object
-  void initialize_timestep_() throw();
+  // /// Initialize the timestep object
+  // void initialize_timestep_() throw();
 
-  /// Initialize the initial conditions object
-  void initialize_initial_ () throw();
+  // /// Initialize the initial conditions object
+  // void initialize_initial_ () throw();
 
-  // /// Initialize the boundary conditions object
-  // void initialize_boundary_() throw();
+  // // /// Initialize the boundary conditions object
+  // // void initialize_boundary_() throw();
 
-  /// Initialize the output objects
-  void initialize_output_  () throw();
+  // /// Initialize the output objects
+  // void initialize_output_  () throw();
 
-  /// Initialize the method objects
-  void initialize_method_  () throw();
+  // /// Initialize the method objects
+  // void initialize_method_  () throw();
 
   /// Initialize parallelism-related parameters
   void initialize_parallel_  () throw();
@@ -255,29 +255,29 @@ protected: // functions
 
 protected: // abstract virtual functions
 
-  /// Create named stopping object
-  virtual Stopping * 
-  create_stopping_ (std::string name) throw ();
+  // /// Create named stopping object
+  // virtual Stopping * 
+  // create_stopping_ (std::string name) throw ();
 
-  /// Create named timestep object
-  virtual Timestep * 
-  create_timestep_ (std::string name) throw ();
+  // /// Create named timestep object
+  // virtual Timestep * 
+  // create_timestep_ (std::string name) throw ();
 
-  /// Create named initialization object
-  virtual Initial * 
-  create_initial_ (std::string name) throw ();
+  // /// Create named initialization object
+  // virtual Initial * 
+  // create_initial_ (std::string name) throw ();
 
   // /// Create named boundary object
   // virtual Boundary * 
   // create_boundary_ (std::string name) throw ();
 
-  /// Create named output object
-  virtual Output * 
-  create_output_ (std::string name) throw ();
+  // /// Create named output object
+  // virtual Output * 
+  // create_output_ (std::string name) throw ();
 
-  /// Create named method object
-  virtual Method * 
-  create_method_ (std::string name) throw ();
+  // /// Create named method object
+  // virtual Method * 
+  // create_method_ (std::string name) throw ();
 
 protected: // attributes
 
@@ -331,14 +331,14 @@ protected: // attributes
   /// Field descriptor
   FieldDescr * field_descr_;
 
-  /// Stopping criteria
-  Stopping * stopping_;
+  // /// Stopping criteria
+  // Stopping * stopping_;
 
-  /// Time-step computation
-  Timestep * timestep_;
+  // /// Time-step computation
+  // Timestep * timestep_;
 
-  /// Initial conditions object
-  Initial * initial_;
+  // /// Initial conditions object
+  // Initial * initial_;
 
   // /// Boundary conditions object
   // Boundary * boundary_;
@@ -353,11 +353,11 @@ protected: // attributes
 
 #endif
 
-  /// Output objects
-  std::vector<Output *> output_list_;
+  // /// Output objects
+  // std::vector<Output *> output_list_;
 
-  /// List of method objects
-  std::vector<Method *> method_list_;
+  // /// List of method objects
+  // std::vector<Method *> method_list_;
 
 };
 

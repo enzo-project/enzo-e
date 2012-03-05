@@ -59,7 +59,7 @@ void EnzoSimulationMpi::run() throw()
 
     while ((block = ++it_block)) {
 
-      initial_->enforce(hierarchy_,field_descr_,block);
+      problem()->initial()->enforce(hierarchy_,field_descr_,block);
 
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
@@ -113,7 +113,7 @@ void EnzoSimulationMpi::run() throw()
       int & cycle_block = enzo_block->CycleNumber;
       double time_block =  enzo_block->Time();
 
-      int stop_block = stopping_->complete(cycle_block,time_block);
+      int stop_block = problem()->stopping()->complete(cycle_block,time_block);
 
       stop_patch = stop_patch && stop_block;
 
@@ -153,19 +153,20 @@ void EnzoSimulationMpi::run() throw()
 	block->set_cycle(cycle_);
 	block->set_time (time_);
 
-	double dt_block = timestep_->compute(field_descr_,block);
+	double dt_block = problem()->timestep()->compute(field_descr_,block);
 
 	// Reduce timestep to coincide with scheduled output if needed
 
 	double time_block = static_cast <EnzoBlock*> (block)->Time();
 
-	for (size_t i=0; i<output_list_.size(); i++) {
-	  dt_block = output_list_[i]->update_timestep(time_block,dt_block);
+	int index_output=0;
+	while (Output * output = problem()->output(index_output++)) {
+	  dt_block = output->update_timestep(time_block,dt_block);
 	}
 
 	// Reduce timestep to coincide with end of simulation if needed
 
-	dt_block = MIN (dt_block, (stopping_->stop_time() - time_block));
+	dt_block = MIN (dt_block, (problem()->stopping()->stop_time() - time_block));
 
 	// Update patch-level timestep
 
@@ -247,23 +248,22 @@ void EnzoSimulationMpi::run() throw()
 	dt_block = dt_hierarchy;
 
 	// Loop through methods
-
-	for (size_t i = 0; i < method_list_.size(); i++) {
-
-	  Method * method = method_list_[i];
+	
+	int index_method = 0;
+	while (Method * method = problem()->method(index_method++)) {
 
 	  double lower[3];
 	  double upper[3];
 	  block->lower(lower+0,lower+1,lower+2);
 	  block->upper(upper+0,upper+1,upper+2);
-  char buffer[10];
-  sprintf (buffer,"%03d-A",cycle_);
-  block->field_block()->print(field_descr_,buffer,lower,upper);
+	  char buffer[10];
+	  sprintf (buffer,"%03d-A",cycle_);
+	  block->field_block()->print(field_descr_,buffer,lower,upper);
 
 	  method -> compute_block (field_descr_,block,time_block,dt_block);
 
-  sprintf (buffer,"%03d-B",cycle_);
-  block->field_block()->print(field_descr_,buffer,lower,upper);
+	  sprintf (buffer,"%03d-B",cycle_);
+	  block->field_block()->print(field_descr_,buffer,lower,upper);
 
 	}
 
@@ -275,7 +275,7 @@ void EnzoSimulationMpi::run() throw()
 
 	// Global cycle and time reduction
 	
-	int stop_block = stopping_->complete(cycle_block,time_block);
+	int stop_block = problem()->stopping()->complete(cycle_block,time_block);
 	
 	// Update stopping criteria for patch
 

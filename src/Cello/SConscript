@@ -77,7 +77,7 @@ libs_test = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
 if (type=='charm'):
-   libs_all = ['simulation','method','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','problem','test','cello','external','png','hdf5'] + libs_papi
+   libs_all = ['simulation','problem','method','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
    libs_field  = libs_all
    libs_io     = libs_all
    libs_mesh   = libs_all

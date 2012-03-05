@@ -17,7 +17,7 @@ class InitialDefault : public Initial {
 public: // interface
 
   /// Constructor
-  InitialDefault(Parameters * parameters) throw();
+  InitialDefault(Parameters * parameters, int cycle, double time) throw();
 
   /// Destructor
   virtual ~InitialDefault() throw()

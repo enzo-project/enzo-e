@@ -11,8 +11,10 @@
 
 //----------------------------------------------------------------------
 
-InitialDefault::InitialDefault(Parameters * parameters) throw ()
-  : Initial (),
+InitialDefault::InitialDefault
+(Parameters * parameters,
+ int cycle, double time) throw ()
+  : Initial (cycle, time),
     parameters_(parameters)
 {
 }

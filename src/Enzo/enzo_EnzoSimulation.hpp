@@ -62,27 +62,27 @@ public: // functions
   virtual void write() const throw();
 
   /// Return an Enzo mesh factory object
-  const Factory & factory() const throw();
+  const Factory * factory() const throw();
 
 protected: // virtual functions
 
-  /// Create named stopping object
-  virtual Stopping * create_stopping_ (std::string name) throw ();
+  // /// Create named stopping object
+  // virtual Stopping * create_stopping_ (std::string name) throw ();
 
-  /// Create named timestep object
-  virtual Timestep * create_timestep_ (std::string name) throw ();
+  // /// Create named timestep object
+  // virtual Timestep * create_timestep_ (std::string name) throw ();
 
-  /// Create named initial conditions object
-  virtual Initial * create_initial_ (std::string name) throw ();
+  // /// Create named initial conditions object
+  // virtual Initial * create_initial_ (std::string name) throw ();
 
-  /// Create named boundary conditions object
-  //  virtual Boundary * create_boundary_ (std::string name) throw ();
+  // /// Create named boundary conditions object
+  // //  virtual Boundary * create_boundary_ (std::string name) throw ();
 
-  /// Create named method object
-  virtual Method * create_method_ (std::string name) throw ();
+  // /// Create named method object
+  // virtual Method * create_method_ (std::string name) throw ();
 
-  /// Create output object for the given filename
-  virtual Output * create_output_ (std::string name) throw ();
+  // /// Create output object for the given filename
+  // virtual Output * create_output_ (std::string name) throw ();
 
 };
 

@@ -46,23 +46,25 @@ void Simulation::output_next() throw()
 
   // find next output
 
-  while (output(index_output_) != NULL && 
-	 ! output(index_output_)->is_scheduled(cycle_, time_)) {
+  Output * output = Simulation::problem()->output(index_output_);
+
+  while (output != NULL && ! output->is_scheduled(cycle_, time_)) {
     ++index_output_;
+    output = Simulation::problem()->output(index_output_);
   }
 
   // output if any scheduled, else proceed with refresh
 
-  if (output(index_output_) != NULL) {
+  if (output != NULL) {
 
     // Prepare for IO
-    output(index_output_)->init();
+    output->init();
 
     // Open files
-    output(index_output_)->open();
+    output->open();
 
     // Write hierarchy
-    output(index_output_)->write_hierarchy(field_descr, hierarchy_);
+    output->write_hierarchy(field_descr, hierarchy_);
 
 
   } else {
@@ -83,7 +85,7 @@ void Block::p_write (int index_output)
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
-  simulation->output(index_output)->write_block(field_descr,this,0,0,0);
+  simulation->problem()->output(index_output)->write_block(field_descr,this,0,0,0);
 
   // Synchronize via main chare before writing
   int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
@@ -108,7 +110,7 @@ void BlockReduce::p_output_reduce(int count)
 
 void Simulation::p_output_reduce() throw()
 {
-  Output * output = Simulation::output(index_output_);
+  Output * output = Simulation::problem()->output(index_output_);
   int ip       = CkMyPe();
   int ip_writer = output->process_writer();
 
@@ -146,7 +148,7 @@ void Simulation::p_output_reduce() throw()
 
 void Simulation::p_output_write (int n, char * buffer) throw()
 {
-  Output * output = Simulation::output(index_output_);
+  Output * output = Simulation::problem()->output(index_output_);
   int ip       = CkMyPe();
   int ip_writer = output->process_writer();
 
