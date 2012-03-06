@@ -472,7 +472,7 @@ void Simulation::refresh() throw()
 void Simulation::scheduled_output()
 
 {
-  size_t index_output;
+  size_t index_output = 0;
   while (Output * output = problem()->output(index_output++)) {
 
     if (output->is_scheduled(cycle_,time_)) {
