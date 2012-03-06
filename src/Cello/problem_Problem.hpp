@@ -55,11 +55,11 @@ public: // interface
 
   /// Return the ith method object
   Method * method(size_t i) const throw() 
-  { return (0 <= i && i < method_list_.size()) ? method_list_[i] : NULL; }
+  { return (i < method_list_.size()) ? method_list_[i] : NULL; }
 
   /// Return the ith output object
   Output * output(size_t i) const throw()
-  { return (0 <= i && i < output_list_.size()) ? output_list_[i] : NULL; }
+  { return (i < output_list_.size()) ? output_list_[i] : NULL; }
 
   /// Return the stopping object
   Stopping *  stopping() const throw() { return stopping_; }
