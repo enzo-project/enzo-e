@@ -962,7 +962,7 @@ void Block::compute(int axis_set)
   field_block()->print(field_descr,buffer,lower_,upper_);
 
   int index_method = 0;
-  for (Method * method = simulation->problem()->method(index_method==)) {
+  for (Method * method = simulation->problem()->method(index_method++)) {
     method -> compute_block (field_descr,this,time_,dt_);
   }
 
