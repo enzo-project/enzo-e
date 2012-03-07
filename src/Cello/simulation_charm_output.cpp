@@ -85,10 +85,13 @@ void Block::p_write (int index_output)
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
-  simulation->problem()->output(index_output)->write_block(field_descr,this,0,0,0);
+  Output * output = simulation->problem()->output(index_output);
+
+  output->write_block(field_descr,this,0,0,0);
 
   // Synchronize via main chare before writing
-  int num_blocks = simulation->hierarchy()->patch(0)->num_blocks();
+  Hierarchy * hierarchy = simulation->hierarchy();
+  int num_blocks = hierarchy->patch(0)->num_blocks();
   simulation->proxy_block_reduce().p_output_reduce (num_blocks);
 }
 
@@ -149,8 +152,6 @@ void Simulation::p_output_reduce() throw()
 void Simulation::p_output_write (int n, char * buffer) throw()
 {
   Output * output = Simulation::problem()->output(index_output_);
-  int ip       = CkMyPe();
-  int ip_writer = output->process_writer();
 
   if (n != 0) {
     output->update_remote(n, buffer);
@@ -164,13 +165,9 @@ void Simulation::p_output_write (int n, char * buffer) throw()
 
     output->counter_reset();
 
-    // Close up file
     output->close();
 
-    // Clean up and prepare for next output
     output->finalize();
-
-
 
     output_next();
   }

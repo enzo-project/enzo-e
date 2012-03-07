@@ -187,6 +187,7 @@ void EnzoSimulationMpi::run() throw()
     ASSERT("EnzoSimulation::run", "dt == 0", dt_hierarchy != 0.0);
 
     monitor_output();
+    performance_output();
 
     stop_hierarchy = true;
 
@@ -305,9 +306,6 @@ void EnzoSimulationMpi::run() throw()
   //======================================================================
 
   monitor_output();
-
-  performance()->stop();
-
   performance_output();
 
 }

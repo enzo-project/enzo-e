@@ -50,6 +50,7 @@ void Papi::start() throw()
 void Papi::stop() throw()
 {
 #ifdef CONFIG_USE_PAPI
+
   if (! is_started_) {
     WARNING("Papi::stop",
 	    "Counters already stopped");
@@ -74,13 +75,7 @@ void Papi::stop() throw()
 float Papi::time_real() const throw()
 {
 #ifdef CONFIG_USE_PAPI
-  if (is_started_) {
-    WARNING("Papi::time_real",
-	    "Counters must be stopped");
-    return 0.0;
-  } else {
-    return time_real_;
-  }
+  return time_real_;
 #else
   return 0.0;
 #endif
@@ -91,13 +86,7 @@ float Papi::time_real() const throw()
 float Papi::time_proc() const throw()
 {
 #ifdef CONFIG_USE_PAPI
-  if (is_started_) {
-    WARNING("Papi::time_proc",
-	    "Counters must be stopped");
-    return 0.0;
-  } else {
-    return time_proc_;
-  }
+  return time_proc_;
 #else
   return 0.0;
 #endif
@@ -108,13 +97,7 @@ float Papi::time_proc() const throw()
 long long Papi::flop_count() const throw()
 {
 #ifdef CONFIG_USE_PAPI
-  if (is_started_) {
-    WARNING("Papi::flop_count",
-	    "Counters must be stopped");
-    return 0;
-  } else {
-    return flop_count_;
-  }
+  return flop_count_;
 #else
   return 0;
 #endif
@@ -125,13 +108,7 @@ long long Papi::flop_count() const throw()
 float Papi::flop_rate() const throw()
 {
 #ifdef CONFIG_USE_PAPI
-  if (is_started_) {
-    WARNING("Papi::flop_rate",
-	    "Counters must be stopped");
-    return 0.0;
-  } else {
-    return flop_rate_;
-  }
+  return flop_rate_;
 #else
   return 0.0;
 #endif

@@ -23,12 +23,6 @@ public: // interface
   /// Destructor
   ~EnzoProblem() throw();
 
-  /// Copy constructor
-  EnzoProblem(const EnzoProblem & EnzoProblem) throw();
-
-  /// Assignment operator
-  EnzoProblem & operator= (const EnzoProblem & EnzoProblem) throw();
-
 private: // functions
 
   /// Create named boundary conditions object
@@ -52,9 +46,6 @@ private: // functions
 
   /// Create named timestep object
   virtual Timestep * create_timestep_ (std::string name) throw ();
-
-private: // attributes
-
 
 };
 

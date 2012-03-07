@@ -12,33 +12,14 @@
 //----------------------------------------------------------------------
 
 EnzoProblem::EnzoProblem() throw ()
+  : Problem()
 {
-  INCOMPLETE("EnzoProblem::EnzoProblem");
 }
 
 //----------------------------------------------------------------------
 
 EnzoProblem::~EnzoProblem() throw ()
 {
-  INCOMPLETE("EnzoProblem::~EnzoProblem");
-}
-
-//----------------------------------------------------------------------
-
-EnzoProblem::EnzoProblem(const EnzoProblem & EnzoProblem) throw ()
-/// @param     EnzoProblem  Object being copied
-{
-  INCOMPLETE("EnzoProblem::EnzoProblem(EnzoProblem)");
-}
-
-//----------------------------------------------------------------------
-
-EnzoProblem & EnzoProblem::operator= (const EnzoProblem & EnzoProblem) throw ()
-/// @param     EnzoProblem  Source object of the assignment
-/// @return    The target assigned object
-{
-  INCOMPLETE("EnzoProblem::operator=");
-  return *this;
 }
 
 //======================================================================

@@ -45,6 +45,10 @@ public: // interface
   /// Stop counters
   void stop() throw();
 
+  /// Update counters
+  void update() throw()
+  {  stop(); start(); }
+
   /// Real time between start() and stop()
   float time_real() const throw();
 

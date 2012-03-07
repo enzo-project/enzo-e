@@ -28,6 +28,8 @@ Simulation::Simulation
     parameter_file_(parameter_file),
 #ifdef CONFIG_USE_CHARM
     group_process_(GroupProcess::create()),
+    proxy_block_reduce_(proxy_block_reduce),
+    index_output_(0),
 #else
     group_process_(group_process),
 #endif
@@ -39,26 +41,18 @@ Simulation::Simulation
     performance_(0),
     monitor_(0),
     hierarchy_(0),
-#ifdef CONFIG_USE_CHARM
-    proxy_block_reduce_(proxy_block_reduce),
-    index_output_(0),
-#endif
     field_descr_(0)
-    // stopping_(0),
-    // timestep_(0),
-    // initial_(0),
-    // output_list_(),
-    // method_list_()
 {
 
   performance_ = new Performance;
 
-#ifdef CONFIG_USE_CHARM
-  monitor_ = new Monitor;
-  monitor_->set_active(CkMyPe() == 0);
-#else
+// #ifdef CONFIG_USE_CHARM
+//   monitor_ = new Monitor;
+//   monitor_->set_active(CkMyPe() == 0);
+// #else
   monitor_ = Monitor::instance();
-#endif
+  monitor_->set_active(group_process_->is_root());
+// #endif
 
   parameters_ = new Parameters(parameter_file,monitor_);
 }
@@ -432,6 +426,7 @@ void Simulation::refresh() throw()
   //--------------------------------------------------
 
   monitor_output();
+  performance_output();
 
   //--------------------------------------------------
   // Stopping
@@ -440,6 +435,8 @@ void Simulation::refresh() throw()
   if (stop_) {
 
     performance_->stop();
+
+    monitor_output();
     performance_output();
 
     proxy_main.p_exit(CkNumPes());
@@ -581,6 +578,8 @@ void Simulation::performance_output() const
 #ifdef CONFIG_USE_PAPI
 
   Papi * papi = performance_->papi();
+
+  papi->update();
 
   double time_real   = papi->time_real();
   double time_proc   = papi->time_proc();

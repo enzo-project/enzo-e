@@ -28,7 +28,7 @@ EnzoBlock::EnzoBlock
     dt(0),
     SubgridFluxes(0)
 {
-  TRACE1 ("sizeof EnzoBlock = %d",sizeof(EnzoBlock));
+
   int i,j;
 
   for (i=0; i<MAX_DIMENSION; i++) {
