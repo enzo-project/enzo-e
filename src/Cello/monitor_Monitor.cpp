@@ -67,56 +67,61 @@ void Monitor::header () const
 	 t->tm_min,
 	 t->tm_sec);
 
-  char c_single = ' ';
-  char c_double = ' ';
-  char c_quad   = ' ';
-  char c_charm  = ' ';
-  char c_mpi    = ' ';
-  char c_papi   = ' ';
+  // Print all recognized configuration settings
 
-#ifdef CONFIG_PRECISION_SINGLE
-  c_single = '*';
-#endif
-#ifdef CONFIG_PRECISION_DOUBLE
-  c_double = '*';
-#endif
-#ifdef CONFIG_PRECISION_QUAD
-  c_quad = '*';
+  // Parallel type defines
+
+#ifdef CONFIG_USE_MPI
+  print ("Define","CONFIG_USE_MPI");
 #endif
 #ifdef CONFIG_USE_CHARM
-  c_charm = '*';
+  print ("Define","CONFIG_USE_CHARM");
 #endif
-#ifdef CONFIG_USE_MPI
-  c_mpi = '*';
+
+  // Precision defines
+
+#ifdef CONFIG_PRECISION_SINGLE
+  print ("Define","CONFIG_PRECISION_SINGLE");
+#endif
+#ifdef CONFIG_PRECISION_DOUBLE
+  print ("Define","CONFIG_PRECISION_DOUBLE");
+#endif
+
+  // Performance defines
+
+#ifdef CONFIG_CHARM_ATSYNC
+  print ("Define","CONFIG_CHARM_ATSYNC");
+#endif
+#ifdef CONFIG_USE_MEMORY
+  print ("Define","CONFIG_USE_MEMORY");
+#endif
+#ifdef CONFIG_USE_PROJECTIONS
+  print ("Define","CONFIG_USE_PROJECTIONS");
 #endif
 #ifdef CONFIG_USE_PAPI
-  c_papi = '*';
+  print ("Define","CONFIG_USE_PAPI");
 #endif
 
-  char s_single[80];
-  char s_double[80];
-  char s_quad  [80];
-  char s_charm [80];
-  char s_mpi   [80];
-  char s_papi  [80];
+  // Debugging defines
 
-  sprintf (s_single,"(%c) CONFIG_PRECISION_SINGLE",c_single);
-  sprintf (s_double,"(%c) CONFIG_PRECISION_DOUBLE",c_double);
-  sprintf (s_quad,  "(%c) CONFIG_PRECISION_QUAD",  c_quad);
-  sprintf (s_charm, "(%c) CONFIG_USE_CHARM",       c_charm);
-  sprintf (s_mpi,   "(%c) CONFIG_USE_MPI",         c_mpi);
-  sprintf (s_papi,  "[%c] CONFIG_USE_PAPI",        c_papi);
+#ifdef CELLO_TRACE
+  print ("Define","CELLO_TRACE");
+#endif
+#ifdef CELLO_DEBUG
+  print ("Define","CELLO_DEBUG");
+#endif
+#ifdef CELLO_DEBUG_VERBOSE
+  print ("Define","CELLO_DEBUG_VERBOSE");
+#endif
 
-  print ("","==============================================");
-  print ("",s_single);
-  print ("",s_double);
-  print ("",s_quad);
-  print ("","");
-  print ("",s_charm);
-  print ("",s_mpi);
-  print ("","");
-  print ("",s_papi);
-  print ("","==============================================");
+  // Library defines
+
+#ifdef H5_USE_16_API
+  print ("Define","H5_USE_16_API");
+#endif
+#ifdef NO_FREETYPE
+  print ("Define","NO_FREETYPE");
+#endif
 
 }
 
@@ -158,7 +163,7 @@ void Monitor::write
     char buffer_component[20];
 
     if (strlen(component)>0) {
-      snprintf (buffer_component,20," %-10s ",component);
+      snprintf (buffer_component,20," %-11s ",component);
     } else {
       buffer_component[0] = 0;
     }

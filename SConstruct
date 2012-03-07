@@ -98,31 +98,36 @@ print
 # CONFIGURATION DEFINES
 #----------------------------------------------------------------------
 
-# Parallel type defines
 define = {}
+
+# Parallel type defines
 
 define["serial"] =        []
 define["mpi"]    =        ['CONFIG_USE_MPI']
 define["charm"]  =        ['CONFIG_USE_CHARM']
 
 # Precision defines
+
 define["single"] =        ['CONFIG_PRECISION_SINGLE']
 define["double"] =        ['CONFIG_PRECISION_DOUBLE']
 
-# Library defines
-define_hdf5  =            ['H5_USE_16_API']
-define_png   =            ['NO_FREETYPE']
+# Performance defines
+
+define_atsync =           ['CONFIG_CHARM_ATSYNC']
+define_memory =           ['CONFIG_USE_MEMORY']
+define_projections =      ['CONFIG_USE_PROJECTIONS']
 define_papi  =            ['CONFIG_USE_PAPI']
 
 # Debugging defines
+
 define_trace =            ['CELLO_TRACE']
 define_debug =            ['CELLO_DEBUG']
 define_debug_verbose =    ['CELLO_DEBUG_VERBOSE']
 
-# Performance defines
-define_atsync =           ['CONFIG_CHARM_ATSYNC']
-define_memory =           ['CONFIG_USE_MEMORY']
-define_projections =      ['CONFIG_USE_PROJECTIONS']
+# Library defines
+
+define_hdf5  =            ['H5_USE_16_API']
+define_png   =            ['NO_FREETYPE']
 
 #----------------------------------------------------------------------
 # ASSEMBLE DEFINES

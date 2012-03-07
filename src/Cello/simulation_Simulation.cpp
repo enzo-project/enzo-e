@@ -426,7 +426,6 @@ void Simulation::refresh() throw()
   //--------------------------------------------------
 
   monitor_output();
-  performance_output();
 
   //--------------------------------------------------
   // Stopping
@@ -437,7 +436,6 @@ void Simulation::refresh() throw()
     performance_->stop();
 
     monitor_output();
-    performance_output();
 
     proxy_main.p_exit(CkNumPes());
 
@@ -560,21 +558,26 @@ void Simulation::update_cycle(int cycle, double time, double dt, double stop)
 
 void Simulation::monitor_output() const 
 {
-  monitor_-> print("Simulation", "cycle %04d time %15.12f dt %15.12g", 
-		   cycle_,time_,dt_);
+
+  monitor_->  print("", "-------------------------------------");
+
+  monitor_-> print("Simulation", "cycle %04d", cycle_);
+  monitor_-> print("Simulation", "time-sim %15.12f",time_);
+  monitor_-> print("Simulation", "dt %15.12g", dt_);
+
 #ifdef CONFIG_USE_MEMORY
+
   Memory * memory = Memory::instance();
-  monitor_->print("Memory","           bytes %lld bytes_high %lld",
-		  memory->bytes(), memory->bytes_high());
+
+  monitor_->print("Memory","bytes-curr %lld", memory->bytes());
+  monitor_->print("Memory","bytes-high %lld", memory->bytes_high());
+
   memory->reset_high();
+
 #endif
-}
 
-//----------------------------------------------------------------------
+  monitor_->print ("Performance","time-real %f",performance_->time());
 
-void Simulation::performance_output() const 
-{
-  monitor_->print ("Performance","real time = %f",performance_->time());
 #ifdef CONFIG_USE_PAPI
 
   Papi * papi = performance_->papi();
@@ -586,10 +589,10 @@ void Simulation::performance_output() const
   double gflop_count = papi->flop_count()*1e-9;
   double gflop_rate  = gflop_count / time_real;
 
-  monitor_->print ("Performance","PAPI Time real   = %f", time_real);
-  monitor_->print ("Performance","PAPI Time proc   = %f", time_proc);
-  monitor_->print ("Performance","PAPI GFlop count = %f", gflop_count);
-  monitor_->print ("Performance","PAPI GFlop rate  = %f", gflop_rate);
+  monitor_->print ("Performance","time-real-papi   %f", time_real);
+  monitor_->print ("Performance","time-proc-papi   %f", time_proc);
+  monitor_->print ("Performance","gflop-count-papi %f", gflop_count);
+  monitor_->print ("Performance","gflop-rate-papi  %f", gflop_rate);
 
 #endif
 }
