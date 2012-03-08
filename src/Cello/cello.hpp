@@ -97,7 +97,6 @@ enum precision_enum {
 #ifdef CONFIG_PRECISION_SINGLE
 
 #   define default_precision precision_single
-#   define scalar_type_enzo_float scalar_type_float
 
 #   define SCALAR_DEFINED
 
@@ -106,7 +105,6 @@ enum precision_enum {
 #ifdef CONFIG_PRECISION_DOUBLE
 
 #   define default_precision precision_double
-#   define scalar_type_enzo_float scalar_type_double
 
 #   ifdef SCALAR_DEFINED
 #      error Both CONFIG_PRECISION_SINGLE and CONFIG_PRECISION_DOUBLE defined

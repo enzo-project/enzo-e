@@ -8,24 +8,18 @@
 #ifndef PROBLEM_HPP
 #define PROBLEM_HPP
 
-//----------------------------------------------------------------------
-// System includes
-//----------------------------------------------------------------------
+#include "cello.hpp"
 
-#include <string>
-#include <vector>
+#include "_error.hpp"
+#include "_monitor.hpp"
+#include "_parallel.hpp"
+#include "_field.hpp"
+#include "_disk.hpp"
+#include "_io.hpp"
+#include "_parameters.hpp"
+#include "_mesh.hpp"
 
-//----------------------------------------------------------------------
-// Component dependencies
-//----------------------------------------------------------------------
+#include "_problem.hpp"
 
-#include "parameters.hpp"
-#include "method.hpp"
-
-//----------------------------------------------------------------------
-// Component class includes
-//----------------------------------------------------------------------
-
-#include "problem_Problem.hpp"
 
 #endif /* PROBLEM_HPP */

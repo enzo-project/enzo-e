@@ -9,42 +9,6 @@
 #define ENZO_HPP
 
 //----------------------------------------------------------------------
-
-#include "fortran.h" /* included so scons knowns to install fortran.h */
-#include "enzo_defines.hpp"
-#include "enzo_typedefs.hpp"
-#include "enzo_fortran.hpp"
-
-//----------------------------------------------------------------------
-
-#define OMEGA_TOLERANCE 1.0e-5
- 
-#ifdef CONFIG_PRECISION_SINGLE
-#   define ETA_TOLERANCE 1.0e-5
-#   define ENZO_HUGE_VAL HUGE_VALF
-#endif
-#ifdef CONFIG_PRECISION_DOUBLE
-#   define ETA_TOLERANCE 1.0e-10
-#   define ENZO_HUGE_VAL HUGE_VAL
-#endif
-#ifdef CONFIG_PRECISION_QUAD
-#   define ETA_TOLERANCE 1.0e-20
-#   define ENZO_HUGE_VAL HUGE_VALL
-#endif
-
-//----------------------------------------------------------------------
-
-struct fluxes
-{
-  long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
-  long_int LeftFluxEndGlobalIndex   [MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxEndGlobalIndex  [MAX_DIMENSION][MAX_DIMENSION];
-  enzo_float *LeftFluxes [MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-  enzo_float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-};
-
-//----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
 
@@ -53,41 +17,28 @@ struct fluxes
 #include <limits>
 
 //----------------------------------------------------------------------
-// Cello include file
+// Component dependencies
 //----------------------------------------------------------------------
 
 #include "cello.hpp"
 
-//----------------------------------------------------------------------
-// Component dependencies
-//----------------------------------------------------------------------
-
-#include "simulation.hpp"
+#include "_error.hpp"
+#include "_monitor.hpp"
+#include "_parallel.hpp"
+#include "_memory.hpp"
+#include "_parameters.hpp"
+#include "_mesh.hpp"
+#include "_field.hpp"
+#include "_disk.hpp"
+#include "_io.hpp"
+#include "_problem.hpp"
+#include "_simulation.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "enzo_EnzoNamespace.hpp"
-
-#include "enzo_EnzoFactory.hpp"
-
-#include "enzo_EnzoSimulation.hpp"
-#include "enzo_EnzoSimulationMpi.hpp"
-#include "enzo_EnzoSimulationCharm.hpp"
-
-#include "enzo_EnzoProblem.hpp"
-
-#include "enzo_EnzoBlock.hpp"
-
-#include "enzo_IoEnzoBlock.hpp"
-
-#include "enzo_EnzoTimestep.hpp"
-#include "enzo_EnzoTimestepPpml.hpp"
-#include "enzo_EnzoBoundary.hpp"
-#include "enzo_EnzoInitialImplosion2.hpp"
-#include "enzo_EnzoMethodPpm.hpp"
-#include "enzo_EnzoMethodPpml.hpp"
+#include "_enzo.hpp"
 
 #endif /* ENZO_HPP */
 

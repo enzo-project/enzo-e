@@ -8,33 +8,21 @@
 #ifndef SIMULATION_HPP
 #define SIMULATION_HPP
 
-//----------------------------------------------------------------------
-// System includes
-//----------------------------------------------------------------------
+#include "cello.hpp"
 
-#include <stdio.h>
-#include <vector>
+#include "_error.hpp"
+#include "_performance.hpp"
+#include "_memory.hpp"
+#include "_monitor.hpp"
+#include "_parallel.hpp"
+#include "_disk.hpp"
+#include "_mesh.hpp"
+#include "_field.hpp"
+#include "_parameters.hpp"
+#include "_io.hpp"
+#include "_problem.hpp"
 
-class Factory;
-
-//----------------------------------------------------------------------
-// Component dependencies
-//----------------------------------------------------------------------
-
-#include "performance.hpp"
-#include "monitor.hpp"
-#include "disk.hpp"
-#include "mesh.hpp"
-#include "method.hpp"
-#include "parameters.hpp"
-#include "io.hpp"
-#include "problem.hpp"
-
-//----------------------------------------------------------------------
-// Component class includes
-//----------------------------------------------------------------------
-
-#include "simulation_Simulation.hpp"
+#include "_simulation.hpp"
 
 #endif /* SIMULATION_HPP */
 

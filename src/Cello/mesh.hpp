@@ -8,58 +8,22 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
-//----------------------------------------------------------------------
-// System includes
-//----------------------------------------------------------------------
-
-#include <stdlib.h>
-#include <string>
-#include <vector>
-#include <memory>
-
-#ifdef CONFIG_USE_CHARM
-#  include "pup_stl.h"
-#endif
-
-//----------------------------------------------------------------------
-// Component dependencies
-//----------------------------------------------------------------------
-
 #include "cello.hpp"
 
-#include "parallel.hpp"
-#include "memory.hpp"
-#include "io.hpp"
+#include "_performance.hpp"
+#include "_monitor.hpp"
+#include "_parallel.hpp"
+#include "_memory.hpp"
+#include "_disk.hpp"
+#include "_io.hpp"
 
 #ifdef CONFIG_USE_CHARM
-#  include "simulation.hpp"
+#  include "_problem.hpp"
+#  include "_simulation.hpp"
 #endif
 
-// NOTE: field.hpp currently includes method.hpp: can get rid of
-// dependency, but only if field.hpp include is moved after Component
-// class includes
-#include "field.hpp" 
-
-//----------------------------------------------------------------------
-// Component class includes
-//----------------------------------------------------------------------
-
-// Tree and components
-#include "mesh_Node.hpp"
-#include "mesh_NodeTrace.hpp"
-#include "mesh_Tree.hpp"
-
-// Hierarchy and components
-#include "mesh_Block.hpp"
-#include "mesh_Patch.hpp"
-#include "mesh_Hierarchy.hpp"
-#include "mesh_Factory.hpp"
-
-// Iterators
-#include "mesh_It.hpp"
-#include "mesh_ItPatch.hpp"
-#include "mesh_ItBlock.hpp"
-#include "mesh_ItNode.hpp"
+#include "_field.hpp" 
+#include "_mesh.hpp"
 
 #endif /* MESH_HPP */
 

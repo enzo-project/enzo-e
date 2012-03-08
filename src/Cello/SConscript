@@ -64,20 +64,19 @@ libs_main        = ['main']
 libs_memory      = ['memory'] +   libs_error
 libs_mesh        = ['mesh','field','io','disk'] + libs_parallel + libs_external + ['cello','png','hdf5']
 libs_io          = ['io'] + libs_mesh
-libs_method      = ['method']
 libs_parameters  = ['parameters'] + libs_error +  ['cello']
 # 
 #components_performance = ['memory','error','monitor', 'test','cello']
 
 libs_simulation = ['simulation','problem']
-#,'method','mesh','field','memory',
+#,'mesh','field','memory',
 #                         'parallel','parameters','error','monitor',
 #                         'performance','cello']
 libs_test = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
 if (type=='charm'):
-   libs_all = ['simulation','problem','method','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
+   libs_all = ['simulation','problem','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
    libs_field  = libs_all
    libs_io     = libs_all
    libs_mesh   = libs_all
@@ -100,21 +99,20 @@ if (type=='charm'):
 #------------------------------
 
 includes_cello =       [Glob('cello*hpp')]
-includes_disk =        [Glob('disk*hpp')]
-includes_error =       [Glob('error*hpp')]
-includes_field =       [Glob('field*hpp')]
-includes_io =          [Glob('io*hpp')]
+includes_disk =        [Glob('*disk*hpp')]
+includes_error =       [Glob('*error*hpp')]
+includes_field =       [Glob('*field*hpp')]
+includes_io =          [Glob('*io*hpp')]
 includes_main =        ['main.hpp']
-includes_memory =      [Glob('memory*hpp')]
-includes_mesh =        [Glob('mesh*hpp')]
-includes_method =      [Glob('method*hpp')]
-includes_monitor =     [Glob('monitor*hpp')]
-includes_parallel =    [Glob('parallel*hpp'),'parallel.def']
-includes_parameters =  [Glob('parameters*hpp'),'parse.h']
-includes_performance = [Glob('performance*hpp')]
-includes_problem     = [Glob('problem*hpp')]
-includes_simulation =  [Glob('simulation*hpp')]
-includes_test =        [Glob('test_Unit*hpp'),'test.hpp']
+includes_memory =      [Glob('*memory*hpp')]
+includes_mesh =        [Glob('*mesh*hpp')]
+includes_monitor =     [Glob('*monitor*hpp')]
+includes_parallel =    [Glob('*parallel*hpp'),'parallel.def']
+includes_parameters =  [Glob('*parameters*hpp'),'parse.h']
+includes_performance = [Glob('*performance*hpp')]
+includes_problem     = [Glob('*problem*hpp')]
+includes_simulation =  [Glob('*simulation*hpp')]
+includes_test =        [Glob('*test*hpp')]
 
 sources_cello =       [Glob('cello*cpp')]
 sources_disk =        [Glob('disk*cpp')]
@@ -124,7 +122,6 @@ sources_io =          [Glob('io*cpp')]
 sources_main =        [Glob('main*cpp')]
 sources_memory =      [Glob('memory*cpp')]
 sources_mesh =        [Glob('mesh*cpp')]
-sources_method =      [Glob('method*cpp')]
 sources_monitor =     [Glob('monitor*cpp')]
 sources_parallel =    [Glob('parallel*cpp')]
 sources_parameters =  [Glob('parameters*cpp'),'parse.tab.c','lex.yy.c']
@@ -279,7 +276,6 @@ libraries_io     = env.Library ('io',     sources_io)
 libraries_main   = env.Library ('main',   sources_main)
 libraries_memory = env.Library ('memory', sources_memory)
 libraries_mesh   = env.Library ('mesh',   sources_mesh)
-libraries_method = env.Library ('method', sources_method)
 libraries_monitor = env.Library ('monitor', sources_monitor)
 libraries_problem = env.Library ('problem', sources_problem)
 libraries_parallel = env.Library ('parallel', sources_parallel)
@@ -347,11 +343,6 @@ env.Alias('install-lib',env.Install (lib_path,libraries_memory))
 env.Alias('install-bin',env.Install (bin_path,binaries_mesh))
 env.Alias('install-inc',env.Install (inc_path,includes_mesh))
 env.Alias('install-lib',env.Install (lib_path,libraries_mesh))
-
-# --------------------------------------------------
-
-env.Alias('install-inc',env.Install (inc_path,includes_method))
-env.Alias('install-lib',env.Install (lib_path,libraries_method))
 
 env.Alias('install-bin',env.Install (bin_path,binaries_monitor))
 env.Alias('install-inc',env.Install (inc_path,includes_monitor))

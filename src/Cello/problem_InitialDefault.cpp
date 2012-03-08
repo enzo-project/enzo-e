@@ -7,7 +7,7 @@
 
 #include "cello.hpp"
 
-#include "method.hpp"
+#include "problem.hpp"
 
 //----------------------------------------------------------------------
 

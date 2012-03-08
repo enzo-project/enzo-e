@@ -8,41 +8,12 @@
 #ifndef FIELD_HPP
 #define FIELD_HPP
 
-//----------------------------------------------------------------------
-// System includes
-//----------------------------------------------------------------------
+#include "cello.hpp"
 
-#include <map>
-#include <memory>
-#include <set>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include "_error.hpp"
+#include "_parallel.hpp"
 
-//----------------------------------------------------------------------
-// Component dependencies
-//----------------------------------------------------------------------
-
-// #include "mesh.hpp"
-#include "error.hpp"
-#include "parallel.hpp"
-
-// #include "disk.hpp"
-// #include "method.hpp"
-
-//----------------------------------------------------------------------
-// Component class includes
-//----------------------------------------------------------------------
-
-class FieldBlock;
-class FieldFace;
-
-#include "field_ItField.hpp"
-#include "field_ItFieldList.hpp"
-#include "field_ItFieldRange.hpp"
-#include "field_FieldDescr.hpp"
-#include "field_FieldBlock.hpp"
-#include "field_FieldFace.hpp"
+#include "_field.hpp"
 
 #endif /* FIELD_HPP */
 

@@ -20,6 +20,7 @@
 #define PROBLEM_PROBLEM_HPP
 
 class Boundary;
+class Factory;
 class Initial;
 class Method;
 class Output;

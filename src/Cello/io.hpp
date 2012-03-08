@@ -8,50 +8,16 @@
 #ifndef IO_HPP
 #define IO_HPP
 
-//----------------------------------------------------------------------
-// System includes
-//----------------------------------------------------------------------
-
-#include "pngwriter.h"
-
-//----------------------------------------------------------------------
-// Component dependencies
-//----------------------------------------------------------------------
-
 #include "cello.hpp"
 
-#include "error.hpp"
-#include "parallel.hpp"
-#include "disk.hpp"
+#include "_error.hpp"
+#include "_parallel.hpp"
+#include "_disk.hpp"
 
-#include "mesh.hpp"
-#include "field.hpp" 
+#include "_mesh.hpp"
+#include "_field.hpp" 
 
-//----------------------------------------------------------------------
-// Component class includes
-//----------------------------------------------------------------------
-
-#include "io_Io.hpp"
-#include "io_IoHierarchy.hpp"
-#include "io_IoPatch.hpp"
-#include "io_IoBlock.hpp"
-#include "io_IoFieldBlock.hpp"
-
-#include "io_ItReduce.hpp"
-#include "io_ItReduceAvg.hpp"
-#include "io_ItReduceSum.hpp"
-#include "io_ItReduceMin.hpp"
-#include "io_ItReduceMax.hpp"
-
-#include "io_Input.hpp"
-
-#include "io_Output.hpp"
-#include "io_OutputImage.hpp"
-#include "io_OutputData.hpp"
-#include "io_OutputRestart.hpp"
-
-#include "io_Schedule.hpp"
-
+#include "_io.hpp"
 
 #endif /* IO_HPP */
 

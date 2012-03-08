@@ -8,26 +8,10 @@
 #ifndef MONITOR_HPP
 #define MONITOR_HPP
 
-//----------------------------------------------------------------------
-// System includes
-//----------------------------------------------------------------------
+#include "_performance.hpp"
+#include "_parallel.hpp"
 
-#include <string>
-#include <cstdarg>
-#include <time.h>
-
-//----------------------------------------------------------------------
-// Component dependencies
-//----------------------------------------------------------------------
-
-#include "performance_Timer.hpp"
-#include "parallel.hpp"
-
-//----------------------------------------------------------------------
-// Component class includes
-//----------------------------------------------------------------------
-
-#include "monitor_Monitor.hpp"
+#include "_monitor.hpp"
 
 #endif /* MONITOR_HPP */
 

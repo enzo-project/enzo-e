@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_test.cpp
+/// @file     mesh_functions.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-01-12
-/// @brief    Functions for Mesh test programs
+/// @brief    Supplemental functions for Mesh test programs
 
 #include "mesh.hpp"
 

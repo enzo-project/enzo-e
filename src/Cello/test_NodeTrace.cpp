@@ -6,11 +6,10 @@
 /// @brief    Test program for the NodeTrace class
 
 #include "main.hpp"
-
 #include "test.hpp"
-#include "test_mesh.hpp"
 
 #include "mesh.hpp"
+#include "mesh_functions.hpp"
 
 PARALLEL_MAIN_BEGIN
 {

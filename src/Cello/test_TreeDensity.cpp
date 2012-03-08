@@ -7,9 +7,10 @@
 
 #include "main.hpp"
 #include "test.hpp"
-#include "test_mesh.hpp"
 
 #include "mesh.hpp"
+#include "mesh_functions.hpp"
+
 #include "disk.hpp"
 
 /* #define OUTPUT_DENSITY 0 */

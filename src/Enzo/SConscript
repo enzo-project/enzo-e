@@ -14,7 +14,7 @@ Import('lib_path')
 # DEPENDENCIES
 #------------------------------
 
-components = ['enzo','simulation', 'problem', 'method', 
+components = ['enzo','simulation', 'problem',
 	      'mesh', 'field',
 	      'io', 'disk','memory','parallel',
 	      'parameters', 
@@ -32,7 +32,7 @@ libraries  = ['png','$FORTRANLIBS']
 # SOURCE
 #------------------------------
 
-includes = [Glob('enzo*hpp'),'fortran.h']
+includes = [Glob('*enzo*hpp'),'fortran.h']
 
 sources  = [Glob('enzo_*cpp'), 
 	    'Grid_ComputeGammaField.cpp',

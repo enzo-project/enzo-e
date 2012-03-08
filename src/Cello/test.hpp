@@ -8,27 +8,13 @@
 #ifndef TEST_HPP
 #define TEST_HPP
 
-//----------------------------------------------------------------------
-// System includes
-//----------------------------------------------------------------------
-
-#include <string.h>
-
-//----------------------------------------------------------------------
-// Component dependencies
-//----------------------------------------------------------------------
-
 #include "cello.hpp"
 
-#include "parallel.hpp"
-#include "error.hpp"
-#include "monitor.hpp"
+#include "_parallel.hpp"
+#include "_error.hpp"
+#include "_monitor.hpp"
 
-//----------------------------------------------------------------------
-// Component class includes
-//----------------------------------------------------------------------
-
-#include "test_Unit.hpp"
+#include "_test.hpp"
 
 #endif /* TEST_HPP */
 

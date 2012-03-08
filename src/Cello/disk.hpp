@@ -8,26 +8,8 @@
 #ifndef DISK_HPP
 #define DISK_HPP
 
-//----------------------------------------------------------------------
-// System includes
-//----------------------------------------------------------------------
+#include "_error.hpp"
 
-#include <string>
-#include <hdf5.h>
-
-//----------------------------------------------------------------------
-// Component dependencies
-//----------------------------------------------------------------------
-
-// #include "parallel.def"
-#include "error.hpp"
-
-//----------------------------------------------------------------------
-// Component class includes
-//----------------------------------------------------------------------
-
-#include "disk_File.hpp"
-#include "disk_FileHdf5.hpp"
-#include "disk_FileIfrit.hpp"
+#include "_disk.hpp"
 
 #endif /* DISK_HPP */
