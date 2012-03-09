@@ -23,6 +23,10 @@ inline T MAX(const T &a, const T &b)
 inline int INDEX(int ix,int iy,int iz,int nx,int ny) 
 {  return ix+nx*(iy+ny*iz); }
 
+template <class T>
+inline void SWAP(T &a, T &b) 
+{  T t = a; a=b; b=t; }
+
 //----------------------------------------------------------------------
 // GLOBAL DEFINES
 //----------------------------------------------------------------------

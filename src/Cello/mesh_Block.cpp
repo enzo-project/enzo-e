@@ -231,6 +231,7 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 			   int fx, int fy, int fz,
 			   int index_field_set) throw()
 {
+  // TRACE3("%d %d %d",fx,fy,fz);
   int ibx,iby,ibz;
   index_patch(&ibx,&iby,&ibz);
   field_block_[index_field_set]
@@ -448,8 +449,6 @@ void Block::refresh (int axis_set)
   bool axm,axp,aym,ayp,azm,azp;
 
   determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp,axis_set);
-
-  //  update_boundary_(is_boundary,axm,axp,aym,ayp,azm,azp,axis_set);
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 

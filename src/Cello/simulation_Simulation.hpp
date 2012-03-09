@@ -112,9 +112,9 @@ public: // interface
   Problem *  problem() const throw()
   { return problem_; }
 
-  /// Return the dimensionality of the Simulation
-  int dimension() const throw()
-  { return dimension_; }
+  // /// Return the dimensionality of the Simulation
+  // int dimension() const throw()
+  // { return dimension_; }
 
   /// Return the Hierarchy
   Hierarchy * hierarchy() const throw()

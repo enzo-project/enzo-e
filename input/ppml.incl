@@ -23,6 +23,10 @@
    
    Field {
 
+#      refresh_faces   = true;
+#      refresh_edges   = true;
+#      refresh_corners = true;
+
       ghosts = 3;
 
       fields = [

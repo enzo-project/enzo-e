@@ -46,13 +46,9 @@ Simulation::Simulation
 
   performance_ = new Performance;
 
-// #ifdef CONFIG_USE_CHARM
-//   monitor_ = new Monitor;
-//   monitor_->set_active(CkMyPe() == 0);
-// #else
   monitor_ = Monitor::instance();
+  monitor_->set_process_rank(group_process_->rank());
   monitor_->set_active(group_process_->is_root());
-// #endif
 
   parameters_ = new Parameters(parameter_file,monitor_);
 }
@@ -77,6 +73,7 @@ void Simulation::initialize() throw()
   // Initialize simulation components
 
   initialize_data_descr_();
+
   initialize_hierarchy_();
 
   problem_->initialize_boundary(parameters_);
@@ -168,20 +165,26 @@ void Simulation::initialize_data_descr_() throw()
   // Set face dimensions to refresh
 
   //--------------------------------------------------
+  // parameter: Field : refresh_faces
   // parameter: Field : refresh_edges
   // parameter: Field : refresh_corners
   //--------------------------------------------------
 
-  field_descr_->set_refresh_face(2, dimension_ - 1);
+  // Refresh face ghost zones
+  if (parameters_->type("Field:refresh_faces") == parameter_logical) {
+    bool refresh_faces = 
+      parameters_->value_logical ("Field:refresh:faces",true);
+    field_descr_->set_refresh_face(2,refresh_faces);
+  }
 
-  // Refresh ghost edges explicitly
+  // Refresh edge ghost zones
   if (parameters_->type("Field:refresh_edges") == parameter_logical) {
     bool refresh_edges = 
       parameters_->value_logical ("Field:refresh:edges",false);
     field_descr_->set_refresh_face(1,refresh_edges);
   }
 
-  // Refresh ghost corners explicitly
+  // Refresh corner ghost zones
   if (parameters_->type("Field:refresh_corners") == parameter_logical) {
     bool refresh_corners = 
       parameters_->value_logical ("Field:refresh:corners",false);

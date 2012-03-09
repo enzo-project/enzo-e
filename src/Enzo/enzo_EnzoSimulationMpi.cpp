@@ -350,46 +350,39 @@ void EnzoSimulationMpi::refresh_ghost_
 
   bool periodic = problem()->boundary()->is_periodic();
 
-  if (dimension_ >= 1) {
-    if (ibx % 2 == 0) {
-      if (! is_boundary[axis_x][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,-1,0,0);
-      if (! is_boundary[axis_x][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,+1,0,0);
-    } else {
-      if (! is_boundary[axis_x][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,+1,0,0);
-      if (! is_boundary[axis_x][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,-1,0,0);
-    }
-  }
-  if (dimension_ >= 2) {
-    if (iby % 2 == 0) {
-      if (! is_boundary[axis_y][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,0,-1,0);
-      if (! is_boundary[axis_y][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,0,+1,0);
-    } else {
-      if (! is_boundary[axis_y][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,0,+1,0);
-      if (! is_boundary[axis_y][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,0,-1,0);
-    }
+  // FOLLOWING IS SIMILAR TO Block::p_refresh_face()
 
+  int nx,ny,nz;
+  block->field_block()->size (&nx,&ny,&nz);
+
+  // Determine axes that may be neighbors
+
+  bool axm = (nx > 1) && (periodic || ! is_boundary[axis_x][face_lower]);
+  bool axp = (nx > 1) && (periodic || ! is_boundary[axis_x][face_upper]); 
+  bool aym = (ny > 1) && (periodic || ! is_boundary[axis_y][face_lower]);
+  bool ayp = (ny > 1) && (periodic || ! is_boundary[axis_y][face_upper]);
+  bool azm = (nz > 1) && (periodic || ! is_boundary[axis_z][face_lower]);
+  bool azp = (nz > 1) && (periodic || ! is_boundary[axis_z][face_upper]);
+
+  int px = (ibx % 2 == 0) ? -1 : 1;
+  int py = (iby % 2 == 0) ? -1 : 1;
+  int pz = (ibz % 2 == 0) ? -1 : 1;
+
+  if (px == 1) SWAP(axm,axp);
+  if (py == 1) SWAP(aym,ayp);
+  if (pz == 1) SWAP(azm,azp);
+
+  if (field_descr_->refresh_face(2)) {
+    // TRACE3("p %d %d %d",px,py,pz);
+    // TRACE6("a %d %d  %d %d  %d %d",axm,axp,aym,ayp,azm,azp);
+    if (axm) block->refresh_ghosts(field_descr_,patch,+px,0,0);
+    if (axp) block->refresh_ghosts(field_descr_,patch,-px,0,0);
+    if (aym) block->refresh_ghosts(field_descr_,patch,0,+py,0);
+    if (ayp) block->refresh_ghosts(field_descr_,patch,0,-py,0);
+    if (azm) block->refresh_ghosts(field_descr_,patch,0,0,+pz);
+    if (azp) block->refresh_ghosts(field_descr_,patch,0,0,-pz);
   }
-  if (dimension_ >= 3) {
-    if (ibz % 2 == 0) {
-      if (! is_boundary[axis_z][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,0,0,-1);
-      if (! is_boundary[axis_z][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,0,0,+1);
-    } else {
-      if (! is_boundary[axis_z][face_upper] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,0,0,+1);
-      if (! is_boundary[axis_z][face_lower] || periodic) 
-	block->refresh_ghosts(field_descr_,patch,0,0,-1);
-    }
-  }
+
 }
 
 #endif /* ! CONFIG_USE_CHARM */
