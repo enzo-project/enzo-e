@@ -9,6 +9,6 @@ Stopping {
    cycle = 100000;
 }
 Initial {
-   code = "implosion_2d";
+   type = "implosion_2d";
 }
 

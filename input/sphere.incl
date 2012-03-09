@@ -36,6 +36,8 @@
 
    }
 
+   Timestep { type = "ppm"; }
+
    Enzo {
 
       ppm {

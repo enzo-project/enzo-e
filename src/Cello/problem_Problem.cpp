@@ -32,8 +32,8 @@ void Problem::initialize_boundary(Parameters * parameters) throw()
   // parameter: Boundary : type
   //--------------------------------------------------
 
-  std::string name = parameters->value_string("Boundary:type","");
-  boundary_ = create_boundary_(name);
+  std::string type = parameters->value_string("Boundary:type","");
+  boundary_ = create_boundary_(type);
 }
 
 //----------------------------------------------------------------------
@@ -41,10 +41,10 @@ void Problem::initialize_boundary(Parameters * parameters) throw()
 void Problem::initialize_initial(Parameters * parameters) throw()
 {
   //--------------------------------------------------
-  // parameter: Initial : code
+  // parameter: Initial : type
   //--------------------------------------------------
 
-  std::string name = parameters->value_string("Initial:code","default");
+  std::string type = parameters->value_string("Initial:type","default");
 
   //--------------------------------------------------
   // parameter: Initial : cycle
@@ -58,7 +58,7 @@ void Problem::initialize_initial(Parameters * parameters) throw()
 
   double init_time   = parameters->value_float   ("Initial:time",0.0);
 
-  initial_ = create_initial_(name,init_cycle, init_time);
+  initial_ = create_initial_(type,init_cycle, init_time);
 
   if (initial_ == 0) {
     initial_ = new InitialDefault(parameters,init_cycle,init_time);
@@ -85,9 +85,9 @@ void Problem::initialize_timestep(Parameters * parameters) throw()
   // parameter: Timestep : type
   //--------------------------------------------------
 
-  std::string name = parameters->value_string("Timestep:type","default");
+  std::string type = parameters->value_string("Timestep:type","default");
 
-  timestep_ = create_timestep_(name);
+  timestep_ = create_timestep_(type);
 }
 
 //----------------------------------------------------------------------

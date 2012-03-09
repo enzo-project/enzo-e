@@ -42,6 +42,10 @@ Method {
 
 }
 
+# Definie timestepping type
+
+Timestep { type = "ppm"; }
+
 # Initialize Enzo-P method parameters
 
 Enzo {

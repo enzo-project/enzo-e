@@ -28,23 +28,19 @@ Boundary * EnzoProblem::create_boundary_ ( std::string name ) throw ()
 /// @param name   Name of boundary condition to use
 {
 
-  boundary_type_enum boundary_type = boundary_type_undefined;
+  boundary_type_enum type = boundary_type_undefined;
 
-  if (       name == "reflecting") {
-    boundary_type = boundary_type_reflecting;
-  } else if (name == "outflow") {
-    boundary_type = boundary_type_outflow;
-  } else if (name == "inflow") {
-    boundary_type = boundary_type_inflow;
-  } else if (name == "periodic") {
-    boundary_type = boundary_type_periodic;
+  if (       name == "reflecting") { type = boundary_type_reflecting;
+  } else if (name == "outflow") {    type = boundary_type_outflow;
+  } else if (name == "inflow") {     type = boundary_type_inflow;
+  } else if (name == "periodic") {   type = boundary_type_periodic;
   } else {
     ERROR1("EnzoProblem::create_boundary_",
 	   "Unrecognized boundary type '%s'",
 	   name.c_str());
   }
 	     
-  return new EnzoBoundary (boundary_type);
+  return new EnzoBoundary (type);
 }
 
 //----------------------------------------------------------------------
@@ -66,12 +62,16 @@ Stopping * EnzoProblem::create_stopping_
 //----------------------------------------------------------------------
 
 Timestep * EnzoProblem::create_timestep_ ( std::string name ) throw ()
-/// @param name   Name of the timestep method to create (ignored)
+/// @param name   Name of the timestep method to create
 {
   if (name == "ppml") {
     return new EnzoTimestepPpml;
-  } else {
+  } else if (name == "ppm") {
     return new EnzoTimestep;
+  } else {
+    ERROR1("EnzoProblem::create_timestep_",
+	   "Unrecognized timestep type '%s'",
+	   name.c_str());
   }
 }
 

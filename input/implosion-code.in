@@ -5,7 +5,7 @@
 
    include "implosion.incl"
 
-   Initial { code = "implosion_2d" }
+   Initial { type = "implosion_2d" }
 
    Output { 
       cycle_step {
