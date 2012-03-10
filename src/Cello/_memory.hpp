@@ -12,6 +12,8 @@
 // System includes
 //----------------------------------------------------------------------
 
+#include <stdio.h>
+
 #include <stack>
 #include <memory>
 
