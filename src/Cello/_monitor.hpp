@@ -12,6 +12,7 @@
 // System includes
 //----------------------------------------------------------------------
 
+#include <stdio.h>
 #include <string>
 #include <cstdarg>
 #include <time.h>
