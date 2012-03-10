@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <string>
 
 //----------------------------------------------------------------------
 // Component class includes

@@ -479,7 +479,7 @@ void Simulation::scheduled_output()
 
       output->open();
 
-      output->write_hierarchy(field_descr_, hierarchy_);
+      output->write_simulation(this);
 
       //--------------------------------------------------
       int ip       = group_process_->rank();

@@ -64,7 +64,7 @@ void Simulation::output_next() throw()
     output->open();
 
     // Write hierarchy
-    output->write_hierarchy(field_descr, hierarchy_);
+    output->write_simulation(this);
 
 
   } else {
@@ -87,17 +87,13 @@ void Block::p_write (int index_output)
   FieldDescr * field_descr = simulation->field_descr();
   Output * output = simulation->problem()->output(index_output);
 
-  output->write_block(field_descr,this,0,0,0);
+  output->write_block(this,field_descr,0,0,0);
 
   // Synchronize via main chare before writing
   Hierarchy * hierarchy = simulation->hierarchy();
   int num_blocks = hierarchy->patch(0)->num_blocks();
   simulation->proxy_block_reduce().p_output_reduce (num_blocks);
 }
-
-//----------------------------------------------------------------------
-
-// Output::write_block()
 
 //----------------------------------------------------------------------
 

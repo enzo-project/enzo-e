@@ -151,32 +151,28 @@ double Output::update_timestep (double time, double dt) const
 //----------------------------------------------------------------------
 
 void Output::write_simulation
-(
- Factory    * factory,
- FieldDescr * field_descr,
- Hierarchy  * hierarchy,
- Simulation * simulation
- ) throw()
+( const Simulation * simulation ) throw()
 {
-  WARNING("Output::write_simulation()",
-	  "This function should not be called");
+  write_hierarchy (simulation->hierarchy(), simulation->field_descr());
 }
 
 //----------------------------------------------------------------------
 
 void Output::write_hierarchy
-( const FieldDescr * field_descr,
-  Hierarchy * hierarchy) throw()
+( 
+ const Hierarchy * hierarchy,
+ const FieldDescr * field_descr
+  ) throw()
 {
 
   ItPatch it_patch (hierarchy);
 
   // (*) write data patch_list_
 
-  while (Patch * patch = ++it_patch) {
+  while (const Patch * patch = ++it_patch) {
 
     // NO OFFSET: ASSUMES ROOT PATCH
-    write_patch (field_descr, patch,  0,0,0);
+    write_patch (patch, field_descr, 0,0,0);
 
   }
 }
@@ -185,8 +181,8 @@ void Output::write_hierarchy
 
 void Output::write_patch 
 (
+ const Patch * patch,
  const FieldDescr * field_descr,
- Patch * patch,
  int ixp0, int iyp0, int izp0
  ) throw()
 
@@ -203,10 +199,10 @@ void Output::write_patch
 #else
 
   ItBlock it_block (patch);
-  while (Block * block = ++it_block) {
+  while (const Block * block = ++it_block) {
 
     // NO OFFSET: ASSUMES ROOT PATCH
-    write_block (field_descr, block, 0,0,0);
+    write_block (block, field_descr, 0,0,0);
 
   }
 #endif
@@ -216,15 +212,16 @@ void Output::write_patch
 
 void Output::write_block
 (
+ const Block * block,
  const FieldDescr * field_descr,
- Block * block,
  int ixp0, int iyp0, int izp0
  ) throw()
 {
   // Write fields
 
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
-    write_field (field_descr, block->field_block(),  it_field_->value());
+    const FieldBlock * field_block = block->field_block();
+    write_field (field_block,  field_descr, it_field_->value());
   }
 }
 

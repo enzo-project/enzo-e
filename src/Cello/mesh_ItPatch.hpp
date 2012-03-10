@@ -17,7 +17,7 @@ class ItPatch : public It<Patch> {
 public: // interface
 
   /// Create an ItPatch object
-  ItPatch (Hierarchy * hierarchy) throw ();
+  ItPatch (const Hierarchy * hierarchy) throw ();
 
   /// Delete the ItPatch object
   virtual ~ItPatch () throw ();
@@ -31,7 +31,7 @@ public: // interface
 private: // attributes
 
   /// The Hierarchy being iterated over
-  Hierarchy * hierarchy_;
+  const Hierarchy * hierarchy_;
 
   /// Index of the current local Patch plus 1, or 0 if between iterations
   /// Always in the range 0 <= index1_ <= number of local patchs

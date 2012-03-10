@@ -23,8 +23,7 @@ public: // interface
   FileHdf5 (std::string path, std::string name) throw();
 
   /// Destructor
-  ~FileHdf5 () throw()
-  {}
+  ~FileHdf5 () throw();
 
   // Files
 
@@ -104,6 +103,15 @@ public: // interface
   ( const void * buffer, std::string name, enum scalar_type type,
     int nx=1, int ny=0, int nz=0) throw();
 
+
+
+  /// Set the compression level
+  void set_compress (int level) throw ();
+
+  /// Return the compression level
+  int compress () throw () {return compress_level_; }
+
+
 private: // functions
 
   /// Convert the scalar type to HDF5 datatype
@@ -137,7 +145,7 @@ private: // functions
 
   /// Return the space for the given attribute
   hid_t get_attr_space_(hid_t dataset_id, std::string name) throw ();
-  
+
 private: // attributes
 
   /// HDF5 file descriptor
@@ -158,11 +166,14 @@ private: // attributes
   hid_t attribute_id_;
 
 
-  /// HDF4 group descriptor
+  /// HDF5 group descriptor
   hid_t group_id_;
 
   /// Group name 
   std::string group_name_;
+
+  /// HDF5 group property list
+  hid_t group_prop_;
 
   /// Whether a group is open or closed
   bool is_group_open_;
@@ -179,8 +190,14 @@ private: // attributes
   /// Dataset size
   hsize_t data_size_[5];
 
+  /// HDF5 dataset property list
+  hid_t data_prop_;
+
   /// Whether a dataset is open or closed
   bool  is_data_open_;
+
+  /// Compression level
+  int compress_level_;
 
 };
 

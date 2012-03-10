@@ -10,8 +10,12 @@
 
 #include "cello.hpp"
 
-#include "_error.hpp"
 #include "_parallel.hpp"
+#include "_simulation.hpp"
+#include "_error.hpp"
+#include "_parameters.hpp"
+#include "_mesh.hpp"
+#include "_field.hpp"
 #include "_disk.hpp"
 
 #include "_mesh.hpp"

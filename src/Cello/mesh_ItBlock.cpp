@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-ItBlock::ItBlock ( Patch * patch ) throw ()
+ItBlock::ItBlock ( const Patch * patch ) throw ()
   : patch_(patch)
 {}
 

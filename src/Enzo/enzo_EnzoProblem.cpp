@@ -72,6 +72,7 @@ Timestep * EnzoProblem::create_timestep_ ( std::string name ) throw ()
     ERROR1("EnzoProblem::create_timestep_",
 	   "Unrecognized timestep type '%s'",
 	   name.c_str());
+    return NULL;
   }
 }
 

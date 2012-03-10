@@ -64,8 +64,8 @@ void OutputData::finalize () throw ()
 
 void OutputData::write_hierarchy 
 (
- const FieldDescr * field_descr,
- Hierarchy * hierarchy
+ const Hierarchy * hierarchy,
+ const FieldDescr * field_descr
  ) throw()
 {
 
@@ -88,7 +88,7 @@ void OutputData::write_hierarchy
   }
 
   // Call write_patch() on contained patches
-  Output::write_hierarchy (field_descr,hierarchy);
+  Output::write_hierarchy (hierarchy, field_descr);
 
 }
 
@@ -96,8 +96,8 @@ void OutputData::write_hierarchy
 
 void OutputData::write_patch 
 (
+ const Patch * patch,
  const FieldDescr * field_descr,
- Patch * patch,
  int ixp0, int iyp0, int izp0
  ) throw()
 {
@@ -128,7 +128,7 @@ void OutputData::write_patch
   }
 
   // Call write_block() on contained blocks
-  Output::write_patch(field_descr,patch,ixp0,iyp0,izp0);
+  Output::write_patch(patch,field_descr,ixp0,iyp0,izp0);
 
   // BUG: this is getting executed before remote blocks begin writing
   // need to add a dependency so that this gets called only after last
@@ -141,8 +141,10 @@ void OutputData::write_patch
 
 //----------------------------------------------------------------------
 
-void OutputData::write_block ( const FieldDescr * field_descr,
-  Block * block,
+void OutputData::write_block 
+( 
+  const Block * block,
+  const FieldDescr * field_descr,
   int ixp0, int iyp0, int izp0) throw()
 {
 
@@ -175,7 +177,7 @@ void OutputData::write_block ( const FieldDescr * field_descr,
 
   // Call write_block() on base Output object
 
-  Output::write_block(field_descr,block,ixp0,iyp0,izp0);
+  Output::write_block(block,field_descr,ixp0,iyp0,izp0);
 
   file_->group_close();
   file_->group_chdir("..");
@@ -185,8 +187,9 @@ void OutputData::write_block ( const FieldDescr * field_descr,
 //----------------------------------------------------------------------
 
 void OutputData::write_field
-( const FieldDescr * field_descr,
-  FieldBlock * field_block,
+( 
+  const FieldBlock * field_block,
+  const FieldDescr * field_descr,
   int field_index) throw()
 {
   io_field_block()->set_field_descr(field_descr);

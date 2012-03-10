@@ -13,7 +13,7 @@
 
 //----------------------------------------------------------------------
 
-ItPatch::ItPatch ( Hierarchy * hierarchy ) throw ()
+ItPatch::ItPatch ( const Hierarchy * hierarchy ) throw ()
   : hierarchy_(hierarchy),
     index1_(0)
 {}

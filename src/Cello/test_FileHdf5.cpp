@@ -24,8 +24,8 @@ PARALLEL_MAIN_BEGIN
 
   // data arrays
 
-  const int nx = 7;
-  const int ny = 5;
+  const int nx = 70;
+  const int ny = 50;
 
   char      * a_char      = new char      [nx*ny];
   int       * a_int       = new int       [nx*ny];
@@ -117,6 +117,7 @@ PARALLEL_MAIN_BEGIN
 
   FileHdf5 hdf5_a("./","test_disk.h5");
 
+  hdf5_a.set_compress(6);
   hdf5_a.file_create();
 
   hdf5_a.file_write_meta(&mx, "mx", scalar_type_int);

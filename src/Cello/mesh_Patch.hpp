@@ -74,7 +74,7 @@ class Patch
   void allocate_blocks(FieldDescr * field_descr) throw();
 
   /// Return whether blocks have been allocated or not
-  bool blocks_allocated() throw()
+  bool blocks_allocated() const throw()
   { 
 #ifdef CONFIG_USE_CHARM
     return block_exists_;
@@ -99,7 +99,7 @@ class Patch
 
 #ifdef CONFIG_USE_CHARM
   /// Return the block CHARM++ chare array
-  CProxy_Block block_array() throw()
+  CProxy_Block block_array() const throw()
   { if (block_exists_) return block_array_; else return 0;}
 
 #else

@@ -39,7 +39,8 @@ void OutputRestart::open () throw()
 
   delete file_;
 
-  file_ = new FileHdf5 (".",file_name);
+  file_ = new FileHdf5 (".",file_name + ".h5");
+  
 
   file_->file_create();
 }
@@ -64,65 +65,72 @@ void OutputRestart::finalize () throw ()
 //----------------------------------------------------------------------
 
 void OutputRestart::write_simulation
-(
- Factory    * factory,
- FieldDescr * field_descr,
- Hierarchy  * hierarchy,
- Simulation * simulation
- ) throw()
+( const Simulation * simulation ) throw()
 /// Note factory, field_descr, and hierarchy needed since otherwise
 /// Simulation functions must be called, which would introduce a circular
 /// dependence between Simulation and Output components
 {
-  OutputData output_data (factory);
+  TRACE("OutputRestart::write_simulation()");
 
-  output_data.write_hierarchy(field_descr,hierarchy);
-  
+  // Write parameter file
+
+  bool is_root = simulation->group_process()->is_root();
+  if (is_root) {
+    std::string file_name = expand_file_name() + ".in";
+    simulation->parameters()->write(file_name.c_str());
+  }
+
+  Output::write_simulation(simulation);
+
 }
 
 //----------------------------------------------------------------------
 void OutputRestart::write_hierarchy 
 (
- const FieldDescr * field_descr,
- Hierarchy * hierarchy
+ const Hierarchy * hierarchy,
+ const FieldDescr * field_descr
  ) throw()
 {
-  WARNING("OutputRestart::write_field()",
-	"This function is not supported for this output type");
+  TRACE("OutputRestart::write_hierarchy()");
+
+  Output::write_hierarchy(hierarchy,field_descr);
+
 }
 
 //----------------------------------------------------------------------
 
 void OutputRestart::write_patch 
 (
+ const Patch * patch,
  const FieldDescr * field_descr,
- Patch * patch,
  int ixp0, int iyp0, int izp0
  ) throw()
 {
-  WARNING("OutputRestart::write_field()",
-	"This function is not supported for this output type");
+  TRACE("OutputRestart::write_patch()");
+  Output::write_patch(patch,field_descr,ixp0,iyp0,izp0);
 }
 
 //----------------------------------------------------------------------
 
-void OutputRestart::write_block ( const FieldDescr * field_descr,
-  Block * block,
-  int ixp0, int iyp0, int izp0) throw()
+void OutputRestart::write_block 
+(
+ const Block * block,
+ const FieldDescr * field_descr,
+ int ixp0, int iyp0, int izp0) throw()
 {
-  WARNING("OutputRestart::write_field()",
-	"This function is not supported for this output type");
+  TRACE("OutputRestart::write_block()");
+  Output::write_block(block,field_descr,ixp0,iyp0,izp0);
 }
 
 //----------------------------------------------------------------------
 
 void OutputRestart::write_field
-( const FieldDescr * field_descr,
-  FieldBlock * field_block,
+(
+  const FieldBlock * field_block,
+  const FieldDescr * field_descr,
   int field_index) throw()
 {
-  WARNING("OutputRestart::write_field()",
-	"This function is not supported for this output type");
+  TRACE("OutputRestart::write_field()");
 }
 
 //----------------------------------------------------------------------

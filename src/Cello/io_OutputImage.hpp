@@ -52,25 +52,26 @@ public: // virtual functions
 
   // /// Write hierarchy-related field data
   // virtual void write_hierarchy
-  // ( const FieldDescr * field_descr,
-  //   Hierarchy * hierarchy) throw();
+  // ( const Hierarchy * hierarchy,
+  //   const FieldDescr * field_descr ) throw();
 
   /// Write patch-related field data; may be called by write_hierarchy
   virtual void write_patch
-  ( const FieldDescr * field_descr,
-    Patch * patch,
+  ( const Patch * patch,
+    const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write block-related field data; may be called by write_patch
   virtual void write_block
-  ( const FieldDescr * field_descr,
-    Block * block,
+  ( const Block * block,
+    const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write fields
   virtual void write_field
-  ( const FieldDescr * field_descr,
-    FieldBlock * Fieldblock, int field_index) throw();
+  ( const FieldBlock * Fieldblock, 
+    const FieldDescr * field_descr,
+    int field_index) throw();
 
   /// Prepare local array with data to be sent to remote chare for processing
   virtual void prepare_remote (int * n, char ** buffer) throw();

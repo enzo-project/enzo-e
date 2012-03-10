@@ -23,16 +23,32 @@ FileHdf5::FileHdf5 (std::string path, std::string name) throw()
     attribute_id_(0),
     group_id_(0),
     group_name_("/"),
+    group_prop_(H5P_DEFAULT),
     is_group_open_(false),
     data_name_(""),
     data_type_(scalar_type_unknown),
     data_rank_(0),
-    is_data_open_(false)
+    data_prop_(H5P_DEFAULT),
+    is_data_open_(false),
+    compress_level_(0)
 {
   const int rank_max = MAX_DATA_RANK;
   for (int i=0; i<rank_max; i++) {
     data_size_[i] = 0;
   }
+
+  // group_prop_ = H5Pcreate (H5P_GROUP_CREATE);
+  data_prop_  = H5Pcreate (H5P_DATASET_CREATE);
+  group_prop_ = H5P_DEFAULT;
+  //data_prop_ = H5P_DEFAULT;
+}
+
+//----------------------------------------------------------------------
+
+FileHdf5::~FileHdf5() throw()
+{
+  // H5Pclose (group_prop_);
+  H5Pclose (data_prop_);
 }
 
 //----------------------------------------------------------------------
@@ -88,7 +104,6 @@ void FileHdf5::file_create () throw()
 
 void FileHdf5::file_close () throw()
 {
-
   // error check file open
 
   std::string file_name = path_ + "/" + name_;
@@ -197,7 +212,7 @@ void FileHdf5::data_create
 			name.c_str(),
 			scalar_to_hdf5_(type),
 			space_id_,
-			H5P_DEFAULT );
+			data_prop_ );
 
   // error check H5Dcreate
 
@@ -729,6 +744,23 @@ void FileHdf5::group_write_meta
   ASSERT1("FileHdf5::group_write_meta",
 	  "H5Aclose() returned %d",retval,(retval >= 0));
 }  
+
+//----------------------------------------------------------------------
+
+void FileHdf5::set_compress (int level) throw ()
+{
+  compress_level_ = level; 
+  if (compress_level_ != 0) {
+    WARNING("FileHdf5::set_compress",
+	    "Hard-coded for 2D data with chunk size [10,10]");
+    int rank = 2;
+    hsize_t chunk_size[MAX_DATA_RANK];
+    chunk_size[0]=10;
+    chunk_size[1]=10;
+    H5Pset_chunk(data_prop_,rank,chunk_size);
+    H5Pset_deflate(data_prop_,compress_level_);
+  }
+}
 
 //======================================================================
 
