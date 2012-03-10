@@ -463,14 +463,12 @@ test_summary("Enzo-PPML",
 test_summary("Enzo-BC-2D", 
 	     array("boundary_reflecting-2d",
 		   "boundary_periodic-2d",
-		   "boundary_inflow-2d",
 		   "boundary_outflow-2d"),
 	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
 
 test_summary("Enzo-BC-3D",
 	     array("boundary_reflecting-3d",
 		   "boundary_periodic-3d",
-		   "boundary_inflow-3d",
 		   "boundary_outflow-3d"),
 	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
 
@@ -611,15 +609,6 @@ test_table ("boundary_periodic-2d",
 
 //----------------------------------------------------------------------
 
-echo "<h3>2D Inflow</h3>";
-
-tests("Enzo","enzo-p","test_boundary_inflow-2d","Inflow 2D");
-
-test_table ("boundary_inflow-2d",
-	    array("0000","0100","0200","0300","0400"), $types);
-
-//----------------------------------------------------------------------
-
 echo "<h3>2D Outflow</h3>";
   
 tests("Enzo","enzo-p","test_boundary_outflow-2d","Outflow 2D");
@@ -646,15 +635,6 @@ echo "<h3>3D Periodic</h3>";
 tests("Enzo", "enzo-p","test_boundary_periodic-3d","Periodic 3D");
 
 test_table ("boundary_periodic-3d",
-	    array("0000","0020","0040","0060","0080"), $types);
-
-//----------------------------------------------------------------------
-
-echo "<h3>3D Inflow</h3>";
-
-tests("Enzo","enzo-p","test_boundary_inflow-3d","Inflow 3D");
-
-test_table ("boundary_inflow-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
 
 //----------------------------------------------------------------------

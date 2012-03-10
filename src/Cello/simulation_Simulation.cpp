@@ -436,8 +436,6 @@ void Simulation::refresh() throw()
 
   if (stop_) {
 
-    performance_->stop();
-
     monitor_output();
 
     proxy_main.p_exit(CkNumPes());
