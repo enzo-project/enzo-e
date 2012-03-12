@@ -166,7 +166,9 @@ void EnzoSimulationMpi::run() throw()
 
 	// Reduce timestep to coincide with end of simulation if needed
 
-	dt_block = MIN (dt_block, (problem()->stopping()->stop_time() - time_block));
+	double time_stop = problem()->stopping()->stop_time();
+
+	dt_block = MIN (dt_block, (time_stop - time_block));
 
 	// Update patch-level timestep
 

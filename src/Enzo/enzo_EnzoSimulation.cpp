@@ -76,27 +76,6 @@ void EnzoSimulation::finalize() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::run() throw()
-{
-  INCOMPLETE("EnzoSimulation::run");
-}
-
-//----------------------------------------------------------------------
-
-void EnzoSimulation::read() throw()
-{
-  INCOMPLETE("EnzoSimulation::read");
-}
-
-//----------------------------------------------------------------------
-
-void EnzoSimulation::write() const throw()
-{
-  INCOMPLETE("EnzoSimulation::write");
-}
-
-//----------------------------------------------------------------------
-
 const Factory * EnzoSimulation::factory() const throw()
 { 
   if (factory_ == NULL) factory_ = new EnzoFactory;

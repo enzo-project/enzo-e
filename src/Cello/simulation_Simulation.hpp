@@ -38,21 +38,29 @@ public: // interface
 
   /// Simulation constructor
 
+#ifdef CONFIG_USE_CHARM
+
   Simulation
   ( const char *       parameter_file,
-#ifdef CONFIG_USE_CHARM
     int                n,
     CProxy_BlockReduce proxy_block_reduce
-#else
-    GroupProcess *     group_process = 0
-#endif
     ) throw();
+
+#else
+
+  Simulation
+  ( const char *       parameter_file,
+    GroupProcess *     group_process = 0
+    ) throw();
+
+#endif
 
   //==================================================
   // CHARM
   //==================================================
 
 #ifdef CONFIG_USE_CHARM
+
   /// Initialize an empty Simulation
   Simulation();
 

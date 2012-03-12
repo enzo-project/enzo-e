@@ -1,5 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
+
 /// @file     enzo_EnzoSimulationCharm.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-03-17

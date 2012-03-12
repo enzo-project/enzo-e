@@ -12,16 +12,21 @@
 #include "simulation.hpp"
 #include "simulation_charm.hpp"
 
+#ifdef CONFIG_USE_CHARM
 Simulation::Simulation
 (
  const char *   parameter_file,
-#ifdef CONFIG_USE_CHARM
  int n,
  CProxy_BlockReduce proxy_block_reduce
-#else
- GroupProcess * group_process
-#endif
  ) throw()
+#else 
+Simulation::Simulation
+(
+ const char *   parameter_file,
+ GroupProcess * group_process
+ ) throw()
+#endif
+
 /// Initialize the Simulation object
   : factory_(0),
     parameters_(0),
