@@ -99,6 +99,7 @@ if (type=='charm'):
 #------------------------------
 
 includes_cello =       [Glob('cello*hpp')]
+includes_charm =       [Glob('charm*hpp')]
 includes_disk =        [Glob('*disk*hpp')]
 includes_error =       [Glob('*error*hpp')]
 includes_field =       [Glob('*field*hpp')]
@@ -316,6 +317,8 @@ lib_disk  = env.Library ('disk',  sources_disk)
 
 env.Alias('install-inc',env.Install (inc_path,includes_cello))
 env.Alias('install-lib',env.Install (lib_path,lib_cello))
+
+env.Alias('install-inc',env.Install (inc_path,includes_charm))
 
 env.Alias('install-bin',env.Install (bin_path,binaries_disk))
 env.Alias('install-inc',env.Install (inc_path,includes_disk))

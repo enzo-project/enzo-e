@@ -12,6 +12,8 @@
 // System includes
 //----------------------------------------------------------------------
 
+#include <stdio.h>
+
 #include <vector>
 #include <string>
 #include <limits>
@@ -21,6 +23,8 @@
 //----------------------------------------------------------------------
 
 #include "cello.hpp"
+
+#include "charm.hpp"
 
 #include "_error.hpp"
 #include "_monitor.hpp"

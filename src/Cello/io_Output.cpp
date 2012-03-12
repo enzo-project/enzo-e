@@ -17,7 +17,8 @@ Output::Output (const Factory * factory) throw()
     process_stride_(1), // default one file per process
     process_(0),        // initialization below
 #ifdef CONFIG_USE_CHARM
-    count_reduce_(0),
+    counter_(1),        // default process-per-stride
+    index_charm_(0),
 #endif
     cycle_(0),
     count_output_(0),

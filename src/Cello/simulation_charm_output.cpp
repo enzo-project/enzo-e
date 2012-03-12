@@ -153,13 +153,10 @@ void Simulation::p_output_write (int n, char * buffer) throw()
     output->update_remote(n, buffer);
   }
 
-  output->counter_increment();
+  // fan-in from writers
+  int remaining = output->counter()->remaining();
 
-  int count = output->counter_value();
-
-  if (count == output->process_stride()) {
-
-    output->counter_reset();
+  if (remaining == 0) {
 
     output->close();
 

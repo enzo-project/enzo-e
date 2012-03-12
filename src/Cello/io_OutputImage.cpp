@@ -23,7 +23,7 @@ OutputImage::OutputImage(const Factory * factory,
 
 {
   // Override default Output::process_stride_: only root writes
-  process_stride_ = process_count;
+  set_process_stride(process_count);
 
   map_r_.resize(2);
   map_g_.resize(2);

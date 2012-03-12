@@ -9,6 +9,7 @@
 #define IO_HPP
 
 #include "cello.hpp"
+#include "charm.hpp"
 
 #include "_parallel.hpp"
 #include "_simulation.hpp"

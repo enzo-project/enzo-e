@@ -59,6 +59,14 @@ public: // functions
   int process_stride () const throw () 
   { return process_stride_; };
 
+  void set_process_stride (int stride) throw () 
+  {
+    process_stride_ = stride; 
+#ifdef CONFIG_USE_CHARM
+    counter_.set_value(process_stride_);
+#endif
+  };
+
   /// Return whether output is scheduled for this cycle
   bool is_scheduled (int cycle, double time);
 
@@ -77,12 +85,10 @@ public: // functions
 
 #ifdef CONFIG_USE_CHARM
 
-  void counter_increment() { count_reduce_++;  }
+  /// Accessor function for the CHARM Counter class
+  Counter * counter() { return & counter_; };
 
-  int counter_value() const { return (count_reduce_); }
-
-  void counter_reset() { count_reduce_ = 0; }
-
+  /// Set the index of this output in its simulation
   void set_index_charm(int index_charm) { index_charm_ = index_charm; }
 
 #endif
@@ -145,17 +151,16 @@ protected: // attributes
   /// Scheduler for this output
   Schedule * schedule_;
 
-  /// Only processes with id's divisible by process_stride_ writes
-  /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
-  int process_stride_;
-
   /// ID of this process
   int process_;
 
 #ifdef CONFIG_USE_CHARM
 
-  /// counter for reduction of data from non-writers to writers
-  int count_reduce_;
+  /// Counter for ending output
+  Counter counter_;
+
+  /// Index of this Output object in Simulation
+  size_t index_charm_;
 
 #endif
 
@@ -183,10 +188,14 @@ protected: // attributes
   /// I/O FieldBlock data accessor
   IoFieldBlock * io_field_block_;
 
-#ifdef CONFIG_USE_CHARM
-  /// Index of this Output object in Simulation
-  size_t index_charm_;
-#endif
+private: // attributes
+
+  /// Only processes with id's divisible by process_stride_ writes
+  /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
+  /// Private so that setting must be made through set_process_stride(),
+
+  int process_stride_;
+
 
 };
 

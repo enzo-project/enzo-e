@@ -10,6 +10,8 @@
 
 #include "cello.hpp"
 
+#include "charm.hpp"
+
 #include "_performance.hpp"
 #include "_monitor.hpp"
 #include "_parallel.hpp"
@@ -21,6 +23,7 @@
 #  include "_problem.hpp"
 #  include "_simulation.hpp"
 #endif
+
 
 #include "_field.hpp" 
 #include "_mesh.hpp"

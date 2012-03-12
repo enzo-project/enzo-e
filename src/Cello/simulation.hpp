@@ -10,6 +10,8 @@
 
 #include "cello.hpp"
 
+#include "charm.hpp"
+
 #include "_error.hpp"
 #include "_performance.hpp"
 #include "_memory.hpp"
