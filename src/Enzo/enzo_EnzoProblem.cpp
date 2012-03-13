@@ -24,40 +24,51 @@ EnzoProblem::~EnzoProblem() throw ()
 
 //======================================================================
 
-Boundary * EnzoProblem::create_boundary_ ( std::string name ) throw ()
+Boundary * EnzoProblem::create_boundary_
+(
+ std::string  name,
+ Parameters * parameters
+ ) throw ()
 /// @param name   Name of boundary condition to use
 {
 
-  boundary_type_enum type = boundary_type_undefined;
+  Boundary * boundary = 0;
 
-  if (       name == "reflecting") { type = boundary_type_reflecting;
-  } else if (name == "outflow") {    type = boundary_type_outflow;
-  } else if (name == "inflow") {     type = boundary_type_inflow;
-  } else if (name == "periodic") {   type = boundary_type_periodic;
+  if (       name == "reflecting") { 
+    boundary = new EnzoBoundary (boundary_type_reflecting);
+  } else if (name == "outflow") {
+    boundary = new EnzoBoundary (boundary_type_outflow);
+  } else if (name == "inflow") {
+    boundary = new EnzoBoundary (boundary_type_inflow);
+  } else if (name == "periodic") {
+    boundary = new EnzoBoundary (boundary_type_periodic);
   } else {
-    ERROR1("EnzoProblem::create_boundary_",
-	   "Unrecognized boundary type '%s'",
-	   name.c_str());
+    boundary = Problem::create_boundary_(name,parameters);
   }
 	     
-  return new EnzoBoundary (type);
+  return boundary;
 }
 
 //----------------------------------------------------------------------
 
-Timestep * EnzoProblem::create_timestep_ ( std::string name ) throw ()
+Timestep * EnzoProblem::create_timestep_
+(
+ std::string  name,
+ Parameters * parameters
+ ) throw ()
 /// @param name   Name of the timestep method to create
 {
+  Timestep * timestep = 0;
+
   if (name == "ppml") {
-    return new EnzoTimestepPpml;
+    timestep = new EnzoTimestepPpml;
   } else if (name == "ppm") {
-    return new EnzoTimestep;
+    timestep = new EnzoTimestep;
   } else {
-    ERROR1("EnzoProblem::create_timestep_",
-	   "Unrecognized timestep type '%s'",
-	   name.c_str());
-    return NULL;
+    timestep = Problem::create_timestep_(name,parameters);
   }
+
+  return timestep;
 }
 
 //----------------------------------------------------------------------
@@ -65,20 +76,25 @@ Timestep * EnzoProblem::create_timestep_ ( std::string name ) throw ()
 Initial * EnzoProblem::create_initial_ 
 (
  std::string  name,
- Parameters * parameters,
- int          init_cycle,
- double       init_time
+ Parameters * parameters
  ) throw ()
 {
   
+  //--------------------------------------------------
+  // parameter: Initial : cycle
+  // parameter: Initial : time
+  //--------------------------------------------------
+
+  int    init_cycle  = parameters->value_integer ("Initial:cycle",0);
+  double init_time   = parameters->value_float   ("Initial:time",0.0);
+
   Initial * initial = 0;
 
   if (name == "implosion_2d") {
     initial = new EnzoInitialImplosion2(init_cycle,init_time);
+  } else {
+    initial = Problem::create_initial_(name,parameters);
   }
-
-  if (!initial)
-    initial = Problem::create_initial_(name,parameters,init_cycle,init_time);
 
   return initial;
 
@@ -86,12 +102,11 @@ Initial * EnzoProblem::create_initial_
 
 //----------------------------------------------------------------------
 
-//----------------------------------------------------------------------
-
 Method * EnzoProblem::create_method_ 
 (
- std::string name,
- Parameters * parameters) throw ()
+ std::string  name,
+ Parameters * parameters
+ ) throw ()
 /// @param name   Name of the method to create
 {
 
@@ -101,50 +116,11 @@ Method * EnzoProblem::create_method_
     method = new EnzoMethodPpm  (parameters);
   } else if (name == "ppml") {
     method = new EnzoMethodPpml (parameters);
-  }
-
-  if (method == 0) {
-    char buffer[ERROR_LENGTH];
-    sprintf (buffer,"Cannot create Method '%s'",name.c_str());
-    ERROR("EnzoProblem::create_method_", buffer);
+  } else {
+    method = Problem::create_method_(name,parameters);
   }
 
   return method;
 }
 
-//----------------------------------------------------------------------
-
-Output * EnzoProblem::create_output_ 
-(
- std::string    type,
- GroupProcess * group_process,
- Hierarchy    * hierarchy,
- const Factory * factory
- ) throw ()
-/// @param type          Type of Output object to create
-/// @param group_process Image output needs group process size
-/// @param hierarchy     Image output needs image size (currently patch(0) size)
-/// @param filename   File name format for the output object
-{
-
-  Output * output = NULL;
-
-  // Create Enzo-specific output types
-
-  // ...
-
-  // Create a Cello output type using base class
-
-  if (output == NULL) {
-    output = Problem::create_output_(type,group_process,hierarchy,factory);
-  }
-
-  if (output == NULL) {
-    char buffer[ERROR_LENGTH];
-    sprintf (buffer,"Cannot create Output type '%s'",type.c_str());
-    ERROR("EnzoProblem::create_output_", buffer);
-  }
-
-  return output;
-}
 

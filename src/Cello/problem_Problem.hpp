@@ -97,16 +97,12 @@ protected: // functions
   void deallocate_() throw();
 
   /// Create named boundary object
-  virtual Boundary * create_boundary_ (std::string name) throw ();
+  virtual Boundary * create_boundary_
+  (std::string name, Parameters * parameters) throw ();
 
   /// Create named initialization object
   virtual Initial *  create_initial_ 
-  (std::string name, Parameters * parameters,
-   int init_cycle, double init_time) throw ();
-
-  /// Create named stopping object
-  virtual Stopping * create_stopping_ 
-  (std::string name, int stop_cycle, double stop_time) throw ();
+  (std::string name, Parameters * parameters) throw ();
 
   /// Create named method object
   virtual Method *   create_method_
@@ -116,8 +112,13 @@ protected: // functions
   virtual Output *   create_output_  
   (std::string, GroupProcess *, Hierarchy *, const Factory * ) throw ();
 
+  /// Create named stopping object
+  virtual Stopping * create_stopping_ 
+  (std::string name, Parameters * parameters) throw ();
+
   /// Create named timestep object
-  virtual Timestep * create_timestep_ (std::string name) throw ();
+  virtual Timestep * create_timestep_ 
+  (std::string name, Parameters * parameters) throw ();
 
 private: // attributes
 

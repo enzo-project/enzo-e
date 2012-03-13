@@ -14,7 +14,6 @@
 Output::Output (const Factory * factory) throw()
   : file_(0),           // Initialization deferred
     schedule_(new Schedule),
-    process_stride_(1), // default one file per process
     process_(0),        // initialization below
 #ifdef CONFIG_USE_CHARM
     counter_(1),        // default process-per-stride
@@ -27,7 +26,9 @@ Output::Output (const Factory * factory) throw()
     file_args_(),       // set_filename()
     it_field_(0),        // set_it_field()
     io_block_(0),
-    io_field_block_(0)
+    io_field_block_(0),
+    process_stride_(1) // default one file per process
+
 {
 
   GroupProcess * group_process = GroupProcess::create();

@@ -34,7 +34,7 @@ void Problem::initialize_boundary(Parameters * parameters) throw()
 
   std::string type = parameters->value_string("Boundary:type","");
 
-  boundary_ = create_boundary_(type);
+  boundary_ = create_boundary_(type,parameters);
 
   ASSERT1("Problem::initialize_boundary",
 	  "Boundary type %s not recognized",
@@ -52,15 +52,7 @@ void Problem::initialize_initial(Parameters * parameters) throw()
 
   std::string type = parameters->value_string("Initial:type","default");
 
-  //--------------------------------------------------
-  // parameter: Initial : cycle
-  // parameter: Initial : time
-  //--------------------------------------------------
-
-  int    init_cycle  = parameters->value_integer ("Initial:cycle",0);
-  double init_time   = parameters->value_float   ("Initial:time",0.0);
-
-  initial_ = create_initial_(type,parameters,init_cycle,init_time);
+  initial_ = create_initial_(type,parameters);
 
   ASSERT1("Problem::initialize_initial",
 	  "Initial type %s not recognized",
@@ -72,17 +64,7 @@ void Problem::initialize_initial(Parameters * parameters) throw()
 
 void Problem::initialize_stopping(Parameters * parameters) throw()
 {
-  //--------------------------------------------------
-  // parameter: Stopping : cycle
-  // parameter: Stopping : time
-  //--------------------------------------------------
-
-  int    stop_cycle = parameters->value_integer
-    ( "Stopping:cycle" , std::numeric_limits<int>::max() );
-  double stop_time  = parameters->value_float
-    ( "Stopping:time" , std::numeric_limits<double>::max() );
-
-  stopping_ = create_stopping_("ignored",stop_cycle,stop_time);
+  stopping_ = create_stopping_("default",parameters);
 
   ASSERT("Problem::initialize_stopping",
 	  "Stopping object not successfully created",
@@ -99,7 +81,7 @@ void Problem::initialize_timestep(Parameters * parameters) throw()
 
   std::string type = parameters->value_string("Timestep:type","default");
 
-  timestep_ = create_timestep_(type);
+  timestep_ = create_timestep_(type,parameters);
 
   ASSERT1("Problem::initialize_timestep",
 	  "Timestep type %s not recognized",
@@ -672,22 +654,17 @@ void Problem::initialize_method(Parameters * parameters) throw()
   parameters->group_set(0,"Method");
   //--------------------------------------------------
 
-  int method_count = parameters->list_length("sequence");
+  int count = parameters->list_length("sequence");
 
-//   ASSERT ("Problem::initialize_method",
-// 	  "List parameter 'Method sequence' must have length "
-// 	  "greater than zero",
-// 	  (method_count > 0));
-
-  for (int i=0; i<method_count; i++) {
+  for (int i=0; i<count; i++) {
 
     //--------------------------------------------------
     // parameter: Method : sequence
     //--------------------------------------------------
 
-    std::string method_name = parameters->list_value_string(i,"sequence");
+    std::string name = parameters->list_value_string(i,"sequence");
 
-    Method * method = create_method_(method_name,parameters);
+    Method * method = create_method_(name,parameters);
 
     if (method) {
 
@@ -695,7 +672,7 @@ void Problem::initialize_method(Parameters * parameters) throw()
 
     } else {
       ERROR1("Problem::initialize_method",
-	     "Unknown Method %s",method_name.c_str());
+	     "Unknown Method %s",name.c_str());
     }
   }
 }
@@ -718,7 +695,11 @@ void Problem::deallocate_() throw()
 
 //----------------------------------------------------------------------
 
-Boundary * Problem::create_boundary_ (std::string name) throw ()
+Boundary * Problem::create_boundary_
+(
+ std::string  name,
+ Parameters * parameters
+ ) throw ()
 {
   // No default Boundary object
   return NULL;
@@ -729,11 +710,18 @@ Boundary * Problem::create_boundary_ (std::string name) throw ()
 Initial * Problem::create_initial_
 (
  std::string  name,
- Parameters * parameters,
- int         init_cycle,
- double      init_time
+ Parameters * parameters
  ) throw ()
 { 
+  //--------------------------------------------------
+  // parameter: Initial : cycle
+  // parameter: Initial : time
+  //--------------------------------------------------
+
+  int    init_cycle  = parameters->value_integer ("Initial:cycle",0);
+  double init_time   = parameters->value_float   ("Initial:time",0.0);
+
+
   if (name == "file") {
     // Initialize by reading values from files
     return new InitialFile(init_cycle,init_time);;
@@ -747,14 +735,23 @@ Initial * Problem::create_initial_
 
 Stopping * Problem::create_stopping_ 
 (
- std::string name,
- int         stop_cycle,
- double      stop_time
+ std::string  name,
+ Parameters * parameters
  ) throw ()
 /// @param name   Name of the stopping method to create (ignored)
 /// @param stop_cycle  Stopping cycle
 /// @param stop_time  Stopping time
 {
+  //--------------------------------------------------
+  // parameter: Stopping : cycle
+  // parameter: Stopping : time
+  //--------------------------------------------------
+
+  int    stop_cycle = parameters->value_integer
+    ( "Stopping:cycle" , std::numeric_limits<int>::max() );
+  double stop_time  = parameters->value_float
+    ( "Stopping:time" , std::numeric_limits<double>::max() );
+
   // Return default stopping criteria object
 
   return new Stopping(stop_cycle,stop_time);
@@ -762,7 +759,11 @@ Stopping * Problem::create_stopping_
 
 //----------------------------------------------------------------------
 
-Timestep * Problem::create_timestep_ (std::string name) throw ()
+Timestep * Problem::create_timestep_ 
+(
+ std::string  name,
+ Parameters * parameters
+ ) throw ()
 { 
   // No default timestep
   return NULL;
@@ -771,7 +772,10 @@ Timestep * Problem::create_timestep_ (std::string name) throw ()
 //----------------------------------------------------------------------
 
 Method * Problem::create_method_ 
-(std::string name, Parameters * parameters) throw ()
+(
+ std::string  name,
+ Parameters * parameters
+ ) throw ()
 {
   // No default method
   return NULL;
