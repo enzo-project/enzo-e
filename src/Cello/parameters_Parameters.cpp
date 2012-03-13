@@ -245,9 +245,10 @@ void Parameters::set_integer
 
   if ( ! param ) {
     param = new Param;
-    char * null_group[1];
-    null_group[0]=0;
-    new_param_ (null_group,parameter,param);
+    size_t ic = parameter.rfind(":");
+    std::string parameter_short = (ic == std::string::npos) ?
+      parameter : parameter.substr(ic+1,std::string::npos);
+    new_param_ (current_group_,parameter_short,param);
   }
 
   param->set_integer_(value);
@@ -292,9 +293,10 @@ void Parameters::set_float
 
   if ( ! param ) {
     param = new Param;
-    char * null_group[1];
-    null_group[0]=0;
-    new_param_ (null_group,parameter,param);
+    size_t ic = parameter.rfind(":");
+    std::string parameter_short = (ic == std::string::npos) ?
+      parameter : parameter.substr(ic+1,std::string::npos);
+    new_param_ (current_group_,parameter_short,param);
   }
 
   param->set_float_(value);
@@ -338,9 +340,10 @@ void Parameters::set_logical
 
   if ( ! param ) {
     param = new Param;
-    char * null_group[1];
-    null_group[0]=0;
-    new_param_ (null_group,parameter,param);
+    size_t ic = parameter.rfind(":");
+    std::string parameter_short = (ic == std::string::npos) ?
+      parameter : parameter.substr(ic+1,std::string::npos);
+    new_param_ (current_group_,parameter_short,param);
   }
 
   param->set_logical_(value);
@@ -382,9 +385,10 @@ void Parameters::set_string
 
   if ( ! param ) {
     param = new Param;
-    char * null_group[1];
-    null_group[0]=0;
-    new_param_ (null_group,parameter,param);
+    size_t ic = parameter.rfind(":");
+    std::string parameter_short = (ic == std::string::npos) ?
+      parameter : parameter.substr(ic+1,std::string::npos);
+    new_param_ (current_group_,parameter_short,param);
   }
 
   param->set_string_(strdup(value));

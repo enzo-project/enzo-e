@@ -202,9 +202,3 @@ void Hierarchy::create_root_patch
   patch_tree_->root_node()->set_data(root_patch);
 
 }
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-#  include "mesh.def.h"
-#endif

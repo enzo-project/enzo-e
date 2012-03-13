@@ -192,9 +192,18 @@ void check_parameters(Parameters * parameters)
   //--------------------------------------------------
 
   parameters->set_logical("logical_1_true",false);
+  unit_assert (parameters->value_logical("Logical:logical_1_true") == false);
   unit_assert (parameters->value_logical("logical_1_true") == false);
   parameters->set_logical("logical_1_true",true);
+  unit_assert (parameters->value_logical("Logical:logical_1_true") == true);
+  unit_assert (parameters->value_logical("logical_1_true") == true);
 
+  parameters->set_logical("Logical:logical_1_true",false);
+  unit_assert (parameters->value_logical("Logical:logical_1_true") == false);
+  unit_assert (parameters->value_logical("logical_1_true") == false);
+  parameters->set_logical("Logical:logical_1_true",true);
+  unit_assert (parameters->value_logical("Logical:logical_1_true") == true);
+  unit_assert (parameters->value_logical("logical_1_true") == true);
 
   parameters->set_logical("none_l1",true);
   unit_assert (parameters->value_logical("none_l1") == true);

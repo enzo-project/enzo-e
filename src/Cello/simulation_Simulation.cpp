@@ -458,8 +458,6 @@ void Simulation::refresh() throw()
 
   if (stop_) {
 
-    monitor_output();
-
     proxy_main.p_exit(CkNumPes());
 
   } else {
@@ -619,13 +617,5 @@ void Simulation::monitor_output() const
 
 #endif
 }
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-#  include "simulation.def.h"
-
-#endif /* CONFIG_USE_CHARM */
 
 //======================================================================
