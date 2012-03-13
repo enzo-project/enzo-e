@@ -361,6 +361,13 @@ void Simulation::initialize_hierarchy_() throw()
   root_blocks[1] = parameters_->list_value_integer(1,"Mesh:root_blocks",1);
   root_blocks[2] = parameters_->list_value_integer(2,"Mesh:root_blocks",1);
 
+#ifndef CONFIG_CHARM
+  ASSERT4 ("Simulation::initialize_simulation_",
+	   "Product of Mesh:root_blocks = [%d %d %d] must equal MPI_Comm_size = %d",
+	   root_blocks[0],root_blocks[1],root_blocks[2], group_process_->size(),
+	   root_blocks[0]*root_blocks[1]*root_blocks[2]==group_process_->size());
+#endif
+
   hierarchy_->create_root_patch
     (group_process_,dimension_,
      field_descr_,

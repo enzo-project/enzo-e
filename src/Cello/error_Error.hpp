@@ -18,118 +18,57 @@
 //----------------------------------------------------------------------
 /// @def      WARNING
 /// @brief    Handle a (non-lethal) warning message
-#define WARNING(FUNCTION,MESSAGE)					\
-  {									\
-    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
-  }
-
-#define WARNING1(FUNCTION,MESSAGE,ARG1)					\
-  {									\
-    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1);							\
-  }
-
-#define WARNING2(FUNCTION,MESSAGE,ARG1,ARG2)				\
-  {									\
-    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2);						\
-  }
-#define WARNING3(FUNCTION,MESSAGE,ARG1,ARG2,ARG3)			\
-  {									\
-    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2,ARG3);						\
-  }
-#define WARNING4(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4)			\
-  {									\
-    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2,ARG3,ARG4);					\
-  }
-#define WARNING5(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5)		\
-  {									\
-    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2,ARG3,ARG4,ARG5);				\
-  }
-#define WARNING6(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)	\
-  {									\
-    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2,ARG3,ARG4,ARG5,ARG6);				\
-  }
-#define WARNING7(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)	\
-  {									\
-    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7);			\
-  }
-#define WARNING8(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8) \
-  {									\
-    message2_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8);			\
-  }
+#define WARNING(F,M)					\
+  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M); }
+#define WARNING1(F,M,A1)				\
+  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1); }
+#define WARNING2(F,M,A1,A2)					\
+  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2);  }
+#define WARNING3(F,M,A1,A2,A3)					\
+  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3);  }
+#define WARNING4(F,M,A1,A2,A3,A4)				\
+  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4);  }
+#define WARNING5(F,M,A1,A2,A3,A4,A5)					\
+  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5);  }
+#define WARNING6(F,M,A1,A2,A3,A4,A5,A6)					\
+  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6);  }
+#define WARNING7(F,M,A1,A2,A3,A4,A5,A6,A7)				\
+  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7);  }
+#define WARNING8(F,M,A1,A2,A3,A4,A5,A6,A7,A8)				\
+  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,
 
 //----------------------------------------------------------------------
 /// @def      UNTESTED
 /// @brief    Handle a (non-lethal) untested message
-#define UNTESTED(FUNCTION)					\
-  {								\
-    message2_(stdout,"UNTESTED",__FILE__,__LINE__,FUNCTION,"");	\
-  }
+#define UNTESTED(F)					\
+  { m2_(stdout,"UNTESTED",__FILE__,__LINE__,F,""); }
 
 //----------------------------------------------------------------------
 /// @def      ERROR
 /// @brief    Handle a (lethal) error message
-#define ERROR(FUNCTION,MESSAGE)						\
-  {									\
-    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
-    terminate_();							\
-  }
-#define ERROR1(FUNCTION,MESSAGE,ARG1)					\
-  {									\
-    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1);							\
-    terminate_();							\
-  }
-#define ERROR2(FUNCTION,MESSAGE,ARG1,ARG2)				\
-  {									\
-    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2);						\
-    terminate_();							\
-  }
-#define ERROR3(FUNCTION,MESSAGE,ARG1,ARG2,ARG3)				\
-  {									\
-    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2,ARG3);						\
-    terminate_();							\
-  }
-#define ERROR4(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4)			\
-  {									\
-    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2,ARG3,ARG4);					\
-    terminate_();							\
-  }
-#define ERROR5(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5)		\
-  {									\
-    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2,ARG3,ARG4,ARG5);				\
-    terminate_();							\
-  }
-#define ERROR6(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)		\
-  {									\
-    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2,ARG3,ARG4,ARG5,ARG6);				\
-    terminate_();							\
-  }
-#define ERROR8(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8) \
-  {									\
-    message2_(stderr,"ERROR",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-	      ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8);			\
-    terminate_();							\
-  }
+#define ERROR(F,M)					\
+  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M); t_(); }
+#define ERROR1(F,M,A1)						\
+  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1); t_(); }
+#define ERROR2(F,M,A1,A2)					\
+  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2); t_(); }
+#define ERROR3(F,M,A1,A2,A3)					\
+  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3); t_(); }
+#define ERROR4(F,M,A1,A2,A3,A4)						\
+  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4); t_(); }
+#define ERROR5(F,M,A1,A2,A3,A4,A5)					\
+  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5); t_(); }
+#define ERROR6(F,M,A1,A2,A3,A4,A5,A6)					\
+  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6); t_(); }
+#define ERROR8(F,M,A1,A2,A3,A4,A5,A6,A7,A8)				\
+  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8); t_(); }
 
 //----------------------------------------------------------------------
 /// @def      INCOMPLETE
 /// @brief    Placeholder for code that is incomplete
-#define INCOMPLETE(FUNCTION)						\
-  {									\
-    message2_(stdout,"INCOMPLETE",__FILE__,__LINE__,FUNCTION,"");	\
+#define INCOMPLETE(F)						\
+  {								\
+    m2_(stdout,"INCOMPLETE",__FILE__,__LINE__,F,"");	\
   }
 
 //----------------------------------------------------------------------
@@ -137,81 +76,48 @@
 /// @brief    Trace file name and location to stdout
 #ifdef CELLO_TRACE
 
-#   define TRACE(MESSAGE)				\
-  {							\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
-	      MESSAGE);					\
-  }
+#   define TRACE(M)					\
+  {  m2_(stdout,"TRACE",__FILE__,__LINE__,"", M); }
+#   define TRACE0						\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", ""); }
+#   define TRACE1(M,A1)					\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1); }
+#   define TRACE2(M,A1,A2)					\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2); }
+#   define TRACE3(M,A1,A2,A3)					\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3); }
+#   define TRACE4(M,A1,A2,A3,A4)				\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4); }
+#   define TRACE5(M,A1,A2,A3,A4,A5)					\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5); }
+#   define TRACE6(M,A1,A2,A3,A4,A5,A6)					\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6); }
+#   define TRACE7(M,A1,A2,A3,A4,A5,A6,A7)				\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
+#   define TRACE8(M,A1,A2,A3,A4,A5,A6,A7,A8)				\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
 
-#   define TRACE0					\
-  {							\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"", "");	\
-  }
-
-#   define TRACE1(MESSAGE,ARG1)				\
-  {							\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
-	      MESSAGE,ARG1);				\
-  }
-
-#   define TRACE2(MESSAGE,ARG1,ARG2)			\
-  {							\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
-	      MESSAGE,ARG1,ARG2);			\
-  }
-
-#   define TRACE3(MESSAGE,ARG1,ARG2,ARG3)		\
-  {							\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
-	      MESSAGE,ARG1,ARG2,ARG3);			\
-  }
-
-#   define TRACE4(MESSAGE,ARG1,ARG2,ARG3,ARG4)		\
-  {							\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
-	      MESSAGE,ARG1,ARG2,ARG3,ARG4);		\
-  }
-#   define TRACE5(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5)	\
-  {							\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"",	\
-	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5);	\
-  }
-#   define TRACE6(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)	\
-  {								\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"",		\
-	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6);		\
-  }
-#   define TRACE7(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)	\
-  {								\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"",		\
-	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7);	\
-  }
-#   define TRACE8(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8)	\
-  {								\
-    message2_(stdout,"TRACE",__FILE__,__LINE__,"",		\
-	      MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8);	\
-  }
 #else
 
 #   define TRACE0				\
   /* This space intentionally left blank */
-#   define TRACE(MESSAGE)			\
+#   define TRACE(M)				\
   /* This space intentionally left blank */
-#   define TRACE1(MESSAGE,ARG1)			\
+#   define TRACE1(M,A1)				\
   /* This space intentionally left blank */
-#   define TRACE2(MESSAGE,ARG1,ARG2)		\
+#   define TRACE2(M,A1,A2)			\
   /* This space intentionally left blank */
-#   define TRACE3(MESSAGE,ARG1,ARG2,ARG3)	\
+#   define TRACE3(M,A1,A2,A3)			\
   /* This space intentionally left blank */
-#   define TRACE4(MESSAGE,ARG1,ARG2,ARG3,ARG4)	\
+#   define TRACE4(M,A1,A2,A3,A4)		\
   /* This space intentionally left blank */
-#   define TRACE5(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5)	\
+#   define TRACE5(M,A1,A2,A3,A4,A5)		\
   /* This space intentionally left blank */
-#   define TRACE6(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)	\
+#   define TRACE6(M,A1,A2,A3,A4,A5,A6)		\
   /* This space intentionally left blank */
-#   define TRACE7(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)	\
+#   define TRACE7(M,A1,A2,A3,A4,A5,A6,A7)	\
   /* This space intentionally left blank */
-#   define TRACE8(MESSAGE,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8)	\
+#   define TRACE8(M,A1,A2,A3,A4,A5,A6,A7,A8)	\
   /* This space intentionally left blank */
 
 #endif
@@ -219,47 +125,18 @@
 //----------------------------------------------------------------------
 /// @def      ASSERT
 /// @brief    Equivalent to assert()
-#define ASSERT(FUNCTION,MESSAGE,ASSERTION)				\
-  {									\
-    if (!(ASSERTION)) {							\
-      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
-      terminate_();							\
-    }									\
-  }
-#define ASSERT1(FUNCTION,MESSAGE,ARG1,ASSERTION)			\
-  {									\
-    if (!(ASSERTION)) {							\
-      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-		ARG1);							\
-      terminate_();							\
-    }									\
-  }
-#define ASSERT2(FUNCTION,MESSAGE,ARG1,ARG2,ASSERTION)			\
-  {									\
-    if (!(ASSERTION)) {							\
-      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-		ARG1,ARG2);						\
-      terminate_();							\
-    }									\
-  }
-#define ASSERT3(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ASSERTION)		\
-  {									\
-    if (!(ASSERTION)) {							\
-      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-		ARG1,ARG2,ARG3);					\
-      terminate_();							\
-    }									\
-  }
-#define ASSERT4(FUNCTION,MESSAGE,ARG1,ARG2,ARG3,ARG4,ASSERTION)		\
-  {									\
-    if (!(ASSERTION)) {							\
-      message2_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE,	\
-		ARG1,ARG2,ARG3,ARG4);					\
-      terminate_();							\
-    }									\
-  }
+#define ASSERT(F,M,A)							\
+  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M); t_(); } }
+#define ASSERT1(F,M,A1,A)						\
+  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1); t_(); } }
+#define ASSERT2(F,M,A1,A2,A)						\
+  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2); t_(); } }
+#define ASSERT3(F,M,A1,A2,A3,A)						\
+  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3); t_(); } }
+#define ASSERT4(F,M,A1,A2,A3,A4,A)					\
+  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4); t_(); } }
 
-extern void message2_
+extern void m2_
 (FILE * fp,
  const char * type, 
  const char * file, 
@@ -268,7 +145,7 @@ extern void message2_
  const char * message,
  ...);
 
-void terminate_();
+void t_();
 
 #endif /* ERROR_ERROR_HPP */
 

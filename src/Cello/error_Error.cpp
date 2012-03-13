@@ -9,7 +9,7 @@
 
 //----------------------------------------------------------------------
 
-extern void message2_
+extern void m2_
 (
  FILE *       fp,
  const char * type,
@@ -52,7 +52,7 @@ extern void message2_
 
 //----------------------------------------------------------------------
 
-void terminate_()
+void t_()
 {
   const int buffer_size = 64;
 
@@ -63,7 +63,7 @@ void terminate_()
   char ** symbols = backtrace_symbols(buffer,num_symbols);
 
   for (int i=0; i<num_symbols; i++) {
-    message2_(stderr,"EXIT","",0,"",symbols[i]);
+    m2_(stderr,"EXIT","",0,"",symbols[i]);
   }
   
   PARALLEL_EXIT;
