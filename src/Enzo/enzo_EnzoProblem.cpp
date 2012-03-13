@@ -45,22 +45,6 @@ Boundary * EnzoProblem::create_boundary_ ( std::string name ) throw ()
 
 //----------------------------------------------------------------------
 
-Stopping * EnzoProblem::create_stopping_ 
-(
- std::string name,
- int         stop_cycle,
- double      stop_time
- ) throw ()
-/// @param name   Name of the stopping method to create (ignored)
-/// @param stop_cycle  Stopping cycle
-/// @param stop_time  Stopping time
-{
-
-  return new Stopping(stop_cycle,stop_time);
-}
-
-//----------------------------------------------------------------------
-
 Timestep * EnzoProblem::create_timestep_ ( std::string name ) throw ()
 /// @param name   Name of the timestep method to create
 {
@@ -80,11 +64,11 @@ Timestep * EnzoProblem::create_timestep_ ( std::string name ) throw ()
 
 Initial * EnzoProblem::create_initial_ 
 (
- std::string name,
- int         init_cycle,
- double      init_time
+ std::string  name,
+ Parameters * parameters,
+ int          init_cycle,
+ double       init_time
  ) throw ()
-/// @param name   Name of the initialization method to create
 {
   
   Initial * initial = 0;
@@ -93,7 +77,11 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialImplosion2(init_cycle,init_time);
   }
 
+  if (!initial)
+    initial = Problem::create_initial_(name,parameters,init_cycle,init_time);
+
   return initial;
+
 }
 
 //----------------------------------------------------------------------

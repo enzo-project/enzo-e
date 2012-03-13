@@ -130,7 +130,7 @@ void OutputRestart::write_field
   const FieldDescr * field_descr,
   int field_index) throw()
 {
-  TRACE("OutputRestart::write_field()");
+  
 }
 
 //----------------------------------------------------------------------

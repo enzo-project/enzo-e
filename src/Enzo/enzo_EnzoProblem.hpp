@@ -30,11 +30,12 @@ private: // functions
 
   /// Create named initialization object
   virtual Initial *  create_initial_ 
-  (std::string name, int init_cycle, double init_time) throw ();
+  (std::string name, Parameters * parameters,
+   int init_cycle, double init_time) throw ();
 
-  /// Create named stopping object
-  virtual Stopping * create_stopping_ 
-  (std::string name, int stop_cycle, double stop_time) throw ();
+  // /// Create named stopping object
+  // virtual Stopping * create_stopping_ 
+  // (std::string name, int stop_cycle, double stop_time) throw ();
 
   /// Create named method object
   virtual Method *   create_method_ 

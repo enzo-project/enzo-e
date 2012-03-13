@@ -33,7 +33,13 @@ void Problem::initialize_boundary(Parameters * parameters) throw()
   //--------------------------------------------------
 
   std::string type = parameters->value_string("Boundary:type","");
+
   boundary_ = create_boundary_(type);
+
+  ASSERT1("Problem::initialize_boundary",
+	  "Boundary type %s not recognized",
+	  type.c_str(),
+	  boundary_ != NULL);
 }
 
 //----------------------------------------------------------------------
@@ -48,33 +54,39 @@ void Problem::initialize_initial(Parameters * parameters) throw()
 
   //--------------------------------------------------
   // parameter: Initial : cycle
-  //--------------------------------------------------
-
-  int init_cycle  = parameters->value_integer ("Initial:cycle",0);
-
-  //--------------------------------------------------
   // parameter: Initial : time
   //--------------------------------------------------
 
+  int    init_cycle  = parameters->value_integer ("Initial:cycle",0);
   double init_time   = parameters->value_float   ("Initial:time",0.0);
 
-  initial_ = create_initial_(type,init_cycle, init_time);
+  initial_ = create_initial_(type,parameters,init_cycle,init_time);
 
-  if (initial_ == 0) {
-    initial_ = new InitialDefault(parameters,init_cycle,init_time);
-  }
+  ASSERT1("Problem::initialize_initial",
+	  "Initial type %s not recognized",
+	  type.c_str(),
+	  initial_ != NULL);
 }
 
 //----------------------------------------------------------------------
 
 void Problem::initialize_stopping(Parameters * parameters) throw()
 {
+  //--------------------------------------------------
+  // parameter: Stopping : cycle
+  // parameter: Stopping : time
+  //--------------------------------------------------
+
   int    stop_cycle = parameters->value_integer
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
   double stop_time  = parameters->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
+
   stopping_ = create_stopping_("ignored",stop_cycle,stop_time);
 
+  ASSERT("Problem::initialize_stopping",
+	  "Stopping object not successfully created",
+	  stopping_ != NULL);
 }
 
 //----------------------------------------------------------------------
@@ -88,6 +100,11 @@ void Problem::initialize_timestep(Parameters * parameters) throw()
   std::string type = parameters->value_string("Timestep:type","default");
 
   timestep_ = create_timestep_(type);
+
+  ASSERT1("Problem::initialize_timestep",
+	  "Timestep type %s not recognized",
+	  type.c_str(),
+	  timestep_ != NULL);
 }
 
 //----------------------------------------------------------------------
@@ -148,7 +165,7 @@ void Problem::initialize_output
     // Error if output type was not recognized
     if (output == NULL) {
       ERROR2("Problem::initialize_output",
-	     "Unrecognized parameter value Output:%s:type = %s",
+	     "Unknown parameter type Output:%s:type = %s",
 	     file_group.c_str(),
 	     type.c_str());
     }
@@ -703,7 +720,7 @@ void Problem::deallocate_() throw()
 
 Boundary * Problem::create_boundary_ (std::string name) throw ()
 {
-  ERROR ("Problem::create_boundary_","Implictly abstract function called");
+  // No default Boundary object
   return NULL;
 }
 
@@ -711,15 +728,18 @@ Boundary * Problem::create_boundary_ (std::string name) throw ()
 
 Initial * Problem::create_initial_
 (
- std::string name,
+ std::string  name,
+ Parameters * parameters,
  int         init_cycle,
  double      init_time
  ) throw ()
-/// @param name   Name of the intialization method to create
-/// @param init_cycle  Initial cycle
-/// @param init_time  Initial time
 { 
-  ERROR ("Problem::create_initial_","Implictly abstract function called");
+  if (name == "file") {
+    // Initialize by reading values from files
+    return new InitialFile(init_cycle,init_time);;
+  } else {
+    return new InitialDefault(parameters,init_cycle,init_time);
+  }
   return NULL;
 }
 
@@ -735,15 +755,16 @@ Stopping * Problem::create_stopping_
 /// @param stop_cycle  Stopping cycle
 /// @param stop_time  Stopping time
 {
-  ERROR ("Problem::create_stopping_","Implictly abstract function called");
-  return NULL;
+  // Return default stopping criteria object
+
+  return new Stopping(stop_cycle,stop_time);
 }
 
 //----------------------------------------------------------------------
 
 Timestep * Problem::create_timestep_ (std::string name) throw ()
 { 
-  ERROR ("Problem::create_timestep_","Implictly abstract function called");
+  // No default timestep
   return NULL;
 }
 
@@ -752,8 +773,7 @@ Timestep * Problem::create_timestep_ (std::string name) throw ()
 Method * Problem::create_method_ 
 (std::string name, Parameters * parameters) throw ()
 {
-  ERROR ("Problem::create_method_",
-	 "Implictly abstract function called");
+  // No default method
   return NULL;
 }
 

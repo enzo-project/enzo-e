@@ -96,13 +96,13 @@ protected: // functions
   /// Deallocate components
   void deallocate_() throw();
 
-
   /// Create named boundary object
   virtual Boundary * create_boundary_ (std::string name) throw ();
 
   /// Create named initialization object
   virtual Initial *  create_initial_ 
-  (std::string name, int init_cycle, double init_time) throw ();
+  (std::string name, Parameters * parameters,
+   int init_cycle, double init_time) throw ();
 
   /// Create named stopping object
   virtual Stopping * create_stopping_ 
