@@ -136,7 +136,7 @@ void Parameters::write ( const char * file_name )
   // Initialize indentation variables
   const std::string indent_amount = "    ";
   int indent_size = 4;
-  std::string indent_string = "   ";
+  std::string indent_string = " ";
   int group_depth = 0;
 
   // Loop over parameters
@@ -163,9 +163,9 @@ void Parameters::write ( const char * file_name )
 
       for (int i=i_group; i<n_prev; i++) {
 	--group_depth;
-	indent_string = indent_string.substr(indent_size,std::string::npos);
+	indent_string = indent_string.substr(0, indent_string.size()-indent_size);
 	fprintf (file_pointer, "%s}%c\n",indent_string.c_str(),
-		 (group_depth==0) ? ' ' : ';' );
+		 (group_depth==0) ? '\n' : ';' );
       }
 
       // Begin new groups
@@ -218,9 +218,11 @@ int Parameters::value_integer
 /// @return  Return integer parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
+
   ASSERT1 ("Parameters::value_integer",
 	   "Parameter %s is not an integer", parameter.c_str(),
 	   ( ! param || param->is_integer()));
+
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%d",deflt);
   monitor_access_(parameter,deflt_string);
@@ -236,14 +238,18 @@ void Parameters::set_integer
 /// @param   value     Value to set the parameter
 {
   Param * param = parameter_(parameter);
-  if (param) {
-    ASSERT1 ("Parameters::set_integer",
-	     "Parameter %s is not an integer", parameter.c_str(),
-	     (param->is_integer()));
-  } else {
+
+  ASSERT1 ("Parameters::set_integer",
+	   "Parameter %s is not an integer", parameter.c_str(),
+	   ( ! param || param->is_integer()));
+
+  if ( ! param ) {
     param = new Param;
-    new_param_ (current_group_,parameter,param);
+    char * null_group[1];
+    null_group[0]=0;
+    new_param_ (null_group,parameter,param);
   }
+
   param->set_integer_(value);
   monitor_write_(parameter);
 }
@@ -258,12 +264,14 @@ double Parameters::value_float
 /// @return  Return floating point (double) parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
+
   ASSERT1 ("Parameters::value_float",
 	   "Parameter %s is not an float", parameter.c_str(),
 	   ( ! param || param->is_float()));
+
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // '#' format character forces a decimal point
-  sprintf (deflt_string,"%#.15g",deflt);
+  sprintf (deflt_string,FLOAT_FORMAT,deflt);
   monitor_access_(parameter,deflt_string);
   return (param != NULL) ? param->get_float() : deflt;
 }
@@ -277,14 +285,18 @@ void Parameters::set_float
 /// @param   value     Value to set the parameter
 {
   Param * param = parameter_(parameter);
-  if (param) {
-    ASSERT1 ("Parameters::set_float",
-	     "Parameter %s is not a float", parameter.c_str(),
-	     (param->is_float()));
-  } else {
+
+  ASSERT1 ("Parameters::set_float",
+	   "Parameter %s is not a float", parameter.c_str(),
+	   (!param || param->is_float()));
+
+  if ( ! param ) {
     param = new Param;
-    new_param_ (current_group_,parameter,param);
+    char * null_group[1];
+    null_group[0]=0;
+    new_param_ (null_group,parameter,param);
   }
+
   param->set_float_(value);
   monitor_write_(parameter);
 }
@@ -299,9 +311,11 @@ bool Parameters::value_logical
 /// @return  Return logical parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
+
   ASSERT1 ("Parameters::value_logical",
 	   "Parameter %s is not an logical", parameter.c_str(),
 	   ( ! param || param->is_logical()));
+
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%s",deflt ? "true" : "false");
   monitor_access_(parameter,deflt_string);
@@ -317,14 +331,18 @@ void Parameters::set_logical
 /// @param   value     Value to set the parameter
 {
   Param * param = parameter_(parameter);
-  if (param) {
-    ASSERT1 ("Parameters::set_logical",
-	     "Parameter %s is not logical", parameter.c_str(),
-	     (param->is_logical()));
-  } else {
+
+  ASSERT1 ("Parameters::set_logical",
+	   "Parameter %s is not logical", parameter.c_str(),
+	   (!param || param->is_logical()));
+
+  if ( ! param ) {
     param = new Param;
-    new_param_ (current_group_,parameter,param);
+    char * null_group[1];
+    null_group[0]=0;
+    new_param_ (null_group,parameter,param);
   }
+
   param->set_logical_(value);
   monitor_write_(parameter);
 }
@@ -339,9 +357,11 @@ const char * Parameters::value_string
 /// @return  Return string parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
+
   ASSERT1 ("Parameters::value_string",
 	   "Parameter %s is not a string", parameter.c_str(),
 	   ( ! param || param->is_string()));
+
   monitor_access_(parameter,deflt);
   return (param != NULL) ? param->get_string() : deflt;
 }
@@ -355,14 +375,18 @@ void Parameters::set_string
 /// @param   value     Value to set the parameter
 {
   Param * param = parameter_(parameter);
-  if (param) {
-    ASSERT1 ("Parameters::value_integer",
-	     "Parameter %s is not an integer", parameter.c_str(),
-	     (param->is_string()));
-  } else {
+
+  ASSERT1 ("Parameters::value_integer",
+	   "Parameter %s is not an integer", parameter.c_str(),
+	   ( ! param || param->is_string()));
+
+  if ( ! param ) {
     param = new Param;
-    new_param_ (current_group_,parameter,param);
+    char * null_group[1];
+    null_group[0]=0;
+    new_param_ (null_group,parameter,param);
   }
+
   param->set_string_(strdup(value));
   monitor_write_(parameter);
 }
@@ -489,7 +513,7 @@ double Parameters::list_value_float
 	   ( ! param || param->is_float()));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // '#' format character forces a decimal point
-  sprintf (deflt_string,"%#.15g",deflt);
+  sprintf (deflt_string,FLOAT_FORMAT,deflt);
   monitor_access_(parameter,deflt_string,index);
   return (param != NULL) ? param->value_float_ : deflt;
 }
@@ -910,11 +934,13 @@ void Parameters::new_param_
 {
 
   // @@@ Move into function: group[i] -> "group[0]:group[1]..."
-  std::string full_parameter = "";
-  for (int i=0; group[i] != 0 && i < MAX_GROUP_DEPTH; i++) {
-    full_parameter = full_parameter + group[i] + ":";
-  }
-  full_parameter = full_parameter + parameter;
+  //  std::string full_parameter = parameter_name_(parameter);
+   std::string full_parameter = "";
+   for (int i=0; group[i] != 0 && i < MAX_GROUP_DEPTH; i++) {
+     full_parameter = full_parameter + group[i] + ":";
+   }
+   full_parameter = full_parameter + parameter;
+  printf ("%s %s %s\n",group[0],parameter.c_str(),full_parameter.c_str());
 
   // Insert parameter into the parameter mapping
   // "Group:group[0]:group[1]:...:parameter" -> "Value"

@@ -75,9 +75,20 @@ void OutputRestart::write_simulation
   // Write parameter file
 
   bool is_root = simulation->group_process()->is_root();
+
   if (is_root) {
+
     std::string file_name = expand_file_name() + ".in";
-    simulation->parameters()->write(file_name.c_str());
+
+    Parameters * parameters = simulation->parameters();
+
+    // Update Initial parameters
+    parameters->set_integer ("Initial:cycle",simulation->cycle());
+    parameters->set_float   ("Initial:time", simulation->time());
+
+    // Write restart parameter file
+    parameters->write(file_name.c_str());
+    
   }
 
   Output::write_simulation(simulation);

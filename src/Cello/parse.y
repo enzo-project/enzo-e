@@ -718,7 +718,7 @@ void print_expression (struct node_expr * node,
       break;
     case enum_node_float:
       /* '#' format character forces a decimal point */
-      fprintf (fp,"%#.15g",node->float_value);
+      fprintf (fp,FLOAT_FORMAT,node->float_value);
       break;
     case enum_node_variable:
       fprintf (fp,"%c",node->var_value);
@@ -764,7 +764,7 @@ void sprintf_expression (struct node_expr * node,
       break;
     case enum_node_float:
       /* '#' format character forces a decimal point */
-      sprintf (buffer,"%#.15g",node->float_value);
+      sprintf (buffer,FLOAT_FORMAT,node->float_value);
       buffer += strlen(buffer);
       break;
     case enum_node_variable:
@@ -828,7 +828,7 @@ void cello_parameters_print_list(struct param_struct * head, int level)
     switch (p->type) {
     case enum_parameter_float:  
       /* '#' format character forces a decimal point */
-      printf ("%#.15g\n",p->float_value);  
+      printf (FLOAT_FORMAT,p->float_value);  
       break;
     case enum_parameter_integer: 
       printf ("%d\n",p->integer_value); 

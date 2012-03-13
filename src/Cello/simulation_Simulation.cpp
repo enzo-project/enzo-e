@@ -75,32 +75,36 @@ void Simulation::initialize() throw()
 
   initialize_simulation_();
 
-  // Initialize simulation components
+  // INITIALIZE SIMULATION COMPONENTS
+  // (warning: initialization may be order dependent)
 
+  // Initialize data
   initialize_data_descr_();
 
+  // Initialize Mesh hierarchy
   initialize_hierarchy_();
 
+  // Initialize boundary conditions
   problem_->initialize_boundary(parameters_);
 
+  // Initialize initial conditions
   problem_->initialize_initial(parameters_);
-  time_  = problem_->initial()->time();
-  cycle_ = problem_->initial()->cycle();
 
+  // initialize stopping criteria
   problem_->initialize_stopping(parameters_);
 
+  // initialize timestep approach
   problem_->initialize_timestep(parameters_);
 
+  // Initialize list of output objects
   problem_->initialize_output
     (parameters_,field_descr_,group_process_,hierarchy_,factory());
 
+  // Initialize list of methods
   problem_->initialize_method(parameters_);
 
   initialize_parallel_();
 
-  char parameter_file[40];
-  snprintf (parameter_file,40,"%s.out",parameter_file_.c_str());
-  parameters_->write(parameter_file);
 }
 
 //----------------------------------------------------------------------
@@ -117,7 +121,9 @@ void Simulation::initialize_simulation_() throw()
 {
 
   //--------------------------------------------------
-  // parameter: Mesh : root_rank
+  // parameter: Mesh    : root_rank
+  // parameter: Initial : cycle
+  // parameter: Initial : time
   //--------------------------------------------------
 
   dimension_ = parameters_->value_integer("Mesh:root_rank",0);
@@ -125,10 +131,13 @@ void Simulation::initialize_simulation_() throw()
   ASSERT ("Simulation::initialize_simulation_()", 
 	  "Parameter 'Mesh:root_rank' must be specified",
 	  dimension_ != 0);
-
+  
   ASSERT ("Simulation::initialize_simulation_()", 
 	  "Parameter 'Mesh:root_rank' must be 1, 2, or 3",
 	  (1 <= dimension_) && (dimension_ <= 3));
+
+  cycle_ = parameters_->value_integer("Initial:cycle",0);
+  time_  = parameters_->value_float  ("Initial:time",0);
 
 }
 

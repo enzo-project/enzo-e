@@ -83,7 +83,7 @@ void Param::write
   std::string parameter = (i_group == std::string::npos) ?
     full_parameter : full_parameter.substr(i_group+1,std::string::npos);
 
-  fprintf (file_pointer,"%s = %s;\n ",
+  fprintf (file_pointer,"%s = %s;\n",
 	   parameter.c_str(),
 	   value_to_string().c_str());
 
@@ -123,8 +123,9 @@ std::string Param::value_to_string ()
     string_buffer = char_buffer;
     break;
   case parameter_float:
-    // '#' format character forces a decimal point
-    sprintf (char_buffer,"%#.15g",value_float_);
+    // '#' format character forces a decimal point, which is required to
+    // differentiate an integer from a float type
+    sprintf (char_buffer,FLOAT_FORMAT,value_float_);
     string_buffer =  char_buffer;
     break;
   case parameter_logical:
