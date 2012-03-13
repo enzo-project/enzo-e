@@ -14,6 +14,7 @@ Domain {
 # Define the computational domain
 
 Mesh { 
+   root_rank   = 2;
    root_size   = [ 256,256 ];
    root_blocks = [   2,  4 ];
 }
@@ -62,7 +63,6 @@ Enzo {
 
 Physics {
 
-   dimensions = 2;
    gamma = 1.4;
 
 }

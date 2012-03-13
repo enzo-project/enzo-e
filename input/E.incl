@@ -4,9 +4,10 @@
       upper = [1.0, 1.0];
    } 
 
-   Mesh { 
-      root_size      = [80, 80];
-      root_blocks    = [ 2, 4 ];
+   Mesh {
+      root_rank   = 2;
+      root_size   = [80, 80];
+      root_blocks = [ 2, 4 ];
    }
 
    Field {
@@ -45,7 +46,6 @@
 
    Physics {
 
-      dimensions = 2;
       gamma = 1.4;
 
    }

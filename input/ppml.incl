@@ -10,8 +10,9 @@
 
    # The computational mesh is a single uniform grid
 
-   Mesh { 
-      root_size      = [32,32,32];
+   Mesh {
+      root_rank = 3;
+      root_size = [32,32,32];
    }
 
    Timestep {
@@ -61,8 +62,6 @@
    }
 
    Physics {
-
-      dimensions = 3;
 
       gamma = 1.4;
 

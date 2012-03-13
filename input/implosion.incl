@@ -9,7 +9,8 @@
    } 
 
    Mesh { 
-      root_size      = [400,400];
+      root_rank = 2;
+      root_size = [400,400];
    }
 
    Field {
@@ -48,7 +49,6 @@
 
    Physics {
 
-      dimensions = 2;
       gamma = 1.4;
 
    }

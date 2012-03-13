@@ -242,12 +242,13 @@ namespace enzo {
     //--------------------------------------------------
     // parameter: Physics : cosmology
     // parameter: Physics : gamma
-    // parameter: Physics : dimensions
+    // parameter: Mesh : root_rank
     //--------------------------------------------------
 
     ComovingCoordinates = parameters->value_logical ("Physics:cosmology",false);
     Gamma               = parameters->value_float   ("Physics:gamma",5.0/3.0);
-    GridRank            = parameters->value_integer ("Physics:dimensions",0);
+    GridRank            = parameters->value_integer ("Mesh:root_rank",0);
+
     BoundaryRank = GridRank;
 
     // Chemistry parameters

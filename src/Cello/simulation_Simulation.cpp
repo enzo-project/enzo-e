@@ -117,10 +117,18 @@ void Simulation::initialize_simulation_() throw()
 {
 
   //--------------------------------------------------
-  // parameter: Physics : dimensions
+  // parameter: Mesh : root_rank
   //--------------------------------------------------
 
-  dimension_ = parameters_->value_integer("Physics:dimensions",0);
+  dimension_ = parameters_->value_integer("Mesh:root_rank",0);
+  
+  ASSERT ("Simulation::initialize_simulation_()", 
+	  "Parameter 'Mesh:root_rank' must be specified",
+	  dimension_ != 0);
+
+  ASSERT ("Simulation::initialize_simulation_()", 
+	  "Parameter 'Mesh:root_rank' must be 1, 2, or 3",
+	  (1 <= dimension_) && (dimension_ <= 3));
 
 }
 
@@ -260,7 +268,7 @@ void Simulation::initialize_data_descr_() throw()
       }
       
       ASSERT2 ("Simulation::initialize_data_descr_()",
-	       "Parameter %s must be a list of logical values with length %d",
+	       "Parameter '%s' must be a list of logical values with length %d",
 	       param_name.c_str(), dimension_, valid);
 
       int id_field = field_descr_->field_id(field_name);

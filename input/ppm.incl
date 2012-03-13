@@ -11,7 +11,8 @@
    # The computational mesh is a single uniform grid
 
    Mesh { 
-      root_size      = [80,80];
+      root_rank = 2;
+      root_size = [80,80];
    }
 
    # Field parameters include those concerning fields as a group, as
@@ -62,8 +63,6 @@
    }
 
    Physics {
-
-      dimensions = 2;
 
       gamma = 1.4;
 

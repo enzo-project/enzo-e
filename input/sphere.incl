@@ -9,8 +9,9 @@
    } 
 
    Mesh { 
-      root_size      = [16,16,16];
-      root_blocks    = [2,2,2];
+      root_rank   = 3;
+      root_size   = [16,16,16];
+      root_blocks = [2,2,2];
    }
 
    Field {
@@ -50,7 +51,6 @@
 
    Physics {
 
-      dimensions = 3;
       gamma = 1.4;
 
    }
