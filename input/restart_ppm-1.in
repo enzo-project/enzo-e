@@ -1,0 +1,23 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/ppm.incl"
+
+Mesh { root_blocks    = [1,1]; }
+
+Stopping { cycle = 200; }
+Testing  {
+    time_final =  0.482994280941784; 
+    cycle_final = 200;
+}
+
+Output {
+
+  file_groups = ["restart"];
+
+  restart {
+     name = ["restart_ppm-1"];
+     type = "restart";
+     schedule = ["cycle","list",100];
+  }
+}

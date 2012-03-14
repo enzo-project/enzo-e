@@ -13,13 +13,11 @@ env['COPY'] = ''
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1; $COPY")
 run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1; $COPY")
-run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS 2>&1")
 make_movie   = Builder(action = "png2swf -r 5 -o $TARGET ${ARGS} ")
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
 env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
 env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
-env.Append(BUILDERS = { 'RunMethod'   : run_method } )
 
 env_mv_out  = env.Clone(COPY = 'mv `ls *.png *.h5` ' + test_path)
 env_mv_test = env.Clone(COPY = 'mv test*out test*in ' + test_path)
@@ -52,6 +50,16 @@ env.RunSerial('test_ItField.unit',   bin_path + '/test_ItField')
 # IO COMPONENT        
 #----------------------------------------------------------------------
 env.RunSerial('test_ItReduce.unit',      bin_path + '/test_ItReduce')
+
+# Restart tests
+
+restart_ppm_1_init = env.RunSerial ('test_restart_ppm-1-start.unit',bin_path + '/enzo-p', 
+                                 ARGS='input/restart_ppm-1.in')
+restart_ppm_1 = env.RunSerial ('test_restart_ppm-1.unit',bin_path + '/enzo-p', 
+                                 ARGS='restart_ppm-1.in')
+
+env.Requires(restart_ppm_1,restart_ppm_1_init)
+
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # MEMORY COMPONENT        
@@ -130,6 +138,8 @@ env.RunSerial('parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/pro
 # TEST FULL APPLICATION
 #----------------------------------------------------------------------
 
+# MethodPpm tests
+
 Clean(env_mv_out.RunSerial ('test_method_ppm-1.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppm-1.in'),
       [Glob('#/' + test_path + '/method_ppm-1-??????-*.png'),
@@ -139,7 +149,6 @@ Clean(env_mv_out.RunSerial ('test_method_ppm-1.unit',bin_path + '/enzo-p',
 env.MakeMovie ("method_ppm-1.swf", "test_method_ppm-1.unit", \
                 ARGS= test_path + "/method_ppm-1-??????.png");
 
-
 Clean(env_mv_out.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppm-8.in'),
       [Glob('#/' + test_path + '/method_ppm-8-??????-*.png'),
@@ -148,6 +157,8 @@ Clean(env_mv_out.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-p',
 
 env.MakeMovie ("method_ppm-8.swf", "test_method_ppm-8.unit", \
                 ARGS= test_path + "/method_ppm-8-??????.png");
+
+# MethodPpml tests
 
 Clean(env_mv_out.RunSerial ('test_method_ppml-1.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppml-1.in'),
@@ -179,8 +190,7 @@ env.MakeMovie ("method_ppml-8-z.swf", "test_method_ppml-8.unit", \
 # BOUNDARY CONDITIONS
 #----------------------------------------------------------------------
 
-# 2D
-
+# 2D tests
 
 Clean(env_mv_out.RunParallel ('test_boundary_reflecting-2d.unit',
                 bin_path + '/enzo-p', 
@@ -223,8 +233,8 @@ env.MakeMovie ("boundary_inflow-2d.swf","test_boundary_inflow-2d.unit", \
                 ARGS= test_path + "/boundary_inflow-2d-????.png");
 env.MakeMovie ("boundary_outflow-2d.swf","test_boundary_outflow-2d.unit", \
                 ARGS= test_path + "/boundary_outflow-2d-????.png");
-# 3D
 
+# 3D tests
 
 Clean(env_mv_out.RunParallel ('test_boundary_reflecting-3d.unit',
 		bin_path + '/enzo-p', 

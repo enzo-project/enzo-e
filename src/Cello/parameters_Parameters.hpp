@@ -230,9 +230,8 @@ private: // functions
   /// Display through monitor that a parameter was assigned a value
   void monitor_write_ (std::string parameter) throw();
 
-  /// Create a new parameter with the given grouping
-  void new_param_ ( char * group[],
-		    std::string parameter,
+  /// Create a new parameter with the given grouping and name
+  void new_param_ ( std::string full_parameter,
 		    Param * param ) throw();
 
   size_t extract_groups_( const std::string parameter, std::string * group);

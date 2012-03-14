@@ -86,7 +86,13 @@ void Parameters::read ( const char * file_name )
 
     param->set(node);
 
-    new_param_(node->group,node->parameter,param);
+    std::string full_parameter = "";
+    for (int i=0; node->group[i] != 0 && i < MAX_GROUP_DEPTH; i++) {
+      full_parameter = full_parameter + node->group[i] + ":";
+    }
+    full_parameter = full_parameter + node->parameter;
+
+    new_param_(full_parameter,param);
 
     node = node->next;
     
@@ -237,7 +243,7 @@ void Parameters::set_integer
 /// @param   parameter Parameter name
 /// @param   value     Value to set the parameter
 {
-  Param * param = parameter_(parameter);
+  Param * param = parameter_(parameter_name_(parameter));
 
   ASSERT1 ("Parameters::set_integer",
 	   "Parameter %s is not an integer", parameter.c_str(),
@@ -245,10 +251,7 @@ void Parameters::set_integer
 
   if ( ! param ) {
     param = new Param;
-    size_t ic = parameter.rfind(":");
-    std::string parameter_short = (ic == std::string::npos) ?
-      parameter : parameter.substr(ic+1,std::string::npos);
-    new_param_ (current_group_,parameter_short,param);
+    new_param_ (parameter_name_(parameter),param);
   }
 
   param->set_integer_(value);
@@ -293,10 +296,7 @@ void Parameters::set_float
 
   if ( ! param ) {
     param = new Param;
-    size_t ic = parameter.rfind(":");
-    std::string parameter_short = (ic == std::string::npos) ?
-      parameter : parameter.substr(ic+1,std::string::npos);
-    new_param_ (current_group_,parameter_short,param);
+    new_param_ (parameter_name_(parameter),param);
   }
 
   param->set_float_(value);
@@ -340,10 +340,7 @@ void Parameters::set_logical
 
   if ( ! param ) {
     param = new Param;
-    size_t ic = parameter.rfind(":");
-    std::string parameter_short = (ic == std::string::npos) ?
-      parameter : parameter.substr(ic+1,std::string::npos);
-    new_param_ (current_group_,parameter_short,param);
+    new_param_ (parameter_name_(parameter),param);
   }
 
   param->set_logical_(value);
@@ -385,10 +382,7 @@ void Parameters::set_string
 
   if ( ! param ) {
     param = new Param;
-    size_t ic = parameter.rfind(":");
-    std::string parameter_short = (ic == std::string::npos) ?
-      parameter : parameter.substr(ic+1,std::string::npos);
-    new_param_ (current_group_,parameter_short,param);
+    new_param_ (parameter_name_(parameter),param);
   }
 
   param->set_string_(strdup(value));
@@ -931,32 +925,24 @@ size_t Parameters::extract_groups_
 
 void Parameters::new_param_
 (
- char * group[],
- std::string parameter,
+ std::string full_parameter,
  Param * param
  ) throw()
 {
-
-  // @@@ Move into function: group[i] -> "group[0]:group[1]..."
-  //  std::string full_parameter = parameter_name_(parameter);
-   std::string full_parameter = "";
-   for (int i=0; group[i] != 0 && i < MAX_GROUP_DEPTH; i++) {
-     full_parameter = full_parameter + group[i] + ":";
-   }
-   full_parameter = full_parameter + parameter;
-  printf ("%s %s %s\n",group[0],parameter.c_str(),full_parameter.c_str());
-
-  // Insert parameter into the parameter mapping
-  // "Group:group[0]:group[1]:...:parameter" -> "Value"
-
-  parameter_map_     [full_parameter] = param;
+  parameter_map_ [full_parameter] = param;
     
-  // Insert parameter into the parameter tree "Group" -> "group[0]" ->
-  // "group[1]" -> ... -> "parameter"
+  std::string groups[MAX_GROUP_DEPTH];
+
+  int num_groups = extract_groups_(full_parameter,groups);
 
   ParamNode * param_node = parameter_tree_;
-  for (int i=0; group[i] != NULL && i < MAX_GROUP_DEPTH; i++) {
-    param_node = param_node->new_subnode(group[i]);
+  for (int i=0; i<num_groups; i++) {
+    param_node = param_node->new_subnode(groups[i]);
   }
-  param_node = param_node->new_subnode(parameter);
+  size_t ic = full_parameter.rfind(":");
+  std::string parameter = full_parameter;
+  if (ic != std::string::npos) {
+    parameter = full_parameter.substr(ic+1,std::string::npos);
+  }
+  param_node = param_node->new_subnode(full_parameter);
 }

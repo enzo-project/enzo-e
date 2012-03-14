@@ -83,6 +83,7 @@ void OutputRestart::write_simulation
     Parameters * parameters = simulation->parameters();
 
     // Update Initial parameters
+
     parameters->set_integer ("Initial:cycle",simulation->cycle());
     parameters->set_float   ("Initial:time", simulation->time());
 
