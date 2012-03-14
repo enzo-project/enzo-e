@@ -50,16 +50,6 @@ env.RunSerial('test_ItField.unit',   bin_path + '/test_ItField')
 # IO COMPONENT        
 #----------------------------------------------------------------------
 env.RunSerial('test_ItReduce.unit',      bin_path + '/test_ItReduce')
-
-# Restart tests
-
-restart_ppm_1_init = env.RunSerial ('test_restart_ppm-1-start.unit',bin_path + '/enzo-p', 
-                                 ARGS='input/restart_ppm-1.in')
-restart_ppm_1 = env.RunSerial ('test_restart_ppm-1.unit',bin_path + '/enzo-p', 
-                                 ARGS='restart_ppm-1.in')
-
-env.Requires(restart_ppm_1,restart_ppm_1_init)
-
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # MEMORY COMPONENT        
@@ -140,23 +130,48 @@ env.RunSerial('parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/pro
 
 # MethodPpm tests
 
+# serial
 Clean(env_mv_out.RunSerial ('test_method_ppm-1.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppm-1.in'),
-      [Glob('#/' + test_path + '/method_ppm-1-??????-*.png'),
-       Glob('#/' + test_path + '/method_ppm-1-??-??????.h5'),
-       'test_method_ppm-1.unit', '#/input/method_ppm-1.in.out'])
+      [Glob('#/' + test_path + '/method_ppm-1*.png'),
+       Glob('#/' + test_path + '/method_ppm-1*.h5'),
+        '#/input/method_ppm-1.in.out'])
 
 env.MakeMovie ("method_ppm-1.swf", "test_method_ppm-1.unit", \
-                ARGS= test_path + "/method_ppm-1-??????.png");
+                ARGS= test_path + "/method_ppm-1*.png");
+
+# parallel
 
 Clean(env_mv_out.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_ppm-8.in'),
-      [Glob('#/' + test_path + '/method_ppm-8-??????-*.png'),
-      Glob('#/' + test_path + '/method_ppm-8-??-??????.h5'),
-       'test_method_ppm-8.unit', '#/input/method_ppm-8.in.out'])
+      [Glob('#/' + test_path + '/method_ppm-8*.png'),
+      Glob('#/' + test_path + '/method_ppm-8*.h5'),
+      '#/input/method_ppm-8.in.out'])
 
 env.MakeMovie ("method_ppm-8.swf", "test_method_ppm-8.unit", \
-                ARGS= test_path + "/method_ppm-8-??????.png");
+                ARGS= test_path + "/method_ppm-8-*.png");
+
+# serial restart
+
+restart_ppm_1_init = env_mv_out.RunSerial (
+   'test_restart_ppm-1-start.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/restart_ppm-1.in')
+
+restart_ppm_1 = env_mv_out.RunSerial (
+   'test_restart_ppm-1.unit',
+   bin_path + '/enzo-p',
+   ARGS='restart_ppm-1.in')
+
+
+env.MakeMovie ("restart_ppm-1.swf", "test_restart_ppm-1.unit", \
+                ARGS= test_path + "/restart_ppm-1-*.png");
+
+Clean(restart_ppm_1,
+      [Glob('#/' + test_path + '/restart_ppm-1*.png'),
+      '#/input/restart_ppm-1.in.out'])
+
+env.Requires(restart_ppm_1,restart_ppm_1_init)
 
 # MethodPpml tests
 
@@ -164,7 +179,7 @@ Clean(env_mv_out.RunSerial ('test_method_ppml-1.unit',bin_path + '/enzo-p',
 		ARGS='input/method_ppml-1.in'),
       [Glob('#/' + test_path + '/method_ppml-1-?-????-*.png'),
        Glob('#/' + test_path + '/method_ppml-1-??-????-*.h5'),
-       'test_method_ppml-1.unit', '#/input/method_ppml-1.in.out'])
+       '#/input/method_ppml-1.in.out'])
 
 env.MakeMovie ("method_ppml-1-x.swf", "test_method_ppml-1.unit", \
                 ARGS= test_path + "/method_ppml-1-x-????.png");
@@ -177,7 +192,7 @@ Clean(env_mv_out.RunParallel ('test_method_ppml-8.unit',bin_path + '/enzo-p',
 		ARGS='input/method_ppml-8.in'),
       [Glob('#/' + test_path + '/method_ppml-8-?-????-*.png'),
        Glob('#/' + test_path + '/method_ppml-8-??-????-*.h5'),
-       'test_method_ppml-8.unit', '#/input/method_ppml-8.in.out'])
+       '#/input/method_ppml-8.in.out'])
 
 env.MakeMovie ("method_ppml-8-x.swf", "test_method_ppml-8.unit", \
                 ARGS= test_path + "/method_ppml-8-x-????.png");

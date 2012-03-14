@@ -5,15 +5,13 @@ include "input/ppm.incl"
 
 Mesh { root_blocks    = [1,1]; }
 
-Stopping { cycle = 200; }
-Testing  {
-    time_final =  0.482994280941784; 
-    cycle_final = 200;
-}
-
 Output {
 
-  file_groups = ["restart"];
+  file_groups = ["density","restart"];
+
+  density {
+     name = ["restart_ppm-1-%06d.png", "cycle"];
+  };
 
   restart {
      name = ["restart_ppm-1"];

@@ -80,13 +80,10 @@
 
    Boundary { type = "reflecting" }
 
-   Stopping {        cycle = 400;   }
+   Stopping {        cycle = 400;   } 
    Testing {   cycle_final = 400; }
 
-   Testing
-   {
-      time_final  = 1.03693807162344;
-   }
+   Testing {  time_final  = 1.03693807162344;  }
 
    Output { 
 
