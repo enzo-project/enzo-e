@@ -175,12 +175,12 @@ env.Requires(restart_ppm_1,restart_ppm_1_init)
 
 # parallel restart
 
-restart_ppm_8_init = env_mv_out.RunSerial (
+restart_ppm_8_init = env_mv_out.RunParallel (
    'test_restart_ppm-8-start.unit',
    bin_path + '/enzo-p', 
    ARGS='input/restart_ppm-8.in')
 
-restart_ppm_8 = env_mv_out.RunSerial (
+restart_ppm_8 = env_mv_out.RunParallel (
    'test_restart_ppm-8.unit',
    bin_path + '/enzo-p',
    ARGS='restart_ppm-8.in')
