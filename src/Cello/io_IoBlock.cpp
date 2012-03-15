@@ -19,11 +19,8 @@ IoBlock::IoBlock() throw ()
   meta_name_.push_back("cycle");
   meta_name_.push_back("time");
   meta_name_.push_back("dt");
-#ifdef CONFIG_USE_CHARM
-  meta_name_.push_back("index");
-#else
   meta_name_.push_back("num_field_blocks");
-#endif
+  meta_name_.push_back("index");
 }
 
 
@@ -58,30 +55,31 @@ void IoBlock::meta_value
 
     *buffer = (void *) & block_->cycle_;
     *type   = scalar_type_int;
+    *n0     = 1;
 
   } else if (index == 4) {
 
     *buffer = (void *) & block_->time_;
     *type   = scalar_type_double;
+    *n0     = 1;
 
   } else if (index == 5) {
 
     *buffer = (void *) & block_->dt_;
     *type   = scalar_type_double;
+    *n0     = 1;
 
   } else if (index == 6) {
 
-#ifdef CONFIG_USE_CHARM
-
     *buffer = (void *) & block_->num_field_blocks_;
     *type   = scalar_type_int;
+    *n0     = 3;
 
-#else 
+  } else if (index == 7) {
 
     *buffer = (void *) & block_->index_;
     *type   = scalar_type_int;
-
-#endif
+    *n0     = 3;
 
   }
 }

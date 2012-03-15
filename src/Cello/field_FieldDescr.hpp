@@ -163,16 +163,16 @@ private: // functions
 
 private: // attributes
 
-  /// String defining each field
+  /// String identifying each field
   std::vector<std::string> field_name_;
 
-  /// Integer id for each field.  Inverse mapping of field_name_
+  /// Index of each field in field_name_
   std::map<std::string,int> field_id_;
 
-  /// String defining each group
+  /// String identifying each group
   std::vector<std::string> group_name_;
 
-  /// Integer id for each group.  Inverse mapping of group_name_
+  /// Index of each group in group_name_
   std::map<std::string,int> group_id_;
 
   typedef std::set<int> int_set_type;

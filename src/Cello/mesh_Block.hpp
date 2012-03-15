@@ -214,13 +214,14 @@ protected: // functions
 
 protected: // attributes
 
+  /// Number of field blocks (required by CHARM++ PUP::er)
+  int num_field_blocks_;
+
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;
 
-#ifndef CONFIG_USE_CHARM
   /// Index into Patch [redundant with CHARM thisIndex.x .y .z]
   int index_[3];
-#endif
 
   /// Size of Patch
   int size_[3];
@@ -233,21 +234,6 @@ protected: // attributes
 
   //--------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
-  /// Number of field blocks: used for CHARM++ PUP::er
-  int num_field_blocks_;
-
-  /// Counter when refreshing 6 faces at once
-  int count_refresh_face_;
-
-  /// Counter when refreshing x-, y-, and z-axes sequentially
-  int count_refresh_face_x_;
-  int count_refresh_face_y_;
-  int count_refresh_face_z_;
-
-#endif
-
   //--------------------------------------------------
 
   /// Current cycle number
@@ -259,6 +245,15 @@ protected: // attributes
   /// Current timestep
   double dt_;
 
+  //--------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+  /// Counter when refreshing faces
+  int count_refresh_face_;
+
+#endif
+
 #ifdef CONFIG_USE_CHARM
 
 public: // CHARM++ PUPer
@@ -266,8 +261,6 @@ public: // CHARM++ PUPer
   /// Pack / unpack the Block in a CHARM++ program
   void pup(PUP::er &p)
   {
-    TRACE1("Block::pup() %s", p.isUnpacking() ? "unpacking":"packing" );
-
     p | num_field_blocks_;
 
     // allocate field_block_[] vector first if unpacking
@@ -279,21 +272,20 @@ public: // CHARM++ PUPer
       p | *field_block_[i];
     }
 
+    PUParray(p,index_,3);
+
     PUParray(p,size_,3);
 
     PUParray(p,lower_,3);
 
     PUParray(p,upper_,3);
 
-    p | count_refresh_face_;
-
-    p | count_refresh_face_x_;
-    p | count_refresh_face_y_;
-    p | count_refresh_face_z_;
-
     p | cycle_;
     p | time_;
     p | dt_;
+
+    p | count_refresh_face_;
+
   }
 
 #endif

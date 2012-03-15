@@ -22,16 +22,15 @@ Block::Block
  double xb, double yb, double zb,    // Block width
  int num_field_blocks) throw ()
   :  field_block_(),
-#ifdef CONFIG_USE_CHARM
      num_field_blocks_(num_field_blocks),
-     count_refresh_face_(0),
-     count_refresh_face_x_(0),
-     count_refresh_face_y_(0),
-     count_refresh_face_z_(0),
-#endif
      cycle_(0),
      time_(0),
-     dt_(0)
+#ifdef CONFIG_USE_CHARM
+    dt_(0),
+    count_refresh_face_(0)
+#else
+    dt_(0)
+#endif
 
 { 
 #ifdef CONFIG_USE_CHARM
@@ -47,25 +46,15 @@ Block::Block
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i] = new FieldBlock (nx,ny,nz);
   }
-
   // Initialize indices into parent patch
-
-#ifdef CONFIG_USE_CHARM
-  // WARNING: this constructor should only be called by test code
-  ibx = 0;
-  iby = 0;
-  ibz = 0;
-#endif
 
   size_[0] = nbx;
   size_[1] = nby;
   size_[2] = nbz;
 
-#ifndef CONFIG_USE_CHARM
   index_[0] = ibx;
   index_[1] = iby;
   index_[2] = ibz;
-#endif
 
   // Initialize extent 
 
@@ -91,13 +80,14 @@ Block::Block
  int num_field_blocks) throw ()
   : field_block_(),
     num_field_blocks_(num_field_blocks),
-    count_refresh_face_(0),
-    count_refresh_face_x_(0),
-    count_refresh_face_y_(0),
-    count_refresh_face_z_(0),
     cycle_(0),
     time_(0),
+#ifdef CONFIG_USE_CHARM
+    dt_(0),
+    count_refresh_face_(0)
+#else
     dt_(0)
+#endif
 
 { 
 #ifdef CONFIG_CHARM_ATSYNC
@@ -120,11 +110,9 @@ Block::Block
   size_[1] = nby;
   size_[2] = nbz;
 
-#ifndef CONFIG_USE_CHARM
   index_[0] = ibx;
   index_[1] = iby;
   index_[2] = ibz;
-#endif
 
   // Initialize extent 
 
@@ -147,9 +135,7 @@ Block::~Block() throw ()
     delete field_block_[i];
     field_block_[i] = 0;
   }
-#ifdef CONFIG_USE_CHARM
   num_field_blocks_ = 0;
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -189,26 +175,16 @@ FieldBlock * Block::field_block (int i) throw()
 
 int Block::index () const throw ()
 {
-#ifdef CONFIG_USE_CHARM
-  return thisIndex.x + size_[0] * (thisIndex.y + size_[1] * thisIndex.z);
-#else
   return index_[0] + size_[0] * (index_[1] + size_[1] * index_[2]);
-#endif
 }
 
 //----------------------------------------------------------------------
 
 void Block::index_patch (int * ix, int * iy, int * iz) const throw ()
 {
-#ifdef CONFIG_USE_CHARM
-  if (ix) (*ix) = thisIndex.x;
-  if (iy) (*iy) = thisIndex.y;
-  if (iz) (*iz) = thisIndex.z;
-#else
   if (ix) (*ix) = index_[0]; 
   if (iy) (*iy) = index_[1]; 
   if (iz) (*iz) = index_[2]; 
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -231,7 +207,6 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 			   int fx, int fy, int fz,
 			   int index_field_set) throw()
 {
-  // TRACE3("%d %d %d",fx,fy,fz);
   int ibx,iby,ibz;
   index_patch(&ibx,&iby,&ibz);
   field_block_[index_field_set]
@@ -966,14 +941,28 @@ void Block::compute()
 void Block::copy_(const Block & block) throw()
 {
 
-  // Create a copy of field_block_
+  num_field_blocks_ = block.num_field_blocks_;
+
   field_block_.resize(block.field_block_.size());
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i] = new FieldBlock (*(block.field_block_[i]));
   }
+
+  for (int i=0; i<3; i++) {
+    index_[i] = block.index_[i];
+    size_[i] = block.size_[i];
+    lower_[i] = block.lower_[i];
+    upper_[i] = block.upper_[i];
+  }
+
+  cycle_ = block.cycle_;
+  time_ = block.time_;
+  dt_ = block.dt_;
+
 #ifdef CONFIG_USE_CHARM
-  num_field_blocks_ = block.num_field_blocks_;
+  count_refresh_face_ = block.count_refresh_face_;
 #endif
+  
 }
 
 //----------------------------------------------------------------------

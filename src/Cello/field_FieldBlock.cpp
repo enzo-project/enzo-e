@@ -15,7 +15,7 @@ FieldBlock::FieldBlock ( int nx, int ny, int nz ) throw()
 #ifdef CONFIG_USE_CHARM
     num_fields_(),
 #endif
-    field_values_(),
+    offsets_(),
     ghosts_allocated_(false)
 {
   if (nx != 0) {
@@ -67,12 +67,12 @@ char * FieldBlock::field_values ( int id_field )
   throw (std::out_of_range)
 {
   char * field = 0;
-  if (unsigned(id_field) < field_values_.size()) {
-    field = field_values_.at(id_field);
+  if (unsigned(id_field) < offsets_.size()) {
+    field = array_ + offsets_[id_field];
   }
   ASSERT3 ("FieldBlock::field_values()",
 	   "Trying to access invalid field id %d out of %d in FieldBlock %p",
-	   id_field,field_values_.size(),this,
+	   id_field,offsets_.size(),this,
 	   field != NULL);
   return field;
 }
@@ -82,8 +82,8 @@ char * FieldBlock::field_values ( int id_field )
 const char * FieldBlock::field_values ( int id_field ) const 
   throw (std::out_of_range)
 {
-  return (unsigned(id_field) < field_values_.size()) ? 
-    field_values_.at(id_field) : NULL;
+  return (unsigned(id_field) < offsets_.size()) ? 
+    array_ + offsets_[id_field] : NULL;
 }
 
 //----------------------------------------------------------------------
@@ -106,7 +106,7 @@ char * FieldBlock::field_unknowns
  int id_field 
  ) throw (std::out_of_range)
 {
-  char * field_unknowns = field_values_.at(id_field);
+  char * field_unknowns = array_ + offsets_[id_field];
 
   if ( ghosts_allocated() ) {
 
@@ -178,20 +178,21 @@ void FieldBlock::clear
       int nx,ny,nz;
       field_size(field_descr,id_field,&nx,&ny,&nz);
       precision_enum precision = field_descr->precision(id_field);
+      char * array = array_ + offsets_[id_field];
       switch (precision) {
       case precision_single:
 	for (int i=0; i<nx*ny*nz; i++) {
-	  ((float *)field_values_[id_field])[i] = (float) value;
+	  ((float *) array)[i] = (float) value;
 	}
 	break;
       case precision_double:
 	for (int i=0; i<nx*ny*nz; i++) {
-	  ((double *)field_values_[id_field])[i] = (double) value;
+	  ((double *) array)[i] = (double) value;
 	}
 	break;
       case precision_quadruple:
 	for (int i=0; i<nx*ny*nz; i++) {
-	  ((long double *)field_values_[id_field])[i] = (long double) value;
+	  ((long double *) array)[i] = (long double) value;
 	}
 	break;
       default:
@@ -224,45 +225,43 @@ void FieldBlock::allocate_array(const FieldDescr * field_descr) throw()
     int padding   = field_descr->padding();
     int alignment = field_descr->alignment();
 
-    int array_size = 0;
+    array_size_ = 0;
 
     for (int id_field=0; id_field<field_descr->field_count(); id_field++) {
 
-      // Increment array_size, including padding and alignment adjustment
+      // Increment array_size_, including padding and alignment adjustment
 
       int nx,ny,nz;       // not needed
 
       int size = field_size(field_descr,id_field, &nx,&ny,&nz);
 
-      array_size += adjust_padding_   (size,padding);
-      array_size += adjust_alignment_ (size,alignment);
+      array_size_ += adjust_padding_   (size,padding);
+      array_size_ += adjust_alignment_ (size,alignment);
 
     }
 
     // Adjust for possible initial misalignment
 
-    array_size += alignment - 1;
+    array_size_ += alignment - 1;
 
     // Allocate the array
 
-    array_ = new char [array_size];
+    array_ = new char [array_size_];
 
     // Initialize field_begin
 
-    char * field_begin = array_ + align_padding_(array_,alignment);
+    int field_offset = align_padding_(array_,alignment);
 
-    int field_offset = 0;
-
-    field_values_.reserve(field_descr->field_count());
+    offsets_.reserve(field_descr->field_count());
 #ifdef CONFIG_USE_CHARM
     num_fields_ = field_descr->field_count();
 #endif
 
     for (int id_field=0; id_field<field_descr->field_count(); id_field++) {
 
-      field_values_.push_back(field_begin + field_offset);
+      offsets_.push_back(field_offset);
 
-      // Increment array_size, including padding and alignment adjustment
+      // Increment array_size_, including padding and alignment adjustment
 
       int nx,ny,nz;       // not needed
 
@@ -272,10 +271,10 @@ void FieldBlock::allocate_array(const FieldDescr * field_descr) throw()
       field_offset += adjust_alignment_(size,alignment);
     }
 
-    // check if array_size is too big or too small
+    // check if array_size_ is too big or too small
 
-    if ( ! ( 0 <= (array_size - field_offset)
-	     &&   (array_size - field_offset) < alignment)) {
+    if ( ! ( 0 <= (array_size_ - field_offset)
+	     &&   (array_size_ - field_offset) < alignment)) {
       ERROR ("FieldBlock::allocate_array",
 		     "Code error: array size was computed incorrectly");
     };
@@ -294,7 +293,7 @@ void FieldBlock::deallocate_array () throw()
 
     delete [] array_;
     array_ = 0;
-    field_values_.clear();
+    offsets_.clear();
 #ifdef CONFIG_USE_CHARM
     num_fields_ = 0;
 #endif
@@ -326,19 +325,19 @@ void FieldBlock::allocate_ghosts(const FieldDescr * field_descr) throw ()
 {
   if (! ghosts_allocated() ) {
 
-    std::vector<char *> old_field_values;
-    char *              old_array;
+    std::vector<int> old_offsets;
+    char *           old_array;
 
     old_array = array_;
     array_ = 0;
 
-    backup_array_ (field_descr,old_field_values);
+    backup_array_ (field_descr,old_offsets);
 
     ghosts_allocated_ = true;
 
     allocate_array(field_descr);
 
-    restore_array_ (field_descr, old_field_values);
+    restore_array_ (field_descr, old_offsets);
 
     delete [] old_array;
 
@@ -354,19 +353,19 @@ void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 {
   if ( ghosts_allocated() ) {
 
-    std::vector<char *> old_field_values;
-    char *              old_array;
+    std::vector<int> old_offsets;
+    char *           old_array;
 
     old_array = array_;
     array_ = 0;
 
-    backup_array_ (field_descr,old_field_values);
+    backup_array_ (field_descr,old_offsets);
 
     ghosts_allocated_ = false;
 
     allocate_array(field_descr);
 
-    restore_array_ (field_descr, old_field_values);
+    restore_array_ (field_descr, old_offsets);
 
     delete [] old_array;
 
@@ -639,7 +638,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
      switch (field_descr->precision(index_field)) {
      case precision_single:
        {
-	 float * field = (float * ) field_values(index_field);
+	 float * field = (float * ) array_[offsets_[index_field]];
 	 float min = std::numeric_limits<float>::max();
 	 float max = std::numeric_limits<float>::min();
 	 double sum = 0.0;
@@ -674,7 +673,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
        break;
      case precision_double:
        {
-	 double * field = (double * ) field_values(index_field);
+	 double * field = (double * ) array_[offsets_[index_field]];
 	 double min = std::numeric_limits<double>::max();
 	 double max = std::numeric_limits<double>::min();
 	 double sum = 0.0;
@@ -710,7 +709,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
      case precision_quadruple:
        {
 	 long double * field = 
-	   (long double * ) field_values(index_field);
+	   (long double * ) array_[offsets_[index_field]];
 	 long double min = std::numeric_limits<long double>::max();
 	 long double max = std::numeric_limits<long double>::min();
 	 long double sum = 0.0;
@@ -754,14 +753,14 @@ void FieldBlock::print (const FieldDescr * field_descr,
 
 void FieldBlock::backup_array_ 
 ( const FieldDescr * field_descr,
-  std::vector<char *> & old_field_values )
+  std::vector<int> & old_offsets )
 {
-  // save old field_values_
+  // save old offsets_
 
   for (int i=0; i<field_descr->field_count(); i++) {
-    old_field_values.push_back(field_values_[i]);
+    old_offsets.push_back(offsets_[i]);
   }
-  field_values_.clear();
+  offsets_.clear();
 #ifdef CONFIG_USE_CHARM
   num_fields_ = 0;
 #endif
@@ -772,7 +771,7 @@ void FieldBlock::backup_array_
 
 void FieldBlock::restore_array_ 
 ( const FieldDescr * field_descr,
-  std::vector<char *> & field_values_from) throw (std::out_of_range)
+  std::vector<int> & offsets_from) throw (std::out_of_range)
 {
   // copy values
   for (int id_field=0; 
@@ -817,8 +816,8 @@ void FieldBlock::restore_array_
 
     // determine array start
 
-    char * array1 = field_values_from.at(id_field) + offset1;
-    char * array2 = field_values_.at(id_field)     + offset2;
+    char * array1 = array_ + offsets_from.at(id_field) + offset1;
+    char * array2 = array_ + offsets_.at(id_field)     + offset2;
 
     // copy values (use memcopy?)
 
@@ -835,5 +834,5 @@ void FieldBlock::restore_array_
     }
   }
 
-  field_values_from.clear();
+  offsets_from.clear();
 }

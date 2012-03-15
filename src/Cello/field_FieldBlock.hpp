@@ -141,37 +141,35 @@ private: // functions
   /// aligned
   int align_padding_ (char * start, int alignment) const throw();
 
-  /// Move (not copy) array_ to array and field_values_ to
-  /// field_values
+  /// Move (not copy) array_ to array and offsets_ to
+  /// offsets
   void backup_array_  ( const FieldDescr * field_descr,
-			std::vector<char *> & field_values );
+			std::vector<int> & offsets );
 
-  /// Move (not copy) array to array_ and field_values to
-  /// field_values_
+  /// Move (not copy) array to array_ and offsets to
+  /// offsets_
   void restore_array_ ( const FieldDescr * field_descr,
-			std::vector<char *> & field_values )
+			std::vector<int> & offsets )
     throw (std::out_of_range);
 
   //----------------------------------------------------------------------
 
 private: // attributes
 
-  // /// Corresponding Field faces
-  // FieldFaces * field_faces_;
-
   /// Size of fields on the block, assuming centered
   int size_[3];
+
+  /// Length of array_ field in bytes
+  int array_size_;
 
   /// Allocated array of field values
   char * array_;
 
-#ifdef CONFIG_USE_CHARM
-  /// Redundant size of the field_values_ vector
+  /// Redundant size of the field_offsets_ vector (for CHARM++ pup)
   int num_fields_;
-#endif
 
-  /// Pointers into values_ of the first element of each field
-  std::vector<char *> field_values_;
+  /// Offsets into values_ of the first element of each field
+  std::vector<int> offsets_;
 
   /// Whether ghost values are allocated or not (make [3] for
   /// directionally split?)
@@ -185,24 +183,21 @@ public: // CHARM++ PUPer
   {
     INCOMPLETE("FieldBlock::pup()");
 
-    TRACE1("FieldBlock::pup() %s", p.isUnpacking() ? "unpacking":"packing");
-
     PUParray(p,size_,3);
 
-    int n = size_[0]*size_[1]*size_[2];
+    p | array_size_;
 
-    // Allocate array if unpacking
-    if (p.isUnpacking()) array_ = new char[n];
+    if (p.isUnpacking()) array_ = new char[array_size_];
 
-    PUParray(p,array_,n);
+    PUParray(p,array_,array_size_);
   
     p | num_fields_;
 
   /// Pointers into values_ of the first element of each field
-    if (p.isUnpacking()) field_values_.resize(num_fields_);
+    if (p.isUnpacking()) offsets_.resize(num_fields_);
 
     for (int i=0; i<num_fields_; i++) {
-      p | *field_values_[i];
+      p | offsets_[i];
     }
 
     p | ghosts_allocated_;

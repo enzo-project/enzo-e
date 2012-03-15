@@ -16,6 +16,10 @@ IoFieldBlock::IoFieldBlock() throw ()
     field_index_(0)
 
 {
+  meta_name_.push_back("size");
+  meta_name_.push_back("array_size");
+  meta_name_.push_back("num_fields");
+  meta_name_.push_back("ghosts_allocated");
 }
 
 
