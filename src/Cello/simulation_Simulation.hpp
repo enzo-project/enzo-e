@@ -21,11 +21,13 @@ class Problem;
 #ifdef CONFIG_USE_CHARM
 #  include "mesh.decl.h"
 #  include "simulation.decl.h"
-   class Simulation : public CBase_Simulation {
-#else
-   class Simulation {
 #endif
 
+class Simulation 
+#ifdef CONFIG_USE_CHARM
+   : public CBase_Simulation 
+#endif
+{
   /// @class    Simulation
   /// @ingroup  Simulation
   /// @brief    [\ref Simulation] Class specifying a simulation to run
@@ -164,9 +166,6 @@ public: // interface
   bool stop() const throw() 
   { return stop_; };
 
-  /// Update Simulation cycle, time, timestep, and stopping criteria
-  void update_cycle(int cycle, double time, double dt, double stop) ;
-
   /// Output Simulation information
   void monitor_output() const ;
 
@@ -174,6 +173,9 @@ public: // interface
   void performance_output() const ;
 
 public: // virtual functions
+
+  /// Update Simulation cycle, time, timestep, and stopping criteria
+  virtual void update_cycle(int cycle, double time, double dt, double stop) ;
 
   /// initialize the Simulation given a parameter file
   virtual void initialize() throw();

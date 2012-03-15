@@ -73,7 +73,6 @@ void EnzoSimulation::finalize() throw()
 {
 }
 
-
 //----------------------------------------------------------------------
 
 const Factory * EnzoSimulation::factory() const throw()

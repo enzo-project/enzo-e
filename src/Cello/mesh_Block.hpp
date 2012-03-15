@@ -59,16 +59,15 @@ public: // interface
   void p_initial();
 
   /// Refresh ghost zones and apply boundary conditions
-  void p_refresh(int cycle, double time, double dt, int axis_set);
+  void p_refresh(int cycle, double time, double dt);
 
   /// Apply the numerical methods on the block
-  void p_compute(int cycle, double time, double dt, int axis_set);
+  void p_compute(int cycle, double time, double dt);
 
   ///
 
   /// Refresh a FieldFace
-  void p_refresh_face(int n, char buffer[], int axis_set,
-		      int fx, int fy, int fz);
+  void p_refresh_face(int n, char buffer[],int fx, int fy, int fz);
 
   /// Contribute block data to ith output object in the simulation
   void p_write (int index_output);
@@ -82,13 +81,13 @@ public: // interface
   //--------------------------------------------------
 
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
-  void prepare(int axis_set);
+  void prepare();
 
   /// Implementation of refresh
-  void refresh(int axis_set);
+  void refresh();
 
   /// Boundary and Method
-  void compute(int axis_set);
+  void compute();
 
   //==================================================
 
@@ -197,8 +196,7 @@ protected: // functions
    bool * aym,
    bool * ayp,
    bool * azm,
-   bool * azp,
-   int axis_set
+   bool * azp
    );
 
   void update_boundary_ 
@@ -209,8 +207,8 @@ protected: // functions
    bool aym,
    bool ayp,
    bool azm,
-   bool azp,
-   int axis_set);
+   bool azp
+   );
 
 #endif
 

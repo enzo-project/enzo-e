@@ -305,7 +305,7 @@ void Block::p_initial()
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::prepare(int axis_set)
+void Block::prepare()
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -316,8 +316,8 @@ void Block::prepare(int axis_set)
 
   bool is_boundary[3][2];
   bool axm,axp,aym,ayp,azm,azp;
-  determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp,axis_set);
-  update_boundary_(is_boundary,axm,axp,aym,ayp,azm,azp,axis_set);
+  determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp);
+  update_boundary_(is_boundary,axm,axp,aym,ayp,azm,azp);
 
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -406,7 +406,7 @@ void Block::p_call_output(CkReductionMsg * msg)
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_refresh (int cycle, double time, double dt, int axis_set)
+void Block::p_refresh (int cycle, double time, double dt)
 {
   cycle_ = cycle;
   time_  = time;
@@ -415,11 +415,11 @@ void Block::p_refresh (int cycle, double time, double dt, int axis_set)
   set_time(time);
   set_cycle(cycle);
 
-  refresh(axis_set);
+  refresh();
 }
 
 //----------------------------------------------------------------------
-void Block::p_compute (int cycle, double time, double dt, int axis_set)
+void Block::p_compute (int cycle, double time, double dt)
 {
   cycle_ = cycle;
   time_  = time;
@@ -428,7 +428,7 @@ void Block::p_compute (int cycle, double time, double dt, int axis_set)
   set_time(time);
   set_cycle(cycle);
 
-  compute(axis_set);
+  compute();
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -439,18 +439,18 @@ void Block::p_compute (int cycle, double time, double dt, int axis_set)
 void Block::p_call_refresh()
 {
   TRACE("p_call_refresh");
-  refresh(axis_all);
+  refresh();
 }
 
 //--------------------------------------------------
 
-void Block::refresh (int axis_set)
+void Block::refresh ()
 {
 
   bool is_boundary[3][2];
   bool axm,axp,aym,ayp,azm,azp;
 
-  determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp,axis_set);
+  determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp);
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -501,42 +501,42 @@ void Block::refresh (int axis_set)
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, 0, 0);
       block_array(ixm,iy,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, 0, 0);
+	(field_face.size(), field_face.array(), +1, 0, 0);
     }
     if ( axp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, 0, 0);
       block_array(ixp,iy,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, 0, 0);
+	(field_face.size(), field_face.array(), -1, 0, 0);
     }
     if ( aym ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, -1, 0);
       block_array(ix,iym,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, +1, 0);
+	(field_face.size(), field_face.array(), 0, +1, 0);
     }
     if ( ayp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, +1, 0);
       block_array(ix,iyp,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, -1, 0);
+	(field_face.size(), field_face.array(), 0, -1, 0);
     }
     if ( azm ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, 0, -1);
       block_array(ix,iy,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, 0, +1);
+	(field_face.size(), field_face.array(), 0, 0, +1);
     }
     if ( azp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, 0, +1);
       block_array(ix,iy,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, 0, -1);
+	(field_face.size(), field_face.array(), 0, 0, -1);
     }
   }
 
@@ -548,28 +548,28 @@ void Block::refresh (int axis_set)
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, -1, 0);
       block_array(ixm,iym,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, +1, 0);
+	(field_face.size(), field_face.array(), +1, +1, 0);
     }
     if ( axm && ayp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, +1, 0);
       block_array(ixm,iyp,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, -1, 0);
+	(field_face.size(), field_face.array(), +1, -1, 0);
     }
     if ( axp && aym ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, -1, 0);
       block_array(ixp,iym,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, +1, 0);
+	(field_face.size(), field_face.array(), -1, +1, 0);
     }
     if ( axp && ayp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, +1, 0);
       block_array(ixp,iyp,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, -1, 0);
+	(field_face.size(), field_face.array(), -1, -1, 0);
     }
 
     if ( aym && azm ) {
@@ -577,28 +577,28 @@ void Block::refresh (int axis_set)
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, -1, -1);
       block_array(ix,iym,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, +1, +1);
+	(field_face.size(), field_face.array(), 0, +1, +1);
     }
     if ( aym && azp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, -1, +1);
       block_array(ix,iym,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, +1, -1);
+	(field_face.size(), field_face.array(), 0, +1, -1);
     }
     if ( ayp && azm ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, +1, -1);
       block_array(ix,iyp,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, -1, +1);
+	(field_face.size(), field_face.array(), 0, -1, +1);
     }
     if ( ayp && azp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, +1, +1);
       block_array(ix,iyp,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, 0, -1, -1);
+	(field_face.size(), field_face.array(), 0, -1, -1);
     }
 
     if ( axm && azm ) {
@@ -606,28 +606,28 @@ void Block::refresh (int axis_set)
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, 0, -1);
       block_array(ixm,iy,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, 0, +1);
+	(field_face.size(), field_face.array(), +1, 0, +1);
     }
     if ( axp && azm ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, 0, -1);
       block_array(ixp,iy,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, 0, +1);
+	(field_face.size(), field_face.array(), -1, 0, +1);
     }
     if ( axm && azp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, 0, +1);
       block_array(ixm,iy,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, 0, -1);
+	(field_face.size(), field_face.array(), +1, 0, -1);
     }
     if ( axp && azp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, 0, +1);
       block_array(ixp,iy,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, 0, -1);
+	(field_face.size(), field_face.array(), -1, 0, -1);
     }
   }
 
@@ -640,56 +640,56 @@ void Block::refresh (int axis_set)
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, -1, -1);
       block_array(ixm,iym,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, +1, +1);
+	(field_face.size(), field_face.array(), +1, +1, +1);
     }
     if ( axm && aym && azp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, -1, +1);
       block_array(ixm,iym,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, +1, -1);
+	(field_face.size(), field_face.array(), +1, +1, -1);
     }
     if ( axm && ayp && azm ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, +1, -1);
       block_array(ixm,iyp,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, -1, +1);
+	(field_face.size(), field_face.array(), +1, -1, +1);
     }
     if ( axm && ayp && azp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, +1, +1);
       block_array(ixm,iyp,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, +1, -1, -1);
+	(field_face.size(), field_face.array(), +1, -1, -1);
     }
     if ( axp && aym && azm ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, -1, -1);
       block_array(ixp,iym,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, +1, +1);
+	(field_face.size(), field_face.array(), -1, +1, +1);
     }
     if ( axp && aym && azp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, -1, +1);
       block_array(ixp,iym,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, +1, -1);
+	(field_face.size(), field_face.array(), -1, +1, -1);
     }
     if ( axp && ayp && azm ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, +1, -1);
       block_array(ixp,iyp,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, -1, +1);
+	(field_face.size(), field_face.array(), -1, -1, +1);
     }
     if ( axp && ayp && azp ) {
       FieldFace field_face;
       field_face.include_ghosts(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, +1, +1);
       block_array(ixp,iyp,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), axis_set, -1, -1, -1);
+	(field_face.size(), field_face.array(), -1, -1, -1);
     }
   }
 
@@ -697,7 +697,7 @@ void Block::refresh (int axis_set)
   // it will never get called.  So every block also calls
   // p_refresh_face() itself with a null array
 
-  p_refresh_face (0,0,axis_set, 0, 0, 0);
+  p_refresh_face (0,0,0, 0, 0);
 
 }
 #endif /* CONFIG_USE_CHARM */
@@ -714,8 +714,7 @@ void Block::determine_boundary_
  bool * aym,
  bool * ayp,
  bool * azm,
- bool * azp,
- int axis_set
+ bool * azp
  )
 {
   
@@ -736,12 +735,12 @@ void Block::determine_boundary_
 
   // Determine in which directions we need to communicate or update boundary
 
-  *axm = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
-  *axp = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
-  *aym = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
-  *ayp = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
-  *azm = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
-  *azp = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+  *axm = nx > 1;
+  *axp = nx > 1;
+  *aym = ny > 1;
+  *ayp = ny > 1;
+  *azm = nz > 1;
+  *azp = nz > 1;
 }
 
 #endif
@@ -759,8 +758,7 @@ void Block::update_boundary_
  bool aym,
  bool ayp,
  bool azm,
- bool azp,
- int axis_set
+ bool azp
 )
 {
 
@@ -798,8 +796,7 @@ void Block::update_boundary_
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_refresh_face (int n, char * buffer, int axis_set, 
-			    int fx, int fy, int fz)
+void Block::p_refresh_face (int n, char * buffer, int fx, int fy, int fz)
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -832,12 +829,12 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
 
   // Determine axes that may be neighbors
 
-  bool axm = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
-  bool aym = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
-  bool azm = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
-  bool axp = (axis_set == axis_all || axis_set == axis_x) && nx > 1;
-  bool ayp = (axis_set == axis_all || axis_set == axis_y) && ny > 1;
-  bool azp = (axis_set == axis_all || axis_set == axis_z) && nz > 1;
+  bool axm = nx > 1;
+  bool aym = ny > 1;
+  bool azm = nz > 1;
+  bool axp = nx > 1;
+  bool ayp = ny > 1;
+  bool azp = nz > 1;
 
   // Adjust for boundary faces
 
@@ -910,31 +907,9 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
   // Compute
   //--------------------------------------------------
 
-  switch (axis_set) {
-  case axis_x:
-    if (++count_refresh_face_x_ >= count) {
-      count_refresh_face_x_ = 0;
-      refresh (axis_y);
-    }
-    break;
-  case axis_y:
-    if (++count_refresh_face_y_ >= count) {
-      count_refresh_face_y_ = 0;
-      refresh (axis_z);
-    }
-    break;
-  case axis_z:
-    if (++count_refresh_face_z_ >= count) {
-      count_refresh_face_z_ = 0;
-      prepare(axis_set);
-    }
-    break;
-  case axis_all:
-    if (++count_refresh_face_ >= count) {
-      count_refresh_face_ = 0;
-      prepare(axis_set);
-    }
-    break;
+  if (++count_refresh_face_ >= count) {
+    count_refresh_face_ = 0;
+    prepare();
   }
 }
 #endif /* CONFIG_USE_CHARM */
@@ -947,7 +922,7 @@ void Block::p_refresh_face (int n, char * buffer, int axis_set,
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::compute(int axis_set)
+void Block::compute()
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -981,14 +956,14 @@ void Block::compute(int axis_set)
 
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 
-  refresh(axis_set);
+  refresh();
 
 }
 #endif /* CONFIG_USE_CHARM */
 
 //======================================================================
 
-  void Block::copy_(const Block & block) throw()
+void Block::copy_(const Block & block) throw()
 {
 
   // Create a copy of field_block_
