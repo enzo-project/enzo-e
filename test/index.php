@@ -453,8 +453,9 @@ for ($k = 0; $k < 6; $k ++) {
 test_summary("Enzo-PPM",
 	     array("method_ppm-1",
 		   "method_ppm-8",
-		   "restart_ppm-1"),
-	     array("enzo-p",  "enzo-p", "enzo-p"));
+                   "restart_ppm-1",
+		   "restart_ppm-8"),
+	     array("enzo-p",  "enzo-p", "enzo-p", "enzo-p"));
 
 test_summary("Enzo-PPML",
 	     array("method_ppml-1",
@@ -562,6 +563,16 @@ echo "<h3>PPM (serial restart) </h3>";
 tests("Enzo","enzo-p","test_restart_ppm-1","");
 
 test_table ("restart_ppm-1",
+	    array("000000","000200","000400"), $types);
+
+//----------------------------------------------------------------------
+
+echo "<h3>PPM (parallel restart) </h3>";
+
+
+tests("Enzo","enzo-p","test_restart_ppm-8","");
+
+test_table ("restart_ppm-8",
 	    array("000000","000200","000400"), $types);
 
    //======================================================================

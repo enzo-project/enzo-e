@@ -173,6 +173,28 @@ Clean(restart_ppm_1,
 
 env.Requires(restart_ppm_1,restart_ppm_1_init)
 
+# parallel restart
+
+restart_ppm_8_init = env_mv_out.RunSerial (
+   'test_restart_ppm-8-start.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/restart_ppm-8.in')
+
+restart_ppm_8 = env_mv_out.RunSerial (
+   'test_restart_ppm-8.unit',
+   bin_path + '/enzo-p',
+   ARGS='restart_ppm-8.in')
+
+
+env.MakeMovie ("restart_ppm-8.swf", "test_restart_ppm-8.unit", \
+                ARGS= test_path + "/restart_ppm-8-*.png");
+
+Clean(restart_ppm_8,
+      [Glob('#/' + test_path + '/restart_ppm-8*.png'),
+      '#/input/restart_ppm-8.in.out'])
+
+env.Requires(restart_ppm_8,restart_ppm_8_init)
+
 # MethodPpml tests
 
 Clean(env_mv_out.RunSerial ('test_method_ppml-1.unit',bin_path + '/enzo-p', 
