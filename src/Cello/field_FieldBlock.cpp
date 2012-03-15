@@ -337,7 +337,7 @@ void FieldBlock::allocate_ghosts(const FieldDescr * field_descr) throw ()
 
     allocate_array(field_descr);
 
-    restore_array_ (field_descr, old_offsets);
+    restore_array_ (field_descr, old_array, old_offsets);
 
     delete [] old_array;
 
@@ -365,7 +365,7 @@ void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 
     allocate_array(field_descr);
 
-    restore_array_ (field_descr, old_offsets);
+    restore_array_ (field_descr, old_array, old_offsets);
 
     delete [] old_array;
 
@@ -635,10 +635,11 @@ void FieldBlock::print (const FieldDescr * field_descr,
      hz = (upper[2]-lower[2])/(nzd-2*gz);
 #endif
 
+     char * array_offset = array_+offsets_[index_field];
      switch (field_descr->precision(index_field)) {
      case precision_single:
        {
-	 float * field = (float * ) array_[offsets_[index_field]];
+	 float * field = (float * ) array_offset;
 	 float min = std::numeric_limits<float>::max();
 	 float max = std::numeric_limits<float>::min();
 	 double sum = 0.0;
@@ -673,7 +674,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
        break;
      case precision_double:
        {
-	 double * field = (double * ) array_[offsets_[index_field]];
+	 double * field = (double * ) array_offset;
 	 double min = std::numeric_limits<double>::max();
 	 double max = std::numeric_limits<double>::min();
 	 double sum = 0.0;
@@ -709,7 +710,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
      case precision_quadruple:
        {
 	 long double * field = 
-	   (long double * ) array_[offsets_[index_field]];
+	   (long double * ) array_offset;
 	 long double min = std::numeric_limits<long double>::max();
 	 long double max = std::numeric_limits<long double>::min();
 	 long double sum = 0.0;
@@ -771,6 +772,7 @@ void FieldBlock::backup_array_
 
 void FieldBlock::restore_array_ 
 ( const FieldDescr * field_descr,
+  const char * array_from,
   std::vector<int> & offsets_from) throw (std::out_of_range)
 {
   // copy values
@@ -816,8 +818,8 @@ void FieldBlock::restore_array_
 
     // determine array start
 
-    char * array1 = array_ + offsets_from.at(id_field) + offset1;
-    char * array2 = array_ + offsets_.at(id_field)     + offset2;
+    const char * array1 = array_from + offsets_from.at(id_field) + offset1;
+    char       * array2 = array_     + offsets_.at(id_field)     + offset2;
 
     // copy values (use memcopy?)
 

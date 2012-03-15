@@ -149,7 +149,8 @@ private: // functions
   /// Move (not copy) array to array_ and offsets to
   /// offsets_
   void restore_array_ ( const FieldDescr * field_descr,
-			std::vector<int> & offsets )
+			const char       * array_from,
+			std::vector<int> & offsets_from )
     throw (std::out_of_range);
 
   //----------------------------------------------------------------------
