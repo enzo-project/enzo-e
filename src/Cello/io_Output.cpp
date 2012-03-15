@@ -32,6 +32,7 @@ Output::Output (const Factory * factory) throw()
 {
 
   GroupProcess * group_process = GroupProcess::create();
+
   process_  = group_process->rank();
   delete group_process;
 

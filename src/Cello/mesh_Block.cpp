@@ -294,6 +294,7 @@ void Block::p_initial()
   // where Block::p_refresh_face() is called before Block::p_initial()
 
   // Refresh before prepare()
+  TRACE("p_initial");
   contribute( CkCallback(CkIndex_Block::p_call_refresh(), thisProxy) );
 
 }
@@ -437,6 +438,7 @@ void Block::p_compute (int cycle, double time, double dt, int axis_set)
 
 void Block::p_call_refresh()
 {
+  TRACE("p_call_refresh");
   refresh(axis_all);
 }
 
