@@ -46,11 +46,14 @@ void Simulation::output_next() throw()
 
   // find next output
 
-  Output * output = Simulation::problem()->output(index_output_);
+  Problem * problem = Simulation::problem();
 
-  while (output != NULL && ! output->is_scheduled(cycle_, time_)) {
+  Output * output = problem->output(index_output_);
+
+  while (output && ! output->is_scheduled(cycle_, time_)) {
+    // skip over output objects that are not scheduled this cycle
     ++index_output_;
-    output = Simulation::problem()->output(index_output_);
+    output = problem->output(index_output_);
   }
 
   // output if any scheduled, else proceed with refresh

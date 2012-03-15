@@ -19,13 +19,13 @@ class Counter {
 public:
   Counter (int count_max) throw()
     : count_max_(count_max),
-      count_(0)
+      count_curr_(0)
   {}
 
   int remaining() throw ()
   {
-    count_ = (count_max_ + count_ - 1) % count_max_;  
-    return count_;
+    count_curr_ = (count_max_ + count_curr_ - 1) % count_max_;  
+    return count_curr_;
   }
 
   void set_value (int count_max) throw ()
@@ -35,7 +35,7 @@ public:
 
 private:
   int count_max_;
-  int count_;
+  int count_curr_;
 };
 
 #endif /* CONFIG_USE_CHARM */
