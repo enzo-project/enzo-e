@@ -366,54 +366,6 @@ void FileHdf5::file_read_meta
 
 //----------------------------------------------------------------------
 
-void FileHdf5::file_write_meta
-  ( const void * buffer, std::string name, enum scalar_type type,
-    int nx, int ny, int nz) throw()
-{
-  // error check file open
-
-  std::string file_name = path_ + "/" + name_;
-
-  ASSERT1("FileHdf5::file_write_meta",
-	  "Trying to write metadata to the unopened file %s",
-	  file_name.c_str(),
-	  is_file_open_);
-
-  // Determine the attribute rank
-
-  hsize_t meta_size[MAX_DATA_RANK];
-
-  // Create data space
-
-  hid_t meta_space_id = create_dataspace_(nx,ny,nz,meta_size);
-
-  hid_t meta_id = H5Acreate ( file_id_,
-			      name.c_str(),
-			      scalar_to_hdf5_(type),
-			      meta_space_id,
-			      H5P_DEFAULT);
-
-  // error check H5Acreate
-
-  ASSERT2("FileHdf5::file_write_meta","H5Acreate(%s) returned %d",
-	  name.c_str(),meta_id,(meta_id>=0));
-
-  // Write the attribute 
-
-  H5Awrite (meta_id, scalar_to_hdf5_(type), buffer);
-
-  // Close the attribute dataspace
-
-  close_dataspace_(meta_space_id);
-
-  // Close the attribute
-
-  H5Aclose(meta_id);
-}
-
-
-//----------------------------------------------------------------------
-
 void FileHdf5::data_read_meta
   ( void * buffer, std::string name,  enum scalar_type * type,
     int * nx, int * ny, int * nz) throw()
@@ -701,52 +653,6 @@ void FileHdf5::group_read_meta
 
 //----------------------------------------------------------------------
 
-void FileHdf5::group_write_meta
-  ( const void * buffer, std::string name, enum scalar_type type,
-    int nx, int ny, int nz) throw()
-{
-  // error check file open
-
-  std::string file_name = path_ + "/" + name_;
-
-  ASSERT1("FileHdf5::group_write_meta",
-	  "Trying to write metadata to the unopened file %s",
-	  file_name.c_str(), is_file_open_);
-
-  // error check group open
-
-  ASSERT1("FileHdf5::group_write_meta",
-	  "Trying to read attribute from unopened group %s",
-	   group_name_.c_str(),is_group_open_);
-
-  // Create the attribute group size
-
-  hsize_t meta_size[MAX_DATA_RANK];
-
-  // Create data space
-
-  hid_t meta_space_id = create_dataspace_(nx,ny,nz,meta_size);
-
-  // Create the attribute
-
-  hid_t meta_id = H5Acreate ( group_id_,
-			      name.c_str(),
-			      scalar_to_hdf5_(type),
-			      meta_space_id,
-			      H5P_DEFAULT);
-
-  H5Awrite (meta_id, scalar_to_hdf5_(type), buffer);
-
-  close_dataspace_(meta_space_id);
-
-  int retval = H5Aclose(meta_id);
-
-  ASSERT1("FileHdf5::group_write_meta",
-	  "H5Aclose() returned %d",retval,(retval >= 0));
-}  
-
-//----------------------------------------------------------------------
-
 void FileHdf5::set_compress (int level) throw ()
 {
   compress_level_ = level; 
@@ -763,6 +669,70 @@ void FileHdf5::set_compress (int level) throw ()
 }
 
 //======================================================================
+
+//----------------------------------------------------------------------
+
+void FileHdf5::write_meta_
+( hid_t group_or_file_id,
+  const void * buffer, std::string name, enum scalar_type type,
+  int nx, int ny, int nz) throw()
+{
+  // error check file open
+
+  std::string file_name = path_ + "/" + name_;
+
+  ASSERT1("FileHdf5::write_meta_",
+	  "Trying to write metadata to the unopened file %s",
+	  file_name.c_str(),
+	  is_file_open_);
+
+  // error check group open
+
+  if (group_or_file_id == group_id_) {
+    ASSERT1("FileHdf5::write_meta_",
+	    "Trying to write attribute to unopened group %s",
+	    group_name_.c_str(),is_group_open_);
+  }
+
+  // Determine the attribute rank
+
+  hsize_t meta_size[MAX_DATA_RANK];
+
+  // Create data space
+
+  hid_t meta_space_id = create_dataspace_(nx,ny,nz,meta_size);
+
+  // Create the attribute
+
+  hid_t meta_id = H5Acreate ( group_or_file_id,
+			      name.c_str(),
+			      scalar_to_hdf5_(type),
+			      meta_space_id,
+			      H5P_DEFAULT);
+
+  // error check H5Acreate
+
+  ASSERT2("FileHdf5::write_meta_","H5Acreate(%s) returned %d",
+	  name.c_str(),meta_id,(meta_id>=0));
+
+  // Write the attribute 
+
+  H5Awrite (meta_id, scalar_to_hdf5_(type), buffer);
+
+  // Close the attribute dataspace
+
+  close_dataspace_(meta_space_id);
+
+  // Close the attribute
+
+  int retval = H5Aclose(meta_id);
+
+  ASSERT1("FileHdf5::write_meta_",
+	  "H5Aclose() returned %d",retval,(retval >= 0));
+
+}
+
+//----------------------------------------------------------------------
 
 int FileHdf5::scalar_to_hdf5_ (enum scalar_type type) const throw()
 {

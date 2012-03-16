@@ -42,10 +42,11 @@ public: // interface
     int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the file
-  virtual void file_write_meta
+
+  void file_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int nx=1, int ny=0, int nz=0) throw();
-  
+    int nx=1, int ny=0, int nz=0) throw()
+  {  write_meta_ ( file_id_, buffer, name, type, nx,ny,nz); }
 
   // Datasets
 
@@ -94,16 +95,15 @@ public: // interface
   virtual void group_close () throw();
   
   /// Read a metadata item associated with the opened group
-  virtual void group_read_meta
+  void group_read_meta
   ( void * buffer, std::string name,  enum scalar_type * s_type,
     int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the opened group
-  virtual void group_write_meta
+  void group_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int nx=1, int ny=0, int nz=0) throw();
-
-
+    int nx=1, int ny=0, int nz=0) throw()
+  {  write_meta_ ( group_id_, buffer, name, type, nx,ny,nz ); }
 
   /// Set the compression level
   void set_compress (int level) throw ();
@@ -111,6 +111,12 @@ public: // interface
   /// Return the compression level
   int compress () throw () {return compress_level_; }
 
+
+protected: // functions
+
+  virtual void write_meta_
+  ( hid_t id, const void * buffer, std::string name, enum scalar_type type,
+    int nx=1, int ny=0, int nz=0) throw();
 
 private: // functions
 

@@ -64,8 +64,8 @@ std::string Output::expand_file_name () const throw()
 {
   const int MAX_BUFFER = 255;
 
-  char buffer_curr[MAX_BUFFER];
-  char buffer_next[MAX_BUFFER];
+  char buffer[MAX_BUFFER];
+  char buffer_new[MAX_BUFFER];
 
   // Error check no \% in file name
 
@@ -103,7 +103,7 @@ std::string Output::expand_file_name () const throw()
   for (size_t i=0; i<file_args_.size(); i++) {
 
     // visit variables from right to left
-    const std::string & file_arg = file_args_[file_args_.size() - i - 1];
+    const std::string & arg = file_args_[file_args_.size() - i - 1];
 
     size_t pos = file_left.rfind("%");
     size_t len = file_left.size();
@@ -111,23 +111,20 @@ std::string Output::expand_file_name () const throw()
     file_middle = file_left.substr(pos,len-pos);
     file_left  = file_left.substr(0,pos);
 
-    strcpy (buffer_curr, file_middle.c_str());
+    strcpy (buffer, file_middle.c_str());
     
-    if (file_arg == "cycle") {
-      sprintf (buffer_next,buffer_curr, cycle_);
-    } else if (file_arg == "time") {
-      sprintf (buffer_next,buffer_curr, time_);
-    } else if (file_arg == "count") {
-      sprintf (buffer_next,buffer_curr, count_output_);
-    } else if (file_arg == "proc") {
-      sprintf (buffer_next,buffer_curr, process_);
-    } else {
-      ERROR3("Output::expand_file_name",
-	     "Unknown file variable #%d '%s' for file '%s'",
-	     int(i),file_arg.c_str(),file_name_.c_str());
-    }
+    if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
+    else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
+    else if (arg == "count") { sprintf (buffer_new,buffer, count_output_); }
+    else if (arg == "proc")  { sprintf (buffer_new,buffer, process_); }
+    else 
+      {
+	ERROR3("Output::expand_file_name",
+	       "Unknown file variable #%d '%s' for file '%s'",
+	       int(i),arg.c_str(),file_name_.c_str());
+      }
 
-    file_right = std::string(buffer_next) + file_right;
+    file_right = std::string(buffer_new) + file_right;
 
   }
 
@@ -145,11 +142,33 @@ bool Output::is_scheduled (int cycle, double time)
 
 //----------------------------------------------------------------------
 
-double Output::update_timestep (double time, double dt) const
+double Output::update_timestep (double time, double dt) const throw ()
 {
   return schedule_->update_timestep(time,dt); 
 }
 
+//----------------------------------------------------------------------
+
+void Output::write_meta_ ( meta_type type_meta, Io * io ) throw ()
+{
+  for (size_t i=0; i<io->meta_count(); i++) {
+
+    void * buffer;
+    std::string name;
+    scalar_type type_scalar;
+    int nx,ny,nz;
+
+    // Get object's ith metadata
+    io->meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
+
+    // Write object's ith metadata
+    if ( type_meta == meta_type_group ) {
+      file_->group_write_meta(buffer,name.c_str(),type_scalar,nx,ny,nz);
+    } else {
+      file_->file_write_meta(buffer,name.c_str(),type_scalar,nx,ny,nz);
+    }
+  }
+}
 
 //----------------------------------------------------------------------
 

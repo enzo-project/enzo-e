@@ -16,6 +16,11 @@ class Patch;
 class Schedule;
 class Simulation;
 
+enum meta_type {
+  meta_type_file,
+  meta_type_group
+};
+
 class Output {
 
   /// @class    Output
@@ -81,7 +86,7 @@ public: // functions
   }
 
   /// Return the updated timestep if time + dt goes past a scheduled output
-  double update_timestep (double time, double dt) const;
+  double update_timestep (double time, double dt) const throw ();
 
 #ifdef CONFIG_USE_CHARM
 
@@ -108,6 +113,15 @@ public: // virtual functions
   virtual void finalize () throw ()
   { count_output_ ++; }
 
+  /// Write metadata to the file
+  void write_meta ( Io * io ) throw ()
+  { write_meta_ (meta_type_file, io); }
+
+  /// Write metadata to the current group in the file
+  void write_meta_group ( Io * io ) throw ()
+  { write_meta_ (meta_type_group, io); }
+
+public:
   /// Write an entire simulation to disk
   virtual void write_simulation ( const Simulation * simulation ) throw();
 
@@ -142,6 +156,10 @@ public: // virtual functions
 
   /// Free local array if allocated; NOP if not
   virtual void cleanup_remote (int * n, char ** buffer) throw() = 0;
+
+private:
+
+  void write_meta_ ( meta_type type, Io * io ) throw();
 
 protected: // attributes
 

@@ -69,23 +69,10 @@ void OutputData::write_hierarchy
  ) throw()
 {
 
-  // Loop over metadata items in Hierarchy
-
   IoHierarchy io_hierarchy(hierarchy);
 
-  for (size_t i=0; i<io_hierarchy.meta_count(); i++) {
-
-    std::string name;
-    scalar_type type;
-    void * buffer;
-    int nx,ny,nz;
-
-    // Get ith Hierarchy metadata
-    io_hierarchy.meta_value(i,& buffer, &name, &type, &nx,&ny,&nz);
-
-    // Write ith Hierarchy metadata
-    file_->file_write_meta(buffer,name.c_str(),type,nx,ny,nz);
-  }
+  // Write hierarchy meta-data
+  Output::write_meta (&io_hierarchy);
 
   // Call write_patch() on contained patches
   Output::write_hierarchy (hierarchy, field_descr);
@@ -113,26 +100,14 @@ void OutputData::write_patch
 
   IoPatch io_patch(patch);
 
-  for (size_t i=0; i<io_patch.meta_count(); i++) {
-
-    void * buffer;
-    std::string name;
-    scalar_type type;
-    int nx,ny,nz;
-
-    // Get ith Patch metadata
-    io_patch.meta_value(i,& buffer, &name, &type, &nx,&ny,&nz);
-
-    // Write ith Patch metadata
-    file_->group_write_meta(buffer,name.c_str(),type,nx,ny,nz);
-  }
+  // Write patch meta-data
+  Output::write_meta_group (&io_patch);
 
   // Call write_block() on contained blocks
   Output::write_patch(patch,field_descr,ixp0,iyp0,izp0);
 
-  // BUG: this is getting executed before remote blocks begin writing
-  // need to add a dependency so that this gets called only after last
-  // block finishes
+  // BUG: the following is getting executed before remote blocks begin
+  // writing.
 
   file_->group_close();
   file_->group_chdir("..");
@@ -160,20 +135,7 @@ void OutputData::write_block
 
   io_block()->set_block(block);
 
-  for (size_t i=0; i<io_block()->meta_count(); i++) {
-
-    void * buffer;
-    std::string name;
-    scalar_type type;
-    int nx,ny,nz;
-
-    // Get ith Block metadata
-    io_block()->meta_value(i,& buffer, &name, &type, &nx,&ny,&nz);
-
-    // Write ith Block metadata
-    file_->group_write_meta(buffer,name.c_str(),type,nx,ny,nz);
-
-  }
+  Output::write_meta_group (io_block());
 
   // Call write_block() on base Output object
 
@@ -196,7 +158,7 @@ void OutputData::write_field
   io_field_block()->set_field_block(field_block);
   io_field_block()->set_field_index(field_index);
 
-  for (int i=0; i<io_field_block()->data_count(); i++) {
+  for (size_t i=0; i<io_field_block()->data_count(); i++) {
 
     void * buffer;
     std::string name;
