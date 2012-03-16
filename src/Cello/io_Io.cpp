@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-Io::Io(int meta_count, int data_count) throw()
+Io::Io(size_t meta_count, size_t data_count) throw()
   : meta_count_(meta_count), 
     meta_name_(), 
     data_count_(data_count),

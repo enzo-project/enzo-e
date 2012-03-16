@@ -13,6 +13,7 @@ IoEnzoBlock::IoEnzoBlock() throw ()
   : IoBlock()
 {
   meta_count_enzo_ = 9;
+
   meta_count_ += meta_count_enzo_;
 
   meta_name_.push_back("enzo_Time");
@@ -25,6 +26,11 @@ IoEnzoBlock::IoEnzoBlock() throw ()
   meta_name_.push_back("enzo_GridEndIndex");
   meta_name_.push_back("enzo_CellWidth");
   
+  ASSERT2("IoPatch::IoPatch()",
+	 "meta_name.size() [%d] !=  meta_count_ [%d]",
+	  meta_name_.size(),meta_count(),
+	  meta_name_.size()==meta_count());
+
 }
 
 //----------------------------------------------------------------------

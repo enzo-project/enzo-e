@@ -10,17 +10,22 @@
 //----------------------------------------------------------------------
 
 IoBlock::IoBlock() throw ()
-  : Io(7,0),
+  : Io(8,0),
     block_(0)
 {
+  meta_name_.push_back("num_field_blocks");
+  meta_name_.push_back("index");
   meta_name_.push_back("size");
   meta_name_.push_back("lower");
   meta_name_.push_back("upper");
   meta_name_.push_back("cycle");
   meta_name_.push_back("time");
   meta_name_.push_back("dt");
-  meta_name_.push_back("num_field_blocks");
-  meta_name_.push_back("index");
+
+  ASSERT2("IoBlock::IoBlock()",
+	 "meta_name.size() [%d] !=  meta_count_ [%d]",
+	  meta_name_.size(),meta_count(),
+	  meta_name_.size()==meta_count());
 }
 
 
@@ -35,51 +40,52 @@ void IoBlock::meta_value
 
   if (index == 0) {
 
+    *buffer = (void *) & block_->num_field_blocks_;
+    *type   = scalar_type_int;
+    *n0     = 1;
+
+  } else if (index == 1) {
+
+    *buffer = (void *) & block_->index_;
+    *type   = scalar_type_int;
+    *n0     = 3;
+
+  } else if (index == 2) {
+
     *buffer = (void *) block_->size_;
     *type   = scalar_type_int;
     *n0     = 3;
     
-  } else if (index == 1) {
+  } else if (index == 3) {
 
     *buffer = (void *) block_->lower_;
     *type   = scalar_type_double;
     *n0     = 3;
 
-  } else if (index == 2) {
+  } else if (index == 4) {
 
     *buffer = (void *) block_->upper_;
     *type   = scalar_type_double;
     *n0     = 3;
 
-  } else if (index == 3) {
+  } else if (index == 5) {
 
     *buffer = (void *) & block_->cycle_;
     *type   = scalar_type_int;
     *n0     = 1;
 
-  } else if (index == 4) {
+
+  } else if (index == 6) {
 
     *buffer = (void *) & block_->time_;
     *type   = scalar_type_double;
     *n0     = 1;
 
-  } else if (index == 5) {
+  } else if (index == 7) {
 
     *buffer = (void *) & block_->dt_;
     *type   = scalar_type_double;
     *n0     = 1;
-
-  } else if (index == 6) {
-
-    *buffer = (void *) & block_->num_field_blocks_;
-    *type   = scalar_type_int;
-    *n0     = 3;
-
-  } else if (index == 7) {
-
-    *buffer = (void *) & block_->index_;
-    *type   = scalar_type_int;
-    *n0     = 3;
 
   }
 }

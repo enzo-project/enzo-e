@@ -73,7 +73,7 @@ void OutputData::write_hierarchy
 
   IoHierarchy io_hierarchy(hierarchy);
 
-  for (int i=0; i<io_hierarchy.meta_count(); i++) {
+  for (size_t i=0; i<io_hierarchy.meta_count(); i++) {
 
     std::string name;
     scalar_type type;
@@ -113,7 +113,7 @@ void OutputData::write_patch
 
   IoPatch io_patch(patch);
 
-  for (int i=0; i<io_patch.meta_count(); i++) {
+  for (size_t i=0; i<io_patch.meta_count(); i++) {
 
     void * buffer;
     std::string name;
@@ -160,7 +160,7 @@ void OutputData::write_block
 
   io_block()->set_block(block);
 
-  for (int i=0; i<io_block()->meta_count(); i++) {
+  for (size_t i=0; i<io_block()->meta_count(); i++) {
 
     void * buffer;
     std::string name;

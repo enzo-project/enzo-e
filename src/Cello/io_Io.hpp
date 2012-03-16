@@ -17,7 +17,7 @@ class Io {
 public: // interface
 
   /// Constructor
-  Io(int meta_count, int data_count) throw();
+  Io(size_t meta_count, size_t data_count) throw();
 
   /// Destructor
   virtual ~Io () throw ()
@@ -37,24 +37,24 @@ public: // interface
    int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
 
   /// Return number of metadata items associated with the associated class
-  int meta_count() const throw()
+  size_t meta_count() const throw()
   { return meta_count_; }
 
   /// Return number of data items associated with the associated class
-  int data_count() const throw()
+  size_t data_count() const throw()
   { return data_count_; }
 
   
 protected: // attributes
 
   /// Number of metadata items
-  int meta_count_;
+  size_t meta_count_;
 
   /// Name of the metadata items
   std::vector <std::string> meta_name_;
 
   /// Number of data items
-  int data_count_;
+  size_t data_count_;
 
   /// Name of the data items
   std::vector <std::string> data_name_;

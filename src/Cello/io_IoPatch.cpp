@@ -18,6 +18,11 @@ IoPatch::IoPatch(const Patch * patch) throw ()
   meta_name_.push_back("blocking");
   meta_name_.push_back("lower");
   meta_name_.push_back("upper");
+
+  ASSERT2("IoPatch::IoPatch()",
+	 "meta_name.size() [%d] !=  meta_count_ [%d]",
+	  meta_name_.size(),meta_count(),
+	  meta_name_.size()==meta_count());
 }
 
 

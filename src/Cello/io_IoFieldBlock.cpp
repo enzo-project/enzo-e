@@ -10,7 +10,7 @@
 //----------------------------------------------------------------------
 
 IoFieldBlock::IoFieldBlock() throw ()
-  : Io(0,1),
+  : Io(4,1),
     field_descr_(0),
     field_block_(0),
     field_index_(0)
@@ -20,6 +20,11 @@ IoFieldBlock::IoFieldBlock() throw ()
   meta_name_.push_back("array_size");
   meta_name_.push_back("num_fields");
   meta_name_.push_back("ghosts_allocated");
+
+  ASSERT2("IoFieldBlock::IoFieldBlock()",
+	 "meta_name.size() [%d] !=  meta_count_ [%d]",
+	  meta_name_.size(),meta_count(),
+	  meta_name_.size()==meta_count());
 }
 
 
