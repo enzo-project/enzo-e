@@ -40,22 +40,15 @@ public: // interface
 
   /// Simulation constructor
 
+
+  Simulation
+  ( const char *       parameter_file,
 #ifdef CONFIG_USE_CHARM
-
-  Simulation
-  ( const char *       parameter_file,
     int                n,
-    CProxy_BlockReduce proxy_block_reduce
-    ) throw();
-
-#else
-
-  Simulation
-  ( const char *       parameter_file,
+    CProxy_BlockReduce proxy_block_reduce,
+#endif
     GroupProcess *     group_process = 0
     ) throw();
-
-#endif
 
   //==================================================
   // CHARM
@@ -69,7 +62,11 @@ public: // interface
   /// Initialize a migrated Simulation
   Simulation (CkMigrateMessage *m);
 
+#endif
+
   //==================================================
+
+#ifdef CONFIG_USE_CHARM
 
   /// Request all Hierarchy blocks to send output to main::p_output_close()
   //  void p_output(int index, int cycle, double time) throw();
@@ -184,13 +181,8 @@ public: // virtual functions
   virtual void finalize() throw();
 
   /// Run the simulation
-  virtual void run() throw();
-
-  /// Load a Simulation from disk
-  virtual void read() throw();
-
-  /// Write a Simulation state to disk
-  virtual void write() const throw();
+  virtual void run() throw()
+  { ERROR ("Simulation::run","Implictly abstract function called"); }
 
   /// Return a Hierarchy factory object
   virtual const Factory * factory () const throw();

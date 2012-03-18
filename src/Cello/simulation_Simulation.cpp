@@ -17,7 +17,8 @@ Simulation::Simulation
 (
  const char *   parameter_file,
  int n,
- CProxy_BlockReduce proxy_block_reduce
+ CProxy_BlockReduce proxy_block_reduce,
+ GroupProcess * group_process
  ) throw()
 #else 
 Simulation::Simulation
@@ -32,12 +33,10 @@ Simulation::Simulation
     parameters_(0),
     parameter_file_(parameter_file),
 #ifdef CONFIG_USE_CHARM
-    group_process_(GroupProcess::create()),
     proxy_block_reduce_(proxy_block_reduce),
     index_output_(0),
-#else
-    group_process_(group_process),
 #endif
+    group_process_(group_process),
     dimension_(0),
     cycle_(0),
     time_(0.0),
@@ -48,6 +47,8 @@ Simulation::Simulation
     hierarchy_(0),
     field_descr_(0)
 {
+
+  if (!group_process_) group_process_ = GroupProcess::create();
 
   performance_ = new Performance;
 
@@ -394,27 +395,6 @@ void Simulation::deallocate_() throw()
 #endif
   delete hierarchy_;     hierarchy_ = 0;
   delete field_descr_;   field_descr_ = 0;
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::run() throw()
-{
-  ERROR ("Simulation::run","Implictly abstract function called");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::read() throw()
-{
-  ERROR ("Simulation::read","Implictly abstract function called");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::write() const throw()
-{
-  ERROR ("Simulation::write","Implictly abstract function called");
 }
 
 //----------------------------------------------------------------------
