@@ -65,7 +65,9 @@ void IoFieldBlock::data_value
 
   int ngx=0,ngy=0,ngz=0;
 
-  // CURRENTLY MUST INCLUDE GHOSTS IN DATA OUTPUT
+  // Must include ghosts in data output, otherwise array dimensions are
+  // incorrect
+
   field_descr_->ghosts(field_index_,&ngx,&ngy,&ngz);
 
    if (n0) (*n0) = nbx + 2*ngx;
