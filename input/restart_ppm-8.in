@@ -14,7 +14,7 @@ Output {
   };
 
   restart {
-     name = ["restart_ppm-8"];
+     name = ["restart_ppm-8-%d","proc"];
      type = "restart";
      schedule = ["cycle","list",100];
   }

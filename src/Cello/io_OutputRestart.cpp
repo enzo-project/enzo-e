@@ -32,14 +32,14 @@ void OutputRestart::init () throw()
 
 void OutputRestart::open () throw()
 {
-  std::string file_name = expand_file_name();
+  std::string file_name = expand_file_name() + ".h5";
 
-  Monitor::instance()->print ("Output","writing data file %s", 
+  Monitor::instance()->print ("Output","writing restart file %s", 
 			      file_name.c_str());
 
   delete file_;
 
-  file_ = new FileHdf5 (".",file_name + ".h5");
+  file_ = new FileHdf5 (".",file_name);
   
 
   file_->file_create();
