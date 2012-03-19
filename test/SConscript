@@ -21,6 +21,7 @@ env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 
 env_mv_out  = env.Clone(COPY = 'mv `ls *.png *.h5` ' + test_path)
 env_mv_test = env.Clone(COPY = 'mv test*out test*in ' + test_path)
+env_rm_png  = env.Clone(COPY = 'rm `ls *.png`')
 
 #----------------------------------------------------------------------
 # DISK COMPONENT          
@@ -153,8 +154,8 @@ env.MakeMovie ("method_ppm-8.swf", "test_method_ppm-8.unit", \
 
 # serial restart
 
-restart_ppm_1_init = env_mv_out.RunSerial (
-   'test_restart_ppm-1-start.unit',
+restart_ppm_1_init = env_rm_png.RunSerial (
+   'test_restart_ppm-1-init.unit',
    bin_path + '/enzo-p', 
    ARGS='input/restart_ppm-1.in')
 
@@ -175,8 +176,8 @@ env.Requires(restart_ppm_1,restart_ppm_1_init)
 
 # parallel restart
 
-restart_ppm_8_init = env_mv_out.RunParallel (
-   'test_restart_ppm-8-start.unit',
+restart_ppm_8_init = env_rm_png.RunParallel (
+   'test_restart_ppm-8-init.unit',
    bin_path + '/enzo-p', 
    ARGS='input/restart_ppm-8.in')
 

@@ -142,7 +142,8 @@ void Problem::initialize_output
 
     // Create output object
 
-    Output * output = create_output_(type,group_process,hierarchy,factory);
+    Output * output = create_output_
+      (type,parameters,group_process,hierarchy,factory);
 
     // Error if output type was not recognized
     if (output == NULL) {
@@ -709,7 +710,7 @@ Boundary * Problem::create_boundary_
 
 Initial * Problem::create_initial_
 (
- std::string  name,
+ std::string  type,
  Parameters * parameters
  ) throw ()
 { 
@@ -722,12 +723,13 @@ Initial * Problem::create_initial_
   double init_time   = parameters->value_float   ("Initial:time",0.0);
 
 
-  if (name == "file") {
-    // Initialize by reading values from files
-    return new InitialFile(init_cycle,init_time);;
-  } else {
-    return new InitialDefault(parameters,init_cycle,init_time);
-  }
+  if (type == "file") {
+    return new InitialFile(parameters,init_cycle,init_time);;
+  } else if (type == "restart") {
+    return new InitialFile(parameters,init_cycle,init_time);;
+  } else if (type == "default") {
+      return new InitialDefault(parameters,init_cycle,init_time);
+    }
   return NULL;
 }
 
@@ -735,10 +737,10 @@ Initial * Problem::create_initial_
 
 Stopping * Problem::create_stopping_ 
 (
- std::string  name,
+ std::string  type,
  Parameters * parameters
  ) throw ()
-/// @param name   Name of the stopping method to create (ignored)
+/// @param type   Type of the stopping method to create (ignored)
 /// @param stop_cycle  Stopping cycle
 /// @param stop_time  Stopping time
 {
@@ -761,7 +763,7 @@ Stopping * Problem::create_stopping_
 
 Timestep * Problem::create_timestep_ 
 (
- std::string  name,
+ std::string  type,
  Parameters * parameters
  ) throw ()
 { 
@@ -773,7 +775,7 @@ Timestep * Problem::create_timestep_
 
 Method * Problem::create_method_ 
 (
- std::string  name,
+ std::string  type,
  Parameters * parameters
  ) throw ()
 {
@@ -787,6 +789,7 @@ Method * Problem::create_method_
 Output * Problem::create_output_ 
 (
  std::string    type,
+ Parameters *   parameters,
  GroupProcess * group_process,
  Hierarchy    * hierarchy,
  const Factory * factory
@@ -805,7 +808,7 @@ Output * Problem::create_output_
   } else if (type == "data") {
     output = new OutputData (factory);
   } else if (type == "restart") {
-    output = new OutputRestart (factory);
+    output = new OutputRestart (factory,parameters);
   }
   return output;
 }

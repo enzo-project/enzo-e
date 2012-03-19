@@ -11,55 +11,72 @@
 
 //----------------------------------------------------------------------
 
-OutputRestart::OutputRestart(const Factory * factory) throw ()
-  : Output(factory)
+OutputRestart::OutputRestart
+(
+ const Factory * factory,
+ Parameters * parameters
+) throw ()
+  : OutputData(factory),
+    param_name_(""),
+    param_args_()
 {
-}
 
-//----------------------------------------------------------------------
+  // ASSUMES "Output : <file_group>" is current parameters group
+  // set in Problem::initialize_output()
 
-OutputRestart::~OutputRestart() throw ()
-{
+  //--------------------------------------------------
+  // parameter: Output : <file_group> : param
+  //--------------------------------------------------
+
+  
+  if (parameters->type("param") == parameter_string) {
+
+    param_name_ = parameters->value_string("param","");
+     
+  } else if (parameters->type("param") == parameter_list) {
+
+    int list_length = parameters->list_length("param");
+
+    if (list_length > 0) {
+      param_name_ = parameters->list_value_string(0,"param","");
+    }
+
+    for (int index = 1; index<list_length; index++) {
+      param_args_.push_back(parameters->list_value_string(index,"param",""));
+    }
+
+  } else {
+
+      ERROR1("OutputRestart::OutputRestart",
+	     "Bad type %d for 'Output : <file_group> : param' parameter",
+	     parameters->type("param"));
+
+  }
+
+  //--------------------------------------------------
+  // parameter: Initial : type
+  // parameter: Initial : cycle
+  //--------------------------------------------------
+
+  // Skip first cycle for restart if this is a restart
+
+  std::string type = parameters->value_string("Initial:type","");
+  bool is_restart = type == "restart";
+  int init_cycle  = parameters->value_integer ("Initial:cycle",-1);
+
+  TRACE3("type = %s is_restart %d init_cycle %d",
+	 type.c_str(),is_restart,init_cycle);
+  if (is_restart) {
+    schedule()->set_skip_cycle(init_cycle);
+  }
+
 }
 
 //======================================================================
 
-void OutputRestart::init () throw()
-{
-}
-
-//----------------------------------------------------------------------
-
-void OutputRestart::open () throw()
-{
-  std::string file_name = expand_file_name() + ".h5";
-
-  Monitor::instance()->print ("Output","writing restart file %s", 
-			      file_name.c_str());
-
-  delete file_;
-
-  file_ = new FileHdf5 (".",file_name);
-  
-
-  file_->file_create();
-}
-
-//----------------------------------------------------------------------
-
-void OutputRestart::close () throw()
-{
-  file_->file_close();
-
-  delete file_;
-  file_ = 0;
-}
-
-//----------------------------------------------------------------------
-
 void OutputRestart::finalize () throw ()
 {
-  Output::finalize();
+  OutputData::finalize();
 }
 
 //----------------------------------------------------------------------
@@ -77,85 +94,35 @@ void OutputRestart::write_simulation
 
   if (is_root) {
 
-    std::string file_name = expand_file_name() + ".in";
+    std::string param_name = expand_file_name(&param_name_,&param_args_);
 
     Parameters * parameters = simulation->parameters();
 
     // Update Initial parameters
 
+  //--------------------------------------------------
+  // parameter: Input : type
+  // parameter: Input : name
+  // parameter: Input : param
+  // parameter: Input : cycle
+  // parameter: Input : time
+  //--------------------------------------------------
+
+    parameters->set_string  ("Initial:type", "restart");
+    WARNING("OutputRestart::write_simulation",
+	    "Initial:name setting requires set_list() capability");
+    parameters->set_string  ("Initial:name", file_name_.c_str());
+
     parameters->set_integer ("Initial:cycle",simulation->cycle());
     parameters->set_float   ("Initial:time", simulation->time());
 
     // Write restart parameter file
-    parameters->write(file_name.c_str());
+    parameters->write(param_name.c_str());
     
   }
 
   Output::write_simulation(simulation);
 
-}
-
-//----------------------------------------------------------------------
-void OutputRestart::write_hierarchy 
-(
- const Hierarchy * hierarchy,
- const FieldDescr * field_descr
- ) throw()
-{
-  Output::write_hierarchy(hierarchy,field_descr);
-}
-
-//----------------------------------------------------------------------
-
-void OutputRestart::write_patch 
-(
- const Patch * patch,
- const FieldDescr * field_descr,
- int ixp0, int iyp0, int izp0
- ) throw()
-{
-  Output::write_patch(patch,field_descr,ixp0,iyp0,izp0);
-}
-
-//----------------------------------------------------------------------
-
-void OutputRestart::write_block 
-(
- const Block * block,
- const FieldDescr * field_descr,
- int ixp0, int iyp0, int izp0) throw()
-{
-  Output::write_block(block,field_descr,ixp0,iyp0,izp0);
-}
-
-//----------------------------------------------------------------------
-
-void OutputRestart::write_field
-(
-  const FieldBlock * field_block,
-  const FieldDescr * field_descr,
-  int field_index) throw()
-{
-  
-}
-
-//----------------------------------------------------------------------
-
-void OutputRestart::prepare_remote (int * n, char ** buffer) throw()
-{
-}
-
-//----------------------------------------------------------------------
-
-void OutputRestart::update_remote  ( int n, char * buffer) throw()
-{
-}
-
-//----------------------------------------------------------------------
-
-
-void OutputRestart::cleanup_remote (int * n, char ** buffer) throw()
-{
 }
 
 //======================================================================

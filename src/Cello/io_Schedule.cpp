@@ -124,6 +124,31 @@ bool Schedule::write_this_cycle ( int cycle, double time ) throw()
   int cycle_stop;
   int cycle_dump;
 
+  // Check if this cycle or time is to be skipped
+
+  bool skip = false;
+
+  switch (schedule_type_) {
+  case schedule_type_time_list:
+  case schedule_type_time_interval:
+
+    for (size_t i=0; i<time_skip_.size(); i++) {
+      if (time_skip_.at(i)==time) skip = true;
+    }
+    break;
+  case schedule_type_cycle_list:
+  case schedule_type_cycle_interval:
+    for (size_t i=0; i<cycle_skip_.size(); i++) {
+      if (cycle_skip_.at(i)==cycle) skip = true;
+    }
+    break;
+  default:
+    WARNING("Output::write_next_cycle",
+	    "Unknown schedule type for active Output object");
+  }
+
+  if (skip) return false;
+
   const double eps = cello::machine_epsilon(precision_single);
 
   switch (schedule_type_) {

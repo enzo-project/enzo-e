@@ -19,7 +19,7 @@ class InitialFile : public Initial {
 public: // interface
 
   /// Constructor
-  InitialFile(int cycle, double time) throw();
+  InitialFile(Parameters * parameters, int cycle, double time) throw();
 
   /// Destructor
   virtual ~InitialFile() throw()
@@ -33,6 +33,7 @@ public: // interface
 
 private: // attributes
 
+  Parameters * parameters_;
 };
 
 #endif /* METHOD_INITIAL_FILE_HPP */

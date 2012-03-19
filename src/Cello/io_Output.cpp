@@ -60,8 +60,15 @@ void Output::set_filename (std::string filename,
 
 //----------------------------------------------------------------------
 
-std::string Output::expand_file_name () const throw()
+std::string Output::expand_file_name 
+(
+ const std::string              * file_name_p,
+ const std::vector<std::string> * file_args_p
+) const throw()
 {
+  const std::string & file_name = *file_name_p;
+  const std::vector<std::string> & file_args = *file_args_p;
+  
   const int MAX_BUFFER = 255;
 
   char buffer[MAX_BUFFER];
@@ -71,12 +78,12 @@ std::string Output::expand_file_name () const throw()
 
   ASSERT1 ("Output::expand_file_name",
 	   "File name %s cannot contain '\\%%'",
-	   file_name_.c_str(),
-	   file_name_.find("\\%") == std::string::npos);
+	   file_name.c_str(),
+	   file_name.find("\\%") == std::string::npos);
 
   // Error check variable count equals format conversion specifier count
 
-  std::string file_rest = file_name_;
+  std::string file_rest = file_name;
   size_t count = 0;
   size_t pos = 0;
   size_t len;
@@ -90,20 +97,20 @@ std::string Output::expand_file_name () const throw()
 	   "The number of format conversion specifiers %d "
 	   "associated with file name %s "
 	   "must equal the number of variables %d",
-	    count, file_name_.c_str(),file_args_.size(),
-	   file_args_.size() == count);
+	    count, file_name.c_str(),file_args.size(),
+	   file_args.size() == count);
 
-  // loop through file_args_[] from the right and replace 
+  // loop through file_args[] from the right and replace 
   // format strings with variable values
 
-  std::string file_left  = file_name_;
+  std::string file_left  = file_name;
   std::string file_middle = "";
   std::string file_right = "";
 
-  for (size_t i=0; i<file_args_.size(); i++) {
+  for (size_t i=0; i<file_args.size(); i++) {
 
     // visit variables from right to left
-    const std::string & arg = file_args_[file_args_.size() - i - 1];
+    const std::string & arg = file_args[file_args.size() - i - 1];
 
     size_t pos = file_left.rfind("%");
     size_t len = file_left.size();
@@ -121,7 +128,7 @@ std::string Output::expand_file_name () const throw()
       {
 	ERROR3("Output::expand_file_name",
 	       "Unknown file variable #%d '%s' for file '%s'",
-	       int(i),arg.c_str(),file_name_.c_str());
+	       int(i),arg.c_str(),file_name.c_str());
       }
 
     file_right = std::string(buffer_new) + file_right;

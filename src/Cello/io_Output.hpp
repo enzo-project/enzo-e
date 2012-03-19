@@ -59,7 +59,9 @@ public: // functions
   { return schedule_; };
 
   /// Return the filename for the file format and given arguments
-  std::string expand_file_name () const throw();
+  std::string expand_file_name 
+  (const std::string * file_name,
+   const std::vector<std::string> * file_args) const throw();
 
   int process_stride () const throw () 
   { return process_stride_; };
@@ -101,7 +103,8 @@ public: // functions
 public: // virtual functions
 
   /// Initialize next output
-  virtual void init () throw() = 0;
+  virtual void init () throw()
+  {} ;
 
   /// Open (or create) a file for IO
   virtual void open () throw() = 0;
@@ -149,13 +152,16 @@ public:
     int field_index) throw() = 0;
 
   /// Prepare local array with data to be sent to remote chare for processing
-  virtual void prepare_remote (int * n, char ** buffer) throw() = 0;
+  virtual void prepare_remote (int * n, char ** buffer) throw()
+  {};
 
   /// Accumulate and write data sent from a remote processes
-  virtual void update_remote  ( int n, char * buffer) throw() = 0;
+  virtual void update_remote  ( int n, char * buffer) throw()
+  {};
 
   /// Free local array if allocated; NOP if not
-  virtual void cleanup_remote (int * n, char ** buffer) throw() = 0;
+  virtual void cleanup_remote (int * n, char ** buffer) throw()
+  {};
 
 private:
 

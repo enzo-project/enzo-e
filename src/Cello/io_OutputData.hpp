@@ -24,13 +24,11 @@ public: // functions
   /// Create an uninitialized OutputData object
   OutputData(const Factory * factory) throw();
 
-  /// OutputData destructor
-  virtual ~OutputData() throw();
+  /// Create an uninitialized OutputData object
+  ~OutputData() throw()
+  {};
 
 public: // virtual functions
-
-  /// Initialize next output
-  virtual void init () throw();
 
   /// Open (or create) a file for IO
   virtual void open () throw();
@@ -60,23 +58,12 @@ public: // virtual functions
 
   /// Write local field to disk
   virtual void write_field
-  ( const FieldBlock * field_block, 
+  ( const FieldBlock * field_block,
     const FieldDescr * field_descr,
     int field_index) throw();
 
-  /// Prepare local array with data to be sent to remote chare for processing
-  virtual void prepare_remote (int * n, char ** buffer) throw();
-
-  /// Accumulate and write data sent from a remote processes
-  virtual void update_remote  ( int n, char * buffer) throw();
-
-  /// Free local array if allocated; NOP if not
-  virtual void cleanup_remote (int * n, char ** buffer) throw();
-
 protected:
 
-  /// Interface object to access Block data for reading and writing
-  IoBlock * io_block_;
 };
 
 #endif /* IO_OUTPUT_DATA_HPP */

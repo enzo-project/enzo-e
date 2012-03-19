@@ -9,8 +9,9 @@
 #define IO_OUTPUT_RESTART_HPP
 
 class ItField;
+class Parameters;
 
-class OutputRestart : public Output {
+class OutputRestart : public OutputData {
 
   /// @class    OutputRestart
   /// @ingroup  Io
@@ -19,21 +20,13 @@ class OutputRestart : public Output {
 public: // functions
 
   /// Create an uninitialized OutputRestart object
-  OutputRestart(const Factory * factory) throw();
+  OutputRestart(const Factory * factory, Parameters * parameters) throw();
 
-  /// OutputRestart destructor
-  virtual ~OutputRestart() throw();
+  ///
+  ~OutputRestart() throw()
+  {}
 
 public: // virtual functions
-
-  /// Prepare for accumulating block data
-  virtual void init () throw();
-
-  /// Open (or create) a file for IO
-  virtual void open () throw();
-
-  /// Close file for IO
-  virtual void close () throw();
 
   /// Finalize output
   virtual void finalize () throw ();
@@ -44,42 +37,13 @@ public: // virtual functions
    const Simulation * simulation
     ) throw();
 
-  /// Write hierarchy-related field data
-  virtual void write_hierarchy
-  ( const Hierarchy * hierarchy,
-    const FieldDescr * field_descr) throw();
+private:
 
-  /// Write patch-related field data; may be called by write_hierarchy
-  virtual void write_patch
-  ( const Patch * patch,
-    const FieldDescr * field_descr,
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
+  /// Name of the parameter file to write, including format arguments 
+  std::string param_name_;
 
-  /// Write block-related field data; may be called by write_patch
-  virtual void write_block
-  ( const Block * block,
-    const FieldDescr * field_descr,
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
-
-  /// Write local field to disk
-  virtual void write_field
-  ( const FieldBlock * field_block,
-    const FieldDescr * field_descr,
-    int field_index) throw();
-
-  /// Prepare local array with data to be sent to remote chare for processing
-  virtual void prepare_remote (int * n, char ** buffer) throw();
-
-  /// Accumulate and write data sent from a remote processes
-  virtual void update_remote  ( int n, char * buffer) throw();
-
-  /// Free local array if allocated; NOP if not
-  virtual void cleanup_remote (int * n, char ** buffer) throw();
-
-private: // functions
-
-private: // attributes
-
+  /// Format strings for param_name_, if any ("cycle", "time", etc.)
+  std::vector<std::string> param_args_;
 };
 
 #endif /* IO_OUTPUT_RESTART_HPP */

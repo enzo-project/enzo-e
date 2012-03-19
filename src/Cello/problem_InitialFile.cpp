@@ -12,10 +12,12 @@
 //----------------------------------------------------------------------
 
 InitialFile::InitialFile
-(int cycle, double time) throw ()
-  : Initial (cycle,time)
+(Parameters * parameters,
+ int cycle, double time) throw ()
+  : Initial (cycle,time),
+    parameters_(parameters)
 {
-  INCOMPLETE("InitialFile::InitialFile");
+  TRACE("InitialFile::InitialFile");
 }
 
 //----------------------------------------------------------------------
@@ -27,6 +29,6 @@ void InitialFile::enforce
  Block            * block
  ) throw()
 {
-  INCOMPLETE("InitialFile::enforce");
+  TRACE("InitialFile::enforce");
 }
 

@@ -59,6 +59,14 @@ public: // functions
   /// Reduce timestep if next write time is greater than time + dt
   double update_timestep(double time, double dt) const throw();
 
+  /// Set cycle to skip
+  void set_skip_cycle (int cycle) throw()
+  { cycle_skip_.push_back(cycle); }
+
+  /// Set times to skip
+  void set_skip_time (double time) throw()
+  { time_skip_.push_back(time); }
+
 protected: // attributes
 
   /// Whether Schedule is currently active
@@ -73,11 +81,17 @@ protected: // attributes
   /// List of cycles to perform schedule
   std::vector<int> cycle_list_;
 
+  /// List of cycles to skip even if scheduled
+  std::vector<int> cycle_skip_;
+
   /// time start, step, and stop of schedule
   std::vector<double> time_interval_;
 
   /// List of times to perform schedule
   std::vector<double> time_list_;
+
+  /// List of times to skip even if scheduled
+  std::vector<double> time_skip_;
 
   /// Index of time or cycle interval or list for next output
   size_t index_;

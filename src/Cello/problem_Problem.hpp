@@ -110,7 +110,8 @@ protected: // functions
 
   /// Create named output object
   virtual Output *   create_output_  
-  (std::string, GroupProcess *, Hierarchy *, const Factory * ) throw ();
+  (std::string name, Parameters * parameters,
+   GroupProcess *, Hierarchy *, const Factory * ) throw ();
 
   /// Create named stopping object
   virtual Stopping * create_stopping_ 

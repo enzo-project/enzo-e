@@ -15,23 +15,11 @@ OutputData::OutputData(const Factory * factory) throw ()
 {
 }
 
-//----------------------------------------------------------------------
-
-OutputData::~OutputData() throw ()
-{
-}
-
 //======================================================================
-
-void OutputData::init () throw()
-{
-}
-
-//----------------------------------------------------------------------
 
 void OutputData::open () throw()
 {
-  std::string file_name = expand_file_name();
+  std::string file_name = expand_file_name(&file_name_,&file_args_);
 
   Monitor::instance()->print ("Output","writing data file %s", 
 			      file_name.c_str());
@@ -179,25 +167,6 @@ void OutputData::write_field
     file_->data_close();
   }
 
-}
-
-//----------------------------------------------------------------------
-
-void OutputData::prepare_remote (int * n, char ** buffer) throw()
-{
-}
-
-//----------------------------------------------------------------------
-
-void OutputData::update_remote  ( int n, char * buffer) throw()
-{
-}
-
-//----------------------------------------------------------------------
-
-
-void OutputData::cleanup_remote (int * n, char ** buffer) throw()
-{
 }
 
 //======================================================================

@@ -80,7 +80,7 @@ void OutputImage::init () throw()
 void OutputImage::open () throw()
 {
   // Open file if writing a single block
-  std::string file_name = expand_file_name();
+  std::string file_name = expand_file_name(&file_name_,&file_args_);
 
   if (is_writer()) {
     // Create png object

@@ -14,8 +14,10 @@ Output {
   };
 
   restart {
-     name = ["restart_ppm-8-%d","proc"];
-     type = "restart";
+     type  = "restart";
+     name  = ["restart_ppm-8-%d.h5","proc"];
+     param = "restart_ppm-8.in";
+     
      schedule = ["cycle","list",100];
   }
 }
