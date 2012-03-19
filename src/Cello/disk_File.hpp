@@ -72,13 +72,15 @@ public: // interface
   /// Create a new dataset for writing (and open it)
   virtual void data_create
   ( std::string name,  enum scalar_type type,
-    int nx=1, int ny=0, int nz=0) throw() = 0;
+    int nxd=1, int nyd=0, int nzd=0,
+    int nx=0,  int ny=0,  int nz=0) throw() = 0;
 
   /// Read from the opened dataset
   virtual void data_read (void * buffer) throw() = 0;
 
   /// Write to the opened dataset
-  virtual void data_write (const void * buffer) throw() = 0;
+  virtual void data_write 
+  (const void * buffer) throw() = 0;
 
   /// Close the opened dataset
   virtual void data_close () throw() = 0;

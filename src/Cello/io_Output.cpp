@@ -159,6 +159,7 @@ void Output::write_meta_ ( meta_type type_meta, Io * io ) throw ()
     int nx,ny,nz;
 
     // Get object's ith metadata
+
     io->meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
 
     // Write object's ith metadata

@@ -72,6 +72,7 @@ void OutputData::write_hierarchy
   IoHierarchy io_hierarchy(hierarchy);
 
   // Write hierarchy meta-data
+
   Output::write_meta (&io_hierarchy);
 
   // Call write_patch() on contained patches
@@ -163,14 +164,17 @@ void OutputData::write_field
     void * buffer;
     std::string name;
     scalar_type type;
-    int nx,ny,nz;
+    int nxd,nyd,nzd;  // Array dimension
+    int nx,ny,nz;     // Array size
 
     // Get ith FieldBlock data
-    io_field_block()->data_value(i, &buffer, &name, &type, &nx,&ny,&nz);
+    io_field_block()->data_value(i, &buffer, &name, &type, 
+				 &nxd,&nyd,&nzd,
+				 &nx, &ny, &nz);
 
     // Write ith FieldBlock data
 
-    file_->data_create(name.c_str(),type,nx,ny,nz);
+    file_->data_create(name.c_str(),type,nxd,nyd,nzd,nx,ny,nz);
     file_->data_write(buffer);
     file_->data_close();
   }

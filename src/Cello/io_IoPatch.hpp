@@ -25,17 +25,8 @@ public: // interface
   virtual ~IoPatch() throw()
   {}
 
-  /// Return the ith metadata item associated with the Patch object
-  void meta_value 
-  (int index, 
-   void ** buffer, std::string * name, enum scalar_type * type,
-   int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
 
-  /// Return the ith data item associated with the Patch object
-  void data_value 
-  (int index, 
-   void ** buffer, std::string * name, enum scalar_type * type,
-   int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+#include "_io_Io_common.hpp"
 
   
 private: // functions

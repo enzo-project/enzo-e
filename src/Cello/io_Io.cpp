@@ -23,18 +23,25 @@ Io::Io(size_t meta_count, size_t data_count) throw()
 void Io::meta_value 
 (int index, 
  void ** buffer, std::string * name, enum scalar_type * type,
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+ int * nxd, int * nyd, int * nzd) throw()
 {
   ASSERT1 ("Io::meta_value()",
    	   "index %d out of range", index,
-   	   0 <= index && index < meta_count_);
+   	   0 <= index && (size_t)index < meta_count_);
 
   if (name) (*name) = meta_name_[index];
-  if (n0) (*n0) = 1;
-  if (n1) (*n1) = 0;
-  if (n2) (*n2) = 0;
-  if (n3) (*n3) = 0;
-  if (n4) (*n4) = 0;
+  if (nxd) (*nxd) = 1;
+  if (nyd) (*nyd) = 0;
+  if (nzd) (*nzd) = 0;
+}
+
+//----------------------------------------------------------------------
+void Io::data_value 
+(int index, 
+ void ** buffer, std::string * name, enum scalar_type * type,
+ int * nxd, int * nyd, int * nzd,
+ int * nx,  int * ny,  int * nz) throw()
+{
 }
 
 //======================================================================

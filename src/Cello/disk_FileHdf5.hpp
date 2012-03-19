@@ -46,7 +46,7 @@ public: // interface
   void file_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
     int nx=1, int ny=0, int nz=0) throw()
-  {  write_meta_ ( file_id_, buffer, name, type, nx,ny,nz); }
+  { write_meta_ ( file_id_, buffer, name, type, nx,ny,nz); }
 
   // Datasets
 
@@ -58,13 +58,15 @@ public: // interface
   /// Create a new dataset for writing (and open it)
   virtual void data_create
   ( std::string name,  enum scalar_type type,
-    int nx=1, int ny=0, int nz=0) throw();
+    int nxd=1, int nyd=0, int nzd=0,
+    int nx=0, int ny=0, int nz=0) throw();
 
   /// Read from the opened dataset
   virtual void data_read (void * buffer) throw();
 
   /// Write to the opened dataset
-  virtual void data_write (const void * buffer) throw();
+  virtual void data_write 
+  (const void * buffer) throw();
 
   /// Close the opened dataset
   virtual void data_close () throw();
@@ -103,7 +105,7 @@ public: // interface
   void group_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
     int nx=1, int ny=0, int nz=0) throw()
-  {  write_meta_ ( group_id_, buffer, name, type, nx,ny,nz ); }
+  { write_meta_ ( group_id_, buffer, name, type, nx,ny,nz ); }
 
   /// Set the compression level
   void set_compress (int level) throw ();
@@ -134,23 +136,38 @@ private: // functions
   void get_output_extents_
   ( hid_t space_id, int * nx, int * ny, int * nz) throw();
 
-  /// Determine rank
-  hid_t create_dataspace_(int nx,int ny,int nz, hsize_t * data_size) throw();
+  /// create the space for the array on disk
+
+  hid_t create_data_space_
+  (int nxd, int nyd, int nzd, int nx,int ny,int nz) throw()
+  { return create_space_ (nx,ny,nz,nx,ny,nz); }
+
+  /// create the space for the array in memory
+  hid_t create_mem_space_
+  (int nxd, int nyd, int nzd, int nx,int ny,int nz) throw()
+  { return create_space_ (nxd,nyd,nzd,nx,ny,nz); }
+
+  /// implementation of create_mem_space() and create_data_space_()
+  hid_t create_space_
+  (int nxd, int nyd, int nzd, int nx,int ny,int nz) throw();
 
   /// Close the given dataspace
-  void close_dataspace_ (hid_t space_id) throw();
+  void close_space_ (hid_t space_id) throw();
+
+  /// Return the space for the given dataset
+  hid_t get_data_space_(hid_t dataset_id, std::string name) throw ();
+
+  /// Close the given memspace
+  void close_mem_space_ (hid_t space_id) throw();
+
+  /// Return the space for the given attribute
+  hid_t get_attr_space_(hid_t dataset_id, std::string name) throw ();
 
   /// Open the dataset
   hid_t open_dataset_ (hid_t group, std::string name) throw();
 
   /// Close the dataset
   void close_dataset_ () throw();
-
-  /// Return the space for the given dataset
-  hid_t get_data_space_(hid_t dataset_id, std::string name) throw ();
-
-  /// Return the space for the given attribute
-  hid_t get_attr_space_(hid_t dataset_id, std::string name) throw ();
 
 private: // attributes
 
@@ -165,7 +182,10 @@ private: // attributes
   hid_t data_id_;
 
   /// HDF5 dataspace descriptor
-  hid_t space_id_;
+  hid_t data_space_id_;
+
+  /// HDF5 memory space descriptor
+  hid_t mem_space_id_;
 
 
   /// HDF5 attribute descriptor
@@ -190,11 +210,11 @@ private: // attributes
   /// Type of data in the HDF5 datatype
   scalar_type data_type_;
 
-  /// Dataset rank, 0 to 5
+  /// Dataset rank, 0 to 3
   int data_rank_;
 
   /// Dataset size
-  hsize_t data_size_[5];
+  hsize_t data_dims_[3];
 
   /// HDF5 dataset property list
   hid_t data_prop_;

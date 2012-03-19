@@ -25,13 +25,13 @@ public: // interface
   void meta_value 
   (int index, 
    void ** buffer, std::string * name, enum scalar_type * type,
-   int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+   int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
   /// Return the ith data item associated with the EnzoBlock object
   void data_value 
   (int index, 
    void ** buffer, std::string * name, enum scalar_type * type,
-   int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+   int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
 private:
   int meta_count_enzo_;

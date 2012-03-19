@@ -31,39 +31,39 @@ IoPatch::IoPatch(const Patch * patch) throw ()
 void IoPatch::meta_value
 (int index,
  void ** buffer, std::string * name, enum scalar_type * type,
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+ int * nxd, int * nyd, int * nzd) throw()
 {
-  Io::meta_value(index,buffer,name,type,n0,n1,n2,n3,n4);
+  Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
 
   if (index == 0) {
 
     *buffer = (void *) patch_->size_;
     *type   = scalar_type_int;
-    *n0     = 3;
+    *nxd     = 3;
     
   } else if (index == 1) {
 
     *buffer = (void *) patch_->offset_;
     *type   = scalar_type_int;
-    *n0     = 3;
+    *nxd     = 3;
 
   } else if (index == 2) {
 
     *buffer = (void *) patch_->blocking_;
     *type   = scalar_type_int;
-    *n0     = 3;
+    *nxd     = 3;
 
   } else if (index == 3) {
 
     *buffer = (void *) patch_->lower_;
     *type   = scalar_type_double;
-    *n0     = 3;
+    *nxd     = 3;
 
   } else if (index == 4) {
 
     *buffer = (void *) patch_->upper_;
     *type   = scalar_type_double;
-    *n0     = 3;
+    *nxd     = 3;
 
   }
   
@@ -74,7 +74,8 @@ void IoPatch::meta_value
 void IoPatch::data_value
 (int index,
  void ** buffer, std::string * name, enum scalar_type * type,
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+ int * nxd, int * nyd, int * nzd,
+ int * nx,  int * ny,  int * nz) throw()
 {
 }
 

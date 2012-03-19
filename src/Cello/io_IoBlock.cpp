@@ -34,58 +34,58 @@ IoBlock::IoBlock() throw ()
 void IoBlock::meta_value
 (int index,
  void ** buffer, std::string * name, enum scalar_type * type,
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+ int * nxd, int * nyd, int * nzd) throw()
 {
-  Io::meta_value(index,buffer,name,type,n0,n1,n2,n3,n4);
+  Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
 
   if (index == 0) {
 
     *buffer = (void *) & block_->num_field_blocks_;
     *type   = scalar_type_int;
-    *n0     = 1;
+    *nxd     = 1;
 
   } else if (index == 1) {
 
     *buffer = (void *) & block_->index_;
     *type   = scalar_type_int;
-    *n0     = 3;
+    *nxd     = 3;
 
   } else if (index == 2) {
 
     *buffer = (void *) block_->size_;
     *type   = scalar_type_int;
-    *n0     = 3;
+    *nxd     = 3;
     
   } else if (index == 3) {
 
     *buffer = (void *) block_->lower_;
     *type   = scalar_type_double;
-    *n0     = 3;
+    *nxd     = 3;
 
   } else if (index == 4) {
 
     *buffer = (void *) block_->upper_;
     *type   = scalar_type_double;
-    *n0     = 3;
+    *nxd     = 3;
 
   } else if (index == 5) {
 
     *buffer = (void *) & block_->cycle_;
     *type   = scalar_type_int;
-    *n0     = 1;
+    *nxd     = 1;
 
 
   } else if (index == 6) {
 
     *buffer = (void *) & block_->time_;
     *type   = scalar_type_double;
-    *n0     = 1;
+    *nxd     = 1;
 
   } else if (index == 7) {
 
     *buffer = (void *) & block_->dt_;
     *type   = scalar_type_double;
-    *n0     = 1;
+    *nxd     = 1;
 
   }
 }
@@ -95,7 +95,8 @@ void IoBlock::meta_value
 void IoBlock::data_value
 (int index,
  void ** buffer, std::string * name, enum scalar_type * type,
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+ int * nxd, int * nyd, int * nzd,
+ int * nx,  int * ny,  int * nz) throw()
 {
 }
 

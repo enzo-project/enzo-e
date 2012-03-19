@@ -18,23 +18,23 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("FileIfrit");
 
-  int n0 = 64;
-  int n1 = 64;
-  int n2 = 64;
+  int nx = 64;
+  int ny = 64;
+  int nz = 64;
 
   const char filename[] = "test_disk.bin";
-  int n = n0*n1*n2;
+  int n = nx*ny*nz;
 
   float * a = new float[n];
 
-  for (int i2=0; i2<n2; i2++) {
-    double x2 = 1.0*i2/(n2-1);
-    for (int i1=0; i1<n1; i1++) {
-      double x1 = 1.0*i1/(n1-1);
-      for (int i0=0; i0<n0; i0++) {
-	double x0 = 1.0*i0/(n0-1);
-	int i = i0 + n0*(i1 + n1*i2);
-	a[i] = (x0-0.5)*(x0-0.5) + (x1-0.5)*(x1-0.5) + (x2-0.5)*(x2-0.5);
+  for (int iz=0; iz<nz; iz++) {
+    double z = 1.0*iz/(nz-1);
+    for (int iy=0; iy<ny; iy++) {
+      double y = 1.0*iy/(ny-1);
+      for (int ix=0; ix<nx; ix++) {
+	double x = 1.0*ix/(nx-1);
+	int i = ix + nx*(iy + ny*iz);
+	a[i] = (x-0.5)*(x-0.5) + (y-0.5)*(y-0.5) + (z-0.5)*(z-0.5);
       }
     }
   }
@@ -42,22 +42,22 @@ PARALLEL_MAIN_BEGIN
   FileIfrit ifrit;
 
   unit_func("write_bin");
-  ifrit.write_bin(filename,a,n0,n1,n2);
+  ifrit.write_bin(filename,a,nx,ny,nz);
   unit_assert(true);
 
   unit_func("read_bin");
   float * b = new float[n];
-  int m0,m1,m2;
-  ifrit.read_bin(filename,b,&m0,&m1,&m2);
-  unit_assert (m0 == n0);
-  unit_assert (m1 == n1);
-  unit_assert (m2 == n2);
+  int mx,my,mz;
+  ifrit.read_bin(filename,b,&mx,&my,&mz);
+  unit_assert (mx == nx);
+  unit_assert (my == ny);
+  unit_assert (mz == nz);
 
   bool passed = true;
-  for (int i2=0; i2<n2 && passed; i2++) {
-    for (int i1=0; i1<n1 && passed; i1++) {
-      for (int i0=0; i0<n0 && passed; i0++) {
-	int i = i0 + n0*(i1 + n1*i2);
+  for (int iz=0; iz<nz && passed; iz++) {
+    for (int iy=0; iy<ny && passed; iy++) {
+      for (int ix=0; ix<nx && passed; ix++) {
+	int i = ix + nx*(iy + ny*iz);
 	if (a[i] != b[i]) passed = false;
       }
     }

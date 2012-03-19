@@ -21,8 +21,8 @@ Block::Block
  double xpm, double ypm, double zpm, // Patch begin
  double xb, double yb, double zb,    // Block width
  int num_field_blocks) throw ()
-  :  field_block_(),
-     num_field_blocks_(num_field_blocks),
+  :  num_field_blocks_(num_field_blocks),
+     field_block_(),
      cycle_(0),
      time_(0),
 #ifdef CONFIG_USE_CHARM
@@ -269,7 +269,7 @@ void Block::p_initial()
   // where Block::p_refresh_face() is called before Block::p_initial()
 
   // Refresh before prepare()
-  TRACE("p_initial");
+
   contribute( CkCallback(CkIndex_Block::p_call_refresh(), thisProxy) );
 
 }
@@ -413,7 +413,6 @@ void Block::p_compute (int cycle, double time, double dt)
 
 void Block::p_call_refresh()
 {
-  TRACE("p_call_refresh");
   refresh();
 }
 

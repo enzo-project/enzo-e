@@ -19,7 +19,8 @@ FileHdf5::FileHdf5 (std::string path, std::string name) throw()
     file_id_(0),
     is_file_open_(false),
     data_id_(0),
-    space_id_(0),
+    data_space_id_(H5S_ALL),
+    mem_space_id_(H5S_ALL),
     attribute_id_(0),
     group_id_(0),
     group_name_("/"),
@@ -34,7 +35,7 @@ FileHdf5::FileHdf5 (std::string path, std::string name) throw()
 {
   const int rank_max = MAX_DATA_RANK;
   for (int i=0; i<rank_max; i++) {
-    data_size_[i] = 0;
+    data_dims_[i] = 0;
   }
 
   // group_prop_ = H5Pcreate (H5P_GROUP_CREATE);
@@ -119,7 +120,8 @@ void FileHdf5::file_close () throw()
 
     // close dataspace
 
-    close_dataspace_ (space_id_);
+    close_space_ (data_space_id_);
+    close_space_ (mem_space_id_);
 
     // Close dataset
 
@@ -168,16 +170,17 @@ void FileHdf5::data_open
 
   // Get the dataspace
 
-  space_id_ = get_data_space_(data_id_, name);
+  data_space_id_ = get_data_space_(data_id_, name);
 
   // set output extents
 
-  get_output_extents_(space_id_,nx,ny,nz);
+  get_output_extents_(data_space_id_,nx,ny,nz);
 
   // Initialize name and type
 
   data_name_ = name;
   data_type_ = hdf5_to_scalar_(H5Dget_type (data_id_));
+  WARNING("FileHdf5::data_open","Set memspace");
 
   // set output parameters
 
@@ -189,14 +192,18 @@ void FileHdf5::data_open
 
 void FileHdf5::data_create
 ( std::string name,  enum scalar_type type,
+  int nxd, int nyd, int nzd,
   int nx, int ny, int nz) throw()
 {
+
+  if (nx==0) nx=nxd;
+  if (ny==0) ny=nyd;
+  if (nz==0) nz=nzd;
 
   // Initialize data attributes
 
   data_name_ = name;
   data_type_ = type;
-
 
   // Determine the group
 
@@ -204,14 +211,16 @@ void FileHdf5::data_create
 
   // Create dataspace
 
-  space_id_ = create_dataspace_(nx,ny,nz,data_size_);
+
+  data_space_id_ = create_data_space_ (nxd,nyd,nzd,nx,ny,nz);
+  mem_space_id_  = create_mem_space_  (nxd,nyd,nzd,nx,ny,nz);
 
   // Create the new dataset
 
   data_id_ = H5Dcreate( group,
 			name.c_str(),
 			scalar_to_hdf5_(type),
-			space_id_,
+			data_space_id_,
 			data_prop_ );
 
   // error check H5Dcreate
@@ -250,8 +259,8 @@ void FileHdf5::data_read
   int retval = 
     H5Dread (data_id_,
 	     scalar_to_hdf5_(data_type_),
-	     space_id_,
-	     H5S_ALL,
+	     data_space_id_,
+	     mem_space_id_,
 	     H5P_DEFAULT,
 	     buffer);
 
@@ -263,8 +272,7 @@ void FileHdf5::data_read
 
 //----------------------------------------------------------------------
 
-void FileHdf5::data_write
-( const void * buffer) throw()
+void FileHdf5::data_write ( const void * buffer ) throw()
 {
   // error check file open
 
@@ -283,7 +291,7 @@ void FileHdf5::data_write
   int retval = 
     H5Dwrite (data_id_,
 	      scalar_to_hdf5_(data_type_),
-	      space_id_,
+	      mem_space_id_,
 	      H5S_ALL,
 	      H5P_DEFAULT,
 	      buffer);
@@ -302,7 +310,8 @@ void FileHdf5::data_close() throw()
 
     // close the dataspace
 
-    close_dataspace_(space_id_);
+    close_space_(data_space_id_);
+    close_space_(mem_space_id_);
 
     // close the dataset
 
@@ -437,13 +446,9 @@ void FileHdf5::data_write_meta
 	  "Trying to read attribute from unopened dataset %s",
 	   data_name_.c_str(),is_data_open_);
 
-  // Create the attribute data size
-
-  hsize_t meta_size[MAX_DATA_RANK];
-
   // Create the data space
 
-  hid_t meta_space_id = create_dataspace_(nx,ny,nz,meta_size);
+  hid_t meta_space_id = create_data_space_ (nx,ny,nz,nx,ny,nz);
 
   // Create the attribute
 
@@ -455,7 +460,7 @@ void FileHdf5::data_write_meta
 
   H5Awrite (meta_id, scalar_to_hdf5_(type), buffer);
 
-  close_dataspace_(meta_space_id);
+  close_space_(meta_space_id);
 
   int retval = H5Aclose(meta_id);
 
@@ -679,6 +684,7 @@ void FileHdf5::write_meta_
 {
   // error check file open
 
+
   std::string file_name = path_ + "/" + name_;
 
   ASSERT1("FileHdf5::write_meta_",
@@ -696,11 +702,9 @@ void FileHdf5::write_meta_
 
   // Determine the attribute rank
 
-  hsize_t meta_size[MAX_DATA_RANK];
-
   // Create data space
 
-  hid_t meta_space_id = create_dataspace_(nx,ny,nz,meta_size);
+  hid_t meta_space_id = create_data_space_ (nx,ny,nz,nx,ny,nz);
 
   // Create the attribute
 
@@ -721,7 +725,7 @@ void FileHdf5::write_meta_
 
   // Close the attribute dataspace
 
-  close_dataspace_(meta_space_id);
+  close_space_(meta_space_id);
 
   // Close the attribute
 
@@ -892,11 +896,11 @@ std::string FileHdf5::relative_to_absolute_
 //----------------------------------------------------------------------
 
 void FileHdf5::get_output_extents_
-( hid_t space_id, int * nx, int * ny, int * nz) throw ()
+( hid_t data_space_id, int * nx, int * ny, int * nz) throw ()
 {
 
    hsize_t data_size[MAX_DATA_RANK];
-   int rank = H5Sget_simple_extent_dims(space_id,data_size,0);
+   int rank = H5Sget_simple_extent_dims(data_space_id,data_size,0);
 
   // error check rank
 
@@ -924,59 +928,108 @@ void FileHdf5::get_output_extents_
 
 //----------------------------------------------------------------------
 
-hid_t FileHdf5::create_dataspace_(int nx,int ny,int nz,
-				  hsize_t * data_size) throw ()
+hid_t FileHdf5::create_space_(int nxd,int nyd,int nzd,
+			      int nx,int ny,int nz) throw ()
 {
+
+  hsize_t space_dims[MAX_DATA_RANK];
+  hsize_t space_size[MAX_DATA_RANK];
 
   hsize_t rank = MAX_DATA_RANK;
 
-  if (nz == 0 || nz == 1) -- rank;
-  if (ny == 0 || ny == 1) -- rank;
+  if (nzd == 0 || nzd == 1) -- rank;
+  if (nyd == 0 || nyd == 1) -- rank;
+
 
   // error check rank
 
-  ASSERT1("FileHdf5::create_dataspace_","rank %d is out of range",
+  ASSERT1("FileHdf5::create_space_","rank %d is out of range",
 	  rank, (1 <= rank && rank <= MAX_DATA_RANK));
 
-  // Define the dataspace: NOTE REVERSED AXES
+  // Define the space: NOTE REVERSED AXES
+
+  bool need_dims = true;
 
   if (rank == 1) {
-    data_size[0] = nx;
+
+    space_dims[0] = nxd;
+
+    space_size[0] = nx ? nx : nxd;  
+
+    need_dims = (space_dims[0] != space_size[0]);
+
   }
   if (rank == 2) {
-    data_size[1] = nx;
-    data_size[0] = ny;
+
+    space_dims[0] = nyd;
+    space_dims[1] = nxd;
+
+    space_size[0] = ny ? ny : nyd;  
+    space_size[1] = nx ? nx : nxd;  
+
+    need_dims = (space_dims[0] != space_size[0] ||
+		 space_dims[1] != space_size[1]);
+
   }
   if (rank == 3) {
-    data_size[2] = nx;
-    data_size[1] = ny;
-    data_size[0] = nz;
+
+    space_dims[0] = nzd;
+    space_dims[1] = nyd;
+    space_dims[2] = nxd;
+
+    space_size[0] = nz ? nz : nzd;
+    space_size[1] = ny ? ny : nyd;
+    space_size[2] = nx ? nx : nxd;
+
+
+    need_dims = (space_dims[0] != space_size[0] ||
+		 space_dims[1] != space_size[1] ||
+		 space_dims[2] != space_size[2]);
+
   }
 
-  hid_t data_space_id = H5Screate_simple (rank, data_size, NULL);
+
+  hid_t space_id;
+
+  if (need_dims) {
+
+    space_id = H5Screate_simple (rank, space_dims, 0);
+
+    hsize_t start[3];
+    hsize_t count[3];
+
+    for (size_t i=0; i<rank; i++) {
+      start[i] = (space_dims[i]-space_size[i])/2;
+      count[i] = space_size[i];
+    }
+
+    H5Sselect_hyperslab (space_id,H5S_SELECT_SET,start,0,count,0);
+  }
+  else space_id = H5Screate_simple (rank, space_dims, 0); 
 
   // error check H5Screate_simple
 
-  ASSERT1("FileHdf5::create_dataspace_",
+  ASSERT1("FileHdf5::create_space_",
 	  "h5Screate_simple returned %d",
-	  space_id_,
-	  (data_space_id>=0));
+	  space_id,
+	  (space_id>=0));
 
-  return data_space_id;
+  return space_id;
 }
 
 //----------------------------------------------------------------------
 
-void FileHdf5::close_dataspace_ (hid_t space_id) throw()
+void FileHdf5::close_space_ (hid_t space_id) throw()
 {
-  // Close dataspace
+  // Close space
 
-  int retval = H5Sclose (space_id);
+  int retval = 0;
+
+  if (space_id != H5S_ALL) retval = H5Sclose (space_id);
 
   // Error check H5Sclose 
 
-  ASSERT1("FileHdf5::close_dataspace_", "Return value %d",
-	  retval,(retval >= 0));
+  ASSERT1("FileHdf5::close_space_", "Return value %d", retval,(retval >= 0));
 }
 
 //----------------------------------------------------------------------
@@ -1012,18 +1065,18 @@ void FileHdf5::close_dataset_ () throw()
 hid_t FileHdf5::get_data_space_(hid_t data_id, std::string name) throw ()
 {
 
-  hid_t space_id = H5Dget_space (data_id);
+  hid_t data_space_id = H5Dget_space (data_id);
 
   // error check rank
 
-  int rank = H5Sget_simple_extent_ndims(space_id);
+  int rank = H5Sget_simple_extent_ndims(data_space_id);
 
   ASSERT3("FileHdf5::get_data_space_", 
 	  "Dataset %s in file %s has unsupported rank %d",
 	  name.c_str(),(path_ + "/" + name_).c_str(),rank,
 	  (1 <= rank && rank <= MAX_DATA_RANK));
 
-  return space_id;
+  return data_space_id;
 
 }
 //----------------------------------------------------------------------
@@ -1031,17 +1084,17 @@ hid_t FileHdf5::get_data_space_(hid_t data_id, std::string name) throw ()
 hid_t FileHdf5::get_attr_space_(hid_t attr_id, std::string name) throw ()
 {
 
-  hid_t space_id = H5Aget_space (attr_id);
+  hid_t data_space_id = H5Aget_space (attr_id);
 
   // error check rank
 
-  int rank = H5Sget_simple_extent_ndims(space_id);
+  int rank = H5Sget_simple_extent_ndims(data_space_id);
 
   ASSERT3("FileHdf5::get_attr_space_",
 	  "Attribute %s in file %s has unsupported rank %d",
 	  name.c_str(),(path_ + "/" + name_).c_str(),rank,
 	  (1 <= rank && rank <= MAX_DATA_RANK));
 
-  return space_id;
+  return data_space_id;
 
 }

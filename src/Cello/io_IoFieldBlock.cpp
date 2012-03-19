@@ -33,7 +33,7 @@ IoFieldBlock::IoFieldBlock() throw ()
 void IoFieldBlock::meta_value
 (int index,
  void ** buffer, std::string * name, enum scalar_type * type,
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+ int * nxd, int * nyd, int * nzd) throw()
 {
 }
 
@@ -42,9 +42,11 @@ void IoFieldBlock::meta_value
 void IoFieldBlock::data_value
 (int index,
  void ** buffer, std::string * name, enum scalar_type * type,
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+ int * nxd, int * nyd, int * nzd,
+ int * nx,  int * ny,  int * nz) throw()
 {
-  if (buffer) (*buffer) = (void * )field_block_->field_values(field_index_);
+  if (buffer) (*buffer) = (void * ) 
+		field_block_->field_unknowns(field_descr_,field_index_);
   if (name)   (*name)   = field_descr_->field_name(field_index_);
   if (type) {
 
@@ -65,15 +67,30 @@ void IoFieldBlock::data_value
 
   int ngx=0,ngy=0,ngz=0;
 
-  // Must include ghosts in data output, otherwise array dimensions are
-  // incorrect
-
   field_descr_->ghosts(field_index_,&ngx,&ngy,&ngz);
 
-   if (n0) (*n0) = nbx + 2*ngx;
-   if (n1) (*n1) = nby + 2*ngy;
-   if (n2) (*n2) = nbz + 2*ngz;
+  // Exclude ghosts when writing
 
+  if (field_block_->ghosts_allocated()) {
+
+    if (nxd) (*nxd) = nbx + 2*ngx;
+    if (nyd) (*nyd) = nby + 2*ngy;
+    if (nzd) (*nzd) = nbz + 2*ngz;
+
+    if (nx) (*nx) = nbx;
+    if (ny) (*ny) = nby;
+    if (nz) (*nz) = nbz;
+
+  } else {
+
+    if (nxd) (*nxd) = nbx;
+    if (nyd) (*nyd) = nby;
+    if (nzd) (*nzd) = nbz;
+
+    if (nx) (*nx) = nbx;
+    if (ny) (*ny) = nby;
+    if (nz) (*nz) = nbz;
+
+  }
 }
-
 //----------------------------------------------------------------------

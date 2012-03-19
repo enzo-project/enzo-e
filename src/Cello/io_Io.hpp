@@ -23,18 +23,9 @@ public: // interface
   virtual ~Io () throw ()
   {}
 
-  /// Return the ith metadata item associated with the associated object
 
-  virtual void meta_value 
-  (int index, 
-   void ** buffer, std::string * name, enum scalar_type * type,
-   int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
+#include "_io_Io_common.hpp"
 
-  /// Return the ith data item associated with the associated object
-  virtual void data_value 
-  (int index, 
-   void ** buffer, std::string * name, enum scalar_type * type,
-   int * n0=0, int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
 
   /// Return number of metadata items associated with the associated class
   size_t meta_count() const throw()

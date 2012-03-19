@@ -38,7 +38,7 @@ IoEnzoBlock::IoEnzoBlock() throw ()
 void IoEnzoBlock::meta_value
 (int index,
  void ** buffer,  std::string * name, enum scalar_type * type,
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+ int * nxd, int * nyd, int * nzd) throw()
 {
 
   int index_block = meta_count_ - meta_count_enzo_;
@@ -46,13 +46,13 @@ void IoEnzoBlock::meta_value
   if (index < index_block) {
 
     // First return Block attributes
-    IoBlock::meta_value(index,buffer,name,type,n0,n1,n2,n3,n4);
+    IoBlock::meta_value(index,buffer,name,type,nxd,nyd,nzd);
 
   } else {
 
     // Then return EnzoBlock attributes
 
-    Io::meta_value(index,buffer,name,type,n0,n1,n2,n3,n4);
+    Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
 
     const EnzoBlock * enzo_block = dynamic_cast<const EnzoBlock *>(block_);
 
@@ -82,31 +82,31 @@ void IoEnzoBlock::meta_value
 
       *buffer = (void *) enzo_block->GridLeftEdge;
       *type   = scalar_type_enzo_float;
-      *n0     = 3;
+      *nxd     = 3;
 
     } else if (index == 5) {
 
       *buffer = (void *) enzo_block->GridDimension;
       *type   = scalar_type_int;
-      *n0     = 3;
+      *nxd     = 3;
 
     } else if (index == 6) {
 
       *buffer = (void *) enzo_block->GridStartIndex;
       *type   = scalar_type_int;
-      *n0     = 3;
+      *nxd     = 3;
 
     } else if (index == 7) {
 
       *buffer = (void *) enzo_block->GridEndIndex;
       *type   = scalar_type_int;
-      *n0     = 3;
+      *nxd     = 3;
 
     } else if (index == 8) {
 
       *buffer = (void *) enzo_block->CellWidth;
       *type   = scalar_type_enzo_float;
-      *n0     = 3;
+      *nxd     = 3;
 
     }
   }
@@ -116,7 +116,7 @@ void IoEnzoBlock::meta_value
 void IoEnzoBlock::data_value
 (int index,
  void ** buffer, std::string * name, enum scalar_type * type,
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+ int * nxd, int * nyd, int * nzd) throw()
 {
 }
 

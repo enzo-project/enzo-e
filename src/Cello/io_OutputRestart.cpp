@@ -70,7 +70,6 @@ void OutputRestart::write_simulation
 /// Simulation functions must be called, which would introduce a circular
 /// dependence between Simulation and Output components
 {
-  TRACE("OutputRestart::write_simulation()");
 
   // Write parameter file
 
@@ -103,10 +102,7 @@ void OutputRestart::write_hierarchy
  const FieldDescr * field_descr
  ) throw()
 {
-  TRACE("OutputRestart::write_hierarchy()");
-
   Output::write_hierarchy(hierarchy,field_descr);
-
 }
 
 //----------------------------------------------------------------------
@@ -118,7 +114,6 @@ void OutputRestart::write_patch
  int ixp0, int iyp0, int izp0
  ) throw()
 {
-  TRACE("OutputRestart::write_patch()");
   Output::write_patch(patch,field_descr,ixp0,iyp0,izp0);
 }
 
@@ -130,7 +125,6 @@ void OutputRestart::write_block
  const FieldDescr * field_descr,
  int ixp0, int iyp0, int izp0) throw()
 {
-  TRACE("OutputRestart::write_block()");
   Output::write_block(block,field_descr,ixp0,iyp0,izp0);
 }
 

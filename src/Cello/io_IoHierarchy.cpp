@@ -29,21 +29,21 @@ IoHierarchy::IoHierarchy(const Hierarchy * hierarchy) throw ()
 void IoHierarchy::meta_value
 (int index,
  void ** buffer, std::string * name, enum scalar_type * type,
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+ int * nxd, int * nyd, int * nzd) throw()
 {
-  Io::meta_value(index,buffer,name,type,n0,n1,n2,n3,n4);
+  Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
 
   if (index == 0) {
 
     *buffer = (void *) hierarchy_->lower_;
     *type   = scalar_type_double;
-    *n0     = 3;
+    *nxd     = 3;
     
   } else if (index == 1) {
 
     *buffer = (void *) hierarchy_->upper_;
     *type   = scalar_type_double;
-    *n0     = 3;
+    *nxd     = 3;
 
   } else if (index == 2) {
 
@@ -58,7 +58,8 @@ void IoHierarchy::meta_value
 void IoHierarchy::data_value
 (int index,
  void ** buffer, std::string * name, enum scalar_type * type,
- int * n0, int * n1, int * n2, int * n3, int * n4) throw()
+ int * nxd, int * nyd, int * nzd,
+ int * nx,  int * ny,  int * nz) throw()
 {
 }
 

@@ -34,7 +34,7 @@ Block * EnzoFactory::create_block
 
 IoBlock * EnzoFactory::create_io_block () const throw()
 {
-  return new IoEnzoBlock ();
+  return new IoEnzoBlock;
 }
 
 //----------------------------------------------------------------------
