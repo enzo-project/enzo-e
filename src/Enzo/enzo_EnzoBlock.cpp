@@ -353,8 +353,18 @@ void EnzoBlock::set_time (double time_start) throw ()
 
   Block::set_time (time_start);
 
-  Time_       = time_start;
+  //  Setting OldTime = Time_ leads to an error in Grid_ComputePressure.C:38
+  //  "requested time is outside available range"
+  //        Grid_ComputePressure.cpp:37   OldTime =     0.046079162508249283
+  //        Grid_ComputePressure.cpp:38      time =     0.046079158782958984
+  //        Grid_ComputePressure.cpp:39      Time =     0.046079158782958984
+  //
+  // (OldTime > time; error is about single-precision epsilon)
+
+  //  OldTime     = Time_;
+
   OldTime     = time_start;
+  Time_       = time_start;
 
 }
 

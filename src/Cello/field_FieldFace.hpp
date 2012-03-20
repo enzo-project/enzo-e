@@ -37,7 +37,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Set whether or not to include ghost zones along each axis
-  inline void include_ghosts (bool gx, bool gy = true, bool gz = true)
+  inline void set_full (bool gx, bool gy = true, bool gz = true)
   {
     full_[axis_x] = gx;
     full_[axis_y] = gy;
