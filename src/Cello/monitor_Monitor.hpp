@@ -52,10 +52,6 @@ public: // interface
   static Monitor * instance()
   { 
     return & instance_;
-    // if ( instance_ == NULL )
-    //   instance_ = new Monitor;
-
-    // return instance_;
   };
 
   /// Set the processor's rank

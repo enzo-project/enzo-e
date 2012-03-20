@@ -154,6 +154,9 @@ public: // functions (TEMPORARILY PUBLIC)
   /// Set Block's time
   virtual void set_time (double time) throw();
 
+  /// Set Block's dt
+  virtual void set_dt (double dt) throw();
+
   /// Initialize Block
   virtual void initialize () throw();
 

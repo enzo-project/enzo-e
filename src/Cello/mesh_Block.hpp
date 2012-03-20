@@ -176,6 +176,10 @@ public: // virtual functions
   virtual void set_time (double time) throw()
   { time_  = time; }
 
+  /// Set Block's timestep
+  virtual void set_dt (double dt) throw()
+  { dt_  = dt; }
+
   /// Initialize Block
   virtual void initialize () throw()
   {}

@@ -254,6 +254,7 @@ void Block::p_initial()
 
   set_cycle(simulation->cycle());
   set_time (simulation->time());
+  set_dt   (simulation->dt());
 
   // Perform any additional initialization
 
@@ -387,8 +388,9 @@ void Block::p_refresh (int cycle, double time, double dt)
   time_  = time;
   dt_    = dt;
 
-  set_time(time);
   set_cycle(cycle);
+  set_time(time);
+  set_dt(dt);
 
   refresh();
 }
@@ -400,8 +402,9 @@ void Block::p_compute (int cycle, double time, double dt)
   time_  = time;
   dt_    = dt;
 
-  set_time(time);
   set_cycle(cycle);
+  set_time(time);
+  set_dt(dt);
 
   compute();
 }
@@ -928,6 +931,10 @@ void Block::compute()
   time_ += dt_;
   ++ cycle_ ;
 
+  set_cycle(cycle_);
+  set_time(time_);
+  set_dt(dt_);
+  
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 
   refresh();

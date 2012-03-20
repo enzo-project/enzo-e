@@ -29,26 +29,30 @@ Simulation::Simulation
 #endif
 
 /// Initialize the Simulation object
-  : factory_(0),
-    parameters_(0),
-    parameter_file_(parameter_file),
+: factory_(0),
+  parameters_(0),
+  parameter_file_(parameter_file),
 #ifdef CONFIG_USE_CHARM
-    proxy_block_reduce_(proxy_block_reduce),
-    index_output_(0),
+  proxy_block_reduce_(proxy_block_reduce),
+  index_output_(0),
 #endif
-    group_process_(group_process),
-    dimension_(0),
-    cycle_(0),
-    time_(0.0),
-    dt_(0),
-    stop_(false),
-    performance_(0),
-    monitor_(0),
-    hierarchy_(0),
-    field_descr_(0)
+  group_process_(group_process),
+  is_group_process_new_(false),
+  dimension_(0),
+  cycle_(0),
+  time_(0.0),
+  dt_(0),
+  stop_(false),
+  performance_(0),
+  monitor_(0),
+  hierarchy_(0),
+  field_descr_(0)
 {
 
-  if (!group_process_) group_process_ = GroupProcess::create();
+  if (!group_process_) {
+    group_process_ = GroupProcess::create();
+    is_group_process_new_ = true;
+  }
 
   performance_ = new Performance;
 
@@ -389,10 +393,8 @@ void Simulation::deallocate_() throw()
   delete factory_;       factory_     = 0;
   delete parameters_;    parameters_  = 0;
   delete performance_;   performance_ = 0;
-#ifdef CONFIG_USE_CHARM
-  delete monitor_;       monitor_ = 0;
-  delete group_process_; group_process_ = 0;
-#endif
+  if (is_group_process_new_)
+    { delete group_process_; group_process_ = 0; }
   delete hierarchy_;     hierarchy_ = 0;
   delete field_descr_;   field_descr_ = 0;
 }

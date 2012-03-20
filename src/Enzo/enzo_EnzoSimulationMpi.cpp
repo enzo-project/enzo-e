@@ -275,6 +275,10 @@ void EnzoSimulationMpi::run() throw()
 	time_block     += dt_block;
 	cycle_block    += 1;
 
+	block->set_cycle (cycle_block);
+	block->set_time  (time_block);
+	block->set_dt    (dt_block);
+
 	// Global cycle and time reduction
 	
 	int stop_block = problem()->stopping()->complete(cycle_block,time_block);

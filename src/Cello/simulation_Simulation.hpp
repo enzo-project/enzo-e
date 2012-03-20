@@ -159,7 +159,7 @@ public: // interface
   double dt() const throw() 
   { return dt_; };
 
-  /// Return the currint stopping criteria (stored from main reduction)
+  /// Return the current stopping criteria (stored from main reduction)
   bool stop() const throw() 
   { return stop_; };
 
@@ -223,6 +223,9 @@ protected: // attributes
 
   /// Parallel group for the simulation
   GroupProcess * group_process_;
+
+  /// Whether the group_process_ object was allocated inside Simulation
+  bool is_group_process_new_;
 
 #ifdef CONFIG_USE_CHARM
 

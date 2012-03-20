@@ -360,6 +360,16 @@ void EnzoBlock::set_time (double time_start) throw ()
 
 //----------------------------------------------------------------------
 
+void EnzoBlock::set_dt (double dt_param) throw ()
+{
+
+  Block::set_dt (dt_param);
+
+  dt = dt_param;
+}
+
+//----------------------------------------------------------------------
+
 void EnzoBlock::initialize () throw()
 {
 
