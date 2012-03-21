@@ -139,6 +139,12 @@ public:
     const FieldDescr * field_descr,  
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// Cleanup after writing blocks in a patch
+  virtual void end_write_patch () throw()
+  { }
+#endif
+
   /// Write local block data to disk
   virtual void write_block
   ( const Block * block, 

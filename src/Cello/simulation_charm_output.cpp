@@ -113,6 +113,9 @@ void BlockReduce::p_output_reduce(int count)
 void Simulation::p_output_reduce() throw()
 {
   Output * output = Simulation::problem()->output(index_output_);
+
+  output->end_write_patch();
+
   int ip       = CkMyPe();
   int ip_writer = output->process_writer();
 

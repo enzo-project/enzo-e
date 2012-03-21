@@ -52,7 +52,7 @@ void OutputData::finalize () throw ()
 
 void OutputData::write_hierarchy 
 (
- const Hierarchy * hierarchy,
+ const Hierarchy  * hierarchy,
  const FieldDescr * field_descr
  ) throw()
 {
@@ -60,6 +60,8 @@ void OutputData::write_hierarchy
   IoHierarchy io_hierarchy(hierarchy);
 
   // Write hierarchy meta-data
+
+  file_->file_write_meta("value", "name",scalar_type_char,6);
 
   Output::write_meta (&io_hierarchy);
 
@@ -96,14 +98,26 @@ void OutputData::write_patch
   Output::write_patch(patch,field_descr,ixp0,iyp0,izp0);
 
   // BUG: the following is getting executed before remote blocks begin
-  // writing.
+  // writing.  Moved to end_write_patch() called from Simulation::p_output_reduce()
 
+#ifndef CONFIG_USE_CHARM
   file_->group_close();
   file_->group_chdir("..");
+#endif
 
 }
 
+#ifdef CONFIG_USE_CHARM
 //----------------------------------------------------------------------
+
+void OutputData::end_write_patch() throw()
+{
+  file_->group_close();
+  file_->group_chdir("..");
+}
+//----------------------------------------------------------------------
+
+#endif
 
 void OutputData::write_block 
 ( 
