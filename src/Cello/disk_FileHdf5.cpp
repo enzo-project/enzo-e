@@ -428,48 +428,6 @@ void FileHdf5::data_read_meta
 
 //----------------------------------------------------------------------
 
-void FileHdf5::data_write_meta
-  ( const void * buffer, std::string name, enum scalar_type type,
-    int nx, int ny, int nz) throw()
-{
-  // error check file open
-
-  std::string file_name = path_ + "/" + name_;
-
-  ASSERT1("FileHdf5::data_write_meta",
-	  "Trying to write metadata to the unopened file %s",
-	  file_name.c_str(), is_file_open_);
-
-  // error check dataset open
-
-  ASSERT1("FileHdf5::data_write_meta",
-	  "Trying to read attribute from unopened dataset %s",
-	   data_name_.c_str(),is_data_open_);
-
-  // Create the data space
-
-  hid_t meta_space_id = create_data_space_ (nx,ny,nz,nx,ny,nz);
-
-  // Create the attribute
-
-  hid_t meta_id = H5Acreate ( data_id_,
-			      name.c_str(),
-			      scalar_to_hdf5_(type),
-			      meta_space_id,
-			      H5P_DEFAULT);
-
-  H5Awrite (meta_id, scalar_to_hdf5_(type), buffer);
-
-  close_space_(meta_space_id);
-
-  int retval = H5Aclose(meta_id);
-
-  ASSERT1("FileHdf5::data_write_meta",
-	  "H5Aclose() returned %d",retval,(retval >= 0));
-}  
-
-//----------------------------------------------------------------------
-
 void FileHdf5::group_chdir (std::string group_path) throw()
 {
   // convert to absolute path if it is relative
@@ -678,7 +636,7 @@ void FileHdf5::set_compress (int level) throw ()
 //----------------------------------------------------------------------
 
 void FileHdf5::write_meta_
-( hid_t group_or_file_id,
+( hid_t type_id,
   const void * buffer, std::string name, enum scalar_type type,
   int nx, int ny, int nz) throw()
 {
@@ -689,15 +647,19 @@ void FileHdf5::write_meta_
 
   ASSERT1("FileHdf5::write_meta_",
 	  "Trying to write metadata to the unopened file %s",
-	  file_name.c_str(),
-	  is_file_open_);
+	  file_name.c_str(), is_file_open_);
 
-  // error check group open
+  // error check group or dataset open
 
-  if (group_or_file_id == group_id_) {
+  if (type_id == group_id_) {
     ASSERT1("FileHdf5::write_meta_",
 	    "Trying to write attribute to unopened group %s",
 	    group_name_.c_str(),is_group_open_);
+  }
+  if (type_id == data_id_) {
+    ASSERT1("FileHdf5::write_meta",
+	    "Trying to read attribute from unopened dataset %s",
+	    data_name_.c_str(),is_data_open_);
   }
 
   // Determine the attribute rank
@@ -708,7 +670,7 @@ void FileHdf5::write_meta_
 
   // Create the attribute
 
-  hid_t meta_id = H5Acreate ( group_or_file_id,
+  hid_t meta_id = H5Acreate ( type_id,
 			      name.c_str(),
 			      scalar_to_hdf5_(type),
 			      meta_space_id,

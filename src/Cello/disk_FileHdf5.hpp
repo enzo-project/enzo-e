@@ -79,7 +79,8 @@ public: // interface
   /// Write a metadata item associated with the opened dataset
   virtual void data_write_meta
   ( const void * buffer, std::string name, enum scalar_type type,
-    int nx=1, int ny=0, int nz=0) throw();
+    int nx=1, int ny=0, int nz=0) throw()
+  { write_meta_ ( data_id_, buffer, name, type, nx,ny,nz); }
 
 
   // Groups
