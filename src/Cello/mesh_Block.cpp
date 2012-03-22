@@ -384,13 +384,9 @@ void Block::p_call_output(CkReductionMsg * msg)
 
 void Block::p_refresh (int cycle, double time, double dt)
 {
-  cycle_ = cycle;
-  time_  = time;
-  dt_    = dt;
-
-  set_cycle(cycle);
-  set_time(time);
-  set_dt(dt);
+  // set_cycle(cycle);
+  // set_time(time);
+  // set_dt(dt);
 
   refresh();
 }
@@ -398,13 +394,9 @@ void Block::p_refresh (int cycle, double time, double dt)
 //----------------------------------------------------------------------
 void Block::p_compute (int cycle, double time, double dt)
 {
-  cycle_ = cycle;
-  time_  = time;
-  dt_    = dt;
-
-  set_cycle(cycle);
-  set_time(time);
-  set_dt(dt);
+  // set_cycle(cycle);
+  // set_time(time);
+  // set_dt(dt);
 
   compute();
 }
@@ -916,7 +908,7 @@ void Block::compute()
 
   int index_method = 0;
   while (Method * method = simulation->problem()->method(index_method++)) {
-    method -> compute_block (field_descr,this,time_,dt_);
+    method -> compute_block (field_descr,this,cycle_,time_,dt_);
   }
 
   sprintf (buffer,"%03d-B",cycle_);
@@ -926,14 +918,13 @@ void Block::compute()
   traceUserBracketEvent(10,time_start, CmiWallTimer());
 #endif
 
-  // Update Block cycle and time
+  // Update Block cycle and time to Simulation time and cycle
 
-  time_ += dt_;
-  ++ cycle_ ;
+  // time_ += dt_;
+  // ++ cycle_ ;
 
-  set_cycle(cycle_);
-  set_time(time_);
-  set_dt(dt_);
+  set_cycle(cycle_+1);
+  set_time(time_+dt_);
   
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 

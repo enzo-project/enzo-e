@@ -24,7 +24,6 @@
 int EnzoBlock::SolveMHDEquations
 (
  FieldDescr * field_descr,
- int cycle,
  enzo_float dt
  )
 {

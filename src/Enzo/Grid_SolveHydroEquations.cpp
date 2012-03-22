@@ -10,7 +10,7 @@
 
 #include "enzo.hpp"
 
-int EnzoBlock::SolveHydroEquations (int CycleNumber, enzo_float dt)
+int EnzoBlock::SolveHydroEquations (int CycleNumber, enzo_float time, enzo_float dt)
 {
   // @@@@ ASSUME UNIGIRD PROBLEM @@@@
 
@@ -329,7 +329,7 @@ int EnzoBlock::SolveHydroEquations (int CycleNumber, enzo_float dt)
      care of elsewhere). */
 
   if (ComovingCoordinates)
-    if (CosmologyComputeExpansionFactor(Time()+0.5*dt, &a, &dadt)
+    if (CosmologyComputeExpansionFactor(time+0.5*dt, &a, &dadt)
 	== ENZO_FAIL) {
       fprintf(stderr, "Error in CsomologyComputeExpansionFactors.\n");
       return ENZO_FAIL;

@@ -30,7 +30,7 @@ public: // virtual functions
 
   virtual void compute_block( FieldDescr * field_descr,
 			      Block * block,
-			      double t, double dt ) throw() = 0; 
+			      int cycle, double time, double dt ) throw() = 0; 
 
 protected: // functions
 

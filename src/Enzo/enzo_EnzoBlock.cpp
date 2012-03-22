@@ -348,10 +348,10 @@ void EnzoBlock::set_cycle (int cycle_start) throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::set_time (double time_start) throw ()
+void EnzoBlock::set_time (double time) throw ()
 {
 
-  Block::set_time (time_start);
+  Block::set_time (time);
 
   //  Setting OldTime = Time_ leads to an error in Grid_ComputePressure.C:38
   //  "requested time is outside available range"
@@ -361,10 +361,14 @@ void EnzoBlock::set_time (double time_start) throw ()
   //
   // (OldTime > time; error is about single-precision epsilon)
 
-  //  OldTime     = Time_;
+  ASSERT("Block::set_time",
+	 "Must be called only once per timestep to maintain OldTime consistency",
+	 Time_ == 0 || Time_ < time);
 
-  OldTime     = time_start;
-  Time_       = time_start;
+  //  WARNING("Block::set_time","TEMPORARY");
+  OldTime     = Time_;
+  //  OldTime     = time;
+  Time_       = time;
 
 }
 

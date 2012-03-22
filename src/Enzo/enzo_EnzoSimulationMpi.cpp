@@ -38,16 +38,13 @@ void EnzoSimulationMpi::run() throw()
   ReduceSerial reduce(group_process_);
 #endif
 
-  // get hierarchy extents for later block boundary checks
-
-  double lower[3];
-  hierarchy_->lower(&lower[0], &lower[1], &lower[2]);
-  double upper[3];
-  hierarchy_->upper(&upper[0], &upper[1], &upper[2]);
+  Problem * problem = Simulation::problem();
 
   //--------------------------------------------------
   // INITIALIZE FIELDS
   //--------------------------------------------------
+
+  Initial * initial = problem->initial();
 
   ItPatch it_patch(hierarchy_);
   Patch * patch;
@@ -59,17 +56,24 @@ void EnzoSimulationMpi::run() throw()
 
     while ((block = ++it_block)) {
 
-      problem()->initial()->enforce(hierarchy_,field_descr_,block);
+      initial->enforce(hierarchy_,field_descr_,block);
 
-      EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
+      block->set_cycle(cycle_);
+      block->set_time(time_);
 
-      enzo_block->set_cycle(cycle_);
-      enzo_block->set_time(time_);
-
-      enzo_block->initialize();
+      block->initialize();
 
     }
   }
+
+  //--------------------------------------------------
+  // REFRESH GHOST ZONES AND ENFORCE BOUNDARY CONDITIONS
+  //--------------------------------------------------
+
+  double lower[3];
+  hierarchy_->lower(&lower[0], &lower[1], &lower[2]);
+  double upper[3];
+  hierarchy_->upper(&upper[0], &upper[1], &upper[2]);
 
   while ((patch = ++it_patch)) {
 
@@ -80,22 +84,26 @@ void EnzoSimulationMpi::run() throw()
 
       bool is_boundary [3][2];
 
-      // is_block_on_boundary_ (block,boundary);
       block->is_on_boundary (lower,upper,is_boundary);
-
-      update_boundary_(block,is_boundary);
 
       refresh_ghost_(block,patch,is_boundary);
 
+      update_boundary_(block,is_boundary);
+
     }
   }
-  // Perform any scheduled output
+
+  //--------------------------------------------------
+  // PERFORM SCHEDULED OUTPUT
+  //--------------------------------------------------
 
   scheduled_output();
   
   //--------------------------------------------------
-  // INITIAL STOPPING CRITERIA TEST
+  // EVALUATE INITIAL STOPPING CRITERIA
   //--------------------------------------------------
+
+  Stopping * stopping = problem->stopping();
 
   int stop_hierarchy = true;
 
@@ -108,19 +116,14 @@ void EnzoSimulationMpi::run() throw()
 
     while ((block = ++it_block)) {
 
-      EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
+      int cycle = block->cycle();
+      int time  = block->time();
 
-      int & cycle_block = enzo_block->CycleNumber;
-      double time_block =  enzo_block->Time();
-
-      int stop_block = problem()->stopping()->complete(cycle_block,time_block);
+      int stop_block = stopping->complete(cycle,time);
 
       stop_patch = stop_patch && stop_block;
-
     }
-
     stop_hierarchy = stop_hierarchy && stop_patch;
-
   }
 
   //======================================================================
@@ -132,6 +135,10 @@ void EnzoSimulationMpi::run() throw()
     //--------------------------------------------------
     // Determine timestep
     //--------------------------------------------------
+
+
+    Timestep * timestep = problem->timestep();
+    Stopping * stopping = problem->stopping();
 
     double dt_hierarchy = std::numeric_limits<double>::max();
 
@@ -148,52 +155,52 @@ void EnzoSimulationMpi::run() throw()
 
       while ((block = ++it_block)) {
 
-	// Accumulate Block-local dt
+	double dt_block   = timestep->compute(field_descr_,block);
+	double time_block = block->time();
 
-	block->set_cycle(cycle_);
-	block->set_time (time_);
-
-	double dt_block = problem()->timestep()->compute(field_descr_,block);
-
-	// Reduce timestep to coincide with scheduled output if needed
-
-	double time_block = static_cast <EnzoBlock*> (block)->Time();
+	// Reduce timestep to coincide with scheduled output
 
 	int index_output=0;
-	while (Output * output = problem()->output(index_output++)) {
+	while (Output * output = problem->output(index_output++)) {
 	  dt_block = output->update_timestep(time_block,dt_block);
 	}
 
-	// Reduce timestep to coincide with end of simulation if needed
+	// Reduce timestep to coincide with end of simulation
 
-	double time_stop = problem()->stopping()->stop_time();
-
+	double time_stop = stopping->stop_time();
 	dt_block = MIN (dt_block, (time_stop - time_block));
 
-	// Update patch-level timestep
-
 	dt_patch = MIN(dt_patch,dt_block);
-
-      } // ( block = ++it_block )
-
-      // Update hierarchy-level timestep
-
+      }
       dt_hierarchy = MIN(dt_hierarchy, dt_patch);
-
-    } // ( patch = ++it_patch )
+    }
 
     dt_hierarchy = reduce.reduce_double(dt_hierarchy,reduce_op_min);
 
+    // Set Simulation timestep
+
     dt_ = dt_hierarchy;
 
-    ASSERT("EnzoSimulation::run", "dt == 0", dt_hierarchy != 0.0);
+    // Set Block timesteps
+
+    while ((patch = ++it_patch)) {
+
+      ItBlock it_block(patch);
+      Block * block;
+
+      // Accumulate Block-local timesteps
+
+      while ((block = ++it_block)) {
+	block->set_dt    (dt_);
+      }
+    }
+
+    ASSERT("EnzoSimulation::run", "dt == 0", dt_ != 0.0);
 
     monitor_output();
 
-    stop_hierarchy = true;
-
     //--------------------------------------------------
-    // Refresh ghosts and boundary
+    // REFRESH GHOST ZONES AND ENFORCE BOUNDARY CONDITIONS
     //--------------------------------------------------
 
     while ((patch = ++it_patch)) {
@@ -207,18 +214,18 @@ void EnzoSimulationMpi::run() throw()
 
 	block->is_on_boundary (lower,upper,is_boundary);
 
-	// Refresh ghost zones
 	refresh_ghost_(block,patch,is_boundary);
 
-	// Update boundary conditions
 	update_boundary_(block,is_boundary);
 
       }
     }
 
     //--------------------------------------------------
-    // Apply numerical methods
+    // APPLY NUMERICAL METHODS AND EVALUATE STOPPING CRITERIA
     //--------------------------------------------------
+
+    stop_hierarchy = true;
 
     while ((patch = ++it_patch)) {
 
@@ -229,59 +236,26 @@ void EnzoSimulationMpi::run() throw()
 
       while ((block = ++it_block)) {
 
-	double lower_block[3];
-	block->lower(&lower_block[axis_x],
-		     &lower_block[axis_y],
-		     &lower_block[axis_z]);
-	double upper_block[3];
-	block->upper(&upper_block[axis_x],
-		     &upper_block[axis_y],
-		     &upper_block[axis_z]);
+	EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
-
-	int        & cycle_block    = enzo_block->CycleNumber;
-	enzo_float   time_block     = enzo_block->Time();
-	enzo_float & dt_block       = enzo_block->dt;
-	enzo_float & old_time_block = enzo_block->OldTime;
-
-	// UNIFORM TIMESTEP OVER ALL BLOCKS IN HIERARCHY
-
-	dt_block = dt_hierarchy;
-
+	enzo_float  time_block  = enzo_block->Time_;
+	enzo_float  dt_block    = enzo_block->dt;
+	
 	// Loop through methods
 	
+	int         cycle_block = enzo_block->CycleNumber;
+
 	int index_method = 0;
-	while (Method * method = problem()->method(index_method++)) {
-
-	  double lower[3];
-	  double upper[3];
-	  block->lower(lower+0,lower+1,lower+2);
-	  block->upper(upper+0,upper+1,upper+2);
-	  char buffer[10];
-	  sprintf (buffer,"%03d-A",cycle_);
-	  block->field_block()->print(field_descr_,buffer,lower,upper);
-
-	  method -> compute_block (field_descr_,block,time_block,dt_block);
-
-	  sprintf (buffer,"%03d-B",cycle_);
-	  block->field_block()->print(field_descr_,buffer,lower,upper);
-
+	while (Method * method = problem->method(index_method++)) {
+	  method -> compute_block (field_descr_,block,cycle_block,time_block,dt_block);
 	}
 
-	// Update enzo_block values
-
-	old_time_block  = time_block;
-	time_block     += dt_block;
-	cycle_block    += 1;
-
-	block->set_cycle (cycle_block);
-	block->set_time  (time_block);
-	block->set_dt    (dt_block);
+	block->set_cycle (++cycle_block);
+	block->set_time  (time_block + dt_block);
 
 	// Global cycle and time reduction
 	
-	int stop_block = problem()->stopping()->complete(cycle_block,time_block);
+	int stop_block = stopping->complete(cycle_block,time_block);
 	
 	// Update stopping criteria for patch
 

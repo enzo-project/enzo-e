@@ -131,7 +131,7 @@ public: // interface
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient);
 
   /// Solve the hydro equations, saving subgrid fluxes
-  int SolveHydroEquations ( int CycleNumber, enzo_float dt);
+  int SolveHydroEquations ( int CycleNumber, enzo_float time, enzo_float dt);
 
   /// Set external boundary values
   int SetExternalBoundary
@@ -144,7 +144,7 @@ public: // interface
     int FieldType);
 
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
-  int SolveMHDEquations(FieldDescr *,  int cycle, enzo_float dt);
+  int SolveMHDEquations(FieldDescr *,  enzo_float dt);
 
 public: // functions (TEMPORARILY PUBLIC)
 

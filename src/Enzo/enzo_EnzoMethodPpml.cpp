@@ -24,12 +24,13 @@ void EnzoMethodPpml::compute_block
 (
  FieldDescr * field_descr, 
  Block * block,
- double t,
+ int cycle,
+ double time,
  double dt
  ) throw()
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  enzo_block->SolveMHDEquations ( field_descr, enzo_block->CycleNumber, dt);
+  enzo_block->SolveMHDEquations ( field_descr, dt);
 }
 
 //----------------------------------------------------------------------
