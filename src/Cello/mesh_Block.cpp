@@ -358,6 +358,8 @@ void Block::p_call_output(CkReductionMsg * msg)
   double dt_patch   = min_reduce[0];
   bool   stop_patch = min_reduce[1] == 1.0 ? true : false;
 
+  set_dt   (dt_patch);
+
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   // WARNING: assumes one patch
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
