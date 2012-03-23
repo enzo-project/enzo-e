@@ -185,7 +185,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
       (nbx,nby,nbz,
        mbx,mby,mbz,
        lower_[0],lower_[1],lower_[2],
-       xb,yb,zb, 1);
+       xb,yb,zb);
 
     // Use built-in CHARM++ Reduction instead of hand-rolling
     // 

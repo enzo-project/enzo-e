@@ -47,40 +47,7 @@ IoBlock * Factory::create_io_block () const throw()
 IoFieldBlock * Factory::create_io_field_block () const throw()
 {
   return new IoFieldBlock;
-}
 
-//----------------------------------------------------------------------
-
-Block * Factory::create_block
-(
- int ibx, int iby, int ibz,
- int nbx, int nby, int nbz,
- int nx, int ny, int nz,
- double xm, double ym, double zm,
- double xb, double yb, double zb,
- int num_field_blocks
- ) const throw()
-{
-  Block * block;
-#ifdef CONFIG_USE_CHARM
-  CProxy_Block block_array = CProxy_Block::ckNew
-    (nbx,nby,nbz,
-     nx,ny,nz,
-     xm,ym,zm, 
-     xb,yb,zb, 
-     num_field_blocks,
-     nbx,nby,nbz);
-  block = block_array(ibx,iby,ibz).ckLocal();
-#else
-  block = new Block 
-    (ibx,iby,ibz, 
-     nbx,nby,nbz,
-     nx,ny,nz,
-     xm,ym,zm, 
-     xb,yb,zb, 
-     num_field_blocks);
-#endif
-  return block;
 }
 
 //----------------------------------------------------------------------
@@ -92,17 +59,42 @@ CProxy_Block Factory::create_block_array
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xb, double yb, double zb,
+ int num_field_blocks,
+ bool allocate
+ ) const throw()
+{
+  if (allocate) {
+    return CProxy_Block::ckNew
+      (
+       nbx,nby,nbz,
+       nx,ny,nz,
+       xm,ym,zm, 
+       xb,yb,zb, 
+       num_field_blocks,
+       nbx,nby,nbz);
+  } else return 0;
+}
+
+#else /* ! CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+Block * Factory::create_block
+(
+ int ibx, int iby, int ibz,
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xm, double ym, double zm,
+ double xb, double yb, double zb,
  int num_field_blocks
  ) const throw()
 {
-  return CProxy_Block::ckNew
-    (
+  return new Block 
+    (ibx,iby,ibz, 
      nbx,nby,nbz,
      nx,ny,nz,
      xm,ym,zm, 
      xb,yb,zb, 
-     num_field_blocks,
-     nbx,nby,nbz);
+     num_field_blocks);
 }
 #endif
 

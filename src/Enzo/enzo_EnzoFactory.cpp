@@ -10,6 +10,38 @@
 #include "enzo_charm.hpp"
 //----------------------------------------------------------------------
 
+IoBlock * EnzoFactory::create_io_block () const throw()
+{
+  return new IoEnzoBlock;
+}
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+CProxy_Block EnzoFactory::create_block_array
+(
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xm, double ym, double zm,
+ double hx, double hy, double hz,
+ int num_field_blocks,
+ bool allocate
+ ) const throw()
+{
+  if (allocate) {
+    return CProxy_EnzoBlock::ckNew
+      (
+       nbx,nby,nbz,
+       nx,ny,nz,
+       xm,ym,zm, 
+       hx,hy,hz, 
+       num_field_blocks,
+       nbx,nby,nbz);
+  } else return 0;
+}
+#else
+//----------------------------------------------------------------------
+
 Block * EnzoFactory::create_block
 (
  int ibx, int iby, int ibz,
@@ -30,34 +62,6 @@ Block * EnzoFactory::create_block
      num_field_blocks);
 }
 
-//----------------------------------------------------------------------
-
-IoBlock * EnzoFactory::create_io_block () const throw()
-{
-  return new IoEnzoBlock;
-}
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-CProxy_Block EnzoFactory::create_block_array
-(
- int nbx, int nby, int nbz,
- int nx, int ny, int nz,
- double xm, double ym, double zm,
- double hx, double hy, double hz,
- int num_field_blocks
- ) const throw()
-{
-  return CProxy_EnzoBlock::ckNew
-    (
-     nbx,nby,nbz,
-     nx,ny,nz,
-     xm,ym,zm, 
-     hx,hy,hz, 
-     num_field_blocks,
-     nbx,nby,nbz);
-}
 #endif
 
 

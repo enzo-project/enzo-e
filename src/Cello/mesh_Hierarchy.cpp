@@ -173,21 +173,14 @@ void Hierarchy::create_root_patch
  int dimension,
  FieldDescr   * field_descr,
  int nx, int ny, int nz,
- int nbx, int nby, int nbz
+ int nbx, int nby, int nbz,
+ bool allocate
 ) throw()
 {
-  //--------------------------------------------------
-  // parameters_->group_set (0,"Mesh");
-  //--------------------------------------------------
-
-  // mesh_->set_refine_factor (parameters_->value_integer("refine",    2));
-  // mesh_->set_max_level     (parameters_->value_integer("max_level", 0));
-  // mesh_->set_balanced      (parameters_->value_logical("balanced",  true));
-  // mesh_->set_backfill      (parameters_->value_logical("backfill",  true));
-  // mesh_->set_coalesce      (parameters_->value_logical("coalesce",  true));
 
   patch_tree_ = new Tree (dimension,2);
 
+  // Create new empty patch
   Patch * root_patch = factory()->create_patch
     (group_process,
      nx,ny,nz,    // size
@@ -196,9 +189,9 @@ void Hierarchy::create_root_patch
      lower_[0], lower_[1], lower_[2],
      upper_[0], upper_[1], upper_[2]);
 
-    
-  root_patch->allocate_blocks(field_descr);
+  if (allocate) {
+    root_patch->allocate_blocks(field_descr);
+  }
 
   patch_tree_->root_node()->set_data(root_patch);
-
 }

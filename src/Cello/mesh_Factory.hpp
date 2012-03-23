@@ -17,7 +17,7 @@ class Patch;
 class Factory {
 
   /// @class    Factory
-  /// @ingroup  Mesh
+  /// @ingroup  Mesh 
   /// @brief [\ref Mesh] Abstract class for creating concrete Hierarchy,
   /// Patch, and Block objects
 
@@ -45,6 +45,7 @@ public: // interface
   /// Create an Input / Output accessor object for a FieldBlock
   virtual IoFieldBlock * create_io_field_block ( ) const throw();
 
+#ifndef CONFIG_USE_CHARM
   /// Create a new Block [abstract factory design pattern]
   virtual Block * create_block
   (int ibx, int iby, int ibz,
@@ -53,15 +54,15 @@ public: // interface
    double xm, double ym, double zm,
    double xb, double yb, double zb,
    int num_field_blocks = 1) const throw();
-
-#ifdef CONFIG_USE_CHARM
+#else
   /// Create a new CHARM++ Block array [abstract factory design pattern]
   virtual CProxy_Block create_block_array
   (int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
-   int num_field_blocks = 1) const throw();
+   int num_field_blocks = 1,
+   bool allocate = true) const throw();
 #endif
 
 };

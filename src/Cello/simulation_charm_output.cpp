@@ -41,9 +41,6 @@ void Simulation::output_first() throw()
 
 void Simulation::output_next() throw()
 {
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation->field_descr();
-
   // find next output
 
   Problem * problem = Simulation::problem();

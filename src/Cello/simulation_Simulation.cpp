@@ -32,12 +32,12 @@ Simulation::Simulation
 : factory_(0),
   parameters_(0),
   parameter_file_(parameter_file),
+  group_process_(group_process),
+  is_group_process_new_(false),
 #ifdef CONFIG_USE_CHARM
   proxy_block_reduce_(proxy_block_reduce),
   index_output_(0),
 #endif
-  group_process_(group_process),
-  is_group_process_new_(false),
   dimension_(0),
   cycle_(0),
   time_(0.0),
@@ -373,6 +373,7 @@ void Simulation::initialize_hierarchy_() throw()
 	   root_blocks[0]*root_blocks[1]*root_blocks[2]==group_process_->size());
 #endif
 
+  
   hierarchy_->create_root_patch
     (group_process_,dimension_,
      field_descr_,
