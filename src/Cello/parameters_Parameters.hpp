@@ -44,35 +44,49 @@ public: // interface
   /// Write parameters to a file
   void write (const char * file_name);
 
+
   /// Return the integer-valued parameter
   int value_integer (std::string , int deflt = 0) throw();
+  /// Return the floating-point valued parameter
+  double value_float (std::string, double deflt = 0.0) throw();
+  /// Return the logical-valued parameter
+  bool value_logical (std::string , bool deflt = false) throw();
+  /// Return the string-valued parameter
+  const char * value_string ( std::string , const char * deflt = "") throw();
+
+  /// Return the length of the list parameter
+  int list_length (std::string parameter);
+  /// Access an integer list element
+  int list_value_integer (int , std::string , int deflt = 0) throw();
+  /// Access a floating point list element
+  double list_value_float (int , std::string , double deflt = 0.0) throw();
+  /// Access a logical list element
+  bool list_value_logical (int ,std::string , bool deflt = false) throw();
+  /// Access a string list element
+  const char * list_value_string (int,std::string,const char * d= "") throw();
 
   /// Assign a value to the integer-valued parameter
   void set_integer ( std::string parameter, int value ) throw();
-
-  /// Return the floating-point valued parameter
-  double value_float (std::string, double deflt = 0.0) 
-    throw();
-
   /// Assign a value to the floating-point valued parameter
   void set_float ( std::string parameter, double value ) 
     throw();
-
-  /// Return the logical-valued parameter
-  bool value_logical (std::string , bool deflt = false) 
-    throw();
-
   /// Assign a value to the logical-valued parameter
   void set_logical ( std::string parameter, bool value ) 
     throw();
-
-  /// Return the string-valued parameter
-  const char * value_string ( std::string , const char * deflt = "") 
-    throw();
-
   /// Assign a value to the string-valued parameter
   void set_string ( std::string parameter, const char * value ) 
     throw();
+
+  /// Return the length of the list parameter
+  void set_list_length (std::string parameter, int length);
+  /// Assign a value to an integer-valued list element parameter
+  void set_list_integer (int , std::string , int value) throw();
+  /// Assign a value to the floating-point list-element parameter
+  void set_list_float (int , std::string , double value) throw();
+  ///  Assign a value to the logical-valued list-element parameter
+  void set_list_logical (int ,std::string , bool value) throw();
+  /// Assign a value to the string-valued list-element parameter
+  void set_list_string (int,std::string,const char * value) throw();
 
   /// Evaluate the floating-point valued parameter expression
   void evaluate_float 
@@ -98,25 +112,6 @@ public: // interface
    double    * y, 
    double    * z, 
    double    * t)
-    throw();
-
-  /// Return the length of the list parameter
-  int list_length (std::string parameter);
-
-  /// Access an integer list element
-  int list_value_integer (int , std::string , int deflt = 0)    
-    throw();
-
-  /// Access a floating point list element
-  double list_value_float (int , std::string , double deflt = 0.0)    
-    throw();
-
-  /// Access a logical list element
-  bool list_value_logical (int ,std::string , bool deflt = false)    
-    throw();
-
-  /// Access a string list element
-  const char * list_value_string (int ,std::string , const char * deflt = "")    
     throw();
 
   /// Evaluate the floating-point valued list element expression

@@ -560,6 +560,64 @@ const char * Parameters::list_value_string
 
 //----------------------------------------------------------------------
 
+void Parameters::set_list_length 
+(
+ std::string parameter,
+ int         length
+ )
+{
+  
+}
+
+//----------------------------------------------------------------------
+
+void Parameters::set_list_integer 
+(
+ int         index,
+ std::string parameter,
+ int         value
+) throw()
+{
+}
+
+//----------------------------------------------------------------------
+
+
+void Parameters::set_list_float
+(
+ int         index,
+ std::string parameter,
+ double      value
+) throw()
+{
+}
+
+//----------------------------------------------------------------------
+
+
+void Parameters::set_list_logical
+(
+ int         index,
+ std::string parameter,
+ bool        value
+) throw()
+{
+}
+
+//----------------------------------------------------------------------
+
+
+void Parameters::set_list_string
+(
+ int          index,
+ std::string  parameter,
+ const char * value
+) throw()
+{
+}
+
+//----------------------------------------------------------------------
+
 void Parameters::list_evaluate_float 
 (
  int index,

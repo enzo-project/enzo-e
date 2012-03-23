@@ -338,6 +338,24 @@ void check_parameters(Parameters * parameters)
   unit_assert (strcmp(parameters->value_string("none_str"),"hello")==0);
 
   //--------------------------------------------------
+  unit_func("set_list elements");
+  //--------------------------------------------------
+
+  parameters->set_list_length ("list",5);
+  parameters->set_list_integer(0,"list",12);
+  parameters->set_list_float  (1,"list",24.0);
+  parameters->set_list_logical(2,"list",true);
+  parameters->set_list_logical(3,"list",false);
+  parameters->set_list_string (4,"list","a string");
+
+  unit_assert(parameters->list_length("list")==5);
+  unit_assert(parameters->list_value_integer(0,"list")==12);
+  unit_assert(parameters->list_value_float  (1,"list")==24.0);
+  unit_assert(parameters->list_value_logical(2,"list")==true);
+  unit_assert(parameters->list_value_logical(3,"list")==false);
+  unit_assert(strcmp(parameters->list_value_string (4,"list"),"a string")==0);
+
+  //--------------------------------------------------
   unit_func("evaluate_float");
   //--------------------------------------------------
 
