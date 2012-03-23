@@ -82,7 +82,8 @@ PARALLEL_MAIN_BEGIN
   yb = (ypp-ypm);
   zb = (zpp-zpm);
 
-  Block * block = new Block
+  Factory factory;
+  Block * block = factory.create_block
     (ix,iy,iz, 
      1,1,1,
      nx,ny,nz,

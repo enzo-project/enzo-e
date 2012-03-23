@@ -19,7 +19,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Block");
 
-  Block * block = new Block
+  Factory factory;
+  Block * block = factory.create_block
     (0,0,0, 
      1,1,1,
      3,4,5,
