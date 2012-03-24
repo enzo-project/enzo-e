@@ -191,6 +191,7 @@ if (atsync != 0):        defines = defines + define_atsync
 is_arch_valid = 0
 sys.path.append("./config");
 if   (arch == "linux-gnu"):    from linux_gnu    import *
+elif (arch == "linux-jump"):   from linux_jump   import *
 elif (arch == "ncsa-bw"):      from ncsa_bw      import *
 elif (arch == "triton-pgi"):   from triton_pgi   import *
 elif (arch == "triton-intel"): from triton_intel import *

@@ -285,6 +285,7 @@ void EnzoSimulationMpi::run() throw()
   //======================================================================
 
   monitor_output();
+  performance_output(performance_simulation_,"simulation");
 
 }
 

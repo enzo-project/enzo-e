@@ -43,7 +43,8 @@ Simulation::Simulation
   time_(0.0),
   dt_(0),
   stop_(false),
-  performance_(0),
+  performance_simulation_(0),
+  performance_cycle_(0),
   monitor_(0),
   hierarchy_(0),
   field_descr_(0)
@@ -54,7 +55,8 @@ Simulation::Simulation
     is_group_process_new_ = true;
   }
 
-  performance_ = new Performance;
+  performance_simulation_ = new Performance;
+  performance_cycle_      = new Performance;
 
   monitor_ = Monitor::instance();
   monitor_->set_process_rank(group_process_->rank());
@@ -74,7 +76,8 @@ Simulation::~Simulation() throw()
 
 void Simulation::initialize() throw()
 {
-  performance_->start();
+  performance_simulation_->start();
+  performance_cycle_->start();
 
   // Initialize parameters
 
@@ -116,7 +119,8 @@ void Simulation::initialize() throw()
 
 void Simulation::finalize() throw()
 {
-  performance_->stop();
+  performance_simulation_->stop();
+  performance_cycle_->stop();
   deallocate_();
 }
 
@@ -393,7 +397,8 @@ void Simulation::deallocate_() throw()
 {
   delete factory_;       factory_     = 0;
   delete parameters_;    parameters_  = 0;
-  delete performance_;   performance_ = 0;
+  delete performance_simulation_;   performance_simulation_ = 0;
+  delete performance_cycle_;   performance_cycle_ = 0;
   if (is_group_process_new_)
     { delete group_process_; group_process_ = 0; }
   delete hierarchy_;     hierarchy_ = 0;
@@ -447,6 +452,8 @@ void Simulation::refresh() throw()
   //--------------------------------------------------
 
   if (stop_) {
+
+    performance_output(performance_simulation_,"simulation");
 
     proxy_main.p_exit(CkNumPes());
 
@@ -587,11 +594,27 @@ void Simulation::monitor_output() const
 
 #endif
 
-  monitor_->print ("Performance","time-real %f",performance_->time());
+  performance_output(performance_cycle_);
+
+}
+
+
+//----------------------------------------------------------------------
+
+void Simulation::performance_output(Performance * performance,
+				    const char * region) const
+{
+  monitor_->print ("Performance","time-cycle-real %f",
+		   performance_cycle_->time());
+  monitor_->print ("Performance","time-accum-real %f",
+		   performance_simulation_->time());
 
 #ifdef CONFIG_USE_PAPI
 
-  Papi * papi = performance_->papi();
+  bool save_active = monitor_->is_active();
+  monitor_->set_active(true);
+
+  Papi * papi = performance->papi();
 
   papi->update();
 
@@ -600,12 +623,14 @@ void Simulation::monitor_output() const
   double gflop_count = papi->flop_count()*1e-9;
   double gflop_rate  = gflop_count / time_real;
 
-  monitor_->print ("Performance","time-real-papi   %f", time_real);
-  monitor_->print ("Performance","time-proc-papi   %f", time_proc);
-  monitor_->print ("Performance","gflop-count-papi %f", gflop_count);
-  monitor_->print ("Performance","gflop-rate-papi  %f", gflop_rate);
+  monitor_->print ("Performance","%s time-real-papi   %f", region, time_real);
+  monitor_->print ("Performance","%s time-proc-papi   %f", region, time_proc);
+  monitor_->print ("Performance","%s gflop-count-papi %f", region, gflop_count);
+  monitor_->print ("Performance","%s gflop-rate-papi  %f", region, gflop_rate);
+
+  monitor_->set_active(save_active);
 
 #endif
-}
 
+}
 //======================================================================

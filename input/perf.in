@@ -1,0 +1,12 @@
+include "input/sphere.incl"
+
+Mesh {
+   root_size   = [128,128,128];
+   root_blocks = [2,2,2];
+}
+
+Stopping {
+   cycle = 10;
+}
+
+Output {file_groups = []; }

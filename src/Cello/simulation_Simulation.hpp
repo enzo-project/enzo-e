@@ -135,9 +135,13 @@ public: // interface
   FieldDescr * field_descr() const throw()
   { return field_descr_; }
 
-  /// Return the performance object
-  Performance * performance() const throw()
-  { return performance_; }
+  /// Return the performance object associated with each cycle
+  Performance * performance_cycle() const throw()
+  { return performance_cycle_; }
+
+  /// Return the performance object associated with the entire simulation
+  Performance * performance_simulation() const throw()
+  { return performance_simulation_; }
 
   /// Return the group process object
   GroupProcess * group_process() const throw()
@@ -167,7 +171,8 @@ public: // interface
   void monitor_output() const ;
 
   /// Output Performance information
-  void performance_output() const ;
+  void performance_output(Performance * performance, 
+			  const char * region = "") const ;
 
 public: // virtual functions
 
@@ -259,8 +264,11 @@ protected: // attributes
   /// Problem container object
   Problem * problem_;
 
-  /// Performance object
-  Performance * performance_;
+  /// Simulation Performance object
+  Performance * performance_simulation_;
+
+  /// Cycle Performance object
+  Performance * performance_cycle_;
 
   /// Monitor object
   Monitor * monitor_;
