@@ -2,7 +2,7 @@
 
 /// @file     io_Output.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     Mon Mar 14 17:35:56 PDT 2011
+/// @date     2011-03-14
 /// @brief    [\ref Io] Declaration of the Output class
 
 #ifndef IO_OUTPUT_HPP
@@ -15,11 +15,6 @@ class ItField;
 class Patch;
 class Schedule;
 class Simulation;
-
-enum meta_type {
-  meta_type_file,
-  meta_type_group
-};
 
 class Output {
 

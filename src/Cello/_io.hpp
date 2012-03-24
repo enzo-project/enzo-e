@@ -16,6 +16,15 @@
 #include "pngwriter.h"
 
 //----------------------------------------------------------------------
+// Typedefs
+//----------------------------------------------------------------------
+
+enum meta_type {
+  meta_type_file,
+  meta_type_group
+};
+
+//----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------
 
@@ -32,6 +41,7 @@
 #include "io_ItReduceMax.hpp"
 
 #include "io_Input.hpp"
+#include "io_InputData.hpp"
 
 #include "io_Output.hpp"
 #include "io_OutputImage.hpp"

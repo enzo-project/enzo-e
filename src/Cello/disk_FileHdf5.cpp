@@ -33,8 +33,7 @@ FileHdf5::FileHdf5 (std::string path, std::string name) throw()
     is_data_open_(false),
     compress_level_(0)
 {
-  const int rank_max = MAX_DATA_RANK;
-  for (int i=0; i<rank_max; i++) {
+  for (int i=0; i<MAX_DATA_RANK; i++) {
     data_dims_[i] = 0;
   }
 
@@ -526,7 +525,7 @@ void FileHdf5::group_create () throw()
     hid_t group_new;
 
     if (group_exists) {
-      group_new= H5Gopen(file_id_,group_full.c_str());
+      group_new = H5Gopen   (file_id_,group_full.c_str());
     } else {
       group_new = H5Gcreate (file_id_,group_full.c_str(), H5P_DEFAULT);
     }
@@ -633,8 +632,6 @@ void FileHdf5::set_compress (int level) throw ()
 
 //======================================================================
 
-//----------------------------------------------------------------------
-
 void FileHdf5::write_meta_
 ( hid_t type_id,
   const void * buffer, std::string name, enum scalar_type type,
@@ -706,15 +703,15 @@ int FileHdf5::scalar_to_hdf5_ (enum scalar_type type) const throw()
   // ( ) IEEE      -   F32BE F64BE     -
   // ( ) STD     B16BE B32BE B64BE     -
   // Types: http://www.hdfgroup.org/HDF5/Tutor/datatypes.html#native-types
-  // char          H5T_NATIVE_CHAR   H5T_STD_I8BE or H5T_STD_I8LE
-  // float         H5T_NATIVE_FLOAT   H5T_IEEE_F32BE or H5T_IEEE_F32LE  
-  // double        H5T_NATIVE_DOUBLE   H5T_IEEE_F64BE or H5T_IEEE_F64LE  
-  // unsigned char H5T_NATIVE_UCHAR   H5T_STD_U8BE or H5T_STD_U8LE
-  // int           H5T_NATIVE_INT   H5T_STD_I32BE or H5T_STD_I32LE
-  // short:        H5T_NATIVE_SHORT   H5T_STD_I16BE or H5T_STD_I16LE
-  // long:         H5T_NATIVE_LONG   H5T_STD_I32BE, H5T_STD_I32LE,
-  //               H5T_STD_I64BE or H5T_STD_I64LE
-  // long long:    H5T_NATIVE_LLONG   H5T_STD_I64BE or H5T_STD_I64LE
+  // char          H5T_NATIVE_CHAR   H5T_STD_I8BE   or H5T_STD_I8LE
+  // float         H5T_NATIVE_FLOAT  H5T_IEEE_F32BE or H5T_IEEE_F32LE  
+  // double        H5T_NATIVE_DOUBLE H5T_IEEE_F64BE or H5T_IEEE_F64LE  
+  // unsigned char H5T_NATIVE_UCHAR  H5T_STD_U8BE   or H5T_STD_U8LE
+  // int           H5T_NATIVE_INT    H5T_STD_I32BE  or H5T_STD_I32LE
+  // short:        H5T_NATIVE_SHORT  H5T_STD_I16BE  or H5T_STD_I16LE
+  // long:         H5T_NATIVE_LONG   H5T_STD_I32BE  or H5T_STD_I32LE
+  //               H5T_STD_I64BE or  H5T_STD_I64LE
+  // long long:    H5T_NATIVE_LLONG  H5T_STD_I64BE  or H5T_STD_I64LE
 
   hid_t hdf5_type;
 
@@ -943,13 +940,11 @@ hid_t FileHdf5::create_space_(int nxd,int nyd,int nzd,
     space_size[1] = ny ? ny : nyd;
     space_size[2] = nx ? nx : nxd;
 
-
     need_dims = (space_dims[0] != space_size[0] ||
 		 space_dims[1] != space_size[1] ||
 		 space_dims[2] != space_size[2]);
 
   }
-
 
   hid_t space_id;
 

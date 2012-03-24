@@ -1,27 +1,27 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     io_OutputData.cpp
+/// @file     io_InputData.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Mar 17 11:14:18 PDT 2011
-/// @brief    Implementation of the OutputData class
+/// @date     2012-03-23
+/// @brief    Implementation of the InputData class
 
 #include "cello.hpp"
 #include "io.hpp"
 
 //----------------------------------------------------------------------
 
-OutputData::OutputData(const Factory * factory) throw ()
-  : Output(factory)
+InputData::InputData(const Factory * factory) throw ()
+  : Input(factory)
 {
 }
 
 //======================================================================
 
-void OutputData::open () throw()
+void InputData::open () throw()
 {
   std::string file_name = expand_file_name(&file_name_,&file_args_);
 
-  Monitor::instance()->print ("Output","writing data file %s", 
+  Monitor::instance()->print ("Input","writing data file %s", 
 			      file_name.c_str());
 
   delete file_;
@@ -33,7 +33,7 @@ void OutputData::open () throw()
 
 //----------------------------------------------------------------------
 
-void OutputData::close () throw()
+void InputData::close () throw()
 {
   file_->file_close();
 
@@ -43,38 +43,39 @@ void OutputData::close () throw()
 
 //----------------------------------------------------------------------
 
-void OutputData::finalize () throw ()
+void InputData::finalize () throw ()
 {
-  Output::finalize();
+  Input::finalize();
 }
 
 //----------------------------------------------------------------------
 
-void OutputData::write_hierarchy 
+void InputData::read_hierarchy 
 (
- const Hierarchy  * hierarchy,
+ Hierarchy  * hierarchy,
  const FieldDescr * field_descr
  ) throw()
 {
 
   IoHierarchy io_hierarchy(hierarchy);
 
-  // Write hierarchy meta-data
+  // Read hierarchy meta-data
 
-  file_->file_write_meta("value", "name",scalar_type_char,6);
+  
+  // file_->file_read_meta("value", "name",scalar_type_char,6);
 
-  Output::write_meta (&io_hierarchy);
+  Input::read_meta (&io_hierarchy);
 
-  // Call write_patch() on contained patches
-  Output::write_hierarchy (hierarchy, field_descr);
+  // Call read_patch() on contained patches
+  Input::read_hierarchy (hierarchy, field_descr);
 
 }
 
 //----------------------------------------------------------------------
 
-void OutputData::write_patch 
+void InputData::read_patch 
 (
- const Patch * patch,
+ Patch * patch,
  const FieldDescr * field_descr,
  int ixp0, int iyp0, int izp0
  ) throw()
@@ -91,11 +92,11 @@ void OutputData::write_patch
 
   IoPatch io_patch(patch);
 
-  // Write patch meta-data
-  Output::write_meta_group (&io_patch);
+  // Read patch meta-data
+  Input::read_meta_group (&io_patch);
 
-  // Call write_block() on contained blocks
-  Output::write_patch(patch,field_descr,ixp0,iyp0,izp0);
+  // Call read_block() on contained blocks
+  Input::read_patch(patch,field_descr,ixp0,iyp0,izp0);
 
 #ifndef CONFIG_USE_CHARM
   file_->group_close();
@@ -107,7 +108,7 @@ void OutputData::write_patch
 #ifdef CONFIG_USE_CHARM
 //----------------------------------------------------------------------
 
-void OutputData::end_write_patch() throw()
+void InputData::end_read_patch() throw()
 {
   file_->group_close();
   file_->group_chdir("..");
@@ -116,9 +117,9 @@ void OutputData::end_write_patch() throw()
 
 #endif
 
-void OutputData::write_block 
+void InputData::read_block 
 ( 
-  const Block * block,
+ Block * block,
   const FieldDescr * field_descr,
   int ixp0, int iyp0, int izp0) throw()
 {
@@ -131,15 +132,15 @@ void OutputData::write_block
   file_->group_chdir(buffer);
   file_->group_create();
 
-  // Write block meta data
+  // Read block meta data
 
   io_block()->set_block(block);
 
-  Output::write_meta_group (io_block());
+  Input::read_meta_group (io_block());
 
-  // Call write_block() on base Output object
+  // Call read_block() on base Input object
 
-  Output::write_block(block,field_descr,ixp0,iyp0,izp0);
+  Input::read_block(block,field_descr,ixp0,iyp0,izp0);
 
   file_->group_close();
   file_->group_chdir("..");
@@ -148,11 +149,11 @@ void OutputData::write_block
 
 //----------------------------------------------------------------------
 
-void OutputData::write_field
+void InputData::read_field
 ( 
-  const FieldBlock * field_block,
-  const FieldDescr * field_descr,
-  int field_index) throw()
+ FieldBlock * field_block,
+ const FieldDescr * field_descr,
+ int field_index) throw()
 {
   io_field_block()->set_field_descr(field_descr);
   io_field_block()->set_field_block(field_block);
@@ -171,10 +172,10 @@ void OutputData::write_field
 				 &nxd,&nyd,&nzd,
 				 &nx, &ny, &nz);
 
-    // Write ith FieldBlock data
+    // Read ith FieldBlock data
 
     file_->data_create(name.c_str(),type,nxd,nyd,nzd,nx,ny,nz);
-    file_->data_write(buffer);
+    file_->data_read(buffer);
     file_->data_close();
   }
 
