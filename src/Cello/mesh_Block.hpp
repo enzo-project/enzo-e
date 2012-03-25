@@ -72,6 +72,9 @@ public: // interface
   /// Contribute block data to ith output object in the simulation
   void p_write (int index_output);
 
+  /// Contribute block data to the Initial input object
+  void p_read ();
+
   /// Entry function after initial barrier to call refresh()
   void p_call_refresh();
 

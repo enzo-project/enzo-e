@@ -16,7 +16,7 @@ Input::Input (const Factory * factory) throw()
     process_stride_(1), // default one file per process
     process_(0),        // initialization below
 #ifdef CONFIG_USE_CHARM
-    count_reduce_(0),
+    counter_(0),
 #endif
     cycle_(0),
     count_input_(0),
@@ -54,7 +54,6 @@ void Input::set_filename (std::string filename,
 }
 
 //----------------------------------------------------------------------
-
 
 std::string Input::expand_file_name 
 (
@@ -136,6 +135,30 @@ std::string Input::expand_file_name
 
 //----------------------------------------------------------------------
 
+void Input::read_meta_ ( meta_type type_meta, Io * io ) throw ()
+{
+  for (size_t i=0; i<io->meta_count(); i++) {
+
+    void * buffer;
+    std::string name;
+    scalar_type type_scalar;
+    int nx,ny,nz;
+
+    // Get object's ith metadata
+
+    io->meta_value(i,& buffer, &name, &type_scalar, &nx,&ny,&nz);
+
+    // Read object's ith metadata
+    if ( type_meta == meta_type_group ) {
+      file_->group_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
+    } else {
+      file_->file_read_meta(buffer,name.c_str(),&type_scalar,&nx,&ny,&nz);
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void Input::read_simulation
 (
  Simulation * simulation
@@ -182,7 +205,8 @@ void Input::read_patch
   // CHARM++ Block callback for read_block()
 
   if (patch->blocks_allocated()) {
-    patch->block_array().p_read (index_charm_);
+    // p_read() NOT IMPLEMENTED
+    patch->block_array().p_read ();
   }
 
 #else

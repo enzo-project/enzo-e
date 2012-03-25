@@ -32,6 +32,7 @@ module mesh {
     entry void p_refresh_face
       (int n, char buffer[n], int fx, int fy, int fz);
     entry void p_write (int index_output);
+    entry void p_read ();
 
     entry void p_call_refresh();
     entry void p_call_output(CkReductionMsg * msg);

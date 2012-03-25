@@ -97,6 +97,13 @@ void Block::p_write (int index_output)
 
 //----------------------------------------------------------------------
 
+void Block::p_read ()
+{
+  INCOMPLETE("Block::p_read");
+}
+
+//----------------------------------------------------------------------
+
 void BlockReduce::p_output_reduce(int count)
 {
   if (++count_output_ >= count) {
