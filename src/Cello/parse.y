@@ -201,24 +201,6 @@ const char * op_name[] = {
     free (item);     
   }
 
-  /* Function to update parameter's subgroups once the subgroup is known */
-
-/*   void update_subgroup (char * subgroup) */
-/*     { */
-/*       struct param_struct * p = param_curr; */
-/*       int inside_subgroup = 1; */
-/*       while (p->next->type     != enum_parameter_sentinel &&  */
-/* 	     p->next->subgroup == NULL) { */
-/* 	if (p->next->type == enum_parameter_subgroup) { */
-/* 	  inside_subgroup = 0; */
-/*           delete_param(p); */
-/*         } else if (inside_subgroup) { */
-/*           p->next->subgroup = strdup(subgroup); */
-/*           p = p -> next; */
-/*         } */
-/*       } */
-/*     } */
-
   struct param_struct * reverse_param(struct param_struct * old_head)
   {
     /* Keep sentinel the same */
