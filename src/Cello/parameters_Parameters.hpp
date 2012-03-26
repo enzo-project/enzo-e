@@ -40,7 +40,6 @@ public: // interface
 
   /// Read in parameters from a file
   void read (const char * file_name);
-
   /// Write parameters to a file
   void write (const char * file_name);
 
@@ -176,13 +175,13 @@ public: // interface
   /// Clear all groups
   void group_clear() throw();
   
-  //--------------------------------------------------
-
   /// Return the type of the given parameter
   parameter_enum type(std::string) throw();
 
   /// Return the type of the given parameter
   parameter_enum list_type(int, std::string) throw();
+
+  //--------------------------------------------------
 
 private: // functions
 
@@ -231,6 +230,8 @@ private: // functions
 
   size_t extract_groups_( const std::string parameter, std::string * group);
 
+  //--------------------------------------------------
+
 private: // attributes
 
   /// Stack of current grouping
@@ -242,7 +243,7 @@ private: // attributes
   /// Map parameter name to Param object
   std::map<std::string, Param *>  parameter_map_;
 
-  /// Parameters represented as a tree
+  /// Parameters represented as a tree with groups as internal nodes
   ParamNode                     * parameter_tree_;
 
   /// Monitor object for parameters
@@ -250,6 +251,7 @@ private: // attributes
 
 };
 
+//----------------------------------------------------------------------
 
 extern "C" { 
   /// C function for reading parameters from a file

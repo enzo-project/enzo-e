@@ -9,6 +9,8 @@
 
 #include "parameters.hpp"
 
+//----------------------------------------------------------------------
+
 void Param::set (struct param_struct * node)
 /// @param   node  The node from which to copy the type and value
 {
@@ -46,6 +48,8 @@ void Param::set (struct param_struct * node)
   }
 }
 
+//----------------------------------------------------------------------
+
 void Param::dealloc_() 
 ///
 { 
@@ -68,6 +72,7 @@ void Param::dealloc_()
   }
 } 
 
+//----------------------------------------------------------------------
 
 void Param::write
 (
@@ -95,6 +100,7 @@ void Param::write
   // }
 }
 
+//----------------------------------------------------------------------
 
 std::string Param::value_to_string ()
 {
@@ -138,6 +144,8 @@ std::string Param::value_to_string ()
   return string_buffer;
 }
  
+//----------------------------------------------------------------------
+
 void Param::evaluate_float
 (struct node_expr * node, 
  int                n, 
@@ -224,6 +232,8 @@ void Param::evaluate_float
   delete [] left;
   delete [] right;
 }
+
+//----------------------------------------------------------------------
 
 void Param::evaluate_logical
 (struct node_expr * node, 
@@ -332,6 +342,8 @@ void Param::evaluate_logical
   delete [] right_logical;
 }
 
+//----------------------------------------------------------------------
+
 void Param::dealloc_list_ (list_type * value)
 /// @param value List to be deallocated
 {
@@ -345,6 +357,8 @@ void Param::dealloc_list_ (list_type * value)
   delete value;
 }
 
+//----------------------------------------------------------------------
+
 void Param::dealloc_node_expr_ (struct node_expr * p)
 /// @param p Head node of the tree defining the floating-point 
 /// expression to deallocate
@@ -354,3 +368,5 @@ void Param::dealloc_node_expr_ (struct node_expr * p)
   free (p->function_name);
   free (p);
 };
+
+//----------------------------------------------------------------------

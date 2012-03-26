@@ -27,6 +27,8 @@ extern "C" {
   void cello_parameters_print_list(struct param_struct * head, int level);
 }
 
+typedef std::vector<class Param *> list_type;
+
 //----------------------------------------------------------------------
 
 class Param {
@@ -37,20 +39,6 @@ class Param {
   /// parameter types and expressions
 
   friend class Parameters;
-
-//   /// @enum param_enum
-//   /// @brief Parameter type 
-//   enum param_enum {
-//     param_unknown_,
-//     param_integer_,
-//     param_float_,
-//     param_logical_,
-//     param_string_,
-//     param_list_,
-//     param_float_expr_,
-//     param_logical_expr_
-//   };
-
 
 public: // interface
 
@@ -143,26 +131,7 @@ public: // interface
   /// Return the type of the parameter
   parameter_enum type() const { return type_; } 
 
-private: // attributes
-
-  /// Parameter type
-  enum parameter_enum type_;
-
-  /// Whether parameter value has been accessed
-  bool value_accessed_;
-
-  /// Type definition for a list of parameters
-  typedef std::vector<class Param *> list_type;
-
-  /// Value of the parameter, with type depending on type_
-  union {
-    int                value_integer_; 
-    double             value_float_; 
-    bool               value_logical_; 
-    char *             value_string_;
-    list_type        * value_list_;
-    struct node_expr * value_expr_;
-  };
+  //----------------------------------------------------------------------
 
 private: // functions
 
@@ -198,6 +167,7 @@ private: // functions
   ///
   /// Lists are bounded by "sentinel" types: the list values are
   /// taken to be between the first sentinel and the next sentinel
+
   void set_list_ (struct param_struct * value) 
   { 
     type_ = parameter_list; 
@@ -206,7 +176,7 @@ private: // functions
     while (value->type != enum_parameter_sentinel) {
       Param * param = new Param;
       param->set(value);
-      (*value_list_).push_back(param);
+      value_list_->push_back(param);
       value = value->next;
     }
   };
@@ -240,6 +210,29 @@ private: // functions
   ///
   void write_float_expr_(FILE * file_pointer,
 			  struct node_expr * value_expr_);
+
+  //----------------------------------------------------------------------
+
+private: // attributes
+
+  /// Parameter type
+  enum parameter_enum type_;
+
+  /// Whether parameter value has been accessed
+  bool value_accessed_;
+
+  /// Type definition for a list of parameters
+
+  /// Value of the parameter, with type depending on type_
+  union {
+    int                value_integer_; 
+    double             value_float_; 
+    bool               value_logical_; 
+    char *             value_string_;
+    list_type *        value_list_;
+    struct node_expr * value_expr_;
+  };
+
 };
 
 //----------------------------------------------------------------------

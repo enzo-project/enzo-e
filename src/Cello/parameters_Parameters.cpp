@@ -125,7 +125,7 @@ void Parameters::write ( const char * file_name )
   FILE * file_pointer = fopen(file_name,"w");
 
   if ( file_pointer == NULL ) {
-    ERROR1("Parameters::writing",
+    ERROR1("Parameters::write",
 	   "Error opening parameter file '%s' for writing",
 	   file_name);
   }
@@ -376,7 +376,7 @@ void Parameters::set_string
 {
   Param * param = parameter_(parameter);
 
-  ASSERT1 ("Parameters::value_integer",
+  ASSERT1 ("Parameters::set_string_integer",
 	   "Parameter %s is not an integer", parameter.c_str(),
 	   ( ! param || param->is_string()));
 
@@ -566,7 +566,24 @@ void Parameters::set_list_length
  int         length
  )
 {
-  
+  Param * param = parameter_(parameter);
+
+  ASSERT1 ("Parameters::set_list_length",
+	   "Parameter %s is not a list", parameter.c_str(),
+	   ( ! param || param->is_list()));
+
+  if ( ! param ) {
+    param = new Param;
+    new_param_ (parameter_name_(parameter),param);
+    param->type_ = parameter_list;
+    typedef std::vector<class Param *> list_type;
+    param->value_list_ = new list_type;
+  }
+  param->value_list_->resize(length,0);
+  for (int i =0; i<length; i++) {
+    if ((*(param->value_list_))[i]==0)
+      (*(param->value_list_))[i]=new Param;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -578,6 +595,15 @@ void Parameters::set_list_integer
  int         value
 ) throw()
 {
+  Param * param = list_element_(parameter,index);
+
+  if ( ! param ) {
+    param = new Param;
+    new_param_ (parameter_name_(parameter),param);
+  }
+
+  param->set_integer_(value);
+  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -590,6 +616,16 @@ void Parameters::set_list_float
  double      value
 ) throw()
 {
+
+  Param * param = list_element_(parameter,index);
+
+  if ( ! param ) {
+    param = new Param;
+    new_param_ (parameter_name_(parameter),param);
+  }
+
+  param->set_float_(value);
+  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -602,6 +638,15 @@ void Parameters::set_list_logical
  bool        value
 ) throw()
 {
+  Param * param = list_element_(parameter,index);
+
+  if ( ! param ) {
+    param = new Param;
+    new_param_ (parameter_name_(parameter),param);
+  }
+
+  param->set_logical_(value);
+  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -614,6 +659,15 @@ void Parameters::set_list_string
  const char * value
 ) throw()
 {
+  Param * param = list_element_(parameter,index);
+
+  if ( ! param ) {
+    param = new Param;
+    new_param_ (parameter_name_(parameter),param);
+  }
+
+  param->set_string_(strdup(value));
+  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -786,32 +840,6 @@ void Parameters::group_clear() throw ()
   }
   current_group_depth_ = 0;
 }
-// //----------------------------------------------------------------------
-
-// std::string Parameters::group(int group_index) throw ()
-// {
-//   return parameter_tree_->subgroup(group_index);
-// }
-
-// //----------------------------------------------------------------------
-
-// int Parameters::subgroup_count() throw ()
-// {
-//   if (parameter_tree_->subnode(current_group_) != 0) {
-//     return parameter_tree_->subnode(current_group_)->size();
-//   }
-//   return 0;
-// }
-
-// //----------------------------------------------------------------------
-
-// std::string Parameters::subgroup(int group_index) throw ()
-// {
-//   if (parameter_tree_->subnode(current_group_) != 0) {
-//     return parameter_tree_->subnode(current_group_)->subgroup(group_index);
-//   }
-//   return "";
-// }
 
 //----------------------------------------------------------------------
 
