@@ -36,10 +36,15 @@ void Papi::start() throw()
     is_started_ = true;
     float mflop_rate;
     // @@@@ MEMORY LEAK (4 bytes) r2026 @@@@
-    PAPI_flops(&time_real_total_, 
-	       &time_proc_total_, 
-	       &flop_count_total_,
-	       &mflop_rate);
+    int retval = PAPI_flops(&time_real_total_, 
+			    &time_proc_total_, 
+			    &flop_count_total_,
+			    &mflop_rate);
+
+    if (retval != PAPI_OK) {
+      WARNING1("Papi::start()",
+	       "Unexpected return value %d",retval);
+    }
     flop_rate_ = mflop_rate * 1e6;
   }
 #endif
@@ -57,10 +62,14 @@ void Papi::stop() throw()
   } else {
     is_started_ = false;
     float mflop_rate;
-    PAPI_flops(&time_real_, 
+    int retval = PAPI_flops(&time_real_, 
 	       &time_proc_, 
 	       &flop_count_,
 	       &mflop_rate);
+    if (retval != PAPI_OK) {
+      WARNING1("Papi::start()",
+	       "Unexpected return value %d",retval);
+    }
     flop_rate_ = mflop_rate * 1e6;
 
     time_real_  = time_real_  - time_real_total_;
