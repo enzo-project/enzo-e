@@ -162,7 +162,7 @@ restart_ppm_1_init = env_rm_png.RunSerial (
 restart_ppm_1 = env_mv_out.RunSerial (
    'test_restart_ppm-1.unit',
    bin_path + '/enzo-p',
-   ARGS='restart_ppm-1.in')
+   ARGS='restart_ppm-1-100.in')
 
 
 env.MakeMovie ("restart_ppm-1.swf", "test_restart_ppm-1.unit", \
@@ -184,7 +184,7 @@ restart_ppm_8_init = env_rm_png.RunParallel (
 restart_ppm_8 = env_mv_out.RunParallel (
    'test_restart_ppm-8.unit',
    bin_path + '/enzo-p',
-   ARGS='restart_ppm-8.in')
+   ARGS='restart_ppm-8-100.in')
 
 
 env.MakeMovie ("restart_ppm-8.swf", "test_restart_ppm-8.unit", \

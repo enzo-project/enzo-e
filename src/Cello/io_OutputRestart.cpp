@@ -64,8 +64,6 @@ OutputRestart::OutputRestart
   bool is_restart = type == "restart";
   int init_cycle  = parameters->value_integer ("Initial:cycle",-1);
 
-  TRACE3("type = %s is_restart %d init_cycle %d",
-	 type.c_str(),is_restart,init_cycle);
   if (is_restart) {
     schedule()->set_skip_cycle(init_cycle);
   }
@@ -101,17 +99,21 @@ void OutputRestart::write_simulation
     // Update Initial parameters
 
   //--------------------------------------------------
-  // parameter: Input : type
-  // parameter: Input : name
-  // parameter: Input : param
-  // parameter: Input : cycle
-  // parameter: Input : time
+  // parameter: Initial : type
+  // parameter: Initial : name
+  // parameter: Initial : param
+  // parameter: Initial : cycle
+  // parameter: Initial : time
   //--------------------------------------------------
 
     parameters->set_string  ("Initial:type", "restart");
-    WARNING("OutputRestart::write_simulation",
-	    "Initial:name setting requires set_list() capability");
-    parameters->set_string  ("Initial:name", file_name_.c_str());
+    
+    int list_length = 1 + file_args_.size();
+    parameters->set_list_length  ("Initial:name", list_length);
+    parameters->set_list_string (0,"Initial:name",file_name_.c_str());
+    for (size_t i=0; i<file_args_.size(); i++) {
+      parameters->set_list_string (i+1,"Initial:name",file_args_[i].c_str());
+    }
 
     parameters->set_integer ("Initial:cycle",simulation->cycle());
     parameters->set_float   ("Initial:time", simulation->time());

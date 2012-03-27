@@ -65,14 +65,9 @@ libs_memory      = ['memory'] +   libs_error
 libs_mesh        = ['mesh','field','io','disk'] + libs_parallel + libs_external + ['cello','png','hdf5']
 libs_io          = ['io'] + libs_mesh
 libs_parameters  = ['parameters'] + libs_error +  ['cello']
-# 
-#components_performance = ['memory','error','monitor', 'test','cello']
 
-libs_simulation = ['simulation','problem']
-#,'mesh','field','memory',
-#                         'parallel','parameters','error','monitor',
-#                         'performance','cello']
-libs_test = ['test'] + libs_parallel
+libs_simulation  = ['simulation','problem']
+libs_test        = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
 if (type=='charm'):
