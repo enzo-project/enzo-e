@@ -41,40 +41,50 @@ void InitialFile::enforce
 
   if (! input_->is_open() ) {
 
-
     std::string              file_name = "";
     std::vector<std::string> file_args;
 
-    // parameter: Initial : name
-
-    parameters_->group_set(0,"Initial");
-
-    if (parameters_->type("name") == parameter_string) {
-
-      file_name = parameters_->value_string("name","");
-     
-    } else if (parameters_->type("name") == parameter_list) {
-
-      int list_length = parameters_->list_length("name");
-
-      file_name = parameters_->list_value_string(0,"name","");
-
-      for (int index = 1; index<list_length; index++) {
-	file_args.push_back(parameters_->list_value_string(index,"name",""));
-      }
-
-    } else {
-
-      ERROR1("InitialFile::enforce",
-	     "Bad type %d for 'Initial : name' parameter",
-	     parameters_->type("name"));
-
-    }
-
-    TRACE("Setting file_name,file_args");
-
-    input_->set_filename (file_name, file_args);
+    get_filename_(&file_name,&file_args);
 
   }
 }
 
+//----------------------------------------------------------------------
+
+void InitialFile::get_filename_
+(
+ std::string * file_name,
+ std::vector<std::string> * file_args
+ ) throw()
+{
+  // parameter: Initial : name
+
+  parameters_->group_set(0,"Initial");
+
+  if (parameters_->type("name") == parameter_string) {
+
+    *file_name = parameters_->value_string("name","");
+     
+  } else if (parameters_->type("name") == parameter_list) {
+
+    int list_length = parameters_->list_length("name");
+
+    *file_name = parameters_->list_value_string(0,"name","");
+
+    for (int index = 1; index<list_length; index++) {
+      file_args->push_back(parameters_->list_value_string(index,"name",""));
+    }
+
+  } else {
+
+    ERROR1("InitialFile::enforce",
+	   "Bad type %d for 'Initial : name' parameter",
+	   parameters_->type("name"));
+
+  }
+
+  TRACE("Setting file_name,file_args");
+
+  input_->set_filename (*file_name, *file_args);
+
+}

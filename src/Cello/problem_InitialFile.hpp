@@ -34,6 +34,11 @@ public: // interface
 			const FieldDescr * field_descr,
 			Block * block) throw();
 
+private: // functions
+
+  void get_filename_(std::string * file_name,
+		     std::vector<std::string> * file_args) throw();
+
 private: // attributes
 
   Parameters * parameters_;
