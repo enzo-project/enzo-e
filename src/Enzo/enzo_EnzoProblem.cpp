@@ -76,7 +76,8 @@ Timestep * EnzoProblem::create_timestep_
 Initial * EnzoProblem::create_initial_ 
 (
  std::string  name,
- Parameters * parameters
+ Parameters * parameters,
+ GroupProcess * group_process
  ) throw ()
 {
   
@@ -93,7 +94,7 @@ Initial * EnzoProblem::create_initial_
   if (name == "implosion_2d") {
     initial = new EnzoInitialImplosion2(init_cycle,init_time);
   } else {
-    initial = Problem::create_initial_(name,parameters);
+    initial = Problem::create_initial_(name,parameters,group_process);
   }
 
   return initial;

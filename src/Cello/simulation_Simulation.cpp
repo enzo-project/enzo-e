@@ -96,7 +96,7 @@ void Simulation::initialize() throw()
   problem_->initialize_boundary(parameters_);
 
   // Initialize initial conditions
-  problem_->initialize_initial(parameters_);
+  problem_->initialize_initial(parameters_,group_process_);
 
   // initialize stopping criteria
   problem_->initialize_stopping(parameters_);

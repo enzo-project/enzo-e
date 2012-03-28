@@ -44,7 +44,8 @@ void Problem::initialize_boundary(Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_initial(Parameters * parameters) throw()
+void Problem::initialize_initial(Parameters * parameters,
+				 GroupProcess * group_process) throw()
 {
   //--------------------------------------------------
   // parameter: Initial : type
@@ -52,7 +53,7 @@ void Problem::initialize_initial(Parameters * parameters) throw()
 
   std::string type = parameters->value_string("Initial:type","default");
 
-  initial_ = create_initial_(type,parameters);
+  initial_ = create_initial_(type,parameters,group_process);
 
   ASSERT1("Problem::initialize_initial",
 	  "Initial type %s not recognized",
@@ -711,7 +712,8 @@ Boundary * Problem::create_boundary_
 Initial * Problem::create_initial_
 (
  std::string  type,
- Parameters * parameters
+ Parameters * parameters,
+ GroupProcess * group_process
  ) throw ()
 { 
   //--------------------------------------------------
@@ -724,7 +726,7 @@ Initial * Problem::create_initial_
 
 
   if (type == "file" || type == "restart") {
-    return new InitialFile(parameters,init_cycle,init_time);;
+    return new InitialFile(parameters,group_process,init_cycle,init_time);;
   } else if (type == "default") {
     return new InitialDefault(parameters,init_cycle,init_time);
   }

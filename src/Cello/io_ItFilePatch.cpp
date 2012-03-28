@@ -30,6 +30,7 @@ Patch * ItFilePatch::operator++ () throw()
   // index1_ ++;
   // if (index1_ > input_->num_patches()) index1_ = 0;
   // return index1_ ? input_->patch(index1_ - 1) : 0;
+  return 0;
 }
 
 //----------------------------------------------------------------------
@@ -37,6 +38,7 @@ Patch * ItFilePatch::operator++ () throw()
 bool ItFilePatch::done () const throw()
 {
   // return index1_ >= input_->num_patches();
+  return false;
 }
 
 

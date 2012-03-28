@@ -23,7 +23,9 @@ class InitialFile : public Initial {
 public: // interface
 
   /// Constructor
-  InitialFile(Parameters * parameters, int cycle, double time) throw();
+  InitialFile(Parameters * parameters, 
+	      GroupProcess * group_process,
+	      int cycle, double time) throw();
 
   /// Destructor
   virtual ~InitialFile() throw();
@@ -41,7 +43,11 @@ private: // functions
 
 private: // attributes
 
+  /// Parameters object
   Parameters * parameters_;
+
+  /// Parallel GroupProcess object for creating Patches
+  GroupProcess * group_process_;
 
   Input * input_;
 };

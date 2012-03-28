@@ -41,10 +41,10 @@ public: // virtual functions
   /// Finalize input
   virtual void finalize () throw ();
 
-  /// Read hierarchy data to disk
-  virtual void read_hierarchy
-  ( Hierarchy * hierarchy,
-    const FieldDescr * field_descr ) throw();
+  // /// Read hierarchy data to disk
+  // virtual void read_hierarchy
+  // ( Hierarchy * hierarchy,
+  //   const FieldDescr * field_descr ) throw();
 
   /// Read patch data to disk
   virtual void read_patch

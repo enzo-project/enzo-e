@@ -72,7 +72,8 @@ public: // interface
   void initialize_boundary(Parameters * parameters) throw();
 
   /// Initialize the initial conditions object
-  void initialize_initial(Parameters * parameters) throw();
+  void initialize_initial(Parameters * parameters,
+			  GroupProcess * group_process) throw();
 
   /// Initialize the method objects
   void initialize_method(Parameters * parameters) throw();
@@ -102,7 +103,8 @@ protected: // functions
 
   /// Create named initialization object
   virtual Initial *  create_initial_ 
-  (std::string name, Parameters * parameters) throw ();
+  (std::string name, Parameters * parameters,
+   GroupProcess * = 0) throw ();
 
   /// Create named method object
   virtual Method *   create_method_

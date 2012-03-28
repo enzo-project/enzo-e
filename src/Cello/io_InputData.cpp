@@ -21,14 +21,14 @@ void InputData::open () throw()
 {
   std::string file_name = expand_file_name_(&file_name_,&file_args_);
 
-  Monitor::instance()->print ("Input","writing data file %s", 
+  Monitor::instance()->print ("Input","reading data file %s", 
 			      file_name.c_str());
 
   close();
 
   file_ = new FileHdf5 (".",file_name);
 
-  file_->file_create();
+  file_->file_open();
 }
 
 //----------------------------------------------------------------------
@@ -61,28 +61,28 @@ void InputData::finalize () throw ()
   Input::finalize();
 }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-void InputData::read_hierarchy 
-(
- Hierarchy  * hierarchy,
- const FieldDescr * field_descr
- ) throw()
-{
+// void InputData::read_hierarchy 
+// (
+//  Hierarchy  * hierarchy,
+//  const FieldDescr * field_descr
+//  ) throw()
+// {
 
-  IoHierarchy io_hierarchy(hierarchy);
+//   IoHierarchy io_hierarchy(hierarchy);
 
-  // Read hierarchy meta-data
+//   // Read hierarchy meta-data
 
   
-  // file_->file_read_meta("value", "name",scalar_type_char,6);
+//   // file_->file_read_meta("value", "name",scalar_type_char,6);
 
-  Input::read_meta (&io_hierarchy);
+//   Input::read_meta (&io_hierarchy);
 
-  // Call read_patch() on contained patches
-  Input::read_hierarchy (hierarchy, field_descr);
+//   // Call read_patch() on contained patches
+//   Input::read_hierarchy (hierarchy, field_descr);
 
-}
+// }
 
 //----------------------------------------------------------------------
 

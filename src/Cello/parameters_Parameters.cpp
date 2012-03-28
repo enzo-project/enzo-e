@@ -903,10 +903,12 @@ void Parameters::monitor_access_
     sprintf (index_string,"[%d]",index);
   }
 
-  monitor_->print("Parameters","accessed %s%s %s",
+  char buffer[MAX_PARAMETER_FILE_WIDTH];
+  sprintf (buffer,"accessed %s%s %s",
 		  parameter_name_(parameter).c_str(),
 		  index_string,
-		  value.c_str());
+	   value.c_str());
+  monitor_->print_verbatim("Parameters",buffer);
 }
 
 //----------------------------------------------------------------------

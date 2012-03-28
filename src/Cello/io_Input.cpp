@@ -44,6 +44,16 @@ Input::~Input () throw()
   delete it_field_;  it_field_ = 0;
   delete io_block_;  io_block_ = 0;
 }
+
+//----------------------------------------------------------------------
+
+bool Input::is_scheduled (int cycle, double time)
+{
+  cycle_ = cycle;
+  time_  = time;
+  return true;
+}
+
 //----------------------------------------------------------------------
 
 void Input::set_filename (std::string filename,
@@ -196,6 +206,7 @@ std::string Input::expand_file_name_
 
     strcpy (buffer, file_middle.c_str());
     
+    TRACE1("cycle = %d",cycle_);
     if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
     else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
     else if (arg == "count") { sprintf (buffer_new,buffer, count_input_); }

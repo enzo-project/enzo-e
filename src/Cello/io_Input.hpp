@@ -59,6 +59,9 @@ public: // functions
 #endif
   };
 
+  /// Used to set cycle and time; always returns true
+  bool is_scheduled (int cycle, double time);
+
   /// Return whether this process is a reader
   bool is_reader () const throw () 
   { return (process_ == process_reader()); };
