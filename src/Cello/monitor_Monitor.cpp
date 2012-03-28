@@ -185,6 +185,55 @@ void Monitor::write
 
 //----------------------------------------------------------------------
 
+void Monitor::write_verbatim
+(
+ FILE * fp,
+ const char * component,
+ const char * message
+ ) const
+{
+  if (active_) {
+
+    va_list fargs;
+
+    // Get parallel process text
+
+    char buffer_process[MONITOR_LENGTH] = "";
+    
+    sprintf (buffer_process,"%0d",ip_);
+
+    // Get time
+
+    char buffer_time[10];
+
+    snprintf (buffer_time,10,"%08.2f",timer_->value());
+
+    // get Component if any
+    char buffer_component[20];
+
+    if (strlen(component)>0) {
+      snprintf (buffer_component,20," %-11s ",component);
+    } else {
+      buffer_component[0] = 0;
+    }
+
+    // Print 
+
+    if (fp == stdout) {
+      PARALLEL_PRINTF 
+	("%s %s %s %s\n",
+	 buffer_process, buffer_time, buffer_component, message);
+    } else {
+      fprintf 
+	(fp,"%s %s %s %s\n",
+	 buffer_process, buffer_time, buffer_component, message);
+    }
+  }
+
+}
+
+//----------------------------------------------------------------------
+
 void Monitor::print (const char * component, const char * message, ...) const
 {
   if (active_) {
@@ -200,5 +249,14 @@ void Monitor::print (const char * component, const char * message, ...) const
     va_end(fargs);
 
     write (stdout, component, buffer_message);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Monitor::print_verbatim (const char * component, const char * message) const
+{
+  if (active_) {
+    write_verbatim (stdout, component, message);
   }
 }

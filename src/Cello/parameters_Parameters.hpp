@@ -86,6 +86,8 @@ public: // interface
   void set_list_logical (int ,std::string , bool value) throw();
   /// Assign a value to the string-valued list-element parameter
   void set_list_string (int,std::string,const char * value) throw();
+  void done_set_list ( std::string parameter ) throw()
+  { monitor_write_(parameter); }
 
   /// Evaluate the floating-point valued parameter expression
   void evaluate_float 

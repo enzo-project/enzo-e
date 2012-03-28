@@ -603,7 +603,6 @@ void Parameters::set_list_integer
   }
 
   param->set_integer_(value);
-  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -625,7 +624,6 @@ void Parameters::set_list_float
   }
 
   param->set_float_(value);
-  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -646,7 +644,6 @@ void Parameters::set_list_logical
   }
 
   param->set_logical_(value);
-  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -667,7 +664,6 @@ void Parameters::set_list_string
   }
 
   param->set_string_(strdup(value));
-  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -923,7 +919,7 @@ void Parameters::monitor_write_ (std::string parameter) throw()
 	   parameter_name_(parameter).c_str(),
 	   param ? param->value_to_string().c_str() : "[undefined]");
 
-  monitor_->print("Parameters",buffer);
+  monitor_->print_verbatim("Parameters",buffer);
 }
 
 //----------------------------------------------------------------------

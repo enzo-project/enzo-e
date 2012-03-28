@@ -114,6 +114,7 @@ void OutputRestart::write_simulation
     for (size_t i=0; i<file_args_.size(); i++) {
       parameters->set_list_string (i+1,"Initial:name",file_args_[i].c_str());
     }
+    parameters->done_set_list("Initial:name");
 
     parameters->set_integer ("Initial:cycle",simulation->cycle());
     parameters->set_float   ("Initial:time", simulation->time());

@@ -68,12 +68,19 @@ public: // interface
   /// Print the Cello header 
   void header () const;
 
-  /// Print a message to stdout
-  void print (const char * component, const char * buffer, ...) const;
-
   /// Write a message to file
   void write (FILE * fp, 
 	      const char * component, const char * buffer, ...) const;
+  /// Write a message to file
+  void write_verbatim (FILE * fp, 
+	      const char * component, const char * buffer) const;
+
+  /// Print a message with possible format specifications to stdout
+  void print (const char * component, const char * buffer, ...) const;
+
+  /// Print a message without format specifications to stdout
+  void print_verbatim (const char * component, const char * buffer) const;
+
 
 private: // functions
 
