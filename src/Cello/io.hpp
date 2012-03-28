@@ -19,9 +19,6 @@
 #include "_field.hpp"
 #include "_disk.hpp"
 
-#include "_mesh.hpp"
-#include "_field.hpp" 
-
 #include "_io.hpp"
 
 #endif /* IO_HPP */

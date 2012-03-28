@@ -61,8 +61,7 @@ public: // interface
 			  int dimension,
 			  FieldDescr   * field_descr,
 			  int nx, int ny, int nz,
-			  int nbx, int nby, int nbz,
-			  bool allocate = true) throw();
+			  int nbx, int nby, int nbz) throw();
 
   /// Return the factory object associated with the Hierarchy
   const Factory * factory () const throw()

@@ -24,14 +24,16 @@ public: // functions
   /// Create an uninitialized InputData object
   InputData(const Factory * factory) throw();
 
-  /// Create an uninitialized InputData object
-  ~InputData() throw()
-  {};
+  /// Close the file if it is open
+  virtual ~InputData() throw();
 
 public: // virtual functions
 
   /// Open (or create) a file for IO
   virtual void open () throw();
+
+  /// Whether the file is open or not
+  virtual bool is_open () throw();
 
   /// Close file for IO
   virtual void close () throw();

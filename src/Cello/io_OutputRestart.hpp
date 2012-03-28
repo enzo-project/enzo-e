@@ -44,6 +44,7 @@ private:
 
   /// Format strings for param_name_, if any ("cycle", "time", etc.)
   std::vector<std::string> param_args_;
+
 };
 
 #endif /* IO_OUTPUT_RESTART_HPP */

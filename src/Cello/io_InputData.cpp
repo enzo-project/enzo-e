@@ -19,12 +19,12 @@ InputData::InputData(const Factory * factory) throw ()
 
 void InputData::open () throw()
 {
-  std::string file_name = expand_file_name(&file_name_,&file_args_);
+  std::string file_name = expand_file_name_(&file_name_,&file_args_);
 
   Monitor::instance()->print ("Input","writing data file %s", 
 			      file_name.c_str());
 
-  delete file_;
+  close();
 
   file_ = new FileHdf5 (".",file_name);
 
@@ -33,12 +33,25 @@ void InputData::open () throw()
 
 //----------------------------------------------------------------------
 
+InputData::~InputData() throw()
+{
+  close();
+}
+
+//----------------------------------------------------------------------
+
+bool InputData::is_open () throw()
+{
+  return (file_ != 0);
+}
+
+//----------------------------------------------------------------------
+
 void InputData::close () throw()
 {
-  file_->file_close();
+  if (file_) file_->file_close();
 
-  delete file_;
-  file_ = 0;
+  delete file_;  file_ = 0;
 }
 
 //----------------------------------------------------------------------

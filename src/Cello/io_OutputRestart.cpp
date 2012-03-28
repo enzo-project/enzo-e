@@ -92,7 +92,7 @@ void OutputRestart::write_simulation
 
   if (is_root) {
 
-    std::string param_name = expand_file_name(&param_name_,&param_args_);
+    std::string param_name = expand_file_name_(&param_name_,&param_args_);
 
     Parameters * parameters = simulation->parameters();
 

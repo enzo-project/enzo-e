@@ -30,6 +30,7 @@ void InitialDefault::enforce
 {
   // Initialize Fields according to parameters
 
+
   //--------------------------------------------------
   parameters_->group_set(0,"Initial");
   //--------------------------------------------------

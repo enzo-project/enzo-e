@@ -23,7 +23,7 @@ public: // interface
 
   /// Destructor
   virtual ~Initial() throw()
-  {}
+  {} ;
 
   /// Initial time
   double time() const throw() { return time_; }

@@ -723,13 +723,11 @@ Initial * Problem::create_initial_
   double init_time   = parameters->value_float   ("Initial:time",0.0);
 
 
-  if (type == "file") {
-    return new InitialFile(parameters,init_cycle,init_time);;
-  } else if (type == "restart") {
+  if (type == "file" || type == "restart") {
     return new InitialFile(parameters,init_cycle,init_time);;
   } else if (type == "default") {
-      return new InitialDefault(parameters,init_cycle,init_time);
-    }
+    return new InitialDefault(parameters,init_cycle,init_time);
+  }
   return NULL;
 }
 

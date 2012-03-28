@@ -19,7 +19,7 @@ OutputData::OutputData(const Factory * factory) throw ()
 
 void OutputData::open () throw()
 {
-  std::string file_name = expand_file_name(&file_name_,&file_args_);
+  std::string file_name = expand_file_name_(&file_name_,&file_args_);
 
   Monitor::instance()->print ("Output","writing data file %s", 
 			      file_name.c_str());
@@ -60,8 +60,6 @@ void OutputData::write_hierarchy
   IoHierarchy io_hierarchy(hierarchy);
 
   // Write hierarchy meta-data
-
-  file_->file_write_meta("value", "name",scalar_type_char,6);
 
   Output::write_meta (&io_hierarchy);
 

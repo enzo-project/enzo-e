@@ -14,7 +14,11 @@ class InitialFile : public Initial {
 
   /// @class    InitialFile
   /// @ingroup  Problem
-  /// @brief    [\ref Problem] File initialization method
+  /// @brief    [\ref Problem] Declaration of the InitialFile class
+  ///
+  /// This class is used to define initial conditions by reading in
+  /// data from files
+
 
 public: // interface
 
@@ -22,8 +26,7 @@ public: // interface
   InitialFile(Parameters * parameters, int cycle, double time) throw();
 
   /// Destructor
-  virtual ~InitialFile() throw()
-  {}
+  virtual ~InitialFile() throw();
 
   /// Read initialization values from Initial group in parameter file
 
@@ -34,6 +37,8 @@ public: // interface
 private: // attributes
 
   Parameters * parameters_;
+
+  Input * input_;
 };
 
 #endif /* METHOD_INITIAL_FILE_HPP */

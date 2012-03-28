@@ -51,16 +51,23 @@ Output::~Output () throw()
 }
 //----------------------------------------------------------------------
 
-void Output::set_filename (std::string filename,
-			   std::vector<std::string> fileargs) throw()
+bool Output::is_scheduled (int cycle, double time)
 {
-  file_name_ = filename; 
-  file_args_ = fileargs;
+  cycle_ = cycle;
+  time_  = time;
+  return schedule()->write_this_cycle(cycle_,time_);
 }
 
 //----------------------------------------------------------------------
 
-std::string Output::expand_file_name 
+double Output::update_timestep (double time, double dt) const throw ()
+{
+  return schedule_->update_timestep(time,dt); 
+}
+
+//======================================================================
+
+std::string Output::expand_file_name_
 (
  const std::string              * file_name_p,
  const std::vector<std::string> * file_args_p
@@ -76,7 +83,7 @@ std::string Output::expand_file_name
 
   // Error check no \% in file name
 
-  ASSERT1 ("Output::expand_file_name",
+  ASSERT1 ("Output::expand_file_name_",
 	   "File name %s cannot contain '\\%%'",
 	   file_name.c_str(),
 	   file_name.find("\\%") == std::string::npos);
@@ -93,7 +100,7 @@ std::string Output::expand_file_name
     file_rest = file_rest.substr(pos+1,len-pos-1);
   }
 
-  ASSERT3 ("Output::expand_file_name",
+  ASSERT3 ("Output::expand_file_name_",
 	   "The number of format conversion specifiers %d "
 	   "associated with file name %s "
 	   "must equal the number of variables %d",
@@ -126,7 +133,7 @@ std::string Output::expand_file_name
     else if (arg == "proc")  { sprintf (buffer_new,buffer, process_); }
     else 
       {
-	ERROR3("Output::expand_file_name",
+	ERROR3("Output::expand_file_name_",
 	       "Unknown file variable #%d '%s' for file '%s'",
 	       int(i),arg.c_str(),file_name.c_str());
       }
@@ -136,22 +143,6 @@ std::string Output::expand_file_name
   }
 
   return file_left + file_right;
-}
-
-//----------------------------------------------------------------------
-
-bool Output::is_scheduled (int cycle, double time)
-{
-  cycle_ = cycle;
-  time_  = time;
-  return schedule()->write_this_cycle(cycle_,time_);
-}
-
-//----------------------------------------------------------------------
-
-double Output::update_timestep (double time, double dt) const throw ()
-{
-  return schedule_->update_timestep(time,dt); 
 }
 
 //----------------------------------------------------------------------

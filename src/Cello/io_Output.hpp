@@ -33,7 +33,8 @@ public: // functions
 
   /// Set file name
   void set_filename (std::string filename,
-		     std::vector<std::string> fileargs) throw();
+		     std::vector<std::string> fileargs) throw()
+  { file_name_ = filename;  file_args_ = fileargs;  }
 
   /// Set field iterator
   void set_it_field (ItField * it_field) throw()
@@ -52,11 +53,6 @@ public: // functions
   /// Return the Schedule object pointer
   Schedule * schedule() throw() 
   { return schedule_; };
-
-  /// Return the filename for the file format and given arguments
-  std::string expand_file_name 
-  (const std::string * file_name,
-   const std::vector<std::string> * file_args) const throw();
 
   int process_stride () const throw () 
   { return process_stride_; };
@@ -164,9 +160,17 @@ public:
   virtual void cleanup_remote (int * n, char ** buffer) throw()
   {};
 
+protected:
+  /// Return the filename for the file format and given arguments
+  std::string expand_file_name_
+  (const std::string * file_name,
+   const std::vector<std::string> * file_args) const throw();
+
 private:
 
+  /// Implementation of write_meta() and write_meta_group()
   void write_meta_ ( meta_type type, Io * io ) throw();
+
 
 protected: // attributes
 

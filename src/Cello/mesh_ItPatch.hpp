@@ -34,7 +34,7 @@ private: // attributes
   const Hierarchy * hierarchy_;
 
   /// Index of the current local Patch plus 1, or 0 if between iterations
-  /// Always in the range 0 <= index1_ <= number of local patchs
+  /// Always in the range 0 <= index1_ <= number of local patches
   size_t index1_;
 };
 

@@ -85,7 +85,7 @@ bool Tree::node_neighbor
   const int dy = r_;
   const int dz = r_*r_;
 
-  int k,kx,ky,kz;
+  int k,kx=0,ky=0,kz=0;
   k = neighbor_trace->index();
   index_(k,&kx,&ky,&kz);
   std::stack<int> index_stack;

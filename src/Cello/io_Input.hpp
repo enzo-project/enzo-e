@@ -48,11 +48,6 @@ public: // functions
   File * file() throw() 
   { return file_; };
 
-  /// Return the filename for the file format and given arguments
-  std::string expand_file_name 
-  (const std::string * file_name,
-   const std::vector<std::string> * file_args) const throw();
-
   int process_stride () const throw () 
   { return process_stride_; };
 
@@ -92,6 +87,9 @@ public: // virtual functions
 
   /// Open (or create) a file for IO
   virtual void open () throw() = 0;
+
+  /// Whether the file is open or not
+  virtual bool is_open () throw() = 0;
 
   /// Close file for IO
   virtual void close () throw() = 0;
@@ -153,6 +151,13 @@ public:
   virtual void cleanup_remote (int * n, char ** buffer) throw()
   {};
 
+protected:
+
+  /// Return the filename for the file format and given arguments
+  std::string expand_file_name_
+  (const std::string * file_name,
+   const std::vector<std::string> * file_args) const throw();
+
 private:
 
   void read_meta_ ( meta_type type, Io * io ) throw();
@@ -206,7 +211,6 @@ private: // attributes
   /// Private so that setting must be made through set_process_stride(),
 
   int process_stride_;
-
 
 };
 

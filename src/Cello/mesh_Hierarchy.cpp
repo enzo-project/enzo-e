@@ -173,12 +173,12 @@ void Hierarchy::create_root_patch
  int dimension,
  FieldDescr   * field_descr,
  int nx, int ny, int nz,
- int nbx, int nby, int nbz,
- bool allocate
-) throw()
+ int nbx, int nby, int nbz) throw()
 {
 
-  patch_tree_ = new Tree (dimension,2);
+  const int refinement = 2; // refinement factor
+
+  patch_tree_ = new Tree (dimension,refinement);
 
   // Create new empty patch
   Patch * root_patch = factory()->create_patch
@@ -189,9 +189,7 @@ void Hierarchy::create_root_patch
      lower_[0], lower_[1], lower_[2],
      upper_[0], upper_[1], upper_[2]);
 
-  if (allocate) {
-    root_patch->allocate_blocks(field_descr);
-  }
+  root_patch->allocate_blocks(field_descr);
 
   patch_tree_->root_node()->set_data(root_patch);
 }

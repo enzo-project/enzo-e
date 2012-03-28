@@ -48,6 +48,8 @@ enum meta_type {
 #include "io_OutputData.hpp"
 #include "io_OutputRestart.hpp"
 
+#include "io_ItFilePatch.hpp"
+
 #include "io_Schedule.hpp"
 
 

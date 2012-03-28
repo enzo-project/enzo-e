@@ -377,7 +377,6 @@ void Simulation::initialize_hierarchy_() throw()
 	   root_blocks[0]*root_blocks[1]*root_blocks[2]==group_process_->size());
 #endif
 
-  
   hierarchy_->create_root_patch
     (group_process_,dimension_,
      field_descr_,
