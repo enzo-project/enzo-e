@@ -427,6 +427,31 @@ void FileHdf5::data_read_meta
 
 //----------------------------------------------------------------------
 
+int FileHdf5::group_count () const throw()
+{
+  H5G_info_t group_info;
+  H5Gget_info (group_id_, &group_info);
+  return group_info.nlinks;
+}
+
+//----------------------------------------------------------------------
+
+std::string FileHdf5::group_name (size_t i) const throw()
+{
+  char buffer[10];
+
+  // 1.6.0 <= HDF5 version < 1.8.0
+  //  H5Gget_objname_by_idx(group_id_,i,buffer,10);
+
+  // 1.8.0 <= HDF5 version 
+  H5Lget_name_by_idx (group_id_,group_name_.c_str(),H5_INDEX_NAME,H5_ITER_INC,
+		      i,buffer,10,H5P_DEFAULT);
+
+  return std::string(buffer);
+}
+
+//----------------------------------------------------------------------
+
 void FileHdf5::group_chdir (std::string group_path) throw()
 {
   // convert to absolute path if it is relative

@@ -28,10 +28,18 @@ module enzo {
   array[3D] EnzoBlock {
 
     entry EnzoBlock
+      (int ibx, int iby, int ibz,
+       int nbx, int nby, int nbz,
+       int nx, int ny, int nz,	
+       double xpm, double ypm, double zpm,
+       double xb, double yb, double zb,
+       int num_field_blocks);
+
+    entry EnzoBlock
       (int nbx, int nby, int nbz,
-       int nx, int ny, int nz,
-       double xm, double ym, double zm,
-       double hx, double hy, double hz,
+       int nx, int ny, int nz,	
+       double xpm, double ypm, double zpm,
+       double xb, double yb, double zb,
        int num_field_blocks);
   };
 

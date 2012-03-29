@@ -97,7 +97,7 @@ void Input::read_hierarchy
 
 //----------------------------------------------------------------------
 
-void Input::read_patch 
+Patch * Input::read_patch 
 (
  Patch * patch,
  const FieldDescr * field_descr,
@@ -125,11 +125,12 @@ void Input::read_patch
 
   }
 #endif
+  return patch;
 }
 
 //----------------------------------------------------------------------
 
-void Input::read_block
+Block * Input::read_block
 (
  Block * block,
  const FieldDescr * field_descr,
@@ -142,6 +143,7 @@ void Input::read_block
     int field_index = it_field_->value();
     read_field (block->field_block(), field_descr, field_index);
   }
+  return block;
 }
 
 //======================================================================

@@ -32,44 +32,45 @@ public: // virtual functions
   /// Open (or create) a file for IO
   virtual void open () throw();
 
-  /// Whether the file is open or not
-  virtual bool is_open () throw();
-
   /// Close file for IO
   virtual void close () throw();
+
+  /// Whether the file is open or not
+  virtual bool is_open () throw();
 
   /// Finalize input
   virtual void finalize () throw ();
 
-  // /// Read hierarchy data to disk
-  // virtual void read_hierarchy
-  // ( Hierarchy * hierarchy,
-  //   const FieldDescr * field_descr ) throw();
+  /// Read hierarchy data from disk
+  virtual void read_hierarchy
+  ( Hierarchy * hierarchy,
+    const FieldDescr * field_descr ) throw();
 
-  /// Read patch data to disk
-  virtual void read_patch
+  /// Read patch data from disk
+  virtual Patch * read_patch
   ( Patch * patch,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
-#ifdef CONFIG_USE_CHARM
-  /// Cleanup after writing blocks in a patch
+  /// Cleanup after reading blocks in a patch (for CHARM++ synchronization)
   virtual void end_read_patch () throw();
-#endif
 
-  /// Read block data to disk
-  virtual void read_block
+  /// Read block data from disk
+  virtual Block * read_block
   ( Block * block,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
-  /// Read local field to disk
+  /// Read local field from disk
   virtual void read_field
   ( FieldBlock * field_block,
     const FieldDescr * field_descr,
     int field_index) throw();
 
 protected:
+
+  /// Copy of the input Factory, for use in creating Patches and Blocks 
+  const Factory * factory_;
 
 };
 

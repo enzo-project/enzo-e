@@ -33,13 +33,14 @@ Block::Block
 #endif
 
 { 
-#ifdef CONFIG_USE_CHARM
+  TRACE0;
+// #ifdef CONFIG_USE_CHARM
 
-#ifdef CONFIG_CHARM_ATSYNC
-  usesAtSync = CmiTrue;
-#endif
+// #ifdef CONFIG_CHARM_ATSYNC
+//   usesAtSync = CmiTrue;
+// #endif
 
-#endif
+// #endif
 
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);

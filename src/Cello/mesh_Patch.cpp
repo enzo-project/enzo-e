@@ -39,8 +39,14 @@ Patch::Patch
 	   nx,ny,nz,nbx,nby,nbz);
   }
 
+  // create a group process if one doesn't exist
+  if (! group_process_) {
+    group_process_ = GroupProcess::create();
+  }
+
   // set layout process range
-  layout_ -> set_process_range(0,group_process->size());
+
+  layout_ -> set_process_range(0,group_process_->size());
 
   size_[0] = nx;
   size_[1] = ny;

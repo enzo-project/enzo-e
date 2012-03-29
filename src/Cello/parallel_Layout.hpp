@@ -4,6 +4,9 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-19
 /// @brief    [\ref Parallel] Declaration of the Layout class
+///
+/// A Layout specifies the mapping of an array of objects, e.g.
+/// Blocks in a Patch, to processors.
 
 #ifndef PARALLEL_LAYOUT_HPP
 #define PARALLEL_LAYOUT_HPP
@@ -16,10 +19,13 @@ class Layout {
   /// @brief    [\ref Parallel] Specify how a Patch is partitioned into
   /// blocks, and how blocks are assigned to generic processes
 
+  friend class IoLayout;
+
 public: // interface
 
   /// Create a Layout with the given blocking, initialized for the root process
-  Layout(int nbx=1, int nby=1, int nbz=1) throw();
+  Layout(int nbx=1, int nby=1, int nbz=1,
+	 int p0=0, int np=1) throw();
 
   /// Set first process id and number of processes
   void set_process_range (int process_first=0, int process_count=1) throw();

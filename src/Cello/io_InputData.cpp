@@ -11,8 +11,16 @@
 //----------------------------------------------------------------------
 
 InputData::InputData(const Factory * factory) throw ()
-  : Input(factory)
+  : Input(factory),
+    factory_(factory)
 {
+}
+
+//----------------------------------------------------------------------
+
+InputData::~InputData() throw()
+{
+  close();
 }
 
 //======================================================================
@@ -33,9 +41,11 @@ void InputData::open () throw()
 
 //----------------------------------------------------------------------
 
-InputData::~InputData() throw()
+void InputData::close () throw()
 {
-  close();
+  if (file_) file_->file_close();
+
+  delete file_;  file_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -47,103 +57,118 @@ bool InputData::is_open () throw()
 
 //----------------------------------------------------------------------
 
-void InputData::close () throw()
-{
-  if (file_) file_->file_close();
-
-  delete file_;  file_ = 0;
-}
-
-//----------------------------------------------------------------------
-
 void InputData::finalize () throw ()
 {
   Input::finalize();
 }
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// void InputData::read_hierarchy 
-// (
-//  Hierarchy  * hierarchy,
-//  const FieldDescr * field_descr
-//  ) throw()
-// {
+void InputData::read_hierarchy 
+(
+ Hierarchy  * hierarchy,
+ const FieldDescr * field_descr
+ ) throw()
+{
 
-//   IoHierarchy io_hierarchy(hierarchy);
+  IoHierarchy io_hierarchy(hierarchy);
 
-//   // Read hierarchy meta-data
+  // Read hierarchy meta-data
 
-  
-//   // file_->file_read_meta("value", "name",scalar_type_char,6);
+  Input::read_meta (&io_hierarchy);
 
-//   Input::read_meta (&io_hierarchy);
+  // Call read_patch() on contained patches
+  Input::read_hierarchy (hierarchy, field_descr);
 
-//   // Call read_patch() on contained patches
-//   Input::read_hierarchy (hierarchy, field_descr);
-
-// }
+}
 
 //----------------------------------------------------------------------
 
-void InputData::read_patch 
+Patch * InputData::read_patch 
 (
  Patch * patch,
  const FieldDescr * field_descr,
  int ixp0, int iyp0, int izp0
  ) throw()
 {
-  // Create file group for patch
+  TRACE("read_patch");
+
+  if (patch == 0) {
+    // create an uninitialized Patch
+    patch = 
+      factory_->create_patch
+      (0,
+       0,0,0,
+       0,0,0,
+       0,0,0,
+       0,0,0,
+       0,0,0);
+  }
+
+  // Change to file group for patch
 
   char buffer[40];
   int ib = patch->index();
   sprintf (buffer,"patch_%d",ib);
   file_->group_chdir(buffer);
-  file_->group_create();
+  file_->group_open();
 
-  // Loop over metadata items in Hierarchy
+  // Read patch meta-data
 
   IoPatch io_patch(patch);
 
-  // Read patch meta-data
   Input::read_meta_group (&io_patch);
 
-  // Call read_block() on contained blocks
-  Input::read_patch(patch,field_descr,ixp0,iyp0,izp0);
+  // Also read the patches parallel Layout
 
-#ifndef CONFIG_USE_CHARM
-  file_->group_close();
-  file_->group_chdir("..");
-#endif
+  IoLayout io_layout(patch->layout());
 
+  Input::read_meta_group (&io_layout);
+
+  TRACE("Bypassing Input::read_block() since blocks are not allocated yet");
+  // // Call read_block() on contained blocks
+  // Input::read_patch(patch,field_descr,ixp0,iyp0,izp0);
+
+  return patch;
 }
 
-#ifdef CONFIG_USE_CHARM
 //----------------------------------------------------------------------
 
 void InputData::end_read_patch() throw()
 {
+  TRACE("end_read_patch");
   file_->group_close();
   file_->group_chdir("..");
 }
 //----------------------------------------------------------------------
 
-#endif
-
-void InputData::read_block 
+Block * InputData::read_block 
 ( 
  Block * block,
-  const FieldDescr * field_descr,
-  int ixp0, int iyp0, int izp0) throw()
+ const FieldDescr * field_descr,
+ int ixp0, int iyp0, int izp0) throw()
 {
 
-  // Create file group for block
+  if (block == 0) {
+    // create an uninitialized Patch
+    block = 
+      factory_->create_block
+      (0,0,0,
+       0,0,0,
+       0,0,0,
+       0.0,0.0,0.0,
+       0.0,0.0,0.0,
+       1);
+  }
+
+  TRACE("read_block");
+  // Open file group for block
 
   char buffer[40];
   int ib = block->index();
   sprintf (buffer,"block_%d",ib);
   file_->group_chdir(buffer);
-  file_->group_create();
+  file_->group_open();
 
   // Read block meta data
 
@@ -158,6 +183,7 @@ void InputData::read_block
   file_->group_close();
   file_->group_chdir("..");
 
+  return block;
 }
 
 //----------------------------------------------------------------------
@@ -168,6 +194,7 @@ void InputData::read_field
  const FieldDescr * field_descr,
  int field_index) throw()
 {
+  TRACE1("read_field %d",field_index);
   io_field_block()->set_field_descr(field_descr);
   io_field_block()->set_field_block(field_block);
   io_field_block()->set_field_index(field_index);
@@ -180,16 +207,17 @@ void InputData::read_field
     int nxd,nyd,nzd;  // Array dimension
     int nx,ny,nz;     // Array size
 
+    // Read ith FieldBlock data
+
+    file_->data_open(name.c_str(),&type,&nx,&ny,&nz);
+    file_->data_read(buffer);
+    file_->data_close();
+
     // Get ith FieldBlock data
     io_field_block()->data_value(i, &buffer, &name, &type, 
 				 &nxd,&nyd,&nzd,
 				 &nx, &ny, &nz);
 
-    // Read ith FieldBlock data
-
-    file_->data_create(name.c_str(),type,nxd,nyd,nzd,nx,ny,nz);
-    file_->data_read(buffer);
-    file_->data_close();
   }
 
 }

@@ -56,52 +56,15 @@ void InitialFile::enforce
 
   INCOMPLETE("InitialFile::enforce");
 
-  Patch * patch = hierarchy->factory()->create_patch
-    (group_process_,
-     0,0,0,
-     0,0,0,
-     0,0,0,
-     0,0,0,
-     0,0,0);
 
-  input_->read_patch(patch,field_descr,0,0,0);
+  Patch * patch = input_->read_patch(0,field_descr,0,0,0);
 
-  // DEBUG
-
-  int nx=0,ny=0,nz=0;
-  patch->size(&nx,&ny,&nz);
-  TRACE3 ("Patch size %d %d %d",nx,ny,nz);
-
-  int nbx=0,nby=0,nbz=0;
-  patch->layout()->block_count(&nbx,&nby,&nbz);
-  int p0=0,np=0;
-  patch->layout()->process_range(&p0,&np);
-  TRACE5 ("Patch layout %d:%d (%d %d %d)",p0,p0+np-1,
-	  nbx,nby,nbz);
-
-
-  nx=0,ny=0,nz=0;
-  patch->offset(&nx,&ny,&nz);
-  TRACE3 ("Patch offset %d %d %d",nx,ny,nz);
-
-  nx=0,ny=0,nz=0;
-  patch->blocking(&nx,&ny,&nz);
-  TRACE3 ("Patch blocking %d %d %d",nx,ny,nz);
-
-  double x=0,y=0,z=0;
-  patch->lower(&x,&y,&z);
-  TRACE3 ("Patch lower %f %f %f",x,y,z);
-
-  x=0,y=0,z=0;
-  patch->upper(&x,&y,&z);
-  TRACE3 ("Patch upper %f %f %f",x,y,z);
-
-  // (X) Layout * layout_;
-  // (*) int size_[3];
-  // ( ) int offset_[3];
-  // ( ) int blocking_[3];
-  // ( ) double lower_[3];
-  // ( ) double upper_[3];
+  File * file = input_->file();
+  int num_blocks = file->group_count();
+  for (int i = 0; i<num_blocks; i++) {
+    //    Block * block = input_->read_block(0,
+    TRACE2("  block(%d) = %s",i,file->group_name(i).c_str());
+  }
 }
 
 //----------------------------------------------------------------------

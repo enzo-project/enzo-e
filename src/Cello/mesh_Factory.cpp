@@ -88,18 +88,19 @@ Block * Factory::create_block
  int num_field_blocks
  ) const throw()
 {
-#ifdef CONFIG_USE_CHARM
-  // (used for test_FieldBlock and test_Block)
-  CProxy_Block block_array = CProxy_Block::ckNew
-      (
-       nbx,nby,nbz,
-       nx,ny,nz,
-       xm,ym,zm, 
-       xb,yb,zb, 
-       num_field_blocks,
-       nbx,nby,nbz);
-  return block_array(ibx,iby,ibz).ckLocal();
-#else
+// #ifdef CONFIG_USE_CHARM
+//   // (used for test_FieldBlock and test_Block)
+//   CProxy_Block block_array = CProxy_Block::ckNew
+//       (
+//        nbx,nby,nbz,
+//        nx,ny,nz,
+//        xm,ym,zm, 
+//        xb,yb,zb, 
+//        num_field_blocks,
+//        nbx,nby,nbz);
+//   return block_array(ibx,iby,ibz).ckLocal();
+// #else
+  TRACE0;
   return new Block 
     (ibx,iby,ibz, 
      nbx,nby,nbz,
@@ -107,6 +108,6 @@ Block * Factory::create_block
      xm,ym,zm, 
      xb,yb,zb, 
      num_field_blocks);
-#endif
+// #endif
 }
 

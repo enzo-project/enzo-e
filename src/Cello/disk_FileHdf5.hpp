@@ -85,6 +85,12 @@ public: // interface
 
   // Groups
 
+  /// Number of subgroups in the current group
+  virtual int group_count () const throw();
+
+  /// Return the name of the ith subgroup
+  virtual std::string group_name (size_t i) const throw();
+
   /// Change to the named group
   virtual void group_chdir (std::string name) throw();
 

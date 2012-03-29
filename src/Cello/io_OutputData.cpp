@@ -15,6 +15,13 @@ OutputData::OutputData(const Factory * factory) throw ()
 {
 }
 
+//----------------------------------------------------------------------
+
+OutputData::~OutputData() throw()
+{
+  close();
+}
+
 //======================================================================
 
 void OutputData::open () throw()
@@ -24,7 +31,7 @@ void OutputData::open () throw()
   Monitor::instance()->print ("Output","writing data file %s", 
 			      file_name.c_str());
 
-  delete file_;
+  close();
 
   file_ = new FileHdf5 (".",file_name);
 
@@ -35,10 +42,16 @@ void OutputData::open () throw()
 
 void OutputData::close () throw()
 {
-  file_->file_close();
+  if (file_) file_->file_close();
 
-  delete file_;
-  file_ = 0;
+  delete file_;  file_ = 0;
+}
+
+//----------------------------------------------------------------------
+
+bool OutputData::is_open () throw()
+{
+  return (file_ != 0);
 }
 
 //----------------------------------------------------------------------
@@ -85,24 +98,27 @@ void OutputData::write_patch
   file_->group_chdir(buffer);
   file_->group_create();
 
-  // Loop over metadata items in Hierarchy
+  // Read patch meta-data
 
   IoPatch io_patch(patch);
 
-  // Write patch meta-data
   Output::write_meta_group (&io_patch);
+
+  // Also write the patches parallel Layout
+
+  IoLayout io_layout(patch->layout());
+
+  Output::write_meta_group (&io_layout);
 
   // Call write_block() on contained blocks
   Output::write_patch(patch,field_descr,ixp0,iyp0,izp0);
 
 #ifndef CONFIG_USE_CHARM
-  file_->group_close();
-  file_->group_chdir("..");
+  end_write_patch();
 #endif
 
 }
 
-#ifdef CONFIG_USE_CHARM
 //----------------------------------------------------------------------
 
 void OutputData::end_write_patch() throw()
@@ -112,7 +128,6 @@ void OutputData::end_write_patch() throw()
 }
 //----------------------------------------------------------------------
 
-#endif
 
 void OutputData::write_block 
 ( 

@@ -13,9 +13,10 @@
 
 //----------------------------------------------------------------------
 
-Layout::Layout(int nbx, int nby, int nbz) throw()
-  : process_first_ (0),
-    process_count_ (1)
+Layout::Layout(int nbx, int nby, int nbz,
+	       int p0, int np) throw()
+  : process_first_ (p0),
+    process_count_ (np)
 {
   block_count_[0] = nbx;
   block_count_[1] = nby;

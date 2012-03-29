@@ -45,8 +45,7 @@ public: // functions
   IoFieldBlock * io_field_block () const throw() { return io_field_block_; }
 
   /// Return the File object pointer
-  File * file() throw() 
-  { return file_; };
+  File * file() throw() { return file_; };
 
   int process_stride () const throw () 
   { return process_stride_; };
@@ -111,7 +110,7 @@ public: // virtual functions
 
 public:
   /// Read an entire simulation to disk
-  virtual void read_simulation ( Simulation * simulation ) throw();
+  virtual void read_simulation ( Simulation * simulation) throw();
 
   /// Read local hierarchy data to disk
   virtual void read_hierarchy
@@ -119,8 +118,8 @@ public:
     const FieldDescr * field_descr  ) throw();
 
   /// Read local patch data to disk
-  virtual void read_patch
-  ( Patch * patch, 
+  virtual Patch * read_patch
+  ( Patch * patch,
     const FieldDescr * field_descr,  
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
@@ -131,7 +130,7 @@ public:
 #endif
 
   /// Read local block data to disk
-  virtual void read_block
+  virtual Block * read_block
   ( Block * block, 
     const FieldDescr * field_descr,  
     int ixp0=0, int iyp0=0, int izp0=0) throw();
@@ -214,7 +213,6 @@ private: // attributes
   /// Private so that setting must be made through set_process_stride(),
 
   int process_stride_;
-
 };
 
 #endif /* IO_INPUT_HPP */

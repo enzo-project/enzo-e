@@ -24,9 +24,8 @@ public: // functions
   /// Create an uninitialized OutputData object
   OutputData(const Factory * factory) throw();
 
-  /// Create an uninitialized OutputData object
-  ~OutputData() throw()
-  {};
+  /// Close the file if it is open
+  virtual ~OutputData() throw();
 
 public: // virtual functions
 
@@ -35,6 +34,9 @@ public: // virtual functions
 
   /// Close file for IO
   virtual void close () throw();
+
+  /// Whether the file is open or not
+  virtual bool is_open () throw();
 
   /// Finalize output
   virtual void finalize () throw ();
@@ -50,10 +52,8 @@ public: // virtual functions
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
-#ifdef CONFIG_USE_CHARM
-  /// Cleanup after writing blocks in a patch
+  /// Cleanup after writing blocks in a patch (for CHARM++ synchronization)
   virtual void end_write_patch () throw();
-#endif
 
   /// Write block data to disk
   virtual void write_block
