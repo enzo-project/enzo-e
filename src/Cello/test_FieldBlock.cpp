@@ -82,16 +82,18 @@ PARALLEL_MAIN_BEGIN
   yb = (ypp-ypm);
   zb = (zpp-zpm);
 
-  Factory factory;
-  Block * block = factory.create_block
-    (ix,iy,iz, 
-     1,1,1,
-     nx,ny,nz,
-     xpm,ypm,zpm,
-     xb,yb,zb,  1);
+  // Factory factory;
+  // Block * block = factory.create_block
+  //   (ix,iy,iz, 
+  //    1,1,1,
+  //    nx,ny,nz,
+  //    xpm,ypm,zpm,
+  //    xb,yb,zb,  1);
 
-  FieldBlock * field_block = block->field_block();
+  // FieldBlock * field_block = block->field_block();
 
+
+  FieldBlock * field_block = new FieldBlock(nx,ny,nz);
   //----------------------------------------------------------------------
 
   unit_class("FieldBlock");
@@ -436,21 +438,17 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert(*((float *) (v2-1)) == -10);
   unit_assert(*((double *) (v3-1)) == -20);
+  TRACE1 ("%f",*((double *) (v4-1)));
   unit_assert(*((double *) (v4-1)) == -30);
+  TRACE1 ("%f",*((double *) (v5-1)));
   unit_assert(*((double *) (v5-1)) ==  40); // g4 has no ghosts
 
   //----------------------------------------------------------------------
   unit_func("cell_width");
 
-  double xm,ym,zm;
-  block->lower(&xm,&ym,&zm);
-
-  double xp,yp,zp;
-  block->upper(&xp,&yp,&zp);
-
   double hx=0,hy=0,hz=0;
 
-  field_block->cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
+  field_block->cell_width(xpm,xpp,&hx,ypm,ypp,&hy,zpm,zpp,&hz);
 
   unit_assert(fabs(hx-2.0/nx) < 1e-6);
   unit_assert(fabs(hy-4.0/ny) < 1e-6);
