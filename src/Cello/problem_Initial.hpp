@@ -34,7 +34,7 @@ public: // interface
 public: // virtual functions
 
   /// Enforce initial conditions on the given Block
-  virtual void enforce (const Hierarchy * hierarchy,
+  virtual void enforce (Hierarchy * hierarchy,
 			const FieldDescr * field_descr,
 			Block * block) throw() = 0;
 

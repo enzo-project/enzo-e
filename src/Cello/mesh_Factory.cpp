@@ -63,7 +63,9 @@ CProxy_Block Factory::create_block_array
  bool allocate
  ) const throw()
 {
+  TRACE("Creating allocated block array");
   if (allocate) {
+    TRACE("Creating allocated block array");
     return CProxy_Block::ckNew
       (
        nbx,nby,nbz,
@@ -72,7 +74,10 @@ CProxy_Block Factory::create_block_array
        xb,yb,zb, 
        num_field_blocks,
        nbx,nby,nbz);
-  } else return 0;
+  } else {
+    TRACE("Creating unallocated block array");
+    return CProxy_Block::ckNew();
+  }
 }
 
 #endif

@@ -377,11 +377,20 @@ void Simulation::initialize_hierarchy_() throw()
 	   root_blocks[0]*root_blocks[1]*root_blocks[2]==group_process_->size());
 #endif
 
+  TRACE0;
+
+  std::string type = parameters_->value_string("Initial:type","default");
+
+  // Don't allocate blocks if reading data from files
+  bool allocate_blocks = ! ( type == "file" || type == "restart" );
+
+  TRACE1 ("allocate_blocks = %d",allocate_blocks);
   hierarchy_->create_root_patch
     (group_process_,dimension_,
      field_descr_,
      root_size[0],root_size[1],root_size[2],
-     root_blocks[0],root_blocks[1],root_blocks[2]);
+     root_blocks[0],root_blocks[1],root_blocks[2],
+     allocate_blocks);
 
 }
 

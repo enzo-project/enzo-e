@@ -19,7 +19,12 @@ InitialFile::InitialFile
     parameters_(parameters),
     group_process_(group_process),
     input_(0)
+#ifdef CONFIG_USE_CHARM
+  , counter_blocks_(0)
+#endif
 {
+#ifdef CONFIG_USE_CHARM
+#endif
   TRACE("InitialFile::InitialFile");
 }
 
@@ -34,7 +39,7 @@ InitialFile::~InitialFile() throw()
 
 void InitialFile::enforce
 (
- const Hierarchy  * hierarchy,
+ Hierarchy  * hierarchy,
  const FieldDescr * field_descr,
  Block            * block
  ) throw()
@@ -54,16 +59,21 @@ void InitialFile::enforce
 
   }
 
+  input_->read_hierarchy(hierarchy,field_descr);
+
   INCOMPLETE("InitialFile::enforce");
 
 
-  Patch * patch = input_->read_patch(0,field_descr,0,0,0);
-
   File * file = input_->file();
   int num_blocks = file->group_count();
+#ifdef CONFIG_USE_CHARM
+  counter_blocks_.set_value(num_blocks);
+#endif
+
   for (int i = 0; i<num_blocks; i++) {
-    //    Block * block = input_->read_block(0,
-    TRACE2("  block(%d) = %s",i,file->group_name(i).c_str());
+    std::string block_name = file->group_name(i).c_str();
+    TRACE2(" calling read_block: block(%d) = %s",i,block_name.c_str());
+    input_->read_block(0,block_name,field_descr);
   }
 }
 

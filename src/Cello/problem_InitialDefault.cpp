@@ -23,7 +23,7 @@ InitialDefault::InitialDefault
 
 void InitialDefault::enforce
 (
- const Hierarchy  * hierarchy,
+ Hierarchy  * hierarchy,
  const FieldDescr * field_descr,
  Block            * block
  ) throw()

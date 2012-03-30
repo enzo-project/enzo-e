@@ -125,9 +125,9 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  unit_func("allocate_blocks");
+  unit_func("allocate_array");
 
-  patch->allocate_blocks(field_descr);
+  patch->allocate_array(field_descr);
 
   //--------------------------------------------------
 
@@ -255,10 +255,6 @@ PARALLEL_MAIN_BEGIN
   unit_func("num_local_blocks");
   unit_assert(block_counter == patch->num_local_blocks());
 #endif
-
-  //--------------------------------------------------
-
-  unit_func("allocate_blocks");
 
   //--------------------------------------------------
 

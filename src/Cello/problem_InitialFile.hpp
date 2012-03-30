@@ -32,7 +32,7 @@ public: // interface
 
   /// Read initialization values from Initial group in parameter file
 
-  virtual void enforce (const Hierarchy * hierarchy,
+  virtual void enforce (Hierarchy * hierarchy,
 			const FieldDescr * field_descr,
 			Block * block) throw();
 
@@ -49,7 +49,13 @@ private: // attributes
   /// Parallel GroupProcess object for creating Patches
   GroupProcess * group_process_;
 
+  /// Associated Input object
   Input * input_;
+
+#ifdef CONFIG_USE_CHARM
+  /// Counter for reading blocks from current patch
+  Counter counter_blocks_;
+#endif
 };
 
 #endif /* METHOD_INITIAL_FILE_HPP */

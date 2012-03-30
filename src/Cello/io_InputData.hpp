@@ -57,9 +57,9 @@ public: // virtual functions
 
   /// Read block data from disk
   virtual Block * read_block
-  ( Block * block,
-    const FieldDescr * field_descr,
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
+  ( Block *            block,
+    std::string        block_name,
+    const FieldDescr * field_descr) throw();
 
   /// Read local field from disk
   virtual void read_field

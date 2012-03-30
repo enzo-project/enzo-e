@@ -70,8 +70,9 @@ class Patch
 
   //--------------------------------------------------
 
-  /// Allocate local blocks
-  void allocate_blocks(FieldDescr * field_descr) throw();
+  /// Allocate array, and optionally allocate element blocks
+  void allocate_array(FieldDescr * field_descr,
+		      bool allocate_blocks = true) throw();
 
   /// Return whether blocks have been allocated or not
   bool blocks_allocated() const throw()

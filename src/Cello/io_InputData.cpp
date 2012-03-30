@@ -71,6 +71,7 @@ void InputData::read_hierarchy
  ) throw()
 {
 
+  TRACE("read_hierarchy");
   IoHierarchy io_hierarchy(hierarchy);
 
   // Read hierarchy meta-data
@@ -145,30 +146,23 @@ void InputData::end_read_patch() throw()
 Block * InputData::read_block 
 ( 
  Block * block,
- const FieldDescr * field_descr,
- int ixp0, int iyp0, int izp0) throw()
+ std::string  block_name,
+ const FieldDescr * field_descr) throw()
 {
 
-  if (block == 0) {
-    // create an uninitialized Patch
-    block = 
-      factory_->create_block
-      (0,0,0,
-       0,0,0,
-       0,0,0,
-       0.0,0.0,0.0,
-       0.0,0.0,0.0,
-       1);
-  }
-
-  TRACE("read_block");
-  // Open file group for block
-
-  char buffer[40];
-  int ib = block->index();
-  sprintf (buffer,"block_%d",ib);
-  file_->group_chdir(buffer);
+  TRACE0;
+  file_->group_chdir(block_name);
   file_->group_open();
+
+  // Create temporary block
+
+  block = factory_->create_block
+    (0,0,0,
+     0,0,0,
+     0,0,0,
+     0.0, 0.0, 0.0,
+     0.0, 0.0, 0.0,
+     1);
 
   // Read block meta data
 
@@ -176,9 +170,13 @@ Block * InputData::read_block
 
   Input::read_meta_group (io_block());
 
-  // Call read_block() on base Input object
+  int ibx=100,iby=100,ibz=100;
+  block->index_patch(&ibx,&iby,&ibz);
 
-  Input::read_block(block,field_descr,ixp0,iyp0,izp0);
+  TRACE3("block index = %d %d %d",ibx,iby,ibz);
+  // // Call read_block() on base Input object
+
+  // Input::read_block(block,field_descr,ixp0,iyp0,izp0);
 
   file_->group_close();
   file_->group_chdir("..");

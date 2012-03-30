@@ -100,24 +100,24 @@ public: // virtual functions
   virtual void finalize () throw ()
   { count_input_ ++; }
 
-  /// Read metadata to the file
+  /// Read metadata from the file
   void read_meta ( Io * io ) throw ()
   { read_meta_ (meta_type_file, io); }
 
-  /// Read metadata to the current group in the file
+  /// Read metadata from the current group in the file
   void read_meta_group ( Io * io ) throw ()
   { read_meta_ (meta_type_group, io); }
 
 public:
-  /// Read an entire simulation to disk
+  /// Read an entire simulation from disk
   virtual void read_simulation ( Simulation * simulation) throw();
 
-  /// Read local hierarchy data to disk
+  /// Read local hierarchy data from disk
   virtual void read_hierarchy
   ( Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
 
-  /// Read local patch data to disk
+  /// Read local patch data from disk
   virtual Patch * read_patch
   ( Patch * patch,
     const FieldDescr * field_descr,  
@@ -129,13 +129,13 @@ public:
   { }
 #endif
 
-  /// Read local block data to disk
+  /// Read local block data from disk
   virtual Block * read_block
-  ( Block * block, 
-    const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
+  ( Block * block,
+    std::string block_name,
+    const FieldDescr * field_descr) throw();
 
-  /// Read local field to disk
+  /// Read local field from disk
   virtual void read_field
   ( FieldBlock * field_block, 
     const FieldDescr * field_descr,

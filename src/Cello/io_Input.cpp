@@ -121,7 +121,8 @@ Patch * Input::read_patch
   while (Block * block = ++it_block) {
 
     // NO OFFSET: ASSUMES ROOT PATCH
-    read_block (block, field_descr, 0,0,0);
+    INCOMPLETE("Input::read_patch--Uncommented read_block()");
+    //    read_block (block, "NAME",field_descr);
 
   }
 #endif
@@ -133,8 +134,8 @@ Patch * Input::read_patch
 Block * Input::read_block
 (
  Block * block,
- const FieldDescr * field_descr,
- int ixp0, int iyp0, int izp0
+ std::string block_name,
+ const FieldDescr * field_descr
  ) throw()
 {
   // Read fields

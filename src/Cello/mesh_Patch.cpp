@@ -30,6 +30,7 @@ Patch::Patch
   layout_(new Layout (nbx,nby,nbz))
 {
 
+  TRACE0;
  // Check 
 
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
@@ -138,7 +139,8 @@ int Patch::index() const throw ()
 
 //======================================================================
 
-void Patch::allocate_blocks(FieldDescr * field_descr) throw()
+void Patch::allocate_array(FieldDescr * field_descr,
+			   bool allocate_blocks) throw()
 {
 
 #ifndef CONFIG_USE_CHARM
@@ -166,7 +168,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 	 (nby*mby == size_[1]) &&
 	 (nbz*mbz == size_[2]))) {
 
-    ERROR6("Patch::allocate_blocks",  
+    ERROR6("Patch::allocate_array",  
 	   "Blocks must evenly subdivide Patch: "
 	   "patch size = (%d %d %d)  block count = (%d %d %d)",
 	   size_[0],size_[1],size_[2],
@@ -191,15 +193,11 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
       (nbx,nby,nbz,
        mbx,mby,mbz,
        lower_[0],lower_[1],lower_[2],
-       xb,yb,zb);
+       xb,yb,zb,
+       allocate_blocks);
+    
+    block_exists_ = allocate_blocks;
 
-    // Use built-in CHARM++ Reduction instead of hand-rolling
-    // 
-    // block_array_.ckSetReductionClient 
-    //   (new CkCallback(CkIndex_Simulation::p_done(NULL),
-    // 		      proxy_main));
-
-    block_exists_ = true;
   }
 
 #else
