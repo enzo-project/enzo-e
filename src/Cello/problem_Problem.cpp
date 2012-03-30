@@ -32,7 +32,6 @@ void Problem::initialize_boundary(Parameters * parameters) throw()
   // parameter: Boundary : type
   //--------------------------------------------------
 
-  TRACE0;
   std::string type = parameters->value_string("Boundary:type","");
 
   boundary_ = create_boundary_(type,parameters);
@@ -48,7 +47,6 @@ void Problem::initialize_boundary(Parameters * parameters) throw()
 void Problem::initialize_initial(Parameters * parameters,
 				 GroupProcess * group_process) throw()
 {
-  TRACE0;
   //--------------------------------------------------
   // parameter: Initial : type
   //--------------------------------------------------
@@ -67,7 +65,6 @@ void Problem::initialize_initial(Parameters * parameters,
 
 void Problem::initialize_stopping(Parameters * parameters) throw()
 {
-  TRACE0;
   stopping_ = create_stopping_("default",parameters);
 
   ASSERT("Problem::initialize_stopping",
@@ -79,7 +76,6 @@ void Problem::initialize_stopping(Parameters * parameters) throw()
 
 void Problem::initialize_timestep(Parameters * parameters) throw()
 {
-  TRACE0;
   //--------------------------------------------------
   // parameter: Timestep : type
   //--------------------------------------------------
@@ -103,7 +99,6 @@ void Problem::initialize_output
  Hierarchy    * hierarchy,
  const Factory * factory) throw()
 {
-  TRACE0;
   // Create and initialize an Output object for each Output group
 
   //--------------------------------------------------
@@ -656,8 +651,6 @@ void Problem::initialize_output
 
 void Problem::initialize_method(Parameters * parameters) throw()
 {
-  TRACE0;
-
   //--------------------------------------------------
   parameters->group_set(0,"Method");
   //--------------------------------------------------

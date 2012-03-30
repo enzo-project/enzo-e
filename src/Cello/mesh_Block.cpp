@@ -33,7 +33,6 @@ Block::Block
 #endif
 
 { 
-  TRACE0;
 // #ifdef CONFIG_USE_CHARM
 
 // #ifdef CONFIG_CHARM_ATSYNC

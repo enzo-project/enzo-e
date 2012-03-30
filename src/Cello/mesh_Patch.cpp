@@ -30,7 +30,6 @@ Patch::Patch
   layout_(new Layout (nbx,nby,nbz))
 {
 
-  TRACE0;
  // Check 
 
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {

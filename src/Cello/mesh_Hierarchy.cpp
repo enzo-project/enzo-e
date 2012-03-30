@@ -182,7 +182,7 @@ void Hierarchy::create_root_patch
   patch_tree_ = new Tree (dimension,refinement);
 
   // Create new empty patch
-  TRACE("create_root_patch");
+
   Patch * root_patch = factory()->create_patch
     (group_process,
      nx,ny,nz,    // size

@@ -29,10 +29,8 @@ EnzoSimulationCharm::EnzoSimulationCharm
   traceRegisterUserEvent("Compute",10);
 #endif
 
-  // Initialize on all processes
   initialize();
 
-  // Start simulation
   run();
 
 }
@@ -57,6 +55,8 @@ void EnzoSimulationCharm::run() throw()
 
     if (patch->blocks_allocated()) {
       patch->block_array().p_initial();
+    } else {
+
     }
 
   }

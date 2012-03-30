@@ -29,7 +29,6 @@ CProxy_Block EnzoFactory::create_block_array
  ) const throw()
 {
   if (allocate) {
-    TRACE("Creating allocated block array");
     return CProxy_EnzoBlock::ckNew
       (
        nbx,nby,nbz,
@@ -39,7 +38,6 @@ CProxy_Block EnzoFactory::create_block_array
        num_field_blocks,
        nbx,nby,nbz);
   } else {
-    TRACE("Creating unallocated block array");
     return CProxy_EnzoBlock::ckNew();
   }
 }

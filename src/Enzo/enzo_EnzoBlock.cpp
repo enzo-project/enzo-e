@@ -67,7 +67,6 @@ EnzoBlock::EnzoBlock
     dt(0),
     SubgridFluxes(0)
 {
-  TRACE1 ("sizeof EnzoBlock = %d",sizeof(EnzoBlock));
   int i,j;
   for (i=0; i<MAX_DIMENSION; i++) {
     AccelerationField[i] = 0;
@@ -386,7 +385,6 @@ void EnzoBlock::set_dt (double dt_param) throw ()
 
 void EnzoBlock::initialize () throw()
 {
-
   Block::initialize();
 
   double xm,ym,zm;

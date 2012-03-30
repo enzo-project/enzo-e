@@ -35,13 +35,11 @@ EnzoSimulation::EnzoSimulation
 /// Initialize an empty EnzoSimulation
 EnzoSimulation::EnzoSimulation() 
 {
-  TRACE("EnzoSimulation()");
 };
 
 /// Initialize a migrated EnzoSimulation
 EnzoSimulation::EnzoSimulation (CkMigrateMessage *m) 
 {
-  TRACE("EnzoSimulation(msg)");
 };
 
 //==================================================
@@ -59,10 +57,10 @@ EnzoSimulation::~EnzoSimulation() throw()
 
 void EnzoSimulation::initialize() throw()
 {
-  // Call initialize for Simulation base class
+  // Initialize Cello Simulation base class
   Simulation::initialize();
 
-  // Initialize enzo namespace variables
+  // Initialize Enzo-P namespace variables
   enzo::initialize(parameters_,field_descr());
 
 }

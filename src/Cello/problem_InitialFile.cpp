@@ -25,7 +25,6 @@ InitialFile::InitialFile
 {
 #ifdef CONFIG_USE_CHARM
 #endif
-  TRACE("InitialFile::InitialFile");
 }
 
 //----------------------------------------------------------------------
@@ -71,9 +70,11 @@ void InitialFile::enforce
 #endif
 
   for (int i = 0; i<num_blocks; i++) {
+
     std::string block_name = file->group_name(i).c_str();
-    TRACE2(" calling read_block: block(%d) = %s",i,block_name.c_str());
+
     input_->read_block(0,block_name,field_descr);
+
   }
 }
 
@@ -110,8 +111,6 @@ void InitialFile::get_filename_
 	   parameters_->type("name"));
 
   }
-
-  TRACE("Setting file_name,file_args");
 
   input_->set_filename (*file_name, *file_args);
 
