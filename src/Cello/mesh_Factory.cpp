@@ -103,7 +103,6 @@ Block * Factory::create_block
      nbx,nby,nbz);
   return block_array(ibx,iby,ibz).ckLocal();
 #else
-  TRACE0;
   // CProxy_Block proxy_block_reduce = 
   //   CProxy_Block::ckNew()
   return new Block 

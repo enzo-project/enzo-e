@@ -27,13 +27,11 @@ void EnzoInitialImplosion2::enforce
 
 {
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-
   ASSERT("EnzoInitialImplosion2",
-	 "Expecting an EnzoBlock",
-	 enzo_block != NULL);
+	 "Block does not exist",
+	 block != NULL);
 
-  FieldBlock * field_block = enzo_block->field_block();
+  FieldBlock * field_block = block->field_block();
 
   ASSERT("EnzoInitialImplosion2",
 	 "Insufficient number of fields",

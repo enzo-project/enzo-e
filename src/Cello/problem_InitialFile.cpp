@@ -54,7 +54,9 @@ void InitialFile::enforce
 
     get_filename_(&file_name,&file_args);
 
+    TRACE0;
     input_->open();
+    TRACE0;
 
   }
 
@@ -62,18 +64,19 @@ void InitialFile::enforce
 
   INCOMPLETE("InitialFile::enforce");
 
-
   File * file = input_->file();
   int num_blocks = file->group_count();
 #ifdef CONFIG_USE_CHARM
   counter_blocks_.set_value(num_blocks);
 #endif
-
+  TRACE0;
   for (int i = 0; i<num_blocks; i++) {
 
     std::string block_name = file->group_name(i).c_str();
+  TRACE0;
 
     input_->read_block(0,block_name,field_descr);
+  TRACE0;
 
   }
 }

@@ -30,7 +30,10 @@ void InitialDefault::enforce
 {
   // Initialize Fields according to parameters
 
-
+  ASSERT("InitialDefault::enforce",
+	 "Block does not exist",
+	 block != NULL);
+  
   //--------------------------------------------------
   parameters_->group_set(0,"Initial");
   //--------------------------------------------------

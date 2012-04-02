@@ -150,9 +150,12 @@ Block * InputData::read_block
  const FieldDescr * field_descr) throw()
 {
 
-  TRACE0;
+  TRACE1("block_name=%s",block_name.c_str());
+  
   file_->group_chdir(block_name);
+  TRACE0;
   file_->group_open();
+  TRACE0;
 
   // Create temporary block
 
@@ -164,6 +167,7 @@ Block * InputData::read_block
      0.0, 0.0, 0.0,
      1);
 
+  TRACE0;
   // Read block meta data
 
   io_block()->set_block(block);

@@ -51,15 +51,26 @@ void EnzoSimulationCharm::run() throw()
   ItPatch it_patch(hierarchy_);
   Patch * patch;
 
+  TRACE0;
   while (( patch = ++it_patch )) {
 
+    TRACE0;
+    printf ("%s:%d %p\n",__FILE__,__LINE__,patch);
     if (patch->blocks_allocated()) {
+      TRACE0;
       patch->block_array().p_initial();
     } else {
 
+      TRACE0;
+      // Blocks don't exist: read Blocks from file and insert into Patch
+
+      // UNCOMMENTING THE FOLLOWING EXITS PREMATURELY FOR NON-RESTART
+       // Initial * initial = problem()->initial();
+       // initial->enforce(hierarchy(),field_descr());
     }
 
   }
+  TRACE0;
 }
 
 

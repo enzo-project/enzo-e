@@ -242,6 +242,7 @@ void Block::p_initial()
 // dependency: Simulation: hierarchy()
 //    todo:remove
 {
+  TRACE0;
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -272,7 +273,7 @@ void Block::p_initial()
   // Refresh before prepare()
 
   contribute( CkCallback(CkIndex_Block::p_call_refresh(), thisProxy) );
-
+  TRACE0;
 }
 
 #endif
@@ -410,6 +411,7 @@ void Block::p_compute (int cycle, double time, double dt)
 
 void Block::p_call_refresh()
 {
+  TRACE0;
   refresh();
 }
 

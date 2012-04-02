@@ -33,10 +33,10 @@ public: // interface
 
 public: // virtual functions
 
-  /// Enforce initial conditions on the given Block
+  /// Enforce initial conditions on the given Block or Hierarchy
   virtual void enforce (Hierarchy * hierarchy,
 			const FieldDescr * field_descr,
-			Block * block) throw() = 0;
+			Block * block = NULL) throw() = 0;
 
 protected: // attributes
 
