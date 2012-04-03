@@ -460,7 +460,7 @@ void Simulation::refresh() throw()
 
     performance_output(performance_simulation_,"simulation");
 
-    proxy_main.p_exit(CkNumPes());
+    proxy_main.entry_exit(CkNumPes());
 
   } else {
 
@@ -472,7 +472,7 @@ void Simulation::refresh() throw()
     Patch * patch;
     while (( patch = ++it_patch )) {
       if (patch->blocks_allocated()) {
-	patch->block_array().p_compute(cycle_, time_, dt_);
+	patch->block_array().entry_compute(cycle_, time_, dt_);
       }
     }
   }

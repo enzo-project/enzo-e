@@ -25,6 +25,6 @@ BlockReduce::BlockReduce()
 
 //----------------------------------------------------------------------
 
-// See simulation_charm_output.cpp for BlockReduce::p_output()
+// See simulation_charm_output.cpp for BlockReduce::entry_output()
 
-// See simulation_charm_output.cpp for BlockReduce::p_output_reduce()
+// See simulation_charm_output.cpp for BlockReduce::entry_output_reduce()

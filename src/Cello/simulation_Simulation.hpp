@@ -68,17 +68,17 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Request all Hierarchy blocks to send output to main::p_output_close()
-  //  void p_output(int index, int cycle, double time) throw();
+  /// Request all Hierarchy blocks to send output to main::entry_output_close()
+  //  void entry_output(int index, int cycle, double time) throw();
 
   // Output
-  void p_output () throw();
+  void entry_output () throw();
 
   // Monitor, test Stopping, update Boundary and ghost zones
   void refresh () throw();
 
   /// default reduction callback
-  void p_done (CkReductionMsg * m)
+  void entry_done (CkReductionMsg * m)
   {  delete m; }
 
   //--------------------------------------------------
@@ -91,12 +91,12 @@ public: // interface
   /// Process the next output object if any, else proceed with simulation
   void output_next() throw();
 
-  /// Reduce output, using p_output_write to send data to writing processes
-  void p_output_reduce() throw();
+  /// Reduce output, using entry_output_write to send data to writing processes
+  void entry_output_reduce() throw();
 
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
-  void p_output_write (int n, char * buffer) throw();
+  void entry_output_write (int n, char * buffer) throw();
 
   CProxy_BlockReduce proxy_block_reduce() 
   { return   proxy_block_reduce_; }

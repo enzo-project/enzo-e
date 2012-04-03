@@ -16,7 +16,7 @@ mainmodule main_simulation {
 
      entry Main(CkArgMsg *m);
 
-     entry void p_exit (int count_blocks);
+     entry void entry_exit (int count_blocks);
 
   };
 

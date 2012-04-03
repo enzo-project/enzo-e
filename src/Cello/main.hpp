@@ -60,7 +60,7 @@ public:
   Main(CkArgMsg* main);
   
   /// Exit the program
-  void p_exit(int count);
+  void entry_exit(int count);
 
   /// Finalize the simulation
   void enzo_finalize(Simulation * simulation);

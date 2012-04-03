@@ -235,7 +235,7 @@ extern CProxy_Simulation  proxy_simulation;
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_initial()
+void Block::entry_initial()
 // dependency: Simulation::field_descr()
 // dependency: Simulation: cycle()
 // dependency: Simulation: time()
@@ -268,11 +268,11 @@ void Block::p_initial()
   initial->enforce(simulation->hierarchy(),field_descr,this);
 
   // NOTE: CHARM++ contribute() barrier is to prevent race conditions
-  // where Block::p_refresh_face() is called before Block::p_initial()
+  // where Block::entry_refresh_face() is called before Block::entry_initial()
 
   // Refresh before prepare()
 
-  contribute( CkCallback(CkIndex_Block::p_call_refresh(), thisProxy) );
+  contribute( CkCallback(CkIndex_Block::entry_call_refresh(), thisProxy) );
   TRACE0;
 }
 
@@ -341,7 +341,7 @@ void Block::prepare()
   min_reduce[0] = dt_block;
   min_reduce[1] = stop_block ? 1.0 : 0.0;
 
-  CkCallback callback (CkIndex_Block::p_call_output(NULL), thisProxy);
+  CkCallback callback (CkIndex_Block::entry_call_output(NULL), thisProxy);
   contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
 
 }
@@ -351,7 +351,7 @@ void Block::prepare()
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_call_output(CkReductionMsg * msg)
+void Block::entry_call_output(CkReductionMsg * msg)
 {
 
   double * min_reduce = (double * )msg->getData();
@@ -370,11 +370,11 @@ void Block::p_call_output(CkReductionMsg * msg)
   simulation->update_cycle(cycle_,time_,dt_patch,stop_patch);
  
   // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
-  // Simulation::p_output()?  Want last block?
+  // Simulation::entry_output()?  Want last block?
   
-  // "root" block calls Simulation::p_output()
+  // "root" block calls Simulation::entry_output()
   if (index() == 0) {
-    proxy_simulation.p_output();
+    proxy_simulation.entry_output();
   }
 
   delete msg;
@@ -385,7 +385,7 @@ void Block::p_call_output(CkReductionMsg * msg)
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_refresh (int cycle, double time, double dt)
+void Block::entry_refresh (int cycle, double time, double dt)
 {
   // set_cycle(cycle);
   // set_time(time);
@@ -395,7 +395,7 @@ void Block::p_refresh (int cycle, double time, double dt)
 }
 
 //----------------------------------------------------------------------
-void Block::p_compute (int cycle, double time, double dt)
+void Block::entry_compute (int cycle, double time, double dt)
 {
   // set_cycle(cycle);
   // set_time(time);
@@ -409,7 +409,7 @@ void Block::p_compute (int cycle, double time, double dt)
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_call_refresh()
+void Block::entry_call_refresh()
 {
   TRACE0;
   refresh();
@@ -473,42 +473,42 @@ void Block::refresh ()
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, 0, 0);
-      block_array(ixm,iy,iz).p_refresh_face 
+      block_array(ixm,iy,iz).entry_refresh_face 
 	(field_face.size(), field_face.array(), +1, 0, 0);
     }
     if ( axp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, 0, 0);
-      block_array(ixp,iy,iz).p_refresh_face 
+      block_array(ixp,iy,iz).entry_refresh_face 
 	(field_face.size(), field_face.array(), -1, 0, 0);
     }
     if ( aym ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, -1, 0);
-      block_array(ix,iym,iz).p_refresh_face 
+      block_array(ix,iym,iz).entry_refresh_face 
 	(field_face.size(), field_face.array(), 0, +1, 0);
     }
     if ( ayp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, +1, 0);
-      block_array(ix,iyp,iz).p_refresh_face 
+      block_array(ix,iyp,iz).entry_refresh_face 
 	(field_face.size(), field_face.array(), 0, -1, 0);
     }
     if ( azm ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, 0, -1);
-      block_array(ix,iy,izm).p_refresh_face 
+      block_array(ix,iy,izm).entry_refresh_face 
 	(field_face.size(), field_face.array(), 0, 0, +1);
     }
     if ( azp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, 0, +1);
-      block_array(ix,iy,izp).p_refresh_face 
+      block_array(ix,iy,izp).entry_refresh_face 
 	(field_face.size(), field_face.array(), 0, 0, -1);
     }
   }
@@ -520,28 +520,28 @@ void Block::refresh ()
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, -1, 0);
-      block_array(ixm,iym,iz).p_refresh_face 
+      block_array(ixm,iym,iz).entry_refresh_face 
 	(field_face.size(), field_face.array(), +1, +1, 0);
     }
     if ( axm && ayp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, +1, 0);
-      block_array(ixm,iyp,iz).p_refresh_face 
+      block_array(ixm,iyp,iz).entry_refresh_face 
 	(field_face.size(), field_face.array(), +1, -1, 0);
     }
     if ( axp && aym ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, -1, 0);
-      block_array(ixp,iym,iz).p_refresh_face 
+      block_array(ixp,iym,iz).entry_refresh_face 
 	(field_face.size(), field_face.array(), -1, +1, 0);
     }
     if ( axp && ayp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, +1, 0);
-      block_array(ixp,iyp,iz).p_refresh_face 
+      block_array(ixp,iyp,iz).entry_refresh_face 
 	(field_face.size(), field_face.array(), -1, -1, 0);
     }
 
@@ -549,28 +549,28 @@ void Block::refresh ()
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, -1, -1);
-      block_array(ix,iym,izm).p_refresh_face 
+      block_array(ix,iym,izm).entry_refresh_face 
 	(field_face.size(), field_face.array(), 0, +1, +1);
     }
     if ( aym && azp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, -1, +1);
-      block_array(ix,iym,izp).p_refresh_face 
+      block_array(ix,iym,izp).entry_refresh_face 
 	(field_face.size(), field_face.array(), 0, +1, -1);
     }
     if ( ayp && azm ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, +1, -1);
-      block_array(ix,iyp,izm).p_refresh_face 
+      block_array(ix,iyp,izm).entry_refresh_face 
 	(field_face.size(), field_face.array(), 0, -1, +1);
     }
     if ( ayp && azp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), 0, +1, +1);
-      block_array(ix,iyp,izp).p_refresh_face 
+      block_array(ix,iyp,izp).entry_refresh_face 
 	(field_face.size(), field_face.array(), 0, -1, -1);
     }
 
@@ -578,28 +578,28 @@ void Block::refresh ()
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, 0, -1);
-      block_array(ixm,iy,izm).p_refresh_face 
+      block_array(ixm,iy,izm).entry_refresh_face 
 	(field_face.size(), field_face.array(), +1, 0, +1);
     }
     if ( axp && azm ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, 0, -1);
-      block_array(ixp,iy,izm).p_refresh_face 
+      block_array(ixp,iy,izm).entry_refresh_face 
 	(field_face.size(), field_face.array(), -1, 0, +1);
     }
     if ( axm && azp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, 0, +1);
-      block_array(ixm,iy,izp).p_refresh_face 
+      block_array(ixm,iy,izp).entry_refresh_face 
 	(field_face.size(), field_face.array(), +1, 0, -1);
     }
     if ( axp && azp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, 0, +1);
-      block_array(ixp,iy,izp).p_refresh_face 
+      block_array(ixp,iy,izp).entry_refresh_face 
 	(field_face.size(), field_face.array(), -1, 0, -1);
     }
   }
@@ -612,65 +612,65 @@ void Block::refresh ()
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, -1, -1);
-      block_array(ixm,iym,izm).p_refresh_face 
+      block_array(ixm,iym,izm).entry_refresh_face 
 	(field_face.size(), field_face.array(), +1, +1, +1);
     }
     if ( axm && aym && azp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, -1, +1);
-      block_array(ixm,iym,izp).p_refresh_face 
+      block_array(ixm,iym,izp).entry_refresh_face 
 	(field_face.size(), field_face.array(), +1, +1, -1);
     }
     if ( axm && ayp && azm ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, +1, -1);
-      block_array(ixm,iyp,izm).p_refresh_face 
+      block_array(ixm,iyp,izm).entry_refresh_face 
 	(field_face.size(), field_face.array(), +1, -1, +1);
     }
     if ( axm && ayp && azp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), -1, +1, +1);
-      block_array(ixm,iyp,izp).p_refresh_face 
+      block_array(ixm,iyp,izp).entry_refresh_face 
 	(field_face.size(), field_face.array(), +1, -1, -1);
     }
     if ( axp && aym && azm ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, -1, -1);
-      block_array(ixp,iym,izm).p_refresh_face 
+      block_array(ixp,iym,izm).entry_refresh_face 
 	(field_face.size(), field_face.array(), -1, +1, +1);
     }
     if ( axp && aym && azp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, -1, +1);
-      block_array(ixp,iym,izp).p_refresh_face 
+      block_array(ixp,iym,izp).entry_refresh_face 
 	(field_face.size(), field_face.array(), -1, +1, -1);
     }
     if ( axp && ayp && azm ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, +1, -1);
-      block_array(ixp,iyp,izm).p_refresh_face 
+      block_array(ixp,iyp,izm).entry_refresh_face 
 	(field_face.size(), field_face.array(), -1, -1, +1);
     }
     if ( axp && ayp && azp ) {
       FieldFace field_face;
       field_face.set_full(lx,ly,lz);
       field_face.load (field_descr, field_block(), +1, +1, +1);
-      block_array(ixp,iyp,izp).p_refresh_face 
+      block_array(ixp,iyp,izp).entry_refresh_face 
 	(field_face.size(), field_face.array(), -1, -1, -1);
     }
   }
 
-  // NOTE: p_refresh_face() calls compute, but if no incoming faces
+  // NOTE: entry_refresh_face() calls compute, but if no incoming faces
   // it will never get called.  So every block also calls
-  // p_refresh_face() itself with a null array
+  // entry_refresh_face() itself with a null array
 
-  p_refresh_face (0,0,0, 0, 0);
+  entry_refresh_face (0,0,0, 0, 0);
 
 }
 #endif /* CONFIG_USE_CHARM */
@@ -769,7 +769,7 @@ void Block::update_boundary_
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_refresh_face (int n, char * buffer, int fx, int fy, int fz)
+void Block::entry_refresh_face (int n, char * buffer, int fx, int fy, int fz)
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -778,7 +778,7 @@ void Block::p_refresh_face (int n, char * buffer, int fx, int fy, int fz)
 
   if ( n != 0) {
 
-    // n == 0 is the call from self to ensure p_refresh_face()
+    // n == 0 is the call from self to ensure entry_refresh_face()
     // always gets called at least once
 
     bool lx,ly,lz;
@@ -889,7 +889,7 @@ void Block::p_refresh_face (int n, char * buffer, int fx, int fy, int fz)
 
 //----------------------------------------------------------------------
 
-// SEE Simulation/simulation_charm_output.cpp for Block::p_write(int)
+// SEE Simulation/simulation_charm_output.cpp for Block::entry_write(int)
 
 //----------------------------------------------------------------------
 
