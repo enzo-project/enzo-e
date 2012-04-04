@@ -21,16 +21,10 @@ EnzoMethodPpml::EnzoMethodPpml( Parameters * parameters )
 //----------------------------------------------------------------------
 
 void EnzoMethodPpml::compute_block
-(
- FieldDescr * field_descr, 
- Block * block,
- int cycle,
- double time,
- double dt
- ) throw()
+( FieldDescr * field_descr,  Block * block ) throw()
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  enzo_block->SolveMHDEquations ( field_descr, dt);
+  enzo_block->SolveMHDEquations ( field_descr, block->dt() );
 }
 
 //----------------------------------------------------------------------

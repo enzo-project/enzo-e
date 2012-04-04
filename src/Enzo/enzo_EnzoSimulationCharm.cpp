@@ -60,7 +60,6 @@ void EnzoSimulationCharm::run() throw()
       TRACE0;
       patch->block_array().entry_initial();
     } else {
-
       TRACE0;
       // Blocks don't exist: read Blocks from file and insert into Patch
 

@@ -906,17 +906,10 @@ void Block::compute()
 
   FieldDescr * field_descr = simulation->field_descr();
 
-  char buffer[10];
-  sprintf (buffer,"%03d-A",cycle_);
-  field_block()->print(field_descr,buffer,lower_,upper_);
-
   int index_method = 0;
   while (Method * method = simulation->problem()->method(index_method++)) {
-    method -> compute_block (field_descr,this,cycle_,time_,dt_);
+    method -> compute_block (field_descr,this);
   }
-
-  sprintf (buffer,"%03d-B",cycle_);
-  field_block()->print(field_descr,buffer,lower_,upper_);
 
 #ifdef CONFIG_USE_PROJECTIONS
   traceUserBracketEvent(10,time_start, CmiWallTimer());
@@ -924,11 +917,9 @@ void Block::compute()
 
   // Update Block cycle and time to Simulation time and cycle
 
-  // time_ += dt_;
-  // ++ cycle_ ;
+  set_cycle (cycle_ + 1);
 
-  set_cycle(cycle_+1);
-  set_time(time_+dt_);
+  set_time  (time_  + dt_);
   
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 

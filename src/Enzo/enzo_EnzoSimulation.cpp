@@ -50,7 +50,7 @@ EnzoSimulation::EnzoSimulation (CkMigrateMessage *m)
 
 EnzoSimulation::~EnzoSimulation() throw()
 {
-  delete problem_; problem_ = 0;;
+  delete problem_; problem_ = 0;
 }
 
 //----------------------------------------------------------------------

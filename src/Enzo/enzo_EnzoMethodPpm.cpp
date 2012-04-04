@@ -21,11 +21,10 @@ EnzoMethodPpm::EnzoMethodPpm ( Parameters * parameters )
 
 void EnzoMethodPpm::compute_block
 (
- FieldDescr * field_descr,
- Block * block,
- int cycle, double time, double dt) throw()
+ FieldDescr * field_descr, Block * block) throw()
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  enzo_block->SolveHydroEquations ( cycle, time, dt);
+  enzo_block->SolveHydroEquations 
+    ( block->cycle(), block->time(), block->dt() );
 }
 

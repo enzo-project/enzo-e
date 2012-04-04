@@ -236,21 +236,16 @@ void EnzoSimulationMpi::run() throw()
 
       while ((block = ++it_block)) {
 
-	EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-
-	enzo_float  time_block  = enzo_block->Time_;
-	enzo_float  dt_block    = enzo_block->dt;
-	
-	// Loop through methods
-	
-	int         cycle_block = enzo_block->CycleNumber;
-
 	int index_method = 0;
 	while (Method * method = problem->method(index_method++)) {
-	  method -> compute_block (field_descr_,block,cycle_block,time_block,dt_block);
+	  method -> compute_block (field_descr_,block);
 	}
 
+	int   cycle_block = block->cycle();
 	block->set_cycle (++cycle_block);
+
+	double time_block = block->time();
+	double   dt_block = block->dt();
 	block->set_time  (time_block + dt_block);
 
 	// Global cycle and time reduction

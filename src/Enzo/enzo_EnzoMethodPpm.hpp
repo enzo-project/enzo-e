@@ -20,8 +20,7 @@ public: // interface
   EnzoMethodPpm(Parameters * parameters);
 
   /// Apply the method to advance a block one timestep 
-  virtual void compute_block(FieldDescr *, Block * block, 
-			     int cycle,  double time, double dt) throw();
+  virtual void compute_block(FieldDescr *, Block * block) throw();
 
 };
 
