@@ -8,6 +8,8 @@ Import('test_path')
 
 env['COPY'] = ''
 
+do_restart = 0
+
 # Define a test for running unit tests
 
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
@@ -154,47 +156,48 @@ env.MakeMovie ("method_ppm-8.swf", "test_method_ppm-8.unit", \
 
 # serial restart
 
-restart_ppm_1_init = env_rm_png.RunSerial (
-   'test_restart_ppm-1-init.unit',
-   bin_path + '/enzo-p', 
-   ARGS='input/restart_ppm-1.in')
+if (do_restart != 0):
+   restart_ppm_1_init = env_rm_png.RunSerial (
+      'test_restart_ppm-1-init.unit',
+      bin_path + '/enzo-p', 
+      ARGS='input/restart_ppm-1.in')
 
-restart_ppm_1 = env_mv_out.RunSerial (
-   'test_restart_ppm-1.unit',
-   bin_path + '/enzo-p',
-   ARGS='restart_ppm-1-100.in')
+   restart_ppm_1 = env_mv_out.RunSerial (
+      'test_restart_ppm-1.unit',
+      bin_path + '/enzo-p',
+      ARGS='restart_ppm-1-100.in')
 
 
-env.MakeMovie ("restart_ppm-1.swf", "test_restart_ppm-1.unit", \
-                ARGS= test_path + "/restart_ppm-1-*.png");
+   env.MakeMovie ("restart_ppm-1.swf", "test_restart_ppm-1.unit", \
+                     ARGS= test_path + "/restart_ppm-1-*.png");
 
-Clean(restart_ppm_1,
-      [Glob('#/' + test_path + '/restart_ppm-1*.png'),
-      '#/input/restart_ppm-1.in.out'])
+   Clean(restart_ppm_1,
+         [Glob('#/' + test_path + '/restart_ppm-1*.png'),
+          '#/input/restart_ppm-1.in.out'])
 
-env.Requires(restart_ppm_1,restart_ppm_1_init)
+   env.Requires(restart_ppm_1,restart_ppm_1_init)
 
 # parallel restart
 
-restart_ppm_8_init = env_rm_png.RunParallel (
-   'test_restart_ppm-8-init.unit',
-   bin_path + '/enzo-p', 
-   ARGS='input/restart_ppm-8.in')
+   restart_ppm_8_init = env_rm_png.RunParallel (
+      'test_restart_ppm-8-init.unit',
+      bin_path + '/enzo-p', 
+      ARGS='input/restart_ppm-8.in')
+   
+   restart_ppm_8 = env_mv_out.RunParallel (
+      'test_restart_ppm-8.unit',
+      bin_path + '/enzo-p',
+      ARGS='restart_ppm-8-100.in')
 
-restart_ppm_8 = env_mv_out.RunParallel (
-   'test_restart_ppm-8.unit',
-   bin_path + '/enzo-p',
-   ARGS='restart_ppm-8-100.in')
 
+   env.MakeMovie ("restart_ppm-8.swf", "test_restart_ppm-8.unit", \
+                     ARGS= test_path + "/restart_ppm-8-*.png");
 
-env.MakeMovie ("restart_ppm-8.swf", "test_restart_ppm-8.unit", \
-                ARGS= test_path + "/restart_ppm-8-*.png");
+   Clean(restart_ppm_8,
+         [Glob('#/' + test_path + '/restart_ppm-8*.png'),
+          '#/input/restart_ppm-8.in.out'])
 
-Clean(restart_ppm_8,
-      [Glob('#/' + test_path + '/restart_ppm-8*.png'),
-      '#/input/restart_ppm-8.in.out'])
-
-env.Requires(restart_ppm_8,restart_ppm_8_init)
+   env.Requires(restart_ppm_8,restart_ppm_8_init)
 
 # MethodPpml tests
 

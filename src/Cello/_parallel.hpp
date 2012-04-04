@@ -17,6 +17,8 @@
 enum enum_reduce_op {
   reduce_op_unknown,
   reduce_op_min,
+  reduce_op_max,
+  reduce_op_sum,
   reduce_op_land
 };
 

@@ -9,6 +9,8 @@
 
 #include "parallel.hpp"
 
+#ifdef CONFIG_USE_MPI
+
 //----------------------------------------------------------------------
 
 int ReduceMpi::reduce_int
@@ -18,13 +20,8 @@ int ReduceMpi::reduce_int
 #ifdef CONFIG_USE_MPI
   MPI_Datatype mpi_type = MPI_INT;
 
-  MPI_Op mpi_op;
-  switch (reduce_op) {
-  case (reduce_op_min) :  mpi_op = MPI_MIN; break;
-  case (reduce_op_land) : mpi_op = MPI_LAND; break;
-  default:                mpi_op = MPI_OP_NULL; break;
-  }
-    
+  MPI_Op mpi_op = get_reduce_type_(reduce_op);
+
   ASSERT1("ReduceMpi::reduce_int",
 	  "Unrecognized operation %d",
 	  int(reduce_op),
@@ -52,13 +49,7 @@ double ReduceMpi::reduce_double
 #ifdef CONFIG_USE_MPI
   MPI_Datatype mpi_type = MPI_DOUBLE;
 
-  MPI_Op mpi_op;
-  switch (reduce_op) {
-  case (reduce_op_min) :  mpi_op = MPI_MIN; break;
-  case (reduce_op_land) : mpi_op = MPI_LAND; break;
-  default:                mpi_op = MPI_OP_NULL; break;
-  }
-    
+  MPI_Op mpi_op = get_reduce_type_(reduce_op);
     
   ASSERT1("ReduceMpi::reduce_int",
 	  "Unrecognized operation %d",
@@ -80,3 +71,17 @@ double ReduceMpi::reduce_double
 
 //======================================================================
 
+MPI_Op ReduceMpi::get_reduce_type_(enum_reduce_op reduce_op) const throw()
+{
+  MPI_Op mpi_op;
+  switch (reduce_op) {
+  case (reduce_op_min) :  mpi_op = MPI_MIN; break;
+  case (reduce_op_max) :  mpi_op = MPI_MAX; break;
+  case (reduce_op_sum) :  mpi_op = MPI_SUM; break;
+  case (reduce_op_land) : mpi_op = MPI_LAND; break;
+  default:                mpi_op = MPI_OP_NULL; break;
+  }
+  return mpi_op;
+}    
+
+#endif /* CONFIG_USE_MPI */

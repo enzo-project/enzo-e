@@ -71,7 +71,7 @@ void Simulation::output_next() throw()
 
   } else {
 
-    refresh();
+    charm_monitor();
 
   }
 }

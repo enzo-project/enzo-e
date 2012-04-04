@@ -22,6 +22,9 @@ module simulation {
 
     entry void entry_done(CkReductionMsg*);
 
+    entry void p_perf_output_min(CkReductionMsg * msg);
+    entry void p_perf_output_max(CkReductionMsg * msg);
+    entry void p_perf_output_sum(CkReductionMsg * msg);
 
   };
 

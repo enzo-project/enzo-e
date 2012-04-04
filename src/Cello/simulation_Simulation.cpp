@@ -45,10 +45,22 @@ Simulation::Simulation
   stop_(false),
   performance_simulation_(0),
   performance_cycle_(0),
+  performance_curr_(0),
   monitor_(0),
   hierarchy_(0),
   field_descr_(0)
 {
+
+  num_perf_ = 1;
+
+#ifdef CONFIG_USE_PAPI
+  num_perf_ += 4;
+#endif
+
+  perf_val_ = new double[num_perf_];
+  perf_min_ = new double[num_perf_];
+  perf_max_ = new double[num_perf_];
+  perf_sum_ = new double[num_perf_];
 
   if (!group_process_) {
     group_process_ = GroupProcess::create();
@@ -402,8 +414,12 @@ void Simulation::deallocate_() throw()
 {
   delete factory_;       factory_     = 0;
   delete parameters_;    parameters_  = 0;
-  delete performance_simulation_;   performance_simulation_ = 0;
-  delete performance_cycle_;   performance_cycle_ = 0;
+  delete performance_simulation_; performance_simulation_ = 0;
+  delete performance_cycle_;      performance_cycle_ = 0;
+  delete [] perf_val_;
+  delete [] perf_min_;
+  delete [] perf_max_;
+  delete [] perf_sum_;
   if (is_group_process_new_)
     { delete group_process_; group_process_ = 0; }
   delete hierarchy_;     hierarchy_ = 0;
@@ -441,16 +457,21 @@ Simulation::Simulation (CkMigrateMessage *m)
 
 //----------------------------------------------------------------------
 
+
 #ifdef CONFIG_USE_CHARM
 
-void Simulation::refresh() throw()
+void Simulation::charm_monitor() throw()
 {
-
   //--------------------------------------------------
   // Monitor
   //--------------------------------------------------
 
   monitor_output();
+
+}
+
+void Simulation::charm_compute() throw()
+{
 
   //--------------------------------------------------
   // Stopping
@@ -458,7 +479,7 @@ void Simulation::refresh() throw()
 
   if (stop_) {
 
-    performance_output(performance_simulation_,"simulation");
+    performance_output(performance_simulation_);
 
     proxy_main.entry_exit(CkNumPes());
 
@@ -579,7 +600,7 @@ void Simulation::update_cycle(int cycle, double time, double dt, double stop)
 
 //----------------------------------------------------------------------
 
-void Simulation::monitor_output() const 
+void Simulation::monitor_output()
 {
 
   monitor_->  print("", "-------------------------------------");
@@ -606,36 +627,179 @@ void Simulation::monitor_output() const
 
 //----------------------------------------------------------------------
 
-void Simulation::performance_output(Performance * performance,
-				    const char * region) const
+void Simulation::performance_output(Performance * performance)
 {
-  monitor_->print ("Performance","time-cycle-real %f",
-		   performance_cycle_->time());
-  monitor_->print ("Performance","time-accum-real %f",
-		   performance_simulation_->time());
+
+  performance_curr_ = performance;
+
+  size_t i = 0;
+
+  // Real time
+  perf_val_[i++] = performance->time();
 
 #ifdef CONFIG_USE_PAPI
-
-  bool save_active = monitor_->is_active();
-  monitor_->set_active(true);
 
   Papi * papi = performance->papi();
 
   papi->update();
 
-  double time_real   = papi->time_real();
-  double time_proc   = papi->time_proc();
-  double gflop_count = papi->flop_count()*1e-9;
-  double gflop_rate  = gflop_count / time_real;
+  // PAPI real time
+  perf_val_[i++]= papi->time_real();
 
-  monitor_->print ("Performance","%s time-real-papi   %f", region, time_real);
-  monitor_->print ("Performance","%s time-proc-papi   %f", region, time_proc);
-  monitor_->print ("Performance","%s gflop-count-papi %f", region, gflop_count);
-  monitor_->print ("Performance","%s gflop-rate-papi  %f", region, gflop_rate);
+  // PAPI proc time
+  double time_real = perf_val_[i++]= papi->time_proc();
 
-  monitor_->set_active(save_active);
+  // PAPI gflop count
+  double gflop_count = perf_val_[i++]= papi->flop_count()*1e-9;
+
+  // PAPI gflop rate
+  perf_val_[i++]= gflop_count / time_real;
 
 #endif
+
+#ifdef CONFIG_USE_CHARM
+
+  // Save the performance object
+
+  // First reduce minimum values
+
+  CkCallback callback (CkIndex_Simulation::p_perf_output_min(NULL),thisProxy);
+  contribute( num_perf_*sizeof(double), perf_val_, 
+	      CkReduction::min_double, callback);
+#else
+
+  Reduce * reduce = group_process()->create_reduce();
+
+  for (size_t i = 0; i < num_perf_; i++) {
+    perf_min_[i] = reduce->reduce_double(perf_val_[i],reduce_op_min);
+    perf_max_[i] = reduce->reduce_double(perf_val_[i],reduce_op_max);
+    perf_sum_[i] = reduce->reduce_double(perf_val_[i],reduce_op_sum);
+  }
+
+  delete reduce; reduce = 0;
+
+  output_performance_();
+
+#endif
+}
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void Simulation::p_perf_output_min(CkReductionMsg * msg)
+{
+  // Collect minimum values
+
+  double * reduce = (double * )msg->getData();
+  for (size_t i=0; i<num_perf_; i++) {
+    perf_min_[i] = reduce[i];
+  }
+  delete msg;
+
+  // Then reduce maximum values
+
+  CkCallback callback (CkIndex_Simulation::p_perf_output_max(NULL),thisProxy);
+  contribute( num_perf_*sizeof(double), perf_val_, 
+	      CkReduction::max_double, callback);
+
+
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void Simulation::p_perf_output_max(CkReductionMsg * msg)
+{
+  // Collect maximum values
+
+  double * reduce = (double * )msg->getData();
+  for (size_t i=0; i<num_perf_; i++) {
+    perf_max_[i] = reduce[i];
+  }
+  delete msg;
+
+  // Finally reduce sum values
+
+  CkCallback callback (CkIndex_Simulation::p_perf_output_sum(NULL),thisProxy);
+  contribute( num_perf_*sizeof(double), perf_val_, 
+	      CkReduction::sum_double, callback);
+
+
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void Simulation::p_perf_output_sum(CkReductionMsg * msg)
+{
+  // Collect summed values
+
+  double * reduce = (double * )msg->getData();
+  for (size_t i=0; i<num_perf_; i++) {
+    perf_sum_[i] = reduce[i];
+  }
+  delete msg;
+
+  // Display performance output
+  output_performance_();
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
+void Simulation::output_performance_()
+{
+  int i = 0;
+  int np = group_process()->size();
+
+  std::string region;
+
+  if (performance_curr_ == performance_simulation_) {
+    region = "total";
+  } else if (performance_curr_ == performance_cycle_) {
+    region = "cycle";
+  } else {
+    ERROR1 ("Simulation::output_performance_",
+	    "Illegal performance_curr_ pointer %p",
+	    performance_curr_);
+  }
+
+  monitor_->print ("Performance","%s time-real        %f %f %f",
+		   region.c_str(),perf_min_[i],perf_sum_[i]/np,perf_max_[i]);
+  ++i;
+
+#ifdef CONFIG_USE_PAPI
+
+  monitor_->print ("Performance","%s time-real-papi   %f %f %f", 
+		   region.c_str(), perf_min_[i],perf_sum_[i]/np,perf_max_[i]);
+  ++i;
+  monitor_->print ("Performance","%s time-proc-papi   %f %f %f",
+		   region.c_str(), perf_min_[i],perf_sum_[i]/np,perf_max_[i]);
+  ++i;
+  monitor_->print ("Performance","%s gflop-count-papi %f %f %f",
+		   region.c_str(), perf_min_[i],perf_sum_[i]/np,perf_max_[i]);
+  ++i;
+  monitor_->print ("Performance","%s gflop-rate-papi  %f %f %f",
+		   region.c_str(), perf_min_[i],perf_sum_[i]/np,perf_max_[i]);
+#endif
+
+#ifdef CONFIG_USE_CHARM
+  if (performance_curr_ == performance_cycle_) {
+    charm_compute();
+  } else {
+    proxy_main.entry_exit(CkNumPes());
+  }
+#endif
+
+  // monitor_->set_active(save_active);
 
 }
 //======================================================================

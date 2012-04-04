@@ -98,6 +98,13 @@ public: // interface
   /// proceed with next output
   void entry_output_write (int n, char * buffer) throw();
 
+
+  // Monitor output
+  void charm_monitor () throw();
+
+  // Stopping criteria and computation
+  void charm_compute () throw();
+
   CProxy_BlockReduce proxy_block_reduce() 
   { return   proxy_block_reduce_; }
 
@@ -168,11 +175,17 @@ public: // interface
   { return stop_; };
 
   /// Output Simulation information
-  void monitor_output() const ;
+  void monitor_output();
 
   /// Output Performance information
-  void performance_output(Performance * performance, 
-			  const char * region = "") const ;
+  void performance_output(Performance * performance);
+
+#ifdef CONFIG_USE_CHARM
+  /// Reduction callback functions for performance_output()
+  void p_perf_output_min(CkReductionMsg * msg);
+  void p_perf_output_max(CkReductionMsg * msg);
+  void p_perf_output_sum(CkReductionMsg * msg);
+#endif
 
 public: // virtual functions
 
@@ -210,6 +223,10 @@ protected: // functions
   void initialize_parallel_  () throw();
 
   void deallocate_() throw();
+
+  /// Perform actual output of performance data
+  /// Function separate from performance_output() for CHARM++
+  void output_performance_();
 
 protected: // attributes
 
@@ -269,6 +286,18 @@ protected: // attributes
 
   /// Cycle Performance object
   Performance * performance_cycle_;
+
+  /// Current Performance object
+  /// Used primarily for CHARM++ 
+  Performance * performance_curr_;
+
+  /// Arrays for storing local performance data to be reduced
+  /// Used for multiple CHARM++ reductions
+  size_t num_perf_;
+  double * perf_val_;
+  double * perf_min_;
+  double * perf_max_;
+  double * perf_sum_;
 
   /// Monitor object
   Monitor * monitor_;

@@ -15,7 +15,7 @@ Output {
 
   restart {
      type  = "restart";
-     name  = ["restart_ppm-1-%d-%d.h5","proc","cycle"];
+     name  = ["restart_ppm-1-%d-%d.h5","cycle","proc"];
      param = ["restart_ppm-1-%d.in","cycle"];
 
      schedule = ["cycle","list",100];

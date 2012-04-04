@@ -10,6 +10,8 @@
 
 #include "error.hpp"
 
+#ifdef CONFIG_USE_MPI
+
 class ReduceMpi : public Reduce {
 
   /// @class    ReduceMpi
@@ -37,7 +39,13 @@ public: // interface
   (  double              local,
      enum_reduce_op   reduce_op )  throw();
 
+protected:
+
+  MPI_Op get_reduce_type_(enum_reduce_op) const throw();
+  
 };
+
+#endif /* CONFIG_USE_MPI */
 
 #endif /* PARALLEL_REDUCE_MPI_HPP */
 
