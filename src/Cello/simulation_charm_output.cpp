@@ -34,7 +34,7 @@ void Simulation::entry_output () throw()
 
 void Simulation::output_first() throw()
 {
-  index_output_ = 0;
+  index_output_ = -1;
 }
 
 //----------------------------------------------------------------------
@@ -45,13 +45,15 @@ void Simulation::output_next() throw()
 
   Problem * problem = Simulation::problem();
 
-  Output * output = problem->output(index_output_);
+  Output * output;
 
-  while (output && ! output->is_scheduled(cycle_, time_)) {
+  do {
     // skip over output objects that are not scheduled this cycle
     ++index_output_;
     output = problem->output(index_output_);
-  }
+  } while (output && ! output->is_scheduled(cycle_, time_));
+
+  // assert ! output || output->is_scheduled(cycle_, time_)
 
   // output if any scheduled, else proceed with refresh
 

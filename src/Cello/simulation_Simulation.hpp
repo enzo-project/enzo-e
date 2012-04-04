@@ -238,7 +238,7 @@ protected: // attributes
   CProxy_BlockReduce  proxy_block_reduce_;
 
   /// Index of currently active output object
-  size_t index_output_;
+  int index_output_;
 
 #endif
 
