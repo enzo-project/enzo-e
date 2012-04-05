@@ -58,6 +58,9 @@ public: // interface
   /// Initialize block for the simulation.
   void entry_initial();
 
+  /// Call current Initial::enforce() on the block
+  void entry_initial_enforce();
+
   /// Refresh ghost zones and apply boundary conditions
   void entry_refresh(int cycle, double time, double dt);
 

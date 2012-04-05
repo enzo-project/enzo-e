@@ -68,28 +68,12 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Request all Hierarchy blocks to send output to main::entry_output_close()
-  //  void entry_output(int index, int cycle, double time) throw();
 
-  // Output
+  // Call initialization on Problem list of Initial objects
+  void entry_initial () throw();
+
+  // Call output on Problem list of Output objects
   void entry_output () throw();
-
-  // Monitor, test Stopping, update Boundary and ghost zones
-  void refresh () throw();
-
-  /// default reduction callback
-  void entry_done (CkReductionMsg * m)
-  {  delete m; }
-
-  //--------------------------------------------------
-  // Output
-  //--------------------------------------------------
-
-  /// reset output index to 0
-  void output_first() throw();
-
-  /// Process the next output object if any, else proceed with simulation
-  void output_next() throw();
 
   /// Reduce output, using entry_output_write to send data to writing processes
   void entry_output_reduce() throw();
@@ -97,7 +81,6 @@ public: // interface
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
   void entry_output_write (int n, char * buffer) throw();
-
 
   // Monitor output
   void charm_monitor () throw();
@@ -253,9 +236,6 @@ protected: // attributes
 
   /// CHARM proxy for global reduction operations on blocks
   CProxy_BlockReduce  proxy_block_reduce_;
-
-  /// Index of currently active output object
-  int index_output_;
 
 #endif
 

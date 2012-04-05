@@ -438,9 +438,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert(*((float *) (v2-1)) == -10);
   unit_assert(*((double *) (v3-1)) == -20);
-  TRACE1 ("%f",*((double *) (v4-1)));
   unit_assert(*((double *) (v4-1)) == -30);
-  TRACE1 ("%f",*((double *) (v5-1)));
   unit_assert(*((double *) (v5-1)) ==  40); // g4 has no ghosts
 
   //----------------------------------------------------------------------

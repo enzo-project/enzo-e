@@ -194,8 +194,6 @@ void Monitor::write_verbatim
 {
   if (active_) {
 
-    va_list fargs;
-
     // Get parallel process text
 
     char buffer_process[MONITOR_LENGTH] = "";

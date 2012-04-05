@@ -51,16 +51,49 @@ public: // interface
   /// Return the boundary object
   Boundary * boundary() const throw()  { return boundary_; }
 
-  /// Return the initialization object
-  Initial *  initial() const throw()   { return initial_; }
+  /// Return the ith initialization object
+  Initial *  initial(int i = -1) const throw()
+  {
+    if (i == -1) i = index_initial_;
+    return (i < (int)initial_list_.size()) ? initial_list_[i] : NULL; 
+  }
+
+#ifdef CONFIG_USE_CHARM
+  /// reset initial index to 0 (not needed, but mirrors initial_output() )
+  void initial_first() throw();
+
+  /// Process the next initial object if any, else proceed with simulation
+  void initial_next(Simulation * simulation) throw();
+
+#endif
+
 
   /// Return the ith method object
   Method * method(size_t i) const throw() 
   { return (i < method_list_.size()) ? method_list_[i] : NULL; }
 
   /// Return the ith output object
-  Output * output(size_t i) const throw()
-  { return (i < output_list_.size()) ? output_list_[i] : NULL; }
+  Output * output(int i = -1) const throw()
+  { 
+    if (i == -1) i = index_output_;
+    return (i < (int)output_list_.size()) ? output_list_[i] : NULL; 
+  }
+
+#ifdef CONFIG_USE_CHARM
+  /// reset output index to 0
+  void output_first() throw();
+
+  /// Process the next output object if any, else proceed with simulation
+  void output_next(Simulation * simulation) throw();
+
+  /// Reduce output, using entry_output_write to send data to writing processes
+  void output_reduce(Simulation * simulation) throw();
+  
+  /// Receive data from non-writing process, write to disk, close, and
+  /// proceed with next output
+  void output_write (Simulation * simulation, int n, char * buffer) throw();
+
+#endif
 
   /// Return the stopping object
   Stopping *  stopping() const throw() { return stopping_; }
@@ -129,7 +162,7 @@ private: // attributes
   Boundary * boundary_;
 
   /// Initial conditions object
-  Initial * initial_;
+  std::vector<Initial *> initial_list_;
 
   /// Stopping criteria
   Stopping * stopping_;
@@ -142,6 +175,12 @@ private: // attributes
 
   /// Output objects
   std::vector<Output *> output_list_;
+
+  /// Index of currently active Initial object
+  size_t index_initial_;
+
+  /// Index of currently active Output object
+  size_t index_output_;
 
 };
 

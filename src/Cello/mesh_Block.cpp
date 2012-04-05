@@ -231,55 +231,6 @@ extern CProxy_Simulation  proxy_simulation;
 
 //======================================================================
 
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Block::entry_initial()
-// dependency: Simulation::field_descr()
-// dependency: Simulation: cycle()
-// dependency: Simulation: time()
-// dependency: Simulation: hierarchy()
-//    todo:remove
-{
-  TRACE0;
-  Simulation * simulation  = proxy_simulation.ckLocalBranch();
-
-  FieldDescr * field_descr = simulation->field_descr();
-
-  // Initialize the block
-
-  allocate(field_descr);
-
-  // Set the Block cycle and time to match Simulation's
-
-  set_cycle(simulation->cycle());
-  set_time (simulation->time());
-  set_dt   (simulation->dt());
-
-  // Perform any additional initialization
-
-  initialize ();
-
-  // Apply the initial conditions 
-
-  Initial * initial = simulation->problem()->initial();
-
-  initial->enforce(simulation->hierarchy(),field_descr,this);
-
-  // NOTE: CHARM++ contribute() barrier is to prevent race conditions
-  // where Block::entry_refresh_face() is called before Block::entry_initial()
-
-  // Refresh before prepare()
-
-  contribute( CkCallback(CkIndex_Block::entry_call_refresh(), thisProxy) );
-  TRACE0;
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
 #ifdef CONFIG_USE_CHARM
 
 void Block::prepare()
@@ -359,6 +310,8 @@ void Block::entry_call_output(CkReductionMsg * msg)
   double dt_patch   = min_reduce[0];
   bool   stop_patch = min_reduce[1] == 1.0 ? true : false;
 
+  delete msg;
+
   set_dt   (dt_patch);
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -377,7 +330,6 @@ void Block::entry_call_output(CkReductionMsg * msg)
     proxy_simulation.entry_output();
   }
 
-  delete msg;
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -411,7 +363,6 @@ void Block::entry_compute (int cycle, double time, double dt)
 
 void Block::entry_call_refresh()
 {
-  TRACE0;
   refresh();
 }
 

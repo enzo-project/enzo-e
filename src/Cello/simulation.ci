@@ -16,15 +16,18 @@ module simulation {
       (const char filename[n], int n, 
        CProxy_BlockReduce proxy_block_reduce);
 
+    entry void entry_initial ();
+
     entry void entry_output ();
     entry void entry_output_reduce();
     entry void entry_output_write(int n, char buffer[n]);
 
-    entry void entry_done(CkReductionMsg*);
-
     entry void p_perf_output_min(CkReductionMsg * msg);
     entry void p_perf_output_max(CkReductionMsg * msg);
     entry void p_perf_output_sum(CkReductionMsg * msg);
+
+//    entry void entry_done(CkReductionMsg*);
+
 
   };
 

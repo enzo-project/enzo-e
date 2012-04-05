@@ -71,7 +71,6 @@ void InputData::read_hierarchy
  ) throw()
 {
 
-  TRACE("read_hierarchy");
   IoHierarchy io_hierarchy(hierarchy);
 
   // Read hierarchy meta-data
@@ -92,8 +91,6 @@ Patch * InputData::read_patch
  int ixp0, int iyp0, int izp0
  ) throw()
 {
-  TRACE("read_patch");
-
   if (patch == 0) {
     // create an uninitialized Patch
     patch = 
@@ -126,7 +123,6 @@ Patch * InputData::read_patch
 
   Input::read_meta_group (&io_layout);
 
-  TRACE("Bypassing Input::read_block() since blocks are not allocated yet");
   // // Call read_block() on contained blocks
   // Input::read_patch(patch,field_descr,ixp0,iyp0,izp0);
 
@@ -137,7 +133,6 @@ Patch * InputData::read_patch
 
 void InputData::end_read_patch() throw()
 {
-  TRACE("end_read_patch");
   file_->group_close();
   file_->group_chdir("..");
 }
@@ -150,12 +145,8 @@ Block * InputData::read_block
  const FieldDescr * field_descr) throw()
 {
 
-  TRACE1("block_name=%s",block_name.c_str());
-  
   file_->group_chdir(block_name);
-  TRACE0;
   file_->group_open();
-  TRACE0;
 
   // Create temporary block
 
@@ -167,7 +158,6 @@ Block * InputData::read_block
      0.0, 0.0, 0.0,
      1);
 
-  TRACE0;
   // Read block meta data
 
   io_block()->set_block(block);
@@ -177,7 +167,6 @@ Block * InputData::read_block
   int ibx=100,iby=100,ibz=100;
   block->index_patch(&ibx,&iby,&ibz);
 
-  TRACE3("block index = %d %d %d",ibx,iby,ibz);
   // // Call read_block() on base Input object
 
   // Input::read_block(block,field_descr,ixp0,iyp0,izp0);
@@ -196,7 +185,6 @@ void InputData::read_field
  const FieldDescr * field_descr,
  int field_index) throw()
 {
-  TRACE1("read_field %d",field_index);
   io_field_block()->set_field_descr(field_descr);
   io_field_block()->set_field_block(field_block);
   io_field_block()->set_field_index(field_index);

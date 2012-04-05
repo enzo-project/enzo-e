@@ -36,7 +36,6 @@ Simulation::Simulation
   is_group_process_new_(false),
 #ifdef CONFIG_USE_CHARM
   proxy_block_reduce_(proxy_block_reduce),
-  index_output_(0),
 #endif
   dimension_(0),
   cycle_(0),
@@ -472,7 +471,6 @@ void Simulation::charm_monitor() throw()
 
 void Simulation::charm_compute() throw()
 {
-
   //--------------------------------------------------
   // Stopping
   //--------------------------------------------------
@@ -681,6 +679,7 @@ void Simulation::performance_output(Performance * performance)
   output_performance_();
 
 #endif
+
 }
 
 //----------------------------------------------------------------------
@@ -702,7 +701,6 @@ void Simulation::p_perf_output_min(CkReductionMsg * msg)
   CkCallback callback (CkIndex_Simulation::p_perf_output_max(NULL),thisProxy);
   contribute( num_perf_*sizeof(double), perf_val_, 
 	      CkReduction::max_double, callback);
-
 
 }
 

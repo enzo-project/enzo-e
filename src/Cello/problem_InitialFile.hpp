@@ -36,6 +36,10 @@ public: // interface
 			const FieldDescr * field_descr,
 			Block * block = NULL) throw();
 
+  /// Override default: InitialFile expects blocks not to be allocated
+  virtual bool expects_blocks_allocated() const throw()
+  { return false; }
+
 private: // functions
 
   void get_filename_(std::string * file_name,

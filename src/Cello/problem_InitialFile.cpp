@@ -43,6 +43,10 @@ void InitialFile::enforce
  Block            * block
  ) throw()
 {
+  ASSERT ("InitialFile::enforce",
+	  "Input block is expected to be NULL",
+	  block == 0);
+
   if (! input_) input_ = new InputData(hierarchy->factory());
 
   if (! input_->is_open() ) {
@@ -54,9 +58,7 @@ void InitialFile::enforce
 
     get_filename_(&file_name,&file_args);
 
-    TRACE0;
     input_->open();
-    TRACE0;
 
   }
 
@@ -69,14 +71,12 @@ void InitialFile::enforce
 #ifdef CONFIG_USE_CHARM
   counter_blocks_.set_value(num_blocks);
 #endif
-  TRACE0;
+
   for (int i = 0; i<num_blocks; i++) {
 
     std::string block_name = file->group_name(i).c_str();
-  TRACE0;
 
     input_->read_block(0,block_name,field_descr);
-  TRACE0;
 
   }
 }

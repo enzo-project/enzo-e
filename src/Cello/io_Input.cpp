@@ -209,7 +209,6 @@ std::string Input::expand_file_name_
 
     strcpy (buffer, file_middle.c_str());
     
-    TRACE1("cycle = %d",cycle_);
     if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
     else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
     else if (arg == "count") { sprintf (buffer_new,buffer, count_input_); }

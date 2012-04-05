@@ -11,9 +11,10 @@
 
 Problem::Problem() throw()
   : boundary_(0),
-    initial_(0),
     stopping_(0),
-    timestep_(0)
+    timestep_(0),
+    index_initial_(0),
+    index_output_(0)
 {
 }
 
@@ -53,12 +54,14 @@ void Problem::initialize_initial(Parameters * parameters,
 
   std::string type = parameters->value_string("Initial:type","default");
 
-  initial_ = create_initial_(type,parameters,group_process);
+  Initial * initial = create_initial_(type,parameters,group_process);
+
+  initial_list_.push_back( initial );
 
   ASSERT1("Problem::initialize_initial",
 	  "Initial type %s not recognized",
 	  type.c_str(),
-	  initial_ != NULL);
+	  initial != NULL);
 }
 
 //----------------------------------------------------------------------
@@ -683,7 +686,9 @@ void Problem::initialize_method(Parameters * parameters) throw()
 void Problem::deallocate_() throw()
 {
   delete boundary_;      boundary_ = 0;
-  delete initial_;       initial_ = 0;
+  for (size_t i=0; i<initial_list_.size(); i++) {
+    delete initial_list_[i];    initial_list_[i] = 0;
+  }
   delete stopping_;      stopping_ = 0;
   delete timestep_;      timestep_ = 0;
   for (size_t i=0; i<output_list_.size(); i++) {

@@ -38,6 +38,10 @@ public: // virtual functions
 			const FieldDescr * field_descr,
 			Block * block = NULL) throw() = 0;
 
+  /// Return whether enforce() expects block != NULL
+  virtual bool expects_blocks_allocated() const throw()
+  { return true; }
+
 protected: // attributes
 
   /// Initial cycle number

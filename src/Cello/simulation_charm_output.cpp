@@ -24,34 +24,36 @@
 void Simulation::entry_output () throw()
 {
   // reset output "loop" over output objects
-  output_first();
+  problem()->output_first();
 
   // process first output object, which continues with refresh() if done
-  output_next();
+  problem()->output_next(this);
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::output_first() throw()
+void Problem::output_first() throw()
 {
   index_output_ = -1;
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::output_next() throw()
+void Problem::output_next(Simulation * simulation) throw()
 {
-  // find next output
-
-  Problem * problem = Simulation::problem();
+  int cycle   = simulation->cycle();
+  double time = simulation->time();
 
   Output * output;
 
+  // skip over unscheduled outputs
+
   do {
-    // skip over output objects that are not scheduled this cycle
+
     ++index_output_;
-    output = problem->output(index_output_);
-  } while (output && ! output->is_scheduled(cycle_, time_));
+    output = this->output(index_output_);
+
+  } while (output && ! output->is_scheduled(cycle, time));
 
   // assert ! output || output->is_scheduled(cycle_, time_)
 
@@ -66,12 +68,12 @@ void Simulation::output_next() throw()
     output->open();
 
     // Write hierarchy
-    output->write_simulation(this);
+    output->write_simulation(simulation);
 
 
   } else {
 
-    charm_monitor();
+    simulation->charm_monitor();
 
   }
 }
@@ -118,7 +120,14 @@ void BlockReduce::entry_output_reduce(int count)
 
 void Simulation::entry_output_reduce() throw()
 {
-  Output * output = Simulation::problem()->output(index_output_);
+  problem()->output_reduce(this);
+}
+
+//----------------------------------------------------------------------
+
+void Problem::output_reduce(Simulation * simulation) throw()
+{
+  Output * output = this->output(index_output_);
 
   output->end_write_patch();
 
@@ -145,7 +154,7 @@ void Simulation::entry_output_reduce() throw()
     output->finalize();
 
     // Continue with next output object if any
-    output_next();
+    output_next(simulation);
 
   } else {
 
@@ -159,7 +168,18 @@ void Simulation::entry_output_reduce() throw()
 
 void Simulation::entry_output_write (int n, char * buffer) throw()
 {
-  Output * output = Simulation::problem()->output(index_output_);
+  problem()->output_write(this,n,buffer);
+}
+
+//----------------------------------------------------------------------
+
+void Problem::output_write 
+(
+ Simulation * simulation,
+ int n, char * buffer
+) throw()
+{
+  Output * output = this->output(index_output_);
 
   if (n != 0) {
     output->update_remote(n, buffer);
@@ -174,7 +194,7 @@ void Simulation::entry_output_write (int n, char * buffer) throw()
 
     output->finalize();
 
-    output_next();
+    output_next(simulation);
   }
 
 }

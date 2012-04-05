@@ -123,7 +123,6 @@ protected: // attributes
   std::vector<Block * > block_;
 #endif
 
-
   /// Factory object for creating Blocks
   const Factory * factory_;
   

@@ -196,7 +196,6 @@ void Patch::allocate_array(FieldDescr * field_descr,
        allocate_blocks);
     
     block_exists_ = allocate_blocks;
-    TRACE1 ("allocated = %d",block_exists_);
 
   }
 
