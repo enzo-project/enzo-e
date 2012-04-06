@@ -18,8 +18,9 @@
 
 //----------------------------------------------------------------------
 
-void Block::entry_initial()
+void Block::p_initial()
 {
+  TRACE0;
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -45,17 +46,18 @@ void Block::entry_initial()
   initial->enforce(simulation->hierarchy(),field_descr,this);
 
   // // NOTE: CHARM++ contribute() barrier is to prevent race conditions
-  // // where Block::entry_refresh_face() is called before Block::entry_initial()
+  // // where Block::p_refresh_face() is called before Block::p_initial()
 
   // // Refresh before prepare()
 
-  contribute( CkCallback(CkIndex_Block::entry_call_refresh(), thisProxy) );
+  contribute( CkCallback(CkIndex_Block::p_call_refresh(), thisProxy) );
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::entry_initial () throw()
+void Simulation::p_initial () throw()
 {
+  TRACE0;
   // reset initial "loop" over initial objects
   problem()->initial_first();
 
@@ -92,7 +94,7 @@ void Problem::initial_next(Simulation * simulation) throw()
 
       while (( patch = ++it_patch )) {
 
-	patch->block_array().entry_initial_enforce();
+	patch->block_array().p_initial_enforce();
 
       }
 
@@ -107,14 +109,14 @@ void Problem::initial_next(Simulation * simulation) throw()
     ItPatch it_patch(hierarchy);
     Patch * patch;
     while (( patch = ++it_patch )) {
-      patch->block_array().entry_call_refresh();
+      patch->block_array().p_call_refresh();
     }
   }
 }
 
 //----------------------------------------------------------------------
 
-void Block::entry_initial_enforce()
+void Block::p_initial_enforce()
 {
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
 
@@ -131,7 +133,7 @@ void Block::entry_initial_enforce()
 
 // //----------------------------------------------------------------------
 
-// void Block::entry_write (int index_initial)
+// void Block::p_write (int index_initial)
 // {
 //   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -143,29 +145,29 @@ void Block::entry_initial_enforce()
 //   // Synchronize via main chare before writing
 //   Hierarchy * hierarchy = simulation->hierarchy();
 //   int num_blocks = hierarchy->patch(0)->num_blocks();
-//   simulation->proxy_block_reduce().entry_initial_reduce (num_blocks);
+//   simulation->proxy_block_reduce().p_initial_reduce (num_blocks);
 // }
 
 // //----------------------------------------------------------------------
 
-// void Block::entry_read ()
+// void Block::p_read ()
 // {
-//   INCOMPLETE("Block::entry_read");
+//   INCOMPLETE("Block::p_read");
 // }
 
 // //----------------------------------------------------------------------
 
-// void BlockReduce::entry_initial_reduce(int count)
+// void BlockReduce::p_initial_reduce(int count)
 // {
 //   if (++count_initial_ >= count) {
-//     proxy_simulation.entry_initial_reduce();
+//     proxy_simulation.p_initial_reduce();
 //     count_initial_ = 0;
 //   }
 // }
 
 // //----------------------------------------------------------------------
 
-// void Simulation::entry_initial_reduce() throw()
+// void Simulation::p_initial_reduce() throw()
 // {
 //   problem()->initial_reduce(this);
 // }
@@ -189,7 +191,7 @@ void Block::entry_initial_enforce()
 //     output->prepare_remote(&n,&buffer);
 
 //     // Remote call to receive data
-//     proxy_simulation[ip_writer].entry_initial_write (n, buffer);
+//     proxy_simulation[ip_writer].p_initial_write (n, buffer);
 
 //     // Close up file
 //     output->close();
@@ -205,7 +207,7 @@ void Block::entry_initial_enforce()
 
 //   } else {
 
-//     proxy_simulation[ip].entry_initialial_write(0,0);
+//     proxy_simulation[ip].p_initial_write(0,0);
 
 //   }
 
@@ -213,7 +215,7 @@ void Block::entry_initial_enforce()
 
 // //----------------------------------------------------------------------
 
-// void Simulation::entry_initial_write (int n, char * buffer) throw()
+// void Simulation::p_initial_write (int n, char * buffer) throw()
 // {
 //   problem()->initial_write(this,n,buffer);
 // }

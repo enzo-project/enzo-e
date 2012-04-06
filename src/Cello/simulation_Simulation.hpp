@@ -70,17 +70,17 @@ public: // interface
 
 
   // Call initialization on Problem list of Initial objects
-  void entry_initial () throw();
+  void p_initial () throw();
 
   // Call output on Problem list of Output objects
-  void entry_output () throw();
+  void p_output () throw();
 
-  /// Reduce output, using entry_output_write to send data to writing processes
-  void entry_output_reduce() throw();
+  /// Reduce output, using p_output_write to send data to writing processes
+  void p_output_reduce() throw();
 
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
-  void entry_output_write (int n, char * buffer) throw();
+  void p_output_write (int n, char * buffer) throw();
 
   // Monitor output
   void charm_monitor () throw();

@@ -22,7 +22,7 @@ public: // interface
   BlockReduce();
 
   /// Reduce output from simulation
-  void entry_output_reduce(int count);
+  void p_output_reduce(int count);
 
 private: // attributes
 

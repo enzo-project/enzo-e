@@ -86,7 +86,7 @@ public: // interface
   /// Process the next output object if any, else proceed with simulation
   void output_next(Simulation * simulation) throw();
 
-  /// Reduce output, using entry_output_write to send data to writing processes
+  /// Reduce output, using p_output_write to send data to writing processes
   void output_reduce(Simulation * simulation) throw();
   
   /// Receive data from non-writing process, write to disk, close, and

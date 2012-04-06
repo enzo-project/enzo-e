@@ -56,33 +56,33 @@ public: // interface
   Block (CkMigrateMessage *m) { };
 
   /// Initialize block for the simulation.
-  void entry_initial();
+  void p_initial();
 
   /// Call current Initial::enforce() on the block
-  void entry_initial_enforce();
+  void p_initial_enforce();
 
   /// Refresh ghost zones and apply boundary conditions
-  void entry_refresh(int cycle, double time, double dt);
+  void p_refresh(int cycle, double time, double dt);
 
   /// Apply the numerical methods on the block
-  void entry_compute(int cycle, double time, double dt);
+  void p_compute(int cycle, double time, double dt);
 
   ///
 
   /// Refresh a FieldFace
-  void entry_refresh_face(int n, char buffer[],int fx, int fy, int fz);
+  void p_refresh_face(int n, char buffer[],int fx, int fy, int fz);
 
   /// Contribute block data to ith output object in the simulation
-  void entry_write (int index_output);
+  void p_write (int index_output);
 
   /// Contribute block data to the Initial input object
-  void entry_read ();
+  void p_read ();
 
   /// Entry function after initial barrier to call refresh()
-  void entry_call_refresh();
+  void p_call_refresh();
 
-  /// Entry function after prepare() to call Simulation::entry_output()
-  void entry_call_output(CkReductionMsg * msg);
+  /// Entry function after prepare() to call Simulation::p_output()
+  void p_call_output(CkReductionMsg * msg);
 
   //--------------------------------------------------
 

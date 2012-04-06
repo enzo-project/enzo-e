@@ -26,7 +26,7 @@ extern CProxy_Simulation proxy_simulation;
 
 //----------------------------------------------------------------------
 
-void Main::entry_exit(int count)
+void Main::p_exit(int count)
 {
   count_exit_++;
   if (count_exit_ >= count) {

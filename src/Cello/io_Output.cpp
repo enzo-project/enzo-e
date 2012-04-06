@@ -214,7 +214,7 @@ void Output::write_patch
   // CHARM++ Block callback for write_block()
 
   if (patch->blocks_allocated()) {
-    patch->block_array().entry_write (index_charm_);
+    patch->block_array().p_write (index_charm_);
   }
 
 #else

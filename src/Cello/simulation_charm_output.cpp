@@ -19,9 +19,9 @@
 
 //----------------------------------------------------------------------
 
-// (Called from BlockReduce::entry_prepare())
+// (Called from BlockReduce::p_prepare())
 
-void Simulation::entry_output () throw()
+void Simulation::p_output () throw()
 {
   // reset output "loop" over output objects
   problem()->output_first();
@@ -84,7 +84,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
-void Block::entry_write (int index_output)
+void Block::p_write (int index_output)
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -96,29 +96,29 @@ void Block::entry_write (int index_output)
   // Synchronize via main chare before writing
   Hierarchy * hierarchy = simulation->hierarchy();
   int num_blocks = hierarchy->patch(0)->num_blocks();
-  simulation->proxy_block_reduce().entry_output_reduce (num_blocks);
+  simulation->proxy_block_reduce().p_output_reduce (num_blocks);
 }
 
 //----------------------------------------------------------------------
 
-void Block::entry_read ()
+void Block::p_read ()
 {
-  INCOMPLETE("Block::entry_read");
+  INCOMPLETE("Block::p_read");
 }
 
 //----------------------------------------------------------------------
 
-void BlockReduce::entry_output_reduce(int count)
+void BlockReduce::p_output_reduce(int count)
 {
   if (++count_output_ >= count) {
-    proxy_simulation.entry_output_reduce();
+    proxy_simulation.p_output_reduce();
     count_output_ = 0;
   }
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::entry_output_reduce() throw()
+void Simulation::p_output_reduce() throw()
 {
   problem()->output_reduce(this);
 }
@@ -142,7 +142,7 @@ void Problem::output_reduce(Simulation * simulation) throw()
     output->prepare_remote(&n,&buffer);
 
     // Remote call to receive data
-    proxy_simulation[ip_writer].entry_output_write (n, buffer);
+    proxy_simulation[ip_writer].p_output_write (n, buffer);
 
     // Close up file
     output->close();
@@ -158,7 +158,7 @@ void Problem::output_reduce(Simulation * simulation) throw()
 
   } else {
 
-    proxy_simulation[ip].entry_output_write(0,0);
+    proxy_simulation[ip].p_output_write(0,0);
 
   }
 
@@ -166,7 +166,7 @@ void Problem::output_reduce(Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::entry_output_write (int n, char * buffer) throw()
+void Simulation::p_output_write (int n, char * buffer) throw()
 {
   problem()->output_write(this,n,buffer);
 }

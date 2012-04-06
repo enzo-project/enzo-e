@@ -14,7 +14,7 @@ module mesh {
   
   chare BlockReduce {
     entry BlockReduce();
-    entry void entry_output_reduce (int count_blocks);
+    entry void p_output_reduce (int count_blocks);
   };
 
   array[3D] Block {
@@ -34,17 +34,17 @@ module mesh {
        double xb, double yb, double zb,
        int num_field_blocks);
 
-    entry void entry_initial();
-    entry void entry_initial_enforce();
-    entry void entry_refresh(int cycle, double time, double dt);
-    entry void entry_compute(int cycle, double time, double dt);
-    entry void entry_refresh_face
+    entry void p_initial();
+    entry void p_initial_enforce();
+    entry void p_refresh(int cycle, double time, double dt);
+    entry void p_compute(int cycle, double time, double dt);
+    entry void p_refresh_face
       (int n, char buffer[n], int fx, int fy, int fz);
-    entry void entry_write (int index_output);
-    entry void entry_read ();
+    entry void p_write (int index_output);
+    entry void p_read ();
 
-    entry void entry_call_refresh();
-    entry void entry_call_output(CkReductionMsg * msg);
+    entry void p_call_refresh();
+    entry void p_call_output(CkReductionMsg * msg);
 
   };
 }

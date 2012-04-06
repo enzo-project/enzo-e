@@ -111,8 +111,8 @@ Patch * Input::read_patch
   // CHARM++ Block callback for read_block()
 
   if (patch->blocks_allocated()) {
-    // entry_read() NOT IMPLEMENTED
-    patch->block_array().entry_read ();
+    // p_read() NOT IMPLEMENTED
+    patch->block_array().p_read ();
   }
 
 #else

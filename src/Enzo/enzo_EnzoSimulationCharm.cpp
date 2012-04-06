@@ -46,7 +46,7 @@ EnzoSimulationCharm::~EnzoSimulationCharm() throw()
 void EnzoSimulationCharm::run() throw()
 {
   
-  // Call Block::entry_initial() on all blocks
+  // Call Block::p_initial() on all blocks
 
   ItPatch it_patch(hierarchy_);
   Patch * patch;
@@ -55,7 +55,7 @@ void EnzoSimulationCharm::run() throw()
 
     if (patch->blocks_allocated()) {
 
-      patch->block_array().entry_initial();
+      patch->block_array().p_initial();
 
     } else {
 
