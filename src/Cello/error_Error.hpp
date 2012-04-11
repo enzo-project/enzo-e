@@ -123,6 +123,57 @@
 #endif
 
 //----------------------------------------------------------------------
+/// @def      DEBUG
+/// @brief    Trace file name and location to stdout
+#ifdef CELLO_DEBUG
+
+#   define DEBUG(M)					\
+  {  m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M); }
+#   define DEBUG0						\
+  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", ""); }
+#   define DEBUG1(M,A1)					\
+  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1); }
+#   define DEBUG2(M,A1,A2)					\
+  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2); }
+#   define DEBUG3(M,A1,A2,A3)					\
+  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3); }
+#   define DEBUG4(M,A1,A2,A3,A4)				\
+  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4); }
+#   define DEBUG5(M,A1,A2,A3,A4,A5)					\
+  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5); }
+#   define DEBUG6(M,A1,A2,A3,A4,A5,A6)					\
+  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6); }
+#   define DEBUG7(M,A1,A2,A3,A4,A5,A6,A7)				\
+  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
+#   define DEBUG8(M,A1,A2,A3,A4,A5,A6,A7,A8)				\
+  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
+
+#else
+
+#   define DEBUG0				\
+  /* This space intentionally left blank */
+#   define DEBUG(M)				\
+  /* This space intentionally left blank */
+#   define DEBUG1(M,A1)				\
+  /* This space intentionally left blank */
+#   define DEBUG2(M,A1,A2)			\
+  /* This space intentionally left blank */
+#   define DEBUG3(M,A1,A2,A3)			\
+  /* This space intentionally left blank */
+#   define DEBUG4(M,A1,A2,A3,A4)		\
+  /* This space intentionally left blank */
+#   define DEBUG5(M,A1,A2,A3,A4,A5)		\
+  /* This space intentionally left blank */
+#   define DEBUG6(M,A1,A2,A3,A4,A5,A6)		\
+  /* This space intentionally left blank */
+#   define DEBUG7(M,A1,A2,A3,A4,A5,A6,A7)	\
+  /* This space intentionally left blank */
+#   define DEBUG8(M,A1,A2,A3,A4,A5,A6,A7,A8)	\
+  /* This space intentionally left blank */
+
+#endif
+
+//----------------------------------------------------------------------
 /// @def      ASSERT
 /// @brief    Equivalent to assert()
 #define ASSERT(F,M,A)							\

@@ -33,6 +33,11 @@ extern void m2_
 
   Monitor * monitor = Monitor::instance();
 
+  bool save_active = true;
+  if (fp == stderr) {
+    save_active = monitor->is_active();
+    monitor->set_active(true);
+  }
   std::string file_str = file;
   if (strlen(file)>0) {
     // Only print file name not full path
@@ -45,6 +50,10 @@ extern void m2_
     monitor->write (fp,type,"%s:%d  %s",file_str.c_str(),line,function);
   } else {
     monitor->write (fp,type,"%s:%d",file_str.c_str(),line);
+  }
+
+  if (fp == stderr) {
+    monitor->set_active(save_active);
   }
 
   fflush (fp);
