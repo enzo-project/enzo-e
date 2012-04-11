@@ -124,29 +124,29 @@
 
 //----------------------------------------------------------------------
 /// @def      DEBUG
-/// @brief    Trace file name and location to stdout
+/// @brief    Write debug statements to stderr
 #ifdef CELLO_DEBUG
 
 #   define DEBUG(M)					\
-  {  m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M); }
+  {  m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M); }
 #   define DEBUG0						\
-  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", ""); }
+  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", ""); }
 #   define DEBUG1(M,A1)					\
-  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1); }
+  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1); }
 #   define DEBUG2(M,A1,A2)					\
-  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2); }
+  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2); }
 #   define DEBUG3(M,A1,A2,A3)					\
-  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3); }
+  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3); }
 #   define DEBUG4(M,A1,A2,A3,A4)				\
-  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4); }
+  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4); }
 #   define DEBUG5(M,A1,A2,A3,A4,A5)					\
-  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5); }
+  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5); }
 #   define DEBUG6(M,A1,A2,A3,A4,A5,A6)					\
-  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6); }
+  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6); }
 #   define DEBUG7(M,A1,A2,A3,A4,A5,A6,A7)				\
-  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
+  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
 #   define DEBUG8(M,A1,A2,A3,A4,A5,A6,A7,A8)				\
-  { m2_(stdout,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
+  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
 
 #else
 
