@@ -115,7 +115,6 @@ public: // interface
   void initialize_output(Parameters * parameters,
 			 FieldDescr * field_descr,
 			 GroupProcess * group_process,
-			 Hierarchy    * hierarchy,
 			 const Factory * factory) throw();
 
   /// Initialize the stopping object
@@ -146,7 +145,7 @@ protected: // functions
   /// Create named output object
   virtual Output *   create_output_  
   (std::string name, Parameters * parameters,
-   GroupProcess *, Hierarchy *, const Factory * ) throw ();
+   GroupProcess *, const Factory * ) throw ();
 
   /// Create named stopping object
   virtual Stopping * create_stopping_ 

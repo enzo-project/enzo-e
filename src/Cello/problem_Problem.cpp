@@ -99,7 +99,6 @@ void Problem::initialize_output
 (Parameters * parameters,
  FieldDescr * field_descr,
  GroupProcess * group_process,
- Hierarchy    * hierarchy,
  const Factory * factory) throw()
 {
   // Create and initialize an Output object for each Output group
@@ -147,7 +146,7 @@ void Problem::initialize_output
     // Create output object
 
     Output * output = create_output_
-      (type,parameters,group_process,hierarchy,factory);
+      (type,parameters,group_process,factory);
 
     // Error if output type was not recognized
     if (output == NULL) {
@@ -795,20 +794,30 @@ Output * Problem::create_output_
  std::string    type,
  Parameters *   parameters,
  GroupProcess * group_process,
- Hierarchy    * hierarchy,
  const Factory * factory
  ) throw ()
 /// @param type          Type of Output object to create
 /// @param group_process Image output needs group process size
-/// @param hierarchy     Image output needs image size (currently patch(0) size)
 { 
   Output * output = NULL;
   if (type == "image") {
-    int np = group_process->size();
-    int nx,ny,nz;
-    hierarchy->patch(0)->size (&nx, &ny, &nz);
+
+    //--------------------------------------------------
+    // parameter: Mesh : root_size
+    // parameter: Mesh : root_blocks
+    //--------------------------------------------------
+
+    int nx,ny;
+
+    nx = parameters->list_value_integer(0,"Mesh:root_size",1);
+    ny = parameters->list_value_integer(1,"Mesh:root_size",1);
+
     // NOTE: assumes cube for non-z axis images
+
+    int np = group_process->size();
+
     output = new OutputImage (factory,np,nx,ny);
+
   } else if (type == "data") {
     output = new OutputData (factory);
   } else if (type == "restart") {

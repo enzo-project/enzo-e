@@ -92,9 +92,6 @@ void Simulation::initialize() throw()
   // Initialize data
   initialize_data_descr_();
 
-  // Initialize Mesh hierarchy
-  initialize_hierarchy_();
-
   // Initialize boundary conditions
   problem_->initialize_boundary(parameters_);
 
@@ -109,12 +106,15 @@ void Simulation::initialize() throw()
 
   // Initialize list of output objects
   problem_->initialize_output
-    (parameters_,field_descr_,group_process_,hierarchy_,factory());
+    (parameters_,field_descr_,group_process_,factory());
 
   // Initialize list of methods
   problem_->initialize_method(parameters_);
 
   initialize_parallel_();
+
+  // Initialize Mesh hierarchy
+  initialize_hierarchy_();
 
 }
 

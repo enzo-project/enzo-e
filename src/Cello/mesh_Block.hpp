@@ -191,7 +191,9 @@ public: // virtual functions
 
   /// Initialize Block
   virtual void initialize () throw()
-  {}
+  {
+    CkPrintf ("DEBUG Block::initialize()\n");
+  }
 
 protected: // functions
 
