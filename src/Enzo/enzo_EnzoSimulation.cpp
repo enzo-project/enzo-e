@@ -15,15 +15,14 @@ EnzoSimulation::EnzoSimulation
 (
  const char *   parameter_file,
 #ifdef CONFIG_USE_CHARM
- int n,
- CProxy_BlockReduce proxy_block_reduce
+ int n
 #else
  GroupProcess * group_process
 #endif
  ) throw()
   : Simulation
 #ifdef CONFIG_USE_CHARM
-    (parameter_file, n, proxy_block_reduce)
+    (parameter_file, n)
 #else
     (parameter_file, group_process)
 #endif

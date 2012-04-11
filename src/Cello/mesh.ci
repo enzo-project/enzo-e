@@ -12,10 +12,10 @@ module mesh {
 
   //  readonly CProxy_BlockReduce  proxy_block_reduce;
   
-  chare BlockReduce {
-    entry BlockReduce();
-    entry void p_output_reduce (int count_blocks);
-  };
+//  chare BlockReduce {
+//    entry BlockReduce();
+//    entry void p_output_reduce (int count_blocks);
+//  };
 
   array[3D] Block {
 

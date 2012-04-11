@@ -23,6 +23,10 @@
 
 void Simulation::p_output () throw()
 {
+  // Set synchronization counter for Simulation::s_write()
+  int num_blocks = hierarchy()->patch(0)->num_blocks();
+  block_counter_.set_value(num_blocks);
+
   // reset output "loop" over output objects
   problem()->output_first();
 
@@ -68,6 +72,7 @@ void Problem::output_next(Simulation * simulation) throw()
     output->open();
 
     // Write hierarchy
+
     output->write_simulation(simulation);
 
 
@@ -94,9 +99,10 @@ void Block::p_write (int index_output)
   output->write_block(this,field_descr,0,0,0);
 
   // Synchronize via main chare before writing
-  Hierarchy * hierarchy = simulation->hierarchy();
-  int num_blocks = hierarchy->patch(0)->num_blocks();
-  simulation->proxy_block_reduce().p_output_reduce (num_blocks);
+  //  Hierarchy * hierarchy = simulation->hierarchy();
+  //  int num_blocks = hierarchy->patch(0)->num_blocks();
+  //  simulation->proxy_block_reduce().p_output_reduce (num_blocks);
+  proxy_simulation[0].s_write();
 }
 
 //----------------------------------------------------------------------
@@ -108,11 +114,20 @@ void Block::p_read ()
 
 //----------------------------------------------------------------------
 
-void BlockReduce::p_output_reduce(int count)
+// void BlockReduce::p_output_reduce(int count)
+// {
+//   if (++count_output_ >= count) {
+//     proxy_simulation.p_output_reduce();
+//     count_output_ = 0;
+//   }
+// }
+
+//----------------------------------------------------------------------
+
+void Simulation::s_write() throw()
 {
-  if (++count_output_ >= count) {
+  if (block_counter_.remaining() == 0) {
     proxy_simulation.p_output_reduce();
-    count_output_ = 0;
   }
 }
 

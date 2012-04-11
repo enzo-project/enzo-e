@@ -12,22 +12,14 @@
 #include "simulation.hpp"
 #include "simulation_charm.hpp"
 
+Simulation::Simulation
+(
+ const char *   parameter_file,
 #ifdef CONFIG_USE_CHARM
-Simulation::Simulation
-(
- const char *   parameter_file,
- int n,
- CProxy_BlockReduce proxy_block_reduce,
- GroupProcess * group_process
- ) throw()
-#else 
-Simulation::Simulation
-(
- const char *   parameter_file,
- GroupProcess * group_process
- ) throw()
+ int            n,
 #endif
-
+ GroupProcess * group_process
+ ) throw()
 /// Initialize the Simulation object
 : factory_(0),
   parameters_(0),
@@ -35,7 +27,7 @@ Simulation::Simulation
   group_process_(group_process),
   is_group_process_new_(false),
 #ifdef CONFIG_USE_CHARM
-  proxy_block_reduce_(proxy_block_reduce),
+  block_counter_(0),
 #endif
   dimension_(0),
   cycle_(0),
@@ -438,7 +430,8 @@ const Factory * Simulation::factory() const throw()
 
 #ifdef CONFIG_USE_CHARM
 
-Simulation::Simulation() 
+Simulation::Simulation()
+  : block_counter_(0)
 {
 }
 
@@ -449,6 +442,7 @@ Simulation::Simulation()
 #ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation (CkMigrateMessage *m) 
+  : block_counter_(0)
 {
 }
 

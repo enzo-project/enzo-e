@@ -82,11 +82,8 @@ PARALLEL_MAIN_BEGIN
 
   proxy_main     = thishandle;
 
-  CProxy_BlockReduce proxy_block_reduce = 
-    CProxy_BlockReduce::ckNew();
-
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
-    (parameter_file, strlen(parameter_file)+1, proxy_block_reduce);
+    (parameter_file, strlen(parameter_file)+1);
 
   //--------------------------------------------------
 

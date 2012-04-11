@@ -13,13 +13,14 @@ module simulation {
   group Simulation {
 
     entry Simulation
-      (const char filename[n], int n, 
-       CProxy_BlockReduce proxy_block_reduce);
+      (const char filename[n], int n);
 
     entry void p_initial ();
 
     entry void p_output ();
-    entry void p_output_reduce();
+    entry void p_output_reduce ();
+    entry void s_write();
+
     entry void p_output_write(int n, char buffer[n]);
 
     entry void p_perf_output_min(CkReductionMsg * msg);

@@ -22,8 +22,7 @@ public: // functions
 
   EnzoSimulation
   ( const char *   parameter_file_name,
-    int            n,
-    CProxy_BlockReduce proxy_block_reduce
+    int            n
     ) throw();
 
 #else

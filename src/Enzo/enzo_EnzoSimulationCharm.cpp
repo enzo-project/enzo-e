@@ -20,9 +20,8 @@
 EnzoSimulationCharm::EnzoSimulationCharm
 (
  const char         parameter_file[],
- int                n,
- CProxy_BlockReduce proxy_block_reduce) throw ()
-  : EnzoSimulation(parameter_file, n, proxy_block_reduce)
+ int                n) throw ()
+  : EnzoSimulation(parameter_file, n)
 {
 
 #ifdef CONFIG_USE_PROJECTIONS

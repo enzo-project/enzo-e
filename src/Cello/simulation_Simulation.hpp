@@ -45,7 +45,6 @@ public: // interface
   ( const char *       parameter_file,
 #ifdef CONFIG_USE_CHARM
     int                n,
-    CProxy_BlockReduce proxy_block_reduce,
 #endif
     GroupProcess *     group_process = 0
     ) throw();
@@ -68,7 +67,6 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-
   // Call initialization on Problem list of Initial objects
   void p_initial () throw();
 
@@ -82,14 +80,14 @@ public: // interface
   /// proceed with next output
   void p_output_write (int n, char * buffer) throw();
 
+  /// Output synchronization for blocks 
+  void s_write() throw();
+
   // Monitor output
   void charm_monitor () throw();
 
   // Stopping criteria and computation
   void charm_compute () throw();
-
-  CProxy_BlockReduce proxy_block_reduce() 
-  { return   proxy_block_reduce_; }
 
 #else
 
@@ -234,8 +232,8 @@ protected: // attributes
 
 #ifdef CONFIG_USE_CHARM
 
-  /// CHARM proxy for global reduction operations on blocks
-  CProxy_BlockReduce  proxy_block_reduce_;
+  /// Counter for Block::p_write() synchronization
+  Counter block_counter_;
 
 #endif
 
