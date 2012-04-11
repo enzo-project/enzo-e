@@ -9,7 +9,7 @@
 #define CHARM_COUNTER_HPP
 
 #ifdef CONFIG_USE_CHARM
-
+#include "charm++.h"
 class Counter {
 
   /// @class    Counter
@@ -24,9 +24,14 @@ public:
 
   int remaining() throw ()
   {
-    count_curr_ = (count_max_ + count_curr_ - 1) % count_max_;  
+    if (count_max_ > 0) {
+      count_curr_ = (count_max_ + count_curr_ - 1) % count_max_;  
+    }
     return count_curr_;
   }
+
+  int count_curr() const throw() { return count_curr_; }
+  int count_max() const throw() { return count_max_; }
 
   void set_value (int count_max) throw ()
   {
