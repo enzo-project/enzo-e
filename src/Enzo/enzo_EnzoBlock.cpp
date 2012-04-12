@@ -385,7 +385,7 @@ void EnzoBlock::set_dt (double dt_param) throw ()
 
 void EnzoBlock::initialize () throw()
 {
-  CkPrintf ("DEBUG EnzoBlock::initialize()\n");
+  DEBUG ("EnzoBlock::initialize()\n");
   Block::initialize();
 
   double xm,ym,zm;
