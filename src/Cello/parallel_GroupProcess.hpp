@@ -19,8 +19,8 @@ class GroupProcess
 
  public: // static interface
 
-  static GroupProcess * create (int process_first     = 0,
-				int process_last_plus = -1) throw();
+  static const GroupProcess * create (int process_first     = 0,
+				      int process_last_plus = -1) throw();
 
  protected: // interface
 
@@ -35,6 +35,12 @@ class GroupProcess
   /// Destructor
   virtual ~GroupProcess() throw()
   {}
+
+
+#ifdef CONFIG_USE_CHARM
+  /// Pack / unpack the Factory in a CHARM++ program
+  void pup(PUP::er &p) {};
+#endif
 
   //--------------------------------------------------
   // Shared with GroupThread, but removed from deleted common "Group"

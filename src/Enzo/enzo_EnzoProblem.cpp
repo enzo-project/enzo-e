@@ -77,7 +77,7 @@ Initial * EnzoProblem::create_initial_
 (
  std::string  name,
  Parameters * parameters,
- GroupProcess * group_process
+ const GroupProcess * group_process
  ) throw ()
 {
   

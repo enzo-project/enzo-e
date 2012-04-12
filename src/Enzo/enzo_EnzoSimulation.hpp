@@ -29,7 +29,7 @@ public: // functions
 
   EnzoSimulation
   ( const char *   parameter_file_name,
-    GroupProcess * group_process = 0
+    const GroupProcess * group_process = 0
     ) throw();
   
 #endif

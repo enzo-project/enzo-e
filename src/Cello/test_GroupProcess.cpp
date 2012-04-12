@@ -57,7 +57,7 @@ PARALLEL_MAIN_BEGIN
   }
 
 
-  GroupProcess * group_process = GroupProcess::create();
+  const GroupProcess * group_process = GroupProcess::create();
 
   int rank = group_process->rank();
   int size = group_process->size();

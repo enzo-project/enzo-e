@@ -19,9 +19,16 @@ EnzoBlock::EnzoBlock
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xp, double yp, double zp,
+#ifdef CONFIG_USE_CHARM
+ CkChareID proxy_patch,
+#endif
  int num_field_blocks) throw()
   : Block (ix,iy,iz,
-	   nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
+	   nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
+#ifdef CONFIG_USE_CHARM
+	   proxy_patch,
+#endif
+	   num_field_blocks),
     Time_(0),
     CycleNumber(0),
     OldTime(0),
@@ -59,8 +66,10 @@ EnzoBlock::EnzoBlock
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xp, double yp, double zp,
+ CkChareID proxy_patch,
  int num_field_blocks) throw()
-  : Block (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
+  : Block (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
+	   proxy_patch,num_field_blocks),
     Time_(0),
     CycleNumber(0),
     OldTime(0),
@@ -339,7 +348,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 
 void EnzoBlock::set_cycle (int cycle_start) throw ()
 {
-
   Block::set_cycle (cycle_start);
 
   CycleNumber = cycle_start;
@@ -349,7 +357,6 @@ void EnzoBlock::set_cycle (int cycle_start) throw ()
 
 void EnzoBlock::set_time (double time) throw ()
 {
-
   Block::set_time (time);
 
   //  Setting OldTime = Time_ leads to an error in Grid_ComputePressure.C:38
@@ -375,7 +382,6 @@ void EnzoBlock::set_time (double time) throw ()
 
 void EnzoBlock::set_dt (double dt_param) throw ()
 {
-
   Block::set_dt (dt_param);
 
   dt = dt_param;
@@ -385,7 +391,8 @@ void EnzoBlock::set_dt (double dt_param) throw ()
 
 void EnzoBlock::initialize () throw()
 {
-  CkPrintf ("DEBUG EnzoBlock::initialize()\n");
+  DEBUG ("DEBUG EnzoBlock::initialize()\n");
+
   Block::initialize();
 
   double xm,ym,zm;

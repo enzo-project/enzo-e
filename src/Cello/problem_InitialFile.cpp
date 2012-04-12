@@ -13,7 +13,7 @@
 
 InitialFile::InitialFile
 (Parameters * parameters,
- GroupProcess * group_process,
+ const GroupProcess * group_process,
  int cycle, double time) throw ()
   : Initial (cycle,time),
     parameters_(parameters),

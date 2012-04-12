@@ -8,30 +8,43 @@
 #include "cello.hpp"
 
 #include "mesh.hpp"
+#include "main.hpp"
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+extern CProxy_Simulation  proxy_simulation;
+#endif
 
 //----------------------------------------------------------------------
 
 Patch::Patch
 (
- const Factory * factory, 
- GroupProcess * group_process,
+#ifndef CONFIG_USE_CHARM
+ const Factory * factory,
+#endif
  int nx,  int ny,  int nz,
  int nx0, int ny0, int nz0,
  int nbx, int nby, int nbz,
  double xm, double ym, double zm,
- double xp, double yp, double zp
+ double xp, double yp, double zp,
+ bool allocate_blocks,
+ int process_first, int process_last_plus
 ) throw()
   :
 #ifdef CONFIG_USE_CHARM
+  block_array_(0),
   block_exists_(false),
-#endif
+  block_counter_(0),
+#else
   factory_(factory),
-  group_process_(group_process),
-  layout_(new Layout (nbx,nby,nbz))
+#endif
+  group_process_(GroupProcess::create(process_first,process_last_plus)),
+  layout_ (nbx,nby,nbz)
 {
 
  // Check 
-
+  DEBUG("Patch::Patch()");
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
 	     
     ERROR6("Patch::Patch", 
@@ -39,14 +52,9 @@ Patch::Patch
 	   nx,ny,nz,nbx,nby,nbz);
   }
 
-  // create a group process if one doesn't exist
-  if (! group_process_) {
-    group_process_ = GroupProcess::create();
-  }
-
   // set layout process range
 
-  layout_ -> set_process_range(0,group_process_->size());
+  layout_.set_process_range(0,group_process_->size());
 
   size_[0] = nx;
   size_[1] = ny;
@@ -68,6 +76,11 @@ Patch::Patch
   upper_[1] = yp;
   upper_[2] = zp;
 
+  allocate_array_(allocate_blocks);
+
+#ifdef CONFIG_USE_CHARM
+  proxy_simulation.s_initialize();
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -75,8 +88,25 @@ Patch::Patch
 Patch::~Patch() throw()
 {
   deallocate_blocks();
-  delete layout_;
+  delete group_process_; group_process_ = 0;
 }
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void Patch::s_block(CkCallback callback)
+{
+  TRACE1("Patch::s_block(%d)",block_counter_.count_curr());
+
+  if (block_counter_.remaining() == 0) {
+
+    callback.send();
+
+  }
+}
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -107,9 +137,16 @@ void Patch::blocking (int * nbx, int * nby, int * nbz) const throw()
 
 //----------------------------------------------------------------------
 
-Layout * Patch::layout () const throw()
+Layout * Patch::layout () throw()
 {
-  return layout_;
+  return &layout_;
+}
+
+//----------------------------------------------------------------------
+
+const Layout * Patch::layout () const throw()
+{
+  return &layout_;
 }
 
 //----------------------------------------------------------------------
@@ -136,10 +173,72 @@ int Patch::index() const throw ()
   return 0;
 }
 
+//----------------------------------------------------------------------
+
+void Patch::deallocate_blocks() throw()
+{
+
+#ifdef CONFIG_USE_CHARM
+
+  if (block_exists_) {
+    block_array_->ckDestroy();
+    delete block_array_; block_array_ = 0;
+    block_exists_ = false;
+  }
+
+#else
+
+  for (size_t i=0; i<block_.size(); i++) {
+    delete block_[i];
+    block_[i] = 0;
+  }
+
+#endif
+}
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+void Patch::p_refresh ()
+{
+  block_array_->p_refresh(); 
+}
+#endif
+
+//----------------------------------------------------------------------
+#ifdef CONFIG_USE_CHARM
+void Patch::p_compute (int cycle, double time, double dt)
+{
+  DEBUG3 ("cycle %d time %f dt %f",cycle,time,dt);
+
+  block_array_->p_compute(cycle,time,dt);
+}
+#endif
+
+//========================================================================
+
+#ifndef CONFIG_USE_CHARM
+size_t Patch::num_local_blocks() const  throw()
+{
+  int rank = group_process_->rank();
+  return layout_.local_count(rank);
+}
+#endif
+
+//----------------------------------------------------------------------
+
+#ifndef CONFIG_USE_CHARM
+Block * Patch::local_block(size_t i) const throw()
+{
+  return (i < block_.size()) ? block_[i] : 0;
+
+}
+#endif
+
+
 //======================================================================
 
-void Patch::allocate_array(FieldDescr * field_descr,
-			   bool allocate_blocks) throw()
+void Patch::allocate_array_(bool allocate_blocks) throw()
 {
 
 #ifndef CONFIG_USE_CHARM
@@ -155,7 +254,7 @@ void Patch::allocate_array(FieldDescr * field_descr,
   // Get number of blocks in the patch
 
   int nbx,nby,nbz;
-  layout_->block_count (&nbx, &nby, &nbz);
+  layout_.block_count (&nbx, &nby, &nbz);
 
   // determine block size
   int mbx = size_[0] / nbx;
@@ -182,22 +281,27 @@ void Patch::allocate_array(FieldDescr * field_descr,
 
   // CREATE AND INITIALIZE NEW DATA BLOCKS
 
+  int num_field_blocks = 1;
+
 #ifdef CONFIG_USE_CHARM
 
-  // WARNING: assumes patch is on Pe 0!!! (OK for unigrid)
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  const Factory * factory = simulation->factory();
 
-  if (CkMyPe() == 0) {
+  block_array_ = new CProxy_Block;
 
-    block_array_ = factory_->create_block_array
-      (nbx,nby,nbz,
-       mbx,mby,mbz,
-       lower_[0],lower_[1],lower_[2],
-       xb,yb,zb,
-       allocate_blocks);
+  (*block_array_) = factory->create_block_array
+    (nbx,nby,nbz,
+     mbx,mby,mbz,
+     lower_[0],lower_[1],lower_[2],
+     xb,yb,zb,
+     thisProxy,
+     num_field_blocks,
+     allocate_blocks);
     
-    block_exists_ = allocate_blocks;
+  block_exists_ = allocate_blocks;
+  block_counter_.set_value(nbx*nby*nbz);
 
-  }
 
 #else
 
@@ -208,7 +312,7 @@ void Patch::allocate_array(FieldDescr * field_descr,
     // Get index of block ib in the patch
 
     int ibx,iby,ibz;
-    layout_->block_indices (ip,ib, &ibx, &iby, &ibz);
+    layout_.block_indices (ip,ib, &ibx, &iby, &ibz);
 
     // create a new data block
 
@@ -217,7 +321,8 @@ void Patch::allocate_array(FieldDescr * field_descr,
        nbx,nby,nbz,
        mbx,mby,mbz,
        lower_[0],lower_[1],lower_[2],
-       xb,yb,zb);
+       xb,yb,zb,
+       num_field_blocks);
 
     // Store the data block in the block array
     block_[ib] = block;
@@ -229,47 +334,5 @@ void Patch::allocate_array(FieldDescr * field_descr,
   }
 #endif /* ! CONFIG_USE_CHARM */
 }
-
-//----------------------------------------------------------------------
-
-void Patch::deallocate_blocks() throw()
-{
-
-#ifdef CONFIG_USE_CHARM
-
-  if (block_exists_) {
-    block_array_.ckDestroy();
-    block_exists_ = false;
-  }
-
-#else
-
-  for (size_t i=0; i<block_.size(); i++) {
-    delete block_[i];
-    block_[i] = 0;
-  }
-
-#endif
-}
-
-//----------------------------------------------------------------------
-#ifndef CONFIG_USE_CHARM
-size_t Patch::num_local_blocks() const  throw()
-{
-  int rank = group_process_->rank();
-  return layout_->local_count(rank);
-}
-#endif
-
-//----------------------------------------------------------------------
-
-#ifndef CONFIG_USE_CHARM
-Block * Patch::local_block(size_t i) const throw()
-{
-  return (i < block_.size()) ? block_[i] : 0;
-
-}
-#endif
-
 
 

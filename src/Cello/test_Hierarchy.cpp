@@ -21,14 +21,14 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("Hierarchy");
   Factory * factory = new Factory;
-  Hierarchy * hierarchy = new Hierarchy (factory);
+  const int dimensions = 3;
+  const int refinement = 2;
+  Hierarchy * hierarchy = factory->create_hierarchy(dimensions, refinement);
   unit_assert(hierarchy != NULL);
 
   FieldDescr field_descr;
-  GroupProcess * group_process = GroupProcess::create();
-  int dimensions = 3;
-  hierarchy->create_root_patch(group_process,dimensions,
-			       &field_descr,12,12,12,3,3,3);
+
+  hierarchy->create_root_patch(&field_descr,12,12,12,3,3,3);
   unit_assert(hierarchy->patch(0)!=NULL);
 
   // Extents

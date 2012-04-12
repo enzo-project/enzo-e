@@ -31,12 +31,12 @@
 #include "_parallel.hpp"
 #include "_memory.hpp"
 #include "_parameters.hpp"
+#include "_simulation.hpp"
 #include "_mesh.hpp"
 #include "_field.hpp"
 #include "_disk.hpp"
 #include "_io.hpp"
 #include "_problem.hpp"
-#include "_simulation.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes

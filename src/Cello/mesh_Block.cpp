@@ -20,18 +20,21 @@ Block::Block
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
  double xb, double yb, double zb,    // Block width
- int num_field_blocks) throw ()
-  :  num_field_blocks_(num_field_blocks),
+#ifdef CONFIG_USE_CHARM
+ CProxy_Patch proxy_patch,
+#endif
+ int num_field_blocks
+) throw ()
+  :
+#ifdef CONFIG_USE_CHARM
+     count_refresh_face_(0),
+     proxy_patch_(proxy_patch),
+#endif
+     num_field_blocks_(num_field_blocks),
      field_block_(),
      cycle_(0),
      time_(0),
-#ifdef CONFIG_USE_CHARM
-    dt_(0),
-    count_refresh_face_(0)
-#else
-    dt_(0)
-#endif
-
+     dt_(0)
 { 
 // #ifdef CONFIG_USE_CHARM
 
@@ -77,17 +80,17 @@ Block::Block
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
  double xb, double yb, double zb,    // Block width
+#ifdef CONFIG_USE_CHARM
+ CProxy_Patch proxy_patch,
+#endif
  int num_field_blocks) throw ()
-  : num_field_blocks_(num_field_blocks),
+  : count_refresh_face_(0),
+    proxy_patch_(proxy_patch),
+    num_field_blocks_(num_field_blocks),
     field_block_(),
     cycle_(0),
     time_(0),
-#ifdef CONFIG_USE_CHARM
-    dt_(0),
-    count_refresh_face_(0)
-#else
     dt_(0)
-#endif
 
 { 
 #ifdef CONFIG_CHARM_ATSYNC
@@ -137,6 +140,41 @@ Block::~Block() throw ()
   }
   num_field_blocks_ = 0;
 }
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void Block::pup(PUP::er &p)
+{
+  p | num_field_blocks_;
+
+  // allocate field_block_[] vector first if unpacking
+  if (p.isUnpacking()) {
+    field_block_.resize(num_field_blocks_);
+  }
+
+  for (int i=0; i<num_field_blocks_; i++) {
+    p | *field_block_[i];
+  }
+
+  PUParray(p,index_,3);
+
+  PUParray(p,size_,3);
+
+  PUParray(p,lower_,3);
+
+  PUParray(p,upper_,3);
+
+  p | cycle_;
+  p | time_;
+  p | dt_;
+
+  p | count_refresh_face_;
+
+}
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -223,10 +261,7 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 //======================================================================
 
 #ifdef CONFIG_USE_CHARM
-
 extern CProxy_Simulation  proxy_simulation;
-// extern CProxy_Main        proxy_main;
-
 #endif /* CONFIG_USE_CHARM */
 
 //======================================================================
@@ -257,8 +292,10 @@ void Block::prepare()
 
   double dt_block;
   Timestep * timestep = problem->timestep();
+  DEBUG("Block::prepare()");
 
   dt_block = timestep->compute(field_descr,this);
+  DEBUG("Block::prepare()");
 
   // Reduce timestep to coincide with scheduled output if needed
 
@@ -267,6 +304,8 @@ void Block::prepare()
     Schedule * schedule = output->schedule();
     dt_block = schedule->update_timestep(time_,dt_block);
   }
+
+  DEBUG("Block::prepare()");
 
   // Reduce timestep to not overshoot final time from stopping criteria
 
@@ -293,6 +332,7 @@ void Block::prepare()
   min_reduce[1] = stop_block ? 1.0 : 0.0;
 
   CkCallback callback (CkIndex_Block::p_call_output(NULL), thisProxy);
+  DEBUG("Block::prepare() calling Block::p_call_output()");
   contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
 
 }
@@ -305,6 +345,7 @@ void Block::prepare()
 void Block::p_call_output(CkReductionMsg * msg)
 {
 
+  DEBUG("Block::p_call_output()");
   double * min_reduce = (double * )msg->getData();
 
   double dt_patch   = min_reduce[0];
@@ -337,12 +378,8 @@ void Block::p_call_output(CkReductionMsg * msg)
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_refresh (int cycle, double time, double dt)
+void Block::p_refresh ()
 {
-  // set_cycle(cycle);
-  // set_time(time);
-  // set_dt(dt);
-
   refresh();
 }
 
@@ -353,6 +390,7 @@ void Block::p_compute (int cycle, double time, double dt)
   // set_time(time);
   // set_dt(dt);
 
+  DEBUG3 ("Block::p_compute() cycle %d time %f dt %f",cycle,time,dt);
   compute();
 }
 #endif /* CONFIG_USE_CHARM */
@@ -361,15 +399,9 @@ void Block::p_compute (int cycle, double time, double dt)
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_call_refresh()
-{
-  refresh();
-}
-
-//--------------------------------------------------
-
 void Block::refresh ()
 {
+  DEBUG ("Block::refresh()");
 
   bool is_boundary[3][2];
   bool axm,axp,aym,ayp,azm,azp;
@@ -723,6 +755,7 @@ void Block::update_boundary_
 void Block::p_refresh_face (int n, char * buffer, int fx, int fy, int fz)
 {
 
+  DEBUG ("Block::p_refresh_face()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -832,9 +865,10 @@ void Block::p_refresh_face (int n, char * buffer, int fx, int fy, int fz)
   //--------------------------------------------------
 
   if (++count_refresh_face_ >= count) {
+    DEBUG ("Block::p_refresh_face() calling prepare()");
     count_refresh_face_ = 0;
     prepare();
-  }
+  } else  DEBUG ("Block::p_refresh_face() skipping prepare()");
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -848,6 +882,7 @@ void Block::p_refresh_face (int n, char * buffer, int fx, int fy, int fz)
 
 void Block::compute()
 {
+  DEBUG ("Block::compute()");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -874,6 +909,7 @@ void Block::compute()
   
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 
+  DEBUG ("Block::compute() calling refresh()");
   refresh();
 
 }
@@ -933,6 +969,7 @@ void Block::is_on_boundary (double lower[3], double upper[3],
 
 void Block::allocate (FieldDescr * field_descr) throw()
 { 
+  DEBUG("Block::allocate()");
   // Allocate fields
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i]->allocate_array(field_descr);

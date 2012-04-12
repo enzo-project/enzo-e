@@ -5,6 +5,7 @@
 /// @date     2010-05-06
 /// @brief    Program implementing unit tests for the Patch class
 
+#include <assert.h>
 #include "main.hpp" 
 #include "test.hpp"
 
@@ -15,7 +16,7 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-  GroupProcess * group_process = GroupProcess::create();
+  const GroupProcess * group_process = GroupProcess::create();
 
   unit_init(0,1);
 
@@ -45,13 +46,27 @@ PARALLEL_MAIN_BEGIN
 
   Factory * factory = new Factory;
 
-  Patch * patch = factory->create_patch 
-    (group_process,
+#ifdef CONFIG_USE_CHARM
+  CProxy_Patch proxy_patch = factory->create_patch 
+#else
+  Patch * patch = factory->create_patch
+#endif
+    (
+#ifndef CONFIG_USE_CHARM
+     factory,
+#endif
      patch_size[0],     patch_size[1],     patch_size[2],
      patch_offset[0],   patch_offset[1],   patch_offset[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2],
      domain_lower[0],   domain_lower[1],   domain_lower[2],
      domain_upper[0],   domain_upper[1],   domain_upper[2]);
+
+  
+
+#ifdef CONFIG_USE_CHARM
+  Patch * patch = proxy_patch.ckLocal();
+  if (patch == 0) assert(false);
+#endif
 
   unit_assert(patch != NULL);
 
@@ -125,12 +140,6 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  unit_func("allocate_array");
-
-  patch->allocate_array(field_descr);
-
-  //--------------------------------------------------
-
 #ifdef CONFIG_USE_CHARM
   unit_func("num_blocks");
   unit_assert(patch->num_blocks() == (size_t)nbx*nby*nbz);
@@ -177,7 +186,6 @@ PARALLEL_MAIN_BEGIN
       unit_assert_quiet (nfy == patch_size[1] / patch_blocking[1]);
       unit_assert_quiet (nfz == patch_size[2] / patch_blocking[2]);
 
-      GroupProcess * group_process = patch->group_process();
       Layout      * layout = patch->layout();
 
       int ip = group_process->rank();

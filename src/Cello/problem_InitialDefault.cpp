@@ -176,19 +176,20 @@ void InitialDefault::allocate_xyzt_
 			  ym,yp,&hy,
 			  zm,zp,&hz);
 
+  double time = block->time();
   // Initialize arrays
   for (int iz=0; iz<(*nz); iz++) {
     for (int iy=0; iy<(*ny); iy++) {
       for (int ix=0; ix<(*nx); ix++) {
 	int i=ix + (*nx)*(iy + (*ny)*iz);
-	(*value)[i] = 0.0;
-	(*vdeflt)[i]  = 0.0;
-	(*mask)[i] = false;
-	(*rdeflt)[i]  = false;
-	(*x)[i] = xm + ix*hx;
-	(*y)[i] = ym + iy*hy;
-	(*z)[i] = zm + iz*hz;
-	(*t)[i] = 0.0;
+	(*value)[i]  = 0.0;
+	(*vdeflt)[i] = 0.0;
+	(*mask)[i]   = false;
+	(*rdeflt)[i] = false;
+	(*x)[i]      = xm + ix*hx;
+	(*y)[i]      = ym + iy*hy;
+	(*z)[i]      = zm + iz*hz;
+	(*t)[i]      = time;
       }
     }
   }

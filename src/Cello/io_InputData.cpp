@@ -91,17 +91,19 @@ Patch * InputData::read_patch
  int ixp0, int iyp0, int izp0
  ) throw()
 {
-  if (patch == 0) {
-    // create an uninitialized Patch
-    patch = 
-      factory_->create_patch
-      (0,
-       0,0,0,
-       0,0,0,
-       0,0,0,
-       0,0,0,
-       0,0,0);
-  }
+  ERROR("InputData::read_patch()",
+	"Not Implemented");
+  // if (patch == 0) {
+  //   // create an uninitialized Patch
+  //   patch = 
+  //     factory_->create_patch
+  //     (0,
+  //      0,0,0,
+  //      0,0,0,
+  //      0,0,0,
+  //      0,0,0,
+  //      0,0,0);
+  // }
 
   // Change to file group for patch
 
@@ -150,13 +152,16 @@ Block * InputData::read_block
 
   // Create temporary block
 
-  block = factory_->create_block
-    (0,0,0,
-     0,0,0,
-     0,0,0,
-     0.0, 0.0, 0.0,
-     0.0, 0.0, 0.0,
-     1);
+  ERROR("InputData::read_block",
+	"Need to pass in Patch proxy to create_block");
+
+  // block = factory_->create_block
+  //   (0,0,0,
+  //    0,0,0,
+  //    0,0,0,
+  //    0.0, 0.0, 0.0,
+  //    0.0, 0.0, 0.0,
+  //    1);
 
   // Read block meta data
 

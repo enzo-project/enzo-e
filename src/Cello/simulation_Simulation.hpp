@@ -46,7 +46,7 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
     int                n,
 #endif
-    GroupProcess *     group_process = 0
+    const GroupProcess * group_process = 0
     ) throw();
 
   //==================================================
@@ -67,27 +67,39 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
+  /// Wait for all local patches to be created before calling run
+  void s_initialize();
+
   // Call initialization on Problem list of Initial objects
-  void p_initial () throw();
+  void p_initial ();
 
   // Call output on Problem list of Output objects
-  void p_output () throw();
+  void p_output ();
+
+  // Write patches
+  void p_write (int index);
 
   /// Reduce output, using p_output_write to send data to writing processes
-  void p_output_reduce() throw();
+  void s_write();
 
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
-  void p_output_write (int n, char * buffer) throw();
+  void p_output_write (int n, char * buffer);
 
-  /// Output synchronization for blocks 
-  void s_write() throw();
+  /// Wait for all local patches to check in before proceeding
+  void s_patch(CkCallback function);
+
+  /// Wait for all local patches to check in before proceeding to refresh
+  void s_initial();
+
+  /// Refresh ghost zones
+  void c_refresh();
 
   // Monitor output
-  void charm_monitor () throw();
+  void c_monitor ();
 
   // Stopping criteria and computation
-  void charm_compute () throw();
+  void c_compute ();
 
 #else
 
@@ -132,7 +144,7 @@ public: // interface
   { return performance_simulation_; }
 
   /// Return the group process object
-  GroupProcess * group_process() const throw()
+  const GroupProcess * group_process() const throw()
   { return group_process_; }
 
   /// Return the monitor object
@@ -200,9 +212,6 @@ protected: // functions
   /// Initialize the data object
   void initialize_data_descr_ () throw();
 
-  /// Initialize parallelism-related parameters
-  void initialize_parallel_  () throw();
-
   void deallocate_() throw();
 
   /// Perform actual output of performance data
@@ -225,15 +234,15 @@ protected: // attributes
   std::string parameter_file_;
 
   /// Parallel group for the simulation
-  GroupProcess * group_process_;
+  const GroupProcess * group_process_;
 
   /// Whether the group_process_ object was allocated inside Simulation
   bool is_group_process_new_;
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Counter for Block::p_write() synchronization
-  Counter block_counter_;
+  /// Counter for s_patch() synchronization
+  Counter patch_counter_;
 
 #endif
 

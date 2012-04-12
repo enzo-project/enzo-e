@@ -23,21 +23,34 @@ class Factory {
 
 public: // interface
 
+  Factory() throw()
+  {}
+ 
   /// Destructor (must be present to avoid possible vtable link errors)
   virtual ~Factory() throw()
   {}
 
   /// Create a new Hierarchy [abstract factory design pattern]
-  virtual Hierarchy * create_hierarchy () const throw ();
+  virtual Hierarchy * create_hierarchy (int dimension, int refinement) const throw ();
 
   /// Create a new Patch [abstract factory design pattern]
-  virtual Patch * create_patch
-  (GroupProcess * group_process,
+#ifdef CONFIG_USE_CHARM
+  virtual CProxy_Patch create_patch 
+#else
+  virtual Patch *      create_patch 
+#endif
+  (
+#ifndef CONFIG_USE_CHARM
+   const Factory * factory,
+#endif
    int nx,   int ny,  int nz,
    int nx0,  int ny0, int nz0,
    int nbx,  int nby, int nbz,
    double xm, double ym, double zm,
-   double xp, double yp, double zp) const throw();
+   double xp, double yp, double zp,
+   bool allocate_blocks = true,
+   int process_first=0, int process_last_plus=-1
+   ) const throw();
 
   /// Create an Input / Output accessor object for Block
   virtual IoBlock * create_io_block ( ) const throw();
@@ -47,24 +60,31 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Create a new CHARM++ Block array [abstract factory design pattern]
+  /// Create a new CHARM++ Block array
   virtual CProxy_Block create_block_array
   (int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
+   CProxy_Patch proxy_patch,
    int num_field_blocks = 1,
    bool allocate = true) const throw();
 
+  /// Pack / unpack the Factory in a CHARM++ program
+  void pup(PUP::er &p) {};
+
 #endif
 
-  /// Create a new Block [abstract factory design pattern]
+  /// Create a new Block
   virtual Block * create_block
   (int ibx, int iby, int ibz,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double xb, double yb, double zb,
+#ifdef CONFIG_USE_CHARM
+   CProxy_Patch proxy_patch,
+#endif
    int num_field_blocks = 1) const throw();
 
 };

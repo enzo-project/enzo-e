@@ -12,7 +12,7 @@ trace           = 1
 # Whether to periodically print basic statistics about field values.
 # See src/Field/field_FieldBlock.cpp
 
-debug           = 0
+debug           = 1
 
 # Whether to periodically print all field values.  See
 # src/Field/field_FieldBlock.cpp

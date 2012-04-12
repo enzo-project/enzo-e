@@ -32,7 +32,7 @@ private: // functions
   /// Create named initialization object
   virtual Initial *  create_initial_ 
   (std::string name, Parameters * parameters,
-   GroupProcess * group_process) throw ();
+   const GroupProcess * group_process) throw ();
 
   /// Create named method object
   virtual Method *   create_method_ 

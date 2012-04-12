@@ -17,7 +17,7 @@ EnzoSimulation::EnzoSimulation
 #ifdef CONFIG_USE_CHARM
  int n
 #else
- GroupProcess * group_process
+ const GroupProcess * group_process
 #endif
  ) throw()
   : Simulation
