@@ -391,7 +391,7 @@ void EnzoBlock::set_dt (double dt_param) throw ()
 
 void EnzoBlock::initialize () throw()
 {
-  DEBUG ("DEBUG EnzoBlock::initialize()\n");
+  DEBUG ("Enter EnzoBlock::initialize()\n");
 
   Block::initialize();
 
@@ -442,6 +442,7 @@ void EnzoBlock::initialize () throw()
   for (int field = 0; field < enzo::NumberOfBaryonFields; field++) {
     BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
   }
+  DEBUG ("Exit EnzoBlock::initialize()\n");
 
 }
 

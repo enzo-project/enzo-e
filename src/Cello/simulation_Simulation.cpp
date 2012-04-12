@@ -394,13 +394,17 @@ void Simulation::initialize_hierarchy_() throw()
   // Don't allocate blocks if reading data from files
   bool allocate_blocks = ! ( type == "file" || type == "restart" );
 
-  if (group_process()->is_root()) {
-    hierarchy_->create_root_patch
-      (field_descr_,
-       root_size[0],root_size[1],root_size[2],
-       root_blocks[0],root_blocks[1],root_blocks[2],
-       allocate_blocks);
-  }
+#ifdef CONFIG_USE_CHARM
+  // Distributed patches in Charm: only allocate on root processor
+  if (group_process()->is_root())
+#endif
+    {
+      hierarchy_->create_root_patch
+	(field_descr_,
+	 root_size[0],root_size[1],root_size[2],
+	 root_blocks[0],root_blocks[1],root_blocks[2],
+	 allocate_blocks);
+    }
 
 }
 

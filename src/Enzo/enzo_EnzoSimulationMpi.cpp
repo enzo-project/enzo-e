@@ -32,6 +32,8 @@ EnzoSimulationMpi::~EnzoSimulationMpi() throw()
 void EnzoSimulationMpi::run() throw()
 {
   
+  DEBUG("EnzoSimulationMpi::run()");
+
 #ifdef CONFIG_USE_MPI
   ReduceMpi    reduce(group_process_);
 #else
@@ -43,6 +45,8 @@ void EnzoSimulationMpi::run() throw()
   //--------------------------------------------------
   // INITIALIZE FIELDS
   //--------------------------------------------------
+
+  DEBUG("EnzoSimulationMpi::run() Initial");
 
   Initial * initial = problem->initial();
 
@@ -69,6 +73,8 @@ void EnzoSimulationMpi::run() throw()
   //--------------------------------------------------
   // REFRESH GHOST ZONES AND ENFORCE BOUNDARY CONDITIONS
   //--------------------------------------------------
+
+  DEBUG("EnzoSimulationMpi::run() refresh, Boundary ");
 
   double lower[3];
   hierarchy_->lower(&lower[0], &lower[1], &lower[2]);
@@ -97,6 +103,9 @@ void EnzoSimulationMpi::run() throw()
   // PERFORM SCHEDULED OUTPUT
   //--------------------------------------------------
 
+
+  DEBUG("EnzoSimulationMpi::run() Output");
+
   scheduled_output();
   
   //--------------------------------------------------
@@ -106,6 +115,8 @@ void EnzoSimulationMpi::run() throw()
   Stopping * stopping = problem->stopping();
 
   int stop_hierarchy = true;
+
+  DEBUG("EnzoSimulationMpi::run() Stopping");
 
   while ((patch = ++it_patch)) {
 

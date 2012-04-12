@@ -13,7 +13,7 @@
 
 //----------------------------------------------------------------------
 
-const GroupProcess * GroupProcess::create
+GroupProcess * GroupProcess::create
 (
  int process_first,
  int process_last_plus

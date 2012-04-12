@@ -18,6 +18,8 @@ module mesh {
 	bool allocate_blocks,
 	int process_first, int process_last_plus);
 
+     entry void p_test();
+
      entry void p_initial ();
      entry void s_initial ();
 

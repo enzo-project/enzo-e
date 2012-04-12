@@ -200,9 +200,7 @@ void Hierarchy::create_root_patch
   Patch * root_patch = factory()->create_patch
 #endif
     (
-#ifndef CONFIG_USE_CHARM
-     factory(),
-#endif
+     field_descr,
      nx,ny,nz,    // size
      0,0,0,       // offset
      nbx,nby,nbz, // blocking

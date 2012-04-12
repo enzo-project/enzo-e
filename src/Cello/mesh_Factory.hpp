@@ -40,9 +40,7 @@ public: // interface
   virtual Patch *      create_patch 
 #endif
   (
-#ifndef CONFIG_USE_CHARM
-   const Factory * factory,
-#endif
+   const FieldDescr * field_descr,
    int nx,   int ny,  int nz,
    int nx0,  int ny0, int nz0,
    int nbx,  int nby, int nbz,

@@ -191,11 +191,6 @@ void Output::write_hierarchy
   ) throw()
 {
 
-#ifdef CONFIG_USE_CHARM
-
-  proxy_simulation.p_write (index_charm_);
-
-#else
   ItPatch it_patch (hierarchy);
 
   // (*) write data patch_list_
@@ -206,7 +201,6 @@ void Output::write_hierarchy
     write_patch (patch, field_descr, 0,0,0);
 
   }
-#endif
 
 }
 
@@ -248,7 +242,7 @@ void Output::write_block
  ) throw()
 {
   // Write fields
-
+  DEBUG("Output::write_block");
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
     const FieldBlock * field_block = block->field_block();
     write_field (field_block,  field_descr, it_field_->value());

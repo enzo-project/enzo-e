@@ -136,6 +136,7 @@ void OutputData::write_block
   int ixp0, int iyp0, int izp0) throw()
 {
 
+  DEBUG("OutputData::write_block");
   // Create file group for block
 
   char buffer[40];

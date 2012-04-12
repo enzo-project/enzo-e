@@ -192,7 +192,7 @@ public: // CHARM++ PUPer
 
 public: // virtual functions
 
-  virtual void allocate (FieldDescr * field_descr) throw();
+  virtual void allocate (const FieldDescr * field_descr) throw();
 
   /// Set Block's cycle
   virtual void set_cycle (int cycle) throw()

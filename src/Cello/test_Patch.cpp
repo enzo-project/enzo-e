@@ -11,12 +11,30 @@
 
 #include "mesh.hpp"
 
+#ifdef CONFIG_USE_CHARM
+CProxy_Patch patch_global;
+#else
+Patch * patch_global;
+#endif
+
+  // Set Patch size, offset, and blocking
+
+  const int patch_size[] = {12,12,12};
+
+  const int patch_offset[] = {5, 2, 9};
+
+  const int patch_blocking[] = {3,3,3};
+
+  // Set domain extents
+
+  const double domain_lower[] = {0.0, 0.0, 0.0};
+  const double domain_upper[] = {1.0, 1.0, 1.0};
+
+
 PARALLEL_MAIN_BEGIN
 {
 
   PARALLEL_INIT;
-
-  const GroupProcess * group_process = GroupProcess::create();
 
   unit_init(0,1);
 
@@ -31,42 +49,37 @@ PARALLEL_MAIN_BEGIN
 
   FieldDescr * field_descr = new FieldDescr;
 
-  // Set Patch size, offset, and blocking
-
-  int patch_size[] = {12,12,12};
-
-  int patch_offset[] = {5, 2, 9};
-
-  int patch_blocking[] = {3,3,3};
-
-  // Set domain extents
-
-  double domain_lower[] = {0.0, 0.0, 0.0};
-  double domain_upper[] = {1.0, 1.0, 1.0};
-
   Factory * factory = new Factory;
 
-#ifdef CONFIG_USE_CHARM
-  CProxy_Patch proxy_patch = factory->create_patch 
-#else
-  Patch * patch = factory->create_patch
-#endif
+  patch_global = factory->create_patch 
     (
-#ifndef CONFIG_USE_CHARM
-     factory,
-#endif
+     field_descr,
      patch_size[0],     patch_size[1],     patch_size[2],
      patch_offset[0],   patch_offset[1],   patch_offset[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2],
      domain_lower[0],   domain_lower[1],   domain_lower[2],
      domain_upper[0],   domain_upper[1],   domain_upper[2]);
 
-  
+#ifdef CONFIG_USE_CHARM
+  patch_global.p_test();
+#else
+  patch_global->p_test();
+
+#endif
+
+  delete factory;
+  delete field_descr;
+}
+ 
+void Patch::p_test () throw()
+{
 
 #ifdef CONFIG_USE_CHARM
-  Patch * patch = proxy_patch.ckLocal();
-  if (patch == 0) assert(false);
+  Patch * patch = thisProxy.ckLocal();
+#else
+  Patch * patch = this;
 #endif
+
 
   unit_assert(patch != NULL);
 
@@ -154,6 +167,8 @@ PARALLEL_MAIN_BEGIN
   FieldBlock * field_block = 0;
 
   size_t block_counter = 0;
+
+  const GroupProcess * group_process = GroupProcess::create();
 
   while ((block = ++itBlock)) {
 
@@ -264,6 +279,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert(block_counter == patch->num_local_blocks());
 #endif
 
+  
   //--------------------------------------------------
 
   unit_func("deallocate_blocks");
@@ -271,9 +287,6 @@ PARALLEL_MAIN_BEGIN
   patch->deallocate_blocks();
 
   //--------------------------------------------------
-
-  delete patch;
-  delete field_descr;
 
   unit_finalize();
 

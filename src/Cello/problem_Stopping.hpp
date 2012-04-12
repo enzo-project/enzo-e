@@ -21,7 +21,7 @@ public: // interface
 	   double stop_time  = std::numeric_limits<double>::max()) throw()
     : stop_cycle_(stop_cycle),
       stop_time_ (stop_time)
-  {    DEBUG2 ("cycle %d    time  %f\n",  stop_cycle_,stop_time_); }
+  {    DEBUG2 ("cycle %d    time  %g\n",  stop_cycle_,stop_time_); }
 
   /// Destructor
   virtual ~Stopping()
@@ -36,7 +36,7 @@ public: // interface
       ERROR("Stopping::complete",
 	    "Neither Stopping::time_stop nor Stopping::cycle_stop initialized");
     }
-    DEBUG4 ("cycle %d %d   time %f %f\n",
+    DEBUG4 ("cycle %d %d   time %g %g\n",
 	    curr_cycle,stop_cycle_,curr_time,stop_time_);
 
     return 

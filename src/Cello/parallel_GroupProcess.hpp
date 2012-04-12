@@ -19,8 +19,8 @@ class GroupProcess
 
  public: // static interface
 
-  static const GroupProcess * create (int process_first     = 0,
-				      int process_last_plus = -1) throw();
+  static GroupProcess * create (int process_first     = 0,
+				int process_last_plus = -1) throw();
 
  protected: // interface
 

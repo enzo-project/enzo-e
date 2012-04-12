@@ -967,7 +967,7 @@ void Block::is_on_boundary (double lower[3], double upper[3],
 }
 //----------------------------------------------------------------------
 
-void Block::allocate (FieldDescr * field_descr) throw()
+void Block::allocate (const FieldDescr * field_descr) throw()
 { 
   DEBUG("Block::allocate()");
   // Allocate fields

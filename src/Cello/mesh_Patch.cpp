@@ -22,6 +22,7 @@ Patch::Patch
 (
 #ifndef CONFIG_USE_CHARM
  const Factory * factory,
+ const FieldDescr * field_descr,
 #endif
  int nx,  int ny,  int nz,
  int nx0, int ny0, int nz0,
@@ -76,7 +77,11 @@ Patch::Patch
   upper_[1] = yp;
   upper_[2] = zp;
 
+#ifdef CONFIG_USE_CHARM
   allocate_array_(allocate_blocks);
+#else
+  allocate_array_(allocate_blocks,field_descr);
+#endif
 
 #ifdef CONFIG_USE_CHARM
   proxy_simulation.s_initialize();
@@ -238,7 +243,12 @@ Block * Patch::local_block(size_t i) const throw()
 
 //======================================================================
 
-void Patch::allocate_array_(bool allocate_blocks) throw()
+void Patch::allocate_array_
+(
+ bool allocate_blocks,
+ const FieldDescr * field_descr
+) throw()
+  // NOTE: field_descr only needed for MPI; may be null for CHARM++
 {
 
 #ifndef CONFIG_USE_CHARM
@@ -286,6 +296,8 @@ void Patch::allocate_array_(bool allocate_blocks) throw()
 #ifdef CONFIG_USE_CHARM
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
+  DEBUG1 ("simulation = %p",simulation);
+
   const Factory * factory = simulation->factory();
 
   block_array_ = new CProxy_Block;

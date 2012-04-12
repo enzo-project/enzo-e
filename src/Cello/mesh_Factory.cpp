@@ -24,9 +24,7 @@ CProxy_Patch Factory::create_patch
 Patch * Factory::create_patch 
 #endif
 (
-#ifndef CONFIG_USE_CHARM
- const Factory * factory,
-#endif
+ const FieldDescr * field_descr,
  int nx,   int ny,  int nz,
  int nx0,  int ny0, int nz0,
  int nbx,  int nby, int nbz,
@@ -49,7 +47,8 @@ Patch * Factory::create_patch
   return proxy_patch;
 #else
   return new Patch
-    (factory,
+    (this,
+     field_descr,
      nx,ny,nz,
      nx0,ny0,nz0,
      nbx,nby,nbz,

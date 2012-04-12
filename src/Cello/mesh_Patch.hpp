@@ -32,6 +32,7 @@ class Patch
   (
 #ifndef CONFIG_USE_CHARM
    const Factory * factory,
+   const FieldDescr * field_descr,
 #endif
    int nx,   int ny,  int nz,
    int nx0,  int ny0, int nz0,
@@ -145,10 +146,15 @@ class Patch
 
 #endif
 
+  /// Unit test implementation: to simplify calling from Charm main
+  void p_test() throw();
+
 protected: // functions
 
   /// Allocate array, and optionally allocate element blocks
-  void allocate_array_(bool allocate_blocks = true) throw();
+  void allocate_array_
+  (bool allocate_blocks = true,
+   const FieldDescr * field_descr = 0) throw ();
 
 protected: // attributes
 

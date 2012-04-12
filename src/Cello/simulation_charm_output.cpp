@@ -111,9 +111,11 @@ void Block::p_write (int index_output)
   FieldDescr * field_descr = simulation->field_descr();
   Output * output = simulation->problem()->output(index_output);
 
+  DEBUG ("Block::p_write() calling Output::write_block()");
   output->write_block(this,field_descr,0,0,0);
 
   // Synchronize after writing
+  DEBUG ("Block::p_write() calling Patch::s_write()");
   proxy_patch_.s_write();
 }
 
