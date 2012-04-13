@@ -947,7 +947,7 @@ void Block::copy_(const Block & block) throw()
 //----------------------------------------------------------------------
 
 void Block::is_on_boundary (double lower[3], double upper[3],
-			     bool is_boundary[3][2]) throw()
+			    bool is_boundary[3][2]) throw()
 {
 
   // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
@@ -969,8 +969,6 @@ void Block::is_on_boundary (double lower[3], double upper[3],
 
 void Block::allocate (const FieldDescr * field_descr) throw()
 { 
-  DEBUG("Block::allocate()");
-  // Allocate fields
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i]->allocate_array(field_descr);
     field_block_[i]->allocate_ghosts(field_descr);
