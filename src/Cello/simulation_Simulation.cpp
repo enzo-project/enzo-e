@@ -12,6 +12,8 @@
 #include "simulation.hpp"
 #include "simulation_charm.hpp"
 
+bool config_performance = true;
+
 Simulation::Simulation
 (
  const char *   parameter_file,
@@ -661,7 +663,13 @@ void Simulation::monitor_output()
 
 #endif
 
-  performance_output(performance_cycle_);
+  if (config_performance) {
+    performance_output(performance_cycle_);
+  } else {
+#ifdef CONFIG_USE_CHARM
+    c_compute();
+#endif
+  }
 
 }
 
