@@ -13,8 +13,11 @@
 
 //----------------------------------------------------------------------
 
-GroupProcess * GroupProcess::create (int process_first,
-				     int process_last_plus) throw()
+GroupProcess * GroupProcess::create
+(
+ int process_first,
+ int process_last_plus
+ ) throw()
 {
   GroupProcess * group = 0;
 

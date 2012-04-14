@@ -10,7 +10,6 @@
 
 class Factory;
 class Hierarchy;
-class Patch;
 class FieldDescr;
 
 class InputData : public Input {

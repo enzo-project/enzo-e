@@ -36,7 +36,7 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_INIT;
 
   // Create global parallel process group object
-  GroupProcess * group_process = GroupProcess::create();
+  const GroupProcess * group_process = GroupProcess::create();
 
   // initialize unit testing
 

@@ -46,6 +46,7 @@ extern void m2_
 
   if (strlen(message) > 0) {
     monitor->write (fp,type,"%s:%d  %s %s",file_str.c_str(),line,function,buffer);
+    
   } else if (strlen(function) > 0) {
     monitor->write (fp,type,"%s:%d  %s",file_str.c_str(),line,function);
   } else {

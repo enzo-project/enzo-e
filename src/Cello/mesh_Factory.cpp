@@ -7,32 +7,56 @@
 
 #include "mesh.hpp"
 
+#ifdef CONFIG_USE_CHARM
+extern CProxy_Simulation  proxy_simulation;
+#endif
+
 //----------------------------------------------------------------------
-Hierarchy * Factory::create_hierarchy () const throw ()
+Hierarchy * Factory::create_hierarchy (int dimension, int refinement) const throw ()
 {
-  return new Hierarchy (this); 
+  return new Hierarchy (this,dimension,refinement); 
 }
 
 //----------------------------------------------------------------------
-
-Patch * Factory::create_patch
+#ifdef CONFIG_USE_CHARM
+CProxy_Patch Factory::create_patch 
+#else
+Patch * Factory::create_patch 
+#endif
 (
- GroupProcess * group_process,
+ const FieldDescr * field_descr,
  int nx,   int ny,  int nz,
  int nx0,  int ny0, int nz0,
  int nbx,  int nby, int nbz,
  double xm, double ym, double zm,
- double xp, double yp, double zp
+ double xp, double yp, double zp,
+ bool allocate_blocks,
+ int process_first, int process_last_plus
  ) const throw()
 {
+#ifdef CONFIG_USE_CHARM
+  CProxy_Patch proxy_patch = CProxy_Patch::ckNew
+    (nx,ny,nz,
+     nx0,ny0,nz0,
+     nbx,nby,nbz,
+     xm,ym,zm,
+     xp,yp,zp,
+     allocate_blocks,
+     process_first, process_last_plus);
+  DEBUG1("proxy_patch.ckLocal() = %p",proxy_patch.ckLocal());
+  return proxy_patch;
+#else
   return new Patch
-    (this,group_process,
+    (this,
+     field_descr,
      nx,ny,nz,
      nx0,ny0,nz0,
      nbx,nby,nbz,
      xm,ym,zm,
-     xp,yp,zp);
-
+     xp,yp,zp,
+     allocate_blocks,
+     process_first, process_last_plus);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -59,6 +83,7 @@ CProxy_Block Factory::create_block_array
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xb, double yb, double zb,
+ CProxy_Patch proxy_patch,
  int num_field_blocks,
  bool allocate
  ) const throw()
@@ -70,6 +95,7 @@ CProxy_Block Factory::create_block_array
        nx,ny,nz,
        xm,ym,zm, 
        xb,yb,zb, 
+       proxy_patch,
        num_field_blocks,
        nbx,nby,nbz);
   } else {
@@ -87,6 +113,9 @@ Block * Factory::create_block
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xb, double yb, double zb,
+#ifdef CONFIG_USE_CHARM
+ CProxy_Patch proxy_patch,
+#endif 
  int num_field_blocks
  ) const throw()
 {
@@ -96,6 +125,7 @@ Block * Factory::create_block
      nx,ny,nz,
      xm,ym,zm, 
      xb,yb,zb, 
+     proxy_patch,
      num_field_blocks,
      nbx,nby,nbz);
   return block_array(ibx,iby,ibz).ckLocal();

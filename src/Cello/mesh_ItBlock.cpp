@@ -34,8 +34,8 @@ Block * ItBlock::operator++ () throw()
     int ibx = (index1_ - 1) % nbx;
     int iby = (((index1_-1) - ibx)/nbx) % nby;
     int ibz = (index1_-1)/(nbx*nby);
-    CProxy_Block block_array = patch_->block_array();
-    block = block_array(ibx,iby,ibz).ckLocal();
+    CProxy_Block * block_array = patch_->block_array();
+    block = (*block_array)(ibx,iby,ibz).ckLocal();
   } while (block==NULL && index1_ <= nb);
   // assert: (block != NULL) or (index1_ > nb)
   if (index1_ > nb) index1_ = 0;

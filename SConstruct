@@ -5,12 +5,12 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
-# Whether to print out messages with the TRACE() statements
+# Whether to print out messages with the TRACE() series of statements
 
 trace           = 1
 
-# Whether to periodically print basic statistics about field values.
-# See src/Field/field_FieldBlock.cpp
+# Whether to print out messages with the DEBUG() series of statements
+# Also writes messages to out.debug.<P> where P is the (physical) process rank
 
 debug           = 0
 

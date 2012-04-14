@@ -7,6 +7,30 @@
 
 module mesh {
 
+  chare Patch {
+
+     entry Patch
+       (int nx,   int ny,  int nz,
+        int nx0,  int ny0, int nz0,
+        int nbx,  int nby, int nbz,
+        double xm, double ym, double zm,
+        double xp, double yp, double zp,
+	bool allocate_blocks,
+	int process_first, int process_last_plus);
+
+     entry void p_test();
+
+     entry void p_initial ();
+     entry void s_initial ();
+
+     entry void p_write (int index);
+     entry void s_write ();
+
+     entry void p_compute(int cycle, double time, double dt);
+     entry void p_refresh();
+    
+  };
+ 
   array[3D] Block {
 
     entry Block
@@ -15,6 +39,7 @@ module mesh {
        int nx, int ny, int nz,	
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
+       CProxy_Patch proxy_patch,
        int num_field_blocks);
 
     entry Block
@@ -22,18 +47,19 @@ module mesh {
        int nx, int ny, int nz,	
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
+       CProxy_Patch proxy_patch,
        int num_field_blocks);
 
     entry void p_initial();
     entry void p_initial_enforce();
-    entry void p_refresh(int cycle, double time, double dt);
+    entry void p_refresh();
     entry void p_compute(int cycle, double time, double dt);
     entry void p_refresh_face
       (int n, char buffer[n], int fx, int fy, int fz);
     entry void p_write (int index_output);
     entry void p_read ();
 
-    entry void p_call_refresh();
+//    entry void p_call_refresh();
     entry void p_call_output(CkReductionMsg * msg);
 
   };

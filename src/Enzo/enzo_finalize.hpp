@@ -4,7 +4,6 @@ void Main::enzo_finalize (Simulation * simulation)
 void enzo_finalize (Simulation * simulation)
 #endif
 {
-
   Parameters * parameters = simulation->parameters();
   Monitor * monitor       = simulation->monitor();
 

@@ -8,7 +8,8 @@
 #ifndef MESH_IT_PATCH_HPP
 #define MESH_IT_PATCH_HPP
 
-class ItPatch : public It<Patch> {
+class ItPatch : public It<Patch> 
+{
 
   /// @class    ItPatch
   /// @ingroup  Mesh

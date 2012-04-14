@@ -46,7 +46,7 @@ void Problem::initialize_boundary(Parameters * parameters) throw()
 //----------------------------------------------------------------------
 
 void Problem::initialize_initial(Parameters * parameters,
-				 GroupProcess * group_process) throw()
+				 const GroupProcess * group_process) throw()
 {
   //--------------------------------------------------
   // parameter: Initial : type
@@ -98,7 +98,7 @@ void Problem::initialize_timestep(Parameters * parameters) throw()
 void Problem::initialize_output
 (Parameters * parameters,
  FieldDescr * field_descr,
- GroupProcess * group_process,
+ const GroupProcess * group_process,
  const Factory * factory) throw()
 {
   // Create and initialize an Output object for each Output group
@@ -716,7 +716,7 @@ Initial * Problem::create_initial_
 (
  std::string  type,
  Parameters * parameters,
- GroupProcess * group_process
+ const GroupProcess * group_process
  ) throw ()
 { 
   //--------------------------------------------------
@@ -793,7 +793,7 @@ Output * Problem::create_output_
 (
  std::string    type,
  Parameters *   parameters,
- GroupProcess * group_process,
+ const GroupProcess * group_process,
  const Factory * factory
  ) throw ()
 /// @param type          Type of Output object to create

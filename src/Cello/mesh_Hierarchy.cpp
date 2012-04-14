@@ -13,20 +13,18 @@
 
 //----------------------------------------------------------------------
 
-Hierarchy::Hierarchy
-(
- const Factory * factory
- ) throw ()
+Hierarchy::Hierarchy ( const Factory * factory,
+		       int dimension, int refinement) throw ()
   : factory_(factory),
     patch_count_(0),
-    patch_tree_(0)
+    patch_tree_(new Tree (dimension,refinement))
 {
   // Initialize extents
   for (int i=0; i<3; i++) {
     lower_[i] = 0.0;
     upper_[i] = 1.0;
+    root_size_[i] = 1;
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -63,6 +61,15 @@ void Hierarchy::set_upper(double x, double y, double z) throw ()
 
 //----------------------------------------------------------------------
 
+void Hierarchy::set_root_size(int nx, int ny, int nz) throw ()
+{
+  root_size_[0] = nx;
+  root_size_[1] = ny;
+  root_size_[2] = nz;
+}
+
+//----------------------------------------------------------------------
+
 // int Hierarchy::dimension() const throw ()
 // { 
 //   return dimension_; 
@@ -94,13 +101,21 @@ int Hierarchy::dimension() const throw ()
 
 //----------------------------------------------------------------------
 
+void Hierarchy::root_size(int * nx, int * ny, int * nz) const throw ()
+{
+  if (nx) *nx = root_size_[0];
+  if (ny) *ny = root_size_[1];
+  if (nz) *nz = root_size_[2];
+}
+
+//----------------------------------------------------------------------
+
 void Hierarchy::lower(double * x, double * y, double * z) const throw ()
 {
   if (x) *x = lower_[0];
   if (y) *y = lower_[1];
   if (z) *z = lower_[2];
 }
-
 //----------------------------------------------------------------------
 
 void Hierarchy::upper(double * x, double * y, double * z) const throw ()
@@ -169,29 +184,30 @@ Patch * Hierarchy::patch(size_t i) const throw()
 
 void Hierarchy::create_root_patch 
 (
- GroupProcess * group_process,
- int dimension,
  FieldDescr   * field_descr,
  int nx, int ny, int nz,
  int nbx, int nby, int nbz,
- bool allocate_blocks) throw()
+ bool allocate_blocks,
+ int process_first, int process_last_plus) throw()
 {
-
-  const int refinement = 2; // refinement factor
-
-  patch_tree_ = new Tree (dimension,refinement);
 
   // Create new empty patch
 
+#ifdef CONFIG_USE_CHARM
+  CProxy_Patch * root_patch = new CProxy_Patch;
+  *root_patch = factory()->create_patch
+#else
   Patch * root_patch = factory()->create_patch
-    (group_process,
+#endif
+    (
+     field_descr,
      nx,ny,nz,    // size
      0,0,0,       // offset
      nbx,nby,nbz, // blocking
      lower_[0], lower_[1], lower_[2],
-     upper_[0], upper_[1], upper_[2]);
-
-  root_patch->allocate_array(field_descr,allocate_blocks);
+     upper_[0], upper_[1], upper_[2],
+     allocate_blocks,
+     process_first, process_last_plus);
 
   patch_tree_->root_node()->set_data(root_patch);
 }

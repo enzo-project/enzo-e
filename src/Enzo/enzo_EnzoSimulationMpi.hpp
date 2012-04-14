@@ -21,7 +21,7 @@ public: // functions
   /// Constructor
   EnzoSimulationMpi
   ( const char * parameter_file,
-    GroupProcess * group_process) throw();
+    const GroupProcess * group_process) throw();
 
   /// Destructor
   ~EnzoSimulationMpi() throw();

@@ -18,7 +18,7 @@ Simulation::Simulation
 #ifdef CONFIG_USE_CHARM
  int            n,
 #endif
- GroupProcess * group_process
+ const GroupProcess * group_process
  ) throw()
 /// Initialize the Simulation object
 : factory_(0),
@@ -27,7 +27,7 @@ Simulation::Simulation
   group_process_(group_process),
   is_group_process_new_(false),
 #ifdef CONFIG_USE_CHARM
-  block_counter_(0),
+  patch_counter_(0),
 #endif
   dimension_(0),
   cycle_(0),
@@ -70,6 +70,26 @@ Simulation::Simulation
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+
+Simulation::Simulation()
+  : patch_counter_(0)
+{ TRACE("Simulation()"); }
+
+#endif
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+Simulation::Simulation (CkMigrateMessage *m)
+  : patch_counter_(0)
+{ TRACE("Simulation(CkMigrateMessage)"); }
+
+#endif
+
+//----------------------------------------------------------------------
+
 Simulation::~Simulation() throw()
 {
   deallocate_();
@@ -89,31 +109,21 @@ void Simulation::initialize() throw()
   // INITIALIZE SIMULATION COMPONENTS
   // (warning: initialization may be order dependent)
 
-  // Initialize data
   initialize_data_descr_();
 
-  // Initialize boundary conditions
   problem_->initialize_boundary(parameters_);
 
-  // Initialize initial conditions
   problem_->initialize_initial(parameters_,group_process_);
 
-  // initialize stopping criteria
   problem_->initialize_stopping(parameters_);
 
-  // initialize timestep approach
   problem_->initialize_timestep(parameters_);
 
-  // Initialize list of output objects
   problem_->initialize_output
     (parameters_,field_descr_,group_process_,factory());
 
-  // Initialize list of methods
   problem_->initialize_method(parameters_);
 
-  initialize_parallel_();
-
-  // Initialize Mesh hierarchy
   initialize_hierarchy_();
 
 }
@@ -150,7 +160,7 @@ void Simulation::initialize_simulation_() throw()
 
   cycle_ = parameters_->value_integer("Initial:cycle",0);
   time_  = parameters_->value_float  ("Initial:time",0);
-
+  dt_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -234,14 +244,10 @@ void Simulation::initialize_data_descr_() throw()
 
   precision_enum precision = precision_unknown;
 
-  if (precision_str == "default")
-    precision = precision_default;
-  else if (precision_str == "single")
-    precision = precision_single;
-  else if (precision_str == "double")
-    precision = precision_double;
-  else if (precision_str == "quadruple")
-    precision = precision_quadruple;
+  if      (precision_str == "default")   precision = precision_default;
+  else if (precision_str == "single")    precision = precision_single;
+  else if (precision_str == "double")    precision = precision_double;
+  else if (precision_str == "quadruple") precision = precision_quadruple;
   else {
     ERROR1 ("Simulation::initialize_data_descr_()", 
 	    "Unknown precision %s",
@@ -321,7 +327,8 @@ void Simulation::initialize_hierarchy_() throw()
   // Create and initialize Hierarchy
   //----------------------------------------------------------------------
 
-  hierarchy_ = factory()->create_hierarchy();
+  const int refinement = 2;
+  hierarchy_ = factory()->create_hierarchy (dimension_,refinement);
 
   // Domain extents
 
@@ -330,11 +337,11 @@ void Simulation::initialize_hierarchy_() throw()
   // parameter: Domain : upper
   //--------------------------------------------------
 
-  ASSERT ("Simulation::initialize_simulation_",
+  ASSERT ("Simulation::initialize_hierarchy_",
 	  "Parameter Domain:lower list length must match Physics::dimension",
 	  (parameters_->list_length("Domain:lower") == dimension_));
 
-  ASSERT ("Simulation::initialize_simulation_",
+  ASSERT ("Simulation::initialize_hierarchy_",
 	  "Parameter Domain:upper list length must match Physics::dimension",
 	  (parameters_->list_length("Domain:upper") ==  dimension_));
 
@@ -344,7 +351,7 @@ void Simulation::initialize_hierarchy_() throw()
   for (int i=0; i<3; i++) {
     lower[i] = parameters_->list_value_float(i, "Domain:lower", 0.0);
     upper[i] = parameters_->list_value_float(i, "Domain:upper", 0.0);
-    ASSERT ("Simulation::initialize_simulation_",
+    ASSERT ("Simulation::initialize_hierarchy_",
 	    "Domain:lower may not be greater than Domain:upper",
 	    lower[i] <= upper[i]);
   }
@@ -367,6 +374,8 @@ void Simulation::initialize_hierarchy_() throw()
   root_size[1] = parameters_->list_value_integer(1,"Mesh:root_size",1);
   root_size[2] = parameters_->list_value_integer(2,"Mesh:root_size",1);
 
+  hierarchy_->set_root_size(root_size[0],root_size[1],root_size[2]);
+
   int root_blocks[3];
 
   root_blocks[0] = parameters_->list_value_integer(0,"Mesh:root_blocks",1);
@@ -374,7 +383,7 @@ void Simulation::initialize_hierarchy_() throw()
   root_blocks[2] = parameters_->list_value_integer(2,"Mesh:root_blocks",1);
 
 #ifndef CONFIG_USE_CHARM
-  ASSERT4 ("Simulation::initialize_simulation_",
+  ASSERT4 ("Simulation::initialize_hierarchy_",
 	   "Product of Mesh:root_blocks = [%d %d %d] must equal MPI_Comm_size = %d",
 	   root_blocks[0],root_blocks[1],root_blocks[2], group_process_->size(),
 	   root_blocks[0]*root_blocks[1]*root_blocks[2]==group_process_->size());
@@ -385,20 +394,20 @@ void Simulation::initialize_hierarchy_() throw()
   // Don't allocate blocks if reading data from files
   bool allocate_blocks = ! ( type == "file" || type == "restart" );
 
-  hierarchy_->create_root_patch
-    (group_process_,dimension_,
-     field_descr_,
-     root_size[0],root_size[1],root_size[2],
-     root_blocks[0],root_blocks[1],root_blocks[2],
-     allocate_blocks);
+#ifdef CONFIG_USE_CHARM
+  // Distributed patches in Charm: only allocate on root processor
+  if (group_process()->is_root())
+#endif
+    {
+      hierarchy_->create_root_patch
+	(field_descr_,
+	 root_size[0],root_size[1],root_size[2],
+	 root_blocks[0],root_blocks[1],root_blocks[2],
+	 allocate_blocks);
+    }
 
 }
 
-//----------------------------------------------------------------------
-
-void Simulation::initialize_parallel_() throw()
-{
-}
 //----------------------------------------------------------------------
 
 void Simulation::deallocate_() throw()
@@ -430,30 +439,21 @@ const Factory * Simulation::factory() const throw()
 
 #ifdef CONFIG_USE_CHARM
 
-Simulation::Simulation()
-  : block_counter_(0)
-{
-}
+//----------------------------------------------------------------------
 
-#endif
+void Simulation::s_initialize()
+{
+  DEBUG("Begin s_initialize()");
+  if (patch_counter_.remaining() == 0) {
+    DEBUG("Calling run()");
+    run();
+  }
+  DEBUG("End s_initialize()");
+}
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
-Simulation::Simulation (CkMigrateMessage *m) 
-  : block_counter_(0)
-{
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-
-#ifdef CONFIG_USE_CHARM
-
-void Simulation::charm_monitor() throw()
+void Simulation::c_monitor()
 {
   //--------------------------------------------------
   // Monitor
@@ -463,19 +463,62 @@ void Simulation::charm_monitor() throw()
 
 }
 
-void Simulation::charm_compute() throw()
+//----------------------------------------------------------------------
+
+void Simulation::s_patch(CkCallback callback)
+{
+  if (patch_counter_.remaining() == 0) {
+    callback.send();
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::s_initial()
+{
+  if (patch_counter_.remaining() == 0) {
+    DEBUG ("Simulation::s_initial() calling c_refresh()");
+    c_refresh();
+  } else  DEBUG ("Simulation::s_initial() skipping c_refresh()");
+
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::c_refresh()
+{
+  DEBUG ("Simulation::c_refresh()");
+  ItPatch it_patch(hierarchy_);
+  Patch * patch;
+
+  while (( patch = ++it_patch )) {
+    DEBUG ("Simulation::c_refresh() calling Patch::p_refresh()");
+    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+    proxy_patch->p_refresh();
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::c_compute()
 {
   //--------------------------------------------------
   // Stopping
   //--------------------------------------------------
 
+  DEBUG1 ("Simulation::c_compute() stop_ = %d",stop_);
+
   if (stop_) {
+    DEBUG0;
 
     performance_output(performance_simulation_);
 
+    DEBUG0;
     proxy_main.p_exit(CkNumPes());
+    DEBUG0;
 
   } else {
+    DEBUG0;
 
     //--------------------------------------------------
     // Compute
@@ -484,11 +527,14 @@ void Simulation::charm_compute() throw()
     ItPatch it_patch(hierarchy_);
     Patch * patch;
     while (( patch = ++it_patch )) {
-      if (patch->blocks_allocated()) {
-	patch->block_array().p_compute(cycle_, time_, dt_);
-      }
+      CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+      DEBUG3("cycle %d time %f dt %f",
+	     cycle_,time_,dt_);
+      proxy_patch->p_compute(cycle_, time_, dt_);
     }
+    DEBUG0;
   }
+    DEBUG0;
 
 }
 
@@ -584,6 +630,9 @@ void Simulation::scheduled_output()
 
 void Simulation::update_cycle(int cycle, double time, double dt, double stop) 
 {
+  DEBUG4 ("Simulation::update_cycle cycle %d time %f dt %f stop %f",
+	  cycle,time,dt,stop);
+ 
   cycle_ = cycle;
   time_  = time;
   dt_    = dt;
@@ -656,6 +705,7 @@ void Simulation::performance_output(Performance * performance)
   // First reduce minimum values
 
   CkCallback callback (CkIndex_Simulation::p_perf_output_min(NULL),thisProxy);
+
   contribute( num_perf_*sizeof(double), perf_val_, 
 	      CkReduction::min_double, callback);
 #else
@@ -785,7 +835,7 @@ void Simulation::output_performance_()
 
 #ifdef CONFIG_USE_CHARM
   if (performance_curr_ == performance_cycle_) {
-    charm_compute();
+    c_compute();
   } else {
     proxy_main.p_exit(CkNumPes());
   }

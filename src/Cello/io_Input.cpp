@@ -28,7 +28,7 @@ Input::Input (const Factory * factory) throw()
     process_stride_(1) // default one file per process
 {
 
-  GroupProcess * group_process = GroupProcess::create();
+  const GroupProcess * group_process = GroupProcess::create();
   process_  = group_process->rank();
   delete group_process;
 
@@ -112,7 +112,7 @@ Patch * Input::read_patch
 
   if (patch->blocks_allocated()) {
     // p_read() NOT IMPLEMENTED
-    patch->block_array().p_read ();
+    patch->block_array()->p_read ();
   }
 
 #else
