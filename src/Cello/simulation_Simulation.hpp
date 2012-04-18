@@ -76,7 +76,7 @@ public: // interface
   // Call output on Problem list of Output objects
   void p_output ();
 
-  // Write patches
+  // Write patches for indexed Output object
   void p_write (int index);
 
   /// Reduce output, using p_output_write to send data to writing processes

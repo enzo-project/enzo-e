@@ -148,7 +148,11 @@ void Problem::output_wait(Simulation * simulation) throw()
   int ip       = CkMyPe();
   int ip_writer = output->process_writer();
 
-  if (ip != ip_writer) {
+  if (ip == ip_writer) {
+
+    proxy_simulation[ip].p_output_write(0,0);
+
+  } else {
 
     int n=1;  char * buffer = 0;
 
@@ -169,10 +173,6 @@ void Problem::output_wait(Simulation * simulation) throw()
 
     // Continue with next output object if any
     output_next(simulation);
-
-  } else {
-
-    proxy_simulation[ip].p_output_write(0,0);
 
   }
 
