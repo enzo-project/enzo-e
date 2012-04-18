@@ -34,16 +34,25 @@ void IoPatch::meta_value
  void ** buffer, std::string * name, enum scalar_type * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
+  DEBUG0;
   Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
+  DEBUG0;
+
+  DEBUG1 ("patch = %p",patch_);
 
 #ifdef CONFIG_USE_CHARM
-  Patch * patch = ((CProxy_Patch *)patch_)->ckLocal();
+  DEBUG0;
+  const Patch * patch = ((CProxy_Patch *)patch_)->ckLocal();
+  DEBUG0;
 #else
-  Patch * patch = patch_;
+  const Patch * patch = patch_;
 #endif
 
   int count = 0;
 
+  DEBUG0;
+  DEBUG1 ("patch = %p",patch);
+  DEBUG1 ("patch id = %d",patch->id_);
   if (index == count++) {
     *buffer = (void *) &patch->id_;
     *type   = scalar_type_int;

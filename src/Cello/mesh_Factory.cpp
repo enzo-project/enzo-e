@@ -49,6 +49,7 @@ Factory::create_patch
      allocate_blocks,
      process_first, process_last_plus);
 
+  DEBUG1 ("proxy_patch = %p",proxy_patch);
   return proxy_patch;
 #else
   DEBUG1("ID = %d",id);
