@@ -4,7 +4,7 @@ cc  = {}
 
 is_arch_valid = 1
 
-flags_arch = '-Ktrap=fp -g'
+flags_arch = '-Ktrap=fp -g -O3'
 flags_link = '-pgf90libs'
 
 cc['mpi']     = 'mpicc'

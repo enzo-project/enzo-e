@@ -196,6 +196,8 @@ elif (arch == "ncsa-bw"):      from ncsa_bw      import *
 elif (arch == "triton-pgi"):   from triton_pgi   import *
 elif (arch == "triton-intel"): from triton_intel import *
 elif (arch == "triton-gnu"):   from triton_gnu   import *
+elif (arch == "triton-tau"):   from triton_tau   import *
+elif (arch == "triton-jump"):  from triton_jump  import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
