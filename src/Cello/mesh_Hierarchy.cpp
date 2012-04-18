@@ -194,11 +194,14 @@ void Hierarchy::create_root_patch
   // Create new empty patch
 
 #ifdef CONFIG_USE_CHARM
-  CProxy_Patch * root_patch = new CProxy_Patch;
-  *root_patch = factory()->create_patch
+  CProxy_Patch * root_patch;
 #else
-  Patch * root_patch = factory()->create_patch
+  Patch * root_patch;
 #endif
+
+  int patch_id = 0;
+  DEBUG1("ID = %d",patch_id);
+  root_patch = factory()->create_patch
     (
      field_descr,
      nx,ny,nz,    // size
@@ -206,8 +209,10 @@ void Hierarchy::create_root_patch
      nbx,nby,nbz, // blocking
      lower_[0], lower_[1], lower_[2],
      upper_[0], upper_[1], upper_[2],
+     patch_id,
      allocate_blocks,
      process_first, process_last_plus);
 
   patch_tree_->root_node()->set_data(root_patch);
+  DEBUG1 ("patch = %p",root_patch);
 }

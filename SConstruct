@@ -12,7 +12,7 @@ trace           = 1
 # Whether to print out messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
 
-debug           = 0
+debug           = 1
 
 # Whether to periodically print all field values.  See
 # src/Field/field_FieldBlock.cpp

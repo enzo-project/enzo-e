@@ -495,6 +495,7 @@ void Simulation::c_refresh()
 
   while (( patch = ++it_patch )) {
     DEBUG ("Simulation::c_refresh() calling Patch::p_refresh()");
+    DEBUG1 ("patch = %p",patch);
     CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
     proxy_patch->p_refresh();
   }

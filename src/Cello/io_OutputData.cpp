@@ -90,6 +90,11 @@ void OutputData::write_patch
  int ixp0, int iyp0, int izp0
  ) throw()
 {
+#ifdef CONFIG_USE_CHARM
+
+  //  patch = ((CProxy_Patch *)patch) -> ckLocal();
+
+#endif
   // Create file group for patch
 
   char buffer[40];
@@ -106,12 +111,20 @@ void OutputData::write_patch
 
   // Also write the patches parallel Layout
 
-  IoLayout io_layout(patch->layout());
+  DEBUG0;
+#ifdef CONFIG_USE_CHARM
+  const Layout * layout = ((CProxy_Patch *)patch)->ckLocal()->layout();
+#else
+  const Layout * layout = patch->layout();
+#endif
+  IoLayout io_layout(layout);
 
   Output::write_meta_group (&io_layout);
+  DEBUG0;
 
   // Call write_block() on contained blocks
   Output::write_patch(patch,field_descr,ixp0,iyp0,izp0);
+  DEBUG0;
 
 #ifndef CONFIG_USE_CHARM
   end_write_patch();
@@ -123,8 +136,10 @@ void OutputData::write_patch
 
 void OutputData::end_write_patch() throw()
 {
+  DEBUG0;
   file_->group_close();
   file_->group_chdir("..");
+  DEBUG0;
 }
 //----------------------------------------------------------------------
 

@@ -41,6 +41,8 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
    CProxy_Patch proxy_patch,
 #endif
+   int patch_id,
+   int patch_rank,
    int num_field_blocks
 ) throw();
 
@@ -56,6 +58,8 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
    CProxy_Patch proxy_patch,
 #endif
+   int patch_id,
+   int patch_rank,
    int num_field_blocks
 ) throw();
 
@@ -263,6 +267,12 @@ protected: // attributes
 
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;
+
+  /// ID of parent patch
+  int patch_id_;
+
+  /// Process of parent patch (for Charm++ IO)
+  int patch_rank_;
 
   /// Index into Patch [redundant with CHARM thisIndex.x .y .z]
   int index_[3];

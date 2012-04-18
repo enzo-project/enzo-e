@@ -706,6 +706,7 @@ void FileHdf5::write_meta_
 
   // Write the attribute 
 
+  DEBUG1("buffer = %p",buffer);
   H5Awrite (meta_id, scalar_to_hdf5_(type), buffer);
 
   // Close the attribute dataspace

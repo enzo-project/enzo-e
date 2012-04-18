@@ -35,10 +35,11 @@ public: // interface
 
   /// Create a new Patch [abstract factory design pattern]
 #ifdef CONFIG_USE_CHARM
-  virtual CProxy_Patch create_patch 
+  virtual CProxy_Patch * 
 #else
-  virtual Patch *      create_patch 
+  virtual Patch *
 #endif
+  create_patch 
   (
    const FieldDescr * field_descr,
    int nx,   int ny,  int nz,
@@ -46,6 +47,7 @@ public: // interface
    int nbx,  int nby, int nbz,
    double xm, double ym, double zm,
    double xp, double yp, double zp,
+   int id,
    bool allocate_blocks = true,
    int process_first=0, int process_last_plus=-1
    ) const throw();
@@ -65,6 +67,8 @@ public: // interface
    double xm, double ym, double zm,
    double hx, double hy, double hz,
    CProxy_Patch proxy_patch,
+   int patch_id,
+   int patch_rank,
    int num_field_blocks = 1,
    bool allocate = true) const throw();
 
@@ -83,6 +87,8 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
    CProxy_Patch proxy_patch,
 #endif
+   int patch_id,
+   int patch_rank,
    int num_field_blocks = 1) const throw();
 
 };

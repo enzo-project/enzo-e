@@ -217,6 +217,7 @@ void Output::write_patch
 
 #ifdef CONFIG_USE_CHARM
 
+  DEBUG0;
   CProxy_Patch * proxy_patch = (CProxy_Patch *)(patch);
   proxy_patch->p_write (index_charm_);
 

@@ -22,12 +22,16 @@ EnzoBlock::EnzoBlock
 #ifdef CONFIG_USE_CHARM
  CkChareID proxy_patch,
 #endif
+ int patch_id,
+ int patch_rank,
  int num_field_blocks) throw()
   : Block (ix,iy,iz,
 	   nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
 #ifdef CONFIG_USE_CHARM
 	   proxy_patch,
 #endif
+	   patch_id,
+	   patch_rank,
 	   num_field_blocks),
     Time_(0),
     CycleNumber(0),
@@ -67,9 +71,11 @@ EnzoBlock::EnzoBlock
  double xm, double ym, double zm,
  double xp, double yp, double zp,
  CkChareID proxy_patch,
+ int patch_id,
+ int patch_rank,
  int num_field_blocks) throw()
   : Block (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
-	   proxy_patch,num_field_blocks),
+	   proxy_patch,patch_id,patch_rank,num_field_blocks),
     Time_(0),
     CycleNumber(0),
     OldTime(0),

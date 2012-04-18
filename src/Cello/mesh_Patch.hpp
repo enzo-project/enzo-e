@@ -31,7 +31,7 @@ class Patch
   Patch
   (
 #ifndef CONFIG_USE_CHARM
-   const Factory * factory,
+   const Factory    * factory,
    const FieldDescr * field_descr,
 #endif
    int nx,   int ny,  int nz,
@@ -39,6 +39,7 @@ class Patch
    int nbx,  int nby, int nbz,
    double xm, double ym, double zm,
    double xp, double yp, double zp,
+   int id,
    bool allocate_blocks = true,
    int process_first =0, int process_last_plus=-1
    ) throw();
@@ -166,6 +167,9 @@ protected: // attributes
 #else
   std::vector<Block * > block_;
 #endif
+
+  /// ID of this Patch
+  int id_;
 
   /// Factory object for creating Blocks
   const Factory * factory_;

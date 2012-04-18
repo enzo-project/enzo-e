@@ -15,6 +15,7 @@ module mesh {
         int nbx,  int nby, int nbz,
         double xm, double ym, double zm,
         double xp, double yp, double zp,
+	int id,
 	bool allocate_blocks,
 	int process_first, int process_last_plus);
 
@@ -40,6 +41,8 @@ module mesh {
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
        CProxy_Patch proxy_patch,
+       int patch_id,
+       int patch_rank,
        int num_field_blocks);
 
     entry Block
@@ -48,6 +51,8 @@ module mesh {
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
        CProxy_Patch proxy_patch,
+       int patch_id,
+       int patch_rank,
        int num_field_blocks);
 
     entry void p_initial();

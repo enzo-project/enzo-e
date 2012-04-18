@@ -37,20 +37,19 @@ void IoLayout::meta_value
   TRACE1("layout=%p",layout_);
   if (index == 0) {
 
-    TRACE0;
-    TRACE1("process_first_ = %d",layout_->process_first_);
+    TRACE2("process_first_ = %p %d",layout_, layout_->process_first_);
     *buffer = (void *) &layout_->process_first_;
     *type   = scalar_type_int;
     
   } else if (index == 1) {
 
-    TRACE1("process_first_ = %d",layout_->process_count_);
+    TRACE2("process_first_ = %p %d",layout_, layout_->process_count_);
     *buffer = (void *) &layout_->process_count_;
     *type   = scalar_type_int;
 
   } else if (index == 2) {
 
-    TRACE1("process_first_ = %d",layout_->block_count_);
+    TRACE2("process_first_ = %p %d",layout_,layout_->block_count_[0]);
     *buffer = (void *) layout_->block_count_;
     *type   = scalar_type_int;
     *nxd     = 3;

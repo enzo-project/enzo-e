@@ -23,6 +23,8 @@ Block::Block
 #ifdef CONFIG_USE_CHARM
  CProxy_Patch proxy_patch,
 #endif
+ int patch_id,
+ int patch_rank,
  int num_field_blocks
 ) throw ()
   :
@@ -32,10 +34,14 @@ Block::Block
 #endif
      num_field_blocks_(num_field_blocks),
      field_block_(),
+     patch_id_(patch_id),
+     patch_rank_(patch_rank),
      cycle_(0),
      time_(0),
      dt_(0)
 { 
+  DEBUG1("ID = %d",patch_id);
+  DEBUG1("IP = %d",patch_rank);
 // #ifdef CONFIG_USE_CHARM
 
 // #ifdef CONFIG_CHARM_ATSYNC
@@ -83,16 +89,23 @@ Block::Block
 #ifdef CONFIG_USE_CHARM
  CProxy_Patch proxy_patch,
 #endif
+ int patch_id,
+ int patch_rank,
  int num_field_blocks) throw ()
   : count_refresh_face_(0),
     proxy_patch_(proxy_patch),
     num_field_blocks_(num_field_blocks),
     field_block_(),
+    patch_id_(patch_id),
+    patch_rank_(patch_rank),
     cycle_(0),
     time_(0),
     dt_(0)
 
 { 
+  DEBUG1("ID = %d",patch_id_);
+  DEBUG1("IP = %d",patch_rank_);
+
 #ifdef CONFIG_CHARM_ATSYNC
   usesAtSync = CmiTrue;
 #endif

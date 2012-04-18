@@ -32,6 +32,8 @@ module enzo {
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
        CProxy_Patch proxy_patch,
+       int patch_id,
+       int patch_rank,
        int num_field_blocks);
 
     entry EnzoBlock
@@ -40,6 +42,8 @@ module enzo {
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
        CProxy_Patch proxy_patch,
+       int patch_id,
+       int patch_rank,
        int num_field_blocks);
   };
 

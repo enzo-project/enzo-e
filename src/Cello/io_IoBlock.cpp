@@ -10,10 +10,12 @@
 //----------------------------------------------------------------------
 
 IoBlock::IoBlock() throw ()
-  : Io(8,0),
+  : Io(10,0),
     block_(0)
 {
   meta_name_.push_back("num_field_blocks");
+  meta_name_.push_back("patch_id");
+  meta_name_.push_back("patch_rank");
   meta_name_.push_back("index");
   meta_name_.push_back("size");
   meta_name_.push_back("lower");
@@ -38,55 +40,42 @@ void IoBlock::meta_value
 {
   Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
 
-  if (index == 0) {
+  int count = 0;
 
+  if (index == count++) {
     *buffer = (void *) & block_->num_field_blocks_;
     *type   = scalar_type_int;
-    *nxd     = 1;
-
-  } else if (index == 1) {
-
+  } else if (index == count++) {
+    *buffer = (void *) & block_->patch_id_;
+    *type   = scalar_type_int;
+  } else if (index == count++) {
+    *buffer = (void *) & block_->patch_rank_;
+    *type   = scalar_type_int;
+  } else if (index == count++) {
     *buffer = (void *) & block_->index_;
     *type   = scalar_type_int;
     *nxd     = 3;
-
-  } else if (index == 2) {
-
+  } else if (index == count++) {
     *buffer = (void *) block_->size_;
     *type   = scalar_type_int;
     *nxd     = 3;
-    
-  } else if (index == 3) {
-
+  } else if (index == count++) {
     *buffer = (void *) block_->lower_;
     *type   = scalar_type_double;
     *nxd     = 3;
-
-  } else if (index == 4) {
-
+  } else if (index == count++) {
     *buffer = (void *) block_->upper_;
     *type   = scalar_type_double;
     *nxd     = 3;
-
-  } else if (index == 5) {
-
+  } else if (index == count++) {
     *buffer = (void *) & block_->cycle_;
     *type   = scalar_type_int;
-    *nxd     = 1;
-
-
-  } else if (index == 6) {
-
+  } else if (index == count++) {
     *buffer = (void *) & block_->time_;
     *type   = scalar_type_double;
-    *nxd     = 1;
-
-  } else if (index == 7) {
-
+  } else if (index == count++) {
     *buffer = (void *) & block_->dt_;
     *type   = scalar_type_double;
-    *nxd     = 1;
-
   }
 }
 
