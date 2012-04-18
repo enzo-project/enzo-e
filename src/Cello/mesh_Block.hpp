@@ -11,6 +11,8 @@
 class FieldDescr;
 class FieldBlock;
 class Patch;
+class Factory;
+class GroupProcess;
 
 #ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
@@ -36,7 +38,13 @@ public: // interface
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
-   int num_field_blocks) throw();
+#ifdef CONFIG_USE_CHARM
+   CProxy_Patch proxy_patch,
+#endif
+   int patch_id,
+   int patch_rank,
+   int num_field_blocks
+) throw();
 
 #ifdef CONFIG_USE_CHARM
 
@@ -47,13 +55,28 @@ public: // interface
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
-   int num_field_blocks) throw();
+#ifdef CONFIG_USE_CHARM
+   CProxy_Patch proxy_patch,
+#endif
+   int patch_id,
+   int patch_rank,
+   int num_field_blocks
+) throw();
 
   /// Initialize an empty Block
   Block() { };
 
   /// Initialize a migrated Block
   Block (CkMigrateMessage *m) { };
+
+#endif
+
+#ifdef CONFIG_USE_CHARM
+
+public: // CHARM++ PUPer
+
+  /// Pack / unpack the Block in a CHARM++ program
+  void pup(PUP::er &p);
 
   /// Initialize block for the simulation.
   void p_initial();
@@ -62,12 +85,10 @@ public: // interface
   void p_initial_enforce();
 
   /// Refresh ghost zones and apply boundary conditions
-  void p_refresh(int cycle, double time, double dt);
+  void p_refresh();
 
   /// Apply the numerical methods on the block
   void p_compute(int cycle, double time, double dt);
-
-  ///
 
   /// Refresh a FieldFace
   void p_refresh_face(int n, char buffer[],int fx, int fy, int fz);
@@ -78,8 +99,8 @@ public: // interface
   /// Contribute block data to the Initial input object
   void p_read ();
 
-  /// Entry function after initial barrier to call refresh()
-  void p_call_refresh();
+  // /// Entry function after initial barrier to call refresh()
+  // void p_call_refresh();
 
   /// Entry function after prepare() to call Simulation::p_output()
   void p_call_output(CkReductionMsg * msg);
@@ -175,7 +196,7 @@ public: // interface
 
 public: // virtual functions
 
-  virtual void allocate (FieldDescr * field_descr) throw();
+  virtual void allocate (const FieldDescr * field_descr) throw();
 
   /// Set Block's cycle
   virtual void set_cycle (int cycle) throw()
@@ -229,11 +250,29 @@ protected: // functions
 
 protected: // attributes
 
+#ifdef CONFIG_USE_CHARM
+
+  /// Counter when refreshing faces
+  int count_refresh_face_;
+
+  /// Parent patch
+  CProxy_Patch proxy_patch_;
+
+#endif
+
+  //--------------------------------------------------
+
   /// Number of field blocks (required by CHARM++ PUP::er)
   int num_field_blocks_;
 
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;
+
+  /// ID of parent patch
+  int patch_id_;
+
+  /// Process of parent patch (for Charm++ IO)
+  int patch_rank_;
 
   /// Index into Patch [redundant with CHARM thisIndex.x .y .z]
   int index_[3];
@@ -249,8 +288,6 @@ protected: // attributes
 
   //--------------------------------------------------
 
-  //--------------------------------------------------
-
   /// Current cycle number
   int cycle_;
 
@@ -259,52 +296,6 @@ protected: // attributes
 
   /// Current timestep
   double dt_;
-
-  //--------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-  /// Counter when refreshing faces
-  int count_refresh_face_;
-
-#endif
-
-#ifdef CONFIG_USE_CHARM
-
-public: // CHARM++ PUPer
-
-  /// Pack / unpack the Block in a CHARM++ program
-  void pup(PUP::er &p)
-  {
-    p | num_field_blocks_;
-
-    // allocate field_block_[] vector first if unpacking
-    if (p.isUnpacking()) {
-      field_block_.resize(num_field_blocks_);
-    }
-
-    for (int i=0; i<num_field_blocks_; i++) {
-      p | *field_block_[i];
-    }
-
-    PUParray(p,index_,3);
-
-    PUParray(p,size_,3);
-
-    PUParray(p,lower_,3);
-
-    PUParray(p,upper_,3);
-
-    p | cycle_;
-    p | time_;
-    p | dt_;
-
-    p | count_refresh_face_;
-
-  }
-
-#endif
-
 
 };
 

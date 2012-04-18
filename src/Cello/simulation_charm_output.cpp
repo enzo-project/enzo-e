@@ -21,16 +21,9 @@
 
 // (Called from BlockReduce::p_prepare())
 
-void Simulation::p_output () throw()
+void Simulation::p_output ()
 {
-  // Set synchronization counter for Simulation::s_write()
-  int num_blocks = hierarchy()->patch(0)->num_blocks();
-  block_counter_.set_value(num_blocks);
-
-  // reset output "loop" over output objects
   problem()->output_first();
-
-  // process first output object, which continues with refresh() if done
   problem()->output_next(this);
 }
 
@@ -78,7 +71,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
   } else {
 
-    simulation->charm_monitor();
+    simulation->c_monitor();
 
   }
 }
@@ -89,58 +82,64 @@ void Problem::output_next(Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
-void Block::p_write (int index_output)
+void Simulation::p_write(int index)
 {
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  FieldDescr * field_descr = simulation->field_descr();
-  Output * output = simulation->problem()->output(index_output);
-
-  output->write_block(this,field_descr,0,0,0);
-
-  // Synchronize via main chare before writing
-  //  Hierarchy * hierarchy = simulation->hierarchy();
-  //  int num_blocks = hierarchy->patch(0)->num_blocks();
-  //  simulation->proxy_block_reduce().p_output_reduce (num_blocks);
-  proxy_simulation[0].s_write();
-}
-
-//----------------------------------------------------------------------
-
-void Block::p_read ()
-{
-  INCOMPLETE("Block::p_read");
-}
-
-//----------------------------------------------------------------------
-
-// void BlockReduce::p_output_reduce(int count)
-// {
-//   if (++count_output_ >= count) {
-//     proxy_simulation.p_output_reduce();
-//     count_output_ = 0;
-//   }
-// }
-
-//----------------------------------------------------------------------
-
-void Simulation::s_write() throw()
-{
-  if (block_counter_.remaining() == 0) {
-    proxy_simulation.p_output_reduce();
+  DEBUG ("Simulation::p_write()");
+  ItPatch it_patch(hierarchy_);
+  Patch * patch;
+  while (( patch = ++it_patch )) {
+    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+    proxy_patch->p_write(index);
   }
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::p_output_reduce() throw()
+void Patch::p_write(int index)
 {
-  problem()->output_reduce(this);
+  DEBUG ("Patch::p_write()");
+  block_array_->p_write(index);
 }
 
 //----------------------------------------------------------------------
 
-void Problem::output_reduce(Simulation * simulation) throw()
+void Block::p_write (int index_output)
+{
+  DEBUG ("Block::p_write()");
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  FieldDescr * field_descr = simulation->field_descr();
+  Output * output = simulation->problem()->output(index_output);
+
+  DEBUG ("Block::p_write() calling Output::write_block()");
+  output->write_block(this,field_descr,0,0,0);
+
+  // Synchronize after writing
+  DEBUG ("Block::p_write() calling Patch::s_write()");
+  proxy_patch_.s_write();
+}
+
+//----------------------------------------------------------------------
+
+void Patch::s_write()
+{
+  DEBUG ("Patch::s_write()");
+  if (block_counter_.remaining() == 0) {
+    proxy_simulation.s_write();
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::s_write()
+{
+  DEBUG ("Simulation::s_write()");
+  problem()->output_wait(this);
+}
+
+//----------------------------------------------------------------------
+
+void Problem::output_wait(Simulation * simulation) throw()
 {
   Output * output = this->output(index_output_);
 
@@ -149,7 +148,11 @@ void Problem::output_reduce(Simulation * simulation) throw()
   int ip       = CkMyPe();
   int ip_writer = output->process_writer();
 
-  if (ip != ip_writer) {
+  if (ip == ip_writer) {
+
+    proxy_simulation[ip].p_output_write(0,0);
+
+  } else {
 
     int n=1;  char * buffer = 0;
 
@@ -171,18 +174,15 @@ void Problem::output_reduce(Simulation * simulation) throw()
     // Continue with next output object if any
     output_next(simulation);
 
-  } else {
-
-    proxy_simulation[ip].p_output_write(0,0);
-
   }
 
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::p_output_write (int n, char * buffer) throw()
+void Simulation::p_output_write (int n, char * buffer)
 {
+  DEBUG ("Simulation::p_output_write()");
   problem()->output_write(this,n,buffer);
 }
 
@@ -194,6 +194,7 @@ void Problem::output_write
  int n, char * buffer
 ) throw()
 {
+  DEBUG ("Problem::output_write()");
   Output * output = this->output(index_output_);
 
   if (n != 0) {

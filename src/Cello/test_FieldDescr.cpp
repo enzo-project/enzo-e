@@ -40,6 +40,7 @@ PARALLEL_MAIN_BEGIN
   unit_func ("FieldDescr");
   field_descr = new FieldDescr;
   unit_assert(field_descr != 0);
+  printf ("sizeof(FieldDescr) = %d\n",sizeof(FieldDescr));
 
   unit_func("~FieldDescr");
   delete field_descr;

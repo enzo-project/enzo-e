@@ -179,6 +179,21 @@ void Monitor::write
 	(fp,"%s %s %s %s\n",
 	 buffer_process, buffer_time, buffer_component, buffer_message);
     }
+
+#ifdef CELLO_DEBUG
+    // Write DEBUG messagess to file
+
+    if (strcmp(component,"DEBUG")==0) {
+      char file[20];
+      sprintf (file,"out.debug.%d",ip_);
+      FILE * fdebug = fopen (file,"a");
+      fprintf (fdebug,"%s %s %s %s\n",
+	 buffer_process, buffer_time, buffer_component, buffer_message);
+      fclose(fdebug);
+    }
+
+#endif
+
   }
 
 }

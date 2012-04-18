@@ -6,8 +6,14 @@
 /// @brief    Implementation of the Output class
 
 #include "cello.hpp"
-
+#include "main.hpp"
 #include "io.hpp"
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+extern CProxy_Simulation  proxy_simulation;
+#endif
 
 //----------------------------------------------------------------------
 
@@ -31,8 +37,7 @@ Output::Output (const Factory * factory) throw()
 
 {
 
-  GroupProcess * group_process = GroupProcess::create();
-
+  const GroupProcess * group_process = GroupProcess::create();
   process_  = group_process->rank();
   delete group_process;
 
@@ -190,12 +195,13 @@ void Output::write_hierarchy
 
   // (*) write data patch_list_
 
-  while (const Patch * patch = ++it_patch) {
+  while (Patch * patch = ++it_patch) {
 
     // NO OFFSET: ASSUMES ROOT PATCH
     write_patch (patch, field_descr, 0,0,0);
 
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -211,11 +217,9 @@ void Output::write_patch
 
 #ifdef CONFIG_USE_CHARM
 
-  // CHARM++ Block callback for write_block()
-
-  if (patch->blocks_allocated()) {
-    patch->block_array().p_write (index_charm_);
-  }
+  DEBUG0;
+  CProxy_Patch * proxy_patch = (CProxy_Patch *)(patch);
+  proxy_patch->p_write (index_charm_);
 
 #else
 
@@ -239,7 +243,7 @@ void Output::write_block
  ) throw()
 {
   // Write fields
-
+  DEBUG("Output::write_block");
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
     const FieldBlock * field_block = block->field_block();
     write_field (field_block,  field_descr, it_field_->value());

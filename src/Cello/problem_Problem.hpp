@@ -86,8 +86,8 @@ public: // interface
   /// Process the next output object if any, else proceed with simulation
   void output_next(Simulation * simulation) throw();
 
-  /// Reduce output, using p_output_write to send data to writing processes
-  void output_reduce(Simulation * simulation) throw();
+  // /// Reduce output, using p_output_write to send data to writing processes
+  void output_wait(Simulation * simulation) throw();
   
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
@@ -106,7 +106,7 @@ public: // interface
 
   /// Initialize the initial conditions object
   void initialize_initial(Parameters * parameters,
-			  GroupProcess * group_process) throw();
+			  const GroupProcess * group_process) throw();
 
   /// Initialize the method objects
   void initialize_method(Parameters * parameters) throw();
@@ -114,7 +114,7 @@ public: // interface
   /// Initialize the output objects
   void initialize_output(Parameters * parameters,
 			 FieldDescr * field_descr,
-			 GroupProcess * group_process,
+			 const GroupProcess * group_process,
 			 const Factory * factory) throw();
 
   /// Initialize the stopping object
@@ -136,7 +136,7 @@ protected: // functions
   /// Create named initialization object
   virtual Initial *  create_initial_ 
   (std::string name, Parameters * parameters,
-   GroupProcess * = 0) throw ();
+   const GroupProcess * = 0) throw ();
 
   /// Create named method object
   virtual Method *   create_method_
@@ -145,7 +145,7 @@ protected: // functions
   /// Create named output object
   virtual Output *   create_output_  
   (std::string name, Parameters * parameters,
-   GroupProcess *, const Factory * ) throw ();
+   const GroupProcess *, const Factory * ) throw ();
 
   /// Create named stopping object
   virtual Stopping * create_stopping_ 

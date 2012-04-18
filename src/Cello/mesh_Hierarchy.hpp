@@ -21,7 +21,8 @@ class Hierarchy {
 public: // interface
 
   /// Initialize a Hierarchy object
-  Hierarchy(const Factory * factory) throw ();
+  Hierarchy ( const Factory * factory,
+	      int dimension, int refinement) throw ();
 
   /// Delete the Hierarchy object
   virtual ~Hierarchy() throw ();
@@ -29,21 +30,27 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Set domain lower extent
-  void set_lower(double nx, double ny, double nz) throw ();
+  void set_lower(double x, double y, double z) throw ();
 
   /// Set domain upper extent
-  void set_upper(double nx, double ny, double nz) throw ();
+  void set_upper(double x, double y, double z) throw ();
   
+  /// Set root-level grid size
+  void set_root_size(int nx, int ny, int nz) throw ();
+
   //----------------------------------------------------------------------
 
   /// Return dimension
   int dimension() const throw ();
 
   /// Return domain lower extent
-  void lower(double * nx, double * ny = 0, double * nz = 0) const throw ();
+  void lower(double * x, double * y = 0, double * z = 0) const throw ();
 
   /// Return domain upper extent
-  void upper(double * nx, double * ny = 0, double * nz = 0) const throw ();
+  void upper(double * x, double * y = 0, double * z = 0) const throw ();
+
+  /// Return root-level grid size
+  void root_size(int * nx, int * ny = 0, int * nz = 0) const throw ();
 
   //----------------------------------------------------------------------
 
@@ -57,12 +64,12 @@ public: // interface
   Patch * patch(size_t i) const throw();
 
   /// Create the initial root patch
-  void create_root_patch (GroupProcess * group_process,
-			  int dimension,
-			  FieldDescr   * field_descr,
+  void create_root_patch (FieldDescr   * field_descr,
 			  int nx, int ny, int nz,
 			  int nbx, int nby, int nbz,
-			  bool allocate_blocks = true) throw();
+			  bool allocate_blocks  = true,
+			  int process_first     = 0, 
+			  int process_last_plus = -1) throw();
 
   /// Return the factory object associated with the Hierarchy
   const Factory * factory () const throw()
@@ -79,6 +86,9 @@ protected: // attributes
 
   /// List of local patches
   Tree * patch_tree_;
+
+  /// Size of the root grid
+  int root_size_[3];
 
   /// Lower extent of the hierarchy
   double lower_[3];

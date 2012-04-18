@@ -692,6 +692,7 @@ void FileHdf5::write_meta_
 
   // Create the attribute
 
+  DEBUG1("Calling H5Acreate(%s)",name.c_str());
   hid_t meta_id = H5Acreate ( type_id,
 			      name.c_str(),
 			      scalar_to_hdf5_(type),
@@ -705,6 +706,7 @@ void FileHdf5::write_meta_
 
   // Write the attribute 
 
+  DEBUG1("buffer = %p",buffer);
   H5Awrite (meta_id, scalar_to_hdf5_(type), buffer);
 
   // Close the attribute dataspace

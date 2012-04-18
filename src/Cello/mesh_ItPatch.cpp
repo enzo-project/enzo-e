@@ -10,6 +10,7 @@
 #include "cello.hpp"
 
 #include "mesh.hpp"
+#include "main.hpp"
 
 //----------------------------------------------------------------------
 

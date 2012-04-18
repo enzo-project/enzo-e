@@ -54,7 +54,8 @@ public: // interface
     return & instance_;
   };
 
-  /// Set the processor's rank
+  /// Set the processor's rank 
+  /// (note cannot use GroupProcess since Monitor object created at startup)
   void set_process_rank (int ip)
   { ip_ = ip; }
 

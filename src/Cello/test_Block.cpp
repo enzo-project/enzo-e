@@ -19,6 +19,9 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Block");
 
+#ifdef CONFIG_USE_CHARM
+  CProxy_Patch proxy_patch;
+#endif
   Factory factory;
   Block * block = factory.create_block
     (0,0,0, 
@@ -26,6 +29,9 @@ PARALLEL_MAIN_BEGIN
      3,4,5,
      -1.0,-2.0,-3.0,
      2.0,  4.0, 6.0,
+#ifdef CONFIG_USE_CHARM
+     proxy_patch,
+#endif
      1);
 
   unit_func("Block");

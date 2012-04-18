@@ -18,16 +18,27 @@
 
 //----------------------------------------------------------------------
 
+void Patch::p_initial()
+{
+  DEBUG("Patch::p_initial()");
+  DEBUG1("block_array() = %p",block_array());
+  block_array()->p_initial();
+}
+
+//----------------------------------------------------------------------
+
 void Block::p_initial()
 {
-  TRACE0;
+  DEBUG("Block::p_initial()");
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
-
+  DEBUG0;
   FieldDescr * field_descr = simulation->field_descr();
 
   // Initialize the block
 
+  DEBUG0;
   allocate(field_descr);
+  DEBUG0;
 
   // Set the Block cycle and time to match Simulation's
 
@@ -35,29 +46,42 @@ void Block::p_initial()
   set_time (simulation->time());
   set_dt   (simulation->dt());
 
+  DEBUG0;
   // Perform any additional initialization for derived class 
 
   initialize ();
+  DEBUG0;
 
   // Apply the initial conditions 
 
   Initial * initial = simulation->problem()->initial();
 
   initial->enforce(simulation->hierarchy(),field_descr,this);
+  DEBUG0;
 
-  // // NOTE: CHARM++ contribute() barrier is to prevent race conditions
-  // // where Block::p_refresh_face() is called before Block::p_initial()
+  // Continue with Patch::s_initial
 
-  // // Refresh before prepare()
+  proxy_patch_.s_initial();
+  DEBUG0;
 
-  contribute( CkCallback(CkIndex_Block::p_call_refresh(), thisProxy) );
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::p_initial () throw()
+void Patch::s_initial()
 {
-  TRACE0;
+  if (block_counter_.remaining() == 0) {
+    DEBUG("Patch::s_initial() calling Simulation::s_initial()");
+    proxy_simulation.s_initial();
+  } else  DEBUG("Patch::s_initial() skipping");
+
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::p_initial ()
+{
+  DEBUG("Simulation::p_initial()");
   // reset initial "loop" over initial objects
   problem()->initial_first();
 
@@ -69,6 +93,7 @@ void Simulation::p_initial () throw()
 
 void Problem::initial_first() throw()
 {
+  DEBUG("Problem::initial_first()");
   index_initial_ = 0;
 }
 
@@ -76,6 +101,7 @@ void Problem::initial_first() throw()
 
 void Problem::initial_next(Simulation * simulation) throw()
 {
+  DEBUG("Problem::initial_next()");
   // find next initial
 
   Initial * initial = this->initial(index_initial_);
@@ -94,12 +120,15 @@ void Problem::initial_next(Simulation * simulation) throw()
 
       while (( patch = ++it_patch )) {
 
-	patch->block_array().p_initial_enforce();
+	CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+	DEBUG("Problem::initial_next() calling Patch::p_initial()");
+	proxy_patch->p_initial();
 
       }
 
     } else {
 
+      DEBUG("Problem::initial_next() calling Initial::enforce(Hierarchy)");
       initial->enforce(hierarchy,field_descr);
 
     }
@@ -109,7 +138,9 @@ void Problem::initial_next(Simulation * simulation) throw()
     ItPatch it_patch(hierarchy);
     Patch * patch;
     while (( patch = ++it_patch )) {
-      patch->block_array().p_call_refresh();
+      CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+      DEBUG("Problem::initial_next() calling Patch::p_refresh()");
+      proxy_patch->p_refresh();
     }
   }
 }
@@ -118,6 +149,7 @@ void Problem::initial_next(Simulation * simulation) throw()
 
 void Block::p_initial_enforce()
 {
+  DEBUG("Block::p_initial_enforce()");
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
 
   Initial    * initial     = simulation->problem()->initial();
@@ -125,6 +157,13 @@ void Block::p_initial_enforce()
   FieldDescr * field_descr = simulation->field_descr();
 
   initial->enforce(hierarchy,field_descr,this);
+}
+
+//----------------------------------------------------------------------
+
+void Block::p_read ()
+{
+  INCOMPLETE("Block::p_read");
 }
 
 //======================================================================

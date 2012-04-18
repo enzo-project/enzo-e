@@ -30,6 +30,11 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
+#ifdef CONFIG_USE_CHARM
+   CkChareID proxy_patch,
+#endif
+   int patch_id,
+   int patch_rank,
    int num_field_blocks) throw();
 
 #ifdef CONFIG_USE_CHARM
@@ -43,12 +48,20 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
+   CkChareID proxy_patch,
+   int patch_id,
+   int patch_rank,
    int num_field_blocks) throw();
+
+  /// Pack / unpack the Block in a CHARM++ program
+  void pup(PUP::er &p)
+  { ERROR("EnoBlock::pup","Not Implemented"); };
 
 #endif
 
   /// Destructor
   virtual ~EnzoBlock() throw();
+
 
   /// Write attributes, e.g. to stdout for debugging
   void write(FILE *fp=stdout) throw ();

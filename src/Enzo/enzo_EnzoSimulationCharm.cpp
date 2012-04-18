@@ -9,11 +9,13 @@
 
 #include "cello.hpp"
 
-#include "simulation.hpp"
 #include "enzo.hpp"
 
 #include "simulation_charm.hpp"
 #include "mesh_charm.hpp"
+
+#include "simulation.hpp"
+
 
 //----------------------------------------------------------------------
 
@@ -30,8 +32,6 @@ EnzoSimulationCharm::EnzoSimulationCharm
 
   initialize();
 
-  run();
-
 }
 
 //----------------------------------------------------------------------
@@ -44,32 +44,36 @@ EnzoSimulationCharm::~EnzoSimulationCharm() throw()
 
 void EnzoSimulationCharm::run() throw()
 {
-  
-  // Call Block::p_initial() on all blocks
-
+  DEBUG("EnzoSimulationCharm::run()");
   ItPatch it_patch(hierarchy_);
   Patch * patch;
 
+  // count patches
+  int patch_count = 0;
+
+  DEBUG("Counting patches");
   while (( patch = ++it_patch )) {
-
-    if (patch->blocks_allocated()) {
-
-      patch->block_array().p_initial();
-
-    } else {
-
-      // Initial      
-
-      // Blocks don't exist: read Blocks from file and insert into Patch
-
-      // UNCOMMENTING THE FOLLOWING EXITS PREMATURELY FOR NON-RESTART
-       // Initial * initial = problem()->initial();
-       // initial->enforce(hierarchy(),field_descr());
-    }
+    // count local patches
+    ++patch_count;
 
   }
-}
+  DEBUG1("Patch count = %d",patch_count);
+    
+  // set patch counter for s_patch() synchronization
+  patch_counter_.set_value(patch_count + 1);
 
+  // Initialize hierarchy
+
+  DEBUG("Calling Patch::p_initial() loop");
+  while (( patch = ++it_patch )) {
+    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+    DEBUG1("Calling %p Patch::p_initial()",proxy_patch);
+    proxy_patch->p_initial();
+  }
+  DEBUG0;
+  s_initial();
+  DEBUG0;
+}
 
 //======================================================================
 

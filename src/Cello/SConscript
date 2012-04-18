@@ -220,6 +220,8 @@ if (type == 'charm'):
                                     LIBS=[libs_mesh,  libs_test])
    test_node_trace   = env.Program (['test_NodeTrace.cpp',sources_mesh],
                                     LIBS=[libs_mesh,  libs_test])
+   test_class_size = env.Program (['test_class_size.cpp',sources_mesh],
+                                    LIBS=[libs_mesh,  libs_test])
 else:
    test_field_block  = env.Program ('test_FieldBlock.cpp', 
                                     LIBS=[libs_field, libs_test])
@@ -247,11 +249,12 @@ else:
                                     LIBS=[libs_mesh,  libs_test])
    test_node_trace   = env.Program ('test_NodeTrace.cpp',  
                                     LIBS=[libs_mesh,  libs_test])
+   test_class_size = env.Program ('test_class_size.cpp',
+                                    LIBS=[libs_mesh,  libs_test])
 
 
 test_memory       = env.Program ('test_Memory.cpp',     LIBS=[libs_memory, libs_test])
 test_monitor      = env.Program ('test_Monitor.cpp',    LIBS=[libs_monitor,libs_test])
-
 test_group_process = env.Program ('test_GroupProcess.cpp', LIBS=[libs_parallel,libs_test])
 test_layout       = env.Program ('test_Layout.cpp',       LIBS=[libs_parallel,libs_test])
 
@@ -263,7 +266,6 @@ test_parse        = env.Program ('test_Parse.cpp',       LIBS=[libs_parameters,l
 
 test_performance = env.Program('test_Performance.cpp',   LIBS=[libs_performance,libs_test])
 test_papi        = env.Program('test_Papi.cpp',          LIBS=[libs_performance,libs_test])
-
 
 libraries_disk   = env.Library ('disk',   sources_disk)
 libraries_error  = env.Library ('error',  sources_error)
@@ -281,6 +283,7 @@ libraries_simulation = env.Library ('simulation', sources_simulation)
 libraries_test  = env.Library ('test', sources_test)
 
 
+binaries_cello = [test_class_size]
 
 binaries_disk  = [test_FileHdf5,
                   test_FileIfrit]
@@ -310,6 +313,7 @@ binaries_performance = [test_performance,test_papi]
 lib_cello = env.Library ('cello', sources_cello)
 lib_disk  = env.Library ('disk',  sources_disk)
 
+env.Alias('install-bin',env.Install (bin_path,binaries_cello))
 env.Alias('install-inc',env.Install (inc_path,includes_cello))
 env.Alias('install-lib',env.Install (lib_path,lib_cello))
 

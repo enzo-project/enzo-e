@@ -10,7 +10,12 @@
 
 class Factory;
 
+#ifdef CONFIG_USE_CHARM
+#include "mesh.decl.h"
+class Patch : public CBase_Patch
+#else
 class Patch
+#endif
 {
 
   /// @class    Patch
@@ -23,24 +28,53 @@ class Patch
  public: // interface
 
   /// Constructor for given Patch size and blocking count
-  Patch(const Factory * factory,
-	GroupProcess * group_process,
-	int nx,   int ny,  int nz,
-	int nx0,  int ny0, int nz0,
-	int nbx,  int nby, int nbz,
-	double xm, double ym, double zm,
-	double xp, double yp, double zp) throw();
+  Patch
+  (
+#ifndef CONFIG_USE_CHARM
+   const Factory    * factory,
+   const FieldDescr * field_descr,
+#endif
+   int nx,   int ny,  int nz,
+   int nx0,  int ny0, int nz0,
+   int nbx,  int nby, int nbz,
+   double xm, double ym, double zm,
+   double xp, double yp, double zp,
+   int id,
+   bool allocate_blocks = true,
+   int process_first =0, int process_last_plus=-1
+   ) throw();
 
-  //----------------------------------------------------------------------
-  // Big Three
-  //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+
+  void pup(PUP::er &p) {TRACE0;};
+
+  /// Wait for all blocks to check in before proceeding
+  void s_block(CkCallback function);
+
+  /// Initialize component blocks
+  void p_initial ();
+
+  /// Wait for all blocks after p_initial
+  void s_initial ();
+
+  /// Call write on all blocks
+  void p_write(int index_output);
+
+  /// Wait for all blocks after p_write
+  void s_write();
+
+  /// Apply the numerical methods on the patch
+  void p_compute(int cycle, double time, double dt);
+
+  /// Refresh ghost zones and apply boundary conditions
+  void p_refresh();
+
+#endif
 
   /// Destructor
   virtual ~Patch() throw();
-
-  // /// Copy constructor
-  // Patch(const Patch & patch,
-  // 	FieldDescr * field_descr) throw();
 
   /// Return the size of the patch in number of grid cells
   void size (int * nx, int * ny=0, int * nz=0) const throw();
@@ -52,7 +86,10 @@ class Patch
   void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
 
   /// Return the layout of the patch, describing processes and blocking
-  Layout * layout () const throw();
+  Layout * layout () throw();
+
+  /// Return the layout of the patch, describing processes and blocking
+  const Layout * layout () const throw();
 
   /// Return domain lower extent
   void lower(double * x, double * y=0, double * z=0) const throw ();
@@ -65,14 +102,10 @@ class Patch
 
   //--------------------------------------------------
 
-  GroupProcess * group_process()  const throw()
+  const GroupProcess * group_process()  const throw()
   { return group_process_; };
 
   //--------------------------------------------------
-
-  /// Allocate array, and optionally allocate element blocks
-  void allocate_array(FieldDescr * field_descr,
-		      bool allocate_blocks = true) throw();
 
   /// Return whether blocks have been allocated or not
   bool blocks_allocated() const throw()
@@ -99,9 +132,10 @@ class Patch
   void deallocate_blocks() throw();
 
 #ifdef CONFIG_USE_CHARM
-  /// Return the block CHARM++ chare array
-  CProxy_Block block_array() const throw()
-  { if (block_exists_) return block_array_; else return 0;}
+  /// Return pointer to the block CHARM++ chare array
+  CProxy_Block * block_array() const throw()
+  //  { if (block_exists_) return block_array_; else return 0;}
+  { return block_array_;}
 
 #else
     
@@ -113,24 +147,38 @@ class Patch
 
 #endif
 
+  /// Unit test implementation: to simplify calling from Charm main
+  void p_test() throw();
+
+protected: // functions
+
+  /// Allocate array, and optionally allocate element blocks
+  void allocate_array_
+  (bool allocate_blocks = true,
+   const FieldDescr * field_descr = 0) throw ();
+
 protected: // attributes
 
   /// Array of blocks ib associated with this process
 #ifdef CONFIG_USE_CHARM
-  CProxy_Block block_array_;
+  CProxy_Block * block_array_;
   bool         block_exists_;
+  Counter      block_counter_;
 #else
   std::vector<Block * > block_;
 #endif
+
+  /// ID of this Patch
+  int id_;
 
   /// Factory object for creating Blocks
   const Factory * factory_;
   
   /// Parallel Group for distributing the Mesh across processors
-  GroupProcess * group_process_;
+  const GroupProcess * group_process_;
 
   /// Layout: describes blocking, processor range, and block-processor mapping 
-  Layout * layout_;
+  Layout layout_;
 
   /// Size of the patch
   int size_[3];
