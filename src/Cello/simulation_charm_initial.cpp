@@ -17,6 +17,35 @@
 #include "mesh_charm.hpp"
 
 //----------------------------------------------------------------------
+//void Simulation::initial()
+//{
+  // read patches
+  // read blocks
+  // count expected requests
+  // send requests
+  // exit
+//}
+
+void Simulation::x_request_patch
+(
+ int patch_id,
+ int block_rank
+)
+{
+  // call x_send_patch()
+  CkChareID patch_proxy;
+  proxy_simulation[block_rank].x_send_patch(patch_id,patch_proxy);
+}
+
+void Simulation::x_send_patch
+(
+ int patch_id,
+ CkChareID proxy_patch
+ )
+{
+}
+
+//----------------------------------------------------------------------
 
 void Patch::p_initial()
 {

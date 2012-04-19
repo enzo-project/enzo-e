@@ -32,6 +32,9 @@ module simulation {
 
     entry void s_patch (CkCallback callback);
 
+    entry void x_request_patch ( int patch_id, int block_rank );
+    entry void x_send_patch ( int patch_id, CkChareID proxy_patch);
+
     entry void c_refresh ();
 
 //    entry void p_done(CkReductionMsg*);

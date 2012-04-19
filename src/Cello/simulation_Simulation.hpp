@@ -92,6 +92,12 @@ public: // interface
   /// Wait for all local patches to check in before proceeding to refresh
   void s_initial();
 
+  /// Request Patch proxy from another process
+  void x_request_patch ( int patch_id, int block_rank );
+
+  /// Send patch proxy to requested process
+  void x_send_patch ( int patch_id, CkChareID proxy_patch);
+
   /// Refresh ghost zones
   void c_refresh();
 
