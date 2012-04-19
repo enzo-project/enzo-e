@@ -47,10 +47,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("Patch");
 
-  FieldDescr * field_descr = new FieldDescr;
+  const FieldDescr * field_descr = new FieldDescr;
 
   Factory * factory = new Factory;
 
+  int patch_id = 0;
   patch_global = factory->create_patch 
     (
      field_descr,
@@ -58,7 +59,8 @@ PARALLEL_MAIN_BEGIN
      patch_offset[0],   patch_offset[1],   patch_offset[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2],
      domain_lower[0],   domain_lower[1],   domain_lower[2],
-     domain_upper[0],   domain_upper[1],   domain_upper[2]);
+     domain_upper[0],   domain_upper[1],   domain_upper[2],
+     patch_id);
 
 #ifdef CONFIG_USE_CHARM
   patch_global.p_test();
