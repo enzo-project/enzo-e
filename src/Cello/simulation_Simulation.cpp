@@ -398,6 +398,7 @@ void Simulation::initialize_hierarchy_() throw()
 
 #ifdef CONFIG_USE_CHARM
   // Distributed patches in Charm: only allocate on root processor
+  patch_counter_.inc_max();
   if (group_process()->is_root())
 #endif
     {
@@ -451,6 +452,15 @@ void Simulation::s_initialize()
     run();
   }
   DEBUG("End s_initialize()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  ItPatch it_patch(hierarchy_);
+  Patch * patch;
+  while (( patch = ++it_patch )) {
+    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+    DEBUG1("proxy_patch = %p",proxy_patch);
+    DEBUG1("local patch = %p",proxy_patch->ckLocal());
+  }
+
 }
 
 //----------------------------------------------------------------------
@@ -469,6 +479,7 @@ void Simulation::c_monitor()
 
 void Simulation::s_patch(CkCallback callback)
 {
+  DEBUG("s_patch");
   if (patch_counter_.remaining() == 0) {
     callback.send();
   }
@@ -478,6 +489,7 @@ void Simulation::s_patch(CkCallback callback)
 
 void Simulation::s_initial()
 {
+  DEBUG("s_initial");
   if (patch_counter_.remaining() == 0) {
     DEBUG ("Simulation::s_initial() calling c_refresh()");
     c_refresh();

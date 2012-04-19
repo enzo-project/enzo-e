@@ -56,7 +56,6 @@ module mesh {
        int num_field_blocks);
 
     entry void p_initial();
-    entry void p_initial_enforce();
     entry void p_refresh();
     entry void p_compute(int cycle, double time, double dt);
     entry void p_refresh_face

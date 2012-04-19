@@ -321,7 +321,7 @@ void Patch::allocate_array_
      allocate_blocks);
     
   block_exists_ = allocate_blocks;
-  block_counter_.set_value(nbx*nby*nbz);
+  block_counter_.set_max(nbx*nby*nbz);
 
 
 #else

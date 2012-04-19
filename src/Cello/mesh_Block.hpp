@@ -81,8 +81,8 @@ public: // CHARM++ PUPer
   /// Initialize block for the simulation.
   void p_initial();
 
-  /// Call current Initial::enforce() on the block
-  void p_initial_enforce();
+  // /// Call current Initial::enforce() on the block
+  // void p_initial_enforce();
 
   /// Refresh ghost zones and apply boundary conditions
   void p_refresh();

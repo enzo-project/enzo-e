@@ -69,7 +69,7 @@ void InitialFile::enforce
   File * file = input_->file();
   int num_blocks = file->group_count();
 #ifdef CONFIG_USE_CHARM
-  counter_blocks_.set_value(num_blocks);
+  counter_blocks_.set_max(num_blocks);
 #endif
 
   for (int i = 0; i<num_blocks; i++) {

@@ -61,7 +61,7 @@ public: // functions
   {
     process_stride_ = stride; 
 #ifdef CONFIG_USE_CHARM
-    counter_.set_value(process_stride_);
+    counter_.set_max(process_stride_);
 #endif
   };
 

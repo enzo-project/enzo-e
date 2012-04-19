@@ -566,17 +566,13 @@ void FieldBlock::print (const FieldDescr * field_descr,
    int ip=0,np=1;
 #ifdef CONFIG_USE_CHARM
    ip=CkMyPe();
-   np=CkNumPes();
 #endif
 #ifdef CONFIG_USE_MPI
    MPI_Comm_rank(MPI_COMM_WORLD,&ip);
-   MPI_Comm_size(MPI_COMM_WORLD,&np);
 #endif
    char filename [40];
    sprintf (filename,"%s-%d.debug",message,ip);
    FILE * fp = fopen (filename,"w");
-  // MPI_Comm_rank (MPI_COMM_WORLD, &ip);
-  // MPI_Comm_size (MPI_COMM_WORLD, &np);
 
    ASSERT("FieldBlock::print",
 	  "FieldBlocks not allocated",
@@ -616,11 +612,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
      iyp = nyd;
      izp = nzd;
 
-
-     // if (np==2) {
-     //   if (ip==0) ixp=nxd-gx;
-     //   if (ip==1) ixm=gx;
-     // }
      int nx,ny,nz;
 
      nx = (ixp-ixm);

@@ -24,6 +24,7 @@ public:
 
   int remaining() throw ()
   {
+    DEBUG2 ("Counter::remaining %d %d", count_curr_,count_max_);
     if (count_max_ > 0) {
       count_curr_ = (count_max_ + count_curr_ - 1) % count_max_;  
     }
@@ -33,9 +34,13 @@ public:
   int count_curr() const throw() { return count_curr_; }
   int count_max() const throw() { return count_max_; }
 
-  void set_value (int count_max) throw ()
+  void set_max (int count_max) throw ()
   {
     count_max_ = count_max;
+  }
+  void inc_max () throw ()
+  {
+    ++count_max_;
   }
 
 private:

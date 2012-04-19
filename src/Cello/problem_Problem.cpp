@@ -727,6 +727,7 @@ Initial * Problem::create_initial_
   int    init_cycle  = parameters->value_integer ("Initial:cycle",0);
   double init_time   = parameters->value_float   ("Initial:time",0.0);
 
+  DEBUG1 ("create_initial(%s)",type.c_str());
 
   if (type == "file" || type == "restart") {
     return new InitialFile(parameters,group_process,init_cycle,init_time);;

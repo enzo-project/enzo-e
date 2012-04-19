@@ -48,7 +48,7 @@ void EnzoSimulationCharm::run() throw()
   ItPatch it_patch(hierarchy_);
   Patch * patch;
 
-  // count patches
+  // count patches for Patch::p_initial()
   int patch_count = 0;
 
   DEBUG("Counting patches");
@@ -60,7 +60,7 @@ void EnzoSimulationCharm::run() throw()
   DEBUG1("Patch count = %d",patch_count);
     
   // set patch counter for s_patch() synchronization
-  patch_counter_.set_value(patch_count + 1);
+  patch_counter_.set_max(patch_count + 1);
 
   // Initialize hierarchy
 

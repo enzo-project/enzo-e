@@ -35,7 +35,10 @@ void Simulation::x_request_patch
   // call x_send_patch()
   CkChareID patch_proxy;
   proxy_simulation[block_rank].x_send_patch(patch_id,patch_proxy);
+  DEBUG ("x_request_patch()");
 }
+
+//----------------------------------------------------------------------
 
 void Simulation::x_send_patch
 (
@@ -43,6 +46,77 @@ void Simulation::x_send_patch
  CkChareID proxy_patch
  )
 {
+  DEBUG ("x_send_patch()");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::p_initial ()
+{
+  DEBUG("Simulation::p_initial()");
+  // reset initial "loop" over initial objects
+  problem()->initial_first();
+
+  // process first initial object, which continues with refresh() if done
+  problem()->initial_next(this);
+}
+
+//----------------------------------------------------------------------
+
+void Problem::initial_first() throw()
+{
+  DEBUG("Problem::initial_first()");
+  index_initial_ = 0;
+}
+
+//----------------------------------------------------------------------
+
+void Problem::initial_next(Simulation * simulation) throw()
+{
+  DEBUG("Problem::initial_next()");
+  // find next initial
+
+  Initial * initial = this->initial(index_initial_);
+
+  // initial if any scheduled, else proceed with refresh
+
+  Hierarchy * hierarchy = simulation->hierarchy();
+  FieldDescr * field_descr = simulation->field_descr();
+
+  if (initial != NULL) {
+
+    DEBUG1 ("Initial expects blocks allocated = %s",
+	    initial->expects_blocks_allocated() ? "true" : "false");
+    if (initial->expects_blocks_allocated()) {
+
+      ItPatch it_patch(hierarchy);
+      Patch * patch;
+
+      while (( patch = ++it_patch )) {
+
+	CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+	DEBUG("Problem::initial_next() calling Patch::p_initial()");
+	proxy_patch->p_initial();
+
+      }
+
+    } else {
+
+      DEBUG("Problem::initial_next() calling Initial::enforce(Hierarchy)");
+      initial->enforce(hierarchy,field_descr);
+
+    }
+
+  } else {
+
+    ItPatch it_patch(hierarchy);
+    Patch * patch;
+    while (( patch = ++it_patch )) {
+      CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+      DEBUG("Problem::initial_next() calling Patch::p_refresh()");
+      proxy_patch->p_refresh();
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -104,88 +178,6 @@ void Patch::s_initial()
     proxy_simulation.s_initial();
   } else  DEBUG("Patch::s_initial() skipping");
 
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::p_initial ()
-{
-  DEBUG("Simulation::p_initial()");
-  // reset initial "loop" over initial objects
-  problem()->initial_first();
-
-  // process first initial object, which continues with refresh() if done
-  problem()->initial_next(this);
-}
-
-//----------------------------------------------------------------------
-
-void Problem::initial_first() throw()
-{
-  DEBUG("Problem::initial_first()");
-  index_initial_ = 0;
-}
-
-//----------------------------------------------------------------------
-
-void Problem::initial_next(Simulation * simulation) throw()
-{
-  DEBUG("Problem::initial_next()");
-  // find next initial
-
-  Initial * initial = this->initial(index_initial_);
-
-  // initial if any scheduled, else proceed with refresh
-
-  Hierarchy * hierarchy = simulation->hierarchy();
-  FieldDescr * field_descr = simulation->field_descr();
-
-  if (initial != NULL) {
-
-    if (initial->expects_blocks_allocated()) {
-
-      ItPatch it_patch(hierarchy);
-      Patch * patch;
-
-      while (( patch = ++it_patch )) {
-
-	CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-	DEBUG("Problem::initial_next() calling Patch::p_initial()");
-	proxy_patch->p_initial();
-
-      }
-
-    } else {
-
-      DEBUG("Problem::initial_next() calling Initial::enforce(Hierarchy)");
-      initial->enforce(hierarchy,field_descr);
-
-    }
-
-  } else {
-
-    ItPatch it_patch(hierarchy);
-    Patch * patch;
-    while (( patch = ++it_patch )) {
-      CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-      DEBUG("Problem::initial_next() calling Patch::p_refresh()");
-      proxy_patch->p_refresh();
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Block::p_initial_enforce()
-{
-  DEBUG("Block::p_initial_enforce()");
-  Simulation * simulation  = proxy_simulation.ckLocalBranch();
-
-  Initial    * initial     = simulation->problem()->initial();
-  Hierarchy  * hierarchy   = simulation->hierarchy();
-  FieldDescr * field_descr = simulation->field_descr();
-
-  initial->enforce(hierarchy,field_descr,this);
 }
 
 //----------------------------------------------------------------------
