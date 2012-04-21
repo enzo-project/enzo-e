@@ -40,7 +40,7 @@ public: // interface
   Problem() throw();
 
   /// Destructor
-  ~Problem() throw();
+  virtual ~Problem() throw();
 
   /// Copy constructor
   Problem(const Problem & problem) throw();

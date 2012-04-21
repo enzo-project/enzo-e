@@ -26,9 +26,9 @@ EnzoSimulationCharm::EnzoSimulationCharm
   : EnzoSimulation(parameter_file, n)
 {
 
-#ifdef CONFIG_USE_PROJECTIONS
-  traceRegisterUserEvent("Compute",10);
-#endif
+// #ifdef CONFIG_USE_PROJECTIONS
+//   traceRegisterUserEvent("Compute",10);
+// #endif
 
   initialize();
 

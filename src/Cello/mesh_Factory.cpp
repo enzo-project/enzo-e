@@ -48,8 +48,6 @@ Factory::create_patch
      id,
      allocate_blocks,
      process_first, process_last_plus);
-
-  DEBUG1 ("proxy_patch = %p",proxy_patch);
   return proxy_patch;
 #else
   DEBUG1("ID = %d",id);
@@ -100,7 +98,8 @@ CProxy_Block Factory::create_block_array
 {
   DEBUG1("ID = %d",patch_id);
   if (allocate) {
-    return CProxy_Block::ckNew
+    CProxy_Block * proxy_block = new CProxy_Block;
+    *proxy_block = CProxy_Block::ckNew
       (
        nbx,nby,nbz,
        nx,ny,nz,
@@ -111,6 +110,8 @@ CProxy_Block Factory::create_block_array
        patch_id,
        patch_rank,
        nbx,nby,nbz);
+    DEBUG1 ("proxy_block = %p",proxy_block);
+    return *proxy_block;
   } else {
     return CProxy_Block::ckNew();
   }

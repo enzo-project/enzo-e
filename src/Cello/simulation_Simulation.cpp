@@ -454,10 +454,21 @@ const Factory * Simulation::factory() const throw()
 void Simulation::s_initialize()
 {
   DEBUG("Begin s_initialize()");
+
   if (patch_counter_.remaining() == 0) {
     DEBUG("Calling run()");
     run();
   }
+  DEBUG("End s_initialize()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ //   ItPatch it_patch(hierarchy_);
+//   Patch * patch;
+//   while (( patch = ++it_patch )) {
+//     CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+//     DEBUG1("proxy_patch = %p",proxy_patch);
+//     DEBUG1("local patch = %p",proxy_patch->ckLocal());
+//   }
+
 }
 
 //----------------------------------------------------------------------
@@ -491,8 +502,6 @@ void Simulation::c_refresh()
   Patch * patch;
 
   while (( patch = ++it_patch )) {
-    DEBUG ("Simulation::c_refresh() calling Patch::p_refresh()");
-    DEBUG1 ("patch = %p",patch);
     CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
     proxy_patch->p_refresh();
   }

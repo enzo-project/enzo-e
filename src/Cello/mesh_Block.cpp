@@ -911,7 +911,7 @@ void Block::compute()
   }
 
 #ifdef CONFIG_USE_PROJECTIONS
-  traceUserBracketEvent(10,time_start, CmiWallTimer());
+  //  traceUserBracketEvent(10,time_start, CmiWallTimer());
 #endif
 
   // Update Block cycle and time to Simulation time and cycle
