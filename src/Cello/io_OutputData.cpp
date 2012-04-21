@@ -83,11 +83,12 @@ void OutputData::write
 {
   // Create file group for patch
 
-#ifdef CONFIG_USE_CHARM
-  const Patch * patch_local = ((CProxy_Patch *)patch)->ckLocal();
-#else
+// #ifdef CONFIG_USE_CHARM
+//   DEBUG1(" patch_proxy = %p",patch); 
+//   const Patch * patch_local = ((const CProxy_Patch *)patch)->ckLocal();
+// #else
   const Patch * patch_local = patch;
-#endif
+// #endif
 
   DEBUG1("patch id = %d",patch_local->id());
   int ib = patch_local->id();

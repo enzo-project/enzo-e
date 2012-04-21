@@ -39,13 +39,13 @@ void IoPatch::meta_value
   DEBUG0;
 
 
-#ifdef CONFIG_USE_CHARM
-  DEBUG0;
-  const Patch * patch = ((CProxy_Patch *)patch_)->ckLocal();
-  DEBUG0;
-#else
+// #ifdef CONFIG_USE_CHARM
+//   DEBUG0;
+//   const Patch * patch = ((CProxy_Patch *)patch_)->ckLocal();
+//   DEBUG0;
+// #else
   const Patch * patch = patch_;
-#endif
+// #endif
 
   int count = 0;
 

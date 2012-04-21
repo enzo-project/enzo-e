@@ -219,6 +219,7 @@ void Output::write
 
   DEBUG0;
   CProxy_Patch * proxy_patch = (CProxy_Patch *)(patch);
+  // Patch * patch_local = proxy_patch->ckLocal();
   proxy_patch->p_write (index_charm_);
 
 #else

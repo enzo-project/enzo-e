@@ -458,16 +458,6 @@ void Simulation::s_initialize()
     DEBUG("Calling run()");
     run();
   }
-  DEBUG("End s_initialize()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  ItPatch it_patch(hierarchy_);
-  Patch * patch;
-  while (( patch = ++it_patch )) {
-    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-    DEBUG1("proxy_patch = %p",proxy_patch);
-    DEBUG1("local patch = %p",proxy_patch->ckLocal());
-  }
-
 }
 
 //----------------------------------------------------------------------
