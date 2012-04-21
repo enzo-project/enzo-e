@@ -13,9 +13,11 @@
 //----------------------------------------------------------------------
 
 #include <stdio.h>
-#include <string>
-#include <cstdarg>
 #include <time.h>
+
+#include <cstdarg>
+#include <string>
+#include <map>
 
 //----------------------------------------------------------------------
 // Component class includes

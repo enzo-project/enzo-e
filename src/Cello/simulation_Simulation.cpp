@@ -101,30 +101,19 @@ Simulation::~Simulation() throw()
 
 void Simulation::initialize() throw()
 {
-  performance_simulation_->start();
-  performance_cycle_->start();
-
-  // Initialize parameters
-
   initialize_simulation_();
 
-  // INITIALIZE SIMULATION COMPONENTS
-  // (warning: initialization may be order dependent)
+  initialize_monitor_();
 
   initialize_data_descr_();
 
   problem_->initialize_boundary(parameters_);
-
-  problem_->initialize_initial(parameters_,group_process_);
-
+  problem_->initialize_initial (parameters_,group_process_);
   problem_->initialize_stopping(parameters_);
-
   problem_->initialize_timestep(parameters_);
-
-  problem_->initialize_output
-    (parameters_,field_descr_,group_process_,factory());
-
-  problem_->initialize_method(parameters_);
+  problem_->initialize_output  (parameters_,field_descr_,
+				group_process_,factory());
+  problem_->initialize_method  (parameters_);
 
   initialize_hierarchy_();
 
@@ -143,6 +132,9 @@ void Simulation::finalize() throw()
 
 void Simulation::initialize_simulation_() throw()
 {
+
+  performance_simulation_->start();
+  performance_cycle_->start();
 
   //--------------------------------------------------
   // parameter: Mesh    : root_rank
@@ -163,6 +155,21 @@ void Simulation::initialize_simulation_() throw()
   cycle_ = parameters_->value_integer("Initial:cycle",0);
   time_  = parameters_->value_float  ("Initial:time",0);
   dt_ = 0;
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::initialize_monitor_() throw()
+{
+  //--------------------------------------------------
+  // parameter: Monitor : debug
+  //--------------------------------------------------
+
+  bool debug = parameters_->value_logical("Monitor:debug",false);
+
+  printf ("debug = %d\n",debug);
+  monitor_->set_active("DEBUG",debug);
+  
 }
 
 //----------------------------------------------------------------------
@@ -465,18 +472,6 @@ void Simulation::s_initialize()
 
 //----------------------------------------------------------------------
 
-void Simulation::c_monitor()
-{
-  //--------------------------------------------------
-  // Monitor
-  //--------------------------------------------------
-
-  monitor_output();
-
-}
-
-//----------------------------------------------------------------------
-
 void Simulation::s_patch(CkCallback callback)
 {
   DEBUG("s_patch");
@@ -573,7 +568,7 @@ void Simulation::scheduled_output()
 
       output->open();
 
-      output->write_simulation(this);
+      output->write(this);
 
       //--------------------------------------------------
       int ip       = group_process_->rank();

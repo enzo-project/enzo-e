@@ -9,8 +9,10 @@ import sys
 
 trace           = 1
 
-# Whether to print out messages with the DEBUG() series of statements
+# Whether to enable displaying messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
+# Still requires the "DEBUG" group to be enabled in Monitor (that is
+# Monitor::is_active("DEBUG") must be true for any output)
 
 debug           = 1
 

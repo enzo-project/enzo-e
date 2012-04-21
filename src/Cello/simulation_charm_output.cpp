@@ -58,20 +58,14 @@ void Problem::output_next(Simulation * simulation) throw()
 
   if (output != NULL) {
 
-    // Prepare for IO
     output->init();
-
-    // Open files
     output->open();
-
-    // Write hierarchy
-
-    output->write_simulation(simulation);
+    output->write(simulation);
 
 
   } else {
 
-    simulation->c_monitor();
+    simulation->monitor_output();
 
   }
 }
@@ -111,8 +105,8 @@ void Block::p_write (int index_output)
   FieldDescr * field_descr = simulation->field_descr();
   Output * output = simulation->problem()->output(index_output);
 
-  DEBUG ("Block::p_write() calling Output::write_block()");
-  output->write_block(this,field_descr,0,0,0);
+  DEBUG ("Block::p_write() calling Output::write(block)");
+  output->write(this,field_descr,0,0,0);
 
   // Synchronize after writing
   DEBUG ("Block::p_write() calling Patch::s_write()");
@@ -142,8 +136,6 @@ void Simulation::s_write()
 void Problem::output_wait(Simulation * simulation) throw()
 {
   Output * output = this->output(index_output_);
-
-  output->end_write_patch();
 
   int ip       = CkMyPe();
   int ip_writer = output->process_writer();

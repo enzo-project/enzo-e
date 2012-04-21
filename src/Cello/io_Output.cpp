@@ -176,15 +176,15 @@ void Output::write_meta_ ( meta_type type_meta, Io * io ) throw ()
 
 //----------------------------------------------------------------------
 
-void Output::write_simulation
+void Output::write
 ( const Simulation * simulation ) throw()
 {
-  write_hierarchy (simulation->hierarchy(), simulation->field_descr());
+  write (simulation->hierarchy(), simulation->field_descr());
 }
 
 //----------------------------------------------------------------------
 
-void Output::write_hierarchy
+void Output::write
 ( 
  const Hierarchy * hierarchy,
  const FieldDescr * field_descr
@@ -198,7 +198,7 @@ void Output::write_hierarchy
   while (Patch * patch = ++it_patch) {
 
     // NO OFFSET: ASSUMES ROOT PATCH
-    write_patch (patch, field_descr, 0,0,0);
+    write (patch, field_descr, 0,0,0);
 
   }
 
@@ -206,7 +206,7 @@ void Output::write_hierarchy
 
 //----------------------------------------------------------------------
 
-void Output::write_patch 
+void Output::write
 (
  const Patch * patch,
  const FieldDescr * field_descr,
@@ -227,7 +227,7 @@ void Output::write_patch
   while (const Block * block = ++it_block) {
 
     // NO OFFSET: ASSUMES ROOT PATCH
-    write_block (block, field_descr, 0,0,0);
+    write (block, field_descr, 0,0,0);
 
   }
 #endif
@@ -235,7 +235,7 @@ void Output::write_patch
 
 //----------------------------------------------------------------------
 
-void Output::write_block
+void Output::write
 (
  const Block * block,
  const FieldDescr * field_descr,
@@ -243,10 +243,10 @@ void Output::write_block
  ) throw()
 {
   // Write fields
-  DEBUG("Output::write_block");
+  DEBUG("Output::write");
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
     const FieldBlock * field_block = block->field_block();
-    write_field (field_block,  field_descr, it_field_->value());
+    write (field_block,  field_descr, it_field_->value());
   }
 }
 

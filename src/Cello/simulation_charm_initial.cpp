@@ -16,15 +16,40 @@
 #include "mesh.hpp"
 #include "mesh_charm.hpp"
 
+
 //----------------------------------------------------------------------
-//void Simulation::initial()
-//{
-  // read patches
-  // read blocks
-  // count expected requests
-  // send requests
-  // exit
-//}
+
+void Simulation::c_initial()
+{
+  ItPatch it_patch(hierarchy_);
+  Patch * patch;
+
+  // count patches for Patch::p_initial()
+  int patch_count = 0;
+
+  while (( patch = ++it_patch )) {
+    // count local patches
+    ++patch_count;
+
+  }
+
+  // set patch counter for s_patch() synchronization
+  patch_counter_.set_max(patch_count + 1);
+
+  DEBUG1 ("patch count = %d",patch_count);
+
+  // Initialize hierarchy
+
+  while (( patch = ++it_patch )) {
+    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+    proxy_patch->p_initial();
+  }
+
+  s_initial();
+
+}
+
+//----------------------------------------------------------------------
 
 void Simulation::x_request_patch
 (

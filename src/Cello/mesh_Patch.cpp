@@ -48,6 +48,7 @@ Patch::Patch
 
  // Check 
   DEBUG2("zp = %f ID = %d",zp,id_);
+  DEBUG2("Patch() %p id = %d",this,this->id());
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
 	     
     ERROR6("Patch::Patch", 
@@ -174,13 +175,6 @@ void Patch::upper(double * xp, double * yp, double * zp) const throw ()
   if (xp) (*xp) = upper_[0];
   if (yp) (*yp) = upper_[1];
   if (zp) (*zp) = upper_[2];
-}
-
-//----------------------------------------------------------------------
-int Patch::index() const throw ()
-{
-  // ASSUMES ROOT PATCH
-  return 0;
 }
 
 //----------------------------------------------------------------------

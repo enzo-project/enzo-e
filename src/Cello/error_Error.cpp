@@ -33,6 +33,7 @@ extern void m2_
 
   Monitor * monitor = Monitor::instance();
 
+  // Override Monitor::is_active() when output is to stderr
   bool save_active = true;
   if (fp == stderr) {
     save_active = monitor->is_active();

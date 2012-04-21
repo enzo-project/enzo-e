@@ -117,33 +117,27 @@ public: // virtual functions
 
 public:
   /// Write an entire simulation to disk
-  virtual void write_simulation ( const Simulation * simulation ) throw();
+  virtual void write ( const Simulation * simulation ) throw();
 
   /// Write local hierarchy data to disk
-  virtual void write_hierarchy
+  virtual void write
   ( const Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
 
   /// Write local patch data to disk
-  virtual void write_patch
+  virtual void write
   ( const Patch * patch, 
     const FieldDescr * field_descr,  
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
-#ifdef CONFIG_USE_CHARM
-  /// Cleanup after writing blocks in a patch
-  virtual void end_write_patch () throw()
-  { }
-#endif
-
   /// Write local block data to disk
-  virtual void write_block
+  virtual void write
   ( const Block * block, 
     const FieldDescr * field_descr,  
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write local field to disk
-  virtual void write_field
+  virtual void write
   ( const FieldBlock * field_block, 
     const FieldDescr * field_descr,
     int field_index) throw() = 0;

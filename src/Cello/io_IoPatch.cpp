@@ -38,7 +38,6 @@ void IoPatch::meta_value
   Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
   DEBUG0;
 
-  DEBUG1 ("patch = %p",patch_);
 
 #ifdef CONFIG_USE_CHARM
   DEBUG0;

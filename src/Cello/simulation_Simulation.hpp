@@ -72,6 +72,7 @@ public: // interface
 
   // Call initialization on Problem list of Initial objects
   void p_initial ();
+  void c_initial ();
 
   // Call output on Problem list of Output objects
   void p_output ();
@@ -101,9 +102,6 @@ public: // interface
   /// Refresh ghost zones
   void c_refresh();
 
-  // Monitor output
-  void c_monitor ();
-
   // Stopping criteria and computation
   void c_compute ();
 
@@ -124,10 +122,6 @@ public: // interface
   /// Return the Problem container object
   Problem *  problem() const throw()
   { return problem_; }
-
-  // /// Return the dimensionality of the Simulation
-  // int dimension() const throw()
-  // { return dimension_; }
 
   /// Return the Hierarchy
   Hierarchy * hierarchy() const throw()
@@ -211,6 +205,9 @@ protected: // functions
 
   /// Initialize global simulation parameters
   void initialize_simulation_ () throw();
+
+  /// Initialize output Monitor object
+  void initialize_monitor_ () throw();
 
   /// Initialize the hierarchy object
   void initialize_hierarchy_ () throw();

@@ -102,14 +102,15 @@ Patch * InputData::read_patch
   //      0,0,0,
   //      0,0,0,
   //      0,0,0,
-  //      0,0,0);
+  //      0,0,0,
+  //      0);
   // }
 
   // Change to file group for patch
 
   char buffer[40];
-  int ib = patch->index();
-  sprintf (buffer,"patch_%d",ib);
+  int id = patch->id();
+  sprintf (buffer,"patch_%d",id);
   file_->group_chdir(buffer);
   file_->group_open();
 

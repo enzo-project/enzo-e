@@ -97,8 +97,11 @@ class Patch
   /// Return domain upper extent
   void upper(double * x, double * y=0, double * z=0) const throw ();
 
-  /// Return the index of this Patch in the containing Hierarchy
-  int index () const throw();
+  /// Return the (global) id of this Patch
+  int id () const throw()
+  {
+    DEBUG2("patch %p id = %d",this,id_);
+    return id_; }
 
   //--------------------------------------------------
 

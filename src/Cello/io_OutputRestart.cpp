@@ -79,8 +79,7 @@ void OutputRestart::finalize () throw ()
 
 //----------------------------------------------------------------------
 
-void OutputRestart::write_simulation
-( const Simulation * simulation ) throw()
+void OutputRestart::write ( const Simulation * simulation ) throw()
 /// Note factory, field_descr, and hierarchy needed since otherwise
 /// Simulation functions must be called, which would introduce a circular
 /// dependence between Simulation and Output components
@@ -124,7 +123,8 @@ void OutputRestart::write_simulation
     
   }
 
-  Output::write_simulation(simulation);
+  // Call base write()
+  Output::write (simulation);
 
 }
 

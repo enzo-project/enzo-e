@@ -44,35 +44,7 @@ EnzoSimulationCharm::~EnzoSimulationCharm() throw()
 
 void EnzoSimulationCharm::run() throw()
 {
-  DEBUG("EnzoSimulationCharm::run()");
-  ItPatch it_patch(hierarchy_);
-  Patch * patch;
-
-  // count patches for Patch::p_initial()
-  int patch_count = 0;
-
-  DEBUG("Counting patches");
-  while (( patch = ++it_patch )) {
-    // count local patches
-    ++patch_count;
-
-  }
-  DEBUG1("Patch count = %d",patch_count);
-    
-  // set patch counter for s_patch() synchronization
-  patch_counter_.set_max(patch_count + 1);
-
-  // Initialize hierarchy
-
-  DEBUG("Calling Patch::p_initial() loop");
-  while (( patch = ++it_patch )) {
-    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-    DEBUG1("Calling %p Patch::p_initial()",proxy_patch);
-    proxy_patch->p_initial();
-  }
-  DEBUG0;
-  s_initial();
-  DEBUG0;
+  c_initial();
 }
 
 //======================================================================
