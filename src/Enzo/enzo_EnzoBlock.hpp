@@ -20,6 +20,14 @@ class EnzoBlock : public Block
 
   friend class IoEnzoBlock;
 
+  friend class EnzoSimulation;
+  friend class EnzoTimestep;
+  friend class EnzoTimestepPpm;
+  friend class EnzoTimestepPpml;
+  friend class EnzoInitialImplosion2;
+
+#include "enzo_EnzoBlock.decl.h"
+
 public: // interface
 
   /// Initialize the EnzoBlock chare array

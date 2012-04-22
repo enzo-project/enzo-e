@@ -87,12 +87,12 @@ void EnzoInitialImplosion2::enforce
 	d[i]  = 0.125;
 	vx[i] = 0.0;
 	vy[i] = 0.0;
-	te[i] = 0.14 / ((enzo::Gamma - 1.0) * d[i]);
+	te[i] = 0.14 / ((EnzoBlock::Gamma - 1.0) * d[i]);
       } else {
 	d[i]  = 1.0;
 	vx[i] = 0.0;
 	vy[i] = 0.0;
-	te[i] = 1.0 / ((enzo::Gamma - 1.0) * d[i]);
+	te[i] = 1.0 / ((EnzoBlock::Gamma - 1.0) * d[i]);
       }
     }
   }

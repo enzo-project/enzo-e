@@ -13,6 +13,8 @@ IoPatch::IoPatch(const Patch * patch) throw ()
   : Io(6,0),
     patch_(patch)
 {
+  DEBUG1("IoPatch(%p)\n",patch);
+
   meta_name_.push_back("id");
   meta_name_.push_back("size");
   meta_name_.push_back("offset");

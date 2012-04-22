@@ -11,6 +11,7 @@
 
 //======================================================================
 
+#include "enzo_EnzoBlock.def.h"
 
 EnzoBlock::EnzoBlock
 (
@@ -416,9 +417,9 @@ void EnzoBlock::initialize () throw()
 
   int gx,gy,gz;
 
-  gx = enzo::ghost_depth[0];
-  gy = enzo::ghost_depth[1];
-  gz = enzo::ghost_depth[2];
+  gx = EnzoBlock::ghost_depth[0];
+  gy = EnzoBlock::ghost_depth[1];
+  gz = EnzoBlock::ghost_depth[2];
 
   GridDimension[0]  = nx + 2*gx;
   GridDimension[1]  = ny + 2*gy;
@@ -445,7 +446,7 @@ void EnzoBlock::initialize () throw()
 
   // Initialize BaryonField[] pointers
 
-  for (int field = 0; field < enzo::NumberOfBaryonFields; field++) {
+  for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
     BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
   }
   DEBUG ("Exit EnzoBlock::initialize()\n");
