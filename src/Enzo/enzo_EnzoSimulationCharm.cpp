@@ -26,6 +26,8 @@ EnzoSimulationCharm::EnzoSimulationCharm
   : SimulationCharm(parameter_file, n)
 {
 
+  problem_ = new EnzoProblem;
+
 // #ifdef CONFIG_USE_PROJECTIONS
 //   traceRegisterUserEvent("Compute",10);
 // #endif
@@ -52,6 +54,7 @@ void EnzoSimulationCharm::initialize() throw()
 
 const Factory * EnzoSimulationCharm::factory() const throw()
 { 
+  DEBUG("EnzoSimulationCharm::factory()");
   if (! factory_) factory_ = new EnzoFactory;
   return factory_;
 }

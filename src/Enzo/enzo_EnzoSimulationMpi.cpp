@@ -19,6 +19,7 @@ EnzoSimulationMpi::EnzoSimulationMpi
  const GroupProcess * group_process ) throw ()
   : SimulationMpi(parameter_file,group_process)
 {
+  problem_ = new EnzoProblem;
 }
 
 //----------------------------------------------------------------------
@@ -39,6 +40,7 @@ void EnzoSimulationMpi::initialize() throw()
 
 const Factory * EnzoSimulationMpi::factory() const throw()
 { 
+  DEBUG("EnzoSimulationMpi::factory()");
   if (! factory_) factory_ = new EnzoFactory;
   return factory_;
 }

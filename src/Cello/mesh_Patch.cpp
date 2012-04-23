@@ -34,6 +34,7 @@ Patch::Patch
  int process_first, int process_last_plus
 ) throw()
   :
+  id_(id),
 #ifdef CONFIG_USE_CHARM
   block_array_(0),
   block_exists_(false),
@@ -41,7 +42,6 @@ Patch::Patch
 #else
   factory_(factory),
 #endif
-  id_(id),
   group_process_(GroupProcess::create(process_first,process_last_plus)),
   layout_ (nbx,nby,nbz)
 {

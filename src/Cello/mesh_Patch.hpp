@@ -162,6 +162,9 @@ protected: // functions
 
 protected: // attributes
 
+  /// ID of this Patch
+  int id_;
+
   /// Array of blocks ib associated with this process
 #ifdef CONFIG_USE_CHARM
   CProxy_Block * block_array_;
@@ -170,9 +173,6 @@ protected: // attributes
 #else
   std::vector<Block * > block_;
 #endif
-
-  /// ID of this Patch
-  int id_;
 
   /// Factory object for creating Blocks
   const Factory * factory_;

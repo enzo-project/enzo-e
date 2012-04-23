@@ -101,9 +101,10 @@ Simulation::~Simulation() throw()
 
 void Simulation::initialize() throw()
 {
+  initialize_monitor_();
+
   initialize_simulation_();
 
-  initialize_monitor_();
 
   initialize_data_descr_();
 
@@ -440,6 +441,7 @@ void Simulation::deallocate_() throw()
 
 const Factory * Simulation::factory() const throw()
 {
+  DEBUG("Simulation::factory()");
   if (factory_ == NULL) factory_ = new Factory;
   return factory_;
 }
