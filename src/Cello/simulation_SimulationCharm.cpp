@@ -25,13 +25,7 @@ SimulationCharm::SimulationCharm
  int                n) throw ()
   : Simulation(parameter_file, n)
 {
-
-// #ifdef CONFIG_USE_PROJECTIONS
-//   traceRegisterUserEvent("Compute",10);
-// #endif
-
-  initialize();
-
+  // derived class should call initialize()
 }
 
 //----------------------------------------------------------------------

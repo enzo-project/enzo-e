@@ -126,7 +126,6 @@ void Simulation::finalize() throw()
 {
   performance_simulation_->stop();
   performance_cycle_->stop();
-  deallocate_();
 }
 
 //======================================================================
