@@ -20,7 +20,8 @@ class EnzoBlock : public Block
 
   friend class IoEnzoBlock;
 
-  friend class EnzoSimulation;
+  friend class EnzoSimulationCharm;
+  friend class EnzoSimulationMpi;
   friend class EnzoTimestep;
   friend class EnzoTimestepPpm;
   friend class EnzoTimestepPpml;

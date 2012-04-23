@@ -117,14 +117,14 @@ Patch * Input::read_patch
 
 #else
 
-  ItBlock it_block (patch);
-  while (Block * block = ++it_block) {
+  // ItBlock it_block (patch);
+  // while (Block * block = ++it_block) {
 
-    // NO OFFSET: ASSUMES ROOT PATCH
-    INCOMPLETE("Input::read_patch--Uncommented read_block()");
-    //    read_block (block, "NAME",field_descr);
+  //   // NO OFFSET: ASSUMES ROOT PATCH
+  //   INCOMPLETE("Input::read_patch--Uncommented read_block()");
+  //   //    read_block (block, "NAME",field_descr);
 
-  }
+  // }
 #endif
   return patch;
 }

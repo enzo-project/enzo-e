@@ -29,13 +29,6 @@ EnzoSimulationMpi::~EnzoSimulationMpi() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationMpi::run() throw()
-{
-  c_initial();
-}
-
-//----------------------------------------------------------------------
-
 void EnzoSimulationMpi::initialize() throw()
 {
   SimulationMpi::initialize();
@@ -315,83 +308,6 @@ void EnzoSimulationMpi::run() throw()
 
   monitor_output();
   performance_output(performance_simulation_);
-
-}
-
-//----------------------------------------------------------------------
-
-void EnzoSimulationMpi::update_boundary_ (Block * block, bool is_boundary[3][2]) throw()
-{
-  // Update boundary conditions
-
-  if (dimension_ >= 1) {
-    if (is_boundary[axis_x][face_lower]) 
-      problem()->boundary()->enforce(field_descr_,block,face_lower,axis_x);
-    if (is_boundary[axis_x][face_upper]) 
-      problem()->boundary()->enforce(field_descr_,block,face_upper,axis_x);
-  }
-  if (dimension_ >= 2) {
-    if (is_boundary[axis_y][face_lower]) 
-      problem()->boundary()->enforce(field_descr_,block,face_lower,axis_y);
-    if (is_boundary[axis_y][face_upper]) 
-      problem()->boundary()->enforce(field_descr_,block,face_upper,axis_y);
-  }
-  if (dimension_ >= 3) {
-    if (is_boundary[axis_z][face_lower]) 
-      problem()->boundary()->enforce(field_descr_,block,face_lower,axis_z);
-    if (is_boundary[axis_z][face_upper]) 
-      problem()->boundary()->enforce(field_descr_,block,face_upper,axis_z);
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoSimulationMpi::refresh_ghost_ 
-(
- Block * block, 
- Patch * patch, 
- bool    is_boundary[3][2]
- ) throw()
-{
-  // Refresh ghost zones
-
-  int ibx,iby,ibz;
-  block->index_patch(&ibx,&iby,&ibz);
-
-  bool periodic = problem()->boundary()->is_periodic();
-
-  // FOLLOWING IS SIMILAR TO Block::p_refresh_face()
-
-  int nx,ny,nz;
-  block->field_block()->size (&nx,&ny,&nz);
-
-  // Determine axes that may be neighbors
-
-  bool axm = (nx > 1) && (periodic || ! is_boundary[axis_x][face_lower]);
-  bool axp = (nx > 1) && (periodic || ! is_boundary[axis_x][face_upper]); 
-  bool aym = (ny > 1) && (periodic || ! is_boundary[axis_y][face_lower]);
-  bool ayp = (ny > 1) && (periodic || ! is_boundary[axis_y][face_upper]);
-  bool azm = (nz > 1) && (periodic || ! is_boundary[axis_z][face_lower]);
-  bool azp = (nz > 1) && (periodic || ! is_boundary[axis_z][face_upper]);
-
-  int px = (ibx % 2 == 0) ? -1 : 1;
-  int py = (iby % 2 == 0) ? -1 : 1;
-  int pz = (ibz % 2 == 0) ? -1 : 1;
-
-  if (px == 1) SWAP(axm,axp);
-  if (py == 1) SWAP(aym,ayp);
-  if (pz == 1) SWAP(azm,azp);
-
-  if (field_descr_->refresh_face(2)) {
-    // TRACE3("p %d %d %d",px,py,pz);
-    // TRACE6("a %d %d  %d %d  %d %d",axm,axp,aym,ayp,azm,azp);
-    if (axm) block->refresh_ghosts(field_descr_,patch,+px,0,0);
-    if (axp) block->refresh_ghosts(field_descr_,patch,-px,0,0);
-    if (aym) block->refresh_ghosts(field_descr_,patch,0,+py,0);
-    if (ayp) block->refresh_ghosts(field_descr_,patch,0,-py,0);
-    if (azm) block->refresh_ghosts(field_descr_,patch,0,0,+pz);
-    if (azp) block->refresh_ghosts(field_descr_,patch,0,0,-pz);
-  }
 
 }
 
