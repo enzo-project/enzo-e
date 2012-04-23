@@ -10,11 +10,11 @@
 //----------------------------------------------------------------------
 
 #define CHARM_ENZO
-#include "main.hpp"
 
 #include "test.hpp"
 
 #include "enzo.hpp"
+#include "main.hpp"
 
 #include "enzo_charm.hpp"
 

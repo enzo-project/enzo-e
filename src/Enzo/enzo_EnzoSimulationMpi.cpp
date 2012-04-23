@@ -17,7 +17,7 @@ EnzoSimulationMpi::EnzoSimulationMpi
 (
  const char * parameter_file,
  const GroupProcess * group_process ) throw ()
-  : EnzoSimulation(parameter_file,group_process)
+  : SimulationMpi(parameter_file,group_process)
 {
 }
 
@@ -25,6 +25,29 @@ EnzoSimulationMpi::EnzoSimulationMpi
 
 EnzoSimulationMpi::~EnzoSimulationMpi() throw()
 {
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulationMpi::run() throw()
+{
+  c_initial();
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulationMpi::initialize() throw()
+{
+  SimulationMpi::initialize();
+  EnzoBlock::initialize(parameters_,field_descr());
+}
+
+//----------------------------------------------------------------------
+
+const Factory * EnzoSimulationMpi::factory() const throw()
+{ 
+  if (! factory_) factory_ = new EnzoFactory;
+  return factory_;
 }
 
 //----------------------------------------------------------------------

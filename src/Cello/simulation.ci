@@ -42,4 +42,9 @@ module simulation {
 
   };
 
+  group SimulationCharm : Simulation {
+    entry SimulationCharm
+      (const char filename[n], int n);
+
+  };
 }

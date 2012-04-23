@@ -4,7 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-10 16:14:57
 /// @brief    Interface file for the Simulation class
-/// @note     2010-12-17: code-wiki interface review
 
 #ifndef SIMULATION_SIMULATION_HPP
 #define SIMULATION_SIMULATION_HPP

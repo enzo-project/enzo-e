@@ -23,7 +23,7 @@ EnzoSimulationCharm::EnzoSimulationCharm
 (
  const char         parameter_file[],
  int                n) throw ()
-  : EnzoSimulation(parameter_file, n)
+  : SimulationCharm(parameter_file, n)
 {
 
 // #ifdef CONFIG_USE_PROJECTIONS
@@ -38,6 +38,22 @@ EnzoSimulationCharm::EnzoSimulationCharm
 
 EnzoSimulationCharm::~EnzoSimulationCharm() throw()
 {
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulationCharm::initialize() throw()
+{
+  SimulationCharm::initialize();
+  EnzoBlock::initialize(parameters_,field_descr());
+}
+
+//----------------------------------------------------------------------
+
+const Factory * EnzoSimulationCharm::factory() const throw()
+{ 
+  if (! factory_) factory_ = new EnzoFactory;
+  return factory_;
 }
 
 //----------------------------------------------------------------------
