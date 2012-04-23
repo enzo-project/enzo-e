@@ -7,7 +7,7 @@
 
 #include "enzo.hpp"
 
-#include "enzo_charm.hpp"
+#include "charm_enzo.hpp"
 //----------------------------------------------------------------------
 
 IoBlock * EnzoFactory::create_io_block () const throw()

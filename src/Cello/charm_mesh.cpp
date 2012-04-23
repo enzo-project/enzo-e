@@ -1,5 +1,6 @@
 #include "mesh.hpp"
-#include "mesh_charm.hpp"
+
+#include "charm_mesh.hpp"
 
 #ifdef CONFIG_USE_CHARM
 #  include "mesh.def.h"

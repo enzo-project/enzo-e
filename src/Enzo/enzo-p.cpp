@@ -16,7 +16,7 @@
 #include "enzo.hpp"
 #include "main.hpp"
 
-#include "enzo_charm.hpp"
+#include "charm_enzo.hpp"
 
 //----------------------------------------------------------------------
 

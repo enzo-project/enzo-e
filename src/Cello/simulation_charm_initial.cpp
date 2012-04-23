@@ -12,9 +12,10 @@
 #ifdef CONFIG_USE_CHARM
 
 #include "simulation.hpp"
-#include "simulation_charm.hpp"
 #include "mesh.hpp"
-#include "mesh_charm.hpp"
+
+#include "charm_simulation.hpp"
+#include "charm_mesh.hpp"
 
 
 //----------------------------------------------------------------------

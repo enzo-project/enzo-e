@@ -10,7 +10,7 @@
 #include "main.hpp"
 
 #include "simulation.hpp"
-#include "simulation_charm.hpp"
+#include "charm_simulation.hpp"
 
 bool config_performance = true;
 

@@ -14,8 +14,8 @@
 #include "simulation.hpp"
 #include "mesh.hpp"
 
-#include "simulation_charm.hpp"
-#include "mesh_charm.hpp"
+#include "charm_simulation.hpp"
+#include "charm_mesh.hpp"
 
 //----------------------------------------------------------------------
 

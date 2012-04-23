@@ -887,10 +887,6 @@ void Block::p_refresh_face (int n, char * buffer, int fx, int fy, int fz)
 
 //----------------------------------------------------------------------
 
-// SEE Simulation/simulation_charm_output.cpp for Block::p_write(int)
-
-//----------------------------------------------------------------------
-
 #ifdef CONFIG_USE_CHARM
 
 void Block::compute()
