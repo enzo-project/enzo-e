@@ -83,15 +83,8 @@ void OutputData::write
 {
   // Create file group for patch
 
-#ifdef CONFIG_USE_CHARM
-  DEBUG1(" patch_proxy = %p",patch); 
-  const Patch * patch_local = ((const CProxy_Patch *)patch)->ckLocal();
-#else
-  const Patch * patch_local = patch;
-#endif
-
-  DEBUG1("patch id = %d",patch_local->id());
-  int ib = patch_local->id();
+  DEBUG1("patch id = %d",patch->id());
+  int ib = patch->id();
   char buffer[40];
   sprintf (buffer,"patch_%d",ib);
   file_->group_chdir(buffer);
@@ -106,7 +99,7 @@ void OutputData::write
   // Also write the patches parallel Layout
 
   DEBUG0;
-  const Layout * layout = patch_local->layout();
+  const Layout * layout = patch->layout();
   IoLayout io_layout(layout);
 
   Output::write_meta_group (&io_layout);

@@ -41,41 +41,33 @@ void IoPatch::meta_value
   DEBUG0;
 
 
-#ifdef CONFIG_USE_CHARM
-  DEBUG0;
-  const Patch * patch = ((CProxy_Patch *) patch_)->ckLocal();
-  DEBUG0;
-#else
-  const Patch * patch = patch_;
-#endif
-
   int count = 0;
 
   DEBUG0;
-  DEBUG1 ("patch = %p",patch);
-  DEBUG3 ("patch size = %d %d %d",patch->size_[0],patch->size_[1],patch->size_[2]);
+  DEBUG1 ("patch = %p",patch_);
+  DEBUG3 ("patch size = %d %d %d",patch_->size_[0],patch_->size_[1],patch_->size_[2]);
   
   if (index == count++) {
-    *buffer = (void *) &patch->id_;
+    *buffer = (void *) &patch_->id_;
     *type   = scalar_type_int;
   } else  if (index == count++) {
-    *buffer = (void *) patch->size_;
+    *buffer = (void *) patch_->size_;
     *type   = scalar_type_int;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) patch->offset_;
+    *buffer = (void *) patch_->offset_;
     *type   = scalar_type_int;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) patch->blocking_;
+    *buffer = (void *) patch_->blocking_;
     *type   = scalar_type_int;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) patch->lower_;
+    *buffer = (void *) patch_->lower_;
     *type   = scalar_type_double;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) patch->upper_;
+    *buffer = (void *) patch_->upper_;
     *type   = scalar_type_double;
     *nxd     = 3;
   }
