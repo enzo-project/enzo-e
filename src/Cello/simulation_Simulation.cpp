@@ -454,7 +454,6 @@ const Factory * Simulation::factory() const throw()
 
 void Simulation::s_initialize()
 {
-  DEBUG("Begin s_initialize()");
 
   if (patch_counter_.remaining() == 0) {
     DEBUG("Calling run()");

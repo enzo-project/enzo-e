@@ -41,19 +41,20 @@ void IoPatch::meta_value
   DEBUG0;
 
 
-// #ifdef CONFIG_USE_CHARM
-//   DEBUG0;
-//   const Patch * patch = ((CProxy_Patch *)patch_)->ckLocal();
-//   DEBUG0;
-// #else
+#ifdef CONFIG_USE_CHARM
+  DEBUG0;
+  const Patch * patch = ((CProxy_Patch *) patch_)->ckLocal();
+  DEBUG0;
+#else
   const Patch * patch = patch_;
-// #endif
+#endif
 
   int count = 0;
 
   DEBUG0;
   DEBUG1 ("patch = %p",patch);
-  DEBUG1 ("patch id = %d",patch->id_);
+  DEBUG3 ("patch size = %d %d %d",patch->size_[0],patch->size_[1],patch->size_[2]);
+  
   if (index == count++) {
     *buffer = (void *) &patch->id_;
     *type   = scalar_type_int;
