@@ -167,7 +167,6 @@ void Simulation::initialize_monitor_() throw()
 
   bool debug = parameters_->value_logical("Monitor:debug",false);
 
-  printf ("debug = %d\n",debug);
   monitor_->set_active("DEBUG",debug);
   
 }
@@ -571,6 +570,7 @@ void Simulation::performance_output(Performance * performance)
 
 void Simulation::output_performance_()
 {
+  DEBUG("Simulation::output_performance");
   int i = 0;
   int np = group_process()->size();
 
@@ -608,8 +608,9 @@ void Simulation::output_performance_()
 #ifdef CONFIG_USE_CHARM
   if (performance_curr_ == performance_cycle_) {
     ((SimulationCharm *) this)->c_compute();
-  } else {
-    proxy_main.p_exit(CkNumPes());
+  // } else {
+  //   DEBUG("Calling p_exit");
+  //   proxy_main.p_exit(CkNumPes());
   }
 #endif
 

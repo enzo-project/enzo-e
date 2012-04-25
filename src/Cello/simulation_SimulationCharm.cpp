@@ -117,10 +117,10 @@ void SimulationCharm::c_compute()
 
   if (stop_) {
     DEBUG0;
-
+    
     performance_output(performance_simulation_);
 
-    DEBUG0;
+    DEBUG("Calling p_exit");
     proxy_main.p_exit(CkNumPes());
     DEBUG0;
 

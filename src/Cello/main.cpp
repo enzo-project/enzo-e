@@ -28,6 +28,7 @@ extern CProxy_SimulationCharm proxy_simulation;
 
 void Main::p_exit(int count)
 {
+  DEBUG("Main::p_exit");
   count_exit_++;
   if (count_exit_ >= count) {
     count_exit_ = 0;
