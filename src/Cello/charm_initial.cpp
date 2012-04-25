@@ -20,7 +20,7 @@
 
 //----------------------------------------------------------------------
 
-void Simulation::c_initial()
+void SimulationCharm::c_initial()
 {
   ItPatch it_patch(hierarchy_);
   Patch * patch;
@@ -52,7 +52,7 @@ void Simulation::c_initial()
 
 //----------------------------------------------------------------------
 
-void Simulation::x_request_patch
+void SimulationCharm::x_request_patch
 (
  int patch_id,
  int block_rank
@@ -66,7 +66,7 @@ void Simulation::x_request_patch
 
 //----------------------------------------------------------------------
 
-void Simulation::x_send_patch
+void SimulationCharm::x_send_patch
 (
  int patch_id,
  CkChareID proxy_patch
@@ -77,9 +77,9 @@ void Simulation::x_send_patch
 
 //----------------------------------------------------------------------
 
-void Simulation::p_initial ()
+void SimulationCharm::p_initial ()
 {
-  DEBUG("Simulation::p_initial()");
+  DEBUG("SimulationCharm::p_initial()");
   // reset initial "loop" over initial objects
   problem()->initial_first();
 
@@ -200,7 +200,7 @@ void Block::p_initial()
 void Patch::s_initial()
 {
   if (block_counter_.remaining() == 0) {
-    DEBUG("Patch::s_initial() calling Simulation::s_initial()");
+    DEBUG("Patch::s_initial() calling SimulationCharm::s_initial()");
     proxy_simulation.s_initial();
   } else  DEBUG("Patch::s_initial() skipping");
 

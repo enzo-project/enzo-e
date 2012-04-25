@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
-extern CProxy_Simulation  proxy_simulation;
+extern CProxy_SimulationCharm  proxy_simulation;
 #endif
 
 //----------------------------------------------------------------------
@@ -197,11 +197,12 @@ void Output::write
 
   while (Patch * patch = ++it_patch) {
 
-    // NO OFFSET: ASSUMES ROOT PATCH
+#ifdef CONFIG_USE_CHARM
+    ((CProxy_Patch *)patch)->p_write(index_charm_);
+#else
     write (patch, field_descr, 0,0,0);
-
+#endif
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -217,21 +218,17 @@ void Output::write
 
 #ifdef CONFIG_USE_CHARM
 
-  DEBUG0;
-  CProxy_Patch * proxy_patch = (CProxy_Patch *)(patch);
-  // Patch * patch_local = proxy_patch->ckLocal();
-  proxy_patch->p_write (index_charm_);
+  patch->block_array()->p_write(index_charm_);
 
 #else
 
   ItBlock it_block (patch);
   while (const Block * block = ++it_block) {
-
-    // NO OFFSET: ASSUMES ROOT PATCH
     write (block, field_descr, 0,0,0);
-
   }
+
 #endif
+
 }
 
 //----------------------------------------------------------------------

@@ -274,7 +274,7 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 //======================================================================
 
 #ifdef CONFIG_USE_CHARM
-extern CProxy_Simulation  proxy_simulation;
+extern CProxy_SimulationCharm  proxy_simulation;
 #endif /* CONFIG_USE_CHARM */
 
 //======================================================================
@@ -895,9 +895,9 @@ void Block::compute()
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-#ifdef CONFIG_USE_PROJECTIONS
-  double time_start = CmiWallTimer();
-#endif
+// #ifdef CONFIG_USE_PROJECTIONS
+//   double time_start = CmiWallTimer();
+// #endif
 
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -906,9 +906,9 @@ void Block::compute()
     method -> compute_block (field_descr,this);
   }
 
-#ifdef CONFIG_USE_PROJECTIONS
-  //  traceUserBracketEvent(10,time_start, CmiWallTimer());
-#endif
+// #ifdef CONFIG_USE_PROJECTIONS
+//   traceUserBracketEvent(10,time_start, CmiWallTimer());
+// #endif
 
   // Update Block cycle and time to Simulation time and cycle
 

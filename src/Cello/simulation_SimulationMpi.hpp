@@ -35,6 +35,9 @@ public: // functions
   /// Run the simulation
   virtual void run() throw();
 
+  /// Perform scheduled output for this cycle_ and time_
+  void scheduled_output();
+
 protected:
 
   void update_boundary_ (Block * block, bool boundary[3][2]) throw();

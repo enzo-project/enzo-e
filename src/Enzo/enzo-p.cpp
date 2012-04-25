@@ -21,7 +21,7 @@
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
-extern CProxy_Simulation proxy_simulation;
+extern CProxy_SimulationCharm proxy_simulation;
 #endif
 
 #ifndef CONFIG_USE_CHARM

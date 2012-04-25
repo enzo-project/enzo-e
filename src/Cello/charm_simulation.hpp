@@ -2,6 +2,6 @@
 #  include "main.decl.h"
 extern CProxy_Main       proxy_main;
 #  include "simulation.decl.h"
-extern CProxy_Simulation proxy_simulation;
+extern CProxy_SimulationCharm proxy_simulation;
 #endif
 

@@ -450,103 +450,6 @@ const Factory * Simulation::factory() const throw()
 
 #ifdef CONFIG_USE_CHARM
 
-//----------------------------------------------------------------------
-
-void Simulation::s_initialize()
-{
-
-  if (patch_counter_.remaining() == 0) {
-    DEBUG("Calling run()");
-    run();
-  }
-  DEBUG("End s_initialize()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
- //   ItPatch it_patch(hierarchy_);
-//   Patch * patch;
-//   while (( patch = ++it_patch )) {
-//     CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-//     DEBUG1("proxy_patch = %p",proxy_patch);
-//     DEBUG1("local patch = %p",proxy_patch->ckLocal());
-//   }
-
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::s_patch(CkCallback callback)
-{
-  DEBUG("s_patch");
-  if (patch_counter_.remaining() == 0) {
-    callback.send();
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::s_initial()
-{
-  DEBUG("s_initial");
-  if (patch_counter_.remaining() == 0) {
-    DEBUG ("Simulation::s_initial() calling c_refresh()");
-    c_refresh();
-  } else  DEBUG ("Simulation::s_initial() skipping c_refresh()");
-
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::c_refresh()
-{
-  DEBUG ("Simulation::c_refresh()");
-  ItPatch it_patch(hierarchy_);
-  Patch * patch;
-
-  while (( patch = ++it_patch )) {
-    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-    proxy_patch->p_refresh();
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::c_compute()
-{
-  //--------------------------------------------------
-  // Stopping
-  //--------------------------------------------------
-
-  DEBUG1 ("Simulation::c_compute() stop_ = %d",stop_);
-
-  if (stop_) {
-    DEBUG0;
-
-    performance_output(performance_simulation_);
-
-    DEBUG0;
-    proxy_main.p_exit(CkNumPes());
-    DEBUG0;
-
-  } else {
-    DEBUG0;
-
-    //--------------------------------------------------
-    // Compute
-    //--------------------------------------------------
-
-    ItPatch it_patch(hierarchy_);
-    Patch * patch;
-    while (( patch = ++it_patch )) {
-      CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-      DEBUG3("cycle %d time %f dt %f",
-	     cycle_,time_,dt_);
-      proxy_patch->p_compute(cycle_, time_, dt_);
-    }
-    DEBUG0;
-  }
-    DEBUG0;
-
-}
-
 #endif
 
 #ifndef CONFIG_USE_CHARM
@@ -555,83 +458,6 @@ void Simulation::c_compute()
 // NOT CHARM
 //----------------------------------------------------------------------
 
-void Simulation::scheduled_output()
-
-{
-  size_t index_output = 0;
-  while (Output * output = problem()->output(index_output++)) {
-
-    if (output->is_scheduled(cycle_,time_)) {
-
-      output->init();
-
-      output->open();
-
-      output->write(this);
-
-      //--------------------------------------------------
-      int ip       = group_process_->rank();
-      int ip_writer = output->process_writer();
-
-      int n=1;  char * buffer = 0;
-
-      if (ip == ip_writer) { // process is writer
-	int ip1 = ip+1;
-	int ip2 = ip_writer+output->process_stride();
-	for (int ip_remote=ip1; ip_remote<ip2; ip_remote++) {
-
-	  // receive size
-
-	  void * handle_recv;
-	  handle_recv = group_process_->recv_begin(ip_remote,&n,sizeof(n));
-	  group_process_->wait(handle_recv);
-	  group_process_->send_end(handle_recv);
-
-	  // allocate buffer
-
-	  buffer = new char [n];
-
-	  // receive buffer
-
-	  handle_recv = group_process_->recv_begin(ip_remote,buffer,n);
-	  group_process_->wait(handle_recv);
-	  group_process_->recv_end(handle_recv);
-	  
-	  // update
-
-	  output->update_remote(n,buffer);
-
-	  // deallocate
-	  output->cleanup_remote(&n,&buffer);
-	}
-      } else { // process is not writer
-
-	// send data to writer
-
-	output->prepare_remote(&n,&buffer);
-
-	// send size
-
-	void * handle_send;
-
-	handle_send = group_process_->send_begin(ip_writer,&n,sizeof(n));
-	group_process_->wait(handle_send);
-	group_process_->send_end(handle_send);
-
-	// send buffer
-
-	handle_send = group_process_->send_begin(ip_writer,buffer,n);
-	group_process_->wait(handle_send);
-	group_process_->send_end(handle_send);
-
-      }
-      //--------------------------------------------------
-
-      output->close();
-      output->finalize();
-    }
-  }
-}
 
 #endif
 
@@ -674,7 +500,7 @@ void Simulation::monitor_output()
     performance_output(performance_cycle_);
   } else {
 #ifdef CONFIG_USE_CHARM
-    c_compute();
+    ((SimulationCharm *) this)->c_compute();
 #endif
   }
 
@@ -719,7 +545,7 @@ void Simulation::performance_output(Performance * performance)
 
   // First reduce minimum values
 
-  CkCallback callback (CkIndex_Simulation::p_perf_output_min(NULL),thisProxy);
+  CkCallback callback (CkIndex_SimulationCharm::p_perf_output_min(NULL),thisProxy);
 
   contribute( num_perf_*sizeof(double), perf_val_, 
 	      CkReduction::min_double, callback);
@@ -740,75 +566,6 @@ void Simulation::performance_output(Performance * performance)
 #endif
 
 }
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Simulation::p_perf_output_min(CkReductionMsg * msg)
-{
-  // Collect minimum values
-
-  double * reduce = (double * )msg->getData();
-  for (size_t i=0; i<num_perf_; i++) {
-    perf_min_[i] = reduce[i];
-  }
-  delete msg;
-
-  // Then reduce maximum values
-
-  CkCallback callback (CkIndex_Simulation::p_perf_output_max(NULL),thisProxy);
-  contribute( num_perf_*sizeof(double), perf_val_, 
-	      CkReduction::max_double, callback);
-
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Simulation::p_perf_output_max(CkReductionMsg * msg)
-{
-  // Collect maximum values
-
-  double * reduce = (double * )msg->getData();
-  for (size_t i=0; i<num_perf_; i++) {
-    perf_max_[i] = reduce[i];
-  }
-  delete msg;
-
-  // Finally reduce sum values
-
-  CkCallback callback (CkIndex_Simulation::p_perf_output_sum(NULL),thisProxy);
-  contribute( num_perf_*sizeof(double), perf_val_, 
-	      CkReduction::sum_double, callback);
-
-
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Simulation::p_perf_output_sum(CkReductionMsg * msg)
-{
-  // Collect summed values
-
-  double * reduce = (double * )msg->getData();
-  for (size_t i=0; i<num_perf_; i++) {
-    perf_sum_[i] = reduce[i];
-  }
-  delete msg;
-
-  // Display performance output
-  output_performance_();
-}
-
-#endif
 
 //----------------------------------------------------------------------
 
@@ -850,7 +607,7 @@ void Simulation::output_performance_()
 
 #ifdef CONFIG_USE_CHARM
   if (performance_curr_ == performance_cycle_) {
-    c_compute();
+    ((SimulationCharm *) this)->c_compute();
   } else {
     proxy_main.p_exit(CkNumPes());
   }

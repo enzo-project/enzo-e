@@ -21,7 +21,7 @@
 
 // (Called from BlockReduce::p_prepare())
 
-void Simulation::p_output ()
+void SimulationCharm::p_output ()
 {
   problem()->output_first();
   problem()->output_next(this);
@@ -70,29 +70,33 @@ void Problem::output_next(Simulation * simulation) throw()
   }
 }
 
+// //----------------------------------------------------------------------
+
+// void SimulationCharm::p_write(int index)
+// {
+//   ERROR("","");
+//   DEBUG ("SimulationCharm::p_write()");
+//   ItPatch it_patch(hierarchy_);
+//   Patch * patch;
+//   while (( patch = ++it_patch )) {
+//     CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
+//     proxy_patch->p_write(index);
+//   }
+// }
+
 //----------------------------------------------------------------------
 
-// Output::init()
-
-//----------------------------------------------------------------------
-
-void Simulation::p_write(int index)
+void Patch::p_write(int index_output)
 {
-  DEBUG ("Simulation::p_write()");
-  ItPatch it_patch(hierarchy_);
-  Patch * patch;
-  while (( patch = ++it_patch )) {
-    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-    proxy_patch->p_write(index);
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Patch::p_write(int index)
-{
+  DEBUG3("patch size = %d %d %d",size_[0],size_[1],size_[2]);
   DEBUG ("Patch::p_write()");
-  block_array_->p_write(index);
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  FieldDescr * field_descr = simulation->field_descr();
+  Output * output = simulation->problem()->output(index_output);
+
+  output->write(this,field_descr,0,0,0);
 }
 
 //----------------------------------------------------------------------
@@ -125,9 +129,9 @@ void Patch::s_write()
 
 //----------------------------------------------------------------------
 
-void Simulation::s_write()
+void SimulationCharm::s_write()
 {
-  DEBUG ("Simulation::s_write()");
+  DEBUG ("SimulationCharm::s_write()");
   problem()->output_wait(this);
 }
 
@@ -172,9 +176,9 @@ void Problem::output_wait(Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::p_output_write (int n, char * buffer)
+void SimulationCharm::p_output_write (int n, char * buffer)
 {
-  DEBUG ("Simulation::p_output_write()");
+  DEBUG ("SimulationCharm::p_output_write()");
   problem()->output_write(this,n,buffer);
 }
 

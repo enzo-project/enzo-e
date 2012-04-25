@@ -82,7 +82,9 @@ void OutputData::write
  ) throw()
 {
   // Create file group for patch
-
+  int nx,ny,nz;
+  patch->size(&nx,&ny,&nz);
+  DEBUG3("patch size = %d %d %d",nx,ny,nz);
   DEBUG1("patch id = %d",patch->id());
   int ib = patch->id();
   char buffer[40];

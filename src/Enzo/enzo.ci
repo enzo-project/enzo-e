@@ -9,7 +9,7 @@ module enzo {
 
 //  extern module mesh;
 
-  readonly CProxy_Simulation  proxy_simulation;
+  readonly CProxy_SimulationCharm  proxy_simulation;
 
   group EnzoSimulationCharm : SimulationCharm {
     entry EnzoSimulationCharm

@@ -15,13 +15,23 @@ module simulation {
     entry Simulation
       (const char filename[n], int n);
 
+//    entry void p_done(CkReductionMsg*);
+
+
+  };
+
+  group SimulationCharm : Simulation {
+
+    entry SimulationCharm
+      (const char filename[n], int n);
+
     entry void s_initialize ();
 
     entry void p_initial ();
     entry void s_initial ();
 
     entry void p_output ();
-    entry void p_write(int index);
+//    entry void p_write(int index);
     entry void s_write();
 
     entry void p_output_write(int n, char buffer[n]);
@@ -36,15 +46,6 @@ module simulation {
     entry void x_send_patch ( int patch_id, CkChareID proxy_patch);
 
     entry void c_refresh ();
-
-//    entry void p_done(CkReductionMsg*);
-
-
-  };
-
-  group SimulationCharm : Simulation {
-    entry SimulationCharm
-      (const char filename[n], int n);
 
   };
 }
