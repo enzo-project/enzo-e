@@ -58,20 +58,6 @@ public: // interface
     return (i < (int)initial_list_.size()) ? initial_list_[i] : NULL; 
   }
 
-#ifdef CONFIG_USE_CHARM
-  /// reset initial index to 0 (not needed, but mirrors initial_output() )
-  void initial_first() throw();
-
-  /// Process the next initial object if any, else proceed with simulation
-  void initial_next(Simulation * simulation) throw();
-
-#endif
-
-
-  /// Return the ith method object
-  Method * method(size_t i) const throw() 
-  { return (i < method_list_.size()) ? method_list_[i] : NULL; }
-
   /// Return the ith output object
   Output * output(int i = -1) const throw()
   { 
@@ -80,8 +66,16 @@ public: // interface
   }
 
 #ifdef CONFIG_USE_CHARM
+  /// reset initial index to 0 (not needed, but mirrors initial_output() )
+  void initial_reset() throw()
+  { index_initial_ = -1; }
+
+  /// Process the next initial object if any, else proceed with simulation
+  void initial_next(Simulation * simulation) throw();
+
   /// reset output index to 0
-  void output_first() throw();
+  void output_reset() throw()
+  { index_output_ = -1; }
 
   /// Process the next output object if any, else proceed with simulation
   void output_next(Simulation * simulation) throw();
@@ -94,6 +88,10 @@ public: // interface
   void output_write (Simulation * simulation, int n, char * buffer) throw();
 
 #endif
+
+  /// Return the ith method object
+  Method * method(size_t i) const throw() 
+  { return (i < method_list_.size()) ? method_list_[i] : NULL; }
 
   /// Return the stopping object
   Stopping *  stopping() const throw() { return stopping_; }

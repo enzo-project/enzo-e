@@ -544,7 +544,8 @@ void Simulation::performance_output(Performance * performance)
 
   // First reduce minimum values
 
-  CkCallback callback (CkIndex_SimulationCharm::p_perf_output_min(NULL),thisProxy);
+  CkCallback callback (CkIndex_SimulationCharm::p_performance_min(NULL),
+		       thisProxy);
 
   contribute( num_perf_*sizeof(double), perf_val_, 
 	      CkReduction::min_double, callback);

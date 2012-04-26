@@ -51,8 +51,6 @@ void InitialFile::enforce
 
   if (! input_->is_open() ) {
 
-    input_->is_scheduled (cycle_,time_);
-
     std::string              file_name = "";
     std::vector<std::string> file_args;
 

@@ -18,7 +18,19 @@
 #include "charm_mesh.hpp"
 
 
+/* #define NEW_INITIAL */
+
 //----------------------------------------------------------------------
+
+#ifdef NEW_INITIAL
+
+void SimulationCharm::c_initial ()
+{
+  problem()->initial_reset();
+  problem()->initial_next(this);
+}
+
+#else
 
 void SimulationCharm::c_initial()
 {
@@ -50,6 +62,8 @@ void SimulationCharm::c_initial()
 
 }
 
+#endif
+
 //----------------------------------------------------------------------
 
 void SimulationCharm::x_request_patch
@@ -73,26 +87,6 @@ void SimulationCharm::x_send_patch
  )
 {
   DEBUG ("x_send_patch()");
-}
-
-//----------------------------------------------------------------------
-
-void SimulationCharm::p_initial ()
-{
-  DEBUG("SimulationCharm::p_initial()");
-  // reset initial "loop" over initial objects
-  problem()->initial_first();
-
-  // process first initial object, which continues with refresh() if done
-  problem()->initial_next(this);
-}
-
-//----------------------------------------------------------------------
-
-void Problem::initial_first() throw()
-{
-  DEBUG("Problem::initial_first()");
-  index_initial_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -208,7 +202,7 @@ void Patch::s_initial()
 
 //----------------------------------------------------------------------
 
-void Block::p_read ()
+void Block::p_read (int index_initial)
 {
   INCOMPLETE("Block::p_read");
 }

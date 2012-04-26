@@ -23,15 +23,8 @@
 
 void SimulationCharm::p_output ()
 {
-  problem()->output_first();
+  problem()->output_reset();
   problem()->output_next(this);
-}
-
-//----------------------------------------------------------------------
-
-void Problem::output_first() throw()
-{
-  index_output_ = -1;
 }
 
 //----------------------------------------------------------------------

@@ -74,9 +74,9 @@ public: // functions
   void c_compute ();
 
   /// Reduction callback functions for performance_output()
-  void p_perf_output_min(CkReductionMsg * msg);
-  void p_perf_output_max(CkReductionMsg * msg);
-  void p_perf_output_sum(CkReductionMsg * msg);
+  void p_performance_min(CkReductionMsg * msg);
+  void p_performance_max(CkReductionMsg * msg);
+  void p_performance_sum(CkReductionMsg * msg);
 
 
 };

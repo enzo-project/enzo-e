@@ -97,7 +97,7 @@ public: // CHARM++ PUPer
   void p_write (int index_output);
 
   /// Contribute block data to the Initial input object
-  void p_read ();
+  void p_read (int index_input = 0);
 
   // /// Entry function after initial barrier to call refresh()
   // void p_call_refresh();
@@ -177,6 +177,22 @@ public: // CHARM++ PUPer
 
   /// Return the index of this Block in the containing Patch 
   int index () const throw();
+
+  /// Return the name of the block within its patch, e.g. "block_3"
+  std::string name () const throw()
+  {
+    std::stringstream convert;
+    convert << "block_" << index();
+    return convert.str();
+  }
+
+  /// Return the name of the parent patch, e.g. "patch_12"
+  std::string patch_name () const throw()
+  {
+    std::stringstream convert;
+    convert << "patch_" << patch_id_;
+    return convert.str();
+  }
 
   /// Return the size the containing Patch
   void size_patch (int * nx, int * ny, int * nz) const throw();

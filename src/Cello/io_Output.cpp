@@ -241,10 +241,11 @@ void Output::write
  ) throw()
 {
   // Write fields
-  DEBUG("Output::write");
+
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
     const FieldBlock * field_block = block->field_block();
     write (field_block,  field_descr, it_field_->value());
   }
+
 }
 

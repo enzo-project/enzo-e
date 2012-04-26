@@ -173,7 +173,7 @@ void SimulationMpi::run() throw()
 
       while ((block = ++it_block)) {
 
-	double dt_block   = timestep->compute(field_descr_,block);
+	double dt_block   = timestep->evaluate(field_descr_,block);
 	double time_block = block->time();
 
 	// Reduce timestep to coincide with scheduled output
@@ -214,6 +214,10 @@ void SimulationMpi::run() throw()
     }
 
     ASSERT("Simulation::run", "dt == 0", dt_ != 0.0);
+
+    // Perform any scheduled output
+
+    scheduled_output();
 
     monitor_output();
 
@@ -287,9 +291,9 @@ void SimulationMpi::run() throw()
     cycle_ ++;
     time_ += dt_hierarchy;
 
-    // Perform any scheduled output
+    // // Perform any scheduled output
 
-    scheduled_output();
+    // scheduled_output();
 
   } // while (! stop_hierarchy)
 
@@ -297,6 +301,7 @@ void SimulationMpi::run() throw()
   // END MAIN LOOP
   //======================================================================
 
+  scheduled_output();
   monitor_output();
   performance_output(performance_simulation_);
 
@@ -324,8 +329,10 @@ void SimulationMpi::scheduled_output()
       int n=1;  char * buffer = 0;
 
       if (ip == ip_writer) { // process is writer
+
 	int ip1 = ip+1;
 	int ip2 = ip_writer+output->process_stride();
+
 	for (int ip_remote=ip1; ip_remote<ip2; ip_remote++) {
 
 	  // receive size
@@ -352,6 +359,7 @@ void SimulationMpi::scheduled_output()
 	  // deallocate
 	  output->cleanup_remote(&n,&buffer);
 	}
+
       } else { // process is not writer
 
 	// send data to writer

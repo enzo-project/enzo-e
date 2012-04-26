@@ -19,7 +19,7 @@ EnzoTimestep::EnzoTimestep () throw()
 
 //----------------------------------------------------------------------
 
-double EnzoTimestep::compute ( const FieldDescr * field_descr,
+double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
 			       Block * block ) throw()
 {
 

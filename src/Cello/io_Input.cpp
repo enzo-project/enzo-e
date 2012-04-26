@@ -47,15 +47,6 @@ Input::~Input () throw()
 
 //----------------------------------------------------------------------
 
-bool Input::is_scheduled (int cycle, double time)
-{
-  cycle_ = cycle;
-  time_  = time;
-  return true;
-}
-
-//----------------------------------------------------------------------
-
 void Input::set_filename (std::string filename,
 			   std::vector<std::string> fileargs) throw()
 {
@@ -112,7 +103,7 @@ Patch * Input::read_patch
 
   if (patch->blocks_allocated()) {
     // p_read() NOT IMPLEMENTED
-    patch->block_array()->p_read ();
+    patch->block_array()->p_read (index_charm_);
   }
 
 #else
