@@ -42,7 +42,7 @@ use_valgrind    = 0
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
 
-use_projections = 1
+use_projections = 0
 
 # Triton MPI type (openmpi or mpich2)
 
@@ -70,6 +70,8 @@ if not env.GetOption('clean'):
           use_papi = 1
 
      env = configure.Finish()
+
+use_papi = 0
 
 #-----------------------------------------------------------------------
 # COMMAND-LINE ARGUMENTS
@@ -118,7 +120,7 @@ define["double"] =        ['CONFIG_PRECISION_DOUBLE']
 define_atsync =           ['CONFIG_CHARM_ATSYNC']
 define_memory =           ['CONFIG_USE_MEMORY']
 define_projections =      ['CONFIG_USE_PROJECTIONS']
-define_papi  =            ['CONFIG_USE_PAPI']
+define_papi  =            ['CONFIG_USE_PAPI','PAPI3']
 
 # Debugging defines
 

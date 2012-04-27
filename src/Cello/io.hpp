@@ -12,6 +12,7 @@
 #include "charm.hpp"
 
 #include "_parallel.hpp"
+#include "_performance.hpp"
 #include "_simulation.hpp"
 #include "_error.hpp"
 #include "_parameters.hpp"
