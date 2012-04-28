@@ -730,8 +730,10 @@ Initial * Problem::create_initial_
   DEBUG1 ("create_initial(%s)",type.c_str());
 
   if (type == "file" || type == "restart") {
+    DEBUG ("Creating InitialFile");
     return new InitialFile(parameters,group_process,init_cycle,init_time);;
   } else if (type == "default") {
+    DEBUG ("Creating InitialDefault");
     return new InitialDefault(parameters,init_cycle,init_time);
   }
   return NULL;

@@ -81,18 +81,6 @@ void SimulationCharm::s_patch(CkCallback callback)
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::s_initial()
-{
-  DEBUG("s_initial");
-  if (patch_counter_.remaining() == 0) {
-    DEBUG ("SimulationCharm::s_initial() calling c_refresh()");
-    c_refresh();
-  } else  DEBUG ("SimulationCharm::s_initial() skipping c_refresh()");
-
-}
-
-//----------------------------------------------------------------------
-
 void SimulationCharm::c_refresh()
 {
   DEBUG ("SimulationCharm::c_refresh()");

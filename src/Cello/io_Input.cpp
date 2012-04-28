@@ -99,23 +99,15 @@ Patch * Input::read_patch
 
 #ifdef CONFIG_USE_CHARM
 
-  // CHARM++ Block callback for read_block()
-
-  if (patch->blocks_allocated()) {
-    // p_read() NOT IMPLEMENTED
-    patch->block_array()->p_read (index_charm_);
-  }
+  patch->block_array()->p_read (index_charm_);
 
 #else
 
-  // ItBlock it_block (patch);
-  // while (Block * block = ++it_block) {
-
-  //   // NO OFFSET: ASSUMES ROOT PATCH
-  //   INCOMPLETE("Input::read_patch--Uncommented read_block()");
-  //   //    read_block (block, "NAME",field_descr);
-
-  // }
+  ItBlock it_block (patch);
+  while (Block * block = ++it_block) {
+    // NO OFFSET: ASSUMES ROOT PATCH
+    read_block (block, "NAME",field_descr);
+  }
 #endif
   return patch;
 }

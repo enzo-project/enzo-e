@@ -5,6 +5,10 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
+# whether to compile "new initial" code (TEMPORARY)
+
+new_initial = 1
+
 # Whether to print out messages with the TRACE() series of statements
 
 trace           = 1
@@ -131,6 +135,9 @@ define_debug_verbose =    ['CELLO_DEBUG_VERBOSE']
 define_hdf5  =            ['H5_USE_16_API']
 define_png   =            ['NO_FREETYPE']
 
+# Temporary defines
+define_new_initial =           ['NEW_INITIAL']
+
 #----------------------------------------------------------------------
 # ASSEMBLE DEFINES
 #----------------------------------------------------------------------
@@ -181,6 +188,7 @@ if (use_gprof == 1):
      
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
+if (new_initial != 0):   defines = defines + define_new_initial
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory

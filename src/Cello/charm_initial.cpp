@@ -18,8 +18,6 @@
 #include "charm_mesh.hpp"
 
 
-/* #define NEW_INITIAL */
-
 //----------------------------------------------------------------------
 
 #ifdef NEW_INITIAL
@@ -30,7 +28,11 @@ void SimulationCharm::c_initial ()
   problem()->initial_next(this);
 }
 
-#else
+#endif
+
+//======================================================================
+
+#ifndef NEW_INITIAL
 
 void SimulationCharm::c_initial()
 {
@@ -49,8 +51,6 @@ void SimulationCharm::c_initial()
   // set patch counter for s_patch() synchronization
   patch_counter_.set_max(patch_count + 1);
 
-  DEBUG1 ("patch count = %d",patch_count);
-
   // Initialize hierarchy
 
   while (( patch = ++it_patch )) {
@@ -66,47 +66,29 @@ void SimulationCharm::c_initial()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::x_request_patch
-(
- int patch_id,
- int block_rank
-)
-{
-  // call x_send_patch()
-  CkChareID patch_proxy;
-  proxy_simulation[block_rank].x_send_patch(patch_id,patch_proxy);
-  DEBUG ("x_request_patch()");
-}
-
-//----------------------------------------------------------------------
-
-void SimulationCharm::x_send_patch
-(
- int patch_id,
- CkChareID proxy_patch
- )
-{
-  DEBUG ("x_send_patch()");
-}
-
-//----------------------------------------------------------------------
-
 void Problem::initial_next(Simulation * simulation) throw()
 {
-  DEBUG("Problem::initial_next()");
-  // find next initial
+#ifdef NEW_INITIAL
 
-  Initial * initial = this->initial(index_initial_);
+  // find next initialization object
 
-  // initial if any scheduled, else proceed with refresh
+  Initial * initial;
 
-  Hierarchy * hierarchy = simulation->hierarchy();
+  DEBUG1 ("index_initial_ = %d",index_initial_);
+
+  initial = this->initial(++index_initial_);
+
+  DEBUG1 ("index_initial_ = %d",index_initial_);
+
+  Hierarchy *  hierarchy   = simulation->hierarchy();
   FieldDescr * field_descr = simulation->field_descr();
+
+  DEBUG2 ("Start Initial(%d) %p",index_initial_,initial);
 
   if (initial != NULL) {
 
-    DEBUG1 ("Initial expects blocks allocated = %s",
-	    initial->expects_blocks_allocated() ? "true" : "false");
+    DEBUG1 ("Start Initial(%d)",index_initial_);
+
     if (initial->expects_blocks_allocated()) {
 
       ItPatch it_patch(hierarchy);
@@ -115,14 +97,12 @@ void Problem::initial_next(Simulation * simulation) throw()
       while (( patch = ++it_patch )) {
 
 	CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-	DEBUG("Problem::initial_next() calling Patch::p_initial()");
 	proxy_patch->p_initial();
 
       }
 
     } else {
 
-      DEBUG("Problem::initial_next() calling Initial::enforce(Hierarchy)");
       initial->enforce(hierarchy,field_descr);
 
     }
@@ -133,18 +113,44 @@ void Problem::initial_next(Simulation * simulation) throw()
     Patch * patch;
     while (( patch = ++it_patch )) {
       CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-      DEBUG("Problem::initial_next() calling Patch::p_refresh()");
       proxy_patch->p_refresh();
     }
   }
+#endif
+}
+//----------------------------------------------------------------------
+
+void SimulationCharm::x_request_patch
+(
+ int patch_id,
+ int block_rank
+)
+{
+#ifdef NEW_INITIAL
+  // call x_send_patch()
+  CkChareID patch_proxy;
+  proxy_simulation[block_rank].x_send_patch(patch_id,patch_proxy);
+  DEBUG ("x_request_patch()");
+#endif
+}
+
+//----------------------------------------------------------------------
+
+void SimulationCharm::x_send_patch
+(
+ int patch_id,
+ CkChareID proxy_patch
+ )
+{
+#ifdef NEW_INITIAL
+
+#endif
 }
 
 //----------------------------------------------------------------------
 
 void Patch::p_initial()
 {
-  DEBUG("Patch::p_initial()");
-  DEBUG1("block_array() = %p",block_array());
   block_array()->p_initial();
 }
 
@@ -152,16 +158,12 @@ void Patch::p_initial()
 
 void Block::p_initial()
 {
-  DEBUG("Block::p_initial()");
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
-  DEBUG0;
   FieldDescr * field_descr = simulation->field_descr();
 
   // Initialize the block
 
-  DEBUG0;
   allocate(field_descr);
-  DEBUG0;
 
   // Set the Block cycle and time to match Simulation's
 
@@ -169,23 +171,19 @@ void Block::p_initial()
   set_time (simulation->time());
   set_dt   (simulation->dt());
 
-  DEBUG0;
   // Perform any additional initialization for derived class 
 
   initialize ();
-  DEBUG0;
 
   // Apply the initial conditions 
 
   Initial * initial = simulation->problem()->initial();
 
   initial->enforce(simulation->hierarchy(),field_descr,this);
-  DEBUG0;
 
   // Continue with Patch::s_initial
 
   proxy_patch_.s_initial();
-  DEBUG0;
 
 }
 
@@ -194,21 +192,25 @@ void Block::p_initial()
 void Patch::s_initial()
 {
   if (block_counter_.remaining() == 0) {
-    DEBUG("Patch::s_initial() calling SimulationCharm::s_initial()");
     proxy_simulation.s_initial();
-  } else  DEBUG("Patch::s_initial() skipping");
-
+  }
 }
 
 //----------------------------------------------------------------------
+
+void SimulationCharm::s_initial()
+{
+  if (patch_counter_.remaining() == 0) {
+    c_refresh();
+  }
+}
+
+//======================================================================
 
 void Block::p_read (int index_initial)
 {
   INCOMPLETE("Block::p_read");
 }
-
-//======================================================================
-
 #endif /* CONFIG_USE_CHARM */
 
 

@@ -224,6 +224,7 @@ void Output::write
 
   ItBlock it_block (patch);
   while (const Block * block = ++it_block) {
+    // NO OFFSET: ASSUMES ROOT PATCH
     write (block, field_descr, 0,0,0);
   }
 

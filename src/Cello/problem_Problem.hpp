@@ -66,6 +66,7 @@ public: // interface
   }
 
 #ifdef CONFIG_USE_CHARM
+
   /// reset initial index to 0 (not needed, but mirrors initial_output() )
   void initial_reset() throw()
   { index_initial_ = -1; }
