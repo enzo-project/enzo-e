@@ -52,31 +52,14 @@ void SimulationCharm::run() throw()
 
 void SimulationCharm::s_initialize()
 {
-
-  if (patch_counter_.remaining() == 0) {
-    DEBUG("Calling run()");
-    run();
-  }
-  DEBUG("End s_initialize()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
- //   ItPatch it_patch(hierarchy_);
-//   Patch * patch;
-//   while (( patch = ++it_patch )) {
-//     CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-//     DEBUG1("proxy_patch = %p",proxy_patch);
-//     DEBUG1("local patch = %p",proxy_patch->ckLocal());
-//   }
-
+  if (patch_loop_.done()) run();
 }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::s_patch(CkCallback callback)
 {
-  DEBUG("s_patch");
-  if (patch_counter_.remaining() == 0) {
-    callback.send();
-  }
+  if (patch_loop_.done()) callback.send();
 }
 
 //----------------------------------------------------------------------

@@ -58,7 +58,7 @@ private: // attributes
 
 #ifdef CONFIG_USE_CHARM
   /// Counter for reading blocks from current patch
-  Counter counter_blocks_;
+  Loop block_loop_;
 #endif
 };
 

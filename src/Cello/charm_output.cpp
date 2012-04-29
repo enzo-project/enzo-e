@@ -93,7 +93,7 @@ void Block::p_write (int index_output)
 
 void Patch::s_write()
 {
-  if (block_counter_.remaining() == 0) {
+  if (block_loop_.done()) {
     proxy_simulation.s_write();
   }
 }
@@ -165,7 +165,7 @@ void Problem::output_write
     output->update_remote(n, buffer);
   }
 
-  if (output->counter()->remaining() == 0) {
+  if (output->loop()->done()) {
 
     output->close();
 

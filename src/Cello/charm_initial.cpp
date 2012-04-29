@@ -48,8 +48,8 @@ void SimulationCharm::c_initial()
 
   }
 
-  // set patch counter for s_patch() synchronization
-  patch_counter_.set_max(patch_count + 1);
+  // set patch loop counter for s_patch() synchronization
+  patch_loop_.set_max(patch_count + 1);
 
   // Initialize hierarchy
 
@@ -74,22 +74,16 @@ void Problem::initial_next(Simulation * simulation) throw()
 
   Initial * initial;
 
-  DEBUG1 ("index_initial_ = %d",index_initial_);
-
   initial = this->initial(++index_initial_);
-
-  DEBUG1 ("index_initial_ = %d",index_initial_);
 
   Hierarchy *  hierarchy   = simulation->hierarchy();
   FieldDescr * field_descr = simulation->field_descr();
 
-  DEBUG2 ("Start Initial(%d) %p",index_initial_,initial);
-
   if (initial != NULL) {
 
-    DEBUG1 ("Start Initial(%d)",index_initial_);
-
     if (initial->expects_blocks_allocated()) {
+
+    DEBUG1 ("Start Initial(%d) A",index_initial_);
 
       ItPatch it_patch(hierarchy);
       Patch * patch;
@@ -103,11 +97,15 @@ void Problem::initial_next(Simulation * simulation) throw()
 
     } else {
 
+    DEBUG1 ("Start Initial(%d) B",index_initial_);
+
       initial->enforce(hierarchy,field_descr);
 
     }
 
   } else {
+
+    DEBUG1 ("Start Initial(%d) C",index_initial_);
 
     ItPatch it_patch(hierarchy);
     Patch * patch;
@@ -191,7 +189,7 @@ void Block::p_initial()
 
 void Patch::s_initial()
 {
-  if (block_counter_.remaining() == 0) {
+  if (block_loop_.done()) {
     proxy_simulation.s_initial();
   }
 }
@@ -200,7 +198,7 @@ void Patch::s_initial()
 
 void SimulationCharm::s_initial()
 {
-  if (patch_counter_.remaining() == 0) {
+  if (patch_loop_.done()) {
     c_refresh();
   }
 }

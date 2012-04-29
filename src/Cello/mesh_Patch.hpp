@@ -180,8 +180,8 @@ protected: // attributes
   /// Array of blocks ib associated with this process
 #ifdef CONFIG_USE_CHARM
   CProxy_Block * block_array_;
-  bool         block_exists_;
-  Counter      block_counter_;
+  bool           block_exists_;
+  Loop           block_loop_;
 #else
   std::vector<Block * > block_;
 #endif

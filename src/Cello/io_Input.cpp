@@ -15,10 +15,9 @@ Input::Input (const Factory * factory) throw()
   : file_(0),           // Initialization deferred
     process_(0),        // initialization below
 #ifdef CONFIG_USE_CHARM
-    counter_(0),
+    loop_(0),
 #endif
     cycle_(0),
-    count_input_(0),
     time_(0),
     file_name_(""),     // set_filename()
     file_args_(),       // set_filename()
@@ -194,7 +193,6 @@ std::string Input::expand_file_name_
     
     if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
     else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
-    else if (arg == "count") { sprintf (buffer_new,buffer, count_input_); }
     else if (arg == "proc")  { sprintf (buffer_new,buffer, process_); }
     else 
       {

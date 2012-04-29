@@ -38,7 +38,7 @@ Patch::Patch
 #ifdef CONFIG_USE_CHARM
   block_array_(0),
   block_exists_(false),
-  block_counter_(0),
+  block_loop_(0),
 #else
   factory_(factory),
 #endif
@@ -108,13 +108,7 @@ Patch::~Patch() throw()
 
 void Patch::s_block(CkCallback callback)
 {
-  TRACE1("Patch::s_block(%d)",block_counter_.count_curr());
-
-  if (block_counter_.remaining() == 0) {
-
-    callback.send();
-
-  }
+  if (block_loop_.done()) callback.send();
 }
 
 #endif
@@ -315,7 +309,7 @@ void Patch::allocate_array_
      allocate_blocks);
     
   block_exists_ = allocate_blocks;
-  block_counter_.set_max(nbx*nby*nbz);
+  block_loop_.set_max(nbx*nby*nbz);
 
 
 #else
@@ -464,7 +458,7 @@ void Patch::p_test () throw()
   Block *  block = 0;
   FieldBlock * field_block = 0;
 
-  size_t block_counter = 0;
+  size_t block_index = 0;
 
   const GroupProcess * group_process = GroupProcess::create();
 
@@ -503,7 +497,7 @@ void Patch::p_test () throw()
 
       int ip = group_process->rank();
 
-      int index_local = block_counter;
+      int index_local = block_index;
       int index_global = layout->global_index(ip,index_local);
 
       //--------------------------------------------------
@@ -546,7 +540,7 @@ void Patch::p_test () throw()
 
     //--------------------------------------------------
 
-    ++block_counter;
+    ++block_index;
 
   }
 
@@ -574,7 +568,7 @@ void Patch::p_test () throw()
 
 #ifndef CONFIG_USE_CHARM
   unit_func("num_local_blocks");
-  unit_assert(block_counter == patch->num_local_blocks());
+  unit_assert(block_index == patch->num_local_blocks());
 #endif
 
   

@@ -29,7 +29,7 @@ Simulation::Simulation
   group_process_(group_process),
   is_group_process_new_(false),
 #ifdef CONFIG_USE_CHARM
-  patch_counter_(0),
+  patch_loop_(0),
 #endif
   dimension_(0),
   cycle_(0),
@@ -75,7 +75,7 @@ Simulation::Simulation
 #ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation()
-  : patch_counter_(0)
+  : patch_loop_(0)
 { TRACE("Simulation()"); }
 
 #endif
@@ -85,7 +85,7 @@ Simulation::Simulation()
 #ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation (CkMigrateMessage *m)
-  : patch_counter_(0)
+  : patch_loop_(0)
 { TRACE("Simulation(CkMigrateMessage)"); }
 
 #endif
@@ -404,7 +404,7 @@ void Simulation::initialize_hierarchy_() throw()
 
 #ifdef CONFIG_USE_CHARM
   // Distributed patches in Charm: only allocate on root processor
-  patch_counter_.inc_max();
+  patch_loop_.inc_max();
   if (group_process()->is_root())
 #endif
     {

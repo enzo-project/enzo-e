@@ -54,14 +54,14 @@ public: // functions
   {
     process_stride_ = stride; 
 #ifdef CONFIG_USE_CHARM
-    counter_.set_max(process_stride_);
+    loop_.set_max(process_stride_);
 #endif
   };
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Accessor function for the CHARM Counter class
-  Counter * counter() { return & counter_; };
+  /// Accessor function for the CHARM Loop class
+  Loop * loop() { return & loop_; };
 
   /// Set the index of this input in its simulation
   void set_index_charm(int index_charm) { index_charm_ = index_charm; }
@@ -85,7 +85,7 @@ public: // virtual functions
 
   /// Finalize input
   virtual void finalize () throw ()
-  { count_input_ ++; }
+  { }
 
   /// Read metadata from the file
   void read_meta ( Io * io ) throw ()
@@ -161,8 +161,8 @@ protected: // attributes
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Counter for ending input
-  Counter counter_;
+  /// Loop for ending input
+  Loop loop_;
 
   /// Index of this Input object in Simulation
   size_t index_charm_;
@@ -171,9 +171,6 @@ protected: // attributes
 
   /// Simulation cycle for next IO
   int cycle_;
-
-  /// Input counter
-  int count_input_;
 
   /// Simulation time for next IO
   double time_;
