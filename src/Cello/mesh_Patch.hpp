@@ -65,6 +65,12 @@ class Patch
   /// Wait for all blocks after p_write
   void s_write();
 
+  /// Call read on all blocks
+  void p_read(int index_input);
+
+  /// Wait for all blocks after p_read
+  void s_read();
+
   /// Apply the numerical methods on the patch
   void p_compute(int cycle, double time, double dt);
 
@@ -99,9 +105,15 @@ class Patch
 
   /// Return the (global) id of this Patch
   int id () const throw()
+  {  return id_; }
+
+  /// Return the name of the patch, e.g. "patch_12"
+  std::string name () const throw()
   {
-    DEBUG2("patch %p id = %d",this,id_);
-    return id_; }
+    std::stringstream convert;
+    convert << "patch_" << id_;
+    return convert.str();
+  }
 
   //--------------------------------------------------
 
@@ -168,8 +180,8 @@ protected: // attributes
   /// Array of blocks ib associated with this process
 #ifdef CONFIG_USE_CHARM
   CProxy_Block * block_array_;
-  bool         block_exists_;
-  Counter      block_counter_;
+  bool           block_exists_;
+  Loop           block_loop_;
 #else
   std::vector<Block * > block_;
 #endif

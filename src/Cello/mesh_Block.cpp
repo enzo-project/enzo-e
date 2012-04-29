@@ -307,7 +307,7 @@ void Block::prepare()
   Timestep * timestep = problem->timestep();
   DEBUG("Block::prepare()");
 
-  dt_block = timestep->compute(field_descr,this);
+  dt_block = timestep->evaluate(field_descr,this);
   DEBUG("Block::prepare()");
 
   // Reduce timestep to coincide with scheduled output if needed

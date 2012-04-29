@@ -32,11 +32,11 @@ PARALLEL_MAIN_BEGIN
      3,4,5,
      -1.0,-2.0,-3.0,
      2.0,  4.0, 6.0,
-     patch_id,
-     patch_rank,
 #ifdef CONFIG_USE_CHARM
      proxy_patch,
 #endif
+     patch_id,
+     patch_rank,
      1);
 
   unit_func("Block");

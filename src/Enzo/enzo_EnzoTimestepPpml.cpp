@@ -19,7 +19,7 @@ EnzoTimestepPpml::EnzoTimestepPpml () throw()
 
 //----------------------------------------------------------------------
 
-double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
+double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
 				   Block * block ) throw()
 {
  

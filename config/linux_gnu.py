@@ -4,9 +4,11 @@ cc  = {}
 
 is_arch_valid = 1
 
-flags_arch = '-g -Wall'
-# flags_link = '-rdynamic -lpthread'
-flags_link = ''
+flags_arch       = '-g -O -Wall'
+
+# -lpthread: not needed?
+# -rdynamic: required for backtraces
+flags_link = '-rdynamic'
 
 cc['mpi']     = 'mpicc'
 cc['serial']  = 'gcc'

@@ -193,8 +193,8 @@ protected: // attributes
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Counter for s_patch() synchronization
-  Counter patch_counter_;
+  /// Loop counter for s_patch() synchronization
+  Loop patch_loop_;
 
 #endif
 

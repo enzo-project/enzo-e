@@ -20,7 +20,7 @@ InitialFile::InitialFile
     group_process_(group_process),
     input_(0)
 #ifdef CONFIG_USE_CHARM
-  , counter_blocks_(0)
+  , block_loop_(0)
 #endif
 {
 #ifdef CONFIG_USE_CHARM
@@ -51,8 +51,6 @@ void InitialFile::enforce
 
   if (! input_->is_open() ) {
 
-    input_->is_scheduled (cycle_,time_);
-
     std::string              file_name = "";
     std::vector<std::string> file_args;
 
@@ -69,7 +67,7 @@ void InitialFile::enforce
   File * file = input_->file();
   int num_blocks = file->group_count();
 #ifdef CONFIG_USE_CHARM
-  counter_blocks_.set_max(num_blocks);
+  block_loop_.stop() = num_blocks;
 #endif
 
   for (int i = 0; i<num_blocks; i++) {

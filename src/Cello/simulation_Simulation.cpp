@@ -29,7 +29,7 @@ Simulation::Simulation
   group_process_(group_process),
   is_group_process_new_(false),
 #ifdef CONFIG_USE_CHARM
-  patch_counter_(0),
+  patch_loop_(0),
 #endif
   dimension_(0),
   cycle_(0),
@@ -85,7 +85,7 @@ Simulation::Simulation
 #ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation()
-  : patch_counter_(0)
+  : patch_loop_(0)
 { TRACE("Simulation()"); }
 
 #endif
@@ -95,7 +95,7 @@ Simulation::Simulation()
 #ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation (CkMigrateMessage *m)
-  : patch_counter_(0)
+  : patch_loop_(0)
 { TRACE("Simulation(CkMigrateMessage)"); }
 
 #endif
@@ -183,7 +183,6 @@ void Simulation::initialize_monitor_() throw()
 
   bool debug = parameters_->value_logical("Monitor:debug",false);
 
-  printf ("debug = %d\n",debug);
   monitor_->set_active("DEBUG",debug);
   
 }
@@ -421,7 +420,7 @@ void Simulation::initialize_hierarchy_() throw()
 
 #ifdef CONFIG_USE_CHARM
   // Distributed patches in Charm: only allocate on root processor
-  patch_counter_.inc_max();
+  ++patch_loop_.stop();
   if (group_process()->is_root())
 #endif
     {
@@ -563,7 +562,8 @@ void Simulation::performance_output(Performance * performance)
 
   // First reduce minimum values
 
-  CkCallback callback (CkIndex_SimulationCharm::p_perf_output_min(NULL),thisProxy);
+  CkCallback callback (CkIndex_SimulationCharm::p_performance_min(NULL),
+		       thisProxy);
 
   contribute( num_perf_*sizeof(double), perf_val_, 
 	      CkReduction::min_double, callback);
@@ -589,6 +589,7 @@ void Simulation::performance_output(Performance * performance)
 
 void Simulation::output_performance_()
 {
+  DEBUG("Simulation::output_performance");
   int i = 0;
   int np = group_process()->size();
 
@@ -626,8 +627,9 @@ void Simulation::output_performance_()
 #ifdef CONFIG_USE_CHARM
   if (performance_curr_ == performance_cycle_) {
     ((SimulationCharm *) this)->c_compute();
-  } else {
-    proxy_main.p_exit(CkNumPes());
+  // } else {
+  //   DEBUG("Calling p_exit");
+  //   proxy_main.p_exit(CkNumPes());
   }
 #endif
 
