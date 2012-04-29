@@ -49,7 +49,7 @@ void SimulationCharm::c_initial()
   }
 
   // set patch loop counter for s_patch() synchronization
-  patch_loop_.set_max(patch_count + 1);
+  patch_loop_.stop() = patch_count + 1;
 
   // Initialize hierarchy
 

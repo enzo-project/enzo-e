@@ -31,47 +31,38 @@ class Loop {
 
  public:
    /// Create a CHARM++ "Loop" object
-   Loop (int index_max = 0
+   Loop (int index_stop = 0
 	) throw()
-    : index_max_(index_max),
+    : index_stop_(index_stop),
       index_curr_(0)
   {}
 
   void pup(PUP::er &p)
   {
-    p | index_max_;
+    p | index_stop_;
     p | index_curr_;
   }
 
 
   inline bool done (int index = 1) throw()
   {
-    if (index_max_ > 0) {
-      index_curr_ = (index_max_ + index_curr_ - index) % index_max_;  
+    if (index_stop_ > 0) {
+      index_curr_ = (index_stop_ + index_curr_ - index) % index_stop_;  
     }
-    return remaining() == 0;
+    return index_curr_ == 0;
   }
 
-  inline int remaining() throw ()
-  {
-    return index_curr_;
-  }
+  inline int index() const throw() { return index_curr_; }
+  
+  inline int stop() const throw()  { return index_stop_; }
 
-  int index_curr() const throw() { return index_curr_; }
-  int index_max() const throw() { return index_max_; }
-
-  void set_max (int index_max) throw ()
-  {
-    index_max_ = index_max;
-  }
-  void inc_max () throw ()
-  {
-    ++index_max_;
-  }
+  inline int & stop () throw ()    { return index_stop_; }
 
 private:
-  int index_max_;
+
+  int index_stop_;
   int index_curr_;
+
 };
 
 #endif /* CONFIG_USE_CHARM */

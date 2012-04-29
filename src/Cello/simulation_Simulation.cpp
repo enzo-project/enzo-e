@@ -404,7 +404,7 @@ void Simulation::initialize_hierarchy_() throw()
 
 #ifdef CONFIG_USE_CHARM
   // Distributed patches in Charm: only allocate on root processor
-  patch_loop_.inc_max();
+  ++patch_loop_.stop();
   if (group_process()->is_root())
 #endif
     {

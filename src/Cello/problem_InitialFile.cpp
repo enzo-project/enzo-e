@@ -67,7 +67,7 @@ void InitialFile::enforce
   File * file = input_->file();
   int num_blocks = file->group_count();
 #ifdef CONFIG_USE_CHARM
-  block_loop_.set_max(num_blocks);
+  block_loop_.stop() = num_blocks;
 #endif
 
   for (int i = 0; i<num_blocks; i++) {

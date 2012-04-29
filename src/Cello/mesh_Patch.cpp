@@ -309,7 +309,7 @@ void Patch::allocate_array_
      allocate_blocks);
     
   block_exists_ = allocate_blocks;
-  block_loop_.set_max(nbx*nby*nbz);
+  block_loop_.stop() = nbx*nby*nbz;
 
 
 #else
