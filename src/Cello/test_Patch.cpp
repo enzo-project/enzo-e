@@ -12,24 +12,14 @@
 #include "mesh.hpp"
 
 #ifdef CONFIG_USE_CHARM
-CProxy_Patch patch_global;
+CProxy_Patch * patch_global;
 #else
 Patch * patch_global;
 #endif
 
-  // Set Patch size, offset, and blocking
-
-extern const int patch_size[];
-
-extern const int patch_offset[];
-
-extern const int patch_blocking[];
-
-  // Set domain extents
-
-extern const double domain_lower[];
-extern const double domain_upper[];
-
+#ifdef CONFIG_USE_CHARM
+extern CProxy_SimulationCharm proxy_simulation;
+#endif
 
 PARALLEL_MAIN_BEGIN
 {
@@ -51,6 +41,17 @@ PARALLEL_MAIN_BEGIN
 
   Factory * factory = new Factory;
 
+  // Set Patch size, offset, and blocking
+
+  const int patch_size[]     = {12,12,12};
+  const int patch_offset[]   = {5, 2, 9};
+  const int patch_blocking[] = {3,3,3};
+
+  // Set domain extents
+
+  const double domain_lower[] = {0.0, 0.0, 0.0};
+  const double domain_upper[] = {1.0, 1.0, 1.0};
+
   int patch_id = 0;
   patch_global = factory->create_patch 
     (
@@ -62,12 +63,7 @@ PARALLEL_MAIN_BEGIN
      domain_upper[0],   domain_upper[1],   domain_upper[2],
      patch_id);
 
-#ifdef CONFIG_USE_CHARM
-  patch_global.p_test();
-#else
   patch_global->p_test();
-
-#endif
 
   delete factory;
   delete field_descr;

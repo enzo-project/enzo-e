@@ -350,21 +350,18 @@ void Patch::allocate_array_
 //----------------------------------------------------------------------
 #include "test.hpp"
  
-// Set Patch size, offset, and blocking
-
-static const int patch_size[] = {12,12,12};
-
-static const int patch_offset[] = {5, 2, 9};
-
-static const int patch_blocking[] = {3,3,3};
-
-// Set domain extents
-
-static const double domain_lower[] = {0.0, 0.0, 0.0};
-static const double domain_upper[] = {1.0, 1.0, 1.0};
-
 void Patch::p_test () throw()
 {
+  // Set Patch size, offset, and blocking
+
+  const int patch_size[]     = {12,12,12};
+  const int patch_offset[]   = {5, 2, 9};
+  const int patch_blocking[] = {3,3,3};
+
+  // Set domain extents
+
+  const double domain_lower[] = {0.0, 0.0, 0.0};
+  const double domain_upper[] = {1.0, 1.0, 1.0};
 
 #ifdef CONFIG_USE_CHARM
   Patch * patch = thisProxy.ckLocal();
