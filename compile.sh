@@ -78,8 +78,13 @@ foreach prec ($PREC)
 
    touch "$dir/running.$arch.$prec"
 
-   scons arch=$arch type=$type prec=$prec -k -j$proc install-bin >& $dir/out.scons
-   scons arch=$arch type=$type prec=$prec -k         $target    >>& $dir/out.scons
+   setenv CELLO_ARCH $arch
+   setenv CELLO_TYPE $type
+   setenv CELLO_PREC $prec
+
+   scons install-inc            >&  $dir/out.scons
+   scons -k -j$proc install-bin >>& $dir/out.scons
+   scons -k         $target     >>& $dir/out.scons
 
    rm -f "$dir/running.$arch.$prec"
 

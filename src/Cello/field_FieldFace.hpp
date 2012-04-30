@@ -17,8 +17,16 @@ class FieldFace {
 
 public: // interface
 
-  /// Constructor
+  /// Constructor of uninitialized FieldFace
   FieldFace() throw();
+
+  /// Constructor of initialized FieldFace
+  FieldFace (const FieldBlock * field_block,
+	     const FieldDescr * field_descr,
+	     int fx, int fy=0, int fz=0,
+	     bool gx=true, bool gy=true, bool gz=true) throw();
+     
+	     
 
 #ifdef CONFIG_USE_CHARM
   /// Constructor

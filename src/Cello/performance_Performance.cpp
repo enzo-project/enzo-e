@@ -19,8 +19,6 @@ Performance::Performance ()
     current_group_       (0),
     current_region_      (0)
 {
-  // Create initial Counters object
-
   counters_.push_back(new Counters(num_attributes,num_counters));
 }
 

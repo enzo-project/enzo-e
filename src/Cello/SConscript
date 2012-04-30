@@ -67,11 +67,12 @@ libs_io          = ['io'] + libs_mesh
 libs_parameters  = ['parameters'] + libs_error +  ['cello']
 
 libs_simulation  = ['simulation','problem']
+libs_lcaperf     = ['lcaperf']
 libs_test        = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
 if (type=='charm'):
-   libs_all = ['charm','simulation','problem','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
+   libs_all = ['charm','simulation','problem','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','lcaperf','test','cello','external','png','hdf5'] + libs_papi
    libs_field  = libs_all
    libs_io     = libs_all
    libs_mesh   = libs_all
@@ -106,6 +107,7 @@ includes_monitor =     [Glob('*monitor*hpp')]
 includes_parallel =    [Glob('*parallel*hpp'),'parallel.def']
 includes_parameters =  [Glob('*parameters*hpp'),'parse.h']
 includes_performance = [Glob('*performance*hpp')]
+includes_lcaperf     = [Glob('*lcaperf*hpp'),'lcaperf.def']
 includes_problem     = [Glob('*problem*hpp')]
 includes_simulation =  [Glob('*simulation*hpp')]
 includes_test =        [Glob('*test*hpp')]
@@ -123,6 +125,7 @@ sources_monitor =     [Glob('monitor*cpp')]
 sources_parallel =    [Glob('parallel*cpp')]
 sources_parameters =  [Glob('parameters*cpp'),'parse.tab.c','lex.yy.c']
 sources_performance = [Glob('performance*cpp')]
+sources_lcaperf =     [Glob('lcaperf*cpp')]
 sources_problem =     [Glob("problem*cpp")]
 sources_simulation =  [Glob("simulation*cpp")]
 sources_test =        [Glob('test_Unit*cpp')]
@@ -186,6 +189,7 @@ if (type == "charm"):
    sources_monitor.append(["main.cpp"])
    sources_parameters.append(["main.cpp"])
    sources_performance.append(["main.cpp"])
+   sources_lcaperf.append(["main.cpp"])
 
 test_FileHdf5     = env.Program ('test_FileHdf5.cpp',   LIBS=[libs_disk,  libs_test])
 test_FileIfrit    = env.Program ('test_FileIfrit.cpp',  LIBS=[libs_disk,  libs_test])
@@ -280,6 +284,7 @@ libraries_problem = env.Library ('problem', sources_problem)
 libraries_parallel = env.Library ('parallel', sources_parallel)
 libraries_parameters = env.Library ('parameters', sources_parameters)
 libraries_performance = env.Library ('performance', sources_performance)
+libraries_lcaperf = env.Library ('lcaperf', sources_lcaperf)
 libraries_simulation = env.Library ('simulation', sources_simulation)
 libraries_test  = env.Library ('test', sources_test)
 
@@ -362,6 +367,9 @@ env.Alias('install-lib',env.Install (lib_path,libraries_parameters))
 env.Alias('install-bin',env.Install (bin_path,binaries_performance))
 env.Alias('install-inc',env.Install (inc_path,includes_performance))
 env.Alias('install-lib',env.Install (lib_path,libraries_performance))
+
+env.Alias('install-inc',env.Install (inc_path,includes_lcaperf))
+env.Alias('install-lib',env.Install (lib_path,libraries_lcaperf))
 
 env.Alias('install-inc',env.Install (inc_path,includes_problem))
 env.Alias('install-lib',env.Install (lib_path,libraries_problem))

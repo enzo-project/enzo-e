@@ -44,6 +44,16 @@ Simulation::Simulation
   field_descr_(0)
 {
 
+  if (!group_process_) {
+    group_process_ = GroupProcess::create();
+    is_group_process_new_ = true;
+  }
+
+  monitor_ = Monitor::instance();
+  monitor_->set_process_rank(group_process_->rank());
+  monitor_->set_active(group_process_->is_root());
+
+
   num_perf_ = 1;
 
 #ifdef CONFIG_USE_PAPI
@@ -55,17 +65,17 @@ Simulation::Simulation
   perf_max_ = new double[num_perf_];
   perf_sum_ = new double[num_perf_];
 
-  if (!group_process_) {
-    group_process_ = GroupProcess::create();
-    is_group_process_new_ = true;
-  }
-
   performance_simulation_ = new Performance;
   performance_cycle_      = new Performance;
 
-  monitor_ = Monitor::instance();
-  monitor_->set_process_rank(group_process_->rank());
-  monitor_->set_active(group_process_->is_root());
+
+  lcaperf_ = new lca::LcaPerf;
+
+  lcaperf_->initialize();
+  lcaperf_->new_region("simulation");
+  lcaperf_->new_attribute("cycle",LCAP_INT);
+  lcaperf_->begin();
+  lcaperf_->assign("cycle",0);
 
   parameters_ = new Parameters(parameter_file,monitor_);
 }
@@ -124,6 +134,11 @@ void Simulation::initialize() throw()
 
 void Simulation::finalize() throw()
 {
+  DEBUG0;
+  lcaperf_->stop("simulation");
+  lcaperf_->end();
+  lcaperf_->print();
+
   performance_simulation_->stop();
   performance_cycle_->stop();
 }
@@ -133,6 +148,7 @@ void Simulation::finalize() throw()
 void Simulation::initialize_simulation_() throw()
 {
 
+  lcaperf_->start("simulation");
   performance_simulation_->start();
   performance_cycle_->start();
 
@@ -425,6 +441,7 @@ void Simulation::deallocate_() throw()
   delete parameters_;    parameters_  = 0;
   delete performance_simulation_; performance_simulation_ = 0;
   delete performance_cycle_;      performance_cycle_ = 0;
+  delete lcaperf_; lcaperf_ = 0;
   delete [] perf_val_;
   delete [] perf_min_;
   delete [] perf_max_;
@@ -510,6 +527,7 @@ void Simulation::monitor_output()
 
 void Simulation::performance_output(Performance * performance)
 {
+
 
   performance_curr_ = performance;
 

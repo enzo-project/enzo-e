@@ -23,7 +23,7 @@ components.append(['enzo','simulation', 'problem',
 	      'mesh', 'field',
 	      'io', 'disk','memory','parallel',
 	      'parameters', 
-	      'error', 'monitor', 'performance', 
+	      'error', 'monitor', 'performance', 'lcaperf',
 	      'test','cello','external'])
 
 if (use_papi):

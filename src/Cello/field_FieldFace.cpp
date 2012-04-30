@@ -12,9 +12,26 @@
 FieldFace::FieldFace() throw()
   : array_()
 {
-  full_[axis_x] = true;
-  full_[axis_y] = true;
-  full_[axis_z] = true;
+  full_[0] = true;
+  full_[1] = true;
+  full_[2] = true;
+}
+
+FieldFace::FieldFace 
+(
+ const FieldBlock * field_block,
+ const FieldDescr * field_descr,
+ int  fx, int  fy, int  fz,
+ bool gx, bool gy, bool gz
+) throw()
+  : array_()
+{
+  full_[0] = true;
+  full_[1] = true;
+  full_[2] = true;
+
+  set_full(gx,gy,gz);
+  load(field_descr,field_block,fx,fy,fz);
 }
 
 //----------------------------------------------------------------------
@@ -23,9 +40,10 @@ FieldFace::FieldFace() throw()
 FieldFace::FieldFace(int n, char * array) throw()
   : array_()
 {
-  full_[axis_x] = true;
-  full_[axis_y] = true;
-  full_[axis_z] = true;
+  full_[0] = true;
+  full_[1] = true;
+  full_[2] = true;
+
   array_.resize(n);
   for (int i=0; i<n; i++) array_[i] = array[i]; 
 };

@@ -91,6 +91,10 @@ public: // interface
   Performance * performance_cycle() const throw()
   { return performance_cycle_; }
 
+  /// Return a pointer to the lcaperf object
+  lca::LcaPerf * lcaperf()
+  { return lcaperf_; }
+
   /// Return the performance object associated with the entire simulation
   Performance * performance_simulation() const throw()
   { return performance_simulation_; }
@@ -221,6 +225,9 @@ protected: // attributes
 
   /// Cycle Performance object
   Performance * performance_cycle_;
+
+  /// Lcaperf
+  lca::LcaPerf * lcaperf_;
 
   /// Current Performance object
   /// Used primarily for CHARM++ 
