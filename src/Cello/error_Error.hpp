@@ -147,6 +147,8 @@
   { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
 #   define DEBUG8(M,A1,A2,A3,A4,A5,A6,A7,A8)				\
   { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
+#   define DEBUG9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
+  { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8,A9); }
 
 #else
 
