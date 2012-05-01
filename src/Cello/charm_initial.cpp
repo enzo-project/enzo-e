@@ -83,7 +83,7 @@ void Problem::initial_next(Simulation * simulation) throw()
 
     if (initial->expects_blocks_allocated()) {
 
-    DEBUG1 ("Start Initial(%d) A",index_initial_);
+      DEBUG1 ("Start Initial(%d) A",index_initial_);
 
       ItPatch it_patch(hierarchy);
       Patch * patch;
@@ -97,9 +97,9 @@ void Problem::initial_next(Simulation * simulation) throw()
 
     } else {
 
-    DEBUG1 ("Start Initial(%d) B",index_initial_);
+      DEBUG1 ("Start Initial(%d) B",index_initial_);
 
-      initial->enforce(hierarchy,field_descr);
+      initial->enforce((Block *)NULL, field_descr, hierarchy);
 
     }
 
@@ -177,7 +177,7 @@ void Block::p_initial()
 
   Initial * initial = simulation->problem()->initial();
 
-  initial->enforce(simulation->hierarchy(),field_descr,this);
+  initial->enforce(this,field_descr, simulation->hierarchy());
 
   // Continue with Patch::s_initial
 
