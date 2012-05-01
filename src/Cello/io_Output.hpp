@@ -81,6 +81,14 @@ public: // functions
   /// Return the updated timestep if time + dt goes past a scheduled output
   double update_timestep (double time, double dt) const throw ();
 
+  /// Write metadata to the file
+  void write_meta ( Io * io ) throw ()
+  { write_meta_ (meta_type_file, io); }
+
+  /// Write metadata to the current group in the file
+  void write_meta_group ( Io * io ) throw ()
+  { write_meta_ (meta_type_group, io); }
+
 #ifdef CONFIG_USE_CHARM
 
   /// Accessor function for the CHARM Loop class
@@ -107,15 +115,6 @@ public: // virtual functions
   virtual void finalize () throw ()
   { count_ ++; }
 
-  /// Write metadata to the file
-  void write_meta ( Io * io ) throw ()
-  { write_meta_ (meta_type_file, io); }
-
-  /// Write metadata to the current group in the file
-  void write_meta_group ( Io * io ) throw ()
-  { write_meta_ (meta_type_group, io); }
-
-public:
   /// Write an entire simulation to disk
   virtual void write ( const Simulation * simulation ) throw();
 

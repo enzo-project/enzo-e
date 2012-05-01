@@ -46,7 +46,7 @@ use_valgrind    = 0
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
 
-use_projections = 0
+use_projections = 1
 
 # Triton MPI type (openmpi or mpich2)
 
@@ -240,7 +240,7 @@ elif (type == "mpi"):
      parallel_run = "mpirun -np 8"
 elif (type == "charm"):
      serial_run   = ""
-     parallel_run = charm_path + "/bin/charmrun +p8 "
+     parallel_run = charm_path + "/bin/charmrun +p4 "
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"

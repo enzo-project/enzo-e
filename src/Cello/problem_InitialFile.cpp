@@ -38,9 +38,9 @@ InitialFile::~InitialFile() throw()
 
 void InitialFile::enforce
 (
- Hierarchy  * hierarchy,
+ Block            * block,
  const FieldDescr * field_descr,
- Block            * block
+ Hierarchy        * hierarchy
  ) throw()
 {
   ASSERT ("InitialFile::enforce",

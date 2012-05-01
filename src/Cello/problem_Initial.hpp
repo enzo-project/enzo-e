@@ -33,10 +33,38 @@ public: // interface
 
 public: // virtual functions
 
+#ifdef NEW_INITIAL
+
+  /// Initialize an entire simulation
+  virtual void enforce ( const Simulation * simulation ) throw()
+  {};
+
+  /// Initialize a mesh Hierarchy
+  virtual void enforce
+  ( Hierarchy * hierarchy, 
+    const FieldDescr * field_descr  ) throw()
+  {};
+
+  /// Initialize a Patch
+  virtual void enforce
+  ( Patch * patch, 
+    const FieldDescr * field_descr,
+    Hierarchy * hierarchy) throw()
+  {};
+
+  /// Initialize a Block
+  virtual void enforce
+  ( Block * block, 
+    const FieldDescr * field_descr,
+    Hierarchy * hierarchy) throw() = 0;
+
+#else /* not NEW_INITIAL */
+
   /// Enforce initial conditions on the given Block or Hierarchy
-  virtual void enforce (Hierarchy * hierarchy,
+  virtual void enforce (Block * block,
 			const FieldDescr * field_descr,
-			Block * block = NULL) throw() = 0;
+			Hierarchy * hierarchy) throw() = 0;
+#endif
 
   /// Return whether enforce() expects block != NULL
   virtual bool expects_blocks_allocated() const throw()
