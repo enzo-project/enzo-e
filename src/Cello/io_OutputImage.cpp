@@ -106,7 +106,6 @@ void OutputImage::finalize () throw()
   Output::finalize();
 }
 
-
 //----------------------------------------------------------------------
 
 void OutputImage::write
@@ -125,7 +124,7 @@ void OutputImage::write
 {
 
   /// Call write(patch) on parent Output class
-  Output::write(patch,field_descr,ixp0,iyp0,izp0);
+  write_(patch,field_descr,ixp0,iyp0,izp0);
 
 }
 

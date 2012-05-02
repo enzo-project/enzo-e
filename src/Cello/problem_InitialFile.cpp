@@ -40,7 +40,7 @@ void InitialFile::enforce
 (
  Block            * block,
  const FieldDescr * field_descr,
- Hierarchy        * hierarchy
+ const Hierarchy  * hierarchy
  ) throw()
 {
   ASSERT ("InitialFile::enforce",
@@ -60,7 +60,7 @@ void InitialFile::enforce
 
   }
 
-  input_->read_hierarchy(hierarchy,field_descr);
+  // input_->read_hierarchy(hierarchy,field_descr);
 
   INCOMPLETE("InitialFile::enforce");
 

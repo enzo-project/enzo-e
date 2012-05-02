@@ -66,9 +66,9 @@ void OutputData::write
 {
   IoHierarchy io_hierarchy(hierarchy);
 
-  Output::write_meta (&io_hierarchy);
+  write_meta (&io_hierarchy);
 
-  Output::write (hierarchy, field_descr);
+  write_(hierarchy, field_descr);
 
 }
 
@@ -90,17 +90,17 @@ void OutputData::write
 
   IoPatch io_patch(patch);
 
-  Output::write_meta_group (&io_patch);
+  write_meta_group (&io_patch);
 
   // Also write the patches parallel Layout
 
   const Layout * layout = patch->layout();
   IoLayout io_layout(layout);
 
-  Output::write_meta_group (&io_layout);
+  write_meta_group (&io_layout);
 
   // Call write(block) on contained blocks
-  Output::write(patch,field_descr,ixp0,iyp0,izp0);
+  write_(patch,field_descr,ixp0,iyp0,izp0);
 
 }
 
@@ -124,11 +124,11 @@ void OutputData::write
 
   io_block()->set_block(block);
 
-  Output::write_meta_group (io_block());
+  write_meta_group (io_block());
 
   // Call write(block) on base Output object
 
-  Output::write(block,field_descr,ixp0,iyp0,izp0);
+  write_(block,field_descr,ixp0,iyp0,izp0);
 
   file_->group_close();
 

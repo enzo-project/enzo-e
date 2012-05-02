@@ -31,8 +31,20 @@ public: // virtual functions
   /// Finalize output
   virtual void finalize () throw ();
 
-  /// Write an entire simulation to disk
+  /// Write Simulation data to disk
   virtual void write ( const Simulation * simulation ) throw();
+
+  /// Write local block data to disk
+  virtual void write
+  ( const Block * block, 
+    const FieldDescr * field_descr,  
+    int ixp0=0, int iyp0=0, int izp0=0) throw();
+
+  /// Write local field to disk
+  virtual void write
+  ( const FieldBlock * field_block, 
+    const FieldDescr * field_descr,
+    int field_index) throw();
 
 private:
 

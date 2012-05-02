@@ -136,7 +136,7 @@ void Problem::initialize_output
 
     std::string type = parameters->value_string("type","unknown");
 
-    // Error if Output::type is not defined
+    // Error if Output:type is not defined
     if (type == "unknown") {
       ERROR1("Problem::initialize_output",
 	     "Output:%s:type parameter is undefined",

@@ -124,8 +124,30 @@ void OutputRestart::write ( const Simulation * simulation ) throw()
   }
 
   // Call base write()
-  Output::write (simulation);
+  write_ (simulation);
 
+}
+
+//----------------------------------------------------------------------
+
+void OutputRestart::write
+  ( const Block * block, 
+    const FieldDescr * field_descr,  
+    int ixp0, int iyp0, int izp0) throw() 
+{
+  ERROR ("OutputRestart::write(Block)",
+	 "OutputRestart does not support writing Blocks");
+}
+
+//----------------------------------------------------------------------
+
+void OutputRestart::write
+  ( const FieldBlock * field_block, 
+    const FieldDescr * field_descr,
+    int field_index) throw() 
+{
+  ERROR ("OutputRestart::write(FieldBlock)",
+	 "OutputRestart does not support writing FieldBlocks");
 }
 
 //======================================================================
