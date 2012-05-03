@@ -122,6 +122,9 @@ private:
 
   /// Process rank
   int comm_rank_;
+
+  /// Timer
+  Timer timer_;
 };
 
 #endif /* TEST_UNIT_HPP */
