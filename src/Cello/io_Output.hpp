@@ -136,7 +136,8 @@ public: // virtual functions
   virtual void write
   ( const Block * block, 
     const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw() = 0;
+    int ixp0=0, int iyp0=0, int izp0=0) throw()
+  { write_(block,field_descr,ixp0,iyp0,izp0); }
 
   /// Write local field to disk
   virtual void write

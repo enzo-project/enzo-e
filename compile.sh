@@ -107,17 +107,22 @@ foreach prec ($PREC)
 
       set line = "$d ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
 
-      set crash = `grep "UNIT TEST" $dir/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
-      if ($crash != 0) then
-         set line = "$line CRASH: $crash"
-         grep "UNIT TEST" $dir/*unit \
-          | sed 's/BEGIN/END/ ; s/:/ /' \
-          | uniq -u \
-          | awk '{print "   ", $1}'
-      endif
-
       printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" $line
       printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" $line >> compile.log
+
+       foreach test ($dir/*unit)
+      set test_begin = `grep "UNIT TEST BEGIN" $test | wc -l`
+       set test_end   = `grep "UNIT TEST END" $test | wc -l`
+
+      @ crash = $test_begin - $test_end
+
+      if ($crash != 0) then
+         set line = "$line CRASH: $test\n"
+         printf line
+	 printf line >> compile.log
+      endif
+      end
+
 
    endif
    rm -f test/COMPILING
