@@ -240,7 +240,7 @@ elif (type == "mpi"):
      parallel_run = "mpirun -np 8"
 elif (type == "charm"):
      serial_run   = ""
-     parallel_run = charm_path + "/bin/charmrun +p8 "
+     parallel_run = charm_path + "/bin/charmrun +p4 "
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"
