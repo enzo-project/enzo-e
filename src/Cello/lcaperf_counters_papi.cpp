@@ -1,12 +1,11 @@
-// $Id: counters_papi.cpp 2093 2011-03-12 01:17:05Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
 
-/// @file     counters_papi.cpp
+/// @file     lcaperf_CountersPapi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-05-20
 /// @brief    Implementation of the CountersPapi class
 
-#include "performance.hpp"
+#include "lcaperf.hpp"
 
 #ifdef CONFIG_USE_PAPI
 

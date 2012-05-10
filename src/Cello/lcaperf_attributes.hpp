@@ -1,19 +1,20 @@
-// $Id: lcaperf_attributes.hpp 2009 2011-02-22 19:43:07Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     lcaperf_Attributes.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-05-19
+/// @brief    [\ref Lcaperf] Declaration of the Attributes class
 
 #ifndef LCAPERF_ATTRIBUTES_HPP
 #define LCAPERF_ATTRIBUTES_HPP
 
-/// @file     lcaperf_attributes.hpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu May 19 18:24:37 PDT 2011
-/// @brief    [\ref lcaperf] Declaration of the Attributes class
+namespace lca {
 
 class Attributes {
 
   /// @class    Attributes
   /// @ingroup  lcaperf
-  /// @brief    [\ref lcaperf] Class for storing attribute values
+  /// @brief    [\ref Lcaperf] Class for storing attribute values
 
 public: // interface
 
@@ -121,6 +122,8 @@ protected: // attributes
   std::vector<std::string>  value_;
 
 };
+
+}
 
 #endif /* LCAPERF_ATTRIBUTES_HPP */
 

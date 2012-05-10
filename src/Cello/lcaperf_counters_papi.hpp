@@ -1,22 +1,17 @@
-// $Id: lcaperf_counters_papi.hpp 2009 2011-02-22 19:43:07Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
 
-#ifndef LCAPERF_COUNTERS_PAPI_HPP
-#define LCAPERF_COUNTERS_PAPI_HPP
-
-/// @file     lcaperf_counters_papi.hpp
+/// @file     lcaperf_CountersPapi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Mon May 23 11:12:54 PDT 2011
-/// @brief    [\ref lcaperf] Declaration of the CountersPapi class
+/// @date     2011-05-23
+/// @brief    [\ref Lcaperf] Declaration of the CountersPapi class
 
-/// @enum
-/// @brief Indices of papi counters
+namespace lca {
 
 class CountersPapi : public CountersUser {
 
   /// @class    CountersPapi
   /// @ingroup  lcaperf
-  /// @brief    [\ref lcaperf] Papi counters
+  /// @brief    [\ref Lcaperf] Papi counters
 
 public: // interface
 
@@ -71,6 +66,8 @@ private: // attributes
   long long vtime_begin_;
 
 };
+
+}
 
 #endif /* LCAPERF_COUNTERS_PAPI_HPP */
 

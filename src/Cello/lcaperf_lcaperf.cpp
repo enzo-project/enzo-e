@@ -1,28 +1,21 @@
-// $Id$
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
 
-/// @file     lcaperf.cpp
+/// @file     lcaperf_Lcaperf.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2004-03-12
 /// @brief    Parallel performance monitoring class
 
-//----------------------------------------------------------------------
-// Debugging level
-//----------------------------------------------------------------------
+#include "lcaperf.hpp"
 
-#ifdef CONFIG_USE_MPI
-#  include <mpi.h>
-#endif
-
-#include "performance.hpp"
+//----------------------------------------------------------------------
 
 namespace lca {
 
 //----------------------------------------------------------------------
+
 LcaPerf::LcaPerf ()
   : attributes_(),
     counters_()
-//----------------------------------------------------------------------
 {
   TRACE("lcaPerf");
   counters_["basic"]  = new CountersBasic;
@@ -41,8 +34,8 @@ LcaPerf::LcaPerf ()
 }
 
 //----------------------------------------------------------------------
+
 LcaPerf::~LcaPerf () // + Finalize the LcaPerf object
-//----------------------------------------------------------------------
 {
   TRACE("~LcaPerf");
   std::map<std::string,Counters *>::iterator iter;
@@ -53,8 +46,8 @@ LcaPerf::~LcaPerf () // + Finalize the LcaPerf object
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::new_region  (const char * region)
-//----------------------------------------------------------------------
 {
   TRACE("new_region");
   // NOTE: does not check whether region is already in regions_ vector
@@ -62,17 +55,17 @@ void LcaPerf::new_region  (const char * region)
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::new_attribute  (const char * name, int type = 0)
-//----------------------------------------------------------------------
 {
   TRACE("new_attribute");
   attributes_.create(name);
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::new_counter (const char * name, 
 			   counter_type type)
-//----------------------------------------------------------------------
 {
   TRACE("new_counter");
   CountersUser * counters_user = 
@@ -82,26 +75,26 @@ void LcaPerf::new_counter (const char * name,
 }
 
 //----------------------------------------------------------------------
+
 long long LcaPerf::value (const char * set, 
 			  const char * key, 
 			  const char * counter)
-//----------------------------------------------------------------------
 {
   TRACE("value");
   return counters_[set]->value (key,counter);
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::delete_attribute (const char * attribute_name)
-//----------------------------------------------------------------------
 {
   TRACE("delete_attribute");
   attributes_.remove(attribute_name);
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::delete_counter (const char * name)
-//----------------------------------------------------------------------
 {
   TRACE("delete_counter");
   CountersUser * counters_user = 
@@ -111,8 +104,8 @@ void LcaPerf::delete_counter (const char * name)
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::initialize (const char * filename)
-//----------------------------------------------------------------------
 {
   TRACE("initialize");
   // Print header (only on root process)
@@ -144,14 +137,15 @@ void LcaPerf::initialize (const char * filename)
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::finalize ()
-//----------------------------------------------------------------------
 {
   TRACE("finalize");
 }
+
 //----------------------------------------------------------------------
+
 void LcaPerf::begin ()
-//----------------------------------------------------------------------
 {
   TRACE("begin");
 // #ifdef CONFIG_USE_MPI
@@ -173,8 +167,8 @@ void LcaPerf::begin ()
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::end ()
-//----------------------------------------------------------------------
 {
   TRACE("end");
   attributes_.remove("*");
@@ -187,8 +181,8 @@ void LcaPerf::end ()
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::start (const char * region_base)
-//----------------------------------------------------------------------
 {
   TRACE1("start(%s)",region_base);
   std::map<std::string,Counters *>::iterator iter;
@@ -199,8 +193,8 @@ void LcaPerf::start (const char * region_base)
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::stop (const char * region_base)
-//----------------------------------------------------------------------
 {
   TRACE1("stop(%s)",region_base);
   std::map<std::string,Counters *>::iterator iter;
@@ -211,8 +205,8 @@ void LcaPerf::stop (const char * region_base)
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::increment (const char *name, long long value)
-//----------------------------------------------------------------------
 {
   TRACE("increment");
   CountersUser * counters_user = 
@@ -222,8 +216,8 @@ void LcaPerf::increment (const char *name, long long value)
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::assign (const char *name, long long value)
-//----------------------------------------------------------------------
 {
   TRACE("assign");
   CountersUser * counters_user = 
@@ -233,10 +227,10 @@ void LcaPerf::assign (const char *name, long long value)
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::attribute (const char * name, 
 			 const void * value, 
 			 int          type)
-//----------------------------------------------------------------------
 {
   TRACE("attribute");
   char attribute_string[80];
@@ -293,8 +287,8 @@ const bool l_disk = false;
 #endif
 
 //----------------------------------------------------------------------
+
 void LcaPerf::header ()
-//----------------------------------------------------------------------
 {
     printf ("lcaperf: ");
     printf             ("   time(s)   " "   ");
@@ -307,8 +301,8 @@ void LcaPerf::header ()
 }
 
 //----------------------------------------------------------------------
+
 void LcaPerf::print ()
-//----------------------------------------------------------------------
 {
   DEBUG("LcaPerf::print");
   TRACE("print");

@@ -1,22 +1,21 @@
-// $Id: lcaperf_counters_mem.hpp 2009 2011-02-22 19:43:07Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     lcaperf_CountersMem.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-05-23
+/// @brief    [\ref Lcaperf] Declaration of the CountersMem class
+///
 
 #ifndef LCAPERF_COUNTERS_MEM_HPP
 #define LCAPERF_COUNTERS_MEM_HPP
 
-/// @file     lcaperf_counters_mem.hpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Mon May 23 11:12:54 PDT 2011
-/// @brief    [\ref lcaperf] Declaration of the CountersMem class
-
-/// @enum
-/// @brief Indices of memory counters
+namespace lca {
 
 class CountersMem : public CountersUser {
 
   /// @class    CountersMem
   /// @ingroup  lcaperf
-  /// @brief    [\ref lcaperf] Mem counters
+  /// @brief    [\ref Lcaperf] Mem counters
 
 public: // interface
 
@@ -69,6 +68,8 @@ private: // attributes
   static long long del_bytes_;
 
 };
+
+}
 
 #endif /* LCAPERF_COUNTERS_MEM_HPP */
 

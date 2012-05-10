@@ -1,12 +1,13 @@
-// $Id: it_counter_keys.cpp 2093 2011-03-12 01:17:05Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
 
-/// @file     it_counter_keys.cpp
+/// @file     lcaperf_ItCounterKeys.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu May 19 2011
+/// @date     2011-05-19
 /// @brief    Implementation of the ItCounterKeys abstract base class
 
-#include "performance.hpp"
+#include "lcaperf.hpp"
+
+//----------------------------------------------------------------------
 
 namespace lca {
 
