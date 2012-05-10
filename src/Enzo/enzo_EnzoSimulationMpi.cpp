@@ -78,7 +78,7 @@ void EnzoSimulationMpi::run() throw()
 
     while ((block = ++it_block)) {
 
-      initial->enforce(hierarchy_,field_descr_,block);
+      initial->enforce(block, field_descr_, hierarchy_);
 
       block->set_cycle(cycle_);
       block->set_time(time_);
@@ -184,7 +184,7 @@ void EnzoSimulationMpi::run() throw()
 
       while ((block = ++it_block)) {
 
-	double dt_block   = timestep->compute(field_descr_,block);
+	double dt_block   = timestep->evaluate(field_descr_,block);
 	double time_block = block->time();
 
 	// Reduce timestep to coincide with scheduled output

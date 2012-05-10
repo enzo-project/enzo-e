@@ -18,6 +18,7 @@
 // Component class includes
 //----------------------------------------------------------------------
 
+#include "performance_Timer.hpp"
 #include "test_Unit.hpp"
 
 #endif /* _TEST_HPP */

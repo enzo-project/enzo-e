@@ -20,9 +20,9 @@ EnzoInitialImplosion2::EnzoInitialImplosion2
 
 void EnzoInitialImplosion2::enforce 
 (
- Hierarchy  * hierarchy,
+ Block * block,
  const FieldDescr * field_descr,
- Block * block
+ const Hierarchy  * hierarchy
  ) throw()
 
 {

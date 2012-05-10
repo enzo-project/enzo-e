@@ -22,11 +22,11 @@ Output::Output (const Factory * factory) throw()
     schedule_(new Schedule),
     process_(0),        // initialization below
 #ifdef CONFIG_USE_CHARM
-    counter_(1),        // default process-per-stride
+    loop_(1),        // default process-per-stride
     index_charm_(0),
 #endif
     cycle_(0),
-    count_output_(0),
+    count_(0),
     time_(0),
     file_name_(""),     // set_filename()
     file_args_(),       // set_filename()
@@ -134,7 +134,7 @@ std::string Output::expand_file_name_
     
     if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
     else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
-    else if (arg == "count") { sprintf (buffer_new,buffer, count_output_); }
+    else if (arg == "count") { sprintf (buffer_new,buffer, count_); }
     else if (arg == "proc")  { sprintf (buffer_new,buffer, process_); }
     else 
       {
@@ -176,7 +176,7 @@ void Output::write_meta_ ( meta_type type_meta, Io * io ) throw ()
 
 //----------------------------------------------------------------------
 
-void Output::write
+void Output::write_
 ( const Simulation * simulation ) throw()
 {
   write (simulation->hierarchy(), simulation->field_descr());
@@ -184,19 +184,15 @@ void Output::write
 
 //----------------------------------------------------------------------
 
-void Output::write
-( 
+void Output::write_ 
+(
  const Hierarchy * hierarchy,
  const FieldDescr * field_descr
-  ) throw()
+ ) throw()
 {
-
   ItPatch it_patch (hierarchy);
 
-  // (*) write data patch_list_
-
   while (Patch * patch = ++it_patch) {
-
 #ifdef CONFIG_USE_CHARM
     ((CProxy_Patch *)patch)->p_write(index_charm_);
 #else
@@ -207,7 +203,7 @@ void Output::write
 
 //----------------------------------------------------------------------
 
-void Output::write
+void Output::write_
 (
  const Patch * patch,
  const FieldDescr * field_descr,
@@ -224,6 +220,7 @@ void Output::write
 
   ItBlock it_block (patch);
   while (const Block * block = ++it_block) {
+    // NO OFFSET: ASSUMES ROOT PATCH
     write (block, field_descr, 0,0,0);
   }
 
@@ -233,7 +230,7 @@ void Output::write
 
 //----------------------------------------------------------------------
 
-void Output::write
+void Output::write_
 (
  const Block * block,
  const FieldDescr * field_descr,
@@ -241,10 +238,11 @@ void Output::write
  ) throw()
 {
   // Write fields
-  DEBUG("Output::write");
+
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
     const FieldBlock * field_block = block->field_block();
     write (field_block,  field_descr, it_field_->value());
   }
+
 }
 

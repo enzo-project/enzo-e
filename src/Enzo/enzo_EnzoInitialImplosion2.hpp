@@ -21,9 +21,12 @@ public: // interface
 
   /// Initialize the block
 
-  virtual void enforce (Hierarchy * hierarchy,
-			const FieldDescr * field_descr,
-			Block * block = NULL) throw();
+  virtual void enforce 
+  (
+   Block * block,
+   const FieldDescr * field_descr,
+   const Hierarchy * hierarchy
+   ) throw();
 
 };
 

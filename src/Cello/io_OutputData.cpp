@@ -66,9 +66,9 @@ void OutputData::write
 {
   IoHierarchy io_hierarchy(hierarchy);
 
-  Output::write_meta (&io_hierarchy);
+  write_meta (&io_hierarchy);
 
-  Output::write (hierarchy, field_descr);
+  write_(hierarchy, field_descr);
 
 }
 
@@ -82,34 +82,25 @@ void OutputData::write
  ) throw()
 {
   // Create file group for patch
-  int nx,ny,nz;
-  patch->size(&nx,&ny,&nz);
-  DEBUG3("patch size = %d %d %d",nx,ny,nz);
-  DEBUG1("patch id = %d",patch->id());
-  int ib = patch->id();
-  char buffer[40];
-  sprintf (buffer,"patch_%d",ib);
-  file_->group_chdir(buffer);
+
+  file_->group_chdir("/"+patch->name());
   file_->group_create();
 
   // Read patch meta-data
 
   IoPatch io_patch(patch);
 
-  Output::write_meta_group (&io_patch);
+  write_meta_group (&io_patch);
 
   // Also write the patches parallel Layout
 
-  DEBUG0;
   const Layout * layout = patch->layout();
   IoLayout io_layout(layout);
 
-  Output::write_meta_group (&io_layout);
-  DEBUG0;
+  write_meta_group (&io_layout);
 
   // Call write(block) on contained blocks
-  Output::write(patch,field_descr,ixp0,iyp0,izp0);
-  DEBUG0;
+  write_(patch,field_descr,ixp0,iyp0,izp0);
 
 }
 
@@ -122,27 +113,24 @@ void OutputData::write
   int ixp0, int iyp0, int izp0) throw()
 {
 
-  DEBUG("OutputData::write(block)");
   // Create file group for block
 
-  char buffer[40];
-  int ib = block->index();
-  sprintf (buffer,"block_%d",ib);
-  file_->group_chdir(buffer);
+  std::string group_name = "/" + block->patch_name() + "/" + block->name();
+  DEBUG1 ("block name = %s",group_name.c_str());
+  file_->group_chdir(group_name);
   file_->group_create();
 
   // Write block meta data
 
   io_block()->set_block(block);
 
-  Output::write_meta_group (io_block());
+  write_meta_group (io_block());
 
   // Call write(block) on base Output object
 
-  Output::write(block,field_descr,ixp0,iyp0,izp0);
+  write_(block,field_descr,ixp0,iyp0,izp0);
 
   file_->group_close();
-  file_->group_chdir("..");
 
 }
 

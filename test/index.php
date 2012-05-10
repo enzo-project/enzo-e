@@ -56,6 +56,16 @@ function test_time ($output_file) {
 
    //----------------------------------------------------------------------
 
+function test_duration ($output_file) {
+  if (file_exists($output_file)) {
+    system("cat $output-file | awk '/UNIT TEST END/ {print $4};");
+  } else {
+    echo "<td></td>";
+  }
+}  
+
+   //----------------------------------------------------------------------
+
 function test_passed ($output_file) {
   if (file_exists($output_file)) {
     echo "<td class=pass>";

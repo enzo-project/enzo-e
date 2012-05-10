@@ -5,9 +5,13 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
+# whether to compile "new initial" code (TEMPORARY)
+
+new_initial = 1
+
 # Whether to print out messages with the TRACE() series of statements
 
-trace           = 1
+trace           = 0
 
 # Whether to enable displaying messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
@@ -71,6 +75,8 @@ if not env.GetOption('clean'):
 
      env = configure.Finish()
 
+use_papi = 0
+
 #-----------------------------------------------------------------------
 # COMMAND-LINE ARGUMENTS
 #-----------------------------------------------------------------------
@@ -118,7 +124,7 @@ define["double"] =        ['CONFIG_PRECISION_DOUBLE']
 define_atsync =           ['CONFIG_CHARM_ATSYNC']
 define_memory =           ['CONFIG_USE_MEMORY']
 define_projections =      ['CONFIG_USE_PROJECTIONS']
-define_papi  =            ['CONFIG_USE_PAPI']
+define_papi  =            ['CONFIG_USE_PAPI','PAPI3']
 
 # Debugging defines
 
@@ -130,6 +136,9 @@ define_debug_verbose =    ['CELLO_DEBUG_VERBOSE']
 
 define_hdf5  =            ['H5_USE_16_API']
 define_png   =            ['NO_FREETYPE']
+
+# Temporary defines
+define_new_initial =           ['NEW_INITIAL']
 
 #----------------------------------------------------------------------
 # ASSEMBLE DEFINES
@@ -174,13 +183,22 @@ if (use_projections == 1):
      defines = defines + define_projections
      charm_perf = '-tracemode projections'
 
-flags_gprof = ''
+flags_config = ''
+flags_cxx = ''
+flags_cc = ''
+flags_fc = ''
+flags_link = ''
+flags_cxx_charm = ''
+flags_cc_charm = ''
+flags_fc_charm = ''
+flags_link_charm = ''
 
 if (use_gprof == 1):
-     flags_gprof = '-pg '
+     flags_config = flags_config + ' -pg'
      
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
+if (new_initial != 0):   defines = defines + define_new_initial
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
@@ -230,7 +248,7 @@ elif (type == "mpi"):
      parallel_run = "mpirun -np 8"
 elif (type == "charm"):
      serial_run   = ""
-     parallel_run = charm_path + "/bin/charmrun +p8 "
+     parallel_run = charm_path + "/bin/charmrun +p4 "
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"
@@ -287,10 +305,25 @@ libpath = libpath + [libpath_fortran]
 
 environ  = os.environ
 
-cxxflags     = flags_arch + ' ' + flags_gprof
-cflags       = flags_arch + ' ' + flags_gprof
-fortranflags = flags_arch + ' ' + flags_gprof
-linkflags    = flags_arch + ' ' + flags_gprof  + ' ' + flags_link
+cxxflags = flags_arch
+cxxflags = cxxflags + ' ' + flags_cxx
+cxxflags = cxxflags + ' ' + flags_config
+if (type=="charm"): cxxflags = cxxflags + ' ' + flags_cxx_charm
+
+cflags   = flags_arch
+cflags   = cflags + ' ' + flags_cc
+cflags   = cflags + ' ' + flags_config
+if (type=="charm"):cflags   = cflags + ' ' + flags_cc_charm
+
+fortranflags = flags_arch
+fortranflags = fortranflags + ' ' + flags_fc
+fortranflags = fortranflags + ' ' + flags_config
+if (type=="charm"):fortranflags = fortranflags + ' ' + flags_fc_charm
+
+linkflags    = flags_arch
+linkflags    = linkflags + ' ' + flags_link
+linkflags    = linkflags + ' ' + flags_config
+if (type=="charm"):linkflags    = linkflags + ' ' + flags_link_charm
 
 env = Environment (
      CC           = cc[type],	

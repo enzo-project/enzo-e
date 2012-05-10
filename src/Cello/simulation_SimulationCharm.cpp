@@ -52,50 +52,20 @@ void SimulationCharm::run() throw()
 
 void SimulationCharm::s_initialize()
 {
-
-  if (patch_counter_.remaining() == 0) {
-    DEBUG("Calling run()");
-    run();
-  }
-  DEBUG("End s_initialize()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
- //   ItPatch it_patch(hierarchy_);
-//   Patch * patch;
-//   while (( patch = ++it_patch )) {
-//     CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-//     DEBUG1("proxy_patch = %p",proxy_patch);
-//     DEBUG1("local patch = %p",proxy_patch->ckLocal());
-//   }
-
+  if (patch_loop_.done()) run();
 }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::s_patch(CkCallback callback)
 {
-  DEBUG("s_patch");
-  if (patch_counter_.remaining() == 0) {
-    callback.send();
-  }
-}
-
-//----------------------------------------------------------------------
-
-void SimulationCharm::s_initial()
-{
-  DEBUG("s_initial");
-  if (patch_counter_.remaining() == 0) {
-    DEBUG ("SimulationCharm::s_initial() calling c_refresh()");
-    c_refresh();
-  } else  DEBUG ("SimulationCharm::s_initial() skipping c_refresh()");
-
+  if (patch_loop_.done()) callback.send();
 }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::c_refresh()
 {
-  DEBUG ("SimulationCharm::c_refresh()");
   ItPatch it_patch(hierarchy_);
   Patch * patch;
 
@@ -113,19 +83,13 @@ void SimulationCharm::c_compute()
   // Stopping
   //--------------------------------------------------
 
-  DEBUG1 ("SimulationCharm::c_compute() stop_ = %d",stop_);
-
   if (stop_) {
-    DEBUG0;
     
     performance_output(performance_simulation_);
 
-    DEBUG("Calling p_exit");
     proxy_main.p_exit(CkNumPes());
-    DEBUG0;
 
   } else {
-    DEBUG0;
 
     //--------------------------------------------------
     // Compute
@@ -135,19 +99,15 @@ void SimulationCharm::c_compute()
     Patch * patch;
     while (( patch = ++it_patch )) {
       CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-      DEBUG3("cycle %d time %f dt %f",
-	     cycle_,time_,dt_);
       proxy_patch->p_compute(cycle_, time_, dt_);
     }
-    DEBUG0;
   }
-    DEBUG0;
 
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_perf_output_min(CkReductionMsg * msg)
+void SimulationCharm::p_performance_min(CkReductionMsg * msg)
 {
   // Collect minimum values
 
@@ -159,7 +119,7 @@ void SimulationCharm::p_perf_output_min(CkReductionMsg * msg)
 
   // Then reduce maximum values
 
-  CkCallback callback (CkIndex_SimulationCharm::p_perf_output_max(NULL),thisProxy);
+  CkCallback callback (CkIndex_SimulationCharm::p_performance_max(NULL),thisProxy);
   contribute( num_perf_*sizeof(double), perf_val_, 
 	      CkReduction::max_double, callback);
 
@@ -167,7 +127,7 @@ void SimulationCharm::p_perf_output_min(CkReductionMsg * msg)
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_perf_output_max(CkReductionMsg * msg)
+void SimulationCharm::p_performance_max(CkReductionMsg * msg)
 {
   // Collect maximum values
 
@@ -179,7 +139,7 @@ void SimulationCharm::p_perf_output_max(CkReductionMsg * msg)
 
   // Finally reduce sum values
 
-  CkCallback callback (CkIndex_SimulationCharm::p_perf_output_sum(NULL),thisProxy);
+  CkCallback callback (CkIndex_SimulationCharm::p_performance_sum(NULL),thisProxy);
   contribute( num_perf_*sizeof(double), perf_val_, 
 	      CkReduction::sum_double, callback);
 
@@ -188,7 +148,7 @@ void SimulationCharm::p_perf_output_max(CkReductionMsg * msg)
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_perf_output_sum(CkReductionMsg * msg)
+void SimulationCharm::p_performance_sum(CkReductionMsg * msg)
 {
   // Collect summed values
 

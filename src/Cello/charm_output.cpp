@@ -23,15 +23,8 @@
 
 void SimulationCharm::p_output ()
 {
-  problem()->output_first();
+  problem()->output_reset();
   problem()->output_next(this);
-}
-
-//----------------------------------------------------------------------
-
-void Problem::output_first() throw()
-{
-  index_output_ = -1;
 }
 
 //----------------------------------------------------------------------
@@ -70,27 +63,10 @@ void Problem::output_next(Simulation * simulation) throw()
   }
 }
 
-// //----------------------------------------------------------------------
-
-// void SimulationCharm::p_write(int index)
-// {
-//   ERROR("","");
-//   DEBUG ("SimulationCharm::p_write()");
-//   ItPatch it_patch(hierarchy_);
-//   Patch * patch;
-//   while (( patch = ++it_patch )) {
-//     CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-//     proxy_patch->p_write(index);
-//   }
-// }
-
 //----------------------------------------------------------------------
 
 void Patch::p_write(int index_output)
 {
-  DEBUG3("patch size = %d %d %d",size_[0],size_[1],size_[2]);
-  DEBUG ("Patch::p_write()");
-
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -103,17 +79,13 @@ void Patch::p_write(int index_output)
 
 void Block::p_write (int index_output)
 {
-  DEBUG ("Block::p_write()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
   Output * output = simulation->problem()->output(index_output);
 
-  DEBUG ("Block::p_write() calling Output::write(block)");
   output->write(this,field_descr,0,0,0);
 
-  // Synchronize after writing
-  DEBUG ("Block::p_write() calling Patch::s_write()");
   proxy_patch_.s_write();
 }
 
@@ -121,8 +93,7 @@ void Block::p_write (int index_output)
 
 void Patch::s_write()
 {
-  DEBUG ("Patch::s_write()");
-  if (block_counter_.remaining() == 0) {
+  if (block_loop_.done()) {
     proxy_simulation.s_write();
   }
 }
@@ -131,7 +102,6 @@ void Patch::s_write()
 
 void SimulationCharm::s_write()
 {
-  DEBUG ("SimulationCharm::s_write()");
   problem()->output_wait(this);
 }
 
@@ -178,7 +148,6 @@ void Problem::output_wait(Simulation * simulation) throw()
 
 void SimulationCharm::p_output_write (int n, char * buffer)
 {
-  DEBUG ("SimulationCharm::p_output_write()");
   problem()->output_write(this,n,buffer);
 }
 
@@ -190,17 +159,13 @@ void Problem::output_write
  int n, char * buffer
 ) throw()
 {
-  DEBUG ("Problem::output_write()");
   Output * output = this->output(index_output_);
 
   if (n != 0) {
     output->update_remote(n, buffer);
   }
 
-  // fan-in from writers
-  int remaining = output->counter()->remaining();
-
-  if (remaining == 0) {
+  if (output->loop()->done()) {
 
     output->close();
 

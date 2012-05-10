@@ -4,11 +4,15 @@ cc  = {}
 
 is_arch_valid = 1
 
-flags_arch = '-g -O -Wall'
+flags_arch       = '-g -O -Wall'
 
 # -lpthread: not needed?
 # -rdynamic: required for backtraces
-flags_link = '-rdynamic'
+
+balancer = 'RotateLB'
+
+flags_cxx_charm  = '-balancer ' + balancer
+flags_link_charm = '-rdynamic -module ' + balancer
 
 cc['mpi']     = 'mpicc'
 cc['serial']  = 'gcc'

@@ -307,7 +307,7 @@ void Block::prepare()
   Timestep * timestep = problem->timestep();
   DEBUG("Block::prepare()");
 
-  dt_block = timestep->compute(field_descr,this);
+  dt_block = timestep->evaluate(field_descr,this);
   DEBUG("Block::prepare()");
 
   // Reduce timestep to coincide with scheduled output if needed
@@ -417,11 +417,14 @@ void Block::refresh ()
   DEBUG ("Block::refresh()");
 
   bool is_boundary[3][2];
-  bool axm,axp,aym,ayp,azm,azp;
-
-  determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp);
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
+  Boundary * boundary = simulation->problem()->boundary();
+  FieldDescr * field_descr = simulation->field_descr();
+  
+  bool periodic = boundary->is_periodic();
+
+  CProxy_Block block_array = thisProxy;
 
   //--------------------------------------------------
   // Refresh
@@ -435,26 +438,29 @@ void Block::refresh ()
   int nby = size_[1];
   int nbz = size_[2];
   
-  int ixm = (ix - 1 + nbx) % nbx;
-  int iym = (iy - 1 + nby) % nby;
-  int izm = (iz - 1 + nbz) % nbz;
-  int ixp = (ix + 1) % nbx;
-  int iyp = (iy + 1) % nby;
-  int izp = (iz + 1) % nbz;
-
-  Boundary * boundary = simulation->problem()->boundary();
+  bool ax3[3],ay3[3],az3[3];
+  determine_boundary_
+    (is_boundary,&ax3[0],&ax3[2],&ay3[0],&ay3[2],&az3[0],&az3[2]);
+  ax3[1]=true;
+  ay3[1]=true;
+  az3[1]=true;
+  ax3[0] = ax3[0] && (periodic || ! is_boundary[axis_x][face_lower]);
+  ax3[2] = ax3[2] && (periodic || ! is_boundary[axis_x][face_upper]);
+  ay3[0] = ay3[0] && (periodic || ! is_boundary[axis_y][face_lower]);
+  ay3[2] = ay3[2] && (periodic || ! is_boundary[axis_y][face_upper]);
+  az3[0] = az3[0] && (periodic || ! is_boundary[axis_z][face_lower]);
+  az3[2] = az3[2] && (periodic || ! is_boundary[axis_z][face_upper]);
+  int ix3[3],iy3[3],iz3[3];
+  ix3[0] = (ix - 1 + nbx) % nbx;
+  iy3[0] = (iy - 1 + nby) % nby;
+  iz3[0] = (iz - 1 + nbz) % nbz;
+  ix3[1] = ix;
+  iy3[1] = iy;
+  iz3[1] = iz;
+  ix3[2] = (ix + 1) % nbx;
+  iy3[2] = (iy + 1) % nby;
+  iz3[2] = (iz + 1) % nbz;
   
-  bool periodic = boundary->is_periodic();
-
-  CProxy_Block block_array = thisProxy;
-
-  axm = axm && (periodic || ! is_boundary[axis_x][face_lower]);
-  axp = axp && (periodic || ! is_boundary[axis_x][face_upper]);
-  aym = aym && (periodic || ! is_boundary[axis_y][face_lower]);
-  ayp = ayp && (periodic || ! is_boundary[axis_y][face_upper]);
-  azm = azm && (periodic || ! is_boundary[axis_z][face_lower]);
-  azp = azp && (periodic || ! is_boundary[axis_z][face_upper]);
-
   // Refresh face ghost zones
 
   bool lx,ly,lz;
@@ -462,203 +468,30 @@ void Block::refresh ()
   ly = false;
   lz = false;
 
-  FieldDescr * field_descr = simulation->field_descr();
+  int axl = 1;
+  int ayl = nby==1 ? 0 : 1;
+  int azl = nbz==1 ? 0 : 1;
 
-  if (field_descr->refresh_face(2)) {
-    if ( axm ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), -1, 0, 0);
-      block_array(ixm,iy,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), +1, 0, 0);
-    }
-    if ( axp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), +1, 0, 0);
-      block_array(ixp,iy,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), -1, 0, 0);
-    }
-    if ( aym ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), 0, -1, 0);
-      block_array(ix,iym,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), 0, +1, 0);
-    }
-    if ( ayp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), 0, +1, 0);
-      block_array(ix,iyp,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), 0, -1, 0);
-    }
-    if ( azm ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), 0, 0, -1);
-      block_array(ix,iy,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), 0, 0, +1);
-    }
-    if ( azp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), 0, 0, +1);
-      block_array(ix,iy,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), 0, 0, -1);
-    }
-  }
+  for (int ax=-axl; ax<=axl; ax++) {
+    for (int ay=-ayl; ay<=ayl; ay++) {
+      for (int az=-azl; az<=azl; az++) {
+	int sum = abs(ax)+abs(ay)+abs(az);
+	if ((ax3[ax+1] && ay3[ay+1] && az3[az+1]) &&
+	    ((sum==1 && field_descr->refresh_face(2)) ||
+	     (sum==2 && field_descr->refresh_face(1)) ||
+	     (sum==3 && field_descr->refresh_face(0)))) {
+	  FieldFace field_face 
+	    (field_block(),field_descr,ax,ay,az,lx,ly,lz);
+	  
+	  DEBUG9("index %d %d %d  %d %d %d  %d %d %d",
+		 index_[0],index_[1],index_[2],
+		 ix3[ax+1],iy3[ay+1],iz3[az+1],
+		 ax,ay,az);
 
-  // Refresh edge ghost zones
-
-  if (field_descr->refresh_face(1)) {
-    if ( axm && aym ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), -1, -1, 0);
-      block_array(ixm,iym,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), +1, +1, 0);
-    }
-    if ( axm && ayp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), -1, +1, 0);
-      block_array(ixm,iyp,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), +1, -1, 0);
-    }
-    if ( axp && aym ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), +1, -1, 0);
-      block_array(ixp,iym,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), -1, +1, 0);
-    }
-    if ( axp && ayp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), +1, +1, 0);
-      block_array(ixp,iyp,iz).p_refresh_face 
-	(field_face.size(), field_face.array(), -1, -1, 0);
-    }
-
-    if ( aym && azm ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), 0, -1, -1);
-      block_array(ix,iym,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), 0, +1, +1);
-    }
-    if ( aym && azp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), 0, -1, +1);
-      block_array(ix,iym,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), 0, +1, -1);
-    }
-    if ( ayp && azm ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), 0, +1, -1);
-      block_array(ix,iyp,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), 0, -1, +1);
-    }
-    if ( ayp && azp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), 0, +1, +1);
-      block_array(ix,iyp,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), 0, -1, -1);
-    }
-
-    if ( axm && azm ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), -1, 0, -1);
-      block_array(ixm,iy,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), +1, 0, +1);
-    }
-    if ( axp && azm ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), +1, 0, -1);
-      block_array(ixp,iy,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), -1, 0, +1);
-    }
-    if ( axm && azp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), -1, 0, +1);
-      block_array(ixm,iy,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), +1, 0, -1);
-    }
-    if ( axp && azp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), +1, 0, +1);
-      block_array(ixp,iy,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), -1, 0, -1);
-    }
-  }
-
-  // Refresh corner ghost zones
-
-  if (field_descr->refresh_face(0)) {
-
-    if ( axm && aym && azm ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), -1, -1, -1);
-      block_array(ixm,iym,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), +1, +1, +1);
-    }
-    if ( axm && aym && azp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), -1, -1, +1);
-      block_array(ixm,iym,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), +1, +1, -1);
-    }
-    if ( axm && ayp && azm ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), -1, +1, -1);
-      block_array(ixm,iyp,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), +1, -1, +1);
-    }
-    if ( axm && ayp && azp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), -1, +1, +1);
-      block_array(ixm,iyp,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), +1, -1, -1);
-    }
-    if ( axp && aym && azm ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), +1, -1, -1);
-      block_array(ixp,iym,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), -1, +1, +1);
-    }
-    if ( axp && aym && azp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), +1, -1, +1);
-      block_array(ixp,iym,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), -1, +1, -1);
-    }
-    if ( axp && ayp && azm ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), +1, +1, -1);
-      block_array(ixp,iyp,izm).p_refresh_face 
-	(field_face.size(), field_face.array(), -1, -1, +1);
-    }
-    if ( axp && ayp && azp ) {
-      FieldFace field_face;
-      field_face.set_full(lx,ly,lz);
-      field_face.load (field_descr, field_block(), +1, +1, +1);
-      block_array(ixp,iyp,izp).p_refresh_face 
-	(field_face.size(), field_face.array(), -1, -1, -1);
+	  block_array(ix3[ax+1],iy3[ay+1],iz3[az+1]).p_refresh_face 
+	    (field_face.size(), field_face.array(), -ax,-ay,-az);
+	}
+      }
     }
   }
 

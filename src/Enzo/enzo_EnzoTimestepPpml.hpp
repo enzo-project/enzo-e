@@ -21,10 +21,10 @@ public: // interface
 
 public: // virtual functions
 
-  /// Compute the timestep for the block
+  /// Evaluate the timestep for the block
 
-  virtual double compute ( const FieldDescr * field_descr,
-			   Block * block ) throw(); 
+  virtual double evaluate
+  ( const FieldDescr * field_descr, Block * block ) throw(); 
 
 };
 
