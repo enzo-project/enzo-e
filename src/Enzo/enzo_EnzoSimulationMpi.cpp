@@ -185,6 +185,7 @@ void EnzoSimulationMpi::run() throw()
       while ((block = ++it_block)) {
 
 	double dt_block   = timestep->evaluate(field_descr_,block);
+	DEBUG1("dt_block = %f",dt_block);
 	double time_block = block->time();
 
 	// Reduce timestep to coincide with scheduled output
