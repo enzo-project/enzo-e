@@ -259,12 +259,7 @@ void SimulationMpi::run() throw()
 	  method -> compute_block (field_descr_,block);
 	}
 
-	int   cycle_block = block->cycle();
 	block->set_cycle (cycle_ + 1);
-
-	double time_block = block->time();
-	double   dt_block = block->dt();
-	DEBUG1 ("dt_block = %f",dt_block);
 	block->set_time  (time_ + dt_);
 
       }
