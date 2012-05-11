@@ -195,11 +195,13 @@ void EnzoSimulationMpi::run() throw()
 	  dt_block = output->update_timestep(time_block,dt_block);
 	}
 
+	DEBUG1("dt_block = %f",dt_block);
 	// Reduce timestep to coincide with end of simulation
 
 	double time_stop = stopping->stop_time();
 	dt_block = MIN (dt_block, (time_stop - time_block));
 
+	DEBUG1("dt_block = %f",dt_block);
 	dt_patch = MIN(dt_patch,dt_block);
       }
       dt_hierarchy = MIN(dt_hierarchy, dt_patch);

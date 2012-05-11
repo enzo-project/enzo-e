@@ -78,47 +78,7 @@ enzo_float EnzoBlock::DomainRightEdge[MAX_DIMENSION];
 
 // PPM
 
-int EnzoBlock::field_density;
-int EnzoBlock::field_total_energy;
-int EnzoBlock::field_internal_energy;
-int EnzoBlock::field_velocity_x;
-int EnzoBlock::field_velocity_y;
-int EnzoBlock::field_velocity_z;
-
-int EnzoBlock::field_color;
-
-// PPM
-
-int EnzoBlock::field_velox;
-int EnzoBlock::field_veloy;
-int EnzoBlock::field_veloz;
-int EnzoBlock::field_bfieldx;
-int EnzoBlock::field_bfieldy;
-int EnzoBlock::field_bfieldz;
-
-int EnzoBlock::field_dens_rx;
-int EnzoBlock::field_velox_rx;
-int EnzoBlock::field_veloy_rx;
-int EnzoBlock::field_veloz_rx;
-int EnzoBlock::field_bfieldx_rx;
-int EnzoBlock::field_bfieldy_rx;
-int EnzoBlock::field_bfieldz_rx;
-
-int EnzoBlock::field_dens_ry;
-int EnzoBlock::field_velox_ry;
-int EnzoBlock::field_veloy_ry;
-int EnzoBlock::field_veloz_ry;
-int EnzoBlock::field_bfieldx_ry;
-int EnzoBlock::field_bfieldy_ry;
-int EnzoBlock::field_bfieldz_ry;
-
-int EnzoBlock::field_dens_rz;
-int EnzoBlock::field_velox_rz;
-int EnzoBlock::field_veloy_rz;
-int EnzoBlock::field_veloz_rz;
-int EnzoBlock::field_bfieldx_rz;
-int EnzoBlock::field_bfieldy_rz;
-int EnzoBlock::field_bfieldz_rz;
+int EnzoBlock::field_index_[NUM_FIELDS];
 
 int EnzoBlock::GridRank;
 
@@ -172,47 +132,9 @@ void EnzoBlock::initialize(Parameters * parameters,
 
   // PPM
 
-  field_density = field_undefined;
-  field_total_energy = field_undefined;
-  field_internal_energy = field_undefined;
-  field_velocity_x = field_undefined;
-  field_velocity_y = field_undefined;
-  field_velocity_z = field_undefined;
-
-  field_color = field_undefined;
-
-  // PPML
-
-  field_velox = field_undefined;
-  field_veloy = field_undefined;
-  field_veloz = field_undefined;
-  field_bfieldx = field_undefined;
-  field_bfieldy = field_undefined;
-  field_bfieldz = field_undefined;
-
-  field_dens_rx = field_undefined;
-  field_velox_rx = field_undefined;
-  field_veloy_rx = field_undefined;
-  field_veloz_rx = field_undefined;
-  field_bfieldx_rx = field_undefined;
-  field_bfieldy_rx = field_undefined;
-  field_bfieldz_rx = field_undefined;
-  field_dens_ry = field_undefined;
-
-  field_velox_ry = field_undefined;
-  field_veloy_ry = field_undefined;
-  field_veloz_ry = field_undefined;
-  field_bfieldx_ry = field_undefined;
-  field_bfieldy_ry = field_undefined;
-  field_bfieldz_ry = field_undefined;
-
-  field_dens_rz = field_undefined;
-  field_velox_rz = field_undefined;
-  field_veloy_rz = field_undefined;
-  field_veloz_rz = field_undefined;
-  field_bfieldx_rz = field_undefined;
-  field_bfieldy_rz = field_undefined;
-  field_bfieldz_rz = field_undefined;
+  for (int i=0; i<NUM_FIELDS; i++) {
+    field_index_[i] = field_undefined;
+  }
 
   GridRank = 0;
   NumberOfBaryonFields = 0;
@@ -395,106 +317,106 @@ void EnzoBlock::initialize(Parameters * parameters,
       parameters->list_value_string(field_index,"Field:fields");
 
     if        (name == "density") {
-      field_density          = field_index;
+      field_index_[field_density]  = field_index;
       FieldType[field_index] = Density;
     } else if (name == "velocity_x") {
-      field_velocity_x       = field_index;
+      field_index_[field_velocity_x]   = field_index;
       FieldType[field_index] = Velocity1;
     } else if (name == "velocity_y") {
-      field_velocity_y       = field_index;
+      field_index_[field_velocity_y]   = field_index;
       FieldType[field_index] = Velocity2;
     } else if (name == "velocity_z") {
-      field_velocity_z       = field_index;
+      field_index_[field_velocity_z]   = field_index;
       FieldType[field_index] = Velocity3;
     } else if (name == "total_energy") {
-      field_total_energy     = field_index;
+      field_index_[field_total_energy] = field_index;
       FieldType[field_index] = TotalEnergy;
     } else if (name == "internal_energy") {
-      field_internal_energy  = field_index;
+      field_index_[field_internal_energy]  = field_index;
       FieldType[field_index] = InternalEnergy;
     } else if (name == "electron_density") {
-      field_color            = field_index;
+      field_index_[field_color]    = field_index;
       FieldType[field_index] = ElectronDensity;
     } else if (name == "velox") {
-      field_velox            = field_index;
+      field_index_[field_velox]    = field_index;
       FieldType[field_index] = Velocity1;
     } else if (name == "veloy") {
-      field_veloy           = field_index;
+      field_index_[field_veloy]   = field_index;
       FieldType[field_index] = Velocity2;
     } else if (name == "veloz") {
-      field_veloz           = field_index;
+      field_index_[field_veloz]   = field_index;
       FieldType[field_index] = Velocity3;
     } else if (name == "bfieldx") {
-      field_bfieldx           = field_index;
+      field_index_[field_bfieldx]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldy") {
-      field_bfieldy           = field_index;
+      field_index_[field_bfieldy]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldz") {
-      field_bfieldz           = field_index;
+      field_index_[field_bfieldz]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "dens_rx") {
-      field_dens_rx           = field_index;
+      field_index_[field_dens_rx]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "velox_rx") {
-      field_velox_rx           = field_index;
+      field_index_[field_velox_rx]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloy_rx") {
-      field_veloy_rx           = field_index;
+      field_index_[field_veloy_rx]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloz_rx") {
-      field_veloz_rx           = field_index;
+      field_index_[field_veloz_rx]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldx_rx") {
-      field_bfieldx_rx           = field_index;
+      field_index_[field_bfieldx_rx]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldy_rx") {
-      field_bfieldy_rx           = field_index;
+      field_index_[field_bfieldy_rx]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldz_rx") {
-      field_bfieldz_rx           = field_index;
+      field_index_[field_bfieldz_rx]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "dens_ry") {
-      field_dens_ry           = field_index;
+      field_index_[field_dens_ry]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "velox_ry") {
-      field_velox_ry           = field_index;
+      field_index_[field_velox_ry]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloy_ry") {
-      field_veloy_ry           = field_index;
+      field_index_[field_veloy_ry]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloz_ry") {
-      field_veloz_ry           = field_index;
+      field_index_[field_veloz_ry]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldx_ry") {
-      field_bfieldx_ry           = field_index;
+      field_index_[field_bfieldx_ry]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldy_ry") {
-      field_bfieldy_ry           = field_index;
+      field_index_[field_bfieldy_ry]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldz_ry") {
-      field_bfieldz_ry           = field_index;
+      field_index_[field_bfieldz_ry]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "dens_rz") {
-      field_dens_rz           = field_index;
+      field_index_[field_dens_rz]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "velox_rz") {
-      field_velox_rz           = field_index;
+      field_index_[field_velox_rz]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloy_rz") {
-      field_veloy_rz           = field_index;
+      field_index_[field_veloy_rz]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloz_rz") {
-      field_veloz_rz           = field_index;
+      field_index_[field_veloz_rz]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldx_rz") {
-      field_bfieldx_rz           = field_index;
+      field_index_[field_bfieldx_rz]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldy_rz") {
-      field_bfieldy_rz           = field_index;
+      field_index_[field_bfieldy_rz]   = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldz_rz") {
-      field_bfieldz_rz           = field_index;
+      field_index_[field_bfieldz_rz]   = field_index;
       FieldType[field_index] = 0;
     } else {
       FieldType[field_index] = 0;
@@ -733,78 +655,78 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   // Fields
 
-  if (field_density != -1) 
-    fprintf (fp,"EnzoBlock: field_density %d\n", field_density);
-  if (field_total_energy != -1) 
-    fprintf (fp,"EnzoBlock: field_total_energy %d\n", field_total_energy);
-  if (field_internal_energy != -1) 
-    fprintf (fp,"EnzoBlock: field_internal_energy %d\n", field_internal_energy);
-  if (field_velocity_x != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_x %d\n", field_velocity_x);
-  if (field_velocity_y != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_y %d\n", field_velocity_y);
-  if (field_velocity_z != -1) 
-    fprintf (fp,"EnzoBlock: field_velocity_z %d\n", field_velocity_z);
-  if (field_color != -1) 
-    fprintf (fp,"EnzoBlock: field_color %d\n", field_color);
+  if (field_index_[field_density] != field_undefined) 
+    fprintf (fp,"EnzoBlock: field_density %d\n", field_index_[field_density]);
+  if (field_index_[field_total_energy] != field_undefined) 
+    fprintf (fp,"EnzoBlock: field_total_energy %d\n", field_index_[field_total_energy]);
+  if (field_index_[field_internal_energy] != field_undefined) 
+    fprintf (fp,"EnzoBlock: field_internal_energy %d\n", field_index_[field_internal_energy]);
+  if (field_index_[field_velocity_x] != field_undefined) 
+    fprintf (fp,"EnzoBlock: field_velocity_x %d\n", field_index_[field_velocity_x]);
+  if (field_index_[field_velocity_y] != field_undefined) 
+    fprintf (fp,"EnzoBlock: field_velocity_y %d\n", field_index_[field_velocity_y]);
+  if (field_index_[field_velocity_z] != field_undefined) 
+    fprintf (fp,"EnzoBlock: field_velocity_z %d\n", field_index_[field_velocity_z]);
+  if (field_index_[field_color] != field_undefined) 
+    fprintf (fp,"EnzoBlock: field_color %d\n", field_index_[field_color]);
 
-  if (field_velox != -1)
-    fprintf (fp,"EnzoBlock: field_velox %d\n", field_velox);
-  if (field_veloy != -1)
-    fprintf (fp,"EnzoBlock: field_veloy %d\n", field_veloy);
-  if (field_veloz != -1)
-    fprintf (fp,"EnzoBlock: field_veloz %d\n", field_veloz);
-  if (field_bfieldx != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldx %d\n", field_bfieldx);
-  if (field_bfieldy != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldy %d\n", field_bfieldy);
-  if (field_bfieldz != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldz %d\n", field_bfieldz);
+  if (field_index_[field_velox] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_velox %d\n", field_index_[field_velox]);
+  if (field_index_[field_veloy] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_veloy %d\n", field_index_[field_veloy]);
+  if (field_index_[field_veloz] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_veloz %d\n", field_index_[field_veloz]);
+  if (field_index_[field_bfieldx] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldx %d\n", field_index_[field_bfieldx]);
+  if (field_index_[field_bfieldy] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldy %d\n", field_index_[field_bfieldy]);
+  if (field_index_[field_bfieldz] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldz %d\n", field_index_[field_bfieldz]);
 
-  if (field_dens_rx != -1)
-    fprintf (fp,"EnzoBlock: field_dens_rx %d\n", field_dens_rx);
-  if (field_velox_rx != -1)
-    fprintf (fp,"EnzoBlock: field_velox_rx %d\n", field_velox_rx);
-  if (field_veloy_rx != -1)
-    fprintf (fp,"EnzoBlock: field_veloy_rx %d\n", field_veloy_rx);
-  if (field_veloz_rx != -1)
-    fprintf (fp,"EnzoBlock: field_veloz_rx %d\n", field_veloz_rx);
-  if (field_bfieldx_rx != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldx_rx %d\n", field_bfieldx_rx);
-  if (field_bfieldy_rx != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldy_rx %d\n", field_bfieldy_rx);
-  if (field_bfieldz_rx != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldz_rx %d\n", field_bfieldz_rx);
+  if (field_index_[field_dens_rx] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_dens_rx %d\n", field_index_[field_dens_rx]);
+  if (field_index_[field_velox_rx] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_velox_rx %d\n", field_index_[field_velox_rx]);
+  if (field_index_[field_veloy_rx] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_veloy_rx %d\n", field_index_[field_veloy_rx]);
+  if (field_index_[field_veloz_rx] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_veloz_rx %d\n", field_index_[field_veloz_rx]);
+  if (field_index_[field_bfieldx_rx] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldx_rx %d\n", field_index_[field_bfieldx_rx]);
+  if (field_index_[field_bfieldy_rx] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldy_rx %d\n", field_index_[field_bfieldy_rx]);
+  if (field_index_[field_bfieldz_rx] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldz_rx %d\n", field_index_[field_bfieldz_rx]);
 
-  if (field_dens_ry != -1)
-    fprintf (fp,"EnzoBlock: field_dens_ry %d\n", field_dens_ry);
-  if (field_velox_ry != -1)
-    fprintf (fp,"EnzoBlock: field_velox_ry %d\n", field_velox_ry);
-  if (field_veloy_ry != -1)
-    fprintf (fp,"EnzoBlock: field_veloy_ry %d\n", field_veloy_ry);
-  if (field_veloz_ry != -1)
-    fprintf (fp,"EnzoBlock: field_veloz_ry %d\n", field_veloz_ry);
-  if (field_bfieldx_ry != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldx_ry %d\n", field_bfieldx_ry);
-  if (field_bfieldy_ry != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldy_ry %d\n", field_bfieldy_ry);
-  if (field_bfieldz_ry != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldz_ry %d\n", field_bfieldz_ry);
+  if (field_index_[field_dens_ry] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_dens_ry %d\n", field_index_[field_dens_ry]);
+  if (field_index_[field_velox_ry] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_velox_ry %d\n", field_index_[field_velox_ry]);
+  if (field_index_[field_veloy_ry] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_veloy_ry %d\n", field_index_[field_veloy_ry]);
+  if (field_index_[field_veloz_ry] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_veloz_ry %d\n", field_index_[field_veloz_ry]);
+  if (field_index_[field_bfieldx_ry] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldx_ry %d\n", field_index_[field_bfieldx_ry]);
+  if (field_index_[field_bfieldy_ry] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldy_ry %d\n", field_index_[field_bfieldy_ry]);
+  if (field_index_[field_bfieldz_ry] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldz_ry %d\n", field_index_[field_bfieldz_ry]);
 
-  if (field_dens_rz != -1)
-    fprintf (fp,"EnzoBlock: field_dens_rz %d\n", field_dens_rz);
-  if (field_velox_rz != -1)
-    fprintf (fp,"EnzoBlock: field_velox_rz %d\n", field_velox_rz);
-  if (field_veloy_rz != -1)
-    fprintf (fp,"EnzoBlock: field_veloy_rz %d\n", field_veloy_rz);
-  if (field_veloz_rz != -1)
-    fprintf (fp,"EnzoBlock: field_veloz_rz %d\n", field_veloz_rz);
-  if (field_bfieldx_rz != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldx_rz %d\n", field_bfieldx_rz);
-  if (field_bfieldy_rz != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldy_rz %d\n", field_bfieldy_rz);
-  if (field_bfieldz_rz != -1)
-    fprintf (fp,"EnzoBlock: field_bfieldz_rz %d\n", field_bfieldz_rz);
+  if (field_index_[field_dens_rz] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_dens_rz %d\n", field_index_[field_dens_rz]);
+  if (field_index_[field_velox_rz] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_velox_rz %d\n", field_index_[field_velox_rz]);
+  if (field_index_[field_veloy_rz] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_veloy_rz %d\n", field_index_[field_veloy_rz]);
+  if (field_index_[field_veloz_rz] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_veloz_rz %d\n", field_index_[field_veloz_rz]);
+  if (field_index_[field_bfieldx_rz] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldx_rz %d\n", field_index_[field_bfieldx_rz]);
+  if (field_index_[field_bfieldy_rz] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldy_rz %d\n", field_index_[field_bfieldy_rz]);
+  if (field_index_[field_bfieldz_rz] != field_undefined)
+    fprintf (fp,"EnzoBlock: field_bfieldz_rz %d\n", field_index_[field_bfieldz_rz]);
 
   // Grid
 

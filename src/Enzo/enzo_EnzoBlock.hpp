@@ -8,6 +8,43 @@
 #ifndef ENZO_ENZO_BLOCK_HPP
 #define ENZO_ENZO_BLOCK_HPP
 
+enum field_type {
+  field_bfieldx,
+  field_bfieldx_rx,
+  field_bfieldx_ry,
+  field_bfieldx_rz,
+  field_bfieldy,
+  field_bfieldy_rx,
+  field_bfieldy_ry,
+  field_bfieldy_rz,
+  field_bfieldz,
+  field_bfieldz_rx,
+  field_bfieldz_ry,
+  field_bfieldz_rz,
+  field_color,
+  field_density,
+  field_dens_rx,
+  field_dens_ry,
+  field_dens_rz,
+  field_internal_energy,
+  field_total_energy,
+  field_velocity_x,
+  field_velocity_y,
+  field_velocity_z,
+  field_velox,
+  field_velox_rx,
+  field_velox_ry,
+  field_velox_rz,
+  field_veloy,
+  field_veloy_rx,
+  field_veloy_ry,
+  field_veloy_rz,
+  field_veloz,
+  field_veloz_rx,
+  field_veloz_ry,
+  field_veloz_rz
+};
+
 //----------------------------------------------------------------------
 
 class EnzoBlock : public Block
@@ -104,48 +141,7 @@ class EnzoBlock : public Block
 
   // PPM
 
-  static int field_density;
-  static int field_total_energy;
-  static int field_internal_energy;
-  static int field_velocity_x;
-  static int field_velocity_y;
-  static int field_velocity_z;
-
-  static int field_color;
-
-  // PPM
-
-  static int field_velox;
-  static int field_veloy;
-  static int field_veloz;
-  static int field_bfieldx;
-  static int field_bfieldy;
-  static int field_bfieldz;
-
-  static int field_dens_rx;
-  static int field_velox_rx;
-  static int field_veloy_rx;
-  static int field_veloz_rx;
-  static int field_bfieldx_rx;
-  static int field_bfieldy_rx;
-  static int field_bfieldz_rx;
-
-  static int field_dens_ry;
-  static int field_velox_ry;
-  static int field_veloy_ry;
-  static int field_veloz_ry;
-  static int field_bfieldx_ry;
-  static int field_bfieldy_ry;
-  static int field_bfieldz_ry;
-
-  static int field_dens_rz;
-  static int field_velox_rz;
-  static int field_veloy_rz;
-  static int field_veloz_rz;
-  static int field_bfieldx_rz;
-  static int field_bfieldy_rz;
-  static int field_bfieldz_rz;
-
+  static int field_index_[NUM_FIELDS];
 
   static int GridRank;
 
@@ -298,7 +294,9 @@ public: // interface
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
   int SolveMHDEquations(FieldDescr *,  enzo_float dt);
 
-public: // functions (TEMPORARILY PUBLIC)
+  /// Return the Cello FieldBlock index for the given field type
+  int index (enum field_type type)
+  { return field_index_[type];}
 
   /// Set Block's cycle
   virtual void set_cycle (int cycle) throw();

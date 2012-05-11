@@ -20,6 +20,8 @@
 #define MAX_ANY_SINGLE_DIRECTION 4200+6
 #define tiny                     1.0e-20
 
+#define NUM_FIELDS 34
+
 #define NINT(A)   ((int) ((A) + 0.5*((A)>0?1:-1)))
 
 #define FORTRAN_NAME(NAME) NAME##_
