@@ -80,40 +80,22 @@ void SimulationCharm::c_refresh()
 
 void SimulationCharm::c_compute()
 {
-  //--------------------------------------------------
-  // Stopping
-  //--------------------------------------------------
-
-  DEBUG1 ("SimulationCharm::c_compute() stop_ = %d",stop_);
 
   if (stop_) {
-    DEBUG0;
     
     performance_output(performance_simulation_);
 
-    DEBUG("Calling p_exit");
     proxy_main.p_exit(CkNumPes());
-    DEBUG0;
 
   } else {
-    DEBUG0;
-
-    //--------------------------------------------------
-    // Compute
-    //--------------------------------------------------
 
     ItPatch it_patch(hierarchy_);
     Patch * patch;
     while (( patch = ++it_patch )) {
       CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-      DEBUG3("cycle %d time %f dt %f",
-	     cycle_,time_,dt_);
       proxy_patch->p_compute(cycle_, time_, dt_);
     }
-    DEBUG0;
   }
-    DEBUG0;
-
 }
 
 //----------------------------------------------------------------------

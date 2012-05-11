@@ -244,14 +244,10 @@ void SimulationMpi::run() throw()
     }
 
     //--------------------------------------------------
-    // APPLY NUMERICAL METHODS AND EVALUATE STOPPING CRITERIA
+    // Compute
     //--------------------------------------------------
 
-    stop_hierarchy = true;
-
     while ((patch = ++it_patch)) {
-
-      int stop_patch = true;
 
       ItBlock it_block(patch);
       Block * block;
@@ -264,36 +260,35 @@ void SimulationMpi::run() throw()
 	}
 
 	int   cycle_block = block->cycle();
-	block->set_cycle (++cycle_block);
+	block->set_cycle (cycle_ + 1);
 
 	double time_block = block->time();
 	double   dt_block = block->dt();
-	block->set_time  (time_block + dt_block);
+	DEBUG1 ("dt_block = %f",dt_block);
+	block->set_time  (time_ + dt_);
 
-	// Global cycle and time reduction
-	
-	int stop_block = stopping->complete(cycle_block,time_block);
-	
-	// Update stopping criteria for patch
-
-	stop_patch = stop_patch && stop_block;
-
-      } // (block = ++it_block)
-
-      // Update stopping criteria for hierarchy
-
-      stop_hierarchy = stop_hierarchy && stop_patch;
-
-    } // (patch = ++it_patch)
-
-    stop_hierarchy = reduce.reduce_int(stop_hierarchy,reduce_op_land);
-
+      }
+    }
     cycle_ ++;
     time_ += dt_hierarchy;
 
-    // // Perform any scheduled output
+    //--------------------------------------------------
+    // Evaluate stopping criteria
+    //--------------------------------------------------
 
-    // scheduled_output();
+    stop_hierarchy = true;
+    while ((patch = ++it_patch)) {
+      int stop_patch = true;
+      ItBlock it_block(patch);
+      Block * block;
+      while ((block = ++it_block)) {
+	int stop_block = stopping->complete(block->cycle(),block->time());
+	stop_patch = stop_patch && stop_block;
+      }
+      stop_hierarchy = stop_hierarchy && stop_patch;
+    }
+    stop_hierarchy = reduce.reduce_int(stop_hierarchy,reduce_op_land);
+
 
   } // while (! stop_hierarchy)
 
