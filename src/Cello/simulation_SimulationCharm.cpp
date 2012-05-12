@@ -79,10 +79,6 @@ void SimulationCharm::c_refresh()
 
 void SimulationCharm::c_compute()
 {
-  //--------------------------------------------------
-  // Stopping
-  //--------------------------------------------------
-
   if (stop_) {
     
     performance_output(performance_simulation_);
@@ -91,10 +87,6 @@ void SimulationCharm::c_compute()
 
   } else {
 
-    //--------------------------------------------------
-    // Compute
-    //--------------------------------------------------
-
     ItPatch it_patch(hierarchy_);
     Patch * patch;
     while (( patch = ++it_patch )) {
@@ -102,7 +94,6 @@ void SimulationCharm::c_compute()
       proxy_patch->p_compute(cycle_, time_, dt_);
     }
   }
-
 }
 
 //----------------------------------------------------------------------

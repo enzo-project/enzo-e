@@ -29,7 +29,7 @@ class Performance {
   /// parallel performance
   ///
   /// Performance data is organized into attributes, counters, groups, and
-  /// regions. @@@
+  /// regions
 
 public: // interface
 

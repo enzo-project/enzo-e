@@ -1,13 +1,14 @@
-// $Id: counters_mpi.cpp 2093 2011-03-12 01:17:05Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
 
-/// @file     counters_mpi.cpp
+/// @file     lcaperf_CountersMpi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-05-22
 /// @brief    Implementation of the CountersMpi class
 
+#include "lcaperf.hpp"
+
 #ifdef CONFIG_USE_MPI
-#include "performance.hpp"
+
 namespace lca {
 
 double CountersMpi::mpi_time_start_ = 0;

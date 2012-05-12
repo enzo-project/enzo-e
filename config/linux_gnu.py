@@ -4,7 +4,7 @@ cc  = {}
 
 is_arch_valid = 1
 
-flags_arch       = '-g -O -Wall'
+flags_arch       = '-g -O3 -Wall'
 
 # -lpthread: not needed?
 # -rdynamic: required for backtraces

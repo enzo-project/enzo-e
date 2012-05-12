@@ -84,8 +84,6 @@ enum function_enum {
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "lcaperf.hpp"
-
 #include "performance_Timer.hpp"
 #include "performance_Counters.hpp"
 #include "performance_Papi.hpp"

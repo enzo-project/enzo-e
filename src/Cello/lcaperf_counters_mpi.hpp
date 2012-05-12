@@ -1,24 +1,22 @@
-// $Id: lcaperf_counters_mpi.hpp 2009 2011-02-22 19:43:07Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     lcaperf_CountersMpi.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-05-19
+/// @brief    [\ref Lcaperf] Declaration of the CountersMpi class
 
 #ifndef LCAPERF_COUNTERS_MPI_HPP
 #define LCAPERF_COUNTERS_MPI_HPP
 
 #ifdef CONFIG_USE_MPI
 
-/// @file     lcaperf_counters_mpi.hpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu May 19 18:24:37 PDT 2011
-/// @brief    [\ref lcaperf] Declaration of the CountersMpi class
-
-/// @enum
-/// @brief Indices of mpi counters
+namespace lca {
 
 class CountersMpi : public CountersUser {
 
   /// @class    CountersMpi
   /// @ingroup  lcaperf
-  /// @brief    [\ref lcaperf] Mpi counters
+  /// @brief    [\ref Lcaperf] Mpi counters
 
 public: // interface
 
@@ -172,6 +170,8 @@ private: // static attributes
   static long long mpi_call_time_;
 
 };
+
+}
 
 #endif /* CONFIG_USE_MPI */
 

@@ -1,13 +1,16 @@
-// $Id: attributes.cpp 2093 2011-03-12 01:17:05Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
 
-/// @file     attributes.cpp
+/// @file     lcaperf_Attributes.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-05-20
 /// @brief    Implemention of the Attributes class
 
-#include "performance.hpp"
+#include "lcaperf.hpp"
+
+//----------------------------------------------------------------------
+
 namespace lca {
+
 //----------------------------------------------------------------------
 
 Attributes::Attributes() throw ()
@@ -97,5 +100,7 @@ void Attributes::assign(std::string attribute, std::string value)
   value_[index_[attribute]] = value;    
 }
 
-//======================================================================
-}
+//----------------------------------------------------------------------
+
+} // namespace lca
+

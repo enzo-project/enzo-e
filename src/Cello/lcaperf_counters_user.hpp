@@ -1,22 +1,20 @@
-// $Id: lcaperf_counters_user_rel.hpp 2009 2011-02-22 19:43:07Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
 
-#ifndef LCAPERF_COUNTERS_USER_REL_HPP
-#define LCAPERF_COUNTERS_USER_REL_HPP
-
-/// @file     lcaperf_counters_user_rel.hpp
+/// @file     lcaperf_CountersUser.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu May 19 18:24:37 PDT 2011
-/// @brief    [\ref lcaperf] Declaration of the CountersUser class
+/// @date     2011-05-19
+/// @brief    [\ref Lcaperf] Declaration of the CountersUser class
 
-/// @enum
-/// @brief Indices of user counters
+#ifndef LCAPERF_COUNTERS_USER_HPP
+#define LCAPERF_COUNTERS_USER_HPP
+
+namespace lca {
 
 class CountersUser : public Counters {
 
   /// @class    CountersUser
   /// @ingroup  lcaperf
-  /// @brief    [\ref lcaperf] User counters
+  /// @brief    [\ref Lcaperf] User counters
 
 public: // interface
 
@@ -73,6 +71,8 @@ private: // attributes
   std::vector<long long> value_;
 
 };
+
+}
 
 #endif /* LCAPERF_COUNTERS_HPP */
 

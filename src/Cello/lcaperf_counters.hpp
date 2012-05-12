@@ -1,13 +1,16 @@
-// $Id: lcaperf_counters.hpp 2009 2011-02-22 19:43:07Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     lcaperf_Counters.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-05-19
+/// @brief    [\ref Lcaperf] Declaration of the Counters class
 
 #ifndef LCAPERF_COUNTERS_HPP
 #define LCAPERF_COUNTERS_HPP
 
-/// @file     lcaperf_counters.hpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu May 19 2011
-/// @brief    [\ref lcaperf] Declaration of the Counters abstract base class
+namespace lca {
+
+//----------------------------------------------------------------------
 
 enum counter_type {
   counter_type_unknown  = 0,
@@ -15,11 +18,13 @@ enum counter_type {
   counter_type_absolute = 2
 };
 
+//----------------------------------------------------------------------
+
 class Counters {
 
   /// @class    Counters
   /// @ingroup  lcaperf
-  /// @brief    [\ref lcaperf] Base class for various performance counters
+  /// @brief    [\ref Lcaperf] Base class for various performance counters
 
   friend class ItCounterKeys;
 
@@ -140,6 +145,8 @@ protected: // attributes
   /// Counters stack
   std::stack<long long *> counters_;
 };
+
+}
 
 #endif /* LCAPERF_COUNTERS_HPP */
 

@@ -36,23 +36,25 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
     // double upper[3] = {1,1,1};
     // enzo_block->field_block()->print (field_descr,"dump",lower,upper);
 
-  density_field = (enzo_float *)field_block->field_values(EnzoBlock::field_density);
+  int index = enzo_block->index(field_density);
+  density_field = (enzo_float *)field_block->field_values(index);
 
   if (EnzoBlock::GridRank >= 1) {
-    velocity_x_field = (enzo_float *)
-      field_block->field_values(EnzoBlock::field_velocity_x);
+    index = enzo_block->index(field_velocity_x);
+    velocity_x_field = (enzo_float *) field_block->field_values(index);
   }
 
   if (EnzoBlock::GridRank >= 2) {
-    velocity_y_field = (enzo_float *)
-      field_block->field_values(EnzoBlock::field_velocity_y);
+    index = enzo_block->index(field_velocity_y);
+    velocity_y_field = (enzo_float *) field_block->field_values(index);
   }
   if (EnzoBlock::GridRank >= 3){
-    velocity_z_field = (enzo_float *)
-      field_block->field_values(EnzoBlock::field_velocity_z);
+    index = enzo_block->index(field_velocity_z);
+    velocity_z_field = (enzo_float *) field_block->field_values(index);
   }
 
   enzo_float a = 1, dadt;
+  
   if (EnzoBlock::ComovingCoordinates)
     enzo_block->CosmologyComputeExpansionFactor(enzo_block->Time(), &a, &dadt);
   //  enzo_float dt, dtTemp;
@@ -68,7 +70,8 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
   int nx,ny,nz;
   field_block -> size (&nx,&ny,&nz);
   int gx,gy,gz;
-  field_descr->ghosts(EnzoBlock::field_density,&gx,&gy,&gz);
+  index = enzo_block->index(field_density);
+  field_descr->ghosts(index,&gx,&gy,&gz);
   int mx,my,mz;
   mx = nx + 2*gx;
   my = ny + 2*gx;

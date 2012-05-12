@@ -1,19 +1,21 @@
-// $Id: lcaperf_counters_deriv.hpp 2009 2011-02-22 19:43:07Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     lcaperf_CountersDeriv.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2012-05-23
+/// @brief    [\ref Lcaperf] Declaration of the CountersDeriv class
+///
 
 #ifndef LCAPERF_COUNTERS_DERIV_HPP
 #define LCAPERF_COUNTERS_DERIV_HPP
 
-/// @file     lcaperf_counters_deriv.hpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Mon May 23 11:12:54 PDT 2011
-/// @brief    [\ref lcaperf] Declaration of the CountersDeriv class
+namespace lca {
 
 class CountersDeriv : public CountersUser {
 
   /// @class    CountersDeriv
   /// @ingroup  lcaperf
-  /// @brief    [\ref lcaperf] Derived counters
+  /// @brief    [\ref Lcaperf] Derived counters
 
 public: // interface
 
@@ -32,6 +34,8 @@ public: // interface
 private: // attributes
 
 };
+
+}
 
 #endif /* LCAPERF_COUNTERS_DERIV_HPP */
 

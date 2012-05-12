@@ -31,18 +31,34 @@
       ghosts = 3;
 
       fields = [
-         "density", 
-           "velox", "veloy", "veloz",
-         "bfieldx", "bfieldy", "bfieldz",
-            "dens_rx",
-           "velox_rx",   "veloy_rx",    "veloz_rx",
-         "bfieldx_rx", "bfieldy_rx", "bfieldz_rx",
-            "dens_ry",
-           "velox_ry",   "veloy_ry",   "veloz_ry",
-         "bfieldx_ry", "bfieldy_ry", "bfieldz_ry",
-            "dens_rz",
-           "velox_rz",   "veloy_rz",   "veloz_rz",
-         "bfieldx_rz", "bfieldy_rz", "bfieldz_rz"
+         "density",
+	 "velox",
+         "veloy",
+         "veloz",
+         "bfieldx",
+	 "bfieldy",
+         "bfieldz",
+         "dens_rx",
+         "velox_rx",
+         "veloy_rx",
+         "veloz_rx",
+         "bfieldx_rx",
+         "bfieldy_rx",
+         "bfieldz_rx",
+         "dens_ry",
+         "velox_ry",
+         "veloy_ry",
+         "veloz_ry",
+         "bfieldx_ry",
+         "bfieldy_ry",
+         "bfieldz_ry",
+         "dens_rz",
+         "velox_rz",
+         "veloy_rz",
+         "veloz_rz",
+         "bfieldx_rz",
+         "bfieldy_rz",
+         "bfieldz_rz"
       ] ;
 
       # courant condition for fields

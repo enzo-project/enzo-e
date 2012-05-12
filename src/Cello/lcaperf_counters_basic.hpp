@@ -1,22 +1,21 @@
-// $Id: lcaperf_counters_basic.hpp 2009 2011-02-22 19:43:07Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     lcaperf_CountersBasic.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2012-05-19
+/// @brief    [\ref Lcaperf] Declaration of the CountersBasic class
+///
 
 #ifndef LCAPERF_COUNTERS_BASIC_HPP
 #define LCAPERF_COUNTERS_BASIC_HPP
 
-/// @file     lcaperf_counters_basic.hpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu May 19 18:24:37 PDT 2011
-/// @brief    [\ref lcaperf] Declaration of the CountersBasic class
-
-/// @enum
-/// @brief Indices of basic counters
+namespace lca {
 
 class CountersBasic : public Counters {
 
   /// @class    CountersBasic
   /// @ingroup  lcaperf
-  /// @brief    [\ref lcaperf] Basic counters
+  /// @brief    [\ref Lcaperf] Basic counters
 
 public: // interface
 
@@ -66,6 +65,8 @@ private: // functions
   };
 
 };
+
+}
 
 #endif /* LCAPERF_COUNTERS_BASIC_HPP */
 

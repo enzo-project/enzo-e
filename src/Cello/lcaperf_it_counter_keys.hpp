@@ -1,19 +1,20 @@
-// $Id: lcaperf_it_counter_keys.hpp 2009 2011-02-22 19:43:07Z bordner $
-// See LICENSE file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     lcaperf_ItCounterKeys.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-06-29
+/// @brief    [\ref Lcaperf] Declaration of the ItCounterKeys class
 
 #ifndef LCAPERF_IT_COUNTER_KEYS_HPP
 #define LCAPERF_IT_COUNTER_KEYS_HPP
 
-/// @file     lcaperf_it_counter_keys.hpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Wed Jun 29 18:31:41 PDT 2011
-/// @brief    [\ref lcaperf] Declaration of the ItCounterKeys class
+namespace lca {
 
 class ItCounterKeys {
 
   /// @class    ItCounterKeys
   /// @ingroup  lcaperf
-  /// @brief    [\ref lcaperf] Iterator over keys in a Counters object
+  /// @brief    [\ref Lcaperf] Iterator over keys in a Counters object
 
 public: // interface
 
@@ -43,5 +44,7 @@ private: // attributes
   /// Copy of counter value array for value()
   long long * value_;
 };
+
+}
 
 #endif
