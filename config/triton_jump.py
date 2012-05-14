@@ -19,6 +19,6 @@ libpath_fortran = '/home/jobordner/lib'
 libs_fortran    = ['imf','ifcore','ifport','stdc++','lmpe', 'mpe']
 
 
-charm_path = '/home/jobordner/public/charm/charm-intel'
+charm_path = '/home/jobordner/public/charm/charm'
 papi_path = ''
 hdf5_path = '/opt/hdf5/intel'

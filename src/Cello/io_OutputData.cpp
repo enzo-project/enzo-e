@@ -28,8 +28,8 @@ void OutputData::open () throw()
 {
   std::string file_name = expand_file_name_(&file_name_,&file_args_);
 
-  Monitor::instance()->print ("Output","writing data file %s", 
-			      file_name.c_str());
+  Monitor::instance()->print 
+    ("Output","writing data file %s", file_name.c_str());
 
   close();
 
@@ -43,141 +43,100 @@ void OutputData::open () throw()
 void OutputData::close () throw()
 {
   if (file_) file_->file_close();
-
   delete file_;  file_ = 0;
 }
 
 //----------------------------------------------------------------------
 
 bool OutputData::is_open () throw()
-{
-  return (file_ != 0);
-}
+{  return (file_ != 0); }
 
 //----------------------------------------------------------------------
 
 void OutputData::finalize () throw ()
-{
-  Output::finalize();
-}
+{  Output::finalize(); }
 
 //----------------------------------------------------------------------
 
-void OutputData::write_hierarchy 
+void OutputData::write
 (
  const Hierarchy  * hierarchy,
  const FieldDescr * field_descr
  ) throw()
 {
-
   IoHierarchy io_hierarchy(hierarchy);
 
-  // Write hierarchy meta-data
+  write_meta (&io_hierarchy);
 
-  Output::write_meta (&io_hierarchy);
-
-  // Call write_patch() on contained patches
-  Output::write_hierarchy (hierarchy, field_descr);
+  write_(hierarchy, field_descr);
 
 }
 
 //----------------------------------------------------------------------
 
-void OutputData::write_patch 
+void OutputData::write
 (
  const Patch * patch,
  const FieldDescr * field_descr,
  int ixp0, int iyp0, int izp0
  ) throw()
 {
-#ifdef CONFIG_USE_CHARM
-
-  //  patch = ((CProxy_Patch *)patch) -> ckLocal();
-
-#endif
   // Create file group for patch
 
-  char buffer[40];
-  int ib = patch->index();
-  sprintf (buffer,"patch_%d",ib);
-  file_->group_chdir(buffer);
+  file_->group_chdir("/"+patch->name());
   file_->group_create();
 
   // Read patch meta-data
 
   IoPatch io_patch(patch);
 
-  Output::write_meta_group (&io_patch);
+  write_meta_group (&io_patch);
 
   // Also write the patches parallel Layout
 
-  DEBUG0;
-#ifdef CONFIG_USE_CHARM
-  const Layout * layout = ((CProxy_Patch *)patch)->ckLocal()->layout();
-#else
   const Layout * layout = patch->layout();
-#endif
   IoLayout io_layout(layout);
 
-  Output::write_meta_group (&io_layout);
-  DEBUG0;
+  write_meta_group (&io_layout);
 
-  // Call write_block() on contained blocks
-  Output::write_patch(patch,field_descr,ixp0,iyp0,izp0);
-  DEBUG0;
-
-#ifndef CONFIG_USE_CHARM
-  end_write_patch();
-#endif
+  // Call write(block) on contained blocks
+  write_(patch,field_descr,ixp0,iyp0,izp0);
 
 }
 
 //----------------------------------------------------------------------
 
-void OutputData::end_write_patch() throw()
-{
-  DEBUG0;
-  file_->group_close();
-  file_->group_chdir("..");
-  DEBUG0;
-}
-//----------------------------------------------------------------------
-
-
-void OutputData::write_block 
+void OutputData::write
 ( 
   const Block * block,
   const FieldDescr * field_descr,
   int ixp0, int iyp0, int izp0) throw()
 {
 
-  DEBUG("OutputData::write_block");
   // Create file group for block
 
-  char buffer[40];
-  int ib = block->index();
-  sprintf (buffer,"block_%d",ib);
-  file_->group_chdir(buffer);
+  std::string group_name = "/" + block->patch_name() + "/" + block->name();
+  DEBUG1 ("block name = %s",group_name.c_str());
+  file_->group_chdir(group_name);
   file_->group_create();
 
   // Write block meta data
 
   io_block()->set_block(block);
 
-  Output::write_meta_group (io_block());
+  write_meta_group (io_block());
 
-  // Call write_block() on base Output object
+  // Call write(block) on base Output object
 
-  Output::write_block(block,field_descr,ixp0,iyp0,izp0);
+  write_(block,field_descr,ixp0,iyp0,izp0);
 
   file_->group_close();
-  file_->group_chdir("..");
 
 }
 
 //----------------------------------------------------------------------
 
-void OutputData::write_field
+void OutputData::write
 ( 
   const FieldBlock * field_block,
   const FieldDescr * field_descr,

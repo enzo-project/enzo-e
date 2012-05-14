@@ -61,7 +61,7 @@ public: // functions
   {
     process_stride_ = stride; 
 #ifdef CONFIG_USE_CHARM
-    counter_.set_value(process_stride_);
+    loop_.stop() = process_stride_;
 #endif
   };
 
@@ -81,10 +81,18 @@ public: // functions
   /// Return the updated timestep if time + dt goes past a scheduled output
   double update_timestep (double time, double dt) const throw ();
 
+  /// Write metadata to the file
+  void write_meta ( Io * io ) throw ()
+  { write_meta_ (meta_type_file, io); }
+
+  /// Write metadata to the current group in the file
+  void write_meta_group ( Io * io ) throw ()
+  { write_meta_ (meta_type_group, io); }
+
 #ifdef CONFIG_USE_CHARM
 
-  /// Accessor function for the CHARM Counter class
-  Counter * counter() { return & counter_; };
+  /// Accessor function for the CHARM Loop class
+  Loop * loop() { return & loop_; };
 
   /// Set the index of this output in its simulation
   void set_index_charm(int index_charm) { index_charm_ = index_charm; }
@@ -105,45 +113,34 @@ public: // virtual functions
 
   /// Finalize output
   virtual void finalize () throw ()
-  { count_output_ ++; }
+  { count_ ++; }
 
-  /// Write metadata to the file
-  void write_meta ( Io * io ) throw ()
-  { write_meta_ (meta_type_file, io); }
+  /// Write Simulation data to disk
+  virtual void write ( const Simulation * simulation ) throw()
+  { write_(simulation); }
 
-  /// Write metadata to the current group in the file
-  void write_meta_group ( Io * io ) throw ()
-  { write_meta_ (meta_type_group, io); }
-
-public:
-  /// Write an entire simulation to disk
-  virtual void write_simulation ( const Simulation * simulation ) throw();
-
-  /// Write local hierarchy data to disk
-  virtual void write_hierarchy
+  /// Write Hierarchy data to disk
+  virtual void write
   ( const Hierarchy * hierarchy, 
-    const FieldDescr * field_descr  ) throw();
+    const FieldDescr * field_descr  ) throw()
+  { write_(hierarchy,field_descr); }
 
   /// Write local patch data to disk
-  virtual void write_patch
+  virtual void write
   ( const Patch * patch, 
     const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
-
-#ifdef CONFIG_USE_CHARM
-  /// Cleanup after writing blocks in a patch
-  virtual void end_write_patch () throw()
-  { }
-#endif
+    int ixp0=0, int iyp0=0, int izp0=0) throw()
+  { write_(patch,field_descr,ixp0,iyp0,izp0); }
 
   /// Write local block data to disk
-  virtual void write_block
+  virtual void write
   ( const Block * block, 
     const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
+    int ixp0=0, int iyp0=0, int izp0=0) throw()
+  { write_(block,field_descr,ixp0,iyp0,izp0); }
 
   /// Write local field to disk
-  virtual void write_field
+  virtual void write
   ( const FieldBlock * field_block, 
     const FieldDescr * field_descr,
     int field_index) throw() = 0;
@@ -161,6 +158,27 @@ public:
   {};
 
 protected:
+
+  /// "Loop" over writing the Hierarchy in the Simulation
+  void write_ (const Simulation * simulation ) throw();
+
+  /// Loop over writing Patches in the Hierarchy
+  void write_
+  ( const Hierarchy * hierarchy, 
+    const FieldDescr * field_descr  ) throw();
+
+  /// Loop over writing Blocks in the Patch
+  void write_
+  ( const Patch * patch, 
+    const FieldDescr * field_descr,  
+    int ixp0=0, int iyp0=0, int izp0=0) throw();
+
+  /// Loop over writing Field data in the Block
+  void write_
+  ( const Block * block, 
+    const FieldDescr * field_descr,  
+    int ixp0=0, int iyp0=0, int izp0=0) throw();
+
   /// Return the filename for the file format and given arguments
   std::string expand_file_name_
   (const std::string * file_name,
@@ -185,8 +203,8 @@ protected: // attributes
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Counter for ending output
-  Counter counter_;
+  /// Loop for ending output
+  Loop loop_;
 
   /// Index of this Output object in Simulation
   size_t index_charm_;
@@ -196,8 +214,8 @@ protected: // attributes
   /// Simulation cycle for next IO
   int cycle_;
 
-  /// Output counter
-  int count_output_;
+  /// Count of number of times this Output object performed output
+  int count_;
 
   /// Simulation time for next IO
   double time_;

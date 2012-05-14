@@ -36,12 +36,13 @@ public: // interface
       ERROR("Stopping::complete",
 	    "Neither Stopping::time_stop nor Stopping::cycle_stop initialized");
     }
-    DEBUG4 ("cycle %d %d   time %g %g\n",
-	    curr_cycle,stop_cycle_,curr_time,stop_time_);
+    bool stop = ( ! ((stop_time_  == -1.0 || curr_time  < stop_time_ ) &&
+		     (stop_cycle_ == -1   || curr_cycle < stop_cycle_)));
+    DEBUG5 ("cycle %d %d   time %g %g  stop %d\n",
+	    curr_cycle,stop_cycle_,curr_time,stop_time_,stop);
 
-    return 
-      ( ! ((stop_time_  == -1.0 || curr_time  < stop_time_ ) &&
-	   (stop_cycle_ == -1   || curr_cycle < stop_cycle_)));
+    
+    return stop;
   }
 
   /// Return stopping cycle

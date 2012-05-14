@@ -23,6 +23,9 @@ PARALLEL_MAIN_BEGIN
   CProxy_Patch proxy_patch;
 #endif
   Factory factory;
+  int patch_id = 0;
+  int patch_rank = 0;
+  
   Block * block = factory.create_block
     (0,0,0, 
      1,1,1,
@@ -32,6 +35,8 @@ PARALLEL_MAIN_BEGIN
 #ifdef CONFIG_USE_CHARM
      proxy_patch,
 #endif
+     patch_id,
+     patch_rank,
      1);
 
   unit_func("Block");

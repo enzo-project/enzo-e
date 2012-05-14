@@ -35,6 +35,21 @@
 
 //----------------------------------------------------------------------
 
+enum bc_enum 
+  { // explicitly enumerated to match what Enzo expects
+    bc_unknown    = 0, 
+    bc_reflecting = 1, 
+    bc_outflow    = 2, 
+    bc_inflow     = 3, 
+    bc_periodic   = 4 
+  };
+
+//----------------------------------------------------------------------
+
+  const int field_undefined = -1;
+
+//----------------------------------------------------------------------
+
 struct fluxes
 {
   long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
@@ -59,11 +74,8 @@ struct fluxes
 
 #include "fortran.h" /* included so scons knowns to install fortran.h */
 
-#include "enzo_EnzoNamespace.hpp"
-
 #include "enzo_EnzoFactory.hpp"
 
-#include "enzo_EnzoSimulation.hpp"
 #include "enzo_EnzoSimulationMpi.hpp"
 #include "enzo_EnzoSimulationCharm.hpp"
 

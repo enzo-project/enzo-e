@@ -13,6 +13,8 @@ IoPatch::IoPatch(const Patch * patch) throw ()
   : Io(6,0),
     patch_(patch)
 {
+  DEBUG1("IoPatch(%p)\n",patch);
+
   meta_name_.push_back("id");
   meta_name_.push_back("size");
   meta_name_.push_back("offset");
@@ -34,37 +36,37 @@ void IoPatch::meta_value
  void ** buffer, std::string * name, enum scalar_type * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
+  DEBUG0;
   Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
-
-#ifdef CONFIG_USE_CHARM
-  Patch * patch = ((CProxy_Patch *)patch_)->ckLocal();
-#else
-  Patch * patch = patch_;
-#endif
+  DEBUG0;
 
   int count = 0;
 
+  DEBUG0;
+  DEBUG1 ("patch = %p",patch_);
+  DEBUG3 ("patch size = %d %d %d",patch_->size_[0],patch_->size_[1],patch_->size_[2]);
+  
   if (index == count++) {
-    *buffer = (void *) &patch->id_;
+    *buffer = (void *) &patch_->id_;
     *type   = scalar_type_int;
   } else  if (index == count++) {
-    *buffer = (void *) patch->size_;
+    *buffer = (void *) patch_->size_;
     *type   = scalar_type_int;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) patch->offset_;
+    *buffer = (void *) patch_->offset_;
     *type   = scalar_type_int;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) patch->blocking_;
+    *buffer = (void *) patch_->blocking_;
     *type   = scalar_type_int;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) patch->lower_;
+    *buffer = (void *) patch_->lower_;
     *type   = scalar_type_double;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) patch->upper_;
+    *buffer = (void *) patch_->upper_;
     *type   = scalar_type_double;
     *nxd     = 3;
   }

@@ -39,6 +39,8 @@ void Unit::init (int rank , int size )
 {
   is_active_ = (rank == 0);
 
+  timer_.start();
+
   comm_rank_ = rank;
   comm_size_ = size;
 
@@ -52,8 +54,9 @@ void Unit::init (int rank , int size )
 
 void Unit::finalize ()
 {
+  timer_.stop();
   if (is_active_)  {
-    PARALLEL_PRINTF ("UNIT TEST END\n");
+    PARALLEL_PRINTF ("UNIT TEST END %f\n",timer_.value());
     fflush(stdout);
   }
 }

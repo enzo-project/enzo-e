@@ -10,18 +10,18 @@
 //----------------------------------------------------------------------
 
 #define CHARM_ENZO
-#include "main.hpp"
 
 #include "test.hpp"
 
 #include "enzo.hpp"
+#include "main.hpp"
 
-#include "enzo_charm.hpp"
+#include "charm_enzo.hpp"
 
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
-extern CProxy_Simulation proxy_simulation;
+extern CProxy_SimulationCharm proxy_simulation;
 #endif
 
 #ifndef CONFIG_USE_CHARM

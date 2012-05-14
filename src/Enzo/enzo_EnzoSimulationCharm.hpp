@@ -11,7 +11,7 @@
 
 #ifdef CONFIG_USE_CHARM
 
-class EnzoSimulationCharm : public EnzoSimulation
+class EnzoSimulationCharm : public SimulationCharm
 			    
 {
 
@@ -27,6 +27,12 @@ public: // functions
 
   /// Destructor
   ~EnzoSimulationCharm() throw();
+
+  /// Initialize the Enzo Simulation
+  virtual void initialize() throw();
+
+  /// Return an EnzoFactory object, creating it if needed
+  virtual const Factory * factory() const throw();
 
   /// Run the simulation
   virtual void run() throw();

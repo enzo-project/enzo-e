@@ -19,7 +19,7 @@ EnzoTimestepPpml::EnzoTimestepPpml () throw()
 
 //----------------------------------------------------------------------
 
-double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
+double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
 				   Block * block ) throw()
 {
  
@@ -46,14 +46,14 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
      set it to one. */
  
   enzo_float a = 1, dadt;
-  if (enzo::ComovingCoordinates)
+  if (EnzoBlock::ComovingCoordinates)
     enzo_block->CosmologyComputeExpansionFactor
       (enzo_block->Time(), &a, &dadt);
   //  float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */
  
-  if (NumberOfBaryonFields > 0) {
+  if (EnzoBlock::NumberOfBaryonFields > 0) {
  
     /* Find fields: density, total energy, velocity1-3. */
  
@@ -92,13 +92,13 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
     enzo_float * by_field = 0;
     enzo_float * bz_field = 0;
 
-    d_field = (enzo_float *)field_block->field_values(enzo::field_density);
-    vx_field = (enzo_float *)field_block->field_values(enzo::field_velox);
-    vy_field = (enzo_float *)field_block->field_values(enzo::field_veloy);
-    vz_field = (enzo_float *)field_block->field_values(enzo::field_veloz);
-    bx_field = (enzo_float *)field_block->field_values(enzo::field_bfieldx);
-    by_field = (enzo_float *)field_block->field_values(enzo::field_bfieldy);
-    bz_field = (enzo_float *)field_block->field_values(enzo::field_bfieldz);
+    d_field = (enzo_float *)field_block->field_values(enzo_block->index(field_density));
+    vx_field = (enzo_float *)field_block->field_values(enzo_block->index(field_velox));
+    vy_field = (enzo_float *)field_block->field_values(enzo_block->index(field_veloy));
+    vz_field = (enzo_float *)field_block->field_values(enzo_block->index(field_veloz));
+    bx_field = (enzo_float *)field_block->field_values(enzo_block->index(field_bfieldx));
+    by_field = (enzo_float *)field_block->field_values(enzo_block->index(field_bfieldy));
+    bz_field = (enzo_float *)field_block->field_values(enzo_block->index(field_bfieldz));
 
 
     // DEBUG
@@ -145,7 +145,7 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
  
     /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
  
-    dtBaryons *= CourantSafetyNumber;
+    dtBaryons *= EnzoBlock::CourantSafetyNumber;
     
   }
  
@@ -171,7 +171,7 @@ double EnzoTimestepPpml::compute ( const FieldDescr * field_descr,
  
   /* 3) Find dt from expansion. */
  
-  // if (enzo::ComovingCoordinates)
+  // if (EnzoBlock::ComovingCoordinates)
   //   if (enzo_block->CosmologyComputeExpansionTimestep
   // 	(enzo_block->Time(), &dtExpansion) == ENZO_FAIL) {
   //     fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");

@@ -103,7 +103,7 @@
       data {
         field_list = ["density"];
 	type     = "data";
-	schedule = ["cycle","interval", 10];
+	schedule = ["cycle","interval", 100];
       };
 
    }

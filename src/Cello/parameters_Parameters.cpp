@@ -270,7 +270,7 @@ double Parameters::value_float
   Param * param = parameter_(parameter);
 
   ASSERT1 ("Parameters::value_float",
-	   "Parameter %s is not an float", parameter.c_str(),
+	   "Parameter %s is not a float", parameter.c_str(),
 	   ( ! param || param->is_float()));
 
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
@@ -315,7 +315,7 @@ bool Parameters::value_logical
   Param * param = parameter_(parameter);
 
   ASSERT1 ("Parameters::value_logical",
-	   "Parameter %s is not an logical", parameter.c_str(),
+	   "Parameter %s is not a logical", parameter.c_str(),
 	   ( ! param || param->is_logical()));
 
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
@@ -376,8 +376,8 @@ void Parameters::set_string
 {
   Param * param = parameter_(parameter);
 
-  ASSERT1 ("Parameters::set_string_integer",
-	   "Parameter %s is not an integer", parameter.c_str(),
+  ASSERT1 ("Parameters::set_string_string",
+	   "Parameter %s is not a string", parameter.c_str(),
 	   ( ! param || param->is_string()));
 
   if ( ! param ) {
@@ -529,7 +529,7 @@ bool Parameters::list_value_logical
 {
   Param * param = list_element_(parameter,index);
   ASSERT2 ("Parameters::list_value_logical",
-	   "Parameter %s[%d] is not logical", 
+	   "Parameter %s[%d] is not a logical", 
 	   parameter.c_str(),index,
 	   ( ! param || param->is_logical()));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
@@ -731,7 +731,7 @@ void Parameters::list_evaluate_logical
 {
   Param * param = list_element_(parameter,index);
   ASSERT2 ("Parameters::list_evaluate_logical",
-	   "Parameter %s[%d] is not logical",
+	   "Parameter %s[%d] is not a logical",
 	   parameter.c_str(),index,
 	   ( ! param || param->is_logical_expr()));
   if (param != NULL) {

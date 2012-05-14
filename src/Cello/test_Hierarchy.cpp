@@ -9,7 +9,7 @@
 #include "test.hpp"
 #include "mesh.hpp"
 
-#include "mesh_charm.hpp"
+#include "charm_mesh.hpp"
 
 PARALLEL_MAIN_BEGIN
 {

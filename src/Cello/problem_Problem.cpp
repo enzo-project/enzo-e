@@ -136,7 +136,7 @@ void Problem::initialize_output
 
     std::string type = parameters->value_string("type","unknown");
 
-    // Error if Output::type is not defined
+    // Error if Output:type is not defined
     if (type == "unknown") {
       ERROR1("Problem::initialize_output",
 	     "Output:%s:type parameter is undefined",
@@ -727,10 +727,13 @@ Initial * Problem::create_initial_
   int    init_cycle  = parameters->value_integer ("Initial:cycle",0);
   double init_time   = parameters->value_float   ("Initial:time",0.0);
 
+  DEBUG1 ("create_initial(%s)",type.c_str());
 
   if (type == "file" || type == "restart") {
+    DEBUG ("Creating InitialFile");
     return new InitialFile(parameters,group_process,init_cycle,init_time);;
   } else if (type == "default") {
+    DEBUG ("Creating InitialDefault");
     return new InitialDefault(parameters,init_cycle,init_time);
   }
   return NULL;

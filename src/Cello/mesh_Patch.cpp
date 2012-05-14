@@ -13,7 +13,7 @@
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
-extern CProxy_Simulation  proxy_simulation;
+extern CProxy_SimulationCharm  proxy_simulation;
 #endif
 
 //----------------------------------------------------------------------
@@ -34,20 +34,21 @@ Patch::Patch
  int process_first, int process_last_plus
 ) throw()
   :
+  id_(id),
 #ifdef CONFIG_USE_CHARM
   block_array_(0),
   block_exists_(false),
-  block_counter_(0),
+  block_loop_(0),
 #else
   factory_(factory),
 #endif
-  id_(id),
   group_process_(GroupProcess::create(process_first,process_last_plus)),
   layout_ (nbx,nby,nbz)
 {
 
  // Check 
   DEBUG2("zp = %f ID = %d",zp,id_);
+  DEBUG2("Patch() %p id = %d",this,this->id());
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
 	     
     ERROR6("Patch::Patch", 
@@ -107,13 +108,7 @@ Patch::~Patch() throw()
 
 void Patch::s_block(CkCallback callback)
 {
-  TRACE1("Patch::s_block(%d)",block_counter_.count_curr());
-
-  if (block_counter_.remaining() == 0) {
-
-    callback.send();
-
-  }
+  if (block_loop_.done()) callback.send();
 }
 
 #endif
@@ -174,13 +169,6 @@ void Patch::upper(double * xp, double * yp, double * zp) const throw ()
   if (xp) (*xp) = upper_[0];
   if (yp) (*yp) = upper_[1];
   if (zp) (*zp) = upper_[2];
-}
-
-//----------------------------------------------------------------------
-int Patch::index() const throw ()
-{
-  // ASSUMES ROOT PATCH
-  return 0;
 }
 
 //----------------------------------------------------------------------
@@ -321,7 +309,7 @@ void Patch::allocate_array_
      allocate_blocks);
     
   block_exists_ = allocate_blocks;
-  block_counter_.set_value(nbx*nby*nbz);
+  block_loop_.stop() = nbx*nby*nbz;
 
 
 #else
@@ -362,21 +350,18 @@ void Patch::allocate_array_
 //----------------------------------------------------------------------
 #include "test.hpp"
  
-// Set Patch size, offset, and blocking
-
-static const int patch_size[] = {12,12,12};
-
-static const int patch_offset[] = {5, 2, 9};
-
-static const int patch_blocking[] = {3,3,3};
-
-// Set domain extents
-
-static const double domain_lower[] = {0.0, 0.0, 0.0};
-static const double domain_upper[] = {1.0, 1.0, 1.0};
-
 void Patch::p_test () throw()
 {
+  // Set Patch size, offset, and blocking
+
+  const int patch_size[]     = {12,12,12};
+  const int patch_offset[]   = {5, 2, 9};
+  const int patch_blocking[] = {3,3,3};
+
+  // Set domain extents
+
+  const double domain_lower[] = {0.0, 0.0, 0.0};
+  const double domain_upper[] = {1.0, 1.0, 1.0};
 
 #ifdef CONFIG_USE_CHARM
   Patch * patch = thisProxy.ckLocal();
@@ -470,7 +455,7 @@ void Patch::p_test () throw()
   Block *  block = 0;
   FieldBlock * field_block = 0;
 
-  size_t block_counter = 0;
+  size_t block_index = 0;
 
   const GroupProcess * group_process = GroupProcess::create();
 
@@ -509,7 +494,7 @@ void Patch::p_test () throw()
 
       int ip = group_process->rank();
 
-      int index_local = block_counter;
+      int index_local = block_index;
       int index_global = layout->global_index(ip,index_local);
 
       //--------------------------------------------------
@@ -552,7 +537,7 @@ void Patch::p_test () throw()
 
     //--------------------------------------------------
 
-    ++block_counter;
+    ++block_index;
 
   }
 
@@ -580,7 +565,7 @@ void Patch::p_test () throw()
 
 #ifndef CONFIG_USE_CHARM
   unit_func("num_local_blocks");
-  unit_assert(block_counter == patch->num_local_blocks());
+  unit_assert(block_index == patch->num_local_blocks());
 #endif
 
   

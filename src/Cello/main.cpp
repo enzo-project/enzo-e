@@ -20,7 +20,7 @@ CProxy_Main proxy_main;
 
 #ifdef CHARM_ENZO
 #include "simulation.hpp"
-extern CProxy_Simulation proxy_simulation;
+extern CProxy_SimulationCharm proxy_simulation;
 #include "enzo_finalize.hpp"
 #endif
 
@@ -28,6 +28,7 @@ extern CProxy_Simulation proxy_simulation;
 
 void Main::p_exit(int count)
 {
+  DEBUG("Main::p_exit");
   count_exit_++;
   if (count_exit_ >= count) {
     count_exit_ = 0;

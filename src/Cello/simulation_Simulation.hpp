@@ -4,7 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-10 16:14:57
 /// @brief    Interface file for the Simulation class
-/// @note     2010-12-17: code-wiki interface review
 
 #ifndef SIMULATION_SIMULATION_HPP
 #define SIMULATION_SIMULATION_HPP
@@ -65,49 +64,6 @@ public: // interface
 
   //==================================================
 
-#ifdef CONFIG_USE_CHARM
-
-  /// Wait for all local patches to be created before calling run
-  void s_initialize();
-
-  // Call initialization on Problem list of Initial objects
-  void p_initial ();
-
-  // Call output on Problem list of Output objects
-  void p_output ();
-
-  // Write patches for indexed Output object
-  void p_write (int index);
-
-  /// Reduce output, using p_output_write to send data to writing processes
-  void s_write();
-
-  /// Receive data from non-writing process, write to disk, close, and
-  /// proceed with next output
-  void p_output_write (int n, char * buffer);
-
-  /// Wait for all local patches to check in before proceeding
-  void s_patch(CkCallback function);
-
-  /// Wait for all local patches to check in before proceeding to refresh
-  void s_initial();
-
-  /// Refresh ghost zones
-  void c_refresh();
-
-  // Monitor output
-  void c_monitor ();
-
-  // Stopping criteria and computation
-  void c_compute ();
-
-#else
-
-  /// Perform scheduled output for this cycle_ and time_
-  void scheduled_output();
-
-#endif
-
   /// Destructor
   virtual ~Simulation() throw();
 
@@ -118,10 +74,6 @@ public: // interface
   /// Return the Problem container object
   Problem *  problem() const throw()
   { return problem_; }
-
-  // /// Return the dimensionality of the Simulation
-  // int dimension() const throw()
-  // { return dimension_; }
 
   /// Return the Hierarchy
   Hierarchy * hierarchy() const throw()
@@ -138,6 +90,10 @@ public: // interface
   /// Return the performance object associated with each cycle
   Performance * performance_cycle() const throw()
   { return performance_cycle_; }
+
+  /// Return a pointer to the lcaperf object
+  lca::LcaPerf * lcaperf()
+  { return lcaperf_; }
 
   /// Return the performance object associated with the entire simulation
   Performance * performance_simulation() const throw()
@@ -173,13 +129,6 @@ public: // interface
   /// Output Performance information
   void performance_output(Performance * performance);
 
-#ifdef CONFIG_USE_CHARM
-  /// Reduction callback functions for performance_output()
-  void p_perf_output_min(CkReductionMsg * msg);
-  void p_perf_output_max(CkReductionMsg * msg);
-  void p_perf_output_sum(CkReductionMsg * msg);
-#endif
-
 public: // virtual functions
 
   /// Update Simulation cycle, time, timestep, and stopping criteria
@@ -205,6 +154,9 @@ protected: // functions
 
   /// Initialize global simulation parameters
   void initialize_simulation_ () throw();
+
+  /// Initialize output Monitor object
+  void initialize_monitor_ () throw();
 
   /// Initialize the hierarchy object
   void initialize_hierarchy_ () throw();
@@ -241,8 +193,8 @@ protected: // attributes
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Counter for s_patch() synchronization
-  Counter patch_counter_;
+  /// Loop counter for s_patch() synchronization
+  Loop patch_loop_;
 
 #endif
 
@@ -273,6 +225,9 @@ protected: // attributes
 
   /// Cycle Performance object
   Performance * performance_cycle_;
+
+  /// Lcaperf
+  lca::LcaPerf * lcaperf_;
 
   /// Current Performance object
   /// Used primarily for CHARM++ 

@@ -102,15 +102,13 @@ Patch * InputData::read_patch
   //      0,0,0,
   //      0,0,0,
   //      0,0,0,
-  //      0,0,0);
+  //      0,0,0,
+  //      0);
   // }
 
   // Change to file group for patch
 
-  char buffer[40];
-  int ib = patch->index();
-  sprintf (buffer,"patch_%d",ib);
-  file_->group_chdir(buffer);
+  file_->group_chdir("/"+patch->name());
   file_->group_open();
 
   // Read patch meta-data

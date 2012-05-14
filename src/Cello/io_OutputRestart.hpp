@@ -31,11 +31,8 @@ public: // virtual functions
   /// Finalize output
   virtual void finalize () throw ();
 
-  /// Write an entire simulation to disk
-  virtual void write_simulation
-  ( 
-   const Simulation * simulation
-    ) throw();
+  /// Write Simulation data to disk
+  virtual void write ( const Simulation * simulation ) throw();
 
 private:
 

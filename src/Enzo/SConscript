@@ -14,17 +14,23 @@ Import('lib_path')
 # DEPENDENCIES
 #------------------------------
 
-components = ['enzo','simulation', 'problem',
+components = []
+
+if (type == "charm"):
+	components.append(['charm'])
+
+components.append(['enzo','simulation', 'problem',
 	      'mesh', 'field',
 	      'io', 'disk','memory','parallel',
 	      'parameters', 
-	      'error', 'monitor', 'performance', 
-	      'test','cello','external']
+	      'error', 'monitor', 'performance', 'lcaperf',
+	      'test','cello','external'])
 
 if (use_papi):
-	components = components + ['papi','pfm']
+	components.append(['papi','pfm'])
 
-components = components + ['hdf5']
+
+components.append(['hdf5'])
 
 libraries  = ['png','$FORTRANLIBS']
 
@@ -72,8 +78,8 @@ sources  = [Glob('enzo_*cpp'),
 
 
 charm_main = []
-if (type == 'charm'):
-   includes = includes + ['enzo.decl.h','enzo.def.h']
+if (type == "charm"):
+   includes.append(['enzo.decl.h','enzo.def.h'])
    charm_main = ['../Cello/main_enzo.cpp']
 
 #------------------------------
@@ -101,6 +107,8 @@ if (type == "charm"):
 #------------------------------
 
 env.Alias('install-bin',env.Install (bin_path,binaries))
+env.Alias('install-bin',env.Install ('#/bin/',binaries))
+
 env.Alias('install-inc',env.Install (inc_path,includes))
 env.Alias('install-lib',env.Install (lib_path,libraries))
 

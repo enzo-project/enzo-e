@@ -19,6 +19,12 @@ Monitor::Monitor()
     ip_(0)
 { 
   timer_->start();
+
+  // Default: always output
+  group_default_ = true;
+
+  // turn off debugging
+  group_active_["DEBUG"] = false;
 }
 
 //----------------------------------------------------------------------
@@ -49,6 +55,8 @@ void Monitor::header () const
   print ("","  Laboratory for Computational Astrophysics");
   print ("","        San Diego Supercomputer Center");
   print ("","     University of California, San Diego");
+  print ("","");  
+  print ("","See 'LICENSE_CELLO' for software license information");
   print ("","");  
 
   // Get date text
@@ -127,6 +135,20 @@ void Monitor::header () const
 
 //----------------------------------------------------------------------
 
+bool Monitor::is_active(const char * component) const throw ()
+{
+  if (! active_) return false;
+  
+  std::map<std::string,bool>::const_iterator it_active
+    = group_active_.find(component);
+
+  bool in_list = it_active != group_active_.end();
+
+  return in_list ? it_active->second : group_default_;
+}
+
+//----------------------------------------------------------------------
+
 void Monitor::write 
 (
  FILE * fp,
@@ -135,7 +157,8 @@ void Monitor::write
   ...
  ) const
 {
-  if (active_) {
+
+  if (is_active(component)) {
 
     va_list fargs;
 
@@ -207,7 +230,7 @@ void Monitor::write_verbatim
  const char * message
  ) const
 {
-  if (active_) {
+  if (is_active(component)) {
 
     // Get parallel process text
 
@@ -249,7 +272,7 @@ void Monitor::write_verbatim
 
 void Monitor::print (const char * component, const char * message, ...) const
 {
-  if (active_) {
+  if (is_active(component)) {
 
     va_list fargs;
 
@@ -269,7 +292,5 @@ void Monitor::print (const char * component, const char * message, ...) const
 
 void Monitor::print_verbatim (const char * component, const char * message) const
 {
-  if (active_) {
-    write_verbatim (stdout, component, message);
-  }
+  write_verbatim (stdout, component, message);
 }

@@ -9,7 +9,7 @@
 
 #include "mesh.hpp"
 
-#include "mesh_charm.hpp"
+#include "charm_mesh.hpp"
 
 //----------------------------------------------------------------------
 

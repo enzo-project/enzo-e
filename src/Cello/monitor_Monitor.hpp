@@ -66,6 +66,13 @@ public: // interface
   /// Return whether monitoring is active
   bool is_active() const throw () { return active_; };
 
+  /// Set whether to monitor for the given component
+  void set_active(const char * component, bool active) 
+  { group_active_[component] = active; };
+
+  /// Return whether monitoring is active for this component
+  bool is_active(const char *) const throw ();
+
   /// Print the Cello header 
   void header () const;
 
@@ -85,7 +92,6 @@ public: // interface
 
 private: // functions
 
-
   //----------------------------------------------------------------------
 
 private: // attributes
@@ -98,6 +104,13 @@ private: // attributes
 
   /// Owning processor's rank
   int ip_;
+
+  /// Whether default is to output all groups or output no groups
+  bool group_default_;
+
+  /// Override default of group_active_ for specific groups
+  std::map<std::string,bool> group_active_;
+
 
   //----------------------------------------------------------------------
 

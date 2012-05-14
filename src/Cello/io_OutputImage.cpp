@@ -16,6 +16,7 @@ OutputImage::OutputImage(const Factory * factory,
 			 int nrows, int ncols) throw ()
   : Output(factory),
     data_(),
+    op_reduce_(reduce_sum),
     axis_(axis_z),
     nrows_(nrows),
     ncols_(ncols),
@@ -106,10 +107,9 @@ void OutputImage::finalize () throw()
   Output::finalize();
 }
 
-
 //----------------------------------------------------------------------
 
-void OutputImage::write_patch
+void OutputImage::write
 (
  const Patch * patch,
  const FieldDescr * field_descr,
@@ -124,14 +124,14 @@ void OutputImage::write_patch
 // @param izp0  offset of the patch relative to the parent patch along z-axis
 {
 
-  /// Call write_patch() on parent Output class
-  Output::write_patch(patch,field_descr,ixp0,iyp0,izp0);
+  /// Call write(patch) on parent Output class
+  write_(patch,field_descr,ixp0,iyp0,izp0);
 
 }
 
 //----------------------------------------------------------------------
 
-void OutputImage::write_block
+void OutputImage::write
 (
  const Block * block,
  const FieldDescr * field_descr,
@@ -148,15 +148,15 @@ void OutputImage::write_block
 
   const FieldBlock * field_block = block->field_block();
   
-  int nxb,nyb,nzb;
-  field_block->size(&nxb,&nyb,&nzb);
+  int nbx,nby,nbz;
+  field_block->size(&nbx,&nby,&nbz);
 
   int ix,iy,iz;
   block->index_patch(&ix,&iy,&iz);
 
-  int ixb0 = ixp0 + ix*nxb;
-  int iyb0 = iyp0 + iy*nyb;
-  int izb0 = izp0 + iz*nzb;
+  int ixb0 = ixp0 + ix*nbx;
+  int iyb0 = iyp0 + iy*nby;
+  int izb0 = izp0 + iz*nbz;
 
   // Index of (single) field to write
 
@@ -172,9 +172,9 @@ void OutputImage::write_block
   // Get array dimensions
 
   int ndx,ndy,ndz;
-  ndx = nxb + 2*gx;
-  ndy = nyb + 2*gy;
-  ndz = nzb + 2*gz;
+  ndx = nbx + 2*gx;
+  ndy = nby + 2*gy;
+  ndz = nbz + 2*gz;
 
   // Add block contribution to image
 
@@ -186,23 +186,21 @@ void OutputImage::write_block
 
     image_reduce_ (((float *) field_unknowns),
 		   ndx,ndy,ndz, 
-		   nxb,nyb,nzb,
-		   ixb0,iyb0,izb0,
-		   axis_, reduce_sum);
+		   nbx,nby,nbz,
+		   ixb0,iyb0,izb0);
     break;
 
   case precision_double:
 
     image_reduce_ (((double *) field_unknowns),
 		   ndx,ndy,ndz, 
-		   nxb,nyb,nzb,
-		   ixb0,iyb0,izb0,
-		   axis_, reduce_sum);
+		   nbx,nby,nbz,
+		   ixb0,iyb0,izb0);
     break;
 
   default:
 
-    WARNING1 ("OutputImage::write_block",
+    WARNING1 ("OutputImage::write(block)",
 	     "Unsupported Field precision %d",
 	      field_descr->precision(index));
     break;
@@ -213,13 +211,13 @@ void OutputImage::write_block
 
 //----------------------------------------------------------------------
 
-void OutputImage::write_field
+void OutputImage::write
 (
  const FieldBlock * Fieldblock,  
  const FieldDescr * field_descr,
  int field_index) throw()
 {
-  WARNING("OutputImage::write_field()",
+  WARNING("OutputImage::write(field)",
 	  "This function should not be called");
 }
 
@@ -227,6 +225,7 @@ void OutputImage::write_field
 
 void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 {
+  DEBUG("prepare_remote");
 
   int size = 0;
   int nx = nrows_;
@@ -260,6 +259,7 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 
 void OutputImage::update_remote  ( int n, char * buffer) throw()
 {
+  DEBUG("update_remote");
 
   union {
     char   * c;
@@ -280,6 +280,7 @@ void OutputImage::update_remote  ( int n, char * buffer) throw()
 
 void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 {
+  DEBUG("cleanup_remote");
   delete [] (*buffer);
   (*buffer) = NULL;
 }
@@ -311,6 +312,7 @@ void OutputImage::png_close_ () throw()
 
 void OutputImage::image_create_ () throw()
 {
+  DEBUG("image_create_");
 
   ASSERT("OutputImage::image_create_",
 	 "image_ already created",
@@ -318,7 +320,27 @@ void OutputImage::image_create_ () throw()
 
   data_ = new double [nrows_*ncols_];
 
-  for (int i=0; i<nrows_*ncols_; i++) data_[i] = 0.0;
+  const double min = std::numeric_limits<double>::max();
+  const double max = std::numeric_limits<double>::min();
+
+  double value0;
+
+  switch (op_reduce_) {
+  case reduce_min: 
+    value0 = max;
+    break;
+  case reduce_max: 
+    value0 = min;
+    break;
+  case reduce_avg: 
+  case reduce_sum: 
+  default:         
+    value0 = 0; 
+    break;
+  }
+
+  for (int i=0; i<nrows_*ncols_; i++) data_[i] = value0;
+
 }
 
 //----------------------------------------------------------------------
@@ -326,6 +348,7 @@ void OutputImage::image_create_ () throw()
 void OutputImage::image_write_ (double min, double max) throw()
 {
 
+  DEBUG("image_write");
   // error check min <= max
 
   ASSERT2("OutputImage::image_write_",
@@ -416,15 +439,13 @@ void OutputImage::image_close_ () throw()
 template<class T>
 void OutputImage::image_reduce_
 (T * array, 
- int nxd, int nyd, int nzd,
+ int ndx, int ndy, int ndz,
  int nx,  int ny,  int nz,
- int nx0, int ny0, int nz0,
- axis_enum   axis, 
- reduce_enum op_reduce) throw()
+ int nx0, int ny0, int nz0) throw()
 {
   // Array multipliers
 
-  int nd3[3] = {1, nxd, nxd*nyd}; 
+  int nd3[3] = {1, ndx, ndx*ndy}; 
 
   // Array size
 
@@ -433,14 +454,14 @@ void OutputImage::image_reduce_
 
   // Remap array axes to image axes axis_x,axis_y
 
-  int axis_x = (axis+1) % 3;  // image x axis
-  int axis_y = (axis+2) % 3;  // image y-axis
+  int axis_x = (axis_+1) % 3;  // image x axis
+  int axis_y = (axis_+2) % 3;  // image y-axis
 
   // Array size permuted to match image
 
   int npx = n[axis_x];
   int npy = n[axis_y];
-  int npz = n[axis];
+  int npz = n[axis_];
 
   // Array start permuted to match image
 
@@ -467,29 +488,10 @@ void OutputImage::image_reduce_
 	       (iiy < ncols_)) ) {
 	ERROR5 ("OutputImage::image_reduce_",
 		"Invalid Access axis %d index(%d %d)  image(%d %d)\n",
-		axis, iix, iiy, nrows_,ncols_);
+		axis_, iix, iiy, nrows_,ncols_);
       }
 
       double & pixel_value = data_ [index_image];
-
-      double min = std::numeric_limits<double>::max();
-      double max = std::numeric_limits<double>::min();
-
-      // reduction axis
-
-      // initialize reduction
-      switch (op_reduce) {
-      case reduce_min: 
-	pixel_value = max;
-	break;
-      case reduce_max: 
-	pixel_value = min;
-	break;
-      case reduce_avg: 
-      case reduce_sum: 
-      default:         
-	pixel_value = 0; break;
-      }
 
       // reduce along axis
       for (int iz=0; iz<npz; iz++) {
@@ -497,11 +499,11 @@ void OutputImage::image_reduce_
 	int index_array = 
 	  nd3[axis_x]*iax + 
 	  nd3[axis_y]*iay + 
-	  nd3[axis]*iz;
+	  nd3[axis_]*iz;
 
 	// reduce along z axis
 
-	switch (op_reduce) {
+	switch (op_reduce_) {
 	case reduce_min: 
 	  pixel_value = MIN(array[index_array],(T)(pixel_value)); 
 	  break;
@@ -516,7 +518,7 @@ void OutputImage::image_reduce_
 	}
       }
 
-      if (op_reduce == reduce_avg) pixel_value /= npz;
+      if (op_reduce_ == reduce_avg) pixel_value /= npz;
 
     }
 

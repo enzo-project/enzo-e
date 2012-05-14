@@ -89,4 +89,5 @@ enum function_enum {
 #include "performance_Papi.hpp"
 #include "performance_Performance.hpp"
 
+
 #endif /* _PERFORMANCE_HPP */

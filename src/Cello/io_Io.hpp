@@ -26,10 +26,17 @@ public: // interface
 
 #include "_io_Io_common.hpp"
 
+  /// Set the number of metadata items associated with the associated class
+  void set_meta_count(size_t count) throw()
+  { meta_count_ = count; }
 
   /// Return number of metadata items associated with the associated class
   size_t meta_count() const throw()
   { return meta_count_; }
+
+  /// Set the number of data items associated with the associated class
+  void set_data_count(size_t count) throw()
+  { data_count_ = count; }
 
   /// Return number of data items associated with the associated class
   size_t data_count() const throw()

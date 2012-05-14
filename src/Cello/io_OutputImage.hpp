@@ -50,25 +50,20 @@ public: // virtual functions
   /// Cleanup after output
   virtual void finalize () throw();
 
-  // /// Write hierarchy-related field data
-  // virtual void write_hierarchy
-  // ( const Hierarchy * hierarchy,
-  //   const FieldDescr * field_descr ) throw();
-
-  /// Write patch-related field data; may be called by write_hierarchy
-  virtual void write_patch
+  /// Write patch-related field data
+  virtual void write
   ( const Patch * patch,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
-  /// Write block-related field data; may be called by write_patch
-  virtual void write_block
+  /// Write block-related field data
+  virtual void write
   ( const Block * block,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write fields
-  virtual void write_field
+  virtual void write
   ( const FieldBlock * Fieldblock, 
     const FieldDescr * field_descr,
     int field_index) throw();
@@ -105,9 +100,7 @@ private: // functions
    ( T * array,
      int nxd, int nyd, int nzd,   // Array dimensions
      int nx,  int ny,  int nz,   // Array dimensions
-     int nx0, int ny0, int nz0,  // Array offset into image
-     axis_enum   axis,           // Axis along which to project
-     reduce_enum op_reduce) throw();
+     int nx0, int ny0, int nz0) throw();
 
 private: // attributes
 
@@ -119,6 +112,9 @@ private: // attributes
 
   /// Current image
   double * data_;
+
+  /// Reduction operation
+  reduce_enum op_reduce_;
 
   /// Axis along which to reduce
   axis_enum axis_;
