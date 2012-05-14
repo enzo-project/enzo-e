@@ -11,37 +11,37 @@ new_initial = 1
 
 # Whether to print out messages with the TRACE() series of statements
 
-trace           = 0
+trace = 0
 
 # Whether to enable displaying messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
 # Still requires the "DEBUG" group to be enabled in Monitor (that is
 # Monitor::is_active("DEBUG") must be true for any output)
 
-debug           = 1
+debug = 1
 
 # Whether to periodically print all field values.  See
 # src/Field/field_FieldBlock.cpp
 
-debug_verbose   = 0
+debug_verbose = 0
 
 # Whether to track dynamic memory statistics.  Can be useful, but can
 # cause problems on some systems that also override new [] () / delete [] ()
 
-memory          = 1
+memory = 1
 
 # Limit CHARM++ load balancing to only when AtSync() is called.  See
 # src/Mesh/mesh_Block.cpp
 
-atsync          = 0
+atsync = 0
 
 # Whether to compile with -pg to use gprof for performance profiling
 
-use_gprof       = 0
+use_gprof = 0
 
 # Whether to run the test programs using valgrind to check for memory leaks
 
-use_valgrind    = 0
+use_valgrind = 0
 
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
@@ -51,6 +51,10 @@ use_projections = 0
 # Triton MPI type (openmpi or mpich2)
 
 mpi_type = 'mpich2'
+
+# How many processors to run unit tests with in CHARM (MPI must be 8)
+
+ip_charm = '4'
 
 #----------------------------------------------------------------------
 # AUTO CONFIGURATION
@@ -248,7 +252,7 @@ elif (type == "mpi"):
      parallel_run = "mpirun -np 8"
 elif (type == "charm"):
      serial_run   = ""
-     parallel_run = charm_path + "/bin/charmrun +p4 "
+     parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"
@@ -270,6 +274,7 @@ Export('bin_path')
 Export('lib_path')
 Export('inc_path')
 Export('test_path')
+Export('ip_charm')
 
 
 cpppath     = [inc_path]

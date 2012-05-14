@@ -4,6 +4,7 @@ set ARCH = $CELLO_ARCH
 set TYPE = $CELLO_TYPE
 set PREC = $CELLO_PREC
 
+set log = "compile.log"
 set proc = 8
 
 set target = "install-bin"
@@ -28,8 +29,7 @@ if ($#argv >= 1) then
       printf "done\n"
       exit
    else if ($argv[1] == "enzo-p") then
-     set conf = $type
-     set target = bin/$conf/enzo-p
+     set target = bin/enzo-p
    else if ($argv[1] == "compile") then
      set target = install-bin
    else if ($argv[1] == "test") then
@@ -75,6 +75,7 @@ foreach prec ($PREC)
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
    printf "$d %-14s %-14s" "$arch $type $prec" "compiling..."
+   printf "$d %-14s %-14s" "$arch $type $prec" "compiling..." >> $log
 
    touch "$dir/running.$arch.$prec"
 
@@ -89,6 +90,7 @@ foreach prec ($PREC)
    rm -f "$dir/running.$arch.$prec"
 
    printf "done\n"
+   printf "done\n" >> $log
 
    # TESTS
 
@@ -108,7 +110,7 @@ foreach prec ($PREC)
       set line = "$d ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
 
       printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" $line
-      printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" $line >> compile.log
+      printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" $line >> $log
 
        foreach test ($dir/*unit)
       set test_begin = `grep "UNIT TEST BEGIN" $test | wc -l`
@@ -118,8 +120,8 @@ foreach prec ($PREC)
 
       if ($crash != 0) then
          set line = "$line CRASH: $test\n"
-         printf line
-	 printf line >> compile.log
+         printf "$line"
+	 printf "$line" >> $log
       endif
       end
 
