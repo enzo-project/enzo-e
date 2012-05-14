@@ -24,7 +24,7 @@ void * GroupProcessSerial::send_begin
 	    "multiple sends with no corresponding receive");
   }
   buffer_[(long int)tag] = buffer;
-  return (void * ) tag;
+  return NULL;
 }
 
 //----------------------------------------------------------------------

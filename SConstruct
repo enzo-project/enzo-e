@@ -11,37 +11,37 @@ new_initial = 1
 
 # Whether to print out messages with the TRACE() series of statements
 
-trace           = 1
+trace = 0
 
 # Whether to enable displaying messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
 # Still requires the "DEBUG" group to be enabled in Monitor (that is
 # Monitor::is_active("DEBUG") must be true for any output)
 
-debug           = 1
+debug = 1
 
 # Whether to periodically print all field values.  See
 # src/Field/field_FieldBlock.cpp
 
-debug_verbose   = 0
+debug_verbose = 0
 
 # Whether to track dynamic memory statistics.  Can be useful, but can
 # cause problems on some systems that also override new [] () / delete [] ()
 
-memory          = 1
+memory = 1
 
 # Limit CHARM++ load balancing to only when AtSync() is called.  See
 # src/Mesh/mesh_Block.cpp
 
-atsync          = 0
+atsync = 0
 
 # Whether to compile with -pg to use gprof for performance profiling
 
-use_gprof       = 0
+use_gprof = 0
 
 # Whether to run the test programs using valgrind to check for memory leaks
 
-use_valgrind    = 0
+use_valgrind = 0
 
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
@@ -51,6 +51,10 @@ use_projections = 0
 # Triton MPI type (openmpi or mpich2)
 
 mpi_type = 'mpich2'
+
+# How many processors to run unit tests with in CHARM (MPI must be 8)
+
+ip_charm = '4'
 
 #----------------------------------------------------------------------
 # AUTO CONFIGURATION
@@ -183,10 +187,18 @@ if (use_projections == 1):
      defines = defines + define_projections
      charm_perf = '-tracemode projections'
 
-flags_gprof = ''
+flags_config = ''
+flags_cxx = ''
+flags_cc = ''
+flags_fc = ''
+flags_link = ''
+flags_cxx_charm = ''
+flags_cc_charm = ''
+flags_fc_charm = ''
+flags_link_charm = ''
 
 if (use_gprof == 1):
-     flags_gprof = '-pg '
+     flags_config = flags_config + ' -pg'
      
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
@@ -240,7 +252,7 @@ elif (type == "mpi"):
      parallel_run = "mpirun -np 8"
 elif (type == "charm"):
      serial_run   = ""
-     parallel_run = charm_path + "/bin/charmrun +p4 "
+     parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"
@@ -262,6 +274,7 @@ Export('bin_path')
 Export('lib_path')
 Export('inc_path')
 Export('test_path')
+Export('ip_charm')
 
 
 cpppath     = [inc_path]
@@ -297,10 +310,25 @@ libpath = libpath + [libpath_fortran]
 
 environ  = os.environ
 
-cxxflags     = flags_arch + ' ' + flags_gprof
-cflags       = flags_arch + ' ' + flags_gprof
-fortranflags = flags_arch + ' ' + flags_gprof
-linkflags    = flags_arch + ' ' + flags_gprof  + ' ' + flags_link
+cxxflags = flags_arch
+cxxflags = cxxflags + ' ' + flags_cxx
+cxxflags = cxxflags + ' ' + flags_config
+if (type=="charm"): cxxflags = cxxflags + ' ' + flags_cxx_charm
+
+cflags   = flags_arch
+cflags   = cflags + ' ' + flags_cc
+cflags   = cflags + ' ' + flags_config
+if (type=="charm"):cflags   = cflags + ' ' + flags_cc_charm
+
+fortranflags = flags_arch
+fortranflags = fortranflags + ' ' + flags_fc
+fortranflags = fortranflags + ' ' + flags_config
+if (type=="charm"):fortranflags = fortranflags + ' ' + flags_fc_charm
+
+linkflags    = flags_arch
+linkflags    = linkflags + ' ' + flags_link
+linkflags    = linkflags + ' ' + flags_config
+if (type=="charm"):linkflags    = linkflags + ' ' + flags_link_charm
 
 env = Environment (
      CC           = cc[type],	

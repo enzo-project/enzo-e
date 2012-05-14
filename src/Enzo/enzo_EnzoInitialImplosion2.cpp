@@ -22,7 +22,7 @@ void EnzoInitialImplosion2::enforce
 (
  Block * block,
  const FieldDescr * field_descr,
- Hierarchy  * hierarchy
+ const Hierarchy  * hierarchy
  ) throw()
 
 {

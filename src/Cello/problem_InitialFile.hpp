@@ -32,9 +32,11 @@ public: // interface
 
   /// Read initialization values from Initial group in parameter file
 
+  /// Enforce initial conditions for the given Block
+
   virtual void enforce (Block * block,
 			const FieldDescr * field_descr,
-			Hierarchy * hierarchy) throw();
+			const Hierarchy * hierarchy) throw();
 
   /// Override default: InitialFile expects blocks not to be allocated
   virtual bool expects_blocks_allocated() const throw()

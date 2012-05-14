@@ -3,7 +3,8 @@
 /// @file     simulation_charm_initial.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-04-03
-/// @brief    Functions implementing CHARM++ initialization-related functions
+/// @brief    Functions implementing initialization functions requiring
+/// CHARM++
 ///
 /// This file contains member functions for various CHARM++ chares and
 /// classes used for calling Initial objects in a CHARM++ simulation.
@@ -54,8 +55,8 @@ void SimulationCharm::c_initial()
   // Initialize hierarchy
 
   while (( patch = ++it_patch )) {
-    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-    proxy_patch->p_initial();
+    CProxy_Patch * patch_proxy = (CProxy_Patch *)patch;
+    patch_proxy->p_initial();
   }
 
   s_initial();
@@ -90,8 +91,8 @@ void Problem::initial_next(Simulation * simulation) throw()
 
       while (( patch = ++it_patch )) {
 
-	CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-	proxy_patch->p_initial();
+	CProxy_Patch * patch_proxy = (CProxy_Patch *)patch;
+	patch_proxy->p_initial();
 
       }
 
@@ -108,10 +109,10 @@ void Problem::initial_next(Simulation * simulation) throw()
     DEBUG1 ("Start Initial(%d) C",index_initial_);
 
     ItPatch it_patch(hierarchy);
-    Patch * patch;
-    while (( patch = ++it_patch )) {
-      CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-      proxy_patch->p_refresh();
+    CProxy_Patch * patch_proxy;
+    while (( patch_proxy = (CProxy_Patch *)++it_patch )) {
+      //      CProxy_Patch * patch_proxy = (CProxy_Patch *)patch;
+      patch_proxy->p_refresh();
     }
   }
 #endif
@@ -125,10 +126,8 @@ void SimulationCharm::x_request_patch
 )
 {
 #ifdef NEW_INITIAL
-  // call x_send_patch()
   CkChareID patch_proxy;
   proxy_simulation[block_rank].x_send_patch(patch_id,patch_proxy);
-  DEBUG ("x_request_patch()");
 #endif
 }
 
@@ -137,10 +136,15 @@ void SimulationCharm::x_request_patch
 void SimulationCharm::x_send_patch
 (
  int patch_id,
- CkChareID proxy_patch
+ CkChareID patch_proxy
  )
 {
 #ifdef NEW_INITIAL
+  ItPatch it_patch(hierarchy_);
+  Patch * patch;
+  while (( patch = ++it_patch )) {
+     
+  }
 
 #endif
 }

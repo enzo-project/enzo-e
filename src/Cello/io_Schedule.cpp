@@ -143,8 +143,8 @@ bool Schedule::write_this_cycle ( int cycle, double time ) throw()
     }
     break;
   default:
-    WARNING("Output::write_next_cycle",
-	    "Unknown schedule type for active Output object");
+    WARNING("Schedule::write_next_cycle",
+	    "Unknown schedule type for active Schedule object");
   }
 
   if (skip) return false;
@@ -198,8 +198,8 @@ bool Schedule::write_this_cycle ( int cycle, double time ) throw()
     }
     break;
   default:
-    WARNING("Output::write_next_cycle",
-	    "Unknown schedule type for active Output object");
+    WARNING("Schedule::write_next_cycle",
+	    "Unknown schedule type for active Schedule object");
   }
 
   return result;

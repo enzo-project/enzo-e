@@ -40,7 +40,6 @@ void IoPatch::meta_value
   Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
   DEBUG0;
 
-
   int count = 0;
 
   DEBUG0;
