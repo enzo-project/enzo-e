@@ -315,12 +315,10 @@ void LcaPerf::print ()
   MPI_Comm_size(MPI_COMM_WORLD,&np);
 #endif
 
-  //  int         cycle_index  = attributes_.index("cycle");
-  //  std::string cycle_string = attributes_.value(cycle_index);
-  std::string cycle_string = "0000";
-
-  // Allocate arrays for summing counters across levels and reducing
-  // along processors (avg and max)
+  int         cycle_index  = attributes_.index("cycle");
+  std::string cycle_value  = attributes_.value(cycle_index);
+  int         level_index  = attributes_.index("level");
+  std::string level_value  = attributes_.value(level_index);
 
   const int i_avg = 0, i_max = 1;
   double time_avg, time_max, time_eff;
@@ -333,7 +331,6 @@ void LcaPerf::print ()
 
   // Loop over regions to print
 
-  DEBUG1 ("regions_.size() = %d",regions_.size());
   for (size_t i_region = 0; i_region < regions_.size(); ++i_region) {
 
     bool empty = true;
@@ -350,8 +347,13 @@ void LcaPerf::print ()
 
     //    WARNING: dependency on number of attributes and attribute ordering
 
-    std::string region_key = region + ":" + cycle_string + ":" + level_string;
 
+    std::stringstream convert;
+    convert << region << ":" << cycle_value << ":" << level_value;
+    std::string region_key = convert.str();
+    DEBUG1 ("region = %s",region_key.c_str());
+
+  
     //--------------------------------------------------
     // TOTAL TIME
     //--------------------------------------------------
@@ -372,6 +374,7 @@ void LcaPerf::print ()
 
       // Select matching keys
 
+      DEBUG2 ("key = %s  region_key = %s",key,region_key.c_str());
       bool keys_match = attributes_.keys_match(key,region_key);
 
       if (keys_match) {
@@ -462,7 +465,7 @@ void LcaPerf::print ()
 
     if (! empty) {
 
-      sprintf (field , "%s   %s\n",cycle_string.c_str(),region.c_str());
+      sprintf (field , "%s   %s\n",cycle_value.c_str(),region.c_str());
 
       line = line + field;
 

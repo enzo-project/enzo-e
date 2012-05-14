@@ -204,6 +204,9 @@ protected: // attributes
   /// Current cycle
   int cycle_;
 
+  /// Current level (currently only used in lcaperf)
+  int level_;
+
   /// Current time
   double time_;
 

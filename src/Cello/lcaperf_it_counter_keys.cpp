@@ -28,20 +28,16 @@ ItCounterKeys::~ItCounterKeys ( ) throw ()
 
 const char * ItCounterKeys::operator++ () throw()
 {
-  DEBUG1("counters_ = %p",counters_);
   const char * key;
   if (iter_ == counters_->global_.end()) {
-  DEBUG0;
     key = 0;
     value_ = 0;
     iter_ = counters_->global_.begin();
   } else {
-  DEBUG0;
     key    = iter_->first.c_str();
     value_ = iter_->second;
     ++iter_;
   }
-  DEBUG0;
   return key;
 }
 

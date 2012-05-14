@@ -93,6 +93,11 @@ void CountersBasic::update_(std::string key, long long * counters)
     for (int i=0; i<num_counters_; i++) g[i]=0;
   }
 
+  if (global_.begin() == global_.end()) {
+    DEBUG ("COUNTERS EMPTY");
+  } else {
+    DEBUG ("COUNTERS NOT EMPTY");
+  }
   long long * globals = global_[key];
 
   // Update global counters
