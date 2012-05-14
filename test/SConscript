@@ -2,6 +2,7 @@ Import('env')
 Import('parallel_run')
 Import('type')
 Import('serial_run')
+Import('ip_charm')
 
 Import('bin_path')
 Import('test_path')
@@ -327,7 +328,7 @@ env.MakeMovie ("initial_png.swf","test_initial_png.unit", \
 if (type == "serial"):
    env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS='1')
 else:
-   env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS='8')
+   env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_charm)
 
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
