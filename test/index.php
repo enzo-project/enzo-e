@@ -11,7 +11,7 @@ if (file_exists("COMPILING")) {
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
 
-   <h2><center><?php echo realpath("..");?> </center> </h2>
+   <h2><center><?php system ("hg branch") ?> branch </center> </h2>
 
    <?php
 
@@ -194,9 +194,6 @@ function test($type,$testrun,$type) {
 };
 
 ?>
-
-This page contains the current status of Enzo-P / Cello unit tests, as run
-on the main development platform.
 
   <hr>
 
