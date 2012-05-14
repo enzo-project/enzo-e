@@ -100,9 +100,7 @@ private: // functions
    ( T * array,
      int nxd, int nyd, int nzd,   // Array dimensions
      int nx,  int ny,  int nz,   // Array dimensions
-     int nx0, int ny0, int nz0,  // Array offset into image
-     axis_enum   axis,           // Axis along which to project
-     reduce_enum op_reduce) throw();
+     int nx0, int ny0, int nz0) throw();
 
 private: // attributes
 
@@ -114,6 +112,9 @@ private: // attributes
 
   /// Current image
   double * data_;
+
+  /// Reduction operation
+  reduce_enum op_reduce_;
 
   /// Axis along which to reduce
   axis_enum axis_;

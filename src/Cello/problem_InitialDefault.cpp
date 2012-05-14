@@ -25,7 +25,7 @@ void InitialDefault::enforce
 (
  Block            * block,
  const FieldDescr * field_descr,
- Hierarchy  * hierarchy
+ const Hierarchy  * hierarchy
  ) throw()
 {
   // Initialize Fields according to parameters

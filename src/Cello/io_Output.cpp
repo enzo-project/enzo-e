@@ -176,7 +176,7 @@ void Output::write_meta_ ( meta_type type_meta, Io * io ) throw ()
 
 //----------------------------------------------------------------------
 
-void Output::write
+void Output::write_
 ( const Simulation * simulation ) throw()
 {
   write (simulation->hierarchy(), simulation->field_descr());
@@ -184,19 +184,15 @@ void Output::write
 
 //----------------------------------------------------------------------
 
-void Output::write
-( 
+void Output::write_ 
+(
  const Hierarchy * hierarchy,
  const FieldDescr * field_descr
-  ) throw()
+ ) throw()
 {
-
   ItPatch it_patch (hierarchy);
 
-  // (*) write data patch_list_
-
   while (Patch * patch = ++it_patch) {
-
 #ifdef CONFIG_USE_CHARM
     ((CProxy_Patch *)patch)->p_write(index_charm_);
 #else
@@ -207,7 +203,7 @@ void Output::write
 
 //----------------------------------------------------------------------
 
-void Output::write
+void Output::write_
 (
  const Patch * patch,
  const FieldDescr * field_descr,
@@ -234,7 +230,7 @@ void Output::write
 
 //----------------------------------------------------------------------
 
-void Output::write
+void Output::write_
 (
  const Block * block,
  const FieldDescr * field_descr,

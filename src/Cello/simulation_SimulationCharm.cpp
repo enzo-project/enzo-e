@@ -66,7 +66,6 @@ void SimulationCharm::s_patch(CkCallback callback)
 
 void SimulationCharm::c_refresh()
 {
-  DEBUG ("SimulationCharm::c_refresh()");
   ItPatch it_patch(hierarchy_);
   Patch * patch;
 
@@ -80,7 +79,6 @@ void SimulationCharm::c_refresh()
 
 void SimulationCharm::c_compute()
 {
-
   if (stop_) {
     
     performance_output(performance_simulation_);

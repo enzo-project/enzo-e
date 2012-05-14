@@ -12,7 +12,7 @@ class ItFieldList : public ItField {
 
   /// @class    ItFieldList
   /// @ingroup  Field
-  /// @brief    [\ref Field] Iterator over Fields in a Block
+  /// @brief    [\ref Field] Iterator over a list of Fields in a Block
 
 public: // interface
 

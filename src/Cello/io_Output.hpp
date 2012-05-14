@@ -115,25 +115,29 @@ public: // virtual functions
   virtual void finalize () throw ()
   { count_ ++; }
 
-  /// Write an entire simulation to disk
-  virtual void write ( const Simulation * simulation ) throw();
+  /// Write Simulation data to disk
+  virtual void write ( const Simulation * simulation ) throw()
+  { write_(simulation); }
 
-  /// Write local hierarchy data to disk
+  /// Write Hierarchy data to disk
   virtual void write
   ( const Hierarchy * hierarchy, 
-    const FieldDescr * field_descr  ) throw();
+    const FieldDescr * field_descr  ) throw()
+  { write_(hierarchy,field_descr); }
 
   /// Write local patch data to disk
   virtual void write
   ( const Patch * patch, 
     const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
+    int ixp0=0, int iyp0=0, int izp0=0) throw()
+  { write_(patch,field_descr,ixp0,iyp0,izp0); }
 
   /// Write local block data to disk
   virtual void write
   ( const Block * block, 
     const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
+    int ixp0=0, int iyp0=0, int izp0=0) throw()
+  { write_(block,field_descr,ixp0,iyp0,izp0); }
 
   /// Write local field to disk
   virtual void write
@@ -154,6 +158,27 @@ public: // virtual functions
   {};
 
 protected:
+
+  /// "Loop" over writing the Hierarchy in the Simulation
+  void write_ (const Simulation * simulation ) throw();
+
+  /// Loop over writing Patches in the Hierarchy
+  void write_
+  ( const Hierarchy * hierarchy, 
+    const FieldDescr * field_descr  ) throw();
+
+  /// Loop over writing Blocks in the Patch
+  void write_
+  ( const Patch * patch, 
+    const FieldDescr * field_descr,  
+    int ixp0=0, int iyp0=0, int izp0=0) throw();
+
+  /// Loop over writing Field data in the Block
+  void write_
+  ( const Block * block, 
+    const FieldDescr * field_descr,  
+    int ixp0=0, int iyp0=0, int izp0=0) throw();
+
   /// Return the filename for the file format and given arguments
   std::string expand_file_name_
   (const std::string * file_name,

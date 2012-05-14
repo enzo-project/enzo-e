@@ -61,7 +61,7 @@ OutputRestart::OutputRestart
   // Skip first cycle for restart if this is a restart
 
   std::string type = parameters->value_string("Initial:type","");
-  bool is_restart = type == "restart";
+  bool is_restart = (type == "restart");
   int init_cycle  = parameters->value_integer ("Initial:cycle",-1);
 
   if (is_restart) {
@@ -124,7 +124,7 @@ void OutputRestart::write ( const Simulation * simulation ) throw()
   }
 
   // Call base write()
-  Output::write (simulation);
+  write_ (simulation);
 
 }
 

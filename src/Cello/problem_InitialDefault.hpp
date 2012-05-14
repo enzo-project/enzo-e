@@ -27,7 +27,7 @@ public: // interface
 
   virtual void enforce (Block * block,
 			const FieldDescr * field_descr,
-			Hierarchy * hierarchy
+			const Hierarchy * hierarchy
 			) throw();
 
 private: // functions
