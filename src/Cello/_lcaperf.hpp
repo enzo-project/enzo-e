@@ -56,6 +56,7 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include <sstream>
 
 #ifdef CONFIG_USE_MPI
 #   include <mpi.h>
