@@ -148,7 +148,7 @@ void FileHdf5::file_close () throw()
 //----------------------------------------------------------------------
 
 void FileHdf5::data_open
-( std::string name,  enum scalar_type * type,
+( std::string name,  scalar_type * type,
   int * nx, int * ny, int * nz) throw()
 {
 
@@ -190,7 +190,7 @@ void FileHdf5::data_open
 //----------------------------------------------------------------------
 
 void FileHdf5::data_create
-( std::string name,  enum scalar_type type,
+( std::string name,  scalar_type type,
   int nxd, int nyd, int nzd,
   int nx, int ny, int nz) throw()
 {
@@ -325,7 +325,7 @@ void FileHdf5::data_close() throw()
 //----------------------------------------------------------------------
 
 void FileHdf5::file_read_meta
-  ( void * buffer, std::string name,  enum scalar_type * type,
+  ( void * buffer, std::string name,  scalar_type * type,
     int * nx, int * ny, int * nz) throw()
 {
 
@@ -375,7 +375,7 @@ void FileHdf5::file_read_meta
 //----------------------------------------------------------------------
 
 void FileHdf5::data_read_meta
-  ( void * buffer, std::string name,  enum scalar_type * type,
+  ( void * buffer, std::string name,  scalar_type * type,
     int * nx, int * ny, int * nz) throw()
 {
   // error check file open
@@ -588,7 +588,7 @@ void FileHdf5::group_close () throw()
 //----------------------------------------------------------------------
 
 void FileHdf5::group_read_meta
-  ( void * buffer, std::string name,  enum scalar_type * type,
+  ( void * buffer, std::string name,  scalar_type * type,
     int * nx, int * ny, int * nz) throw()
 {
   // error check file open
@@ -659,7 +659,7 @@ void FileHdf5::set_compress (int level) throw ()
 
 void FileHdf5::write_meta_
 ( hid_t type_id,
-  const void * buffer, std::string name, enum scalar_type type,
+  const void * buffer, std::string name, scalar_type type,
   int nx, int ny, int nz) throw()
 {
   // error check file open
@@ -724,7 +724,7 @@ void FileHdf5::write_meta_
 
 //----------------------------------------------------------------------
 
-int FileHdf5::scalar_to_hdf5_ (enum scalar_type type) const throw()
+int FileHdf5::scalar_to_hdf5_ (scalar_type type) const throw()
 {
   // (*) NATIVE    -   FLOAT DOUBLE LDOUBLE
   // ( ) IEEE      -   F32BE F64BE     -
@@ -783,13 +783,13 @@ int FileHdf5::scalar_to_hdf5_ (enum scalar_type type) const throw()
 
 //----------------------------------------------------------------------
 
-enum scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
+scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
 {
 
   H5T_class_t hdf5_class = H5Tget_class(hdf5_type);
   size_t      hdf5_size  = H5Tget_size (hdf5_type);
 
-  enum scalar_type type = scalar_type_unknown;
+  scalar_type type = scalar_type_unknown;
  
   if (hdf5_class == H5T_INTEGER) {
 

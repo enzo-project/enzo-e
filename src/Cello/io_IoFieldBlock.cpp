@@ -32,7 +32,7 @@ IoFieldBlock::IoFieldBlock() throw ()
 
 void IoFieldBlock::meta_value
 (int index,
- void ** buffer, std::string * name, enum scalar_type * type,
+ void ** buffer, std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
 }
@@ -41,7 +41,7 @@ void IoFieldBlock::meta_value
 
 void IoFieldBlock::data_value
 (int index,
- void ** buffer, std::string * name, enum scalar_type * type,
+ void ** buffer, std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {

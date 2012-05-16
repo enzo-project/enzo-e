@@ -29,7 +29,7 @@ IoLayout::IoLayout(const Layout * layout) throw ()
 
 void IoLayout::meta_value
 (int index,
- void ** buffer, std::string * name, enum scalar_type * type,
+ void ** buffer, std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
   Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
@@ -62,7 +62,7 @@ void IoLayout::meta_value
 
 void IoLayout::data_value
 (int index,
- void ** buffer, std::string * name, enum scalar_type * type,
+ void ** buffer, std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {

@@ -25,6 +25,32 @@ public: // interface
   /// Destructor
   ~FileHdf5 () throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+
+    p | file_id_;
+    p | is_file_open_;
+    p | data_id_;
+    p | data_space_id_;
+    p | mem_space_id_;
+    p | attribute_id_;
+    p | group_id_;
+    p | group_name_;
+    p | group_prop_;
+    p | is_group_open_;
+    p | data_name_;
+    p | data_type_;
+    p | data_rank_;
+    PUParray(p,data_dims_,3);
+    p | data_prop_;
+    p | is_data_open_;
+    p | compress_level_;
+    
+  }
+#endif
+
   // Files
 
   /// Open an existing file
@@ -38,13 +64,13 @@ public: // interface
   
   /// Read a metadata item associated with the file
   virtual void file_read_meta
-  ( void * buffer, std::string name,  enum scalar_type * s_type,
+  ( void * buffer, std::string name,  scalar_type * s_type,
     int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the file
 
   void file_write_meta
-  ( const void * buffer, std::string name, enum scalar_type type,
+  ( const void * buffer, std::string name, scalar_type type,
     int nx=1, int ny=0, int nz=0) throw()
   { write_meta_ ( file_id_, buffer, name, type, nx,ny,nz); }
 
@@ -52,12 +78,12 @@ public: // interface
 
   /// Open an existing dataset for reading
   virtual void data_open
-  ( std::string name,  enum scalar_type * type,
+  ( std::string name,  scalar_type * type,
     int * nx=0, int * ny=0, int * nz=0) throw();
 
   /// Create a new dataset for writing (and open it)
   virtual void data_create
-  ( std::string name,  enum scalar_type type,
+  ( std::string name,  scalar_type type,
     int nxd=1, int nyd=0, int nzd=0,
     int nx=0, int ny=0, int nz=0) throw();
 
@@ -73,12 +99,12 @@ public: // interface
 
   /// Read a metadata item associated with the opened dataset
   virtual void data_read_meta
-  ( void * buffer, std::string name,  enum scalar_type * s_type,
+  ( void * buffer, std::string name,  scalar_type * s_type,
     int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the opened dataset
   virtual void data_write_meta
-  ( const void * buffer, std::string name, enum scalar_type type,
+  ( const void * buffer, std::string name, scalar_type type,
     int nx=1, int ny=0, int nz=0) throw()
   { write_meta_ ( data_id_, buffer, name, type, nx,ny,nz); }
 
@@ -105,12 +131,12 @@ public: // interface
   
   /// Read a metadata item associated with the opened group
   void group_read_meta
-  ( void * buffer, std::string name,  enum scalar_type * s_type,
+  ( void * buffer, std::string name,  scalar_type * s_type,
     int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the opened group
   void group_write_meta
-  ( const void * buffer, std::string name, enum scalar_type type,
+  ( const void * buffer, std::string name, scalar_type type,
     int nx=1, int ny=0, int nz=0) throw()
   { write_meta_ ( group_id_, buffer, name, type, nx,ny,nz ); }
 
@@ -124,16 +150,16 @@ public: // interface
 protected: // functions
 
   virtual void write_meta_
-  ( hid_t id, const void * buffer, std::string name, enum scalar_type type,
+  ( hid_t id, const void * buffer, std::string name, scalar_type type,
     int nx=1, int ny=0, int nz=0) throw();
 
 private: // functions
 
   /// Convert the scalar type to HDF5 datatype
-  int scalar_to_hdf5_(enum scalar_type type) const throw();
+  int scalar_to_hdf5_(scalar_type type) const throw();
 
   /// Convert the scalar type to an HDF5 datatype
-  enum scalar_type hdf5_to_scalar_(int type) const throw();
+  scalar_type hdf5_to_scalar_(int type) const throw();
 
   /// Convert a relative path to an absolute path
   std::string relative_to_absolute_

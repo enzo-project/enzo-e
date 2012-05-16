@@ -24,13 +24,13 @@ public: // interface
   /// Return the ith metadata item associated with the EnzoBlock object
   void meta_value 
   (int index, 
-   void ** buffer, std::string * name, enum scalar_type * type,
+   void ** buffer, std::string * name, scalar_type * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
   /// Return the ith data item associated with the EnzoBlock object
   void data_value 
   (int index, 
-   void ** buffer, std::string * name, enum scalar_type * type,
+   void ** buffer, std::string * name, scalar_type * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
 private:

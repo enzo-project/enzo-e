@@ -8,9 +8,9 @@
 #ifndef DISK_FILE_HPP
 #define DISK_FILE_HPP
 
-/// @enum scalar_type
+/// @enum scalar_enum
 /// @brief Simple scalar data type, e.g. scalar_int, scalar_float, etc.
-enum scalar_type {
+enum scalar_enum {
   scalar_type_unknown,
   scalar_type_char,        // Used for string data, with size + 1 for \0 
   scalar_type_int,
@@ -20,6 +20,8 @@ enum scalar_type {
   scalar_type_double,
   scalar_type_long_double
 };
+
+typedef char scalar_type;
 
 #define MAX_DISK_ARRAY_RANK 5
 
@@ -53,12 +55,12 @@ public: // interface
   
   /// Read a metadata item associated with the file
   virtual void file_read_meta
-  ( void * buffer, std::string name,  enum scalar_type * s_type,
+  ( void * buffer, std::string name,  scalar_type * s_type,
     int * nx=0, int * ny=0, int * nz=0) throw() = 0;
   
   /// Write a metadata item associated with the file
   virtual void file_write_meta
-  ( const void * buffer, std::string name, enum scalar_type type,
+  ( const void * buffer, std::string name, scalar_type type,
     int nx=1, int ny=0, int nz=0) throw() = 0;
   
 
@@ -66,12 +68,12 @@ public: // interface
 
   /// Open an existing dataset for reading
   virtual void data_open
-  ( std::string name,  enum scalar_type * type,
+  ( std::string name,  scalar_type * type,
     int * nx=0, int * ny=0, int * nz=0) throw() = 0;
 
   /// Create a new dataset for writing (and open it)
   virtual void data_create
-  ( std::string name,  enum scalar_type type,
+  ( std::string name,  scalar_type type,
     int nxd=1, int nyd=0, int nzd=0,
     int nx=0,  int ny=0,  int nz=0) throw() = 0;
 
@@ -87,12 +89,12 @@ public: // interface
 
   /// Read a metadata item associated with the opened dataset
   virtual void data_read_meta
-  ( void * buffer, std::string name,  enum scalar_type * s_type,
+  ( void * buffer, std::string name,  scalar_type * s_type,
     int * nx, int * ny=0, int * nz=0) throw() = 0;
   
   /// Write a metadata item associated with the opened dataset
   virtual void data_write_meta
-  ( const void * buffer, std::string name, enum scalar_type type,
+  ( const void * buffer, std::string name, scalar_type type,
     int nx=1, int ny=0, int nz=0) throw() = 0;
 
 
@@ -118,12 +120,12 @@ public: // interface
 
   /// Read a metadata item associated with the opened group
   virtual void group_read_meta
-  ( void * buffer, std::string name,  enum scalar_type * s_type,
+  ( void * buffer, std::string name,  scalar_type * s_type,
     int * nx, int * ny=0, int * nz=0) throw() = 0;
   
   /// Write a metadata item associated with the opened group
   virtual void group_write_meta
-  ( const void * buffer, std::string name, enum scalar_type type,
+  ( const void * buffer, std::string name, scalar_type type,
     int nx=1, int ny=0, int nz=0) throw() = 0;
 
 protected: // attributes

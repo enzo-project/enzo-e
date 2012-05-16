@@ -15,7 +15,7 @@
 #include <stdio.h>
 
 //----------------------------------------------------------------------
-// COMMON FUNCTIONS
+// TEMPLATE FUNCTIONS
 //----------------------------------------------------------------------
 
 template <class T>
@@ -34,7 +34,7 @@ inline void SWAP(T &a, T &b)
 {  T t = a; a=b; b=t; }
 
 //----------------------------------------------------------------------
-// GLOBAL DEFINES
+// ENUMERATED TYPES
 //----------------------------------------------------------------------
 
 /// @enum     face_enum
@@ -64,37 +64,33 @@ enum reduce_enum {
   reduce_sum      /// Sum of values along the axis
 };
 
-//======================================================================
-// COMPONENTS
-//======================================================================
+// /// @enum component_enum
+// /// @brief List of components
+// enum component_enum {
+//   component_undefined,
+//   component_charm,
+//   component_disk,
+//   component_first = component_disk,
+//   component_error,
+//   component_field,
+//   component_memory,
+//   component_mesh,
+//   component_method,
+//   component_monitor,
+//   component_parallel,
+//   component_parameters,
+//   component_particles,
+//   component_performance,
+//   component_portal,
+//   component_simulation,
+//   num_components = component_simulation
+// };
 
-enum component_enum {
-  component_undefined,
-  component_disk,
-  component_first = component_disk,
-  component_error,
-  component_field,
-  component_memory,
-  component_mesh,
-  component_method,
-  component_monitor,
-  component_parallel,
-  component_parameters,
-  component_particles,
-  component_performance,
-  component_portal,
-  component_simulation,
-  num_components = component_simulation
-};
-
-extern const char * component_name [];
-
-//======================================================================
-// PRECISION
-//======================================================================
-
+// extern const char * component_name [];
+/// @enum precision_enum
+/// @brief list of known floating-point precision
 enum precision_enum {
-  // @@@ KEEP IN SYNCH WITH precision_name in cello_precision.cpp
+  // @@@ KEEP IN SYNCH WITH precision_name in cello.cpp
   precision_unknown,     //  unknown precision
   precision_default,     //  default precision
   precision_single,      //  32-bit field data
@@ -105,29 +101,18 @@ enum precision_enum {
 };
 
 #ifdef CONFIG_PRECISION_SINGLE
-
 #   define default_precision precision_single
-
 #   define SCALAR_DEFINED
-
 #endif
-
 #ifdef CONFIG_PRECISION_DOUBLE
-
 #   define default_precision precision_double
-
 #   ifdef SCALAR_DEFINED
 #      error Both CONFIG_PRECISION_SINGLE and CONFIG_PRECISION_DOUBLE defined
 #   endif
-
 #   define SCALAR_DEFINED
-
 #endif
-
 #ifndef SCALAR_DEFINED
-
 #   error Neither CONFIG_PRECISION_SINGLE nor CONFIG_PRECISION_DOUBLE defined
-
 #endif
 
 namespace cello {
@@ -138,11 +123,11 @@ namespace cello {
   extern const char * precision_name[7];
 
   template <class T>
-  T err_rel (T a, T b)
+  T err_rel (const T & a, const T & b)
   {  return (a != 0.0) ? fabs((a - b) / a) : fabs(a-b);  }
 
   template <class T>
-  T err_abs (T a, T b)
+  T err_abs (const T & a, const T & b)
   {  return fabs(a-b);  };
 
 };
