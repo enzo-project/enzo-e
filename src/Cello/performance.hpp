@@ -8,6 +8,7 @@
 #ifndef PERFORMANCE_HPP
 #define PERFORMANCE_HPP
 
+#include "_parallel.hpp"
 #include "_memory.hpp"
 #include "_error.hpp"
 

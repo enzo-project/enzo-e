@@ -40,6 +40,16 @@ public: // interface
   virtual ~File () throw()
   {}
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | path_;
+    p | name_;
+  }
+#endif
+
   //--------------------------------------------------
   // Files
   //--------------------------------------------------

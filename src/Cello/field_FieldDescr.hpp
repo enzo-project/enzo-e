@@ -39,6 +39,32 @@ public: // functions
   /// Assignment operator
   FieldDescr & operator= (const FieldDescr & field_descr) throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | field_name_;
+    p | field_id_;
+    p | group_name_;
+    p | group_id_;
+    p | field_in_group_;
+    p | alignment_;
+    p | padding_;
+    p | courant_;
+    ERROR("FieldDescr::pup()",
+	  "Not fully implemented!");
+    //    p | precision_;
+    //    p | centering_;
+    //    p | ghosts_;
+    PUParray (p,refresh_face_,3);
+    p | min_value_;
+    p | max_value_;
+    //    p | min_action_;
+    //    p | max_action_;
+  }
+#endif
+
   /// Set membership of a field in a group
   void set_field_in_group(int id_field, int id_group) 
     throw(std::out_of_range);

@@ -24,6 +24,18 @@ public: /// interface
   /// Initialize the FileIfrit object
   FileIfrit() {};
 
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    /* this space deliberately left blank */
+
+  }
+#endif
+
   /// Read a 3d array from an ifrit file
   void read_bin  (std::string name, 
 		  float *     buffer, 

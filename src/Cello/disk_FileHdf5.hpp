@@ -30,6 +30,8 @@ public: // interface
   inline void pup (PUP::er &p)
   {
 
+    File::pup(p);
+
     p | file_id_;
     p | is_file_open_;
     p | data_id_;
