@@ -266,7 +266,7 @@ void Simulation::initialize_data_descr_() throw()
   std::string precision_str = 
     parameters_->value_string("Field:precision","default");
 
-  precision_enum precision = precision_unknown;
+  precision_type precision = precision_unknown;
 
   if      (precision_str == "default")   precision = precision_default;
   else if (precision_str == "single")    precision = precision_single;
