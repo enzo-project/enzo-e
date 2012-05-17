@@ -25,6 +25,16 @@ public: // interface
   virtual ~ItField () throw()
   { }
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    // this space intentionally blank
+  }
+#endif
+
   /// Go to the first value
   virtual void first () throw() = 0;
 

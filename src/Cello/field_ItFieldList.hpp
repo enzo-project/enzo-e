@@ -25,6 +25,18 @@ public: // interface
   virtual ~ItFieldList () throw()
   { }
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    ItField::pup(p);
+    p | index_;
+    p | values_;
+
+  }
+#endif
+
   /// Append a value to the list of values
   void append (int value) 
   { values_.push_back(value); }
