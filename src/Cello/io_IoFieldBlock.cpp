@@ -50,7 +50,7 @@ void IoFieldBlock::data_value
   if (name)   (*name)   = field_descr_->field_name(field_index_);
   if (type) {
 
-    precision_enum precision = field_descr_->precision(field_index_);
+    precision_type precision = field_descr_->precision(field_index_);
     if (precision == precision_default) precision = default_precision;
 
     switch (precision) {
