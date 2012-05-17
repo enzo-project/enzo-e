@@ -100,6 +100,8 @@ enum precision_enum {
   precision_quadruple,   // 128-bit field data
 };
 
+typedef int precision_type;
+
 #ifdef CONFIG_PRECISION_SINGLE
 #   define default_precision precision_single
 #   define SCALAR_DEFINED
@@ -117,9 +119,9 @@ enum precision_enum {
 
 namespace cello {
 
-  int sizeof_precision       (enum precision_enum);
-  int is_precision_supported (enum precision_enum);
-  double machine_epsilon     (enum precision_enum);
+  int sizeof_precision       (precision_type);
+  int is_precision_supported (precision_type);
+  double machine_epsilon     (precision_type);
   extern const char * precision_name[7];
 
   template <class T>

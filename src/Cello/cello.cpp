@@ -17,7 +17,7 @@ namespace cello {
 
   //----------------------------------------------------------------------
 
-  int sizeof_precision(enum precision_enum precision)
+  int sizeof_precision(enum precision_type precision)
   {
     int size = 0;
     switch (precision) {
@@ -49,7 +49,7 @@ namespace cello {
 
   //----------------------------------------------------------------------
 
-  int is_precision_supported(enum precision_enum precision)
+  int is_precision_supported(precision_type precision)
   {
     int is_supported = false;
     switch (precision) {
@@ -83,7 +83,7 @@ namespace cello {
 
   //----------------------------------------------------------------------
 
-  double machine_epsilon (enum precision_enum precision)
+  double machine_epsilon (precision_type precision)
   {
     double epsilon = 0.0;
     switch (precision) {

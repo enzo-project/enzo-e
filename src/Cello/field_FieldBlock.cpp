@@ -120,7 +120,7 @@ char * FieldBlock::field_unknowns
     ny += 2*gy + (cy?0:1);
     nz += 2*gz + (cz?0:1);
 
-    precision_enum precision = field_descr->precision(id_field);
+    precision_type precision = field_descr->precision(id_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
     field_unknowns += bytes_per_element * (gx + nx*(gy + ny*gz));
@@ -174,7 +174,7 @@ void FieldBlock::clear
 	 id_field++) {
       int nx,ny,nz;
       field_size(field_descr,id_field,&nx,&ny,&nz);
-      precision_enum precision = field_descr->precision(id_field);
+      precision_type precision = field_descr->precision(id_field);
       char * array = &array_[0] + offsets_[id_field];
       switch (precision) {
       case precision_single:
@@ -517,7 +517,7 @@ int FieldBlock::field_size
 
   // Return array size in bytes
 
-  precision_enum precision = field_descr->precision(id_field);
+  precision_type precision = field_descr->precision(id_field);
   int bytes_per_element = cello::sizeof_precision (precision);
   if (nz) {
     return (*nx) * (*ny) * (*nz) * bytes_per_element;
@@ -778,7 +778,7 @@ void FieldBlock::restore_array_
 
     // adjust for precision
 
-    precision_enum precision = field_descr->precision(id_field);
+    precision_type precision = field_descr->precision(id_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
     offset1 *= bytes_per_element;

@@ -229,7 +229,7 @@ void InitialDefault::copy_values_
 
   // Copy evaluated values to field values
 
-  precision_enum precision = field_descr->precision(index_field);
+  precision_type precision = field_descr->precision(index_field);
   switch (precision) {
   case precision_single:
     for (int iz = 0; iz<nz; iz++) {
