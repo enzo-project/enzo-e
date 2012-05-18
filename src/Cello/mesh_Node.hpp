@@ -23,6 +23,11 @@ public: // interface
   /// Destructor
   ~Node() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  void pup (PUP::er &p);
+#endif
+
   /// Set the data payload for the Node
   void set_data(void * data)
   { data_ = data; }

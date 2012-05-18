@@ -15,7 +15,7 @@
 
 Hierarchy::Hierarchy ( const Factory * factory,
 		       int dimension, int refinement) throw ()
-  : factory_(factory),
+  : factory_((Factory * )factory),
     patch_count_(0),
     patch_tree_(new Tree (dimension,refinement))
 {

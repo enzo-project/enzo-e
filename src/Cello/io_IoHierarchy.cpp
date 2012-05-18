@@ -11,7 +11,7 @@
 
 IoHierarchy::IoHierarchy(const Hierarchy * hierarchy) throw ()
   : Io(3,0),
-    hierarchy_(hierarchy)
+    hierarchy_((Hierarchy *)hierarchy)
 {
   meta_name_.push_back("lower");
   meta_name_.push_back("upper");

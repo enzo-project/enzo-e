@@ -66,6 +66,44 @@ public: // interface
   /// Initialize an empty Block
   Block() { };
 
+#ifdef CONFIG_USE_CHARM
+
+  void pup(PUP::er &p)
+  {
+    p | count_refresh_face_;
+    p | proxy_patch_;
+
+    p | num_field_blocks_;
+
+    // allocate field_block_[] vector first if unpacking
+    if (p.isUnpacking()) {
+      field_block_.resize(num_field_blocks_);
+    }
+
+    for (int i=0; i<num_field_blocks_; i++) {
+      p | *field_block_[i];
+    }
+
+    p | patch_id_;
+    p | patch_rank_;
+
+    PUParray(p,index_,3);
+
+    PUParray(p,size_,3);
+
+    PUParray(p,lower_,3);
+
+    PUParray(p,upper_,3);
+
+    p | cycle_;
+    p | time_;
+    p | dt_;
+
+  }
+
+#endif
+
+//----------------------------------------------------------------------
   /// Initialize a migrated Block
   Block (CkMigrateMessage *m) { };
 
@@ -74,9 +112,6 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
 
 public: // CHARM++ PUPer
-
-  /// Pack / unpack the Block in a CHARM++ program
-  void pup(PUP::er &p);
 
   /// Initialize block for the simulation.
   void p_initial();

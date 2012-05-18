@@ -27,6 +27,22 @@ public: // interface
   /// Delete the Hierarchy object
   virtual ~Hierarchy() throw ();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    p | *factory_;
+    p | patch_count_;
+    p | *patch_tree_;
+    PUParray(p,root_size_,3);
+    PUParray(p,lower_,3);
+    PUParray(p,upper_,3);
+
+  }
+#endif
+
   //----------------------------------------------------------------------
 
   /// Set domain lower extent
@@ -79,7 +95,7 @@ protected: // attributes
 
   /// Factory for creating Simulations, Hierarchies, Patches and Blocks
   /// [abstract factory design pattern]
-  const Factory * factory_;
+  Factory * factory_;
 
   /// Number of patches (redundant with patch_tree_)
   int patch_count_;

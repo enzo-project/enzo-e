@@ -50,20 +50,25 @@ public: // functions
     p | field_id_;
     p | group_name_;
     p | group_id_;
-    // p | field_in_group_;
+    p | field_in_group_;
     p | alignment_;
     p | padding_;
     p | courant_;
-    ERROR("FieldDescr::pup()",
-	  "Not fully implemented!");
     p | precision_;
-    //    p | centering_;
-    //    p | ghosts_;
+    int num_fields = field_name_.size();
+    if (p.isUnpacking()) {
+      centering_.resize(num_fields);
+      ghosts_.resize(num_fields);
+    }
+    for (int i=0; i<num_fields; i++) {
+      p | *centering_[i];
+      p | *ghosts_[i];
+    }
     PUParray (p,refresh_face_,3);
     p | min_value_;
     p | max_value_;
-    //    p | min_action_;
-    //    p | max_action_;
+    p | min_action_;
+    p | max_action_;
   }
 #endif
 

@@ -30,6 +30,28 @@ public: // functions
   /// Delete an Input object
   virtual ~Input() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | *file_;
+    p | process_;
+    p | loop_;
+    p | index_charm_;
+    p | cycle_;
+    p | time_;
+    p | file_name_;
+    p | file_args_;
+    p | *it_field_;
+    p | *io_block_;
+    p | *io_field_block_;
+    p | process_stride_;
+  }
+#endif
+
+
+
   /// Set file name
   void set_filename (std::string filename,
 		     std::vector<std::string> fileargs) throw();

@@ -23,6 +23,17 @@ public: // interface
   virtual ~Io () throw ()
   {}
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    p | meta_count_;
+    p | meta_name_;
+    p | data_count_;
+    p | data_name_;
+
+  }
+#endif
 
 #include "_io_Io_common.hpp"
 

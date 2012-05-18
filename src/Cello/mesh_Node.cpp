@@ -23,6 +23,17 @@ Node::~Node() throw ()
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+void Node::pup (PUP::er &p)
+{
+  // NOTE: change this function whenever attributes change
+  p | *((Patch * )data_);
+  p | *child_;
+}
+#endif
+
+//----------------------------------------------------------------------
+
 int Node::refine (int c)
 {
   if (child_ == 0) {

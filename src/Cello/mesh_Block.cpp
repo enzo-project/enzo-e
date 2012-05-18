@@ -156,41 +156,6 @@ Block::~Block() throw ()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
-void Block::pup(PUP::er &p)
-{
-  p | num_field_blocks_;
-
-  // allocate field_block_[] vector first if unpacking
-  if (p.isUnpacking()) {
-    field_block_.resize(num_field_blocks_);
-  }
-
-  for (int i=0; i<num_field_blocks_; i++) {
-    p | *field_block_[i];
-  }
-
-  PUParray(p,index_,3);
-
-  PUParray(p,size_,3);
-
-  PUParray(p,lower_,3);
-
-  PUParray(p,upper_,3);
-
-  p | cycle_;
-  p | time_;
-  p | dt_;
-
-  p | count_refresh_face_;
-
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
 Block::Block(const Block & block) throw ()
   : field_block_()
 /// @param     block  Object being copied
