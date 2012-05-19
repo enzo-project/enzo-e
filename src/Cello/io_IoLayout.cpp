@@ -11,7 +11,7 @@
 
 IoLayout::IoLayout(const Layout * layout) throw ()
   : Io(3,0),
-    layout_(layout)
+    layout_((Layout*)layout)
 {
   TRACE1("layout = %p",layout);
   meta_name_.push_back("layout_process_first");

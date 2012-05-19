@@ -1,4 +1,4 @@
-* TODO Add pup() [130/204]
+* TODO Add pup() [132/204]
   Potential issues
   - Block::proxy_patch_: how do proxy objects work with restart?
   - void * Node::data_ assumes data_ holds a Patch 
@@ -41,9 +41,9 @@
 ** DONE [[file:src/Cello/io_IoHierarchy.hpp][io_IoHierarchy.hpp]]
 ** DONE [[file:src/Cello/io_Io.hpp][io_Io.hpp]]
 ** DONE [[file:src/Cello/io_IoLayout.cpp][io_IoLayout.cpp]]
-** TODO [[file:src/Cello/io_IoLayout.hpp][io_IoLayout.hpp]]
+** DONE [[file:src/Cello/io_IoLayout.hpp][io_IoLayout.hpp]]
 ** DONE [[file:src/Cello/io_IoPatch.cpp][io_IoPatch.cpp]]
-** TODO [[file:src/Cello/io_IoPatch.hpp][io_IoPatch.hpp]]
+** DONE [[file:src/Cello/io_IoPatch.hpp][io_IoPatch.hpp]]
 ** TODO [[file:src/Cello/io_ItFilePatch.hpp][io_ItFilePatch.hpp]]
 ** TODO [[file:src/Cello/io_ItReduceAvg.hpp][io_ItReduceAvg.hpp]]
 ** DONE [[file:src/Cello/io_ItReduce.cpp][io_ItReduce.cpp]]

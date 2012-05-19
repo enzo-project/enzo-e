@@ -11,7 +11,7 @@
 
 IoPatch::IoPatch(const Patch * patch) throw ()
   : Io(6,0),
-    patch_(patch)
+    patch_((Patch*)patch)
 {
   DEBUG1("IoPatch(%p)\n",patch);
 

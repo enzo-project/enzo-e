@@ -50,7 +50,7 @@ public: // functions
     p | field_id_;
     p | group_name_;
     p | group_id_;
-    p | field_in_group_;
+    // p | field_in_group_;
     p | alignment_;
     p | padding_;
     p | courant_;
@@ -72,9 +72,9 @@ public: // functions
   }
 #endif
 
-   /// Set membership of a field in a group
-   void set_field_in_group(int id_field, int id_group) 
-     throw(std::out_of_range);
+   // /// Set membership of a field in a group
+   // void set_field_in_group(int id_field, int id_group) 
+   //   throw(std::out_of_range);
 
   /// Set alignment
   void set_alignment(int alignment) throw();
@@ -146,9 +146,9 @@ public: // functions
   int group_id(const std::string name) throw();
 
 
-   /// Return whether the given field is in the given group
-   bool field_in_group(int id_field, int id_group) 
-     const throw(std::out_of_range);
+   // /// Return whether the given field is in the given group
+   // bool field_in_group(int id_field, int id_group) 
+   //   const throw(std::out_of_range);
 
 
   /// alignment in bytes of fields in memory
@@ -208,9 +208,9 @@ private: // attributes
   /// Index of each group in group_name_
   std::map<std::string,int> group_id_;
 
-   typedef std::set<int> int_set_type;
-   /// Set of groups containing each field.  field_in_group_[field][group]
-   std::vector<int_set_type> field_in_group_;
+   // typedef std::set<int> int_set_type;
+   // /// Set of groups containing each field.  field_in_group_[field][group]
+   // std::vector<int_set_type> field_in_group_;
 
   /// alignment of start of each field in bytes
   int alignment_;

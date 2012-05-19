@@ -83,7 +83,5 @@ private: // attributes
   /// number of compute blocks per thread
   int block_count_[3];
 
-private: // functions
-
 };
 #endif /* PARALLEL_LAYOUT_HPP */

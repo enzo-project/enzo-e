@@ -17,7 +17,7 @@ FieldDescr::FieldDescr ()
     field_id_(),
     group_name_(),
     group_id_(),
-    field_in_group_(),
+    // field_in_group_(),
     alignment_(1),
     padding_(0),
     courant_(1),
@@ -135,12 +135,12 @@ int FieldDescr::group_id(const std::string name)
 
 //----------------------------------------------------------------------
 
-bool FieldDescr::field_in_group(int id_field, int id_group) const 
-  throw(std::out_of_range)
-{
-  int_set_type t = field_in_group_.at(id_field);
-  return t.find(id_group) != t.end();
-}
+// bool FieldDescr::field_in_group(int id_field, int id_group) const 
+//   throw(std::out_of_range)
+// {
+//   int_set_type t = field_in_group_.at(id_field);
+//   return t.find(id_group) != t.end();
+// }
 
 //----------------------------------------------------------------------
 
@@ -272,8 +272,8 @@ int FieldDescr::insert_field(std::string field_name) throw()
   ghosts[1] = 1;
   ghosts[2] = 1;
 
-  int_set_type a;
-  field_in_group_.push_back(a);
+  // int_set_type a;
+  // field_in_group_.push_back(a);
   precision_. push_back(precision);
   centering_. push_back(centered);
   ghosts_.    push_back(ghosts);
@@ -296,11 +296,11 @@ void FieldDescr::insert_group(std::string group_name) throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_field_in_group(int id_field, int id_group) 
-  throw(std::out_of_range)
-{
-  field_in_group_.at(id_field).insert(id_group);
-}
+// void FieldDescr::set_field_in_group(int id_field, int id_group) 
+//   throw(std::out_of_range)
+// {
+//   field_in_group_.at(id_field).insert(id_group);
+// }
 
 //----------------------------------------------------------------------
 
@@ -417,7 +417,7 @@ void FieldDescr::copy_(const FieldDescr & field_descr) throw()
   field_id_       = field_descr.field_id_;
   group_name_     = field_descr.group_name_;
   group_id_       = field_descr.group_id_;
-  field_in_group_ = field_descr.field_in_group_;
+  // field_in_group_ = field_descr.field_in_group_;
   precision_      = field_descr.precision_;
   centering_.clear();
   for (size_t i=0; i<field_descr.centering_.size(); i++) {
