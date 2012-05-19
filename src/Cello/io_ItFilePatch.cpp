@@ -14,7 +14,7 @@
 //----------------------------------------------------------------------
 
 ItFilePatch::ItFilePatch ( const Input * input ) throw ()
-  : input_(input),
+  : input_((Input *)input),
     index1_(0)
 {}
 

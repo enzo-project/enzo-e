@@ -47,6 +47,7 @@ enum face_enum {
   face_upper = 1,
   face_all
 };
+typedef int face_type;
 
 /// @enum     axis_enum
 /// @brief    Axis [x|y|z]
@@ -56,6 +57,7 @@ enum axis_enum {
   axis_z = 2,
   axis_all
 };
+typedef int axis_type;
 
 /// @enum     reduce_enum
 /// @brief    Reduction operator, used for image projections
@@ -66,6 +68,7 @@ enum reduce_enum {
   reduce_avg,     /// Average value along the axis
   reduce_sum      /// Sum of values along the axis
 };
+typedef int reduce_type;
 
 // /// @enum component_enum
 // /// @brief List of components

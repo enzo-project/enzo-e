@@ -40,7 +40,7 @@ Patch::Patch
   block_exists_(false),
   block_loop_(0),
 #else
-  factory_(factory),
+  factory_((Factory * )factory),
 #endif
   group_process_(GroupProcess::create(process_first,process_last_plus)),
   layout_ (nbx,nby,nbz)

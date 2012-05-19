@@ -27,12 +27,30 @@ public: // functions
   /// OutputImage destructor: free allocated image data
   virtual ~OutputImage() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    p | map_r_;
+    p | map_g_;
+    p | map_b_;
+    p |  map_a_;
+    p | *data_;
+    p | op_reduce_;
+    p | axis_;
+    p | nrows_;
+    p | ncols_;
+    WARNING("OutputImage::pup","Not calling pup() on pngwriter object");
+  // p | *png_;
+  }
+#endif
+
   // Set the image colormap
   void set_colormap
   (int n, double * map_r, double * map_g, double * map_b, double * map_a=0) throw();
 
   // Set the axis for projecting
-  void set_axis (axis_enum axis) throw()
+  void set_axis (axis_type axis) throw()
   { axis_ = axis; };
 
 
@@ -114,10 +132,10 @@ private: // attributes
   double * data_;
 
   /// Reduction operation
-  reduce_enum op_reduce_;
+  reduce_type op_reduce_;
 
   /// Axis along which to reduce
-  axis_enum axis_;
+  axis_type axis_;
 
   /// Current image columns
   int nrows_;

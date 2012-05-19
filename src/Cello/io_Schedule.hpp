@@ -12,13 +12,15 @@
 /// @enum     schedule_type
 /// @brief    Scheduling types
 
-enum schedule_type {
+enum schedule_enum {
   schedule_type_unknown,
   schedule_type_cycle_interval,
   schedule_type_cycle_list,
   schedule_type_time_interval,
   schedule_type_time_list
 };
+
+typedef int schedule_type;
 
 class Schedule {
 
@@ -30,6 +32,24 @@ public: // functions
 
   /// Create an uninitialized Schedule object with the given file_name format
   Schedule() throw();
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    p | active_;
+    p | schedule_type_;
+    p | cycle_interval_;
+    p | cycle_list_;
+    p | cycle_skip_;
+    p | time_interval_;
+    p | time_list_;
+    p | time_skip_;
+    p | index_;
+  }
+#endif
 
   /// Set cycle interval (start, step, stop)
   void set_cycle_interval
