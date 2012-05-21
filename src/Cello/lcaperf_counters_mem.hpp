@@ -35,6 +35,15 @@ public: // interface
   /// Assignment operator
   CountersMem & operator= (const CountersMem & counters) throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    WARNING("CountersMem::pup()","Static variables not pup'ed");
+  }
+#endif
+
   //----------------------------------------------------------------------
 
 public: // functions

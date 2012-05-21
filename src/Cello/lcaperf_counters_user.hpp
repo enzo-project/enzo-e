@@ -34,10 +34,20 @@ public: // interface
   /// Assignment operator
   CountersUser & operator= (const CountersUser & counters) throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Counters::pup(p);
+    p | value_;
+  }
+#endif
+
   //----------------------------------------------------------------------
 
   /// Create a new counter
-  void create (std::string counter, enum counter_type type);
+  void create (std::string counter, counter_type type);
 
   /// Delete a counter
   void remove (std::string counter);

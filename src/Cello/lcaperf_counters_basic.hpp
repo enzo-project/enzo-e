@@ -35,6 +35,15 @@ public: // interface
   /// Assignment operator
   CountersBasic & operator= (const CountersBasic & CountersBasic) throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Counters::pup(p);
+  }
+#endif
+
   //----------------------------------------------------------------------
 
 protected: // functions

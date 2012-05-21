@@ -36,6 +36,21 @@ public: // interface
   /// Assignment operator
   CountersMpi & operator= (const CountersMpi & counters) throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    //    p |  ip_mpi_;
+    //    p |  np_mpi_;
+    //    p |  ip_node_;
+    //    p |  np_node_;
+    ERROR("CountersMpi::pup",
+	  "Charm++ pup() function called in MPI configuration");
+
+  }
+#endif
+
   //----------------------------------------------------------------------
 
   /// Initialize CountersMpi 
