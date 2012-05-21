@@ -48,6 +48,21 @@ private:
 
 public: // interface
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    p |  *timer_;
+    p |  active_;
+    p |  ip_;
+    p |  group_default_;
+    p |  group_active_;
+
+  }
+#endif
+
   /// Return an instance of a Monitor object
   static Monitor * instance()
   { 

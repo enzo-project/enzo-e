@@ -39,6 +39,18 @@ public: // interface
   /// Destructor
   ~NodeTrace () throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p |  level_;
+    p |  index_;
+    WARNING("NodeTrace::pup","not pup'ing node_ vector of pointers");
+    //    p |  node_;
+  }
+#endif
+  
   /// Move one level "up" the Tree to the specified child (Z-ordering)
   inline Node * push (int index) 
   {

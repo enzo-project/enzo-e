@@ -8,6 +8,7 @@
 #ifndef ERROR_HPP
 #define ERROR_HPP
 
+#include "_performance.hpp"
 #include "_monitor.hpp"
 #include "_parallel.hpp"
 

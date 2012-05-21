@@ -7,6 +7,8 @@
 ///
 /// Wrapper functions for PAPI
 
+#include "cello.hpp"
+
 #include "performance.hpp"
 
 //----------------------------------------------------------------------

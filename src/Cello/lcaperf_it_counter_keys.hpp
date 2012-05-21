@@ -23,6 +23,21 @@ public: // interface
 
   /// Delete the ItCounterKeys object
   ~ItCounterKeys () throw ();
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    WARNING("ItCounterKeys::pup","Not pup'ing counters_");
+    //    p |  counters_;
+    WARNING("ItCounterKeys::pup","Not pup'ing iter_");
+    //    p |  iter_;
+    WARNING("ItCounterKeys::pup","Not pup'ing value_");
+    //    p |  value_;
+  }
+#endif
   
   /// Iterate through all local CounterKeys in the Mesh
   const char * operator++ () throw();

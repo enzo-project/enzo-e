@@ -48,6 +48,33 @@ private: // interface
   /// Delete the Memory object
   ~Memory() throw ();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+#   ifdef CONFIG_USE_MEMORY
+    WARNING("Memory::pup","Not pup'ing instance_ static variable");
+    // p | instance_;
+    p | is_active_;
+    p | do_allocate_fill_; 
+    p |  allocate_fill_value_;
+    p | do_deallocate_fill_; 
+    p |  deallocate_fill_value_;
+    p |  max_group_id_;
+    WARNING("Memory::pup","Not pup'ing curr_group_ stack variable");
+    //    p |  curr_group_;
+    WARNING("Memory::pup","Not pup'ing group_names_ pointer array");
+    //  PUParray(p,group_names_,MEMORY_MAX_NUM_GROUPS + 1);
+    PUParray(p,limit_,      MEMORY_MAX_NUM_GROUPS + 1);
+    PUParray(p,bytes_,      MEMORY_MAX_NUM_GROUPS + 1);
+    PUParray(p,bytes_high_, MEMORY_MAX_NUM_GROUPS + 1);
+    PUParray(p,new_calls_,  MEMORY_MAX_NUM_GROUPS + 1);
+    PUParray(p,delete_calls_,MEMORY_MAX_NUM_GROUPS + 1);
+#  endif
+  }
+#endif
+
 public: // interface
 
   /// Allocate memory
@@ -146,9 +173,6 @@ private: // attributes
 #ifdef CONFIG_USE_MEMORY
   /// Single instance of the Memory object (singleton design pattern)
   static Memory instance_;
-#endif
-
-#ifdef CONFIG_USE_MEMORY
   
   /// Whether keeping track of memory statistics is active or not
   bool is_active_;
