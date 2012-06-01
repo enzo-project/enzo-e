@@ -23,6 +23,14 @@ public: // interface
     : Reduce (group_process)
   { /* EMPTY */ };
     
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    Reduce::pup(p);
+  }
+#endif
+
   /// Destructor
   virtual ~ReduceCharm() throw()
   { /* EMPTY */ };

@@ -18,12 +18,21 @@ public: // interface
 
   /// Constructor
   Reduce(const GroupProcess * group_process) throw()
-    : group_process_(group_process)
+    : group_process_((GroupProcess *)group_process)
   { /* EMPTY */ };
     
   /// Destructor
   virtual ~Reduce() throw()
   { /* EMPTY */ };
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | *group_process_;
+  }
+#endif
 
   /// Parallel int reduction of the stored local value
   virtual int reduce_int 
@@ -37,7 +46,7 @@ public: // interface
 
 protected: // attributes
 
-  const GroupProcess * group_process_;
+  GroupProcess * group_process_;
 
 };
 
