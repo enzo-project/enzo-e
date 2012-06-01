@@ -1,4 +1,4 @@
-* TODO Add pup() [170/204]
+* TODO Add pup() [172/204]
   Potential issues
   - Block::proxy_patch_: how do proxy objects work with restart?
   - void * Node::data_ assumes data_ holds a Patch 
@@ -119,8 +119,8 @@
 ** DONE [[file:src/Cello/parallel_ReduceCharm.hpp][parallel_ReduceCharm.hpp]]
 ** DONE [[file:src/Cello/parallel_Reduce.hpp][parallel_Reduce.hpp]]
 ** DONE [[file:src/Cello/parallel_ReduceMpi.cpp][parallel_ReduceMpi.cpp]]
-** TODO [[file:src/Cello/parallel_ReduceMpi.hpp][parallel_ReduceMpi.hpp]]
-** TODO [[file:src/Cello/parallel_ReduceSerial.hpp][parallel_ReduceSerial.hpp]]
+** DONE [[file:src/Cello/parallel_ReduceMpi.hpp][parallel_ReduceMpi.hpp]]
+** DONE [[file:src/Cello/parallel_ReduceSerial.hpp][parallel_ReduceSerial.hpp]]
 ** DONE [[file:src/Cello/_parameters.hpp][_parameters.hpp]]
 ** DONE [[file:src/Cello/parameters_Param.cpp][parameters_Param.cpp]]
 ** DONE [[file:src/Cello/parameters_Parameters.cpp][parameters_Parameters.cpp]]

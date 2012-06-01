@@ -56,6 +56,7 @@ public: // interface
 
     p |  *timer_;
     p |  active_;
+    WARNING("Monitor::pup","ip_ may change");
     p |  ip_;
     p |  group_default_;
     p |  group_active_;

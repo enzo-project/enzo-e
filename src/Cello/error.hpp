@@ -9,10 +9,10 @@
 #define ERROR_HPP
 
 #include "_performance.hpp"
+#include "_error.hpp"
 #include "_monitor.hpp"
 #include "_parallel.hpp"
 
-#include "_error.hpp"
 
 #endif /* ERROR_HPP */
 

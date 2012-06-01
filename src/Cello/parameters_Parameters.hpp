@@ -38,6 +38,21 @@ public: // interface
   /// Delete a Parameters object (singleton design pattern)
   ~Parameters();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    WARNING("Parameters::pup","current_group_ not pup'ed");
+    //    PUParray(p,current_group_,MAX_GROUP_DEPTH);
+    p | current_group_depth_;
+    WARNING("Parameters::pup","parameter_map_ not pup'ed");
+    //    p | parameter_map_;
+    p | *parameter_tree_;
+    p | *monitor_; 
+
+  }
+#endif
+
   /// Read in parameters from a file
   void read (const char * file_name);
   /// Write parameters to a file

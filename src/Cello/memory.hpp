@@ -8,8 +8,8 @@
 #ifndef MEMORY_HPP
 #define MEMORY_HPP
 
-#include "_parallel.hpp"
 #include "_error.hpp"
+#include "_parallel.hpp"
 
 #include "_memory.hpp"
 

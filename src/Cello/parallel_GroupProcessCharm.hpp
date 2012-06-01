@@ -25,6 +25,17 @@ public: // interface
   /// Destructor
   virtual ~GroupProcessCharm() throw()
   {}
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    GroupProcess::pup(p);
+    p | process_first_;
+    p | process_last_plus_;
+  }
+#endif
+
 
 #ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
