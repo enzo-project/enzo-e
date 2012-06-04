@@ -19,12 +19,16 @@
 #ifndef PROBLEM_PROBLEM_HPP
 #define PROBLEM_PROBLEM_HPP
 
+class Block;
 class Boundary;
 class Factory;
+class FieldDescr;
 class Initial;
+class Input;
 class Method;
 class Output;
 class Parameters;
+class Simulation;
 class Stopping;
 class Timestep;
 
@@ -42,11 +46,26 @@ public: // interface
   /// Destructor
   virtual ~Problem() throw();
 
-  /// Copy constructor
-  Problem(const Problem & problem) throw();
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
 
-  /// Assignment operator
-  Problem & operator= (const Problem & problem) throw();
+    p | * boundary_;
+    WARNING("Problem::pup", "initial_list_ not pup'ed");
+    //  std::vector<Initial *> initial_list_;
+    p | * stopping_;
+    p | * timestep_;
+    WARNING("Problem::pup", "method_list_ not pup'ed");
+    //    std::vector<Method *> method_list_;
+    WARNING("Problem::pup", "output_list_ not pup'ed");
+    //  std::vector<Output *> output_list_;
+    p | index_initial_;
+    p | index_output_;
+
+  }
+#endif
 
   /// Return the boundary object
   Boundary * boundary() const throw()  { return boundary_; }

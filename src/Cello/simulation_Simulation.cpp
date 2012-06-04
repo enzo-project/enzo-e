@@ -26,7 +26,7 @@ Simulation::Simulation
 : factory_(0),
   parameters_(0),
   parameter_file_(parameter_file),
-  group_process_(group_process),
+  group_process_((GroupProcess *)group_process),
   is_group_process_new_(false),
 #ifdef CONFIG_USE_CHARM
   patch_loop_(0),

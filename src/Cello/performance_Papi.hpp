@@ -35,6 +35,22 @@ public: // interface
   // Papi & operator= (const Papi & papi) throw()
   // {return *this};
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | is_started_;
+    p | time_real_total_;
+    p | time_proc_total_;
+    p | flop_count_total_;
+    p | flop_rate_;
+    p | time_real_;
+    p | time_proc_;
+    p | flop_count_;
+  }
+#endif
+
   //----------------------------------------------------------------------
   // global control
   //----------------------------------------------------------------------

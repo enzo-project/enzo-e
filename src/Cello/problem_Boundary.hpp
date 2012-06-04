@@ -24,6 +24,15 @@ public: // interface
   virtual ~Boundary() throw()
   {}
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+  }
+#endif
+
+
 public: // virtual functions
 
   /// Enforce boundary conditions

@@ -25,6 +25,18 @@ public: // interface
   virtual ~Initial() throw()
   {} ;
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | cycle_;
+    p | time_;
+
+  }
+#endif
+
+
   /// Initial time
   double time() const throw() { return time_; }
 

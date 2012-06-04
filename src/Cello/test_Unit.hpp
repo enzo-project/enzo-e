@@ -72,6 +72,7 @@ private:
     p | test_num_;
     p | is_active_;
     p | comm_size_;
+    WARNING ("Unit::pup","comm_rank_ not pup'ed");
     //  p | comm_rank_;
     p | timer_;
 
