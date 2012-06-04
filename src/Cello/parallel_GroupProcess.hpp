@@ -42,21 +42,8 @@ class GroupProcess
   {
     // NOTE: change this function whenever attributes change
     p | size_;
-    WARNING("GroupProcess::pup","rank_ may change");
-    p | rank_;
-
-<<<<<<< /home/bordner/cello/cello-src.charm-pupping/src/Cello/parallel_GroupProcess.hpp
-  }
-=======
-#ifdef CONFIG_USE_CHARM
-  /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    // NOTE: change this function whenever attributes change
-    p | size_;
     p | rank_;
   }
->>>>>>> /tmp/parallel_GroupProcess.hpp~other.rZvWzT
 #endif
 
   //--------------------------------------------------

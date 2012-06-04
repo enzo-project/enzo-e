@@ -193,10 +193,10 @@ public: // interface
   void group_clear() throw();
   
   /// Return the type of the given parameter
-  parameter_enum type(std::string) throw();
+  parameter_type type(std::string) throw();
 
   /// Return the type of the given parameter
-  parameter_enum list_type(int, std::string) throw();
+  parameter_type list_type(int, std::string) throw();
 
   //--------------------------------------------------
 

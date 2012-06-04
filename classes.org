@@ -1,4 +1,4 @@
-* TODO Add pup() [172/204]
+* TODO Add pup() [176/204]
   Potential issues
   - Block::proxy_patch_: how do proxy objects work with restart?
   - void * Node::data_ assumes data_ holds a Patch 
@@ -124,10 +124,10 @@
 ** DONE [[file:src/Cello/_parameters.hpp][_parameters.hpp]]
 ** DONE [[file:src/Cello/parameters_Param.cpp][parameters_Param.cpp]]
 ** DONE [[file:src/Cello/parameters_Parameters.cpp][parameters_Parameters.cpp]]
-** TODO [[file:src/Cello/parameters_Parameters.hpp][parameters_Parameters.hpp]]
-** TODO [[file:src/Cello/parameters_Param.hpp][parameters_Param.hpp]]
-** TODO [[file:src/Cello/parameters_ParamNode.hpp][parameters_ParamNode.hpp]]
-** TODO [[file:src/Cello/performance_Counters.hpp][performance_Counters.hpp]]
+** DONE [[file:src/Cello/parameters_Parameters.hpp][parameters_Parameters.hpp]]
+** DONE [[file:src/Cello/parameters_Param.hpp][parameters_Param.hpp]]
+** DONE [[file:src/Cello/parameters_ParamNode.hpp][parameters_ParamNode.hpp]]
+** DONE [[file:src/Cello/performance_Counters.hpp][performance_Counters.hpp]]
 ** DONE [[file:src/Cello/_performance.hpp][_performance.hpp]]
 ** DONE [[file:src/Cello/performance_Papi.cpp][performance_Papi.cpp]]
 ** TODO [[file:src/Cello/performance_Papi.hpp][performance_Papi.hpp]]

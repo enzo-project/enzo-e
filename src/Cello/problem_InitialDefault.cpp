@@ -58,7 +58,7 @@ void InitialDefault::enforce
 
     // parameter: Initial : <field> : value
 
-    parameter_enum parameter_type = parameters_->type("value");
+    parameter_type parameter_type = parameters_->type("value");
 
     if (parameter_type == parameter_float) {
 
@@ -279,7 +279,7 @@ void InitialDefault::evaluate_float_
 
   // parameter: Initial : <field> : value
 
-  parameter_enum value_type = 
+  parameter_type value_type = 
     parameters_->list_type(index_list,"value");
 
   if (value_type != parameter_float_expr &&
@@ -313,7 +313,7 @@ void InitialDefault::evaluate_logical_
 
   // parameter: Initial : <field> : value
 
-  parameter_enum value_type = 
+  parameter_type value_type = 
     parameters_->list_type(index_list,"value");
 
   bool v;
