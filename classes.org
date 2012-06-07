@@ -5,6 +5,7 @@
   - external objects, e.g. pngwriter in [[file:src/Cello/io_OutputImage.hpp][io_OutputImage.hpp]]
   - performance objects: start times, etc.
   - std::vector<bool> not supported?
+  - how to pup a union variable?
   
 ** DONE [[file:src/Cello/cello.hpp][cello.hpp]]
 ** DONE [[file:src/Cello/charm_initial.cpp][charm_initial.cpp]]
