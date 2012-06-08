@@ -23,6 +23,15 @@ public: // interface
   /// Destructor
   ~EnzoProblem() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Problem::pup(p);
+  }
+#endif
+
 private: // functions
 
   /// Create named boundary conditions object

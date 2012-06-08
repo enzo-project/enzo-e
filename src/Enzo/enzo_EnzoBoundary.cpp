@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoBoundary::EnzoBoundary (boundary_type_enum boundary_type) throw()
+EnzoBoundary::EnzoBoundary (boundary_type boundary_type) throw()
   : Boundary(),
     boundary_type_ (boundary_type)
 { 

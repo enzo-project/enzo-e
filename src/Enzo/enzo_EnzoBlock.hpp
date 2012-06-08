@@ -190,7 +190,28 @@ public: // interface
 
   /// Pack / unpack the Block in a CHARM++ program
   void pup(PUP::er &p)
-  { ERROR("EnoBlock::pup","Not Implemented"); };
+  { 
+
+    Block::pup(p);
+
+    p | Time_;
+    p | CycleNumber;
+    p | OldTime;
+    p | dt;
+
+    WARNING("EnzoBlock::pup()", "AccelerationField not pup'ed");
+    WARNING("EnzoBlock::pup()", "SubgridFluxes not pup'ed");
+
+    PUParray(p,GridLeftEdge,MAX_DIMENSION); 
+    PUParray(p,GridDimension,MAX_DIMENSION); 
+    PUParray(p,GridStartIndex,MAX_DIMENSION); 
+    PUParray(p,GridEndIndex,MAX_DIMENSION); 
+    PUParray(p,CellWidth,MAX_DIMENSION);
+
+    WARNING("EnzoBlock::pup()", "BaryonField not pup'ed");
+    WARNING("EnzoBlock::pup()", "OldBaryonField not pup'ed");
+
+  };
 
 #endif
 
