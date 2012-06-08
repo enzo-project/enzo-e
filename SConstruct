@@ -214,15 +214,18 @@ if (atsync != 0):        defines = defines + define_atsync
 
 is_arch_valid = 0
 sys.path.append("./config");
-if   (arch == "linux-gnu"):    from linux_gnu       import *
-if   (arch == "linux-gprof"):  from linux_gnu_gprof import *
-elif (arch == "linux-jump"):   from linux_jump      import *
-elif (arch == "ncsa-bw"):      from ncsa_bw         import *
-elif (arch == "triton-pgi"):   from triton_pgi      import *
-elif (arch == "triton-intel"): from triton_intel    import *
-elif (arch == "triton-gnu"):   from triton_gnu      import *
-elif (arch == "triton-tau"):   from triton_tau      import *
-elif (arch == "triton-jump"):  from triton_jump     import *
+
+
+if   (arch == "linux-gnu"):    from linux_gnu    import *
+elif (arch == "linux-gprof"):  from linux_gprof  import *
+elif (arch == "linux-mpe"):    from linux_mpe    import *
+elif (arch == "linux-tau"):    from linux_tau    import *
+elif (arch == "ncsa-bw"):      from ncsa_bw      import *
+elif (arch == "triton-gnu"):   from triton_gnu   import *
+elif (arch == "triton-intel"): from triton_intel import *
+elif (arch == "triton-mpe"):   from triton_mpe   import *
+elif (arch == "triton-pgi"):   from triton_pgi   import *
+elif (arch == "triton-tau"):   from triton_tau   import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
