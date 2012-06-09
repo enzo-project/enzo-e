@@ -11,7 +11,7 @@ new_initial = 1
 
 # Whether to print out messages with the TRACE() series of statements
 
-trace = 0
+trace = 1
 
 # Whether to enable displaying messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
@@ -30,10 +30,9 @@ debug_verbose = 0
 
 memory = 1
 
-# Limit CHARM++ load balancing to only when AtSync() is called.  See
-# src/Mesh/mesh_Block.cpp
+# Enable charm++ dynamic load balancing
 
-atsync = 0
+balance = 1
 
 # Whether to compile with -pg to use gprof for performance profiling
 
@@ -125,7 +124,6 @@ define["double"] =        ['CONFIG_PRECISION_DOUBLE']
 
 # Performance defines
 
-define_atsync =           ['CONFIG_CHARM_ATSYNC']
 define_memory =           ['CONFIG_USE_MEMORY']
 define_projections =      ['CONFIG_USE_PROJECTIONS']
 define_papi  =            ['CONFIG_USE_PAPI','PAPI3']
@@ -206,7 +204,6 @@ if (new_initial != 0):   defines = defines + define_new_initial
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
-if (atsync != 0):        defines = defines + define_atsync
 
 #======================================================================
 # ARCHITECTURE SETTINGS
@@ -244,6 +241,8 @@ cc ['charm']  = charmc + charm_perf + ' '
 # UNIT TEST SETTINGS
 #======================================================================
 
+parallel_run_args = ""
+
 if (type == "serial"):
      serial_run   = ""
      parallel_run = ""
@@ -253,11 +252,12 @@ elif (type == "mpi"):
 elif (type == "charm"):
      serial_run   = ""
      parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
+     if (balance):  parallel_run_args = "+balancer RotateLB"
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"
-     parallel_run = parallel_run + " " + valgrind
      serial_run   = valgrind + " " + serial_run
+     parallel_run = parallel_run + " " + valgrind
 
 #======================================================================
 # CELLO PATHS
@@ -358,6 +358,7 @@ if (type == "charm"):
 Export('env')
 Export('type')
 Export('parallel_run')
+Export('parallel_run_args')
 Export('serial_run')
 Export('use_papi')
 

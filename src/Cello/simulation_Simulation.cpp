@@ -72,9 +72,9 @@ Simulation::Simulation
   lcaperf_ = new lca::LcaPerf;
 
   lcaperf_->initialize();
+  lcaperf_->begin();
   lcaperf_->new_region("simulation");
   lcaperf_->new_attribute("cycle",LCAP_INT);
-  lcaperf_->begin();
   lcaperf_->assign("cycle",0);
 
   parameters_ = new Parameters(parameter_file,monitor_);

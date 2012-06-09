@@ -42,13 +42,6 @@ Block::Block
 { 
   DEBUG1("ID = %d",patch_id);
   DEBUG1("IP = %d",patch_rank);
-// #ifdef CONFIG_USE_CHARM
-
-// #ifdef CONFIG_CHARM_ATSYNC
-//   usesAtSync = CmiTrue;
-// #endif
-
-// #endif
 
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);
@@ -103,12 +96,9 @@ Block::Block
     dt_(0)
 
 { 
+
   DEBUG1("ID = %d",patch_id_);
   DEBUG1("IP = %d",patch_rank_);
-
-#ifdef CONFIG_CHARM_ATSYNC
-  usesAtSync = CmiTrue;
-#endif
 
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);

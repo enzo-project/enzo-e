@@ -174,7 +174,13 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize a migrated Block
-  EnzoBlock (CkMigrateMessage *m) {};
+  EnzoBlock (CkMigrateMessage *m) 
+  {
+    TRACE("CkMigrateMessage");
+    for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
+      BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
+    }
+  };
 
   /// Initialize the EnzoBlock chare array
   EnzoBlock

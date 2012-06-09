@@ -899,7 +899,6 @@ void EnzoBlock::initialize () throw()
   for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
     BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
   }
-  DEBUG ("Exit EnzoBlock::initialize()\n");
 
 }
 

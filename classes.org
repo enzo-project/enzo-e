@@ -1,4 +1,7 @@
-* TODO Add pup() [204/204]
+* TODO Debug pup()
+** [[file:src/Enzo/enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]]
+
+* DONE Add pup() [204/204]
   Potential issues
   - Block::proxy_patch_: how do proxy objects work with restart?
   - void * Node::data_ assumes data_ holds a Patch 
@@ -6,7 +9,6 @@
   - performance objects: start times, etc.
   - std::vector<bool> not supported?
   - how to pup a union variable?
-  
 ** DONE [[file:src/Cello/cello.hpp][cello.hpp]]
 ** DONE [[file:src/Cello/charm_initial.cpp][charm_initial.cpp]]
 ** DONE [[file:src/Cello/charm_Loop.hpp][charm_Loop.hpp]]

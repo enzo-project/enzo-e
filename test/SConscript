@@ -1,5 +1,6 @@
 Import('env')
 Import('parallel_run')
+Import('parallel_run_args')
 Import('type')
 Import('serial_run')
 Import('ip_charm')
@@ -14,8 +15,8 @@ do_restart = 0
 # Define a test for running unit tests
 
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
-run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1; $COPY")
-run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1; $COPY")
+run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS> $TARGET 2>&1; $COPY")
+run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS " + parallel_run_args + " > $TARGET 2>&1; $COPY")
 make_movie   = Builder(action = "png2swf -r 5 -o $TARGET ${ARGS} ")
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
