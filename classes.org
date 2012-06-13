@@ -1,6 +1,5 @@
 * TODO Debug pup()
 ** [[file:src/Enzo/enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]]
-
 * DONE Add pup() [204/204]
   Potential issues
   - Block::proxy_patch_: how do proxy objects work with restart?

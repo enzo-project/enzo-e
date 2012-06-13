@@ -177,9 +177,9 @@ public: // interface
   EnzoBlock (CkMigrateMessage *m) 
   {
     TRACE("CkMigrateMessage");
-    for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-      BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
-    }
+    // for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
+    //   BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
+    // }
   };
 
   /// Initialize the EnzoBlock chare array
@@ -198,24 +198,44 @@ public: // interface
   void pup(PUP::er &p)
   { 
 
+    TRACE0;
     Block::pup(p);
+    TRACE0;
 
     p | Time_;
+    TRACE0;
     p | CycleNumber;
+    TRACE0;
     p | OldTime;
+    TRACE0;
     p | dt;
+    TRACE0;
 
     WARNING("EnzoBlock::pup()", "AccelerationField not pup'ed");
     WARNING("EnzoBlock::pup()", "SubgridFluxes not pup'ed");
 
     PUParray(p,GridLeftEdge,MAX_DIMENSION); 
+    TRACE0;
     PUParray(p,GridDimension,MAX_DIMENSION); 
+    TRACE0;
     PUParray(p,GridStartIndex,MAX_DIMENSION); 
+    TRACE0;
     PUParray(p,GridEndIndex,MAX_DIMENSION); 
+    TRACE0;
     PUParray(p,CellWidth,MAX_DIMENSION);
+    TRACE0;
 
     WARNING("EnzoBlock::pup()", "BaryonField not pup'ed");
     WARNING("EnzoBlock::pup()", "OldBaryonField not pup'ed");
+    TRACE1("EnzoBlock::NumberOfBaryonFields=%d",EnzoBlock::NumberOfBaryonFields);
+    if (p.isUnpacking()) {
+      for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
+	TRACE2("p[%d] = %p",field,field_block_[0]->field_values(field));
+	BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
+    TRACE0;
+      }
+    }
+    TRACE0;
 
   };
 
