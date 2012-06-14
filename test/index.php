@@ -291,7 +291,6 @@ function summary_failed_tests ($test_output, $executables)
       $output = "../test/$types[$i]/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
     }
-
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
   }
   printf ("<th></th>");
@@ -510,9 +509,22 @@ test_summary("Io",array("ItReduce"),
 test_summary("Memory",array("Memory"),
 	     array("test_Memory")); 
 test_summary("Mesh",
-	     array("Hierarchy","Patch","Block","Tree","Node","NodeTrace","ItNode"),
-	     array("test_Hierarchy","test_Patch","test_Block","test_Tree","test_TreeDensity",
-		   "test_Node","test_NodeTrace","test_ItNode")); 
+	     array("Hierarchy",
+		   "Patch",
+		   "Block",
+		   "Tree",
+		   "TreeDensity",
+		   "Node",
+		   "NodeTrace",
+		   "ItNode"),
+	     array("test_Hierarchy",
+		   "test_Patch",
+		   "test_Block",
+		   "test_Tree",
+		   "test_TreeDensity",
+		   "test_Node",
+		   "test_NodeTrace",
+		   "test_ItNode")); 
 test_summary("Monitor",array("Monitor"),
 	     array("test_Monitor")); 
 test_summary("Parallel",array("GroupProcess","Layout"),
