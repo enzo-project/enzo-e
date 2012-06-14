@@ -55,6 +55,7 @@ mpi_type = 'mpich2'
 # How many processors to run unit tests with in CHARM (MPI must be 8)
 
 ip_charm = '4'
+ip_mpi   = '8'
 
 #----------------------------------------------------------------------
 # AUTO CONFIGURATION
@@ -253,7 +254,7 @@ if (type == "serial"):
      parallel_run = ""
 elif (type == "mpi"):
      serial_run   = ""
-     parallel_run = "mpirun -np 8"
+     parallel_run = "mpirun -np " + ip_mpi
 elif (type == "charm"):
      serial_run   = ""
      parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
@@ -279,6 +280,7 @@ Export('lib_path')
 Export('inc_path')
 Export('test_path')
 Export('ip_charm')
+Export('ip_mpi')
 
 
 cpppath     = [inc_path]
