@@ -7,7 +7,7 @@
 
 module enzo {
 
-//  extern module mesh;
+  extern module mesh;
 
   readonly CProxy_SimulationCharm  proxy_simulation;
 
@@ -17,7 +17,7 @@ module enzo {
 
   }
 
-  array[3D] EnzoBlock {
+  array[3D] EnzoBlock : Block {
 
     entry EnzoBlock
       (int ibx, int iby, int ibz,
