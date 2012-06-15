@@ -30,8 +30,7 @@ public: // interface
   {
     // NOTE: change this function whenever attributes change
 
-    WARNING("ItCounterKeys::pup","Not pup'ing counters_");
-    //    p |  counters_;
+    p | * counters_;
     WARNING("ItCounterKeys::pup","Not pup'ing iter_");
     //    p |  iter_;
     WARNING("ItCounterKeys::pup","Not pup'ing value_");

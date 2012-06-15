@@ -36,8 +36,14 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     // NOTE: change this function whenever attributes change
+
+    CountersUser::pup(p);
+
     p |  is_papi_active_;
     p |  event_set_;
+    if (p.isUnpacking()) {
+      papi_counters_ = new long long [num_papi_counters);
+    }
     PUParray(p,papi_counters_,num_papi_counters);
     p |  vtime_begin_;
 

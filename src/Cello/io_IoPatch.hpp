@@ -30,6 +30,7 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     // NOTE: change this function whenever attributes change
+
     Io::pup(p);
 
     p | *patch_;

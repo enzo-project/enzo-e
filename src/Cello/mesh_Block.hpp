@@ -70,6 +70,7 @@ public: // interface
 
   void pup(PUP::er &p)
   {
+    TRACE("BEGIN Block::pup");
     p | count_refresh_face_;
     p | proxy_patch_;
 
@@ -80,7 +81,10 @@ public: // interface
       field_block_.resize(num_field_blocks_);
     }
 
+    // BUG: field_block_[] may be null
+    TRACE1("num_field_blocks_ = %d",num_field_blocks_);
     for (int i=0; i<num_field_blocks_; i++) {
+      TRACE0;
       p | *field_block_[i];
     }
 
@@ -98,6 +102,7 @@ public: // interface
     p | cycle_;
     p | time_;
     p | dt_;
+    TRACE("END Block::pup");
 
   }
 

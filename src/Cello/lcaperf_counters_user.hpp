@@ -39,7 +39,9 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     // NOTE: change this function whenever attributes change
+
     Counters::pup(p);
+
     p | value_;
   }
 #endif

@@ -30,8 +30,10 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
-    Io::pup(p);
     // NOTE: change this function whenever attributes change
+
+    Io::pup(p);
+
     p | *hierarchy_;
   }
 #endif

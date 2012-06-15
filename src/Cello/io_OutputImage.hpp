@@ -31,10 +31,12 @@ public: // functions
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    Output::pup(p);
+
     p | map_r_;
     p | map_g_;
     p | map_b_;
-    p |  map_a_;
+    p | map_a_;
     p | *data_;
     p | op_reduce_;
     p | axis_;

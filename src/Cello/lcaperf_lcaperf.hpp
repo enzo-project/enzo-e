@@ -30,7 +30,7 @@ class LcaPerf {
     // NOTE: change this function whenever attributes change
     p |  attributes_;
     WARNING("Lcaperf::pup",
-	    "Not pup'ing counters_");
+	    "Not pup'ing std::map counters_");
     //    p |  counters_;
     p |  regions_;
   }

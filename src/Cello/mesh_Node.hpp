@@ -9,6 +9,8 @@
 #ifndef MESH_NODE_HPP
 #define MESH_NODE_HPP
 
+class Patch;
+
 class Node {
 
   /// @class    Node
@@ -24,8 +26,12 @@ public: // interface
   ~Node() throw();
 
 #ifdef CONFIG_USE_CHARM
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | *((Patch * )data_);
+    p | *child_;
+  };
 #endif
 
   /// Set the data payload for the Node

@@ -54,18 +54,16 @@ private: // interface
   {
     // NOTE: change this function whenever attributes change
 #   ifdef CONFIG_USE_MEMORY
-    WARNING("Memory::pup","Not pup'ing instance_ static variable");
-    // p | instance_;
+
     p | is_active_;
     p | do_allocate_fill_; 
-    p |  allocate_fill_value_;
+    p | allocate_fill_value_;
     p | do_deallocate_fill_; 
-    p |  deallocate_fill_value_;
-    p |  max_group_id_;
+    p | deallocate_fill_value_;
+    p | max_group_id_;
     WARNING("Memory::pup","Not pup'ing curr_group_ stack variable");
     //    p |  curr_group_;
-    WARNING("Memory::pup","Not pup'ing group_names_ pointer array");
-    //  PUParray(p,group_names_,MEMORY_MAX_NUM_GROUPS + 1);
+    PUParray(p,group_names_,MEMORY_MAX_NUM_GROUPS + 1);
     PUParray(p,limit_,      MEMORY_MAX_NUM_GROUPS + 1);
     PUParray(p,bytes_,      MEMORY_MAX_NUM_GROUPS + 1);
     PUParray(p,bytes_high_, MEMORY_MAX_NUM_GROUPS + 1);
@@ -196,7 +194,7 @@ private: // attributes
   std::stack<memory_group_handle> curr_group_;
 
   /// Array of known group names
-  char * group_names_ [MEMORY_MAX_NUM_GROUPS + 1];
+  std::string group_names_ [MEMORY_MAX_NUM_GROUPS + 1];
 
   /// Limit on number of bytes to allocate.  Currently not checked.
   long long limit_   [MEMORY_MAX_NUM_GROUPS + 1];

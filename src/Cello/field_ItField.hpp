@@ -30,8 +30,6 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     // NOTE: change this function whenever attributes change
-
-    // this space intentionally blank
   }
 #endif
 

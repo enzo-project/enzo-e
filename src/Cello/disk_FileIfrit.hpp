@@ -31,8 +31,6 @@ public: /// interface
   {
     // NOTE: change this function whenever attributes change
 
-    /* this space deliberately left blank */
-
   }
 #endif
 

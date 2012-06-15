@@ -50,7 +50,6 @@ public: // functions
     p | field_id_;
     p | group_name_;
     p | group_id_;
-    // p | field_in_group_;
     p | alignment_;
     p | padding_;
     p | courant_;
@@ -58,10 +57,14 @@ public: // functions
     int num_fields = field_name_.size();
     if (p.isUnpacking()) {
       centering_.resize(num_fields);
-      ghosts_.resize(num_fields);
     }
     for (int i=0; i<num_fields; i++) {
       p | *centering_[i];
+    }
+    if (p.isUnpacking()) {
+      ghosts_.resize(num_fields);
+    }
+    for (int i=0; i<num_fields; i++) {
       p | *ghosts_[i];
     }
     PUParray (p,refresh_face_,3);
@@ -207,10 +210,6 @@ private: // attributes
 
   /// Index of each group in group_name_
   std::map<std::string,int> group_id_;
-
-   // typedef std::set<int> int_set_type;
-   // /// Set of groups containing each field.  field_in_group_[field][group]
-   // std::vector<int_set_type> field_in_group_;
 
   /// alignment of start of each field in bytes
   int alignment_;

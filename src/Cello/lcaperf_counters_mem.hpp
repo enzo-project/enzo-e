@@ -40,7 +40,8 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     // NOTE: change this function whenever attributes change
-    WARNING("CountersMem::pup()","Static variables not pup'ed");
+
+    CountersUser::pup(p);
   }
 #endif
 
