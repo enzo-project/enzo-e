@@ -1,0 +1,184 @@
+* TODO Code refactoring [0/2]
+** TODO Flatten Hierarchy / Patch / Block
+** TODO [#B] Move FieldBlock to Enzo (?)
+   Cello should be primarily high-level data structures up to Block
+   It should enable flexible communication patterns to process
+   Block data, but different applications will have different
+   requirements for data contained in each Block
+* TODO Review each class and rank necessity [14/138]
+  #A  should do immediately
+  #B  should do
+  #C  might want to do someday
+** DONE [#B] [[file:src/Cello/cello.hpp][src/Cello/cello.hpp]] [0/3]
+*** TODO Move common functions to cello namespace and use lower-case
+    Like err_rel() and err_abs()
+*** TODO Check scope of enum usage and move to subcomponents
+*** TODO Update programming guidelines for foo_enum, foo_type, foo = foo_xxx
+** DONE [[file:src/Cello/component_Classname.hpp][src/Cello/component_Classname.hpp]] [/]
+** DONE [[file:src/Cello/disk_FileHdf5.hpp][src/Cello/disk_FileHdf5.hpp]] [/]
+** DONE [#C] [[file:src/Cello/disk_File.hpp][src/Cello/disk_File.hpp]] [0/2]
+*** TODO Rename scalar_type to scalar_enum
+*** TODO Move scalar_type to _disk.hpp
+** DONE [#A] [[file:src/Cello/disk_FileIfrit.hpp][src/Cello/disk_FileIfrit.hpp]] [0/1]
+*** TODO Remove
+** DONE [[file:src/Cello/_disk.hpp][src/Cello/_disk.hpp]] [/]
+** DONE [#C] [[file:src/Cello/disk.hpp][src/Cello/disk.hpp]] [0/1]
+*** TODO Add header comments for #include sections
+** DONE [#B] [[file:src/Cello/error_Error.hpp][src/Cello/error_Error.hpp]] [0/1]
+*** TODO Figure out how to remove need for numbers in e.g. WARNING8()
+** DONE [[file:src/Cello/_error.hpp][src/Cello/_error.hpp]] [/]
+** DONE [#C] [[file:src/Cello/error.hpp][src/Cello/error.hpp]] [0/1]
+*** TODO Add header comments for #include sections
+** TODO [#A] [[file:src/Cello/field_FieldBlock.hpp][src/Cello/field_FieldBlock.hpp]] [0/4]
+*** TODO [#B] Replace char* calls with templated scalar calls
+    Want to also allow bit-fields, or at least constant / char fields
+    and integer fields
+*** TODO [#A] Simplify allocation and deallocation
+    too many such functions (6)
+      array_allocated()
+      allocate_array()
+      deallocate_array()
+      ghosts_allocated()
+      allocate_ghosts()
+      deallocate_ghosts()
+*** TODO [#A] Simplify field values access
+    too many functions (4)
+       char * field_values
+       const char * field_values
+       char * field_unknowns
+       const char * field_unknowns
+    also confusing given ghosts may or may not be allocated
+      
+*** TODO [#B] Remove or implement split(), merge()
+
+** TODO [[file:src/Cello/field_FieldDescr.hpp][src/Cello/field_FieldDescr.hpp]] [/]
+** TODO [[file:src/Cello/field_FieldFace.hpp][src/Cello/field_FieldFace.hpp]] [/]
+** TODO [[file:src/Cello/_field.hpp][src/Cello/_field.hpp]] [/]
+** TODO [[file:src/Cello/field.hpp][src/Cello/field.hpp]] [/]
+** TODO [[file:src/Cello/field_ItField.hpp][src/Cello/field_ItField.hpp]] [/]
+** TODO [[file:src/Cello/field_ItFieldList.hpp][src/Cello/field_ItFieldList.hpp]] [/]
+** TODO [[file:src/Cello/field_ItFieldRange.hpp][src/Cello/field_ItFieldRange.hpp]] [/]
+** TODO [[file:src/Cello/_io.hpp][src/Cello/_io.hpp]] [/]
+** TODO [[file:src/Cello/io.hpp][src/Cello/io.hpp]] [/]
+** TODO [[file:src/Cello/io_InputData.hpp][src/Cello/io_InputData.hpp]] [/]
+** TODO [[file:src/Cello/io_Input.hpp][src/Cello/io_Input.hpp]] [/]
+** TODO [[file:src/Cello/io_IoBlock.hpp][src/Cello/io_IoBlock.hpp]] [/]
+** TODO [[file:src/Cello/_io_Io_common.hpp][src/Cello/_io_Io_common.hpp]] [/]
+** TODO [[file:src/Cello/io_IoFieldBlock.hpp][src/Cello/io_IoFieldBlock.hpp]] [/]
+** TODO [[file:src/Cello/io_IoHierarchy.hpp][src/Cello/io_IoHierarchy.hpp]] [/]
+** TODO [[file:src/Cello/io_Io.hpp][src/Cello/io_Io.hpp]] [/]
+** TODO [[file:src/Cello/io_IoLayout.hpp][src/Cello/io_IoLayout.hpp]] [/]
+** TODO [[file:src/Cello/io_IoPatch.hpp][src/Cello/io_IoPatch.hpp]] [/]
+** TODO [[file:src/Cello/io_ItFilePatch.hpp][src/Cello/io_ItFilePatch.hpp]] [/]
+** TODO [[file:src/Cello/io_ItReduceAvg.hpp][src/Cello/io_ItReduceAvg.hpp]] [/]
+** TODO [[file:src/Cello/io_ItReduce.hpp][src/Cello/io_ItReduce.hpp]] [/]
+** TODO [[file:src/Cello/io_ItReduceMax.hpp][src/Cello/io_ItReduceMax.hpp]] [/]
+** TODO [[file:src/Cello/io_ItReduceMin.hpp][src/Cello/io_ItReduceMin.hpp]] [/]
+** TODO [[file:src/Cello/io_ItReduceSum.hpp][src/Cello/io_ItReduceSum.hpp]] [/]
+** TODO [[file:src/Cello/io_OutputData.hpp][src/Cello/io_OutputData.hpp]] [/]
+** TODO [[file:src/Cello/io_Output.hpp][src/Cello/io_Output.hpp]] [/]
+** TODO [[file:src/Cello/io_OutputImage.hpp][src/Cello/io_OutputImage.hpp]] [/]
+** TODO [[file:src/Cello/io_OutputRestart.hpp][src/Cello/io_OutputRestart.hpp]] [/]
+** TODO [[file:src/Cello/io_Schedule.hpp][src/Cello/io_Schedule.hpp]] [/]
+** TODO [[file:src/Cello/lcaperf_attributes.hpp][src/Cello/lcaperf_attributes.hpp]] [/]
+** TODO [[file:src/Cello/lcaperf_counters_basic.hpp][src/Cello/lcaperf_counters_basic.hpp]] [/]
+** TODO [[file:src/Cello/lcaperf_counters_deriv.hpp][src/Cello/lcaperf_counters_deriv.hpp]] [/]
+** TODO [[file:src/Cello/lcaperf_counters.hpp][src/Cello/lcaperf_counters.hpp]] [/]
+** TODO [[file:src/Cello/lcaperf_counters_mem.hpp][src/Cello/lcaperf_counters_mem.hpp]] [/]
+** TODO [[file:src/Cello/lcaperf_counters_mpi.hpp][src/Cello/lcaperf_counters_mpi.hpp]] [/]
+** TODO [[file:src/Cello/lcaperf_counters_papi.hpp][src/Cello/lcaperf_counters_papi.hpp]] [/]
+** TODO [[file:src/Cello/lcaperf_counters_user.hpp][src/Cello/lcaperf_counters_user.hpp]] [/]
+** TODO [[file:src/Cello/_lcaperf.hpp][src/Cello/_lcaperf.hpp]] [/]
+** TODO [[file:src/Cello/lcaperf.hpp][src/Cello/lcaperf.hpp]] [/]
+** TODO [[file:src/Cello/lcaperf_it_counter_keys.hpp][src/Cello/lcaperf_it_counter_keys.hpp]] [/]
+** TODO [[file:src/Cello/lcaperf_lcaperf.hpp][src/Cello/lcaperf_lcaperf.hpp]] [/]
+** TODO [[file:src/Cello/_main.hpp][src/Cello/_main.hpp]] [/]
+** TODO [[file:src/Cello/main.hpp][src/Cello/main.hpp]] [/]
+** TODO [[file:src/Cello/_memory.hpp][src/Cello/_memory.hpp]] [/]
+** TODO [[file:src/Cello/memory.hpp][src/Cello/memory.hpp]] [/]
+** TODO [[file:src/Cello/memory_Memory.hpp][src/Cello/memory_Memory.hpp]] [/]
+** TODO [[file:src/Cello/mesh_Block.hpp][src/Cello/mesh_Block.hpp]] [/]
+** TODO [[file:src/Cello/mesh_Factory.hpp][src/Cello/mesh_Factory.hpp]] [/]
+** TODO [[file:src/Cello/mesh_functions.hpp][src/Cello/mesh_functions.hpp]] [/]
+** TODO [[file:src/Cello/mesh_Hierarchy.hpp][src/Cello/mesh_Hierarchy.hpp]] [/]
+** TODO [[file:src/Cello/_mesh.hpp][src/Cello/_mesh.hpp]] [/]
+** TODO [[file:src/Cello/mesh.hpp][src/Cello/mesh.hpp]] [/]
+** TODO [[file:src/Cello/mesh_ItBlock.hpp][src/Cello/mesh_ItBlock.hpp]] [/]
+** TODO [[file:src/Cello/mesh_It.hpp][src/Cello/mesh_It.hpp]] [/]
+** TODO [[file:src/Cello/mesh_ItNode.hpp][src/Cello/mesh_ItNode.hpp]] [/]
+** TODO [[file:src/Cello/mesh_ItPatch.hpp][src/Cello/mesh_ItPatch.hpp]] [/]
+** TODO [[file:src/Cello/mesh_Node.hpp][src/Cello/mesh_Node.hpp]] [/]
+** TODO [[file:src/Cello/mesh_NodeTrace.hpp][src/Cello/mesh_NodeTrace.hpp]] [/]
+** TODO [[file:src/Cello/mesh_Patch.hpp][src/Cello/mesh_Patch.hpp]] [/]
+** TODO [[file:src/Cello/mesh_Tree.hpp][src/Cello/mesh_Tree.hpp]] [/]
+** TODO [[file:src/Cello/_monitor.hpp][src/Cello/_monitor.hpp]] [/]
+** TODO [[file:src/Cello/monitor.hpp][src/Cello/monitor.hpp]] [/]
+** TODO [[file:src/Cello/monitor_Monitor.hpp][src/Cello/monitor_Monitor.hpp]] [/]
+** TODO [[file:src/Cello/parallel_GroupProcessCharm.hpp][src/Cello/parallel_GroupProcessCharm.hpp]] [/]
+** TODO [[file:src/Cello/parallel_GroupProcess.hpp][src/Cello/parallel_GroupProcess.hpp]] [/]
+** TODO [[file:src/Cello/parallel_GroupProcessMpi.hpp][src/Cello/parallel_GroupProcessMpi.hpp]] [/]
+** TODO [[file:src/Cello/parallel_GroupProcessSerial.hpp][src/Cello/parallel_GroupProcessSerial.hpp]] [/]
+** TODO [[file:src/Cello/_parallel.hpp][src/Cello/_parallel.hpp]] [/]
+** TODO [[file:src/Cello/parallel.hpp][src/Cello/parallel.hpp]] [/]
+** TODO [[file:src/Cello/parallel_Layout.hpp][src/Cello/parallel_Layout.hpp]] [/]
+** TODO [[file:src/Cello/parallel_Mpi.hpp][src/Cello/parallel_Mpi.hpp]] [/]
+** TODO [[file:src/Cello/parallel_ReduceCharm.hpp][src/Cello/parallel_ReduceCharm.hpp]] [/]
+** TODO [[file:src/Cello/parallel_Reduce.hpp][src/Cello/parallel_Reduce.hpp]] [/]
+** TODO [[file:src/Cello/parallel_ReduceMpi.hpp][src/Cello/parallel_ReduceMpi.hpp]] [/]
+** TODO [[file:src/Cello/parallel_ReduceSerial.hpp][src/Cello/parallel_ReduceSerial.hpp]] [/]
+** TODO [[file:src/Cello/_parameters.hpp][src/Cello/_parameters.hpp]] [/]
+** TODO [[file:src/Cello/parameters.hpp][src/Cello/parameters.hpp]] [/]
+** TODO [[file:src/Cello/parameters_Parameters.hpp][src/Cello/parameters_Parameters.hpp]] [/]
+** TODO [[file:src/Cello/parameters_Param.hpp][src/Cello/parameters_Param.hpp]] [/]
+** TODO [[file:src/Cello/parameters_ParamNode.hpp][src/Cello/parameters_ParamNode.hpp]] [/]
+** TODO [[file:src/Cello/performance_Counters.hpp][src/Cello/performance_Counters.hpp]] [/]
+** TODO [[file:src/Cello/_performance.hpp][src/Cello/_performance.hpp]] [/]
+** TODO [[file:src/Cello/performance.hpp][src/Cello/performance.hpp]] [/]
+** TODO [[file:src/Cello/performance_Papi.hpp][src/Cello/performance_Papi.hpp]] [/]
+** TODO [[file:src/Cello/performance_Performance.hpp][src/Cello/performance_Performance.hpp]] [/]
+** TODO [[file:src/Cello/performance_Timer.hpp][src/Cello/performance_Timer.hpp]] [/]
+** TODO [[file:src/Cello/problem_Boundary.hpp][src/Cello/problem_Boundary.hpp]] [/]
+** TODO [[file:src/Cello/_problem.hpp][src/Cello/_problem.hpp]] [/]
+** TODO [[file:src/Cello/problem.hpp][src/Cello/problem.hpp]] [/]
+** TODO [[file:src/Cello/problem_InitialDefault.hpp][src/Cello/problem_InitialDefault.hpp]] [/]
+** TODO [[file:src/Cello/problem_InitialFile.hpp][src/Cello/problem_InitialFile.hpp]] [/]
+** TODO [[file:src/Cello/problem_Initial.hpp][src/Cello/problem_Initial.hpp]] [/]
+** TODO [[file:src/Cello/problem_Method.hpp][src/Cello/problem_Method.hpp]] [/]
+** TODO [[file:src/Cello/problem_Problem.hpp][src/Cello/problem_Problem.hpp]] [/]
+** TODO [[file:src/Cello/problem_Stopping.hpp][src/Cello/problem_Stopping.hpp]] [/]
+** TODO [[file:src/Cello/problem_Timestep.hpp][src/Cello/problem_Timestep.hpp]] [/]
+** TODO [[file:src/Cello/_simulation.hpp][src/Cello/_simulation.hpp]] [/]
+** TODO [[file:src/Cello/simulation.hpp][src/Cello/simulation.hpp]] [/]
+** TODO [[file:src/Cello/simulation_SimulationCharm.hpp][src/Cello/simulation_SimulationCharm.hpp]] [/]
+** TODO [[file:src/Cello/simulation_Simulation.hpp][src/Cello/simulation_Simulation.hpp]] [/]
+** TODO [[file:src/Cello/simulation_SimulationMpi.hpp][src/Cello/simulation_SimulationMpi.hpp]] [/]
+** TODO [[file:src/Cello/_test.hpp][src/Cello/_test.hpp]] [/]
+** TODO [[file:src/Cello/test.hpp][src/Cello/test.hpp]] [/]
+** TODO [[file:src/Cello/test_Unit.hpp][src/Cello/test_Unit.hpp]] [/]
+** TODO [[file:src/Enzo/charm_enzo.hpp][src/Enzo/charm_enzo.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_defines.hpp][src/Enzo/enzo_defines.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_EnzoBlock.hpp][src/Enzo/enzo_EnzoBlock.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_EnzoBoundary.hpp][src/Enzo/enzo_EnzoBoundary.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_EnzoFactory.hpp][src/Enzo/enzo_EnzoFactory.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_EnzoInitialImplosion2.hpp][src/Enzo/enzo_EnzoInitialImplosion2.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_EnzoMethodPpm.hpp][src/Enzo/enzo_EnzoMethodPpm.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_EnzoMethodPpml.hpp][src/Enzo/enzo_EnzoMethodPpml.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_EnzoProblem.hpp][src/Enzo/enzo_EnzoProblem.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_EnzoSimulationCharm.hpp][src/Enzo/enzo_EnzoSimulationCharm.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_EnzoSimulationMpi.hpp][src/Enzo/enzo_EnzoSimulationMpi.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_EnzoTimestep.hpp][src/Enzo/enzo_EnzoTimestep.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_EnzoTimestepPpml.hpp][src/Enzo/enzo_EnzoTimestepPpml.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_finalize.hpp][src/Enzo/enzo_finalize.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_fortran.hpp][src/Enzo/enzo_fortran.hpp]] [/]
+** TODO [[file:src/Enzo/_enzo.hpp][src/Enzo/_enzo.hpp]] [/]
+** TODO [[file:src/Enzo/enzo.hpp][src/Enzo/enzo.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_IoEnzoBlock.hpp][src/Enzo/enzo_IoEnzoBlock.hpp]] [/]
+** TODO [[file:src/Enzo/enzo_typedefs.hpp][src/Enzo/enzo_typedefs.hpp]] [/]
+** DONE [#C] [[file:src/Cello/charm.hpp][src/Cello/charm.hpp]] [0/1]
+*** TODO [#C] Add header comments
+** DONE [#C] [[file:src/Cello/charm_Loop.hpp][src/Cello/charm_Loop.hpp]] [0/1]
+*** TODO fill in example usage in header comment
+** DONE [#C] [[file:src/Cello/charm_mesh.hpp][src/Cello/charm_mesh.hpp]] [0/1]
+*** TODO Add header comment
+** DONE [#C] [[file:src/Cello/charm_simulation.hpp][src/Cello/charm_simulation.hpp]] [0/1]
+*** TODO Add header comment

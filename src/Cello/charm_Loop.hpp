@@ -17,6 +17,18 @@
 /// First A creates and initializes a Loop variable, set to the number
 /// of expected "returns" into A::s_foo() from B::p_foo() (which may
 /// or may not be the number of calls from A to B).
+///
+/// A::foo()
+/// {
+/// }
+///
+/// B::p_foo()
+/// {
+/// }
+/// 
+/// A::s_foo()
+/// {
+/// }
 
 #ifndef CHARM_LOOP_HPP
 #define CHARM_LOOP_HPP
@@ -53,9 +65,7 @@ class Loop {
   }
 
   inline int index() const throw() { return index_curr_; }
-  
   inline int stop() const throw()  { return index_stop_; }
-
   inline int & stop () throw ()    { return index_stop_; }
 
 private:
