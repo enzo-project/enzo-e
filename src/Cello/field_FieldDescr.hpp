@@ -135,8 +135,7 @@ public: // functions
   void ghosts(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
     throw(std::out_of_range);
 
-  /// Set 
-  /// precision of given field
+  /// Return precision of given field
   precision_enum precision(int id_field) const 
     throw(std::out_of_range);
 

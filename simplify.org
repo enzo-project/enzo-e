@@ -1,3 +1,4 @@
+#+PRIORITIES: A B C D 0
 * TODO Code refactoring [0/2]
 ** TODO Flatten Hierarchy / Patch / Block
 ** TODO [#B] Move FieldBlock to Enzo (?)
@@ -5,31 +6,17 @@
    It should enable flexible communication patterns to process
    Block data, but different applications will have different
    requirements for data contained in each Block
-* TODO Review each class and rank necessity [14/138]
-  #A  should do immediately
-  #B  should do
-  #C  might want to do someday
-** DONE [#B] [[file:src/Cello/cello.hpp][src/Cello/cello.hpp]] [0/3]
-*** TODO Move common functions to cello namespace and use lower-case
-    Like err_rel() and err_abs()
-*** TODO Check scope of enum usage and move to subcomponents
-*** TODO Update programming guidelines for foo_enum, foo_type, foo = foo_xxx
-** DONE [[file:src/Cello/component_Classname.hpp][src/Cello/component_Classname.hpp]] [/]
-** DONE [[file:src/Cello/disk_FileHdf5.hpp][src/Cello/disk_FileHdf5.hpp]] [/]
-** DONE [#C] [[file:src/Cello/disk_File.hpp][src/Cello/disk_File.hpp]] [0/2]
-*** TODO Rename scalar_type to scalar_enum
-*** TODO Move scalar_type to _disk.hpp
-** DONE [#A] [[file:src/Cello/disk_FileIfrit.hpp][src/Cello/disk_FileIfrit.hpp]] [0/1]
+* TODO Global refactoring [1/1]
+** DONE [#C] Move enum definitions to _component.hpp 
+* TODO Class refactoring [15/138]
+  #A  crucial priority
+  #B  high priority
+  #C  average priority
+  #D  low priority
+  #E  no changes needed
+** DONE [#C] [[file:src/Cello/disk_FileIfrit.hpp][src/Cello/disk_FileIfrit.hpp]] [0/1]
 *** TODO Remove
-** DONE [[file:src/Cello/_disk.hpp][src/Cello/_disk.hpp]] [/]
-** DONE [#C] [[file:src/Cello/disk.hpp][src/Cello/disk.hpp]] [0/1]
-*** TODO Add header comments for #include sections
-** DONE [#B] [[file:src/Cello/error_Error.hpp][src/Cello/error_Error.hpp]] [0/1]
-*** TODO Figure out how to remove need for numbers in e.g. WARNING8()
-** DONE [[file:src/Cello/_error.hpp][src/Cello/_error.hpp]] [/]
-** DONE [#C] [[file:src/Cello/error.hpp][src/Cello/error.hpp]] [0/1]
-*** TODO Add header comments for #include sections
-** TODO [#A] [[file:src/Cello/field_FieldBlock.hpp][src/Cello/field_FieldBlock.hpp]] [0/4]
+** DONE [#B] [[file:src/Cello/field_FieldBlock.hpp][src/Cello/field_FieldBlock.hpp]] [0/4]
 *** TODO [#B] Replace char* calls with templated scalar calls
     Want to also allow bit-fields, or at least constant / char fields
     and integer fields
@@ -51,7 +38,19 @@
       
 *** TODO [#B] Remove or implement split(), merge()
 
-** TODO [[file:src/Cello/field_FieldDescr.hpp][src/Cello/field_FieldDescr.hpp]] [/]
+** DONE [#E] [[file:src/Cello/_disk.hpp][src/Cello/_disk.hpp]] [/]
+** DONE [#B] [[file:src/Cello/error_Error.hpp][src/Cello/error_Error.hpp]] [0/1]
+*** TODO Figure out how to remove need for numbers in e.g. WARNING8()
+** DONE [#E] [[file:src/Cello/_error.hpp][src/Cello/_error.hpp]] [/]
+** TODO [#C] [[file:src/Cello/field_FieldDescr.hpp][src/Cello/field_FieldDescr.hpp]] [0/4]
+*** TODO Simplify interface
+*** TODO Implement or remove minimum / maximum
+    consolidate "set_minimum()"... as "set_range()"?
+    clean maximum_value(): consolidate as "in_range()"?
+*** TODO Implement or remove groups
+    Should be supported via parameter files
+    Groups can include "computed"
+*** TODO "bytes_per_element()" not needed(?)
 ** TODO [[file:src/Cello/field_FieldFace.hpp][src/Cello/field_FieldFace.hpp]] [/]
 ** TODO [[file:src/Cello/_field.hpp][src/Cello/_field.hpp]] [/]
 ** TODO [[file:src/Cello/field.hpp][src/Cello/field.hpp]] [/]
@@ -174,6 +173,18 @@
 ** TODO [[file:src/Enzo/enzo.hpp][src/Enzo/enzo.hpp]] [/]
 ** TODO [[file:src/Enzo/enzo_IoEnzoBlock.hpp][src/Enzo/enzo_IoEnzoBlock.hpp]] [/]
 ** TODO [[file:src/Enzo/enzo_typedefs.hpp][src/Enzo/enzo_typedefs.hpp]] [/]
+** DONE [#C] [[file:src/Cello/cello.hpp][src/Cello/cello.hpp]] [0/3]
+*** TODO Move common functions to cello namespace and use lower-case
+    Like err_rel() and err_abs()
+*** TODO Check scope of enum usage and move to subcomponents
+*** TODO Update programming guidelines for foo_enum, foo_type, foo = foo_xxx
+** DONE [#C] [[file:src/Cello/disk_File.hpp][src/Cello/disk_File.hpp]] [0/2]
+*** TODO Rename scalar_type to scalar_enum
+*** TODO Move scalar_type to _disk.hpp
+** DONE [#C] [[file:src/Cello/disk.hpp][src/Cello/disk.hpp]] [0/1]
+*** TODO Add header comments for #include sections
+** DONE [#C] [[file:src/Cello/error.hpp][src/Cello/error.hpp]] [0/1]
+*** TODO Add header comments for #include sections
 ** DONE [#C] [[file:src/Cello/charm.hpp][src/Cello/charm.hpp]] [0/1]
 *** TODO [#C] Add header comments
 ** DONE [#C] [[file:src/Cello/charm_Loop.hpp][src/Cello/charm_Loop.hpp]] [0/1]
@@ -182,3 +193,5 @@
 *** TODO Add header comment
 ** DONE [#C] [[file:src/Cello/charm_simulation.hpp][src/Cello/charm_simulation.hpp]] [0/1]
 *** TODO Add header comment
+** DONE [#E] [[file:src/Cello/disk_FileHdf5.hpp][src/Cello/disk_FileHdf5.hpp]] [/]
+** DONE [#E] [[file:src/Cello/component_Classname.hpp][src/Cello/component_Classname.hpp]] [/]

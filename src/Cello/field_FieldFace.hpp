@@ -26,8 +26,6 @@ public: // interface
 	     int fx, int fy=0, int fz=0,
 	     bool gx=true, bool gy=true, bool gz=true) throw();
      
-	     
-
 #ifdef CONFIG_USE_CHARM
   /// Constructor
   FieldFace(int n, char * array) throw();
@@ -86,7 +84,7 @@ public: // interface
 private: // functions
 
   /// Compute loop limits for load_precision_ and store_precision_
-  void loop_limits
+  void loop_limits_
   (int *ix0, int *iy0, int *iz0,
    int *nx,  int *ny,  int *nz,
    int nd3[3], int ng3[3],
