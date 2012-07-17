@@ -1,0 +1,860 @@
+scons: Reading SConscript files ...
+Checking for C header file papi.h... (cached) no
+PAPI not installed
+
+    CELLO_ARCH scons arch= linux-gnu
+    CELLO_TYPE scons type= charm
+    CELLO_PREC scons prec= single
+
+
+scons: warning: Two different environments were specified for target field_FieldBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 204, in <module>
+
+scons: warning: Two different environments were specified for target field_FieldDescr.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 204, in <module>
+
+scons: warning: Two different environments were specified for target field_FieldFace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 204, in <module>
+
+scons: warning: Two different environments were specified for target main_simulation.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 204, in <module>
+
+scons: warning: Two different environments were specified for target field_FieldBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 206, in <module>
+
+scons: warning: Two different environments were specified for target field_FieldDescr.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 206, in <module>
+
+scons: warning: Two different environments were specified for target field_FieldFace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 206, in <module>
+
+scons: warning: Two different environments were specified for target main_simulation.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 206, in <module>
+
+scons: warning: Two different environments were specified for target field_FieldBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 208, in <module>
+
+scons: warning: Two different environments were specified for target field_FieldDescr.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 208, in <module>
+
+scons: warning: Two different environments were specified for target field_FieldFace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 208, in <module>
+
+scons: warning: Two different environments were specified for target main_simulation.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 208, in <module>
+
+scons: warning: Two different environments were specified for target main_simulation.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 210, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Block.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 214, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Factory.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 214, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Hierarchy.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 214, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 214, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItNode.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 214, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItPatch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 214, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Node.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 214, in <module>
+
+scons: warning: Two different environments were specified for target mesh_NodeTrace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 214, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Patch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 214, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Tree.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 214, in <module>
+
+scons: warning: Two different environments were specified for target main_mesh.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 214, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Block.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 216, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Factory.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 216, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Hierarchy.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 216, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 216, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItNode.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 216, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItPatch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 216, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Node.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 216, in <module>
+
+scons: warning: Two different environments were specified for target mesh_NodeTrace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 216, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Patch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 216, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Tree.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 216, in <module>
+
+scons: warning: Two different environments were specified for target main_mesh.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 216, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Block.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 218, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Factory.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 218, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Hierarchy.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 218, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 218, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItNode.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 218, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItPatch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 218, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Node.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 218, in <module>
+
+scons: warning: Two different environments were specified for target mesh_NodeTrace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 218, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Patch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 218, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Tree.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 218, in <module>
+
+scons: warning: Two different environments were specified for target main_mesh.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 218, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Block.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 220, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Factory.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 220, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Hierarchy.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 220, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 220, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItNode.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 220, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItPatch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 220, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Node.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 220, in <module>
+
+scons: warning: Two different environments were specified for target mesh_NodeTrace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 220, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Patch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 220, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Tree.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 220, in <module>
+
+scons: warning: Two different environments were specified for target main_mesh.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 220, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Block.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 222, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Factory.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 222, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Hierarchy.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 222, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 222, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItNode.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 222, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItPatch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 222, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Node.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 222, in <module>
+
+scons: warning: Two different environments were specified for target mesh_NodeTrace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 222, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Patch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 222, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Tree.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 222, in <module>
+
+scons: warning: Two different environments were specified for target main_mesh.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 222, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Block.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 224, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Factory.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 224, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Hierarchy.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 224, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 224, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItNode.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 224, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItPatch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 224, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Node.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 224, in <module>
+
+scons: warning: Two different environments were specified for target mesh_NodeTrace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 224, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Patch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 224, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Tree.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 224, in <module>
+
+scons: warning: Two different environments were specified for target main_mesh.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 224, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Block.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 226, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Factory.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 226, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Hierarchy.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 226, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 226, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItNode.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 226, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItPatch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 226, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Node.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 226, in <module>
+
+scons: warning: Two different environments were specified for target mesh_NodeTrace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 226, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Patch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 226, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Tree.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 226, in <module>
+
+scons: warning: Two different environments were specified for target main_mesh.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 226, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Block.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 228, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Factory.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 228, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Hierarchy.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 228, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 228, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItNode.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 228, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItPatch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 228, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Node.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 228, in <module>
+
+scons: warning: Two different environments were specified for target mesh_NodeTrace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 228, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Patch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 228, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Tree.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 228, in <module>
+
+scons: warning: Two different environments were specified for target main_mesh.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 228, in <module>
+
+scons: warning: Two different environments were specified for target field_FieldBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 277, in <module>
+
+scons: warning: Two different environments were specified for target field_FieldDescr.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 277, in <module>
+
+scons: warning: Two different environments were specified for target field_FieldFace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 277, in <module>
+
+scons: warning: Two different environments were specified for target main_simulation.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 277, in <module>
+
+scons: warning: Two different environments were specified for target io_Input.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_InputData.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_Io.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_IoBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_IoFieldBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_IoHierarchy.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_IoLayout.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_IoPatch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_ItFilePatch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_ItReduce.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_Output.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_OutputData.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_OutputImage.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_OutputRestart.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target io_Schedule.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 278, in <module>
+
+scons: warning: Two different environments were specified for target main_enzo.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 279, in <module>
+
+scons: warning: Two different environments were specified for target main_mesh.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 279, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Block.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 281, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Factory.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 281, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Hierarchy.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 281, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItBlock.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 281, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItNode.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 281, in <module>
+
+scons: warning: Two different environments were specified for target mesh_ItPatch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 281, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Node.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 281, in <module>
+
+scons: warning: Two different environments were specified for target mesh_NodeTrace.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 281, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Patch.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 281, in <module>
+
+scons: warning: Two different environments were specified for target mesh_Tree.o,
+	but they appear to have the same action: $CXX -o $TARGET -c $CXXFLAGS $CCFLAGS $_CCCOMCOM $SOURCES
+File "/home/bordner/Cello/cello-src/build/charm/Cello/SConscript", line 281, in <module>
+scons: done reading SConscript files.
+scons: Building targets ...
+Install file: "build/charm/Cello/error_Error.hpp" as "include/error_Error.hpp"
+Install file: "build/charm/Cello/field_FieldDescr.hpp" as "include/field_FieldDescr.hpp"
+Install file: "build/charm/Cello/field_FieldFace.hpp" as "include/field_FieldFace.hpp"
+Install file: "build/charm/Cello/charm_Loop.hpp" as "include/charm_Loop.hpp"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo-p.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo-p.cpp
+In file included from build/charm/Enzo/enzo-p.cpp:117:0:
+build/charm/Enzo/enzo.def.h: In static member function ‘static void CkIndex_EnzoSimulationCharm::_marshallmessagepup_EnzoSimulationCharm_marshall1(PUP::er&, void*)’:
+build/charm/Enzo/enzo.def.h:120:50: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+Install file: "build/charm/Enzo/enzo_finalize.hpp" as "include/enzo_finalize.hpp"
+/home/bordner/charm/charm/bin/charmc -language charm++ build/charm/Cello/main.ci; mv main.*.h `dirname build/charm/Cello/main.ci`
+/home/bordner/charm/charm/bin/charmc -language charm++ build/charm/Cello/main_enzo.ci; mv main_enzo.*.h `dirname build/charm/Cello/main_enzo.ci`
+/home/bordner/charm/charm/bin/charmc -language charm++ build/charm/Cello/main_mesh.ci; mv main_mesh.*.h `dirname build/charm/Cello/main_mesh.ci`
+/home/bordner/charm/charm/bin/charmc -language charm++ build/charm/Cello/main_simulation.ci; mv main_simulation.*.h `dirname build/charm/Cello/main_simulation.ci`
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/main_enzo.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/main_enzo.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/charm_initial.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/charm_initial.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ build/charm/Cello/mesh.ci; mv mesh.*.h `dirname build/charm/Cello/mesh.ci`
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/charm_mesh.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/charm_mesh.cpp
+In file included from build/charm/Cello/charm_mesh.cpp:6:0:
+build/charm/Cello/mesh.def.h: In static member function ‘static void CkIndex_Block::_marshallmessagepup_p_refresh_face_marshall6(PUP::er&, void*)’:
+build/charm/Cello/mesh.def.h:1480:48: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/charm_output.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/charm_output.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ build/charm/Cello/simulation.ci; mv simulation.*.h `dirname build/charm/Cello/simulation.ci`
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/charm_simulation.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/charm_simulation.cpp
+In file included from build/charm/Cello/charm_simulation.cpp:5:0:
+build/charm/Cello/simulation.def.h: In static member function ‘static void CkIndex_Simulation::_marshallmessagepup_Simulation_marshall1(PUP::er&, void*)’:
+build/charm/Cello/simulation.def.h:110:50: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+In file included from build/charm/Cello/charm_simulation.cpp:5:0:
+build/charm/Cello/simulation.def.h: In static member function ‘static void CkIndex_SimulationCharm::_marshallmessagepup_SimulationCharm_marshall1(PUP::er&, void*)’:
+build/charm/Cello/simulation.def.h:461:50: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+build/charm/Cello/simulation.def.h: In static member function ‘static void CkIndex_SimulationCharm::_marshallmessagepup_p_output_write_marshall6(PUP::er&, void*)’:
+build/charm/Cello/simulation.def.h:704:48: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+ar rc build/charm/Cello/libcharm.a build/charm/Cello/charm_initial.o build/charm/Cello/charm_mesh.o build/charm/Cello/charm_output.o build/charm/Cello/charm_simulation.o
+ranlib build/charm/Cello/libcharm.a
+Install file: "build/charm/Cello/libcharm.a" as "lib/charm/libcharm.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_EnzoBlock.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_EnzoBlock.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_EnzoBoundary.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_EnzoBoundary.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_EnzoFactory.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_EnzoFactory.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_EnzoInitialImplosion2.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_EnzoInitialImplosion2.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_EnzoMethodPpm.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_EnzoMethodPpm.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_EnzoMethodPpml.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_EnzoMethodPpml.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_EnzoProblem.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_EnzoProblem.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_EnzoSimulationCharm.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_EnzoSimulationCharm.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_EnzoSimulationMpi.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_EnzoSimulationMpi.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_EnzoTimestep.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_EnzoTimestep.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_EnzoTimestepPpml.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_EnzoTimestepPpml.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo_IoEnzoBlock.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/enzo_IoEnzoBlock.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/Grid_ComputeGammaField.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/Grid_ComputeGammaField.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/Grid_ComputePressure.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/Grid_ComputePressure.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/Grid_ComputePressureDualEnergyFormalism.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/Grid_ComputePressureDualEnergyFormalism.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/Grid_ComputeTemperatureField.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/Grid_ComputeTemperatureField.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/Grid_IdentifyPhysicalQuantities.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/Grid_IdentifyPhysicalQuantities.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/Grid_IdentifySpeciesFields.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/Grid_IdentifySpeciesFields.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/Grid_SetExternalBoundaryValues.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/Grid_SetExternalBoundaryValues.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/Grid_SetMinimumSupport.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/Grid_SetMinimumSupport.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/Grid_SolveHydroEquations.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/Grid_SolveHydroEquations.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/Grid_SolveMHDEquations.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/Grid_SolveMHDEquations.cpp
+gfortran -o build/charm/Enzo/calcdiss.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/calcdiss.F
+build/charm/Enzo/calcdiss.F:444.20:
+
+               is = i + sign(two, pslice(i+1,j) - pslice(i-1,j))        
+                    1
+Warning: Possible change of value in conversion from REAL(4) to INTEGER(4) at (1)
+build/charm/Enzo/calcdiss.F:497.21:
+
+               ism = i + sign(two, dp1)        ! post-shock             
+                     1
+Warning: Possible change of value in conversion from REAL(4) to INTEGER(4) at (1)
+build/charm/Enzo/calcdiss.F:498.21:
+
+               isp = i - sign(two, dp1)        ! upstream               
+                     1
+Warning: Possible change of value in conversion from REAL(4) to INTEGER(4) at (1)
+gfortran -o build/charm/Enzo/calc_dt.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/calc_dt.F
+gfortran -o build/charm/Enzo/euler.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/euler.F
+build/charm/Enzo/euler.F:12.52:
+
+     &            gamma, idiff, gravity, idual, eta1, eta2,             
+                                                    1
+Warning: Unused dummy argument 'eta1' at (1)
+build/charm/Enzo/euler.F:12.58:
+
+     &            gamma, idiff, gravity, idual, eta1, eta2,             
+                                                          1
+Warning: Unused dummy argument 'eta2' at (1)
+gfortran -o build/charm/Enzo/inteuler.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/inteuler.F
+build/charm/Enzo/inteuler.F:10.57:
+
+     &            idim, jdim, i1, i2, j1, j2, idual, eta1, eta2,        
+                                                         1
+Warning: Unused dummy argument 'eta1' at (1)
+gfortran -o build/charm/Enzo/intvar.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/intvar.F
+gfortran -o build/charm/Enzo/pgas2d_dual.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/pgas2d_dual.F
+gfortran -o build/charm/Enzo/pgas2d.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/pgas2d.F
+gfortran -o build/charm/Enzo/ppm_de.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/ppm_de.F
+gfortran -o build/charm/Enzo/twoshock.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/twoshock.F
+build/charm/Enzo/twoshock.F:10.58:
+
+     &           pbar, ubar, gravity, grslice, idual, eta1              
+                                                          1
+Warning: Unused dummy argument 'eta1' at (1)
+build/charm/Enzo/twoshock.F:10.52:
+
+     &           pbar, ubar, gravity, grslice, idual, eta1              
+                                                    1
+Warning: Unused dummy argument 'idual' at (1)
+gfortran -o build/charm/Enzo/xeuler_sweep.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/xeuler_sweep.F
+gfortran -o build/charm/Enzo/yeuler_sweep.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/yeuler_sweep.F
+gfortran -o build/charm/Enzo/zeuler_sweep.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/zeuler_sweep.F
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/CosmologyGetUnits.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/CosmologyGetUnits.cpp
+gfortran -o build/charm/Enzo/PPML_Conservative.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/PPML_Conservative.F
+gfortran -o build/charm/Enzo/PPML_HLLD.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/PPML_HLLD.F
+gfortran -o build/charm/Enzo/PPML_MAIN.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/PPML_MAIN.F
+gfortran -o build/charm/Enzo/PPML_monot.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/PPML_monot.F
+gfortran -o build/charm/Enzo/PPML_potokx.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/PPML_potokx.F
+build/charm/Enzo/PPML_potokx.F:166.13:
+
+         TL5=0.5d0*(TL(5)+TR(5))                                        
+             1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+build/charm/Enzo/PPML_potokx.F:301.13:
+
+         TL5=0.5d0*(TL(5)+TR(5))                                        
+             1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+gfortran -o build/charm/Enzo/PPML_potoky.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/PPML_potoky.F
+build/charm/Enzo/PPML_potoky.F:166.13:
+
+         TL6=0.5d0*(TL(6)+TR(6))                                        
+             1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+build/charm/Enzo/PPML_potoky.F:300.13:
+
+         TL6=0.5d0*(TL(6)+TR(6))                                        
+             1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+gfortran -o build/charm/Enzo/PPML_potokz.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/PPML_potokz.F
+build/charm/Enzo/PPML_potokz.F:164.13:
+
+         TL7=0.5d0*(TL(7)+TR(7))                                        
+             1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+build/charm/Enzo/PPML_potokz.F:299.13:
+
+         TL7=0.5d0*(TL(7)+TR(7))                                        
+             1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+gfortran -o build/charm/Enzo/PPML_Primitive.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/PPML_Primitive.F
+gfortran -o build/charm/Enzo/PPML_sub.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/PPML_sub.F
+gfortran -o build/charm/Enzo/PPML_TimeStep.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude build/charm/Enzo/PPML_TimeStep.F
+build/charm/Enzo/PPML_TimeStep.F:92.19:
+
+               DSC=CGA**2-4.d0*VAX*CG                                   
+                   1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+build/charm/Enzo/PPML_TimeStep.F:95.19:
+
+               CGS=sqrt((CGA+CFSX)/2.d0)                                
+                   1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+build/charm/Enzo/PPML_TimeStep.F:98.19:
+
+               DSC=CGA**2-4.d0*VAY*CG                                   
+                   1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+build/charm/Enzo/PPML_TimeStep.F:101.19:
+
+               CGS=sqrt((CGA+CFSY)/2.d0)                                
+                   1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+build/charm/Enzo/PPML_TimeStep.F:104.19:
+
+               DSC=CGA**2-4.d0*VAZ*CG                                   
+                   1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+build/charm/Enzo/PPML_TimeStep.F:107.19:
+
+               CGS=sqrt((CGA+CFSZ)/2.d0)                                
+                   1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+build/charm/Enzo/PPML_TimeStep.F:118.9:
+
+      DT=C0/(1.D0/DTMX+1.D0/DTMY+1.D0/DTMZ)                             
+         1
+Warning: Possible change of value in conversion from REAL(8) to REAL(4) at (1)
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/FindField.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Enzo/FindField.cpp
+ar rc build/charm/Enzo/libenzo.a build/charm/Enzo/enzo_EnzoBlock.o build/charm/Enzo/enzo_EnzoBoundary.o build/charm/Enzo/enzo_EnzoFactory.o build/charm/Enzo/enzo_EnzoInitialImplosion2.o build/charm/Enzo/enzo_EnzoMethodPpm.o build/charm/Enzo/enzo_EnzoMethodPpml.o build/charm/Enzo/enzo_EnzoProblem.o build/charm/Enzo/enzo_EnzoSimulationCharm.o build/charm/Enzo/enzo_EnzoSimulationMpi.o build/charm/Enzo/enzo_EnzoTimestep.o build/charm/Enzo/enzo_EnzoTimestepPpml.o build/charm/Enzo/enzo_IoEnzoBlock.o build/charm/Enzo/Grid_ComputeGammaField.o build/charm/Enzo/Grid_ComputePressure.o build/charm/Enzo/Grid_ComputePressureDualEnergyFormalism.o build/charm/Enzo/Grid_ComputeTemperatureField.o build/charm/Enzo/Grid_IdentifyPhysicalQuantities.o build/charm/Enzo/Grid_IdentifySpeciesFields.o build/charm/Enzo/Grid_SetExternalBoundaryValues.o build/charm/Enzo/Grid_SetMinimumSupport.o build/charm/Enzo/Grid_SolveHydroEquations.o build/charm/Enzo/Grid_SolveMHDEquations.o build/charm/Enzo/calcdiss.o build/charm/Enzo/calc_dt.o build/charm/Enzo/euler.o build/charm/Enzo/inteuler.o build/charm/Enzo/intvar.o build/charm/Enzo/pgas2d_dual.o build/charm/Enzo/pgas2d.o build/charm/Enzo/ppm_de.o build/charm/Enzo/twoshock.o build/charm/Enzo/xeuler_sweep.o build/charm/Enzo/yeuler_sweep.o build/charm/Enzo/zeuler_sweep.o build/charm/Enzo/CosmologyGetUnits.o build/charm/Enzo/PPML_Conservative.o build/charm/Enzo/PPML_HLLD.o build/charm/Enzo/PPML_MAIN.o build/charm/Enzo/PPML_monot.o build/charm/Enzo/PPML_potokx.o build/charm/Enzo/PPML_potoky.o build/charm/Enzo/PPML_potokz.o build/charm/Enzo/PPML_Primitive.o build/charm/Enzo/PPML_sub.o build/charm/Enzo/PPML_TimeStep.o build/charm/Enzo/FindField.o
+ranlib build/charm/Enzo/libenzo.a
+Install file: "build/charm/Enzo/libenzo.a" as "lib/charm/libenzo.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/simulation.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/simulation.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/simulation_Simulation.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/simulation_Simulation.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/simulation_SimulationCharm.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/simulation_SimulationCharm.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/simulation_SimulationMpi.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/simulation_SimulationMpi.cpp
+ar rc build/charm/Cello/libsimulation.a build/charm/Cello/simulation.o build/charm/Cello/simulation_Simulation.o build/charm/Cello/simulation_SimulationCharm.o build/charm/Cello/simulation_SimulationMpi.o
+ranlib build/charm/Cello/libsimulation.a
+Install file: "build/charm/Cello/libsimulation.a" as "lib/charm/libsimulation.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/problem_Initial.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/problem_Initial.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/problem_InitialDefault.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/problem_InitialDefault.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/problem_InitialFile.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/problem_InitialFile.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/problem_Problem.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/problem_Problem.cpp
+ar rc build/charm/Cello/libproblem.a build/charm/Cello/problem_Initial.o build/charm/Cello/problem_InitialDefault.o build/charm/Cello/problem_InitialFile.o build/charm/Cello/problem_Problem.o
+ranlib build/charm/Cello/libproblem.a
+Install file: "build/charm/Cello/libproblem.a" as "lib/charm/libproblem.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/mesh_Block.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/mesh_Block.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/mesh_Factory.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/mesh_Factory.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/mesh_Hierarchy.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/mesh_Hierarchy.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/mesh_ItBlock.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/mesh_ItBlock.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/mesh_ItNode.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/mesh_ItNode.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/mesh_ItPatch.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/mesh_ItPatch.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/mesh_Node.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/mesh_Node.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/mesh_NodeTrace.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/mesh_NodeTrace.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/mesh_Patch.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/mesh_Patch.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/mesh_Tree.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/mesh_Tree.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/main_mesh.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/main_mesh.cpp
+ar rc build/charm/Cello/libmesh.a build/charm/Cello/mesh_Block.o build/charm/Cello/mesh_Factory.o build/charm/Cello/mesh_Hierarchy.o build/charm/Cello/mesh_ItBlock.o build/charm/Cello/mesh_ItNode.o build/charm/Cello/mesh_ItPatch.o build/charm/Cello/mesh_Node.o build/charm/Cello/mesh_NodeTrace.o build/charm/Cello/mesh_Patch.o build/charm/Cello/mesh_Tree.o build/charm/Cello/main_mesh.o
+ranlib build/charm/Cello/libmesh.a
+Install file: "build/charm/Cello/libmesh.a" as "lib/charm/libmesh.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/field_FieldBlock.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/field_FieldBlock.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/field_FieldDescr.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/field_FieldDescr.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/field_FieldFace.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/field_FieldFace.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/main_simulation.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/main_simulation.cpp
+ar rc build/charm/Cello/libfield.a build/charm/Cello/field_FieldBlock.o build/charm/Cello/field_FieldDescr.o build/charm/Cello/field_FieldFace.o build/charm/Cello/main_simulation.o
+ranlib build/charm/Cello/libfield.a
+Install file: "build/charm/Cello/libfield.a" as "lib/charm/libfield.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_Input.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_Input.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_InputData.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_InputData.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_Io.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_Io.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_IoBlock.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_IoBlock.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_IoFieldBlock.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_IoFieldBlock.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_IoHierarchy.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_IoHierarchy.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_IoLayout.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_IoLayout.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_IoPatch.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_IoPatch.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_ItFilePatch.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_ItFilePatch.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_ItReduce.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_ItReduce.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_Output.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_Output.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_OutputData.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_OutputData.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_OutputImage.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_OutputImage.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_OutputRestart.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_OutputRestart.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/io_Schedule.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/io_Schedule.cpp
+build/charm/Cello/io_Schedule.cpp: In member function ‘double Schedule::update_timestep(double, double) const’:
+build/charm/Cello/io_Schedule.cpp:218:10: warning: variable ‘time_stop’ set but not used [-Wunused-but-set-variable]
+ar rc build/charm/Cello/libio.a build/charm/Cello/io_Input.o build/charm/Cello/io_InputData.o build/charm/Cello/io_Io.o build/charm/Cello/io_IoBlock.o build/charm/Cello/io_IoFieldBlock.o build/charm/Cello/io_IoHierarchy.o build/charm/Cello/io_IoLayout.o build/charm/Cello/io_IoPatch.o build/charm/Cello/io_ItFilePatch.o build/charm/Cello/io_ItReduce.o build/charm/Cello/io_Output.o build/charm/Cello/io_OutputData.o build/charm/Cello/io_OutputImage.o build/charm/Cello/io_OutputRestart.o build/charm/Cello/io_Schedule.o build/charm/Cello/main_simulation.o
+ranlib build/charm/Cello/libio.a
+Install file: "build/charm/Cello/libio.a" as "lib/charm/libio.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/disk_File.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/disk_File.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/disk_FileHdf5.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/disk_FileHdf5.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/disk_FileIfrit.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/disk_FileIfrit.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/main.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/main.cpp
+ar rc build/charm/Cello/libdisk.a build/charm/Cello/disk_File.o build/charm/Cello/disk_FileHdf5.o build/charm/Cello/disk_FileIfrit.o build/charm/Cello/main.o
+ranlib build/charm/Cello/libdisk.a
+Install file: "build/charm/Cello/libdisk.a" as "lib/charm/libdisk.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/memory_Memory.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/memory_Memory.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/memory_new_delete.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/memory_new_delete.cpp
+ar rc build/charm/Cello/libmemory.a build/charm/Cello/memory_Memory.o build/charm/Cello/memory_new_delete.o build/charm/Cello/main.o
+ranlib build/charm/Cello/libmemory.a
+Install file: "build/charm/Cello/libmemory.a" as "lib/charm/libmemory.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/parallel_GroupProcess.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/parallel_GroupProcess.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/parallel_GroupProcessCharm.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/parallel_GroupProcessCharm.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/parallel_GroupProcessMpi.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/parallel_GroupProcessMpi.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/parallel_GroupProcessSerial.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/parallel_GroupProcessSerial.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/parallel_Layout.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/parallel_Layout.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/parallel_ReduceMpi.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/parallel_ReduceMpi.cpp
+ar rc build/charm/Cello/libparallel.a build/charm/Cello/parallel_GroupProcess.o build/charm/Cello/parallel_GroupProcessCharm.o build/charm/Cello/parallel_GroupProcessMpi.o build/charm/Cello/parallel_GroupProcessSerial.o build/charm/Cello/parallel_Layout.o build/charm/Cello/parallel_ReduceMpi.o
+ranlib build/charm/Cello/libparallel.a
+Install file: "build/charm/Cello/libparallel.a" as "lib/charm/libparallel.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/parameters.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/parameters.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/parameters_Param.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/parameters_Param.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/parameters_Parameters.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/parameters_Parameters.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/parse.tab.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/parse.tab.c
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/lex.yy.o -c -g -O3 -Wall -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/lex.yy.c
+<stdout>:1622:17: warning: ‘yyunput’ defined but not used [-Wunused-function]
+ar rc build/charm/Cello/libparameters.a build/charm/Cello/parameters.o build/charm/Cello/parameters_Param.o build/charm/Cello/parameters_Parameters.o build/charm/Cello/parse.tab.o build/charm/Cello/lex.yy.o build/charm/Cello/main.o
+ranlib build/charm/Cello/libparameters.a
+Install file: "build/charm/Cello/libparameters.a" as "lib/charm/libparameters.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/error_Error.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/error_Error.cpp
+ar rc build/charm/Cello/liberror.a build/charm/Cello/error_Error.o build/charm/Cello/main.o
+ranlib build/charm/Cello/liberror.a
+Install file: "build/charm/Cello/liberror.a" as "lib/charm/liberror.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/monitor_Monitor.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/monitor_Monitor.cpp
+ar rc build/charm/Cello/libmonitor.a build/charm/Cello/monitor_Monitor.o build/charm/Cello/main.o
+ranlib build/charm/Cello/libmonitor.a
+Install file: "build/charm/Cello/libmonitor.a" as "lib/charm/libmonitor.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/performance_Papi.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/performance_Papi.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/performance_Performance.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/performance_Performance.cpp
+ar rc build/charm/Cello/libperformance.a build/charm/Cello/performance_Papi.o build/charm/Cello/performance_Performance.o build/charm/Cello/main.o
+ranlib build/charm/Cello/libperformance.a
+Install file: "build/charm/Cello/libperformance.a" as "lib/charm/libperformance.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/lcaperf_attributes.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/lcaperf_attributes.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/lcaperf_counters.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/lcaperf_counters.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/lcaperf_counters_basic.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/lcaperf_counters_basic.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/lcaperf_counters_deriv.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/lcaperf_counters_deriv.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/lcaperf_counters_mpi.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/lcaperf_counters_mpi.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/lcaperf_counters_papi.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/lcaperf_counters_papi.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/lcaperf_counters_user.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/lcaperf_counters_user.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/lcaperf_it_counter_keys.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/lcaperf_it_counter_keys.cpp
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/lcaperf_lcaperf.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/lcaperf_lcaperf.cpp
+ar rc build/charm/Cello/liblcaperf.a build/charm/Cello/lcaperf_attributes.o build/charm/Cello/lcaperf_counters.o build/charm/Cello/lcaperf_counters_basic.o build/charm/Cello/lcaperf_counters_deriv.o build/charm/Cello/lcaperf_counters_mpi.o build/charm/Cello/lcaperf_counters_papi.o build/charm/Cello/lcaperf_counters_user.o build/charm/Cello/lcaperf_it_counter_keys.o build/charm/Cello/lcaperf_lcaperf.o build/charm/Cello/main.o
+ranlib build/charm/Cello/liblcaperf.a
+Install file: "build/charm/Cello/liblcaperf.a" as "lib/charm/liblcaperf.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/test_Unit.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/test_Unit.cpp
+ar rc build/charm/Cello/libtest.a build/charm/Cello/test_Unit.o
+ranlib build/charm/Cello/libtest.a
+Install file: "build/charm/Cello/libtest.a" as "lib/charm/libtest.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Cello/cello.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/Cello/cello.cpp
+ar rc build/charm/Cello/libcello.a build/charm/Cello/cello.o
+ranlib build/charm/Cello/libcello.a
+Install file: "build/charm/Cello/libcello.a" as "lib/charm/libcello.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/External/pngwriter.o -c -g -O3 -Wall -balancer RotateLB -DCONFIG_USE_CHARM -DCONFIG_PRECISION_SINGLE -DH5_USE_16_API -DNO_FREETYPE -DNEW_INITIAL -DCELLO_DEBUG -DCONFIG_USE_MEMORY -Iinclude -I/usr/include build/charm/External/pngwriter.cpp
+build/charm/External/pngwriter.cpp: In member function ‘void pngwriter::close()’:
+build/charm/External/pngwriter.cpp:992:22: warning: deprecated conversion from string constant to ‘png_charp {aka char*}’ [-Wwrite-strings]
+build/charm/External/pngwriter.cpp:995:22: warning: deprecated conversion from string constant to ‘png_charp {aka char*}’ [-Wwrite-strings]
+build/charm/External/pngwriter.cpp:998:22: warning: deprecated conversion from string constant to ‘png_charp {aka char*}’ [-Wwrite-strings]
+build/charm/External/pngwriter.cpp:1001:22: warning: deprecated conversion from string constant to ‘png_charp {aka char*}’ [-Wwrite-strings]
+build/charm/External/pngwriter.cpp:1004:22: warning: deprecated conversion from string constant to ‘png_charp {aka char*}’ [-Wwrite-strings]
+build/charm/External/pngwriter.cpp: In member function ‘void pngwriter::scale_wh(int, int)’:
+build/charm/External/pngwriter.cpp:3359:11: warning: variable ‘kx’ set but not used [-Wunused-but-set-variable]
+build/charm/External/pngwriter.cpp:3360:11: warning: variable ‘ky’ set but not used [-Wunused-but-set-variable]
+ar rc build/charm/External/libexternal.a build/charm/External/pngwriter.o
+ranlib build/charm/External/libexternal.a
+Install file: "build/charm/External/libexternal.a" as "lib/charm/libexternal.a"
+/home/bordner/charm/charm/bin/charmc -language charm++ -o build/charm/Enzo/enzo-p -g -O3 -Wall -rdynamic -module RotateLB build/charm/Enzo/enzo-p.o build/charm/Cello/main_enzo.o -Llib/charm -L/usr/lib -lcharm -lenzo -lsimulation -lproblem -lmesh -lfield -lio -ldisk -lmemory -lparallel -lparameters -lerror -lmonitor -lperformance -llcaperf -ltest -lcello -lexternal -lhdf5 -lpng -lgfortran
+Install file: "build/charm/Enzo/enzo-p" as "bin/enzo-p"
+scons: done building targets.
