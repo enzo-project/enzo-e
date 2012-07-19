@@ -81,10 +81,10 @@ public: // functions
     throw(std::out_of_range);
 
   /// Insert a new field
-  int insert_field(std::string name_field) throw();
+  int insert_field(std::string & name_field) throw();
 
   /// Insert a new group
-  void insert_group(std::string name_group) throw();
+  void insert_group(std::string & name_group) throw();
 
   //----------------------------------------------------------------------
 
@@ -95,10 +95,10 @@ public: // functions
   std::string field_name(size_t id_field) const throw(std::out_of_range);
 
   /// Return whether the field has been inserted
-  bool is_field(const std::string name) const throw();
+  bool is_field(const std::string & name) const throw();
 
   /// Return the integer handle for the named field
-  int field_id(const std::string name) throw();
+  int field_id(const std::string & name) const throw();
 
   /// Return the number of groups
   int group_count() const throw();
@@ -107,10 +107,10 @@ public: // functions
   std::string group_name(int id_group) const throw(std::out_of_range);
 
   /// Return whether the group has been inserted
-  bool is_group(const std::string name) const throw();
+  bool is_group(const std::string & name) const throw();
 
   /// Return the integer handle for the named group
-  int group_id(const std::string name) throw();
+  int group_id(const std::string & name) const throw();
 
 
   /// Return whether the given field is in the given group
