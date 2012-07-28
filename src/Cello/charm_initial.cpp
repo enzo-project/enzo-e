@@ -21,55 +21,16 @@
 
 //----------------------------------------------------------------------
 
-#ifdef NEW_INITIAL
-
 void SimulationCharm::c_initial ()
 {
   problem()->initial_reset();
   problem()->initial_next(this);
 }
 
-#endif
-
 //======================================================================
-
-#ifndef NEW_INITIAL
-
-void SimulationCharm::c_initial()
-{
-  ItPatch it_patch(hierarchy_);
-  Patch * patch;
-
-  // count patches for Patch::p_initial()
-  int patch_count = 0;
-
-  while (( patch = ++it_patch )) {
-    // count local patches
-    ++patch_count;
-
-  }
-
-  // set patch loop counter for s_patch() synchronization
-  patch_loop_.stop() = patch_count + 1;
-
-  // Initialize hierarchy
-
-  while (( patch = ++it_patch )) {
-    CProxy_Patch * patch_proxy = (CProxy_Patch *)patch;
-    patch_proxy->p_initial();
-  }
-
-  s_initial();
-
-}
-
-#endif
-
-//----------------------------------------------------------------------
 
 void Problem::initial_next(Simulation * simulation) throw()
 {
-#ifdef NEW_INITIAL
 
   // find next initialization object
 
@@ -115,7 +76,6 @@ void Problem::initial_next(Simulation * simulation) throw()
       patch_proxy->p_refresh();
     }
   }
-#endif
 }
 //----------------------------------------------------------------------
 
@@ -125,10 +85,8 @@ void SimulationCharm::x_request_patch
  int block_rank
 )
 {
-#ifdef NEW_INITIAL
   CkChareID patch_proxy;
   proxy_simulation[block_rank].x_send_patch(patch_id,patch_proxy);
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -139,14 +97,11 @@ void SimulationCharm::x_send_patch
  CkChareID patch_proxy
  )
 {
-#ifdef NEW_INITIAL
   ItPatch it_patch(hierarchy_);
   Patch * patch;
   while (( patch = ++it_patch )) {
      
   }
-
-#endif
 }
 
 //----------------------------------------------------------------------

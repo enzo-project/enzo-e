@@ -81,10 +81,10 @@ public: // functions
     throw(std::out_of_range);
 
   /// Insert a new field
-  int insert_field(std::string & name_field) throw();
+  int insert_field(const std::string & name_field) throw();
 
   /// Insert a new group
-  void insert_group(std::string & name_group) throw();
+  void insert_group(const std::string & name_group) throw();
 
   //----------------------------------------------------------------------
 

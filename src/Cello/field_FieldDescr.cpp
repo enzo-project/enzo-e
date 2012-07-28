@@ -97,7 +97,7 @@ bool FieldDescr::is_field(const std::string & name) const
 int FieldDescr::field_id(const std::string & name) const
   throw()
 {
-  return field_id_[name];
+  return field_id_.at(name);
 }
 
 //----------------------------------------------------------------------
@@ -129,7 +129,7 @@ bool FieldDescr::is_group(const std::string & name) const
 int FieldDescr::group_id(const std::string & name) const
   throw()
 {
-  return group_id_[name];
+  return group_id_.at(name);
 }
 
 //----------------------------------------------------------------------
@@ -234,7 +234,7 @@ field_action_enum FieldDescr::maximum_action(int id_field) const
 
 //----------------------------------------------------------------------
 
-int FieldDescr::insert_field(std::string & field_name) throw()
+int FieldDescr::insert_field(const std::string & field_name) throw()
 {
 
   int id = field_count();
@@ -286,7 +286,7 @@ int FieldDescr::insert_field(std::string & field_name) throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::insert_group(std::string group_name) throw()
+void FieldDescr::insert_group(const std::string & group_name) throw()
 {
   int id = group_count();
   group_name_.push_back(group_name);

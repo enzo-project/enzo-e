@@ -5,6 +5,7 @@
 /// @date     2010-04-02
 /// @brief    Test program for the Class_Size class
 
+#include "cello.hpp"
 #include "main.hpp"
 #include "test.hpp"
 
