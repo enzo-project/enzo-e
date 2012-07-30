@@ -1,0 +1,7 @@
+default:          Main development and release branch
+charm-cleaning:   For simplifying Charm++ control constructs
+charm-pupping:    For adding pup() and migration constructors
+lcaperf:          For incorporating lcaperf into the Performance component
+remove-mpi        For converting to Charm++ only to simplify code
+simplify          For simplify Cello, including moving some of Cello into 
+                  Enzo-P, but excluding removing MPI

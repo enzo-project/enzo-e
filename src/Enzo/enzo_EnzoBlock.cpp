@@ -1190,8 +1190,6 @@ int EnzoBlock::CosmologyComputeExpansionFactor
  
 #ifdef INVERSE_HYPERBOLIC_EXISTS
  
-  enzo_float eta, eta_old, x;
-  int i;
  
   /* 2) For OmegaMatterNow < 1 and OmegaLambdaNow == 0 see
         Peebles 1993, eq. 13-3, 13-10.
@@ -1200,6 +1198,9 @@ int EnzoBlock::CosmologyComputeExpansionFactor
  
   if (OmegaMatterNow < 1 && OmegaLambdaNow < OMEGA_TOLERANCE) {
  
+    enzo_float eta, eta_old, x;
+    int i;
+
     x = 2*TimeHubble0*pow(1.0 - OmegaMatterNow, 1.5) / OmegaMatterNow;
  
     /* Compute eta in a three step process, first from a third-order

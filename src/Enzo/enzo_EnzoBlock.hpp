@@ -177,9 +177,7 @@ public: // interface
   EnzoBlock (CkMigrateMessage *m) 
   {
     TRACE("CkMigrateMessage");
-    // for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-    //   BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
-    // }
+    initialize();
   };
 
   /// Initialize the EnzoBlock chare array
@@ -330,7 +328,7 @@ public: // interface
   int SolveMHDEquations(FieldDescr *,  enzo_float dt);
 
   /// Return the Cello FieldBlock index for the given field type
-  int index (enum field_type type)
+  int index (enum field_type type) const
   { return field_index_[type];}
 
   /// Set Block's cycle

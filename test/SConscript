@@ -4,6 +4,7 @@ Import('parallel_run_args')
 Import('type')
 Import('serial_run')
 Import('ip_charm')
+Import('ip_mpi')
 
 Import('bin_path')
 Import('test_path')
@@ -330,8 +331,8 @@ if (type == "serial"):
    env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS='1')
 elif (type == "charm"):
    env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_charm)
-elif (type == "mpi"):
-   env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS='8')
+else:
+   env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_mpi)
 
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
