@@ -174,7 +174,8 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize a migrated Block
-  EnzoBlock (CkMigrateMessage *m) {};
+  EnzoBlock (CkMigrateMessage *m) 
+  { initialize(); };
 
   /// Initialize the EnzoBlock chare array
   EnzoBlock
@@ -295,7 +296,7 @@ public: // interface
   int SolveMHDEquations(FieldDescr *,  enzo_float dt);
 
   /// Return the Cello FieldBlock index for the given field type
-  int index (enum field_type type)
+  int index (enum field_type type) const
   { return field_index_[type];}
 
   /// Set Block's cycle
