@@ -19,8 +19,6 @@ extern CProxy_SimulationCharm  proxy_simulation;
 
 //----------------------------------------------------------------------
 
-#ifdef NEW_INITIAL
-
 void Initial::enforce_
 ( Simulation * simulation ) throw()
 {
@@ -93,5 +91,3 @@ void Initial::enforce_
   ERROR("Initial::enforce_",
 	"This function should not be called");
 }
-
-#endif

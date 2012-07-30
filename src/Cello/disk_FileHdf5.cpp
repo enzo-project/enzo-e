@@ -532,7 +532,7 @@ void FileHdf5::group_create () throw()
 
     bool group_exists = false;
     for (size_t i=0; i<group_info.nlinks; i++) {
-      char group_name[80];
+      char group_name[80] = {0};
       H5Lget_name_by_idx (file_id_, group_full.c_str(),
 			  H5_INDEX_NAME,
 			  H5_ITER_NATIVE,i,

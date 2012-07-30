@@ -11,7 +11,8 @@
 //----------------------------------------------------------------------
 
 FieldBlock::FieldBlock ( int nx, int ny, int nz ) throw()
-  : array_(0),
+  : array_size_(0),
+    array_(0),
 #ifdef CONFIG_USE_CHARM
     num_fields_(),
 #endif
