@@ -33,8 +33,6 @@ public: // interface
 
 public: // virtual functions
 
-#ifdef NEW_INITIAL
-
   /// Initialize an entire simulation
   virtual void enforce ( Simulation * simulation ) throw()
   { enforce_(simulation); }
@@ -61,21 +59,11 @@ public: // virtual functions
     ) throw()
   { enforce_(block,field_descr,hierarchy); }
 
-#else /* not NEW_INITIAL */
-
-  /// Enforce initial conditions on the given Block or Hierarchy
-  virtual void enforce (Block * block,
-			const FieldDescr * field_descr,
-			const Hierarchy * hierarchy) throw() = 0;
-#endif
-
   /// Return whether enforce() expects block != NULL
   virtual bool expects_blocks_allocated() const throw()
   { return true; }
 
 protected: // functions
-
-#ifdef NEW_INITIAL
 
   /// "Loop" over enforcing initial conditions on the Hierarchy
   void enforce_ (Simulation * simulation ) throw();
@@ -98,9 +86,6 @@ protected: // functions
     const FieldDescr * field_descr,  
     const Hierarchy * hierarchy
     ) throw();
-
-
-#endif
 
 protected: // attributes
 

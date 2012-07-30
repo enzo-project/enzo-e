@@ -53,8 +53,7 @@ FieldDescr::~FieldDescr()
 
 //----------------------------------------------------------------------
 
-FieldDescr::FieldDescr(const FieldDescr & field_descr) 
-  throw()
+FieldDescr::FieldDescr(const FieldDescr & field_descr) throw() 
 {
   copy_(field_descr);
 }
@@ -87,7 +86,7 @@ std::string FieldDescr::field_name(size_t id_field) const
 
 //----------------------------------------------------------------------
 
-bool FieldDescr::is_field(const std::string name) const 
+bool FieldDescr::is_field(const std::string & name) const 
   throw()
 { 
   return (field_id_.find(name) != field_id_.end());
@@ -95,10 +94,10 @@ bool FieldDescr::is_field(const std::string name) const
 
 //----------------------------------------------------------------------
 
-int FieldDescr::field_id(const std::string name)
+int FieldDescr::field_id(const std::string & name) const
   throw()
 {
-  return field_id_[name];
+  return field_id_.at(name);
 }
 
 //----------------------------------------------------------------------
@@ -119,7 +118,7 @@ std::string FieldDescr::group_name(int id_group) const
 
 //----------------------------------------------------------------------
 
-bool FieldDescr::is_group(const std::string name) const
+bool FieldDescr::is_group(const std::string & name) const
   throw()
 { 
   return (group_id_.find(name) != group_id_.end());
@@ -127,10 +126,10 @@ bool FieldDescr::is_group(const std::string name) const
 
 //----------------------------------------------------------------------
 
-int FieldDescr::group_id(const std::string name)
+int FieldDescr::group_id(const std::string & name) const
   throw()
 {
-  return group_id_[name];
+  return group_id_.at(name);
 }
 
 //----------------------------------------------------------------------
@@ -235,7 +234,7 @@ field_action_enum FieldDescr::maximum_action(int id_field) const
 
 //----------------------------------------------------------------------
 
-int FieldDescr::insert_field(std::string field_name) throw()
+int FieldDescr::insert_field(const std::string & field_name) throw()
 {
 
   int id = field_count();
@@ -287,7 +286,7 @@ int FieldDescr::insert_field(std::string field_name) throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::insert_group(std::string group_name) throw()
+void FieldDescr::insert_group(const std::string & group_name) throw()
 {
   int id = group_count();
   group_name_.push_back(group_name);
@@ -410,6 +409,9 @@ void FieldDescr::set_maximum
 
 void FieldDescr::copy_(const FieldDescr & field_descr) throw()
 {
+  refresh_face_[0]=field_descr.refresh_face_[0];
+  refresh_face_[1]=field_descr.refresh_face_[1];
+  refresh_face_[2]=field_descr.refresh_face_[2];
   alignment_      = field_descr.alignment_;
   padding_        = field_descr.padding_;
   courant_        = field_descr.courant_;

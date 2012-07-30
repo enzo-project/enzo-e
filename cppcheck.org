@@ -1,0 +1,353 @@
+** DONE [[file:problem_Problem.hpp][problem_Problem.hpp]] 75: (information) Technically the member function 'Problem::initial_next' can be const.
+** DONE [[file:charm_Loop.hpp][charm_Loop.hpp]] 40: (information) Technically the member function 'Loop::pup' can be const.
+** DONE [[file:./disk_FileHdf5.cpp][./disk_FileHdf5.cpp]] 535: (style) Variable 'group_name' is not assigned a value
+** DONE [[file:disk_FileHdf5.hpp][disk_FileHdf5.hpp]] 121: (information) Technically the member function 'FileHdf5::compress' can be const.
+** DONE [[file:./enzo_EnzoBlock.cpp][./enzo_EnzoBlock.cpp]] 1194: (information) The scope of the variable eta can be reduced
+** DONE [[file:./enzo_EnzoBlock.cpp][./enzo_EnzoBlock.cpp]] 1194: (information) The scope of the variable eta_old can be reduced
+** DONE [[file:./enzo_EnzoBlock.cpp][./enzo_EnzoBlock.cpp]] 1194: (information) The scope of the variable x can be reduced
+** DONE [[file:./enzo_EnzoBlock.cpp][./enzo_EnzoBlock.cpp]] 1195: (information) The scope of the variable i can be reduced
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::AccelerationField' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::BaryonField' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::CellWidth' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::CycleNumber' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::dt' is not initialised in the constructor.*
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::GridDimension' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::GridEndIndex' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::GridLeftEdge' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::GridStartIndex' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::OldBaryonField' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::OldTime' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::SubgridFluxes' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 177: (warning) Member variable 'EnzoBlock::Time_' is not initialised in the constructor.
+** DONE [[file:enzo_EnzoBlock.hpp][enzo_EnzoBlock.hpp]] 298: (information) Technically the member function 'EnzoBlock::index' can be const.
+** DONE [[file:./field_FieldBlock.cpp][./field_FieldBlock.cpp]] 13: (warning) Member variable 'FieldBlock::array_size_' is not initialised in the constructor.
+** DONE [[file:./field_FieldDescr.cpp][./field_FieldDescr.cpp]] 130 -> [field_FieldDescr.hpp:113]: (information) Technically the member function 'FieldDescr::group_id' can be const.
+** DONE [[file:./field_FieldDescr.cpp][./field_FieldDescr.cpp]] 130: (performance) Function parameter 'name' should be passed by reference.
+** DONE [[file:./field_FieldDescr.cpp][./field_FieldDescr.cpp]] 56: (warning) Member variable 'FieldDescr::refresh_face_' is not initialised in the constructor.
+** DONE [[file:./field_FieldDescr.cpp][./field_FieldDescr.cpp]] 64: (warning) Member variable 'FieldDescr::refresh_face_' is not assigned a value in 'FieldDescr::operator='
+** DONE [[file:./field_FieldDescr.cpp][./field_FieldDescr.cpp]] 90: (performance) Function parameter 'name' should be passed by reference.
+** DONE [[file:./field_FieldDescr.cpp][./field_FieldDescr.cpp]] 98 -> [field_FieldDescr.hpp:101]: (information) Technically the member function 'FieldDescr::field_id' can be const.
+** TODO [[file:./field_FieldDescr.cpp][./field_FieldDescr.cpp]] 98: (performance) Function parameter 'name' should be passed by reference.
+** TODO [[file:field_FieldDescr.hpp][field_FieldDescr.hpp]] 101: (performance) Function parameter 'name' should be passed by reference.
+** TODO [[file:field_FieldDescr.hpp][field_FieldDescr.hpp]] 110: (performance) Function parameter 'name' should be passed by reference.
+** TODO [[file:field_FieldDescr.hpp][field_FieldDescr.hpp]] 113: (performance) Function parameter 'name' should be passed by reference.
+** TODO [[file:field_FieldDescr.hpp][field_FieldDescr.hpp]] 98: (performance) Function parameter 'name' should be passed by reference.
+** TODO [[file:./field_FieldFace.cpp][./field_FieldFace.cpp]] 293 -> [field_FieldFace.hpp:89]: (information) Technically the member function 'FieldFace::loop_limits' can be const.
+** TODO [[file:field_ItFieldList.hpp][field_ItFieldList.hpp]] 20: (warning) Member variable 'ItFieldList::index_' is not initialised in the constructor.
+** TODO [[file:field_ItFieldRange.hpp][field_ItFieldRange.hpp]] 20: (warning) Member variable 'ItFieldRange::index_' is not initialised in the constructor.
+** TODO [[file:field_ItFieldRange.hpp][field_ItFieldRange.hpp]] 25: (warning) Member variable 'ItFieldRange::index_' is not initialised in the constructor.
+** TODO [[file:./Grid_ComputeGammaField.cpp][./Grid_ComputeGammaField.cpp]] 28: (style) Variable 'H2IINum' is not assigned a value
+** TODO [[file:./Grid_ComputeGammaField.cpp][./Grid_ComputeGammaField.cpp]] 28: (style) Variable 'H2INum' is not assigned a value
+** TODO [[file:./Grid_ComputeGammaField.cpp][./Grid_ComputeGammaField.cpp]] 28: (style) Variable 'HeIIINum' is not assigned a value
+** TODO [[file:./Grid_ComputeGammaField.cpp][./Grid_ComputeGammaField.cpp]] 28: (style) Variable 'HeIINum' is not assigned a value
+** TODO [[file:./Grid_ComputeGammaField.cpp][./Grid_ComputeGammaField.cpp]] 28: (style) Variable 'HeINum' is not assigned a value
+** TODO [[file:./Grid_ComputeGammaField.cpp][./Grid_ComputeGammaField.cpp]] 28: (style) Variable 'HIINum' is not assigned a value
+** TODO [[file:./Grid_ComputeGammaField.cpp][./Grid_ComputeGammaField.cpp]] 28: (style) Variable 'HINum' is not assigned a value
+** TODO [[file:./Grid_ComputeGammaField.cpp][./Grid_ComputeGammaField.cpp]] 28: (style) Variable 'HMNum' is not assigned a value
+** TODO [[file:./Grid_ComputeGammaField.cpp][./Grid_ComputeGammaField.cpp]] 29: (style) Variable 'DIINum' is not assigned a value
+** TODO [[file:./Grid_ComputeGammaField.cpp][./Grid_ComputeGammaField.cpp]] 29: (style) Variable 'DINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 140: (style) Variable 'H2INum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 140: (style) Variable 'HeIIINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 140: (style) Variable 'HeIINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 140: (style) Variable 'HeINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 140: (style) Variable 'HIINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 140: (style) Variable 'HINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 140: (style) Variable 'HMNum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 141: (style) Variable 'DIINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 141: (style) Variable 'DINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 141: (style) Variable 'H2IINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 31: (information) The scope of the variable density can be reduced
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 31: (information) The scope of the variable gas_energy can be reduced
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 32: (information) The scope of the variable total_energy can be reduced
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 32: (information) The scope of the variable velocity1 can be reduced
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 32: (information) The scope of the variable velocity2 can be reduced
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 32: (information) The scope of the variable velocity3 can be reduced
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 59: (style) Variable 'GENum' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 59: (style) Variable 'Vel1Num' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 59: (style) Variable 'Vel2Num' is not assigned a value
+** TODO [[file:./Grid_ComputePressure.cpp][./Grid_ComputePressure.cpp]] 59: (style) Variable 'Vel3Num' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 101: (style) Variable 'H2INum' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 101: (style) Variable 'HeIIINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 101: (style) Variable 'HeIINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 101: (style) Variable 'HeINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 101: (style) Variable 'HIINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 101: (style) Variable 'HINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 101: (style) Variable 'HMNum' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 102: (style) Variable 'DIINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 102: (style) Variable 'DINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 102: (style) Variable 'H2IINum' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 23: (information) The scope of the variable density can be reduced
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 23: (information) The scope of the variable gas_energy can be reduced
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 50: (style) Variable 'GENum' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 50: (style) Variable 'Vel1Num' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 50: (style) Variable 'Vel2Num' is not assigned a value
+** TODO [[file:./Grid_ComputePressureDualEnergyFormalism.cpp][./Grid_ComputePressureDualEnergyFormalism.cpp]] 50: (style) Variable 'Vel3Num' is not assigned a value
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable DeNum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable DIINum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable DINum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable H2IINum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable H2INum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable HDINum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable HeIIINum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable HeIINum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable HeINum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable HIINum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable HINum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (information) The scope of the variable HMNum can be reduced
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (style) Variable 'H2IINum' is not assigned a value
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (style) Variable 'H2INum' is not assigned a value
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (style) Variable 'HeIIINum' is not assigned a value
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (style) Variable 'HeIINum' is not assigned a value
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (style) Variable 'HeINum' is not assigned a value
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (style) Variable 'HIINum' is not assigned a value
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (style) Variable 'HINum' is not assigned a value
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 38: (style) Variable 'HMNum' is not assigned a value
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 39: (style) Variable 'DIINum' is not assigned a value
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 39: (style) Variable 'DINum' is not assigned a value
+** TODO [[file:./Grid_ComputeTemperatureField.cpp][./Grid_ComputeTemperatureField.cpp]] 94: (information) The scope of the variable number_density can be reduced
+** TODO [[file:./Grid_ComputeTimeStep_PPM.cpp][./Grid_ComputeTimeStep_PPM.cpp]] 102: (error) Mismatching allocation and deallocation: pressure_field
+** TODO [[file:./Grid_ComputeTimeStep_PPM.cpp][./Grid_ComputeTimeStep_PPM.cpp]] 38: (information) The scope of the variable result can be reduced
+** TODO [[file:./Grid_ComputeTimeStep_PPM.cpp][./Grid_ComputeTimeStep_PPM.cpp]] 60: (style) Variable 'GENum' is not assigned a value
+** TODO [[file:./Grid_ComputeTimeStep_PPM.cpp][./Grid_ComputeTimeStep_PPM.cpp]] 60: (style) Variable 'Vel1Num' is not assigned a value
+** TODO [[file:./Grid_ComputeTimeStep_PPM.cpp][./Grid_ComputeTimeStep_PPM.cpp]] 60: (style) Variable 'Vel2Num' is not assigned a value
+** TODO [[file:./Grid_ComputeTimeStep_PPM.cpp][./Grid_ComputeTimeStep_PPM.cpp]] 60: (style) Variable 'Vel3Num' is not assigned a value
+** TODO [[file:./Grid_ComputeTimeStep_PPML.cpp][./Grid_ComputeTimeStep_PPML.cpp]] 45: (style) Variable 'size' is assigned a value that is never used
+** TODO [[file:./Grid_SetMinimumSupport.cpp][./Grid_SetMinimumSupport.cpp]] 32: (information) The scope of the variable i can be reduced
+** TODO [[file:./Grid_SetMinimumSupport.cpp][./Grid_SetMinimumSupport.cpp]] 39: (style) Variable 'GENum' is not assigned a value
+** TODO [[file:./Grid_SetMinimumSupport.cpp][./Grid_SetMinimumSupport.cpp]] 39: (style) Variable 'Vel1Num' is not assigned a value
+** TODO [[file:./Grid_SetMinimumSupport.cpp][./Grid_SetMinimumSupport.cpp]] 39: (style) Variable 'Vel2Num' is not assigned a value
+** TODO [[file:./Grid_SetMinimumSupport.cpp][./Grid_SetMinimumSupport.cpp]] 39: (style) Variable 'Vel3Num' is not assigned a value
+** TODO [[file:./Grid_SolveHydroEquations.cpp][./Grid_SolveHydroEquations.cpp]] 131: (error) Memory leak: GammaField
+** TODO [[file:./Grid_SolveHydroEquations.cpp][./Grid_SolveHydroEquations.cpp]] 131: (error) Memory leak: velocity2
+** TODO [[file:./Grid_SolveHydroEquations.cpp][./Grid_SolveHydroEquations.cpp]] 131: (error) Memory leak: velocity3
+** TODO [[file:./Grid_SolveHydroEquations.cpp][./Grid_SolveHydroEquations.cpp]] 22: (style) Variable 'GENum' is not assigned a value
+** TODO [[file:./Grid_SolveHydroEquations.cpp][./Grid_SolveHydroEquations.cpp]] 22: (style) Variable 'Vel1Num' is not assigned a value
+** TODO [[file:./Grid_SolveHydroEquations.cpp][./Grid_SolveHydroEquations.cpp]] 22: (style) Variable 'Vel2Num' is not assigned a value
+** TODO [[file:./Grid_SolveHydroEquations.cpp][./Grid_SolveHydroEquations.cpp]] 22: (style) Variable 'Vel3Num' is not assigned a value
+** TODO [[file:./Grid_SolveHydroEquations.cpp][./Grid_SolveHydroEquations.cpp]] 236: (style) Variable 'standard' is not assigned a value
+** TODO [[file:./Grid_SolveHydroEquations.cpp][./Grid_SolveHydroEquations.cpp]] 335: (error) Memory leak: temp
+** TODO [[file:./io_Input.cpp][./io_Input.cpp]] 14: (warning) Member variable 'Input::index_charm_' is not initialised in the constructor.
+** TODO [[file:io_ItReduce.hpp][io_ItReduce.hpp]] 21: (warning) Member variable 'ItReduce::count_' is not initialised in the constructor.
+** TODO [[file:io_ItReduce.hpp][io_ItReduce.hpp]] 21: (warning) Member variable 'ItReduce::value_' is not initialised in the constructor.
+** TODO [[file:./io_OutputImage.cpp][./io_OutputImage.cpp]] 457 -> [cello.hpp:51]: (style) Variable 'axis_x' hides enumerator with same name
+** TODO [[file:./io_OutputImage.cpp][./io_OutputImage.cpp]] 458 -> [cello.hpp:52]: (style) Variable 'axis_y' hides enumerator with same name
+** TODO [[file:./io_Schedule.cpp][./io_Schedule.cpp]] 218: (information) The scope of the variable time_stop can be reduced
+** TODO [[file:./io_Schedule.cpp][./io_Schedule.cpp]] 218: (style) Variable 'time_stop' is assigned a value that is never used
+** TODO [[file:./lcaperf_attributes.cpp][./lcaperf_attributes.cpp]] 28: (warning) Member variable 'Attributes::index_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_attributes.cpp][./lcaperf_attributes.cpp]] 28: (warning) Member variable 'Attributes::name_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_attributes.cpp][./lcaperf_attributes.cpp]] 28: (warning) Member variable 'Attributes::value_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_attributes.cpp][./lcaperf_attributes.cpp]] 35: (warning) Member variable 'Attributes::index_' is not assigned a value in 'Attributes::operator='
+** TODO [[file:./lcaperf_attributes.cpp][./lcaperf_attributes.cpp]] 35: (warning) Member variable 'Attributes::name_' is not assigned a value in 'Attributes::operator='
+** TODO [[file:./lcaperf_attributes.cpp][./lcaperf_attributes.cpp]] 35: (warning) Member variable 'Attributes::value_' is not assigned a value in 'Attributes::operator='
+** TODO [[file:lcaperf_attributes.hpp][lcaperf_attributes.hpp]] 57: (information) Technically the member function 'lca::Attributes::index' can be const.
+** TODO [[file:./lcaperf_counters_basic.cpp][./lcaperf_counters_basic.cpp]] 45: (warning) Member variable 'CountersBasic::time_begin_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters_basic.cpp][./lcaperf_counters_basic.cpp]] 53: (warning) Member variable 'CountersBasic::time_begin_' is not assigned a value in 'CountersBasic::operator='
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 51: (warning) Member variable 'Counters::counters_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 51: (warning) Member variable 'Counters::frame_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 51: (warning) Member variable 'Counters::global_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 51: (warning) Member variable 'Counters::index_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 51: (warning) Member variable 'Counters::is_logging_active_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 51: (warning) Member variable 'Counters::is_tracing_active_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 51: (warning) Member variable 'Counters::name_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 51: (warning) Member variable 'Counters::num_counters_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 51: (warning) Member variable 'Counters::type_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 59: (warning) Member variable 'Counters::counters_' is not assigned a value in 'Counters::operator='
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 59: (warning) Member variable 'Counters::frame_' is not assigned a value in 'Counters::operator='
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 59: (warning) Member variable 'Counters::global_' is not assigned a value in 'Counters::operator='
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 59: (warning) Member variable 'Counters::index_' is not assigned a value in 'Counters::operator='
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 59: (warning) Member variable 'Counters::is_logging_active_' is not assigned a value in 'Counters::operator='
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 59: (warning) Member variable 'Counters::is_tracing_active_' is not assigned a value in 'Counters::operator='
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 59: (warning) Member variable 'Counters::name_' is not assigned a value in 'Counters::operator='
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 59: (warning) Member variable 'Counters::num_counters_' is not assigned a value in 'Counters::operator='
+** TODO [[file:./lcaperf_counters.cpp][./lcaperf_counters.cpp]] 59: (warning) Member variable 'Counters::type_' is not assigned a value in 'Counters::operator='
+** TODO [[file:lcaperf_counters.hpp][lcaperf_counters.hpp]] 34 -> [_performance.hpp:58]: (style) Variable 'num_counters' hides enumerator with same name
+** TODO [[file:./lcaperf_counters_mpi.cpp][./lcaperf_counters_mpi.cpp]] 62: (warning) Member variable 'CountersMpi::ip_mpi_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters_mpi.cpp][./lcaperf_counters_mpi.cpp]] 62: (warning) Member variable 'CountersMpi::ip_node_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters_mpi.cpp][./lcaperf_counters_mpi.cpp]] 62: (warning) Member variable 'CountersMpi::np_mpi_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters_mpi.cpp][./lcaperf_counters_mpi.cpp]] 62: (warning) Member variable 'CountersMpi::np_node_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters_mpi.cpp][./lcaperf_counters_mpi.cpp]] 70: (warning) Member variable 'CountersMpi::ip_mpi_' is not assigned a value in 'CountersMpi::operator='
+** TODO [[file:./lcaperf_counters_mpi.cpp][./lcaperf_counters_mpi.cpp]] 70: (warning) Member variable 'CountersMpi::ip_node_' is not assigned a value in 'CountersMpi::operator='
+** TODO [[file:./lcaperf_counters_mpi.cpp][./lcaperf_counters_mpi.cpp]] 70: (warning) Member variable 'CountersMpi::np_mpi_' is not assigned a value in 'CountersMpi::operator='
+** TODO [[file:./lcaperf_counters_mpi.cpp][./lcaperf_counters_mpi.cpp]] 70: (warning) Member variable 'CountersMpi::np_node_' is not assigned a value in 'CountersMpi::operator='
+** TODO [[file:./lcaperf_counters_user.cpp][./lcaperf_counters_user.cpp]] 32: (warning) Member variable 'CountersUser::value_' is not initialised in the constructor.
+** TODO [[file:./lcaperf_counters_user.cpp][./lcaperf_counters_user.cpp]] 41: (warning) Member variable 'CountersUser::value_' is not assigned a value in 'CountersUser::operator='
+** TODO [[file:./lex.yy.c][./lex.yy.c]] 381: (style) struct or union member 'yy_trans_info::yy_nxt' is never used
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 121 -> [memory_Memory.hpp:57]: (information) Technically the member function 'Memory::deallocate' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 155 -> [memory_Memory.hpp:60]: (information) Technically the member function 'Memory::new_group' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 173 -> [memory_Memory.hpp:64]: (information) Technically the member function 'Memory::begin_group' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 200 -> [memory_Memory.hpp:67]: (information) Technically the member function 'Memory::end_group' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 238 -> [memory_Memory.hpp:70]: (information) Technically the member function 'Memory::current_group' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 263 -> [memory_Memory.hpp:73]: (information) Technically the member function 'Memory::bytes' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 274 -> [memory_Memory.hpp:89]: (information) Technically the member function 'Memory::available' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 289 -> [memory_Memory.hpp:76]: (information) Technically the member function 'Memory::efficiency' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 306 -> [memory_Memory.hpp:79]: (information) Technically the member function 'Memory::bytes_high' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 30 -> [memory_Memory.hpp:136]: (information) Technically the member function 'Memory::initialize_' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 317 -> [memory_Memory.hpp:82]: (information) Technically the member function 'Memory::set_limit' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 327 -> [memory_Memory.hpp:86]: (information) Technically the member function 'Memory::limit' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 338 -> [memory_Memory.hpp:93]: (information) Technically the member function 'Memory::num_new' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 349 -> [memory_Memory.hpp:96]: (information) Technically the member function 'Memory::num_delete' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 360 -> [memory_Memory.hpp:99]: (information) Technically the member function 'Memory::print' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 379 -> [memory_Memory.hpp:102]: (information) Technically the member function 'Memory::reset' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 397 -> [memory_Memory.hpp:105]: (information) Technically the member function 'Memory::reset_high' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 408 -> [memory_Memory.hpp:142]: (information) Technically the member function 'Memory::check_handle_' can be const.
+** TODO [[file:./memory_Memory.cpp][./memory_Memory.cpp]] 62 -> [memory_Memory.hpp:139]: (information) Technically the member function 'Memory::finalize_' can be const.
+** TODO [[file:memory_Memory.hpp][memory_Memory.hpp]] 108: (information) Technically the member function 'Memory::set_active' can be const.
+** TODO [[file:memory_Memory.hpp][memory_Memory.hpp]] 116: (information) Technically the member function 'Memory::set_allocate_fill' can be const.
+** TODO [[file:memory_Memory.hpp][memory_Memory.hpp]] 125: (information) Technically the member function 'Memory::set_deallocate_fill' can be const.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 67: (warning) Member variable 'Block::count_refresh_face_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 67: (warning) Member variable 'Block::cycle_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 67: (warning) Member variable 'Block::dt_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 67: (warning) Member variable 'Block::index_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 67: (warning) Member variable 'Block::lower_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 67: (warning) Member variable 'Block::num_field_blocks_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 67: (warning) Member variable 'Block::patch_id_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 67: (warning) Member variable 'Block::patch_rank_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 67: (warning) Member variable 'Block::size_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 67: (warning) Member variable 'Block::time_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 67: (warning) Member variable 'Block::upper_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 70: (warning) Member variable 'Block::count_refresh_face_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 70: (warning) Member variable 'Block::cycle_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 70: (warning) Member variable 'Block::dt_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 70: (warning) Member variable 'Block::index_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 70: (warning) Member variable 'Block::lower_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 70: (warning) Member variable 'Block::num_field_blocks_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 70: (warning) Member variable 'Block::patch_id_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 70: (warning) Member variable 'Block::patch_rank_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 70: (warning) Member variable 'Block::size_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 70: (warning) Member variable 'Block::time_' is not initialised in the constructor.
+** TODO [[file:mesh_Block.hpp][mesh_Block.hpp]] 70: (warning) Member variable 'Block::upper_' is not initialised in the constructor.
+** TODO [[file:mesh_Factory.hpp][mesh_Factory.hpp]] 76: (information) Technically the member function 'Factory::pup' can be const.
+** TODO [[file:mesh_functions.hpp][mesh_functions.hpp]] 343: (style) Variable 'sum_level' is assigned a value that is never used
+** TODO [[file:mesh_functions.hpp][mesh_functions.hpp]] 455: (style) Variable 'scale' is assigned a value that is never used
+** TODO [[file:mesh_functions.hpp][mesh_functions.hpp]] 869: (error) Memory leak: field_te
+** TODO [[file:parallel_GroupProcess.hpp][parallel_GroupProcess.hpp]] 42: (information) Technically the member function 'GroupProcess::pup' can be const.
+** TODO [[file:./parameters_Param.cpp][./parameters_Param.cpp]] 302: (information) The scope of the variable i can be reduced
+** TODO [[file:./parameters_Parameters.cpp][./parameters_Parameters.cpp]] 214: (error) Resource leak: file_pointer
+** TODO [[file:./parameters_Parameters.cpp][./parameters_Parameters.cpp]] 579 -> [parameters_Param.hpp:30]: (style) Class 'list_type' hides typedef with same name
+** TODO [[file:./parameters_Parameters.cpp][./parameters_Parameters.cpp]] 992: (performance) Function parameter 'parameter' should be passed by reference.
+** TODO [[file:parameters_Parameters.hpp][parameters_Parameters.hpp]] 184 -> [parameters_Param.hpp:30]: (style) Variable 'list_type' hides typedef with same name
+** TODO [[file:parameters_Parameters.hpp][parameters_Parameters.hpp]] 233: (performance) Function parameter 'parameter' should be passed by reference.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 101: (information) Technically the member function 'Param::is_string' can be const.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 104: (information) Technically the member function 'Param::is_list' can be const.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 107: (information) Technically the member function 'Param::is_float_expr' can be const.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 110: (information) Technically the member function 'Param::is_logical_expr' can be const.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 46: (warning) Member variable 'Param::value_expr_' is not initialised in the constructor.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 46: (warning) Member variable 'Param::value_float_' is not initialised in the constructor.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 46: (warning) Member variable 'Param::value_integer_' is not initialised in the constructor.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 46: (warning) Member variable 'Param::value_list_' is not initialised in the constructor.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 46: (warning) Member variable 'Param::value_logical_' is not initialised in the constructor.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 46: (warning) Member variable 'Param::value_string_' is not initialised in the constructor.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 92: (information) Technically the member function 'Param::is_integer' can be const.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 95: (information) Technically the member function 'Param::is_float' can be const.
+** TODO [[file:parameters_Param.hpp][parameters_Param.hpp]] 98: (information) Technically the member function 'Param::is_logical' can be const.
+** TODO [[file:parameters_ParamNode.hpp][parameters_ParamNode.hpp]] 48: (warning) Member variable 'ParamNode::name_' is not assigned a value in 'ParamNode::operator='
+** TODO [[file:parameters_ParamNode.hpp][parameters_ParamNode.hpp]] 48: (warning) Member variable 'ParamNode::subnodes_' is not assigned a value in 'ParamNode::operator='
+** TODO [[file:./parse.tab.c][./parse.tab.c]] 338: (error) Memory leak: p
+** TODO [[file:./parse.tab.c][./parse.tab.c]] 348: (error) Memory leak: p
+** TODO [[file:./parse.tab.c][./parse.tab.c]] 357: (error) Memory leak: p
+** TODO [[file:./parse.tab.c][./parse.tab.c]] 365: (error) Memory leak: p
+** TODO [[file:./parse.tab.c][./parse.tab.c]] 373: (error) Memory leak: p
+** TODO [[file:./parse.tab.c][./parse.tab.c]] 399: (error) Memory leak: p
+** TODO [[file:./parse.tab.c][./parse.tab.c]] 409: (error) Memory leak: p
+** TODO [[file:performance_Counters.hpp][performance_Counters.hpp]] 21 -> [_performance.hpp:21]: (style) Variable 'num_attributes' hides enumerator with same name
+** TODO [[file:performance_Counters.hpp][performance_Counters.hpp]] 21 -> [_performance.hpp:58]: (style) Function parameter 'num_counters' hides enumerator with same name
+** TODO [[file:performance_Counters.hpp][performance_Counters.hpp]] 41: (warning) Member variable 'Counters::attributes_' is not initialised in the constructor.
+** TODO [[file:performance_Counters.hpp][performance_Counters.hpp]] 41: (warning) Member variable 'Counters::counters_start_' is not initialised in the constructor.
+** TODO [[file:performance_Counters.hpp][performance_Counters.hpp]] 41: (warning) Member variable 'Counters::counters_stop_' is not initialised in the constructor.
+** TODO [[file:performance_Counters.hpp][performance_Counters.hpp]] 46: (warning) Member variable 'Counters::attributes_' is not assigned a value in 'Counters::operator='
+** TODO [[file:performance_Counters.hpp][performance_Counters.hpp]] 46: (warning) Member variable 'Counters::counters_start_' is not assigned a value in 'Counters::operator='
+** TODO [[file:performance_Counters.hpp][performance_Counters.hpp]] 46: (warning) Member variable 'Counters::counters_stop_' is not assigned a value in 'Counters::operator='
+** TODO [[file:./performance_Papi.cpp][./performance_Papi.cpp]] 29 -> [performance_Papi.hpp:43]: (information) Technically the member function 'Papi::start' can be const.
+** TODO [[file:./performance_Papi.cpp][./performance_Papi.cpp]] 55 -> [performance_Papi.hpp:46]: (information) Technically the member function 'Papi::stop' can be const.
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 34: (warning) Member variable 'Performance::attribute_monotonic_' is not initialised in the constructor.
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 34: (warning) Member variable 'Performance::attribute_names_' is not initialised in the constructor.
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 34: (warning) Member variable 'Performance::counter_names_' is not initialised in the constructor.
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 34: (warning) Member variable 'Performance::counters_' is not initialised in the constructor.
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 34: (warning) Member variable 'Performance::current_group_' is not initialised in the constructor.
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 34: (warning) Member variable 'Performance::current_region_' is not initialised in the constructor.
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 34: (warning) Member variable 'Performance::group_names_' is not initialised in the constructor.
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 34: (warning) Member variable 'Performance::papi_' is not initialised in the constructor.
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 34: (warning) Member variable 'Performance::region_names_' is not initialised in the constructor.
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 34: (warning) Member variable 'Performance::timer_' is not initialised in the constructor.
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 41: (warning) Member variable 'Performance::attribute_monotonic_' is not assigned a value in 'Performance::operator='
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 41: (warning) Member variable 'Performance::attribute_names_' is not assigned a value in 'Performance::operator='
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 41: (warning) Member variable 'Performance::counter_names_' is not assigned a value in 'Performance::operator='
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 41: (warning) Member variable 'Performance::counters_' is not assigned a value in 'Performance::operator='
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 41: (warning) Member variable 'Performance::current_group_' is not assigned a value in 'Performance::operator='
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 41: (warning) Member variable 'Performance::current_region_' is not assigned a value in 'Performance::operator='
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 41: (warning) Member variable 'Performance::group_names_' is not assigned a value in 'Performance::operator='
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 41: (warning) Member variable 'Performance::papi_' is not assigned a value in 'Performance::operator='
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 41: (warning) Member variable 'Performance::region_names_' is not assigned a value in 'Performance::operator='
+** TODO [[file:./performance_Performance.cpp][./performance_Performance.cpp]] 41: (warning) Member variable 'Performance::timer_' is not assigned a value in 'Performance::operator='
+** TODO [[file:./problem_InitialDefault.cpp][./problem_InitialDefault.cpp]] 217: (style) Variable 'mz' is assigned a value that is never used
+** TODO [[file:./problem_Problem.cpp][./problem_Problem.cpp]] 556: (error) Mismatching allocation and deallocation: r
+** TODO [[file:./problem_Problem.cpp][./problem_Problem.cpp]] 557: (error) Mismatching allocation and deallocation: g
+** TODO [[file:./problem_Problem.cpp][./problem_Problem.cpp]] 558: (error) Mismatching allocation and deallocation: b
+** TODO [[file:./problem_Problem.cpp][./problem_Problem.cpp]] 625: (error) Mismatching allocation and deallocation: r
+** TODO [[file:./problem_Problem.cpp][./problem_Problem.cpp]] 626: (error) Mismatching allocation and deallocation: g
+** TODO [[file:./problem_Problem.cpp][./problem_Problem.cpp]] 627: (error) Mismatching allocation and deallocation: b
+** TODO [[file:./problem_Problem.cpp][./problem_Problem.cpp]] 628: (error) Mismatching allocation and deallocation: a
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::cycle_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::dimension_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::dt_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::factory_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::field_descr_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::group_process_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::hierarchy_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::is_group_process_new_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::lcaperf_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::monitor_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::num_perf_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::parameters_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::perf_max_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::perf_min_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::performance_curr_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::performance_cycle_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::performance_simulation_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::perf_sum_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::perf_val_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::problem_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::stop_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 87: (warning) Member variable 'Simulation::time_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::cycle_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::dimension_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::dt_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::factory_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::field_descr_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::group_process_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::hierarchy_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::is_group_process_new_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::lcaperf_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::monitor_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::num_perf_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::parameters_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::perf_max_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::perf_min_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::performance_curr_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::performance_cycle_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::performance_simulation_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::perf_sum_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::perf_val_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::problem_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::stop_' is not initialised in the constructor.
+** TODO [[file:./simulation_Simulation.cpp][./simulation_Simulation.cpp]] 97: (warning) Member variable 'Simulation::time_' is not initialised in the constructor.
+** TODO [[file:./test_FieldBlock.cpp][./test_FieldBlock.cpp]] 291: (error) syntax error
+** TODO [[file:./test_FieldBlock.cpp][./test_FieldBlock.cpp]] 74: (style) Variable 'ix' is assigned a value that is never used
+** TODO [[file:./test_FieldBlock.cpp][./test_FieldBlock.cpp]] 74: (style) Variable 'iy' is assigned a value that is never used
+** TODO [[file:./test_FieldBlock.cpp][./test_FieldBlock.cpp]] 74: (style) Variable 'iz' is assigned a value that is never used
+** TODO [[file:./test_FieldBlock.cpp][./test_FieldBlock.cpp]] 80: (style) Variable 'xb' is assigned a value that is never used
+** TODO [[file:./test_FieldBlock.cpp][./test_FieldBlock.cpp]] 80: (style) Variable 'yb' is assigned a value that is never used
+** TODO [[file:./test_FieldBlock.cpp][./test_FieldBlock.cpp]] 80: (style) Variable 'zb' is assigned a value that is never used
+** TODO [[file:./test_FieldDescr.cpp][./test_FieldDescr.cpp]] 286: (error) syntax error
+** TODO [[file:./test_FieldDescr.cpp][./test_FieldDescr.cpp]] 482: (error) Memory leak: fill_heap
+** TODO [[file:./test_FieldFace.cpp][./test_FieldFace.cpp]] 308: (error) syntax error
+** TODO [[file:./test_FileHdf5.cpp][./test_FileHdf5.cpp]] 44: (error) syntax error
+** TODO [[file:./test_FileIfrit.cpp][./test_FileIfrit.cpp]] 30: (error) syntax error
+** TODO [[file:./test_GroupProcess.cpp][./test_GroupProcess.cpp]] 90: (error) syntax error
+** TODO [[file:./test_ItNode.cpp][./test_ItNode.cpp]] 182: (error) syntax error
+** TODO [[file:./test_Layout.cpp][./test_Layout.cpp]] 158: (error) syntax error
+** TODO [[file:./test_Node.cpp][./test_Node.cpp]] 59: (error) syntax error
+** TODO [[file:./test_Parse.cpp][./test_Parse.cpp]] 18: (error) syntax error
+** TODO [[file:./test_Tree.cpp][./test_Tree.cpp]] 360: (style) Variable 'level_count' is not assigned a value
+** TODO [[file:./test_TreeDensity.cpp][./test_TreeDensity.cpp]] 327: (style) Variable 'level_count' is not assigned a value
+** TODO [[file:./test_TreeDensity.cpp][./test_TreeDensity.cpp]] 349: (error) Memory leak: sum_mesh
