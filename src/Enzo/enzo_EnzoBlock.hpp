@@ -177,7 +177,7 @@ public: // interface
   EnzoBlock (CkMigrateMessage *m) 
   {
     TRACE("CkMigrateMessage");
-    initialize();
+    //    initialize();
   };
 
   /// Initialize the EnzoBlock chare array
@@ -215,6 +215,7 @@ public: // interface
 
     WARNING("EnzoBlock::pup()", "BaryonField not pup'ed");
     WARNING("EnzoBlock::pup()", "OldBaryonField not pup'ed");
+    TRACE1("NumberOfBaryonFields = %d",EnzoBlock::NumberOfBaryonFields);
     if (p.isUnpacking()) {
       for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
 	TRACE2("p[%d] = %p",field,field_block_[0]->field_values(field));

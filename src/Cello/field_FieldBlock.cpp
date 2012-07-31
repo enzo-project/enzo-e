@@ -271,6 +271,7 @@ void FieldBlock::allocate_array(const FieldDescr * field_descr) throw()
 	   "Code error: array size was computed incorrectly");
   };
 
+  TRACE1("array_.size() = %d",array_.size());
 }
 
 //----------------------------------------------------------------------

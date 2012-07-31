@@ -163,48 +163,6 @@ Block & Block::operator = (const Block & block) throw ()
   return *this;
 }
 
-#ifdef CONFIG_USE_CHARM
-
-void Block::pup(PUP::er &p)
-{
-  TRACE1("BEGIN Block::pup %s",
-	 p.isPacking() ? "isPacking" : 
-	 (p.isSizing() ? "isSizing" : "isUnpacking"));
-
-  p | count_refresh_face_;
-  p | proxy_patch_;
-
-  p | num_field_blocks_;
-
-  // allocate field_block_[] vector first if unpacking
-  if (p.isUnpacking()) {
-    field_block_.resize(num_field_blocks_);
-  }
-
-  // BUG: field_block_[] may be null
-  for (int i=0; i<num_field_blocks_; i++) {
-    field_block_[i] = new FieldBlock;
-    p | *field_block_[i];
-  }
-
-  p | patch_id_;
-  p | patch_rank_;
-
-  PUParray(p,index_,3);
-
-  PUParray(p,size_,3);
-
-  PUParray(p,lower_,3);
-
-  PUParray(p,upper_,3);
-
-  p | cycle_;
-  p | time_;
-  p | dt_;
-  TRACE("END Block::pup");
-
-}
-#endif
 //----------------------------------------------------------------------
 
 const FieldBlock * Block::field_block (int i) const throw()
