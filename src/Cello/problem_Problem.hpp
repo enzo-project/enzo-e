@@ -52,11 +52,12 @@ public: // interface
   {
     // NOTE: change this function whenever attributes change
 
-    p | * boundary_;
+    TRACEPUP;
+    p | *boundary_;
     WARNING("Problem::pup", "initial_list_ not pup'ed");
     //  std::vector<Initial *> initial_list_;
-    p | * stopping_;
-    p | * timestep_;
+    p | *stopping_;
+    p | *timestep_;
     WARNING("Problem::pup", "method_list_ not pup'ed");
     //    std::vector<Method *> method_list_;
     WARNING("Problem::pup", "output_list_ not pup'ed");

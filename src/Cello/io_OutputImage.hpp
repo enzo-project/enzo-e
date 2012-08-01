@@ -31,17 +31,19 @@ public: // functions
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    // NEVER GETS CALLED
+    TRACEPUP;
     Output::pup(p);
 
     p | map_r_;
     p | map_g_;
     p | map_b_;
     p | map_a_;
-    p | *data_;
     p | op_reduce_;
     p | axis_;
     p | nrows_;
     p | ncols_;
+    PUParray(p,data_,nrows_*ncols_);
     WARNING("OutputImage::pup","Not calling pup() on pngwriter object");
   // p | *png_;
   }
