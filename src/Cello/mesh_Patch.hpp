@@ -51,7 +51,7 @@ class Patch
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
-    CBase_Patch(p);
+    CBase_Patch::pup(p);
     // NOTE: change this function whenever attributes change
     p | id_;
     p | *block_array_;
