@@ -68,6 +68,7 @@ public: // interface
 
   void pup(PUP::er &p)
 {
+  CBase_Block(p);
   TRACEPUP;
 
   p | count_refresh_face_;
