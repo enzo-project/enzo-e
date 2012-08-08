@@ -71,6 +71,8 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    TRACEPUP;
+    CBase_Simulation::pup(p);
     // NOTE: change this function whenever attributes change
     p | * factory_;
     p | * parameters_;

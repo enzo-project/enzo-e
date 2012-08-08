@@ -329,6 +329,7 @@ void Block::p_call_output(CkReductionMsg * msg)
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
+  TRACE1("block cycle = %d\n",cycle_);
   simulation->update_cycle(cycle_,time_,dt_patch,stop_patch);
  
   // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls

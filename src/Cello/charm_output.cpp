@@ -51,6 +51,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
   // output if any scheduled, else proceed with refresh
 
+  TRACE2 ("output %d = %p\n",cycle,output);
   if (output != NULL) {
 
     TRACE("calling output->init()");
@@ -63,6 +64,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
   } else {
 
+    TRACE("calling simulation->monitor_output()\n");
     simulation->monitor_output();
 
   }
