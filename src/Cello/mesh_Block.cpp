@@ -379,10 +379,16 @@ void Block::p_call_output(CkReductionMsg * msg)
   // Simulation::p_output()?  Want last block?
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   
+
   // "root" block calls Simulation::p_output()
-  if (index() == 0) {
-    proxy_simulation.p_output();
-  }
+  //  if (index() == 0) {
+  //    proxy_simulation.p_output();
+  //  }
+
+  // Wait for all blocks to check in before calling Simulation::p_output()
+  // for next output
+
+  proxy_patch_.s_output();
 
 }
 #endif /* CONFIG_USE_CHARM */

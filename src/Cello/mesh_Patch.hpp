@@ -59,6 +59,9 @@ class Patch
   /// Wait for all blocks after p_initial
   void s_initial ();
 
+  /// Wait for all blocks before calling next Output
+  void s_output ();
+
   /// Call write on all blocks
   void p_write(int index_output);
 
