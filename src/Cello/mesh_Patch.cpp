@@ -352,6 +352,7 @@ void Patch::allocate_array_
  
 void Patch::p_test () throw()
 {
+  TRACE0;
   // Set Patch size, offset, and blocking
 
   const int patch_size[]     = {12,12,12};

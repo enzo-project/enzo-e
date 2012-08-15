@@ -191,6 +191,14 @@ void Problem::output_write
 
 }
 
+//----------------------------------------------------------------------
+
+void Patch::s_output()
+{
+  if (block_loop_.done()) {
+    proxy_simulation.p_output();
+  }
+}
 //======================================================================
 
 #endif /* CONFIG_USE_CHARM */

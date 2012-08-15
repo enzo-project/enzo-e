@@ -21,8 +21,6 @@
 #ifndef CHARM_LOOP_HPP
 #define CHARM_LOOP_HPP
 
-#ifdef CONFIG_USE_CHARM
-#include "charm++.h"
 class Loop {
 
   /// @class    Loop
@@ -38,11 +36,13 @@ class Loop {
   {}
 
   /// CHARM++ pack / unpack
+#ifdef CONFIG_USE_CHARM
   void pup(PUP::er &p)
   {
     p | index_stop_;
     p | index_curr_;
   }
+#endif
 
   /// Return whether the CHARM++ parallel "loop" is done
   inline bool done (int index = 1) throw()
@@ -71,8 +71,6 @@ private:
   int index_curr_;
 
 };
-
-#endif /* CONFIG_USE_CHARM */
 
 #endif /* CHARM_LOOP_HPP */
 

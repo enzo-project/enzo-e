@@ -323,22 +323,28 @@ void Block::p_call_output(CkReductionMsg * msg)
 
   set_dt   (dt_patch);
 
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   // WARNING: assumes one patch
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   TRACE1("block cycle = %d\n",cycle_);
   simulation->update_cycle(cycle_,time_,dt_patch,stop_patch);
  
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
   // Simulation::p_output()?  Want last block?
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   
+
   // "root" block calls Simulation::p_output()
-  if (index() == 0) {
-    proxy_simulation.p_output();
-  }
+  //  if (index() == 0) {
+  //    proxy_simulation.p_output();
+  //  }
+
+  // Wait for all blocks to check in before calling Simulation::p_output()
+  // for next output
+
+  proxy_patch_.s_output();
 
 }
 #endif /* CONFIG_USE_CHARM */
