@@ -34,7 +34,7 @@ int RefineSlope::apply
 	  0,gx,gy,gz,
 	  gx>0 && gy>0 && gz>0);
 
-  precision_enum precision = field_descr->precision(0);
+  precision_type precision = field_descr->precision(0);
 
   void * void_array = field_block->field_values(0);
 
