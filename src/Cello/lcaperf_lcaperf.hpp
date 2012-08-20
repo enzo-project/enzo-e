@@ -23,6 +23,19 @@ class LcaPerf {
   /// LcaPerf destructor
   ~LcaPerf();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p |  attributes_;
+    WARNING("Lcaperf::pup",
+	    "Not pup'ing std::map counters_");
+    //    p |  counters_;
+    p |  regions_;
+  }
+#endif
+
   /// Add a region name: used for printing
   void new_region (const char * region_name);
 

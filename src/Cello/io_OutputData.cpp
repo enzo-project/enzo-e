@@ -122,7 +122,7 @@ void OutputData::write
 
   // Write block meta data
 
-  io_block()->set_block(block);
+  io_block()->set_block((Block *)block);
 
   write_meta_group (io_block());
 
@@ -142,8 +142,8 @@ void OutputData::write
   const FieldDescr * field_descr,
   int field_index) throw()
 {
-  io_field_block()->set_field_descr(field_descr);
-  io_field_block()->set_field_block(field_block);
+  io_field_block()->set_field_descr((FieldDescr*)field_descr);
+  io_field_block()->set_field_block((FieldBlock*)field_block);
   io_field_block()->set_field_index(field_index);
 
   for (size_t i=0; i<io_field_block()->data_count(); i++) {

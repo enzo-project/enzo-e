@@ -23,6 +23,15 @@ public: // interface
   virtual ~InitialDefault() throw()
   {}
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | *parameters_;
+  }
+#endif
+  
   /// Read initialization values from Initial group in parameter file
 
   virtual void enforce (Block * block,

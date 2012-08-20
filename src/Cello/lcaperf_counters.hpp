@@ -12,11 +12,13 @@ namespace lca {
 
 //----------------------------------------------------------------------
 
-enum counter_type {
-  counter_type_unknown  = 0,
-  counter_type_relative = 1,
-  counter_type_absolute = 2
-};
+  enum counter_enum {
+    counter_type_unknown  = 0,
+    counter_type_relative = 1,
+    counter_type_absolute = 2
+  };
+
+  typedef int counter_type;
 
 //----------------------------------------------------------------------
 
@@ -45,6 +47,27 @@ public: // interface
 
   /// Assignment operator
   Counters & operator= (const Counters & Counters) throw();
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    p |  num_counters_;
+    p |  is_tracing_active_;
+    p |  is_logging_active_;
+    WARNING("Counters::pup()","global_ not pup'ed: std::map of pointers");
+    //    p |  global_;
+    p |  index_;
+    p |  name_;
+    p |  type_;
+    WARNING("Counters::pup()","frame_ not pup'ed: std::stack");
+    //    p |  frame_;
+    WARNING("Counters::pup()","counters_ not pup'ed: std::stack of pointers");
+    //    p |  counters_;
+  }
+#endif
 
   /// Initialize the Counters object
   virtual void initialize()
@@ -137,7 +160,7 @@ protected: // attributes
   std::vector<std::string> name_;
 
   /// Couner types: i.e. absolute or relative
-  std::vector<enum counter_type> type_;
+  std::vector<counter_type> type_;
 
   /// Frame stack
   std::stack<std::string> frame_;

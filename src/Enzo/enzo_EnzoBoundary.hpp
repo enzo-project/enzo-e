@@ -12,7 +12,7 @@
 
 /// @enum     boundary_type_enum
 /// @brief    External boundary condition types
-enum boundary_type_enum {
+enum boundary_enum {
   boundary_type_undefined,   // 0 is an undefined boundary
   boundary_type_reflecting,
   boundary_type_outflow,
@@ -21,6 +21,7 @@ enum boundary_type_enum {
   boundary_type_file, // boundary conditions to be read from a file
   boundary_type_code  // boundary conditions to be computed from code
 };
+typedef int boundary_type;
 
 //----------------------------------------------------------------------
 
@@ -33,7 +34,17 @@ class EnzoBoundary : public Boundary {
 public: // interface
 
   /// Create a new EnzoBoundary
-  EnzoBoundary(boundary_type_enum boundary_type) throw();
+  EnzoBoundary(boundary_type boundary_type) throw();
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Boundary::pup(p);
+    p |  boundary_type_;
+  }
+#endif
 
 public: // virtual functions
 
@@ -98,7 +109,7 @@ protected: // functions
 protected: // attributes
 
   // Type of boundary conditions
-  boundary_type_enum boundary_type_;
+  boundary_type boundary_type_;
 
 };
 

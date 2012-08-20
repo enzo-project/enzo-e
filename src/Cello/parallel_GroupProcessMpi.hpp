@@ -16,9 +16,11 @@ enum send_enum {
   send_synchronous,
   send_ready };
 
-enum data_enum {
-  data_single,
-  data_double };
+typedef int send_type ;
+
+// enum data_enum {
+//   data_single,
+//  data_double };
 
 class GroupProcessMpi : public GroupProcess {
 
@@ -97,11 +99,11 @@ public: // interface (Group)
   //--------------------------------------------------
 
   /// Set whether send is standard, buffered, synchronous, or ready
-  void set_type_send (send_enum type)  throw()
+  void set_type_send (send_type type)  throw()
   { send_type_ = type; };
 
   /// Return whether send is standard, buffered, synchronous, or ready
-  send_enum type_send () const throw()
+  send_type type_send () const throw()
   { return send_type_; };
 
   /// Set whether send is blocking or non-blocking
@@ -145,7 +147,7 @@ private: // attributes
   int process_last_plus_;
 
   /// Whether to use standard, buffered, synchronous, or ready sends
-  enum send_enum send_type_;
+  send_type send_type_;
 
   /// Whether to use blocking sends
   bool send_blocking_;

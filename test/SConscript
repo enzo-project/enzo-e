@@ -1,5 +1,6 @@
 Import('env')
 Import('parallel_run')
+Import('parallel_run_args')
 Import('type')
 Import('serial_run')
 Import('ip_charm')
@@ -10,13 +11,13 @@ Import('test_path')
 
 env['COPY'] = ''
 
-do_restart = 0
+do_restart = 1
 
 # Define a test for running unit tests
 
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
-run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1; $COPY")
-run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1; $COPY")
+run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS> $TARGET 2>&1; $COPY")
+run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS " + parallel_run_args + " > $TARGET 2>&1; $COPY")
 make_movie   = Builder(action = "png2swf -r 5 -o $TARGET ${ARGS} ")
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
@@ -332,7 +333,6 @@ elif (type == "charm"):
    env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_charm)
 else:
    env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_mpi)
-
 
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')

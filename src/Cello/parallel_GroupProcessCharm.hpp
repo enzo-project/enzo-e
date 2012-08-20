@@ -26,6 +26,17 @@ public: // interface
   virtual ~GroupProcessCharm() throw()
   {}
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    GroupProcess::pup(p);
+    p | process_first_;
+    p | process_last_plus_;
+    // NOTE: change this function whenever attributes change
+  }
+#endif
+
 public: // interface (Group)
 
   /// Synchronize between all compute elements in the Group

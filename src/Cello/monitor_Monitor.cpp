@@ -97,9 +97,6 @@ void Monitor::header () const
 
   // Performance defines
 
-#ifdef CONFIG_CHARM_ATSYNC
-  print ("Define","CONFIG_CHARM_ATSYNC");
-#endif
 #ifdef CONFIG_USE_MEMORY
   print ("Define","CONFIG_USE_MEMORY");
 #endif

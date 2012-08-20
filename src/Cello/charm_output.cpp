@@ -23,6 +23,7 @@
 
 void SimulationCharm::p_output ()
 {
+  TRACE("OUTPUT SimulationCharm::p_output()");
   problem()->output_reset();
   problem()->output_next(this);
 }
@@ -31,6 +32,7 @@ void SimulationCharm::p_output ()
 
 void Problem::output_next(Simulation * simulation) throw()
 {
+  TRACE("OUTPUT Problem::output_next()");
   int cycle   = simulation->cycle();
   double time = simulation->time();
 
@@ -49,15 +51,20 @@ void Problem::output_next(Simulation * simulation) throw()
 
   // output if any scheduled, else proceed with refresh
 
+  TRACE2 ("output %d = %p\n",cycle,output);
   if (output != NULL) {
 
+    TRACE("calling output->init()");
     output->init();
+    TRACE("calling output->open()");
     output->open();
+    TRACE("calling output->write()");
     output->write(simulation);
 
 
   } else {
 
+    TRACE("calling simulation->monitor_output()\n");
     simulation->monitor_output();
 
   }
@@ -67,6 +74,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
 void Patch::p_write(int index_output)
 {
+  TRACE("OUTPUT Patch::p_write()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -79,6 +87,7 @@ void Patch::p_write(int index_output)
 
 void Block::p_write (int index_output)
 {
+  TRACE("OUTPUT Block::p_write()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -93,6 +102,7 @@ void Block::p_write (int index_output)
 
 void Patch::s_write()
 {
+  TRACE("OUTPUT Patch::s_write()");
   if (block_loop_.done()) {
     proxy_simulation.s_write();
   }
@@ -102,6 +112,7 @@ void Patch::s_write()
 
 void SimulationCharm::s_write()
 {
+  TRACE("OUTPUT SimulationCharm::s_write()");
   problem()->output_wait(this);
 }
 
@@ -109,6 +120,7 @@ void SimulationCharm::s_write()
 
 void Problem::output_wait(Simulation * simulation) throw()
 {
+  TRACE("OUTPUT Problem::output_wait()");
   Output * output = this->output(index_output_);
 
   int ip       = CkMyPe();
@@ -129,6 +141,7 @@ void Problem::output_wait(Simulation * simulation) throw()
     proxy_simulation[ip_writer].p_output_write (n, buffer);
 
     // Close up file
+    TRACE("calling output->close()");
     output->close();
 
     // Deallocate from prepare_remote()
@@ -148,6 +161,7 @@ void Problem::output_wait(Simulation * simulation) throw()
 
 void SimulationCharm::p_output_write (int n, char * buffer)
 {
+  TRACE("OUTPUT SimulationCharm::p_output_write()");
   problem()->output_write(this,n,buffer);
 }
 
@@ -159,6 +173,7 @@ void Problem::output_write
  int n, char * buffer
 ) throw()
 {
+  TRACE("OUTPUT Problem::output_write()");
   Output * output = this->output(index_output_);
 
   if (n != 0) {

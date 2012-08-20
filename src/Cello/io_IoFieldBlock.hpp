@@ -26,16 +26,32 @@ public: // interface
   virtual ~IoFieldBlock() throw()
   {}
 
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    Io::pup(p);
+
+    p | *field_descr_;
+    p | *field_block_;
+    p | field_index_;
+  }
+#endif
+
+
   /// Set FieldIndex
   void set_field_index (int field_index) throw()
   { field_index_ = field_index;};
 
   /// Set FieldBlock
-  void set_field_block (const FieldBlock * field_block) throw()
+  void set_field_block (FieldBlock * field_block) throw()
   { field_block_ = field_block;};
 
   /// Set FieldDescr
-  void set_field_descr (const FieldDescr * field_descr) throw()
+  void set_field_descr (FieldDescr * field_descr) throw()
   { field_descr_ = field_descr; };
 
 
@@ -45,10 +61,10 @@ public: // interface
 protected: // functions
 
   /// FieldDescr for the FieldBlock
-  const FieldDescr * field_descr_;
+  FieldDescr * field_descr_;
 
   /// Current FieldBlock
-  const FieldBlock * field_block_;
+  FieldBlock * field_block_;
 
   /// Index of the field in the FieldBlock
   int field_index_;

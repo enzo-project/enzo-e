@@ -61,6 +61,25 @@ private:
   /// Private destructor  of the Unit object [singleton design pattern]
   ~Unit();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    PUParray (p,class_name_,UNIT_MAX_NAME_LEN);
+    PUParray (p,func_name_, UNIT_MAX_NAME_LEN);
+    p | test_num_;
+    p | is_active_;
+    p | comm_size_;
+    WARNING ("Unit::pup","comm_rank_ not pup'ed");
+    //  p | comm_rank_;
+    p | timer_;
+
+  }
+#endif
+
+
 public:
 
   /// Return an instance of a Unit object
@@ -96,6 +115,15 @@ private:
   /// Singleton instance of the Unit object
   static Unit instance_;
 
+  /// Output string for passed tests
+  static const char * pass_string_;
+
+  /// Output string for failed tests
+  static const char * fail_string_;
+
+  /// Output string for incomplete tests
+  static const char * incomplete_string_;
+  
   /// Name of the current class being tested
   char class_name_ [UNIT_MAX_NAME_LEN];
 
@@ -105,15 +133,6 @@ private:
   /// Running count of tests
   int test_num_;
 
-  /// Output string for passed tests
-  const char * pass_string_;
-
-  /// Output string for failed tests
-  const char * fail_string_;
-
-  /// Output string for incomplete tests
-  const char * incomplete_string_;
-  
   /// Whether to output passed tests or not
   int is_active_;
 

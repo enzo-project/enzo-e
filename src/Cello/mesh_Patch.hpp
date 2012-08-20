@@ -47,8 +47,26 @@ class Patch
 
 #ifdef CONFIG_USE_CHARM
 
-
-  void pup(PUP::er &p) {TRACE0;};
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    CBase_Patch::pup(p);
+    // NOTE: change this function whenever attributes change
+    p | id_;
+    p | *block_array_;
+    p | block_exists_;
+    p | block_loop_;
+    p | *factory_;
+    p | *group_process_;
+    p | layout_;
+    PUParray (p,size_,3);
+    PUParray (p,offset_,3);
+    PUParray (p,blocking_,3);
+    PUParray (p,lower_,3);
+    PUParray (p,upper_,3);
+  }
+#endif
 
   /// Wait for all blocks to check in before proceeding
   void s_block(CkCallback function);
@@ -190,10 +208,10 @@ protected: // attributes
 #endif
 
   /// Factory object for creating Blocks
-  const Factory * factory_;
+  Factory * factory_;
   
   /// Parallel Group for distributing the Mesh across processors
-  const GroupProcess * group_process_;
+  GroupProcess * group_process_;
 
   /// Layout: describes blocking, processor range, and block-processor mapping 
   Layout layout_;

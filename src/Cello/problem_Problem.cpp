@@ -440,7 +440,7 @@ void Problem::initialize_output
 
       // Parse image-specific parameters
 
-      parameter_enum type = parameter_unknown;
+      parameter_type type = parameter_unknown;
 
       // position parameter
 

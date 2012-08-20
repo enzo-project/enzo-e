@@ -26,6 +26,18 @@ public: // functions
   /// Close the file if it is open
   virtual ~InputData() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    Input::pup(p);
+
+    // this function intentionally left blank
+  }
+#endif
+
 public: // virtual functions
 
   /// Open (or create) a file for IO
@@ -68,8 +80,6 @@ public: // virtual functions
 
 protected:
 
-  /// Copy of the input Factory, for use in creating Patches and Blocks 
-  const Factory * factory_;
 
 };
 

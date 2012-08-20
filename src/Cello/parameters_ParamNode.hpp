@@ -52,6 +52,17 @@ private: // No copy or assign
 
 public: // interface
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | name_;
+    WARNING("ParamNode::pup","subnodes_ not pup'ed");
+    //    p | subnodes_;
+  }
+#endif
+
   /// Return the node name
   std::string name() const {return name_;};
 
