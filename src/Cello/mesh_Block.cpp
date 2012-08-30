@@ -42,13 +42,6 @@ Block::Block
 { 
   DEBUG1("ID = %d",patch_id);
   DEBUG1("IP = %d",patch_rank);
-// #ifdef CONFIG_USE_CHARM
-
-// #ifdef CONFIG_CHARM_ATSYNC
-//   usesAtSync = CmiTrue;
-// #endif
-
-// #endif
 
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);
@@ -103,12 +96,9 @@ Block::Block
     dt_(0)
 
 { 
+
   DEBUG1("ID = %d",patch_id_);
   DEBUG1("IP = %d",patch_rank_);
-
-#ifdef CONFIG_CHARM_ATSYNC
-  usesAtSync = CmiTrue;
-#endif
 
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);
@@ -153,41 +143,6 @@ Block::~Block() throw ()
   }
   num_field_blocks_ = 0;
 }
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Block::pup(PUP::er &p)
-{
-  p | num_field_blocks_;
-
-  // allocate field_block_[] vector first if unpacking
-  if (p.isUnpacking()) {
-    field_block_.resize(num_field_blocks_);
-  }
-
-  for (int i=0; i<num_field_blocks_; i++) {
-    p | *field_block_[i];
-  }
-
-  PUParray(p,index_,3);
-
-  PUParray(p,size_,3);
-
-  PUParray(p,lower_,3);
-
-  PUParray(p,upper_,3);
-
-  p | cycle_;
-  p | time_;
-  p | dt_;
-
-  p | count_refresh_face_;
-
-}
-
-#endif
 
 //----------------------------------------------------------------------
 
@@ -368,21 +323,28 @@ void Block::p_call_output(CkReductionMsg * msg)
 
   set_dt   (dt_patch);
 
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   // WARNING: assumes one patch
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
+  TRACE1("block cycle = %d\n",cycle_);
   simulation->update_cycle(cycle_,time_,dt_patch,stop_patch);
  
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
   // Simulation::p_output()?  Want last block?
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   
+
   // "root" block calls Simulation::p_output()
-  if (index() == 0) {
-    proxy_simulation.p_output();
-  }
+  //  if (index() == 0) {
+  //    proxy_simulation.p_output();
+  //  }
+
+  // Wait for all blocks to check in before calling Simulation::p_output()
+  // for next output
+
+  proxy_patch_.s_output();
 
 }
 #endif /* CONFIG_USE_CHARM */

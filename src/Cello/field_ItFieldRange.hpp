@@ -30,6 +30,18 @@ public: // interface
   virtual ~ItFieldRange () throw ()
   {}
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    ItField::pup(p);
+    p | index_;
+    p | first_;
+    p | last_;
+
+  }
+#endif
   /// Go to the first value
   virtual void first () throw()
   { index_ = first_; }

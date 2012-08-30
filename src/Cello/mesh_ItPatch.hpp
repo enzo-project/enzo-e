@@ -22,6 +22,15 @@ public: // interface
 
   /// Delete the ItPatch object
   virtual ~ItPatch () throw ();
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | *hierarchy_;
+  }
+#endif
   
   /// Iterate through all local Patches in the Hierarchy
   Patch * operator++ () throw();
@@ -32,11 +41,11 @@ public: // interface
 private: // attributes
 
   /// The Hierarchy being iterated over
-  const Hierarchy * hierarchy_;
+  Hierarchy * hierarchy_;
 
-  /// Index of the current local Patch plus 1, or 0 if between iterations
-  /// Always in the range 0 <= index1_ <= number of local patches
-  size_t index1_;
+  // /// Index of the current local Patch plus 1, or 0 if between iterations
+  // /// Always in the range 0 <= index1_ <= number of local patches
+  // size_t index1_;
 };
 
 #endif /* MESH_IT_PATCH_HPP */

@@ -33,6 +33,21 @@ public: // interface
   /// Destructor
   virtual ~ItNode() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p |  lower_level_;
+    p |  upper_level_;
+    WARNING("ItNode::pup","Not pup'ing tree_ pointer");
+    //    p |  *tree_;
+    WARNING("ItNode::pup","Not pup'ing node_trace_");
+    //    p |  node_trace_;
+    p |  reset_;
+  }
+#endif
+
   /// Iterate through all leaf Nodes in the Tree
   Node * next_leaf () throw();
 

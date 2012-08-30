@@ -17,7 +17,7 @@ FieldDescr::FieldDescr ()
     field_id_(),
     group_name_(),
     group_id_(),
-    field_in_group_(),
+    // field_in_group_(),
     alignment_(1),
     padding_(0),
     courant_(1),
@@ -134,12 +134,12 @@ int FieldDescr::group_id(const std::string & name) const
 
 //----------------------------------------------------------------------
 
-bool FieldDescr::field_in_group(int id_field, int id_group) const 
-  throw(std::out_of_range)
-{
-  int_set_type t = field_in_group_.at(id_field);
-  return t.find(id_group) != t.end();
-}
+// bool FieldDescr::field_in_group(int id_field, int id_group) const 
+//   throw(std::out_of_range)
+// {
+//   int_set_type t = field_in_group_.at(id_field);
+//   return t.find(id_group) != t.end();
+// }
 
 //----------------------------------------------------------------------
 
@@ -170,7 +170,7 @@ void FieldDescr::centering
  bool * cx, 
  bool * cy, 
  bool * cz
-) const throw(std::out_of_range)
+ ) const throw(std::out_of_range)
 {
   if (cx) (*cx) = centering_.at(id_field)[0];
   if (cy) (*cy) = centering_.at(id_field)[1];
@@ -185,7 +185,7 @@ void FieldDescr::ghosts
  int * gx, 
  int * gy, 
  int * gz
-) const throw(std::out_of_range)
+ ) const throw(std::out_of_range)
 {
   if (gx) (*gx) = ghosts_.at(id_field)[0];
   if (gy) (*gy) = ghosts_.at(id_field)[1];
@@ -194,7 +194,7 @@ void FieldDescr::ghosts
 
 //----------------------------------------------------------------------
 
-precision_enum FieldDescr::precision(int id_field) const 
+precision_type FieldDescr::precision(int id_field) const 
   throw(std::out_of_range)
 {
   return precision_.at(id_field);
@@ -210,7 +210,7 @@ double FieldDescr::minimum_value(int id_field) const
 
 //----------------------------------------------------------------------
 
-field_action_enum FieldDescr::minimum_action(int id_field) const 
+field_action_type FieldDescr::minimum_action(int id_field) const 
   throw(std::out_of_range)
 {
   return min_action_.at(id_field);
@@ -226,7 +226,7 @@ double FieldDescr::maximum_value(int id_field) const
 
 //----------------------------------------------------------------------
 
-field_action_enum FieldDescr::maximum_action(int id_field) const 
+field_action_type FieldDescr::maximum_action(int id_field) const 
   throw(std::out_of_range)
 {
   return max_action_.at(id_field);
@@ -259,7 +259,7 @@ int FieldDescr::insert_field(const std::string & field_name) throw()
 
   // Initialize attributes with default values
 
-  precision_enum precision = default_precision;
+  precision_type precision = default_precision;
 
   bool * centered = new bool[3];
   centered[0] = true;
@@ -271,8 +271,8 @@ int FieldDescr::insert_field(const std::string & field_name) throw()
   ghosts[1] = 1;
   ghosts[2] = 1;
 
-  int_set_type a;
-  field_in_group_.push_back(a);
+  // int_set_type a;
+  // field_in_group_.push_back(a);
   precision_. push_back(precision);
   centering_. push_back(centered);
   ghosts_.    push_back(ghosts);
@@ -295,11 +295,11 @@ void FieldDescr::insert_group(const std::string & group_name) throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_field_in_group(int id_field, int id_group) 
-  throw(std::out_of_range)
-{
-  field_in_group_.at(id_field).insert(id_group);
-}
+// void FieldDescr::set_field_in_group(int id_field, int id_group) 
+//   throw(std::out_of_range)
+// {
+//   field_in_group_.at(id_field).insert(id_group);
+// }
 
 //----------------------------------------------------------------------
 
@@ -324,7 +324,7 @@ void FieldDescr::set_courant(double courant) throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_precision(int id_field, precision_enum precision) 
+void FieldDescr::set_precision(int id_field, precision_type precision) 
   throw(std::out_of_range)
 {
   if ( ! cello::is_precision_supported (precision) ) {
@@ -332,7 +332,7 @@ void FieldDescr::set_precision(int id_field, precision_enum precision)
     sprintf (buffer,"precision \"%s\" is not supported",
 	     cello::precision_name[precision]);
     WARNING("FieldDescr::set_precision",
-		    buffer);
+	    buffer);
   }
   precision_.at(id_field) = 
     (precision == precision_default) ? default_precision : precision;
@@ -385,7 +385,7 @@ void FieldDescr::set_minimum
 (
  int               id_field, 
  double            min_value, 
- field_action_enum min_action
+ field_action_type min_action
  ) throw(std::out_of_range)
 {
   min_value_.at(id_field)  = min_value;
@@ -398,7 +398,7 @@ void FieldDescr::set_maximum
 (
  int               id_field, 
  double            max_value, 
- field_action_enum max_action
+ field_action_type max_action
  ) throw(std::out_of_range)
 {
   max_value_.at(id_field)  = max_value;
@@ -419,7 +419,7 @@ void FieldDescr::copy_(const FieldDescr & field_descr) throw()
   field_id_       = field_descr.field_id_;
   group_name_     = field_descr.group_name_;
   group_id_       = field_descr.group_id_;
-  field_in_group_ = field_descr.field_in_group_;
+  // field_in_group_ = field_descr.field_in_group_;
   precision_      = field_descr.precision_;
   centering_.clear();
   for (size_t i=0; i<field_descr.centering_.size(); i++) {

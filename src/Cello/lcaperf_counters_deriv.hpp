@@ -25,6 +25,15 @@ public: // interface
   /// Destructor
   ~CountersDeriv() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    CountersUser::pup(p);
+  }
+#endif
+
   /// Copy constructor
   CountersDeriv(const CountersDeriv & counters) throw();
 

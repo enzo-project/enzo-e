@@ -31,21 +31,6 @@ Performance::~Performance()
 
 //----------------------------------------------------------------------
 
-Performance::Performance(const Performance & classname) throw()
-{
-  INCOMPLETE("Performance::Performance");
-}
-
-//----------------------------------------------------------------------
-
-Performance & Performance::operator= (const Performance & classname) throw()
-{
-  INCOMPLETE("Performance::operator=");
-  return *this;
-}
-
-//----------------------------------------------------------------------
-
 void Performance::start () throw ()
 {
   timer_.start();

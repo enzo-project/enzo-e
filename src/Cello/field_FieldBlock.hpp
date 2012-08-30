@@ -39,6 +39,27 @@ public: // interface
   /// Assignment operator
   FieldBlock & operator= (const FieldBlock & field_block) throw ();
 
+#ifdef CONFIG_USE_CHARM
+
+  void pup(PUP::er &p) 
+  {
+
+    TRACEPUP;
+
+    TRACE1("this = %p",this);
+    PUParray(p,size_,3);
+
+    p | array_;
+    p | offsets_;
+    p | ghosts_allocated_;
+
+    TRACE3("size = %d %d %d\n",size_[0],size_[1],size_[2]);
+    TRACE1("array_.size() = %d",array_.size());
+    TRACE1("offsets_.size() = %d",offsets_.size());
+  }
+
+#endif
+
   /// Return size of fields on the block, assuming centered
   void size(int * nx = 0, int * ny = 0, int * nz = 0) const throw();
 
@@ -62,7 +83,7 @@ public: // interface
   /// otherwise dangerous due to varying field sizes, precisions,
   /// padding and alignment
   const char * array ()  const throw () 
-  { return array_; };
+  { return array_allocated() ? &array_[0] : NULL; };
 
   /// Return width of cells along each dimension
   void cell_width(double xm,   double xp,   double * hx,
@@ -139,7 +160,7 @@ private: // functions
 
   /// Given array start and alignment, return first address that is
   /// aligned
-  int align_padding_ (char * start, int alignment) const throw();
+  int align_padding_ (int alignment) const throw();
 
   /// Move (not copy) array_ to array and offsets_ to
   /// offsets
@@ -160,14 +181,8 @@ private: // attributes
   /// Size of fields on the block, assuming centered
   int size_[3];
 
-  /// Length of array_ field in bytes
-  int array_size_;
-
   /// Allocated array of field values
-  char * array_;
-
-  /// Redundant size of the field_offsets_ vector (for CHARM++ pup)
-  int num_fields_;
+  std::vector<char> array_;
 
   /// Offsets into values_ of the first element of each field
   std::vector<int> offsets_;
@@ -175,36 +190,6 @@ private: // attributes
   /// Whether ghost values are allocated or not (make [3] for
   /// directionally split?)
   bool ghosts_allocated_;
-
-#ifdef CONFIG_USE_CHARM
-
-public: // CHARM++ PUPer
-
-  void pup(PUP::er &p) 
-  {
-    INCOMPLETE("FieldBlock::pup()");
-
-    PUParray(p,size_,3);
-
-    p | array_size_;
-
-    if (p.isUnpacking()) array_ = new char[array_size_];
-
-    PUParray(p,array_,array_size_);
-  
-    p | num_fields_;
-
-  /// Pointers into values_ of the first element of each field
-    if (p.isUnpacking()) offsets_.resize(num_fields_);
-
-    for (int i=0; i<num_fields_; i++) {
-      p | offsets_[i];
-    }
-
-    p | ghosts_allocated_;
-  }
-
-#endif
 
 };   
 

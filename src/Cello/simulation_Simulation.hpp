@@ -67,6 +67,39 @@ public: // interface
   /// Destructor
   virtual ~Simulation() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    TRACEPUP;
+    CBase_Simulation::pup(p);
+    // NOTE: change this function whenever attributes change
+    p | * factory_;
+    p | * parameters_;
+    p | parameter_file_;
+    p | * group_process_;
+    p | is_group_process_new_;
+    p | patch_loop_;
+    p | dimension_; 
+    p | cycle_;
+    p | time_;
+    p | dt_;
+    p | stop_;
+    p | * problem_;
+    p | * performance_simulation_;
+    p | * performance_cycle_;
+    p | * lcaperf_;
+    p | * performance_curr_;
+    p | num_perf_;
+    PUParray(p,perf_val_,num_perf_);
+    PUParray(p,perf_min_,num_perf_);
+    PUParray(p,perf_max_,num_perf_);
+    PUParray(p,perf_sum_,num_perf_);
+    p | * monitor_;
+    p | * hierarchy_;
+    p | * field_descr_;
+  }
+#endif
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
   //----------------------------------------------------------------------
@@ -186,7 +219,7 @@ protected: // attributes
   std::string parameter_file_;
 
   /// Parallel group for the simulation
-  const GroupProcess * group_process_;
+  GroupProcess * group_process_;
 
   /// Whether the group_process_ object was allocated inside Simulation
   bool is_group_process_new_;

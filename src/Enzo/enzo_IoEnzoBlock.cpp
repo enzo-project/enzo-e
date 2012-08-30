@@ -37,7 +37,7 @@ IoEnzoBlock::IoEnzoBlock() throw ()
 
 void IoEnzoBlock::meta_value
 (int index,
- void ** buffer,  std::string * name, enum scalar_type * type,
+ void ** buffer,  std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
 
@@ -115,7 +115,7 @@ void IoEnzoBlock::meta_value
 
 void IoEnzoBlock::data_value
 (int index,
- void ** buffer, std::string * name, enum scalar_type * type,
+ void ** buffer, std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
 }

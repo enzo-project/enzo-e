@@ -12,8 +12,12 @@
 // System includes
 //----------------------------------------------------------------------
 
-#include <string>
 #include <hdf5.h>
+#ifdef CONFIG_USE_CHARM
+#include "pup_stl.h"
+#endif
+
+#include <string>
 
 //----------------------------------------------------------------------
 // Component class includes

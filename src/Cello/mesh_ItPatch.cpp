@@ -15,8 +15,7 @@
 //----------------------------------------------------------------------
 
 ItPatch::ItPatch ( const Hierarchy * hierarchy ) throw ()
-  : hierarchy_(hierarchy),
-    index1_(0)
+  : hierarchy_((Hierarchy *)hierarchy)
 {}
 
 //----------------------------------------------------------------------

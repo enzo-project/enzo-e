@@ -27,6 +27,18 @@ public: // interface
   Layout(int nbx=1, int nby=1, int nbz=1,
 	 int p0=0, int np=1) throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | process_first_;
+    p | process_count_;
+    PUParray(p,block_count_,3);
+  }
+#endif
+
+
   /// Set first process id and number of processes
   void set_process_range (int process_first=0, int process_count=1) throw();
 
@@ -70,8 +82,6 @@ private: // attributes
 
   /// number of compute blocks per thread
   int block_count_[3];
-
-private: // functions
 
 };
 #endif /* PARALLEL_LAYOUT_HPP */

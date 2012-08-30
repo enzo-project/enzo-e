@@ -39,6 +39,10 @@ SimulationCharm::~SimulationCharm() throw()
 void SimulationCharm::initialize() throw()
 {
   Simulation::initialize();
+
+  WARNING("SimulationCharm::initialize()",
+	  "Calling StartLB for debugging load balancing()");
+
 }
 
 //----------------------------------------------------------------------

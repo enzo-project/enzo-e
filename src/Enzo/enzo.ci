@@ -11,7 +11,7 @@ module enzo {
 
   readonly CProxy_SimulationCharm  proxy_simulation;
 
-  group EnzoSimulationCharm : SimulationCharm {
+  group [migratable] EnzoSimulationCharm : SimulationCharm {
     entry EnzoSimulationCharm
       (const char filename[n], int n);
 

@@ -27,6 +27,15 @@ public: // functions
   /// Close the file if it is open
   virtual ~OutputData() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Output::pup(p);
+  }
+#endif
+
 public: // virtual functions
 
   /// Open (or create) a file for IO
