@@ -172,7 +172,7 @@ public: // functions
     throw(std::out_of_range);
 
   /// Return precision of given field
-  precision_enum precision(int id_field) const throw(std::out_of_range);
+  precision_type precision(int id_field) const throw(std::out_of_range);
 
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();
