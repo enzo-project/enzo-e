@@ -108,6 +108,8 @@ void SimulationCharm::x_send_patch
 
 void Patch::p_initial()
 {
+  TRACE("Patch::p_initial()");
+  TRACE("Patch::p_initial(Patch) calling Block::p_initial()");
   block_array()->p_initial();
 }
 
@@ -115,6 +117,7 @@ void Patch::p_initial()
 
 void Block::p_initial()
 {
+  TRACE("Block::p_initial()");
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -124,6 +127,7 @@ void Block::p_initial()
 
   // Set the Block cycle and time to match Simulation's
 
+  TRACE("Block::p_initial Setting time");
   set_cycle(simulation->cycle());
   set_time (simulation->time());
   set_dt   (simulation->dt());

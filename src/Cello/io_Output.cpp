@@ -194,6 +194,7 @@ void Output::write_
 
   while (Patch * patch = ++it_patch) {
 #ifdef CONFIG_USE_CHARM
+    TRACE("Output::write_(hierarchy)");
     ((CProxy_Patch *)patch)->p_write(index_charm_);
 #else
     write (patch, field_descr, 0,0,0);
@@ -212,6 +213,7 @@ void Output::write_
 
 {
 
+    TRACE("Output::write_(patch)");
 #ifdef CONFIG_USE_CHARM
 
   patch->block_array()->p_write(index_charm_);
@@ -237,6 +239,7 @@ void Output::write_
  int ixp0, int iyp0, int izp0
  ) throw()
 {
+    TRACE("Output::write_(block)");
   // Write fields
 
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {

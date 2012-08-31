@@ -26,6 +26,21 @@ public: // interface
   {
   }
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | time_;
+    p | is_running_;
+    p | t1_.tv_sec;
+    p | t1_.tv_usec;
+    p | t2_.tv_sec;
+    p | t2_.tv_usec;
+    // tz_ only there for gettimeofday() calls: value is never used
+  }
+#endif
+
   /// Start the timer
   void start() throw()
   { 

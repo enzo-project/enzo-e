@@ -73,6 +73,7 @@ void OutputImage::set_colormap
 
 void OutputImage::init () throw()
 {
+  TRACE("OutputImage::init()");
   image_create_();
 }
 
@@ -80,6 +81,7 @@ void OutputImage::init () throw()
 
 void OutputImage::open () throw()
 {
+  TRACE("OutputImage::open()");
   // Open file if writing a single block
   std::string file_name = expand_file_name_ (&file_name_,&file_args_);
 
@@ -95,6 +97,7 @@ void OutputImage::open () throw()
 
 void OutputImage::close () throw()
 {
+  TRACE("OutputImage::close()");
   if (is_writer()) image_write_();
   image_close_();
   png_close_();
@@ -123,6 +126,7 @@ void OutputImage::write
 // @param iyp0  offset of the patch relative to the parent patch along y-axis
 // @param izp0  offset of the patch relative to the parent patch along z-axis
 {
+  TRACE("OutputImage::write(patch)");
 
   /// Call write(patch) on parent Output class
   write_(patch,field_descr,ixp0,iyp0,izp0);
@@ -146,6 +150,7 @@ void OutputImage::write
 // @param izp0  offset of the parent patch relative to its parent along z-axis 
 {
 
+  TRACE("OutputImage::write(block)");
   const FieldBlock * field_block = block->field_block();
   
   int nbx,nby,nbz;
@@ -225,6 +230,7 @@ void OutputImage::write
 
 void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 {
+  TRACE("OutputImage::prepare_remote()");
   DEBUG("prepare_remote");
 
   int size = 0;
@@ -259,6 +265,7 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 
 void OutputImage::update_remote  ( int n, char * buffer) throw()
 {
+  TRACE("OutputImage::update_remote()");
   DEBUG("update_remote");
 
   union {
@@ -280,6 +287,7 @@ void OutputImage::update_remote  ( int n, char * buffer) throw()
 
 void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 {
+  TRACE("OutputImage::cleanup_remote()");
   DEBUG("cleanup_remote");
   delete [] (*buffer);
   (*buffer) = NULL;
@@ -319,6 +327,7 @@ void OutputImage::image_create_ () throw()
 	 data_ == NULL);
 
   data_ = new double [nrows_*ncols_];
+  TRACE1("new data_ = %p",data_);
 
   const double min = std::numeric_limits<double>::max();
   const double max = std::numeric_limits<double>::min();
@@ -374,6 +383,7 @@ void OutputImage::image_write_ (double min, double max) throw()
     max = MAX(max,data_[i]);
   }
 
+  TRACE1("image_write_() data_ = %p",data_);
   size_t n = map_r_.size();
 
   // loop over pixels (ix,iy)
@@ -430,6 +440,7 @@ void OutputImage::image_close_ () throw()
   ASSERT("OutputImage::image_create_",
 	 "image_ already created",
 	 data_ != NULL);
+  TRACE1("delete data_ = %p",data_);
   delete [] data_;
   data_ = 0;
 }
@@ -472,6 +483,7 @@ void OutputImage::image_reduce_
 
   // image x-axis
 
+  TRACE1("image_reduce_() data_ = %p",data_);
   for (int iax=0; iax<npx; iax++) {
 
     int iix = npx0 + iax;
@@ -512,6 +524,9 @@ void OutputImage::image_reduce_
 	  break;
 	case reduce_avg: 
 	case reduce_sum: 
+	  // @@@@@@@@@@@@@@@@@@@@@@@@@
+	  // BUG: segfault here when Charm++ load balancing
+	  // @@@@@@@@@@@@@@@@@@@@@@@@@
 	  pixel_value += array[index_array]; break;
 	default:
 	  break;

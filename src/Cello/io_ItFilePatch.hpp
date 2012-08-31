@@ -24,6 +24,16 @@ public: // interface
 
   /// Delete the ItFilePatch object
   virtual ~ItFilePatch () throw ();
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | *input_;
+    p | index1_;
+  }
+#endif
   
   /// Iterate through all Patches in the File
   Patch * operator++ () throw();
@@ -34,7 +44,7 @@ public: // interface
 private: // attributes
 
   /// The Input object being iterated over
-  const Input * input_;
+  Input * input_;
 
   /// Index of the current local Patch plus 1, or 0 if between iterations
   /// Always in the range 0 <= index1_ <= number of patches

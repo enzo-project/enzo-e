@@ -22,11 +22,25 @@ class EnzoSimulationCharm : public SimulationCharm
 public: // functions
 
   /// CHARM++ Constructor
+  EnzoSimulationCharm() {}
+
+  /// CHARM++ Constructor
   EnzoSimulationCharm
   ( const char parameter_file[], int n) throw();
 
   /// Destructor
   ~EnzoSimulationCharm() throw();
+
+  /// CHARM++ Migration constructor
+  EnzoSimulationCharm(CkMigrateMessage*)
+  {};
+
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    SimulationCharm::pup(p);
+  }
 
   /// Initialize the Enzo Simulation
   virtual void initialize() throw();

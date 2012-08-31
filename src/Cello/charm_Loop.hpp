@@ -21,8 +21,6 @@
 #ifndef CHARM_LOOP_HPP
 #define CHARM_LOOP_HPP
 
-#ifdef CONFIG_USE_CHARM
-#include "charm++.h"
 class Loop {
 
   /// @class    Loop
@@ -37,13 +35,16 @@ class Loop {
       index_curr_(0)
   {}
 
+  /// CHARM++ pack / unpack
+#ifdef CONFIG_USE_CHARM
   void pup(PUP::er &p)
   {
     p | index_stop_;
     p | index_curr_;
   }
+#endif
 
-
+  /// Return whether the CHARM++ parallel "loop" is done
   inline bool done (int index = 1) throw()
   {
     if (index_stop_ > 0) {
@@ -52,20 +53,24 @@ class Loop {
     return index_curr_ == 0;
   }
 
+  /// Return the current CHARM++ parallel "loop" index
   inline int index() const throw() { return index_curr_; }
   
+  /// Return the upper-limit on the CHARM++ parallel "loop"
   inline int stop() const throw()  { return index_stop_; }
 
+  /// Access to the upper-limit on the CHARM++ parallel "loop"
   inline int & stop () throw ()    { return index_stop_; }
 
 private:
 
+  /// Last value of the parallel loop index
   int index_stop_;
+
+  /// Current value of the parallel loop index
   int index_curr_;
 
 };
-
-#endif /* CONFIG_USE_CHARM */
 
 #endif /* CHARM_LOOP_HPP */
 

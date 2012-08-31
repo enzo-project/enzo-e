@@ -37,6 +37,7 @@ void Initial::enforce_
 
   while (Patch * patch = ++it_patch) {
 #ifdef CONFIG_USE_CHARM
+    TRACE("Initial::enforce_(Hierarchy) calling Patch::p_initial()");
     ((CProxy_Patch *)patch)->p_initial();
 #else
     enforce (patch, field_descr, hierarchy);
@@ -57,6 +58,7 @@ void Initial::enforce_
 
 #ifdef CONFIG_USE_CHARM
 
+  TRACE("Initial::enforce_(Patch) calling Block::p_initial()");
   patch->block_array()->p_initial();
 
 #else

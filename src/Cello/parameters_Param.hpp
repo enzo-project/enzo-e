@@ -61,6 +61,23 @@ public: // interface
   { INCOMPLETE("Param::operator =");
     return *this; };
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | type_;
+    p | value_accessed_;
+    WARNING("Param::pup","value_* union not pup'ed");
+    // value_integer_; 
+    // value_float_; 
+    // value_logical_; 
+    // *value_string_;
+    // *value_list_;
+    // *value_expr_;
+  }
+#endif
+
   /// Evaluate a floating-point expression given vectos x,y,z,t
   void evaluate_float  
   ( struct node_expr * node, 
@@ -129,7 +146,7 @@ public: // interface
   std::string value_to_string ();
 
   /// Return the type of the parameter
-  parameter_enum type() const { return type_; } 
+  parameter_type type() const { return type_; } 
 
   //----------------------------------------------------------------------
 
@@ -216,7 +233,7 @@ private: // functions
 private: // attributes
 
   /// Parameter type
-  enum parameter_enum type_;
+  parameter_type type_;
 
   /// Whether parameter value has been accessed
   bool value_accessed_;

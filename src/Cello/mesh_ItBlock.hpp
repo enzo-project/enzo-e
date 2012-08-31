@@ -21,6 +21,16 @@ public: // interface
 
   /// Delete the ItBlock object
   virtual ~ItBlock () throw ();
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    It<Block>::pup(p);
+    p | *patch_;
+  }
+#endif
   
   /// Iterate through all local Blocks in the Patch
   Block * operator++ () throw();
@@ -31,7 +41,7 @@ public: // interface
 private: // attributes
 
   /// The Patch being iterated over
-  const Patch * patch_;
+  Patch * patch_;
 
 };
 

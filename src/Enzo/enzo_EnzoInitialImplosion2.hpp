@@ -19,6 +19,15 @@ public: // interface
   /// Constructor
   EnzoInitialImplosion2(int cycle, double time) throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Initial::pup(p);
+  }
+#endif
+
   /// Initialize the block
 
   virtual void enforce 

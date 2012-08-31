@@ -21,16 +21,26 @@ public: // interface
   /// Constructor
   IoEnzoBlock() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    IoBlock::pup(p);
+    p | meta_count_enzo_;
+  }
+#endif
+
   /// Return the ith metadata item associated with the EnzoBlock object
   void meta_value 
   (int index, 
-   void ** buffer, std::string * name, enum scalar_type * type,
+   void ** buffer, std::string * name, scalar_type * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
   /// Return the ith data item associated with the EnzoBlock object
   void data_value 
   (int index, 
-   void ** buffer, std::string * name, enum scalar_type * type,
+   void ** buffer, std::string * name, scalar_type * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
 private:

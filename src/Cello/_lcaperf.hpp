@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     lcaperf.hpp
+/// @file     _lcaperf.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-14
 /// @brief    Include file for the \ref Lcaperf component
@@ -40,6 +40,9 @@
 ///   start()		 region_start
 ///   stop()      	 region_stop
 
+#ifndef _LCAPERF_HPP
+#define _LCAPERF_HPP
+
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
@@ -61,9 +64,18 @@
 #ifdef CONFIG_USE_MPI
 #   include <mpi.h>
 #endif
+#ifdef CONFIG_USE_CHARM
+#   include "charm++.h"
+#   include "pup_stl.h"
+#endif
 #ifdef CONFIG_USE_PAPI
 #  include <papi.h>
 #endif
+
+enum {
+  index_papi_fp_ops  = 0,
+  num_papi_counters  = 1
+};
 
 #include "lcaperf.def"
 #include "lcaperf_attributes.hpp"
@@ -83,3 +95,6 @@
 #include "lcaperf_it_counter_keys.hpp"
 
 #include "lcaperf_lcaperf.hpp"
+
+#endif
+

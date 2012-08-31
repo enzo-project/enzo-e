@@ -19,6 +19,8 @@ public: // interface
 
   /// Initialize a Counters object
   Counters(size_t num_attributes, size_t num_counters)
+    : num_attributes_(num_attributes),
+      num_counters_(num_counters)
     {
       attributes_     = new int       [num_attributes];
       counters_start_ = new long long [num_counters];
@@ -42,13 +44,24 @@ public: // interface
   {
   }
 
-  /// Assignment operator
-  Counters & operator= (const Counters & classname) throw()
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
   {
-    return *this;
+    // NOTE: change this function whenever attributes change
+    p | num_attributes_;
+    p | num_counters_;
+    PUParray(p,attributes_,num_attributes_);
+    PUParray(p,counters_start_,num_counters_);
+    PUParray(p,counters_stop_,num_counters_);
+    
   }
+#endif
 
 private: // attributes
+
+  int num_attributes_;
+  int num_counters_;
 
   /// Array of attribute values
   int       * attributes_;

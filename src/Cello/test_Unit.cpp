@@ -13,14 +13,14 @@
 
 // Unit * Unit::instance_ = 0;
 Unit Unit::instance_;
+const char * Unit::pass_string_       = " pass ";
+const char * Unit::fail_string_       = " FAIL ";
+const char * Unit::incomplete_string_ = " incomplete ";
 
 //----------------------------------------------------------------------
 
 Unit::Unit()
   : test_num_(0),
-    pass_string_(" pass "),
-    fail_string_(" FAIL "),
-    incomplete_string_(" incomplete "),
     is_active_(false),
     comm_size_(1),
     comm_rank_(0)
@@ -95,11 +95,11 @@ bool Unit::assertion (int result, const char * file, int line, bool quiet)
     if (! (quiet && result)) {
       const char * result_string = 0;
       if (result == true) {
-	result_string = pass_string_;
+	result_string = Unit::pass_string_;
       } else if (result == false) {
-	result_string = fail_string_;
+	result_string = Unit::fail_string_;
       } else {
-	result_string = incomplete_string_;
+	result_string = Unit::incomplete_string_;
       }
       PARALLEL_PRINTF ("%s %d/%d %s %d %s %s\n",
 		       result_string,

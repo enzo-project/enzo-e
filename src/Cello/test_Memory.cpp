@@ -140,6 +140,7 @@ PARALLEL_MAIN_BEGIN
   NEW_F3(size_test_1);
 
   unit_assert (memory->bytes(handle_1) == size_test_1);
+  printf ("%lld %d\n",memory->bytes()         , size_test_1 + size);
   unit_assert (memory->bytes()         == size_test_1 + size);
   
   DEL_F1(size_test_1);

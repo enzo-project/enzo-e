@@ -25,18 +25,27 @@ public: // interface
   virtual ~IoBlock() throw()
   {}
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Io::pup(p);
+    p | *block_;
+  }
+#endif
+
   /// Set block
-  void set_block (const Block * block) throw()
+  void set_block (Block * block) throw()
   { block_ = block; };
 
 #include "_io_Io_common.hpp"
   
 protected: // functions
 
-  const Block * block_;
+protected: // attributes
 
-private: // attributes
-
+  Block * block_;
 
 };
 

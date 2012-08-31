@@ -9,6 +9,7 @@
 #define PARAMETERS_HPP
 
 #include "_error.hpp"
+#include "_performance.hpp"
 #include "_monitor.hpp"
 
 #include "_parameters.hpp"

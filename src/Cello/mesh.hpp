@@ -18,6 +18,7 @@
 #include "_parallel.hpp"
 #include "_memory.hpp"
 #include "_disk.hpp"
+#include "_parameters.hpp"
 #include "_io.hpp"
 
 #ifdef CONFIG_USE_CHARM

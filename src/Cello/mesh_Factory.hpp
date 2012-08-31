@@ -30,6 +30,16 @@ public: // interface
   virtual ~Factory() throw()
   {}
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    // This function intentionally left blank
+  }
+#endif
+
   /// Create a new Hierarchy [abstract factory design pattern]
   virtual Hierarchy * create_hierarchy (int dimension, int refinement) const throw ();
 
@@ -71,9 +81,6 @@ public: // interface
    int patch_rank,
    int num_field_blocks = 1,
    bool allocate = true) const throw();
-
-  /// Pack / unpack the Factory in a CHARM++ program
-  void pup(PUP::er &p) {};
 
 #endif
 
