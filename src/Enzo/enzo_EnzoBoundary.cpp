@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoBoundary::EnzoBoundary (boundary_type_enum boundary_type) throw()
+EnzoBoundary::EnzoBoundary (boundary_type boundary_type) throw()
   : Boundary(),
     boundary_type_ (boundary_type)
 { 
@@ -86,7 +86,7 @@ void EnzoBoundary::enforce_reflecting_
     bool vx =      (field_descr->field_name(field) == "velocity_x");
     bool vy =      (field_descr->field_name(field) == "velocity_y");
     bool vz =      (field_descr->field_name(field) == "velocity_z");
-    precision_enum precision = field_descr->precision(field);
+    precision_type precision = field_descr->precision(field);
     switch (precision) {
     case precision_single:
       enforce_reflecting_precision_(face,axis, (float *)array,
@@ -238,7 +238,7 @@ void EnzoBoundary::enforce_outflow_
   for (int field = 0; field < field_descr->field_count(); field++) {
     field_descr->ghosts(field,&gx,&gy,&gz);
     void * array = field_block->field_values(field);
-    precision_enum precision = field_descr->precision(field);
+    precision_type precision = field_descr->precision(field);
     switch (precision) {
     case precision_single:
       enforce_outflow_precision_(face,axis, (float *)array,

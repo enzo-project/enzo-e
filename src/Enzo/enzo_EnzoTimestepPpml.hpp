@@ -19,6 +19,15 @@ public: // interface
   /// Create a new EnzoTimestepPpml
   EnzoTimestepPpml() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Timestep::pup(p);
+  }
+#endif
+
 public: // virtual functions
 
   /// Evaluate the timestep for the block

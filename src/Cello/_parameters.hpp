@@ -21,6 +21,8 @@ enum parameter_enum {
   parameter_logical_expr
 };
 
+typedef int parameter_type;
+
 #define MAX_BUFFER_LENGTH 10000
 
 extern const char * parameter_type_name [];

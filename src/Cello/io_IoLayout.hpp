@@ -25,13 +25,24 @@ public: // interface
   virtual ~IoLayout() throw()
   {}
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Io::pup(p);
+
+    p | *layout_;
+  }
+
+#endif
 
 #include "_io_Io_common.hpp"
 
   
 private: // functions
 
-  const Layout * layout_;
+  Layout * layout_;
 
 private: // attributes
 

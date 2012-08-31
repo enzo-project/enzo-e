@@ -45,7 +45,7 @@ td.FAIL       {  color: #000;  background-color: #f77;}
 /* th.FAIL       {  color: #000;  background-color: #f77; } */
 td.inverse    {  color: #fff;  background-color: #000; }
 
-th.compiling { background-color: #ff7; color: #000; }
+th.compiling { background-color: #afa; color: #000; }
 /* strong.pass   {  color: #00f;  background-color: #fff; }
 strong.FAIL   {  color: #f00;  background-color: #fff; }
  */

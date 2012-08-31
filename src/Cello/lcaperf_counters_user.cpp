@@ -48,7 +48,7 @@ CountersUser & CountersUser::operator= (const CountersUser & counters) throw ()
 
 //======================================================================
 
-void CountersUser::create (std::string counter, enum counter_type type)
+void CountersUser::create (std::string counter, counter_type type)
 {
   TRACE("void CountersUser::create ");
   

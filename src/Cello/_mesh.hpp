@@ -43,5 +43,9 @@
 #include "mesh_ItBlock.hpp"
 #include "mesh_ItNode.hpp"
 
+// Refinement
+#include "mesh_Refine.hpp"
+#include "mesh_RefineSlope.hpp"
+
 #endif /* _MESH_HPP */
 

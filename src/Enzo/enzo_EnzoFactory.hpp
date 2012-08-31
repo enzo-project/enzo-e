@@ -20,6 +20,15 @@ public: // interface
   EnzoFactory() throw()
   {   }
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Factory::pup(p);
+  }
+#endif
+
   /// Create the Input / Output accessor object for EnzoBlock
   virtual IoBlock * create_io_block () const throw();
 

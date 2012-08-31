@@ -18,6 +18,8 @@ enum field_action_enum {
   field_action_method    // Retry with alternate method if range exceeded
 };
 
+typedef int field_action_type;
+
 class FieldDescr 
 {
 
@@ -39,9 +41,43 @@ public: // functions
   /// Assignment operator
   FieldDescr & operator= (const FieldDescr & field_descr) throw();
 
-  /// Set membership of a field in a group
-  void set_field_in_group(int id_field, int id_group) 
-    throw(std::out_of_range);
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | field_name_;
+    p | field_id_;
+    p | group_name_;
+    p | group_id_;
+    p | alignment_;
+    p | padding_;
+    p | courant_;
+    p | precision_;
+    int num_fields = field_name_.size();
+    if (p.isUnpacking()) {
+      centering_.resize(num_fields);
+    }
+    for (int i=0; i<num_fields; i++) {
+      p | *centering_[i];
+    }
+    if (p.isUnpacking()) {
+      ghosts_.resize(num_fields);
+    }
+    for (int i=0; i<num_fields; i++) {
+      p | *ghosts_[i];
+    }
+    PUParray (p,refresh_face_,3);
+    p | min_value_;
+    p | max_value_;
+    p | min_action_;
+    p | max_action_;
+  }
+#endif
+
+   // /// Set membership of a field in a group
+   // void set_field_in_group(int id_field, int id_group) 
+   //   throw(std::out_of_range);
 
   /// Set alignment
   void set_alignment(int alignment) throw();
@@ -67,17 +103,17 @@ public: // functions
   bool refresh_face(int face) const throw();
 
   /// Set precision for a field
-  void set_precision(int id_field, precision_enum precision) 
+  void set_precision(int id_field, precision_type precision) 
     throw(std::out_of_range);
 
   /// Set minimum bound and action
   void set_minimum (int id_field, double min_value,
-		    enum field_action_enum min_action) 
+		    field_action_type min_action) 
     throw(std::out_of_range);
 
   /// Set maximum bound and action
   void set_maximum (int id_field, double max_value, 
-		    enum field_action_enum max_action) 
+		    field_action_type max_action) 
     throw(std::out_of_range);
 
   /// Insert a new field
@@ -113,9 +149,9 @@ public: // functions
   int group_id(const std::string & name) const throw();
 
 
-  /// Return whether the given field is in the given group
-  bool field_in_group(int id_field, int id_group) 
-    const throw(std::out_of_range);
+   // /// Return whether the given field is in the given group
+   // bool field_in_group(int id_field, int id_group) 
+   //   const throw(std::out_of_range);
 
 
   /// alignment in bytes of fields in memory
@@ -137,7 +173,7 @@ public: // functions
 
   /// Set 
   /// precision of given field
-  precision_enum precision(int id_field) const 
+  precision_type precision(int id_field) const 
     throw(std::out_of_range);
 
   /// Number of bytes per element required by the given field
@@ -147,14 +183,14 @@ public: // functions
   double minimum_value(int id_field) const throw(std::out_of_range);
 
   /// minimum action for the field
-  enum field_action_enum minimum_action(int id_field) const
+  field_action_type minimum_action(int id_field) const
     throw(std::out_of_range);
 
   /// maximum value for the field
   double maximum_value(int id_field) const  throw(std::out_of_range);
 
   /// maximum action for the field
-  enum field_action_enum maximum_action(int id_field) const 
+  field_action_type maximum_action(int id_field) const 
     throw(std::out_of_range);
 
 private: // functions
@@ -175,10 +211,6 @@ private: // attributes
   /// Index of each group in group_name_
   std::map<std::string,int> group_id_;
 
-  typedef std::set<int> int_set_type;
-  /// Set of groups containing each field.  field_in_group_[field][group]
-  std::vector<int_set_type> field_in_group_;
-
   /// alignment of start of each field in bytes
   int alignment_;
 
@@ -189,7 +221,7 @@ private: // attributes
   double courant_;
 
   /// Precision of each field
-  std::vector<precision_enum> precision_;
+  std::vector<precision_type> precision_;
 
   /// cell centering for each field
   std::vector<bool *> centering_;
@@ -207,10 +239,10 @@ private: // attributes
   std::vector<double> max_value_;
 
   /// what to do if a field violates its minimum value
-  std::vector<enum field_action_enum> min_action_;
+  std::vector<field_action_type> min_action_;
 
   /// what to do if a field violates its maximum value
-  std::vector<enum field_action_enum> max_action_;
+  std::vector<field_action_type> max_action_;
 
 };
 

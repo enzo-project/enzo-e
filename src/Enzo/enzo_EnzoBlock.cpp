@@ -92,6 +92,7 @@ int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
 //----------------------------------------------------------------------
 
+// STATIC
 void EnzoBlock::initialize(Parameters * parameters,
 			   FieldDescr * field_descr)
 
@@ -132,9 +133,11 @@ void EnzoBlock::initialize(Parameters * parameters,
 
   // PPM
 
+  TRACE0;
   for (int i=0; i<NUM_FIELDS; i++) {
     field_index_[i] = field_undefined;
   }
+  TRACE0;
 
   GridRank = 0;
   NumberOfBaryonFields = 0;
@@ -848,7 +851,7 @@ void EnzoBlock::set_dt (double dt_param) throw ()
 
 void EnzoBlock::initialize () throw()
 {
-  DEBUG ("Enter EnzoBlock::initialize()\n");
+  TRACE ("Enter EnzoBlock::initialize()\n");
 
   Block::initialize();
 
@@ -899,8 +902,8 @@ void EnzoBlock::initialize () throw()
   for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
     BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
   }
-  DEBUG ("Exit EnzoBlock::initialize()\n");
 
+  TRACE ("Exit  EnzoBlock::initialize()\n");
 }
 
 //----------------------------------------------------------------------

@@ -25,16 +25,25 @@ public: // interface
   virtual ~IoPatch() throw()
   {}
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    Io::pup(p);
+
+    p | *patch_;
+    
+  }
+#endif
 
 #include "_io_Io_common.hpp"
 
   
-private: // functions
-
-  const Patch * patch_;
-
 private: // attributes
 
+  Patch * patch_;
 
 };
 

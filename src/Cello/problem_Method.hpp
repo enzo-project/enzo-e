@@ -24,6 +24,14 @@ public: // interface
   virtual ~Method() throw()
   {}
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+  }
+#endif
+
 public: // virtual functions
 
   /// Apply the method to advance a block one timestep 

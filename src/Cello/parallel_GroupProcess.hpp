@@ -36,10 +36,14 @@ class GroupProcess
   virtual ~GroupProcess() throw()
   {}
 
-
 #ifdef CONFIG_USE_CHARM
-  /// Pack / unpack the Factory in a CHARM++ program
-  void pup(PUP::er &p) {};
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | size_;
+    p | rank_;
+  }
 #endif
 
   //--------------------------------------------------

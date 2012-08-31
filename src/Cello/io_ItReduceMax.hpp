@@ -14,21 +14,26 @@ class ItReduceMax : public ItReduce {
   /// @ingroup  Io
   /// @brief    [\ref Io] Iterator over Reduces in a Reduce
 
-public: //
+public: // interface
 
-  /// Prohibit creating new ItReduceMaxs directly: require
-  /// ItReduceMax::create()
+  /// Create an ItReduceMax object
   ItReduceMax () throw ()
   : ItReduce(std::numeric_limits<double>::min())
   { }
-
-
-public: // interface
 
   /// Delete the ItReduceMax object
   virtual ~ItReduceMax () throw ()
   { }
   
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    ItReduce::pup(p);
+  }
+#endif
+
   /// Reduce another value
   virtual void next (double value) throw()
   { value_ = MAX(value,value_); }

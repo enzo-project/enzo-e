@@ -9,6 +9,8 @@
 #ifndef MESH_NODE_HPP
 #define MESH_NODE_HPP
 
+class Patch;
+
 class Node {
 
   /// @class    Node
@@ -22,6 +24,15 @@ public: // interface
 
   /// Destructor
   ~Node() throw();
+
+#ifdef CONFIG_USE_CHARM
+  void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | *((Patch * )data_);
+    p | *child_;
+  };
+#endif
 
   /// Set the data payload for the Node
   void set_data(void * data)
