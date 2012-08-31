@@ -34,6 +34,17 @@ public: // interface
   /// Assignment operator
   Attributes & operator= (const Attributes & Attributes) throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | index_;
+    p | name_;
+    p | value_;
+  }
+#endif
+
   //----------------------------------------------------------------------
 
   /// Create a new attribute with the given name

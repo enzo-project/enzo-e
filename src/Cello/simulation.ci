@@ -10,7 +10,7 @@ module simulation {
 //  extern module main;
   extern module mesh;
 
-  group Simulation {
+  group [migratable] Simulation {
 
     entry Simulation
       (const char filename[n], int n);
@@ -20,7 +20,7 @@ module simulation {
 
   };
 
-  group SimulationCharm : Simulation {
+  group [migratable] SimulationCharm : Simulation {
 
     entry SimulationCharm
       (const char filename[n], int n);

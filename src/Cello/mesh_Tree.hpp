@@ -23,6 +23,21 @@ public: // interface
   /// Destructor
   ~Tree() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | d_;
+    p | r_;
+    p | c_;
+    p | *root_;
+    p | num_nodes_;
+    p | max_level_;
+
+  }
+#endif
+
   /// Return the dimensionality of the tree
   int dimension() const
   { return d_; }

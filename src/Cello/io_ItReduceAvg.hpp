@@ -14,18 +14,25 @@ class ItReduceAvg : public ItReduce {
   /// @ingroup  Io
   /// @brief    [\ref Io] Iterator over Reduces in a Reduce
 
-public: //
+public: // interface
 
-  /// Prohibit creating new ItReduceAvgs directly: require ItReduceAvg::create()
+  /// Create an ItReduceAvg object
   ItReduceAvg () throw ()
   : ItReduce(0.0)
   { }
 
-public: // interface
-
   /// Delete the ItReduceAvg object
   virtual ~ItReduceAvg () throw ()
   { }
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    ItReduce::pup(p);
+  }
+#endif
   
   /// Reduce another value
   virtual void next (double value) throw()

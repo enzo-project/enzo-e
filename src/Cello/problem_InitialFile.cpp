@@ -17,7 +17,7 @@ InitialFile::InitialFile
  int cycle, double time) throw ()
   : Initial (cycle,time),
     parameters_(parameters),
-    group_process_(group_process),
+    group_process_((GroupProcess * )group_process),
     input_(0)
 #ifdef CONFIG_USE_CHARM
   , block_loop_(0)

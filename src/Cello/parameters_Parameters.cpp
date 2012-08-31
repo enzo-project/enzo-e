@@ -839,7 +839,7 @@ void Parameters::group_clear() throw ()
 
 //----------------------------------------------------------------------
 
-parameter_enum Parameters::type
+parameter_type Parameters::type
 ( std::string  parameter) throw()
 /// @param   parameter Parameter name
 /// @return  Return type of the given parameter
@@ -850,7 +850,7 @@ parameter_enum Parameters::type
 
 //----------------------------------------------------------------------
 
-parameter_enum Parameters::list_type
+parameter_type Parameters::list_type
 ( 
  int index,
  std::string  parameter

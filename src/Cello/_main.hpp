@@ -59,6 +59,17 @@ public:
   /// Initialize the Main chare (defined in the calling program)
   Main(CkArgMsg* main);
   
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    CBase_Main::pup(p);
+    // NOTE: change this function whenever attributes change
+    p | count_exit_;
+  }
+#endif
+
   /// Exit the program
   void p_exit(int count);
 
@@ -68,7 +79,6 @@ public:
 private:
 
    int count_exit_; 
-   Monitor * monitor_;
 
 };
 #endif

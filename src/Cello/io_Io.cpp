@@ -22,7 +22,7 @@ Io::Io(size_t meta_count, size_t data_count) throw()
 
 void Io::meta_value 
 (int index, 
- void ** buffer, std::string * name, enum scalar_type * type,
+ void ** buffer, std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
   ASSERT1 ("Io::meta_value()",
@@ -38,7 +38,7 @@ void Io::meta_value
 //----------------------------------------------------------------------
 void Io::data_value 
 (int index, 
- void ** buffer, std::string * name, enum scalar_type * type,
+ void ** buffer, std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {

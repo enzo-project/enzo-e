@@ -11,8 +11,7 @@
 //----------------------------------------------------------------------
 
 InputData::InputData(const Factory * factory) throw ()
-  : Input(factory),
-    factory_(factory)
+  : Input(factory)
 {
 }
 
@@ -188,7 +187,7 @@ void InputData::read_field
  const FieldDescr * field_descr,
  int field_index) throw()
 {
-  io_field_block()->set_field_descr(field_descr);
+  io_field_block()->set_field_descr((FieldDescr*)field_descr);
   io_field_block()->set_field_block(field_block);
   io_field_block()->set_field_index(field_index);
 

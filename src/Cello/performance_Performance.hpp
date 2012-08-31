@@ -39,11 +39,25 @@ public: // interface
   /// Delete a Performance object
   ~Performance();
 
-  /// Copy constructor
-  Performance(const Performance & performance) throw();
-
-  /// Assignment operator
-  Performance & operator= (const Performance & performance) throw();
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | timer_;
+    p | papi_;
+    WARNING("Performance::pup",
+	    "std::vector<Counters *> counters_ not pup'ed");
+  //  std::vector<Counters *> counters_;
+    p | attribute_names_;
+    p | counter_names_;
+    p | group_names_;
+    p | region_names_;
+    p | attribute_monotonic_;
+    p | current_group_;
+    p | current_region_;
+  }
+#endif
 
   //--------------------------------------------------
 
@@ -189,7 +203,7 @@ private: // attributes
   std::vector<std::string> region_names_;
 
   /// Which attributes are monotonic
-  std::vector<bool> attribute_monotonic_;
+  std::vector<int> attribute_monotonic_;
 
   /// Current group; 0 if none
   unsigned current_group_;

@@ -30,6 +30,18 @@ public: // interface
   /// Destructor
   virtual ~InitialFile() throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    Initial::pup(p);
+    p | *parameters_;
+    p | *group_process_;
+    p | *input_;
+    p | block_loop_;
+  }
+#endif
+
   /// Read initialization values from Initial group in parameter file
 
   /// Enforce initial conditions for the given Block
@@ -53,7 +65,7 @@ private: // attributes
   Parameters * parameters_;
 
   /// Parallel GroupProcess object for creating Patches
-  const GroupProcess * group_process_;
+  GroupProcess * group_process_;
 
   /// Associated Input object
   Input * input_;

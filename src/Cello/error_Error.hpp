@@ -77,7 +77,8 @@
 #   define TRACE(M)					\
   {  m2_(stdout,"TRACE",__FILE__,__LINE__,"", M); }
 #   define TRACE0						\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", ""); }
+  { PARALLEL_PRINTF("TRACE %s:%d\n",__FILE__,__LINE__);		\
+    m2_(stdout,"TRACE",__FILE__,__LINE__,"", ""); }
 #   define TRACE1(M,A1)					\
   { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1); }
 #   define TRACE2(M,A1,A2)					\
@@ -94,6 +95,13 @@
   { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
 #   define TRACE8(M,A1,A2,A3,A4,A5,A6,A7,A8)				\
   { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
+
+#ifdef CONFIG_USE_CHARM
+#   define TRACEPUP							\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"",				\
+	p.isPacking()?"isPacking":(p.isUnpacking()?"isUnpacking":"isSizing")); }
+
+#endif
 
 #else
 

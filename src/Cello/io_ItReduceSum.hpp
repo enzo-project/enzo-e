@@ -14,19 +14,27 @@ class ItReduceSum : public ItReduce {
   /// @ingroup  Io
   /// @brief    [\ref Io] Iterator over Reduces in a Reduce
 
-public: //
 
-  /// Prohibit creating new ItReduceSums directly: require ItReduceSum::create()
+public: // interface
+
+  /// Create an ItReduceSum object
   ItReduceSum () throw ()
   : ItReduce(0.0)
   {}
-
-public: // interface
 
   /// Delete the ItReduceSum object
   virtual ~ItReduceSum () throw ()
   {}
   
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    ItReduce::pup(p);
+  }
+#endif
+
   /// Reduce another value
   virtual void next (double value) throw()
   { value_ += value; }

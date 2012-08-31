@@ -31,6 +31,25 @@ public: // interface
   /// Assignment operator
   CountersPapi & operator= (const CountersPapi & counters) throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+
+    CountersUser::pup(p);
+
+    p |  is_papi_active_;
+    p |  event_set_;
+    if (p.isUnpacking()) {
+      papi_counters_ = new long long [num_papi_counters);
+    }
+    PUParray(p,papi_counters_,num_papi_counters);
+    p |  vtime_begin_;
+
+  }
+#endif
+
   //----------------------------------------------------------------------
 
 protected: // functions

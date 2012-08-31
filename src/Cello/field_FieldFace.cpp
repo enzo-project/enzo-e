@@ -104,7 +104,7 @@ void FieldFace::load
   for (size_t field=0; field< num_fields; field++) {
   
     // Get precision
-    precision_enum precision = field_descr->precision(field);
+    precision_type precision = field_descr->precision(field);
 
     // Get field values and face array
     const char * field_face = field_block->field_values(field);
@@ -166,7 +166,7 @@ void FieldFace::store
   for (size_t field=0; field<num_fields; field++) {
 
     // Get precision
-    precision_enum precision = field_descr->precision(field);
+    precision_type precision = field_descr->precision(field);
 
     // Get field values
     char * field_ghost = field_block->field_values(field);
@@ -230,7 +230,7 @@ void FieldFace::allocate
 
     // Need element size for alignment adjust below
 
-    precision_enum precision = field_descr->precision(index_field);
+    precision_type precision = field_descr->precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
     // Get field block dimensions nd3[]

@@ -11,7 +11,7 @@
 
 IoHierarchy::IoHierarchy(const Hierarchy * hierarchy) throw ()
   : Io(3,0),
-    hierarchy_(hierarchy)
+    hierarchy_((Hierarchy *)hierarchy)
 {
   meta_name_.push_back("lower");
   meta_name_.push_back("upper");
@@ -28,7 +28,7 @@ IoHierarchy::IoHierarchy(const Hierarchy * hierarchy) throw ()
 
 void IoHierarchy::meta_value
 (int index,
- void ** buffer, std::string * name, enum scalar_type * type,
+ void ** buffer, std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
   Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
@@ -57,7 +57,7 @@ void IoHierarchy::meta_value
 
 void IoHierarchy::data_value
 (int index,
- void ** buffer, std::string * name, enum scalar_type * type,
+ void ** buffer, std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {

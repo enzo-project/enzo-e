@@ -40,6 +40,15 @@ public: // interface
   /// Assignment operator
   FieldFace & operator= (const FieldFace & FieldFace) throw();
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    p | array_;
+    PUParray(p,full_,3);
+  }
+#endif
   //----------------------------------------------------------------------
 
   /// Set whether or not to include ghost zones along each axis

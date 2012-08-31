@@ -26,7 +26,7 @@ Simulation::Simulation
 : factory_(0),
   parameters_(0),
   parameter_file_(parameter_file),
-  group_process_(group_process),
+  group_process_((GroupProcess *)group_process),
   is_group_process_new_(false),
 #ifdef CONFIG_USE_CHARM
   patch_loop_(0),
@@ -72,9 +72,9 @@ Simulation::Simulation
   lcaperf_ = new lca::LcaPerf;
 
   lcaperf_->initialize();
+  lcaperf_->begin();
   lcaperf_->new_region("simulation");
   lcaperf_->new_attribute("cycle",LCAP_INT);
-  lcaperf_->begin();
   lcaperf_->assign("cycle",0);
 
   parameters_ = new Parameters(parameter_file,monitor_);
@@ -266,7 +266,7 @@ void Simulation::initialize_data_descr_() throw()
   std::string precision_str = 
     parameters_->value_string("Field:precision","default");
 
-  precision_enum precision = precision_unknown;
+  precision_type precision = precision_unknown;
 
   if      (precision_str == "default")   precision = precision_default;
   else if (precision_str == "single")    precision = precision_single;

@@ -11,7 +11,7 @@
 
 IoPatch::IoPatch(const Patch * patch) throw ()
   : Io(6,0),
-    patch_(patch)
+    patch_((Patch*)patch)
 {
   DEBUG1("IoPatch(%p)\n",patch);
 
@@ -33,7 +33,7 @@ IoPatch::IoPatch(const Patch * patch) throw ()
 
 void IoPatch::meta_value
 (int index,
- void ** buffer, std::string * name, enum scalar_type * type,
+ void ** buffer, std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
   DEBUG0;
@@ -77,7 +77,7 @@ void IoPatch::meta_value
 
 void IoPatch::data_value
 (int index,
- void ** buffer, std::string * name, enum scalar_type * type,
+ void ** buffer, std::string * name, scalar_type * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {

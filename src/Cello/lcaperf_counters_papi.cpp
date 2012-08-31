@@ -11,11 +11,6 @@
 
 namespace lca {
 
-enum {
-  index_papi_fp_ops  = 0,
-  num_papi_counters  = 1
-};
-
 const char * papi_counter_name[] = {
   "PAPI_FP_OPS",
 };

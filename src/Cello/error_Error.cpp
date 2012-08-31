@@ -5,6 +5,8 @@
 /// @date     2011-09-07
 /// @brief    Implementation of Error functions
 
+#include "cello.hpp"
+
 #include "error.hpp"
 
 //----------------------------------------------------------------------
