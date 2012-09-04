@@ -258,7 +258,7 @@ protected: // attributes
   /// I/O FieldBlock data accessor
   IoFieldBlock * io_field_block_;
 
-private: // attributes
+protected: // attributes
 
   /// Only processes with id's divisible by process_stride_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
