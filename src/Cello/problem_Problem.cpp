@@ -822,7 +822,7 @@ Output * Problem::create_output_
     output = new OutputImage (factory,np,nx,ny);
 
   } else if (type == "data") {
-    output = new OutputData (factory);
+    output = new OutputData (factory,parameters);
   } else if (type == "restart") {
     output = new OutputRestart (factory,parameters);
   }

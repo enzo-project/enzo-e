@@ -16,7 +16,7 @@ OutputRestart::OutputRestart
  const Factory * factory,
  Parameters * parameters
 ) throw ()
-  : OutputData(factory),
+  : OutputData(factory,parameters),
     param_name_(""),
     param_args_()
 {
