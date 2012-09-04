@@ -425,7 +425,7 @@ void SimulationMpi::refresh_ghost_
 
   bool periodic = problem()->boundary()->is_periodic();
 
-  // FOLLOWING IS SIMILAR TO Block::p_refresh_face()
+  // FOLLOWING CODE IS SIMILAR TO Block::x_refresh()
 
   int nx,ny,nz;
   block->field_block()->size (&nx,&ny,&nz);

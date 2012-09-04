@@ -55,16 +55,8 @@ void EnzoSimulationCharm::initialize() throw()
 
 const Factory * EnzoSimulationCharm::factory() const throw()
 { 
-  DEBUG("EnzoSimulationCharm::factory()");
   if (! factory_) factory_ = new EnzoFactory;
   return factory_;
-}
-
-//----------------------------------------------------------------------
-
-void EnzoSimulationCharm::run() throw()
-{
-  c_initial();
 }
 
 //======================================================================

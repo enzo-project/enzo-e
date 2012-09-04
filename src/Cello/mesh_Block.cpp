@@ -299,8 +299,8 @@ void Block::prepare()
   min_reduce[0] = dt_block;
   min_reduce[1] = stop_block ? 1.0 : 0.0;
 
-  CkCallback callback (CkIndex_Block::p_call_output(NULL), thisProxy);
-  DEBUG("Block::prepare() calling Block::p_call_output()");
+  CkCallback callback (CkIndex_Block::p_output(NULL), thisProxy);
+  DEBUG("Block::prepare() calling Block::p_output()");
   contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
 
 }
@@ -310,10 +310,10 @@ void Block::prepare()
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_call_output(CkReductionMsg * msg)
+void Block::p_output(CkReductionMsg * msg)
 {
 
-  DEBUG("Block::p_call_output()");
+  DEBUG("Block::p_output()");
   double * min_reduce = (double * )msg->getData();
 
   double dt_patch   = min_reduce[0];
@@ -450,18 +450,18 @@ void Block::refresh ()
 		 ix3[ax+1],iy3[ay+1],iz3[az+1],
 		 ax,ay,az);
 
-	  block_array(ix3[ax+1],iy3[ay+1],iz3[az+1]).p_refresh_face 
+	  block_array(ix3[ax+1],iy3[ay+1],iz3[az+1]).x_refresh 
 	    (field_face.size(), field_face.array(), -ax,-ay,-az);
 	}
       }
     }
   }
 
-  // NOTE: p_refresh_face() calls compute, but if no incoming faces
+  // NOTE: x_refresh() calls compute, but if no incoming faces
   // it will never get called.  So every block also calls
-  // p_refresh_face() itself with a null array
+  // x_refresh() itself with a null array
 
-  p_refresh_face (0,0,0, 0, 0);
+  x_refresh (0,0,0, 0, 0);
 
 }
 #endif /* CONFIG_USE_CHARM */
@@ -560,17 +560,17 @@ void Block::update_boundary_
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_refresh_face (int n, char * buffer, int fx, int fy, int fz)
+void Block::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 {
 
-  DEBUG ("Block::p_refresh_face()");
+  DEBUG ("Block::x_refresh()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
 
   if ( n != 0) {
 
-    // n == 0 is the call from self to ensure p_refresh_face()
+    // n == 0 is the call from self to ensure x_refresh()
     // always gets called at least once
 
     bool lx,ly,lz;
@@ -673,10 +673,10 @@ void Block::p_refresh_face (int n, char * buffer, int fx, int fy, int fz)
   //--------------------------------------------------
 
   if (++count_refresh_face_ >= count) {
-    DEBUG ("Block::p_refresh_face() calling prepare()");
+    DEBUG ("Block::x_refresh() calling prepare()");
     count_refresh_face_ = 0;
     prepare();
-  } else  DEBUG ("Block::p_refresh_face() skipping prepare()");
+  } else  DEBUG ("Block::x_refresh() skipping prepare()");
 }
 #endif /* CONFIG_USE_CHARM */
 
