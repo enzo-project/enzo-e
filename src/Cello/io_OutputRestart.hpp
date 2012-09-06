@@ -11,7 +11,7 @@
 class ItField;
 class Parameters;
 
-class OutputRestart : public OutputData {
+class OutputRestart : public Output {
 
   /// @class    OutputRestart
   /// @ingroup  Io
@@ -20,9 +20,9 @@ class OutputRestart : public OutputData {
 public: // functions
 
   /// Create an uninitialized OutputRestart object
-  OutputRestart(const Factory * factory, Parameters * parameters) throw();
+  OutputRestart(const Factory * factory, Parameters * parameters, int process_count) throw();
 
-  ///
+  /// Destructor
   ~OutputRestart() throw()
   {}
 
@@ -32,29 +32,41 @@ public: // functions
   {
     // NOTE: change this function whenever attributes change
 
-    OutputData::pup(p);
+    Output::pup(p);
 
-    p | param_name_;
-    p | param_args_;
+    p | dir_name_;
+    p | dir_args_;
   }
 
 #endif
 
 public: // virtual functions
 
-  /// Finalize output
-  virtual void finalize () throw ();
+  /// Open (or create) a file for IO
+  virtual void open () throw()
+  { /* EMPTY */ };
 
+  /// Close file for IO
+  virtual void close () throw()
+  { /* EMPTY */ };
+  
   /// Write Simulation data to disk
   virtual void write ( const Simulation * simulation ) throw();
+
+  /// Write local field to disk
+  virtual void write
+  ( const FieldBlock * field_block, 
+    const FieldDescr * field_descr,
+    int field_index) throw()
+  { /* EMPTY */ }
 
 private:
 
   /// Name of the parameter file to write, including format arguments 
-  std::string param_name_;
+  std::string dir_name_;
 
-  /// Format strings for param_name_, if any ("cycle", "time", etc.)
-  std::vector<std::string> param_args_;
+  /// Format strings for dir_name_, if any ("cycle", "time", etc.)
+  std::vector<std::string> dir_args_;
 
 };
 

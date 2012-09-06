@@ -290,7 +290,7 @@ void FieldFace::deallocate() throw()
 
 //----------------------------------------------------------------------
 
-void FieldFace::loop_limits
+void FieldFace::loop_limits_
 (
  int *ix0,
  int *iy0,
@@ -384,7 +384,7 @@ size_t FieldFace::load_precision_
 
   // Loop limits
 
-  loop_limits(&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, fx,fy,fz,load=true);
+  loop_limits_ (&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, fx,fy,fz,load=true);
 
   // TRACE3 (" load fx,fy,fz = %d %d %d",fx,fy,fz);
   // TRACE3 (" load nd3      = %d %d %d",nd3[0],nd3[1],nd3[2]); 
@@ -428,7 +428,7 @@ size_t FieldFace::store_precision_
 
   // Loop limits
 
-  loop_limits(&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, fx,fy,fz,load=false);
+  loop_limits_ (&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, fx,fy,fz,load=false);
 
   // TRACE3 (" store fx,fy,fz = %d %d %d",fx,fy,fz);
   // TRACE3 (" store nd3      = %d %d %d",nd3[0],nd3[1],nd3[2]); 

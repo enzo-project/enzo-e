@@ -1,11 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-//----------------------------------------------------------------------
 /// @file     error_Error.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-04-07
 /// @brief    Declaration of the Error class
-//----------------------------------------------------------------------
 
 #ifndef ERROR_ERROR_HPP
 #define ERROR_ERROR_HPP
@@ -128,6 +126,12 @@
 #   define TRACE8(M,A1,A2,A3,A4,A5,A6,A7,A8)	\
   /* This space intentionally left blank */
 
+#ifdef CONFIG_USE_CHARM
+#   define TRACEPUP							\
+  /* This space intentionally left blank */
+
+#endif
+
 #endif
 
 //----------------------------------------------------------------------
@@ -180,7 +184,8 @@
   /* This space intentionally left blank */
 #   define DEBUG8(M,A1,A2,A3,A4,A5,A6,A7,A8)	\
   /* This space intentionally left blank */
-
+#   define DEBUG9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)	\
+  /* This space intentionally left blank */
 #endif
 
 //----------------------------------------------------------------------

@@ -91,6 +91,7 @@ void FileHdf5::file_create () throw()
 
   // error check file created
 
+  TRACE1("File = %s",file_name.c_str());
   ASSERT2("FileHdf5::file_create",  "Return value %d opening file %s",
 	  file_id_,file_name.c_str(), file_id_ >= 0);
 

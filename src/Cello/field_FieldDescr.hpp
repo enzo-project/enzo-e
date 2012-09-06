@@ -171,10 +171,8 @@ public: // functions
   void ghosts(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
     throw(std::out_of_range);
 
-  /// Set 
-  /// precision of given field
-  precision_type precision(int id_field) const 
-    throw(std::out_of_range);
+  /// Return precision of given field
+  precision_type precision(int id_field) const throw(std::out_of_range);
 
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();

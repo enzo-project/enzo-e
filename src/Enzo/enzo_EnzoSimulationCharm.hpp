@@ -48,9 +48,6 @@ public: // functions
   /// Return an EnzoFactory object, creating it if needed
   virtual const Factory * factory() const throw();
 
-  /// Run the simulation
-  virtual void run() throw();
-
 };
 
 #endif /* CONFIG_USE_CHARM */
