@@ -37,7 +37,6 @@ Factory::create_patch
  ) const throw()
 {
 #ifdef CONFIG_USE_CHARM
-  DEBUG2("zp = %f ID = %d",zp,id);
   CProxy_Patch * proxy_patch = new CProxy_Patch;
   *proxy_patch = CProxy_Patch::ckNew
     (nx,ny,nz,
@@ -48,6 +47,7 @@ Factory::create_patch
      id,
      allocate_blocks,
      process_first, process_last_plus);
+  TRACE1("proxy_patch = %p",proxy_patch);
   return proxy_patch;
 #else
   DEBUG1("ID = %d",id);

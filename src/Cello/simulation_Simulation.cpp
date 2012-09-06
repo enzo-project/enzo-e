@@ -33,6 +33,7 @@ Simulation::Simulation
 #endif
   dimension_(0),
   cycle_(0),
+  level_(0),
   time_(0.0),
   dt_(0),
   stop_(false),
@@ -75,7 +76,7 @@ Simulation::Simulation
   lcaperf_->begin();
   lcaperf_->new_region("simulation");
   lcaperf_->new_attribute("cycle",LCAP_INT);
-  lcaperf_->assign("cycle",0);
+  lcaperf_->new_attribute("level",LCAP_INT);
 
   parameters_ = new Parameters(parameter_file,monitor_);
 }
@@ -136,8 +137,8 @@ void Simulation::finalize() throw()
 {
   DEBUG0;
   lcaperf_->stop("simulation");
-  lcaperf_->end();
   lcaperf_->print();
+  lcaperf_->end();
 
   performance_simulation_->stop();
   performance_cycle_->stop();
@@ -148,6 +149,8 @@ void Simulation::finalize() throw()
 void Simulation::initialize_simulation_() throw()
 {
 
+  lcaperf_->attribute("cycle",&cycle_,LCAP_INT);
+  lcaperf_->attribute("level",&level_,LCAP_INT);
   lcaperf_->start("simulation");
   performance_simulation_->start();
   performance_cycle_->start();
@@ -527,8 +530,12 @@ void Simulation::monitor_output()
 
 void Simulation::performance_output(Performance * performance)
 {
+  lcaperf_->print();
+  lcaperf_->stop("simulation");
 
 
+  lcaperf_->attribute("cycle",&cycle_,LCAP_INT);
+  lcaperf_->start("simulation");
   performance_curr_ = performance;
 
   size_t i = 0;

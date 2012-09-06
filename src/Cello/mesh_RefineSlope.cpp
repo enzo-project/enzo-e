@@ -41,6 +41,8 @@ int RefineSlope::apply
   int num_fields = field_descr->field_count();
 
 
+  int count_flagged = 0;
+
   switch (precision) {
   case precision_single:
     {
@@ -68,6 +70,9 @@ int RefineSlope::apply
 	   precision,0);
     break;
   }
+
+  return count_flagged;
+
 }
 
 

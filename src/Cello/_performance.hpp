@@ -71,6 +71,7 @@ enum function_enum {
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include <sys/resource.h>
 
 #ifdef __linux__

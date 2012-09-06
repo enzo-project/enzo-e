@@ -107,11 +107,11 @@ $types = array("charm","mpi");
   global $num_types;
 
   $input_file  = "../input/$output.in";
-  $input_link  = "../cello-src/input/$output.in";
+  $input_link  = "../input/$output.in";
   $input_html = "<a href=\"$input_link\">$output.in</a>";
 
   $source_file = "../src/$component/$testrun.cpp";
-  $source_link = "../cello-src/src/$component/$testrun.cpp";
+  $source_link = "../src/$component/$testrun.cpp";
   $source_html = "<a href=\"$source_link\">$testrun.cpp</a>";
 
   if (! file_exists($source_file)) {
@@ -391,6 +391,38 @@ function test_table ($file_root,$size_array, $types)
     }
     echo "</table></br>";
 }
+
+function test_table_blocks ($file_root,$cycle_array, $types)
+{
+  echo "<table>";
+  $rows = 2;
+  $cols = 4;
+  for ($i = 0; $i < sizeof($types); ++$i) {
+     $type = $types[$i];
+     echo "<tr><th>$file_root</th>";
+     for ($index_cycle = 0; $index_cycle < sizeof($cycle_array); $index_cycle++) {
+       $cycle = $cycle_array[$index_cycle];
+       echo "<th colspan = $cols class=block>$cycle</th> ";
+     }
+     echo " </tr>";
+     for ($row = 0; $row < $rows; $row++) {
+       echo "<tr>";
+       echo "<td>$type</td>";
+       
+       for ($index_cycle = 0; $index_cycle < sizeof($cycle_array); $index_cycle++) {
+	 $cycle = $cycle_array[$index_cycle];
+	 for ($col = 0; $col < $cols; $col++) {
+	   $block = $rows - 1 - $row + $rows*$col;
+
+	   echo "<td class=block> <img src=$type/${file_root}-$cycle-block_$block.png width=80></img> </td>";
+	 }
+       }
+       echo "</tr>";
+     }
+   }
+   echo "</table></br>";
+}
+
   function swf_movie ($filename, $last_image, $image_size)
   {
     global $types;
@@ -485,6 +517,10 @@ test_summary("Enzo-BC-3D",
 test_summary("Enzo-IC", 
 	     array("initial_png"),
 	     array("enzo-p"));
+
+test_summary("Enzo-output", 
+	     array("stride-1","stride-2","stride-3"),
+	     array("enzo-p","enzo-p","enzo-p"));
 
 // Print row divider
 
@@ -665,7 +701,6 @@ test_table ("boundary_outflow-2d",
 
 test_group("Enzo-BC-3D");
 
-
 echo "<h3>3D Reflecting</h3>";
 
 tests("Enzo","enzo-p","test_boundary_reflecting-3d","Reflecting 3D");
@@ -691,7 +726,7 @@ tests("Enzo","enzo-p","test_boundary_outflow-3d","Outflow 3D");
 test_table ("boundary_outflow-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
 
-   //======================================================================
+//----------------------------------------------------------------------
 
 test_group("Enzo-IC");
 
@@ -702,6 +737,31 @@ tests("Enzo","enzo-p","test_initial_png","");
 
 test_table ("initial_png",
 	    array("00","10","20","30","40", "50"), $types);
+
+//----------------------------------------------------------------------
+
+test_group("Enzo-output");
+
+
+echo "<h3>Process stride</h3>";
+
+echo "<h3>Stride 1</h3>";
+
+tests("Enzo","enzo-p","test_output-stride-1","");
+
+test_table_blocks ("output-stride-1", array("00","10","20"),$types);
+
+echo "<h3>Stride 2</h3>";
+
+tests("Enzo","enzo-p","test_output-stride-2","");
+
+test_table_blocks ("output-stride-2",  array("00","10","20"), $types);
+
+echo "<h3>Stride 3</h3>";
+
+tests("Enzo","enzo-p","test_output-stride-3","");
+
+test_table_blocks ("output-stride-3",  array("00","10","20"), $types);
 
    //======================================================================
 

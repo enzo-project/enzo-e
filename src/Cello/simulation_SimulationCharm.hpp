@@ -42,7 +42,6 @@ public: // functions
     Simulation::pup(p);
   }
 
-
   /// Initialize the Enzo Simulation
   virtual void initialize() throw();
 
@@ -55,13 +54,10 @@ public: // functions
 
   // Call initialization on Problem list of Initial objects
   void p_initial ();
-  void c_initial ();
+  void initial ();
 
   // Call output on Problem list of Output objects
   void p_output ();
-
-  // // Write patches for indexed Output object
-  // void p_write (int index);
 
   /// Reduce output, using p_output_write to send data to writing processes
   void s_write();
@@ -75,12 +71,6 @@ public: // functions
 
   /// Wait for all local patches to check in before proceeding to refresh
   void s_initial();
-
-  /// Request Patch proxy from another process
-  void x_request_patch ( int patch_id, int block_rank );
-
-  /// Send patch proxy to requested process
-  void x_send_patch ( int patch_id, CkChareID proxy_patch);
 
   /// Refresh ghost zones
   void c_refresh();
