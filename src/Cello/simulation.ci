@@ -27,11 +27,9 @@ module simulation {
 
     entry void s_initialize ();
 
-//    entry void p_initial ();
     entry void s_initial ();
 
     entry void p_output ();
-//    entry void p_write(int index);
     entry void s_write();
 
     entry void p_output_write(int n, char buffer[n]);
@@ -42,8 +40,8 @@ module simulation {
 
     entry void s_patch (CkCallback callback);
 
-    entry void x_request_patch ( int patch_id, int block_rank );
-    entry void x_send_patch ( int patch_id, CkChareID proxy_patch);
+//    entry void x_request_patch ( int patch_id, int block_rank );
+//    entry void x_send_patch ( int patch_id, CkChareID proxy_patch);
 
     entry void c_refresh ();
 

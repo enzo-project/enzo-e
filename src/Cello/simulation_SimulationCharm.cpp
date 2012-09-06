@@ -49,7 +49,7 @@ void SimulationCharm::initialize() throw()
 
 void SimulationCharm::run() throw()
 {
-  c_initial();
+  initial();
 }
 
 //----------------------------------------------------------------------

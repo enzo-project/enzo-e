@@ -9,10 +9,9 @@ flags_arch       = '-g -Wall'
 # -lpthread: not needed?
 # -rdynamic: required for backtraces
 
-balancer = 'RotateLB'
-
-flags_cxx_charm  = '-balancer ' + balancer
-flags_link_charm = '-rdynamic -module ' + balancer
+# print 'B 1 flags_link_charm = ',flags_link_charm
+flags_link_charm = ' -rdynamic'
+print 'B 2 flags_link_charm = ',flags_link_charm
 
 cc['mpi']     = 'mpicc'
 cc['serial']  = 'gcc'

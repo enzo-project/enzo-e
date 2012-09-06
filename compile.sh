@@ -112,17 +112,17 @@ foreach prec ($PREC)
       printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" $line
       printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" $line >> $log
 
-       foreach test ($dir/*unit)
-      set test_begin = `grep "UNIT TEST BEGIN" $test | wc -l`
-       set test_end   = `grep "UNIT TEST END" $test | wc -l`
+      foreach test ($dir/*unit)
+        set test_begin = `grep "UNIT TEST BEGIN" $test | wc -l`
+        set test_end   = `grep "UNIT TEST END" $test | wc -l`
 
-      @ crash = $test_begin - $test_end
+        @ crash = $test_begin - $test_end
 
-      if ($crash != 0) then
-         set line = "$line CRASH: $test\n"
-         printf "$line"
-	 printf "$line" >> $log
-      endif
+        if ($crash != 0) then
+           set line = "   CRASH: $test\n"
+           printf "$line"
+           printf "$line" >> $log
+        endif
       end
 
 

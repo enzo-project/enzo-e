@@ -29,6 +29,7 @@ memory = 1
 # Enable charm++ dynamic load balancing
 
 balance = 1
+balancer = 'RotateLB'
 
 # Whether to compile with -pg to use gprof for performance profiling
 
@@ -191,7 +192,7 @@ flags_link_charm = ''
 
 if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
-     
+  
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
 if (debug != 0):         defines = defines + define_debug
@@ -204,7 +205,6 @@ if (memory != 0):        defines = defines + define_memory
 
 is_arch_valid = 0
 sys.path.append("./config");
-
 
 if   (arch == "linux-gnu"):    from linux_gnu    import *
 elif (arch == "linux-gprof"):  from linux_gprof  import *
@@ -233,6 +233,14 @@ charmc = charm_path + '/bin/charmc -language charm++ '
 
 cxx['charm']  = charmc + charm_perf + ' '
 cc ['charm']  = charmc + charm_perf + ' '
+
+print 'A 1 flags_link_charm = ',flags_link_charm
+
+if (balance == 1):
+     flags_cxx_charm = flags_cxx_charm + ' -balancer ' + balancer
+     flags_link_charm = flags_link_charm + ' -module ' + balancer
+
+print 'A 2 flags_link_charm = ',flags_link_charm
 
 #======================================================================
 # UNIT TEST SETTINGS
