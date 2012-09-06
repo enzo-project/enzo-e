@@ -15,6 +15,7 @@ do_restart = 1
 
 # Define a test for running unit tests
 
+hdf5_to_png  = Builder(action = 'test/cello-h5topng.sh $ARGS');
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS> $TARGET 2>&1; $COPY")
 run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS " + parallel_run_args + " > $TARGET 2>&1; $COPY")
@@ -23,10 +24,13 @@ make_movie   = Builder(action = "png2swf -r 5 -o $TARGET ${ARGS} ")
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
 env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
 env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
+env.Append(BUILDERS = { 'Hdf5ToPng'   : hdf5_to_png } )
 
 env_mv_out  = env.Clone(COPY = 'mv `ls *.png *.h5` ' + test_path)
 env_mv_test = env.Clone(COPY = 'mv test*out test*in ' + test_path)
 env_rm_png  = env.Clone(COPY = 'rm `ls *.png`')
+
+# h5topng
 
 #----------------------------------------------------------------------
 # DISK COMPONENT          
@@ -334,6 +338,40 @@ elif (type == "charm"):
 else:
    env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_mpi)
 
+
+
+output_stride_1_RUN = env.RunParallel ('test_output-stride-1-RUN.unit',
+                                               bin_path + '/enzo-p', 
+                                               ARGS='input/output-stride-1.in')
+output_stride_1_C00 = env.Hdf5ToPng('test_output-stride-1-C00.unit','test_output-stride-1-RUN.unit',
+                                   ARGS='output-stride-1 00');
+output_stride_1_C10 = env.Hdf5ToPng('test_output-stride-1-C10.unit','test_output-stride-1-C00.unit',
+                                   ARGS='output-stride-1 10');
+output_stride_1 = env_mv_out.Hdf5ToPng('test_output-stride-1.unit','test_output-stride-1-C10.unit',
+                                   ARGS='output-stride-1 20');
+
+env.Requires(output_stride_1,    output_stride_1_C10)
+env.Requires(output_stride_1_C10,output_stride_1_C00)
+env.Requires(output_stride_1_C00,output_stride_1_RUN)
+
+Clean(output_stride_1,
+      [Glob('#/' + test_path + '/output-stride-1*.png'),
+       'test_output-stride-1.unit',
+       '#/input/output-stride-1.in.out'])
+
+Clean(env_mv_out.RunParallel ('test_output-stride-2.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/output-stride-2.in'),
+      [Glob('#/' + test_path + '/output-stride-2.png'),
+       'test_output-stride-2.unit',
+       '#/input/output-stride-2.in.out'])
+
+Clean(env_mv_out.RunParallel ('test_output-stride-3.unit',
+		bin_path + '/enzo-p', 
+		ARGS='input/output-stride-3.in'),
+      [Glob('#/' + test_path + '/output-stride-3.png'),
+       'test_output-stride-3.unit',
+       '#/input/output-stride-3.in.out'])
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
 

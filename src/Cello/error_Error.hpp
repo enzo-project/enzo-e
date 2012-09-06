@@ -128,6 +128,12 @@
 #   define TRACE8(M,A1,A2,A3,A4,A5,A6,A7,A8)	\
   /* This space intentionally left blank */
 
+#ifdef CONFIG_USE_CHARM
+#   define TRACEPUP							\
+  /* This space intentionally left blank */
+
+#endif
+
 #endif
 
 //----------------------------------------------------------------------
@@ -180,7 +186,8 @@
   /* This space intentionally left blank */
 #   define DEBUG8(M,A1,A2,A3,A4,A5,A6,A7,A8)	\
   /* This space intentionally left blank */
-
+#   define DEBUG9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)	\
+  /* This space intentionally left blank */
 #endif
 
 //----------------------------------------------------------------------

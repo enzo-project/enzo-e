@@ -9,7 +9,9 @@
 
 #include "io.hpp"
 
+#ifdef CONFIG_USE_CHARM
 extern CProxy_SimulationCharm  proxy_simulation;
+#endif
 
 //----------------------------------------------------------------------
 
@@ -71,10 +73,7 @@ void OutputRestart::write ( const Simulation * simulation ) throw()
 
   TRACE("OutputRestart::write");
 
-#ifndef CONFIG_USE_CHARM
-  ERROR("OutputRestart::OutputRestart",
-	"Restart capability only implemented for Charm++");
-#endif
+#ifdef CONFIG_USE_CHARM
 
   // Write parameter file
 
@@ -84,9 +83,16 @@ void OutputRestart::write ( const Simulation * simulation ) throw()
 
     std::string dir_name = expand_file_name_(&dir_name_,&dir_args_);
 
-    CkCallback callback(proxy_simulation,);
+    ERROR("OutputRestart::write",
+	  "Restart not debugged yet--hangs");
+    CkCallback callback(CkIndex_SimulationCharm::s_write(),proxy_simulation);
     CkStartCheckpoint (dir_name.c_str(),callback);
   }
+#else
+
+  ERROR("OutputRestart::OutputRestart",
+	"Restart capability only implemented for Charm++");
+#endif
 
 
 }

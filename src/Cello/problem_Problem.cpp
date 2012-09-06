@@ -824,7 +824,7 @@ Output * Problem::create_output_
 
   } else if (type == "data") {
 
-    output = new OutputData (factory);
+    output = new OutputData (factory,parameters);
 
   } else if (type == "restart") {
 

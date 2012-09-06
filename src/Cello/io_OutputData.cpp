@@ -10,9 +10,29 @@
 
 //----------------------------------------------------------------------
 
-OutputData::OutputData(const Factory * factory) throw ()
+OutputData::OutputData
+(
+ const Factory * factory,
+ Parameters * parameters
+) throw ()
   : Output(factory)
 {
+  // Set process stride, with default = 1
+
+  // ASSUMES "Output : <file_group>" is current parameters group
+  // set in Problem::initialize_output()
+
+  //--------------------------------------------------
+  // parameter: Output : <file_group> : stride
+  //--------------------------------------------------
+
+  ASSERT ("OutputData::OutputData",
+	  "Output:<group_name>:process_stride",
+	  parameters->type("stride") == parameter_unknown ||
+	  parameters->type("stride") == parameter_integer);
+
+  process_stride_ = parameters->value_integer("stride",1);
+
 }
 
 //----------------------------------------------------------------------
