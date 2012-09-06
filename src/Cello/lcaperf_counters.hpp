@@ -29,6 +29,7 @@ class Counters {
   /// @brief    [\ref Lcaperf] Base class for various performance counters
 
   friend class ItCounterKeys;
+  friend class LcaPerf;
 
 public: // interface
 
