@@ -214,5 +214,9 @@ void Hierarchy::create_root_patch
      process_first, process_last_plus);
 
   patch_tree_->root_node()->set_data(root_patch);
-  DEBUG1 ("patch = %p",root_patch);
+  TRACE1 ("root_patch = %p",root_patch);
+  {  int nx,ny,nz;
+  ((Patch *)root_patch)->size(&nx,&ny,&nz);
+  }
+  TRACE3("size = %d %d %d",nx,ny,nz);
 }

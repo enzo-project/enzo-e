@@ -120,7 +120,7 @@ public: // interface
   void p_compute(int cycle, double time, double dt);
 
   /// Refresh a FieldFace
-  void p_refresh_face(int n, char buffer[],int fx, int fy, int fz);
+  void x_refresh(int n, char buffer[],int fx, int fy, int fz);
 
   /// Contribute block data to ith output object in the simulation
   void p_write (int index_output);
@@ -128,11 +128,8 @@ public: // interface
   /// Contribute block data to the Initial input object
   void p_read (int index_input = 0);
 
-  // /// Entry function after initial barrier to call refresh()
-  // void p_call_refresh();
-
   /// Entry function after prepare() to call Simulation::p_output()
-  void p_call_output(CkReductionMsg * msg);
+  void p_output(CkReductionMsg * msg);
 
   //--------------------------------------------------
 

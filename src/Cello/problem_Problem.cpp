@@ -191,9 +191,10 @@ void Problem::initialize_output
 
     } else {
 
-      ERROR2("Problem::initialize_output",
-	     "Bad type %d for 'Output : %s : name' parameter",
-	     parameters->type("name"),file_group.c_str());
+      ASSERT2("Problem::initialize_output",
+	      "Bad type %d for 'Output : %s : name' parameter",
+	      parameters->type("name"),file_group.c_str(),
+	      type == "restart");
 
     }
 
@@ -202,7 +203,7 @@ void Problem::initialize_output
     ASSERT1("Problem::initialize_output",
 	   "Output 'name' must be specified for file group %s",
 	   file_group.c_str(),
-	   file_name != "");
+	    type == "restart" || file_name != "");
 
     // Set the output object file name and arguments
 
@@ -802,7 +803,9 @@ Output * Problem::create_output_
 /// @param type          Type of Output object to create
 /// @param group_process Image output needs group process size
 { 
+
   Output * output = NULL;
+
   if (type == "image") {
 
     //--------------------------------------------------
@@ -817,15 +820,19 @@ Output * Problem::create_output_
 
     // NOTE: assumes cube for non-z axis images
 
-    int np = group_process->size();
-
-    output = new OutputImage (factory,np,nx,ny);
+    output = new OutputImage (factory,group_process->size(),nx,ny);
 
   } else if (type == "data") {
+
     output = new OutputData (factory,parameters);
+
   } else if (type == "restart") {
-    output = new OutputRestart (factory,parameters);
+
+    output = new OutputRestart (factory,parameters,group_process->size());
+
   }
+
   return output;
+
 }
 

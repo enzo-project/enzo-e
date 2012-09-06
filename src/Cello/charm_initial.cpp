@@ -21,7 +21,7 @@
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::c_initial ()
+void SimulationCharm::initial ()
 {
   problem()->initial_reset();
   problem()->initial_next(this);
@@ -75,32 +75,6 @@ void Problem::initial_next(Simulation * simulation) throw()
       //      CProxy_Patch * patch_proxy = (CProxy_Patch *)patch;
       patch_proxy->p_refresh();
     }
-  }
-}
-//----------------------------------------------------------------------
-
-void SimulationCharm::x_request_patch
-(
- int patch_id,
- int block_rank
-)
-{
-  CkChareID patch_proxy;
-  proxy_simulation[block_rank].x_send_patch(patch_id,patch_proxy);
-}
-
-//----------------------------------------------------------------------
-
-void SimulationCharm::x_send_patch
-(
- int patch_id,
- CkChareID patch_proxy
- )
-{
-  ItPatch it_patch(hierarchy_);
-  Patch * patch;
-  while (( patch = ++it_patch )) {
-     
   }
 }
 
