@@ -359,10 +359,12 @@ function summary_passed_tests ($test_output, $executables)
 
 function test_table ($file_root,$size_array, $types)
 {
+  $show_flash = 0;
   echo "<table>";
   echo "<tr>";
-    echo "<th>$file_root</th>  <th>animation</th>";
-    for ($j = 0; $j < sizeof($size_array); ++$j) {
+  echo "<th>$file_root</th>";
+  if ($show_flash) echo "<th>animation</th>";
+  for ($j = 0; $j < sizeof($size_array); ++$j) {
       $size = $size_array[$j];
       printf ("<th>$size</th>\n");
     }
@@ -372,14 +374,16 @@ function test_table ($file_root,$size_array, $types)
       $type = $types[$i];
      	printf ("<th>$type</th>\n"); 
 	// Show movie file if available
-	echo "<td>";
-         $swf_file = "$type/$file_root.swf"; 
-	 $size_last = $size_array[sizeof($size_array)-1]; 
-	 $png_file_last = "$type/$file_root-$size_last.png"; 
-	 swf_movie($swf_file, 
-     	   	  $png_file_last, 
-     	   	  160); 
-	echo "</td>";
+	if ($show_flash) {
+	  echo "<td>";
+	  $swf_file = "$type/$file_root.swf"; 
+	  $size_last = $size_array[sizeof($size_array)-1]; 
+	  $png_file_last = "$type/$file_root-$size_last.png"; 
+	  swf_movie($swf_file, 
+		    $png_file_last, 
+		    160); 
+	  echo "</td>";
+	}
 	// Show available image frames
 	for ($j = 0; $j < sizeof($size_array); ++$j) {
 	  $size = $size_array[$j];
