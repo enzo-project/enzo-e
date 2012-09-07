@@ -1,6 +1,22 @@
 ------------------------------------------------------------------------
 
-Version 0.5b4  2011-12-08
+Version 0.5b5  2012-09-06 [+344 changesets]
+
+  This is the first release in 10 months, and includes too many
+  changes to summarize.  Much of the effort has been in implementing
+  checkpoint / restart in a way that would work for both MPI and
+  Charm++; however, this was abandoned in favor of using Charm++'s
+  built-in support for checkpoint / restart, which required writing
+  about 76 "packing" functions.  This effectively makes Cello a
+  Charm++-only code rather than Charm++ and MPI, though MPI code is
+  still present.  Restart capability is still being debugged, but will
+  be available ASAP.  Innumerable other additions, bug fixes, and
+  changes have been made, including restructuring the file layout to
+  src/Cello and src/Enzo subdirectories.
+
+------------------------------------------------------------------------
+
+Version 0.5b4  2011-12-08 [+54 changesets]
 
   This update fixes a lot of errors that became apparent when testing
   on Intel and PGI compilers in addition to GNU.
@@ -25,7 +41,7 @@ Version 0.5b4  2011-12-08
 
 ------------------------------------------------------------------------
 
-Version 0.5b3  2011-10-28
+Version 0.5b3  2011-10-28 [+15 changesets]
 
   * NEW:     FINISHED PPML MHD
   * New:     added TimestepPpml
@@ -41,7 +57,7 @@ Version 0.5b3  2011-10-28
 
 ------------------------------------------------------------------------
 
-Version 0.5b2  2011-10-27
+Version 0.5b2  2011-10-27 [+18 changesets]
 
   * New:     added REVISIONS
   * Change:  modified support Triton GNU, Intel, and PGI compilers
