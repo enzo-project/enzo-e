@@ -82,11 +82,13 @@ void OutputRestart::write ( const Simulation * simulation ) throw()
   if (is_root) {
 
     std::string dir_name = expand_file_name_(&dir_name_,&dir_args_);
-
-    ERROR("OutputRestart::write",
-	  "Restart not debugged yet--hangs");
+    char dir_char[255];
+    strcpy(dir_char,dir_name.c_str());
+    // ERROR("OutputRestart::write",
+    // 	  "Restart not debugged yet--hangs");
     CkCallback callback(CkIndex_SimulationCharm::s_write(),proxy_simulation);
-    CkStartCheckpoint (dir_name.c_str(),callback);
+    
+    CkStartCheckpoint (dir_char,callback);
   }
 #else
 

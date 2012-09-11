@@ -35,7 +35,7 @@ public: // interface
     // int *& test2 = test;
     // TRACE1 ("test2 = %d",*test2);
     // Patch *& data_alias = (Patch *) data_;
-    p | *((Patch *)data_);
+    p | *((CProxy_Patch *)data_);
     TRACE0;
     p | *child_;
   };

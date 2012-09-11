@@ -414,3 +414,61 @@ void Memory::check_handle_(memory_group_handle group_handle) throw ()
 	   0 <= group_handle && group_handle <= max_group_id_);
 #endif
 }
+
+//======================================================================
+
+#ifdef CONFIG_USE_MEMORY
+
+void *operator new (size_t bytes) throw (std::bad_alloc)
+{
+  size_t p = (size_t) Memory::instance()->allocate(bytes);
+
+  // Return pointer to new storage
+
+  return (void *) p;
+}
+
+#endif /* CONFIG_USE_MEMORY */
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_MEMORY
+
+void *operator new [] (size_t bytes) throw (std::bad_alloc)
+{
+  size_t p = (size_t) Memory::instance()->allocate(bytes);
+
+  // Return pointer to new storage
+
+  return (void *)(p);
+
+}
+
+#endif /* CONFIG_USE_MEMORY */
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_MEMORY
+
+void operator delete (void *p) throw ()
+{
+  if (p==0) return;
+
+  Memory::instance()->deallocate(p);
+
+}
+
+#endif /* CONFIG_USE_MEMORY */
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_MEMORY
+
+void operator delete [] (void *p) throw ()
+{
+  if (p==0) return;
+
+  Memory::instance()->deallocate(p);
+}
+
+#endif /* CONFIG_USE_MEMORY */
