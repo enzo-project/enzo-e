@@ -571,8 +571,8 @@ test_summary("Parallel",array("GroupProcess","Layout"),
 	     array("test_GroupProcess","test_Layout")); 
 test_summary("Parameters",array("Parameters"),
 	     array("test_Parameters")); 
-test_summary("Performance",array("Papi", "Performance"),
-	     array("test_Papi","test_Performance")); 
+test_summary("Performance",array("Papi", "Performance","LcaPerf"),
+	     array("test_Papi","test_Performance","test_LcaPerf")); 
 
 
 printf ("</tr></table></br>\n");
@@ -860,6 +860,7 @@ test_group("Performance");
 
 tests("Cello","test_Performance","test_Performance","");
 tests("Cello","test_Papi",       "test_Papi","");
+tests("Cello","test_LcaPerf",    "test_LcaPerf","");
 
 /* <hr> */
 /* <h2>Mesh Tests (Prototype Code)</h2> */

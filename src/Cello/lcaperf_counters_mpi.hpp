@@ -10,8 +10,6 @@
 
 #ifdef CONFIG_USE_MPI
 
-namespace lca {
-
 class CountersMpi : public CountersUser {
 
   /// @class    CountersMpi
@@ -170,8 +168,6 @@ private: // static attributes
   static long long mpi_call_time_;
 
 };
-
-}
 
 #endif /* CONFIG_USE_MPI */
 

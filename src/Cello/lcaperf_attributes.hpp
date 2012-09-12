@@ -8,8 +8,6 @@
 #ifndef LCAPERF_ATTRIBUTES_HPP
 #define LCAPERF_ATTRIBUTES_HPP
 
-namespace lca {
-
 class Attributes {
 
   /// @class    Attributes
@@ -133,8 +131,6 @@ protected: // attributes
   std::vector<std::string>  value_;
 
 };
-
-}
 
 #endif /* LCAPERF_ATTRIBUTES_HPP */
 

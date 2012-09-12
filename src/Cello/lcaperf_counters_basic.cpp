@@ -9,8 +9,6 @@
 
 //----------------------------------------------------------------------
 
-namespace lca {
-
 enum {
   //  index_time_begin   = 0,
   //  index_time_end     = 1,
@@ -26,11 +24,11 @@ CountersBasic::CountersBasic() throw ()
     time_begin_(-1)
 {
   name_[index_time]  = "time";
-  type_[index_time]  = counter_type_relative;
+  type_[index_time]  = counters_type_relative;
   index_[name_[index_time]] = index_time;
 
   name_[index_calls] = "calls";
-  type_[index_calls] = counter_type_relative;
+  type_[index_calls] = counters_type_relative;
   index_[name_[index_calls]]= index_calls;
 }
 
@@ -111,6 +109,4 @@ void CountersBasic::update_(std::string key, long long * counters)
 }
 
 //======================================================================
-
-};
 

@@ -8,17 +8,15 @@
 #ifndef LCAPERF_COUNTERS_HPP
 #define LCAPERF_COUNTERS_HPP
 
-namespace lca {
-
 //----------------------------------------------------------------------
 
-  enum counter_enum {
-    counter_type_unknown  = 0,
-    counter_type_relative = 1,
-    counter_type_absolute = 2
+  enum counters_enum {
+    counters_type_unknown  = 0,
+    counters_type_relative = 1,
+    counters_type_absolute = 2
   };
 
-  typedef int counter_type;
+  typedef int counters_type;
 
 //----------------------------------------------------------------------
 
@@ -106,7 +104,7 @@ public: // interface
   { return name_.at(index); }
 
   /// Return the user counter type
-  counter_type type (int index) const 
+  counters_type type (int index) const 
   { return type_.at(index); }
   
 
@@ -161,7 +159,7 @@ protected: // attributes
   std::vector<std::string> name_;
 
   /// Couner types: i.e. absolute or relative
-  std::vector<counter_type> type_;
+  std::vector<counters_type> type_;
 
   /// Frame stack
   std::stack<std::string> frame_;
@@ -169,8 +167,6 @@ protected: // attributes
   /// Counters stack
   std::stack<long long *> counters_;
 };
-
-}
 
 #endif /* LCAPERF_COUNTERS_HPP */
 

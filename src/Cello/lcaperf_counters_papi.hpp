@@ -5,8 +5,6 @@
 /// @date     2011-05-23
 /// @brief    [\ref Lcaperf] Declaration of the CountersPapi class
 
-namespace lca {
-
 class CountersPapi : public CountersUser {
 
   /// @class    CountersPapi
@@ -85,8 +83,6 @@ private: // attributes
   long long vtime_begin_;
 
 };
-
-}
 
 #endif /* LCAPERF_COUNTERS_PAPI_HPP */
 

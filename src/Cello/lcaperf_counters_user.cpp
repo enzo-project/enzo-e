@@ -9,10 +9,6 @@
 
 //----------------------------------------------------------------------
 
-namespace lca {
-
-//----------------------------------------------------------------------
-
 CountersUser::CountersUser() throw ()
   : Counters(0),
     value_()
@@ -48,7 +44,7 @@ CountersUser & CountersUser::operator= (const CountersUser & counters) throw ()
 
 //======================================================================
 
-void CountersUser::create (std::string counter, counter_type type)
+void CountersUser::create (std::string counter, counters_type type)
 {
   TRACE("void CountersUser::create ");
   
@@ -162,9 +158,9 @@ void CountersUser::stop_(long long * counters)
 {
   TRACE("void CountersUser::stop_");
   for (int k=0; k<num_counters_; k++) {
-    if (type_[k] == counter_type_relative) 
+    if (type_[k] == counters_type_relative) 
       counters[k] = value_[k] - counters[k];
-    if (type_[k] == counter_type_absolute) 
+    if (type_[k] == counters_type_absolute) 
       counters[k] = value_[k];
   }
 }
@@ -184,9 +180,9 @@ void CountersUser::update_(std::string key, long long * counters)
   long long * globals = global_[key];
 
   for (int k=0; k<num_counters_; k++) {
-    if (type_[k] == counter_type_relative) 
+    if (type_[k] == counters_type_relative) 
       globals[k] += counters[k];
-    if (type_[k] == counter_type_absolute) 
+    if (type_[k] == counters_type_absolute) 
       globals[k] = counters[k];
   }  
 
@@ -196,5 +192,3 @@ void CountersUser::update_(std::string key, long long * counters)
 }
 
 //======================================================================
-
-}

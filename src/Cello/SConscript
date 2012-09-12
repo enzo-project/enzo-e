@@ -268,8 +268,12 @@ if (type == "mpi"):
 test_parameters   = env.Program ('test_Parameters.cpp',  LIBS=[libs_parameters,libs_test])
 test_parse        = env.Program ('test_Parse.cpp',       LIBS=[libs_parameters,libs_test])
 
-test_performance = env.Program('test_Performance.cpp',   LIBS=[libs_performance,libs_test])
-test_papi        = env.Program('test_Papi.cpp',          LIBS=[libs_performance,libs_test])
+test_performance = env.Program('test_Performance.cpp',  
+                               LIBS=[libs_performance,libs_test])
+test_papi        = env.Program('test_Papi.cpp',          
+                               LIBS=[libs_performance,libs_test])
+test_lcaperf     = env.Program ('test_LcaPerf.cpp',      
+                                LIBS=[libs_lcaperf, libs_test])
 
 libraries_charm   = env.Library ('charm',   sources_charm)
 libraries_disk   = env.Library ('disk',   sources_disk)
@@ -310,6 +314,7 @@ elif (type == "charm"):
 	sources_parallel.append(["main.cpp"])
 binaries_parameters = [test_parameters, test_parse]
 binaries_performance = [test_performance,test_papi]
+binaries_lcaperf     = [test_lcaperf]
 #--------------------------------------------------
 
 #------------------------------
@@ -368,6 +373,7 @@ env.Alias('install-bin',env.Install (bin_path,binaries_performance))
 env.Alias('install-inc',env.Install (inc_path,includes_performance))
 env.Alias('install-lib',env.Install (lib_path,libraries_performance))
 
+env.Alias('install-bin',env.Install (bin_path,binaries_lcaperf))
 env.Alias('install-inc',env.Install (inc_path,includes_lcaperf))
 env.Alias('install-lib',env.Install (lib_path,libraries_lcaperf))
 

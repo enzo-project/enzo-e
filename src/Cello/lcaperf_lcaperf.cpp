@@ -9,10 +9,6 @@
 
 //----------------------------------------------------------------------
 
-namespace lca {
-
-//----------------------------------------------------------------------
-
 LcaPerf::LcaPerf ()
   : attributes_(),
     counters_()
@@ -65,7 +61,7 @@ void LcaPerf::new_attribute  (const char * name, int type = 0)
 //----------------------------------------------------------------------
 
 void LcaPerf::new_counter (const char * name, 
-			   counter_type type)
+			   counters_type type)
 {
   TRACE("new_counter");
   CountersUser * counters_user = 
@@ -478,5 +474,4 @@ void LcaPerf::print ()
   if (counters_.find("basic") != counters_.end()) counters_["basic"]->clear();
   if (counters_.find("mpi") != counters_.end())   counters_["mpi"]->clear();
 
-}
 }

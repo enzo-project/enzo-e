@@ -47,8 +47,8 @@ public: // interface
     p | timer_;
     p | papi_;
     WARNING("Performance::pup",
-	    "std::vector<Counters *> counters_ not pup'ed");
-  //  std::vector<Counters *> counters_;
+	    "std::vector<PerfCounters *> counters_ not pup'ed");
+  //  std::vector<PerfCounters *> counters_;
     p | attribute_names_;
     p | counter_names_;
     p | group_names_;
@@ -188,7 +188,7 @@ private: // attributes
   Papi papi_;
 
   /// Array of counters for regions
-  std::vector<Counters *> counters_;
+  std::vector<PerfCounters *> counters_;
 
   /// Attribute names
   std::vector<std::string> attribute_names_;

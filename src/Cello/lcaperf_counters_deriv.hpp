@@ -9,8 +9,6 @@
 #ifndef LCAPERF_COUNTERS_DERIV_HPP
 #define LCAPERF_COUNTERS_DERIV_HPP
 
-namespace lca {
-
 class CountersDeriv : public CountersUser {
 
   /// @class    CountersDeriv
@@ -43,8 +41,6 @@ public: // interface
 private: // attributes
 
 };
-
-}
 
 #endif /* LCAPERF_COUNTERS_DERIV_HPP */
 

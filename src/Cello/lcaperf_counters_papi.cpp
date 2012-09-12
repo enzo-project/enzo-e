@@ -9,8 +9,6 @@
 
 #ifdef CONFIG_USE_PAPI
 
-namespace lca {
-
 const char * papi_counter_name[] = {
   "PAPI_FP_OPS",
 };
@@ -24,10 +22,10 @@ CountersPapi::CountersPapi() throw ()
   papi_counters_(NULL),
   vtime_begin_(0)
 {
-  create("papi-vtime-begin",  counter_type_absolute);
-  create("papi-vtime-end",    counter_type_absolute);
-  create("papi-vtime-active", counter_type_relative);
-  create("papi-fp-ops",       counter_type_relative);
+  create("papi-vtime-begin",  counters_type_absolute);
+  create("papi-vtime-end",    counters_type_absolute);
+  create("papi-vtime-active", counters_type_relative);
+  create("papi-fp-ops",       counters_type_relative);
 
   // Initialize the PAPI library
 
@@ -338,5 +336,4 @@ void CountersPapi::papi_read_counters_ ()
   }
 }
 
-}
 #endif

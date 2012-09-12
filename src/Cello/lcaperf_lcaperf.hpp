@@ -11,8 +11,6 @@
 
 //----------------------------------------------------------------------
 
-namespace lca {
-
 class LcaPerf {
 
  public: // functions
@@ -53,7 +51,7 @@ class LcaPerf {
 
   /// Create a new counter of the given type
   void new_counter  (const char *      counter_name,
-		     counter_type counter_type);
+		     counters_type counter_type);
 
   /// Increment the given user counter
   void increment (const char * counter_name,
@@ -111,7 +109,5 @@ class LcaPerf {
   std::vector<std::string> regions_;
 
 };
-
-}
 
 #endif

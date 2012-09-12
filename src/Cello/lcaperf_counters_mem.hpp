@@ -9,8 +9,6 @@
 #ifndef LCAPERF_COUNTERS_MEM_HPP
 #define LCAPERF_COUNTERS_MEM_HPP
 
-namespace lca {
-
 class CountersMem : public CountersUser {
 
   /// @class    CountersMem
@@ -78,8 +76,6 @@ private: // attributes
   static long long del_bytes_;
 
 };
-
-}
 
 #endif /* LCAPERF_COUNTERS_MEM_HPP */
 

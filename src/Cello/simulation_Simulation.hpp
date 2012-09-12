@@ -88,7 +88,7 @@ public: // interface
     p | * problem_;
     p | * performance_simulation_;
     p | * performance_cycle_;
-    p | * lcaperf_;
+    p | lcaperf_;
     p | * performance_curr_;
     p | num_perf_;
     PUParray(p,perf_val_,num_perf_);
@@ -125,8 +125,8 @@ public: // interface
   { return performance_cycle_; }
 
   /// Return a pointer to the lcaperf object
-  lca::LcaPerf * lcaperf()
-  { return lcaperf_; }
+  LcaPerf * lcaperf()
+  { return & lcaperf_; }
 
   /// Return the performance object associated with the entire simulation
   Performance * performance_simulation() const throw()
@@ -263,7 +263,7 @@ protected: // attributes
   Performance * performance_cycle_;
 
   /// Lcaperf
-  lca::LcaPerf * lcaperf_;
+  LcaPerf lcaperf_;
 
   /// Current Performance object
   /// Used primarily for CHARM++ 

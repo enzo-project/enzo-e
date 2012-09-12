@@ -1,24 +1,24 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     performance_Counters.hpp
+/// @file     performance_PerfCounters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-19 12:55:54
-/// @brief    [\ref Performance] Interface for the Counters class
+/// @brief    [\ref Performance] Interface for the PerfCounters class
 
 #ifndef PERFORMANCE_COUNTERS_HPP
 #define PERFORMANCE_COUNTERS_HPP
 
-class Counters {
+class PerfCounters {
 
-  /// @class    Counters
+  /// @class    PerfCounters
   /// @ingroup  Performance
   /// @brief    [\ref Performance] Represent counter values for a single
   /// set of attributes
 
 public: // interface
 
-  /// Initialize a Counters object
-  Counters(size_t num_attributes, size_t num_counters)
+  /// Initialize a PerfCounters object
+  PerfCounters(size_t num_attributes, size_t num_counters)
     : num_attributes_(num_attributes),
       num_counters_(num_counters)
     {
@@ -32,7 +32,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Destructor
-  ~Counters()
+  ~PerfCounters()
     {
       delete [] attributes_;
       delete [] counters_start_;
@@ -40,7 +40,7 @@ public: // interface
     }
 
   /// Copy constructor
-  Counters(const Counters & classname) throw()
+  PerfCounters(const PerfCounters & classname) throw()
   {
   }
 

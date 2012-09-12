@@ -26,7 +26,7 @@ EnzoSimulationCharm::EnzoSimulationCharm
   : SimulationCharm(parameter_file, n)
 {
 
-  monitor_->set_active(true);
+  //  monitor_->set_active(true);
   problem_ = new EnzoProblem;
 
 // #ifdef CONFIG_USE_PROJECTIONS

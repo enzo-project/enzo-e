@@ -9,10 +9,6 @@
 
 //----------------------------------------------------------------------
 
-namespace lca {
-
-//----------------------------------------------------------------------
-
 ItCounterKeys::ItCounterKeys ( Counters * counters ) throw ()
   : counters_(counters),
     iter_(counters->global_.begin()),
@@ -53,5 +49,4 @@ bool ItCounterKeys::done () const throw()
 long long * ItCounterKeys::value () const throw()
 {
   return value_;
-}
 }

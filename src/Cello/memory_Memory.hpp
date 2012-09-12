@@ -37,7 +37,8 @@ public: // interface
 
 private: // interface
   /// Create the (single) Memory object (singleton design pattern)
-  Memory() throw () { initialize_(); };
+  Memory() throw () : is_active_(false)
+  { initialize_(); };
 
   /// Copy the (single) Memory object (singleton design pattern)
   Memory (const Memory &);
@@ -111,6 +112,9 @@ public: // interface
 #else
   { } ;
 #endif
+
+  bool is_active () const throw()
+  { return is_active_; }
 
   /// Set whether to fill memory with a value after allocating
   void set_allocate_fill (bool do_fill, char fill_value = 0)

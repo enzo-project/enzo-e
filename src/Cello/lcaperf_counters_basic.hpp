@@ -9,8 +9,6 @@
 #ifndef LCAPERF_COUNTERS_BASIC_HPP
 #define LCAPERF_COUNTERS_BASIC_HPP
 
-namespace lca {
-
 class CountersBasic : public Counters {
 
   /// @class    CountersBasic
@@ -74,8 +72,6 @@ private: // functions
   };
 
 };
-
-}
 
 #endif /* LCAPERF_COUNTERS_BASIC_HPP */
 

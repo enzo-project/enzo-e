@@ -113,6 +113,7 @@ Clean(env_mv_test.RunSerial
 #----------------------------------------------------------------------
 env.RunSerial('test_Performance.unit', bin_path + '/test_Performance')
 env.RunSerial('test_Papi.unit',        bin_path + '/test_Papi')
+env.RunSerial('test_LcaPerf.unit',     bin_path + '/test_LcaPerf')
 #----------------------------------------------------------------------
 # PORTAL COMPONENT        
 #----------------------------------------------------------------------

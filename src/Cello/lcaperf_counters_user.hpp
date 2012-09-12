@@ -8,8 +8,6 @@
 #ifndef LCAPERF_COUNTERS_USER_HPP
 #define LCAPERF_COUNTERS_USER_HPP
 
-namespace lca {
-
 class CountersUser : public Counters {
 
   /// @class    CountersUser
@@ -49,7 +47,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Create a new counter
-  void create (std::string counter, counter_type type);
+  void create (std::string counter, counters_type type);
 
   /// Delete a counter
   void remove (std::string counter);
@@ -83,8 +81,6 @@ private: // attributes
   std::vector<long long> value_;
 
 };
-
-}
 
 #endif /* LCAPERF_COUNTERS_HPP */
 

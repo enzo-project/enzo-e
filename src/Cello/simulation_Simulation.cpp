@@ -70,13 +70,13 @@ Simulation::Simulation
   performance_cycle_      = new Performance;
 
 
-  lcaperf_ = new lca::LcaPerf;
+  //  lcaperf_ = new lca::LcaPerf;
 
-  lcaperf_->initialize();
-  lcaperf_->begin();
-  lcaperf_->new_region("simulation");
-  lcaperf_->new_attribute("cycle",LCAP_INT);
-  lcaperf_->new_attribute("level",LCAP_INT);
+  lcaperf_.initialize();
+  lcaperf_.begin();
+  lcaperf_.new_region("simulation");
+  lcaperf_.new_attribute("cycle",LCAP_INT);
+  lcaperf_.new_attribute("level",LCAP_INT);
 
   parameters_ = new Parameters(parameter_file,monitor_);
 }
@@ -136,9 +136,9 @@ void Simulation::initialize() throw()
 void Simulation::finalize() throw()
 {
   DEBUG0;
-  lcaperf_->stop("simulation");
-  lcaperf_->print();
-  lcaperf_->end();
+  lcaperf_.stop("simulation");
+  lcaperf_.print();
+  lcaperf_.end();
 
   performance_simulation_->stop();
   performance_cycle_->stop();
@@ -149,9 +149,9 @@ void Simulation::finalize() throw()
 void Simulation::initialize_simulation_() throw()
 {
 
-  lcaperf_->attribute("cycle",&cycle_,LCAP_INT);
-  lcaperf_->attribute("level",&level_,LCAP_INT);
-  lcaperf_->start("simulation");
+  lcaperf_.attribute("cycle",&cycle_,LCAP_INT);
+  lcaperf_.attribute("level",&level_,LCAP_INT);
+  lcaperf_.start("simulation");
   performance_simulation_->start();
   performance_cycle_->start();
 
@@ -444,7 +444,7 @@ void Simulation::deallocate_() throw()
   delete parameters_;    parameters_  = 0;
   delete performance_simulation_; performance_simulation_ = 0;
   delete performance_cycle_;      performance_cycle_ = 0;
-  delete lcaperf_; lcaperf_ = 0;
+  //  delete lcaperf_; lcaperf_ = 0;
   delete [] perf_val_;
   delete [] perf_min_;
   delete [] perf_max_;
@@ -504,16 +504,14 @@ void Simulation::monitor_output()
   monitor_-> print("Simulation", "time-sim %15.12f",time_);
   monitor_-> print("Simulation", "dt %15.12g", dt_);
 
-#ifdef CONFIG_USE_MEMORY
-
   Memory * memory = Memory::instance();
 
-  monitor_->print("Memory","bytes-curr %lld", memory->bytes());
-  monitor_->print("Memory","bytes-high %lld", memory->bytes_high());
+  if (memory->is_active()) {
+    monitor_->print("Memory","bytes-curr %lld", memory->bytes());
+    monitor_->print("Memory","bytes-high %lld", memory->bytes_high());
 
-  memory->reset_high();
-
-#endif
+    memory->reset_high();
+  }
 
   if (config_performance) {
     performance_output(performance_cycle_);
@@ -530,12 +528,12 @@ void Simulation::monitor_output()
 
 void Simulation::performance_output(Performance * performance)
 {
-  lcaperf_->print();
-  lcaperf_->stop("simulation");
+  lcaperf_.print();
+  lcaperf_.stop("simulation");
 
 
-  lcaperf_->attribute("cycle",&cycle_,LCAP_INT);
-  lcaperf_->start("simulation");
+  lcaperf_.attribute("cycle",&cycle_,LCAP_INT);
+  lcaperf_.start("simulation");
   performance_curr_ = performance;
 
   size_t i = 0;

@@ -19,7 +19,7 @@ Performance::Performance ()
     current_group_       (0),
     current_region_      (0)
 {
-  counters_.push_back(new Counters(num_attributes,num_counters));
+  counters_.push_back(new PerfCounters(num_attributes,num_counters));
 }
 
 //----------------------------------------------------------------------
@@ -44,20 +44,6 @@ void Performance::stop () throw ()
   timer_.stop();
   papi_.stop();
 }
-
-//----------------------------------------------------------------------
-
-// void Performance::print (const Monitor * monitor) const throw ()
-// {
-// #ifdef CONFIG_USE_MEMORY
-//   Memory::instance()->print();
-// #endif
-//   timer_.print();
-// #ifdef CONFIG_USE_PAPI
-//   papi_.print();
-// #endif
-//   print_rusage_(monitor);
-// }
 
 //----------------------------------------------------------------------
 

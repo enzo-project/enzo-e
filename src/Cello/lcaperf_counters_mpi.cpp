@@ -9,8 +9,6 @@
 
 #ifdef CONFIG_USE_MPI
 
-namespace lca {
-
 double CountersMpi::mpi_time_start_ = 0;
 long long CountersMpi::mpi_call_time_ = 0;
 
@@ -38,17 +36,17 @@ CountersMpi::CountersMpi() throw ()
     ip_node_(-1),
     np_node_(-1)
 {
-  create("mpi-time",       counter_type_relative);
-  create("mpi-calls",      counter_type_relative);
-  create("mpi-send-time",  counter_type_relative);
-  create("mpi-send-bytes", counter_type_relative);
-  create("mpi-send-calls", counter_type_relative);
-  create("mpi-recv-time",  counter_type_relative);
-  create("mpi-recv-bytes", counter_type_relative);
-  create("mpi-recv-calls", counter_type_relative);
-  create("mpi-sync-time",  counter_type_relative);
-  create("mpi-sync-procs", counter_type_relative);
-  create("mpi-sync-calls", counter_type_relative);
+  create("mpi-time",       counters_type_relative);
+  create("mpi-calls",      counters_type_relative);
+  create("mpi-send-time",  counters_type_relative);
+  create("mpi-send-bytes", counters_type_relative);
+  create("mpi-send-calls", counters_type_relative);
+  create("mpi-recv-time",  counters_type_relative);
+  create("mpi-recv-bytes", counters_type_relative);
+  create("mpi-recv-calls", counters_type_relative);
+  create("mpi-sync-time",  counters_type_relative);
+  create("mpi-sync-procs", counters_type_relative);
+  create("mpi-sync-calls", counters_type_relative);
 }
 
 //----------------------------------------------------------------------
@@ -768,7 +766,6 @@ int MPI_Exscan(void *sendb, void *br, int n, MPI_Datatype datatype,
   fprintf (stderr,"WARNING: MPI_Exscan not traced\n");
   int result = MPI_Exscan(sendb,br,n,datatype,op,comm);
   return result;
-}
 }
 #endif
 

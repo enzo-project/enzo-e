@@ -8,8 +8,6 @@
 #ifndef LCAPERF_IT_COUNTER_KEYS_HPP
 #define LCAPERF_IT_COUNTER_KEYS_HPP
 
-namespace lca {
-
 class ItCounterKeys {
 
   /// @class    ItCounterKeys
@@ -58,7 +56,5 @@ private: // attributes
   /// Copy of counter value array for value()
   long long * value_;
 };
-
-}
 
 #endif

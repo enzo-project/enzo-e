@@ -9,10 +9,6 @@
 
 //----------------------------------------------------------------------
 
-namespace lca {
-
-//----------------------------------------------------------------------
-
 Counters::Counters(int num_counters) throw ()
   : num_counters_(num_counters),
     is_tracing_active_(false),
@@ -373,7 +369,6 @@ std::string Counters::merge_keys_ (std::string key_1, std::string key_2) const
 // {
 //   return value_;
 // }
-}
 
 
 
