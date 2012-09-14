@@ -22,14 +22,14 @@ class SimulationCharm : public Simulation
 public: // functions
 
   /// CHARM++ Constructor
-  SimulationCharm() {}
-
-  /// CHARM++ Constructor
   SimulationCharm
   ( const char parameter_file[], int n) throw();
 
   /// Destructor
   ~SimulationCharm() throw();
+
+  /// CHARM++ Constructor
+  SimulationCharm() {}
 
   /// CHARM++ Migration constructor
   SimulationCharm(CkMigrateMessage*)
@@ -66,8 +66,8 @@ public: // functions
   /// proceed with next output
   void p_output_write (int n, char * buffer);
 
-  /// Wait for all local patches to check in before proceeding
-  void s_patch(CkCallback function);
+  // /// Wait for all local patches to check in before proceeding
+  // void s_patch(CkCallback function);
 
   /// Wait for all local patches to check in before proceeding to refresh
   void s_initial();

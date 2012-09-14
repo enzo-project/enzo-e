@@ -115,10 +115,10 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("LcaPerf");
 
-  LcaPerf * lcaperf = new LcaPerf;
+  LcaPerf * lcaperf = new LcaPerf(0,1);
 
   
-  lcaperf->initialize("out.lcaperf");
+  lcaperf->initialize();
 
 
   // Initialize arrays

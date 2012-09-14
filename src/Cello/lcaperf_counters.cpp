@@ -34,6 +34,7 @@ Counters::~Counters() throw ()
   for (iter_global=global_.begin(); iter_global!=global_.end(); ++iter_global) {
     delete [] iter_global->second;
   }
+  TRACE("clear()");
   global_.clear();
   // delete key counters
   while (! counters_.empty()) {
@@ -101,6 +102,7 @@ void Counters::end ()
   for (iter_global=global_.begin(); iter_global!=global_.end(); ++iter_global) {
     delete [] iter_global->second;
   }
+  TRACE("clear()");
   global_.clear();
 
 }
@@ -216,7 +218,7 @@ long long Counters::value (std::string key, std::string counter)
 
 void Counters::clear ()
 {
-  TRACE("void Counters::clear");
+  TRACE1("void Counters::clear size = %d",counters_.size());
   bool error = false;
   if (counters_.size() > 0) {
     int size = counters_.size();

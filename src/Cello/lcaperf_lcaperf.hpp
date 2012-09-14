@@ -16,7 +16,7 @@ class LcaPerf {
  public: // functions
 
   /// LcaPerf constructor
-  LcaPerf();
+  LcaPerf(int ip=0, int np=1);
 
   /// LcaPerf destructor
   ~LcaPerf();
@@ -25,6 +25,7 @@ class LcaPerf {
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    p | ip_;
     // NOTE: change this function whenever attributes change
     p |  attributes_;
     WARNING("Lcaperf::pup",
@@ -65,7 +66,7 @@ class LcaPerf {
   void delete_counter (const char * counter_name);
 
   /// Initialize lcaperf
-  void initialize (const char * filename = 0);
+  void initialize ();
 
   /// Finalize lcaperf
   void finalize ();
@@ -98,6 +99,12 @@ class LcaPerf {
   //----------------------------------------------------------------------
 
  protected: // attributes
+
+  /// Process rank
+  int ip_;
+
+  /// Process count
+  int np_;
 
   /// Attributes object
   Attributes     attributes_;

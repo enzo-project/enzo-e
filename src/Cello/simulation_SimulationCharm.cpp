@@ -59,12 +59,12 @@ void SimulationCharm::s_initialize()
   if (patch_loop_.done()) run();
 }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-void SimulationCharm::s_patch(CkCallback callback)
-{
-  if (patch_loop_.done()) callback.send();
-}
+// void SimulationCharm::s_patch(CkCallback callback)
+// {
+//   if (patch_loop_.done()) callback.send();
+// }
 
 //----------------------------------------------------------------------
 

@@ -54,11 +54,11 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Initialize an empty Simulation
-  Simulation();
+   /// Initialize an empty Simulation
+   Simulation();
 
-  /// Initialize a migrated Simulation
-  Simulation (CkMigrateMessage *m);
+   /// Initialize a migrated Simulation
+   Simulation (CkMigrateMessage *m);
 
 #endif
 
@@ -88,7 +88,7 @@ public: // interface
     p | * problem_;
     p | * performance_simulation_;
     p | * performance_cycle_;
-    p | lcaperf_;
+    p | * lcaperf_;
     p | * performance_curr_;
     p | num_perf_;
     PUParray(p,perf_val_,num_perf_);
@@ -126,7 +126,7 @@ public: // interface
 
   /// Return a pointer to the lcaperf object
   LcaPerf * lcaperf()
-  { return & lcaperf_; }
+  { return lcaperf_; }
 
   /// Return the performance object associated with the entire simulation
   Performance * performance_simulation() const throw()
@@ -164,8 +164,8 @@ public: // interface
 
 public: // virtual functions
 
-  /// Update Simulation cycle, time, timestep, and stopping criteria
-  virtual void update_cycle(int cycle, double time, double dt, double stop) ;
+  /// Update Simulation state, including cycle, time, timestep, and stopping criteria
+  virtual void update_state(int cycle, double time, double dt, double stop) ;
 
   /// initialize the Simulation given a parameter file
   virtual void initialize() throw();
@@ -226,7 +226,7 @@ protected: // attributes
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Loop counter for s_patch() synchronization
+  /// Loop counter for synchronization after patch operations
   Loop patch_loop_;
 
 #endif
@@ -262,12 +262,12 @@ protected: // attributes
   /// Cycle Performance object
   Performance * performance_cycle_;
 
-  /// Lcaperf
-  LcaPerf lcaperf_;
-
   /// Current Performance object
   /// Used primarily for CHARM++ 
   Performance * performance_curr_;
+
+  /// Lcaperf
+  LcaPerf * lcaperf_;
 
   /// Arrays for storing local performance data to be reduced
   /// Used for multiple CHARM++ reductions

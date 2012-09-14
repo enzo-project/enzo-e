@@ -40,6 +40,7 @@ Simulation::Simulation
   performance_simulation_(0),
   performance_cycle_(0),
   performance_curr_(0),
+  lcaperf_(0),
   monitor_(0),
   hierarchy_(0),
   field_descr_(0)
@@ -70,13 +71,15 @@ Simulation::Simulation
   performance_cycle_      = new Performance;
 
 
-  //  lcaperf_ = new lca::LcaPerf;
+  lcaperf_ = new LcaPerf (group_process_->rank(), group_process_->size());
 
-  lcaperf_.initialize();
-  lcaperf_.begin();
-  lcaperf_.new_region("simulation");
-  lcaperf_.new_attribute("cycle",LCAP_INT);
-  lcaperf_.new_attribute("level",LCAP_INT);
+  lcaperf_->initialize();
+
+  lcaperf_->new_region("simulation");
+  lcaperf_->new_attribute("cycle",LCAP_INT);
+  lcaperf_->new_attribute("level",LCAP_INT);
+
+  lcaperf_->begin();
 
   parameters_ = new Parameters(parameter_file,monitor_);
 }
@@ -86,7 +89,8 @@ Simulation::Simulation
 #ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation()
-  : patch_loop_(0)
+  : patch_loop_(0),
+    lcaperf_(0)
 { TRACE("Simulation()"); }
 
 #endif
@@ -96,7 +100,8 @@ Simulation::Simulation()
 #ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation (CkMigrateMessage *m)
-  : patch_loop_(0)
+  : patch_loop_(0),
+    lcaperf_(0)
 { TRACE("Simulation(CkMigrateMessage)"); }
 
 #endif
@@ -136,9 +141,10 @@ void Simulation::initialize() throw()
 void Simulation::finalize() throw()
 {
   DEBUG0;
-  lcaperf_.stop("simulation");
-  lcaperf_.print();
-  lcaperf_.end();
+
+  lcaperf_->stop("simulation");
+  lcaperf_->end();
+  lcaperf_->finalize();
 
   performance_simulation_->stop();
   performance_cycle_->stop();
@@ -148,12 +154,6 @@ void Simulation::finalize() throw()
 
 void Simulation::initialize_simulation_() throw()
 {
-
-  lcaperf_.attribute("cycle",&cycle_,LCAP_INT);
-  lcaperf_.attribute("level",&level_,LCAP_INT);
-  lcaperf_.start("simulation");
-  performance_simulation_->start();
-  performance_cycle_->start();
 
   //--------------------------------------------------
   // parameter: Mesh    : root_rank
@@ -174,6 +174,16 @@ void Simulation::initialize_simulation_() throw()
   cycle_ = parameters_->value_integer("Initial:cycle",0);
   time_  = parameters_->value_float  ("Initial:time",0);
   dt_ = 0;
+
+  // Initialize Performance
+
+  lcaperf_->attribute("cycle",&cycle_,LCAP_INT);
+  lcaperf_->attribute("level",&level_,LCAP_INT);
+  lcaperf_->start("simulation");
+
+  performance_simulation_->start();
+  performance_cycle_->start();
+
 }
 
 //----------------------------------------------------------------------
@@ -444,7 +454,7 @@ void Simulation::deallocate_() throw()
   delete parameters_;    parameters_  = 0;
   delete performance_simulation_; performance_simulation_ = 0;
   delete performance_cycle_;      performance_cycle_ = 0;
-  //  delete lcaperf_; lcaperf_ = 0;
+  delete lcaperf_; lcaperf_ = 0;
   delete [] perf_val_;
   delete [] perf_min_;
   delete [] perf_max_;
@@ -482,9 +492,9 @@ const Factory * Simulation::factory() const throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::update_cycle(int cycle, double time, double dt, double stop) 
+void Simulation::update_state(int cycle, double time, double dt, double stop) 
 {
-  DEBUG4 ("Simulation::update_cycle cycle %d time %f dt %f stop %f",
+  DEBUG4 ("Simulation::update_state cycle %d time %f dt %f stop %f",
 	  cycle,time,dt,stop);
  
   cycle_ = cycle;
@@ -528,12 +538,11 @@ void Simulation::monitor_output()
 
 void Simulation::performance_output(Performance * performance)
 {
-  lcaperf_.print();
-  lcaperf_.stop("simulation");
+  lcaperf_->stop("simulation");
+  lcaperf_->print();
+  lcaperf_->attribute("cycle",&cycle_,LCAP_INT);
+  lcaperf_->start("simulation");
 
-
-  lcaperf_.attribute("cycle",&cycle_,LCAP_INT);
-  lcaperf_.start("simulation");
   performance_curr_ = performance;
 
   size_t i = 0;

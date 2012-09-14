@@ -9,8 +9,10 @@
 
 //----------------------------------------------------------------------
 
-LcaPerf::LcaPerf ()
-  : attributes_(),
+LcaPerf::LcaPerf (int ip, int np)
+  : ip_(ip),
+    np_(np),
+    attributes_(),
     counters_()
 {
   TRACE("lcaPerf");
@@ -101,23 +103,11 @@ void LcaPerf::delete_counter (const char * name)
 
 //----------------------------------------------------------------------
 
-void LcaPerf::initialize (const char * filename)
+void LcaPerf::initialize ()
 {
   TRACE("initialize");
-  // Print header (only on root process)
 
-  int ip = 0;
-
-#ifdef CONFIG_USE_MPI
-  int init_called = 0;
-  MPI_Initialized (&init_called);
-  if (init_called) {
-    MPI_Comm_rank(MPI_COMM_WORLD,&ip);
-  }
-#endif
-
-  // Display header
-  if (ip == 0) {
+  if (ip_ == 0) {
     printf ("---------------------------\n");
     printf ("lcaperf: Version %d.%d\n",LCAP_VERSION_MAJOR,LCAP_VERSION_MINOR);
     printf ("lcaperf: Copyright 2011, James Bordner and the Regents of the\n");
@@ -144,16 +134,6 @@ void LcaPerf::finalize ()
 void LcaPerf::begin ()
 {
   TRACE("begin");
-// #ifdef CONFIG_USE_MPI
-//   // Define mpi-size and mpi-rank attributes
-//   int ip,np;
-//   MPI_Comm_size (MPI_COMM_WORLD,&np);
-//   MPI_Comm_rank (MPI_COMM_WORLD,&ip);
-//   new_attribute("mpi-size");
-//   new_attribute("mpi-rank");
-//   attribute("mpi-size",&np, LCAP_INT);
-//   attribute("mpi-rank",&ip, LCAP_INT);
-// #endif
 
   std::map<std::string,Counters *>::iterator iter;
   
@@ -306,11 +286,6 @@ void LcaPerf::print ()
   // Get comm size, required for computing average times etc. over all
   // processes
 
-  int np = 1;
-#ifdef USE_MPI
-  MPI_Comm_size(MPI_COMM_WORLD,&np);
-#endif
-
   int         cycle_index  = attributes_.index("cycle");
   std::string cycle_value  = attributes_.value(cycle_index);
   int         level_index  = attributes_.index("level");
@@ -354,7 +329,8 @@ void LcaPerf::print ()
     // TOTAL TIME
     //--------------------------------------------------
 
-    // Loop over keys in the Counters object to sum counters over levels
+    // A @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 
+    // A REFACTOR: duplicate code between A and B
 
     counter_array_reduce[i_avg] = 0;
     counter_array_reduce[i_max] = 0;
@@ -362,32 +338,31 @@ void LcaPerf::print ()
     ItCounterKeys itKeysBasic (counters_["basic"]);
     int i_time = counters_["basic"]->index("time");
 
-    DEBUG0;
-
+    // A                         @@@@@@@@@@@
     while (const char * key = ++itKeysBasic) {
-
-      DEBUG0;
-
+      // A                       @@@@@@@@@@@
+      
       // Select matching keys
 
-      DEBUG2 ("key = %s  region_key = %s",key,region_key.c_str());
       bool keys_match = attributes_.keys_match(key,region_key);
 
       if (keys_match) {
- 	// Get array of counters
+	// A                         @@@@@@@@@@@
  	long long * counter_array = itKeysBasic.value();
- 	// Sum over levels
+	// A                         @@@@@@@@@@@
  	counter_array_reduce[i_avg] += counter_array[i_time];
  	counter_array_reduce[i_max] += counter_array[i_time];
       }
     }
 
-#ifdef USE_MPI
-    MPI_Allreduce (MPI_IN_PLACE,&counter_array_reduce[i_avg],1,MPI_LONG_LONG,
- 		   MPI_SUM,MPI_COMM_WORLD);
-    MPI_Allreduce (MPI_IN_PLACE,&counter_array_reduce[i_max],1,MPI_LONG_LONG,
- 		   MPI_MAX,MPI_COMM_WORLD);
-#endif
+    WARNING("LcaPerf::print()",
+	    "Parallel reduction not performed");
+// #ifdef USE_MPI
+//     MPI_Allreduce (MPI_IN_PLACE,&counter_array_reduce[i_avg],1,MPI_LONG_LONG,
+//  		   MPI_SUM,MPI_COMM_WORLD);
+//     MPI_Allreduce (MPI_IN_PLACE,&counter_array_reduce[i_max],1,MPI_LONG_LONG,
+//  		   MPI_MAX,MPI_COMM_WORLD);
+// #endif
 
     time_avg = 0.0;
     time_eff = 1.0;
@@ -396,14 +371,15 @@ void LcaPerf::print ()
 
       empty = false;
 
-      time_avg = 1e-6*counter_array_reduce[i_avg]/np;
+      time_avg = 1e-6*counter_array_reduce[i_avg]/np_;
       time_max = 1e-6*counter_array_reduce[i_max];
-      time_eff = time_avg / time_max;
+      time_eff = time_max ? (time_avg / time_max) : 1.0;
     }
 
-    sprintf (field, "%06.2f %5.4f   ",time_avg,time_eff);
+    sprintf (field, "%6.4f %6.4f   ",time_avg,time_eff);
 
     line = line + field;
+    // A @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
     //--------------------------------------------------
     // MPI TIME
@@ -411,35 +387,41 @@ void LcaPerf::print ()
 
     if (counters_.find("mpi") != counters_.end()) {
 
+      // B @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 
+      // B REFACTOR: duplicate code between A and B
+      
       counter_array_reduce[i_avg] = 0;
       counter_array_reduce[i_max] = 0;
 
       ItCounterKeys itKeysMpi (counters_["mpi"]);
       i_time = counters_["mpi"]->index("mpi-time");
 
-	DEBUG0;
+      // B                         @@@@@@@@@
       while (const char * key = ++itKeysMpi) {
-	DEBUG0;
+	// B                       @@@@@@@@@
 
 	// Select matching keys
 
 	bool keys_match = attributes_.keys_match(key,region_key);
 
 	if (keys_match) {
-	  // Get array of counters
+	  // B                         @@@@@@@@@
 	  long long * counter_array = itKeysMpi.value();
-	  // Sum over levels
+	  // B                         @@@@@@@@@
 	  counter_array_reduce[i_avg] += counter_array[i_time];
 	  counter_array_reduce[i_max] += counter_array[i_time];
 	}
       }
 
-#ifdef USE_MPI
-      MPI_Allreduce (MPI_IN_PLACE,&counter_array_reduce[i_avg],1,MPI_LONG_LONG,
-		     MPI_SUM,MPI_COMM_WORLD);
-      MPI_Allreduce (MPI_IN_PLACE,&counter_array_reduce[i_max],1,MPI_LONG_LONG,
-		     MPI_MAX,MPI_COMM_WORLD);
-#endif
+    WARNING("LcaPerf::print()",
+	    "Parallel reduction not performed");
+
+// #ifdef USE_MPI
+//       MPI_Allreduce (MPI_IN_PLACE,&counter_array_reduce[i_avg],1,MPI_LONG_LONG,
+// 		     MPI_SUM,MPI_COMM_WORLD);
+//       MPI_Allreduce (MPI_IN_PLACE,&counter_array_reduce[i_max],1,MPI_LONG_LONG,
+// 		     MPI_MAX,MPI_COMM_WORLD);
+// #endif
 
       time_avg = 0.0;
       time_eff = 1.0;
@@ -448,15 +430,16 @@ void LcaPerf::print ()
 
 	empty = false;
 
-	time_avg = 1e-6*counter_array_reduce[i_avg]/np;
+	time_avg = 1e-6*counter_array_reduce[i_avg]/np_;
 	time_max = 1e-6*counter_array_reduce[i_max];
 	time_eff = time_max ? (time_avg / time_max) : 1.0;
 
       }
 
-      sprintf (field, "%06.2f %5.4f   ",time_avg,time_eff);
+      sprintf (field, "%6.4f %6.4f   ",time_avg,time_eff);
 
       line = line + field;
+      // B @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     }
 
     if (! empty) {
