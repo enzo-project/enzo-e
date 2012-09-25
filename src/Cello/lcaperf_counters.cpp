@@ -5,6 +5,8 @@
 /// @date     2012-05-19
 /// @brief    Implementation of the Counters abstract base class
 
+#include "cello.hpp"
+
 #include "lcaperf.hpp"
 
 //----------------------------------------------------------------------

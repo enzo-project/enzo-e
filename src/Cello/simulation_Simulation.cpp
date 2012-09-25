@@ -301,6 +301,11 @@ void Simulation::initialize_data_descr_() throw()
 
   int alignment = parameters_->value_integer("Field:alignment",8);
 
+  ASSERT1 ("Simulation::initialize_data_descr_",
+	  "Illegal Field:alignment parameter value %d",
+	   alignment,
+	   1 <= alignment );
+	  
   field_descr_->set_alignment (alignment);
   
   //--------------------------------------------------

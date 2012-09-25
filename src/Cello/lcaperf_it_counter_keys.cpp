@@ -5,6 +5,8 @@
 /// @date     2011-05-19
 /// @brief    Implementation of the ItCounterKeys abstract base class
 
+#include "cello.hpp"
+
 #include "lcaperf.hpp"
 
 //----------------------------------------------------------------------

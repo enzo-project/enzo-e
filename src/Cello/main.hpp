@@ -58,7 +58,22 @@ public:
 
   /// Initialize the Main chare (defined in the calling program)
   Main(CkArgMsg* main);
-  
+
+  /// Migration constructor
+  Main(CkMigrateMessage * m)
+  { 
+    TRACE("Main::Main(CkMigrateMessage)");
+  }
+
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    TRACEPUP;
+    CBase_Main::pup(p);
+    p|count_exit_;
+    p|*monitor_;
+  }
+
   /// Exit the program
   void p_exit(int count);
 

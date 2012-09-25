@@ -9,6 +9,9 @@
 #define LCAPERF_HPP
 
 #include "_error.hpp"
+#include "_parallel.hpp"
+#include "_performance.hpp"
+#include "_monitor.hpp"
 #include "_lcaperf.hpp"
 
 #endif /* LCAPERF_HPP */

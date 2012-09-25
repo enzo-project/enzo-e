@@ -5,6 +5,8 @@
 /// @date     2011-05-20
 /// @brief    Implemention of the Attributes class
 
+#include "cello.hpp"
+
 #include "lcaperf.hpp"
 
 //----------------------------------------------------------------------

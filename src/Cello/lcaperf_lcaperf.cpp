@@ -5,6 +5,8 @@
 /// @date     2004-03-12
 /// @brief    Parallel performance monitoring class
 
+#include "cello.hpp"
+
 #include "lcaperf.hpp"
 
 //----------------------------------------------------------------------
@@ -106,13 +108,15 @@ void LcaPerf::delete_counter (const char * name)
 void LcaPerf::initialize ()
 {
   TRACE("initialize");
+ 
+  const Monitor * monitor = Monitor::instance();
 
   if (ip_ == 0) {
-    printf ("---------------------------\n");
-    printf ("lcaperf: Version %d.%d\n",LCAP_VERSION_MAJOR,LCAP_VERSION_MINOR);
-    printf ("lcaperf: Copyright 2011, James Bordner and the Regents of the\n");
-    printf ("lcaperf: University of California.  All rights reserved.\n");
-    printf ("---------------------------\n");
+    monitor->print ("Lcaperf","---------------------------");
+    monitor->print ("Lcaperf"," Version %d.%d",LCAP_VERSION_MAJOR,LCAP_VERSION_MINOR);
+    monitor->print ("Lcaperf"," Copyright 2011, James Bordner and the Regents of the");
+    monitor->print ("Lcaperf"," University of California.  All rights reserved.");
+    monitor->print ("Lcaperf","---------------------------");
   }
 
   std::map<std::string,Counters *>::iterator iter;
@@ -266,22 +270,22 @@ const bool l_disk = false;
 
 void LcaPerf::header ()
 {
-    printf ("lcaperf: ");
-    printf             ("   time(s)   " "   ");
-    if (l_mpi)  printf ("   MPI(s)    " "   ");
-    if (l_papi) printf (" flops(GF)   " "   ");
-    if (l_mem)  printf (" memory(GB)  " "   ");
-    if (l_disk) printf ("  disk(GB)   " "   ");
-    //    printf ("cycle ");
-    //    printf ("region\n");
+  const Monitor * monitor = Monitor::instance();
+
+  monitor->print ("Lcaperf","lcaperf: ");
+  monitor->print             ("Lcaperf","   time(s)   " "   ");
+  if (l_mpi)  monitor->print ("Lcaperf","   MPI(s)    " "   ");
+  if (l_papi) monitor->print ("Lcaperf"," flops(GF)   " "   ");
+  if (l_mem)  monitor->print ("Lcaperf"," memory(GB)  " "   ");
+  if (l_disk) monitor->print ("Lcaperf","  disk(GB)   " "   ");
+  //    monitor->print ("Lcaperf","cycle ");
+  //    monitor->print ("Lcaperf","region\n");
 }
 
 //----------------------------------------------------------------------
 
 void LcaPerf::print ()
 {
-  DEBUG("LcaPerf::print");
-  TRACE("print");
 
   // Get comm size, required for computing average times etc. over all
   // processes
@@ -448,11 +452,9 @@ void LcaPerf::print ()
 
       line = line + field;
 
-      printf ("%s",line.c_str());
+      Monitor::instance()->print ("Lcaperf","%s",line.c_str());
     }
   }
-
-  printf ("\n");
 
   if (counters_.find("basic") != counters_.end()) counters_["basic"]->clear();
   if (counters_.find("mpi") != counters_.end())   counters_["mpi"]->clear();

@@ -29,7 +29,8 @@ memory = 1
 # Enable charm++ dynamic load balancing
 
 balance = 1
-balancer = 'RotateLB'
+
+balancer = 'RotateLB'  # For testing only
 
 # Whether to compile with -pg to use gprof for performance profiling
 
@@ -257,7 +258,7 @@ elif (type == "mpi"):
 elif (type == "charm"):
      serial_run   = ""
      parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
-     if (balance):  parallel_run_args = "+balancer RotateLB"
+     if (balance):  parallel_run_args = "+balancer " + balancer
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"

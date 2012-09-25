@@ -37,7 +37,9 @@ public: // interface
     // Patch *& data_alias = (Patch *) data_;
     p | *((CProxy_Patch *)data_);
     TRACE0;
-    p | *child_;
+    p | size_;
+    if (p.isUnpacking()) child_array_ = new Node[size_];
+    PUParray(p,child_array_,size_);
   };
 #endif
 
@@ -61,7 +63,7 @@ public: // interface
 
   /// return whether the node is a leaf node
   bool is_leaf () const
-  { return (child_ == 0); }
+  { return (child_array_ == 0); }
 
 private: // functions
 
@@ -71,8 +73,13 @@ private: // attributes
   /// Pointer to the data payload for the Node
   void * data_;
 
+#ifdef CONFIG_USE_CHARM
+  /// Number of children: used for CHARM++ pup()
+  char size_; 
+#endif
+
   /// Array of child nodes
-  Node * child_;
+  Node * child_array_;
 
 };
 

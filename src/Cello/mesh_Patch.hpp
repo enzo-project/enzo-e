@@ -46,8 +46,6 @@ class Patch
 
 
 #ifdef CONFIG_USE_CHARM
-
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -68,7 +66,16 @@ class Patch
     PUParray (p,lower_,3);
     PUParray (p,upper_,3);
   }
+
+  /// CHARM++ Migration constructor
+  Patch(CkMigrateMessage * m) : CBase_Patch(m) 
+  { 
+    TRACE("Patch::Patch(CkMigrateMessage)");  
+  };
+
 #endif
+
+#ifdef CONFIG_USE_CHARM
 
   /// Wait for all blocks to check in before proceeding
   void s_block(CkCallback function);

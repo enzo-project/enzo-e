@@ -5,6 +5,8 @@
 /// @date     2011-05-22
 /// @brief    Implementation of the CountersMpi class
 
+#include "cello.hpp"
+
 #include "lcaperf.hpp"
 
 #ifdef CONFIG_USE_MPI
