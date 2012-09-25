@@ -31,7 +31,7 @@ foreach prec (double)
 
    @ t = ($S - $S0) + 60 * ( ( $M - $M0) + 60 * ( $H - $H0) )
 
-   echo "END  type = $type  arch = $arch  prec = $prec  time = $t"
+   echo "END  type = $type  arch = $arch  prec = $prec  time = $t s"
 end
 end
 end

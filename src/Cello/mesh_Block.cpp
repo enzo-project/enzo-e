@@ -400,18 +400,18 @@ void Block::refresh ()
   int nby = size_[1];
   int nbz = size_[2];
   
-  bool ax3[3],ay3[3],az3[3];
+  bool fx3[3],fy3[3],fz3[3];
   determine_boundary_
-    (is_boundary,&ax3[0],&ax3[2],&ay3[0],&ay3[2],&az3[0],&az3[2]);
-  ax3[1]=true;
-  ay3[1]=true;
-  az3[1]=true;
-  ax3[0] = ax3[0] && (periodic || ! is_boundary[axis_x][face_lower]);
-  ax3[2] = ax3[2] && (periodic || ! is_boundary[axis_x][face_upper]);
-  ay3[0] = ay3[0] && (periodic || ! is_boundary[axis_y][face_lower]);
-  ay3[2] = ay3[2] && (periodic || ! is_boundary[axis_y][face_upper]);
-  az3[0] = az3[0] && (periodic || ! is_boundary[axis_z][face_lower]);
-  az3[2] = az3[2] && (periodic || ! is_boundary[axis_z][face_upper]);
+    (is_boundary,&fx3[0],&fx3[2],&fy3[0],&fy3[2],&fz3[0],&fz3[2]);
+  fx3[1]=true;
+  fy3[1]=true;
+  fz3[1]=true;
+  fx3[0] = fx3[0] && (periodic || ! is_boundary[axis_x][face_lower]);
+  fx3[2] = fx3[2] && (periodic || ! is_boundary[axis_x][face_upper]);
+  fy3[0] = fy3[0] && (periodic || ! is_boundary[axis_y][face_lower]);
+  fy3[2] = fy3[2] && (periodic || ! is_boundary[axis_y][face_upper]);
+  fz3[0] = fz3[0] && (periodic || ! is_boundary[axis_z][face_lower]);
+  fz3[2] = fz3[2] && (periodic || ! is_boundary[axis_z][face_upper]);
   int ix3[3],iy3[3],iz3[3];
   ix3[0] = (ix - 1 + nbx) % nbx;
   iy3[0] = (iy - 1 + nby) % nby;
@@ -425,33 +425,39 @@ void Block::refresh ()
   
   // Refresh face ghost zones
 
-  bool lx,ly,lz;
-  lx = false;
-  ly = false;
-  lz = false;
+  bool gx,gy,gz;
+  gx = false;
+  gy = false;
+  gz = false;
 
-  int axl = 1;
-  int ayl = nby==1 ? 0 : 1;
-  int azl = nbz==1 ? 0 : 1;
+  int fxl = 1;
+  int fyl = nby==1 ? 0 : 1;
+  int fzl = nbz==1 ? 0 : 1;
 
-  for (int ax=-axl; ax<=axl; ax++) {
-    for (int ay=-ayl; ay<=ayl; ay++) {
-      for (int az=-azl; az<=azl; az++) {
-	int sum = abs(ax)+abs(ay)+abs(az);
-	if ((ax3[ax+1] && ay3[ay+1] && az3[az+1]) &&
+  for (int fx=-fxl; fx<=fxl; fx++) {
+    for (int fy=-fyl; fy<=fyl; fy++) {
+      for (int fz=-fzl; fz<=fzl; fz++) {
+	int sum = abs(fx)+abs(fy)+abs(fz);
+	if ((fx3[fx+1] && fy3[fy+1] && fz3[fz+1]) &&
 	    ((sum==1 && field_descr->refresh_face(2)) ||
 	     (sum==2 && field_descr->refresh_face(1)) ||
 	     (sum==3 && field_descr->refresh_face(0)))) {
-	  FieldFace field_face 
-	    (field_block(),field_descr,ax,ay,az,lx,ly,lz);
+
+	  FieldFace field_face (field_block(),field_descr);
+
+	  field_face.set_face(fx,fy,fz);
+	  field_face.set_ghost(gx,gy,gz);
 	  
 	  DEBUG9("index %d %d %d  %d %d %d  %d %d %d",
 		 index_[0],index_[1],index_[2],
-		 ix3[ax+1],iy3[ay+1],iz3[az+1],
-		 ax,ay,az);
+		 ix3[fx+1],iy3[fy+1],iz3[fz+1],
+		 fx,fy,fz);
 
-	  block_array(ix3[ax+1],iy3[ay+1],iz3[az+1]).x_refresh 
-	    (field_face.size(), field_face.array(), -ax,-ay,-az);
+	  int n; 
+	  char * array;
+	  field_face.load(&n, &array);
+
+	  block_array(ix3[fx+1],iy3[fy+1],iz3[fz+1]).x_refresh (n, array, -fx,-fy,-fz);
 	}
       }
     }
@@ -473,12 +479,12 @@ void Block::refresh ()
 void Block::determine_boundary_
 (
  bool is_boundary[3][2],
- bool * axm,
- bool * axp,
- bool * aym,
- bool * ayp,
- bool * azm,
- bool * azp
+ bool * fxm,
+ bool * fxp,
+ bool * fym,
+ bool * fyp,
+ bool * fzm,
+ bool * fzp
  )
 {
   
@@ -499,12 +505,12 @@ void Block::determine_boundary_
 
   // Determine in which directions we need to communicate or update boundary
 
-  *axm = nx > 1;
-  *axp = nx > 1;
-  *aym = ny > 1;
-  *ayp = ny > 1;
-  *azm = nz > 1;
-  *azp = nz > 1;
+  if (fxm) *fxm = nx > 1;
+  if (fxp) *fxp = nx > 1;
+  if (fym) *fym = ny > 1;
+  if (fyp) *fyp = ny > 1;
+  if (fzm) *fzm = nz > 1;
+  if (fzp) *fzp = nz > 1;
 }
 
 #endif
@@ -517,12 +523,12 @@ void Block::determine_boundary_
 void Block::update_boundary_
 (
  bool is_boundary[3][2],
- bool axm,
- bool axp,
- bool aym,
- bool ayp,
- bool azm,
- bool azp
+ bool fxm,
+ bool fxp,
+ bool fym,
+ bool fyp,
+ bool fzm,
+ bool fzp
 )
 {
 
@@ -534,22 +540,22 @@ void Block::update_boundary_
 
   // Update boundaries
 
-  if ( axm && is_boundary[axis_x][face_lower] ) {
+  if ( fxm && is_boundary[axis_x][face_lower] ) {
     boundary->enforce(field_descr,this,face_lower,axis_x);
   }
-  if ( axp && is_boundary[axis_x][face_upper] ) {
+  if ( fxp && is_boundary[axis_x][face_upper] ) {
     boundary->enforce(field_descr,this,face_upper,axis_x);
   }
-  if ( aym && is_boundary[axis_y][face_lower] ) {
+  if ( fym && is_boundary[axis_y][face_lower] ) {
     boundary->enforce(field_descr,this,face_lower,axis_y);
   }
-  if ( ayp && is_boundary[axis_y][face_upper] ) {
+  if ( fyp && is_boundary[axis_y][face_upper] ) {
     boundary->enforce(field_descr,this,face_upper,axis_y);
   }
-  if ( azm && is_boundary[axis_z][face_lower] ) {
+  if ( fzm && is_boundary[axis_z][face_lower] ) {
     boundary->enforce(field_descr,this,face_lower,axis_z);
   }
-  if ( azp && is_boundary[axis_z][face_upper] ) {
+  if ( fzp && is_boundary[axis_z][face_upper] ) {
     boundary->enforce(field_descr,this,face_upper,axis_z);
   }
 }
@@ -573,15 +579,17 @@ void Block::x_refresh (int n, char * buffer, int fx, int fy, int fz)
     // n == 0 is the call from self to ensure x_refresh()
     // always gets called at least once
 
-    bool lx,ly,lz;
-    lx = false;
-    ly = false;
-    lz = false;
+    bool gx,gy,gz;
+    gx = false;
+    gy = false;
+    gz = false;
 
-    FieldFace field_face(n, buffer);
-    field_face.set_full(lx,ly,lz);
+    FieldFace field_face(field_block(), field_descr);
 
-    field_face.store (field_descr, field_block(), fx, fy, fz);
+    field_face.set_face(fx,fy,fz);
+    field_face.set_ghost(gx,gy,gz);
+
+    field_face.store (n, buffer);
   }
 
   //--------------------------------------------------
@@ -594,12 +602,12 @@ void Block::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 
   // Determine axes that may be neighbors
 
-  bool axm = nx > 1;
-  bool axp = nx > 1;
-  bool aym = ny > 1;
-  bool ayp = ny > 1;
-  bool azm = nz > 1;
-  bool azp = nz > 1;
+  bool fxm = nx > 1;
+  bool fxp = nx > 1;
+  bool fym = ny > 1;
+  bool fyp = ny > 1;
+  bool fzm = nz > 1;
+  bool fzp = nz > 1;
 
   // Adjust for boundary faces
 
@@ -614,12 +622,12 @@ void Block::x_refresh (int n, char * buffer, int fx, int fy, int fz)
   bool is_boundary[3][2];
   is_on_boundary (lower,upper,is_boundary);
 
-  axm = axm && (periodic || ! is_boundary[axis_x][face_lower]);
-  axp = axp && (periodic || ! is_boundary[axis_x][face_upper]);
-  aym = aym && (periodic || ! is_boundary[axis_y][face_lower]);
-  ayp = ayp && (periodic || ! is_boundary[axis_y][face_upper]);
-  azm = azm && (periodic || ! is_boundary[axis_z][face_lower]);
-  azp = azp && (periodic || ! is_boundary[axis_z][face_upper]);
+  fxm = fxm && (periodic || ! is_boundary[axis_x][face_lower]);
+  fxp = fxp && (periodic || ! is_boundary[axis_x][face_upper]);
+  fym = fym && (periodic || ! is_boundary[axis_y][face_lower]);
+  fyp = fyp && (periodic || ! is_boundary[axis_y][face_upper]);
+  fzm = fzm && (periodic || ! is_boundary[axis_z][face_lower]);
+  fzp = fzp && (periodic || ! is_boundary[axis_z][face_upper]);
 
   // Count total expected number of incoming faces
 
@@ -630,42 +638,42 @@ void Block::x_refresh (int n, char * buffer, int fx, int fy, int fz)
   // faces
 
   if (field_descr->refresh_face(2)) {
-    if ( axm ) ++count;
-    if ( axp ) ++count;
-    if ( aym ) ++count;
-    if ( ayp ) ++count;
-    if ( azm ) ++count;
-    if ( azp ) ++count;
+    if ( fxm ) ++count;
+    if ( fxp ) ++count;
+    if ( fym ) ++count;
+    if ( fyp ) ++count;
+    if ( fzm ) ++count;
+    if ( fzp ) ++count;
   }
 
   // edges
 
   if (field_descr->refresh_face(1)) {
-    if ( axm && aym ) ++count;
-    if ( axm && ayp ) ++count;
-    if ( axp && aym ) ++count;
-    if ( axp && ayp ) ++count;
-    if ( aym && azm ) ++count;
-    if ( aym && azp ) ++count;
-    if ( ayp && azm ) ++count;
-    if ( ayp && azp ) ++count;
-    if ( azm && axm ) ++count;
-    if ( azm && axp ) ++count;
-    if ( azp && axm ) ++count;
-    if ( azp && axp ) ++count;
+    if ( fxm && fym ) ++count;
+    if ( fxm && fyp ) ++count;
+    if ( fxp && fym ) ++count;
+    if ( fxp && fyp ) ++count;
+    if ( fym && fzm ) ++count;
+    if ( fym && fzp ) ++count;
+    if ( fyp && fzm ) ++count;
+    if ( fyp && fzp ) ++count;
+    if ( fzm && fxm ) ++count;
+    if ( fzm && fxp ) ++count;
+    if ( fzp && fxm ) ++count;
+    if ( fzp && fxp ) ++count;
   }
 
   // corners
 
   if (field_descr->refresh_face(0)) {
-    if ( axm && aym && azm ) ++count;
-    if ( axm && aym && azp ) ++count;
-    if ( axm && ayp && azm ) ++count;
-    if ( axm && ayp && azp ) ++count;
-    if ( axp && aym && azm ) ++count;
-    if ( axp && aym && azp ) ++count;
-    if ( axp && ayp && azm ) ++count;
-    if ( axp && ayp && azp ) ++count;
+    if ( fxm && fym && fzm ) ++count;
+    if ( fxm && fym && fzp ) ++count;
+    if ( fxm && fyp && fzm ) ++count;
+    if ( fxm && fyp && fzp ) ++count;
+    if ( fxp && fym && fzm ) ++count;
+    if ( fxp && fym && fzp ) ++count;
+    if ( fxp && fyp && fzm ) ++count;
+    if ( fxp && fyp && fzp ) ++count;
   }
 
   //--------------------------------------------------

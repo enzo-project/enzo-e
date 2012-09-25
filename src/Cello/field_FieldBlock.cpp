@@ -145,16 +145,6 @@ void FieldBlock::cell_width
 
 //----------------------------------------------------------------------
 
-// FieldFaces * FieldBlock::field_faces(const FieldDescr * field_descr) throw ()
-// {
-//   if (field_faces_ == NULL) {
-//     field_faces_ = new FieldFaces(field_descr,this);
-//   }
-//   return field_faces_;
-// }
-
-//----------------------------------------------------------------------
-
 void FieldBlock::clear
 (
  const FieldDescr * field_descr,
@@ -385,13 +375,18 @@ void FieldBlock::refresh_ghosts
 
   // Transfer face data via FieldFace objects
 
-  FieldFace face_send;
-  FieldFace face_recv;
+  FieldFace face_send (this,field_descr);
+  FieldFace face_recv (this,field_descr);
 
-  face_send.allocate(field_descr,this,fx,fy,fz);
-  face_recv.allocate(field_descr,this,fx,fy,fz);
+  face_send.set_face(fx,fy,fz);
+  face_recv.set_face(fx,fy,fz);
 
-  face_send.load(field_descr,this,fx,fy,fz);
+  int n;
+
+  char * array_send = face_send.allocate();
+  char * array_recv = face_recv.allocate();
+
+  face_send.load(&n, &array_send);
 
   int ip = group_process->rank();
 
@@ -401,15 +396,13 @@ void FieldBlock::refresh_ghosts
 
     // send 
 
-    handle_send = group_process->send_begin 
-      (ip_remote, face_send.array(),face_send.size());
+    handle_send = group_process->send_begin (ip_remote, array_send, n);
     group_process->wait(handle_send);
     group_process->send_end (handle_send);
 
     // receive
 
-    handle_recv = group_process->recv_begin 
-      (ip_remote, face_recv.array(),face_recv.size());
+    handle_recv = group_process->recv_begin (ip_remote, array_recv, n);
     group_process->wait(handle_recv);
     group_process->recv_end (handle_recv);
 
@@ -417,23 +410,18 @@ void FieldBlock::refresh_ghosts
 
     // receive
 
-    handle_recv = group_process->recv_begin 
-      (ip_remote, face_recv.array(),face_recv.size());
+    handle_recv = group_process->recv_begin (ip_remote, array_recv,n);
     group_process->wait(handle_recv);
     group_process->recv_end (handle_recv);
 
     // send 
-    handle_send = group_process->send_begin 
-      (ip_remote, face_send.array(),face_send.size());
+    handle_send = group_process->send_begin (ip_remote, array_send,n);
     group_process->wait(handle_send);
     group_process->send_end (handle_send);
 
   }
 
-  face_recv.store(field_descr,this,fx,fy,fz);
-
-  face_send.deallocate();
-  face_recv.deallocate();
+  face_recv.store(n, array_recv);
 
 }
 

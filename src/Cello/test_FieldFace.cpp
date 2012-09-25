@@ -303,8 +303,6 @@ PARALLEL_MAIN_BEGIN
   // Refresh ghosts
   //----------------------------------------------------------------------
 
-  FieldFace face;
-
   for (int ia = 0; ia<3; ++ia) {
 
     for (int ibz = 0; ibz < nbz; ibz++) {
@@ -313,14 +311,14 @@ PARALLEL_MAIN_BEGIN
 	  axis_enum axis = (axis_enum)(ia);
 	  
 	  int index_lower = ibx + nbx * (iby + nby * ibz);
-	  FieldBlock * field_lower = field_block[index_lower];
+	  FieldBlock * block_lower = field_block[index_lower];
 
 	  int index_upper = 0;
 	  if (axis==0) index_upper = ((ibx+1)%nbx) + nbx * (  iby        + nby * ibz);
 	  if (axis==1) index_upper =   ibx        + nbx * (((iby+1)%nby) + nby * ibz);
 	  if (axis==2) index_upper =   ibx        + nbx * (  iby        + nby * ((ibz+1)%nbz));
 
-	  FieldBlock * field_upper = field_block[index_upper];
+	  FieldBlock * block_upper = field_block[index_upper];
 
 	  int ixm=0,iym=0,izm=0;
 	  int ixp=0,iyp=0,izp=0;
@@ -329,15 +327,59 @@ PARALLEL_MAIN_BEGIN
 	  if (axis==axis_y) {iym=-1; iyp=+1; }
 	  if (axis==axis_z) {izm=-1; izp=+1; }
 
-	  face.allocate   (field_descr,field_lower,ixm,iym,izm);
+	  FieldFace face_lower (block_lower,field_descr);
+	  FieldFace face_upper (block_upper,field_descr);
 
-	  face.load       (field_descr, field_lower, ixp,iyp,izp);
-	  face.store      (field_descr, field_upper, ixm,iym,izm);
+	  int n;
+	  char * array;
 
-	  face.load       (field_descr, field_upper, ixm,iym,izm);
-	  face.store      (field_descr, field_lower, ixp,iyp,izp);
 
-	  face.deallocate ();
+	  face_lower.set_face(ixp,iyp,izp);
+	  face_upper.set_face(ixm,iym,izm);
+
+	  face_lower.load (&n, &array);
+	  face_upper.store (n,array);
+
+	  face_upper.load (&n, &array);
+	  face_lower.store (n,array);
+
+	  // NEW
+	  //
+	  //  block    face   block
+	  //   lower   lower   upper
+	  //  +---++    ++    ++    ++---+
+	  //  |   ||    ||    ||    ||   |
+	  //  +---++    ++    ++    ++---+
+	  // 1    xx >> xx
+	  // 2          xx    >>    xx
+	  // 3                yy << yy
+	  // 4    yy    <<    yy
+	  //
+	  //  array_lower = face_lower.load(ixp,iyp,izp)
+	  //  face_upper.store (ixm,iym,izm,array_lower);
+
+
+	  // OLD
+	  //
+	  //  block    face   block
+	  //   lower           upper
+	  //  +---++    ++    ++---+
+	  //  |   ||    ||    ||   |
+	  //  +---++    ++    ++---+
+	  // 1    xx >> xx
+	  // 2          xx >> xx 
+	  // 3          yy << yy
+	  // 4    yy << yy
+
+	  // face.allocate   (field_descr,block_lower,ixm,iym,izm);
+
+	  // face.load       (field_descr, block_lower, ixp,iyp,izp);
+	  // face.store      (field_descr, block_upper, ixm,iym,izm);
+
+	  // face.load       (field_descr, block_upper, ixm,iym,izm);
+	  // face.store      (field_descr, block_lower, ixp,iyp,izp);
+
+	  // face.deallocate ();
 
 	}
       }
