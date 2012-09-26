@@ -51,6 +51,7 @@ class Loop {
 #ifdef CONFIG_USE_CHARM
   void pup(PUP::er &p)
   {
+    TRACEPUP;
     p | index_stop_;
     p | index_curr_;
   }

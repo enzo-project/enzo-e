@@ -7,7 +7,7 @@
 
 module mesh {
 
-  chare Patch {
+  chare [migratable] Patch {
 
      entry Patch
        (int nx,   int ny,  int nz,

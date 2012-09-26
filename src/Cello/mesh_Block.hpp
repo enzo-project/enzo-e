@@ -68,8 +68,8 @@ public: // interface
 
   void pup(PUP::er &p)
 {
-  CBase_Block::pup(p);
   TRACEPUP;
+  CBase_Block::pup(p);
 
   p | count_refresh_face_;
   p | proxy_patch_;

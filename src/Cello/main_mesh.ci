@@ -11,7 +11,7 @@ mainmodule main_mesh {
 
   readonly CProxy_Main proxy_main;
 
-  mainchare Main {
+  mainchare [migratable] Main {
 
      entry Main(CkArgMsg *m);
 

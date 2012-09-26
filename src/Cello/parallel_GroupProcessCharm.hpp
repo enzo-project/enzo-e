@@ -30,6 +30,7 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    TRACEPUP;
     GroupProcess::pup(p);
     p | process_first_;
     p | process_last_plus_;

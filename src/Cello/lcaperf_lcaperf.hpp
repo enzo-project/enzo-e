@@ -25,8 +25,9 @@ class LcaPerf {
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
-    p | ip_;
+    TRACEPUP;
     // NOTE: change this function whenever attributes change
+    p | ip_;
     p |  attributes_;
     WARNING("Lcaperf::pup",
 	    "Not pup'ing std::map counters_");

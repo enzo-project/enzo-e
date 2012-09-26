@@ -65,6 +65,7 @@ private:
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    TRACEPUP;
     // NOTE: change this function whenever attributes change
 
     PUParray (p,class_name_,UNIT_MAX_NAME_LEN);

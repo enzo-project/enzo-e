@@ -31,8 +31,8 @@ public: // functions
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
-    // NEVER GETS CALLED
     TRACEPUP;
+
     Output::pup(p);
 
     p | map_r_;

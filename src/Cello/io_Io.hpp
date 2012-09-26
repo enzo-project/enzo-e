@@ -27,6 +27,9 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+
+    TRACEPUP;
+
     p | meta_count_;
     p | meta_name_;
     p | data_count_;

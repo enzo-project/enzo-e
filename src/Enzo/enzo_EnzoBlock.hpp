@@ -196,6 +196,7 @@ public: // interface
   void pup(PUP::er &p)
   { 
 
+    TRACEPUP;
     Block::pup(p);
 
     TRACE ("BEGIN EnzoBlock::pup()");

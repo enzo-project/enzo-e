@@ -358,11 +358,11 @@ size_t FieldFace::load_precision_
 
   loop_limits_ (&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, load=true);
 
-  TRACE3 (" load face_[0],face_[1],face_[2] = %d %d %d",face_[0],face_[1],face_[2]);
-  TRACE3 (" load nd3      = %d %d %d",nd3[0],nd3[1],nd3[2]); 
-  TRACE3 (" load ng3      = %d %d %d",ng3[0],ng3[1],ng3[2]); 
-  TRACE3 (" load i0       = %d %d %d",ix0,iy0,iz0);
-  TRACE3 (" load n        = %d %d %d",nx,ny,nz);
+  //  TRACE3 (" load face_[0],face_[1],face_[2] = %d %d %d",face_[0],face_[1],face_[2]);
+  //  TRACE3 (" load nd3      = %d %d %d",nd3[0],nd3[1],nd3[2]); 
+  //  TRACE3 (" load ng3      = %d %d %d",ng3[0],ng3[1],ng3[2]); 
+  //  TRACE3 (" load i0       = %d %d %d",ix0,iy0,iz0);
+  //  TRACE3 (" load n        = %d %d %d",nx,ny,nz);
   for (int iz=0; iz <nz; iz++)  {
     int kz = iz+iz0;
     for (int iy=0; iy < ny; iy++) {
@@ -399,11 +399,11 @@ size_t FieldFace::store_precision_
 
   loop_limits_ (&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, load=false);
 
-  TRACE3 (" store face_[0],face_[1],face_[2] = %d %d %d",face_[0],face_[1],face_[2]);
-  TRACE3 (" store nd3      = %d %d %d",nd3[0],nd3[1],nd3[2]); 
-  TRACE3 (" store ng3      = %d %d %d",ng3[0],ng3[1],ng3[2]); 
-  TRACE3 (" store i0       = %d %d %d",ix0,iy0,iz0);
-  TRACE3 (" store n        = %d %d %d",nx,ny,nz);
+  //  TRACE3 (" store face_[0],face_[1],face_[2] = %d %d %d",face_[0],face_[1],face_[2]);
+  //  TRACE3 (" store nd3      = %d %d %d",nd3[0],nd3[1],nd3[2]); 
+  //  TRACE3 (" store ng3      = %d %d %d",ng3[0],ng3[1],ng3[2]); 
+  //  TRACE3 (" store i0       = %d %d %d",ix0,iy0,iz0);
+  //  TRACE3 (" store n        = %d %d %d",nx,ny,nz);
   for (int iz=0; iz <nz; iz++)  {
     int kz = iz+iz0;
     for (int iy=0; iy < ny; iy++) {

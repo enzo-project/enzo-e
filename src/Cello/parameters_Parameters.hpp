@@ -42,6 +42,7 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    TRACEPUP;
     WARNING("Parameters::pup","current_group_ not pup'ed");
     //    PUParray(p,current_group_,MAX_GROUP_DEPTH);
     p | current_group_depth_;

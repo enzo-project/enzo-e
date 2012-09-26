@@ -40,6 +40,7 @@ class GroupProcess
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    TRACEPUP;
     // NOTE: change this function whenever attributes change
     p | size_;
     p | rank_;

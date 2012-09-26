@@ -52,14 +52,16 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
-    // NOTE: change this function whenever attributes change
+    TRACEPUP;
+    WARNING("Monitor::pup","Monitor pup() disabled");
 
-    p |  *timer_;
-    p |  active_;
-    WARNING("Monitor::pup","ip_ may change");
-    p |  ip_;
-    p |  group_default_;
-    p |  group_active_;
+    // // NOTE: change this function whenever attributes change
+    // p |  *timer_;
+    // p |  active_;
+    // WARNING("Monitor::pup","ip_ may change");
+    // p |  ip_;
+    // p |  group_default_;
+    // p |  group_active_;
 
   }
 #endif

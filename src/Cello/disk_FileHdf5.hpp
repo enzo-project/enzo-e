@@ -30,6 +30,8 @@ public: // interface
   inline void pup (PUP::er &p)
   {
 
+    TRACEPUP;
+
     File::pup(p);
 
     p | file_id_;

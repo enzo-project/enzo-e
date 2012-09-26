@@ -64,6 +64,7 @@ public:
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    TRACEPUP;
     CBase_Main::pup(p);
     // NOTE: change this function whenever attributes change
     p | count_exit_;

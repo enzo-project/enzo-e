@@ -13,7 +13,7 @@ mainmodule main_enzo {
 
   readonly CProxy_Main proxy_main;
 
-  mainchare Main {
+  mainchare [migratable] Main {
 
      entry Main(CkArgMsg *m);
 

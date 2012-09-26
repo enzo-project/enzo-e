@@ -26,8 +26,9 @@ public: // interface
   ~Node() throw();
 
 #ifdef CONFIG_USE_CHARM
-  void pup (PUP::er &p)
+  inline void pup (PUP::er &p)
   {
+    TRACEPUP;
     // NOTE: change this function whenever attributes change
     TRACE1("data_ = %p",data_);
     // int * test = new int[1];
