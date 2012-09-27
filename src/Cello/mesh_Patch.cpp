@@ -94,6 +94,28 @@ Patch::Patch
 #endif
 }
 
+void Patch::pup (PUP::er &p)
+  {
+    TRACEPUP;
+    CBase_Patch::pup(p);
+    // NOTE: change this function whenever attributes change
+    p | id_;
+    TRACE1("id_ = %d",id_);
+    TRACE1("block_array_ = %p",block_array_);
+    if (p.isUnpacking()) block_array_ = new CProxy_Block;
+    p | *block_array_;
+    p | block_exists_;
+    p | block_loop_;
+    p | factory_;
+    p | *group_process_;
+    p | layout_;
+    PUParray (p,size_,3);
+    PUParray (p,offset_,3);
+    PUParray (p,blocking_,3);
+    PUParray (p,lower_,3);
+    PUParray (p,upper_,3);
+  }
+
 //----------------------------------------------------------------------
 
 Patch::~Patch() throw()

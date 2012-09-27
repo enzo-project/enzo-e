@@ -21,6 +21,11 @@ public: // interface
   {   }
 
 #ifdef CONFIG_USE_CHARM
+
+  PUPable_decl(EnzoFactory);
+
+  EnzoFactory(CkMigrateMessage *m) : Factory (m) {}
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {

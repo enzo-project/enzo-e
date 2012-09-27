@@ -43,10 +43,10 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
-    WARNING("Parameters::pup","current_group_ not pup'ed");
+    WARNING("Parameters::pup","skipping current_group_");
     //    PUParray(p,current_group_,MAX_GROUP_DEPTH);
     p | current_group_depth_;
-    WARNING("Parameters::pup","parameter_map_ not pup'ed");
+    WARNING("Parameters::pup","skipping parameter_map_ ");
     //    p | parameter_map_;
     p | *parameter_tree_;
     p | *monitor_; 

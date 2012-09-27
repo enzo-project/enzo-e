@@ -35,6 +35,7 @@ public: // interface
     // NOTE: change this function whenever attributes change
     Io::pup(p);
 
+    if (p.isUnpacking()) layout_ = new Layout;
     p | *layout_;
   }
 

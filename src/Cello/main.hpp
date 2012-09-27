@@ -71,7 +71,8 @@ public:
     TRACEPUP;
     CBase_Main::pup(p);
     p|count_exit_;
-    p|*monitor_;
+    WARNING ("Main::pup","skipping monitor_");
+    //    p|*monitor_;
   }
 
   /// Exit the program

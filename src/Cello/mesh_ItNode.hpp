@@ -41,9 +41,9 @@ public: // interface
     // NOTE: change this function whenever attributes change
     p |  lower_level_;
     p |  upper_level_;
-    WARNING("ItNode::pup","Not pup'ing tree_ pointer");
+    WARNING("ItNode::pup","skipping tree_");
     //    p |  *tree_;
-    WARNING("ItNode::pup","Not pup'ing node_trace_");
+    WARNING("ItNode::pup","skipping node_trace_");
     //    p |  node_trace_;
     p |  reset_;
   }

@@ -30,7 +30,7 @@ class LcaPerf {
     p | ip_;
     p |  attributes_;
     WARNING("Lcaperf::pup",
-	    "Not pup'ing std::map counters_");
+	    "skipping counters_");
     //    p |  counters_;
     p |  regions_;
   }

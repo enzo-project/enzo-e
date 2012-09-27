@@ -34,7 +34,8 @@ public: // interface
 
     // NOTE: change this function whenever attributes change
     Io::pup(p);
-    p | *block_;
+    WARNING ("IoBlock::pup","skipping block_");
+    //    p | *block_;
   }
 #endif
 

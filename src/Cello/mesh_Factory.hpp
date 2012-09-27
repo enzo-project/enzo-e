@@ -14,7 +14,7 @@ class IoBlock;
 class IoFieldBlock;
 class Patch;
 
-class Factory {
+class Factory : public PUP::able {
 
   /// @class    Factory
   /// @ingroup  Mesh 
@@ -31,8 +31,16 @@ public: // interface
   {}
 
 #ifdef CONFIG_USE_CHARM
+
+  /// CHARM++ function for determining the specific class in the class hierarchy
+  PUPable_decl(Factory);
+
+  /// CHARM++ migration constructor for PUP::able
+
+  Factory (CkMigrateMessage *m) : PUP::able(m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
+  void pup (PUP::er &p)
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change

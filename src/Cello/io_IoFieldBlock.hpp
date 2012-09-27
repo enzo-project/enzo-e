@@ -38,8 +38,12 @@ public: // interface
 
     Io::pup(p);
 
-    p | *field_descr_;
-    p | *field_block_;
+    WARNING ("IoFieldBlock::pup","skipping field_descr_");
+    // if (p.isUnpacking()) field_descr_ = new FieldDescr;
+    // p | *field_descr_;
+    WARNING ("IoFieldBlock::pup","skipping field_block_");
+    // if (p.isUnpacking()) field_block_ = new FieldBlock;
+    // p | *field_block_;
     p | field_index_;
   }
 #endif

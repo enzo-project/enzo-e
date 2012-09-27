@@ -44,7 +44,7 @@ public: // functions
     p | nrows_;
     p | ncols_;
     PUParray(p,data_,nrows_*ncols_);
-    WARNING("OutputImage::pup","Not calling pup() on pngwriter object");
+    WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   }
 #endif

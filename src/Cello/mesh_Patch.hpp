@@ -47,24 +47,7 @@ class Patch
 
 #ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    CBase_Patch::pup(p);
-    // NOTE: change this function whenever attributes change
-    p | id_;
-    p | *block_array_;
-    p | block_exists_;
-    p | block_loop_;
-    p | *factory_;
-    p | *group_process_;
-    p | layout_;
-    PUParray (p,size_,3);
-    PUParray (p,offset_,3);
-    PUParray (p,blocking_,3);
-    PUParray (p,lower_,3);
-    PUParray (p,upper_,3);
-  }
+  void pup (PUP::er &p);
 
   /// CHARM++ Migration constructor
   Patch(CkMigrateMessage * m) : CBase_Patch(m) 

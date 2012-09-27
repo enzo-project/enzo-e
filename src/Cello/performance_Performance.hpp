@@ -48,7 +48,7 @@ public: // interface
     p | timer_;
     p | papi_;
     WARNING("Performance::pup",
-	    "std::vector<PerfCounters *> counters_ not pup'ed");
+	    "skipping std::vector<PerfCounters *> counters_");
   //  std::vector<PerfCounters *> counters_;
     p | attribute_names_;
     p | counter_names_;

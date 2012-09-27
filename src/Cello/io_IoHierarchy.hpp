@@ -37,7 +37,9 @@ public: // interface
 
     Io::pup(p);
 
-    p | *hierarchy_;
+    WARNING ("IoHierarchy::pup","skipping hierarchy_");
+    //    if (p.isUnpacking()) hierarchy_ = new Hierarchy;
+    //    p | *hierarchy_;
   }
 #endif
 

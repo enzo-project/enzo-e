@@ -69,7 +69,7 @@ public: // interface
     // NOTE: change this function whenever attributes change
     p | type_;
     p | value_accessed_;
-    WARNING("Param::pup","value_* union not pup'ed");
+    WARNING("Param::pup","skipping value_* union");
     // value_integer_; 
     // value_float_; 
     // value_logical_; 

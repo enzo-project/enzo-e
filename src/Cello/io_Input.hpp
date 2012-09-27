@@ -38,7 +38,8 @@ public: // functions
     TRACEPUP;
 
     // NOTE: change this function whenever attributes change
-    p | *file_;
+    //    p | *file_;
+    WARNING("Input::pup","skipping file_");
     p | process_;
     p | loop_;
     p | index_charm_;

@@ -54,13 +54,13 @@ public: // interface
 
     TRACEPUP;
     p | *boundary_;
-    WARNING("Problem::pup", "initial_list_ not pup'ed");
+    WARNING("Problem::pup", "skipping initial_list_");
     //  std::vector<Initial *> initial_list_;
     p | *stopping_;
     p | *timestep_;
-    WARNING("Problem::pup", "method_list_ not pup'ed");
+    WARNING("Problem::pup", "skipping method_list_");
     //    std::vector<Method *> method_list_;
-    WARNING("Problem::pup", "output_list_ not pup'ed");
+    WARNING("Problem::pup", "skipping output_list_");
     //  std::vector<Output *> output_list_;
     p | index_initial_;
     p | index_output_;

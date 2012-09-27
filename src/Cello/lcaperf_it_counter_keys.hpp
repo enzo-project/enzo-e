@@ -29,10 +29,11 @@ public: // interface
     TRACEPUP;
     // NOTE: change this function whenever attributes change
 
-    p | * counters_;
-    WARNING("ItCounterKeys::pup","Not pup'ing iter_");
+    WARNING ("ItCounterKeys","skipping counters_");
+    //    p | * counters_;
+    WARNING("ItCounterKeys::pup","skipping iter_");
     //    p |  iter_;
-    WARNING("ItCounterKeys::pup","Not pup'ing value_");
+    WARNING("ItCounterKeys::pup","skipping value_");
     //    p |  value_;
   }
 #endif

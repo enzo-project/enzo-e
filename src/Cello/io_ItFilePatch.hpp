@@ -31,7 +31,8 @@ public: // interface
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
-    p | *input_;
+    WARNING ("ItFilePatch","skipping input_");
+    //    p | *input_;
     p | index1_;
   }
 #endif

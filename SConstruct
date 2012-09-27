@@ -235,13 +235,9 @@ charmc = charm_path + '/bin/charmc -language charm++ '
 cxx['charm']  = charmc + charm_perf + ' '
 cc ['charm']  = charmc + charm_perf + ' '
 
-print 'A 1 flags_link_charm = ',flags_link_charm
-
 if (balance == 1):
      flags_cxx_charm = flags_cxx_charm + ' -balancer ' + balancer
      flags_link_charm = flags_link_charm + ' -module ' + balancer
-
-print 'A 2 flags_link_charm = ',flags_link_charm
 
 #======================================================================
 # UNIT TEST SETTINGS

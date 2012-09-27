@@ -36,7 +36,8 @@ public: // interface
 
     Io::pup(p);
 
-    p | *patch_;
+    WARNING ("IoPatch::pup","skipping patch_");
+    //    p | *patch_;
     
   }
 #endif

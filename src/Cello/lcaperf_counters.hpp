@@ -57,14 +57,14 @@ public: // interface
     p |  num_counters_;
     p |  is_tracing_active_;
     p |  is_logging_active_;
-    WARNING("Counters::pup()","global_ not pup'ed: std::map of pointers");
+    WARNING("Counters::pup()","skipping global_");
     //    p |  global_;
     p |  index_;
     p |  name_;
     p |  type_;
-    WARNING("Counters::pup()","frame_ not pup'ed: std::stack");
+    WARNING("Counters::pup()","skipping frame_");
     //    p |  frame_;
-    WARNING("Counters::pup()","counters_ not pup'ed: std::stack of pointers");
+    WARNING("Counters::pup()","skipping counters_");
     //    p |  counters_;
   }
 #endif

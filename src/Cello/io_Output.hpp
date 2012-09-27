@@ -37,7 +37,8 @@ public: // functions
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
-    p | *file_;
+    //    p | *file_;
+    WARNING ("Output::pup","skipping file_");
     p | *schedule_;
     p | process_;
     p | loop_;
@@ -47,9 +48,12 @@ public: // functions
     p | time_;
     p | file_name_;
     p | file_args_;
-    p | *it_field_;
-    p | *io_block_;
-    p | *io_field_block_;
+    WARNING("Output::pup","skipping it_field_");
+    //    p | *it_field_;
+    WARNING("Output::pup","skipping io_block_");
+    //    p | *io_block_;
+    WARNING("Output::pup","skipping io_field_block");
+    //    p | *io_field_block_;
     p | process_stride_;
 
   }
