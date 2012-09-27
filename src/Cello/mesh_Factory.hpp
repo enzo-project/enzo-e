@@ -14,8 +14,12 @@ class IoBlock;
 class IoFieldBlock;
 class Patch;
 
-class Factory : public PUP::able {
-
+#ifdef CONFIG_USE_CHARM
+class Factory : public PUP::able 
+#else
+class Factory 
+#endif
+{
   /// @class    Factory
   /// @ingroup  Mesh 
   /// @brief [\ref Mesh] Abstract class for creating concrete Hierarchy,

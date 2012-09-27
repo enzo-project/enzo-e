@@ -94,6 +94,9 @@ Patch::Patch
 #endif
 }
 
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 void Patch::pup (PUP::er &p)
   {
     TRACEPUP;
@@ -115,6 +118,7 @@ void Patch::pup (PUP::er &p)
     PUParray (p,lower_,3);
     PUParray (p,upper_,3);
   }
+#endif
 
 //----------------------------------------------------------------------
 
