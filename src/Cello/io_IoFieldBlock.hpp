@@ -29,25 +29,8 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-
-    TRACEPUP;
-
-    // NOTE: change this function whenever attributes change
-
-    Io::pup(p);
-
-    WARNING ("IoFieldBlock::pup","skipping field_descr_");
-    // if (p.isUnpacking()) field_descr_ = new FieldDescr;
-    // p | *field_descr_;
-    WARNING ("IoFieldBlock::pup","skipping field_block_");
-    // if (p.isUnpacking()) field_block_ = new FieldBlock;
-    // p | *field_block_;
-    p | field_index_;
-  }
+  void pup (PUP::er &p);
 #endif
-
 
   /// Set FieldIndex
   void set_field_index (int field_index) throw()

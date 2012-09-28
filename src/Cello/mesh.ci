@@ -8,6 +8,7 @@
 module mesh {
 
   PUPable Factory;
+  PUPable InputData;
 
   chare [migratable] Patch {
 

@@ -32,7 +32,7 @@ public: // interface
     TRACEPUP;
     // NOTE: change this function whenever attributes change
     WARNING ("ItFilePatch","skipping input_");
-    //    p | *input_;
+    p | input_; // PUP::able
     p | index1_;
   }
 #endif

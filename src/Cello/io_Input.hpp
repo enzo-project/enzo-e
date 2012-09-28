@@ -15,7 +15,12 @@ class ItField;
 class Patch;
 class Simulation;
 
-class Input {
+#ifdef CONFIG_USE_CHARM
+class Input : public PUP::able 
+#else
+class Input 
+#endif
+{
 
   /// @class    Input
   /// @ingroup  Io
@@ -24,6 +29,8 @@ class Input {
 
 public: // functions
 
+  Input() throw() { }
+
   /// Create an uninitialized Input object
   Input(const Factory * factory) throw();
 
@@ -31,30 +38,17 @@ public: // functions
   virtual ~Input() throw();
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_abstract(Input);
+
+  /// Charm++ PUP::able migration constructor
+  //  Input (CkMigrateMessage *m) : PUP::able(m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
+  void pup (PUP::er &p);
 
-    TRACEPUP;
-
-    // NOTE: change this function whenever attributes change
-    //    p | *file_;
-    WARNING("Input::pup","skipping file_");
-    p | process_;
-    p | loop_;
-    p | index_charm_;
-    p | cycle_;
-    p | time_;
-    p | file_name_;
-    p | file_args_;
-    p | *it_field_;
-    p | *io_block_;
-    p | *io_field_block_;
-    p | process_stride_;
-  }
 #endif
-
-
 
   /// Set file name
   void set_filename (std::string filename,

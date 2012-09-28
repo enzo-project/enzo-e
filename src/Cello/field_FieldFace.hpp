@@ -41,8 +41,12 @@ public: // interface
     TRACEPUP;
 
     // NOTE: change this function whenever attributes change
-    p | *field_block_;
+    bool n = p.isUnpacking();
+
+    if (n) field_descr_ = new FieldDescr;
     p | *field_descr_;
+    if (n) field_block_ = new FieldBlock;
+    p | *field_block_;
     p | array_;
     PUParray(p,face_,3);
     PUParray(p,ghost_,3);

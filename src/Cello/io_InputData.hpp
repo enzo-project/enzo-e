@@ -20,6 +20,8 @@ class InputData : public Input {
 
 public: // functions
 
+  InputData() throw() {}
+
   /// Create an uninitialized InputData object
   InputData(const Factory * factory) throw();
 
@@ -27,18 +29,16 @@ public: // functions
   virtual ~InputData() throw();
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_decl(InputData);
+
+  /// Charm++ PUP::able migration constructor
+  InputData (CkMigrateMessage *m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
+  void pup (PUP::er &p);
 
-    TRACEPUP;
-
-    // NOTE: change this function whenever attributes change
-
-    Input::pup(p);
-
-    // this function intentionally left blank
-  }
 #endif
 
 public: // virtual functions

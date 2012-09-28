@@ -22,6 +22,24 @@ InputData::~InputData() throw()
   close();
 }
 
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void InputData::pup (PUP::er &p)
+{
+
+  TRACEPUP;
+
+  // NOTE: change this function whenever attributes change
+
+  Input::pup(p);
+
+  // this function intentionally left blank
+}
+
+#endif
+
 //======================================================================
 
 void InputData::open () throw()

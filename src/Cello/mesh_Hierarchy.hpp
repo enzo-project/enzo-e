@@ -29,20 +29,7 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-
-    p | *factory_;
-    p | patch_count_;
-    p | *patch_tree_;
-    PUParray(p,root_size_,3);
-    PUParray(p,lower_,3);
-    PUParray(p,upper_,3);
-
-  }
+  void pup (PUP::er &p);
 #endif
 
   //----------------------------------------------------------------------
@@ -98,6 +85,12 @@ protected: // attributes
   /// Factory for creating Simulations, Hierarchies, Patches and Blocks
   /// [abstract factory design pattern]
   Factory * factory_;
+
+  /// Dimension of the hierarchy [ used for Charm++ pup() of Tree ]
+  int dimension_;
+  
+  /// Refinement of the hierarchy [ used for Charm++ pup() of Tree ]
+  int refinement_;
 
   /// Number of patches (redundant with patch_tree_)
   int patch_count_;

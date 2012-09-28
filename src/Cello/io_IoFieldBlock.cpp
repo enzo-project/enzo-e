@@ -27,6 +27,25 @@ IoFieldBlock::IoFieldBlock() throw ()
 	  meta_name_.size()==meta_count());
 }
 
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+void IoFieldBlock::pup (PUP::er &p)
+{
+
+  TRACEPUP;
+
+  // NOTE: change this function whenever attributes change
+
+  Io::pup(p);
+
+  if (p.isUnpacking()) field_descr_ = new FieldDescr;
+  p | *field_descr_;
+  if (p.isUnpacking()) field_block_ = new FieldBlock;
+  p | *field_block_;
+  p | field_index_;
+}
+#endif
 
 //----------------------------------------------------------------------
 

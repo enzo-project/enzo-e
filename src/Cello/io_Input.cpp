@@ -46,6 +46,40 @@ Input::~Input () throw()
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+
+void Input::pup (PUP::er &p)
+{
+
+  // NOTE: change this function whenever attributes change
+
+  TRACEPUP;
+
+  bool n = p.isUnpacking();
+
+  WARNING("Input::pup","skipping file_");
+  //    p | *file_;
+  p | process_;
+  p | loop_;
+  p | index_charm_;
+  p | cycle_;
+  p | time_;
+  p | file_name_;
+  p | file_args_;
+  WARNING("Input::pup","skipping it_field_");
+  //    if (n) it_field_ = new ItField;
+  //    p | *it_field_;
+  if (n) io_block_ = new IoBlock;
+  p | *io_block_;
+  if (n) io_field_block_ = new IoFieldBlock;
+  p | *io_field_block_;
+  p | process_stride_;
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
 void Input::set_filename (std::string filename,
 			   std::vector<std::string> fileargs) throw()
 {

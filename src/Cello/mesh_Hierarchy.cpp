@@ -16,6 +16,8 @@
 Hierarchy::Hierarchy ( const Factory * factory,
 		       int dimension, int refinement) throw ()
   : factory_((Factory * )factory),
+    dimension_(dimension),
+    refinement_(refinement),
     patch_count_(0),
     patch_tree_(new Tree (dimension,refinement))
 {
@@ -40,6 +42,31 @@ Hierarchy::~Hierarchy() throw()
   delete patch_tree_;
   patch_count_ = 0;
 }
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ Pack / Unpack function
+void Hierarchy::pup (PUP::er &p)
+{
+    
+  TRACEPUP;
+  // NOTE: change this function whenever attributes change
+
+  bool n = p.isUnpacking();
+
+  p | factory_; // PUP::able
+  p | dimension_;
+  p | refinement_;
+  p | patch_count_;
+  if(n) patch_tree_ = new Tree (dimension_, refinement_);
+  p | *patch_tree_;
+  PUParray(p,root_size_,3);
+  PUParray(p,lower_,3);
+  PUParray(p,upper_,3);
+
+}
+#endif
 
 //----------------------------------------------------------------------
 
