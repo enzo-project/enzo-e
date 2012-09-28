@@ -43,10 +43,11 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
-    WARNING("Parameters::pup","skipping current_group_");
-    //    PUParray(p,current_group_,MAX_GROUP_DEPTH);
+    bool up = p.isUnpacking();
     p | current_group_depth_;
-    WARNING("Parameters::pup","skipping parameter_map_ ");
+    WARNING("Parameters::pup","skipping current_group_ (array of char *: change to std::string)");
+    //    PUParray(p,current_group_,MAX_GROUP_DEPTH);
+    WARNING("Parameters::pup","skipping parameter_map_ (map <std::string,Param *>)");
     //    p | parameter_map_;
     p | *parameter_tree_;
     p | *monitor_; 

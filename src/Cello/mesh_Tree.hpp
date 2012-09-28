@@ -32,6 +32,8 @@ public: // interface
     p | d_;
     p | r_;
     p | c_;
+    bool up = p.isUnpacking();
+    if (up) root_ = new Node;
     p | *root_;
     p | num_nodes_;
     p | max_level_;

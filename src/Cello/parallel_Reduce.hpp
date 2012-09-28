@@ -31,7 +31,8 @@ public: // interface
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
-    p | *group_process_;
+    WARNING("Reduce::pup","skipping group_process_ (alias)");
+
   }
 #endif
 
