@@ -110,7 +110,11 @@ void Patch::pup (PUP::er &p)
     p | block_exists_;
     p | block_loop_;
     p | factory_;
-    p | *group_process_;
+
+    //    WARNING("Patch::pup","skipping group_process_ (regenerated)");
+    // p | *group_process_;
+    bool up = p.isUnpacking();
+    if (up) group_process_ = GroupProcess::create();
     p | layout_;
     PUParray (p,size_,3);
     PUParray (p,offset_,3);
