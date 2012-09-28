@@ -54,6 +54,44 @@ Output::~Output () throw()
   delete it_field_;  it_field_ = 0;
   delete io_block_;  io_block_ = 0;
 }
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void Output::pup (PUP::er &p)
+{
+
+  // NOTE: change this function whenever attributes change
+
+  TRACEPUP;
+
+  bool n = p.isUnpacking();
+
+  WARNING ("Output::pup","skipping file_");
+  //    p | *file_;
+  WARNING ("Output::pup","skipping schedule_");
+  //  p | *schedule_;
+  p | process_;
+  p | loop_;
+  p | index_charm_;
+  p | cycle_;
+  p | count_;
+  p | time_;
+  p | file_name_;
+  p | file_args_;
+  WARNING("Output::pup","skipping it_field_");
+  //    if (n) it_field_ = new ItField;
+  //    p | *it_field_;
+  if (n) io_block_ = new IoBlock;
+  p | *io_block_;
+  if (n) io_field_block_ = new IoFieldBlock;
+  p | *io_field_block_;
+  p | process_stride_;
+
+}
+#endif
+
 //----------------------------------------------------------------------
 
 bool Output::is_scheduled (int cycle, double time)

@@ -19,6 +19,9 @@ class OutputImage : public Output {
 
 public: // functions
 
+  /// Empty constructor for Charm++ pup()
+  OutputImage() throw() {}
+
   /// Create an uninitialized OutputImage object
   OutputImage(const Factory * factory,
 	      int process_count,
@@ -28,25 +31,16 @@ public: // functions
   virtual ~OutputImage() throw();
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_decl(OutputImage);
+
+  /// Charm++ PUP::able migration constructor
+  OutputImage (CkMigrateMessage *m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
+  void pup (PUP::er &p);
 
-    Output::pup(p);
-
-    p | map_r_;
-    p | map_g_;
-    p | map_b_;
-    p | map_a_;
-    p | op_reduce_;
-    p | axis_;
-    p | nrows_;
-    p | ncols_;
-    PUParray(p,data_,nrows_*ncols_);
-    WARNING("OutputImage::pup","skipping png");
-  // p | *png_;
-  }
 #endif
 
   // Set the image colormap

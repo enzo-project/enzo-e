@@ -42,8 +42,7 @@ public: // interface
   static ItReduce * create (reduce_enum reduce);
 
   /// Delete the ItReduce object
-  virtual ~ItReduce () throw ()
-  {} ;
+  virtual ~ItReduce () throw () {}
   
   /// Reduce another value
   virtual void next (double value) throw() = 0;

@@ -20,6 +20,7 @@ class InputData : public Input {
 
 public: // functions
 
+  /// Empty constructor for Charm++ pup()
   InputData() throw() {}
 
   /// Create an uninitialized InputData object

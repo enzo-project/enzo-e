@@ -16,7 +16,12 @@ class Patch;
 class Schedule;
 class Simulation;
 
-class Output {
+#ifdef CONFIG_USE_CHARM
+class Output : public PUP::able 
+#else
+class Output 
+#endif
+{
 
   /// @class    Output
   /// @ingroup  Io
@@ -25,6 +30,9 @@ class Output {
 
 public: // functions
 
+  /// Empty constructor for Charm++ pup()
+  Output() throw() { }
+
   /// Create an uninitialized Output object
   Output(const Factory * factory) throw();
 
@@ -32,31 +40,16 @@ public: // functions
   virtual ~Output() throw();
 
 #ifdef CONFIG_USE_CHARM
-  /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-    //    p | *file_;
-    WARNING ("Output::pup","skipping file_");
-    p | *schedule_;
-    p | process_;
-    p | loop_;
-    p | index_charm_;
-    p | cycle_;
-    p | count_;
-    p | time_;
-    p | file_name_;
-    p | file_args_;
-    WARNING("Output::pup","skipping it_field_");
-    //    p | *it_field_;
-    WARNING("Output::pup","skipping io_block_");
-    //    p | *io_block_;
-    WARNING("Output::pup","skipping io_field_block");
-    //    p | *io_field_block_;
-    p | process_stride_;
 
-  }
+  /// Charm++ PUP::able declarations
+  PUPable_abstract(Output);
+
+  /// Charm++ PUP::able migration constructor
+  //  Output (CkMigrateMessage *m) : PUP::able(m) {}
+
+  /// CHARM++ Pack / Unpack function
+  void pup (PUP::er &p);
+
 #endif
 
   /// Set file name

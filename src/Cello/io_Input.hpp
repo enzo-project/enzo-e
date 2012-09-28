@@ -29,6 +29,7 @@ class Input
 
 public: // functions
 
+  /// Empty constructor for Charm++ pup()
   Input() throw() { }
 
   /// Create an uninitialized Input object

@@ -22,6 +22,9 @@ class OutputData : public Output {
 
 public: // functions
 
+  /// Empty constructor for Charm++ pup()
+  OutputData() throw() {}
+
   /// Create an uninitialized OutputData object
   OutputData(const Factory * factory,
 	     Parameters * parameters) throw();
@@ -30,13 +33,16 @@ public: // functions
   virtual ~OutputData() throw();
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_decl(OutputData);
+
+  /// Charm++ PUP::able migration constructor
+  OutputData (CkMigrateMessage *m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-    Output::pup(p);
-  }
+  void pup (PUP::er &p);
+
 #endif
 
 public: // virtual functions

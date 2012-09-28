@@ -19,6 +19,9 @@ class OutputRestart : public Output {
 
 public: // functions
 
+  /// Empty constructor for Charm++ pup()
+  OutputRestart() throw() {}
+
   /// Create an uninitialized OutputRestart object
   OutputRestart(const Factory * factory, Parameters * parameters, int process_count) throw();
 
@@ -27,17 +30,15 @@ public: // functions
   {}
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_decl(OutputRestart);
+
+  /// Charm++ PUP::able migration constructor
+  OutputRestart (CkMigrateMessage *m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-
-    Output::pup(p);
-
-    p | dir_name_;
-    p | dir_args_;
-  }
+  void pup (PUP::er &p);
 
 #endif
 

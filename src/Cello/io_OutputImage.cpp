@@ -50,6 +50,30 @@ OutputImage::~OutputImage() throw ()
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+
+void OutputImage::pup (PUP::er &p)
+{
+  TRACEPUP;
+
+  Output::pup(p);
+
+  p | map_r_;
+  p | map_g_;
+  p | map_b_;
+  p | map_a_;
+  p | op_reduce_;
+  p | axis_;
+  p | nrows_;
+  p | ncols_;
+  PUParray(p,data_,nrows_*ncols_);
+  WARNING("OutputImage::pup","skipping png");
+  // p | *png_;
+}
+#endif
+
+//----------------------------------------------------------------------
+
 void OutputImage::set_colormap
 (int n, double * map_r, double * map_g, double * map_b, double * map_a) throw()
 {

@@ -66,6 +66,24 @@ OutputRestart::OutputRestart
 
 }
 
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void OutputRestart::pup (PUP::er &p)
+  {
+    TRACEPUP;
+    // NOTE: change this function whenever attributes change
+
+    Output::pup(p);
+
+    p | dir_name_;
+    p | dir_args_;
+  }
+
+#endif
+
 //======================================================================
 
 void OutputRestart::write ( const Simulation * simulation ) throw()
