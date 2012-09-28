@@ -69,6 +69,9 @@ public: // interface
   void pup(PUP::er &p)
 {
   TRACEPUP;
+
+  bool up = p.isUnpacking();
+
   CBase_Block::pup(p);
 
   p | count_refresh_face_;
@@ -76,11 +79,9 @@ public: // interface
   p | num_field_blocks_;
 
   // allocate field_block_[] vector first if unpacking
-  if (p.isUnpacking()) {
-    field_block_.resize(num_field_blocks_);
-  }
+  if (up) field_block_.resize(num_field_blocks_);
   for (int i=0; i<num_field_blocks_; i++) {
-    if (p.isUnpacking())  field_block_[i] = new FieldBlock;
+    if (up) field_block_[i] = new FieldBlock;
     p | *field_block_[i];
   }
 

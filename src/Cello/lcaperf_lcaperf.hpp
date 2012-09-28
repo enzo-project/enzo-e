@@ -28,11 +28,10 @@ class LcaPerf {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
     p | ip_;
-    p |  attributes_;
-    WARNING("Lcaperf::pup",
-	    "skipping counters_");
-    //    p |  counters_;
-    p |  regions_;
+    p | attributes_;
+    WARNING("Lcaperf::pup","skipping counters_");
+    // p |  counters_;
+    p | regions_;
   }
 #endif
 

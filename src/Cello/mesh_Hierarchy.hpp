@@ -20,6 +20,9 @@ class Hierarchy {
 
 public: // interface
 
+  /// Empty constructor for Charm++ pup()
+  Hierarchy() throw() { }
+  
   /// Initialize a Hierarchy object
   Hierarchy ( const Factory * factory,
 	      int dimension, int refinement) throw ();

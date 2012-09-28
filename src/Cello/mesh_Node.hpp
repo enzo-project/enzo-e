@@ -28,18 +28,21 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
   inline void pup (PUP::er &p)
   {
-    TRACEPUP;
     // NOTE: change this function whenever attributes change
+
+    TRACEPUP;
+    bool up = p.isUnpacking();
+
     TRACE1("data_ = %p",data_);
     // int * test = new int[1];
     // *test = 2;
     // int *& test2 = test;
     // TRACE1 ("test2 = %d",*test2);
     // Patch *& data_alias = (Patch *) data_;
+    if (up) data_ = (void *) new CProxy_Patch;
     p | *((CProxy_Patch *)data_);
-    TRACE0;
     p | size_;
-    if (p.isUnpacking()) child_array_ = new Node[size_];
+    if (up) child_array_ = new Node[size_];
     PUParray(p,child_array_,size_);
   };
 #endif

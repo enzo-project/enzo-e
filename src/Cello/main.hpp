@@ -72,6 +72,7 @@ public:
     CBase_Main::pup(p);
     p|count_exit_;
     WARNING ("Main::pup","skipping monitor_");
+    if (p.isUnpacking()) monitor_ = Monitor::instance();
     //    p|*monitor_;
   }
 

@@ -47,7 +47,7 @@ public: // interface
     // NOTE: change this function whenever attributes change
     p |  level_;
     p |  index_;
-    WARNING("NodeTrace::pup","skipping node_");
+    WARNING("NodeTrace::pup","skipping node_ (vector of pointers)");
     //    p |  node_;
   }
 #endif

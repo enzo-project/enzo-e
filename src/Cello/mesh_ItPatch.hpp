@@ -27,8 +27,13 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
-    TRACEPUP;
     // NOTE: change this function whenever attributes change
+
+    TRACEPUP;
+
+    bool (up) = p.isUnpacking();
+
+    if (up) hierarchy_ = new Hierarchy;
     p | *hierarchy_;
   }
 #endif

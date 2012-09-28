@@ -38,14 +38,15 @@ public: // interface
   inline void pup (PUP::er &p)
   {
 
+    // NOTE: change this function whenever attributes change
+
     TRACEPUP;
 
-    // NOTE: change this function whenever attributes change
-    bool n = p.isUnpacking();
+    bool up = p.isUnpacking();
 
-    if (n) field_descr_ = new FieldDescr;
+    if (up) field_descr_ = new FieldDescr;
     p | *field_descr_;
-    if (n) field_block_ = new FieldBlock;
+    if (up) field_block_ = new FieldBlock;
     p | *field_block_;
     p | array_;
     PUParray(p,face_,3);

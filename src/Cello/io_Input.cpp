@@ -55,7 +55,7 @@ void Input::pup (PUP::er &p)
 
   TRACEPUP;
 
-  bool n = p.isUnpacking();
+  bool up = p.isUnpacking();
 
   WARNING("Input::pup","skipping file_");
   //    p | *file_;
@@ -67,11 +67,11 @@ void Input::pup (PUP::er &p)
   p | file_name_;
   p | file_args_;
   WARNING("Input::pup","skipping it_field_");
-  //    if (n) it_field_ = new ItField;
+  //    if (up) it_field_ = new ItField;
   //    p | *it_field_;
-  if (n) io_block_ = new IoBlock;
+  if (up) io_block_ = new IoBlock;
   p | *io_block_;
-  if (n) io_field_block_ = new IoFieldBlock;
+  if (up) io_field_block_ = new IoFieldBlock;
   p | *io_field_block_;
   p | process_stride_;
 }

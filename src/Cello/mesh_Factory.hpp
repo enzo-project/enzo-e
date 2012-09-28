@@ -48,8 +48,6 @@ public: // interface
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
-
-    // This function intentionally left blank
   }
 #endif
 

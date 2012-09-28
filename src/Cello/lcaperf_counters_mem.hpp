@@ -41,6 +41,8 @@ public: // interface
     // NOTE: change this function whenever attributes change
 
     CountersUser::pup(p);
+
+    WARNING("CountersMem::pup","skipping static members");
   }
 #endif
 

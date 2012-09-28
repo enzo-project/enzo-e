@@ -35,7 +35,7 @@ Hierarchy::~Hierarchy() throw()
 {
   ItNode it_node (patch_tree_);
   while (Node * node = it_node.next_leaf()) {
-    Patch * patch = (Patch *)node->data();
+    Patch * patch = (Patch *) node->data();
     delete patch;
     patch = 0;
   }
@@ -53,13 +53,13 @@ void Hierarchy::pup (PUP::er &p)
   TRACEPUP;
   // NOTE: change this function whenever attributes change
 
-  bool n = p.isUnpacking();
+  bool up = p.isUnpacking();
 
   p | factory_; // PUP::able
   p | dimension_;
   p | refinement_;
   p | patch_count_;
-  if(n) patch_tree_ = new Tree (dimension_, refinement_);
+  if (up) patch_tree_ = new Tree (dimension_, refinement_);
   p | *patch_tree_;
   PUParray(p,root_size_,3);
   PUParray(p,lower_,3);

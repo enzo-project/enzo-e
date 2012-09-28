@@ -29,7 +29,8 @@ public: // interface
     TRACEPUP;
     // NOTE: change this function whenever attributes change
     It<Block>::pup(p);
-    p | *patch_;
+    WARNING("ItBlock::pup","skipping patch_ (aliased pointer)");
+    // p | *patch_;
   }
 #endif
   
