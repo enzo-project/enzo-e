@@ -19,6 +19,19 @@ EnzoTimestepPpml::EnzoTimestepPpml () throw()
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+
+void EnzoTimestepPpml::pup (PUP::er &p)
+{
+  TRACEPUP;
+  // NOTE: change this function whenever attributes change
+  Timestep::pup(p);
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
 double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
 				   Block * block ) throw()
 {

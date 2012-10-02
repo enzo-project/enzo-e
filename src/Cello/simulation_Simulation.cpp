@@ -98,6 +98,64 @@ Simulation::Simulation()
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
+void Simulation::pup (PUP::er &p)
+{
+  TRACEPUP;
+  CBase_Simulation::pup(p);
+  bool up = p.isUnpacking();
+  // NOTE: change this function whenever attributes change
+  p | factory_; // PUP::able
+
+  if (up) parameters_ = new Parameters;
+  p | * parameters_;
+
+  p | parameter_file_;
+
+  if (up) group_process_ = GroupProcess::create();
+
+  p | is_group_process_new_;
+  p | patch_loop_;
+  p | dimension_; 
+  p | cycle_;
+  p | time_;
+  p | dt_;
+  p | stop_;
+
+  if (up) problem_ = new Problem;
+  p | * problem_;
+
+  if (up) performance_simulation_ = new Performance;
+  p | * performance_simulation_;
+
+  if (up) performance_cycle_ = new Performance;
+  p | * performance_cycle_;
+
+  if (up) performance_curr_ = new Performance;
+  p | * performance_curr_;
+
+  if (up) lcaperf_ = new LcaPerf;
+  p | *lcaperf_;
+
+  p | num_perf_;
+  PUParray(p,perf_val_,num_perf_);
+  PUParray(p,perf_min_,num_perf_);
+  PUParray(p,perf_max_,num_perf_);
+  PUParray(p,perf_sum_,num_perf_);
+
+  if (up) monitor_ = Monitor::instance();
+
+  if (up) hierarchy_ = new Hierarchy;
+  p | *hierarchy_;
+
+  if (up) field_descr_ = new FieldDescr;
+  p | *field_descr_;
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation (CkMigrateMessage *m)
   : patch_loop_(0),

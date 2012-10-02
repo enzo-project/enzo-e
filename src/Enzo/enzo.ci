@@ -9,6 +9,10 @@ module enzo {
 
   PUPable EnzoBoundary;
   PUPable EnzoFactory;
+  PUPable EnzoMethodPpm;
+  PUPable EnzoMethodPpml;
+  PUPable EnzoTimestep;
+  PUPable EnzoTimestepPpml;
 
   extern module mesh;
 

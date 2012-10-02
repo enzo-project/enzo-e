@@ -17,6 +17,23 @@ Hierarchy * Factory::create_hierarchy (int dimension, int refinement) const thro
   return new Hierarchy (this,dimension,refinement); 
 }
 
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void Factory::pup (PUP::er &p)
+
+{
+  TRACEPUP;
+
+  PUP::able::pup(p);
+
+  // NOTE: change this function whenever attributes change
+}
+
+#endif
+
 //----------------------------------------------------------------------
 #ifdef CONFIG_USE_CHARM
 CProxy_Patch * 

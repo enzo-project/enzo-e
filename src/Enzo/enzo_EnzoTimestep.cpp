@@ -17,6 +17,19 @@ EnzoTimestep::EnzoTimestep () throw()
 
 }
 
+#ifdef CONFIG_USE_CHARM
+
+//----------------------------------------------------------------------
+
+void EnzoTimestep::pup (PUP::er &p)
+{
+  TRACEPUP;
+  // NOTE: change this function whenever attributes change
+  Timestep::pup(p);
+}
+
+#endif
+
 //----------------------------------------------------------------------
 
 double EnzoTimestep::evaluate ( const FieldDescr * field_descr,

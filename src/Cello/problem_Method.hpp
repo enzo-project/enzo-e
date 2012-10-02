@@ -8,13 +8,22 @@
 #ifndef METHOD_METHOD_HPP
 #define METHOD_METHOD_HPP
 
-class Method {
+#ifdef CONFIG_USE_CHARM
+class Method : public PUP::able 
+#else
+class Method 
+#endif
+{
+
 
   /// @class    Method
   /// @ingroup  Method
   /// @brief    [\ref Method] Interface to an application method / analysis / visualization function.
 
 public: // interface
+
+  /// Create a new Method
+  Method () throw() {}
 
   /// Create a new Method
   Method(Parameters * parameters) throw()
@@ -25,12 +34,14 @@ public: // interface
   {}
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_abstract(Method);
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-  }
+  void pup (PUP::er &p)
+  { TRACEPUP; PUP::able::pup(p); }
+
 #endif
 
 public: // virtual functions

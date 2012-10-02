@@ -34,15 +34,25 @@ void Problem::pup (PUP::er &p)
   // NOTE: change this function whenever attributes change
 
   TRACEPUP;
+
+  bool up = p.isUnpacking();
+
   p | boundary_; // PUP::able
+
   WARNING("Problem::pup", "skipping initial_list_");
   //  std::vector<Initial *> initial_list_;
+
+  if (up) stopping_ = new Stopping;
   p | *stopping_;
-  p | *timestep_;
+
+  p | timestep_; // PUP::able
+
   WARNING("Problem::pup", "skipping method_list_");
   //    std::vector<Method *> method_list_;
+
   WARNING("Problem::pup", "skipping output_list_");
   //  std::vector<Output *> output_list_;
+
   p | index_initial_;
   p | index_output_;
 

@@ -34,7 +34,8 @@ public: // interface
   PUPable_abstract(Boundary);
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  void pup (PUP::er &p) 
+  { TRACEPUP; PUP::able::pup(p); };
 
 #endif
 

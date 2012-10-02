@@ -55,6 +55,8 @@ void Input::pup (PUP::er &p)
 
   TRACEPUP;
 
+  PUP::able::pup(p);
+
   bool up = p.isUnpacking();
 
   WARNING("Input::pup","skipping file_");

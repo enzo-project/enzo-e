@@ -109,7 +109,7 @@ void Patch::pup (PUP::er &p)
     p | *block_array_;
     p | block_exists_;
     p | block_loop_;
-    p | factory_;
+    p | factory_; // PUP::able
 
     //    WARNING("Patch::pup","skipping group_process_ (regenerated)");
     // p | *group_process_;

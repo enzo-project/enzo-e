@@ -20,13 +20,16 @@ public: // interface
   EnzoTimestep() throw();
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_decl(EnzoTimestep);
+  
+  /// Charm++ PUP::able migration constructor
+  EnzoTimestep (CkMigrateMessage *m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-    Timestep::pup(p);
-  }
+  void pup (PUP::er &p);
+  
 #endif
 
 public: // virtual functions

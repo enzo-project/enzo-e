@@ -19,6 +19,19 @@ EnzoMethodPpm::EnzoMethodPpm ( Parameters * parameters )
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+
+void EnzoMethodPpm::pup (PUP::er &p)
+{
+  TRACEPUP;
+  // NOTE: change this function whenever attributes change
+  Method::pup(p);
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
 void EnzoMethodPpm::compute_block
 (
  FieldDescr * field_descr, Block * block) throw()

@@ -44,11 +44,8 @@ public: // interface
   Factory (CkMigrateMessage *m) : PUP::able(m) {}
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-  }
+  void pup (PUP::er &p);
+
 #endif
 
   /// Create a new Hierarchy [abstract factory design pattern]

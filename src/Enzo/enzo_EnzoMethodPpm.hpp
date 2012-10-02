@@ -19,16 +19,20 @@ public: // interface
   /// Create a new EnzoMethodPpm object
   EnzoMethodPpm(Parameters * parameters);
 
+
 #ifdef CONFIG_USE_CHARM
-  /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-    Method::pup(p);
-  }
-#endif
+
+  /// Charm++ PUP::able declarations
+  PUPable_decl(EnzoMethodPpm);
   
+  /// Charm++ PUP::able migration constructor
+  EnzoMethodPpm (CkMigrateMessage *m) {}
+
+  /// CHARM++ Pack / Unpack function
+  void pup (PUP::er &p);
+  
+#endif
+
   /// Apply the method to advance a block one timestep 
   virtual void compute_block(FieldDescr *, Block * block) throw();
 
