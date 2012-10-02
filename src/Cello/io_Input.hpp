@@ -30,7 +30,7 @@ class Input
 public: // functions
 
   /// empty constructor for charm++ pup()
-  Input() throw() { }
+  Input() throw() {}
 
   /// Create an uninitialized Input object
   Input(const Factory * factory) throw();

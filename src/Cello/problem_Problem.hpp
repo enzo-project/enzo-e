@@ -48,24 +48,7 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    // NOTE: change this function whenever attributes change
-
-    TRACEPUP;
-    p | *boundary_;
-    WARNING("Problem::pup", "skipping initial_list_");
-    //  std::vector<Initial *> initial_list_;
-    p | *stopping_;
-    p | *timestep_;
-    WARNING("Problem::pup", "skipping method_list_");
-    //    std::vector<Method *> method_list_;
-    WARNING("Problem::pup", "skipping output_list_");
-    //  std::vector<Output *> output_list_;
-    p | index_initial_;
-    p | index_output_;
-
-  }
+  void pup (PUP::er &p);
 #endif
 
   /// Return the boundary object

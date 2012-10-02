@@ -36,6 +36,27 @@ InitialFile::~InitialFile() throw()
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+void InitialFile::pup (PUP::er &p)
+  {
+    TRACEPUP;
+
+    bool up = p.isUnpacking();
+
+    Initial::pup(p);
+
+    if (up) parameters_ = new Parameters;
+    p | *parameters_;
+
+    if (up) group_process_ = GroupProcess::create();
+    p | input_; // PUP::able
+    p | block_loop_;
+  }
+
+#endif
+
+//----------------------------------------------------------------------
+
 void InitialFile::enforce
 (
  Block            * block,

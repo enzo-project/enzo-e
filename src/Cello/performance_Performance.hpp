@@ -48,7 +48,7 @@ public: // interface
     p | timer_;
     p | papi_;
     WARNING("Performance::pup",
-	    "skipping std::vector<PerfCounters *> counters_");
+	    "skipping counters_ [ not accessed except deallocate ]");
   //  std::vector<PerfCounters *> counters_;
     p | attribute_names_;
     p | counter_names_;

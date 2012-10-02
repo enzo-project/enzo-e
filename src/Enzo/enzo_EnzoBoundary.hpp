@@ -37,14 +37,16 @@ public: // interface
   EnzoBoundary(boundary_type boundary_type) throw();
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_decl(EnzoBoundary);
+  
+  /// Charm++ PUP::able migration constructor
+  EnzoBoundary (CkMigrateMessage *m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-    Boundary::pup(p);
-    p |  boundary_type_;
-  }
+  void pup (PUP::er &p);
+  
 #endif
 
 public: // virtual functions

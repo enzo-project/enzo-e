@@ -38,6 +38,7 @@ public: // interface
     p | t1_.tv_usec;
     p | t2_.tv_sec;
     p | t2_.tv_usec;
+    WARNING ("Timer::pup","skipping tz_ [not accessed]");
     // tz_ only there for gettimeofday() calls: value is never used
   }
 #endif

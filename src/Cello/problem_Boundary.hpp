@@ -8,7 +8,13 @@
 #ifndef METHOD_BOUNDARY_HPP
 #define METHOD_BOUNDARY_HPP
 
-class Boundary {
+
+#ifdef CONFIG_USE_CHARM
+class Boundary : public PUP::able 
+#else
+class Boundary 
+#endif
+{
 
   /// @class    Boundary
   /// @ingroup  Method
@@ -17,20 +23,19 @@ class Boundary {
 public: // interface
 
   /// Create a new Boundary
-  Boundary() throw()
-  {};
+  Boundary() throw() {}
 
   /// Destructor
-  virtual ~Boundary() throw()
-  {}
+  virtual ~Boundary() throw() {}
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_abstract(Boundary);
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-  }
+  void pup (PUP::er &p);
+
 #endif
 
 

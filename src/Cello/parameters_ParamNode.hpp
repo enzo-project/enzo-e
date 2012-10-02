@@ -59,7 +59,7 @@ public: // interface
     TRACEPUP;
     // NOTE: change this function whenever attributes change
     p | name_;
-    WARNING("ParamNode::pup","skipping subnodes_");
+    WARNING("ParamNode::pup","skipping subnodes_ [ map<string,Param*> ]");
     //    p | subnodes_;
   }
 #endif

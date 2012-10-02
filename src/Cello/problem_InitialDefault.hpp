@@ -27,8 +27,13 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    // NOTE: update whenever attributes change
+
     TRACEPUP;
-    // NOTE: change this function whenever attributes change
+
+    bool up = p.isUnpacking();
+
+    if (up) parameters_ = new Parameters;
     p | *parameters_;
   }
 #endif

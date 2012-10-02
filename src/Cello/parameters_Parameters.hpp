@@ -43,7 +43,6 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
-    bool up = p.isUnpacking();
     p | current_group_depth_;
     WARNING("Parameters::pup","skipping current_group_ (array of char *: change to std::string)");
     //    PUParray(p,current_group_,MAX_GROUP_DEPTH);
