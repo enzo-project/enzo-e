@@ -42,6 +42,7 @@ extern const char * parameter_type_name [];
 //----------------------------------------------------------------------
 
 #include "parse.h"
+#include "parameters_Config.hpp"
 #include "parameters_Param.hpp"
 #include "parameters_ParamNode.hpp"
 #include "parameters_Parameters.hpp"
