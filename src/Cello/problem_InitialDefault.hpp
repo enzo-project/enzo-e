@@ -16,6 +16,9 @@ class InitialDefault : public Initial {
 
 public: // interface
 
+  /// CHARM++ constructor
+  InitialDefault() throw() { }
+  
   /// Constructor
   InitialDefault(Parameters * parameters, int cycle, double time) throw();
 
@@ -24,20 +27,16 @@ public: // interface
   {}
 
 #ifdef CONFIG_USE_CHARM
+
+  PUPable_decl(InitialDefault);
+
+  InitialDefault(CkMigrateMessage *m) : Initial (m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    // NOTE: update whenever attributes change
+  void pup (PUP::er &p);
 
-    TRACEPUP;
-
-    bool up = p.isUnpacking();
-
-    if (up) parameters_ = new Parameters;
-    p | *parameters_;
-  }
 #endif
-  
+
   /// Read initialization values from Initial group in parameter file
 
   virtual void enforce (Block * block,

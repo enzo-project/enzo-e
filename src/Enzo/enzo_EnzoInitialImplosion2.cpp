@@ -13,8 +13,22 @@
 
 EnzoInitialImplosion2::EnzoInitialImplosion2 
 (int init_cycle, double init_time) throw ()
-  : Initial(init_cycle, init_time)
-{}
+  : Initial(init_cycle, init_time) 
+{ }
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void EnzoInitialImplosion2::pup (PUP::er &p)
+{
+  // NOTE: update whenever attributes change
+
+  TRACEPUP;
+
+  Initial::pup(p);
+}
+#endif
 
 //----------------------------------------------------------------------
 

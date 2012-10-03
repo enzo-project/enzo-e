@@ -8,6 +8,19 @@
 #include "enzo.hpp"
 
 #include "charm_enzo.hpp"
+
+//----------------------------------------------------------------------
+
+void EnzoFactory::pup (PUP::er &p)
+{
+  // NOTE: change this function whenever attributes change
+
+  TRACEPUP;
+
+  Factory::pup(p);
+
+}
+
 //----------------------------------------------------------------------
 
 IoBlock * EnzoFactory::create_io_block () const throw()

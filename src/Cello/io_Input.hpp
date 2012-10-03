@@ -15,10 +15,9 @@ class ItField;
 class Patch;
 class Simulation;
 
+class Input
 #ifdef CONFIG_USE_CHARM
-class Input : public PUP::able 
-#else
-class Input 
+  : public PUP::able 
 #endif
 {
 

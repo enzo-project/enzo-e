@@ -22,6 +22,9 @@ class InitialFile : public Initial {
 
 public: // interface
 
+  /// CHARM++ constructor
+  InitialFile() throw() { }
+
   /// Constructor
   InitialFile(Parameters * parameters, 
 	      const GroupProcess * group_process,
@@ -31,8 +34,14 @@ public: // interface
   virtual ~InitialFile() throw();
 
 #ifdef CONFIG_USE_CHARM
+
+  PUPable_decl(InitialFile);
+
+  InitialFile(CkMigrateMessage *m) : Initial (m) {}
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
+
 #endif
 
   /// Read initialization values from Initial group in parameter file

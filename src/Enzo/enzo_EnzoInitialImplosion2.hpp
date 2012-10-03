@@ -16,17 +16,21 @@ class EnzoInitialImplosion2 : public Initial {
 
 public: // interface
 
+  /// CHARM++ constructor
+  EnzoInitialImplosion2() throw() { }
+  
   /// Constructor
   EnzoInitialImplosion2(int cycle, double time) throw();
 
 #ifdef CONFIG_USE_CHARM
+
+  PUPable_decl(EnzoInitialImplosion2);
+
+  EnzoInitialImplosion2(CkMigrateMessage *m) : Initial (m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-    Initial::pup(p);
-  }
+  void pup (PUP::er &p);
+
 #endif
 
   /// Initialize the block

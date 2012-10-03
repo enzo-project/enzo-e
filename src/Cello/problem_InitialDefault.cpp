@@ -21,6 +21,26 @@ InitialDefault::InitialDefault
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+
+void InitialDefault::pup (PUP::er &p)
+{
+  // NOTE: update whenever attributes change
+
+  TRACEPUP;
+
+  Initial::pup(p);
+
+  bool up = p.isUnpacking();
+
+  if (up) parameters_ = new Parameters;
+  p | *parameters_;
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
 void InitialDefault::enforce
 (
  Block            * block,

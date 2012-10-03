@@ -17,14 +17,21 @@ EnzoBoundary::EnzoBoundary (boundary_type boundary_type) throw()
 { 
 }
 
+//----------------------------------------------------------------------
+
 #ifdef CONFIG_USE_CHARM
 
 void EnzoBoundary::pup (PUP::er &p)
 {
-  TRACEPUP;
+
   // NOTE: change this function whenever attributes change
+
+  TRACEPUP;
+
   Boundary::pup(p);
-  p |  boundary_type_;
+
+  p | boundary_type_;
+
 }
 
 #endif

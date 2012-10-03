@@ -19,6 +19,21 @@ extern CProxy_SimulationCharm  proxy_simulation;
 
 //----------------------------------------------------------------------
 
+void Initial::pup (PUP::er &p)
+{
+  // NOTE: change this function whenever attributes change
+
+  TRACEPUP;
+
+  PUP::able::pup(p);
+
+  p | cycle_;
+  p | time_;
+
+}
+
+//----------------------------------------------------------------------
+
 void Initial::enforce_
 ( Simulation * simulation ) throw()
 {

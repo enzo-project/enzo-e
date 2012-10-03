@@ -13,6 +13,7 @@ module enzo {
   PUPable EnzoMethodPpml;
   PUPable EnzoTimestep;
   PUPable EnzoTimestepPpml;
+  PUPable EnzoInitialImplosion2;
 
   extern module mesh;
 

@@ -100,10 +100,13 @@ Simulation::Simulation()
 #ifdef CONFIG_USE_CHARM
 void Simulation::pup (PUP::er &p)
 {
+  // NOTE: change this function whenever attributes change
+
   TRACEPUP;
+
   CBase_Simulation::pup(p);
   bool up = p.isUnpacking();
-  // NOTE: change this function whenever attributes change
+
   p | factory_; // PUP::able
 
   if (up) parameters_ = new Parameters;

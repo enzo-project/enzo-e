@@ -8,13 +8,20 @@
 #ifndef METHOD_INITIAL_HPP
 #define METHOD_INITIAL_HPP
 
-class Initial {
+class Initial
+#ifdef CONFIG_USE_CHARM
+  : public PUP::able 
+#endif
+{
 
   /// @class    Initial
   /// @ingroup  Method
   /// @brief    [\ref Method] Encapsulate an initial conditions generator
 
 public: // interface
+
+ /// empty constructor for charm++ pup()
+  Initial() throw() {}
 
   /// Create a new Initial
   Initial(int cycle, double time) throw()
@@ -26,17 +33,18 @@ public: // interface
   {} ;
 
 #ifdef CONFIG_USE_CHARM
+
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(Initial);
+
+  /// CHARM++ migration constructor for PUP::able
+
+  Initial (CkMigrateMessage *m) : PUP::able(m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-    p | cycle_;
-    p | time_;
+  void pup (PUP::er &p);
 
-  }
 #endif
-
 
   /// Initial time
   double time() const throw() { return time_; }

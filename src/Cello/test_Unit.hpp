@@ -68,13 +68,15 @@ private:
     TRACEPUP;
     // NOTE: change this function whenever attributes change
 
+    WARNING ("Unit::pup","skipping instance_ [static]");
+
     PUParray (p,class_name_,UNIT_MAX_NAME_LEN);
     PUParray (p,func_name_, UNIT_MAX_NAME_LEN);
     p | test_num_;
     p | is_active_;
     p | comm_size_;
-    WARNING ("Unit::pup","skipping comm_rank_");
-    //  p | comm_rank_;
+    WARNING ("Unit::pup","pupping comm_rank_");
+    p | comm_rank_;
     p | timer_;
 
   }

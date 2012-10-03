@@ -192,21 +192,23 @@ public: // interface
    int patch_rank,
    int num_field_blocks) throw();
 
-  /// Pack / unpack the Block in a CHARM++ program
+  /// Pack / unpack the EnzoBlock in a CHARM++ program
   void pup(PUP::er &p)
   { 
 
     TRACEPUP;
+    TRACE ("BEGIN EnzoBlock::pup()");
+
     Block::pup(p);
 
-    TRACE ("BEGIN EnzoBlock::pup()");
+
     p | Time_;
     p | CycleNumber;
     p | OldTime;
     p | dt;
 
-    WARNING("EnzoBlock::pup()", "AccelerationField not pup'ed");
-    WARNING("EnzoBlock::pup()", "SubgridFluxes not pup'ed");
+    WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
+    WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
 
     PUParray(p,GridLeftEdge,MAX_DIMENSION); 
     PUParray(p,GridDimension,MAX_DIMENSION); 
@@ -214,15 +216,14 @@ public: // interface
     PUParray(p,GridEndIndex,MAX_DIMENSION); 
     PUParray(p,CellWidth,MAX_DIMENSION);
 
-    WARNING("EnzoBlock::pup()", "BaryonField not pup'ed");
-    WARNING("EnzoBlock::pup()", "OldBaryonField not pup'ed");
-    TRACE1("NumberOfBaryonFields = %d",EnzoBlock::NumberOfBaryonFields);
     if (p.isUnpacking()) {
       for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-	TRACE2("p[%d] = %p",field,field_block_[0]->field_values(field));
 	BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
       }
     }
+
+    WARNING("EnzoBlock::pup()", "skipping OldBaryonField[] [not used]");
+
     TRACE ("END EnzoBlock::pup()");
 
   };

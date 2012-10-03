@@ -17,8 +17,8 @@ class EnzoFactory : public Factory {
 
 public: // interface
 
-  EnzoFactory() throw()
-  {   }
+  /// CHARM++ constructor
+  EnzoFactory() throw() { }
 
 #ifdef CONFIG_USE_CHARM
 
@@ -27,12 +27,8 @@ public: // interface
   EnzoFactory(CkMigrateMessage *m) : Factory (m) {}
 
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-    Factory::pup(p);
-  }
+  void pup (PUP::er &p);
+
 #endif
 
   /// Create the Input / Output accessor object for EnzoBlock
