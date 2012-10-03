@@ -27,7 +27,7 @@ class Factory
 public: // interface
 
   Factory() throw()
-  {}
+  { TRACE("Factory::Factory()"); }
  
   /// Destructor (must be present to avoid possible vtable link errors)
   virtual ~Factory() throw()
@@ -43,7 +43,7 @@ public: // interface
   Factory (CkMigrateMessage *m) : PUP::able(m) {}
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  virtual void pup (PUP::er &p);
 
 #endif
 

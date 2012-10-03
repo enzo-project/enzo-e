@@ -35,7 +35,7 @@ public: // functions
   PUPable_decl(OutputRestart);
 
   /// Charm++ PUP::able migration constructor
-  OutputRestart (CkMigrateMessage *m) {}
+  OutputRestart (CkMigrateMessage *m) : Output (m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

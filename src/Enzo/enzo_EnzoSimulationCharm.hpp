@@ -29,8 +29,7 @@ public: // functions
   EnzoSimulationCharm() {}
 
   /// CHARM++ Migration constructor
-  EnzoSimulationCharm(CkMigrateMessage*)
-  {};
+  EnzoSimulationCharm(CkMigrateMessage * m) : SimulationCharm(m)  { };
 
   /// Destructor
   ~EnzoSimulationCharm() throw();

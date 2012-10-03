@@ -53,13 +53,13 @@ public: // interface
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
-#ifdef CONFIG_USE_CHARM
    CProxy_Patch proxy_patch,
-#endif
    int patch_id,
    int patch_rank,
    int num_field_blocks
 ) throw();
+
+#endif
 
   /// Initialize an empty Block
   Block() { };
@@ -101,8 +101,12 @@ public: // interface
 #endif
 
 //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
   /// Initialize a migrated Block
-  Block (CkMigrateMessage *m) { };
+  Block (CkMigrateMessage *m) 
+    : CBase_Block(m) { };
 
 #endif
 

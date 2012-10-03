@@ -61,6 +61,7 @@ public:
 
   /// Migration constructor
   Main(CkMigrateMessage * m)
+    : CBase_Main(m)
   { 
     TRACE("Main::Main(CkMigrateMessage)");
   }

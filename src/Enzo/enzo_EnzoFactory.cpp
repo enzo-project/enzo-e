@@ -17,6 +17,7 @@ void EnzoFactory::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
 
+  TRACE0;
   TRACEPUP;
 
   Factory::pup(p);

@@ -175,6 +175,7 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
   /// Initialize a migrated Block
   EnzoBlock (CkMigrateMessage *m) 
+    : Block (m)
   {
     TRACE("CkMigrateMessage");
     //    initialize();

@@ -32,7 +32,8 @@ public: // functions
   SimulationCharm() {}
 
   /// CHARM++ Migration constructor
-  SimulationCharm(CkMigrateMessage*)
+  SimulationCharm(CkMigrateMessage*m)
+    : Simulation(m)
   {}
 
   /// CHARM++ Pack / Unpack function

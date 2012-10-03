@@ -108,9 +108,6 @@ void Patch::pup (PUP::er &p)
     if (p.isUnpacking()) block_array_ = new CProxy_Block;
     p | *block_array_;
     p | block_exists_;
-    p | block_loop_;
-    p | factory_; // PUP::able
-
     //    WARNING("Patch::pup","skipping group_process_ (regenerated)");
     // p | *group_process_;
     bool up = p.isUnpacking();
@@ -121,6 +118,12 @@ void Patch::pup (PUP::er &p)
     PUParray (p,blocking_,3);
     PUParray (p,lower_,3);
     PUParray (p,upper_,3);
+    TRACE0;
+    //    WARNING("Patch::pup","skipping factory_ (crashes)");
+    p | factory_; // PUP::able // CRASHES 2012-10-03
+    TRACE0;
+    p | block_loop_;
+
   }
 #endif
 

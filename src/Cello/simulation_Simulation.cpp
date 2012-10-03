@@ -161,7 +161,8 @@ void Simulation::pup (PUP::er &p)
 #ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation (CkMigrateMessage *m)
-  : patch_loop_(0),
+  : CBase_Simulation(m),
+    patch_loop_(0),
     lcaperf_(0)
 { TRACE("Simulation(CkMigrateMessage)"); }
 

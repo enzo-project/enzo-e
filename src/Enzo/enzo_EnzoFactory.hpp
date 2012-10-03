@@ -18,7 +18,7 @@ class EnzoFactory : public Factory {
 public: // interface
 
   /// CHARM++ constructor
-  EnzoFactory() throw() { }
+  EnzoFactory() throw() { TRACE ("EnzoFactory::EnzoFactory()"); }
 
 #ifdef CONFIG_USE_CHARM
 
@@ -27,7 +27,7 @@ public: // interface
   EnzoFactory(CkMigrateMessage *m) : Factory (m) {}
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  virtual void pup (PUP::er &p);
 
 #endif
 
