@@ -32,7 +32,11 @@ class Simulation;
 class Stopping;
 class Timestep;
 
-class Problem {
+class Problem 
+#ifdef CONFIG_USE_CHARM
+  : public PUP::able
+#endif
+{
 
   /// @class    Problem
   /// @ingroup  Problem
@@ -46,9 +50,19 @@ public: // interface
   /// Destructor
   virtual ~Problem() throw();
 
+
 #ifdef CONFIG_USE_CHARM
+
+  /// CHARM++ function for determining the specific class in the class hierarchy
+  PUPable_decl(Problem);
+
+  /// CHARM++ migration constructor for PUP::able
+
+  Problem (CkMigrateMessage *m) : PUP::able(m) {}
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
+
 #endif
 
   /// Return the boundary object

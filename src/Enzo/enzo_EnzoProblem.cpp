@@ -22,6 +22,21 @@ EnzoProblem::~EnzoProblem() throw ()
 {
 }
 
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void EnzoProblem::pup (PUP::er &p)
+{
+  // NOTE: change this function whenever attributes change
+
+  TRACEPUP;
+
+  Problem::pup(p);
+}
+
+#endif
+
 //======================================================================
 
 Boundary * EnzoProblem::create_boundary_

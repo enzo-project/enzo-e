@@ -19,6 +19,8 @@ extern CProxy_SimulationCharm  proxy_simulation;
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+
 void Initial::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
@@ -31,6 +33,8 @@ void Initial::pup (PUP::er &p)
   p | time_;
 
 }
+
+#endif
 
 //----------------------------------------------------------------------
 

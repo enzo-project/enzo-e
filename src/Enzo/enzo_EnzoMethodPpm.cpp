@@ -23,9 +23,13 @@ EnzoMethodPpm::EnzoMethodPpm ( Parameters * parameters )
 
 void EnzoMethodPpm::pup (PUP::er &p)
 {
-  TRACEPUP;
+
   // NOTE: change this function whenever attributes change
+
+  TRACEPUP;
+
   Method::pup(p);
+
 }
 
 #endif

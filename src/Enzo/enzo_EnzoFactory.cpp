@@ -11,6 +11,8 @@
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+
 void EnzoFactory::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
@@ -20,6 +22,8 @@ void EnzoFactory::pup (PUP::er &p)
   Factory::pup(p);
 
 }
+
+#endif
 
 //----------------------------------------------------------------------
 

@@ -14,10 +14,9 @@ class IoBlock;
 class IoFieldBlock;
 class Patch;
 
+class Factory
 #ifdef CONFIG_USE_CHARM
-class Factory : public PUP::able 
-#else
-class Factory 
+  : public PUP::able 
 #endif
 {
   /// @class    Factory

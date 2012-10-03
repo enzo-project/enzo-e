@@ -24,13 +24,16 @@ public: // interface
   ~EnzoProblem() throw();
 
 #ifdef CONFIG_USE_CHARM
+
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(EnzoProblem);
+
+  /// CHARM++ migration constructor
+  EnzoProblem(CkMigrateMessage *m) : Problem (m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-    Problem::pup(p);
-  }
+  void pup (PUP::er &p);
+
 #endif
 
 private: // functions

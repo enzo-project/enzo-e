@@ -8,16 +8,14 @@
 module mesh {
 
   PUPable Factory;
-
   PUPable Initial;
   PUPable InitialDefault;
   PUPable InitialFile;
-
   PUPable InputData;
-
+  PUPable OutputData;
   PUPable OutputImage;
   PUPable OutputRestart;
-  PUPable OutputData;
+  PUPable Problem;
 
   chare [migratable] Patch {
 

@@ -35,6 +35,8 @@ void Problem::pup (PUP::er &p)
 
   TRACEPUP;
 
+  PUP::able::pup(p);
+
   bool up = p.isUnpacking();
 
   p | boundary_; // PUP::able

@@ -24,8 +24,10 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
+  /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialImplosion2);
 
+  /// CHARM++ migration constructor
   EnzoInitialImplosion2(CkMigrateMessage *m) : Initial (m) {}
 
   /// CHARM++ Pack / Unpack function

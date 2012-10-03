@@ -9,11 +9,12 @@ module enzo {
 
   PUPable EnzoBoundary;
   PUPable EnzoFactory;
+  PUPable EnzoInitialImplosion2;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
+  PUPable EnzoProblem;
   PUPable EnzoTimestep;
   PUPable EnzoTimestepPpml;
-  PUPable EnzoInitialImplosion2;
 
   extern module mesh;
 
