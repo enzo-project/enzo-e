@@ -144,9 +144,13 @@ void Simulation::pup (PUP::er &p)
   p | *lcaperf_;
 
   p | num_perf_;
+  if (up) perf_val_ = new double [num_perf_];
   PUParray(p,perf_val_,num_perf_);
+  if (up) perf_min_ = new double [num_perf_];
   PUParray(p,perf_min_,num_perf_);
+  if (up) perf_max_ = new double [num_perf_];
   PUParray(p,perf_max_,num_perf_);
+  if (up) perf_sum_ = new double [num_perf_];
   PUParray(p,perf_sum_,num_perf_);
 
   if (up) monitor_ = Monitor::instance();
@@ -434,32 +438,14 @@ void Simulation::initialize_hierarchy_() throw()
 
   // Domain extents
 
-  //--------------------------------------------------
-  // parameter: Domain : lower
-  // parameter: Domain : upper
-  //--------------------------------------------------
-
-  ASSERT ("Simulation::initialize_hierarchy_",
-	  "Parameter Domain:lower list length must match Physics::dimension",
-	  (parameters_->list_length("Domain:lower") == dimension_));
-
-  ASSERT ("Simulation::initialize_hierarchy_",
-	  "Parameter Domain:upper list length must match Physics::dimension",
-	  (parameters_->list_length("Domain:upper") ==  dimension_));
-
-  double lower[3];
-  double upper[3];
-
-  for (int i=0; i<3; i++) {
-    lower[i] = parameters_->list_value_float(i, "Domain:lower", 0.0);
-    upper[i] = parameters_->list_value_float(i, "Domain:upper", 0.0);
-    ASSERT ("Simulation::initialize_hierarchy_",
-	    "Domain:lower may not be greater than Domain:upper",
-	    lower[i] <= upper[i]);
-  }
-
-  hierarchy_->set_lower(lower[0], lower[1], lower[2]);
-  hierarchy_->set_upper(upper[0], upper[1], upper[2]);
+  hierarchy_->set_lower
+    (config_.domain_lower[0], 
+     config_.domain_lower[1], 
+     config_.domain_lower[2]);
+  hierarchy_->set_upper
+    (config_.domain_upper[0], 
+     config_.domain_upper[1], 
+     config_.domain_upper[2]);
 
   //----------------------------------------------------------------------
   // Create and initialize root Patch in Hierarchy

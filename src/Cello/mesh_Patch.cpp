@@ -118,10 +118,7 @@ void Patch::pup (PUP::er &p)
     PUParray (p,blocking_,3);
     PUParray (p,lower_,3);
     PUParray (p,upper_,3);
-    TRACE0;
-    //    WARNING("Patch::pup","skipping factory_ (crashes)");
-    p | factory_; // PUP::able // CRASHES 2012-10-03
-    TRACE0;
+    //    p | factory_; // not used unless ifndef CONFIG_USE_CHARM
     p | block_loop_;
 
   }

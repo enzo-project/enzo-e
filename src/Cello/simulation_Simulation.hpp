@@ -151,7 +151,7 @@ public: // virtual functions
 
   /// Return a Hierarchy factory object
   virtual const Factory * factory () const throw();
-
+  
 protected: // functions
 
   /// Initialize the Problem object

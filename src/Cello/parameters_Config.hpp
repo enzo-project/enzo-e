@@ -66,7 +66,7 @@ public: // attributes
   bool                       enzo_ppm_use_minimum_pressure_support;
 
   int                        field_alignment;
-  std::vector<bool>          field_centering [MAX_FIELDS];
+  std::vector<int>           field_centering [MAX_FIELDS];
   double                     field_courant;
   std::vector<std::string>   field_fields;
   int                        field_ghosts[3];;

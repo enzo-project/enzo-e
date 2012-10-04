@@ -8,7 +8,9 @@
 #ifndef MESH_PATCH_HPP
 #define MESH_PATCH_HPP
 
+#ifndef CONFIG_USE_CHARM
 class Factory;
+#endif
 
 #ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
@@ -198,8 +200,10 @@ protected: // attributes
   std::vector<Block * > block_;
 #endif
 
+#ifndef CONFIG_USE_CHARM
   /// Factory object for creating Blocks
   Factory * factory_;
+#endif
   
   /// Parallel Group for distributing the Mesh across processors
   GroupProcess * group_process_;
