@@ -42,7 +42,7 @@ void EnzoProblem::pup (PUP::er &p)
 Boundary * EnzoProblem::create_boundary_
 (
  std::string  name,
- Parameters * parameters
+ Config * config
  ) throw ()
 /// @param name   Name of boundary condition to use
 {
@@ -58,7 +58,7 @@ Boundary * EnzoProblem::create_boundary_
   } else if (name == "periodic") {
     boundary = new EnzoBoundary (boundary_type_periodic);
   } else {
-    boundary = Problem::create_boundary_(name,parameters);
+    boundary = Problem::create_boundary_(name,config);
   }
 	     
   return boundary;

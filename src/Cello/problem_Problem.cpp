@@ -64,15 +64,15 @@ void Problem::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_boundary(Parameters * parameters) throw()
+void Problem::initialize_boundary(Config * config) throw()
 {
   //--------------------------------------------------
   // parameter: Boundary : type
   //--------------------------------------------------
 
-  std::string type = parameters->value_string("Boundary:type","");
+  std::string type = config->boundary_type;
 
-  boundary_ = create_boundary_(type,parameters);
+  boundary_ = create_boundary_(type,config);
 
   ASSERT1("Problem::initialize_boundary",
 	  "Boundary type %s not recognized",
@@ -741,7 +741,7 @@ void Problem::deallocate_() throw()
 Boundary * Problem::create_boundary_
 (
  std::string  name,
- Parameters * parameters
+ Config * config
  ) throw ()
 {
   // No default Boundary object

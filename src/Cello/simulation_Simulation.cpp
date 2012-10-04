@@ -82,6 +82,8 @@ Simulation::Simulation
   lcaperf_->begin();
 
   parameters_ = new Parameters(parameter_file,monitor_);
+
+  config_.read(parameters_);
 }
 
 //----------------------------------------------------------------------
@@ -111,6 +113,8 @@ void Simulation::pup (PUP::er &p)
 
   if (up) parameters_ = new Parameters;
   p | * parameters_;
+
+  p | config_;
 
   p | parameter_file_;
 
@@ -164,7 +168,7 @@ Simulation::Simulation (CkMigrateMessage *m)
   : CBase_Simulation(m),
     patch_loop_(0),
     lcaperf_(0)
-{ TRACE("Simulation(CkMigrateMessage)"); }
+{ TRACE("Simulation(Ck`MigrateMessage)"); }
 
 #endif
 
@@ -186,7 +190,7 @@ void Simulation::initialize() throw()
 
   initialize_data_descr_();
 
-  problem_->initialize_boundary(parameters_);
+  problem_->initialize_boundary(&config_);
   problem_->initialize_initial (parameters_,group_process_);
   problem_->initialize_stopping(parameters_);
   problem_->initialize_timestep(parameters_);
@@ -217,13 +221,7 @@ void Simulation::finalize() throw()
 void Simulation::initialize_simulation_() throw()
 {
 
-  //--------------------------------------------------
-  // parameter: Mesh    : root_rank
-  // parameter: Initial : cycle
-  // parameter: Initial : time
-  //--------------------------------------------------
-
-  dimension_ = parameters_->value_integer("Mesh:root_rank",0);
+  dimension_ = config_.mesh_root_rank;
   
   ASSERT ("Simulation::initialize_simulation_()", 
 	  "Parameter 'Mesh:root_rank' must be specified",
@@ -233,8 +231,8 @@ void Simulation::initialize_simulation_() throw()
 	  "Parameter 'Mesh:root_rank' must be 1, 2, or 3",
 	  (1 <= dimension_) && (dimension_ <= 3));
 
-  cycle_ = parameters_->value_integer("Initial:cycle",0);
-  time_  = parameters_->value_float  ("Initial:time",0);
+  cycle_ = config_.initial_cycle;
+  time_  = config_.initial_time;
   dt_ = 0;
 
   // Initialize Performance

@@ -187,6 +187,9 @@ protected: // attributes
   /// Parameters associated with this simulation
   Parameters * parameters_;
 
+  /// Configuration values, read from Parameters object
+  Config config_;
+
   /// Parameter file name
   std::string parameter_file_;
 

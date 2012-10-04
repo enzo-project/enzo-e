@@ -40,7 +40,7 @@ private: // functions
 
   /// Create named boundary conditions object
   virtual Boundary * create_boundary_ 
-  (std::string name, Parameters * parameters) throw ();
+  (std::string name, Config * config) throw ();
 
   /// Create named initialization object
   virtual Initial *  create_initial_ 

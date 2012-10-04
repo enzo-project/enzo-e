@@ -2,7 +2,7 @@
 
 /// @file     parameters_Config.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
+/// @date     2012-10-02
 /// @brief    [\ref Parameters] Declaration of the Config class
 ///
 
@@ -11,6 +11,8 @@
 
 #define MAX_FIELDS 10
 #define MAX_FILE_GROUPS 10
+
+class Parameters;
 
 class Config {
 
@@ -34,14 +36,11 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-  }
+  void pup (PUP::er &p);
 #endif
-  
-  // PUBLIC ATTRIBUTES!
+
+  /// Read values from the Parameters object
+  void read (Parameters * parameters) throw();
 
 public: // attributes
 
@@ -76,7 +75,7 @@ public: // attributes
   bool                       field_refresh_corners;
   bool                       field_refresh_edges;
 
-  std::vector<int>           initial_cycle;
+  int                        initial_cycle;
   std::string                initial_type;
   double                     initial_time;
   std::vector<std::string>   initial_name;

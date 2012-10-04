@@ -26,8 +26,10 @@ class Factory
 
 public: // interface
 
-  Factory() throw()
+#ifdef CONFIG_USE_CHARM
+  Factory() throw() : PUP::able()
   { TRACE("Factory::Factory()"); }
+#endif
  
   /// Destructor (must be present to avoid possible vtable link errors)
   virtual ~Factory() throw()

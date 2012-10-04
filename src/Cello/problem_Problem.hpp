@@ -118,7 +118,7 @@ public: // interface
   Timestep * timestep() const throw()  { return timestep_; }
 
   /// Initialize the boundary conditions object
-  void initialize_boundary(Parameters * parameters) throw();
+  void initialize_boundary(Config * config) throw();
 
   /// Initialize the initial conditions object
   void initialize_initial(Parameters * parameters,
@@ -147,7 +147,7 @@ protected: // functions
 
   /// Create named boundary object
   virtual Boundary * create_boundary_
-  (std::string name, Parameters * parameters) throw ();
+  (std::string name, Config * config) throw ();
 
   /// Create named initialization object
   virtual Initial *  create_initial_ 
