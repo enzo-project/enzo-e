@@ -25,7 +25,6 @@ Hierarchy * Factory::create_hierarchy (int dimension, int refinement) const thro
 void Factory::pup (PUP::er &p)
 
 {
-  TRACE0;
   TRACEPUP;
 
   PUP::able::pup(p);

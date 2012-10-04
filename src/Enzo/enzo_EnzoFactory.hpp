@@ -18,7 +18,9 @@ class EnzoFactory : public Factory {
 public: // interface
 
   /// CHARM++ constructor
-  EnzoFactory() throw() { TRACE ("EnzoFactory::EnzoFactory()"); }
+  EnzoFactory() throw() 
+  : Factory()
+  { TRACE ("EnzoFactory::EnzoFactory()"); }
 
 #ifdef CONFIG_USE_CHARM
 

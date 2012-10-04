@@ -32,8 +32,7 @@ public: // interface
 #endif
  
   /// Destructor (must be present to avoid possible vtable link errors)
-  virtual ~Factory() throw()
-  {}
+  virtual ~Factory() throw() { }
 
 #ifdef CONFIG_USE_CHARM
 
@@ -42,7 +41,8 @@ public: // interface
 
   /// CHARM++ migration constructor for PUP::able
 
-  Factory (CkMigrateMessage *m) : PUP::able(m) {}
+  Factory (CkMigrateMessage *m) : PUP::able(m) 
+  { TRACE("Factory::Factory(CkMigrateMessage*)"); }
 
   /// CHARM++ Pack / Unpack function
   virtual void pup (PUP::er &p);
