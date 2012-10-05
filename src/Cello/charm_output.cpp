@@ -124,6 +124,7 @@ void Problem::output_wait(Simulation * simulation) throw()
   Output * output = this->output(index_output_);
 
   int ip       = CkMyPe();
+  TRACE1 ("output = %p",output);
   int ip_writer = output->process_writer();
 
   if (ip == ip_writer) {

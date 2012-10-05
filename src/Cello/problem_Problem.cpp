@@ -11,8 +11,11 @@
 
 Problem::Problem() throw()
   : boundary_(0),
+    num_initial_(0),
     stopping_(0),
     timestep_(0),
+    num_method_(0),
+    num_output_(0),
     index_initial_(0),
     index_output_(0)
 {
@@ -41,19 +44,28 @@ void Problem::pup (PUP::er &p)
 
   p | boundary_; // PUP::able
 
-  WARNING("Problem::pup", "skipping initial_list_");
-  //  std::vector<Initial *> initial_list_;
+  p | num_initial_;
+  if (up) initial_list_.resize(num_initial_);
+  for (int i=0; i<num_initial_; i++) {
+    p | *initial_list_[i]; // PUP::able
+  }
 
   if (up) stopping_ = new Stopping;
   p | *stopping_;
 
   p | timestep_; // PUP::able
 
-  WARNING("Problem::pup", "skipping method_list_");
-  //    std::vector<Method *> method_list_;
+  p | num_method_;
+  if (up) method_list_.resize(num_method_);
+  for (int i=0; i<num_method_; i++) {
+    p | *method_list_[i]; // PUP::able
+  }
 
-  WARNING("Problem::pup", "skipping output_list_");
-  //  std::vector<Output *> output_list_;
+  p | num_output_;
+  if (up) output_list_.resize(num_output_);
+  for (int i=0; i<num_output_; i++) {
+    p | *output_list_[i]; // PUP::able
+  }
 
   p | index_initial_;
   p | index_output_;

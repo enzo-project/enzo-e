@@ -82,6 +82,11 @@ public: // interface
     return (i < (int)output_list_.size()) ? output_list_[i] : NULL; 
   }
 
+  /// Return the ith method object
+  Method * method(size_t i) const throw() 
+  { return (i < method_list_.size()) ? method_list_[i] : NULL; }
+
+
 #ifdef CONFIG_USE_CHARM
 
   /// reset initial index to 0 (not needed, but mirrors initial_output() )
@@ -106,10 +111,6 @@ public: // interface
   void output_write (Simulation * simulation, int n, char * buffer) throw();
 
 #endif
-
-  /// Return the ith method object
-  Method * method(size_t i) const throw() 
-  { return (i < method_list_.size()) ? method_list_[i] : NULL; }
 
   /// Return the stopping object
   Stopping *  stopping() const throw() { return stopping_; }
@@ -176,6 +177,11 @@ private: // attributes
   /// Boundary conditions object
   Boundary * boundary_;
 
+#ifdef CONFIG_USE_CHARM
+  /// Length of initial_list_ vector
+  int num_initial_;
+#endif
+
   /// Initial conditions object
   std::vector<Initial *> initial_list_;
 
@@ -185,8 +191,18 @@ private: // attributes
   /// Time-step computation
   Timestep * timestep_;
 
+#ifdef CONFIG_USE_CHARM
+  /// Length of method_list_ vector
+  int num_method_;
+#endif
+
   /// List of method objects
   std::vector<Method *> method_list_;
+
+#ifdef CONFIG_USE_CHARM
+  /// Length of output_list_ vector
+  int num_output_;
+#endif
 
   /// Output objects
   std::vector<Output *> output_list_;

@@ -39,8 +39,11 @@ public: // interface
     // int *& test2 = test;
     // TRACE1 ("test2 = %d",*test2);
     // Patch *& data_alias = (Patch *) data_;
-    if (up) data_ = (void *) new CProxy_Patch;
-    p | *((CProxy_Patch *)data_);
+    p | have_data_;
+    if (have_data_) {
+      if (up) data_ = (void *) new CProxy_Patch;
+      p | *((CProxy_Patch *)data_);
+    }
     p | size_;
     if (up) child_array_ = new Node[size_];
     PUParray(p,child_array_,size_);
@@ -49,7 +52,8 @@ public: // interface
 
   /// Set the data payload for the Node
   void set_data(void * data)
-  { data_ = data; }
+  { data_ = data;
+    have_data_ = data != NULL;}
 
   /// Return the data for the given Node
   void * data() const
@@ -73,6 +77,11 @@ private: // functions
 
 
 private: // attributes
+
+#ifdef CONFIG_USE_CHARM
+  /// Whether data_ is null
+  bool have_data_;
+#endif
 
   /// Pointer to the data payload for the Node
   void * data_;

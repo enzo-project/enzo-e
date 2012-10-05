@@ -12,7 +12,8 @@
 //----------------------------------------------------------------------
 
 Node::Node() throw ()
-  : data_(0),
+  : have_data_(0),
+    data_(0),
 #ifdef CONFIG_USE_CHARM
     size_(0),
 #endif
