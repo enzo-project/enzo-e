@@ -53,7 +53,10 @@ public: // interface
   /// Set the data payload for the Node
   void set_data(void * data)
   { data_ = data;
-    have_data_ = data != NULL;}
+#ifdef CONFIG_USE_CHARM
+    have_data_ = data != NULL;
+#endif
+}
 
   /// Return the data for the given Node
   void * data() const
