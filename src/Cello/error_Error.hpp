@@ -97,7 +97,7 @@
 
 #ifdef CONFIG_USE_CHARM
 #   define TRACEPUP							\
-  { m2_(stdout,"TRACE",__FILE__,__LINE__,"",				\
+  { m2_(stdout,"TRACEPUP",__FILE__,__LINE__,"",				\
 	p.isPacking()?"isPacking":(p.isUnpacking()?"isUnpacking":"isSizing")); }
 
 #endif

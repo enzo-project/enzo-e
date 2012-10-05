@@ -66,7 +66,8 @@ void OutputImage::pup (PUP::er &p)
   p | axis_;
   p | nrows_;
   p | ncols_;
-  PUParray(p,data_,nrows_*ncols_);
+  WARNING("OutputImage::pup","skipping data_");
+  //  PUParray(p,data_,nrows_*ncols_);
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
 }

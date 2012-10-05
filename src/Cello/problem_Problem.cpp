@@ -45,6 +45,7 @@ void Problem::pup (PUP::er &p)
   p | boundary_; // PUP::able
 
   p | num_initial_;
+  TRACE1 ("num_initial_ = %d",num_initial_);
   if (up) initial_list_.resize(num_initial_);
   for (int i=0; i<num_initial_; i++) {
     p | *initial_list_[i]; // PUP::able
@@ -56,12 +57,14 @@ void Problem::pup (PUP::er &p)
   p | timestep_; // PUP::able
 
   p | num_method_;
+  TRACE1 ("num_method_ = %d",num_method_);
   if (up) method_list_.resize(num_method_);
   for (int i=0; i<num_method_; i++) {
     p | *method_list_[i]; // PUP::able
   }
 
   p | num_output_;
+  TRACE1 ("num_output_ = %d",num_output_);
   if (up) output_list_.resize(num_output_);
   for (int i=0; i<num_output_; i++) {
     p | *output_list_[i]; // PUP::able
@@ -106,6 +109,7 @@ void Problem::initialize_initial(Parameters * parameters,
   Initial * initial = create_initial_(type,parameters,group_process);
 
   initial_list_.push_back( initial );
+  ++ num_initial_;
 
   ASSERT1("Problem::initialize_initial",
 	  "Initial type %s not recognized",
@@ -693,6 +697,7 @@ void Problem::initialize_output
     // output objects
 
     output_list_.push_back(output); 
+    ++ num_output_;
 
 
   } // (for index_file_group)
@@ -722,6 +727,8 @@ void Problem::initialize_method(Parameters * parameters) throw()
     if (method) {
 
       method_list_.push_back(method); 
+      ++ num_method_;
+
 
     } else {
       ERROR1("Problem::initialize_method",
@@ -735,14 +742,17 @@ void Problem::initialize_method(Parameters * parameters) throw()
 void Problem::deallocate_() throw()
 {
   delete boundary_;      boundary_ = 0;
+  num_initial_ = 0;
   for (size_t i=0; i<initial_list_.size(); i++) {
     delete initial_list_[i];    initial_list_[i] = 0;
   }
   delete stopping_;      stopping_ = 0;
   delete timestep_;      timestep_ = 0;
+  num_output_ = 0;
   for (size_t i=0; i<output_list_.size(); i++) {
     delete output_list_[i];    output_list_[i] = 0;
   }
+  num_method_ = 0;
   for (size_t i=0; i<method_list_.size(); i++) {
     delete method_list_[i];    method_list_[i] = 0;
   }
