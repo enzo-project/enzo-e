@@ -177,10 +177,8 @@ private: // attributes
   /// Boundary conditions object
   Boundary * boundary_;
 
-#ifdef CONFIG_USE_CHARM
-  /// Length of initial_list_ vector
+  /// Length of initial_list_ vector [CHARM++]
   int num_initial_;
-#endif
 
   /// Initial conditions object
   std::vector<Initial *> initial_list_;
@@ -191,18 +189,14 @@ private: // attributes
   /// Time-step computation
   Timestep * timestep_;
 
-#ifdef CONFIG_USE_CHARM
-  /// Length of method_list_ vector
+  /// Length of method_list_ vector [CHARM++]
   int num_method_;
-#endif
 
   /// List of method objects
   std::vector<Method *> method_list_;
 
-#ifdef CONFIG_USE_CHARM
-  /// Length of output_list_ vector
+  /// Length of output_list_ vector [CHARM++]
   int num_output_;
-#endif
 
   /// Output objects
   std::vector<Output *> output_list_;
