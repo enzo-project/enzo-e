@@ -12,14 +12,12 @@
 
 Config::Config() throw ()
 {
-  INCOMPLETE("Config::Config");
 }
 
 //----------------------------------------------------------------------
 
 Config::~Config() throw ()
 {
-  INCOMPLETE("Config::~Config");
 }
 
 //----------------------------------------------------------------------
@@ -27,7 +25,6 @@ Config::~Config() throw ()
 Config::Config(const Config & config) throw ()
 /// @param     config  Object being copied
 {
-  INCOMPLETE("Config::Config(Config)");
 }
 
 //----------------------------------------------------------------------
@@ -181,14 +178,22 @@ void Config::read(Parameters * parameters) throw()
   //  output_schedule
   //  output_type
 
-  //  physics_cosmology;
-  //  physics_cosmology_comoving_box_size;
-  //  physics_cosmology_hubble_constant_now;
-  //  physics_cosmology_initial_redshift;
-  //  physics_cosmology_max_expansion_rate;
-  //  physics_cosmology_omega_lamda_now;
-  //  physics_cosmology_omega_matter_now;
-  //  physics_gamma;
+  // RENAME physics_ as enzo_
+
+  physics_cosmology = parameters->value_logical ("Physics:cosmology",false);
+  physics_cosmology_comoving_box_size = parameters->value_float
+    ("Physics:cosmology:comoving_box_size", 64.0);
+  physics_cosmology_hubble_constant_now = parameters->value_float
+    ("Physics:cosmology:hubble_constant_now",0.701);
+  physics_cosmology_initial_redshift = parameters->value_float
+    ("Physics:cosmology:initial_redshift",  20.0);;
+  physics_cosmology_max_expansion_rate = parameters->value_float
+    ("Physics:cosmology:max_expansion_rate", 0.01);
+  physics_cosmology_omega_lamda_now = parameters->value_float
+    ("Physics:cosmology:omega_lambda_now",   0.721);
+  physics_cosmology_omega_matter_now = parameters->value_float
+    ("Physics:cosmology:omega_matter_now",   0.279);
+  physics_gamma = parameters->value_float ("Physics:gamma",5.0/3.0);
 
   //  stopping_cycle;
   //  stopping_time;

@@ -67,7 +67,10 @@ class EnzoBlock : public Block
   //----------------------------------------------------------------------
   // functions
 
-  static void initialize (Parameters * parameters, FieldDescr *);
+  static void initialize 
+  (Parameters * parameters, 
+   Config * config,
+   FieldDescr *);
 
   //----------------------------------------------------------------------
   // variables

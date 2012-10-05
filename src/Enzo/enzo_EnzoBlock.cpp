@@ -94,6 +94,7 @@ int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
 // STATIC
 void EnzoBlock::initialize(Parameters * parameters,
+			   Config     * config,
 			   FieldDescr * field_descr)
 
 {
@@ -164,14 +165,13 @@ void EnzoBlock::initialize(Parameters * parameters,
   }
 
   //--------------------------------------------------
-  // parameter: Physics : cosmology
-  // parameter: Physics : gamma
   // parameter: Mesh : root_rank
   //--------------------------------------------------
 
-  ComovingCoordinates = parameters->value_logical ("Physics:cosmology",false);
-  Gamma               = parameters->value_float   ("Physics:gamma",5.0/3.0);
-  GridRank            = parameters->value_integer ("Mesh:root_rank",0);
+  ComovingCoordinates = config->physics_cosmology;
+  Gamma               = config->physics_gamma;
+
+  GridRank            = config->mesh_root_rank;
 
   BoundaryRank = GridRank;
 
@@ -199,23 +199,12 @@ void EnzoBlock::initialize(Parameters * parameters,
   // parameter: Physics : cosmology : comoving_box_size
   //--------------------------------------------------
 
-  InitialRedshift   = parameters->value_float
-    ("Physics:cosmology:initial_redshift",  20.0);
-
-  HubbleConstantNow = parameters->value_float
-    ("Physics:cosmology:hubble_constant_now",0.701);
-
-  OmegaLambdaNow    = parameters->value_float
-    ("Physics:cosmology:omega_lambda_now",   0.721);
-
-  OmegaMatterNow    = parameters->value_float
-    ("Physics:cosmology:omega_matter_now",   0.279);
-
-  MaxExpansionRate  = parameters->value_float
-    ("Physics:cosmology:max_expansion_rate", 0.01);
-
-  ComovingBoxSize   = parameters->value_float
-    ("Physics:cosmology:comoving_box_size", 64.0);
+  InitialRedshift   = config->physics_cosmology_initial_redshift;
+  HubbleConstantNow = config->physics_cosmology_hubble_constant_now;
+  OmegaLambdaNow    = config->physics_cosmology_omega_lamda_now;
+  OmegaMatterNow    = config->physics_cosmology_omega_matter_now;
+  MaxExpansionRate  = config->physics_cosmology_max_expansion_rate;
+  ComovingBoxSize   = config->physics_cosmology_comoving_box_size;
 
   //--------------------------------------------------
   // parameter: Enzo : ppm : pressure_free

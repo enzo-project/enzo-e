@@ -48,7 +48,7 @@ EnzoSimulationCharm::~EnzoSimulationCharm() throw()
 void EnzoSimulationCharm::initialize() throw()
 {
   SimulationCharm::initialize();
-  EnzoBlock::initialize(parameters_,field_descr());
+  EnzoBlock::initialize(parameters_,&config_,field_descr());
 }
 
 //----------------------------------------------------------------------
