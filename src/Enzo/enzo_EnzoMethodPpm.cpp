@@ -11,8 +11,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpm::EnzoMethodPpm ( Parameters * parameters )
-  : Method(parameters)
+EnzoMethodPpm::EnzoMethodPpm () : Method()
 {
   // PPM parameters initialized in EnzoBlock::initialize()
 }

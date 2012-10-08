@@ -49,7 +49,7 @@ private: // functions
 
   /// Create named method object
   virtual Method *   create_method_ 
-  (std::string name, Parameters * parameters) throw ();
+  (std::string name) throw ();
 
   /// Create named timestep object
   virtual Timestep * create_timestep_

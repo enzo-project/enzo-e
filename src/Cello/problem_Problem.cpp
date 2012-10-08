@@ -722,7 +722,7 @@ void Problem::initialize_method(Parameters * parameters) throw()
 
     std::string name = parameters->list_value_string(i,"sequence");
 
-    Method * method = create_method_(name,parameters);
+    Method * method = create_method_(name);
 
     if (method) {
 
@@ -839,12 +839,9 @@ Timestep * Problem::create_timestep_
 
 //----------------------------------------------------------------------
 
-Method * Problem::create_method_ 
-(
- std::string  type,
- Parameters * parameters
- ) throw ()
+Method * Problem::create_method_ ( std::string  name ) throw ()
 {
+  TRACE1("Problem::create_method %s",name.c_str());
   // No default method
   return NULL;
 }
@@ -854,18 +851,18 @@ Method * Problem::create_method_
 
 Output * Problem::create_output_ 
 (
- std::string    type,
+ std::string    name,
  Parameters *   parameters,
  const GroupProcess * group_process,
  const Factory * factory
  ) throw ()
-/// @param type          Type of Output object to create
+/// @param name          Name of Output object to create
 /// @param group_process Image output needs group process size
 { 
 
   Output * output = NULL;
 
-  if (type == "image") {
+  if (name == "image") {
 
     //--------------------------------------------------
     // parameter: Mesh : root_size
@@ -881,11 +878,11 @@ Output * Problem::create_output_
 
     output = new OutputImage (factory,group_process->size(),nx,ny);
 
-  } else if (type == "data") {
+  } else if (name == "data") {
 
     output = new OutputData (factory,parameters);
 
-  } else if (type == "restart") {
+  } else if (name == "restart") {
 
     output = new OutputRestart (factory,parameters,group_process->size());
 

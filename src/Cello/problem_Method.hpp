@@ -25,10 +25,6 @@ public: // interface
   /// Create a new Method
   Method () throw() {}
 
-  /// Create a new Method
-  Method(Parameters * parameters) throw()
-  {};
-
   /// Destructor
   virtual ~Method() throw()
   {}

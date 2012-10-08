@@ -13,8 +13,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpml::EnzoMethodPpml( Parameters * parameters )
-  : Method(parameters)
+EnzoMethodPpml::EnzoMethodPpml() : Method()
 {
 }
 

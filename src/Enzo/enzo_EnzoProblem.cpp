@@ -118,22 +118,19 @@ Initial * EnzoProblem::create_initial_
 
 //----------------------------------------------------------------------
 
-Method * EnzoProblem::create_method_ 
-(
- std::string  name,
- Parameters * parameters
- ) throw ()
+Method * EnzoProblem::create_method_ ( std::string  name ) throw ()
 /// @param name   Name of the method to create
 {
 
   Method * method = 0;
 
+  TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
-    method = new EnzoMethodPpm  (parameters);
+    method = new EnzoMethodPpm ();
   } else if (name == "ppml") {
-    method = new EnzoMethodPpml (parameters);
+    method = new EnzoMethodPpml();
   } else {
-    method = Problem::create_method_(name,parameters);
+    method = Problem::create_method_(name);
   }
 
   return method;

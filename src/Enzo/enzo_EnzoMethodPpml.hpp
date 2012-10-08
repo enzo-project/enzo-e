@@ -17,7 +17,7 @@ class EnzoMethodPpml : public Method {
 public: // interface
 
   /// Creae a new EnzoMethodPpml object
-  EnzoMethodPpml(Parameters * parameters);
+  EnzoMethodPpml();
 
 #ifdef CONFIG_USE_CHARM
 

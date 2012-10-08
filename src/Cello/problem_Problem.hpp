@@ -157,7 +157,7 @@ protected: // functions
 
   /// Create named method object
   virtual Method *   create_method_
-  (std::string name, Parameters * parameters) throw ();
+  (std::string name) throw ();
 
   /// Create named output object
   virtual Output *   create_output_  
