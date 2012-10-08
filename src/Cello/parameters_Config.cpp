@@ -159,7 +159,8 @@ void Config::read(Parameters * parameters) throw()
   enzo_ppm_use_minimum_pressure_support = parameters->value_logical
     ("Enzo:ppm:use_minimum_pressure_support",false);
 
-  int num_fields = parameters->list_length("Field:fields"); 
+  num_fields = parameters->list_length("Field:fields"); 
+
   field_fields.resize(num_fields);
   for (int i=0; i<num_fields; i++) {
     field_fields[i] = parameters->list_value_string(i, "Field:fields");
@@ -177,15 +178,17 @@ void Config::read(Parameters * parameters) throw()
 
   field_alignment = parameters->value_integer("Field:alignment",8);
 
+  field_centering[0].resize(num_fields);
+  field_centering[1].resize(num_fields);
+  field_centering[2].resize(num_fields);
   for (int i=0; i<num_fields; i++) {
 
-    field_centering[i].resize(3);
     std::string param_name = 
       std::string("Field:") + field_fields[i] + ":centering";
 
-    field_centering[i][0] = parameters->list_value_logical(0,param_name,true);
-    field_centering[i][1] = parameters->list_value_logical(1,param_name,true);
-    field_centering[i][2] = parameters->list_value_logical(2,param_name,true);
+    field_centering[0][i] = parameters->list_value_logical(0,param_name,true);
+    field_centering[1][i] = parameters->list_value_logical(1,param_name,true);
+    field_centering[2][i] = parameters->list_value_logical(2,param_name,true);
     
   }
 

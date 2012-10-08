@@ -367,9 +367,9 @@ void Simulation::initialize_data_descr_() throw()
 
     std::string field_name = field_descr_->field_name(i);
 
-    bool cx = config_.field_centering[i][0];
-    bool cy = config_.field_centering[i][1];
-    bool cz = config_.field_centering[i][2];
+    bool cx = config_.field_centering[0][i];
+    bool cy = config_.field_centering[1][i];
+    bool cz = config_.field_centering[2][i];
 
     field_descr_->set_centering(i,cx,cy,cz);
 
