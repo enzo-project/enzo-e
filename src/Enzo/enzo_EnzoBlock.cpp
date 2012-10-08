@@ -93,8 +93,7 @@ int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 //----------------------------------------------------------------------
 
 // STATIC
-void EnzoBlock::initialize(Parameters * parameters,
-			   Config     * config,
+void EnzoBlock::initialize(Config     * config,
 			   FieldDescr * field_descr)
 
 {
@@ -190,15 +189,6 @@ void EnzoBlock::initialize(Parameters * parameters,
 
   // PPM parameters
 
-  //--------------------------------------------------
-  // parameter: Physics : cosmology : initial_redshift
-  // parameter: Physics : cosmology : hubble_constant_now
-  // parameter: Physics : cosmology : omega_lambda_now
-  // parameter: Physics : cosmology : omega_matter_now
-  // parameter: Physics : cosmology : max_expansion_rate
-  // parameter: Physics : cosmology : comoving_box_size
-  //--------------------------------------------------
-
   InitialRedshift   = config->physics_cosmology_initial_redshift;
   HubbleConstantNow = config->physics_cosmology_hubble_constant_now;
   OmegaLambdaNow    = config->physics_cosmology_omega_lamda_now;
@@ -206,79 +196,29 @@ void EnzoBlock::initialize(Parameters * parameters,
   MaxExpansionRate  = config->physics_cosmology_max_expansion_rate;
   ComovingBoxSize   = config->physics_cosmology_comoving_box_size;
 
-  //--------------------------------------------------
-  // parameter: Enzo : ppm : pressure_free
-  // parameter: Enzo : ppm : use_minimum_pressure_support
-  // parameter: Enzo : ppm : minimum_pressure_support_parameter
-  // parameter: Enzo : ppm : flattening
-  // parameter: Enzo : ppm : diffusion
-  // parameter: Enzo : ppm : steepening
-  // parameter: Enzo : ppm : pressure_floor
-  // parameter: Enzo : ppm : density_floor
-  // parameter: Enzo : ppm : temperature_floor
-  // parameter: Enzo : ppm : number_density_floor
-  // parameter: Enzo : ppm : dual_energy
-  // parameter: Enzo : ppm : dual_energy_eta_1
-  // parameter: Enzo : ppm : dual_energy_eta_2
-  //--------------------------------------------------
-
-  PressureFree = parameters->value_logical
-    ("Enzo:ppm:pressure_free",false);
-
-  UseMinimumPressureSupport = parameters->value_logical
-    ("Enzo:ppm:use_minimum_pressure_support",false);
-
-  MinimumPressureSupportParameter = parameters->value_integer
-    ("Enzo:ppm:minimum_pressure_support_parameter",100);
-
-  PPMFlatteningParameter = parameters->value_integer
-    ("Enzo:ppm:flattening", 3);
-
-  PPMDiffusionParameter  = parameters->value_logical 
-    ("Enzo:ppm:diffusion",  false);
-
-  PPMSteepeningParameter = parameters->value_logical 
-    ("Enzo:ppm:steepening", false);
-
-  double floor_default = 1e-6;
-
-  pressure_floor       = parameters->value_float
-    ("Enzo:ppm:pressure_floor", floor_default);
-
-  density_floor        = parameters->value_float
-    ("Enzo:ppm:density_floor",  floor_default);
-
-  temperature_floor    = parameters->value_float
-    ("Enzo:ppm:temperature_floor", floor_default);
-
-  number_density_floor = parameters->value_float
-    ("Enzo:ppm:number_density_floor", floor_default);
-
-  DualEnergyFormalism     = parameters->value_logical 
-    ("Enzo:ppm:dual_energy",false);
-
-  DualEnergyFormalismEta1 = parameters->value_float
-    ("Enzo:ppm:dual_energy_eta_1", 0.001);
-
-  DualEnergyFormalismEta2 = parameters->value_float
-    ("Enzo:ppm:dual_energy_eta_2", 0.1);
+  PressureFree              = config->enzo_ppm_pressure_free;
+  UseMinimumPressureSupport = config->enzo_ppm_use_minimum_pressure_support;
+  MinimumPressureSupportParameter = 
+    config->enzo_ppm_minimum_pressure_support_parameter;
+  PPMFlatteningParameter    = config->enzo_ppm_flattening;
+  PPMDiffusionParameter     = config->enzo_ppm_diffusion;
+  PPMSteepeningParameter    = config->enzo_ppm_steepening;
+  pressure_floor            = config->enzo_ppm_pressure_floor;
+  density_floor             = config->enzo_ppm_density_floor;
+  temperature_floor         = config->enzo_ppm_temperature_floor;
+  number_density_floor      = config->enzo_ppm_number_density_floor;
+  DualEnergyFormalism       = config->enzo_ppm_dual_energy;
+  DualEnergyFormalismEta1   = config->enzo_ppm_dual_energy_eta_1;
+  DualEnergyFormalismEta2   = config->enzo_ppm_dual_energy_eta_2;
 
   //--------------------------------------------------
   // parameter: Field : ghosts
   // parameter: Field : fields
   //--------------------------------------------------
 
-  int gx = 1;
-  int gy = 1;
-  int gz = 1;
-
-  if (parameters->type("Field:ghosts") == parameter_integer) {
-    gx = gy = gz = parameters->value_integer("Field:ghosts",1);
-  } else if (parameters->type("Field:ghosts") == parameter_list) {
-    gx = parameters->list_value_integer(0,"Field:ghosts",1);
-    gy = parameters->list_value_integer(1,"Field:ghosts",1);
-    gz = parameters->list_value_integer(2,"Field:ghosts",1);
-  }
+  int gx = config->field_ghosts[0];
+  int gy = config->field_ghosts[1];
+  int gz = config->field_ghosts[2];
 
   if (GridRank < 1) gx = 0;
   if (GridRank < 2) gy = 0;
@@ -288,7 +228,7 @@ void EnzoBlock::initialize(Parameters * parameters,
   ghost_depth[1] = gy;
   ghost_depth[2] = gz;
 
-  NumberOfBaryonFields = parameters->list_length("Field:fields");
+  NumberOfBaryonFields = config->field_fields.size();
 
   // Check NumberOfBaryonFields
 
@@ -305,20 +245,19 @@ void EnzoBlock::initialize(Parameters * parameters,
 
   for (int field_index=0; field_index<NumberOfBaryonFields; field_index++) {
 
-    std::string name = 
-      parameters->list_value_string(field_index,"Field:fields");
+    std::string name = config->field_fields[field_index];
 
     if        (name == "density") {
       field_index_[field_density]  = field_index;
       FieldType[field_index] = Density;
     } else if (name == "velocity_x") {
-      field_index_[field_velocity_x]   = field_index;
+      field_index_[field_velocity_x] = field_index;
       FieldType[field_index] = Velocity1;
     } else if (name == "velocity_y") {
-      field_index_[field_velocity_y]   = field_index;
+      field_index_[field_velocity_y] = field_index;
       FieldType[field_index] = Velocity2;
     } else if (name == "velocity_z") {
-      field_index_[field_velocity_z]   = field_index;
+      field_index_[field_velocity_z] = field_index;
       FieldType[field_index] = Velocity3;
     } else if (name == "total_energy") {
       field_index_[field_total_energy] = field_index;
@@ -327,88 +266,88 @@ void EnzoBlock::initialize(Parameters * parameters,
       field_index_[field_internal_energy]  = field_index;
       FieldType[field_index] = InternalEnergy;
     } else if (name == "electron_density") {
-      field_index_[field_color]    = field_index;
+      field_index_[field_color]  = field_index;
       FieldType[field_index] = ElectronDensity;
     } else if (name == "velox") {
-      field_index_[field_velox]    = field_index;
+      field_index_[field_velox]  = field_index;
       FieldType[field_index] = Velocity1;
     } else if (name == "veloy") {
-      field_index_[field_veloy]   = field_index;
+      field_index_[field_veloy] = field_index;
       FieldType[field_index] = Velocity2;
     } else if (name == "veloz") {
-      field_index_[field_veloz]   = field_index;
+      field_index_[field_veloz] = field_index;
       FieldType[field_index] = Velocity3;
     } else if (name == "bfieldx") {
-      field_index_[field_bfieldx]   = field_index;
+      field_index_[field_bfieldx] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldy") {
-      field_index_[field_bfieldy]   = field_index;
+      field_index_[field_bfieldy] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldz") {
-      field_index_[field_bfieldz]   = field_index;
+      field_index_[field_bfieldz] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "dens_rx") {
-      field_index_[field_dens_rx]   = field_index;
+      field_index_[field_dens_rx] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "velox_rx") {
-      field_index_[field_velox_rx]   = field_index;
+      field_index_[field_velox_rx] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloy_rx") {
-      field_index_[field_veloy_rx]   = field_index;
+      field_index_[field_veloy_rx] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloz_rx") {
-      field_index_[field_veloz_rx]   = field_index;
+      field_index_[field_veloz_rx] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldx_rx") {
-      field_index_[field_bfieldx_rx]   = field_index;
+      field_index_[field_bfieldx_rx] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldy_rx") {
-      field_index_[field_bfieldy_rx]   = field_index;
+      field_index_[field_bfieldy_rx] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldz_rx") {
-      field_index_[field_bfieldz_rx]   = field_index;
+      field_index_[field_bfieldz_rx] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "dens_ry") {
-      field_index_[field_dens_ry]   = field_index;
+      field_index_[field_dens_ry] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "velox_ry") {
-      field_index_[field_velox_ry]   = field_index;
+      field_index_[field_velox_ry] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloy_ry") {
-      field_index_[field_veloy_ry]   = field_index;
+      field_index_[field_veloy_ry] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloz_ry") {
-      field_index_[field_veloz_ry]   = field_index;
+      field_index_[field_veloz_ry] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldx_ry") {
-      field_index_[field_bfieldx_ry]   = field_index;
+      field_index_[field_bfieldx_ry] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldy_ry") {
-      field_index_[field_bfieldy_ry]   = field_index;
+      field_index_[field_bfieldy_ry] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldz_ry") {
-      field_index_[field_bfieldz_ry]   = field_index;
+      field_index_[field_bfieldz_ry] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "dens_rz") {
-      field_index_[field_dens_rz]   = field_index;
+      field_index_[field_dens_rz] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "velox_rz") {
-      field_index_[field_velox_rz]   = field_index;
+      field_index_[field_velox_rz] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloy_rz") {
-      field_index_[field_veloy_rz]   = field_index;
+      field_index_[field_veloy_rz] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "veloz_rz") {
-      field_index_[field_veloz_rz]   = field_index;
+      field_index_[field_veloz_rz] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldx_rz") {
-      field_index_[field_bfieldx_rz]   = field_index;
+      field_index_[field_bfieldx_rz] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldy_rz") {
-      field_index_[field_bfieldy_rz]   = field_index;
+      field_index_[field_bfieldy_rz] = field_index;
       FieldType[field_index] = 0;
     } else if (name == "bfieldz_rz") {
-      field_index_[field_bfieldz_rz]   = field_index;
+      field_index_[field_bfieldz_rz] = field_index;
       FieldType[field_index] = 0;
     } else {
       FieldType[field_index] = 0;
@@ -422,32 +361,18 @@ void EnzoBlock::initialize(Parameters * parameters,
   // BoundaryDimension[1] = ny + 2*ghost_depth[1];
   // BoundaryDimension[2] = nz + 2*ghost_depth[2];
 
-  //--------------------------------------------------
-  // parameter: Domain : lower
-  // parameter: Domain : upper
-  //--------------------------------------------------
   
-  // (ALREADY READ BY Simulation::initialize_simulation_())
+  DomainLeftEdge [0] = config->domain_lower[0];
+  DomainLeftEdge [1] = config->domain_lower[1];
+  DomainLeftEdge [2] = config->domain_lower[2];
 
-  DomainLeftEdge [0] = parameters->list_value_float (0,"Domain:lower",0.0);
-  DomainLeftEdge [1] = parameters->list_value_float (1,"Domain:lower",0.0);
-  DomainLeftEdge [2] = parameters->list_value_float (2,"Domain:lower",0.0);
+  DomainRightEdge[0] = config->domain_upper[0];
+  DomainRightEdge[1] = config->domain_upper[1];
+  DomainRightEdge[2] = config->domain_upper[2];
 
-  DomainRightEdge[0] = parameters->list_value_float (0,"Domain:upper",1.0);
-  DomainRightEdge[1] = parameters->list_value_float (1,"Domain:upper",1.0);
-  DomainRightEdge[2] = parameters->list_value_float (2,"Domain:upper",1.0);
+  CourantSafetyNumber = config->field_courant;
 
-  //--------------------------------------------------
-  // parameter: Field : courant
-  //--------------------------------------------------
-
-  CourantSafetyNumber = parameters->value_float  ("Field:courant",0.6);
-
-  //--------------------------------------------------
-  // parameter: Initial : time
-  //--------------------------------------------------
-
-  double time  = parameters->value_float  ("Initial:time",0.0);
+  double time  = config->initial_time;
 
   InitialTimeInCodeUnits = time;
 
@@ -821,9 +746,9 @@ void EnzoBlock::set_time (double time) throw ()
 	 Time_ == 0 || Time_ < time);
 
   //  WARNING("Block::set_time","TEMPORARY");
-  OldTime     = Time_;
-  //  OldTime     = time;
-  Time_       = time;
+  OldTime   = Time_;
+  //  OldTime   = time;
+  Time_     = time;
 
 }
 
@@ -848,9 +773,9 @@ void EnzoBlock::initialize () throw()
 
   lower(&xm,&ym,&zm);
 
-  GridLeftEdge[0]    = xm;
-  GridLeftEdge[1]    = ym;
-  GridLeftEdge[2]    = zm;
+  GridLeftEdge[0]  = xm;
+  GridLeftEdge[1]  = ym;
+  GridLeftEdge[2]  = zm;
 
   // Grid dimensions
 
@@ -871,9 +796,9 @@ void EnzoBlock::initialize () throw()
   GridStartIndex[1] = gy;
   GridStartIndex[2] = gz;
 
-  GridEndIndex[0]   = gx + nx - 1;
-  GridEndIndex[1]   = gy + ny - 1;
-  GridEndIndex[2]   = gz + nz - 1;
+  GridEndIndex[0] = gx + nx - 1;
+  GridEndIndex[1] = gy + ny - 1;
+  GridEndIndex[2] = gz + nz - 1;
 
   // Initialize CellWidth
 
@@ -1177,7 +1102,7 @@ int EnzoBlock::CosmologyComputeExpansionFactor
  
   if (fabs(OmegaMatterNow-1) < OMEGA_TOLERANCE &&
       OmegaLambdaNow < OMEGA_TOLERANCE)
-    *a      = pow(time/InitialTimeInCodeUnits, enzo_float(2.0/3.0));
+    *a    = pow(time/InitialTimeInCodeUnits, enzo_float(2.0/3.0));
  
 #define INVERSE_HYPERBOLIC_EXISTS
  

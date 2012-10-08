@@ -254,14 +254,9 @@ void Simulation::initialize_simulation_() throw()
 
 void Simulation::initialize_monitor_() throw()
 {
-  //--------------------------------------------------
-  // parameter: Monitor : debug
-  //--------------------------------------------------
-
-  bool debug = parameters_->value_logical("Monitor:debug",false);
-
+  bool debug = config_.monitor_debug;
   monitor_->set_active("DEBUG",debug);
-  
+ 
 }
 
 //----------------------------------------------------------------------
@@ -277,34 +272,18 @@ void Simulation::initialize_data_descr_() throw()
 
   // Add data fields
 
-  int i;
-  for (i=0; i<parameters_->list_length("Field:fields"); i++) {
-    field_descr_->insert_field
-      (parameters_->list_value_string(i, "Field:fields"));
+  for (size_t i=0; i<config_.field_fields.size(); i++) {
+    field_descr_->insert_field (config_.field_fields[i]);
   }
 
   // Define default ghost zone depth for all fields, default value of 1
 
-  //--------------------------------------------------
-  // parameter: Field : ghosts
-  //--------------------------------------------------
+  int gx = config_.field_ghosts[0];
+  int gy = config_.field_ghosts[1];
+  int gz = config_.field_ghosts[2];
 
-  int gx = 0;
-  int gy = 0;
-  int gz = 0;
-
-  if (parameters_->type("Field:ghosts") == parameter_integer) {
-    gx = gy = gz = parameters_->value_integer("Field:ghosts",0);
-    if (dimension_ < 2) gy = 0;
-    if (dimension_ < 3) gz = 0;
-  } else if (parameters_->type("Field:ghosts") == parameter_list) {
-    gx = parameters_->list_value_integer(0,"Field:ghosts",0);
-    gy = parameters_->list_value_integer(1,"Field:ghosts",0);
-    gz = parameters_->list_value_integer(2,"Field:ghosts",0);
-  }
-
-  for (i=0; i<field_descr_->field_count(); i++) {
-    field_descr_->set_ghosts(i,gx,gy,gz);
+  for (int i=0; i<field_descr_->field_count(); i++) {
+    field_descr_->set_ghosts (i,gx,gy,gz);
   }
 
   // Set face dimensions to refresh
@@ -355,7 +334,7 @@ void Simulation::initialize_data_descr_() throw()
 	    precision_str.c_str());
   }
 
-  for (i=0; i<field_descr_->field_count(); i++) {
+  for (int i=0; i<field_descr_->field_count(); i++) {
     field_descr_->set_precision(i,precision);
   }
 
@@ -363,7 +342,7 @@ void Simulation::initialize_data_descr_() throw()
   // parameter: Field : alignment
   //--------------------------------------------------
 
-  int alignment = parameters_->value_integer("Field:alignment",8);
+  int alignment = config_.field_alignment;
 
   ASSERT1 ("Simulation::initialize_data_descr_",
 	  "Illegal Field:alignment parameter value %d",
@@ -388,37 +367,14 @@ void Simulation::initialize_data_descr_() throw()
 
     std::string field_name = field_descr_->field_name(i);
 
-    std::string param_name = 
-      std::string("Field:") + field_name + ":centering";
-    
-    if (parameters_->type(param_name) != parameter_unknown) {
+    bool cx = config_.field_centering[i][0];
+    bool cy = config_.field_centering[i][1];
+    bool cz = config_.field_centering[i][2];
 
-      bool valid = parameters_->type(param_name) == parameter_list;
-      valid = valid && parameters_->list_length(param_name) == dimension_;
-      for (int i=0; i<dimension_; i++) {
-	valid = valid && 
-	  (parameters_->list_type(i,param_name) == parameter_logical);
-      }
-      
-      ASSERT2 ("Simulation::initialize_data_descr_()",
-	       "Parameter '%s' must be a list of logical values with length %d",
-	       param_name.c_str(), dimension_, valid);
+    field_descr_->set_centering(i,cx,cy,cz);
 
-      int id_field = field_descr_->field_id(field_name);
-
-      bool cx,cy,cz;
-
-      cx = (dimension_ >= 1) ? 
-	parameters_->list_value_logical(0,param_name,true) : true;
-      cy = (dimension_ >= 2) ? 
-	parameters_->list_value_logical(1,param_name,true) : true;
-      cz = (dimension_ >= 3) ? 
-	parameters_->list_value_logical(2,param_name,true) : true;
-
-      field_descr_->set_centering (id_field, cx,cy,cz);
-
-    }
   }
+
 }
 //----------------------------------------------------------------------
 

@@ -130,29 +130,77 @@ void Config::read(Parameters * parameters) throw()
     domain_upper[i] = parameters->list_value_float(i, "Domain:upper", 0.0);
   }
 
-  //  enzo_ppm_density_floor;
-  //  enzo_ppm_diffusion;
-  //  enzo_ppm_dual_energy;
-  //  enzo_ppm_dual_energy_eta_1;
-  //  enzo_ppm_dual_energy_eta_2;
-  //  enzo_ppm_flattening;
-  //  enzo_ppm_minimum_pressure_support_parameter;
-  //  enzo_ppm_number_density_floor;
-  //  enzo_ppm_pressure_floor;
-  //  enzo_ppm_pressure_free;
-  //  enzo_ppm_steepening;
-  //  enzo_ppm_temperature_floor;
-  //  enzo_ppm_use_minimum_pressure_support;
+  double floor_default = 1e-6;
 
-  //  field_alignment;
-  //  field_centering
-  //  field_courant;
-  //  field_fields;
-  //  field_ghosts
+  enzo_ppm_density_floor = parameters->value_float
+    ("Enzo:ppm:density_floor",  floor_default);
+  enzo_ppm_diffusion = parameters->value_logical 
+    ("Enzo:ppm:diffusion",  false);
+  enzo_ppm_dual_energy = parameters->value_logical 
+    ("Enzo:ppm:dual_energy",false);
+  enzo_ppm_dual_energy_eta_1 = parameters->value_float
+    ("Enzo:ppm:dual_energy_eta_1", 0.001);
+  enzo_ppm_dual_energy_eta_2 = parameters->value_float
+    ("Enzo:ppm:dual_energy_eta_2", 0.1);
+  enzo_ppm_flattening = parameters->value_integer
+    ("Enzo:ppm:flattening", 3);
+  enzo_ppm_minimum_pressure_support_parameter = parameters->value_integer
+    ("Enzo:ppm:minimum_pressure_support_parameter",100);
+  enzo_ppm_number_density_floor = parameters->value_float
+    ("Enzo:ppm:number_density_floor", floor_default);
+  enzo_ppm_pressure_floor = parameters->value_float
+    ("Enzo:ppm:pressure_floor", floor_default);
+  enzo_ppm_pressure_free = parameters->value_logical
+    ("Enzo:ppm:pressure_free",false);
+  enzo_ppm_steepening = parameters->value_logical 
+    ("Enzo:ppm:steepening", false);
+  enzo_ppm_temperature_floor = parameters->value_float
+    ("Enzo:ppm:temperature_floor", floor_default);
+  enzo_ppm_use_minimum_pressure_support = parameters->value_logical
+    ("Enzo:ppm:use_minimum_pressure_support",false);
+
+  int num_fields = parameters->list_length("Field:fields"); 
+  field_fields.resize(num_fields);
+  for (int i=0; i<num_fields; i++) {
+    field_fields[i] = parameters->list_value_string(i, "Field:fields");
+  }
+
+  if (parameters->type("Field:ghosts") == parameter_integer) {
+    field_ghosts[0] = parameters->value_integer("Field:ghosts",0);
+    field_ghosts[1] = parameters->value_integer("Field:ghosts",0);
+    field_ghosts[2] = parameters->value_integer("Field:ghosts",0);
+  } else if (parameters->type("Field:ghosts") == parameter_list) {
+    field_ghosts[0] = parameters->list_value_integer(0,"Field:ghosts",0);
+    field_ghosts[1] = parameters->list_value_integer(1,"Field:ghosts",0);
+    field_ghosts[2] = parameters->list_value_integer(2,"Field:ghosts",0);
+  }
+
+  field_alignment = parameters->value_integer("Field:alignment",8);
+
+  for (int i=0; i<num_fields; i++) {
+
+    field_centering[i].resize(3);
+    std::string param_name = 
+      std::string("Field:") + field_fields[i] + ":centering";
+
+    field_centering[i][0] = parameters->list_value_logical(0,param_name,true);
+    field_centering[i][1] = parameters->list_value_logical(1,param_name,true);
+    field_centering[i][2] = parameters->list_value_logical(2,param_name,true);
+    
+  }
+
+  field_courant = parameters->value_float  ("Field:courant",0.6);
+
   //  field_padding;
   //  field_precision;
   //  field_refresh_corners;
   //  field_refresh_edges;
+
+  mesh_root_rank = parameters->value_integer("Mesh:root_rank",0);
+
+  if (mesh_root_rank < 2) field_ghosts[1] = 0;
+  if (mesh_root_rank < 3) field_ghosts[2] = 0;
+  
 
   initial_cycle = parameters->value_integer("Initial:cycle",0);
   initial_time  = parameters->value_float  ("Initial:time",0.0);
@@ -161,12 +209,11 @@ void Config::read(Parameters * parameters) throw()
   //  initial_value
 
   //  mesh_root_blocks
-  mesh_root_rank = parameters->value_integer("Mesh:root_rank",0);
   //  mesh_root_size
 
   //  method_sequence;
 
-  //  monitor_debug;
+  monitor_debug = parameters->value_logical("Monitor:debug",false);
 
   //  output_file_groups;
   //  output_axis

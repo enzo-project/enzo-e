@@ -33,7 +33,7 @@ EnzoSimulationMpi::~EnzoSimulationMpi() throw()
 void EnzoSimulationMpi::initialize() throw()
 {
   SimulationMpi::initialize();
-  EnzoBlock::initialize(parameters_,&config_,field_descr());
+  EnzoBlock::initialize(&config_,field_descr());
 }
 
 //----------------------------------------------------------------------
