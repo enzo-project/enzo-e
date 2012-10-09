@@ -22,6 +22,9 @@ Import('lib_path')
 includes = [Glob('png*h')]
 sources  = [Glob('png*cpp')]
 
+includes_expreval = [Glob('ExprEval/*h')]
+sources_expreval  = [Glob('ExprEval/*cpp')]
+
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
@@ -30,7 +33,8 @@ sources  = [Glob('png*cpp')]
 # TARGETS
 #------------------------------
 
-libraries = env.Library ('external', sources)
+libraries          = env.Library ('external', sources)
+libraries_expreval = env.Library ('expreval', sources_expreval)
 
 
 #------------------------------
@@ -39,3 +43,6 @@ libraries = env.Library ('external', sources)
 
 env.Alias('install-inc',env.Install (inc_path,includes))
 env.Alias('install-lib',env.Install (lib_path,libraries))
+
+env.Alias('install-inc',env.Install (inc_path,includes_expreval))
+env.Alias('install-lib',env.Install (lib_path,libraries_expreval))
