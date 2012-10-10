@@ -73,6 +73,7 @@ void Config::pup (PUP::er &p)
   p | field_precision;
   p | field_refresh_corners;
   p | field_refresh_edges;
+  p | field_refresh_faces;
 
   p | initial_cycle;
   p | initial_type;
@@ -194,10 +195,25 @@ void Config::read(Parameters * parameters) throw()
 
   field_courant = parameters->value_float  ("Field:courant",0.6);
 
-  //  field_padding;
-  //  field_precision;
-  //  field_refresh_corners;
-  //  field_refresh_edges;
+  field_padding = parameters->value_integer("Field:padding",0);
+
+  // Field precision
+
+  std::string precision_str = parameters->value_string("Field:precision","default");
+
+  if      (precision_str == "default")   field_precision = precision_default;
+  else if (precision_str == "single")    field_precision = precision_single;
+  else if (precision_str == "double")    field_precision = precision_double;
+  else if (precision_str == "quadruple") field_precision = precision_quadruple;
+  else {
+    ERROR1 ("Simulation::initialize_data_descr_()", 
+	    "Unknown precision %s",
+	    precision_str.c_str());
+  }
+
+  field_refresh_corners = parameters->value_logical ("Field:refresh:corners",true);
+  field_refresh_edges   = parameters->value_logical ("Field:refresh:edges",  true);
+  field_refresh_faces   = parameters->value_logical ("Field:refresh:faces",  true);
 
   mesh_root_rank = parameters->value_integer("Mesh:root_rank",0);
 
@@ -207,12 +223,32 @@ void Config::read(Parameters * parameters) throw()
 
   initial_cycle = parameters->value_integer("Initial:cycle",0);
   initial_time  = parameters->value_float  ("Initial:time",0.0);
-  //  initial_type;
+  initial_type  = parameters->value_string("Initial:type","default");
+
   //  initial_name;
   //  initial_value
 
-  //  mesh_root_blocks
-  //  mesh_root_size
+  mesh_root_blocks[0] = parameters->list_value_integer(0,"Mesh:root_blocks",1);
+  mesh_root_blocks[1] = parameters->list_value_integer(1,"Mesh:root_blocks",1);
+  mesh_root_blocks[2] = parameters->list_value_integer(2,"Mesh:root_blocks",1);
+
+#ifndef CONFIG_USE_CHARM
+  int root_blocks = mesh_root_blocks[0]*mesh_root_blocks[1]*mesh_root_blocks[2];
+  GroupProcess * group_process = GroupProcess::create();
+  ASSERT4 ("Simulation::initialize_hierarchy_",
+	   "Product of Mesh:root_blocks = [%d %d %d] must equal MPI_Comm_size",
+	   mesh_root_blocks[0],
+	   mesh_root_blocks[1],
+	   mesh_root_blocks[2],
+	   group_process->size(),
+	   root_blocks==group_process->size());
+  delete group_process;
+#endif
+
+
+  mesh_root_size[0] = parameters->list_value_integer(0,"Mesh:root_size",1);
+  mesh_root_size[1] = parameters->list_value_integer(1,"Mesh:root_size",1);
+  mesh_root_size[2] = parameters->list_value_integer(2,"Mesh:root_size",1);
 
   //  method_sequence;
 
@@ -245,13 +281,15 @@ void Config::read(Parameters * parameters) throw()
     ("Physics:cosmology:omega_matter_now",   0.279);
   physics_gamma = parameters->value_float ("Physics:gamma",5.0/3.0);
 
-  //  stopping_cycle;
-  //  stopping_time;
+  stopping_cycle = parameters->value_integer
+    ( "Stopping:cycle" , std::numeric_limits<int>::max() );
+  stopping_time  = parameters->value_float
+    ( "Stopping:time" , std::numeric_limits<double>::max() );
 
   //  testing_cycle_final;
   //  testing_time_final;
 
-  //  timestep_type;
+  timestep_type = parameters->value_string("Timestep:type","default");
 
 }
 

@@ -81,9 +81,6 @@ void Problem::pup (PUP::er &p)
 
 void Problem::initialize_boundary(Config * config) throw()
 {
-  //--------------------------------------------------
-  // parameter: Boundary : type
-  //--------------------------------------------------
 
   std::string type = config->boundary_type;
 
@@ -97,31 +94,28 @@ void Problem::initialize_boundary(Config * config) throw()
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_initial(Parameters * parameters,
+void Problem::initialize_initial(Config * config,
+				 Parameters * parameters,
 				 const GroupProcess * group_process) throw()
 {
-  //--------------------------------------------------
-  // parameter: Initial : type
-  //--------------------------------------------------
-
-  std::string type = parameters->value_string("Initial:type","default");
-
-  Initial * initial = create_initial_(type,parameters,group_process);
+  Initial * initial = create_initial_
+    (config->initial_type,parameters,config,group_process);
 
   initial_list_.push_back( initial );
+
   ++ num_initial_;
 
   ASSERT1("Problem::initialize_initial",
 	  "Initial type %s not recognized",
-	  type.c_str(),
+	  config->initial_type.c_str(),
 	  initial != NULL);
 }
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_stopping(Parameters * parameters) throw()
+void Problem::initialize_stopping(Config * config) throw()
 {
-  stopping_ = create_stopping_("default",parameters);
+  stopping_ = create_stopping_("default",config);
 
   ASSERT("Problem::initialize_stopping",
 	  "Stopping object not successfully created",
@@ -130,19 +124,17 @@ void Problem::initialize_stopping(Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_timestep(Parameters * parameters) throw()
+void Problem::initialize_timestep(Config * config) throw()
 {
   //--------------------------------------------------
   // parameter: Timestep : type
   //--------------------------------------------------
 
-  std::string type = parameters->value_string("Timestep:type","default");
-
-  timestep_ = create_timestep_(type,parameters);
+  timestep_ = create_timestep_(config->timestep_type,config);
 
   ASSERT1("Problem::initialize_timestep",
 	  "Timestep type %s not recognized",
-	  type.c_str(),
+	  config->timestep_type.c_str(),
 	  timestep_ != NULL);
 }
 
@@ -776,6 +768,7 @@ Initial * Problem::create_initial_
 (
  std::string  type,
  Parameters * parameters,
+ Config * config,
  const GroupProcess * group_process
  ) throw ()
 { 
@@ -784,17 +777,10 @@ Initial * Problem::create_initial_
   // parameter: Initial : time
   //--------------------------------------------------
 
-  int    init_cycle  = parameters->value_integer ("Initial:cycle",0);
-  double init_time   = parameters->value_float   ("Initial:time",0.0);
-
-  DEBUG1 ("create_initial(%s)",type.c_str());
-
   if (type == "file" || type == "restart") {
-    DEBUG ("Creating InitialFile");
-    return new InitialFile(parameters,group_process,init_cycle,init_time);;
+    return new InitialFile   (parameters,group_process,config->initial_cycle,config->initial_time);;
   } else if (type == "default") {
-    DEBUG ("Creating InitialDefault");
-    return new InitialDefault(parameters,init_cycle,init_time);
+    return new InitialDefault(parameters,config->initial_cycle,config->initial_time);
   }
   return NULL;
 }
@@ -804,25 +790,14 @@ Initial * Problem::create_initial_
 Stopping * Problem::create_stopping_ 
 (
  std::string  type,
- Parameters * parameters
+ Config * config
  ) throw ()
 /// @param type   Type of the stopping method to create (ignored)
 /// @param stop_cycle  Stopping cycle
 /// @param stop_time  Stopping time
 {
-  //--------------------------------------------------
-  // parameter: Stopping : cycle
-  // parameter: Stopping : time
-  //--------------------------------------------------
-
-  int    stop_cycle = parameters->value_integer
-    ( "Stopping:cycle" , std::numeric_limits<int>::max() );
-  double stop_time  = parameters->value_float
-    ( "Stopping:time" , std::numeric_limits<double>::max() );
-
-  // Return default stopping criteria object
-
-  return new Stopping(stop_cycle,stop_time);
+  return new Stopping(config->stopping_cycle,
+		      config->stopping_time);
 }
 
 //----------------------------------------------------------------------
@@ -830,7 +805,7 @@ Stopping * Problem::create_stopping_
 Timestep * Problem::create_timestep_ 
 (
  std::string  type,
- Parameters * parameters
+ Config * config
  ) throw ()
 { 
   // No default timestep

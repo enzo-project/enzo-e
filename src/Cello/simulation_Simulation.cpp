@@ -111,8 +111,8 @@ void Simulation::pup (PUP::er &p)
 
   p | factory_; // PUP::able
 
-  if (up) parameters_ = new Parameters;
-  p | * parameters_;
+  // if (up) parameters_ = new Parameters;
+  // p | * parameters_;
 
   p | config_;
 
@@ -195,11 +195,10 @@ void Simulation::initialize() throw()
   initialize_data_descr_();
 
   problem_->initialize_boundary(&config_);
-  problem_->initialize_initial (parameters_,group_process_);
-  problem_->initialize_stopping(parameters_);
-  problem_->initialize_timestep(parameters_);
-  problem_->initialize_output  (parameters_,field_descr_,
-				group_process_,factory());
+  problem_->initialize_initial (&config_,parameters_,group_process_);
+  problem_->initialize_stopping(&config_);
+  problem_->initialize_timestep(&config_);
+  problem_->initialize_output  (parameters_,field_descr_,group_process_,factory());
   problem_->initialize_method  (parameters_);
 
   initialize_hierarchy_();
@@ -288,54 +287,14 @@ void Simulation::initialize_data_descr_() throw()
 
   // Set face dimensions to refresh
 
-  //--------------------------------------------------
-  // parameter: Field : refresh_faces
-  // parameter: Field : refresh_edges
-  // parameter: Field : refresh_corners
-  //--------------------------------------------------
-
-  // Refresh face ghost zones
-  if (parameters_->type("Field:refresh_faces") == parameter_logical) {
-    bool refresh_faces = 
-      parameters_->value_logical ("Field:refresh:faces",true);
-    field_descr_->set_refresh_face(2,refresh_faces);
-  }
-
-  // Refresh edge ghost zones
-  if (parameters_->type("Field:refresh_edges") == parameter_logical) {
-    bool refresh_edges = 
-      parameters_->value_logical ("Field:refresh:edges",false);
-    field_descr_->set_refresh_face(1,refresh_edges);
-  }
-
-  // Refresh corner ghost zones
-  if (parameters_->type("Field:refresh_corners") == parameter_logical) {
-    bool refresh_corners = 
-      parameters_->value_logical ("Field:refresh:corners",false);
-    field_descr_->set_refresh_face(0,refresh_corners);
-  }
+  field_descr_->set_refresh_face(2,config_.field_refresh_faces);
+  field_descr_->set_refresh_face(1,config_.field_refresh_edges);
+  field_descr_->set_refresh_face(0,config_.field_refresh_corners);
   
-  //--------------------------------------------------
-  // parameter: Field : precision
-  //--------------------------------------------------
-
-  std::string precision_str = 
-    parameters_->value_string("Field:precision","default");
-
-  precision_type precision = precision_unknown;
-
-  if      (precision_str == "default")   precision = precision_default;
-  else if (precision_str == "single")    precision = precision_single;
-  else if (precision_str == "double")    precision = precision_double;
-  else if (precision_str == "quadruple") precision = precision_quadruple;
-  else {
-    ERROR1 ("Simulation::initialize_data_descr_()", 
-	    "Unknown precision %s",
-	    precision_str.c_str());
-  }
+  // Default precision
 
   for (int i=0; i<field_descr_->field_count(); i++) {
-    field_descr_->set_precision(i,precision);
+    field_descr_->set_precision(i,config_.field_precision);
   }
 
   //--------------------------------------------------
@@ -351,17 +310,8 @@ void Simulation::initialize_data_descr_() throw()
 	  
   field_descr_->set_alignment (alignment);
   
-  //--------------------------------------------------
-  // parameter: Field : padding
-  //--------------------------------------------------
+  field_descr_->set_padding (config_.field_padding);
 
-  int padding = parameters_->value_integer("Field:padding",0);
-
-  field_descr_->set_padding (padding);
-
-  //--------------------------------------------------
-  // parameter: Field : <field_name> : centering
-  //--------------------------------------------------
 
   for (int i=0; i<field_descr_->field_count(); i++) {
 
@@ -412,31 +362,14 @@ void Simulation::initialize_hierarchy_() throw()
   // parameter: Mesh : root_blocks
   //--------------------------------------------------
 
-  int root_size[3];
-
-  root_size[0] = parameters_->list_value_integer(0,"Mesh:root_size",1);
-  root_size[1] = parameters_->list_value_integer(1,"Mesh:root_size",1);
-  root_size[2] = parameters_->list_value_integer(2,"Mesh:root_size",1);
-
-  hierarchy_->set_root_size(root_size[0],root_size[1],root_size[2]);
-
-  int root_blocks[3];
-
-  root_blocks[0] = parameters_->list_value_integer(0,"Mesh:root_blocks",1);
-  root_blocks[1] = parameters_->list_value_integer(1,"Mesh:root_blocks",1);
-  root_blocks[2] = parameters_->list_value_integer(2,"Mesh:root_blocks",1);
-
-#ifndef CONFIG_USE_CHARM
-  ASSERT4 ("Simulation::initialize_hierarchy_",
-	   "Product of Mesh:root_blocks = [%d %d %d] must equal MPI_Comm_size = %d",
-	   root_blocks[0],root_blocks[1],root_blocks[2], group_process_->size(),
-	   root_blocks[0]*root_blocks[1]*root_blocks[2]==group_process_->size());
-#endif
-
-  std::string type = parameters_->value_string("Initial:type","default");
+  hierarchy_->set_root_size(config_.mesh_root_size[0],
+			    config_.mesh_root_size[1],
+			    config_.mesh_root_size[2]);
 
   // Don't allocate blocks if reading data from files
-  bool allocate_blocks = ! ( type == "file" || type == "restart" );
+
+  bool allocate_blocks = ! ( config_.initial_type == "file" || 
+			     config_.initial_type == "restart" );
 
 #ifdef CONFIG_USE_CHARM
   // Distributed patches in Charm: only allocate on root processor
@@ -446,8 +379,12 @@ void Simulation::initialize_hierarchy_() throw()
     {
       hierarchy_->create_root_patch
 	(field_descr_,
-	 root_size[0],root_size[1],root_size[2],
-	 root_blocks[0],root_blocks[1],root_blocks[2],
+	 config_.mesh_root_size[0],
+	 config_.mesh_root_size[1],
+	 config_.mesh_root_size[2],
+	 config_.mesh_root_blocks[0],
+	 config_.mesh_root_blocks[1],
+	 config_.mesh_root_blocks[2],
 	 allocate_blocks);
     }
 

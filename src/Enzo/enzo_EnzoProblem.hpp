@@ -44,16 +44,17 @@ private: // functions
 
   /// Create named initialization object
   virtual Initial *  create_initial_ 
-  (std::string name, Parameters * parameters,
+  (std::string name, 
+   Parameters * parameters,
+   Config * config,
    const GroupProcess * group_process) throw ();
 
   /// Create named method object
-  virtual Method *   create_method_ 
-  (std::string name) throw ();
+  virtual Method *   create_method_ (std::string name) throw ();
 
   /// Create named timestep object
   virtual Timestep * create_timestep_
-  (std::string name, Parameters * parameters) throw ();
+  (std::string name, Config * config) throw ();
 
 };
 

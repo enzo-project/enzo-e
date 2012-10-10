@@ -72,9 +72,10 @@ public: // attributes
   std::vector<std::string>   field_fields;
   int                        field_ghosts[3];;
   int                        field_padding;
-  std::string                field_precision;
+  int                        field_precision;
   bool                       field_refresh_corners;
   bool                       field_refresh_edges;
+  bool                       field_refresh_faces;
 
   int                        initial_cycle;
   std::string                initial_type;

@@ -36,6 +36,7 @@ extern const char * parameter_type_name [];
 #include <map>
 #include <string>
 #include <vector>
+#include <limits>
 
 //----------------------------------------------------------------------
 // Component class includes

@@ -69,7 +69,7 @@ Boundary * EnzoProblem::create_boundary_
 Timestep * EnzoProblem::create_timestep_
 (
  std::string  name,
- Parameters * parameters
+ Config * config
  ) throw ()
 /// @param name   Name of the timestep method to create
 {
@@ -80,7 +80,7 @@ Timestep * EnzoProblem::create_timestep_
   } else if (name == "ppm") {
     timestep = new EnzoTimestep;
   } else {
-    timestep = Problem::create_timestep_(name,parameters);
+    timestep = Problem::create_timestep_(name,config);
   }
 
   return timestep;
@@ -92,6 +92,7 @@ Initial * EnzoProblem::create_initial_
 (
  std::string  name,
  Parameters * parameters,
+ Config * config,
  const GroupProcess * group_process
  ) throw ()
 {
@@ -101,15 +102,12 @@ Initial * EnzoProblem::create_initial_
   // parameter: Initial : time
   //--------------------------------------------------
 
-  int    init_cycle  = parameters->value_integer ("Initial:cycle",0);
-  double init_time   = parameters->value_float   ("Initial:time",0.0);
-
   Initial * initial = 0;
 
   if (name == "implosion_2d") {
-    initial = new EnzoInitialImplosion2(init_cycle,init_time);
+    initial = new EnzoInitialImplosion2(config->initial_cycle,config->initial_time);
   } else {
-    initial = Problem::create_initial_(name,parameters,group_process);
+    initial = Problem::create_initial_(name,parameters,config,group_process);
   }
 
   return initial;
