@@ -87,6 +87,10 @@ public: // interface
   /// Return the Parameters
   Parameters * parameters() const throw()
   { return parameters_; }
+
+  /// Return the Config
+  const Config * config() const throw()
+  { return &config_; }
   
   /// Return the field descriptor
   FieldDescr * field_descr() const throw()

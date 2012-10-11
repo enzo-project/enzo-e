@@ -465,8 +465,8 @@ void Config::read(Parameters * parameters) throw()
   stopping_time  = parameters->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
 
-  //  testing_cycle_final;
-  //  testing_time_final;
+  testing_cycle_final = parameters->value_integer("Testing:cycle_final",0);
+  testing_time_final  = parameters->value_float  ("Testing:time_final", 0.0);
 
   timestep_type = parameters->value_string("Timestep:type","default");
 

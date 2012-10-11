@@ -77,6 +77,10 @@ void SimulationMpi::run() throw()
     }
   }
 
+  // delete parameters in favor of config 
+  delete parameters_;
+  parameters_ = 0;
+
   //--------------------------------------------------
   // REFRESH GHOST ZONES AND ENFORCE BOUNDARY CONDITIONS
   //--------------------------------------------------

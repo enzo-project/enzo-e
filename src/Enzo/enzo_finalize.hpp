@@ -4,14 +4,12 @@ void Main::enzo_finalize (Simulation * simulation)
 void enzo_finalize (Simulation * simulation)
 #endif
 {
-  Parameters * parameters = simulation->parameters();
-  Monitor * monitor       = simulation->monitor();
+  const Config * config   = simulation->config();
+  Monitor * monitor = simulation->monitor();
 
   simulation->finalize();
   
-  // parameter: Testing : cycle_final
-
-  int    cycle_final = parameters->value_integer("Testing:cycle_final",0);
+  int cycle_final = config->testing_cycle_final;
 
   unit_class ("Enzo-P");
   unit_func  ("final cycle");
@@ -21,9 +19,7 @@ void enzo_finalize (Simulation * simulation)
     monitor->print ("Testing","expected cycle:  %d",cycle_final);
   }
 
-  // parameter: Testing : time_final
-
-  double time_final  = parameters->value_float("Testing:time_final",0.0);
+  double time_final  = config->testing_time_final;
 
   unit_class ("Enzo-P");
   unit_func  ("final time");

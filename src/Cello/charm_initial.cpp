@@ -136,6 +136,8 @@ void Patch::s_initial()
 void SimulationCharm::s_initial()
 {
   if (patch_loop_.done()) {
+    delete parameters_;
+    parameters_ = 0;
     c_refresh();
   }
 }
