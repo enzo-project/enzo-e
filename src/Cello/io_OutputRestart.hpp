@@ -9,7 +9,6 @@
 #define IO_OUTPUT_RESTART_HPP
 
 class ItField;
-class Parameters;
 
 class OutputRestart : public Output {
 
@@ -23,7 +22,7 @@ public: // functions
   OutputRestart() throw() {}
 
   /// Create an uninitialized OutputRestart object
-  OutputRestart(const Factory * factory, Parameters * parameters, int process_count) throw();
+  OutputRestart(const Factory * factory, Config * config, int process_count) throw();
 
   /// Destructor
   ~OutputRestart() throw()

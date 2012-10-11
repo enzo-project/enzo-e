@@ -64,6 +64,7 @@ void Config::pup (PUP::er &p)
   p | enzo_ppm_temperature_floor;
   p | enzo_ppm_use_minimum_pressure_support;
 
+  p | num_fields;
   p | field_alignment;
   PUParray(p,field_centering,MAX_FIELDS);
   p | field_courant;
@@ -89,15 +90,22 @@ void Config::pup (PUP::er &p)
 
   p | monitor_debug;
 
+  p | num_file_groups;
   p | output_file_groups;
-  PUParray (p,output_axis,MAX_FILE_GROUPS);
-  PUParray (p,output_colormap,MAX_FILE_GROUPS);
-  PUParray (p,output_colormap_alpha,MAX_FILE_GROUPS);
+  PUParray (p,output_type,MAX_FILE_GROUPS);
+  PUParray (p,output_image_axis,MAX_FILE_GROUPS);
+  PUParray (p,output_image_colormap,MAX_FILE_GROUPS);
+  PUParray (p,output_image_colormap_alpha,MAX_FILE_GROUPS);
   PUParray (p,output_field_list,MAX_FILE_GROUPS);
+  PUParray (p,output_stride,MAX_FILE_GROUPS);
   PUParray (p,output_name,MAX_FILE_GROUPS);
   PUParray (p,output_dir,MAX_FILE_GROUPS);
-  PUParray (p,output_schedule,MAX_FILE_GROUPS);
-  PUParray (p,output_type,MAX_FILE_GROUPS);
+  PUParray (p,output_schedule_type,MAX_FILE_GROUPS);
+  PUParray (p,output_schedule_var,MAX_FILE_GROUPS);
+  PUParray (p,output_schedule_start,MAX_FILE_GROUPS);
+  PUParray (p,output_schedule_stop,MAX_FILE_GROUPS);
+  PUParray (p,output_schedule_step,MAX_FILE_GROUPS);
+  PUParray (p,output_schedule_list,MAX_FILE_GROUPS);
 
   p | physics_cosmology;
   p | physics_cosmology_comoving_box_size;
@@ -162,6 +170,9 @@ void Config::read(Parameters * parameters) throw()
 
   num_fields = parameters->list_length("Field:fields"); 
 
+  ASSERT2 ("Config::read","Number of fields %d exceeds MAX_FIELDS %d",
+	   num_fields, MAX_FIELDS, num_fields <= MAX_FIELDS);
+
   field_fields.resize(num_fields);
   for (int i=0; i<num_fields; i++) {
     field_fields[i] = parameters->list_value_string(i, "Field:fields");
@@ -206,8 +217,7 @@ void Config::read(Parameters * parameters) throw()
   else if (precision_str == "double")    field_precision = precision_double;
   else if (precision_str == "quadruple") field_precision = precision_quadruple;
   else {
-    ERROR1 ("Simulation::initialize_data_descr_()", 
-	    "Unknown precision %s",
+    ERROR1 ("Config::read()", "Unknown precision %s",
 	    precision_str.c_str());
   }
 
@@ -235,7 +245,7 @@ void Config::read(Parameters * parameters) throw()
 #ifndef CONFIG_USE_CHARM
   int root_blocks = mesh_root_blocks[0]*mesh_root_blocks[1]*mesh_root_blocks[2];
   GroupProcess * group_process = GroupProcess::create();
-  ASSERT4 ("Simulation::initialize_hierarchy_",
+  ASSERT4 ("Config::read()",
 	   "Product of Mesh:root_blocks = [%d %d %d] must equal MPI_Comm_size",
 	   mesh_root_blocks[0],
 	   mesh_root_blocks[1],
@@ -250,20 +260,191 @@ void Config::read(Parameters * parameters) throw()
   mesh_root_size[1] = parameters->list_value_integer(1,"Mesh:root_size",1);
   mesh_root_size[2] = parameters->list_value_integer(2,"Mesh:root_size",1);
 
-  //  method_sequence;
+  int size = parameters->list_length("Method:sequence");
+  method_sequence.resize(size);
+  for (int i=0; i<size; i++) {
+    method_sequence[i] = parameters->list_value_string(i,"Method:sequence");
+  }
 
   monitor_debug = parameters->value_logical("Monitor:debug",false);
 
-  //  output_file_groups;
-  //  output_axis
-  //  output_colormap
-  //  output_colormap_alpha
-  //  output_field_list
-  //  output_name
-  //  output_dir
-  //  output_schedule
-  //  output_type
+  // Output
 
+  parameters->group_set(0,"Output");
+
+  num_file_groups = parameters->list_length("file_groups");
+
+  ASSERT2 ("Config::read","Number of file groups %d exceeds MAX_FILE_GROUPS %d",
+	   num_file_groups, MAX_FILE_GROUPS, num_file_groups <= MAX_FILE_GROUPS);
+
+  parameters->group_set(0,"Output");
+
+
+  output_file_groups.resize(num_file_groups);
+
+  for (int index=0; index<num_file_groups; index++) {
+
+    output_file_groups[index] = 
+      parameters->list_value_string (index,"Output:file_groups","unknown");
+
+    parameters->group_set(1,output_file_groups[index]);
+
+    output_type[index] = parameters->value_string("type","unknown");
+
+    if (output_type[index] == "unknown") {
+      ERROR1("Config::read",
+	     "Output:%s:type parameter is undefined",
+	     output_file_groups[index].c_str());
+    }
+
+    output_stride[index] = parameters->value_integer("stride",0);
+
+    if (parameters->type("dir") == parameter_string) {
+      output_dir[index].resize(1);
+      output_dir[index][0] = parameters->value_string("dir","");
+    } else if (parameters->type("dir") == parameter_list) {
+      int size = parameters->list_length("dir");
+      if (size > 0) output_dir[index].resize(size);
+      for (int i=0; i<size; i++) {
+	output_dir[index][i] = parameters->list_value_string(i,"dir","");
+      }
+    }
+
+    if (parameters->type("name") == parameter_string) {
+      output_name[index].resize(1);
+      output_name[index][0] = parameters->value_string("name","");
+    } else if (parameters->type("name") == parameter_list) {
+      int size = parameters->list_length("name");
+      if (size > 0) output_name[index].resize(size);
+      for (int i=0; i<size; i++) {
+	output_name[index][i] = parameters->list_value_string(i,"name","");
+      }
+    }
+    //  output_axis
+    //  output_colormap
+    //  output_colormap_alpha
+    if (parameters->type("field_list") == parameter_list) {
+      int length = parameters->list_length("field_list");
+      output_field_list[index].resize(length);
+      for (int i=0; i<length; i++) {
+	output_field_list[index][i] = parameters->list_value_string(i,"field_list","");
+      }
+    }
+      
+    //  output_schedule
+
+    ASSERT1("Config::read",
+	   "'schedule' is not defined for output file group %s",
+	    output_file_groups[index].c_str(),
+	    (parameters->type("schedule") != parameter_unknown));
+
+    int length = parameters->list_length("schedule");
+    ASSERT1("Config::read","Incorrect 'schedule' for Output group %s",
+	    output_file_groups[index].c_str(), (length >= 3));
+
+    output_schedule_var[index]  = parameters->list_value_string(0,"schedule");
+    output_schedule_type[index] = parameters->list_value_string(1,"schedule");
+
+    bool var_is_int;
+
+    if (output_schedule_var[index] == "cycle") {
+      var_is_int = true;
+    } else if (output_schedule_var[index] == "time") {
+      var_is_int = false;
+    } else {
+      ERROR2 ("Config::read",
+	      "Schedule variable %s is not recognized for output file group %s",
+	      output_schedule_var[index].c_str(),output_file_groups[index].c_str());
+    }
+
+    const int    max_int    = std::numeric_limits<int>::max();
+    const double max_double = std::numeric_limits<double>::max();
+
+    if (output_schedule_type[index] == "interval") {
+      if (length == 3) { // step
+	if (var_is_int) {
+	  output_schedule_start[index] = 0;
+	  output_schedule_step[index]  = parameters->list_value_integer(2,"schedule");
+	  output_schedule_stop[index]  = max_int;
+	} else {
+	  output_schedule_start[index] = 0.0;
+	  output_schedule_step[index]  = parameters->list_value_float(2,"schedule");
+	  output_schedule_stop[index]  = max_double;
+	}
+      } else if (length == 4) { // start, step
+	if (var_is_int) {
+	  output_schedule_start[index] = parameters->list_value_integer(2,"schedule");
+	  output_schedule_step[index]  = parameters->list_value_integer(3,"schedule");
+	  output_schedule_stop[index]  = max_int;
+	} else {
+	  output_schedule_start[index] = parameters->list_value_float(2,"schedule");
+	  output_schedule_step[index]  = parameters->list_value_float(3,"schedule");
+	  output_schedule_stop[index]  = max_double;
+	}
+      } else if (length == 5) { // start, step, stop
+	if (var_is_int) {
+	  output_schedule_start[index] = parameters->list_value_integer(2,"schedule");
+	  output_schedule_step[index]  = parameters->list_value_integer(3,"schedule");
+	  output_schedule_stop[index]  = parameters->list_value_integer(4,"schedule");
+	} else {
+	  output_schedule_start[index] = parameters->list_value_float(2,"schedule");
+	  output_schedule_step[index]  = parameters->list_value_float(3,"schedule");
+	  output_schedule_stop[index]  = parameters->list_value_float(4,"schedule");
+	}
+      }
+    } else if (output_schedule_type[index] == "list") {
+      output_schedule_list[index].resize(length-2);
+      for (int i=2; i<length; i++) {
+	if (var_is_int) {
+	  output_schedule_list[index][i-2] = parameters->list_value_integer(i,"schedule");
+	} else {
+	  output_schedule_list[index][i-2] = parameters->list_value_float(i,"schedule");
+	}
+      }
+    } else {
+      ERROR2 ("Config::read",
+	      "Schedule type %s is not recognized for output file group %s",
+	      output_schedule_type[index].c_str(),output_file_groups[index].c_str());
+    }
+
+    // Image 
+
+    TRACE2 ("output_type[%d] = %s",index,output_type[index].c_str());
+
+    if (output_type[index] == "image") {
+
+      output_image_axis[index] = "z";
+
+      if (parameters->type("axis") != parameter_unknown) {
+	std::string axis = parameters->value_string("axis");
+	ASSERT2("Problem::initialize_output",
+		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
+		output_file_groups[index].c_str(), axis.c_str(),
+		axis=="x" || axis=="y" || axis=="z");
+      } 
+
+      if (parameters->type("colormap") == parameter_list) {
+	int size = parameters->list_length("colormap");
+	output_image_colormap[index].resize(size);
+	for (int i=0; i<size; i++) {
+	  double cm = 
+	    output_image_colormap[index][i] = parameters->list_value_float(i,"colormap",0.0);
+	  printf ("cm[%d] = %f\n",i,cm);
+	}
+      }
+
+      if (parameters->type("colormap_alpha") == parameter_list) {
+	int size = parameters->list_length("colormap_alpha");
+	output_image_colormap_alpha[index].resize(size);
+	for (int i=0; i<size; i++) {
+	  output_image_colormap_alpha[index][i] = 
+	    parameters->list_value_float(i,"colormap_alpha",0.0);
+	}
+      }
+
+    }
+
+  }  
   // RENAME physics_ as enzo_
 
   physics_cosmology = parameters->value_logical ("Physics:cosmology",false);

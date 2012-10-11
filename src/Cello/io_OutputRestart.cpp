@@ -18,7 +18,7 @@ extern CProxy_SimulationCharm  proxy_simulation;
 OutputRestart::OutputRestart
 (
  const Factory * factory,
- Parameters * parameters,
+ Config * config,
  int process_count
 ) throw ()
   : Output(factory),
@@ -33,35 +33,10 @@ OutputRestart::OutputRestart
 	  "Restart capability only implemented for Charm++");
 #endif
 
-  // ASSUMES "Output : <file_group>" is current parameters group
-  // set in Problem::initialize_output()
+  dir_name_ = config->output_dir[index_][0];
 
-  //--------------------------------------------------
-  // parameter: Output : <file_group> : param
-  //--------------------------------------------------
-  
-  if (parameters->type("dir") == parameter_string) {
-
-    dir_name_ = parameters->value_string("dir","");
-     
-  } else if (parameters->type("dir") == parameter_list) {
-
-    int list_length = parameters->list_length("dir");
-
-    if (list_length > 0) {
-      dir_name_ = parameters->list_value_string(0,"dir","");
-    }
-
-    for (int index = 1; index<list_length; index++) {
-      dir_args_.push_back(parameters->list_value_string(index,"dir",""));
-    }
-
-  } else {
-
-      ERROR1("OutputRestart::OutputRestart",
-	     "Bad type %d for 'Output : <file_group> : dir' parameter",
-	     parameters->type("dir"));
-
+  for (size_t i=1; i<config->output_dir[index_].size(); i++) {
+    dir_args_.push_back(config->output_dir[index_][i]);
   }
 
 }

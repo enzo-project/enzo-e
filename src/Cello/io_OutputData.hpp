@@ -12,7 +12,7 @@ class Factory;
 class Hierarchy;
 class Patch;
 class FieldDescr;
-class Parameters;
+class Config;
 
 class OutputData : public Output {
 
@@ -27,7 +27,7 @@ public: // functions
 
   /// Create an uninitialized OutputData object
   OutputData(const Factory * factory,
-	     Parameters * parameters) throw();
+	     Config * config) throw();
 
   /// Close the file if it is open
   virtual ~OutputData() throw();

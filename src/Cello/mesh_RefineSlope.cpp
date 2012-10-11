@@ -38,7 +38,7 @@ int RefineSlope::apply
 
   void * void_array = field_block->field_values(0);
 
-  int num_fields = field_descr->field_count();
+  //  int num_fields = field_descr->field_count();
 
 
   int count_flagged = 0;

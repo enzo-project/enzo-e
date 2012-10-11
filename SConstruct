@@ -7,7 +7,7 @@ import sys
 
 # Whether to print out messages with the TRACE() series of statements
 
-trace = 1
+trace = 0
 
 # Whether to enable displaying messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
@@ -43,7 +43,7 @@ use_valgrind = 0
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
 
-use_projections = 0
+use_projections = 1
 
 # Triton MPI type (openmpi or mpich2)
 

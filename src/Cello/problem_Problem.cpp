@@ -141,155 +141,50 @@ void Problem::initialize_timestep(Config * config) throw()
 //----------------------------------------------------------------------
 
 void Problem::initialize_output
-(Parameters * parameters,
+(Config * config,
  FieldDescr * field_descr,
  const GroupProcess * group_process,
  const Factory * factory) throw()
 {
-  // Create and initialize an Output object for each Output group
 
-  //--------------------------------------------------
-  // parameter: Output : file_groups
-  //--------------------------------------------------
+  for (int index=0; index < config->num_file_groups; index++) {
 
-  //--------------------------------------------------
-  parameters->group_set(0,"Output");
-  //--------------------------------------------------
+    std::string file_group = config->output_file_groups [index];
+    std::string type       = config->output_type[index];
 
-  int num_file_groups = parameters->list_length("file_groups");
+    Output * output = create_output_ (type,config,group_process,factory);
 
-
-  for (int index_file_group=0; index_file_group < num_file_groups; index_file_group++) {
-
-    //--------------------------------------------------
-    parameters->group_set(0,"Output");
-    //--------------------------------------------------
-
-    std::string file_group = parameters->list_value_string
-      (index_file_group,"file_groups","unknown");
-
-    //--------------------------------------------------
-    parameters->group_set(1,file_group);
-
-    //--------------------------------------------------
-    // File type parameter
-    //--------------------------------------------------
-
-    //--------------------------------------------------
-    // parameter: Output : <file_group> : type
-    //--------------------------------------------------
-
-    std::string type = parameters->value_string("type","unknown");
-
-    // Error if Output:type is not defined
-    if (type == "unknown") {
-      ERROR1("Problem::initialize_output",
-	     "Output:%s:type parameter is undefined",
-	     file_group.c_str());
-    }
-
-    // Create output object
-
-    Output * output = create_output_
-      (type,parameters,group_process,factory);
-
-    // Error if output type was not recognized
     if (output == NULL) {
       ERROR2("Problem::initialize_output",
 	     "Unknown parameter type Output:%s:type = %s",
-	     file_group.c_str(),
-	     type.c_str());
+	     file_group.c_str(),type.c_str());
     }
 
-    //--------------------------------------------------
-    // File name parameter
-    //--------------------------------------------------
+    std::string file_name = config->output_name[index][0];
 
-    std::string file_name = "";
     std::vector<std::string> file_args;
 
-    //--------------------------------------------------
-    // parameter: Output : <file_group> : name
-    //--------------------------------------------------
-
-    if (parameters->type("name") == parameter_string) {
-
-      // Case 1: string e.g. name = "filename";
-
-      file_name = parameters->value_string("name","");
-
-     
-    } else if (parameters->type("name") == parameter_list) {
-      // Case 2: list e.g. name = ["filename-cycle-%0d.time-%5.3f", "cycle","time"]
-
-      int list_length = parameters->list_length("name");
-
-      // get file name
-      if (list_length > 0) {
-	file_name = parameters->list_value_string(0,"name","");
-      }
-
-      // get file args ("cycle", "time", etc.) to schedule
-      for (int index = 1; index<list_length; index++) {
-	file_args.push_back(parameters->list_value_string(index,"name",""));
-      }
-
-    } else {
-
-      ASSERT2("Problem::initialize_output",
-	      "Bad type %d for 'Output : %s : name' parameter",
-	      parameters->type("name"),file_group.c_str(),
-	      type == "restart");
-
+    for (size_t i=1; i<config->output_name[index].size(); i++) {
+      file_args.push_back(config->output_name[index][i]);
     }
-
-    // Error check name specified
-
-    ASSERT1("Problem::initialize_output",
-	   "Output 'name' must be specified for file group %s",
-	   file_group.c_str(),
-	    type == "restart" || file_name != "");
-
-    // Set the output object file name and arguments
 
     output->set_filename (file_name,file_args);
 
-    //--------------------------------------------------
-    // Field_list parameter
-    //--------------------------------------------------
 
-    //--------------------------------------------------
-    // parameter: Output : <file_group> : field_list
-    //--------------------------------------------------
-
-    if (parameters->type("field_list") != parameter_unknown) {
-
-      // Set field list to specified field list
-
-      if (parameters->type("field_list") == parameter_list) {
+    if (config->output_field_list[index].size() > 0) {
 
 	ItFieldList * it_field = new ItFieldList;
-
-	int length = parameters->list_length("field_list");
+	int length = config->output_field_list[index].size();
 	for (int i=0; i<length; i++) {
-	  std::string field_name = 
-	    parameters->list_value_string(i,"field_list","");
+	  std::string field_name = config->output_field_list[index][i];
 	  int field_index = field_descr->field_id(field_name);
 	  it_field->append(field_index);
 	}
 	
 	output->set_it_field(it_field);
 
-      } else {
-
-	ERROR("Problem::initialize_output",
-	      "Bad type for Output 'field_list' parameter");
-
-      }
-
     } else {
 
-      // field_list not defined: default to all fields
       int field_count = field_descr->field_count();
       ItFieldRange * it_field = new ItFieldRange(field_count);
 
@@ -297,179 +192,58 @@ void Problem::initialize_output
 
     }
 
+
     //--------------------------------------------------
     // Scheduling parameters
     //--------------------------------------------------
 
-    //--------------------------------------------------
-    // parameter: Output : <file_group> : schedule
-    //--------------------------------------------------
-
-    // error check schedule parameter exists
-
-    ASSERT("Problem::initialize_output",
-	   "The 'schedule' parameter must be specified for all Output file groups",
-	   parameters->type("schedule") != parameter_unknown);
-
-    // get schedule variable ("cycle" or "time")
-
     bool var_cycle,var_time;
-    var_cycle = (strcmp(parameters->list_value_string(0,"schedule"),"cycle")==0);
-    var_time  = (strcmp(parameters->list_value_string(0,"schedule"),"time")==0);
 
-    // error check variable name
-
-    ASSERT("Problem::initialize_output",
-	   "The first 'schedule' parameter list element must be 'cycle' or 'time'",
-	   var_cycle || var_time);
-
-    // get schedule type (interval or list)
+    var_cycle = (config->output_schedule_var[index] == "cycle");
+    var_time  = (config->output_schedule_var[index] == "time");
 
     bool type_interval,type_list;
 
-    type_interval = (strcmp(parameters->list_value_string(1,"schedule"),"interval")==0);
-    type_list     = (strcmp(parameters->list_value_string(1,"schedule"),"list")==0);
+    type_interval = config->output_schedule_type[index] == "interval";
+    type_list     = config->output_schedule_type[index] == "list";
 
-    // error check schedule type
+    
+    if (type_interval) {
 
-    ASSERT("Problem::initialize_output",
-	   "The second 'schedule' parameter list element "
-	   "must be 'interval' or 'list'",
-	   type_interval || type_list);
+      if (var_cycle) {
 
-    int len = parameters->list_length("schedule");
+	int start = config->output_schedule_start[index];
+	int stop  = config->output_schedule_stop[index];
+	int step  = config->output_schedule_step[index];
 
-    if (var_cycle && type_interval) {
+	output->schedule()->set_cycle_interval(start,step,stop);
 
-      // get cycle interval schedule
+      } else if (var_time) {
 
-      const int max_int = std::numeric_limits<int>::max();
+	double start = config->output_schedule_start[index];
+	double stop  = config->output_schedule_stop[index];
+	double step  = config->output_schedule_step[index];
 
-      // Set time limits
-
-      int start = 0, stop = 0, step = 0;
-
-      if (len == 3) { 
-
-	// schedule = [ "cycle", "interval",  <step> ];
-
-	start = 0;
-	stop  = max_int;
-	step  = parameters->list_value_integer(2,"schedule");
-
-      } else if (len == 5) {
-
-	// schedule = [ "cycle", "interval",  <start>, <stop>, <step> ]
-
-	start = parameters->list_value_integer(2,"schedule");
-	stop  = parameters->list_value_integer(3,"schedule");
-	step  = parameters->list_value_integer(4,"schedule");
-
-      } else {
-
-	// error check schedule parameter list length
-
-	ERROR("Problem::initialize_output",
-	      "Output 'schedule' list parameter has wrong number of elements");
-
+	output->schedule()->set_time_interval(start,step,stop);
       }
 
-      // Set cycle interval output schedule 
+    } else if (type_list) {
 
-      output->schedule()->set_cycle_interval(start,step,stop);
+      if (var_cycle) {
 
-    } else if (var_cycle && type_list) {
-
-      // get cycle list schedule
-
-      std::vector<int> list;
-
-      for (int index = 2; index < len; index++) {
-
-	int value = parameters->list_value_integer(index,"schedule");
-
-	list.push_back (value);
-
-	if (list.size() > 1) {
-
-	  // error check monotonicity
-
-	  ASSERT("Problem::initialize_output",
-		 "Output 'schedule' parameter list values must be monotonically increasing",
-		 (list[list.size()-2] < list[list.size()-1]));
-
+	int size = config->output_schedule_list[index].size();
+	std::vector<int> list;
+	list.resize(size);
+	for (int i=0; i<size; i++) {
+	  list[i] = (int) config->output_schedule_list[index][i];
 	}
-      }
+	output->schedule()->set_cycle_list(list);
 
-      // Set cycle list output schedule 
-      
-      output->schedule()->set_cycle_list(list);
+      } else if (var_time) {
 
-    } else if (var_time && type_interval) {
-
-      // get time interval schedule
-
-      const double max_double = std::numeric_limits<double>::max();
-
-      // set time limits
-
-      double start = 0, stop = -1, step = 1;
-
-      if (len == 3) {
-
-	// schedule = [ "time", "interval",  <step> ];
-
-	start = 0;
-	stop  = max_double;
-	step  = parameters->list_value_float(2,"schedule");
-
-      } else if (len == 5) {
-
-	// schedule = [ "time", "interval",  <start>, <stop>, <step> ]
-
-	start = parameters->list_value_float(2,"schedule");
-	stop  = parameters->list_value_float(3,"schedule");
-	step  = parameters->list_value_float(4,"schedule");
-
-      } else {
-
-	// error check schedule parameter list length
-
-	ERROR("Problem::initialize_output",
-	      "Output 'schedule' list parameter has wrong number of elements");
+	output->schedule()->set_time_list(config->output_schedule_list[index]);
 
       }
-
-      // Set time interval output schedule 
-
-      output->schedule()->set_time_interval(start,step,stop);
-
-    } else if (var_time && type_list) {
-
-      // get time list schedule
-
-      std::vector<double> list;
-
-      for (int index = 2; index < len; index++) {
-
-	double value = parameters->list_value_float(index,"schedule");
-
-	list.push_back (value);
-
-	if (list.size() > 1) {
-
-	  // error check monotonicity
-
-	  ASSERT("Problem::initialize_output",
-		 "Output 'schedule' parameter list values must be "
-		 "monotonically increasing",
-		 (list[list.size()-2] < list[list.size()-1]));
-	}
-      }
-
-      // Set time list output schedule 
-
-      output->schedule()->set_time_list(list);
 
     }
 
@@ -479,125 +253,38 @@ void Problem::initialize_output
 
     OutputImage * output_image = dynamic_cast<OutputImage *> (output);
 
-    // WARNING("Problem::initialize_output()",
-    // 	    "Temporarily setting output_image ghosts");
-    //    output_image->set_ghosts(3,3,0);
     if (output != NULL) {
 
-      // Parse image-specific parameters
+      // AXIS
 
-      parameter_type type = parameter_unknown;
+      std::string axis = config->output_image_axis[index];
 
-      // position parameter
+      if (axis == "x") output_image->set_axis(axis_x);
+      if (axis == "y") output_image->set_axis(axis_y);
+      if (axis == "z") output_image->set_axis(axis_z);
 
-      type = parameters->type("position");
+      // COLORMAP
 
-      if ( type != parameter_unknown) {
+      int n = config->output_image_colormap[index].size() / 3;
 
-	// error check position type
-
-	ASSERT1("Problem::initialize_output",
-	       "Output %s position must be a float",
-		file_group.c_str(),
-		type == parameter_float);
-
-	INCOMPLETE("Problem::initialize_output_(): image position not implemented");
-
-      }
-
-      // axis parameter
-
-      type = parameters->type("axis");
-
-      //--------------------------------------------------
-      // parameter: Output : <file_group> : axis
-      //--------------------------------------------------
-
-      if (type != parameter_unknown) {
-
-	// error check position type
-
-	ASSERT1("Problem::initialize_output",
-		"Output %s axis must be a string",
-		file_group.c_str(), type == parameter_string);
-
-	std::string axis = parameters->value_string("axis");
-
-	// set the output axis
-
-	if (axis == "x") output_image->set_axis(axis_x);
-	if (axis == "y") output_image->set_axis(axis_y);
-	if (axis == "z") output_image->set_axis(axis_z);
-
-	// error check axis
-
-	ASSERT2("Problem::initialize_output",
-		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
-		file_group.c_str(), axis.c_str(),
-		axis=="x" || axis=="y" || axis=="z");
-
-
-      }
-
-      //--------------------------------------------------
-      // parameter: Output : <file_group> : colormap
-      //--------------------------------------------------
-
-      type = parameters->type("colormap");
-
-      if (type != parameter_unknown) {
-
-	// error check colormap list type
-
-	ASSERT1("Problem::initialize_output",
-		"Output %s colormap must be a list",
-		file_group.c_str(), type == parameter_list);
-
-	int n = parameters->list_length("colormap");
-
-	// error check colormap list length
-
-	ASSERT1("Problem::initialize_output",
-		"Output %s colormap list length must be divisible by 3",
-		file_group.c_str(), n % 3 == 0);
-
-	n /= 3;
-
-	// allocate arrays
-
+      if (n > 0) {
 	double * r = new double [n];
 	double * g = new double [n];
 	double * b = new double [n];
 
-
 	for (int i=0; i<n; i++) {
-
 
 	  int ir=3*i+0;
 	  int ig=3*i+1;
 	  int ib=3*i+2;
 
-	  // error check colormap value types
-
-	  ASSERT1("Problem::initialize_output",
-		  "Output %s colormap list must only contain floats",
-		  file_group.c_str(), 
-		  ((parameters->list_type(ir,"colormap") == parameter_float) &&
-		   (parameters->list_type(ig,"colormap") == parameter_float) &&
-		   (parameters->list_type(ib,"colormap") == parameter_float)));
-
-	  // get next colormap r[i] g[i], b[i]
-	  r[i] = parameters->list_value_float (ir, "colormap",0.0);
-	  g[i] = parameters->list_value_float (ig, "colormap",0.0);
-	  b[i] = parameters->list_value_float (ib, "colormap",0.0);
+	  r[i] = config->output_image_colormap[index][ir];
+	  g[i] = config->output_image_colormap[index][ig];
+	  b[i] = config->output_image_colormap[index][ib];
 
 	}
 
-	// set the colormap
-
 	output_image->set_colormap(n,r,g,b);
-
-	// deallocate arrays
 
 	delete r;
 	delete g;
@@ -605,31 +292,13 @@ void Problem::initialize_output
 
       }
 
-      //--------------------------------------------------
-      // parameter: Output : <file_group> : colormap_alpha
-      //--------------------------------------------------
+      // R G B A
 
-      type = parameters->type("colormap_alpha");
+      // COLORMAP_ALPHA
 
-      if (type != parameter_unknown) {
+      n = config->output_image_colormap_alpha[index].size() / 4;
 
-	// error check colormap_alpha list type
-
-	ASSERT1("Problem::initialize_output",
-		"Output %s colormap_alpha must be a list",
-		file_group.c_str(), type == parameter_list);
-
-	int n = parameters->list_length("colormap_alpha");
-
-	// error check colormap_alpha list length
-
-	ASSERT1("Problem::initialize_output",
-		"Output %s colormap_alpha list length must be divisible by 4",
-		file_group.c_str(), n % 4 == 0);
-
-	n /= 4;
-
-	// allocate arrays
+      if (n > 0) {
 
 	double * r = new double [n];
 	double * g = new double [n];
@@ -638,52 +307,31 @@ void Problem::initialize_output
 
 	for (int i=0; i<n; i++) {
 
-
 	  int ir=4*i+0;
 	  int ig=4*i+1;
 	  int ib=4*i+2;
 	  int ia=4*i+3;
 
-	  // error check colormap_alpha value types
-
-	  ASSERT1("Problem::initialize_output",
-		  "Output %s colormap_alpha list must only contain floats",
-		  file_group.c_str(), 
-		  ((parameters->list_type(ir,"colormap_alpha") == parameter_float) &&
-		   (parameters->list_type(ig,"colormap_alpha") == parameter_float) &&
-		   (parameters->list_type(ib,"colormap_alpha") == parameter_float) &&
-		   (parameters->list_type(ia,"colormap_alpha") == parameter_float)));
-
-	  // get next colormap r[i] g[i], b[i]
-	  r[i] = parameters->list_value_float (ir, "colormap_alpha",0.0);
-	  g[i] = parameters->list_value_float (ig, "colormap_alpha",0.0);
-	  b[i] = parameters->list_value_float (ib, "colormap_alpha",0.0);
-	  a[i] = parameters->list_value_float (ia, "colormap_alpha",0.0);
+	  r[i] = config->output_image_colormap_alpha[index][ir];
+	  g[i] = config->output_image_colormap_alpha[index][ig];
+	  b[i] = config->output_image_colormap_alpha[index][ib];
+	  a[i] = config->output_image_colormap_alpha[index][ia];
 
 	}
 
-	// set the colormap
-
 	output_image->set_colormap(n,r,g,b,a);
-
-	// deallocate arrays
 
 	delete r;
 	delete g;
 	delete b;
 	delete a;
-
       }
-
-
     }
 
     // Initialize index of Output object in Simulation for CHARM
     // Output read()/write() callback by Hierarchy, Patch or Block
 
-#ifdef CONFIG_USE_CHARM
-    output->set_index_charm(output_list_.size());
-#endif
+    output->set_index(output_list_.size());
 
     // Add the initialized Output object to the Simulation's list of
     // output objects
@@ -692,27 +340,18 @@ void Problem::initialize_output
     ++ num_output_;
 
 
-  } // (for index_file_group)
+  } // (for index)
 
 }
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_method(Parameters * parameters) throw()
+void Problem::initialize_method(Config * config) throw()
 {
-  //--------------------------------------------------
-  parameters->group_set(0,"Method");
-  //--------------------------------------------------
 
-  int count = parameters->list_length("sequence");
+  for (int i=0; i<config->method_sequence.size(); i++) {
 
-  for (int i=0; i<count; i++) {
-
-    //--------------------------------------------------
-    // parameter: Method : sequence
-    //--------------------------------------------------
-
-    std::string name = parameters->list_value_string(i,"sequence");
+    std::string name = config->method_sequence[i];
 
     Method * method = create_method_(name);
 
@@ -827,7 +466,7 @@ Method * Problem::create_method_ ( std::string  name ) throw ()
 Output * Problem::create_output_ 
 (
  std::string    name,
- Parameters *   parameters,
+ Config *  config,
  const GroupProcess * group_process,
  const Factory * factory
  ) throw ()
@@ -846,8 +485,8 @@ Output * Problem::create_output_
 
     int nx,ny;
 
-    nx = parameters->list_value_integer(0,"Mesh:root_size",1);
-    ny = parameters->list_value_integer(1,"Mesh:root_size",1);
+    nx = config->mesh_root_size[0];
+    ny = config->mesh_root_size[1];
 
     // NOTE: assumes cube for non-z axis images
 
@@ -855,11 +494,11 @@ Output * Problem::create_output_
 
   } else if (name == "data") {
 
-    output = new OutputData (factory,parameters);
+    output = new OutputData (factory,config);
 
   } else if (name == "restart") {
 
-    output = new OutputRestart (factory,parameters,group_process->size());
+    output = new OutputRestart (factory,config,group_process->size());
 
   }
 

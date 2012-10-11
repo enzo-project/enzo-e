@@ -23,8 +23,8 @@ Output::Output (const Factory * factory) throw()
     process_(0),        // initialization below
 #ifdef CONFIG_USE_CHARM
     loop_(1),        // default process-per-stride
-    index_charm_(0),
 #endif
+    index_(0),
     cycle_(0),
     count_(0),
     time_(0),
@@ -77,7 +77,7 @@ void Output::pup (PUP::er &p)
   p | *schedule_;
   p | process_;
   p | loop_;
-  p | index_charm_;
+  p | index_;
   p | cycle_;
   p | count_;
   p | time_;
@@ -236,7 +236,7 @@ void Output::write_
   while (Patch * patch = ++it_patch) {
 #ifdef CONFIG_USE_CHARM
     TRACE("Output::write_(hierarchy)");
-    ((CProxy_Patch *)patch)->p_write(index_charm_);
+    ((CProxy_Patch *)patch)->p_write(index_);
 #else
     write (patch, field_descr, 0,0,0);
 #endif
@@ -257,7 +257,7 @@ void Output::write_
     TRACE("Output::write_(patch)");
 #ifdef CONFIG_USE_CHARM
 
-  patch->block_array()->p_write(index_charm_);
+  patch->block_array()->p_write(index_);
 
 #else
 

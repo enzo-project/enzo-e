@@ -133,13 +133,13 @@ public: // interface
   void initialize_timestep(Config * config) throw();
 
   /// Initialize the output objects
-  void initialize_output(Parameters * parameters,
+  void initialize_output(Config * config,
 			 FieldDescr * field_descr,
 			 const GroupProcess * group_process,
 			 const Factory * factory) throw();
 
   /// Initialize the method objects
-  void initialize_method(Parameters * parameters) throw();
+  void initialize_method(Config * config) throw();
 
 
 protected: // functions
@@ -164,7 +164,7 @@ protected: // functions
 
   /// Create named output object
   virtual Output *   create_output_  
-  (std::string name, Parameters * parameters,
+  (std::string name, Config * config,
    const GroupProcess *, const Factory * ) throw ();
 
   /// Create named stopping object

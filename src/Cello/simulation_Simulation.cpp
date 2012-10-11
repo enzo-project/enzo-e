@@ -12,7 +12,7 @@
 #include "simulation.hpp"
 #include "charm_simulation.hpp"
 
-bool config_performance = true;
+bool config_performance = false;
 
 Simulation::Simulation
 (
@@ -198,8 +198,8 @@ void Simulation::initialize() throw()
   problem_->initialize_initial (&config_,parameters_,group_process_);
   problem_->initialize_stopping(&config_);
   problem_->initialize_timestep(&config_);
-  problem_->initialize_output  (parameters_,field_descr_,group_process_,factory());
-  problem_->initialize_method  (parameters_);
+  problem_->initialize_output  (&config_,field_descr_,group_process_,factory());
+  problem_->initialize_method  (&config_);
 
   initialize_hierarchy_();
 

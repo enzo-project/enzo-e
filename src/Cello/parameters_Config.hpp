@@ -9,7 +9,7 @@
 #ifndef PARAMETERS_CONFIG_HPP
 #define PARAMETERS_CONFIG_HPP
 
-#define MAX_FIELDS 10
+#define MAX_FIELDS      30
 #define MAX_FILE_GROUPS 10
 
 class Parameters;
@@ -91,15 +91,23 @@ public: // attributes
 
   bool                       monitor_debug;
 
+  int                        num_file_groups;
   std::vector<std::string>   output_file_groups;
-  std::string                output_axis           [MAX_FILE_GROUPS];
-  std::vector<double>        output_colormap       [MAX_FILE_GROUPS];
-  std::vector<double>        output_colormap_alpha [MAX_FILE_GROUPS];
+  std::string                output_type           [MAX_FILE_GROUPS];
+
+  std::string                output_image_axis           [MAX_FILE_GROUPS];
+  std::vector<double>        output_image_colormap_alpha [MAX_FILE_GROUPS];
+  std::vector<double>        output_image_colormap       [MAX_FILE_GROUPS];
+  std::vector<std::string>   output_dir            [MAX_FILE_GROUPS];
+  int                        output_stride         [MAX_FILE_GROUPS];
   std::vector<std::string>   output_field_list     [MAX_FILE_GROUPS];
   std::vector<std::string>   output_name           [MAX_FILE_GROUPS];
-  std::vector<std::string>   output_dir            [MAX_FILE_GROUPS];
-  std::vector<std::string>   output_schedule       [MAX_FILE_GROUPS];
-  std::string                output_type           [MAX_FILE_GROUPS];
+  std::string                output_schedule_type  [MAX_FILE_GROUPS];
+  std::string                output_schedule_var   [MAX_FILE_GROUPS];
+  double                     output_schedule_start [MAX_FILE_GROUPS];
+  double                     output_schedule_stop  [MAX_FILE_GROUPS];
+  double                     output_schedule_step  [MAX_FILE_GROUPS];
+  std::vector<double>        output_schedule_list  [MAX_FILE_GROUPS];
 
   bool                       physics_cosmology;
   double                     physics_cosmology_comoving_box_size;
