@@ -103,6 +103,9 @@ void Monitor::header () const
 #ifdef CONFIG_USE_PROJECTIONS
   print ("Define","CONFIG_USE_PROJECTIONS");
 #endif
+#ifdef CONFIG_USE_PERFORMANCE
+  print ("Define","CONFIG_USE_PERFORMANCE");
+#endif
 #ifdef CONFIG_USE_PAPI
   print ("Define","CONFIG_USE_PAPI");
 #endif

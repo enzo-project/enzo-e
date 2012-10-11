@@ -40,6 +40,12 @@ use_gprof = 0
 
 use_valgrind = 0
 
+# Whether to use Cello Performance class for collecting performance data
+# (currently requires global reductions, and may not be fully function)
+# (basic time data on root processor is still output)
+
+use_performance = 0
+
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
 
@@ -125,6 +131,7 @@ define["double"] =        ['CONFIG_PRECISION_DOUBLE']
 
 define_memory =           ['CONFIG_USE_MEMORY']
 define_projections =      ['CONFIG_USE_PROJECTIONS']
+define_performance =      ['CONFIG_USE_PERFORMANCE']
 define_papi  =            ['CONFIG_USE_PAPI','PAPI3']
 
 # Debugging defines
@@ -180,6 +187,9 @@ charm_perf = ''
 if (use_projections == 1):
      defines = defines + define_projections
      charm_perf = '-tracemode projections'
+
+if (use_performance == 1):
+     defines = defines + define_performance
 
 flags_config = ''
 flags_cxx = ''

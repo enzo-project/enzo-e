@@ -12,8 +12,6 @@
 #include "simulation.hpp"
 #include "charm_simulation.hpp"
 
-bool config_performance = false;
-
 Simulation::Simulation
 (
  const char *   parameter_file,
@@ -37,6 +35,8 @@ Simulation::Simulation
   time_(0.0),
   dt_(0),
   stop_(false),
+  problem_(0),
+  timer_(),
   performance_simulation_(0),
   performance_cycle_(0),
   performance_curr_(0),
@@ -80,6 +80,8 @@ Simulation::Simulation
   lcaperf_->new_attribute("level",LCAP_INT);
 
   lcaperf_->begin();
+
+  timer_.start();
 
   parameters_ = new Parameters(parameter_file,monitor_);
 
@@ -467,14 +469,14 @@ void Simulation::monitor_output()
     memory->reset_high();
   }
 
-  if (config_performance) {
-    performance_output(performance_cycle_);
-  } else {
-#ifdef CONFIG_USE_CHARM
-    ((SimulationCharm *) this)->c_compute();
+#ifdef CONFIG_USE_PERFORMANCE
+  performance_output(performance_cycle_);
+#else
+  output_performance_();
+# ifdef CONFIG_USE_CHARM
+  ((SimulationCharm *) this)->c_compute();
+# endif
 #endif
-  }
-
 }
 
 
@@ -548,6 +550,11 @@ void Simulation::performance_output(Performance * performance)
 void Simulation::output_performance_()
 {
   DEBUG("Simulation::output_performance");
+
+  monitor_->print ("Performance","time-accum %f", timer_.value());
+
+#ifdef CONFIG_USE_PERFORMANCE
+
   int i = 0;
   int np = group_process()->size();
 
@@ -590,6 +597,8 @@ void Simulation::output_performance_()
   //   proxy_main.p_exit(CkNumPes());
   }
 #endif
+
+#endif /* CONFIG_USE_PERFORMANCE */
 
   // monitor_->set_active(save_active);
 

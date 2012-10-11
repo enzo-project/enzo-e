@@ -345,7 +345,7 @@ void Config::read(Parameters * parameters) throw()
     output_schedule_var[index]  = parameters->list_value_string(0,"schedule");
     output_schedule_type[index] = parameters->list_value_string(1,"schedule");
 
-    bool var_is_int;
+    bool var_is_int = true;
 
     if (output_schedule_var[index] == "cycle") {
       var_is_int = true;
@@ -427,9 +427,7 @@ void Config::read(Parameters * parameters) throw()
 	int size = parameters->list_length("colormap");
 	output_image_colormap[index].resize(size);
 	for (int i=0; i<size; i++) {
-	  double cm = 
-	    output_image_colormap[index][i] = parameters->list_value_float(i,"colormap",0.0);
-	  printf ("cm[%d] = %f\n",i,cm);
+	  output_image_colormap[index][i] = parameters->list_value_float(i,"colormap",0.0);
 	}
       }
 

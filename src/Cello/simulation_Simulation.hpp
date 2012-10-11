@@ -231,6 +231,9 @@ protected: // attributes
   /// Problem container object
   Problem * problem_;
 
+  /// Simulation timer
+  Timer timer_;
+
   /// Simulation Performance object
   Performance * performance_simulation_;
 
