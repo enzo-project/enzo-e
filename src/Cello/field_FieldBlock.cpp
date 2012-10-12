@@ -392,6 +392,7 @@ void FieldBlock::refresh_ghosts
 
   void * handle_send;
   void * handle_recv;
+  TRACE2 ("ip,ip_remote = %d %d",ip,ip_remote);
   if (ip < ip_remote) { // send then receive
 
     // send 
@@ -406,7 +407,7 @@ void FieldBlock::refresh_ghosts
     group_process->wait(handle_recv);
     group_process->recv_end (handle_recv);
 
-  } else {  // receive then send
+  } else if (ip > ip_remote) {  // receive then send
 
     // receive
 
@@ -418,6 +419,10 @@ void FieldBlock::refresh_ghosts
     handle_send = group_process->send_begin (ip_remote, array_send,n);
     group_process->wait(handle_send);
     group_process->send_end (handle_send);
+
+  } else {
+
+    for (int i=0; i<n; i++) array_recv[i] = array_send[i];
 
   }
 
