@@ -63,6 +63,7 @@ class EnzoBlock : public Block
   friend class EnzoTimestepPpm;
   friend class EnzoTimestepPpml;
   friend class EnzoInitialImplosion2;
+  friend class EnzoInitialSedovArray3;
 
   //----------------------------------------------------------------------
   // functions

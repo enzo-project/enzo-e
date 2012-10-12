@@ -104,8 +104,13 @@ Initial * EnzoProblem::create_initial_
 
   Initial * initial = 0;
 
+  int cycle   = config->initial_cycle;
+  double time = config->initial_time;
+
   if (name == "implosion_2d") {
-    initial = new EnzoInitialImplosion2(config->initial_cycle,config->initial_time);
+    initial = new EnzoInitialImplosion2(cycle,time);
+  } else if (name == "sedov_array_3d") {
+    initial = new EnzoInitialSedovArray3(config);
   } else {
     initial = Problem::create_initial_(name,parameters,config,group_process);
   }

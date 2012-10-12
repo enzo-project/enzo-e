@@ -82,10 +82,6 @@ void EnzoInitialImplosion2::enforce
   int gx,gy;
   field_descr->ghosts(index_density,&gx,&gy);
 
-  // Left edges
-  double x0, y0;
-  block->lower(&x0,&y0);
-
   // WARNING("EnzoInitialImplosion2",
   // 		  "Assumes same ghost zone depth for all fields");
 
@@ -93,9 +89,9 @@ void EnzoInitialImplosion2::enforce
   int ngy = ny + 2*gy;
 
   for (int iy=gy; iy<ny+gy; iy++) {
-    double y = y0 + (iy - gy + 0.5)*hy;
-    for (int ix=gy; ix<nx+gx; ix++) {
-      double x = x0 + (ix - gx + 0.5)*hx;
+    double y = ym + (iy - gy + 0.5)*hy;
+    for (int ix=gx; ix<nx+gx; ix++) {
+      double x = xm + (ix - gx + 0.5)*hx;
       int i = INDEX(ix,iy,0,ngx,ngy);
       if (x + y < 0.1517) {
 	d[i]  = 0.125;
