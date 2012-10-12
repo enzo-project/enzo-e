@@ -1,0 +1,131 @@
+# Problem: 3D array of Sedov blast problems for weak scaling tests
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+   Domain { 
+      lower = [0.0, 0.0, 0.0];
+      upper = [1.0, 1.0, 1.0];
+   } 
+
+   # The computational mesh is a single uniform grid
+
+   Mesh { 
+      root_rank = 3;
+      root_blocks = [ 1, 1, 1];
+      root_size   = [64,64,64];
+   }
+
+   # Field parameters include those concerning fields as a group, as
+   # well as individual fields
+   
+   Field {
+
+      ghosts = 3;
+
+      fields = [
+	"density",	
+	"velocity_x",
+	"velocity_y",
+	"velocity_z",
+	"total_energy",
+	"internal_energy"
+      ] ;
+
+      # courant condition for fields
+
+      courant   = 0.8;
+
+      padding   = 0;
+      alignment = 8;    
+   }
+
+   Method {
+
+      # list of methods to apply and in what order
+ 
+      sequence = ["ppm"];
+
+   }
+
+   Timestep { type = "ppm"; }
+
+   Enzo {
+
+      ppm {
+
+         # method-specific parameters.  Note this is Enzo-P not Cello 
+
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+
+         dual_energy = false;
+     }
+   }
+
+   Physics {
+
+      gamma = 1.4;
+
+   }
+
+   Initial { type = "sedov_array_3d"; }
+
+   Boundary { type = "periodic" }
+
+   Stopping {        cycle = 100;   } 
+   Testing {   cycle_final = 100; }
+
+   Testing {  time_final  = 0.0;  }
+
+   Output { 
+
+      file_groups = ["dx","dy","dz","data"];
+
+      dx {
+    
+	type     = "image";
+        axis     = "x";
+        name     = ["dx%03d.png","cycle"];
+        field_list = ["density"];
+	schedule = ["cycle","interval", 10];
+        colormap = [0.00, 0.00, 0.50,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00];
+        
+      };
+
+      dy {
+        field_list = ["density"];
+	type     = "image";
+        axis     = "y";
+        name     = ["dy%03d.png","cycle"];
+	schedule = ["cycle","interval", 10];
+        colormap = [0.00, 0.00, 0.50,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00];
+        
+      };
+
+      dz {
+        field_list = ["density"];
+	type     = "image";
+        axis     = "z";
+        name     = ["dz%03d.png","cycle"];
+	schedule = ["cycle","interval", 10];
+        colormap = [0.00, 0.00, 0.50,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00];
+        
+      };
+      data {
+#        field_list = ["density"];
+        name = ["d-%03d-%03d.h5","cycle","proc"];
+	type     = "data";
+	schedule = ["cycle","interval", 100];
+      };
+
+   }
+

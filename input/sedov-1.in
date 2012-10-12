@@ -1,0 +1,8 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/sedov_array_3.incl"
+
+Mesh { root_blocks    = [1,1,1];
+       root_size      = [64,64,64]; }
+

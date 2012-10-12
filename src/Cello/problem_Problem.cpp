@@ -160,6 +160,7 @@ void Problem::initialize_output
 	     file_group.c_str(),type.c_str());
     }
 
+    TRACE2("output_name[%d][0] = %p",index,config->output_name[index][0].c_str());
     std::string file_name = config->output_name[index][0];
 
     std::vector<std::string> file_args;
