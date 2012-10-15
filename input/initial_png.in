@@ -51,20 +51,14 @@ Timestep { type = "ppm"; }
 
 Enzo {
 
+   gamma = 1.4;
+
    ppm {
       diffusion   = true;
       flattening  = 3;
       steepening  = true;
       dual_energy = false;
    }
-}
-
-# Set physical constants 
-
-Physics {
-
-   gamma = 1.4;
-
 }
 
 # Define initial conditions

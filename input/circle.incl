@@ -38,6 +38,8 @@
 
    Enzo {
 
+      gamma = 1.4;
+
       ppm {
          diffusion   = true;
          flattening  = 3;
@@ -46,11 +48,6 @@
      }
    }
 
-   Physics {
-
-      gamma = 1.4;
-
-   }
 
    Initial {
        density       { value = [ 0.125,

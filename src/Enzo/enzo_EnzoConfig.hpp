@@ -60,14 +60,14 @@ public: // attributes
   float                      enzo_ppm_temperature_floor;
   bool                       enzo_ppm_use_minimum_pressure_support;
 
-  bool                       physics_cosmology;
-  double                     physics_cosmology_comoving_box_size;
-  double                     physics_cosmology_hubble_constant_now;
-  double                     physics_cosmology_initial_redshift;
-  double                     physics_cosmology_max_expansion_rate;
-  double                     physics_cosmology_omega_lamda_now;
-  double                     physics_cosmology_omega_matter_now;
-  double                     physics_gamma;
+  bool                       enzo_cosmology;
+  double                     enzo_cosmology_comoving_box_size;
+  double                     enzo_cosmology_hubble_constant_now;
+  double                     enzo_cosmology_initial_redshift;
+  double                     enzo_cosmology_max_expansion_rate;
+  double                     enzo_cosmology_omega_lamda_now;
+  double                     enzo_cosmology_omega_matter_now;
+  double                     enzo_gamma;
 
 
 };

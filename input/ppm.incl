@@ -52,7 +52,9 @@
 
       ppm {
 
-         # method-specific parameters.  Note this is Enzo-P not Cello 
+         gamma = 1.4;
+
+         # method-specific parameters
 
          diffusion   = true;
          flattening  = 3;
@@ -60,12 +62,6 @@
 
          dual_energy = false;
      }
-   }
-
-   Physics {
-
-      gamma = 1.4;
-
    }
 
    Initial {

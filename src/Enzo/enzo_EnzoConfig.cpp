@@ -47,14 +47,14 @@ void EnzoConfig::pup (PUP::er &p)
   p | enzo_ppm_temperature_floor;
   p | enzo_ppm_use_minimum_pressure_support;
 
-  p | physics_cosmology;
-  p | physics_cosmology_comoving_box_size;
-  p | physics_cosmology_hubble_constant_now;
-  p | physics_cosmology_initial_redshift;
-  p | physics_cosmology_max_expansion_rate;
-  p | physics_cosmology_omega_lamda_now;
-  p | physics_cosmology_omega_matter_now;
-  p | physics_gamma;
+  p | enzo_cosmology;
+  p | enzo_cosmology_comoving_box_size;
+  p | enzo_cosmology_hubble_constant_now;
+  p | enzo_cosmology_initial_redshift;
+  p | enzo_cosmology_max_expansion_rate;
+  p | enzo_cosmology_omega_lamda_now;
+  p | enzo_cosmology_omega_matter_now;
+  p | enzo_gamma;
 
 }
 
@@ -101,20 +101,20 @@ void EnzoConfig::read(Parameters * parameters) throw()
     ("Enzo:ppm:use_minimum_pressure_support",false);
 
 
-  physics_cosmology = parameters->value_logical ("Physics:cosmology",false);
-  physics_cosmology_comoving_box_size = parameters->value_float
-    ("Physics:cosmology:comoving_box_size", 64.0);
-  physics_cosmology_hubble_constant_now = parameters->value_float
-    ("Physics:cosmology:hubble_constant_now",0.701);
-  physics_cosmology_initial_redshift = parameters->value_float
-    ("Physics:cosmology:initial_redshift",  20.0);;
-  physics_cosmology_max_expansion_rate = parameters->value_float
-    ("Physics:cosmology:max_expansion_rate", 0.01);
-  physics_cosmology_omega_lamda_now = parameters->value_float
-    ("Physics:cosmology:omega_lambda_now",   0.721);
-  physics_cosmology_omega_matter_now = parameters->value_float
-    ("Physics:cosmology:omega_matter_now",   0.279);
-  physics_gamma = parameters->value_float ("Physics:gamma",5.0/3.0);
+  enzo_cosmology = parameters->value_logical ("Enzo:cosmology",false);
+  enzo_cosmology_comoving_box_size = parameters->value_float
+    ("Enzo:cosmology:comoving_box_size", 64.0);
+  enzo_cosmology_hubble_constant_now = parameters->value_float
+    ("Enzo:cosmology:hubble_constant_now",0.701);
+  enzo_cosmology_initial_redshift = parameters->value_float
+    ("Enzo:cosmology:initial_redshift",  20.0);;
+  enzo_cosmology_max_expansion_rate = parameters->value_float
+    ("Enzo:cosmology:max_expansion_rate", 0.01);
+  enzo_cosmology_omega_lamda_now = parameters->value_float
+    ("Enzo:cosmology:omega_lambda_now",   0.721);
+  enzo_cosmology_omega_matter_now = parameters->value_float
+    ("Enzo:cosmology:omega_matter_now",   0.279);
+  enzo_gamma = parameters->value_float ("Enzo:gamma",5.0/3.0);
 
   TRACE("END   EnzoConfig::read()");
 }

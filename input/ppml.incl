@@ -77,7 +77,7 @@
 
    }
 
-   Physics {
+   Enzo {
 
       gamma = 1.4;
 

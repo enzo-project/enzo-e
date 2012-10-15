@@ -52,6 +52,8 @@
 
    Enzo {
 
+      gamma = 1.4;
+
       ppm {
 
          diffusion   = true;
@@ -60,12 +62,6 @@
 
          dual_energy = false;
      }
-   }
-
-   Physics {
-
-      gamma = 1.4;
-
    }
 
    Initial {
