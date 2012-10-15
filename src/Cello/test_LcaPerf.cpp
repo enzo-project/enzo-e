@@ -71,7 +71,7 @@ void foo_mpi (LcaPerf * lcaperf,
 #endif
 
 //------------------------------------------------------------------------
-void foo_enzo(LcaPerf * lcaperf,
+void foo_hydro(LcaPerf * lcaperf,
 	      int n, int count, int size, float *x, float *y, float *z, 
 	      const char * region)
 //------------------------------------------------------------------------
@@ -259,10 +259,6 @@ PARALLEL_MAIN_BEGIN
 
 #endif
 
-  //----------------------------------------------------------------------
-  // ENZO print
-  //----------------------------------------------------------------------
-
   unit_func ("mpi");
 
   lcaperf->new_region ("EvolveHierarchy");
@@ -278,7 +274,7 @@ PARALLEL_MAIN_BEGIN
     
     lcaperf->attribute("cycle",&cycle,LCAP_INT);
 
-    foo_enzo (lcaperf,N,10,100,x,y,z,"hydro");
+    foo_hydro (lcaperf,N,10,100,x,y,z,"hydro");
 
     lcaperf->print();
   }

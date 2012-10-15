@@ -92,7 +92,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 376 "build/serial/Cello/parse.y"
+#line 365 "build/serial/Cello/parse.y"
  
   int logical_type;  
   int integer_type; 

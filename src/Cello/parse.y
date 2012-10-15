@@ -1,16 +1,5 @@
 %{
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2009 James Bordner
- * Copyright (C) 2009 Laboratory for Computational Astrophysics
- * Copyright (C) 2009 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
+/* See LICENSE_CELLO file for license and copyright information */
 
 #include <stdio.h>
 #include <math.h>
