@@ -104,19 +104,16 @@ void EnzoInitialSedovArray3::enforce
   int gx,gy,gz;
   field_descr->ghosts(index_density,&gx,&gy,&gz);
 
-  double x0, y0, z0;
-  block->lower(&x0,&y0,&z0);
-
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
   int ngz = nz + 2*gz;
 
-  for (int iy=gy; iy<ny+gy; iy++) {
-    double y = y0 + (iy - gy + 0.5)*hy;
-    for (int ix=gy; ix<nx+gx; ix++) {
-      double x = x0 + (ix - gx + 0.5)*hx;
-      for (int iz=gy; iz<nz+gz; iz++) {
-	double z = z0 + (iz - gz + 0.5)*hz;
+  for (int iz=gz; iz<nz+gz; iz++) {
+    double z = zm + (iz - gz + 0.5)*hz;
+    for (int iy=gy; iy<ny+gy; iy++) {
+      double y = ym + (iy - gy + 0.5)*hy;
+      for (int ix=gx; ix<nx+gx; ix++) {
+	double x = xm + (ix - gx + 0.5)*hx;
 	double r2 = x*x + y*y + z*z;
 
 	int i = INDEX(ix,iy,iz,ngx,ngy);
@@ -124,6 +121,7 @@ void EnzoInitialSedovArray3::enforce
 	vx[i] = 0.0;
 	vy[i] = 0.0;
 	vz[i] = 0.0;
+	
 	te[i] = (r2 < sedov_radius_2) ? sedov_te_in : sedov_te_out;
 
       }

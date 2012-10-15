@@ -124,7 +124,7 @@
 #        field_list = ["density"];
         name = ["d-%03d-%03d.h5","cycle","proc"];
 	type     = "data";
-	schedule = ["cycle","interval", 100];
+	schedule = ["cycle","interval", 10];
       };
 
    }
