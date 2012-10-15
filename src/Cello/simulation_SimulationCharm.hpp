@@ -44,7 +44,7 @@ public: // functions
     Simulation::pup(p);
   }
 
-  /// Initialize the Enzo Simulation
+  /// Initialize the Charm++ Simulation
   virtual void initialize() throw();
 
   /// Run the simulation

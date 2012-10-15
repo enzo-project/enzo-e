@@ -93,7 +93,7 @@ int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 //----------------------------------------------------------------------
 
 // STATIC
-void EnzoBlock::initialize(Config     * config,
+void EnzoBlock::initialize(EnzoConfig * enzo_config,
 			   FieldDescr * field_descr)
 
 {
@@ -167,10 +167,10 @@ void EnzoBlock::initialize(Config     * config,
   // parameter: Mesh : root_rank
   //--------------------------------------------------
 
-  ComovingCoordinates = config->physics_cosmology;
-  Gamma               = config->physics_gamma;
+  ComovingCoordinates = enzo_config->physics_cosmology;
+  Gamma               = enzo_config->physics_gamma;
 
-  GridRank            = config->mesh_root_rank;
+  GridRank            = enzo_config->mesh_root_rank;
 
   BoundaryRank = GridRank;
 
@@ -189,36 +189,36 @@ void EnzoBlock::initialize(Config     * config,
 
   // PPM parameters
 
-  InitialRedshift   = config->physics_cosmology_initial_redshift;
-  HubbleConstantNow = config->physics_cosmology_hubble_constant_now;
-  OmegaLambdaNow    = config->physics_cosmology_omega_lamda_now;
-  OmegaMatterNow    = config->physics_cosmology_omega_matter_now;
-  MaxExpansionRate  = config->physics_cosmology_max_expansion_rate;
-  ComovingBoxSize   = config->physics_cosmology_comoving_box_size;
+  InitialRedshift   = enzo_config->physics_cosmology_initial_redshift;
+  HubbleConstantNow = enzo_config->physics_cosmology_hubble_constant_now;
+  OmegaLambdaNow    = enzo_config->physics_cosmology_omega_lamda_now;
+  OmegaMatterNow    = enzo_config->physics_cosmology_omega_matter_now;
+  MaxExpansionRate  = enzo_config->physics_cosmology_max_expansion_rate;
+  ComovingBoxSize   = enzo_config->physics_cosmology_comoving_box_size;
 
-  PressureFree              = config->enzo_ppm_pressure_free;
-  UseMinimumPressureSupport = config->enzo_ppm_use_minimum_pressure_support;
+  PressureFree              = enzo_config->enzo_ppm_pressure_free;
+  UseMinimumPressureSupport = enzo_config->enzo_ppm_use_minimum_pressure_support;
   MinimumPressureSupportParameter = 
-    config->enzo_ppm_minimum_pressure_support_parameter;
-  PPMFlatteningParameter    = config->enzo_ppm_flattening;
-  PPMDiffusionParameter     = config->enzo_ppm_diffusion;
-  PPMSteepeningParameter    = config->enzo_ppm_steepening;
-  pressure_floor            = config->enzo_ppm_pressure_floor;
-  density_floor             = config->enzo_ppm_density_floor;
-  temperature_floor         = config->enzo_ppm_temperature_floor;
-  number_density_floor      = config->enzo_ppm_number_density_floor;
-  DualEnergyFormalism       = config->enzo_ppm_dual_energy;
-  DualEnergyFormalismEta1   = config->enzo_ppm_dual_energy_eta_1;
-  DualEnergyFormalismEta2   = config->enzo_ppm_dual_energy_eta_2;
+    enzo_config->enzo_ppm_minimum_pressure_support_parameter;
+  PPMFlatteningParameter    = enzo_config->enzo_ppm_flattening;
+  PPMDiffusionParameter     = enzo_config->enzo_ppm_diffusion;
+  PPMSteepeningParameter    = enzo_config->enzo_ppm_steepening;
+  pressure_floor            = enzo_config->enzo_ppm_pressure_floor;
+  density_floor             = enzo_config->enzo_ppm_density_floor;
+  temperature_floor         = enzo_config->enzo_ppm_temperature_floor;
+  number_density_floor      = enzo_config->enzo_ppm_number_density_floor;
+  DualEnergyFormalism       = enzo_config->enzo_ppm_dual_energy;
+  DualEnergyFormalismEta1   = enzo_config->enzo_ppm_dual_energy_eta_1;
+  DualEnergyFormalismEta2   = enzo_config->enzo_ppm_dual_energy_eta_2;
 
   //--------------------------------------------------
   // parameter: Field : ghosts
   // parameter: Field : fields
   //--------------------------------------------------
 
-  int gx = config->field_ghosts[0];
-  int gy = config->field_ghosts[1];
-  int gz = config->field_ghosts[2];
+  int gx = enzo_config->field_ghosts[0];
+  int gy = enzo_config->field_ghosts[1];
+  int gz = enzo_config->field_ghosts[2];
 
   if (GridRank < 1) gx = 0;
   if (GridRank < 2) gy = 0;
@@ -228,7 +228,7 @@ void EnzoBlock::initialize(Config     * config,
   ghost_depth[1] = gy;
   ghost_depth[2] = gz;
 
-  NumberOfBaryonFields = config->field_fields.size();
+  NumberOfBaryonFields = enzo_config->field_fields.size();
 
   // Check NumberOfBaryonFields
 
@@ -245,7 +245,7 @@ void EnzoBlock::initialize(Config     * config,
 
   for (int field_index=0; field_index<NumberOfBaryonFields; field_index++) {
 
-    std::string name = config->field_fields[field_index];
+    std::string name = enzo_config->field_fields[field_index];
 
     if        (name == "density") {
       field_index_[field_density]  = field_index;
@@ -362,17 +362,17 @@ void EnzoBlock::initialize(Config     * config,
   // BoundaryDimension[2] = nz + 2*ghost_depth[2];
 
   
-  DomainLeftEdge [0] = config->domain_lower[0];
-  DomainLeftEdge [1] = config->domain_lower[1];
-  DomainLeftEdge [2] = config->domain_lower[2];
+  DomainLeftEdge [0] = enzo_config->domain_lower[0];
+  DomainLeftEdge [1] = enzo_config->domain_lower[1];
+  DomainLeftEdge [2] = enzo_config->domain_lower[2];
 
-  DomainRightEdge[0] = config->domain_upper[0];
-  DomainRightEdge[1] = config->domain_upper[1];
-  DomainRightEdge[2] = config->domain_upper[2];
+  DomainRightEdge[0] = enzo_config->domain_upper[0];
+  DomainRightEdge[1] = enzo_config->domain_upper[1];
+  DomainRightEdge[2] = enzo_config->domain_upper[2];
 
-  CourantSafetyNumber = config->field_courant;
+  CourantSafetyNumber = enzo_config->field_courant;
 
-  double time  = config->initial_time;
+  double time  = enzo_config->initial_time;
 
   InitialTimeInCodeUnits = time;
 

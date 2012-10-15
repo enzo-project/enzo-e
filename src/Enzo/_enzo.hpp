@@ -81,6 +81,8 @@ struct fluxes
 
 #include "enzo_EnzoProblem.hpp"
 
+#include "enzo_EnzoConfig.hpp"
+
 #include "enzo_EnzoBlock.hpp"
 
 #include "enzo_IoEnzoBlock.hpp"

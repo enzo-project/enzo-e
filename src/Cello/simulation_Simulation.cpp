@@ -23,6 +23,7 @@ Simulation::Simulation
 /// Initialize the Simulation object
 : factory_(0),
   parameters_(0),
+  config_(0),
   parameter_file_(parameter_file),
   group_process_((GroupProcess *)group_process),
   is_group_process_new_(false),
@@ -85,7 +86,6 @@ Simulation::Simulation
 
   parameters_ = new Parameters(parameter_file,monitor_);
 
-  config_.read(parameters_);
 }
 
 //----------------------------------------------------------------------
@@ -116,7 +116,8 @@ void Simulation::pup (PUP::er &p)
   // if (up) parameters_ = new Parameters;
   // p | * parameters_;
 
-  p | config_;
+  WARNING("Simulation::pup","config_ needs to be PUP::able");
+  p | *config_;
 
   p | parameter_file_;
 
@@ -189,6 +190,8 @@ Simulation::~Simulation() throw()
 
 void Simulation::initialize() throw()
 {
+  initialize_config_();
+
   initialize_monitor_();
 
   initialize_simulation_();
@@ -196,12 +199,12 @@ void Simulation::initialize() throw()
 
   initialize_data_descr_();
 
-  problem_->initialize_boundary(&config_);
-  problem_->initialize_initial (&config_,parameters_,group_process_);
-  problem_->initialize_stopping(&config_);
-  problem_->initialize_timestep(&config_);
-  problem_->initialize_output  (&config_,field_descr_,group_process_,factory());
-  problem_->initialize_method  (&config_);
+  problem_->initialize_boundary(config_);
+  problem_->initialize_initial (config_,parameters_,group_process_);
+  problem_->initialize_stopping(config_);
+  problem_->initialize_timestep(config_);
+  problem_->initialize_output  (config_,field_descr_,group_process_,factory());
+  problem_->initialize_method  (config_);
 
   initialize_hierarchy_();
 
@@ -226,7 +229,7 @@ void Simulation::finalize() throw()
 void Simulation::initialize_simulation_() throw()
 {
 
-  dimension_ = config_.mesh_root_rank;
+  dimension_ = config_->mesh_root_rank;
   
   ASSERT ("Simulation::initialize_simulation_()", 
 	  "Parameter 'Mesh:root_rank' must be specified",
@@ -236,8 +239,8 @@ void Simulation::initialize_simulation_() throw()
 	  "Parameter 'Mesh:root_rank' must be 1, 2, or 3",
 	  (1 <= dimension_) && (dimension_ <= 3));
 
-  cycle_ = config_.initial_cycle;
-  time_  = config_.initial_time;
+  cycle_ = config_->initial_cycle;
+  time_  = config_->initial_time;
   dt_ = 0;
 
   // Initialize Performance
@@ -253,9 +256,21 @@ void Simulation::initialize_simulation_() throw()
 
 //----------------------------------------------------------------------
 
+void Simulation::initialize_config_() throw()
+{
+  TRACE("BEGIN Simulation::initialize_config_");
+  if (config_ == NULL) {
+    config_ = new Config;
+    config_->read(parameters_);
+  }
+  TRACE("END   Simulation::initialize_config_");
+}
+
+//----------------------------------------------------------------------
+
 void Simulation::initialize_monitor_() throw()
 {
-  bool debug = config_.monitor_debug;
+  bool debug = config_->monitor_debug;
   monitor_->set_active("DEBUG",debug);
  
 }
@@ -273,15 +288,15 @@ void Simulation::initialize_data_descr_() throw()
 
   // Add data fields
 
-  for (size_t i=0; i<config_.field_fields.size(); i++) {
-    field_descr_->insert_field (config_.field_fields[i]);
+  for (size_t i=0; i<config_->field_fields.size(); i++) {
+    field_descr_->insert_field (config_->field_fields[i]);
   }
 
   // Define default ghost zone depth for all fields, default value of 1
 
-  int gx = config_.field_ghosts[0];
-  int gy = config_.field_ghosts[1];
-  int gz = config_.field_ghosts[2];
+  int gx = config_->field_ghosts[0];
+  int gy = config_->field_ghosts[1];
+  int gz = config_->field_ghosts[2];
 
   for (int i=0; i<field_descr_->field_count(); i++) {
     field_descr_->set_ghosts (i,gx,gy,gz);
@@ -289,21 +304,21 @@ void Simulation::initialize_data_descr_() throw()
 
   // Set face dimensions to refresh
 
-  field_descr_->set_refresh_face(2,config_.field_refresh_faces);
-  field_descr_->set_refresh_face(1,config_.field_refresh_edges);
-  field_descr_->set_refresh_face(0,config_.field_refresh_corners);
+  field_descr_->set_refresh_face(2,config_->field_refresh_faces);
+  field_descr_->set_refresh_face(1,config_->field_refresh_edges);
+  field_descr_->set_refresh_face(0,config_->field_refresh_corners);
   
   // Default precision
 
   for (int i=0; i<field_descr_->field_count(); i++) {
-    field_descr_->set_precision(i,config_.field_precision);
+    field_descr_->set_precision(i,config_->field_precision);
   }
 
   //--------------------------------------------------
   // parameter: Field : alignment
   //--------------------------------------------------
 
-  int alignment = config_.field_alignment;
+  int alignment = config_->field_alignment;
 
   ASSERT1 ("Simulation::initialize_data_descr_",
 	  "Illegal Field:alignment parameter value %d",
@@ -312,16 +327,16 @@ void Simulation::initialize_data_descr_() throw()
 	  
   field_descr_->set_alignment (alignment);
   
-  field_descr_->set_padding (config_.field_padding);
+  field_descr_->set_padding (config_->field_padding);
 
 
   for (int i=0; i<field_descr_->field_count(); i++) {
 
     std::string field_name = field_descr_->field_name(i);
 
-    bool cx = config_.field_centering[0][i];
-    bool cy = config_.field_centering[1][i];
-    bool cz = config_.field_centering[2][i];
+    bool cx = config_->field_centering[0][i];
+    bool cy = config_->field_centering[1][i];
+    bool cz = config_->field_centering[2][i];
 
     field_descr_->set_centering(i,cx,cy,cz);
 
@@ -347,13 +362,13 @@ void Simulation::initialize_hierarchy_() throw()
   // Domain extents
 
   hierarchy_->set_lower
-    (config_.domain_lower[0], 
-     config_.domain_lower[1], 
-     config_.domain_lower[2]);
+    (config_->domain_lower[0], 
+     config_->domain_lower[1], 
+     config_->domain_lower[2]);
   hierarchy_->set_upper
-    (config_.domain_upper[0], 
-     config_.domain_upper[1], 
-     config_.domain_upper[2]);
+    (config_->domain_upper[0], 
+     config_->domain_upper[1], 
+     config_->domain_upper[2]);
 
   //----------------------------------------------------------------------
   // Create and initialize root Patch in Hierarchy
@@ -364,14 +379,14 @@ void Simulation::initialize_hierarchy_() throw()
   // parameter: Mesh : root_blocks
   //--------------------------------------------------
 
-  hierarchy_->set_root_size(config_.mesh_root_size[0],
-			    config_.mesh_root_size[1],
-			    config_.mesh_root_size[2]);
+  hierarchy_->set_root_size(config_->mesh_root_size[0],
+			    config_->mesh_root_size[1],
+			    config_->mesh_root_size[2]);
 
   // Don't allocate blocks if reading data from files
 
-  bool allocate_blocks = ! ( config_.initial_type == "file" || 
-			     config_.initial_type == "restart" );
+  bool allocate_blocks = ! ( config_->initial_type == "file" || 
+			     config_->initial_type == "restart" );
 
 #ifdef CONFIG_USE_CHARM
   // Distributed patches in Charm: only allocate on root processor
@@ -381,12 +396,12 @@ void Simulation::initialize_hierarchy_() throw()
     {
       hierarchy_->create_root_patch
 	(field_descr_,
-	 config_.mesh_root_size[0],
-	 config_.mesh_root_size[1],
-	 config_.mesh_root_size[2],
-	 config_.mesh_root_blocks[0],
-	 config_.mesh_root_blocks[1],
-	 config_.mesh_root_blocks[2],
+	 config_->mesh_root_size[0],
+	 config_->mesh_root_size[1],
+	 config_->mesh_root_size[2],
+	 config_->mesh_root_blocks[0],
+	 config_->mesh_root_blocks[1],
+	 config_->mesh_root_blocks[2],
 	 allocate_blocks);
     }
 

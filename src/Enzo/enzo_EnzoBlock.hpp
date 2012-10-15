@@ -68,9 +68,7 @@ class EnzoBlock : public Block
   //----------------------------------------------------------------------
   // functions
 
-  static void initialize 
-  (Config * config,
-   FieldDescr *);
+  static void initialize (EnzoConfig * enzo_config, FieldDescr *);
 
   //----------------------------------------------------------------------
   // variables

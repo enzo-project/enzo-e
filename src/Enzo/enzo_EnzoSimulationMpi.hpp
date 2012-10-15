@@ -32,6 +32,10 @@ public: // functions
   /// Return an EnzoFactory object, creating it if needed
   virtual const Factory * factory() const throw();
 
+private: // functions
+
+  virtual void initialize_config_() throw();
+
 };
 
 #endif /* ! CONFIG_USE_CHARM */

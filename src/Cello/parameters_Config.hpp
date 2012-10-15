@@ -22,17 +22,11 @@ class Config {
 
 public: // interface
 
-  /// Constructor
-  Config() throw();
+  // /// Constructor
+  // Config() throw();
 
-  /// Destructor
-  ~Config() throw();
-
-  /// Copy constructor
-  Config(const Config & config) throw();
-
-  /// Assignment operator
-  Config & operator= (const Config & config) throw();
+  // /// Destructor
+  // ~Config() throw();
 
 #ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
@@ -50,20 +44,6 @@ public: // attributes
 
   double                     domain_lower[3];
   double                     domain_upper[3];
-
-  double                     enzo_ppm_density_floor;
-  bool                       enzo_ppm_diffusion;
-  bool                       enzo_ppm_dual_energy;
-  double                     enzo_ppm_dual_energy_eta_1;
-  double                     enzo_ppm_dual_energy_eta_2;
-  int                        enzo_ppm_flattening;
-  int                        enzo_ppm_minimum_pressure_support_parameter;
-  double                     enzo_ppm_number_density_floor;
-  double                     enzo_ppm_pressure_floor;
-  bool                       enzo_ppm_pressure_free;
-  bool                       enzo_ppm_steepening;
-  float                      enzo_ppm_temperature_floor;
-  bool                       enzo_ppm_use_minimum_pressure_support;
 
   int                        num_fields;
   int                        field_alignment;
@@ -108,15 +88,6 @@ public: // attributes
   double                     output_schedule_stop  [MAX_FILE_GROUPS];
   double                     output_schedule_step  [MAX_FILE_GROUPS];
   std::vector<double>        output_schedule_list  [MAX_FILE_GROUPS];
-
-  bool                       physics_cosmology;
-  double                     physics_cosmology_comoving_box_size;
-  double                     physics_cosmology_hubble_constant_now;
-  double                     physics_cosmology_initial_redshift;
-  double                     physics_cosmology_max_expansion_rate;
-  double                     physics_cosmology_omega_lamda_now;
-  double                     physics_cosmology_omega_matter_now;
-  double                     physics_gamma;
 
   int                        stopping_cycle;
   double                     stopping_time;

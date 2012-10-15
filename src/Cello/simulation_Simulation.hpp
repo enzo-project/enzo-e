@@ -90,7 +90,7 @@ public: // interface
 
   /// Return the Config
   const Config * config() const throw()
-  { return &config_; }
+  { return config_; }
   
   /// Return the field descriptor
   FieldDescr * field_descr() const throw()
@@ -158,6 +158,9 @@ public: // virtual functions
   
 protected: // functions
 
+  /// Initialize the Config object
+  virtual void initialize_config_ () throw();
+
   /// Initialize the Problem object
   void initialize_problem_ () throw();
 
@@ -190,9 +193,6 @@ protected: // attributes
 
   /// Parameters associated with this simulation
   Parameters * parameters_;
-
-  /// Configuration values, read from Parameters object
-  Config config_;
 
   /// Parameter file name
   std::string parameter_file_;
@@ -231,6 +231,9 @@ protected: // attributes
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
+
+  /// Configuration values, read from Parameters object
+  Config * config_;
 
   /// Problem container object
   Problem * problem_;
