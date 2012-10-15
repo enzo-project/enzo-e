@@ -34,7 +34,7 @@ public: // functions
   Output() throw() { }
 
   /// Create an uninitialized Output object
-  Output(const Factory * factory) throw();
+  Output(int index, const Factory * factory) throw();
 
   /// Delete an Output object
   virtual ~Output() throw();
@@ -117,9 +117,7 @@ public: // functions
 
 #endif
 
-  /// Set the index of this output in its simulation
-  void set_index(int index) throw() { index_ = index; }
-
+  /// Return the index id in the containing Problem
   int index() const throw() { return index_; }
 
 

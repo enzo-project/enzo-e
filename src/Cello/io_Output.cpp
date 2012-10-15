@@ -17,14 +17,14 @@ extern CProxy_SimulationCharm  proxy_simulation;
 
 //----------------------------------------------------------------------
 
-Output::Output (const Factory * factory) throw()
+Output::Output (int index, const Factory * factory) throw()
   : file_(0),           // Initialization deferred
     schedule_(new Schedule),
     process_(0),        // initialization below
 #ifdef CONFIG_USE_CHARM
     loop_(1),        // default process-per-stride
 #endif
-    index_(0),
+    index_(index),
     cycle_(0),
     count_(0),
     time_(0),

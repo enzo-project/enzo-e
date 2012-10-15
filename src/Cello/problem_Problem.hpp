@@ -164,7 +164,7 @@ protected: // functions
 
   /// Create named output object
   virtual Output *   create_output_  
-  (std::string name, Config * config,
+  (std::string name, int index, Config * config,
    const GroupProcess *, const Factory * ) throw ();
 
   /// Create named stopping object

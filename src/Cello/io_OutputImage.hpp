@@ -23,7 +23,8 @@ public: // functions
   OutputImage() throw() {}
 
   /// Create an uninitialized OutputImage object
-  OutputImage(const Factory * factory,
+  OutputImage(int index,
+	      const Factory * factory,
 	      int process_count,
 	      int nrows, int ncols) throw();
 

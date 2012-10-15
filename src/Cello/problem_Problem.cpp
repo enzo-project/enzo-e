@@ -48,7 +48,7 @@ void Problem::pup (PUP::er &p)
   TRACE1 ("num_initial_ = %d",num_initial_);
   if (up) initial_list_.resize(num_initial_);
   for (int i=0; i<num_initial_; i++) {
-    p | *initial_list_[i]; // PUP::able
+    p | initial_list_[i]; // PUP::able
   }
 
   if (up) stopping_ = new Stopping;
@@ -60,14 +60,14 @@ void Problem::pup (PUP::er &p)
   TRACE1 ("num_method_ = %d",num_method_);
   if (up) method_list_.resize(num_method_);
   for (int i=0; i<num_method_; i++) {
-    p | *method_list_[i]; // PUP::able
+    p | method_list_[i]; // PUP::able
   }
 
   p | num_output_;
   TRACE1 ("num_output_ = %d",num_output_);
   if (up) output_list_.resize(num_output_);
   for (int i=0; i<num_output_; i++) {
-    p | *output_list_[i]; // PUP::able
+    p | output_list_[i]; // PUP::able
   }
 
   p | index_initial_;
@@ -152,7 +152,7 @@ void Problem::initialize_output
     std::string file_group = config->output_file_groups [index];
     std::string type       = config->output_type[index];
 
-    Output * output = create_output_ (type,config,group_process,factory);
+    Output * output = create_output_ (type,index, config,group_process,factory);
 
     if (output == NULL) {
       ERROR2("Problem::initialize_output",
@@ -160,16 +160,17 @@ void Problem::initialize_output
 	     file_group.c_str(),type.c_str());
     }
 
-    TRACE2("output_name[%d][0] = %p",index,config->output_name[index][0].c_str());
-    std::string file_name = config->output_name[index][0];
+    if (config->output_name[index].size() > 0) {
+      std::string file_name = config->output_name[index][0];
 
-    std::vector<std::string> file_args;
+      std::vector<std::string> file_args;
 
-    for (size_t i=1; i<config->output_name[index].size(); i++) {
-      file_args.push_back(config->output_name[index][i]);
+      for (size_t i=1; i<config->output_name[index].size(); i++) {
+	file_args.push_back(config->output_name[index][i]);
+      }
+
+      output->set_filename (file_name,file_args);
     }
-
-    output->set_filename (file_name,file_args);
 
 
     if (config->output_field_list[index].size() > 0) {
@@ -329,11 +330,6 @@ void Problem::initialize_output
       }
     }
 
-    // Initialize index of Output object in Simulation for CHARM
-    // Output read()/write() callback by Hierarchy, Patch or Block
-
-    output->set_index(output_list_.size());
-
     // Add the initialized Output object to the Simulation's list of
     // output objects
 
@@ -467,6 +463,7 @@ Method * Problem::create_method_ ( std::string  name ) throw ()
 Output * Problem::create_output_ 
 (
  std::string    name,
+ int index,
  Config *  config,
  const GroupProcess * group_process,
  const Factory * factory
@@ -491,15 +488,15 @@ Output * Problem::create_output_
 
     // NOTE: assumes cube for non-z axis images
 
-    output = new OutputImage (factory,group_process->size(),nx,ny);
+    output = new OutputImage (index,factory,group_process->size(),nx,ny);
 
   } else if (name == "data") {
 
-    output = new OutputData (factory,config);
+    output = new OutputData (index,factory,config);
 
   } else if (name == "restart") {
 
-    output = new OutputRestart (factory,config,group_process->size());
+    output = new OutputRestart (index,factory,config,group_process->size());
 
   }
 

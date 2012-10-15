@@ -44,6 +44,11 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
+    WARNING("Performance::pup",
+	    "skipping Performance");
+    TRACE1 ("performance = %p",this);
+    return;
+    
     // NOTE: change this function whenever attributes change
     p | timer_;
     p | papi_;

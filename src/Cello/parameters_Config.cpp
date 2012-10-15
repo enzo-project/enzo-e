@@ -66,7 +66,7 @@ void Config::pup (PUP::er &p)
 
   p | num_fields;
   p | field_alignment;
-  PUParray(p,field_centering,MAX_FIELDS);
+  PUParray(p,field_centering,3);
   p | field_courant;
   p | field_fields;
   PUParray(p,field_ghosts,3);
@@ -284,6 +284,8 @@ void Config::read(Parameters * parameters) throw()
 
   for (int index=0; index<num_file_groups; index++) {
 
+    TRACE1 ("index = %d",index);
+
     output_file_groups[index] = 
       parameters->list_value_string (index,"Output:file_groups","unknown");
 
@@ -307,14 +309,18 @@ void Config::read(Parameters * parameters) throw()
       if (size > 0) output_dir[index].resize(size);
       for (int i=0; i<size; i++) {
 	output_dir[index][i] = parameters->list_value_string(i,"dir","");
+	TRACE3("output_dir[%d][%d] = %s",index,i,output_dir[index][i].c_str());
       }
     }
 
+    TRACE1("index = %d",index);
     if (parameters->type("name") == parameter_string) {
+      TRACE0;
       output_name[index].resize(1);
       output_name[index][0] = parameters->value_string("name","");
     } else if (parameters->type("name") == parameter_list) {
       int size = parameters->list_length("name");
+      TRACE1("size = %d",size);
       if (size > 0) output_name[index].resize(size);
       for (int i=0; i<size; i++) {
 	output_name[index][i] = parameters->list_value_string(i,"name","");

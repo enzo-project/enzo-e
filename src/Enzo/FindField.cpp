@@ -24,9 +24,11 @@
  
 int EnzoBlock::FindField(int field, int farray[], int numfields)
 {
-  for (int i = 0; i < numfields; i++)
-    if (field == farray[i])
-      return i;
+  TRACE1("numfields = %d",numfields);
+  for (int i = 0; i < numfields; i++) {
+    TRACE3 ("FindField field = %d  farray[%d]=%d",field,i,farray[i]);
+    if (field == farray[i]) return i;
+  }
  
   /* not found */
  

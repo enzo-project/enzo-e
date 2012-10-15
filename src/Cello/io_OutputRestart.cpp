@@ -17,11 +17,12 @@ extern CProxy_SimulationCharm  proxy_simulation;
 
 OutputRestart::OutputRestart
 (
+ int index,
  const Factory * factory,
  Config * config,
  int process_count
 ) throw ()
-  : Output(factory),
+  : Output(index,factory),
     dir_name_(""),
     dir_args_()
 {
@@ -33,7 +34,12 @@ OutputRestart::OutputRestart
 	  "Restart capability only implemented for Charm++");
 #endif
 
+  TRACE1 ("index = %d",index_);
+  TRACE2 ("config->output_dir[%d]=%p",index_,&config->output_dir[index_]);
+  TRACE2 ("config->output_dir[%d][0]=%s",
+	  index_,config->output_dir[index_][0].c_str());
   dir_name_ = config->output_dir[index_][0];
+  TRACE0;
 
   for (size_t i=1; i<config->output_dir[index_].size(); i++) {
     dir_args_.push_back(config->output_dir[index_][i]);

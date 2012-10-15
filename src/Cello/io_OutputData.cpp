@@ -12,10 +12,11 @@
 
 OutputData::OutputData
 (
+ int index,
  const Factory * factory,
  Config * config
 ) throw ()
-  : Output(factory)
+  : Output(index,factory)
 {
   // Set process stride, with default = 1
 

@@ -26,7 +26,8 @@ public: // functions
   OutputData() throw() {}
 
   /// Create an uninitialized OutputData object
-  OutputData(const Factory * factory,
+  OutputData(int index,
+	     const Factory * factory,
 	     Config * config) throw();
 
   /// Close the file if it is open

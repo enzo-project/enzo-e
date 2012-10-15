@@ -41,6 +41,8 @@ public: // interface
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
+    WARNING("PerformancePapi::pup","skipping");
+    return;
     p | is_started_;
     p | time_real_total_;
     p | time_proc_total_;

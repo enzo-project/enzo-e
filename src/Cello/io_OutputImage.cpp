@@ -11,10 +11,11 @@
 
 //----------------------------------------------------------------------
 
-OutputImage::OutputImage(const Factory * factory,
+OutputImage::OutputImage(int index,
+			 const Factory * factory,
 			 int process_count,
 			 int nrows, int ncols) throw ()
-  : Output(factory),
+  : Output(index,factory),
     data_(),
     op_reduce_(reduce_sum),
     axis_(axis_z),

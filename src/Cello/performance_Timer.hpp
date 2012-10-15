@@ -31,14 +31,22 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
+    WARNING("Timer::pup","skipping");
+    //    return;
+
     // NOTE: change this function whenever attributes change
+    TRACE0;
     p | time_;
+    TRACE0;
     p | is_running_;
+    TRACE0;
+    
     p | t1_.tv_sec;
     p | t1_.tv_usec;
+    TRACE0;
     p | t2_.tv_sec;
     p | t2_.tv_usec;
-    WARNING ("Timer::pup","skipping tz_ [not accessed]");
+    TRACE0;
     // tz_ only there for gettimeofday() calls: value is never used
   }
 #endif
