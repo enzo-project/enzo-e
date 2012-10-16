@@ -142,10 +142,10 @@ void EnzoInitialSedovArray3::enforce
   int kzp = array_[2];
   TRACE3 ("SEDOV: %d %d %d",kxp,kyp,kzp);
 
+  double xdm,ydm,zdm;
+  hierarchy->lower(&xdm,&ydm,&zdm);
   double xdp,ydp,zdp;
   hierarchy->upper(&xdp,&ydp,&zdp);
-  double xdm,ydm,zdm;
-  hierarchy->upper(&xdm,&ydm,&zdm);
 
   double hxa = (xdp-xdm) / array_[0];
   double hya = (ydp-ydm) / array_[1];
