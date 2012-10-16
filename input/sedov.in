@@ -1,0 +1,12 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/sedov_array_3.incl"
+
+# Default: 64^3 domain, 32^3 block sizes, with sedov blast in each block
+
+Mesh { root_size      = [64,64,64]; }
+Mesh { root_blocks    = [2,2,2]; }
+Enzo { sedov { array = [2,2,2]; } }
+Stopping { cycle = 10; }
+
