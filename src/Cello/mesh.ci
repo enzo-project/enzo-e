@@ -7,6 +7,7 @@
 
 module mesh {
 
+  PUPable Config;
   PUPable Factory;
   PUPable Initial;
   PUPable InitialDefault;
@@ -16,6 +17,8 @@ module mesh {
   PUPable OutputImage;
   PUPable OutputRestart;
   PUPable Problem;
+  PUPable ItFieldList;
+  PUPable ItFieldRange;
 
   chare [migratable] Patch {
 

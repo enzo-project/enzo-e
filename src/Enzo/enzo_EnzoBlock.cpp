@@ -220,6 +220,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   int gy = enzo_config->field_ghosts[1];
   int gz = enzo_config->field_ghosts[2];
 
+  TRACE3("gx,gy,gz=%d %d %d",gx,gy,gz);
   if (GridRank < 1) gx = 0;
   if (GridRank < 2) gy = 0;
   if (GridRank < 3) gz = 0;

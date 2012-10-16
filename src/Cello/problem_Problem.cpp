@@ -346,7 +346,7 @@ void Problem::initialize_output
 void Problem::initialize_method(Config * config) throw()
 {
 
-  for (int i=0; i<config->method_sequence.size(); i++) {
+  for (size_t i=0; i<config->method_sequence.size(); i++) {
 
     std::string name = config->method_sequence[i];
 

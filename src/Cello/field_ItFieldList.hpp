@@ -26,18 +26,16 @@ public: // interface
   { }
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_decl(ItFieldList);
+
+  /// Charm++ PUP::able migration constructor
+  ItFieldList (CkMigrateMessage *m) : ItField (m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
+  void pup (PUP::er &p);
 
-    TRACEPUP;
-
-    // NOTE: change this function whenever attributes change
-    ItField::pup(p);
-    p | index_;
-    p | values_;
-
-  }
 #endif
 
   /// Append a value to the list of values

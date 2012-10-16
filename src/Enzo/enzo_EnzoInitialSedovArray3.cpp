@@ -107,17 +107,12 @@ void EnzoInitialSedovArray3::enforce
 
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
-  int ngz = nz + 2*gz;
 
   // background 
 
   for (int iz=gz; iz<nz+gz; iz++) {
-    double z = zbm + (iz - gz + 0.5)*hz;
     for (int iy=gy; iy<ny+gy; iy++) {
-      double y = ybm + (iy - gy + 0.5)*hy;
       for (int ix=gx; ix<nx+gx; ix++) {
-	double x = xbm + (ix - gx + 0.5)*hx;
-	double r2 = x*x + y*y + z*z;
 
 	int i = INDEX(ix,iy,iz,ngx,ngy);
 	d[i]  = sedov_density;

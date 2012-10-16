@@ -16,6 +16,9 @@ class ItFieldRange : public ItField {
 
 public: // interface
 
+  /// Empty constructor for Charm++ pup()
+  ItFieldRange() throw() {}
+  
   /// Create an iterator over integers first to last
   ItFieldRange ( size_t first, size_t last ) throw ()
     : ItField(), first_(first), last_(last)
@@ -31,20 +34,18 @@ public: // interface
   {}
 
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_decl(ItFieldRange);
+
+  /// Charm++ PUP::able migration constructor
+  ItFieldRange (CkMigrateMessage *m) : ItField (m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
+  void pup (PUP::er &p);
 
-    TRACEPUP;
-
-    // NOTE: change this function whenever attributes change
-    ItField::pup(p);
-    p | index_;
-    p | first_;
-    p | last_;
-
-  }
 #endif
+
   /// Go to the first value
   virtual void first () throw()
   { index_ = first_; }

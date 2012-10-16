@@ -26,6 +26,7 @@ EnzoConfig::~EnzoConfig() throw ()
 
 void EnzoConfig::pup (PUP::er &p)
 {
+  Config::pup(p);
   TRACEPUP;
   // NOTE: change this function whenever attributes change
   p | boundary_type;
@@ -117,6 +118,8 @@ void EnzoConfig::read(Parameters * parameters) throw()
   enzo_cosmology_omega_matter_now = parameters->value_float
     ("Enzo:cosmology:omega_matter_now",   0.279);
   enzo_gamma = parameters->value_float ("Enzo:gamma",5.0/3.0);
+
+  TRACE1("enzo_gamma = %f",enzo_gamma);
 
   enzo_sedov_array[0] = parameters->list_value_integer (0,"Enzo:sedov:array",1);
   enzo_sedov_array[1] = parameters->list_value_integer (1,"Enzo:sedov:array",1);

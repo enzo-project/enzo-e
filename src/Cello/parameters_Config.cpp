@@ -27,6 +27,10 @@ void Config::pup (PUP::er &p)
   p | field_courant;
   p | field_fields;
   PUParray(p,field_ghosts,3);
+  if (p.isUnpacking()) {
+    TRACE3 ("gx,gy,gz = %d %d %d",field_ghosts[0],field_ghosts[1],field_ghosts[2]);
+  }
+
   p | field_padding;
   p | field_precision;
   p | field_refresh_corners;

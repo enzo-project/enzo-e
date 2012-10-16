@@ -14,7 +14,11 @@
 
 class Parameters;
 
-class Config {
+class Config 
+#ifdef CONFIG_USE_CHARM
+  : public PUP::able 
+#endif
+{
 
   /// @class    Config
   /// @ingroup  Parameters
@@ -22,15 +26,21 @@ class Config {
 
 public: // interface
 
-  // /// Constructor
-  // Config() throw();
-
-  // /// Destructor
-  // ~Config() throw();
+  /// empty constructor for charm++ pup()
+  Config() throw() {}
 
 #ifdef CONFIG_USE_CHARM
+
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(Config);
+
+  /// CHARM++ migration constructor for PUP::able
+
+  Config (CkMigrateMessage *m) : PUP::able(m) {}
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
+
 #endif
 
   /// Read values from the Parameters object

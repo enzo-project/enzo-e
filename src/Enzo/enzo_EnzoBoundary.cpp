@@ -28,6 +28,7 @@ void EnzoBoundary::pup (PUP::er &p)
 
   TRACEPUP;
 
+
   Boundary::pup(p);
 
   p | boundary_type_;

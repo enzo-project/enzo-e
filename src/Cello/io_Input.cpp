@@ -71,6 +71,7 @@ void Input::pup (PUP::er &p)
   WARNING("Input::pup","skipping it_field_");
   //    if (up) it_field_ = new ItField;
   //    p | *it_field_;
+  p | it_field_; // PUP::able
   if (up) io_block_ = new IoBlock;
   p | *io_block_;
   if (up) io_field_block_ = new IoFieldBlock;

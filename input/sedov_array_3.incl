@@ -50,9 +50,9 @@
 
    Enzo {
 
-      ppm {
+      gamma = 1.4;
 
-         gamma = 1.4;
+      ppm {
 
          diffusion   = true;
          flattening  = 3;

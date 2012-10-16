@@ -35,8 +35,16 @@ public: // interface
   EnzoConfig & operator= (const EnzoConfig & config) throw();
 
 #ifdef CONFIG_USE_CHARM
+
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(EnzoConfig);
+
+  /// CHARM++ migration constructor
+  EnzoConfig(CkMigrateMessage *m) : Config (m) {}
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
+
 #endif
 
   /// Read values from the Parameters object

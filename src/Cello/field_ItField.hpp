@@ -9,7 +9,11 @@
 #ifndef FIELD_IT_FIELD_HPP
 #define FIELD_IT_FIELD_HPP
 
-class ItField {
+class ItField 
+#ifdef CONFIG_USE_CHARM
+  : public PUP::able 
+#endif
+{
 
   /// @class    ItField
   /// @ingroup  Field
@@ -25,15 +29,18 @@ public: // interface
   virtual ~ItField () throw()
   { }
 
+
 #ifdef CONFIG_USE_CHARM
+
+  /// Charm++ PUP::able declarations
+  PUPable_abstract(ItField);
+
+  /// Charm++ PUP::able migration constructor
+  ItField (CkMigrateMessage *m) : PUP::able(m) {}
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
+  void pup (PUP::er &p) { PUP::able::pup(p); };
 
-    TRACEPUP;
-
-    // NOTE: change this function whenever attributes change
-  }
 #endif
 
   /// Go to the first value

@@ -23,7 +23,6 @@ Simulation::Simulation
 /// Initialize the Simulation object
 : factory_(0),
   parameters_(0),
-  config_(0),
   parameter_file_(parameter_file),
   group_process_((GroupProcess *)group_process),
   is_group_process_new_(false),
@@ -36,6 +35,7 @@ Simulation::Simulation
   time_(0.0),
   dt_(0),
   stop_(false),
+  config_(0),
   problem_(0),
   timer_(),
   performance_simulation_(0),
@@ -117,7 +117,7 @@ void Simulation::pup (PUP::er &p)
   // p | * parameters_;
 
   WARNING("Simulation::pup","config_ needs to be PUP::able");
-  p | *config_;
+  p | config_;
 
   p | parameter_file_;
 
@@ -468,28 +468,39 @@ void Simulation::update_state(int cycle, double time, double dt, double stop)
 
 void Simulation::monitor_output()
 {
-
+  TRACE1("monitor = %p",monitor_);
   monitor_->  print("", "-------------------------------------");
+  TRACE0;
 
   monitor_-> print("Simulation", "cycle %04d", cycle_);
   monitor_-> print("Simulation", "time-sim %15.12f",time_);
   monitor_-> print("Simulation", "dt %15.12g", dt_);
 
+  TRACE0;
+
   Memory * memory = Memory::instance();
 
+  TRACE0;
   if (memory->is_active()) {
     monitor_->print("Memory","bytes-curr %lld", memory->bytes());
     monitor_->print("Memory","bytes-high %lld", memory->bytes_high());
 
     memory->reset_high();
   }
+  TRACE0;
 
 #ifdef CONFIG_USE_PERFORMANCE
+  TRACE0;
   performance_output(performance_cycle_);
+  TRACE0;
 #else
+  TRACE0;
   output_performance_();
+  TRACE0;
 # ifdef CONFIG_USE_CHARM
+  TRACE0;
   ((SimulationCharm *) this)->c_compute();
+  TRACE0;
 # endif
 #endif
 }

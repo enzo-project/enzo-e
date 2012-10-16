@@ -68,7 +68,7 @@ public: // functions
     if (up) ghosts_.resize(num_fields);
     for (int i=0; i<num_fields; i++) {
       if (up) ghosts_[i] = new int[3];
-      p | *ghosts_[i];
+      PUParray(p,ghosts_[i],3);
     }
     PUParray (p,refresh_face_,3);
     p | min_value_;
