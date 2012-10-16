@@ -84,6 +84,7 @@ PARALLEL_MAIN_BEGIN
 
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
     (parameter_file, strlen(parameter_file)+1);
+  TRACE1("proxy_simulation = %p",&proxy_simulation);
 
   //--------------------------------------------------
 

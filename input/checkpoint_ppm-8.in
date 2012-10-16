@@ -16,7 +16,7 @@ Output {
   restart {
 
      type  = "restart";
-     dir   = ["restart_ppm-8-%d.in","cycle"];
+     dir   = ["restart_ppm-8-%d","cycle"];
      schedule = ["cycle","list",100];
   }
 }

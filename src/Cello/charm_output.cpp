@@ -139,7 +139,9 @@ void Problem::output_wait(Simulation * simulation) throw()
     output->prepare_remote(&n,&buffer);
 
     // Remote call to receive data
+    CkPrintf ("proxy_simulation[%d] = %p\n",ip_writer,&proxy_simulation[ip_writer]);
     proxy_simulation[ip_writer].p_output_write (n, buffer);
+    TRACE0;
 
     // Close up file
     TRACE("calling output->close()");
