@@ -34,7 +34,6 @@ int EnzoBlock::IdentifyPhysicalQuantities
  
   /* Find Density, if possible. */
 
-  TRACE1("NumberOfBaryonFields = %d",NumberOfBaryonFields);
   if ((DensNum = FindField(Density, FieldType, NumberOfBaryonFields)) < 0) {
     fprintf(stderr, "GIPQ: Cannot find density.\n");
     return ENZO_FAIL;

@@ -110,7 +110,7 @@ Initial * EnzoProblem::create_initial_
   if (name == "implosion_2d") {
     initial = new EnzoInitialImplosion2(cycle,time);
   } else if (name == "sedov_array_3d") {
-    initial = new EnzoInitialSedovArray3(config);
+    initial = new EnzoInitialSedovArray3(static_cast<EnzoConfig *>(config));
   } else {
     initial = Problem::create_initial_(name,parameters,config,group_process);
   }

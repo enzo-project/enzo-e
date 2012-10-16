@@ -6,3 +6,8 @@ include "input/sedov_array_3.incl"
 Mesh { root_blocks    = [1,1,1];
        root_size      = [64,64,64]; }
 
+Enzo {
+   sedov {
+     array = [1,1,1];
+   }
+}

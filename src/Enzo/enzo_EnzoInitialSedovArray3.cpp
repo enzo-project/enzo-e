@@ -17,9 +17,12 @@
 //----------------------------------------------------------------------
 
 EnzoInitialSedovArray3::EnzoInitialSedovArray3 
-(const Config * config) throw ()
+(const EnzoConfig * config) throw ()
   : Initial(config->initial_cycle, config->initial_time) 
 {
+  array_[0] = config->enzo_sedov_array[0];
+  array_[1] = config->enzo_sedov_array[1];
+  array_[2] = config->enzo_sedov_array[2];
 }
 
 //----------------------------------------------------------------------
@@ -57,9 +60,6 @@ void EnzoInitialSedovArray3::enforce
 	 "Insufficient number of fields",
 	 field_descr->field_count() >= 4);
 
-  WARNING("EnzoInitialSedovArray3::enforce",
-	  "hard-coded field index ordering");
-
   int index_density      = field_descr->field_id("density");
   int index_velocity_x   = field_descr->field_id("velocity_x");
   int index_velocity_y   = field_descr->field_id("velocity_y");
@@ -75,16 +75,16 @@ void EnzoInitialSedovArray3::enforce
   int nx,ny,nz;
   field_block->size(&nx,&ny,&nz);
 
-  double xm = -0.5;
-  double ym = -0.5;
-  double zm = -0.5;
+  double xbm,ybm,zbm;
+  block->lower(&xbm,&ybm,&zbm);
 
-  double xp = +0.5;
-  double yp = +0.5;
-  double zp = +0.5;
+  double xbp,ybp,zbp;
+  block->upper(&xbp,&ybp,&zbp);
 
   double hx,hy,hz;
-  field_block->cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
+  field_block->cell_width(xbm,xbp,&hx,
+			  ybm,ybp,&hy,
+			  zbm,zbp,&hz);
 
   // Parameters
 
@@ -101,6 +101,7 @@ void EnzoInitialSedovArray3::enforce
 	  "This problem requires Blocks to be cubical",
 	  hx == hy && hy == hz);
 
+  
   int gx,gy,gz;
   field_descr->ghosts(index_density,&gx,&gy,&gz);
 
@@ -108,12 +109,14 @@ void EnzoInitialSedovArray3::enforce
   int ngy = ny + 2*gy;
   int ngz = nz + 2*gz;
 
+  // background 
+
   for (int iz=gz; iz<nz+gz; iz++) {
-    double z = zm + (iz - gz + 0.5)*hz;
+    double z = zbm + (iz - gz + 0.5)*hz;
     for (int iy=gy; iy<ny+gy; iy++) {
-      double y = ym + (iy - gy + 0.5)*hy;
+      double y = ybm + (iy - gy + 0.5)*hy;
       for (int ix=gx; ix<nx+gx; ix++) {
-	double x = xm + (ix - gx + 0.5)*hx;
+	double x = xbm + (ix - gx + 0.5)*hx;
 	double r2 = x*x + y*y + z*z;
 
 	int i = INDEX(ix,iy,iz,ngx,ngy);
@@ -121,10 +124,62 @@ void EnzoInitialSedovArray3::enforce
 	vx[i] = 0.0;
 	vy[i] = 0.0;
 	vz[i] = 0.0;
-	
-	te[i] = (r2 < sedov_radius_2) ? sedov_te_in : sedov_te_out;
+	te[i] = sedov_te_out;
 
       }
     }
   }
+
+  // array of explosions
+
+  // (kx,ky,kz) index of explosion in domain
+  // (x,y,z) position in block
+  int kxm = 0;
+  int kym = 0;
+  int kzm = 0;
+  int kxp = array_[0];
+  int kyp = array_[1];
+  int kzp = array_[2];
+  TRACE3 ("SEDOV: %d %d %d",kxp,kyp,kzp);
+
+  double xdp,ydp,zdp;
+  hierarchy->upper(&xdp,&ydp,&zdp);
+  double xdm,ydm,zdm;
+  hierarchy->upper(&xdm,&ydm,&zdm);
+
+  double hxa = (xdp-xdm) / array_[0];
+  double hya = (ydp-ydm) / array_[1];
+  double hza = (zdp-zdm) / array_[2];
+
+  for (int kz=kzm; kz<kzp; kz++) {
+    double zc = hza*(0.5+kz);
+    for (int ky=kym; ky<kyp; ky++) {
+      double yc = hya*(0.5+ky);
+      for (int kx=kxm; kx<kxp; kx++) {
+	double xc = hxa*(0.5+kx);
+	TRACE3("xc,yc,zc = %f %f %f",xc,yc,zc);
+
+	// (explosion center xc,yc,zc)
+
+	for (int iz=gz; iz<nz+gz; iz++) {
+	  double z = zbm + (iz - gz + 0.5)*hz - zc;
+	  for (int iy=gy; iy<ny+gy; iy++) {
+	    double y = ybm + (iy - gy + 0.5)*hy - yc;
+	    for (int ix=gx; ix<nx+gx; ix++) {
+	      double x = xbm + (ix - gx + 0.5)*hx - xc;
+	      double r2 = x*x + y*y + z*z;
+
+	      int i = INDEX(ix,iy,iz,ngx,ngy);
+	      
+	      if (r2 < sedov_radius_2) te[i] = sedov_te_in;
+
+	    }
+	  }
+	}
+
+      }
+    }
+  }
+
+
 }

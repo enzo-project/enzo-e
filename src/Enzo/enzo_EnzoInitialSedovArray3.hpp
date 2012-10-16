@@ -20,7 +20,7 @@ public: // interface
   EnzoInitialSedovArray3() throw() { }
   
   /// Constructor
-  EnzoInitialSedovArray3(const Config * config) throw();
+  EnzoInitialSedovArray3(const EnzoConfig * enzo_config) throw();
 
 #ifdef CONFIG_USE_CHARM
 
@@ -39,6 +39,10 @@ public: // interface
 
   virtual void enforce 
   ( Block * block, const FieldDescr * field_descr, const Hierarchy * hierarchy ) throw();
+
+private: // attributes
+
+  int array_[3];
 
 };
 

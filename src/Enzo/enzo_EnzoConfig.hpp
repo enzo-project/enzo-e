@@ -69,6 +69,8 @@ public: // attributes
   double                     enzo_cosmology_omega_matter_now;
   double                     enzo_gamma;
 
+  int                        enzo_sedov_array[3];
+
 
 };
 
