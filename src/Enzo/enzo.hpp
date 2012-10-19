@@ -32,7 +32,9 @@
 #include "_memory.hpp"
 #include "_parameters.hpp"
 #include "_performance.hpp"
+#ifdef CONFIG_USE_LCAPERF
 #include "_lcaperf.hpp"
+#endif
 #include "_simulation.hpp"
 #include "_field.hpp"
 #include "_mesh.hpp"

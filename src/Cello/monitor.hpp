@@ -11,7 +11,9 @@
 #include "_error.hpp"
 #include "_parallel.hpp"
 #include "_performance.hpp"
+#ifdef CONFIG_USE_LCAPERF
 #include "_lcaperf.hpp"
+#endif
 
 #include "_monitor.hpp"
 

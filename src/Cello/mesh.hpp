@@ -13,7 +13,9 @@
 #include "charm.hpp"
 
 #include "_performance.hpp"
+#ifdef CONFIG_USE_LCAPERF
 #include "_lcaperf.hpp"
+#endif
 #include "_monitor.hpp"
 #include "_parallel.hpp"
 #include "_memory.hpp"
