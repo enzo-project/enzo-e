@@ -41,7 +41,9 @@ Simulation::Simulation
   performance_simulation_(0),
   performance_cycle_(0),
   performance_curr_(0),
+#ifdef CONFIG_USE_LCAPERF
   lcaperf_(0),
+#endif
   monitor_(0),
   hierarchy_(0),
   field_descr_(0)
@@ -72,6 +74,8 @@ Simulation::Simulation
   performance_cycle_      = new Performance;
 
 
+#ifdef CONFIG_USE_LCAPERF
+
   lcaperf_ = new LcaPerf (group_process_->rank(), group_process_->size());
 
   lcaperf_->initialize();
@@ -81,6 +85,8 @@ Simulation::Simulation
   lcaperf_->new_attribute("level",LCAP_INT);
 
   lcaperf_->begin();
+
+#endif
 
   timer_.start();
 
@@ -93,8 +99,10 @@ Simulation::Simulation
 #ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation()
-  : patch_loop_(0),
-    lcaperf_(0)
+  : patch_loop_(0)
+#ifdef CONFIG_USE_LCAPERF
+  , lcaperf_(0)
+#endif
 { TRACE("Simulation()"); }
 
 #endif
@@ -143,8 +151,10 @@ void Simulation::pup (PUP::er &p)
   if (up) performance_curr_ = new Performance;
   p | * performance_curr_;
 
+#ifdef CONFIG_USE_LCAPERF
   if (up) lcaperf_ = new LcaPerf;
   p | *lcaperf_;
+#endif
 
   p | num_perf_;
   if (up) perf_val_ = new double [num_perf_];
@@ -173,9 +183,11 @@ void Simulation::pup (PUP::er &p)
 
 Simulation::Simulation (CkMigrateMessage *m)
   : CBase_Simulation(m),
-    patch_loop_(0),
-    lcaperf_(0)
-{ TRACE("Simulation(Ck`MigrateMessage)"); }
+    patch_loop_(0)
+#ifdef CONFIG_USE_LCAPERF
+  , lcaperf_(0)
+#endif
+{ TRACE("Simulation(CkMigrateMessage)"); }
 
 #endif
 
@@ -216,9 +228,13 @@ void Simulation::finalize() throw()
 {
   DEBUG0;
 
+#ifdef CONFIG_USE_LCAPERF
+
   lcaperf_->stop("simulation");
   lcaperf_->end();
   lcaperf_->finalize();
+
+#endif
 
   performance_simulation_->stop();
   performance_cycle_->stop();
@@ -245,9 +261,13 @@ void Simulation::initialize_simulation_() throw()
 
   // Initialize Performance
 
+#ifdef CONFIG_USE_LCAPERF
+
   lcaperf_->attribute("cycle",&cycle_,LCAP_INT);
   lcaperf_->attribute("level",&level_,LCAP_INT);
   lcaperf_->start("simulation");
+
+#endif
 
   performance_simulation_->start();
   performance_cycle_->start();
@@ -415,7 +435,9 @@ void Simulation::deallocate_() throw()
   delete parameters_;    parameters_  = 0;
   delete performance_simulation_; performance_simulation_ = 0;
   delete performance_cycle_;      performance_cycle_ = 0;
+#ifdef CONFIG_USE_LCAPERF
   delete lcaperf_; lcaperf_ = 0;
+#endif
   delete [] perf_val_;
   delete [] perf_min_;
   delete [] perf_max_;
@@ -490,18 +512,19 @@ void Simulation::monitor_output()
   TRACE0;
 
 #ifdef CONFIG_USE_PERFORMANCE
-  TRACE0;
+
   performance_output(performance_cycle_);
-  TRACE0;
+
 #else
-  TRACE0;
+
   output_performance_();
-  TRACE0;
+
 # ifdef CONFIG_USE_CHARM
-  TRACE0;
+
   ((SimulationCharm *) this)->c_compute();
-  TRACE0;
+
 # endif
+
 #endif
 }
 
@@ -510,10 +533,14 @@ void Simulation::monitor_output()
 
 void Simulation::performance_output(Performance * performance)
 {
+#ifdef CONFIG_USE_LCAPERF
+
   lcaperf_->stop("simulation");
   lcaperf_->print();
   lcaperf_->attribute("cycle",&cycle_,LCAP_INT);
   lcaperf_->start("simulation");
+
+#endif
 
   performance_curr_ = performance;
 
@@ -551,6 +578,7 @@ void Simulation::performance_output(Performance * performance)
   CkCallback callback (CkIndex_SimulationCharm::p_performance_min(NULL),
 		       thisProxy);
 
+  TRACE1("Calling contribute %d",num_perf_*sizeof(double));
   contribute( num_perf_*sizeof(double), perf_val_, 
 	      CkReduction::min_double, callback);
 #else

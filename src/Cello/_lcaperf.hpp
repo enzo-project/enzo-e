@@ -43,6 +43,8 @@
 #ifndef _LCAPERF_HPP
 #define _LCAPERF_HPP
 
+#ifdef CONFIG_USE_LCAPERF
+
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
@@ -96,5 +98,7 @@ enum {
 
 #include "lcaperf_lcaperf.hpp"
 
-#endif
+#endif /* CONFIG_USE_LCAPERF */
+
+#endif /* _LCAPERF_HPP */
 

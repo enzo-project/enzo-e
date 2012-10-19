@@ -7,7 +7,7 @@ import sys
 
 # Whether to print out messages with the TRACE() series of statements
 
-trace = 1
+trace = 0
 
 # Whether to enable displaying messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
@@ -46,6 +46,10 @@ use_valgrind = 0
 
 use_performance = 0
 
+# Whether to use LcaPerf performance class for collecting performance data
+
+use_lcaperf = 0
+
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
 
@@ -82,8 +86,6 @@ if not env.GetOption('clean'):
           use_papi = 1
 
      env = configure.Finish()
-
-use_papi = 0
 
 #-----------------------------------------------------------------------
 # COMMAND-LINE ARGUMENTS
@@ -132,6 +134,7 @@ define["double"] =        ['CONFIG_PRECISION_DOUBLE']
 define_memory =           ['CONFIG_USE_MEMORY']
 define_projections =      ['CONFIG_USE_PROJECTIONS']
 define_performance =      ['CONFIG_USE_PERFORMANCE']
+define_lcaperf =          ['CONFIG_USE_LCAPERF']
 define_papi  =            ['CONFIG_USE_PAPI','PAPI3']
 
 # Debugging defines
@@ -190,6 +193,9 @@ if (use_projections == 1):
 
 if (use_performance == 1):
      defines = defines + define_performance
+
+if (use_lcaperf == 1):
+     defines = defines + define_lcaperf
 
 flags_config = ''
 flags_cxx = ''
@@ -374,6 +380,7 @@ Export('parallel_run')
 Export('parallel_run_args')
 Export('serial_run')
 Export('use_papi')
+Export('use_lcaperf')
 
 SConscript( 'src/SConscript',variant_dir='build/' + config )
 SConscript('test/SConscript',variant_dir = test_path )

@@ -5,6 +5,9 @@
 /// @date     2011-05-23
 /// @brief    [\ref Lcaperf] Declaration of the CountersPapi class
 
+#ifndef LCAPERF_COUNTERS_PAPI_HPP
+#define LCAPERF_COUNTERS_PAPI_HPP
+
 class CountersPapi : public CountersUser {
 
   /// @class    CountersPapi
@@ -34,8 +37,6 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
-
-    bool n = p.isUnpacking();
 
     // NOTE: change this function whenever attributes change
 

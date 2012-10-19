@@ -37,7 +37,10 @@ public: // interface
 
 private: // interface
   /// Create the (single) Memory object (singleton design pattern)
-  Memory() throw () : is_active_(false)
+  Memory() throw ()
+#ifdef CONFIG_USE_MEMORY
+ : is_active_(false)
+#endif
   { initialize_(); };
 
   /// Copy the (single) Memory object (singleton design pattern)
@@ -114,7 +117,13 @@ public: // interface
 #endif
 
   bool is_active () const throw()
-  { return is_active_; }
+  { 
+#ifdef CONFIG_USE_MEMORY
+    return is_active_; 
+#else
+    return 0;
+#endif
+  }
 
   /// Set whether to fill memory with a value after allocating
   void set_allocate_fill (bool do_fill, char fill_value = 0)

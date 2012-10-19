@@ -78,7 +78,11 @@ void SimulationCharm::c_compute()
 {
   if (stop_) {
     
+#ifdef CONFIG_USE_PERFORMANCE
     performance_output(performance_simulation_);
+#else
+    output_performance_();
+#endif
 
     proxy_main.p_exit(CkNumPes());
 
@@ -108,6 +112,7 @@ void SimulationCharm::p_performance_min(CkReductionMsg * msg)
   // Then reduce maximum values
 
   CkCallback callback (CkIndex_SimulationCharm::p_performance_max(NULL),thisProxy);
+  TRACE1("Calling contribute %d",num_perf_*sizeof(double));
   contribute( num_perf_*sizeof(double), perf_val_, 
 	      CkReduction::max_double, callback);
 
@@ -128,6 +133,7 @@ void SimulationCharm::p_performance_max(CkReductionMsg * msg)
   // Finally reduce sum values
 
   CkCallback callback (CkIndex_SimulationCharm::p_performance_sum(NULL),thisProxy);
+  TRACE1("Calling contribute %d",num_perf_*sizeof(double));
   contribute( num_perf_*sizeof(double), perf_val_, 
 	      CkReduction::sum_double, callback);
 

@@ -5,6 +5,7 @@
 Import('env')
 Import('type')
 Import('use_papi')
+Import('use_lcaperf')
 
 Import('bin_path')
 Import('inc_path')
@@ -23,9 +24,11 @@ components.append(['enzo','simulation', 'problem',
 	      'mesh', 'field',
 	      'io', 'disk','memory','parallel',
 	      'parameters', 
-	      'error', 'monitor', 'performance', 'lcaperf',
+	      'error', 'monitor', 'performance',
 	      'test','cello','external'])
 
+if (use_lcaperf):
+	components.append(['lcaperf'])
 if (use_papi):
 	components.append(['papi','pfm'])
 

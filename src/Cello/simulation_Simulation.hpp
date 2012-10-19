@@ -100,9 +100,11 @@ public: // interface
   Performance * performance_cycle() const throw()
   { return performance_cycle_; }
 
+#ifdef CONFIG_USE_LCAPERF
   /// Return a pointer to the lcaperf object
   LcaPerf * lcaperf()
   { return lcaperf_; }
+#endif
 
   /// Return the performance object associated with the entire simulation
   Performance * performance_simulation() const throw()
@@ -251,8 +253,10 @@ protected: // attributes
   /// Used primarily for CHARM++ 
   Performance * performance_curr_;
 
+#ifdef CONFIG_USE_LCAPERF
   /// Lcaperf
   LcaPerf * lcaperf_;
+#endif
 
   /// Arrays for storing local performance data to be reduced
   /// Used for multiple CHARM++ reductions
