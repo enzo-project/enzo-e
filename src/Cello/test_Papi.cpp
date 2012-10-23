@@ -23,16 +23,24 @@ PARALLEL_MAIN_BEGIN
 
   papi.init();
 
-  //  papi.add_counter(PAPI_FP_INS);
-  papi.add_counter("PAPI_FP_OPS");
+  //  papi.add_event(PAPI_FP_INS);
+  papi.add_event("PAPI_FP_OPS");
+
+  papi.add_region("A");
+  papi.add_region("B");
+  papi.add_region("C");
 
   int count_array[] = {10000,1000,100};
+  std::string region_array[] = {"A","B","C"};
 
-  for (int icount = 0; icount<2; icount++) {
+  TRACE0;
+  for (int index_region = 0; index_region<3; index_region++) {
 
-    int count = count_array[icount];
+    int count = count_array[index_region];
 
-    papi.start();
+  TRACE0;
+    papi.start_region(index_region);
+  TRACE0;
 
     float a=1.0, b=2.5;
     for (int i=0; i<count; i++) {
@@ -40,16 +48,37 @@ PARALLEL_MAIN_BEGIN
     }
     printf ("printf to inhibit optimizing-out code: flops = %f\n",b);
 
-    papi.stop();
+  TRACE0;
+    papi.stop_region(index_region);
+  TRACE0;
 
-    unit_assert (fabs(papi.value(0) - count)/(count) < 0.05);
+    const long long * values = papi.values(index_region);
+  TRACE0;
 
-    int num_counters = papi.num_counters();
-    for (int i=0; i<num_counters; i++) {
-      printf ("%d %s %lld\n",i,papi.name(i).c_str(),papi.value(i));
-    }
+  TRACE1 ("values = %p",values);
+    unit_assert (fabs(values[0] - count)/(count) < 0.05);
+
   }
 
+  TRACE0;
+  const int num_events = papi.num_events();
+  TRACE0;
+  const int num_regions = papi.num_regions();
+  TRACE0;
+  for (int index_event=0; index_event<num_events; index_event++) {
+
+    const long long * events = papi.values(index_event);
+
+    for (int index_region=0; index_region<num_regions; index_region++) {
+
+  TRACE0;
+      printf ("region %s  event %s value %lld\n",
+	      papi.region_name(index_region).c_str(),
+	      papi.event_name(index_event).c_str(),
+	      events[index_event]);
+
+    }
+  }
 
 
   unit_finalize();

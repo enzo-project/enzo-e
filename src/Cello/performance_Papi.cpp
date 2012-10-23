@@ -21,10 +21,14 @@ Papi::Papi() throw()
   : is_started_(false),
     is_initialized_(false),
     event_set_(PAPI_NULL),
-    num_counters_(0),
-    names_(),
-    values_()
+    num_events_(0),
+    event_names_(),
+    num_regions_(0),
+    region_events_(),
+    region_index_()
+
 {
+  insert_region_("cello");
 }
 
 //======================================================================
@@ -60,34 +64,27 @@ void Papi::init() throw()
 
 //----------------------------------------------------------------------
 
-std::string Papi::name (int id) const throw()
+int Papi::num_events() const throw()
 {
-  return names_[id];
+  return num_events_;
 }
 
 //----------------------------------------------------------------------
 
-long long Papi::value (int id) const throw()
+std::string Papi::event_name (int index_event) const throw()
 {
-  return values_[id];
+  return event_names_[index_event];
 }
 
 //----------------------------------------------------------------------
 
-int Papi::num_counters() const throw()
-{
-  return num_counters_;
-}
-
-//----------------------------------------------------------------------
-
-int Papi::add_counter(std::string event) throw()
+int Papi::add_event(std::string event) throw()
 {
 #ifdef CONFIG_USE_PAPI
   if (! is_initialized_) {
 
-    WARNING1("PAPI::add_counter",
-	     "Not adding counter %s since PAPI is not initialized",
+    WARNING1("PAPI::add_event",
+	     "Not adding event %s since PAPI is not initialized",
 	     event.c_str());
     return 0;
 
@@ -98,7 +95,7 @@ int Papi::add_counter(std::string event) throw()
     retval = PAPI_event_name_to_code ((char *)event.c_str(),&id);
 
     if (retval != PAPI_OK) {
-      WARNING2("PAPI::add_counter","PAPI_event_name_to_code %s returned %d",
+      WARNING2("PAPI::add_event","PAPI_event_name_to_code %s returned %d",
 	       event.c_str(),retval);
       return 0;
     }
@@ -106,18 +103,16 @@ int Papi::add_counter(std::string event) throw()
     retval = PAPI_add_event(event_set_, id);
 
     if (retval != PAPI_OK) {
-      WARNING2("PAPI::add_counter","PAPI_add_event for %d returned %d",
+      WARNING2("PAPI::add_event","PAPI_add_event for %d returned %d",
 	       id,retval);
       return 0;
     } else {
       
-      names_.push_back(event);
+      event_names_.push_back(event);
 
-      values_.push_back(0);
-      
-      ++ num_counters_;
+      ++ num_events_;
 
-      return num_counters_-1;
+      return num_events_-1;
 
     }
   }
@@ -129,102 +124,126 @@ int Papi::add_counter(std::string event) throw()
 //----------------------------------------------------------------------
 
 
-void Papi::start() throw()
+void Papi::start_events() throw()
 {
 #ifdef CONFIG_USE_PAPI
   int retval;
-  if (is_started_) {
-    retval = PAPI_reset(event_set_);
+
+  if (! is_started_) {
+
+    retval = PAPI_start(event_set_);
 
     if (retval != PAPI_OK) {
-      WARNING1("PAPI::start()","PAPI_reset() returned %d",retval);
+      WARNING1("PAPI::start_events()","PAPI_start() returned %d",retval);
     }
-  } else {
+
     is_started_ = true;
-  }
 
-  retval = PAPI_start(event_set_);
-
-  if (retval != PAPI_OK) {
-    WARNING1("PAPI::start()","PAPI_start() returned %d",retval);
+  } else {
+    WARNING("Papi::start_events",
+	    "Events already started");
   }
 #endif
 }
 
 //----------------------------------------------------------------------
 
-void Papi::stop() throw()
+void Papi::stop_events() throw()
 {
 #ifdef CONFIG_USE_PAPI
 
-  if (! is_started_) {
-    WARNING("Papi::stop",
-	    "Counters already stopped");
-  } else {
-    int retval = PAPI_stop(event_set_,&values_[0]);
+  if ( is_started_) {
 
-    if (retval != PAPI_OK) {
-      WARNING1("PAPI::stop()","PAPI_stop() returned %d",retval);
-    } else {
+    long long * values = new long long [num_events_];
+    int retval = PAPI_stop(event_set_,values);
+    delete [] values; // values not used here
+
+    if (retval == PAPI_OK) {
       is_started_ = true;
+    } else {
+      WARNING1("PAPI::stop_events()","PAPI_stop() returned %d",retval);
     }
+
+  } else {
+    WARNING("Papi::stop_events",
+	    "Events already stopped");
   }
+
 #endif
 }
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// float Papi::time_real() const throw()
-// {
-// #ifdef CONFIG_USE_PAPI
-//   return time_real_;
-// #else
-//   return 0.0;
-// #endif
-// }
+int Papi::num_regions() const throw()
+{
+  return num_regions_;
+}
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// float Papi::time_proc() const throw()
-// {
-// #ifdef CONFIG_USE_PAPI
-//   return time_proc_;
-// #else
-//   return 0.0;
-// #endif
-// }
+std::string Papi::region_name (int index_region) const throw()
+{
+  return region_names_[index_region];
+}
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// long long Papi::flop_count() const throw()
-// {
-// #ifdef CONFIG_USE_PAPI
-//   return flop_count_;
-// #else
-//   return 0;
-// #endif
-// }
+int Papi::region_index (std::string name) const throw()
+{
+  return region_index_.at(name);
+}
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// float Papi::flop_rate() const throw()
-// {
-// #ifdef CONFIG_USE_PAPI
-//   return flop_rate_;
-// #else
-//   return 0.0;
-// #endif
-// }
+int Papi::add_region (std::string name_region) throw()
+{ 
+  insert_region_(name_region);
+  return num_regions_ - 1;
+}
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// void Papi::print () const throw()
-// {
-// #ifdef CONFIG_USE_PAPI
-//   Monitor * monitor = Monitor::instance();
-//   monitor->print ("Performance","PAPI Time real   = %f",time_real());
-//   monitor->print ("Performance","PAPI Time proc   = %f",time_proc());
-//   monitor->print ("Performance","PAPI GFlop count = %f",flop_count()*1e-9);
-//   monitor->print ("Performance","PAPI GFlop rate  = %f",flop_count()*1e-9 / time_real());
-// #endif
-// };
+void  Papi::start_region(int index_region) throw()
+{  
+  //  region_stack_.push(region); 
+  //  std::vector<long long> new_values;
+  //  values_stack_.push(new_values);
+}
+
+//----------------------------------------------------------------------
+
+void  Papi::stop_region(int index_region) throw()
+{
+  // if (region != region_stack_.top() ) {
+  //   WARNING2("Papi::stop_region",
+  // 	     "Trying to stop region %s when active region is %s",
+  // 	     region.c_str(),region_stack_.top().c_str());
+
+  // } else {
+  //   region_stack_.pop();
+  //   values_stack_.pop();
+  // }
+}
+
+//======================================================================
+
+void Papi::insert_region_(std::string region) throw()
+{
+  region_names_.push_back(region);
+
+  region_index_[region] = region_events_.size();
+
+  std::vector <long long> new_events;
+  new_events.resize(num_events_);
+  region_events_.push_back(new_events);
+}
+
+//----------------------------------------------------------------------
+
+const long long * Papi::values (int index_region) const throw()
+{
+  const long long * values = &region_events_[index_region][0];
+  return values;
+}
+
+

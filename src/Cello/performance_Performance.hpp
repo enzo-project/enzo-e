@@ -68,10 +68,10 @@ public: // interface
   //--------------------------------------------------
 
   /// Start timers and counters
-  void start () throw ();
+  void start (int index_region = 0) throw ();
 
   /// Stop timers and counters
-  void stop () throw ();
+  void stop (int index_region = 0) throw ();
 
   double time () throw ()
   { return timer_.value(); }

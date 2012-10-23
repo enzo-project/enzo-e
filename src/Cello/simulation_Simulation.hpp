@@ -169,6 +169,9 @@ protected: // functions
   /// Initialize global simulation parameters
   void initialize_simulation_ () throw();
 
+  /// Initialize performance objects
+  void initialize_performance_ () throw();
+
   /// Initialize output Monitor object
   void initialize_monitor_ () throw();
 

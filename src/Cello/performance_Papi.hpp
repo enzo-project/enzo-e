@@ -12,7 +12,7 @@ class Papi {
 
   /// @class    Papi
   /// @ingroup  Groupname
-  /// @brief    [\ref Performance] Class for accessing PAPI counters
+  /// @brief    [\ref Performance] Class for accessing PAPI events
 
 public: // interface
 
@@ -53,31 +53,56 @@ public: // interface
   /// Initialize PAPI
   void init() throw();
 
-  /// Start counters
-  void start() throw();
+  /// Return the number of PAPI events
+  int num_events() const throw();
 
-  /// Stop counters
-  void stop() throw();
-
-  /// Clear the counters
-  void clear() throw();
-
-  /// Read the counters
-  void read() throw();
-
-  /// Return the name of the ith counter
-  std::string name (int id) const throw();
-
-  /// Return the value of the ith counter
-  long long value (int id) const throw();
-
-  /// Return the number of counters
-  int num_counters() const throw();
+  /// Return the name of the ith event counter
+  std::string event_name (int index_event) const throw();
 
   /// Add a new counter, returning the id
-  int add_counter(std::string event) throw();
+  int add_event(std::string event) throw();
+
+  /// Start event counting for the region
+  void start_events() throw();
+
+  /// Stop event counting for the region
+  void stop_events() throw();
+
+
+  /// Return number of regions
+  int num_regions() const throw();
+
+  /// Return the current region
+  std::string region_name (int index_region) const throw();
+
+  /// Return the index of the given region
+  int region_index (std::string name) const throw();
+
+  /// Add a new region, returning the id
+  int add_region(std::string region) throw();
+
+  /// Push a new region onto the stack
+  void start_region(int index_region) throw();
+
+  /// Push a new region onto the stack
+  void stop_region(int index_region) throw();
+
+  /// Clear the counters for the region
+  void clear_region(int index_region) throw();
+
+  /// Read the counters for the region
+  void read_region(int index_region) throw();
+
+  /// Return array to events for the ith region
+  const long long * values (int index_region) const throw();
+
+
+private: // functions
+
+  void insert_region_(std::string) throw();
 
 private: // attributes
+
 
   /// Whether counting has started
   bool is_started_;
@@ -85,17 +110,30 @@ private: // attributes
   /// Whether PAPI is initialized
   bool is_initialized_;
 
+
   /// PAPI event set
   int event_set_;
 
-  /// Number of PAPI counters successfully added to the event_set_
-  int num_counters_;
+  /// Number of PAPI events successfully added to the event_set_
+  int num_events_;
 
-  /// list of counter names
-  std::vector<std::string> names_;
+  /// vector of event names in event set
+  std::vector<std::string> event_names_;
+
+
+  /// Number of regions in lists
+  int num_regions_;
+
+  /// list of region names
+  std::vector<std::string> region_names_;
 
   /// list of counter values
-  std::vector<long long> values_;
+  std::vector< std::vector<long long> > region_events_;
+
+
+  /// mapping of region name to index
+  std::map<std::string,int> region_index_;
+
 };
 
 #endif /* PERFORMANCE_PAPI_HPP */

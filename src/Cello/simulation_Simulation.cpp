@@ -203,11 +203,9 @@ Simulation::~Simulation() throw()
 void Simulation::initialize() throw()
 {
   initialize_config_();
-
   initialize_monitor_();
-
   initialize_simulation_();
-
+  initialize_performance_();
 
   initialize_data_descr_();
 
@@ -258,8 +256,12 @@ void Simulation::initialize_simulation_() throw()
   cycle_ = config_->initial_cycle;
   time_  = config_->initial_time;
   dt_ = 0;
+}
 
-  // Initialize Performance
+//----------------------------------------------------------------------
+
+void Simulation::initialize_performance_() throw()
+{
 
 #ifdef CONFIG_USE_LCAPERF
 

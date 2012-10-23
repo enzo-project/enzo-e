@@ -70,6 +70,7 @@ enum function_enum {
 //----------------------------------------------------------------------
 
 #include <vector>
+#include <stack>
 #include <string>
 #include <sstream>
 #include <sys/resource.h>

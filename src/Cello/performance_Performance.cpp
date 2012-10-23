@@ -31,18 +31,18 @@ Performance::~Performance()
 
 //----------------------------------------------------------------------
 
-void Performance::start () throw ()
+void Performance::start (int index_region) throw ()
 {
   timer_.start();
-  papi_.start();
+  papi_.start_region(index_region);
 }
 
 //----------------------------------------------------------------------
 
-void Performance::stop () throw ()
+void Performance::stop (int index_region) throw ()
 {
   timer_.stop();
-  papi_.stop();
+  papi_.stop_region(index_region);
 }
 
 //----------------------------------------------------------------------
