@@ -43,14 +43,6 @@ public: // interface
     // NOTE: change this function whenever attributes change
     WARNING("PerformancePapi::pup","skipping");
     return;
-    p | is_started_;
-    p | time_real_total_;
-    p | time_proc_total_;
-    p | flop_count_total_;
-    p | flop_rate_;
-    p | time_real_;
-    p | time_proc_;
-    p | flop_count_;
   }
 #endif
 
@@ -58,55 +50,54 @@ public: // interface
   // global control
   //----------------------------------------------------------------------
 
+  /// Initialize PAPI
+  void init() throw();
+
   /// Start counters
   void start() throw();
 
   /// Stop counters
   void stop() throw();
 
-  /// Update counters
-  void update() throw()
-  {  stop(); start(); }
+  /// Clear the counters
+  void clear() throw();
 
-  /// Real time between start() and stop()
-  float time_real() const throw();
+  /// Read the counters
+  void read() throw();
 
-  /// Process time between start() and stop()
-  float time_proc() const throw();
+  /// Return the name of the ith counter
+  std::string name (int id) const throw();
 
-  /// Return number of flops between start() and stop()
-  long long flop_count() const throw();
+  /// Return the value of the ith counter
+  long long value (int id) const throw();
 
-  /// Return flop rate between start() and stop()
-  float flop_rate() const throw();
+  /// Return the number of counters
+  int num_counters() const throw();
 
-  // void print () const throw();
+  /// Add a new counter, returning the id
+  int add_counter(int event) throw();
 
 private: // attributes
 
   /// Whether counting has started
   bool is_started_;
 
-  /// Argument 1 to PAPI_flops(): real time
-  float time_real_total_;
+  /// Whether PAPI is initialized
+  bool is_initialized_;
 
-  /// Argument 2 to PAPI_flops(): process time
-  float time_proc_total_;
+  /// PAPI event set
+  int event_set_;
 
-  /// Argument 3 to PAPI_flops(): floating point operations
-  long long flop_count_total_;
+  /// Number of PAPI counters successfully added to the event_set_
+  int num_counters_;
 
-  /// Argument 4 to PAPI_flops(): floating point rate in flops/s
-  float flop_rate_;
+  /// list of counter names
+  std::vector<std::string> names_;
 
-  /// Real time since last start
-  float time_real_;
+  /// list of counter values
+  std::vector<long long> values_;
 
-  /// Process time since last stop
-  float time_proc_;
-
-  /// Argument 3 to PAPI_flops(): floating point operations
-  long long flop_count_;
+  
 
 };
 

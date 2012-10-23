@@ -553,19 +553,23 @@ void Simulation::performance_output(Performance * performance)
 
   Papi * papi = performance->papi();
 
-  papi->update();
+  WARNING("Simulation::performance_output",
+	  "commented-out PAPI updates");
 
-  // PAPI real time
-  perf_val_[i++]= papi->time_real();
+  // papi->stop();
+  // papi->start();
 
-  // PAPI proc time
-  double time_real = perf_val_[i++]= papi->time_proc();
+  // // PAPI real time
+  // perf_val_[i++]= papi->time_real();
 
-  // PAPI gflop count
-  double gflop_count = perf_val_[i++]= papi->flop_count()*1e-9;
+  // // PAPI proc time
+  // double time_real = perf_val_[i++]= papi->time_proc();
 
-  // PAPI gflop rate
-  perf_val_[i++]= gflop_count / time_real;
+  // // PAPI gflop count
+  // double gflop_count = perf_val_[i++]= papi->flop_count()*1e-9;
+
+  // // PAPI gflop rate
+  // perf_val_[i++]= gflop_count / time_real;
 
 #endif
 
