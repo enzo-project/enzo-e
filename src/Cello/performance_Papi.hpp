@@ -75,7 +75,7 @@ public: // interface
   int num_counters() const throw();
 
   /// Add a new counter, returning the id
-  int add_counter(int event) throw();
+  int add_counter(std::string event) throw();
 
 private: // attributes
 
@@ -96,9 +96,6 @@ private: // attributes
 
   /// list of counter values
   std::vector<long long> values_;
-
-  
-
 };
 
 #endif /* PERFORMANCE_PAPI_HPP */

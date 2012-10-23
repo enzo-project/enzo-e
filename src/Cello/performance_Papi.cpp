@@ -62,12 +62,14 @@ void Papi::init() throw()
 
 std::string Papi::name (int id) const throw()
 {
+  return names_[id];
 }
 
 //----------------------------------------------------------------------
 
 long long Papi::value (int id) const throw()
 {
+  return values_[id];
 }
 
 //----------------------------------------------------------------------
@@ -79,29 +81,37 @@ int Papi::num_counters() const throw()
 
 //----------------------------------------------------------------------
 
-int Papi::add_counter(int event) throw()
+int Papi::add_counter(std::string event) throw()
 {
 #ifdef CONFIG_USE_PAPI
   if (! is_initialized_) {
 
     WARNING1("PAPI::add_counter",
-	     "Not adding counter %d since PAPI is not initialized",
-	     event);
+	     "Not adding counter %s since PAPI is not initialized",
+	     event.c_str());
     return 0;
 
   } else {
 
-    int retval = PAPI_add_event(event_set_, event);
+    int retval;
+    int id;
+    retval = PAPI_event_name_to_code ((char *)event.c_str(),&id);
+
+    if (retval != PAPI_OK) {
+      WARNING2("PAPI::add_counter","PAPI_event_name_to_code %s returned %d",
+	       event.c_str(),retval);
+      return 0;
+    }
+
+    retval = PAPI_add_event(event_set_, id);
 
     if (retval != PAPI_OK) {
       WARNING2("PAPI::add_counter","PAPI_add_event for %d returned %d",
-	       name.c_str(),retval);
+	       id,retval);
       return 0;
     } else {
       
-      char name[40];
-      PAPI_event_code_to_name(event,name);
-      names_.push_back(name);
+      names_.push_back(event);
 
       values_.push_back(0);
       
@@ -122,17 +132,21 @@ int Papi::add_counter(int event) throw()
 void Papi::start() throw()
 {
 #ifdef CONFIG_USE_PAPI
+  int retval;
   if (is_started_) {
-    WARNING("Papi::start",
-	    "Counters already started");
-  } else {
-    int retval = PAPI_start(event_set_);
+    retval = PAPI_reset(event_set_);
 
     if (retval != PAPI_OK) {
-      WARNING1("PAPI::start()","PAPI_start() returned %d",retval);
-    } else {
-      is_started_ = true;
+      WARNING1("PAPI::start()","PAPI_reset() returned %d",retval);
     }
+  } else {
+    is_started_ = true;
+  }
+
+  retval = PAPI_start(event_set_);
+
+  if (retval != PAPI_OK) {
+    WARNING1("PAPI::start()","PAPI_start() returned %d",retval);
   }
 #endif
 }
@@ -147,10 +161,10 @@ void Papi::stop() throw()
     WARNING("Papi::stop",
 	    "Counters already stopped");
   } else {
-    int retval = PAPI_start(event_set_);
+    int retval = PAPI_stop(event_set_,&values_[0]);
 
     if (retval != PAPI_OK) {
-      WARNING1("PAPI::start()","PAPI_start() returned %d",retval);
+      WARNING1("PAPI::stop()","PAPI_stop() returned %d",retval);
     } else {
       is_started_ = true;
     }
