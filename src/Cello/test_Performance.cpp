@@ -24,7 +24,7 @@ void sleep_flop (int s, int count)
   for (int i=0; i<count; i++) {
     b = a + b;
   }
-  printf ("inhibit optimizing out loop %f",b);
+  printf ("inhibit optimizing out loop %f\n",b);
 
 }
 
@@ -54,9 +54,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("num_counters");
 
-  unit_assert (performance->num_counters() >= 2);
+  int num_counters = performance->num_counters();
+  unit_assert (num_counters >= 2);
 
-  long long * counters = new long long [performance->num_counters()];
+  printf ("num counters = %d\n",num_counters);
+  long long * counters = new long long [num_counters];
 
   unit_func("new_region");
 
@@ -64,6 +66,8 @@ PARALLEL_MAIN_BEGIN
   int index_region_2 = performance->new_region("region_2");
 
   unit_assert (index_region_1 != index_region_2);
+
+  performance->begin();
 
   performance->start_region(index_region_1);
 
@@ -89,13 +93,31 @@ PARALLEL_MAIN_BEGIN
 
   performance->region_counters(index_region_1,counters);
 
+  printf ("%lld %lld %lld\n",counters[0],counters[1],counters[2]);
   unit_assert(counters[index_counter_1] == 10 + 50 + 10);
-  unit_assert(counters[index_counter_2] ==      50);
+  unit_assert(counters[index_counter_2] == 20 + 100 + 20);
 
   performance->region_counters(index_region_2,counters);
+  printf ("%lld %lld %lld\n",counters[0],counters[1],counters[2]);
 
-  unit_assert(counters[index_counter_1] == 20 + 100 + 20);
-  unit_assert(counters[index_counter_2] ==      100);
+  unit_assert(counters[index_counter_1] == 50);
+  unit_assert(counters[index_counter_2] == 100);
+
+  performance->end();
+
+  int num_regions = performance->num_regions();
+  for (int ir = 0; ir < num_regions; ir++) {
+
+    performance->region_counters(ir,counters);
+
+    for (int ic = 0; ic < num_counters; ic++) {
+    
+      printf ("region %s counter %s value %lld\n",
+	      performance->region_name(ir).c_str(),
+	      performance->counter_name(ic).c_str(),
+	      counters[ic]);
+    }
+  }
 
   delete performance;
 

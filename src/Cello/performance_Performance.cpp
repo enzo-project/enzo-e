@@ -10,16 +10,25 @@
 #include "performance.hpp"
 
 Performance::Performance ()
-  : num_counters_(0),
-    counter_names_       (),
+  : num_counters_total_(0),
+    num_counters_user_(0),
+    counter_names_(),
+    counter_values_(),
+    index_time_real_(0),
     num_regions_(0),
     region_names_(),
+    region_counters_start_(),
     region_counters_(),
     region_index_()
 {
-  num_counters_ += 1; // time-real
- 
-  insert_region_("cello");
+
+  // Add non-user counters
+  new_counter("time-usec");
+
+
+  num_counters_user_ = 0;
+
+  new_region("cello");
 
   papi_.start_events();
 
@@ -34,32 +43,73 @@ Performance::~Performance()
 
 //----------------------------------------------------------------------
 
+void Performance::begin() throw()
+{
+  for (int i=0; i<num_regions_; i++) {
+    region_counters_[i].resize(num_counters_total_);
+    region_counters_start_[i].resize(num_counters_total_);
+  }
+
+  index_time_real_ = num_counters_user_;
+
+}
+
+//----------------------------------------------------------------------
+
+void Performance::end() throw()
+{
+  
+}
+
+//----------------------------------------------------------------------
+
 int Performance::new_counter(std::string counter_name)
 {
+  ++ num_counters_total_;
+  ++ num_counters_user_;
+
   counter_names_.push_back(counter_name);
-  return counter_names_.size()-1;
+  counter_values_.push_back(0);
+
+  return num_counters_user_ - 1;
 }
 
 //----------------------------------------------------------------------
 
-long long Performance::counter(int id_counter)
+long long Performance::counter(int index_counter)
 {
-  INCOMPLETE("Performance::counter");
-  return 0;
+  if (index_counter < num_counters_user_) {
+    return counter_values_[index_counter];
+  } else if (index_counter == index_time_real_) {
+    return time_real_();
+  }
 }
 
 //----------------------------------------------------------------------
 
-void Performance::assign_counter(int id_counter, long long value)
+void Performance::assign_counter(int index_counter, long long value)
 {
-  INCOMPLETE("Performance::assign_counter");
+  if (0 <= index_counter && index_counter < num_counters_user_) {
+    counter_values_[index_counter] = value;
+  } else {
+    WARNING2 ("Performance::assign_counter",
+	     "counter index %d out of range [0,%d)",
+	     index_counter,num_counters_user_);
+  }
+
 }
 
 //----------------------------------------------------------------------
 
-void Performance::increment_counter(int id_counter, long long value)
+void Performance::increment_counter(int index_counter, long long value)
 {
-  INCOMPLETE("Performance::increment_counter");
+  if (0 <= index_counter && index_counter < num_counters_user_) {
+    counter_values_[index_counter] += value;
+  } else {
+    WARNING2 ("Performance::increment_counter",
+	      "counter index %d out of range [0,%d)",
+	      index_counter,num_counters_user_);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -85,53 +135,52 @@ int Performance::region_index (std::string name) const throw()
 
 //----------------------------------------------------------------------
 
-int Performance::new_region (std::string name_region) throw()
+int Performance::new_region (std::string region_name) throw()
 { 
-  insert_region_(name_region);
+  ++ num_regions_;
+
+  region_names_.push_back(region_name);
+  region_index_[region_name] = num_regions_ - 1;
+
+  std::vector <long long> new_counters;
+  region_counters_.push_back(new_counters);
+  region_counters_start_.push_back(new_counters);
+
   return num_regions_ - 1;
 }
 
 //----------------------------------------------------------------------
 
 void  Performance::start_region(int index_region) throw()
-{  
-  //  region_stack_.push(region); 
-  //  std::vector<long long> new_values;
-  //  values_stack_.push(new_values);
+{
+  for (int i=0; i<num_counters_total_; i++) {
+    region_counters_start_[index_region][i] = counter(i);
+    TRACE2 ("start_region %d  %lld",index_region,
+	    region_counters_start_[index_region][i]);
+  }
 }
 
 //----------------------------------------------------------------------
 
 void  Performance::stop_region(int index_region) throw()
 {
-  // if (region != region_stack_.top() ) {
-  //   WARNING2("Performance::stop_region",
-  // 	     "Trying to stop region %s when active region is %s",
-  // 	     region.c_str(),region_stack_.top().c_str());
-
-  // } else {
-  //   region_stack_.pop();
-  //   values_stack_.pop();
-  // }
+  for (int i=0; i<num_counters_total_; i++) {
+    region_counters_[index_region][i] += 
+      counter(i) - region_counters_start_[index_region][i];
+    TRACE2 ("stop_region %d  %lld",index_region,
+	    region_counters_[index_region][i]);
+  }
 }
+
+//----------------------------------------------------------------------
 
 void Performance::region_counters(int index_region, long long * counters) throw()
 {
-  for (int i=0; i<num_counters_; i++) {
+  for (int i=0; i<num_counters_total_; i++) {
     counters[i] = region_counters_[index_region][i];
   }
 }
 
 //======================================================================
 
-void Performance::insert_region_(std::string region) throw()
-{
-  region_names_.push_back(region);
-
-  region_index_[region] = region_counters_.size();
-
-  std::vector <long long> new_counters;
-  new_counters.resize(num_counters_);
-  region_counters_.push_back(new_counters);
-}
 

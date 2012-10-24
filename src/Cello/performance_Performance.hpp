@@ -37,7 +37,9 @@ public: // interface
     return;
     
     // NOTE: change this function whenever attributes change
-    p | num_counters_;
+    p | num_counters_total_;
+    p | num_counters_user_;
+    p | index_time_real_;
     p | papi_;
     p | counter_names_;
     p | num_regions_;
@@ -49,25 +51,32 @@ public: // interface
 
   //--------------------------------------------------
 
-  /// Return the Papi object
-  Papi * papi() { return &papi_; };
-    
+  /// Begin collecting performance data
+  void begin() throw();
+
+  /// End collecting performance data
+  void end() throw();
+
   //--------------------------------------------------
 
   /// Return the number of counters
-  int num_counters() const throw() { return num_counters_; }
+  int num_counters() const throw() { return num_counters_total_; }
 
   ///  	Create a new user counter.
   int new_counter(std::string counter_name);
 
   ///  	Return the value of a counter.
-  long long counter(int id_counter);
+  long long counter(int index_counter);
 
   ///  	Assign a value to a user counter.
-  void assign_counter(int id_counter, long long value);
+  void assign_counter(int index_counter, long long value);
 
   ///  	Increment a user counter.
-  void increment_counter(int id_counter, long long value);
+  void increment_counter(int index_counter, long long value);
+
+  ///  	Increment a user counter.
+  std::string counter_name (int index_counter)
+  { return counter_names_[index_counter]; }
 
   //--------------------------------------------------
 
@@ -95,45 +104,44 @@ public: // interface
   /// Read the counters for the region
   void region_counters(int index_region, long long * counters) throw();
 
+  //--------------------------------------------------
+
+  /// Return the Papi object
+  Papi * papi() { return &papi_; };
+
+  //==================================================
 
 private: // functions
-
-  void deallocate_ () throw ();
 
   long long time_real_ () const
   {
     struct timeval tv;
     struct timezone tz;
-    gettimeofday(&tv,&tz);
-    return (long long) (1000000) * tv.tv_sec + tv.tv_usec;
+    gettimeofday (&tv,&tz);
+    return (long long )(1000000) * tv.tv_sec + tv.tv_usec;
   }
 
-
-  //--------------------------------------------------
-
-  long long time_virt_ () const
-  {
-# ifdef CONFIG_USE_PAPI
-    return PAPI_get_virt_usec();
-# else
-    return 0;
-# endif
-  }
-
-private: // functions
-
-  void insert_region_(std::string) throw();
+  //==================================================
 
 private: // attributes
 
-  /// Number of counters
-  int num_counters_;
+  /// Total Number of counters
+  int num_counters_total_;
+
+  /// Number of user counters
+  int num_counters_user_;
+
+  /// Index of the time counter
+  int index_time_real_;
 
   /// PAPI counters, if available
   Papi papi_;
 
   /// Counter names
   std::vector<std::string> counter_names_;
+
+  /// Counter values
+  std::vector<long long> counter_values_;
 
   /// Number of regions in lists
   int num_regions_;
@@ -143,6 +151,9 @@ private: // attributes
 
   /// list of counter values
   std::vector< std::vector<long long> > region_counters_;
+
+  /// list of counter values
+  std::vector< std::vector<long long> > region_counters_start_;
 
 
   /// mapping of region name to index
