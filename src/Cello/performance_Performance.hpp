@@ -38,14 +38,14 @@ public: // interface
     return;
     
     // NOTE: change this function whenever attributes change
+    p | num_counters_;
     p | timer_;
     p | papi_;
-    WARNING("Performance::pup",
-	    "skipping counters_ [ not accessed except deallocate ]");
-  //  std::vector<PerfCounters *> counters_;
     p | counter_names_;
+    p | num_regions_;
     p | region_names_;
-    p | current_region_;
+    p | region_counters_;
+    p | region_index_;
   }
 #endif
 
@@ -72,22 +72,6 @@ public: // interface
     
   //--------------------------------------------------
 
-  unsigned new_region(std::string region_name);
-
-  /// Return the value of an region
-  int region(unsigned id_region);
-
-  /// Assign a value to an region
-  void set_region(unsigned id_region);
-
-  ///  	Define the start of a region
-  void start_region(unsigned region_name);
-
-  ///  	Define the end of a region
-  void stop_region(unsigned region_name);
-
-  //--------------------------------------------------
-
   ///  	Create a new user counter.
   unsigned new_counter(std::string counter_name);
 
@@ -101,10 +85,29 @@ public: // interface
   void increment_counter(unsigned id_counter,
 			 type_counter value);
 
-  //--------------------------------------------------
+  /// Return number of regions
+  int num_regions() const throw();
 
-  ///  	Flush data to disk
-  void flush();
+  /// Return the current region
+  std::string region_name (int index_region) const throw();
+
+  /// Return the index of the given region
+  int region_index (std::string name) const throw();
+
+  /// Add a new region, returning the id
+  int add_region(std::string region) throw();
+
+  /// Push a new region onto the stack
+  void start_region(int index_region) throw();
+
+  /// Push a new region onto the stack
+  void stop_region(int index_region) throw();
+
+  /// Clear the counters for the region
+  void clear_region(int index_region) throw();
+
+  /// Read the counters for the region
+  void read_region(int index_region) throw();
 
 private: // functions
 
@@ -139,7 +142,15 @@ private: // functions
    std::string              item_name
    );
 
+
+private: // functions
+
+  void insert_region_(std::string) throw();
+
 private: // attributes
+
+  /// Number of counters
+  int num_counters_;
 
   /// Global timer
   Timer timer_;
@@ -147,18 +158,21 @@ private: // attributes
   /// PAPI counters, if available
   Papi papi_;
 
-  /// Array of counters for regions
-  std::vector<PerfCounters *> counters_;
-
   /// Counter names
   std::vector<std::string> counter_names_;
 
-  /// Region names
+  /// Number of regions in lists
+  int num_regions_;
+
+  /// list of region names
   std::vector<std::string> region_names_;
 
-  /// Current region; 0 if none
-  unsigned current_region_;
+  /// list of counter values
+  std::vector< std::vector<long long> > region_counters_;
 
+
+  /// mapping of region name to index
+  std::map<std::string,int> region_index_;
 
 };
 

@@ -26,60 +26,54 @@ PARALLEL_MAIN_BEGIN
   //  papi.add_event(PAPI_FP_INS);
   papi.add_event("PAPI_FP_OPS");
 
-  papi.add_region("A");
-  papi.add_region("B");
-  papi.add_region("C");
+  const int num_events = papi.num_events();
 
-  int count_array[] = {10000,1000,100};
-  std::string region_array[] = {"A","B","C"};
+  const int num_count = 4;
 
-  TRACE0;
-  for (int index_region = 0; index_region<3; index_region++) {
+  // - count means turn off PAPI counting: result should be 0
+  const int count_array[] = {10000,1000,-1000,1000};
 
-    int count = count_array[index_region];
+  papi.start_events();
 
-  TRACE0;
-    papi.start_region(index_region);
-  TRACE0;
+  long long * values_start = new long long [num_events];
+  long long * values_stop  = new long long [num_events];
+
+  for (int index_count = 0; index_count<num_count; index_count++) {
+
+    int count = abs(count_array[index_count]);
+
+    if (count_array[index_count] < 0) {
+      papi.stop_events();
+    }
+
+    papi.event_values(values_start);
 
     float a=1.0, b=2.5;
     for (int i=0; i<count; i++) {
       b = a + b;
     }
-    printf ("printf to inhibit optimizing-out code: flops = %f\n",b);
 
-  TRACE0;
-    papi.stop_region(index_region);
-  TRACE0;
+    papi.event_values(values_stop);
 
-    const long long * values = papi.values(index_region);
-  TRACE0;
-
-  TRACE1 ("values = %p",values);
-    unit_assert (fabs(values[0] - count)/(count) < 0.05);
-
-  }
-
-  TRACE0;
-  const int num_events = papi.num_events();
-  TRACE0;
-  const int num_regions = papi.num_regions();
-  TRACE0;
-  for (int index_event=0; index_event<num_events; index_event++) {
-
-    const long long * events = papi.values(index_event);
-
-    for (int index_region=0; index_region<num_regions; index_region++) {
-
-  TRACE0;
-      printf ("region %s  event %s value %lld\n",
-	      papi.region_name(index_region).c_str(),
-	      papi.event_name(index_event).c_str(),
-	      events[index_event]);
-
+    if (count_array[index_count] < 0) {
+      papi.start_events();
     }
+
+    for (int ie = 0; ie < num_events; ie++) {
+      values_stop[ie] -= values_start[ie];
+      printf ("event %s value %lld  [inhibit optimize: b = %f]\n",
+	      papi.event_name(ie).c_str(),
+	      values_stop[ie],b);
+    }
+
+    if (count_array[index_count] > 0) 
+      unit_assert (fabs(values_stop[0] - count)/(count) < 0.05);
+    else
+      unit_assert (values_stop[0] == 0);
+
   }
 
+  papi.stop_events();
 
   unit_finalize();
 

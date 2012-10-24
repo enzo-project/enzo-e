@@ -18,17 +18,13 @@
 //----------------------------------------------------------------------
 
 Papi::Papi() throw()
-  : is_started_(false),
-    is_initialized_(false),
+  : is_initialized_(false),
+    is_started_(false),
     event_set_(PAPI_NULL),
     num_events_(0),
-    event_names_(),
-    num_regions_(0),
-    region_events_(),
-    region_index_()
+    event_names_()
 
 {
-  insert_region_("cello");
 }
 
 //======================================================================
@@ -156,10 +152,10 @@ void Papi::stop_events() throw()
 
     long long * values = new long long [num_events_];
     int retval = PAPI_stop(event_set_,values);
-    delete [] values; // values not used here
+    delete [] values; // values not used
 
     if (retval == PAPI_OK) {
-      is_started_ = true;
+      is_started_ = false;
     } else {
       WARNING1("PAPI::stop_events()","PAPI_stop() returned %d",retval);
     }
@@ -174,76 +170,10 @@ void Papi::stop_events() throw()
 
 //----------------------------------------------------------------------
 
-int Papi::num_regions() const throw()
+int Papi::event_values (long long * values) const throw()
 {
-  return num_regions_;
-}
-
-//----------------------------------------------------------------------
-
-std::string Papi::region_name (int index_region) const throw()
-{
-  return region_names_[index_region];
-}
-
-//----------------------------------------------------------------------
-
-int Papi::region_index (std::string name) const throw()
-{
-  return region_index_.at(name);
-}
-
-//----------------------------------------------------------------------
-
-int Papi::add_region (std::string name_region) throw()
-{ 
-  insert_region_(name_region);
-  return num_regions_ - 1;
-}
-
-//----------------------------------------------------------------------
-
-void  Papi::start_region(int index_region) throw()
-{  
-  //  region_stack_.push(region); 
-  //  std::vector<long long> new_values;
-  //  values_stack_.push(new_values);
-}
-
-//----------------------------------------------------------------------
-
-void  Papi::stop_region(int index_region) throw()
-{
-  // if (region != region_stack_.top() ) {
-  //   WARNING2("Papi::stop_region",
-  // 	     "Trying to stop region %s when active region is %s",
-  // 	     region.c_str(),region_stack_.top().c_str());
-
-  // } else {
-  //   region_stack_.pop();
-  //   values_stack_.pop();
-  // }
-}
-
-//======================================================================
-
-void Papi::insert_region_(std::string region) throw()
-{
-  region_names_.push_back(region);
-
-  region_index_[region] = region_events_.size();
-
-  std::vector <long long> new_events;
-  new_events.resize(num_events_);
-  region_events_.push_back(new_events);
-}
-
-//----------------------------------------------------------------------
-
-const long long * Papi::values (int index_region) const throw()
-{
-  const long long * values = &region_events_[index_region][0];
-  return values;
+  PAPI_read(event_set_,values);
+  return num_events_;
 }
 
 
