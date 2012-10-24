@@ -27,7 +27,7 @@ module simulation {
     entry void s_write();
     entry void p_output ();
     entry void p_output_write(int n, char buffer[n]);
-    entry void c_refresh ();
+    entry void p_refresh ();
 
   };
 }

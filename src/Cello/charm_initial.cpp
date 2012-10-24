@@ -67,14 +67,11 @@ void Problem::initial_next(Simulation * simulation) throw()
 
   } else {
 
-    DEBUG1 ("Start Initial(%d) C",index_initial_);
+    SimulationCharm * simulation_charm  = 
+      dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
 
-    ItPatch it_patch(hierarchy);
-    CProxy_Patch * patch_proxy;
-    while (( patch_proxy = (CProxy_Patch *)++it_patch )) {
-      //      CProxy_Patch * patch_proxy = (CProxy_Patch *)patch;
-      patch_proxy->p_refresh();
-    }
+    simulation_charm->refresh();
+
   }
 }
 
@@ -138,7 +135,7 @@ void SimulationCharm::s_initial()
   if (patch_loop_.done()) {
     delete parameters_;
     parameters_ = 0;
-    c_refresh();
+    p_refresh();
   }
 }
 

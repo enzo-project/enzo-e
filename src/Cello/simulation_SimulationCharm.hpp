@@ -74,8 +74,11 @@ public: // functions
   /// Wait for all local patches to check in before proceeding to refresh
   void s_initial();
 
+  /// Refresh ghost zones (Charm++ entry)
+  void p_refresh();
+
   /// Refresh ghost zones
-  void c_refresh();
+  void refresh();
 
   // Stopping criteria and computation
   void c_compute ();

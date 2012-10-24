@@ -229,6 +229,7 @@ void Patch::deallocate_blocks() throw()
 #ifdef CONFIG_USE_CHARM
 void Patch::p_refresh ()
 {
+  TRACE("Patch::p_refresh");
   block_array_->p_refresh(); 
 }
 #endif

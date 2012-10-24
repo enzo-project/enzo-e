@@ -352,11 +352,6 @@ void Block::p_output(CkReductionMsg * msg)
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_refresh ()
-{
-  refresh();
-}
-
 //----------------------------------------------------------------------
 void Block::p_compute (int cycle, double time, double dt)
 {
@@ -375,7 +370,7 @@ void Block::p_compute (int cycle, double time, double dt)
 
 void Block::refresh ()
 {
-  DEBUG ("Block::refresh()");
+  TRACE ("Block::refresh()");
 
   bool is_boundary[3][2];
 

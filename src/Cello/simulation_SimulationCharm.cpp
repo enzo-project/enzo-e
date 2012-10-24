@@ -61,8 +61,15 @@ void SimulationCharm::s_initialize()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::c_refresh()
+void SimulationCharm::p_refresh()
 {
+  TRACE("SimulationCharm::p_refresh");
+  refresh();
+};
+
+void SimulationCharm::refresh()
+{
+  TRACE("SimulationCharm::refresh");
   ItPatch it_patch(hierarchy_);
   Patch * patch;
 
@@ -78,8 +85,6 @@ void SimulationCharm::c_compute()
 {
   if (stop_) {
     
-    //    performance_output();
-
     proxy_main.p_exit(CkNumPes());
 
   } else {

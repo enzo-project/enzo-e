@@ -58,36 +58,6 @@ Simulation::Simulation
   monitor_->set_process_rank(group_process_->rank());
   monitor_->set_active(group_process_->is_root());
 
-
-  counter_simulation_ = performance_.new_region("simulation");
-  counter_cycle_      = performance_.new_region("cycle");
-//   num_perf_ = 1;
-
-// #ifdef CONFIG_USE_PAPI
-//   num_perf_ += 4;
-// #endif
-
-//   perf_val_ = new double[num_perf_];
-//   perf_min_ = new double[num_perf_];
-//   perf_max_ = new double[num_perf_];
-//   perf_sum_ = new double[num_perf_];
-
-#ifdef CONFIG_USE_LCAPERF
-
-  lcaperf_ = new LcaPerf (group_process_->rank(), group_process_->size());
-
-  lcaperf_->initialize();
-
-  lcaperf_->new_region("simulation");
-  lcaperf_->new_attribute("cycle",LCAP_INT);
-  lcaperf_->new_attribute("level",LCAP_INT);
-
-  lcaperf_->begin();
-
-#endif
-
-  timer_.start();
-
   parameters_ = new Parameters(parameter_file,monitor_);
 
 }
@@ -217,6 +187,9 @@ void Simulation::finalize() throw()
 
   performance_.stop_region(counter_cycle_);
   performance_.stop_region(counter_simulation_);
+
+  performance_.end();
+
 }
 
 //======================================================================
@@ -244,6 +217,26 @@ void Simulation::initialize_simulation_() throw()
 void Simulation::initialize_performance_() throw()
 {
 
+
+  counter_simulation_ = performance_.new_region("simulation");
+  counter_cycle_      = performance_.new_region("cycle");
+
+#ifdef CONFIG_USE_LCAPERF
+
+  lcaperf_ = new LcaPerf (group_process_->rank(), group_process_->size());
+
+  lcaperf_->initialize();
+
+  lcaperf_->new_region("simulation");
+  lcaperf_->new_attribute("cycle",LCAP_INT);
+  lcaperf_->new_attribute("level",LCAP_INT);
+
+  lcaperf_->begin();
+
+#endif
+
+  timer_.start();
+
 #ifdef CONFIG_USE_LCAPERF
 
   lcaperf_->attribute("cycle",&cycle_,LCAP_INT);
@@ -251,6 +244,8 @@ void Simulation::initialize_performance_() throw()
   lcaperf_->start("simulation");
 
 #endif
+
+  performance_.begin();
 
   performance_.start_region(counter_simulation_);
   performance_.start_region(counter_cycle_);
@@ -472,7 +467,7 @@ void Simulation::monitor_output()
   }
   TRACE0;
 
-  // output_performance_();
+  performance_output ();
 
 # ifdef CONFIG_USE_CHARM
 
@@ -489,6 +484,26 @@ void Simulation::performance_output()
 {
   TRACE("Simulation::performance_output()");
 
+  int num_regions  = performance_.num_regions();
+  int num_counters =  performance_.num_counters();
+  long long * counters = new long long [num_counters];
+
+  for (int ir = 0; ir < num_regions; ir++) {
+
+    performance_.region_counters(ir,counters);
+
+    for (int ic = 0; ic < num_counters; ic++) {
+    
+      printf ("region %s counter %s value %lld\n",
+	      performance_.region_name(ir).c_str(),
+	      performance_.counter_name(ic).c_str(),
+	      counters[ic]);
+    }
+  }
+
+  delete [] counters;
+
+  
 #ifdef CONFIG_USE_LCAPERF
 
   lcaperf_->stop("simulation");
