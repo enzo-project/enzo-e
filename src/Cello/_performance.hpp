@@ -87,7 +87,7 @@ enum function_enum {
 //----------------------------------------------------------------------
 
 #include "performance_Timer.hpp"
-#include "performance_Counters.hpp"
+#include "performance_PerfCounters.hpp"
 #include "performance_Papi.hpp"
 #include "performance_Performance.hpp"
 

@@ -13,16 +13,14 @@ class PerfCounters {
   /// @class    PerfCounters
   /// @ingroup  Performance
   /// @brief    [\ref Performance] Represent counter values for a single
-  /// set of attributes
+  /// region
 
 public: // interface
 
   /// Initialize a PerfCounters object
-  PerfCounters(size_t num_attributes, size_t num_counters)
-    : num_attributes_(num_attributes),
-      num_counters_(num_counters)
+  PerfCounters(size_t num_counters)
+    : num_counters_(num_counters)
     {
-      attributes_     = new int       [num_attributes];
       counters_start_ = new long long [num_counters];
       counters_stop_  = new long long [num_counters];
     }
@@ -34,7 +32,6 @@ public: // interface
   /// Destructor
   ~PerfCounters()
     {
-      delete [] attributes_;
       delete [] counters_start_;
       delete [] counters_stop_;
     }
@@ -50,9 +47,7 @@ public: // interface
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
-    p | num_attributes_;
     p | num_counters_;
-    PUParray(p,attributes_,num_attributes_);
     PUParray(p,counters_start_,num_counters_);
     PUParray(p,counters_stop_,num_counters_);
     
@@ -61,11 +56,7 @@ public: // interface
 
 private: // attributes
 
-  int num_attributes_;
   int num_counters_;
-
-  /// Array of attribute values
-  int       * attributes_;
 
   /// Array of the current counter values at the start of the region
   long long * counters_start_;

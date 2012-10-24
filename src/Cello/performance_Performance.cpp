@@ -11,15 +11,11 @@
 
 Performance::Performance ()
   : counters_(),
-    attribute_names_     (),
     counter_names_       (),
-    group_names_         (),
     region_names_        (),
-    attribute_monotonic_ (),
-    current_group_       (0),
     current_region_      (0)
 {
-  counters_.push_back(new PerfCounters(num_attributes,num_counters));
+  counters_.push_back(new PerfCounters(num_counters));
 }
 
 //----------------------------------------------------------------------
@@ -43,97 +39,6 @@ void Performance::stop (int index_region) throw ()
 {
   timer_.stop();
   papi_.stop_region(index_region);
-}
-
-//----------------------------------------------------------------------
-
-unsigned Performance::new_attribute(std::string attribute_name,
-				    bool is_monotonic)
-/// @param    id_attribute
-/// @param    attribute_name
-/// @param    type
-{
-  attribute_names_.push_back(attribute_name);
-  attribute_monotonic_.push_back(is_monotonic);
-
-  return attribute_names_.size()-1;
-}
-
-//----------------------------------------------------------------------
-
-int Performance::attribute(unsigned id_attribute)
-{
-  INCOMPLETE("Performance::attribute");
-  return 0;
-}
-
-//----------------------------------------------------------------------
-
-void Performance::set_attribute(unsigned id_attribute,
-				int value)
-{
-  INCOMPLETE("Performance::set_attribute");
-}
-
-//----------------------------------------------------------------------
-
-unsigned Performance::new_group(std::string group_name)
-{
-  group_names_.push_back(group_name);
-  return group_names_.size()-1;
-}
-
-//----------------------------------------------------------------------
-
-int Performance::group(unsigned id_group)
-{
-  INCOMPLETE("Performance::group");
-  return 0;
-}
-
-//----------------------------------------------------------------------
-
-void Performance::group_set(unsigned id_group)
-{
-  INCOMPLETE("Performance::group_set");
-}
-
-//----------------------------------------------------------------------
-
-void Performance::begin_group(unsigned group_id)
-{
-  
-  if ( current_group_ ) {
-    // begin_group() called when another group is already active
-	     
-    WARNING2("Performance::begin_group",
-	     "begin_group(%s) called before end_group(%s)",
-	     group_names_.at(current_group_).c_str(),
-	     group_names_.at(group_id).c_str());
-
-    // End the mistakenly active group
-    end_group(current_group_);
-
-  }
-
-  current_group_ = group_id;
-
-}
-
-//----------------------------------------------------------------------
-
-void Performance::end_group(unsigned id_group)
-{
-  if (id_group != current_group_) {
-    // end_group() called with an inactive one
-    WARNING2("Performance::end_group",
-	     "Mismatch between begin_group(%s) and end_group(%s)",
-	     group_names_[current_group_].c_str(),
-	     group_names_[id_group].c_str());
-  }
-
-  current_group_ = 0;
-
 }
 
 //----------------------------------------------------------------------
