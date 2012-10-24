@@ -20,7 +20,9 @@ Performance::Performance ()
   num_counters_ += 1; // time-real
  
   insert_region_("cello");
+
   papi_.start_events();
+
 }
 
 //----------------------------------------------------------------------
@@ -32,21 +34,7 @@ Performance::~Performance()
 
 //----------------------------------------------------------------------
 
-void Performance::start (int index_region) throw ()
-{
-  timer_.start();
-}
-
-//----------------------------------------------------------------------
-
-void Performance::stop (int index_region) throw ()
-{
-  timer_.stop();
-}
-
-//----------------------------------------------------------------------
-
-unsigned Performance::new_counter(std::string counter_name)
+int Performance::new_counter(std::string counter_name)
 {
   counter_names_.push_back(counter_name);
   return counter_names_.size()-1;
@@ -54,7 +42,7 @@ unsigned Performance::new_counter(std::string counter_name)
 
 //----------------------------------------------------------------------
 
-type_counter Performance::counter(unsigned id_counter)
+long long Performance::counter(int id_counter)
 {
   INCOMPLETE("Performance::counter");
   return 0;
@@ -62,16 +50,14 @@ type_counter Performance::counter(unsigned id_counter)
 
 //----------------------------------------------------------------------
 
-void Performance::set_counter(unsigned          id_counter,
-			      type_counter value)
+void Performance::assign_counter(int id_counter, long long value)
 {
-  INCOMPLETE("Performance::set_counter");
+  INCOMPLETE("Performance::assign_counter");
 }
 
 //----------------------------------------------------------------------
 
-void Performance::increment_counter(unsigned          id_counter,
-				    type_counter value)
+void Performance::increment_counter(int id_counter, long long value)
 {
   INCOMPLETE("Performance::increment_counter");
 }
@@ -99,7 +85,7 @@ int Performance::region_index (std::string name) const throw()
 
 //----------------------------------------------------------------------
 
-int Performance::add_region (std::string name_region) throw()
+int Performance::new_region (std::string name_region) throw()
 { 
   insert_region_(name_region);
   return num_regions_ - 1;
@@ -127,6 +113,13 @@ void  Performance::stop_region(int index_region) throw()
   //   region_stack_.pop();
   //   values_stack_.pop();
   // }
+}
+
+void Performance::region_counters(int index_region, long long * counters) throw()
+{
+  for (int i=0; i<num_counters_; i++) {
+    counters[i] = region_counters_[index_region][i];
+  }
 }
 
 //======================================================================

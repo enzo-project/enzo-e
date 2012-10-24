@@ -79,13 +79,6 @@ public: // functions
 
   // Stopping criteria and computation
   void c_compute ();
-
-  /// Reduction callback functions for performance_output()
-  void p_performance_min(CkReductionMsg * msg);
-  void p_performance_max(CkReductionMsg * msg);
-  void p_performance_sum(CkReductionMsg * msg);
-
-
 };
 
 #endif /* CONFIG_USE_CHARM */

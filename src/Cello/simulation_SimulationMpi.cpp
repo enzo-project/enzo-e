@@ -297,7 +297,7 @@ void SimulationMpi::run() throw()
 
   scheduled_output();
   monitor_output();
-  performance_output(performance_simulation_);
+  performance_output();
 
 }
 

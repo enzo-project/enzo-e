@@ -15,9 +15,6 @@ module simulation {
     entry Simulation
       (const char filename[n], int n);
 
-//    entry void p_done(CkReductionMsg*);
-
-
   };
 
   group [migratable] SimulationCharm : Simulation {
@@ -26,24 +23,10 @@ module simulation {
       (const char filename[n], int n);
 
     entry void s_initialize ();
-
     entry void s_initial ();
-
     entry void s_write();
-
     entry void p_output ();
-
     entry void p_output_write(int n, char buffer[n]);
-
-    entry void p_performance_min(CkReductionMsg * msg);
-    entry void p_performance_max(CkReductionMsg * msg);
-    entry void p_performance_sum(CkReductionMsg * msg);
-
-//     entry void s_patch (CkCallback callback);
-
-//    entry void x_request_patch ( int patch_id, int block_rank );
-//    entry void x_send_patch ( int patch_id, CkChareID proxy_patch);
-
     entry void c_refresh ();
 
   };

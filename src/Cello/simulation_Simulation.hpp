@@ -97,18 +97,14 @@ public: // interface
   { return field_descr_; }
 
   /// Return the performance object associated with each cycle
-  Performance * performance_cycle() const throw()
-  { return performance_cycle_; }
+  const Performance * performance() const throw()
+  { return &performance_; }
 
 #ifdef CONFIG_USE_LCAPERF
   /// Return a pointer to the lcaperf object
   LcaPerf * lcaperf()
   { return lcaperf_; }
 #endif
-
-  /// Return the performance object associated with the entire simulation
-  Performance * performance_simulation() const throw()
-  { return performance_simulation_; }
 
   /// Return the group process object
   const GroupProcess * group_process() const throw()
@@ -138,7 +134,7 @@ public: // interface
   void monitor_output();
 
   /// Output Performance information
-  void performance_output(Performance * performance);
+  void performance_output();
 
 public: // virtual functions
 
@@ -182,10 +178,6 @@ protected: // functions
   void initialize_data_descr_ () throw();
 
   void deallocate_() throw();
-
-  /// Perform actual output of performance data
-  /// Function separate from performance_output() for CHARM++
-  void output_performance_();
 
 protected: // attributes
 
@@ -247,27 +239,16 @@ protected: // attributes
   Timer timer_;
 
   /// Simulation Performance object
-  Performance * performance_simulation_;
+  Performance performance_;
 
-  /// Cycle Performance object
-  Performance * performance_cycle_;
-
-  /// Current Performance object
-  /// Used primarily for CHARM++ 
-  Performance * performance_curr_;
+  /// Performance counter ids
+  int counter_simulation_;
+  int counter_cycle_;
 
 #ifdef CONFIG_USE_LCAPERF
   /// Lcaperf
   LcaPerf * lcaperf_;
 #endif
-
-  /// Arrays for storing local performance data to be reduced
-  /// Used for multiple CHARM++ reductions
-  size_t num_perf_;
-  double * perf_val_;
-  double * perf_min_;
-  double * perf_max_;
-  double * perf_sum_;
 
   /// Monitor object
   Monitor * monitor_;

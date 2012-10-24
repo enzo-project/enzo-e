@@ -10,7 +10,6 @@
 
 /// @def      type_counter
 /// @brief    Counter value type
-typedef unsigned long long type_counter;
 
 class Performance {
 
@@ -39,7 +38,6 @@ public: // interface
     
     // NOTE: change this function whenever attributes change
     p | num_counters_;
-    p | timer_;
     p | papi_;
     p | counter_names_;
     p | num_regions_;
@@ -51,39 +49,27 @@ public: // interface
 
   //--------------------------------------------------
 
-  /// Start timers and counters
-  void start (int index_region = 0) throw ();
-
-  /// Stop timers and counters
-  void stop (int index_region = 0) throw ();
-
-  double time () throw ()
-  { return timer_.value(); }
-
-  //--------------------------------------------------
-
-  /// Return the Timer object
-  Timer * timer() 
-  { return &timer_; };
-
   /// Return the Papi object
-  Papi * papi() 
-  { return &papi_; };
+  Papi * papi() { return &papi_; };
     
   //--------------------------------------------------
 
+  /// Return the number of counters
+  int num_counters() const throw() { return num_counters_; }
+
   ///  	Create a new user counter.
-  unsigned new_counter(std::string counter_name);
+  int new_counter(std::string counter_name);
 
   ///  	Return the value of a counter.
-  type_counter counter(unsigned id_counter);
+  long long counter(int id_counter);
 
   ///  	Assign a value to a user counter.
-  void set_counter(unsigned id_counter,
-		   type_counter value);
+  void assign_counter(int id_counter, long long value);
+
   ///  	Increment a user counter.
-  void increment_counter(unsigned id_counter,
-			 type_counter value);
+  void increment_counter(int id_counter, long long value);
+
+  //--------------------------------------------------
 
   /// Return number of regions
   int num_regions() const throw();
@@ -95,7 +81,7 @@ public: // interface
   int region_index (std::string name) const throw();
 
   /// Add a new region, returning the id
-  int add_region(std::string region) throw();
+  int new_region(std::string region) throw();
 
   /// Push a new region onto the stack
   void start_region(int index_region) throw();
@@ -107,24 +93,25 @@ public: // interface
   void clear_region(int index_region) throw();
 
   /// Read the counters for the region
-  void read_region(int index_region) throw();
+  void region_counters(int index_region, long long * counters) throw();
+
 
 private: // functions
 
   void deallocate_ () throw ();
 
-  type_counter time_real_ () const
+  long long time_real_ () const
   {
     struct timeval tv;
     struct timezone tz;
     gettimeofday(&tv,&tz);
-    return (type_counter) (1000000) * tv.tv_sec + tv.tv_usec;
+    return (long long) (1000000) * tv.tv_sec + tv.tv_usec;
   }
 
 
   //--------------------------------------------------
 
-  type_counter time_virt_ () const
+  long long time_virt_ () const
   {
 # ifdef CONFIG_USE_PAPI
     return PAPI_get_virt_usec();
@@ -132,16 +119,6 @@ private: // functions
     return 0;
 # endif
   }
-
-  //--------------------------------------------------
-
-  void new_item_ 
-  (
-   std::vector<std::string> & item_names,
-   unsigned                 id_item, 
-   std::string              item_name
-   );
-
 
 private: // functions
 
@@ -151,9 +128,6 @@ private: // attributes
 
   /// Number of counters
   int num_counters_;
-
-  /// Global timer
-  Timer timer_;
 
   /// PAPI counters, if available
   Papi papi_;

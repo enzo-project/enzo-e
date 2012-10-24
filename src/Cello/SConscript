@@ -281,6 +281,8 @@ test_parse        = env.Program ('test_Parse.cpp',       LIBS=[libs_parameters,l
 
 test_performance = env.Program('test_Performance.cpp',  
                                LIBS=[libs_performance,libs_test])
+test_timer = env.Program('test_Timer.cpp',  
+                               LIBS=[libs_performance,libs_test])
 test_papi        = env.Program('test_Papi.cpp',          
                                LIBS=[libs_performance,libs_test])
 if (use_lcaperf):
@@ -328,7 +330,7 @@ if (type == "mpi"):
 elif (type == "charm"):
 	sources_parallel.append(["main.cpp"])
 binaries_parameters = [test_parameters, test_parse]
-binaries_performance = [test_performance,test_papi]
+binaries_performance = [test_performance,test_papi,test_timer]
 if (use_lcaperf):
    binaries_lcaperf     = [test_lcaperf]
 #--------------------------------------------------

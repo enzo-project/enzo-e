@@ -10,6 +10,26 @@
 
 #include "performance.hpp"
 
+//----------------------------------------------------------------------
+
+void sleep_flop (int s, int count)
+{
+  char sleep_string [10];
+  sprintf (sleep_string,"sleep %d",s);
+  int err = system(sleep_string);
+
+  if (err == -1) ERROR("main","system(sleep) failed!!");
+
+  float a=1.0, b=2.5;
+  for (int i=0; i<count; i++) {
+    b = a + b;
+  }
+  printf ("inhibit optimizing out loop %f",b);
+
+}
+
+//----------------------------------------------------------------------
+
 PARALLEL_MAIN_BEGIN
 {
 
@@ -17,99 +37,65 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
-  unit_class("Timer");
-
-  Timer timer;
-  const double time_tolerance = 0.05;
-
-  // Timer tests
-
-  PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
-
-  timer.start();
-
-  int err; // To inhibit warnings--I'm not expecting the sleep command to fail
-
-  err = system("sleep 1");
-  if (err == -1) ERROR("main","system(sleep) failed!!");
-  timer.stop();
-
-  PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
-
-  unit_func("start");
-  unit_assert((timer.value() - 1.0) < time_tolerance);
-
-  timer.start();
-  err = system("sleep 1");
-  if (err == -1) ERROR("main","system(sleep) failed!!");
-  timer.stop();
-
-  PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
-
-  unit_func("stop");
-  unit_assert((timer.value() - 2.0) < time_tolerance);
-
   unit_class("Performance");
-
-  unit_func("Performance");
 
   Performance * performance = new Performance ();
 
   // Initialize counters that are non-zero at start
 
-  unit_assert(true);
+  unit_assert(performance != NULL);
 
   unit_func("new_counter");
-  unit_assert (unit_incomplete);
 
-  unit_func("new_region");
-  unit_assert (unit_incomplete);
+  int index_counter_1 = performance->new_counter("counter_1");
+  int index_counter_2 = performance->new_counter("counter_2");
 
-  //--------------------------------------------------
-  // Regions
-  //--------------------------------------------------
-
-
-  unit_func("region");
-  unit_assert (unit_incomplete);
-
-  unit_func("set_region");
-  unit_assert (unit_incomplete);
-
-  unit_func("num_regions");
-  unit_assert (unit_incomplete);
-
-  unit_func("start_region");
-  unit_assert (unit_incomplete);
-
-  unit_func("stop_region");
-  unit_assert (unit_incomplete);
-
-  //--------------------------------------------------
-  // Counters
-  //--------------------------------------------------
-
-  unit_func("counter");
-  unit_assert (unit_incomplete);
-
-  unit_func("set_counter");
-  unit_assert (unit_incomplete);
-
-  unit_func("increment_counter");
-  unit_assert (unit_incomplete);
+  unit_assert (index_counter_1 != index_counter_2);
 
   unit_func("num_counters");
-  unit_assert (unit_incomplete);
 
-  //--------------------------------------------------
-  // Disk
-  //--------------------------------------------------
+  unit_assert (performance->num_counters() >= 2);
 
-  unit_func("flush");
-  unit_assert (unit_incomplete);
+  long long * counters = new long long [performance->num_counters()];
 
-  unit_func("~Performance");
-  unit_assert (unit_incomplete);
+  unit_func("new_region");
+
+  int index_region_1 = performance->new_region("region_1");
+  int index_region_2 = performance->new_region("region_2");
+
+  unit_assert (index_region_1 != index_region_2);
+
+  performance->start_region(index_region_1);
+
+  sleep_flop (1,1000000);
+  performance->increment_counter(index_counter_1,10);
+  performance->increment_counter(index_counter_2,20);
+
+  performance->start_region(index_region_2);
+  
+  sleep_flop (2,500000);
+  performance->increment_counter(index_counter_1,50);
+  performance->increment_counter(index_counter_2,100);
+
+  performance->stop_region(index_region_2);
+
+  sleep_flop (1,1000000);
+  performance->increment_counter(index_counter_1,10);
+  performance->increment_counter(index_counter_2,20);
+
+  performance->stop_region(index_region_1);
+
+  unit_func("user counters");
+
+  performance->region_counters(index_region_1,counters);
+
+  unit_assert(counters[index_counter_1] == 10 + 50 + 10);
+  unit_assert(counters[index_counter_2] ==      50);
+
+  performance->region_counters(index_region_2,counters);
+
+  unit_assert(counters[index_counter_1] == 20 + 100 + 20);
+  unit_assert(counters[index_counter_2] ==      100);
 
   delete performance;
 
