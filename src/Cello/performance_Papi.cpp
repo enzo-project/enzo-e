@@ -125,7 +125,7 @@ void Papi::start_events() throw()
 #ifdef CONFIG_USE_PAPI
   int retval;
 
-  if (! is_started_) {
+  if (! is_started_ && num_events_ > 0 ) {
 
     retval = PAPI_start(event_set_);
 
@@ -135,9 +135,12 @@ void Papi::start_events() throw()
 
     is_started_ = true;
 
-  } else {
+  } else if (is_started_) {
     WARNING("Papi::start_events",
 	    "Events already started");
+  } else {
+    WARNING("Papi::start_events",
+	    "No events to start");
   }
 #endif
 }
@@ -148,7 +151,7 @@ void Papi::stop_events() throw()
 {
 #ifdef CONFIG_USE_PAPI
 
-  if ( is_started_) {
+  if ( is_started_ && num_events_ > 0) {
 
     long long * values = new long long [num_events_];
     int retval = PAPI_stop(event_set_,values);
@@ -160,9 +163,12 @@ void Papi::stop_events() throw()
       WARNING1("PAPI::stop_events()","PAPI_stop() returned %d",retval);
     }
 
-  } else {
+  } else if ( ! is_started_ ) {
     WARNING("Papi::stop_events",
 	    "Events already stopped");
+  } else {
+    WARNING("Papi::stop_events",
+	    "No events to stop");
   }
 
 #endif
@@ -172,8 +178,12 @@ void Papi::stop_events() throw()
 
 int Papi::event_values (long long * values) const throw()
 {
+#ifdef CONFIG_USE_PAPI
   PAPI_read(event_set_,values);
   return num_events_;
+#else
+  return 0;
+#endif
 }
 
 

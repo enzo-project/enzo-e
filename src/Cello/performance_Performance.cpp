@@ -30,7 +30,8 @@ Performance::Performance ()
 
   new_region("cello");
 
-  papi_.start_events();
+  papi_.init();
+  papi_.add_event ("PAPI_FP_OPS");
 
 }
 
@@ -38,7 +39,6 @@ Performance::Performance ()
 
 Performance::~Performance()
 {
-  papi_.stop_events();
 }
 
 //----------------------------------------------------------------------
@@ -52,13 +52,14 @@ void Performance::begin() throw()
 
   index_time_real_ = num_counters_user_;
 
+  papi_.start_events();
 }
 
 //----------------------------------------------------------------------
 
 void Performance::end() throw()
 {
-  
+  papi_.stop_events();
 }
 
 //----------------------------------------------------------------------

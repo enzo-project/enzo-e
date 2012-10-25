@@ -68,6 +68,8 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_schedule_step,MAX_FILE_GROUPS);
   PUParray (p,output_schedule_list,MAX_FILE_GROUPS);
 
+  PUParray (p,performance_papi_counters,MAX_PAPI_COUNTERS);
+
   p | stopping_cycle;
   p | stopping_time;
 
@@ -374,6 +376,15 @@ void Config::read(Parameters * parameters) throw()
     }
 
   }  
+
+  if (parameters->type("Performance:papi:counters") == parameter_list) {
+    int length = parameters->list_length("Performance:papi:counters");
+    performance_papi_counters[index].resize(length);
+    for (int i=0; i<length; i++) {
+      performance_papi_counters[index][i] = parameters->list_value_string
+	(i,"Performance:papi:counters","");
+    }
+  }
 
   stopping_cycle = parameters->value_integer
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
