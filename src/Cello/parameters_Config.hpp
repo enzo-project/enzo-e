@@ -11,7 +11,6 @@
 
 #define MAX_FIELDS      30
 #define MAX_FILE_GROUPS 10
-#define MAX_PAPI_COUNTERS 10
 
 class Parameters;
 
@@ -100,7 +99,7 @@ public: // attributes
   double                     output_schedule_step  [MAX_FILE_GROUPS];
   std::vector<double>        output_schedule_list  [MAX_FILE_GROUPS];
 
-  std::vector<std::string>   performance_papi_counters [MAX_PAPI_COUNTERS];
+  std::vector<std::string>   performance_papi_counters;
 
   int                        stopping_cycle;
   double                     stopping_time;

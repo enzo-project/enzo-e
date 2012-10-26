@@ -13,7 +13,7 @@
 //----------------------------------------------------------------------
 
 /// @enum enum_reduce_op
-/// @bried type of reduction operation
+/// @brief type of reduction operation
 enum enum_reduce_op {
   reduce_op_unknown,
   reduce_op_min,

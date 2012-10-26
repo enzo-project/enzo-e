@@ -68,7 +68,7 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_schedule_step,MAX_FILE_GROUPS);
   PUParray (p,output_schedule_list,MAX_FILE_GROUPS);
 
-  PUParray (p,performance_papi_counters,MAX_PAPI_COUNTERS);
+  p | performance_papi_counters;
 
   p | stopping_cycle;
   p | stopping_time;
@@ -379,10 +379,12 @@ void Config::read(Parameters * parameters) throw()
 
   if (parameters->type("Performance:papi:counters") == parameter_list) {
     int length = parameters->list_length("Performance:papi:counters");
-    performance_papi_counters[index].resize(length);
+    performance_papi_counters.resize(length);
     for (int i=0; i<length; i++) {
-      performance_papi_counters[index][i] = parameters->list_value_string
+      performance_papi_counters[i] = parameters->list_value_string
 	(i,"Performance:papi:counters","");
+      TRACE2("performance_papi_counters[%d] = %s",
+	     i,performance_papi_counters[i].c_str());
     }
   }
 

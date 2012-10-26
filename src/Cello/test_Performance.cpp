@@ -47,10 +47,14 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("new_counter");
 
-  int index_counter_1 = performance->new_counter("counter_1");
-  int index_counter_2 = performance->new_counter("counter_2");
+  int id_counter_1 = performance->new_counter(counter_type_user,"counter_1");
+  int id_counter_2 = performance->new_counter(counter_type_user,"counter_2");
+  int id_counter_flops =
+    performance->new_counter(counter_type_papi,"PAPI_FP_INS");
 
-  unit_assert (index_counter_1 != index_counter_2);
+  unit_assert (id_counter_1 != id_counter_2);
+  unit_assert (id_counter_1 != id_counter_flops);
+  unit_assert (id_counter_2 != id_counter_flops);
 
   unit_func("num_counters");
 
@@ -58,64 +62,92 @@ PARALLEL_MAIN_BEGIN
   unit_assert (num_counters >= 2);
 
   printf ("num counters = %d\n",num_counters);
-  long long * counters = new long long [num_counters];
+  long long * region_counters = new long long [num_counters];
 
   unit_func("new_region");
 
-  int index_region_1 = performance->new_region("region_1");
-  int index_region_2 = performance->new_region("region_2");
+  int id_region_1 = performance->new_region("region_1");
+  int id_region_2 = performance->new_region("region_2");
 
-  unit_assert (index_region_1 != index_region_2);
+  unit_assert (id_region_1 != id_region_2);
 
   performance->begin();
 
-  performance->start_region(index_region_1);
+  long long counter_values [10];
+  unit_assert (performance->counter_values(counter_values) == num_counters);
+
+  performance->start_region(id_region_1);
+
 
   sleep_flop (1,1000000);
-  performance->increment_counter(index_counter_1,10);
-  performance->increment_counter(index_counter_2,20);
+  performance->increment_counter(id_counter_1,10);
 
-  performance->start_region(index_region_2);
+  performance->increment_counter(id_counter_2,20);
+
+
+  performance->start_region(id_region_2);
+
   
   sleep_flop (2,500000);
-  performance->increment_counter(index_counter_1,50);
-  performance->increment_counter(index_counter_2,100);
 
-  performance->stop_region(index_region_2);
+  performance->increment_counter(id_counter_1,50);
+
+  performance->increment_counter(id_counter_2,100);
+
+
+  performance->stop_region(id_region_2);
+
 
   sleep_flop (1,1000000);
-  performance->increment_counter(index_counter_1,10);
-  performance->increment_counter(index_counter_2,20);
+  performance->increment_counter(id_counter_1,10);
 
-  performance->stop_region(index_region_1);
+  performance->increment_counter(id_counter_2,20);
+
+
+
+  performance->stop_region(id_region_1);
 
   unit_func("user counters");
 
-  performance->region_counters(index_region_1,counters);
 
-  printf ("%lld %lld %lld\n",counters[0],counters[1],counters[2]);
-  unit_assert(counters[index_counter_1] == 10 + 50 + 10);
-  unit_assert(counters[index_counter_2] == 20 + 100 + 20);
 
-  performance->region_counters(index_region_2,counters);
-  printf ("%lld %lld %lld\n",counters[0],counters[1],counters[2]);
+  performance->region_counters(id_region_1,region_counters);
 
-  unit_assert(counters[index_counter_1] == 50);
-  unit_assert(counters[index_counter_2] == 100);
+  int index_counter_1 = performance->id_to_index(id_counter_1);
+  int index_counter_2 = performance->id_to_index(id_counter_2);
+
+  
+  unit_assert(region_counters[index_counter_1] == 10 + 50 + 10);
+  unit_assert(region_counters[index_counter_2] == 20 + 100 + 20);
+
+  performance->region_counters(id_region_2,region_counters);
+
+  unit_assert(region_counters[index_counter_1] == 50);
+  unit_assert(region_counters[index_counter_2] == 100);
 
   performance->end();
+
+  performance->counter_values(counter_values) ;
+
+  for (int index_counter = 0; index_counter < num_counters; index_counter++) {
+    
+    int id_counter = performance->index_to_id(index_counter);
+
+    printf ("COUNTER %s VALUE %lld\n",
+	    performance->counter_name(id_counter).c_str(),
+	    counter_values[index_counter]);
+  }
 
   int num_regions = performance->num_regions();
   for (int ir = 0; ir < num_regions; ir++) {
 
-    performance->region_counters(ir,counters);
+    performance->region_counters(ir,region_counters);
 
     for (int ic = 0; ic < num_counters; ic++) {
     
-      printf ("region %s counter %s value %lld\n",
+      printf ("region %s value %lld\n",
 	      performance->region_name(ir).c_str(),
-	      performance->counter_name(ic).c_str(),
-	      counters[ic]);
+	      region_counters[ic]);
     }
   }
 

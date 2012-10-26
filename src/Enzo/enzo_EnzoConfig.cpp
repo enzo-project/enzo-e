@@ -72,6 +72,8 @@ void EnzoConfig::read(Parameters * parameters) throw()
 
   // Read Cello parameters
 
+  
+  TRACE("EnzoCharm::read calling Config::read()");
   ((Config*)this) -> read (parameters);
 
   double floor_default = 1e-6;

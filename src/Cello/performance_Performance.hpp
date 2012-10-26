@@ -8,8 +8,22 @@
 #ifndef PERFORMANCE_PERFORMANCE_HPP
 #define PERFORMANCE_PERFORMANCE_HPP
 
-/// @def      type_counter
+/// @enum     type_counter
 /// @brief    Counter value type
+#define NUM_COUNTER_TYPES 4
+enum counter_type {
+  counter_type_unknown,
+  counter_type_basic,
+  counter_type_papi,
+  counter_type_user
+};
+
+enum counter_base {
+  base_user  = 1000,
+  base_papi  = 2000,
+  base_basic = 3000
+};
+
 
 class Performance {
 
@@ -33,19 +47,22 @@ public: // interface
     TRACEPUP;
     WARNING("Performance::pup",
 	    "skipping Performance");
-    TRACE1 ("performance = %p",this);
     return;
     
     // NOTE: change this function whenever attributes change
-    p | num_counters_total_;
-    p | num_counters_user_;
-    p | index_time_real_;
     p | papi_;
-    p | counter_names_;
+    PUParray (p,counter_names_,NUM_COUNTER_TYPES);
     p | num_regions_;
     p | region_names_;
     p | region_counters_;
+    p | region_started_;
     p | region_index_;
+    p | i0_basic;
+    p | i0_user;
+    p | i0_papi;
+    p | n_basic;
+    p | n_user;
+    p | n_papi;
   }
 #endif
 
@@ -60,13 +77,13 @@ public: // interface
   //--------------------------------------------------
 
   /// Return the number of counters
-  int num_counters() const throw() { return num_counters_total_; }
+  int num_counters() const throw() { return n_basic + n_papi + n_user; }
 
   ///  	Create a new user counter.
-  int new_counter(std::string counter_name);
+  int new_counter(counter_type type, std::string counter_name);
 
   ///  	Return the value of a counter.
-  long long counter(int index_counter);
+  long long counter(int index_counter) throw();
 
   ///  	Assign a value to a user counter.
   void assign_counter(int index_counter, long long value);
@@ -74,9 +91,18 @@ public: // interface
   ///  	Increment a user counter.
   void increment_counter(int index_counter, long long value);
 
-  ///  	Increment a user counter.
-  std::string counter_name (int index_counter)
-  { return counter_names_[index_counter]; }
+  ///  	Return the given counter name
+  std::string counter_name (int id)
+  { counter_type type;
+    int index;
+    id_to_type_index_ (id,&type,&index);
+    return counter_names_[type][index]; 
+  }
+
+  ///  	Return the array of counter values
+  int counter_values (const long long * values) const
+  { values = &counter_values_[0];
+    return counter_values_.size(); }
 
   //--------------------------------------------------
 
@@ -104,6 +130,10 @@ public: // interface
   /// Read the counters for the region
   void region_counters(int index_region, long long * counters) throw();
 
+  /// Return whether the given region is active
+  bool region_started(int index_region) const throw()
+  { return region_started_[index_region]; }
+
   //--------------------------------------------------
 
   /// Return the Papi object
@@ -111,8 +141,26 @@ public: // interface
 
   //==================================================
 
+  /// Convert counter ID to global index
+  int id_to_index(int id_counter) const throw();
+
+  /// Convert global index to counter ID
+  int index_to_id(int index_counter) const throw();
+
+  /// Convert counter type and type-index to counter ID
+  int type_index_to_id(counter_type type, int index_type_counter) const throw();
+
 private: // functions
 
+
+
+  /// Get type and index relative to type from id
+  void id_to_type_index_(int id_counter, counter_type * type, int * index_local) const throw();
+
+  /// Refresh the array of current counter values
+  void refresh_counters_() throw();
+
+  /// Return the current time in usec
   long long time_real_ () const
   {
     struct timeval tv;
@@ -125,20 +173,14 @@ private: // functions
 
 private: // attributes
 
-  /// Total Number of counters
-  int num_counters_total_;
-
-  /// Number of user counters
-  int num_counters_user_;
-
-  /// Index of the time counter
-  int index_time_real_;
-
   /// PAPI counters, if available
   Papi papi_;
 
   /// Counter names
-  std::vector<std::string> counter_names_;
+  std::vector<std::string> counter_names_[NUM_COUNTER_TYPES];
+
+  // /// Counter types
+  // std::vector<counter_type> counter_types_[NUM_COUNTER_TYPES];
 
   /// Counter values
   std::vector<long long> counter_values_;
@@ -152,12 +194,20 @@ private: // attributes
   /// list of counter values
   std::vector< std::vector<long long> > region_counters_;
 
-  /// list of counter values
-  std::vector< std::vector<long long> > region_counters_start_;
-
+  /// list of counter values (should be bool but Charm++ requires int)
+  std::vector< int > region_started_;
 
   /// mapping of region name to index
   std::map<std::string,int> region_index_;
+
+  /// Array for storing PAPI counter values
+  long long * papi_counters_;
+
+  /// Indices for marking beginning of counters of different types
+  int i0_basic, i0_papi, i0_user;
+
+  /// Indices for marking ending of counters of different types
+  int n_basic,  n_papi,  n_user;
 
 };
 

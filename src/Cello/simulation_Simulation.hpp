@@ -157,7 +157,7 @@ public: // virtual functions
 protected: // functions
 
   /// Initialize the Config object
-  virtual void initialize_config_ () throw();
+  void initialize_config_ () throw();
 
   /// Initialize the Problem object
   void initialize_problem_ () throw();
@@ -242,8 +242,8 @@ protected: // attributes
   Performance performance_;
 
   /// Performance counter ids
-  int counter_simulation_;
-  int counter_cycle_;
+  int id_simulation_;
+  int id_cycle_;
 
 #ifdef CONFIG_USE_LCAPERF
   /// Lcaperf

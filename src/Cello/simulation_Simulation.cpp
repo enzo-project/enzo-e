@@ -39,8 +39,8 @@ Simulation::Simulation
   problem_(0),
   timer_(),
   performance_(),
-  counter_simulation_(-1),
-  counter_cycle_(-1),
+  id_simulation_(-1),
+  id_cycle_(-1),
 #ifdef CONFIG_USE_LCAPERF
   lcaperf_(0),
 #endif
@@ -153,6 +153,7 @@ Simulation::~Simulation() throw()
 
 void Simulation::initialize() throw()
 {
+  TRACE("Simulation::initialize calling Simulation::initialize_config_()");
   initialize_config_();
   initialize_monitor_();
   initialize_simulation_();
@@ -185,8 +186,7 @@ void Simulation::finalize() throw()
 
 #endif
 
-  performance_.stop_region(counter_cycle_);
-  performance_.stop_region(counter_simulation_);
+  performance_.stop_region(id_simulation_);
 
   performance_.end();
 
@@ -218,8 +218,8 @@ void Simulation::initialize_performance_() throw()
 {
 
 
-  counter_simulation_ = performance_.new_region("simulation");
-  counter_cycle_      = performance_.new_region("cycle");
+  id_simulation_ = performance_.new_region("simulation");
+  id_cycle_      = performance_.new_region("cycle");
 
 #ifdef CONFIG_USE_LCAPERF
 
@@ -245,10 +245,12 @@ void Simulation::initialize_performance_() throw()
 
 #endif
 
+  for (size_t i=0; i<config_->performance_papi_counters.size(); i++) {
+    performance_.new_counter(counter_type_papi, config_->performance_papi_counters[i]);
+  }
   performance_.begin();
 
-  performance_.start_region(counter_simulation_);
-  performance_.start_region(counter_cycle_);
+  performance_.start_region(id_simulation_);
 
 }
 
@@ -259,6 +261,7 @@ void Simulation::initialize_config_() throw()
   TRACE("BEGIN Simulation::initialize_config_");
   if (config_ == NULL) {
     config_ = new Config;
+    TRACE("Simulation::initialize_config_ calling Config::read()");
     config_->read(parameters_);
   }
   TRACE("END   Simulation::initialize_config_");
@@ -488,16 +491,20 @@ void Simulation::performance_output()
   int num_counters =  performance_.num_counters();
   long long * counters = new long long [num_counters];
 
-  for (int ir = 0; ir < num_regions; ir++) {
+  for (int index_region = 0; index_region < num_regions; index_region++) {
 
-    performance_.region_counters(ir,counters);
+    int id_region = index_region;
 
-    for (int ic = 0; ic < num_counters; ic++) {
+    performance_.region_counters(index_region,counters);
+
+    for (int index_counter = 0; index_counter < num_counters; index_counter++) {
     
-      printf ("region %s counter %s value %lld\n",
-	      performance_.region_name(ir).c_str(),
-	      performance_.counter_name(ic).c_str(),
-	      counters[ic]);
+      int id_counter = performance_.index_to_id(index_counter);
+
+      monitor_->print("Performance","%s %s %lld",
+	      performance_.region_name(id_region).c_str(),
+	      performance_.counter_name(id_counter).c_str(),
+	      counters[index_counter]);
     }
   }
 
