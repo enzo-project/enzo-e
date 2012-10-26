@@ -45,18 +45,22 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     WARNING("Performance::pup",
 	    "skipping Performance");
     return;
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     
     // NOTE: change this function whenever attributes change
     p | papi_;
     PUParray (p,counter_names_,NUM_COUNTER_TYPES);
+    p | counter_values_;
     p | num_regions_;
     p | region_names_;
     p | region_counters_;
     p | region_started_;
     p | region_index_;
+    //    p | papi_counters_
     p | i0_basic;
     p | i0_user;
     p | i0_papi;
@@ -178,9 +182,6 @@ private: // attributes
 
   /// Counter names
   std::vector<std::string> counter_names_[NUM_COUNTER_TYPES];
-
-  // /// Counter types
-  // std::vector<counter_type> counter_types_[NUM_COUNTER_TYPES];
 
   /// Counter values
   std::vector<long long> counter_values_;

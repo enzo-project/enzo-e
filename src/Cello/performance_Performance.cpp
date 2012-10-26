@@ -31,8 +31,6 @@ Performance::Performance ()
 
   new_counter(counter_type_basic,"time-usec");
 
-  //  new_region("cello");
-
   papi_.init();
 
 }
@@ -65,6 +63,7 @@ void Performance::begin() throw()
 void Performance::end() throw()
 {
   papi_.stop_events();
+  // stop regions?
 }
 
 //----------------------------------------------------------------------
@@ -101,14 +100,6 @@ int Performance::new_counter
   return id;
 }
 
-// //----------------------------------------------------------------------
-
-// long long Performance::counter(int id) throw()
-// {
-//   refresh_counters_();
-//   return counter_values_[id_to_index(id)];
-// }
-
 //----------------------------------------------------------------------
 
 void Performance::refresh_counters_() throw()
@@ -129,7 +120,7 @@ void Performance::assign_counter(int id, long long value)
 {
   int index = id_to_index(id);
 
-  if (i0_user <= index && index < i0_user + n_user) {
+  if ( (i0_user <= index) && (index < i0_user + n_user )) {
     
     counter_values_[index] = value;
 
@@ -149,7 +140,7 @@ void Performance::increment_counter(int id, long long value)
 {
   int index = id_to_index(id);
 
-  if (i0_user <= index && index < i0_user + n_user) {
+  if ( (i0_user <= index) && (index < i0_user + n_user) ) {
 
     counter_values_[index] += value;
 
@@ -203,13 +194,11 @@ int Performance::new_region (std::string region_name) throw()
 
 void  Performance::start_region(int id_region) throw()
 {
-  // NOTE: identical to stop_region()
+  // NOTE: similar to stop_region()
 
   TRACE1("Performance::start_region %s",region_names_[id_region].c_str());
 
   int index_region = id_region;
-
-  refresh_counters_();
 
   if (! region_started_[index_region]) {
 
@@ -222,6 +211,8 @@ void  Performance::start_region(int id_region) throw()
     return;
   }
 
+  refresh_counters_();
+    
   for (int i=0; i<num_counters(); i++) {
 
     region_counters_[index_region][i] = 
@@ -234,7 +225,7 @@ void  Performance::start_region(int id_region) throw()
 
 void  Performance::stop_region(int id_region) throw()
 {
-  // NOTE: identical to start_region()
+  // NOTE: similar to start_region()
 
   TRACE1("Performance::stop_region %s",region_names_[id_region].c_str());
 
@@ -248,6 +239,7 @@ void  Performance::stop_region(int id_region) throw()
     WARNING1 ("Performance::stop_region",
 	     "Region %s already stopped",
 	     region_names_[id_region].c_str());
+    return;
   }
 
   refresh_counters_();
@@ -282,12 +274,12 @@ int Performance::index_to_id (int index) const throw()
 {
   int id;
 
-  if (i0_user <= index && index < i0_user + n_user) {
-    id = (index - i0_user) + base_user;
+  if        (i0_user  <= index && index < i0_user +  n_user) {
+    id = base_user +  (index - i0_user);
   } else if (i0_basic <= index && index < i0_basic + n_basic) {
-    id = (index - i0_basic) + base_basic;
-  } else if (i0_papi <= index && index < i0_papi + n_papi) {
-    id = (index - i0_papi) + base_papi;
+    id = base_basic + (index - i0_basic);
+  } else if (i0_papi  <= index && index < i0_papi +  n_papi) {
+    id = base_papi +  (index - i0_papi);
   } else {
     WARNING1 ("Performance::index_to_id",
 	      "counter index %d out of range",
@@ -301,15 +293,12 @@ int Performance::index_to_id (int index) const throw()
 
 int Performance::type_index_to_id (counter_type type, int index) const throw()
 {
-  int id;
+  int id = index;
 
-  if (type == counter_type_user) {
-    id = index + base_user;
-  } else if (type == counter_type_basic) {
-    id = index + base_basic;
-  } else if (type == counter_type_papi) {
-    id = index + base_papi;
-  } else {
+  if      (type == counter_type_user)  id += base_user;
+  else if (type == counter_type_basic) id += base_basic;
+  else if (type == counter_type_papi)  id += base_papi;
+  else {
     WARNING1 ("Performance::type_index_to_id",
 	      "unknown counter_type %d",
 	      type);
@@ -322,13 +311,17 @@ int Performance::type_index_to_id (counter_type type, int index) const throw()
 
 int Performance::id_to_index(int id) const throw()
 {
-  int index = 0;
-  if (base_user <= id && id < base_papi) {
-    index = id - base_user + i0_user;
-  } else if (base_papi <= id && id < base_basic) {
-    index = id - base_papi + i0_papi;
-  } else if (base_basic <= id) {
-    index = id - base_user + i0_basic;
+  int index = id;
+  if      (base_user <= id  && id < base_user  + n_user)
+    index += (i0_user  - base_user);
+  else if (base_papi <= id  && id < base_papi  + n_papi)  
+    index += (i0_papi  - base_papi);
+  else if (base_basic <= id && id < base_basic + n_basic) 
+    index += (i0_basic - base_basic);
+  else {
+    WARNING1 ("Performance::id_to_index",
+	      "counter id %d out of range",
+	      id);
   }
   return index;
 }
@@ -338,16 +331,21 @@ int Performance::id_to_index(int id) const throw()
 void Performance::id_to_type_index_
 (int id, counter_type * type, int * index) const throw()
 {
-  *index = id;
-  if (base_user <= id && id < base_papi) {
-    *type = counter_type_user;
-    *index -= base_user;
-  } else if (base_papi <= id && id < base_basic) {
-    *type = counter_type_papi;
-    *index -= base_papi;
-  } else if (base_basic <= id) {
-    *type = counter_type_basic;
-    *index -= base_basic;
+  (*index) = id;
+  if (base_user <= id && id < base_user + n_user) {
+    (*type) = counter_type_user;
+    (*index) -= base_user;
+  } else if (base_papi <= id && id < base_papi + n_papi) {
+    (*type) = counter_type_papi;
+    (*index) -= base_papi;
+  } else if (base_basic <= id && id < base_basic + n_basic) {
+    (*type) = counter_type_basic;
+    (*index) -= base_basic;
+  } else {
+    WARNING1 ("Performance::id_to_type_index_",
+	      "counter id %d out of range",
+	      id);
   }
+    
 }
 
