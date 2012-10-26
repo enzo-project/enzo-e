@@ -112,6 +112,7 @@ Clean(env_mv_test.RunSerial
 env.RunSerial('test_Performance.unit', bin_path + '/test_Performance')
 env.RunSerial('test_Papi.unit',        bin_path + '/test_Papi')
 env.RunSerial('test_Timer.unit',       bin_path + '/test_Timer')
+
 # env.RunSerial('test_LcaPerf.unit',     bin_path + '/test_LcaPerf')
 #----------------------------------------------------------------------
 # PORTAL COMPONENT        
@@ -320,6 +321,10 @@ env.MakeMovie ("boundary_periodic-3d.swf","test_boundary_periodic-3d.unit", \
 #                 ARGS= test_path + "/boundary_inflow-3d-????.png");
 env.MakeMovie ("boundary_outflow-3d.swf","test_boundary_outflow-3d.unit", \
                 ARGS= test_path + "/boundary_outflow-3d-????.png");
+
+env.RunParallel ('test_performance-papi.unit',
+                bin_path + '/enzo-p', 
+                ARGS='input/performance-papi.in')
 
 
 Clean(env_mv_out.RunParallel ('test_initial_png.unit',
