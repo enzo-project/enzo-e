@@ -1,0 +1,15 @@
+# Problem: 2D Implosion problem with Performance monitoring
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/ppm.incl"
+
+Mesh { root_blocks    = [2,4]; }
+
+Output { file_groups = [] }
+Stopping { cycle = 10; }
+
+Performance {
+   papi {
+     counters = ["PAPI_FP_INS"];
+   }
+}
