@@ -348,9 +348,11 @@ public: // interface
   /// Initialize Block
   virtual void initialize () throw();
 
-public: // attributes (YIKES!)
+private: // attributes
 
   enzo_float Time_;
+
+public: // attributes (YIKES!)
 
   int CycleNumber;
 

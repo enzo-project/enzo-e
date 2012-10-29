@@ -215,8 +215,7 @@ void  Performance::start_region(int id_region) throw()
     
   for (int i=0; i<num_counters(); i++) {
 
-    region_counters_[index_region][i] = 
-      counter_values_[i] - region_counters_[index_region][i];
+    region_counters_[index_region][i] = counter_values_[i];
 
   }
 }
