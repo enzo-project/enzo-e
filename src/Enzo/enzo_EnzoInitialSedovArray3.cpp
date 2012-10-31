@@ -18,11 +18,25 @@
 
 EnzoInitialSedovArray3::EnzoInitialSedovArray3 
 (const EnzoConfig * config) throw ()
-  : Initial(config->initial_cycle, config->initial_time) 
+  : Initial(config->initial_cycle, config->initial_time) ,
+    hydro_(hydro_unknown)
 {
   array_[0] = config->enzo_sedov_array[0];
   array_[1] = config->enzo_sedov_array[1];
   array_[2] = config->enzo_sedov_array[2];
+
+  
+  if (config->method_sequence[0] == "ppm") {
+    hydro_ = hydro_ppm;
+    TRACE("hydro_ppm");
+  } else if (config->method_sequence[0] == "ppml") {
+    hydro_ = hydro_ppml;
+    TRACE("hydro_ppml");
+  } else {
+    ERROR1("EnzoInitialSedovArray3::EnzoInitialSedovArray3",
+	  "Unknown method %s",config->method_sequence[0].c_str());
+  }
+					  
 }
 
 //----------------------------------------------------------------------
@@ -40,8 +54,7 @@ void EnzoInitialSedovArray3::pup (PUP::er &p)
 #endif
 
 //----------------------------------------------------------------------
-
-void EnzoInitialSedovArray3::enforce 
+void EnzoInitialSedovArray3::enforce
 (
  Block * block,
  const FieldDescr * field_descr,
@@ -60,17 +73,13 @@ void EnzoInitialSedovArray3::enforce
 	 "Insufficient number of fields",
 	 field_descr->field_count() >= 4);
 
-  int index_density      = field_descr->field_id("density");
-  int index_velocity_x   = field_descr->field_id("velocity_x");
-  int index_velocity_y   = field_descr->field_id("velocity_y");
-  int index_velocity_z   = field_descr->field_id("velocity_z");
-  int index_total_energy = field_descr->field_id("total_energy");
-
-  enzo_float *  d = (enzo_float *) field_block->field_values(index_density);
-  enzo_float * vx = (enzo_float *) field_block->field_values(index_velocity_x);
-  enzo_float * vy = (enzo_float *) field_block->field_values(index_velocity_y);
-  enzo_float * vz = (enzo_float *) field_block->field_values(index_velocity_z);
-  enzo_float * te = (enzo_float *) field_block->field_values(index_total_energy);
+  enzo_float *  d = (enzo_float *) field_block->field_values
+    (field_descr->field_id("density"));
+  
+  enzo_float * te = 0;
+  if (hydro_ == hydro_ppm) 
+    te = (enzo_float *) field_block->field_values
+      (field_descr->field_id("total_energy"));
 
   int nx,ny,nz;
   field_block->size(&nx,&ny,&nz);
@@ -97,16 +106,27 @@ void EnzoInitialSedovArray3::enforce
   const double sedov_te_in = sedov_p_in  / ((EnzoBlock::Gamma - 1.0) * sedov_density);
   const double sedov_te_out= sedov_p_out / ((EnzoBlock::Gamma - 1.0) * sedov_density);
 
-  ASSERT ("EnzoInitialSedovArray3::enforce",
-	  "This problem requires Blocks to be cubical",
-	  hx == hy && hy == hz);
-
-  
   int gx,gy,gz;
-  field_descr->ghosts(index_density,&gx,&gy,&gz);
+  field_descr->ghosts(0,&gx,&gy,&gz);
 
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
+
+  // clear all fields
+
+  for (int iv=0; iv<field_descr->field_count(); iv++) {
+
+    enzo_float * field = (enzo_float *) field_block->field_values (iv);
+
+    for (int iz=gz; iz<nz+gz; iz++) {
+      for (int iy=gy; iy<ny+gy; iy++) {
+	for (int ix=gx; ix<nx+gx; ix++) {
+	  int i = INDEX(ix,iy,iz,ngx,ngy);
+	  field[i] = 0.0;
+	}
+      }
+    }
+  }
 
   // background 
 
@@ -116,10 +136,7 @@ void EnzoInitialSedovArray3::enforce
 
 	int i = INDEX(ix,iy,iz,ngx,ngy);
 	d[i]  = sedov_density;
-	vx[i] = 0.0;
-	vy[i] = 0.0;
-	vz[i] = 0.0;
-	te[i] = sedov_te_out;
+	if (hydro_ == hydro_ppm) te[i] = sedov_te_out;
 
       }
     }
@@ -165,9 +182,12 @@ void EnzoInitialSedovArray3::enforce
 	      double r2 = x*x + y*y + z*z;
 
 	      int i = INDEX(ix,iy,iz,ngx,ngy);
-	      
-	      if (r2 < sedov_radius_2) te[i] = sedov_te_in;
-
+	  
+	      if (r2 < sedov_radius_2) {
+		if (hydro_ == hydro_ppm)  te[i] = sedov_te_in;
+		if (hydro_ == hydro_ppml) d[i] = sedov_density * 
+					    (sedov_te_in / sedov_te_out);
+	      }
 	    }
 	  }
 	}
@@ -175,6 +195,5 @@ void EnzoInitialSedovArray3::enforce
       }
     }
   }
-
-
 }
+

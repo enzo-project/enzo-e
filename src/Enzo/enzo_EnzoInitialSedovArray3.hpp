@@ -8,6 +8,12 @@
 #ifndef ENZO_ENZO_INITIAL_SEDOV_ARRAY3_HPP
 #define ENZO_ENZO_INITIAL_SEDOV_ARRAY3_HPP
 
+enum hydro_type {
+  hydro_unknown,
+  hydro_ppm,
+  hydro_ppml
+};
+
 class EnzoInitialSedovArray3 : public Initial {
 
   /// @class    EnzoInitialSedovArray3
@@ -42,7 +48,11 @@ public: // interface
 
 private: // attributes
 
+  /// Size of the array of Sedov blasts
   int array_[3];
+
+  /// Whether PPM or PPML is used
+  hydro_type hydro_;
 
 };
 
