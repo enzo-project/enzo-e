@@ -22,4 +22,4 @@ libs_fortran    = ['gfortran']
 charm_path = '/home/ux452912/charm/charm'
 
 papi_path  = '/home/ux452912'
-hdf5_path  = '/opt/hdf5/gnu'
+hdf5_path  = '/home/ux452912'

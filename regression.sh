@@ -10,7 +10,7 @@ foreach prec (double)
 
    
    echo "BEGIN type = $type  arch = $arch  prec = $prec"
-   setenv CELLO_ARCH linux-$arch
+   setenv CELLO_ARCH gordon-$arch
    setenv CELLO_TYPE $type
    setenv CELLO_PREC $prec
 
