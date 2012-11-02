@@ -5,14 +5,13 @@ set target = test
 ./compile.sh clean
 
 foreach type (charm mpi)
-foreach arch (gnu)
-foreach prec (double)
+
+   set arch = $CELLO_ARCH
+   set prec = $CELLO_PREC
 
    
    echo "BEGIN type = $type  arch = $arch  prec = $prec"
-   setenv CELLO_ARCH gordon-$arch
    setenv CELLO_TYPE $type
-   setenv CELLO_PREC $prec
 
    set H0 = `date +"%H"`
    set M0 = `date +"%M"`
@@ -33,5 +32,5 @@ foreach prec (double)
 
    echo "END  type = $type  arch = $arch  prec = $prec  time = $t s"
 end
-end
-end
+# end
+# end
