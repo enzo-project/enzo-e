@@ -97,7 +97,14 @@ bool FieldDescr::is_field(const std::string & name) const
 int FieldDescr::field_id(const std::string & name) const
   throw()
 {
-  return field_id_.at(name);
+  //  return field_id_[name]; // ERROR IN PGI ON GORDON 11.9-0 64-bit
+  std::map<const std::string,int>::const_iterator it;
+  it=field_id_.find(name);
+  if (it != field_id_.end()) {
+    return it->second;
+  } else {
+    return -1;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -113,7 +120,7 @@ int FieldDescr::group_count() const
 std::string FieldDescr::group_name(int id_group) const 
   throw(std::out_of_range)
 {
-  return group_name_.at(id_group);
+  return group_name_[id_group];
 }
 
 //----------------------------------------------------------------------
@@ -129,7 +136,14 @@ bool FieldDescr::is_group(const std::string & name) const
 int FieldDescr::group_id(const std::string & name) const
   throw()
 {
-  return group_id_.at(name);
+  std::map<const std::string,int>::const_iterator it;
+  it=group_id_.find(name);
+  if (it != group_id_.end()) {
+    return it->second;
+  } else {
+    return -1;
+  }
+  //  return group_id_[name];
 }
 
 //----------------------------------------------------------------------

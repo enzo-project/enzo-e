@@ -59,7 +59,7 @@ public: // interface
     p | region_names_;
     p | region_counters_;
     p | region_started_;
-    p | region_index_;
+    //    p | region_index_;
     //    p | papi_counters_
     p | i0_basic;
     p | i0_user;
@@ -199,7 +199,7 @@ private: // attributes
   std::vector< int > region_started_;
 
   /// mapping of region name to index
-  std::map<std::string,int> region_index_;
+  std::map<const std::string,int> region_index_;
 
   /// Array for storing PAPI counter values
   long long * papi_counters_;

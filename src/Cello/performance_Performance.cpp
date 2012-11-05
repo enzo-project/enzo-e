@@ -171,7 +171,14 @@ std::string Performance::region_name (int index_region) const throw()
 
 int Performance::region_index (std::string name) const throw()
 {
-  return region_index_.at(name);
+  std::map<const std::string,int>::const_iterator it;
+  it=region_index_.find(name);
+  if (it != region_index_.end()) {
+    return it->second;
+  } else {
+    return -1;
+  }
+  //  return region_index_.at(name);
 }
 
 //----------------------------------------------------------------------

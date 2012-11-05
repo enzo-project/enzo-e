@@ -236,6 +236,8 @@ elif (arch == "triton-mpe"):   from triton_mpe   import *
 elif (arch == "triton-pgi"):   from triton_pgi   import *
 elif (arch == "triton-tau"):   from triton_tau   import *
 elif (arch == "gordon-gnu"):   from gordon_gnu   import *
+elif (arch == "gordon-pgi"):   from gordon_pgi   import *
+elif (arch == "gordon-intel"): from gordon_intel   import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
