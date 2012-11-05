@@ -215,15 +215,15 @@ void Output::write_meta_ ( meta_type type_meta, Io * io ) throw ()
 
 //----------------------------------------------------------------------
 
-void Output::write_
+void Output::write_simulation_
 ( const Simulation * simulation ) throw()
 {
-  write (simulation->hierarchy(), simulation->field_descr());
+  write_hierarchy (simulation->hierarchy(), simulation->field_descr());
 }
 
 //----------------------------------------------------------------------
 
-void Output::write_ 
+void Output::write_hierarchy_
 (
  const Hierarchy * hierarchy,
  const FieldDescr * field_descr
@@ -236,14 +236,14 @@ void Output::write_
     TRACE("Output::write_(hierarchy)");
     ((CProxy_Patch *)patch)->p_write(index_);
 #else
-    write (patch, field_descr, 0,0,0);
+    write_patch (patch, field_descr, 0,0,0);
 #endif
   }
 }
 
 //----------------------------------------------------------------------
 
-void Output::write_
+void Output::write_patch_
 (
  const Patch * patch,
  const FieldDescr * field_descr,
@@ -252,7 +252,7 @@ void Output::write_
 
 {
 
-    TRACE("Output::write_(patch)");
+    TRACE("Output::write_patch_()");
 #ifdef CONFIG_USE_CHARM
 
   patch->block_array()->p_write(index_);
@@ -262,7 +262,7 @@ void Output::write_
   ItBlock it_block (patch);
   while (const Block * block = ++it_block) {
     // NO OFFSET: ASSUMES ROOT PATCH
-    write (block, field_descr, 0,0,0);
+    write_block (block, field_descr, 0,0,0);
   }
 
 #endif
@@ -271,19 +271,19 @@ void Output::write_
 
 //----------------------------------------------------------------------
 
-void Output::write_
+void Output::write_block_
 (
  const Block * block,
  const FieldDescr * field_descr,
  int ixp0, int iyp0, int izp0
  ) throw()
 {
-    TRACE("Output::write_(block)");
+    TRACE("Output::write_block_()");
   // Write fields
 
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
     const FieldBlock * field_block = block->field_block();
-    write (field_block,  field_descr, it_field_->value());
+    write_field_block (field_block,  field_descr, it_field_->value());
   }
 
 }

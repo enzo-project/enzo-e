@@ -140,7 +140,7 @@ void OutputImage::finalize () throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::write
+void OutputImage::write_patch
 (
  const Patch * patch,
  const FieldDescr * field_descr,
@@ -154,16 +154,16 @@ void OutputImage::write
 // @param iyp0  offset of the patch relative to the parent patch along y-axis
 // @param izp0  offset of the patch relative to the parent patch along z-axis
 {
-  TRACE("OutputImage::write(patch)");
+  TRACE("OutputImage::write_patch()");
 
-  /// Call write(patch) on parent Output class
-  write_(patch,field_descr,ixp0,iyp0,izp0);
+  /// Call write_patch() on parent Output class
+  write_patch_(patch,field_descr,ixp0,iyp0,izp0);
 
 }
 
 //----------------------------------------------------------------------
 
-void OutputImage::write
+void OutputImage::write_block
 (
  const Block * block,
  const FieldDescr * field_descr,
@@ -178,7 +178,7 @@ void OutputImage::write
 // @param izp0  offset of the parent patch relative to its parent along z-axis 
 {
 
-  TRACE("OutputImage::write(block)");
+  TRACE("OutputImage::write_block()");
   const FieldBlock * field_block = block->field_block();
   
   int nbx,nby,nbz;
@@ -233,7 +233,7 @@ void OutputImage::write
 
   default:
 
-    WARNING1 ("OutputImage::write(block)",
+    WARNING1 ("OutputImage::write_block()",
 	     "Unsupported Field precision %d",
 	      field_descr->precision(index));
     break;
@@ -244,13 +244,13 @@ void OutputImage::write
 
 //----------------------------------------------------------------------
 
-void OutputImage::write
+void OutputImage::write_field_block
 (
  const FieldBlock * Fieldblock,  
  const FieldDescr * field_descr,
  int field_index) throw()
 {
-  WARNING("OutputImage::write(field)",
+  WARNING("OutputImage::write_field_block",
 	  "This function should not be called");
 }
 

@@ -536,7 +536,7 @@ void FieldBlock::print (const FieldDescr * field_descr,
 
 #ifndef CELLO_DEBUG
   return;
-#endif
+#else
 
   int ip=0;
 
@@ -716,6 +716,8 @@ void FieldBlock::print (const FieldDescr * field_descr,
 
      free ((void *)field_name);
    }
+
+#endif /* ifndef CELLO_DEBUG */
 }
 
 //----------------------------------------------------------------------

@@ -48,37 +48,38 @@ public: // functions
 
 public: // virtual functions
 
+  /// Initialize next output
+  virtual void init () throw()
+  {} ;
+
   /// Open (or create) a file for IO
   virtual void open () throw();
 
   /// Close file for IO
   virtual void close () throw();
 
-  /// Whether the file is open or not
-  virtual bool is_open () throw();
-
   /// Finalize output
   virtual void finalize () throw ();
 
   /// Write hierarchy data to disk
-  virtual void write
+  virtual void write_hierarchy
   ( const Hierarchy * hierarchy,
     const FieldDescr * field_descr ) throw();
 
   /// Write patch data to disk
-  virtual void write
+  virtual void write_patch
   ( const Patch * patch,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write block data to disk
-  virtual void write
+  virtual void write_block
   ( const Block * block,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write local field to disk
-  virtual void write
+  virtual void write_field_block
   ( const FieldBlock * field_block,
     const FieldDescr * field_descr,
     int field_index) throw();

@@ -68,19 +68,19 @@ public: // virtual functions
   virtual void finalize () throw();
 
   /// Write patch-related field data
-  virtual void write
+  virtual void write_patch
   ( const Patch * patch,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write block-related field data
-  virtual void write
+  virtual void write_block
   ( const Block * block,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Write fields
-  virtual void write
+  virtual void write_field_block
   ( const FieldBlock * Fieldblock, 
     const FieldDescr * field_descr,
     int field_index) throw();

@@ -138,31 +138,31 @@ public: // virtual functions
   { count_ ++; }
 
   /// Write Simulation data to disk
-  virtual void write ( const Simulation * simulation ) throw()
-  { write_(simulation); }
+  virtual void write_simulation ( const Simulation * simulation ) throw()
+  { write_simulation_(simulation); }
 
   /// Write Hierarchy data to disk
-  virtual void write
+  virtual void write_hierarchy
   ( const Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw()
-  { write_(hierarchy,field_descr); }
+  { write_hierarchy_(hierarchy,field_descr); }
 
   /// Write local patch data to disk
-  virtual void write
+  virtual void write_patch
   ( const Patch * patch, 
     const FieldDescr * field_descr,  
     int ixp0=0, int iyp0=0, int izp0=0) throw()
-  { write_(patch,field_descr,ixp0,iyp0,izp0); }
+  { write_patch_(patch,field_descr,ixp0,iyp0,izp0); }
 
   /// Write local block data to disk
-  virtual void write
+  virtual void write_block
   ( const Block * block, 
     const FieldDescr * field_descr,  
     int ixp0=0, int iyp0=0, int izp0=0) throw()
-  { write_(block,field_descr,ixp0,iyp0,izp0); }
+  { write_block_(block,field_descr,ixp0,iyp0,izp0); }
 
   /// Write local field to disk
-  virtual void write
+  virtual void write_field_block
   ( const FieldBlock * field_block, 
     const FieldDescr * field_descr,
     int field_index) throw() = 0;
@@ -182,21 +182,21 @@ public: // virtual functions
 protected:
 
   /// "Loop" over writing the Hierarchy in the Simulation
-  void write_ (const Simulation * simulation ) throw();
+  void write_simulation_ (const Simulation * simulation ) throw();
 
   /// Loop over writing Patches in the Hierarchy
-  void write_
+  void write_hierarchy_
   ( const Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
 
   /// Loop over writing Blocks in the Patch
-  void write_
+  void write_patch_
   ( const Patch * patch, 
     const FieldDescr * field_descr,  
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Loop over writing Field data in the Block
-  void write_
+  void write_block_
   ( const Block * block, 
     const FieldDescr * field_descr,  
     int ixp0=0, int iyp0=0, int izp0=0) throw();

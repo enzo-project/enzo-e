@@ -353,11 +353,11 @@ size_t FieldFace::load_precision_
 {
   int ix0,iy0,iz0;
   int nx,ny,nz;
-  bool load;
+  const bool load = true;
 
   // Loop limits
 
-  loop_limits_ (&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, load=true);
+  loop_limits_ (&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, load);
 
   for (int iz=0; iz <nz; iz++)  {
     int kz = iz+iz0;
@@ -389,11 +389,11 @@ size_t FieldFace::store_precision_
 
   int ix0,iy0,iz0;
   int nx,ny,nz;
-  bool load;
+  const bool load = false;
 
   // Loop limits
 
-  loop_limits_ (&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, load=false);
+  loop_limits_ (&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, load);
 
   for (int iz=0; iz <nz; iz++)  {
     int kz = iz+iz0;

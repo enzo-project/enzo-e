@@ -211,7 +211,7 @@ void InputData::read_field
 
   for (size_t i=0; i<io_field_block()->data_count(); i++) {
 
-    void * buffer;
+    void * buffer = 0;
     std::string name;
     scalar_type type;
     int nxd,nyd,nzd;  // Array dimension

@@ -77,17 +77,12 @@ void OutputData::close () throw()
 
 //----------------------------------------------------------------------
 
-bool OutputData::is_open () throw()
-{  return (file_ != 0); }
-
-//----------------------------------------------------------------------
-
 void OutputData::finalize () throw ()
 {  Output::finalize(); }
 
 //----------------------------------------------------------------------
 
-void OutputData::write
+void OutputData::write_hierarchy
 (
  const Hierarchy  * hierarchy,
  const FieldDescr * field_descr
@@ -97,13 +92,13 @@ void OutputData::write
 
   write_meta (&io_hierarchy);
 
-  write_(hierarchy, field_descr);
+  write_hierarchy_(hierarchy, field_descr);
 
 }
 
 //----------------------------------------------------------------------
 
-void OutputData::write
+void OutputData::write_patch
 (
  const Patch * patch,
  const FieldDescr * field_descr,
@@ -129,13 +124,13 @@ void OutputData::write
   write_meta_group (&io_layout);
 
   // Call write(block) on contained blocks
-  write_(patch,field_descr,ixp0,iyp0,izp0);
+  write_patch_(patch,field_descr,ixp0,iyp0,izp0);
 
 }
 
 //----------------------------------------------------------------------
 
-void OutputData::write
+void OutputData::write_block
 ( 
   const Block * block,
   const FieldDescr * field_descr,
@@ -157,7 +152,7 @@ void OutputData::write
 
   // Call write(block) on base Output object
 
-  write_(block,field_descr,ixp0,iyp0,izp0);
+  write_block_(block,field_descr,ixp0,iyp0,izp0);
 
   file_->group_close();
 
@@ -165,7 +160,7 @@ void OutputData::write
 
 //----------------------------------------------------------------------
 
-void OutputData::write
+void OutputData::write_field_block
 ( 
   const FieldBlock * field_block,
   const FieldDescr * field_descr,

@@ -58,8 +58,8 @@ void Problem::output_next(Simulation * simulation) throw()
     output->init();
     TRACE("calling output->open()");
     output->open();
-    TRACE("calling output->write()");
-    output->write(simulation);
+    TRACE("calling output->write_simulation()");
+    output->write_simulation(simulation);
 
 
   } else {
@@ -80,7 +80,7 @@ void Patch::p_write(int index_output)
   FieldDescr * field_descr = simulation->field_descr();
   Output * output = simulation->problem()->output(index_output);
 
-  output->write(this,field_descr,0,0,0);
+  output->write_patch(this,field_descr,0,0,0);
 }
 
 //----------------------------------------------------------------------
@@ -93,7 +93,7 @@ void Block::p_write (int index_output)
   FieldDescr * field_descr = simulation->field_descr();
   Output * output = simulation->problem()->output(index_output);
 
-  output->write(this,field_descr,0,0,0);
+  output->write_block(this,field_descr,0,0,0);
 
   proxy_patch_.s_write();
 }
