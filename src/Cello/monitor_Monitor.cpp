@@ -77,11 +77,9 @@ void Monitor::header () const
 
   // Print all compile-time configuration setings
 
-#ifdef CONFIG_USE_MPI
-  print ("Define","CELLO_ARCH = %s",CELLO_ARCH);
-  print ("Define","CELLO_PREC = %s",CELLO_PREC);
-  print ("Define","CELLO_TYPE = %s",CELLO_TYPE);
-#endif
+  //  print ("Define","CELLO_ARCH = %s",CELLO_ARCH);
+  //  print ("Define","CELLO_PREC = %s",CELLO_PREC);
+  //  print ("Define","CELLO_TYPE = %s",CELLO_TYPE);
 
   // Print all recognized configuration settings
 

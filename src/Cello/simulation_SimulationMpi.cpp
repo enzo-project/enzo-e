@@ -67,7 +67,7 @@ void SimulationMpi::run() throw()
 
     while ((block = ++it_block)) {
 
-      initial->enforce(block, field_descr_, hierarchy_);
+      initial->enforce_block(block, field_descr_, hierarchy_);
 
       block->set_cycle(cycle_);
       block->set_time(time_);

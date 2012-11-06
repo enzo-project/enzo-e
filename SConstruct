@@ -150,10 +150,6 @@ define_debug_verbose =    ['CELLO_DEBUG_VERBOSE']
 define_hdf5  =            ['H5_USE_16_API']
 define_png   =            ['NO_FREETYPE']
 
-define_arch = [{'CELLO_ARCH' : arch}]
-define_prec = [{'CELLO_PREC' : prec}]
-define_type = [{'CELLO_TYPE' : type}]
-
 #----------------------------------------------------------------------
 # ASSEMBLE DEFINES
 #----------------------------------------------------------------------
@@ -221,8 +217,6 @@ if (trace != 0):         defines = defines + define_trace
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
-
-defines = defines + define_arch + define_prec + define_type
 
 #======================================================================
 # ARCHITECTURE SETTINGS
