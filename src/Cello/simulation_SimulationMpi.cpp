@@ -314,7 +314,7 @@ void SimulationMpi::scheduled_output()
 
       output->open();
 
-      output->write(this);
+      output->write_simulation(this);
 
       //--------------------------------------------------
       int ip       = group_process_->rank();

@@ -14,7 +14,6 @@ Import('inc_path')
 Import('lib_path')
 
 Import('use_papi')
-Import('use_lcaperf')
 
 #------------------------------
 # DEPENDENCIES
@@ -54,11 +53,6 @@ if (use_papi):
 else:
    libs_papi = []
 
-if (use_lcaperf):
-   libs_lcaperf = ['lcaperf']
-else:
-   libs_lcaperf = []
-
 libs_external    = ['external']
 libs_monitor     = ['monitor']
 libs_error       = ['error'] + libs_monitor
@@ -77,7 +71,7 @@ libs_test        = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
 if (type=='charm'):
-   libs_all = ['charm','simulation','problem','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_lcaperf + libs_papi
+   libs_all = ['charm','simulation','problem','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
    libs_field  = libs_all
    libs_io     = libs_all
    libs_mesh   = libs_all
@@ -112,10 +106,6 @@ includes_monitor =     [Glob('*monitor*hpp')]
 includes_parallel =    [Glob('*parallel*hpp'),'parallel.def']
 includes_parameters =  [Glob('*parameters*hpp'),'parse.h']
 includes_performance = [Glob('*performance*hpp')]
-if (use_lcaperf):
-   includes_lcaperf     = [Glob('*lcaperf*hpp'),'lcaperf.def']
-else:
-   includes_lcaperf = []
 includes_problem     = [Glob('*problem*hpp')]
 includes_simulation =  [Glob('*simulation*hpp')]
 includes_test =        [Glob('*test*hpp')]
@@ -133,10 +123,6 @@ sources_monitor =     [Glob('monitor*cpp')]
 sources_parallel =    [Glob('parallel*cpp')]
 sources_parameters =  [Glob('parameters*cpp'),'parse.tab.c','lex.yy.c']
 sources_performance = [Glob('performance*cpp')]
-if (use_lcaperf):
-   sources_lcaperf = [Glob('lcaperf*cpp')]
-else:
-   sources_lcaperf = []
 sources_problem =     [Glob("problem*cpp")]
 sources_simulation =  [Glob("simulation*cpp")]
 sources_test =        [Glob('test_Unit*cpp')]
@@ -200,7 +186,6 @@ if (type == "charm"):
    sources_monitor.append(["main.cpp"])
    sources_parameters.append(["main.cpp"])
    sources_performance.append(["main.cpp"])
-   sources_lcaperf.append(["main.cpp"])
 
 test_FileHdf5     = env.Program ('test_FileHdf5.cpp',   LIBS=[libs_disk,  libs_test])
 test_FileIfrit    = env.Program ('test_FileIfrit.cpp',  LIBS=[libs_disk,  libs_test])
@@ -285,10 +270,6 @@ test_timer = env.Program('test_Timer.cpp',
                                LIBS=[libs_performance,libs_test])
 test_papi        = env.Program('test_Papi.cpp',          
                                LIBS=[libs_performance,libs_test])
-if (use_lcaperf):
-   test_lcaperf     = env.Program ('test_LcaPerf.cpp',      
-                                   LIBS=[libs_lcaperf, libs_test])
-
 
 libraries_charm   = env.Library ('charm',   sources_charm)
 libraries_disk   = env.Library ('disk',   sources_disk)
@@ -303,8 +284,6 @@ libraries_problem = env.Library ('problem', sources_problem)
 libraries_parallel = env.Library ('parallel', sources_parallel)
 libraries_parameters = env.Library ('parameters', sources_parameters)
 libraries_performance = env.Library ('performance', sources_performance)
-if (use_lcaperf):
-   libraries_lcaperf = env.Library ('lcaperf', sources_lcaperf)
 
 libraries_simulation = env.Library ('simulation', sources_simulation)
 libraries_test  = env.Library ('test', sources_test)
@@ -331,8 +310,6 @@ elif (type == "charm"):
 	sources_parallel.append(["main.cpp"])
 binaries_parameters = [test_parameters, test_parse]
 binaries_performance = [test_performance,test_papi,test_timer]
-if (use_lcaperf):
-   binaries_lcaperf     = [test_lcaperf]
 #--------------------------------------------------
 
 #------------------------------
@@ -390,11 +367,6 @@ env.Alias('install-lib',env.Install (lib_path,libraries_parameters))
 env.Alias('install-bin',env.Install (bin_path,binaries_performance))
 env.Alias('install-inc',env.Install (inc_path,includes_performance))
 env.Alias('install-lib',env.Install (lib_path,libraries_performance))
-
-if (use_lcaperf):
-   env.Alias('install-bin',env.Install (bin_path,binaries_lcaperf))
-   env.Alias('install-inc',env.Install (inc_path,includes_lcaperf))
-   env.Alias('install-lib',env.Install (lib_path,libraries_lcaperf))
 
 env.Alias('install-inc',env.Install (inc_path,includes_problem))
 env.Alias('install-lib',env.Install (lib_path,libraries_problem))

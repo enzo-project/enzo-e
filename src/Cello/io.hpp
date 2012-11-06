@@ -13,7 +13,6 @@
 
 #include "_parallel.hpp"
 #include "_performance.hpp"
-#include "_lcaperf.hpp"
 #include "_error.hpp"
 #include "_parameters.hpp"
 #include "_field.hpp"

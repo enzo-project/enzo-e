@@ -861,7 +861,6 @@ test_group("Performance");
 tests("Cello","test_Performance","test_Performance","");
 tests("Cello","test_Papi",       "test_Papi","");
 tests("Cello","test_Timer",       "test_Timer","");
-/* tests("Cello","test_LcaPerf",    "test_LcaPerf",""); */
 
 /* <hr> */
 /* <h2>Mesh Tests (Prototype Code)</h2> */

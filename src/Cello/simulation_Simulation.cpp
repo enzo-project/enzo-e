@@ -31,7 +31,6 @@ Simulation::Simulation
 #endif
   dimension_(0),
   cycle_(0),
-  level_(0),
   time_(0.0),
   dt_(0),
   stop_(false),
@@ -41,9 +40,6 @@ Simulation::Simulation
   performance_(),
   id_simulation_(-1),
   id_cycle_(-1),
-#ifdef CONFIG_USE_LCAPERF
-  lcaperf_(0),
-#endif
   monitor_(0),
   hierarchy_(0),
   field_descr_(0)
@@ -68,9 +64,6 @@ Simulation::Simulation
 
 Simulation::Simulation()
   : patch_loop_(0)
-#ifdef CONFIG_USE_LCAPERF
-  , lcaperf_(0)
-#endif
 { TRACE("Simulation()"); }
 
 #endif
@@ -112,11 +105,6 @@ void Simulation::pup (PUP::er &p)
 
   p | performance_;
 
-#ifdef CONFIG_USE_LCAPERF
-  if (up) lcaperf_ = new LcaPerf;
-  p | *lcaperf_;
-#endif
-
   if (up) monitor_ = Monitor::instance();
 
   if (up) hierarchy_ = new Hierarchy;
@@ -135,9 +123,6 @@ void Simulation::pup (PUP::er &p)
 Simulation::Simulation (CkMigrateMessage *m)
   : CBase_Simulation(m),
     patch_loop_(0)
-#ifdef CONFIG_USE_LCAPERF
-  , lcaperf_(0)
-#endif
 { TRACE("Simulation(CkMigrateMessage)"); }
 
 #endif
@@ -178,14 +163,6 @@ void Simulation::finalize() throw()
 {
   DEBUG0;
 
-#ifdef CONFIG_USE_LCAPERF
-
-  lcaperf_->stop("simulation");
-  lcaperf_->end();
-  lcaperf_->finalize();
-
-#endif
-
   performance_.stop_region(id_simulation_);
 
   performance_.end();
@@ -221,29 +198,7 @@ void Simulation::initialize_performance_() throw()
   id_simulation_ = performance_.new_region("simulation");
   id_cycle_      = performance_.new_region("cycle");
 
-#ifdef CONFIG_USE_LCAPERF
-
-  lcaperf_ = new LcaPerf (group_process_->rank(), group_process_->size());
-
-  lcaperf_->initialize();
-
-  lcaperf_->new_region("simulation");
-  lcaperf_->new_attribute("cycle",LCAP_INT);
-  lcaperf_->new_attribute("level",LCAP_INT);
-
-  lcaperf_->begin();
-
-#endif
-
   timer_.start();
-
-#ifdef CONFIG_USE_LCAPERF
-
-  lcaperf_->attribute("cycle",&cycle_,LCAP_INT);
-  lcaperf_->attribute("level",&level_,LCAP_INT);
-  lcaperf_->start("simulation");
-
-#endif
 
   for (size_t i=0; i<config_->performance_papi_counters.size(); i++) {
     performance_.new_counter(counter_type_papi, config_->performance_papi_counters[i]);
@@ -414,9 +369,6 @@ void Simulation::deallocate_() throw()
 {
   delete factory_;       factory_     = 0;
   delete parameters_;    parameters_  = 0;
-#ifdef CONFIG_USE_LCAPERF
-  delete lcaperf_; lcaperf_ = 0;
-#endif
   if (is_group_process_new_)
     { delete group_process_; group_process_ = 0; }
   delete hierarchy_;     hierarchy_ = 0;
@@ -491,6 +443,8 @@ void Simulation::performance_output()
   int num_counters =  performance_.num_counters();
   long long * counters = new long long [num_counters];
 
+  TRACE1 ("performance_output() num_counters = %d",num_counters);
+  TRACE1 ("performance_output() num_regions = %d",num_regions);
   for (int index_region = 0; index_region < num_regions; index_region++) {
 
     int id_region = index_region;
@@ -511,16 +465,6 @@ void Simulation::performance_output()
   delete [] counters;
 
   
-#ifdef CONFIG_USE_LCAPERF
-
-  lcaperf_->stop("simulation");
-  lcaperf_->print();
-  lcaperf_->attribute("cycle",&cycle_,LCAP_INT);
-  lcaperf_->start("simulation");
-
-#endif
-
-
 // #ifdef CONFIG_USE_CHARM
 
 //   // Save the performance object

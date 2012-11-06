@@ -100,12 +100,6 @@ public: // interface
   const Performance * performance() const throw()
   { return &performance_; }
 
-#ifdef CONFIG_USE_LCAPERF
-  /// Return a pointer to the lcaperf object
-  LcaPerf * lcaperf()
-  { return lcaperf_; }
-#endif
-
   /// Return the group process object
   const GroupProcess * group_process() const throw()
   { return group_process_; }
@@ -213,8 +207,8 @@ protected: // attributes
   /// Current cycle
   int cycle_;
 
-  /// Current level (currently only used in lcaperf)
-  int level_;
+  // /// Current level (currently only used in lcaperf)
+  // int level_;
 
   /// Current time
   double time_;
@@ -244,11 +238,6 @@ protected: // attributes
   /// Performance counter ids
   int id_simulation_;
   int id_cycle_;
-
-#ifdef CONFIG_USE_LCAPERF
-  /// Lcaperf
-  LcaPerf * lcaperf_;
-#endif
 
   /// Monitor object
   Monitor * monitor_;
