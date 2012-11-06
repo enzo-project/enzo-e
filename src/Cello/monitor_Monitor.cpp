@@ -75,6 +75,12 @@ void Monitor::header () const
 	 t->tm_min,
 	 t->tm_sec);
 
+  // Print all compile-time configuration setings
+
+  //  print ("Define","CELLO_ARCH = %s",CELLO_ARCH);
+  //  print ("Define","CELLO_PREC = %s",CELLO_PREC);
+  //  print ("Define","CELLO_TYPE = %s",CELLO_TYPE);
+
   // Print all recognized configuration settings
 
   // Parallel type defines

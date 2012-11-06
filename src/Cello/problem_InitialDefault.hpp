@@ -39,10 +39,10 @@ public: // interface
 
   /// Read initialization values from Initial group in parameter file
 
-  virtual void enforce (Block * block,
-			const FieldDescr * field_descr,
-			const Hierarchy * hierarchy
-			) throw();
+  virtual void enforce_block (Block * block,
+			      const FieldDescr * field_descr,
+			      const Hierarchy * hierarchy
+			      ) throw();
 
 private: // functions
   

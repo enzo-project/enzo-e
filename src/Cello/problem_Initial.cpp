@@ -38,15 +38,15 @@ void Initial::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void Initial::enforce_
+void Initial::enforce_simulation_
 ( Simulation * simulation ) throw()
 {
-  enforce (simulation->hierarchy(), simulation->field_descr());
+  enforce_hierarchy (simulation->hierarchy(), simulation->field_descr());
 }
 
 //----------------------------------------------------------------------
 
-void Initial::enforce_ 
+void Initial::enforce_hierarchy_
 (
  Hierarchy * hierarchy,
  const FieldDescr * field_descr
@@ -56,17 +56,17 @@ void Initial::enforce_
 
   while (Patch * patch = ++it_patch) {
 #ifdef CONFIG_USE_CHARM
-    TRACE("Initial::enforce_(Hierarchy) calling Patch::p_initial()");
+    TRACE("Initial::enforce_hiearchy_() calling Patch::p_initial()");
     ((CProxy_Patch *)patch)->p_initial();
 #else
-    enforce (patch, field_descr, hierarchy);
+    enforce_patch (patch, field_descr, hierarchy);
 #endif
   }
 }
 
 //----------------------------------------------------------------------
 
-void Initial::enforce_
+void Initial::enforce_patch_
 (
  Patch * patch,
  const FieldDescr * field_descr,
@@ -77,7 +77,7 @@ void Initial::enforce_
 
 #ifdef CONFIG_USE_CHARM
 
-  TRACE("Initial::enforce_(Patch) calling Block::p_initial()");
+  TRACE("Initial::enforce_patch_() calling Block::p_initial()");
   patch->block_array()->p_initial();
 
 #else
@@ -85,7 +85,7 @@ void Initial::enforce_
   ItBlock it_block (patch);
   while (Block * block = ++it_block) {
     // NO OFFSET: ASSUMES ROOT PATCH
-    enforce (block, field_descr, hierarchy);
+    enforce_block (block, field_descr, hierarchy);
   }
 
 #endif
@@ -94,7 +94,7 @@ void Initial::enforce_
 
 //----------------------------------------------------------------------
 
-void Initial::enforce_
+void Initial::enforce_block_
 (
  Block * block,
  const FieldDescr * field_descr,
@@ -109,6 +109,6 @@ void Initial::enforce_
   //   const FieldBlock * field_block = block->field_block();
   //   enforce (field_block,  field_descr, it_field.value());
   // }
-  ERROR("Initial::enforce_",
+  ERROR("Initial::enforce_block_",
 	"This function should not be called");
 }

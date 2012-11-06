@@ -46,6 +46,7 @@ public: // interface
     WARNING("Parameters::pup",
 	    "skipping Parameters::pup(): Config used for parameters instead");
     return;
+
     p | current_group_depth_;
     WARNING("Parameters::pup","skipping current_group_ (array of char *: change to std::string)");
     //    PUParray(p,current_group_,MAX_GROUP_DEPTH);
