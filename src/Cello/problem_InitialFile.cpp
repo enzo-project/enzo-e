@@ -61,14 +61,14 @@ void InitialFile::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void InitialFile::enforce
+void InitialFile::enforce_block
 (
  Block            * block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()
 {
-  ASSERT ("InitialFile::enforce",
+  ASSERT ("InitialFile::enforce_block",
 	  "Input block is expected to be NULL",
 	  block == 0);
 
@@ -87,7 +87,7 @@ void InitialFile::enforce
 
   // input_->read_hierarchy(hierarchy,field_descr);
 
-  INCOMPLETE("InitialFile::enforce");
+  INCOMPLETE("InitialFile::enforce_block");
 
   File * file = input_->file();
   int num_blocks = file->group_count();
@@ -132,7 +132,7 @@ void InitialFile::get_filename_
 
   } else {
 
-    ERROR1("InitialFile::enforce",
+    ERROR1("InitialFile::enforce_block",
 	   "Bad type %d for 'Initial : name' parameter",
 	   parameters_->type("name"));
 

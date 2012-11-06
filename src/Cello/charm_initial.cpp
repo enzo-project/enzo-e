@@ -61,7 +61,7 @@ void Problem::initial_next(Simulation * simulation) throw()
 
       DEBUG1 ("Start Initial(%d) B",index_initial_);
 
-      initial->enforce((Block *)NULL, field_descr, hierarchy);
+      initial->enforce_block((Block *)NULL, field_descr, hierarchy);
 
     }
 
@@ -111,7 +111,7 @@ void Block::p_initial()
 
   Initial * initial = simulation->problem()->initial();
 
-  initial->enforce(this,field_descr, simulation->hierarchy());
+  initial->enforce_block(this,field_descr, simulation->hierarchy());
 
   // Continue with Patch::s_initial
 

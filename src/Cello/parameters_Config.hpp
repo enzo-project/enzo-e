@@ -60,7 +60,7 @@ public: // attributes
   std::vector<int>           field_centering [3];
   double                     field_courant;
   std::vector<std::string>   field_fields;
-  int                        field_ghosts[3];;
+  int                        field_ghosts[3];
   int                        field_padding;
   int                        field_precision;
   bool                       field_refresh_corners;

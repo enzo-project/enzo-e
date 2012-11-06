@@ -55,30 +55,30 @@ public: // interface
 public: // virtual functions
 
   /// Initialize an entire simulation
-  virtual void enforce ( Simulation * simulation ) throw()
-  { enforce_(simulation); }
+  virtual void enforce_simulation ( Simulation * simulation ) throw()
+  { enforce_simulation_(simulation); }
 
   /// Initialize a mesh Hierarchy
-  virtual void enforce
+  virtual void enforce_hierarchy
   ( Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw()
-  { enforce_(hierarchy,field_descr); }
+  { enforce_hierarchy_(hierarchy,field_descr); }
 
   /// Initialize a Patch
-  virtual void enforce
+  virtual void enforce_patch
   ( Patch * patch, 
     const FieldDescr * field_descr,
     const  Hierarchy * hierarchy
     ) throw()
-  { enforce_(patch,field_descr,hierarchy); }
+  { enforce_patch_(patch,field_descr,hierarchy); }
 
   /// Initialize a Block
-  virtual void enforce
+  virtual void enforce_block
   ( Block * block, 
     const FieldDescr * field_descr,
     const Hierarchy * hierarchy
     ) throw()
-  { enforce_(block,field_descr,hierarchy); }
+  { enforce_block_(block,field_descr,hierarchy); }
 
   /// Return whether enforce() expects block != NULL
   virtual bool expects_blocks_allocated() const throw()
@@ -87,22 +87,22 @@ public: // virtual functions
 protected: // functions
 
   /// "Loop" over enforcing initial conditions on the Hierarchy
-  void enforce_ (Simulation * simulation ) throw();
+  void enforce_simulation_ (Simulation * simulation ) throw();
 
   /// Loop over enforcing initial conditions Patches in the Hierarchy
-  void enforce_
+  void enforce_hierarchy_
   ( Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
 
   /// Loop over enforcing initial conditions Blocks in the Patch
-  void enforce_
+  void enforce_patch_
   ( Patch * patch, 
     const FieldDescr * field_descr,
     const Hierarchy * hierarchy
     ) throw();
 
   /// Loop over enforcing initial conditions Field data in the Block
-  void enforce_
+  void enforce_block_
   ( Block * block, 
     const FieldDescr * field_descr,  
     const Hierarchy * hierarchy

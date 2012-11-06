@@ -41,7 +41,7 @@ void InitialDefault::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void InitialDefault::enforce
+void InitialDefault::enforce_block
 (
  Block            * block,
  const FieldDescr * field_descr,
@@ -50,7 +50,7 @@ void InitialDefault::enforce
 {
   // Initialize Fields according to parameters
 
-  ASSERT("InitialDefault::enforce",
+  ASSERT("InitialDefault::enforce_block",
 	 "Block does not exist",
 	 block != NULL);
   
@@ -91,7 +91,7 @@ void InitialDefault::enforce
 
       int list_length = parameters_->list_length("value");
 
-      ASSERT1("InitialDefault::enforce",
+      ASSERT1("InitialDefault::enforce_block",
 	     "Length of list parameter Initial:%s:value must be odd",
 	     field_name.c_str(),
 	     (list_length % 2) == 1);
@@ -131,12 +131,12 @@ void InitialDefault::enforce
       }
 
     } else if (parameter_type == parameter_unknown) {
-      WARNING1("InitialDefault::enforce",  
+      WARNING1("InitialDefault::enforce_block",  
 	       "Uninitialized field %s",
 	       field_name.c_str());
       
     } else {
-      ERROR2("InitialDefault::enforce",
+      ERROR2("InitialDefault::enforce_block",
 	     "Illegal parameter type %s when initializing field %s",
 	     parameter_type_name[parameter_type],field_name.c_str());
     }
