@@ -4,7 +4,7 @@ cc  = {}
 
 is_arch_valid = 1
 
-flags_arch = '-fast'
+flags_arch = '-O3'
 flags_link = '-pgf90libs'
 
 cc['mpi']     = 'mpicc'

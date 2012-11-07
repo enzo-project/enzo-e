@@ -4,7 +4,9 @@ cc  = {}
 
 is_arch_valid = 1
 
-flags_arch = '-g'
+#flags_arch = '-g'
+#flags_arch = '-Ofast' # ERROR: ipo linking
+flags_arch = '-O3'
 flags_link  = ''
 
 cc['mpi']     = 'mpicc'
