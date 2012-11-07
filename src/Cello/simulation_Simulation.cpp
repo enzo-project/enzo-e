@@ -426,6 +426,7 @@ void Simulation::monitor_output()
 
   performance_output ();
 
+  Memory * memory = Memory::instance();
   memory->reset_high();
 
 # ifdef CONFIG_USE_CHARM
