@@ -74,6 +74,7 @@ PARALLEL_MAIN_BEGIN
   performance->begin();
 
   long long counter_values [10];
+  TRACE2("%d %d",performance->counter_values(counter_values) , num_counters);
   unit_assert (performance->counter_values(counter_values) == num_counters);
 
   performance->start_region(id_region_1);

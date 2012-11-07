@@ -127,8 +127,11 @@ public: // interface
   /// Output Simulation information
   void monitor_output();
 
-  /// Output Performance information
+  /// Output Performance information to stdout (root process data only)
   void performance_output();
+
+  /// Write performance information to disk (all process data)
+  void performance_write();
 
 public: // virtual functions
 
@@ -238,6 +241,12 @@ protected: // attributes
   /// Performance counter ids
   int id_simulation_;
   int id_cycle_;
+
+  /// Performance file name format (requires %d for process rank)
+  std::string performance_name_;
+
+  /// Processor stride for writing strict processor subset of performance data
+  int performance_stride_;
 
   /// Monitor object
   Monitor * monitor_;

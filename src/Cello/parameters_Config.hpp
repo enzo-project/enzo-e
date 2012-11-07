@@ -100,6 +100,8 @@ public: // attributes
   std::vector<double>        output_schedule_list  [MAX_FILE_GROUPS];
 
   std::vector<std::string>   performance_papi_counters;
+  std::string                performance_name;
+  int                        performance_stride;
 
   int                        stopping_cycle;
   double                     stopping_time;

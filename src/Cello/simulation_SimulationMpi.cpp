@@ -295,9 +295,9 @@ void SimulationMpi::run() throw()
   // END MAIN LOOP
   //======================================================================
 
+  performance_write();
   scheduled_output();
   monitor_output();
-  performance_output();
 
 }
 

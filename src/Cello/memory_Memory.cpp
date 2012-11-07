@@ -48,6 +48,7 @@ void Memory::initialize_() throw ()
     limit_       [i] = 0;
     bytes_       [i] = 0;
     bytes_high_  [i] = 0;
+    bytes_highest_  [i] = 0;
     new_calls_   [i] = 0;
     delete_calls_[i] = 0;
   }
@@ -96,14 +97,16 @@ void * Memory::allocate ( size_t bytes ) throw ()
 
     ++ new_calls_[0] ;
     bytes_[0] += bytes;
-    bytes_high_[0] = MAX(bytes_high_[0],bytes_[0]);
+    bytes_high_[0]    = MAX(bytes_high_[0],   bytes_[0]);
+    bytes_highest_[0] = MAX(bytes_highest_[0],bytes_[0]);
 
     memory_group_handle current = curr_group_.top();
 
     if (current != 0) {
       ++ new_calls_[current] ;
       bytes_[current] += bytes;
-      bytes_high_[current] = MAX(bytes_high_[current],bytes_[current]);
+      bytes_high_[current]    = MAX(bytes_high_[current],   bytes_[current]);
+      bytes_highest_[current] = MAX(bytes_highest_[current],bytes_[current]);
     }
 
   } else {
@@ -306,7 +309,20 @@ float Memory::efficiency ( memory_group_handle group_handle ) throw ()
 long long Memory::bytes_high ( memory_group_handle group_handle ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
+  TRACE1("bytes_high = %lld",bytes_high_[group_handle]);
   return bytes_high_[group_handle];
+#else
+  return 0;
+#endif
+}
+
+//----------------------------------------------------------------------
+
+long long Memory::bytes_highest ( memory_group_handle group_handle ) throw ()
+{
+#ifdef CONFIG_USE_MEMORY
+  TRACE1("bytes_highest = %lld",bytes_highest_[group_handle]);
+  return bytes_highest_[group_handle];
 #else
   return 0;
 #endif
@@ -364,11 +380,12 @@ void Memory::print () throw ()
     Monitor * monitor = Monitor::instance();
     if (i == 0 || group_names_[i] != NULL) {
       monitor->print ("Memory","Group %s",i ? group_names_[i]: "Total");
-      monitor->print ("Memory","  limit        = %ld",long(limit_[i]));
-      monitor->print ("Memory","  bytes        = %ld",long(bytes_[i]));
-      monitor->print ("Memory","  bytes_high   = %ld",long(bytes_high_[i]));
-      monitor->print ("Memory","  new_calls    = %ld",long(new_calls_[i]));
-      monitor->print ("Memory","  delete_calls = %ld",long(delete_calls_[i]));
+      monitor->print ("Memory","  limit         = %ld",long(limit_[i]));
+      monitor->print ("Memory","  bytes         = %ld",long(bytes_[i]));
+      monitor->print ("Memory","  bytes_high    = %ld",long(bytes_high_[i]));
+      monitor->print ("Memory","  bytes_highest = %ld",long(bytes_highest_[i]));
+      monitor->print ("Memory","  new_calls     = %ld",long(new_calls_[i]));
+      monitor->print ("Memory","  delete_calls  = %ld",long(delete_calls_[i]));
     }
   }
 #endif
@@ -386,6 +403,7 @@ void Memory::reset() throw()
   for (int i=0; i<max_group_id_ + 1; i++) {
     bytes_       [i] = 0;
     bytes_high_  [i] = 0;
+    bytes_highest_  [i] = 0;
     new_calls_   [i] = 0;
     delete_calls_[i] = 0;
   }
@@ -397,6 +415,7 @@ void Memory::reset() throw()
 void Memory::reset_high() throw()
 {
 #ifdef CONFIG_USE_MEMORY
+  TRACE("reset_high");
   for (int i=0; i<max_group_id_ + 1; i++) {
     bytes_high_ [i] = bytes_[i];
   }

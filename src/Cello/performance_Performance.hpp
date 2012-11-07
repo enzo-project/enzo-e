@@ -10,18 +10,21 @@
 
 /// @enum     type_counter
 /// @brief    Counter value type
-#define NUM_COUNTER_TYPES 4
+#define NUM_COUNTER_TYPES 5
 enum counter_type {
   counter_type_unknown,
-  counter_type_basic,
+  counter_type_basic_rel,
+  counter_type_basic_abs,
   counter_type_papi,
   counter_type_user
 };
 
+
 enum counter_base {
-  base_user  = 1000,
-  base_papi  = 2000,
-  base_basic = 3000
+  base_user      = 1000,
+  base_papi      = 2000,
+  base_basic_abs = 3000,
+  base_basic_rel = 4000
 };
 
 
@@ -61,12 +64,14 @@ public: // interface
     p | region_started_;
     //    p | region_index_;
     //    p | papi_counters_
-    p | i0_basic;
-    p | i0_user;
-    p | i0_papi;
-    p | n_basic;
-    p | n_user;
-    p | n_papi;
+    p | i0_basic_rel_;
+    p | i0_basic_abs_;
+    p | i0_user_;
+    p | i0_papi_;
+    p | n_basic_rel_;
+    p | n_basic_abs_;
+    p | n_user_;
+    p | n_papi_;
   }
 #endif
 
@@ -81,7 +86,7 @@ public: // interface
   //--------------------------------------------------
 
   /// Return the number of counters
-  int num_counters() const throw() { return n_basic + n_papi + n_user; }
+  int num_counters() const throw() { return n_basic_rel_ + n_basic_abs_ + n_papi_ + n_user_; }
 
   ///  	Create a new user counter.
   int new_counter(counter_type type, std::string counter_name);
@@ -205,10 +210,16 @@ private: // attributes
   long long * papi_counters_;
 
   /// Indices for marking beginning of counters of different types
-  int i0_basic, i0_papi, i0_user;
+  int i0_basic_rel_;
+  int i0_basic_abs_;
+  int i0_papi_;
+  int i0_user_;
 
   /// Indices for marking ending of counters of different types
-  int n_basic,  n_papi,  n_user;
+  int n_basic_rel_;
+  int n_basic_abs_;
+  int n_papi_;
+  int n_user_;
 
 };
 

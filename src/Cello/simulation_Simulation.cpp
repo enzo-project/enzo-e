@@ -40,6 +40,8 @@ Simulation::Simulation
   performance_(),
   id_simulation_(-1),
   id_cycle_(-1),
+  performance_name_(""),
+  performance_stride_(1),
   monitor_(0),
   hierarchy_(0),
   field_descr_(0)
@@ -105,6 +107,11 @@ void Simulation::pup (PUP::er &p)
 
   p | performance_;
 
+  p | id_simulation_;
+  p | id_cycle_;
+  p | performance_name_;
+  p | performance_stride_;
+
   if (up) monitor_ = Monitor::instance();
 
   if (up) hierarchy_ = new Hierarchy;
@@ -165,7 +172,10 @@ void Simulation::finalize() throw()
 
   performance_.stop_region(id_simulation_);
 
+  PARALLEL_PRINTF("Tracing Simulation::finalize %d\n",group_process_->rank());
+
   performance_.end();
+
 
 }
 
@@ -197,6 +207,9 @@ void Simulation::initialize_performance_() throw()
 
   id_simulation_ = performance_.new_region("simulation");
   id_cycle_      = performance_.new_region("cycle");
+
+  performance_name_   = config_->performance_name;
+  performance_stride_ = config_->performance_stride;
 
   timer_.start();
 
@@ -411,18 +424,9 @@ void Simulation::monitor_output()
 
   TRACE0;
 
-  Memory * memory = Memory::instance();
-
-  TRACE0;
-  if (memory->is_active()) {
-    monitor_->print("Memory","bytes-curr %lld", memory->bytes());
-    monitor_->print("Memory","bytes-high %lld", memory->bytes_high());
-
-    memory->reset_high();
-  }
-  TRACE0;
-
   performance_output ();
+
+  memory->reset_high();
 
 # ifdef CONFIG_USE_CHARM
 
@@ -443,8 +447,6 @@ void Simulation::performance_output()
   int num_counters =  performance_.num_counters();
   long long * counters = new long long [num_counters];
 
-  TRACE1 ("performance_output() num_counters = %d",num_counters);
-  TRACE1 ("performance_output() num_regions = %d",num_regions);
   for (int index_region = 0; index_region < num_regions; index_region++) {
 
     int id_region = index_region;
@@ -458,99 +460,55 @@ void Simulation::performance_output()
       monitor_->print("Performance","%s %s %lld",
 	      performance_.region_name(id_region).c_str(),
 	      performance_.counter_name(id_counter).c_str(),
-	      counters[index_counter]);
+	      counters[index_counter]);  
     }
   }
 
   delete [] counters;
 
-  
-// #ifdef CONFIG_USE_CHARM
-
-//   // Save the performance object
-
-//   // First reduce minimum values
-
-//   CkCallback callback (CkIndex_SimulationCharm::p_performance_min(NULL),
-// 		       thisProxy);
-
-//   TRACE1("Calling contribute %d",num_perf_*sizeof(double));
-//   contribute( num_perf_*sizeof(double), perf_val_, 
-// 	      CkReduction::min_double, callback);
-// #else
-
-//   Reduce * reduce = group_process()->create_reduce();
-
-//   for (size_t i = 0; i < num_perf_; i++) {
-//     perf_min_[i] = reduce->reduce_double(perf_val_[i],reduce_op_min);
-//     perf_max_[i] = reduce->reduce_double(perf_val_[i],reduce_op_max);
-//     perf_sum_[i] = reduce->reduce_double(perf_val_[i],reduce_op_sum);
-//   }
-
-//   delete reduce; reduce = 0;
-
-//  output_performance_();
-
-// #endif
-
 }
+
 
 //----------------------------------------------------------------------
 
-// void Simulation::output_performance_()
-// {
-//   DEBUG("Simulation::output_performance");
+void Simulation::performance_write()
+{
+  TRACE("Simulation::performance_write()");
 
-//   monitor_->print ("Performance","time-accum %f", timer_.value());
+  PARALLEL_PRINTF("Tracing Simulation::performance_write %d\n",group_process_->rank());
 
-// #ifdef CONFIG_USE_PERFORMANCE
+  if (performance_name_ != "" && (group_process_->rank() % performance_stride_) == 0) {
 
-//   int i = 0;
-//   int np = group_process()->size();
+    char filename[30];
+    sprintf (filename,performance_name_.c_str(),group_process_->rank());
+    FILE * fp = fopen(filename,"w");
 
-//   std::string region;
+    int num_regions  = performance_.num_regions();
+    int num_counters =  performance_.num_counters();
+    long long * counters = new long long [num_counters];
 
-//   if (performance_curr_ == performance_simulation_) {
-//     region = "total";
-//   } else if (performance_curr_ == performance_cycle_) {
-//     region = "cycle";
-//   } else {
-//     ERROR1 ("Simulation::output_performance_",
-// 	    "Illegal performance_curr_ pointer %p",
-// 	    performance_curr_);
-//   }
+    for (int index_region = 0; index_region < num_regions; index_region++) {
 
-//   monitor_->print ("Performance","%s time-real        %f %f %f",
-// 		   region.c_str(),perf_min_[i],perf_sum_[i]/np,perf_max_[i]);
-//   ++i;
+      int id_region = index_region;
 
-// #ifdef CONFIG_USE_PAPI
+      performance_.region_counters(index_region,counters);
 
-//   monitor_->print ("Performance","%s time-real-papi   %f %f %f", 
-// 		   region.c_str(), perf_min_[i],perf_sum_[i]/np,perf_max_[i]);
-//   ++i;
-//   monitor_->print ("Performance","%s time-proc-papi   %f %f %f",
-// 		   region.c_str(), perf_min_[i],perf_sum_[i]/np,perf_max_[i]);
-//   ++i;
-//   monitor_->print ("Performance","%s gflop-count-papi %f %f %f",
-// 		   region.c_str(), perf_min_[i],perf_sum_[i]/np,perf_max_[i]);
-//   ++i;
-//   monitor_->print ("Performance","%s gflop-rate-papi  %f %f %f",
-// 		   region.c_str(), perf_min_[i],perf_sum_[i]/np,perf_max_[i]);
-// #endif
+      for (int index_counter = 0; index_counter < num_counters; index_counter++) {
+    
+	int id_counter = performance_.index_to_id(index_counter);
 
-// #ifdef CONFIG_USE_CHARM
-//   if (performance_curr_ == performance_cycle_) {
-//     ((SimulationCharm *) this)->c_compute();
-//   // } else {
-//   //   DEBUG("Calling p_exit");
-//   //   proxy_main.p_exit(CkNumPes());
-//   }
-// #endif
+	fprintf (fp,"%s %s %lld\n",
+		 performance_.region_name(id_region).c_str(),
+		 performance_.counter_name(id_counter).c_str(),
+		 counters[index_counter]);  
+      }
+    }
 
-// #endif /* CONFIG_USE_PERFORMANCE */
+    delete [] counters;
+    fclose(fp);
+    
+  }
 
-//   // monitor_->set_active(save_active);
+}
 
-// }
 //======================================================================

@@ -86,6 +86,7 @@ void SimulationCharm::c_compute()
   if (stop_) {
     
     performance_.stop_region (id_cycle_);
+    performance_write();
 
     proxy_main.p_exit(CkNumPes());
 

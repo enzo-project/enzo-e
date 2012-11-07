@@ -21,15 +21,20 @@ Performance::Performance ()
     region_started_(),
     region_index_(),
     papi_counters_(0),
-    i0_basic(0),
-    i0_papi(0),
-    i0_user(0),
-    n_basic(0),
-    n_papi(0),
-    n_user(0)
+    i0_basic_rel_(0),
+    i0_basic_abs_(0),
+    i0_papi_(0),
+    i0_user_(0),
+    n_basic_rel_(0),
+    n_basic_abs_(0),
+    n_papi_(0),
+    n_user_(0)
 {
 
-  new_counter(counter_type_basic,"time-usec");
+  new_counter(counter_type_basic_rel,"time-usec");
+  new_counter(counter_type_basic_abs,"bytes-curr");
+  new_counter(counter_type_basic_abs,"bytes-high");
+  new_counter(counter_type_basic_abs,"bytes-highest");
 
   papi_.init();
 
@@ -82,20 +87,37 @@ int Performance::new_counter
 
   int id;
 
-  if (type == counter_type_basic) {
-    id = type_index_to_id (counter_type_basic,n_basic);
-    ++n_basic;
-    ++i0_papi;
-    ++i0_user;
+  if (type == counter_type_basic_rel) {
+
+    id = type_index_to_id (type,n_basic_rel_);
+    ++n_basic_rel_;
+
+    ++i0_user_;    ++i0_papi_;    ++i0_basic_abs_;
+
+  } else if (type == counter_type_basic_abs) {
+
+    id = type_index_to_id (type,n_basic_abs_);
+    ++n_basic_abs_;
+
+    ++i0_user_;    ++i0_papi_;
+
   } else if (type == counter_type_papi) {
-    id = type_index_to_id (counter_type_papi,n_papi);
-    ++n_papi;
-    ++i0_user;
+
+    id = type_index_to_id (type,n_papi_);
+    ++n_papi_;
+
+    ++i0_user_;
+
     papi_.add_event (counter_name);
+
   } else if (type == counter_type_user) {
-    id = type_index_to_id (counter_type_user,n_user);
-    ++n_user;
+
+    id = type_index_to_id (type,n_user_);
+    ++n_user_;
+
   }
+
+  TRACE4("%d %d %d %d",n_basic_abs_,n_basic_rel_,n_papi_,n_user_);
 
   return id;
 }
@@ -106,11 +128,17 @@ void Performance::refresh_counters_() throw()
 {
   papi_.event_values(papi_counters_);
 
-  for (int i=i0_papi; i<i0_papi+n_papi; i++) {
-    counter_values_[i] = papi_counters_[i-i0_papi];
+  for (int i=i0_papi_; i<i0_papi_+n_papi_; i++) {
+    counter_values_[i] = papi_counters_[i-i0_papi_];
   }
 
-  counter_values_[i0_basic] = time_real_();
+  Memory * memory = Memory::instance();
+  
+  counter_values_[i0_basic_rel_]   = time_real_();
+
+  counter_values_[i0_basic_abs_]   = memory->bytes();
+  counter_values_[i0_basic_abs_+1] = memory->bytes_high();
+  counter_values_[i0_basic_abs_+2] = memory->bytes_highest();
 
 }
 
@@ -120,7 +148,7 @@ void Performance::assign_counter(int id, long long value)
 {
   int index = id_to_index(id);
 
-  if ( (i0_user <= index) && (index < i0_user + n_user )) {
+  if ( (i0_user_ <= index) && (index < i0_user_ + n_user_ )) {
     
     counter_values_[index] = value;
 
@@ -128,7 +156,7 @@ void Performance::assign_counter(int id, long long value)
 
     WARNING3 ("Performance::assign_counter",
 	      "counter index %d out of range [%d,%d]",
-	      index,i0_user,i0_user+n_user-1);
+	      index,i0_user_,i0_user_+n_user_-1);
 
   }
 
@@ -140,7 +168,7 @@ void Performance::increment_counter(int id, long long value)
 {
   int index = id_to_index(id);
 
-  if ( (i0_user <= index) && (index < i0_user + n_user) ) {
+  if ( (i0_user_ <= index) && (index < i0_user_ + n_user_) ) {
 
     counter_values_[index] += value;
 
@@ -148,7 +176,7 @@ void Performance::increment_counter(int id, long long value)
 
     WARNING3 ("Performance::increment_counter",
 	      "counter index %d out of range [%d,%d]",
-	      index,i0_user,i0_user+n_user-1);
+	      index,i0_user_,i0_user_+n_user_-1);
 
   }
 }
@@ -252,8 +280,12 @@ void  Performance::stop_region(int id_region) throw()
 
   for (int i=0; i<num_counters(); i++) {
 
-    region_counters_[index_region][i] = 
-      counter_values_[i] - region_counters_[index_region][i];
+    if (i0_basic_abs_ <= i && i < i0_basic_abs_ + n_basic_abs_) {
+      region_counters_[index_region][i] = counter_values_[i];
+    } else {
+      region_counters_[index_region][i] = 
+	counter_values_[i] - region_counters_[index_region][i];
+    }
 
   }
 }
@@ -262,14 +294,18 @@ void  Performance::stop_region(int id_region) throw()
 
 void Performance::region_counters(int index_region, long long * counters) throw()
 {
-  if (!region_started_[index_region]) {
+  if ( ! region_started_[index_region]) {
     for (int i=0; i<num_counters(); i++) {
       counters[i] = region_counters_[index_region][i];
     }
   } else {
     refresh_counters_();
     for (int i=0; i<num_counters(); i++) {
-      counters[i] = counter_values_[i] - region_counters_[index_region][i];
+      if (i0_basic_abs_ <= i && i < i0_basic_abs_ + n_basic_abs_) {
+	counters[i] = counter_values_[i];
+      } else {
+	counters[i] = counter_values_[i] - region_counters_[index_region][i];
+      }
     }
   }
 }
@@ -280,12 +316,14 @@ int Performance::index_to_id (int index) const throw()
 {
   int id;
 
-  if        (i0_user  <= index && index < i0_user +  n_user) {
-    id = base_user +  (index - i0_user);
-  } else if (i0_basic <= index && index < i0_basic + n_basic) {
-    id = base_basic + (index - i0_basic);
-  } else if (i0_papi  <= index && index < i0_papi +  n_papi) {
-    id = base_papi +  (index - i0_papi);
+  if        (i0_user_  <= index && index < i0_user_ +  n_user_) {
+    id = base_user      +  (index - i0_user_);
+  } else if (i0_basic_abs_ <= index && index < i0_basic_abs_ + n_basic_abs_) {
+    id = base_basic_abs + (index - i0_basic_abs_);
+  } else if (i0_basic_rel_ <= index && index < i0_basic_rel_ + n_basic_rel_) {
+    id = base_basic_rel + (index - i0_basic_rel_);
+  } else if (i0_papi_  <= index && index < i0_papi_ +  n_papi_) {
+    id = base_papi      +  (index - i0_papi_);
   } else {
     WARNING1 ("Performance::index_to_id",
 	      "counter index %d out of range",
@@ -302,7 +340,8 @@ int Performance::type_index_to_id (counter_type type, int index) const throw()
   int id = index;
 
   if      (type == counter_type_user)  id += base_user;
-  else if (type == counter_type_basic) id += base_basic;
+  else if (type == counter_type_basic_rel) id += base_basic_rel;
+  else if (type == counter_type_basic_abs) id += base_basic_abs;
   else if (type == counter_type_papi)  id += base_papi;
   else {
     WARNING1 ("Performance::type_index_to_id",
@@ -318,12 +357,14 @@ int Performance::type_index_to_id (counter_type type, int index) const throw()
 int Performance::id_to_index(int id) const throw()
 {
   int index = id;
-  if      (base_user <= id  && id < base_user  + n_user)
-    index += (i0_user  - base_user);
-  else if (base_papi <= id  && id < base_papi  + n_papi)  
-    index += (i0_papi  - base_papi);
-  else if (base_basic <= id && id < base_basic + n_basic) 
-    index += (i0_basic - base_basic);
+  if      (base_user <= id  && id < base_user  + n_user_)
+    index += (i0_user_  - base_user);
+  else if (base_papi <= id  && id < base_papi  + n_papi_)  
+    index += (i0_papi_  - base_papi);
+  else if (base_basic_rel <= id && id < base_basic_rel + n_basic_rel_) 
+    index += (i0_basic_rel_ - base_basic_rel);
+  else if (base_basic_abs <= id && id < base_basic_abs + n_basic_abs_) 
+    index += (i0_basic_abs_ - base_basic_abs);
   else {
     WARNING1 ("Performance::id_to_index",
 	      "counter id %d out of range",
@@ -338,15 +379,18 @@ void Performance::id_to_type_index_
 (int id, counter_type * type, int * index) const throw()
 {
   (*index) = id;
-  if (base_user <= id && id < base_user + n_user) {
+  if (base_user <= id && id < base_user + n_user_) {
     (*type) = counter_type_user;
     (*index) -= base_user;
-  } else if (base_papi <= id && id < base_papi + n_papi) {
+  } else if (base_papi <= id && id < base_papi + n_papi_) {
     (*type) = counter_type_papi;
     (*index) -= base_papi;
-  } else if (base_basic <= id && id < base_basic + n_basic) {
-    (*type) = counter_type_basic;
-    (*index) -= base_basic;
+  } else if (base_basic_rel <= id && id < base_basic_rel + n_basic_rel_) {
+    (*type) = counter_type_basic_rel;
+    (*index) -= base_basic_rel;
+  } else if (base_basic_abs <= id && id < base_basic_abs + n_basic_abs_) {
+    (*type) = counter_type_basic_abs;
+    (*index) -= base_basic_abs;
   } else {
     WARNING1 ("Performance::id_to_type_index_",
 	      "counter id %d out of range",
