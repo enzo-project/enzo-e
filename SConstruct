@@ -346,7 +346,8 @@ linkflags    = linkflags + ' ' + flags_link
 linkflags    = linkflags + ' ' + flags_config
 if (type=="charm"):linkflags    = linkflags + ' ' + flags_link_charm
 
-
+if not os.path.exists("include"):
+     os.makedirs("include")
 cello_def = open ("include/auto_config.def", "w")
 
 cello_def.write ("#define CELLO_ARCH \""+arch+"\"\n")
