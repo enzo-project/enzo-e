@@ -23,6 +23,8 @@
 // Component class includes
 //----------------------------------------------------------------------
 
+#include "auto_config.def"
+
 #include "monitor_Monitor.hpp"
 
 #endif /* _MONITOR_HPP */

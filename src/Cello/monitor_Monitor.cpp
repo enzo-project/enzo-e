@@ -85,58 +85,22 @@ void Monitor::header () const
 
   // Parallel type defines
 
-#ifdef CONFIG_USE_MPI
-  print ("Define","CONFIG_USE_MPI");
-#endif
-#ifdef CONFIG_USE_CHARM
-  print ("Define","CONFIG_USE_CHARM");
-#endif
-
-  // Precision defines
-
-#ifdef CONFIG_PRECISION_SINGLE
-  print ("Define","CONFIG_PRECISION_SINGLE");
-#endif
-#ifdef CONFIG_PRECISION_DOUBLE
-  print ("Define","CONFIG_PRECISION_DOUBLE");
-#endif
-
-  // Performance defines
-
-#ifdef CONFIG_USE_MEMORY
-  print ("Define","CONFIG_USE_MEMORY");
-#endif
-#ifdef CONFIG_USE_PROJECTIONS
-  print ("Define","CONFIG_USE_PROJECTIONS");
-#endif
-#ifdef CONFIG_USE_PERFORMANCE
-  print ("Define","CONFIG_USE_PERFORMANCE");
-#endif
-#ifdef CONFIG_USE_PAPI
-  print ("Define","CONFIG_USE_PAPI");
-#endif
-
-  // Debugging defines
-
-#ifdef CELLO_TRACE
-  print ("Define","CELLO_TRACE");
-#endif
-#ifdef CELLO_DEBUG
-  print ("Define","CELLO_DEBUG");
-#endif
-#ifdef CELLO_DEBUG_VERBOSE
-  print ("Define","CELLO_DEBUG_VERBOSE");
-#endif
-
-  // Library defines
-
-#ifdef H5_USE_16_API
-  print ("Define","H5_USE_16_API");
-#endif
-#ifdef NO_FREETYPE
-  print ("Define","NO_FREETYPE");
-#endif
-
+  print ("Define","CELLO_ARCH %s",CELLO_ARCH);
+  print ("Define","CELLO_PREC %s",CELLO_PREC);
+  print ("Define","CELLO_TYPE %s",CELLO_TYPE);
+  
+  print ("Define","CC           %s",CELLO_CC);
+  print ("Define","CFLAGS       %s",CELLO_CFLAGS);
+  print ("Define","CPPDEFINES   %s",CELLO_CPPDEFINES);
+  print ("Define","CPPPATH      %s",CELLO_CPPPATH);
+  print ("Define","CXX          %s",CELLO_CXX);
+  print ("Define","CXXFLAGS     %s",CELLO_CXXFLAGS);
+  print ("Define","FORTRANFLAGS %s",CELLO_FORTRANFLAGS);
+  print ("Define","FORTRAN      %s",CELLO_FORTRAN);
+  print ("Define","FORTRANLIBS  %s",CELLO_FORTRANLIBS);
+  print ("Define","FORTRANPATH  %s",CELLO_FORTRANPATH);
+  print ("Define","LIBPATH      %s",CELLO_LIBPATH);
+  print ("Define","LINKFLAGS    %s",CELLO_LINKFLAGS);
 }
 
 //----------------------------------------------------------------------

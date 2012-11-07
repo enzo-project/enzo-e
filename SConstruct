@@ -346,6 +346,27 @@ linkflags    = linkflags + ' ' + flags_link
 linkflags    = linkflags + ' ' + flags_config
 if (type=="charm"):linkflags    = linkflags + ' ' + flags_link_charm
 
+
+cello_def = open ("include/auto_config.def", "w")
+
+cello_def.write ("#define CELLO_ARCH \""+arch+"\"\n")
+cello_def.write ("#define CELLO_TYPE \""+type+"\"\n")
+cello_def.write ("#define CELLO_PREC \""+prec+"\"\n")
+cello_def.write ("#define CELLO_CC           \""+cc[type]+"\"\n")	
+cello_def.write ("#define CELLO_CFLAGS       \""+cflags+"\"\n")
+cello_def.write ("#define CELLO_CPPDEFINES   \""+" ".join(map(str,defines))+"\"\n")
+cello_def.write ("#define CELLO_CPPPATH      \""+" ".join(map(str,cpppath))+"\"\n")
+cello_def.write ("#define CELLO_CXX          \""+cxx[type]+"\"\n")	
+cello_def.write ("#define CELLO_CXXFLAGS     \""+cxxflags+"\"\n")
+cello_def.write ("#define CELLO_FORTRANFLAGS \""+fortranflags+"\"\n")
+cello_def.write ("#define CELLO_FORTRAN      \""+f90[type]+"\"\n")
+cello_def.write ("#define CELLO_FORTRANLIBS  \""+" ".join(map(str,libs_fortran))+"\"\n")
+cello_def.write ("#define CELLO_FORTRANPATH  \""+" ".join(map(str,fortranpath))+"\"\n")
+cello_def.write ("#define CELLO_LIBPATH      \""+" ".join(map(str,libpath))+"\"\n")
+cello_def.write ("#define CELLO_LINKFLAGS    \""+linkflags+"\"\n" )
+
+cello_def.close()
+
 env = Environment (
      CC           = cc[type],	
      CFLAGS       = cflags,
