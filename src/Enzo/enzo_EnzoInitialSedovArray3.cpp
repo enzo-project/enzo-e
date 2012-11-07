@@ -54,7 +54,7 @@ void EnzoInitialSedovArray3::pup (PUP::er &p)
 #endif
 
 //----------------------------------------------------------------------
-void EnzoInitialSedovArray3::enforce
+void EnzoInitialSedovArray3::enforce_block
 (
  Block * block,
  const FieldDescr * field_descr,

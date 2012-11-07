@@ -32,7 +32,7 @@ void EnzoInitialImplosion2::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoInitialImplosion2::enforce 
+void EnzoInitialImplosion2::enforce_block 
 (
  Block * block,
  const FieldDescr * field_descr,
@@ -47,11 +47,11 @@ void EnzoInitialImplosion2::enforce
 
   FieldBlock * field_block = block->field_block();
 
-  ASSERT("EnzoInitialImplosion2",
+  ASSERT("EnzoInitialImplosion2::enforce_block",
 	 "Insufficient number of fields",
 	 field_descr->field_count() >= 4);
 
-  WARNING("EnzoInitialImplosion2::enforce",
+  WARNING("EnzoInitialImplosion2::enforce_block",
 	  "hard-coded field index ordering");
 
   int index_density         = 0;

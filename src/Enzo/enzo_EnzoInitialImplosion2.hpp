@@ -37,7 +37,7 @@ public: // interface
 
   /// Initialize the block
 
-  virtual void enforce 
+  virtual void enforce_block
   (
    Block * block,
    const FieldDescr * field_descr,
