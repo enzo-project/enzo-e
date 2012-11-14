@@ -28,7 +28,7 @@ memory = 1
 
 # Enable charm++ dynamic load balancing
 
-balance = 1
+balance = 0
 
 balancer = 'RotateLB'  # For testing only
 

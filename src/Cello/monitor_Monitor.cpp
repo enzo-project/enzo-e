@@ -83,6 +83,10 @@ void Monitor::header () const
 
   // Print all recognized configuration settings
 
+  GroupProcess * group_process = GroupProcess::create();
+  print ("Define","Simulation processors %d",group_process->size());
+  delete group_process;
+
   // Parallel type defines
 
   print ("Define","CELLO_ARCH %s",CELLO_ARCH);
