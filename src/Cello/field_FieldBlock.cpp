@@ -206,7 +206,7 @@ void FieldBlock::allocate_array(const FieldDescr * field_descr) throw()
     ERROR ("FieldBlock::allocate_array",
 		   "Allocate called with zero field size");
   }
-
+  TRACE("FieldBlock::allocate_array");
   int padding   = field_descr->padding();
   int alignment = field_descr->alignment();
 
@@ -231,7 +231,18 @@ void FieldBlock::allocate_array(const FieldDescr * field_descr) throw()
 
   // Allocate the array
 
+  printf ("size = %d\n",array_size);
+  printf ("%s:%d memory = %lld %lld %lld\n",__FILE__,__LINE__,
+	  Memory::instance()->bytes(),
+	  Memory::instance()->bytes_high(),
+	  Memory::instance()->bytes_highest());
+  
   array_.resize(array_size);
+
+  printf ("%s:%d memory = %lld %lld %lld\n",__FILE__,__LINE__,
+	  Memory::instance()->bytes(),
+	  Memory::instance()->bytes_high(),
+	  Memory::instance()->bytes_highest());
 
   // Initialize field_begin
 
@@ -270,6 +281,7 @@ void FieldBlock::allocate_array(const FieldDescr * field_descr) throw()
 
 void FieldBlock::deallocate_array () throw()
 {
+  TRACE("FieldBlock::deallocate_array");
   if ( array_allocated() ) {
 
     TRACE("deallocating array_");
@@ -299,53 +311,53 @@ bool FieldBlock::ghosts_allocated() const throw ()
 
 //----------------------------------------------------------------------
 
-void FieldBlock::allocate_ghosts(const FieldDescr * field_descr) throw ()
-{
-  if (! ghosts_allocated() ) {
+// void FieldBlock::allocate_ghosts(const FieldDescr * field_descr) throw ()
+// {
+//   if (! ghosts_allocated() ) {
 
-    std::vector<int>  old_offsets;
-    std::vector<char> old_array;
+//     std::vector<int>  old_offsets;
+//     std::vector<char> old_array;
 
-    old_array = array_;
+//     old_array = array_;
 
-    backup_array_ (field_descr,old_offsets);
+//     backup_array_ (field_descr,old_offsets);
 
-    ghosts_allocated_ = true;
+//     ghosts_allocated_ = true;
 
-    allocate_array(field_descr);
+//     allocate_array(field_descr);
 
-    restore_array_ (field_descr, &old_array[0], old_offsets);
+//     restore_array_ (field_descr, &old_array[0], old_offsets);
 
-  } else {
-    WARNING("FieldBlock::allocate_ghosts",
-		    "Allocate called with ghosts already allocated");
-  }
-}
+//   } else {
+//     WARNING("FieldBlock::allocate_ghosts",
+// 		    "Allocate called with ghosts already allocated");
+//   }
+// }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
-{
-  if ( ghosts_allocated() ) {
+// void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
+// {
+//   if ( ghosts_allocated() ) {
 
-    std::vector<int> old_offsets;
-    std::vector<char> old_array;
+//     std::vector<int> old_offsets;
+//     std::vector<char> old_array;
 
-    old_array = array_;
+//     old_array = array_;
 
-    backup_array_ (field_descr,old_offsets);
+//     backup_array_ (field_descr,old_offsets);
 
-    ghosts_allocated_ = false;
+//     ghosts_allocated_ = false;
 
-    allocate_array(field_descr);
+//     allocate_array(field_descr);
 
-    restore_array_ (field_descr, &old_array[0], old_offsets);
+//     restore_array_ (field_descr, &old_array[0], old_offsets);
 
-  } else {
-    WARNING("FieldBlock::deallocate_ghosts",
-	    "Function called with ghosts not allocated");
-  }
-}
+//   } else {
+//     WARNING("FieldBlock::deallocate_ghosts",
+// 	    "Function called with ghosts not allocated");
+//   }
+// }
 
 //----------------------------------------------------------------------
 // MPI functions
@@ -364,9 +376,9 @@ void FieldBlock::refresh_ghosts
 {
 
   if ( ! ghosts_allocated() ) {
-    WARNING("FieldBlock::refresh_ghosts",
-	    "Called with ghosts not allocated: allocating ghosts");
-    allocate_ghosts(field_descr);
+    ERROR("FieldBlock::refresh_ghosts",
+	    "Called with ghosts not allocated");
+    // allocate_ghosts(field_descr);
   }
 
   // Send face

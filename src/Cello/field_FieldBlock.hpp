@@ -111,11 +111,15 @@ public: // interface
   /// Return whether ghost cells are allocated or not
   bool ghosts_allocated() const throw ();
 
-  /// Allocate and clear ghost values if not already allocated
-  void allocate_ghosts(const FieldDescr * field_descr) throw ();
+  /// Set whether allocate will allocate array with ghosts or not
+  void set_ghosts_allocated(bool lg) throw ()
+  { ghosts_allocated_ = lg; }
 
-  /// Deallocate ghost values if allocated
-  void deallocate_ghosts(const FieldDescr * field_descr) throw ();
+  // /// Allocate and clear ghost values if not already allocated
+  // void allocate_ghosts(const FieldDescr * field_descr) throw ();
+
+  // /// Deallocate ghost values if allocated
+  // void deallocate_ghosts(const FieldDescr * field_descr) throw ();
 
 
 #ifndef CONFIG_USE_CHARM /* MPI only */
@@ -187,8 +191,7 @@ private: // attributes
   /// Offsets into values_ of the first element of each field
   std::vector<int> offsets_;
 
-  /// Whether ghost values are allocated or not (make [3] for
-  /// directionally split?)
+  /// Whether ghost values are allocated or not 
   bool ghosts_allocated_;
 
 };   
