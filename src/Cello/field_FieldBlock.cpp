@@ -231,18 +231,7 @@ void FieldBlock::allocate_array(const FieldDescr * field_descr) throw()
 
   // Allocate the array
 
-  printf ("size = %d\n",array_size);
-  printf ("%s:%d memory = %lld %lld %lld\n",__FILE__,__LINE__,
-	  Memory::instance()->bytes(),
-	  Memory::instance()->bytes_high(),
-	  Memory::instance()->bytes_highest());
-  
   array_.resize(array_size);
-
-  printf ("%s:%d memory = %lld %lld %lld\n",__FILE__,__LINE__,
-	  Memory::instance()->bytes(),
-	  Memory::instance()->bytes_high(),
-	  Memory::instance()->bytes_highest());
 
   // Initialize field_begin
 
