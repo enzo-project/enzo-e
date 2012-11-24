@@ -54,7 +54,7 @@ else:
    libs_papi = []
 
 libs_external    = ['external']
-libs_monitor     = ['monitor']
+libs_monitor     = ['monitor','parallel']
 libs_error       = ['error'] + libs_monitor
 libs_disk        = ['disk'] + libs_error + ['hdf5']
 libs_performance = ['performance', 'memory'] + libs_error + libs_papi

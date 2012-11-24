@@ -13,8 +13,6 @@ mainmodule main {
 
      entry Main(CkArgMsg *m);
 
-//     entry Main(CkMigrateMessage * );
-
      entry void p_exit (int count_blocks);
 
   };
