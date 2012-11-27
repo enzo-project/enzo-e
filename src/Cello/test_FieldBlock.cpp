@@ -118,32 +118,52 @@ PARALLEL_MAIN_BEGIN
   // Allocate
 
   unit_func("allocate_array");
-  field_block->allocate_array(field_descr);
-  unit_assert(field_block->array() != 0);
 
-  unit_func("array_allocated");
-  unit_assert( field_block->array_allocated());
+  field_block->allocate_array(field_descr, false);
+
+  int array_size_without_ghosts = field_block->array_size();
+
+  unit_assert(field_block->array() != 0);
+  unit_assert(field_block->array_allocated());
+  unit_assert(field_block->array_size() > 0);
+
+  // Reallocate
+
+  unit_func("reallocate_array");
+
+  field_block->reallocate_array(field_descr, true);
+
+  int array_size_with_ghosts = field_block->array_size();
+
+  unit_assert(field_block->array() != 0);
+  unit_assert(field_block->array_allocated());
+  unit_assert(field_block->array_size() > 0);
+  unit_assert(array_size_with_ghosts > array_size_without_ghosts);
 
   // Deallocate
 
   unit_func("deallocate_array");
-  field_block->deallocate_array();
-  unit_assert(field_block->array() == 0);
 
-  unit_func("array_allocate");
+  field_block->deallocate_array();
+
+  unit_assert(field_block->array() == 0);
   unit_assert( ! field_block->array_allocated());
+  unit_assert(field_block->array_size() == 0);
 
   // Allocate
 
   unit_func("allocate_array");
-  field_block->allocate_array(field_descr);
+
+  field_block->allocate_array(field_descr,true);
+
   unit_assert(field_block->array() != 0);
-  
-  unit_func("array_allocated");
-  unit_assert( field_block->array_allocated());
+  unit_assert(field_block->array_allocated());
+  unit_assert(field_block->array_size() == array_size_with_ghosts);
 
   
   //----------------------------------------------------------------------
+  field_block->reallocate_array(field_descr, false);
+
 
   float       *v1,*u1;
   double      *v2,*u2;
@@ -179,8 +199,10 @@ PARALLEL_MAIN_BEGIN
   size_t nb4 = (char *) v5 - (char *) v4;
 
   unit_assert (nb1 == sizeof (float) * nu1);
-  unit_assert (nb2 == sizeof (double)* nu2);
-  unit_assert (nb3 == sizeof (double)* nu3);
+  TRACE2("nb2,nu2 = %d %d",nb2,sizeof(double)*nu2);
+  unit_assert (nb2 == sizeof (double)* nu2); // FAIL
+  TRACE2("nb3,nu3 = %d %d",nb3,sizeof(double)*nu3);
+  unit_assert (nb3 == sizeof (double)* nu3); // FAIL
   unit_assert (nb4 == sizeof (double)* nu4);
 
   //----------------------------------------------------------------------
@@ -205,20 +227,14 @@ PARALLEL_MAIN_BEGIN
   nb3 = (char *)u4 - (char *)u3;
   nb4 = (char *)u5-(char *)u4;
 
-  unit_assert (nb1 == sizeof (float) * nu1);
-  unit_assert (nb2 == sizeof (double)* nu2);
-  unit_assert (nb3 == sizeof (double)* nu3);
-  unit_assert (nb4 == sizeof (double)* nu4);
+  unit_assert (nb1 == sizeof (float) * nu1); // FAIL
+  unit_assert (nb2 == sizeof (double)* nu2); // FAIL
+  unit_assert (nb3 == sizeof (double)* nu3); // FAIL
+  unit_assert (nb4 == sizeof (double)* nu4); // FAIL
 
 
   //----------------------------------------------------------------------
 
-  unit_func("allocate_ghosts");  // with ghosts
-
-  unit_assert ( ! field_block->ghosts_allocated());
-  field_block->allocate_ghosts(field_descr);
-  unit_assert ( field_block->ghosts_allocated());
-  
   v1 =  (float *)      field_block->field_values(i1);
   v2 = (double *)      field_block->field_values(i2);
   v3 = (double *)      field_block->field_values(i3);
@@ -312,7 +328,7 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  unit_assert(passed);
+  unit_assert(passed); // FAIL
 
   //--------------------------------------------------
 
@@ -478,9 +494,9 @@ PARALLEL_MAIN_BEGIN
   unit_assert(2.0 == v5[0] );
 
   //----------------------------------------------------------------------
-  unit_func("deallocate_ghosts");
-  unit_assert( field_block->ghosts_allocated());
-  field_block->deallocate_ghosts(field_descr);
+  unit_func("reallocate_ghosts");
+
+  field_block->reallocate_array(field_descr, false);
 
   v1    = 
     (float *) field_block->field_values(i1);
@@ -493,8 +509,6 @@ PARALLEL_MAIN_BEGIN
   v5 =
     (long double *) field_block->field_values(i5);
 
-  unit_assert( ! field_block->ghosts_allocated());
-
   unit_assert(3.0 == v2[(nx+1)*ny*nz-1]);
   unit_assert(4.0 == v3[0] );
   unit_assert(4.0 == v3[nx*(ny+1)*nz-1]);
@@ -502,54 +516,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(4.0 == v4[nx*ny*(nz+1)-1]);
   unit_assert(2.0 == v5[0] );
   
-  //----------------------------------------------------------------------
-  //  unit_func("split");
-  //  unit_assert(false);
-  //----------------------------------------------------------------------
-  // unit_func("merge");
-  // unit_assert(false);
-	
-  //----------------------------------------------------------------------
-  // I/O
-  //----------------------------------------------------------------------
-
-  // FileHdf5 * file = new FileHdf5;
-
-  // Block * block_read = factory.create_block
-  //   (ix,iy,iz, 
-  //    1,1,1,
-  //    nx,ny,nz,
-  //    xpm,ypm,zpm,
-  //    xb,yb,zb,  1);
-
-  // FieldBlock * field_block_read = block_read->field_block();
-
-  // unit_func("write");
-
-  // // Write header data
-  // field_block->open(file,"field_block_header.out","w");
-  // field_block->write(file,file_content_header);
-  // field_block->close(file);
-
-  // // Read header data
-  // field_block_read->open(file,"field_block_header.out","r");
-  // field_block_read->read(file,file_content_header);
-  // field_block_read->close(file);
-
-  // // Compare header data written and read
-
-  // // FieldBlock
-  // //   size_[]
-  // //
-
-  // unit_assert(false);
-
-  // //----------------------------------------------------------------------
-  // unit_func("read");
-
-  // delete file;
-  // unit_assert(false);
-	
   //----------------------------------------------------------------------
   unit_finalize();
   //----------------------------------------------------------------------

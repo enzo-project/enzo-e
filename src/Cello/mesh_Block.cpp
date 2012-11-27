@@ -776,8 +776,7 @@ void Block::is_on_boundary (double lower[3], double upper[3],
 void Block::allocate (const FieldDescr * field_descr) throw()
 { 
   for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i]->set_ghosts_allocated(true);
-    field_block_[i]->allocate_array(field_descr);
+    field_block_[i]->allocate_array(field_descr,true);
     //    field_block_[i]->allocate_array(field_descr);
     //    field_block_[i]->allocate_ghosts(field_descr);
   }

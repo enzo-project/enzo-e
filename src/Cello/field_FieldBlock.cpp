@@ -13,7 +13,7 @@
 FieldBlock::FieldBlock ( int nx, int ny, int nz ) throw()
   : array_(),
     offsets_(),
-    ghosts_allocated_(false)
+    ghosts_allocated_(true)
 {
   if (nx != 0) {
     size_[0] = nx;
@@ -192,21 +192,40 @@ void FieldBlock::clear
     }
   } else {
     ERROR("FieldBlock::clear",
-		  "Called clear with unallocated arrays");
+	  "Called clear with unallocated arrays");
   }
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlock::allocate_array(const FieldDescr * field_descr) throw()
+void FieldBlock::allocate_array
+(
+ const FieldDescr * field_descr,
+ bool               ghosts_allocated
+ ) throw()
 {
+
+  TRACE("FieldBlock::allocate_array");
+
+  // Error check size
+
   if (! (size_[0] > 0 &&
 	 size_[1] > 0 &&
 	 size_[2] > 0) ) {
     ERROR ("FieldBlock::allocate_array",
 		   "Allocate called with zero field size");
   }
-  TRACE("FieldBlock::allocate_array");
+
+  // Warning check array already allocated
+  if (array_allocated() ) {
+    WARNING ("FieldBlock::allocate_array",
+	     "Array already allocated: calling reallocate()");
+    reallocate_array(field_descr,ghosts_allocated);
+    return;
+  }
+
+  ghosts_allocated_ = ghosts_allocated;
+
   int padding   = field_descr->padding();
   int alignment = field_descr->alignment();
 
@@ -268,6 +287,43 @@ void FieldBlock::allocate_array(const FieldDescr * field_descr) throw()
 
 //----------------------------------------------------------------------
 
+void FieldBlock::reallocate_array
+(
+ const FieldDescr * field_descr,
+ bool               ghosts_allocated
+ ) throw()
+{
+  if (! array_allocated() ) {
+    WARNING ("FieldBlock::reallocate_array",
+	     "Array not allocated yet: calling allocate()");
+    allocate_array(field_descr,ghosts_allocated);
+    return;
+  }
+  
+  TRACE("FieldBlock::deallocate_array");
+
+  std::vector<int>  old_offsets;
+  std::vector<char> old_array;
+
+  old_array = array_;
+  old_offsets = offsets_;
+
+  array_.clear();
+  offsets_.clear();
+
+  TRACE2 ("ghosts %d -> %d",ghosts_allocated_,ghosts_allocated);
+  ghosts_allocated_ = ghosts_allocated;
+
+  allocate_array(field_descr,ghosts_allocated_);
+
+  TRACE2 ("sizeof old array,offsets = %d %d",old_array.size(),old_offsets.size());
+  TRACE2 ("sizeof new array,offsets = %d %d",array_.size(),offsets_.size());
+
+  restore_array_ (field_descr, &old_array[0], old_offsets);
+}
+
+//----------------------------------------------------------------------
+
 void FieldBlock::deallocate_array () throw()
 {
   TRACE("FieldBlock::deallocate_array");
@@ -286,36 +342,9 @@ void FieldBlock::deallocate_array () throw()
 
 //----------------------------------------------------------------------
 
-bool FieldBlock::array_allocated() const throw()
-{
-  return array_.size() > 0;
-}
-
-//----------------------------------------------------------------------
-	
-bool FieldBlock::ghosts_allocated() const throw ()
-{
-  return ghosts_allocated_;
-}
-
-//----------------------------------------------------------------------
-
 // void FieldBlock::allocate_ghosts(const FieldDescr * field_descr) throw ()
 // {
 //   if (! ghosts_allocated() ) {
-
-//     std::vector<int>  old_offsets;
-//     std::vector<char> old_array;
-
-//     old_array = array_;
-
-//     backup_array_ (field_descr,old_offsets);
-
-//     ghosts_allocated_ = true;
-
-//     allocate_array(field_descr);
-
-//     restore_array_ (field_descr, &old_array[0], old_offsets);
 
 //   } else {
 //     WARNING("FieldBlock::allocate_ghosts",
@@ -483,7 +512,7 @@ int FieldBlock::align_padding_ (int alignment) const throw()
 
 //----------------------------------------------------------------------
 
-int FieldBlock::field_size 
+int FieldBlock::field_size
 (
  const FieldDescr * field_descr,
  int                id_field,
@@ -496,7 +525,7 @@ int FieldBlock::field_size
   // Adjust memory usage due to ghosts if needed
 
   int  gx,gy,gz;
-  if ( ghosts_allocated() ) {
+  if ( ghosts_allocated_ ) {
     field_descr->ghosts(id_field,&gx,&gy,&gz);
   } else {
     gx = gy = gz = 0;
@@ -723,21 +752,6 @@ void FieldBlock::print (const FieldDescr * field_descr,
 
 //----------------------------------------------------------------------
 
-void FieldBlock::backup_array_ 
-( const FieldDescr * field_descr,
-  std::vector<int> & old_offsets )
-{
-  // save old offsets_
-
-  for (int i=0; i<field_descr->field_count(); i++) {
-    old_offsets.push_back(offsets_[i]);
-  }
-  offsets_.clear();
-
-}
-
-//----------------------------------------------------------------------
-
 void FieldBlock::restore_array_ 
 ( const FieldDescr * field_descr,
   const char * array_from,
@@ -786,6 +800,9 @@ void FieldBlock::restore_array_
 
     // determine array start
 
+    TRACE3 ("1 %p %d %d",array_from, offsets_from.at(id_field),offset1);
+    TRACE3 ("2 %p %d %d", &array_[0], offsets_.at(id_field), offset2);
+
     const char * array1 = array_from + offsets_from.at(id_field) + offset1;
     char       * array2 = &array_[0] + offsets_.at(id_field)     + offset2;
 
@@ -797,7 +814,7 @@ void FieldBlock::restore_array_
 	  for (int ip=0; ip<bytes_per_element; ip++) {
 	    int i1 = ip + bytes_per_element*(ix + nx1*(iy + ny1*iz));
 	    int i2 = ip + bytes_per_element*(ix + nx2*(iy + ny2*iz));
-	    array2[i2] = array1[i1];
+	    array2[i2] = array1[i1]; // XXX array1 = garbage
 	  }
 	}
       }
