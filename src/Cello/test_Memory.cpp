@@ -93,12 +93,14 @@ PARALLEL_MAIN_BEGIN
   timer.start();
   const int num_alloc = 10000;
   const int size_alloc = 1000;
+  TRACE2 ("%d %d",memory->num_new() , new_count);
   for (int j=0; j<num_alloc; j++) {
     f1 = new double[size_alloc];
     new_count++;
     delete [] f1;
     del_count++;
   }
+  TRACE2 ("%d %d",memory->num_new() , new_count);
   timer.stop();
   PARALLEL_PRINTF ("new/delete  per sec = %g\n",num_alloc/timer.value());
 
@@ -126,9 +128,11 @@ PARALLEL_MAIN_BEGIN
   unsigned group_test_1 = 1;
   unsigned group_test_2 = 2;
 
+  TRACE2 ("%d %d",memory->num_new() , new_count);
   memory->new_group (group_test_1,"Test_1");
   memory->new_group (group_test_2,"Test_2");
 
+  TRACE2 ("%d %d",memory->num_new() , new_count);
   memory->begin_group(group_test_1);
 
   const char * name_1;
@@ -197,6 +201,7 @@ PARALLEL_MAIN_BEGIN
   
   unit_func ("efficiency()");
 
+  TRACE2 ("%d %d",memory->num_new() , new_count);
   char * temp_0 = new char [10000];
   new_count++;
   unit_assert (fabs(memory->efficiency() - 0.01) < 1e-7);
@@ -209,6 +214,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert (fabs(memory->efficiency(1) - 0.1) < 1e-7);
   memory->end_group(1);
 
+  TRACE2 ("%d %d",memory->num_new() , new_count);
   delete [] temp_1;
   del_count++;
 
@@ -220,10 +226,12 @@ PARALLEL_MAIN_BEGIN
 
   // num_new()
   unit_func ("num_new()");
+  TRACE2 ("%d %d",memory->num_new() , new_count);
   unit_assert(memory->num_new() == new_count);
 
   // num_delete()
   unit_func ("num_delete()");
+  TRACE2 ("%d %d",memory->num_delete() , del_count);
   unit_assert(memory->num_delete() == del_count);
 
   memory->print();

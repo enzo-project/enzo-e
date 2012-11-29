@@ -9,8 +9,58 @@
 
 //----------------------------------------------------------------------
 
-CommBlock::CommBlock() throw ()
+CommBlock::CommBlock
+(
+ int ibx, int iby, int ibz,
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xpm, double ypm, double zpm, // Patch begin
+ double xb, double yb, double zb,    // Block width
+#ifdef CONFIG_USE_CHARM
+ CProxy_Patch proxy_patch,
+#endif
+ int patch_id,
+ int patch_rank,
+ int num_field_blocks
+) throw ()
 {
+  block_ = new Block 
+    (ibx,iby,ibz, 
+     nbx,nby,nbz,
+     nx,ny,nz,
+     xm,ym,zm, 
+     xb,yb,zb, 
+     patch_id,
+     patch_rank,
+     num_field_blocks);
+}
+
+//----------------------------------------------------------------------
+
+CommBlock::CommBlock
+(
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xpm, double ypm, double zpm, // Patch begin
+ double xb, double yb, double zb,    // Block width
+#ifdef CONFIG_USE_CHARM
+ CProxy_Patch proxy_patch,
+#endif
+ int patch_id,
+ int patch_rank,
+ int num_field_blocks) throw ()
+{
+  block = new Block
+      (
+       nbx,nby,nbz,
+       nx,ny,nz,
+       xm,ym,zm, 
+       xb,yb,zb, 
+       proxy_patch,
+       num_field_blocks,
+       patch_id,
+       patch_rank,
+       nbx,nby,nbz);
 }
 
 //----------------------------------------------------------------------
