@@ -41,7 +41,8 @@ public: // interface
 #endif
    int patch_id,
    int patch_rank,
-   int num_field_blocks
+   int num_field_blocks,
+   CommBlock * comm_block = 0
 ) throw();
 
 #ifdef CONFIG_USE_CHARM
@@ -56,7 +57,8 @@ public: // interface
    CProxy_Patch proxy_patch,
    int patch_id,
    int patch_rank,
-   int num_field_blocks
+   int num_field_blocks,
+   CommBlock * comm_block = 0
 ) throw();
 
 #endif
@@ -128,14 +130,13 @@ public: // interface
 
   //==================================================
 
-#else /* ! CONFIG_USE_CHARM */
+#endif
 
   /// Refresh ghost data
   void refresh_ghosts(const FieldDescr * field_descr,
 		      const Patch * patch,
 		      int fx, int fy, int fz,
 		      int index_field_set = 0) throw();
-#endif
 
   //----------------------------------------------------------------------
   // Big Three

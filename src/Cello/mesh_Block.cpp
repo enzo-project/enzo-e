@@ -25,7 +25,8 @@ Block::Block
 #endif
  int patch_id,
  int patch_rank,
- int num_field_blocks
+ int num_field_blocks,
+ CommBlock * comm_block
 ) throw ()
   :
 #ifdef CONFIG_USE_CHARM
@@ -38,7 +39,8 @@ Block::Block
      patch_rank_(patch_rank),
      cycle_(0),
      time_(0),
-     dt_(0)
+     dt_(0),
+     comm_block_(comm_block)
 { 
   DEBUG1("ID = %d",patch_id);
   DEBUG1("IP = %d",patch_rank);
@@ -84,7 +86,9 @@ Block::Block
 #endif
  int patch_id,
  int patch_rank,
- int num_field_blocks) throw ()
+ int num_field_blocks,
+ CommBlock * comm_block
+ ) throw ()
   : count_refresh_face_(0),
     proxy_patch_(proxy_patch),
     num_field_blocks_(num_field_blocks),
@@ -93,8 +97,8 @@ Block::Block
     patch_rank_(patch_rank),
     cycle_(0),
     time_(0),
-    dt_(0)
-
+    dt_(0),
+    comm_block_(comm_block)
 { 
 
   DEBUG1("ID = %d",patch_id_);
@@ -206,8 +210,6 @@ void Block::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
 // MPI FUNCTIONS
 //======================================================================
 
-#ifndef CONFIG_USE_CHARM
-
 void Block::refresh_ghosts(const FieldDescr * field_descr,
 			   const Patch * patch,
 			   int fx, int fy, int fz,
@@ -221,8 +223,6 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 		       patch->layout(),
 		       ibx,iby,ibz, fx,fy,fz);
 }
-
-#endif
 
 //======================================================================
 // CHARM FUNCTIONS

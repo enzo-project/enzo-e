@@ -32,7 +32,8 @@ CommBlock::CommBlock
      xb,yb,zb, 
      patch_id,
      patch_rank,
-     num_field_blocks);
+     num_field_blocks,
+     this);
 }
 
 //----------------------------------------------------------------------
@@ -51,16 +52,15 @@ CommBlock::CommBlock
  int num_field_blocks) throw ()
 {
   block = new Block
-      (
-       nbx,nby,nbz,
-       nx,ny,nz,
-       xm,ym,zm, 
-       xb,yb,zb, 
-       proxy_patch,
-       num_field_blocks,
-       patch_id,
-       patch_rank,
-       nbx,nby,nbz);
+    (nbx,nby,nbz,
+     nx,ny,nz,
+     xm,ym,zm, 
+     xb,yb,zb, 
+     proxy_patch,
+     patch_id,
+     patch_rank,
+     num_field_blocks,
+     this);
 }
 
 //----------------------------------------------------------------------
