@@ -7,6 +7,8 @@
 
 #include "comm.hpp"
 
+#ifdef CONFIG_USE_CHARM
+
 //----------------------------------------------------------------------
 
 CommBlock::CommBlock
@@ -16,9 +18,7 @@ CommBlock::CommBlock
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
  double xb, double yb, double zb,    // Block width
-#ifdef CONFIG_USE_CHARM
  CProxy_Patch proxy_patch,
-#endif
  int patch_id,
  int patch_rank,
  int num_field_blocks
@@ -44,9 +44,7 @@ CommBlock::CommBlock
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
  double xb, double yb, double zb,    // Block width
-#ifdef CONFIG_USE_CHARM
  CProxy_Patch proxy_patch,
-#endif
  int patch_id,
  int patch_rank,
  int num_field_blocks) throw ()
@@ -86,47 +84,11 @@ CommBlock & CommBlock::operator= (const CommBlock & CommBlock) throw ()
 }
 
 //----------------------------------------------------------------------
-void CommBlock::p_compute (int cycle, double time, double dt)
-{
-  // set_cycle(cycle);
-  // set_time(time);
-  // set_dt(dt);
-
-  DEBUG3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
-  compute();
-}
-#endif /* CONFIG_USE_CHARM */
-
-//----------------------------------------------------------------------
 
 void CommBlock::p_initial()
 {
-  TRACE("CommBlock::p_initial()");
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation->field_descr();
-
-  // Initialize the block
-
-  allocate(field_descr);
-
-  // Set the Block cycle and time to match Simulation's
-
-  TRACE("CommBlock::p_initial Setting time");
-  set_cycle(simulation->cycle());
-  set_time (simulation->time());
-  set_dt   (simulation->dt());
-
-  // Perform any additional initialization for derived class 
-
-  initialize ();
-
-  // Apply the initial conditions 
-
-  Initial * initial = simulation->problem()->initial();
-
-  initial->enforce_block(this,field_descr, simulation->hierarchy());
-
-  // Continue with Patch::s_initial
+  block_->initial(simulation);
 
   proxy_patch_.s_initial();
 
@@ -137,40 +99,13 @@ void CommBlock::p_initial()
 void CommBlock::p_output(CkReductionMsg * msg)
 {
 
-  DEBUG("CommBlock::p_output()");
-  double * min_reduce = (double * )msg->getData();
-
-  double dt_patch   = min_reduce[0];
-  bool   stop_patch = min_reduce[1] == 1.0 ? true : false;
-
-  delete msg;
-
-  set_dt   (dt_patch);
-
-  // WARNING: assumes one patch
-
   Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  simulation->update_state(cycle_,time_,dt_patch,stop_patch);
- 
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
-  // Simulation::p_output()?  Want last block?
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  
-
-  // "root" block calls Simulation::p_output()
-  //  if (index() == 0) {
-  //    proxy_simulation.p_output();
-  //  }
-
-  // Wait for all blocks to check in before calling Simulation::p_output()
-  // for next output
-
-  proxy_patch_.s_output();
+  block_->output(simulation);
+  proxy_patch_.s_output(Simulation * simulation);
 
 }
-#endif /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
 
 void CommBlock::p_read (int index_initial)
 {
@@ -178,8 +113,6 @@ void CommBlock::p_read (int index_initial)
 }
 
 //----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
 
 void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 {
@@ -301,7 +234,6 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
     prepare();
   } else  DEBUG ("CommBlock::x_refresh() skipping prepare()");
 }
-#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
@@ -319,4 +251,6 @@ void CommBlock::p_write (int index_output)
 }
 
 //======================================================================
+
+#endif /* CONFIG_USE_CHARM */
 

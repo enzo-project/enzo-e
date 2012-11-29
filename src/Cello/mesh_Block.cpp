@@ -434,7 +434,7 @@ void Block::determine_boundary_
 
   // return is_boundary[] array of faces on domain boundary
 
-  is_on_boundary(lower_h,upper_h,is_boundary);
+  is_on_boundary (lower_h,upper_h,is_boundary);
 
   int nx,ny,nz;
   field_block()->size (&nx,&ny,&nz);
@@ -536,6 +536,75 @@ void Block::compute()
 
 }
 #endif /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void Block::initial(Simulation * simulation)
+{
+  TRACE("Block::initial()");
+
+  FieldDescr * field_descr = simulation->field_descr();
+
+  // Initialize the block
+
+  allocate(field_descr);
+
+  // Set the Block cycle and time to match Simulation's
+
+  TRACE("CommBlock::p_initial Setting time");
+  set_cycle(simulation->cycle());
+  set_time (simulation->time());
+  set_dt   (simulation->dt());
+
+  // Perform any additional initialization for derived class 
+
+  initialize ();
+
+  // Apply the initial conditions 
+
+  Initial * initial = simulation->problem()->initial();
+
+  initial->enforce_block(this,field_descr, simulation->hierarchy());
+
+}
+#endif
+
+//----------------------------------------------------------------------
+
+void Block::output(Simulation * simulation)
+{
+  DEBUG("Block::output()");
+
+  double * min_reduce = (double * )msg->getData();
+
+  double dt_patch   = min_reduce[0];
+  bool   stop_patch = min_reduce[1] == 1.0 ? true : false;
+
+  delete msg;
+
+  set_dt   (dt_patch);
+
+  // WARNING: assumes one patch
+
+  simulation->update_state(cycle_,time_,dt_patch,stop_patch);
+ 
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
+  // Simulation::p_output()?  Want last block?
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  
+
+  // "root" block calls Simulation::p_output()
+  //  if (index() == 0) {
+  //    proxy_simulation.p_output();
+  //  }
+
+  // Wait for all blocks to check in before calling Simulation::p_output()
+  // for next output
+
+}
 
 //======================================================================
 

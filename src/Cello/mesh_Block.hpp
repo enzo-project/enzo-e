@@ -128,6 +128,12 @@ public: // interface
   /// Boundary and Method
   void compute();
 
+  /// Initial conditions
+  void initial (Simulation * simulation);
+
+  /// Output
+  void output (Simulation * simulation);
+
   //==================================================
 
 #endif

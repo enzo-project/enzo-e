@@ -60,10 +60,12 @@ public: // interface
   void p_initial();
 
   /// (X) Refresh ghost zones and apply boundary conditions
-  void p_refresh() { refresh(); }
+  void p_refresh() 
+  { block_->refresh(); }
 
   /// (X) Apply the numerical methods on the block
-  void p_compute(int cycle, double time, double dt);
+  void p_compute(int cycle, double time, double dt)
+  { block_->compute(); }
   
   /// (X) Refresh a FieldFace
   void x_refresh(int n, char buffer[],int fx, int fy, int fz);
