@@ -272,7 +272,7 @@ function summary_incomplete_output ( $test_output, $executables)
       $output_files = "$output_files $output";
       ++$num_output_files;
     }
-    system("cat $output_files | awk 'BEGIN{b=0; e=0;}; /UNIT TEST BEGIN/ {b=b+1};/UNIT TEST END/ {e=e+1};END{if (b==e) {print \"<td></td>\"} else {print \"<td class=fail>\"b - e\"</td>\";}}'");
+    system("cat $output_files | awk 'BEGIN{e=0;}; /UNIT TEST END/ {e=e+1};END{if ($num_output_files==e) {print \"<td></td>\"} else {print \"<td class=fail>\"$num_output_files - e\"</td>\";}}'");
   }
   printf ("<th></th>");
 }

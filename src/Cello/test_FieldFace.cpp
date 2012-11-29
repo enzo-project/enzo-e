@@ -178,8 +178,7 @@ void init_fields
 
 	// Allocate field blocks including ghosts
 
-	block->allocate_array(field_descr);
-	block->allocate_ghosts(field_descr);
+	block->allocate_array(field_descr,true);
 
 	// Initialize fields
 
