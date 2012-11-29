@@ -85,21 +85,6 @@ void Patch::p_write(int index_output)
 
 //----------------------------------------------------------------------
 
-void Block::p_write (int index_output)
-{
-  TRACE("OUTPUT Block::p_write()");
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  FieldDescr * field_descr = simulation->field_descr();
-  Output * output = simulation->problem()->output(index_output);
-
-  output->write_block(this,field_descr,0,0,0);
-
-  proxy_patch_.s_write();
-}
-
-//----------------------------------------------------------------------
-
 void Patch::s_write()
 {
   TRACE("OUTPUT Patch::s_write()");

@@ -12,6 +12,7 @@
 
 #include "charm.hpp"
 
+#include "_comm.hpp"
 #include "_performance.hpp"
 #include "_monitor.hpp"
 #include "_parallel.hpp"
