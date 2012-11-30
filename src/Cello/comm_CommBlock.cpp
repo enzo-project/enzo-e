@@ -23,6 +23,7 @@ CommBlock::CommBlock
  int patch_rank,
  int num_field_blocks
 ) throw ()
+  :  count_refresh_face_(0)
 {
   block_ = new Block 
     (ibx,iby,ibz, 
@@ -96,6 +97,20 @@ void CommBlock::p_initial()
 
 //----------------------------------------------------------------------
 
+void CommBlock::p_refresh() 
+{
+  block_->refresh(); 
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_compute(int cycle, double time, double dt)
+{
+  block_->compute(); 
+}
+
+//----------------------------------------------------------------------
+
 void CommBlock::p_output(CkReductionMsg * msg)
 {
 
@@ -114,125 +129,22 @@ void CommBlock::p_read (int index_initial)
 
 //----------------------------------------------------------------------
 
-void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
+void CommBlock::p_exchange (int n, char * buffer, int fx, int fy, int fz)
 {
 
-  DEBUG ("CommBlock::x_refresh()");
+  TRACE ("CommBlock::p_exchange()");
+  
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  FieldDescr * field_descr = simulation->field_descr();
+  // Call exchange() on the Block
+  block_->exchange(simulation,int n, char * buffer, int fx, int fy, int fz);
 
-  if ( n != 0) {
-
-    // n == 0 is the call from self to ensure x_refresh()
-    // always gets called at least once
-
-    bool gx,gy,gz;
-    gx = false;
-    gy = false;
-    gz = false;
-
-    FieldFace field_face(field_block(), field_descr);
-
-    field_face.set_face(fx,fy,fz);
-    field_face.set_ghost(gx,gy,gz);
-
-    field_face.store (n, buffer);
-  }
-
-  //--------------------------------------------------
-  // Count incoming faces
-  // (SHOULD NOT RECOMPUTE EVERY CALL)
-  //--------------------------------------------------
-
-  int nx,ny,nz;
-  field_block()->size (&nx,&ny,&nz);
-
-  // Determine axes that may be neighbors
-
-  bool fxm = nx > 1;
-  bool fxp = nx > 1;
-  bool fym = ny > 1;
-  bool fyp = ny > 1;
-  bool fzm = nz > 1;
-  bool fzp = nz > 1;
-
-  // Adjust for boundary faces
-
-  bool periodic = simulation->problem()->boundary()->is_periodic();
-
-  Hierarchy * hierarchy = simulation->hierarchy();
-
-  double lower[3], upper[3];
-  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
-  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
-
-  bool is_boundary[3][2];
-  is_on_boundary (lower,upper,is_boundary);
-
-  fxm = fxm && (periodic || ! is_boundary[axis_x][face_lower]);
-  fxp = fxp && (periodic || ! is_boundary[axis_x][face_upper]);
-  fym = fym && (periodic || ! is_boundary[axis_y][face_lower]);
-  fyp = fyp && (periodic || ! is_boundary[axis_y][face_upper]);
-  fzm = fzm && (periodic || ! is_boundary[axis_z][face_lower]);
-  fzp = fzp && (periodic || ! is_boundary[axis_z][face_upper]);
-
-  // Count total expected number of incoming faces
-
-  // self
-
-  int count = 1;
-
-  // faces
-
-  if (field_descr->refresh_face(2)) {
-    if ( fxm ) ++count;
-    if ( fxp ) ++count;
-    if ( fym ) ++count;
-    if ( fyp ) ++count;
-    if ( fzm ) ++count;
-    if ( fzp ) ++count;
-  }
-
-  // edges
-
-  if (field_descr->refresh_face(1)) {
-    if ( fxm && fym ) ++count;
-    if ( fxm && fyp ) ++count;
-    if ( fxp && fym ) ++count;
-    if ( fxp && fyp ) ++count;
-    if ( fym && fzm ) ++count;
-    if ( fym && fzp ) ++count;
-    if ( fyp && fzm ) ++count;
-    if ( fyp && fzp ) ++count;
-    if ( fzm && fxm ) ++count;
-    if ( fzm && fxp ) ++count;
-    if ( fzp && fxm ) ++count;
-    if ( fzp && fxp ) ++count;
-  }
-
-  // corners
-
-  if (field_descr->refresh_face(0)) {
-    if ( fxm && fym && fzm ) ++count;
-    if ( fxm && fym && fzp ) ++count;
-    if ( fxm && fyp && fzm ) ++count;
-    if ( fxm && fyp && fzp ) ++count;
-    if ( fxp && fym && fzm ) ++count;
-    if ( fxp && fym && fzp ) ++count;
-    if ( fxp && fyp && fzm ) ++count;
-    if ( fxp && fyp && fzp ) ++count;
-  }
-
-  //--------------------------------------------------
-  // Compute
-  //--------------------------------------------------
+  // When done exchanging, call prepare
 
   if (++count_refresh_face_ >= count) {
-    DEBUG ("CommBlock::x_refresh() calling prepare()");
     count_refresh_face_ = 0;
     prepare();
-  } else  DEBUG ("CommBlock::x_refresh() skipping prepare()");
+  }
 }
 
 //----------------------------------------------------------------------
@@ -240,12 +152,16 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 void CommBlock::p_write (int index_output)
 {
   TRACE("OUTPUT CommBlock::p_write()");
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  FieldDescr * field_descr = simulation->field_descr();
-  Output * output = simulation->problem()->output(index_output);
+  // Call output() on the Block
 
-  output->write_block(this,field_descr,0,0,0);
+  FieldDescr * field_descr = simulation->field_descr();
+  Problem    * problem     = simulation->problem();
+  Output     * output      = problem->output(index_output);
+
+  output->write_block(block_,field_descr,0,0,0);
 
   proxy_patch_.s_write();
 }

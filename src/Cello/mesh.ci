@@ -75,7 +75,7 @@ module mesh {
     entry void p_write (int index_output);
     entry void p_compute(int cycle, double time, double dt);
 
-    entry void x_refresh(int n, char buffer[n], int fx, int fy, int fz);
+    entry void p_exchange(int n, char buffer[n], int fx, int fy, int fz);
 
     entry void p_read (int index_input);
 

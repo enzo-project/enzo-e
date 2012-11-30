@@ -8,7 +8,7 @@
 #ifndef COMM_COMM_BLOCK_HPP
 #define COMM_COMM_BLOCK_HPP
 
-class CommBlock {
+class CommBlock : CBase_CommBlock {
 
   /// @class    CommBlock
   /// @ingroup  Comm
@@ -24,9 +24,7 @@ public: // interface
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
-#ifdef CONFIG_USE_CHARM
    CProxy_Patch proxy_patch,
-#endif
    int patch_id,
    int patch_rank,
    int num_field_blocks
@@ -45,7 +43,7 @@ public: // interface
 ) throw();
 
   /// Initialize an empty Block
-  Block() { };
+  CommBlock() { };
 
   /// Destructor
   ~CommBlock() throw();
@@ -56,19 +54,34 @@ public: // interface
   /// Assignment operator
   CommBlock & operator= (const CommBlock & CommBlock) throw();
 
+
+#ifdef CONFIG_USE_CHARM
+
+  /// Initialize a migrated Block
+  CommBlock (CkMigrateMessage *m) 
+    : CBase_CommBlock(m) { };
+
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    p | block_;
+    p | count_refresh_face_;
+    // NOTE: change this function whenever attributes change
+  }
+
+#endif
+
   /// (X) Initialize block for the simulation.
   void p_initial();
 
   /// (X) Refresh ghost zones and apply boundary conditions
-  void p_refresh() 
-  { block_->refresh(); }
+  void p_refresh();
 
   /// (X) Apply the numerical methods on the block
-  void p_compute(int cycle, double time, double dt)
-  { block_->compute(); }
+  void p_compute(int cycle, double time, double dt);
   
   /// (X) Refresh a FieldFace
-  void x_refresh(int n, char buffer[],int fx, int fy, int fz);
+  void p_exchange(int n, char buffer[],int fx, int fy, int fz);
 
   /// (X) Contribute block data to ith output object in the simulation
   void p_write (int index_output);
@@ -80,15 +93,6 @@ public: // interface
   void p_output(CkReductionMsg * msg);
 
 
-#ifdef CONFIG_USE_CHARM
-  /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-  }
-#endif
-  
 private: // functions
 
   //--------------------------------------------------
@@ -99,6 +103,9 @@ private: // attributes
 
   /// Block that this CommBlock is associated with
   Block * block_;
+
+  /// Counter when refreshing faces
+  int count_refresh_face_;
 
 };
 

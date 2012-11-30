@@ -30,7 +30,6 @@ Block::Block
 ) throw ()
   :
 #ifdef CONFIG_USE_CHARM
-     count_refresh_face_(0),
      proxy_patch_(proxy_patch),
 #endif
      num_field_blocks_(num_field_blocks),
@@ -89,8 +88,7 @@ Block::Block
  int num_field_blocks,
  CommBlock * comm_block
  ) throw ()
-  : count_refresh_face_(0),
-    proxy_patch_(proxy_patch),
+  : proxy_patch_(proxy_patch),
     num_field_blocks_(num_field_blocks),
     field_block_(),
     patch_id_(patch_id),
@@ -150,22 +148,22 @@ Block::~Block() throw ()
 
 //----------------------------------------------------------------------
 
-Block::Block(const Block & block) throw ()
-  : field_block_()
-/// @param     block  Object being copied
-{
-  copy_(block);
-}
+// Block::Block(const Block & block) throw ()
+//   : field_block_()
+// /// @param     block  Object being copied
+// {
+//   copy_(block);
+// }
 
 //----------------------------------------------------------------------
 
-Block & Block::operator = (const Block & block) throw ()
-/// @param     block  Source object of the assignment
-/// @return    The target assigned object
-{
-  copy_(block);
-  return *this;
-}
+// Block & Block::operator = (const Block & block) throw ()
+// /// @param     block  Source object of the assignment
+// /// @return    The target assigned object
+// {
+//   copy_(block);
+//   return *this;
+// }
 
 //----------------------------------------------------------------------
 
@@ -322,8 +320,6 @@ void Block::refresh ()
   
   bool periodic = boundary->is_periodic();
 
-  CProxy_Block block_array = thisProxy;
-
   //--------------------------------------------------
   // Refresh
   //--------------------------------------------------
@@ -393,20 +389,133 @@ void Block::refresh ()
 	  char * array;
 	  field_face.load(&n, &array);
 
-	  block_array(ix3[fx+1],iy3[fy+1],iz3[fz+1]).x_refresh (n, array, -fx,-fy,-fz);
+	  comm_block_(ix3[fx+1],iy3[fy+1],iz3[fz+1]).p_exchange (n, array, -fx,-fy,-fz);
 	}
       }
     }
   }
 
-  // NOTE: x_refresh() calls compute, but if no incoming faces
+  // NOTE: p_exchange() calls compute, but if no incoming faces
   // it will never get called.  So every block also calls
-  // x_refresh() itself with a null array
+  // p_exchange() itself with a null array
 
-  x_refresh (0,0,0, 0, 0);
+  comm_block_.p_exchange (0,0,0, 0, 0);
 
 }
 #endif /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+void Block::exchange 
+(
+ Simulation * simulation, 
+ int n, char * buffer, int fx, int fy, int fz)
+{
+
+  FieldDescr * field_descr = simulation->field_descr();
+
+  if ( n != 0) {
+
+    // n == 0 is the call from self to ensure p_exchange()
+    // always gets called at least once
+
+    bool gx,gy,gz;
+    gx = false;
+    gy = false;
+    gz = false;
+
+    FieldFace field_face(field_block(), field_descr);
+
+    field_face.set_face(fx,fy,fz);
+    field_face.set_ghost(gx,gy,gz);
+
+    field_face.store (n, buffer);
+  }
+
+  //--------------------------------------------------
+  // Count incoming faces
+  // (SHOULD NOT RECOMPUTE EVERY CALL)
+  //--------------------------------------------------
+
+  int nx,ny,nz;
+  field_block()->size (&nx,&ny,&nz);
+
+  // Determine axes that may be neighbors
+
+  bool fxm = nx > 1;
+  bool fxp = nx > 1;
+  bool fym = ny > 1;
+  bool fyp = ny > 1;
+  bool fzm = nz > 1;
+  bool fzp = nz > 1;
+
+  // Adjust for boundary faces
+
+  bool periodic = simulation->problem()->boundary()->is_periodic();
+
+  Hierarchy * hierarchy = simulation->hierarchy();
+
+  double lower[3], upper[3];
+  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
+  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
+
+  bool is_boundary[3][2];
+  is_on_boundary (lower,upper,is_boundary);
+
+  fxm = fxm && (periodic || ! is_boundary[axis_x][face_lower]);
+  fxp = fxp && (periodic || ! is_boundary[axis_x][face_upper]);
+  fym = fym && (periodic || ! is_boundary[axis_y][face_lower]);
+  fyp = fyp && (periodic || ! is_boundary[axis_y][face_upper]);
+  fzm = fzm && (periodic || ! is_boundary[axis_z][face_lower]);
+  fzp = fzp && (periodic || ! is_boundary[axis_z][face_upper]);
+
+  // Count total expected number of incoming faces
+
+  // self
+
+  int count = 1;
+
+  // faces
+
+  if (field_descr->refresh_face(2)) {
+    if ( fxm ) ++count;
+    if ( fxp ) ++count;
+    if ( fym ) ++count;
+    if ( fyp ) ++count;
+    if ( fzm ) ++count;
+    if ( fzp ) ++count;
+  }
+
+  // edges
+
+  if (field_descr->refresh_face(1)) {
+    if ( fxm && fym ) ++count;
+    if ( fxm && fyp ) ++count;
+    if ( fxp && fym ) ++count;
+    if ( fxp && fyp ) ++count;
+    if ( fym && fzm ) ++count;
+    if ( fym && fzp ) ++count;
+    if ( fyp && fzm ) ++count;
+    if ( fyp && fzp ) ++count;
+    if ( fzm && fxm ) ++count;
+    if ( fzm && fxp ) ++count;
+    if ( fzp && fxm ) ++count;
+    if ( fzp && fxp ) ++count;
+  }
+
+  // corners
+
+  if (field_descr->refresh_face(0)) {
+    if ( fxm && fym && fzm ) ++count;
+    if ( fxm && fym && fzp ) ++count;
+    if ( fxm && fyp && fzm ) ++count;
+    if ( fxm && fyp && fzp ) ++count;
+    if ( fxp && fym && fzm ) ++count;
+    if ( fxp && fym && fzp ) ++count;
+    if ( fxp && fyp && fzm ) ++count;
+    if ( fxp && fyp && fzp ) ++count;
+  }
+}
 
 //----------------------------------------------------------------------
 
@@ -608,32 +717,28 @@ void Block::output(Simulation * simulation)
 
 //======================================================================
 
-void Block::copy_(const Block & block) throw()
-{
+// void Block::copy_(const Block & block) throw()
+// {
 
-  num_field_blocks_ = block.num_field_blocks_;
+//   num_field_blocks_ = block.num_field_blocks_;
 
-  field_block_.resize(block.field_block_.size());
-  for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i] = new FieldBlock (*(block.field_block_[i]));
-  }
+//   field_block_.resize(block.field_block_.size());
+//   for (size_t i=0; i<field_block_.size(); i++) {
+//     field_block_[i] = new FieldBlock (*(block.field_block_[i]));
+//   }
 
-  for (int i=0; i<3; i++) {
-    index_[i] = block.index_[i];
-    size_[i] = block.size_[i];
-    lower_[i] = block.lower_[i];
-    upper_[i] = block.upper_[i];
-  }
+//   for (int i=0; i<3; i++) {
+//     index_[i] = block.index_[i];
+//     size_[i] = block.size_[i];
+//     lower_[i] = block.lower_[i];
+//     upper_[i] = block.upper_[i];
+//   }
 
-  cycle_ = block.cycle_;
-  time_ = block.time_;
-  dt_ = block.dt_;
+//   cycle_ = block.cycle_;
+//   time_ = block.time_;
+//   dt_ = block.dt_;
 
-#ifdef CONFIG_USE_CHARM
-  count_refresh_face_ = block.count_refresh_face_;
-#endif
-  
-}
+// }
 
 //----------------------------------------------------------------------
 

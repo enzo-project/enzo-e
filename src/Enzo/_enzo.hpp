@@ -83,6 +83,7 @@ struct fluxes
 
 #include "enzo_EnzoConfig.hpp"
 
+#include "enzo_EnzoCommBlock.hpp"
 #include "enzo_EnzoBlock.hpp"
 
 #include "enzo_IoEnzoBlock.hpp"
@@ -96,8 +97,6 @@ struct fluxes
 
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
-
-#include "enzo_EnzoCommBlock.hpp"
 
 #endif /* ENZO_PRIVATE_HPP */
 

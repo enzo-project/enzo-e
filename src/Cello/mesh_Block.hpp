@@ -12,12 +12,12 @@ class Patch;
 class Factory;
 class GroupProcess;
 
-#ifdef CONFIG_USE_CHARM
-#include "mesh.decl.h"
-class Block : public CBase_Block
-#else
+// #ifdef CONFIG_USE_CHARM
+// #include "mesh.decl.h"
+// class Block : public CBase_Block
+// #else
 class Block
-#endif
+// #endif
 {
   /// @class    Block
   /// @ingroup  Mesh
@@ -74,9 +74,8 @@ public: // interface
 
   bool up = p.isUnpacking();
 
-  CBase_Block::pup(p);
+  //  CBase_Block::pup(p);
 
-  p | count_refresh_face_;
   p | proxy_patch_;
   p | num_field_blocks_;
 
@@ -103,27 +102,17 @@ public: // interface
 #endif
 
 //----------------------------------------------------------------------
-
 #ifdef CONFIG_USE_CHARM
-
-  /// Initialize a migrated Block
-  Block (CkMigrateMessage *m) 
-    : CBase_Block(m) { };
-
-#endif
-
-#ifdef CONFIG_USE_CHARM
-
-  // /// Call current Initial::enforce() on the block
-  // void p_initial_enforce();
-
-  //--------------------------------------------------
 
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
   void prepare();
 
   /// Implementation of refresh
   void refresh();
+
+  /// Exchange data with a neighbor block
+  void exchange(Simulation * simulation, 
+		int n, char * buffer, int fx, int fy, int fz);
 
   /// Boundary and Method
   void compute();
@@ -151,11 +140,11 @@ public: // interface
   /// Destructor
   virtual ~Block() throw();
 
-  /// Copy constructor
-  Block(const Block & block) throw();
+  // /// Copy constructor
+  // Block(const Block & block) throw();
 
-  /// Assignment operator
-  Block & operator= (const Block & block) throw();
+  // /// Assignment operator
+  // Block & operator= (const Block & block) throw();
 
   //----------------------------------------------------------------------
 
@@ -251,8 +240,8 @@ public: // virtual functions
 
 protected: // functions
 
-  /// Allocate and copy in attributes from give Block
-  void copy_(const Block & block) throw();
+  // /// Allocate and copy in attributes from give Block
+  // void copy_(const Block & block) throw();
 
 #ifdef CONFIG_USE_CHARM
 
@@ -286,10 +275,7 @@ protected: // attributes
 #ifdef CONFIG_USE_CHARM
 
   // CHARM++ chare associated with this Block
-  CommBlock comm_block_;
-
-  /// Counter when refreshing faces
-  int count_refresh_face_;
+  CommBlock * comm_block_;
 
   /// Parent patch
   CProxy_Patch proxy_patch_;

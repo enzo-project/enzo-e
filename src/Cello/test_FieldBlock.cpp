@@ -200,9 +200,9 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert (nb1 == sizeof (float) * nu1);
   TRACE2("nb2,nu2 = %d %d",nb2,sizeof(double)*nu2);
-  unit_assert (nb2 == sizeof (double)* nu2);
+  unit_assert (nb2 == sizeof (double)* nu2); // FAIL
   TRACE2("nb3,nu3 = %d %d",nb3,sizeof(double)*nu3);
-  unit_assert (nb3 == sizeof (double)* nu3);
+  unit_assert (nb3 == sizeof (double)* nu3); // FAIL
   unit_assert (nb4 == sizeof (double)* nu4);
 
   //----------------------------------------------------------------------
@@ -227,17 +227,13 @@ PARALLEL_MAIN_BEGIN
   nb3 = (char *)u4 - (char *)u3;
   nb4 = (char *)u5-(char *)u4;
 
-  unit_assert (nb1 == sizeof (float) * nu1);
-  unit_assert (nb2 == sizeof (double)* nu2);
-  unit_assert (nb3 == sizeof (double)* nu3);
-  unit_assert (nb4 == sizeof (double)* nu4);
+  unit_assert (nb1 == sizeof (float) * nu1); // FAIL
+  unit_assert (nb2 == sizeof (double)* nu2); // FAIL
+  unit_assert (nb3 == sizeof (double)* nu3); // FAIL
+  unit_assert (nb4 == sizeof (double)* nu4); // FAIL
 
 
   //----------------------------------------------------------------------
-
-  // with ghosts
-
-  field_block->reallocate_array(field_descr,true);
 
   v1 =  (float *)      field_block->field_values(i1);
   v2 = (double *)      field_block->field_values(i2);
@@ -332,7 +328,7 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  unit_assert(passed);
+  unit_assert(passed); // FAIL
 
   //--------------------------------------------------
 

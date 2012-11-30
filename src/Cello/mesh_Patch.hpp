@@ -162,7 +162,7 @@ class Patch
 
 #ifdef CONFIG_USE_CHARM
   /// Return pointer to the block CHARM++ chare array
-  CProxy_Block * block_array() const throw()
+  CProxy_CommBlock * block_array() const throw()
   //  { if (block_exists_) return block_array_; else return 0;}
   { return block_array_;}
 
@@ -193,7 +193,7 @@ protected: // attributes
 
   /// Array of blocks ib associated with this process
 #ifdef CONFIG_USE_CHARM
-  CProxy_Block * block_array_;
+  CProxy_CommBlock * block_array_;
   bool           block_exists_;
   Loop           block_loop_;
 #else

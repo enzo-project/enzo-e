@@ -38,7 +38,7 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
   /// Create a new CHARM++ Block array [abstract factory design pattern]
-  virtual CProxy_Block create_block_array
+  virtual CProxy_CommBlock create_block_array
   (int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
