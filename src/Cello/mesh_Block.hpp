@@ -12,12 +12,12 @@ class Patch;
 class Factory;
 class GroupProcess;
 
-// #ifdef CONFIG_USE_CHARM
-// #include "mesh.decl.h"
-// class Block : public CBase_Block
-// #else
+#ifdef CONFIG_USE_CHARM
+#include "mesh.decl.h"
+class Block : public CBase_Block
+#else
 class Block
-// #endif
+#endif
 {
   /// @class    Block
   /// @ingroup  Mesh
@@ -41,8 +41,7 @@ public: // interface
 #endif
    int patch_id,
    int patch_rank,
-   int num_field_blocks,
-   CommBlock * comm_block = 0
+   int num_field_blocks
 ) throw();
 
 #ifdef CONFIG_USE_CHARM
@@ -57,8 +56,7 @@ public: // interface
    CProxy_Patch proxy_patch,
    int patch_id,
    int patch_rank,
-   int num_field_blocks,
-   CommBlock * comm_block = 0
+   int num_field_blocks
 ) throw();
 
 #endif
@@ -74,8 +72,9 @@ public: // interface
 
   bool up = p.isUnpacking();
 
-  //  CBase_Block::pup(p);
+  CBase_Block::pup(p);
 
+  p | count_refresh_face_;
   p | proxy_patch_;
   p | num_field_blocks_;
 
@@ -102,7 +101,42 @@ public: // interface
 #endif
 
 //----------------------------------------------------------------------
+
 #ifdef CONFIG_USE_CHARM
+
+  /// Initialize a migrated Block
+  Block (CkMigrateMessage *m) 
+    : CBase_Block(m) { };
+
+#endif
+
+#ifdef CONFIG_USE_CHARM
+
+  /// Initialize block for the simulation.
+  void p_initial();
+
+  // /// Call current Initial::enforce() on the block
+  // void p_initial_enforce();
+
+  /// Refresh ghost zones and apply boundary conditions
+  void p_refresh() { refresh(); }
+
+  /// Apply the numerical methods on the block
+  void p_compute(int cycle, double time, double dt);
+
+  /// Refresh a FieldFace
+  void x_refresh(int n, char buffer[],int fx, int fy, int fz);
+
+  /// Contribute block data to ith output object in the simulation
+  void p_write (int index_output);
+
+  /// Contribute block data to the Initial input object
+  void p_read (int index_input = 0);
+
+  /// Entry function after prepare() to call Simulation::p_output()
+  void p_output(CkReductionMsg * msg);
+
+  //--------------------------------------------------
 
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
   void prepare();
@@ -110,28 +144,19 @@ public: // interface
   /// Implementation of refresh
   void refresh();
 
-  /// Exchange data with a neighbor block
-  void exchange(Simulation * simulation, 
-		int n, char * buffer, int fx, int fy, int fz);
-
   /// Boundary and Method
   void compute();
 
-  /// Initial conditions
-  void initial (Simulation * simulation);
-
-  /// Output
-  void output (Simulation * simulation);
-
   //==================================================
 
-#endif
+#else /* ! CONFIG_USE_CHARM */
 
   /// Refresh ghost data
   void refresh_ghosts(const FieldDescr * field_descr,
 		      const Patch * patch,
 		      int fx, int fy, int fz,
 		      int index_field_set = 0) throw();
+#endif
 
   //----------------------------------------------------------------------
   // Big Three
@@ -140,11 +165,11 @@ public: // interface
   /// Destructor
   virtual ~Block() throw();
 
-  // /// Copy constructor
-  // Block(const Block & block) throw();
+  /// Copy constructor
+  Block(const Block & block) throw();
 
-  // /// Assignment operator
-  // Block & operator= (const Block & block) throw();
+  /// Assignment operator
+  Block & operator= (const Block & block) throw();
 
   //----------------------------------------------------------------------
 
@@ -240,8 +265,8 @@ public: // virtual functions
 
 protected: // functions
 
-  // /// Allocate and copy in attributes from give Block
-  // void copy_(const Block & block) throw();
+  /// Allocate and copy in attributes from give Block
+  void copy_(const Block & block) throw();
 
 #ifdef CONFIG_USE_CHARM
 
@@ -274,8 +299,8 @@ protected: // attributes
 
 #ifdef CONFIG_USE_CHARM
 
-  // CHARM++ chare associated with this Block
-  CommBlock * comm_block_;
+  /// Counter when refreshing faces
+  int count_refresh_face_;
 
   /// Parent patch
   CProxy_Patch proxy_patch_;

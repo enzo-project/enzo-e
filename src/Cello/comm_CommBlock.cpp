@@ -1,5 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
+#ifdef TEMP_USE_COMM
+
 /// @file     comm_CommBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-11-18
@@ -170,3 +172,4 @@ void CommBlock::p_write (int index_output)
 
 #endif /* CONFIG_USE_CHARM */
 
+#endif /* TEMP_USE_COMM */

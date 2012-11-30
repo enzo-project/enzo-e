@@ -86,6 +86,41 @@ void Patch::p_initial()
 
 //----------------------------------------------------------------------
 
+void Block::p_initial()
+{
+  TRACE("Block::p_initial()");
+  Simulation * simulation  = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+
+  // Initialize the block
+
+  allocate(field_descr);
+
+  // Set the Block cycle and time to match Simulation's
+
+  TRACE("Block::p_initial Setting time");
+  set_cycle(simulation->cycle());
+  set_time (simulation->time());
+  set_dt   (simulation->dt());
+
+  // Perform any additional initialization for derived class 
+
+  initialize ();
+
+  // Apply the initial conditions 
+
+  Initial * initial = simulation->problem()->initial();
+
+  initial->enforce_block(this,field_descr, simulation->hierarchy());
+
+  // Continue with Patch::s_initial
+
+  proxy_patch_.s_initial();
+
+}
+
+//----------------------------------------------------------------------
+
 void Patch::s_initial()
 {
   if (block_loop_.done()) {
@@ -106,6 +141,10 @@ void SimulationCharm::s_initial()
 
 //======================================================================
 
+void Block::p_read (int index_initial)
+{
+  INCOMPLETE("Block::p_read");
+}
 #endif /* CONFIG_USE_CHARM */
 
 

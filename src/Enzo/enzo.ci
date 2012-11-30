@@ -28,9 +28,9 @@ module enzo {
 
   }
 
-  array[3D] EnzoCommBlock : CommBlock {
+  array[3D] EnzoBlock : Block {
 
-    entry EnzoCommBlock
+    entry EnzoBlock
       (int ibx, int iby, int ibz,
        int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
@@ -41,7 +41,7 @@ module enzo {
        int patch_rank,
        int num_field_blocks);
 
-    entry EnzoCommBlock
+    entry EnzoBlock
       (int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
        double xpm, double ypm, double zpm,

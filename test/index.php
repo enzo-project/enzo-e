@@ -272,7 +272,9 @@ function summary_incomplete_output ( $test_output, $executables)
       $output_files = "$output_files $output";
       ++$num_output_files;
     }
+
     system("cat $output_files | awk 'BEGIN{e=0;}; /UNIT TEST END/ {e=e+1};END{if ($num_output_files==e) {print \"<td></td>\"} else {print \"<td class=fail>\"$num_output_files - e\"</td>\";}}'");
+
   }
   printf ("<th></th>");
 }

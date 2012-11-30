@@ -1,5 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
+#ifdef TEMP_USE_COMM
+
 /// @file     comm_CommBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-11-28
@@ -111,3 +113,4 @@ private: // attributes
 
 #endif /* COMM_COMM_BLOCK_HPP */
 
+#endif /* TEMP_USE_COMM */

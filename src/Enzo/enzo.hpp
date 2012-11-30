@@ -34,7 +34,6 @@
 #include "_performance.hpp"
 #include "_simulation.hpp"
 #include "_field.hpp"
-#include "_comm.hpp"
 #include "_mesh.hpp"
 #include "_disk.hpp"
 #include "_io.hpp"

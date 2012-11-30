@@ -47,9 +47,9 @@ module mesh {
     
   };
  
-  array[3D] CommBlock {
+  array[3D] Block {
 
-    entry CommBlock
+    entry Block
       (int ibx, int iby, int ibz,
        int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
@@ -60,7 +60,7 @@ module mesh {
        int patch_rank,
        int num_field_blocks);
 
-    entry CommBlock
+    entry Block
       (int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
        double xpm, double ypm, double zpm,
@@ -75,7 +75,7 @@ module mesh {
     entry void p_write (int index_output);
     entry void p_compute(int cycle, double time, double dt);
 
-    entry void p_exchange(int n, char buffer[n], int fx, int fy, int fz);
+    entry void x_refresh(int n, char buffer[n], int fx, int fy, int fz);
 
     entry void p_read (int index_input);
 

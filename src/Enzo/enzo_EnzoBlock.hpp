@@ -174,6 +174,14 @@ public: // interface
    int num_field_blocks) throw();
 
 #ifdef CONFIG_USE_CHARM
+  /// Initialize a migrated Block
+  EnzoBlock (CkMigrateMessage *m) 
+    : Block (m)
+  {
+    TRACE("CkMigrateMessage");
+    //    initialize();
+  };
+
   /// Initialize the EnzoBlock chare array
   EnzoBlock
   (

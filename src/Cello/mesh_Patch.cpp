@@ -105,7 +105,7 @@ void Patch::pup (PUP::er &p)
     p | id_;
     TRACE1("id_ = %d",id_);
     TRACE1("block_array_ = %p",block_array_);
-    if (p.isUnpacking()) block_array_ = new CProxy_CommBlock;
+    if (p.isUnpacking()) block_array_ = new CProxy_Block;
     p | *block_array_;
     p | block_exists_;
     //    WARNING("Patch::pup","skipping group_process_ (regenerated)");
@@ -325,7 +325,7 @@ void Patch::allocate_array_
 
   const Factory * factory = simulation->factory();
 
-  block_array_ = new CProxy_CommBlock;
+  block_array_ = new CProxy_Block;
 
   DEBUG1("ID = %d",id_);
   (*block_array_) = factory->create_block_array

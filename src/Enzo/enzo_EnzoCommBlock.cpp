@@ -1,5 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
+#ifdef TEMP_USE_COMM
+
 /// @file     enzo_EnzoCommBlock
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-11-28
@@ -62,3 +64,4 @@ EnzoCommBlock::EnzoCommBlock
 
 //======================================================================
 
+#endif /* TEMP_USE_COMM */

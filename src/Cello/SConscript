@@ -56,7 +56,6 @@ else:
 libs_external    = ['external']
 libs_monitor     = ['monitor','parallel']
 libs_error       = ['error'] + libs_monitor
-libs_comm        = ['comm']
 libs_disk        = ['disk'] + libs_error + ['hdf5']
 libs_performance = ['performance', 'memory'] + libs_error + libs_papi
 libs_parallel    = ['parallel'] +libs_error
@@ -72,7 +71,7 @@ libs_test        = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
 if (type=='charm'):
-   libs_all = ['charm','simulation','problem','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','comm','test','cello','external','png','hdf5'] + libs_papi
+   libs_all = ['charm','simulation','problem','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
    libs_field  = libs_all
    libs_io     = libs_all
    libs_mesh   = libs_all
@@ -96,6 +95,7 @@ if (type=='charm'):
 
 includes_cello =       [Glob('cello*hpp')]
 includes_charm =       [Glob('charm*hpp')]
+includes_comm =        [Glob('*comm*hpp')]
 includes_disk =        [Glob('*disk*hpp')]
 includes_error =       [Glob('*error*hpp')]
 includes_field =       [Glob('*field*hpp')]
@@ -103,7 +103,6 @@ includes_io =          [Glob('*io*hpp')]
 includes_main =        ['main.hpp']
 includes_memory =      [Glob('*memory*hpp')]
 includes_mesh =        [Glob('*mesh*hpp')]
-includes_comm =        [Glob('*comm*hpp')]
 includes_monitor =     [Glob('*monitor*hpp')]
 includes_parallel =    [Glob('*parallel*hpp'),'parallel.def']
 includes_parameters =  [Glob('*parameters*hpp'),'parse.h']
@@ -121,7 +120,6 @@ sources_io =          [Glob('io*cpp')]
 sources_main =        [Glob('main*cpp')]
 sources_memory =      [Glob('memory*cpp')]
 sources_mesh =        [Glob('mesh*cpp')]
-sources_comm =        [Glob('comm*cpp')]
 sources_monitor =     [Glob('monitor*cpp')]
 sources_parallel =    [Glob('parallel*cpp')]
 sources_parameters =  [Glob('parameters*cpp'),'parse.tab.c','lex.yy.c']
@@ -282,7 +280,6 @@ libraries_io     = env.Library ('io',     sources_io)
 libraries_main   = env.Library ('main',   sources_main)
 libraries_memory = env.Library ('memory', sources_memory)
 libraries_mesh   = env.Library ('mesh',   sources_mesh)
-libraries_comm   = env.Library ('comm',   sources_comm)
 libraries_monitor = env.Library ('monitor', sources_monitor)
 libraries_problem = env.Library ('problem', sources_problem)
 libraries_parallel = env.Library ('parallel', sources_parallel)
@@ -329,6 +326,8 @@ env.Alias('install-lib',env.Install (lib_path,lib_cello))
 env.Alias('install-inc',env.Install (inc_path,includes_charm))
 env.Alias('install-lib',env.Install (lib_path,libraries_charm))
 
+env.Alias('install-inc',env.Install (inc_path,includes_comm))
+
 env.Alias('install-bin',env.Install (bin_path,binaries_disk))
 env.Alias('install-inc',env.Install (inc_path,includes_disk))
 env.Alias('install-lib',env.Install (lib_path,libraries_disk))
@@ -355,10 +354,6 @@ env.Alias('install-lib',env.Install (lib_path,libraries_memory))
 env.Alias('install-bin',env.Install (bin_path,binaries_mesh))
 env.Alias('install-inc',env.Install (inc_path,includes_mesh))
 env.Alias('install-lib',env.Install (lib_path,libraries_mesh))
-
-# env.Alias('install-bin',env.Install (bin_path,binaries_comm))
-env.Alias('install-inc',env.Install (inc_path,includes_comm))
-env.Alias('install-lib',env.Install (lib_path,libraries_comm))
 
 env.Alias('install-bin',env.Install (bin_path,binaries_monitor))
 env.Alias('install-inc',env.Install (inc_path,includes_monitor))

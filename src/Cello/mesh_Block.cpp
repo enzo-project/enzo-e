@@ -25,11 +25,11 @@ Block::Block
 #endif
  int patch_id,
  int patch_rank,
- int num_field_blocks,
- CommBlock * comm_block
+ int num_field_blocks
 ) throw ()
   :
 #ifdef CONFIG_USE_CHARM
+     count_refresh_face_(0),
      proxy_patch_(proxy_patch),
 #endif
      num_field_blocks_(num_field_blocks),
@@ -38,8 +38,7 @@ Block::Block
      patch_rank_(patch_rank),
      cycle_(0),
      time_(0),
-     dt_(0),
-     comm_block_(comm_block)
+     dt_(0)
 { 
   DEBUG1("ID = %d",patch_id);
   DEBUG1("IP = %d",patch_rank);
@@ -85,18 +84,17 @@ Block::Block
 #endif
  int patch_id,
  int patch_rank,
- int num_field_blocks,
- CommBlock * comm_block
- ) throw ()
-  : proxy_patch_(proxy_patch),
+ int num_field_blocks) throw ()
+  : count_refresh_face_(0),
+    proxy_patch_(proxy_patch),
     num_field_blocks_(num_field_blocks),
     field_block_(),
     patch_id_(patch_id),
     patch_rank_(patch_rank),
     cycle_(0),
     time_(0),
-    dt_(0),
-    comm_block_(comm_block)
+    dt_(0)
+
 { 
 
   DEBUG1("ID = %d",patch_id_);
@@ -148,22 +146,22 @@ Block::~Block() throw ()
 
 //----------------------------------------------------------------------
 
-// Block::Block(const Block & block) throw ()
-//   : field_block_()
-// /// @param     block  Object being copied
-// {
-//   copy_(block);
-// }
+Block::Block(const Block & block) throw ()
+  : field_block_()
+/// @param     block  Object being copied
+{
+  copy_(block);
+}
 
 //----------------------------------------------------------------------
 
-// Block & Block::operator = (const Block & block) throw ()
-// /// @param     block  Source object of the assignment
-// /// @return    The target assigned object
-// {
-//   copy_(block);
-//   return *this;
-// }
+Block & Block::operator = (const Block & block) throw ()
+/// @param     block  Source object of the assignment
+/// @return    The target assigned object
+{
+  copy_(block);
+  return *this;
+}
 
 //----------------------------------------------------------------------
 
@@ -208,6 +206,8 @@ void Block::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
 // MPI FUNCTIONS
 //======================================================================
 
+#ifndef CONFIG_USE_CHARM
+
 void Block::refresh_ghosts(const FieldDescr * field_descr,
 			   const Patch * patch,
 			   int fx, int fy, int fz,
@@ -221,6 +221,8 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 		       patch->layout(),
 		       ibx,iby,ibz, fx,fy,fz);
 }
+
+#endif
 
 //======================================================================
 // CHARM FUNCTIONS
@@ -308,6 +310,64 @@ void Block::prepare()
 
 #ifdef CONFIG_USE_CHARM
 
+void Block::p_output(CkReductionMsg * msg)
+{
+
+  DEBUG("Block::p_output()");
+  double * min_reduce = (double * )msg->getData();
+
+  double dt_patch   = min_reduce[0];
+  bool   stop_patch = min_reduce[1] == 1.0 ? true : false;
+
+  delete msg;
+
+  set_dt   (dt_patch);
+
+  // WARNING: assumes one patch
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  simulation->update_state(cycle_,time_,dt_patch,stop_patch);
+ 
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
+  // Simulation::p_output()?  Want last block?
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  
+
+  // "root" block calls Simulation::p_output()
+  //  if (index() == 0) {
+  //    proxy_simulation.p_output();
+  //  }
+
+  // Wait for all blocks to check in before calling Simulation::p_output()
+  // for next output
+
+  proxy_patch_.s_output();
+
+}
+#endif /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+//----------------------------------------------------------------------
+void Block::p_compute (int cycle, double time, double dt)
+{
+  // set_cycle(cycle);
+  // set_time(time);
+  // set_dt(dt);
+
+  DEBUG3 ("Block::p_compute() cycle %d time %f dt %f",cycle,time,dt);
+  compute();
+}
+#endif /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
 void Block::refresh ()
 {
   TRACE ("Block::refresh()");
@@ -319,6 +379,8 @@ void Block::refresh ()
   FieldDescr * field_descr = simulation->field_descr();
   
   bool periodic = boundary->is_periodic();
+
+  CProxy_Block block_array = thisProxy;
 
   //--------------------------------------------------
   // Refresh
@@ -389,34 +451,126 @@ void Block::refresh ()
 	  char * array;
 	  field_face.load(&n, &array);
 
-	  comm_block_(ix3[fx+1],iy3[fy+1],iz3[fz+1]).p_exchange (n, array, -fx,-fy,-fz);
+	  block_array(ix3[fx+1],iy3[fy+1],iz3[fz+1]).x_refresh (n, array, -fx,-fy,-fz);
 	}
       }
     }
   }
 
-  // NOTE: p_exchange() calls compute, but if no incoming faces
+  // NOTE: x_refresh() calls compute, but if no incoming faces
   // it will never get called.  So every block also calls
-  // p_exchange() itself with a null array
+  // x_refresh() itself with a null array
 
-  comm_block_.p_exchange (0,0,0, 0, 0);
+  x_refresh (0,0,0, 0, 0);
 
 }
 #endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
-void Block::exchange 
+#ifdef CONFIG_USE_CHARM
+
+void Block::determine_boundary_
 (
- Simulation * simulation, 
- int n, char * buffer, int fx, int fy, int fz)
+ bool is_boundary[3][2],
+ bool * fxm,
+ bool * fxp,
+ bool * fym,
+ bool * fyp,
+ bool * fzm,
+ bool * fzp
+ )
 {
+  
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  Hierarchy * hierarchy   = simulation->hierarchy();
+
+  double lower_h[3], upper_h[3];
+  hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
+  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
+
+  // return is_boundary[] array of faces on domain boundary
+
+  is_on_boundary(lower_h,upper_h,is_boundary);
+
+  int nx,ny,nz;
+  field_block()->size (&nx,&ny,&nz);
+
+  // Determine in which directions we need to communicate or update boundary
+
+  if (fxm) *fxm = nx > 1;
+  if (fxp) *fxp = nx > 1;
+  if (fym) *fym = ny > 1;
+  if (fyp) *fyp = ny > 1;
+  if (fzm) *fzm = nz > 1;
+  if (fzp) *fzp = nz > 1;
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
+
+#ifdef CONFIG_USE_CHARM
+
+void Block::update_boundary_
+(
+ bool is_boundary[3][2],
+ bool fxm,
+ bool fxp,
+ bool fym,
+ bool fyp,
+ bool fzm,
+ bool fzp
+)
+{
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  Boundary * boundary = simulation->problem()->boundary();
+  const FieldDescr * field_descr = simulation->field_descr();
+
+
+  // Update boundaries
+
+  if ( fxm && is_boundary[axis_x][face_lower] ) {
+    boundary->enforce(field_descr,this,face_lower,axis_x);
+  }
+  if ( fxp && is_boundary[axis_x][face_upper] ) {
+    boundary->enforce(field_descr,this,face_upper,axis_x);
+  }
+  if ( fym && is_boundary[axis_y][face_lower] ) {
+    boundary->enforce(field_descr,this,face_lower,axis_y);
+  }
+  if ( fyp && is_boundary[axis_y][face_upper] ) {
+    boundary->enforce(field_descr,this,face_upper,axis_y);
+  }
+  if ( fzm && is_boundary[axis_z][face_lower] ) {
+    boundary->enforce(field_descr,this,face_lower,axis_z);
+  }
+  if ( fzp && is_boundary[axis_z][face_upper] ) {
+    boundary->enforce(field_descr,this,face_upper,axis_z);
+  }
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void Block::x_refresh (int n, char * buffer, int fx, int fy, int fz)
+{
+
+  DEBUG ("Block::x_refresh()");
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
 
   if ( n != 0) {
 
-    // n == 0 is the call from self to ensure p_exchange()
+    // n == 0 is the call from self to ensure x_refresh()
     // always gets called at least once
 
     bool gx,gy,gz;
@@ -515,97 +669,18 @@ void Block::exchange
     if ( fxp && fyp && fzm ) ++count;
     if ( fxp && fyp && fzp ) ++count;
   }
+
+  //--------------------------------------------------
+  // Compute
+  //--------------------------------------------------
+
+  if (++count_refresh_face_ >= count) {
+    DEBUG ("Block::x_refresh() calling prepare()");
+    count_refresh_face_ = 0;
+    prepare();
+  } else  DEBUG ("Block::x_refresh() skipping prepare()");
 }
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Block::determine_boundary_
-(
- bool is_boundary[3][2],
- bool * fxm,
- bool * fxp,
- bool * fym,
- bool * fyp,
- bool * fzm,
- bool * fzp
- )
-{
-  
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  Hierarchy * hierarchy   = simulation->hierarchy();
-
-  double lower_h[3], upper_h[3];
-  hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
-  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
-
-  // return is_boundary[] array of faces on domain boundary
-
-  is_on_boundary (lower_h,upper_h,is_boundary);
-
-  int nx,ny,nz;
-  field_block()->size (&nx,&ny,&nz);
-
-  // Determine in which directions we need to communicate or update boundary
-
-  if (fxm) *fxm = nx > 1;
-  if (fxp) *fxp = nx > 1;
-  if (fym) *fym = ny > 1;
-  if (fyp) *fyp = ny > 1;
-  if (fzm) *fzm = nz > 1;
-  if (fzp) *fzp = nz > 1;
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-
-#ifdef CONFIG_USE_CHARM
-
-void Block::update_boundary_
-(
- bool is_boundary[3][2],
- bool fxm,
- bool fxp,
- bool fym,
- bool fyp,
- bool fzm,
- bool fzp
-)
-{
-
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  Boundary * boundary = simulation->problem()->boundary();
-  const FieldDescr * field_descr = simulation->field_descr();
-
-
-  // Update boundaries
-
-  if ( fxm && is_boundary[axis_x][face_lower] ) {
-    boundary->enforce(field_descr,this,face_lower,axis_x);
-  }
-  if ( fxp && is_boundary[axis_x][face_upper] ) {
-    boundary->enforce(field_descr,this,face_upper,axis_x);
-  }
-  if ( fym && is_boundary[axis_y][face_lower] ) {
-    boundary->enforce(field_descr,this,face_lower,axis_y);
-  }
-  if ( fyp && is_boundary[axis_y][face_upper] ) {
-    boundary->enforce(field_descr,this,face_upper,axis_y);
-  }
-  if ( fzm && is_boundary[axis_z][face_lower] ) {
-    boundary->enforce(field_descr,this,face_lower,axis_z);
-  }
-  if ( fzp && is_boundary[axis_z][face_upper] ) {
-    boundary->enforce(field_descr,this,face_upper,axis_z);
-  }
-}
-
-#endif
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
@@ -646,99 +721,34 @@ void Block::compute()
 }
 #endif /* CONFIG_USE_CHARM */
 
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void Block::initial(Simulation * simulation)
-{
-  TRACE("Block::initial()");
-
-  FieldDescr * field_descr = simulation->field_descr();
-
-  // Initialize the block
-
-  allocate(field_descr);
-
-  // Set the Block cycle and time to match Simulation's
-
-  TRACE("CommBlock::p_initial Setting time");
-  set_cycle(simulation->cycle());
-  set_time (simulation->time());
-  set_dt   (simulation->dt());
-
-  // Perform any additional initialization for derived class 
-
-  initialize ();
-
-  // Apply the initial conditions 
-
-  Initial * initial = simulation->problem()->initial();
-
-  initial->enforce_block(this,field_descr, simulation->hierarchy());
-
-}
-#endif
-
-//----------------------------------------------------------------------
-
-void Block::output(Simulation * simulation)
-{
-  DEBUG("Block::output()");
-
-  double * min_reduce = (double * )msg->getData();
-
-  double dt_patch   = min_reduce[0];
-  bool   stop_patch = min_reduce[1] == 1.0 ? true : false;
-
-  delete msg;
-
-  set_dt   (dt_patch);
-
-  // WARNING: assumes one patch
-
-  simulation->update_state(cycle_,time_,dt_patch,stop_patch);
- 
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
-  // Simulation::p_output()?  Want last block?
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  
-
-  // "root" block calls Simulation::p_output()
-  //  if (index() == 0) {
-  //    proxy_simulation.p_output();
-  //  }
-
-  // Wait for all blocks to check in before calling Simulation::p_output()
-  // for next output
-
-}
-
 //======================================================================
 
-// void Block::copy_(const Block & block) throw()
-// {
+void Block::copy_(const Block & block) throw()
+{
 
-//   num_field_blocks_ = block.num_field_blocks_;
+  num_field_blocks_ = block.num_field_blocks_;
 
-//   field_block_.resize(block.field_block_.size());
-//   for (size_t i=0; i<field_block_.size(); i++) {
-//     field_block_[i] = new FieldBlock (*(block.field_block_[i]));
-//   }
+  field_block_.resize(block.field_block_.size());
+  for (size_t i=0; i<field_block_.size(); i++) {
+    field_block_[i] = new FieldBlock (*(block.field_block_[i]));
+  }
 
-//   for (int i=0; i<3; i++) {
-//     index_[i] = block.index_[i];
-//     size_[i] = block.size_[i];
-//     lower_[i] = block.lower_[i];
-//     upper_[i] = block.upper_[i];
-//   }
+  for (int i=0; i<3; i++) {
+    index_[i] = block.index_[i];
+    size_[i] = block.size_[i];
+    lower_[i] = block.lower_[i];
+    upper_[i] = block.upper_[i];
+  }
 
-//   cycle_ = block.cycle_;
-//   time_ = block.time_;
-//   dt_ = block.dt_;
+  cycle_ = block.cycle_;
+  time_ = block.time_;
+  dt_ = block.dt_;
 
-// }
+#ifdef CONFIG_USE_CHARM
+  count_refresh_face_ = block.count_refresh_face_;
+#endif
+  
+}
 
 //----------------------------------------------------------------------
 
