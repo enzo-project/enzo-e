@@ -100,7 +100,7 @@ IoFieldBlock * Factory::create_io_field_block () const throw()
 //----------------------------------------------------------------------
 #ifdef CONFIG_USE_CHARM
 
-CProxy_Block Factory::create_block_array
+CProxy_CommBlock Factory::create_block_array
 (
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -115,8 +115,8 @@ CProxy_Block Factory::create_block_array
 {
   DEBUG1("ID = %d",patch_id);
   if (allocate) {
-    CProxy_Block * proxy_block = new CProxy_Block;
-    *proxy_block = CProxy_Block::ckNew
+    CProxy_CommBlock * proxy_block = new CProxy_CommBlock;
+    *proxy_block = CProxy_CommBlock::ckNew
       (
        nbx,nby,nbz,
        nx,ny,nz,
@@ -130,14 +130,14 @@ CProxy_Block Factory::create_block_array
     DEBUG1 ("proxy_block = %p",proxy_block);
     return *proxy_block;
   } else {
-    return CProxy_Block::ckNew();
+    return CProxy_CommBlock::ckNew();
   }
 }
 
 #endif
 
 //----------------------------------------------------------------------
-Block * Factory::create_block
+CommBlock * Factory::create_block
 (
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
@@ -154,7 +154,7 @@ Block * Factory::create_block
 {
 #ifdef CONFIG_USE_CHARM
   DEBUG1("ID = %d",patch_id);
-    CProxy_Block block_array = CProxy_Block::ckNew
+    CProxy_CommBlock block_array = CProxy_CommBlock::ckNew
     (nbx,nby,nbz,
      nx,ny,nz,
      xm,ym,zm, 
@@ -167,9 +167,9 @@ Block * Factory::create_block
   return block_array(ibx,iby,ibz).ckLocal();
 #else
   DEBUG1("ID = %d",patch_id);
-  // CProxy_Block proxy_block_reduce = 
-  //   CProxy_Block::ckNew()
-  return new Block 
+  // CProxy_CommBlock proxy_block_reduce = 
+  //   CProxy_CommBlock::ckNew()
+  return new CommBlock 
     (ibx,iby,ibz, 
      nbx,nby,nbz,
      nx,ny,nz,

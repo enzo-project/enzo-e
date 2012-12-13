@@ -63,7 +63,7 @@ void InitialFile::pup (PUP::er &p)
 
 void InitialFile::enforce_block
 (
- Block            * block,
+ CommBlock        * block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()

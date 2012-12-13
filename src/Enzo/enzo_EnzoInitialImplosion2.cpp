@@ -34,7 +34,7 @@ void EnzoInitialImplosion2::pup (PUP::er &p)
 
 void EnzoInitialImplosion2::enforce_block 
 (
- Block * block,
+ CommBlock * block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()
@@ -42,7 +42,7 @@ void EnzoInitialImplosion2::enforce_block
 {
 
   ASSERT("EnzoInitialImplosion2",
-	 "Block does not exist",
+	 "CommBlock does not exist",
 	 block != NULL);
 
   FieldBlock * field_block = block->field_block();

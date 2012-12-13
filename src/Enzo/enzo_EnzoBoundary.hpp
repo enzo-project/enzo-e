@@ -53,7 +53,7 @@ public: // virtual functions
 
   /// Enforce boundary conditions on block for a subet of faces
   virtual void enforce ( const FieldDescr * field_descr,
-			 Block * block,
+			 CommBlock * block,
 			 face_enum face = face_all,
 			 axis_enum axis = axis_all) const throw(); 
 

@@ -42,7 +42,7 @@ void EnzoBoundary::pup (PUP::er &p)
 void EnzoBoundary::enforce 
 (
  const FieldDescr * field_descr,
- Block * block,
+ CommBlock * block,
  face_enum     face,
  axis_enum     axis 
  ) const throw()

@@ -28,7 +28,7 @@ module enzo {
 
   }
 
-  array[3D] EnzoBlock : Block {
+  array[3D] EnzoBlock : CommBlock {
 
     entry EnzoBlock
       (int ibx, int iby, int ibz,

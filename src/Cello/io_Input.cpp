@@ -137,7 +137,7 @@ Patch * Input::read_patch
 #else
 
   ItBlock it_block (patch);
-  while (Block * block = ++it_block) {
+  while (CommBlock * block = ++it_block) {
     // NO OFFSET: ASSUMES ROOT PATCH
     read_block (block, "NAME",field_descr);
   }
@@ -147,9 +147,9 @@ Patch * Input::read_patch
 
 //----------------------------------------------------------------------
 
-Block * Input::read_block
+CommBlock * Input::read_block
 (
- Block * block,
+ CommBlock * block,
  std::string block_name,
  const FieldDescr * field_descr
  ) throw()

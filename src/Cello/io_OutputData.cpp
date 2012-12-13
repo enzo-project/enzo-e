@@ -132,7 +132,7 @@ void OutputData::write_patch
 
 void OutputData::write_block
 ( 
-  const Block * block,
+  const CommBlock * block,
   const FieldDescr * field_descr,
   int ixp0, int iyp0, int izp0) throw()
 {
@@ -146,7 +146,7 @@ void OutputData::write_block
 
   // Write block meta data
 
-  io_block()->set_block((Block *)block);
+  io_block()->set_block((CommBlock *)block);
 
   write_meta_group (io_block());
 

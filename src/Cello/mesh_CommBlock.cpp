@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_Block.cpp
+/// @file     mesh_CommBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Feb 28 13:22:26 PST 2011
-/// @brief    Implementation of the Block object
+/// @brief    Implementation of the CommBlock object
 /// @todo     Remove hierarchy dependency via Initial--only need domain bounds
 
 #include "cello.hpp"
@@ -13,13 +13,13 @@
 
 //----------------------------------------------------------------------
 
-Block::Block
+CommBlock::CommBlock
 (
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
- double xb, double yb, double zb,    // Block width
+ double xb, double yb, double zb,    // CommBlock width
 #ifdef CONFIG_USE_CHARM
  CProxy_Patch proxy_patch,
 #endif
@@ -73,12 +73,12 @@ Block::Block
 
 #ifdef CONFIG_USE_CHARM
 
-Block::Block
+CommBlock::CommBlock
 (
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Patch begin
- double xb, double yb, double zb,    // Block width
+ double xb, double yb, double zb,    // CommBlock width
 #ifdef CONFIG_USE_CHARM
  CProxy_Patch proxy_patch,
 #endif
@@ -134,7 +134,7 @@ Block::Block
 
 //----------------------------------------------------------------------
 
-Block::~Block() throw ()
+CommBlock::~CommBlock() throw ()
 { 
   // Deallocate field_block_[]
   for (size_t i=0; i<field_block_.size(); i++) {
@@ -146,7 +146,7 @@ Block::~Block() throw ()
 
 //----------------------------------------------------------------------
 
-Block::Block(const Block & block) throw ()
+CommBlock::CommBlock(const CommBlock & block) throw ()
   : field_block_()
 /// @param     block  Object being copied
 {
@@ -155,7 +155,7 @@ Block::Block(const Block & block) throw ()
 
 //----------------------------------------------------------------------
 
-Block & Block::operator = (const Block & block) throw ()
+CommBlock & CommBlock::operator = (const CommBlock & block) throw ()
 /// @param     block  Source object of the assignment
 /// @return    The target assigned object
 {
@@ -165,28 +165,28 @@ Block & Block::operator = (const Block & block) throw ()
 
 //----------------------------------------------------------------------
 
-const FieldBlock * Block::field_block (int i) const throw()
+const FieldBlock * CommBlock::field_block (int i) const throw()
 { 
   return field_block_.at(i); 
 }
 
 //----------------------------------------------------------------------
 
-FieldBlock * Block::field_block (int i) throw()
+FieldBlock * CommBlock::field_block (int i) throw()
 { 
   return field_block_.at(i); 
 }
 
 //----------------------------------------------------------------------
 
-int Block::index () const throw ()
+int CommBlock::index () const throw ()
 {
   return index_[0] + size_[0] * (index_[1] + size_[1] * index_[2]);
 }
 
 //----------------------------------------------------------------------
 
-void Block::index_patch (int * ix, int * iy, int * iz) const throw ()
+void CommBlock::index_patch (int * ix, int * iy, int * iz) const throw ()
 {
   if (ix) (*ix) = index_[0]; 
   if (iy) (*iy) = index_[1]; 
@@ -195,7 +195,7 @@ void Block::index_patch (int * ix, int * iy, int * iz) const throw ()
 
 //----------------------------------------------------------------------
 
-void Block::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
+void CommBlock::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
 {
   if (nx) (*nx)=size_[0]; 
   if (ny) (*ny)=size_[1]; 
@@ -208,7 +208,7 @@ void Block::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
 
 #ifndef CONFIG_USE_CHARM
 
-void Block::refresh_ghosts(const FieldDescr * field_descr,
+void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
 			   const Patch * patch,
 			   int fx, int fy, int fz,
 			   int index_field_set) throw()
@@ -236,7 +236,7 @@ extern CProxy_SimulationCharm  proxy_simulation;
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::prepare()
+void CommBlock::prepare()
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -260,10 +260,10 @@ void Block::prepare()
 
   double dt_block;
   Timestep * timestep = problem->timestep();
-  DEBUG("Block::prepare()");
+  DEBUG("CommBlock::prepare()");
 
   dt_block = timestep->evaluate(field_descr,this);
-  DEBUG("Block::prepare()");
+  DEBUG("CommBlock::prepare()");
 
   // Reduce timestep to coincide with scheduled output if needed
 
@@ -273,7 +273,7 @@ void Block::prepare()
     dt_block = schedule->update_timestep(time_,dt_block);
   }
 
-  DEBUG("Block::prepare()");
+  DEBUG("CommBlock::prepare()");
 
   // Reduce timestep to not overshoot final time from stopping criteria
 
@@ -291,7 +291,7 @@ void Block::prepare()
   int stop_block = stopping->complete(cycle_,time_);
 
   //--------------------------------------------------
-  // Reduce to find Block array minimum dt and stopping criteria
+  // Reduce to find CommBlock array minimum dt and stopping criteria
   //--------------------------------------------------
 
   double min_reduce[2];
@@ -299,7 +299,7 @@ void Block::prepare()
   min_reduce[0] = dt_block;
   min_reduce[1] = stop_block ? 1.0 : 0.0;
 
-  CkCallback callback (CkIndex_Block::p_output(NULL), thisProxy);
+  CkCallback callback (CkIndex_CommBlock::p_output(NULL), thisProxy);
   TRACE1("Calling contribute %d",2*sizeof(double));
   contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
 
@@ -310,10 +310,10 @@ void Block::prepare()
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::p_output(CkReductionMsg * msg)
+void CommBlock::p_output(CkReductionMsg * msg)
 {
 
-  DEBUG("Block::p_output()");
+  DEBUG("CommBlock::p_output()");
   double * min_reduce = (double * )msg->getData();
 
   double dt_patch   = min_reduce[0];
@@ -353,13 +353,13 @@ void Block::p_output(CkReductionMsg * msg)
 #ifdef CONFIG_USE_CHARM
 
 //----------------------------------------------------------------------
-void Block::p_compute (int cycle, double time, double dt)
+void CommBlock::p_compute (int cycle, double time, double dt)
 {
   // set_cycle(cycle);
   // set_time(time);
   // set_dt(dt);
 
-  DEBUG3 ("Block::p_compute() cycle %d time %f dt %f",cycle,time,dt);
+  DEBUG3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
   compute();
 }
 #endif /* CONFIG_USE_CHARM */
@@ -368,9 +368,9 @@ void Block::p_compute (int cycle, double time, double dt)
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::refresh ()
+void CommBlock::refresh ()
 {
-  TRACE ("Block::refresh()");
+  TRACE ("CommBlock::refresh()");
 
   bool is_boundary[3][2];
 
@@ -380,7 +380,7 @@ void Block::refresh ()
   
   bool periodic = boundary->is_periodic();
 
-  CProxy_Block block_array = thisProxy;
+  CProxy_CommBlock block_array = thisProxy;
 
   //--------------------------------------------------
   // Refresh
@@ -470,7 +470,7 @@ void Block::refresh ()
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::determine_boundary_
+void CommBlock::determine_boundary_
 (
  bool is_boundary[3][2],
  bool * fxm,
@@ -514,7 +514,7 @@ void Block::determine_boundary_
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::update_boundary_
+void CommBlock::update_boundary_
 (
  bool is_boundary[3][2],
  bool fxm,
@@ -560,10 +560,10 @@ void Block::update_boundary_
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::x_refresh (int n, char * buffer, int fx, int fy, int fz)
+void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 {
 
-  DEBUG ("Block::x_refresh()");
+  DEBUG ("CommBlock::x_refresh()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -675,10 +675,10 @@ void Block::x_refresh (int n, char * buffer, int fx, int fy, int fz)
   //--------------------------------------------------
 
   if (++count_refresh_face_ >= count) {
-    DEBUG ("Block::x_refresh() calling prepare()");
+    DEBUG ("CommBlock::x_refresh() calling prepare()");
     count_refresh_face_ = 0;
     prepare();
-  } else  DEBUG ("Block::x_refresh() skipping prepare()");
+  } else  DEBUG ("CommBlock::x_refresh() skipping prepare()");
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -686,9 +686,9 @@ void Block::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 
 #ifdef CONFIG_USE_CHARM
 
-void Block::compute()
+void CommBlock::compute()
 {
-  DEBUG ("Block::compute()");
+  DEBUG ("CommBlock::compute()");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -707,7 +707,7 @@ void Block::compute()
    traceUserBracketEvent(10,time_start, CmiWallTimer());
  #endif
 
-  // Update Block cycle and time to Simulation time and cycle
+  // Update CommBlock cycle and time to Simulation time and cycle
 
   set_cycle (cycle_ + 1);
 
@@ -715,7 +715,7 @@ void Block::compute()
   
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 
-  DEBUG ("Block::compute() calling refresh()");
+  DEBUG ("CommBlock::compute() calling refresh()");
   refresh();
 
 }
@@ -723,7 +723,7 @@ void Block::compute()
 
 //======================================================================
 
-void Block::copy_(const Block & block) throw()
+void CommBlock::copy_(const CommBlock & block) throw()
 {
 
   num_field_blocks_ = block.num_field_blocks_;
@@ -752,7 +752,7 @@ void Block::copy_(const Block & block) throw()
 
 //----------------------------------------------------------------------
 
-void Block::is_on_boundary (double lower[3], double upper[3],
+void CommBlock::is_on_boundary (double lower[3], double upper[3],
 			    bool is_boundary[3][2]) throw()
 {
 
@@ -773,7 +773,7 @@ void Block::is_on_boundary (double lower[3], double upper[3],
 }
 //----------------------------------------------------------------------
 
-void Block::allocate (const FieldDescr * field_descr) throw()
+void CommBlock::allocate (const FieldDescr * field_descr) throw()
 { 
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i]->allocate_array(field_descr,true);

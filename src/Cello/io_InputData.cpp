@@ -155,9 +155,9 @@ void InputData::end_read_patch() throw()
 }
 //----------------------------------------------------------------------
 
-Block * InputData::read_block 
+CommBlock * InputData::read_block 
 ( 
- Block * block,
+ CommBlock * block,
  std::string  block_name,
  const FieldDescr * field_descr) throw()
 {

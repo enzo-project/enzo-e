@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_Block.hpp
+/// @file     mesh_CommBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
-/// @brief    [\ref Mesh] Declaration of the Block class
+/// @brief    [\ref Mesh] Declaration of the CommBlock class
 
 #ifndef MESH_BLOCK_HPP
 #define MESH_BLOCK_HPP
@@ -14,22 +14,22 @@ class GroupProcess;
 
 #ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
-class Block : public CBase_Block
+class CommBlock : public CBase_CommBlock
 #else
-class Block
+class CommBlock
 #endif
 {
-  /// @class    Block
+  /// @class    CommBlock
   /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] Basic serial block of mesh data
+  /// @brief    [\ref Mesh] Handles parallel communication and synchronization of mesh Blocks
 
   friend class IoBlock;
 
 public: // interface
 
-  /// create a Block with the given block count, lower PATCH extent, block
+  /// create a CommBlock with the given block count, lower PATCH extent, block
   /// size, and number of field blocks
-  Block
+  CommBlock
   (
    int ibx, int iby, int ibz,
    int nbx, int nby, int nbz,
@@ -46,8 +46,8 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-  /// For CHARM Block arrays
-  Block
+  /// For CHARM CommBlock arrays
+  CommBlock
   (
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
@@ -61,8 +61,8 @@ public: // interface
 
 #endif
 
-  /// Initialize an empty Block
-  Block() { };
+  /// Initialize an empty CommBlock
+  CommBlock() { };
 
 #ifdef CONFIG_USE_CHARM
 
@@ -72,7 +72,7 @@ public: // interface
 
   bool up = p.isUnpacking();
 
-  CBase_Block::pup(p);
+  CBase_CommBlock::pup(p);
 
   p | count_refresh_face_;
   p | proxy_patch_;
@@ -104,15 +104,15 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Initialize a migrated Block
-  Block (CkMigrateMessage *m) 
-    : CBase_Block(m) { };
+  /// Initialize a migrated CommBlock
+  CommBlock (CkMigrateMessage *m) 
+    : CBase_CommBlock(m) { };
 
 #endif
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Initialize block for the simulation.
+  /// Initialize CommBlock for the simulation.
   void p_initial();
 
   // /// Call current Initial::enforce() on the block
@@ -163,13 +163,13 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Destructor
-  virtual ~Block() throw();
+  virtual ~CommBlock() throw();
 
   /// Copy constructor
-  Block(const Block & block) throw();
+  CommBlock(const CommBlock & block) throw();
 
   /// Assignment operator
-  Block & operator= (const Block & block) throw();
+  CommBlock & operator= (const CommBlock & block) throw();
 
   //----------------------------------------------------------------------
 
@@ -203,10 +203,10 @@ public: // interface
     if (z) *z = upper_[2];
   }
 
-  /// Return the position of this Block in the containing Patch 
+  /// Return the position of this CommBlock in the containing Patch 
   void index_patch (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
 
-  /// Return the index of this Block in the containing Patch 
+  /// Return the index of this CommBlock in the containing Patch 
   int index () const throw();
 
   /// Return the name of the block within its patch, e.g. "block_3"
@@ -245,28 +245,28 @@ public: // virtual functions
 
   virtual void allocate (const FieldDescr * field_descr) throw();
 
-  /// Set Block's cycle
+  /// Set CommBlock's cycle
   virtual void set_cycle (int cycle) throw()
   { cycle_ = cycle;}
 
-  /// Set Block's time
+  /// Set CommBlock's time
   virtual void set_time (double time) throw()
   { time_  = time; }
 
-  /// Set Block's timestep
+  /// Set CommBlock's timestep
   virtual void set_dt (double dt) throw()
   { dt_  = dt; }
 
-  /// Initialize Block
+  /// Initialize CommBlock
   virtual void initialize () throw()
   {
-    DEBUG ("DEBUG Block::initialize()\n");
+    DEBUG ("DEBUG CommBlock::initialize()\n");
   }
 
 protected: // functions
 
-  /// Allocate and copy in attributes from give Block
-  void copy_(const Block & block) throw();
+  /// Allocate and copy in attributes from give CommBlock
+  void copy_(const CommBlock & block) throw();
 
 #ifdef CONFIG_USE_CHARM
 

@@ -19,7 +19,6 @@
 #ifndef PROBLEM_PROBLEM_HPP
 #define PROBLEM_PROBLEM_HPP
 
-class Block;
 class Boundary;
 class Factory;
 class FieldDescr;

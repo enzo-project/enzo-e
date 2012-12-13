@@ -44,7 +44,7 @@ public: // interface
   /// Initialize the block
 
   virtual void enforce_block
-  ( Block * block, const FieldDescr * field_descr, const Hierarchy * hierarchy ) throw();
+  ( CommBlock * block, const FieldDescr * field_descr, const Hierarchy * hierarchy ) throw();
 
 private: // attributes
 

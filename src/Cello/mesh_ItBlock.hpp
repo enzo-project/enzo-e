@@ -8,11 +8,11 @@
 #ifndef MESH_IT_BLOCK_HPP
 #define MESH_IT_BLOCK_HPP
 
-class ItBlock : public It<Block> {
+class ItBlock : public It<CommBlock> {
 
   /// @class    ItBlock
   /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] Iterator over local Blocks in a Patch
+  /// @brief    [\ref Mesh] Iterator over local CommBlocks in a Patch
 
 public: // interface
 
@@ -28,14 +28,14 @@ public: // interface
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
-    It<Block>::pup(p);
+    It<CommBlock>::pup(p);
     WARNING("ItBlock::pup","skipping patch_ (aliased pointer)");
     // p | *patch_;
   }
 #endif
   
-  /// Iterate through all local Blocks in the Patch
-  Block * operator++ () throw();
+  /// Iterate through all local CommBlocks in the Patch
+  CommBlock * operator++ () throw();
 
   /// Return whether the iteration is complete
   bool done() const throw();

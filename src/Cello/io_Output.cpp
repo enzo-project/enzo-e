@@ -260,7 +260,7 @@ void Output::write_patch_
 #else
 
   ItBlock it_block (patch);
-  while (const Block * block = ++it_block) {
+  while (const CommBlock * block = ++it_block) {
     // NO OFFSET: ASSUMES ROOT PATCH
     write_block (block, field_descr, 0,0,0);
   }
@@ -273,7 +273,7 @@ void Output::write_patch_
 
 void Output::write_block_
 (
- const Block * block,
+ const CommBlock * block,
  const FieldDescr * field_descr,
  int ixp0, int iyp0, int izp0
  ) throw()

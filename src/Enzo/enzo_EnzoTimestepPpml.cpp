@@ -33,7 +33,7 @@ void EnzoTimestepPpml::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
-				   Block * block ) throw()
+				   CommBlock * block ) throw()
 {
  
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);

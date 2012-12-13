@@ -165,7 +165,7 @@ void OutputImage::write_patch
 
 void OutputImage::write_block
 (
- const Block * block,
+ const CommBlock * block,
  const FieldDescr * field_descr,
  int ixp0,
  int iyp0,

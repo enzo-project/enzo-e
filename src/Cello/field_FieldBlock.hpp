@@ -9,7 +9,7 @@
 #define FIELD_FIELD_BLOCK_HPP
 
 class Patch;
-class Block;
+class CommBlock;
 class FieldDescr;
 
 class FieldBlock {
