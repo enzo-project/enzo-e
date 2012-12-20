@@ -63,7 +63,7 @@ void SimulationMpi::run() throw()
   while ((patch = ++it_patch)) {
 
     ItBlock it_block(patch);
-    Block * block;
+    CommBlock * block;
 
     while ((block = ++it_block)) {
 
@@ -95,7 +95,7 @@ void SimulationMpi::run() throw()
   while ((patch = ++it_patch)) {
 
     ItBlock it_block(patch);
-    Block * block;
+    CommBlock * block;
 
     while ((block = ++it_block)) {
 
@@ -134,7 +134,7 @@ void SimulationMpi::run() throw()
     int    stop_patch  = true;
 
     ItBlock it_block(patch);
-    Block * block;
+    CommBlock * block;
 
     while ((block = ++it_block)) {
 
@@ -171,7 +171,7 @@ void SimulationMpi::run() throw()
       double dt_patch = std::numeric_limits<double>::max();
 
       ItBlock it_block(patch);
-      Block * block;
+      CommBlock * block;
 
       // Accumulate Block-local timesteps
 
@@ -208,7 +208,7 @@ void SimulationMpi::run() throw()
     while ((patch = ++it_patch)) {
 
       ItBlock it_block(patch);
-      Block * block;
+      CommBlock * block;
 
       // Accumulate Block-local timesteps
 
@@ -232,7 +232,7 @@ void SimulationMpi::run() throw()
     while ((patch = ++it_patch)) {
 
       ItBlock it_block(patch);
-      Block * block;
+      CommBlock * block;
 
       while ((block = ++it_block)) {
 
@@ -254,7 +254,7 @@ void SimulationMpi::run() throw()
     while ((patch = ++it_patch)) {
 
       ItBlock it_block(patch);
-      Block * block;
+      CommBlock * block;
 
       while ((block = ++it_block)) {
 
@@ -279,7 +279,7 @@ void SimulationMpi::run() throw()
     while ((patch = ++it_patch)) {
       int stop_patch = true;
       ItBlock it_block(patch);
-      Block * block;
+      CommBlock * block;
       while ((block = ++it_block)) {
 	int stop_block = stopping->complete(block->cycle(),block->time());
 	stop_patch = stop_patch && stop_block;
@@ -387,7 +387,7 @@ void SimulationMpi::scheduled_output()
 
 void SimulationMpi::update_boundary_ 
 (
- Block * block, 
+ CommBlock * block, 
  bool is_boundary[3][2]
  ) throw()
 {
@@ -417,7 +417,7 @@ void SimulationMpi::update_boundary_
 
 void SimulationMpi::refresh_ghost_ 
 (
- Block * block, 
+ CommBlock * block, 
  Patch * patch, 
  bool    is_boundary[3][2]
  ) throw()
@@ -429,7 +429,7 @@ void SimulationMpi::refresh_ghost_
 
   bool periodic = problem()->boundary()->is_periodic();
 
-  // FOLLOWING CODE IS SIMILAR TO Block::x_refresh()
+  // FOLLOWING CODE IS SIMILAR TO CommBlock::x_refresh()
 
   int nx,ny,nz;
   block->field_block()->size (&nx,&ny,&nz);

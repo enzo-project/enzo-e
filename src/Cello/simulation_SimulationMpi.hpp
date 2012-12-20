@@ -10,7 +10,7 @@
 
 #if defined(CONFIG_USE_MPI) || ! defined(CONFIG_USE_CHARM)
 
-class Block;
+class CommBlock;
 class Patch;
 
 class SimulationMpi : public Simulation {
@@ -40,9 +40,9 @@ public: // functions
 
 protected:
 
-  void update_boundary_ (Block * block, bool boundary[3][2]) throw();
-  void refresh_ghost_   (Block * block, Patch * patch, bool boundary[3][2]) throw();
-  // void is_block_on_boundary_ (Block * block, bool boundary[3][2]) throw();
+  void update_boundary_ (CommBlock * block, bool boundary[3][2]) throw();
+  void refresh_ghost_   (CommBlock * block, Patch * patch, bool boundary[3][2]) throw();
+  // void is_block_on_boundary_ (CommBlock * block, bool boundary[3][2]) throw();
   
 };
 
