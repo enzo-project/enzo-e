@@ -146,6 +146,44 @@ Block::~Block() throw ()
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+
+void Block::pup(PUP::er &p)
+{
+  TRACEPUP;
+
+  bool up = p.isUnpacking();
+
+  CBase_Block::pup(p);
+
+  p | count_refresh_face_;
+  p | proxy_patch_;
+  p | num_field_blocks_;
+
+  // allocate field_block_[] vector first if unpacking
+  if (up) field_block_.resize(num_field_blocks_);
+  for (int i=0; i<num_field_blocks_; i++) {
+    if (up) field_block_[i] = new FieldBlock;
+    p | *field_block_[i];
+  }
+
+  p | patch_id_;
+  p | patch_rank_;
+
+  PUParray(p,index_,3);
+  PUParray(p,size_,3);
+  PUParray(p,lower_,3);
+  PUParray(p,upper_,3);
+  p | cycle_;
+  p | time_;
+  p | dt_;
+
+}
+
+#endif
+
+//----------------------------------------------------------------------
+
 Block::Block(const Block & block) throw ()
   : field_block_()
 /// @param     block  Object being copied
@@ -163,44 +201,6 @@ Block & Block::operator = (const Block & block) throw ()
   return *this;
 }
 
-//----------------------------------------------------------------------
-
-const FieldBlock * Block::field_block (int i) const throw()
-{ 
-  return field_block_.at(i); 
-}
-
-//----------------------------------------------------------------------
-
-FieldBlock * Block::field_block (int i) throw()
-{ 
-  return field_block_.at(i); 
-}
-
-//----------------------------------------------------------------------
-
-int Block::index () const throw ()
-{
-  return index_[0] + size_[0] * (index_[1] + size_[1] * index_[2]);
-}
-
-//----------------------------------------------------------------------
-
-void Block::index_patch (int * ix, int * iy, int * iz) const throw ()
-{
-  if (ix) (*ix) = index_[0]; 
-  if (iy) (*iy) = index_[1]; 
-  if (iz) (*iz) = index_[2]; 
-}
-
-//----------------------------------------------------------------------
-
-void Block::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
-{
-  if (nx) (*nx)=size_[0]; 
-  if (ny) (*ny)=size_[1]; 
-  if (nz) (*nz)=size_[2]; 
-}
 
 //======================================================================
 // MPI FUNCTIONS
@@ -353,15 +353,15 @@ void Block::p_output(CkReductionMsg * msg)
 #ifdef CONFIG_USE_CHARM
 
 //----------------------------------------------------------------------
-void Block::p_compute (int cycle, double time, double dt)
-{
-  // set_cycle(cycle);
-  // set_time(time);
-  // set_dt(dt);
+// void Block::p_compute (int cycle, double time, double dt)
+// {
+//   // set_cycle(cycle);
+//   // set_time(time);
+//   // set_dt(dt);
 
-  DEBUG3 ("Block::p_compute() cycle %d time %f dt %f",cycle,time,dt);
-  compute();
-}
+//   DEBUG3 ("Block::p_compute() cycle %d time %f dt %f",cycle,time,dt);
+//   compute();
+// }
 #endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------

@@ -27,15 +27,14 @@ class Block
 
 public: // interface
 
-  /// create a Block with the given block count, lower PATCH extent, block
-  /// size, and number of field blocks
+  /// Create a single Block in a Patch
   Block
   (
    int ibx, int iby, int ibz,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
-   double xb, double yb, double zb,
+   double xb,  double yb,  double zb,
 #ifdef CONFIG_USE_CHARM
    CProxy_Patch proxy_patch,
 #endif
@@ -46,13 +45,13 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-  /// For CHARM Block arrays
+  /// Create a Block chare array in a Patch
   Block
   (
    int nbx, int nby, int nbz,
-   int nx, int ny, int nz,
+   int nx,  int ny,  int nz,
    double xmp, double ymp, double zmp,
-   double xb, double yb, double zb,
+   double xb,  double yb,  double zb,
    CProxy_Patch proxy_patch,
    int patch_id,
    int patch_rank,
@@ -66,51 +65,33 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-  void pup(PUP::er &p)
-{
-  TRACEPUP;
-
-  bool up = p.isUnpacking();
-
-  CBase_Block::pup(p);
-
-  p | count_refresh_face_;
-  p | proxy_patch_;
-  p | num_field_blocks_;
-
-  // allocate field_block_[] vector first if unpacking
-  if (up) field_block_.resize(num_field_blocks_);
-  for (int i=0; i<num_field_blocks_; i++) {
-    if (up) field_block_[i] = new FieldBlock;
-    p | *field_block_[i];
-  }
-
-  p | patch_id_;
-  p | patch_rank_;
-
-  PUParray(p,index_,3);
-  PUParray(p,size_,3);
-  PUParray(p,lower_,3);
-  PUParray(p,upper_,3);
-  p | cycle_;
-  p | time_;
-  p | dt_;
-
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
   /// Initialize a migrated Block
   Block (CkMigrateMessage *m) 
     : CBase_Block(m) { };
 
 #endif
 
+  /// Copy constructor
+  Block(const Block & block) throw();
+
+  /// Assignment operator
+  Block & operator= (const Block & block) throw();
+
+  /// Destructor
+  virtual ~Block() throw();
+
 #ifdef CONFIG_USE_CHARM
+
+  /// CHARM++ Pack / Unpack function
+  void pup(PUP::er &p);
+
+#endif
+
+#ifdef CONFIG_USE_CHARM
+
+  //==================================================
+  // Charm++ Entry Functions
+  //==================================================
 
   /// Initialize block for the simulation.
   void p_initial();
@@ -120,9 +101,11 @@ public: // interface
 
   /// Refresh ghost zones and apply boundary conditions
   void p_refresh() { refresh(); }
+  void refresh();
 
   /// Apply the numerical methods on the block
-  void p_compute(int cycle, double time, double dt);
+  void p_compute(int cycle, double time, double dt) { compute(); }
+  void compute();
 
   /// Refresh a FieldFace
   void x_refresh(int n, char buffer[],int fx, int fy, int fz);
@@ -137,19 +120,14 @@ public: // interface
   void p_output(CkReductionMsg * msg);
 
   //--------------------------------------------------
-
-  /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
+  // enforce boundary, compute timetstep and stopping, reduce to p_output()
   void prepare();
 
-  /// Implementation of refresh
-  void refresh();
-
-  /// Boundary and Method
-  void compute();
+#else /* ! CONFIG_USE_CHARM */
 
   //==================================================
-
-#else /* ! CONFIG_USE_CHARM */
+  // MPI functions
+  //==================================================
 
   /// Refresh ghost data
   void refresh_ghosts(const FieldDescr * field_descr,
@@ -158,90 +136,54 @@ public: // interface
 		      int index_field_set = 0) throw();
 #endif
 
-  //----------------------------------------------------------------------
-  // Big Three
-  //----------------------------------------------------------------------
-
-  /// Destructor
-  virtual ~Block() throw();
-
-  /// Copy constructor
-  Block(const Block & block) throw();
-
-  /// Assignment operator
-  Block & operator= (const Block & block) throw();
-
-  //----------------------------------------------------------------------
+  //==================================================
+  // INLINE FUNCTIONS
+  //==================================================
 
   /// Return the ith Field block
-  const FieldBlock * field_block (int i=0) const throw();
+  inline const FieldBlock * field_block (int i=0) const throw();
 
   /// Return the ith Field block
-  FieldBlock * field_block (int i=0) throw();
-
-//----------------------------------------------------------------------
+  inline FieldBlock * field_block (int i=0) throw();
 
   /// Return domain lower extent
-  inline void lower(double * x, 
-		    double * y = 0,
-		    double * z = 0) const throw ()
-  {
-    if (x) *x = lower_[0];
-    if (y) *y = lower_[1];
-    if (z) *z = lower_[2];
-  }
-
-//----------------------------------------------------------------------
+  inline void lower(double * x, double * y = 0, double * z = 0) const throw ();
 
   /// Return domain upper extent
-  inline void upper(double * x,
-		    double * y = 0,
-		    double * z = 0) const throw ()
-  {
-    if (x) *x = upper_[0];
-    if (y) *y = upper_[1];
-    if (z) *z = upper_[2];
-  }
+  inline void upper(double * x, double * y = 0, double * z = 0) const throw ();
 
   /// Return the position of this Block in the containing Patch 
-  void index_patch (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
+  inline void index_patch (int * ix, int * iy = 0, int * iz = 0) const throw();
 
   /// Return the index of this Block in the containing Patch 
-  int index () const throw();
+  inline int index () const throw();
 
   /// Return the name of the block within its patch, e.g. "block_3"
-  std::string name () const throw()
-  {
-    std::stringstream convert;
-    convert << "block_" << index();
-    return convert.str();
-  }
+  inline std::string name () const throw();
 
   /// Return the name of the parent patch, e.g. "patch_12"
-  std::string patch_name () const throw()
-  {
-    std::stringstream convert;
-    convert << "patch_" << patch_id_;
-    return convert.str();
-  }
+  inline std::string patch_name () const throw();
 
   /// Return the size the containing Patch
-  void size_patch (int * nx, int * ny, int * nz) const throw();
+  inline void patch_size (int * nx, int * ny, int * nz) const throw();
 
   /// Return the current cycle number
-  int cycle() const throw() { return cycle_; };
+  inline int cycle() const throw() { return cycle_; };
 
   /// Return the current time
-  double time() const throw() { return time_; };
+  inline double time() const throw() { return time_; };
 
   /// Return the current timestep
-  double dt() const throw() { return dt_; };
+  inline double dt() const throw() { return dt_; };
  
-  /// Return which block faces lie along the given lower[] and upper[] boundaries
-  void is_on_boundary (double lower[3], double upper[3],
+  /// Return which block faces lie along the given boundaries
+  void is_on_boundary (double lower[3], 
+		       double upper[3],
 		       bool boundary[3][2]) throw();
 
-public: // virtual functions
+  //==================================================
+  // VIRTUAL FUNCTIONS
+  //==================================================
 
   virtual void allocate (const FieldDescr * field_descr) throw();
 
@@ -259,11 +201,11 @@ public: // virtual functions
 
   /// Initialize Block
   virtual void initialize () throw()
-  {
-    DEBUG ("DEBUG Block::initialize()\n");
-  }
+  { DEBUG ("DEBUG Block::initialize()\n"); }
 
+  //==================================================
 protected: // functions
+  //==================================================
 
   /// Allocate and copy in attributes from give Block
   void copy_(const Block & block) throw();
@@ -274,28 +216,31 @@ protected: // functions
   void determine_boundary_
   (
    bool is_boundary[3][2],
-   bool * axm,
-   bool * axp,
-   bool * aym,
-   bool * ayp,
-   bool * azm,
-   bool * azp
+   bool * lxm,
+   bool * lxp,
+   bool * lym,
+   bool * lyp,
+   bool * lzm,
+   bool * lzp
    );
 
+  /// Call Boundary object on specified faces
   void update_boundary_ 
   (
    bool is_boundary[3][2],
-   bool axm,
-   bool axp,
-   bool aym,
-   bool ayp,
-   bool azm,
-   bool azp
+   bool lxm,
+   bool lxp,
+   bool lym,
+   bool lyp,
+   bool lzm,
+   bool lzp
    );
 
 #endif
 
+  //==================================================
 protected: // attributes
+  //==================================================
 
 #ifdef CONFIG_USE_CHARM
 
@@ -306,8 +251,6 @@ protected: // attributes
   CProxy_Patch proxy_patch_;
 
 #endif
-
-  //--------------------------------------------------
 
   /// Number of field blocks (required by CHARM++ PUP::er)
   int num_field_blocks_;
@@ -333,8 +276,6 @@ protected: // attributes
   /// Upper extent of the box associated with the block [computable from Patch]
   double upper_[3];
 
-  //--------------------------------------------------
-
   /// Current cycle number
   int cycle_;
 
@@ -345,6 +286,83 @@ protected: // attributes
   double dt_;
 
 };
+
+//======================================================================
+
+const FieldBlock * Block::field_block (int i) const throw()
+{ 
+  return field_block_.at(i); 
+}
+
+//----------------------------------------------------------------------
+
+FieldBlock * Block::field_block (int i) throw()
+{ 
+  return field_block_.at(i); 
+}
+
+//----------------------------------------------------------------------
+
+void Block::lower(double * x , double * y , double * z ) const throw ()
+{
+  if (x) *x = lower_[0];
+  if (y) *y = lower_[1];
+  if (z) *z = lower_[2];
+}
+
+//----------------------------------------------------------------------
+
+void Block::upper(double * x , double * y , double * z ) const throw ()
+{
+  if (x) *x = upper_[0];
+  if (y) *y = upper_[1];
+  if (z) *z = upper_[2];
+}
+
+//----------------------------------------------------------------------
+
+void Block::index_patch (int * ix, int * iy, int * iz) const throw ()
+{
+  if (ix) (*ix) = index_[0]; 
+  if (iy) (*iy) = index_[1]; 
+  if (iz) (*iz) = index_[2]; 
+}
+
+//----------------------------------------------------------------------
+
+int Block::index () const throw ()
+{
+  return index_[0] + size_[0] * (index_[1] + size_[1] * index_[2]);
+}
+
+//----------------------------------------------------------------------
+
+std::string Block::name () const throw()
+{
+  std::stringstream convert;
+  convert << "block_" << index();
+  return convert.str();
+}
+
+//----------------------------------------------------------------------
+
+std::string Block::patch_name () const throw()
+{
+  std::stringstream convert;
+  convert << "patch_" << patch_id_;
+  return convert.str();
+}
+
+//----------------------------------------------------------------------
+
+void Block::patch_size (int * nx=0, int * ny=0, int * nz=0) const throw ()
+{
+  if (nx) (*nx)=size_[0]; 
+  if (ny) (*ny)=size_[1]; 
+  if (nz) (*nz)=size_[2]; 
+}
+//----------------------------------------------------------------------
+
 
 #endif /* MESH_BLOCK_HPP */
 
