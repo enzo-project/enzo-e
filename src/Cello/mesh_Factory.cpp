@@ -127,7 +127,7 @@ CProxy_CommBlock Factory::create_block_array
        patch_id,
        patch_rank,
        nbx,nby,nbz);
-    DEBUG1 ("proxy_block = %p",proxy_block);
+    //    DEBUG1 ("block = %p",block);
     return *proxy_block;
   } else {
     return CProxy_CommBlock::ckNew();

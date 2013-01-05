@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_Block.cpp
+/// @file     test_CommBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Mar  1 20:42:57 UTC 2011
-/// @brief    Test program for the Block class
+/// @brief    Test program for the CommBlock class
 
 #include "main.hpp" 
 #include "test.hpp"
@@ -17,7 +17,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
-  unit_class("Block");
+  unit_class("CommBlock");
 
 #ifdef CONFIG_USE_CHARM
   CProxy_Patch proxy_patch;
@@ -26,7 +26,7 @@ PARALLEL_MAIN_BEGIN
   int patch_id = 0;
   int patch_rank = 0;
   
-  Block * block = factory.create_block
+  CommBlock * block = factory.create_block
     (0,0,0, 
      1,1,1,
      3,4,5,
@@ -39,7 +39,7 @@ PARALLEL_MAIN_BEGIN
      patch_rank,
      1);
 
-  unit_func("Block");
+  unit_func("CommBlock");
   unit_assert (block != NULL);
 
   //----------------------------------------------------------------------
