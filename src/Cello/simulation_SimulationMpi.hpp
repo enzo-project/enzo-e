@@ -10,11 +10,7 @@
 
 #if defined(CONFIG_USE_MPI) || ! defined(CONFIG_USE_CHARM)
 
-<<<<<<< /home/bordner/Cello/cello-src/src/Cello/simulation_SimulationMpi.hpp
-//class Block;
-=======
 class CommBlock;
->>>>>>> /tmp/simulation_SimulationMpi.hpp~other.lpAauU
 class Patch;
 
 class SimulationMpi : public Simulation {
