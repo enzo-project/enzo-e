@@ -59,10 +59,10 @@ libs_error       = ['error'] + libs_monitor
 libs_disk        = ['disk'] + libs_error + ['hdf5']
 libs_performance = ['performance', 'memory'] + libs_error + libs_papi
 libs_parallel    = ['parallel'] +libs_error
-libs_field       = ['field', 'mesh', 'io'] + libs_parallel + ['cello']
+libs_field       = ['field', 'mesh', 'comm', 'io'] + libs_parallel + ['cello']
 libs_main        = ['main']
 libs_memory      = ['memory'] +   libs_error
-libs_mesh        = ['mesh','field','io','disk'] + libs_parallel + libs_external + ['cello','png','hdf5']
+libs_mesh        = ['mesh','comm','field','io','disk'] + libs_parallel + libs_external + ['cello','png','hdf5']
 libs_io          = ['io'] + libs_mesh
 libs_parameters  = ['parameters'] + libs_error +  ['cello']
 
@@ -71,7 +71,7 @@ libs_test        = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
 if (type=='charm'):
-   libs_all = ['charm','simulation','problem','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
+   libs_all = ['charm','simulation','problem','mesh','comm','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
    libs_field  = libs_all
    libs_io     = libs_all
    libs_mesh   = libs_all
@@ -112,6 +112,7 @@ includes_simulation =  [Glob('*simulation*hpp')]
 includes_test =        [Glob('*test*hpp')]
 
 sources_cello =       [Glob('cello*cpp')]
+sources_comm =        [Glob('comm*cpp')]
 sources_charm =       [Glob('charm*cpp')]
 sources_disk =        [Glob('disk*cpp')]
 sources_error =       [Glob('error*cpp')]
@@ -273,6 +274,7 @@ test_papi        = env.Program('test_Papi.cpp',
                                LIBS=[libs_performance,libs_test])
 
 libraries_charm   = env.Library ('charm',   sources_charm)
+libraries_comm    = env.Library ('comm',   sources_comm)
 libraries_disk   = env.Library ('disk',   sources_disk)
 libraries_error  = env.Library ('error',  sources_error)
 libraries_field  = env.Library ('field',  sources_field)
@@ -327,6 +329,7 @@ env.Alias('install-inc',env.Install (inc_path,includes_charm))
 env.Alias('install-lib',env.Install (lib_path,libraries_charm))
 
 env.Alias('install-inc',env.Install (inc_path,includes_comm))
+env.Alias('install-lib',env.Install (lib_path,libraries_comm))
 
 env.Alias('install-bin',env.Install (bin_path,binaries_disk))
 env.Alias('install-inc',env.Install (inc_path,includes_disk))

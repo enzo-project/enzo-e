@@ -1,7 +1,5 @@
 // See LICENSE_CELLO file for license and copyright information
 
-#ifdef TEMP_USE_COMM
-
 /// @file     _comm.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-11-27
@@ -31,5 +29,3 @@
 #include "comm_CommBlock.hpp"
 
 #endif /* _COMM_HPP */
-
-#endif /* TEMP_USE_COMM */

@@ -20,7 +20,7 @@ if (type == "charm"):
 	components.append(['charm'])
 
 components.append(['enzo','simulation', 'problem',
-	      'mesh', 'field',
+	      'mesh', 'comm', 'field',
 	      'io', 'disk','memory','parallel',
 	      'parameters', 
 	      'error', 'monitor', 'performance',
