@@ -231,7 +231,6 @@ elif (arch == "gordon-gnu"):   from gordon_gnu   import *
 elif (arch == "gordon-pgi"):   from gordon_pgi   import *
 elif (arch == "gordon-intel"): from gordon_intel   import *
 
-print 'G cc = ',cc[type]
 #======================================================================
 # END ARCHITECTURE SETTINGS
 #======================================================================
@@ -325,7 +324,6 @@ libpath = libpath + [libpath_fortran]
 # ENVIRONMENT
 #======================================================================
 
-print 'B cc = ',cc[type]
 environ  = os.environ
 
 cxxflags = flags_arch
@@ -352,7 +350,6 @@ if not os.path.exists("include"):
      os.makedirs("include")
 cello_def = open ("include/auto_config.def", "w")
 
-print 'B cc = ',cc[type]
 cello_def.write ("#define CELLO_ARCH \""+arch+"\"\n")
 cello_def.write ("#define CELLO_TYPE \""+type+"\"\n")
 cello_def.write ("#define CELLO_PREC \""+prec+"\"\n")

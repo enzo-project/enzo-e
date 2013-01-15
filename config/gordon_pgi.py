@@ -7,6 +7,7 @@ is_arch_valid = 1
 flags_arch = '-O3'
 flags_link = '-pgf90libs'
 
+cc['charm']   = 'pgcc'
 cc['mpi']     = 'mpicc'
 cc['serial']  = 'pgcc'
 cxx['mpi']    = 'mpicxx'

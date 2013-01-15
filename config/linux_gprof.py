@@ -14,6 +14,7 @@ balancer = 'RotateLB'
 flags_cxx_charm  = '-balancer ' + balancer
 flags_link_charm = '-rdynamic -module ' + balancer
 
+cc['charm']   = 'gcc'
 cc['mpi']     = 'mpicc'
 cc['serial']  = 'gcc'
 cxx['mpi']    = 'mpic++'
