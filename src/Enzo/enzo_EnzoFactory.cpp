@@ -34,7 +34,7 @@ IoBlock * EnzoFactory::create_io_block () const throw()
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
-CProxy_Block EnzoFactory::create_block_array
+CProxy_CommBlock EnzoFactory::create_block_array
 (
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -68,7 +68,7 @@ CProxy_Block EnzoFactory::create_block_array
 
 //----------------------------------------------------------------------
 
-Block * EnzoFactory::create_block
+CommBlock * EnzoFactory::create_block
 (
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
@@ -81,7 +81,7 @@ Block * EnzoFactory::create_block
  ) const throw()
 {
 #ifdef CONFIG_USE_CHARM
-    CProxy_Block block_array = CProxy_EnzoBlock::ckNew
+    CProxy_CommBlock block_array = CProxy_EnzoBlock::ckNew
     (nbx,nby,nbz,
      nx,ny,nz,
      xm,ym,zm, 

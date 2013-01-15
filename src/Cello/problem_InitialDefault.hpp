@@ -39,14 +39,14 @@ public: // interface
 
   /// Read initialization values from Initial group in parameter file
 
-  virtual void enforce_block (Block * block,
+  virtual void enforce_block (CommBlock * block,
 			      const FieldDescr * field_descr,
 			      const Hierarchy * hierarchy
 			      ) throw();
 
 private: // functions
   
-  void allocate_xyzt_(Block * block,
+  void allocate_xyzt_(CommBlock * block,
 		      int index_field,
 		      int * mx, int * my, int * mz,
 		      double ** value, double ** vdeflt,
@@ -67,7 +67,7 @@ private: // functions
 			double * x, double * y, double * z, double * t) throw();
 
   void evaluate_logical_ (const Hierarchy * hierarchy,
-			  const Block * block,
+			  const CommBlock * block,
 			  FieldBlock * field_block, int index_field, 
 			 std::string field_name,
 			 int n, bool * value, bool * vdeflt,
@@ -76,7 +76,7 @@ private: // functions
   /// Read in a PNG file and create an integer array using r + b + g values
   void create_png_mask_ (bool * mask,
 			 const Hierarchy * hierarchy,
-			 const Block * block,
+			 const CommBlock * block,
 			 const char * pngfile,
 			 int   nxb, int nyb,
 			 int * nx, int * ny );

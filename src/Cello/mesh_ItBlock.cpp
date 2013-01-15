@@ -22,11 +22,11 @@ ItBlock::~ItBlock ( ) throw ()
 
 //----------------------------------------------------------------------
 
-Block * ItBlock::operator++ () throw()
+CommBlock * ItBlock::operator++ () throw()
 {
 #ifdef CONFIG_USE_CHARM
   //
-  Block * block;
+  CommBlock * block;
   int nbx,nby,nbz;
   size_t nb = patch_->num_blocks(&nbx,&nby,&nbz);
   do {
@@ -34,7 +34,7 @@ Block * ItBlock::operator++ () throw()
     int ibx = (index1_ - 1) % nbx;
     int iby = (((index1_-1) - ibx)/nbx) % nby;
     int ibz = (index1_-1)/(nbx*nby);
-    CProxy_Block * block_array = patch_->block_array();
+    CProxy_CommBlock * block_array = patch_->block_array();
     block = (*block_array)(ibx,iby,ibz).ckLocal();
   } while (block==NULL && index1_ <= nb);
   // assert: (block != NULL) or (index1_ > nb)

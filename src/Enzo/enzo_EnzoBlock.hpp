@@ -47,13 +47,13 @@ enum field_type {
 
 //----------------------------------------------------------------------
 
-class EnzoBlock : public Block
+class EnzoBlock : public CommBlock
 
 {
 
   /// @class    EnzoBlock
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] An EnzoBlock is a Block with Enzo data
+  /// @brief    [\ref Enzo] An EnzoBlock is a CommBlock with Enzo data
 
   friend class IoEnzoBlock;
 
@@ -174,9 +174,9 @@ public: // interface
    int num_field_blocks) throw();
 
 #ifdef CONFIG_USE_CHARM
-  /// Initialize a migrated Block
+  /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
-    : Block (m)
+    : CommBlock (m)
   {
     TRACE("CkMigrateMessage");
     //    initialize();
@@ -201,7 +201,7 @@ public: // interface
     TRACEPUP;
     TRACE ("BEGIN EnzoBlock::pup()");
 
-    Block::pup(p);
+    CommBlock::pup(p);
 
 
     p | Time_;
@@ -336,16 +336,16 @@ public: // interface
   int index (enum field_type type) const
   { return field_index_[type];}
 
-  /// Set Block's cycle
+  /// Set EnzoBlock's cycle
   virtual void set_cycle (int cycle) throw();
 
-  /// Set Block's time
+  /// Set EnzoBlock's time
   virtual void set_time (double time) throw();
 
-  /// Set Block's dt
+  /// Set EnzoBlock's dt
   virtual void set_dt (double dt) throw();
 
-  /// Initialize Block
+  /// Initialize EnzoBlock
   virtual void initialize () throw();
 
 private: // attributes

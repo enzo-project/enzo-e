@@ -33,7 +33,7 @@ public: // interface
 #endif
 
   /// Apply the method to advance a block one timestep 
-  virtual void compute_block( FieldDescr *, Block * block ) throw(); 
+  virtual void compute_block( FieldDescr *, CommBlock * block ) throw(); 
 
 };
 

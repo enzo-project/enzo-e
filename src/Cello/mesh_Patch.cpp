@@ -105,7 +105,7 @@ void Patch::pup (PUP::er &p)
     p | id_;
     TRACE1("id_ = %d",id_);
     TRACE1("block_array_ = %p",block_array_);
-    if (p.isUnpacking()) block_array_ = new CProxy_Block;
+    if (p.isUnpacking()) block_array_ = new CProxy_CommBlock;
     p | *block_array_;
     p | block_exists_;
     //    WARNING("Patch::pup","skipping group_process_ (regenerated)");
@@ -257,7 +257,7 @@ size_t Patch::num_local_blocks() const  throw()
 //----------------------------------------------------------------------
 
 #ifndef CONFIG_USE_CHARM
-Block * Patch::local_block(size_t i) const throw()
+CommBlock * Patch::local_block(size_t i) const throw()
 {
   return (i < block_.size()) ? block_[i] : 0;
 
@@ -302,7 +302,7 @@ void Patch::allocate_array_
 	 (nbz*mbz == size_[2]))) {
 
     ERROR6("Patch::allocate_array",  
-	   "Blocks must evenly subdivide Patch: "
+	   "CommBlocks must evenly subdivide Patch: "
 	   "patch size = (%d %d %d)  block count = (%d %d %d)",
 	   size_[0],size_[1],size_[2],
 	   nbx,nby,nbz);
@@ -325,7 +325,7 @@ void Patch::allocate_array_
 
   const Factory * factory = simulation->factory();
 
-  block_array_ = new CProxy_Block;
+  block_array_ = new CProxy_CommBlock;
 
   DEBUG1("ID = %d",id_);
   (*block_array_) = factory->create_block_array
@@ -357,7 +357,7 @@ void Patch::allocate_array_
     // create a new data block
 
     DEBUG1("Patch::Patch(%d)",id_);
-    Block * block = factory_->create_block 
+    CommBlock * block = factory_->create_block 
       (ibx,iby,ibz,
        nbx,nby,nbz,
        mbx,mby,mbz,
@@ -484,7 +484,7 @@ void Patch::p_test () throw()
 
   ItBlock itBlock (patch);
 
-  Block *  block = 0;
+  CommBlock *  block = 0;
   FieldBlock * field_block = 0;
 
   size_t block_index = 0;
@@ -500,7 +500,7 @@ void Patch::p_test () throw()
 
   //--------------------------------------------------
 
-    unit_class("Block");
+    unit_class("CommBlock");
     unit_func("field_block");
 
     field_block = block ? block->field_block() : NULL;
@@ -549,14 +549,14 @@ void Patch::p_test () throw()
       double xpb,ypb,zpb;
       block->upper (&xpb,&ypb,&zpb);
 
-      unit_class("Block");
+      unit_class("CommBlock");
       unit_func("lower");
 
       unit_assert(cello::err_abs(xm + ibx*(xpb-xmb) , xmb) < 1e-6);
       unit_assert(cello::err_abs(ym + iby*(ypb-ymb) , ymb) < 1e-6);
       unit_assert(cello::err_abs(zm + ibz*(zpb-zmb) , zmb) < 1e-6);
 
-      unit_class("Block");
+      unit_class("CommBlock");
       unit_func("upper");
 
       unit_assert(cello::err_abs(xm + (ibx+1)*(xpb-xmb) , xpb) < 1e-6);
@@ -575,7 +575,7 @@ void Patch::p_test () throw()
 
   //--------------------------------------------------
 
-  unit_class("Block");
+  unit_class("CommBlock");
   unit_func("index_patch");
 
   int * b = new int [nbx*nby*nbz];

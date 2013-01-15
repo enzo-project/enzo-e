@@ -71,8 +71,8 @@ public: // virtual functions
   virtual void end_read_patch () throw();
 
   /// Read block data from disk
-  virtual Block * read_block
-  ( Block *            block,
+  virtual CommBlock * read_block
+  ( CommBlock *            block,
     std::string        block_name,
     const FieldDescr * field_descr) throw();
 

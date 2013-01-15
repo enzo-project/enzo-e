@@ -33,7 +33,7 @@ void EnzoTimestep::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
-			       Block * block ) throw()
+			       CommBlock * block ) throw()
 {
 
 

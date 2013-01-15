@@ -43,7 +43,7 @@ void InitialDefault::pup (PUP::er &p)
 
 void InitialDefault::enforce_block
 (
- Block            * block,
+ CommBlock        * block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()
@@ -51,7 +51,7 @@ void InitialDefault::enforce_block
   // Initialize Fields according to parameters
 
   ASSERT("InitialDefault::enforce_block",
-	 "Block does not exist",
+	 "CommBlock does not exist",
 	 block != NULL);
   
   //--------------------------------------------------
@@ -158,7 +158,7 @@ void InitialDefault::enforce_block
 
 void InitialDefault::allocate_xyzt_
 (
- Block * block,
+ CommBlock * block,
  int index_field,
  int * nx, int * ny, int * nz,
  double ** value, double ** vdeflt,
@@ -325,7 +325,7 @@ void InitialDefault::evaluate_float_
 
 void InitialDefault::evaluate_logical_ 
 (const Hierarchy * hierarchy,
- const Block * block,
+ const CommBlock * block,
  FieldBlock * field_block, int index_list, std::string field_name, 
  int n, bool * mask, bool * deflt,
  double * x, double * y, double * z, double * t) throw ()
@@ -372,7 +372,7 @@ void InitialDefault::create_png_mask_
 (
  bool            * mask,
  const Hierarchy * hierarchy,
- const Block     * block,
+ const CommBlock * block,
  const char      * pngfile,
  int               nxb,
  int               nyb,

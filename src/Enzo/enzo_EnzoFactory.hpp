@@ -13,7 +13,7 @@ class EnzoFactory : public Factory {
   /// @class    EnzoFactory
   /// @ingroup  Enzo
   /// @brief [\ref Enzo] Abstract class for creating concrete Hierarchy,
-  /// Patch, and Block objects
+  /// Patch, and CommBlock objects
 
 public: // interface
 
@@ -37,8 +37,8 @@ public: // interface
   virtual IoBlock * create_io_block () const throw();
 
 #ifdef CONFIG_USE_CHARM
-  /// Create a new CHARM++ Block array [abstract factory design pattern]
-  virtual CProxy_Block create_block_array
+  /// Create a new CHARM++ CommBlock array [abstract factory design pattern]
+  virtual CProxy_CommBlock create_block_array
   (int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
@@ -49,8 +49,8 @@ public: // interface
    int num_field_blocks = 1,
    bool allocate = true) const throw();
 #else
-  /// Create a new Block  [abstract factory design pattern]
-  virtual Block * create_block
+  /// Create a new CommBlock  [abstract factory design pattern]
+  virtual CommBlock * create_block
   (int ibx, int iby, int ibz,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,

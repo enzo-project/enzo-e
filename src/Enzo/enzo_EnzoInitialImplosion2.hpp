@@ -39,7 +39,7 @@ public: // interface
 
   virtual void enforce_block
   (
-   Block * block,
+   CommBlock * block,
    const FieldDescr * field_descr,
    const Hierarchy * hierarchy
    ) throw();

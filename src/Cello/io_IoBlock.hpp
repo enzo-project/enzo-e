@@ -8,13 +8,13 @@
 #ifndef IO_IO_BLOCK_HPP
 #define IO_IO_BLOCK_HPP
 
-class Block;
+class CommBlock;
 
 class IoBlock : public Io {
 
   /// @class    IoBlock
   /// @ingroup  Io
-  /// @brief    [\ref Io] Class for linking between Block and Output classes
+  /// @brief    [\ref Io] Class for linking between CommBlock and Output classes
 
 public: // interface
 
@@ -40,7 +40,7 @@ public: // interface
 #endif
 
   /// Set block
-  void set_block (Block * block) throw()
+  void set_block (CommBlock * block) throw()
   { block_ = block; };
 
 #include "_io_Io_common.hpp"
@@ -49,7 +49,7 @@ protected: // functions
 
 protected: // attributes
 
-  Block * block_;
+  CommBlock * block_;
 
 };
 

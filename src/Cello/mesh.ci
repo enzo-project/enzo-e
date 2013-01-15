@@ -47,9 +47,9 @@ module mesh {
     
   };
  
-  array[3D] Block {
+  array[3D] CommBlock {
 
-    entry Block
+    entry CommBlock
       (int ibx, int iby, int ibz,
        int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
@@ -60,7 +60,7 @@ module mesh {
        int patch_rank,
        int num_field_blocks);
 
-    entry Block
+    entry CommBlock
       (int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
        double xpm, double ypm, double zpm,

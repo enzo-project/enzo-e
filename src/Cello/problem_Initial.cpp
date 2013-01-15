@@ -77,13 +77,13 @@ void Initial::enforce_patch_
 
 #ifdef CONFIG_USE_CHARM
 
-  TRACE("Initial::enforce_patch_() calling Block::p_initial()");
+  TRACE("Initial::enforce_patch_() calling CommBlock::p_initial()");
   patch->block_array()->p_initial();
 
 #else
 
   ItBlock it_block (patch);
-  while (Block * block = ++it_block) {
+  while (CommBlock * block = ++it_block) {
     // NO OFFSET: ASSUMES ROOT PATCH
     enforce_block (block, field_descr, hierarchy);
   }
@@ -96,7 +96,7 @@ void Initial::enforce_patch_
 
 void Initial::enforce_block_
 (
- Block * block,
+ CommBlock * block,
  const FieldDescr * field_descr,
  const Hierarchy * hierarchy
  ) throw()

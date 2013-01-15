@@ -394,14 +394,14 @@ EnzoBlock::EnzoBlock
  int patch_id,
  int patch_rank,
  int num_field_blocks) throw()
-  : Block (ix,iy,iz,
-	   nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
+  : CommBlock (ix,iy,iz,
+	       nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
 #ifdef CONFIG_USE_CHARM
-	   proxy_patch,
+	       proxy_patch,
 #endif
-	   patch_id,
-	   patch_rank,
-	   num_field_blocks),
+	       patch_id,
+	       patch_rank,
+	       num_field_blocks),
     Time_(0),
     CycleNumber(0),
     OldTime(0),
@@ -443,8 +443,8 @@ EnzoBlock::EnzoBlock
  int patch_id,
  int patch_rank,
  int num_field_blocks) throw()
-  : Block (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
-	   proxy_patch,patch_id,patch_rank,num_field_blocks),
+  : CommBlock (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
+	       proxy_patch,patch_id,patch_rank,num_field_blocks),
     Time_(0),
     CycleNumber(0),
     OldTime(0),
@@ -723,7 +723,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 
 void EnzoBlock::set_cycle (int cycle_start) throw ()
 {
-  Block::set_cycle (cycle_start);
+  CommBlock::set_cycle (cycle_start);
 
   CycleNumber = cycle_start;
 }
@@ -732,7 +732,7 @@ void EnzoBlock::set_cycle (int cycle_start) throw ()
 
 void EnzoBlock::set_time (double time) throw ()
 {
-  Block::set_time (time);
+  CommBlock::set_time (time);
 
   //  Setting OldTime = Time_ leads to an error in Grid_ComputePressure.C:38
   //  "requested time is outside available range"
@@ -742,11 +742,11 @@ void EnzoBlock::set_time (double time) throw ()
   //
   // (OldTime > time; error is about single-precision epsilon)
 
-  ASSERT("Block::set_time",
+  ASSERT("EnzoBlock::set_time",
 	 "Must be called only once per timestep to maintain OldTime consistency",
 	 Time_ == 0 || Time_ < time);
 
-  //  WARNING("Block::set_time","TEMPORARY");
+  //  WARNING("EnzoBlock::set_time","TEMPORARY");
   OldTime   = Time_;
   //  OldTime   = time;
   Time_     = time;
@@ -757,7 +757,7 @@ void EnzoBlock::set_time (double time) throw ()
 
 void EnzoBlock::set_dt (double dt_param) throw ()
 {
-  Block::set_dt (dt_param);
+  CommBlock::set_dt (dt_param);
 
   dt = dt_param;
 }
@@ -768,7 +768,7 @@ void EnzoBlock::initialize () throw()
 {
   TRACE ("Enter EnzoBlock::initialize()\n");
 
-  Block::initialize();
+  CommBlock::initialize();
 
   double xm,ym,zm;
 

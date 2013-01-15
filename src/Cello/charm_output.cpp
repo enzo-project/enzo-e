@@ -85,9 +85,9 @@ void Patch::p_write(int index_output)
 
 //----------------------------------------------------------------------
 
-void Block::p_write (int index_output)
+void CommBlock::p_write (int index_output)
 {
-  TRACE("OUTPUT Block::p_write()");
+  TRACE("OUTPUT CommBlock::p_write()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();

@@ -30,7 +30,8 @@
 
 class Tree;
 
-#include "mesh_Block.hpp"
+#include "_comm.hpp"
+
 #include "mesh_Patch.hpp"
 #include "mesh_Hierarchy.hpp"
 #include "mesh_Factory.hpp"

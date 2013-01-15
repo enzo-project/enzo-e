@@ -37,7 +37,7 @@ void EnzoMethodPpm::pup (PUP::er &p)
 
 void EnzoMethodPpm::compute_block
 (
- FieldDescr * field_descr, Block * block) throw()
+ FieldDescr * field_descr, CommBlock * block) throw()
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   enzo_block->SolveHydroEquations 

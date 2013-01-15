@@ -48,7 +48,7 @@ public: // interface
 
   /// Enforce initial conditions for the given Block
 
-  virtual void enforce_block (Block * block,
+  virtual void enforce_block (CommBlock * block,
 			      const FieldDescr * field_descr,
 			      const Hierarchy * hierarchy) throw();
 

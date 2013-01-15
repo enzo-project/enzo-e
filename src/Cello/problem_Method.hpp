@@ -45,7 +45,7 @@ public: // virtual functions
   /// Apply the method to advance a block one timestep 
 
   virtual void compute_block
-  ( FieldDescr * field_descr, Block * block) throw() = 0; 
+  ( FieldDescr * field_descr, CommBlock * block) throw() = 0; 
 
 protected: // functions
 

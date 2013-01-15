@@ -74,7 +74,7 @@ public: // virtual functions
 
   /// Write block data to disk
   virtual void write_block
-  ( const Block * block,
+  ( const CommBlock * block,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
 

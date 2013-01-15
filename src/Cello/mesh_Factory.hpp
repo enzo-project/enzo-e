@@ -22,7 +22,7 @@ class Factory
   /// @class    Factory
   /// @ingroup  Mesh 
   /// @brief [\ref Mesh] Abstract class for creating concrete Hierarchy,
-  /// Patch, and Block objects
+  /// Patch, and CommBlock objects
 
 public: // interface
 
@@ -71,7 +71,7 @@ public: // interface
    int process_first=0, int process_last_plus=-1
    ) const throw();
 
-  /// Create an Input / Output accessor object for Block
+  /// Create an Input / Output accessor object for CommBlock
   virtual IoBlock * create_io_block ( ) const throw();
 
   /// Create an Input / Output accessor object for a FieldBlock
@@ -79,8 +79,8 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Create a new CHARM++ Block array
-  virtual CProxy_Block create_block_array
+  /// Create a new CHARM++ CommBlock array
+  virtual CProxy_CommBlock create_block_array
   (int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
@@ -93,8 +93,8 @@ public: // interface
 
 #endif
 
-  /// Create a new Block
-  virtual Block * create_block
+  /// Create a new CommBlock
+  virtual CommBlock * create_block
   (int ibx, int iby, int ibz,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,

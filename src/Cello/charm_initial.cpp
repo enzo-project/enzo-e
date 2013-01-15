@@ -61,7 +61,7 @@ void Problem::initial_next(Simulation * simulation) throw()
 
       DEBUG1 ("Start Initial(%d) B",index_initial_);
 
-      initial->enforce_block((Block *)NULL, field_descr, hierarchy);
+      initial->enforce_block((CommBlock *)NULL, field_descr, hierarchy);
 
     }
 
@@ -80,15 +80,15 @@ void Problem::initial_next(Simulation * simulation) throw()
 void Patch::p_initial()
 {
   TRACE("Patch::p_initial()");
-  TRACE("Patch::p_initial(Patch) calling Block::p_initial()");
+  TRACE("Patch::p_initial(Patch) calling CommBlock::p_initial()");
   block_array()->p_initial();
 }
 
 //----------------------------------------------------------------------
 
-void Block::p_initial()
+void CommBlock::p_initial()
 {
-  TRACE("Block::p_initial()");
+  TRACE("CommBlock::p_initial()");
   Simulation * simulation  = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -96,9 +96,9 @@ void Block::p_initial()
 
   allocate(field_descr);
 
-  // Set the Block cycle and time to match Simulation's
+  // Set the CommBlock cycle and time to match Simulation's
 
-  TRACE("Block::p_initial Setting time");
+  TRACE("CommBlock::p_initial Setting time");
   set_cycle(simulation->cycle());
   set_time (simulation->time());
   set_dt   (simulation->dt());
@@ -141,9 +141,9 @@ void SimulationCharm::s_initial()
 
 //======================================================================
 
-void Block::p_read (int index_initial)
+void CommBlock::p_read (int index_initial)
 {
-  INCOMPLETE("Block::p_read");
+  INCOMPLETE("CommBlock::p_read");
 }
 #endif /* CONFIG_USE_CHARM */
 

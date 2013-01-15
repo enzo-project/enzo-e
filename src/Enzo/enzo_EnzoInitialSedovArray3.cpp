@@ -56,7 +56,7 @@ void EnzoInitialSedovArray3::pup (PUP::er &p)
 //----------------------------------------------------------------------
 void EnzoInitialSedovArray3::enforce_block
 (
- Block * block,
+ CommBlock * block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()
@@ -64,7 +64,7 @@ void EnzoInitialSedovArray3::enforce_block
 {
 
   ASSERT("EnzoInitialSedovArray3",
-	 "Block does not exist",
+	 "CommBlock does not exist",
 	 block != NULL);
 
   FieldBlock * field_block = block->field_block();
