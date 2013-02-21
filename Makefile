@@ -1,8 +1,12 @@
-.PHONY: src clean 
+.PHONY: charm
+charm:
+	python scons.py bin/charm/enzo-p type=charm
 
-src:
-	scons
+.PHONY: mpi
+mpi:
+	python scons.py bin/mpi/enzo-p type=mpi
 
+.PHONY: clean
 clean:
 	scons -c
 
