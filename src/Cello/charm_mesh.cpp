@@ -1,4 +1,5 @@
 #include "mesh.hpp"
+#include "comm.hpp"
 
 #include "charm_mesh.hpp"
 
