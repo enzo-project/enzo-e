@@ -1,13 +1,14 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_CommBlock.hpp
+/// @file     comm_CommBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
-/// @brief    [\ref Mesh] Declaration of the CommBlock class
+/// @brief    [\ref Comm] Declaration of the CommBlock class
 
-#ifndef MESH_BLOCK_HPP
-#define MESH_BLOCK_HPP
+#ifndef COMM_COMMBLOCK_HPP
+#define COMM_COMMBLOCK_HPP
 
+class Block;
 class Patch;
 class Factory;
 class GroupProcess;
@@ -20,8 +21,8 @@ class CommBlock
 #endif
 {
   /// @class    CommBlock
-  /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] Handles parallel communication and synchronization of mesh Blocks
+  /// @ingroup  Comm
+  /// @brief    [\ref Comm] Handles parallel communication and synchronization of mesh Blocks
 
   friend class IoBlock;
 
@@ -297,6 +298,9 @@ protected: // functions
 
 protected: // attributes
 
+  /// Mesh Block that this CommBlock controls
+  Block block;
+
 #ifdef CONFIG_USE_CHARM
 
   /// Counter when refreshing faces
@@ -346,5 +350,5 @@ protected: // attributes
 
 };
 
-#endif /* MESH_BLOCK_HPP */
+#endif /* COMM_COMMBLOCK_HPP */
 
