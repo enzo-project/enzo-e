@@ -8,6 +8,7 @@
 #include "cello.hpp"
 
 #include "mesh.hpp"
+#include "comm.hpp"
 #include "main.hpp"
 
 //----------------------------------------------------------------------

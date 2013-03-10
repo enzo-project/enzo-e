@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_CommBlock.cpp
+/// @file     comm_CommBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Feb 28 13:22:26 PST 2011
 /// @brief    Implementation of the CommBlock object

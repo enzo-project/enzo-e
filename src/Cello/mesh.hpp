@@ -28,6 +28,6 @@
 
 #include "_field.hpp" 
 #include "_mesh.hpp"
-
+#include "_comm.hpp"
 #endif /* MESH_HPP */
 
