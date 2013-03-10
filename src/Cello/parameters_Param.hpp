@@ -106,26 +106,29 @@ public: // interface
   void write(FILE * file_pointer,
 	     std::string parameter);
 
-  /// Return whether the parameter is an integer
-  bool is_integer()      { return type_ == parameter_integer; };
+  //  /// Return whether the parameter is an integer
+  //  bool is_integer()      { return type_ == parameter_integer; };
+  //
+  //  /// Return whether the parameter is a floating-point number
+  //  bool is_float()       { return type_ == parameter_float; };
+  //
+  //  /// Return whether the parameter is a logical
+  //  bool is_logical()      { return type_ == parameter_logical; };
+  //
+  //  /// Return whether the parameter is a string
+  //  bool is_string()       { return type_ == parameter_string; };
+  //
+  //  /// Return whether the parameter is a list
+  //  bool is_list()         { return type_ == parameter_list; };
+  //
+  //  /// Return whether the parameter is a floating-point expression
+  //  bool is_float_expr()  { return type_ == parameter_float_expr; };
+  //
+  //  /// Return whether the parameter is a logical expression
+  //  bool is_logical_expr() { return type_ == parameter_logical_expr; };
 
-  /// Return whether the parameter is a floating-point number
-  bool is_float()       { return type_ == parameter_float; };
-
-  /// Return whether the parameter is a logical
-  bool is_logical()      { return type_ == parameter_logical; };
-
-  /// Return whether the parameter is a string
-  bool is_string()       { return type_ == parameter_string; };
-
-  /// Return whether the parameter is a list
-  bool is_list()         { return type_ == parameter_list; };
-
-  /// Return whether the parameter is a floating-point expression
-  bool is_float_expr()  { return type_ == parameter_float_expr; };
-
-  /// Return whether the parameter is a logical expression
-  bool is_logical_expr() { return type_ == parameter_logical_expr; };
+  /// Return whether the parameter has the given type
+  bool is_type (parameter_enum type) { return type_ == type; };
 
   /// Get an integer parameter
   int get_integer () 
