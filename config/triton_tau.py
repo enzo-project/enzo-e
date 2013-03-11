@@ -7,6 +7,7 @@ is_arch_valid = 1
 flags_arch = '-g'
 flags_link  = ''
 
+cc['charm']   = 'icc'
 cc['mpi']     = 'mpicc'
 cc['serial']  = 'icc'
 cxx['mpi']    = 'mpicxx'

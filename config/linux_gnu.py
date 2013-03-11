@@ -12,6 +12,7 @@ flags_arch       = '-O3'
 
 flags_link_charm = ' -rdynamic'
 
+cc['charm']   = 'gcc'
 cc['mpi']     = 'mpicc'
 cc['serial']  = 'gcc'
 cxx['mpi']    = 'mpic++'

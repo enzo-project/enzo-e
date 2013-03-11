@@ -246,7 +246,7 @@ if (not is_arch_valid):
 charmc = charm_path + '/bin/charmc -language charm++ '
 
 cxx['charm']  = charmc + charm_perf + ' '
-cc ['charm']  = charmc + charm_perf + ' '
+# cc ['charm']  = charmc + charm_perf + ' '
 
 if (balance == 1):
      flags_cxx_charm = flags_cxx_charm + ' -balancer ' + balancer

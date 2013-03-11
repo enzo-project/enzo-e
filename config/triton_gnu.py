@@ -8,6 +8,7 @@ is_arch_valid = 1
 flags_arch = '-O3'
 flags_link  = '-rdynamic'
 
+cc['charm']   = 'gcc'
 cc['mpi']     = 'mpicc'
 cc['serial']  = 'gcc'
 cxx['mpi']    = 'mpic++'

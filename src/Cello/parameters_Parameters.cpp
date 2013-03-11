@@ -227,7 +227,7 @@ int Parameters::value_integer
 
   ASSERT1 ("Parameters::value_integer",
 	   "Parameter %s is not an integer", parameter.c_str(),
-	   ( ! param || param->is_integer()));
+	   ( ! param || param->is_type(parameter_integer)));
 
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%d",deflt);
@@ -247,7 +247,7 @@ void Parameters::set_integer
 
   ASSERT1 ("Parameters::set_integer",
 	   "Parameter %s is not an integer", parameter.c_str(),
-	   ( ! param || param->is_integer()));
+	   ( ! param || param->is_type(parameter_integer)));
 
   if ( ! param ) {
     param = new Param;
@@ -271,7 +271,7 @@ double Parameters::value_float
 
   ASSERT1 ("Parameters::value_float",
 	   "Parameter %s is not a float", parameter.c_str(),
-	   ( ! param || param->is_float()));
+	   ( ! param || param->is_type(parameter_float)));
 
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // '#' format character forces a decimal point
@@ -292,7 +292,7 @@ void Parameters::set_float
 
   ASSERT1 ("Parameters::set_float",
 	   "Parameter %s is not a float", parameter.c_str(),
-	   (!param || param->is_float()));
+	   (!param || param->is_type(parameter_float)));
 
   if ( ! param ) {
     param = new Param;
@@ -316,7 +316,7 @@ bool Parameters::value_logical
 
   ASSERT1 ("Parameters::value_logical",
 	   "Parameter %s is not a logical", parameter.c_str(),
-	   ( ! param || param->is_logical()));
+	   ( ! param || param->is_type(parameter_logical)));
 
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%s",deflt ? "true" : "false");
@@ -336,7 +336,7 @@ void Parameters::set_logical
 
   ASSERT1 ("Parameters::set_logical",
 	   "Parameter %s is not logical", parameter.c_str(),
-	   (!param || param->is_logical()));
+	   (!param || param->is_type(parameter_logical)));
 
   if ( ! param ) {
     param = new Param;
@@ -360,7 +360,7 @@ const char * Parameters::value_string
 
   ASSERT1 ("Parameters::value_string",
 	   "Parameter %s is not a string", parameter.c_str(),
-	   ( ! param || param->is_string()));
+	   ( ! param || param->is_type(parameter_string)));
 
   monitor_access_(parameter,deflt);
   return (param != NULL) ? param->get_string() : deflt;
@@ -378,7 +378,7 @@ void Parameters::set_string
 
   ASSERT1 ("Parameters::set_string_string",
 	   "Parameter %s is not a string", parameter.c_str(),
-	   ( ! param || param->is_string()));
+	   ( ! param || param->is_type(parameter_string)));
 
   if ( ! param ) {
     param = new Param;
@@ -413,7 +413,7 @@ void Parameters::evaluate_float
   Param * param = parameter_(parameter);
   ASSERT1 ("Parameters::evaluate_float",
 	   "Parameter %s is not a floating-point expression", parameter.c_str(),
-	   ( ! param || param->is_float_expr()));
+	   ( ! param || param->is_type(parameter_float_expr)));
   if (param != NULL) {
     param->evaluate_float(param->value_expr_,n,result,x,y,z,t);
   } else {
@@ -448,7 +448,7 @@ void Parameters::evaluate_logical
   Param * param = parameter_(parameter);
   ASSERT1 ("Parameters::evaluate_logical",
 	   "Parameter %s is not a logical expression", parameter.c_str(),
-	   (! param || param->is_logical_expr()));
+	   (! param || param->is_type(parameter_logical_expr)));
   if (param != NULL) {
     param->evaluate_logical(param->value_expr_,n,result,x,y,z,t);
   } else {
@@ -467,7 +467,7 @@ int Parameters::list_length(std::string parameter)
   Param * param = parameter_(parameter);
   ASSERT1 ("Parameters::list_length",
 	   "Parameter %s is not a list", parameter.c_str(),
-	   ( ! param || param->is_list()));
+	   ( ! param || param->is_type(parameter_list)));
   return (param != NULL) ? (param->value_list_)->size() : 0;
 }
 
@@ -486,7 +486,7 @@ int Parameters::list_value_integer
   ASSERT2 ("Parameters::list_value_integer",
 	   "Parameter %s[%d] is not an integer", 
 	   parameter.c_str(),index,
-	   ( ! param || param->is_integer()));
+	   ( ! param || param->is_type(parameter_integer)));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%d",deflt);
   monitor_access_(parameter,deflt_string,index);
@@ -508,7 +508,7 @@ double Parameters::list_value_float
   ASSERT2 ("Parameters::list_value_float",
 	   "Parameter %s[%d] is not a float", 
 	   parameter.c_str(),index,
-	   ( ! param || param->is_float()));
+	   ( ! param || param->is_type(parameter_float)));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // '#' format character forces a decimal point
   sprintf (deflt_string,FLOAT_FORMAT,deflt);
@@ -531,7 +531,7 @@ bool Parameters::list_value_logical
   ASSERT2 ("Parameters::list_value_logical",
 	   "Parameter %s[%d] is not a logical", 
 	   parameter.c_str(),index,
-	   ( ! param || param->is_logical()));
+	   ( ! param || param->is_type(parameter_logical)));
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%s",deflt ? "true" : "false");
   monitor_access_(parameter,deflt_string,index);
@@ -553,7 +553,7 @@ const char * Parameters::list_value_string
   ASSERT2 ("Parameters::list_value_string",
 	   "Parameter %s[%d] is not a string",
 	   parameter.c_str(),index,
-	   ( ! param || param->is_string()));
+	   ( ! param || param->is_type(parameter_string)));
   monitor_access_(parameter,deflt,index);
   return (param != NULL) ? param->value_string_ : deflt;
 }
@@ -570,7 +570,7 @@ void Parameters::set_list_length
 
   ASSERT1 ("Parameters::set_list_length",
 	   "Parameter %s is not a list", parameter.c_str(),
-	   ( ! param || param->is_list()));
+	   ( ! param || param->is_type(parameter_list)));
 
   if ( ! param ) {
     param = new Param;
@@ -695,7 +695,7 @@ void Parameters::list_evaluate_float
   ASSERT2 ("Parameters::list_evaluate_float",
 	   "Parameter %s[%d] is not a floating-point expression",
 	   parameter.c_str(),index,
-	   ( ! param || param->is_float_expr()));
+	   ( ! param || param->is_type(parameter_float_expr)));
   if (param != NULL) {
     param->evaluate_float(param->value_expr_,n,result,x,y,z,t);
   } else {
@@ -733,7 +733,7 @@ void Parameters::list_evaluate_logical
   ASSERT2 ("Parameters::list_evaluate_logical",
 	   "Parameter %s[%d] is not a logical",
 	   parameter.c_str(),index,
-	   ( ! param || param->is_logical_expr()));
+	   ( ! param || param->is_type(parameter_logical_expr)));
   if (param != NULL) {
     param->evaluate_logical(param->value_expr_,n,result,x,y,z,t);
   } else {
