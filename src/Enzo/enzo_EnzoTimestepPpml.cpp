@@ -36,7 +36,7 @@ double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
 				   CommBlock * block ) throw()
 {
  
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoCommBlock * enzo_block = static_cast<EnzoCommBlock*> (block);
 
   /* initialize */
  
@@ -59,14 +59,14 @@ double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
      set it to one. */
  
   enzo_float a = 1, dadt;
-  if (EnzoBlock::ComovingCoordinates)
+  if (EnzoCommBlock::ComovingCoordinates)
     enzo_block->CosmologyComputeExpansionFactor
       (enzo_block->Time(), &a, &dadt);
   //  float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */
  
-  if (EnzoBlock::NumberOfBaryonFields > 0) {
+  if (EnzoCommBlock::NumberOfBaryonFields > 0) {
  
     /* Find fields: density, total energy, velocity1-3. */
  
@@ -158,7 +158,7 @@ double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
  
     /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
  
-    dtBaryons *= EnzoBlock::CourantSafetyNumber;
+    dtBaryons *= EnzoCommBlock::CourantSafetyNumber;
     
   }
  
@@ -184,7 +184,7 @@ double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
  
   /* 3) Find dt from expansion. */
  
-  // if (EnzoBlock::ComovingCoordinates)
+  // if (EnzoCommBlock::ComovingCoordinates)
   //   if (enzo_block->CosmologyComputeExpansionTimestep
   // 	(enzo_block->Time(), &dtExpansion) == ENZO_FAIL) {
   //     fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");

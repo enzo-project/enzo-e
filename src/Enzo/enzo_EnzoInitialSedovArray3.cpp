@@ -103,8 +103,8 @@ void EnzoInitialSedovArray3::enforce_block
   const double sedov_radius = 3.5 * hx;
   const double sedov_radius_2 = sedov_radius*sedov_radius;
 
-  const double sedov_te_in = sedov_p_in  / ((EnzoBlock::Gamma - 1.0) * sedov_density);
-  const double sedov_te_out= sedov_p_out / ((EnzoBlock::Gamma - 1.0) * sedov_density);
+  const double sedov_te_in = sedov_p_in  / ((EnzoCommBlock::Gamma - 1.0) * sedov_density);
+  const double sedov_te_out= sedov_p_out / ((EnzoCommBlock::Gamma - 1.0) * sedov_density);
 
   int gx,gy,gz;
   field_descr->ghosts(0,&gx,&gy,&gz);

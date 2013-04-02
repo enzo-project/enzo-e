@@ -8,13 +8,13 @@
 #ifndef IO_IO_ENZO_BLOCK_HPP
 #define IO_IO_ENZO_BLOCK_HPP
 
-class EnzoBlock;
+class EnzoCommBlock;
 
 class IoEnzoBlock : public IoBlock {
 
   /// @class    IoEnzoBlock
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Class for interfacing between EnzoBlock and Output objects
+  /// @brief    [\ref Enzo] Class for interfacing between EnzoCommBlock and Output objects
 
 public: // interface
 
@@ -36,13 +36,13 @@ public: // interface
   }
 #endif
 
-  /// Return the ith metadata item associated with the EnzoBlock object
+  /// Return the ith metadata item associated with the EnzoCommBlock object
   void meta_value 
   (int index, 
    void ** buffer, std::string * name, scalar_type * type,
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
-  /// Return the ith data item associated with the EnzoBlock object
+  /// Return the ith data item associated with the EnzoCommBlock object
   void data_value 
   (int index, 
    void ** buffer, std::string * name, scalar_type * type,

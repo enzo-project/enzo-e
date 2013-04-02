@@ -22,7 +22,7 @@ PARALLEL_MAIN_BEGIN
 
   printf ("%4ld sizeof(CommBlock)\n",sizeof(CommBlock));
   printf ("%4ld sizeof(Boundary)\n",sizeof(Boundary));
-  printf ("%4ld sizeof(EnzoBlock)\n",sizeof(EnzoBlock));
+  printf ("%4ld sizeof(EnzoCommBlock)\n",sizeof(EnzoCommBlock));
   printf ("%4ld sizeof(Factory)\n",sizeof(Factory));
   printf ("%4ld sizeof(FieldBlock)\n",sizeof(FieldBlock));
   printf ("%4ld sizeof(FieldDescr)\n",sizeof(FieldDescr));

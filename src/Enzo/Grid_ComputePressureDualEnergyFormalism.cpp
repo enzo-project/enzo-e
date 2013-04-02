@@ -14,7 +14,7 @@
  
 //----------------------------------------------------------------------
  
-int EnzoBlock::ComputePressureDualEnergyFormalism
+int EnzoCommBlock::ComputePressureDualEnergyFormalism
 (enzo_float time, enzo_float *pressure)
 {
  

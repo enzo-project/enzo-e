@@ -24,7 +24,7 @@
  
  
  
-int EnzoBlock::IdentifySpeciesFields
+int EnzoCommBlock::IdentifySpeciesFields
 (
  int &DeNum, int &HINum, int &HIINum,
  int &HeINum, int &HeIINum, int &HeIIINum,

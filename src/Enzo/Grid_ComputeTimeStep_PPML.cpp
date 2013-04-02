@@ -24,7 +24,7 @@
 
 #include "enzo.hpp"
 
-enzo_float EnzoBlock::ComputeTimeStep()
+enzo_float EnzoCommBlock::ComputeTimeStep()
 {
 
   TRACE("");

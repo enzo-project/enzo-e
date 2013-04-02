@@ -33,7 +33,7 @@ public: // interface
 
 #endif
 
-  /// Create the Input / Output accessor object for EnzoBlock
+  /// Create the Input / Output accessor object for EnzoCommBlock
   virtual IoBlock * create_io_block () const throw();
 
 #ifdef CONFIG_USE_CHARM

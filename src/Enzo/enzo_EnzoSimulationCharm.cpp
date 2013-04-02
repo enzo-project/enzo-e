@@ -51,7 +51,7 @@ void EnzoSimulationCharm::pup (PUP::er &p)
   // NOTE: change this function whenever attributes change
   SimulationCharm::pup(p);
   if (p.isUnpacking()) {
-    EnzoBlock::initialize(static_cast<EnzoConfig*>(config_),field_descr());
+    EnzoCommBlock::initialize(static_cast<EnzoConfig*>(config_),field_descr());
   }
 }
 
@@ -65,7 +65,7 @@ void EnzoSimulationCharm::initialize() throw()
   initialize_config_();
 
   SimulationCharm::initialize();
-  EnzoBlock::initialize(static_cast<EnzoConfig*>(config_),field_descr());
+  EnzoCommBlock::initialize(static_cast<EnzoConfig*>(config_),field_descr());
 }
 
 //----------------------------------------------------------------------

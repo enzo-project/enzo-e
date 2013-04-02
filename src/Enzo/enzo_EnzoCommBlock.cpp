@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoBlock.cpp
+/// @file     enzo_EnzoCommBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Mar  3 23:02:02 PST 2011
-/// @brief    Implementation of the EnzoBlock class
+/// @brief    Implementation of the EnzoCommBlock class
 
 #include "cello.hpp"
 
@@ -13,44 +13,44 @@
 
 /// Boundary
 
-int  EnzoBlock::BoundaryRank;
-int  EnzoBlock::BoundaryDimension[MAX_DIMENSION];
-int  EnzoBlock::BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-bc_enum *EnzoBlock::BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
-enzo_float *EnzoBlock::BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
+int  EnzoCommBlock::BoundaryRank;
+int  EnzoCommBlock::BoundaryDimension[MAX_DIMENSION];
+int  EnzoCommBlock::BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+bc_enum *EnzoCommBlock::BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
+enzo_float *EnzoCommBlock::BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
 
-int EnzoBlock::ComovingCoordinates;
-int EnzoBlock::UseMinimumPressureSupport;
-enzo_float EnzoBlock::MinimumPressureSupportParameter;
-enzo_float EnzoBlock::ComovingBoxSize;
-enzo_float EnzoBlock::HubbleConstantNow;
-enzo_float EnzoBlock::OmegaMatterNow;
-enzo_float EnzoBlock::OmegaLambdaNow;
-enzo_float EnzoBlock::MaxExpansionRate;
+int EnzoCommBlock::ComovingCoordinates;
+int EnzoCommBlock::UseMinimumPressureSupport;
+enzo_float EnzoCommBlock::MinimumPressureSupportParameter;
+enzo_float EnzoCommBlock::ComovingBoxSize;
+enzo_float EnzoCommBlock::HubbleConstantNow;
+enzo_float EnzoCommBlock::OmegaMatterNow;
+enzo_float EnzoCommBlock::OmegaLambdaNow;
+enzo_float EnzoCommBlock::MaxExpansionRate;
 
 // Chemistry
 
-int EnzoBlock::MultiSpecies;
+int EnzoCommBlock::MultiSpecies;
 
 // Gravity
 
-int EnzoBlock::GravityOn;
+int EnzoCommBlock::GravityOn;
 
 // Physics
 
-int EnzoBlock::PressureFree;
-enzo_float EnzoBlock::Gamma;
-enzo_float EnzoBlock::GravitationalConstant;
+int EnzoCommBlock::PressureFree;
+enzo_float EnzoCommBlock::Gamma;
+enzo_float EnzoCommBlock::GravitationalConstant;
 
 // Problem-specific
 
-int EnzoBlock::ProblemType;
+int EnzoCommBlock::ProblemType;
 
 // Method PPM
 
-int EnzoBlock::PPMFlatteningParameter;
-int EnzoBlock::PPMDiffusionParameter;
-int EnzoBlock::PPMSteepeningParameter;
+int EnzoCommBlock::PPMFlatteningParameter;
+int EnzoCommBlock::PPMDiffusionParameter;
+int EnzoCommBlock::PPMSteepeningParameter;
 
 // Parallel
 
@@ -58,42 +58,42 @@ int EnzoBlock::PPMSteepeningParameter;
 
 // Numerics
 
-int EnzoBlock::DualEnergyFormalism;
-enzo_float EnzoBlock::DualEnergyFormalismEta1;
-enzo_float EnzoBlock::DualEnergyFormalismEta2;
+int EnzoCommBlock::DualEnergyFormalism;
+enzo_float EnzoCommBlock::DualEnergyFormalismEta1;
+enzo_float EnzoCommBlock::DualEnergyFormalismEta2;
 
-enzo_float EnzoBlock::pressure_floor;
-enzo_float EnzoBlock::density_floor;
-enzo_float EnzoBlock::number_density_floor;
-enzo_float EnzoBlock::temperature_floor;
+enzo_float EnzoCommBlock::pressure_floor;
+enzo_float EnzoCommBlock::density_floor;
+enzo_float EnzoCommBlock::number_density_floor;
+enzo_float EnzoCommBlock::temperature_floor;
 
-enzo_float EnzoBlock::CourantSafetyNumber;
-enzo_float EnzoBlock::InitialRedshift;
-enzo_float EnzoBlock::InitialTimeInCodeUnits;
+enzo_float EnzoCommBlock::CourantSafetyNumber;
+enzo_float EnzoCommBlock::InitialRedshift;
+enzo_float EnzoCommBlock::InitialTimeInCodeUnits;
 
 // Domain
 
-enzo_float EnzoBlock::DomainLeftEdge [MAX_DIMENSION];
-enzo_float EnzoBlock::DomainRightEdge[MAX_DIMENSION];
+enzo_float EnzoCommBlock::DomainLeftEdge [MAX_DIMENSION];
+enzo_float EnzoCommBlock::DomainRightEdge[MAX_DIMENSION];
 
 // PPM
 
-int EnzoBlock::field_index_[NUM_FIELDS];
+int EnzoCommBlock::field_index_[NUM_FIELDS];
 
-int EnzoBlock::GridRank;
+int EnzoCommBlock::GridRank;
 
-int EnzoBlock::ghost_depth[MAX_DIMENSION];
+int EnzoCommBlock::ghost_depth[MAX_DIMENSION];
 
 // Fields
 
-int EnzoBlock::NumberOfBaryonFields;      // active baryon fields
+int EnzoCommBlock::NumberOfBaryonFields;      // active baryon fields
 
-int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+int EnzoCommBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
 //----------------------------------------------------------------------
 
 // STATIC
-void EnzoBlock::initialize(EnzoConfig * enzo_config,
+void EnzoCommBlock::initialize(EnzoConfig * enzo_config,
 			   FieldDescr * field_descr)
 
 {
@@ -234,10 +234,10 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   // Check NumberOfBaryonFields
 
   if (NumberOfBaryonFields == 0) {
-    ERROR ("EnzoBlock::initialize",
+    ERROR ("EnzoCommBlock::initialize",
 	   "List parameter 'Field fields' must have length greater than zero");
   } else if (NumberOfBaryonFields > MAX_NUMBER_OF_BARYON_FIELDS) {
-    ERROR2 ("EnzoBlock::initialize",
+    ERROR2 ("EnzoCommBlock::initialize",
 	    "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
 	    MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields );
   }
@@ -352,7 +352,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
       FieldType[field_index] = 0;
     } else {
       FieldType[field_index] = 0;
-      WARNING1 ("EnzoBlock::EnzoBlock", 
+      WARNING1 ("EnzoCommBlock::EnzoCommBlock", 
 		"Unknown field type for field %s",
 		name.c_str());
     }
@@ -381,7 +381,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
 
 
-EnzoBlock::EnzoBlock
+EnzoCommBlock::EnzoCommBlock
 (
  int ix, int iy, int iz,
  int nbx, int nby, int nbz,
@@ -433,7 +433,7 @@ EnzoBlock::EnzoBlock
 
 #ifdef CONFIG_USE_CHARM
 
-EnzoBlock::EnzoBlock
+EnzoCommBlock::EnzoCommBlock
 (
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -476,209 +476,209 @@ EnzoBlock::EnzoBlock
 
 //----------------------------------------------------------------------
 
-EnzoBlock::~EnzoBlock() throw ()
+EnzoCommBlock::~EnzoCommBlock() throw ()
 {
 }
 
 //======================================================================
 
-void EnzoBlock::write(FILE * fp) throw ()
+void EnzoCommBlock::write(FILE * fp) throw ()
 {
-  fprintf (fp,"EnzoBlock: ComovingCoordinates %d\n",
+  fprintf (fp,"EnzoCommBlock: ComovingCoordinates %d\n",
 	   ComovingCoordinates);
-  fprintf (fp,"EnzoBlock: UseMinimumPressureSupport %d\n",
+  fprintf (fp,"EnzoCommBlock: UseMinimumPressureSupport %d\n",
 	   UseMinimumPressureSupport);
-  fprintf (fp,"EnzoBlock: MinimumPressureSupportParameter %g\n",
+  fprintf (fp,"EnzoCommBlock: MinimumPressureSupportParameter %g\n",
 	   MinimumPressureSupportParameter);
-  fprintf (fp,"EnzoBlock: ComovingBoxSize %g\n",
+  fprintf (fp,"EnzoCommBlock: ComovingBoxSize %g\n",
 	   ComovingBoxSize);
-  fprintf (fp,"EnzoBlock: HubbleConstantNow %g\n",
+  fprintf (fp,"EnzoCommBlock: HubbleConstantNow %g\n",
 	   HubbleConstantNow);
-  fprintf (fp,"EnzoBlock: OmegaLambdaNow %g\n",
+  fprintf (fp,"EnzoCommBlock: OmegaLambdaNow %g\n",
 	   OmegaLambdaNow);
-  fprintf (fp,"EnzoBlock: OmegaMatterNow %g\n",
+  fprintf (fp,"EnzoCommBlock: OmegaMatterNow %g\n",
 	   OmegaMatterNow);
-  fprintf (fp,"EnzoBlock: MaxExpansionRate %g\n",
+  fprintf (fp,"EnzoCommBlock: MaxExpansionRate %g\n",
 	   MaxExpansionRate);
 
   // Chemistry
 
-  fprintf (fp,"EnzoBlock: MultiSpecies %d\n",
+  fprintf (fp,"EnzoCommBlock: MultiSpecies %d\n",
 	   MultiSpecies);
 
   // Gravity
 
-  fprintf (fp,"EnzoBlock: GravityOn %d\n",
+  fprintf (fp,"EnzoCommBlock: GravityOn %d\n",
 	   GravityOn);
-  //  fprintf (fp,"EnzoBlock: *AccelerationField %g\n",
+  //  fprintf (fp,"EnzoCommBlock: *AccelerationField %g\n",
   //           *AccelerationField[MAX_DIMENSION)];
 
   // Physics
 
-  fprintf (fp,"EnzoBlock: PressureFree %d\n",
+  fprintf (fp,"EnzoCommBlock: PressureFree %d\n",
 	   PressureFree);
-  fprintf (fp,"EnzoBlock: Gamma %g\n",
+  fprintf (fp,"EnzoCommBlock: Gamma %g\n",
 	   Gamma);
-  fprintf (fp,"EnzoBlock: GravitationalConstant %g\n",
+  fprintf (fp,"EnzoCommBlock: GravitationalConstant %g\n",
 	   GravitationalConstant);
 
   // Problem-specific
 
-  fprintf (fp,"EnzoBlock: ProblemType %d\n",
+  fprintf (fp,"EnzoCommBlock: ProblemType %d\n",
 	   ProblemType);
 
   // Method PPM
 
-  fprintf (fp,"EnzoBlock: PPMFlatteningParameter %d\n",
+  fprintf (fp,"EnzoCommBlock: PPMFlatteningParameter %d\n",
 	   PPMFlatteningParameter);
-  fprintf (fp,"EnzoBlock: PPMDiffusionParameter %d\n",
+  fprintf (fp,"EnzoCommBlock: PPMDiffusionParameter %d\n",
 	   PPMDiffusionParameter);
-  fprintf (fp,"EnzoBlock: PPMSteepeningParameter %d\n",
+  fprintf (fp,"EnzoCommBlock: PPMSteepeningParameter %d\n",
 	   PPMSteepeningParameter);
 
   // Numerics
 
-  fprintf (fp,"EnzoBlock: DualEnergyFormalism %d\n",
+  fprintf (fp,"EnzoCommBlock: DualEnergyFormalism %d\n",
 	   DualEnergyFormalism);
-  fprintf (fp,"EnzoBlock: DualEnergyFormalismEta1 %g\n",
+  fprintf (fp,"EnzoCommBlock: DualEnergyFormalismEta1 %g\n",
 	   DualEnergyFormalismEta1);
-  fprintf (fp,"EnzoBlock: DualEnergyFormalismEta2 %g\n",
+  fprintf (fp,"EnzoCommBlock: DualEnergyFormalismEta2 %g\n",
 	   DualEnergyFormalismEta2);
-  fprintf (fp,"EnzoBlock: pressure_floor %g\n",
+  fprintf (fp,"EnzoCommBlock: pressure_floor %g\n",
 	   pressure_floor);
-  fprintf (fp,"EnzoBlock: density_density_floor %g\n",
+  fprintf (fp,"EnzoCommBlock: density_density_floor %g\n",
 	   density_floor);
-  fprintf (fp,"EnzoBlock: number_density_floor %g\n",
+  fprintf (fp,"EnzoCommBlock: number_density_floor %g\n",
 	   number_density_floor);
-  fprintf (fp,"EnzoBlock: temperature_floor %g\n",
+  fprintf (fp,"EnzoCommBlock: temperature_floor %g\n",
 	   temperature_floor);
 
-  fprintf (fp,"EnzoBlock: CourantSafetyNumber %g\n",
+  fprintf (fp,"EnzoCommBlock: CourantSafetyNumber %g\n",
 	   CourantSafetyNumber);
-  fprintf (fp,"EnzoBlock: InitialRedshift %g\n",
+  fprintf (fp,"EnzoCommBlock: InitialRedshift %g\n",
 	   InitialRedshift);
-  fprintf (fp,"EnzoBlock: InitialTimeInCodeUnits %g\n",
+  fprintf (fp,"EnzoCommBlock: InitialTimeInCodeUnits %g\n",
 	   InitialTimeInCodeUnits);
-  fprintf (fp,"EnzoBlock: Time %g\n",
+  fprintf (fp,"EnzoCommBlock: Time %g\n",
 	   Time());
-  fprintf (fp,"EnzoBlock: OldTime %g\n",
+  fprintf (fp,"EnzoCommBlock: OldTime %g\n",
 	   OldTime);
 
   // Domain
 
-  fprintf (fp,"EnzoBlock: DomainLeftEdge %g %g %g\n",
+  fprintf (fp,"EnzoCommBlock: DomainLeftEdge %g %g %g\n",
 	   DomainLeftEdge [0],DomainLeftEdge [0],DomainLeftEdge [0]);
-  fprintf (fp,"EnzoBlock: DomainRightEdge %g %g %g\n",
+  fprintf (fp,"EnzoCommBlock: DomainRightEdge %g %g %g\n",
 	   DomainRightEdge[0],DomainRightEdge[1],DomainRightEdge[2]);
 
   // Fields
 
   if (field_index_[field_density] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_density %d\n", field_index_[field_density]);
+    fprintf (fp,"EnzoCommBlock: field_density %d\n", field_index_[field_density]);
   if (field_index_[field_total_energy] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_total_energy %d\n", field_index_[field_total_energy]);
+    fprintf (fp,"EnzoCommBlock: field_total_energy %d\n", field_index_[field_total_energy]);
   if (field_index_[field_internal_energy] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_internal_energy %d\n", field_index_[field_internal_energy]);
+    fprintf (fp,"EnzoCommBlock: field_internal_energy %d\n", field_index_[field_internal_energy]);
   if (field_index_[field_velocity_x] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_velocity_x %d\n", field_index_[field_velocity_x]);
+    fprintf (fp,"EnzoCommBlock: field_velocity_x %d\n", field_index_[field_velocity_x]);
   if (field_index_[field_velocity_y] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_velocity_y %d\n", field_index_[field_velocity_y]);
+    fprintf (fp,"EnzoCommBlock: field_velocity_y %d\n", field_index_[field_velocity_y]);
   if (field_index_[field_velocity_z] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_velocity_z %d\n", field_index_[field_velocity_z]);
+    fprintf (fp,"EnzoCommBlock: field_velocity_z %d\n", field_index_[field_velocity_z]);
   if (field_index_[field_color] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_color %d\n", field_index_[field_color]);
+    fprintf (fp,"EnzoCommBlock: field_color %d\n", field_index_[field_color]);
 
   if (field_index_[field_velox] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_velox %d\n", field_index_[field_velox]);
+    fprintf (fp,"EnzoCommBlock: field_velox %d\n", field_index_[field_velox]);
   if (field_index_[field_veloy] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloy %d\n", field_index_[field_veloy]);
+    fprintf (fp,"EnzoCommBlock: field_veloy %d\n", field_index_[field_veloy]);
   if (field_index_[field_veloz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloz %d\n", field_index_[field_veloz]);
+    fprintf (fp,"EnzoCommBlock: field_veloz %d\n", field_index_[field_veloz]);
   if (field_index_[field_bfieldx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldx %d\n", field_index_[field_bfieldx]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldx %d\n", field_index_[field_bfieldx]);
   if (field_index_[field_bfieldy] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldy %d\n", field_index_[field_bfieldy]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldy %d\n", field_index_[field_bfieldy]);
   if (field_index_[field_bfieldz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldz %d\n", field_index_[field_bfieldz]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldz %d\n", field_index_[field_bfieldz]);
 
   if (field_index_[field_dens_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_dens_rx %d\n", field_index_[field_dens_rx]);
+    fprintf (fp,"EnzoCommBlock: field_dens_rx %d\n", field_index_[field_dens_rx]);
   if (field_index_[field_velox_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_velox_rx %d\n", field_index_[field_velox_rx]);
+    fprintf (fp,"EnzoCommBlock: field_velox_rx %d\n", field_index_[field_velox_rx]);
   if (field_index_[field_veloy_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloy_rx %d\n", field_index_[field_veloy_rx]);
+    fprintf (fp,"EnzoCommBlock: field_veloy_rx %d\n", field_index_[field_veloy_rx]);
   if (field_index_[field_veloz_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloz_rx %d\n", field_index_[field_veloz_rx]);
+    fprintf (fp,"EnzoCommBlock: field_veloz_rx %d\n", field_index_[field_veloz_rx]);
   if (field_index_[field_bfieldx_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldx_rx %d\n", field_index_[field_bfieldx_rx]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldx_rx %d\n", field_index_[field_bfieldx_rx]);
   if (field_index_[field_bfieldy_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldy_rx %d\n", field_index_[field_bfieldy_rx]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldy_rx %d\n", field_index_[field_bfieldy_rx]);
   if (field_index_[field_bfieldz_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldz_rx %d\n", field_index_[field_bfieldz_rx]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldz_rx %d\n", field_index_[field_bfieldz_rx]);
 
   if (field_index_[field_dens_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_dens_ry %d\n", field_index_[field_dens_ry]);
+    fprintf (fp,"EnzoCommBlock: field_dens_ry %d\n", field_index_[field_dens_ry]);
   if (field_index_[field_velox_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_velox_ry %d\n", field_index_[field_velox_ry]);
+    fprintf (fp,"EnzoCommBlock: field_velox_ry %d\n", field_index_[field_velox_ry]);
   if (field_index_[field_veloy_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloy_ry %d\n", field_index_[field_veloy_ry]);
+    fprintf (fp,"EnzoCommBlock: field_veloy_ry %d\n", field_index_[field_veloy_ry]);
   if (field_index_[field_veloz_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloz_ry %d\n", field_index_[field_veloz_ry]);
+    fprintf (fp,"EnzoCommBlock: field_veloz_ry %d\n", field_index_[field_veloz_ry]);
   if (field_index_[field_bfieldx_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldx_ry %d\n", field_index_[field_bfieldx_ry]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldx_ry %d\n", field_index_[field_bfieldx_ry]);
   if (field_index_[field_bfieldy_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldy_ry %d\n", field_index_[field_bfieldy_ry]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldy_ry %d\n", field_index_[field_bfieldy_ry]);
   if (field_index_[field_bfieldz_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldz_ry %d\n", field_index_[field_bfieldz_ry]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldz_ry %d\n", field_index_[field_bfieldz_ry]);
 
   if (field_index_[field_dens_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_dens_rz %d\n", field_index_[field_dens_rz]);
+    fprintf (fp,"EnzoCommBlock: field_dens_rz %d\n", field_index_[field_dens_rz]);
   if (field_index_[field_velox_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_velox_rz %d\n", field_index_[field_velox_rz]);
+    fprintf (fp,"EnzoCommBlock: field_velox_rz %d\n", field_index_[field_velox_rz]);
   if (field_index_[field_veloy_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloy_rz %d\n", field_index_[field_veloy_rz]);
+    fprintf (fp,"EnzoCommBlock: field_veloy_rz %d\n", field_index_[field_veloy_rz]);
   if (field_index_[field_veloz_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloz_rz %d\n", field_index_[field_veloz_rz]);
+    fprintf (fp,"EnzoCommBlock: field_veloz_rz %d\n", field_index_[field_veloz_rz]);
   if (field_index_[field_bfieldx_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldx_rz %d\n", field_index_[field_bfieldx_rz]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldx_rz %d\n", field_index_[field_bfieldx_rz]);
   if (field_index_[field_bfieldy_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldy_rz %d\n", field_index_[field_bfieldy_rz]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldy_rz %d\n", field_index_[field_bfieldy_rz]);
   if (field_index_[field_bfieldz_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldz_rz %d\n", field_index_[field_bfieldz_rz]);
+    fprintf (fp,"EnzoCommBlock: field_bfieldz_rz %d\n", field_index_[field_bfieldz_rz]);
 
   // Grid
 
-  fprintf (fp,"EnzoBlock: GridRank %d\n",    GridRank);
-  fprintf (fp,"EnzoBlock: GridDimension %d %d %d\n",
+  fprintf (fp,"EnzoCommBlock: GridRank %d\n",    GridRank);
+  fprintf (fp,"EnzoCommBlock: GridDimension %d %d %d\n",
 	   GridDimension[0],GridDimension[1],GridDimension[2]);
-  fprintf (fp,"EnzoBlock: GridStartIndex %d %d %d\n",
+  fprintf (fp,"EnzoCommBlock: GridStartIndex %d %d %d\n",
 	   GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
-  fprintf (fp,"EnzoBlock: GridEndIndex %d %d %d\n",
+  fprintf (fp,"EnzoCommBlock: GridEndIndex %d %d %d\n",
 	   GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
-  fprintf (fp,"EnzoBlock: GridLeftEdge %g %g %g\n",
+  fprintf (fp,"EnzoCommBlock: GridLeftEdge %g %g %g\n",
 	   GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
 
-  fprintf (fp,"EnzoBlock: CellWidth %g %g %g\n", 
+  fprintf (fp,"EnzoCommBlock: CellWidth %g %g %g\n", 
 	   CellWidth[0], CellWidth[1], CellWidth[2] );
 
-  fprintf (fp,"EnzoBlock: ghost %d %d %d\n",
+  fprintf (fp,"EnzoCommBlock: ghost %d %d %d\n",
 	   ghost_depth[0],ghost_depth[1],ghost_depth[2]);
 
 
-  fprintf (fp,"EnzoBlock: NumberOfBaryonFields %d\n",
+  fprintf (fp,"EnzoCommBlock: NumberOfBaryonFields %d\n",
 	   NumberOfBaryonFields);
   int i;
   for (i=0; i<NumberOfBaryonFields; i++) {
-    fprintf (fp,"EnzoBlock: BaryonField[%d] %p\n",
+    fprintf (fp,"EnzoCommBlock: BaryonField[%d] %p\n",
 	     i, BaryonField[i]);
-    fprintf (fp,"EnzoBlock: OldBaryonField[%d] %p\n",
+    fprintf (fp,"EnzoCommBlock: OldBaryonField[%d] %p\n",
 	     i, OldBaryonField[i]);
-    fprintf (fp,"EnzoBlock: FieldType[%d] %d\n",
+    fprintf (fp,"EnzoCommBlock: FieldType[%d] %d\n",
 	     i, FieldType[i]);
   }
 
-  fprintf (fp,"EnzoBlock: BoundaryRank %d\n", BoundaryRank);
-  fprintf (fp,"EnzoBlock: BoundaryDimension %d %d %d\n",
+  fprintf (fp,"EnzoCommBlock: BoundaryRank %d\n", BoundaryRank);
+  fprintf (fp,"EnzoCommBlock: BoundaryDimension %d %d %d\n",
 	   BoundaryDimension[0],BoundaryDimension[1],BoundaryDimension[2]);
 
   // unknown, reflecting, outflow, inflow, periodic
@@ -687,10 +687,10 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   for (i=0; i<NumberOfBaryonFields; i++) {
 
-    fprintf (fp,"EnzoBlock: BoundaryFieldType[%d] %d\n", 
+    fprintf (fp,"EnzoCommBlock: BoundaryFieldType[%d] %d\n", 
 	     i, BoundaryFieldType[i]);
 
-    fprintf (fp,"EnzoBlock: BoundaryType[%d] %p %p %p %p %p %p\n", i, 
+    fprintf (fp,"EnzoCommBlock: BoundaryType[%d] %p %p %p %p %p %p\n", i, 
 	     BoundaryType[i][0][0],
 	     BoundaryType[i][0][1],
 	     BoundaryType[i][1][0],
@@ -698,7 +698,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 	     BoundaryType[i][2][0],
 	     BoundaryType[i][2][1]);
 
-    fprintf (fp,"EnzoBlock: BoundaryValue[%d] %p %p %p %p %p %p\n",i,
+    fprintf (fp,"EnzoCommBlock: BoundaryValue[%d] %p %p %p %p %p %p\n",i,
 	     BoundaryValue[i][0][0],
 	     BoundaryValue[i][0][1],
 	     BoundaryValue[i][1][0],
@@ -709,19 +709,19 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   // problem
 
-  fprintf (fp,"EnzoBlock: CycleNumber %d\n",   CycleNumber);
-  fprintf (fp,"EnzoBlock: dt %g\n", dt);
+  fprintf (fp,"EnzoCommBlock: CycleNumber %d\n",   CycleNumber);
+  fprintf (fp,"EnzoCommBlock: dt %g\n", dt);
 
   // fluxes
 
-  fprintf (fp,"EnzoBlock: SubgridFluxes %p\n", SubgridFluxes);
+  fprintf (fp,"EnzoCommBlock: SubgridFluxes %p\n", SubgridFluxes);
   
 
 }
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::set_cycle (int cycle_start) throw ()
+void EnzoCommBlock::set_cycle (int cycle_start) throw ()
 {
   CommBlock::set_cycle (cycle_start);
 
@@ -730,7 +730,7 @@ void EnzoBlock::set_cycle (int cycle_start) throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::set_time (double time) throw ()
+void EnzoCommBlock::set_time (double time) throw ()
 {
   CommBlock::set_time (time);
 
@@ -742,11 +742,11 @@ void EnzoBlock::set_time (double time) throw ()
   //
   // (OldTime > time; error is about single-precision epsilon)
 
-  ASSERT("EnzoBlock::set_time",
+  ASSERT("EnzoCommBlock::set_time",
 	 "Must be called only once per timestep to maintain OldTime consistency",
 	 Time_ == 0 || Time_ < time);
 
-  //  WARNING("EnzoBlock::set_time","TEMPORARY");
+  //  WARNING("EnzoCommBlock::set_time","TEMPORARY");
   OldTime   = Time_;
   //  OldTime   = time;
   Time_     = time;
@@ -755,7 +755,7 @@ void EnzoBlock::set_time (double time) throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::set_dt (double dt_param) throw ()
+void EnzoCommBlock::set_dt (double dt_param) throw ()
 {
   CommBlock::set_dt (dt_param);
 
@@ -764,9 +764,9 @@ void EnzoBlock::set_dt (double dt_param) throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::initialize () throw()
+void EnzoCommBlock::initialize () throw()
 {
-  TRACE ("Enter EnzoBlock::initialize()\n");
+  TRACE ("Enter EnzoCommBlock::initialize()\n");
 
   CommBlock::initialize();
 
@@ -785,9 +785,9 @@ void EnzoBlock::initialize () throw()
 
   int gx,gy,gz;
 
-  gx = EnzoBlock::ghost_depth[0];
-  gy = EnzoBlock::ghost_depth[1];
-  gz = EnzoBlock::ghost_depth[2];
+  gx = EnzoCommBlock::ghost_depth[0];
+  gy = EnzoCommBlock::ghost_depth[1];
+  gz = EnzoCommBlock::ghost_depth[2];
 
   GridDimension[0]  = nx + 2*gx;
   GridDimension[1]  = ny + 2*gy;
@@ -814,11 +814,11 @@ void EnzoBlock::initialize () throw()
 
   // Initialize BaryonField[] pointers
 
-  for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
+  for (int field = 0; field < EnzoCommBlock::NumberOfBaryonFields; field++) {
     BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
   }
 
-  TRACE ("Exit  EnzoBlock::initialize()\n");
+  TRACE ("Exit  EnzoCommBlock::initialize()\n");
 }
 
 //----------------------------------------------------------------------
@@ -827,7 +827,7 @@ void EnzoBlock::initialize () throw()
 //   field type in the list of boundary's and apply that boundary value/type.
 //   Returns: 0 on failure
 //
-int EnzoBlock::SetExternalBoundary
+int EnzoCommBlock::SetExternalBoundary
 (
  int FieldRank, 
  int GridDims[],
@@ -1073,7 +1073,7 @@ int EnzoBlock::SetExternalBoundary
 
 //----------------------------------------------------------------------
 
-int EnzoBlock::CosmologyComputeExpansionFactor
+int EnzoCommBlock::CosmologyComputeExpansionFactor
 (enzo_float time, enzo_float *a, enzo_float *dadt)
 {
  
@@ -1183,7 +1183,7 @@ int EnzoBlock::CosmologyComputeExpansionFactor
 
 //---------------------------------------------------------------------- 
  
-int EnzoBlock::CosmologyComputeExpansionTimestep
+int EnzoCommBlock::CosmologyComputeExpansionTimestep
 (enzo_float time, enzo_float *dtExpansion)
 {
  

@@ -23,7 +23,7 @@
  
 //----------------------------------------------------------------------
  
-int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
+int EnzoCommBlock::ComputePressure(enzo_float time, enzo_float *pressure)
 {
 
   /* declarations */

@@ -50,11 +50,11 @@ void IoEnzoBlock::meta_value
 
   } else {
 
-    // Then return EnzoBlock attributes
+    // Then return EnzoCommBlock attributes
 
     Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
 
-    const EnzoBlock * enzo_block = dynamic_cast<const EnzoBlock *>(block_);
+    const EnzoCommBlock * enzo_block = dynamic_cast<const EnzoCommBlock *>(block_);
 
     index -= index_block;
 

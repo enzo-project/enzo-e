@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoBlock.hpp
+/// @file     enzo_EnzoCommBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Mar  3 23:01:51 PST 2011
-/// @brief    [\ref Enzo] Declaration of the EnzoBlock class
+/// @brief    [\ref Enzo] Declaration of the EnzoCommBlock class
 
-#ifndef ENZO_ENZO_BLOCK_HPP
-#define ENZO_ENZO_BLOCK_HPP
+#ifndef ENZO_ENZO_COMM_BLOCK_HPP
+#define ENZO_ENZO_COMM_BLOCK_HPP
 
 enum field_type {
   field_bfieldx,
@@ -47,13 +47,13 @@ enum field_type {
 
 //----------------------------------------------------------------------
 
-class EnzoBlock : public CommBlock
+class EnzoCommBlock : public CommBlock
 
 {
 
-  /// @class    EnzoBlock
+  /// @class    EnzoCommBlock
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] An EnzoBlock is a CommBlock with Enzo data
+  /// @brief    [\ref Enzo] An EnzoCommBlock is a CommBlock with Enzo data
 
   friend class IoEnzoBlock;
 
@@ -158,8 +158,8 @@ class EnzoBlock : public CommBlock
 
 public: // interface
 
-  /// Initialize the EnzoBlock chare array
-  EnzoBlock
+  /// Initialize the EnzoCommBlock chare array
+  EnzoCommBlock
   (
    int ix, int iy, int iz,
    int nbx, int nby, int nbz,
@@ -174,16 +174,16 @@ public: // interface
    int num_field_blocks) throw();
 
 #ifdef CONFIG_USE_CHARM
-  /// Initialize a migrated EnzoBlock
-  EnzoBlock (CkMigrateMessage *m) 
+  /// Initialize a migrated EnzoCommBlock
+  EnzoCommBlock (CkMigrateMessage *m) 
     : CommBlock (m)
   {
     TRACE("CkMigrateMessage");
     //    initialize();
   };
 
-  /// Initialize the EnzoBlock chare array
-  EnzoBlock
+  /// Initialize the EnzoCommBlock chare array
+  EnzoCommBlock
   (
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
@@ -194,12 +194,12 @@ public: // interface
    int patch_rank,
    int num_field_blocks) throw();
 
-  /// Pack / unpack the EnzoBlock in a CHARM++ program
+  /// Pack / unpack the EnzoCommBlock in a CHARM++ program
   void pup(PUP::er &p)
   { 
 
     TRACEPUP;
-    TRACE ("BEGIN EnzoBlock::pup()");
+    TRACE ("BEGIN EnzoCommBlock::pup()");
 
     CommBlock::pup(p);
 
@@ -209,8 +209,8 @@ public: // interface
     p | OldTime;
     p | dt;
 
-    WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
-    WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
+    WARNING("EnzoCommBlock::pup()", "skipping AccelerationField_ (not used)");
+    WARNING("EnzoCommBlock::pup()", "skipping SubgridFluxes (not used)");
 
     PUParray(p,GridLeftEdge,MAX_DIMENSION); 
     PUParray(p,GridDimension,MAX_DIMENSION); 
@@ -219,21 +219,21 @@ public: // interface
     PUParray(p,CellWidth,MAX_DIMENSION);
 
     if (p.isUnpacking()) {
-      for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
+      for (int field = 0; field < EnzoCommBlock::NumberOfBaryonFields; field++) {
 	BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
       }
     }
 
-    WARNING("EnzoBlock::pup()", "skipping OldBaryonField[] [not used]");
+    WARNING("EnzoCommBlock::pup()", "skipping OldBaryonField[] [not used]");
 
-    TRACE ("END EnzoBlock::pup()");
+    TRACE ("END EnzoCommBlock::pup()");
 
   };
 
 #endif
 
   /// Destructor
-  virtual ~EnzoBlock() throw();
+  virtual ~EnzoCommBlock() throw();
 
 
   /// Write attributes, e.g. to stdout for debugging
@@ -336,16 +336,16 @@ public: // interface
   int index (enum field_type type) const
   { return field_index_[type];}
 
-  /// Set EnzoBlock's cycle
+  /// Set EnzoCommBlock's cycle
   virtual void set_cycle (int cycle) throw();
 
-  /// Set EnzoBlock's time
+  /// Set EnzoCommBlock's time
   virtual void set_time (double time) throw();
 
-  /// Set EnzoBlock's dt
+  /// Set EnzoCommBlock's dt
   virtual void set_dt (double dt) throw();
 
-  /// Initialize EnzoBlock
+  /// Initialize EnzoCommBlock
   virtual void initialize () throw();
 
 private: // attributes
@@ -381,5 +381,5 @@ public: // attributes (YIKES!)
 
 };
 
-#endif /* ENZO_ENZO_BLOCK_HPP */
+#endif /* ENZO_ENZO_COMM_BLOCK_HPP */
 

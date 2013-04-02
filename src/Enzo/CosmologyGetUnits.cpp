@@ -33,7 +33,7 @@
 
 //----------------------------------------------------------------------
  
-int EnzoBlock::CosmologyGetUnits
+int EnzoCommBlock::CosmologyGetUnits
 (
  enzo_float *DensityUnits, enzo_float *LengthUnits,
  enzo_float *TemperatureUnits, enzo_float *TimeUnits,

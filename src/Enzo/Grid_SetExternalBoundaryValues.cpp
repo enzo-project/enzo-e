@@ -21,7 +21,7 @@
 
 #include "enzo.hpp"
  
-int EnzoBlock::SetExternalBoundaryValues()
+int EnzoCommBlock::SetExternalBoundaryValues()
 {
   int dim, field;
  
