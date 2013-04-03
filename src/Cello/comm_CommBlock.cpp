@@ -27,27 +27,20 @@ CommBlock::CommBlock
  int patch_rank,
  int num_field_blocks
 ) throw ()
-  :
+  : block_(nx, ny, nz, num_field_blocks),
 #ifdef CONFIG_USE_CHARM
-     count_refresh_face_(0),
-     proxy_patch_(proxy_patch),
+    count_refresh_face_(0),
+    proxy_patch_(proxy_patch),
 #endif
-     num_field_blocks_(num_field_blocks),
-     field_block_(),
-     patch_id_(patch_id),
-     patch_rank_(patch_rank),
-     cycle_(0),
-     time_(0),
-     dt_(0)
+    patch_id_(patch_id),
+    patch_rank_(patch_rank),
+    cycle_(0),
+    time_(0),
+    dt_(0)
 { 
   DEBUG1("ID = %d",patch_id);
   DEBUG1("IP = %d",patch_rank);
 
-  // Initialize field_block_[]
-  field_block_.resize(num_field_blocks);
-  for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i] = new FieldBlock (nx,ny,nz);
-  }
   // Initialize indices into parent patch
 
   size_[0] = nbx;
@@ -85,10 +78,9 @@ CommBlock::CommBlock
  int patch_id,
  int patch_rank,
  int num_field_blocks) throw ()
-  : count_refresh_face_(0),
+  : block_(nx, ny, nz, num_field_blocks),
+    count_refresh_face_(0),
     proxy_patch_(proxy_patch),
-    num_field_blocks_(num_field_blocks),
-    field_block_(),
     patch_id_(patch_id),
     patch_rank_(patch_rank),
     cycle_(0),
@@ -99,12 +91,6 @@ CommBlock::CommBlock
 
   DEBUG1("ID = %d",patch_id_);
   DEBUG1("IP = %d",patch_rank_);
-
-  // Initialize field_block_[]
-  field_block_.resize(num_field_blocks);
-  for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i] = new FieldBlock (nx,ny,nz);
-  }
 
   // Initialize indices into parent patch
 
@@ -136,18 +122,11 @@ CommBlock::CommBlock
 
 CommBlock::~CommBlock() throw ()
 { 
-  // Deallocate field_block_[]
-  for (size_t i=0; i<field_block_.size(); i++) {
-    delete field_block_[i];
-    field_block_[i] = 0;
-  }
-  num_field_blocks_ = 0;
 }
 
 //----------------------------------------------------------------------
 
 CommBlock::CommBlock(const CommBlock & block) throw ()
-  : field_block_()
 /// @param     block  Object being copied
 {
   copy_(block);
@@ -161,20 +140,6 @@ CommBlock & CommBlock::operator = (const CommBlock & block) throw ()
 {
   copy_(block);
   return *this;
-}
-
-//----------------------------------------------------------------------
-
-const FieldBlock * CommBlock::field_block (int i) const throw()
-{ 
-  return field_block_.at(i); 
-}
-
-//----------------------------------------------------------------------
-
-FieldBlock * CommBlock::field_block (int i) throw()
-{ 
-  return field_block_.at(i); 
 }
 
 //----------------------------------------------------------------------
@@ -215,7 +180,7 @@ void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
 {
   int ibx,iby,ibz;
   index_patch(&ibx,&iby,&ibz);
-  field_block_[index_field_set]
+  block_.field_block(index_field_set)
     -> refresh_ghosts (field_descr,
 		       patch->group_process(),
 		       patch->layout(),
@@ -437,7 +402,7 @@ void CommBlock::refresh ()
 	     (sum==2 && field_descr->refresh_face(1)) ||
 	     (sum==3 && field_descr->refresh_face(0)))) {
 
-	  FieldFace field_face (field_block(),field_descr);
+	  FieldFace field_face (block_.field_block(),field_descr);
 
 	  field_face.set_face(fx,fy,fz);
 	  field_face.set_ghost(gx,gy,gz);
@@ -495,7 +460,7 @@ void CommBlock::determine_boundary_
   is_on_boundary(lower_h,upper_h,is_boundary);
 
   int nx,ny,nz;
-  field_block()->size (&nx,&ny,&nz);
+  block_.field_block()->size (&nx,&ny,&nz);
 
   // Determine in which directions we need to communicate or update boundary
 
@@ -578,7 +543,7 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
     gy = false;
     gz = false;
 
-    FieldFace field_face(field_block(), field_descr);
+    FieldFace field_face(block_.field_block(), field_descr);
 
     field_face.set_face(fx,fy,fz);
     field_face.set_ghost(gx,gy,gz);
@@ -592,7 +557,7 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
   //--------------------------------------------------
 
   int nx,ny,nz;
-  field_block()->size (&nx,&ny,&nz);
+  block_.field_block()->size (&nx,&ny,&nz);
 
   // Determine axes that may be neighbors
 
@@ -723,29 +688,22 @@ void CommBlock::compute()
 
 //======================================================================
 
-void CommBlock::copy_(const CommBlock & block) throw()
+void CommBlock::copy_(const CommBlock & comm_block) throw()
 {
-
-  num_field_blocks_ = block.num_field_blocks_;
-
-  field_block_.resize(block.field_block_.size());
-  for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i] = new FieldBlock (*(block.field_block_[i]));
-  }
-
+  block_.copy_(*comm_block.block());
   for (int i=0; i<3; i++) {
-    index_[i] = block.index_[i];
-    size_[i] = block.size_[i];
-    lower_[i] = block.lower_[i];
-    upper_[i] = block.upper_[i];
+    index_[i] = comm_block.index_[i];
+    size_[i] = comm_block.size_[i];
+    lower_[i] = comm_block.lower_[i];
+    upper_[i] = comm_block.upper_[i];
   }
 
-  cycle_ = block.cycle_;
-  time_ = block.time_;
-  dt_ = block.dt_;
+  cycle_ = comm_block.cycle_;
+  time_ = comm_block.time_;
+  dt_ = comm_block.dt_;
 
 #ifdef CONFIG_USE_CHARM
-  count_refresh_face_ = block.count_refresh_face_;
+  count_refresh_face_ = comm_block.count_refresh_face_;
 #endif
   
 }
@@ -775,11 +733,9 @@ void CommBlock::is_on_boundary (double lower[3], double upper[3],
 
 void CommBlock::allocate (const FieldDescr * field_descr) throw()
 { 
-  for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i]->allocate_array(field_descr,true);
-    //    field_block_[i]->allocate_array(field_descr);
-    //    field_block_[i]->allocate_ghosts(field_descr);
-  }
+  block_.allocate(field_descr);
+    //    block_.field_block(i)->allocate_array(field_descr);
+    //    block_.field_block(i)->allocate_ghosts(field_descr);
 }
 
 //----------------------------------------------------------------------

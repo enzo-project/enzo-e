@@ -33,12 +33,12 @@ void EnzoTimestep::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
-			       CommBlock * block ) throw()
+			       CommBlock * comm_block ) throw()
 {
 
 
-  EnzoCommBlock * enzo_block = static_cast<EnzoCommBlock*> (block);
-  FieldBlock * field_block = enzo_block->field_block();
+  EnzoCommBlock * enzo_comm_block = static_cast<EnzoCommBlock*> (comm_block);
+  FieldBlock * field_block = enzo_comm_block->block()->field_block();
   enzo_float * density_field    = 0;
   enzo_float * velocity_x_field = 0;
   enzo_float * velocity_y_field = 0;
@@ -47,29 +47,29 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
   // DEBUG
     // double lower[3] = {0,0,0};
     // double upper[3] = {1,1,1};
-    // enzo_block->field_block()->print (field_descr,"dump",lower,upper);
+    // enzo_comm_block->field_block()->print (field_descr,"dump",lower,upper);
 
-  int index = enzo_block->index(field_density);
+  int index = enzo_comm_block->index(field_density);
   density_field = (enzo_float *)field_block->field_values(index);
 
   if (EnzoCommBlock::GridRank >= 1) {
-    index = enzo_block->index(field_velocity_x);
+    index = enzo_comm_block->index(field_velocity_x);
     velocity_x_field = (enzo_float *) field_block->field_values(index);
   }
 
   if (EnzoCommBlock::GridRank >= 2) {
-    index = enzo_block->index(field_velocity_y);
+    index = enzo_comm_block->index(field_velocity_y);
     velocity_y_field = (enzo_float *) field_block->field_values(index);
   }
   if (EnzoCommBlock::GridRank >= 3){
-    index = enzo_block->index(field_velocity_z);
+    index = enzo_comm_block->index(field_velocity_z);
     velocity_z_field = (enzo_float *) field_block->field_values(index);
   }
 
   enzo_float a = 1, dadt;
   
   if (EnzoCommBlock::ComovingCoordinates)
-    enzo_block->CosmologyComputeExpansionFactor(enzo_block->Time(), &a, &dadt);
+    enzo_comm_block->CosmologyComputeExpansionFactor(enzo_comm_block->Time(), &a, &dadt);
   //  enzo_float dt, dtTemp;
   enzo_float dtBaryons      = ENZO_HUGE_VAL;
   //  enzo_float dtViscous      = ENZO_HUGE_VAL;
@@ -83,7 +83,7 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
   int nx,ny,nz;
   field_block -> size (&nx,&ny,&nz);
   int gx,gy,gz;
-  index = enzo_block->index(field_density);
+  index = enzo_comm_block->index(field_density);
   field_descr->ghosts(index,&gx,&gy,&gz);
   int mx,my,mz;
   mx = nx + 2*gx;
@@ -99,12 +99,12 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
 
   int  result;
   if (EnzoCommBlock::DualEnergyFormalism) {
-    result = enzo_block->ComputePressureDualEnergyFormalism
-      (enzo_block->Time(), pressure_field);
+    result = enzo_comm_block->ComputePressureDualEnergyFormalism
+      (enzo_comm_block->Time(), pressure_field);
   }
   else {
-    result = enzo_block->ComputePressure
-      (enzo_block->Time(), pressure_field);
+    result = enzo_comm_block->ComputePressure
+      (enzo_comm_block->Time(), pressure_field);
   }
  
   if (result == ENZO_FAIL) {
@@ -136,7 +136,7 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
   /* 3) Find dt from expansion. */
  
   if (EnzoCommBlock::ComovingCoordinates)
-    if (enzo_block->CosmologyComputeExpansionTimestep(enzo_block->Time(), &dtExpansion) == ENZO_FAIL) {
+    if (enzo_comm_block->CosmologyComputeExpansionTimestep(enzo_comm_block->Time(), &dtExpansion) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
       exit(ENZO_FAIL);
     }
@@ -158,14 +158,17 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
   /* 5) calculate minimum timestep */
 
 
-  FORTRAN_NAME(calc_dt)(&EnzoCommBlock::GridRank, enzo_block->GridDimension, enzo_block->GridDimension+1,
-			enzo_block->GridDimension+2,
-			enzo_block->GridStartIndex, enzo_block->GridEndIndex,
-			enzo_block->GridStartIndex+1, enzo_block->GridEndIndex+1,
-			enzo_block->GridStartIndex+2, enzo_block->GridEndIndex+2,
-			&enzo_block->CellWidth[0], 
-			&enzo_block->CellWidth[1], 
-			&enzo_block->CellWidth[2],
+  FORTRAN_NAME(calc_dt)(&EnzoCommBlock::GridRank, enzo_comm_block->GridDimension, enzo_comm_block->GridDimension+1,
+			enzo_comm_block->GridDimension+2,
+			enzo_comm_block->GridStartIndex, 
+			enzo_comm_block->GridEndIndex,
+			enzo_comm_block->GridStartIndex+1, 
+			enzo_comm_block->GridEndIndex+1,
+			enzo_comm_block->GridStartIndex+2, 
+			enzo_comm_block->GridEndIndex+2,
+			&enzo_comm_block->CellWidth[0], 
+			&enzo_comm_block->CellWidth[1], 
+			&enzo_comm_block->CellWidth[2],
 			&EnzoCommBlock::Gamma, &EnzoCommBlock::PressureFree, &a,
 			density_field, pressure_field,
 			velocity_x_field, 

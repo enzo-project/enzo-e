@@ -165,7 +165,7 @@ void OutputImage::write_patch
 
 void OutputImage::write_block
 (
- const CommBlock * block,
+ const CommBlock * comm_block,
  const FieldDescr * field_descr,
  int ixp0,
  int iyp0,
@@ -179,13 +179,13 @@ void OutputImage::write_block
 {
 
   TRACE("OutputImage::write_block()");
-  const FieldBlock * field_block = block->field_block();
+  const FieldBlock * field_block = comm_block->block()->field_block();
   
   int nbx,nby,nbz;
   field_block->size(&nbx,&nby,&nbz);
 
   int ix,iy,iz;
-  block->index_patch(&ix,&iy,&iz);
+  comm_block->index_patch(&ix,&iy,&iz);
 
   int ixb0 = ixp0 + ix*nbx;
   int iyb0 = iyp0 + iy*nby;

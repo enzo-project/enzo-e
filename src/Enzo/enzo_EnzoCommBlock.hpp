@@ -220,7 +220,7 @@ public: // interface
 
     if (p.isUnpacking()) {
       for (int field = 0; field < EnzoCommBlock::NumberOfBaryonFields; field++) {
-	BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
+	BaryonField[field] = (enzo_float *)block_.field_block(0)->field_values(field);
       }
     }
 

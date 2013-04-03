@@ -149,7 +149,7 @@ Patch * Input::read_patch
 
 CommBlock * Input::read_block
 (
- CommBlock * block,
+ CommBlock * comm_block,
  std::string block_name,
  const FieldDescr * field_descr
  ) throw()
@@ -158,9 +158,9 @@ CommBlock * Input::read_block
 
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
     int field_index = it_field_->value();
-    read_field (block->field_block(), field_descr, field_index);
+    read_field (comm_block->block()->field_block(), field_descr, field_index);
   }
-  return block;
+  return comm_block;
 }
 
 //======================================================================

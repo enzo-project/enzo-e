@@ -417,7 +417,7 @@ void SimulationMpi::update_boundary_
 
 void SimulationMpi::refresh_ghost_ 
 (
- CommBlock * block, 
+ CommBlock * comm_block, 
  Patch * patch, 
  bool    is_boundary[3][2]
  ) throw()
@@ -425,14 +425,14 @@ void SimulationMpi::refresh_ghost_
   // Refresh ghost zones
 
   int ibx,iby,ibz;
-  block->index_patch(&ibx,&iby,&ibz);
+  comm_block->index_patch(&ibx,&iby,&ibz);
 
   bool periodic = problem()->boundary()->is_periodic();
 
   // FOLLOWING CODE IS SIMILAR TO CommBlock::x_refresh()
 
   int nx,ny,nz;
-  block->field_block()->size (&nx,&ny,&nz);
+  comm_block->block()->field_block()->size (&nx,&ny,&nz);
 
   // Determine axes that may be neighbors
 
@@ -454,12 +454,12 @@ void SimulationMpi::refresh_ghost_
   if (field_descr_->refresh_face(2)) {
     // TRACE3("p %d %d %d",px,py,pz);
     // TRACE6("a %d %d  %d %d  %d %d",axm,axp,aym,ayp,azm,azp);
-    if (axm) block->refresh_ghosts(field_descr_,patch,+px,0,0);
-    if (axp) block->refresh_ghosts(field_descr_,patch,-px,0,0);
-    if (aym) block->refresh_ghosts(field_descr_,patch,0,+py,0);
-    if (ayp) block->refresh_ghosts(field_descr_,patch,0,-py,0);
-    if (azm) block->refresh_ghosts(field_descr_,patch,0,0,+pz);
-    if (azp) block->refresh_ghosts(field_descr_,patch,0,0,-pz);
+    if (axm) comm_block->refresh_ghosts(field_descr_,patch,+px,0,0);
+    if (axp) comm_block->refresh_ghosts(field_descr_,patch,-px,0,0);
+    if (aym) comm_block->refresh_ghosts(field_descr_,patch,0,+py,0);
+    if (ayp) comm_block->refresh_ghosts(field_descr_,patch,0,-py,0);
+    if (azm) comm_block->refresh_ghosts(field_descr_,patch,0,0,+pz);
+    if (azp) comm_block->refresh_ghosts(field_descr_,patch,0,0,-pz);
   }
 
 }

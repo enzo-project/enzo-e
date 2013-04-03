@@ -43,7 +43,7 @@ void InitialDefault::pup (PUP::er &p)
 
 void InitialDefault::enforce_block
 (
- CommBlock        * block,
+ CommBlock        * comm_block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()
@@ -52,13 +52,13 @@ void InitialDefault::enforce_block
 
   ASSERT("InitialDefault::enforce_block",
 	 "CommBlock does not exist",
-	 block != NULL);
+	 comm_block != NULL);
   
   //--------------------------------------------------
   parameters_->group_set(0,"Initial");
   //--------------------------------------------------
 
-  FieldBlock *       field_block = block->field_block();
+  FieldBlock *       field_block = comm_block->block()->field_block();
 
   double *value=0, *vdeflt=0, *x=0, *y=0, *z=0, *t=0;
   bool * mask=0, *rdeflt=0;
@@ -98,7 +98,7 @@ void InitialDefault::enforce_block
 
       // Allocate arrays if needed
       if (value == NULL) {
-	allocate_xyzt_(block,index_field,
+	allocate_xyzt_(comm_block,index_field,
 		       &nx,&ny,&nz,
 		       &value, &vdeflt,
 		       &mask,&rdeflt,
@@ -123,7 +123,7 @@ void InitialDefault::enforce_block
 	evaluate_float_ (field_block, index_list, field_name, 
 			  n, value,vdeflt,x,y,z,t);
 
-	evaluate_logical_ (hierarchy,block,field_block, index_list + 1, field_name, 
+	evaluate_logical_ (hierarchy,comm_block,field_block, index_list + 1, field_name, 
 			  n, mask,rdeflt,x,y,z,t);
 
 	copy_values_ (field_descr,field_block,value, mask,index_field,nx,ny,nz);
@@ -158,7 +158,7 @@ void InitialDefault::enforce_block
 
 void InitialDefault::allocate_xyzt_
 (
- CommBlock * block,
+ CommBlock * comm_block,
  int index_field,
  int * nx, int * ny, int * nz,
  double ** value, double ** vdeflt,
@@ -167,7 +167,7 @@ void InitialDefault::allocate_xyzt_
  ) throw()
 {
 
-  FieldBlock * field_block = block->field_block();
+  FieldBlock * field_block = comm_block->block()->field_block();
 
   // Get field size
 
@@ -188,15 +188,15 @@ void InitialDefault::allocate_xyzt_
 
   double xm, xp, ym, yp, zm, zp;
 
-  block->lower(&xm,&ym,&zm);
-  block->upper(&xp,&yp,&zp);
+  comm_block->lower(&xm,&ym,&zm);
+  comm_block->upper(&xp,&yp,&zp);
 
   double hx,hy,hz;
   field_block->cell_width(xm,xp,&hx,
 			  ym,yp,&hy,
 			  zm,zp,&hz);
 
-  double time = block->time();
+  double time = comm_block->time();
   // Initialize arrays
   for (int iz=0; iz<(*nz); iz++) {
     for (int iy=0; iy<(*ny); iy++) {
@@ -325,7 +325,7 @@ void InitialDefault::evaluate_float_
 
 void InitialDefault::evaluate_logical_ 
 (const Hierarchy * hierarchy,
- const CommBlock * block,
+ const CommBlock * comm_block,
  FieldBlock * field_block, int index_list, std::string field_name, 
  int n, bool * mask, bool * deflt,
  double * x, double * y, double * z, double * t) throw ()
@@ -357,7 +357,7 @@ void InitialDefault::evaluate_logical_
 	    field_name.c_str(),
 	    nzb == 1);
     file = parameters_->list_value_string(index_list,"value","default");
-    create_png_mask_(mask,hierarchy,block,file,nxb,nyb,&nx,&ny);
+    create_png_mask_(mask,hierarchy,comm_block,file,nxb,nyb,&nx,&ny);
     break;
   default:
     ERROR3("InitialDefault::evaluate_logical",
@@ -372,7 +372,7 @@ void InitialDefault::create_png_mask_
 (
  bool            * mask,
  const Hierarchy * hierarchy,
- const CommBlock * block,
+ const CommBlock * comm_block,
  const char      * pngfile,
  int               nxb,
  int               nyb,
@@ -412,10 +412,10 @@ void InitialDefault::create_png_mask_
   // Get the block's lower and upper extents
 
   double lower_b[3];
-  block->lower(&lower_b[0],&lower_b[1],&lower_b[2]);
+  comm_block->lower(&lower_b[0],&lower_b[1],&lower_b[2]);
 
   double upper_b[3];
-  block->upper(&upper_b[0],&upper_b[1],&upper_b[2]);
+  comm_block->upper(&upper_b[0],&upper_b[1],&upper_b[2]);
 
   // get the offset between the block and the hierarchy
 
@@ -426,7 +426,7 @@ void InitialDefault::create_png_mask_
   // get the block's cell width
 
   double hb[3];
-  block->field_block()->cell_width 
+  comm_block->block()->field_block()->cell_width 
     (lower_b[0],upper_b[0],&hb[0],
      lower_b[1],upper_b[1],&hb[1],
      lower_b[2],upper_b[2],&hb[2]);

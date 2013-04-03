@@ -56,7 +56,7 @@ void EnzoInitialSedovArray3::pup (PUP::er &p)
 //----------------------------------------------------------------------
 void EnzoInitialSedovArray3::enforce_block
 (
- CommBlock * block,
+ CommBlock * comm_block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()
@@ -65,9 +65,9 @@ void EnzoInitialSedovArray3::enforce_block
 
   ASSERT("EnzoInitialSedovArray3",
 	 "CommBlock does not exist",
-	 block != NULL);
+	 comm_block != NULL);
 
-  FieldBlock * field_block = block->field_block();
+  FieldBlock * field_block = comm_block->block()->field_block();
 
   ASSERT("EnzoInitialSedovArray3",
 	 "Insufficient number of fields",
@@ -85,10 +85,10 @@ void EnzoInitialSedovArray3::enforce_block
   field_block->size(&nx,&ny,&nz);
 
   double xbm,ybm,zbm;
-  block->lower(&xbm,&ybm,&zbm);
+  comm_block->lower(&xbm,&ybm,&zbm);
 
   double xbp,ybp,zbp;
-  block->upper(&xbp,&ybp,&zbp);
+  comm_block->upper(&xbp,&ybp,&zbp);
 
   double hx,hy,hz;
   field_block->cell_width(xbm,xbp,&hx,

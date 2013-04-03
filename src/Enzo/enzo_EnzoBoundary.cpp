@@ -42,25 +42,25 @@ void EnzoBoundary::pup (PUP::er &p)
 void EnzoBoundary::enforce 
 (
  const FieldDescr * field_descr,
- CommBlock * block,
+ CommBlock * comm_block,
  face_enum     face,
  axis_enum     axis 
  ) const throw()
 {
   if (face == face_all) {
     // WARNING: recursive
-    enforce(field_descr,block,face_lower,axis);
+    enforce(field_descr,comm_block,face_lower,axis);
     // WARNING: recursive
-    enforce(field_descr,block,face_upper,axis);
+    enforce(field_descr,comm_block,face_upper,axis);
   } else if (axis == axis_all) {
     // WARNING: recursive
-    enforce(field_descr,block,face,axis_x);
+    enforce(field_descr,comm_block,face,axis_x);
     // WARNING: recursive
-    enforce(field_descr,block,face,axis_y);
+    enforce(field_descr,comm_block,face,axis_y);
     // WARNING: recursive
-    enforce(field_descr,block,face,axis_z);
+    enforce(field_descr,comm_block,face,axis_z);
   } else {
-    FieldBlock * field_block = block->field_block();
+    FieldBlock * field_block = comm_block->block()->field_block();
     if ( ! field_block->ghosts_allocated() ) {
       ERROR("EnzoBoundary::enforce",
 	    "Function called with ghosts not allocated");

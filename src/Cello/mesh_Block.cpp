@@ -11,24 +11,39 @@
 
 //----------------------------------------------------------------------
 
-Block::Block() throw ()
+Block::Block(int nx, int ny, int nz,
+	     int num_field_blocks) throw ()
+  : num_field_blocks_(num_field_blocks),
+    field_block_()
 {
-  INCOMPLETE("Block::Block");
+  // Initialize field_block_[]
+  field_block_.resize(num_field_blocks);
+  for (size_t i=0; i<field_block_.size(); i++) {
+    field_block_[i] = new FieldBlock (nx,ny,nz);
+  }
 }
 
 //----------------------------------------------------------------------
 
 Block::~Block() throw ()
 {
-  INCOMPLETE("Block::~Block");
+  // Deallocate field_block_[]
+  for (size_t i=0; i<field_block_.size(); i++) {
+    delete field_block_[i];
+    field_block_[i] = 0;
+  }
+  num_field_blocks_ = 0;
 }
 
 //----------------------------------------------------------------------
 
 Block::Block(const Block & block) throw ()
 /// @param     block  Object being copied
+:
+  num_field_blocks_(block.num_field_blocks_)
+
 {
-  INCOMPLETE("Block::Block(Block)");
+  copy_(block);
 }
 
 //----------------------------------------------------------------------
@@ -37,9 +52,40 @@ Block & Block::operator= (const Block & block) throw ()
 /// @param     block  Source object of the assignment
 /// @return    The target assigned object
 {
-  INCOMPLETE("Block::operator=");
+  copy_(block);
   return *this;
+}
+
+//----------------------------------------------------------------------
+
+void Block::allocate (const FieldDescr * field_descr) throw()
+{
+  for (size_t i=0; i<field_block_.size(); i++) {
+    field_block_[i]->allocate_array(field_descr,true);
+  }
+}
+
+//----------------------------------------------------------------------
+
+const FieldBlock * Block::field_block (int i) const throw()
+{ 
+  return field_block_.at(i);
+}
+
+//----------------------------------------------------------------------
+
+FieldBlock * Block::field_block (int i) throw()
+{ 
+  return field_block_.at(i); 
 }
 
 //======================================================================
 
+void Block::copy_(const Block & block) throw()
+{
+  num_field_blocks_ = block.num_field_blocks_;
+  field_block_.resize(block.field_block_.size());
+  for (size_t i=0; i<field_block_.size(); i++) {
+    field_block_[i] = new FieldBlock (*(block.field_block_[i]));
+  }
+}

@@ -485,30 +485,30 @@ void Patch::p_test () throw()
 
   ItBlock itBlock (patch);
 
-  CommBlock *  block = 0;
+  CommBlock *  comm_block = 0;
   FieldBlock * field_block = 0;
 
   size_t block_index = 0;
 
   const GroupProcess * group_process = GroupProcess::create();
 
-  while ((block = ++itBlock)) {
+  while ((comm_block = ++itBlock)) {
 
   //--------------------------------------------------
 
     unit_func("allocate_blocks");
-    unit_assert_quiet(block != NULL);
+    unit_assert_quiet(comm_block != NULL);
 
   //--------------------------------------------------
 
     unit_class("CommBlock");
     unit_func("field_block");
 
-    field_block = block ? block->field_block() : NULL;
+    field_block = comm_block ? comm_block->block()->field_block() : NULL;
 
     unit_assert_quiet(field_block != NULL);
 
-    if (block && field_block) {
+    if (comm_block && field_block) {
 
       //--------------------------------------------------
 
@@ -546,9 +546,9 @@ void Patch::p_test () throw()
       //--------------------------------------------------
 
       double xmb,ymb,zmb;
-      block->lower (&xmb,&ymb,&zmb);
+      comm_block->lower (&xmb,&ymb,&zmb);
       double xpb,ypb,zpb;
-      block->upper (&xpb,&ypb,&zpb);
+      comm_block->upper (&xpb,&ypb,&zpb);
 
       unit_class("CommBlock");
       unit_func("lower");
@@ -583,9 +583,9 @@ void Patch::p_test () throw()
   int i;
   for (i=0; i<nbx*nby*nbz; i++) b[i]=0;
 
-  while ((block = ++itBlock)) {
+  while ((comm_block = ++itBlock)) {
     int ibx,iby,ibz;
-    block->index_patch(&ibx,&iby,&ibz);
+    comm_block->index_patch(&ibx,&iby,&ibz);
     b[ibx + nbx*(iby + nby*ibz)] = 1;
   }
   for (i=0; i<nbx*nby*nbz; i++) {

@@ -33,10 +33,10 @@ void EnzoTimestepPpml::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
-				   CommBlock * block ) throw()
+				   CommBlock * comm_block ) throw()
 {
  
-  EnzoCommBlock * enzo_block = static_cast<EnzoCommBlock*> (block);
+  EnzoCommBlock * enzo_comm_block = static_cast<EnzoCommBlock*> (comm_block);
 
   /* initialize */
  
@@ -60,8 +60,8 @@ double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
  
   enzo_float a = 1, dadt;
   if (EnzoCommBlock::ComovingCoordinates)
-    enzo_block->CosmologyComputeExpansionFactor
-      (enzo_block->Time(), &a, &dadt);
+    enzo_comm_block->CosmologyComputeExpansionFactor
+      (enzo_comm_block->Time(), &a, &dadt);
   //  float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */
@@ -96,7 +96,7 @@ double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
 
     /* Call fortran routine to do calculation. */
  
-    FieldBlock * field_block = enzo_block->field_block();
+    FieldBlock * field_block = enzo_comm_block->block()->field_block();
     enzo_float * d_field    = 0;
     enzo_float * vx_field = 0;
     enzo_float * vy_field = 0;
@@ -105,33 +105,33 @@ double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
     enzo_float * by_field = 0;
     enzo_float * bz_field = 0;
 
-    d_field = (enzo_float *)field_block->field_values(enzo_block->index(field_density));
-    vx_field = (enzo_float *)field_block->field_values(enzo_block->index(field_velox));
-    vy_field = (enzo_float *)field_block->field_values(enzo_block->index(field_veloy));
-    vz_field = (enzo_float *)field_block->field_values(enzo_block->index(field_veloz));
-    bx_field = (enzo_float *)field_block->field_values(enzo_block->index(field_bfieldx));
-    by_field = (enzo_float *)field_block->field_values(enzo_block->index(field_bfieldy));
-    bz_field = (enzo_float *)field_block->field_values(enzo_block->index(field_bfieldz));
+    d_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_density));
+    vx_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_velox));
+    vy_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_veloy));
+    vz_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_veloz));
+    bx_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_bfieldx));
+    by_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_bfieldy));
+    bz_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_bfieldz));
 
 
     // DEBUG
     // double lower[3] = {0,0,0};
     // double upper[3] = {1,1,1};
-    // enzo_block->field_block()->print (field_descr,"dump",lower,upper);
+    // enzo_comm_block->field_block()->print (field_descr,"dump",lower,upper);
 
     FORTRAN_NAME(calc_dt_ppml)
-      (enzo_block->GridDimension, 
-       enzo_block->GridDimension+1, 
-       enzo_block->GridDimension+2,
-       enzo_block->GridStartIndex, 
-       enzo_block->GridEndIndex,
-       enzo_block->GridStartIndex+1, 
-       enzo_block->GridEndIndex+1,
-       enzo_block->GridStartIndex+2, 
-       enzo_block->GridEndIndex+2,
-       &enzo_block->CellWidth[0], 
-       &enzo_block->CellWidth[1], 
-       &enzo_block->CellWidth[2],
+      (enzo_comm_block->GridDimension, 
+       enzo_comm_block->GridDimension+1, 
+       enzo_comm_block->GridDimension+2,
+       enzo_comm_block->GridStartIndex, 
+       enzo_comm_block->GridEndIndex,
+       enzo_comm_block->GridStartIndex+1, 
+       enzo_comm_block->GridEndIndex+1,
+       enzo_comm_block->GridStartIndex+2, 
+       enzo_comm_block->GridEndIndex+2,
+       &enzo_comm_block->CellWidth[0], 
+       &enzo_comm_block->CellWidth[1], 
+       &enzo_comm_block->CellWidth[2],
        d_field,
        vx_field, vy_field, vz_field,
        bx_field, by_field, bz_field,
@@ -185,8 +185,8 @@ double EnzoTimestepPpml::evaluate ( const FieldDescr * field_descr,
   /* 3) Find dt from expansion. */
  
   // if (EnzoCommBlock::ComovingCoordinates)
-  //   if (enzo_block->CosmologyComputeExpansionTimestep
-  // 	(enzo_block->Time(), &dtExpansion) == ENZO_FAIL) {
+  //   if (enzo_comm_block->CosmologyComputeExpansionTimestep
+  // 	(enzo_comm_block->Time(), &dtExpansion) == ENZO_FAIL) {
   //     fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
   //     exit(EXIT_FAILURE);
   //   }
