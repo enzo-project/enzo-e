@@ -24,7 +24,7 @@
 
 #include "enzo.hpp"
  
-enzo_float EnzoCommBlock::ComputeTimeStep()
+enzo_float EnzoBlock::ComputeTimeStep()
 {
  
   /* initialize */

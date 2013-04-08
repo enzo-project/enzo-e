@@ -37,7 +37,7 @@ void EnzoMethodPpml::pup (PUP::er &p)
 void EnzoMethodPpml::compute_block
 ( FieldDescr * field_descr,  CommBlock * block ) throw()
 {
-  EnzoCommBlock * enzo_block = static_cast<EnzoCommBlock*> (block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   enzo_block->SolveMHDEquations ( field_descr, block->dt() );
 }
 

@@ -13,7 +13,7 @@
 
 EnzoMethodPpm::EnzoMethodPpm () : Method()
 {
-  // PPM parameters initialized in EnzoCommBlock::initialize()
+  // PPM parameters initialized in EnzoBlock::initialize()
 }
 
 //----------------------------------------------------------------------
@@ -39,7 +39,7 @@ void EnzoMethodPpm::compute_block
 (
  FieldDescr * field_descr, CommBlock * block) throw()
 {
-  EnzoCommBlock * enzo_block = static_cast<EnzoCommBlock*> (block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   enzo_block->SolveHydroEquations 
     ( block->cycle(), block->time(), block->dt() );
 }

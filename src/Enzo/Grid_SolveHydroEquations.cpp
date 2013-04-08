@@ -3,14 +3,14 @@
 /// @file      Grid_SolveHydroEquations.cpp
 /// @author    Greg Bryan
 /// @date      November, 1994
-/// @todo      Currently EnzoCommBlock::SolveHydroEquations uses field data from enzoDescr (BaryonField, GridStartIndex, etc.); change to use block fields directly to avoid EnzoSimulationSerial::block_begin() copies and repeated boundary condition initialization
+/// @todo      Currently EnzoBlock::SolveHydroEquations uses field data from enzoDescr (BaryonField, GridStartIndex, etc.); change to use block fields directly to avoid EnzoSimulationSerial::block_begin() copies and repeated boundary condition initialization
 /// @brief     Solve the hydro equations, saving subgrid fluxes
 
 #include "cello.hpp"
 
 #include "enzo.hpp"
 
-int EnzoCommBlock::SolveHydroEquations (int CycleNumber, enzo_float time, enzo_float dt)
+int EnzoBlock::SolveHydroEquations (int CycleNumber, enzo_float time, enzo_float dt)
 {
   // @@@@ ASSUME UNIGIRD PROBLEM @@@@
 

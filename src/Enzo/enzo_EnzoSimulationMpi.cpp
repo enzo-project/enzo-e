@@ -35,7 +35,7 @@ void EnzoSimulationMpi::initialize() throw()
   initialize_config_();
 
   SimulationMpi::initialize();
-  EnzoCommBlock::initialize(static_cast<EnzoConfig*>(config_),field_descr());
+  EnzoBlock::initialize(static_cast<EnzoConfig*>(config_),field_descr());
 }
 
 //----------------------------------------------------------------------

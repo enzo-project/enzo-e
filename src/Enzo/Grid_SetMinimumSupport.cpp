@@ -11,7 +11,7 @@
  
 //----------------------------------------------------------------------
  
-int EnzoCommBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient)
+int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient)
 {
   if (NumberOfBaryonFields > 0) {
  

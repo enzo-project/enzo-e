@@ -7,6 +7,47 @@
 
 module enzo {
 
+  readonly int  EnzoBlock::BoundaryRank;
+  readonly int  EnzoBlock::BoundaryDimension[MAX_DIMENSION];
+  readonly int  EnzoBlock::BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+  //  readonly bc_enum *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
+  // readonly enzo_float 
+  //   *EnzoBlock::BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2]; 
+  readonly int EnzoBlock::ComovingCoordinates;
+  readonly int EnzoBlock::UseMinimumPressureSupport;
+  readonly enzo_float EnzoBlock::MinimumPressureSupportParameter;
+  readonly enzo_float EnzoBlock::ComovingBoxSize;
+  readonly enzo_float EnzoBlock::HubbleConstantNow;
+  readonly enzo_float EnzoBlock::OmegaMatterNow;
+  readonly enzo_float EnzoBlock::OmegaLambdaNow;
+  readonly enzo_float EnzoBlock::MaxExpansionRate;
+  readonly int EnzoBlock::MultiSpecies;
+  readonly int EnzoBlock::GravityOn;
+  readonly int EnzoBlock::PressureFree;
+  readonly enzo_float EnzoBlock::Gamma;
+  readonly enzo_float EnzoBlock::GravitationalConstant;
+  readonly int EnzoBlock::ProblemType;
+  readonly int EnzoBlock::PPMFlatteningParameter;
+  readonly int EnzoBlock::PPMDiffusionParameter;
+  readonly int EnzoBlock::PPMSteepeningParameter;
+  readonly int EnzoBlock::DualEnergyFormalism;
+  readonly enzo_float EnzoBlock::DualEnergyFormalismEta1;
+  readonly enzo_float EnzoBlock::DualEnergyFormalismEta2;
+  readonly enzo_float EnzoBlock::pressure_floor;
+  readonly enzo_float EnzoBlock::density_floor;
+  readonly enzo_float EnzoBlock::number_density_floor;
+  readonly enzo_float EnzoBlock::temperature_floor;
+  readonly enzo_float EnzoBlock::CourantSafetyNumber;
+  readonly enzo_float EnzoBlock::InitialRedshift;
+  readonly enzo_float EnzoBlock::InitialTimeInCodeUnits;
+  readonly enzo_float EnzoBlock::DomainLeftEdge [MAX_DIMENSION];
+  readonly enzo_float EnzoBlock::DomainRightEdge[MAX_DIMENSION];
+  readonly int EnzoBlock::field_index_[NUM_FIELDS];
+  readonly int EnzoBlock::GridRank;
+  readonly int EnzoBlock::ghost_depth[MAX_DIMENSION];
+  readonly int EnzoBlock::NumberOfBaryonFields;      // active baryon fields
+  readonly int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+
   PUPable EnzoConfig;
   PUPable EnzoBoundary;
   PUPable EnzoFactory;
@@ -28,9 +69,9 @@ module enzo {
 
   }
 
-  array[3D] EnzoCommBlock : CommBlock {
+  array[3D] EnzoBlock : CommBlock {
 
-    entry EnzoCommBlock
+    entry EnzoBlock
       (int ibx, int iby, int ibz,
        int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
@@ -41,7 +82,7 @@ module enzo {
        int patch_rank,
        int num_field_blocks);
 
-    entry EnzoCommBlock
+    entry EnzoBlock
       (int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
        double xpm, double ypm, double zpm,

@@ -21,7 +21,7 @@
 
 #include "enzo.hpp" 
 
-int EnzoCommBlock::SolveMHDEquations
+int EnzoBlock::SolveMHDEquations
 (
  FieldDescr * field_descr,
  enzo_float dt
@@ -251,7 +251,7 @@ int EnzoCommBlock::SolveMHDEquations
     enzo_float *qu6 = &temp[k*size];  k++;
     enzo_float *qu7 = &temp[k*size];  k++;
 
-    ASSERT ("EnzoCommBlock::SolveMHDEquations",
+    ASSERT ("EnzoBlock::SolveMHDEquations",
 	    "Insufficient temporary storage",
 	    k <= 31);
     /* create and fill in arrays which are easiler for the solver to

@@ -60,7 +60,7 @@ void EnzoSimulation::initialize() throw()
   Simulation::initialize();
 
   // Initialize Enzo-P namespace variables
-  EnzoCommBlock::initialize(parameters_,field_descr());
+  EnzoBlock::initialize(parameters_,field_descr());
 
 }
 

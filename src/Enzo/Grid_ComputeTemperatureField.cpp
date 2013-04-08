@@ -31,7 +31,7 @@
  
 //---------------------------------------------------------------------- 
  
-int EnzoCommBlock::ComputeTemperatureField(enzo_float *temperature)
+int EnzoBlock::ComputeTemperatureField(enzo_float *temperature)
 {
  
   int DensNum, result;
