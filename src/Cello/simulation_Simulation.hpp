@@ -42,9 +42,7 @@ public: // interface
 
   Simulation
   ( const char *       parameter_file,
-#ifdef CONFIG_USE_CHARM
     int                n,
-#endif
     const GroupProcess * group_process = 0
     ) throw();
 

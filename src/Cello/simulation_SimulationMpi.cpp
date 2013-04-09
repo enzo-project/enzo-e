@@ -17,7 +17,7 @@ SimulationMpi::SimulationMpi
 (
  const char * parameter_file,
  const GroupProcess * group_process ) throw ()
-  : Simulation(parameter_file,group_process)
+  : Simulation(parameter_file,0,group_process)
 {
 }
 

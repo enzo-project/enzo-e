@@ -15,9 +15,7 @@
 Simulation::Simulation
 (
  const char *   parameter_file,
-#ifdef CONFIG_USE_CHARM
  int            n,
-#endif
  const GroupProcess * group_process
  ) throw()
 /// Initialize the Simulation object
