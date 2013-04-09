@@ -26,9 +26,6 @@ Simulation::Simulation
   parameter_file_(parameter_file),
   group_process_((GroupProcess *)group_process),
   is_group_process_new_(false),
-#ifdef CONFIG_USE_CHARM
-  patch_loop_(0),
-#endif
   dimension_(0),
   cycle_(0),
   time_(0.0),
@@ -65,7 +62,6 @@ Simulation::Simulation
 #ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation()
-  : patch_loop_(0)
 { TRACE("Simulation()"); }
 
 #endif
@@ -95,7 +91,6 @@ void Simulation::pup (PUP::er &p)
   if (up) group_process_ = GroupProcess::create();
 
   p | is_group_process_new_;
-  p | patch_loop_;
   p | dimension_; 
   p | cycle_;
   p | time_;
@@ -128,8 +123,7 @@ void Simulation::pup (PUP::er &p)
 #ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation (CkMigrateMessage *m)
-  : CBase_Simulation(m),
-    patch_loop_(0)
+  : CBase_Simulation(m)
 { TRACE("Simulation(CkMigrateMessage)"); }
 
 #endif
@@ -358,8 +352,6 @@ void Simulation::initialize_hierarchy_() throw()
 			     config_->initial_type == "restart" );
 
 #ifdef CONFIG_USE_CHARM
-  // Distributed patches in Charm: only allocate on root processor
-  ++patch_loop_.stop();
   if (group_process()->is_root())
 #endif
     {

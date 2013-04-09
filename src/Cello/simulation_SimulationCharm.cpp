@@ -49,7 +49,7 @@ void SimulationCharm::initialize() throw()
 
 void SimulationCharm::s_initialize()
 {
-  if (patch_loop_.done()) run();
+  if (group_process_->is_root()) run();
 }
 
 //----------------------------------------------------------------------

@@ -197,13 +197,6 @@ protected: // attributes
   /// Whether the group_process_ object was allocated inside Simulation
   bool is_group_process_new_;
 
-#ifdef CONFIG_USE_CHARM
-
-  /// Loop counter for synchronization after patch operations
-  Loop patch_loop_;
-
-#endif
-
   /// Dimension or rank of the simulation
   int  dimension_; 
 

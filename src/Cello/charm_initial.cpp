@@ -133,7 +133,7 @@ void Patch::s_initial()
 
 void SimulationCharm::s_initial()
 {
-  if (patch_loop_.done()) {
+  if (group_process_->is_root()) {
     delete parameters_;
     parameters_ = 0;
     p_refresh();
