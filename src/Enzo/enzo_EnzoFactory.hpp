@@ -44,7 +44,6 @@ public: // interface
    double xm, double ym, double zm,
    double hx, double hy, double hz,
    CProxy_Patch proxy_patch,
-   int patch_rank,
    int num_field_blocks = 1,
    bool allocate = true) const throw();
 #else
@@ -55,7 +54,6 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
-   int patch_rank,
    int num_field_blocks = 1) const throw();
 
 #endif

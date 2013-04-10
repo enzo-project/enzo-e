@@ -39,7 +39,6 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
    CProxy_Patch proxy_patch,
 #endif
-   int patch_rank,
    int num_field_blocks
 ) throw();
 
@@ -53,7 +52,6 @@ public: // interface
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
    CProxy_Patch proxy_patch,
-   int patch_rank,
    int num_field_blocks
 ) throw();
 
@@ -74,9 +72,6 @@ public: // interface
 
   p | count_refresh_face_;
   p | proxy_patch_;
-
-
-  p | patch_rank_;
 
   PUParray(p,index_,3);
   PUParray(p,size_,3);
@@ -289,9 +284,6 @@ protected: // attributes
 #endif
 
   //--------------------------------------------------
-
-  /// Process of parent patch (for Charm++ IO)
-  int patch_rank_;
 
   /// Index into Patch [redundant with CHARM thisIndex.x .y .z]
   int index_[3];

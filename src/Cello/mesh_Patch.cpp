@@ -326,7 +326,6 @@ void Patch::allocate_array_
      lower_[0],lower_[1],lower_[2],
      xb,yb,zb,
      thisProxy,
-     CkMyPe(),
      num_field_blocks,
      allocate_blocks);
     
@@ -353,7 +352,6 @@ void Patch::allocate_array_
        mbx,mby,mbz,
        lower_[0],lower_[1],lower_[2],
        xb,yb,zb,
-       ip,
        num_field_blocks);
 
     // Store the data block in the block array

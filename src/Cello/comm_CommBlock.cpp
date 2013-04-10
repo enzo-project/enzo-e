@@ -23,7 +23,6 @@ CommBlock::CommBlock
 #ifdef CONFIG_USE_CHARM
  CProxy_Patch proxy_patch,
 #endif
- int patch_rank,
  int num_field_blocks
 ) throw ()
   : block_(nx, ny, nz, num_field_blocks),
@@ -31,12 +30,10 @@ CommBlock::CommBlock
     count_refresh_face_(0),
     proxy_patch_(proxy_patch),
 #endif
-    patch_rank_(patch_rank),
     cycle_(0),
     time_(0),
     dt_(0)
 { 
-  DEBUG1("IP = %d",patch_rank);
 
   // Initialize indices into parent patch
 
@@ -72,19 +69,15 @@ CommBlock::CommBlock
 #ifdef CONFIG_USE_CHARM
  CProxy_Patch proxy_patch,
 #endif
- int patch_rank,
  int num_field_blocks) throw ()
   : block_(nx, ny, nz, num_field_blocks),
     count_refresh_face_(0),
     proxy_patch_(proxy_patch),
-    patch_rank_(patch_rank),
     cycle_(0),
     time_(0),
     dt_(0)
 
 { 
-
-  DEBUG1("IP = %d",patch_rank_);
 
   // Initialize indices into parent patch
 

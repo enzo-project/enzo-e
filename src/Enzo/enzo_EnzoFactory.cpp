@@ -41,7 +41,6 @@ CProxy_CommBlock EnzoFactory::create_block_array
  double xm, double ym, double zm,
  double hx, double hy, double hz,
  CProxy_Patch proxy_patch,
- int patch_rank,
  int num_field_blocks,
  bool allocate
  ) const throw()
@@ -54,7 +53,6 @@ CProxy_CommBlock EnzoFactory::create_block_array
        xm,ym,zm, 
        hx,hy,hz, 
        proxy_patch,
-       patch_rank,
        num_field_blocks,
        nbx,nby,nbz);
   } else {
@@ -73,7 +71,6 @@ CommBlock * EnzoFactory::create_block
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double hx, double hy, double hz,
- int patch_rank,
  int num_field_blocks
  ) const throw()
 {
@@ -84,7 +81,6 @@ CommBlock * EnzoFactory::create_block
      xm,ym,zm, 
      xb,yb,zb, 
      proxy_patch,
-     patch_rank,
      num_field_blocks,
      nbx,nby,nbz);
   return block_array(ibx,iby,ibz).ckLocal();
@@ -96,7 +92,6 @@ CommBlock * EnzoFactory::create_block
      nx,ny,nz,
      xm,ym,zm, 
      hx,hy,hz, 
-     patch_rank,
      num_field_blocks);
 #endif
 }
