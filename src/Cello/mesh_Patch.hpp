@@ -41,7 +41,6 @@ class Patch
    int nbx,  int nby, int nbz,
    double xm, double ym, double zm,
    double xp, double yp, double zp,
-   int id,
    bool allocate_blocks = true,
    int process_first =0, int process_last_plus=-1
    ) throw();

@@ -52,7 +52,6 @@ PARALLEL_MAIN_BEGIN
   const double domain_lower[] = {0.0, 0.0, 0.0};
   const double domain_upper[] = {1.0, 1.0, 1.0};
 
-  int patch_id = 0;
   patch_global = factory->create_patch 
     (
      field_descr,
@@ -60,8 +59,7 @@ PARALLEL_MAIN_BEGIN
      patch_offset[0],   patch_offset[1],   patch_offset[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2],
      domain_lower[0],   domain_lower[1],   domain_lower[2],
-     domain_upper[0],   domain_upper[1],   domain_upper[2],
-     patch_id);
+     domain_upper[0],   domain_upper[1],   domain_upper[2]);
 
   patch_global->p_test();
 

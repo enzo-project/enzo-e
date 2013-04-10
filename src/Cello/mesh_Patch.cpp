@@ -30,7 +30,6 @@ Patch::Patch
  int nbx, int nby, int nbz,
  double xm, double ym, double zm,
  double xp, double yp, double zp,
- int id,
  bool allocate_blocks,
  int process_first, int process_last_plus
 ) throw()

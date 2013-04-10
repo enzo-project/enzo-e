@@ -226,8 +226,6 @@ void Hierarchy::create_root_patch
   Patch * root_patch;
 #endif
 
-  int patch_id = 0;
-  DEBUG1("ID = %d",patch_id);
   root_patch = factory()->create_patch
     (
      field_descr,
@@ -236,7 +234,6 @@ void Hierarchy::create_root_patch
      nbx,nby,nbz, // blocking
      lower_[0], lower_[1], lower_[2],
      upper_[0], upper_[1], upper_[2],
-     patch_id,
      allocate_blocks,
      process_first, process_last_plus);
 

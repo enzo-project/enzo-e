@@ -48,7 +48,6 @@ Factory::create_patch
  int nbx,  int nby, int nbz,
  double xm, double ym, double zm,
  double xp, double yp, double zp,
- int id,
  bool allocate_blocks,
  int process_first, int process_last_plus
  ) const throw()
@@ -61,7 +60,6 @@ Factory::create_patch
      nbx,nby,nbz,
      xm,ym,zm,
      xp,yp,zp,
-     id,
      allocate_blocks,
      process_first, process_last_plus);
   TRACE1("proxy_patch = %p",proxy_patch);
@@ -76,7 +74,6 @@ Factory::create_patch
      nbx,nby,nbz,
      xm,ym,zm,
      xp,yp,zp,
-     id,
      allocate_blocks,
      process_first, process_last_plus);
 #endif
