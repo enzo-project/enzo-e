@@ -1,0 +1,81 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     mesh_patch.ci
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-05-09
+/// @brief    CHARM++ Mesh process group
+
+module mesh {
+
+  PUPable Config;
+  PUPable Factory;
+  PUPable Initial;
+  PUPable InitialDefault;
+  PUPable InitialFile;
+  PUPable InputData;
+  PUPable OutputData;
+  PUPable OutputImage;
+  PUPable OutputRestart;
+  PUPable Problem;
+  PUPable ItFieldList;
+  PUPable ItFieldRange;
+
+  chare [migratable] Patch {
+
+     entry Patch
+       (int nx,   int ny,  int nz,
+        int nx0,  int ny0, int nz0,
+        int nbx,  int nby, int nbz,
+        double xm, double ym, double zm,
+        double xp, double yp, double zp,
+	bool allocate_blocks,
+	int process_first, int process_last_plus);
+
+     entry void p_test();
+
+     entry void p_initial ();
+     entry void s_initial ();
+
+     entry void s_output ();
+
+     entry void p_write (int index);
+     entry void s_write ();
+
+     entry void p_compute(int cycle, double time, double dt);
+     entry void p_refresh();
+    
+  };
+ 
+  array[3D] CommBlock {
+
+    entry CommBlock
+      (int ibx, int iby, int ibz,
+       int nbx, int nby, int nbz,
+       int nx, int ny, int nz,	
+       double xpm, double ypm, double zpm,
+       double xb, double yb, double zb,
+       CProxy_Patch proxy_patch,
+       int num_field_blocks);
+
+    entry CommBlock
+      (int nbx, int nby, int nbz,
+       int nx, int ny, int nz,	
+       double xpm, double ypm, double zpm,
+       double xb, double yb, double zb,
+       CProxy_Patch proxy_patch,
+       int num_field_blocks);
+
+    entry void p_initial();
+    entry void p_refresh();
+    entry void p_write (int index_output);
+    entry void p_compute(int cycle, double time, double dt);
+
+    entry void x_refresh(int n, char buffer[n], int fx, int fy, int fz);
+
+    entry void p_read (int index_input);
+
+    entry void p_output(CkReductionMsg * msg);
+
+  };
+}
+
