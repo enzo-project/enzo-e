@@ -35,7 +35,6 @@ Patch::Patch
  int process_first, int process_last_plus
 ) throw()
   :
-  id_(id),
 #ifdef CONFIG_USE_CHARM
   block_array_(0),
   block_exists_(false),
@@ -48,8 +47,6 @@ Patch::Patch
 {
 
  // Check 
-  DEBUG2("zp = %f ID = %d",zp,id_);
-  DEBUG2("Patch() %p id = %d",this,this->id());
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
 	     
     ERROR6("Patch::Patch", 
@@ -84,7 +81,6 @@ Patch::Patch
   upper_[2] = zp;
 
 #ifdef CONFIG_USE_CHARM
-  DEBUG2("patch %p ID = %d",this,id_);
   allocate_array_(allocate_blocks);
 #else
   allocate_array_(allocate_blocks,field_descr);
@@ -103,8 +99,6 @@ void Patch::pup (PUP::er &p)
     TRACEPUP;
     CBase_Patch::pup(p);
     // NOTE: change this function whenever attributes change
-    p | id_;
-    TRACE1("id_ = %d",id_);
     TRACE1("block_array_ = %p",block_array_);
     if (p.isUnpacking()) block_array_ = new CProxy_CommBlock;
     p | *block_array_;
@@ -276,7 +270,6 @@ void Patch::allocate_array_
   // NOTE: field_descr only needed for MPI; may be null for CHARM++
 {
 
-  DEBUG2("patch %p ID = %d",this,id_);
 #ifndef CONFIG_USE_CHARM
 
   // determine local block count nb
@@ -328,14 +321,12 @@ void Patch::allocate_array_
 
   block_array_ = new CProxy_CommBlock;
 
-  DEBUG1("ID = %d",id_);
   (*block_array_) = factory->create_block_array
     (nbx,nby,nbz,
      mbx,mby,mbz,
      lower_[0],lower_[1],lower_[2],
      xb,yb,zb,
      thisProxy,
-     id_,
      CkMyPe(),
      num_field_blocks,
      allocate_blocks);
@@ -357,14 +348,12 @@ void Patch::allocate_array_
 
     // create a new data block
 
-    DEBUG1("Patch::Patch(%d)",id_);
     CommBlock * block = factory_->create_block 
       (ibx,iby,ibz,
        nbx,nby,nbz,
        mbx,mby,mbz,
        lower_[0],lower_[1],lower_[2],
        xb,yb,zb,
-       id_,
        ip,
        num_field_blocks);
 

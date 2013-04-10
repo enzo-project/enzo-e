@@ -125,8 +125,7 @@ Patch * InputData::read_patch
 
   // Change to file group for patch
 
-  file_->group_chdir("/"+patch->name());
-  file_->group_open();
+  file_->group_chdir("/patch_0");
 
   // Read patch meta-data
 

@@ -107,7 +107,7 @@ void OutputData::write_patch
 {
   // Create file group for patch
 
-  file_->group_chdir("/"+patch->name());
+  file_->group_chdir("/patch_0");
   file_->group_create();
 
   // Read patch meta-data
@@ -139,7 +139,7 @@ void OutputData::write_block
 
   // Create file group for block
 
-  std::string group_name = "/" + block->patch_name() + "/" + block->name();
+  std::string group_name = "/patch_0/" + block->name();
   DEBUG1 ("block name = %s",group_name.c_str());
   file_->group_chdir(group_name);
   file_->group_create();
