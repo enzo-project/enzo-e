@@ -254,12 +254,12 @@ Clean(env_mv_out.RunParallel ('test_boundary_periodic-2d.unit',
        'test_boundary_periodic-2d.unit',
        '#/input/boundary_periodic-2d.in.out'])
 
-Clean(env_mv_out.RunParallel ('test_boundary_inflow-2d.unit',
-		bin_path + '/enzo-p', 
-		ARGS='input/boundary_inflow-2d.in'),
-      [Glob('#/' + test_path + '/boundary_inflow-2d.png'),
-       'test_boundary_inflow-2d.unit',
-       '#/input/boundary_inflow-2d.in.out'])
+# Clean(env_mv_out.RunParallel ('test_boundary_inflow-2d.unit',
+# 		bin_path + '/enzo-p', 
+# 		ARGS='input/boundary_inflow-2d.in'),
+#       [Glob('#/' + test_path + '/boundary_inflow-2d.png'),
+#        'test_boundary_inflow-2d.unit',
+#        '#/input/boundary_inflow-2d.in.out'])
 
 Clean(env_mv_out.RunParallel ('test_boundary_outflow-2d.unit',
 		bin_path + '/enzo-p', 
@@ -277,8 +277,8 @@ env.MakeMovie ("boundary_reflecting-2d.swf",
                 ARGS= test_path + "/boundary_reflecting-2d-????.png");
 env.MakeMovie ("boundary_periodic-2d.swf","test_boundary_periodic-2d.unit", \
                 ARGS= test_path + "/boundary_periodic-2d-????.png");
-env.MakeMovie ("boundary_inflow-2d.swf","test_boundary_inflow-2d.unit", \
-                ARGS= test_path + "/boundary_inflow-2d-????.png");
+# env.MakeMovie ("boundary_inflow-2d.swf","test_boundary_inflow-2d.unit", \
+#                ARGS= test_path + "/boundary_inflow-2d-????.png");
 env.MakeMovie ("boundary_outflow-2d.swf","test_boundary_outflow-2d.unit", \
                 ARGS= test_path + "/boundary_outflow-2d-????.png");
 
@@ -298,12 +298,12 @@ Clean(env_mv_out.RunParallel ('test_boundary_periodic-3d.unit',
        'test_boundary_periodic-3d.unit',
        '#/input/boundary_periodic-3d.in.out'])
 
-Clean(env_mv_out.RunParallel ('test_boundary_inflow-3d.unit',
-		bin_path + '/enzo-p', 
-		ARGS='input/boundary_inflow-3d.in'),
-      [Glob('#/' + test_path + '/boundary_inflow-3d.png'),
-       'test_boundary_inflow-3d.unit',
-       '#/input/boundary_inflow-3d.in.out'])
+# Clean(env_mv_out.RunParallel ('test_boundary_inflow-3d.unit',
+# 		bin_path + '/enzo-p', 
+# 		ARGS='input/boundary_inflow-3d.in'),
+#       [Glob('#/' + test_path + '/boundary_inflow-3d.png'),
+#        'test_boundary_inflow-3d.unit',
+#        '#/input/boundary_inflow-3d.in.out'])
 
 Clean(env_mv_out.RunParallel ('test_boundary_outflow-3d.unit',
 		bin_path + '/enzo-p', 
