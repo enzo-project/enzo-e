@@ -62,6 +62,32 @@ public: // interface
 
   //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+
+# ifdef CONFIG_USE_CHARM
+  /// Return pointer to the CommBlock CHARM++ chare array
+  CProxy_CommBlock * block_array() const throw()
+  //  { if (block_exists_) return block_array_; else return 0;}
+  { return block_array_;}
+
+# else
+  /// Return the total number of local blocks
+  size_t num_local_blocks() const throw();
+
+  /// Return the ith local CommBlock
+  CommBlock * local_block(size_t i) const throw();
+# endif
+
+  void create_forest (FieldDescr   * field_descr,
+		      int nx, int ny, int nz,
+		      int nbx, int nby, int nbz,
+		      bool allocate_blocks  = true,
+		      int process_first     = 0, 
+		      int process_last_plus = -1) throw();
+
+
+#else /* REMOVE_PATCH */
+
   /// Return the total number of local patches
   size_t num_patches() const throw();
 
@@ -79,9 +105,12 @@ public: // interface
 			  int process_first     = 0, 
 			  int process_last_plus = -1) throw();
 
+#endif /* REMOVE_PATCH */
+
   /// Return the factory object associated with the Hierarchy
   const Factory * factory () const throw()
   { return factory_; }
+
 
 protected: // attributes
 
@@ -95,11 +124,26 @@ protected: // attributes
   /// Refinement of the hierarchy [ used for Charm++ pup() of Tree ]
   int refinement_;
 
+#ifdef REMOVE_PATCH
+
+  /// Array of CommBlocks 
+# ifdef CONFIG_USE_CHARM
+  CProxy_CommBlock * block_array_;
+  bool           block_exists_;
+  Loop           block_loop_;
+# else
+  std::vector<CommBlock * > block_;
+# endif
+
+#else /* REMOVE_PATCH */
+  
   /// Number of patches (redundant with patch_tree_)
   int patch_count_;
 
   /// List of local patches
   Tree * patch_tree_;
+
+#endif /* REMOVE_PATCH */
 
   /// Size of the root grid
   int root_size_[3];

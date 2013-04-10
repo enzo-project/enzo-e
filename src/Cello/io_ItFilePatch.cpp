@@ -7,6 +7,9 @@
 /// @brief    Implementation of ItFilePatch
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
+
 #include "cello.hpp"
 
 #include "mesh.hpp"
@@ -41,6 +44,6 @@ bool ItFilePatch::done () const throw()
   return false;
 }
 
-
+#endif /* REMOVE_PATCH */
 
 

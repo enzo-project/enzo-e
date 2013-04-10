@@ -353,7 +353,11 @@ void Simulation::initialize_hierarchy_() throw()
   if (group_process()->is_root())
 #endif
     {
+#ifdef REMOVE_PATCH
+      hierarchy_->create_forest
+#else
       hierarchy_->create_root_patch
+#endif
 	(field_descr_,
 	 config_->mesh_root_size[0],
 	 config_->mesh_root_size[1],
@@ -363,7 +367,6 @@ void Simulation::initialize_hierarchy_() throw()
 	 config_->mesh_root_blocks[2],
 	 allocate_blocks);
     }
-
 }
 
 //----------------------------------------------------------------------

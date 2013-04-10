@@ -12,7 +12,10 @@ class Factory;
 class FieldDescr;
 class Hierarchy;
 class ItField;
+#ifdef REMOVE_PATCH
+#else
 class Patch;
+#endif
 class Simulation;
 
 class Input
@@ -124,17 +127,23 @@ public:
   ( Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
   /// Read local patch data from disk
   virtual Patch * read_patch
   ( Patch * patch,
     const FieldDescr * field_descr,  
     int ixp0=0, int iyp0=0, int izp0=0) throw();
+#endif /* REMOVE_PATCH */
 
-#ifdef CONFIG_USE_CHARM
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
+#   ifdef CONFIG_USE_CHARM
   /// Cleanup after writing blocks in a patch
   virtual void end_read_patch () throw()
   { }
-#endif
+#   endif
+#endif /* REMOVE_PATCH */
 
   /// Read local block data from disk
   virtual CommBlock * read_block

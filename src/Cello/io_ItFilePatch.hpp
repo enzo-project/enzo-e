@@ -8,6 +8,9 @@
 /// This class is used to iterate over all Patches defined in
 /// a data file
 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
+
 #ifndef IO_IT_FILE_PATCH_HPP
 #define IO_IT_FILE_PATCH_HPP
 
@@ -56,3 +59,4 @@ private: // attributes
 
 #endif /* IO_IT_FILE_PATCH_HPP */
 
+#endif /* REMOVE_PATCH */

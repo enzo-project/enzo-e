@@ -27,7 +27,7 @@ class CommBlock
 
 public: // interface
 
-  /// create a CommBlock with the given block count, lower PATCH extent, block
+  /// create a CommBlock with the given block count, lower forest/patch extent, block
   /// size, and number of field blocks
   CommBlock
   (
@@ -37,7 +37,10 @@ public: // interface
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
 #ifdef CONFIG_USE_CHARM
+#  ifdef REMOVE_PATCH
+#  else
    CProxy_Patch proxy_patch,
+#  endif
 #endif
    int num_field_blocks
 ) throw();
@@ -51,7 +54,10 @@ public: // interface
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
+#  ifdef REMOVE_PATCH
+#  else
    CProxy_Patch proxy_patch,
+#  endif
    int num_field_blocks
 ) throw();
 
@@ -71,7 +77,10 @@ public: // interface
   CBase_CommBlock::pup(p);
 
   p | count_refresh_face_;
+#  ifdef REMOVE_PATCH
+#  else
   p | proxy_patch_;
+#endif
 
   PUParray(p,index_,3);
   PUParray(p,size_,3);
@@ -138,7 +147,10 @@ public: // interface
 
   /// Refresh ghost data
   void refresh_ghosts(const FieldDescr * field_descr,
+#  ifdef REMOVE_PATCH
+#  else
 		      const Patch * patch,
+#endif
 		      int fx, int fy, int fz,
 		      int index_field_set = 0) throw();
 #endif
@@ -184,13 +196,16 @@ public: // interface
     if (z) *z = upper_[2];
   }
 
+#  ifdef REMOVE_PATCH
+#  else
   /// Return the position of this CommBlock in the containing Patch 
   void index_patch (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
+#  endif
 
-  /// Return the index of this CommBlock in the containing Patch 
+  /// Return the index of this CommBlock in the containing Patch / Forest
   int index () const throw();
 
-  /// Return the name of the block within its patch, e.g. "block_3"
+  /// Return the name of the block
   std::string name () const throw()
   {
     std::stringstream convert;
@@ -198,8 +213,12 @@ public: // interface
     return convert.str();
   }
 
-  /// Return the size the containing Patch
+  /// Return the size the containing Patch / Forest
+#  ifdef REMOVE_PATCH
+  void size_forest (int * nx, int * ny, int * nz) const throw();
+#  else
   void size_patch (int * nx, int * ny, int * nz) const throw();
+#endif
 
   /// Return the current cycle number
   int cycle() const throw() { return cycle_; };
@@ -278,23 +297,26 @@ protected: // attributes
   /// Counter when refreshing faces
   int count_refresh_face_;
 
+#ifdef REMOVE_PATCH
+#else
   /// Parent patch
   CProxy_Patch proxy_patch_;
+#endif
 
 #endif
 
   //--------------------------------------------------
 
-  /// Index into Patch [redundant with CHARM thisIndex.x .y .z]
+  /// Index into Patch / Forest [redundant with CHARM thisIndex.x .y .z]
   int index_[3];
 
-  /// Size of Patch
+  /// Size of Patch / Forest [redundant with CHARM thisIndex.x .y .z]
   int size_[3];
 
-  /// Lower extent of the box associated with the block [computable from Patch]
+  /// Lower extent of the box associated with the block [computable]
   double lower_[3];
 
-  /// Upper extent of the box associated with the block [computable from Patch]
+  /// Upper extent of the box associated with the block [computable]
   double upper_[3];
 
   //--------------------------------------------------

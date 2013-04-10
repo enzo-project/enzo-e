@@ -5,6 +5,9 @@
 /// @date     2011-10-06
 /// @brief    [\ref Io] Declaration of the IoPatch class
 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
+
 #ifndef IO_IO_PATCH_HPP
 #define IO_IO_PATCH_HPP
 
@@ -53,3 +56,4 @@ private: // attributes
 
 #endif /* IO_IO_PATCH_HPP */
 
+#endif /* REMOVE_PATCH */

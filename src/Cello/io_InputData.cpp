@@ -94,13 +94,15 @@ void InputData::read_hierarchy
 
   Input::read_meta (&io_hierarchy);
 
-  // Call read_patch() on contained patches
+  // Calls read_blocks() on contained forest
   Input::read_hierarchy (hierarchy, field_descr);
 
 }
 
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+#else
 Patch * InputData::read_patch 
 (
  Patch * patch,
@@ -110,18 +112,6 @@ Patch * InputData::read_patch
 {
   ERROR("InputData::read_patch()",
 	"Not Implemented");
-  // if (patch == 0) {
-  //   // create an uninitialized Patch
-  //   patch = 
-  //     factory_->create_patch
-  //     (0,
-  //      0,0,0,
-  //      0,0,0,
-  //      0,0,0,
-  //      0,0,0,
-  //      0,0,0,
-  //      0);
-  // }
 
   // Change to file group for patch
 
@@ -144,14 +134,19 @@ Patch * InputData::read_patch
 
   return patch;
 }
+#endif /* REMOVE_PATCH */
 
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+#else
 void InputData::end_read_patch() throw()
 {
   file_->group_close();
   file_->group_chdir("..");
 }
+#endif
+
 //----------------------------------------------------------------------
 
 CommBlock * InputData::read_block 
@@ -169,22 +164,18 @@ CommBlock * InputData::read_block
   ERROR("InputData::read_block",
 	"Need to pass in Patch proxy to create_block");
 
-  // block = factory_->create_block
-  //   (0,0,0,
-  //    0,0,0,
-  //    0,0,0,
-  //    0.0, 0.0, 0.0,
-  //    0.0, 0.0, 0.0,
-  //    1);
-
   // Read block meta data
 
   io_block()->set_block(block);
 
   Input::read_meta_group (io_block());
 
-  int ibx=100,iby=100,ibz=100;
+  int ibx,iby,ibz;
+#ifdef REMOVE_PATCH
+  block->index_forest(&ibx,&iby,&ibz);
+#else
   block->index_patch(&ibx,&iby,&ibz);
+#endif
 
   // // Call read_block() on base Input object
 

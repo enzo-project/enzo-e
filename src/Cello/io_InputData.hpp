@@ -61,14 +61,20 @@ public: // virtual functions
   ( Hierarchy * hierarchy,
     const FieldDescr * field_descr ) throw();
 
+#ifdef REMOVE_PATCH
+#else
   /// Read patch data from disk
   virtual Patch * read_patch
   ( Patch * patch,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
+#endif
 
+#ifdef REMOVE_PATCH
+#else
   /// Cleanup after reading blocks in a patch (for CHARM++ synchronization)
   virtual void end_read_patch () throw();
+#endif
 
   /// Read block data from disk
   virtual CommBlock * read_block

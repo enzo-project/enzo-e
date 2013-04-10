@@ -48,6 +48,11 @@ void Problem::initial_next(Simulation * simulation) throw()
 
       DEBUG1 ("Start Initial(%d) A",index_initial_);
 
+#ifdef REMOVE_PATCH
+      
+      hierarchy->block_array()->p_initial();
+
+#else
       ItPatch it_patch(hierarchy);
       Patch * patch;
 
@@ -57,6 +62,7 @@ void Problem::initial_next(Simulation * simulation) throw()
 	patch_proxy->p_initial();
 
       }
+#endif
 
     } else {
 
@@ -78,12 +84,15 @@ void Problem::initial_next(Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+#else
 void Patch::p_initial()
 {
   TRACE("Patch::p_initial()");
   TRACE("Patch::p_initial(Patch) calling CommBlock::p_initial()");
   block_array()->p_initial();
 }
+#endif
 
 //----------------------------------------------------------------------
 
@@ -114,20 +123,28 @@ void CommBlock::p_initial()
 
   initial->enforce_block(this,field_descr, simulation->hierarchy());
 
-  // Continue with Patch::s_initial
+#ifdef REMOVE_PATCH
+  WARNING("CommBlock::p_initial",
+	  "Check that Simulation::s_initial() sync count is correct");
+  proxy_simulation.s_initial();
+#else
 
   proxy_patch_.s_initial();
+#endif
 
 }
 
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+#else
 void Patch::s_initial()
 {
   if (block_loop_.done()) {
     proxy_simulation.s_initial();
   }
 }
+#endif
 
 //----------------------------------------------------------------------
 

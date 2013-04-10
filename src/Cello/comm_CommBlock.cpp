@@ -18,24 +18,30 @@ CommBlock::CommBlock
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
- double xpm, double ypm, double zpm, // Patch begin
+ double xpm, double ypm, double zpm, // Domain begin
  double xb, double yb, double zb,    // CommBlock width
-#ifdef CONFIG_USE_CHARM
+#ifdef REMOVE_PATCH
+#else
+#  ifdef CONFIG_USE_CHARM
  CProxy_Patch proxy_patch,
+#  endif
 #endif
  int num_field_blocks
 ) throw ()
   : block_(nx, ny, nz, num_field_blocks),
 #ifdef CONFIG_USE_CHARM
     count_refresh_face_(0),
+#   ifdef REMOVE_PATCH
+#   else
     proxy_patch_(proxy_patch),
+#   endif
 #endif
     cycle_(0),
     time_(0),
     dt_(0)
 { 
 
-  // Initialize indices into parent patch
+  // Initialize indices
 
   size_[0] = nbx;
   size_[1] = nby;
@@ -64,22 +70,28 @@ CommBlock::CommBlock
 (
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
- double xpm, double ypm, double zpm, // Patch begin
+ double xpm, double ypm, double zpm, // Domain begin
  double xb, double yb, double zb,    // CommBlock width
 #ifdef CONFIG_USE_CHARM
+#   ifdef REMOVE_PATCH
+#   else
  CProxy_Patch proxy_patch,
+#   endif
 #endif
  int num_field_blocks) throw ()
   : block_(nx, ny, nz, num_field_blocks),
     count_refresh_face_(0),
+#   ifdef REMOVE_PATCH
+#   else
     proxy_patch_(proxy_patch),
+#   endif
     cycle_(0),
     time_(0),
     dt_(0)
 
 { 
 
-  // Initialize indices into parent patch
+  // Initialize indices
 
   int ibx = thisIndex.x;
   int iby = thisIndex.y;
@@ -138,7 +150,11 @@ int CommBlock::index () const throw ()
 
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+void CommBlock::index_forest (int * ix, int * iy, int * iz) const throw ()
+#else
 void CommBlock::index_patch (int * ix, int * iy, int * iz) const throw ()
+#endif
 {
   if (ix) (*ix) = index_[0]; 
   if (iy) (*iy) = index_[1]; 
@@ -147,7 +163,11 @@ void CommBlock::index_patch (int * ix, int * iy, int * iz) const throw ()
 
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+void CommBlock::size_forest (int * nx=0, int * ny=0, int * nz=0) const throw ()
+#else
 void CommBlock::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
+#endif
 {
   if (nx) (*nx)=size_[0]; 
   if (ny) (*ny)=size_[1]; 
@@ -161,16 +181,27 @@ void CommBlock::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
 #ifndef CONFIG_USE_CHARM
 
 void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
+#ifdef REMOVE_PATCH
+#else
 			   const Patch * patch,
+#endif
 			   int fx, int fy, int fz,
 			   int index_field_set) throw()
 {
   int ibx,iby,ibz;
+#ifdef REMOVE_PATCH
+  index_forest(&ibx,&iby,&ibz);
+#else
   index_patch(&ibx,&iby,&ibz);
+#endif
   block_.field_block(index_field_set)
     -> refresh_ghosts (field_descr,
+#ifdef REMOVE_PATCH
+		       @@@
+#else
 		       patch->group_process(),
 		       patch->layout(),
+#endif
 		       ibx,iby,ibz, fx,fy,fz);
 }
 
@@ -268,19 +299,27 @@ void CommBlock::p_output(CkReductionMsg * msg)
   DEBUG("CommBlock::p_output()");
   double * min_reduce = (double * )msg->getData();
 
+#ifdef REMOVE_PATCH
+  double dt_forest   = min_reduce[0];
+  bool   stop_forest = min_reduce[1] == 1.0 ? true : false;
+  set_dt   (dt_forest);
+#else
   double dt_patch   = min_reduce[0];
   bool   stop_patch = min_reduce[1] == 1.0 ? true : false;
+  set_dt   (dt_patch);
+#endif
+
 
   delete msg;
 
-  set_dt   (dt_patch);
-
-  // WARNING: assumes one patch
-
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
+#ifdef REMOVE_PATCH
+  simulation->update_state(cycle_,time_,dt_forest,stop_forest);
+#else
   simulation->update_state(cycle_,time_,dt_patch,stop_patch);
- 
+#endif
+
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
   // Simulation::p_output()?  Want last block?
@@ -295,7 +334,13 @@ void CommBlock::p_output(CkReductionMsg * msg)
   // Wait for all blocks to check in before calling Simulation::p_output()
   // for next output
 
+#ifdef REMOVE_PATCH
+  WARNING("CommBlock::p_output",
+	  "Check that Simulation::p_output() sync count is correct");
+  proxy_simulation.p_output();
+#else
   proxy_patch_.s_output();
+#endif
 
 }
 #endif /* CONFIG_USE_CHARM */

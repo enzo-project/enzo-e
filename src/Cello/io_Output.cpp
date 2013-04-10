@@ -229,6 +229,21 @@ void Output::write_hierarchy_
  const FieldDescr * field_descr
  ) throw()
 {
+#ifdef REMOVE_PATCH
+#ifdef CONFIG_USE_CHARM
+
+  hierarchy->block_array()->p_write(index_);
+
+#else
+
+  ItBlock it_block (hierarchy);
+  while (const CommBlock * block = ++it_block) {
+    // NO OFFSET: ASSUMES ROOT PATCH
+    write_block (block, field_descr, 0,0,0);
+  }
+
+#endif
+#else /* REMOVE_PATCH */
   ItPatch it_patch (hierarchy);
 
   while (Patch * patch = ++it_patch) {
@@ -239,9 +254,13 @@ void Output::write_hierarchy_
     write_patch (patch, field_descr, 0,0,0);
 #endif
   }
+#endif
 }
 
 //----------------------------------------------------------------------
+
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
 
 void Output::write_patch_
 (
@@ -268,6 +287,7 @@ void Output::write_patch_
 #endif
 
 }
+#endif /* REMOVE_PATCH */
 
 //----------------------------------------------------------------------
 

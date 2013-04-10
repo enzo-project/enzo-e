@@ -5,6 +5,10 @@
 /// @date     2011-05-10
 /// @brief    Implementation of the Patch class
 
+#ifdef REMOVE_PATCH
+
+#else /* REMOVE_PATCH */
+
 #include "cello.hpp"
 
 #include "mesh.hpp"
@@ -594,3 +598,4 @@ void Patch::p_test () throw()
   PARALLEL_EXIT;
 }
 
+#endif /* REMOVE_PATCH */

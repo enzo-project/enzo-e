@@ -5,6 +5,9 @@
 /// @date     2011-10-06
 /// @brief    Implementation of the IoPatch class
 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
+
 #include "io.hpp"
 
 //----------------------------------------------------------------------
@@ -80,3 +83,4 @@ void IoPatch::data_value
 }
 
 //----------------------------------------------------------------------
+#endif /* REMOVE_PATCH */

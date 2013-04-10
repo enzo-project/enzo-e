@@ -5,6 +5,10 @@
 /// @date     2011-05-10
 /// @brief    [\ref Mesh] Declaration of the interface for the Patch class
 
+#ifdef REMOVE_PATCH
+
+#else /* REMOVE_PATCH */
+
 #ifndef MESH_PATCH_HPP
 #define MESH_PATCH_HPP
 
@@ -14,6 +18,7 @@ class Factory;
 
 #ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
+
 class Patch : public CBase_Patch
 #else
 class Patch
@@ -77,9 +82,6 @@ class Patch
 
   /// Call read on all CommBlocks
   void p_read(int index_input);
-
-  /// Wait for all CommBlocks after p_read
-  void s_read();
 
   /// Apply the numerical methods on the patch
   void p_compute(int cycle, double time, double dt);
@@ -172,7 +174,7 @@ protected: // functions
 
 protected: // attributes
 
-  /// Array of CommBlocks ib associated with this process
+  /// Array of CommBlocks 
 #ifdef CONFIG_USE_CHARM
   CProxy_CommBlock * block_array_;
   bool           block_exists_;
@@ -210,4 +212,6 @@ protected: // attributes
 };
 
 #endif /* MESH_PATCH_HPP */
+
+#endif /* REMOVE_PATCH */
 

@@ -5,6 +5,10 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
+# Whether to compile with REMOVE_PATCH defined
+
+remove_patch = 0
+
 # Whether to print out messages with the TRACE() series of statements
 
 trace = 0
@@ -116,34 +120,38 @@ print
 
 define = {}
 
+# Remove-patch define
+
+define_remove_patch = ['REMOVE_PATCH']
+
 # Parallel type defines
 
-define["serial"] =        []
-define["mpi"]    =        ['CONFIG_USE_MPI']
-define["charm"]  =        ['CONFIG_USE_CHARM']
+define["serial"] =    []
+define["mpi"]    =    ['CONFIG_USE_MPI']
+define["charm"]  =    ['CONFIG_USE_CHARM']
 
 # Precision defines
 
-define["single"] =        ['CONFIG_PRECISION_SINGLE']
-define["double"] =        ['CONFIG_PRECISION_DOUBLE']
+define["single"] =    ['CONFIG_PRECISION_SINGLE']
+define["double"] =    ['CONFIG_PRECISION_DOUBLE']
 
 # Performance defines
 
-define_memory =           ['CONFIG_USE_MEMORY']
-define_projections =      ['CONFIG_USE_PROJECTIONS']
-define_performance =      ['CONFIG_USE_PERFORMANCE']
-define_papi  =            ['CONFIG_USE_PAPI','PAPI3']
+define_memory =       ['CONFIG_USE_MEMORY']
+define_projections =  ['CONFIG_USE_PROJECTIONS']
+define_performance =  ['CONFIG_USE_PERFORMANCE']
+define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 
 # Debugging defines
 
-define_trace =            ['CELLO_TRACE']
-define_debug =            ['CELLO_DEBUG']
-define_debug_verbose =    ['CELLO_DEBUG_VERBOSE']
+define_trace =        ['CELLO_TRACE']
+define_debug =        ['CELLO_DEBUG']
+define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
 
 # Library defines
 
-define_hdf5  =            ['H5_USE_16_API']
-define_png   =            ['NO_FREETYPE']
+define_hdf5  =        ['H5_USE_16_API']
+define_png   =        ['NO_FREETYPE']
 
 #----------------------------------------------------------------------
 # ASSEMBLE DEFINES
@@ -206,6 +214,7 @@ if (use_gprof == 1):
   
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
+if (remove_patch != 0):  defines = defines + define_remove_patch
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
@@ -285,6 +294,7 @@ lib_path = '#/lib/'+config
 inc_path = '#/include'
 test_path= 'test/'+config
 
+Export('remove_patch')
 Export('bin_path')
 Export('lib_path')
 Export('inc_path')

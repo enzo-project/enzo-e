@@ -98,6 +98,8 @@ void OutputData::write_hierarchy
 
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
 void OutputData::write_patch
 (
  const Patch * patch,
@@ -127,6 +129,7 @@ void OutputData::write_patch
   write_patch_(patch,field_descr,ixp0,iyp0,izp0);
 
 }
+#endif /* REMOVE_PATCH */
 
 //----------------------------------------------------------------------
 
@@ -139,7 +142,12 @@ void OutputData::write_block
 
   // Create file group for block
 
+#ifdef REMOVE_PATCH
+  std::string group_name = "/" + block->name();
+#else /* REMOVE_PATCH */
   std::string group_name = "/patch_0/" + block->name();
+#endif /* REMOVE_PATCH */
+
   DEBUG1 ("block name = %s",group_name.c_str());
   file_->group_chdir(group_name);
   file_->group_create();

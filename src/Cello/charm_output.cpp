@@ -73,6 +73,8 @@ void Problem::output_next(Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+#else
 void Patch::p_write(int index_output)
 {
   TRACE("OUTPUT Patch::p_write()");
@@ -83,6 +85,8 @@ void Patch::p_write(int index_output)
 
   output->write_patch(this,field_descr,0,0,0);
 }
+#endif
+
 
 //----------------------------------------------------------------------
 
@@ -96,11 +100,20 @@ void CommBlock::p_write (int index_output)
 
   output->write_block(this,field_descr,0,0,0);
 
+#ifdef REMOVE_PATCH
+  WARNING("CommBlock::p_write",
+	  "Check that Simulation::s_write() sync count is correct");
+  proxy_simulation.s_write();
+#else
   proxy_patch_.s_write();
+#endif
 }
 
 //----------------------------------------------------------------------
 
+
+#ifdef REMOVE_PATCH
+#else
 void Patch::s_write()
 {
   TRACE("OUTPUT Patch::s_write()");
@@ -108,6 +121,7 @@ void Patch::s_write()
     proxy_simulation.s_write();
   }
 }
+#endif
 
 //----------------------------------------------------------------------
 
@@ -196,12 +210,15 @@ void Problem::output_write
 
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+#else
 void Patch::s_output()
 {
   if (block_loop_.done()) {
     proxy_simulation.p_output();
   }
 }
+#endif
 //======================================================================
 
 #endif /* CONFIG_USE_CHARM */

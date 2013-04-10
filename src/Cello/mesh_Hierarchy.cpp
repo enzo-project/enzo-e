@@ -17,9 +17,11 @@ Hierarchy::Hierarchy ( const Factory * factory,
 		       int dimension, int refinement) throw ()
   : factory_((Factory * )factory),
     dimension_(dimension),
-    refinement_(refinement),
-    patch_count_(0),
-    patch_tree_(new Tree (dimension,refinement))
+    refinement_(refinement)
+#ifdef REMOVE_PATCH
+#else
+    , patch_count_(0), patch_tree_(new Tree (dimension,refinement))
+#endif
 {
   // Initialize extents
   for (int i=0; i<3; i++) {
@@ -39,8 +41,11 @@ Hierarchy::~Hierarchy() throw()
     delete patch;
     patch = 0;
   }
+#ifdef REMOVE_PATCH
+#else
   delete patch_tree_;
   patch_count_ = 0;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -58,9 +63,12 @@ void Hierarchy::pup (PUP::er &p)
   p | factory_; // PUP::able
   p | dimension_;
   p | refinement_;
+#ifdef REMOVE_PATCH
+#else
   p | patch_count_;
   if (up) patch_tree_ = new Tree (dimension_, refinement_);
   p | *patch_tree_;
+#endif
   PUParray(p,root_size_,3);
   PUParray(p,lower_,3);
   PUParray(p,upper_,3);
@@ -97,10 +105,10 @@ void Hierarchy::set_root_size(int nx, int ny, int nz) throw ()
 
 //----------------------------------------------------------------------
 
-// int Hierarchy::dimension() const throw ()
-// { 
-//   return dimension_; 
-// }
+int Hierarchy::dimension() const throw ()
+{ 
+  return dimension_; 
+}
 
 // //----------------------------------------------------------------------
 
@@ -111,20 +119,23 @@ void Hierarchy::set_root_size(int nx, int ny, int nz) throw ()
 
 //----------------------------------------------------------------------
 
-int Hierarchy::dimension() const throw ()
-{
-  Patch * root = (Patch * )patch_tree_->root_node();
-  if (root == 0) {
-    return 0;
-  } else {
-    int nx,ny,nz;
-    root->size(&nx,&ny,&nz);
-    if (nz != 1) return 3;
-    if (ny != 1) return 2;
-    if (nx != 1) return 1;
-    return 0;
-  }
-}
+// int Hierarchy::dimension() const throw ()
+// {
+// #ifdef REMOVE_PATCH
+// #else
+//   Patch * root = (Patch * )patch_tree_->root_node();
+// #endif
+//   if (root == 0) {
+//     return 0;
+//   } else {
+//     int nx,ny,nz;
+//     root->size(&nx,&ny,&nz);
+//     if (nz != 1) return 3;
+//     if (ny != 1) return 2;
+//     if (nx != 1) return 1;
+//     return 0;
+//   }
+// }
 
 //----------------------------------------------------------------------
 
@@ -188,26 +199,59 @@ void Hierarchy::upper(double * x, double * y, double * z) const throw ()
 
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+#else
+
 size_t Hierarchy::num_patches() const throw()
 {
   return patch_tree_->num_nodes();
 }
+#endif
+
 
 //----------------------------------------------------------------------
+
+#ifdef REMOVE_PATCH
+#else
 
 Patch * Hierarchy::patch(size_t i) throw()
 {
   return (Patch * ) patch_tree_->root_node()->data();
 }
 
+#endif
+
 //----------------------------------------------------------------------
+
+#ifdef REMOVE_PATCH
+#else
+
 
 Patch * Hierarchy::patch(size_t i) const throw()
 {
   return (Patch * ) patch_tree_->root_node()->data();
 }
 
+#endif
+
 //----------------------------------------------------------------------
+
+#ifdef REMOVE_PATCH
+
+void Hierarchy::create_forest
+(
+ FieldDescr   * field_descr,
+ int nx, int ny, int nz,
+ int nbx, int nby, int nbz,
+ bool allocate_blocks,
+ int process_first, int process_last_plus) throw()
+{
+  INCOMPLETE("Hierarchy::create_forest");
+}
+
+//----------------------------------------------------------------------
+
+#else
 
 void Hierarchy::create_root_patch 
 (
@@ -244,3 +288,5 @@ void Hierarchy::create_root_patch
   }
   TRACE3("size = %d %d %d",nx,ny,nz);
 }
+
+#endif

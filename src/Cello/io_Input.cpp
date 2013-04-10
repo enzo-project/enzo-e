@@ -107,6 +107,22 @@ void Input::read_hierarchy
 ) throw()
 {
 
+#ifdef REMOVE_PATCH
+
+#  ifdef CONFIG_USE_CHARM
+
+  hierarchy->block_array()->p_read (index_charm_);
+
+#  else /* CONFIG_USE_CHARM */
+
+  ItBlock it_block (hierarchy);
+  while (CommBlock * block = ++it_block) {
+    read_block (block, "NAME",field_descr);
+  }
+
+#  endif /* CONFIG_USE_CHARM */
+
+#else /* REMOVE_PATCH */
   ItPatch it_patch (hierarchy);
 
   // (*) read data patch_list_
@@ -117,10 +133,13 @@ void Input::read_hierarchy
     read_patch (patch, field_descr,  0,0,0);
 
   }
+#endif /* REMOVE_PATCH */
 }
 
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+#else
 Patch * Input::read_patch 
 (
  Patch * patch,
@@ -144,6 +163,7 @@ Patch * Input::read_patch
 #endif
   return patch;
 }
+#endif /* REMOVE_PATCH */
 
 //----------------------------------------------------------------------
 
