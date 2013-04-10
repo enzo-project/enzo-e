@@ -65,7 +65,6 @@ Factory::create_patch
   TRACE1("proxy_patch = %p",proxy_patch);
   return proxy_patch;
 #else
-  DEBUG1("ID = %d",id);
   return new Patch
     (this,
      field_descr,
