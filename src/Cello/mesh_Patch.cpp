@@ -128,17 +128,6 @@ Patch::~Patch() throw()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
-void Patch::s_block(CkCallback callback)
-{
-  if (block_loop_.done()) callback.send();
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
 void Patch::size (int * npx, int * npy, int * npz) const throw()
 {
   if (npx) (*npx) = size_[0];

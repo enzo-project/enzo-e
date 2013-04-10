@@ -60,9 +60,6 @@ class Patch
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Wait for all CommBlocks to check in before proceeding
-  void s_block(CkCallback function);
-
   /// Initialize component CommBlocks
   void p_initial ();
 
