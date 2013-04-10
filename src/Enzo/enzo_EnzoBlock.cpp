@@ -389,13 +389,19 @@ EnzoBlock::EnzoBlock
  double xm, double ym, double zm,
  double xp, double yp, double zp,
 #ifdef CONFIG_USE_CHARM
+#  ifdef REMOVE_PATCH
+#  else /* REMOVE_PATCH */
  CkChareID proxy_patch,
+#  endif /* REMOVE_PATCH */
 #endif
  int num_field_blocks) throw()
   : CommBlock (ix,iy,iz,
 	       nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
 #ifdef CONFIG_USE_CHARM
+#  ifdef REMOVE_PATCH
+#  else /* REMOVE_PATCH */
 	       proxy_patch,
+#  endif /* REMOVE_PATCH */
 #endif
 	       num_field_blocks),
     Time_(0),
@@ -435,10 +441,17 @@ EnzoBlock::EnzoBlock
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xp, double yp, double zp,
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
  CkChareID proxy_patch,
+#endif /* REMOVE_PATCH */
  int num_field_blocks) throw()
   : CommBlock (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
-	       proxy_patch,num_field_blocks),
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
+	       proxy_patch,
+#endif /* REMOVE_PATCH */
+	       num_field_blocks),
     Time_(0),
     CycleNumber(0),
     OldTime(0),

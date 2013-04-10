@@ -77,7 +77,6 @@ module enzo {
        int nx, int ny, int nz,	
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
-       CProxy_Patch proxy_patch,
        int num_field_blocks);
 
     entry EnzoBlock
@@ -85,7 +84,6 @@ module enzo {
        int nx, int ny, int nz,	
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
-       CProxy_Patch proxy_patch,
        int num_field_blocks);
   };
 

@@ -5,6 +5,10 @@
 /// @date     2010-05-06
 /// @brief    Program implementing unit tests for the Patch class
 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
+
+
 #include <assert.h>
 #include "main.hpp" 
 #include "test.hpp"
@@ -68,3 +72,5 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
+
+#endif /* REMOVE_PATCH */

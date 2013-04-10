@@ -43,7 +43,10 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
    CProxy_Patch proxy_patch,
+#endif /* REMOVE_PATCH */
    int num_field_blocks = 1,
    bool allocate = true) const throw();
 #else

@@ -34,7 +34,10 @@ PARALLEL_MAIN_BEGIN
   printf ("%4ld sizeof(Method)\n",sizeof(Method));
   printf ("%4ld sizeof(Node)\n",sizeof(Node));
   printf ("%4ld sizeof(Parameters)\n",sizeof(Parameters));
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
   printf ("%4ld sizeof(Patch)\n",sizeof(Patch));
+#endif /* REMOVE_PATCH */
   printf ("%4ld sizeof(Problem)\n",sizeof(Problem));
   printf ("%4ld sizeof(Simulation)\n",sizeof(Simulation));
   printf ("%4ld sizeof(Stopping)\n",sizeof(Stopping));

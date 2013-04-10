@@ -11,7 +11,11 @@
 #if defined(CONFIG_USE_MPI) || ! defined(CONFIG_USE_CHARM)
 
 class CommBlock;
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
 class Patch;
+#endif /* REMOVE_PATCH */
+
 
 class SimulationMpi : public Simulation {
 
@@ -41,7 +45,12 @@ public: // functions
 protected:
 
   void update_boundary_ (CommBlock * block, bool boundary[3][2]) throw();
+#ifdef REMOVE_PATCH
+  void refresh_ghost_   (CommBlock * block, bool boundary[3][2]) throw();
+#else /* REMOVE_PATCH */
   void refresh_ghost_   (CommBlock * block, Patch * patch, bool boundary[3][2]) throw();
+#endif /* REMOVE_PATCH */
+
   
 };
 

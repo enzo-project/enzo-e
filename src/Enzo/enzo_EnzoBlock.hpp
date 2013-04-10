@@ -168,7 +168,11 @@ public: // interface
    double xm, double ym, double zm,
    double hx, double hy, double hz,
 #ifdef CONFIG_USE_CHARM
+#  ifdef REMOVE_PATCH
+#  else /* REMOVE_PATCH */
    CkChareID proxy_patch,
+#  endif /* REMOVE_PATCH */
+
 #endif
    int num_field_blocks) throw();
 
@@ -188,7 +192,11 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
+#  ifdef REMOVE_PATCH
+#  else /* REMOVE_PATCH */
    CkChareID proxy_patch,
+#  endif /* REMOVE_PATCH */
+
    int num_field_blocks) throw();
 
   /// Pack / unpack the EnzoBlock in a CHARM++ program

@@ -28,7 +28,12 @@ PARALLEL_MAIN_BEGIN
 
   FieldDescr field_descr;
 
+#ifdef REMOVE_PATCH
+  hierarchy->create_forest(&field_descr,12,12,12,3,3,3);
+#else /* REMOVE_PATCH */
   hierarchy->create_root_patch(&field_descr,12,12,12,3,3,3);
+#endif /* REMOVE_PATCH */
+
   unit_assert(hierarchy->patch(0)!=NULL);
 
   // Extents
