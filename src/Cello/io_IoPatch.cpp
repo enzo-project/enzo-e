@@ -10,12 +10,11 @@
 //----------------------------------------------------------------------
 
 IoPatch::IoPatch(const Patch * patch) throw ()
-  : Io(6,0),
+  : Io(5,0),
     patch_((Patch*)patch)
 {
   DEBUG1("IoPatch(%p)\n",patch);
 
-  meta_name_.push_back("id");
   meta_name_.push_back("size");
   meta_name_.push_back("offset");
   meta_name_.push_back("blocking");
@@ -47,9 +46,6 @@ void IoPatch::meta_value
   DEBUG3 ("patch size = %d %d %d",patch_->size_[0],patch_->size_[1],patch_->size_[2]);
   
   if (index == count++) {
-    *buffer = (void *) &patch_->id_;
-    *type   = scalar_type_int;
-  } else  if (index == count++) {
     *buffer = (void *) patch_->size_;
     *type   = scalar_type_int;
     *nxd     = 3;

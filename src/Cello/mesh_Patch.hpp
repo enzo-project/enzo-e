@@ -117,18 +117,6 @@ class Patch
   /// Return domain upper extent
   void upper(double * x, double * y=0, double * z=0) const throw ();
 
-  /// Return the (global) id of this Patch
-  int id () const throw()
-  {  return id_; }
-
-  /// Return the name of the patch, e.g. "patch_12"
-  std::string name () const throw()
-  {
-    std::stringstream convert;
-    convert << "patch_" << id_;
-    return convert.str();
-  }
-
   //--------------------------------------------------
 
   const GroupProcess * group_process()  const throw()
@@ -187,9 +175,6 @@ protected: // functions
    const FieldDescr * field_descr = 0) throw ();
 
 protected: // attributes
-
-  /// ID of this Patch
-  int id_;
 
   /// Array of CommBlocks ib associated with this process
 #ifdef CONFIG_USE_CHARM

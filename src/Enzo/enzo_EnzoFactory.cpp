@@ -41,7 +41,6 @@ CProxy_CommBlock EnzoFactory::create_block_array
  double xm, double ym, double zm,
  double hx, double hy, double hz,
  CProxy_Patch proxy_patch,
- int patch_id,
  int patch_rank,
  int num_field_blocks,
  bool allocate
@@ -55,7 +54,6 @@ CProxy_CommBlock EnzoFactory::create_block_array
        xm,ym,zm, 
        hx,hy,hz, 
        proxy_patch,
-       patch_id,
        patch_rank,
        num_field_blocks,
        nbx,nby,nbz);
@@ -75,7 +73,6 @@ CommBlock * EnzoFactory::create_block
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double hx, double hy, double hz,
- int patch_id,
  int patch_rank,
  int num_field_blocks
  ) const throw()
@@ -87,7 +84,6 @@ CommBlock * EnzoFactory::create_block
      xm,ym,zm, 
      xb,yb,zb, 
      proxy_patch,
-     patch_id,
      patch_rank,
      num_field_blocks,
      nbx,nby,nbz);
@@ -100,7 +96,6 @@ CommBlock * EnzoFactory::create_block
      nx,ny,nz,
      xm,ym,zm, 
      hx,hy,hz, 
-     patch_id,
      patch_rank,
      num_field_blocks);
 #endif

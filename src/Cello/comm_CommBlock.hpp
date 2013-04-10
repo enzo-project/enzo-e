@@ -9,7 +9,6 @@
 #define COMM_COMMBLOCK_HPP
 
 class Block;
-class Patch;
 class Factory;
 class GroupProcess;
 
@@ -40,7 +39,6 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
    CProxy_Patch proxy_patch,
 #endif
-   int patch_id,
    int patch_rank,
    int num_field_blocks
 ) throw();
@@ -55,7 +53,6 @@ public: // interface
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
    CProxy_Patch proxy_patch,
-   int patch_id,
    int patch_rank,
    int num_field_blocks
 ) throw();
@@ -79,7 +76,6 @@ public: // interface
   p | proxy_patch_;
 
 
-  p | patch_id_;
   p | patch_rank_;
 
   PUParray(p,index_,3);
@@ -207,14 +203,6 @@ public: // interface
     return convert.str();
   }
 
-  /// Return the name of the parent patch, e.g. "patch_12"
-  std::string patch_name () const throw()
-  {
-    std::stringstream convert;
-    convert << "patch_" << patch_id_;
-    return convert.str();
-  }
-
   /// Return the size the containing Patch
   void size_patch (int * nx, int * ny, int * nz) const throw();
 
@@ -301,9 +289,6 @@ protected: // attributes
 #endif
 
   //--------------------------------------------------
-
-  /// ID of parent patch
-  int patch_id_;
 
   /// Process of parent patch (for Charm++ IO)
   int patch_rank_;

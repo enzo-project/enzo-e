@@ -107,13 +107,11 @@ CProxy_CommBlock Factory::create_block_array
  double xm, double ym, double zm,
  double xb, double yb, double zb,
  CProxy_Patch proxy_patch,
- int patch_id,
  int patch_rank,
  int num_field_blocks,
  bool allocate
  ) const throw()
 {
-  DEBUG1("ID = %d",patch_id);
   if (allocate) {
     CProxy_CommBlock * proxy_block = new CProxy_CommBlock;
     *proxy_block = CProxy_CommBlock::ckNew
@@ -124,7 +122,6 @@ CProxy_CommBlock Factory::create_block_array
        xb,yb,zb, 
        proxy_patch,
        num_field_blocks,
-       patch_id,
        patch_rank,
        nbx,nby,nbz);
     //    DEBUG1 ("block = %p",block);
@@ -147,26 +144,22 @@ CommBlock * Factory::create_block
 #ifdef CONFIG_USE_CHARM
  CProxy_Patch proxy_patch,
 #endif 
- int patch_id,
  int patch_rank,
  int num_field_blocks
  ) const throw()
 {
 #ifdef CONFIG_USE_CHARM
-  DEBUG1("ID = %d",patch_id);
     CProxy_CommBlock block_array = CProxy_CommBlock::ckNew
     (nbx,nby,nbz,
      nx,ny,nz,
      xm,ym,zm, 
      xb,yb,zb, 
      proxy_patch,
-     patch_id,
      patch_rank,
      num_field_blocks,
      nbx,nby,nbz);
   return block_array(ibx,iby,ibz).ckLocal();
 #else
-  DEBUG1("ID = %d",patch_id);
   // CProxy_CommBlock proxy_block_reduce = 
   //   CProxy_CommBlock::ckNew()
   return new CommBlock 
@@ -175,7 +168,6 @@ CommBlock * Factory::create_block
      nx,ny,nz,
      xm,ym,zm, 
      xb,yb,zb, 
-     patch_id,
      patch_rank,
      num_field_blocks);
 #endif
