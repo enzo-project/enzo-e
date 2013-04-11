@@ -282,7 +282,7 @@ void Hierarchy::create_forest
 {
   TRACE3("Hierarchy::create_forest() block size  %d %d %d",nx,ny,nz);
   TRACE3("Hierarchy::create_forest() blocking    %d %d %d",nbx,nby,nbz);
-  //  set_root_size(nbx,nby,nbz);
+  set_root_size(nx,ny,nz);
 
   layout_ = new Layout (nbx,nby,nbz);
   layout_->set_process_range(0,group_process_->size());
@@ -448,8 +448,6 @@ void Hierarchy::allocate_array_
 
     // create a new data block
 
-    printf ("create_block  %d %d %d  %d %d %d  %d %d %d\n",
-	    ibx,iby,ibz,nbx,nby,nbz,mbx,mby,mbz);
     CommBlock * block = factory_->create_block 
       (ibx,iby,ibz,
        nbx,nby,nbz,
