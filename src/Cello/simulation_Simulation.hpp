@@ -18,12 +18,7 @@ class Performance;
 class Problem;
 
 #ifdef CONFIG_USE_CHARM
-#ifdef REMOVE_PATCH
-#  include "mesh_patch.decl.h"
-#else /* REMOVE_PATCH */
 #  include "mesh.decl.h"
-#endif /* REMOVE_PATCH */
-
 #  include "simulation.decl.h"
 #endif
 

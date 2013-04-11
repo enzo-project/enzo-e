@@ -318,7 +318,13 @@ void Simulation::initialize_hierarchy_() throw()
   //----------------------------------------------------------------------
 
   const int refinement = 2;
+#ifdef REMOVE_PATCH
+  hierarchy_ = factory()->create_hierarchy (dimension_,refinement,
+					    0, group_process_->size());
+#else /* REMOVE_PATCH */
   hierarchy_ = factory()->create_hierarchy (dimension_,refinement);
+#endif /* REMOVE_PATCH */
+
 
   // Domain extents
 

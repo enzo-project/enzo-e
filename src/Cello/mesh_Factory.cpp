@@ -11,11 +11,21 @@
 extern CProxy_SimulationCharm  proxy_simulation;
 #endif
 
+#ifdef REMOVE_PATCH
+
+//----------------------------------------------------------------------
+Hierarchy * Factory::create_hierarchy (int dimension, int refinement,
+				       int process_first, int process_last_plus) const throw ()
+{
+  return new Hierarchy (this,dimension,refinement,process_first, process_last_plus); 
+}
+#else /* REMOVE_PATCH */
 //----------------------------------------------------------------------
 Hierarchy * Factory::create_hierarchy (int dimension, int refinement) const throw ()
 {
   return new Hierarchy (this,dimension,refinement); 
 }
+#endif /* REMOVE_PATCH */
 
 
 //----------------------------------------------------------------------
@@ -35,6 +45,9 @@ void Factory::pup (PUP::er &p)
 #endif
 
 //----------------------------------------------------------------------
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
+
 #ifdef CONFIG_USE_CHARM
 CProxy_Patch * 
 #else
@@ -77,6 +90,7 @@ Factory::create_patch
      process_first, process_last_plus);
 #endif
 }
+#endif /* REMOVE_PATCH */
 
 //----------------------------------------------------------------------
 
@@ -102,7 +116,10 @@ CProxy_CommBlock Factory::create_block_array
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xb, double yb, double zb,
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
  CProxy_Patch proxy_patch,
+#endif /* REMOVE_PATCH */
  int num_field_blocks,
  bool allocate
  ) const throw()
@@ -115,7 +132,10 @@ CProxy_CommBlock Factory::create_block_array
        nx,ny,nz,
        xm,ym,zm, 
        xb,yb,zb, 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
        proxy_patch,
+#endif /* REMOVE_PATCH */
        num_field_blocks,
        nbx,nby,nbz);
     //    DEBUG1 ("block = %p",block);
@@ -136,7 +156,10 @@ CommBlock * Factory::create_block
  double xm, double ym, double zm,
  double xb, double yb, double zb,
 #ifdef CONFIG_USE_CHARM
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
  CProxy_Patch proxy_patch,
+#endif /* REMOVE_PATCH */
 #endif 
  int num_field_blocks
  ) const throw()
@@ -147,7 +170,10 @@ CommBlock * Factory::create_block
      nx,ny,nz,
      xm,ym,zm, 
      xb,yb,zb, 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
      proxy_patch,
+#endif /* REMOVE_PATCH */
      num_field_blocks,
      nbx,nby,nbz);
   return block_array(ibx,iby,ibz).ckLocal();

@@ -14,11 +14,18 @@
 //----------------------------------------------------------------------
 
 Hierarchy::Hierarchy ( const Factory * factory,
-		       int dimension, int refinement) throw ()
+		       int dimension, int refinement
+#ifdef REMOVE_PATCH
+		       ,int process_first, int process_last_plus
+#endif
+
+) throw ()
   : factory_((Factory * )factory),
     dimension_(dimension),
     refinement_(refinement)
 #ifdef REMOVE_PATCH
+  , layout_(0),
+    group_process_(GroupProcess::create(process_first,process_last_plus))
 #else
     , patch_count_(0), patch_tree_(new Tree (dimension,refinement))
 #endif
@@ -35,17 +42,30 @@ Hierarchy::Hierarchy ( const Factory * factory,
 
 Hierarchy::~Hierarchy() throw()
 {
+#ifdef REMOVE_PATCH
+
+# ifdef CONFIG_USE_CHARM
+
+  block_array_->ckDestroy();
+
+# else
+
+  for (int i=0; i<block_.size(); i++) delete [] block_[i];
+
+# endif
+
+#else /* REMOVE_PATCH */
+
   ItNode it_node (patch_tree_);
   while (Node * node = it_node.next_leaf()) {
     Patch * patch = (Patch *) node->data();
     delete patch;
     patch = 0;
   }
-#ifdef REMOVE_PATCH
-#else
   delete patch_tree_;
   patch_count_ = 0;
-#endif
+
+#endif /* REMOVE_PATCH */
 }
 
 //----------------------------------------------------------------------
@@ -64,6 +84,8 @@ void Hierarchy::pup (PUP::er &p)
   p | dimension_;
   p | refinement_;
 #ifdef REMOVE_PATCH
+  p | *layout_;
+  if (up) group_process_ = GroupProcess::create();
 #else
   p | patch_count_;
   if (up) patch_tree_ = new Tree (dimension_, refinement_);
@@ -98,9 +120,20 @@ void Hierarchy::set_upper(double x, double y, double z) throw ()
 
 void Hierarchy::set_root_size(int nx, int ny, int nz) throw ()
 {
+#ifdef REMOVE_PATCH
+
+  layout_ = new Layout (nx,ny,nz);
+  layout_->set_process_range(0,group_process_->size());
+
+  num_blocks_ = nx*ny*nz;
+
+#endif /* REMOVE_PATCH */
+
   root_size_[0] = nx;
   root_size_[1] = ny;
   root_size_[2] = nz;
+
+
 }
 
 //----------------------------------------------------------------------
@@ -162,6 +195,25 @@ void Hierarchy::upper(double * x, double * y, double * z) const throw ()
   if (y) *y = upper_[1];
   if (z) *z = upper_[2];
 }
+
+//----------------------------------------------------------------------
+
+#ifdef REMOVE_PATCH
+
+Layout * Hierarchy::layout () throw()
+{
+  return layout_;
+}
+
+//----------------------------------------------------------------------
+
+const Layout * Hierarchy::layout () const throw()
+{
+  return layout_;
+}
+
+#endif /* REMOVE_PATCH */
+
 // //----------------------------------------------------------------------
 
 // int Hierarchy::max_level() const throw ()
@@ -197,6 +249,7 @@ void Hierarchy::upper(double * x, double * y, double * z) const throw ()
 //   return (patch_list_.size() > 0) ? patch_list_[0] : NULL; 
 // }
 
+//========================================================================
 //----------------------------------------------------------------------
 
 #ifdef REMOVE_PATCH
@@ -248,6 +301,26 @@ void Hierarchy::create_forest
 {
   INCOMPLETE("Hierarchy::create_forest");
 }
+
+
+#ifndef CONFIG_USE_CHARM
+size_t Hierarchy::num_local_blocks() const  throw()
+{
+  int rank = group_process_->rank();
+  return layout_->local_count(rank);
+}
+#endif
+
+//----------------------------------------------------------------------
+
+#ifndef CONFIG_USE_CHARM
+CommBlock * Hierarchy::local_block(size_t i) const throw()
+{
+  return (i < block_.size()) ? block_[i] : 0;
+
+}
+#endif
+
 
 //----------------------------------------------------------------------
 

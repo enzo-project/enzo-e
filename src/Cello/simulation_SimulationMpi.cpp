@@ -59,7 +59,7 @@ void SimulationMpi::run() throw()
 
 #ifdef REMOVE_PATCH
 
-    ItBlock it_block(hierarchy);
+  ItBlock it_block(hierarchy_);
 
 #else /* REMOVE_PATCH */
 
@@ -104,14 +104,15 @@ void SimulationMpi::run() throw()
   hierarchy_->upper(&upper[0], &upper[1], &upper[2]);
 
 #ifdef REMOVE_PATCH
-    ItBlock it_block(hierarchy);
+
 #else /* REMOVE_PATCH */
 
   while ((patch = ++it_patch)) {
 
     ItBlock it_block(patch);
-#endif /* REMOVE_PATCH */
     CommBlock * block;
+
+#endif /* REMOVE_PATCH */
 
     while ((block = ++it_block)) {
 
@@ -155,10 +156,6 @@ void SimulationMpi::run() throw()
 
 #ifdef REMOVE_PATCH
 
-  ItBlock it_block(hierarchy);
-
-  CommBlock * block;
-
   while ((block = ++it_block)) {
 
     int cycle = block->cycle();
@@ -166,15 +163,16 @@ void SimulationMpi::run() throw()
 
     int stop_block = stopping->complete(cycle,time);
 
+    stop_hierarchy = stop_hierarchy && stop_block;
   }
-  stop_hierarchy = stop_hierarchy && stop_block
+
 
 
 #else /* REMOVE_PATCH */
 
   while ((patch = ++it_patch)) {
-    ItBlock it_block(patch);
 
+    ItBlock it_block(patch);
 
     CommBlock * block;
 
@@ -212,7 +210,7 @@ void SimulationMpi::run() throw()
 
     // Accumulate Patch-local timesteps
 #ifdef REMOVE_PATCH
-      ItBlock it_block(hierarchy);
+
 #else /* REMOVE_PATCH */
 
     while ((patch = ++it_patch)) {
@@ -244,21 +242,15 @@ void SimulationMpi::run() throw()
 	dt_block = MIN (dt_block, (time_stop - time_block));
 
 #ifdef REMOVE_PATCH
+	dt_hierarchy = MIN(dt_hierarchy, dt_block);
       }
-      dt_hierarchy = MIN(dt_hierarchy, dt_block);
 #else /* REMOVE_PATCH */
 	dt_patch = MIN(dt_patch,dt_block);
 
       }
       dt_hierarchy = MIN(dt_hierarchy, dt_patch);
-#endif /* REMOVE_PATCH */
-
-
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
     }
 #endif /* REMOVE_PATCH */
-
 
     dt_hierarchy = reduce.reduce_double(dt_hierarchy,reduce_op_min);
 
@@ -269,16 +261,16 @@ void SimulationMpi::run() throw()
     // Set Block timesteps
 
 #ifdef REMOVE_PATCH
-      ItBlock it_block(hierarchy);
+
 #else /* REMOVE_PATCH */
     while ((patch = ++it_patch)) {
 
       ItBlock it_block(patch);
+      CommBlock * block;
 #endif /* REMOVE_PATCH */
 
       // Accumulate Block-local timesteps
 
-      CommBlock * block;
       while ((block = ++it_block)) {
 	block->set_dt    (dt_);
       }
@@ -301,15 +293,15 @@ void SimulationMpi::run() throw()
     //--------------------------------------------------
 
 #ifdef REMOVE_PATCH
-    ItBlock it_block(hierarchy);
+
 #else /* REMOVE_PATCH */
     while ((patch = ++it_patch)) {
 
       ItBlock it_block(patch);
+      CommBlock * block;
 #endif /* REMOVE_PATCH */
 
 
-      CommBlock * block;
       while ((block = ++it_block)) {
 
 	bool is_boundary [3][2];
@@ -336,15 +328,15 @@ void SimulationMpi::run() throw()
     //--------------------------------------------------
 
 #ifdef REMOVE_PATCH
-    ItBlock it_block(hierarchy);
+
 #else /* REMOVE_PATCH */
     while ((patch = ++it_patch)) {
 
       ItBlock it_block(patch);
+      CommBlock * block;
 #endif /* REMOVE_PATCH */
 
 
-      CommBlock * block;
       while ((block = ++it_block)) {
 
 	int index_method = 0;
@@ -370,14 +362,14 @@ void SimulationMpi::run() throw()
 
     stop_hierarchy = true;
 #ifdef REMOVE_PATCH
-      ItBlock it_block(hierarchy);
+
 #else /* REMOVE_PATCH */
     while ((patch = ++it_patch)) {
       ItBlock it_block(patch);
       int stop_patch = true;
+      CommBlock * block;
 #endif /* REMOVE_PATCH */
 
-      CommBlock * block;
       while ((block = ++it_block)) {
 	int stop_block = stopping->complete(block->cycle(),block->time());
 #ifdef REMOVE_PATCH
@@ -565,12 +557,12 @@ void SimulationMpi::refresh_ghost_
     // TRACE3("p %d %d %d",px,py,pz);
     // TRACE6("a %d %d  %d %d  %d %d",axm,axp,aym,ayp,azm,azp);
 #ifdef REMOVE_PATCH
-    if (axm) comm_block->refresh_ghosts(field_descr_,+px,0,0);
-    if (axp) comm_block->refresh_ghosts(field_descr_,-px,0,0);
-    if (aym) comm_block->refresh_ghosts(field_descr_,0,+py,0);
-    if (ayp) comm_block->refresh_ghosts(field_descr_,0,-py,0);
-    if (azm) comm_block->refresh_ghosts(field_descr_,0,0,+pz);
-    if (azp) comm_block->refresh_ghosts(field_descr_,0,0,-pz);
+    if (axm) comm_block->refresh_ghosts(field_descr_,hierarchy_,+px,0,0);
+    if (axp) comm_block->refresh_ghosts(field_descr_,hierarchy_,-px,0,0);
+    if (aym) comm_block->refresh_ghosts(field_descr_,hierarchy_,0,+py,0);
+    if (ayp) comm_block->refresh_ghosts(field_descr_,hierarchy_,0,-py,0);
+    if (azm) comm_block->refresh_ghosts(field_descr_,hierarchy_,0,0,+pz);
+    if (azp) comm_block->refresh_ghosts(field_descr_,hierarchy_,0,0,-pz);
 #else /* REMOVE_PATCH */
     if (axm) comm_block->refresh_ghosts(field_descr_,patch,+px,0,0);
     if (axp) comm_block->refresh_ghosts(field_descr_,patch,-px,0,0);

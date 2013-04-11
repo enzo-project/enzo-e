@@ -187,10 +187,11 @@ void OutputImage::write_block
   int nbx,nby,nbz;
   field_block->size(&nbx,&nby,&nbz);
 
+  int ix,iy,iz;
+
 #ifdef REMOVE_PATCH
   comm_block->index_forest(&ix,&iy,&iz);
 #else /* REMOVE_PATCH */
-  int ix,iy,iz;
   comm_block->index_patch(&ix,&iy,&iz);
 #endif /* REMOVE_PATCH */
 

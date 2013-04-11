@@ -7,6 +7,9 @@
 /// @brief    Implementation of ItPatch
 //----------------------------------------------------------------------
 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
+
 #include "cello.hpp"
 
 #include "mesh.hpp"
@@ -39,6 +42,4 @@ bool ItPatch::done () const throw()
   return index1_ >= hierarchy_->num_patches();
 }
 
-
-
-
+#endif /* REMOVE_PATCH */

@@ -77,13 +77,13 @@ public: // virtual functions
   ( const Patch * patch,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
+#endif /* REMOVE_PATCH */
 
   /// Write block data to disk
   virtual void write_block
   ( const CommBlock * block,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
-#endif /* REMOVE_PATCH */
 
 
   /// Write local field to disk

@@ -182,22 +182,27 @@ void CommBlock::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
 
 void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
 #ifdef REMOVE_PATCH
+			       const Hierarchy * hierarchy,
 #else
-			   const Patch * patch,
+			       const Patch * patch,
 #endif
-			   int fx, int fy, int fz,
-			   int index_field_set) throw()
+			       int fx, int fy, int fz,
+			       int index_field_set) throw()
 {
   int ibx,iby,ibz;
+
 #ifdef REMOVE_PATCH
   index_forest(&ibx,&iby,&ibz);
 #else
   index_patch(&ibx,&iby,&ibz);
 #endif
+
   block_.field_block(index_field_set)
     -> refresh_ghosts (field_descr,
+
 #ifdef REMOVE_PATCH
-		       @@@
+		       hierarchy->group_process(),
+		       hierarchy->layout(),
 #else
 		       patch->group_process(),
 		       patch->layout(),

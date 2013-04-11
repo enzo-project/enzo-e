@@ -7,7 +7,7 @@ import sys
 
 # Whether to compile with REMOVE_PATCH defined
 
-remove_patch = 0
+remove_patch = 1
 
 # Whether to print out messages with the TRACE() series of statements
 

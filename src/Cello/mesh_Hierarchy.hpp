@@ -9,6 +9,9 @@
 #define MESH_HIERARCHY_HPP
 
 class Factory;
+#ifdef CONFIG_USE_CHARM
+class CProxy_CommBlock;
+#endif
 
 class Hierarchy {
 
@@ -25,7 +28,11 @@ public: // interface
   
   /// Initialize a Hierarchy object
   Hierarchy ( const Factory * factory,
-	      int dimension, int refinement) throw ();
+	      int dimension, int refinement
+#ifdef REMOVE_PATCH
+	      ,int process_first, int process_last_plus
+#endif /* REMOVE_PATCH */
+) throw ();
 
   /// Delete the Hierarchy object
   virtual ~Hierarchy() throw ();
@@ -78,6 +85,14 @@ public: // interface
   CommBlock * local_block(size_t i) const throw();
 # endif
 
+  /// Return the total number of blocks
+  size_t num_blocks() const throw()
+  { 
+    WARNING("Hierarchy::num_blocks()",
+	    "num_blocks_ initialization not implemented for AMR");
+    return num_blocks_; 
+  }
+
   void create_forest (FieldDescr   * field_descr,
 		      int nx, int ny, int nz,
 		      int nbx, int nby, int nbz,
@@ -111,6 +126,18 @@ public: // interface
   const Factory * factory () const throw()
   { return factory_; }
 
+#ifdef REMOVE_PATCH
+  /// Return the layout of the patch, describing processes and blocking
+  Layout * layout () throw();
+
+  /// Return the layout of the patch, describing processes and blocking
+  const Layout * layout () const throw();
+
+  const GroupProcess * group_process()  const throw()
+  { return group_process_; };
+
+#endif /* REMOVE_PATCH */
+
 
 protected: // attributes
 
@@ -125,6 +152,8 @@ protected: // attributes
   int refinement_;
 
 #ifdef REMOVE_PATCH
+
+  int num_blocks_; 
 
   /// Array of CommBlocks 
 # ifdef CONFIG_USE_CHARM
@@ -154,6 +183,14 @@ protected: // attributes
   /// Upper extent of the hierarchy
   double upper_[3];
 
+#ifdef REMOVE_PATCH
+
+  /// Parallel Group for distributing the Mesh across processors
+  GroupProcess * group_process_;
+
+  /// Layout: describes blocking, processor range, and processor mapping 
+  Layout * layout_;
+#endif /* REMOVE_PATCH */
 };
 
 

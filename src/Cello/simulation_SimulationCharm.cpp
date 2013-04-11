@@ -70,6 +70,9 @@ void SimulationCharm::p_refresh()
 void SimulationCharm::refresh()
 {
   TRACE("SimulationCharm::refresh");
+#ifdef REMOVE_PATCH
+  hierarchy()->block_array()->p_refresh(); 
+#else /* REMOVE_PATCH */
   ItPatch it_patch(hierarchy_);
   Patch * patch;
 
@@ -77,6 +80,8 @@ void SimulationCharm::refresh()
     CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
     proxy_patch->p_refresh();
   }
+#endif /* REMOVE_PATCH */
+
 }
 
 //----------------------------------------------------------------------
@@ -96,12 +101,17 @@ void SimulationCharm::c_compute()
 
     performance_.start_region (id_cycle_);
 
+#ifdef REMOVE_PATCH
+    hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
+#else /* REMOVE_PATCH */
     ItPatch it_patch(hierarchy_);
     Patch * patch;
     while (( patch = ++it_patch )) {
       CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
       proxy_patch->p_compute(cycle_, time_, dt_);
     }
+#endif /* REMOVE_PATCH */
+
   }
 
 }

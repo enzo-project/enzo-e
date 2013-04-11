@@ -148,9 +148,10 @@ public: // interface
   /// Refresh ghost data
   void refresh_ghosts(const FieldDescr * field_descr,
 #  ifdef REMOVE_PATCH
+		      const Hierarchy * hierarchy,
 #  else
 		      const Patch * patch,
-#endif
+#  endif
 		      int fx, int fy, int fz,
 		      int index_field_set = 0) throw();
 #endif
@@ -197,6 +198,7 @@ public: // interface
   }
 
 #  ifdef REMOVE_PATCH
+  void index_forest (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
 #  else
   /// Return the position of this CommBlock in the containing Patch 
   void index_patch (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
@@ -298,6 +300,7 @@ protected: // attributes
   int count_refresh_face_;
 
 #ifdef REMOVE_PATCH
+
 #else
   /// Parent patch
   CProxy_Patch proxy_patch_;

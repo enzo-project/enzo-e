@@ -64,6 +64,8 @@ public: // virtual functions
     const FieldDescr * field_descr  ) throw()
   { enforce_hierarchy_(hierarchy,field_descr); }
 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
   /// Initialize a Patch
   virtual void enforce_patch
   ( Patch * patch, 
@@ -71,6 +73,8 @@ public: // virtual functions
     const  Hierarchy * hierarchy
     ) throw()
   { enforce_patch_(patch,field_descr,hierarchy); }
+#endif /* REMOVE_PATCH */
+
 
   /// Initialize a CommBlock
   virtual void enforce_block
@@ -89,17 +93,21 @@ protected: // functions
   /// "Loop" over enforcing initial conditions on the Hierarchy
   void enforce_simulation_ (Simulation * simulation ) throw();
 
-  /// Loop over enforcing initial conditions Patches in the Hierarchy
+  /// Loop over enforcing initial conditions Patches / Blocks in the Hierarchy
   void enforce_hierarchy_
   ( Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
   /// Loop over enforcing initial conditions on CommBlocks in the Patch
   void enforce_patch_
   ( Patch * patch, 
     const FieldDescr * field_descr,
     const Hierarchy * hierarchy
     ) throw();
+#endif /* REMOVE_PATCH */
+
 
   /// Loop over enforcing initial conditions Field data in the CommBlock
   void enforce_block_

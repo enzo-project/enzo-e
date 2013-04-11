@@ -5,6 +5,9 @@
 /// @date     Tue Feb  1 16:46:01 PST 2011
 /// @brief    [\ref Mesh] Declaration of the ItPatch iterator
 
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */
+
 #ifndef MESH_IT_PATCH_HPP
 #define MESH_IT_PATCH_HPP
 
@@ -55,3 +58,5 @@ private: // attributes
 };
 
 #endif /* MESH_IT_PATCH_HPP */
+
+#endif /* REMOVE_PATCH */
