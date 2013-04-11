@@ -102,7 +102,6 @@ void Patch::pup (PUP::er &p)
     TRACEPUP;
     CBase_Patch::pup(p);
     // NOTE: change this function whenever attributes change
-    TRACE1("block_array_ = %p",block_array_);
     if (p.isUnpacking()) block_array_ = new CProxy_CommBlock;
     p | *block_array_;
     p | block_exists_;
@@ -307,7 +306,6 @@ void Patch::allocate_array_
 #ifdef CONFIG_USE_CHARM
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
-  DEBUG1 ("simulation = %p",simulation);
 
   const Factory * factory = simulation->factory();
 

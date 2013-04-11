@@ -8,6 +8,7 @@
 #ifndef MESH_HIERARCHY_HPP
 #define MESH_HIERARCHY_HPP
 
+
 class Factory;
 #ifdef CONFIG_USE_CHARM
 class CProxy_CommBlock;
@@ -32,7 +33,7 @@ public: // interface
 #ifdef REMOVE_PATCH
 	      ,int process_first, int process_last_plus
 #endif /* REMOVE_PATCH */
-) throw ();
+	      ) throw ();
 
   /// Delete the Hierarchy object
   virtual ~Hierarchy() throw ();
@@ -71,10 +72,33 @@ public: // interface
 
 #ifdef REMOVE_PATCH
 
+  /// Return whether CommBlocks have been allocated or not
+  bool blocks_allocated() const throw()
+  { 
+#ifdef CONFIG_USE_CHARM
+    return block_exists_;
+#else
+    return (block_.size() != 0);
+#endif
+  }
+
+  /// Return the number of CommBlocks
+  size_t num_blocks(int * nbx = 0, 
+		    int * nby = 0,
+		    int * nbz = 0) const throw()
+  { 
+    if (nbx) *nbx = blocking_[0];
+    if (nby) *nby = blocking_[1];
+    if (nbz) *nbz = blocking_[2];
+    return blocking_[0]*blocking_[1]*blocking_[2]; 
+  };
+
+  /// Deallocate local CommBlocks
+  void deallocate_blocks() throw();
+
 # ifdef CONFIG_USE_CHARM
   /// Return pointer to the CommBlock CHARM++ chare array
   CProxy_CommBlock * block_array() const throw()
-  //  { if (block_exists_) return block_array_; else return 0;}
   { return block_array_;}
 
 # else
@@ -100,6 +124,9 @@ public: // interface
 		      int process_first     = 0, 
 		      int process_last_plus = -1) throw();
 
+
+  /// Return the number of CommBlocks along each dimension
+  void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
 
 #else /* REMOVE_PATCH */
 
@@ -136,6 +163,15 @@ public: // interface
   const GroupProcess * group_process()  const throw()
   { return group_process_; };
 
+#endif /* REMOVE_PATCH */
+
+protected: // functions
+
+#ifdef REMOVE_PATCH
+  /// Allocate array, and optionally allocate element CommBlocks
+  void allocate_array_
+  (bool allocate_blocks = true,
+   const FieldDescr * field_descr = 0) throw ();
 #endif /* REMOVE_PATCH */
 
 
@@ -190,6 +226,10 @@ protected: // attributes
 
   /// Layout: describes blocking, processor range, and processor mapping 
   Layout * layout_;
+
+  /// How the Forest is distributed into CommBlocks
+  int blocking_[3];
+
 #endif /* REMOVE_PATCH */
 };
 

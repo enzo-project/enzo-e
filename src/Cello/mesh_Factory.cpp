@@ -7,26 +7,24 @@
 
 #include "mesh.hpp"
 
-#ifdef CONFIG_USE_CHARM
-extern CProxy_SimulationCharm  proxy_simulation;
-#endif
-
 #ifdef REMOVE_PATCH
 
 //----------------------------------------------------------------------
+
 Hierarchy * Factory::create_hierarchy (int dimension, int refinement,
 				       int process_first, int process_last_plus) const throw ()
 {
   return new Hierarchy (this,dimension,refinement,process_first, process_last_plus); 
 }
+
 #else /* REMOVE_PATCH */
-//----------------------------------------------------------------------
+
 Hierarchy * Factory::create_hierarchy (int dimension, int refinement) const throw ()
 {
   return new Hierarchy (this,dimension,refinement); 
 }
-#endif /* REMOVE_PATCH */
 
+#endif /* REMOVE_PATCH */
 
 //----------------------------------------------------------------------
 

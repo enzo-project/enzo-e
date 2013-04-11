@@ -63,7 +63,8 @@ CommBlock * ItBlock::operator++ () throw()
 
 #ifdef REMOVE_PATCH
   index1_ ++;
-  if (index1_ > hierarchy_->num_local_blocks()) index1_ = 0;
+  int nb = hierarchy_->num_local_blocks();
+  if (index1_ > nb) index1_ = 0;
   return index1_ ? hierarchy_->local_block(index1_ - 1) : NULL;
 #else /* REMOVE_PATCH */
   index1_ ++;

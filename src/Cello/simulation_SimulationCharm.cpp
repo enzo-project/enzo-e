@@ -16,7 +16,6 @@
 
 #include "simulation.hpp"
 
-
 //----------------------------------------------------------------------
 
 SimulationCharm::SimulationCharm
@@ -25,6 +24,8 @@ SimulationCharm::SimulationCharm
  int                n) throw ()
   : Simulation(parameter_file, n)
 {
+  TRACE("SimulationCharm::SimulationCharm");
+
   // derived class should call initialize()
 }
 
@@ -32,16 +33,24 @@ SimulationCharm::SimulationCharm
 
 SimulationCharm::~SimulationCharm() throw()
 {
+  TRACE("SimulationCharm::~SimulationCharm()");
 }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::initialize() throw()
 {
+  TRACE("SimulationCharm::initialize()");
   Simulation::initialize();
 
   WARNING("SimulationCharm::initialize()",
 	  "Calling StartLB for debugging load balancing()");
+
+#ifdef REMOVE_PATCH
+
+  s_initialize();
+
+#endif
 
 }
 
@@ -49,6 +58,7 @@ void SimulationCharm::initialize() throw()
 
 void SimulationCharm::s_initialize()
 {
+  TRACE("SimulationCharm::s_initialize()");
   if (group_process_->is_root()) run();
 }
 
@@ -56,6 +66,7 @@ void SimulationCharm::s_initialize()
 
 void SimulationCharm::run() throw()
 {
+  TRACE("SimulationCharm::run()");
   initial();
 }
 
@@ -88,6 +99,7 @@ void SimulationCharm::refresh()
 
 void SimulationCharm::c_compute()
 {
+  TRACE("SimulationCharm::c_compute()");
   if (stop_) {
     
     performance_.stop_region (id_cycle_);

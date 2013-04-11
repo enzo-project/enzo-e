@@ -72,15 +72,13 @@ public: // interface
 {
   TRACEPUP;
 
-  bool up = p.isUnpacking();
-
   CBase_CommBlock::pup(p);
 
   p | count_refresh_face_;
 #  ifdef REMOVE_PATCH
-#  else
+#  else /* REMOVE_PATCH */
   p | proxy_patch_;
-#endif
+#  endif /* REMOVE_PATCH */
 
   PUParray(p,index_,3);
   PUParray(p,size_,3);
