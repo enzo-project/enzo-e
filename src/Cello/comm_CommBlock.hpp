@@ -257,6 +257,13 @@ public: // virtual functions
 
 protected: // functions
 
+  void initialize_
+  ( int ibx, int iby, int ibz,
+    int nbx, int nby, int nbz,
+    int nx, int ny, int nz,
+    double xpm, double ypm, double zpm, // Domain begin
+    double xb, double yb, double zb);    // CommBlock width
+
   /// Allocate and copy in attributes from give CommBlock
   void copy_(const CommBlock & block) throw();
 

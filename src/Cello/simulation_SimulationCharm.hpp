@@ -42,6 +42,7 @@ public: // functions
     TRACEPUP;
     // NOTE: change this function whenever attributes change
     Simulation::pup(p);
+    p | block_loop_;
   }
 
   /// Initialize the Charm++ Simulation
@@ -50,6 +51,23 @@ public: // functions
   /// Run the simulation
   virtual void run() throw();
 
+  /// Add a new CommBlock to this local branch
+  inline void insert_block() 
+  {
+    WARNING("SimulationCharm::insert_block()",
+	    "Migrating CommBlocks will disturb local counts");
+    ++block_loop_;
+    TRACE2 ("++local count %d = %d",group_process_->rank(),block_loop_.stop());
+  }
+
+  /// Remove a CommBlock from this local branch
+  inline void delete_block() 
+  {
+    WARNING("SimulationCharm::delete_block()",
+	    "Migrating CommBlocks will disturb local counts");
+    --block_loop_; 
+    TRACE2 ("--local count %d = %d",group_process_->rank(),block_loop_.stop());
+  }
 
   /// Wait for all local patches to be created before calling run
   void s_initialize();
@@ -82,6 +100,10 @@ public: // functions
 
   // Stopping criteria and computation
   void c_compute ();
+
+protected: // attributes
+  Loop block_loop_;
+
 };
 
 #endif /* CONFIG_USE_CHARM */

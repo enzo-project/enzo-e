@@ -48,8 +48,9 @@ CProxy_CommBlock EnzoFactory::create_block_array
  bool allocate
  ) const throw()
 {
+  CProxy_EnzoBlock enzo_block_array;
   if (allocate) {
-    return CProxy_EnzoBlock::ckNew
+    enzo_block_array = CProxy_EnzoBlock::ckNew
       (
        nbx,nby,nbz,
        nx,ny,nz,
@@ -62,8 +63,10 @@ CProxy_CommBlock EnzoFactory::create_block_array
        num_field_blocks,
        nbx,nby,nbz);
   } else {
-    return CProxy_EnzoBlock::ckNew();
+    enzo_block_array = CProxy_EnzoBlock::ckNew();
   }
+  TRACE1("EnzoFactory::create_block_array = %p",&enzo_block_array);
+  return enzo_block_array;
 }
 
 #else

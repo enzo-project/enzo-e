@@ -66,6 +66,12 @@ class Loop {
     return index_curr_ == 0;
   }
 
+  inline int operator = (int value) { index_stop_ = value; return index_stop_; }
+  inline int operator -= (int value) { index_stop_ -= value; return index_stop_; }
+  inline int operator += (int value) { index_stop_ += value; return index_stop_; }
+  inline int operator -- () { --index_stop_; return index_stop_; }
+  inline int operator ++ () { ++index_stop_; return index_stop_; }
+
   /// Return the current CHARM++ parallel "loop" index
   inline int index() const throw() { return index_curr_; }
   /// Return the upper-limit on the CHARM++ parallel "loop"

@@ -10,6 +10,7 @@
 
 #include "mesh.hpp"
 #include "main.hpp"
+#include "charm_simulation.hpp"
 
 //----------------------------------------------------------------------
 
@@ -41,25 +42,8 @@ CommBlock::CommBlock
     dt_(0)
 { 
 
-  // Initialize indices
+  initialize_(ibx,iby,ibz,nbx,nby,nbz,nx,ny,nz,xpm,ypm,zpm,xb,yb,zb);
 
-  size_[0] = nbx;
-  size_[1] = nby;
-  size_[2] = nbz;
-
-  index_[0] = ibx;
-  index_[1] = iby;
-  index_[2] = ibz;
-
-  // Initialize extent 
-
-  lower_[axis_x] = xpm + ibx*xb;
-  lower_[axis_y] = ypm + iby*yb;
-  lower_[axis_z] = zpm + ibz*zb;
-
-  upper_[axis_x] = xpm + (ibx+1)*xb;
-  upper_[axis_y] = ypm + (iby+1)*yb;
-  upper_[axis_z] = zpm + (ibz+1)*zb;
 }
 
 //----------------------------------------------------------------------
@@ -88,7 +72,6 @@ CommBlock::CommBlock
     cycle_(0),
     time_(0),
     dt_(0)
-
 { 
 
   // Initialize indices
@@ -97,30 +80,65 @@ CommBlock::CommBlock
   int iby = thisIndex.y;
   int ibz = thisIndex.z;
 
-  size_[0] = nbx;
-  size_[1] = nby;
-  size_[2] = nbz;
+  initialize_(ibx,iby,ibz,nbx,nby,nbz,nx,ny,nz,xpm,ypm,zpm,xb,yb,zb);
 
-  index_[0] = ibx;
-  index_[1] = iby;
-  index_[2] = ibz;
-
-  // Initialize extent 
-
-  lower_[axis_x] = xpm + ibx*xb;
-  lower_[axis_y] = ypm + iby*yb;
-  lower_[axis_z] = zpm + ibz*zb;
-
-  upper_[axis_x] = xpm + (ibx+1)*xb;
-  upper_[axis_y] = ypm + (iby+1)*yb;
-  upper_[axis_z] = zpm + (ibz+1)*zb;
 }
+
+#endif /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+void CommBlock::initialize_
+(
+ int ibx, int iby, int ibz,
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xpm, double ypm, double zpm, // Domain begin
+ double xb, double yb, double zb    // CommBlock width
+ )
+ {
+   size_[0] = nbx;
+   size_[1] = nby;
+   size_[2] = nbz;
+
+   index_[0] = ibx;
+   index_[1] = iby;
+   index_[2] = ibz;
+
+   // Initialize extent 
+
+   lower_[axis_x] = xpm + ibx*xb;
+   lower_[axis_y] = ypm + iby*yb;
+   lower_[axis_z] = zpm + ibz*zb;
+
+   upper_[axis_x] = xpm + (ibx+1)*xb;
+   upper_[axis_y] = ypm + (iby+1)*yb;
+   upper_[axis_z] = zpm + (ibz+1)*zb;
+
+#ifdef CONFIG_USE_CHARM
+
+   // Count CommBlocks on each processor
+   SimulationCharm * simulation_charm  = 
+     dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
+
+   if (simulation_charm) simulation_charm->insert_block();
 #endif
+
+
+ }
 
 //----------------------------------------------------------------------
 
 CommBlock::~CommBlock() throw ()
 { 
+#ifdef CONFIG_USE_CHARM
+
+  SimulationCharm * simulation_charm  = 
+    dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
+
+  if (simulation_charm) simulation_charm->delete_block();
+#endif
+
 }
 
 //----------------------------------------------------------------------
@@ -215,11 +233,6 @@ void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
 //======================================================================
 // CHARM FUNCTIONS
 //======================================================================
-
-#ifdef CONFIG_USE_CHARM
-extern CProxy_SimulationCharm  proxy_simulation;
-#endif /* CONFIG_USE_CHARM */
-
 //======================================================================
 
 #ifdef CONFIG_USE_CHARM
@@ -227,6 +240,7 @@ extern CProxy_SimulationCharm  proxy_simulation;
 void CommBlock::prepare()
 {
 
+  TRACE1("CommBlock::prepare() %p",&thisProxy);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   //--------------------------------------------------
@@ -248,10 +262,10 @@ void CommBlock::prepare()
 
   double dt_block;
   Timestep * timestep = problem->timestep();
-  DEBUG("CommBlock::prepare()");
+  TRACE("CommBlock::prepare()");
 
   dt_block = timestep->evaluate(field_descr,this);
-  DEBUG("CommBlock::prepare()");
+  TRACE("CommBlock::prepare()");
 
   // Reduce timestep to coincide with scheduled output if needed
 
@@ -261,7 +275,7 @@ void CommBlock::prepare()
     dt_block = schedule->update_timestep(time_,dt_block);
   }
 
-  DEBUG("CommBlock::prepare()");
+  TRACE("CommBlock::prepare()");
 
   // Reduce timestep to not overshoot final time from stopping criteria
 
@@ -301,7 +315,7 @@ void CommBlock::prepare()
 void CommBlock::p_output(CkReductionMsg * msg)
 {
 
-  DEBUG("CommBlock::p_output()");
+  TRACE("CommBlock::p_output()");
   double * min_reduce = (double * )msg->getData();
 
 #ifdef REMOVE_PATCH
@@ -361,7 +375,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   // set_time(time);
   // set_dt(dt);
 
-  DEBUG3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
+  TRACE3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
   compute();
 }
 #endif /* CONFIG_USE_CHARM */
@@ -565,7 +579,7 @@ void CommBlock::update_boundary_
 void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 {
 
-  DEBUG ("CommBlock::x_refresh()");
+  TRACE ("CommBlock::x_refresh()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -677,10 +691,10 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
   //--------------------------------------------------
 
   if (++count_refresh_face_ >= count) {
-    DEBUG ("CommBlock::x_refresh() calling prepare()");
+    TRACE ("CommBlock::x_refresh() calling prepare()");
     count_refresh_face_ = 0;
     prepare();
-  } else  DEBUG ("CommBlock::x_refresh() skipping prepare()");
+  } else  TRACE ("CommBlock::x_refresh() skipping prepare()");
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -690,7 +704,7 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 
 void CommBlock::compute()
 {
-  DEBUG ("CommBlock::compute()");
+  TRACE ("CommBlock::compute()");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -717,7 +731,7 @@ void CommBlock::compute()
   
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 
-  DEBUG ("CommBlock::compute() calling refresh()");
+  TRACE ("CommBlock::compute() calling refresh()");
   refresh();
 
 }

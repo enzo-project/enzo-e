@@ -87,21 +87,29 @@ void Hierarchy::pup (PUP::er &p)
 
   bool up = p.isUnpacking();
 
-  p | factory_; // PUP::able
+  p | *factory_;
   p | dimension_;
   p | refinement_;
 #ifdef REMOVE_PATCH
-  p | *layout_;
-  if (up) group_process_ = GroupProcess::create();
-  PUParray(p,blocking_,3);
-#else
-  p | patch_count_;
-  if (up) patch_tree_ = new Tree (dimension_, refinement_);
-  p | *patch_tree_;
-#endif
+  p | num_blocks_;
+  if (p.isUnpacking()) block_array_ = new CProxy_CommBlock;
+  p | *block_array_;
+  p | block_exists_;
+    p | block_loop_;
+#endif /* REMOVE_PATCH */
   PUParray(p,root_size_,3);
   PUParray(p,lower_,3);
   PUParray(p,upper_,3);
+
+#ifdef REMOVE_PATCH
+  if (up) group_process_ = GroupProcess::create();
+  p | *layout_;
+  PUParray(p,blocking_,3);
+#else /* REMOVE_PATCH */
+  p | patch_count_;
+  if (up) patch_tree_ = new Tree (dimension_, refinement_);
+  p | *patch_tree_;
+#endif /* REMOVE_PATCH */
 
 }
 #endif
@@ -333,6 +341,8 @@ void Hierarchy::create_root_patch
  int process_first, int process_last_plus) throw()
 {
 
+  TRACE3("Hierarchy::create_root_patch() block size  %d %d %d",nx,ny,nz);
+  TRACE3("Hierarchy::create_root_patch() blocking    %d %d %d",nbx,nby,nbz);
   // Create new empty patch
 
 #ifdef CONFIG_USE_CHARM

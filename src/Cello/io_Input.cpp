@@ -111,7 +111,9 @@ void Input::read_hierarchy
 
 #  ifdef CONFIG_USE_CHARM
 
-  hierarchy->block_array()->p_read (index_charm_);
+  bool is_root = hierarchy->group_process()->is_root();
+
+  if (is_root) hierarchy->block_array()->p_read (index_charm_);
 
 #  else /* CONFIG_USE_CHARM */
 

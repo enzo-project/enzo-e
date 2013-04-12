@@ -232,7 +232,9 @@ void Output::write_hierarchy_
 #ifdef REMOVE_PATCH
 #ifdef CONFIG_USE_CHARM
 
-  hierarchy->block_array()->p_write(index_);
+  bool is_root = hierarchy->group_process()->is_root();
+
+  if (is_root) hierarchy->block_array()->p_write(index_);
 
 #else
 

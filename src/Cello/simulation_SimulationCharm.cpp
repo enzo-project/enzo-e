@@ -22,7 +22,8 @@ SimulationCharm::SimulationCharm
 (
  const char         parameter_file[],
  int                n) throw ()
-  : Simulation(parameter_file, n)
+  : Simulation(parameter_file, n),
+    block_loop_(0)
 {
   TRACE("SimulationCharm::SimulationCharm");
 

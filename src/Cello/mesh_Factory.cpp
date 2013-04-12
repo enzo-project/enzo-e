@@ -73,7 +73,6 @@ Factory::create_patch
      xp,yp,zp,
      allocate_blocks,
      process_first, process_last_plus);
-  TRACE1("proxy_patch = %p",proxy_patch);
   return proxy_patch;
 #else
   return new Patch
@@ -137,9 +136,12 @@ CProxy_CommBlock Factory::create_block_array
        num_field_blocks,
        nbx,nby,nbz);
     //    DEBUG1 ("block = %p",block);
+    TRACE1("Factor::create_block_array = %p",proxy_block);
     return *proxy_block;
   } else {
-    return CProxy_CommBlock::ckNew();
+    CProxy_CommBlock proxy_block = CProxy_CommBlock::ckNew();
+    TRACE1("Factor::create_block_array = %p",&proxy_block);
+    return proxy_block;
   }
 }
 
@@ -163,7 +165,7 @@ CommBlock * Factory::create_block
  ) const throw()
 {
 #ifdef CONFIG_USE_CHARM
-    CProxy_CommBlock block_array = CProxy_CommBlock::ckNew
+  CProxy_CommBlock block_array = CProxy_CommBlock::ckNew
     (nbx,nby,nbz,
      nx,ny,nz,
      xm,ym,zm, 

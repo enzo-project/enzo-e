@@ -50,7 +50,8 @@ void Problem::initial_next(Simulation * simulation) throw()
 
 #ifdef REMOVE_PATCH
       
-      hierarchy->block_array()->p_initial();
+      if (hierarchy->group_process()->is_root()) 
+	hierarchy->block_array()->p_initial();
 
 #else
       ItPatch it_patch(hierarchy);
@@ -124,8 +125,6 @@ void CommBlock::p_initial()
   initial->enforce_block(this,field_descr, simulation->hierarchy());
 
 #ifdef REMOVE_PATCH
-  WARNING("CommBlock::p_initial",
-	  "Check that Simulation::s_initial() sync count is correct");
   proxy_simulation.s_initial();
 #else
 
@@ -150,7 +149,7 @@ void Patch::s_initial()
 
 void SimulationCharm::s_initial()
 {
-  if (group_process_->is_root()) {
+  if (group_process()->is_root()) {
     delete parameters_;
     parameters_ = 0;
     p_refresh();
