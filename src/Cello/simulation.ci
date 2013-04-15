@@ -22,6 +22,7 @@ module simulation {
     entry SimulationCharm
       (const char filename[n], int n);
 
+    entry void p_initialize ();
     entry void s_initialize ();
     entry void s_initial ();
     entry void s_write();

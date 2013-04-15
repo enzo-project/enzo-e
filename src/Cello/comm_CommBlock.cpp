@@ -118,9 +118,13 @@ void CommBlock::initialize_
 #ifdef CONFIG_USE_CHARM
 
    // Count CommBlocks on each processor
+   
    SimulationCharm * simulation_charm  = 
      dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
 
+   TRACE1 ("simulation_charm = %p",simulation_charm);
+   TRACE1 ("simulation = %p",proxy_simulation.ckLocalBranch());
+   TRACE1 ("proxy_simulation = %p",&proxy_simulation);
    if (simulation_charm) simulation_charm->insert_block();
 #endif
 
@@ -354,8 +358,6 @@ void CommBlock::p_output(CkReductionMsg * msg)
   // for next output
 
 #ifdef REMOVE_PATCH
-  WARNING("CommBlock::p_output",
-	  "Check that Simulation::p_output() sync count is correct");
   proxy_simulation.p_output();
 #else
   proxy_patch_.s_output();
@@ -694,7 +696,7 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
     TRACE ("CommBlock::x_refresh() calling prepare()");
     count_refresh_face_ = 0;
     prepare();
-  } else  TRACE ("CommBlock::x_refresh() skipping prepare()");
+  }
 }
 #endif /* CONFIG_USE_CHARM */
 

@@ -127,7 +127,6 @@ void CommBlock::p_initial()
 #ifdef REMOVE_PATCH
   proxy_simulation.s_initial();
 #else
-
   proxy_patch_.s_initial();
 #endif
 
@@ -149,10 +148,19 @@ void Patch::s_initial()
 
 void SimulationCharm::s_initial()
 {
+  TRACE("ENTER SimulationCharm::s_initial()");
   if (group_process()->is_root()) {
+#ifdef REMOVE_PATCH
+    TRACE2("ENTER SimulationCharm::s_initial() block_loop_ == %d / %d",block_loop_.index(),block_loop_.stop());
+    if (block_loop_.done()) {
+#endif /* REMOVE_PATCH */
+    TRACE("CONTINUE SimulationCharm::s_initial()");
     delete parameters_;
     parameters_ = 0;
     p_refresh();
+#ifdef REMOVE_PATCH
+  }
+#endif /* REMOVE_PATCH */
   }
 }
 

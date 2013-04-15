@@ -69,6 +69,9 @@ public: // functions
     TRACE2 ("--local count %d = %d",group_process_->rank(),block_loop_.stop());
   }
 
+  /// Call initialize()
+  void p_initialize() { initialize(); }
+
   /// Wait for all local patches to be created before calling run
   void s_initialize();
 
