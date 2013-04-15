@@ -50,7 +50,8 @@ Hierarchy::~Hierarchy() throw()
 
 # ifdef CONFIG_USE_CHARM
 
-  block_array_->ckDestroy();
+  deallocate_blocks();
+  delete group_process_; group_process_ = 0;
 
 # else
 
@@ -430,6 +431,8 @@ void Hierarchy::allocate_array_
   int num_field_blocks = 1;
 
 #ifdef CONFIG_USE_CHARM
+
+  TRACE("Allocating block_array_");
 
   block_array_ = new CProxy_CommBlock;
 

@@ -83,7 +83,8 @@ void SimulationCharm::refresh()
 {
   TRACE("SimulationCharm::refresh");
 #ifdef REMOVE_PATCH
-  hierarchy()->block_array()->p_refresh(); 
+  if (hierarchy()->group_process()->is_root()) 
+    hierarchy()->block_array()->p_refresh(); 
 #else /* REMOVE_PATCH */
   ItPatch it_patch(hierarchy_);
   Patch * patch;
@@ -115,7 +116,8 @@ void SimulationCharm::c_compute()
     performance_.start_region (id_cycle_);
 
 #ifdef REMOVE_PATCH
-    hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
+    if (hierarchy()->group_process()->is_root()) 
+      hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
 #else /* REMOVE_PATCH */
     ItPatch it_patch(hierarchy_);
     Patch * patch;

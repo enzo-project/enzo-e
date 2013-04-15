@@ -355,6 +355,7 @@ void CommBlock::p_output(CkReductionMsg * msg)
   // for next output
 
 #ifdef REMOVE_PATCH
+  TRACE("CommBlock::p_output() calling SimulationCharm::p_output");
   proxy_simulation.p_output();
 #else
   proxy_patch_.s_output();

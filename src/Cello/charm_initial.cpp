@@ -150,15 +150,20 @@ void SimulationCharm::s_initial()
 {
   TRACE("ENTER SimulationCharm::s_initial()");
 #ifdef REMOVE_PATCH
+  TRACE2 ("block_loop: %d/%d",block_loop_.index(),block_loop_.stop());
   if (block_loop_.done()) {
+    TRACE ("CONTINUE SimulationCharm::s_initial()");
     CkCallback callback (CkIndex_SimulationCharm::c_initial(), thisProxy);
     contribute(0,0,CkReduction::concat,callback);
-#else
-  if (group_process()->is_root()) {
+#else /* REMOVE_PATCH */
+    if (group_process()->is_root()) {
+      c_initial();
+    }
 #endif /* REMOVE_PATCH */
-    TRACE("CONTINUE SimulationCharm::s_initial()");
-    c_initial();
+
+#ifdef REMOVE_PATCH
   }
+#endif /* REMOVE_PATCH */
 }
 //----------------------------------------------------------------------
 

@@ -24,9 +24,17 @@
 
 void SimulationCharm::p_output ()
 {
+#ifdef REMOVE_PATCH
+  TRACE2 ("block_loop: %d/%d",block_loop_.index(),block_loop_.stop());
+  if (block_loop_.done()) {
+#endif /* REMOVE_PATCH */
+
   TRACE("OUTPUT SimulationCharm::p_output()");
   problem()->output_reset();
   problem()->output_next(this);
+#ifdef REMOVE_PATCH
+  }
+#endif /* REMOVE_PATCH */
 }
 
 //----------------------------------------------------------------------
