@@ -7,11 +7,11 @@ import sys
 
 # Whether to compile with REMOVE_PATCH defined
 
-remove_patch = 1
+remove_patch = 0
 
 # Whether to print out messages with the TRACE() series of statements
 
-trace = 1
+trace = 0
 
 # Whether to enable displaying messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
