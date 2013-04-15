@@ -57,7 +57,7 @@ class Loop {
   }
 #endif
 
-  /// Return whether the CHARM++ parallel "loop" is done
+  /// Increment counter and return whether the CHARM++ parallel "loop" is done.
   inline bool done (int index = 1) throw()
   {
     if (index_stop_ > 0) {

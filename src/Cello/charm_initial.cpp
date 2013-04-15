@@ -149,19 +149,25 @@ void Patch::s_initial()
 void SimulationCharm::s_initial()
 {
   TRACE("ENTER SimulationCharm::s_initial()");
-  if (group_process()->is_root()) {
 #ifdef REMOVE_PATCH
-    TRACE2("ENTER SimulationCharm::s_initial() block_loop_ == %d / %d",block_loop_.index(),block_loop_.stop());
-    if (block_loop_.done()) {
+  if (block_loop_.done()) {
+    CkCallback callback (CkIndex_SimulationCharm::c_initial(), thisProxy);
+    contribute(0,0,CkReduction::concat,callback);
+#else
+  if (group_process()->is_root()) {
 #endif /* REMOVE_PATCH */
     TRACE("CONTINUE SimulationCharm::s_initial()");
-    delete parameters_;
-    parameters_ = 0;
-    p_refresh();
-#ifdef REMOVE_PATCH
+    c_initial();
   }
-#endif /* REMOVE_PATCH */
-  }
+}
+//----------------------------------------------------------------------
+
+void SimulationCharm::c_initial()
+{
+  TRACE("SimulationCharm::c_initial()");
+  delete parameters_;
+  parameters_ = 0;
+  p_refresh();
 }
 
 //======================================================================

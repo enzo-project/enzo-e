@@ -266,10 +266,8 @@ void CommBlock::prepare()
 
   double dt_block;
   Timestep * timestep = problem->timestep();
-  TRACE("CommBlock::prepare()");
 
   dt_block = timestep->evaluate(field_descr,this);
-  TRACE("CommBlock::prepare()");
 
   // Reduce timestep to coincide with scheduled output if needed
 
@@ -279,7 +277,6 @@ void CommBlock::prepare()
     dt_block = schedule->update_timestep(time_,dt_block);
   }
 
-  TRACE("CommBlock::prepare()");
 
   // Reduce timestep to not overshoot final time from stopping criteria
 
