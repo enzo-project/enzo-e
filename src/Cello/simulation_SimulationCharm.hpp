@@ -95,10 +95,8 @@ public: // functions
   /// Wait for all local patches to check in before proceeding to refresh
   void s_initial();
 
-#ifdef REMOVE_PATCH
   /// Continue on to refresh
   void c_initial();
-#endif /* REMOVE_PATCH */
 
   /// Refresh ghost zones (Charm++ entry)
   void p_refresh();
