@@ -147,7 +147,26 @@ void Patch::s_write()
 
 void SimulationCharm::s_write()
 {
-  TRACE("OUTPUT SimulationCharm::s_write()");
+  TRACE("SimulationCharm::s_write()");
+#ifdef REMOVE_PATCH
+  TRACE2 ("block_loop: %d/%d",block_loop_.index(),block_loop_.stop());
+  if (block_loop_.done()) {
+    CkCallback callback (CkIndex_SimulationCharm::c_write(), thisProxy);
+    contribute(0,0,CkReduction::concat,callback);
+#else /* REMOVE_PATCH */
+    c_write();
+#endif /* REMOVE_PATCH */
+
+#ifdef REMOVE_PATCH
+  }
+#endif /* REMOVE_PATCH */
+
+}
+
+//----------------------------------------------------------------------
+
+void SimulationCharm::c_write()
+{
   problem()->output_wait(this);
 }
 
@@ -210,8 +229,8 @@ void Problem::output_write
  int n, char * buffer
 ) throw()
 {
-  TRACE("OUTPUT Problem::output_write()");
   Output * output = this->output(index_output_);
+  TRACE2("OUTPUT Problem::output_write() %d %p",n,output);
 
   if (n != 0) {
     output->update_remote(n, buffer);

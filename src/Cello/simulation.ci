@@ -30,7 +30,9 @@ module simulation {
 
     entry void p_output ();
     entry void c_output ();
+
     entry void s_write ();
+    entry void c_write ();
 
     entry void p_output_write (int n, char buffer[n]);
     entry void p_refresh ();
