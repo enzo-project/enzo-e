@@ -49,9 +49,11 @@ void Problem::initial_next(Simulation * simulation) throw()
       DEBUG1 ("Start Initial(%d) A",index_initial_);
 
 #ifdef REMOVE_PATCH
-      
-      if (hierarchy->group_process()->is_root()) 
+
+      TRACE ("DEBUG: Problem::initial_next calling CommBlock::p_initial()");
+      if (hierarchy->group_process()->is_root()) {
 	hierarchy->block_array()->p_initial();
+      }
 
 #else
       ItPatch it_patch(hierarchy);
@@ -125,7 +127,8 @@ void CommBlock::p_initial()
   initial->enforce_block(this,field_descr, simulation->hierarchy());
 
 #ifdef REMOVE_PATCH
-  proxy_simulation.s_initial();
+  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
+  simulation_charm->s_initial();
 #else
   proxy_patch_.s_initial();
 #endif

@@ -24,11 +24,15 @@ module simulation {
 
     entry void p_initialize ();
     entry void s_initialize ();
+
     entry void s_initial ();
-    entry void c_initial();
-    entry void s_write();
+    entry void c_initial ();
+
     entry void p_output ();
-    entry void p_output_write(int n, char buffer[n]);
+    entry void c_output ();
+    entry void s_write ();
+
+    entry void p_output_write (int n, char buffer[n]);
     entry void p_refresh ();
 
   };

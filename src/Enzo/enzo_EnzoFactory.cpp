@@ -48,6 +48,10 @@ CProxy_CommBlock EnzoFactory::create_block_array
  bool allocate
  ) const throw()
 {
+  TRACE3 ("EnzoFactory::create_block_array nb = %d %d %d",nbx,nby,nbz);
+  TRACE3 ("EnzoFactory::create_block_array n = %d %d %d",nx,ny,nz);
+  TRACE3 ("EnzoFactory::create_block_array x = %f %f %f",xm,ym,zm);
+  TRACE3 ("EnzoFactory::create_block_array h = %f %f %f",hx,hy,hz);
   CProxy_EnzoBlock enzo_block_array;
   if (allocate) {
     enzo_block_array = CProxy_EnzoBlock::ckNew

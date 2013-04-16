@@ -55,14 +55,20 @@ void Initial::enforce_hierarchy_
 #ifdef REMOVE_PATCH
 
 #ifdef CONFIG_USE_CHARM
-  hierarchy->block_array()->p_initial();
-#else
+
+  if (hierarchy->group_process()->is_root()) {
+    hierarchy->block_array()->p_initial();
+  }
+
+#else /* CONFIG_USE_CHARM */
+
   ItBlock it_block (hierarchy);
   while (CommBlock * block = ++it_block) {
     // NO OFFSET: ASSUMES ROOT PATCH
     enforce_block (block, field_descr, hierarchy);
   }
-#endif
+
+#endif /* CONFIG_USE_CHARM */
 
 
 #else /* REMOVE_PATCH */

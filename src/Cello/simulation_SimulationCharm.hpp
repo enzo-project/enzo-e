@@ -85,8 +85,10 @@ public: // functions
   void c_initial();
 
 
-  // Call output on Problem list of Output objects
+  /// Call output on Problem list of Output objects
   void p_output ();
+  /// Continue on to p_refresh()
+  void c_output ();
 
   /// Reduce output, using p_output_write to send data to writing processes
   void s_write();
@@ -109,6 +111,7 @@ public: // functions
   void c_compute ();
 
 protected: // attributes
+
   Loop block_loop_;
 
 };

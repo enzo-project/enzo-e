@@ -111,7 +111,11 @@ public: // interface
   // void p_initial_enforce();
 
   /// Refresh ghost zones and apply boundary conditions
-  void p_refresh() { refresh(); }
+  void p_refresh() 
+  {
+    TRACE("CommBlock::p_refresh");
+    refresh(); 
+  }
 
   /// Apply the numerical methods on the block
   void p_compute(int cycle, double time, double dt);

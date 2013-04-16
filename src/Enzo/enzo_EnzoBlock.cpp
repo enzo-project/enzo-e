@@ -379,7 +379,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
 } // void initialize()
 
-
+//----------------------------------------------------------------------
 
 EnzoBlock::EnzoBlock
 (
@@ -410,28 +410,11 @@ EnzoBlock::EnzoBlock
     dt(0),
     SubgridFluxes(0)
 {
-
-  int i,j;
-
-  for (i=0; i<MAX_DIMENSION; i++) {
-    AccelerationField[i] = 0;
-
-    for (i=0; i<MAX_DIMENSION; i++) {
-      AccelerationField[i] = 0;
-      GridLeftEdge[i] = 0;
-      GridDimension[i] = 0;
-      GridStartIndex[i] = 0;
-      GridEndIndex[i] = 0;
-      CellWidth[i] = 0;
-    }
-
-    for (j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
-      BaryonField[j] = 0;
-      OldBaryonField[j] = 0;
-    }
-
-  }
+  TRACE("EnzoBlock::EnzoBlock()");
+  initialize_enzo_();
 }
+
+//----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
 
@@ -458,29 +441,31 @@ EnzoBlock::EnzoBlock
     dt(0),
     SubgridFluxes(0)
 {
-  int i,j;
-  for (i=0; i<MAX_DIMENSION; i++) {
-    AccelerationField[i] = 0;
-
-    for (i=0; i<MAX_DIMENSION; i++) {
-      AccelerationField[i] = 0;
-      GridLeftEdge[i] = 0;
-      GridDimension[i] = 0;
-      GridStartIndex[i] = 0;
-      GridEndIndex[i] = 0;
-      CellWidth[i] = 0;
-    }
-
-    for (j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
-      BaryonField[j] = 0;
-      OldBaryonField[j] = 0;
-    }
-
-  }
+  TRACE("EnzoBlock::EnzoBlock()");
+  initialize_enzo_();
 }
 
 #endif
 
+//----------------------------------------------------------------------
+
+void EnzoBlock::initialize_enzo_()
+{
+  for (int i=0; i<MAX_DIMENSION; i++) {
+    AccelerationField[i] = 0;
+    GridLeftEdge[i] = 0;
+    GridDimension[i] = 0;
+    GridStartIndex[i] = 0;
+    GridEndIndex[i] = 0;
+    CellWidth[i] = 0;
+  }
+
+  for (int j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
+    BaryonField[j] = 0;
+    OldBaryonField[j] = 0;
+  }
+
+}
 //----------------------------------------------------------------------
 
 EnzoBlock::~EnzoBlock() throw ()

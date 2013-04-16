@@ -49,7 +49,12 @@ Simulation::Simulation
 
   monitor_ = Monitor::instance();
   monitor_->set_process_rank(group_process_->rank());
+  //  monitor_->set_active(group_process_->is_root());
+#ifdef CELLO_DEBUG
+  monitor_->set_active(true);
+#else
   monitor_->set_active(group_process_->is_root());
+#endif
 
   parameters_ = new Parameters(parameter_file,monitor_);
 

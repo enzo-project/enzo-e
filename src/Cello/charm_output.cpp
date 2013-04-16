@@ -24,17 +24,28 @@
 
 void SimulationCharm::p_output ()
 {
+  TRACE("SimulationCharm::p_output");
 #ifdef REMOVE_PATCH
   TRACE2 ("block_loop: %d/%d",block_loop_.index(),block_loop_.stop());
   if (block_loop_.done()) {
+    CkCallback callback (CkIndex_SimulationCharm::c_output(), thisProxy);
+    contribute(0,0,CkReduction::concat,callback);
+#else /* REMOVE_PATCH */
+    c_output();
 #endif /* REMOVE_PATCH */
 
-  TRACE("OUTPUT SimulationCharm::p_output()");
-  problem()->output_reset();
-  problem()->output_next(this);
 #ifdef REMOVE_PATCH
   }
 #endif /* REMOVE_PATCH */
+}
+
+//----------------------------------------------------------------------
+
+void SimulationCharm::c_output()
+{
+  TRACE("OUTPUT SimulationCharm::c_output()");
+  problem()->output_reset();
+  problem()->output_next(this);
 }
 
 //----------------------------------------------------------------------
@@ -111,7 +122,8 @@ void CommBlock::p_write (int index_output)
 #ifdef REMOVE_PATCH
   WARNING("CommBlock::p_write",
 	  "Check that Simulation::s_write() sync count is correct");
-  proxy_simulation.s_write();
+  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
+  simulation_charm->s_write();
 #else
   proxy_patch_.s_write();
 #endif

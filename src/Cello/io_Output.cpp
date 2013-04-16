@@ -230,12 +230,13 @@ void Output::write_hierarchy_
  ) throw()
 {
 #ifdef REMOVE_PATCH
+
 #ifdef CONFIG_USE_CHARM
 
   if (hierarchy->group_process()->is_root())
     hierarchy->block_array()->p_write(index_);
 
-#else
+#else /* CONFIG_USE_CHARM */
 
   ItBlock it_block (hierarchy);
   while (const CommBlock * block = ++it_block) {
@@ -243,17 +244,20 @@ void Output::write_hierarchy_
     write_block (block, field_descr, 0,0,0);
   }
 
-#endif
+#endif /* CONFIG_USE_CHARM */
+
 #else /* REMOVE_PATCH */
   ItPatch it_patch (hierarchy);
 
   while (Patch * patch = ++it_patch) {
+
 #ifdef CONFIG_USE_CHARM
     TRACE("Output::write_(hierarchy)");
     ((CProxy_Patch *)patch)->p_write(index_);
-#else
+#else /* CONFIG_USE_CHARM */
     write_patch (patch, field_descr, 0,0,0);
-#endif
+#endif /* CONFIG_USE_CHARM */
+
   }
 #endif
 }

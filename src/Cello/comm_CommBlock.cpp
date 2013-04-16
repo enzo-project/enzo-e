@@ -73,14 +73,18 @@ CommBlock::CommBlock
     time_(0),
     dt_(0)
 { 
-
+  TRACE("CommBlock::CommBlock()");
   // Initialize indices
 
   int ibx = thisIndex.x;
   int iby = thisIndex.y;
   int ibz = thisIndex.z;
 
-  initialize_(ibx,iby,ibz,nbx,nby,nbz,nx,ny,nz,xpm,ypm,zpm,xb,yb,zb);
+  initialize_(ibx,iby,ibz,
+	      nbx,nby,nbz,
+	      nx,ny,nz,
+	      xpm,ypm,zpm,
+	      xb,yb,zb);
 
 }
 
@@ -137,8 +141,7 @@ CommBlock::~CommBlock() throw ()
 { 
 #ifdef CONFIG_USE_CHARM
 
-  SimulationCharm * simulation_charm  = 
-    dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
+  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
 
   if (simulation_charm) simulation_charm->delete_block();
 #endif
@@ -323,12 +326,13 @@ void CommBlock::p_output(CkReductionMsg * msg)
   double dt_forest   = min_reduce[0];
   bool   stop_forest = min_reduce[1] == 1.0 ? true : false;
   set_dt   (dt_forest);
+  TRACE2("CommBlock::p_output(): dt=%f  stop=%d",dt_forest,stop_forest);
 #else
   double dt_patch   = min_reduce[0];
   bool   stop_patch = min_reduce[1] == 1.0 ? true : false;
   set_dt   (dt_patch);
+  TRACE2("CommBlock::p_output(): dt=%f  stop=%d",dt_patch,stop_patch);
 #endif
-
 
   delete msg;
 
@@ -356,7 +360,8 @@ void CommBlock::p_output(CkReductionMsg * msg)
 
 #ifdef REMOVE_PATCH
   TRACE("CommBlock::p_output() calling SimulationCharm::p_output");
-  proxy_simulation.p_output();
+  SimulationCharm * simulation_charm = proxy_simulation.ckLocalBranch();
+  simulation_charm->p_output();
 #else
   proxy_patch_.s_output();
 #endif
