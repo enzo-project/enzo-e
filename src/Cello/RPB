@@ -1,0 +1,2 @@
+#ifdef REMOVE_PATCH
+#else /* REMOVE_PATCH */

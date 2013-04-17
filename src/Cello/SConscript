@@ -212,8 +212,6 @@ if (type == 'charm'):
                                     LIBS=[libs_mesh,  libs_test])
    test_hierarchy    = env.Program (['test_Hierarchy.cpp',sources_mesh],
                                     LIBS=[libs_mesh,  libs_test])
-   test_patch        = env.Program (['test_Patch.cpp',sources_mesh],
-                                    LIBS=[libs_mesh,  libs_test])
    test_tree         = env.Program (['test_Tree.cpp',sources_mesh],
                                     LIBS=[libs_mesh,  libs_test])
    test_tree_density = env.Program (['test_TreeDensity.cpp',sources_mesh],
@@ -240,8 +238,6 @@ else:
    test_block        = env.Program ('test_Block.cpp',      
                                     LIBS=[libs_mesh,  libs_test])
    test_hierarchy    = env.Program ('test_Hierarchy.cpp',  
-                                    LIBS=[libs_mesh,  libs_test])
-   test_patch        = env.Program ('test_Patch.cpp',      
                                     LIBS=[libs_mesh,  libs_test])
    test_tree         = env.Program ('test_Tree.cpp',       
                                     LIBS=[libs_mesh,  libs_test])
@@ -304,7 +300,7 @@ binaries_field = [test_field_block,
 
 binaries_io    = [test_it_reduce]
 binaries_memory  = [test_memory]
-binaries_mesh = [ test_block,test_hierarchy,test_patch,test_tree,test_tree_density,test_node,test_node_trace,test_it_node]
+binaries_mesh = [ test_block,test_hierarchy,test_tree,test_tree_density,test_node,test_node_trace,test_it_node]
 binaries_monitor = [test_monitor]
 binaries_parallel = [test_group_process,test_layout]
 if (type == "mpi"):

@@ -40,28 +40,29 @@ CProxy_CommBlock EnzoFactory::create_block_array
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double hx, double hy, double hz,
- CProxy_Patch proxy_patch,
- int patch_id,
- int patch_rank,
  int num_field_blocks,
  bool allocate
  ) const throw()
 {
+  TRACE3 ("EnzoFactory::create_block_array nb = %d %d %d",nbx,nby,nbz);
+  TRACE3 ("EnzoFactory::create_block_array n = %d %d %d",nx,ny,nz);
+  TRACE3 ("EnzoFactory::create_block_array x = %f %f %f",xm,ym,zm);
+  TRACE3 ("EnzoFactory::create_block_array h = %f %f %f",hx,hy,hz);
+  CProxy_EnzoBlock enzo_block_array;
   if (allocate) {
-    return CProxy_EnzoBlock::ckNew
+    enzo_block_array = CProxy_EnzoBlock::ckNew
       (
        nbx,nby,nbz,
        nx,ny,nz,
        xm,ym,zm, 
        hx,hy,hz, 
-       proxy_patch,
-       patch_id,
-       patch_rank,
        num_field_blocks,
        nbx,nby,nbz);
   } else {
-    return CProxy_EnzoBlock::ckNew();
+    enzo_block_array = CProxy_EnzoBlock::ckNew();
   }
+  TRACE1("EnzoFactory::create_block_array = %p",&enzo_block_array);
+  return enzo_block_array;
 }
 
 #else
@@ -75,8 +76,6 @@ CommBlock * EnzoFactory::create_block
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double hx, double hy, double hz,
- int patch_id,
- int patch_rank,
  int num_field_blocks
  ) const throw()
 {
@@ -86,9 +85,6 @@ CommBlock * EnzoFactory::create_block
      nx,ny,nz,
      xm,ym,zm, 
      xb,yb,zb, 
-     proxy_patch,
-     patch_id,
-     patch_rank,
      num_field_blocks,
      nbx,nby,nbz);
   return block_array(ibx,iby,ibz).ckLocal();
@@ -100,8 +96,6 @@ CommBlock * EnzoFactory::create_block
      nx,ny,nz,
      xm,ym,zm, 
      hx,hy,hz, 
-     patch_id,
-     patch_rank,
      num_field_blocks);
 #endif
 }

@@ -67,12 +67,6 @@ public: // virtual functions
   /// Cleanup after output
   virtual void finalize () throw();
 
-  /// Write patch-related field data
-  virtual void write_patch
-  ( const Patch * patch,
-    const FieldDescr * field_descr,
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
-
   /// Write block-related field data
   virtual void write_block
   ( const CommBlock * block,

@@ -8,7 +8,11 @@
 #ifndef MESH_HIERARCHY_HPP
 #define MESH_HIERARCHY_HPP
 
+
 class Factory;
+#ifdef CONFIG_USE_CHARM
+class CProxy_CommBlock;
+#endif
 
 class Hierarchy {
 
@@ -25,7 +29,9 @@ public: // interface
   
   /// Initialize a Hierarchy object
   Hierarchy ( const Factory * factory,
-	      int dimension, int refinement) throw ();
+	      int dimension, int refinement,
+	      int process_first, int process_last_plus
+	      ) throw ();
 
   /// Delete the Hierarchy object
   virtual ~Hierarchy() throw ();
@@ -62,26 +68,81 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Return the total number of local patches
-  size_t num_patches() const throw();
+  /// Return whether CommBlocks have been allocated or not
+  bool blocks_allocated() const throw()
+  { 
+#ifdef CONFIG_USE_CHARM
+    return block_exists_;
+#else
+    return (block_.size() != 0);
+#endif
+  }
 
-  /// Return the ith patch.  Patch[0] is the root
-  Patch * patch(size_t i) throw();
+  /// Return the number of CommBlocks
+  size_t num_blocks(int * nbx = 0, 
+		    int * nby = 0,
+		    int * nbz = 0) const throw()
+  { 
+    if (nbx) *nbx = blocking_[0];
+    if (nby) *nby = blocking_[1];
+    if (nbz) *nbz = blocking_[2];
+    return blocking_[0]*blocking_[1]*blocking_[2]; 
+  };
 
-  /// Return the ith patch
-  Patch * patch(size_t i) const throw();
+  /// Deallocate local CommBlocks
+  void deallocate_blocks() throw();
 
-  /// Create the initial root patch
-  void create_root_patch (FieldDescr   * field_descr,
-			  int nx, int ny, int nz,
-			  int nbx, int nby, int nbz,
-			  bool allocate_blocks  = true,
-			  int process_first     = 0, 
-			  int process_last_plus = -1) throw();
+# ifdef CONFIG_USE_CHARM
+  /// Return pointer to the CommBlock CHARM++ chare array
+  CProxy_CommBlock * block_array() const throw()
+  { return block_array_;}
+
+# else
+  /// Return the total number of local blocks
+  size_t num_local_blocks() const throw();
+
+  /// Return the ith local CommBlock
+  CommBlock * local_block(size_t i) const throw();
+# endif
+
+  /// Return the total number of blocks
+  size_t num_blocks() const throw()
+  { 
+    WARNING("Hierarchy::num_blocks()",
+	    "num_blocks_ initialization not implemented for AMR");
+    return num_blocks_; 
+  }
+
+  void create_forest (FieldDescr   * field_descr,
+		      int nx, int ny, int nz,
+		      int nbx, int nby, int nbz,
+		      bool allocate_blocks  = true,
+		      int process_first     = 0, 
+		      int process_last_plus = -1) throw();
+
+
+  /// Return the number of CommBlocks along each dimension
+  void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
 
   /// Return the factory object associated with the Hierarchy
   const Factory * factory () const throw()
   { return factory_; }
+
+  /// Return the layout of the patch, describing processes and blocking
+  Layout * layout () throw();
+
+  /// Return the layout of the patch, describing processes and blocking
+  const Layout * layout () const throw();
+
+  const GroupProcess * group_process()  const throw()
+  { return group_process_; };
+
+protected: // functions
+
+  /// Allocate array, and optionally allocate element CommBlocks
+  void allocate_array_
+  (bool allocate_blocks = true,
+   const FieldDescr * field_descr = 0) throw ();
 
 protected: // attributes
 
@@ -95,11 +156,16 @@ protected: // attributes
   /// Refinement of the hierarchy [ used for Charm++ pup() of Tree ]
   int refinement_;
 
-  /// Number of patches (redundant with patch_tree_)
-  int patch_count_;
+  int num_blocks_; 
 
-  /// List of local patches
-  Tree * patch_tree_;
+  /// Array of CommBlocks 
+# ifdef CONFIG_USE_CHARM
+  CProxy_CommBlock * block_array_;
+  bool               block_exists_;
+  Loop               block_loop_;
+# else
+  std::vector<CommBlock * > block_;
+# endif
 
   /// Size of the root grid
   int root_size_[3];
@@ -109,6 +175,15 @@ protected: // attributes
 
   /// Upper extent of the hierarchy
   double upper_[3];
+
+  /// Parallel Group for distributing the Mesh across processors
+  GroupProcess * group_process_;
+
+  /// Layout: describes blocking, processor range, and processor mapping 
+  Layout * layout_;
+
+  /// How the Forest is distributed into CommBlocks
+  int blocking_[3];
 
 };
 

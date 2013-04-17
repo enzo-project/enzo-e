@@ -12,7 +12,6 @@ class Factory;
 class FieldDescr;
 class Hierarchy;
 class ItField;
-class Patch;
 class Schedule;
 class Simulation;
 
@@ -147,13 +146,6 @@ public: // virtual functions
     const FieldDescr * field_descr  ) throw()
   { write_hierarchy_(hierarchy,field_descr); }
 
-  /// Write local patch data to disk
-  virtual void write_patch
-  ( const Patch * patch, 
-    const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw()
-  { write_patch_(patch,field_descr,ixp0,iyp0,izp0); }
-
   /// Write local block data to disk
   virtual void write_block
   ( const CommBlock * block, 
@@ -184,16 +176,10 @@ protected:
   /// "Loop" over writing the Hierarchy in the Simulation
   void write_simulation_ (const Simulation * simulation ) throw();
 
-  /// Loop over writing Patches in the Hierarchy
+  /// Loop over writing Blocks in the Hierarchy
   void write_hierarchy_
   ( const Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
-
-  /// Loop over writing CommBlocks in the Patch
-  void write_patch_
-  ( const Patch * patch, 
-    const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
 
   /// Loop over writing Field data in the CommBlock
   void write_block_

@@ -10,12 +10,11 @@
 //----------------------------------------------------------------------
 
 IoHierarchy::IoHierarchy(const Hierarchy * hierarchy) throw ()
-  : Io(3,0),
+  : Io(2,0),
     hierarchy_((Hierarchy *)hierarchy)
 {
   meta_name_.push_back("lower");
   meta_name_.push_back("upper");
-  meta_name_.push_back("patch_count");
 
   ASSERT2("IoHierarchy::IoHierarchy()",
 	 "meta_name.size() [%d] !=  meta_count_ [%d]",
@@ -45,12 +44,7 @@ void IoHierarchy::meta_value
     *type   = scalar_type_double;
     *nxd     = 3;
 
-  } else if (index == 2) {
-
-    *buffer = (void *) & hierarchy_->patch_count_;
-    *type   = scalar_type_int;
   }
-  
 }
 
 //----------------------------------------------------------------------

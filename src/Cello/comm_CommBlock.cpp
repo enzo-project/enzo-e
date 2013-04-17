@@ -10,6 +10,7 @@
 
 #include "mesh.hpp"
 #include "main.hpp"
+#include "charm_simulation.hpp"
 
 //----------------------------------------------------------------------
 
@@ -18,48 +19,21 @@ CommBlock::CommBlock
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
- double xpm, double ypm, double zpm, // Patch begin
+ double xpm, double ypm, double zpm, // Domain begin
  double xb, double yb, double zb,    // CommBlock width
-#ifdef CONFIG_USE_CHARM
- CProxy_Patch proxy_patch,
-#endif
- int patch_id,
- int patch_rank,
  int num_field_blocks
 ) throw ()
   : block_(nx, ny, nz, num_field_blocks),
 #ifdef CONFIG_USE_CHARM
     count_refresh_face_(0),
-    proxy_patch_(proxy_patch),
 #endif
-    patch_id_(patch_id),
-    patch_rank_(patch_rank),
     cycle_(0),
     time_(0),
     dt_(0)
 { 
-  DEBUG1("ID = %d",patch_id);
-  DEBUG1("IP = %d",patch_rank);
 
-  // Initialize indices into parent patch
+  initialize_(ibx,iby,ibz,nbx,nby,nbz,nx,ny,nz,xpm,ypm,zpm,xb,yb,zb);
 
-  size_[0] = nbx;
-  size_[1] = nby;
-  size_[2] = nbz;
-
-  index_[0] = ibx;
-  index_[1] = iby;
-  index_[2] = ibz;
-
-  // Initialize extent 
-
-  lower_[axis_x] = xpm + ibx*xb;
-  lower_[axis_y] = ypm + iby*yb;
-  lower_[axis_z] = zpm + ibz*zb;
-
-  upper_[axis_x] = xpm + (ibx+1)*xb;
-  upper_[axis_y] = ypm + (iby+1)*yb;
-  upper_[axis_z] = zpm + (ibz+1)*zb;
 }
 
 //----------------------------------------------------------------------
@@ -70,58 +44,88 @@ CommBlock::CommBlock
 (
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
- double xpm, double ypm, double zpm, // Patch begin
+ double xpm, double ypm, double zpm, // Domain begin
  double xb, double yb, double zb,    // CommBlock width
-#ifdef CONFIG_USE_CHARM
- CProxy_Patch proxy_patch,
-#endif
- int patch_id,
- int patch_rank,
  int num_field_blocks) throw ()
   : block_(nx, ny, nz, num_field_blocks),
     count_refresh_face_(0),
-    proxy_patch_(proxy_patch),
-    patch_id_(patch_id),
-    patch_rank_(patch_rank),
     cycle_(0),
     time_(0),
     dt_(0)
-
 { 
-
-  DEBUG1("ID = %d",patch_id_);
-  DEBUG1("IP = %d",patch_rank_);
-
-  // Initialize indices into parent patch
+  TRACE("CommBlock::CommBlock()");
+  // Initialize indices
 
   int ibx = thisIndex.x;
   int iby = thisIndex.y;
   int ibz = thisIndex.z;
 
-  size_[0] = nbx;
-  size_[1] = nby;
-  size_[2] = nbz;
+  initialize_(ibx,iby,ibz,
+	      nbx,nby,nbz,
+	      nx,ny,nz,
+	      xpm,ypm,zpm,
+	      xb,yb,zb);
 
-  index_[0] = ibx;
-  index_[1] = iby;
-  index_[2] = ibz;
-
-  // Initialize extent 
-
-  lower_[axis_x] = xpm + ibx*xb;
-  lower_[axis_y] = ypm + iby*yb;
-  lower_[axis_z] = zpm + ibz*zb;
-
-  upper_[axis_x] = xpm + (ibx+1)*xb;
-  upper_[axis_y] = ypm + (iby+1)*yb;
-  upper_[axis_z] = zpm + (ibz+1)*zb;
 }
+
+#endif /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+void CommBlock::initialize_
+(
+ int ibx, int iby, int ibz,
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ double xpm, double ypm, double zpm, // Domain begin
+ double xb, double yb, double zb    // CommBlock width
+ )
+ {
+   size_[0] = nbx;
+   size_[1] = nby;
+   size_[2] = nbz;
+
+   index_[0] = ibx;
+   index_[1] = iby;
+   index_[2] = ibz;
+
+   // Initialize extent 
+
+   lower_[axis_x] = xpm + ibx*xb;
+   lower_[axis_y] = ypm + iby*yb;
+   lower_[axis_z] = zpm + ibz*zb;
+
+   upper_[axis_x] = xpm + (ibx+1)*xb;
+   upper_[axis_y] = ypm + (iby+1)*yb;
+   upper_[axis_z] = zpm + (ibz+1)*zb;
+
+#ifdef CONFIG_USE_CHARM
+
+   // Count CommBlocks on each processor
+   
+   SimulationCharm * simulation_charm  = 
+     dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
+
+   TRACE1 ("simulation_charm = %p",simulation_charm);
+   TRACE1 ("simulation = %p",proxy_simulation.ckLocalBranch());
+   TRACE1 ("proxy_simulation = %p",&proxy_simulation);
+   if (simulation_charm) simulation_charm->insert_block();
 #endif
+
+
+ }
 
 //----------------------------------------------------------------------
 
 CommBlock::~CommBlock() throw ()
 { 
+#ifdef CONFIG_USE_CHARM
+
+  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
+
+  if (simulation_charm) simulation_charm->delete_block();
+#endif
+
 }
 
 //----------------------------------------------------------------------
@@ -151,7 +155,7 @@ int CommBlock::index () const throw ()
 
 //----------------------------------------------------------------------
 
-void CommBlock::index_patch (int * ix, int * iy, int * iz) const throw ()
+void CommBlock::index_forest (int * ix, int * iy, int * iz) const throw ()
 {
   if (ix) (*ix) = index_[0]; 
   if (iy) (*iy) = index_[1]; 
@@ -160,7 +164,7 @@ void CommBlock::index_patch (int * ix, int * iy, int * iz) const throw ()
 
 //----------------------------------------------------------------------
 
-void CommBlock::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
+void CommBlock::size_forest (int * nx=0, int * ny=0, int * nz=0) const throw ()
 {
   if (nx) (*nx)=size_[0]; 
   if (ny) (*ny)=size_[1]; 
@@ -174,16 +178,18 @@ void CommBlock::size_patch (int * nx=0, int * ny=0, int * nz=0) const throw ()
 #ifndef CONFIG_USE_CHARM
 
 void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
-			   const Patch * patch,
-			   int fx, int fy, int fz,
-			   int index_field_set) throw()
+			       const Hierarchy * hierarchy,
+			       int fx, int fy, int fz,
+			       int index_field_set) throw()
 {
   int ibx,iby,ibz;
-  index_patch(&ibx,&iby,&ibz);
+
+  index_forest(&ibx,&iby,&ibz);
+
   block_.field_block(index_field_set)
     -> refresh_ghosts (field_descr,
-		       patch->group_process(),
-		       patch->layout(),
+		       hierarchy->group_process(),
+		       hierarchy->layout(),
 		       ibx,iby,ibz, fx,fy,fz);
 }
 
@@ -192,11 +198,6 @@ void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
 //======================================================================
 // CHARM FUNCTIONS
 //======================================================================
-
-#ifdef CONFIG_USE_CHARM
-extern CProxy_SimulationCharm  proxy_simulation;
-#endif /* CONFIG_USE_CHARM */
-
 //======================================================================
 
 #ifdef CONFIG_USE_CHARM
@@ -204,6 +205,7 @@ extern CProxy_SimulationCharm  proxy_simulation;
 void CommBlock::prepare()
 {
 
+  TRACE1("CommBlock::prepare() %p",&thisProxy);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   //--------------------------------------------------
@@ -225,10 +227,8 @@ void CommBlock::prepare()
 
   double dt_block;
   Timestep * timestep = problem->timestep();
-  DEBUG("CommBlock::prepare()");
 
   dt_block = timestep->evaluate(field_descr,this);
-  DEBUG("CommBlock::prepare()");
 
   // Reduce timestep to coincide with scheduled output if needed
 
@@ -238,7 +238,6 @@ void CommBlock::prepare()
     dt_block = schedule->update_timestep(time_,dt_block);
   }
 
-  DEBUG("CommBlock::prepare()");
 
   // Reduce timestep to not overshoot final time from stopping criteria
 
@@ -278,22 +277,20 @@ void CommBlock::prepare()
 void CommBlock::p_output(CkReductionMsg * msg)
 {
 
-  DEBUG("CommBlock::p_output()");
+  TRACE("CommBlock::p_output()");
   double * min_reduce = (double * )msg->getData();
 
-  double dt_patch   = min_reduce[0];
-  bool   stop_patch = min_reduce[1] == 1.0 ? true : false;
+  double dt_forest   = min_reduce[0];
+  bool   stop_forest = min_reduce[1] == 1.0 ? true : false;
+  set_dt   (dt_forest);
+  TRACE2("CommBlock::p_output(): dt=%f  stop=%d",dt_forest,stop_forest);
 
   delete msg;
 
-  set_dt   (dt_patch);
-
-  // WARNING: assumes one patch
-
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  simulation->update_state(cycle_,time_,dt_patch,stop_patch);
- 
+  simulation->update_state(cycle_,time_,dt_forest,stop_forest);
+
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
   // Simulation::p_output()?  Want last block?
@@ -308,8 +305,9 @@ void CommBlock::p_output(CkReductionMsg * msg)
   // Wait for all blocks to check in before calling Simulation::p_output()
   // for next output
 
-  proxy_patch_.s_output();
-
+  TRACE("CommBlock::p_output() calling SimulationCharm::p_output");
+  SimulationCharm * simulation_charm = proxy_simulation.ckLocalBranch();
+  simulation_charm->p_output();
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -324,7 +322,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   // set_time(time);
   // set_dt(dt);
 
-  DEBUG3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
+  TRACE3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
   compute();
 }
 #endif /* CONFIG_USE_CHARM */
@@ -528,7 +526,7 @@ void CommBlock::update_boundary_
 void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 {
 
-  DEBUG ("CommBlock::x_refresh()");
+  TRACE ("CommBlock::x_refresh()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -640,10 +638,10 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
   //--------------------------------------------------
 
   if (++count_refresh_face_ >= count) {
-    DEBUG ("CommBlock::x_refresh() calling prepare()");
+    TRACE ("CommBlock::x_refresh() calling prepare()");
     count_refresh_face_ = 0;
     prepare();
-  } else  DEBUG ("CommBlock::x_refresh() skipping prepare()");
+  }
 }
 #endif /* CONFIG_USE_CHARM */
 
@@ -653,7 +651,7 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 
 void CommBlock::compute()
 {
-  DEBUG ("CommBlock::compute()");
+  TRACE ("CommBlock::compute()");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -680,7 +678,7 @@ void CommBlock::compute()
   
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 
-  DEBUG ("CommBlock::compute() calling refresh()");
+  TRACE ("CommBlock::compute() calling refresh()");
   refresh();
 
 }

@@ -48,14 +48,9 @@ void Problem::initial_next(Simulation * simulation) throw()
 
       DEBUG1 ("Start Initial(%d) A",index_initial_);
 
-      ItPatch it_patch(hierarchy);
-      Patch * patch;
-
-      while (( patch = ++it_patch )) {
-
-	CProxy_Patch * patch_proxy = (CProxy_Patch *)patch;
-	patch_proxy->p_initial();
-
+      TRACE ("DEBUG: Problem::initial_next calling CommBlock::p_initial()");
+      if (hierarchy->group_process()->is_root()) {
+	hierarchy->block_array()->p_initial();
       }
 
     } else {
@@ -74,15 +69,6 @@ void Problem::initial_next(Simulation * simulation) throw()
     simulation_charm->refresh();
 
   }
-}
-
-//----------------------------------------------------------------------
-
-void Patch::p_initial()
-{
-  TRACE("Patch::p_initial()");
-  TRACE("Patch::p_initial(Patch) calling CommBlock::p_initial()");
-  block_array()->p_initial();
 }
 
 //----------------------------------------------------------------------
@@ -114,30 +100,32 @@ void CommBlock::p_initial()
 
   initial->enforce_block(this,field_descr, simulation->hierarchy());
 
-  // Continue with Patch::s_initial
+  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
+  simulation_charm->s_initial();
 
-  proxy_patch_.s_initial();
-
-}
-
-//----------------------------------------------------------------------
-
-void Patch::s_initial()
-{
-  if (block_loop_.done()) {
-    proxy_simulation.s_initial();
-  }
 }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::s_initial()
 {
-  if (patch_loop_.done()) {
-    delete parameters_;
-    parameters_ = 0;
-    p_refresh();
+  TRACE("ENTER SimulationCharm::s_initial()");
+  TRACE2 ("block_loop: %d/%d",block_loop_.index(),block_loop_.stop());
+  if (block_loop_.done()) {
+    TRACE ("CONTINUE SimulationCharm::s_initial()");
+    CkCallback callback (CkIndex_SimulationCharm::c_initial(), thisProxy);
+    contribute(0,0,CkReduction::concat,callback);
+
   }
+}
+//----------------------------------------------------------------------
+
+void SimulationCharm::c_initial()
+{
+  TRACE("SimulationCharm::c_initial()");
+  delete parameters_;
+  parameters_ = 0;
+  p_refresh();
 }
 
 //======================================================================

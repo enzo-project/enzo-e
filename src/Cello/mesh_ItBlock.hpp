@@ -17,7 +17,7 @@ class ItBlock : public It<CommBlock> {
 public: // interface
 
   /// Create an ItBlock object
-  ItBlock (const Patch * patch) throw ();
+  ItBlock (const Hierarchy * hierarchy) throw ();
 
   /// Delete the ItBlock object
   virtual ~ItBlock () throw ();
@@ -42,8 +42,7 @@ public: // interface
 
 private: // attributes
 
-  /// The Patch being iterated over
-  Patch * patch_;
+  Hierarchy * hierarchy_;
 
 };
 

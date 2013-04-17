@@ -16,15 +16,17 @@
 
 #include "simulation.hpp"
 
-
 //----------------------------------------------------------------------
 
 SimulationCharm::SimulationCharm
 (
  const char         parameter_file[],
  int                n) throw ()
-  : Simulation(parameter_file, n)
+  : Simulation(parameter_file, n),
+    block_loop_(0)
 {
+  TRACE("SimulationCharm::SimulationCharm");
+
   // derived class should call initialize()
 }
 
@@ -32,30 +34,35 @@ SimulationCharm::SimulationCharm
 
 SimulationCharm::~SimulationCharm() throw()
 {
+  TRACE("SimulationCharm::~SimulationCharm()");
 }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::initialize() throw()
 {
+  TRACE("SimulationCharm::initialize()");
   Simulation::initialize();
 
   WARNING("SimulationCharm::initialize()",
 	  "Calling StartLB for debugging load balancing()");
 
+  s_initialize();
 }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::s_initialize()
 {
-  if (patch_loop_.done()) run();
+  TRACE("SimulationCharm::s_initialize()");
+  if (group_process_->is_root()) run();
 }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::run() throw()
 {
+  TRACE("SimulationCharm::run()");
   initial();
 }
 
@@ -70,19 +77,15 @@ void SimulationCharm::p_refresh()
 void SimulationCharm::refresh()
 {
   TRACE("SimulationCharm::refresh");
-  ItPatch it_patch(hierarchy_);
-  Patch * patch;
-
-  while (( patch = ++it_patch )) {
-    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-    proxy_patch->p_refresh();
-  }
+  if (hierarchy()->group_process()->is_root()) 
+    hierarchy()->block_array()->p_refresh(); 
 }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::c_compute()
 {
+  TRACE("SimulationCharm::c_compute()");
   if (stop_) {
     
     performance_.stop_region (id_cycle_);
@@ -96,12 +99,8 @@ void SimulationCharm::c_compute()
 
     performance_.start_region (id_cycle_);
 
-    ItPatch it_patch(hierarchy_);
-    Patch * patch;
-    while (( patch = ++it_patch )) {
-      CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-      proxy_patch->p_compute(cycle_, time_, dt_);
-    }
+    if (hierarchy()->group_process()->is_root()) 
+      hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
   }
 
 }

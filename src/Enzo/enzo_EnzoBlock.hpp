@@ -155,8 +155,6 @@ public:
 
   static int FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
-
-
 public: // interface
 
   /// Initialize the EnzoBlock chare array
@@ -167,14 +165,10 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
-#ifdef CONFIG_USE_CHARM
-   CkChareID proxy_patch,
-#endif
-   int patch_id,
-   int patch_rank,
    int num_field_blocks) throw();
 
 #ifdef CONFIG_USE_CHARM
+
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
     : CommBlock (m)
@@ -183,6 +177,10 @@ public: // interface
     //    initialize();
   };
 
+#endif /*CONFIG_USE_CHARM */
+
+#ifdef CONFIG_USE_CHARM
+
   /// Initialize the EnzoBlock chare array
   EnzoBlock
   (
@@ -190,10 +188,11 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
-   CkChareID proxy_patch,
-   int patch_id,
-   int patch_rank,
    int num_field_blocks) throw();
+
+#endif /* CONFIG_USE_CHARM */
+
+#ifdef CONFIG_USE_CHARM
 
   /// Pack / unpack the EnzoBlock in a CHARM++ program
   void pup(PUP::er &p)
@@ -231,7 +230,10 @@ public: // interface
 
   };
 
-#endif
+#endif /*CONFIG_USE_CHARM */
+
+  /// Implementation of initialization in constructors
+  void initialize_enzo_();
 
   /// Destructor
   virtual ~EnzoBlock() throw();

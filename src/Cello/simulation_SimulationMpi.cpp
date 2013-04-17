@@ -17,7 +17,7 @@ SimulationMpi::SimulationMpi
 (
  const char * parameter_file,
  const GroupProcess * group_process ) throw ()
-  : Simulation(parameter_file,group_process)
+  : Simulation(parameter_file,0,group_process)
 {
 }
 
@@ -57,24 +57,19 @@ void SimulationMpi::run() throw()
 
   Initial * initial = problem->initial();
 
-  ItPatch it_patch(hierarchy_);
-  Patch * patch;
+  ItBlock it_block(hierarchy_);
 
-  while ((patch = ++it_patch)) {
+  CommBlock * block;
 
-    ItBlock it_block(patch);
-    CommBlock * block;
+  while ((block = ++it_block)) {
 
-    while ((block = ++it_block)) {
+    initial->enforce_block(block, field_descr_, hierarchy_);
 
-      initial->enforce_block(block, field_descr_, hierarchy_);
+    block->set_cycle(cycle_);
+    block->set_time(time_);
 
-      block->set_cycle(cycle_);
-      block->set_time(time_);
+    block->initialize();
 
-      block->initialize();
-
-    }
   }
 
   // delete parameters in favor of config 
@@ -92,22 +87,16 @@ void SimulationMpi::run() throw()
   double upper[3];
   hierarchy_->upper(&upper[0], &upper[1], &upper[2]);
 
-  while ((patch = ++it_patch)) {
+  while ((block = ++it_block)) {
 
-    ItBlock it_block(patch);
-    CommBlock * block;
+    bool is_boundary [3][2];
 
-    while ((block = ++it_block)) {
+    block->is_on_boundary (lower,upper,is_boundary);
 
-      bool is_boundary [3][2];
+    refresh_ghost_(block,is_boundary);
 
-      block->is_on_boundary (lower,upper,is_boundary);
+    update_boundary_(block,is_boundary);
 
-      refresh_ghost_(block,patch,is_boundary);
-
-      update_boundary_(block,is_boundary);
-
-    }
   }
 
   //--------------------------------------------------
@@ -129,23 +118,14 @@ void SimulationMpi::run() throw()
 
   DEBUG("SimulationMpi::run() Stopping");
 
-  while ((patch = ++it_patch)) {
+  while ((block = ++it_block)) {
 
-    int    stop_patch  = true;
+    int cycle = block->cycle();
+    int time  = block->time();
 
-    ItBlock it_block(patch);
-    CommBlock * block;
+    int stop_block = stopping->complete(cycle,time);
 
-    while ((block = ++it_block)) {
-
-      int cycle = block->cycle();
-      int time  = block->time();
-
-      int stop_block = stopping->complete(cycle,time);
-
-      stop_patch = stop_patch && stop_block;
-    }
-    stop_hierarchy = stop_hierarchy && stop_patch;
+    stop_hierarchy = stop_hierarchy && stop_block;
   }
 
   //======================================================================
@@ -164,37 +144,27 @@ void SimulationMpi::run() throw()
 
     double dt_hierarchy = std::numeric_limits<double>::max();
 
-    // Accumulate Patch-local timesteps
+    // Accumulate Block-local timesteps
 
-    while ((patch = ++it_patch)) {
+    CommBlock * block;
+    while ((block = ++it_block)) {
 
-      double dt_patch = std::numeric_limits<double>::max();
+      double dt_block   = timestep->evaluate(field_descr_,block);
+      double time_block = block->time();
 
-      ItBlock it_block(patch);
-      CommBlock * block;
+      // Reduce timestep to coincide with scheduled output
 
-      // Accumulate Block-local timesteps
-
-      while ((block = ++it_block)) {
-
-	double dt_block   = timestep->evaluate(field_descr_,block);
-	double time_block = block->time();
-
-	// Reduce timestep to coincide with scheduled output
-
-	int index_output=0;
-	while (Output * output = problem->output(index_output++)) {
-	  dt_block = output->update_timestep(time_block,dt_block);
-	}
-
-	// Reduce timestep to coincide with end of simulation
-
-	double time_stop = stopping->stop_time();
-	dt_block = MIN (dt_block, (time_stop - time_block));
-
-	dt_patch = MIN(dt_patch,dt_block);
+      int index_output=0;
+      while (Output * output = problem->output(index_output++)) {
+	dt_block = output->update_timestep(time_block,dt_block);
       }
-      dt_hierarchy = MIN(dt_hierarchy, dt_patch);
+
+      // Reduce timestep to coincide with end of simulation
+
+      double time_stop = stopping->stop_time();
+      dt_block = MIN (dt_block, (time_stop - time_block));
+
+      dt_hierarchy = MIN(dt_hierarchy, dt_block);
     }
 
     dt_hierarchy = reduce.reduce_double(dt_hierarchy,reduce_op_min);
@@ -205,16 +175,10 @@ void SimulationMpi::run() throw()
 
     // Set Block timesteps
 
-    while ((patch = ++it_patch)) {
+    // Accumulate Block-local timesteps
 
-      ItBlock it_block(patch);
-      CommBlock * block;
-
-      // Accumulate Block-local timesteps
-
-      while ((block = ++it_block)) {
-	block->set_dt    (dt_);
-      }
+    while ((block = ++it_block)) {
+      block->set_dt    (dt_);
     }
 
     ASSERT("Simulation::run", "dt == 0", dt_ != 0.0);
@@ -229,45 +193,34 @@ void SimulationMpi::run() throw()
     // REFRESH GHOST ZONES AND ENFORCE BOUNDARY CONDITIONS
     //--------------------------------------------------
 
-    while ((patch = ++it_patch)) {
+    while ((block = ++it_block)) {
 
-      ItBlock it_block(patch);
-      CommBlock * block;
+      bool is_boundary [3][2];
 
-      while ((block = ++it_block)) {
+      block->is_on_boundary (lower,upper,is_boundary);
 
-	bool is_boundary [3][2];
+      refresh_ghost_(block,is_boundary);
 
-	block->is_on_boundary (lower,upper,is_boundary);
+      update_boundary_(block,is_boundary);
 
-	refresh_ghost_(block,patch,is_boundary);
-
-	update_boundary_(block,is_boundary);
-
-      }
     }
 
     //--------------------------------------------------
     // Compute
     //--------------------------------------------------
 
-    while ((patch = ++it_patch)) {
+    while ((block = ++it_block)) {
 
-      ItBlock it_block(patch);
-      CommBlock * block;
-
-      while ((block = ++it_block)) {
-
-	int index_method = 0;
-	while (Method * method = problem->method(index_method++)) {
-	  method -> compute_block (field_descr_,block);
-	}
-
-	block->set_cycle (cycle_ + 1);
-	block->set_time  (time_ + dt_);
-
+      int index_method = 0;
+      while (Method * method = problem->method(index_method++)) {
+	method -> compute_block (field_descr_,block);
       }
+
+      block->set_cycle (cycle_ + 1);
+      block->set_time  (time_ + dt_);
+
     }
+
     cycle_ ++;
     time_ += dt_hierarchy;
 
@@ -276,18 +229,13 @@ void SimulationMpi::run() throw()
     //--------------------------------------------------
 
     stop_hierarchy = true;
-    while ((patch = ++it_patch)) {
-      int stop_patch = true;
-      ItBlock it_block(patch);
-      CommBlock * block;
-      while ((block = ++it_block)) {
-	int stop_block = stopping->complete(block->cycle(),block->time());
-	stop_patch = stop_patch && stop_block;
-      }
-      stop_hierarchy = stop_hierarchy && stop_patch;
-    }
-    stop_hierarchy = reduce.reduce_int(stop_hierarchy,reduce_op_land);
 
+    while ((block = ++it_block)) {
+      int stop_block = stopping->complete(block->cycle(),block->time());
+      stop_hierarchy = stop_hierarchy && stop_block;
+    }
+
+    stop_hierarchy = reduce.reduce_int(stop_hierarchy,reduce_op_land);
 
   } // while (! stop_hierarchy)
 
@@ -418,15 +366,13 @@ void SimulationMpi::update_boundary_
 void SimulationMpi::refresh_ghost_ 
 (
  CommBlock * comm_block, 
- Patch * patch, 
  bool    is_boundary[3][2]
  ) throw()
 {
   // Refresh ghost zones
 
   int ibx,iby,ibz;
-  comm_block->index_patch(&ibx,&iby,&ibz);
-
+  comm_block->index_forest(&ibx,&iby,&ibz);
   bool periodic = problem()->boundary()->is_periodic();
 
   // FOLLOWING CODE IS SIMILAR TO CommBlock::x_refresh()
@@ -454,12 +400,12 @@ void SimulationMpi::refresh_ghost_
   if (field_descr_->refresh_face(2)) {
     // TRACE3("p %d %d %d",px,py,pz);
     // TRACE6("a %d %d  %d %d  %d %d",axm,axp,aym,ayp,azm,azp);
-    if (axm) comm_block->refresh_ghosts(field_descr_,patch,+px,0,0);
-    if (axp) comm_block->refresh_ghosts(field_descr_,patch,-px,0,0);
-    if (aym) comm_block->refresh_ghosts(field_descr_,patch,0,+py,0);
-    if (ayp) comm_block->refresh_ghosts(field_descr_,patch,0,-py,0);
-    if (azm) comm_block->refresh_ghosts(field_descr_,patch,0,0,+pz);
-    if (azp) comm_block->refresh_ghosts(field_descr_,patch,0,0,-pz);
+    if (axm) comm_block->refresh_ghosts(field_descr_,hierarchy_,+px,0,0);
+    if (axp) comm_block->refresh_ghosts(field_descr_,hierarchy_,-px,0,0);
+    if (aym) comm_block->refresh_ghosts(field_descr_,hierarchy_,0,+py,0);
+    if (ayp) comm_block->refresh_ghosts(field_descr_,hierarchy_,0,-py,0);
+    if (azm) comm_block->refresh_ghosts(field_descr_,hierarchy_,0,0,+pz);
+    if (azp) comm_block->refresh_ghosts(field_descr_,hierarchy_,0,0,-pz);
   }
 
 }

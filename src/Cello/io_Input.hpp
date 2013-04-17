@@ -12,7 +12,6 @@ class Factory;
 class FieldDescr;
 class Hierarchy;
 class ItField;
-class Patch;
 class Simulation;
 
 class Input
@@ -123,18 +122,6 @@ public:
   virtual void read_hierarchy
   ( Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
-
-  /// Read local patch data from disk
-  virtual Patch * read_patch
-  ( Patch * patch,
-    const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
-
-#ifdef CONFIG_USE_CHARM
-  /// Cleanup after writing blocks in a patch
-  virtual void end_read_patch () throw()
-  { }
-#endif
 
   /// Read local block data from disk
   virtual CommBlock * read_block

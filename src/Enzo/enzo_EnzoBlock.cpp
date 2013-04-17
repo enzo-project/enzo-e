@@ -379,7 +379,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
 } // void initialize()
 
-
+//----------------------------------------------------------------------
 
 EnzoBlock::EnzoBlock
 (
@@ -388,19 +388,9 @@ EnzoBlock::EnzoBlock
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xp, double yp, double zp,
-#ifdef CONFIG_USE_CHARM
- CkChareID proxy_patch,
-#endif
- int patch_id,
- int patch_rank,
  int num_field_blocks) throw()
   : CommBlock (ix,iy,iz,
 	       nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
-#ifdef CONFIG_USE_CHARM
-	       proxy_patch,
-#endif
-	       patch_id,
-	       patch_rank,
 	       num_field_blocks),
     Time_(0),
     CycleNumber(0),
@@ -408,28 +398,11 @@ EnzoBlock::EnzoBlock
     dt(0),
     SubgridFluxes(0)
 {
-
-  int i,j;
-
-  for (i=0; i<MAX_DIMENSION; i++) {
-    AccelerationField[i] = 0;
-
-    for (i=0; i<MAX_DIMENSION; i++) {
-      AccelerationField[i] = 0;
-      GridLeftEdge[i] = 0;
-      GridDimension[i] = 0;
-      GridStartIndex[i] = 0;
-      GridEndIndex[i] = 0;
-      CellWidth[i] = 0;
-    }
-
-    for (j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
-      BaryonField[j] = 0;
-      OldBaryonField[j] = 0;
-    }
-
-  }
+  TRACE("EnzoBlock::EnzoBlock()");
+  initialize_enzo_();
 }
+
+//----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
 
@@ -439,41 +412,40 @@ EnzoBlock::EnzoBlock
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xp, double yp, double zp,
- CkChareID proxy_patch,
- int patch_id,
- int patch_rank,
  int num_field_blocks) throw()
   : CommBlock (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
-	       proxy_patch,patch_id,patch_rank,num_field_blocks),
+	       num_field_blocks),
     Time_(0),
     CycleNumber(0),
     OldTime(0),
     dt(0),
     SubgridFluxes(0)
 {
-  int i,j;
-  for (i=0; i<MAX_DIMENSION; i++) {
-    AccelerationField[i] = 0;
-
-    for (i=0; i<MAX_DIMENSION; i++) {
-      AccelerationField[i] = 0;
-      GridLeftEdge[i] = 0;
-      GridDimension[i] = 0;
-      GridStartIndex[i] = 0;
-      GridEndIndex[i] = 0;
-      CellWidth[i] = 0;
-    }
-
-    for (j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
-      BaryonField[j] = 0;
-      OldBaryonField[j] = 0;
-    }
-
-  }
+  TRACE("EnzoBlock::EnzoBlock()");
+  initialize_enzo_();
 }
 
 #endif
 
+//----------------------------------------------------------------------
+
+void EnzoBlock::initialize_enzo_()
+{
+  for (int i=0; i<MAX_DIMENSION; i++) {
+    AccelerationField[i] = 0;
+    GridLeftEdge[i] = 0;
+    GridDimension[i] = 0;
+    GridStartIndex[i] = 0;
+    GridEndIndex[i] = 0;
+    CellWidth[i] = 0;
+  }
+
+  for (int j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
+    BaryonField[j] = 0;
+    OldBaryonField[j] = 0;
+  }
+
+}
 //----------------------------------------------------------------------
 
 EnzoBlock::~EnzoBlock() throw ()

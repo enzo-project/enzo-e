@@ -20,7 +20,6 @@ foreach type (charm mpi)
 
    set arch = $CELLO_ARCH
    set prec = $CELLO_PREC
-
    
    echo "BEGIN type = $type  arch = $arch  prec = $prec"
    setenv CELLO_TYPE $type

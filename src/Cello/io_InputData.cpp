@@ -94,65 +94,11 @@ void InputData::read_hierarchy
 
   Input::read_meta (&io_hierarchy);
 
-  // Call read_patch() on contained patches
+  // Calls read_blocks() on contained forest
   Input::read_hierarchy (hierarchy, field_descr);
 
 }
 
-//----------------------------------------------------------------------
-
-Patch * InputData::read_patch 
-(
- Patch * patch,
- const FieldDescr * field_descr,
- int ixp0, int iyp0, int izp0
- ) throw()
-{
-  ERROR("InputData::read_patch()",
-	"Not Implemented");
-  // if (patch == 0) {
-  //   // create an uninitialized Patch
-  //   patch = 
-  //     factory_->create_patch
-  //     (0,
-  //      0,0,0,
-  //      0,0,0,
-  //      0,0,0,
-  //      0,0,0,
-  //      0,0,0,
-  //      0);
-  // }
-
-  // Change to file group for patch
-
-  file_->group_chdir("/"+patch->name());
-  file_->group_open();
-
-  // Read patch meta-data
-
-  IoPatch io_patch(patch);
-
-  Input::read_meta_group (&io_patch);
-
-  // Also read the patches parallel Layout
-
-  IoLayout io_layout(patch->layout());
-
-  Input::read_meta_group (&io_layout);
-
-  // // Call read_block() on contained blocks
-  // Input::read_patch(patch,field_descr,ixp0,iyp0,izp0);
-
-  return patch;
-}
-
-//----------------------------------------------------------------------
-
-void InputData::end_read_patch() throw()
-{
-  file_->group_close();
-  file_->group_chdir("..");
-}
 //----------------------------------------------------------------------
 
 CommBlock * InputData::read_block 
@@ -170,22 +116,14 @@ CommBlock * InputData::read_block
   ERROR("InputData::read_block",
 	"Need to pass in Patch proxy to create_block");
 
-  // block = factory_->create_block
-  //   (0,0,0,
-  //    0,0,0,
-  //    0,0,0,
-  //    0.0, 0.0, 0.0,
-  //    0.0, 0.0, 0.0,
-  //    1);
-
   // Read block meta data
 
   io_block()->set_block(block);
 
   Input::read_meta_group (io_block());
 
-  int ibx=100,iby=100,ibz=100;
-  block->index_patch(&ibx,&iby,&ibz);
+  int ibx,iby,ibz;
+  block->index_forest(&ibx,&iby,&ibz);
 
   // // Call read_block() on base Input object
 

@@ -118,32 +118,32 @@ define = {}
 
 # Parallel type defines
 
-define["serial"] =        []
-define["mpi"]    =        ['CONFIG_USE_MPI']
-define["charm"]  =        ['CONFIG_USE_CHARM']
+define["serial"] =    []
+define["mpi"]    =    ['CONFIG_USE_MPI']
+define["charm"]  =    ['CONFIG_USE_CHARM']
 
 # Precision defines
 
-define["single"] =        ['CONFIG_PRECISION_SINGLE']
-define["double"] =        ['CONFIG_PRECISION_DOUBLE']
+define["single"] =    ['CONFIG_PRECISION_SINGLE']
+define["double"] =    ['CONFIG_PRECISION_DOUBLE']
 
 # Performance defines
 
-define_memory =           ['CONFIG_USE_MEMORY']
-define_projections =      ['CONFIG_USE_PROJECTIONS']
-define_performance =      ['CONFIG_USE_PERFORMANCE']
-define_papi  =            ['CONFIG_USE_PAPI','PAPI3']
+define_memory =       ['CONFIG_USE_MEMORY']
+define_projections =  ['CONFIG_USE_PROJECTIONS']
+define_performance =  ['CONFIG_USE_PERFORMANCE']
+define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 
 # Debugging defines
 
-define_trace =            ['CELLO_TRACE']
-define_debug =            ['CELLO_DEBUG']
-define_debug_verbose =    ['CELLO_DEBUG_VERBOSE']
+define_trace =        ['CELLO_TRACE']
+define_debug =        ['CELLO_DEBUG']
+define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
 
 # Library defines
 
-define_hdf5  =            ['H5_USE_16_API']
-define_png   =            ['NO_FREETYPE']
+define_hdf5  =        ['H5_USE_16_API']
+define_png   =        ['NO_FREETYPE']
 
 #----------------------------------------------------------------------
 # ASSEMBLE DEFINES

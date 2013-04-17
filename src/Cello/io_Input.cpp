@@ -107,42 +107,19 @@ void Input::read_hierarchy
 ) throw()
 {
 
-  ItPatch it_patch (hierarchy);
+#  ifdef CONFIG_USE_CHARM
 
-  // (*) read data patch_list_
+  if (hierarchy->group_process()->is_root())
+    hierarchy->block_array()->p_read (index_charm_);
 
-  while (Patch * patch = ++it_patch) {
+#  else /* CONFIG_USE_CHARM */
 
-    // NO OFFSET: ASSUMES ROOT PATCH
-    read_patch (patch, field_descr,  0,0,0);
-
-  }
-}
-
-//----------------------------------------------------------------------
-
-Patch * Input::read_patch 
-(
- Patch * patch,
- const FieldDescr * field_descr,
- int ixp0, int iyp0, int izp0
- ) throw()
-
-{
-
-#ifdef CONFIG_USE_CHARM
-
-  patch->block_array()->p_read (index_charm_);
-
-#else
-
-  ItBlock it_block (patch);
+  ItBlock it_block (hierarchy);
   while (CommBlock * block = ++it_block) {
-    // NO OFFSET: ASSUMES ROOT PATCH
     read_block (block, "NAME",field_descr);
   }
-#endif
-  return patch;
+
+#  endif /* CONFIG_USE_CHARM */
 }
 
 //----------------------------------------------------------------------
