@@ -14,21 +14,14 @@
 //----------------------------------------------------------------------
 
 Hierarchy::Hierarchy ( const Factory * factory,
-		       int dimension, int refinement
-#ifdef REMOVE_PATCH
-		       ,int process_first, int process_last_plus
-#endif
-
-) throw ()
+		       int dimension, int refinement,
+		       int process_first, int process_last_plus
+		       ) throw ()
   : factory_((Factory *)factory),
     dimension_(dimension),
     refinement_(refinement),
-#ifdef REMOVE_PATCH
     layout_(0),
     group_process_(GroupProcess::create(process_first,process_last_plus))
-#else
-    patch_count_(0), patch_tree_(new Tree (dimension,refinement))
-#endif
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
@@ -36,9 +29,7 @@ Hierarchy::Hierarchy ( const Factory * factory,
     lower_[i] = 0.0;
     upper_[i] = 1.0;
     root_size_[i] = 1;
-#ifdef REMOVE_PATCH
     blocking_[i] = 0;
-#endif /* REMOVE_PATCH */
   }
 }
 
@@ -46,8 +37,6 @@ Hierarchy::Hierarchy ( const Factory * factory,
 
 Hierarchy::~Hierarchy() throw()
 {
-#ifdef REMOVE_PATCH
-
 # ifdef CONFIG_USE_CHARM
 
   deallocate_blocks();
@@ -61,19 +50,6 @@ Hierarchy::~Hierarchy() throw()
   }
 
 # endif
-
-#else /* REMOVE_PATCH */
-
-  ItNode it_node (patch_tree_);
-  while (Node * node = it_node.next_leaf()) {
-    Patch * patch = (Patch *) node->data();
-    delete patch;
-    patch = 0;
-  }
-  delete patch_tree_;
-  patch_count_ = 0;
-
-#endif /* REMOVE_PATCH */
 }
 
 //----------------------------------------------------------------------
@@ -91,26 +67,18 @@ void Hierarchy::pup (PUP::er &p)
   p | *factory_;
   p | dimension_;
   p | refinement_;
-#ifdef REMOVE_PATCH
   p | num_blocks_;
   if (p.isUnpacking()) block_array_ = new CProxy_CommBlock;
   p | *block_array_;
   p | block_exists_;
-    p | block_loop_;
-#endif /* REMOVE_PATCH */
+  p | block_loop_;
   PUParray(p,root_size_,3);
   PUParray(p,lower_,3);
   PUParray(p,upper_,3);
 
-#ifdef REMOVE_PATCH
   if (up) group_process_ = GroupProcess::create();
   p | *layout_;
   PUParray(p,blocking_,3);
-#else /* REMOVE_PATCH */
-  p | patch_count_;
-  if (up) patch_tree_ = new Tree (dimension_, refinement_);
-  p | *patch_tree_;
-#endif /* REMOVE_PATCH */
 
 }
 #endif
@@ -180,8 +148,6 @@ void Hierarchy::upper(double * x, double * y, double * z) const throw ()
 
 //----------------------------------------------------------------------
 
-#ifdef REMOVE_PATCH
-
 void Hierarchy::blocking (int * nbx, int * nby, int * nbz) const throw()
 {
   if (nbx) (*nbx) = blocking_[0];
@@ -189,11 +155,7 @@ void Hierarchy::blocking (int * nbx, int * nby, int * nbz) const throw()
   if (nbz) (*nbz) = blocking_[2];
 }
 
-#endif /* REMOVE_PATCH */
-
 //----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
 
 void Hierarchy::deallocate_blocks() throw()
 {
@@ -216,70 +178,21 @@ void Hierarchy::deallocate_blocks() throw()
 #endif
 }
 
-#endif /* REMOVE_PATCH */
-
 //----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
 
 Layout * Hierarchy::layout () throw()
 {
   return layout_;
 }
 
-#endif /* REMOVE_PATCH */
-
 //----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
 
 const Layout * Hierarchy::layout () const throw()
 {
   return layout_;
 }
 
-#endif /* REMOVE_PATCH */
-
 //----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
-#else
-
-size_t Hierarchy::num_patches() const throw()
-{
-  return patch_tree_->num_nodes();
-}
-#endif
-
-
-//----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-
-Patch * Hierarchy::patch(size_t i) throw()
-{
-  return (Patch * ) patch_tree_->root_node()->data();
-}
-
-#endif /* REMOVE_PATCH */
-
-//----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-
-
-Patch * Hierarchy::patch(size_t i) const throw()
-{
-  return (Patch * ) patch_tree_->root_node()->data();
-}
-
-#endif /* REMOVE_PATCH */
-
-//----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
 
 void Hierarchy::create_forest
 (
@@ -328,54 +241,7 @@ CommBlock * Hierarchy::local_block(size_t i) const throw()
 }
 #endif  /* CONFIG_USE_CHARM */
 
-
 //----------------------------------------------------------------------
-
-#else /* REMOVE_PATCH */
-
-void Hierarchy::create_root_patch 
-(
- FieldDescr   * field_descr,
- int nx, int ny, int nz,
- int nbx, int nby, int nbz,
- bool allocate_blocks,
- int process_first, int process_last_plus) throw()
-{
-
-  TRACE3("Hierarchy::create_root_patch() block size  %d %d %d",nx,ny,nz);
-  TRACE3("Hierarchy::create_root_patch() blocking    %d %d %d",nbx,nby,nbz);
-  // Create new empty patch
-
-#ifdef CONFIG_USE_CHARM
-  CProxy_Patch * root_patch;
-#else  /* CONFIG_USE_CHARM */
-  Patch * root_patch;
-#endif  /* CONFIG_USE_CHARM */
-
-  root_patch = factory()->create_patch
-    (
-     field_descr,
-     nx,ny,nz,    // size
-     0,0,0,       // offset
-     nbx,nby,nbz, // blocking
-     lower_[0], lower_[1], lower_[2],
-     upper_[0], upper_[1], upper_[2],
-     allocate_blocks,
-     process_first, process_last_plus);
-
-  patch_tree_->root_node()->set_data(root_patch);
-  TRACE1 ("root_patch = %p",root_patch);
-  {  int nx,ny,nz;
-  ((Patch *)root_patch)->size(&nx,&ny,&nz);
-  }
-  TRACE3("size = %d %d %d",nx,ny,nz);
-}
-
-#endif  /* REMOVE_PATCH */
-
-//----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
 
 void Hierarchy::allocate_array_
 (
@@ -479,7 +345,5 @@ void Hierarchy::allocate_array_
   }
 #endif /* CONFIG_USE_CHARM */
 }
-
-#endif /* REMOVE_PATCH */
 
 

@@ -552,7 +552,6 @@ test_summary("Memory",array("Memory"),
 	     array("test_Memory")); 
 test_summary("Mesh",
 	     array("Hierarchy",
-		   "Patch",
 		   "Block",
 		   "Tree",
 		   "TreeDensity",
@@ -560,7 +559,6 @@ test_summary("Mesh",
 		   "NodeTrace",
 		   "ItNode"),
 	     array("test_Hierarchy",
-		   "test_Patch",
 		   "test_Block",
 		   "test_Tree",
 		   "test_TreeDensity",
@@ -810,7 +808,6 @@ tests("Cello","test_Memory","test_Memory","");
 test_group("Mesh");
 
 tests("Cello","test_Hierarchy","test_Hierarchy",""); 
-tests("Cello","test_Patch","test_Patch",""); 
 tests("Cello","test_Block","test_Block",""); 
 tests("Cello","test_Tree","test_Tree",""); 
 

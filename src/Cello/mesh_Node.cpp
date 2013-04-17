@@ -41,13 +41,8 @@ void Node::pup (PUP::er &p)
   // Patch *& data_alias = (Patch *) data_;
   p | have_data_;
   if (have_data_) {
-#ifdef REMOVE_PATCH
     if (up) data_ = (void *) new CProxy_CommBlock;
     p | *((CProxy_CommBlock *)data_);
-#else /* REMOVE_PATCH */
-    if (up) data_ = (void *) new CProxy_Patch;
-    p | *((CProxy_Patch *)data_);
-#endif
   }
   p | size_;
   if (up) child_array_ = new Node[size_];

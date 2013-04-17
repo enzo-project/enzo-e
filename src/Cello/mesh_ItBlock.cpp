@@ -11,14 +11,8 @@
 
 //----------------------------------------------------------------------
 
-#ifdef REMOVE_PATCH
 ItBlock::ItBlock ( const Hierarchy * hierarchy ) throw ()
   : hierarchy_((Hierarchy * )hierarchy)
-#else /* REMOVE_PATCH */
-ItBlock::ItBlock ( const Patch * patch ) throw ()
-  : patch_((Patch * )patch)
-#endif /* REMOVE_PATCH */
-
 {}
 
 //----------------------------------------------------------------------
@@ -34,24 +28,15 @@ CommBlock * ItBlock::operator++ () throw()
   //
   CommBlock * block;
   int nbx,nby,nbz;
-#ifdef REMOVE_PATCH
   hierarchy_->root_size(&nbx,&nby,&nbz);
   size_t nb = nbx*nby*nbz;
-#else /* REMOVE_PATCH */
-  size_t nb = patch_->num_blocks(&nbx,&nby,&nbz);
-#endif /* REMOVE_PATCH */
 
   do {
     index1_++;
     int ibx = (index1_ - 1) % nbx;
     int iby = (((index1_-1) - ibx)/nbx) % nby;
     int ibz = (index1_-1)/(nbx*nby);
-#ifdef REMOVE_PATCH
     CProxy_CommBlock * block_array = hierarchy_->block_array();
-#else /* REMOVE_PATCH */
-    CProxy_CommBlock * block_array = patch_->block_array();
-#endif /* REMOVE_PATCH */
-
     block = (*block_array)(ibx,iby,ibz).ckLocal();
   } while (block==NULL && index1_ <= nb);
   // assert: (block != NULL) or (index1_ > nb)
@@ -61,16 +46,10 @@ CommBlock * ItBlock::operator++ () throw()
 
 #else /* CONFIG_USE_CHARM */
 
-#ifdef REMOVE_PATCH
   index1_ ++;
   int nb = hierarchy_->num_local_blocks();
   if (index1_ > nb) index1_ = 0;
   return index1_ ? hierarchy_->local_block(index1_ - 1) : NULL;
-#else /* REMOVE_PATCH */
-  index1_ ++;
-  if (index1_ > patch_->num_local_blocks()) index1_ = 0;
-  return index1_ ? patch_->local_block(index1_ - 1) : NULL;
-#endif
 
 #endif /* CONFIG_USE_CHARM */
 }
@@ -79,21 +58,9 @@ CommBlock * ItBlock::operator++ () throw()
 
 bool ItBlock::done () const throw()
 {
-#ifdef REMOVE_PATCH
-
   int nbx,nby,nbz;
   hierarchy_->root_size(&nbx,&nby,&nbz);
   size_t nb = nbx*nby*nbz;
   return index1_ >= nb;
-
-#else /* REMOVE_PATCH */
-
-# ifdef CONFIG_USE_CHARM
-  return index1_ >= patch_->num_blocks();
-# else
-  return index1_ >= patch_->num_local_blocks();
-# endif
-
-#endif /* REMOVE_PATCH */
 }
 

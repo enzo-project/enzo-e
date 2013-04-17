@@ -52,8 +52,6 @@ void Initial::enforce_hierarchy_
  const FieldDescr * field_descr
  ) throw()
 {
-#ifdef REMOVE_PATCH
-
 #ifdef CONFIG_USE_CHARM
 
   if (hierarchy->group_process()->is_root()) {
@@ -70,53 +68,7 @@ void Initial::enforce_hierarchy_
 
 #endif /* CONFIG_USE_CHARM */
 
-
-#else /* REMOVE_PATCH */
-
-  ItPatch it_patch (hierarchy);
-
-  while (Patch * patch = ++it_patch) {
-#ifdef CONFIG_USE_CHARM
-    TRACE("Initial::enforce_hiearchy_() calling Patch::p_initial()");
-    ((CProxy_Patch *)patch)->p_initial();
-#else
-    enforce_patch (patch, field_descr, hierarchy);
-#endif
-  }
-#endif /* REMOVE_PATCH */
-
 }
-
-//----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-void Initial::enforce_patch_
-(
- Patch * patch,
- const FieldDescr * field_descr,
- const Hierarchy * hierarchy
- ) throw()
-
-{
-
-#ifdef CONFIG_USE_CHARM
-
-  TRACE("Initial::enforce_patch_() calling CommBlock::p_initial()");
-  patch->block_array()->p_initial();
-
-#else
-
-  ItBlock it_block (patch);
-  while (CommBlock * block = ++it_block) {
-    // NO OFFSET: ASSUMES ROOT PATCH
-    enforce_block (block, field_descr, hierarchy);
-  }
-
-#endif
-
-}
-#endif /* REMOVE_PATCH */
 
 //----------------------------------------------------------------------
 

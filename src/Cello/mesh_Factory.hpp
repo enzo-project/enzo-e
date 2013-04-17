@@ -12,10 +12,6 @@ class GroupProcess;
 class Hierarchy;
 class IoBlock;
 class IoFieldBlock;
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-class Patch;
-#endif /* REMOVE_PATCH */
 
 class Factory
 #ifdef CONFIG_USE_CHARM
@@ -53,32 +49,9 @@ public: // interface
 #endif
 
 
-#ifdef REMOVE_PATCH
   /// Create a new Hierarchy [abstract factory design pattern]
   virtual Hierarchy * create_hierarchy (int dimension, int refinement,
 					int process_first, int process_last_plus) const throw ();
-#else /* REMOVE_PATCH */
-  /// Create a new Hierarchy [abstract factory design pattern]
-  virtual Hierarchy * create_hierarchy (int dimension, int refinement) const throw ();
-
-  /// Create a new Patch [abstract factory design pattern]
-# ifdef CONFIG_USE_CHARM
-  virtual CProxy_Patch * 
-# else
-  virtual Patch *
-# endif
-  create_patch 
-  (
-   const FieldDescr * field_descr,
-   int nx,   int ny,  int nz,
-   int nx0,  int ny0, int nz0,
-   int nbx,  int nby, int nbz,
-   double xm, double ym, double zm,
-   double xp, double yp, double zp,
-   bool allocate_blocks = true,
-   int process_first=0, int process_last_plus=-1
-   ) const throw();
-#endif /* REMOVE_PATCH */
 
   /// Create an Input / Output accessor object for CommBlock
   virtual IoBlock * create_io_block ( ) const throw();
@@ -94,10 +67,6 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-   CProxy_Patch proxy_patch,
-#endif
    int num_field_blocks = 1,
    bool allocate = true) const throw();
 
@@ -110,12 +79,6 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double xb, double yb, double zb,
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-#  ifdef CONFIG_USE_CHARM
-   CProxy_Patch proxy_patch,
-#  endif
-#endif
    int num_field_blocks = 1) const throw();
 
 };

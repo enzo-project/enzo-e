@@ -30,10 +30,6 @@ enum meta_type {
 
 #include "io_Io.hpp"
 #include "io_IoHierarchy.hpp"
-#ifdef REMOVE_PATCH
-#else
-#include "io_IoPatch.hpp"
-#endif
 #include "io_IoLayout.hpp"
 #include "io_IoBlock.hpp"
 #include "io_IoFieldBlock.hpp"
@@ -51,11 +47,6 @@ enum meta_type {
 #include "io_OutputImage.hpp"
 #include "io_OutputData.hpp"
 #include "io_OutputRestart.hpp"
-
-#ifdef REMOVE_PATCH
-#else
-#include "io_ItFilePatch.hpp"
-#endif
 
 #include "io_Schedule.hpp"
 

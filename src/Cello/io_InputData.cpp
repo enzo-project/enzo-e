@@ -101,54 +101,6 @@ void InputData::read_hierarchy
 
 //----------------------------------------------------------------------
 
-#ifdef REMOVE_PATCH
-#else
-Patch * InputData::read_patch 
-(
- Patch * patch,
- const FieldDescr * field_descr,
- int ixp0, int iyp0, int izp0
- ) throw()
-{
-  ERROR("InputData::read_patch()",
-	"Not Implemented");
-
-  // Change to file group for patch
-
-  file_->group_chdir("/patch_0");
-
-  // Read patch meta-data
-
-  IoPatch io_patch(patch);
-
-  Input::read_meta_group (&io_patch);
-
-  // Also read the patches parallel Layout
-
-  IoLayout io_layout(patch->layout());
-
-  Input::read_meta_group (&io_layout);
-
-  // // Call read_block() on contained blocks
-  // Input::read_patch(patch,field_descr,ixp0,iyp0,izp0);
-
-  return patch;
-}
-#endif /* REMOVE_PATCH */
-
-//----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
-#else
-void InputData::end_read_patch() throw()
-{
-  file_->group_close();
-  file_->group_chdir("..");
-}
-#endif
-
-//----------------------------------------------------------------------
-
 CommBlock * InputData::read_block 
 ( 
  CommBlock * block,
@@ -171,11 +123,7 @@ CommBlock * InputData::read_block
   Input::read_meta_group (io_block());
 
   int ibx,iby,ibz;
-#ifdef REMOVE_PATCH
   block->index_forest(&ibx,&iby,&ibz);
-#else
-  block->index_patch(&ibx,&iby,&ibz);
-#endif
 
   // // Call read_block() on base Input object
 

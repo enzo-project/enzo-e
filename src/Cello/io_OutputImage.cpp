@@ -140,32 +140,6 @@ void OutputImage::finalize () throw()
 
 //----------------------------------------------------------------------
 
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-void OutputImage::write_patch
-(
- const Patch * patch,
- const FieldDescr * field_descr,
- int ixp0,
- int iyp0,
- int izp0
- ) throw()
-// @param field_descr  Field descriptor
-// @param patch        Patch to output
-// @param ixp0  offset of the patch relative to the parent patch along x-axis 
-// @param iyp0  offset of the patch relative to the parent patch along y-axis
-// @param izp0  offset of the patch relative to the parent patch along z-axis
-{
-  TRACE("OutputImage::write_patch()");
-
-  /// Call write_patch() on parent Output class
-  write_patch_(patch,field_descr,ixp0,iyp0,izp0);
-
-}
-#endif /* REMOVE_PATCH */
-
-//----------------------------------------------------------------------
-
 void OutputImage::write_block
 (
  const CommBlock * comm_block,
@@ -189,12 +163,7 @@ void OutputImage::write_block
 
   int ix,iy,iz;
 
-#ifdef REMOVE_PATCH
   comm_block->index_forest(&ix,&iy,&iz);
-#else /* REMOVE_PATCH */
-  comm_block->index_patch(&ix,&iy,&iz);
-#endif /* REMOVE_PATCH */
-
 
   int ixb0 = ixp0 + ix*nbx;
   int iyb0 = iyp0 + iy*nby;

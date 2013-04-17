@@ -107,8 +107,6 @@ void Input::read_hierarchy
 ) throw()
 {
 
-#ifdef REMOVE_PATCH
-
 #  ifdef CONFIG_USE_CHARM
 
   if (hierarchy->group_process()->is_root())
@@ -122,49 +120,7 @@ void Input::read_hierarchy
   }
 
 #  endif /* CONFIG_USE_CHARM */
-
-#else /* REMOVE_PATCH */
-  ItPatch it_patch (hierarchy);
-
-  // (*) read data patch_list_
-
-  while (Patch * patch = ++it_patch) {
-
-    // NO OFFSET: ASSUMES ROOT PATCH
-    read_patch (patch, field_descr,  0,0,0);
-
-  }
-#endif /* REMOVE_PATCH */
 }
-
-//----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
-#else
-Patch * Input::read_patch 
-(
- Patch * patch,
- const FieldDescr * field_descr,
- int ixp0, int iyp0, int izp0
- ) throw()
-
-{
-
-#ifdef CONFIG_USE_CHARM
-
-  patch->block_array()->p_read (index_charm_);
-
-#else
-
-  ItBlock it_block (patch);
-  while (CommBlock * block = ++it_block) {
-    // NO OFFSET: ASSUMES ROOT PATCH
-    read_block (block, "NAME",field_descr);
-  }
-#endif
-  return patch;
-}
-#endif /* REMOVE_PATCH */
 
 //----------------------------------------------------------------------
 

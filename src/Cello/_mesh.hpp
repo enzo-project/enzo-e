@@ -31,7 +31,6 @@
 class Tree;
 
 #include "mesh_Block.hpp"
-#include "mesh_Patch.hpp"
 #include "mesh_Hierarchy.hpp"
 #include "mesh_Factory.hpp"
 
@@ -42,7 +41,6 @@ class Tree;
 
 // Iterators
 #include "mesh_It.hpp"
-#include "mesh_ItPatch.hpp"
 #include "mesh_ItBlock.hpp"
 #include "mesh_ItNode.hpp"
 

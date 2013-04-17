@@ -229,8 +229,6 @@ void Output::write_hierarchy_
  const FieldDescr * field_descr
  ) throw()
 {
-#ifdef REMOVE_PATCH
-
 #ifdef CONFIG_USE_CHARM
 
   if (hierarchy->group_process()->is_root())
@@ -246,53 +244,7 @@ void Output::write_hierarchy_
 
 #endif /* CONFIG_USE_CHARM */
 
-#else /* REMOVE_PATCH */
-  ItPatch it_patch (hierarchy);
-
-  while (Patch * patch = ++it_patch) {
-
-#ifdef CONFIG_USE_CHARM
-    TRACE("Output::write_(hierarchy)");
-    ((CProxy_Patch *)patch)->p_write(index_);
-#else /* CONFIG_USE_CHARM */
-    write_patch (patch, field_descr, 0,0,0);
-#endif /* CONFIG_USE_CHARM */
-
-  }
-#endif
 }
-
-//----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-
-void Output::write_patch_
-(
- const Patch * patch,
- const FieldDescr * field_descr,
- int ixp0, int iyp0, int izp0
- ) throw()
-
-{
-
-    TRACE("Output::write_patch_()");
-#ifdef CONFIG_USE_CHARM
-
-  patch->block_array()->p_write(index_);
-
-#else
-
-  ItBlock it_block (patch);
-  while (const CommBlock * block = ++it_block) {
-    // NO OFFSET: ASSUMES ROOT PATCH
-    write_block (block, field_descr, 0,0,0);
-  }
-
-#endif
-
-}
-#endif /* REMOVE_PATCH */
 
 //----------------------------------------------------------------------
 

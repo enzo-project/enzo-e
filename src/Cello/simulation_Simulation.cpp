@@ -323,13 +323,8 @@ void Simulation::initialize_hierarchy_() throw()
   //----------------------------------------------------------------------
 
   const int refinement = 2;
-#ifdef REMOVE_PATCH
   hierarchy_ = factory()->create_hierarchy (dimension_,refinement,
 					    0, group_process_->size());
-#else /* REMOVE_PATCH */
-  hierarchy_ = factory()->create_hierarchy (dimension_,refinement);
-#endif /* REMOVE_PATCH */
-
 
   // Domain extents
 
@@ -364,11 +359,7 @@ void Simulation::initialize_hierarchy_() throw()
   if (group_process()->is_root())
 #endif
     {
-#ifdef REMOVE_PATCH
       hierarchy_->create_forest
-#else
-      hierarchy_->create_root_patch
-#endif
 	(field_descr_,
 	 config_->mesh_root_size[0],
 	 config_->mesh_root_size[1],

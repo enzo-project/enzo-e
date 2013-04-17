@@ -165,15 +165,6 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
-#ifdef CONFIG_USE_CHARM
-
-#  ifdef REMOVE_PATCH
-#  else /* REMOVE_PATCH */
-   CkChareID proxy_patch,
-#  endif /* REMOVE_PATCH */
-
-#endif /*CONFIG_USE_CHARM */
-
    int num_field_blocks) throw();
 
 #ifdef CONFIG_USE_CHARM
@@ -197,11 +188,6 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
-#  ifdef REMOVE_PATCH
-#  else /* REMOVE_PATCH */
-   CkChareID proxy_patch,
-#  endif /* REMOVE_PATCH */
-
    int num_field_blocks) throw();
 
 #endif /* CONFIG_USE_CHARM */

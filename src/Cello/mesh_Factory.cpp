@@ -7,8 +7,6 @@
 
 #include "mesh.hpp"
 
-#ifdef REMOVE_PATCH
-
 //----------------------------------------------------------------------
 
 Hierarchy * Factory::create_hierarchy (int dimension, int refinement,
@@ -16,15 +14,6 @@ Hierarchy * Factory::create_hierarchy (int dimension, int refinement,
 {
   return new Hierarchy (this,dimension,refinement,process_first, process_last_plus); 
 }
-
-#else /* REMOVE_PATCH */
-
-Hierarchy * Factory::create_hierarchy (int dimension, int refinement) const throw ()
-{
-  return new Hierarchy (this,dimension,refinement); 
-}
-
-#endif /* REMOVE_PATCH */
 
 //----------------------------------------------------------------------
 
@@ -41,53 +30,6 @@ void Factory::pup (PUP::er &p)
 }
 
 #endif
-
-//----------------------------------------------------------------------
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-
-#ifdef CONFIG_USE_CHARM
-CProxy_Patch * 
-#else
-Patch * 
-#endif
-Factory::create_patch 
-(
- const FieldDescr * field_descr,
- int nx,   int ny,  int nz,
- int nx0,  int ny0, int nz0,
- int nbx,  int nby, int nbz,
- double xm, double ym, double zm,
- double xp, double yp, double zp,
- bool allocate_blocks,
- int process_first, int process_last_plus
- ) const throw()
-{
-#ifdef CONFIG_USE_CHARM
-  CProxy_Patch * proxy_patch = new CProxy_Patch;
-  *proxy_patch = CProxy_Patch::ckNew
-    (nx,ny,nz,
-     nx0,ny0,nz0,
-     nbx,nby,nbz,
-     xm,ym,zm,
-     xp,yp,zp,
-     allocate_blocks,
-     process_first, process_last_plus);
-  return proxy_patch;
-#else
-  return new Patch
-    (this,
-     field_descr,
-     nx,ny,nz,
-     nx0,ny0,nz0,
-     nbx,nby,nbz,
-     xm,ym,zm,
-     xp,yp,zp,
-     allocate_blocks,
-     process_first, process_last_plus);
-#endif
-}
-#endif /* REMOVE_PATCH */
 
 //----------------------------------------------------------------------
 
@@ -113,10 +55,6 @@ CProxy_CommBlock Factory::create_block_array
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xb, double yb, double zb,
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
- CProxy_Patch proxy_patch,
-#endif /* REMOVE_PATCH */
  int num_field_blocks,
  bool allocate
  ) const throw()
@@ -129,10 +67,6 @@ CProxy_CommBlock Factory::create_block_array
        nx,ny,nz,
        xm,ym,zm, 
        xb,yb,zb, 
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-       proxy_patch,
-#endif /* REMOVE_PATCH */
        num_field_blocks,
        nbx,nby,nbz);
     //    DEBUG1 ("block = %p",block);
@@ -155,12 +89,6 @@ CommBlock * Factory::create_block
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xb, double yb, double zb,
-#ifdef CONFIG_USE_CHARM
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
- CProxy_Patch proxy_patch,
-#endif /* REMOVE_PATCH */
-#endif 
  int num_field_blocks
  ) const throw()
 {
@@ -170,10 +98,6 @@ CommBlock * Factory::create_block
      nx,ny,nz,
      xm,ym,zm, 
      xb,yb,zb, 
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-     proxy_patch,
-#endif /* REMOVE_PATCH */
      num_field_blocks,
      nbx,nby,nbz);
   return block_array(ibx,iby,ibz).ckLocal();

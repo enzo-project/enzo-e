@@ -12,11 +12,6 @@ class Factory;
 class FieldDescr;
 class Hierarchy;
 class ItField;
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-class Patch;
-#endif /* REMOVE_PATCH */
-
 class Schedule;
 class Simulation;
 
@@ -151,16 +146,6 @@ public: // virtual functions
     const FieldDescr * field_descr  ) throw()
   { write_hierarchy_(hierarchy,field_descr); }
 
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-  /// Write local patch data to disk
-  virtual void write_patch
-  ( const Patch * patch, 
-    const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw()
-  { write_patch_(patch,field_descr,ixp0,iyp0,izp0); }
-#endif /* REMOVE_PATCH */
-
   /// Write local block data to disk
   virtual void write_block
   ( const CommBlock * block, 
@@ -195,16 +180,6 @@ protected:
   void write_hierarchy_
   ( const Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
-
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-  /// Loop over writing CommBlocks in the Patch
-  void write_patch_
-  ( const Patch * patch, 
-    const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
-#endif /* REMOVE_PATCH */
-
 
   /// Loop over writing Field data in the CommBlock
   void write_block_

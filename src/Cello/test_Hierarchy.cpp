@@ -23,22 +23,12 @@ PARALLEL_MAIN_BEGIN
   Factory * factory = new Factory;
   const int dimensions = 3;
   const int refinement = 2;
-#ifdef REMOVE_PATCH
   Hierarchy * hierarchy = factory->create_hierarchy(dimensions, refinement,0,1);
-#else /* REMOVE_PATCH */
-  Hierarchy * hierarchy = factory->create_hierarchy(dimensions, refinement);
-#endif
   unit_assert(hierarchy != NULL);
 
   FieldDescr field_descr;
 
-#ifdef REMOVE_PATCH
   hierarchy->create_forest(&field_descr,12,12,12,3,3,3);
-#else /* REMOVE_PATCH */
-  hierarchy->create_root_patch(&field_descr,12,12,12,3,3,3);
-  unit_assert(hierarchy->patch(0)!=NULL);
-#endif /* REMOVE_PATCH */
-
 
   // Extents
 

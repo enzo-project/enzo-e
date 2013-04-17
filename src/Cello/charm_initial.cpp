@@ -48,24 +48,10 @@ void Problem::initial_next(Simulation * simulation) throw()
 
       DEBUG1 ("Start Initial(%d) A",index_initial_);
 
-#ifdef REMOVE_PATCH
-
       TRACE ("DEBUG: Problem::initial_next calling CommBlock::p_initial()");
       if (hierarchy->group_process()->is_root()) {
 	hierarchy->block_array()->p_initial();
       }
-
-#else
-      ItPatch it_patch(hierarchy);
-      Patch * patch;
-
-      while (( patch = ++it_patch )) {
-
-	CProxy_Patch * patch_proxy = (CProxy_Patch *)patch;
-	patch_proxy->p_initial();
-
-      }
-#endif
 
     } else {
 
@@ -84,18 +70,6 @@ void Problem::initial_next(Simulation * simulation) throw()
 
   }
 }
-
-//----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
-#else
-void Patch::p_initial()
-{
-  TRACE("Patch::p_initial()");
-  TRACE("Patch::p_initial(Patch) calling CommBlock::p_initial()");
-  block_array()->p_initial();
-}
-#endif
 
 //----------------------------------------------------------------------
 
@@ -126,47 +100,23 @@ void CommBlock::p_initial()
 
   initial->enforce_block(this,field_descr, simulation->hierarchy());
 
-#ifdef REMOVE_PATCH
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
   simulation_charm->s_initial();
-#else
-  proxy_patch_.s_initial();
-#endif
 
 }
-
-//----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
-#else
-void Patch::s_initial()
-{
-  if (block_loop_.done()) {
-    proxy_simulation.s_initial();
-  }
-}
-#endif
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::s_initial()
 {
   TRACE("ENTER SimulationCharm::s_initial()");
-#ifdef REMOVE_PATCH
   TRACE2 ("block_loop: %d/%d",block_loop_.index(),block_loop_.stop());
   if (block_loop_.done()) {
     TRACE ("CONTINUE SimulationCharm::s_initial()");
     CkCallback callback (CkIndex_SimulationCharm::c_initial(), thisProxy);
     contribute(0,0,CkReduction::concat,callback);
-#else /* REMOVE_PATCH */
-    if (group_process()->is_root()) {
-      c_initial();
-    }
-#endif /* REMOVE_PATCH */
 
-#ifdef REMOVE_PATCH
   }
-#endif /* REMOVE_PATCH */
 }
 //----------------------------------------------------------------------
 

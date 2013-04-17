@@ -29,10 +29,8 @@ public: // interface
   
   /// Initialize a Hierarchy object
   Hierarchy ( const Factory * factory,
-	      int dimension, int refinement
-#ifdef REMOVE_PATCH
-	      ,int process_first, int process_last_plus
-#endif /* REMOVE_PATCH */
+	      int dimension, int refinement,
+	      int process_first, int process_last_plus
 	      ) throw ();
 
   /// Delete the Hierarchy object
@@ -69,8 +67,6 @@ public: // interface
   void root_size(int * nx, int * ny = 0, int * nz = 0) const throw ();
 
   //----------------------------------------------------------------------
-
-#ifdef REMOVE_PATCH
 
   /// Return whether CommBlocks have been allocated or not
   bool blocks_allocated() const throw()
@@ -128,32 +124,10 @@ public: // interface
   /// Return the number of CommBlocks along each dimension
   void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
 
-#else /* REMOVE_PATCH */
-
-  /// Return the total number of local patches
-  size_t num_patches() const throw();
-
-  /// Return the ith patch.  Patch[0] is the root
-  Patch * patch(size_t i) throw();
-
-  /// Return the ith patch
-  Patch * patch(size_t i) const throw();
-
-  /// Create the initial root patch
-  void create_root_patch (FieldDescr   * field_descr,
-			  int nx, int ny, int nz,
-			  int nbx, int nby, int nbz,
-			  bool allocate_blocks  = true,
-			  int process_first     = 0, 
-			  int process_last_plus = -1) throw();
-
-#endif /* REMOVE_PATCH */
-
   /// Return the factory object associated with the Hierarchy
   const Factory * factory () const throw()
   { return factory_; }
 
-#ifdef REMOVE_PATCH
   /// Return the layout of the patch, describing processes and blocking
   Layout * layout () throw();
 
@@ -163,17 +137,12 @@ public: // interface
   const GroupProcess * group_process()  const throw()
   { return group_process_; };
 
-#endif /* REMOVE_PATCH */
-
 protected: // functions
 
-#ifdef REMOVE_PATCH
   /// Allocate array, and optionally allocate element CommBlocks
   void allocate_array_
   (bool allocate_blocks = true,
    const FieldDescr * field_descr = 0) throw ();
-#endif /* REMOVE_PATCH */
-
 
 protected: // attributes
 
@@ -187,8 +156,6 @@ protected: // attributes
   /// Refinement of the hierarchy [ used for Charm++ pup() of Tree ]
   int refinement_;
 
-#ifdef REMOVE_PATCH
-
   int num_blocks_; 
 
   /// Array of CommBlocks 
@@ -200,16 +167,6 @@ protected: // attributes
   std::vector<CommBlock * > block_;
 # endif
 
-#else /* REMOVE_PATCH */
-  
-  /// Number of patches (redundant with patch_tree_)
-  int patch_count_;
-
-  /// List of local patches
-  Tree * patch_tree_;
-
-#endif /* REMOVE_PATCH */
-
   /// Size of the root grid
   int root_size_[3];
 
@@ -218,8 +175,6 @@ protected: // attributes
 
   /// Upper extent of the hierarchy
   double upper_[3];
-
-#ifdef REMOVE_PATCH
 
   /// Parallel Group for distributing the Mesh across processors
   GroupProcess * group_process_;
@@ -230,7 +185,6 @@ protected: // attributes
   /// How the Forest is distributed into CommBlocks
   int blocking_[3];
 
-#endif /* REMOVE_PATCH */
 };
 
 

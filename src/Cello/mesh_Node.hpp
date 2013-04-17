@@ -9,11 +9,6 @@
 #ifndef MESH_NODE_HPP
 #define MESH_NODE_HPP
 
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-class Patch;
-#endif
-
 class Node {
 
   /// @class    Node

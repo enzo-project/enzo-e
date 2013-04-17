@@ -70,7 +70,6 @@ env.RunSerial('test_Memory.unit',      bin_path + '/test_Memory')
 # MESH COMPONENT          
 #----------------------------------------------------------------------
 env.RunSerial('test_Hierarchy.unit', bin_path + '/test_Hierarchy')
-env.RunSerial('test_Patch.unit',     bin_path + '/test_Patch')
 env.RunSerial('test_Block.unit',     bin_path + '/test_Block')
 Clean(env_mv_out.RunSerial('test_Tree.unit', bin_path + '/test_Tree'),
       ['#/test_tree_1-initial.png',

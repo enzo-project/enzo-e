@@ -47,12 +47,7 @@ void SimulationCharm::initialize() throw()
   WARNING("SimulationCharm::initialize()",
 	  "Calling StartLB for debugging load balancing()");
 
-#ifdef REMOVE_PATCH
-
   s_initialize();
-
-#endif
-
 }
 
 //----------------------------------------------------------------------
@@ -82,19 +77,8 @@ void SimulationCharm::p_refresh()
 void SimulationCharm::refresh()
 {
   TRACE("SimulationCharm::refresh");
-#ifdef REMOVE_PATCH
   if (hierarchy()->group_process()->is_root()) 
     hierarchy()->block_array()->p_refresh(); 
-#else /* REMOVE_PATCH */
-  ItPatch it_patch(hierarchy_);
-  Patch * patch;
-
-  while (( patch = ++it_patch )) {
-    CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-    proxy_patch->p_refresh();
-  }
-#endif /* REMOVE_PATCH */
-
 }
 
 //----------------------------------------------------------------------
@@ -115,18 +99,8 @@ void SimulationCharm::c_compute()
 
     performance_.start_region (id_cycle_);
 
-#ifdef REMOVE_PATCH
     if (hierarchy()->group_process()->is_root()) 
       hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
-#else /* REMOVE_PATCH */
-    ItPatch it_patch(hierarchy_);
-    Patch * patch;
-    while (( patch = ++it_patch )) {
-      CProxy_Patch * proxy_patch = (CProxy_Patch *)patch;
-      proxy_patch->p_compute(cycle_, time_, dt_);
-    }
-#endif /* REMOVE_PATCH */
-
   }
 
 }

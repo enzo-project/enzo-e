@@ -19,12 +19,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("CommBlock");
 
-#ifdef CONFIG_USE_CHARM
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-  CProxy_Patch proxy_patch;
-#endif /* REMOVE_PATCH */
-#endif
   Factory factory;
   
   CommBlock * block = factory.create_block
@@ -33,13 +27,6 @@ PARALLEL_MAIN_BEGIN
      3,4,5,
      -1.0,-2.0,-3.0,
      2.0,  4.0, 6.0,
-#ifdef CONFIG_USE_CHARM
-#ifdef REMOVE_PATCH
-#else /* REMOVE_PATCH */
-     proxy_patch,
-#endif /* REMOVE_PATCH */
-
-#endif
      1);
 
   unit_func("CommBlock");
