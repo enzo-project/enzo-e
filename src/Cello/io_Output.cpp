@@ -273,7 +273,7 @@ void Output::write_patch_
 
 void Output::write_block_
 (
- const CommBlock * block,
+ const CommBlock * comm_block,
  const FieldDescr * field_descr,
  int ixp0, int iyp0, int izp0
  ) throw()
@@ -282,7 +282,7 @@ void Output::write_block_
   // Write fields
 
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
-    const FieldBlock * field_block = block->field_block();
+    const FieldBlock * field_block = comm_block->block()->field_block();
     write_field_block (field_block,  field_descr, it_field_->value());
   }
 

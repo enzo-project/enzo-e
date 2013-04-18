@@ -63,7 +63,7 @@ public: // interface
 #endif
 
   /// Initialize an empty CommBlock
-  CommBlock() { };
+  CommBlock()  { };
 
 #ifdef CONFIG_USE_CHARM
 
@@ -77,14 +77,7 @@ public: // interface
 
   p | count_refresh_face_;
   p | proxy_patch_;
-  p | num_field_blocks_;
 
-  // allocate field_block_[] vector first if unpacking
-  if (up) field_block_.resize(num_field_blocks_);
-  for (int i=0; i<num_field_blocks_; i++) {
-    if (up) field_block_[i] = new FieldBlock;
-    p | *field_block_[i];
-  }
 
   p | patch_id_;
   p | patch_rank_;
@@ -172,13 +165,9 @@ public: // interface
   /// Assignment operator
   CommBlock & operator= (const CommBlock & block) throw();
 
-  //----------------------------------------------------------------------
-
-  /// Return the ith Field block
-  const FieldBlock * field_block (int i=0) const throw();
-
-  /// Return the ith Field block
-  FieldBlock * field_block (int i=0) throw();
+  /// Return the Block associated with this CommBlock
+  Block * block() throw() { return & block_; };
+  const Block * block() const throw() { return & block_; };
 
 //----------------------------------------------------------------------
 
@@ -299,7 +288,7 @@ protected: // functions
 protected: // attributes
 
   /// Mesh Block that this CommBlock controls
-  Block block;
+  Block block_;
 
 #ifdef CONFIG_USE_CHARM
 
@@ -312,12 +301,6 @@ protected: // attributes
 #endif
 
   //--------------------------------------------------
-
-  /// Number of field blocks (required by CHARM++ PUP::er)
-  int num_field_blocks_;
-
-  /// Array of field blocks
-  std::vector<FieldBlock *> field_block_;
 
   /// ID of parent patch
   int patch_id_;

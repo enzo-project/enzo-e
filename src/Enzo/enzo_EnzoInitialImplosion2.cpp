@@ -34,7 +34,7 @@ void EnzoInitialImplosion2::pup (PUP::er &p)
 
 void EnzoInitialImplosion2::enforce_block 
 (
- CommBlock * block,
+ CommBlock * comm_block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()
@@ -43,9 +43,9 @@ void EnzoInitialImplosion2::enforce_block
 
   ASSERT("EnzoInitialImplosion2",
 	 "CommBlock does not exist",
-	 block != NULL);
+	 comm_block != NULL);
 
-  FieldBlock * field_block = block->field_block();
+  FieldBlock * field_block = comm_block->block()->field_block();
 
   ASSERT("EnzoInitialImplosion2::enforce_block",
 	 "Insufficient number of fields",
@@ -70,10 +70,10 @@ void EnzoInitialImplosion2::enforce_block
 
   // Cell widths
   double xm,ym;
-  block->lower(&xm,&ym);
+  comm_block->lower(&xm,&ym);
 
   double xp,yp;
-  block->upper(&xp,&yp);
+  comm_block->upper(&xp,&yp);
 
   double hx,hy;
   field_block->cell_width(xm,xp,&hx,ym,yp,&hy);

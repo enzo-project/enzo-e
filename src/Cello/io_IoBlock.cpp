@@ -43,7 +43,7 @@ void IoBlock::meta_value
   int count = 0;
 
   if (index == count++) {
-    *buffer = (void *) & block_->num_field_blocks_;
+    *buffer = (void *) & block_->block()->num_field_blocks_;
     *type   = scalar_type_int;
   } else if (index == count++) {
     *buffer = (void *) & block_->patch_id_;

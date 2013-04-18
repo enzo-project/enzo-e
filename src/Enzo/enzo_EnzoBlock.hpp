@@ -53,7 +53,7 @@ class EnzoBlock : public CommBlock
 
   /// @class    EnzoBlock
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] An EnzoBlock is a CommBlock with Enzo data
+  /// @brief    [\ref Enzo] An EnzoBlock is a Block with Enzo data
 
   friend class IoEnzoBlock;
 
@@ -73,6 +73,7 @@ class EnzoBlock : public CommBlock
   //----------------------------------------------------------------------
   // variables
 
+public:
   /// Boundary
 
   static int  BoundaryRank;
@@ -220,7 +221,7 @@ public: // interface
 
     if (p.isUnpacking()) {
       for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-	BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
+	BaryonField[field] = (enzo_float *)block_.field_block(0)->field_values(field);
       }
     }
 
