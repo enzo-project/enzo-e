@@ -52,6 +52,8 @@ foreach arch ($ARCH)
 foreach type ($TYPE)
 foreach prec ($PREC)
 
+    echo "arch = $arch  type = $type  prec = $prec"
+
    set conf = $type
 
    rm -f "test/*/running.$arch.$prec"
@@ -83,9 +85,17 @@ foreach prec ($PREC)
    setenv CELLO_TYPE $type
    setenv CELLO_PREC $prec
 
+   rm -f bin/$type/enzo-p
+
    scons install-inc            >&  $dir/out.scons
    scons -k -j$proc install-bin >>& $dir/out.scons
    scons -k         $target     >>& $dir/out.scons
+
+   if (-e bin/$type/enzo-p) then
+      echo "Success"
+   else
+      echo "FAIL"
+   endif
 
    rm -f "$dir/running.$arch.$prec"
 

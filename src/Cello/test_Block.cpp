@@ -19,12 +19,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("CommBlock");
 
-#ifdef CONFIG_USE_CHARM
-  CProxy_Patch proxy_patch;
-#endif
   Factory factory;
-  int patch_id = 0;
-  int patch_rank = 0;
   
   CommBlock * block = factory.create_block
     (0,0,0, 
@@ -32,11 +27,6 @@ PARALLEL_MAIN_BEGIN
      3,4,5,
      -1.0,-2.0,-3.0,
      2.0,  4.0, 6.0,
-#ifdef CONFIG_USE_CHARM
-     proxy_patch,
-#endif
-     patch_id,
-     patch_rank,
      1);
 
   unit_func("CommBlock");

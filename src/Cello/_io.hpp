@@ -30,7 +30,6 @@ enum meta_type {
 
 #include "io_Io.hpp"
 #include "io_IoHierarchy.hpp"
-#include "io_IoPatch.hpp"
 #include "io_IoLayout.hpp"
 #include "io_IoBlock.hpp"
 #include "io_IoFieldBlock.hpp"
@@ -48,8 +47,6 @@ enum meta_type {
 #include "io_OutputImage.hpp"
 #include "io_OutputData.hpp"
 #include "io_OutputRestart.hpp"
-
-#include "io_ItFilePatch.hpp"
 
 #include "io_Schedule.hpp"
 

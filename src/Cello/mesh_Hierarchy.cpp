@@ -14,18 +14,22 @@
 //----------------------------------------------------------------------
 
 Hierarchy::Hierarchy ( const Factory * factory,
-		       int dimension, int refinement) throw ()
-  : factory_((Factory * )factory),
+		       int dimension, int refinement,
+		       int process_first, int process_last_plus
+		       ) throw ()
+  : factory_((Factory *)factory),
     dimension_(dimension),
     refinement_(refinement),
-    patch_count_(0),
-    patch_tree_(new Tree (dimension,refinement))
+    layout_(0),
+    group_process_(GroupProcess::create(process_first,process_last_plus))
 {
+  TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
   for (int i=0; i<3; i++) {
     lower_[i] = 0.0;
     upper_[i] = 1.0;
     root_size_[i] = 1;
+    blocking_[i] = 0;
   }
 }
 
@@ -33,14 +37,19 @@ Hierarchy::Hierarchy ( const Factory * factory,
 
 Hierarchy::~Hierarchy() throw()
 {
-  ItNode it_node (patch_tree_);
-  while (Node * node = it_node.next_leaf()) {
-    Patch * patch = (Patch *) node->data();
-    delete patch;
-    patch = 0;
+# ifdef CONFIG_USE_CHARM
+
+  deallocate_blocks();
+  delete group_process_; group_process_ = 0;
+
+# else
+
+  for (int i=0; i<block_.size(); i++) {
+    delete block_[i];
+    block_[i] = 0;
   }
-  delete patch_tree_;
-  patch_count_ = 0;
+
+# endif
 }
 
 //----------------------------------------------------------------------
@@ -55,15 +64,21 @@ void Hierarchy::pup (PUP::er &p)
 
   bool up = p.isUnpacking();
 
-  p | factory_; // PUP::able
+  p | *factory_;
   p | dimension_;
   p | refinement_;
-  p | patch_count_;
-  if (up) patch_tree_ = new Tree (dimension_, refinement_);
-  p | *patch_tree_;
+  p | num_blocks_;
+  if (p.isUnpacking()) block_array_ = new CProxy_CommBlock;
+  p | *block_array_;
+  p | block_exists_;
+  p | block_loop_;
   PUParray(p,root_size_,3);
   PUParray(p,lower_,3);
   PUParray(p,upper_,3);
+
+  if (up) group_process_ = GroupProcess::create();
+  p | *layout_;
+  PUParray(p,blocking_,3);
 
 }
 #endif
@@ -90,40 +105,19 @@ void Hierarchy::set_upper(double x, double y, double z) throw ()
 
 void Hierarchy::set_root_size(int nx, int ny, int nz) throw ()
 {
+  TRACE3("Hierarchy::set_root_size(%d %d %d)",nx,ny,nz);
+
   root_size_[0] = nx;
   root_size_[1] = ny;
   root_size_[2] = nz;
+
 }
 
 //----------------------------------------------------------------------
 
-// int Hierarchy::dimension() const throw ()
-// { 
-//   return dimension_; 
-// }
-
-// //----------------------------------------------------------------------
-
-// void Hierarchy::set_dimension(int dimension) throw ()
-// {
-//   dimension_ = dimension; 
-// }
-
-//----------------------------------------------------------------------
-
 int Hierarchy::dimension() const throw ()
-{
-  Patch * root = (Patch * )patch_tree_->root_node();
-  if (root == 0) {
-    return 0;
-  } else {
-    int nx,ny,nz;
-    root->size(&nx,&ny,&nz);
-    if (nz != 1) return 3;
-    if (ny != 1) return 2;
-    if (nx != 1) return 1;
-    return 0;
-  }
+{ 
+  return dimension_; 
 }
 
 //----------------------------------------------------------------------
@@ -151,65 +145,56 @@ void Hierarchy::upper(double * x, double * y, double * z) const throw ()
   if (y) *y = upper_[1];
   if (z) *z = upper_[2];
 }
-// //----------------------------------------------------------------------
-
-// int Hierarchy::max_level() const throw ()
-// { 
-//   return max_level_; 
-// }
-
-// //----------------------------------------------------------------------
-
-// void Hierarchy::set_max_level(int max_level) throw ()
-// {
-//   max_level_ = max_level; 
-// }
-
-// //----------------------------------------------------------------------
-
-// int Hierarchy::refine_factor() const throw ()
-// {
-//   return refine_; 
-// }
-
-// //----------------------------------------------------------------------
-
-// void Hierarchy::set_refine_factor(int refine) throw ()
-// {
-//   refine_ = refine; 
-// }
 
 //----------------------------------------------------------------------
 
-// Patch * Hierarchy::root_patch() throw ()
-// { 
-//   return (patch_list_.size() > 0) ? patch_list_[0] : NULL; 
-// }
-
-//----------------------------------------------------------------------
-
-size_t Hierarchy::num_patches() const throw()
+void Hierarchy::blocking (int * nbx, int * nby, int * nbz) const throw()
 {
-  return patch_tree_->num_nodes();
+  if (nbx) (*nbx) = blocking_[0];
+  if (nby) (*nby) = blocking_[1];
+  if (nbz) (*nbz) = blocking_[2];
 }
 
 //----------------------------------------------------------------------
 
-Patch * Hierarchy::patch(size_t i) throw()
+void Hierarchy::deallocate_blocks() throw()
 {
-  return (Patch * ) patch_tree_->root_node()->data();
+
+#ifdef CONFIG_USE_CHARM
+
+  if (block_exists_) {
+    block_array_->ckDestroy();
+    delete block_array_; block_array_ = 0;
+    block_exists_ = false;
+  }
+
+#else
+
+  for (size_t i=0; i<block_.size(); i++) {
+    delete block_[i];
+    block_[i] = 0;
+  }
+
+#endif
 }
 
 //----------------------------------------------------------------------
 
-Patch * Hierarchy::patch(size_t i) const throw()
+Layout * Hierarchy::layout () throw()
 {
-  return (Patch * ) patch_tree_->root_node()->data();
+  return layout_;
 }
 
 //----------------------------------------------------------------------
 
-void Hierarchy::create_root_patch 
+const Layout * Hierarchy::layout () const throw()
+{
+  return layout_;
+}
+
+//----------------------------------------------------------------------
+
+void Hierarchy::create_forest
 (
  FieldDescr   * field_descr,
  int nx, int ny, int nz,
@@ -217,33 +202,148 @@ void Hierarchy::create_root_patch
  bool allocate_blocks,
  int process_first, int process_last_plus) throw()
 {
+  TRACE3("Hierarchy::create_forest() block size  %d %d %d",nx,ny,nz);
+  TRACE3("Hierarchy::create_forest() blocking    %d %d %d",nbx,nby,nbz);
+  set_root_size(nx,ny,nz);
 
-  // Create new empty patch
+  layout_ = new Layout (nbx,nby,nbz);
+  layout_->set_process_range(0,group_process_->size());
+  blocking_[0] = nbx;
+  blocking_[1] = nby;
+  blocking_[2] = nbz;
 
 #ifdef CONFIG_USE_CHARM
-  CProxy_Patch * root_patch;
-#else
-  Patch * root_patch;
-#endif
-
-  int patch_id = 0;
-  DEBUG1("ID = %d",patch_id);
-  root_patch = factory()->create_patch
-    (
-     field_descr,
-     nx,ny,nz,    // size
-     0,0,0,       // offset
-     nbx,nby,nbz, // blocking
-     lower_[0], lower_[1], lower_[2],
-     upper_[0], upper_[1], upper_[2],
-     patch_id,
-     allocate_blocks,
-     process_first, process_last_plus);
-
-  patch_tree_->root_node()->set_data(root_patch);
-  TRACE1 ("root_patch = %p",root_patch);
-  {  int nx,ny,nz;
-  ((Patch *)root_patch)->size(&nx,&ny,&nz);
-  }
-  TRACE3("size = %d %d %d",nx,ny,nz);
+  allocate_array_(allocate_blocks);
+#else  /* CONFIG_USE_CHARM */
+  allocate_array_(allocate_blocks,field_descr);
+#endif  /* CONFIG_USE_CHARM */
 }
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+#else  /* CONFIG_USE_CHARM */
+size_t Hierarchy::num_local_blocks() const  throw()
+{
+  int rank = group_process_->rank();
+  return layout_->local_count(rank);
+}
+#endif  /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+#else  /* CONFIG_USE_CHARM */
+CommBlock * Hierarchy::local_block(size_t i) const throw()
+{
+  return (i < block_.size()) ? block_[i] : 0;
+
+}
+#endif  /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+void Hierarchy::allocate_array_
+(
+ bool allocate_blocks,
+ const FieldDescr * field_descr
+) throw()
+  // NOTE: field_descr only needed for MPI; may be null for CHARM++
+{
+
+#ifdef CONFIG_USE_CHARM
+
+
+#else /* CONFIG_USE_CHARM */
+
+  // determine local block count nb
+  int nb = num_local_blocks();
+
+  // create local blocks
+  block_.resize(nb);
+
+#endif /* CONFIG_USE_CHARM */
+
+  // Get number of blocks in the forest
+
+  int nbx,nby,nbz;
+  layout_->block_count (&nbx, &nby, &nbz);
+
+  // determine block size
+  int mbx = root_size_[0] / nbx;
+  int mby = root_size_[1] / nby;
+  int mbz = root_size_[2] / nbz;
+
+  // Check that blocks evenly subdivide forest
+  if (! ((nbx*mbx == root_size_[0]) &&
+	 (nby*mby == root_size_[1]) &&
+	 (nbz*mbz == root_size_[2]))) {
+
+    ERROR6("Forest::allocate_array_()",  
+	   "CommBlocks must evenly subdivide forest: "
+	   "forest size = (%d %d %d)  block count = (%d %d %d)",
+	   root_size_[0],root_size_[1],root_size_[2],
+	   nbx,nby,nbz);
+      
+  }
+
+  // Determine size of each block
+  double xb = (upper_[0] - lower_[0]) / nbx;
+  double yb = (upper_[1] - lower_[1]) / nby;
+  double zb = (upper_[2] - lower_[2]) / nbz;
+
+  // CREATE AND INITIALIZE NEW DATA BLOCKS
+
+  int num_field_blocks = 1;
+
+#ifdef CONFIG_USE_CHARM
+
+  TRACE("Allocating block_array_");
+
+  block_array_ = new CProxy_CommBlock;
+
+  (*block_array_) = factory_->create_block_array
+    (nbx,nby,nbz,
+     mbx,mby,mbz,
+     lower_[0],lower_[1],lower_[2],
+     xb,yb,zb,
+     num_field_blocks,
+     allocate_blocks);
+    
+  block_exists_ = allocate_blocks;
+  block_loop_.stop() = nbx*nby*nbz;
+
+
+#else /* CONFIG_USE_CHARM */
+
+  int ip = group_process_->rank();
+
+  for (int ib=0; ib<nb; ib++) {
+
+    // Get index of block ib in the forest
+
+    int ibx,iby,ibz;
+    layout_->block_indices (ip,ib, &ibx, &iby, &ibz);
+
+    // create a new data block
+
+    CommBlock * block = factory_->create_block 
+      (ibx,iby,ibz,
+       nbx,nby,nbz,
+       mbx,mby,mbz,
+       lower_[0],lower_[1],lower_[2],
+       xb,yb,zb,
+       num_field_blocks);
+
+    // Store the data block in the block array
+    block_[ib] = block;
+
+    // Allocate data on the block
+
+    block->allocate(field_descr);
+
+  }
+#endif /* CONFIG_USE_CHARM */
+}
+
+

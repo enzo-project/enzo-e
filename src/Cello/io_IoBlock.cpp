@@ -10,12 +10,10 @@
 //----------------------------------------------------------------------
 
 IoBlock::IoBlock() throw ()
-  : Io(10,0),
+  : Io(8,0),
     block_(0)
 {
   meta_name_.push_back("num_field_blocks");
-  meta_name_.push_back("patch_id");
-  meta_name_.push_back("patch_rank");
   meta_name_.push_back("index");
   meta_name_.push_back("size");
   meta_name_.push_back("lower");
@@ -44,12 +42,6 @@ void IoBlock::meta_value
 
   if (index == count++) {
     *buffer = (void *) & block_->block()->num_field_blocks_;
-    *type   = scalar_type_int;
-  } else if (index == count++) {
-    *buffer = (void *) & block_->patch_id_;
-    *type   = scalar_type_int;
-  } else if (index == count++) {
-    *buffer = (void *) & block_->patch_rank_;
     *type   = scalar_type_int;
   } else if (index == count++) {
     *buffer = (void *) & block_->index_;

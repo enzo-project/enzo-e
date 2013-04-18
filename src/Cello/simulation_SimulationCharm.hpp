@@ -42,6 +42,7 @@ public: // functions
     TRACEPUP;
     // NOTE: change this function whenever attributes change
     Simulation::pup(p);
+    p | block_loop_;
   }
 
   /// Initialize the Charm++ Simulation
@@ -50,19 +51,49 @@ public: // functions
   /// Run the simulation
   virtual void run() throw();
 
+  /// Add a new CommBlock to this local branch
+  inline void insert_block() 
+  {
+    WARNING("SimulationCharm::insert_block()",
+	    "Migrating CommBlocks will disturb local counts");
+    ++block_loop_;
+    TRACE2 ("++local count %d = %d",group_process_->rank(),block_loop_.stop());
+  }
+
+  /// Remove a CommBlock from this local branch
+  inline void delete_block() 
+  {
+    WARNING("SimulationCharm::delete_block()",
+	    "Migrating CommBlocks will disturb local counts");
+    --block_loop_; 
+    TRACE2 ("--local count %d = %d",group_process_->rank(),block_loop_.stop());
+  }
+
+  /// Call initialize()
+  void p_initialize() { initialize(); }
 
   /// Wait for all local patches to be created before calling run
   void s_initialize();
 
-  // Call initialization on Problem list of Initial objects
+  /// Call initialization on Problem list of Initial objects
   void p_initial ();
+  /// Implementation of initialization
   void initial ();
+  /// Wait for all local patches to check in before proceeding to refresh
+  void s_initial();
+  /// Continue on to refresh after s_initial() synchronization
+  void c_initial();
 
-  // Call output on Problem list of Output objects
+
+  /// Call output on Problem list of Output objects
   void p_output ();
+  /// Continue on to p_refresh()
+  void c_output ();
 
   /// Reduce output, using p_output_write to send data to writing processes
   void s_write();
+  /// Continue on to Problem::output_wait()
+  void c_write();
 
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
@@ -71,8 +102,6 @@ public: // functions
   // /// Wait for all local patches to check in before proceeding
   // void s_patch(CkCallback function);
 
-  /// Wait for all local patches to check in before proceeding to refresh
-  void s_initial();
 
   /// Refresh ghost zones (Charm++ entry)
   void p_refresh();
@@ -82,6 +111,11 @@ public: // functions
 
   // Stopping criteria and computation
   void c_compute ();
+
+protected: // attributes
+
+  Loop block_loop_;
+
 };
 
 #endif /* CONFIG_USE_CHARM */

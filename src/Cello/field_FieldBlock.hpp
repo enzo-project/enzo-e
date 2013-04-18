@@ -8,7 +8,6 @@
 #ifndef FIELD_FIELD_BLOCK_HPP
 #define FIELD_FIELD_BLOCK_HPP
 
-class Patch;
 class CommBlock;
 class FieldDescr;
 

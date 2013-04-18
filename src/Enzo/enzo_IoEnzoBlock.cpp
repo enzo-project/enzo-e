@@ -26,7 +26,7 @@ IoEnzoBlock::IoEnzoBlock() throw ()
   meta_name_.push_back("enzo_GridEndIndex");
   meta_name_.push_back("enzo_CellWidth");
   
-  ASSERT2("IoPatch::IoPatch()",
+  ASSERT2("IoEnzoBlock::IoEnzoBlock()",
 	 "meta_name.size() [%d] !=  meta_count_ [%d]",
 	  meta_name_.size(),meta_count(),
 	  meta_name_.size()==meta_count());

@@ -26,6 +26,7 @@ EnzoSimulationCharm::EnzoSimulationCharm
   : SimulationCharm(parameter_file, n)
 {
 
+  TRACE("EnzoSimulationCharm::EnzoSimulationCharm()");
   //  monitor_->set_active(true);
   problem_ = new EnzoProblem;
 
@@ -33,7 +34,7 @@ EnzoSimulationCharm::EnzoSimulationCharm
 //   traceRegisterUserEvent("Compute",10);
 // #endif
 
-  initialize();
+//  initialize();
 
 }
 

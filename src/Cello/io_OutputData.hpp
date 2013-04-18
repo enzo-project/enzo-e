@@ -10,7 +10,6 @@
 
 class Factory;
 class Hierarchy;
-class Patch;
 class FieldDescr;
 class Config;
 
@@ -66,17 +65,12 @@ public: // virtual functions
   ( const Hierarchy * hierarchy,
     const FieldDescr * field_descr ) throw();
 
-  /// Write patch data to disk
-  virtual void write_patch
-  ( const Patch * patch,
-    const FieldDescr * field_descr,
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
-
   /// Write block data to disk
   virtual void write_block
   ( const CommBlock * block,
     const FieldDescr * field_descr,
     int ixp0=0, int iyp0=0, int izp0=0) throw();
+
 
   /// Write local field to disk
   virtual void write_field_block

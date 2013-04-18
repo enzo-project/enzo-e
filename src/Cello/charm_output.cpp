@@ -24,7 +24,19 @@
 
 void SimulationCharm::p_output ()
 {
-  TRACE("OUTPUT SimulationCharm::p_output()");
+  TRACE("SimulationCharm::p_output");
+  TRACE2 ("block_loop: %d/%d",block_loop_.index(),block_loop_.stop());
+  if (block_loop_.done()) {
+    CkCallback callback (CkIndex_SimulationCharm::c_output(), thisProxy);
+    contribute(0,0,CkReduction::concat,callback);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void SimulationCharm::c_output()
+{
+  TRACE("OUTPUT SimulationCharm::c_output()");
   problem()->output_reset();
   problem()->output_next(this);
 }
@@ -73,19 +85,6 @@ void Problem::output_next(Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
-void Patch::p_write(int index_output)
-{
-  TRACE("OUTPUT Patch::p_write()");
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  FieldDescr * field_descr = simulation->field_descr();
-  Output * output = simulation->problem()->output(index_output);
-
-  output->write_patch(this,field_descr,0,0,0);
-}
-
-//----------------------------------------------------------------------
-
 void CommBlock::p_write (int index_output)
 {
   TRACE("OUTPUT CommBlock::p_write()");
@@ -96,24 +95,30 @@ void CommBlock::p_write (int index_output)
 
   output->write_block(this,field_descr,0,0,0);
 
-  proxy_patch_.s_write();
-}
-
-//----------------------------------------------------------------------
-
-void Patch::s_write()
-{
-  TRACE("OUTPUT Patch::s_write()");
-  if (block_loop_.done()) {
-    proxy_simulation.s_write();
-  }
+  WARNING("CommBlock::p_write",
+	  "Check that Simulation::s_write() sync count is correct");
+  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
+  simulation_charm->s_write();
 }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::s_write()
 {
-  TRACE("OUTPUT SimulationCharm::s_write()");
+  TRACE("SimulationCharm::s_write()");
+  TRACE2 ("block_loop: %d/%d",block_loop_.index(),block_loop_.stop());
+  if (block_loop_.done()) {
+    CkCallback callback (CkIndex_SimulationCharm::c_write(), thisProxy);
+    contribute(0,0,CkReduction::concat,callback);
+
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+void SimulationCharm::c_write()
+{
   problem()->output_wait(this);
 }
 
@@ -176,8 +181,8 @@ void Problem::output_write
  int n, char * buffer
 ) throw()
 {
-  TRACE("OUTPUT Problem::output_write()");
   Output * output = this->output(index_output_);
+  TRACE2("OUTPUT Problem::output_write() %d %p",n,output);
 
   if (n != 0) {
     output->update_remote(n, buffer);
@@ -194,14 +199,6 @@ void Problem::output_write
 
 }
 
-//----------------------------------------------------------------------
-
-void Patch::s_output()
-{
-  if (block_loop_.done()) {
-    proxy_simulation.p_output();
-  }
-}
 //======================================================================
 
 #endif /* CONFIG_USE_CHARM */

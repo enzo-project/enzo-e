@@ -102,7 +102,7 @@
 
 #endif
 
-#else
+#else /* CELLO_TRACE */
 
 #   define TRACE0				\
   /* This space intentionally left blank */
@@ -131,7 +131,7 @@
 
 #endif
 
-#endif
+#endif /* CELLO_TRACE */
 
 //----------------------------------------------------------------------
 /// @def      DEBUG
@@ -161,7 +161,7 @@
 #   define DEBUG9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
   { m2_(stderr,"DEBUG",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8,A9); }
 
-#else
+#else /* CELLO_DEBUG */
 
 #   define DEBUG0				\
   /* This space intentionally left blank */
@@ -185,7 +185,8 @@
   /* This space intentionally left blank */
 #   define DEBUG9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)	\
   /* This space intentionally left blank */
-#endif
+
+#endif /* CELLO_DEBUG */
 
 //----------------------------------------------------------------------
 /// @def      ASSERT

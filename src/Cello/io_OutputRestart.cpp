@@ -85,7 +85,8 @@ void OutputRestart::write_simulation ( const Simulation * simulation ) throw()
     strcpy(dir_char,dir_name.c_str());
     // ERROR("OutputRestart::write_simulation",
     // 	  "Restart not debugged yet--hangs");
-    CkCallback callback(CkIndex_SimulationCharm::s_write(),proxy_simulation);
+    CkCallback callback(CkIndex_SimulationCharm::s_write(),
+			proxy_simulation);
     
     CkStartCheckpoint (dir_char,callback);
   }
