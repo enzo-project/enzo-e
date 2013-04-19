@@ -59,9 +59,39 @@ CProxy_CommBlock Factory::create_block_array
  bool allocate
  ) const throw()
 {
+
+  CProxy_CommBlock proxy_block;
+
   if (allocate) {
-    CProxy_CommBlock * proxy_block = new CProxy_CommBlock;
-    *proxy_block = CProxy_CommBlock::ckNew
+
+#ifdef    PREPARE_AMR
+
+    proxy_block = CProxy_CommBlock::ckNew();
+
+    for (int ix=0; ix<nbx; ix++) {
+      for (int iy=0; iy<nby; iy++) {
+	for (int iz=0; iz<nbz; iz++) {
+	  Index index(ix,iy,iz);
+	  index.set_array(ix,iy,iz);
+	  index.set_level(0);
+
+	  proxy_block[index].insert 
+	    (ix,iy,iz,
+	     nbx,nby,nbz,
+	     nx,ny,nz,
+	     xm,ym,zm, 
+	     xb,yb,zb, 
+	     num_field_blocks);
+
+	}
+      }
+    }
+
+    proxy_block.doneInserting();
+
+#else  /* PREPARE_AMR */
+
+    proxy_block = CProxy_CommBlock::ckNew
       (
        nbx,nby,nbz,
        nx,ny,nz,
@@ -69,14 +99,17 @@ CProxy_CommBlock Factory::create_block_array
        xb,yb,zb, 
        num_field_blocks,
        nbx,nby,nbz);
-    //    DEBUG1 ("block = %p",block);
-    TRACE1("Factor::create_block_array = %p",proxy_block);
-    return *proxy_block;
+    
+#endif /* PREPARE_AMR */
+
   } else {
-    CProxy_CommBlock proxy_block = CProxy_CommBlock::ckNew();
-    TRACE1("Factor::create_block_array = %p",&proxy_block);
-    return proxy_block;
+
+    proxy_block = CProxy_CommBlock::ckNew();
+
   }
+
+  TRACE1("Factor::create_block_array = %p",&proxy_block);
+  return proxy_block;
 }
 
 #endif
@@ -92,7 +125,8 @@ CommBlock * Factory::create_block
  int num_field_blocks
  ) const throw()
 {
-#ifdef CONFIG_USE_CHARM
+#if defined (CONFIG_USE_CHARM) && ! defined (PREPARE_AMR)
+
   CProxy_CommBlock block_array = CProxy_CommBlock::ckNew
     (nbx,nby,nbz,
      nx,ny,nz,
@@ -100,14 +134,11 @@ CommBlock * Factory::create_block
      xb,yb,zb, 
      num_field_blocks,
      nbx,nby,nbz);
-#ifdef    PREPARE_AMR
-    Index index(ibx,iby,ibz);
-    return block_array[index].ckLocal();
-#else  /* PREPARE_AMR */
+
   return block_array(ibx,iby,ibz).ckLocal();
-#endif /* PREPARE_AMR */
 
 #else
+
   // CProxy_CommBlock proxy_block_reduce = 
   //   CProxy_CommBlock::ckNew()
   return new CommBlock 
@@ -117,6 +148,7 @@ CommBlock * Factory::create_block
      xm,ym,zm, 
      xb,yb,zb, 
      num_field_blocks);
+
 #endif
 }
 

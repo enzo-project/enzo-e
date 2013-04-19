@@ -5,6 +5,7 @@
 Import('env')
 Import('type')
 Import('use_papi')
+Import('prepare_amr')
 
 Import('bin_path')
 Import('inc_path')
@@ -99,8 +100,12 @@ test_enzo_p = env.Program (['enzo-p.cpp', charm_main])
 binaries = [test_enzo_p]
 
 if (type == "charm"):
-   env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
-   env.CharmBuilder('enzo.def.h', 'enzo.ci',ARG = 'enzo')
+   if (prepare_amr == 1):
+      env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
+      env.CharmBuilder('enzo.def.h', 'enzo.ci',ARG = 'enzo')
+   else:
+      env.CharmBuilder('enzo.decl.h','enzo_3d.ci',ARG = 'enzo')
+      env.CharmBuilder('enzo.def.h', 'enzo_3d.ci',ARG = 'enzo')
 
 #------------------------------
 # INSTALL

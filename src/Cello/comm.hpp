@@ -8,6 +8,8 @@
 #ifndef COMM_HPP
 #define COMM_HPP
 
+#include "charm.hpp"
+
 #include "_field.hpp" 
 #include "_mesh.hpp"
 #include "_comm.hpp"

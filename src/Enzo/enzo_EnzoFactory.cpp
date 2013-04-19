@@ -44,12 +44,38 @@ CProxy_CommBlock EnzoFactory::create_block_array
  bool allocate
  ) const throw()
 {
-  TRACE3 ("EnzoFactory::create_block_array nb = %d %d %d",nbx,nby,nbz);
-  TRACE3 ("EnzoFactory::create_block_array n = %d %d %d",nx,ny,nz);
-  TRACE3 ("EnzoFactory::create_block_array x = %f %f %f",xm,ym,zm);
-  TRACE3 ("EnzoFactory::create_block_array h = %f %f %f",hx,hy,hz);
   CProxy_EnzoBlock enzo_block_array;
+
   if (allocate) {
+
+#ifdef    PREPARE_AMR
+
+    enzo_block_array = CProxy_EnzoBlock::ckNew();
+
+    for (int ix=0; ix<nbx; ix++) {
+      for (int iy=0; iy<nby; iy++) {
+	for (int iz=0; iz<nbz; iz++) {
+
+	  Index index(ix,iy,iz);
+	  index.set_array(ix,iy,iz);
+	  index.set_level(0);
+
+	  enzo_block_array[index].insert 
+	    (ix,iy,iz,
+	     nbx,nby,nbz,
+	     nx,ny,nz,
+	     xm,ym,zm, 
+	     hx,hy,hz, 
+	     num_field_blocks);
+
+	}
+      }
+    }
+
+    enzo_block_array.doneInserting();
+
+#else  /* PREPARE_AMR */
+
     enzo_block_array = CProxy_EnzoBlock::ckNew
       (
        nbx,nby,nbz,
@@ -58,8 +84,14 @@ CProxy_CommBlock EnzoFactory::create_block_array
        hx,hy,hz, 
        num_field_blocks,
        nbx,nby,nbz);
+
+#endif /* PREPARE_AMR */
+
+
   } else {
+
     enzo_block_array = CProxy_EnzoBlock::ckNew();
+
   }
   TRACE1("EnzoFactory::create_block_array = %p",&enzo_block_array);
   return enzo_block_array;

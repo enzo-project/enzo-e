@@ -11,6 +11,7 @@
 class Block;
 class Factory;
 class GroupProcess;
+class FieldDescr;
 
 #ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
@@ -27,6 +28,10 @@ class CommBlock
 
 public: // interface
 
+#ifdef CONFIG_USE_CHARM
+
+#ifdef    PREPARE_AMR
+
   /// create a CommBlock with the given block count, lower forest/patch extent, block
   /// size, and number of field blocks
   CommBlock
@@ -39,11 +44,27 @@ public: // interface
    int num_field_blocks
 ) throw();
 
-#ifdef CONFIG_USE_CHARM
+#else  /* PREPARE_AMR */
 
   /// For CHARM CommBlock arrays
   CommBlock
   (
+   int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   double xmp, double ymp, double zmp,
+   double xb, double yb, double zb,
+   int num_field_blocks
+) throw();
+
+#endif /* PREPARE_AMR */
+
+#else
+
+  /// create a CommBlock with the given block count, lower forest/patch extent, block
+  /// size, and number of field blocks
+  CommBlock
+  (
+   int ibx, int iby, int ibz,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
@@ -154,8 +175,8 @@ public: // interface
   CommBlock & operator= (const CommBlock & block) throw();
 
   /// Return the Block associated with this CommBlock
-  Block * block() throw() { return & block_; };
-  const Block * block() const throw() { return & block_; };
+  Block * block() throw() { return block_; };
+  const Block * block() const throw() { return block_; };
 
 //----------------------------------------------------------------------
 
@@ -274,7 +295,7 @@ protected: // functions
 protected: // attributes
 
   /// Mesh Block that this CommBlock controls
-  Block block_;
+  Block * block_;
 
 #ifdef CONFIG_USE_CHARM
 

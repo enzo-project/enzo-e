@@ -1,12 +1,13 @@
 #ifndef INDEX_HPP
 #define INDEX_HPP
 
-// ARRAY_BITS + TREE_BITS + LEVEL_PART_BITS == 32
-#define INDEX_MAX_ARRAY_BITS 10
-#define INDEX_MAX_ARRAY_INDEX 1024 /* 2 ** INDEX_MAX_ARRAY_BITS */
-#define INDEX_MAX_TREE_BITS 20
-#define INDEX_MAX_LEVEL_AXIS_BITS 2
-#define INDEX_MAX_LEVEL_AXIS_RANGE 4 /* 2 ** AXIS_BITS2 */
+// ARRAY_BITS + TREE_BITS + LEVEL_AXIS_BITS == 32
+
+#define INDEX_MAX_ARRAY_BITS       10
+#define INDEX_MAX_ARRAY_INDEX    1024 /* 2 ** INDEX_MAX_ARRAY_BITS */
+#define INDEX_MAX_TREE_BITS        20
+#define INDEX_MAX_LEVEL_AXIS_BITS   2
+#define INDEX_MAX_LEVEL_AXIS_RANGE  4 /* 2 ** AXIS_BITS2 */
 
 struct BIndex {
   unsigned array : INDEX_MAX_ARRAY_BITS; // maximum 1024 x 1024 x 1024 root blocks
@@ -69,8 +70,12 @@ public:
     if (icz) (*icz) = (a_[2].tree >> (il+1)) & 1;
   }
   
-  int array (int axis) const
-  { return a_[axis].array; }
+  void array (int * ix, int *iy, int *iz) const
+  { 
+    if (ix) (*ix) = a_[0].array;
+    if (iy) (*iy) = a_[1].array;
+    if (iz) (*iz) = a_[2].array;
+  }
 
   int level () const
   { return a_[0].level + INDEX_MAX_LEVEL_AXIS_RANGE*
@@ -85,6 +90,7 @@ public:
     a_[0].level = (il>>0*INDEX_MAX_LEVEL_AXIS_BITS) & 3;
     a_[1].level = (il>>1*INDEX_MAX_LEVEL_AXIS_BITS) & 3;
     a_[2].level = (il>>2*INDEX_MAX_LEVEL_AXIS_BITS) & 3;
+    clean();
   }
 
   /// Clear tree bits that are associated with levels higher than
