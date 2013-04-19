@@ -20,7 +20,7 @@ module mesh {
   PUPable ItFieldList;
   PUPable ItFieldRange;
 
-  array[Index] CommBlock {
+  array[3D] CommBlock {
 
     entry CommBlock
       (int ibx, int iby, int ibz,

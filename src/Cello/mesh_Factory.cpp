@@ -100,7 +100,13 @@ CommBlock * Factory::create_block
      xb,yb,zb, 
      num_field_blocks,
      nbx,nby,nbz);
+#ifdef    PREPARE_AMR
+    Index index(ibx,iby,ibz);
+    return block_array[index].ckLocal();
+#else  /* PREPARE_AMR */
   return block_array(ibx,iby,ibz).ckLocal();
+#endif /* PREPARE_AMR */
+
 #else
   // CProxy_CommBlock proxy_block_reduce = 
   //   CProxy_CommBlock::ckNew()

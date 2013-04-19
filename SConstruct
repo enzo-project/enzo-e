@@ -5,6 +5,10 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
+# TEMPORARY: Whether to use 3D Chare arrays or new AMR Index 
+
+prepare_amr = 0
+
 # Whether to print out messages with the TRACE() series of statements
 
 trace = 0
@@ -127,6 +131,10 @@ define["charm"]  =    ['CONFIG_USE_CHARM']
 define["single"] =    ['CONFIG_PRECISION_SINGLE']
 define["double"] =    ['CONFIG_PRECISION_DOUBLE']
 
+# TEMPORARY
+
+define_prepare_amr  = ['PREPARE_AMR']
+
 # Performance defines
 
 define_memory =       ['CONFIG_USE_MEMORY']
@@ -206,6 +214,7 @@ if (use_gprof == 1):
   
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
+if (prepare_amr != 0):   defines = defines + define_prepare_amr
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
@@ -399,6 +408,8 @@ Export('parallel_run')
 Export('parallel_run_args')
 Export('serial_run')
 Export('use_papi')
+
+Export('prepare_amr')
 
 SConscript( 'src/SConscript',variant_dir='build/' + config )
 SConscript('test/SConscript',variant_dir = test_path )

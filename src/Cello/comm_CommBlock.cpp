@@ -414,7 +414,14 @@ void CommBlock::refresh ()
 	  char * array;
 	  field_face.load(&n, &array);
 
+#ifdef    PREPARE_AMR
+	  Index index;
+	  index.set_array(ix3[fx+1],iy3[fy+1],iz3[fz+1]);
+	  index.clean();
+	  thisProxy[index].x_refresh (n,array,-fx,-fy,-fz);
+#else  /* PREPARE_AMR */
 	  block_array(ix3[fx+1],iy3[fy+1],iz3[fz+1]).x_refresh (n, array, -fx,-fy,-fz);
+#endif /* PREPARE_AMR */
 	}
       }
     }
