@@ -1,6 +1,8 @@
 #ifndef INDEX_HPP
 #define INDEX_HPP
 
+#ifdef CONFIG_USE_CHARM
+
 // ARRAY_BITS + TREE_BITS + LEVEL_AXIS_BITS == 32
 
 #define INDEX_MAX_ARRAY_BITS       10
@@ -185,3 +187,4 @@ public:
 #endif /* INDEX_HPP */
 
 
+#endif /* CONFIG_USE_CHARM */
