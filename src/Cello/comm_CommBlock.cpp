@@ -58,8 +58,9 @@ CommBlock::CommBlock
  double xb, double yb, double zb,    // CommBlock width
  int num_field_blocks
 ) throw ()
+  :
 #ifdef CONFIG_USE_CHARM
-  :  count_refresh_face_(0),
+   count_refresh_face_(0),
 #endif
     cycle_(0),
     time_(0),

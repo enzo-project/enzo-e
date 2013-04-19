@@ -12,6 +12,7 @@ class Block;
 class Factory;
 class GroupProcess;
 class FieldDescr;
+class Hierarchy;
 
 #ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
