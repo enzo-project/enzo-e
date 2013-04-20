@@ -72,9 +72,6 @@ ip_mpi   = '8'
 
 use_papi = 0
 
-env = Environment(CCCOMSTR = "Compiling $TARGET",
-                  LINKCOMSTR = "Linking $TARGET")
-
 if not env.GetOption('clean'):
 
      configure = Configure(env)
