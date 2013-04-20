@@ -7,7 +7,7 @@ import sys
 
 # TEMPORARY: Whether to use 3D Chare arrays or new AMR Index 
 
-prepare_amr = 1
+prepare_amr = 0
 
 # Whether to print out messages with the TRACE() series of statements
 
