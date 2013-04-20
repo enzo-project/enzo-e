@@ -41,7 +41,8 @@ CProxy_CommBlock EnzoFactory::create_block_array
  double xm, double ym, double zm,
  double hx, double hy, double hz,
  int num_field_blocks,
- bool allocate
+ bool allocate,
+ bool testing
  ) const throw()
 {
   CProxy_EnzoBlock enzo_block_array;
@@ -108,7 +109,8 @@ CommBlock * EnzoFactory::create_block
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double hx, double hy, double hz,
- int num_field_blocks
+ int num_field_blocks,
+ bool testing
  ) const throw()
 {
 #ifdef CONFIG_USE_CHARM

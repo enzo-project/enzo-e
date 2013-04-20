@@ -7,7 +7,7 @@ import sys
 
 # TEMPORARY: Whether to use 3D Chare arrays or new AMR Index 
 
-prepare_amr = 0
+prepare_amr = 1
 
 # Whether to print out messages with the TRACE() series of statements
 
@@ -72,7 +72,8 @@ ip_mpi   = '8'
 
 use_papi = 0
 
-env = Environment()
+env = Environment(CCCOMSTR = "Compiling $TARGET",
+                  LINKCOMSTR = "Linking $TARGET")
 
 if not env.GetOption('clean'):
 

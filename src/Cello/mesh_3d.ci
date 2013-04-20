@@ -35,7 +35,8 @@ module mesh {
        int nx, int ny, int nz,	
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
-       int num_field_blocks);
+       int num_field_blocks,
+       bool testing);
 
     entry void p_initial();
     entry void p_refresh();

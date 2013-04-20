@@ -22,7 +22,8 @@ CommBlock::CommBlock
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Domain begin
  double xb, double yb, double zb,    // CommBlock width
- int num_field_blocks) throw ()
+ int num_field_blocks,
+ bool testing) throw ()
   : count_refresh_face_(0),
     cycle_(0),
     time_(0),
@@ -39,11 +40,8 @@ CommBlock::CommBlock
   iby = thisIndex.y;
   ibz = thisIndex.z;
 
-  initialize_(ibx,iby,ibz,
-	      nbx,nby,nbz,
-	      nx,ny,nz,
-	      xpm,ypm,zpm,
-	      xb,yb,zb);
+  initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz,
+	      xpm,ypm,zpm, xb,yb,zb,    testing);
 
 }
 
@@ -56,7 +54,8 @@ CommBlock::CommBlock
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Domain begin
  double xb, double yb, double zb,    // CommBlock width
- int num_field_blocks
+ int num_field_blocks,
+ bool testing
 ) throw ()
   :
 #ifdef CONFIG_USE_CHARM
@@ -67,7 +66,9 @@ CommBlock::CommBlock
     dt_(0)
 { 
   block_ = new Block  (nx, ny, nz, num_field_blocks);
-  initialize_(ibx,iby,ibz,nbx,nby,nbz,nx,ny,nz,xpm,ypm,zpm,xb,yb,zb);
+
+  initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz,
+	      xpm,ypm,zpm, xb,yb,zb,    testing);
 
 }
 
@@ -82,7 +83,8 @@ void CommBlock::initialize_
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Domain begin
- double xb, double yb, double zb    // CommBlock width
+ double xb, double yb, double zb,   // CommBlock width
+ bool testing
  )
  {
    size_[0] = nbx;
@@ -105,15 +107,17 @@ void CommBlock::initialize_
 
 #ifdef CONFIG_USE_CHARM
 
-   // Count CommBlocks on each processor
+   if (! testing) {
+     // Count CommBlocks on each processor
    
-   SimulationCharm * simulation_charm  = 
-     dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
+     SimulationCharm * simulation_charm  = 
+       dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
 
-   TRACE1 ("simulation_charm = %p",simulation_charm);
-   TRACE1 ("simulation = %p",proxy_simulation.ckLocalBranch());
-   TRACE1 ("proxy_simulation = %p",&proxy_simulation);
-   if (simulation_charm) simulation_charm->insert_block();
+     TRACE1 ("simulation_charm = %p",simulation_charm);
+     TRACE1 ("simulation = %p",proxy_simulation.ckLocalBranch());
+     TRACE1 ("proxy_simulation = %p",&proxy_simulation);
+     if (simulation_charm) simulation_charm->insert_block();
+   }
 #endif
 
 

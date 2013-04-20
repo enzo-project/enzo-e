@@ -56,7 +56,8 @@ CProxy_CommBlock Factory::create_block_array
  double xm, double ym, double zm,
  double xb, double yb, double zb,
  int num_field_blocks,
- bool allocate
+ bool allocate,
+ bool testing
  ) const throw()
 {
 
@@ -81,7 +82,8 @@ CProxy_CommBlock Factory::create_block_array
 	     nx,ny,nz,
 	     xm,ym,zm, 
 	     xb,yb,zb, 
-	     num_field_blocks);
+	     num_field_blocks,
+	     testing);
 
 	}
       }
@@ -98,6 +100,7 @@ CProxy_CommBlock Factory::create_block_array
        xm,ym,zm, 
        xb,yb,zb, 
        num_field_blocks,
+       testing,
        nbx,nby,nbz);
     
 #endif /* PREPARE_AMR */
@@ -122,7 +125,8 @@ CommBlock * Factory::create_block
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xb, double yb, double zb,
- int num_field_blocks
+ int num_field_blocks,
+ bool testing
  ) const throw()
 {
 #if defined (CONFIG_USE_CHARM) && ! defined (PREPARE_AMR)
@@ -133,6 +137,7 @@ CommBlock * Factory::create_block
      xm,ym,zm, 
      xb,yb,zb, 
      num_field_blocks,
+     testing,
      nbx,nby,nbz);
 
   return block_array(ibx,iby,ibz).ckLocal();
@@ -147,7 +152,8 @@ CommBlock * Factory::create_block
      nx,ny,nz,
      xm,ym,zm, 
      xb,yb,zb, 
-     num_field_blocks);
+     num_field_blocks,
+     testing);
 
 #endif
 }

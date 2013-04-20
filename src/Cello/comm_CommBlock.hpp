@@ -42,7 +42,8 @@ public: // interface
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
-   int num_field_blocks
+   int num_field_blocks,
+   bool testing = false
 ) throw();
 
 #else  /* PREPARE_AMR */
@@ -54,12 +55,13 @@ public: // interface
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
-   int num_field_blocks
+   int num_field_blocks,
+   bool testing = false
 ) throw();
 
 #endif /* PREPARE_AMR */
 
-#else
+#else  /* CONFIG_USE_CHARM */
 
   /// create a CommBlock with the given block count, lower forest/patch extent, block
   /// size, and number of field blocks
@@ -70,10 +72,11 @@ public: // interface
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
-   int num_field_blocks
+   int num_field_blocks,
+   bool testing=false
 ) throw();
 
-#endif
+#endif /* CONFIG_USE_CHARM */
 
   /// Initialize an empty CommBlock
   CommBlock()  { };
@@ -261,7 +264,8 @@ protected: // functions
     int nbx, int nby, int nbz,
     int nx, int ny, int nz,
     double xpm, double ypm, double zpm, // Domain begin
-    double xb, double yb, double zb);    // CommBlock width
+    double xb, double yb, double zb,    // CommBlock width
+    bool testing);
 
   /// Allocate and copy in attributes from give CommBlock
   void copy_(const CommBlock & block) throw();
