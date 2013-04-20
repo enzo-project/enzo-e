@@ -381,31 +381,6 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
 //----------------------------------------------------------------------
 
-#if defined(CONFIG_USE_CHARM) && ! defined (PREPARE_AMR)
-
-EnzoBlock::EnzoBlock
-(
- int nbx, int nby, int nbz,
- int nx, int ny, int nz,
- double xm, double ym, double zm,
- double xp, double yp, double zp,
- int num_field_blocks) throw()
-  : CommBlock (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
-	       num_field_blocks),
-    Time_(0),
-    CycleNumber(0),
-    OldTime(0),
-    dt(0),
-    SubgridFluxes(0)
-{
-  TRACE("EnzoBlock::EnzoBlock()");
-  initialize_enzo_();
-}
-
-#else /* defined(CONFIG_USE_CHARM) && ! defined (PREPARE_AMR) */
-
-//----------------------------------------------------------------------
-
 EnzoBlock::EnzoBlock
 (
  int ix, int iy, int iz,
@@ -426,9 +401,6 @@ EnzoBlock::EnzoBlock
   TRACE("EnzoBlock::EnzoBlock()");
   initialize_enzo_();
 }
-
-#endif /* defined(CONFIG_USE_CHARM) && ! defined (PREPARE_AMR) */
-
 
 //----------------------------------------------------------------------
 

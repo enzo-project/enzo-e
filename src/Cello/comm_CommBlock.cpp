@@ -14,39 +14,6 @@
 
 //----------------------------------------------------------------------
 
-#if defined(CONFIG_USE_CHARM) && ! defined (PREPARE_AMR)
-
-CommBlock::CommBlock
-(
- int nbx, int nby, int nbz,
- int nx, int ny, int nz,
- double xpm, double ypm, double zpm, // Domain begin
- double xb, double yb, double zb,    // CommBlock width
- int num_field_blocks,
- bool testing) throw ()
-  : count_refresh_face_(0),
-    cycle_(0),
-    time_(0),
-    dt_(0)
-{ 
-  TRACE("CommBlock::CommBlock()");
-  // Initialize indices
-
-  block_ = new Block (nx, ny, nz, num_field_blocks);
-
-  int ibx,iby,ibz;
-
-  ibx = thisIndex.x;
-  iby = thisIndex.y;
-  ibz = thisIndex.z;
-
-  initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz,
-	      xpm,ypm,zpm, xb,yb,zb,    testing);
-
-}
-
-#else  /* CONFIG_USE_CHARM && ! PREPARE_AMR */
-
 CommBlock::CommBlock
 (
  int ibx, int iby, int ibz,
@@ -73,9 +40,6 @@ CommBlock::CommBlock
 	      xpm,ypm,zpm, xb,yb,zb,    testing);
 
 }
-
-#endif  /* CONFIG_USE_CHARM && ! PREPARE_AMR */
-
 
 //----------------------------------------------------------------------
 
@@ -364,17 +328,7 @@ void CommBlock::refresh ()
 
   int ibx,iby,ibz;
 
-#ifdef    PREPARE_AMR
-
   thisIndex.array(&ibx,&iby,&ibz);
-
-#else  /* PREPARE_AMR */
-
-  ibx = thisIndex.x;
-  iby = thisIndex.y;
-  ibz = thisIndex.z;
-
-#endif /* PREPARE_AMR */
 
   int nbx = size_[0];
   int nby = size_[1];
@@ -437,15 +391,13 @@ void CommBlock::refresh ()
 	  char * array;
 	  field_face.load(&n, &array);
 
-#ifdef    PREPARE_AMR
 	  Index index;
+
 	  index.set_array(ix3[fx+1],iy3[fy+1],iz3[fz+1]);
 	  index.set_level(0);
 	  index.clean();
+
 	  thisProxy[index].x_refresh (n,array,-fx,-fy,-fz);
-#else  /* PREPARE_AMR */
-	  block_array(ix3[fx+1],iy3[fy+1],iz3[fz+1]).x_refresh (n, array, -fx,-fy,-fz);
-#endif /* PREPARE_AMR */
 	}
       }
     }

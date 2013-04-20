@@ -65,8 +65,6 @@ CProxy_CommBlock Factory::create_block_array
 
   if (allocate) {
 
-#ifdef    PREPARE_AMR
-
     proxy_block = CProxy_CommBlock::ckNew();
 
     for (int ix=0; ix<nbx; ix++) {
@@ -91,20 +89,6 @@ CProxy_CommBlock Factory::create_block_array
     }
 
     proxy_block.doneInserting();
-
-#else  /* PREPARE_AMR */
-
-    proxy_block = CProxy_CommBlock::ckNew
-      (
-       nbx,nby,nbz,
-       nx,ny,nz,
-       xm,ym,zm, 
-       xb,yb,zb, 
-       num_field_blocks,
-       testing,
-       nbx,nby,nbz);
-    
-#endif /* PREPARE_AMR */
 
   } else {
 
@@ -132,8 +116,6 @@ CommBlock * Factory::create_block
 {
 #ifdef CONFIG_USE_CHARM
 
-#ifdef PREPARE_AMR
-
   CProxy_CommBlock block_array = CProxy_CommBlock::ckNew();
   Index index(0,0,0);
   index.set_level(0);
@@ -154,22 +136,6 @@ CommBlock * Factory::create_block
   ASSERT("Factory::create_block()","block is NULL",
 	 block != NULL);
   return block;
-
-#else /* PREPARE_AMR */
-
-  CProxy_CommBlock block_array = CProxy_CommBlock::ckNew
-    (nbx,nby,nbz,
-     nx,ny,nz,
-     xm,ym,zm, 
-     xb,yb,zb, 
-     num_field_blocks,
-     testing,
-     nbx,nby,nbz);
-
-  return block_array(ibx,iby,ibz).ckLocal();
-
-#endif /* PREPARE_AMR */
-
 
 #else /* CONFIG_USE_CHARM */
 

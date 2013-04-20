@@ -157,19 +157,6 @@ public:
 
 public: // interface
 
-#if defined CONFIG_USE_CHARM && ! defined PREPARE_AMR
-
-  /// Initialize the EnzoBlock chare array
-  EnzoBlock
-  (
-   int nbx, int nby, int nbz,
-   int nx, int ny, int nz,
-   double xm, double ym, double zm,
-   double hx, double hy, double hz,
-   int num_field_blocks) throw();
-
-#else /* defined(CONFIG_USE_CHARM) && ! defined (PREPARE_AMR) */
-
   /// Initialize the EnzoBlock chare array
   EnzoBlock
   (
@@ -179,9 +166,6 @@ public: // interface
    double xm, double ym, double zm,
    double hx, double hy, double hz,
    int num_field_blocks) throw();
-
-
-#endif /* defined(CONFIG_USE_CHARM) && ! defined (PREPARE_AMR) */
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize a migrated EnzoBlock

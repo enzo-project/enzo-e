@@ -15,8 +15,6 @@ Import('lib_path')
 
 Import('use_papi')
 
-Import('prepare_amr')
-
 #------------------------------
 # DEPENDENCIES
 #------------------------------
@@ -163,14 +161,9 @@ if (type == "charm"):
    env.CharmBuilder('main_mesh.def.h', 'main_mesh.ci',ARG = 'main_mesh')
    includes_main.append(['main_mesh.decl.h','main_mesh.def.h'])
 
-   if (prepare_amr == 1):
-      env.CharmBuilder('mesh.decl.h','mesh.ci',ARG = 'mesh')
-      env.CharmBuilder('mesh.def.h', 'mesh.ci',ARG = 'mesh')
-      includes_mesh.append(['mesh.decl.h','mesh.def.h'])
-   else:
-      env.CharmBuilder('mesh.decl.h','mesh_3d.ci',ARG = 'mesh')
-      env.CharmBuilder('mesh.def.h', 'mesh_3d.ci',ARG = 'mesh')
-      includes_mesh.append(['mesh.decl.h','mesh.def.h'])
+   env.CharmBuilder('mesh.decl.h','mesh.ci',ARG = 'mesh')
+   env.CharmBuilder('mesh.def.h', 'mesh.ci',ARG = 'mesh')
+   includes_mesh.append(['mesh.decl.h','mesh.def.h'])
 
    env.CharmBuilder('simulation.decl.h','simulation.ci',ARG='simulation')
    env.CharmBuilder('simulation.def.h', 'simulation.ci',ARG='simulation')

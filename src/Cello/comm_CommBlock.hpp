@@ -29,40 +29,6 @@ class CommBlock
 
 public: // interface
 
-#ifdef CONFIG_USE_CHARM
-
-#ifdef    PREPARE_AMR
-
-  /// create a CommBlock with the given block count, lower forest/patch extent, block
-  /// size, and number of field blocks
-  CommBlock
-  (
-   int ibx, int iby, int ibz,
-   int nbx, int nby, int nbz,
-   int nx, int ny, int nz,
-   double xmp, double ymp, double zmp,
-   double xb, double yb, double zb,
-   int num_field_blocks,
-   bool testing = false
-) throw();
-
-#else  /* PREPARE_AMR */
-
-  /// For CHARM CommBlock arrays
-  CommBlock
-  (
-   int nbx, int nby, int nbz,
-   int nx, int ny, int nz,
-   double xmp, double ymp, double zmp,
-   double xb, double yb, double zb,
-   int num_field_blocks,
-   bool testing = false
-) throw();
-
-#endif /* PREPARE_AMR */
-
-#else  /* CONFIG_USE_CHARM */
-
   /// create a CommBlock with the given block count, lower forest/patch extent, block
   /// size, and number of field blocks
   CommBlock
@@ -75,8 +41,6 @@ public: // interface
    int num_field_blocks,
    bool testing=false
 ) throw();
-
-#endif /* CONFIG_USE_CHARM */
 
   /// Initialize an empty CommBlock
   CommBlock()  { };

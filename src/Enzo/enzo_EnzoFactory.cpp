@@ -34,6 +34,7 @@ IoBlock * EnzoFactory::create_io_block () const throw()
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
+
 CProxy_CommBlock EnzoFactory::create_block_array
 (
  int nbx, int nby, int nbz,
@@ -48,8 +49,6 @@ CProxy_CommBlock EnzoFactory::create_block_array
   CProxy_EnzoBlock enzo_block_array;
 
   if (allocate) {
-
-#ifdef    PREPARE_AMR
 
     enzo_block_array = CProxy_EnzoBlock::ckNew();
 
@@ -74,20 +73,6 @@ CProxy_CommBlock EnzoFactory::create_block_array
     }
 
     enzo_block_array.doneInserting();
-
-#else  /* PREPARE_AMR */
-
-    enzo_block_array = CProxy_EnzoBlock::ckNew
-      (
-       nbx,nby,nbz,
-       nx,ny,nz,
-       xm,ym,zm, 
-       hx,hy,hz, 
-       num_field_blocks,
-       nbx,nby,nbz);
-
-#endif /* PREPARE_AMR */
-
 
   } else {
 
@@ -121,14 +106,12 @@ CommBlock * EnzoFactory::create_block
      xb,yb,zb, 
      num_field_blocks,
      nbx,nby,nbz);
-#ifdef    PREPARE_AMR
+
     Index index(ibx,iby,ibz);
+
     return block_array[index].ckLocal();
-#else  /* PREPARE_AMR */
-  return block_array(ibx,iby,ibz).ckLocal();
-#endif /* PREPARE_AMR */
    
-#else
+#else /* CONFIG_USE_CHARM */
   return new EnzoBlock 
     (
      ibx,iby,ibz, 
@@ -137,7 +120,7 @@ CommBlock * EnzoFactory::create_block
      xm,ym,zm, 
      hx,hy,hz, 
      num_field_blocks);
-#endif
+#endif /* CONFIG_USE_CHARM */
 }
 
 #endif
