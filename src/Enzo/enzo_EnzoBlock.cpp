@@ -404,31 +404,6 @@ EnzoBlock::EnzoBlock
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
-EnzoBlock::EnzoBlock
-(
- int nbx, int nby, int nbz,
- int nx, int ny, int nz,
- double xm, double ym, double zm,
- double xp, double yp, double zp,
- int num_field_blocks) throw()
-  : CommBlock (nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
-	       num_field_blocks),
-    Time_(0),
-    CycleNumber(0),
-    OldTime(0),
-    dt(0),
-    SubgridFluxes(0)
-{
-  TRACE("EnzoBlock::EnzoBlock()");
-  initialize_enzo_();
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
 void EnzoBlock::initialize_enzo_()
 {
   for (int i=0; i<MAX_DIMENSION; i++) {
@@ -753,7 +728,7 @@ void EnzoBlock::initialize () throw()
   // Grid dimensions
 
   int nx,ny,nz;
-  block_.field_block(0) -> size (&nx,&ny,&nz);
+  block_->field_block(0) -> size (&nx,&ny,&nz);
 
   int gx,gy,gz;
 
@@ -778,7 +753,7 @@ void EnzoBlock::initialize () throw()
   double xp,yp,zp;
   upper(&xp,&yp,&zp);
   double hx,hy,hz;
-  block_.field_block(0)->cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
+  block_->field_block(0)->cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
 
   CellWidth[0] = hx;
   CellWidth[1] = hy;
@@ -787,7 +762,7 @@ void EnzoBlock::initialize () throw()
   // Initialize BaryonField[] pointers
 
   for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-    BaryonField[field] = (enzo_float *)block_.field_block(0)->field_values(field);
+    BaryonField[field] = (enzo_float *)block_->field_block(0)->field_values(field);
   }
 
   TRACE ("Exit  EnzoBlock::initialize()\n");

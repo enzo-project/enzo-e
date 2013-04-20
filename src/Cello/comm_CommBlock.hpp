@@ -11,6 +11,8 @@
 class Block;
 class Factory;
 class GroupProcess;
+class FieldDescr;
+class Hierarchy;
 
 #ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
@@ -36,22 +38,9 @@ public: // interface
    int nx, int ny, int nz,
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
-   int num_field_blocks
+   int num_field_blocks,
+   bool testing=false
 ) throw();
-
-#ifdef CONFIG_USE_CHARM
-
-  /// For CHARM CommBlock arrays
-  CommBlock
-  (
-   int nbx, int nby, int nbz,
-   int nx, int ny, int nz,
-   double xmp, double ymp, double zmp,
-   double xb, double yb, double zb,
-   int num_field_blocks
-) throw();
-
-#endif
 
   /// Initialize an empty CommBlock
   CommBlock()  { };
@@ -154,8 +143,8 @@ public: // interface
   CommBlock & operator= (const CommBlock & block) throw();
 
   /// Return the Block associated with this CommBlock
-  Block * block() throw() { return & block_; };
-  const Block * block() const throw() { return & block_; };
+  Block * block() throw() { return block_; };
+  const Block * block() const throw() { return block_; };
 
 //----------------------------------------------------------------------
 
@@ -239,7 +228,8 @@ protected: // functions
     int nbx, int nby, int nbz,
     int nx, int ny, int nz,
     double xpm, double ypm, double zpm, // Domain begin
-    double xb, double yb, double zb);    // CommBlock width
+    double xb, double yb, double zb,    // CommBlock width
+    bool testing);
 
   /// Allocate and copy in attributes from give CommBlock
   void copy_(const CommBlock & block) throw();
@@ -274,7 +264,7 @@ protected: // functions
 protected: // attributes
 
   /// Mesh Block that this CommBlock controls
-  Block block_;
+  Block * block_;
 
 #ifdef CONFIG_USE_CHARM
 

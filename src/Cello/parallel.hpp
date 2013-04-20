@@ -10,9 +10,11 @@
 
 #include "cello.hpp"
 
+#include "charm.hpp"
+
+#include "_comm.hpp"
 #include "_error.hpp"
 
 #include "_parallel.hpp"
-
 #endif /* PARALLEL_HPP */
 

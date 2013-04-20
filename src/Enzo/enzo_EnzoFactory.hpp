@@ -44,7 +44,8 @@ public: // interface
    double xm, double ym, double zm,
    double hx, double hy, double hz,
    int num_field_blocks = 1,
-   bool allocate = true) const throw();
+   bool allocate = true,
+   bool testing=false) const throw();
 #else
   /// Create a new CommBlock  [abstract factory design pattern]
   virtual CommBlock * create_block
@@ -53,7 +54,8 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
-   int num_field_blocks = 1) const throw();
+   int num_field_blocks = 1,
+   bool testing=false) const throw();
 
 #endif
 

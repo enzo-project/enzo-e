@@ -168,7 +168,6 @@ public: // interface
    int num_field_blocks) throw();
 
 #ifdef CONFIG_USE_CHARM
-
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
     : CommBlock (m)
@@ -177,20 +176,7 @@ public: // interface
     //    initialize();
   };
 
-#endif /*CONFIG_USE_CHARM */
-
-#ifdef CONFIG_USE_CHARM
-
-  /// Initialize the EnzoBlock chare array
-  EnzoBlock
-  (
-   int nbx, int nby, int nbz,
-   int nx, int ny, int nz,
-   double xm, double ym, double zm,
-   double hx, double hy, double hz,
-   int num_field_blocks) throw();
-
-#endif /* CONFIG_USE_CHARM */
+#endif  /* CONFIG_USE_CHARM */
 
 #ifdef CONFIG_USE_CHARM
 
@@ -220,7 +206,7 @@ public: // interface
 
     if (p.isUnpacking()) {
       for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-	BaryonField[field] = (enzo_float *)block_.field_block(0)->field_values(field);
+	BaryonField[field] = (enzo_float *)block_->field_block(0)->field_values(field);
       }
     }
 

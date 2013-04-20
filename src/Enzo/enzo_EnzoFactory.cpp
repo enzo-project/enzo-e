@@ -34,6 +34,7 @@ IoBlock * EnzoFactory::create_io_block () const throw()
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
+
 CProxy_CommBlock EnzoFactory::create_block_array
 (
  int nbx, int nby, int nbz,
@@ -41,25 +42,42 @@ CProxy_CommBlock EnzoFactory::create_block_array
  double xm, double ym, double zm,
  double hx, double hy, double hz,
  int num_field_blocks,
- bool allocate
+ bool allocate,
+ bool testing
  ) const throw()
 {
-  TRACE3 ("EnzoFactory::create_block_array nb = %d %d %d",nbx,nby,nbz);
-  TRACE3 ("EnzoFactory::create_block_array n = %d %d %d",nx,ny,nz);
-  TRACE3 ("EnzoFactory::create_block_array x = %f %f %f",xm,ym,zm);
-  TRACE3 ("EnzoFactory::create_block_array h = %f %f %f",hx,hy,hz);
   CProxy_EnzoBlock enzo_block_array;
+
   if (allocate) {
-    enzo_block_array = CProxy_EnzoBlock::ckNew
-      (
-       nbx,nby,nbz,
-       nx,ny,nz,
-       xm,ym,zm, 
-       hx,hy,hz, 
-       num_field_blocks,
-       nbx,nby,nbz);
-  } else {
+
     enzo_block_array = CProxy_EnzoBlock::ckNew();
+
+    for (int ix=0; ix<nbx; ix++) {
+      for (int iy=0; iy<nby; iy++) {
+	for (int iz=0; iz<nbz; iz++) {
+
+	  Index index(ix,iy,iz);
+	  index.set_array(ix,iy,iz);
+	  index.set_level(0);
+
+	  enzo_block_array[index].insert 
+	    (ix,iy,iz,
+	     nbx,nby,nbz,
+	     nx,ny,nz,
+	     xm,ym,zm, 
+	     hx,hy,hz, 
+	     num_field_blocks);
+
+	}
+      }
+    }
+
+    enzo_block_array.doneInserting();
+
+  } else {
+
+    enzo_block_array = CProxy_EnzoBlock::ckNew();
+
   }
   TRACE1("EnzoFactory::create_block_array = %p",&enzo_block_array);
   return enzo_block_array;
@@ -76,7 +94,8 @@ CommBlock * EnzoFactory::create_block
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double hx, double hy, double hz,
- int num_field_blocks
+ int num_field_blocks,
+ bool testing
  ) const throw()
 {
 #ifdef CONFIG_USE_CHARM
@@ -87,8 +106,12 @@ CommBlock * EnzoFactory::create_block
      xb,yb,zb, 
      num_field_blocks,
      nbx,nby,nbz);
-  return block_array(ibx,iby,ibz).ckLocal();
-#else
+
+    Index index(ibx,iby,ibz);
+
+    return block_array[index].ckLocal();
+   
+#else /* CONFIG_USE_CHARM */
   return new EnzoBlock 
     (
      ibx,iby,ibz, 
@@ -97,7 +120,7 @@ CommBlock * EnzoFactory::create_block
      xm,ym,zm, 
      hx,hy,hz, 
      num_field_blocks);
-#endif
+#endif /* CONFIG_USE_CHARM */
 }
 
 #endif
