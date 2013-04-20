@@ -61,8 +61,6 @@ module enzo {
 
   extern module mesh;
 
-  readonly CProxy_SimulationCharm  proxy_simulation;
-
   group [migratable] EnzoSimulationCharm : SimulationCharm {
     entry EnzoSimulationCharm
       (const char filename[n], int n);
