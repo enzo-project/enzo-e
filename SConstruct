@@ -72,6 +72,8 @@ ip_mpi   = '8'
 
 use_papi = 0
 
+env = Environment()
+
 if not env.GetOption('clean'):
 
      configure = Configure(env)
