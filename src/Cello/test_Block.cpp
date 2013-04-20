@@ -21,13 +21,15 @@ PARALLEL_MAIN_BEGIN
 
   Factory factory;
   
+  bool testing;
+
   CommBlock * block = factory.create_block
     (0,0,0, 
      1,1,1,
      3,4,5,
      -1.0,-2.0,-3.0,
      2.0,  4.0, 6.0,
-     1);
+     1, testing=true);
 
   unit_func("CommBlock");
   unit_assert (block != NULL);

@@ -117,6 +117,7 @@ public: // interface
 		      int nx, int ny, int nz,
 		      int nbx, int nby, int nbz,
 		      bool allocate_blocks  = true,
+		      bool testing          = false,
 		      int process_first     = 0, 
 		      int process_last_plus = -1) throw();
 
@@ -142,6 +143,7 @@ protected: // functions
   /// Allocate array, and optionally allocate element CommBlocks
   void allocate_array_
   (bool allocate_blocks = true,
+   bool testing = false,
    const FieldDescr * field_descr = 0) throw ();
 
 protected: // attributes

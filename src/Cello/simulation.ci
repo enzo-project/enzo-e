@@ -7,8 +7,9 @@
 
 module simulation {
 
-//  extern module main;
   extern module mesh;
+
+  readonly CProxy_SimulationCharm proxy_simulation;
 
   group [migratable] Simulation {
 

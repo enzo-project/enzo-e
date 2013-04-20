@@ -61,28 +61,30 @@ module enzo {
 
   extern module mesh;
 
+//  readonly CProxy_SimulationCharm  proxy_simulation;
+
   group [migratable] EnzoSimulationCharm : SimulationCharm {
     entry EnzoSimulationCharm
       (const char filename[n], int n);
 
   }
 
-  array[Index] EnzoBlock : CommBlock {
+  array[3D] EnzoBlock : CommBlock {
+
+    //    entry EnzoBlock
+    //      (int ibx, int iby, int ibz,
+    //       int nbx, int nby, int nbz,
+    //       int nx, int ny, int nz,	
+    //       double xpm, double ypm, double zpm,
+    //       double xb, double yb, double zb,
+    //       int num_field_blocks);
 
     entry EnzoBlock
-      (int ibx, int iby, int ibz,
-       int nbx, int nby, int nbz,
+      (int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
        int num_field_blocks);
-
-//    entry EnzoBlock
-//      (int nbx, int nby, int nbz,
-//       int nx, int ny, int nz,	
-//       double xpm, double ypm, double zpm,
-//       double xb, double yb, double zb,
-//       int num_field_blocks);
   };
 
 };

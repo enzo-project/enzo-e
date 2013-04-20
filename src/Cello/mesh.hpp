@@ -19,13 +19,10 @@
 #include "_disk.hpp"
 #include "_parameters.hpp"
 #include "_io.hpp"
-
 #ifdef CONFIG_USE_CHARM
 #  include "_problem.hpp"
 #  include "_simulation.hpp"
 #endif
-
-
 #include "_field.hpp" 
 #include "_mesh.hpp"
 #include "_comm.hpp"

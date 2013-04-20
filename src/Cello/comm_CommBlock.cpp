@@ -21,54 +21,25 @@ CommBlock::CommBlock
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Domain begin
  double xb, double yb, double zb,    // CommBlock width
- int num_field_blocks
+ int num_field_blocks,
+ bool testing
 ) throw ()
-  : block_(nx, ny, nz, num_field_blocks),
+  :
 #ifdef CONFIG_USE_CHARM
-    count_refresh_face_(0),
+   count_refresh_face_(0),
 #endif
     cycle_(0),
     time_(0),
     dt_(0)
 { 
+  TRACE0;
+  block_ = new Block  (nx, ny, nz, num_field_blocks);
+  TRACE0;
 
-  initialize_(ibx,iby,ibz,nbx,nby,nbz,nx,ny,nz,xpm,ypm,zpm,xb,yb,zb);
-
-}
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-CommBlock::CommBlock
-(
- int nbx, int nby, int nbz,
- int nx, int ny, int nz,
- double xpm, double ypm, double zpm, // Domain begin
- double xb, double yb, double zb,    // CommBlock width
- int num_field_blocks) throw ()
-  : block_(nx, ny, nz, num_field_blocks),
-    count_refresh_face_(0),
-    cycle_(0),
-    time_(0),
-    dt_(0)
-{ 
-  TRACE("CommBlock::CommBlock()");
-  // Initialize indices
-
-  int ibx = thisIndex.x;
-  int iby = thisIndex.y;
-  int ibz = thisIndex.z;
-
-  initialize_(ibx,iby,ibz,
-	      nbx,nby,nbz,
-	      nx,ny,nz,
-	      xpm,ypm,zpm,
-	      xb,yb,zb);
+  initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz,
+	      xpm,ypm,zpm, xb,yb,zb,    testing);
 
 }
-
-#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
@@ -78,7 +49,8 @@ void CommBlock::initialize_
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xpm, double ypm, double zpm, // Domain begin
- double xb, double yb, double zb    // CommBlock width
+ double xb, double yb, double zb,   // CommBlock width
+ bool testing
  )
  {
    size_[0] = nbx;
@@ -101,15 +73,17 @@ void CommBlock::initialize_
 
 #ifdef CONFIG_USE_CHARM
 
-   // Count CommBlocks on each processor
+   if (! testing) {
+     // Count CommBlocks on each processor
    
-   SimulationCharm * simulation_charm  = 
-     dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
+     SimulationCharm * simulation_charm  = 
+       dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
 
-   TRACE1 ("simulation_charm = %p",simulation_charm);
-   TRACE1 ("simulation = %p",proxy_simulation.ckLocalBranch());
-   TRACE1 ("proxy_simulation = %p",&proxy_simulation);
-   if (simulation_charm) simulation_charm->insert_block();
+     TRACE1 ("simulation_charm = %p",simulation_charm);
+     TRACE1 ("simulation = %p",proxy_simulation.ckLocalBranch());
+     TRACE1 ("proxy_simulation = %p",&proxy_simulation);
+     if (simulation_charm) simulation_charm->insert_block();
+   }
 #endif
 
 
@@ -120,6 +94,9 @@ void CommBlock::initialize_
 CommBlock::~CommBlock() throw ()
 { 
 #ifdef CONFIG_USE_CHARM
+
+  if (block_) delete block_;
+  block_ = 0;
 
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
 
@@ -186,7 +163,7 @@ void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
 
   index_forest(&ibx,&iby,&ibz);
 
-  block_.field_block(index_field_set)
+  block_->field_block(index_field_set)
     -> refresh_ghosts (field_descr,
 		       hierarchy->group_process(),
 		       hierarchy->layout(),
@@ -349,9 +326,9 @@ void CommBlock::refresh ()
   // Refresh
   //--------------------------------------------------
 
-  int ix = thisIndex.x;
-  int iy = thisIndex.y;
-  int iz = thisIndex.z;
+  int ibx,iby,ibz;
+
+  thisIndex.array(&ibx,&iby,&ibz);
 
   int nbx = size_[0];
   int nby = size_[1];
@@ -370,15 +347,15 @@ void CommBlock::refresh ()
   fz3[0] = fz3[0] && (periodic || ! is_boundary[axis_z][face_lower]);
   fz3[2] = fz3[2] && (periodic || ! is_boundary[axis_z][face_upper]);
   int ix3[3],iy3[3],iz3[3];
-  ix3[0] = (ix - 1 + nbx) % nbx;
-  iy3[0] = (iy - 1 + nby) % nby;
-  iz3[0] = (iz - 1 + nbz) % nbz;
-  ix3[1] = ix;
-  iy3[1] = iy;
-  iz3[1] = iz;
-  ix3[2] = (ix + 1) % nbx;
-  iy3[2] = (iy + 1) % nby;
-  iz3[2] = (iz + 1) % nbz;
+  ix3[0] = (ibx - 1 + nbx) % nbx;
+  iy3[0] = (iby - 1 + nby) % nby;
+  iz3[0] = (ibz - 1 + nbz) % nbz;
+  ix3[1] = ibx;
+  iy3[1] = iby;
+  iz3[1] = ibz;
+  ix3[2] = (ibx + 1) % nbx;
+  iy3[2] = (iby + 1) % nby;
+  iz3[2] = (ibz + 1) % nbz;
   
   // Refresh face ghost zones
 
@@ -400,7 +377,7 @@ void CommBlock::refresh ()
 	     (sum==2 && field_descr->refresh_face(1)) ||
 	     (sum==3 && field_descr->refresh_face(0)))) {
 
-	  FieldFace field_face (block_.field_block(),field_descr);
+	  FieldFace field_face (block_->field_block(),field_descr);
 
 	  field_face.set_face(fx,fy,fz);
 	  field_face.set_ghost(gx,gy,gz);
@@ -414,7 +391,13 @@ void CommBlock::refresh ()
 	  char * array;
 	  field_face.load(&n, &array);
 
-	  block_array(ix3[fx+1],iy3[fy+1],iz3[fz+1]).x_refresh (n, array, -fx,-fy,-fz);
+	  Index index;
+
+	  index.set_array(ix3[fx+1],iy3[fy+1],iz3[fz+1]);
+	  index.set_level(0);
+	  index.clean();
+
+	  thisProxy[index].x_refresh (n,array,-fx,-fy,-fz);
 	}
       }
     }
@@ -458,7 +441,7 @@ void CommBlock::determine_boundary_
   is_on_boundary(lower_h,upper_h,is_boundary);
 
   int nx,ny,nz;
-  block_.field_block()->size (&nx,&ny,&nz);
+  block_->field_block()->size (&nx,&ny,&nz);
 
   // Determine in which directions we need to communicate or update boundary
 
@@ -541,7 +524,7 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
     gy = false;
     gz = false;
 
-    FieldFace field_face(block_.field_block(), field_descr);
+    FieldFace field_face(block_->field_block(), field_descr);
 
     field_face.set_face(fx,fy,fz);
     field_face.set_ghost(gx,gy,gz);
@@ -555,7 +538,7 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
   //--------------------------------------------------
 
   int nx,ny,nz;
-  block_.field_block()->size (&nx,&ny,&nz);
+  block_->field_block()->size (&nx,&ny,&nz);
 
   // Determine axes that may be neighbors
 
@@ -688,7 +671,7 @@ void CommBlock::compute()
 
 void CommBlock::copy_(const CommBlock & comm_block) throw()
 {
-  block_.copy_(*comm_block.block());
+  block_->copy_(*comm_block.block());
   for (int i=0; i<3; i++) {
     index_[i] = comm_block.index_[i];
     size_[i] = comm_block.size_[i];
@@ -731,7 +714,7 @@ void CommBlock::is_on_boundary (double lower[3], double upper[3],
 
 void CommBlock::allocate (const FieldDescr * field_descr) throw()
 { 
-  block_.allocate(field_descr);
+  block_->allocate(field_descr);
     //    block_.field_block(i)->allocate_array(field_descr);
     //    block_.field_block(i)->allocate_ghosts(field_descr);
 }

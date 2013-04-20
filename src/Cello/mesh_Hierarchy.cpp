@@ -200,6 +200,7 @@ void Hierarchy::create_forest
  int nx, int ny, int nz,
  int nbx, int nby, int nbz,
  bool allocate_blocks,
+ bool testing,
  int process_first, int process_last_plus) throw()
 {
   TRACE3("Hierarchy::create_forest() block size  %d %d %d",nx,ny,nz);
@@ -213,9 +214,9 @@ void Hierarchy::create_forest
   blocking_[2] = nbz;
 
 #ifdef CONFIG_USE_CHARM
-  allocate_array_(allocate_blocks);
+  allocate_array_(allocate_blocks,testing);
 #else  /* CONFIG_USE_CHARM */
-  allocate_array_(allocate_blocks,field_descr);
+  allocate_array_(allocate_blocks,testing,field_descr);
 #endif  /* CONFIG_USE_CHARM */
 }
 
@@ -246,6 +247,7 @@ CommBlock * Hierarchy::local_block(size_t i) const throw()
 void Hierarchy::allocate_array_
 (
  bool allocate_blocks,
+ bool testing,
  const FieldDescr * field_descr
 ) throw()
   // NOTE: field_descr only needed for MPI; may be null for CHARM++
@@ -308,7 +310,8 @@ void Hierarchy::allocate_array_
      lower_[0],lower_[1],lower_[2],
      xb,yb,zb,
      num_field_blocks,
-     allocate_blocks);
+     allocate_blocks,
+     testing);
     
   block_exists_ = allocate_blocks;
   block_loop_.stop() = nbx*nby*nbz;
@@ -333,7 +336,8 @@ void Hierarchy::allocate_array_
        mbx,mby,mbz,
        lower_[0],lower_[1],lower_[2],
        xb,yb,zb,
-       num_field_blocks);
+       num_field_blocks,
+       testing);
 
     // Store the data block in the block array
     block_[ib] = block;

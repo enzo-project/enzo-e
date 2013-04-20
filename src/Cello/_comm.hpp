@@ -12,11 +12,11 @@
 // System includes
 //----------------------------------------------------------------------
 
-// #include <stdlib.h>
-// #include <string>
-// #include <sstream>
-// #include <vector>
-// #include <memory>
+#include <stdlib.h>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <memory>
 
 #ifdef CONFIG_USE_CHARM
 #  include "pup_stl.h"

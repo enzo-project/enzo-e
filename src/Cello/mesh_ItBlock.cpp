@@ -37,7 +37,10 @@ CommBlock * ItBlock::operator++ () throw()
     int iby = (((index1_-1) - ibx)/nbx) % nby;
     int ibz = (index1_-1)/(nbx*nby);
     CProxy_CommBlock * block_array = hierarchy_->block_array();
-    block = (*block_array)(ibx,iby,ibz).ckLocal();
+
+    Index index(ibx,iby,ibz);
+    block = (*block_array)[index].ckLocal();
+
   } while (block==NULL && index1_ <= nb);
   // assert: (block != NULL) or (index1_ > nb)
   if (index1_ > nb) index1_ = 0;
