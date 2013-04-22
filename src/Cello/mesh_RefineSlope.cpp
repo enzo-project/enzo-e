@@ -11,7 +11,8 @@
 
 //----------------------------------------------------------------------
 
-RefineSlope::RefineSlope() throw ()
+RefineSlope::RefineSlope(double slope_max) throw ()
+  : slope_max_(slope_max)
 {
 }
 
@@ -40,22 +41,24 @@ int RefineSlope::apply
 
   //  int num_fields = field_descr->field_count();
 
-
   int count_flagged = 0;
+
+  const int d3[3] = {1,nx,nx*ny};
 
   switch (precision) {
   case precision_single:
     {
-      float * array = (float*)void_array;
-      float * slope = new float [nx*ny*nz];
-      const int d3[3] = {1,nx,nx*ny};
+      float * array_float = (float*)void_array;
+      float slope_float;
       for (int axis=0; axis<3; axis++) {
 	int d = d3[axis];
 	for (int ix=0; ix<nx; ix++) {
 	  for (int iy=0; iy<ny; iy++) {
 	    for (int iz=0; iz<nz; iz++) {
 	      int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
-	      if (array[i]) slope[i] = (array[i+d] - array[i-d]) / array[i];
+	      slope_float = (array_float[i]) ? 
+		(array_float[i+d] - array_float[i-d]) / array_float[i] : 0.0;
+	      if (slope_float > slope_max_) ++count_flagged;
 	    }
 	  }
 	}
@@ -63,6 +66,23 @@ int RefineSlope::apply
     }
     break;
   case precision_double:
+    {
+      double * array_double = (double*)void_array;
+      double slope_double;
+
+      for (int axis=0; axis<3; axis++) {
+	int d = d3[axis];
+	for (int ix=0; ix<nx; ix++) {
+	  for (int iy=0; iy<ny; iy++) {
+	    for (int iz=0; iz<nz; iz++) {
+	      int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
+	      slope_double = (array_double[i]) ? 
+		(array_double[i+d] - array_double[i-d]) / array_double[i] : 0.0;
+	    }
+	  }
+	}
+      }
+    }
     break;
   default:
     ERROR2("RefineSlope::apply",

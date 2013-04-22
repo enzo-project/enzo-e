@@ -18,12 +18,15 @@ class RefineSlope {
 public: // interface
 
   /// Constructor
-  RefineSlope() throw();
+  RefineSlope(double slope_max) throw();
 
   /// Evaluate the refinement criteria, updating the refinement field
   virtual int apply (FieldBlock * field_block,
 		     const FieldDescr * field_descr) throw();
 
+private:
+  /// Maximum allowed slope before refinement kicks in
+  double slope_max_;
 };
 
 #endif /* MESH_REFINE_SLOPE_HPP */
