@@ -50,7 +50,10 @@ void Config::pup (PUP::er &p)
   p | mesh_balance;
   p | mesh_refine_type;
   p | mesh_refine_fields;
-  p | mesh_refine_slope_max;
+  p | mesh_refine_slope_min;
+  p | mesh_refine_mass_min;
+  p | mesh_refine_mass_level_exponent;
+  p | mesh_refine_mass_min_overdensity;
 
   p | method_sequence;
 
@@ -193,6 +196,8 @@ void Config::read(Parameters * parameters) throw()
   if (mesh_root_rank < 2) field_ghosts[1] = 0;
   if (mesh_root_rank < 3) field_ghosts[2] = 0;
   
+  //--------------------------------------------------
+
   mesh_root_blocks[0] = parameters->list_value_integer(0,"Mesh:root_blocks",1);
   mesh_root_blocks[1] = parameters->list_value_integer(1,"Mesh:root_blocks",1);
   mesh_root_blocks[2] = parameters->list_value_integer(2,"Mesh:root_blocks",1);
@@ -210,13 +215,21 @@ void Config::read(Parameters * parameters) throw()
   delete group_process;
 #endif
 
+  //--------------------------------------------------
+
   mesh_root_size[0] = parameters->list_value_integer(0,"Mesh:root_size",1);
   mesh_root_size[1] = parameters->list_value_integer(1,"Mesh:root_size",1);
   mesh_root_size[2] = parameters->list_value_integer(2,"Mesh:root_size",1);
 
+  //--------------------------------------------------
+
   mesh_max_level = parameters->value_integer("Mesh:max_level",0);
 
+  //--------------------------------------------------
+
   mesh_balance   = parameters->value_logical("Mesh:balance",true);
+
+  //--------------------------------------------------
 
   int num_refine_type = parameters->list_length("Mesh:refine_type");
   mesh_refine_type.resize(num_refine_type);
@@ -224,24 +237,36 @@ void Config::read(Parameters * parameters) throw()
     mesh_refine_type[i] = parameters->list_value_string(i,"Mesh:refine_type");
   }
 
+  //--------------------------------------------------
+
   int num_refine_fields = parameters->list_length("Mesh:refine_fields");
+
   mesh_refine_fields.resize(num_refine_fields);
+
   for (int i=0; i<num_refine_fields; i++) {
     mesh_refine_fields[i] = parameters->list_value_string
       (i,"Mesh:refine_fields");
   }
 
-  int num_refine_slope_max = parameters->list_length("Mesh:refine_slope_max");
-  mesh_refine_slope_max.resize(num_refine_slope_max);
-  for (int i=0; i<num_refine_slope_max; i++) {
-    mesh_refine_slope_max[i] = parameters->list_value_float
-      (i,"Mesh:refine_slope_max",0.3);
-  }
+  //--------------------------------------------------
 
-  ASSERT ("Config::read",
-	  "Sizes of parameter lists Mesh:refine:slope_max and "
-	  "Mesh:refine:fields must be the same",
-	  num_refine_slope_max == num_refine_fields);
+  mesh_refine_slope_min = 
+    parameters->value_float ("Mesh:refine_slope_min",0.3);
+
+  //--------------------------------------------------
+
+  // This parameter is typically computed ("internal" parameter in Enzo)
+  mesh_refine_mass_min = 
+    parameters->value_float ("Mesh:refine_mass_min",-1.0);
+
+  //--------------------------------------------------
+
+  mesh_refine_mass_level_exponent = 
+    parameters->value_float ("Mesh:refine_mass_level_exponent",0.0);
+  //--------------------------------------------------
+
+  mesh_refine_mass_min_overdensity = 
+    parameters->value_float ("Mesh:refine_mass_min_overdensity",1.5);
 
   //--------------------------------------------------
   // Method

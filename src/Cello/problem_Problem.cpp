@@ -462,13 +462,28 @@ Refine * Problem::create_refine_
  int index
  ) throw ()
 { 
+  TRACE3("mesh_root_size = %d %d %d",config->mesh_root_size[0],config->mesh_root_size[1],config->mesh_root_size[2]);
   //--------------------------------------------------
   // parameter: Refine : cycle
   // parameter: Refine : time
   //--------------------------------------------------
 
+    TRACE1 ("index = %d",index);
+
   if (type == "slope") {
-    return new RefineSlope (config->mesh_refine_slope_max[index]);
+    return new RefineSlope (config->mesh_refine_slope_min);
+  } else if (type == "mass") {
+    double root_cell_volume = 1.0;
+    for (int i=0; i<config->mesh_root_rank; i++) {
+      root_cell_volume *= 
+	(config->domain_upper[i] - config->domain_lower[i])
+	/ (config->mesh_root_size[i]);
+    }
+
+    return new RefineMass (config->mesh_refine_mass_min,
+			   config->mesh_refine_mass_level_exponent,
+			   config->mesh_refine_mass_min_overdensity,
+			   root_cell_volume);
   }
   return NULL;
 }

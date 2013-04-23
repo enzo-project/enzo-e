@@ -84,9 +84,11 @@ public: // attributes
 
   std::vector<std::string>   mesh_refine_type ;
   std::vector<std::string>   mesh_refine_fields ;
-  std::vector<double>        mesh_refine_slope_max;
+  double                     mesh_refine_slope_min;
+  double                     mesh_refine_mass_min;
+  double                     mesh_refine_mass_min_overdensity;
+  double                     mesh_refine_mass_level_exponent;
   
-
   std::vector<std::string>   method_sequence;
 
   bool                       monitor_debug;

@@ -2,18 +2,17 @@
 
 /// @file     mesh_RefineSlope.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
-/// @brief    
-///
-/// 
+/// @date     2012-07-14
+/// @brief    Implementation of RefineSlope class
 
 #include "mesh.hpp"
 
 //----------------------------------------------------------------------
 
-RefineSlope::RefineSlope(double slope_max) throw ()
-  : slope_max_(slope_max)
+RefineSlope::RefineSlope(double slope_min) throw ()
+  : slope_min_(slope_min)
 {
+  TRACE("RefineSlope::RefineSlope");
 }
 
 //----------------------------------------------------------------------
@@ -58,7 +57,7 @@ int RefineSlope::apply
 	      int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
 	      slope_float = (array_float[i]) ? 
 		(array_float[i+d] - array_float[i-d]) / array_float[i] : 0.0;
-	      if (slope_float > slope_max_) ++count_flagged;
+	      if (slope_float > slope_min_) ++count_flagged;
 	    }
 	  }
 	}

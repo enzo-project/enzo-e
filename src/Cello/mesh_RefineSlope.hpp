@@ -18,7 +18,7 @@ class RefineSlope : public Refine {
 public: // interface
 
   /// Constructor
-  RefineSlope(double slope_max) throw();
+  RefineSlope(double slope_min) throw();
 
 
 #ifdef CONFIG_USE_CHARM
@@ -35,7 +35,7 @@ public: // interface
   {
     // NOTE: change this function whenever attributes change
     Refine::pup(p);
-    p | slope_max_;
+    p | slope_min_;
   }
 #endif
   /// Evaluate the refinement criteria, updating the refinement field
@@ -43,8 +43,8 @@ public: // interface
 		     const FieldDescr * field_descr) throw();
 
 private:
-  /// Maximum allowed slope before refinement kicks in
-  double slope_max_;
+  /// Minimum allowed slope before refinement kicks in
+  double slope_min_;
 };
 
 #endif /* MESH_REFINE_SLOPE_HPP */

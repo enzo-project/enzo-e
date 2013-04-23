@@ -20,8 +20,8 @@ Hierarchy::Hierarchy ( const Factory * factory,
   : factory_((Factory *)factory),
     dimension_(dimension),
     refinement_(refinement),
-    layout_(0),
-    group_process_(GroupProcess::create(process_first,process_last_plus))
+    group_process_(GroupProcess::create(process_first,process_last_plus)),
+    layout_(0)
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents

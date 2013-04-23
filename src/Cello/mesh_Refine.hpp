@@ -46,6 +46,7 @@ public: // interface
   {
     ERROR("Refine::apply",
 	 "'Abstract' virtual function Refine::apply() should not be called");
+    return 0;
   };
 
 };

@@ -4,7 +4,7 @@ set ARCH = $CELLO_ARCH
 set TYPE = $CELLO_TYPE
 set PREC = $CELLO_PREC
 
-set log = "compile.log"
+set log = "log.compile"
 set proc = 8
 
 set target = "install-bin"

@@ -47,6 +47,7 @@ class Tree;
 // Refinement
 #include "mesh_Refine.hpp"
 #include "mesh_RefineSlope.hpp"
+#include "mesh_RefineMass.hpp"
 
 #endif /* _MESH_HPP */
 
