@@ -50,7 +50,12 @@ CProxy_CommBlock EnzoFactory::create_block_array
 
   if (allocate) {
 
-    enzo_block_array = CProxy_EnzoBlock::ckNew();
+    CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
+    CkArrayOptions opts;
+    opts.setMap(array_map);
+    enzo_block_array = CProxy_CommBlock::ckNew(opts);
+
+    //    enzo_block_array = CProxy_EnzoBlock::ckNew();
 
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {

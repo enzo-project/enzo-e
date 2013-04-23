@@ -17,6 +17,8 @@ module mesh {
   PUPable OutputImage;
   PUPable OutputRestart;
   PUPable Problem;
+  PUPable Refine;
+  PUPable RefineSlope;
   PUPable ItFieldList;
   PUPable ItFieldRange;
 
@@ -30,6 +32,8 @@ module mesh {
        double xb, double yb, double zb,
        int num_field_blocks,
        bool testing);
+
+   entry CommBlock();	
 
 //    entry CommBlock
 //      (int nbx, int nby, int nbz,

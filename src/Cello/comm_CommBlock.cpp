@@ -32,9 +32,8 @@ CommBlock::CommBlock
     time_(0),
     dt_(0)
 { 
-  TRACE0;
+  TRACE("CommBlock::CommBlock");
   block_ = new Block  (nx, ny, nz, num_field_blocks);
-  TRACE0;
 
   initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz,
 	      xpm,ypm,zpm, xb,yb,zb,    testing);

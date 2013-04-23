@@ -18,6 +18,11 @@ module simulation {
 
   };
 
+  /// Initial mapping of array elements
+  group [migratable] ArrayMap : CkArrayMap {
+    entry ArrayMap(int, int, int);
+  };
+
   group [migratable] SimulationCharm : Simulation {
 
     entry SimulationCharm
