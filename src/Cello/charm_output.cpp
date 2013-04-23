@@ -95,8 +95,6 @@ void CommBlock::p_write (int index_output)
 
   output->write_block(this,field_descr,0,0,0);
 
-  WARNING("CommBlock::p_write",
-	  "Check that Simulation::s_write() sync count is correct");
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
   simulation_charm->s_write();
 }

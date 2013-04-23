@@ -12,6 +12,7 @@
 Problem::Problem() throw()
   : boundary_(0),
     num_initial_(0),
+    num_refine_(0),
     stopping_(0),
     timestep_(0),
     num_method_(0),
@@ -49,6 +50,13 @@ void Problem::pup (PUP::er &p)
   if (up) initial_list_.resize(num_initial_);
   for (int i=0; i<num_initial_; i++) {
     p | initial_list_[i]; // PUP::able
+  }
+
+  p | num_refine_;
+  TRACE1 ("num_refine_ = %d",num_refine_);
+  if (up) refine_list_.resize(num_refine_);
+  for (int i=0; i<num_refine_; i++) {
+    p | refine_list_[i]; // PUP::able
   }
 
   if (up) stopping_ = new Stopping;
@@ -109,6 +117,26 @@ void Problem::initialize_initial(Config * config,
 	  "Initial type %s not recognized",
 	  config->initial_type.c_str(),
 	  initial != NULL);
+}
+
+//----------------------------------------------------------------------
+
+void Problem::initialize_refine(Config * config) throw()
+{
+  for (size_t i=0; i<config->mesh_refine_type.size(); i++) {
+
+    std::string name = config->mesh_refine_type[i];
+
+    Refine * refine = create_refine_ (name,config,i);
+
+    if (refine) {
+      refine_list_.push_back( refine );
+      ++ num_refine_;
+    } else {
+      ERROR1("Problem::initialize_refine",
+	     "Unknown Refine %s",name.c_str());
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -374,6 +402,10 @@ void Problem::deallocate_() throw()
   for (size_t i=0; i<initial_list_.size(); i++) {
     delete initial_list_[i];    initial_list_[i] = 0;
   }
+  num_refine_ = 0;
+  for (size_t i=0; i<refine_list_.size(); i++) {
+    delete refine_list_[i];    refine_list_[i] = 0;
+  }
   delete stopping_;      stopping_ = 0;
   delete timestep_;      timestep_ = 0;
   num_output_ = 0;
@@ -417,6 +449,26 @@ Initial * Problem::create_initial_
     return new InitialFile   (parameters,group_process,config->initial_cycle,config->initial_time);;
   } else if (type == "default") {
     return new InitialDefault(parameters,config->initial_cycle,config->initial_time);
+  }
+  return NULL;
+}
+
+//----------------------------------------------------------------------
+
+Refine * Problem::create_refine_
+(
+ std::string  type,
+ Config * config,
+ int index
+ ) throw ()
+{ 
+  //--------------------------------------------------
+  // parameter: Refine : cycle
+  // parameter: Refine : time
+  //--------------------------------------------------
+
+  if (type == "slope") {
+    return new RefineSlope (config->mesh_refine_slope_max[index]);
   }
   return NULL;
 }

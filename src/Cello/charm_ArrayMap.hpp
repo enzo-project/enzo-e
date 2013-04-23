@@ -24,6 +24,21 @@ public:
   ~ArrayMap();
   int procNum(int, const CkArrayIndex &idx);
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM++ migration constructor for PUP::able
+  ArrayMap (CkMigrateMessage *m) : CBase_ArrayMap(m) {}
+
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    CBase_ArrayMap::pup(p);
+    // NOTE: change this function whenever attributes change
+    p | nx_;
+    p | ny_;
+    p | nz_;
+  }
+#endif
+
 private:
 
   int nx_, ny_, nz_;

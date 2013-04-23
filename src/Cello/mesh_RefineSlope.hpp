@@ -9,7 +9,7 @@
 #ifndef MESH_REFINE_SLOPE_HPP
 #define MESH_REFINE_SLOPE_HPP
 
-class RefineSlope {
+class RefineSlope : public Refine {
 
   /// @class    RefineSlope
   /// @ingroup  Mesh
@@ -20,6 +20,24 @@ public: // interface
   /// Constructor
   RefineSlope(double slope_max) throw();
 
+
+#ifdef CONFIG_USE_CHARM
+
+  /// default constructor
+  RefineSlope () throw() : Refine() {};
+
+  PUPable_decl(RefineSlope);
+
+  RefineSlope(CkMigrateMessage *m) : Refine (m) {}
+
+  /// CHARM++ Pack / Unpack function
+  inline void pup (PUP::er &p)
+  {
+    // NOTE: change this function whenever attributes change
+    Refine::pup(p);
+    p | slope_max_;
+  }
+#endif
   /// Evaluate the refinement criteria, updating the refinement field
   virtual int apply (FieldBlock * field_block,
 		     const FieldDescr * field_descr) throw();

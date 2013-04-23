@@ -10,6 +10,7 @@
 ///
 ///    Boundary:    Boundary conditions
 ///    Initial:     Initial conditions
+///    Refine:      Refinement criteria
 ///    Method:      List of numerical methods
 ///    Output:      List of output functions
 ///    Refinement:  How the mesh hierarchy is to be refined
@@ -27,6 +28,7 @@ class Input;
 class Method;
 class Output;
 class Parameters;
+class Refine;
 class Simulation;
 class Stopping;
 class Timestep;
@@ -74,6 +76,13 @@ public: // interface
     return (i < (int)initial_list_.size()) ? initial_list_[i] : NULL; 
   }
 
+  /// Return the ith refine object
+  Refine *  refine(int i = -1) const throw()
+  {
+    if (i == -1) i = index_refine_;
+    return (i < (int)refine_list_.size()) ? refine_list_[i] : NULL; 
+  }
+
   /// Return the ith output object
   Output * output(int i = -1) const throw()
   { 
@@ -94,6 +103,13 @@ public: // interface
 
   /// Process the next initial object if any, else proceed with simulation
   void initial_next(Simulation * simulation) throw();
+
+  /// reset refine index to 0 (not needed, but mirrors refine_output() )
+  void refine_reset() throw()
+  { index_refine_ = -1; }
+
+  /// Process the next refine object if any, else proceed with simulation
+  void refine_next(Simulation * simulation) throw();
 
   /// reset output index to 0
   void output_reset() throw()
@@ -124,6 +140,9 @@ public: // interface
   void initialize_initial(Config * config,
 			  Parameters * parameters,
 			  const GroupProcess * group_process) throw();
+
+  /// Initialize the refine object
+  void initialize_refine(Config * config ) throw();
 
   /// Initialize the stopping object
   void initialize_stopping(Config * config ) throw();
@@ -157,6 +176,10 @@ protected: // functions
    Config * config,
    const GroupProcess * = 0) throw ();
 
+  /// Create named refine object
+  virtual Refine * create_refine_ 
+  (std::string name, Config * config, int index) throw ();
+
   /// Create named method object
   virtual Method *   create_method_
   (std::string name) throw ();
@@ -185,6 +208,12 @@ private: // attributes
   /// Initial conditions object
   std::vector<Initial *> initial_list_;
 
+  /// Length of refine_list vector [CHARM++]
+  int num_refine_;
+
+  /// Refinement criteria objects
+  std::vector<Refine *> refine_list_;
+
   /// Stopping criteria
   Stopping * stopping_;
 
@@ -205,6 +234,9 @@ private: // attributes
 
   /// Index of currently active Initial object
   size_t index_initial_;
+
+  /// Index of currently active Refine object
+  size_t index_refine_;
 
   /// Index of currently active Output object
   size_t index_output_;

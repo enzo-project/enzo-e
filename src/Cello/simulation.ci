@@ -19,7 +19,7 @@ module simulation {
   };
 
   /// Initial mapping of array elements
-  group ArrayMap : CkArrayMap {
+  group [migratable] ArrayMap : CkArrayMap {
     entry ArrayMap(int, int, int);
   };
 

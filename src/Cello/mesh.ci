@@ -17,6 +17,8 @@ module mesh {
   PUPable OutputImage;
   PUPable OutputRestart;
   PUPable Problem;
+  PUPable Refine;
+  PUPable RefineSlope;
   PUPable ItFieldList;
   PUPable ItFieldRange;
 
