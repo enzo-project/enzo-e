@@ -14,8 +14,6 @@ class Method : public PUP::able
 class Method 
 #endif
 {
-
-
   /// @class    Method
   /// @ingroup  Method
   /// @brief    [\ref Method] Interface to an application method / analysis / visualization function.

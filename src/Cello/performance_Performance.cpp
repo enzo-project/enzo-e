@@ -117,7 +117,7 @@ int Performance::new_counter
 
   }
 
-  TRACE4("%d %d %d %d",n_basic_abs_,n_basic_rel_,n_papi_,n_user_);
+  //  TRACE4("%d %d %d %d",n_basic_abs_,n_basic_rel_,n_papi_,n_user_);
 
   return id;
 }

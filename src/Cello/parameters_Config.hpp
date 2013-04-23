@@ -9,7 +9,10 @@
 #ifndef PARAMETERS_CONFIG_HPP
 #define PARAMETERS_CONFIG_HPP
 
+/* Maximum number of fields in any field list in the configuration file */
 #define MAX_FIELDS      30
+
+/* Maximum number of output file groups specified in the configuration file */
 #define MAX_FILE_GROUPS 10
 
 class Parameters;
@@ -76,6 +79,13 @@ public: // attributes
   int                        mesh_root_blocks[3];
   int                        mesh_root_rank;
   int                        mesh_root_size[3];
+  int                        mesh_max_level;
+  bool                       mesh_balance;
+
+  std::vector<std::string>   mesh_refine_type ;
+  std::vector<std::string>   mesh_refine_fields ;
+  std::vector<double>        mesh_refine_slope_max;
+  
 
   std::vector<std::string>   method_sequence;
 

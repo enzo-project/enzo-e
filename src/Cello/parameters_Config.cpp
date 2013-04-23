@@ -46,6 +46,11 @@ void Config::pup (PUP::er &p)
   PUParray(p,mesh_root_blocks,3);
   p | mesh_root_rank;
   PUParray(p,mesh_root_size,3);
+  p | mesh_max_level;
+  p | mesh_balance;
+  p | mesh_refine_type;
+  p | mesh_refine_fields;
+  p | mesh_refine_slope_max;
 
   p | method_sequence;
 
@@ -89,13 +94,25 @@ void Config::pup (PUP::er &p)
 void Config::read(Parameters * parameters) throw()
 {
   TRACE("BEGIN Config::read()");
+
+  //--------------------------------------------------
+  // Boundary
+  //--------------------------------------------------
+
   boundary_type = parameters->value_string("Boundary:type","");
+
+  //--------------------------------------------------
+  // Domain
+  //--------------------------------------------------
 
   for (int i=0; i<3; i++)  {
     domain_lower[i] = parameters->list_value_float(i, "Domain:lower", 0.0);
     domain_upper[i] = parameters->list_value_float(i, "Domain:upper", 0.0);
   }
 
+  //--------------------------------------------------
+  // Field
+  //--------------------------------------------------
 
   num_fields = parameters->list_length("Field:fields"); 
 
@@ -154,12 +171,11 @@ void Config::read(Parameters * parameters) throw()
   field_refresh_edges   = parameters->value_logical ("Field:refresh:edges",  true);
   field_refresh_faces   = parameters->value_logical ("Field:refresh:faces",  true);
 
-  mesh_root_rank = parameters->value_integer("Mesh:root_rank",0);
+  //--------------------------------------------------
+  // Initial
+  //--------------------------------------------------
 
-  if (mesh_root_rank < 2) field_ghosts[1] = 0;
-  if (mesh_root_rank < 3) field_ghosts[2] = 0;
-  
-
+  TRACE("Parameters: Initial");
   initial_cycle = parameters->value_integer("Initial:cycle",0);
   initial_time  = parameters->value_float  ("Initial:time",0.0);
   initial_type  = parameters->value_string("Initial:type","default");
@@ -167,6 +183,16 @@ void Config::read(Parameters * parameters) throw()
   //  initial_name;
   //  initial_value
 
+  //--------------------------------------------------
+  // Mesh
+  //--------------------------------------------------
+
+  TRACE("Parameters: Mesh");
+  mesh_root_rank = parameters->value_integer("Mesh:root_rank",0);
+
+  if (mesh_root_rank < 2) field_ghosts[1] = 0;
+  if (mesh_root_rank < 3) field_ghosts[2] = 0;
+  
   mesh_root_blocks[0] = parameters->list_value_integer(0,"Mesh:root_blocks",1);
   mesh_root_blocks[1] = parameters->list_value_integer(1,"Mesh:root_blocks",1);
   mesh_root_blocks[2] = parameters->list_value_integer(2,"Mesh:root_blocks",1);
@@ -184,10 +210,44 @@ void Config::read(Parameters * parameters) throw()
   delete group_process;
 #endif
 
-
   mesh_root_size[0] = parameters->list_value_integer(0,"Mesh:root_size",1);
   mesh_root_size[1] = parameters->list_value_integer(1,"Mesh:root_size",1);
   mesh_root_size[2] = parameters->list_value_integer(2,"Mesh:root_size",1);
+
+  mesh_max_level = parameters->value_integer("Mesh:max_level",0);
+
+  mesh_balance   = parameters->value_logical("Mesh:balance",true);
+
+  int num_refine_type = parameters->list_length("Mesh:refine_type");
+  mesh_refine_type.resize(num_refine_type);
+  for (int i=0; i<num_refine_type; i++) {
+    mesh_refine_type[i] = parameters->list_value_string(i,"Mesh:refine_type");
+  }
+
+  int num_refine_fields = parameters->list_length("Mesh:refine_fields");
+  mesh_refine_fields.resize(num_refine_fields);
+  for (int i=0; i<num_refine_fields; i++) {
+    mesh_refine_fields[i] = parameters->list_value_string
+      (i,"Mesh:refine_fields");
+  }
+
+  int num_refine_slope_max = parameters->list_length("Mesh:refine_slope_max");
+  mesh_refine_slope_max.resize(num_refine_slope_max);
+  for (int i=0; i<num_refine_slope_max; i++) {
+    mesh_refine_slope_max[i] = parameters->list_value_float
+      (i,"Mesh:refine_slope_max",0.3);
+  }
+
+  ASSERT ("Config::read",
+	  "Sizes of parameter lists Mesh:refine:slope_max and "
+	  "Mesh:refine:fields must be the same",
+	  num_refine_slope_max == num_refine_fields);
+
+  //--------------------------------------------------
+  // Method
+  //--------------------------------------------------
+ 
+  TRACE("Parameters: Method");
 
   int size = parameters->list_length("Method:sequence");
   method_sequence.resize(size);
@@ -195,9 +255,15 @@ void Config::read(Parameters * parameters) throw()
     method_sequence[i] = parameters->list_value_string(i,"Method:sequence");
   }
 
+  //--------------------------------------------------
+  // Monitor
+  //--------------------------------------------------
+
   monitor_debug = parameters->value_logical("Monitor:debug",false);
 
+  //--------------------------------------------------
   // Output
+  //--------------------------------------------------
 
   parameters->group_set(0,"Output");
 
@@ -379,6 +445,10 @@ void Config::read(Parameters * parameters) throw()
 
   }  
 
+  //--------------------------------------------------
+  // Performance
+  //--------------------------------------------------
+
   if (parameters->type("Performance:papi:counters") == parameter_list) {
     int length = parameters->list_length("Performance:papi:counters");
     performance_papi_counters.resize(length);
@@ -393,13 +463,25 @@ void Config::read(Parameters * parameters) throw()
   performance_name   = parameters->value_string ("Performance:name","");
   performance_stride = parameters->value_integer("Performance:stride",1);
 
+  //--------------------------------------------------
+  // Stopping
+  //--------------------------------------------------
+
   stopping_cycle = parameters->value_integer
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
   stopping_time  = parameters->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
 
+  //--------------------------------------------------
+  // Testing
+  //--------------------------------------------------
+
   testing_cycle_final = parameters->value_integer("Testing:cycle_final",0);
   testing_time_final  = parameters->value_float  ("Testing:time_final", 0.0);
+
+  //--------------------------------------------------
+  // Timestep
+  //--------------------------------------------------
 
   timestep_type = parameters->value_string("Timestep:type","default");
 

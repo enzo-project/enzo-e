@@ -65,7 +65,10 @@ CProxy_CommBlock Factory::create_block_array
 
   if (allocate) {
 
-    proxy_block = CProxy_CommBlock::ckNew();
+    CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
+    CkArrayOptions opts;
+    opts.setMap(array_map);
+    proxy_block = CProxy_CommBlock::ckNew(opts);
 
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {

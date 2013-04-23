@@ -1,3 +1,6 @@
+.PHONY: default
+default: charm-8
+
 .PHONY: charm-%
 charm-%:
 	python scons.py -j$* bin/charm/enzo-p type=charm
