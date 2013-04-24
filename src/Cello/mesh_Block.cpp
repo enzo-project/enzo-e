@@ -12,7 +12,10 @@
 //----------------------------------------------------------------------
 
 Block::Block(int nx, int ny, int nz,
-	     int num_field_blocks) throw ()
+	     int num_field_blocks,
+	     double xm, double xp,
+	     double ym, double yp,
+	     double zm, double zp) throw ()
   : num_field_blocks_(num_field_blocks),
     field_block_()
 {
@@ -21,6 +24,12 @@ Block::Block(int nx, int ny, int nz,
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i] = new FieldBlock (nx,ny,nz);
   }
+  lower_[0] = xm;
+  lower_[1] = ym;
+  lower_[2] = zm;
+  upper_[0] = xp;
+  upper_[1] = yp;
+  upper_[2] = zp;
 }
 
 //----------------------------------------------------------------------

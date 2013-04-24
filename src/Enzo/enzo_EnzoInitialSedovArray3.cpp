@@ -85,10 +85,10 @@ void EnzoInitialSedovArray3::enforce_block
   field_block->size(&nx,&ny,&nz);
 
   double xbm,ybm,zbm;
-  comm_block->lower(&xbm,&ybm,&zbm);
+  comm_block->block()->lower(&xbm,&ybm,&zbm);
 
   double xbp,ybp,zbp;
-  comm_block->upper(&xbp,&ybp,&zbp);
+  comm_block->block()->upper(&xbp,&ybp,&zbp);
 
   double hx,hy,hz;
   field_block->cell_width(xbm,xbp,&hx,

@@ -149,9 +149,8 @@ public: // virtual functions
   /// Write local block data to disk
   virtual void write_block
   ( const CommBlock * block, 
-    const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw()
-  { write_block_(block,field_descr,ixp0,iyp0,izp0); }
+    const FieldDescr * field_descr) throw()
+  { write_block_(block,field_descr); }
 
   /// Write local field to disk
   virtual void write_field_block
@@ -184,8 +183,7 @@ protected:
   /// Loop over writing Field data in the CommBlock
   void write_block_
   ( const CommBlock * block, 
-    const FieldDescr * field_descr,  
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
+    const FieldDescr * field_descr) throw();
 
   /// Return the filename for the file format and given arguments
   std::string expand_file_name_

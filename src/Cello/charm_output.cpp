@@ -93,7 +93,7 @@ void CommBlock::p_write (int index_output)
   FieldDescr * field_descr = simulation->field_descr();
   Output * output = simulation->problem()->output(index_output);
 
-  output->write_block(this,field_descr,0,0,0);
+  output->write_block(this,field_descr);
 
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
   simulation_charm->s_write();

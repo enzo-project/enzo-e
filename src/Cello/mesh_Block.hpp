@@ -22,7 +22,10 @@ public: // interface
 
   /// Constructor
   Block(int nx, int ny, int nz,
-	int num_field_blocks) throw();
+	int num_field_blocks,
+	double xm, double xp,
+	double ym, double yp,
+	double zm, double zp) throw();
 
   /// Destructor
   ~Block() throw();
@@ -49,6 +52,8 @@ public: // interface
       if (up) field_block_[i] = new FieldBlock;
       p | *field_block_[i];
     }
+    PUParray(p,lower_,3);
+    PUParray(p,upper_,3);
     // NOTE: change this function whenever attributes change
   }
 #endif
@@ -61,6 +66,31 @@ public: // interface
 
   /// Return the ith Field block
   FieldBlock * field_block (int i=0) throw();
+
+  /// Return domain lower extent
+  /// B
+  inline void lower(double * x, 
+		    double * y = 0,
+		    double * z = 0) const throw ()
+  {
+    if (x) *x = lower_[0];
+    if (y) *y = lower_[1];
+    if (z) *z = lower_[2];
+  }
+
+  //----------------------------------------------------------------------
+
+  /// Return domain upper extent
+  /// B
+  inline void upper(double * x,
+		    double * y = 0,
+		    double * z = 0) const throw ()
+  {
+    if (x) *x = upper_[0];
+    if (y) *y = upper_[1];
+    if (z) *z = upper_[2];
+  }
+
 
 public: // virtual functions
 
@@ -77,6 +107,14 @@ private: // attributes
 
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;
+
+  /// Lower extent of the box associated with the block [computable]
+  /// B
+  double lower_[3];
+
+  /// Upper extent of the box associated with the block [computable]
+  /// B
+  double upper_[3];
 
   // NOTE: change pup() function whenever attributes change
 
