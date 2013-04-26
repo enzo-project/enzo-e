@@ -719,7 +719,7 @@ void EnzoBlock::initialize () throw()
 
   double xm,ym,zm;
 
-  lower(&xm,&ym,&zm);
+  block_->lower(&xm,&ym,&zm);
 
   GridLeftEdge[0]  = xm;
   GridLeftEdge[1]  = ym;
@@ -751,7 +751,7 @@ void EnzoBlock::initialize () throw()
   // Initialize CellWidth
 
   double xp,yp,zp;
-  upper(&xp,&yp,&zp);
+  block_->upper(&xp,&yp,&zp);
   double hx,hy,hz;
   block_->field_block(0)->cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
 

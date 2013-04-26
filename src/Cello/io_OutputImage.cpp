@@ -143,16 +143,10 @@ void OutputImage::finalize () throw()
 void OutputImage::write_block
 (
  const CommBlock * comm_block,
- const FieldDescr * field_descr,
- int ixp0,
- int iyp0,
- int izp0
+ const FieldDescr * field_descr
 ) throw()
 // @param comm_block  Block to write
 // @param field_descr  Field descriptor
-// @param ixp0  offset along x-axis 
-// @param iyp0  offset along y-axis 
-// @param izp0  offset along z-axis 
 {
 
   TRACE("OutputImage::write_block()");
@@ -165,9 +159,9 @@ void OutputImage::write_block
 
   comm_block->index_forest(&ix,&iy,&iz);
 
-  int ixb0 = ixp0 + ix*nbx;
-  int iyb0 = iyp0 + iy*nby;
-  int izb0 = izp0 + iz*nbz;
+  int ixb0 = ix*nbx;
+  int iyb0 = iy*nby;
+  int izb0 = iz*nbz;
 
   // Index of (single) field to write
 

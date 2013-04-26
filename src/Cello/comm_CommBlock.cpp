@@ -33,7 +33,11 @@ CommBlock::CommBlock
     dt_(0)
 { 
   TRACE("CommBlock::CommBlock");
-  block_ = new Block  (nx, ny, nz, num_field_blocks);
+
+  block_ = new Block  (nx, ny, nz, num_field_blocks,
+		       xpm+ibx*xb, xpm+(ibx+1)*xb,
+		       ypm+iby*yb, ypm+(iby+1)*yb,
+		       zpm+ibz*zb, zpm+(ibz+1)*zb);
 
   initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz,
 	      xpm,ypm,zpm, xb,yb,zb,    testing);
@@ -59,16 +63,6 @@ void CommBlock::initialize_
    index_[0] = ibx;
    index_[1] = iby;
    index_[2] = ibz;
-
-   // Initialize extent 
-
-   lower_[axis_x] = xpm + ibx*xb;
-   lower_[axis_y] = ypm + iby*yb;
-   lower_[axis_z] = zpm + ibz*zb;
-
-   upper_[axis_x] = xpm + (ibx+1)*xb;
-   upper_[axis_y] = ypm + (iby+1)*yb;
-   upper_[axis_z] = zpm + (ibz+1)*zb;
 
 #ifdef CONFIG_USE_CHARM
 
@@ -124,13 +118,6 @@ CommBlock & CommBlock::operator = (const CommBlock & block) throw ()
 
 //----------------------------------------------------------------------
 
-int CommBlock::index () const throw ()
-{
-  return index_[0] + size_[0] * (index_[1] + size_[1] * index_[2]);
-}
-
-//----------------------------------------------------------------------
-
 void CommBlock::index_forest (int * ix, int * iy, int * iz) const throw ()
 {
   if (ix) (*ix) = index_[0]; 
@@ -173,7 +160,6 @@ void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
 
 //======================================================================
 // CHARM FUNCTIONS
-//======================================================================
 //======================================================================
 
 #ifdef CONFIG_USE_CHARM
@@ -674,8 +660,6 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   for (int i=0; i<3; i++) {
     index_[i] = comm_block.index_[i];
     size_[i] = comm_block.size_[i];
-    lower_[i] = comm_block.lower_[i];
-    upper_[i] = comm_block.upper_[i];
   }
 
   cycle_ = comm_block.cycle_;
@@ -691,23 +675,29 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
 //----------------------------------------------------------------------
 
 void CommBlock::is_on_boundary (double lower[3], double upper[3],
-			    bool is_boundary[3][2]) throw()
+				bool is_boundary[3][2]) throw()
 {
 
-  // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+  // // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
 
-  is_boundary[axis_x][face_lower] = 
-    (cello::err_abs(lower_[axis_x],lower[axis_x]) < 1e-6);
-  is_boundary[axis_y][face_lower] = 
-    (cello::err_abs(lower_[axis_y],lower[axis_y]) < 1e-6);
-  is_boundary[axis_z][face_lower] = 
-    (cello::err_abs(lower_[axis_z],lower[axis_z]) < 1e-6);
-  is_boundary[axis_x][face_upper] = 
-    (cello::err_abs(upper_[axis_x],upper[axis_x]) < 1e-6);
-  is_boundary[axis_y][face_upper] = 
-    (cello::err_abs(upper_[axis_y],upper[axis_y]) < 1e-6);
-  is_boundary[axis_z][face_upper] = 
-    (cello::err_abs(upper_[axis_z],upper[axis_z]) < 1e-6);
+  // is_boundary[axis_x][face_lower] = 
+  //   (cello::err_abs(lower_[axis_x],lower[axis_x]) < 1e-6);
+  // is_boundary[axis_y][face_lower] = 
+  //   (cello::err_abs(lower_[axis_y],lower[axis_y]) < 1e-6);
+  // is_boundary[axis_z][face_lower] = 
+  //   (cello::err_abs(lower_[axis_z],lower[axis_z]) < 1e-6);
+  // is_boundary[axis_x][face_upper] = 
+  //   (cello::err_abs(upper_[axis_x],upper[axis_x]) < 1e-6);
+  // is_boundary[axis_y][face_upper] = 
+  //   (cello::err_abs(upper_[axis_y],upper[axis_y]) < 1e-6);
+  // is_boundary[axis_z][face_upper] = 
+  //   (cello::err_abs(upper_[axis_z],upper[axis_z]) < 1e-6);
+  is_boundary[0][0] = (index_[0] == 0);
+  is_boundary[1][0] = (index_[1] == 0);
+  is_boundary[2][0] = (index_[2] == 0);
+  is_boundary[0][1] = (index_[0] == size_[0] - 1);
+  is_boundary[1][1] = (index_[1] == size_[1] - 1);
+  is_boundary[2][1] = (index_[2] == size_[2] - 1);
 }
 //----------------------------------------------------------------------
 

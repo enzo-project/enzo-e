@@ -39,8 +39,8 @@ PARALLEL_MAIN_BEGIN
   double lower[3];
   double upper[3];
 
-  block->lower(&lower[0],&lower[1],&lower[2]);
-  block->upper(&upper[0],&upper[1],&upper[2]);
+  block->block()->lower(&lower[0],&lower[1],&lower[2]);
+  block->block()->upper(&upper[0],&upper[1],&upper[2]);
 
   unit_func("lower");
   unit_assert(lower[0] == -1.0);

@@ -29,7 +29,7 @@ class CommBlock
 
 public: // interface
 
-  /// create a CommBlock with the given block count, lower forest/patch extent, block
+  /// create a CommBlock with the given block count, lower extent, block
   /// size, and number of field blocks
   CommBlock
   (
@@ -47,6 +47,7 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
+  /// CB
   void pup(PUP::er &p)
 {
   TRACEPUP;
@@ -57,8 +58,6 @@ public: // interface
 
   PUParray(p,index_,3);
   PUParray(p,size_,3);
-  PUParray(p,lower_,3);
-  PUParray(p,upper_,3);
   p | cycle_;
   p | time_;
   p | dt_;
@@ -72,6 +71,7 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
 
   /// Initialize a migrated CommBlock
+  /// CB
   CommBlock (CkMigrateMessage *m) 
     : CBase_CommBlock(m) { };
 
@@ -80,12 +80,14 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
 
   /// Initialize CommBlock for the simulation.
+  /// CB
   void p_initial();
 
   // /// Call current Initial::enforce() on the block
   // void p_initial_enforce();
 
   /// Refresh ghost zones and apply boundary conditions
+  /// CB
   void p_refresh() 
   {
     TRACE("CommBlock::p_refresh");
@@ -93,29 +95,37 @@ public: // interface
   }
 
   /// Apply the numerical methods on the block
+  /// CB
   void p_compute(int cycle, double time, double dt);
 
   /// Refresh a FieldFace
+  /// CB
   void x_refresh(int n, char buffer[],int fx, int fy, int fz);
 
   /// Contribute block data to ith output object in the simulation
+  /// CB
   void p_write (int index_output);
 
   /// Contribute block data to the Initial input object
+  /// CB
   void p_read (int index_input = 0);
 
   /// Entry function after prepare() to call Simulation::p_output()
+  /// CB
   void p_output(CkReductionMsg * msg);
 
   //--------------------------------------------------
 
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
+  /// B
   void prepare();
 
   /// Implementation of refresh
+  /// B / CB
   void refresh();
 
   /// Boundary and Method
+  /// B
   void compute();
 
   //==================================================
@@ -143,47 +153,27 @@ public: // interface
   CommBlock & operator= (const CommBlock & block) throw();
 
   /// Return the Block associated with this CommBlock
+  /// CB
   Block * block() throw() { return block_; };
   const Block * block() const throw() { return block_; };
 
 //----------------------------------------------------------------------
 
-  /// Return domain lower extent
-  inline void lower(double * x, 
-		    double * y = 0,
-		    double * z = 0) const throw ()
-  {
-    if (x) *x = lower_[0];
-    if (y) *y = lower_[1];
-    if (z) *z = lower_[2];
-  }
-
-//----------------------------------------------------------------------
-
-  /// Return domain upper extent
-  inline void upper(double * x,
-		    double * y = 0,
-		    double * z = 0) const throw ()
-  {
-    if (x) *x = upper_[0];
-    if (y) *y = upper_[1];
-    if (z) *z = upper_[2];
-  }
-
+  /// B | CB
   void index_forest (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
 
-  /// Return the index of this CommBlock in the containing Patch / Forest
-  int index () const throw();
+  /// Return the index of this CommBlock in the array
+  /// CB / remove
 
   /// Return the name of the block
   std::string name () const throw()
   {
     std::stringstream convert;
-    convert << "block_" << index();
+    convert << "block_" << id_();
     return convert.str();
   }
 
-  /// Return the size the containing Patch / Forest
+  /// Return the size the CommBlock array
   void size_forest (int * nx, int * ny, int * nz) const throw();
 
   /// Return the current cycle number
@@ -222,6 +212,10 @@ public: // virtual functions
   }
 
 protected: // functions
+
+  int id_ () const throw ()
+  { return index_[0] + size_[0] * (index_[1] + size_[1] * index_[2]); }
+
 
   void initialize_
   ( int ibx, int iby, int ibz,
@@ -264,40 +258,42 @@ protected: // functions
 protected: // attributes
 
   /// Mesh Block that this CommBlock controls
+  /// CB
   Block * block_;
 
 #ifdef CONFIG_USE_CHARM
 
   /// Counter when refreshing faces
+  /// CB: use Sync
   int count_refresh_face_;
 
 #endif
 
   //--------------------------------------------------
 
-  /// Index into Patch / Forest [redundant with CHARM thisIndex.x .y .z]
+  /// Index into array [redundant with CHARM thisIndex.x .y .z]
+  /// CB
   int index_[3];
 
-  /// Size of Patch / Forest [redundant with CHARM thisIndex.x .y .z]
+  /// Size of array [redundant with CHARM thisIndex.x .y .z]
+  /// CB
   int size_[3];
-
-  /// Lower extent of the box associated with the block [computable]
-  double lower_[3];
-
-  /// Upper extent of the box associated with the block [computable]
-  double upper_[3];
 
   //--------------------------------------------------
 
   /// Current cycle number
+  /// B / CB
   int cycle_;
 
   /// Current time
+  /// B
   double time_;
 
   /// Current timestep
+  /// B
   double dt_;
 
+  /// Whether face is on the domain boundary
 };
 
 #endif /* COMM_COMMBLOCK_HPP */

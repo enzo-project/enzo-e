@@ -52,11 +52,11 @@ void IoBlock::meta_value
     *type   = scalar_type_int;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) block_->lower_;
+    *buffer = (void *) block_->block()->lower_;
     *type   = scalar_type_double;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) block_->upper_;
+    *buffer = (void *) block_->block()->upper_;
     *type   = scalar_type_double;
     *nxd     = 3;
   } else if (index == count++) {
