@@ -410,15 +410,10 @@ void Simulation::update_state(int cycle, double time, double dt, double stop)
 
 void Simulation::monitor_output()
 {
-  TRACE1("monitor = %p",monitor_);
-  monitor_->  print("", "-------------------------------------");
-  TRACE0;
-
+  monitor_-> print("", "-------------------------------------");
   monitor_-> print("Simulation", "cycle %04d", cycle_);
   monitor_-> print("Simulation", "time-sim %15.12f",time_);
   monitor_-> print("Simulation", "dt %15.12g", dt_);
-
-  TRACE0;
 
   performance_output ();
 

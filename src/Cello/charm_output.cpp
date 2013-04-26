@@ -60,24 +60,16 @@ void Problem::output_next(Simulation * simulation) throw()
 
   } while (output && ! output->is_scheduled(cycle, time));
 
-  // assert ! output || output->is_scheduled(cycle_, time_)
-
   // output if any scheduled, else proceed with refresh
 
-  TRACE2 ("output %d = %p\n",cycle,output);
   if (output != NULL) {
 
-    TRACE("calling output->init()");
     output->init();
-    TRACE("calling output->open()");
     output->open();
-    TRACE("calling output->write_simulation()");
     output->write_simulation(simulation);
-
 
   } else {
 
-    TRACE("calling simulation->monitor_output()\n");
     simulation->monitor_output();
 
   }

@@ -55,24 +55,24 @@ void SimulationCharm::initialize() throw()
 void SimulationCharm::s_initialize()
 {
   TRACE("SimulationCharm::s_initialize()");
-  if (group_process_->is_root()) run();
+  //  if (group_process_->is_root()) run();
+  if (group_process_->is_root()) initial();
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::run() throw()
-{
-  TRACE("SimulationCharm::run()");
-  initial();
-}
+// void SimulationCharm::run() throw()
+// {
+//   TRACE("SimulationCharm::run()");
+//   initial();
+// }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::p_refresh()
-{
-  TRACE("SimulationCharm::p_refresh");
-  refresh();
-};
+{ refresh(); };
+
+//----------------------------------------------------------------------
 
 void SimulationCharm::refresh()
 {

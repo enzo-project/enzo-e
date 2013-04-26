@@ -329,7 +329,7 @@ void Hierarchy::allocate_array_
 
     // create a new data block
 
-    CommBlock * block = factory_->create_block 
+    CommBlock * comm_block = factory_->create_block 
       (ibx,iby,ibz,
        nbx,nby,nbz,
        mbx,mby,mbz,
@@ -339,11 +339,11 @@ void Hierarchy::allocate_array_
        testing);
 
     // Store the data block in the block array
-    block_[ib] = block;
+    block_[ib] = comm_block;
 
     // Allocate data on the block
 
-    block->allocate(field_descr);
+    comm_block->block()->allocate(field_descr);
 
   }
 #endif /* CONFIG_USE_CHARM */

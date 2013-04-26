@@ -654,35 +654,12 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
 
 void CommBlock::is_on_boundary (bool is_boundary[3][2]) throw()
 {
-
-  // // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
-
-  // is_boundary[axis_x][face_lower] = 
-  //   (cello::err_abs(lower_[axis_x],lower[axis_x]) < 1e-6);
-  // is_boundary[axis_y][face_lower] = 
-  //   (cello::err_abs(lower_[axis_y],lower[axis_y]) < 1e-6);
-  // is_boundary[axis_z][face_lower] = 
-  //   (cello::err_abs(lower_[axis_z],lower[axis_z]) < 1e-6);
-  // is_boundary[axis_x][face_upper] = 
-  //   (cello::err_abs(upper_[axis_x],upper[axis_x]) < 1e-6);
-  // is_boundary[axis_y][face_upper] = 
-  //   (cello::err_abs(upper_[axis_y],upper[axis_y]) < 1e-6);
-  // is_boundary[axis_z][face_upper] = 
-  //   (cello::err_abs(upper_[axis_z],upper[axis_z]) < 1e-6);
   is_boundary[0][0] = (index_[0] == 0);
   is_boundary[1][0] = (index_[1] == 0);
   is_boundary[2][0] = (index_[2] == 0);
-  is_boundary[0][1] = (index_[0] == size_[0] - 1);
-  is_boundary[1][1] = (index_[1] == size_[1] - 1);
-  is_boundary[2][1] = (index_[2] == size_[2] - 1);
-}
-//----------------------------------------------------------------------
-
-void CommBlock::allocate (const FieldDescr * field_descr) throw()
-{ 
-  block_->allocate(field_descr);
-    //    block_.field_block(i)->allocate_array(field_descr);
-    //    block_.field_block(i)->allocate_ghosts(field_descr);
+  is_boundary[0][1] = (index_[0] == (size_[0] - 1));
+  is_boundary[1][1] = (index_[1] == (size_[1] - 1));
+  is_boundary[2][1] = (index_[2] == (size_[2] - 1));
 }
 
 //----------------------------------------------------------------------

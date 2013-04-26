@@ -81,7 +81,7 @@ void CommBlock::p_initial()
 
   // Initialize the block
 
-  allocate(field_descr);
+  block()->allocate(field_descr);
 
   // Set the CommBlock cycle and time to match Simulation's
 
@@ -134,6 +134,7 @@ void CommBlock::p_read (int index_initial)
 {
   INCOMPLETE("CommBlock::p_read");
 }
+
 #endif /* CONFIG_USE_CHARM */
 
 

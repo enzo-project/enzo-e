@@ -48,8 +48,8 @@ public: // functions
   /// Initialize the Charm++ Simulation
   virtual void initialize() throw();
 
-  /// Run the simulation
-  virtual void run() throw();
+  // /// Run the simulation
+  // virtual void run() throw();
 
   /// Add a new CommBlock to this local branch
   inline void insert_block() 
@@ -76,9 +76,9 @@ public: // functions
   void s_initialize();
 
   /// Call initialization on Problem list of Initial objects
-  void p_initial ();
+  void p_initial();
   /// Implementation of initialization
-  void initial ();
+  void initial();
   /// Wait for all local patches to check in before proceeding to refresh
   void s_initial();
   /// Continue on to refresh after s_initial() synchronization

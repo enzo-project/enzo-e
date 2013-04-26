@@ -87,6 +87,7 @@ PARALLEL_MAIN_BEGIN
 
   proxy_simulation.p_initialize();
 
+
   //--------------------------------------------------
 
 #else /* ! CONFIG_USE_CHARM */

@@ -461,13 +461,10 @@ Refine * Problem::create_refine_
  int index
  ) throw ()
 { 
-  TRACE3("mesh_root_size = %d %d %d",config->mesh_root_size[0],config->mesh_root_size[1],config->mesh_root_size[2]);
-  //--------------------------------------------------
-  // parameter: Refine : cycle
-  // parameter: Refine : time
-  //--------------------------------------------------
-
-    TRACE1 ("index = %d",index);
+  TRACE3("mesh_root_size = %d %d %d",
+	 config->mesh_root_size[0],
+	 config->mesh_root_size[1],
+	 config->mesh_root_size[2]);
 
   if (type == "slope") {
     return new RefineSlope (config->mesh_refine_slope_min);

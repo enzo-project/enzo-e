@@ -190,8 +190,6 @@ public: // interface
 
 public: // virtual functions
 
-  virtual void allocate (const FieldDescr * field_descr) throw();
-
   /// Set CommBlock's cycle
   virtual void set_cycle (int cycle) throw()
   { cycle_ = cycle;}
