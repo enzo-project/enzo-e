@@ -154,8 +154,7 @@ void Monitor::write
 
     char buffer_time[10];
 
-    //    snprintf (buffer_time,10,"%08.2f",timer_->value());
-    snprintf (buffer_time,10,"",timer_->value());
+    snprintf (buffer_time,10,"%08.2f",timer_->value());
 
     // get Component if any
     char buffer_component[20];
@@ -217,8 +216,7 @@ void Monitor::write_verbatim
 
     char buffer_time[10];
 
-    //    snprintf (buffer_time,10,"%08.2f",timer_->value());
-    snprintf (buffer_time,10,"");
+    snprintf (buffer_time,10,"%08.2f",timer_->value());
 
     // get Component if any
     char buffer_component[20];

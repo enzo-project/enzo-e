@@ -1,5 +1,5 @@
 .PHONY: default
-default: charm-8
+default: charm-6
 
 .PHONY: charm-%
 charm-%:

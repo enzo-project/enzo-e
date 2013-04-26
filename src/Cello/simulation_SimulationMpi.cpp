@@ -82,16 +82,11 @@ void SimulationMpi::run() throw()
 
   DEBUG("SimulationMpi::run() refresh, Boundary ");
 
-  double lower[3];
-  hierarchy_->lower(&lower[0], &lower[1], &lower[2]);
-  double upper[3];
-  hierarchy_->upper(&upper[0], &upper[1], &upper[2]);
-
   while ((block = ++it_block)) {
 
     bool is_boundary [3][2];
 
-    block->is_on_boundary (lower,upper,is_boundary);
+    block->is_on_boundary (is_boundary);
 
     refresh_ghost_(block,is_boundary);
 
@@ -197,7 +192,7 @@ void SimulationMpi::run() throw()
 
       bool is_boundary [3][2];
 
-      block->is_on_boundary (lower,upper,is_boundary);
+      block->is_on_boundary (is_boundary);
 
       refresh_ghost_(block,is_boundary);
 

@@ -77,6 +77,7 @@ int RefineSlope::apply
 	      int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
 	      slope_double = (array_double[i]) ? 
 		(array_double[i+d] - array_double[i-d]) / array_double[i] : 0.0;
+	      if (slope_double > slope_min_) ++count_flagged;
 	    }
 	  }
 	}

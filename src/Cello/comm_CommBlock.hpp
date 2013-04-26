@@ -54,7 +54,7 @@ public: // interface
 
   CBase_CommBlock::pup(p);
 
-  p | count_refresh_face_;
+  p | sync_refresh_;
 
   PUParray(p,index_,3);
   PUParray(p,size_,3);
@@ -185,9 +185,8 @@ public: // interface
   /// Return the current timestep
   double dt() const throw() { return dt_; };
  
-  /// Return which block faces lie along the given lower[] and upper[] boundaries
-  void is_on_boundary (double lower[3], double upper[3],
-		       bool boundary[3][2]) throw();
+  /// Return which block faces lie along a domain boundary
+  void is_on_boundary (bool boundary[3][2]) throw();
 
 public: // virtual functions
 
@@ -242,16 +241,11 @@ protected: // functions
    bool * azp
    );
 
-  void update_boundary_ 
-  (
-   bool is_boundary[3][2],
-   bool axm,
-   bool axp,
-   bool aym,
-   bool ayp,
-   bool azm,
-   bool azp
-   );
+  /// Update boundary conditions
+  void update_boundary_ ();
+
+  /// Count number of expected faces to be communicated
+  int count_refresh_ ();
 
 #endif
 
@@ -265,7 +259,8 @@ protected: // attributes
 
   /// Counter when refreshing faces
   /// CB: use Sync
-  int count_refresh_face_;
+
+  Loop sync_refresh_;
 
 #endif
 

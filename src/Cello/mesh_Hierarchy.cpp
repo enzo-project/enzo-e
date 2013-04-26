@@ -44,7 +44,7 @@ Hierarchy::~Hierarchy() throw()
 
 # else
 
-  for (int i=0; i<block_.size(); i++) {
+  for (size_t i=0; i<block_.size(); i++) {
     delete block_[i];
     block_[i] = 0;
   }

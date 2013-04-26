@@ -25,9 +25,6 @@ CommBlock::CommBlock
  bool testing
 ) throw ()
   :
-#ifdef CONFIG_USE_CHARM
-   count_refresh_face_(0),
-#endif
     cycle_(0),
     time_(0),
     dt_(0)
@@ -42,6 +39,8 @@ CommBlock::CommBlock
   initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz,
 	      xpm,ypm,zpm, xb,yb,zb,    testing);
 
+
+  sync_refresh_.stop() = count_refresh_();
 }
 
 //----------------------------------------------------------------------
@@ -174,10 +173,7 @@ void CommBlock::prepare()
   // Enforce boundary conditions
   //--------------------------------------------------
 
-  bool is_boundary[3][2];
-  bool axm,axp,aym,ayp,azm,azp;
-  determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp);
-  update_boundary_(is_boundary,axm,axp,aym,ayp,azm,azp);
+  update_boundary_();
 
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -404,38 +400,27 @@ void CommBlock::refresh ()
 void CommBlock::determine_boundary_
 (
  bool is_boundary[3][2],
- bool * fxm,
- bool * fxp,
- bool * fym,
- bool * fyp,
- bool * fzm,
- bool * fzp
+ bool * fxm, bool * fxp,
+ bool * fym, bool * fyp,
+ bool * fzm, bool * fzp
  )
 {
   
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  Hierarchy * hierarchy   = simulation->hierarchy();
-
-  double lower_h[3], upper_h[3];
-  hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
-  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
-
   // return is_boundary[] array of faces on domain boundary
 
-  is_on_boundary(lower_h,upper_h,is_boundary);
+  is_on_boundary (is_boundary);
 
   int nx,ny,nz;
   block_->field_block()->size (&nx,&ny,&nz);
 
   // Determine in which directions we need to communicate or update boundary
 
-  if (fxm) *fxm = nx > 1;
-  if (fxp) *fxp = nx > 1;
-  if (fym) *fym = ny > 1;
-  if (fyp) *fyp = ny > 1;
-  if (fzm) *fzm = nz > 1;
-  if (fzp) *fzp = nz > 1;
+  if (fxm) *fxm = (nx > 1);
+  if (fxp) *fxp = (nx > 1);
+  if (fym) *fym = (ny > 1);
+  if (fyp) *fyp = (ny > 1);
+  if (fzm) *fzm = (nz > 1);
+  if (fzp) *fzp = (nz > 1);
 }
 
 #endif
@@ -445,17 +430,13 @@ void CommBlock::determine_boundary_
 
 #ifdef CONFIG_USE_CHARM
 
-void CommBlock::update_boundary_
-(
- bool is_boundary[3][2],
- bool fxm,
- bool fxp,
- bool fym,
- bool fyp,
- bool fzm,
- bool fzp
-)
+void CommBlock::update_boundary_ ()
 {
+
+  bool is_boundary[3][2];
+  bool fxm,fxp,fym,fyp,fzm,fzp;
+
+  determine_boundary_(is_boundary,&fxm,&fxp,&fym,&fyp,&fzm,&fzp);
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -518,6 +499,23 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
   }
 
   //--------------------------------------------------
+  // Compute
+  //--------------------------------------------------
+
+  if (sync_refresh_.done()) {
+    TRACE ("CommBlock::x_refresh() calling prepare()");
+    prepare();
+  }
+}
+#endif /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+int CommBlock::count_refresh_()
+{
+  //--------------------------------------------------
   // Count incoming faces
   // (SHOULD NOT RECOMPUTE EVERY CALL)
   //--------------------------------------------------
@@ -536,16 +534,12 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 
   // Adjust for boundary faces
 
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
   bool periodic = simulation->problem()->boundary()->is_periodic();
 
-  Hierarchy * hierarchy = simulation->hierarchy();
-
-  double lower[3], upper[3];
-  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
-  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
-
   bool is_boundary[3][2];
-  is_on_boundary (lower,upper,is_boundary);
+  is_on_boundary (is_boundary);
 
   fxm = fxm && (periodic || ! is_boundary[axis_x][face_lower]);
   fxp = fxp && (periodic || ! is_boundary[axis_x][face_upper]);
@@ -554,13 +548,13 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
   fzm = fzm && (periodic || ! is_boundary[axis_z][face_lower]);
   fzp = fzp && (periodic || ! is_boundary[axis_z][face_upper]);
 
-  // Count total expected number of incoming faces
-
-  // self
+  // count self
 
   int count = 1;
 
-  // faces
+  // count faces
+
+  FieldDescr * field_descr = simulation->field_descr();
 
   if (field_descr->refresh_face(2)) {
     if ( fxm ) ++count;
@@ -571,7 +565,7 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
     if ( fzp ) ++count;
   }
 
-  // edges
+  // count edges
 
   if (field_descr->refresh_face(1)) {
     if ( fxm && fym ) ++count;
@@ -588,7 +582,7 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
     if ( fzp && fxp ) ++count;
   }
 
-  // corners
+  // count corners
 
   if (field_descr->refresh_face(0)) {
     if ( fxm && fym && fzm ) ++count;
@@ -601,16 +595,9 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
     if ( fxp && fyp && fzp ) ++count;
   }
 
-  //--------------------------------------------------
-  // Compute
-  //--------------------------------------------------
-
-  if (++count_refresh_face_ >= count) {
-    TRACE ("CommBlock::x_refresh() calling prepare()");
-    count_refresh_face_ = 0;
-    prepare();
-  }
+  return count;
 }
+
 #endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
@@ -667,15 +654,14 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   dt_ = comm_block.dt_;
 
 #ifdef CONFIG_USE_CHARM
-  count_refresh_face_ = comm_block.count_refresh_face_;
+  sync_refresh_ = comm_block.sync_refresh_;
 #endif
   
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::is_on_boundary (double lower[3], double upper[3],
-				bool is_boundary[3][2]) throw()
+void CommBlock::is_on_boundary (bool is_boundary[3][2]) throw()
 {
 
   // // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY

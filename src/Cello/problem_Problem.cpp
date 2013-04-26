@@ -385,7 +385,6 @@ void Problem::initialize_method(Config * config) throw()
       method_list_.push_back(method); 
       ++ num_method_;
 
-
     } else {
       ERROR1("Problem::initialize_method",
 	     "Unknown Method %s",name.c_str());
