@@ -4,6 +4,15 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-26
 /// @brief    Charm-related functions associated with initialization
+///
+///    PREPARE
+///        
+///    CommBlock::prepare()
+///       update_boundary_()
+///       compute dt
+///       compute stopping
+///       contribute( >>>>> CommBlock::p_output() >>>>> )
+   
 
 #ifdef CONFIG_USE_CHARM
 

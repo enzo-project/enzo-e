@@ -8,6 +8,87 @@
 /// This file contains member functions for various CHARM++ chares and
 /// classes used for Output in a CHARM++ simulation.  Functions are
 /// listed in roughly the order of flow-of-control.
+///
+///    OUTPUT
+///
+///    CommBlock::p_output()
+///       simulation->update_state(dt,stop)
+///       simulation_charm->p_output()
+///
+///    SimulationCharm::p_output()
+///       if (block_sync_.done())
+///          contribute(SimulationCharm::c_output())
+///
+///    SimulationCharm::c_output()
+///       problem()->output_reset()   
+///       problem()->output_next()   
+///
+///    Problem::output_next()
+///       if (output)
+///          output->init()
+///          output->open()
+///          output->write_simulation()
+///       else
+///          simulation()->monitor_output()
+///
+///    Output::write_simulation() [virtual]
+///       write_simulation_()
+///
+///    Output::write_simulation_()
+///       write_hierarchy()
+///
+///    Output::write_hierarchy() [virtual]
+///       write_hierarchy_()
+///
+///    Output::write_hierarchy_()
+///       if (is_root())
+///          block_array.p_write()
+///
+///    Simulation::monitor_output()
+///       performance_output()
+///       memory.reset_high()
+///       >>>>> c_compute() >>>>>
+///
+///    CommBlock::p_write()
+///       output.write_block(this)
+///       simulation_charm.s_write()
+///
+///    Output::write_block() [virtual]
+///       write_block_()
+///
+///    Output::write_block_()
+///       write_field_block()
+///
+///    Output::write_field_block() [virtual]
+///
+///    Simulation::s_write()
+///       if (block_sync.done())
+///          contribute (SimulationCharm::c_write())
+///
+///    SimulationCharm::c_write()
+///       problem()->output_wait()
+///
+///    Problem::output_wait()
+///       if (ip==writer)
+///          proxy_simulation[ip].p_output_write()
+///       else
+///          output.prepare_remote()
+///          proxy_simulaion[ip_writer].p_output_write()
+///          output.close()
+///          output.cleanup_remote()
+///          output.finalize()
+///          output_next()
+///
+///    SimulationCharm::p_output_write()
+///       problem.output_write()
+///
+///    Problem::output_write()
+///       output().update_remote()
+///       if (output->sync().done())
+///          output.close()
+///          output.finalize()
+///          output_next()
+
 
 #ifdef CONFIG_USE_CHARM
 

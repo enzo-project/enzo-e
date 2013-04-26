@@ -9,6 +9,40 @@
 /// This file contains member functions for various CHARM++ chares and
 /// classes used for calling Initial objects in a CHARM++ simulation.
 /// Functions are listed in roughly the order of flow-of-control.
+///
+///    INITIAL
+///
+///    SimulationCharm::initial()
+///       problem.initial_reset()
+///       problem.initial_next()
+///
+///    Problem::initial_next()
+///       if (initial)
+///          if (blocks_allocated)
+///             if (is_root())
+///                block_array.p_initial()
+///          else
+///             inital.enforce_block(0)
+///       else [ NOT CALLED ]
+///           >>>>> simulation_charm.refresh() >>>>>
+///     
+///    CommBlock::p_initial()
+///       block()->allocate()
+///       set (cycle,time,dt)
+///       initialize()
+///       initial->enforce_block(this)
+///       simulation_charm.s_initial()
+///
+///    SimulationCharm::s_initial()
+///       if (block_sync_.done())
+///          contribute(SimulationCharm::c_initial())
+///
+///    SimulationCharm::c_initial()
+///       delete parameters_
+///       if (is_root()) 
+///          >>>>> block_array->p_adapt(0) >>>>> 
+///             
+///    ----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
 

@@ -4,6 +4,25 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-26
 /// @brief    Charm-related functions associated with initialization
+///
+/// REFRESH
+///
+///    CommBlock::refresh()
+///       determine_boundary()
+///       for face
+///          field_face.set_face()
+///          field_face.set_ghost()
+///          field_face.load(array)
+///          block_array[index].x_refresh(array)
+///       this.x_refresh(0)
+///
+///    CommBlock::x_refresh()
+///       field_face.set_face()
+///       field_face.set_ghost()
+///       field_face.store()
+///       if (sync_refresh.done())
+///            >>>>> prepare() >>>>>
+
 
 #ifdef CONFIG_USE_CHARM
 

@@ -4,6 +4,24 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-26
 /// @brief    Charm-related functions associated with initialization
+///
+///    INITIALIZE
+///
+///    SimulationCharm::p_initialize()
+///       initialize()
+///
+///    EnzoSimulationCharm::initialize()
+///       initialize_config_()
+///       SimulationCharm::initialize()
+///       EnzoBlock::initialize()
+///
+///    SimulationCharm::initialize()
+///       Simulation::initialize()
+///       s_initialize()
+///
+///    SimulationCharm::s_initialize()
+///       if (is_root)  >>>>> initial() >>>>>
+///
 
 #ifdef CONFIG_USE_CHARM
 
