@@ -20,7 +20,32 @@
 
 //----------------------------------------------------------------------
 
-// (Called from BlockReduce::p_prepare())
+void CommBlock::p_output(CkReductionMsg * msg)
+{
+
+  TRACE("CommBlock::p_output()");
+  double * min_reduce = (double * )msg->getData();
+
+  double dt_forest   = min_reduce[0];
+  bool   stop_forest = min_reduce[1] == 1.0 ? true : false;
+  set_dt   (dt_forest);
+  TRACE2("CommBlock::p_output(): dt=%f  stop=%d",dt_forest,stop_forest);
+
+  delete msg;
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  simulation->update_state(cycle_,time_,dt_forest,stop_forest);
+
+  // Wait for all blocks to check in before calling Simulation::p_output()
+  // for next output
+
+  TRACE("CommBlock::p_output() calling SimulationCharm::p_output");
+  SimulationCharm * simulation_charm = proxy_simulation.ckLocalBranch();
+  simulation_charm->p_output();
+}
+
+//----------------------------------------------------------------------
 
 void SimulationCharm::p_output ()
 {
@@ -74,6 +99,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
   }
 }
+
 
 //----------------------------------------------------------------------
 
@@ -189,6 +215,15 @@ void Problem::output_write
 
 }
 
+//----------------------------------------------------------------------
+
+void SimulationCharm::monitor_output()
+{
+  TRACE("Simulation::monitor_output()");
+  Simulation::monitor_output();
+
+  c_compute();
+}
 //======================================================================
 
 #endif /* CONFIG_USE_CHARM */

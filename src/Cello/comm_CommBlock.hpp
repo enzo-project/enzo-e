@@ -88,11 +88,7 @@ public: // interface
 
   /// Refresh ghost zones and apply boundary conditions
   /// CB
-  void p_refresh() 
-  {
-    TRACE("CommBlock::p_refresh");
-    refresh(); 
-  }
+  void p_refresh();
 
   /// Apply the numerical methods on the block
   /// CB

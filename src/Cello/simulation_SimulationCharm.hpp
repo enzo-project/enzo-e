@@ -70,7 +70,7 @@ public: // functions
   }
 
   /// Call initialize()
-  void p_initialize() { initialize(); }
+  void p_initialize();
 
   /// Wait for all local patches to be created before calling run
   void s_initialize();
@@ -109,8 +109,11 @@ public: // functions
   /// Refresh ghost zones
   void refresh();
 
-  // Stopping criteria and computation
+  /// Stopping criteria and computation
   void c_compute ();
+
+  /// Updated Simulation function to call c_compute()
+  void monitor_output();
 
 protected: // attributes
 

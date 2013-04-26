@@ -123,7 +123,7 @@ public: // interface
   { return stop_; };
 
   /// Output Simulation information
-  void monitor_output();
+  virtual void monitor_output();
 
   /// Output Performance information to stdout (root process data only)
   void performance_output();

@@ -39,28 +39,6 @@ SimulationCharm::~SimulationCharm() throw()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::initialize() throw()
-{
-  TRACE("SimulationCharm::initialize()");
-  Simulation::initialize();
-
-  WARNING("SimulationCharm::initialize()",
-	  "Calling StartLB for debugging load balancing()");
-
-  s_initialize();
-}
-
-//----------------------------------------------------------------------
-
-void SimulationCharm::s_initialize()
-{
-  TRACE("SimulationCharm::s_initialize()");
-  //  if (group_process_->is_root()) run();
-  if (group_process_->is_root()) initial();
-}
-
-//----------------------------------------------------------------------
-
 // void SimulationCharm::run() throw()
 // {
 //   TRACE("SimulationCharm::run()");
@@ -68,43 +46,6 @@ void SimulationCharm::s_initialize()
 // }
 
 //----------------------------------------------------------------------
-
-void SimulationCharm::p_refresh()
-{ refresh(); };
-
-//----------------------------------------------------------------------
-
-void SimulationCharm::refresh()
-{
-  TRACE("SimulationCharm::refresh");
-  if (hierarchy()->group_process()->is_root()) 
-    hierarchy()->block_array()->p_refresh(); 
-}
-
-//----------------------------------------------------------------------
-
-void SimulationCharm::c_compute()
-{
-  TRACE("SimulationCharm::c_compute()");
-  if (stop_) {
-    
-    performance_.stop_region (id_cycle_);
-    performance_write();
-
-    proxy_main.p_exit(CkNumPes());
-
-  } else {
-
-    if (cycle_ > 0 ) performance_.stop_region (id_cycle_);
-
-    performance_.start_region (id_cycle_);
-
-    if (hierarchy()->group_process()->is_root()) 
-      hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
-  }
-
-}
-
 //======================================================================
 
 #endif /* CONFIG_USE_CHARM */
