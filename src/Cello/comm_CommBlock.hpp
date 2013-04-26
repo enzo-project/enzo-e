@@ -110,6 +110,10 @@ public: // interface
   /// CB
   void p_output(CkReductionMsg * msg);
 
+  /// Initiate mesh adaptation on given level 
+  /// CB
+  void p_adapt (int level);
+
   //--------------------------------------------------
 
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]

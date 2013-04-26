@@ -87,7 +87,6 @@ public: // functions
 
   /// Call output on Problem list of Output objects
   void p_output ();
-  /// Continue on to p_refresh()
   void c_output ();
 
   /// Reduce output, using p_output_write to send data to writing processes
@@ -101,10 +100,6 @@ public: // functions
 
   // /// Wait for all local patches to check in before proceeding
   // void s_patch(CkCallback function);
-
-
-  /// Refresh ghost zones (Charm++ entry)
-  void p_refresh();
 
   /// Refresh ghost zones
   void refresh();

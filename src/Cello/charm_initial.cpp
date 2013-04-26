@@ -63,6 +63,9 @@ void Problem::initial_next(Simulation * simulation) throw()
 
   } else {
 
+    ERROR("Problem::initial_next()",
+	  "Multiple Initial objects not yet implemented");
+
     SimulationCharm * simulation_charm  = 
       dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
 
@@ -125,15 +128,18 @@ void SimulationCharm::c_initial()
   TRACE("SimulationCharm::c_initial()");
   delete parameters_;
   parameters_ = 0;
-  p_refresh();
+  if (hierarchy()->group_process()->is_root()) 
+    hierarchy()->block_array()->p_adapt(0); 
 }
 
-//======================================================================
+//----------------------------------------------------------------------
 
 void CommBlock::p_read (int index_initial)
 {
   INCOMPLETE("CommBlock::p_read");
 }
+
+//======================================================================
 
 #endif /* CONFIG_USE_CHARM */
 

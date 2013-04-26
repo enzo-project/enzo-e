@@ -54,6 +54,8 @@ module mesh {
 
     entry void p_output(CkReductionMsg * msg);
 
+    entry void p_adapt (int level);
+
   };
 }
 

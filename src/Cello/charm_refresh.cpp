@@ -16,16 +16,14 @@
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_refresh()
-{ refresh(); };
+// void SimulationCharm::p_refresh()
+// { refresh(); };
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::refresh()
 {
   TRACE("SimulationCharm::refresh");
-  if (hierarchy()->group_process()->is_root()) 
-    hierarchy()->block_array()->p_refresh(); 
 }
 
 //----------------------------------------------------------------------

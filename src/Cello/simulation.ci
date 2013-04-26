@@ -41,7 +41,6 @@ module simulation {
     entry void c_write ();
 
     entry void p_output_write (int n, char buffer[n]);
-    entry void p_refresh ();
 
   };
 }
