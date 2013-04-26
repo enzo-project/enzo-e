@@ -39,8 +39,10 @@ CommBlock::CommBlock
   initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz,
 	      xpm,ypm,zpm, xb,yb,zb,    testing);
 
-
+#ifdef CONFIG_USE_CHARM
   sync_refresh_.stop() = count_refresh_();
+#endif /* CONFIG_USE_CHARM */
+
 }
 
 //----------------------------------------------------------------------
@@ -248,17 +250,6 @@ void CommBlock::p_output(CkReductionMsg * msg)
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   simulation->update_state(cycle_,time_,dt_forest,stop_forest);
-
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
-  // Simulation::p_output()?  Want last block?
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  
-
-  // "root" block calls Simulation::p_output()
-  //  if (index() == 0) {
-  //    proxy_simulation.p_output();
-  //  }
 
   // Wait for all blocks to check in before calling Simulation::p_output()
   // for next output

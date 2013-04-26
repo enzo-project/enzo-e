@@ -110,8 +110,8 @@ void CommBlock::p_initial()
 void SimulationCharm::s_initial()
 {
   TRACE("ENTER SimulationCharm::s_initial()");
-  TRACE2 ("block_loop: %d/%d",block_loop_.index(),block_loop_.stop());
-  if (block_loop_.done()) {
+  TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
+  if (block_sync_.done()) {
     TRACE ("CONTINUE SimulationCharm::s_initial()");
     CkCallback callback (CkIndex_SimulationCharm::c_initial(), thisProxy);
     contribute(0,0,CkReduction::concat,callback);

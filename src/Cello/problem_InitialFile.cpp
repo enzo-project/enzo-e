@@ -20,7 +20,7 @@ InitialFile::InitialFile
     group_process_((GroupProcess * )group_process),
     input_(0)
 #ifdef CONFIG_USE_CHARM
-  , block_loop_(0)
+  , block_sync_(0)
 #endif
 {
 #ifdef CONFIG_USE_CHARM
@@ -53,7 +53,7 @@ void InitialFile::pup (PUP::er &p)
 
   p | input_; // PUP::able
 
-  p | block_loop_;
+  p | block_sync_;
 
 }
 
@@ -92,7 +92,7 @@ void InitialFile::enforce_block
   File * file = input_->file();
   int num_blocks = file->group_count();
 #ifdef CONFIG_USE_CHARM
-  block_loop_.stop() = num_blocks;
+  block_sync_.stop() = num_blocks;
 #endif
 
   for (int i = 0; i<num_blocks; i++) {

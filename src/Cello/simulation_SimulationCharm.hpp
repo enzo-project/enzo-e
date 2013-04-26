@@ -42,7 +42,7 @@ public: // functions
     TRACEPUP;
     // NOTE: change this function whenever attributes change
     Simulation::pup(p);
-    p | block_loop_;
+    p | block_sync_;
   }
 
   /// Initialize the Charm++ Simulation
@@ -56,8 +56,8 @@ public: // functions
   {
     WARNING("SimulationCharm::insert_block()",
 	    "Migrating CommBlocks will disturb local counts");
-    ++block_loop_;
-    TRACE2 ("++local count %d = %d",group_process_->rank(),block_loop_.stop());
+    ++block_sync_;
+    TRACE2 ("++local count %d = %d",group_process_->rank(),block_sync_.stop());
   }
 
   /// Remove a CommBlock from this local branch
@@ -65,8 +65,8 @@ public: // functions
   {
     WARNING("SimulationCharm::delete_block()",
 	    "Migrating CommBlocks will disturb local counts");
-    --block_loop_; 
-    TRACE2 ("--local count %d = %d",group_process_->rank(),block_loop_.stop());
+    --block_sync_; 
+    TRACE2 ("--local count %d = %d",group_process_->rank(),block_sync_.stop());
   }
 
   /// Call initialize()
@@ -114,7 +114,7 @@ public: // functions
 
 protected: // attributes
 
-  Loop block_loop_;
+  Sync block_sync_;
 
 };
 

@@ -260,7 +260,7 @@ protected: // attributes
   /// Counter when refreshing faces
   /// CB: use Sync
 
-  Loop sync_refresh_;
+  Sync sync_refresh_;
 
 #endif
 

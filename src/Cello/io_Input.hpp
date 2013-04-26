@@ -73,14 +73,14 @@ public: // functions
   {
     process_stride_ = stride; 
 #ifdef CONFIG_USE_CHARM
-    loop_.stop() = process_stride_;
+    sync_.stop() = process_stride_;
 #endif
   };
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Accessor function for the CHARM Loop class
-  Loop * loop() { return & loop_; };
+  /// Accessor function for the CHARM Sync class
+  Sync * sync() { return & sync_; };
 
   /// Set the index of this input in its simulation
   void set_index_charm(int index_charm) { index_charm_ = index_charm; }
@@ -168,8 +168,8 @@ protected: // attributes
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Loop for ending input
-  Loop loop_;
+  /// Sync for ending input
+  Sync sync_;
 
   /// Index of this Input object in Simulation
   size_t index_charm_;

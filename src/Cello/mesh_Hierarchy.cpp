@@ -71,7 +71,7 @@ void Hierarchy::pup (PUP::er &p)
   if (p.isUnpacking()) block_array_ = new CProxy_CommBlock;
   p | *block_array_;
   p | block_exists_;
-  p | block_loop_;
+  p | block_sync_;
   PUParray(p,root_size_,3);
   PUParray(p,lower_,3);
   PUParray(p,upper_,3);
@@ -314,8 +314,7 @@ void Hierarchy::allocate_array_
      testing);
     
   block_exists_ = allocate_blocks;
-  block_loop_.stop() = nbx*nby*nbz;
-
+  block_sync_.stop() = nbx*nby*nbz;
 
 #else /* CONFIG_USE_CHARM */
 

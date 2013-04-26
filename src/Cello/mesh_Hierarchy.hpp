@@ -164,7 +164,7 @@ protected: // attributes
 # ifdef CONFIG_USE_CHARM
   CProxy_CommBlock * block_array_;
   bool               block_exists_;
-  Loop               block_loop_;
+  Sync               block_sync_;
 # else
   std::vector<CommBlock * > block_;
 # endif

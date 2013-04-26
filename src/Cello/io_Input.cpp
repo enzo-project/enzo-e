@@ -15,7 +15,7 @@ Input::Input (const Factory * factory) throw()
   : file_(0),           // Initialization deferred
     process_(0),        // initialization below
 #ifdef CONFIG_USE_CHARM
-    loop_(0),
+    sync_(0),
 #endif
     cycle_(0),
     time_(0),
@@ -62,7 +62,7 @@ void Input::pup (PUP::er &p)
   WARNING("Input::pup","skipping file_");
   //    p | *file_;
   p | process_;
-  p | loop_;
+  p | sync_;
   p | index_charm_;
   p | cycle_;
   p | time_;
