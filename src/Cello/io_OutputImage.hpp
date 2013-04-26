@@ -70,8 +70,7 @@ public: // virtual functions
   /// Write block-related field data
   virtual void write_block
   ( const CommBlock * block,
-    const FieldDescr * field_descr,
-    int ixp0=0, int iyp0=0, int izp0=0) throw();
+    const FieldDescr * field_descr) throw();
 
   /// Write fields
   virtual void write_field_block

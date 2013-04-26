@@ -188,8 +188,8 @@ void InitialDefault::allocate_xyzt_
 
   double xm, xp, ym, yp, zm, zp;
 
-  comm_block->lower(&xm,&ym,&zm);
-  comm_block->upper(&xp,&yp,&zp);
+  comm_block->block()->lower(&xm,&ym,&zm);
+  comm_block->block()->upper(&xp,&yp,&zp);
 
   double hx,hy,hz;
   field_block->cell_width(xm,xp,&hx,
@@ -412,10 +412,10 @@ void InitialDefault::create_png_mask_
   // Get the block's lower and upper extents
 
   double lower_b[3];
-  comm_block->lower(&lower_b[0],&lower_b[1],&lower_b[2]);
+  comm_block->block()->lower(&lower_b[0],&lower_b[1],&lower_b[2]);
 
   double upper_b[3];
-  comm_block->upper(&upper_b[0],&upper_b[1],&upper_b[2]);
+  comm_block->block()->upper(&upper_b[0],&upper_b[1],&upper_b[2]);
 
   // get the offset between the block and the hierarchy
 

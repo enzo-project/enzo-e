@@ -238,8 +238,7 @@ void Output::write_hierarchy_
 
   ItBlock it_block (hierarchy);
   while (const CommBlock * block = ++it_block) {
-    // NO OFFSET: ASSUMES ROOT PATCH
-    write_block (block, field_descr, 0,0,0);
+    write_block (block, field_descr);
   }
 
 #endif /* CONFIG_USE_CHARM */
@@ -251,8 +250,7 @@ void Output::write_hierarchy_
 void Output::write_block_
 (
  const CommBlock * comm_block,
- const FieldDescr * field_descr,
- int ixp0, int iyp0, int izp0
+ const FieldDescr * field_descr
  ) throw()
 {
     TRACE("Output::write_block_()");

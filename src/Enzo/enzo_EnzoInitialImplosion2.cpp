@@ -70,10 +70,10 @@ void EnzoInitialImplosion2::enforce_block
 
   // Cell widths
   double xm,ym;
-  comm_block->lower(&xm,&ym);
+  comm_block->block()->lower(&xm,&ym);
 
   double xp,yp;
-  comm_block->upper(&xp,&yp);
+  comm_block->block()->upper(&xp,&yp);
 
   double hx,hy;
   field_block->cell_width(xm,xp,&hx,ym,yp,&hy);

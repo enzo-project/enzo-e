@@ -111,11 +111,6 @@ CommBlock * InputData::read_block
   file_->group_chdir(block_name);
   file_->group_open();
 
-  // Create temporary block
-
-  ERROR("InputData::read_block",
-	"Need to pass in Patch proxy to create_block");
-
   // Read block meta data
 
   io_block()->set_block(block);

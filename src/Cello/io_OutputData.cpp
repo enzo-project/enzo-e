@@ -101,8 +101,7 @@ void OutputData::write_hierarchy
 void OutputData::write_block
 ( 
   const CommBlock * block,
-  const FieldDescr * field_descr,
-  int ixp0, int iyp0, int izp0) throw()
+  const FieldDescr * field_descr) throw()
 {
 
   // Create file group for block
@@ -121,7 +120,7 @@ void OutputData::write_block
 
   // Call write(block) on base Output object
 
-  write_block_(block,field_descr,ixp0,iyp0,izp0);
+  write_block_(block,field_descr);
 
   file_->group_close();
 
