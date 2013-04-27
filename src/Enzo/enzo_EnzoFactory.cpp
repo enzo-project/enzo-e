@@ -46,6 +46,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
  bool testing
  ) const throw()
 {
+  TRACE ("EnzoFactor::create_block_array");
   CProxy_EnzoBlock enzo_block_array;
 
   if (allocate) {
@@ -57,6 +58,8 @@ CProxy_CommBlock EnzoFactory::create_block_array
 
     //    enzo_block_array = CProxy_EnzoBlock::ckNew();
 
+    int level;
+
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
 	for (int iz=0; iz<nbz; iz++) {
@@ -65,10 +68,12 @@ CProxy_CommBlock EnzoFactory::create_block_array
 	  index.set_array(ix,iy,iz);
 	  index.set_level(0);
 
+	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 	  enzo_block_array[index].insert 
 	    (ix,iy,iz,
 	     nbx,nby,nbz,
 	     nx,ny,nz,
+	     level=0,
 	     xm,ym,zm, 
 	     hx,hy,hz, 
 	     num_field_blocks);
@@ -77,6 +82,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
       }
     }
 
+    TRACE ("done inserting");
     enzo_block_array.doneInserting();
 
   } else {
@@ -103,10 +109,12 @@ CommBlock * EnzoFactory::create_block
  bool testing
  ) const throw()
 {
+  int level;
 #ifdef CONFIG_USE_CHARM
     CProxy_CommBlock block_array = CProxy_EnzoBlock::ckNew
     (nbx,nby,nbz,
      nx,ny,nz,
+     level=0,
      xm,ym,zm, 
      xb,yb,zb, 
      num_field_blocks,
@@ -122,6 +130,7 @@ CommBlock * EnzoFactory::create_block
      ibx,iby,ibz, 
      nbx,nby,nbz,
      nx,ny,nz,
+     level=0,
      xm,ym,zm, 
      hx,hy,hz, 
      num_field_blocks);

@@ -29,19 +29,13 @@ module mesh {
       (int ibx, int iby, int ibz,
        int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
+       int level,
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
        int num_field_blocks,
        bool testing);
 
-   entry CommBlock();	
-
-//    entry CommBlock
-//      (int nbx, int nby, int nbz,
-//       int nx, int ny, int nz,	
-//       double xpm, double ypm, double zpm,
-//       double xb, double yb, double zb,
-//       int num_field_blocks);
+    entry CommBlock();	
 
     entry void p_initial();
     entry void p_refresh();
@@ -55,6 +49,8 @@ module mesh {
     entry void p_output(CkReductionMsg * msg);
 
     entry void p_adapt (int level);
+    entry void p_refine();
+    entry void p_coarsen();
 
   };
 }

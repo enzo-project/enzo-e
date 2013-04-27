@@ -19,6 +19,7 @@ CommBlock::CommBlock
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
+ int level,
  double xpm, double ypm, double zpm, // Domain begin
  double xb, double yb, double zb,    // CommBlock width
  int num_field_blocks,
@@ -27,7 +28,8 @@ CommBlock::CommBlock
   :
     cycle_(0),
     time_(0),
-    dt_(0)
+    dt_(0),
+    level_(level)
 { 
   TRACE("CommBlock::CommBlock");
 
@@ -57,6 +59,7 @@ void CommBlock::initialize_
  bool testing
  )
  {
+   level_ = 0;
    size_[0] = nbx;
    size_[1] = nby;
    size_[2] = nbz;
@@ -260,8 +263,9 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   }
 
   cycle_ = comm_block.cycle_;
-  time_ = comm_block.time_;
-  dt_ = comm_block.dt_;
+  time_  = comm_block.time_;
+  dt_    = comm_block.dt_;
+  level_ = comm_block.level_;
 
 #ifdef CONFIG_USE_CHARM
   sync_refresh_ = comm_block.sync_refresh_;

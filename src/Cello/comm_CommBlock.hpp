@@ -36,6 +36,7 @@ public: // interface
    int ibx, int iby, int ibz,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
+   int level,
    double xmp, double ymp, double zmp,
    double xb, double yb, double zb,
    int num_field_blocks,
@@ -61,6 +62,7 @@ public: // interface
   p | cycle_;
   p | time_;
   p | dt_;
+  p | level_;
 
 }
 
@@ -113,6 +115,9 @@ public: // interface
   /// Initiate mesh adaptation on given level 
   /// CB
   void p_adapt (int level);
+  void adapt(int level);
+  void p_refine();
+  void p_coarsen();
 
   //--------------------------------------------------
 
@@ -285,6 +290,9 @@ protected: // attributes
   /// Current timestep
   /// B
   double dt_;
+
+  /// Mesh refinement level
+  int level_;
 
   /// Whether face is on the domain boundary
 };

@@ -163,6 +163,7 @@ public: // interface
    int ix, int iy, int iz,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
+   int level,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
    int num_field_blocks) throw();

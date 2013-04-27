@@ -71,16 +71,10 @@ PARALLEL_MAIN_BEGIN
 
   int nx,ny,nz;
   nx=4; ny=5; nz=6;
-  int ix,iy,iz;
-  ix=0; iy=0; iz=0;
   double xpm,ypm,zpm;
   xpm = -1.0;  ypm = -2.0, zpm = -3.0;
   double xpp,ypp,zpp;
   xpp =  1.0;  ypp =  2.0, zpp =  3.0;
-  double xb,yb,zb;
-  xb = (xpp-xpm);
-  yb = (ypp-ypm);
-  zb = (zpp-zpm);
 
   // Factory factory;
   // Block * block = factory.create_block
@@ -121,7 +115,7 @@ PARALLEL_MAIN_BEGIN
 
   field_block->allocate_array(field_descr, false);
 
-  int array_size_without_ghosts = field_block->array_size();
+  size_t array_size_without_ghosts = field_block->array_size();
 
   unit_assert(field_block->array() != 0);
   unit_assert(field_block->array_allocated());

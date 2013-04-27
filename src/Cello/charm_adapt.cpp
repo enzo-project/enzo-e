@@ -23,10 +23,10 @@
 ///       else
 ///          >>>>> refresh() >>>>>
 ///
-///    CommBlock::p_refine(level)
-///       parent.p_set_child_depth(level+1)
+///    CommBlock::p_refine()
+///       parent.p_set_child_depth(my_level+1)
 ///       for neighbor
-///          neighbor.p_set_neighbor_depth(index, level+1)
+///          neighbor.p_set_neighbor_depth(index, my_level+1)
 ///          neighbor.p_balance(index)
 ///       for child
 ///          create child
@@ -60,7 +60,7 @@
 
 void CommBlock::p_adapt(int level)
 {
-  TRACE("p_adapt()");
+  TRACE("ADAPT p_adapt()");
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
 
   if (simulation_charm->config()->mesh_max_level == 0) {
@@ -75,6 +75,28 @@ void CommBlock::p_adapt(int level)
 
   }
   
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::adapt(int level)
+{
+  if (level == level_)
+  TRACE1("ADAPT CommBlock::adapt(%d)",level);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_refine()
+{
+  TRACE("ADAPT CommBlock::p_refine()");
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_coarsen()
+{
+  TRACE("ADAPT CommBlock::p_coarsen()");
 }
 //======================================================================
 

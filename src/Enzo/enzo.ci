@@ -73,16 +73,11 @@ module enzo {
       (int ibx, int iby, int ibz,
        int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
+       int level,
        double xpm, double ypm, double zpm,
        double xb, double yb, double zb,
        int num_field_blocks);
 
-//    entry EnzoBlock
-//      (int nbx, int nby, int nbz,
-//       int nx, int ny, int nz,	
-//       double xpm, double ypm, double zpm,
-//       double xb, double yb, double zb,
-//       int num_field_blocks);
   };
 
 };

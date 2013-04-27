@@ -26,10 +26,7 @@
 ///           method->compute_block()
 ///       set_state(cycle+1, time + dt)
 ///
-///       if (adapt)
-///          >>>>> adapt(0) >>>>>
-///       else
-///          >>>>> refresh() >>>>> 
+//        >>>>> p_adapt(0) >>>>>
 
 #ifdef CONFIG_USE_CHARM
 

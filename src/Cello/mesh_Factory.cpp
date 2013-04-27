@@ -63,12 +63,15 @@ CProxy_CommBlock Factory::create_block_array
 
   CProxy_CommBlock proxy_block;
 
+  TRACE("Factory::create_block_array");
   if (allocate) {
 
     CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
     CkArrayOptions opts;
     opts.setMap(array_map);
     proxy_block = CProxy_CommBlock::ckNew(opts);
+
+    int level;
 
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
@@ -77,11 +80,12 @@ CProxy_CommBlock Factory::create_block_array
 	  Index index(ix,iy,iz);
 	  index.set_level(0);
 	  index.clear();
-
+	  TRACE3("Inserting %d %d %d",ix,iy,iz);
 	  proxy_block[index].insert 
 	    (ix,iy,iz,
 	     nbx,nby,nbz,
 	     nx,ny,nz,
+	     level = 0,
 	     xm,ym,zm, 
 	     xb,yb,zb, 
 	     num_field_blocks,
@@ -99,7 +103,7 @@ CProxy_CommBlock Factory::create_block_array
 
   }
 
-  TRACE1("Factor::create_block_array = %p",&proxy_block);
+  TRACE1("Factory::create_block_array = %p",&proxy_block);
   return proxy_block;
 }
 
@@ -124,10 +128,13 @@ CommBlock * Factory::create_block
   index.set_level(0);
   index.clear();
 
+  int level;
+
   proxy_block[index].insert
     (0,0,0,
      nbx,nby,nbz,
      nx,ny,nz,
+     level=0,
      xm,ym,zm, 
      xb,yb,zb, 
      num_field_blocks,
@@ -146,6 +153,7 @@ CommBlock * Factory::create_block
     (ibx,iby,ibz, 
      nbx,nby,nbz,
      nx,ny,nz,
+     level=0,
      xm,ym,zm, 
      xb,yb,zb, 
      num_field_blocks,
