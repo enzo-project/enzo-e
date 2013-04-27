@@ -149,6 +149,8 @@ CommBlock * Factory::create_block
 
 #else /* CONFIG_USE_CHARM */
 
+  int level;
+
   return new CommBlock 
     (ibx,iby,ibz, 
      nbx,nby,nbz,
