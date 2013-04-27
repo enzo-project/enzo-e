@@ -60,7 +60,7 @@ CProxy_CommBlock Factory::create_block_array
  bool testing
  ) const throw()
 {
-
+  TRACE("Factor::create_block_array()");
   CProxy_CommBlock proxy_block;
 
   TRACE("Factory::create_block_array");
