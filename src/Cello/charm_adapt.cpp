@@ -13,13 +13,13 @@
 ///       else
 ///          refresh()
 ///
-///    CommBlock::adapt(level)
+///    CommBlock::adapt(level,max_level)
 ///       if (level == my_level && is_leaf())
 ///          adapt = determine_refinement()
 ///          if (adapt == adapt_refine)  p_refine()
 ///          if (adapt == adapt_coarsen) p_coarsen()
 ///       if (level < max_level)
-///          StartQD( p_adapt(level + 1) )
+///          StartQD( p_adapt(level + 1, max_level) )
 ///       else
 ///          >>>>> refresh() >>>>>
 ///
@@ -71,18 +71,21 @@ void CommBlock::p_adapt(int level)
 
     INCOMPLETE("CommBlock::p_adapt(): Adaptation not implemented, calling refresh()");
 
-    refresh();
+    adapt(level);
+
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(),thisProxy[thisIndex]));
 
   }
-  
+
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::adapt(int level)
 {
-  if (level == level_)
   TRACE1("ADAPT CommBlock::adapt(%d)",level);
+  if (level == level_) {
+  }
 }
 
 //----------------------------------------------------------------------
@@ -94,10 +97,36 @@ void CommBlock::p_refine()
 
 //----------------------------------------------------------------------
 
+void CommBlock::q_adapt()
+{
+  TRACE("ADAPT CommBlock::q_adapt()");
+  refresh();
+}
+
+//----------------------------------------------------------------------
+
 void CommBlock::p_coarsen()
 {
   TRACE("ADAPT CommBlock::p_coarsen()");
 }
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_balance()
+{
+  TRACE("ADAPT CommBlock::p_balance()");
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::determine_balance()
+{
+  TRACE("ADAPT CommBlock::determine_balance()");
+}
+
+//----------------------------------------------------------------------
+
+
 //======================================================================
 
 #endif /* CONFIG_USE_CHARM */

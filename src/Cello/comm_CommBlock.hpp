@@ -115,9 +115,12 @@ public: // interface
   /// Initiate mesh adaptation on given level 
   /// CB
   void p_adapt (int level);
+  void q_adapt ();
   void adapt(int level);
   void p_refine();
   void p_coarsen();
+  void p_balance();
+  void determine_balance();
 
   //--------------------------------------------------
 

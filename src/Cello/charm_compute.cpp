@@ -105,6 +105,7 @@ void CommBlock::compute()
   // prepare for next cycle: Timestep, Stopping, Monitor, Output
 
   TRACE ("CommBlock::compute() calling p_adapt()");
+  
   p_adapt(0);
 
 }
