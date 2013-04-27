@@ -120,7 +120,7 @@ public: // interface
   void p_refine();
   void p_coarsen();
   void p_balance();
-  void determine_balance();
+  int determine_refine();
 
   //--------------------------------------------------
 

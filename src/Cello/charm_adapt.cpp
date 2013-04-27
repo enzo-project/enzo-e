@@ -85,6 +85,20 @@ void CommBlock::adapt(int level)
 {
   TRACE1("ADAPT CommBlock::adapt(%d)",level);
   if (level == level_) {
+    int adapt = determine_refine();
+  }
+}
+
+//----------------------------------------------------------------------
+
+int CommBlock::determine_refine()
+{
+  TRACE("ADAPT CommBlock::determine_refine()");
+  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
+  Refine * refine;
+  int i=0;
+  while (refine = simulation_charm->problem()->refine(i++)) {
+    TRACE1("ADAPT refine = %p",refine);
   }
 }
 
@@ -115,13 +129,6 @@ void CommBlock::p_coarsen()
 void CommBlock::p_balance()
 {
   TRACE("ADAPT CommBlock::p_balance()");
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::determine_balance()
-{
-  TRACE("ADAPT CommBlock::determine_balance()");
 }
 
 //----------------------------------------------------------------------

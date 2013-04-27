@@ -73,26 +73,26 @@ public: // interface
   Initial *  initial(int i = -1) const throw()
   {
     if (i == -1) i = index_initial_;
-    return (i < (int)initial_list_.size()) ? initial_list_[i] : NULL; 
+    return (0 <= i && i < (int)initial_list_.size()) ? initial_list_[i] : NULL; 
   }
 
   /// Return the ith refine object
   Refine *  refine(int i = -1) const throw()
   {
     if (i == -1) i = index_refine_;
-    return (i < (int)refine_list_.size()) ? refine_list_[i] : NULL; 
+    return (0 <= i && i < (int)refine_list_.size()) ? refine_list_[i] : NULL; 
   }
 
   /// Return the ith output object
   Output * output(int i = -1) const throw()
   { 
     if (i == -1) i = index_output_;
-    return (i < (int)output_list_.size()) ? output_list_[i] : NULL; 
+    return (0 <= i && i < (int)output_list_.size()) ? output_list_[i] : NULL; 
   }
 
   /// Return the ith method object
   Method * method(size_t i) const throw() 
-  { return (i < method_list_.size()) ? method_list_[i] : NULL; }
+  { return (0 <= i && i < method_list_.size()) ? method_list_[i] : NULL; }
 
 
 #ifdef CONFIG_USE_CHARM
@@ -103,13 +103,6 @@ public: // interface
 
   /// Process the next initial object if any, else proceed with simulation
   void initial_next(Simulation * simulation) throw();
-
-  /// reset refine index to 0 (not needed, but mirrors refine_output() )
-  void refine_reset() throw()
-  { index_refine_ = -1; }
-
-  /// Process the next refine object if any, else proceed with simulation
-  void refine_next(Simulation * simulation) throw();
 
   /// reset output index to 0
   void output_reset() throw()
