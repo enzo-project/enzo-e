@@ -46,7 +46,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
  bool testing
  ) const throw()
 {
-  TRACE ("EnzoFactor::create_block_array");
+  TRACE ("EnzoFactory::create_block_array");
   CProxy_EnzoBlock enzo_block_array;
 
   if (allocate) {

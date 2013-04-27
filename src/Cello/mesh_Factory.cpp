@@ -60,7 +60,7 @@ CProxy_CommBlock Factory::create_block_array
  bool testing
  ) const throw()
 {
-
+  TRACE("Factor::create_block_array()");
   CProxy_CommBlock proxy_block;
 
   TRACE("Factory::create_block_array");
@@ -148,6 +148,8 @@ CommBlock * Factory::create_block
   return block;
 
 #else /* CONFIG_USE_CHARM */
+
+  int level;
 
   return new CommBlock 
     (ibx,iby,ibz, 
