@@ -29,7 +29,8 @@ CommBlock::CommBlock
     cycle_(0),
     time_(0),
     dt_(0),
-    level_(level)
+    level_(level),
+    level_active_(-1)
 { 
   TRACE("CommBlock::CommBlock");
 
@@ -266,6 +267,7 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   time_  = comm_block.time_;
   dt_    = comm_block.dt_;
   level_ = comm_block.level_;
+  level_active_ = comm_block.level_active_;
 
 #ifdef CONFIG_USE_CHARM
   sync_refresh_ = comm_block.sync_refresh_;

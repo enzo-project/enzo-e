@@ -13,13 +13,13 @@
 ///       else
 ///          refresh()
 ///
-///    CommBlock::adapt(level,max_level)
+///    CommBlock::adapt(level)
 ///       if (level == my_level && is_leaf())
 ///          adapt = determine_refinement()
 ///          if (adapt == adapt_refine)  p_refine()
 ///          if (adapt == adapt_coarsen) p_coarsen()
 ///       if (level < max_level)
-///          StartQD( p_adapt(level + 1, max_level) )
+///          StartQD( p_adapt(level + 1) )
 ///       else
 ///          >>>>> refresh() >>>>>
 ///
@@ -60,33 +60,41 @@
 
 void CommBlock::p_adapt(int level)
 {
-  TRACE("ADAPT p_adapt()");
+  TRACE1("ADAPT p_adapt(%d)",level);
+  level_active_ = level;
+  adapt (); 
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::adapt()
+{
+  TRACE1("ADAPT adapt(%d)",level_active_);
+
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
 
-  if (simulation_charm->config()->mesh_max_level == 0) {
+  int max_level = simulation_charm->config()->mesh_max_level;
+
+  if (max_level == 0) {
 
     refresh();
 
   } else {
 
-    INCOMPLETE("CommBlock::p_adapt(): Adaptation not implemented, calling refresh()");
+    TRACE1("ADAPT CommBlock::adapt(%d)",level_active_);
+    if (level_active_ == level_) {
+      int adapt = determine_refine();
+    }
 
-    adapt(level);
-
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(),thisProxy[thisIndex]));
+    int max_level = simulation_charm->config()->mesh_max_level;
+    if (level_active_ < max_level) {
+      CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(),thisProxy[thisIndex]));
+    } else {
+      refresh();
+    }
 
   }
 
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::adapt(int level)
-{
-  TRACE1("ADAPT CommBlock::adapt(%d)",level);
-  if (level == level_) {
-    int adapt = determine_refine();
-  }
 }
 
 //----------------------------------------------------------------------
@@ -94,11 +102,22 @@ void CommBlock::adapt(int level)
 int CommBlock::determine_refine()
 {
   TRACE("ADAPT CommBlock::determine_refine()");
+
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
-  Refine * refine;
+
+  FieldBlock * field_block = block()->field_block();
+  FieldDescr * field_descr = simulation_charm->field_descr();
+
   int i=0;
+  int result = adapt_same;
+
+  Refine * refine;
   while (refine = simulation_charm->problem()->refine(i++)) {
-    TRACE1("ADAPT refine = %p",refine);
+    result = refine->apply(field_block, field_descr);
+    TRACE2("ADAPT refine %s %s",
+	   refine->name().c_str(),
+	   (result==adapt_refine) ? "refine" :
+	   ((result==adapt_coarsen) ? "coarsen" : "same"));
   }
 }
 
@@ -113,8 +132,10 @@ void CommBlock::p_refine()
 
 void CommBlock::q_adapt()
 {
-  TRACE("ADAPT CommBlock::q_adapt()");
-  refresh();
+  
+  TRACE1("ADAPT q_adapt(%d)",level_active_);
+  ++level_active_;
+  adapt();
 }
 
 //----------------------------------------------------------------------

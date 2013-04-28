@@ -9,10 +9,13 @@
 
 //----------------------------------------------------------------------
 
-RefineSlope::RefineSlope(double slope_min) throw ()
-  : slope_min_(slope_min)
+RefineSlope::RefineSlope(double slope_min_refine,
+			 double slope_max_coarsen) throw ()
+  : slope_min_refine_ (slope_min_refine),
+    slope_max_coarsen_(slope_max_coarsen)
 {
-  TRACE("RefineSlope::RefineSlope");
+  TRACE2("RefineSlope::RefineSlope (%f %f)",
+	 slope_min_refine_,slope_max_coarsen_);
 }
 
 //----------------------------------------------------------------------
@@ -29,10 +32,10 @@ int RefineSlope::apply
   int gx,gy,gz;
   field_descr->ghosts(0, &gx,&gy,&gz);
 
-  ASSERT4("RefineSlope::apply",
-	  "Ghost zone depths for field %d (%d,%d,%d) must be at least 1",
-	  0,gx,gy,gz,
-	  gx>0 && gy>0 && gz>0);
+  // ASSERT4("RefineSlope::apply",
+  // 	  "Ghost zone depths for field %d (%d,%d,%d) must be at least 1",
+  // 	  0,gx,gy,gz,
+  // 	  gx>0 && gy>0 && gz>0);
 
   precision_type precision = field_descr->precision(0);
 
@@ -40,24 +43,28 @@ int RefineSlope::apply
 
   //  int num_fields = field_descr->field_count();
 
-  int count_flagged = 0;
+  bool all_coarsen = true;
+  bool any_refine = false;
 
   const int d3[3] = {1,nx,nx*ny};
 
+  // count number of times slope refine and coarsen conditions are satisified
   switch (precision) {
   case precision_single:
     {
-      float * array_float = (float*)void_array;
-      float slope_float;
+      // TODO: use template
+      float * array = (float*)void_array;
+      float slope;
       for (int axis=0; axis<3; axis++) {
 	int d = d3[axis];
 	for (int ix=0; ix<nx; ix++) {
 	  for (int iy=0; iy<ny; iy++) {
 	    for (int iz=0; iz<nz; iz++) {
 	      int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
-	      slope_float = (array_float[i]) ? 
-		(array_float[i+d] - array_float[i-d]) / array_float[i] : 0.0;
-	      if (slope_float > slope_min_) ++count_flagged;
+	      slope = (array[i]) ? 
+		(array[i+d] - array[i-d]) / array[i] : 0.0;
+	      if (slope > slope_min_refine_)  any_refine  = true;
+	      if (slope > slope_max_coarsen_) all_coarsen = false;
 	    }
 	  }
 	}
@@ -66,8 +73,9 @@ int RefineSlope::apply
     break;
   case precision_double:
     {
-      double * array_double = (double*)void_array;
-      double slope_double;
+      // TODO: use template
+      double * array = (double*)void_array;
+      double slope;
 
       for (int axis=0; axis<3; axis++) {
 	int d = d3[axis];
@@ -75,9 +83,10 @@ int RefineSlope::apply
 	  for (int iy=0; iy<ny; iy++) {
 	    for (int iz=0; iz<nz; iz++) {
 	      int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
-	      slope_double = (array_double[i]) ? 
-		(array_double[i+d] - array_double[i-d]) / array_double[i] : 0.0;
-	      if (slope_double > slope_min_) ++count_flagged;
+	      slope = (array[i]) ? 
+		(array[i+d] - array[i-d]) / array[i] : 0.0;
+	      if (slope > slope_min_refine_)  any_refine  = true;
+	      if (slope > slope_max_coarsen_) all_coarsen = false;
 	    }
 	  }
 	}
@@ -91,7 +100,8 @@ int RefineSlope::apply
     break;
   }
 
-  return count_flagged;
+  return 
+    any_refine ?  adapt_refine : (all_coarsen ? adapt_coarsen : adapt_same) ;
 
 }
 

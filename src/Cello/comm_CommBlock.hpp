@@ -63,6 +63,7 @@ public: // interface
   p | time_;
   p | dt_;
   p | level_;
+  p | level_active_;
 
 }
 
@@ -116,7 +117,7 @@ public: // interface
   /// CB
   void p_adapt (int level);
   void q_adapt ();
-  void adapt(int level);
+  void adapt();
   void p_refine();
   void p_coarsen();
   void p_balance();
@@ -296,6 +297,9 @@ protected: // attributes
 
   /// Mesh refinement level
   int level_;
+
+  /// Mesh refinement level currently being refined
+  int level_active_;
 
   /// Whether face is on the domain boundary
 };

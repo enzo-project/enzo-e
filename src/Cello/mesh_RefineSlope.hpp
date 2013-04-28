@@ -18,8 +18,8 @@ class RefineSlope : public Refine {
 public: // interface
 
   /// Constructor
-  RefineSlope(double slope_min) throw();
-
+  RefineSlope(double slope_min_refine,
+	      double slope_max_coarsen) throw();
 
 #ifdef CONFIG_USE_CHARM
 
@@ -35,16 +35,22 @@ public: // interface
   {
     // NOTE: change this function whenever attributes change
     Refine::pup(p);
-    p | slope_min_;
+    p | slope_min_refine_;
+    p | slope_max_coarsen_;
   }
 #endif
   /// Evaluate the refinement criteria, updating the refinement field
   virtual int apply (FieldBlock * field_block,
 		     const FieldDescr * field_descr) throw();
 
+  virtual std::string name () const { return "slope"; };
+
 private:
   /// Minimum allowed slope before refinement kicks in
-  double slope_min_;
+  double slope_min_refine_;
+
+  /// Maximum allowed slope before coarsening is allowed
+  double slope_max_coarsen_;
 };
 
 #endif /* MESH_REFINE_SLOPE_HPP */

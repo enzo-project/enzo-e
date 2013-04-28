@@ -49,6 +49,8 @@ public: // interface
     return 0;
   };
 
+  virtual std::string name () const { return "unknown"; }
+
 };
 
 #endif /* MESH_REFINE_HPP */

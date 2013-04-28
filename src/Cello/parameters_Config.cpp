@@ -48,12 +48,13 @@ void Config::pup (PUP::er &p)
   PUParray(p,mesh_root_size,3);
   p | mesh_max_level;
   p | mesh_balance;
-  p | mesh_refine_type;
-  p | mesh_refine_fields;
-  p | mesh_refine_slope_min;
-  p | mesh_refine_mass_min;
-  p | mesh_refine_mass_level_exponent;
-  p | mesh_refine_mass_min_overdensity;
+  p | mesh_adapt_type;
+  p | mesh_adapt_fields;
+  p | mesh_adapt_slope_min_refine;
+  p | mesh_adapt_slope_max_coarsen;
+  p | mesh_adapt_mass_min;
+  p | mesh_adapt_mass_level_exponent;
+  p | mesh_adapt_mass_min_overdensity;
 
   p | method_sequence;
 
@@ -231,42 +232,45 @@ void Config::read(Parameters * parameters) throw()
 
   //--------------------------------------------------
 
-  int num_refine_type = parameters->list_length("Mesh:refine_type");
-  mesh_refine_type.resize(num_refine_type);
-  for (int i=0; i<num_refine_type; i++) {
-    mesh_refine_type[i] = parameters->list_value_string(i,"Mesh:refine_type");
+  int num_adapt_type = parameters->list_length("Mesh:adapt_type");
+  mesh_adapt_type.resize(num_adapt_type);
+  for (int i=0; i<num_adapt_type; i++) {
+    mesh_adapt_type[i] = parameters->list_value_string(i,"Mesh:adapt_type");
   }
 
   //--------------------------------------------------
 
-  int num_refine_fields = parameters->list_length("Mesh:refine_fields");
+  int num_adapt_fields = parameters->list_length("Mesh:adapt_fields");
 
-  mesh_refine_fields.resize(num_refine_fields);
+  mesh_adapt_fields.resize(num_adapt_fields);
 
-  for (int i=0; i<num_refine_fields; i++) {
-    mesh_refine_fields[i] = parameters->list_value_string
-      (i,"Mesh:refine_fields");
+  for (int i=0; i<num_adapt_fields; i++) {
+    mesh_adapt_fields[i] = parameters->list_value_string
+      (i,"Mesh:adapt_fields");
   }
 
   //--------------------------------------------------
 
-  mesh_refine_slope_min = 
-    parameters->value_float ("Mesh:refine_slope_min",0.3);
+  mesh_adapt_slope_min_refine = 
+    parameters->value_float ("Mesh:adapt_slope_min_refine",0.3);
+
+  mesh_adapt_slope_max_coarsen = 
+    parameters->value_float ("Mesh:adapt_slope_min_coarsen",0.15);
 
   //--------------------------------------------------
 
   // This parameter is typically computed ("internal" parameter in Enzo)
-  mesh_refine_mass_min = 
-    parameters->value_float ("Mesh:refine_mass_min",-1.0);
+  mesh_adapt_mass_min = 
+    parameters->value_float ("Mesh:adapt_mass_min",-1.0);
 
   //--------------------------------------------------
 
-  mesh_refine_mass_level_exponent = 
-    parameters->value_float ("Mesh:refine_mass_level_exponent",0.0);
+  mesh_adapt_mass_level_exponent = 
+    parameters->value_float ("Mesh:adapt_mass_level_exponent",0.0);
   //--------------------------------------------------
 
-  mesh_refine_mass_min_overdensity = 
-    parameters->value_float ("Mesh:refine_mass_min_overdensity",1.5);
+  mesh_adapt_mass_min_overdensity = 
+    parameters->value_float ("Mesh:adapt_mass_min_overdensity",1.5);
 
   //--------------------------------------------------
   // Method

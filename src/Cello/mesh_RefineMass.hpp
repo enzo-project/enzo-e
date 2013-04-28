@@ -47,6 +47,8 @@ public: // interface
   virtual int apply (FieldBlock * field_block,
 		     const FieldDescr * field_descr) throw();
 
+  virtual std::string name () const { return "mass"; };
+
 private:
 
   /// Minimum allowed mass before refinement kicks in

@@ -82,12 +82,13 @@ public: // attributes
   int                        mesh_max_level;
   bool                       mesh_balance;
 
-  std::vector<std::string>   mesh_refine_type ;
-  std::vector<std::string>   mesh_refine_fields ;
-  double                     mesh_refine_slope_min;
-  double                     mesh_refine_mass_min;
-  double                     mesh_refine_mass_min_overdensity;
-  double                     mesh_refine_mass_level_exponent;
+  std::vector<std::string>   mesh_adapt_type ;
+  std::vector<std::string>   mesh_adapt_fields ;
+  double                     mesh_adapt_slope_min_refine;
+  double                     mesh_adapt_slope_max_coarsen;
+  double                     mesh_adapt_mass_min;
+  double                     mesh_adapt_mass_min_overdensity;
+  double                     mesh_adapt_mass_level_exponent;
   
   std::vector<std::string>   method_sequence;
 

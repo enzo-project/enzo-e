@@ -8,6 +8,16 @@
 #ifndef _MESH_HPP
 #define _MESH_HPP
 
+/// @enum     adapt_type
+/// @brief    Mesh adaptation type: refine, coarsen, or stay the same
+
+enum adapt_type {
+  adapt_unknown,
+  adapt_same,
+  adapt_refine,
+  adapt_coarsen
+};
+
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------

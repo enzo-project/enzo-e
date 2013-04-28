@@ -70,11 +70,6 @@ int RefineMass::apply
   int gx,gy,gz;
   field_descr->ghosts(0, &gx,&gy,&gz);
 
-  ASSERT4("RefineMass::apply",
-	  "Ghost zone depths for field %d (%d,%d,%d) must be at least 1",
-	  0,gx,gy,gz,
-	  gx>0 && gy>0 && gz>0);
-
   precision_type precision = field_descr->precision(0);
 
   void * void_array = field_block->field_values(0);
