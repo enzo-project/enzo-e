@@ -30,7 +30,7 @@ PARALLEL_MAIN_BEGIN
   CommBlock * block = factory.create_block
     (
 #ifdef CONFIG_USE_CHARM
-       block_array, index,
+       block_array, &index,
 #endif
      0,0,0, 
      1,1,1,
