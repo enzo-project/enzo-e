@@ -118,8 +118,8 @@ public: // interface
   void p_adapt (int level);
   void q_adapt ();
   void adapt();
-  void p_refine();
-  void p_coarsen();
+  void refine();
+  void coarsen();
   void p_balance();
   int determine_refine();
 
@@ -234,6 +234,9 @@ protected: // functions
   /// Allocate and copy in attributes from give CommBlock
   void copy_(const CommBlock & block) throw();
 
+  /// Return adapt_coarsen, adapt_refine, or adapt_same given two adapt results
+  int update_adapt_ (int a1, int a2) const throw();
+
 #ifdef CONFIG_USE_CHARM
 
   /// Determine which faces require boundary updates or communication
@@ -295,13 +298,16 @@ protected: // attributes
   /// B
   double dt_;
 
+  //--------------------------------------------------
+
+  /// MESH REFINEMENT
+
   /// Mesh refinement level
   int level_;
 
   /// Mesh refinement level currently being refined
   int level_active_;
 
-  /// Whether face is on the domain boundary
 };
 
 #endif /* COMM_COMMBLOCK_HPP */

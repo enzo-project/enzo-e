@@ -56,6 +56,18 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+#define IC(ix,iy,iz)  ((ix+2)%2) + 2*( ((iy+2)%2) + 2*((iz+2)%2) )
+#define NC(array_rank) (array_rank == 1 ? 2 : (array_rank == 2 ? 4 : 8))
+#define IN(axis,face)  ((face) + 2*(axis))
+#define NN(array_rank) (array_rank*2)
+
+const char * adapt_name[] = {
+  "adapt_unknown",
+  "adapt_same",
+  "adapt_refine",
+  "adapt_coarsen"
+};
+
 //----------------------------------------------------------------------
 
 void CommBlock::p_adapt(int level)
@@ -81,16 +93,24 @@ void CommBlock::adapt()
 
   } else {
 
-    TRACE1("ADAPT CommBlock::adapt(%d)",level_active_);
     if (level_active_ == level_) {
       int adapt = determine_refine();
+      TRACE1 ("ADAPT adapt = %s",adapt_name[adapt]);
+      if      (adapt == adapt_refine)  refine();
+      else if (adapt == adapt_coarsen) coarsen();
     }
 
     int max_level = simulation_charm->config()->mesh_max_level;
+
     if (level_active_ < max_level) {
+
       CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(),thisProxy[thisIndex]));
+
     } else {
+
+      level_active_ = -1;
       refresh();
+
     }
 
   }
@@ -109,40 +129,104 @@ int CommBlock::determine_refine()
   FieldDescr * field_descr = simulation_charm->field_descr();
 
   int i=0;
-  int result = adapt_same;
-
-  Refine * refine;
-  while (refine = simulation_charm->problem()->refine(i++)) {
-    result = refine->apply(field_block, field_descr);
-    TRACE2("ADAPT refine %s %s",
-	   refine->name().c_str(),
-	   (result==adapt_refine) ? "refine" :
-	   ((result==adapt_coarsen) ? "coarsen" : "same"));
+  int adapt = adapt_unknown;
+  while (Refine * refine = simulation_charm->problem()->refine(i++)) {
+    adapt = update_adapt_(adapt,refine->apply(field_block, field_descr));
   }
+  return adapt;
+
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_refine()
+int CommBlock::update_adapt_(int a1, int a2) const throw()
 {
-  TRACE("ADAPT CommBlock::p_refine()");
+  TRACE2("ADAPT %d %d",a1,a2);
+  if (a1 == adapt_unknown) return a2;
+  if (a2 == adapt_unknown) return a1;
+  if      ((a1 == adapt_coarsen) && (a2 == adapt_coarsen)) 
+    return adapt_coarsen;
+  else if ((a1 == adapt_refine)  || (a2 == adapt_refine))
+    return adapt_refine;
+  else
+    return adapt_same;
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::refine()
+{
+  TRACE("ADAPT CommBlock::refine()");
+
+  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
+  const Factory * factory = simulation_charm->factory();
+  int rank = simulation_charm->dimension();
+  int nc = NC(rank);
+
+  int ibx = index_[0];
+  int iby = index_[1];
+  int ibz = index_[2];
+  int nbx = size_[0];
+  int nby = size_[1];
+  int nbz = size_[2];
+
+  int nx,ny,nz;
+  block()->field_block()->size(&nx,&ny,&nz);
+
+  double xm[2],ym[2],zm[2];
+  block()->lower(&xm[0],&ym[0],&zm[0]);
+  double xp[2],yp[2],zp[2];
+  block()->upper(&xm[1],&ym[1],&zm[1]);
+  xm[1] = xp[0] = 0.5 * (xm[0] + xp[1]);
+  ym[1] = yp[0] = 0.5 * (ym[0] + yp[1]);
+  zm[1] = zp[0] = 0.5 * (zm[0] + zp[1]);
+
+  int num_field_blocks = 1;
+  bool testing = false;
+
+  for (int ic=0; ic<nc; ic++) {
+
+    int ix = (ic & 1) >> 0;
+    int iy = (ic & 2) >> 1;
+    int iz = (ic & 4) >> 2;
+
+    TRACE5("ADAPT new child %d [%d %d %d]/ %d",ic,ix,iy,iz,nc);
+
+    Index index = thisIndex;
+    index.set_level(level_+1);
+    index.set_tree (level_+1,ix,iy,iz);
+    index.clean();
+
+    factory->create_block 
+      (thisProxy, &index,
+       ibx,iby,ibz,
+       nbx,nby,nbz,
+       nx,ny,nz,
+       level_+1,
+       xm[ix],ym[iy],zm[iz],
+       xp[ix],yp[iy],zp[iz],
+       num_field_blocks,
+       testing);
+
+  }
+  
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::coarsen()
+{
+  TRACE("ADAPT CommBlock::coarsen()");
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::q_adapt()
 {
-  
+  thisProxy.doneInserting();
   TRACE1("ADAPT q_adapt(%d)",level_active_);
   ++level_active_;
   adapt();
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::p_coarsen()
-{
-  TRACE("ADAPT CommBlock::p_coarsen()");
 }
 
 //----------------------------------------------------------------------

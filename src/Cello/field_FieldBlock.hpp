@@ -60,7 +60,7 @@ public: // interface
 #endif
 
   /// Return size of fields on the block, assuming centered
-  void size(int * nx = 0, int * ny = 0, int * nz = 0) const throw();
+  void size(int * nx, int * ny = 0, int * nz = 0) const throw();
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated

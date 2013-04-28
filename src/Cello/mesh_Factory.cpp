@@ -112,55 +112,55 @@ CProxy_CommBlock Factory::create_block_array
 //----------------------------------------------------------------------
 CommBlock * Factory::create_block
 (
+#ifdef CONFIG_USE_CHARM
+ CProxy_CommBlock block_array, Index * index,
+#endif /* CONFIG_USE_CHARM */
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
+ int level,
  double xm, double ym, double zm,
  double xb, double yb, double zb,
  int num_field_blocks,
  bool testing
  ) const throw()
 {
-#ifdef CONFIG_USE_CHARM
+// #ifdef CONFIG_USE_CHARM
 
-  CProxy_CommBlock proxy_block = CProxy_CommBlock::ckNew();
-  Index index(0,0,0);
-  index.set_level(0);
-  index.clear();
+//   CProxy_CommBlock proxy_block = CProxy_CommBlock::ckNew();
+//   Index index(0,0,0);
+//   index.set_level(level);
+//   index.clear();
 
-  int level;
+//   proxy_block[index].insert
+//     (0,0,0,
+//      nbx,nby,nbz,
+//      nx,ny,nz,
+//      level,
+//      xm,ym,zm, 
+//      xb,yb,zb, 
+//      num_field_blocks,
+//      testing);
 
-  proxy_block[index].insert
-    (0,0,0,
-     nbx,nby,nbz,
-     nx,ny,nz,
-     level=0,
-     xm,ym,zm, 
-     xb,yb,zb, 
-     num_field_blocks,
-     testing);
+//   proxy_block.doneInserting();
 
-  proxy_block.doneInserting();
+//   CommBlock * block = proxy_block[index].ckLocal();
+//   //  ASSERT("Factory::create_block()","block is NULL",block != NULL);
 
-  CommBlock * block = proxy_block[index].ckLocal();
-  //  ASSERT("Factory::create_block()","block is NULL",block != NULL);
+//   return block;
 
-  return block;
-
-#else /* CONFIG_USE_CHARM */
-
-  int level;
+// #else /* CONFIG_USE_CHARM */
 
   return new CommBlock 
     (ibx,iby,ibz, 
      nbx,nby,nbz,
      nx,ny,nz,
-     level=0,
+     level,
      xm,ym,zm, 
      xb,yb,zb, 
      num_field_blocks,
      testing);
 
-#endif /* CONFIG_USE_CHARM */
+// #endif /* CONFIG_USE_CHARM */
 }
 

@@ -329,10 +329,20 @@ void Hierarchy::allocate_array_
 
     // create a new data block
 
+    int level;
+#ifdef CONFIG_USE_CHARM
+    CProxy_CommBlock block_array;
+    Index index(0,0,0);
+#endif
     CommBlock * comm_block = factory_->create_block 
-      (ibx,iby,ibz,
+      (
+#ifdef CONFIG_USE_CHARM
+       block_array, index,
+#endif
+       ibx,iby,ibz,
        nbx,nby,nbz,
        mbx,mby,mbz,
+       level = 0,
        lower_[0],lower_[1],lower_[2],
        xb,yb,zb,
        num_field_blocks,

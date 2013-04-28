@@ -78,7 +78,7 @@ PARALLEL_MAIN_BEGIN
 
   // Factory factory;
   // Block * block = factory.create_block
-  //   (ix,iy,iz, 
+  //   (NULL, ix,iy,iz, 
   //    1,1,1,
   //    nx,ny,nz,
   //    xpm,ypm,zpm,

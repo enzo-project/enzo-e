@@ -74,6 +74,10 @@ public: // interface
   // ACCESSOR FUNCTIONS
   //----------------------------------------------------------------------
 
+  /// Return the dimensionality of the simulation
+  int dimension() const throw()
+  { return dimension_; }
+
   /// Return the Problem container object
   Problem *  problem() const throw()
   { return problem_; }

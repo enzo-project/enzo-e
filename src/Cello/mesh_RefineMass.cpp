@@ -62,7 +62,8 @@ int RefineMass::apply
   WARNING ("RefineMass::RefineMass()",
 	   "Assuming level==0 for level_exponent");
 
-  double modified_min = min_ * pow(2.0,level*level_exponent_);
+  double mass_min_refine  = min_ * pow(2.0,level*level_exponent_);
+  double mass_max_coarsen = mass_min_refine / 2.0;
 
   int nx,ny,nz;
   field_block->size(&nx,&ny,&nz);
@@ -76,24 +77,25 @@ int RefineMass::apply
 
   //  int num_fields = field_descr->field_count();
 
-  int count_flagged = 0;
+  bool all_coarsen = true;
+  bool any_refine = false;
 
   const int d3[3] = {1,nx,nx*ny};
 
   switch (precision) {
   case precision_single:
     {
-      float * array_float = (float*)void_array;
-      float mass_float;
+      float * array = (float*)void_array;
+      float mass;
       for (int axis=0; axis<3; axis++) {
 	int d = d3[axis];
 	for (int ix=0; ix<nx; ix++) {
 	  for (int iy=0; iy<ny; iy++) {
 	    for (int iz=0; iz<nz; iz++) {
 	      int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
-	      mass_float = (array_float[i]) ? 
-		(array_float[i+d] - array_float[i-d]) / array_float[i] : 0.0;
-	      if (mass_float < modified_min) ++count_flagged;
+	      mass = (array[i]) ? (array[i+d] - array[i-d]) / array[i] : 0.0;
+	      if (mass > mass_min_refine)  any_refine  = true;
+	      if (mass > mass_max_coarsen) all_coarsen = false;
 	    }
 	  }
 	}
@@ -102,8 +104,8 @@ int RefineMass::apply
     break;
   case precision_double:
     {
-      double * array_double = (double*)void_array;
-      double mass_double;
+      double * array = (double*)void_array;
+      double mass;
 
       for (int axis=0; axis<3; axis++) {
 	int d = d3[axis];
@@ -111,9 +113,9 @@ int RefineMass::apply
 	  for (int iy=0; iy<ny; iy++) {
 	    for (int iz=0; iz<nz; iz++) {
 	      int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
-	      mass_double = (array_double[i]) ? 
-		(array_double[i+d] - array_double[i-d]) / array_double[i] : 0.0;
-	      if (mass_double < modified_min) ++count_flagged;
+	      mass = (array[i]) ? (array[i+d] - array[i-d]) / array[i] : 0.0;
+	      if (mass > mass_min_refine)  any_refine  = true;
+	      if (mass > mass_max_coarsen) all_coarsen = false;
 	    }
 	  }
 	}
@@ -127,7 +129,8 @@ int RefineMass::apply
     break;
   }
 
-  return count_flagged;
+  return 
+    any_refine ?  adapt_refine : (all_coarsen ? adapt_coarsen : adapt_same) ;
 
 }
 

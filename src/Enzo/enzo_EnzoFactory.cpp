@@ -100,37 +100,43 @@ CProxy_CommBlock EnzoFactory::create_block_array
 
 CommBlock * EnzoFactory::create_block
 (
+#ifdef CONFIG_USE_CHARM
+ CProxy_CommBlock block_array,
+ Index * index,
+#endif /* CONFIG_USE_CHARM */
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
+ int level,
  double xm, double ym, double zm,
  double hx, double hy, double hz,
  int num_field_blocks,
  bool testing
  ) const throw()
 {
-  int level;
 #ifdef CONFIG_USE_CHARM
-    CProxy_CommBlock block_array = CProxy_EnzoBlock::ckNew
-    (nbx,nby,nbz,
-     nx,ny,nz,
-     level=0,
-     xm,ym,zm, 
-     xb,yb,zb, 
-     num_field_blocks,
-     nbx,nby,nbz);
+ 
+  block_array = CProxy_EnzoBlock::ckNew
+     (nbx,nby,nbz,
+      nx,ny,nz,
+      level,
+      xm,ym,zm, 
+      xb,yb,zb, 
+      num_field_blocks,
+      nbx,nby,nbz);
 
-    Index index(ibx,iby,ibz);
+     Index index(ibx,iby,ibz);
 
-    return block_array[index].ckLocal();
+     return block_array[index].ckLocal();
    
 #else /* CONFIG_USE_CHARM */
+
   return new EnzoBlock 
     (
      ibx,iby,ibz, 
      nbx,nby,nbz,
      nx,ny,nz,
-     level=0,
+     level,
      xm,ym,zm, 
      hx,hy,hz, 
      num_field_blocks);

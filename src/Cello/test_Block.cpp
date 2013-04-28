@@ -23,10 +23,19 @@ PARALLEL_MAIN_BEGIN
   
   bool testing;
 
+#ifdef CONFIG_USE_CHARM
+    CProxy_CommBlock block_array;
+    Index index(0,0,0);
+#endif
   CommBlock * block = factory.create_block
-    (0,0,0, 
+    (
+#ifdef CONFIG_USE_CHARM
+       block_array, index,
+#endif
+     0,0,0, 
      1,1,1,
      3,4,5,
+     0,
      -1.0,-2.0,-3.0,
      2.0,  4.0, 6.0,
      1, testing=true);

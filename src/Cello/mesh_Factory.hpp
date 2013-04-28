@@ -75,9 +75,14 @@ public: // interface
 
   /// Create a new CommBlock
   virtual CommBlock * create_block
-  (int ibx, int iby, int ibz,
+  (
+#ifdef CONFIG_USE_CHARM
+   CProxy_CommBlock block_array, Index * index,
+#endif
+   int ibx, int iby, int ibz,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
+   int level,
    double xm, double ym, double zm,
    double xb, double yb, double zb,
    int num_field_blocks = 1,
