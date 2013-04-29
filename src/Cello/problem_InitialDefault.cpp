@@ -214,9 +214,9 @@ void InitialDefault::allocate_xyzt_
 	(*vdeflt)[i] = 0.0;
 	(*mask)[i]   = false;
 	(*rdeflt)[i] = false;
-	(*x)[i]      = xm + ix*hx;
-	(*y)[i]      = ym + iy*hy;
-	(*z)[i]      = zm + iz*hz;
+	(*x)[i]      = xm + (ix-gx)*hx;
+	(*y)[i]      = ym + (iy-gy)*hy;
+	(*z)[i]      = zm + (iz-gz)*hz;
 	(*t)[i]      = time;
       }
     }
