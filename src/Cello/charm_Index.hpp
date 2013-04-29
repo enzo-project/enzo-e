@@ -67,9 +67,9 @@ public:
   
   void child (int il, int * icx, int * icy, int * icz) const
   {
-    if (icx) (*icx) = (a_[0].tree >> (il+1)) & 1;
-    if (icy) (*icy) = (a_[1].tree >> (il+1)) & 1;
-    if (icz) (*icz) = (a_[2].tree >> (il+1)) & 1;
+    if (icx) (*icx) = (a_[0].tree >> il) & 1;
+    if (icy) (*icy) = (a_[1].tree >> il) & 1;
+    if (icz) (*icz) = (a_[2].tree >> il) & 1;
   }
   
   void array (int * ix, int *iy, int *iz) const
@@ -125,15 +125,11 @@ public:
   /// Accumulate a level of the tree
   void set_tree(int il, int ix, int iy=0, int iz=0)
   {
-    // clear
-    a_[0].tree &= ~(1<<il);
-    a_[1].tree &= ~(1<<il);
-    a_[2].tree &= ~(1<<il);
-
-    // set
-    a_[0].tree |= (ix<<il);
-    a_[1].tree |= (iy<<il);
-    a_[2].tree |= (iz<<il);
+    ASSERT ("Index::set_tree","level must be at least 1",il>0);
+    --il;
+    a_[0].tree = (a_[0].tree & ~(1<<il)) | (ix<<il);
+    a_[1].tree = (a_[1].tree & ~(1<<il)) | (iy<<il);
+    a_[2].tree = (a_[2].tree & ~(1<<il)) | (iz<<il);
   }
 
   void print (const char * msg = "\0") const
@@ -152,7 +148,7 @@ public:
     printf ("%d ",a_[axis].array);
     }
     printf ("] ");
-    printf ("[%d-%d-%d]",v_[0],v_[1],v_[2]);
+    printf ("[%08X-%08X-%08X]",v_[0],v_[1],v_[2]);
     printf ("\n");
   }
 private:

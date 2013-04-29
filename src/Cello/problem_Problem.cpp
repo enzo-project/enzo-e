@@ -121,13 +121,14 @@ void Problem::initialize_initial(Config * config,
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_refine(Config * config) throw()
+void Problem::initialize_refine(Config * config,
+				FieldDescr * field_descr) throw()
 {
   for (size_t i=0; i<config->mesh_adapt_type.size(); i++) {
 
     std::string name = config->mesh_adapt_type[i];
 
-    Refine * refine = create_refine_ (name,config,i);
+    Refine * refine = create_refine_ (name,config,field_descr,i);
 
     if (refine) {
       refine_list_.push_back( refine );
@@ -458,6 +459,7 @@ Refine * Problem::create_refine_
 (
  std::string  type,
  Config * config,
+ FieldDescr * field_descr,
  int index
  ) throw ()
 { 
@@ -467,8 +469,10 @@ Refine * Problem::create_refine_
 	 config->mesh_root_size[2]);
 
   if (type == "slope") {
-    return new RefineSlope (config->mesh_adapt_slope_min_refine,
-			    config->mesh_adapt_slope_max_coarsen);
+    return new RefineSlope (field_descr,
+			    config->mesh_adapt_slope_min_refine,
+			    config->mesh_adapt_slope_max_coarsen,
+			    config->mesh_adapt_fields);
   } else if (type == "mass") {
     double root_cell_volume = 1.0;
     for (int i=0; i<config->mesh_root_rank; i++) {

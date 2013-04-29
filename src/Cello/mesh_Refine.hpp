@@ -41,7 +41,7 @@ public: // interface
 #endif
   
   /// Evaluate the refinement criteria, updating the refinement field
-  virtual int apply (FieldBlock * field_block,
+  virtual int apply (CommBlock * comm_block,
 		     const FieldDescr * field_descr) throw ()
   {
     ERROR("Refine::apply",

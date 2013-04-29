@@ -48,6 +48,7 @@ private: // functions
   
   void allocate_xyzt_(CommBlock * block,
 		      int index_field,
+		      const FieldDescr * field_descr,
 		      int * mx, int * my, int * mz,
 		      double ** value, double ** vdeflt,
 		      bool ** mask, bool ** rdeflt,
@@ -69,14 +70,16 @@ private: // functions
   void evaluate_logical_ (const Hierarchy * hierarchy,
 			  const CommBlock * block,
 			  FieldBlock * field_block, int index_field, 
-			 std::string field_name,
-			 int n, bool * value, bool * vdeflt,
-			 double * x, double * y, double * z, double * t) throw();
+			  std::string field_name,
+			  const FieldDescr * field_descr,			
+			  int n, bool * value, bool * vdeflt,
+			  double * x, double * y, double * z, double * t) throw();
 
   /// Read in a PNG file and create an integer array using r + b + g values
   void create_png_mask_ (bool * mask,
 			 const Hierarchy * hierarchy,
 			 const CommBlock * block,
+			 const FieldDescr * field_descr,
 			 const char * pngfile,
 			 int   nxb, int nyb,
 			 int * nx, int * ny );

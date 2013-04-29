@@ -152,7 +152,7 @@ void Simulation::initialize() throw()
 
   problem_->initialize_boundary(config_);
   problem_->initialize_initial (config_,parameters_,group_process_);
-  problem_->initialize_refine  (config_);
+  problem_->initialize_refine  (config_,field_descr_);
   problem_->initialize_stopping(config_);
   problem_->initialize_timestep(config_);
   problem_->initialize_output  (config_,field_descr_,group_process_,factory());

@@ -137,7 +137,8 @@ public: // interface
 			  const GroupProcess * group_process) throw();
 
   /// Initialize the refine object
-  void initialize_refine(Config * config ) throw();
+  void initialize_refine(Config * config,
+			 FieldDescr * field_descr) throw();
 
   /// Initialize the stopping object
   void initialize_stopping(Config * config ) throw();
@@ -173,7 +174,10 @@ protected: // functions
 
   /// Create named refine object
   virtual Refine * create_refine_ 
-  (std::string name, Config * config, int index) throw ();
+  (std::string name, 
+   Config * config, 
+   FieldDescr * field_descr,
+   int index) throw ();
 
   /// Create named method object
   virtual Method *   create_method_

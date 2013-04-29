@@ -5,46 +5,68 @@
 /// @date     2013-04-25
 /// @brief    Charm-related mesh adaptation control functions
 ///
-///    ADAPT
+/// ADAPT
+
+/// A mesh adaptation step involves evaluationg refinement criteria
+/// (Refine objects) on all leaves to determine whether to refine,
+/// coarsen, or stay the same.
 ///
-///    CommBlock::p_adapt(level) 
-///       if (adapt)
-///          adapt(level)
-///       else
-///          refresh()
+/// Each block tagged for refinement creates children, and each block
+/// tagged for coarsening tells its parent, which coarsens if all of
+/// its children are tagged.
 ///
-///    CommBlock::adapt(level)
-///       if (level == my_level && is_leaf())
-///          adapt = determine_refinement()
-///          if (adapt == adapt_refine)  p_refine()
-///          if (adapt == adapt_coarsen) p_coarsen()
-///       if (level < max_level)
-///          StartQD( p_adapt(level + 1) )
-///       else
-///          >>>>> refresh() >>>>>
+/// Any block that is coarsened or refined tells its neighbors and
+/// parent about its updated state (number of descendents)
 ///
-///    CommBlock::p_refine()
-///       parent.p_set_child_depth(my_level+1)
-///       for neighbor
-///          neighbor.p_set_neighbor_depth(index, my_level+1)
-///          neighbor.p_balance(index)
-///       for child
-///          create child
+/// After quiescence, a balancing phase is performed.  The mesh ist
+/// traversed by levels, finest first, and any block that is adjacent
+/// to any block that has a grandchild is tagged for refinement.
+/// Balancing a block can trigger further blocks to require balancing,
+/// but only coarser ones, which will be handled in the next level.  A
+/// quiescence step is used between each level.
 ///
-///    CommBlock::p_coarsen()
-///       ???
+/// Typically only one mesh adaptation step is performed at a time, except
+/// when applying initial conditions.  In that case several steps may
+/// be applied, up to a specified maximum (mesh_adapt_max_level_initial)
+
+/// CommBlock::p_adapt(level) 
+///    if (adapt)
+///       adapt(level)
+///    else
+///       refresh()
 ///
-///    CommBlock::p_balance(index)
-///       if (is_leaf())
-///          adapt = determine_balance()
-///          if (adapt == adapt_refine) p_refine()
+/// CommBlock::adapt(level)
+///    if (level == my_level && is_leaf())
+///       adapt = determine_refinement()
+///       if (adapt == adapt_refine)  p_refine()
+///       if (adapt == adapt_coarsen) p_coarsen()
+///    if (level < max_level)
+///       StartQD( p_adapt(level + 1) )
+///    else
+///       >>>>> refresh() >>>>>
 ///
-///    CommBlock::determine_balance()
-///       adapt_type = adapt_same     
-///       for neighbor
-///          if (neighbor_depth > my_level) 
-///             adapt_type = adapt_refine
-///       return adapt_type
+/// CommBlock::p_refine()
+///    parent.p_set_child_depth(my_level+1)
+///    for neighbor
+///       neighbor.p_set_neighbor_depth(index, my_level+1)
+///       neighbor.p_balance(index)
+///    for child
+///       create child
+///
+/// CommBlock::p_coarsen()
+///    ???
+///
+/// CommBlock::p_balance(index)
+///    if (is_leaf())
+///       adapt = determine_balance()
+///       if (adapt == adapt_refine) p_refine()
+///
+/// CommBlock::determine_balance()
+///    adapt_type = adapt_same     
+///    for neighbor
+///       if (neighbor_depth > my_level) 
+///          adapt_type = adapt_refine
+///    return adapt_type
 
 
 #ifdef CONFIG_USE_CHARM
@@ -57,9 +79,9 @@
 #include "charm_mesh.hpp"
 
 #define IC(ix,iy,iz)  ((ix+2)%2) + 2*( ((iy+2)%2) + 2*((iz+2)%2) )
-#define NC(array_rank) (array_rank == 1 ? 2 : (array_rank == 2 ? 4 : 8))
+#define NC(rank) (rank == 1 ? 2 : (rank == 2 ? 4 : 8))
 #define IN(axis,face)  ((face) + 2*(axis))
-#define NN(array_rank) (array_rank*2)
+#define NN(rank) (rank*2)
 
 const char * adapt_name[] = {
   "adapt_unknown",
@@ -85,7 +107,16 @@ void CommBlock::adapt()
 
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
 
-  int max_level = simulation_charm->config()->mesh_max_level;
+  int mesh_max_level    = simulation_charm->config()->mesh_max_level;
+  int initial_max_level = simulation_charm->config()->initial_max_level;
+  int initial_cycle     = simulation_charm->config()->initial_cycle;
+
+  TRACE2 ("cycle %d  initial_cycle %d",cycle(),initial_cycle);
+  int max_level = (cycle() == initial_cycle) ? 
+    initial_max_level : mesh_max_level;
+
+  TRACE3("ADAPT max_level %d  initial %d  mesh %d",max_level,
+	 initial_max_level, mesh_max_level);
 
   if (max_level == 0) {
 
@@ -112,9 +143,7 @@ void CommBlock::adapt()
       refresh();
 
     }
-
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -125,13 +154,12 @@ int CommBlock::determine_refine()
 
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
 
-  FieldBlock * field_block = block()->field_block();
   FieldDescr * field_descr = simulation_charm->field_descr();
 
   int i=0;
   int adapt = adapt_unknown;
   while (Refine * refine = simulation_charm->problem()->refine(i++)) {
-    adapt = update_adapt_(adapt,refine->apply(field_block, field_descr));
+    adapt = update_adapt_(adapt,refine->apply(this, field_descr));
   }
   return adapt;
 
@@ -161,7 +189,6 @@ void CommBlock::refine()
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
   const Factory * factory = simulation_charm->factory();
   int rank = simulation_charm->dimension();
-  int nc = NC(rank);
 
   int ibx = index_[0];
   int iby = index_[1];
@@ -184,6 +211,8 @@ void CommBlock::refine()
   int num_field_blocks = 1;
   bool testing = false;
 
+  int nc = NC(rank);
+
   for (int ic=0; ic<nc; ic++) {
 
     int ix = (ic & 1) >> 0;
@@ -197,6 +226,8 @@ void CommBlock::refine()
     index.set_tree (level_+1,ix,iy,iz);
     index.clean();
 
+    thisIndex.print();
+    index.print();
     factory->create_block 
       (thisProxy, &index,
        ibx,iby,ibz,

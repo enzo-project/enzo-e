@@ -42,6 +42,7 @@ void Config::pup (PUP::er &p)
   p | initial_time;
   p | initial_name;
   PUParray(p,initial_value,MAX_FIELDS);
+  p | initial_max_level;
 
   PUParray(p,mesh_root_blocks,3);
   p | mesh_root_rank;
@@ -183,7 +184,7 @@ void Config::read(Parameters * parameters) throw()
   initial_cycle = parameters->value_integer("Initial:cycle",0);
   initial_time  = parameters->value_float  ("Initial:time",0.0);
   initial_type  = parameters->value_string("Initial:type","default");
-
+  initial_max_level = parameters->value_integer("Initial:max_level",0);
   //  initial_name;
   //  initial_value
 

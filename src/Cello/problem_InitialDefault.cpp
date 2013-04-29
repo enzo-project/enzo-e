@@ -98,7 +98,7 @@ void InitialDefault::enforce_block
 
       // Allocate arrays if needed
       if (value == NULL) {
-	allocate_xyzt_(comm_block,index_field,
+	allocate_xyzt_(comm_block,index_field,field_descr,
 		       &nx,&ny,&nz,
 		       &value, &vdeflt,
 		       &mask,&rdeflt,
@@ -123,8 +123,9 @@ void InitialDefault::enforce_block
 	evaluate_float_ (field_block, index_list, field_name, 
 			  n, value,vdeflt,x,y,z,t);
 
-	evaluate_logical_ (hierarchy,comm_block,field_block, index_list + 1, field_name, 
-			  n, mask,rdeflt,x,y,z,t);
+	evaluate_logical_ 
+	  (hierarchy,comm_block,field_block, index_list+1, field_name, 
+	   field_descr, n, mask,rdeflt,x,y,z,t);
 
 	copy_values_ (field_descr,field_block,value, mask,index_field,nx,ny,nz);
 
@@ -160,6 +161,7 @@ void InitialDefault::allocate_xyzt_
 (
  CommBlock * comm_block,
  int index_field,
+ const FieldDescr * field_descr,
  int * nx, int * ny, int * nz,
  double ** value, double ** vdeflt,
  bool   ** mask,bool   ** rdeflt,
@@ -172,6 +174,12 @@ void InitialDefault::allocate_xyzt_
   // Get field size
 
   field_block->size(nx,ny,nz);
+
+  int gx,gy,gz;
+  field_descr->ghosts(index_field,&gx,&gy,&gz);
+  (*nx) += 2*gx;
+  (*ny) += 2*gy;
+  (*nz) += 2*gz;
 
   int n = (*nx)*(*ny)*(*nz);
 
@@ -239,13 +247,10 @@ void InitialDefault::copy_values_
   mx = nx;
   my = ny;
   mz = nz;
-  if (field_block->ghosts_allocated()){
-    int gx,gy,gz;
-    field_descr->ghosts(index_field,&gx,&gy,&gz);
-    mx += 2*gx;
-    my += 2*gy;
-    mz += 2*gz;
-  }
+  int gx,gy,gz;
+
+  field_descr->ghosts(index_field,&gx,&gy,&gz);
+  int offset = gx + nx*(gy + ny*gz);
 
   // Copy evaluated values to field values
 
@@ -257,7 +262,7 @@ void InitialDefault::copy_values_
 	for (int ix = 0; ix<nx; ix++) {
 	  int in=ix + nx*(iy + ny*iz);
 	  int im=ix + mx*(iy + my*iz);
-	  if (mask[in]) ((float *) field)[im] = (float) value[in];
+	  if (mask[in]) ((float *) field - offset)[im] = (float) value[in];
 	}
       }
     }
@@ -268,7 +273,7 @@ void InitialDefault::copy_values_
 	for (int ix = 0; ix<nx; ix++) {
 	  int in=ix + nx*(iy + ny*iz);
 	  int im=ix + mx*(iy + my*iz);
-	  if (mask[in]) ((double *) field)[im] = (double) value[in];
+	  if (mask[in]) ((double *) field - offset)[im] = (double) value[in];
 	}
       }
     }
@@ -279,7 +284,8 @@ void InitialDefault::copy_values_
 	for (int ix = 0; ix<nx; ix++) {
 	  int in=ix + nx*(iy + ny*iz);
 	  int im=ix + mx*(iy + my*iz);
-	  if (mask[in]) ((long double *) field)[im] = (long double) value[in];
+	  if (mask[in]) ((long double *) field - offset)[im] 
+			  = (long double) value[in];
 	}
       }
     }
@@ -326,7 +332,9 @@ void InitialDefault::evaluate_float_
 void InitialDefault::evaluate_logical_ 
 (const Hierarchy * hierarchy,
  const CommBlock * comm_block,
- FieldBlock * field_block, int index_list, std::string field_name, 
+ FieldBlock * field_block, 
+ int index_list, std::string field_name, 
+ const FieldDescr * field_descr,
  int n, bool * mask, bool * deflt,
  double * x, double * y, double * z, double * t) throw ()
 {
@@ -357,7 +365,7 @@ void InitialDefault::evaluate_logical_
 	    field_name.c_str(),
 	    nzb == 1);
     file = parameters_->list_value_string(index_list,"value","default");
-    create_png_mask_(mask,hierarchy,comm_block,file,nxb,nyb,&nx,&ny);
+    create_png_mask_(mask,hierarchy,comm_block,field_descr,file,nxb,nyb,&nx,&ny);
     break;
   default:
     ERROR3("InitialDefault::evaluate_logical",
@@ -367,12 +375,14 @@ void InitialDefault::evaluate_logical_
   }
 }
 
+//----------------------------------------------------------------------
 
 void InitialDefault::create_png_mask_
 (
  bool            * mask,
  const Hierarchy * hierarchy,
  const CommBlock * comm_block,
+ const FieldDescr * field_descr,
  const char      * pngfile,
  int               nxb,
  int               nyb,
@@ -380,6 +390,11 @@ void InitialDefault::create_png_mask_
  int             * ny
  )
 {
+  int gx,gy,gz;
+  field_descr->ghosts(0,&gx,&gy,&gz);
+  nxb += 2*gx;
+  nyb += 2*gy;
+
   pngwriter png;
 
   // Open the PNG file
