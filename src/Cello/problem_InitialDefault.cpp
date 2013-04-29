@@ -242,11 +242,6 @@ void InitialDefault::copy_values_
 
   // Determine allocated array size
 
-  int mx=0,my=0,mz=0;
-
-  mx = nx;
-  my = ny;
-  mz = nz;
   int gx,gy,gz;
 
   field_descr->ghosts(index_field,&gx,&gy,&gz);
@@ -260,9 +255,8 @@ void InitialDefault::copy_values_
     for (int iz = 0; iz<nz; iz++) {
       for (int iy = 0; iy<ny; iy++) {
 	for (int ix = 0; ix<nx; ix++) {
-	  int in=ix + nx*(iy + ny*iz);
-	  int im=ix + mx*(iy + my*iz);
-	  if (mask[in]) ((float *) field - offset)[im] = (float) value[in];
+	  int i = ix + nx*(iy + ny*iz);
+	  if (mask[i]) ((float *) field - offset)[i] = (float) value[i];
 	}
       }
     }
@@ -271,9 +265,8 @@ void InitialDefault::copy_values_
     for (int iz = 0; iz<nz; iz++) {
       for (int iy = 0; iy<ny; iy++) {
 	for (int ix = 0; ix<nx; ix++) {
-	  int in=ix + nx*(iy + ny*iz);
-	  int im=ix + mx*(iy + my*iz);
-	  if (mask[in]) ((double *) field - offset)[im] = (double) value[in];
+	  int i = ix + nx*(iy + ny*iz);
+	  if (mask[i]) ((double *) field - offset)[i] = (double) value[i];
 	}
       }
     }
@@ -282,10 +275,9 @@ void InitialDefault::copy_values_
     for (int iz = 0; iz<nz; iz++) {
       for (int iy = 0; iy<ny; iy++) {
 	for (int ix = 0; ix<nx; ix++) {
-	  int in=ix + nx*(iy + ny*iz);
-	  int im=ix + mx*(iy + my*iz);
-	  if (mask[in]) ((long double *) field - offset)[im] 
-			  = (long double) value[in];
+	  int i = ix + nx*(iy + ny*iz);
+	  if (mask[i]) ((long double *) field - offset)[i] 
+			  = (long double) value[i];
 	}
       }
     }

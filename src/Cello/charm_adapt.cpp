@@ -229,7 +229,7 @@ void CommBlock::refine()
     thisIndex.print();
     index.print();
     factory->create_block 
-      (thisProxy, &index,
+      (thisProxy, index,
        ibx,iby,ibz,
        nbx,nby,nbz,
        nx,ny,nz,

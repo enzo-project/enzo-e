@@ -18,13 +18,13 @@ RefineSlope::RefineSlope(FieldDescr * field_descr,
 {
   if (field_name_list.size() != 0) {
     field_id_list_.resize(field_name_list.size());
-    for (int i=0; i<field_id_list_.size(); i++) {
+    for (size_t i=0; i<field_id_list_.size(); i++) {
       field_id_list_[i] = field_descr->field_id(field_name_list[i]);
       TRACE2("Added field %d %s",field_id_list_[i],field_name_list[i].c_str());
     }
   } else {
     field_id_list_.resize(field_descr->field_count());
-    for (int i=0; i<field_id_list_.size(); i++) {
+    for (size_t i=0; i<field_id_list_.size(); i++) {
       field_id_list_[i] = i;
       TRACE2("Added field %d %s",i,field_descr->field_name(i).c_str());
     }
@@ -62,7 +62,7 @@ int RefineSlope::apply
   field_block->cell_width(xm[1],xp[1],&h[1]);
   field_block->cell_width(xm[2],xp[2],&h[2]);
 
-  for (int k=0; k<field_id_list_.size(); k++) {
+  for (size_t k=0; k<field_id_list_.size(); k++) {
 
     int id_field = field_id_list_[k];
 

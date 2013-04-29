@@ -19,26 +19,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("CommBlock");
 
-  Factory factory;
-  
-  bool testing;
-
-#ifdef CONFIG_USE_CHARM
-    CProxy_CommBlock block_array;
-    Index index(0,0,0);
-#endif
-  CommBlock * block = factory.create_block
-    (
-#ifdef CONFIG_USE_CHARM
-       block_array, &index,
-#endif
-     0,0,0, 
-     1,1,1,
-     3,4,5,
-     0,
-     -1.0,-2.0,-3.0,
-     2.0,  4.0, 6.0,
-     1, testing=true);
+  Block * block = new Block 
+    (3,4,5,1,
+     -1.0, 2.0,
+     -2.0, 4.0,
+     -3.0, 6.0);
 
   unit_func("CommBlock");
   unit_assert (block != NULL);
@@ -48,8 +33,8 @@ PARALLEL_MAIN_BEGIN
   double lower[3];
   double upper[3];
 
-  block->block()->lower(&lower[0],&lower[1],&lower[2]);
-  block->block()->upper(&upper[0],&upper[1],&upper[2]);
+  block->lower(&lower[0],&lower[1],&lower[2]);
+  block->upper(&upper[0],&upper[1],&upper[2]);
 
   unit_func("lower");
   unit_assert(lower[0] == -1.0);
@@ -57,9 +42,9 @@ PARALLEL_MAIN_BEGIN
   unit_assert(lower[2] == -3.0);
 
   unit_func("upper");
-  unit_assert(upper[0] ==  1.0);
-  unit_assert(upper[1] ==  2.0);
-  unit_assert(upper[2] ==  3.0);
+  unit_assert(upper[0] ==  2.0);
+  unit_assert(upper[1] ==  4.0);
+  unit_assert(upper[2] ==  6.0);
 
   //----------------------------------------------------------------------
 

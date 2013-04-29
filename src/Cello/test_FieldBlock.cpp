@@ -127,7 +127,7 @@ PARALLEL_MAIN_BEGIN
 
   field_block->reallocate_array(field_descr, true);
 
-  int array_size_with_ghosts = field_block->array_size();
+  size_t array_size_with_ghosts = field_block->array_size();
 
   unit_assert(field_block->array() != 0);
   unit_assert(field_block->array_allocated());
