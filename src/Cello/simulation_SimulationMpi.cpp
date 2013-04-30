@@ -55,21 +55,23 @@ void SimulationMpi::run() throw()
 
   DEBUG("SimulationMpi::run() Initial");
 
-  Initial * initial = problem->initial();
-
   ItBlock it_block(hierarchy_);
 
   CommBlock * block;
 
-  while ((block = ++it_block)) {
+  int index_initial = 0;
+  while (Initial * initial = problem->initial(index_initial++)) {
+	 
+    while ((block = ++it_block)) {
 
-    initial->enforce_block(block, field_descr_, hierarchy_);
+      initial->enforce_block(block, field_descr_, hierarchy_);
 
-    block->set_cycle(cycle_);
-    block->set_time(time_);
+      block->set_cycle(cycle_);
+      block->set_time(time_);
 
-    block->initialize();
+      block->initialize();
 
+    }
   }
 
   // delete parameters in favor of config 
