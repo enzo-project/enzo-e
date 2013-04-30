@@ -54,9 +54,9 @@ void Initial::enforce_hierarchy_
 {
 #ifdef CONFIG_USE_CHARM
 
-  if (hierarchy->group_process()->is_root()) {
-    hierarchy->block_array()->p_initial();
-  }
+  // if (hierarchy->group_process()->is_root()) {
+  //   hierarchy->block_array()->p_initial();
+  // }
 
 #else /* CONFIG_USE_CHARM */
 

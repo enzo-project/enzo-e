@@ -372,6 +372,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   DomainRightEdge[2] = enzo_config->domain_upper[2];
 
   CourantSafetyNumber = enzo_config->field_courant;
+  TRACE1("Courant = %f",EnzoBlock::CourantSafetyNumber);
 
   double time  = enzo_config->initial_time;
 
@@ -404,6 +405,7 @@ EnzoBlock::EnzoBlock
 {
   TRACE("EnzoBlock::EnzoBlock()");
   initialize_enzo_();
+  initialize();
 }
 
 //----------------------------------------------------------------------
@@ -423,7 +425,6 @@ void EnzoBlock::initialize_enzo_()
     BaryonField[j] = 0;
     OldBaryonField[j] = 0;
   }
-
 }
 //----------------------------------------------------------------------
 
@@ -717,9 +718,7 @@ void EnzoBlock::set_dt (double dt_param) throw ()
 
 void EnzoBlock::initialize () throw()
 {
-  TRACE ("Enter EnzoBlock::initialize()\n");
-
-  CommBlock::initialize();
+  TRACE ("EnzoBlock::initialize()\n");
 
   double xm,ym,zm;
 
@@ -743,6 +742,8 @@ void EnzoBlock::initialize () throw()
   GridDimension[0]  = nx + 2*gx;
   GridDimension[1]  = ny + 2*gy;
   GridDimension[2]  = nz + 2*gz;
+
+  TRACE("Initializing GridStartIndex");
 
   GridStartIndex[0] = gx;
   GridStartIndex[1] = gy;

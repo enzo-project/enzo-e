@@ -28,9 +28,6 @@ void SimulationCharm::initialize() throw()
   TRACE("SimulationCharm::initialize()");
   Simulation::initialize();
 
-  WARNING("SimulationCharm::initialize()",
-	  "Calling StartLB for debugging load balancing()");
-
   s_initialize();
 }
 
@@ -39,8 +36,10 @@ void SimulationCharm::initialize() throw()
 void SimulationCharm::s_initialize()
 {
   TRACE("SimulationCharm::s_initialize()");
-  //  if (group_process_->is_root()) run();
-  if (group_process_->is_root()) hierarchy()->block_array()->p_initial();
+
+  if (group_process_->is_root()) {
+    CkStartQD (CkCallback(CkIndex_CommBlock::p_phase_adapt(),*hierarchy()->block_array()));
+   }
 
 }
 

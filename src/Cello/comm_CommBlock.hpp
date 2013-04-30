@@ -109,7 +109,9 @@ public: // interface
 
   /// Contribute block data to the Initial input object
   /// CB
-  void p_read (int index_input = 0);
+  void p_read (int index_input = 0)
+  {  INCOMPLETE("CommBlock::p_read");  }
+
 
   /// Entry function after prepare() to call Simulation::p_output()
   /// CB
@@ -230,7 +232,7 @@ public: // virtual functions
   /// Initialize CommBlock
   virtual void initialize () throw()
   {
-    DEBUG ("DEBUG CommBlock::initialize()\n");
+    TRACE("CommBlock::initialize()\n");
   }
 
 protected: // functions

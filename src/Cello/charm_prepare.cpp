@@ -30,7 +30,7 @@ void CommBlock::prepare()
   TRACE1("CommBlock::prepare() %p",&thisProxy);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  //--------------------------------------------------
+ //--------------------------------------------------
   // Enforce boundary conditions
   //--------------------------------------------------
 
@@ -48,6 +48,7 @@ void CommBlock::prepare()
   Timestep * timestep = problem->timestep();
 
   dt_block = timestep->evaluate(field_descr,this);
+  TRACE1("dt_block = %f",dt_block);
 
   // Reduce timestep to coincide with scheduled output if needed
 

@@ -12,6 +12,8 @@
 #include "main.hpp"
 #include "charm_simulation.hpp"
 
+#include "enzo.hpp" /* temp */
+
 //----------------------------------------------------------------------
 
 CommBlock::CommBlock
@@ -49,14 +51,37 @@ CommBlock::CommBlock
 		       ypm+iby*yb, ypm+(iby+1)*yb,
 		       zpm+ibz*zb, zpm+(ibz+1)*zb);
 
+#ifdef CONFIG_USE_CHARM
+  SimulationCharm * simulation  = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+
+  // Set the CommBlock cycle and time to match Simulation's
+
+  TRACE("CommBlock::p_initial Setting time");
+  set_cycle(simulation->cycle());
+  set_time (simulation->time());
+  set_dt   (simulation->dt());
+  // Allocate block data
+
+  block()->allocate(field_descr);
+
+#endif
+  // Perform any additional initialization for derived class 
+
+  initialize ();
+
   initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz,
 	      xpm,ypm,zpm, xb,yb,zb,    testing);
 
 #ifdef CONFIG_USE_CHARM
   sync_refresh_.stop() = count_refresh_();
+  apply_initial_();   // this doesn't work here...
+  //                         it must be called after EnzoBlock::EnzoBlock()
+  TRACE1("Courant = %f",EnzoBlock::CourantSafetyNumber);
+  //                         
 #endif /* CONFIG_USE_CHARM */
 
-  //  apply_initial_();
+  //
 
 }
 
@@ -98,6 +123,24 @@ void CommBlock::initialize_
 
    for (int ic=0; ic<8; ic++) depth_[ic] = 0;
  }
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+void CommBlock::apply_initial_() throw ()
+{
+
+  SimulationCharm * simulation  = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+
+  // Apply initial conditions
+
+  index_initial_ = 0;
+  while (Initial * initial = simulation->problem()->initial(index_initial_++)) {
+    initial->enforce_block(this,field_descr, simulation->hierarchy());
+  }
+}
+#endif
 
 //----------------------------------------------------------------------
 
