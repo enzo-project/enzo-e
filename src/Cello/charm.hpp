@@ -2,6 +2,8 @@
 
 #include "charm++.h"
 
+#include <string>
+
 #include "_error.hpp"
 
 #include "charm_Index.hpp"

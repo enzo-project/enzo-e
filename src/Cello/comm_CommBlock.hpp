@@ -63,6 +63,7 @@ public: // interface
   p | time_;
   p | dt_;
   p | level_;
+  PUParray(p,depth_,8);
   p | level_active_;
 
 }
@@ -122,6 +123,17 @@ public: // interface
   void coarsen();
   void p_balance();
   int determine_refine();
+  /// Update the depth of the given child
+  void p_update_depth (int ic, int depth);
+  void p_print(std::string message) {  
+    thisIndex.print(message.c_str());
+    TRACE2("%s level %d",message.c_str(),level_);
+    TRACE9("%s depth %d%d%d%d%d%d%d%d",message.c_str(),
+	   depth_[0],depth_[1],depth_[2],depth_[3],
+	   depth_[4],depth_[5],depth_[6],depth_[7]);
+  }
+
+
 
   //--------------------------------------------------
 
@@ -304,6 +316,9 @@ protected: // attributes
 
   /// Mesh refinement level
   int level_;
+
+  /// Depth of each child, starting with 0 if no child
+  int depth_[8];
 
   /// Mesh refinement level currently being refined
   int level_active_;

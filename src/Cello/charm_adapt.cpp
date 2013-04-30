@@ -7,28 +7,37 @@
 ///
 /// ADAPT
 
-/// A mesh adaptation step involves evaluationg refinement criteria
-/// (Refine objects) on all leaves to determine whether to refine,
-/// coarsen, or stay the same.
+/// A mesh adaptation step involves evaluating refinement criteria
+/// (Refine objects) on each leaf CommBlock in the hierarchy to
+/// determine whether the CommBlock should refine, coarsen, or stay
+/// the same.
 ///
-/// Each block tagged for refinement creates children, and each block
-/// tagged for coarsening tells its parent, which coarsens if all of
-/// its children are tagged.
+/// Each CommBlock tagged for refinement creates refined child
+/// CommBlocks.  Each CommBlock tagged for coarsening communicates
+/// with its parent, which, if all children are tagged for coarsening,
+/// will coarsen by deleting its children.  Corresponding data are
+/// interpolated to refined CommBlocks and coarsened to coarsened
+/// CommBlocks.
 ///
-/// Any block that is coarsened or refined tells its neighbors and
-/// parent about its updated state (number of descendents)
+/// Any CommBlock that is coarsened or refined tells its neighbors and
+/// parent about its updated state (number of descendents).  The
+/// "depth" of each child (distance from deepest descendent) is stored
+/// in each CommBlock, which determines the depth of the CommBlock.
 ///
-/// After quiescence, a balancing phase is performed.  The mesh ist
-/// traversed by levels, finest first, and any block that is adjacent
-/// to any block that has a grandchild is tagged for refinement.
-/// Balancing a block can trigger further blocks to require balancing,
-/// but only coarser ones, which will be handled in the next level.  A
+/// After "quiescence" (wait until no communication), a balancing
+/// phase is performed.  The mesh is traversed by levels, finest
+/// first, and any CommBlock that is adjacent to any CommBlock that
+/// has a grandchild is tagged for refinement.  Balancing a CommBlock
+/// can trigger further CommBlocks to require balancing, but only
+/// coarser ones, which will be handled in the next level.  A
 /// quiescence step is used between each level.
 ///
-/// Typically only one mesh adaptation step is performed at a time, except
-/// when applying initial conditions.  In that case several steps may
-/// be applied, up to a specified maximum (mesh_adapt_max_level_initial)
+/// Typically only one mesh adaptation step is performed at a time,
+/// except when applying initial conditions.  In that case, several
+/// steps may be applied, up to a specified maximum
+/// (Mesh:initial_max_level).
 
+   
 /// CommBlock::p_adapt(level) 
 ///    if (adapt)
 ///       adapt(level)
@@ -78,7 +87,8 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-#define IC(ix,iy,iz)  ((ix+2)%2) + 2*( ((iy+2)%2) + 2*((iz+2)%2) )
+// NOTE: +2 is so indices can be -1, e.g. for child indicies of neighboring blocks
+#define IC(icx,icy,icz)  ((icx+2)%2) + 2*( ((icy+2)%2) + 2*((icz+2)%2) )
 #define NC(rank) (rank == 1 ? 2 : (rank == 2 ? 4 : 8))
 #define IN(axis,face)  ((face) + 2*(axis))
 #define NN(rank) (rank*2)
@@ -94,8 +104,8 @@ const char * adapt_name[] = {
 
 void CommBlock::p_adapt(int level)
 {
-  TRACE1("ADAPT p_adapt(%d)",level);
   level_active_ = level;
+  TRACE1("ADAPT p_adapt(%d)",level);
   adapt (); 
 }
 
@@ -182,6 +192,24 @@ int CommBlock::update_adapt_(int a1, int a2) const throw()
 
 //----------------------------------------------------------------------
 
+void CommBlock::p_update_depth (int ic, int depth)
+{
+  // update self
+  depth_[ic] = std::max(depth_[ic],depth);
+  // update parent
+  if (level_ > 0) {
+    Index index = thisIndex;
+    int icx,icy,icz;
+    index.child(level_,&icx,&icy,&icz);
+    index.set_level(level_-1);
+    index.clean();
+    thisProxy[index].p_update_depth (IC(icx,icy,icz), depth + 1);
+  }
+  
+}
+
+//----------------------------------------------------------------------
+
 void CommBlock::refine()
 {
   TRACE("ADAPT CommBlock::refine()");
@@ -215,29 +243,30 @@ void CommBlock::refine()
 
   for (int ic=0; ic<nc; ic++) {
 
-    int ix = (ic & 1) >> 0;
-    int iy = (ic & 2) >> 1;
-    int iz = (ic & 4) >> 2;
+    int icx = (ic & 1) >> 0;
+    int icy = (ic & 2) >> 1;
+    int icz = (ic & 4) >> 2;
 
-    TRACE5("ADAPT new child %d [%d %d %d]/ %d",ic,ix,iy,iz,nc);
+    TRACE5("ADAPT new child %d [%d %d %d]/ %d",ic,icx,icy,icz,nc);
 
     Index index = thisIndex;
     index.set_level(level_+1);
-    index.set_tree (level_+1,ix,iy,iz);
+    index.set_tree (level_+1,icx,icy,icz);
     index.clean();
 
-    thisIndex.print();
-    index.print();
     factory->create_block 
       (thisProxy, index,
        ibx,iby,ibz,
        nbx,nby,nbz,
        nx,ny,nz,
        level_+1,
-       xm[ix],ym[iy],zm[iz],
-       xp[ix],yp[iy],zp[iz],
+       xm[icx],ym[icy],zm[icz],
+       xp[icx],yp[icy],zp[icz],
        num_field_blocks,
        testing);
+
+
+    p_update_depth (ic,1);
 
   }
   
@@ -255,9 +284,9 @@ void CommBlock::coarsen()
 void CommBlock::q_adapt()
 {
   thisProxy.doneInserting();
-  TRACE1("ADAPT q_adapt(%d)",level_active_);
-  ++level_active_;
-  adapt();
+  TRACE3("ADAPT q_adapt %d %d %d",level_,level_active_,thisIndex.is_root());
+  if (thisIndex.is_root()) thisProxy.p_print("q_adapt");
+  if (thisIndex.is_root()) thisProxy.p_adapt(level_active_ + 1);
 }
 
 //----------------------------------------------------------------------
@@ -266,9 +295,6 @@ void CommBlock::p_balance()
 {
   TRACE("ADAPT CommBlock::p_balance()");
 }
-
-//----------------------------------------------------------------------
-
 
 //======================================================================
 

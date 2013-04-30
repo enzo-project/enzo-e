@@ -62,16 +62,16 @@ public:
     }
   }
 
-  int tree (int axis) const
-  { return a_[axis].tree; }
-  
   void child (int il, int * icx, int * icy, int * icz) const
   {
     if (icx) (*icx) = (a_[0].tree >> il) & 1;
     if (icy) (*icy) = (a_[1].tree >> il) & 1;
     if (icz) (*icz) = (a_[2].tree >> il) & 1;
   }
-  
+
+  bool is_root() const
+  { return (v_[0]==0 && v_[1]==0 && v_[2]==0); }
+
   void array (int * ix, int *iy, int *iz) const
   { 
     if (ix) (*ix) = a_[0].array;
@@ -122,6 +122,9 @@ public:
     a_[2].array = iz;
   }
 
+  int tree (int axis) const
+  { return a_[axis].tree; }
+  
   /// Accumulate a level of the tree
   void set_tree(int il, int ix, int iy=0, int iz=0)
   {

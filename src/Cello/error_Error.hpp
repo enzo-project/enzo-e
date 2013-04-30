@@ -94,6 +94,8 @@
   { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
 #   define TRACE8(M,A1,A2,A3,A4,A5,A6,A7,A8)				\
   { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
+#   define TRACE9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8,A9); }
 
 #ifdef CONFIG_USE_CHARM
 #   define TRACEPUP							\
@@ -123,6 +125,8 @@
 #   define TRACE7(M,A1,A2,A3,A4,A5,A6,A7)	\
   /* This space intentionally left blank */
 #   define TRACE8(M,A1,A2,A3,A4,A5,A6,A7,A8)	\
+  /* This space intentionally left blank */
+#   define TRACE9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
   /* This space intentionally left blank */
 
 #ifdef CONFIG_USE_CHARM
