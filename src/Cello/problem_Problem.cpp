@@ -17,7 +17,6 @@ Problem::Problem() throw()
     timestep_(0),
     num_method_(0),
     num_output_(0),
-    index_initial_(0),
     index_output_(0)
 {
 }
@@ -78,7 +77,6 @@ void Problem::pup (PUP::er &p)
     p | output_list_[i]; // PUP::able
   }
 
-  p | index_initial_;
   p | index_output_;
 
 }

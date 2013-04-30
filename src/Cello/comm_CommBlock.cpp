@@ -29,6 +29,7 @@ CommBlock::CommBlock
     cycle_(0),
     time_(0),
     dt_(0),
+    index_initial_(0),
     level_(level),
     level_active_(-1)
 { 

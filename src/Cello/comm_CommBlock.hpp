@@ -62,6 +62,7 @@ public: // interface
   p | cycle_;
   p | time_;
   p | dt_;
+  p | index_initial_;
   p | level_;
   PUParray(p,depth_,8);
   p | level_active_;
@@ -116,6 +117,10 @@ public: // interface
 
   /// Initiate mesh adaptation on given level 
   /// CB
+
+  /// Begin the adaptation phase
+  void p_phase_adapt() {  p_adapt(0); }
+
   void p_adapt (int level);
   void q_adapt ();
   void adapt();
@@ -251,6 +256,9 @@ protected: // functions
 
 #ifdef CONFIG_USE_CHARM
 
+  /// Apply all initial conditions to this Block
+  void apply_initial_() throw();
+
   /// Determine which faces require boundary updates or communication
   void determine_boundary_
   (
@@ -311,6 +319,9 @@ protected: // attributes
   double dt_;
 
   //--------------------------------------------------
+  
+  /// Index of current initialization routine
+  int index_initial_;
 
   /// MESH REFINEMENT
 

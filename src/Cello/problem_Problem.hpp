@@ -70,9 +70,8 @@ public: // interface
   Boundary * boundary() const throw()  { return boundary_; }
 
   /// Return the ith initialization object
-  Initial *  initial(int i = -1) const throw()
+  Initial *  initial(int i) const throw()
   {
-    if (i == -1) i = index_initial_;
     return (0 <= i && i < (int)initial_list_.size()) ? initial_list_[i] : NULL; 
   }
 
@@ -98,13 +97,6 @@ public: // interface
 
 
 #ifdef CONFIG_USE_CHARM
-
-  /// reset initial index to 0 (not needed, but mirrors initial_output() )
-  void initial_reset() throw()
-  { index_initial_ = -1; }
-
-  /// Process the next initial object if any, else proceed with simulation
-  void initial_next(Simulation * simulation) throw();
 
   /// reset output index to 0
   void output_reset() throw()
@@ -230,9 +222,6 @@ private: // attributes
 
   /// Output objects
   std::vector<Output *> output_list_;
-
-  /// Index of currently active Initial object
-  size_t index_initial_;
 
   /// Index of currently active Refine object
   size_t index_refine_;

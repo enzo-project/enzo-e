@@ -58,7 +58,8 @@ void SimulationCharm::s_initialize()
 {
   TRACE("SimulationCharm::s_initialize()");
   //  if (group_process_->is_root()) run();
-  if (group_process_->is_root()) initial();
+  if (group_process_->is_root()) hierarchy()->block_array()->p_initial();
+
 }
 
 #endif /* CONFIG_USE_CHARM */

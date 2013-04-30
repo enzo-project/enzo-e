@@ -92,7 +92,7 @@ void Monitor::header () const
   print ("Define","CELLO_ARCH %s",CELLO_ARCH);
   print ("Define","CELLO_PREC %s",CELLO_PREC);
   print ("Define","CELLO_TYPE %s",CELLO_TYPE);
-  
+
   print ("Define","CC           %s",CELLO_CC);
   print ("Define","CFLAGS       %s",CELLO_CFLAGS);
   print ("Define","CPPDEFINES   %s",CELLO_CPPDEFINES);

@@ -56,60 +56,6 @@
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::initial ()
-{
-  problem()->initial_reset();
-  problem()->initial_next(this);
-}
-
-//======================================================================
-
-void Problem::initial_next(Simulation * simulation) throw()
-{
-
-  // find next initialization object
-
-  Initial * initial;
-
-  initial = this->initial(++index_initial_);
-
-  Hierarchy *  hierarchy   = simulation->hierarchy();
-  FieldDescr * field_descr = simulation->field_descr();
-
-  if (initial != NULL) {
-
-    if (initial->expects_blocks_allocated()) {
-
-      DEBUG1 ("Start Initial(%d) A",index_initial_);
-
-      TRACE ("DEBUG: Problem::initial_next calling CommBlock::p_initial()");
-      if (hierarchy->group_process()->is_root()) {
-	hierarchy->block_array()->p_initial();
-      }
-
-    } else {
-
-      DEBUG1 ("Start Initial(%d) B",index_initial_);
-
-      initial->enforce_block((CommBlock *)NULL, field_descr, hierarchy);
-
-    }
-
-  } else {
-
-    ERROR("Problem::initial_next()",
-	  "Multiple Initial objects not yet implemented");
-
-    SimulationCharm * simulation_charm  = 
-      dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
-
-    simulation_charm->refresh();
-
-  }
-}
-
-//----------------------------------------------------------------------
-
 void CommBlock::p_initial()
 {
   TRACE("CommBlock::p_initial()");
@@ -133,12 +79,23 @@ void CommBlock::p_initial()
 
   // Apply the initial conditions 
 
-  Initial * initial = simulation->problem()->initial();
+  apply_initial_();
 
-  initial->enforce_block(this,field_descr, simulation->hierarchy());
+}
 
+//----------------------------------------------------------------------
+
+void CommBlock::apply_initial_() throw ()
+{
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
-  simulation_charm->s_initial();
+  FieldDescr * field_descr = simulation_charm->field_descr();
+  index_initial_ = 0;
+  while (Initial * initial = simulation_charm->problem()->initial(index_initial_++)) {
+    initial->enforce_block(this,field_descr, simulation_charm->hierarchy());
+  }
+  proxy_simulation.s_initial();
+
+  CkStartQD (CkCallback(CkIndex_CommBlock::p_phase_adapt(),thisProxy[thisIndex]));
 
 }
 
@@ -150,8 +107,10 @@ void SimulationCharm::s_initial()
   TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
   if (block_sync_.done()) {
     TRACE ("CONTINUE SimulationCharm::s_initial()");
-    CkCallback callback (CkIndex_SimulationCharm::c_initial(), thisProxy);
-    contribute(0,0,CkReduction::concat,callback);
+    // DOES NOT WORK HERE: race condition can lead to 
+    //    parameters_ being accessed after being deleted
+    //    delete parameters_;
+    //    parameters_ = 0;
 
   }
 }
