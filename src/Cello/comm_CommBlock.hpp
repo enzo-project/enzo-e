@@ -119,8 +119,7 @@ public: // interface
   /// CB
 
   /// Begin the adaptation phase
-  void p_phase_adapt() {  p_adapt(0); }
-
+  void p_phase_adapt();
   void p_adapt (int level);
   void q_adapt ();
   void adapt();

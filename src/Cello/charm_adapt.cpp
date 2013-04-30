@@ -100,7 +100,11 @@ const char * adapt_name[] = {
   "adapt_coarsen"
 };
 
-//----------------------------------------------------------------------
+//======================================================================
+
+void CommBlock::p_phase_adapt() {  p_adapt(0); }
+
+//======================================================================
 
 void CommBlock::p_adapt(int level)
 {
@@ -265,7 +269,6 @@ void CommBlock::refine()
        num_field_blocks,
        testing);
 
-
     p_update_depth (ic,1);
 
   }
@@ -285,8 +288,13 @@ void CommBlock::q_adapt()
 {
   thisProxy.doneInserting();
   TRACE3("ADAPT q_adapt %d %d %d",level_,level_active_,thisIndex.is_root());
-  if (thisIndex.is_root()) thisProxy.p_print("q_adapt");
-  if (thisIndex.is_root()) thisProxy.p_adapt(level_active_ + 1);
+  if (thisIndex.is_root()) {
+    char buffer[40];
+    sprintf (buffer,"q_adapt(%d)",level_active_);
+    thisIndex.print(buffer);
+    thisProxy.p_print(buffer);
+    thisProxy.p_adapt(level_active_ + 1);
+  }
 }
 
 //----------------------------------------------------------------------

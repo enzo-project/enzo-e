@@ -56,6 +56,8 @@ CommBlock::CommBlock
   sync_refresh_.stop() = count_refresh_();
 #endif /* CONFIG_USE_CHARM */
 
+  //  apply_initial_();
+
 }
 
 //----------------------------------------------------------------------

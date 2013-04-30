@@ -4,29 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-01
 /// @brief    Functions implementing CHARM++ compute-related functions
-///
-/// COMPUTE
-///
-///    SimulationCharm::c_compute()
-///       if (!stop)
-///          if (cycle > 0) performance.stop_region()
-///          performance.start_region()
-///          if (is_root())
-///             block_array().p_compute()
-///       else
-///          performance.stop_region()
-///          performance_write()
-///	  Main::p_exit()
-///
-///    CommBlock::p_compute()
-///       compute()
-///
-///    CommBlock::compute()
-///       for method
-///           method->compute_block()
-///       set_state(cycle+1, time + dt)
-///
-//        >>>>> p_adapt(0) >>>>>
 
 #ifdef CONFIG_USE_CHARM
 

@@ -4,7 +4,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-04-03
 /// @brief    Functions implementing initialization functions requiring
-/// CHARM++
+///             CHARM++
 ///
 /// This file contains member functions for various CHARM++ chares and
 /// classes used for calling Initial objects in a CHARM++ simulation.
@@ -59,12 +59,21 @@
 void CommBlock::p_initial()
 {
   TRACE("CommBlock::p_initial()");
-  Simulation * simulation  = proxy_simulation.ckLocalBranch();
+  // Apply the initial conditions 
+
+  apply_initial_();
+
+  CkStartQD (CkCallback(CkIndex_CommBlock::p_phase_adapt(),thisProxy[thisIndex]));
+
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::apply_initial_() throw ()
+{
+
+  SimulationCharm * simulation  = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
-
-  // Initialize the block
-
-  block()->allocate(field_descr);
 
   // Set the CommBlock cycle and time to match Simulation's
 
@@ -73,56 +82,20 @@ void CommBlock::p_initial()
   set_time (simulation->time());
   set_dt   (simulation->dt());
 
+  // Allocate block data
+
+  block()->allocate(field_descr);
+
   // Perform any additional initialization for derived class 
 
   initialize ();
 
-  // Apply the initial conditions 
+  // Apply initial conditions
 
-  apply_initial_();
-
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::apply_initial_() throw ()
-{
-  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation_charm->field_descr();
   index_initial_ = 0;
-  while (Initial * initial = simulation_charm->problem()->initial(index_initial_++)) {
-    initial->enforce_block(this,field_descr, simulation_charm->hierarchy());
+  while (Initial * initial = simulation->problem()->initial(index_initial_++)) {
+    initial->enforce_block(this,field_descr, simulation->hierarchy());
   }
-  proxy_simulation.s_initial();
-
-  CkStartQD (CkCallback(CkIndex_CommBlock::p_phase_adapt(),thisProxy[thisIndex]));
-
-}
-
-//----------------------------------------------------------------------
-
-void SimulationCharm::s_initial()
-{
-  TRACE("ENTER SimulationCharm::s_initial()");
-  TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
-  if (block_sync_.done()) {
-    TRACE ("CONTINUE SimulationCharm::s_initial()");
-    // DOES NOT WORK HERE: race condition can lead to 
-    //    parameters_ being accessed after being deleted
-    //    delete parameters_;
-    //    parameters_ = 0;
-
-  }
-}
-//----------------------------------------------------------------------
-
-void SimulationCharm::c_initial()
-{
-  TRACE("SimulationCharm::c_initial()");
-  delete parameters_;
-  parameters_ = 0;
-  if (hierarchy()->group_process()->is_root()) 
-    hierarchy()->block_array()->p_adapt(0); 
 }
 
 //----------------------------------------------------------------------

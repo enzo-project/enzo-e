@@ -31,9 +31,6 @@ module simulation {
     entry void p_initialize ();
     entry void s_initialize ();
 
-    entry void s_initial ();
-    entry void c_initial ();
-
     entry void p_output ();
     entry void c_output ();
 

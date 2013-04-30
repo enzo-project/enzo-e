@@ -75,16 +75,6 @@ public: // functions
   /// Wait for all local patches to be created before calling run
   void s_initialize();
 
-  /// Call initialization on Problem list of Initial objects
-  void p_initial();
-  /// Implementation of initialization
-  void initial();
-  /// Wait for all local patches to check in before proceeding to refresh
-  void s_initial();
-  /// Continue on to refresh after s_initial() synchronization
-  void c_initial();
-
-
   /// Call output on Problem list of Output objects
   void p_output ();
   void c_output ();
