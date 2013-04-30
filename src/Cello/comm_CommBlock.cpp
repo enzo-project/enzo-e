@@ -33,13 +33,15 @@ CommBlock::CommBlock
     level_active_(-1)
 { 
 
+#ifdef CONFIG_USE_CHARM
   thisIndex.print("create");
-  // TRACE3("CommBlock::CommBlock ib (%d %d %d)",ibx,iby,ibz);
-  // TRACE3("CommBlock::CommBlock nb (%d %d %d)",nbx,nby,nbz);
-  // TRACE3("CommBlock::CommBlock  n (%d %d %d)",nx,ny,nz);
-  // TRACE1("CommBlock::CommBlock  l %d",level);
-  // TRACE3("CommBlock::CommBlock xp(%f %f %f)",xpm,ypm,zpm);
-  // TRACE3("CommBlock::CommBlock  b(%f %f %f)",xb,yb,zb);
+#endif
+  TRACE3("CommBlock::CommBlock ib (%d %d %d)",ibx,iby,ibz);
+  TRACE3("CommBlock::CommBlock nb (%d %d %d)",nbx,nby,nbz);
+  TRACE3("CommBlock::CommBlock  n (%d %d %d)",nx,ny,nz);
+  TRACE1("CommBlock::CommBlock  l %d",level);
+  TRACE3("CommBlock::CommBlock xp(%f %f %f)",xpm,ypm,zpm);
+  TRACE3("CommBlock::CommBlock  b(%f %f %f)",xb,yb,zb);
 
   block_ = new Block  (nx, ny, nz, num_field_blocks,
 		       xpm+ibx*xb, xpm+(ibx+1)*xb,
