@@ -245,18 +245,26 @@ void InitialDefault::copy_values_
   int gx,gy,gz;
 
   field_descr->ghosts(index_field,&gx,&gy,&gz);
+
   int offset = gx + nx*(gy + ny*gz);
 
   // Copy evaluated values to field values
 
+  //  @@@@ BUG: PNG image input
+  //  @@@@ IC's SMALLER BUT CENTERED IF OFFSET SET TO 0
+  //  @@@@ IC's SHIFTED TO LOWER LEFT
+  //  mask[0][0],[1][1],[2][2] == 1
+
   precision_type precision = field_descr->precision(index_field);
+  TRACE3("nx ny nz = %d %d %d",nx,ny,nz);
   switch (precision) {
   case precision_single:
     for (int iz = 0; iz<nz; iz++) {
       for (int iy = 0; iy<ny; iy++) {
 	for (int ix = 0; ix<nx; ix++) {
 	  int i = ix + nx*(iy + ny*iz);
-	  if (mask[i]) ((float *) field - offset)[i] = (float) value[i];
+	  if (mask[i]) 
+	    ((float *) field - offset)[i] = (float) value[i];
 	}
       }
     }
@@ -266,7 +274,8 @@ void InitialDefault::copy_values_
       for (int iy = 0; iy<ny; iy++) {
 	for (int ix = 0; ix<nx; ix++) {
 	  int i = ix + nx*(iy + ny*iz);
-	  if (mask[i]) ((double *) field - offset)[i] = (double) value[i];
+	  if (mask[i]) 
+	    ((double *) field - offset)[i] = (double) value[i];
 	}
       }
     }
@@ -276,8 +285,8 @@ void InitialDefault::copy_values_
       for (int iy = 0; iy<ny; iy++) {
 	for (int ix = 0; ix<nx; ix++) {
 	  int i = ix + nx*(iy + ny*iz);
-	  if (mask[i]) ((long double *) field - offset)[i] 
-			  = (long double) value[i];
+	  if (mask[i]) 
+	    ((long double *) field - offset)[i] = (long double) value[i];
 	}
       }
     }
@@ -410,12 +419,6 @@ void InitialDefault::create_png_mask_
   double upper_h[3];
   hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
 
-  // Get the hierarchy's size
-
-  double size_h[3];
-  size_h[0] = upper_h[0]-lower_h[0];
-  size_h[1] = upper_h[1]-lower_h[1];
-
   // Get the block's lower and upper extents
 
   double lower_b[3];
@@ -423,12 +426,6 @@ void InitialDefault::create_png_mask_
 
   double upper_b[3];
   comm_block->block()->upper(&upper_b[0],&upper_b[1],&upper_b[2]);
-
-  // get the offset between the block and the hierarchy
-
-  double offset_b[3];
-  offset_b[0] = lower_b[0]-lower_h[0];
-  offset_b[1] = lower_b[1]-lower_h[1];
 
   // get the block's cell width
 
@@ -438,24 +435,64 @@ void InitialDefault::create_png_mask_
      lower_b[1],upper_b[1],&hb[1],
      lower_b[2],upper_b[2],&hb[2]);
 
+  // Get the hierarchy's size including ghosts
+
+  double size_h[3];
+  size_h[0] = upper_h[0]-lower_h[0] + 2*gx*hb[0];
+  size_h[1] = upper_h[1]-lower_h[1] + 2*gy*hb[1];
+
+  // get the offset between the block and the hierarchy
+
+  double offset_b[3];
+  offset_b[0] = lower_b[0]-lower_h[0];
+  offset_b[1] = lower_b[1]-lower_h[1];
+
   // Compute the block mask from the image pixel values
+  // 0
+  // ++---++
+  //    0
+  //    ++---++
+  // 0  3
+  // ++------++
+
+  TRACE3("block lower %f %f %f",lower_b[0],lower_b[1],lower_b[2]);
+  TRACE3("block upper %f %f %f",upper_b[0],upper_b[1],upper_b[2]);
+  TRACE3("domain lower %f %f %f",lower_h[0],lower_h[1],lower_h[2]);
+  TRACE3("domain upper %f %f %f",upper_h[0],upper_h[1],upper_h[2]);
+
+  TRACE2("nb %d %d",nxb,nyb);
+  TRACE3("hb %15.12f %15.12f %15.12f",hb[0],hb[1],hb[2]);
+  TRACE3("size %15.12f %15.12f %15.12f",size_h[0],size_h[1],size_h[2]);
 
   for (int iy_b=0; iy_b<nyb; iy_b++) {
     int iy_h = int((*ny)*(iy_b*hb[1]+offset_b[1])/(size_h[1]));
     for (int ix_b=0; ix_b<nxb; ix_b++) {
       int ix_h = int((*nx)*(ix_b*hb[0]+offset_b[0])/(size_h[0]));
-
-      int i_b = ix_b + nxb*iy_b;
+      if (ix_b==0&&iy_b==0)         TRACE2("A %d : %d",ix_h,ix_h);
+      if (ix_b==nxb-1&&iy_b==nyb-1) TRACE2("B %d : %d",ix_h,ix_h);
+      
+      int i_b = ix_b + nxb*(iy_b);
 
       int r = png.read(ix_h+1,iy_h+1,1);
       int g = png.read(ix_h+1,iy_h+1,2);
       int b = png.read(ix_h+1,iy_h+1,3);
 
+      if (ix_b==0 && iy_b==0) TRACE3("color %d %d %d",r,g,b);
       mask[i_b] = (r+g+b > 0);
-
+      if (ix_b==0 && iy_b==0) {
+	TRACE4("MASK 0: %d %d %d  %d",r,g,b,mask[i_b]);
+	TRACE2("MASK 0: %d %d",ix_h,iy_h);
+      }
+      if (ix_b==nxb-1 && iy_b==nyb-1) {
+	TRACE4("MASK n: %d %d %d  %d",r,g,b,mask[i_b]);
+	TRACE2("MASK n: %d %d",ix_h,iy_h);
+      }
     }
   }
-
+  TRACE5("mask %p = %d %d %d %d",mask,mask[0],mask[nxb+1],mask[2*(nxb+1)],mask[3*(nxb+1)]);
+  int k = 1024+nxb*(1024);
+  TRACE5("mask %p = %d %d %d %d",mask,mask[k+(nxb+1)],mask[k+2*(nxb+1)],mask[k+3*(nxb+1)],mask[k+4*(nxb+1)]);
+ 
   png.close();
   return;
 }
