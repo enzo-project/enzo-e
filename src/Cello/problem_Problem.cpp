@@ -363,7 +363,6 @@ void Problem::initialize_output
     output_list_.push_back(output); 
     ++ num_output_;
 
-
   } // (for index)
 
 }
@@ -554,7 +553,9 @@ Output * Problem::create_output_
 
     // NOTE: assumes cube for non-z axis images
 
-    output = new OutputImage (index,factory,group_process->size(),nx,ny);
+    std::string image_type = config->output_image_type[index];
+
+    output = new OutputImage (index,factory,group_process->size(),nx,ny,image_type);
 
   } else if (name == "data") {
 

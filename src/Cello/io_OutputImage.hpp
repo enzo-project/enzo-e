@@ -26,7 +26,8 @@ public: // functions
   OutputImage(int index,
 	      const Factory * factory,
 	      int process_count,
-	      int nrows, int ncols) throw();
+	      int nrows, int ncols,
+	      std::string image_type) throw();
 
   /// OutputImage destructor: free allocated image data
   virtual ~OutputImage() throw();
@@ -110,7 +111,8 @@ private: // functions
    ( T * array,
      int nxd, int nyd, int nzd,   // Array dimensions
      int nx,  int ny,  int nz,   // Array dimensions
-     int nx0, int ny0, int nz0) throw();
+     int nx0, int ny0, int nz0,
+     int level = 1) throw();
 
 private: // attributes
 
@@ -138,6 +140,8 @@ private: // attributes
   /// Current pngwriter
   pngwriter * png_;
 
+  /// Image type: data or mesh
+  std::string image_type_;
 
 };
 

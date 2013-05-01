@@ -67,6 +67,7 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_image_axis,MAX_FILE_GROUPS);
   PUParray (p,output_image_colormap,MAX_FILE_GROUPS);
   PUParray (p,output_image_colormap_alpha,MAX_FILE_GROUPS);
+  PUParray (p,output_image_type,MAX_FILE_GROUPS);
   PUParray (p,output_field_list,MAX_FILE_GROUPS);
   PUParray (p,output_stride,MAX_FILE_GROUPS);
   PUParray (p,output_name,MAX_FILE_GROUPS);
@@ -454,6 +455,8 @@ void Config::read(Parameters * parameters) throw()
 		axis=="x" || axis=="y" || axis=="z");
       } 
 
+      output_image_type[index] = parameters->value_string("image_type","data");
+
       if (parameters->type("colormap") == parameter_list) {
 	int size = parameters->list_length("colormap");
 	output_image_colormap[index].resize(size);
@@ -470,9 +473,7 @@ void Config::read(Parameters * parameters) throw()
 	    parameters->list_value_float(i,"colormap_alpha",0.0);
 	}
       }
-
     }
-
   }  
 
   //--------------------------------------------------

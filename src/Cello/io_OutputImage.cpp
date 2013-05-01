@@ -14,14 +14,16 @@
 OutputImage::OutputImage(int index,
 			 const Factory * factory,
 			 int process_count,
-			 int nrows, int ncols) throw ()
+			 int nrows, int ncols,
+			 std::string image_type) throw ()
   : Output(index,factory),
     data_(),
     op_reduce_(reduce_sum),
     axis_(axis_z),
     nrows_(nrows),
     ncols_(ncols),
-    png_(0)
+    png_(0),
+    image_type_(image_type)
 
 {
   // Override default Output::process_stride_: only root writes
@@ -73,6 +75,7 @@ void OutputImage::pup (PUP::er &p)
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   if (p.isUnpacking()) png_ = 0;
+  p | image_type_;
 }
 #endif
 
@@ -185,6 +188,9 @@ void OutputImage::write_block
 
   const char * field_unknowns = field_block->field_unknowns(field_descr,index);
 
+  int level = comm_block->level();
+  TRACE1 ("OutputImage: level = %d",level);
+
   switch (field_descr->precision(index)) {
 
   case precision_single:
@@ -192,7 +198,8 @@ void OutputImage::write_block
     image_reduce_ (((float *) field_unknowns),
 		   ndx,ndy,ndz, 
 		   nbx,nby,nbz,
-		   ixb0,iyb0,izb0);
+		   ixb0,iyb0,izb0,
+		   level);
     break;
 
   case precision_double:
@@ -200,7 +207,8 @@ void OutputImage::write_block
     image_reduce_ (((double *) field_unknowns),
 		   ndx,ndy,ndz, 
 		   nbx,nby,nbz,
-		   ixb0,iyb0,izb0);
+		   ixb0,iyb0,izb0,
+		   level);
     break;
 
   default:
@@ -452,7 +460,8 @@ void OutputImage::image_reduce_
 (T * array, 
  int ndx, int ndy, int ndz,
  int nx,  int ny,  int nz,
- int nx0, int ny0, int nz0) throw()
+ int nx0, int ny0, int nz0,
+ int level) throw()
 {
   // Array multipliers
 
@@ -484,59 +493,87 @@ void OutputImage::image_reduce_
   // image x-axis
 
   TRACE1("image_reduce_() data_ = %p",data_);
-  for (int iax=0; iax<npx; iax++) {
+  TRACE1("image_reduce type = ",image_type_.c_str());
 
-    int iix = npx0 + iax;
+  if (image_type_ == "data") {
 
-    // image y-axis
+    for (int iax=0; iax<npx; iax++) {
+      int iix = npx0 + iax;
+      for (int iay=0; iay<npy; iay++) {
+	int iiy = npy0 + iay;
 
-    for (int iay=0; iay<npy; iay++) {
-      
-      int iiy = npy0 + iay;
+	int index_image = iix + nrows_*iiy;
 
-      int index_image = iix + nrows_*iiy;
+	ASSERT5 ("OutputImage::image_reduce_",
+		 "Invalid Access axis %d index(%d %d)  image(%d %d)\n",
+		 axis_, iix, iiy, nrows_,ncols_,
+		 ( (iix < nrows_) && (iiy < ncols_)));
 
-      if ( ! ( (iix < nrows_) &&
-	       (iiy < ncols_)) ) {
-	ERROR5 ("OutputImage::image_reduce_",
-		"Invalid Access axis %d index(%d %d)  image(%d %d)\n",
-		axis_, iix, iiy, nrows_,ncols_);
-      }
+	double & pixel_value = data_ [index_image];
 
-      double & pixel_value = data_ [index_image];
-
-      // reduce along axis
-      for (int iz=0; iz<npz; iz++) {
+	// reduce along axis
+	for (int iz=0; iz<npz; iz++) {
 	
-	int index_array = 
-	  nd3[axis_x]*iax + 
-	  nd3[axis_y]*iay + 
-	  nd3[axis_]*iz;
+	  int index_array = 
+	    nd3[axis_x]*iax + 
+	    nd3[axis_y]*iay + 
+	    nd3[axis_]*iz;
 
-	// reduce along z axis
+	  // reduce along z axis
 
-	switch (op_reduce_) {
-	case reduce_min: 
-	  pixel_value = MIN(array[index_array],(T)(pixel_value)); 
-	  break;
-	case reduce_max: 
-	  pixel_value = MAX(array[index_array],(T)(pixel_value)); 
-	  break;
-	case reduce_avg: 
-	case reduce_sum: 
-	  // @@@@@@@@@@@@@@@@@@@@@@@@@
-	  // BUG: segfault here when Charm++ load balancing
-	  // @@@@@@@@@@@@@@@@@@@@@@@@@
-	  pixel_value += array[index_array]; break;
-	default:
-	  break;
+	  switch (op_reduce_) {
+	  case reduce_min: 
+	    pixel_value = MIN(array[index_array],(T)(pixel_value)); 
+	    break;
+	  case reduce_max: 
+	    pixel_value = MAX(array[index_array],(T)(pixel_value)); 
+	    break;
+	  case reduce_avg: 
+	  case reduce_sum: 
+	    // @@@@@@@@@@@@@@@@@@@@@@@@@
+	    // BUG: segfault here when Charm++ load balancing
+	    // @@@@@@@@@@@@@@@@@@@@@@@@@
+	    pixel_value += array[index_array]; break;
+	  default:
+	    break;
+	  }
 	}
-      }
 
-      if (op_reduce_ == reduce_avg) pixel_value /= npz;
+	if (op_reduce_ == reduce_avg) pixel_value /= npz;
+
+      }
+    }
+  } else if (image_type_ == "mesh") {
+
+    int iix,iiy;
+    int index_image;
+    for (int iax=0; iax<npx; iax++) {
+      iix = npx0 + iax;
+      iiy = npy0 + 0;
+      index_image = iix + nrows_*iiy;
+      data_ [index_image] = level+1;
+
+      iix = npx0 + iax;
+      iiy = npy0 + npy-1;
+      index_image = iix + nrows_*iiy;
+      data_ [index_image] = level+1;
 
     }
+    for (int iay=0; iay<npy; iay++) {
+      iix = npx0 + 0;
+      iiy = npy0 + iay;
+      index_image = iix + nrows_*iiy;
+      data_ [index_image] = level+1;
 
+      iix = npx0 + npx-1;
+      iiy = npy0 + iay;
+      index_image = iix + nrows_*iiy;
+      data_ [index_image] = level+1;
+    }
+  } else {
+    ERROR1 ("OutputImage::image_reduce_",
+	    "Invalid image-type_ '%s'",
+	    image_type_.c_str());
   }
 }
 

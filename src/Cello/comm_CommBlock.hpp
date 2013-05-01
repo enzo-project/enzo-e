@@ -209,6 +209,10 @@ public: // interface
   /// Return the current time
   double time() const throw() { return time_; };
 
+  /// Return the level in the Hierarchy
+  int level() const throw() { return level_; };
+
+
   /// Return the current timestep
   double dt() const throw() { return dt_; };
  
