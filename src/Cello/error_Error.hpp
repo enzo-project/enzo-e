@@ -196,7 +196,7 @@
 /// @def      ASSERT
 /// @brief    Equivalent to assert()
 
-#ifdef CELLO_DEBUG
+// #ifdef CELLO_DEBUG
 
 #define ASSERT(F,M,A)							\
   {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M); t_(); } }
@@ -211,16 +211,16 @@
 #define ASSERT5(F,M,A1,A2,A3,A4,A5,A)					\
   {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5); t_(); } }
 
-#else  /* CELLO_DEBUG */
+// #else  /* CELLO_DEBUG */
 
-#define ASSERT(F,M,A) /* NULL */
-#define ASSERT1(F,M,A1,A)  /* NULL */
-#define ASSERT2(F,M,A1,A2,A) /* NULL */
-#define ASSERT3(F,M,A1,A2,A3,A) /* NULL */
-#define ASSERT4(F,M,A1,A2,A3,A4,A) /* NULL */
-#define ASSERT5(F,M,A1,A2,A3,A4,A5,A) /* NULL */
+// #define ASSERT(F,M,A) /* NULL */
+// #define ASSERT1(F,M,A1,A)  /* NULL */
+// #define ASSERT2(F,M,A1,A2,A) /* NULL */
+// #define ASSERT3(F,M,A1,A2,A3,A) /* NULL */
+// #define ASSERT4(F,M,A1,A2,A3,A4,A) /* NULL */
+// #define ASSERT5(F,M,A1,A2,A3,A4,A5,A) /* NULL */
 
-#endif /* CELLO_DEBUG */
+// #endif /* CELLO_DEBUG */
 
 extern void m2_
 (FILE * fp,
