@@ -97,7 +97,6 @@ void CommBlock::initialize_
  bool testing
  )
  {
-   level_ = 0;
    size_[0] = nbx;
    size_[1] = nby;
    size_[2] = nbz;

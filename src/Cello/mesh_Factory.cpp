@@ -125,6 +125,7 @@ CommBlock * Factory::create_block
  bool testing
  ) const throw()
 {
+  TRACE1("create_block level %d",level);
 #ifdef CONFIG_USE_CHARM
 
    block_array[index].insert

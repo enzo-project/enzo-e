@@ -49,7 +49,7 @@ int RefineSlope::apply
 
   int nx,ny,nz;
   field_block->size(&nx,&ny,&nz);
-  TRACE3("n = %d %d %d",nx,ny,nz);
+  // TRACE3("n = %d %d %d",nx,ny,nz);
 
   int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
 
@@ -90,9 +90,9 @@ int RefineSlope::apply
 		int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
 		slope = fabs((array[i+d] - array[i-d]) / h[axis]);
 		if (slope > slope_min_refine_)  any_refine  = true;
-		if (slope > slope_min_refine_)  
-		  TRACE6 ("%d: %d %d %d  %g %g",
-			  id_field,ix,iy,iz,array[i+d],array[i-d]);
+		// if (slope > slope_min_refine_)  
+		  // TRACE6 ("%d: %d %d %d  %g %g",
+		  // 	  id_field,ix,iy,iz,array[i+d],array[i-d]);
 		if (slope > slope_max_coarsen_) all_coarsen = false;
 	      }
 	    }
@@ -115,9 +115,9 @@ int RefineSlope::apply
 		slope = fabs((array[i+d] - array[i-d]) / h[axis]);
 		if (slope > slope_min_refine_)  any_refine  = true;
 		if (slope > slope_max_coarsen_) all_coarsen = false;
-		if (slope > slope_min_refine_)  
-		  TRACE6 ("%d: %d %d %d  %g %g",
-			  id_field,ix,iy,iz,array[i+d],array[i-d]);
+		// if (slope > slope_min_refine_)  
+		//   TRACE6 ("%d: %d %d %d  %g %g",
+		// 	  id_field,ix,iy,iz,array[i+d],array[i-d]);
 	      }
 	    }
 	  }
@@ -130,10 +130,10 @@ int RefineSlope::apply
 	     precision,0);
       break;
     }
-    TRACE3 ("RefineSlope any_refine[%d] = %d all_coarsen = %d",id_field,
-	    any_refine,all_coarsen);
+    // TRACE3 ("RefineSlope any_refine[%d] = %d all_coarsen = %d",id_field,
+    // 	    any_refine,all_coarsen);
   }
-  TRACE2 ("RefineSlope any_refine = %d all_coarsen = %d",
+  TRACE2 ("REFINE RefineSlope any_refine = %d all_coarsen = %d",
 	  any_refine,all_coarsen);
 
   return 

@@ -125,7 +125,7 @@ void CommBlock::adapt()
   int initial_max_level = simulation_charm->config()->initial_max_level;
   int initial_cycle     = simulation_charm->config()->initial_cycle;
 
-  TRACE2 ("cycle %d  initial_cycle %d",cycle(),initial_cycle);
+  TRACE2 ("ADAPT cycle %d  initial_cycle %d",cycle(),initial_cycle);
   int max_level = (cycle() == initial_cycle) ? 
     initial_max_level : mesh_max_level;
 
@@ -138,6 +138,7 @@ void CommBlock::adapt()
 
   } else {
 
+    TRACE2("ADAPT determine_refine %d %d",level_active_,level_);
     if (level_active_ == level_) {
       int adapt = determine_refine();
       TRACE1 ("ADAPT adapt = %s",adapt_name[adapt]);
