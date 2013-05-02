@@ -95,6 +95,12 @@ public: // interface
     return index_mpi_;
 #endif
   }
+  void set_index(Index * index) {
+#ifdef CONFIG_USE_CHARM
+#else
+    index_mpi_ = *index;
+#endif
+  }    
 
 #ifdef CONFIG_USE_CHARM
 
@@ -264,8 +270,6 @@ protected: // functions
   ( int ibx, int iby, int ibz,
     int nbx, int nby, int nbz,
     int nx, int ny, int nz,
-    double xpm, double ypm, double zpm, // Domain begin
-    double xb, double yb, double zb,    // CommBlock width
     bool testing);
 
   /// Allocate and copy in attributes from give CommBlock

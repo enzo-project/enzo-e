@@ -18,12 +18,12 @@
 
 CommBlock::CommBlock
 (
- int ibx, int iby, int ibz,
- int nbx, int nby, int nbz,
- int nx, int ny, int nz,
- int level,
- double xpm, double ypm, double zpm, // Domain begin
- double xb, double yb, double zb,    // CommBlock width
+ int ibx, int iby, int ibz,          // Forest element
+ int nbx, int nby, int nbz,          // Forest size
+ int nx, int ny, int nz,             // Block cells
+ int level,                          // Block level
+ double xpm, double ypm, double zpm, // Forest begin
+ double xb, double yb, double zb,    // Block size
  int num_field_blocks,
  bool testing
 ) throw ()
@@ -45,7 +45,7 @@ CommBlock::CommBlock
   TRACE3("CommBlock::CommBlock nb (%d %d %d)",nbx,nby,nbz);
   TRACE3("CommBlock::CommBlock  n (%d %d %d)",nx,ny,nz);
   TRACE1("CommBlock::CommBlock  l %d",level);
-  TRACE3("CommBlock::CommBlock xp(%f %f %f)",xpm,ypm,zpm);
+  TRACE3("CommBlock::CommBlock xm(%f %f %f)",xpm,ypm,zpm);
   TRACE3("CommBlock::CommBlock  b(%f %f %f)",xb,yb,zb);
 
   block_ = new Block  (nx, ny, nz, num_field_blocks,
@@ -72,8 +72,7 @@ CommBlock::CommBlock
 
   initialize ();
 
-  initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz,
-	      xpm,ypm,zpm, xb,yb,zb,    testing);
+  initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz, testing);
 
 #ifdef CONFIG_USE_CHARM
   sync_refresh_.stop() = count_refresh_();
@@ -94,8 +93,6 @@ void CommBlock::initialize_
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
- double xpm, double ypm, double zpm, // Domain begin
- double xb, double yb, double zb,   // CommBlock width
  bool testing
  )
  {

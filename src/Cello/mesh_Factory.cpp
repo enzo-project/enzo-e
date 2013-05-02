@@ -113,8 +113,9 @@ CProxy_CommBlock Factory::create_block_array
 CommBlock * Factory::create_block
 (
 #ifdef CONFIG_USE_CHARM
- CProxy_CommBlock block_array, Index index,
+ CProxy_CommBlock block_array,
 #endif /* CONFIG_USE_CHARM */
+ Index index,
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -146,15 +147,19 @@ CommBlock * Factory::create_block
 
 #else /* CONFIG_USE_CHARM */
 
-  return new CommBlock 
-    (ibx,iby,ibz, 
-     nbx,nby,nbz,
-     nx,ny,nz,
-     level,
-     xm,ym,zm, 
-     xb,yb,zb, 
-     num_field_blocks,
-     testing);
+   CommBlock * comm_block = new CommBlock 
+     (ibx,iby,ibz, 
+      nbx,nby,nbz,
+      nx,ny,nz,
+      level,
+      xm,ym,zm, 
+      xb,yb,zb, 
+      num_field_blocks,
+      testing);
+
+   comm_block->set_index(index);
+
+   return comm_block;
 
 #endif /* CONFIG_USE_CHARM */
 }

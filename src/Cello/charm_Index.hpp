@@ -91,9 +91,11 @@ public:
 
   void set_level(int il)
   { 
-    a_[0].level = (il>>0*INDEX_MAX_LEVEL_AXIS_BITS) & 3;
-    a_[1].level = (il>>1*INDEX_MAX_LEVEL_AXIS_BITS) & 3;
-    a_[2].level = (il>>2*INDEX_MAX_LEVEL_AXIS_BITS) & 3;
+    int shift = INDEX_MAX_LEVEL_AXIS_BITS;
+    int mask  = INDEX_MAX_LEVEL_AXIS_RANGE - 1;
+    a_[0].level = (il>>0*shift) & mask;
+    a_[1].level = (il>>1*shift) & mask;
+    a_[2].level = (il>>2*shift) & mask;
     clean();
   }
 

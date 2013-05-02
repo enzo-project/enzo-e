@@ -237,14 +237,20 @@ void CommBlock::refine()
   block()->lower(&xm[0],&ym[0],&zm[0]);
   double xp[2],yp[2],zp[2];
   block()->upper(&xp[1],&yp[1],&zp[1]);
+
   xm[1] = xp[0] = 0.5 * (xm[0] + xp[1]);
   ym[1] = yp[0] = 0.5 * (ym[0] + yp[1]);
   zm[1] = zp[0] = 0.5 * (zm[0] + zp[1]);
-  TRACE3("ADAPT refine xm0 = %f %f %f",xm[0],ym[0],zm[0]);
-  TRACE3("ADAPT refine xp0 = %f %f %f",xp[0],yp[0],zp[0]);
-  TRACE3("ADAPT refine xm1 = %f %f %f",xm[1],ym[1],zm[1]);
-  TRACE3("ADAPT refine xp1 = %f %f %f",xp[1],yp[1],zp[1]);
 
+  if (! ((0.0 <= xm[0] && xm[0] <= 1.0) &&
+	 (0.0 <= ym[0] && ym[0] <= 1.0) &&
+	 (0.0 <= zm[0] && zm[0] <= 1.0) &&
+	 (0.0 <= xm[1] && xm[1] <= 1.0) &&
+	 (0.0 <= ym[1] && ym[1] <= 1.0) &&
+	 (0.0 <= zm[1] && zm[1] <= 1.0)) ) {
+    TRACE6("CommBlock ERROR:  %f %f %f  %f %f %f", xm[0],ym[0],zm[0],xp[0],yp[0],zp[0]);
+    TRACE6("CommBlock ERROR:  %f %f %f  %f %f %f", xm[1],ym[1],zm[1],xp[1],yp[1],zp[1]);
+  }
   int num_field_blocks = 1;
   bool testing = false;
 

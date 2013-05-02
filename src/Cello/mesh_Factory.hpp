@@ -77,8 +77,9 @@ public: // interface
   virtual CommBlock * create_block
   (
 #ifdef CONFIG_USE_CHARM
-   CProxy_CommBlock block_array, Index index,
+   CProxy_CommBlock block_array,
 #endif
+   Index index,
    int ibx, int iby, int ibz,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,

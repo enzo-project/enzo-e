@@ -102,8 +102,8 @@ CommBlock * EnzoFactory::create_block
 (
 #ifdef CONFIG_USE_CHARM
  CProxy_CommBlock block_array,
- Index * index,
 #endif /* CONFIG_USE_CHARM */
+ Index * index,
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -131,15 +131,20 @@ CommBlock * EnzoFactory::create_block
    
 #else /* CONFIG_USE_CHARM */
 
-  return new EnzoBlock 
-    (
-     ibx,iby,ibz, 
-     nbx,nby,nbz,
-     nx,ny,nz,
-     level,
-     xm,ym,zm, 
-     hx,hy,hz, 
-     num_field_blocks);
+     EnzoBlock * enzo_block = new EnzoBlock 
+       (
+	ibx,iby,ibz, 
+	nbx,nby,nbz,
+	nx,ny,nz,
+	level,
+	xm,ym,zm, 
+	hx,hy,hz, 
+	num_field_blocks);
+
+     enzo_block->set_index(index);
+
+     return enzo_block;
+  
 #endif /* CONFIG_USE_CHARM */
 }
 

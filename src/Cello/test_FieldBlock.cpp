@@ -76,17 +76,6 @@ PARALLEL_MAIN_BEGIN
   double xpp,ypp,zpp;
   xpp =  1.0;  ypp =  2.0, zpp =  3.0;
 
-  // Factory factory;
-  // Block * block = factory.create_block
-  //   (NULL, ix,iy,iz, 
-  //    1,1,1,
-  //    nx,ny,nz,
-  //    xpm,ypm,zpm,
-  //    xb,yb,zb,  1);
-
-  // FieldBlock * field_block = block->field_block();
-
-
   FieldBlock * field_block = new FieldBlock(nx,ny,nz);
   //----------------------------------------------------------------------
 

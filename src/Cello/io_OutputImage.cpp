@@ -28,12 +28,12 @@ OutputImage::OutputImage(int index,
 
 {
   
+  TRACE1 ("OutputImage reduce %d",op_reduce_);
+
   if (image_reduce_type=="min") op_reduce_ = reduce_min;
   if (image_reduce_type=="max") op_reduce_ = reduce_max;
   if (image_reduce_type=="avg") op_reduce_ = reduce_avg;
   if (image_reduce_type=="sum") op_reduce_ = reduce_sum;
-
-  TRACE1 ("OutputImage reduce %d",op_reduce_);
 
   int nl = image_block_size * (1 << max_level); // image size factor
 
@@ -565,6 +565,7 @@ void OutputImage::reduce_line_y_(int ix, int iym, int iyp, double value)
 
 void OutputImage::reduce_box_(int ixm, int ixp, int iym, int iyp, double value)
 {
+  TRACE5("reduce_box %d %d %d %d %f",ixm,ixp,iym,iyp,value);
   reduce_line_x_(ixm,ixp,iym,value);
   reduce_line_x_(ixm,ixp,iyp,value);
   reduce_line_y_(ixm,iym,iyp,value);
@@ -576,6 +577,7 @@ void OutputImage::reduce_box_(int ixm, int ixp, int iym, int iyp, double value)
 
 void OutputImage::reduce_cube_(int ixm, int ixp, int iym, int iyp, double value)
 {
+  TRACE5("reduce_cube %d %d %d %d %f",ixm,ixp,iym,iyp,value);
   ASSERT2("OutputImage::reduce_line_x","! (ixm (%d) <= ixp (%d)",ixm,ixp,ixm<=ixp);
   ASSERT2("OutputImage::reduce_line_y","! (iym (%d) <= iyp (%d)",iym,iyp,iym<=iyp);
   if (ixp < ixm) { int t = ixp; ixp = ixm; ixm = t; }
@@ -633,4 +635,15 @@ void OutputImage::extents_img_ (const CommBlock * comm_block,
   (*ixp) = (*ixm) + mx;
   (*iyp) = (*iym) + my;
   (*izp) = (*izm) + mz;
+
+  //@@@@@@@@@@
+  double xm,ym,zm;
+  double d = 640.0;
+  comm_block->block()->lower(&xm,&ym,&zm);
+  TRACE6("CommBlock lower extents %f %f %f  - %f %f %f",
+	 *ixm/d,*iym/d,*izm/d, xm,ym,zm);
+  double xp,yp,zp;
+  comm_block->block()->upper(&xp,&yp,&zp);
+  TRACE6("CommBlock upper extents %f %f %f  - %f %f %f",
+	 *ixp/d,*iyp/d,*izp/d, xp,yp,zp);
 }
