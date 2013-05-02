@@ -24,6 +24,6 @@ f90['serial'] = 'gfortran'
 libpath_fortran = ''
 libs_fortran    = ['gfortran']
 
-charm_path  = '/home/bordner/charm/charm'
+charm_path  = '/home/bordner/Charm/charm'
 papi_path   = '/usr/local'
 hdf5_path   = '/usr'
