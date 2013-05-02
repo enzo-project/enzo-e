@@ -36,8 +36,10 @@ CommBlock::CommBlock
     level_active_(-1)
 { 
 
+  TRACE("ENTER CommBlock::CommBlock()");
+
 #ifdef CONFIG_USE_CHARM
-  thisIndex.print("create");
+  index().print("create");
 #endif
   TRACE3("CommBlock::CommBlock ib (%d %d %d)",ibx,iby,ibz);
   TRACE3("CommBlock::CommBlock nb (%d %d %d)",nbx,nby,nbz);

@@ -546,16 +546,19 @@ Output * Problem::create_output_
     // parameter: Mesh : root_blocks
     //--------------------------------------------------
 
-    int nx,ny;
-
-    nx = config->mesh_root_size[0];
-    ny = config->mesh_root_size[1];
+    int nx = config->mesh_root_size[0];
+    int ny = config->mesh_root_size[1];
+    int nz = config->mesh_root_size[2];
 
     // NOTE: assumes cube for non-z axis images
 
-    std::string image_type = config->output_image_type[index];
-
-    output = new OutputImage (index,factory,group_process->size(),nx,ny,image_type);
+    std::string image_type       = config->output_image_type[index];
+    int         image_block_size = config->output_image_block_size[index];
+    int         max_level        = config->mesh_max_level;
+    std::string image_reduce_type = config->output_image_reduce_type[index];
+    
+    output = new OutputImage (index,factory,group_process->size(),nx,ny,nz, max_level,
+			      image_type,image_reduce_type,image_block_size);
 
   } else if (name == "data") {
 

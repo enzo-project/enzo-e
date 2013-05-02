@@ -33,6 +33,8 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+// #define SKIP_TO_OUTPUT
+
 //----------------------------------------------------------------------
 
 // void SimulationCharm::p_refresh()
@@ -40,17 +42,34 @@
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::refresh()
+void CommBlock::p_refresh() 
 {
-  TRACE("SimulationCharm::refresh");
+  // @@@ 128 OK
+  TRACE("CommBlock::p_refresh");
+#ifdef SKIP_TO_OUTPUT
+  WARNING("CommBlock::q_adapt_exit",
+	  "CALLING p_output() INSTEAD OF REFRESH FOR IMAGE MESH CREATION");
+
+  //@@@@@@@@@@@@@@@@@@@@@@2
+  double min_reduce[2];
+
+  min_reduce[0] = 0.0;
+  min_reduce[1] = 0.0;
+  CkCallback callback (CkIndex_CommBlock::p_output(NULL), thisProxy);
+  contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
+
+  //    thisProxy.p_output();
+  //@@@@@@@@@@@@@@@@@@@@@@2
+#else
+  refresh(); 
+#endif
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_refresh() 
+void SimulationCharm::refresh()
 {
-  TRACE("CommBlock::p_refresh");
-  refresh(); 
+  TRACE("SimulationCharm::refresh");
 }
 
 //----------------------------------------------------------------------
@@ -163,6 +182,7 @@ void CommBlock::refresh ()
 void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
 {
 
+  // @@@ 512 ???
   TRACE ("CommBlock::x_refresh()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -191,6 +211,7 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
   //--------------------------------------------------
 
   if (sync_refresh_.done()) {
+    // @@@ 97 XXX
     TRACE ("CommBlock::x_refresh() calling prepare()");
     prepare();
   }

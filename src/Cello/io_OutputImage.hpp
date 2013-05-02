@@ -26,8 +26,11 @@ public: // functions
   OutputImage(int index,
 	      const Factory * factory,
 	      int process_count,
-	      int nrows, int ncols,
-	      std::string image_type) throw();
+	      int nx0, int ny0, int nz0,
+	      int max_level,
+	      std::string image_type,
+	      std::string image_reduce_type,
+	      int         image_block_size) throw();
 
   /// OutputImage destructor: free allocated image data
   virtual ~OutputImage() throw();
@@ -105,14 +108,20 @@ private: // functions
   /// Close the image data
   void image_close_ () throw();
 
-   /// Generate a PNG image of an array
-   template<class T>
-   void image_reduce_
-   ( T * array,
-     int nxd, int nyd, int nzd,   // Array dimensions
-     int nx,  int ny,  int nz,   // Array dimensions
-     int nx0, int ny0, int nz0,
-     int level = 1) throw();
+   /// Generate a PNG image of array data
+  void reduce_point_ ( double * data, int * count, double value) throw();
+
+  void extents_img_ (const CommBlock * comm_block,
+		     int *ixm, int *ixp,
+		     int *iym, int *iyp,
+		     int *izm, int *izp ) const;
+
+  void reduce_line_x_(int ixm, int ixp, int iy, double value);
+  void reduce_line_y_(int ix, int iym, int iyp, double value);
+  void reduce_box_(int ixm, int ixp, int iym, int iyp, double value);
+  void reduce_cube_(int ixm, int ixp, int iym, int iyp, double value);
+  
+
 
 private: // attributes
 
@@ -122,8 +131,11 @@ private: // attributes
   std::vector<double> map_b_;
   std::vector<double> map_a_;
 
-  /// Current image
+  /// Current image data
   double * data_;
+
+  /// Current count of data points (for average reduction)
+  int * count_;
 
   /// Reduction operation
   reduce_type op_reduce_;
@@ -131,11 +143,8 @@ private: // attributes
   /// Axis along which to reduce
   axis_type axis_;
 
-  /// Current image columns
-  int nrows_;
-
-  /// Current image rows
-  int ncols_;
+  /// Current image size (depending on axis_)
+  int nxi_,nyi_,nzi_;
 
   /// Current pngwriter
   pngwriter * png_;

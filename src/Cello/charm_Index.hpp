@@ -1,8 +1,6 @@
 #ifndef INDEX_HPP
 #define INDEX_HPP
 
-#ifdef CONFIG_USE_CHARM
-
 // ARRAY_BITS + TREE_BITS + LEVEL_AXIS_BITS == 32
 
 #define INDEX_MAX_ARRAY_BITS       10
@@ -15,12 +13,14 @@ struct BIndex {
   unsigned array : INDEX_MAX_ARRAY_BITS; // maximum 1024 x 1024 x 1024 root blocks
   unsigned  tree : INDEX_MAX_TREE_BITS; // maximum INDEX_MAX_TREE_BITS levels / bits
   unsigned level : INDEX_MAX_LEVEL_AXIS_BITS; // maximum 32 level specification
+#ifdef CONFIG_USE_CHARM
 #ifndef TEST
 public:
   void pup(PUP::er &p) {
     
   }
 #endif
+#endif /* CONFIG_USE_CHARM */
 };
 
 class Index {
@@ -47,11 +47,13 @@ public:
     set_array(ix,iy,iz);
   }
 
+#ifdef CONFIG_USE_CHARM
 #ifndef TEST
   void pup(PUP::er &p) {
     p(v_,3);
   }
 #endif
+#endif /* CONFIG_USE_CHARM */
 
   void clear () 
   {
@@ -162,6 +164,7 @@ private:
 };
 
 //----------------------------------------------------------------------
+#ifdef CONFIG_USE_CHARM
 
 #ifndef TEST
 class CkArrayIndexIndex:public CkArrayIndex {
@@ -184,6 +187,5 @@ public:
 };
 #endif
 #endif /* INDEX_HPP */
-
 
 #endif /* CONFIG_USE_CHARM */

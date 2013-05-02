@@ -65,9 +65,11 @@ void Config::pup (PUP::er &p)
   p | output_file_groups;
   PUParray (p,output_type,MAX_FILE_GROUPS);
   PUParray (p,output_image_axis,MAX_FILE_GROUPS);
+  PUParray (p,output_image_block_size,MAX_FILE_GROUPS);
   PUParray (p,output_image_colormap,MAX_FILE_GROUPS);
   PUParray (p,output_image_colormap_alpha,MAX_FILE_GROUPS);
   PUParray (p,output_image_type,MAX_FILE_GROUPS);
+  PUParray (p,output_image_reduce_type,MAX_FILE_GROUPS);
   PUParray (p,output_field_list,MAX_FILE_GROUPS);
   PUParray (p,output_stride,MAX_FILE_GROUPS);
   PUParray (p,output_name,MAX_FILE_GROUPS);
@@ -445,6 +447,9 @@ void Config::read(Parameters * parameters) throw()
 
     if (output_type[index] == "image") {
 
+      WARNING1 ("Config::read()",
+		"output_image_axis[%d] set to z",index);
+
       output_image_axis[index] = "z";
 
       if (parameters->type("axis") != parameter_unknown) {
@@ -455,7 +460,11 @@ void Config::read(Parameters * parameters) throw()
 		axis=="x" || axis=="y" || axis=="z");
       } 
 
+      output_image_block_size[index] = parameters->value_integer("image_block_size",1);
+
       output_image_type[index] = parameters->value_string("image_type","data");
+
+      output_image_reduce_type[index] = parameters->value_string("image_reduce_type","sum");
 
       if (parameters->type("colormap") == parameter_list) {
 	int size = parameters->list_length("colormap");

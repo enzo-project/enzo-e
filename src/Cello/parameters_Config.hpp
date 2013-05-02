@@ -100,9 +100,11 @@ public: // attributes
   std::string                output_type           [MAX_FILE_GROUPS];
 
   std::string                output_image_axis           [MAX_FILE_GROUPS];
+  int                        output_image_block_size     [MAX_FILE_GROUPS];
   std::vector<double>        output_image_colormap_alpha [MAX_FILE_GROUPS];
   std::vector<double>        output_image_colormap       [MAX_FILE_GROUPS];
   std::string                output_image_type           [MAX_FILE_GROUPS];
+  std::string                output_image_reduce_type    [MAX_FILE_GROUPS];
   std::vector<std::string>   output_dir            [MAX_FILE_GROUPS];
   int                        output_stride         [MAX_FILE_GROUPS];
   std::vector<std::string>   output_field_list     [MAX_FILE_GROUPS];

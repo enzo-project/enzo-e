@@ -134,7 +134,7 @@ void CommBlock::adapt()
 
   if (max_level == 0) {
 
-    refresh();
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(),thisProxy[thisIndex]));
 
   } else {
 
@@ -155,7 +155,8 @@ void CommBlock::adapt()
     } else {
 
       level_active_ = -1;
-      refresh();
+
+      CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(),thisProxy[thisIndex]));
 
     }
   }
@@ -210,7 +211,6 @@ void CommBlock::p_update_depth (int ic, int depth)
     index.clean();
     thisProxy[index].p_update_depth (IC(icx,icy,icz), depth + 1);
   }
-  
 }
 
 //----------------------------------------------------------------------
@@ -236,10 +236,14 @@ void CommBlock::refine()
   double xm[2],ym[2],zm[2];
   block()->lower(&xm[0],&ym[0],&zm[0]);
   double xp[2],yp[2],zp[2];
-  block()->upper(&xm[1],&ym[1],&zm[1]);
+  block()->upper(&xp[1],&yp[1],&zp[1]);
   xm[1] = xp[0] = 0.5 * (xm[0] + xp[1]);
   ym[1] = yp[0] = 0.5 * (ym[0] + yp[1]);
   zm[1] = zp[0] = 0.5 * (zm[0] + zp[1]);
+  TRACE3("ADAPT refine xm0 = %f %f %f",xm[0],ym[0],zm[0]);
+  TRACE3("ADAPT refine xp0 = %f %f %f",xp[0],yp[0],zp[0]);
+  TRACE3("ADAPT refine xm1 = %f %f %f",xm[1],ym[1],zm[1]);
+  TRACE3("ADAPT refine xp1 = %f %f %f",xp[1],yp[1],zp[1]);
 
   int num_field_blocks = 1;
   bool testing = false;
@@ -305,7 +309,17 @@ void CommBlock::p_balance()
   TRACE("ADAPT CommBlock::p_balance()");
 }
 
-//======================================================================
+//----------------------------------------------------------------------
+
+void CommBlock::q_adapt_exit()
+{
+  TRACE("ADAPT CommBlock::q_adapt_exit()");
+  thisProxy.doneInserting();
+  if (thisIndex.is_root()) {
+    thisProxy.p_refresh();
+  };
+  
+}
 
 #endif /* CONFIG_USE_CHARM */
 

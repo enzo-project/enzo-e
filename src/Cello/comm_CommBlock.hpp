@@ -66,6 +66,10 @@ public: // interface
   p | level_;
   PUParray(p,depth_,8);
   p | level_active_;
+#ifdef CONFIG_USE_CHARM
+#else
+  p | index_mpi_;
+#endif
 
 }
 
@@ -81,6 +85,16 @@ public: // interface
     : CBase_CommBlock(m) { };
 
 #endif
+
+
+  /// Index of the CommBlock
+  Index index() const {
+#ifdef CONFIG_USE_CHARM
+    return thisIndex;
+#else
+    return index_mpi_;
+#endif
+  }
 
 #ifdef CONFIG_USE_CHARM
 
@@ -124,6 +138,7 @@ public: // interface
   void p_phase_adapt();
   void p_adapt (int level);
   void q_adapt ();
+  void q_adapt_exit ();
   void adapt();
   void refine();
   void coarsen();
@@ -132,7 +147,7 @@ public: // interface
   /// Update the depth of the given child
   void p_update_depth (int ic, int depth);
   void p_print(std::string message) {  
-    thisIndex.print(message.c_str());
+    index().print(message.c_str());
     TRACE2("%s level %d",message.c_str(),level_);
     TRACE9("%s depth %d%d%d%d%d%d%d%d",message.c_str(),
 	   depth_[0],depth_[1],depth_[2],depth_[3],
@@ -300,6 +315,10 @@ protected: // attributes
 #endif
 
   //--------------------------------------------------
+#ifdef CONFIG_USE_CHARM
+#else
+  Index index_mpi_;
+#endif
 
   /// Index into array [redundant with CHARM thisIndex.x .y .z]
   /// CB

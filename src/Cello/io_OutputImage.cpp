@@ -14,18 +14,42 @@
 OutputImage::OutputImage(int index,
 			 const Factory * factory,
 			 int process_count,
-			 int nrows, int ncols,
-			 std::string image_type) throw ()
+			 int nx0, int ny0, int nz0,
+			 int max_level,
+			 std::string image_type,
+			 std::string image_reduce_type,
+			 int         image_block_size) throw ()
   : Output(index,factory),
     data_(),
-    op_reduce_(reduce_sum),
+    count_(),
     axis_(axis_z),
-    nrows_(nrows),
-    ncols_(ncols),
     png_(0),
     image_type_(image_type)
 
 {
+  
+  if (image_reduce_type=="min") op_reduce_ = reduce_min;
+  if (image_reduce_type=="max") op_reduce_ = reduce_max;
+  if (image_reduce_type=="avg") op_reduce_ = reduce_avg;
+  if (image_reduce_type=="sum") op_reduce_ = reduce_sum;
+
+  TRACE1 ("OutputImage reduce %d",op_reduce_);
+
+  int nl = image_block_size * (1 << max_level); // image size factor
+
+  nxi_ = nl * nx0;
+  nyi_ = nl * ny0;
+  nzi_ = nl * nz0;
+
+  if (image_type_ == "mesh"){
+    nxi_++;
+    nyi_++;
+    nzi_++;
+  }
+
+  TRACE2("OutputImage nl,max_level %d %d",nl,max_level);
+  TRACE3("OutputImage nxi,nyi,nzi %d %d %d",nxi_,nyi_,nzi_);
+  
   // Override default Output::process_stride_: only root writes
   set_process_stride(process_count);
 
@@ -67,11 +91,12 @@ void OutputImage::pup (PUP::er &p)
   p | map_a_;
   p | op_reduce_;
   p | axis_;
-  p | nrows_;
-  p | ncols_;
+  p | nxi_;
+  p | nyi_;
   WARNING("OutputImage::pup","skipping data_");
-  //  PUParray(p,data_,nrows_*ncols_);
+  //  PUParray(p,data_,nxi_*nyi_);
   if (p.isUnpacking()) data_ = 0;
+  if (p.isUnpacking()) count_ = 0;
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   if (p.isUnpacking()) png_ = 0;
@@ -154,14 +179,16 @@ void OutputImage::write_block
 
   TRACE("OutputImage::write_block()");
   const FieldBlock * field_block = comm_block->block()->field_block();
-  
+
+  // FieldBlock size
   int nbx,nby,nbz;
   field_block->size(&nbx,&nby,&nbz);
 
+  // Block forest array size
   int ix,iy,iz;
-
   comm_block->index_forest(&ix,&iy,&iz);
 
+  // Start of array
   int ixb0 = ix*nbx;
   int iyb0 = iy*nby;
   int izb0 = iz*nbz;
@@ -177,49 +204,64 @@ void OutputImage::write_block
   int gx,gy,gz;
   field_descr->ghosts(index,&gx,&gy,&gz);
 
-  // Get array dimensions
-
+  // FieldBlock array dimensions
   int ndx,ndy,ndz;
   ndx = nbx + 2*gx;
   ndy = nby + 2*gy;
   ndz = nbz + 2*gz;
 
-  // Add block contribution to image
+  // add block contribution to image
 
   const char * field_unknowns = field_block->field_unknowns(field_descr,index);
 
   int level = comm_block->level();
-  TRACE1 ("OutputImage: level = %d",level);
 
-  switch (field_descr->precision(index)) {
+  // pixel extents of box
+  int ixm,iym,izm; 
+  int ixp,iyp,izp;
+  extents_img_ (comm_block,&ixm,&ixp,&iym,&iyp,&izm,&izp);
 
-  case precision_single:
+  // pixel extents of cells
+  int dbx = (ixp-ixm) / nbx;
+  int dby = (iyp-iym) / nby;
+  int dbz = (izp-izm) / nbz;
 
-    image_reduce_ (((float *) field_unknowns),
-		   ndx,ndy,ndz, 
-		   nbx,nby,nbz,
-		   ixb0,iyb0,izb0,
-		   level);
-    break;
+  if (image_type_ == "mesh") {
 
-  case precision_double:
+    reduce_box_(ixm,ixp,iym,iyp,double(level+1));
 
-    image_reduce_ (((double *) field_unknowns),
-		   ndx,ndy,ndz, 
-		   nbx,nby,nbz,
-		   ixb0,iyb0,izb0,
-		   level);
-    break;
+  } else if (image_type_ == "data") {
 
-  default:
+      // for each cell
+    TRACE3("OutputImage ixm,ixp,nbx %d %d %d",ixm,ixp,nbx);
+    TRACE3("OutputImage iym,iyp,nby %d %d %d",iym,iyp,nby);
+    TRACE3("OutputImage izm,izp,nbz %d %d %d",izm,izp,nbz);
+      for (int ix=0; ix<nbx; ix++) {
+	int jxm = ixm +  ix*(ixp-ixm)/nbx;
+	int jxp = ixm + (ix+1)*(ixp-ixm)/nbx-1;
+	for (int iy=0; iy<nby; iy++) {
+	  int jym = iym +  iy*(iyp-iym)/nby;
+	  int jyp = iym + (iy+1)*(iyp-iym)/nby-1;
+	  for (int iz=0; iz<nbz; iz++) {
+	    int jzm = izm + iz*(izp-izm)/nbz;
+	    int jzp = izm + (iz+1)*(izp-izm)/nbz-1;
+	    int i=ix + ndx*(iy + ndy*iz);
+	    switch (field_descr->precision(index)) {
 
-    WARNING1 ("OutputImage::write_block()",
-	     "Unsupported Field precision %d",
-	      field_descr->precision(index));
-    break;
+	    case precision_single:
+	      reduce_cube_(jxm,jxp,jym,jyp, (((float*)field_unknowns)[i]));
+	      break;
 
+	    case precision_double:
+	      reduce_cube_(jxm,jxp,jym,jyp,(((double *)field_unknowns)[i]));
+	      break;
+	    }
+
+
+	  }
+	}
+      }
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -242,13 +284,14 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
   DEBUG("prepare_remote");
 
   int size = 0;
-  int nx = nrows_;
-  int ny = ncols_;
+  int nx = nxi_;
+  int ny = nyi_;
 
   // Determine buffer size
 
-  size += nx*ny*sizeof(double);
-  size += 2*sizeof(int);
+  size += nx*ny*sizeof(double); // data_
+  size += nx*ny*sizeof(int);    // count_
+  size += 2*sizeof(int);        // nxi_, nyi_
   (*n) = size;
 
   // Allocate buffer (deallocated in cleanup_remote())
@@ -266,6 +309,7 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
   *p.i++ = ny;
 
   for (int k=0; k<nx*ny; k++) *p.d++ = data_[k];
+  for (int k=0; k<nx*ny; k++) *p.i++ = count_[k];
   
 }
 
@@ -287,7 +331,24 @@ void OutputImage::update_remote  ( int n, char * buffer) throw()
   int nx = *p.i++;
   int ny = *p.i++;
 
-  for (int k=0; k<nx*ny; k++) data_[k] += *p.d++;
+  if (op_reduce_ == reduce_min) {
+
+    for (int k=0; k<nx*ny; k++) data_[k] = std::min(data_[k],*p.d++);
+
+  } else if (op_reduce_ == reduce_max) {
+
+    for (int k=0; k<nx*ny; k++) data_[k] = std::max(data_[k],*p.d++);
+
+  } else if (op_reduce_ == reduce_sum) {
+
+    for (int k=0; k<nx*ny; k++) data_[k] += *p.d++;
+
+  } else if (op_reduce_ == reduce_avg) {
+
+    for (int k=0; k<nx*ny; k++) data_[k]  += *p.d++;
+    for (int k=0; k<nx*ny; k++) count_[k] += *p.i++;
+
+  }
 
 }
 
@@ -308,7 +369,7 @@ void OutputImage::png_create_ (std::string filename) throw()
 {
   if (is_writer()) {
     const char * file_name = strdup(filename.c_str());
-    png_ = new pngwriter(nrows_, ncols_,0,file_name);
+    png_ = new pngwriter(nxi_, nyi_,0,file_name);
     free ((void *)file_name);
   }
 }
@@ -334,7 +395,8 @@ void OutputImage::image_create_ () throw()
 	 "image_ already created",
 	 data_ == NULL);
 
-  data_ = new double [nrows_*ncols_];
+  data_  = new double [nxi_*nyi_];
+  count_ = new    int [nxi_*nyi_];
   TRACE1("new data_ = %p",data_);
 
   const double min = std::numeric_limits<double>::max();
@@ -356,7 +418,7 @@ void OutputImage::image_create_ () throw()
     break;
   }
 
-  for (int i=0; i<nrows_*ncols_; i++) data_[i] = value0;
+  for (int i=0; i<nxi_*nyi_; i++) data_[i] = value0;
 
 }
 
@@ -374,8 +436,8 @@ void OutputImage::image_write_ (double min, double max) throw()
 
   // simplified variable names
 
-  int mx = nrows_;
-  int my = ncols_;
+  int mx = nxi_;
+  int my = nyi_;
   int m  = mx*my;
 
   // Scale by data if min == max (default)
@@ -403,6 +465,7 @@ void OutputImage::image_write_ (double min, double max) throw()
       int i = ix + mx*iy;
 
       double value = data_[i];
+      if (op_reduce_ == reduce_avg) value /= count_[i];
 
       double r=0.0,g=0.0,b=0.0,a=0.0;
 
@@ -455,125 +518,119 @@ void OutputImage::image_close_ () throw()
 
 //----------------------------------------------------------------------
 
-template<class T>
-void OutputImage::image_reduce_
-(T * array, 
- int ndx, int ndy, int ndz,
- int nx,  int ny,  int nz,
- int nx0, int ny0, int nz0,
- int level) throw()
+void OutputImage::reduce_point_ 
+(double * data, int * count, double value) throw()
 {
-  // Array multipliers
-
-  int nd3[3] = {1, ndx, ndx*ndy}; 
-
-  // Array size
-
-  int n[3]  = {nx,  ny,  nz};
-  int n0[3] = {nx0, ny0, nz0};
-
-  // Remap array axes to image axes axis_x,axis_y
-
-  int axis_x = (axis_+1) % 3;  // image x axis
-  int axis_y = (axis_+2) % 3;  // image y-axis
-
-  // Array size permuted to match image
-
-  int npx = n[axis_x];
-  int npy = n[axis_y];
-  int npz = n[axis_];
-
-  // Array start permuted to match image
-
-  int npx0 = n0[axis_x];
-  int npy0 = n0[axis_y];
-
-  // Loop over array subsection
-
-  // image x-axis
-
-  TRACE1("image_reduce_() data_ = %p",data_);
-  TRACE1("image_reduce type = ",image_type_.c_str());
-
-  if (image_type_ == "data") {
-
-    for (int iax=0; iax<npx; iax++) {
-      int iix = npx0 + iax;
-      for (int iay=0; iay<npy; iay++) {
-	int iiy = npy0 + iay;
-
-	int index_image = iix + nrows_*iiy;
-
-	ASSERT5 ("OutputImage::image_reduce_",
-		 "Invalid Access axis %d index(%d %d)  image(%d %d)\n",
-		 axis_, iix, iiy, nrows_,ncols_,
-		 ( (iix < nrows_) && (iiy < ncols_)));
-
-	double & pixel_value = data_ [index_image];
-
-	// reduce along axis
-	for (int iz=0; iz<npz; iz++) {
-	
-	  int index_array = 
-	    nd3[axis_x]*iax + 
-	    nd3[axis_y]*iay + 
-	    nd3[axis_]*iz;
-
-	  // reduce along z axis
-
-	  switch (op_reduce_) {
-	  case reduce_min: 
-	    pixel_value = MIN(array[index_array],(T)(pixel_value)); 
-	    break;
-	  case reduce_max: 
-	    pixel_value = MAX(array[index_array],(T)(pixel_value)); 
-	    break;
-	  case reduce_avg: 
-	  case reduce_sum: 
-	    // @@@@@@@@@@@@@@@@@@@@@@@@@
-	    // BUG: segfault here when Charm++ load balancing
-	    // @@@@@@@@@@@@@@@@@@@@@@@@@
-	    pixel_value += array[index_array]; break;
-	  default:
-	    break;
-	  }
-	}
-
-	if (op_reduce_ == reduce_avg) pixel_value /= npz;
-
-      }
-    }
-  } else if (image_type_ == "mesh") {
-
-    int iix,iiy;
-    int index_image;
-    for (int iax=0; iax<npx; iax++) {
-      iix = npx0 + iax;
-      iiy = npy0 + 0;
-      index_image = iix + nrows_*iiy;
-      data_ [index_image] = level+1;
-
-      iix = npx0 + iax;
-      iiy = npy0 + npy-1;
-      index_image = iix + nrows_*iiy;
-      data_ [index_image] = level+1;
-
-    }
-    for (int iay=0; iay<npy; iay++) {
-      iix = npx0 + 0;
-      iiy = npy0 + iay;
-      index_image = iix + nrows_*iiy;
-      data_ [index_image] = level+1;
-
-      iix = npx0 + npx-1;
-      iiy = npy0 + iay;
-      index_image = iix + nrows_*iiy;
-      data_ [index_image] = level+1;
-    }
-  } else {
-    ERROR1 ("OutputImage::image_reduce_",
-	    "Invalid image-type_ '%s'",
-	    image_type_.c_str());
+  switch (op_reduce_) {
+  case reduce_min:
+    *data = std::min(*data,value); 
+    break;
+  case reduce_max:
+    *data = std::max(*data,value); 
+    break;
+  case reduce_avg:
+    *count ++;
+  case reduce_sum:
+    *data += value;
+    break;
   }
 }
 
+//----------------------------------------------------------------------
+
+void OutputImage::reduce_line_x_(int ixm, int ixp, int iy, double value)
+{
+  ASSERT2("OutputImage::reduce_line_x","! (ixm (%d) <= ixp (%d)",ixm,ixp,ixm<=ixp);
+  if (ixp < ixm) { int t = ixp; ixp = ixm; ixm = t; }
+
+  for (int ix=ixm; ix<=ixp; ++ix) {
+    int i = ix + nxi_*iy;
+    reduce_point_(&data_[i],&count_[i],value);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void OutputImage::reduce_line_y_(int ix, int iym, int iyp, double value)
+{
+  ASSERT2("OutputImage::reduce_line_y","! (iym (%d) <= iyp (%d)",iym,iyp,iym<=iyp);
+  if (iyp < iym) { int t = iyp; iyp = iym; iym = t; }
+  for (int iy=iym; iy<=iyp; ++iy) {
+    int i = ix + nxi_*iy;
+    reduce_point_(&data_[i],&count_[i],value);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void OutputImage::reduce_box_(int ixm, int ixp, int iym, int iyp, double value)
+{
+  reduce_line_x_(ixm,ixp,iym,value);
+  reduce_line_x_(ixm,ixp,iyp,value);
+  reduce_line_y_(ixm,iym,iyp,value);
+  reduce_line_y_(ixp,iym,iyp,value);
+}
+
+//----------------------------------------------------------------------
+
+
+void OutputImage::reduce_cube_(int ixm, int ixp, int iym, int iyp, double value)
+{
+  ASSERT2("OutputImage::reduce_line_x","! (ixm (%d) <= ixp (%d)",ixm,ixp,ixm<=ixp);
+  ASSERT2("OutputImage::reduce_line_y","! (iym (%d) <= iyp (%d)",iym,iyp,iym<=iyp);
+  if (ixp < ixm) { int t = ixp; ixp = ixm; ixm = t; }
+  if (iyp < iym) { int t = iyp; iyp = iym; iym = t; }
+
+  for (int ix=ixm; ix<=ixp; ++ix) {
+    for (int iy=iym; iy<=iyp; ++iy) {
+      int i = ix + nxi_*iy;
+      reduce_point_(&data_[i],&count_[i],value);
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void OutputImage::extents_img_ (const CommBlock * comm_block,
+				int *ixm, int *ixp,
+				int *iym, int *iyp,
+				int *izm, int *izp) const
+{
+  int ix,iy,iz;
+  comm_block->index().array(&ix,&iy,&iz);
+
+  int nx,ny,nz; // block array size
+  comm_block->size_forest(&nx,&ny,&nz);
+
+  int mx,my,mz;
+  if (image_type_ == "mesh") {
+    mx = (nxi_ - 1) / nx;
+    my = (nyi_ - 1) / ny;
+    mz = (nzi_ - 1) / nz;
+  } else {
+    mx = (nxi_) / nx;
+    my = (nyi_) / ny;
+    mz = (nzi_) / nz;
+  }
+
+  if (ixm) (*ixm) = ix*mx;
+  if (iym) (*iym) = iy*my;
+  if (izm) (*izm) = iz*mz;
+
+  Index index = comm_block->index();
+
+  int level = index.level();
+  for (int i=0; i<level; i++) {
+    int icx,icy,icz;
+    index.child(i,&icx,&icy,&icz);
+    mx /= 2;
+    my /= 2;
+    mz /= 2;
+    (*ixm) = (icx) ? (*ixm) + mx : (*ixm);
+    (*iym) = (icy) ? (*iym) + my : (*iym);
+    (*izm) = (icz) ? (*izm) + mz : (*izm);
+  }
+  (*ixp) = (*ixm) + mx;
+  (*iyp) = (*iym) + my;
+  (*izp) = (*izm) + mz;
+}
