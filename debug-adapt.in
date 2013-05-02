@@ -1,0 +1,51 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/ppm.incl"
+
+
+Mesh 
+{
+   root_size   = [32,32];
+   root_blocks = [ 2, 2]; 
+   max_level   = 3; 
+   adapt_type = ["slope"];
+}
+
+Initial {
+   max_level = 2;
+}
+Stopping { cycle = 0; }
+
+Output {
+
+#   file_groups = ["image_mesh"]; 
+#   file_groups = ["image_data"]; 
+   file_groups = ["image_mesh","image_data"]; 
+
+      image_data {
+        field_list = ["density"];
+	type     = "image";
+	image_type  = "data";
+	schedule = ["cycle","interval", 10];
+        colormap = [0.00, 0.00, 0.50,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00];
+        name = ["rho_image.%02d.png","cycle"];
+      };
+      image_mesh {
+        field_list = ["density"];
+	type     = "image";
+	image_type  = "mesh";
+	image_block_size  = 5;
+	schedule = ["cycle","interval", 10];
+        colormap = [0.00, 0.00, 0.50,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00];
+        name = ["rho_data.%02d.png","cycle"];
+        
+      };
+
+}
