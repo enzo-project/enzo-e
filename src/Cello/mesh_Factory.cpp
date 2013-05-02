@@ -79,7 +79,7 @@ CProxy_CommBlock Factory::create_block_array
 
 	  Index index(ix,iy,iz);
 	  index.set_level(0);
-	  index.clear();
+	  index.clean();
 	  TRACE3("Inserting %d %d %d",ix,iy,iz);
 	  proxy_block[index].insert 
 	    (ix,iy,iz,
@@ -115,7 +115,7 @@ CommBlock * Factory::create_block
 #ifdef CONFIG_USE_CHARM
  CProxy_CommBlock block_array,
 #endif /* CONFIG_USE_CHARM */
- Index index,
+ const Index & index,
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,

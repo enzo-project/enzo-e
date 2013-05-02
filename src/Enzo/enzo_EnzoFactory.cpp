@@ -94,16 +94,13 @@ CProxy_CommBlock EnzoFactory::create_block_array
   return enzo_block_array;
 }
 
-#else
+#else /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
 CommBlock * EnzoFactory::create_block
 (
-#ifdef CONFIG_USE_CHARM
- CProxy_CommBlock block_array,
-#endif /* CONFIG_USE_CHARM */
- Index * index,
+ const Index & index,
  int ibx, int iby, int ibz,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -114,38 +111,21 @@ CommBlock * EnzoFactory::create_block
  bool testing
  ) const throw()
 {
-#ifdef CONFIG_USE_CHARM
- 
-  block_array = CProxy_EnzoBlock::ckNew
-     (nbx,nby,nbz,
-      nx,ny,nz,
-      level,
-      xm,ym,zm, 
-      xb,yb,zb, 
-      num_field_blocks,
-      nbx,nby,nbz);
 
-     Index index(ibx,iby,ibz);
+  EnzoBlock * enzo_block = new EnzoBlock 
+    (
+     ibx,iby,ibz, 
+     nbx,nby,nbz,
+     nx,ny,nz,
+     level,
+     xm,ym,zm, 
+     hx,hy,hz, 
+     num_field_blocks);
 
-     return block_array[index].ckLocal();
-   
-#else /* CONFIG_USE_CHARM */
+  enzo_block->set_index(index);
 
-     EnzoBlock * enzo_block = new EnzoBlock 
-       (
-	ibx,iby,ibz, 
-	nbx,nby,nbz,
-	nx,ny,nz,
-	level,
-	xm,ym,zm, 
-	hx,hy,hz, 
-	num_field_blocks);
-
-     enzo_block->set_index(index);
-
-     return enzo_block;
+  return enzo_block;
   
-#endif /* CONFIG_USE_CHARM */
 }
 
 #endif

@@ -325,22 +325,19 @@ void Hierarchy::allocate_array_
     // Get index of block ib in the forest
 
     int ibx,iby,ibz;
+
     layout_->block_indices (ip,ib, &ibx, &iby, &ibz);
 
     // create a new data block
 
     int level;
 
-    CProxy_CommBlock block_array;
-    Index index();
+    Index index;
     index.set_array(ibx,iby,ibz);
     index.clean();
 
     CommBlock * comm_block = factory_->create_block 
       (
-#ifdef CONFIG_USE_CHARM
-       block_array,
-#endif
        index,
        ibx,iby,ibz,
        nbx,nby,nbz,

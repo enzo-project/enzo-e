@@ -95,10 +95,10 @@ public: // interface
     return index_mpi_;
 #endif
   }
-  void set_index(Index * index) {
+  void set_index(const Index & index) {
 #ifdef CONFIG_USE_CHARM
 #else
-    index_mpi_ = *index;
+    index_mpi_ = index;
 #endif
   }    
 

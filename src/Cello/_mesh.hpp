@@ -40,6 +40,8 @@ enum adapt_type {
 
 class Tree;
 
+#include "charm_Index.hpp"
+
 #include "mesh_Block.hpp"
 #include "mesh_Hierarchy.hpp"
 #include "mesh_Factory.hpp"
