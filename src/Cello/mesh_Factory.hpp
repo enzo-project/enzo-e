@@ -79,8 +79,7 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
    CProxy_CommBlock block_array,
 #endif
-   const Index & index,
-   int ibx, int iby, int ibz,
+   Index index,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int level,

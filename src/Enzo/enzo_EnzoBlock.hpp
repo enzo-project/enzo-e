@@ -160,7 +160,7 @@ public: // interface
   /// Initialize the EnzoBlock chare array
   EnzoBlock
   (
-   int ix, int iy, int iz,
+   Index index,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int level,

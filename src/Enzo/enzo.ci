@@ -70,7 +70,7 @@ module enzo {
   array[Index] EnzoBlock : CommBlock {
 
     entry EnzoBlock
-      (int ibx, int iby, int ibz,
+      (Index index,
        int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
        int level,

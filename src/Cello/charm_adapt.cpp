@@ -226,6 +226,7 @@ void CommBlock::refine()
   int ibx = index_[0];
   int iby = index_[1];
   int ibz = index_[2];
+  TRACE3("ADAPT ib = %d %d %d",ibx,iby,ibz);
   int nbx = size_[0];
   int nby = size_[1];
   int nbz = size_[2];
@@ -271,7 +272,6 @@ void CommBlock::refine()
 
     factory->create_block 
       (thisProxy, index,
-       ibx,iby,ibz,
        nbx,nby,nbz,
        nx,ny,nz,
        level_+1,

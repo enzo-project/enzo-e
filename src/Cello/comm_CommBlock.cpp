@@ -18,7 +18,7 @@
 
 CommBlock::CommBlock
 (
- int ibx, int iby, int ibz,          // Forest element
+ Index index,
  int nbx, int nby, int nbz,          // Forest size
  int nx, int ny, int nz,             // Block cells
  int level,                          // Block level
@@ -39,14 +39,17 @@ CommBlock::CommBlock
   TRACE("ENTER CommBlock::CommBlock()");
 
 #ifdef CONFIG_USE_CHARM
-  index().print("create");
+  index.print("create");
 #endif
-  TRACE3("CommBlock::CommBlock ib (%d %d %d)",ibx,iby,ibz);
+
   TRACE3("CommBlock::CommBlock nb (%d %d %d)",nbx,nby,nbz);
   TRACE3("CommBlock::CommBlock  n (%d %d %d)",nx,ny,nz);
   TRACE1("CommBlock::CommBlock  l %d",level);
   TRACE3("CommBlock::CommBlock xm(%f %f %f)",xpm,ypm,zpm);
   TRACE3("CommBlock::CommBlock  b(%f %f %f)",xb,yb,zb);
+
+  int ibx,iby,ibz;
+  index.array(&ibx,&iby,&ibz);
 
   block_ = new Block  (nx, ny, nz, num_field_blocks,
 		       xpm+ibx*xb, xpm+(ibx+1)*xb,

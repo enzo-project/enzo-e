@@ -40,7 +40,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  double xm, double ym, double zm,
- double hx, double hy, double hz,
+ double xb, double yb, double zb,
  int num_field_blocks,
  bool allocate,
  bool testing
@@ -65,24 +65,21 @@ CProxy_CommBlock EnzoFactory::create_block_array
 	for (int iz=0; iz<nbz; iz++) {
 
 	  Index index(ix,iy,iz);
-	  index.set_array(ix,iy,iz);
-	  index.set_level(0);
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 	  enzo_block_array[index].insert 
-	    (ix,iy,iz,
+	    (index,
 	     nbx,nby,nbz,
 	     nx,ny,nz,
 	     level=0,
 	     xm,ym,zm, 
-	     hx,hy,hz, 
+	     xb,yb,zb, 
 	     num_field_blocks);
 
 	}
       }
     }
 
-    TRACE ("done inserting");
     enzo_block_array.doneInserting();
 
   } else {
@@ -94,40 +91,62 @@ CProxy_CommBlock EnzoFactory::create_block_array
   return enzo_block_array;
 }
 
-#else /* CONFIG_USE_CHARM */
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
 CommBlock * EnzoFactory::create_block
 (
- const Index & index,
- int ibx, int iby, int ibz,
+#ifdef CONFIG_USE_CHARM
+ CProxy_CommBlock block_array,
+#endif /* CONFIG_USE_CHARM */
+ Index index,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  int level,
  double xm, double ym, double zm,
- double hx, double hy, double hz,
+ double xb, double yb, double zb,
  int num_field_blocks,
  bool testing
  ) const throw()
 {
 
+  TRACE("new EnzoBlock");
+
+#ifdef CONFIG_USE_CHARM
+
+   block_array[index].insert
+     (
+      index,
+      nbx,nby,nbz,
+      nx,ny,nz,
+      level,
+      xm,ym,zm, 
+      xb,yb,zb, 
+      num_field_blocks,
+      testing);
+
+   CommBlock * block = block_array[index].ckLocal();
+   TRACE1("block = %p",block);
+   //  ASSERT("Factory::create_block()","block is NULL",block != NULL);
+
+   return block;
+
+#else /* CONFIG_USE_CHARM */
+
   EnzoBlock * enzo_block = new EnzoBlock 
     (
-     ibx,iby,ibz, 
+     index,
      nbx,nby,nbz,
      nx,ny,nz,
      level,
      xm,ym,zm, 
-     hx,hy,hz, 
+     xb,yb,zb, 
      num_field_blocks);
-
-  enzo_block->set_index(index);
 
   return enzo_block;
   
+#endif /* CONFIG_USE_CHARM */
+
 }
-
-#endif
-
 

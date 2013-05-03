@@ -78,11 +78,9 @@ CProxy_CommBlock Factory::create_block_array
 	for (int iz=0; iz<nbz; iz++) {
 
 	  Index index(ix,iy,iz);
-	  index.set_level(0);
-	  index.clean();
-	  TRACE3("Inserting %d %d %d",ix,iy,iz);
+
 	  proxy_block[index].insert 
-	    (ix,iy,iz,
+	    (index,
 	     nbx,nby,nbz,
 	     nx,ny,nz,
 	     level = 0,
@@ -115,8 +113,7 @@ CommBlock * Factory::create_block
 #ifdef CONFIG_USE_CHARM
  CProxy_CommBlock block_array,
 #endif /* CONFIG_USE_CHARM */
- const Index & index,
- int ibx, int iby, int ibz,
+ Index index,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  int level,
@@ -126,11 +123,13 @@ CommBlock * Factory::create_block
  bool testing
  ) const throw()
 {
+
   TRACE1("create_block level %d",level);
 #ifdef CONFIG_USE_CHARM
 
    block_array[index].insert
-     (0,0,0,
+     (
+      index,
       nbx,nby,nbz,
       nx,ny,nz,
       level,
@@ -148,7 +147,7 @@ CommBlock * Factory::create_block
 #else /* CONFIG_USE_CHARM */
 
    CommBlock * comm_block = new CommBlock 
-     (ibx,iby,ibz, 
+     (index,
       nbx,nby,nbz,
       nx,ny,nz,
       level,
@@ -156,8 +155,6 @@ CommBlock * Factory::create_block
       xb,yb,zb, 
       num_field_blocks,
       testing);
-
-   comm_block->set_index(index);
 
    return comm_block;
 

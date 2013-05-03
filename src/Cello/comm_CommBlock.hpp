@@ -33,7 +33,7 @@ public: // interface
   /// size, and number of field blocks
   CommBlock
   (
-   int ibx, int iby, int ibz,
+   Index index,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int level,

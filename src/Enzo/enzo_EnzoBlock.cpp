@@ -384,14 +384,14 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
 EnzoBlock::EnzoBlock
 (
- int ix, int iy, int iz,
+ Index index,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  int level,
  double xm, double ym, double zm,
  double xp, double yp, double zp,
  int num_field_blocks) throw()
-  : CommBlock (ix,iy,iz,
+  : CommBlock (index,
 	       nbx,nby,nbz,
 	       nx,ny,nz,
 	       level,

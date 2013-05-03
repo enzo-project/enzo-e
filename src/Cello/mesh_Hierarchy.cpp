@@ -332,14 +332,11 @@ void Hierarchy::allocate_array_
 
     int level;
 
-    Index index;
-    index.set_array(ibx,iby,ibz);
-    index.clean();
+    Index index (ibx,iby,ibz);
 
     CommBlock * comm_block = factory_->create_block 
       (
        index,
-       ibx,iby,ibz,
        nbx,nby,nbz,
        mbx,mby,mbz,
        level = 0,
