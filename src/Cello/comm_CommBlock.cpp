@@ -79,10 +79,7 @@ CommBlock::CommBlock
 
 #ifdef CONFIG_USE_CHARM
   sync_refresh_.stop() = count_refresh_();
-  apply_initial_();   // this doesn't work here...
-  //                         it must be called after EnzoBlock::EnzoBlock()
-  TRACE1("Courant = %f",EnzoBlock::CourantSafetyNumber);
-  //                         
+  apply_initial_();
 #endif /* CONFIG_USE_CHARM */
 
   //

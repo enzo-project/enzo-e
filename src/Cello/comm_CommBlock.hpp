@@ -84,19 +84,7 @@ public: // interface
 
 
   /// Index of the CommBlock
-  Index index() const {
-#ifdef CONFIG_USE_CHARM
-    return thisIndex;
-#else
-    return index_mpi_;
-#endif
-  }
-  void set_index(const Index & index) {
-#ifdef CONFIG_USE_CHARM
-#else
-    index_mpi_ = index;
-#endif
-  }    
+  Index index() const { return index_; }
 
 #ifdef CONFIG_USE_CHARM
 
