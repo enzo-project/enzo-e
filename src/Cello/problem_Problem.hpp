@@ -126,6 +126,7 @@ public: // interface
   /// Initialize the initial conditions object
   void initialize_initial(Config * config,
 			  Parameters * parameters,
+			  const FieldDescr * field_descr,
 			  const GroupProcess * group_process) throw();
 
   /// Initialize the refine object

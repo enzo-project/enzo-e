@@ -40,8 +40,6 @@ public: // interface
    Index index,
    int nx, int ny, int nz,
    int level,
-   double xmp, double ymp, double zmp,
-   double xb, double yb, double zb,
    int num_field_blocks,
    bool testing=false
 ) throw();
@@ -210,6 +208,16 @@ public: // interface
   /// Return the size the CommBlock array
   void size_forest (int * nx, int * ny, int * nz) const throw();
 
+  /// Compute the lower extent of the CommBlock in the domain
+  void lower(double * xm, double * ym = 0, double * zm = 0) const throw ();
+
+  /// Compute the upper extent of the CommBlock in the domain
+  void upper(double * xp, double * yp = 0, double * zp = 0) const throw ();
+
+  void index_global
+  ( int *ix, int *iy, int *iz,  
+    int *nx, int *ny, int *nz ) const;
+
   /// Return the current cycle number
   int cycle() const throw() { return cycle_; };
 
@@ -246,6 +254,9 @@ public: // virtual functions
     TRACE("CommBlock::initialize()\n");
   }
 
+  /// Return the local simulation object
+  Simulation * simulation() const;
+
 protected: // functions
 
   std::string id_ () const throw ()
@@ -265,6 +276,9 @@ protected: // functions
 
   /// Return adapt_coarsen, adapt_refine, or adapt_same given two adapt results
   int update_adapt_ (int a1, int a2) const throw();
+
+  /// Return the (lower) indices of the CommBlock in the level, 
+  /// and the number of indices
 
 #ifdef CONFIG_USE_CHARM
 

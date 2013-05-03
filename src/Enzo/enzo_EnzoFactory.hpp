@@ -41,8 +41,6 @@ public: // interface
   virtual CProxy_CommBlock create_block_array
   (int nbx, int nby, int nbz,
    int nx, int ny, int nz,
-   double xm, double ym, double zm,
-   double hx, double hy, double hz,
    int num_field_blocks = 1,
    bool allocate = true,
    bool testing=false) const throw();
@@ -59,8 +57,6 @@ public: // interface
    Index index,
    int nx, int ny, int nz,
    int level,
-   double xm, double ym, double zm,
-   double hx, double hy, double hz,
    int num_field_blocks = 1,
    bool testing=false) const throw();
 

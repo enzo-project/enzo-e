@@ -74,7 +74,7 @@ public: // attributes
   std::string                initial_type;
   double                     initial_time;
   std::vector<std::string>   initial_name;
-  std::vector<std::string>   initial_value [MAX_FIELDS];
+  // std::vector<std::string>   initial_value [MAX_FIELDS];
   int                        initial_max_level;
 
   int                        mesh_root_blocks[3];

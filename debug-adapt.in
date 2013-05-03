@@ -6,15 +6,30 @@ include "input/ppm.incl"
 
 Mesh 
 {
+   root_rank = 2;
    root_size   = [32,32];
    root_blocks = [ 2, 2]; 
-   max_level   = 2; 
+   max_level   = 5; 
    adapt_type = ["slope"];
 }
 
 Initial {
-   max_level = 2;
+   max_level = 5;
+      fields = [
+	"density",	
+	"velocity_x",
+	"velocity_y",
+	"total_energy",
+	"internal_energy"
+      ] ;
 }
+ Initial {
+    density       { value = [  1.0, "input/Cello.png", 
+                               0.1 ]; };
+    total_energy  { value = [  0.14 / (0.4 * 0.1), "input/Cello.png",
+                               1.0  / (0.4 * 1.0)  ]; };
+ }
+
 Stopping { cycle = 0; }
 
 Output {
@@ -39,7 +54,7 @@ Output {
 	image_type  = "mesh";
 	image_reduce_type = "avg";
         field_list = ["density"];
-	image_block_size  = 5;
+	image_block_size  = 1;
 	schedule = ["cycle","interval", 10];
         colormap = [1.00, 1.00, 1.00,
 	            0.00, 0.00, 0.00];

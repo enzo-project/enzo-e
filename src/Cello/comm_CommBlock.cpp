@@ -24,8 +24,6 @@ CommBlock::CommBlock
  Index index,
  int nx, int ny, int nz,             // Block cells
  int level,                          // Block level
- double xpm, double ypm, double zpm, // Forest begin
- double xb, double yb, double zb,    // Block size
  int num_field_blocks,
  bool testing
  ) throw ()
@@ -50,27 +48,27 @@ CommBlock::CommBlock
 
   TRACE3("CommBlock::CommBlock  n (%d %d %d)",nx,ny,nz);
   TRACE1("CommBlock::CommBlock  l %d",level);
-  TRACE3("CommBlock::CommBlock xm(%f %f %f)",xpm,ypm,zpm);
-  TRACE3("CommBlock::CommBlock  b(%f %f %f)",xb,yb,zb);
 
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
 
+  double xm,ym,zm;
+  lower(&xm,&ym,&zm);
+  double xp,yp,zp;
+  upper(&xp,&yp,&zp);
+
   block_ = new Block  (nx, ny, nz, num_field_blocks,
-		       xpm+ibx*xb, xpm+(ibx+1)*xb,
-		       ypm+iby*yb, ypm+(iby+1)*yb,
-		       zpm+ibz*zb, zpm+(ibz+1)*zb);
+		       xm, xp, ym, yp, zm, zp);
 
 #ifdef CONFIG_USE_CHARM
-  SimulationCharm * simulation  = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation->field_descr();
+  FieldDescr * field_descr = simulation()->field_descr();
 
   // Set the CommBlock cycle and time to match Simulation's
 
   TRACE("CommBlock::p_initial Setting time");
-  set_cycle(simulation->cycle());
-  set_time (simulation->time());
-  set_dt   (simulation->dt());
+  set_cycle(simulation()->cycle());
+  set_time (simulation()->time());
+  set_dt   (simulation()->dt());
   // Allocate block data
 
   block()->allocate(field_descr);
@@ -104,13 +102,9 @@ void CommBlock::initialize_
    if (! testing) {
      // Count CommBlocks on each processor
    
-     SimulationCharm * simulation_charm  = 
-       dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
-
-     TRACE1 ("simulation_charm = %p",simulation_charm);
-     TRACE1 ("simulation = %p",proxy_simulation.ckLocalBranch());
+     TRACE1 ("simulation = %p",simulation());
      TRACE1 ("proxy_simulation = %p",&proxy_simulation);
-     if (simulation_charm) simulation_charm->insert_block();
+     ((SimulationCharm *)simulation())->insert_block();
    }
 #endif
 
@@ -123,14 +117,14 @@ void CommBlock::initialize_
 void CommBlock::apply_initial_() throw ()
 {
 
-  SimulationCharm * simulation  = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation->field_descr();
+  FieldDescr * field_descr = simulation()->field_descr();
 
   // Apply initial conditions
 
   index_initial_ = 0;
-  while (Initial * initial = simulation->problem()->initial(index_initial_++)) {
-    initial->enforce_block(this,field_descr, simulation->hierarchy());
+  Problem * problem = simulation()->problem();
+  while (Initial * initial = problem->initial(index_initial_++)) {
+    initial->enforce_block(this,field_descr, simulation()->hierarchy());
   }
 }
 #endif
@@ -144,9 +138,7 @@ CommBlock::~CommBlock() throw ()
   if (block_) delete block_;
   block_ = 0;
 
-  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
-
-  if (simulation_charm) simulation_charm->delete_block();
+  ((SimulationCharm *)simulation())->delete_block();
 #endif
 
 }
@@ -180,14 +172,94 @@ void CommBlock::index_forest (int * ix, int * iy, int * iz) const throw ()
 
 void CommBlock::size_forest (int * nx=0, int * ny=0, int * nz=0) const throw ()
 {
-#ifdef CONFIG_USE_CHARM
-  proxy_simulation.ckLocalBranch()
-#else
-  simulation_
-#endif
-    ->hierarchy()->num_blocks(nx,ny,nz);
+  simulation()->hierarchy()->num_blocks(nx,ny,nz);
 
   TRACE3 ("size_forest = %d %d %d",*nx,*ny,*nz);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::lower
+(double * xm, double * ym, double * zm) const throw ()
+{
+  int  ix, iy, iz;
+  int  nx, ny, nz;
+
+  index_global (&ix,&iy,&iz,&nx,&ny,&nz);
+
+  double xdm, ydm, zdm;
+  double xdp, ydp, zdp;
+  simulation()->hierarchy()->lower(&xdm,&ydm,&zdm);
+  simulation()->hierarchy()->upper(&xdp,&ydp,&zdp);
+
+  double ax = 1.0*ix/nx;
+  double ay = 1.0*iy/ny;
+  double az = 1.0*iz/nz;
+
+  double xbm = (1.0-ax)*xdm + ax*xdp;
+  double ybm = (1.0-ay)*ydm + ay*ydp;
+  double zbm = (1.0-az)*zdm + az*zdp;
+
+  if (xm) (*xm) = xbm;
+  if (ym) (*ym) = ybm;
+  if (zm) (*zm) = zbm;
+  TRACE6 ("DEBUG LOWER %d %d %d  %f %f %f",ix,iy,iz,*xm,*ym,*zm);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::upper
+(double * xp, double * yp, double * zp) const throw ()
+{
+  int  ix, iy, iz;
+  int  nx, ny, nz;
+
+  index_global (&ix,&iy,&iz,&nx,&ny,&nz);
+
+  double xdm, ydm, zdm;
+  double xdp, ydp, zdp;
+  simulation()->hierarchy()->lower(&xdm,&ydm,&zdm);
+  simulation()->hierarchy()->upper(&xdp,&ydp,&zdp);
+
+  double ax = 1.0*(ix+1)/nx;
+  double ay = 1.0*(iy+1)/ny;
+  double az = 1.0*(iz+1)/nz;
+
+  double xbp = (1.0-ax)*xdm + ax*xdp;
+  double ybp = (1.0-ay)*ydm + ay*ydp;
+  double zbp = (1.0-az)*zdm + az*zdp;
+
+  if (xp) (*xp) = xbp;
+  if (yp) (*yp) = ybp;
+  if (zp) (*zp) = zbp;
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::index_global
+( int *ix, int *iy, int *iz,
+  int *nx, int *ny, int *nz ) const
+{
+  index_forest(ix,iy,iz);
+  size_forest (nx,ny,nz);
+  TRACE6("DEBUG INDEX A %d %d %d  %d %d %d",
+	 *ix,*iy,*iz,*nx,*ny,*nz);
+
+  Index index = this->index();
+
+  int level = index.level();
+  for (int i=0; i<level; i++) {
+    int bx,by,bz;
+    index.child(i,&bx,&by,&bz);
+    if (ix) (*ix) = ((*ix) << 1) | bx;
+    if (iy) (*iy) = ((*iy) << 1) | by;
+    if (iz) (*iz) = ((*iz) << 1) | bz;
+    if (nx) (*nx) <<= 1;
+    if (ny) (*ny) <<= 1;
+    if (nz) (*nz) <<= 1;
+  }
+  TRACE6("DEBUG INDEX B %d %d %d  %d %d %d",
+	 *ix,*iy,*iz,*nx,*ny,*nz);
 }
 
 //======================================================================
@@ -258,10 +330,8 @@ void CommBlock::update_boundary_ ()
 
   determine_boundary_(is_boundary,&fxm,&fxp,&fym,&fyp,&fzm,&fzp);
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  Boundary * boundary = simulation->problem()->boundary();
-  const FieldDescr * field_descr = simulation->field_descr();
+  Boundary * boundary = simulation()->problem()->boundary();
+  const FieldDescr * field_descr = simulation()->field_descr();
 
 
   // Update boundaries
@@ -287,22 +357,6 @@ void CommBlock::update_boundary_ ()
 }
 
 #endif
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-#endif /* CONFIG_USE_CHARM */
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-#endif /* CONFIG_USE_CHARM */
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-#endif /* CONFIG_USE_CHARM */
 
 //======================================================================
 
@@ -340,4 +394,13 @@ void CommBlock::is_on_boundary (bool is_boundary[3][2]) throw()
 }
 
 //----------------------------------------------------------------------
+
+Simulation * CommBlock::simulation() const
+{
+#ifdef CONFIG_USE_CHARM
+  return proxy_simulation.ckLocalBranch();
+#else /* CONFIG_USE_CHARM */
+  return simulation_;
+#endif /* CONFIG_USE_CHARM */
+}
 

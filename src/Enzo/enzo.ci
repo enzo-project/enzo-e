@@ -73,8 +73,6 @@ module enzo {
       (Index index,
        int nx, int ny, int nz,	
        int level,
-       double xpm, double ypm, double zpm,
-       double xb, double yb, double zb,
        int num_field_blocks);
 
   };

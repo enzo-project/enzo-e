@@ -63,8 +63,6 @@ CProxy_CommBlock Factory::create_block_array
 (
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
- double xm, double ym, double zm,
- double xb, double yb, double zb,
  int num_field_blocks,
  bool allocate,
  bool testing
@@ -93,8 +91,6 @@ CProxy_CommBlock Factory::create_block_array
 	    (index,
 	     nx,ny,nz,
 	     level = 0,
-	     xm,ym,zm, 
-	     xb,yb,zb, 
 	     num_field_blocks,
 	     testing);
 
@@ -127,8 +123,6 @@ CommBlock * Factory::create_block
  Index index,
  int nx, int ny, int nz,
  int level,
- double xm, double ym, double zm,
- double xb, double yb, double zb,
  int num_field_blocks,
  bool testing
  ) const throw()
@@ -142,8 +136,6 @@ CommBlock * Factory::create_block
       index,
       nx,ny,nz,
       level,
-      xm,ym,zm, 
-      xb,yb,zb, 
       num_field_blocks,
       testing);
 
@@ -160,8 +152,6 @@ CommBlock * Factory::create_block
       index,
       nx,ny,nz,
       level,
-      xm,ym,zm, 
-      xb,yb,zb, 
       num_field_blocks,
       testing);
 

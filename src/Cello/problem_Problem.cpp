@@ -19,12 +19,15 @@ Problem::Problem() throw()
     num_output_(0),
     index_output_(0)
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
+  
 }
 
 //----------------------------------------------------------------------
 
 Problem::~Problem() throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   deallocate_();
 }
 
@@ -87,6 +90,7 @@ void Problem::pup (PUP::er &p)
 
 void Problem::initialize_boundary(Config * config) throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
 
   std::string type = config->boundary_type;
 
@@ -102,8 +106,10 @@ void Problem::initialize_boundary(Config * config) throw()
 
 void Problem::initialize_initial(Config * config,
 				 Parameters * parameters,
+				 const FieldDescr * field_descr,
 				 const GroupProcess * group_process) throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   Initial * initial = create_initial_
     (config->initial_type,parameters,config,group_process);
 
@@ -122,6 +128,8 @@ void Problem::initialize_initial(Config * config,
 void Problem::initialize_refine(Config * config,
 				FieldDescr * field_descr) throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
+    TRACE1("mesh_adapt_type.size() = %d", config->mesh_adapt_type.size());
   for (size_t i=0; i<config->mesh_adapt_type.size(); i++) {
 
     std::string name = config->mesh_adapt_type[i];
@@ -131,6 +139,7 @@ void Problem::initialize_refine(Config * config,
     if (refine) {
       refine_list_.push_back( refine );
       ++ num_refine_;
+      TRACE1("num_refine = %d",num_refine_);
     } else {
       ERROR1("Problem::initialize_refine",
 	     "Unknown Refine %s",name.c_str());
@@ -142,6 +151,7 @@ void Problem::initialize_refine(Config * config,
 
 void Problem::initialize_stopping(Config * config) throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   stopping_ = create_stopping_("default",config);
 
   ASSERT("Problem::initialize_stopping",
@@ -153,6 +163,7 @@ void Problem::initialize_stopping(Config * config) throw()
 
 void Problem::initialize_timestep(Config * config) throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   //--------------------------------------------------
   // parameter: Timestep : type
   //--------------------------------------------------
@@ -174,6 +185,7 @@ void Problem::initialize_output
  const Factory * factory) throw()
 {
 
+  TRACE1 ("num_refine_ = %d",num_refine_);
   for (int index=0; index < config->num_file_groups; index++) {
 
     std::string file_group = config->output_file_groups [index];
@@ -371,6 +383,7 @@ void Problem::initialize_output
 
 void Problem::initialize_method(Config * config) throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
 
   for (size_t i=0; i<config->method_sequence.size(); i++) {
 
@@ -394,6 +407,7 @@ void Problem::initialize_method(Config * config) throw()
 
 void Problem::deallocate_() throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   delete boundary_;      boundary_ = 0;
   num_initial_ = 0;
   for (size_t i=0; i<initial_list_.size(); i++) {
@@ -424,6 +438,7 @@ Boundary * Problem::create_boundary_
  ) throw ()
 {
   // No default Boundary object
+  TRACE1 ("num_refine_ = %d",num_refine_);
   return NULL;
 }
 
@@ -437,6 +452,7 @@ Initial * Problem::create_initial_
  const GroupProcess * group_process
  ) throw ()
 { 
+  TRACE1 ("num_refine_ = %d",num_refine_);
   //--------------------------------------------------
   // parameter: Initial : cycle
   // parameter: Initial : time
@@ -445,7 +461,8 @@ Initial * Problem::create_initial_
   if (type == "file" || type == "restart") {
     return new InitialFile   (parameters,group_process,config->initial_cycle,config->initial_time);;
   } else if (type == "default") {
-    return new InitialDefault(parameters,config->initial_cycle,config->initial_time);
+    return new InitialDefault(parameters,
+			      config->initial_cycle,config->initial_time);
   }
   return NULL;
 }
@@ -460,6 +477,7 @@ Refine * Problem::create_refine_
  int index
  ) throw ()
 { 
+  TRACE1 ("num_refine_ = %d",num_refine_);
   TRACE3("mesh_root_size = %d %d %d",
 	 config->mesh_root_size[0],
 	 config->mesh_root_size[1],
@@ -497,6 +515,7 @@ Stopping * Problem::create_stopping_
 /// @param stop_cycle  Stopping cycle
 /// @param stop_time  Stopping time
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   return new Stopping(config->stopping_cycle,
 		      config->stopping_time);
 }
@@ -509,6 +528,7 @@ Timestep * Problem::create_timestep_
  Config * config
  ) throw ()
 { 
+  TRACE1 ("num_refine_ = %d",num_refine_);
   // No default timestep
   return NULL;
 }
@@ -517,6 +537,7 @@ Timestep * Problem::create_timestep_
 
 Method * Problem::create_method_ ( std::string  name ) throw ()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   TRACE1("Problem::create_method %s",name.c_str());
   // No default method
   return NULL;
@@ -537,6 +558,7 @@ Output * Problem::create_output_
 /// @param group_process Image output needs group process size
 { 
 
+  TRACE1 ("num_refine_ = %d",num_refine_);
   Output * output = NULL;
 
   if (name == "image") {
@@ -550,6 +572,10 @@ Output * Problem::create_output_
     int ny = config->mesh_root_size[1];
     int nz = config->mesh_root_size[2];
 
+    int nbx = config->mesh_root_blocks[0];
+    int nby = config->mesh_root_blocks[1];
+    int nbz = config->mesh_root_blocks[2];
+
     // NOTE: assumes cube for non-z axis images
 
     std::string image_type       = config->output_image_type[index];
@@ -557,7 +583,10 @@ Output * Problem::create_output_
     int         max_level        = config->mesh_max_level;
     std::string image_reduce_type = config->output_image_reduce_type[index];
     
-    output = new OutputImage (index,factory,group_process->size(),nx,ny,nz, max_level,
+    output = new OutputImage (index,factory,group_process->size(),
+			      nx,ny,nz, 
+			      nbx,nby,nbz, 
+			      max_level,
 			      image_type,image_reduce_type,image_block_size);
 
   } else if (name == "data") {

@@ -15,13 +15,13 @@ OutputImage::OutputImage(int index,
 			 const Factory * factory,
 			 int process_count,
 			 int nx0, int ny0, int nz0,
+			 int nxb, int nyb, int nzb,
 			 int max_level,
 			 std::string image_type,
 			 std::string image_reduce_type,
 			 int         image_block_size) throw ()
   : Output(index,factory),
     data_(),
-    count_(),
     axis_(axis_z),
     png_(0),
     image_type_(image_type)
@@ -37,14 +37,20 @@ OutputImage::OutputImage(int index,
 
   int nl = image_block_size * (1 << max_level); // image size factor
 
-  nxi_ = nl * nx0;
-  nyi_ = nl * ny0;
-  nzi_ = nl * nz0;
+  TRACE1 ("image_block_size factor = %d",nl);
 
-  if (image_type_ == "mesh"){
-    nxi_++;
-    nyi_++;
-    nzi_++;
+  if (image_type_ == "mesh") {
+
+    nxi_ = 2*nl * nxb + 1;
+    nyi_ = 2*nl * nyb + 1;
+    nzi_ = 2*nl * nzb + 1;
+
+  } else {
+
+    nxi_ = nl * nx0;
+    nyi_ = nl * ny0;
+    nzi_ = nl * nz0;
+
   }
 
   TRACE2("OutputImage nl,max_level %d %d",nl,max_level);
@@ -96,7 +102,6 @@ void OutputImage::pup (PUP::er &p)
   WARNING("OutputImage::pup","skipping data_");
   //  PUParray(p,data_,nxi_*nyi_);
   if (p.isUnpacking()) data_ = 0;
-  if (p.isUnpacking()) count_ = 0;
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   if (p.isUnpacking()) png_ = 0;
@@ -290,7 +295,6 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
   // Determine buffer size
 
   size += nx*ny*sizeof(double); // data_
-  size += nx*ny*sizeof(int);    // count_
   size += 2*sizeof(int);        // nxi_, nyi_
   (*n) = size;
 
@@ -309,7 +313,6 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
   *p.i++ = ny;
 
   for (int k=0; k<nx*ny; k++) *p.d++ = data_[k];
-  for (int k=0; k<nx*ny; k++) *p.i++ = count_[k];
   
 }
 
@@ -346,7 +349,6 @@ void OutputImage::update_remote  ( int n, char * buffer) throw()
   } else if (op_reduce_ == reduce_avg) {
 
     for (int k=0; k<nx*ny; k++) data_[k]  += *p.d++;
-    for (int k=0; k<nx*ny; k++) count_[k] += *p.i++;
 
   }
 
@@ -396,7 +398,6 @@ void OutputImage::image_create_ () throw()
 	 data_ == NULL);
 
   data_  = new double [nxi_*nyi_];
-  count_ = new    int [nxi_*nyi_];
   TRACE1("new data_ = %p",data_);
 
   const double min = std::numeric_limits<double>::max();
@@ -465,7 +466,6 @@ void OutputImage::image_write_ (double min, double max) throw()
       int i = ix + mx*iy;
 
       double value = data_[i];
-      if (op_reduce_ == reduce_avg) value /= count_[i];
 
       double r=0.0,g=0.0,b=0.0,a=0.0;
 
@@ -519,7 +519,7 @@ void OutputImage::image_close_ () throw()
 //----------------------------------------------------------------------
 
 void OutputImage::reduce_point_ 
-(double * data, int * count, double value) throw()
+(double * data, double value) throw()
 {
   switch (op_reduce_) {
   case reduce_min:
@@ -529,7 +529,6 @@ void OutputImage::reduce_point_
     *data = std::max(*data,value); 
     break;
   case reduce_avg:
-    *count ++;
   case reduce_sum:
     *data += value;
     break;
@@ -545,7 +544,7 @@ void OutputImage::reduce_line_x_(int ixm, int ixp, int iy, double value)
 
   for (int ix=ixm; ix<=ixp; ++ix) {
     int i = ix + nxi_*iy;
-    reduce_point_(&data_[i],&count_[i],value);
+    reduce_point_(&data_[i],value);
   }
 }
 
@@ -557,7 +556,7 @@ void OutputImage::reduce_line_y_(int ix, int iym, int iyp, double value)
   if (iyp < iym) { int t = iyp; iyp = iym; iym = t; }
   for (int iy=iym; iy<=iyp; ++iy) {
     int i = ix + nxi_*iy;
-    reduce_point_(&data_[i],&count_[i],value);
+    reduce_point_(&data_[i],value);
   }
 }
 
@@ -586,7 +585,7 @@ void OutputImage::reduce_cube_(int ixm, int ixp, int iym, int iyp, double value)
   for (int ix=ixm; ix<=ixp; ++ix) {
     for (int iy=iym; iy<=iyp; ++iy) {
       int i = ix + nxi_*iy;
-      reduce_point_(&data_[i],&count_[i],value);
+      reduce_point_(&data_[i],value);
     }
   }
 }
@@ -598,13 +597,13 @@ void OutputImage::extents_img_ (const CommBlock * comm_block,
 				int *iym, int *iyp,
 				int *izm, int *izp) const
 {
-  int ix,iy,iz;
-  comm_block->index().array(&ix,&iy,&iz);
-
-  int nx,ny,nz; // block array size
-  comm_block->size_forest(&nx,&ny,&nz);
 
   int mx,my,mz;
+
+  int ix,iy,iz;
+  int nx,ny,nz;
+  comm_block->index_global(&ix,&iy,&iz,&nx,&ny,&nz);
+
   if (image_type_ == "mesh") {
     mx = (nxi_ - 1) / nx;
     my = (nyi_ - 1) / ny;
@@ -614,36 +613,13 @@ void OutputImage::extents_img_ (const CommBlock * comm_block,
     my = (nyi_) / ny;
     mz = (nzi_) / nz;
   }
+  
+  (*ixm) = ix * mx;
+  (*iym) = iy * my;
+  (*izm) = iz * mz;
 
-  if (ixm) (*ixm) = ix*mx;
-  if (iym) (*iym) = iy*my;
-  if (izm) (*izm) = iz*mz;
-
-  Index index = comm_block->index();
-
-  int level = index.level();
-  for (int i=0; i<level; i++) {
-    int icx,icy,icz;
-    index.child(i,&icx,&icy,&icz);
-    mx /= 2;
-    my /= 2;
-    mz /= 2;
-    (*ixm) = (icx) ? (*ixm) + mx : (*ixm);
-    (*iym) = (icy) ? (*iym) + my : (*iym);
-    (*izm) = (icz) ? (*izm) + mz : (*izm);
-  }
-  (*ixp) = (*ixm) + mx;
-  (*iyp) = (*iym) + my;
-  (*izp) = (*izm) + mz;
-
-  //@@@@@@@@@@
-  double xm,ym,zm;
-  double d = 640.0;
-  comm_block->block()->lower(&xm,&ym,&zm);
-  TRACE6("CommBlock lower extents %f %f %f  - %f %f %f",
-	 *ixm/d,*iym/d,*izm/d, xm,ym,zm);
-  double xp,yp,zp;
-  comm_block->block()->upper(&xp,&yp,&zp);
-  TRACE6("CommBlock upper extents %f %f %f  - %f %f %f",
-	 *ixp/d,*iyp/d,*izp/d, xp,yp,zp);
+  (*ixp) = (ix+1)* mx;
+  (*iyp) = (iy+1)* my;
+  (*izp) = (iz+1)* mz;
+  
 }

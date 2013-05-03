@@ -27,6 +27,7 @@ public: // functions
 	      const Factory * factory,
 	      int process_count,
 	      int nx0, int ny0, int nz0,
+	      int nxb, int nyb, int nzb,
 	      int max_level,
 	      std::string image_type,
 	      std::string image_reduce_type,
@@ -109,7 +110,7 @@ private: // functions
   void image_close_ () throw();
 
    /// Generate a PNG image of array data
-  void reduce_point_ ( double * data, int * count, double value) throw();
+  void reduce_point_ ( double * data, double value) throw();
 
   void extents_img_ (const CommBlock * comm_block,
 		     int *ixm, int *ixp,
@@ -133,9 +134,6 @@ private: // attributes
 
   /// Current image data
   double * data_;
-
-  /// Current count of data points (for average reduction)
-  int * count_;
 
   /// Reduction operation
   reduce_type op_reduce_;

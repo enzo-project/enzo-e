@@ -119,11 +119,10 @@ void CommBlock::adapt()
 {
   TRACE1("ADAPT adapt(%d)",level_active_);
 
-  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
 
-  int mesh_max_level    = simulation_charm->config()->mesh_max_level;
-  int initial_max_level = simulation_charm->config()->initial_max_level;
-  int initial_cycle     = simulation_charm->config()->initial_cycle;
+  int mesh_max_level    = simulation()->config()->mesh_max_level;
+  int initial_max_level = simulation()->config()->initial_max_level;
+  int initial_cycle     = simulation()->config()->initial_cycle;
 
   TRACE2 ("ADAPT cycle %d  initial_cycle %d",cycle(),initial_cycle);
   int max_level = (cycle() == initial_cycle) ? 
@@ -146,9 +145,9 @@ void CommBlock::adapt()
       else if (adapt == adapt_coarsen) coarsen();
     }
 
-    int max_level = simulation_charm->config()->mesh_max_level;
+    int max_level = simulation()->config()->mesh_max_level;
 
-    if (level_active_ < max_level) {
+    if (level_active_ < max_level - 1) {
 
       CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(),thisProxy[thisIndex]));
 
@@ -168,13 +167,11 @@ int CommBlock::determine_refine()
 {
   TRACE("ADAPT CommBlock::determine_refine()");
 
-  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
-
-  FieldDescr * field_descr = simulation_charm->field_descr();
+  FieldDescr * field_descr = simulation()->field_descr();
 
   int i=0;
   int adapt = adapt_unknown;
-  while (Refine * refine = simulation_charm->problem()->refine(i++)) {
+  while (Refine * refine = simulation()->problem()->refine(i++)) {
     adapt = update_adapt_(adapt,refine->apply(this, field_descr));
   }
   return adapt;
@@ -219,36 +216,12 @@ void CommBlock::refine()
 {
   TRACE("ADAPT CommBlock::refine()");
 
-  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
-  const Factory * factory = simulation_charm->factory();
-  int rank = simulation_charm->dimension();
-
-  int ibx,iby,ibz;
-  index_.array(&ibx,&iby,&ibz);
-
-  TRACE3("ADAPT ib = %d %d %d",ibx,iby,ibz);
+  const Factory * factory = simulation()->factory();
+  int rank = simulation()->dimension();
 
   int nx,ny,nz;
   block()->field_block()->size(&nx,&ny,&nz);
 
-  double xm[2],ym[2],zm[2];
-  block()->lower(&xm[0],&ym[0],&zm[0]);
-  double xp[2],yp[2],zp[2];
-  block()->upper(&xp[1],&yp[1],&zp[1]);
-
-  xm[1] = xp[0] = 0.5 * (xm[0] + xp[1]);
-  ym[1] = yp[0] = 0.5 * (ym[0] + yp[1]);
-  zm[1] = zp[0] = 0.5 * (zm[0] + zp[1]);
-
-  if (! ((0.0 <= xm[0] && xm[0] <= 1.0) &&
-	 (0.0 <= ym[0] && ym[0] <= 1.0) &&
-	 (0.0 <= zm[0] && zm[0] <= 1.0) &&
-	 (0.0 <= xm[1] && xm[1] <= 1.0) &&
-	 (0.0 <= ym[1] && ym[1] <= 1.0) &&
-	 (0.0 <= zm[1] && zm[1] <= 1.0)) ) {
-    TRACE6("CommBlock ERROR:  %f %f %f  %f %f %f", xm[0],ym[0],zm[0],xp[0],yp[0],zp[0]);
-    TRACE6("CommBlock ERROR:  %f %f %f  %f %f %f", xm[1],ym[1],zm[1],xp[1],yp[1],zp[1]);
-  }
   int num_field_blocks = 1;
   bool testing = false;
 
@@ -271,8 +244,6 @@ void CommBlock::refine()
       (thisProxy, index,
        nx,ny,nz,
        level_+1,
-       xm[icx],ym[icy],zm[icz],
-       xp[icx],yp[icy],zp[icz],
        num_field_blocks,
        testing);
 

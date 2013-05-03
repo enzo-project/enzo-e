@@ -301,11 +301,6 @@ void Hierarchy::allocate_array_
       
   }
 
-  // Determine size of each block
-  double xb = (upper_[0] - lower_[0]) / nbx;
-  double yb = (upper_[1] - lower_[1]) / nby;
-  double zb = (upper_[2] - lower_[2]) / nbz;
-
   // CREATE AND INITIALIZE NEW DATA BLOCKS
 
   int num_field_blocks = 1;
@@ -319,8 +314,6 @@ void Hierarchy::allocate_array_
   (*block_array_) = factory_->create_block_array
     (nbx,nby,nbz,
      mbx,mby,mbz,
-     lower_[0],lower_[1],lower_[2],
-     xb,yb,zb,
      num_field_blocks,
      allocate_data,
      testing);
@@ -352,8 +345,6 @@ void Hierarchy::allocate_array_
        index,
        mbx,mby,mbz,
        level = 0,
-       lower_[0],lower_[1],lower_[2],
-       xb,yb,zb,
        num_field_blocks,
        testing);
 

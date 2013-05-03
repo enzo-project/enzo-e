@@ -390,8 +390,6 @@ EnzoBlock::EnzoBlock
  Index index,
  int nx, int ny, int nz,
  int level,
- double xm, double ym, double zm,
- double xp, double yp, double zp,
  int num_field_blocks) throw()
   : CommBlock 
     (
@@ -401,7 +399,6 @@ EnzoBlock::EnzoBlock
      index,
      nx,ny,nz,
      level,
-     xm,ym,zm,xp,yp,zp,
      num_field_blocks),
     Time_(0),
     CycleNumber(0),
