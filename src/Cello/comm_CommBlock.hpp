@@ -13,6 +13,7 @@ class Factory;
 class GroupProcess;
 class FieldDescr;
 class Hierarchy;
+class Simulation;
 
 #ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
@@ -33,8 +34,10 @@ public: // interface
   /// size, and number of field blocks
   CommBlock
   (
+#ifndef CONFIG_USE_CHARM
+   Simulation * simulation,
+#endif
    Index index,
-   int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int level,
    double xmp, double ymp, double zmp,
@@ -58,7 +61,6 @@ public: // interface
   p | sync_refresh_;
 
   p | index_;
-  PUParray(p,size_,3);
   p | cycle_;
   p | time_;
   p | dt_;
@@ -256,12 +258,7 @@ protected: // functions
     return buffer;
   }
 
-
-  void initialize_
-  ( int ibx, int iby, int ibz,
-    int nbx, int nby, int nbz,
-    int nx, int ny, int nz,
-    bool testing);
+  void initialize_  ( int nx, int ny, int nz,    bool testing);
 
   /// Allocate and copy in attributes from give CommBlock
   void copy_(const CommBlock & block) throw();
@@ -296,8 +293,13 @@ protected: // functions
 
 protected: // attributes
 
+#ifndef CONFIG_USE_CHARM
+  /// Pointer to parent simulation object (MPI only)
+  Simulation * simulation_;
+#endif
+
+  ///
   /// Mesh Block that this CommBlock controls
-  /// CB
   Block * block_;
 
 #ifdef CONFIG_USE_CHARM
@@ -312,10 +314,6 @@ protected: // attributes
   //--------------------------------------------------
 
   Index index_;
-
-  /// Size of array [redundant with CHARM thisIndex.x .y .z]
-  /// CB
-  int size_[3];
 
   //--------------------------------------------------
 

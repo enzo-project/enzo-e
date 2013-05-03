@@ -93,12 +93,11 @@ void CommBlock::refresh ()
   //--------------------------------------------------
 
   int ibx,iby,ibz;
+  index_forest(&ibx,&iby,&ibz);
 
-  thisIndex.array(&ibx,&iby,&ibz);
-
-  int nbx = size_[0];
-  int nby = size_[1];
-  int nbz = size_[2];
+  int nbx,nby,nbz;
+  size_forest(&nbx,&nby,&nbz);
+  TRACE3("size_forest %d %d %d",nbx,nby,nbz);
   
   bool fx3[3],fy3[3],fz3[3];
   determine_boundary_

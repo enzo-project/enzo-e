@@ -13,15 +13,24 @@
 
 //----------------------------------------------------------------------
 
-Hierarchy::Hierarchy ( const Factory * factory,
-		       int dimension, int refinement,
-		       int process_first, int process_last_plus
-		       ) throw ()
-  : factory_((Factory *)factory),
-    dimension_(dimension),
-    refinement_(refinement),
-    group_process_(GroupProcess::create(process_first,process_last_plus)),
-    layout_(0)
+Hierarchy::Hierarchy 
+(
+#ifndef CONFIG_USE_CHARM
+ Simulation * simulation,
+#endif
+ const Factory * factory,
+ int dimension, int refinement,
+ int process_first, int process_last_plus
+ ) throw ()
+  :
+#ifndef CONFIG_USE_CHARM
+  simulation_(simulation),
+#endif
+  factory_((Factory *)factory),
+  dimension_(dimension),
+  refinement_(refinement),
+  group_process_(GroupProcess::create(process_first,process_last_plus)),
+  layout_(0)
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
@@ -200,6 +209,7 @@ void Hierarchy::create_forest
  int nx, int ny, int nz,
  int nbx, int nby, int nbz,
  bool allocate_blocks,
+ bool allocate_data,
  bool testing,
  int process_first, int process_last_plus) throw()
 {
@@ -213,11 +223,13 @@ void Hierarchy::create_forest
   blocking_[1] = nby;
   blocking_[2] = nbz;
 
+  if (allocate_blocks) {
 #ifdef CONFIG_USE_CHARM
-  allocate_array_(allocate_blocks,testing);
+    allocate_array_(allocate_data,testing);
 #else  /* CONFIG_USE_CHARM */
-  allocate_array_(allocate_blocks,testing,field_descr);
+    allocate_array_(allocate_data,testing,field_descr);
 #endif  /* CONFIG_USE_CHARM */
+  }
 }
 
 //----------------------------------------------------------------------
@@ -246,7 +258,7 @@ CommBlock * Hierarchy::local_block(size_t i) const throw()
 
 void Hierarchy::allocate_array_
 (
- bool allocate_blocks,
+ bool allocate_data,
  bool testing,
  const FieldDescr * field_descr
 ) throw()
@@ -310,10 +322,10 @@ void Hierarchy::allocate_array_
      lower_[0],lower_[1],lower_[2],
      xb,yb,zb,
      num_field_blocks,
-     allocate_blocks,
+     allocate_data,
      testing);
     
-  block_exists_ = allocate_blocks;
+  block_exists_ = allocate_data;
   block_sync_.stop() = nbx*nby*nbz;
 
 #else /* CONFIG_USE_CHARM */
@@ -336,8 +348,8 @@ void Hierarchy::allocate_array_
 
     CommBlock * comm_block = factory_->create_block 
       (
+       simulation_,
        index,
-       nbx,nby,nbz,
        mbx,mby,mbz,
        level = 0,
        lower_[0],lower_[1],lower_[2],

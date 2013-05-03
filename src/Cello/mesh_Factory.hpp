@@ -50,8 +50,13 @@ public: // interface
 
 
   /// Create a new Hierarchy [abstract factory design pattern]
-  virtual Hierarchy * create_hierarchy (int dimension, int refinement,
-					int process_first, int process_last_plus) const throw ();
+  virtual Hierarchy * create_hierarchy 
+  (
+#ifndef CONFIG_USE_CHARM
+   Simulation * simulation,
+#endif
+   int dimension, int refinement,
+   int process_first, int process_last_plus) const throw ();
 
   /// Create an Input / Output accessor object for CommBlock
   virtual IoBlock * create_io_block ( ) const throw();
@@ -63,7 +68,8 @@ public: // interface
 
   /// Create a new CHARM++ CommBlock array
   virtual CProxy_CommBlock create_block_array
-  (int nbx, int nby, int nbz,
+  (
+   int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
@@ -78,9 +84,10 @@ public: // interface
   (
 #ifdef CONFIG_USE_CHARM
    CProxy_CommBlock block_array,
+#else
+   Simulation * simulation,
 #endif
    Index index,
-   int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int level,
    double xm, double ym, double zm,

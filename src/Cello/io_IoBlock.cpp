@@ -48,10 +48,6 @@ void IoBlock::meta_value
     *type   = scalar_type_int;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) block_->size_;
-    *type   = scalar_type_int;
-    *nxd     = 3;
-  } else if (index == count++) {
     *buffer = (void *) block_->block()->lower_;
     *type   = scalar_type_double;
     *nxd     = 3;

@@ -69,7 +69,6 @@ CProxy_CommBlock EnzoFactory::create_block_array
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 	  enzo_block_array[index].insert 
 	    (index,
-	     nbx,nby,nbz,
 	     nx,ny,nz,
 	     level=0,
 	     xm,ym,zm, 
@@ -99,9 +98,10 @@ CommBlock * EnzoFactory::create_block
 (
 #ifdef CONFIG_USE_CHARM
  CProxy_CommBlock block_array,
+#else
+ Simulation * simulation,
 #endif /* CONFIG_USE_CHARM */
  Index index,
- int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  int level,
  double xm, double ym, double zm,
@@ -118,7 +118,6 @@ CommBlock * EnzoFactory::create_block
    block_array[index].insert
      (
       index,
-      nbx,nby,nbz,
       nx,ny,nz,
       level,
       xm,ym,zm, 
@@ -136,8 +135,8 @@ CommBlock * EnzoFactory::create_block
 
   EnzoBlock * enzo_block = new EnzoBlock 
     (
+     simulation,
      index,
-     nbx,nby,nbz,
      nx,ny,nz,
      level,
      xm,ym,zm, 

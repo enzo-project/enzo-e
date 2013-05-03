@@ -10,6 +10,8 @@
 
 
 class Factory;
+class Simulation;
+
 #ifdef CONFIG_USE_CHARM
 class CProxy_CommBlock;
 #endif
@@ -28,7 +30,11 @@ public: // interface
   Hierarchy() throw() { }
   
   /// Initialize a Hierarchy object
-  Hierarchy ( const Factory * factory,
+  Hierarchy (
+#ifndef CONFIG_USE_CHARM
+	     Simulation * simulation,
+#endif
+	     const Factory * factory,
 	      int dimension, int refinement,
 	      int process_first, int process_last_plus
 	      ) throw ();
@@ -116,7 +122,8 @@ public: // interface
   void create_forest (FieldDescr   * field_descr,
 		      int nx, int ny, int nz,
 		      int nbx, int nby, int nbz,
-		      bool allocate_blocks  = true,
+		      bool allocate_blocks,
+		      bool allocate_data,
 		      bool testing          = false,
 		      int process_first     = 0, 
 		      int process_last_plus = -1) throw();
@@ -142,12 +149,18 @@ protected: // functions
 
   /// Allocate array, and optionally allocate element CommBlocks
   void allocate_array_
-  (bool allocate_blocks = true,
+  (bool allocate_data = true,
    bool testing = false,
    const FieldDescr * field_descr = 0) throw ();
 
 protected: // attributes
 
+#ifndef CONFIG_USE_CHARM
+  /// Simulation object (MPI only)
+  Simulation * simulation_;
+#endif
+
+  /// 
   /// Factory for creating Simulations, Hierarchies, Patches and Blocks
   /// [abstract factory design pattern]
   Factory * factory_;

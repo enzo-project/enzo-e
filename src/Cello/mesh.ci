@@ -27,7 +27,6 @@ module mesh {
 
     entry CommBlock
       (Index index,
-       int nbx, int nby, int nbz,
        int nx, int ny, int nz,	
        int level,
        double xpm, double ypm, double zpm,

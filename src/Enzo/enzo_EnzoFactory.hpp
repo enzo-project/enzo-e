@@ -53,9 +53,10 @@ public: // interface
   (
 #ifdef CONFIG_USE_CHARM
    CProxy_CommBlock block_array,
+#else
+   Simulation * simulation,
 #endif /* CONFIG_USE_CHARM */
    Index index,
-   int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int level,
    double xm, double ym, double zm,

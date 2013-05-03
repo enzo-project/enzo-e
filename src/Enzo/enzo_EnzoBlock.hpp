@@ -160,8 +160,10 @@ public: // interface
   /// Initialize the EnzoBlock chare array
   EnzoBlock
   (
+#ifndef CONFIG_USE_CHARM
+   Simulation * simulation,
+#endif
    Index index,
-   int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int level,
    double xm, double ym, double zm,

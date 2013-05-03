@@ -9,10 +9,20 @@
 
 //----------------------------------------------------------------------
 
-Hierarchy * Factory::create_hierarchy (int dimension, int refinement,
-				       int process_first, int process_last_plus) const throw ()
+Hierarchy * Factory::create_hierarchy 
+(
+#ifndef CONFIG_USE_CHARM
+ Simulation * simulation,
+#endif
+ int dimension, int refinement,
+ int process_first, int process_last_plus) const throw ()
 {
-  return new Hierarchy (this,dimension,refinement,process_first, process_last_plus); 
+  return new Hierarchy 
+    (
+#ifndef CONFIG_USE_CHARM
+     simulation,
+#endif
+     this,dimension,refinement,process_first, process_last_plus); 
 }
 
 //----------------------------------------------------------------------
@@ -81,7 +91,6 @@ CProxy_CommBlock Factory::create_block_array
 
 	  proxy_block[index].insert 
 	    (index,
-	     nbx,nby,nbz,
 	     nx,ny,nz,
 	     level = 0,
 	     xm,ym,zm, 
@@ -112,9 +121,10 @@ CommBlock * Factory::create_block
 (
 #ifdef CONFIG_USE_CHARM
  CProxy_CommBlock block_array,
+#else /* CONFIG_USE_CHARM */
+ Simulation * simulation,
 #endif /* CONFIG_USE_CHARM */
  Index index,
- int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  int level,
  double xm, double ym, double zm,
@@ -130,7 +140,6 @@ CommBlock * Factory::create_block
    block_array[index].insert
      (
       index,
-      nbx,nby,nbz,
       nx,ny,nz,
       level,
       xm,ym,zm, 
@@ -147,8 +156,8 @@ CommBlock * Factory::create_block
 #else /* CONFIG_USE_CHARM */
 
    CommBlock * comm_block = new CommBlock 
-     (index,
-      nbx,nby,nbz,
+     (simulation,
+      index,
       nx,ny,nz,
       level,
       xm,ym,zm, 

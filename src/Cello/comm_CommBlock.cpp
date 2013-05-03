@@ -18,22 +18,28 @@
 
 CommBlock::CommBlock
 (
+#ifndef CONFIG_USE_CHARM
+ Simulation * simulation,
+#endif
  Index index,
- int nbx, int nby, int nbz,          // Forest size
  int nx, int ny, int nz,             // Block cells
  int level,                          // Block level
  double xpm, double ypm, double zpm, // Forest begin
  double xb, double yb, double zb,    // Block size
  int num_field_blocks,
  bool testing
-) throw ()
-  : index_(index),
-    cycle_(0),
-    time_(0),
-    dt_(0),
-    index_initial_(0),
-    level_(level),
-    level_active_(-1)
+ ) throw ()
+  : 
+#ifndef CONFIG_USE_CHARM
+  simulation_(simulation),
+#endif
+  index_(index),
+  cycle_(0),
+  time_(0),
+  dt_(0),
+  index_initial_(0),
+  level_(level),
+  level_active_(-1)
 { 
 
   TRACE("ENTER CommBlock::CommBlock()");
@@ -42,7 +48,6 @@ CommBlock::CommBlock
   index.print("create");
 #endif
 
-  TRACE3("CommBlock::CommBlock nb (%d %d %d)",nbx,nby,nbz);
   TRACE3("CommBlock::CommBlock  n (%d %d %d)",nx,ny,nz);
   TRACE1("CommBlock::CommBlock  l %d",level);
   TRACE3("CommBlock::CommBlock xm(%f %f %f)",xpm,ypm,zpm);
@@ -75,7 +80,7 @@ CommBlock::CommBlock
 
   initialize ();
 
-  initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz, testing);
+  initialize_(nx,ny,nz, testing);
 
 #ifdef CONFIG_USE_CHARM
   sync_refresh_.stop() = count_refresh_();
@@ -90,16 +95,10 @@ CommBlock::CommBlock
 
 void CommBlock::initialize_
 (
- int ibx, int iby, int ibz,
- int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  bool testing
  )
  {
-   size_[0] = nbx;
-   size_[1] = nby;
-   size_[2] = nbz;
-
 #ifdef CONFIG_USE_CHARM
 
    if (! testing) {
@@ -181,9 +180,14 @@ void CommBlock::index_forest (int * ix, int * iy, int * iz) const throw ()
 
 void CommBlock::size_forest (int * nx=0, int * ny=0, int * nz=0) const throw ()
 {
-  if (nx) (*nx)=size_[0]; 
-  if (ny) (*ny)=size_[1]; 
-  if (nz) (*nz)=size_[2]; 
+#ifdef CONFIG_USE_CHARM
+  proxy_simulation.ckLocalBranch()
+#else
+  simulation_
+#endif
+    ->hierarchy()->num_blocks(nx,ny,nz);
+
+  TRACE3 ("size_forest = %d %d %d",*nx,*ny,*nz);
 }
 
 //======================================================================
@@ -305,9 +309,6 @@ void CommBlock::update_boundary_ ()
 void CommBlock::copy_(const CommBlock & comm_block) throw()
 {
   block_->copy_(*comm_block.block());
-  for (int i=0; i<3; i++) {
-    size_[i] = comm_block.size_[i];
-  }
 
   cycle_ = comm_block.cycle_;
   time_  = comm_block.time_;
@@ -326,14 +327,16 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
 void CommBlock::is_on_boundary (bool is_boundary[3][2]) throw()
 {
   int ix,iy,iz;
-  index_.array(&ix,&iy,&iz);
+  index_forest(&ix,&iy,&iz);
+  int nx,ny,nz;
+  size_forest(&nx,&ny,&nz);
 
   is_boundary[0][0] = (ix == 0);
   is_boundary[1][0] = (iy == 0);
   is_boundary[2][0] = (iz == 0);
-  is_boundary[0][1] = (ix == (size_[0] - 1));
-  is_boundary[1][1] = (iy == (size_[1] - 1));
-  is_boundary[2][1] = (iz == (size_[2] - 1));
+  is_boundary[0][1] = (ix == (nx - 1));
+  is_boundary[1][1] = (iy == (ny - 1));
+  is_boundary[2][1] = (iz == (nz - 1));
 }
 
 //----------------------------------------------------------------------

@@ -324,8 +324,12 @@ void Simulation::initialize_hierarchy_() throw()
   //----------------------------------------------------------------------
 
   const int refinement = 2;
-  hierarchy_ = factory()->create_hierarchy (dimension_,refinement,
-					    0, group_process_->size());
+  hierarchy_ = factory()->create_hierarchy 
+    (
+#ifndef CONFIG_USE_CHARM
+     this,
+#endif
+     dimension_,refinement, 0, group_process_->size());
 
   // Domain extents
 
@@ -353,23 +357,26 @@ void Simulation::initialize_hierarchy_() throw()
 
   // Don't allocate blocks if reading data from files
 
-  bool allocate_blocks = ! ( config_->initial_type == "file" || 
-			     config_->initial_type == "restart" );
 
 #ifdef CONFIG_USE_CHARM
-  if (group_process()->is_root())
+  bool allocate_blocks = (group_process()->is_root());
+#else
+  bool allocate_blocks = true;
 #endif
-    {
-      hierarchy_->create_forest
-	(field_descr_,
-	 config_->mesh_root_size[0],
-	 config_->mesh_root_size[1],
-	 config_->mesh_root_size[2],
-	 config_->mesh_root_blocks[0],
-	 config_->mesh_root_blocks[1],
-	 config_->mesh_root_blocks[2],
-	 allocate_blocks);
-    }
+
+  bool allocate_data = ! ( config_->initial_type == "file" || 
+			   config_->initial_type == "restart" );
+
+  hierarchy_->create_forest
+    (field_descr_,
+     config_->mesh_root_size[0],
+     config_->mesh_root_size[1],
+     config_->mesh_root_size[2],
+     config_->mesh_root_blocks[0],
+     config_->mesh_root_blocks[1],
+     config_->mesh_root_blocks[2],
+     allocate_blocks,
+     allocate_data);
 }
 
 //----------------------------------------------------------------------
