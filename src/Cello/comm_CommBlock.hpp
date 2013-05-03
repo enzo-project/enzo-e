@@ -57,7 +57,7 @@ public: // interface
 
   p | sync_refresh_;
 
-  PUParray(p,index_,3);
+  p | index_;
   PUParray(p,size_,3);
   p | cycle_;
   p | time_;
@@ -66,10 +66,6 @@ public: // interface
   p | level_;
   PUParray(p,depth_,8);
   p | level_active_;
-#ifdef CONFIG_USE_CHARM
-#else
-  p | index_mpi_;
-#endif
 
 }
 
@@ -262,8 +258,15 @@ public: // virtual functions
 
 protected: // functions
 
-  int id_ () const throw ()
-  { return index_[0] + size_[0] * (index_[1] + size_[1] * index_[2]); }
+  std::string id_ () const throw ()
+  {
+    char buffer[27];
+    sprintf (buffer,"%08X-%08X-%08X",
+	     index_.value(0),
+	     index_.value(1),
+	     index_.value(2));
+    return buffer;
+  }
 
 
   void initialize_
@@ -319,14 +322,8 @@ protected: // attributes
 #endif
 
   //--------------------------------------------------
-#ifdef CONFIG_USE_CHARM
-#else
-  Index index_mpi_;
-#endif
 
-  /// Index into array [redundant with CHARM thisIndex.x .y .z]
-  /// CB
-  int index_[3];
+  Index index_;
 
   /// Size of array [redundant with CHARM thisIndex.x .y .z]
   /// CB

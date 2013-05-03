@@ -27,7 +27,7 @@ CommBlock::CommBlock
  int num_field_blocks,
  bool testing
 ) throw ()
-  :
+  : index_(index),
     cycle_(0),
     time_(0),
     dt_(0),
@@ -103,10 +103,6 @@ void CommBlock::initialize_
    size_[1] = nby;
    size_[2] = nbz;
 
-   index_[0] = ibx;
-   index_[1] = iby;
-   index_[2] = ibz;
-
 #ifdef CONFIG_USE_CHARM
 
    if (! testing) {
@@ -181,9 +177,7 @@ CommBlock & CommBlock::operator = (const CommBlock & block) throw ()
 
 void CommBlock::index_forest (int * ix, int * iy, int * iz) const throw ()
 {
-  if (ix) (*ix) = index_[0]; 
-  if (iy) (*iy) = index_[1]; 
-  if (iz) (*iz) = index_[2]; 
+  index_.array(ix,iy,iz);
 }
 
 //----------------------------------------------------------------------
@@ -315,7 +309,6 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
 {
   block_->copy_(*comm_block.block());
   for (int i=0; i<3; i++) {
-    index_[i] = comm_block.index_[i];
     size_[i] = comm_block.size_[i];
   }
 
@@ -335,12 +328,15 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
 
 void CommBlock::is_on_boundary (bool is_boundary[3][2]) throw()
 {
-  is_boundary[0][0] = (index_[0] == 0);
-  is_boundary[1][0] = (index_[1] == 0);
-  is_boundary[2][0] = (index_[2] == 0);
-  is_boundary[0][1] = (index_[0] == (size_[0] - 1));
-  is_boundary[1][1] = (index_[1] == (size_[1] - 1));
-  is_boundary[2][1] = (index_[2] == (size_[2] - 1));
+  int ix,iy,iz;
+  index_.array(&ix,&iy,&iz);
+
+  is_boundary[0][0] = (ix == 0);
+  is_boundary[1][0] = (iy == 0);
+  is_boundary[2][0] = (iz == 0);
+  is_boundary[0][1] = (ix == (size_[0] - 1));
+  is_boundary[1][1] = (iy == (size_[1] - 1));
+  is_boundary[2][1] = (iz == (size_[2] - 1));
 }
 
 //----------------------------------------------------------------------

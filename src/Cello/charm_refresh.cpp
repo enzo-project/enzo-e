@@ -149,7 +149,7 @@ void CommBlock::refresh ()
 	  field_face.set_ghost(gx,gy,gz);
 	  
 	  DEBUG9("index %d %d %d  %d %d %d  %d %d %d",
-		 index_[0],index_[1],index_[2],
+		 ibx,iby,ibz,
 		 ix3[fx+1],iy3[fy+1],iz3[fz+1],
 		 fx,fy,fz);
 

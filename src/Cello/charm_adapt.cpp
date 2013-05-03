@@ -223,9 +223,9 @@ void CommBlock::refine()
   const Factory * factory = simulation_charm->factory();
   int rank = simulation_charm->dimension();
 
-  int ibx = index_[0];
-  int iby = index_[1];
-  int ibz = index_[2];
+  int ibx,iby,ibz;
+  index_.array(&ibx,&iby,&ibz);
+
   TRACE3("ADAPT ib = %d %d %d",ibx,iby,ibz);
   int nbx = size_[0];
   int nby = size_[1];

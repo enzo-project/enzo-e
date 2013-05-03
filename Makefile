@@ -1,5 +1,5 @@
 .PHONY: default
-default: charm-6
+default: charm-1
 
 .PHONY: charm-%
 charm-%:
@@ -16,5 +16,5 @@ serial-%:
 
 .PHONY: clean
 clean:
-	scons -c
+	python scons.py -c
 
