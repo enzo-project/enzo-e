@@ -93,6 +93,7 @@ Initial * EnzoProblem::create_initial_
  std::string  name,
  Parameters * parameters,
  Config * config,
+ const FieldDescr * field_descr,
  const GroupProcess * group_process
  ) throw ()
 {
@@ -112,7 +113,8 @@ Initial * EnzoProblem::create_initial_
   } else if (name == "sedov_array_3d") {
     initial = new EnzoInitialSedovArray3(static_cast<EnzoConfig *>(config));
   } else {
-    initial = Problem::create_initial_(name,parameters,config,group_process);
+    initial = Problem::create_initial_
+      (name,parameters,config,field_descr,group_process);
   }
 
   return initial;

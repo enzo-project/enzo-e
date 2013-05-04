@@ -9,7 +9,7 @@
 
 //----------------------------------------------------------------------
 
-RefineSlope::RefineSlope(FieldDescr * field_descr,
+RefineSlope::RefineSlope(const FieldDescr * field_descr,
 			 double slope_min_refine,
 			 double slope_max_coarsen,
 			 std::vector<std::string> field_name_list) throw ()
@@ -53,14 +53,14 @@ int RefineSlope::apply
 
   int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
 
-  double h[3];
+  double h3[3];
   Block * block = comm_block->block();
   double xm[3],xp[3];
   block->lower(&xm[0],&xm[1],&xm[2]);
   block->upper(&xp[0],&xp[1],&xp[2]);
-  field_block->cell_width(xm[0],xp[0],&h[0]);
-  field_block->cell_width(xm[1],xp[1],&h[1]);
-  field_block->cell_width(xm[2],xp[2],&h[2]);
+  field_block->cell_width(xm[0],xp[0],&h3[0]);
+  field_block->cell_width(xm[1],xp[1],&h3[1]);
+  field_block->cell_width(xm[2],xp[2],&h3[2]);
 
   for (size_t k=0; k<field_id_list_.size(); k++) {
 
@@ -78,51 +78,12 @@ int RefineSlope::apply
     // count number of times slope refine and coarsen conditions are satisified
     switch (precision) {
     case precision_single:
-      {
-	// TODO: use template
-	float * array = (float*)void_array;
-	float slope;
-	for (int axis=0; axis<rank; axis++) {
-	  int d = d3[axis];
-	  for (int ix=0; ix<nx; ix++) {
-	    for (int iy=0; iy<ny; iy++) {
-	      for (int iz=0; iz<nz; iz++) {
-		int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
-		slope = fabs((array[i+d] - array[i-d]) / h[axis]);
-		if (slope > slope_min_refine_)  any_refine  = true;
-		// if (slope > slope_min_refine_)  
-		  // TRACE6 ("%d: %d %d %d  %g %g",
-		  // 	  id_field,ix,iy,iz,array[i+d],array[i-d]);
-		if (slope > slope_max_coarsen_) all_coarsen = false;
-	      }
-	    }
-	  }
-	}
-      }
+      evaluate_block_((float*)void_array, nx,ny,nz,gx,gy,gz,
+		      &any_refine,&all_coarsen, rank,h3,d3);
       break;
     case precision_double:
-      {
-	// TODO: use template
-	double * array = (double*)void_array;
-	double slope;
-
-	for (int axis=0; axis<rank; axis++) {
-	  int d = d3[axis];
-	  for (int ix=0; ix<nx; ix++) {
-	    for (int iy=0; iy<ny; iy++) {
-	      for (int iz=0; iz<nz; iz++) {
-		int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
-		slope = fabs((array[i+d] - array[i-d]) / h[axis]);
-		if (slope > slope_min_refine_)  any_refine  = true;
-		if (slope > slope_max_coarsen_) all_coarsen = false;
-		// if (slope > slope_min_refine_)  
-		//   TRACE6 ("%d: %d %d %d  %g %g",
-		// 	  id_field,ix,iy,iz,array[i+d],array[i-d]);
-	      }
-	    }
-	  }
-	}
-      }
+      evaluate_block_((double*)void_array, nx,ny,nz,gx,gy,gz,
+		      &any_refine,&all_coarsen, rank,h3,d3);
       break;
     default:
       ERROR2("RefineSlope::apply",
@@ -141,6 +102,31 @@ int RefineSlope::apply
 
 }
 
+//----------------------------------------------------------------------
 
+template <class T>
+void RefineSlope::evaluate_block_(T * array, 
+				  int nx, int ny, int nz,
+				  int gx, int gy, int gz,
+				  bool *any_refine,
+				  bool * all_coarsen, 
+				  int rank, 
+				  double * h3, const int * d3)
+{
+  double slope;
+  for (int axis=0; axis<rank; axis++) {
+    int d = d3[axis];
+    for (int ix=0; ix<nx; ix++) {
+      for (int iy=0; iy<ny; iy++) {
+	for (int iz=0; iz<nz; iz++) {
+	  int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
+	  slope = fabs(array[i+d] - array[i-d]) / (2*h3[axis]);
+	  if (slope > slope_min_refine_)  *any_refine  = true;
+	  if (slope > slope_max_coarsen_) *all_coarsen = false;
+	}
+      }
+    }
+  }
+}
 //======================================================================
 

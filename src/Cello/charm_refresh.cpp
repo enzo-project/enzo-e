@@ -44,7 +44,7 @@ void CommBlock::p_refresh()
 {
   // @@@ 128 OK
   TRACE("CommBlock::p_refresh");
-#ifdef SKIP_TO_OUTPUT
+#ifdef TEMP_SKIP_REFRESH
   WARNING("CommBlock::q_adapt_exit",
 	  "CALLING p_output() INSTEAD OF REFRESH FOR IMAGE MESH CREATION");
 

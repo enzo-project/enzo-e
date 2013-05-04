@@ -47,6 +47,7 @@ private: // functions
   (std::string name, 
    Parameters * parameters,
    Config * config,
+   const FieldDescr *,
    const GroupProcess * group_process) throw ();
 
   /// Create named method object

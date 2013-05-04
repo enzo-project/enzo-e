@@ -131,7 +131,7 @@ public: // interface
 
   /// Initialize the refine object
   void initialize_refine(Config * config,
-			 FieldDescr * field_descr) throw();
+			 const FieldDescr * field_descr) throw();
 
   /// Initialize the stopping object
   void initialize_stopping(Config * config ) throw();
@@ -141,7 +141,7 @@ public: // interface
 
   /// Initialize the output objects
   void initialize_output(Config * config,
-			 FieldDescr * field_descr,
+			 const FieldDescr * field_descr,
 			 const GroupProcess * group_process,
 			 const Factory * factory) throw();
 
@@ -163,13 +163,14 @@ protected: // functions
   (std::string name, 
    Parameters * parameters,
    Config * config,
+   const FieldDescr *,
    const GroupProcess * = 0) throw ();
 
   /// Create named refine object
   virtual Refine * create_refine_ 
   (std::string name, 
    Config * config, 
-   FieldDescr * field_descr,
+   const FieldDescr * field_descr,
    int index) throw ();
 
   /// Create named method object

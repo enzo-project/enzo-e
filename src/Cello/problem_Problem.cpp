@@ -111,7 +111,7 @@ void Problem::initialize_initial(Config * config,
 {
   TRACE1 ("num_refine_ = %d",num_refine_);
   Initial * initial = create_initial_
-    (config->initial_type,parameters,config,group_process);
+    (config->initial_type,parameters,config,field_descr,group_process);
 
   initial_list_.push_back( initial );
 
@@ -126,7 +126,7 @@ void Problem::initialize_initial(Config * config,
 //----------------------------------------------------------------------
 
 void Problem::initialize_refine(Config * config,
-				FieldDescr * field_descr) throw()
+				const FieldDescr * field_descr) throw()
 {
   TRACE1 ("num_refine_ = %d",num_refine_);
     TRACE1("mesh_adapt_type.size() = %d", config->mesh_adapt_type.size());
@@ -180,7 +180,7 @@ void Problem::initialize_timestep(Config * config) throw()
 
 void Problem::initialize_output
 (Config * config,
- FieldDescr * field_descr,
+ const FieldDescr * field_descr,
  const GroupProcess * group_process,
  const Factory * factory) throw()
 {
@@ -449,6 +449,7 @@ Initial * Problem::create_initial_
  std::string  type,
  Parameters * parameters,
  Config * config,
+ const FieldDescr * field_descr,
  const GroupProcess * group_process
  ) throw ()
 { 
@@ -461,7 +462,7 @@ Initial * Problem::create_initial_
   if (type == "file" || type == "restart") {
     return new InitialFile   (parameters,group_process,config->initial_cycle,config->initial_time);;
   } else if (type == "default") {
-    return new InitialDefault(parameters,
+    return new InitialDefault(parameters,field_descr,
 			      config->initial_cycle,config->initial_time);
   }
   return NULL;
@@ -473,7 +474,7 @@ Refine * Problem::create_refine_
 (
  std::string  type,
  Config * config,
- FieldDescr * field_descr,
+ const FieldDescr * field_descr,
  int index
  ) throw ()
 { 

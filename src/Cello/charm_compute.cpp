@@ -19,7 +19,7 @@
 
 void SimulationCharm::c_compute()
 {
-#ifdef SKIP_TO_OUTPUT
+#ifdef TEMP_SKIP_REFRESH
   CkExit();
 #endif
 

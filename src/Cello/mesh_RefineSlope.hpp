@@ -18,7 +18,7 @@ class RefineSlope : public Refine {
 public: // interface
 
   /// Constructor
-  RefineSlope(FieldDescr * field_descr,
+  RefineSlope(const FieldDescr * field_descr,
 	      double slope_min_refine,
 	      double slope_max_coarsen,
 	      std::vector<std::string> field_name_list) throw();
@@ -48,7 +48,19 @@ public: // interface
 
   virtual std::string name () const { return "slope"; };
 
-private:
+private: // functions
+
+  template <class T>
+  void evaluate_block_(T * array, 
+		       int nx, int ny, int nz,
+		       int gx, int gy, int gz,
+		       bool *any_refine,
+		       bool * all_coarsen, 
+		       int rank, 
+		       double * h3, const int * d3);
+
+private: // attributes
+
   /// Minimum allowed slope before refinement kicks in
   double slope_min_refine_;
 

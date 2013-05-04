@@ -20,11 +20,12 @@ public: // interface
   InitialDefault() throw() { }
   
   /// Constructor
-  InitialDefault(Parameters * parameters, int cycle, double time) throw();
+  InitialDefault(Parameters * parameters, 
+		 const FieldDescr * field_descr,
+		 int cycle, double time) throw();
 
   /// Destructor
-  virtual ~InitialDefault() throw()
-  {}
+  virtual ~InitialDefault() throw();
 
 #ifdef CONFIG_USE_CHARM
 
@@ -67,26 +68,54 @@ private: // functions
 			int n, double * value, double * vdeflt,
 			double * x, double * y, double * z, double * t) throw();
 
-  void evaluate_logical_ (const Hierarchy * hierarchy,
-			  const CommBlock * block,
-			  FieldBlock * field_block, int index_field, 
-			  std::string field_name,
-			  const FieldDescr * field_descr,			
-			  int n, bool * value, bool * vdeflt,
-			  double * x, double * y, double * z, double * t) throw();
+  void evaluate_mask_ (const Hierarchy * hierarchy,
+		       const CommBlock * block,
+		       FieldBlock * field_block,
+		       int index_field, int index_value,
+		       std::string field_name,
+		       const FieldDescr * field_descr,			
+		       int n, bool * value, bool * vdeflt,
+		       double * x, double * y, double * z, double * t) throw();
 
   /// Read in a PNG file and create an integer array using r + b + g values
-  void create_png_mask_ (bool * mask,
-			 const Hierarchy * hierarchy,
-			 const CommBlock * block,
-			 const FieldDescr * field_descr,
-			 const char * pngfile,
-			 int   nxb, int nyb,
-			 int * nx, int * ny );
+  void create_mask_ (bool ** mask, int * nx, int * ny ,
+		     std::string pngfile);
+
+  /// Create a mask for the block given mask_[][]
+  void evaluate_mask_png_ ( bool            * mask_block, int nxb, int nyb,
+			    bool            * mask_png,   int nx,  int ny,
+			    const Hierarchy * hierarchy,
+			    const CommBlock * comm_block,
+			    const FieldDescr * field_descr);
+
+  template<class T>
+  void copy_precision_
+  (T * field, bool * mask, int offset, double * value, int nx, int ny, int nz);
+
+  template<class T>
+  void copy_precision_
+  (T * field, int offset, double * value, int nx, int ny, int nz);
 
 private: // attributes
 
   Parameters * parameters_;
+
+  /// Field descriptor
+  const FieldDescr * field_descr_;
+
+  /// Masks for fields and values: mask_[index_field][index_value]
+  bool *** mask_;
+
+  /// Size of the masks
+  int **nx_;
+  int **ny_;
+
+  /// number of fields
+  int num_fields_;
+
+  /// number of masked values per field
+  int * num_masks_;
+
 
 };
 
