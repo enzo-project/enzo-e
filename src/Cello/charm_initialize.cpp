@@ -38,7 +38,8 @@ void SimulationCharm::s_initialize()
   TRACE("SimulationCharm::s_initialize()");
 
   if (group_process_->is_root()) {
-    CkStartQD (CkCallback(CkIndex_CommBlock::p_phase_adapt(),*hierarchy()->block_array()));
+    CkStartQD (CkCallback(CkIndex_CommBlock::p_adapt_enter(),
+			  *hierarchy()->block_array()));
    }
 
 }

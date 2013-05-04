@@ -19,6 +19,10 @@
 
 void SimulationCharm::c_compute()
 {
+#ifdef SKIP_TO_OUTPUT
+  CkExit();
+#endif
+
   TRACE("SimulationCharm::c_compute()");
   if (stop_) {
     
@@ -82,7 +86,7 @@ void CommBlock::compute()
 
   TRACE ("CommBlock::compute() calling p_adapt(0)");
   
-  p_adapt(0);
+  p_adapt_enter();
 
 }
 

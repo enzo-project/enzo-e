@@ -346,6 +346,7 @@ void Hierarchy::allocate_array_
        mbx,mby,mbz,
        level = 0,
        num_field_blocks,
+       0,
        testing);
 
     // Store the data block in the block array

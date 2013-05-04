@@ -66,7 +66,8 @@ enum reduce_enum {
   reduce_min,     /// Minimal value along the axis
   reduce_max,     /// Maximal value along the axis
   reduce_avg,     /// Average value along the axis
-  reduce_sum      /// Sum of values along the axis
+  reduce_sum,     /// Sum of values along the axis
+  reduce_set      /// Value of last processed (used for mesh plotting)
 };
 typedef int reduce_type;
 

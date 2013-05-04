@@ -41,6 +41,7 @@ public: // interface
    int nx, int ny, int nz,
    int level,
    int num_field_blocks,
+   int count_adapt,
    bool testing=false
 ) throw();
 
@@ -65,7 +66,7 @@ public: // interface
   p | index_initial_;
   p | level_;
   PUParray(p,depth_,8);
-  p | level_active_;
+  p | count_adapt_;
 
 }
 
@@ -125,8 +126,8 @@ public: // interface
   /// CB
 
   /// Begin the adaptation phase
-  void p_phase_adapt();
-  void p_adapt (int level);
+  void p_adapt_enter();
+  void p_adapt (int count_adapt);
   void q_adapt ();
   void q_adapt_exit ();
   void adapt();
@@ -233,6 +234,9 @@ public: // interface
  
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) throw();
+
+  /// Return whether this CommBlock is a leaf in the octree forest
+  bool is_leaf() const;
 
 public: // virtual functions
 
@@ -356,9 +360,9 @@ protected: // attributes
   /// Depth of each child, starting with 0 if no child
   int depth_[8];
 
-  /// Mesh refinement level currently being refined
-  int level_active_;
-
+  /// Counter for adaption phase.  (Usually 1 except possibly
+  /// initialization)
+  int count_adapt_;
 };
 
 #endif /* COMM_COMMBLOCK_HPP */

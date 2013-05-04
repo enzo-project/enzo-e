@@ -23,12 +23,12 @@ Initial {
 	"internal_energy"
       ] ;
 }
- Initial {
-    density       { value = [  1.0, "input/Cello.png", 
-                               0.1 ]; };
-    total_energy  { value = [  0.14 / (0.4 * 0.1), "input/Cello.png",
-                               1.0  / (0.4 * 1.0)  ]; };
- }
+# Initial {
+#    density       { value = [  1.0, "input/Cello.png", 
+#                               0.1 ]; };
+#    total_energy  { value = [  0.14 / (0.4 * 0.1), "input/Cello.png",
+#                               1.0  / (0.4 * 1.0)  ]; };
+# }
 
 Stopping { cycle = 0; }
 
@@ -52,12 +52,14 @@ Output {
       image_mesh {
 	type     = "image";
 	image_type  = "mesh";
-	image_reduce_type = "avg";
+	image_reduce_type = "max";
         field_list = ["density"];
 	image_block_size  = 1;
 	schedule = ["cycle","interval", 10];
-        colormap = [1.00, 1.00, 1.00,
-	            0.00, 0.00, 0.00];
+        colormap = [1.00, 1.00, 1.00,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00, 
+                    0.00, 0.00, 1.00];
         name = ["mesh.%02d.png","cycle"];
         
       };

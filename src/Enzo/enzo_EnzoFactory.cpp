@@ -69,7 +69,8 @@ CProxy_CommBlock EnzoFactory::create_block_array
 	    (index,
 	     nx,ny,nz,
 	     level=0,
-	     num_field_blocks);
+	     num_field_blocks,
+	     0);
 
 	}
       }
@@ -101,6 +102,7 @@ CommBlock * EnzoFactory::create_block
  int nx, int ny, int nz,
  int level,
  int num_field_blocks,
+ int count_adapt,
  bool testing
  ) const throw()
 {
@@ -115,6 +117,7 @@ CommBlock * EnzoFactory::create_block
       nx,ny,nz,
       level,
       num_field_blocks,
+      count_adapt,
       testing);
 
    CommBlock * block = block_array[index].ckLocal();
@@ -131,7 +134,8 @@ CommBlock * EnzoFactory::create_block
      index,
      nx,ny,nz,
      level,
-     num_field_blocks);
+     num_field_blocks,
+     count_adapt);
 
   return enzo_block;
   

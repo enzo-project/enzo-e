@@ -102,63 +102,55 @@ const char * adapt_name[] = {
 
 //======================================================================
 
-void CommBlock::p_phase_adapt() {  p_adapt(0); }
-
-//======================================================================
-
-void CommBlock::p_adapt(int level)
+void CommBlock::p_adapt_enter()
 {
-  level_active_ = level;
-  TRACE1("ADAPT p_adapt(%d)",level);
-  adapt (); 
+  int initial_cycle     = simulation()->config()->initial_cycle;
+  int initial_max_level = simulation()->config()->initial_max_level;
+
+  count_adapt_ = (cycle() == initial_cycle) ? initial_max_level : 1;
+  TRACE1("count_adapt = %d",count_adapt_);
+  p_adapt(count_adapt_);
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::adapt()
+void CommBlock::p_adapt(int count)
 {
-  TRACE1("ADAPT adapt(%d)",level_active_);
+  TRACE1("ADAPT p_adapt(%d)",count_adapt_);
 
+  TRACE1("count_adapt = %d",count_adapt_);
+  if (count_adapt_-- > 0) {
 
-  int mesh_max_level    = simulation()->config()->mesh_max_level;
-  int initial_max_level = simulation()->config()->initial_max_level;
-  int initial_cycle     = simulation()->config()->initial_cycle;
+    TRACE1("count_adapt = %d",count_adapt_);
+      int adapt = determine_refine();
 
-  TRACE2 ("ADAPT cycle %d  initial_cycle %d",cycle(),initial_cycle);
-  int max_level = (cycle() == initial_cycle) ? 
-    initial_max_level : mesh_max_level;
+      TRACE1 ("ADAPT adapt = %s",adapt_name[adapt]);
 
-  TRACE3("ADAPT max_level %d  initial %d  mesh %d",max_level,
-	 initial_max_level, mesh_max_level);
+      if      (adapt == adapt_refine)  refine();
+      else if (adapt == adapt_coarsen) coarsen();
 
-  if (max_level == 0) {
-
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(),thisProxy[thisIndex]));
+      CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(),
+			    thisProxy[thisIndex]));
 
   } else {
 
-    TRACE2("ADAPT determine_refine %d %d",level_active_,level_);
-    if (level_active_ == level_) {
-      int adapt = determine_refine();
-      TRACE1 ("ADAPT adapt = %s",adapt_name[adapt]);
-      if      (adapt == adapt_refine)  refine();
-      else if (adapt == adapt_coarsen) coarsen();
-    }
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(),
+			  thisProxy[thisIndex]));
 
-    int max_level = simulation()->config()->mesh_max_level;
-
-    if (level_active_ < max_level - 1) {
-
-      CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(),thisProxy[thisIndex]));
-
-    } else {
-
-      level_active_ = -1;
-
-      CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(),thisProxy[thisIndex]));
-
-    }
   }
+}
+
+//----------------------------------------------------------------------
+
+bool CommBlock::is_leaf() const
+{
+  int rank = simulation()->dimension();
+  int nc = NC(rank);
+  bool leaf = true;
+  for (int ic=0; ic<nc; ic++) {
+    leaf = leaf && (depth_[ic] == 0);
+  }
+  return leaf;
 }
 
 //----------------------------------------------------------------------
@@ -167,14 +159,19 @@ int CommBlock::determine_refine()
 {
   TRACE("ADAPT CommBlock::determine_refine()");
 
-  FieldDescr * field_descr = simulation()->field_descr();
+  if (is_leaf()) {
+    FieldDescr * field_descr = simulation()->field_descr();
 
-  int i=0;
-  int adapt = adapt_unknown;
-  while (Refine * refine = simulation()->problem()->refine(i++)) {
-    adapt = update_adapt_(adapt,refine->apply(this, field_descr));
+    int i=0;
+    int adapt = adapt_unknown;
+    while (Refine * refine = simulation()->problem()->refine(i++)) {
+      adapt = update_adapt_(adapt,refine->apply(this, field_descr));
+    }
+    return adapt;
+
+  } else {
+    return adapt_same;
   }
-  return adapt;
 
 }
 
@@ -245,6 +242,7 @@ void CommBlock::refine()
        nx,ny,nz,
        level_+1,
        num_field_blocks,
+       count_adapt_,
        testing);
 
     p_update_depth (ic,1);
@@ -265,13 +263,15 @@ void CommBlock::coarsen()
 void CommBlock::q_adapt()
 {
   thisProxy.doneInserting();
-  TRACE3("ADAPT q_adapt %d %d %d",level_,level_active_,thisIndex.is_root());
+  TRACE1("count_adapt = %d",count_adapt_);
+  TRACE3("ADAPT q_adapt %d %d %d",level_,count_adapt_,thisIndex.is_root());
   if (thisIndex.is_root()) {
     char buffer[40];
-    sprintf (buffer,"q_adapt(%d)",level_active_);
+  TRACE1("count_adapt = %d",count_adapt_);
+    sprintf (buffer,"q_adapt(%d)",count_adapt_);
     thisIndex.print(buffer);
     thisProxy.p_print(buffer);
-    thisProxy.p_adapt(level_active_ + 1);
+    thisProxy.p_adapt(count_adapt_);
   }
 }
 

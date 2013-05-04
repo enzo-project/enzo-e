@@ -166,7 +166,8 @@ public: // interface
    Index index,
    int nx, int ny, int nz,
    int level,
-   int num_field_blocks) throw();
+   int num_field_blocks,
+   int count_adapt) throw();
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize a migrated EnzoBlock

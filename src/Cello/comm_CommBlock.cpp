@@ -25,6 +25,7 @@ CommBlock::CommBlock
  int nx, int ny, int nz,             // Block cells
  int level,                          // Block level
  int num_field_blocks,
+ int count_adapt,
  bool testing
  ) throw ()
   : 
@@ -37,7 +38,7 @@ CommBlock::CommBlock
   dt_(0),
   index_initial_(0),
   level_(level),
-  level_active_(-1)
+  count_adapt_(count_adapt)
 { 
 
   TRACE("ENTER CommBlock::CommBlock()");
@@ -368,7 +369,7 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   time_  = comm_block.time_;
   dt_    = comm_block.dt_;
   level_ = comm_block.level_;
-  level_active_ = comm_block.level_active_;
+  count_adapt_ = comm_block.count_adapt_;
 
 #ifdef CONFIG_USE_CHARM
   sync_refresh_ = comm_block.sync_refresh_;

@@ -33,8 +33,6 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-/* #define SKIP_TO_OUTPUT */
-
 //----------------------------------------------------------------------
 
 // void SimulationCharm::p_refresh()

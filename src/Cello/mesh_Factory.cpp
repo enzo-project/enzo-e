@@ -92,6 +92,7 @@ CProxy_CommBlock Factory::create_block_array
 	     nx,ny,nz,
 	     level = 0,
 	     num_field_blocks,
+	     0,
 	     testing);
 
 	}
@@ -124,6 +125,7 @@ CommBlock * Factory::create_block
  int nx, int ny, int nz,
  int level,
  int num_field_blocks,
+ int count_adapt,
  bool testing
  ) const throw()
 {
@@ -137,6 +139,7 @@ CommBlock * Factory::create_block
       nx,ny,nz,
       level,
       num_field_blocks,
+      count_adapt,
       testing);
 
    CommBlock * block = block_array[index].ckLocal();
@@ -153,6 +156,7 @@ CommBlock * Factory::create_block
       nx,ny,nz,
       level,
       num_field_blocks,
+      count_adapt,
       testing);
 
    return comm_block;

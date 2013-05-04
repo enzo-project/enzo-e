@@ -34,6 +34,7 @@ OutputImage::OutputImage(int index,
   if (image_reduce_type=="max") op_reduce_ = reduce_max;
   if (image_reduce_type=="avg") op_reduce_ = reduce_avg;
   if (image_reduce_type=="sum") op_reduce_ = reduce_sum;
+  if (image_reduce_type=="set") op_reduce_ = reduce_set;
 
   int nl = image_block_size * (1 << max_level); // image size factor
 
@@ -350,6 +351,10 @@ void OutputImage::update_remote  ( int n, char * buffer) throw()
 
     for (int k=0; k<nx*ny; k++) data_[k]  += *p.d++;
 
+  } else if (op_reduce_ == reduce_set) {
+
+    for (int k=0; k<nx*ny; k++) data_[k]  = *p.d++;
+
   }
 
 }
@@ -407,13 +412,14 @@ void OutputImage::image_create_ () throw()
 
   switch (op_reduce_) {
   case reduce_min: 
-    value0 = max;
+    value0 = min;
     break;
   case reduce_max: 
-    value0 = min;
+    value0 = max;
     break;
   case reduce_avg: 
   case reduce_sum: 
+  case reduce_set:
   default:         
     value0 = 0; 
     break;
@@ -532,6 +538,8 @@ void OutputImage::reduce_point_
   case reduce_sum:
     *data += value;
     break;
+  case reduce_set:
+    *data = value;
   }
 }
 

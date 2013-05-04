@@ -89,6 +89,7 @@ public: // interface
    int nx, int ny, int nz,
    int level,
    int num_field_blocks = 1,
+   int count_adapt = 0,
    bool testing = false) const throw();
 
 };
