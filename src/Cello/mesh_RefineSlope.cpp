@@ -14,7 +14,8 @@ RefineSlope::RefineSlope(const FieldDescr * field_descr,
 			 double slope_max_coarsen,
 			 std::vector<std::string> field_name_list) throw ()
   : slope_min_refine_ (slope_min_refine),
-    slope_max_coarsen_(slope_max_coarsen)
+    slope_max_coarsen_(slope_max_coarsen),
+    debug_(false)
 {
   if (field_name_list.size() != 0) {
     field_id_list_.resize(field_name_list.size());
@@ -62,6 +63,10 @@ int RefineSlope::apply
   field_block->cell_width(xm[1],xp[1],&h3[1]);
   field_block->cell_width(xm[2],xp[2],&h3[2]);
 
+  debug_ = ((xm[0]==0.375 && xp[0]==0.5   && xm[1]==0.875 && xp[1]==1.0) ||
+	    (xm[0]==0.500 && xp[0]==0.625 && xm[1]==0.875 && xp[1]==1.0));
+
+
   for (size_t k=0; k<field_id_list_.size(); k++) {
 
     int id_field = field_id_list_[k];
@@ -97,6 +102,12 @@ int RefineSlope::apply
   TRACE2 ("REFINE RefineSlope any_refine = %d all_coarsen = %d",
 	  any_refine,all_coarsen);
 
+  if (debug_) TRACE7 ("refine-debug %f %f %f  %f %f %f  %d",
+		      xm[0],xm[1],xm[2],
+		      xp[0],xp[1],xp[2],
+		      any_refine);
+
+
   return 
   any_refine ?  adapt_refine : (all_coarsen ? adapt_coarsen : adapt_same) ;
 
@@ -114,15 +125,18 @@ void RefineSlope::evaluate_block_(T * array,
 				  double * h3, const int * d3)
 {
   double slope;
+  TRACE3("refine-debug nx,ny,nz = %d %d %d",nx,ny,nz);
   for (int axis=0; axis<rank; axis++) {
     int d = d3[axis];
     for (int ix=0; ix<nx; ix++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int iz=0; iz<nz; iz++) {
-	  int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
+	  int i = (gx+ix) + (nx+2*gx)*((gy+iy) + (ny+2*gy)*(gz+iz));
 	  slope = fabs(array[i+d] - array[i-d]) / (2*h3[axis]);
 	  if (slope > slope_min_refine_)  *any_refine  = true;
 	  if (slope > slope_max_coarsen_) *all_coarsen = false;
+	  if (debug_) TRACE5 ("refine-debug a%d  [%d %d %d]  %d",
+			      axis,ix,iy,iz,*any_refine);
 	}
       }
     }

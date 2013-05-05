@@ -69,6 +69,9 @@ private: // attributes
 
   /// List of field id's
   std::vector <int> field_id_list_;
+  
+  /// TEMPORARY
+  bool debug_;
 };
 
 #endif /* MESH_REFINE_SLOPE_HPP */

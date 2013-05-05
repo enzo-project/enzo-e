@@ -28,13 +28,13 @@ OutputImage::OutputImage(int index,
 
 {
   
-  TRACE1 ("OutputImage reduce %d",op_reduce_);
-
   if (image_reduce_type=="min") op_reduce_ = reduce_min;
   if (image_reduce_type=="max") op_reduce_ = reduce_max;
   if (image_reduce_type=="avg") op_reduce_ = reduce_avg;
   if (image_reduce_type=="sum") op_reduce_ = reduce_sum;
   if (image_reduce_type=="set") op_reduce_ = reduce_set;
+
+  TRACE1 ("OutputImage reduce %d",op_reduce_);
 
   int nl = image_block_size * (1 << max_level); // image size factor
 
@@ -232,41 +232,53 @@ void OutputImage::write_block
   int dby = (iyp-iym) / nby;
   int dbz = (izp-izm) / nbz;
 
+  double xm,ym,zm;
+  double xp,yp,zp;
+  comm_block->lower(&xm,&ym,&zm);
+  comm_block->upper(&xp,&yp,&zp);
+  double v = 1.0;
+  if (nbx > 1) v *= (xp-xm);
+  if (nby > 1) v *= (yp-ym);
+  if (nbz > 1) v *= (zp-zm);
+  TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),zp-zm,v);
   if (image_type_ == "mesh") {
 
     reduce_box_(ixm,ixp,iym,iyp,double(level+1));
 
   } else if (image_type_ == "data") {
 
+    if (! comm_block->is_leaf()) return;
       // for each cell
     TRACE3("OutputImage ixm,ixp,nbx %d %d %d",ixm,ixp,nbx);
     TRACE3("OutputImage iym,iyp,nby %d %d %d",iym,iyp,nby);
     TRACE3("OutputImage izm,izp,nbz %d %d %d",izm,izp,nbz);
-      for (int ix=0; ix<nbx; ix++) {
-	int jxm = ixm +  ix*(ixp-ixm)/nbx;
-	int jxp = ixm + (ix+1)*(ixp-ixm)/nbx-1;
-	for (int iy=0; iy<nby; iy++) {
-	  int jym = iym +  iy*(iyp-iym)/nby;
-	  int jyp = iym + (iy+1)*(iyp-iym)/nby-1;
-	  for (int iz=0; iz<nbz; iz++) {
-	    int jzm = izm + iz*(izp-izm)/nbz;
-	    int jzp = izm + (iz+1)*(izp-izm)/nbz-1;
-	    int i=ix + ndx*(iy + ndy*iz);
-	    switch (field_descr->precision(index)) {
 
-	    case precision_single:
-	      reduce_cube_(jxm,jxp,jym,jyp, (((float*)field_unknowns)[i]));
-	      break;
+    for (int ix=0; ix<nbx; ix++) {
+      int jxm = ixm +  ix*(ixp-ixm)/nbx;
+      int jxp = ixm + (ix+1)*(ixp-ixm)/nbx-1;
+      for (int iy=0; iy<nby; iy++) {
+	int jym = iym +  iy*(iyp-iym)/nby;
+	int jyp = iym + (iy+1)*(iyp-iym)/nby-1;
+	for (int iz=0; iz<nbz; iz++) {
+	  int jzm = izm + iz*(izp-izm)/nbz;
+	  int jzp = izm + (iz+1)*(izp-izm)/nbz-1;
+	  int i=ix + ndx*(iy + ndy*iz);
 
-	    case precision_double:
-	      reduce_cube_(jxm,jxp,jym,jyp,(((double *)field_unknowns)[i]));
-	      break;
-	    }
+	  switch (field_descr->precision(index)) {
 
+	  case precision_single:
+	    reduce_cube_(jxm,jxp,jym,jyp, (((float*)field_unknowns)[i]));
+	    break;
 
+	  case precision_double:
+	    reduce_cube_(jxm,jxp,jym,jyp,(((double *)field_unknowns)[i]));
+	    break;
 	  }
+
+
 	}
       }
+    }
   }
 }
 
