@@ -69,6 +69,7 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_image_colormap,MAX_FILE_GROUPS);
   PUParray (p,output_image_colormap_alpha,MAX_FILE_GROUPS);
   PUParray (p,output_image_type,MAX_FILE_GROUPS);
+  PUParray (p,output_image_size,MAX_FILE_GROUPS);
   PUParray (p,output_image_reduce_type,MAX_FILE_GROUPS);
   PUParray (p,output_field_list,MAX_FILE_GROUPS);
   PUParray (p,output_stride,MAX_FILE_GROUPS);
@@ -465,6 +466,12 @@ void Config::read(Parameters * parameters) throw()
       output_image_block_size[index] = parameters->value_integer("image_block_size",1);
 
       output_image_type[index] = parameters->value_string("image_type","data");
+
+      output_image_size[index].resize(2);
+      output_image_size[index][0] = 
+	parameters->list_value_integer(0,"image_size",0);
+      output_image_size[index][1] = 
+	parameters->list_value_integer(1,"image_size",0);
 
       output_image_reduce_type[index] = parameters->value_string("image_reduce_type","sum");
 

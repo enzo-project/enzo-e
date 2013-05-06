@@ -15,6 +15,23 @@ class FieldDescr;
 class Hierarchy;
 class Simulation;
 
+// NOTE: +2 in IC is so indices can be -1, e.g. for child indicies of
+// neighboring blocks
+// IC  index for child blocks
+#define IC(icx,icy,icz)  ((icx+2)%2) + 2*( ((icy+2)%2) + 2*((icz+2)%2) )
+// NC  number of children
+#define NC(rank) (1<<rank)
+// IN  index for neighbors
+#define IN(axis,face)  ((face) + 2*(axis))
+// NC  number of neighbors
+#define NN(rank) (rank*2)
+
+// rank NN NC NI
+// 0    0  1  1
+// 1    2  2  2=2*1
+// 2    4  4  8=4*2
+// 3    6  8  24=6*4
+
 #ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
 class CommBlock : public CBase_CommBlock
@@ -65,7 +82,12 @@ public: // interface
   p | dt_;
   p | index_initial_;
   p | level_;
-  PUParray(p,depth_,8);
+  p | num_child_;
+  PUParray(p,child_exists_,num_child_);
+  p | num_neighbor_;
+  PUParray(p,neighbor_exists_,num_neighbor_);
+  p | num_nibling_;
+  PUParray(p,nibling_exists_,num_nibling_);
   p | count_adapt_;
 
 }
@@ -133,16 +155,13 @@ public: // interface
   void adapt();
   void refine();
   void coarsen();
+  void p_child_can_coarsen(int ic);
   void p_balance();
-  int determine_refine();
+  int determine_adapt();
   /// Update the depth of the given child
-  void p_update_depth (int ic, int depth);
   void p_print(std::string message) {  
     index().print(message.c_str());
     TRACE2("%s level %d",message.c_str(),level_);
-    TRACE9("%s depth %d%d%d%d%d%d%d%d",message.c_str(),
-	   depth_[0],depth_[1],depth_[2],depth_[3],
-	   depth_[4],depth_[5],depth_[6],depth_[7]);
   }
 
 
@@ -279,7 +298,7 @@ protected: // functions
   void copy_(const CommBlock & block) throw();
 
   /// Return adapt_coarsen, adapt_refine, or adapt_same given two adapt results
-  int update_adapt_ (int a1, int a2) const throw();
+  int reduce_adapt_ (int a1, int a2) const throw();
 
   /// Return the (lower) indices of the CommBlock in the level, 
   /// and the number of indices
@@ -357,12 +376,28 @@ protected: // attributes
   /// Mesh refinement level
   int level_;
 
+  /// Number of children possible
+  int num_child_;
+
   /// Depth of each child, starting with 0 if no child
-  int depth_[8];
+  bool * child_exists_;
+
+  /// Number of neighbors possible
+  int num_neighbor_;
+
+  /// Depth of each neighbor, starting with 0 if no neighbor
+  bool * neighbor_exists_;
+
+  /// Number of niblings (refined neighbors) possible
+  int num_nibling_;
+
+  /// Depth of each nibling, starting with 0 if no nibling
+  bool * nibling_exists_;
 
   /// Counter for adaption phase.  (Usually 1 except possibly
   /// initialization)
   int count_adapt_;
+
 };
 
 #endif /* COMM_COMMBLOCK_HPP */

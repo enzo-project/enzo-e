@@ -18,11 +18,14 @@ OutputImage::OutputImage(int index,
 			 int nxb, int nyb, int nzb,
 			 int max_level,
 			 std::string image_type,
+			 int image_size_x, int image_size_y,
 			 std::string image_reduce_type,
 			 int         image_block_size) throw ()
   : Output(index,factory),
     data_(),
     axis_(axis_z),
+    nxi_(image_size_x),
+    nyi_(image_size_y),
     png_(0),
     image_type_(image_type)
 
@@ -40,19 +43,9 @@ OutputImage::OutputImage(int index,
 
   TRACE1 ("image_block_size factor = %d",nl);
 
-  if (image_type_ == "mesh") {
-
-    nxi_ = 2*nl * nxb + 1;
-    nyi_ = 2*nl * nyb + 1;
-    nzi_ = 2*nl * nzb + 1;
-
-  } else {
-
-    nxi_ = nl * nx0;
-    nyi_ = nl * ny0;
-    nzi_ = nl * nz0;
-
-  }
+  if (nxi_ == 0) nxi_ = (image_type_ == "mesh") ? 2*nl * nxb + 1 : nl * nx0;
+  if (nyi_ == 0) nyi_ = (image_type_ == "mesh") ? 2*nl * nyb + 1 : nl * ny0;
+  if (nzi_ == 0) nzi_ = (image_type_ == "mesh") ? 2*nl * nzb + 1 : nl * nz0;
 
   TRACE2("OutputImage nl,max_level %d %d",nl,max_level);
   TRACE3("OutputImage nxi,nyi,nzi %d %d %d",nxi_,nyi_,nzi_);
@@ -100,8 +93,8 @@ void OutputImage::pup (PUP::er &p)
   p | axis_;
   p | nxi_;
   p | nyi_;
+  p | nzi_;
   WARNING("OutputImage::pup","skipping data_");
-  //  PUParray(p,data_,nxi_*nyi_);
   if (p.isUnpacking()) data_ = 0;
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
@@ -254,13 +247,13 @@ void OutputImage::write_block
     TRACE3("OutputImage izm,izp,nbz %d %d %d",izm,izp,nbz);
 
     for (int ix=0; ix<nbx; ix++) {
-      int jxm = ixm +  ix*(ixp-ixm)/nbx;
+      int jxm = ixm +  ix   *(ixp-ixm)/nbx;
       int jxp = ixm + (ix+1)*(ixp-ixm)/nbx-1;
       for (int iy=0; iy<nby; iy++) {
-	int jym = iym +  iy*(iyp-iym)/nby;
+	int jym = iym +  iy   *(iyp-iym)/nby;
 	int jyp = iym + (iy+1)*(iyp-iym)/nby-1;
 	for (int iz=0; iz<nbz; iz++) {
-	  int jzm = izm + iz*(izp-izm)/nbz;
+	  int jzm = izm + iz    *(izp-izm)/nbz;
 	  int jzp = izm + (iz+1)*(izp-izm)/nbz-1;
 	  int i=ix + ndx*(iy + ndy*iz);
 
@@ -596,11 +589,7 @@ void OutputImage::reduce_box_(int ixm, int ixp, int iym, int iyp, double value)
 
 void OutputImage::reduce_cube_(int ixm, int ixp, int iym, int iyp, double value)
 {
-  TRACE5("reduce_cube %d %d %d %d %f",ixm,ixp,iym,iyp,value);
-  ASSERT2("OutputImage::reduce_line_x","! (ixm (%d) <= ixp (%d)",ixm,ixp,ixm<=ixp);
-  ASSERT2("OutputImage::reduce_line_y","! (iym (%d) <= iyp (%d)",iym,iyp,iym<=iyp);
-  if (ixp < ixm) { int t = ixp; ixp = ixm; ixm = t; }
-  if (iyp < iym) { int t = iyp; iyp = iym; iym = t; }
+  if (ixm > ixp || iym >iyp) return;
 
   for (int ix=ixm; ix<=ixp; ++ix) {
     for (int iy=iym; iy<=iyp; ++iy) {

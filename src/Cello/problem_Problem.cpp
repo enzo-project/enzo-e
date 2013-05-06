@@ -580,6 +580,8 @@ Output * Problem::create_output_
     // NOTE: assumes cube for non-z axis images
 
     std::string image_type       = config->output_image_type[index];
+    int         image_size_x     = config->output_image_size[index][0];
+    int         image_size_y     = config->output_image_size[index][1];
     int         image_block_size = config->output_image_block_size[index];
     int         max_level        = config->mesh_max_level;
     std::string image_reduce_type = config->output_image_reduce_type[index];
@@ -588,7 +590,10 @@ Output * Problem::create_output_
 			      nx,ny,nz, 
 			      nbx,nby,nbz, 
 			      max_level,
-			      image_type,image_reduce_type,image_block_size);
+			      image_type,
+			      image_size_x,image_size_y,
+			      image_reduce_type,
+			      image_block_size);
 
   } else if (name == "data") {
 

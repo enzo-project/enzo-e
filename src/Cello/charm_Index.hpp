@@ -64,6 +64,23 @@ public:
     }
   }
 
+  Index index_child (int icx, int icy, int icz) const
+  {
+    Index index = *this;
+    int level = index.level();
+    index.set_level(level+1);
+    index.set_tree(level+1,icx,icy,icz);
+    return index;
+  }
+
+  Index index_neighbor (int axis, int face) const
+  {
+    Index index = *this;
+    if (face == 0) -- index.a_[axis].tree;
+    if (face == 1) ++ index.a_[axis].tree;
+    return index;
+  }
+
   void child (int il, int * icx, int * icy, int * icz) const
   {
     if (icx) (*icx) = (a_[0].tree >> il) & 1;

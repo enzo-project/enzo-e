@@ -30,6 +30,7 @@ public: // functions
 	      int nxb, int nyb, int nzb,
 	      int max_level,
 	      std::string image_type,
+	      int image_size_x, int image_size_y,
 	      std::string image_reduce_type,
 	      int         image_block_size) throw();
 

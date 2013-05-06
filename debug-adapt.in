@@ -9,12 +9,12 @@ Mesh
    root_rank = 2;
    root_size   = [64,64];
    root_blocks = [ 2, 2]; 
-   max_level   = 6; 
+   max_level   = 8; 
    adapt_type = ["slope"];
 }
 
 Initial {
-   max_level = 6;
+   max_level = 8;
       fields = [
 	"density",	
 	"velocity_x",
@@ -48,6 +48,7 @@ Output {
       image_data {
 	type     = "image";
 	image_type  = "data";
+	image_size  = [1024,1024];
         field_list = ["density"];
 	schedule = ["cycle","interval", 10];
         colormap = [0.00, 0.00, 0.50,  

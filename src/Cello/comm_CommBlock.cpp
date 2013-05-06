@@ -77,9 +77,36 @@ CommBlock::CommBlock
 #endif
   // Perform any additional initialization for derived class 
 
+  int rank = simulation()->dimension();
+
   initialize ();
 
-  initialize_(nx,ny,nz, testing);
+#ifdef CONFIG_USE_CHARM
+
+   if (! testing) {
+     // Count CommBlocks on each processor
+   
+     TRACE1 ("simulation = %p",simulation());
+     TRACE1 ("proxy_simulation = %p",&proxy_simulation);
+     ((SimulationCharm *)simulation())->insert_block();
+   }
+#endif
+
+   num_child_    = NC(rank);
+   child_exists_ = new bool [num_child_];
+   for (int ic=0; ic<num_child_; ic++) child_exists_[ic] = false;
+
+   num_neighbor_ = NN(rank);
+   neighbor_exists_ = new bool [num_neighbor_];
+   for (int in=0; in<num_neighbor_; in++) neighbor_exists_[in] = false;
+   
+   num_nibling_  = NN(rank)*NC(rank-1);
+   nibling_exists_ = new bool [num_nibling_];
+   for (int ii=0; ii<num_nibling_; ii++) nibling_exists_[ii] = false;
+
+
+   TRACE3("num_child = %d  num_neighbor = %d  num_nibling = %d",
+	  num_child_,num_neighbor_,num_nibling_);
 
 #ifdef CONFIG_USE_CHARM
   sync_refresh_.stop() = count_refresh_();
@@ -98,18 +125,6 @@ void CommBlock::initialize_
  bool testing
  )
  {
-#ifdef CONFIG_USE_CHARM
-
-   if (! testing) {
-     // Count CommBlocks on each processor
-   
-     TRACE1 ("simulation = %p",simulation());
-     TRACE1 ("proxy_simulation = %p",&proxy_simulation);
-     ((SimulationCharm *)simulation())->insert_block();
-   }
-#endif
-
-   for (int ic=0; ic<8; ic++) depth_[ic] = 0;
  }
 
 //----------------------------------------------------------------------

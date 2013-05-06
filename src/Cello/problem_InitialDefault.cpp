@@ -330,7 +330,6 @@ void InitialDefault::copy_values_
   //  mask[0][0],[1][1],[2][2] == 1
 
   precision_type precision = field_descr->precision(index_field);
-  TRACE3("nx ny nz = %d %d %d",nx,ny,nz);
   switch (precision) {
   case precision_single:
     if (mask) copy_precision_((float *)field,mask,offset,value,nx,ny,nz);
@@ -585,7 +584,6 @@ void InitialDefault::create_mask_
   for (int i=0; i<n; i++) (*mask)[i] = false;
 
   for (int iy=0; iy<(*ny); iy++) {
-    TRACE1("iy = %d",iy);
     for (int ix=0; ix<(*nx); ix++) {
 
       int i = ix + (*nx)*iy;
