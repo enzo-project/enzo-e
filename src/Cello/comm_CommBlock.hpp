@@ -18,13 +18,13 @@ class Simulation;
 // NOTE: +2 in IC is so indices can be -1, e.g. for child indicies of
 // neighboring blocks
 // IC  index for child blocks
-#define IC(icx,icy,icz)  ((icx+2)%2) + 2*( ((icy+2)%2) + 2*((icz+2)%2) )
+#define IC(icx,icy,icz)  (((icx)+2)%2) + 2*( (((icy)+2)%2) + 2*(((icz)+2)%2) )
 // NC  number of children
-#define NC(rank) (1<<rank)
+#define NC(rank) (1<<(rank))
 // IN  index for neighbors
 #define IN(axis,face)  ((face) + 2*(axis))
 // NC  number of neighbors
-#define NN(rank) (rank*2)
+#define NN(rank) (2*(rank))
 
 // rank NN NC NI
 // 0    0  1  1
@@ -255,7 +255,15 @@ public: // interface
   void is_on_boundary (bool boundary[3][2]) throw();
 
   /// Return whether this CommBlock is a leaf in the octree forest
-  bool is_leaf() const;
+  bool is_leaf() const
+  {
+    bool leaf = true;
+    for (int ic=0; ic<num_child_; ic++) {
+      leaf = leaf && (! child_exists_[ic]);
+    }
+    return leaf;
+  }
+
 
 public: // virtual functions
 

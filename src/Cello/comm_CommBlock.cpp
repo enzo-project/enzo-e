@@ -77,7 +77,7 @@ CommBlock::CommBlock
 #endif
   // Perform any additional initialization for derived class 
 
-  int rank = simulation()->dimension();
+  int rank = this->simulation()->dimension();
 
   initialize ();
 

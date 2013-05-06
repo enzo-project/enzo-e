@@ -101,17 +101,6 @@ void CommBlock::p_adapt(int count)
 
 //----------------------------------------------------------------------
 
-bool CommBlock::is_leaf() const
-{
-  bool leaf = true;
-  for (int ic=0; ic<num_child_; ic++) {
-    leaf = leaf && (! child_exists_[ic]);
-  }
-  return leaf;
-}
-
-//----------------------------------------------------------------------
-
 int CommBlock::determine_adapt()
 {
   TRACE("ADAPT CommBlock::determine_adapt()");

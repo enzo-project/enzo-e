@@ -64,12 +64,26 @@ public:
     }
   }
 
-  Index index_child (int icx, int icy, int icz) const
+  Index index_parent () const
+  {
+    Index index = *this;
+    int level = index.level();
+    if (level > 0) {
+      index.set_level(level - 1);
+      index.clean();
+    } else {
+      WARNING("Index::index_parent()",
+	      "Attempting to access parent of root");
+    }
+    return index;
+  }
+
+  Index index_child (int ic3[3]) const
   {
     Index index = *this;
     int level = index.level();
     index.set_level(level+1);
-    index.set_tree(level+1,icx,icy,icz);
+    index.set_tree(level+1,ic3[0],ic3[1],ic3[2]);
     return index;
   }
 
@@ -79,6 +93,22 @@ public:
     if (face == 0) -- index.a_[axis].tree;
     if (face == 1) ++ index.a_[axis].tree;
     return index;
+  }
+
+  Index index_uncle (int axis, int face) const
+  {
+    Index ip = index_parent();
+    Index in = ip.index_neighbor(axis,face);
+    return in;
+  }
+
+  Index index_nibling (int axis, int face, int ic3[3]) const
+  {
+    ic3[axis] = 1 - ic3[axis];
+
+    Index in = index_neighbor(axis,face);
+    Index ii = in.index_child(ic3);
+    return ii;
   }
 
   void child (int il, int * icx, int * icy, int * icz) const
