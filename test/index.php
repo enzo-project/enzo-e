@@ -560,6 +560,7 @@ test_summary("Mesh",
 		   "ItNode"),
 	     array("test_Hierarchy",
 		   "test_Block",
+		   "test_Index",
 		   "test_Tree",
 		   "test_TreeDensity",
 		   "test_Node",
@@ -809,6 +810,7 @@ test_group("Mesh");
 
 tests("Cello","test_Hierarchy","test_Hierarchy",""); 
 tests("Cello","test_Block","test_Block",""); 
+tests("Cello","test_Index","test_Index",""); 
 tests("Cello","test_Tree","test_Tree",""); 
 
 printf ("<img width=257 src=\"mpi/test_tree_1-initial.png\"></img>\n");

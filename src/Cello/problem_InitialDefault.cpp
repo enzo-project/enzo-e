@@ -445,7 +445,6 @@ void InitialDefault::evaluate_mask_
   bool v;
   std::string file;
   int nxb,nyb,nzb;
-  int nx,ny;
 
   switch (value_type) {
   case parameter_logical:

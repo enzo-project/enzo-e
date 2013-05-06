@@ -266,7 +266,7 @@ void CommBlock::index_global
   int level = index.level();
   for (int i=0; i<level; i++) {
     int bx,by,bz;
-    index.child(i,&bx,&by,&bz);
+    index.child(i+1,&bx,&by,&bz);
     if (ix) (*ix) = ((*ix) << 1) | bx;
     if (iy) (*iy) = ((*iy) << 1) | by;
     if (iz) (*iz) = ((*iz) << 1) | bz;

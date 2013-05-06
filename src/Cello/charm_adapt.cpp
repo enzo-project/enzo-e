@@ -183,7 +183,7 @@ void CommBlock::refine()
 
     Index index = thisIndex;
     index.set_level(level_+1);
-    index.set_tree (level_+1,ic3[0],ic3[1],ic3[2]);
+    index.set_child(level_+1,ic3[0],ic3[1],ic3[2]);
     index.clean();
 
     int num_field_blocks = 1;
@@ -202,7 +202,9 @@ void CommBlock::refine()
     child_exists_[ic] = true;
 
     // update neighbors' states, or invoke balance refine if not
-    
+
+    INCOMPLETE("CommBlock::refine(): "
+	       "update neighbors' states, or invoke balance refine if not");
     for (int axis=0; axis<rank; axis++) {
       int face = ic3[axis];
       if (neighbor_exists_[IN(axis,face)]) {

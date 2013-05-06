@@ -26,7 +26,7 @@
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "charm_Index.hpp"
+#include "mesh_Index.hpp"
 #include "comm_CommBlock.hpp"
 
 #endif /* _COMM_HPP */
