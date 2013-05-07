@@ -8,7 +8,7 @@ Mesh
 {
    root_rank = 2;
    root_size   = [64,64];
-   root_blocks = [ 2, 2]; 
+   root_blocks = [ 4, 4]; 
    max_level   = 8; 
    adapt_type = ["slope"];
 }
