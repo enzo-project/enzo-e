@@ -86,12 +86,6 @@ public: // functions
   /// proceed with next output
   void p_output_write (int n, char * buffer);
 
-  // /// Wait for all local patches to check in before proceeding
-  // void s_patch(CkCallback function);
-
-  /// Refresh ghost zones
-  void refresh();
-
   /// Stopping criteria and computation
   void c_compute ();
 
