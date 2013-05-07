@@ -98,7 +98,8 @@ CommBlock::CommBlock
 
    num_neighbor_ = NN(rank);
    neighbor_exists_ = new bool [num_neighbor_];
-   for (int in=0; in<num_neighbor_; in++) neighbor_exists_[in] = false;
+   for (int in=0; in<num_neighbor_; in++) 
+     neighbor_exists_[in] = (level == 0);
    
    num_nibling_  = NN(rank)*NC(rank-1);
    nibling_exists_ = new bool [num_nibling_];

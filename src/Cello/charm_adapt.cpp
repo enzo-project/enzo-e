@@ -85,10 +85,10 @@ void CommBlock::p_adapt(int count)
 
       TRACE1 ("ADAPT adapt = %s",adapt_name[adapt]);
 
-      if      (adapt == adapt_refine)  refine();
+      if      (adapt == adapt_refine)  p_refine();
       else if (adapt == adapt_coarsen) coarsen();
 
-      CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(),
+      CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(), 
 			    thisProxy[thisIndex]));
 
   } else {
@@ -142,28 +142,11 @@ int CommBlock::reduce_adapt_(int a1, int a2) const throw()
     return adapt_same;
 }
 
-// //----------------------------------------------------------------------
-
-// void CommBlock::p_update_depth (int ic, int depth)
-// {
-//   // update self
-//   depth_[ic] = std::max(depth_[ic],depth);
-//   // update parent
-//   if (level_ > 0) {
-//     Index index = thisIndex;
-//     int icx,icy,icz;
-//     index.child(level_,&icx,&icy,&icz);
-//     index.set_level(level_-1);
-//     index.clean();
-//     thisProxy[index].p_update_depth (IC(icx,icy,icz), depth + 1);
-//   }
-// }
-
 //----------------------------------------------------------------------
 
-void CommBlock::refine()
+void CommBlock::p_refine()
 {
-  TRACE("ADAPT CommBlock::refine()");
+  TRACE("ADAPT CommBlock::p_refine()");
 
   const Factory * factory = simulation()->factory();
   int rank = simulation()->dimension();
@@ -203,15 +186,23 @@ void CommBlock::refine()
 
     // update neighbors' states, or invoke balance refine if not
 
-    INCOMPLETE("CommBlock::refine(): "
+    INCOMPLETE("CommBlock::p_refine(): "
 	       "update neighbors' states, or invoke balance refine if not");
     for (int axis=0; axis<rank; axis++) {
       int face = ic3[axis];
+
       if (neighbor_exists_[IN(axis,face)]) {
+
 	// if neighbor exists, tell it that it has a new nibling
 	Index index = thisIndex;
+
       } else {
-	// if neighbor doesn't exist, tell corresponding uncle it must refine
+
+	int n3[3];
+	size_forest (&n3[0],&n3[1],&n3[2]);
+	Index index_uncle = index.index_uncle (axis,face,n3[axis]);
+	thisProxy[index_uncle].p_refine();
+	// if neighbor doesn't exist, then corresponding uncle it must refine
       }
     }
 

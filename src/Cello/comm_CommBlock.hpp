@@ -153,7 +153,7 @@ public: // interface
   void q_adapt ();
   void q_adapt_exit ();
   void adapt();
-  void refine();
+  void p_refine();
   void coarsen();
   void p_child_can_coarsen(int ic);
   void p_balance();

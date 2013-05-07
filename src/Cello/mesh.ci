@@ -47,11 +47,12 @@ module mesh {
     entry void p_output(CkReductionMsg * msg);
 
     entry void p_adapt_enter ();
-    entry void q_adapt_exit();
     entry void p_adapt (int count_adapt);
-    entry void q_adapt();
+    entry void p_refine ();
     entry void p_child_can_coarsen(int ic);
     entry void p_balance();
+    entry void q_adapt_exit();
+    entry void q_adapt();
 
     entry void p_print(std::string);
   };
