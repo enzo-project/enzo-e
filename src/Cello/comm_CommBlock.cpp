@@ -91,7 +91,7 @@ CommBlock::CommBlock
     size_forest(&na3[0],&na3[1],&na3[2]);
     for (int axis = 0; axis < rank; axis++) {
       for (int face = 0; face < 2; face ++) {
-	p_set_neighbor (thisIndex.index_neighbor(axis,face,na3[axis]));
+	p_set_neighbor (index_.index_neighbor(axis,face,na3[axis]));
 	
       }
     }

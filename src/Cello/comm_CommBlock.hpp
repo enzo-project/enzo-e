@@ -157,25 +157,7 @@ public: // interface
   {
     for (size_t i=0; i<children_.size(); i++) {
       // erase by replacing occurences with self
-      if (children_[i] == index) children_[i] = thisIndex; 
-    }
-  }
-  void p_set_neighbor(Index index)
-  { neighbors_.push_back(index); }
-  void p_delete_neighbor(Index index)
-  {
-    for (size_t i=0; i<neighbors_.size(); i++) {
-      // erase by replacing occurences with self
-      if (neighbors_[i] == index) neighbors_[i] = thisIndex; 
-    }
-  }
-  void p_set_nibling(Index index)
-  { niblings_.push_back(index); }
-  void p_delete_nibling(Index index)
-  {
-    for (size_t i=0; i<niblings_.size(); i++) {
-      // erase by replacing occurences with self
-      if (niblings_[i] == index) niblings_[i] = thisIndex; 
+      if (children_[i] == index) children_[i] = index_;
     }
   }
   void coarsen();
@@ -215,6 +197,24 @@ public: // interface
 		      int index_field_set = 0) throw();
 #endif
 
+  void p_set_neighbor(Index index)
+  { neighbors_.push_back(index); }
+  void p_delete_neighbor(Index index)
+  {
+    for (size_t i=0; i<neighbors_.size(); i++) {
+      // erase by replacing occurences with self
+      if (neighbors_[i] == index) neighbors_[i] = index_;
+    }
+  }
+  void p_set_nibling(Index index)
+  { niblings_.push_back(index); }
+  void p_delete_nibling(Index index)
+  {
+    for (size_t i=0; i<niblings_.size(); i++) {
+      // erase by replacing occurences with self
+      if (niblings_[i] == index) niblings_[i] = index_;
+    }
+  }
   //----------------------------------------------------------------------
   // Big Three
   //----------------------------------------------------------------------
@@ -283,7 +283,7 @@ public: // interface
   {
     for (size_t i = 0; i < children_.size(); i++) {
       // deleted children are replaced with thisProxy
-      if (children_.at(i) != thisIndex) return false;    
+      if (children_.at(i) != index_) return false;    
     }
     return true;
   }
