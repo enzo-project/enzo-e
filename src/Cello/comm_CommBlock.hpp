@@ -82,12 +82,9 @@ public: // interface
   p | dt_;
   p | index_initial_;
   p | level_;
-  p | num_child_;
-  PUParray(p,child_exists_,num_child_);
-  p | num_neighbor_;
-  PUParray(p,neighbor_exists_,num_neighbor_);
-  p | num_nibling_;
-  PUParray(p,nibling_exists_,num_nibling_);
+  p | children_;
+  p | neighbors_;
+  p | niblings_;
   p | count_adapt_;
 
 }
@@ -154,6 +151,33 @@ public: // interface
   void q_adapt_exit ();
   void adapt();
   void p_refine();
+  void set_child(Index index)
+  { children_.push_back(index); }
+  void delete_child(Index index)
+  {
+    for (size_t i=0; i<children_.size(); i++) {
+      // erase by replacing occurences with self
+      if (children_[i] == index) children_[i] = thisIndex; 
+    }
+  }
+  void p_set_neighbor(Index index)
+  { neighbors_.push_back(index); }
+  void p_delete_neighbor(Index index)
+  {
+    for (size_t i=0; i<neighbors_.size(); i++) {
+      // erase by replacing occurences with self
+      if (neighbors_[i] == index) neighbors_[i] = thisIndex; 
+    }
+  }
+  void p_set_nibling(Index index)
+  { niblings_.push_back(index); }
+  void p_delete_nibling(Index index)
+  {
+    for (size_t i=0; i<niblings_.size(); i++) {
+      // erase by replacing occurences with self
+      if (niblings_[i] == index) niblings_[i] = thisIndex; 
+    }
+  }
   void coarsen();
   void p_child_can_coarsen(int ic);
   void p_balance();
@@ -257,11 +281,11 @@ public: // interface
   /// Return whether this CommBlock is a leaf in the octree forest
   bool is_leaf() const
   {
-    bool leaf = true;
-    for (int ic=0; ic<num_child_; ic++) {
-      leaf = leaf && (! child_exists_[ic]);
+    for (size_t i = 0; i < children_.size(); i++) {
+      // deleted children are replaced with thisProxy
+      if (children_.at(i) != thisIndex) return false;    
     }
-    return leaf;
+    return true;
   }
 
 
@@ -384,23 +408,11 @@ protected: // attributes
   /// Mesh refinement level
   int level_;
 
-  /// Number of children possible
-  int num_child_;
+  std::vector<Index> children_;
 
-  /// Depth of each child, starting with 0 if no child
-  bool * child_exists_;
+  std::vector<Index> neighbors_;
 
-  /// Number of neighbors possible
-  int num_neighbor_;
-
-  /// Depth of each neighbor, starting with 0 if no neighbor
-  bool * neighbor_exists_;
-
-  /// Number of niblings (refined neighbors) possible
-  int num_nibling_;
-
-  /// Depth of each nibling, starting with 0 if no nibling
-  bool * nibling_exists_;
+  std::vector<Index> niblings_;
 
   /// Counter for adaption phase.  (Usually 1 except possibly
   /// initialization)

@@ -38,6 +38,9 @@ CommBlock::CommBlock
   dt_(0),
   index_initial_(0),
   level_(level),
+  children_(),
+  neighbors_(),
+  niblings_(),
   count_adapt_(count_adapt)
 { 
 
@@ -81,6 +84,18 @@ CommBlock::CommBlock
 
   initialize ();
 
+  if (level == 0) {
+    WARNING("CommBlock::CommBlock",
+	    "Ignoring periodic versus non-periodic b.c.");
+    int na3[3];
+    size_forest(&na3[0],&na3[1],&na3[2]);
+    for (int axis = 0; axis < rank; axis++) {
+      for (int face = 0; face < 2; face ++) {
+	p_set_neighbor (thisIndex.index_neighbor(axis,face,na3[axis]));
+	
+      }
+    }
+  }
 #ifdef CONFIG_USE_CHARM
 
    if (! testing) {
@@ -90,28 +105,11 @@ CommBlock::CommBlock
      TRACE1 ("proxy_simulation = %p",&proxy_simulation);
      ((SimulationCharm *)simulation())->insert_block();
    }
-#endif
 
-   num_child_    = NC(rank);
-   child_exists_ = new bool [num_child_];
-   for (int ic=0; ic<num_child_; ic++) child_exists_[ic] = false;
-
-   num_neighbor_ = NN(rank);
-   neighbor_exists_ = new bool [num_neighbor_];
-   for (int in=0; in<num_neighbor_; in++) 
-     neighbor_exists_[in] = (level == 0);
-   
-   num_nibling_  = NN(rank)*NC(rank-1);
-   nibling_exists_ = new bool [num_nibling_];
-   for (int ii=0; ii<num_nibling_; ii++) nibling_exists_[ii] = false;
-
-
-   TRACE3("num_child = %d  num_neighbor = %d  num_nibling = %d",
-	  num_child_,num_neighbor_,num_nibling_);
-
-#ifdef CONFIG_USE_CHARM
   sync_refresh_.stop() = count_refresh_();
+
   apply_initial_();
+
 #endif /* CONFIG_USE_CHARM */
 
   //

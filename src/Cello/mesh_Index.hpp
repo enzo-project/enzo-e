@@ -65,9 +65,9 @@ public:
 
   Index & operator = (const Index & index);
 
-  bool operator == (const Index & index);
+  bool operator == (const Index & index) const;
 
-  bool operator != (const Index & index);
+  bool operator != (const Index & index) const;
 
 #ifdef CONFIG_USE_CHARM
 #ifndef TEST

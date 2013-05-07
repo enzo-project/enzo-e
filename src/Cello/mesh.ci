@@ -49,6 +49,10 @@ module mesh {
     entry void p_adapt_enter ();
     entry void p_adapt (int count_adapt);
     entry void p_refine ();
+    entry void p_set_neighbor(Index index);
+    entry void p_delete_neighbor(Index index);
+    entry void p_set_nibling(Index index);
+    entry void p_delete_nibling(Index index);
     entry void p_child_can_coarsen(int ic);
     entry void p_balance();
     entry void q_adapt_exit();

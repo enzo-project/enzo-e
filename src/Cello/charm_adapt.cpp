@@ -154,7 +154,9 @@ void CommBlock::p_refine()
   int nx,ny,nz;
   block()->field_block()->size(&nx,&ny,&nz);
 
-  for (int ic=0; ic<num_child_; ic++) {
+  
+  int nc = NC(rank);
+  for (int ic=0; ic<nc; ic++) {
 
     int ic3[3];
     ic3[0] = (ic & 1) >> 0;
@@ -162,19 +164,19 @@ void CommBlock::p_refine()
     ic3[2] = (ic & 4) >> 2;
 
     TRACE5("ADAPT new child %d [%d %d %d]/ %d",
-	   ic,ic3[0],ic3[1],ic3[2],num_child_);
+	   ic,ic3[0],ic3[1],ic3[2],nc);
 
-    Index index = thisIndex;
-    index.set_level(level_+1);
-    index.set_child(level_+1,ic3[0],ic3[1],ic3[2]);
-    index.clean();
+    Index index_child = thisIndex;
+    index_child.set_level(level_+1);
+    index_child.set_child(level_+1,ic3[0],ic3[1],ic3[2]);
+    index_child.clean();
 
     int num_field_blocks = 1;
     bool testing = false;
 
     // create new children
     factory->create_block 
-      (thisProxy, index,
+      (thisProxy, index_child,
        nx,ny,nz,
        level_+1,
        num_field_blocks,
@@ -182,7 +184,7 @@ void CommBlock::p_refine()
        testing);
 
     // update own state
-    child_exists_[ic] = true;
+    set_child(index_child);
 
     // update neighbors' states, or invoke balance refine if not
 
@@ -191,19 +193,19 @@ void CommBlock::p_refine()
     for (int axis=0; axis<rank; axis++) {
       int face = ic3[axis];
 
-      if (neighbor_exists_[IN(axis,face)]) {
+      // if (neighbor_exists_[IN(axis,face)]) {
 
-	// if neighbor exists, tell it that it has a new nibling
-	Index index = thisIndex;
+      // 	// if neighbor exists, tell it that it has a new nibling
+      // 	Index index = thisIndex;
 
-      } else {
+      // } else {
 
-	int n3[3];
-	size_forest (&n3[0],&n3[1],&n3[2]);
-	Index index_uncle = index.index_uncle (axis,face,n3[axis]);
-	thisProxy[index_uncle].p_refine();
-	// if neighbor doesn't exist, then corresponding uncle it must refine
-      }
+      // 	int n3[3];
+      // 	size_forest (&n3[0],&n3[1],&n3[2]);
+      // 	Index index_uncle = index.index_uncle (axis,face,n3[axis]);
+      // 	thisProxy[index_uncle].p_refine();
+      // 	// if neighbor doesn't exist, then corresponding uncle it must refine
+      // }
     }
 
   }

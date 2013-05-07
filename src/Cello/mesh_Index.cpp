@@ -31,7 +31,7 @@ Index & Index::operator = (const Index & index)
 
 //----------------------------------------------------------------------
 
-bool Index::operator == (const Index & index)
+bool Index::operator == (const Index & index) const
 {
   return (v_[0] == index.v_[0] && 
 	  v_[1] == index.v_[1] &&
@@ -40,10 +40,12 @@ bool Index::operator == (const Index & index)
 
 //----------------------------------------------------------------------
 
-bool Index::operator != (const Index & index)
+bool Index::operator != (const Index & index) const
 {
   return ! (*this == index);
 }
+
+//----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
 #ifndef TEST
