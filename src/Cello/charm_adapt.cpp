@@ -51,7 +51,6 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-
 const char * adapt_name[] = {
   "adapt_unknown",
   "adapt_same",
@@ -61,13 +60,13 @@ const char * adapt_name[] = {
 
 //======================================================================
 
-void CommBlock::p_adapt_enter()
+void CommBlock::p_adapt_begin()
 {
   int initial_cycle     = simulation()->config()->initial_cycle;
   int initial_max_level = simulation()->config()->initial_max_level;
 
   count_adapt_ = (cycle() == initial_cycle) ? initial_max_level : 1;
-  TRACE1("count_adapt = %d",count_adapt_);
+
   p_adapt(count_adapt_);
 }
 
@@ -75,27 +74,23 @@ void CommBlock::p_adapt_enter()
 
 void CommBlock::p_adapt(int count)
 {
-  TRACE1("ADAPT p_adapt(%d)",count_adapt_);
 
-  TRACE1("count_adapt = %d",count_adapt_);
+  count_coarsen_ = 0;
+
   if (count_adapt_-- > 0) {
 
-    TRACE1("count_adapt = %d",count_adapt_);
-      int adapt = determine_adapt();
+    int adapt = determine_adapt();
 
-      TRACE1 ("ADAPT adapt = %s",adapt_name[adapt]);
+    if (adapt == adapt_refine)  p_refine();
+    if (adapt == adapt_coarsen)   coarsen();
 
-      if      (adapt == adapt_refine)  p_refine();
-      else if (adapt == adapt_coarsen) coarsen();
-
-      CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(), 
-			    thisProxy[thisIndex]));
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(), 
+			  thisProxy[thisIndex]));
 
   } else {
 
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(),
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(),
 			  thisProxy[thisIndex]));
-
   }
 }
 
@@ -103,9 +98,7 @@ void CommBlock::p_adapt(int count)
 
 int CommBlock::determine_adapt()
 {
-  TRACE("ADAPT CommBlock::determine_adapt()");
-
-  // Only a leaf block can adapt
+  // Only leaves can adapt
 
   if (! is_leaf()) return adapt_same;
   
@@ -113,49 +106,67 @@ int CommBlock::determine_adapt()
 
     FieldDescr * field_descr = simulation()->field_descr();
 
-    // Evaluate refinement criteria
     int i=0;
     int adapt = adapt_unknown;
-    while (Refine * refine = simulation()->problem()->refine(i++)) {
-      adapt = reduce_adapt_(adapt,refine->apply(this, field_descr));
+
+    Problem * problem = simulation()->problem();
+    Refine * refine;
+
+    while ((refine = problem->refine(i++))) {
+
+      int adapt_step = refine->apply(this, field_descr);
+
+      adapt = reduce_adapt_(adapt,adapt_step);
+
     }
 
-    // return the result
     return adapt;
-
   }
-
 }
 
 //----------------------------------------------------------------------
 
 int CommBlock::reduce_adapt_(int a1, int a2) const throw()
 {
-  TRACE2("ADAPT %d %d",a1,a2);
   if (a1 == adapt_unknown) return a2;
   if (a2 == adapt_unknown) return a1;
-  if      ((a1 == adapt_coarsen) && (a2 == adapt_coarsen)) 
+
+  if      ((a1 == adapt_coarsen) && 
+	   (a2 == adapt_coarsen)) {
+
     return adapt_coarsen;
-  else if ((a1 == adapt_refine)  || (a2 == adapt_refine))
+
+  } else if ((a1 == adapt_refine)  || 
+	     (a2 == adapt_refine)) {
+
     return adapt_refine;
-  else
+
+  } else {
+
     return adapt_same;
+
+  }
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::p_refine()
 {
-  TRACE("ADAPT CommBlock::p_refine()");
 
-  const Factory * factory = simulation()->factory();
   int rank = simulation()->dimension();
-
-  int nx,ny,nz;
-  block()->field_block()->size(&nx,&ny,&nz);
 
   
   int nc = NC(rank);
+
+  // block size
+  int nx,ny,nz;
+  block()->field_block()->size(&nx,&ny,&nz);
+
+  // forest size
+  int na3[3];
+  size_forest (&na3[0],&na3[1],&na3[2]);
+
+  TRACE1 ("nc = %d",nc);
   for (int ic=0; ic<nc; ic++) {
 
     int ic3[3];
@@ -166,48 +177,72 @@ void CommBlock::p_refine()
     TRACE5("ADAPT new child %d [%d %d %d]/ %d",
 	   ic,ic3[0],ic3[1],ic3[2],nc);
 
-    Index index_child = thisIndex;
-    index_child.set_level(level_+1);
-    index_child.set_child(level_+1,ic3[0],ic3[1],ic3[2]);
-    index_child.clean();
+    Index index_child = index_.index_child(ic3);
+    index_child.print("creating");
 
-    int num_field_blocks = 1;
-    bool testing = false;
+    if ( ! is_child(index_child) ) {
 
-    // create new children
-    factory->create_block 
-      (thisProxy, index_child,
-       nx,ny,nz,
-       level_+1,
-       num_field_blocks,
-       count_adapt_,
-       testing);
+      // create child
 
-    // update own state
-    set_child(index_child);
+      int num_field_blocks = 1;
+      bool testing = false;
 
-    // update neighbors' states, or invoke balance refine if not
+      const Factory * factory = simulation()->factory();
 
-    INCOMPLETE("CommBlock::p_refine(): "
-	       "update neighbors' states, or invoke balance refine if not");
-    for (int axis=0; axis<rank; axis++) {
-      int face = ic3[axis];
+      // create new children
+      factory->create_block 
+	(thisProxy, index_child,
+	 nx,ny,nz,
+	 level_+1,
+	 num_field_blocks,
+	 count_adapt_,
+	 testing);
 
-      // if (neighbor_exists_[IN(axis,face)]) {
+      // update children
+      set_child(index_child);
 
-      // 	// if neighbor exists, tell it that it has a new nibling
-      // 	Index index = thisIndex;
+      int vc3[3];
+      index_child.values(&vc3[0],&vc3[1],&vc3[2]);
 
-      // } else {
+      // for each adjacent neighbor
+      for (int axis=0; axis<rank; axis++) {
 
-      // 	int n3[3];
-      // 	size_forest (&n3[0],&n3[1],&n3[2]);
-      // 	Index index_uncle = index.index_uncle (axis,face,n3[axis]);
-      // 	thisProxy[index_uncle].p_refine();
-      // 	// if neighbor doesn't exist, then corresponding uncle it must refine
-      // }
+	int face = ic3[axis];
+
+	// update neighbor
+
+	Index index_neighbor = index_.index_neighbor(axis,face,na3[axis]);
+
+	if (is_neighbor(index_neighbor)) {
+
+	  // new child is neighbor's nibling
+
+	  thisProxy[index_neighbor].p_set_nibling(vc3);
+
+	} else {
+
+	  // no neighbor?  then uncle must refine
+
+	  if (level_ > 0) {
+
+	    Index index_uncle = index_.index_uncle (axis,face,na3[axis]);
+
+	    thisProxy[index_uncle].p_refine();
+	  }
+
+	}
+
+	// new child is nibling's neighbor
+
+	Index index_nibling = index_.index_nibling
+	  (axis, 1-face, ic3, na3[axis]);
+
+	if (is_nibling(index_nibling)) {
+	  thisProxy[index_nibling].p_set_neighbor(vc3);
+	}
+
+      }
     }
-
   }
   
 }
@@ -240,7 +275,6 @@ void CommBlock::q_adapt()
   TRACE1("count_adapt = %d",count_adapt_);
   TRACE3("ADAPT q_adapt %d %d %d",level_,count_adapt_,thisIndex.is_root());
   if (thisIndex.is_root()) {
-    char buffer[40];
     TRACE1("count_adapt = %d",count_adapt_);
     // sprintf (buffer,"q_adapt(%d)",count_adapt_);
     // thisIndex.print(buffer);
@@ -258,9 +292,9 @@ void CommBlock::p_balance()
 
 //----------------------------------------------------------------------
 
-void CommBlock::q_adapt_exit()
+void CommBlock::q_adapt_end()
 {
-  TRACE("ADAPT CommBlock::q_adapt_exit()");
+  TRACE("ADAPT CommBlock::q_adapt_end()");
   thisProxy.doneInserting();
   if (thisIndex.is_root()) {
     thisProxy.p_refresh();
@@ -268,6 +302,13 @@ void CommBlock::q_adapt_exit()
   
 }
 
+//----------------------------------------------------------------------
+
+void CommBlock::set_child(Index index)
+{ children_.push_back(index); }
+
+//----------------------------------------------------------------------
+  
 #endif /* CONFIG_USE_CHARM */
 
 

@@ -45,8 +45,14 @@ void CommBlock::p_refresh()
   // @@@ 128 OK
   TRACE("CommBlock::p_refresh");
 #ifdef TEMP_SKIP_REFRESH
-  WARNING("CommBlock::q_adapt_exit",
-	  "CALLING p_output() INSTEAD OF REFRESH FOR IMAGE MESH CREATION");
+
+  static int warning_displayed = false;
+
+  if  ( ! warning_displayed ) {
+    warning_displayed = true;
+    WARNING("CommBlock::q_adapt_exit",
+	    "CALLING p_output() INSTEAD OF REFRESH FOR IMAGE MESH CREATION");
+  }
 
   //@@@@@@@@@@@@@@@@@@@@@@2
   double min_reduce[2];

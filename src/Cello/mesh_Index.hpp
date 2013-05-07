@@ -33,14 +33,6 @@ struct BIndex {
 
   unsigned level : INDEX_MAX_LEVEL_AXIS_BITS; 
 
-#ifdef CONFIG_USE_CHARM
-#ifndef TEST
-public:
-  void pup(PUP::er &p) {
-    
-  }
-#endif
-#endif /* CONFIG_USE_CHARM */
 };
 
 class Index {
@@ -61,6 +53,8 @@ public:
 
   Index();
 
+  Index(const Index & index);
+
   Index(int ix, int iy, int iz);
 
   Index & operator = (const Index & index);
@@ -68,12 +62,6 @@ public:
   bool operator == (const Index & index) const;
 
   bool operator != (const Index & index) const;
-
-#ifdef CONFIG_USE_CHARM
-#ifndef TEST
-  void pup(PUP::er &p);
-#endif
-#endif /* CONFIG_USE_CHARM */
 
   void clear () ;
   
@@ -101,7 +89,21 @@ public:
   int level () const;
 
   /// Return the packed bit index for the given axis
-  unsigned value (int axis) const;
+  // unsigned value (int axis) const;
+
+  /// Set the Index according to raw bit values
+  void set_values (int vx, int vy = 0, int vz = 0)
+  {
+    v_[0] = vx;
+    v_[1] = vy;
+    v_[2] = vz;
+  }
+
+  /// Return the packed bit index for the given axis
+  void values (int * vx, int * vy, int * vz) const
+  { if (vx) *vx = v_[0];
+    if (vy) *vy = v_[1];
+    if (vz) *vz = v_[2]; }
 
   /// Set the level for this node
   void set_level(int level);
@@ -121,12 +123,39 @@ public:
 
   void print (const char * msg = "\0",
 	      int max_level = -1) const;
-private:
+
+private: // functions
+
+  inline void copy_ (const Index & index)
+  {
+    a_[0] = index.a_[0];
+    a_[1] = index.a_[1];
+    a_[2] = index.a_[2];
+  }
+
+private: // attributes
+
     union {
       BIndex a_[3];
-      unsigned v_[3];
+      int v_[3];
     };
 };
+
+#ifdef CONFIG_USE_CHARM
+#ifndef TEST
+  PUPbytes(Index);
+#endif
+#endif /* CONFIG_USE_CHARM */
+
+#ifdef CONFIG_USE_CHARM
+#ifndef TEST
+// public:
+//   void pup(PUP::er &p) {
+    
+//   }
+PUPbytes(BIndex);
+#endif
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 #ifdef CONFIG_USE_CHARM
@@ -141,14 +170,17 @@ public:
     nInts=sizeof(index_)/sizeof(int);
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     // ADDED SINCE OTHERWISE CkArrayIndex::index[] DOES NOT GET INITIALIZED
-    index[0] = in.value(0);
-    index[1] = in.value(1);
-    index[2] = in.value(2);
+    int v3[3];
+    in.values(&v3[0],&v3[1],&v3[2]);
+    index[0] = v3[0];
+    index[1] = v3[1];
+    index[2] = v3[2];
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   }
   //Not required, but convenient: cast-to-foo operators
-  operator Index &() {return index_;}
-  operator const Index &() const {return index_;}
+   operator Index &() {return index_;}
+   operator const Index &() const {return index_;}
+    Index & ind() { return index_; }
 };
 #endif
 #endif /* INDEX_HPP */

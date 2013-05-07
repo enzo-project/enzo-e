@@ -41,6 +41,7 @@ CommBlock::CommBlock
   children_(),
   neighbors_(),
   niblings_(),
+  count_coarsen_(0),
   count_adapt_(count_adapt)
 { 
 
@@ -89,9 +90,12 @@ CommBlock::CommBlock
 	    "Ignoring periodic versus non-periodic b.c.");
     int na3[3];
     size_forest(&na3[0],&na3[1],&na3[2]);
+    int v3[3];
     for (int axis = 0; axis < rank; axis++) {
       for (int face = 0; face < 2; face ++) {
-	p_set_neighbor (index_.index_neighbor(axis,face,na3[axis]));
+	Index index_neighbor = index_.index_neighbor(axis,face,na3[axis]);
+	index_neighbor.values(&v3[0],&v3[1],&v3[2]);
+	p_set_neighbor (v3);
 	
       }
     }
@@ -372,6 +376,88 @@ void CommBlock::update_boundary_ ()
 }
 
 #endif
+
+//----------------------------------------------------------------------
+
+bool CommBlock::is_child (const Index & index)
+{ 
+  for (size_t i=0; i<children_.size(); i++) {
+    if (children_[i] == index) return true;
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::delete_child(Index index)
+{
+  for (size_t i=0; i<children_.size(); i++) {
+    // erase by replacing occurences with self
+    if (children_[i] == index) children_[i] = index_;
+  }
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_set_neighbor(int v3[3])
+{
+  Index index;
+  index.set_values(v3[0],v3[1],v3[2]);
+  neighbors_.push_back(index); 
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_delete_neighbor(const int v3[3])
+{
+  Index index;
+  index.set_values(v3[0],v3[1],v3[2]);
+  for (size_t i=0; i<neighbors_.size(); i++) {
+    // erase by replacing occurences with self
+    if (neighbors_[i] == index) neighbors_[i] = index_;
+  }
+}
+
+//----------------------------------------------------------------------
+
+bool CommBlock::is_neighbor (const Index & index)
+{ 
+  for (size_t i=0; i<neighbors_.size(); i++) {
+    if (neighbors_[i] == index) return true;
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_set_nibling(const int v3[3])
+{
+  Index index;
+  index.set_values(v3[0],v3[1],v3[2]);
+  niblings_.push_back(index); 
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_delete_nibling(const int v3[3])
+{
+  Index index;
+  index.set_values(v3[0],v3[1],v3[2]);
+  for (size_t i=0; i<niblings_.size(); i++) {
+    // erase by replacing occurences with self
+    if (niblings_[i] == index) niblings_[i] = index_;
+  }
+}
+
+//----------------------------------------------------------------------
+
+bool CommBlock::is_nibling (const Index & index)
+{ 
+  for (size_t i=0; i<niblings_.size(); i++) {
+    if (niblings_[i] == index) return true;
+  }
+  return false;
+}
 
 //======================================================================
 

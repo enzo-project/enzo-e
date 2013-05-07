@@ -54,8 +54,6 @@ public: // functions
   /// Add a new CommBlock to this local branch
   inline void insert_block() 
   {
-    WARNING("SimulationCharm::insert_block()",
-	    "Migrating CommBlocks will disturb local counts");
     ++block_sync_;
     TRACE2 ("++local count %d = %d",group_process_->rank(),block_sync_.stop());
   }

@@ -200,6 +200,7 @@ if (use_projections == 1):
 if (use_performance == 1):
      defines = defines + define_performance
 
+flags_arch_cpp = ''
 flags_config = ''
 flags_cxx = ''
 flags_cc = ''
@@ -336,7 +337,7 @@ libpath = libpath + [libpath_fortran]
 
 environ  = os.environ
 
-cxxflags = flags_arch
+cxxflags = flags_arch + ' ' + flags_arch_cpp
 cxxflags = cxxflags + ' ' + flags_cxx
 cxxflags = cxxflags + ' ' + flags_config
 if (type=="charm"): cxxflags = cxxflags + ' ' + flags_cxx_charm
@@ -351,7 +352,7 @@ fortranflags = fortranflags + ' ' + flags_fc
 fortranflags = fortranflags + ' ' + flags_config
 if (type=="charm"):fortranflags = fortranflags + ' ' + flags_fc_charm
 
-linkflags    = flags_arch
+linkflags    = flags_arch + ' ' + flags_arch_cpp
 linkflags    = linkflags + ' ' + flags_link
 linkflags    = linkflags + ' ' + flags_config
 if (type=="charm"):linkflags    = linkflags + ' ' + flags_link_charm

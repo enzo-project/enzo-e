@@ -67,7 +67,6 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-  /// CB
   void pup(PUP::er &p)
 {
   TRACEPUP;
@@ -85,6 +84,7 @@ public: // interface
   p | children_;
   p | neighbors_;
   p | niblings_;
+  p | count_coarsen_;
   p | count_adapt_;
 
 }
@@ -96,7 +96,6 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
 
   /// Initialize a migrated CommBlock
-  /// CB
   CommBlock (CkMigrateMessage *m) 
     : CBase_CommBlock(m) { };
 
@@ -109,57 +108,48 @@ public: // interface
 #ifdef CONFIG_USE_CHARM
 
   /// Initialize CommBlock for the simulation.
-  /// CB
   void p_initial();
 
   // /// Call current Initial::enforce() on the block
   // void p_initial_enforce();
 
   /// Refresh ghost zones and apply boundary conditions
-  /// CB
   void p_refresh();
 
   /// Apply the numerical methods on the block
-  /// CB
   void p_compute(int cycle, double time, double dt);
 
   /// Refresh a FieldFace
-  /// CB
   void x_refresh(int n, char buffer[],int fx, int fy, int fz);
 
   /// Contribute block data to ith output object in the simulation
-  /// CB
   void p_write (int index_output);
 
   /// Contribute block data to the Initial input object
-  /// CB
   void p_read (int index_input = 0)
   {  INCOMPLETE("CommBlock::p_read");  }
 
 
+  //--------------------------------------------------
+  // ADAPT
+  //--------------------------------------------------
+
   /// Entry function after prepare() to call Simulation::p_output()
-  /// CB
   void p_output(CkReductionMsg * msg);
 
   /// Initiate mesh adaptation on given level 
-  /// CB
 
-  /// Begin the adaptation phase
-  void p_adapt_enter();
+  /// Begin the adapt phase of one or more adapt steps
+  void p_adapt_begin();
+  /// Exit the adapt phase
+  void q_adapt_end ();
+
+  /// Begin a single adapt step
   void p_adapt (int count_adapt);
+  /// End the adapt step
   void q_adapt ();
-  void q_adapt_exit ();
-  void adapt();
+  //  void adapt();
   void p_refine();
-  void set_child(Index index)
-  { children_.push_back(index); }
-  void delete_child(Index index)
-  {
-    for (size_t i=0; i<children_.size(); i++) {
-      // erase by replacing occurences with self
-      if (children_[i] == index) children_[i] = index_;
-    }
-  }
   void coarsen();
   void p_child_can_coarsen(int ic);
   void p_balance();
@@ -197,24 +187,18 @@ public: // interface
 		      int index_field_set = 0) throw();
 #endif
 
-  void p_set_neighbor(Index index)
-  { neighbors_.push_back(index); }
-  void p_delete_neighbor(Index index)
-  {
-    for (size_t i=0; i<neighbors_.size(); i++) {
-      // erase by replacing occurences with self
-      if (neighbors_[i] == index) neighbors_[i] = index_;
-    }
-  }
-  void p_set_nibling(Index index)
-  { niblings_.push_back(index); }
-  void p_delete_nibling(Index index)
-  {
-    for (size_t i=0; i<niblings_.size(); i++) {
-      // erase by replacing occurences with self
-      if (niblings_[i] == index) niblings_[i] = index_;
-    }
-  }
+  void set_child(Index index);
+  void p_set_neighbor(int v3[3]);
+  void p_set_nibling(const int v3[3]);
+
+  void delete_child(Index index);
+  void p_delete_neighbor(const int v3[3]);
+  void p_delete_nibling(const int v3[3]);
+
+  bool is_child (const Index & index);
+  bool is_neighbor (const Index & index);
+  bool is_nibling (const Index & index);
+  
   //----------------------------------------------------------------------
   // Big Three
   //----------------------------------------------------------------------
@@ -229,7 +213,6 @@ public: // interface
   CommBlock & operator= (const CommBlock & block) throw();
 
   /// Return the Block associated with this CommBlock
-  /// CB
   Block * block() throw() { return block_; };
   const Block * block() const throw() { return block_; };
 
@@ -239,7 +222,6 @@ public: // interface
   void index_forest (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
 
   /// Return the index of this CommBlock in the array
-  /// CB / remove
 
   /// Return the name of the block
   std::string name () const throw()
@@ -317,10 +299,10 @@ protected: // functions
   std::string id_ () const throw ()
   {
     char buffer[27];
+    int v3[3];
+    index_.values(&v3[0],&v3[1],&v3[2]);
     sprintf (buffer,"%08X-%08X-%08X",
-	     index_.value(0),
-	     index_.value(1),
-	     index_.value(2));
+	     v3[0],v3[1],v3[2]);
     return buffer;
   }
 
@@ -374,7 +356,6 @@ protected: // attributes
 #ifdef CONFIG_USE_CHARM
 
   /// Counter when refreshing faces
-  /// CB: use Sync
 
   Sync sync_refresh_;
 
@@ -414,8 +395,10 @@ protected: // attributes
 
   std::vector<Index> niblings_;
 
-  /// Counter for adaption phase.  (Usually 1 except possibly
-  /// initialization)
+  /// Can coarsen only if all children can coarsen
+  int count_coarsen_;
+
+  /// Number of adapt steps in the adapt phase
   int count_adapt_;
 
 };

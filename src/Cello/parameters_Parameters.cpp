@@ -18,7 +18,8 @@ Parameters::Parameters(Monitor * monitor)
   : current_group_depth_(0),
     parameter_map_(),
     parameter_tree_(new ParamNode("Cello")),
-    monitor_(monitor)
+    monitor_(monitor),
+    do_monitor_(true)
 {
   if (! monitor_) monitor_ = Monitor::instance();
 
@@ -879,6 +880,8 @@ void Parameters::monitor_access_
  int index
  ) throw()
 {
+  if (! do_monitor_) return;
+
   Param * param = 0;
 
   if (index == -1) {

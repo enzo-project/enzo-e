@@ -13,6 +13,13 @@ Index::Index() { clear(); }
 
 //----------------------------------------------------------------------
 
+Index::Index(const Index & index) 
+{
+  copy_(index);
+}
+
+//----------------------------------------------------------------------
+
 Index::Index(int ix, int iy, int iz) 
 {
   clear();
@@ -23,9 +30,7 @@ Index::Index(int ix, int iy, int iz)
 
 Index & Index::operator = (const Index & index)
 {
-  a_[0] = index.a_[0];
-  a_[1] = index.a_[1];
-  a_[2] = index.a_[2];
+  copy_(index);
   return *this;
 }
 
@@ -47,15 +52,15 @@ bool Index::operator != (const Index & index) const
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-#ifndef TEST
-void Index::pup(PUP::er &p) {
-  p(v_,3);
-}
-#endif
-#endif /* CONFIG_USE_CHARM */
+// #ifdef CONFIG_USE_CHARM
+// #ifndef TEST
+// void Index::pup(PUP::er &p) {
+//   p(v_,3);
+// }
+// #endif
+// #endif /* CONFIG_USE_CHARM */
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
 void Index::clear () 
 {
@@ -190,11 +195,6 @@ int Index::level () const
     (    a_[1].level + INDEX_MAX_LEVEL_AXIS_RANGE*
 	 a_[2].level );  
 }
-
-//----------------------------------------------------------------------
-
-unsigned Index::value (int axis) const
-{ return v_[axis];  }
 
 //----------------------------------------------------------------------
 

@@ -88,7 +88,7 @@ void CommBlock::compute()
 
   TRACE ("CommBlock::compute() calling p_adapt(0)");
   
-  p_adapt_enter();
+  p_adapt_begin();
 
 }
 

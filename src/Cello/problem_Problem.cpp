@@ -109,6 +109,11 @@ void Problem::initialize_initial(Config * config,
 				 const FieldDescr * field_descr,
 				 const GroupProcess * group_process) throw()
 {
+
+  // bool do_monitor = parameters->do_monitor();
+
+  // parameters->set_monitor(false);
+
   TRACE1 ("num_refine_ = %d",num_refine_);
   Initial * initial = create_initial_
     (config->initial_type,parameters,config,field_descr,group_process);
@@ -121,6 +126,9 @@ void Problem::initialize_initial(Config * config,
 	  "Initial type %s not recognized",
 	  config->initial_type.c_str(),
 	  initial != NULL);
+
+  // parameters->set_monitor(do_monitor);
+
 }
 
 //----------------------------------------------------------------------
