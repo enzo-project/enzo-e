@@ -248,11 +248,11 @@ void CommBlock::q_adapt()
   TRACE3("ADAPT q_adapt %d %d %d",level_,count_adapt_,thisIndex.is_root());
   if (thisIndex.is_root()) {
     char buffer[40];
-  TRACE1("count_adapt = %d",count_adapt_);
-    sprintf (buffer,"q_adapt(%d)",count_adapt_);
-    thisIndex.print(buffer);
-    thisProxy.p_print(buffer);
-    thisProxy.p_adapt(count_adapt_);
+    TRACE1("count_adapt = %d",count_adapt_);
+    // sprintf (buffer,"q_adapt(%d)",count_adapt_);
+    // thisIndex.print(buffer);
+    // thisProxy.p_print(buffer);
+  thisProxy.p_adapt(count_adapt_);
   }
 }
 
