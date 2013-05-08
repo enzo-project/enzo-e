@@ -16,9 +16,9 @@
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_refresh() 
+void CommBlock::p_refresh_begin() 
 {
-  TRACE("CommBlock::p_refresh");
+  TRACE("CommBlock::p_refresh_begin");
 #ifdef TEMP_SKIP_REFRESH
 
   static int warning_displayed = false;
@@ -48,120 +48,156 @@ void CommBlock::p_refresh()
 
 void CommBlock::refresh ()
 {
-  TRACE ("CommBlock::refresh()");
-
-  bool is_boundary[3][2];
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   Boundary * boundary = simulation->problem()->boundary();
-  FieldDescr * field_descr = simulation->field_descr();
+
   
+  TRACE ("CommBlock::refresh() setting QD q_refresh_end()");
+
+  const Config * config = simulation->config();
+
+  std::string refresh_type = config->field_refresh_type;
+
+  if (refresh_type == "quiescence") {
+
+    TRACE("Setting refresh quiescence detection callback");
+
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
+			  thisProxy[thisIndex]));
+
+  } 
+
+  // which faces need to be refreshed?
+  bool no_refresh[3][2];
+  is_on_boundary (no_refresh);
   bool periodic = boundary->is_periodic();
-
-  CProxy_CommBlock block_array = thisProxy;
-
-  //--------------------------------------------------
-  // Refresh
-  //--------------------------------------------------
-
-  int ibx,iby,ibz;
-  index_forest(&ibx,&iby,&ibz);
-
-  int nbx,nby,nbz;
-  size_forest(&nbx,&nby,&nbz);
-  TRACE3("size_forest %d %d %d",nbx,nby,nbz);
-  
-  bool fx3[3],fy3[3],fz3[3];
-  determine_boundary_
-    (is_boundary,&fx3[0],&fx3[2],&fy3[0],&fy3[2],&fz3[0],&fz3[2]);
-  fx3[1]=true;
-  fy3[1]=true;
-  fz3[1]=true;
-  fx3[0] = fx3[0] && (periodic || ! is_boundary[axis_x][face_lower]);
-  fx3[2] = fx3[2] && (periodic || ! is_boundary[axis_x][face_upper]);
-  fy3[0] = fy3[0] && (periodic || ! is_boundary[axis_y][face_lower]);
-  fy3[2] = fy3[2] && (periodic || ! is_boundary[axis_y][face_upper]);
-  fz3[0] = fz3[0] && (periodic || ! is_boundary[axis_z][face_lower]);
-  fz3[2] = fz3[2] && (periodic || ! is_boundary[axis_z][face_upper]);
-  int ix3[3],iy3[3],iz3[3];
-  ix3[0] = (ibx - 1 + nbx) % nbx;
-  iy3[0] = (iby - 1 + nby) % nby;
-  iz3[0] = (ibz - 1 + nbz) % nbz;
-  ix3[1] = ibx;
-  iy3[1] = iby;
-  iz3[1] = ibz;
-  ix3[2] = (ibx + 1) % nbx;
-  iy3[2] = (iby + 1) % nby;
-  iz3[2] = (ibz + 1) % nbz;
-  
-  // Refresh face ghost zones
-
-  bool gx,gy,gz;
-  gx = false;
-  gy = false;
-  gz = false;
-
-  int fxl = 1;
-  int fyl = (nby==1 && ! periodic) ? 0 : 1;
-  int fzl = (nbz==1 && ! periodic) ? 0 : 1;
-
-  for (int fx=-fxl; fx<=fxl; fx++) {
-    for (int fy=-fyl; fy<=fyl; fy++) {
-      for (int fz=-fzl; fz<=fzl; fz++) {
-	int sum = abs(fx)+abs(fy)+abs(fz);
-	if ((fx3[fx+1] && fy3[fy+1] && fz3[fz+1]) &&
-	    ((sum==1 && field_descr->refresh_face(2)) ||
-	     (sum==2 && field_descr->refresh_face(1)) ||
-	     (sum==3 && field_descr->refresh_face(0)))) {
-
-	  FieldFace field_face (block_->field_block(),field_descr);
-
-	  field_face.set_face(fx,fy,fz);
-	  field_face.set_ghost(gx,gy,gz);
-	  
-	  DEBUG9("index %d %d %d  %d %d %d  %d %d %d",
-		 ibx,iby,ibz,
-		 ix3[fx+1],iy3[fy+1],iz3[fz+1],
-		 fx,fy,fz);
-
-	  int n; 
-	  char * array;
-	  field_face.load(&n, &array);
-
-	  Index index;
-
-	  index.set_array(ix3[fx+1],iy3[fy+1],iz3[fz+1]);
-	  index.set_level(0);
-	  index.clean();
-
-	  thisProxy[index].x_refresh (n,array,-fx,-fy,-fz);
-	}
+  if (periodic) {
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+	no_refresh[axis][face] = false;
       }
     }
   }
 
-  // NOTE: x_refresh() calls compute, but if no incoming faces
-  // it will never get called.  So every block also calls
-  // x_refresh() itself with a null array
+  // set face loop limits accordingly
+  int ixm = no_refresh[0][0] ? 0 : -1;
+  int iym = no_refresh[1][0] ? 0 : -1;
+  int izm = no_refresh[2][0] ? 0 : -1;
+  int ixp = no_refresh[0][1] ? 0 : 1;
+  int iyp = no_refresh[1][1] ? 0 : 1;
+  int izp = no_refresh[2][1] ? 0 : 1;
 
-  x_refresh (0,0,0, 0, 0);
+  // Include ghost zones in refresh?
 
+  bool lgx,lgy,lgz;
+
+  lgx = false;
+  lgy = false;
+  lgz = false;
+
+  // Forest size needed for Index
+
+  int n3[3];
+  size_forest(&n3[0],&n3[1],&n3[2]);
+
+  TRACE6 ("limits %d %d %d   %d %d %d",ixm,iym,izm,ixp,iyp,izp);
+
+  int refresh_rank = config->field_refresh_rank;
+  int rank         = simulation->dimension();
+  bool refresh_type_counter = (refresh_type == "counter");
+  if (refresh_type_counter) loop_refresh_.stop() = 0;
+
+  for (int ix=ixm; ix<=ixp; ix++) {
+    for (int iy=iym; iy<=iyp; iy++) {
+      for (int iz=izm; iz<=izp; iz++) {
+	int face_rank = rank - (abs(ix) + abs(iy) + abs(iz));
+	if (face_rank >= refresh_rank) {
+	  TRACE3("Calling refresh_same %d %d %d",ix,iy,iz);
+	  Index index = index_.index_neighbor(ix,iy,iz,n3);
+
+	  // update coarse neighbors
+	  if (! is_neighbor(index)) {
+
+	    if (refresh_type_counter) ++loop_refresh_.stop();
+	    //	    refresh_coarse(index);
+
+	  } else {
+
+	    // update fine neighbors
+
+	    bool count_nibling = 0;
+
+	    //  Index index_nibling (int axis, int face, int ic3[3], int narray) const;
+	    /// for nibling
+	    ///   if (is_nibling)
+	    ///      ++count_nibling
+	    ///     refresh_fine()
+
+	    // update neighbors
+
+	    if (count_nibling == 0 && index_ != index) {
+
+	      if (refresh_type_counter) ++loop_refresh_.stop();
+	      refresh_same(index,ix,iy,iz,lgx,lgy,lgz);
+
+	    }
+	  }
+	}
+      }
+    }
+  }
+  TRACE1("CommBlock::refresh() face counter = %d",
+	 loop_refresh_.value());
+  if (refresh_type_counter) {
+    ++loop_refresh_.stop();
+    x_refresh_same (0,0,0,0,0);
+  }
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
+void CommBlock::refresh_coarse (Index index)
+{
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::refresh_same (Index index, 
+			      int ix,  int iy,  int iz,
+			      int lgx, int lgy, int lgz)
 {
 
-  // @@@ 512 ???
-  TRACE ("CommBlock::x_refresh()");
+  
+  TRACE3("ENTER refresh_same %d %d %d",ix,iy,iz);
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+
+  FieldFace field_face (block_->field_block(),field_descr);
+
+  field_face.set_face(ix,iy,iz);
+  field_face.set_ghost(lgx,lgy,lgz);
+	  
+  int n; 
+  char * array;
+  field_face.load(&n, &array);
+
+  thisProxy[index].x_refresh_same (n,array,-ix,-iy,-iz);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::x_refresh_same (int n, char * buffer, int fx, int fy, int fz)
+{
+  TRACE3 ("CommBlock::x_refresh_same(%d %d %d)",fx,fy,fz);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
 
   if ( n != 0) {
 
-    // n == 0 is the call from self to ensure x_refresh()
+    // n == 0 is the call from self to ensure x_refresh_same()
     // always gets called at least once
 
     bool gx,gy,gz;
@@ -177,99 +213,24 @@ void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
     field_face.store (n, buffer);
   }
 
-  //--------------------------------------------------
-  // Compute
-  //--------------------------------------------------
-
-  if (sync_refresh_.done()) {
-    // @@@ 97 XXX
-    TRACE ("CommBlock::x_refresh() calling prepare()");
-    prepare();
+  const Config * config = simulation->config();
+  std::string refresh_type = config->field_refresh_type;
+  
+  if (refresh_type == "counter") {
+    if (loop_refresh_.done()) {
+      q_refresh_end();
+    }
   }
 }
 
 //----------------------------------------------------------------------
 
-int CommBlock::count_refresh_()
+void CommBlock::q_refresh_end()
 {
-  // Count incoming faces for face 
-
-  int nx,ny,nz;
-  block_->field_block()->size (&nx,&ny,&nz);
-
-  // Determine axes that may be neighbors
-
-  bool fxm = nx > 1;
-  bool fxp = nx > 1;
-  bool fym = ny > 1;
-  bool fyp = ny > 1;
-  bool fzm = nz > 1;
-  bool fzp = nz > 1;
-
-  // Adjust for boundary faces
-
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  bool periodic = simulation->problem()->boundary()->is_periodic();
-
-  bool is_boundary[3][2];
-  is_on_boundary (is_boundary);
-
-  fxm = fxm && (periodic || ! is_boundary[axis_x][face_lower]);
-  fxp = fxp && (periodic || ! is_boundary[axis_x][face_upper]);
-  fym = fym && (periodic || ! is_boundary[axis_y][face_lower]);
-  fyp = fyp && (periodic || ! is_boundary[axis_y][face_upper]);
-  fzm = fzm && (periodic || ! is_boundary[axis_z][face_lower]);
-  fzp = fzp && (periodic || ! is_boundary[axis_z][face_upper]);
-
-  // count self
-
-  int count = 1;
-
-  // count faces
-
-  FieldDescr * field_descr = simulation->field_descr();
-
-  if (field_descr->refresh_face(2)) {
-    if ( fxm ) ++count;
-    if ( fxp ) ++count;
-    if ( fym ) ++count;
-    if ( fyp ) ++count;
-    if ( fzm ) ++count;
-    if ( fzp ) ++count;
-  }
-
-  // count edges
-
-  if (field_descr->refresh_face(1)) {
-    if ( fxm && fym ) ++count;
-    if ( fxm && fyp ) ++count;
-    if ( fxp && fym ) ++count;
-    if ( fxp && fyp ) ++count;
-    if ( fym && fzm ) ++count;
-    if ( fym && fzp ) ++count;
-    if ( fyp && fzm ) ++count;
-    if ( fyp && fzp ) ++count;
-    if ( fzm && fxm ) ++count;
-    if ( fzm && fxp ) ++count;
-    if ( fzp && fxm ) ++count;
-    if ( fzp && fxp ) ++count;
-  }
-
-  // count corners
-
-  if (field_descr->refresh_face(0)) {
-    if ( fxm && fym && fzm ) ++count;
-    if ( fxm && fym && fzp ) ++count;
-    if ( fxm && fyp && fzm ) ++count;
-    if ( fxm && fyp && fzp ) ++count;
-    if ( fxp && fym && fzm ) ++count;
-    if ( fxp && fym && fzp ) ++count;
-    if ( fxp && fyp && fzm ) ++count;
-    if ( fxp && fyp && fzp ) ++count;
-  }
-
-  return count;
+  TRACE ("CommBlock::q_refresh_end() calling prepare()");
+  prepare();
 }
+
+//----------------------------------------------------------------------
 
 #endif /* CONFIG_USE_CHARM */

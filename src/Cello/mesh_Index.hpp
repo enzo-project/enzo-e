@@ -69,7 +69,11 @@ public:
 
   Index index_child (int ic3[3]) const;
 
+  /// Index of neighbor along given face
   Index index_neighbor (int axis, int face, int narray) const;
+
+  /// Generalized neighbor including edge and corner
+  Index index_neighbor (int ix, int iy, int iz, int n3[3]) const;
 
   Index index_uncle (int axis, int face, int narray) const;
 

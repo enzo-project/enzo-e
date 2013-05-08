@@ -22,6 +22,8 @@
 
       ghosts = 3;
 
+      refresh { rank = 1;  } # refresh edges not corners
+
       fields = [
 	"density",	
 	"velocity_x",
@@ -79,7 +81,10 @@
    Stopping {        cycle = 400;   } 
    Testing {   cycle_final = 400; }
 
-   Testing {  time_final  = 1.03693807162344;  }
+# OLD TIME
+#   Testing {  time_final  = 1.03693807162344;  } 
+# TIME FOR UPDATED InitialDefault
+   Testing {  time_final  = 1.04044035635889; }
 
    Output { 
 

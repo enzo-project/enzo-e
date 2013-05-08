@@ -73,8 +73,6 @@ public: // interface
 
   CBase_CommBlock::pup(p);
 
-  p | sync_refresh_;
-
   p | index_;
   p | cycle_;
   p | time_;
@@ -86,6 +84,7 @@ public: // interface
   p | niblings_;
   p | count_coarsen_;
   p | count_adapt_;
+  p | loop_refresh_;
 
 }
 
@@ -113,14 +112,8 @@ public: // interface
   // /// Call current Initial::enforce() on the block
   // void p_initial_enforce();
 
-  /// Refresh ghost zones and apply boundary conditions
-  void p_refresh();
-
   /// Apply the numerical methods on the block
   void p_compute(int cycle, double time, double dt);
-
-  /// Refresh a FieldFace
-  void x_refresh(int n, char buffer[],int fx, int fy, int fz);
 
   /// Contribute block data to ith output object in the simulation
   void p_write (int index_output);
@@ -137,22 +130,20 @@ public: // interface
   /// Entry function after prepare() to call Simulation::p_output()
   void p_output(CkReductionMsg * msg);
 
-  /// Initiate mesh adaptation on given level 
-
   /// Begin the adapt phase of one or more adapt steps
   void p_adapt_begin();
-  /// Exit the adapt phase
+
+  /// Exit the adapt phase after QD
   void q_adapt_end ();
 
   /// Begin a single adapt step
   void p_adapt (int count_adapt);
-  /// End the adapt step
+  /// End the adapt step after QD
   void q_adapt ();
   //  void adapt();
   void p_refine();
   void coarsen();
   void p_child_can_coarsen(int ic);
-  void p_balance();
   int determine_adapt();
   /// Update the depth of the given child
   void p_print(std::string message) {  
@@ -160,20 +151,38 @@ public: // interface
     TRACE2("%s level %d",message.c_str(),level_);
   }
 
+  //--------------------------------------------------
+  // REFRESH
+  //--------------------------------------------------
 
+  /// Refresh ghost zones and apply boundary conditions
+  void p_refresh_begin();
+
+  /// Exit the refresh phase after QD
+  void q_refresh_end ();
+
+  /// update ghost zones with given neighbor in same level
+  void refresh_same (Index index,
+		     int ix, int iy, int iz,
+		     int lgx, int lgy, int lgz);
+  /// update ghost zones with given neighbor in coarser level
+  void refresh_coarse (Index index);
+
+  /// update ghost zones with given neighbor in same level
+  void refresh_fine (Index index);
+
+  /// Refresh a FieldFace in the same level
+  void x_refresh_same(int n, char buffer[],int fx, int fy, int fz);
 
   //--------------------------------------------------
 
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
-  /// B
   void prepare();
 
   /// Implementation of refresh
-  /// B / CB
   void refresh();
 
   /// Boundary and Method
-  /// B
   void compute();
 
   //==================================================
@@ -218,10 +227,8 @@ public: // interface
 
 //----------------------------------------------------------------------
 
-  /// B | CB
+  /// Return the index of the root block containing this block
   void index_forest (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
-
-  /// Return the index of this CommBlock in the array
 
   /// Return the name of the block
   std::string name () const throw()
@@ -240,6 +247,7 @@ public: // interface
   /// Compute the upper extent of the CommBlock in the domain
   void upper(double * xp, double * yp = 0, double * zp = 0) const throw ();
 
+  /// Return the index of this CommBlock in global coordinates for its level
   void index_global
   ( int *ix, int *iy, int *iz,  
     int *nx, int *ny, int *nz ) const;
@@ -337,9 +345,6 @@ protected: // functions
   /// Update boundary conditions
   void update_boundary_ ();
 
-  /// Count number of expected faces to be communicated
-  int count_refresh_ ();
-
 #endif
 
 protected: // attributes
@@ -353,14 +358,6 @@ protected: // attributes
   /// Mesh Block that this CommBlock controls
   Block * block_;
 
-#ifdef CONFIG_USE_CHARM
-
-  /// Counter when refreshing faces
-
-  Sync sync_refresh_;
-
-#endif
-
   //--------------------------------------------------
 
   Index index_;
@@ -368,15 +365,12 @@ protected: // attributes
   //--------------------------------------------------
 
   /// Current cycle number
-  /// B / CB
   int cycle_;
 
   /// Current time
-  /// B
   double time_;
 
   /// Current timestep
-  /// B
   double dt_;
 
   //--------------------------------------------------
@@ -389,10 +383,13 @@ protected: // attributes
   /// Mesh refinement level
   int level_;
 
+  /// list of child nodes
   std::vector<Index> children_;
 
+  /// list of neighbor nodes
   std::vector<Index> neighbors_;
 
+  /// list of nibling nodes
   std::vector<Index> niblings_;
 
   /// Can coarsen only if all children can coarsen
@@ -400,6 +397,11 @@ protected: // attributes
 
   /// Number of adapt steps in the adapt phase
   int count_adapt_;
+
+#ifdef CONFIG_USE_CHARM
+  /// Synchronization counter for ghost refresh
+  Sync loop_refresh_;
+#endif
 
 };
 

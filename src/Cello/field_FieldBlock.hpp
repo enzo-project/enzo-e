@@ -42,19 +42,13 @@ public: // interface
 
   void pup(PUP::er &p) 
   {
-
     TRACEPUP;
 
-    TRACE1("this = %p",this);
     PUParray(p,size_,3);
 
     p | array_;
     p | offsets_;
     p | ghosts_allocated_;
-
-    TRACE3("size = %d %d %d\n",size_[0],size_[1],size_[2]);
-    TRACE1("array_.size() = %d",array_.size());
-    TRACE1("offsets_.size() = %d",offsets_.size());
   }
 
 #endif

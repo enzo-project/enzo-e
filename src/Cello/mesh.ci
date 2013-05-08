@@ -35,18 +35,15 @@ module mesh {
 
     entry CommBlock();	
 
-//    entry void p_initial();
-    entry void p_refresh();
     entry void p_write (int index_output);
     entry void p_compute(int cycle, double time, double dt);
-
-    entry void x_refresh(int n, char buffer[n], int fx, int fy, int fz);
-
     entry void p_read (int index_input);
-
     entry void p_output(CkReductionMsg * msg);
 
+    // adapt
+
     entry void p_adapt_begin ();
+    entry void q_adapt_end();
     entry void p_adapt (int count_adapt);
     entry void p_refine ();
     entry void p_set_neighbor(const int v3[3]);
@@ -54,9 +51,13 @@ module mesh {
     entry void p_set_nibling(const int v3[3]);
     entry void p_delete_nibling(const int v3[3]);
     entry void p_child_can_coarsen(int ic);
-    entry void p_balance();
-    entry void q_adapt_end();
     entry void q_adapt();
+
+    // refresh
+
+    entry void p_refresh_begin();
+    entry void q_refresh_end();
+    entry void x_refresh_same(int n, char buffer[n], int fx, int fy, int fz);
 
     entry void p_print(std::string);
   };

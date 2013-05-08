@@ -66,9 +66,8 @@ public: // attributes
   int                        field_ghosts[3];
   int                        field_padding;
   int                        field_precision;
-  bool                       field_refresh_corners;
-  bool                       field_refresh_edges;
-  bool                       field_refresh_faces;
+  int                        field_refresh_rank;
+  std::string                field_refresh_type;
 
   int                        initial_cycle;
   std::string                initial_type;
@@ -90,7 +89,7 @@ public: // attributes
   double                     mesh_adapt_mass_min;
   double                     mesh_adapt_mass_min_overdensity;
   double                     mesh_adapt_mass_level_exponent;
-  
+
   std::vector<std::string>   method_sequence;
 
   bool                       monitor_debug;

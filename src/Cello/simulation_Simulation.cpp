@@ -270,12 +270,6 @@ void Simulation::initialize_data_descr_() throw()
     field_descr_->set_ghosts (i,gx,gy,gz);
   }
 
-  // Set face dimensions to refresh
-
-  field_descr_->set_refresh_face(2,config_->field_refresh_faces);
-  field_descr_->set_refresh_face(1,config_->field_refresh_edges);
-  field_descr_->set_refresh_face(0,config_->field_refresh_corners);
-  
   // Default precision
 
   for (int i=0; i<field_descr_->field_count(); i++) {

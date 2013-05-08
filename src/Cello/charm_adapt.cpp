@@ -166,16 +166,12 @@ void CommBlock::p_refine()
   int na3[3];
   size_forest (&na3[0],&na3[1],&na3[2]);
 
-  TRACE1 ("nc = %d",nc);
   for (int ic=0; ic<nc; ic++) {
 
     int ic3[3];
     ic3[0] = (ic & 1) >> 0;
     ic3[1] = (ic & 2) >> 1;
     ic3[2] = (ic & 4) >> 2;
-
-    TRACE5("ADAPT new child %d [%d %d %d]/ %d",
-	   ic,ic3[0],ic3[1],ic3[2],nc);
 
     Index index_child = index_.index_child(ic3);
     index_child.print("creating");
@@ -272,22 +268,10 @@ void CommBlock::p_child_can_coarsen(int ic)
 void CommBlock::q_adapt()
 {
   thisProxy.doneInserting();
-  TRACE1("count_adapt = %d",count_adapt_);
-  TRACE3("ADAPT q_adapt %d %d %d",level_,count_adapt_,thisIndex.is_root());
+
   if (thisIndex.is_root()) {
-    TRACE1("count_adapt = %d",count_adapt_);
-    // sprintf (buffer,"q_adapt(%d)",count_adapt_);
-    // thisIndex.print(buffer);
-    // thisProxy.p_print(buffer);
-  thisProxy.p_adapt(count_adapt_);
+    thisProxy.p_adapt(count_adapt_);
   }
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::p_balance()
-{
-  TRACE("ADAPT CommBlock::p_balance()");
 }
 
 //----------------------------------------------------------------------
@@ -297,7 +281,7 @@ void CommBlock::q_adapt_end()
   TRACE("ADAPT CommBlock::q_adapt_end()");
   thisProxy.doneInserting();
   if (thisIndex.is_root()) {
-    thisProxy.p_refresh();
+    thisProxy.p_refresh_begin();
   };
   
 }

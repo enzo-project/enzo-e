@@ -394,7 +394,9 @@ void SimulationMpi::refresh_ghost_
   if (py == 1) SWAP(aym,ayp);
   if (pz == 1) SWAP(azm,azp);
 
-  if (field_descr_->refresh_face(2)) {
+  int refresh_rank = config()->field_refresh_rank;
+  int face_rank = dimension_ - 1;
+  if (face_rank >= refresh_rank) {
     // TRACE3("p %d %d %d",px,py,pz);
     // TRACE6("a %d %d  %d %d  %d %d",axm,axp,aym,ayp,azm,azp);
     if (axm) comm_block->refresh_ghosts(field_descr_,hierarchy_,+px,0,0);

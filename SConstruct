@@ -123,7 +123,7 @@ define = {}
 
 # Temporary defines
 
-define_skip_refresh =        ['TEMP_SKIP_REFRESH']
+define_skip_refresh = ['TEMP_SKIP_REFRESH']
 
 # Parallel type defines
 
@@ -216,7 +216,7 @@ if (use_gprof == 1):
   
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
-if (skip_refresh != 0):      defines = defines + define_skip_refresh
+if (skip_refresh != 0):  defines = defines + define_skip_refresh
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory

@@ -92,7 +92,9 @@ PARALLEL_MAIN_BEGIN
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
 
-	unit_func("index_neighbor");
+	
+	//--------------------------------------------------
+ 	unit_func("index_neighbor(axis,face)");
 
 	// neighbor is not the same as self
 	Index in = i1.index_neighbor(axis,face,na3[axis]);
@@ -103,6 +105,22 @@ PARALLEL_MAIN_BEGIN
 	// neighbor's corresponding neighbor is self
 	Index in2 = in.index_neighbor(axis,1-face,na3[axis]);
 	unit_assert(in2 == i1);
+
+	//--------------------------------------------------
+	unit_func("index_neighbor(ix,iy,iz)");
+
+	int i3[3] ;
+	i3[0] = 0;
+	i3[1] = 0;
+	i3[2] = 0;
+	i3[axis] = face*2-1;
+
+	// neighbor is not the same as self
+	Index ina = i1.index_neighbor(axis,face,na3[axis]);
+	Index inb = i1.index_neighbor(i3[0],i3[1],i3[2],na3);
+	unit_assert (ina == inb);
+
+	//--------------------------------------------------
 
 	if (level > 0) {
 
@@ -125,8 +143,23 @@ PARALLEL_MAIN_BEGIN
 
       }
     }
+
+    unit_func("index_neighbor(ix,iy,iz)");
+    for (int ix = -1; ix <= 1; ix++) {
+      for (int iy = -1; iy <= 1; iy++) {
+	for (int iz = -1; iz <= 1; iz++) {
+	  Index in = i1.index_neighbor(ix,iy,iz,na3);
+	  if ( ! (ix==0 && iy==0 && iz==0)) unit_assert(in != i1);
+	  unit_assert(in.level() == level);
+	  Index in2 = in.index_neighbor(-ix,-iy,-iz,na3);
+	  unit_assert(in2 == i1);
+	}
+      }
+    }
+
   }
   
+
   //	index_uncle (int axis, int face, int narray) const
   // 	index_nibling (int axis, int face, int ic3[3], int narray) const
   //void 	child (int level, int *icx, int *icy, int *icz) const

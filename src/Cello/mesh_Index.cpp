@@ -141,6 +141,51 @@ Index Index::index_neighbor (int axis, int face, int narray) const
 
 //----------------------------------------------------------------------
 
+Index Index::index_neighbor (int ix, int iy, int iz, int n3[3]) const
+{
+  TRACE6("index_neighbor ix iy iz  %d %d %d  n3 %d %d %d",
+	 ix,iy,iz,n3[0],n3[1],n3[2]);
+
+  Index index = *this;
+
+  int i3[3] = {ix,iy,iz};
+
+  const int level = index.level();
+
+  for (int axis = 0; axis < 3; axis++) {
+    
+    int array = index.a_[axis].array;
+    int tree  = index.a_[axis].tree;
+
+    // update tree bits
+
+    int shift_level = (1 << (INDEX_MAX_TREE_BITS - level));
+
+    tree += i3[axis]*shift_level; 
+
+    // update array if necessary
+
+    int shift_overflow = (1 << INDEX_MAX_TREE_BITS);
+
+    if (tree & shift_overflow) {
+
+      tree &= ~(shift_overflow);
+
+      TRACE2("array change= %d %d",array,(n3[axis] + array + i3[axis]) % n3[axis]);
+
+      array = (n3[axis] + array + i3[axis]) % n3[axis];
+
+    }
+    index.a_[axis].array = array;
+    index.a_[axis].tree  = tree;
+  }
+
+
+  return index;
+}
+
+//----------------------------------------------------------------------
+
 Index Index::index_uncle (int axis, int face, int narray) const
 {
   TRACE3("index_uncle axis %d  face %d  narray %d",

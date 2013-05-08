@@ -86,20 +86,33 @@ CommBlock::CommBlock
   initialize ();
 
   if (level == 0) {
-    WARNING("CommBlock::CommBlock",
-	    "Ignoring periodic versus non-periodic b.c.");
+
     int na3[3];
     size_forest(&na3[0],&na3[1],&na3[2]);
+
     int v3[3];
-    for (int axis = 0; axis < rank; axis++) {
-      for (int face = 0; face < 2; face ++) {
-	Index index_neighbor = index_.index_neighbor(axis,face,na3[axis]);
-	index_neighbor.values(&v3[0],&v3[1],&v3[2]);
-	p_set_neighbor (v3);
-	
+    Index index;
+    int ixp = (rank >= 1) ? 1 : 0;
+    int iyp = (rank >= 2) ? 1 : 0;
+    int izp = (rank >= 3) ? 1 : 0;
+    
+    int refresh_rank = simulation()->config()->field_refresh_rank;
+
+    for (int ix=-ixp; ix<=ixp; ix++) {
+      for (int iy=-iyp; iy<=iyp; iy++) {
+	for (int iz=-izp; iz<=izp; iz++) {
+
+	  int face_rank = rank - (abs(ix)+abs(iy)+abs(iz));
+	  if (face_rank >= refresh_rank) {
+	    index = index_.index_neighbor(ix,iy,iz,na3);
+	    index.values(&v3[0],&v3[1],&v3[2]);
+	    p_set_neighbor (v3);
+	  }
+	}
       }
     }
   }
+
 #ifdef CONFIG_USE_CHARM
 
    if (! testing) {
@@ -109,8 +122,6 @@ CommBlock::CommBlock
      TRACE1 ("proxy_simulation = %p",&proxy_simulation);
      ((SimulationCharm *)simulation())->insert_block();
    }
-
-  sync_refresh_.stop() = count_refresh_();
 
   apply_initial_();
 
@@ -471,10 +482,6 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   level_ = comm_block.level_;
   count_adapt_ = comm_block.count_adapt_;
 
-#ifdef CONFIG_USE_CHARM
-  sync_refresh_ = comm_block.sync_refresh_;
-#endif
-  
 }
 
 //----------------------------------------------------------------------

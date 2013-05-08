@@ -33,9 +33,8 @@ void Config::pup (PUP::er &p)
 
   p | field_padding;
   p | field_precision;
-  p | field_refresh_corners;
-  p | field_refresh_edges;
-  p | field_refresh_faces;
+  p | field_refresh_rank;
+  p | field_refresh_type;
 
   p | initial_cycle;
   p | initial_type;
@@ -175,10 +174,28 @@ void Config::read(Parameters * parameters) throw()
     ERROR1 ("Config::read()", "Unknown precision %s",
 	    precision_str.c_str());
   }
+  // face_rank = rank - ( |ix| + |iy| + |iz| )
+  //
+  // face_rank               0     1     2         0      1
+  //                    3D corner edge  face  2D corner edge
+  // refresh_rank == 0:      x     x     x         x      x  >= 0D faces
+  // refresh_rank == 1             x     x                x  >= 1D faces
+  // refresh_rank == 2                   x                   >= 2D faces
+  //
+  // refresh if (face_rank >= rank)
 
-  field_refresh_corners = parameters->value_logical ("Field:refresh:corners",true);
-  field_refresh_edges   = parameters->value_logical ("Field:refresh:edges",  true);
-  field_refresh_faces   = parameters->value_logical ("Field:refresh:faces",  true);
+  field_refresh_rank = parameters->value_integer ("Field:refresh:rank",0);
+
+  // field refresh type == "quiescence" or "counter"
+
+  field_refresh_type = parameters->value_string  ("Field:refresh:type","quiescence");
+
+  if ( ! ((field_refresh_type == "quiescence") ||
+	  (field_refresh_type == "counter"))) {
+    ERROR1 ("Config::read()", 
+	    "Unknown Field:refresh:type %s (must be \"quiescence\" or \"counter\"",
+	    field_refresh_type.c_str());
+  }
 
   //--------------------------------------------------
   // Initial
