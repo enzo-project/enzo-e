@@ -96,7 +96,7 @@ CommBlock::CommBlock
     int iyp = (rank >= 2) ? 1 : 0;
     int izp = (rank >= 3) ? 1 : 0;
     
-    int refresh_rank = simulation()->config()->field_refresh_rank;
+    int refresh_rank = this->simulation()->config()->field_refresh_rank;
 
     for (int ix=-ixp; ix<=ixp; ix++) {
       for (int iy=-iyp; iy<=iyp; iy++) {

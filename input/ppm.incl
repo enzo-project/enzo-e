@@ -22,7 +22,7 @@
 
       ghosts = 3;
 
-      refresh { rank = 1;  } # refresh edges not corners
+      refresh { rank = 1;  }; # refresh edges not corners
 
       fields = [
 	"density",	
