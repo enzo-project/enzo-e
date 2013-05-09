@@ -44,7 +44,9 @@ CProxy_CommBlock EnzoFactory::create_block_array
  bool testing
  ) const throw()
 {
-  TRACE ("EnzoFactory::create_block_array");
+  TRACE8("EnzoFactory::create_block_array(na(%d %d %d) n(%d %d %d num_field_blocks %d  allocate %d",
+	 nbx,nby,nbz,nx,ny,nz,num_field_blocks,allocate);
+
   CProxy_EnzoBlock enzo_block_array;
 
   if (allocate) {
@@ -54,9 +56,11 @@ CProxy_CommBlock EnzoFactory::create_block_array
     opts.setMap(array_map);
     enzo_block_array = CProxy_CommBlock::ckNew(opts);
 
-    //    enzo_block_array = CProxy_EnzoBlock::ckNew();
-
     int level;
+
+    int count_adapt;
+
+    bool initial;
 
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
@@ -68,9 +72,10 @@ CProxy_CommBlock EnzoFactory::create_block_array
 	  enzo_block_array[index].insert 
 	    (index,
 	     nx,ny,nz,
-	     level=0,
 	     num_field_blocks,
-	     0);
+	     count_adapt = 0,
+	     initial=true,
+	     testing);
 
 	}
       }
@@ -100,14 +105,16 @@ CommBlock * EnzoFactory::create_block
 #endif /* CONFIG_USE_CHARM */
  Index index,
  int nx, int ny, int nz,
- int level,
  int num_field_blocks,
  int count_adapt,
+ bool initial,
  bool testing
  ) const throw()
 {
 
-  TRACE("new EnzoBlock");
+  TRACE6("EnzoFactory::create_block(n(%d %d %d)  num_field_blocks %d  count_adatp %d  initial %d)",
+	 nx,ny,nz,num_field_blocks,count_adapt,initial);
+
 
 #ifdef CONFIG_USE_CHARM
 
@@ -115,9 +122,9 @@ CommBlock * EnzoFactory::create_block
      (
       index,
       nx,ny,nz,
-      level,
       num_field_blocks,
       count_adapt,
+      initial,
       testing);
 
    CommBlock * block = block_array[index].ckLocal();
@@ -133,9 +140,10 @@ CommBlock * EnzoFactory::create_block
      simulation,
      index,
      nx,ny,nz,
-     level,
      num_field_blocks,
-     count_adapt);
+     initial,
+     count_adapt,
+     testing);
 
   return enzo_block;
   

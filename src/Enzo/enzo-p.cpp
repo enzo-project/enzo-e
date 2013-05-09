@@ -85,7 +85,7 @@ PARALLEL_MAIN_BEGIN
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
     (parameter_file, strlen(parameter_file)+1);
 
-  proxy_simulation.p_initialize();
+  proxy_simulation.p_initialize_begin();
 
 
   //--------------------------------------------------

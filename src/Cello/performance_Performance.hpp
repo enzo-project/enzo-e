@@ -8,6 +8,8 @@
 #ifndef PERFORMANCE_PERFORMANCE_HPP
 #define PERFORMANCE_PERFORMANCE_HPP
 
+class Config;
+
 /// @enum     type_counter
 /// @brief    Counter value type
 #define NUM_COUNTER_TYPES 5
@@ -38,7 +40,7 @@ class Performance {
 public: // interface
 
   /// Initialize a Performance object
-  Performance();
+  Performance(Config *);
 
   /// Delete a Performance object
   ~Performance();
@@ -72,6 +74,7 @@ public: // interface
     p | n_basic_abs_;
     p | n_user_;
     p | n_papi_;
+    p | warnings_;
   }
 #endif
 
@@ -125,7 +128,10 @@ public: // interface
   int region_index (std::string name) const throw();
 
   /// Add a new region, returning the id
-  int new_region(std::string region) throw();
+  void new_region(int index_region, std::string region) throw();
+
+  /// Return whether performance monitoring is started for the region 
+  bool is_region_active(int index_region) throw();
 
   /// Push a new region onto the stack
   void start_region(int index_region) throw();
@@ -220,6 +226,9 @@ private: // attributes
   int n_basic_abs_;
   int n_papi_;
   int n_user_;
+
+  /// Whether to output warning messages
+  bool warnings_;
 
 };
 

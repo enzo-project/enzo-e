@@ -352,7 +352,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
       FieldType[field_index] = 0;
     } else {
       FieldType[field_index] = 0;
-      WARNING1 ("EnzoBlock::EnzoBlock", 
+      WARNING1 ("EnzoBlock::initialize", 
 		"Unknown field type for field %s",
 		name.c_str());
     }
@@ -389,9 +389,11 @@ EnzoBlock::EnzoBlock
 #endif
  Index index,
  int nx, int ny, int nz,
- int level,
  int num_field_blocks,
- int count_adapt) throw()
+ int count_adapt,
+ bool initial,
+ bool testing
+) throw()
   : CommBlock 
     (
 #ifndef CONFIG_USE_CHARM
@@ -399,16 +401,19 @@ EnzoBlock::EnzoBlock
 #endif
      index,
      nx,ny,nz,
-     level,
      num_field_blocks,
-     count_adapt),
+     count_adapt,
+     initial,
+     testing),
     Time_(0),
     CycleNumber(0),
     OldTime(0),
     dt(0),
     SubgridFluxes(0)
 {
-  TRACE("EnzoBlock::EnzoBlock()");
+  int mx,my,mz;
+  index.array(&mx,&my,&mz);
+  TRACE3("EnzoBlock::EnzoBlock(%d %d %d)",mx,my,mz);
   initialize_enzo_();
   initialize();
 }

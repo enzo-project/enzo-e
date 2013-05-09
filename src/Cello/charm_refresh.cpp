@@ -19,6 +19,7 @@
 void CommBlock::p_refresh_begin() 
 {
   TRACE("CommBlock::p_refresh_begin");
+  simulation()->performance()->start_region(perf_refresh);
 #ifdef TEMP_SKIP_REFRESH
 
   static int warning_displayed = false;
@@ -148,7 +149,7 @@ void CommBlock::refresh ()
     }
   }
   TRACE1("CommBlock::refresh() face counter = %d",
-	 loop_refresh_.value());
+	 loop_refresh_.index());
   if (refresh_type_counter) {
     ++loop_refresh_.stop();
     x_refresh_same (0,0,0,0,0);
@@ -227,6 +228,7 @@ void CommBlock::x_refresh_same (int n, char * buffer, int fx, int fy, int fz)
 
 void CommBlock::q_refresh_end()
 {
+  simulation()->performance()->stop_region(perf_refresh);
   TRACE ("CommBlock::q_refresh_end() calling prepare()");
   prepare();
 }

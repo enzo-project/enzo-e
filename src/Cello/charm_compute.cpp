@@ -19,6 +19,7 @@
 
 void SimulationCharm::c_compute()
 {
+  
 #ifdef TEMP_SKIP_REFRESH
   WARNING("SimulationCharm::c_compute()",
 	  "TEMP_SKIP_REFRESH is defined--simulation aborting");
@@ -26,18 +27,17 @@ void SimulationCharm::c_compute()
 #endif
 
   TRACE("SimulationCharm::c_compute()");
+  if (cycle_ > 0 ) performance()->stop_region (perf_cycle);
+
   if (stop_) {
     
-    performance_.stop_region (id_cycle_);
     performance_write();
 
     proxy_main.p_exit(CkNumPes());
 
   } else {
 
-    if (cycle_ > 0 ) performance_.stop_region (id_cycle_);
-
-    performance_.start_region (id_cycle_);
+    performance()->start_region (perf_cycle);
 
     if (hierarchy()->group_process()->is_root()) 
       hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
@@ -53,7 +53,9 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   // set_dt(dt);
 
   TRACE3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
+  simulation()->performance()->start_region(perf_compute);
   compute();
+  simulation()->performance()->stop_region(perf_compute);
 }
 
 //----------------------------------------------------------------------

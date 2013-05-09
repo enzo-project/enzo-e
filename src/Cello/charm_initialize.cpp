@@ -16,7 +16,7 @@
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_initialize() 
+void SimulationCharm::p_initialize_begin() 
 {
   initialize();  // virtual: calls EnzoSimulationCharm::initialize()
 }
@@ -26,22 +26,25 @@ void SimulationCharm::p_initialize()
 void SimulationCharm::initialize() throw()
 {
   TRACE("SimulationCharm::initialize()");
+
   Simulation::initialize();
 
-  s_initialize();
+  if (group_process_->is_root()) {
+  CkStartQD 
+    ( CkCallback(CkIndex_SimulationCharm::q_initialize_end(), thisProxy));
+  }
+
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::s_initialize()
+void SimulationCharm::q_initialize_end() 
 {
-  TRACE("SimulationCharm::s_initialize()");
-
   if (group_process_->is_root()) {
-    CkStartQD (CkCallback(CkIndex_CommBlock::p_adapt_begin(),
-			  *hierarchy()->block_array()));
-   }
-
+    (*hierarchy()->block_array() ).p_adapt_begin();
+  }
 }
+
+//----------------------------------------------------------------------
 
 #endif /* CONFIG_USE_CHARM */

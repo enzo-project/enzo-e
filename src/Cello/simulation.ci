@@ -28,8 +28,8 @@ module simulation {
     entry SimulationCharm
       (const char filename[n], int n);
 
-    entry void p_initialize ();
-    entry void s_initialize ();
+    entry void p_initialize_begin ();
+    entry void q_initialize_end ();
 
     entry void p_output ();
     entry void c_output ();

@@ -62,6 +62,11 @@ const char * adapt_name[] = {
 
 void CommBlock::p_adapt_begin()
 {
+  Performance * performance = simulation()->performance();
+  if (! performance->is_region_active(perf_adapt)) {
+    performance->start_region(perf_adapt);
+  }
+
   int initial_cycle     = simulation()->config()->initial_cycle;
   int initial_max_level = simulation()->config()->initial_max_level;
 
@@ -153,8 +158,8 @@ int CommBlock::reduce_adapt_(int a1, int a2) const throw()
 void CommBlock::p_refine()
 {
 
+  TRACE("CommBlock::p_refine()");
   int rank = simulation()->dimension();
-
   
   int nc = NC(rank);
 
@@ -166,6 +171,10 @@ void CommBlock::p_refine()
   int na3[3];
   size_forest (&na3[0],&na3[1],&na3[2]);
 
+  int initial_cycle     = simulation()->config()->initial_cycle;
+
+  bool initial = initial_cycle == cycle();
+
   for (int ic=0; ic<nc; ic++) {
 
     int ic3[3];
@@ -174,7 +183,6 @@ void CommBlock::p_refine()
     ic3[2] = (ic & 4) >> 2;
 
     Index index_child = index_.index_child(ic3);
-    index_child.print("creating");
 
     if ( ! is_child(index_child) ) {
 
@@ -189,9 +197,9 @@ void CommBlock::p_refine()
       factory->create_block 
 	(thisProxy, index_child,
 	 nx,ny,nz,
-	 level_+1,
 	 num_field_blocks,
 	 count_adapt_,
+	 initial,
 	 testing);
 
       // update children
@@ -279,6 +287,11 @@ void CommBlock::q_adapt()
 void CommBlock::q_adapt_end()
 {
   TRACE("ADAPT CommBlock::q_adapt_end()");
+
+  Performance * performance = simulation()->performance();
+  if (performance->is_region_active(perf_adapt))
+    simulation()->performance()->stop_region(perf_adapt);
+
   thisProxy.doneInserting();
   if (thisIndex.is_root()) {
     thisProxy.p_refresh_begin();

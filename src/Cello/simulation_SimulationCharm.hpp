@@ -68,10 +68,10 @@ public: // functions
   }
 
   /// Call initialize()
-  void p_initialize();
+  void p_initialize_begin();
 
   /// Wait for all local patches to be created before calling run
-  void s_initialize();
+  void q_initialize_end();
 
   /// Call output on Problem list of Output objects
   void p_output ();

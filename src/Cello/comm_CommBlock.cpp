@@ -23,9 +23,9 @@ CommBlock::CommBlock
 #endif
  Index index,
  int nx, int ny, int nz,             // Block cells
- int level,                          // Block level
  int num_field_blocks,
  int count_adapt,
+ bool initial,
  bool testing
  ) throw ()
   : 
@@ -37,7 +37,7 @@ CommBlock::CommBlock
   time_(0),
   dt_(0),
   index_initial_(0),
-  level_(level),
+  level_(index_.level()),
   children_(),
   neighbors_(),
   niblings_(),
@@ -45,14 +45,15 @@ CommBlock::CommBlock
   count_adapt_(count_adapt)
 { 
 
-  TRACE("ENTER CommBlock::CommBlock()");
+  TRACE6("CommBlock::CommBlock(n(%d %d %d)  num_field_blocks %d  count_adapt %d  initial %d)",
+	 nx,ny,nz,num_field_blocks,count_adapt,initial);
 
 #ifdef CONFIG_USE_CHARM
-  index.print("create");
+  //  index.print("create");
 #endif
 
   TRACE3("CommBlock::CommBlock  n (%d %d %d)",nx,ny,nz);
-  TRACE1("CommBlock::CommBlock  l %d",level);
+  TRACE1("CommBlock::CommBlock  l %d",level_);
 
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
@@ -85,7 +86,7 @@ CommBlock::CommBlock
 
   initialize ();
 
-  if (level == 0) {
+  if (level_ == 0) {
 
     int na3[3];
     size_forest(&na3[0],&na3[1],&na3[2]);
@@ -123,11 +124,9 @@ CommBlock::CommBlock
      ((SimulationCharm *)simulation())->insert_block();
    }
 
-  apply_initial_();
-
+   TRACE1("Initial %d",initial);
+   if (initial) apply_initial_();
 #endif /* CONFIG_USE_CHARM */
-
-  //
 
 }
 
@@ -147,6 +146,8 @@ void CommBlock::initialize_
 void CommBlock::apply_initial_() throw ()
 {
 
+  TRACE("CommBlock::apply_initial_()");
+  simulation()->performance()->start_region(perf_initial);
   FieldDescr * field_descr = simulation()->field_descr();
 
   // Apply initial conditions
@@ -156,6 +157,7 @@ void CommBlock::apply_initial_() throw ()
   while (Initial * initial = problem->initial(index_initial_++)) {
     initial->enforce_block(this,field_descr, simulation()->hierarchy());
   }
+  simulation()->performance()->stop_region(perf_initial);
 }
 #endif
 

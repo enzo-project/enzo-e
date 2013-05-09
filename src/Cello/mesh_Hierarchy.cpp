@@ -339,14 +339,16 @@ void Hierarchy::allocate_array_
 
     Index index (ibx,iby,ibz);
 
+    int count_adapt;
+    bool initial;
     CommBlock * comm_block = factory_->create_block 
       (
        simulation_,
        index,
        mbx,mby,mbz,
-       level = 0,
        num_field_blocks,
-       0,
+       count_adapt = 0,
+       initial = true,
        testing);
 
     // Store the data block in the block array

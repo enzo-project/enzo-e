@@ -56,9 +56,9 @@ public: // interface
 #endif
    Index index,
    int nx, int ny, int nz,
-   int level,
    int num_field_blocks,
    int count_adapt,
+   bool initial,
    bool testing=false
 ) throw();
 

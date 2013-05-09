@@ -119,6 +119,7 @@ public: // attributes
   std::vector<std::string>   performance_papi_counters;
   std::string                performance_name;
   int                        performance_stride;
+  bool                       performance_warnings;
 
   int                        stopping_cycle;
   double                     stopping_time;

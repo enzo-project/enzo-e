@@ -32,9 +32,7 @@ Simulation::Simulation
   config_(0),
   problem_(0),
   timer_(),
-  performance_(),
-  id_simulation_(-1),
-  id_cycle_(-1),
+  performance_(NULL),
   performance_name_(""),
   performance_stride_(1),
   monitor_(0),
@@ -103,10 +101,8 @@ void Simulation::pup (PUP::er &p)
   if (up) problem_ = new Problem;
   p | * problem_;
 
-  p | performance_;
+  p | *performance_;
 
-  p | id_simulation_;
-  p | id_cycle_;
   p | performance_name_;
   p | performance_stride_;
 
@@ -145,8 +141,8 @@ void Simulation::initialize() throw()
   TRACE("Simulation::initialize calling Simulation::initialize_config_()");
   initialize_config_();
   initialize_monitor_();
-  initialize_simulation_();
   initialize_performance_();
+  initialize_simulation_();
 
   initialize_data_descr_();
 
@@ -169,11 +165,11 @@ void Simulation::finalize() throw()
 {
   DEBUG0;
 
-  performance_.stop_region(id_simulation_);
+  performance_->stop_region(perf_simulation);
 
   PARALLEL_PRINTF("Tracing Simulation::finalize %d\n",group_process_->rank());
 
-  performance_.end();
+  performance_->end();
 
 
 }
@@ -203,9 +199,15 @@ void Simulation::initialize_simulation_() throw()
 void Simulation::initialize_performance_() throw()
 {
 
+  performance_ = new Performance (config_);
 
-  id_simulation_ = performance_.new_region("simulation");
-  id_cycle_      = performance_.new_region("cycle");
+  performance_->new_region(perf_simulation, "simulation");
+  performance_->new_region(perf_cycle,      "cycle");
+  performance_->new_region(perf_initial,    "initial");
+  performance_->new_region(perf_adapt,      "adapt");
+  performance_->new_region(perf_refresh,    "refresh");
+  performance_->new_region(perf_compute,    "compute");
+  performance_->new_region(perf_output,     "output");
 
   performance_name_   = config_->performance_name;
   performance_stride_ = config_->performance_stride;
@@ -213,11 +215,11 @@ void Simulation::initialize_performance_() throw()
   timer_.start();
 
   for (size_t i=0; i<config_->performance_papi_counters.size(); i++) {
-    performance_.new_counter(counter_type_papi, config_->performance_papi_counters[i]);
+    performance_->new_counter(counter_type_papi, config_->performance_papi_counters[i]);
   }
-  performance_.begin();
+  performance_->begin();
 
-  performance_.start_region(id_simulation_);
+  performance_->start_region(perf_simulation);
 
 }
 
@@ -384,6 +386,7 @@ void Simulation::deallocate_() throw()
     { delete group_process_; group_process_ = 0; }
   delete hierarchy_;     hierarchy_ = 0;
   delete field_descr_;   field_descr_ = 0;
+  delete performance_;   performance_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -434,24 +437,22 @@ void Simulation::performance_output()
 {
   TRACE("Simulation::performance_output()");
 
-  int num_regions  = performance_.num_regions();
-  int num_counters =  performance_.num_counters();
+  int num_regions  = performance_->num_regions();
+  int num_counters =  performance_->num_counters();
   long long * counters = new long long [num_counters];
 
-  for (int index_region = 0; index_region < num_regions; index_region++) {
+  for (int ir = 0; ir < num_regions; ir++) {
 
-    int id_region = index_region;
+    performance_->region_counters(ir,counters);
 
-    performance_.region_counters(index_region,counters);
-
-    for (int index_counter = 0; index_counter < num_counters; index_counter++) {
+    for (int ic = 0; ic < num_counters; ic++) {
     
-      int id_counter = performance_.index_to_id(index_counter);
+      int perf_counter = performance_->index_to_id(ic);
 
       monitor_->print("Performance","%s %s %lld",
-	      performance_.region_name(id_region).c_str(),
-	      performance_.counter_name(id_counter).c_str(),
-	      counters[index_counter]);  
+	      performance_->region_name(ir).c_str(),
+	      performance_->counter_name(perf_counter).c_str(),
+	      counters[ic]);  
     }
   }
 
@@ -474,24 +475,22 @@ void Simulation::performance_write()
     sprintf (filename,performance_name_.c_str(),group_process_->rank());
     FILE * fp = fopen(filename,"w");
 
-    int num_regions  = performance_.num_regions();
-    int num_counters =  performance_.num_counters();
+    int num_regions  = performance_->num_regions();
+    int num_counters =  performance_->num_counters();
     long long * counters = new long long [num_counters];
 
-    for (int index_region = 0; index_region < num_regions; index_region++) {
+    for (int ir = 0; ir < num_regions; ir++) {
 
-      int id_region = index_region;
+      performance_->region_counters(ir,counters);
 
-      performance_.region_counters(index_region,counters);
-
-      for (int index_counter = 0; index_counter < num_counters; index_counter++) {
+      for (int ic = 0; ic < num_counters; ic++) {
     
-	int id_counter = performance_.index_to_id(index_counter);
+	int perf_counter = performance_->index_to_id(ic);
 
 	fprintf (fp,"%s %s %lld\n",
-		 performance_.region_name(id_region).c_str(),
-		 performance_.counter_name(id_counter).c_str(),
-		 counters[index_counter]);  
+		 performance_->region_name(ir).c_str(),
+		 performance_->counter_name(perf_counter).c_str(),
+		 counters[ic]);  
       }
     }
 

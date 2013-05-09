@@ -99,8 +99,8 @@ public: // interface
   { return field_descr_; }
 
   /// Return the performance object associated with each cycle
-  const Performance * performance() const throw()
-  { return &performance_; }
+  Performance * performance() throw()
+  { return performance_; }
 
   /// Return the group process object
   const GroupProcess * group_process() const throw()
@@ -231,11 +231,7 @@ protected: // attributes
   Timer timer_;
 
   /// Simulation Performance object
-  Performance performance_;
-
-  /// Performance counter ids
-  int id_simulation_;
-  int id_cycle_;
+  Performance * performance_;
 
   /// Performance file name format (requires %d for process rank)
   std::string performance_name_;

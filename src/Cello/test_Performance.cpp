@@ -37,9 +37,10 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
+  Parameters parameters;
   unit_class("Performance");
 
-  Performance * performance = new Performance ();
+  Performance * performance = new Performance (NULL);
 
   // Initialize counters that are non-zero at start
 
@@ -66,8 +67,10 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("new_region");
 
-  int id_region_1 = performance->new_region("region_1");
-  int id_region_2 = performance->new_region("region_2");
+  int id_region_1 = 0;
+  int id_region_2 = 1;
+  performance->new_region(id_region_1,"region_1");
+  performance->new_region(id_region_2,"region_2");
 
   unit_assert (id_region_1 != id_region_2);
 

@@ -68,10 +68,11 @@ CProxy_CommBlock Factory::create_block_array
  bool testing
  ) const throw()
 {
-  TRACE("Factor::create_block_array()");
+  TRACE8("Factory::create_block_array(na(%d %d %d) n(%d %d %d num_field_blocks %d  allocate %d",
+	 nbx,nby,nbz,nx,ny,nz,num_field_blocks,allocate);
+
   CProxy_CommBlock proxy_block;
 
-  TRACE("Factory::create_block_array");
   if (allocate) {
 
     CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
@@ -80,6 +81,8 @@ CProxy_CommBlock Factory::create_block_array
     proxy_block = CProxy_CommBlock::ckNew(opts);
 
     int level;
+    int count_adapt;
+    bool initial;
 
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
@@ -90,9 +93,9 @@ CProxy_CommBlock Factory::create_block_array
 	  proxy_block[index].insert 
 	    (index,
 	     nx,ny,nz,
-	     level = 0,
 	     num_field_blocks,
-	     0,
+	     count_adapt = 0,
+	     initial = true,
 	     testing);
 
 	}
@@ -123,23 +126,25 @@ CommBlock * Factory::create_block
 #endif /* CONFIG_USE_CHARM */
  Index index,
  int nx, int ny, int nz,
- int level,
  int num_field_blocks,
  int count_adapt,
+ bool initial,
  bool testing
  ) const throw()
 {
 
-  TRACE1("create_block level %d",level);
+  TRACE6("Factory::create_block(n(%d %d %d)  num_field_blocks %d  count_adatp %d  initial %d)",
+	 nx,ny,nz,num_field_blocks,count_adapt,initial);
+
 #ifdef CONFIG_USE_CHARM
 
    block_array[index].insert
      (
       index,
       nx,ny,nz,
-      level,
       num_field_blocks,
       count_adapt,
+      initial,
       testing);
 
    CommBlock * block = block_array[index].ckLocal();
@@ -154,9 +159,9 @@ CommBlock * Factory::create_block
      (simulation,
       index,
       nx,ny,nz,
-      level,
       num_field_blocks,
       count_adapt,
+      initial,
       testing);
 
    return comm_block;
