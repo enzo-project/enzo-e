@@ -61,6 +61,10 @@ private: // functions
   virtual Prolong * create_prolong_
   (std::string name, Config * config) throw ();
 
+  /// Create named restriction object
+  virtual Restrict * create_restrict_
+  (std::string name, Config * config) throw ();
+
 };
 
 #endif /* ENZO_ENZO_PROBLEM_HPP */

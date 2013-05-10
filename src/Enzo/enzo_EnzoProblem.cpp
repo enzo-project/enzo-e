@@ -168,3 +168,28 @@ Prolong * EnzoProblem::create_prolong_
 
 //----------------------------------------------------------------------
 
+Restrict * EnzoProblem::create_restrict_ 
+(
+ std::string  name,
+ Config * config ) throw ()
+{
+
+  Restrict * restrict = 0;
+
+  if (name == "enzo") {
+    
+    restrict = new EnzoRestrict 
+      (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
+
+  } else {
+
+    restrict = Problem::create_restrict_(name,config);
+
+  }
+
+  return restrict;
+  
+}
+
+//----------------------------------------------------------------------
+

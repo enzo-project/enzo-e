@@ -83,6 +83,7 @@ void Problem::pup (PUP::er &p)
   p | index_output_;
 
   p | prolong_; // PUP::able
+  p | restrict_; // PUP::able
 }
 
 #endif
@@ -185,6 +186,18 @@ void Problem::initialize_prolong(Config * config) throw()
 	  "Prolong type %s not recognized",
 	  config->prolong_type.c_str(),
 	  prolong_ != NULL);
+}
+
+//----------------------------------------------------------------------
+
+void Problem::initialize_restrict(Config * config) throw()
+{
+  restrict_ = create_restrict_(config->restrict_type,config);
+
+  ASSERT1("Problem::initialize_restrict",
+	  "Restrict type %s not recognized",
+	  config->restrict_type.c_str(),
+	  restrict_ != NULL);
 }
 
 //----------------------------------------------------------------------
@@ -642,5 +655,26 @@ Prolong * Problem::create_prolong_ ( std::string  name ,
   
 }
 
+//----------------------------------------------------------------------
+
+Restrict * Problem::create_restrict_ ( std::string  name ,
+				     Config * config) throw ()
+{
+  Restrict * restrict = 0;
+
+  if (name == "linear") {
+
+    restrict = new RestrictLinear;
+
+  } else {
+    
+    ERROR1("Problem::create_restrict_",
+	  "Unrecognized Field:restrict parameter %s",name.c_str());
+
+  }
+
+  return restrict;
+  
+}
 
 //----------------------------------------------------------------------

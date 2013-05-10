@@ -24,9 +24,9 @@ Initial {
       ] ;
 }
   Initial {
-     density       { value = [  1.0, "input/Cello.png", 
+     density       { value = [  1.0, "input/test_balance.png", 
                                 0.1 ]; };
-     total_energy  { value = [  0.1 / (0.4 * 0.1), "input/Cello.png",
+     total_energy  { value = [  0.1 / (0.4 * 0.1), "input/test_balance.png",
                                 1.0 / (0.4 * 1.0)  ]; };
   }
 

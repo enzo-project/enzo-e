@@ -21,15 +21,6 @@ public: // interface
   /// Constructor
   EnzoProlong(std::string method) throw();
 
-  // /// Destructor
-  // ~EnzoProlong() throw();
-
-  // /// Copy constructor
-  // EnzoProlong(const EnzoProlong & prolong) throw();
-
-  // /// Assignment operator
-  // EnzoProlong & operator= (const EnzoProlong & prolong) throw();
-
 #ifdef CONFIG_USE_CHARM
 
   /// CHARM++ PUP::able declaration

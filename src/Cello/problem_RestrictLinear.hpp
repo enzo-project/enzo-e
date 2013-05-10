@@ -1,33 +1,33 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     problem_ProlongLinear.hpp
+/// @file     problem_RestrictLinear.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2013-05-09
-/// @brief    [\ref Problem] Declaration of the ProlongLinear class
+/// @date     2013-05-10
+/// @brief    [\ref Problem] Declaration of the RestrictLinear class
 
-#ifndef PROBLEM_PROLONG_LINEAR_HPP
-#define PROBLEM_PROLONG_LINEAR_HPP
+#ifndef PROBLEM_RESTRICT_LINEAR_HPP
+#define PROBLEM_RESTRICT_LINEAR_HPP
 
-class ProlongLinear : public Prolong 
+class RestrictLinear : public Restrict 
 
 {
 
-  /// @class    ProlongLinear
+  /// @class    RestrictLinear
   /// @ingroup  Problem
   /// @brief    [\ref Problem] 
 
 public: // interface
 
   /// Constructor
-  ProlongLinear() throw();
+  RestrictLinear() throw();
 
 #ifdef CONFIG_USE_CHARM
 
   /// CHARM++ PUP::able declaration
-  PUPable_decl(ProlongLinear);
+  PUPable_decl(RestrictLinear);
 
   /// CHARM++ migration constructor
-  ProlongLinear(CkMigrateMessage *m) {}
+  RestrictLinear(CkMigrateMessage *m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
@@ -35,18 +35,18 @@ public: // interface
 
 #endif
 
-  /// Prolong comm_block_Ht values to the child block given by (icx,icy,icz)
+  /// Restrict comm_block_ft values to the child block given by (icx,icy,icz)
   virtual void apply 
-  (CommBlock        * comm_block_f, 
-   const CommBlock  * comm_block_c, 
+  (CommBlock        * comm_block_c, 
+   const CommBlock  * comm_block_f, 
    const FieldDescr * field_descr,
    int icx, int icy, int icz);
 
 private: // functions
 
   template<class T>
-  void interpolate_(T       * values_f,
-		    const T * values_c,
+  void interpolate_(T       * values_c,
+		    const T * values_f,
 		    int ndx, int ndy, int ndz,
 		    int ixm, int iym, int izm,
 		    int nx, int ny, int nz,
@@ -58,5 +58,5 @@ private: // attributes
 
 };
 
-#endif /* PROBLEM_PROLONG_LINEAR_HPP */
+#endif /* PROBLEM_RESTRICT_LINEAR_HPP */
 

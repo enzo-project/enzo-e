@@ -26,10 +26,11 @@ class FieldDescr;
 class Initial;
 class Input;
 class Method;
-class Prolong;
 class Output;
 class Parameters;
+class Prolong;
 class Refine;
+class Restrict;
 class Simulation;
 class Stopping;
 class Timestep;
@@ -152,6 +153,9 @@ public: // interface
   /// Initialize the prolong objects
   void initialize_prolong(Config * config) throw();
 
+  /// Initialize the restrict objects
+  void initialize_restrict(Config * config) throw();
+
 
 protected: // functions
 
@@ -198,6 +202,10 @@ protected: // functions
   virtual Prolong * create_prolong_ 
   (std::string name, Config * config) throw ();
 
+  /// Create named restrictation object
+  virtual Restrict * create_restrict_ 
+  (std::string name, Config * config) throw ();
+
 private: // attributes
 
   /// Boundary conditions object
@@ -235,6 +243,9 @@ private: // attributes
 
   /// Prolongation object
   Prolong * prolong_;
+
+  /// Restriction object
+  Restrict * restrict_;
 
   /// Index of currently active Refine object
   size_t index_refine_;

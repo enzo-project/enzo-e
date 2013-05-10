@@ -122,6 +122,7 @@ public: // attributes
   bool                       performance_warnings;
 
   std::string                prolong_type;
+  std::string                restrict_type;
 
   int                        stopping_cycle;
   double                     stopping_time;

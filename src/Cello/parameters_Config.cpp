@@ -86,6 +86,7 @@ void Config::pup (PUP::er &p)
   p | performance_stride;
 
   p | prolong_type;
+  p | restrict_type;
 
   p | stopping_cycle;
   p | stopping_time;
@@ -536,6 +537,8 @@ void Config::read(Parameters * parameters) throw()
   performance_warnings = parameters->value_logical("Performance:warnings",true);
 
   prolong_type  = parameters->value_string ("Field:prolong","linear");
+
+  restrict_type  = parameters->value_string ("Field:restrict","linear");
 
   //--------------------------------------------------
   // Stopping
