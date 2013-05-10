@@ -82,6 +82,7 @@ void Problem::pup (PUP::er &p)
 
   p | index_output_;
 
+  p | prolong_; // PUP::able
 }
 
 #endif
@@ -110,11 +111,6 @@ void Problem::initialize_initial(Config * config,
 				 const GroupProcess * group_process) throw()
 {
 
-  // bool do_monitor = parameters->do_monitor();
-
-  // parameters->set_monitor(false);
-
-  TRACE1 ("num_refine_ = %d",num_refine_);
   Initial * initial = create_initial_
     (config->initial_type,parameters,config,field_descr,group_process);
 
@@ -126,8 +122,6 @@ void Problem::initialize_initial(Config * config,
 	  "Initial type %s not recognized",
 	  config->initial_type.c_str(),
 	  initial != NULL);
-
-  // parameters->set_monitor(do_monitor);
 
 }
 
@@ -172,9 +166,6 @@ void Problem::initialize_stopping(Config * config) throw()
 void Problem::initialize_timestep(Config * config) throw()
 {
   TRACE1 ("num_refine_ = %d",num_refine_);
-  //--------------------------------------------------
-  // parameter: Timestep : type
-  //--------------------------------------------------
 
   timestep_ = create_timestep_(config->timestep_type,config);
 
@@ -182,6 +173,18 @@ void Problem::initialize_timestep(Config * config) throw()
 	  "Timestep type %s not recognized",
 	  config->timestep_type.c_str(),
 	  timestep_ != NULL);
+}
+
+//----------------------------------------------------------------------
+
+void Problem::initialize_prolong(Config * config) throw()
+{
+  prolong_ = create_prolong_(config->prolong_type,config);
+
+  ASSERT1("Problem::initialize_prolong",
+	  "Prolong type %s not recognized",
+	  config->prolong_type.c_str(),
+	  prolong_ != NULL);
 }
 
 //----------------------------------------------------------------------
@@ -617,3 +620,27 @@ Output * Problem::create_output_
 
 }
 
+//----------------------------------------------------------------------
+
+Prolong * Problem::create_prolong_ ( std::string  name ,
+				     Config * config) throw ()
+{
+  Prolong * prolong = 0;
+
+  if (name == "linear") {
+
+    prolong = new ProlongLinear;
+
+  } else {
+    
+    ERROR1("Problem::create_prolong_",
+	  "Unrecognized Field:prolong parameter %s",name.c_str());
+
+  }
+
+  return prolong;
+  
+}
+
+
+//----------------------------------------------------------------------

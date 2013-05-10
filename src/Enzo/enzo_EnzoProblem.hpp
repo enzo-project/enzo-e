@@ -57,6 +57,10 @@ private: // functions
   virtual Timestep * create_timestep_
   (std::string name, Config * config) throw ();
 
+  /// Create named interpolation object
+  virtual Prolong * create_prolong_
+  (std::string name, Config * config) throw ();
+
 };
 
 #endif /* ENZO_ENZO_PROBLEM_HPP */

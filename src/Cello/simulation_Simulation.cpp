@@ -154,6 +154,7 @@ void Simulation::initialize() throw()
   problem_->initialize_timestep(config_);
   problem_->initialize_output  (config_,field_descr_,group_process_,factory());
   problem_->initialize_method  (config_);
+  problem_->initialize_prolong (config_);
 
   initialize_hierarchy_();
 

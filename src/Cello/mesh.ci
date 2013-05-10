@@ -17,6 +17,7 @@ module mesh {
   PUPable OutputImage;
   PUPable OutputRestart;
   PUPable Problem;
+  PUPable ProlongLinear;
   PUPable Refine;
   PUPable RefineSlope;
   PUPable RefineMass;

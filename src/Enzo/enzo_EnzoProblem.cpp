@@ -131,9 +131,9 @@ Method * EnzoProblem::create_method_ ( std::string  name ) throw ()
 
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
-    method = new EnzoMethodPpm ();
+    method = new EnzoMethodPpm;
   } else if (name == "ppml") {
-    method = new EnzoMethodPpml();
+    method = new EnzoMethodPpml;
   } else {
     method = Problem::create_method_(name);
   }
@@ -141,4 +141,30 @@ Method * EnzoProblem::create_method_ ( std::string  name ) throw ()
   return method;
 }
 
+//----------------------------------------------------------------------
+
+Prolong * EnzoProblem::create_prolong_ 
+(
+ std::string  name,
+ Config * config ) throw ()
+{
+
+  Prolong * prolong = 0;
+
+  if (name == "enzo") {
+    
+    prolong = new EnzoProlong 
+      (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
+
+  } else {
+
+    prolong = Problem::create_prolong_(name,config);
+
+  }
+
+  return prolong;
+  
+}
+
+//----------------------------------------------------------------------
 

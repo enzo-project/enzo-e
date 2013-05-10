@@ -109,6 +109,11 @@ void CommBlock::refresh ()
   bool refresh_type_counter = (refresh_type == "counter");
   if (refresh_type_counter) loop_refresh_.stop() = 0;
 
+  // (icx0,icy0,icz0) are loop limits
+  // e.g. 
+  // if face (ix,iy,iz) = (0,0,1), then children are ([01], [01], 1)
+  // if face (ix,iy,iz) = (0,-1,0), then children are ([01], 0, [01])
+  // if face (ix,iy,iz) = (1,0,-1), then children are (1, [01], 0)
   for (int ix=ixm; ix<=ixp; ix++) {
     for (int iy=iym; iy<=iyp; iy++) {
       for (int iz=izm; iz<=izp; iz++) {
@@ -127,15 +132,9 @@ void CommBlock::refresh ()
 
 	    // update fine neighbors
 
-	    bool count_nibling = 0;
+	    //	    refresh_same(index,ix,iy,iz,lgx,lgy,lgz);
 
-	    //  Index index_nibling (int axis, int face, int ic3[3], int narray) const;
-	    /// for nibling
-	    ///   if (is_nibling)
-	    ///      ++count_nibling
-	    ///     refresh_fine()
-
-	    // update neighbors
+	    int count_nibling = refresh_fine (index,ix,iy,iz,lgx,lgy,lgz);
 
 	    if (count_nibling == 0 && index_ != index) {
 
@@ -222,6 +221,46 @@ void CommBlock::x_refresh_same (int n, char * buffer, int fx, int fy, int fz)
       q_refresh_end();
     }
   }
+}
+
+//----------------------------------------------------------------------
+
+int CommBlock::refresh_fine 
+(Index index, 
+ int ix,  int iy,  int iz,
+ int lgx, int lgy, int lgz)
+{
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  int rank = simulation->dimension();
+
+
+  if (ix==0 && iy==0 && iz==0) return 0;
+
+  int icxm = (ix == 0) ? 0 : (ix+1)/2;
+  int icxp = (ix == 0) ? 1 : (ix+1)/2;
+  int icym = (iy == 0) ? 0 : (iy+1)/2;
+  int icyp = (iy == 0) ? 1 : (iy+1)/2;
+  int iczm = (iz == 0) ? 0 : (iz+1)/2;
+  int iczp = (iz == 0) ? 1 : (iz+1)/2;
+  if (rank < 3) {iczm=0;  iczp=0; }
+  if (rank < 2) {icym=0;  icyp=0; }
+
+  TRACE9 ("NIBLING: Face (%d %d %d) child (%d:%d %d:%d %d:%d)",
+	  ix,iy,iz, icxm,icxp,icym, icyp,iczm,iczp);
+
+  int count = 0;
+  // loop over niblings
+  for (int icx=icxm; icx<=icxp; icx++) {
+    for (int icy=icym; icy<=icyp; icy++) {
+      for (int icz=iczm; icz<=iczp; icz++) {
+	    //  Index index_nibling (int axis, int face, int ic3[3], int narray) const;
+	// if nibling exists
+	// interpolate ghosts
+	// increment count
+      }
+    }
+  }
+  return count;
 }
 
 //----------------------------------------------------------------------

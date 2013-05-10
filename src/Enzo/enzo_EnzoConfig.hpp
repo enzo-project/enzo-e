@@ -79,7 +79,7 @@ public: // attributes
 
   int                        enzo_sedov_array[3];
 
-
+  std::string                enzo_interpolation_method;
 };
 
 #endif /* PARAMETERS_ENZO_CONFIG_HPP */

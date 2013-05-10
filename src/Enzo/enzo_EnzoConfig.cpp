@@ -57,6 +57,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | enzo_cosmology_omega_matter_now;
   p | enzo_gamma;
 
+  p | enzo_interpolation_method;
+
   PUParray(p,enzo_sedov_array,3);
 
 }
@@ -126,6 +128,9 @@ void EnzoConfig::read(Parameters * parameters) throw()
   enzo_sedov_array[0] = parameters->list_value_integer (0,"Enzo:sedov:array",1);
   enzo_sedov_array[1] = parameters->list_value_integer (1,"Enzo:sedov:array",1);
   enzo_sedov_array[2] = parameters->list_value_integer (2,"Enzo:sedov:array",1);
+
+  enzo_interpolation_method = parameters->value_string 
+    ("Enzo:interpolation_method","SecondOrderA");
 
   TRACE("END   EnzoConfig::read()");
 }

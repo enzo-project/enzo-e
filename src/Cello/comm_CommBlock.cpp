@@ -117,15 +117,18 @@ CommBlock::CommBlock
 #ifdef CONFIG_USE_CHARM
 
    if (! testing) {
+
      // Count CommBlocks on each processor
    
      TRACE1 ("simulation = %p",simulation());
      TRACE1 ("proxy_simulation = %p",&proxy_simulation);
+
      ((SimulationCharm *)simulation())->insert_block();
+
    }
 
-   TRACE1("Initial %d",initial);
    if (initial) apply_initial_();
+
 #endif /* CONFIG_USE_CHARM */
 
 }

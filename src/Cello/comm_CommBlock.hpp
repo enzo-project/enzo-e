@@ -161,15 +161,18 @@ public: // interface
   /// Exit the refresh phase after QD
   void q_refresh_end ();
 
-  /// update ghost zones with given neighbor in same level
+  /// send  ghost zones to given neighbor in same level
   void refresh_same (Index index,
 		     int ix, int iy, int iz,
 		     int lgx, int lgy, int lgz);
-  /// update ghost zones with given neighbor in coarser level
+
+  /// send ghost zones to coarse neighbor in given direction
   void refresh_coarse (Index index);
 
-  /// update ghost zones with given neighbor in same level
-  void refresh_fine (Index index);
+  /// send ghost zones to fine neighbors in given direction
+  int refresh_fine (Index index,
+		     int ix, int iy, int iz,
+		     int lgx, int lgy, int lgz);
 
   /// Refresh a FieldFace in the same level
   void x_refresh_same(int n, char buffer[],int fx, int fy, int fz);
@@ -223,6 +226,7 @@ public: // interface
 
   /// Return the Block associated with this CommBlock
   Block * block() throw() { return block_; };
+
   const Block * block() const throw() { return block_; };
 
 //----------------------------------------------------------------------

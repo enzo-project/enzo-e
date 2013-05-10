@@ -26,6 +26,7 @@ class FieldDescr;
 class Initial;
 class Input;
 class Method;
+class Prolong;
 class Output;
 class Parameters;
 class Refine;
@@ -148,6 +149,9 @@ public: // interface
   /// Initialize the method objects
   void initialize_method(Config * config) throw();
 
+  /// Initialize the prolong objects
+  void initialize_prolong(Config * config) throw();
+
 
 protected: // functions
 
@@ -190,6 +194,10 @@ protected: // functions
   virtual Timestep * create_timestep_ 
   (std::string name, Config * config) throw ();
 
+  /// Create named prolongation object
+  virtual Prolong * create_prolong_ 
+  (std::string name, Config * config) throw ();
+
 private: // attributes
 
   /// Boundary conditions object
@@ -224,6 +232,9 @@ private: // attributes
 
   /// Output objects
   std::vector<Output *> output_list_;
+
+  /// Prolongation object
+  Prolong * prolong_;
 
   /// Index of currently active Refine object
   size_t index_refine_;

@@ -121,6 +121,8 @@ public: // attributes
   int                        performance_stride;
   bool                       performance_warnings;
 
+  std::string                prolong_type;
+
   int                        stopping_cycle;
   double                     stopping_time;
 

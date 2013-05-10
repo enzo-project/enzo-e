@@ -31,7 +31,7 @@ void EnzoMethodPpm::pup (PUP::er &p)
 
 }
 
-#endif
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 

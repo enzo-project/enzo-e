@@ -13,7 +13,6 @@
 
 Performance::Performance (Config * config)
   : papi_(),
-    warnings_(config ? config->performance_warnings : true),
     counter_names_(),
     counter_values_(),
     num_regions_(0),
@@ -29,7 +28,9 @@ Performance::Performance (Config * config)
     n_basic_rel_(0),
     n_basic_abs_(0),
     n_papi_(0),
-    n_user_(0)
+    n_user_(0),
+    warnings_(config ? config->performance_warnings : true)
+
 {
 
   new_counter(counter_type_basic_rel,"time-usec");
