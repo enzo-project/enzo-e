@@ -134,7 +134,7 @@ void CommBlock::refresh ()
 
 	    //	    refresh_same(index,ix,iy,iz,lgx,lgy,lgz);
 
-	    int count_nibling = refresh_fine (index,ix,iy,iz,lgx,lgy,lgz);
+	    int count_nibling = refresh_fine (index,ix,iy,iz,lgx,lgy,lgz,n3);
 
 	    if (count_nibling == 0 && index_ != index) {
 
@@ -228,7 +228,8 @@ void CommBlock::x_refresh_same (int n, char * buffer, int fx, int fy, int fz)
 int CommBlock::refresh_fine 
 (Index index, 
  int ix,  int iy,  int iz,
- int lgx, int lgy, int lgz)
+ int lgx, int lgy, int lgz,
+ int n3[3])
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   int rank = simulation->dimension();
@@ -249,10 +250,15 @@ int CommBlock::refresh_fine
 	  ix,iy,iz, icxm,icxp,icym, icyp,iczm,iczp);
 
   int count = 0;
-  // loop over niblings
-  for (int icx=icxm; icx<=icxp; icx++) {
-    for (int icy=icym; icy<=icyp; icy++) {
-      for (int icz=iczm; icz<=iczp; icz++) {
+  // loop over niblings along face
+  int ic3[3];
+  for (ic3[0]=icxm; ic3[0]<=icxp; ic3[0]++) {
+    for (ic3[1]=icym; ic3[1]<=icyp; ic3[1]++) {
+      for (ic3[2]=iczm; ic3[2]<=iczp; ic3[2]++) {
+	Index index_nibling = index.index_nibling(ix,iy,iz,ic3,n3);
+	if (is_nibling(index_nibling)) {
+	  
+	}
 	    //  Index index_nibling (int axis, int face, int ic3[3], int narray) const;
 	// if nibling exists
 	// interpolate ghosts

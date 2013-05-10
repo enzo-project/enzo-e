@@ -161,8 +161,8 @@ int CommBlock::reduce_adapt_(int a1, int a2) const throw()
   if (a1 == adapt_unknown) return a2;
   if (a2 == adapt_unknown) return a1;
 
-  if      ((a1 == adapt_coarsen) && 
-	   (a2 == adapt_coarsen)) {
+  if ((a1 == adapt_coarsen) && 
+      (a2 == adapt_coarsen)) {
 
     return adapt_coarsen;
 
@@ -196,7 +196,8 @@ void CommBlock::p_refine()
   int na3[3];
   size_forest (&na3[0],&na3[1],&na3[2]);
 
-  int initial_cycle     = simulation()->config()->initial_cycle;
+  int initial_cycle = simulation()->config()->initial_cycle;
+  int balance       = simulation()->config()->mesh_balance;
 
   bool initial = initial_cycle == cycle();
 
@@ -252,7 +253,7 @@ void CommBlock::p_refine()
 
 	  // no neighbor?  then uncle must refine
 
-	  if (level_ > 0) {
+	  if (level_ > 0 && balance) {
 
 	    Index index_uncle = index_.index_uncle (axis,face,na3[axis]);
 

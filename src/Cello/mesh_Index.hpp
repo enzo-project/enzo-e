@@ -77,7 +77,11 @@ public:
 
   Index index_uncle (int axis, int face, int narray) const;
 
+  /// Index of the nibling along given face adjacent to child
   Index index_nibling (int axis, int face, int ic3[3], int narray) const;
+
+  /// Generalized nibling including edge and corner
+  Index index_nibling (int ix, int iy, int iz, int ic3[3], int n3[3]) const;
 
   /// child index of this node in parent
   void child (int level, int * icx, int * icy, int * icz) const;

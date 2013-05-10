@@ -10,7 +10,10 @@ Mesh
    root_size   = [64,64];
    root_blocks = [ 4, 4]; 
    max_level   = 7; 
-   adapt_type = ["slope"];
+   adapt {
+      type = ["slope"];
+      balance = true;
+   }
 }
 
 Initial {

@@ -55,6 +55,7 @@ void Config::pup (PUP::er &p)
   p | mesh_adapt_mass_min;
   p | mesh_adapt_mass_level_exponent;
   p | mesh_adapt_mass_min_overdensity;
+  p | mesh_adapt_balance;
 
   p | method_sequence;
 
@@ -258,49 +259,52 @@ void Config::read(Parameters * parameters) throw()
 
   //--------------------------------------------------
 
-  mesh_balance   = parameters->value_logical("Mesh:balance",true);
+  mesh_balance   = parameters->value_logical("Mesh:adapt:balance",true);
 
   //--------------------------------------------------
 
-  int num_adapt_type = parameters->list_length("Mesh:adapt_type");
+  int num_adapt_type = parameters->list_length("Mesh:adapt:type");
   mesh_adapt_type.resize(num_adapt_type);
   for (int i=0; i<num_adapt_type; i++) {
-    mesh_adapt_type[i] = parameters->list_value_string(i,"Mesh:adapt_type");
+    mesh_adapt_type[i] = parameters->list_value_string(i,"Mesh:adapt:type");
   }
 
   //--------------------------------------------------
 
-  int num_adapt_fields = parameters->list_length("Mesh:adapt_fields");
+  int num_adapt_fields = parameters->list_length("Mesh:adapt:fields");
 
   mesh_adapt_fields.resize(num_adapt_fields);
 
   for (int i=0; i<num_adapt_fields; i++) {
     mesh_adapt_fields[i] = parameters->list_value_string
-      (i,"Mesh:adapt_fields");
+      (i,"Mesh:adapt:fields");
   }
 
   //--------------------------------------------------
 
   mesh_adapt_slope_min_refine = 
-    parameters->value_float ("Mesh:adapt_slope_min_refine",0.3);
+    parameters->value_float ("Mesh:adapt:slope_min_refine",0.3);
 
   mesh_adapt_slope_max_coarsen = 
-    parameters->value_float ("Mesh:adapt_slope_min_coarsen",0.15);
+    parameters->value_float ("Mesh:adapt:slope_min_coarsen",0.15);
 
   //--------------------------------------------------
 
   // This parameter is typically computed ("internal" parameter in Enzo)
   mesh_adapt_mass_min = 
-    parameters->value_float ("Mesh:adapt_mass_min",-1.0);
+    parameters->value_float ("Mesh:adapt:mass_min",-1.0);
 
   //--------------------------------------------------
 
   mesh_adapt_mass_level_exponent = 
-    parameters->value_float ("Mesh:adapt_mass_level_exponent",0.0);
+    parameters->value_float ("Mesh:adapt:mass_level_exponent",0.0);
   //--------------------------------------------------
 
   mesh_adapt_mass_min_overdensity = 
-    parameters->value_float ("Mesh:adapt_mass_min_overdensity",1.5);
+    parameters->value_float ("Mesh:adapt:mass_min_overdensity",1.5);
+
+  mesh_adapt_balance = 
+    parameters->value_logical ("Mesh:adapt:balance",true);
 
   //--------------------------------------------------
   // Method

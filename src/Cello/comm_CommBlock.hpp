@@ -171,8 +171,9 @@ public: // interface
 
   /// send ghost zones to fine neighbors in given direction
   int refresh_fine (Index index,
-		     int ix, int iy, int iz,
-		     int lgx, int lgy, int lgz);
+		    int ix, int iy, int iz,
+		    int lgx, int lgy, int lgz,
+		    int n3[3]);
 
   /// Refresh a FieldFace in the same level
   void x_refresh_same(int n, char buffer[],int fx, int fy, int fz);
