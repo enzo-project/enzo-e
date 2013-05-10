@@ -418,8 +418,7 @@ function test_table_blocks ($file_root,$cycle_array, $types)
        for ($index_cycle = 0; $index_cycle < sizeof($cycle_array); $index_cycle++) {
 	 $cycle = $cycle_array[$index_cycle];
 	 for ($col = 0; $col < $cols; $col++) {
-	   $block = $rows - 1 - $row + $rows*$col;
-
+	   $block = sprintf ("%08d-%08d-%08d",$rows - $row - 1,$col,0);
 	   echo "<td class=block> <img src=$type/${file_root}-$cycle-block_$block.png width=80></img> </td>";
 	 }
        }
@@ -525,7 +524,7 @@ test_summary("Enzo-IC",
 	     array("enzo-p"));
 
 test_summary("Enzo-output", 
-	     array("stride-1","stride-2","stride-3"),
+	     array("output-stride-1","output-stride-2","output-stride-3"),
 	     array("enzo-p","enzo-p","enzo-p"));
 
 // Print row divider

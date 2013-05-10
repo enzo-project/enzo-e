@@ -19,9 +19,10 @@ Output {
 
 }
 
-Stopping {
-   cycle = 20;
-}
+Stopping {  cycle = 20; }
+Testing {   cycle_final = 20; }
+Testing {  time_final  = 0.0506399683654308; }
+
 # Output { density      { name = ["method_ppm-8-%06d.png", "cycle"]; } }
 # Output { data { name = ["method_ppm-8-%02d-%06d.h5", "proc","cycle"]; } }
 

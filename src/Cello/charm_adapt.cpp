@@ -67,12 +67,30 @@ void CommBlock::p_adapt_begin()
     performance->start_region(perf_adapt);
   }
 
-  int initial_cycle     = simulation()->config()->initial_cycle;
-  int initial_max_level = simulation()->config()->initial_max_level;
+  const Config * config = simulation()->config();
 
-  count_adapt_ = (cycle() == initial_cycle) ? initial_max_level : 1;
+  int initial_cycle     = config->initial_cycle;
+  int initial_max_level = config->initial_max_level;
+  int mesh_max_level    = config->mesh_max_level;
 
-  p_adapt(count_adapt_);
+  if (cycle() == initial_cycle) {
+    count_adapt_ = initial_max_level;
+  } else if (mesh_max_level > 0) {
+    count_adapt_ = 1;
+  } else {
+    count_adapt_ = 0;
+  }
+
+  if (count_adapt_ > 0) {
+
+    PARALLEL_PRINTF("p_adapt(%d)\n",count_adapt_);
+    p_adapt(count_adapt_);
+
+  } else {
+
+    q_adapt_end();
+
+  }
 }
 
 //----------------------------------------------------------------------
@@ -106,7 +124,7 @@ int CommBlock::determine_adapt()
   // Only leaves can adapt
 
   if (! is_leaf()) return adapt_same;
-  
+
   else {
 
     FieldDescr * field_descr = simulation()->field_descr();
@@ -123,6 +141,13 @@ int CommBlock::determine_adapt()
 
       adapt = reduce_adapt_(adapt,adapt_step);
 
+    }
+
+    const Config * config = simulation()->config();
+    int mesh_max_level    = config->mesh_max_level;
+
+    if ((mesh_max_level == level_) && (adapt == adapt_refine)) {
+      adapt = adapt_same;
     }
 
     return adapt;

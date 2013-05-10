@@ -19,7 +19,7 @@ class EnzoProlong : public Prolong {
 public: // interface
 
   /// Constructor
-  EnzoProlong(std::string interpolation_method) throw();
+  EnzoProlong(std::string method) throw();
 
   // /// Destructor
   // ~EnzoProlong() throw();
@@ -57,7 +57,7 @@ private: // attributes
   // NOTE: change pup() function whenever attributes change
 
   /// Interpolation Method: see Enzo documenation
-  int interpolation_method_;
+  int method_;
 
 };
 

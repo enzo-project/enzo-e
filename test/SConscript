@@ -343,16 +343,25 @@ else:
    env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_mpi)
 
 
+output_stride_1_RUN = env.RunParallel (
+   'test_output-stride-1.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/output-stride-1.in')
 
-output_stride_1_RUN = env.RunParallel ('test_output-stride-1-RUN.unit',
-                                               bin_path + '/enzo-p', 
-                                               ARGS='input/output-stride-1.in')
-output_stride_1_C00 = env.Hdf5ToPng('test_output-stride-1-C00.unit','test_output-stride-1-RUN.unit',
-                                   ARGS='output-stride-1 00');
-output_stride_1_C10 = env.Hdf5ToPng('test_output-stride-1-C10.unit','test_output-stride-1-C00.unit',
-                                   ARGS='output-stride-1 10');
-output_stride_1 = env_mv_out.Hdf5ToPng('test_output-stride-1.unit','test_output-stride-1-C10.unit',
-                                   ARGS='output-stride-1 20');
+output_stride_1_C00 = env.Hdf5ToPng (
+   'test_output-stride-1-C00.unit',
+   'test_output-stride-1.unit',
+   ARGS='output-stride-1 00');
+
+output_stride_1_C10 = env.Hdf5ToPng (
+   'test_output-stride-1-C10.unit',
+   'test_output-stride-1-C00.unit',
+   ARGS='output-stride-1 10');
+
+output_stride_1 = env_mv_out.Hdf5ToPng (
+   'test_output-stride-1-H5.unit',
+   'test_output-stride-1-C10.unit',
+   ARGS='output-stride-1 20');
 
 env.Requires(output_stride_1,    output_stride_1_C10)
 env.Requires(output_stride_1_C10,output_stride_1_C00)
