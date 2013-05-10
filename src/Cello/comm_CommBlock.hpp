@@ -166,6 +166,9 @@ public: // interface
 		     int ix, int iy, int iz,
 		     int lgx, int lgy, int lgz);
 
+  /// Refresh a FieldFace in the same level
+  void x_refresh_same(int n, char buffer[],int fx, int fy, int fz);
+
   /// send ghost zones to coarse neighbor in given direction
   void refresh_coarse (Index index);
 
@@ -175,8 +178,8 @@ public: // interface
 		    int lgx, int lgy, int lgz,
 		    int n3[3]);
 
-  /// Refresh a FieldFace in the same level
-  void x_refresh_same(int n, char buffer[],int fx, int fy, int fz);
+  /// Refresh a FieldFace in the next-finer level
+  void x_refresh_fine(int n, char buffer[],int fx, int fy, int fz);
 
   //--------------------------------------------------
 

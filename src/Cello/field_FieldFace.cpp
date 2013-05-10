@@ -195,6 +195,20 @@ void FieldFace::store (int n, char * array) throw()
 
 //----------------------------------------------------------------------
 
+void FieldFace::prolong (int n, char * array, Prolong * prolong) throw()
+{
+  INCOMPLETE("FieldFace::prolong()");
+}
+
+//----------------------------------------------------------------------
+
+void FieldFace::restrict (int n, char * array, Restrict * restrict) throw()
+{
+  INCOMPLETE("FieldFace::restrict()");
+}
+
+//----------------------------------------------------------------------
+
 char * FieldFace::allocate () throw()
 {
 

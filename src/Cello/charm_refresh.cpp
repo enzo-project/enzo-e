@@ -232,6 +232,8 @@ int CommBlock::refresh_fine
  int n3[3])
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+
   int rank = simulation->dimension();
 
 
@@ -249,24 +251,77 @@ int CommBlock::refresh_fine
   TRACE9 ("NIBLING: Face (%d %d %d) child (%d:%d %d:%d %d:%d)",
 	  ix,iy,iz, icxm,icxp,icym, icyp,iczm,iczp);
 
+
   int count = 0;
   // loop over niblings along face
   int ic3[3];
   for (ic3[0]=icxm; ic3[0]<=icxp; ic3[0]++) {
     for (ic3[1]=icym; ic3[1]<=icyp; ic3[1]++) {
       for (ic3[2]=iczm; ic3[2]<=iczp; ic3[2]++) {
+
 	Index index_nibling = index.index_nibling(ix,iy,iz,ic3,n3);
+
+	// if there exists a neighboring nibling
+
 	if (is_nibling(index_nibling)) {
+
+	  // increment counter
+
+	  ++ count;
+
+	  // pack face data
+
+	  FieldFace field_face (block_->field_block(),field_descr);
+
+	  field_face.set_face(ix,iy,iz);
+	  field_face.set_ghost(lgx,lgy,lgz);
 	  
+	  int n; 
+	  char * array;
+	  field_face.load(&n, &array);
+
+	  // send face data
+
+	  thisProxy[index].x_refresh_fine (n,array,-ix,-iy,-iz);
+
 	}
-	    //  Index index_nibling (int axis, int face, int ic3[3], int narray) const;
-	// if nibling exists
-	// interpolate ghosts
-	// increment count
       }
     }
   }
   return count;
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::x_refresh_fine (int n, char * buffer, int fx, int fy, int fz)
+ {
+   TRACE3 ("CommBlock::x_refresh_fine(%d %d %d)",fx,fy,fz);
+
+   Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+   FieldDescr * field_descr = simulation->field_descr();
+   const Config * config    = simulation->config();
+
+   bool gx,gy,gz;
+   gx = false;
+   gy = false;
+   gz = false;
+
+   FieldFace field_face(block_->field_block(), field_descr);
+
+   field_face.set_face(fx,fy,fz);
+   field_face.set_ghost(gx,gy,gz);
+
+   
+   field_face.store (n, buffer);
+
+   std::string refresh_type = config->field_refresh_type;
+  
+   if (refresh_type == "counter") {
+     if (loop_refresh_.done()) {
+       q_refresh_end();
+     }
+   }
 }
 
 //----------------------------------------------------------------------

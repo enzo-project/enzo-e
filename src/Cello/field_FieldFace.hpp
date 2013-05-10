@@ -8,6 +8,9 @@
 #ifndef FIELD_FIELD_FACE_HPP
 #define FIELD_FIELD_FACE_HPP
 
+class Restrict;
+class Prolong;
+
 class FieldFace {
 
   /// @class    FieldFace
@@ -93,6 +96,12 @@ public: // interface
 
   /// Store the array values to the field's ghost data
   void store(int n, char * array) throw();
+
+  /// Store by interpolating from coarse data
+  void prolong(int n, char * array, Prolong * prolong) throw();
+
+  /// Store by restricting from fine data
+  void restrict(int n, char * array, Restrict * restrict) throw();
 
   /// Allocate array_ storage
   char * allocate() throw();
