@@ -174,6 +174,20 @@ private: // functions
 			std::vector<int> & offsets_from )
     throw (std::out_of_range);
 
+  template <class T>
+  void print_
+  (const T * field,
+   const char * field_name,
+   const char * message,
+   double lower [3],
+   FILE * fp,
+   int ixm,int iym,int izm,
+   int ixp,int iyp,int izp,
+   int nx, int ny, int nz,
+   int gx, int gy ,int gz,
+   double hx, double hy ,double hz,
+   int nxd,int nyd) const;
+
   //----------------------------------------------------------------------
 
 private: // attributes

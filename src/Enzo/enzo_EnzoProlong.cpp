@@ -42,27 +42,23 @@ void EnzoProlong::pup (PUP::er &p)
 
 void EnzoProlong::apply 
 (
- CommBlock        * comm_block_f, 
- const  CommBlock * comm_block_c, 
+ FieldBlock       * field_block_f, 
+ const FieldBlock * field_block_c, 
  const FieldDescr * field_descr,
  int icx, int icy, int icz)
 {
-  Block * block_f = comm_block_f->block();
-  const Block * block_c = comm_block_c->block();
-  FieldBlock * field_block_f = block_f->field_block();
-  const FieldBlock * field_block_c = block_c->field_block();
+
+  int nd3_c[3];
+  int nd3_f[3];
+  field_block_f->size(&nd3_f[0],&nd3_f[1],&nd3_f[2]);
+  field_block_c->size(&nd3_c[0],&nd3_c[1],&nd3_c[2]);
+
+  int rank = (nd3_c[2] > 1) ? 3 : (nd3_c[1] >1 ) ? 2 : 1;
 
   for (int index=0; index<field_descr->field_count(); index++) {
 
-    int rank = comm_block_f->simulation()->dimension();
-
     enzo_float * values_c = (enzo_float *) field_block_c->field_values(index);
     enzo_float * values_f = (enzo_float *) field_block_f->field_values(index);
-
-    int nd3_c[3];
-    int nd3_f[3];
-    field_block_f->size(&nd3_f[0],&nd3_f[1],&nd3_f[2]);
-    field_block_c->size(&nd3_c[0],&nd3_c[1],&nd3_c[2]);
 
     int i3m_c[3];
     int i3m_f[3];
@@ -78,7 +74,8 @@ void EnzoProlong::apply
       i3p_f[axis]=nd3_f[axis]-i3m_f[axis];
     }
 
-    enzo_float * work = 0;
+    INCOMPLETE("Work array size unknown: using 100");
+    enzo_float * work = new enzo_float [100];
     int positivity_flag = 2;
     int error;
 
@@ -92,6 +89,7 @@ void EnzoProlong::apply
 
     values_f = &values_f[ic];
 
+    error = 0;
     FORTRAN_NAME(interpolate)(&rank, values_c, nd3_c, i3m_c, i3p_c, r3,
 			      values_f, nd3_f, i3m_f, work, &method_,
 			      &positivity_flag, &error);

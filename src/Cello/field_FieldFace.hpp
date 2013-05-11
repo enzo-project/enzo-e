@@ -90,18 +90,17 @@ public: // interface
     if (fz) (*fz) = face_[2];
   }
   
-  /// Load an array with the field face
+  /// Create an array with the field's face data
   void load(int * n, char ** array) throw();
 
+  /// Interpolate the data using the given prolongation operator
+  void prolong(Prolong * prolong) throw();
 
-  /// Store the array values to the field's ghost data
-  void store(int n, char * array) throw();
-
-  /// Store by interpolating from coarse data
-  void prolong(int n, char * array, Prolong * prolong) throw();
-
-  /// Store by restricting from fine data
+  /// Restrict the data using the given restriction operator
   void restrict(int n, char * array, Restrict * restrict) throw();
+
+  /// Copy the input array data to the field's ghost zones
+  void store(int n, char * array) throw();
 
   /// Allocate array_ storage
   char * allocate() throw();

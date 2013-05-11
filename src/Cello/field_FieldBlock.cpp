@@ -557,11 +557,12 @@ int FieldBlock::field_size
 
 //----------------------------------------------------------------------
 
-void FieldBlock::print (const FieldDescr * field_descr,
-			const char * message,
-			double lower[3],
-			double upper[3],
-			bool use_file) const throw()
+void FieldBlock::print
+(const FieldDescr * field_descr,
+ const char * message,
+ double lower[3],
+ double upper[3],
+ bool use_file) const throw()
 {
 
 #ifndef CELLO_DEBUG
@@ -625,120 +626,43 @@ void FieldBlock::print (const FieldDescr * field_descr,
      ny = (iyp-iym);
      nz = (izp-izm);
 
-#ifdef CELLO_DEBUG_VERBOSE
      double hx,hy,hz;
 
      hx = (upper[0]-lower[0])/(nxd-2*gx);
      hy = (upper[1]-lower[1])/(nyd-2*gy);
      hz = (upper[2]-lower[2])/(nzd-2*gz);
-#endif
 
      const char * array_offset = &array_[0]+offsets_[index_field];
      switch (field_descr->precision(index_field)) {
      case precision_single:
-       {
-	 const float * field = (const float * ) array_offset;
-	 float min = std::numeric_limits<float>::max();
-	 float max = std::numeric_limits<float>::min();
-	 double sum = 0.0;
-	 for (int iz=izm; iz<izp; iz++) {
-	   for (int iy=iym; iy<iyp; iy++) {
-	     for (int ix=ixm; ix<ixp; ix++) {
-	       int i = ix + nxd*(iy + nyd*iz);
-	       min = MIN(min,field[i]);
-	       max = MAX(max,field[i]);
-	       sum += field[i];
-#ifdef CELLO_DEBUG_VERBOSE
-	       double x = hx*(ix-gx) + lower[axis_x];
-	       double y = hy*(iy-gy) + lower[axis_y];
-	       double z = hz*(iz-gz) + lower[axis_z];
-	       if (isnan(field[i])) {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
-			 message,field_name,x,y,z,ix,iy,iz);
-	       } else {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %g\n",
-			 message,field_name,x,y,z,ix,iy,iz,field[i]);
-	       }
-#endif
-	     }
-	   }
-	 }
-	 double avg = sum / (nx*ny*nz);
-	 fprintf
-	   (fp,"%s [%s] %18.14g %18.14g %18.14g\n",
-	    message ? message : "", field_name, min,avg,max);
-
-       }
+       print_((const float * ) array_offset,
+	      field_name, message, lower, fp,
+	      ixm,iym,izm,
+	      ixp,iyp,izp,
+	      nx, ny, nz,
+	      gx, gy ,gz,
+	      hx, hy ,hz,
+	      nxd,nyd);
        break;
      case precision_double:
-       {
-	 const double * field = (const double * ) array_offset;
-	 double min = std::numeric_limits<double>::max();
-	 double max = std::numeric_limits<double>::min();
-	 double sum = 0.0;
-		  
-	 for (int iz=izm; iz<izp; iz++) {
-	   for (int iy=iym; iy<iyp; iy++) {
-	     for (int ix=ixm; ix<ixp; ix++) {
-	       int i = ix + nxd*(iy + nyd*iz);
-	       min = MIN(min,field[i]);
-	       max = MAX(max,field[i]);
-	       sum += field[i];
-#ifdef CELLO_DEBUG_VERBOSE
-	       double x = hx*(ix-gx) + lower[axis_x];
-	       double y = hy*(iy-gy) + lower[axis_y];
-	       double z = hz*(iz-gz) + lower[axis_z];
-	       if (isnan(field[i])) {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
-			 message,field_name,x,y,z,ix,iy,iz);
-	       } else {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %g\n",
-			 message,field_name,x,y,z,ix,iy,iz,field[i]);
-	       }
-#endif
-	     }
-	   }
-	 }
-	 double avg = sum / (nx*ny*nz);
-	 fprintf 
-	   (fp,"%s [%s] %18.14g %18.14g %18.14g\n",
-	    message ? message : "",field_name,min,avg,max);
-       }
+       print_((const double * ) array_offset, 
+	      field_name, message, lower, fp,
+	      ixm,iym,izm,
+	      ixp,iyp,izp,
+	      nx, ny, nz,
+	      gx, gy ,gz,
+	      hx, hy ,hz,
+	      nxd,nyd);
        break;
      case precision_quadruple:
-       {
-	 const long double * field = 
-	   (const long double * ) array_offset;
-	 long double min = std::numeric_limits<long double>::max();
-	 long double max = std::numeric_limits<long double>::min();
-	 long double sum = 0.0;
-	 for (int iz=izm; iz<izp; iz++) {
-	   for (int iy=iym; iy<iyp; iy++) {
-	     for (int ix=ixm; ix<ixp; ix++) {
-	       int i = ix + nxd*(iy + nyd*iz);
-	       min = MIN(min,field[i]);
-	       max = MAX(max,field[i]);
-	       sum += field[i];
-#ifdef CELLO_DEBUG_VERBOSE
-	       double x = hx*(ix-gx) + lower[axis_x];
-	       double y = hy*(iy-gy) + lower[axis_y];
-	       double z = hz*(iz-gz) + lower[axis_z];
-	       if (isnan(field[i])) {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
-			 message,field_name,x,y,z,ix,iy,iz);
-	       } else {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %Lf\n",
-			 message,field_name,x,y,z,ix,iy,iz,field[i]);
-	       }
-#endif
-	     }
-	   }
-	 }
-	 long double avg = sum / (nx*ny*nz);
-	 fprintf 
-	   (fp,"%s [%s] %18.14Lf %18.14Lf %18.14Lf\n",
-	    message ? message : "",field_name,min,avg,max);
-       }
+       print_((const long double * ) array_offset, 
+	      field_name, message, lower, fp,
+	      ixm,iym,izm,
+	      ixp,iyp,izp,
+	      nx, ny, nz,
+	      gx, gy ,gz,
+	      hx, hy ,hz,
+	      nxd,nyd);
        break;
      default:
        ERROR("FieldBlock::print", "Unsupported precision");
@@ -748,6 +672,53 @@ void FieldBlock::print (const FieldDescr * field_descr,
    }
 
 #endif /* ifndef CELLO_DEBUG */
+}
+
+template <class T>
+void FieldBlock::print_
+(const T * field,
+ const char * field_name,
+ const char * message,
+ double lower [3],
+ FILE * fp,
+ int ixm,int iym,int izm,
+ int ixp,int iyp,int izp,
+ int nx, int ny, int nz,
+ int gx, int gy ,int gz,
+ double hx, double hy ,double hz,
+ int nxd,int nyd) const
+{
+
+  T min = std::numeric_limits<T>::max();
+  T max = std::numeric_limits<T>::min();
+  double sum = 0.0;
+  for (int iz=izm; iz<izp; iz++) {
+    for (int iy=iym; iy<iyp; iy++) {
+      for (int ix=ixm; ix<ixp; ix++) {
+	int i = ix + nxd*(iy + nyd*iz);
+	min = MIN(min,field[i]);
+	max = MAX(max,field[i]);
+	sum += field[i];
+#ifdef CELLO_DEBUG_VERBOSE
+	double x = hx*(ix-gx) + lower[axis_x];
+	double y = hy*(iy-gy) + lower[axis_y];
+	double z = hz*(iz-gz) + lower[axis_z];
+	if (isnan(field[i])) {
+	  fprintf(fp,"DEBUG: %s %s  %2d %2d %2d NAN\n",
+		  message,field_name,ix,iy,iz);
+	} else {
+	  fprintf(fp,"DEBUG: %s %s  %2d %2d %2d %f\n",
+		  message,field_name,ix,iy,iz,field[i]);
+	}
+#endif
+      }
+    }
+  }
+  double avg = sum / (nx*ny*nz);
+  fprintf
+    (fp,"%s [%s] %18.14g %18.14g %18.14g\n",
+     message ? message : "", field_name, min,avg,max);
+
 }
 
 //----------------------------------------------------------------------

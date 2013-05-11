@@ -57,7 +57,6 @@ FieldFace::FieldFace(const FieldFace & field_face) throw ()
   : field_block_(field_face.field_block_),
     field_descr_(field_face.field_descr_),
     array_()
-/// @param     FieldFace  Object being copied
 {
   array_        = field_face.array_;
   ghost_[0] = field_face.ghost_[0];
@@ -86,9 +85,7 @@ FieldFace & FieldFace::operator= (const FieldFace & field_face) throw ()
 
 void FieldFace::load ( int * n, char ** array) throw()
 {
-  if (array_.size() == 0) {
-    allocate ();
-  }
+  if (array_.size() == 0)  allocate ();
 
   size_t num_fields = field_descr_->field_count();
 
@@ -96,25 +93,18 @@ void FieldFace::load ( int * n, char ** array) throw()
 
   for (size_t field=0; field< num_fields; field++) {
   
-    // Get precision
     precision_type precision = field_descr_->precision(field);
 
-    // Get field values and face array
     const char * field_face = field_block_->field_values(field);
 
-    // Get chunk of array for this field
     char * array_face  = &array_[index];
 
-    // Get field dimensions
     int nd3[3];
     field_block_->field_size(field_descr_,field,&nd3[0],&nd3[1],&nd3[2]);
 
-    // Get ghost depth
     int ng3[3];
     field_descr_->ghosts(field,&ng3[0],&ng3[1],&ng3[2]);
-
     
-    // Load values for the field
     switch (precision) {
     case precision_single:
       index += load_precision_( (float * )       (array_face), 
@@ -148,24 +138,18 @@ void FieldFace::store (int n, char * array) throw()
 
   for (size_t field=0; field<num_fields; field++) {
 
-    // Get precision
     precision_type precision = field_descr_->precision(field);
 
-    // Get field values
     char * field_ghost = field_block_->field_values(field);
     
-    // Get chunk of array for this field
     char * array_ghost  = array + index;
 
-    // Get field dimensions
     int nd3[3];
     field_block_->field_size(field_descr_,field,&nd3[0],&nd3[1],&nd3[2]);
 
-    // Get ghost depth
     int ng3[3];
     field_descr_->ghosts(field,&ng3[0],&ng3[1],&ng3[2]);
 
-    // Compute permutation indices
     switch (precision) {
     case precision_single:
       index += store_precision_
@@ -195,28 +179,21 @@ void FieldFace::store (int n, char * array) throw()
 
 //----------------------------------------------------------------------
 
-void FieldFace::prolong (int n, char * array, Prolong * prolong) throw()
-{
-  INCOMPLETE("FieldFace::prolong()");
-}
+void FieldFace::prolong (Prolong * prolong) throw()
+{  INCOMPLETE("FieldFace::prolong()");}
 
 //----------------------------------------------------------------------
 
 void FieldFace::restrict (int n, char * array, Restrict * restrict) throw()
-{
-  INCOMPLETE("FieldFace::restrict()");
-}
+{  INCOMPLETE("FieldFace::restrict()");}
 
 //----------------------------------------------------------------------
 
 char * FieldFace::allocate () throw()
 {
-
   size_t num_fields = field_descr_->field_count();
 
   int array_size = 0;
-
-  // Determine array size
 
   for (size_t index_field = 0; index_field < num_fields; index_field++) {
 
@@ -225,19 +202,13 @@ char * FieldFace::allocate () throw()
     precision_type precision = field_descr_->precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
-    // Get field block dimensions nd3[]
-    // Get field_size, which includes ghosts and precision adjustments
 
     int nd3[3];
     int field_bytes = field_block_->field_size 
       (field_descr_,index_field, &nd3[0], &nd3[1], &nd3[2]);
 
-    // Get ghost depth
-
     int ng3[3];
     field_descr_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
-
-    // Adjust field_bytes if not storing ghost zones
 
     int n_old = nd3[0]*nd3[1]*nd3[2];
 
@@ -250,8 +221,6 @@ char * FieldFace::allocate () throw()
     field_bytes /= n_old;
     field_bytes *= n_new;
 
-    // Get size of the corner, edge, or face
-
     int face_bytes = field_bytes;
     if (face_[0]) face_bytes = (face_bytes * ng3[0]) / nd3[0];
     if (face_[1]) face_bytes = (face_bytes * ng3[1]) / nd3[1];
@@ -260,15 +229,13 @@ char * FieldFace::allocate () throw()
     face_bytes += 
       field_block_->adjust_alignment_(face_bytes,bytes_per_element);
 
-    // Increment array size
-
     array_size += face_bytes;
 
   }
 
-  // Allocate the array
 
   array_.resize(array_size);
+
   for (int i=0; i<array_size; i++) array_[i] = 0;
 
   return &array_[0];
@@ -277,27 +244,17 @@ char * FieldFace::allocate () throw()
 //----------------------------------------------------------------------
 
 void FieldFace::deallocate() throw()
-{
-  array_.clear();
-}
+{  array_.clear(); }
 
 //----------------------------------------------------------------------
 
 void FieldFace::loop_limits_
 (
- int *ix0,
- int *iy0,
- int *iz0,
- int *nx,
- int *ny,
- int *nz,
- int nd3[3],
- int ng3[3],
- bool load
+ int *ix0, int *iy0, int *iz0,
+ int *nx,  int *ny,  int *nz,
+ int nd3[3], int ng3[3],  bool load
  )
 {
-  // offset (ix0,iy0,iz0)
-
   if (face_[0] == 0) {
     (*ix0) = (ghost_[0]) ? 0 : ng3[0];
   } else {

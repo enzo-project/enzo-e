@@ -19,19 +19,14 @@ RestrictLinear::RestrictLinear() throw()
 
 void RestrictLinear::apply 
 (
- CommBlock        * comm_block_c, 
- const  CommBlock * comm_block_f, 
+ FieldBlock        * field_block_c, 
+ const  FieldBlock * field_block_f, 
  const FieldDescr * field_descr,
  int icx, int icy, int icz)
 {
   INCOMPLETE("RestructLinear::apply");
 
   return;
-
-  Block *       block_c = comm_block_c->block();
-  const Block * block_f = comm_block_f->block();
-  FieldBlock *       field_block_c = block_c->field_block();
-  const FieldBlock * field_block_f = block_f->field_block();
 
   for (int index=0; index<field_descr->field_count(); index++) {
 

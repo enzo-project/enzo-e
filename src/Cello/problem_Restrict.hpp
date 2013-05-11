@@ -40,8 +40,8 @@ public: // interface
 
   /// Restrict comm_block_f child values given by (icx,icy,icz) to the parent
   virtual void apply 
-  (CommBlock        * comm_block_c, 
-   const CommBlock  * comm_block_f, 
+  (FieldBlock        * field_block_c, 
+   const FieldBlock  * field_block_f, 
    const FieldDescr * field_descr,
    int icx, int icy, int icz) = 0;
 

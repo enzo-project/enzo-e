@@ -21,9 +21,9 @@ if (type == "charm"):
 
 components.append(['enzo','simulation', 'problem',
 	      'comm', 'mesh', 'field',
-	      'io', 'disk','memory','parallel',
+	      'io', 'disk','memory',
 	      'parameters', 
-	      'error', 'monitor', 'performance',
+	      'error', 'monitor', 'parallel','performance',
 	      'test','cello','external'])
 
 if (use_papi):
@@ -107,7 +107,9 @@ libraries   = env.Library ('enzo', sources)
 
 test_enzo_p = env.Program (['enzo-p.cpp', charm_main])
 
-binaries = [test_enzo_p]
+test_enzo_prolong = env.Program (['test_Prolong.cpp', charm_main])
+
+binaries = [test_enzo_p, test_enzo_prolong]
 
 if (type == "charm"):
    env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')

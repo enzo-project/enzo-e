@@ -31,27 +31,23 @@ void EnzoRestrict::pup (PUP::er &p)
 
 void EnzoRestrict::apply 
 (
- CommBlock        * comm_block_c, 
- const  CommBlock * comm_block_f, 
+ FieldBlock        * field_block_c, 
+ const  FieldBlock * field_block_f, 
  const FieldDescr * field_descr,
  int icx, int icy, int icz)
 {
-  Block * block_c = comm_block_c->block();
-  const Block * block_f = comm_block_f->block();
-  FieldBlock * field_block_c = block_c->field_block();
-  const FieldBlock * field_block_f = block_f->field_block();
+
+  int nd3_f[3];
+  int nd3_c[3];
+  field_block_c->size(&nd3_c[0],&nd3_c[1],&nd3_c[2]);
+  field_block_f->size(&nd3_f[0],&nd3_f[1],&nd3_f[2]);
+
+  int rank = (nd3_c[2] > 1) ? 3 : (nd3_c[1] >1 ) ? 2 : 1;
 
   for (int index=0; index<field_descr->field_count(); index++) {
 
-    int rank = comm_block_c->simulation()->dimension();
-
     enzo_float * values_f = (enzo_float *) field_block_f->field_values(index);
     enzo_float * values_c = (enzo_float *) field_block_c->field_values(index);
-
-    int nd3_f[3];
-    int nd3_c[3];
-    field_block_c->size(&nd3_c[0],&nd3_c[1],&nd3_c[2]);
-    field_block_f->size(&nd3_f[0],&nd3_f[1],&nd3_f[2]);
 
     int i3m_f[3];
     int i3m_c[3];

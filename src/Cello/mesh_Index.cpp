@@ -211,8 +211,8 @@ Index Index::index_nibling (int axis, int face, int ic3[3], int narray) const
 
 Index Index::index_nibling (int ix, int iy, int iz, int ic3[3], int n3[3]) const
 {
-  TRACE7("index_nibling ix iy iz %d %d %d  child %d %d %d  narray %d",
-	 ix,iy,iz,ic3[0],ic3[1],ic3[2],narray);
+  TRACE9("index_nibling ix iy iz %d %d %d  child %d %d %d  n3 %d %d %d",
+	 ix,iy,iz,ic3[0],ic3[1],ic3[2],n3[0],n3[1],n3[2]);
 
   // want facing child in neighbor not corresponding child
 

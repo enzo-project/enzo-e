@@ -35,10 +35,11 @@ public: // interface
 #endif
 
   /// Prolong comm_block_Ht values to the child block given by (icx,icy,icz)
-  virtual void apply (CommBlock        * comm_block_h, 
-		      const CommBlock  * comm_block_Ht, 
-		      const FieldDescr * field_descr,
-		      int icx, int icy, int icz);
+  virtual void apply 
+  ( FieldBlock       * field_block_f, 
+    const FieldBlock * field_block_c, 
+    const FieldDescr * field_descr,
+    int icx, int icy, int icz);
 
 private: // functions
 

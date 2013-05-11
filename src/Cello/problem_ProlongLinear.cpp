@@ -19,15 +19,11 @@ ProlongLinear::ProlongLinear() throw()
 
 void ProlongLinear::apply 
 (
- CommBlock        * comm_block_f, 
- const  CommBlock * comm_block_c, 
+       FieldBlock * field_block_f, 
+ const FieldBlock * field_block_c, 
  const FieldDescr * field_descr,
  int icx, int icy, int icz)
 {
-  Block * block_f = comm_block_f->block();
-  const Block * block_c = comm_block_c->block();
-  FieldBlock * field_block_f = block_f->field_block();
-  const FieldBlock * field_block_c = block_c->field_block();
 
   for (int index=0; index<field_descr->field_count(); index++) {
 
