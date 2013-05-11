@@ -43,7 +43,6 @@ includes = [Glob('*enzo*hpp'),'fortran.h']
 sources  = [Glob('enzo_*cpp'), 
     	    'calcdiss.F',
 	    'calc_dt.F',
-	    'cicinterp.F',
 	    'CosmologyGetUnits.cpp',
 	    'euler.F',
 	    'FindField.cpp',
@@ -63,9 +62,10 @@ sources  = [Glob('enzo_*cpp'),
 	    'interpolate.F',
 	    'inteuler.F',
 	    'inteuler.F',
-	    'int_lin3d.F',
 	    'intvar.F',
+	    'int_lin3d.F',
 	    'ngpinterp.F',
+	    'cicinterp.F',
 	    'pgas2d_dual.F',
 	    'pgas2d.F',
 	    'ppm_de.F',
@@ -112,6 +112,8 @@ binaries = [test_enzo_p]
 if (type == "charm"):
    env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
    env.CharmBuilder('enzo.def.h', 'enzo.ci',ARG = 'enzo')
+   env.CharmBuilder('main_enzo.decl.h','enzo_main.ci',ARG = 'main_enzo')
+   env.CharmBuilder('main_enzo.def.h', 'enzo_main.ci',ARG = 'main_enzo')
 
 #------------------------------
 # INSTALL

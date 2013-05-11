@@ -108,8 +108,6 @@ void CommBlock::p_output(CkReductionMsg * msg)
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  simulation->performance()->start_region(perf_output);
-
   TRACE("CommBlock::p_output()");
   double * min_reduce = (double * )msg->getData();
 
@@ -137,6 +135,8 @@ void SimulationCharm::p_output ()
   TRACE("SimulationCharm::p_output");
   TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
   if (block_sync_.done()) {
+    SimulationCharm * simulation = proxy_simulation.ckLocalBranch();
+    performance()->start_region(perf_output);
     TRACE("SimulationCharm::p_output calling c_output");
     CkCallback callback (CkIndex_SimulationCharm::c_output(), thisProxy);
     contribute(0,0,CkReduction::concat,callback);
@@ -181,7 +181,6 @@ void Problem::output_next(Simulation * simulation) throw()
 
   } else {
 
-    simulation->performance()->stop_region(perf_output);
     simulation->monitor_output();
 
   }
@@ -308,6 +307,8 @@ void SimulationCharm::monitor_output()
 {
   TRACE("Simulation::monitor_output()");
   Simulation::monitor_output();
+
+  performance()->stop_region(perf_output);
 
   c_compute();
 }

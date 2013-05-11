@@ -83,7 +83,6 @@ void CommBlock::p_adapt_begin()
 
   if (count_adapt_ > 0) {
 
-    PARALLEL_PRINTF("p_adapt(%d)\n",count_adapt_);
     p_adapt(count_adapt_);
 
   } else {

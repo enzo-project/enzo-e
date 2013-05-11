@@ -54,6 +54,7 @@ Simulation::Simulation
   monitor_->set_active(group_process_->is_root());
 #endif
 
+  monitor_->print("test","testing");
   parameters_ = new Parameters(parameter_file,monitor_);
 
 }
