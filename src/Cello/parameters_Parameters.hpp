@@ -205,6 +205,9 @@ public: // interface
   /// Return the type of the given parameter
   parameter_type list_type(int, std::string) throw();
 
+  /// Set whether to output 
+  void set_monitor (bool lmonitor) { lmonitor_ = lmonitor; };
+
   //--------------------------------------------------
 
 private: // functions

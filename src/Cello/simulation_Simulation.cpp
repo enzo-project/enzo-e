@@ -141,6 +141,8 @@ void Simulation::initialize() throw()
 {
   TRACE("Simulation::initialize calling Simulation::initialize_config_()");
   initialize_config_();
+  parameters_->set_monitor(false);
+
   initialize_monitor_();
   initialize_performance_();
   initialize_simulation_();

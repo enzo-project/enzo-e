@@ -86,29 +86,39 @@ CommBlock::CommBlock
 
   initialize ();
 
-  if (level_ == 0) {
+  // Initialize neighbor
 
-    int na3[3];
-    size_forest(&na3[0],&na3[1],&na3[2]);
+  int na3[3];
+  size_forest(&na3[0],&na3[1],&na3[2]);
 
-    int v3[3];
-    Index index;
-    int ixp = (rank >= 1) ? 1 : 0;
-    int iyp = (rank >= 2) ? 1 : 0;
-    int izp = (rank >= 3) ? 1 : 0;
+  int v3[3];
+
+  int ixp = (rank >= 1) ? 1 : 0;
+  int iyp = (rank >= 2) ? 1 : 0;
+  int izp = (rank >= 3) ? 1 : 0;
     
-    int refresh_rank = this->simulation()->config()->field_refresh_rank;
+  int refresh_rank = this->simulation()->config()->field_refresh_rank;
 
-    for (int ix=-ixp; ix<=ixp; ix++) {
-      for (int iy=-iyp; iy<=iyp; iy++) {
-	for (int iz=-izp; iz<=izp; iz++) {
+  int ic3[3] = {0,0,0};
+  if (level_ > 0) {
+    index_.child(level_,&ic3[0],&ic3[1],&ic3[2]);
+  }
 
-	  int face_rank = rank - (abs(ix)+abs(iy)+abs(iz));
-	  if (face_rank >= refresh_rank) {
-	    index = index_.index_neighbor(ix,iy,iz,na3);
-	    index.values(&v3[0],&v3[1],&v3[2]);
-	    p_set_neighbor (v3);
-	  }
+  for (int ix=-ixp; ix<=ixp; ix++) {
+    bool isx = ((ix==0) || (ix==-1&&ic3[0]==1) || (ix==1&&ic3[0]==0));
+    for (int iy=-iyp; iy<=iyp; iy++) {
+      bool isy = ((iy==0) || (iy==-1&&ic3[1]==1) || (iy==1&&ic3[1]==0));
+      for (int iz=-izp; iz<=izp; iz++) {
+	bool isz = ((iz==0) || (iz==-1&&ic3[2]==1) || (iz==1&&ic3[2]==0));
+
+	int face_rank = rank - (abs(ix)+abs(iy)+abs(iz));
+
+	bool has_neighbor =  ((face_rank >= refresh_rank) &&
+			      ((level_ == 0) || (isx&&isy&&isz)));
+	if (has_neighbor) {
+	  Index index = index_.index_neighbor(ix,iy,iz,na3);
+	  index.values(&v3[0],&v3[1],&v3[2]);
+	  p_set_neighbor (v3);
 	}
       }
     }
@@ -116,18 +126,18 @@ CommBlock::CommBlock
 
 #ifdef CONFIG_USE_CHARM
 
-   if (! testing) {
+  if (! testing) {
 
-     // Count CommBlocks on each processor
+    // Count CommBlocks on each processor
    
-     TRACE1 ("simulation = %p",simulation());
-     TRACE1 ("proxy_simulation = %p",&proxy_simulation);
+    TRACE1 ("simulation = %p",simulation());
+    TRACE1 ("proxy_simulation = %p",&proxy_simulation);
 
-     ((SimulationCharm *)simulation())->insert_block();
+    ((SimulationCharm *)simulation())->insert_block();
 
-   }
+  }
 
-   if (initial) apply_initial_();
+  if (initial) apply_initial_();
 
 #endif /* CONFIG_USE_CHARM */
 
@@ -140,8 +150,8 @@ void CommBlock::initialize_
  int nx, int ny, int nz,
  bool testing
  )
- {
- }
+{
+}
 
 //----------------------------------------------------------------------
 
