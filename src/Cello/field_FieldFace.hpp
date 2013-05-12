@@ -38,24 +38,9 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-
-    // NOTE: change this function whenever attributes change
-
-    TRACEPUP;
-
-    bool up = p.isUnpacking();
-
-    if (up) field_descr_ = new FieldDescr;
-    p | *field_descr_;
-    if (up) field_block_ = new FieldBlock;
-    p | *field_block_;
-    p | array_;
-    PUParray(p,face_,3);
-    PUParray(p,ghost_,3);
-  }
+  inline void pup (PUP::er &p);
 #endif
+
   //----------------------------------------------------------------------
 
   /// Set whether or not to include ghost zones along each axis
@@ -90,14 +75,32 @@ public: // interface
     if (fz) (*fz) = face_[2];
   }
   
+  /// Set child indices if prolongation or restriction is required
+  inline void set_child (int icx, int icy = 0, int icz = 0)
+  {
+    child_[0] = icx;
+    child_[1] = icy;
+    child_[2] = icz;
+  }
+
+  /// Return child indices if prolongation or restriction is required
+  inline void get_child (int * icx, int * icy = 0, int * icz = 0)
+  {
+    if (*icx) (*icx) = child_[0];
+    if (*icy) (*icy) = child_[1];
+    if (*icz) (*icz) = child_[2];
+  }
+
   /// Create an array with the field's face data
   void load(int * n, char ** array) throw();
 
   /// Interpolate the data using the given prolongation operator
-  void prolong(Prolong * prolong) throw();
+  void set_prolong(Prolong * prolong) throw()
+  { prolong_ = prolong; }
 
   /// Restrict the data using the given restriction operator
-  void restrict(int n, char * array, Restrict * restrict) throw();
+  void set_restrict(Restrict * restrict) throw()
+  { restrict_ = restrict; }
 
   /// Copy the input array data to the field's ghost zones
   void store(int n, char * array) throw();
@@ -117,12 +120,12 @@ public: // interface
 
 private: // functions
 
+  /// copy data
+  void copy_(const FieldFace & field_face); 
+
   /// Compute loop limits for load_precision_ and store_precision_
   void loop_limits_
-  (int *ix0, int *iy0, int *iz0,
-   int *nx,  int *ny,  int *nz,
-   int nd3[3], int ng3[3],
-   bool load);
+  (int i0[3], int n3[3], int nd3[3], int ng3[3], bool load);
 
 
   /// Precision-agnostic function for loading field block face into
@@ -152,13 +155,20 @@ private: // attributes
   /// Allocated array used for storing all ghosts and face
   std::vector<char> array_;
 
-  /// Selects face: -1 0 1 for each axis (lower, ignore, upper)
-  /// e.g. face_ = {1,0,-1) is upper-x, lower-z face
-  /// face_ = {0,0,0} is entire FieldBlock
+  /// Select face, including edges and corners (-1,-1,-1) to (1,1,1)
   int face_[3];
 
   /// Whether to include ghost zones along x,y,z axes
   bool ghost_[3];
+
+  /// Child index (0,0,0) to (1,1,1) if restriction or prolongation are used
+  int child_[3];
+
+  /// Restriction operation if any
+  Restrict * restrict_;
+
+  /// Prolongation operation if any
+  Prolong * prolong_;
 
 };
 

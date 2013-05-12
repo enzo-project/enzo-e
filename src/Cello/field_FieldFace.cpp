@@ -6,15 +6,18 @@
 /// @brief    Implementation of the FieldFace class
 
 #include "cello.hpp"
-
 #include "field.hpp"
+#include "problem_Prolong.hpp"
+#include "problem_Restrict.hpp"
 
 //----------------------------------------------------------------------
 
 FieldFace::FieldFace() throw()
   : field_block_(0),
     field_descr_(0),
-    array_()
+    array_(),
+    restrict_(0),
+    prolong_(0)
 {
   ghost_[0] = true;
   ghost_[1] = true;
@@ -22,6 +25,9 @@ FieldFace::FieldFace() throw()
   face_[0] = 0;
   face_[1] = 0;
   face_[2] = 0;
+  child_[0] = 0;
+  child_[1] = 0;
+  child_[2] = 0;
 }
 
 //----------------------------------------------------------------------
@@ -33,7 +39,9 @@ FieldFace::FieldFace
  ) throw()
   : field_block_(field_block),
     field_descr_((FieldDescr*)field_descr),
-    array_()
+    array_(),
+    restrict_(0),
+    prolong_(0)
 {
   ghost_[0] = true;
   ghost_[1] = true;
@@ -41,7 +49,9 @@ FieldFace::FieldFace
   face_[0] = 0;
   face_[1] = 0;
   face_[2] = 0;
-
+  child_[0] = 0;
+  child_[1] = 0;
+  child_[2] = 0;
 }
 
 //----------------------------------------------------------------------
@@ -58,13 +68,7 @@ FieldFace::FieldFace(const FieldFace & field_face) throw ()
     field_descr_(field_face.field_descr_),
     array_()
 {
-  array_        = field_face.array_;
-  ghost_[0] = field_face.ghost_[0];
-  ghost_[1] = field_face.ghost_[1];
-  ghost_[2] = field_face.ghost_[2];
-  face_[0] = field_face.face_[0];
-  face_[1] = field_face.face_[1];
-  face_[2] = field_face.face_[2];
+  copy_(field_face);
 }
 
 //----------------------------------------------------------------------
@@ -74,11 +78,48 @@ FieldFace & FieldFace::operator= (const FieldFace & field_face) throw ()
 ///
 /// @return    The target assigned object
 {
-  array_ = field_face.array_;
+  copy_(field_face);
+  return *this;
+}
+
+//----------------------------------------------------------------------
+
+void FieldFace::copy_(const FieldFace & field_face)
+{
+  array_        = field_face.array_;
   ghost_[0] = field_face.ghost_[0];
   ghost_[1] = field_face.ghost_[1];
   ghost_[2] = field_face.ghost_[2];
-  return *this;
+  face_[0] = field_face.face_[0];
+  face_[1] = field_face.face_[1];
+  face_[2] = field_face.face_[2];
+  child_[0] = field_face.child_[0];
+  child_[1] = field_face.child_[1];
+  child_[2] = field_face.child_[2];
+  prolong_ =  field_face.prolong_;
+  restrict_ =  field_face.restrict_;
+}
+//----------------------------------------------------------------------
+
+void FieldFace::pup (PUP::er &p)
+{
+
+  // NOTE: change this function whenever attributes change
+
+  TRACEPUP;
+
+  bool up = p.isUnpacking();
+
+  if (up) field_descr_ = new FieldDescr;
+  p | *field_descr_;
+  if (up) field_block_ = new FieldBlock;
+  p | *field_block_;
+  p | array_;
+  PUParray(p,face_,3);
+  PUParray(p,ghost_,3);
+  PUParray(p,child_,3);
+  p | *restrict_;  // PUPable
+  p | *prolong_;  // PUPable
 }
 
 //======================================================================
@@ -179,16 +220,6 @@ void FieldFace::store (int n, char * array) throw()
 
 //----------------------------------------------------------------------
 
-void FieldFace::prolong (Prolong * prolong) throw()
-{  INCOMPLETE("FieldFace::prolong()");}
-
-//----------------------------------------------------------------------
-
-void FieldFace::restrict (int n, char * array, Restrict * restrict) throw()
-{  INCOMPLETE("FieldFace::restrict()");}
-
-//----------------------------------------------------------------------
-
 char * FieldFace::allocate () throw()
 {
   size_t num_fields = field_descr_->field_count();
@@ -248,71 +279,6 @@ void FieldFace::deallocate() throw()
 
 //----------------------------------------------------------------------
 
-void FieldFace::loop_limits_
-(
- int *ix0, int *iy0, int *iz0,
- int *nx,  int *ny,  int *nz,
- int nd3[3], int ng3[3],  bool load
- )
-{
-  if (face_[0] == 0) {
-    (*ix0) = (ghost_[0]) ? 0 : ng3[0];
-  } else {
-    if (load) {
-      if (face_[0] == -1) (*ix0) = ng3[0];   
-      if (face_[0] == +1) (*ix0) = nd3[0] - 2*ng3[0];
-    } else {
-      if (face_[0] == -1) (*ix0) = 0;
-      if (face_[0] == +1) (*ix0) = nd3[0] - ng3[0];
-    }
-  }
-  if (face_[1] == 0) {
-    (*iy0) = (ghost_[1]) ? 0 : ng3[1];
-  } else {
-    if (load) {
-      if (face_[1] == -1) (*iy0) = ng3[1];
-      if (face_[1] == +1) (*iy0) = nd3[1] - 2*ng3[1];
-    } else {
-      if (face_[1] == -1) (*iy0) = 0;
-      if (face_[1] == +1) (*iy0) = nd3[1] - ng3[1];
-    }
-  }
-
-  if (face_[2] == 0) {
-    (*iz0) = (ghost_[2]) ? 0 : ng3[2];
-  } else {
-    if (load) {
-      if (face_[2] == -1) (*iz0) = ng3[2];
-      if (face_[2] == +1) (*iz0) = nd3[2] - 2*ng3[2];
-    } else {
-      if (face_[2] == -1) (*iz0) = 0;
-      if (face_[2] == +1) (*iz0) = nd3[2] - ng3[2];
-    }
-  }
-
-
-  if (face_[0] == 0) {
-    (*nx) = (ghost_[0]) ? nd3[0] : nd3[0]-2*ng3[0];
-  } else {
-    (*nx) = ng3[0]; 
-  }
-
-  if (face_[1] == 0) {
-    (*ny) = (ghost_[1]) ? nd3[1] : nd3[1]-2*ng3[1];
-  } else {
-    (*ny) = ng3[1]; 
-  }
-
-  if (face_[2] == 0) {
-    (*nz) = (ghost_[2]) ? nd3[2] : nd3[2]-2*ng3[2];
-  } else {
-    (*nz) = ng3[2]; 
-  }
-
-}
-
-//----------------------------------------------------------------------
-
 template<class T>
 size_t FieldFace::load_precision_
 (
@@ -322,28 +288,24 @@ size_t FieldFace::load_precision_
  int       ng3[3]
 ) throw()
 {
-  int ix0,iy0,iz0;
-  int nx,ny,nz;
-  const bool load = true;
+  bool load;
+  int i0[3],n[3];
+  loop_limits_ (i0,n, nd3,ng3, load = true);
 
-  // Loop limits
-
-  loop_limits_ (&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, load);
-
-  for (int iz=0; iz <nz; iz++)  {
-    int kz = iz+iz0;
-    for (int iy=0; iy < ny; iy++) {
-      int ky = iy+iy0;
-      for (int ix=0; ix < nx; ix++) {
-	int kx = ix+ix0;
-	int index_array = ix +  nx   *(iy +  ny    * iz);
+  for (int iz=0; iz <n[2]; iz++)  {
+    int kz = iz+i0[2];
+    for (int iy=0; iy < n[1]; iy++) {
+      int ky = iy+i0[1];
+      for (int ix=0; ix < n[0]; ix++) {
+	int kx = ix+i0[0];
+	int index_array = ix +   n[0]*(iy +   n[1] * iz);
 	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
 	array[index_array] = field_face[index_field];
       }
     }
   }
 
-  return (sizeof(T) * nx * ny * nz);
+  return (sizeof(T) * n[0] * n[1] * n[2]);
 }
 
 //----------------------------------------------------------------------
@@ -357,27 +319,84 @@ size_t FieldFace::store_precision_
  int       ng3[3]
  ) throw()
 {
+  bool load;
+  int i0[3],n[3];
+  loop_limits_ (i0,n, nd3,ng3, load = false);
 
-  int ix0,iy0,iz0;
-  int nx,ny,nz;
-  const bool load = false;
-
-  // Loop limits
-
-  loop_limits_ (&ix0,&iy0,&iz0,&nx,&ny,&nz, nd3,ng3, load);
-
-  for (int iz=0; iz <nz; iz++)  {
-    int kz = iz+iz0;
-    for (int iy=0; iy < ny; iy++) {
-      int ky = iy+iy0;
-      for (int ix=0; ix < nx; ix++) {
-	int kx = ix+ix0;
-	int index_array = ix +  nx   *(iy +  ny    * iz);
+  for (int iz=0; iz <n[2]; iz++)  {
+    int kz = iz+i0[2];
+    for (int iy=0; iy < n[1]; iy++) {
+      int ky = iy+i0[1];
+      for (int ix=0; ix < n[0]; ix++) {
+	int kx = ix+i0[0];
+	int index_array = ix +   n[0]*(iy +   n[1] * iz);
 	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
 	field_ghost[index_field] = array[index_array];
       }
     }
   }
 
-  return (sizeof(T) * nx * ny * nz);
+  return (sizeof(T) * n[0] * n[1] * n[2]);
 }
+
+//----------------------------------------------------------------------
+
+void FieldFace::loop_limits_
+( int i0[3],int n[3], int nd3[3], int ng3[3],  bool load )
+{
+  // NOTES: 4:p12
+
+  bool store = ! load;
+
+  for (int axis=0; axis<3; axis++) {
+
+    // starting index i0[axis]
+
+    if (face_[axis] == 0) {
+
+      if (ghost_[axis]) {
+
+	i0[axis] =  0;
+	n[axis] = nd3[axis];
+
+      } else {
+
+	i0[axis] = ng3[axis];
+	n[axis]  = nd3[axis] - 2*ng3[axis];
+
+      }
+
+      if ( (load && prolong_) ||
+	   (store && restrict_)) {
+	// adjust for child offset
+	INCOMPLETE("FieldFace::loop_limits_()");
+      }
+    }
+
+    if (face_[axis] == -1 || face_[axis] == 1) {
+
+      if (load) { // face data
+	if (face_[axis] == -1) i0[axis] = ng3[axis];   
+	if (face_[axis] == +1) i0[axis] = nd3[axis] - 2*ng3[axis];
+      }
+
+      if (store) { // ghost data
+	if (face_[axis] == -1) i0[axis] = 0;
+	if (face_[axis] == +1) i0[axis] = nd3[axis] - ng3[axis];
+      }
+
+      n[axis] = ng3[axis];
+
+      if (load && restrict_) { 
+	// adjust for 2g depth
+	INCOMPLETE("FieldFace::loop_limits_()");
+      }
+      if (load && prolong_) {
+	// adjust for 1/2 g depth
+	INCOMPLETE("FieldFace::loop_limits_()");
+      }
+    }
+
+  }
+}
+

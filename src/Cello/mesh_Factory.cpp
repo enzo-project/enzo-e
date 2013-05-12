@@ -80,7 +80,6 @@ CProxy_CommBlock Factory::create_block_array
     opts.setMap(array_map);
     proxy_block = CProxy_CommBlock::ckNew(opts);
 
-    int level;
     int count_adapt;
     bool initial;
 
