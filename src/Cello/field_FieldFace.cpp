@@ -366,10 +366,12 @@ void FieldFace::loop_limits_
 
       }
 
-      if ( (load && prolong_) ||
+      if ( (load  && prolong_ ) ||
 	   (store && restrict_)) {
 	// adjust for child offset
-	INCOMPLETE("FieldFace::loop_limits_()");
+	n[axis]  /= 2;;
+	i0[axis] += child_[axis] * n[axis];
+	INCOMPLETE("FieldFace::loop_limits_() UNTESTED");
       }
     }
 
@@ -385,15 +387,22 @@ void FieldFace::loop_limits_
 	if (face_[axis] == +1) i0[axis] = nd3[axis] - ng3[axis];
       }
 
-      n[axis] = ng3[axis];
+      if (load && restrict_) { // 2*g ghost depth
 
-      if (load && restrict_) { 
-	// adjust for 2g depth
-	INCOMPLETE("FieldFace::loop_limits_()");
-      }
-      if (load && prolong_) {
-	// adjust for 1/2 g depth
-	INCOMPLETE("FieldFace::loop_limits_()");
+	INCOMPLETE("FieldFace::loop_limits_() UNTESTED");
+	if (face_[axis] == 1) i0[axis] -= ng3[axis];
+	n[axis] = 2*ng3[axis];
+
+      }	else if (load && prolong_) { // g/2 ghost depth
+
+	INCOMPLETE("FieldFace::loop_limits_() UNTESTED");
+	if (face_[axis] == 1) i0[axis] += ng3[axis]/2;
+	n[axis] = (ng3[axis]+1)/2;
+
+      } else {
+
+	n[axis] = ng3[axis];
+
       }
     }
 
