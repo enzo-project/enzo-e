@@ -38,16 +38,16 @@ public: // interface
 
   virtual void apply 
   ( precision_type precision,
-    void * values_f,
-    int ndx_f, int ndy_f, int ndf_z, 
-    int nx_f,  int ny_f,  int nz_f,
-    const void * values_c,
-    int ndx_c, int ndy_c, int ndc_z, 
-    int nx_c,  int ny_c,  int nz_c);
+    void *       values_f, int nd3_f[3], int n3_f[3],
+    const void * values_c, int nd3_c[3], int n3_c[3]);
 
 private: // functions
 
-
+  template <class T>
+  void apply 
+  ( T *       values_f, int nd3_f[3], int n3_f[3],
+    const T * values_c, int nd3_c[3], int n3_c[3]);
+  
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change

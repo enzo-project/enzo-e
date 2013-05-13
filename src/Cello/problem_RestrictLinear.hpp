@@ -37,20 +37,16 @@ public: // interface
 
   /// Restrict field_block_ft values to the child block given by (icx,icy,icz)
   virtual void apply 
-  (FieldBlock        * field_block_c, 
-   const FieldBlock  * field_block_f, 
-   const FieldDescr * field_descr,
-   int icx, int icy, int icz);
+  ( precision_type precision,
+    void *       values_c, int nd3_c[3], int n3_c[3],
+    const void * values_f, int nd3_f[3], int n3_f[3]);
 
 private: // functions
 
   template<class T>
-  void interpolate_(T       * values_c,
-		    const T * values_f,
-		    int ndx, int ndy, int ndz,
-		    int ixm, int iym, int izm,
-		    int nx, int ny, int nz,
-		    int gx, int gy, int gz);
+  void apply_
+  ( T *       values_c, int nd3_c[3], int n3_c[3],
+    const T * values_f, int nd3_f[3], int n3_f[3]);
 
 private: // attributes
 

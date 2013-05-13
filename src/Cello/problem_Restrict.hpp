@@ -40,10 +40,9 @@ public: // interface
 
   /// Restrict comm_block_f child values given by (icx,icy,icz) to the parent
   virtual void apply 
-  (FieldBlock        * field_block_c, 
-   const FieldBlock  * field_block_f, 
-   const FieldDescr * field_descr,
-   int icx, int icy, int icz) = 0;
+  ( precision_type precision,
+    void *       values_f, int nd3_f[3], int n3_f[3],
+    const void * values_c, int nd3_c[3], int n3_c[3]) = 0;
 
 private: // functions
 

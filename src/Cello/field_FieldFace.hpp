@@ -75,14 +75,6 @@ public: // interface
     if (fz) (*fz) = face_[2];
   }
   
-  // /// Return child indices if prolongation or restriction is required
-  // inline void get_child (int * icx, int * icy = 0, int * icz = 0)
-  // {
-  //   if (*icx) (*icx) = child_[0];
-  //   if (*icy) (*icy) = child_[1];
-  //   if (*icz) (*icz) = child_[2];
-  // }
-
   /// Create an array with the field's face data
   void load(int * n, char ** array) throw();
 
@@ -119,11 +111,11 @@ private: // functions
 
   /// Compute loop limits for load_precision_
   void load_loop_limits_
-  (int i0[3], int n3[3], int nd3[3], int ng3[3]);
+  (int im3[3], int n3[3], int nd3[3], int ng3[3]);
 
   /// Compute loop limits for store_precision_
   void store_loop_limits_
-  (int i0[3], int n3[3], int nd3[3], int ng3[3]);
+  (int im3[3], int n3[3], int nd3[3], int ng3[3]);
 
   /// Set child indices if prolongation or restriction is required
   inline void set_child_ (int icx, int icy = 0, int icz = 0)

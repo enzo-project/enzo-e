@@ -51,11 +51,12 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  int n3[3] = {4,4,4};
+  int nf3[3] = {8,8,8};
+  int nc3[3] = {4,4,4};
   int g3[3] = {3,3,3};
-  int nd3[3] = {n3[0]+2*g3[0],
-		n3[1]+2*g3[1],
-		n3[2]+2*g3[2]};
+  int nd3[3] = {nf3[0]+2*g3[0],
+		nf3[1]+2*g3[1],
+		nf3[2]+2*g3[2]};
 
   double * grid_fine = new double [nd3[0]*nd3[1]];
   double * grid_coarse = new double [nd3[0]*nd3[1]];
@@ -73,10 +74,8 @@ PARALLEL_MAIN_BEGIN
 
   ProlongLinear prolong_linear;
   prolong_linear.apply(precision_double,
-		       grid_fine,
-		       nd3[0],nd3[1],nd3[2], n3[0],n3[1],n3[2],
-		       grid_coarse,
-		       nd3[0],nd3[1],nd3[2], n3[0]/2,n3[1]/2,n3[2]/2);
+		       grid_fine,   nd3, n3f,
+		       grid_coarse, nd3, n3c);
 
   print_grid(grid_fine,nd3);
 		       

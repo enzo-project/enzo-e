@@ -19,15 +19,11 @@ FieldFace::FieldFace() throw()
     restrict_(0),
     prolong_(0)
 {
-  ghost_[0] = false;
-  ghost_[1] = false;
-  ghost_[2] = false;
-  face_[0] = 0;
-  face_[1] = 0;
-  face_[2] = 0;
-  child_[0] = 0;
-  child_[1] = 0;
-  child_[2] = 0;
+  for (int i=0; i<3; i++) {
+    ghost_[i] = false;
+    face_[i] = 0;
+    child_[i] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -43,15 +39,11 @@ FieldFace::FieldFace
     restrict_(0),
     prolong_(0)
 {
-  ghost_[0] = false;
-  ghost_[1] = false;
-  ghost_[2] = false;
-  face_[0] = 0;
-  face_[1] = 0;
-  face_[2] = 0;
-  child_[0] = 0;
-  child_[1] = 0;
-  child_[2] = 0;
+  for (int i=0; i<3; i++) {
+    ghost_[i] = false;
+    face_[i] = 0;
+    child_[i] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -87,15 +79,12 @@ FieldFace & FieldFace::operator= (const FieldFace & field_face) throw ()
 void FieldFace::copy_(const FieldFace & field_face)
 {
   array_        = field_face.array_;
-  ghost_[0] = field_face.ghost_[0];
-  ghost_[1] = field_face.ghost_[1];
-  ghost_[2] = field_face.ghost_[2];
-  face_[0] = field_face.face_[0];
-  face_[1] = field_face.face_[1];
-  face_[2] = field_face.face_[2];
-  child_[0] = field_face.child_[0];
-  child_[1] = field_face.child_[1];
-  child_[2] = field_face.child_[2];
+  
+  for (int i=0; i<3; i++) {
+    ghost_[i] = field_face.ghost_[i];
+    face_[i] = field_face.face_[i];
+    child_[i] = field_face.child_[i];
+  }
   prolong_ =  field_face.prolong_;
   restrict_ =  field_face.restrict_;
 }
@@ -147,6 +136,18 @@ void FieldFace::load ( int * n, char ** array) throw()
     int ng3[3];
     field_descr_->ghosts(field,&ng3[0],&ng3[1],&ng3[2]);
     
+    // if (restrict_) {
+
+    //   // restrict field before loading into array
+
+    //   int im = im3[0] + nd3[0]*(im3[1] + nd3[1]*im3[2]);
+
+    //   int n3_c[3]    = { n3_c[0]/2,  n3_c[1]/2,  n3_c[2]/2 };
+
+    //   restrict_->apply((float *)array,           n3_c, n3_c,
+    // 		       &((float *)field_face)[im]), nd3,  n3;
+      
+    // }
     switch (precision) {
     case precision_single:
       index += load_precision_( (float * )       (array_face), 
@@ -290,23 +291,23 @@ size_t FieldFace::load_precision_
 ) throw()
 {
   bool load;
-  int i0[3],n[3];
-  load_loop_limits_ (i0,n, nd3,ng3);
+  int im3[3],n3[3];
+  load_loop_limits_ (im3,n3, nd3,ng3);
 
-  for (int iz=0; iz <n[2]; iz++)  {
-    int kz = iz+i0[2];
-    for (int iy=0; iy < n[1]; iy++) {
-      int ky = iy+i0[1];
-      for (int ix=0; ix < n[0]; ix++) {
-	int kx = ix+i0[0];
-	int index_array = ix +   n[0]*(iy +   n[1] * iz);
-	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
-	array[index_array] = field_face[index_field];
+   for (int iz=0; iz <n3[2]; iz++)  {
+      int kz = iz+im3[2];
+      for (int iy=0; iy < n3[1]; iy++) {
+	int ky = iy+im3[1];
+	for (int ix=0; ix < n3[0]; ix++) {
+	  int kx = ix+im3[0];
+	  int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
+	  int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
+	  array[index_array] = field_face[index_field];
+	}
       }
     }
-  }
+    return (sizeof(T) * n3[0] * n3[1] * n3[2]);
 
-  return (sizeof(T) * n[0] * n[1] * n[2]);
 }
 
 //----------------------------------------------------------------------
@@ -321,78 +322,75 @@ size_t FieldFace::store_precision_
  ) throw()
 {
   bool load;
-  int i0[3],n[3];
-  store_loop_limits_ (i0,n, nd3,ng3);
+  int im3[3],n3[3];
+  store_loop_limits_ (im3,n3, nd3,ng3);
 
-  for (int iz=0; iz <n[2]; iz++)  {
-    int kz = iz+i0[2];
-    for (int iy=0; iy < n[1]; iy++) {
-      int ky = iy+i0[1];
-      for (int ix=0; ix < n[0]; ix++) {
-	int kx = ix+i0[0];
-	int index_array = ix +   n[0]*(iy +   n[1] * iz);
+  for (int iz=0; iz <n3[2]; iz++)  {
+    int kz = iz+im3[2];
+    for (int iy=0; iy < n3[1]; iy++) {
+      int ky = iy+im3[1];
+      for (int ix=0; ix < n3[0]; ix++) {
+	int kx = ix+im3[0];
+	int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
 	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
 	field_ghost[index_field] = array[index_array];
       }
     }
   }
 
-  return (sizeof(T) * n[0] * n[1] * n[2]);
+  return (sizeof(T) * n3[0] * n3[1] * n3[2]);
 }
 
 //----------------------------------------------------------------------
 
 void FieldFace::load_loop_limits_
-( int i0[3],int n[3], int nd3[3], int ng3[3])
+( int im3[3],int n3[3], int nd3[3], int ng3[3])
 {
   // NOTES: 4:p12
 
   for (int axis=0; axis<3; axis++) {
 
-    // starting index i0[axis]
+    // starting index im3[axis]
 
     if (face_[axis] == 0) {
 
       if (ghost_[axis]) {
 
-	i0[axis] =  0;
-	n[axis] = nd3[axis];
+	im3[axis] =  0;
+	n3[axis] = nd3[axis];
 
       } else {
 
-	i0[axis] = ng3[axis];
-	n[axis]  = nd3[axis] - 2*ng3[axis];
+	im3[axis] = ng3[axis];
+	n3[axis]  = nd3[axis] - 2*ng3[axis];
 
       }
 
       if ( prolong_ ) {
 	// adjust for child offset
-	n[axis]  /= 2;;
-	i0[axis] += child_[axis] * n[axis];
-	INCOMPLETE("FieldFace::loop_limits_() UNTESTED");
+	n3[axis]  /= 2;;
+	im3[axis] += child_[axis] * n3[axis];
       }
     }
 
     if (face_[axis] == -1 || face_[axis] == 1) {
 
-	if (face_[axis] == -1) i0[axis] = ng3[axis];   
-	if (face_[axis] == +1) i0[axis] = nd3[axis] - 2*ng3[axis];
+	if (face_[axis] == -1) im3[axis] = ng3[axis];   
+	if (face_[axis] == +1) im3[axis] = nd3[axis] - 2*ng3[axis];
 
       if (restrict_) { // 2*g ghost depth
 
-	INCOMPLETE("FieldFace::loop_limits_() UNTESTED");
-	if (face_[axis] == 1) i0[axis] -= ng3[axis];
-	n[axis] = 2*ng3[axis];
+	if (face_[axis] == 1) im3[axis] -= ng3[axis];
+	n3[axis] = 2*ng3[axis];
 
       }	else if (prolong_) { // g/2 ghost depth
 
-	INCOMPLETE("FieldFace::loop_limits_() UNTESTED");
-	if (face_[axis] == 1) i0[axis] += ng3[axis]/2;
-	n[axis] = (ng3[axis]+1)/2;
+	if (face_[axis] == 1) im3[axis] += ng3[axis]/2;
+	n3[axis] = (ng3[axis]+1)/2;
 
       } else {
 
-	n[axis] = ng3[axis];
+	n3[axis] = ng3[axis];
 
       }
     }
@@ -403,43 +401,38 @@ void FieldFace::load_loop_limits_
 //----------------------------------------------------------------------
 
 void FieldFace::store_loop_limits_
-( int i0[3],int n[3], int nd3[3], int ng3[3])
+( int im3[3],int n3[3], int nd3[3], int ng3[3])
 {
   // NOTES: 4:p12
 
   for (int axis=0; axis<3; axis++) {
 
-    // starting index i0[axis]
-
     if (face_[axis] == 0) {
 
       if (ghost_[axis]) {
 
-	i0[axis] =  0;
-	n[axis] = nd3[axis];
+	im3[axis] =  0;
+	n3[axis] = nd3[axis];
 
       } else {
 
-	i0[axis] = ng3[axis];
-	n[axis]  = nd3[axis] - 2*ng3[axis];
+	im3[axis] = ng3[axis];
+	n3[axis]  = nd3[axis] - 2*ng3[axis];
 
       }
 
       if ( restrict_ ) {
-	// adjust for child offset
-	n[axis]  /= 2;;
-	i0[axis] += child_[axis] * n[axis];
-	INCOMPLETE("FieldFace::loop_limits_() UNTESTED");
+	n3[axis]  /= 2;;
+	im3[axis] += child_[axis] * n3[axis];
       }
     }
 
     if (face_[axis] == -1 || face_[axis] == 1) {
 
-      if (face_[axis] == -1) i0[axis] = 0;
-      if (face_[axis] == +1) i0[axis] = nd3[axis] - ng3[axis];
+      if (face_[axis] == -1) im3[axis] = 0;
+      if (face_[axis] == +1) im3[axis] = nd3[axis] - ng3[axis];
 
-
-      n[axis] = ng3[axis];
+      n3[axis] = ng3[axis];
 
     }
 

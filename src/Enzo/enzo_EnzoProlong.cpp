@@ -42,16 +42,20 @@ void EnzoProlong::pup (PUP::er &p)
 
 void EnzoProlong::apply 
 ( precision_type precision,
-  void * values_f,
-  int ndx_f, int ndy_f, int ndf_z, 
-  int nx_f,  int ny_f,  int nz_f,
-  const void * values_c,
-  int ndx_c, int ndy_c, int ndc_z, 
-  int nx_c,  int ny_c,  int nz_c)
+  void *       values_f, int nd3_f[3], int n3_f[3],
+  const void * values_c, int nd3_c[3], int n3_c[3])
 {
   ERROR("EnzoProlong::apply()",
 	"Not Implemented yet");
+}
 
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoProlong::apply 
+( T *       values_f, int nd3_f[3], int n3_f[3],
+  const T * values_c, int nd3_c[3], int n3_c[3])
+{
   // int nd3_c[3];
   // int nd3_f[3];
   // field_block_f->size(&nd3_f[0],&nd3_f[1],&nd3_f[2]);
