@@ -81,7 +81,7 @@ public: // interface
   virtual CommBlock * create_block
   (
 #ifdef CONFIG_USE_CHARM
-   CProxy_CommBlock block_array,
+   CProxy_CommBlock * block_array,
 #else
    Simulation * simulation,
 #endif

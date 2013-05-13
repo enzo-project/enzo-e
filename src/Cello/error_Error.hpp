@@ -64,10 +64,10 @@
 //----------------------------------------------------------------------
 /// @def      INCOMPLETE
 /// @brief    Placeholder for code that is incomplete
-#define INCOMPLETE(F)						\
-  {								\
-    m2_(stdout,"INCOMPLETE",__FILE__,__LINE__,F,"");	\
-  }
+#define INCOMPLETE(M)					\
+  { m2_(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M);  }
+#define INCOMPLETE1(M,A1)					\
+  { m2_(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M,A1);  }
 
 //----------------------------------------------------------------------
 /// @def      TRACE

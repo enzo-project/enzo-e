@@ -422,6 +422,10 @@ EnzoBlock::EnzoBlock
 
 void EnzoBlock::initialize_enzo_()
 {
+  set_cycle(simulation()->cycle());
+  set_time (simulation()->time());
+  set_dt   (simulation()->dt());
+
   for (int i=0; i<MAX_DIMENSION; i++) {
     AccelerationField[i] = 0;
     GridLeftEdge[i] = 0;
@@ -686,6 +690,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 void EnzoBlock::set_cycle (int cycle_start) throw ()
 {
   CommBlock::set_cycle (cycle_start);
+  TRACE2("%p EnzoBlock::set_cycle(%d)",this,cycle_start);
 
   CycleNumber = cycle_start;
 }
@@ -694,7 +699,7 @@ void EnzoBlock::set_cycle (int cycle_start) throw ()
 
 void EnzoBlock::set_time (double time) throw ()
 {
-  TRACE4 ("%p EnzoBlock::set_time() %24.15g %24.15g %24.15g",this,OldTime,Time_,time);
+  TRACE2("%p EnzoBlock::set_time(%20.15g)",this,time);
   CommBlock::set_time (time);
 
   //  Setting OldTime = Time_ leads to an error in Grid_ComputePressure.C:38

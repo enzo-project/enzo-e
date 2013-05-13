@@ -119,7 +119,7 @@ CProxy_CommBlock Factory::create_block_array
 CommBlock * Factory::create_block
 (
 #ifdef CONFIG_USE_CHARM
- CProxy_CommBlock block_array,
+ CProxy_CommBlock * block_array,
 #else /* CONFIG_USE_CHARM */
  Simulation * simulation,
 #endif /* CONFIG_USE_CHARM */
@@ -137,20 +137,20 @@ CommBlock * Factory::create_block
 
 #ifdef CONFIG_USE_CHARM
 
-   block_array[index].insert
-     (
-      index,
-      nx,ny,nz,
-      num_field_blocks,
-      count_adapt,
-      initial,
-      testing);
+  (*block_array)[index].insert
+    (
+     index,
+     nx,ny,nz,
+     num_field_blocks,
+     count_adapt,
+     initial,
+     testing);
 
-   CommBlock * block = block_array[index].ckLocal();
-   TRACE1("block = %p",block);
-   //  ASSERT("Factory::create_block()","block is NULL",block != NULL);
+  CommBlock * block = (*block_array)[index].ckLocal();
 
-   return block;
+  ASSERT("Factory::create_block()","block is NULL",block != NULL);
+
+  return block;
 
 #else /* CONFIG_USE_CHARM */
 

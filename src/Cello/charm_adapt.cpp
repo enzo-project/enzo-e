@@ -220,7 +220,7 @@ void CommBlock::p_refine()
 
       // create new children
       factory->create_block 
-	(thisProxy, index_child,
+	(&thisProxy, index_child,
 	 nx,ny,nz,
 	 num_field_blocks,
 	 count_adapt_,
@@ -294,6 +294,8 @@ void CommBlock::coarsen()
 
 void CommBlock::p_child_can_coarsen(int ic)
 {
+  INCOMPLETE1("CommBlock::p_child_can_coarsen(%d) is not implemented yet",
+	      ic);
 }
 
 //----------------------------------------------------------------------

@@ -99,7 +99,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
 CommBlock * EnzoFactory::create_block
 (
 #ifdef CONFIG_USE_CHARM
- CProxy_CommBlock block_array,
+ CProxy_CommBlock * block_array,
 #else
  Simulation * simulation,
 #endif /* CONFIG_USE_CHARM */
@@ -118,7 +118,9 @@ CommBlock * EnzoFactory::create_block
 
 #ifdef CONFIG_USE_CHARM
 
-   block_array[index].insert
+  CProxy_EnzoBlock * enzo_block_array = (CProxy_EnzoBlock * ) block_array;
+
+  (*enzo_block_array)[index].insert
      (
       index,
       nx,ny,nz,
@@ -127,7 +129,7 @@ CommBlock * EnzoFactory::create_block
       initial,
       testing);
 
-   CommBlock * block = block_array[index].ckLocal();
+  CommBlock * block = (*enzo_block_array)[index].ckLocal();
    TRACE1("block = %p",block);
    //  ASSERT("Factory::create_block()","block is NULL",block != NULL);
 

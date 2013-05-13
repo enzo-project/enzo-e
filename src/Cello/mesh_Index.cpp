@@ -186,43 +186,6 @@ Index Index::index_neighbor (int ix, int iy, int iz, int n3[3]) const
 
 //----------------------------------------------------------------------
 
-Index Index::index_uncle (int axis, int face, int narray) const
-{
-  TRACE3("index_uncle axis %d  face %d  narray %d",
-	 axis,face,narray);
-  return index_parent().index_neighbor(axis,face, narray);
-}
-
-//----------------------------------------------------------------------
-
-Index Index::index_nibling (int axis, int face, int ic3[3], int narray) const
-{
-  TRACE6("index_nibling axis %d  face %d   child %d %d %d  narray %d",
-	 axis,face,ic3[0],ic3[1],ic3[2],narray);
-
-  // want facing child in neighbor not corresponding child
-
-  // ic3[axis] = 1 - ic3[axis];
-
-  return index_neighbor(axis,face,narray).index_child(ic3);
-}
-
-//----------------------------------------------------------------------
-
-Index Index::index_nibling (int ix, int iy, int iz, int ic3[3], int n3[3]) const
-{
-  TRACE9("index_nibling ix iy iz %d %d %d  child %d %d %d  n3 %d %d %d",
-	 ix,iy,iz,ic3[0],ic3[1],ic3[2],n3[0],n3[1],n3[2]);
-
-  // want facing child in neighbor not corresponding child
-
-  //  ic3[axis] = 1 - ic3[axis];
-
-  return index_neighbor(ix,iy,iz,n3).index_child(ic3);
-}
-
-//----------------------------------------------------------------------
-
 void Index::child (int level, int * icx, int * icy, int * icz) const
 {
   ASSERT ("Index::child","level must be at least 1",level>0);
