@@ -126,52 +126,59 @@ void FieldFace::load ( int * n, char ** array) throw()
   
     precision_type precision = field_descr_->precision(field);
 
-    const char * field_face = field_block_->field_values(field);
+    const void * field_face = field_block_->field_values(field);
 
-    char * array_face  = &array_[index];
+    void * array_face  = &array_[index];
 
-    int ndf3[3];
-    field_block_->field_size(field_descr_,field,&ndf3[0],&ndf3[1],&ndf3[2]);
+    int nd3[3],ng3[3],im3[3],n3[3];
 
-    int ng3[3];
+    field_block_->field_size(field_descr_,field,&nd3[0],&nd3[1],&nd3[2]);
     field_descr_->ghosts(field,&ng3[0],&ng3[1],&ng3[2]);
-    
-    int im3[3],nf3[3];
-    load_loop_limits_ (im3,nf3, ndf3,ng3);
 
-    // if (restrict_) {
+    load_loop_limits_ (im3,n3, nd3,ng3);
 
-    //   // restrict field before loading into array
+    if (restrict_) {
 
-    //   int im = im3[0] + nd3[0]*(im3[1] + nd3[1]*im3[2]);
+      // Restrict field to array
 
-    //   int n3_c[3]    = { n3_c[0]/2,  n3_c[1]/2,  n3_c[2]/2 };
+      int i0 = im3[0] + nd3[0]*(im3[1] + nd3[1]*im3[2]);
 
-    //   restrict_->apply((float *)array,           n3_c, n3_c,
-    // 		       &((float *)field_face)[im]), nd3,  n3;
-      
-    // }
-    switch (precision) {
-    case precision_single:
-      index += load_precision_
-	( (float * )       (array_face), 
-	  (const float * ) (field_face),
-	  ndf3,nf3,im3);
-      break;
-    case precision_double:
-      index += load_precision_
-	((double * )       (array_face), 
-	 (const double * ) (field_face),
-	 ndf3,nf3,im3);
-      break;
-    case precision_quadruple:
-      index += load_precision_ 
-	((long double * )      (array_face), 
-	 (const long double * )(field_face),
-	 ndf3,nf3,im3);
-      break;
-    default:
-      ERROR("FieldFace::load", "Unsupported precision");
+      int nc3[3] = { (n3[0]+1)/2, (n3[1]+1)/2,(n3[2]+1)/2 };
+
+      restrict_->apply(precision, array_face,nc3,nc3, field_face,nd3,n3);
+
+      index += nc3[0]*nc3[1]*nc3[2];
+
+    } else {
+
+      // Copy field to array
+      switch (precision) {
+      case precision_single:
+	{
+	  float *       array = (float *) array_face;
+	  const float * field = (const float *) field_face;
+	  index += load_ ( array,field, nd3,n3,im3);
+	}
+	break;
+      case precision_double:
+	{
+	  double *       array = (double *)array_face;
+	  const double * field = (const double *) field_face;
+	  index += load_ ( array,field, nd3,n3,im3);
+	}
+	break;
+      case precision_quadruple:
+	{
+	  long double *       array = (long double *)array_face;
+	  const long double * field = (const long double *) field_face;
+	  index += load_ ( array,field, nd3,n3,im3);
+	}
+	break;
+      default:
+	ERROR("FieldFace::load", "Unsupported precision");
+	break;
+      }
+
     }
   }
 
@@ -196,36 +203,61 @@ void FieldFace::store (int n, char * array) throw()
     
     char * array_ghost  = array + index;
 
-    int ndf3[3];
-    field_block_->field_size(field_descr_,field,&ndf3[0],&ndf3[1],&ndf3[2]);
+    int nd3[3],ng3[3],im3[3],n3[3];
 
-    int ng3[3];
+    field_block_->field_size(field_descr_,field,&nd3[0],&nd3[1],&nd3[2]);
     field_descr_->ghosts(field,&ng3[0],&ng3[1],&ng3[2]);
 
-    int im3[3],nf3[3];
-    store_loop_limits_ (im3,nf3, ndf3,ng3);
+    store_loop_limits_ (im3,n3, nd3,ng3);
 
-    switch (precision) {
-    case precision_single:
-      index += store_precision_
-	((float * )      (field_ghost), 
-	 (const float * )(array_ghost),
-	 ndf3,nf3,im3);
-      break;
-    case precision_double:
-      index += store_precision_
-	((double * )      (field_ghost),
-	 (const double * )(array_ghost),
-	 ndf3,nf3,im3);
-      break;
-    case precision_quadruple:
-      index += store_precision_
-	((long double * )      (field_ghost),
-	 (const long double * )(array_ghost),
-	 ndf3,nf3,im3);
-      break;
-    default:
-      ERROR("FieldFace::store", "Unsupported precision");
+    if (prolong_) {
+
+      // Prolong array to field
+
+      bool need_padding = (ng3[0]%2==1) || (ng3[1]%2==1) || (ng3[2]%2==1);
+
+      ASSERT("FieldFace::store()",
+	     "Odd ghost zones not implemented yet: prolong needs padding",
+	     need_padding);
+
+      int i0 = im3[0] + nd3[0]*(im3[1] + nd3[1]*im3[2]);
+
+      int nc3[3] = { (n3[0]+1)/2, (n3[1]+1)/2,(n3[2]+1)/2 };
+
+      prolong_->apply(precision, field_ghost,nd3,n3, array_ghost,nc3,nc3);
+
+      index += nc3[0]*nc3[1]*nc3[2];
+
+    } else {
+
+      // Copyarray to field
+
+      switch (precision) {
+      case precision_single:
+	{
+	  float *       field = (float *)field_ghost;
+	  const float * array = (const float *)array_ghost;
+	  index += store_ (field, array, nd3,n3,im3);
+	}
+	break;
+      case precision_double:
+	{
+	  double *       field = (double *)field_ghost;
+	  const double * array = (const double *)array_ghost;
+	  index += store_ (field, array, nd3,n3,im3);
+	}
+	break;
+      case precision_quadruple:
+	{
+	  long double *       field = (long double *)field_ghost;
+	  const long double * array = (const long double *)array_ghost;
+	  index += store_ (field, array, nd3,n3,im3);
+	}
+	break;
+      default:
+	ERROR("FieldFace::store", "Unsupported precision");
+	break;
+      }
     }
   }
 
@@ -248,28 +280,28 @@ char * FieldFace::allocate () throw()
     int bytes_per_element = cello::sizeof_precision (precision);
 
 
-    int ndf3[3];
+    int nd3[3];
     int field_bytes = field_block_->field_size 
-      (field_descr_,index_field, &ndf3[0], &ndf3[1], &ndf3[2]);
+      (field_descr_,index_field, &nd3[0], &nd3[1], &nd3[2]);
 
     int ng3[3];
     field_descr_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    int n_old = ndf3[0]*ndf3[1]*ndf3[2];
+    int n_old = nd3[0]*nd3[1]*nd3[2];
 
-    if (! ghost_[0]) ndf3[0] -= 2*ng3[0];
-    if (! ghost_[1]) ndf3[1] -= 2*ng3[1];
-    if (! ghost_[2]) ndf3[2] -= 2*ng3[2];
+    if (! ghost_[0]) nd3[0] -= 2*ng3[0];
+    if (! ghost_[1]) nd3[1] -= 2*ng3[1];
+    if (! ghost_[2]) nd3[2] -= 2*ng3[2];
 
-    int n_new = ndf3[0]*ndf3[1]*ndf3[2];
+    int n_new = nd3[0]*nd3[1]*nd3[2];
 
     field_bytes /= n_old;
     field_bytes *= n_new;
 
     int face_bytes = field_bytes;
-    if (face_[0]) face_bytes = (face_bytes * ng3[0]) / ndf3[0];
-    if (face_[1]) face_bytes = (face_bytes * ng3[1]) / ndf3[1];
-    if (face_[2]) face_bytes = (face_bytes * ng3[2]) / ndf3[2];
+    if (face_[0]) face_bytes = (face_bytes * ng3[0]) / nd3[0];
+    if (face_[1]) face_bytes = (face_bytes * ng3[1]) / nd3[1];
+    if (face_[2]) face_bytes = (face_bytes * ng3[2]) / nd3[2];
 
     face_bytes += 
       field_block_->adjust_alignment_(face_bytes,bytes_per_element);
@@ -294,57 +326,55 @@ void FieldFace::deallocate() throw()
 //----------------------------------------------------------------------
 
 template<class T>
-size_t FieldFace::load_precision_
-(
- T * array, const T * field_face,
- int ndf3[3], int nf3[3],int im3[3]
-) throw()
+size_t FieldFace::load_
+( T * array_face, const T * field_face, 
+  int nd3[3], int n3[3],int im3[3] ) throw()
 {
-   for (int iz=0; iz <nf3[2]; iz++)  {
-      int kz = iz+im3[2];
-      for (int iy=0; iy < nf3[1]; iy++) {
-	int ky = iy+im3[1];
-	for (int ix=0; ix < nf3[0]; ix++) {
-	  int kx = ix+im3[0];
-	  int index_array = ix +   nf3[0]*(iy +   nf3[1] * iz);
-	  int index_field = kx + ndf3[0]*(ky + ndf3[1] * kz);
-	  array[index_array] = field_face[index_field];
-	}
+
+
+  for (int iz=0; iz <n3[2]; iz++)  {
+    int kz = iz+im3[2];
+    for (int iy=0; iy < n3[1]; iy++) {
+      int ky = iy+im3[1];
+      for (int ix=0; ix < n3[0]; ix++) {
+	int kx = ix+im3[0];
+	int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
+	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
+	array_face[index_array] = field_face[index_field];
       }
     }
-    return (sizeof(T) * nf3[0] * nf3[1] * nf3[2]);
+  }
+
+  return (sizeof(T) * n3[0] * n3[1] * n3[2]);
 
 }
 
 //----------------------------------------------------------------------
 
 template<class T>
-size_t FieldFace::store_precision_
-(
- T * field_ghost, const T * array,
- int ndf3[3], int nf3[3],int im3[3]
- ) throw()
+    size_t FieldFace::store_
+( T * field_ghost, const T * array, int nd3[3], int n3[3],int im3[3] ) throw()
 {
-  for (int iz=0; iz <nf3[2]; iz++)  {
+  for (int iz=0; iz <n3[2]; iz++)  {
     int kz = iz+im3[2];
-    for (int iy=0; iy < nf3[1]; iy++) {
+    for (int iy=0; iy < n3[1]; iy++) {
       int ky = iy+im3[1];
-      for (int ix=0; ix < nf3[0]; ix++) {
+      for (int ix=0; ix < n3[0]; ix++) {
 	int kx = ix+im3[0];
-	int index_array = ix +   nf3[0]*(iy +   nf3[1] * iz);
-	int index_field = kx + ndf3[0]*(ky + ndf3[1] * kz);
+	int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
+	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
 	field_ghost[index_field] = array[index_array];
       }
     }
   }
 
-  return (sizeof(T) * nf3[0] * nf3[1] * nf3[2]);
+  return (sizeof(T) * n3[0] * n3[1] * n3[2]);
 }
 
 //----------------------------------------------------------------------
 
 void FieldFace::load_loop_limits_
-( int im3[3],int nf3[3], int ndf3[3], int ng3[3])
+( int im3[3],int n3[3], int nd3[3], int ng3[3])
 {
   // NOTES: 4:p12
 
@@ -357,40 +387,40 @@ void FieldFace::load_loop_limits_
       if (ghost_[axis]) {
 
 	im3[axis] =  0;
-	nf3[axis] = ndf3[axis];
+	n3[axis] = nd3[axis];
 
       } else {
 
 	im3[axis] = ng3[axis];
-	nf3[axis]  = ndf3[axis] - 2*ng3[axis];
+	n3[axis]  = nd3[axis] - 2*ng3[axis];
 
       }
 
       if ( prolong_ ) {
 	// adjust for child offset
-	nf3[axis]  /= 2;;
-	im3[axis] += child_[axis] * nf3[axis];
+	n3[axis]  /= 2;;
+	im3[axis] += child_[axis] * n3[axis];
       }
     }
 
     if (face_[axis] == -1 || face_[axis] == 1) {
 
 	if (face_[axis] == -1) im3[axis] = ng3[axis];   
-	if (face_[axis] == +1) im3[axis] = ndf3[axis] - 2*ng3[axis];
+	if (face_[axis] == +1) im3[axis] = nd3[axis] - 2*ng3[axis];
 
       if (restrict_) { // 2*g ghost depth
 
 	if (face_[axis] == 1) im3[axis] -= ng3[axis];
-	nf3[axis] = 2*ng3[axis];
+	n3[axis] = 2*ng3[axis];
 
       }	else if (prolong_) { // g/2 ghost depth
 
 	if (face_[axis] == 1) im3[axis] += ng3[axis]/2;
-	nf3[axis] = (ng3[axis]+1)/2;
+	n3[axis] = (ng3[axis]+1)/2;
 
       } else {
 
-	nf3[axis] = ng3[axis];
+	n3[axis] = ng3[axis];
 
       }
     }
@@ -401,7 +431,7 @@ void FieldFace::load_loop_limits_
 //----------------------------------------------------------------------
 
 void FieldFace::store_loop_limits_
-( int im3[3],int nf3[3], int ndf3[3], int ng3[3])
+( int im3[3],int n3[3], int nd3[3], int ng3[3])
 {
   // NOTES: 4:p12
 
@@ -412,27 +442,27 @@ void FieldFace::store_loop_limits_
       if (ghost_[axis]) {
 
 	im3[axis] =  0;
-	nf3[axis] = ndf3[axis];
+	n3[axis] = nd3[axis];
 
       } else {
 
 	im3[axis] = ng3[axis];
-	nf3[axis]  = ndf3[axis] - 2*ng3[axis];
+	n3[axis]  = nd3[axis] - 2*ng3[axis];
 
       }
 
       if ( restrict_ ) {
-	nf3[axis]  /= 2;;
-	im3[axis] += child_[axis] * nf3[axis];
+	n3[axis]  /= 2;;
+	im3[axis] += child_[axis] * n3[axis];
       }
     }
 
     if (face_[axis] == -1 || face_[axis] == 1) {
 
       if (face_[axis] == -1) im3[axis] = 0;
-      if (face_[axis] == +1) im3[axis] = ndf3[axis] - ng3[axis];
+      if (face_[axis] == +1) im3[axis] = nd3[axis] - ng3[axis];
 
-      nf3[axis] = ng3[axis];
+      n3[axis] = ng3[axis];
 
     }
 
