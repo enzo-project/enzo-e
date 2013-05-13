@@ -109,10 +109,6 @@ private: // functions
   /// copy data
   void copy_(const FieldFace & field_face); 
 
-  /// Compute loop limits for load_precision_
-  void load_loop_limits_
-  (int im3[3], int n3[3], int nd3[3], int ng3[3]);
-
   /// Compute loop limits for store_precision_
   void store_loop_limits_
   (int im3[3], int n3[3], int nd3[3], int ng3[3]);
@@ -125,22 +121,21 @@ private: // functions
     child_[2] = icz;
   }
 
-
   /// Precision-agnostic function for loading field block face into
   /// the field_face array; returns number of bytes copied
   template<class T>
-  size_t load_precision_ (T *       array_face, 
-			  const T * field_face,
-			  int       nd3[3], 
-			  int       ng3[3]) throw();
+  size_t load_precision_ (T * array_face,  const T * field_face,
+			  int nd3[3], int nf3[3], int im3[3]) throw();
 
   /// Precision-agnostic function for copying the field_face array into
   /// the field block ghosts; returns number of bytes copied
   template<class T>
-  size_t store_precision_ (T *       field_ghosts, 
-			   const T * array_ghosts, 
-			   int       nd3[3], 
-			   int       ng3[3]) throw();
+  size_t store_precision_ (T * field_ghosts,  const T * array_ghosts, 
+			   int nd3[3], int nf3[3], int im3[3]) throw();
+
+  /// Compute loop limits for load_precision_
+  void load_loop_limits_
+  (int im3[3], int n3[3], int nd3[3], int ng3[3]);
 
 private: // attributes
 
