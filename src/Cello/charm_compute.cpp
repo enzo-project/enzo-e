@@ -84,6 +84,7 @@ void CommBlock::compute()
   // Update CommBlock cycle and time to Simulation time and cycle
 
   set_cycle (cycle_ + 1);
+  TRACE("CommBlock::compute() calling set_time()");
   set_time  (time_  + dt_);
   
   // prepare for next cycle: Timestep, Stopping, Monitor, Output

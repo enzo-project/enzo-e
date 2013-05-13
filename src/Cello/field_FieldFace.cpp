@@ -19,9 +19,9 @@ FieldFace::FieldFace() throw()
     restrict_(0),
     prolong_(0)
 {
-  ghost_[0] = true;
-  ghost_[1] = true;
-  ghost_[2] = true;
+  ghost_[0] = false;
+  ghost_[1] = false;
+  ghost_[2] = false;
   face_[0] = 0;
   face_[1] = 0;
   face_[2] = 0;
@@ -43,9 +43,9 @@ FieldFace::FieldFace
     restrict_(0),
     prolong_(0)
 {
-  ghost_[0] = true;
-  ghost_[1] = true;
-  ghost_[2] = true;
+  ghost_[0] = false;
+  ghost_[1] = false;
+  ghost_[2] = false;
   face_[0] = 0;
   face_[1] = 0;
   face_[2] = 0;
@@ -101,6 +101,7 @@ void FieldFace::copy_(const FieldFace & field_face)
 }
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
 void FieldFace::pup (PUP::er &p)
 {
 
@@ -121,7 +122,7 @@ void FieldFace::pup (PUP::er &p)
   p | *restrict_;  // PUPable
   p | *prolong_;  // PUPable
 }
-
+#endif
 //======================================================================
 
 void FieldFace::load ( int * n, char ** array) throw()
@@ -290,7 +291,7 @@ size_t FieldFace::load_precision_
 {
   bool load;
   int i0[3],n[3];
-  loop_limits_ (i0,n, nd3,ng3, load = true);
+  load_loop_limits_ (i0,n, nd3,ng3);
 
   for (int iz=0; iz <n[2]; iz++)  {
     int kz = iz+i0[2];
@@ -321,7 +322,7 @@ size_t FieldFace::store_precision_
 {
   bool load;
   int i0[3],n[3];
-  loop_limits_ (i0,n, nd3,ng3, load = false);
+  store_loop_limits_ (i0,n, nd3,ng3);
 
   for (int iz=0; iz <n[2]; iz++)  {
     int kz = iz+i0[2];
@@ -341,12 +342,10 @@ size_t FieldFace::store_precision_
 
 //----------------------------------------------------------------------
 
-void FieldFace::loop_limits_
-( int i0[3],int n[3], int nd3[3], int ng3[3],  bool load )
+void FieldFace::load_loop_limits_
+( int i0[3],int n[3], int nd3[3], int ng3[3])
 {
   // NOTES: 4:p12
-
-  bool store = ! load;
 
   for (int axis=0; axis<3; axis++) {
 
@@ -366,8 +365,7 @@ void FieldFace::loop_limits_
 
       }
 
-      if ( (load  && prolong_ ) ||
-	   (store && restrict_)) {
+      if ( prolong_ ) {
 	// adjust for child offset
 	n[axis]  /= 2;;
 	i0[axis] += child_[axis] * n[axis];
@@ -377,23 +375,16 @@ void FieldFace::loop_limits_
 
     if (face_[axis] == -1 || face_[axis] == 1) {
 
-      if (load) { // face data
 	if (face_[axis] == -1) i0[axis] = ng3[axis];   
 	if (face_[axis] == +1) i0[axis] = nd3[axis] - 2*ng3[axis];
-      }
 
-      if (store) { // ghost data
-	if (face_[axis] == -1) i0[axis] = 0;
-	if (face_[axis] == +1) i0[axis] = nd3[axis] - ng3[axis];
-      }
-
-      if (load && restrict_) { // 2*g ghost depth
+      if (restrict_) { // 2*g ghost depth
 
 	INCOMPLETE("FieldFace::loop_limits_() UNTESTED");
 	if (face_[axis] == 1) i0[axis] -= ng3[axis];
 	n[axis] = 2*ng3[axis];
 
-      }	else if (load && prolong_) { // g/2 ghost depth
+      }	else if (prolong_) { // g/2 ghost depth
 
 	INCOMPLETE("FieldFace::loop_limits_() UNTESTED");
 	if (face_[axis] == 1) i0[axis] += ng3[axis]/2;
@@ -404,6 +395,52 @@ void FieldFace::loop_limits_
 	n[axis] = ng3[axis];
 
       }
+    }
+
+  }
+}
+
+//----------------------------------------------------------------------
+
+void FieldFace::store_loop_limits_
+( int i0[3],int n[3], int nd3[3], int ng3[3])
+{
+  // NOTES: 4:p12
+
+  for (int axis=0; axis<3; axis++) {
+
+    // starting index i0[axis]
+
+    if (face_[axis] == 0) {
+
+      if (ghost_[axis]) {
+
+	i0[axis] =  0;
+	n[axis] = nd3[axis];
+
+      } else {
+
+	i0[axis] = ng3[axis];
+	n[axis]  = nd3[axis] - 2*ng3[axis];
+
+      }
+
+      if ( restrict_ ) {
+	// adjust for child offset
+	n[axis]  /= 2;;
+	i0[axis] += child_[axis] * n[axis];
+	INCOMPLETE("FieldFace::loop_limits_() UNTESTED");
+      }
+    }
+
+    if (face_[axis] == -1 || face_[axis] == 1) {
+
+      if (face_[axis] == -1) i0[axis] = 0;
+      if (face_[axis] == +1) i0[axis] = nd3[axis] - ng3[axis];
+
+
+      n[axis] = ng3[axis];
+
     }
 
   }

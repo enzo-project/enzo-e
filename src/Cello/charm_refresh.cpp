@@ -91,12 +91,6 @@ void CommBlock::refresh ()
 
   // Include ghost zones in refresh?
 
-  bool lgx,lgy,lgz;
-
-  lgx = false;
-  lgy = false;
-  lgz = false;
-
   // Forest size needed for Index
 
   int n3[3];
@@ -130,16 +124,17 @@ void CommBlock::refresh ()
 
 	  } else {
 
-	    // update fine neighbors
+	    // update any fine neighbors...
 
-	    //	    refresh_same(index,ix,iy,iz,lgx,lgy,lgz);
+	    int count_nibling = refresh_fine (index,ix,iy,iz,n3);
 
-	    int count_nibling = refresh_fine (index,ix,iy,iz,lgx,lgy,lgz,n3);
+	    // ...update neighbor if none
 
 	    if (count_nibling == 0 && index_ != index) {
 
 	      if (refresh_type_counter) ++loop_refresh_.stop();
-	      refresh_same(index,ix,iy,iz,lgx,lgy,lgz);
+
+	      refresh_same(index,ix,iy,iz);
 
 	    }
 	  }
@@ -164,8 +159,7 @@ void CommBlock::refresh_coarse (Index index)
 //----------------------------------------------------------------------
 
 void CommBlock::refresh_same (Index index, 
-			      int ix,  int iy,  int iz,
-			      int lgx, int lgy, int lgz)
+			      int ix,  int iy,  int iz)
 {
 
   
@@ -177,7 +171,6 @@ void CommBlock::refresh_same (Index index,
   FieldFace field_face (block_->field_block(),field_descr);
 
   field_face.set_face(ix,iy,iz);
-  field_face.set_ghost(lgx,lgy,lgz);
 	  
   int n; 
   char * array;
@@ -200,15 +193,9 @@ void CommBlock::x_refresh_same (int n, char * buffer, int fx, int fy, int fz)
     // n == 0 is the call from self to ensure x_refresh_same()
     // always gets called at least once
 
-    bool gx,gy,gz;
-    gx = false;
-    gy = false;
-    gz = false;
-
     FieldFace field_face(block_->field_block(), field_descr);
 
     field_face.set_face(fx,fy,fz);
-    field_face.set_ghost(gx,gy,gz);
 
     field_face.store (n, buffer);
   }
@@ -228,7 +215,6 @@ void CommBlock::x_refresh_same (int n, char * buffer, int fx, int fy, int fz)
 int CommBlock::refresh_fine 
 (Index index, 
  int ix,  int iy,  int iz,
- int lgx, int lgy, int lgz,
  int n3[3])
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -274,7 +260,6 @@ int CommBlock::refresh_fine
 	  FieldFace field_face (block_->field_block(),field_descr);
 
 	  field_face.set_face(ix,iy,iz);
-	  field_face.set_ghost(lgx,lgy,lgz);
 	  
 	  int n; 
 	  char * array;
@@ -302,16 +287,9 @@ void CommBlock::x_refresh_fine (int n, char * buffer, int fx, int fy, int fz)
    FieldDescr * field_descr = simulation->field_descr();
    const Config * config    = simulation->config();
 
-   bool gx,gy,gz;
-   gx = false;
-   gy = false;
-   gz = false;
-
    FieldFace field_face(block_->field_block(), field_descr);
 
    field_face.set_face(fx,fy,fz);
-   field_face.set_ghost(gx,gy,gz);
-
    
    field_face.store (n, buffer);
 

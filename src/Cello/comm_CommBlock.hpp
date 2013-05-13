@@ -163,8 +163,7 @@ public: // interface
 
   /// send  ghost zones to given neighbor in same level
   void refresh_same (Index index,
-		     int ix, int iy, int iz,
-		     int lgx, int lgy, int lgz);
+		     int ix, int iy, int iz);
 
   /// Refresh a FieldFace in the same level
   void x_refresh_same(int n, char buffer[],int fx, int fy, int fz);
@@ -175,7 +174,6 @@ public: // interface
   /// send ghost zones to fine neighbors in given direction
   int refresh_fine (Index index,
 		    int ix, int iy, int iz,
-		    int lgx, int lgy, int lgz,
 		    int n3[3]);
 
   /// Refresh a FieldFace in the next-finer level
@@ -295,7 +293,9 @@ public: // virtual functions
 
   /// Set CommBlock's time
   virtual void set_time (double time) throw()
-  { time_  = time; }
+  {
+    TRACE2("%p set_time(%20.15g)",this,time);
+    time_  = time; }
 
   /// Set CommBlock's timestep
   virtual void set_dt (double dt) throw()

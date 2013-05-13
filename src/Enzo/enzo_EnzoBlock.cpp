@@ -129,7 +129,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   InitialTimeInCodeUnits = 0;
 
   //    Time = 0;
-  //    OldTime = 0;
+  // OldTime = 0;
 
   // PPM
 
@@ -413,7 +413,7 @@ EnzoBlock::EnzoBlock
 {
   int mx,my,mz;
   index.array(&mx,&my,&mz);
-  TRACE3("EnzoBlock::EnzoBlock(%d %d %d)",mx,my,mz);
+  TRACE4("%p EnzoBlock::EnzoBlock(%d %d %d)",this,mx,my,mz);
   initialize_enzo_();
   initialize();
 }
@@ -694,6 +694,7 @@ void EnzoBlock::set_cycle (int cycle_start) throw ()
 
 void EnzoBlock::set_time (double time) throw ()
 {
+  TRACE4 ("%p EnzoBlock::set_time() %24.15g %24.15g %24.15g",this,OldTime,Time_,time);
   CommBlock::set_time (time);
 
   //  Setting OldTime = Time_ leads to an error in Grid_ComputePressure.C:38

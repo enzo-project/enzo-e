@@ -37,20 +37,24 @@ public: // interface
 
   /// Prolong comm_block_Ht values to the child block given by (icx,icy,icz)
   virtual void apply 
-  (      FieldBlock * field_block_f, 
-   const FieldBlock * field_block_c, 
-   const FieldDescr * field_descr,
-   int icx, int icy, int icz);
+  ( precision_type precision,
+     void * values_f,
+    int ndx_f, int ndy_f, int ndf_z, 
+    int nx_f,  int ny_f,  int nz_f,
+    const void * values_c,
+    int ndx_c, int ndy_c, int ndc_z, 
+    int nx_c,  int ny_c,  int nz_c);
 
 private: // functions
 
-  template<class T>
-  void interpolate_(T       * values_f,
-		    const T * values_c,
-		    int ndx, int ndy, int ndz,
-		    int ixm, int iym, int izm,
-		    int nx, int ny, int nz,
-		    int gx, int gy, int gz);
+  template <class T>  
+  void apply_
+  ( T * values_f,
+    int ndx_f, int ndy_f, int ndf_z, 
+    int nx_f,  int ny_f,  int nz_f,
+    const T * values_c,
+    int ndx_c, int ndy_c, int ndc_z, 
+    int nx_c,  int ny_c,  int nz_c);
 
 private: // attributes
 

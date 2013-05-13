@@ -75,32 +75,26 @@ public: // interface
     if (fz) (*fz) = face_[2];
   }
   
-  /// Set child indices if prolongation or restriction is required
-  inline void set_child (int icx, int icy = 0, int icz = 0)
-  {
-    child_[0] = icx;
-    child_[1] = icy;
-    child_[2] = icz;
-  }
-
-  /// Return child indices if prolongation or restriction is required
-  inline void get_child (int * icx, int * icy = 0, int * icz = 0)
-  {
-    if (*icx) (*icx) = child_[0];
-    if (*icy) (*icy) = child_[1];
-    if (*icz) (*icz) = child_[2];
-  }
+  // /// Return child indices if prolongation or restriction is required
+  // inline void get_child (int * icx, int * icy = 0, int * icz = 0)
+  // {
+  //   if (*icx) (*icx) = child_[0];
+  //   if (*icy) (*icy) = child_[1];
+  //   if (*icz) (*icz) = child_[2];
+  // }
 
   /// Create an array with the field's face data
   void load(int * n, char ** array) throw();
 
   /// Interpolate the data using the given prolongation operator
-  void set_prolong(Prolong * prolong) throw()
-  { prolong_ = prolong; }
+  void set_prolong(Prolong * prolong, int icx, int icy=0, int icz=0) throw()
+  { prolong_ = prolong; 
+    set_child_(icx,icy,icz);  }
 
   /// Restrict the data using the given restriction operator
-  void set_restrict(Restrict * restrict) throw()
-  { restrict_ = restrict; }
+  void set_restrict(Restrict * restrict, int icx, int icy=0, int icz=0) throw()
+  { restrict_ = restrict; 
+    set_child_(icx,icy,icz);  }
 
   /// Copy the input array data to the field's ghost zones
   void store(int n, char * array) throw();
@@ -123,9 +117,21 @@ private: // functions
   /// copy data
   void copy_(const FieldFace & field_face); 
 
-  /// Compute loop limits for load_precision_ and store_precision_
-  void loop_limits_
-  (int i0[3], int n3[3], int nd3[3], int ng3[3], bool load);
+  /// Compute loop limits for load_precision_
+  void load_loop_limits_
+  (int i0[3], int n3[3], int nd3[3], int ng3[3]);
+
+  /// Compute loop limits for store_precision_
+  void store_loop_limits_
+  (int i0[3], int n3[3], int nd3[3], int ng3[3]);
+
+  /// Set child indices if prolongation or restriction is required
+  inline void set_child_ (int icx, int icy = 0, int icz = 0)
+  {
+    child_[0] = icx;
+    child_[1] = icy;
+    child_[2] = icz;
+  }
 
 
   /// Precision-agnostic function for loading field block face into

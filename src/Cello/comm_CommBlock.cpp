@@ -73,6 +73,7 @@ CommBlock::CommBlock
 
   TRACE("CommBlock::p_initial Setting time");
   set_cycle(simulation()->cycle());
+  TRACE("CommBlock::CommBlock calling set_time()");
   set_time (simulation()->time());
   set_dt   (simulation()->dt());
   // Allocate block data
