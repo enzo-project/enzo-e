@@ -507,6 +507,10 @@ test_summary("Enzo-PPML",
 		   "method_ppml-8"),
 	     array("enzo-p",  "enzo-p"));
 
+test_summary("Enzo-AMR", 
+	     array("adapt-L1-P1", "adapt-L3-P1",),
+	     array("enzo-p", "enzo-p"));
+
 test_summary("Enzo-BC-2D", 
 	     array("boundary_reflecting-2d",
 		   "boundary_periodic-2d",
@@ -674,7 +678,26 @@ test_table ("method_ppml-8-z",
 
 //======================================================================
 
-  test_group("Enzo-BC-2D");
+test_group("Enzo-AMR");
+
+echo "<h3>2D Serial</h3>";
+
+tests("Enzo","enzo-p","test_adapt-L1-P1","Level 1");
+
+test_table ("adapt-L1-P1-mesh",
+	    array("0000","0020","0040","0060","0080"), $types);
+test_table ("adapt-L1-P1-density",
+	    array("0000","0020","0040","0060","0080"), $types);
+
+test_table ("adapt-L3-P1-mesh",
+	    array("0000","0020","0040","0060","0080"), $types);
+test_table ("adapt-L3-P1-density",
+	    array("0000","0020","0040","0060","0080"), $types);
+
+
+//======================================================================
+
+test_group("Enzo-BC-2D");
 
 echo "<h3>2D Reflecting</h3>";
 
@@ -682,6 +705,7 @@ tests("Enzo","enzo-p","test_boundary_reflecting-2d","Reflecting 2D");
 
 test_table ("boundary_reflecting-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
+
 
 //----------------------------------------------------------------------
 

@@ -102,7 +102,7 @@ Index Index::index_child (int ic3[3]) const
 
 //----------------------------------------------------------------------
 
-Index Index::index_neighbor (int axis, int face, int narray) const
+Index Index::index_neighbor (int axis, int face, int narray, bool periodic) const
 {
   TRACE3("index_neighbor axis %d  face %d  narray %d",
 	 axis,face,narray);
@@ -131,6 +131,12 @@ Index Index::index_neighbor (int axis, int face, int narray) const
 
     array = (narray + array + face) % narray;
 
+    TRACE3("array %d  face %d  narray %d",array,face,narray);
+     // if (!periodic) {
+     //   // return this index if not periodic but trying to access periodic neighbor
+     //   // this works, but why?
+     //   if ( ((0 <= array+face) && (array+face < narray))) return index;
+     // }
   }
 
   index.a_[axis].array = array;
@@ -141,7 +147,7 @@ Index Index::index_neighbor (int axis, int face, int narray) const
 
 //----------------------------------------------------------------------
 
-Index Index::index_neighbor (int ix, int iy, int iz, int n3[3]) const
+Index Index::index_neighbor (int ix, int iy, int iz, int n3[3], bool periodic) const
 {
   TRACE6("index_neighbor ix iy iz  %d %d %d  n3 %d %d %d",
 	 ix,iy,iz,n3[0],n3[1],n3[2]);

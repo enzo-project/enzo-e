@@ -4,6 +4,7 @@
 include "input/method_ppm-1.in"
 
 Mesh {
+   root_blocks = [1,1];
    max_level   = 1; 
    adapt {
       type = ["slope"];
@@ -11,7 +12,19 @@ Mesh {
    }
 }
 
-Stopping { cycle = 50; }
+Initial {
+    density       { value = [ 1.0, 
+                          (x- 0.4)*(x- 0.4)+(y- 0.4)*(y- 0.4) > 0.04,
+                              0.125 ]; };
+    total_energy  { value = [ 1.0  / (0.4 * 1.0) ,
+                          (x- 0.4)*(x- 0.4)+(y- 0.4)*(y- 0.4) > 0.04,
+                       0.14 / (0.4 * 0.1)]; };
+    velocity_x    { value = [0.0]; };
+    velocity_y    { value = [0.0]; }
+}
+
+
+Stopping { cycle = 100; }
 
 Initial {
    max_level = 1;
@@ -36,6 +49,7 @@ Output {
 	image_reduce_type = "max";
         field_list = ["density"];
 	image_block_size  = 1;
+#	image_size = [160,160];
 	schedule = ["cycle","interval", 10];
         colormap = [1.00, 1.00, 1.00,  
                     0.00, 1.00, 0.00, 

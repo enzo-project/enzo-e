@@ -70,21 +70,21 @@ public:
   Index index_child (int ic3[3]) const;
 
   /// Index of neighbor along given face
-  Index index_neighbor (int axis, int face, int narray) const;
+  Index index_neighbor (int axis, int face, int narray, bool periodic=false) const;
 
   /// Generalized neighbor including edge and corner
-  Index index_neighbor (int ix, int iy, int iz, int n3[3]) const;
+  Index index_neighbor (int ix, int iy, int iz, int n3[3], bool periodic=false) const;
 
-  inline Index index_uncle (int axis, int face, int narray) const
-  {  return index_parent().index_neighbor(axis,face, narray); }
+  inline Index index_uncle (int axis, int face, int narray, bool periodic=false) const
+  {  return index_parent().index_neighbor(axis,face, narray, periodic); }
 
   /// return the given parent's neighbor index
-  inline Index index_nibling (int axis, int face, int ic3[3], int narray) const
-  {  return index_neighbor(axis,face,narray).index_child(ic3); }
+  inline Index index_nibling (int axis, int face, int ic3[3], int narray,bool periodic=false) const
+  {  return index_neighbor(axis,face,narray,periodic).index_child(ic3); }
 
   /// Return the given neighbor's child index
-  Index index_nibling (int ix, int iy, int iz, int ic3[3], int n3[3]) const
-  {  return index_neighbor(ix,iy,iz,n3).index_child(ic3); }
+  Index index_nibling (int ix, int iy, int iz, int ic3[3], int n3[3],bool periodic=false) const
+  {  return index_neighbor(ix,iy,iz,n3,periodic).index_child(ic3); }
 
   /// child index of this node in parent
   void child (int level, int * icx, int * icy, int * icz) const;

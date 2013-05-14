@@ -238,7 +238,7 @@ env.MakeMovie ("method_ppml-8-z.swf", "test_method_ppml-8.unit", \
 # BOUNDARY CONDITIONS
 #----------------------------------------------------------------------
 
-# 2D tests
+# 2D boundary condition tests
 
 Clean(env_mv_out.RunParallel ('test_boundary_reflecting-2d.unit',
                 bin_path + '/enzo-p', 
@@ -269,9 +269,6 @@ Clean(env_mv_out.RunParallel ('test_boundary_outflow-2d.unit',
        '#/input/boundary_outflow-2d.in.out'])
 
 
-
-# NOTE: dependencies don't work with running tests: need to specify run output)
-
 env.MakeMovie ("boundary_reflecting-2d.swf", 
                "test_boundary_reflecting-2d.unit", \
                 ARGS= test_path + "/boundary_reflecting-2d-????.png");
@@ -282,7 +279,7 @@ env.MakeMovie ("boundary_periodic-2d.swf","test_boundary_periodic-2d.unit", \
 env.MakeMovie ("boundary_outflow-2d.swf","test_boundary_outflow-2d.unit", \
                 ARGS= test_path + "/boundary_outflow-2d-????.png");
 
-# 3D tests
+# 3D boundary condition tests
 
 Clean(env_mv_out.RunParallel ('test_boundary_reflecting-3d.unit',
 		bin_path + '/enzo-p', 
@@ -320,6 +317,35 @@ env.MakeMovie ("boundary_periodic-3d.swf","test_boundary_periodic-3d.unit", \
 #                 ARGS= test_path + "/boundary_inflow-3d-????.png");
 env.MakeMovie ("boundary_outflow-3d.swf","test_boundary_outflow-3d.unit", \
                 ARGS= test_path + "/boundary_outflow-3d-????.png");
+
+#----------------------------------------------------------------------
+# AMR
+#----------------------------------------------------------------------
+
+# serial
+Clean(env_mv_out.RunSerial ('test_adapt-L1-P1.unit',bin_path + '/enzo-p', 
+		ARGS='input/adapt-L1-P1.in'),
+      [Glob('#/' + test_path + '/adapt-L1-P1*.png'),
+       '#/input/adapt-L1-P1.in.out'])
+env.MakeMovie ("adapt-L1-P1-mesh.swf", "test_adapt-L1-P1-mesh.unit", \
+                ARGS= test_path + "/adapt-L1-P1-mesh-*.png");
+env.MakeMovie ("adapt-L1-P1-density.swf", "test_adapt-L1-P1-density.unit", \
+                ARGS= test_path + "/adapt-L1-P1-density-*.png");
+
+Clean(env_mv_out.RunSerial ('test_adapt-L3-P1.unit',bin_path + '/enzo-p', 
+		ARGS='input/adapt-L3-P1.in'),
+      [Glob('#/' + test_path + '/adapt-L3-P1*.png'),
+       '#/input/adapt-L3-P1.in.out'])
+env.MakeMovie ("adapt-L3-P1-mesh.swf", "test_adapt-L3-P1-mesh.unit", \
+                ARGS= test_path + "/adapt-L3-P1-mesh-*.png");
+env.MakeMovie ("adapt-L3-P1-density.swf", "test_adapt-L3-P1-density.unit", \
+                ARGS= test_path + "/adapt-L3-P1-density-*.png");
+
+
+
+#----------------------------------------------------------------------
+# PERFORMANCE
+#----------------------------------------------------------------------
 
 env.RunParallel ('test_performance-papi.unit',
                 bin_path + '/enzo-p', 

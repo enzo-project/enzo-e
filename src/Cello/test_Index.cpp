@@ -7,6 +7,7 @@
 
 #include "main.hpp"
 #include "test.hpp"
+#include "mesh.hpp"
 
 // #include "charm_Index.hpp"
 
