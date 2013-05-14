@@ -1,0 +1,48 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/method_ppm-1.in"
+
+Mesh {
+   max_level   = 1; 
+   adapt {
+      type = ["slope"];
+      balance = true;
+   }
+}
+
+Stopping { cycle = 50; }
+
+Initial {
+   max_level = 1;
+}
+
+Field {
+   refresh {
+     type = "quiescence";
+   }
+}
+
+
+Output {
+
+      file_groups = ["density", "mesh"];
+
+      density { name = ["adapt-L1-P1-density-%04d.png", "cycle"]; };
+
+      mesh {
+	type     = "image";
+	image_type  = "mesh";
+	image_reduce_type = "max";
+        field_list = ["density"];
+	image_block_size  = 1;
+	schedule = ["cycle","interval", 10];
+        colormap = [1.00, 1.00, 1.00,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00, 
+                    0.00, 0.00, 1.00];
+        name = ["adapt-L1-P1-mesh-%04d.png","cycle"];
+        
+      }
+}
+

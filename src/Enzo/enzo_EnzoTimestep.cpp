@@ -158,7 +158,7 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
   /* 5) calculate minimum timestep */
 
 
-  TRACE3("enzo_comm_block->GridStartIndex = %d %D %d",
+  TRACE3("enzo_comm_block->GridStartIndex = %d %d %d",
 	 enzo_comm_block->GridStartIndex[0],
 	 enzo_comm_block->GridStartIndex[1],
 	 enzo_comm_block->GridStartIndex[2]);

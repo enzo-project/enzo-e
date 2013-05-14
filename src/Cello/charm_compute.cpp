@@ -54,46 +54,49 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   TRACE3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
   simulation()->performance()->start_region(perf_compute);
-  compute();
-  simulation()->performance()->stop_region(perf_compute);
-}
 
-//----------------------------------------------------------------------
+#ifdef CONFIG_USE_PROJECTIONS
+  double time_start = CmiWallTimer();
+#endif
 
-void CommBlock::compute()
-{
-  TRACE ("CommBlock::compute()");
+  if (is_leaf()) {
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+    FieldDescr * field_descr = simulation()->field_descr();
+    int index_method = 0;
+    while (Method * method = simulation()->problem()->method(index_method++)) {
 
- #ifdef CONFIG_USE_PROJECTIONS
-   double time_start = CmiWallTimer();
- #endif
+      method -> compute_block (field_descr,this);
 
-  FieldDescr * field_descr = simulation->field_descr();
-
-  int index_method = 0;
-  while (Method * method = simulation->problem()->method(index_method++)) {
-    method -> compute_block (field_descr,this);
+    }
   }
 
- #ifdef CONFIG_USE_PROJECTIONS
-   traceUserBracketEvent(10,time_start, CmiWallTimer());
- #endif
+#ifdef CONFIG_USE_PROJECTIONS
+  traceUserBracketEvent(10,time_start, CmiWallTimer());
+#endif
 
   // Update CommBlock cycle and time to Simulation time and cycle
 
   set_cycle (cycle_ + 1);
-  TRACE("CommBlock::compute() calling set_time()");
   set_time  (time_  + dt_);
   
-  // prepare for next cycle: Timestep, Stopping, Monitor, Output
+  
+  simulation()->performance()->stop_region(perf_compute);
 
   TRACE ("CommBlock::compute() calling p_adapt(0)");
-  
-  p_adapt_begin();
 
+  p_adapt_begin();
 }
+
+// //----------------------------------------------------------------------
+
+// void CommBlock::compute()
+// {
+//   TRACE ("CommBlock::compute()");
+
+//   Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+
+// }
 
 //----------------------------------------------------------------------
 

@@ -1,0 +1,13 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/adapt-L1-P1.in"
+
+Mesh    { max_level   = 3; }
+
+Initial {  max_level = 3; }
+
+Output {
+      density { name = ["adapt-L3-P1-density-%04d.png", "cycle"]; };
+      mesh {    name = ["adapt-L3-P1-mesh-%04d.png","cycle"]; }
+}

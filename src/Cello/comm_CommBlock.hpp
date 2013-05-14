@@ -187,9 +187,6 @@ public: // interface
   /// Implementation of refresh
   void refresh();
 
-  /// Boundary and Method
-  void compute();
-
   //==================================================
 
 #else /* ! CONFIG_USE_CHARM */

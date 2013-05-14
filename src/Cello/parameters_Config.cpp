@@ -192,9 +192,7 @@ void Config::read(Parameters * parameters) throw()
 
   // field refresh type == "quiescence" or "counter"
 
-  //  field_refresh_type = parameters->value_string  
-  ("Field:refresh:type","quiescence");
-  field_refresh_type = parameters->value_string  
+  field_refresh_type = parameters->value_string 
     ("Field:refresh:type","counter");
 
   if ( ! ((field_refresh_type == "quiescence") ||

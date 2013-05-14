@@ -8,7 +8,7 @@ Mesh
 {
    root_rank = 2;
    root_size   = [64,64];
-   root_blocks = [ 4, 4]; 
+   root_blocks = [ 2, 1]; 
    max_level   = 1; 
    adapt {
       type = ["slope"];
@@ -16,6 +16,11 @@ Mesh
    }
 }
 
+Field {
+   refresh {
+     type = "quiescence";
+   }
+}
 Initial {
    max_level = 1;
       fields = [
@@ -47,6 +52,7 @@ Output {
 #   file_groups = ["image_mesh"]; 
 #   file_groups = ["image_data"]; 
    file_groups = ["image_mesh","image_data"]; 
+#   file_groups = []; 
 
       image_data {
 	type     = "image";

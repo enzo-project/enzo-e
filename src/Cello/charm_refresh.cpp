@@ -53,7 +53,6 @@ void CommBlock::refresh ()
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   Boundary * boundary = simulation->problem()->boundary();
 
-  
   TRACE ("CommBlock::refresh() setting QD q_refresh_end()");
 
   const Config * config = simulation->config();
@@ -66,6 +65,8 @@ void CommBlock::refresh ()
 
     CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
 			  thisProxy[thisIndex]));
+
+    if (! is_leaf()) return;
 
   } 
 
