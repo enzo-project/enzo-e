@@ -3,7 +3,10 @@
 
 include "input/adapt-L1-P1.in"
 
-Mesh    { max_level   = 3; }
+Mesh    {
+   root_size   = [64,64];
+    max_level   = 3; 
+}
 
 Initial {  max_level = 3; }
 

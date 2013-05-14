@@ -54,8 +54,6 @@ void RestrictLinear::apply_
 ( T *       values_c, int nd3_c[3], int n3_c[3],
   const T * values_f, int nd3_f[3], int n3_f[3])
 {
-  INCOMPLETE("RestrictLinear::apply_()");
-
   const int rank = (nd3_f[1] == 1) ? 1 : ((nd3_f[2] == 1) ? 2 : 3);
 
   const int dx = 1;

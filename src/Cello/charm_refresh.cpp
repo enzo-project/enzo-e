@@ -19,7 +19,9 @@
 void CommBlock::p_refresh_begin() 
 {
   TRACE("CommBlock::p_refresh_begin");
-  simulation()->performance()->start_region(perf_refresh);
+
+  //  simulation()->performance()->start_region(perf_refresh);
+
 #ifdef TEMP_SKIP_REFRESH
 
   static int warning_displayed = false;
@@ -68,11 +70,17 @@ void CommBlock::refresh ()
 
     if (! is_leaf()) return;
 
+    index_.print ("leaf",-1,2);
+
   } 
 
   // which faces need to be refreshed?
   bool no_refresh[3][2];
   is_on_boundary (no_refresh);
+  TRACE6("is_on_boundary %d %d %d  %d %d %d",
+	 no_refresh[0][0],no_refresh[1][0],no_refresh[2][0],
+	 no_refresh[0][1],no_refresh[1][1],no_refresh[2][1]);
+
   bool periodic = boundary->is_periodic();
   if (periodic) {
     for (int axis=0; axis<3; axis++) {
@@ -83,12 +91,16 @@ void CommBlock::refresh ()
   }
 
   // set face loop limits accordingly
-  int ixm = no_refresh[0][0] ? 0 : -1;
-  int iym = no_refresh[1][0] ? 0 : -1;
-  int izm = no_refresh[2][0] ? 0 : -1;
-  int ixp = no_refresh[0][1] ? 0 : 1;
-  int iyp = no_refresh[1][1] ? 0 : 1;
-  int izp = no_refresh[2][1] ? 0 : 1;
+  int ifxm = no_refresh[0][0] ? 0 : -1;
+  int ifym = no_refresh[1][0] ? 0 : -1;
+  int ifzm = no_refresh[2][0] ? 0 : -1;
+  int ifxp = no_refresh[0][1] ? 0 : 1;
+  int ifyp = no_refresh[1][1] ? 0 : 1;
+  int ifzp = no_refresh[2][1] ? 0 : 1;
+
+  int rank         = simulation->dimension();
+  if (rank < 2) ifym = ifyp = 0;
+  if (rank < 3) ifzm = ifzp = 0;
 
   // Include ghost zones in refresh?
 
@@ -97,45 +109,65 @@ void CommBlock::refresh ()
   int n3[3];
   size_forest(&n3[0],&n3[1],&n3[2]);
 
-  TRACE6 ("limits %d %d %d   %d %d %d",ixm,iym,izm,ixp,iyp,izp);
+  TRACE6 ("limits %d %d %d   %d %d %d",ifxm,ifym,ifzm,ifxp,ifyp,ifzp);
 
   int refresh_rank = config->field_refresh_rank;
-  int rank         = simulation->dimension();
   bool refresh_type_counter = (refresh_type == "counter");
   if (refresh_type_counter) loop_refresh_.stop() = 0;
 
   // (icx0,icy0,icz0) are loop limits
   // e.g. 
-  // if face (ix,iy,iz) = (0,0,1), then children are ([01], [01], 1)
-  // if face (ix,iy,iz) = (0,-1,0), then children are ([01], 0, [01])
-  // if face (ix,iy,iz) = (1,0,-1), then children are (1, [01], 0)
-  for (int ix=ixm; ix<=ixp; ix++) {
-    for (int iy=iym; iy<=iyp; iy++) {
-      for (int iz=izm; iz<=izp; iz++) {
-	int face_rank = rank - (abs(ix) + abs(iy) + abs(iz));
+  // if face (ifx,ify,ifz) = (0,0,1), then children are ([01], [01], 1)
+  // if face (ifx,ify,ifz) = (0,-1,0), then children are ([01], 0, [01])
+  // if face (ifx,ify,ifz) = (1,0,-1), then children are (1, [01], 0)
+  for (int ifx=ifxm; ifx<=ifxp; ifx++) {
+    for (int ify=ifym; ify<=ifyp; ify++) {
+      for (int ifz=ifzm; ifz<=ifzp; ifz++) {
+	int face_rank = rank - (abs(ifx) + abs(ify) + abs(ifz));
 	if (face_rank >= refresh_rank) {
-	  TRACE3("Calling refresh_same %d %d %d",ix,iy,iz);
-	  Index index = index_.index_neighbor(ix,iy,iz,n3);
+	  TRACE3("Calling refresh_same %d %d %d",ifx,ify,ifz);
+	  Index index_neighbor = index_.index_neighbor(ifx,ify,ifz,n3);
 
-	  // update coarse neighbors
-	  if (! is_neighbor(index)) {
+	  // if no neighbor, update coarse
+
+	  if (! is_neighbor(index_neighbor)) {
 
 	    if (refresh_type_counter) ++loop_refresh_.stop();
-	    //	    refresh_coarse(index);
+
+	    refresh_coarse(index_neighbor.index_parent(),ifx,ify,ifz,n3);
 
 	  } else {
 
-	    // update any fine neighbors...
+	    // if neighbor check for niblings...
 
-	    int count_nibling = refresh_fine (index,ix,iy,iz,n3);
+	    int num_niblings = 0;
 
-	    // ...update neighbor if none
+	    int icxm,icym,iczm;
+	    int icxp,icyp,iczp;
+	    loop_limits_nibling_(&icxm,&icym,&iczm,
+				 &icxp,&icyp,&iczp,
+				 ifx,ify,ifz);
 
-	    if (count_nibling == 0 && index_ != index) {
+	    int ic3[3];
+	    for (ic3[0]=icxm; ic3[0]<=icxp; ic3[0]++) {
+	      for (ic3[1]=icym; ic3[1]<=icyp; ic3[1]++) {
+		for (ic3[2]=iczm; ic3[2]<=iczp; ic3[2]++) {
+		  Index index_nibling = index_neighbor.index_child(ic3);
+		  if (is_nibling(index_nibling)) {
+		    ++num_niblings;
+		    refresh_fine(index_nibling,ifx,ify,ifz,ic3);
+		  }
+		}
+	      }
+	    }
+
+	    // otherwise update neighbor
+
+	    if (num_niblings == 0 && index_ != index_neighbor) {
 
 	      if (refresh_type_counter) ++loop_refresh_.stop();
 
-	      refresh_same(index,ix,iy,iz);
+	      refresh_same(index_neighbor,ifx,ify,ifz);
 
 	    }
 	  }
@@ -153,50 +185,136 @@ void CommBlock::refresh ()
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_coarse (Index index)
+void CommBlock::refresh_same (Index index, 
+			      int ifx,  int ify,  int ifz)
 {
+
+  index_.print("refresh_same A",-1,2);
+  index.print("refresh_same B",-1,2);
+
+  TRACE3("ENTER refresh_same %d %d %d",ifx,ify,ifz);
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+  FieldBlock * field_block = block_->field_block();
+
+  FieldFace field_face (field_block,field_descr);
+
+  field_face.set_face(ifx,ify,ifz);
+	  
+  int n; 
+  char * array;
+    field_face.load(&n, &array);
+
+  thisProxy[index].x_refresh_same (n,array,-ifx,-ify,-ifz);
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_same (Index index, 
-			      int ix,  int iy,  int iz)
+void CommBlock::refresh_fine 
+(Index index, int ifx,  int ify,  int ifz, int ic3[3])
 {
-
-  
-  TRACE3("ENTER refresh_same %d %d %d",ix,iy,iz);
-
+  TRACE3("ENTER refresh_fine %d %d %d",ifx,ify,ifz);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
+  FieldBlock * field_block = block_->field_block();
+  Prolong * prolong = simulation->problem()->prolong();
 
-  FieldFace field_face (block_->field_block(),field_descr);
+  // pack face data
 
-  field_face.set_face(ix,iy,iz);
+  FieldFace field_face (field_block,field_descr);
+
+  field_face.set_face(ifx,ify,ifz);
+  field_face.set_prolong(prolong,ic3[0],ic3[1],ic3[2]);
 	  
   int n; 
   char * array;
   field_face.load(&n, &array);
 
-  thisProxy[index].x_refresh_same (n,array,-ix,-iy,-iz);
+  // send face data
+
+  TRACE6("Calling x_refresh_fine %d %d %d %d %d %d",
+	 ifx,ify,ifz, ic3[0],ic3[1],ic3[2]);
+  thisProxy[index].x_refresh_fine (n,array,
+				   -ifx,-ify,-ifz,
+				   ic3[0],ic3[1],ic3[2]);
+	  
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::x_refresh_same (int n, char * buffer, int fx, int fy, int fz)
+void CommBlock::loop_limits_nibling_ 
+(int *icxm, int *icym, int *iczm,
+ int *icxp, int *icyp, int *iczp,
+ int ifx, int ify, int ifz) const throw()
 {
-  TRACE3 ("CommBlock::x_refresh_same(%d %d %d)",fx,fy,fz);
+  int rank = simulation()->dimension();
+
+  (*icxm) = (ifx == 0) ? 0 : (ifx+1)/2;
+  (*icxp) = (ifx == 0) ? 1 : (ifx+1)/2;
+  (*icym) = (ify == 0) ? 0 : (ify+1)/2;
+  (*icyp) = (ify == 0) ? 1 : (ify+1)/2;
+  (*iczm) = (ifz == 0) ? 0 : (ifz+1)/2;
+  (*iczp) = (ifz == 0) ? 1 : (ifz+1)/2;
+  if (rank < 2) (*icym) = (*icyp) = 0;
+  if (rank < 3) (*iczm) = (*iczp) = 0;
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::refresh_coarse 
+(
+ Index index, 
+ int ifx,  int ify,  int ifz,
+ int ic3[3])
+{
+
+  TRACE3("ENTER refresh_coarse %d %d %d",ifx,ify,ifz);
+  index_.print("refresh_coarse A",-1,2);
+
+  index.print ("refresh_coarse B",-1,2);
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+  FieldBlock * field_block = block_->field_block();
+  Restrict * restrict = simulation->problem()->restrict();
+
+  int level = index_.level();
+  int icx,icy,icz;
+  index_.child(level,&icx,&icy,&icz);
+
+  FieldFace field_face (field_block,field_descr);
+
+  field_face.set_restrict(restrict,icx,icy,icz);
+  field_face.set_face(ifx,ify,ifz);
+	  
+  int n; 
+  char * array;
+  field_face.load(&n, &array);
+
+  thisProxy[index].x_refresh_coarse (n,array,-ifx,-ify,-ifz,
+				     icx,icy,icz);
+
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::x_refresh_same (int n, char * buffer, int ifx, int ify, int ifz)
+{
+  TRACE3 ("CommBlock::x_refresh_same(%d %d %d)",ifx,ify,ifz);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
+  FieldBlock * field_block = block_->field_block();
 
   if ( n != 0) {
 
     // n == 0 is the call from self to ensure x_refresh_same()
     // always gets called at least once
 
-    FieldFace field_face(block_->field_block(), field_descr);
+    FieldFace field_face(field_block, field_descr);
 
-    field_face.set_face(fx,fy,fz);
+    field_face.set_face(ifx,ify,ifz);
 
     field_face.store (n, buffer);
   }
@@ -213,101 +331,74 @@ void CommBlock::x_refresh_same (int n, char * buffer, int fx, int fy, int fz)
 
 //----------------------------------------------------------------------
 
-int CommBlock::refresh_fine 
-(Index index, 
- int ix,  int iy,  int iz,
- int n3[3])
+void CommBlock::x_refresh_fine (int n, char * buffer, 
+				int ifx, int ify, int ifz,
+				int icx, int icy, int icz)
 {
+  index_.print("x_refresh_fine",-1,2);
+  TRACE6 ("CommBlock::x_refresh_fine(face %d %d %d  child  %d %d %d)",
+	  ifx,ify,ifz,icx,icy,icz);
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
+
   FieldDescr * field_descr = simulation->field_descr();
+  FieldBlock * field_block = block_->field_block();
+  Prolong * prolong = simulation->problem()->prolong();
 
-  int rank = simulation->dimension();
+  FieldFace field_face(field_block, field_descr);
 
+  field_face.set_face(ifx,ify,ifz);
+  field_face.set_prolong(prolong,icx,icy,icz);
+   
+  field_face.store (n, buffer);
 
-  if (ix==0 && iy==0 && iz==0) return 0;
-
-  int icxm = (ix == 0) ? 0 : (ix+1)/2;
-  int icxp = (ix == 0) ? 1 : (ix+1)/2;
-  int icym = (iy == 0) ? 0 : (iy+1)/2;
-  int icyp = (iy == 0) ? 1 : (iy+1)/2;
-  int iczm = (iz == 0) ? 0 : (iz+1)/2;
-  int iczp = (iz == 0) ? 1 : (iz+1)/2;
-  if (rank < 3) {iczm=0;  iczp=0; }
-  if (rank < 2) {icym=0;  icyp=0; }
-
-  TRACE9 ("NIBLING: Face (%d %d %d) child (%d:%d %d:%d %d:%d)",
-	  ix,iy,iz, icxm,icxp,icym, icyp,iczm,iczp);
-
-
-  int count = 0;
-  // loop over niblings along face
-  int ic3[3];
-  for (ic3[0]=icxm; ic3[0]<=icxp; ic3[0]++) {
-    for (ic3[1]=icym; ic3[1]<=icyp; ic3[1]++) {
-      for (ic3[2]=iczm; ic3[2]<=iczp; ic3[2]++) {
-
-	Index index_nibling = index.index_nibling(ix,iy,iz,ic3,n3);
-
-	// if there exists a neighboring nibling
-
-	if (is_nibling(index_nibling)) {
-
-	  // increment counter
-
-	  ++ count;
-
-	  // pack face data
-
-	  FieldFace field_face (block_->field_block(),field_descr);
-
-	  field_face.set_face(ix,iy,iz);
-	  
-	  int n; 
-	  char * array;
-	  field_face.load(&n, &array);
-
-	  // send face data
-
-	  thisProxy[index].x_refresh_fine (n,array,-ix,-iy,-iz);
-
-	}
-      }
+  std::string refresh_type = simulation->config()->field_refresh_type;
+  
+  if (refresh_type == "counter") {
+    if (loop_refresh_.done()) {
+      q_refresh_end();
     }
   }
-  return count;
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::x_refresh_fine (int n, char * buffer, int fx, int fy, int fz)
- {
-   TRACE3 ("CommBlock::x_refresh_fine(%d %d %d)",fx,fy,fz);
+void CommBlock::x_refresh_coarse (int n, char * buffer, 
+				int ifx, int ify, int ifz,
+				int icx, int icy, int icz)
+{
+  index_.print("x_refresh_coarse",-1,2);
+  TRACE6 ("CommBlock::x_refresh_coarse(face %d %d %d  child  %d %d %d)",
+	  ifx,ify,ifz,icx,icy,icz);
 
-   Simulation * simulation = proxy_simulation.ckLocalBranch();
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-   FieldDescr * field_descr = simulation->field_descr();
-   const Config * config    = simulation->config();
+  FieldDescr * field_descr = simulation->field_descr();
+  FieldBlock * field_block = block_->field_block();
+  Restrict * restrict = simulation->problem()->restrict();
 
-   FieldFace field_face(block_->field_block(), field_descr);
+  FieldFace field_face(field_block, field_descr);
 
-   field_face.set_face(fx,fy,fz);
+  field_face.set_face(ifx,ify,ifz);
+  field_face.set_restrict(restrict,icx,icy,icz);
    
-   field_face.store (n, buffer);
+  field_face.store (n, buffer);
 
-   std::string refresh_type = config->field_refresh_type;
+  std::string refresh_type = simulation->config()->field_refresh_type;
   
-   if (refresh_type == "counter") {
-     if (loop_refresh_.done()) {
-       q_refresh_end();
-     }
-   }
+  if (refresh_type == "counter") {
+    if (loop_refresh_.done()) {
+      q_refresh_end();
+    }
+  }
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::q_refresh_end()
 {
-  simulation()->performance()->stop_region(perf_refresh);
+  //  simulation()->performance()->stop_region(perf_refresh);
+
   TRACE ("CommBlock::q_refresh_end() calling prepare()");
   prepare();
 }

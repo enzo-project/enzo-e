@@ -218,7 +218,6 @@ void CommBlock::p_refine()
 
       const Factory * factory = simulation()->factory();
 
-      // create new children
       factory->create_block 
 	(&thisProxy, index_child,
 	 nx,ny,nz,
@@ -227,13 +226,13 @@ void CommBlock::p_refine()
 	 initial,
 	 testing);
 
-      // update children
       set_child(index_child);
 
       int vc3[3];
       index_child.values(&vc3[0],&vc3[1],&vc3[2]);
 
-      // for each adjacent neighbor
+      // for each (axis,face)
+
       for (int axis=0; axis<rank; axis++) {
 
 	int face = ic3[axis];

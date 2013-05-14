@@ -59,8 +59,14 @@ module mesh {
 
     entry void p_refresh_begin();
     entry void q_refresh_end();
-    entry void x_refresh_same(int n, char buffer[n], int fx, int fy, int fz);
-    entry void x_refresh_fine(int n, char buffer[n], int fx, int fy, int fz);
+    entry void x_refresh_same(int n, char buffer[n], 
+                              int ifx, int ify, int ifz);
+    entry void x_refresh_fine(int n, char buffer[n],
+			      int ifx, int ify, int ifz,
+			      int icx, int icy, int icz);
+    entry void x_refresh_coarse(int n, char buffer[n],
+			      int ifx, int ify, int ifz,
+			      int icx, int icy, int icz);
 
     entry void p_print(std::string);
   };

@@ -32,7 +32,8 @@ public: // functions
 	      std::string image_type,
 	      int image_size_x, int image_size_y,
 	      std::string image_reduce_type,
-	      int         image_block_size) throw();
+	      int         image_block_size,
+	      bool ghost ) throw();
 
   /// OutputImage destructor: free allocated image data
   virtual ~OutputImage() throw();
@@ -151,6 +152,8 @@ private: // attributes
   /// Image type: data or mesh
   std::string image_type_;
 
+  /// Whether to include ghost zones
+  bool ghost_;
 };
 
 #endif /* IO_OUTPUT_IMAGE_HPP */

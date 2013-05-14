@@ -97,6 +97,12 @@ Index Index::index_child (int ic3[3]) const
   int level = index.level();
   index.set_level(level+1);
   index.set_child (level+1,ic3[0],ic3[1],ic3[2]);
+#ifdef CELLO_TRACE
+  char buffer[40];
+  sprintf (buffer,"index_child(ix iy iz %d %d %d)",ic3[0],ic3[1],ic3[2]);
+  this->print(buffer);
+  index.print(buffer);
+#endif
   return index;
 }
 
@@ -129,20 +135,68 @@ Index Index::index_neighbor (int axis, int face, int narray, bool periodic) cons
 
     TRACE2("array change= %d %d",array,(narray + array + face) % narray);
 
+      // if (!periodic) {
+      //   // return self index if on boundary
+      //   if ( ! ((0 <= array+face) && (array+face < narray))) return index;
+      // }
+
     array = (narray + array + face) % narray;
 
     TRACE3("array %d  face %d  narray %d",array,face,narray);
-     // if (!periodic) {
-     //   // return this index if not periodic but trying to access periodic neighbor
-     //   // this works, but why?
-     //   if ( ((0 <= array+face) && (array+face < narray))) return index;
-     // }
   }
 
   index.a_[axis].array = array;
   index.a_[axis].tree = tree;
 
+#ifdef CELLO_TRACE
+  char buffer[40];
+  sprintf (buffer,"index_neighbor(axis %d face %d)",axis,face);
+  this->print(buffer);
+  index.print(buffer);
+#endif
+
   return index;
+}
+
+//----------------------------------------------------------------------
+
+bool Index::is_on_boundary (int axis, int face, int narray, bool periodic) const
+{
+  if (periodic) return false;
+
+  TRACE4("is_on_boundary axis %d  face %d  narray %d period %d", 
+	 axis,face,narray,periodic);
+
+  if (face == 0) face = -1;
+
+  int level = this->level();
+  int array = a_[axis].array;
+  int tree  = a_[axis].tree;
+
+  // update tree bits
+
+  int shift_level = (1 << (INDEX_MAX_TREE_BITS - level));
+  TRACE2("shift level %d %0X",level,shift_level);
+
+  tree += face*shift_level; 
+
+  int shift_overflow = (1 << INDEX_MAX_TREE_BITS);
+
+  if (tree & shift_overflow) {
+
+    if (narray == 1) return true;
+
+    tree &= ~(shift_overflow);
+
+    TRACE2("array change= %d %d",array,(narray + array + face) % narray);
+
+    return ! ((0 <= array+face) && (array+face < narray) );
+
+  } else {
+    
+    return false;
+  }
+
 }
 
 //----------------------------------------------------------------------
@@ -186,6 +240,12 @@ Index Index::index_neighbor (int ix, int iy, int iz, int n3[3], bool periodic) c
     index.a_[axis].tree  = tree;
   }
 
+#ifdef CELLO_TRACE
+  char buffer[40];
+  sprintf (buffer,"index_neighbor(ix iy iz %d %d %d)",ix,iy,iz);
+  this->print(buffer);
+  index.print(buffer);
+#endif
 
   return index;
 }
@@ -284,35 +344,37 @@ void Index::set_child(int level, int ix, int iy, int iz)
 //----------------------------------------------------------------------
 
 void Index::print (const char * msg,
-		   int max_level) const
+		   int max_level,
+		   int rank) const
 {
   if (max_level == -1) max_level = this->level();
 
-  printf ("INDEX %s: ", msg);
+  PARALLEL_PRINTF ("INDEX %s: ", msg);
 
-  printf ("A [ ");
+  PARALLEL_PRINTF ("A [ ");
   for (int axis=0; axis<3; axis++) {
-    printf ("%d ",a_[axis].array);
+    PARALLEL_PRINTF ("%d ",a_[axis].array);
   }
-  printf ("] ");
+  PARALLEL_PRINTF ("] ");
 
-  printf ("T [ ");
+  PARALLEL_PRINTF ("T [ ");
   int ic3[3];
-  for (int axis=0; axis<3; axis++) {
+  for (int axis=0; axis<rank; axis++) {
     for (int level = 0; level < max_level; level++) {
       child (level+1, &ic3[0], &ic3[1], &ic3[2]);
-      printf ("%d",ic3[axis]);
+      PARALLEL_PRINTF ("%d",ic3[axis]);
     }
-    printf (" ");
+    PARALLEL_PRINTF (" ");
   }
-  printf ("] ");
+  PARALLEL_PRINTF ("] ");
 
-  printf ("L [ %d ] ",a_[0].level + INDEX_MAX_LEVEL_AXIS_RANGE*
-	  (           a_[1].level + INDEX_MAX_LEVEL_AXIS_RANGE*
-		      a_[2].level ));
+  PARALLEL_PRINTF ("L [ %d ] ",a_[0].level + INDEX_MAX_LEVEL_AXIS_RANGE*
+		   (           a_[1].level + INDEX_MAX_LEVEL_AXIS_RANGE*
+			       a_[2].level ));
 
-  printf ("[%08X-%08X-%08X]",v_[0],v_[1],v_[2]);
-  printf ("\n");
+  PARALLEL_PRINTF ("[%08X-%08X-%08X]",v_[0],v_[1],v_[2]);
+  PARALLEL_PRINTF ("\n");
+  fflush(stdout);
 }
 
 //======================================================================

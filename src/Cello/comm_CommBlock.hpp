@@ -162,22 +162,27 @@ public: // interface
   void q_refresh_end ();
 
   /// send  ghost zones to given neighbor in same level
-  void refresh_same (Index index,
-		     int ix, int iy, int iz);
-
-  /// Refresh a FieldFace in the same level
-  void x_refresh_same(int n, char buffer[],int fx, int fy, int fz);
+  void refresh_same (Index index,  int ifx, int ify, int ifz);
 
   /// send ghost zones to coarse neighbor in given direction
-  void refresh_coarse (Index index);
+  void refresh_coarse (Index index, int ifx, int ify, int ifz, int n3[3]);
 
   /// send ghost zones to fine neighbors in given direction
-  int refresh_fine (Index index,
-		    int ix, int iy, int iz,
-		    int n3[3]);
+  void refresh_fine (Index index, int ifx, int ify, int ifz,  int n3[3]);
+
+  /// Refresh a FieldFace in the same level
+  void x_refresh_same(int n, char buffer[],
+		      int ifx, int ify, int ifz);
+
+  /// Refresh a FieldFace in the next-coarser level
+  void x_refresh_coarse(int n, char buffer[],
+			int ifx, int ify, int ifz,
+			int icx, int icy, int icz);
 
   /// Refresh a FieldFace in the next-finer level
-  void x_refresh_fine(int n, char buffer[],int fx, int fy, int fz);
+  void x_refresh_fine(int n, char buffer[],
+		      int ifx, int ify, int ifz,
+		      int icx, int icy, int icz);
 
   //--------------------------------------------------
 
@@ -351,6 +356,11 @@ protected: // functions
   void update_boundary_ ();
 
 #endif
+
+  void loop_limits_nibling_ 
+  (int *icxm, int *icym, int *iczm,
+   int *icxp, int *icyp, int *iczp,
+   int ifx, int ify, int ifz) const throw();
 
 protected: // attributes
 

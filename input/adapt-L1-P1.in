@@ -4,12 +4,20 @@
 include "input/method_ppm-1.in"
 
 Mesh {
+   root_size   = [128,128];
    root_blocks = [1,1];
    max_level   = 1; 
    adapt {
       type = ["slope"];
       balance = true;
    }
+}
+
+Stopping { cycle = 100; }
+
+Testing {
+   cycle_final = 100; 
+   time_final  = 0.108293093927205;
 }
 
 Initial {
@@ -23,8 +31,6 @@ Initial {
     velocity_y    { value = [0.0]; }
 }
 
-
-Stopping { cycle = 100; }
 
 Initial {
    max_level = 1;
@@ -41,7 +47,9 @@ Output {
 
       file_groups = ["density", "mesh"];
 
-      density { name = ["adapt-L1-P1-density-%04d.png", "cycle"]; };
+      density { name = ["adapt-L1-P1-density-%04d.png", "cycle"]; 
+              schedule = ["cycle","interval", 25];
+               };
 
       mesh {
 	type     = "image";
@@ -50,7 +58,7 @@ Output {
         field_list = ["density"];
 	image_block_size  = 1;
 #	image_size = [160,160];
-	schedule = ["cycle","interval", 10];
+	schedule = ["cycle","interval", 25];
         colormap = [1.00, 1.00, 1.00,  
                     0.00, 1.00, 0.00, 
                     1.00, 0.00, 0.00, 

@@ -341,6 +341,15 @@ env.MakeMovie ("adapt-L3-P1-mesh.swf", "test_adapt-L3-P1-mesh.unit", \
 env.MakeMovie ("adapt-L3-P1-density.swf", "test_adapt-L3-P1-density.unit", \
                 ARGS= test_path + "/adapt-L3-P1-density-*.png");
 
+Clean(env_mv_out.RunSerial ('test_adapt-L5-P1.unit',bin_path + '/enzo-p', 
+		ARGS='input/adapt-L5-P1.in'),
+      [Glob('#/' + test_path + '/adapt-L5-P1*.png'),
+       '#/input/adapt-L5-P1.in.out'])
+env.MakeMovie ("adapt-L5-P1-mesh.swf", "test_adapt-L5-P1-mesh.unit", \
+                ARGS= test_path + "/adapt-L5-P1-mesh-*.png");
+env.MakeMovie ("adapt-L5-P1-density.swf", "test_adapt-L5-P1-density.unit", \
+                ARGS= test_path + "/adapt-L5-P1-density-*.png");
+
 
 
 #----------------------------------------------------------------------

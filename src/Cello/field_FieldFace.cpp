@@ -214,16 +214,21 @@ void FieldFace::store (int n, char * array) throw()
 
       // Prolong array to field
 
+      TRACE3 ("test padding %d %d %d",ng3[0],ng3[1],ng3[2]);
       bool need_padding = (ng3[0]%2==1) || (ng3[1]%2==1) || (ng3[2]%2==1);
 
       ASSERT("FieldFace::store()",
 	     "Odd ghost zones not implemented yet: prolong needs padding",
-	     need_padding);
+	     ! need_padding);
 
       int i0 = im3[0] + nd3[0]*(im3[1] + nd3[1]*im3[2]);
 
       int nc3[3] = { (n3[0]+1)/2, (n3[1]+1)/2,(n3[2]+1)/2 };
 
+      TRACE6 ("store prolong ghost  fine %d %d %d   n %d %d %d",
+	      nd3[0],nd3[1],nd3[2],n3[0],n3[1],n3[2]);
+      TRACE6 ("store prolong ghost  coarse %d %d %d   n %d %d %d",
+	      nc3[0],nc3[1],nc3[2],nc3[0],nc3[1],nc3[2]);
       prolong_->apply(precision, field_ghost,nd3,n3, array_ghost,nc3,nc3);
 
       index += nc3[0]*nc3[1]*nc3[2];

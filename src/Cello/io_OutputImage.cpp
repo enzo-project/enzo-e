@@ -20,17 +20,18 @@ OutputImage::OutputImage(int index,
 			 std::string image_type,
 			 int image_size_x, int image_size_y,
 			 std::string image_reduce_type,
-			 int         image_block_size) throw ()
+			 int         image_block_size,
+			 bool ghost) throw ()
   : Output(index,factory),
     data_(),
     axis_(axis_z),
     nxi_(image_size_x),
     nyi_(image_size_y),
     png_(0),
-    image_type_(image_type)
+    image_type_(image_type),
+    ghost_(ghost)
 
 {
-  
   if (image_reduce_type=="min") op_reduce_ = reduce_min;
   if (image_reduce_type=="max") op_reduce_ = reduce_max;
   if (image_reduce_type=="avg") op_reduce_ = reduce_avg;
@@ -100,6 +101,7 @@ void OutputImage::pup (PUP::er &p)
   // p | *png_;
   if (p.isUnpacking()) png_ = 0;
   p | image_type_;
+  p | ghost_;
 }
 #endif
 
@@ -211,8 +213,10 @@ void OutputImage::write_block
 
   // add block contribution to image
 
-  const char * field_unknowns = field_block->field_unknowns(field_descr,index);
-
+  const char * field = (ghost_) ? 
+    field_block->field_values(index) :
+    field_block->field_unknowns(field_descr,index);
+    
   int level = comm_block->level();
 
   // pixel extents of box
@@ -234,6 +238,8 @@ void OutputImage::write_block
   if (nby > 1) v *= (yp-ym);
   if (nbz > 1) v *= (zp-zm);
   TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),zp-zm,v);
+  
+
   if (image_type_ == "mesh") {
 
     reduce_box_(ixm,ixp,iym,iyp,double(level+1));
@@ -246,25 +252,28 @@ void OutputImage::write_block
     TRACE3("OutputImage iym,iyp,nby %d %d %d",iym,iyp,nby);
     TRACE3("OutputImage izm,izp,nbz %d %d %d",izm,izp,nbz);
 
-    for (int ix=0; ix<nbx; ix++) {
-      int jxm = ixm +  ix   *(ixp-ixm)/nbx;
-      int jxp = ixm + (ix+1)*(ixp-ixm)/nbx-1;
-      for (int iy=0; iy<nby; iy++) {
-	int jym = iym +  iy   *(iyp-iym)/nby;
-	int jyp = iym + (iy+1)*(iyp-iym)/nby-1;
-	for (int iz=0; iz<nbz; iz++) {
-	  int jzm = izm + iz    *(izp-izm)/nbz;
-	  int jzp = izm + (iz+1)*(izp-izm)/nbz-1;
+    int mx = ghost_ ? ndx : nbx;
+    int my = ghost_ ? ndy : nby;
+    int mz = ghost_ ? ndz : nbz;
+    for (int ix=0; ix<mx; ix++) {
+      int jxm = ixm +  ix   *(ixp-ixm)/mx;
+      int jxp = ixm + (ix+1)*(ixp-ixm)/mx-1;
+      for (int iy=0; iy<my; iy++) {
+	int jym = iym +  iy   *(iyp-iym)/my;
+	int jyp = iym + (iy+1)*(iyp-iym)/my-1;
+	for (int iz=0; iz<mz; iz++) {
+	  int jzm = izm + iz    *(izp-izm)/mz;
+	  int jzp = izm + (iz+1)*(izp-izm)/mz-1;
 	  int i=ix + ndx*(iy + ndy*iz);
 
 	  switch (field_descr->precision(index)) {
 
 	  case precision_single:
-	    reduce_cube_(jxm,jxp,jym,jyp, (((float*)field_unknowns)[i]));
+	    reduce_cube_(jxm,jxp,jym,jyp, (((float*)field)[i]));
 	    break;
 
 	  case precision_double:
-	    reduce_cube_(jxm,jxp,jym,jyp,(((double *)field_unknowns)[i]));
+	    reduce_cube_(jxm,jxp,jym,jyp,(((double *)field)[i]));
 	    break;
 	  }
 

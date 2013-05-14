@@ -508,8 +508,8 @@ test_summary("Enzo-PPML",
 	     array("enzo-p",  "enzo-p"));
 
 test_summary("Enzo-AMR", 
-	     array("adapt-L1-P1", "adapt-L3-P1",),
-	     array("enzo-p", "enzo-p"));
+	     array("adapt-L1-P1", "adapt-L3-P1", "adapt-L5-P1"),
+	     array("enzo-p",      "enzo-p",      "enzo-p"));
 
 test_summary("Enzo-BC-2D", 
 	     array("boundary_reflecting-2d",
@@ -685,14 +685,23 @@ echo "<h3>2D Serial</h3>";
 tests("Enzo","enzo-p","test_adapt-L1-P1","Level 1");
 
 test_table ("adapt-L1-P1-mesh",
-	    array("0000","0020","0040","0060","0080"), $types);
+	    array("0000","0025","0050","0075","0100"), $types);
 test_table ("adapt-L1-P1-density",
-	    array("0000","0020","0040","0060","0080"), $types);
+	    array("0000","0025","0050","0075","0100"), $types);
+
+tests("Enzo","enzo-p","test_adapt-L3-P1","Level 3");
 
 test_table ("adapt-L3-P1-mesh",
-	    array("0000","0020","0040","0060","0080"), $types);
+	    array("0000","0025","0050","0075","0100"), $types);
 test_table ("adapt-L3-P1-density",
-	    array("0000","0020","0040","0060","0080"), $types);
+	    array("0000","0025","0050","0075","0100"), $types);
+
+tests("Enzo","enzo-p","test_adapt-L5-P1","Level 5");
+
+test_table ("adapt-L5-P1-mesh",
+	    array("0000","0025","0050","0075","0100"), $types);
+test_table ("adapt-L5-P1-density",
+	    array("0000","0025","0050","0075","0100"), $types);
 
 
 //======================================================================

@@ -60,16 +60,22 @@ void ProlongLinear::apply_
   const double c1[4] = { 5.0*0.25, 3.0*0.25, 1.0*0.25, -1.0*0.25};
   const double c2[4] = {-1.0*0.25, 1.0*0.25, 3.0*0.25,  5.0*0.25};
 
-	  
+
+  int rank = (nd3_f[2] > 1) ? 3 : ( (nd3_f[1] > 1) ? 2 : 1 );
+
+  for (int i=0; i<rank; i++) {
+    const char * xyz = "xyz";
+    ASSERT3 ("ProlongLinear::apply_",
+	     "fine array %c-axis %d must be twice the size of the coarse axis %d",
+	     xyz[i],n3_c[i],n3_f[i],
+	     n3_f[i]==n3_c[i]*2);
+
+    ASSERT2 ("ProlongLinear::apply_",
+	     "fine grid %c-axis %d must be divisible by 4",
+	     xyz[i],n3_f[i],n3_f[i] % 4 == 0);
+  }
+
   if (n3_f[1]==1) {
-
-    ASSERT ("ProlongLinear::apply_",
-	    "fine array must be twice the size of the coarse array",
-	    n3_f[0]==n3_c[0]*2);
-
-    ASSERT ("ProlongLinear::apply_",
-	    "fine grid array sizes must be divisible by 4",
-	    n3_f[0] % 4 == 0);
 
     for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
       int i_c = ix0/2;
@@ -82,14 +88,6 @@ void ProlongLinear::apply_
     }
 
   } else if (n3_f[2] == 1) {
-
-    ASSERT ("ProlongLinear::apply_",
-	    "fine array must be twice the size of the coarse array",
-	    n3_f[1]==n3_c[1]*2);
-
-    ASSERT ("ProlongLinear::apply_",
-	    "fine grid array sizes must be divisible by 4",
-	    n3_f[1] % 4 == 0);
 
     for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
       for (int iy0=0; iy0<n3_f[1]; iy0+=4) {
@@ -113,14 +111,6 @@ void ProlongLinear::apply_
       }
     }
   } else {
-
-    ASSERT ("ProlongLinear::apply_",
-	    "fine array must be twice the size of the coarse array",
-	    n3_f[2]==n3_c[2]*2);
-
-    ASSERT ("ProlongLinear::apply_",
-	    "fine grid array sizes must be divisible by 4",
-	    n3_f[2] % 4 == 0);
 
     for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
       for (int iy0=0; iy0<n3_f[1]; iy0+=4) {

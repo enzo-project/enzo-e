@@ -44,7 +44,7 @@ CommBlock::CommBlock
   count_coarsen_(0),
   count_adapt_(count_adapt)
 { 
-
+  index.print ("CommBlock::CommBlock");
   TRACE6("CommBlock::CommBlock(n(%d %d %d)  num_field_blocks %d  count_adapt %d  initial %d)",
 	 nx,ny,nz,num_field_blocks,count_adapt,initial);
 
@@ -504,17 +504,19 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
 
 void CommBlock::is_on_boundary (bool is_boundary[3][2]) throw()
 {
-  int ix,iy,iz;
-  index_forest(&ix,&iy,&iz);
-  int nx,ny,nz;
-  size_forest(&nx,&ny,&nz);
 
-  is_boundary[0][0] = (ix == 0);
-  is_boundary[1][0] = (iy == 0);
-  is_boundary[2][0] = (iz == 0);
-  is_boundary[0][1] = (ix == (nx - 1));
-  is_boundary[1][1] = (iy == (ny - 1));
-  is_boundary[2][1] = (iz == (nz - 1));
+  Boundary * boundary = simulation()->problem()->boundary();
+  bool periodic = boundary->is_periodic();
+
+  int n3[3];
+  size_forest (&n3[0],&n3[1],&n3[2]);
+  
+  for (int axis=0; axis<3; axis++) {
+    for (int face=0; face<2; face++) {
+      is_boundary[axis][face] = 
+	index_.is_on_boundary(axis,face,n3[axis],periodic);
+    }
+  }
 }
 
 //----------------------------------------------------------------------

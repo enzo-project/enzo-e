@@ -94,6 +94,7 @@ c     NOT ACCESSED: eta1
 c
 c  local declarations
 c
+      integer iii,jjj
       integer i, j, ic
       ENZO_REAL steepen(ijkn),
      &     tmp1(ijkn),tmp2(ijkn),tmp3(ijkn),tmp4(ijkn)
@@ -279,6 +280,12 @@ c     cra(i) = sqrt(max(gamma*pra(i)*dra(i), 0.0))
          if ( (cla(i) .gt. huge) .or.
      &        (cla(i) .eq.0)) then
             write(6,*) 'inteuler: cla', i,cla(i), pla(i),dla(i)
+            write(6,*) 'inteuler: i1,i2',i1,i2
+            do iii=1,idim
+            do jjj=1,jdim
+               write(6,*) 'dslice ',iii,jjj,dslice(iii,jjj)
+            end do
+            end do
             stop
          endif
          if ( (cra(i) .gt. huge) .or.
