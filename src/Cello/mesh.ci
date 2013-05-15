@@ -46,14 +46,14 @@ module mesh {
 
     entry void p_adapt_begin ();
     entry void q_adapt_end();
-    entry void p_adapt (int count_adapt);
-    entry void p_refine ();
+    entry void p_adapt_start (int count_adapt);
+    entry void q_adapt_stop();
+    entry void p_refine (bool forced);
     entry void p_set_neighbor(const int v3[3]);
     entry void p_delete_neighbor(const int v3[3]);
     entry void p_set_nibling(const int v3[3]);
     entry void p_delete_nibling(const int v3[3]);
     entry void p_child_can_coarsen(int ic);
-    entry void q_adapt();
 
     // refresh
 
@@ -67,6 +67,8 @@ module mesh {
     entry void x_refresh_coarse(int n, char buffer[n],
 			      int ifx, int ify, int ifz,
 			      int icx, int icy, int icz);
+    entry void x_refresh_child(int n, char buffer[n],
+			       int icx, int icy, int icz);
 
     entry void p_print(std::string);
   };

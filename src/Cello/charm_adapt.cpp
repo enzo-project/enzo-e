@@ -67,6 +67,8 @@ void CommBlock::p_adapt_begin()
     performance->start_region(perf_adapt);
   }
 
+  forced_ = false;
+
   const Config * config = simulation()->config();
 
   int initial_cycle     = config->initial_cycle;
@@ -83,7 +85,7 @@ void CommBlock::p_adapt_begin()
 
   if (count_adapt_ > 0) {
 
-    p_adapt(count_adapt_);
+    p_adapt_start(count_adapt_);
 
   } else {
 
@@ -94,7 +96,7 @@ void CommBlock::p_adapt_begin()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_adapt(int count)
+void CommBlock::p_adapt_start(int count)
 {
 
   count_coarsen_ = 0;
@@ -106,7 +108,7 @@ void CommBlock::p_adapt(int count)
     if (adapt == adapt_refine)  p_refine();
     if (adapt == adapt_coarsen)   coarsen();
 
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt(), 
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_stop(), 
 			  thisProxy[thisIndex]));
 
   } else {
@@ -128,13 +130,13 @@ int CommBlock::determine_adapt()
 
     FieldDescr * field_descr = simulation()->field_descr();
 
-    int i=0;
+    int index_refine = 0;
     int adapt = adapt_unknown;
 
     Problem * problem = simulation()->problem();
     Refine * refine;
 
-    while ((refine = problem->refine(i++))) {
+    while ((refine = problem->refine(index_refine++))) {
 
       int adapt_step = refine->apply(this, field_descr);
 
@@ -145,7 +147,13 @@ int CommBlock::determine_adapt()
     const Config * config = simulation()->config();
     int mesh_max_level    = config->mesh_max_level;
 
-    if ((mesh_max_level == level_) && (adapt == adapt_refine)) {
+    // can't refine if we are at the maximum refinement level
+    if ((level_ == mesh_max_level) && (adapt == adapt_refine)) {
+      adapt = adapt_same;
+    }
+
+    // can't coarsen if we've been forced to refine to balance
+    if (forced_ && (adapt == adapt_coarsen)) {
       adapt = adapt_same;
     }
 
@@ -179,8 +187,9 @@ int CommBlock::reduce_adapt_(int a1, int a2) const throw()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_refine()
+void CommBlock::p_refine(bool forced)
 {
+  forced_ = forced;
 
   TRACE("CommBlock::p_refine()");
   int rank = simulation()->dimension();
@@ -196,7 +205,7 @@ void CommBlock::p_refine()
   size_forest (&na3[0],&na3[1],&na3[2]);
 
   int initial_cycle = simulation()->config()->initial_cycle;
-  int balance       = simulation()->config()->mesh_balance;
+  bool do_balance   = simulation()->config()->mesh_balance;
 
   bool initial = initial_cycle == cycle();
 
@@ -237,7 +246,7 @@ void CommBlock::p_refine()
 
 	int face = ic3[axis];
 
-	// update neighbor
+	// update non-sibling neighbors
 
 	Index index_neighbor = index_.index_neighbor(axis,face,na3[axis]);
 
@@ -251,19 +260,19 @@ void CommBlock::p_refine()
 
 	  // no neighbor?  then uncle must refine
 
-	  if (level_ > 0 && balance) {
+	  if (level_ > 0 && do_balance) {
 
-	    Index index_uncle = index_.index_uncle (axis,face,na3[axis]);
+	    Index index_uncle = index_neighbor.index_parent();
 
-	    thisProxy[index_uncle].p_refine();
+	    bool forced;
+	    thisProxy[index_uncle].p_refine(forced = true);
 	  }
 
 	}
 
 	// new child is nibling's neighbor
 
-	Index index_nibling = index_.index_nibling
-	  (axis, 1-face, ic3, na3[axis]);
+	Index index_nibling = index_neighbor.index_child(ic3);
 
 	if (is_nibling(index_nibling)) {
 	  thisProxy[index_nibling].p_set_neighbor(vc3);
@@ -293,18 +302,55 @@ void CommBlock::coarsen()
 
 void CommBlock::p_child_can_coarsen(int ic)
 {
-  INCOMPLETE1("CommBlock::p_child_can_coarsen(%d) is not implemented yet",
-	      ic);
+  int rank = simulation()->dimension();
+  if (++count_coarsen_ >= NC(rank)) {
+    for (size_t i=0; i<children_.size(); i++) {
+      if (children_[i] != thisIndex) {
+	// Restricted child data is sent to parent when child destroyed
+	thisProxy[children_[i]].ckDestroy();
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::q_adapt()
+void CommBlock::x_refresh_child (int n, char * buffer, 
+				int icx, int icy, int icz)
+{
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  FieldDescr * field_descr = simulation->field_descr();
+  FieldBlock * field_block = block_->field_block();
+  Restrict * restrict = simulation->problem()->restrict();
+
+  FieldFace field_face(field_block, field_descr);
+
+  // Full block data
+  field_face.set_face(0,0,0);
+
+  field_face.set_restrict(restrict,icx,icy,icz);
+   
+  field_face.store (n, buffer);
+
+  // Will need counter if not using QD
+  // std::string refresh_type = simulation->config()->field_refresh_type;
+  
+  // if (refresh_type == "counter") {
+  //   if (loop_refresh_.done()) {
+  //     q_refresh_end();
+  //   }
+  // }
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::q_adapt_stop()
 {
   thisProxy.doneInserting();
 
   if (thisIndex.is_root()) {
-    thisProxy.p_adapt(count_adapt_);
+    thisProxy.p_adapt_start(count_adapt_);
   }
 }
 
@@ -316,7 +362,7 @@ void CommBlock::q_adapt_end()
 
   Performance * performance = simulation()->performance();
   if (performance->is_region_active(perf_adapt))
-    simulation()->performance()->stop_region(perf_adapt);
+    performance->stop_region(perf_adapt);
 
   thisProxy.doneInserting();
   if (thisIndex.is_root()) {

@@ -42,15 +42,18 @@ CommBlock::CommBlock
   neighbors_(),
   niblings_(),
   count_coarsen_(0),
-  count_adapt_(count_adapt)
+  count_adapt_(count_adapt),
+#ifdef CONFIG_USE_CHARM
+  loop_refresh_(),
+#endif
+  forced_(false)
 { 
+#ifdef CELLO_TRACE
   index.print ("CommBlock::CommBlock");
+#endif
+
   TRACE6("CommBlock::CommBlock(n(%d %d %d)  num_field_blocks %d  count_adapt %d  initial %d)",
 	 nx,ny,nz,num_field_blocks,count_adapt,initial);
-
-#ifdef CONFIG_USE_CHARM
-  //  index.print("create");
-#endif
 
   TRACE3("CommBlock::CommBlock  n (%d %d %d)",nx,ny,nz);
   TRACE1("CommBlock::CommBlock  l %d",level_);
@@ -181,6 +184,34 @@ CommBlock::~CommBlock() throw ()
 { 
 #ifdef CONFIG_USE_CHARM
 
+  if (level_ > 0) {
+
+    // Send restricted data to parent 
+
+    FieldBlock * field_block = block()->field_block();
+    FieldDescr * field_descr = simulation()->field_descr();
+    FieldFace field_face (field_block,field_descr);
+
+    //    set "face" to full FieldBlock
+    field_face.set_face(0,0,0);
+
+    //    set restriction
+    Restrict * restrict = simulation()->problem()->restrict();
+    int icx,icy,icz;
+    index_.child(level_,&icx,&icy,&icz);
+    field_face.set_restrict(restrict,icx,icy,icz);
+
+    //    load array with data
+
+    int n; 
+    char * array;
+    field_face.load(&n,&array);
+
+    //    send data to parent
+
+    thisProxy[index_.index_parent()].x_refresh_child(n,array,icx,icy,icz);
+    
+  }
   if (block_) delete block_;
   block_ = 0;
 

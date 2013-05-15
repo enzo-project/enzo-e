@@ -20,6 +20,10 @@ void CommBlock::p_refresh_begin()
 {
   TRACE("CommBlock::p_refresh_begin");
 
+  Performance * performance = simulation()->performance();
+  if (! performance->is_region_active(perf_refresh)) {
+    performance->start_region(perf_refresh);
+  }
   //  simulation()->performance()->start_region(perf_refresh);
 
 #ifdef TEMP_SKIP_REFRESH
@@ -70,7 +74,9 @@ void CommBlock::refresh ()
 
     if (! is_leaf()) return;
 
+#ifdef CELLO_TRACE
     index_.print ("leaf",-1,2);
+#endif
 
   } 
 
@@ -189,8 +195,10 @@ void CommBlock::refresh_same (Index index,
 			      int ifx,  int ify,  int ifz)
 {
 
+#ifdef CELLO_TRACE
   index_.print("refresh_same A",-1,2);
   index.print("refresh_same B",-1,2);
+#endif
 
   TRACE3("ENTER refresh_same %d %d %d",ifx,ify,ifz);
 
@@ -204,7 +212,7 @@ void CommBlock::refresh_same (Index index,
 	  
   int n; 
   char * array;
-    field_face.load(&n, &array);
+  field_face.load(&n, &array);
 
   thisProxy[index].x_refresh_same (n,array,-ifx,-ify,-ifz);
 }
@@ -270,9 +278,10 @@ void CommBlock::refresh_coarse
 {
 
   TRACE3("ENTER refresh_coarse %d %d %d",ifx,ify,ifz);
+#ifdef CELLO_TRACE
   index_.print("refresh_coarse A",-1,2);
-
   index.print ("refresh_coarse B",-1,2);
+#endif
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
@@ -335,7 +344,9 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
 				int ifx, int ify, int ifz,
 				int icx, int icy, int icz)
 {
+#ifdef CELLO_TRACE
   index_.print("x_refresh_fine",-1,2);
+#endif
   TRACE6 ("CommBlock::x_refresh_fine(face %d %d %d  child  %d %d %d)",
 	  ifx,ify,ifz,icx,icy,icz);
 
@@ -367,7 +378,9 @@ void CommBlock::x_refresh_coarse (int n, char * buffer,
 				int ifx, int ify, int ifz,
 				int icx, int icy, int icz)
 {
+#ifdef CELLO_TRACE
   index_.print("x_refresh_coarse",-1,2);
+#endif
   TRACE6 ("CommBlock::x_refresh_coarse(face %d %d %d  child  %d %d %d)",
 	  ifx,ify,ifz,icx,icy,icz);
 
@@ -397,6 +410,9 @@ void CommBlock::x_refresh_coarse (int n, char * buffer,
 
 void CommBlock::q_refresh_end()
 {
+  Performance * performance = simulation()->performance();
+  if (performance->is_region_active(perf_refresh))
+    performance->stop_region(perf_refresh);
   //  simulation()->performance()->stop_region(perf_refresh);
 
   TRACE ("CommBlock::q_refresh_end() calling prepare()");

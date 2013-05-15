@@ -85,6 +85,7 @@ public: // interface
   p | count_coarsen_;
   p | count_adapt_;
   p | loop_refresh_;
+  p | forced_;
 
 }
 
@@ -137,11 +138,11 @@ public: // interface
   void q_adapt_end ();
 
   /// Begin a single adapt step
-  void p_adapt (int count_adapt);
+  void p_adapt_start (int count_adapt);
   /// End the adapt step after QD
-  void q_adapt ();
+  void q_adapt_stop ();
   //  void adapt();
-  void p_refine();
+  void p_refine(bool forced = false);
   void coarsen();
   void p_child_can_coarsen(int ic);
   int determine_adapt();
@@ -183,6 +184,10 @@ public: // interface
   void x_refresh_fine(int n, char buffer[],
 		      int ifx, int ify, int ifz,
 		      int icx, int icy, int icz);
+
+  /// Get restricted data from child when it is deleted
+  void x_refresh_child (int n, char buffer[],
+		       int icx, int icy, int icz);
 
   //--------------------------------------------------
 
@@ -417,6 +422,9 @@ protected: // attributes
   /// Synchronization counter for ghost refresh
   Sync loop_refresh_;
 #endif
+
+  /// Whether node was forced to refine to maintain balance
+  bool forced_;
 
 };
 

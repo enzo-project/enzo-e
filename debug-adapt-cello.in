@@ -8,8 +8,8 @@ Mesh
 {
    root_rank = 2;
    root_size   = [64,64];
-   root_blocks = [ 2, 1]; 
-   max_level   = 1; 
+   root_blocks = [ 2, 2]; 
+   max_level   = 7; 
    adapt {
       type = ["slope"];
       balance = true;
@@ -22,7 +22,7 @@ Field {
    }
 }
 Initial {
-   max_level = 1;
+   max_level = 7;
       fields = [
 	"density",	
 	"velocity_x",
