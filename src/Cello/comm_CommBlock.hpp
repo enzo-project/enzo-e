@@ -169,7 +169,9 @@ public: // interface
   void refresh_coarse (Index index, int ifx, int ify, int ifz);
 
   /// send ghost zones to fine neighbors in given direction
-  void refresh_fine (Index index, int ifx, int ify, int ifz,  int n3[3]);
+  void refresh_fine (Index index, 
+		     int ifx, int ify, int ifz,  
+		     int icx, int icy, int icz);
 
   /// Refresh a FieldFace in the same level
   void x_refresh_same(int n, char buffer[],

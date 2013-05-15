@@ -67,7 +67,10 @@ public:
   
   Index index_parent () const;
 
-  Index index_child (int ic3[3]) const;
+  Index index_child (int ic3[3]) const
+  { return index_child(ic3[0],ic3[1],ic3[2]); }
+
+  Index index_child (int icx, int icy, int icz) const;
 
   /// Index of neighbor along given face
   Index index_neighbor 

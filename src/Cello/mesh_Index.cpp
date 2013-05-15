@@ -90,16 +90,16 @@ Index Index::index_parent () const
 
 //----------------------------------------------------------------------
 
-Index Index::index_child (int ic3[3]) const
+Index Index::index_child (int icx, int icy, int icz) const
 {
-  TRACE4("index_child level %d  %d %d %d",level(),ic3[0],ic3[1],ic3[2]);
+  TRACE4("index_child level %d  %d %d %d",level(),icx,icy,icz);
   Index index = *this;
   int level = index.level();
   index.set_level(level+1);
-  index.set_child (level+1,ic3[0],ic3[1],ic3[2]);
+  index.set_child (level+1,icx,icy,icz);
 #ifdef CELLO_TRACE
   char buffer[40];
-  sprintf (buffer,"index_child(ix iy iz %d %d %d)",ic3[0],ic3[1],ic3[2]);
+  sprintf (buffer,"index_child(ix iy iz %d %d %d)",icx,icy,icz);
   this->print(buffer);
   index.print(buffer);
 #endif

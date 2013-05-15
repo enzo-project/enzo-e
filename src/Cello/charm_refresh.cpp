@@ -71,7 +71,7 @@ void CommBlock::refresh ()
 
   int refresh_rank = config->field_refresh_rank;
   bool refresh_type_counter = (refresh_type == "counter");
-  if (refresh_type_counter) loop_refresh_.stop() = 0;
+  loop_refresh_.stop() = 0;
 
   int rank = simulation->dimension();
 
@@ -83,19 +83,15 @@ void CommBlock::refresh ()
 	  TRACE3("Calling refresh_same %d %d %d",ifx,ify,ifz);
 	  Index index_neighbor = index_.index_neighbor(ifx,ify,ifz,n3);
 
-	  // if no neighbor, update coarse
+	  // if no neighbor in level, refresh coarse neighbor
 
 	  if (! is_neighbor(index_neighbor)) {
-
-	    if (refresh_type_counter) ++loop_refresh_.stop();
 
 	    refresh_coarse(index_neighbor.index_parent(),ifx,ify,ifz);
 
 	  } else {
 
-	    // if neighbor check for niblings...
-
-	    int num_niblings = 0;
+	    // else check for adjacent fine neighbors
 
 	    int icxm,icym,iczm;
 	    int icxp,icyp,iczp;
@@ -103,14 +99,16 @@ void CommBlock::refresh ()
 				 &icxp,&icyp,&iczp,
 				 ifx,ify,ifz);
 
-	    int ic3[3];
-	    for (ic3[0]=icxm; ic3[0]<=icxp; ic3[0]++) {
-	      for (ic3[1]=icym; ic3[1]<=icyp; ic3[1]++) {
-		for (ic3[2]=iczm; ic3[2]<=iczp; ic3[2]++) {
-		  Index index_nibling = index_neighbor.index_child(ic3);
+	    int num_niblings = 0;
+	    int icx,icy,icz;
+	    for (icx=icxm; icx<=icxp; icx++) {
+	      for (icy=icym; icy<=icyp; icy++) {
+		for (icz=iczm; icz<=iczp; icz++) {
+		  Index index_nibling = 
+		    index_neighbor.index_child(icx,icy,icz);
 		  if (is_nibling(index_nibling)) {
 		    ++num_niblings;
-		    refresh_fine(index_nibling,ifx,ify,ifz,ic3);
+		    refresh_fine(index_nibling, ifx,ify,ifz, icx,icy,icz);
 		  }
 		}
 	      }
@@ -120,8 +118,6 @@ void CommBlock::refresh ()
 
 	    if (num_niblings == 0 && index_ != index_neighbor) {
 
-	      if (refresh_type_counter) ++loop_refresh_.stop();
-
 	      refresh_same(index_neighbor,ifx,ify,ifz);
 
 	    }
@@ -130,11 +126,14 @@ void CommBlock::refresh ()
       }
     }
   }
-  TRACE1("CommBlock::refresh() face counter = %d",
-	 loop_refresh_.index());
+
   if (refresh_type_counter) {
+
+    // Prevent hang if single-CommBlock simulation
     ++loop_refresh_.stop();
+
     x_refresh_same (0,0,0,0,0);
+
   }
 }
 
@@ -202,13 +201,17 @@ void CommBlock::refresh_same (Index index,
   char * array;
   field_face.load(&n, &array);
 
+  ++loop_refresh_.stop();
+
   thisProxy[index].x_refresh_same (n,array,-ifx,-ify,-ifz);
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::refresh_fine 
-(Index index, int ifx,  int ify,  int ifz, int ic3[3])
+(Index index, 
+ int ifx, int ify, int ifz, 
+ int icx, int icy, int icz)
 {
   TRACE3("ENTER refresh_fine %d %d %d",ifx,ify,ifz);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -221,7 +224,7 @@ void CommBlock::refresh_fine
   FieldFace field_face (field_block,field_descr);
 
   field_face.set_face(ifx,ify,ifz);
-  field_face.set_prolong(prolong,ic3[0],ic3[1],ic3[2]);
+  field_face.set_prolong(prolong,icx,icy,icz);
 	  
   int n; 
   char * array;
@@ -230,10 +233,13 @@ void CommBlock::refresh_fine
   // send face data
 
   TRACE6("Calling x_refresh_fine %d %d %d %d %d %d",
-	 ifx,ify,ifz, ic3[0],ic3[1],ic3[2]);
+	 ifx,ify,ifz, icx,icy,icz);
+
+  ++loop_refresh_.stop();
+
   thisProxy[index].x_refresh_fine (n,array,
 				   -ifx,-ify,-ifz,
-				   ic3[0],ic3[1],ic3[2]);
+				   icx,icy,icz);
 	  
 }
 
@@ -288,6 +294,8 @@ void CommBlock::refresh_coarse
   char * array;
   field_face.load(&n, &array);
 
+  ++loop_refresh_.stop();
+
   thisProxy[index].x_refresh_coarse (n,array,-ifx,-ify,-ifz,
 				     icx,icy,icz);
 
@@ -315,8 +323,7 @@ void CommBlock::x_refresh_same (int n, char * buffer, int ifx, int ify, int ifz)
     field_face.store (n, buffer);
   }
 
-  const Config * config = simulation->config();
-  std::string refresh_type = config->field_refresh_type;
+  std::string refresh_type = simulation->config()->field_refresh_type;
   
   if (refresh_type == "counter") {
     if (loop_refresh_.done()) {
@@ -341,11 +348,12 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
 
   FieldDescr * field_descr = simulation->field_descr();
   FieldBlock * field_block = block_->field_block();
-  Prolong * prolong = simulation->problem()->prolong();
 
   FieldFace field_face(field_block, field_descr);
 
   field_face.set_face(ifx,ify,ifz);
+
+  Prolong *    prolong = simulation->problem()->prolong();
   field_face.set_prolong(prolong,icx,icy,icz);
    
   field_face.store (n, buffer);
@@ -375,11 +383,12 @@ void CommBlock::x_refresh_coarse (int n, char * buffer,
 
   FieldDescr * field_descr = simulation->field_descr();
   FieldBlock * field_block = block_->field_block();
-  Restrict * restrict = simulation->problem()->restrict();
 
   FieldFace field_face(field_block, field_descr);
 
   field_face.set_face(ifx,ify,ifz);
+
+  Restrict *   restrict = simulation->problem()->restrict();
   field_face.set_restrict(restrict,icx,icy,icz);
    
   field_face.store (n, buffer);
