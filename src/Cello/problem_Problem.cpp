@@ -607,10 +607,9 @@ Output * Problem::create_output_
     int         image_size_x     = config->output_image_size[index][0];
     int         image_size_y     = config->output_image_size[index][1];
     int         image_block_size = config->output_image_block_size[index];
+    bool        image_ghost      = config->output_image_ghost[index];
     int         max_level        = config->mesh_max_level;
     std::string image_reduce_type = config->output_image_reduce_type[index];
-    
-    bool ghost = false;
     output = new OutputImage (index,factory,group_process->size(),
 			      nx,ny,nz, 
 			      nbx,nby,nbz, 
@@ -619,7 +618,7 @@ Output * Problem::create_output_
 			      image_size_x,image_size_y,
 			      image_reduce_type,
 			      image_block_size,
-			      ghost);
+			      image_ghost);
 
   } else if (name == "data") {
 

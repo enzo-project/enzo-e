@@ -106,6 +106,7 @@ public: // attributes
   std::string                output_image_type           [MAX_FILE_GROUPS];
   std::vector<int>           output_image_size           [MAX_FILE_GROUPS];
   std::string                output_image_reduce_type    [MAX_FILE_GROUPS];
+  bool                       output_image_ghost          [MAX_FILE_GROUPS];
   std::vector<std::string>   output_dir            [MAX_FILE_GROUPS];
   int                        output_stride         [MAX_FILE_GROUPS];
   std::vector<std::string>   output_field_list     [MAX_FILE_GROUPS];
