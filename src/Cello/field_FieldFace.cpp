@@ -120,20 +120,20 @@ void FieldFace::load ( int * n, char ** array) throw()
 
   size_t num_fields = field_descr_->field_count();
 
-  size_t index = 0;
+  size_t index_array = 0;
 
-  for (size_t field=0; field< num_fields; field++) {
+  for (size_t index_field=0; index_field< num_fields; index_field++) {
   
-    precision_type precision = field_descr_->precision(field);
+    precision_type precision = field_descr_->precision(index_field);
 
-    const void * field_face = field_block_->field_values(field);
+    const void * field_face = field_block_->field_values(index_field);
 
-    void * array_face  = &array_[index];
+    void * array_face  = &array_[index_array];
 
     int nd3[3],ng3[3],im3[3],n3[3];
 
-    field_block_->field_size(field_descr_,field,&nd3[0],&nd3[1],&nd3[2]);
-    field_descr_->ghosts(field,&ng3[0],&ng3[1],&ng3[2]);
+    field_block_->field_size(field_descr_,index_field,&nd3[0],&nd3[1],&nd3[2]);
+    field_descr_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     load_loop_limits_ (im3,n3, nd3,ng3);
 
@@ -147,7 +147,7 @@ void FieldFace::load ( int * n, char ** array) throw()
 
       restrict_->apply(precision, array_face,nc3,nc3, field_face,nd3,n3);
 
-      index += nc3[0]*nc3[1]*nc3[2];
+      index_array += nc3[0]*nc3[1]*nc3[2];
 
     } else {
 
@@ -157,21 +157,21 @@ void FieldFace::load ( int * n, char ** array) throw()
 	{
 	  float *       array = (float *) array_face;
 	  const float * field = (const float *) field_face;
-	  index += load_ ( array,field, nd3,n3,im3);
+	  index_array += load_ ( array,field, nd3,n3,im3);
 	}
 	break;
       case precision_double:
 	{
 	  double *       array = (double *)array_face;
 	  const double * field = (const double *) field_face;
-	  index += load_ ( array,field, nd3,n3,im3);
+	  index_array += load_ ( array,field, nd3,n3,im3);
 	}
 	break;
       case precision_quadruple:
 	{
 	  long double *       array = (long double *)array_face;
 	  const long double * field = (const long double *) field_face;
-	  index += load_ ( array,field, nd3,n3,im3);
+	  index_array += load_ ( array,field, nd3,n3,im3);
 	}
 	break;
       default:
@@ -193,20 +193,20 @@ void FieldFace::store (int n, char * array) throw()
 
   size_t num_fields = field_descr_->field_count();
 
-  size_t index = 0;
+  size_t index_array = 0;
 
-  for (size_t field=0; field<num_fields; field++) {
+  for (size_t index_field=0; index_field<num_fields; index_field++) {
 
-    precision_type precision = field_descr_->precision(field);
+    precision_type precision = field_descr_->precision(index_field);
 
-    char * field_ghost = field_block_->field_values(field);
+    char * field_ghost = field_block_->field_values(index_field);
     
-    char * array_ghost  = array + index;
+    char * array_ghost  = array + index_array;
 
     int nd3[3],ng3[3],im3[3],n3[3];
 
-    field_block_->field_size(field_descr_,field,&nd3[0],&nd3[1],&nd3[2]);
-    field_descr_->ghosts(field,&ng3[0],&ng3[1],&ng3[2]);
+    field_block_->field_size(field_descr_,index_field,&nd3[0],&nd3[1],&nd3[2]);
+    field_descr_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     store_loop_limits_ (im3,n3, nd3,ng3);
 
@@ -231,7 +231,7 @@ void FieldFace::store (int n, char * array) throw()
 	      nc3[0],nc3[1],nc3[2],nc3[0],nc3[1],nc3[2]);
       prolong_->apply(precision, field_ghost,nd3,n3, array_ghost,nc3,nc3);
 
-      index += nc3[0]*nc3[1]*nc3[2];
+      index_array += nc3[0]*nc3[1]*nc3[2];
 
     } else {
 
@@ -242,21 +242,21 @@ void FieldFace::store (int n, char * array) throw()
 	{
 	  float *       field = (float *)field_ghost;
 	  const float * array = (const float *)array_ghost;
-	  index += store_ (field, array, nd3,n3,im3);
+	  index_array += store_ (field, array, nd3,n3,im3);
 	}
 	break;
       case precision_double:
 	{
 	  double *       field = (double *)field_ghost;
 	  const double * array = (const double *)array_ghost;
-	  index += store_ (field, array, nd3,n3,im3);
+	  index_array += store_ (field, array, nd3,n3,im3);
 	}
 	break;
       case precision_quadruple:
 	{
 	  long double *       field = (long double *)field_ghost;
 	  const long double * array = (const long double *)array_ghost;
-	  index += store_ (field, array, nd3,n3,im3);
+	  index_array += store_ (field, array, nd3,n3,im3);
 	}
 	break;
       default:
