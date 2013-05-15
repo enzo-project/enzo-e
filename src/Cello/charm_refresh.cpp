@@ -24,7 +24,6 @@ void CommBlock::p_refresh_begin()
   if (! performance->is_region_active(perf_refresh)) {
     performance->start_region(perf_refresh);
   }
-  //  simulation()->performance()->start_region(perf_refresh);
 
   refresh(); 
 }
@@ -35,7 +34,6 @@ void CommBlock::refresh ()
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
-  Boundary * boundary = simulation->problem()->boundary();
 
   TRACE ("CommBlock::refresh() setting QD q_refresh_end()");
 
@@ -58,33 +56,9 @@ void CommBlock::refresh ()
 
   } 
 
-  // which faces need to be refreshed?
-  bool no_refresh[3][2];
-  is_on_boundary (no_refresh);
-  TRACE6("is_on_boundary %d %d %d  %d %d %d",
-	 no_refresh[0][0],no_refresh[1][0],no_refresh[2][0],
-	 no_refresh[0][1],no_refresh[1][1],no_refresh[2][1]);
-
-  bool periodic = boundary->is_periodic();
-  if (periodic) {
-    for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
-	no_refresh[axis][face] = false;
-      }
-    }
-  }
-
-  // set face loop limits accordingly
-  int ifxm = no_refresh[0][0] ? 0 : -1;
-  int ifym = no_refresh[1][0] ? 0 : -1;
-  int ifzm = no_refresh[2][0] ? 0 : -1;
-  int ifxp = no_refresh[0][1] ? 0 : 1;
-  int ifyp = no_refresh[1][1] ? 0 : 1;
-  int ifzp = no_refresh[2][1] ? 0 : 1;
-
-  int rank         = simulation->dimension();
-  if (rank < 2) ifym = ifyp = 0;
-  if (rank < 3) ifzm = ifzp = 0;
+  int ifxm,ifym,ifzm;
+  int ifxp,ifyp,ifzp;
+  loop_limits_refresh_(&ifxm,&ifym,&ifzm,&ifxp,&ifyp,&ifzp);
 
   // Include ghost zones in refresh?
 
@@ -99,11 +73,8 @@ void CommBlock::refresh ()
   bool refresh_type_counter = (refresh_type == "counter");
   if (refresh_type_counter) loop_refresh_.stop() = 0;
 
-  // (icx0,icy0,icz0) are loop limits
-  // e.g. 
-  // if face (ifx,ify,ifz) = (0,0,1), then children are ([01], [01], 1)
-  // if face (ifx,ify,ifz) = (0,-1,0), then children are ([01], 0, [01])
-  // if face (ifx,ify,ifz) = (1,0,-1), then children are (1, [01], 0)
+  int rank = simulation->dimension();
+
   for (int ifx=ifxm; ifx<=ifxp; ifx++) {
     for (int ify=ifym; ify<=ifyp; ify++) {
       for (int ifz=ifzm; ifz<=ifzp; ifz++) {
@@ -165,6 +136,45 @@ void CommBlock::refresh ()
     ++loop_refresh_.stop();
     x_refresh_same (0,0,0,0,0);
   }
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::loop_limits_refresh_
+(int * ifxm, int * ifym, int * ifzm, int * ifxp, int * ifyp, int * ifzp)
+  const throw()
+{
+
+  Boundary * boundary = simulation()->problem()->boundary();
+
+  // which faces need to be refreshed?
+  bool on_boundary[3][2];
+  is_on_boundary (on_boundary);
+  TRACE6("is_on_boundary %d %d %d  %d %d %d",
+	 on_boundary[0][0],on_boundary[1][0],on_boundary[2][0],
+	 on_boundary[0][1],on_boundary[1][1],on_boundary[2][1]);
+
+  bool periodic = boundary->is_periodic();
+  if (periodic) {
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+	on_boundary[axis][face] = false;
+      }
+    }
+  }
+
+  // set face loop limits accordingly
+  (*ifxm) = on_boundary[0][0] ? 0 : -1;
+  (*ifym) = on_boundary[1][0] ? 0 : -1;
+  (*ifzm) = on_boundary[2][0] ? 0 : -1;
+  (*ifxp) = on_boundary[0][1] ? 0 : 1;
+  (*ifyp) = on_boundary[1][1] ? 0 : 1;
+  (*ifzp) = on_boundary[2][1] ? 0 : 1;
+
+  int rank = simulation()->dimension();
+  if (rank < 2) (*ifym) = (*ifyp) = 0;
+  if (rank < 3) (*ifzm) = (*ifzp) = 0;
+
 }
 
 //----------------------------------------------------------------------

@@ -279,7 +279,7 @@ public: // interface
   double dt() const throw() { return dt_; };
  
   /// Return which block faces lie along a domain boundary
-  void is_on_boundary (bool boundary[3][2]) throw();
+  void is_on_boundary (bool boundary[3][2]) const throw();
 
   /// Return whether this CommBlock is a leaf in the octree forest
   bool is_leaf() const
@@ -361,6 +361,10 @@ protected: // functions
   void update_boundary_ ();
 
 #endif
+
+  void loop_limits_refresh_ 
+  (int *ifxm, int *ifym, int *ifzm,
+   int *ifxp, int *ifyp, int *ifzp) const throw();
 
   void loop_limits_nibling_ 
   (int *icxm, int *icym, int *iczm,

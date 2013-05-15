@@ -67,8 +67,6 @@ void CommBlock::p_adapt_begin()
     performance->start_region(perf_adapt);
   }
 
-  forced_ = false;
-
   const Config * config = simulation()->config();
 
   int initial_cycle     = config->initial_cycle;
@@ -98,8 +96,12 @@ void CommBlock::p_adapt_begin()
 
 void CommBlock::p_adapt_start(int count)
 {
-
+  // Initialize child coarsening counter
   count_coarsen_ = 0;
+
+  // Inhibit coarsening on startup
+  int initial_cycle = simulation()->config()->initial_cycle;
+  forced_ = (cycle()==initial_cycle);
 
   if (count_adapt_-- > 0) {
 
@@ -148,12 +150,12 @@ int CommBlock::determine_adapt()
     int mesh_max_level    = config->mesh_max_level;
 
     // can't refine if we are at the maximum refinement level
-    if ((level_ == mesh_max_level) && (adapt == adapt_refine)) {
+    if ((adapt == adapt_refine) && (level_ == mesh_max_level)) {
       adapt = adapt_same;
     }
 
     // can't coarsen if we've been forced to refine to balance
-    if (forced_ && (adapt == adapt_coarsen)) {
+    if ((adapt == adapt_coarsen) && forced_ ) {
       adapt = adapt_same;
     }
 
@@ -302,6 +304,7 @@ void CommBlock::coarsen()
 
 void CommBlock::p_child_can_coarsen(int ic)
 {
+  if (forced_) return;
   int rank = simulation()->dimension();
   if (++count_coarsen_ >= NC(rank)) {
     for (size_t i=0; i<children_.size(); i++) {

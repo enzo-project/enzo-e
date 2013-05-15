@@ -533,7 +533,7 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
 
 //----------------------------------------------------------------------
 
-void CommBlock::is_on_boundary (bool is_boundary[3][2]) throw()
+void CommBlock::is_on_boundary (bool is_boundary[3][2]) const throw()
 {
 
   Boundary * boundary = simulation()->problem()->boundary();
