@@ -1,0 +1,16 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/mesh-balanced.in"
+
+
+Mesh { adapt { balance = false; } }
+
+Output {
+      image_data {
+        name = ["mesh-unbalanced-data.%02d.png","cycle"];
+      };
+      image_mesh {
+        name = ["mesh-unbalanced-mesh.%02d.png","cycle"];
+      }
+}

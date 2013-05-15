@@ -87,6 +87,10 @@ void CommBlock::refresh ()
 
 	  if (! is_neighbor(index_neighbor)) {
 
+#ifdef CELLO_TRACE
+	    index_.print("not neighbor A");
+	    index_neighbor.print("not neighbor A");
+#endif
 	    refresh_coarse(index_neighbor.index_parent(),ifx,ify,ifz);
 
 	  } else {

@@ -1,0 +1,85 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/ppm.incl"
+
+
+Mesh 
+{
+   root_rank = 2;
+   root_size   = [64,64];
+   root_blocks = [ 2, 2]; 
+   max_level   = 7; 
+   adapt {
+      type = ["slope"];
+      balance = true;
+   }
+}
+
+Field {
+   refresh {
+     type = "quiescence";
+   }
+}
+Initial {
+   max_level = 7;
+      fields = [
+	"density",	
+	"velocity_x",
+	"velocity_y",
+	"total_energy",
+	"internal_energy"
+      ] ;
+}
+  Initial {
+     density       { value = [  1.0, "input/test_balance.png", 
+                                0.1 ]; };
+     total_energy  { value = [  0.1 / (0.4 * 0.1), "input/test_balance.png",
+                                1.0 / (0.4 * 1.0)  ]; };
+  }
+
+# Initial {
+#     density      { value = [ 1.0,           (x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) < 0.25,  
+#                              0.1 ]; };
+#     total_energy { value = [ 1.0/(0.4*1.0), (x- 0.5)*(x- 0.5) + (y- 0.5)*(y- 0.5) < 0.25,  
+#                              0.1/(0.4*0.1) ]; };
+# }
+
+Stopping { cycle = 0; }
+
+Output {
+
+#   file_groups = ["image_mesh"]; 
+#   file_groups = ["image_data"]; 
+   file_groups = ["image_mesh","image_data"]; 
+#   file_groups = []; 
+
+      image_data {
+	type     = "image";
+	image_type  = "data";
+	image_size  = [1024,1024];
+        field_list = ["density"];
+	schedule = ["cycle","interval", 10];
+        colormap = [0.00, 0.00, 0.50,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00];
+        name = ["mesh-balanced-data.%02d.png","cycle"];
+      };
+      image_mesh {
+	type     = "image";
+	image_type  = "mesh";
+	image_reduce_type = "max";
+        field_list = ["density"];
+	image_block_size  = 1;
+	schedule = ["cycle","interval", 10];
+        colormap = [1.00, 1.00, 1.00,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00, 
+                    0.00, 0.00, 1.00];
+        name = ["mesh-balanced-mesh.%02d.png","cycle"];
+        
+      };
+
+}
+Performance { warnings = false; }

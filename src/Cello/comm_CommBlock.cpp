@@ -103,17 +103,17 @@ CommBlock::CommBlock
     
   int refresh_rank = this->simulation()->config()->field_refresh_rank;
 
-  int ic3[3] = {0,0,0};
+  int icx=0,icy=0,icz=0;
   if (level_ > 0) {
-    index_.child(level_,&ic3[0],&ic3[1],&ic3[2]);
+    index_.child(level_,&icx,&icy,&icz);
   }
 
   for (int ix=-ixp; ix<=ixp; ix++) {
-    bool isx = ((ix==0) || (ix==-1&&ic3[0]==1) || (ix==1&&ic3[0]==0));
+    bool isx = ((ix==0) || (ix==-1&&icx==1) || (ix==1&&icx==0));
     for (int iy=-iyp; iy<=iyp; iy++) {
-      bool isy = ((iy==0) || (iy==-1&&ic3[1]==1) || (iy==1&&ic3[1]==0));
+      bool isy = ((iy==0) || (iy==-1&&icy==1) || (iy==1&&icy==0));
       for (int iz=-izp; iz<=izp; iz++) {
-	bool isz = ((iz==0) || (iz==-1&&ic3[2]==1) || (iz==1&&ic3[2]==0));
+	bool isz = ((iz==0) || (iz==-1&&icz==1) || (iz==1&&icz==0));
 
 	int face_rank = rank - (abs(ix)+abs(iy)+abs(iz));
 
@@ -122,6 +122,10 @@ CommBlock::CommBlock
 	if (has_neighbor) {
 	  Index index = index_.index_neighbor(ix,iy,iz,na3);
 	  index.values(&v3[0],&v3[1],&v3[2]);
+#ifdef CELLO_TRACE
+	  index_.print("1 calling p_set_neighbor A");
+	  index.print ("1 calling p_set_neighbor B");
+#endif
 	  p_set_neighbor (v3);
 	}
       }
@@ -461,6 +465,10 @@ void CommBlock::p_set_neighbor(int v3[3])
 {
   Index index;
   index.set_values(v3[0],v3[1],v3[2]);
+#ifdef CELLO_TRACE
+  index_.print("p_set_neighbor neighbor 1");
+  index.print ("p_set_neighbor neighbor 2");
+#endif
   neighbors_.push_back(index); 
 }
 
@@ -492,6 +500,10 @@ void CommBlock::p_set_nibling(const int v3[3])
 {
   Index index;
   index.set_values(v3[0],v3[1],v3[2]);
+#ifdef CELLO_TRACE
+  index_.print("p_set_nibling uncle  ");
+  index.print( "p_set_nibling nibling");
+#endif
   niblings_.push_back(index); 
 }
 

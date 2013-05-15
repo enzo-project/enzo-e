@@ -507,6 +507,10 @@ test_summary("Enzo-PPML",
 		   "method_ppml-8"),
 	     array("enzo-p",  "enzo-p"));
 
+test_summary("Enzo-Mesh", 
+	     array("mesh-balanced", "mesh-unbalanced"),
+	     array("enzo-p",        "enzo-p"));
+
 test_summary("Enzo-AMR", 
 	     array("adapt-L1-P1", "adapt-L2-P1", "adapt-L3-P1", "adapt-L4-P1", "adapt-L5-P1"),
 	     array("enzo-p",      "enzo-p",      "enzo-p",      "enzo-p",      "enzo-p"));
@@ -675,6 +679,20 @@ test_table ("method_ppml-8-y",
 test_table ("method_ppml-8-z",
 	    array("0000","0010","0020","0030","0040"), $types);
 
+
+//======================================================================
+
+test_group("Enzo-Mesh");
+
+echo "<h3>2D Serial</h3>";
+
+tests("Enzo","enzo-p","test_mesh-balanced","balanced");
+
+test_table ("mesh-balanced", array("mesh.00","data.00"), $types);
+
+tests("Enzo","enzo-p","test_mesh-unbalanced","unbalanced");
+
+test_table ("mesh-unbalanced", array("00"), $types);
 
 //======================================================================
 

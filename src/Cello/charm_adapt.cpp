@@ -239,8 +239,8 @@ void CommBlock::p_refine(bool forced)
 
       set_child(index_child);
 
-      int vc3[3];
-      index_child.values(&vc3[0],&vc3[1],&vc3[2]);
+      int values_child[3];
+      index_child.values(&values_child[0],&values_child[1],&values_child[2]);
 
       // for each (axis,face)
 
@@ -256,7 +256,7 @@ void CommBlock::p_refine(bool forced)
 
 	  // new child is neighbor's nibling
 
-	  thisProxy[index_neighbor].p_set_nibling(vc3);
+	  thisProxy[index_neighbor].p_set_nibling(values_child);
 
 	} else {
 
@@ -272,12 +272,33 @@ void CommBlock::p_refine(bool forced)
 
 	}
 
-	// new child is nibling's neighbor
+	// new child is nibling's neighbor (and vice versa)
 
-	Index index_nibling = index_neighbor.index_child(ic3);
+	int jc3[3] = {ic3[0],ic3[1],ic3[2]};
+	jc3[axis] = 1-jc3[axis];
+
+	Index index_nibling = index_neighbor.index_child(jc3);
+
+#ifdef CELLO_TRACE
+	index_neighbor.print ("is_nibling neighbor",-1,2);
+	index_.print         ("is_nibling parent  ",-1,2);
+	index_child.print    ("is_nibling child   ",-1,2);
+	index_nibling.print  ("is_nibling nibling ",-1,2);
+#endif
 
 	if (is_nibling(index_nibling)) {
-	  thisProxy[index_nibling].p_set_neighbor(vc3);
+	  
+	  int values_nibling[3];
+	  index_nibling.values
+	    (&values_nibling[0],&values_nibling[1],&values_nibling[2]);
+
+#ifdef CELLO_TRACE
+	  index_nibling.print("2 calling p_set_neighbor A");
+	  index_child.print  ("2 calling p_set_neighbor B");
+#endif
+
+	  thisProxy[index_nibling].p_set_neighbor(values_child);
+	  thisProxy[index_child].p_set_neighbor(values_nibling);
 	}
 
       }

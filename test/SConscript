@@ -319,8 +319,23 @@ env.MakeMovie ("boundary_outflow-3d.swf","test_boundary_outflow-3d.unit", \
                 ARGS= test_path + "/boundary_outflow-3d-????.png");
 
 #----------------------------------------------------------------------
-# AMR
+# Mesh generation
 #----------------------------------------------------------------------
+
+Clean(env_mv_out.RunSerial ('test_mesh-balanced.unit',bin_path + '/enzo-p', 
+		ARGS='input/mesh-balanced.in'),
+      [Glob('#/' + test_path + '/mesh-balanced*.png'),
+       '#/input/mesh-balanced.in.out'])
+
+Clean(env_mv_out.RunSerial ('test_mesh-unbalanced.unit',bin_path + '/enzo-p', 
+		ARGS='input/mesh-unbalanced.in'),
+      [Glob('#/' + test_path + '/mesh-unbalanced*.png'),
+       '#/input/mesh-unbalanced.in.out'])
+
+#----------------------------------------------------------------------
+# AMR PPM
+#----------------------------------------------------------------------
+
 
 # serial
 Clean(env_mv_out.RunSerial ('test_adapt-L1-P1.unit',bin_path + '/enzo-p', 
