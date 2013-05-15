@@ -4,7 +4,7 @@
 include "input/method_ppm-1.in"
 
 Mesh {
-   root_size   = [128,128];
+   root_size   = [256,256];
    root_blocks = [1,1];
    max_level   = 1; 
    adapt {
