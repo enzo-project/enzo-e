@@ -26,29 +26,7 @@ void CommBlock::p_refresh_begin()
   }
   //  simulation()->performance()->start_region(perf_refresh);
 
-#ifdef TEMP_SKIP_REFRESH
-
-  static int warning_displayed = false;
-
-  if  ( ! warning_displayed ) {
-    warning_displayed = true;
-    WARNING("CommBlock::q_adapt_exit",
-	    "CALLING p_output() INSTEAD OF REFRESH FOR IMAGE MESH CREATION");
-  }
-
-  //@@@@@@@@@@@@@@@@@@@@@@2
-  double min_reduce[2];
-
-  min_reduce[0] = 0.0;
-  min_reduce[1] = 0.0;
-  CkCallback callback (CkIndex_CommBlock::p_output(NULL), thisProxy);
-  contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
-
-  //    thisProxy.p_output();
-  //@@@@@@@@@@@@@@@@@@@@@@2
-#else
   refresh(); 
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -140,7 +118,7 @@ void CommBlock::refresh ()
 
 	    if (refresh_type_counter) ++loop_refresh_.stop();
 
-	    refresh_coarse(index_neighbor.index_parent(),ifx,ify,ifz,n3);
+	    refresh_coarse(index_neighbor.index_parent(),ifx,ify,ifz);
 
 	  } else {
 
@@ -273,8 +251,7 @@ void CommBlock::loop_limits_nibling_
 void CommBlock::refresh_coarse 
 (
  Index index, 
- int ifx,  int ify,  int ifz,
- int ic3[3])
+ int ifx,  int ify,  int ifz)
 {
 
   TRACE3("ENTER refresh_coarse %d %d %d",ifx,ify,ifz);
