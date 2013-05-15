@@ -692,7 +692,7 @@ test_table ("mesh-balanced", array("mesh.00","data.00"), $types);
 
 tests("Enzo","enzo-p","test_mesh-unbalanced","unbalanced");
 
-test_table ("mesh-unbalanced", array("00"), $types);
+test_table ("mesh-unbalanced", array("mesh.00","data.00"), $types);
 
 //======================================================================
 
