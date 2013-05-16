@@ -280,9 +280,9 @@ void CommBlock::p_refine(bool forced)
 	Index index_nibling = index_neighbor.index_child(jc3);
 
 #ifdef CELLO_TRACE
-	index_neighbor.print ("is_nibling neighbor",-1,2);
+	//	index_neighbor.print ("is_nibling neighbor",-1,2);
 	index_.print         ("is_nibling parent  ",-1,2);
-	index_child.print    ("is_nibling child   ",-1,2);
+	//	index_child.print    ("is_nibling child   ",-1,2);
 	index_nibling.print  ("is_nibling nibling ",-1,2);
 #endif
 

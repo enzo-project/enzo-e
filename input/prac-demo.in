@@ -1,0 +1,28 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/ppm.incl"
+
+Mesh { root_blocks    = [16,9]; 
+       root_size = [1920,1080];}
+
+  Initial {
+     density       { value = [  1.0, "input/Cello-1080.png", 
+                                0.1 ]; };
+     total_energy  { value = [  0.1 / (0.4 * 0.1), "input/Cello-1080.png",
+                                1.0 / (0.4 * 1.0)  ]; };
+  }
+
+Output { file_groups = ["density"]; }
+Output {
+    density {     
+        name = ["prac-demo-%06d.png", "cycle"]; 
+        colormap = [0.0, 0.0, 0.0,  
+                    0.0, 1.0, 0.0, 
+                    1.0, 1.0, 0.0, 
+                    1.0, 1.0, 1.0];
+       }
+}
+Output { data { 
+        name = ["method_ppm-8-%02d-%06d.h5", "proc","cycle"]; 
+} }

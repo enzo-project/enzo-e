@@ -23,10 +23,10 @@ Boundary { type = "periodic"; }
 
    Initial {
        density       { value = [ 1.0, 
-                             (x- 0.25)*(x- 0.25)+(y- 0.25)*(y- 0.25) > 0.03,
+                             (x- 0.50)*(x- 0.50)+(y- 0.25)*(y- 0.25) > 0.03,
                                  0.125 ]; };
        total_energy  { value = [ 1.0  / (0.4 * 1.0) ,
-                             (x- 0.25)*(x- 0.25)+(y- 0.25)*(y- 0.25) > 0.03,
+                             (x- 0.50)*(x- 0.50)+(y- 0.25)*(y- 0.25) > 0.03,
 	                         0.14 / (0.4 * 0.1)]; };
        velocity_x    { value = [0.0]; };
        velocity_y    { value = [0.0]; }
@@ -37,7 +37,8 @@ Stopping { cycle = 1; }
 Output {
 
        file_groups = ["density","mesh"];
-  density { name = ["debug-adapt-density-%03d.png", "cycle"]; } ;
+  density { name = ["debug-adapt-density-%03d.png", "cycle"]; 
+       image_ghost = true; } ;
 
    mesh {
       	type     = "image";
