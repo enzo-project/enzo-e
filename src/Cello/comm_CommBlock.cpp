@@ -508,7 +508,7 @@ void CommBlock::p_set_nibling(const int v3[3])
 
   if (! is_leaf()) {
     int level = this->level() + 1; // + 1 since dealing with next generation
-    int nc = NC(simulation()->dimension());
+    int rank = simulation()->dimension();
     bool periodic = simulation()->problem()->boundary()->is_periodic();
     int na3[3];
     size_forest(&na3[0],&na3[1],&na3[2]);
@@ -520,7 +520,7 @@ void CommBlock::p_set_nibling(const int v3[3])
 			    &values_child[2]);
       int ic3[3];
       index_child.child(level,ic3+0,ic3+1,ic3+2);
-      for (int axis=0; axis<nc; axis++) {
+      for (int axis=0; axis<rank; axis++) {
 	int face = ic3[axis];
 	Index index_neighbor = 
 	  index_child.index_neighbor(axis,face,na3[axis],periodic);

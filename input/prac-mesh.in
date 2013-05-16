@@ -1,0 +1,37 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/prac-demo.in"
+
+  Initial {
+     max_level = 8;
+     density       { value = [  1.0, "prac-demo-000400.png", 
+                                0.1 ]; };
+     total_energy  { value = [  0.1 / (0.4 * 0.1), "prac-demo-000400.png", 
+                                1.0 / (0.4 * 1.0)  ]; };
+  }
+  Mesh {
+     max_level = 8;
+       adapt {
+           type = ["slope"];
+       }
+  }
+
+Output { 
+   file_groups = ["mesh"]; 
+
+   mesh {
+      	type     = "image";
+	image_type  = "mesh";
+	image_reduce_type = "max";
+        field_list = ["density"];
+	image_block_size  = 1;
+	schedule = ["cycle","interval", 100];
+        colormap = [1.00, 1.00, 1.00,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00, 
+                    0.00, 0.00, 1.00];
+        name = ["prac-mesh-%06d.png","cycle"];
+        
+      }
+}
