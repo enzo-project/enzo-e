@@ -465,11 +465,13 @@ void CommBlock::p_set_neighbor(int v3[3])
 {
   Index index;
   index.set_values(v3[0],v3[1],v3[2]);
+
+  neighbors_.push_back(index);
+
 #ifdef CELLO_TRACE
   index_.print("p_set_neighbor neighbor 1");
   index.print ("p_set_neighbor neighbor 2");
 #endif
-  neighbors_.push_back(index); 
 }
 
 //----------------------------------------------------------------------
@@ -498,13 +500,46 @@ bool CommBlock::is_neighbor (const Index & index)
 
 void CommBlock::p_set_nibling(const int v3[3])
 {
-  Index index;
-  index.set_values(v3[0],v3[1],v3[2]);
-#ifdef CELLO_TRACE
-  index_.print("p_set_nibling uncle  ");
-  index.print( "p_set_nibling nibling");
-#endif
-  niblings_.push_back(index); 
+  Index index_nibling;
+  index_nibling.set_values(v3[0],v3[1],v3[2]);
+  niblings_.push_back(index_nibling);
+
+  // check if any children are neighbors
+
+  if (! is_leaf()) {
+    int level = this->level() + 1; // + 1 since dealing with next generation
+    int nc = NC(simulation()->dimension());
+    bool periodic = simulation()->problem()->boundary()->is_periodic();
+    int na3[3];
+    size_forest(&na3[0],&na3[1],&na3[2]);
+    for (size_t ic=0; ic < children_.size(); ++ic) {
+      Index index_child = children_[ic];
+      int values_child[3];
+      index_child.values(&values_child[0],
+			    &values_child[1],
+			    &values_child[2]);
+      int ic3[3];
+      index_child.child(level,ic3+0,ic3+1,ic3+2);
+      for (int axis=0; axis<nc; axis++) {
+	int face = ic3[axis];
+	Index index_neighbor = 
+	  index_child.index_neighbor(axis,face,na3[axis],periodic);
+	if (index_neighbor == index_nibling) {
+	  int values_neighbor[3];
+	  index_neighbor.values(&values_neighbor[0],
+				&values_neighbor[1],
+				&values_neighbor[2]);
+
+	  thisProxy[index_neighbor].p_set_neighbor(values_child);
+
+	  thisProxy[index_child].p_set_neighbor(values_neighbor);
+
+	  return; // can only be one and we found it
+	}
+
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------
