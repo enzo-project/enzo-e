@@ -285,7 +285,7 @@ void Config::read(Parameters * parameters) throw()
     parameters->value_float ("Mesh:adapt:slope_min_refine",0.3);
 
   mesh_adapt_slope_max_coarsen = 
-    parameters->value_float ("Mesh:adapt:slope_min_coarsen",0.15);
+    parameters->value_float ("Mesh:adapt:slope_max_coarsen",0.15);
 
   //--------------------------------------------------
 

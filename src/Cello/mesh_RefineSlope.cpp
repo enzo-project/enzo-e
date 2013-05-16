@@ -17,6 +17,7 @@ RefineSlope::RefineSlope(const FieldDescr * field_descr,
     slope_max_coarsen_(slope_max_coarsen),
     debug_(false)
 {
+  PARALLEL_PRINTF("slope min max %f %f\n",slope_min_refine,slope_max_coarsen);
   if (field_name_list.size() != 0) {
     field_id_list_.resize(field_name_list.size());
     for (size_t i=0; i<field_id_list_.size(); i++) {
@@ -132,7 +133,8 @@ void RefineSlope::evaluate_block_(T * array,
       for (int iy=0; iy<ny; iy++) {
 	for (int iz=0; iz<nz; iz++) {
 	  int i = (gx+ix) + (nx+2*gx)*((gy+iy) + (ny+2*gy)*(gz+iz));
-	  slope = fabs(array[i+d] - array[i-d]) / (2*h3[axis]);
+	  slope = fabs((array[i+d] - array[i-d]) / (2.0*h3[axis]*array[i]));
+	  
 	  if (slope > slope_min_refine_)  *any_refine  = true;
 	  if (slope > slope_max_coarsen_) *all_coarsen = false;
 	  if (debug_) TRACE5 ("refine-debug a%d  [%d %d %d]  %d",

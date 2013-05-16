@@ -4,21 +4,32 @@
 include "input/prac-demo.in"
 
   Initial {
-     max_level = 8;
+     max_level = 3;
      density       { value = [  1.0, "prac-demo-000400.png", 
                                 0.1 ]; };
      total_energy  { value = [  0.1 / (0.4 * 0.1), "prac-demo-000400.png", 
                                 1.0 / (0.4 * 1.0)  ]; };
   }
   Mesh {
-     max_level = 8;
+     max_level = 3;
        adapt {
            type = ["slope"];
+           slope_min_refine = 0.003;
+           slope_max_coarsen = 0.0015;
        }
   }
 
+Field {
+  refresh {
+      type = "quiescence";
+  };
+}
+
 Output { 
-   file_groups = ["mesh"]; 
+   file_groups = ["mesh","data"]; 
+
+  data { name = ["prac-density-%06d.png", "cycle"]; 
+       image_ghost = true; } ;
 
    mesh {
       	type     = "image";

@@ -506,6 +506,7 @@ void CommBlock::p_set_nibling(const int v3[3])
 
   // check if any children are neighbors
 
+#ifdef CONFIG_USE_CHARM
   if (! is_leaf()) {
     int level = this->level() + 1; // + 1 since dealing with next generation
     int rank = simulation()->dimension();
@@ -540,6 +541,7 @@ void CommBlock::p_set_nibling(const int v3[3])
       }
     }
   }
+#endif
 }
 
 //----------------------------------------------------------------------
