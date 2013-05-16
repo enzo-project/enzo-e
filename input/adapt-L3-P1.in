@@ -13,7 +13,6 @@ Initial {  max_level = 3; }
 Output {
       density { 
              name = ["adapt-L3-P1-density-%f.png", "time"]; 
-              schedule = ["time","interval", 0.005];
 };
       mesh { 
              name = ["adapt-L3-P1-mesh-%f.png", "time"]; 

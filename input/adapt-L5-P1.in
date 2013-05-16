@@ -6,7 +6,6 @@ include "input/adapt-L1-P1.in"
 Mesh    { 
    root_size   = [16,16];
    max_level   = 5; 
-   adapt {balance = false; }
 }
 
 Initial {  max_level = 5; }
