@@ -64,7 +64,7 @@ PARALLEL_MAIN_BEGIN
   set_grid  (grid_coarse,nd3,1,1,2);     // 1 + 1*ix + 2* iy
   print_grid(grid_coarse,nd3);
 
-  set_grid  (grid_fine,  nd3,CLEAR,0,0); // = CLEAR
+  set_grid  (grid_fine,nd3,CLEAR,0,0); // = CLEAR
   print_grid(grid_fine,nd3);
 
   // FORTRAN_NAME(interpolate)(&ndim, grid_coarse, nd3, pstart, pend,
@@ -74,8 +74,8 @@ PARALLEL_MAIN_BEGIN
 
   ProlongLinear prolong_linear;
   prolong_linear.apply(precision_double,
-		       grid_fine,   nd3, n3f,
-		       grid_coarse, nd3, n3c);
+		       grid_fine,   nd3, nf3,
+		       grid_coarse, nd3, nc3);
 
   print_grid(grid_fine,nd3);
 		       
