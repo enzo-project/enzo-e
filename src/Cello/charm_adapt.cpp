@@ -211,6 +211,9 @@ void CommBlock::p_refine(bool forced)
 
   bool initial = initial_cycle == cycle();
 
+  int narray = 0;
+  char * array = 0;
+    
   for (int ic=0; ic<nc; ic++) {
 
     int ic3[3];
@@ -235,6 +238,8 @@ void CommBlock::p_refine(bool forced)
 	 num_field_blocks,
 	 count_adapt_,
 	 initial,
+	 narray,
+	 array,
 	 testing);
 
       set_child(index_child);

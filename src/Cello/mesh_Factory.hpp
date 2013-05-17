@@ -90,6 +90,8 @@ public: // interface
    int num_field_blocks,
    int count_adapt,
    bool initial,
+   int narray,
+   char * array,
    bool testing = false) const throw();
 
 };

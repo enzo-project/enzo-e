@@ -341,6 +341,8 @@ void Hierarchy::allocate_array_
 
     int count_adapt;
     bool initial;
+    int narray = 0;
+    char * array = 0;
     CommBlock * comm_block = factory_->create_block 
       (
        simulation_,
@@ -349,6 +351,8 @@ void Hierarchy::allocate_array_
        num_field_blocks,
        count_adapt = 0,
        initial = true,
+       narray,
+       array,
        testing);
 
     // Store the data block in the block array

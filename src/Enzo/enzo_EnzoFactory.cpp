@@ -75,6 +75,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
 	     num_field_blocks,
 	     count_adapt = 0,
 	     initial=true,
+	     0,NULL,
 	     testing);
 
 	}
@@ -108,6 +109,8 @@ CommBlock * EnzoFactory::create_block
  int num_field_blocks,
  int count_adapt,
  bool initial,
+ int narray,
+ char * array,
  bool testing
  ) const throw()
 {
@@ -127,6 +130,8 @@ CommBlock * EnzoFactory::create_block
       num_field_blocks,
       count_adapt,
       initial,
+      narray,
+      array,
       testing);
 
   CommBlock * block = (*enzo_block_array)[index].ckLocal();

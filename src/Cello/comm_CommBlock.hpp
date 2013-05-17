@@ -59,6 +59,8 @@ public: // interface
    int num_field_blocks,
    int count_adapt,
    bool initial,
+   int narray,
+   void * array,
    bool testing=false
 ) throw();
 

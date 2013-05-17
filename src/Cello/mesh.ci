@@ -33,6 +33,8 @@ module mesh {
        int num_field_blocks,
        int count_adapt,
        bool initial,
+       int  n,
+       char arr[n],
        bool testing);
 
     entry CommBlock();	

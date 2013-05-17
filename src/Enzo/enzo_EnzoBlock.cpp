@@ -392,6 +392,8 @@ EnzoBlock::EnzoBlock
  int num_field_blocks,
  int count_adapt,
  bool initial,
+ int narray,
+ char * array,
  bool testing
 ) throw()
   : CommBlock 
@@ -404,6 +406,8 @@ EnzoBlock::EnzoBlock
      num_field_blocks,
      count_adapt,
      initial,
+     narray,
+     array,
      testing),
     Time_(0),
     CycleNumber(0),
