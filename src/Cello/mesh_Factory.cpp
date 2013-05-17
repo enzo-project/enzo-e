@@ -83,6 +83,10 @@ CProxy_CommBlock Factory::create_block_array
     int count_adapt;
     bool initial;
 
+    int    cycle = 0;
+    double time  = 0.0;
+    double dt    = 0.0;
+
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
 	for (int iz=0; iz<nbz; iz++) {
@@ -95,7 +99,8 @@ CProxy_CommBlock Factory::create_block_array
 	     num_field_blocks,
 	     count_adapt = 0,
 	     initial = true,
-	     0,NULL,
+	     cycle,time,dt,
+	     0,NULL,op_array_copy,
 	     testing);
 
 	}
@@ -129,8 +134,8 @@ CommBlock * Factory::create_block
  int num_field_blocks,
  int count_adapt,
  bool initial,
- int narray,
- char * array,
+ int cycle, double time, double dt,
+ int narray, char * array, int op_array,
  bool testing
  ) const throw()
 {
@@ -147,8 +152,8 @@ CommBlock * Factory::create_block
      num_field_blocks,
      count_adapt,
      initial,
-     narray,
-     array,
+     cycle, time,dt,
+     narray, array,op_array,
      testing);
 
   CommBlock * block = (*block_array)[index].ckLocal();
@@ -166,8 +171,8 @@ CommBlock * Factory::create_block
       num_field_blocks,
       count_adapt,
       initial,
-      narray,
-      array,
+      cycle, time, dt,
+      narray, array, op_array,
       testing);
 
    return comm_block;

@@ -42,6 +42,7 @@ void SimulationCharm::c_compute()
 
 void CommBlock::p_compute (int cycle, double time, double dt)
 {
+  TRACE ("BEGIN PHASE COMPUTE");
   // set_cycle(cycle);
   // set_time(time);
   // set_dt(dt);
@@ -73,7 +74,9 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   // Update CommBlock cycle and time to Simulation time and cycle
 
+
   set_cycle (cycle_ + 1);
+  TRACE1("Calling set_time (%f)",time_+dt_);
   set_time  (time_  + dt_);
   
   
@@ -82,6 +85,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   TRACE ("CommBlock::compute() calling p_adapt(0)");
 
   p_adapt_begin();
+  TRACE ("END   PHASE COMPUTE");
 }
 
 // //----------------------------------------------------------------------

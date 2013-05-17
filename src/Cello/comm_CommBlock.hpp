@@ -26,6 +26,12 @@ class Simulation;
 // NC  number of neighbors
 #define NN(rank) (2*(rank))
 
+enum array_type {
+  op_array_copy,
+  op_array_restrict,
+  op_array_prolong
+};
+
 // rank NN NC NI
 // 0    0  1  1
 // 1    2  2  2=2*1
@@ -59,8 +65,8 @@ public: // interface
    int num_field_blocks,
    int count_adapt,
    bool initial,
-   int narray,
-   void * array,
+   int cycle, double time, double dt,
+   int narray, char * array, int op_array,
    bool testing=false
 ) throw();
 
@@ -69,27 +75,8 @@ public: // interface
 
 #ifdef CONFIG_USE_CHARM
 
-  void pup(PUP::er &p)
-{
-  TRACEPUP;
-
-  CBase_CommBlock::pup(p);
-
-  p | index_;
-  p | cycle_;
-  p | time_;
-  p | dt_;
-  p | index_initial_;
-  p | level_;
-  p | children_;
-  p | neighbors_;
-  p | niblings_;
-  p | count_coarsen_;
-  p | count_adapt_;
-  p | loop_refresh_;
-  p | forced_;
-
-}
+  /// CHARM pupper
+  void pup(PUP::er &p);
 
 #endif
 
@@ -146,7 +133,8 @@ public: // interface
   //  void adapt();
   void p_refine(bool forced = false);
   void coarsen();
-  void p_child_can_coarsen(int ic);
+  void p_child_can_coarsen(int icx,int icy, int icz,
+			   int n, char * array);
   int determine_adapt();
   /// Update the depth of the given child
   void p_print(std::string message) {  
@@ -239,8 +227,11 @@ public: // interface
 
   /// Return the Block associated with this CommBlock
   Block * block() throw() { return block_; };
-
   const Block * block() const throw() { return block_; };
+
+  /// Return the child Block associated with this CommBlock
+  Block * child_block() throw() { return child_block_; };
+  const Block * child_block() const throw() { return child_block_; };
 
 //----------------------------------------------------------------------
 
@@ -382,9 +373,11 @@ protected: // attributes
   Simulation * simulation_;
 #endif
 
-  ///
   /// Mesh Block that this CommBlock controls
   Block * block_;
+
+  /// Block for holding restricted child data 
+  Block * child_block_;
 
   //--------------------------------------------------
 

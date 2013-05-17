@@ -26,8 +26,8 @@ CommBlock::CommBlock
  int num_field_blocks,
  int count_adapt,
  bool initial,
- int narray,
- void * array,
+ int cycle, double time, double dt,
+ int narray, char * array, int op_array,
  bool testing
  ) throw ()
   : 
@@ -35,9 +35,6 @@ CommBlock::CommBlock
   simulation_(simulation),
 #endif
   index_(index),
-  cycle_(0),
-  time_(0),
-  dt_(0),
   index_initial_(0),
   level_(index_.level()),
   children_(),
@@ -68,22 +65,21 @@ CommBlock::CommBlock
   double xp,yp,zp;
   upper(&xp,&yp,&zp);
 
+  FieldDescr * field_descr = this->simulation()->field_descr();
+
   block_ = new Block  (nx, ny, nz, num_field_blocks,
 		       xm, xp, ym, yp, zm, zp);
+  // Allocate block data
+  block_->allocate(field_descr);
+  child_block_ = NULL;
 
 #ifdef CONFIG_USE_CHARM
-  FieldDescr * field_descr = simulation()->field_descr();
 
-  // Set the CommBlock cycle and time to match Simulation's
+  // Call virtual functions to update state
 
-  TRACE("CommBlock::p_initial Setting time");
-  set_cycle(simulation()->cycle());
-  TRACE("CommBlock::CommBlock calling set_time()");
-  set_time (simulation()->time());
-  set_dt   (simulation()->dt());
-  // Allocate block data
-
-  block()->allocate(field_descr);
+  set_cycle(cycle);
+  set_time (time);
+  set_dt   (dt);
 
 #endif
   // Perform any additional initialization for derived class 
@@ -134,6 +130,36 @@ CommBlock::CommBlock
     }
   }
 
+
+  if (narray != 0) {
+    // copy any input data
+    FieldDescr * field_descr = this->simulation()->field_descr();
+    FieldFace field_face (block()->field_block(),field_descr);
+
+    //    set "face" to full FieldBlock
+    field_face.set_face(0,0,0);
+
+    //    set array operation if any
+    switch (op_array) {
+    case op_array_restrict:
+      {
+	Restrict * restrict = this->simulation()->problem()->restrict();
+	field_face.set_restrict(restrict,icx,icy,icz);
+      }
+      break;
+    case op_array_prolong:
+      {
+	Prolong * prolong = this->simulation()->problem()->prolong();
+	field_face.set_prolong(prolong,icx,icy,icz);
+      }
+      break;
+    default:
+      break;
+    }
+
+    field_face.store(narray,array);
+  }
+
 #ifdef CONFIG_USE_CHARM
 
   if (! testing) {
@@ -152,6 +178,36 @@ CommBlock::CommBlock
 #endif /* CONFIG_USE_CHARM */
 
 }
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+
+void CommBlock::pup(PUP::er &p)
+{
+  TRACEPUP;
+
+  CBase_CommBlock::pup(p);
+
+  p | *block_;
+  p | *child_block_;
+  p | index_;
+  p | cycle_;
+  p | time_;
+  p | dt_;
+  p | index_initial_;
+  p | level_;
+  p | children_;
+  p | neighbors_;
+  p | niblings_;
+  p | count_coarsen_;
+  p | count_adapt_;
+  p | loop_refresh_;
+  p | forced_;
+
+}
+
+#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
@@ -194,6 +250,7 @@ CommBlock::~CommBlock() throw ()
 
     // Send restricted data to parent 
 
+    // <duplicated code: refactor me!>
     FieldBlock * field_block = block()->field_block();
     FieldDescr * field_descr = simulation()->field_descr();
     FieldFace field_face (field_block,field_descr);
@@ -208,10 +265,10 @@ CommBlock::~CommBlock() throw ()
     field_face.set_restrict(restrict,icx,icy,icz);
 
     //    load array with data
-
     int n; 
     char * array;
     field_face.load(&n,&array);
+    // </duplicated code>
 
     //    send data to parent
 
@@ -220,6 +277,8 @@ CommBlock::~CommBlock() throw ()
   }
   if (block_) delete block_;
   block_ = 0;
+  if (child_block_) delete child_block_;
+  child_block_ = 0;
 
   ((SimulationCharm *)simulation())->delete_block();
 #endif
@@ -573,6 +632,7 @@ bool CommBlock::is_nibling (const Index & index)
 void CommBlock::copy_(const CommBlock & comm_block) throw()
 {
   block_->copy_(*comm_block.block());
+  if (child_block_) child_block_->copy_(*comm_block.child_block());
 
   cycle_ = comm_block.cycle_;
   time_  = comm_block.time_;
@@ -604,11 +664,13 @@ void CommBlock::is_on_boundary (bool is_boundary[3][2]) const throw()
 //----------------------------------------------------------------------
 
 Simulation * CommBlock::simulation() const
-{
+  {
 #ifdef CONFIG_USE_CHARM
-  return proxy_simulation.ckLocalBranch();
+    return proxy_simulation.ckLocalBranch();
 #else /* CONFIG_USE_CHARM */
-  return simulation_;
+    return simulation_;
 #endif /* CONFIG_USE_CHARM */
-}
+  }
 
+
+//----------------------------------------------------------------------

@@ -343,6 +343,11 @@ void Hierarchy::allocate_array_
     bool initial;
     int narray = 0;
     char * array = 0;
+    int op_array = op_array_copy;
+    int cycle = 0;
+    double time = 0.0;
+    double dt = 0.0;
+
     CommBlock * comm_block = factory_->create_block 
       (
        simulation_,
@@ -351,16 +356,12 @@ void Hierarchy::allocate_array_
        num_field_blocks,
        count_adapt = 0,
        initial = true,
-       narray,
-       array,
+       cycle, time, dt,
+       narray, array, op_array,
        testing);
 
     // Store the data block in the block array
     block_[ib] = comm_block;
-
-    // Allocate data on the block
-
-    comm_block->block()->allocate(field_descr);
 
   }
 #endif /* CONFIG_USE_CHARM */

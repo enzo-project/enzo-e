@@ -392,8 +392,8 @@ EnzoBlock::EnzoBlock
  int num_field_blocks,
  int count_adapt,
  bool initial,
- int narray,
- char * array,
+ int cycle, double time, double dt,
+ int narray, char * array, int op_array,
  bool testing
 ) throw()
   : CommBlock 
@@ -406,13 +406,13 @@ EnzoBlock::EnzoBlock
      num_field_blocks,
      count_adapt,
      initial,
-     narray,
-     array,
+     cycle, time, dt,
+     narray,  array, op_array,
      testing),
-    Time_(0),
-    CycleNumber(0),
+    Time_(time),
+    CycleNumber(cycle),
     OldTime(0),
-    dt(0),
+    dt(dt),
     SubgridFluxes(0)
 {
   int mx,my,mz;
@@ -425,9 +425,9 @@ EnzoBlock::EnzoBlock
 
 void EnzoBlock::initialize_enzo_()
 {
-  set_cycle(simulation()->cycle());
-  set_time (simulation()->time());
-  set_dt   (simulation()->dt());
+  // set_cycle(simulation()->cycle());
+  // set_time (simulation()->time());
+  // set_dt   (simulation()->dt());
 
   for (int i=0; i<MAX_DIMENSION; i++) {
     AccelerationField[i] = 0;

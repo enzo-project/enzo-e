@@ -61,6 +61,10 @@ public: // interface
 
   //----------------------------------------------------------------------
 
+  /// Return the number of FieldBlocks
+  int num_field_blocks() const throw()
+  { return num_field_blocks_; }
+
   /// Return the ith Field block
   const FieldBlock * field_block (int i=0) const throw();
 

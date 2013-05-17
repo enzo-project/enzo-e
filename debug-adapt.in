@@ -23,16 +23,16 @@ Boundary { type = "periodic"; }
 
    Initial {
        density       { value = [ 1.0, 
-                             (x- 0.250)*(x- 0.250)+(y- 0.25)*(y- 0.25) > 0.03,
+                             (x- 0.250)*(x- 0.250)+(y- 0.25)*(y- 0.25) > 0.01,
                                  0.125 ]; };
        total_energy  { value = [ 1.0  / (0.4 * 1.0) ,
-                             (x- 0.250)*(x- 0.250)+(y- 0.25)*(y- 0.25) > 0.03,
+                             (x- 0.250)*(x- 0.250)+(y- 0.25)*(y- 0.25) > 0.01,
 	                         0.14 / (0.4 * 0.1)]; };
        velocity_x    { value = [0.0]; };
        velocity_y    { value = [0.0]; }
    }
 
-Stopping { cycle = 10; }
+Stopping { cycle = 100; }
 
 Output {
 

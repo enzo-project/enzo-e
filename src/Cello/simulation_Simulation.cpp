@@ -168,7 +168,7 @@ void Simulation::initialize() throw()
 
 void Simulation::finalize() throw()
 {
-  DEBUG0;
+  TRACE0;
 
   performance_->stop_region(perf_simulation);
 
@@ -398,7 +398,7 @@ void Simulation::deallocate_() throw()
 
 const Factory * Simulation::factory() const throw()
 {
-  DEBUG("Simulation::factory()");
+  TRACE("Simulation::factory()");
   if (factory_ == NULL) factory_ = new Factory;
   return factory_;
 }
@@ -407,7 +407,7 @@ const Factory * Simulation::factory() const throw()
 
 void Simulation::update_state(int cycle, double time, double dt, double stop) 
 {
-  DEBUG4 ("Simulation::update_state cycle %d time %f dt %f stop %f",
+  TRACE4 ("Simulation::update_state cycle %d time %f dt %f stop %f",
 	  cycle,time,dt,stop);
  
   cycle_ = cycle;

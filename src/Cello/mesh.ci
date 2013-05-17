@@ -33,8 +33,8 @@ module mesh {
        int num_field_blocks,
        int count_adapt,
        bool initial,
-       int  n,
-       char arr[n],
+        int cycle, double time, double dt,
+       int  n,     char arr[n],  int op_array,
        bool testing);
 
     entry CommBlock();	
@@ -55,7 +55,8 @@ module mesh {
     entry void p_delete_neighbor(const int v3[3]);
     entry void p_set_nibling(const int v3[3]);
     entry void p_delete_nibling(const int v3[3]);
-    entry void p_child_can_coarsen(int ic);
+    entry void p_child_can_coarsen(int icx,int icy,int icz,
+				   int n, char arr[n]);
 
     // refresh
 

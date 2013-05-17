@@ -59,8 +59,8 @@ public: // interface
    int num_field_blocks,
    int count_adapt,
    bool initial,
-   int narray,
-   char * array,
+   int cycle, double time, double dt,
+   int narray, char * array, int op_array,
    bool testing=false) const throw();
 
 };

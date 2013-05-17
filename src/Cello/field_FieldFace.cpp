@@ -425,6 +425,12 @@ void FieldFace::load_loop_limits_
   n3[0] = std::max(n3[0],1);
   n3[1] = std::max(n3[1],1);
   n3[2] = std::max(n3[2],1);
+  TRACE3("load_loop_limits_  im3 = %d %d %d",im3[0],im3[1],im3[2]);
+  TRACE3("load_loop_limits_  n3  = %d %d %d",n3[0],n3[1],n3[2]);
+  TRACE3("load_loop_limits_  nd3  = %d %d %d",nd3[0],nd3[1],nd3[2]);
+  TRACE3("load_loop_limits_  ng3  = %d %d %d",ng3[0],ng3[1],ng3[2]);
+  TRACE3("load_loop_limits_ child = %d %d %d",child_[0],child_[1],child_[2]);
+  
 }
 
 //----------------------------------------------------------------------
@@ -469,5 +475,10 @@ void FieldFace::store_loop_limits_
   n3[0] = std::max(n3[0],1);
   n3[1] = std::max(n3[1],1);
   n3[2] = std::max(n3[2],1);
+  TRACE3("store_loop_limits_  im3 = %d %d %d",im3[0],im3[1],im3[2]);
+  TRACE3("store_loop_limits_  n3  = %d %d %d",n3[0],n3[1],n3[2]);
+  TRACE3("store_loop_limits_  nd3  = %d %d %d",nd3[0],nd3[1],nd3[2]);
+  TRACE3("store_loop_limits_  ng3  = %d %d %d",ng3[0],ng3[1],ng3[2]);
+  TRACE3("store_loop_limits_ child = %d %d %d",child_[0],child_[1],child_[2]);
 }
 

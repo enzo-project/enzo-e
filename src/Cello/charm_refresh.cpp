@@ -193,6 +193,7 @@ void CommBlock::refresh_same (Index index,
 
   TRACE3("ENTER refresh_same %d %d %d",ifx,ify,ifz);
 
+  // <duplicated code: refactor me!>
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
   FieldBlock * field_block = block_->field_block();
@@ -204,6 +205,7 @@ void CommBlock::refresh_same (Index index,
   int n; 
   char * array;
   field_face.load(&n, &array);
+  // </duplicated code>
 
   ++loop_refresh_.stop();
 
@@ -218,6 +220,8 @@ void CommBlock::refresh_fine
  int icx, int icy, int icz)
 {
   TRACE3("ENTER refresh_fine %d %d %d",ifx,ify,ifz);
+
+  // <duplicated code: refactor me!>
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
   FieldBlock * field_block = block_->field_block();
@@ -233,6 +237,7 @@ void CommBlock::refresh_fine
   int n; 
   char * array;
   field_face.load(&n, &array);
+  // </duplicated code>
 
   // send face data
 
@@ -280,6 +285,7 @@ void CommBlock::refresh_coarse
   index.print ("refresh_coarse B",-1,2);
 #endif
 
+  // <duplicated code: refactor me!>
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
   FieldBlock * field_block = block_->field_block();
@@ -297,6 +303,7 @@ void CommBlock::refresh_coarse
   int n; 
   char * array;
   field_face.load(&n, &array);
+  // </duplicated code>
 
   ++loop_refresh_.stop();
 
@@ -348,8 +355,8 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
   TRACE6 ("CommBlock::x_refresh_fine(face %d %d %d  child  %d %d %d)",
 	  ifx,ify,ifz,icx,icy,icz);
 
+  // <duplicated code: refactor me!>
   Simulation * simulation = proxy_simulation.ckLocalBranch();
-
   FieldDescr * field_descr = simulation->field_descr();
   FieldBlock * field_block = block_->field_block();
 
@@ -361,6 +368,7 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
   field_face.set_prolong(prolong,icx,icy,icz);
    
   field_face.store (n, buffer);
+  // </duplicated code>
 
   std::string refresh_type = simulation->config()->field_refresh_type;
   
@@ -383,8 +391,8 @@ void CommBlock::x_refresh_coarse (int n, char * buffer,
   TRACE6 ("CommBlock::x_refresh_coarse(face %d %d %d  child  %d %d %d)",
 	  ifx,ify,ifz,icx,icy,icz);
 
+  // <duplicated code: refactor me!>
   Simulation * simulation = proxy_simulation.ckLocalBranch();
-
   FieldDescr * field_descr = simulation->field_descr();
   FieldBlock * field_block = block_->field_block();
 
@@ -396,6 +404,7 @@ void CommBlock::x_refresh_coarse (int n, char * buffer,
   field_face.set_restrict(restrict,icx,icy,icz);
    
   field_face.store (n, buffer);
+  // </duplicated code>
 
   std::string refresh_type = simulation->config()->field_refresh_type;
   

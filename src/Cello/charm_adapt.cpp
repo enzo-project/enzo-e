@@ -62,6 +62,7 @@ const char * adapt_name[] = {
 
 void CommBlock::p_adapt_begin()
 {
+  TRACE ("BEGIN PHASE ADAPT");
   Performance * performance = simulation()->performance();
   if (! performance->is_region_active(perf_adapt)) {
     performance->start_region(perf_adapt);
@@ -211,9 +212,6 @@ void CommBlock::p_refine(bool forced)
 
   bool initial = initial_cycle == cycle();
 
-  int narray = 0;
-  char * array = 0;
-    
   for (int ic=0; ic<nc; ic++) {
 
     int ic3[3];
@@ -230,7 +228,26 @@ void CommBlock::p_refine(bool forced)
       int num_field_blocks = 1;
       bool testing = false;
 
-      const Factory * factory = simulation()->factory();
+      // <duplicated code: refactor me!>
+      int narray = 0;  
+      char * array = 0;
+      int op_array = op_array_prolong;
+
+      Simulation * simulation = proxy_simulation.ckLocalBranch();
+      FieldDescr * field_descr = simulation->field_descr();
+      FieldBlock * field_block = block_->field_block();
+      Prolong * prolong = simulation->problem()->prolong();
+
+      FieldFace field_face (field_block,field_descr);
+
+      field_face.set_prolong(prolong,ic3[0],ic3[1],ic3[2]);
+      field_face.set_face(0,0,0); // 0-face is full block
+
+      field_face.load(&narray, &array);
+
+      // </duplicated code>
+    
+      const Factory * factory = simulation->factory();
 
       factory->create_block 
 	(&thisProxy, index_child,
@@ -238,8 +255,8 @@ void CommBlock::p_refine(bool forced)
 	 num_field_blocks,
 	 count_adapt_,
 	 initial,
-	 narray,
-	 array,
+	 cycle_,time_,dt_,
+	 narray, array, op_array,
 	 testing);
 
       set_child(index_child);
@@ -317,22 +334,77 @@ void CommBlock::p_refine(bool forced)
 void CommBlock::coarsen()
 {
   if (level_ > 0) {
+
     Index index = thisIndex;
     int icx,icy,icz;
     index.child(level_,&icx,&icy,&icz);
     index.set_level(level_ - 1);
     index.clean();
-    thisProxy[index].p_child_can_coarsen(IC(icx,icy,icz));
+
+    // <duplicated code: refactor me!>
+    Simulation * simulation = proxy_simulation.ckLocalBranch();
+    FieldDescr * field_descr = simulation->field_descr();
+    FieldBlock * field_block = block_->field_block();
+    Restrict * restrict = simulation->problem()->restrict();
+
+    FieldFace field_face (field_block,field_descr);
+
+    field_face.set_restrict(restrict,icx,icy,icz);
+    field_face.set_face(0,0,0); // 0-face is full block
+
+    int narray; 
+    char * array;
+    field_face.load(&narray, &array);
+    // </duplicated code>
+
+    thisProxy[index].p_child_can_coarsen(icx,icy,icz,narray,array);
+
   }
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_child_can_coarsen(int ic)
+void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
+				    int n, char * array)
 {
   if (forced_) return;
-  int rank = simulation()->dimension();
+
+  // <duplicated code: refactor me!>
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+
+  // allocate child block if this is the first
+  if (!child_block_) {
+    int nx,ny,nz;
+    block_->field_block()->size(&nx,&ny,&nz);
+    int num_field_blocks = block_->num_field_blocks();
+    double xm,ym,zm;
+    block_->lower(&xm,&ym,&zm);
+    double xp,yp,zp;
+    block_->upper(&xp,&yp,&zp);
+    child_block_ = new Block  
+      (nx, ny, nz, 
+       num_field_blocks,
+       xm, xp, ym, 
+       yp, zm, zp);
+
+    child_block_->allocate(field_descr);
+  }
+
+  FieldBlock * child_field_block = child_block_->field_block();
+  FieldFace child_field_face(child_field_block, field_descr);
+  Restrict *   restrict = simulation->problem()->restrict();
+  child_field_face.set_restrict(restrict,icx,icy,icz);
+  child_field_face.set_face(0,0,0);
+   
+  child_field_face.store (n, array);
+  // </duplicated code>
+
+  int rank = simulation->dimension();
   if (++count_coarsen_ >= NC(rank)) {
+    delete block_;
+    block_ = child_block_;
+    child_block_ = 0;
     for (size_t i=0; i<children_.size(); i++) {
       if (children_[i] != thisIndex) {
 	// Restricted child data is sent to parent when child destroyed
@@ -398,6 +470,7 @@ void CommBlock::q_adapt_end()
     thisProxy.p_refresh_begin();
   };
   
+  TRACE ("END   PHASE ADAPT");
 }
 
 //----------------------------------------------------------------------
