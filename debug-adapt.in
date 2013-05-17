@@ -23,22 +23,26 @@ Boundary { type = "periodic"; }
 
    Initial {
        density       { value = [ 1.0, 
-                             (x- 0.50)*(x- 0.50)+(y- 0.25)*(y- 0.25) > 0.03,
+                             (x- 0.250)*(x- 0.250)+(y- 0.25)*(y- 0.25) > 0.03,
                                  0.125 ]; };
        total_energy  { value = [ 1.0  / (0.4 * 1.0) ,
-                             (x- 0.50)*(x- 0.50)+(y- 0.25)*(y- 0.25) > 0.03,
+                             (x- 0.250)*(x- 0.250)+(y- 0.25)*(y- 0.25) > 0.03,
 	                         0.14 / (0.4 * 0.1)]; };
        velocity_x    { value = [0.0]; };
        velocity_y    { value = [0.0]; }
    }
 
-Stopping { cycle = 1; }
+Stopping { cycle = 10; }
 
 Output {
 
        file_groups = ["density","mesh"];
   density { name = ["debug-adapt-density-%03d.png", "cycle"]; 
-       image_ghost = true; } ;
+       image_ghost = true; 
+	schedule = ["cycle","interval", 1];
+        colormap = [0.0, 0.0, 0.0,  
+	            1.0, 1.0, 1.0];
+} ;
 
    mesh {
       	type     = "image";
@@ -46,7 +50,7 @@ Output {
 	image_reduce_type = "max";
         field_list = ["density"];
 	image_block_size  = 1;
-	schedule = ["cycle","interval", 100];
+	schedule = ["cycle","interval", 1];
         colormap = [1.00, 1.00, 1.00,  
                     0.00, 1.00, 0.00, 
                     1.00, 0.00, 0.00, 

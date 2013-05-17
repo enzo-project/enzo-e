@@ -39,10 +39,10 @@ public: // interface
 #endif
 
   /// Restrict comm_block_f child values given by (icx,icy,icz) to the parent
-  virtual void apply 
+  virtual int apply 
   ( precision_type precision,
-    void *       values_f, int nd3_f[3], int n3_f[3],
-    const void * values_c, int nd3_c[3], int n3_c[3]) = 0;
+    void *       values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+    const void * values_f, int nd3_f[3], int im3_f[3], int n3_f[3]) = 0;
 
 private: // functions
 

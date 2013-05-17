@@ -36,17 +36,17 @@ public: // interface
 
   /// Prolong comm_block_Ht values to the child block given by (icx,icy,icz)
 
-  virtual void apply 
+  virtual int apply 
   ( precision_type precision,
-    void *       values_f, int nd3_f[3], int n3_f[3],
-    const void * values_c, int nd3_c[3], int n3_c[3]);
+    void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
+    const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3]);
 
 private: // functions
 
   template <class T>
-  void apply 
-  ( T *       values_f, int nd3_f[3], int n3_f[3],
-    const T * values_c, int nd3_c[3], int n3_c[3]);
+  int apply_
+  ( T *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
+    const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3]);
   
 private: // attributes
 

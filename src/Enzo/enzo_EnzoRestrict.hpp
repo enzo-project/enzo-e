@@ -35,17 +35,17 @@ public: // interface
 #endif
 
   /// Restrict field_block_c values to the child block given by (icx,icy,icz)
-  virtual void apply 
+  int apply 
   ( precision_type precision,
-    void *       values_c, int nd3_c[3], int n3_c[3],
-    const void * values_f, int nd3_f[3], int n3_f[3]);
+    void *       values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+    const void * values_f, int nd3_f[3], int im3_f[3], int n3_f[3]);
 
 private: // functions
 
   template <class T>
-  void apply_
-  ( T *       values_c, int nd3_c[3], int n3_c[3],
-    const T * values_f, int nd3_f[3], int n3_f[3]);
+  int apply_
+  ( T *       values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+    const T * values_f, int nd3_f[3], int im3_f[3], int n3_f[3]);
 
 private: // attributes
 

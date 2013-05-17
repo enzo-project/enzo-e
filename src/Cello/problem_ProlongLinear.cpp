@@ -17,24 +17,24 @@ ProlongLinear::ProlongLinear() throw()
 
 //----------------------------------------------------------------------
 
-void ProlongLinear::apply 
+int ProlongLinear::apply 
 ( precision_type precision,
-  void *       values_f, int nd3_f[3], int n3_f[3],
-  const void * values_c, int nd3_c[3], int n3_c[3])
+  void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
+  const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
 {
   switch (precision)  {
 
   case precision_single:
 
-    apply_( (float *)       values_f, nd3_f, n3_f,
-	    (const float *) values_c, nd3_c, n3_c);
+    return apply_( (float *)       values_f, nd3_f, im3_f, n3_f,
+		   (const float *) values_c, nd3_c, im3_c, n3_c);
 
     break;
 
   case precision_double:
 
-    apply_( (double *)       values_f, nd3_f, n3_f,
-	    (const double *) values_c, nd3_c, n3_c);
+    return apply_( (double *)       values_f, nd3_f, im3_f, n3_f,
+		   (const double *) values_c, nd3_c, im3_c, n3_c);
 
     break;
 
@@ -49,9 +49,9 @@ void ProlongLinear::apply
 //----------------------------------------------------------------------
 
 template <class T>
-void ProlongLinear::apply_
-( T *       values_f, int nd3_f[3], int n3_f[3],
-  const T * values_c, int nd3_c[3], int n3_c[3])
+int ProlongLinear::apply_
+( T *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
+  const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
 {
   int dx_c = 1;
   int dy_c = nd3_c[0];
@@ -78,28 +78,40 @@ void ProlongLinear::apply_
   if (n3_f[1]==1) {
 
     for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
-      int i_c = ix0/2;
+      int ic_x = ix0/2;
       for (int ix=ix0; ix<ix0+4; ix++) {
 	int icx = ix-ix0;
-	int i_f = ix;
+	int if_x = ix;
+
+	int i_c = im3_c[0]+ic_x;
+	int i_f = im3_f[0]+if_x;
+
 	values_f[i_f] = ( c1[icx]*values_c[i_c] + 
 			  c2[icx]*values_c[i_c+dx_c]);
       }
     }
 
+    return (sizeof(T) * n3_f[0]);
+
+
   } else if (n3_f[2] == 1) {
 
     for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
+      int ic_x = ix0/2;
       for (int iy0=0; iy0<n3_f[1]; iy0+=4) {
-
-	int i_c = ix0/2 + nd3_c[1]*(iy0/2);
+	int ic_y = iy0/2;
 
 	for (int ix=ix0; ix<ix0+4; ix++) {
 	  int icx = ix-ix0;
+	  int if_x = ix;
 	  for (int iy=iy0; iy<iy0+4; iy++) {
 	    int icy = iy-iy0;
+	    int if_y = iy;
 
-	    int i_f = ix + nd3_f[0]*iy;
+	    int i_c = (im3_c[0]+ic_x) + nd3_c[0]*
+	      (       (im3_c[1]+ic_y));
+	    int i_f = (im3_f[0]+if_x) + nd3_f[0]*
+	      (       (im3_f[1]+if_y));
 
 	    values_f[i_f] = 
 	      ( c1[icx]*c1[icy]*values_c[i_c] +
@@ -110,22 +122,34 @@ void ProlongLinear::apply_
 	}
       }
     }
+
+    return (sizeof(T) * n3_f[0]*n3_f[1]);
+
   } else {
 
     for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
+      int ic_x = ix0/2;
       for (int iy0=0; iy0<n3_f[1]; iy0+=4) {
+	int ic_y = iy0/2;
 	for (int iz0=0; iz0<n3_f[2]; iz0+=4) {
-
-	  int i_c = ix0/2 + nd3_c[0]*(iy0/2 + nd3_c[1]*iz0/2);
+	  int ic_z = iz0/2;
 
 	  for (int ix=ix0; ix<ix0+4; ix++) {
 	    int icx = ix-ix0;
+	    int if_x = ix;
 	    for (int iy=iy0; iy<iy0+4; iy++) {
 	      int icy = iy-iy0;
+	      int if_y = iy;
 	      for (int iz=iz0; iz<iz0+4; iz++) {
 		int icz = iz-iz0;
+		int if_z = iz;
 
-		int i_f = ix + nd3_f[0]*(iy + nd3_f[1]*iz);
+		int i_c = (im3_c[0]+ic_x) + nd3_c[0]*
+		  (       (im3_c[1]+ic_y) + nd3_c[1]*
+			  (im3_c[2]+ic_z));
+		int i_f = (im3_f[0]+if_x) + nd3_f[0]*
+		  (       (im3_f[1]+if_y) + nd3_f[1]*
+			  (im3_f[2]+if_z));
 
 		values_f[i_f] = 
 		  ( c1[icx]*c1[icy]*c1[icz]*values_c[i_c] +
@@ -143,6 +167,8 @@ void ProlongLinear::apply_
       }
     }
   }
+  return (sizeof(T) * n3_f[0]*n3_f[1]*n3_f[2]);
+
 }
 
 //======================================================================

@@ -413,7 +413,6 @@ EnzoBlock::EnzoBlock
 {
   int mx,my,mz;
   index.array(&mx,&my,&mz);
-  TRACE4("%p EnzoBlock::EnzoBlock(%d %d %d)",this,mx,my,mz);
   initialize_enzo_();
   initialize();
 }
@@ -710,9 +709,11 @@ void EnzoBlock::set_time (double time) throw ()
   //
   // (OldTime > time; error is about single-precision epsilon)
 
-  ASSERT("EnzoBlock::set_time",
-	 "Must be called only once per timestep to maintain OldTime consistency",
-	 Time_ == 0 || Time_ < time);
+  ASSERT2("EnzoBlock::set_time()",
+	 "set_time() may be called more than once or dt = 0.0\n"
+	  "Time_ = %15.8f time = %15.8f",
+	  Time_,time,
+	  Time_ == 0 || Time_ < time);
 
   //  WARNING("EnzoBlock::set_time","TEMPORARY");
   OldTime   = Time_;

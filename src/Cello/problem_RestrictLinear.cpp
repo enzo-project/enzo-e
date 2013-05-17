@@ -17,24 +17,24 @@ RestrictLinear::RestrictLinear() throw()
 
 //----------------------------------------------------------------------
 
-void RestrictLinear::apply 
+int RestrictLinear::apply 
 ( precision_type precision,
-  void *       values_c, int nd3_c[3], int n3_c[3],
-  const void * values_f, int nd3_f[3], int n3_f[3])
+  void *       values_c, int nd3_c[3], int im3_c[3],  int n3_c[3],
+  const void * values_f, int nd3_f[3], int im3_f[3],  int n3_f[3])
 {
   switch (precision) {
 
   case precision_single:
 
-    apply_( (float *) values_c,       nd3_c, n3_c,
-	    (const float *) values_f, nd3_f, n3_f);
-
+    return apply_( (float *) values_c,       nd3_c, im3_c, n3_c,
+		   (const float *) values_f, nd3_f, im3_f, n3_f);
+    
     break;
 
   case precision_double:
 
-    apply_( (double *) values_c,       nd3_c, n3_c,
-	    (const double *) values_f, nd3_f, n3_f);
+    return apply_( (double *) values_c,       nd3_c, im3_c, n3_c,
+		   (const double *) values_f, nd3_f, im3_f, n3_f);
 
     break;
 
@@ -43,6 +43,7 @@ void RestrictLinear::apply
     ERROR1 ("RestrictLinear::apply()",
 	    "Unknown precision %d",
 	    precision);
+    return 0;
     break;
   }
 }
@@ -50,10 +51,13 @@ void RestrictLinear::apply
 //----------------------------------------------------------------------
 
 template<class T>
-void RestrictLinear::apply_
-( T *       values_c, int nd3_c[3], int n3_c[3],
-  const T * values_f, int nd3_f[3], int n3_f[3])
+int RestrictLinear::apply_
+( T *       values_c, int nd3_c[3], int im3_c[3],  int n3_c[3],
+  const T * values_f, int nd3_f[3], int im3_f[3],  int n3_f[3])
 {
+
+  TRACE1 ("RestrictLinear apply values_f = %p",values_f);
+  TRACE1("in restruct values_f[0] = %f",values_f[0]);
   const int rank = (nd3_f[1] == 1) ? 1 : ((nd3_f[2] == 1) ? 2 : 3);
 
   const int dx = 1;
@@ -61,51 +65,77 @@ void RestrictLinear::apply_
   const int dz = nd3_f[0]*nd3_f[1];
 
   if (rank == 1) {
-    for (int i_c=0; i_c<n3_c[0]; i_c++) {
-      int i_f = i_c*2;
-      values_c[i_c] = 
-	values_f[i_f     ] + 
-	values_f[i_f + dx];
+
+    for (int ix_c=0; ix_c<n3_c[0]; ix_c++) {
+      int ix_f = ix_c*2;
+
+      int i_c = (im3_c[0]+ix_c);
+      int i_f = (im3_f[0]+ix_f);
+
+      values_c[i_c] = 0.5 *
+	( values_f[i_f     ] + 
+	  values_f[i_f + dx] );
     }
 
   } else if (rank == 2) {
+
     for (int ix_c=0; ix_c<n3_c[0]; ix_c++) {
       int ix_f = ix_c*2;
       for (int iy_c=0; iy_c<n3_c[1]; iy_c++) {
 	int iy_f = iy_c*2;
-	int i_c = ix_c + nd3_c[0]*iy_c;
-	int i_f = ix_f + nd3_f[0]*iy_f;
-	values_c[ix_c] = 
-	  values_f[i_f          ] + 
-	  values_f[i_f + dx     ] +
-	  values_f[i_f +      dy] + 
-	  values_f[i_f + dx + dy];
+
+	int i_c = (im3_c[0]+ix_c) + nd3_c[0]*
+	  (       (im3_c[1]+iy_c));
+	int i_f = (im3_f[0]+ix_f) + nd3_f[0]*
+	  (       (im3_f[1]+iy_f));
+
+	values_c[i_c] = 0.25 *
+	  ( values_f[i_f          ] + 
+	    values_f[i_f + dx     ] +
+	    values_f[i_f +      dy] + 
+	    values_f[i_f + dx + dy] );
+
+	TRACE9("Restrict %f[%3d %3d] = %f[%3d %3d]-%f[%3d %3d]",
+	       values_c[ix_c] ,ix_c,iy_c,
+	       values_f[i_f],ix_f,iy_f,
+	       values_f[i_f+dx+dy],ix_f+1,iy_f+1);
+	TRACE4("          i_c %d i_f %d dx %d dy %d",
+	       i_c,i_f,dx,dy);
 
       }
     }
 
+    
   } else if (rank == 3) {
+
     for (int ix_c=0; ix_c<n3_c[0]; ix_c++) {
       int ix_f = ix_c*2;
       for (int iy_c=0; iy_c<n3_c[1]; iy_c++) {
 	int iy_f = iy_c*2;
 	for (int iz_c=0; iz_c<n3_c[2]; iz_c++) {
 	  int iz_f = iz_c*2;
-	  int i_c = ix_c + nd3_c[0]*iy_c;
-	  int i_f = ix_f + nd3_f[0]*iy_f;
-	  values_c[ix_c] = 
-	    values_f[i_f               ] + 
-	    values_f[i_f + dx          ] +
-	    values_f[i_f +      dy     ] + 
-	    values_f[i_f + dx + dy     ] +
-	    values_f[i_f           + dz] + 
-	    values_f[i_f + dx      + dz] +
-	    values_f[i_f +      dy + dz] + 
-	    values_f[i_f + dx + dy + dz];
+
+	  int i_c = (im3_c[0]+ix_c) + nd3_c[0]*
+	    (       (im3_c[1]+iy_c) + nd3_c[1]*
+		    (im3_c[2]+iz_c));
+	  int i_f = (im3_f[0]+ix_f) + nd3_f[0]*
+	    (       (im3_f[1]+iy_f) + nd3_f[1]*
+		    (im3_f[2]+iz_f));
+
+	  values_c[i_c] = 0.125 * 
+	    ( values_f[i_f               ] + 
+	      values_f[i_f + dx          ] +
+	      values_f[i_f +      dy     ] + 
+	      values_f[i_f + dx + dy     ] +
+	      values_f[i_f           + dz] + 
+	      values_f[i_f + dx      + dz] +
+	      values_f[i_f +      dy + dz] + 
+	      values_f[i_f + dx + dy + dz] );
 	}
       }
     }
   }
+  return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
 }
 
 //======================================================================

@@ -40,21 +40,22 @@ void EnzoProlong::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoProlong::apply 
+int EnzoProlong::apply 
 ( precision_type precision,
-  void *       values_f, int nd3_f[3], int n3_f[3],
-  const void * values_c, int nd3_c[3], int n3_c[3])
+  void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
+  const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
 {
   ERROR("EnzoProlong::apply()",
 	"Not Implemented yet");
+  return 0;
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoProlong::apply 
-( T *       values_f, int nd3_f[3], int n3_f[3],
-  const T * values_c, int nd3_c[3], int n3_c[3])
+int EnzoProlong::apply_
+( T *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
+  const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
 {
   // int nd3_c[3];
   // int nd3_f[3];

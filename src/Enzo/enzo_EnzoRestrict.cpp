@@ -29,24 +29,24 @@ void EnzoRestrict::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoRestrict::apply 
+int EnzoRestrict::apply 
 ( precision_type precision,
-  void *       values_c, int nd3_c[3], int n3_c[3],
-  const void * values_f, int nd3_f[3], int n3_f[3])
+  void *       values_c, int nd3_c[3], int im3_c[3],  int n3_c[3],
+  const void * values_f, int nd3_f[3], int im3_f[3],  int n3_f[3])
 {
   switch (precision)  {
 
   case precision_single:
 
-    apply_( (float *)       values_c, nd3_c, n3_c,
-	    (const float *) values_f, nd3_f, n3_f);
+    return apply_( (float *)       values_c, nd3_c, im3_c, n3_c,
+		   (const float *) values_f, nd3_f, im3_f, n3_f);
 
     break;
 
   case precision_double:
 
-    apply_( (double *)       values_c, nd3_c, n3_c,
-	    (const double *) values_f, nd3_f, n3_f);
+    return apply_( (double *)       values_c, nd3_c, im3_c, n3_c,
+		   (const double *) values_f, nd3_f, im3_f, n3_f);
 
     break;
 
@@ -55,17 +55,18 @@ void EnzoRestrict::apply
     ERROR1 ("EnzoRestrict::apply()",
 	    "Unknown precision %d",
 	    precision);
+    return 0;
   }
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoRestrict::apply_
-( T *       values_c, int nd3_c[3], int n3_c[3],
-  const T * values_f, int nd3_f[3], int n3_f[3])
+int EnzoRestrict::apply_
+( T *       values_c, int nd3_c[3], int im3_c[3],  int n3_c[3],
+  const T * values_f, int nd3_f[3], int im3_f[3],  int n3_f[3])
 {
-
+  return 0;
   // int nd3_f[3];
   // int nd3_c[3];
   // field_block_c->size(&nd3_c[0],&nd3_c[1],&nd3_c[2]);

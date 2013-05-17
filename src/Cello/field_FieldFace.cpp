@@ -118,11 +118,11 @@ void FieldFace::load ( int * n, char ** array) throw()
 {
   if (array_.size() == 0)  allocate ();
 
-  size_t num_fields = field_descr_->field_count();
+  const size_t num_fields = field_descr_->field_count();
 
   size_t index_array = 0;
 
-  for (size_t index_field=0; index_field< num_fields; index_field++) {
+  for (size_t index_field=0; index_field < num_fields; index_field++) {
   
     precision_type precision = field_descr_->precision(index_field);
 
@@ -141,13 +141,14 @@ void FieldFace::load ( int * n, char ** array) throw()
 
       // Restrict field to array
 
-      int i0 = im3[0] + nd3[0]*(im3[1] + nd3[1]*im3[2]);
-
       int nc3[3] = { (n3[0]+1)/2, (n3[1]+1)/2,(n3[2]+1)/2 };
 
-      restrict_->apply(precision, array_face,nc3,nc3, field_face,nd3,n3);
+      int im3_array[3] = {0,0,0};
 
-      index_array += nc3[0]*nc3[1]*nc3[2];
+      index_array += restrict_->apply
+	(precision, 
+	 array_face,nc3,im3_array,nc3, 
+	 field_face,nd3,im3,      n3);
 
     } else {
 
@@ -191,7 +192,7 @@ void FieldFace::load ( int * n, char ** array) throw()
 void FieldFace::store (int n, char * array) throw()
 {
 
-  size_t num_fields = field_descr_->field_count();
+  const size_t num_fields = field_descr_->field_count();
 
   size_t index_array = 0;
 
@@ -214,28 +215,24 @@ void FieldFace::store (int n, char * array) throw()
 
       // Prolong array to field
 
-      TRACE3 ("test padding %d %d %d",ng3[0],ng3[1],ng3[2]);
       bool need_padding = (ng3[0]%2==1) || (ng3[1]%2==1) || (ng3[2]%2==1);
 
       ASSERT("FieldFace::store()",
 	     "Odd ghost zones not implemented yet: prolong needs padding",
 	     ! need_padding);
 
-      int i0 = im3[0] + nd3[0]*(im3[1] + nd3[1]*im3[2]);
-
       int nc3[3] = { (n3[0]+1)/2, (n3[1]+1)/2,(n3[2]+1)/2 };
 
-      TRACE6 ("store prolong ghost  fine %d %d %d   n %d %d %d",
-	      nd3[0],nd3[1],nd3[2],n3[0],n3[1],n3[2]);
-      TRACE6 ("store prolong ghost  coarse %d %d %d   n %d %d %d",
-	      nc3[0],nc3[1],nc3[2],nc3[0],nc3[1],nc3[2]);
-      prolong_->apply(precision, field_ghost,nd3,n3, array_ghost,nc3,nc3);
+      int im3_array[3] = {0,0,0};
 
-      index_array += nc3[0]*nc3[1]*nc3[2];
+      index_array += prolong_->apply
+	(precision, 
+	 field_ghost,nd3,im3,       n3,
+	 array_ghost,nc3,im3_array, nc3);
 
     } else {
 
-      // Copyarray to field
+      // Copy array to field
 
       switch (precision) {
       case precision_single:
@@ -315,7 +312,6 @@ char * FieldFace::allocate () throw()
 
   }
 
-
   array_.resize(array_size);
 
   for (int i=0; i<array_size; i++) array_[i] = 0;
@@ -356,8 +352,7 @@ size_t FieldFace::load_
 
 //----------------------------------------------------------------------
 
-template<class T>
-    size_t FieldFace::store_
+template<class T> size_t FieldFace::store_
 ( T * field_ghost, const T * array, int nd3[3], int n3[3],int im3[3] ) throw()
 {
   for (int iz=0; iz <n3[2]; iz++)  {
@@ -366,7 +361,7 @@ template<class T>
       int ky = iy+im3[1];
       for (int ix=0; ix < n3[0]; ix++) {
 	int kx = ix+im3[0];
-	int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
+	int index_array = ix +  n3[0]*(iy +  n3[1] * iz);
 	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
 	field_ghost[index_field] = array[index_array];
       }
@@ -410,8 +405,9 @@ void FieldFace::load_loop_limits_
 
     if (face_[axis] == -1 || face_[axis] == 1) {
 
-	if (face_[axis] == -1) im3[axis] = ng3[axis];   
-	if (face_[axis] == +1) im3[axis] = nd3[axis] - 2*ng3[axis];
+      if (face_[axis] == -1) im3[axis] = ng3[axis];   
+      if (face_[axis] == +1) im3[axis] = nd3[axis] - 2*ng3[axis];
+      n3[axis] = ng3[axis];
 
       if (restrict_) { // 2*g ghost depth
 
@@ -423,14 +419,12 @@ void FieldFace::load_loop_limits_
 	if (face_[axis] == 1) im3[axis] += ng3[axis]/2;
 	n3[axis] = (ng3[axis]+1)/2;
 
-      } else {
-
-	n3[axis] = ng3[axis];
-
       }
     }
-
   }
+  n3[0] = std::max(n3[0],1);
+  n3[1] = std::max(n3[1],1);
+  n3[2] = std::max(n3[2],1);
 }
 
 //----------------------------------------------------------------------
@@ -472,5 +466,8 @@ void FieldFace::store_loop_limits_
     }
 
   }
+  n3[0] = std::max(n3[0],1);
+  n3[1] = std::max(n3[1],1);
+  n3[2] = std::max(n3[2],1);
 }
 
