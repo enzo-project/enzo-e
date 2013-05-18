@@ -135,7 +135,7 @@ CommBlock * EnzoFactory::create_block
       count_adapt,
       initial,
       cycle,time,dt,
-      narray, array, op_array_copy,
+      narray, array, op_array,
       testing);
 
   CommBlock * block = (*enzo_block_array)[index].ckLocal();
@@ -155,7 +155,7 @@ CommBlock * EnzoFactory::create_block
      initial,
      count_adapt,
      cycle, time, dt,
-     narray, array, op_array_copy,
+     narray, array, op_array,
      testing);
 
   return enzo_block;
