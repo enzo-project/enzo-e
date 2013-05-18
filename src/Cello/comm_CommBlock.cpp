@@ -51,11 +51,11 @@ CommBlock::CommBlock
   index.print ("CommBlock::CommBlock");
 #endif
 
-  TRACE6("CommBlock::CommBlock(n(%d %d %d)  num_field_blocks %d  count_adapt %d  initial %d)",
+  printf("CommBlock::CommBlock(n(%d %d %d)  num_field_blocks %d  count_adapt %d  initial %d)\n",
 	 nx,ny,nz,num_field_blocks,count_adapt,initial);
 
-  TRACE3("CommBlock::CommBlock  n (%d %d %d)",nx,ny,nz);
-  TRACE1("CommBlock::CommBlock  l %d",level_);
+  printf("CommBlock::CommBlock  n (%d %d %d)\n",nx,ny,nz);
+  printf("CommBlock::CommBlock  l %d\n",level_);
 
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);

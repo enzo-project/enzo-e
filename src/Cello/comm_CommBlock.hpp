@@ -131,7 +131,8 @@ public: // interface
   /// End the adapt step after QD
   void q_adapt_stop ();
   //  void adapt();
-  void p_refine(bool forced = false);
+  void p_refine();
+  void p_balance(int v3[3]);
   void coarsen();
   void p_child_can_coarsen(int icx,int icy, int icz,
 			   int n, char * array);

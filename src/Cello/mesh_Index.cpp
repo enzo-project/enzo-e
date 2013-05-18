@@ -359,9 +359,9 @@ void Index::print (const char * msg,
 
   PARALLEL_PRINTF ("T [ ");
   int ic3[3];
-  for (int axis=0; axis<rank; axis++) {
-    for (int level = 0; level < max_level; level++) {
-      child (level+1, &ic3[0], &ic3[1], &ic3[2]);
+  for (int level = 0; level < max_level; level++) {
+    child (level+1, &ic3[0], &ic3[1], &ic3[2]);
+    for (int axis=0; axis<rank; axis++) {
       PARALLEL_PRINTF ("%d",ic3[axis]);
     }
     PARALLEL_PRINTF (" ");

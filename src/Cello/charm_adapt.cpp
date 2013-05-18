@@ -190,10 +190,11 @@ int CommBlock::reduce_adapt_(int a1, int a2) const throw()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_refine(bool forced)
+void CommBlock::p_refine()
 {
-  forced_ = forced;
 
+  index_.print ("refine",-1,2);
+  
   TRACE("CommBlock::p_refine()");
   int rank = simulation()->dimension();
   
@@ -278,6 +279,13 @@ void CommBlock::p_refine(bool forced)
 
 	  // new child is neighbor's nibling
 
+	  printf ("%s:%d set_nibling axis %d face %d\n",
+		  __FILE__,__LINE__,axis,face);
+
+	  
+	  index_neighbor.print("set_nibling A",-1,2);
+	  index_child.print   ("set_nibling B",-1,2);
+
 	  thisProxy[index_neighbor].p_set_nibling(values_child);
 
 	} else {
@@ -288,8 +296,10 @@ void CommBlock::p_refine(bool forced)
 
 	    Index index_uncle = index_neighbor.index_parent();
 
-	    bool forced;
-	    thisProxy[index_uncle].p_refine(forced = true);
+	    int values_this[3];
+	    index_.values (values_this,values_this+1,values_this+2);
+	    
+	    thisProxy[index_uncle].p_balance(values_this);
 	  }
 
 	}
@@ -301,12 +311,12 @@ void CommBlock::p_refine(bool forced)
 
 	Index index_nibling = index_neighbor.index_child(jc3);
 
-#ifdef CELLO_TRACE
+	//#ifdef CELLO_TRACE
 	//	index_neighbor.print ("is_nibling neighbor",-1,2);
-	index_.print         ("is_nibling parent  ",-1,2);
+	//	index_.print         ("is_nibling parent  ",-1,2);
 	//	index_child.print    ("is_nibling child   ",-1,2);
-	index_nibling.print  ("is_nibling nibling ",-1,2);
-#endif
+	//	index_nibling.print  ("is_nibling nibling ",-1,2);
+	//#endif
 
 	if (is_nibling(index_nibling)) {
 	  
@@ -314,10 +324,10 @@ void CommBlock::p_refine(bool forced)
 	  index_nibling.values
 	    (&values_nibling[0],&values_nibling[1],&values_nibling[2]);
 
-#ifdef CELLO_TRACE
-	  index_nibling.print("2 calling p_set_neighbor A");
-	  index_child.print  ("2 calling p_set_neighbor B");
-#endif
+	  //#ifdef CELLO_TRACE
+	  index_nibling.print("set_neighbor A",-1,2);
+	  index_child.print  ("set_neighbor B",-1,2);
+	  //#endif
 
 	  thisProxy[index_nibling].p_set_neighbor(values_child);
 	  thisProxy[index_child].p_set_neighbor(values_nibling);
@@ -327,6 +337,14 @@ void CommBlock::p_refine(bool forced)
     }
   }
   
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_balance(int values_child[3])
+{
+  forced_ = true;
+  p_refine();
 }
 
 //----------------------------------------------------------------------

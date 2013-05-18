@@ -3,11 +3,11 @@
 
 include "input/ppm.incl"
 
-Initial { max_level = 2; }
+Initial { max_level = 5; }
 
 Mesh { root_blocks    = [1,1]; 
         root_size = [32,32];
-       max_level = 2; 
+       max_level = 5; 
        adapt {
            type = ["slope"];
        }
