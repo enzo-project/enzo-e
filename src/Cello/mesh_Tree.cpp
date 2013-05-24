@@ -407,7 +407,6 @@ void Tree::coalesce ()
 		node->set_data(&level_data[index_data++]);
 		level1 = (int * ) node->data();
 	      }
-	      // @@@ BUG ldt == 0
 	      *level1 = *level0;
 	    }
 	  }

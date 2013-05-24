@@ -45,7 +45,7 @@ CommBlock::CommBlock
 #ifdef CONFIG_USE_CHARM
   loop_refresh_(),
 #endif
-  forced_(false)
+  neighbor_state_()
 { 
 #ifdef CELLO_TRACE
   index.print ("CommBlock::CommBlock");
@@ -130,6 +130,9 @@ CommBlock::CommBlock
     }
   }
 
+  // 
+  neighbor_state_.resize(27);
+  for (int i=0; i<27; i++) neighbor_state_[i] = neighbor_state_unknown;
 
   if (narray != 0) {
     // copy any input data
@@ -203,7 +206,7 @@ void CommBlock::pup(PUP::er &p)
   p | count_coarsen_;
   p | count_adapt_;
   p | loop_refresh_;
-  p | forced_;
+  p | neighbor_state_;
 
 }
 

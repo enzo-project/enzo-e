@@ -6,7 +6,7 @@ include "input/ppm.incl"
 Initial { max_level = 5; }
 
 Mesh { root_blocks    = [1,1]; 
-        root_size = [32,32];
+        root_size = [24,24];
        max_level = 5; 
        adapt {
            type = ["slope"];
@@ -32,19 +32,20 @@ Boundary { type = "periodic"; }
        velocity_y    { value = [0.0]; }
    }
 
-Stopping { cycle = 100; }
+Stopping { cycle = 10; }
 
 Output {
 
-       file_groups = ["density","mesh"];
+  file_groups = ["density","mesh"];
   density { name = ["debug-adapt-density-%03d.png", "cycle"]; 
-       image_ghost = true; 
-	schedule = ["cycle","interval", 1];
+#  image_ghost = true; 
+  image_ghost = false; 
+  schedule = ["cycle","interval", 1];
         colormap = [0.0, 0.0, 0.0,  
 	            1.0, 1.0, 1.0];
-} ;
+  };
 
-   mesh {
+  mesh {
       	type     = "image";
 	image_type  = "mesh";
 	image_reduce_type = "max";

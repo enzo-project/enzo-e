@@ -41,6 +41,14 @@
 /// except when applying initial conditions.  In that case, several
 /// steps may be applied, up to a specified maximum 
 /// (Mesh:initial_max_level).
+///
+/// Maintain type (coarse,same,fine) of neighbor at all required faces
+/// Update when refining
+/// Update when coarsening
+/// Force balanced-refined shouldn't coarsen
+///     determine adapt
+///     neighbor update
+///     balance check
 
 #ifdef CONFIG_USE_CHARM
 
@@ -102,7 +110,6 @@ void CommBlock::p_adapt_start(int count)
 
   // Inhibit coarsening on startup
   int initial_cycle = simulation()->config()->initial_cycle;
-  forced_ = (cycle()==initial_cycle);
 
   if (count_adapt_-- > 0) {
 
@@ -156,7 +163,7 @@ int CommBlock::determine_adapt()
     }
 
     // can't coarsen if we've been forced to refine to balance
-    if ((adapt == adapt_coarsen) && forced_ ) {
+    if ((adapt == adapt_coarsen) && ! can_coarsen() ) {
       adapt = adapt_same;
     }
 
@@ -343,7 +350,6 @@ void CommBlock::p_refine()
 
 void CommBlock::p_balance(int values_child[3])
 {
-  forced_ = true;
   p_refine();
 }
 
@@ -385,7 +391,7 @@ void CommBlock::coarsen()
 void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
 				    int n, char * array)
 {
-  if (forced_) return;
+  if (! can_coarsen()) return;
 
   // <duplicated code: refactor me!>
   Simulation * simulation = proxy_simulation.ckLocalBranch();

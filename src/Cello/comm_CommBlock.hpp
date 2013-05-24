@@ -15,21 +15,32 @@ class FieldDescr;
 class Hierarchy;
 class Simulation;
 
-// NOTE: +2 in IC is so indices can be -1, e.g. for child indicies of
-// neighboring blocks
-// IC  index for child blocks
+// index for child blocks
 #define IC(icx,icy,icz)  (((icx)+2)%2) + 2*( (((icy)+2)%2) + 2*(((icz)+2)%2) )
-// NC  number of children
+
+// number of children
 #define NC(rank) (1<<(rank))
-// IN  index for neighbors
+
+// index for neighbors (axis,face)
 #define IN(axis,face)  ((face) + 2*(axis))
-// NC  number of neighbors
+
+// index for neighbors (ix,iy,iz)
+#define IN3(ix,iy,iz)  ((ix+1) + 3*((iy+1) + 3*(iz+1)))
+
+// number of neighbors
 #define NN(rank) (2*(rank))
 
 enum array_type {
   op_array_copy,
   op_array_restrict,
   op_array_prolong
+};
+
+enum neighbor_state {
+  neighbor_state_unknown,
+  neighbor_state_same,
+  neighbor_state_coarse,
+  neighbor_state_fine
 };
 
 // rank NN NC NI
@@ -133,6 +144,12 @@ public: // interface
   //  void adapt();
   void p_refine();
   void p_balance(int v3[3]);
+  bool can_coarsen() const
+  { 
+    for (int i=0; i<niblings_.size(); i++) 
+      if (niblings_[i] != index_) return false;
+    return true;
+  }
   void coarsen();
   void p_child_can_coarsen(int icx,int icy, int icz,
 			   int n, char * array);
@@ -414,6 +431,9 @@ protected: // attributes
   /// list of nibling nodes
   std::vector<Index> niblings_;
 
+  /// list of neighbor states
+  std::vector<face_type> neighbor_state_;
+
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;
 
@@ -424,9 +444,6 @@ protected: // attributes
   /// Synchronization counter for ghost refresh
   Sync loop_refresh_;
 #endif
-
-  /// Whether node was forced to refine to maintain balance
-  bool forced_;
 
 };
 
