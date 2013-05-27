@@ -36,12 +36,12 @@ enum array_type {
   op_array_prolong
 };
 
-enum neighbor_state {
-  neighbor_state_unknown,
-  neighbor_state_same,
-  neighbor_state_coarse,
-  neighbor_state_fine
-};
+// enum neighbor_state {
+//   neighbor_state_unknown,
+//   neighbor_state_same,
+//   neighbor_state_coarse,
+//   neighbor_state_fine
+// };
 
 // rank NN NC NI
 // 0    0  1  1
@@ -149,6 +149,12 @@ public: // interface
     for (int i=0; i<niblings_.size(); i++) 
       if (niblings_[i] != index_) return false;
     return true;
+
+    //in3
+    //    for (int i=0; i<27; i++)
+    //      if (face_level[i] > level_) return false;
+    //    return true;
+      
   }
   void coarsen();
   void p_child_can_coarsen(int icx,int icy, int icz,
@@ -219,17 +225,22 @@ public: // interface
 #endif
 
   void set_child(Index index);
-  void p_set_neighbor(int v3[3]);
-  void p_set_nibling(const int v3[3]);
+  void p_set_neighbor(const int v3[3], int in3[3]);
+  void p_set_nibling (const int v3[3], int in3[3]);
 
   void delete_child(Index index);
   void p_delete_neighbor(const int v3[3]);
   void p_delete_nibling(const int v3[3]);
 
-  bool is_child (const Index & index);
-  bool is_neighbor (const Index & index);
-  bool is_nibling (const Index & index);
-  
+  bool is_child (const Index & index) const;
+  bool is_neighbor (const Index & index) const ;
+  bool is_nibling (const Index & index) const ;
+
+  int face_level (int ifx, int ify=0, int ifz=0) const
+  {
+    int i = (ifx+1) + 3*((ify+1) + 3*(ifz+1));
+    return face_level_[i];
+  }
   //----------------------------------------------------------------------
   // Big Three
   //----------------------------------------------------------------------
@@ -431,8 +442,8 @@ protected: // attributes
   /// list of nibling nodes
   std::vector<Index> niblings_;
 
-  /// list of neighbor states
-  std::vector<face_type> neighbor_state_;
+  /// level of neighbors (and self) along each face
+  std::vector<int> face_level_;
 
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;

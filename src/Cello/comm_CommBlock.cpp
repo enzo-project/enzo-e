@@ -45,7 +45,7 @@ CommBlock::CommBlock
 #ifdef CONFIG_USE_CHARM
   loop_refresh_(),
 #endif
-  neighbor_state_()
+  face_level_()
 { 
 #ifdef CELLO_TRACE
   index.print ("CommBlock::CommBlock");
@@ -124,15 +124,16 @@ CommBlock::CommBlock
 	  index_.print("1 calling p_set_neighbor A");
 	  index.print ("1 calling p_set_neighbor B");
 #endif
-	  p_set_neighbor (v3);
+	  int in3[3];
+	  p_set_neighbor (v3,in3);
 	}
       }
     }
   }
 
   // 
-  neighbor_state_.resize(27);
-  for (int i=0; i<27; i++) neighbor_state_[i] = neighbor_state_unknown;
+  face_level_.resize(27);
+  for (int i=0; i<27; i++) face_level_[i] = -1;
 
   if (narray != 0) {
     // copy any input data
@@ -206,7 +207,7 @@ void CommBlock::pup(PUP::er &p)
   p | count_coarsen_;
   p | count_adapt_;
   p | loop_refresh_;
-  p | neighbor_state_;
+  p | face_level_;
 
 }
 
@@ -505,7 +506,7 @@ void CommBlock::update_boundary_ ()
 
 //----------------------------------------------------------------------
 
-bool CommBlock::is_child (const Index & index)
+bool CommBlock::is_child (const Index & index) const
 { 
   for (size_t i=0; i<children_.size(); i++) {
     if (children_[i] == index) return true;
@@ -525,7 +526,7 @@ void CommBlock::delete_child(Index index)
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_set_neighbor(int v3[3])
+void CommBlock::p_set_neighbor(const int v3[3], int in3[3])
 {
   Index index;
   index.set_values(v3[0],v3[1],v3[2]);
@@ -552,7 +553,7 @@ void CommBlock::p_delete_neighbor(const int v3[3])
 
 //----------------------------------------------------------------------
 
-bool CommBlock::is_neighbor (const Index & index)
+bool CommBlock::is_neighbor (const Index & index) const
 { 
   for (size_t i=0; i<neighbors_.size(); i++) {
     if (neighbors_[i] == index) return true;
@@ -562,8 +563,10 @@ bool CommBlock::is_neighbor (const Index & index)
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_set_nibling(const int v3[3])
+void CommBlock::p_set_nibling(const int v3[3], int in3[3])
 {
+
+  // face_level_[IN3(in3)
   Index index_nibling;
   index_nibling.set_values(v3[0],v3[1],v3[2]);
   niblings_.push_back(index_nibling);
@@ -581,8 +584,8 @@ void CommBlock::p_set_nibling(const int v3[3])
       Index index_child = children_[ic];
       int values_child[3];
       index_child.values(&values_child[0],
-			    &values_child[1],
-			    &values_child[2]);
+			 &values_child[1],
+			 &values_child[2]);
       int ic3[3];
       index_child.child(level,ic3+0,ic3+1,ic3+2);
       for (int axis=0; axis<rank; axis++) {
@@ -595,9 +598,13 @@ void CommBlock::p_set_nibling(const int v3[3])
 				&values_neighbor[1],
 				&values_neighbor[2]);
 
-	  thisProxy[index_neighbor].p_set_neighbor(values_child);
+	  // @@@
+	  thisProxy[index_neighbor].p_set_neighbor
+	    (values_child, ic3);
 
-	  thisProxy[index_child].p_set_neighbor(values_neighbor);
+	  // @@@
+	  thisProxy[index_child].p_set_neighbor
+	    (values_neighbor, ic3);
 
 	  return; // can only be one and we found it
 	}
@@ -622,7 +629,7 @@ void CommBlock::p_delete_nibling(const int v3[3])
 
 //----------------------------------------------------------------------
 
-bool CommBlock::is_nibling (const Index & index)
+bool CommBlock::is_nibling (const Index & index) const
 { 
   for (size_t i=0; i<niblings_.size(); i++) {
     if (niblings_[i] == index) return true;

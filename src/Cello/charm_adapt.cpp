@@ -49,6 +49,26 @@
 ///     determine adapt
 ///     neighbor update
 ///     balance check
+///
+/// adapt: refine / coarsen at all levels
+///
+/// 1. determine adapt
+/// 2. refine / balance where necessary
+/// 3. QD
+/// 4. coarsen where possible
+/// 5. QD [optional?]
+///
+/// p_adapt_begin()
+///    adapt_ = determine_adapt 
+///    if (refine_) {
+///      tell known neighbors
+///      create children
+///      update children neighbors
+///      balance if necessary
+///    }
+///  each face stores relative level of finest grid
+///  0==same, -1==coarse, +1== fine
+
 
 #ifdef CONFIG_USE_CHARM
 
@@ -200,7 +220,9 @@ int CommBlock::reduce_adapt_(int a1, int a2) const throw()
 void CommBlock::p_refine()
 {
 
+#ifdef CELLO_TRACE
   index_.print ("refine",-1,2);
+#endif /* CELLO_TRACE */
   
   TRACE("CommBlock::p_refine()");
   int rank = simulation()->dimension();
@@ -290,10 +312,17 @@ void CommBlock::p_refine()
 		  __FILE__,__LINE__,axis,face);
 
 	  
+#ifdef CELLO_TRACE
 	  index_neighbor.print("set_nibling A",-1,2);
 	  index_child.print   ("set_nibling B",-1,2);
+#endif /* CELLO_TRACE */
 
-	  thisProxy[index_neighbor].p_set_nibling(values_child);
+	  int in3[3] = {0};
+	  in3[axis] = 1-2*face; // (0,1) --> (+1,-1)
+
+	  // @@@ in3 untested
+	  thisProxy[index_neighbor].p_set_nibling
+	    (values_child,in3);
 
 	} else {
 
@@ -318,12 +347,12 @@ void CommBlock::p_refine()
 
 	Index index_nibling = index_neighbor.index_child(jc3);
 
-	//#ifdef CELLO_TRACE
-	//	index_neighbor.print ("is_nibling neighbor",-1,2);
-	//	index_.print         ("is_nibling parent  ",-1,2);
-	//	index_child.print    ("is_nibling child   ",-1,2);
-	//	index_nibling.print  ("is_nibling nibling ",-1,2);
-	//#endif
+#ifdef CELLO_TRACE
+	index_neighbor.print ("is_nibling neighbor",-1,2);
+	index_.print         ("is_nibling parent  ",-1,2);
+	index_child.print    ("is_nibling child   ",-1,2);
+	index_nibling.print  ("is_nibling nibling ",-1,2);
+#endif /* CELLO_TRACE */
 
 	if (is_nibling(index_nibling)) {
 	  
@@ -331,13 +360,22 @@ void CommBlock::p_refine()
 	  index_nibling.values
 	    (&values_nibling[0],&values_nibling[1],&values_nibling[2]);
 
-	  //#ifdef CELLO_TRACE
+#ifdef CELLO_TRACE
 	  index_nibling.print("set_neighbor A",-1,2);
 	  index_child.print  ("set_neighbor B",-1,2);
-	  //#endif
+#endif /* CELLO_TRACE */
 
-	  thisProxy[index_nibling].p_set_neighbor(values_child);
-	  thisProxy[index_child].p_set_neighbor(values_nibling);
+	  int in3[3] = {0};
+ 	  in3[axis] = 1-2*face; // (0,1) --> (+1,-1)
+
+	  thisProxy[index_nibling].p_set_neighbor
+	    (values_child,in3);
+
+	  in3[axis] = -in3[axis];
+
+	  // @@@ in3 untested
+	  thisProxy[index_child].p_set_neighbor
+	    (values_nibling,in3);
 	}
 
       }
