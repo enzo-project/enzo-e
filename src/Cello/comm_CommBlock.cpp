@@ -633,9 +633,10 @@ void CommBlock::p_set_nibling(const int v3[3], int in3[3])
 	    index_neighbor.values(&values_neighbor[0],
 				  &values_neighbor[1],
 				  &values_neighbor[2]);
-
+#ifdef CONFIG_USE_CHARM
 	    thisProxy[index_neighbor].p_set_neighbor (values_child, ic3);
 	    thisProxy[index_child].   p_set_neighbor (values_neighbor, ic3);
+#endif /* CONFIG_USE_CHARM */
 
 	    return; // can only be one and we found it
 	  }
