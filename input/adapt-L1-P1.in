@@ -40,6 +40,7 @@ Initial {
 }
 
 Field {
+    ghosts = 4; # must be even for ProlongLinear
    refresh {
      type = "quiescence";
    }

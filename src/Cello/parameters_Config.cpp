@@ -56,6 +56,7 @@ void Config::pup (PUP::er &p)
   p | mesh_adapt_mass_level_exponent;
   p | mesh_adapt_mass_min_overdensity;
   p | mesh_adapt_balance;
+  p | mesh_adapt_temp_face_level;
 
   p | method_sequence;
 
@@ -304,6 +305,9 @@ void Config::read(Parameters * parameters) throw()
 
   mesh_adapt_balance = 
     parameters->value_logical ("Mesh:adapt:balance",true);
+
+  mesh_adapt_temp_face_level = 
+    parameters->value_logical ("Mesh:adapt:temp_face_level",false);
 
   //--------------------------------------------------
   // Method

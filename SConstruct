@@ -5,6 +5,11 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
+# (TEMPORARY) Whether to bypass Block refresh and jump to output
+# (for debugging adapt)
+
+skip_refresh = 0
+
 # Whether to print out messages with the TRACE() series of statements
 
 trace = 0
@@ -116,6 +121,10 @@ print
 
 define = {}
 
+# Temporary defines
+
+define_skip_refresh =        ['TEMP_SKIP_REFRESH']
+
 # Parallel type defines
 
 define["serial"] =    []
@@ -207,6 +216,7 @@ if (use_gprof == 1):
   
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
+if (skip_refresh != 0):      defines = defines + define_skip_refresh
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory

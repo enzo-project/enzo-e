@@ -54,8 +54,8 @@ module mesh {
     entry void p_balance (int v3[3]);
     entry void p_set_neighbor(const int v3[3], int in3[3]);
     entry void p_set_nibling(const int v3[3], int in3[3]);
-    entry void p_delete_neighbor(const int v3[3]);
-    entry void p_delete_nibling(const int v3[3]);
+    entry void p_delete_neighbor(const int v3[3], int in3[3]);
+    entry void p_delete_nibling(const int v3[3], int in3[3]);
     entry void p_child_can_coarsen(int icx,int icy,int icz,
 				   int n, char arr[n]);
 

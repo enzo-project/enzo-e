@@ -18,6 +18,24 @@
 
 void CommBlock::p_refresh_begin() 
 {
+#ifdef TEMP_SKIP_REFRESH
+  WARNING("CommBlock::q_adapt_exit",
+	  "CALLING p_output() INSTEAD OF REFRESH FOR IMAGE MESH CREATION");
+
+  //@@@@@@@@@@@@@@@@@@@@@@2
+  double min_reduce[2];
+
+  min_reduce[0] = 0.0;
+  min_reduce[1] = 0.0;
+  CkCallback callback (CkIndex_CommBlock::p_output(NULL), thisProxy);
+  contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
+
+  //    thisProxy.p_output();
+  //@@@@@@@@@@@@@@@@@@@@@@2
+#else
+  //  refresh(); 
+#endif
+
   TRACE("CommBlock::p_refresh_begin");
 
   Performance * performance = simulation()->performance();
@@ -85,7 +103,9 @@ void CommBlock::refresh ()
 
 	  // if no neighbor in level, refresh coarse neighbor
 
-	  if (! is_neighbor(index_neighbor)) {
+	  int if3[3] = {ifx,ify,ifz};
+
+	  if (! is_neighbor(index_neighbor,if3)) {
 
 #ifdef CELLO_TRACE
 	    index_.print("not neighbor A");
@@ -110,7 +130,7 @@ void CommBlock::refresh ()
 		for (icz=iczm; icz<=iczp; icz++) {
 		  Index index_nibling = 
 		    index_neighbor.index_child(icx,icy,icz);
-		  if (is_nibling(index_nibling)) {
+		  if (is_nibling(index_nibling,if3)) {
 		    ++num_niblings;
 		    refresh_fine(index_nibling, ifx,ify,ifz, icx,icy,icz);
 		  }

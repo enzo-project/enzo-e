@@ -300,11 +300,14 @@ void CommBlock::p_refine()
 
 	int face = ic3[axis];
 
+	int in3[3] = {0};
+	in3[axis] = 1-2*face; // (0,1) --> (+1,-1)
+
 	// update non-sibling neighbors
 
 	Index index_neighbor = index_.index_neighbor(axis,face,na3[axis]);
 
-	if (is_neighbor(index_neighbor)) {
+	if (is_neighbor(index_neighbor,in3)) {
 
 	  // new child is neighbor's nibling
 
@@ -316,9 +319,6 @@ void CommBlock::p_refine()
 	  index_neighbor.print("set_nibling A",-1,2);
 	  index_child.print   ("set_nibling B",-1,2);
 #endif /* CELLO_TRACE */
-
-	  int in3[3] = {0};
-	  in3[axis] = 1-2*face; // (0,1) --> (+1,-1)
 
 	  // @@@ in3 untested
 	  thisProxy[index_neighbor].p_set_nibling
@@ -354,7 +354,7 @@ void CommBlock::p_refine()
 	index_nibling.print  ("is_nibling nibling ",-1,2);
 #endif /* CELLO_TRACE */
 
-	if (is_nibling(index_nibling)) {
+	if (is_nibling(index_nibling,ic3)) {
 	  
 	  int values_nibling[3];
 	  index_nibling.values
@@ -389,6 +389,41 @@ void CommBlock::p_refine()
 void CommBlock::p_balance(int values_child[3])
 {
   p_refine();
+}
+
+//----------------------------------------------------------------------
+
+bool CommBlock::can_coarsen() const
+{ 
+  if (use_face_level()) {
+
+    int refresh_rank = simulation()->config()->field_refresh_rank;
+    int rank = simulation()->dimension();
+    int if3m[3],if3p[3],if3[3];
+
+    loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
+			 if3p+0,if3p+1,if3p+2);
+
+    for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
+      for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
+	for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
+	  int face_rank = rank - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
+	  if (face_rank >= refresh_rank) {
+	    int i=IN3(if3);
+	    if (face_level_[i] > level_) return false;
+	  }
+	}
+      }
+    }
+
+    return true;
+
+  } else {
+
+    for (int i=0; i<niblings_.size(); i++) 
+      if (niblings_[i] != index_) return false;
+    return true;
+  }
 }
 
 //----------------------------------------------------------------------

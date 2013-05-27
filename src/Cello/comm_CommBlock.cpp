@@ -82,6 +82,7 @@ CommBlock::CommBlock
   set_dt   (dt);
 
 #endif
+
   // Perform any additional initialization for derived class 
 
   int rank = this->simulation()->dimension();
@@ -89,6 +90,9 @@ CommBlock::CommBlock
   initialize ();
 
   // Initialize neighbor
+
+  face_level_.resize(27);
+  for (int i=0; i<27; i++) face_level_[i] = -1;
 
   int na3[3];
   size_forest(&na3[0],&na3[1],&na3[2]);
@@ -124,7 +128,7 @@ CommBlock::CommBlock
 	  index_.print("1 calling p_set_neighbor A");
 	  index.print ("1 calling p_set_neighbor B");
 #endif
-	  int in3[3];
+	  int in3[3] = {ix,iy,iz};
 	  p_set_neighbor (v3,in3);
 	}
       }
@@ -132,8 +136,6 @@ CommBlock::CommBlock
   }
 
   // 
-  face_level_.resize(27);
-  for (int i=0; i<27; i++) face_level_[i] = -1;
 
   if (narray != 0) {
     // copy any input data
@@ -243,6 +245,11 @@ void CommBlock::apply_initial_() throw ()
   simulation()->performance()->stop_region(perf_initial);
 }
 #endif
+
+//----------------------------------------------------------------------
+
+bool CommBlock::use_face_level() const
+{ return simulation()->config()->mesh_adapt_temp_face_level; }
 
 //----------------------------------------------------------------------
 
@@ -528,37 +535,59 @@ void CommBlock::delete_child(Index index)
 
 void CommBlock::p_set_neighbor(const int v3[3], int in3[3])
 {
-  Index index;
-  index.set_values(v3[0],v3[1],v3[2]);
+  if (use_face_level()) {
 
-  neighbors_.push_back(index);
+    INCOMPLETE("CommBlock::p_set_neighbor UNTESTED");
 
+    face_level_[IN3(in3)] = level_;
+
+  } else {
+    Index index;
+    index.set_values(v3[0],v3[1],v3[2]);
 #ifdef CELLO_TRACE
-  index_.print("p_set_neighbor neighbor 1");
-  index.print ("p_set_neighbor neighbor 2");
+    index_.print("p_set_neighbor neighbor 1");
+    index.print ("p_set_neighbor neighbor 2");
 #endif
+    neighbors_.push_back(index);
+  }
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_delete_neighbor(const int v3[3])
+void CommBlock::p_delete_neighbor(const int v3[3],int in3[3])
 {
-  Index index;
-  index.set_values(v3[0],v3[1],v3[2]);
-  for (size_t i=0; i<neighbors_.size(); i++) {
-    // erase by replacing occurences with self
-    if (neighbors_[i] == index) neighbors_[i] = index_;
+  if (use_face_level()) {
+
+    INCOMPLETE("CommBlock::p_delete_neighbor");
+
+    face_level_[IN3(in3)] = level_ - 1;
+
+  } else {
+    Index index;
+    index.set_values(v3[0],v3[1],v3[2]);
+    for (size_t i=0; i<neighbors_.size(); i++) {
+      // erase by replacing occurences with self
+      if (neighbors_[i] == index) neighbors_[i] = index_;
+    }
   }
 }
 
 //----------------------------------------------------------------------
 
-bool CommBlock::is_neighbor (const Index & index) const
+bool CommBlock::is_neighbor (const Index & index, int in3[3]) const
 { 
-  for (size_t i=0; i<neighbors_.size(); i++) {
-    if (neighbors_[i] == index) return true;
+  if (use_face_level()) {
+
+    INCOMPLETE("CommBlock::is_neighbor");
+
+    return (face_level_[IN3(in3)] == level_);
+
+  } else {
+    for (size_t i=0; i<neighbors_.size(); i++) {
+      if (neighbors_[i] == index) return true;
+    }
+    return false;
   }
-  return false;
 }
 
 //----------------------------------------------------------------------
@@ -566,75 +595,95 @@ bool CommBlock::is_neighbor (const Index & index) const
 void CommBlock::p_set_nibling(const int v3[3], int in3[3])
 {
 
-  // face_level_[IN3(in3)
-  Index index_nibling;
-  index_nibling.set_values(v3[0],v3[1],v3[2]);
-  niblings_.push_back(index_nibling);
+  if (use_face_level()) {
 
-  // check if any children are neighbors
+    INCOMPLETE("CommBlock::p_set_nibling");
 
-#ifdef CONFIG_USE_CHARM
-  if (! is_leaf()) {
-    int level = this->level() + 1; // + 1 since dealing with next generation
-    int rank = simulation()->dimension();
-    bool periodic = simulation()->problem()->boundary()->is_periodic();
-    int na3[3];
-    size_forest(&na3[0],&na3[1],&na3[2]);
-    for (size_t ic=0; ic < children_.size(); ++ic) {
-      Index index_child = children_[ic];
-      int values_child[3];
-      index_child.values(&values_child[0],
-			 &values_child[1],
-			 &values_child[2]);
-      int ic3[3];
-      index_child.child(level,ic3+0,ic3+1,ic3+2);
-      for (int axis=0; axis<rank; axis++) {
-	int face = ic3[axis];
-	Index index_neighbor = 
-	  index_child.index_neighbor(axis,face,na3[axis],periodic);
-	if (index_neighbor == index_nibling) {
-	  int values_neighbor[3];
-	  index_neighbor.values(&values_neighbor[0],
-				&values_neighbor[1],
-				&values_neighbor[2]);
+    face_level_[IN3(in3)] = level_ + 1;
 
-	  // @@@
-	  thisProxy[index_neighbor].p_set_neighbor
-	    (values_child, ic3);
+  } else {
 
-	  // @@@
-	  thisProxy[index_child].p_set_neighbor
-	    (values_neighbor, ic3);
+    Index index_nibling;
+    index_nibling.set_values(v3[0],v3[1],v3[2]);
+    niblings_.push_back(index_nibling);
 
-	  return; // can only be one and we found it
+
+    // check if any children are neighbors
+
+    if (! is_leaf()) {
+      int level = this->level() + 1; // + 1 since dealing with next generation
+      int rank = simulation()->dimension();
+      bool periodic = simulation()->problem()->boundary()->is_periodic();
+      int na3[3];
+      size_forest(&na3[0],&na3[1],&na3[2]);
+      for (size_t ic=0; ic < children_.size(); ++ic) {
+	Index index_child = children_[ic];
+	int values_child[3];
+	index_child.values(&values_child[0],
+			   &values_child[1],
+			   &values_child[2]);
+	int ic3[3];
+	index_child.child(level,ic3+0,ic3+1,ic3+2);
+	for (int axis=0; axis<rank; axis++) {
+	  int face = ic3[axis];
+	  Index index_neighbor = 
+	    index_child.index_neighbor(axis,face,na3[axis],periodic);
+	  if (index_neighbor == index_nibling) {
+	    int values_neighbor[3];
+	    index_neighbor.values(&values_neighbor[0],
+				  &values_neighbor[1],
+				  &values_neighbor[2]);
+
+	    thisProxy[index_neighbor].p_set_neighbor (values_child, ic3);
+	    thisProxy[index_child].   p_set_neighbor (values_neighbor, ic3);
+
+	    return; // can only be one and we found it
+	  }
+
 	}
-
       }
     }
   }
-#endif
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_delete_nibling(const int v3[3])
+void CommBlock::p_delete_nibling(const int v3[3], int in3[3])
 {
-  Index index;
-  index.set_values(v3[0],v3[1],v3[2]);
-  for (size_t i=0; i<niblings_.size(); i++) {
-    // erase by replacing occurences with self
-    if (niblings_[i] == index) niblings_[i] = index_;
+  if (use_face_level()) {
+
+    INCOMPLETE("CommBlock::p_delete_nibling");
+
+    face_level_[IN3(in3)] = level_;
+
+  } else {
+
+    Index index;
+    index.set_values(v3[0],v3[1],v3[2]);
+    for (size_t i=0; i<niblings_.size(); i++) {
+      // erase by replacing occurences with self
+      if (niblings_[i] == index) niblings_[i] = index_;
+    }
   }
 }
 
 //----------------------------------------------------------------------
 
-bool CommBlock::is_nibling (const Index & index) const
+bool CommBlock::is_nibling (const Index & index, int in3[3]) const
 { 
-  for (size_t i=0; i<niblings_.size(); i++) {
-    if (niblings_[i] == index) return true;
+  if (use_face_level()) {
+
+    INCOMPLETE("CommBlock::is_nibling");
+
+    return (face_level_[IN3(in3)] == level_ + 1);
+
+  } else {
+
+    for (size_t i=0; i<niblings_.size(); i++) {
+      if (niblings_[i] == index) return true;
+    }
+    return false;
   }
-  return false;
 }
 
 //======================================================================

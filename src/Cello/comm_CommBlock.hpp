@@ -25,7 +25,7 @@ class Simulation;
 #define IN(axis,face)  ((face) + 2*(axis))
 
 // index for neighbors (ix,iy,iz)
-#define IN3(ix,iy,iz)  ((ix+1) + 3*((iy+1) + 3*(iz+1)))
+#define IN3(in3)  ((in3[0]+1) + 3*((in3[1]+1) + 3*(in3[2]+1)))
 
 // number of neighbors
 #define NN(rank) (2*(rank))
@@ -144,18 +144,7 @@ public: // interface
   //  void adapt();
   void p_refine();
   void p_balance(int v3[3]);
-  bool can_coarsen() const
-  { 
-    for (int i=0; i<niblings_.size(); i++) 
-      if (niblings_[i] != index_) return false;
-    return true;
-
-    //in3
-    //    for (int i=0; i<27; i++)
-    //      if (face_level[i] > level_) return false;
-    //    return true;
-      
-  }
+  bool can_coarsen() const;
   void coarsen();
   void p_child_can_coarsen(int icx,int icy, int icz,
 			   int n, char * array);
@@ -225,16 +214,16 @@ public: // interface
 #endif
 
   void set_child(Index index);
-  void p_set_neighbor(const int v3[3], int in3[3]);
-  void p_set_nibling (const int v3[3], int in3[3]);
-
   void delete_child(Index index);
-  void p_delete_neighbor(const int v3[3]);
-  void p_delete_nibling(const int v3[3]);
-
   bool is_child (const Index & index) const;
-  bool is_neighbor (const Index & index) const ;
-  bool is_nibling (const Index & index) const ;
+
+  void p_set_neighbor(const int v3[3], int in3[3]);
+  void p_delete_neighbor(const int v3[3], int in3[3]);
+  bool is_neighbor (const Index & index, int in3[3]) const ;
+
+  void p_set_nibling (const int v3[3], int in3[3]);
+  void p_delete_nibling(const int v3[3], int in3[3]);
+  bool is_nibling (const Index & index, int in3[3]) const ;
 
   int face_level (int ifx, int ify=0, int ifz=0) const
   {
@@ -363,6 +352,8 @@ protected: // functions
 
   /// Return the (lower) indices of the CommBlock in the level, 
   /// and the number of indices
+
+  bool use_face_level() const;
 
 #ifdef CONFIG_USE_CHARM
 

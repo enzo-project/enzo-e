@@ -17,6 +17,7 @@ Mesh
 }
 
 Field {
+   ghosts = 4;
    refresh {
      type = "quiescence";
    }

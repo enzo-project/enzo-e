@@ -20,6 +20,10 @@
 void SimulationCharm::c_compute()
 {
   
+#ifdef TEMP_SKIP_REFRESH
+  CkExit();
+#endif
+
   TRACE("SimulationCharm::c_compute()");
   if (cycle_ > 0 ) performance()->stop_region (perf_cycle);
 
