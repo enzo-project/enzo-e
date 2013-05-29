@@ -91,7 +91,7 @@ CommBlock::CommBlock
   // Initialize neighbor
 
   face_level_.resize(27);
-  for (int i=0; i<27; i++) face_level_[i] = -1;
+  for (int i=0; i<27; i++) face_level_[i] = 0;
 
   int na3[3];
   size_forest(&na3[0],&na3[1],&na3[2]);
