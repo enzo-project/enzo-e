@@ -86,6 +86,8 @@ CProxy_CommBlock Factory::create_block_array
     int    cycle = 0;
     double time  = 0.0;
     double dt    = 0.0;
+    int num_face_level = 0;
+    int * face_level = 0;
 
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
@@ -101,6 +103,7 @@ CProxy_CommBlock Factory::create_block_array
 	     initial = true,
 	     cycle,time,dt,
 	     0,NULL,op_array_copy,
+	     num_face_level, face_level,
 	     testing);
 
 	}
@@ -136,6 +139,7 @@ CommBlock * Factory::create_block
  bool initial,
  int cycle, double time, double dt,
  int narray, char * array, int op_array,
+ int num_face_level, int * face_level,
  bool testing
  ) const throw()
 {
@@ -154,6 +158,7 @@ CommBlock * Factory::create_block
      initial,
      cycle, time,dt,
      narray, array,op_array,
+     num_face_level, face_level,
      testing);
 
   CommBlock * block = (*block_array)[index].ckLocal();
@@ -173,6 +178,7 @@ CommBlock * Factory::create_block
       initial,
       cycle, time, dt,
       narray, array, op_array,
+     num_face_level, face_level,
       testing);
 
    return comm_block;

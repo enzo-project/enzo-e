@@ -394,6 +394,7 @@ EnzoBlock::EnzoBlock
  bool initial,
  int cycle, double time, double dt,
  int narray, char * array, int op_array,
+ int num_face_level, int * face_level,
  bool testing
 ) throw()
   : CommBlock 
@@ -408,6 +409,7 @@ EnzoBlock::EnzoBlock
      initial,
      cycle, time, dt,
      narray,  array, op_array,
+     num_face_level, face_level,
      testing),
     Time_(time),
     CycleNumber(cycle),

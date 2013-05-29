@@ -114,6 +114,8 @@ void CommBlock::p_adapt_start()
 
 void CommBlock::q_adapt_next()
 {
+  thisProxy.doneInserting();
+
   if (adapt_ == adapt_coarsen) coarsen();
 
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_stop(), 
@@ -254,59 +256,56 @@ void CommBlock::refine()
 	 initial,
 	 cycle_,time_,dt_,
 	 narray, array, op_array,
+	 27,&face_level_[0],
 	 testing);
 
       set_child(index_child);
 
       // for each (axis,face)
 
-      for (int axis=0; axis<rank; axis++) {
+      // for (int axis=0; axis<rank; axis++) {
 
-	int face = ic3[axis];
+      // 	int face = ic3[axis];
 
-	int in3[3] = {0};
-	in3[axis] = 2*face-1; // (0,1) --> (+1,-1)
+      // 	int if3[3] = {0};
+      // 	if3[axis] = 2*face-1; // (0,1) --> (+1,-1)
 
-	// update non-sibling neighbors
+      // 	// update non-sibling neighbors
 
-	Index index_neighbor = index_.index_neighbor(axis,face,na3[axis]);
+      // 	Index index_neighbor = index_.index_neighbor(axis,face,na3[axis]);
 
-	if (face_level(in3)==level_) {
+      // if (face_level(if3) == level_) {
 
-	  // new child is neighbor's nibling
+      //   // new child is neighbor's nibling
 
-	  thisProxy[index_neighbor].p_set_face_level (in3,level_+1);
+      //   thisProxy[index_neighbor].p_set_face_level (if3,level_+1);
 
-	} else {
+      // } else if (face_level(if3) == level_ - 1) {
 
-	  // no neighbor?  then uncle must refine
+      //   // no neighbor?  then uncle must refine
 
-	  if (level_ > 0 && do_balance) {
+      //   if (level_ > 0 && do_balance) {
 
-	    Index index_uncle = index_neighbor.index_parent();
+      //     Index index_uncle = index_neighbor.index_parent();
 
-	    thisProxy[index_uncle].p_balance();
-	  }
+      //     thisProxy[index_uncle].p_balance();
+      //   }
 
-	}
-
-	// new child is nibling's neighbor (and vice versa)
-
-	int jc3[3] = {ic3[0],ic3[1],ic3[2]};
-	jc3[axis] = 1-jc3[axis];
-
-	if (face_level(ic3)==level_+1) {
+      // } else if (face_level(ic3)==level_ + 1) {
 	  
-	  Index index_nibling = index_neighbor.index_child(jc3);
+      //   int jc3[3] = {ic3[0],ic3[1],ic3[2]};
+      //   jc3[axis] = 1-jc3[axis];
 
-	  thisProxy[index_child].p_set_face_level (in3,level_);
+      //   Index index_nibling = index_neighbor.index_child(jc3);
 
-	  in3[axis] = -in3[axis];
+      //   thisProxy[index_child].p_set_face_level (if3,level_);
 
-	  thisProxy[index_nibling].p_set_face_level (in3,level_);
-	}
+      //   if3[axis] = -if3[axis];
 
-      }
+      //   thisProxy[index_nibling].p_set_face_level (if3,level_);
+      // }
+
+      // }
     }
   }
   
@@ -346,7 +345,7 @@ bool CommBlock::can_coarsen() const
       for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
 	int face_rank = rank - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
 	if (refresh_rank <= face_rank && face_rank < rank) {
-	  int i=IN3(if3);
+	  int i=IF3(if3);
 	  if (face_level_[i] > level_) return false;
 	}
       }

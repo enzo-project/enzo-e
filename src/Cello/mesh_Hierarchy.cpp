@@ -347,6 +347,8 @@ void Hierarchy::allocate_array_
     int cycle = 0;
     double time = 0.0;
     double dt = 0.0;
+    int num_face_level = 0;
+    int * face_level = 0;
 
     CommBlock * comm_block = factory_->create_block 
       (
@@ -358,6 +360,7 @@ void Hierarchy::allocate_array_
        initial = true,
        cycle, time, dt,
        narray, array, op_array,
+       num_face_level, face_revel,
        testing);
 
     // Store the data block in the block array

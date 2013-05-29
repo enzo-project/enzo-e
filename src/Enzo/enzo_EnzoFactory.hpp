@@ -61,6 +61,7 @@ public: // interface
    bool initial,
    int cycle, double time, double dt,
    int narray, char * array, int op_array,
+   int num_face_level, int * face_level,
    bool testing=false) const throw();
 
 };

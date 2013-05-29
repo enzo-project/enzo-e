@@ -35,6 +35,7 @@ module mesh {
        bool initial,
         int cycle, double time, double dt,
        int  n,     char arr[n],  int op_array,
+       int num_face_level, int face_level[num_face_level],
        bool testing);
 
     entry CommBlock();	

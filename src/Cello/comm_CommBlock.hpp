@@ -24,8 +24,8 @@ class Simulation;
 // index for neighbors (axis,face)
 #define IN(axis,face)  ((face) + 2*(axis))
 
-// index for neighbors (ix,iy,iz)
-#define IN3(in3)  ((in3[0]+1) + 3*((in3[1]+1) + 3*(in3[2]+1)))
+// index for face (ix,iy,iz)
+#define IF3(if3)  ((if3[0]+1) + 3*((if3[1]+1) + 3*(if3[2]+1)))
 
 // number of neighbors
 #define NN(rank) (2*(rank))
@@ -78,6 +78,7 @@ public: // interface
    bool initial,
    int cycle, double time, double dt,
    int narray, char * array, int op_array,
+   int num_face_level, int * face_level,
    bool testing=false
 ) throw();
 
@@ -220,11 +221,11 @@ public: // interface
   void delete_child(Index index);
   bool is_child (const Index & index) const;
 
-  void p_set_face_level (int in3[3], int level)
-  { face_level_[IN3(in3)] = level; }
+  void p_set_face_level (int if3[3], int level)
+  { face_level_[IF3(if3)] = level; }
 
   int face_level (int if3[3]) const
-  {  return face_level_[IN3(if3)];  }
+  {  return face_level_[IF3(if3)];  }
 
   //----------------------------------------------------------------------
   // Big Three
@@ -347,7 +348,7 @@ protected: // functions
   /// Return the (lower) indices of the CommBlock in the level, 
   /// and the number of indices
 
-  bool use_face_level() const;
+  void initialize_face_level_(int num_face_level, int * face_level);
 
 #ifdef CONFIG_USE_CHARM
 

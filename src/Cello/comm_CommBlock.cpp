@@ -28,6 +28,7 @@ CommBlock::CommBlock
  bool initial,
  int cycle, double time, double dt,
  int narray, char * array, int op_array,
+ int num_face_level, int * face_level,
  bool testing
  ) throw ()
   : 
@@ -88,10 +89,23 @@ CommBlock::CommBlock
 
   initialize ();
 
-  // Initialize neighbor face levels to be same
+  // Initialize neighbor face levels
 
-  face_level_.resize(27);
-  for (int i=0; i<27; i++) face_level_[i] = 0;
+  if (num_face_level == 0) {
+
+    // root level
+
+    // assert level_ == 0
+    face_level_.resize(27);
+    for (int i=0; i<27; i++) face_level_[i] = 0;
+
+  } else {
+
+    // update face_level for self and neighbors
+
+    initialize_face_level_(num_face_level,face_level);
+
+  }
 
   int na3[3];
   size_forest(&na3[0],&na3[1],&na3[2]);
@@ -107,31 +121,31 @@ CommBlock::CommBlock
     index_.child(level_,&icx,&icy,&icz);
   }
 
-  bool periodic = this->simulation()->problem()->boundary()->is_periodic();
-  for (int ix=-ixp; ix<=ixp; ix++) {
-    bool isx = ((ix==0) || (ix==-1&&icx==1) || (ix==1&&icx==0));
-    for (int iy=-iyp; iy<=iyp; iy++) {
-      bool isy = ((iy==0) || (iy==-1&&icy==1) || (iy==1&&icy==0));
-      for (int iz=-izp; iz<=izp; iz++) {
-	bool isz = ((iz==0) || (iz==-1&&icz==1) || (iz==1&&icz==0));
+//   bool periodic = this->simulation()->problem()->boundary()->is_periodic();
+//   for (int ix=-ixp; ix<=ixp; ix++) {
+//     bool isx = ((ix==0) || (ix==-1&&icx==1) || (ix==1&&icx==0));
+//     for (int iy=-iyp; iy<=iyp; iy++) {
+//       bool isy = ((iy==0) || (iy==-1&&icy==1) || (iy==1&&icy==0));
+//       for (int iz=-izp; iz<=izp; iz++) {
+// 	bool isz = ((iz==0) || (iz==-1&&icz==1) || (iz==1&&icz==0));
 
-	int face_rank = rank - (abs(ix)+abs(iy)+abs(iz));
+// 	int face_rank = rank - (abs(ix)+abs(iy)+abs(iz));
 
-	bool has_neighbor = ((refresh_rank <= face_rank && face_rank < rank) &&
-			     ((level_ == 0) || (isx && isy && isz)));
-	if (has_neighbor) {
-	  Index index = index_.index_neighbor(ix,iy,iz,na3,periodic);
-#ifdef CELLO_TRACE
-	  index_.print("1 calling p_set_neighbor A");
-	  index.print ("1 calling p_set_neighbor B");
-#endif
-	  int in3[3] = {ix,iy,iz};
-	  TRACE("Calling p_set_neighbor");
-	  p_set_face_level (in3,level_);
-	}
-      }
-    }
-  }
+// 	bool has_neighbor = ((refresh_rank <= face_rank && face_rank < rank) &&
+// 			     ((level_ == 0) || (isx && isy && isz)));
+// 	if (has_neighbor) {
+// 	  Index index = index_.index_neighbor(ix,iy,iz,na3,periodic);
+// #ifdef CELLO_TRACE
+// 	  index_.print("1 calling p_set_neighbor A");
+// 	  index.print ("1 calling p_set_neighbor B");
+// #endif
+// 	  int in3[3] = {ix,iy,iz};
+// 	  TRACE("Calling p_set_neighbor");
+// 	  p_set_face_level (in3,level_);
+// 	}
+//       }
+//     }
+//   }
 
   // 
 
@@ -217,6 +231,98 @@ void CommBlock::initialize_
  bool testing
  )
 {
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::initialize_face_level_(int num_face_level, int * face_level)
+{
+  face_level_.resize(num_face_level);
+
+  int rank = this->simulation()->dimension();
+
+  int na3[3];
+  size_forest (&na3[0],&na3[1],&na3[2]);
+  int ic3[3];
+  index_.child(level_,ic3+0,ic3+1,ic3+2);
+
+  for (int axis=0; axis<rank; axis++) {
+
+    int if3[3] = {0,0,0};
+
+    // internal face is sibling: same level as self
+
+    int face  = 1 - ic3[axis];      // child (0 1)  ->  face (1 0)
+    if3[axis] = -(2*ic3[axis] - 1); // child (0 1)  ->  if3  (+1 -1)
+
+    // set self to sibling level
+    p_set_face_level(if3,level_);
+
+    // set sibling to self level
+
+    Index index_sibling = index_.index_neighbor(axis,face,na3[axis]);
+    if3[axis] = -if3[axis];  //  if3 (-1 +1)
+    thisProxy[index_sibling].p_set_face_level(if3,level_);
+
+    // external face is cousin/nibling/uncle: same as parent face
+
+    face      = ic3[axis];         // child (0 1)  ->  face (0 1)
+    if3[axis] = (2*ic3[axis] - 1); // child (0 1)  ->  if3  (-1 +1)
+
+    int face_level_parent = face_level[IF3(if3)];
+      
+    // set self to neighbor level
+    p_set_face_level(if3,face_level_parent);
+
+    // set neighbor to self level
+    Index index_neighbor = index_.index_neighbor(axis,face,na3[axis]);
+
+    if      (face_level_parent == level_ - 2) {
+
+      // if neighbor is great uncle too coarse: force balance
+
+      bool do_balance   = simulation()->config()->mesh_balance;
+      Index index_great_uncle = index_neighbor.index_parent().index_parent();
+      if (do_balance) {
+	thisProxy[index_great_uncle].p_balance();
+      }
+
+    } else if (face_level_parent == level_ - 1) {
+
+      // if neighbor is uncle set face to self level
+
+      Index index_uncle = index_neighbor.index_parent();
+      if3[axis] = -if3[axis];  //  if3 (-1 +1)
+      thisProxy[index_uncle].p_set_face_level(if3,level_);
+
+    } else if (face_level_parent == level_) {
+
+      // if neighbor is cousin set face to self level
+
+      if3[axis] = -if3[axis];  //  if3 (-1 +1)
+      thisProxy[index_neighbor].p_set_face_level(if3,level_);
+
+    } else if (face_level_parent == level_ + 1) {
+
+      // if neighbors are niblings set faces to self level 
+
+      int ic3m[3],ic3p[3],ic3[3];
+	
+      loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
+			   ic3p,ic3p+1,ic3p+2,
+			   if3[0],if3[1],if3[2]);
+      if3[axis] = -if3[axis];  //  if3 (-1 +1)
+      for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
+	for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
+	  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
+	    Index index_nibling = 
+	      index_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
+	    thisProxy[index_nibling].p_set_face_level(if3,level_);
+	  }
+	}
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------

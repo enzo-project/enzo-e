@@ -3,11 +3,11 @@
 
 include "input/ppm.incl"
 
-Initial { max_level = 5; }
+Initial { max_level = 6; }
 
 Mesh { root_blocks    = [1,1]; 
-        root_size = [24,24];
-       max_level = 5; 
+        root_size = [64,64];
+       max_level = 6; 
        adapt {
            type = ["slope"];
        }
@@ -37,17 +37,19 @@ Stopping { cycle = 10; }
 Output {
 
   file_groups = ["density","mesh"];
-  density { name = ["debug-adapt-density-%03d.png", "cycle"]; 
-#  image_ghost = true; 
-  image_ghost = false; 
-  schedule = ["cycle","interval", 1];
-        colormap = [0.0, 0.0, 0.0,  
+  density {
+      name = ["debug-adapt-density-%03d.png", "cycle"]; 
+      image_size  = [1024,1024];
+      image_ghost = false; 
+      schedule = ["cycle","interval", 1];
+      colormap = [0.0, 0.0, 0.0,  
 	            1.0, 1.0, 1.0];
   };
 
   mesh {
       	type     = "image";
 	image_type  = "mesh";
+	image_size  = [1025,1025];
 	image_reduce_type = "max";
         field_list = ["density"];
 	image_block_size  = 1;

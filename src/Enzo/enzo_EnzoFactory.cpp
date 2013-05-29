@@ -63,6 +63,8 @@ CProxy_CommBlock EnzoFactory::create_block_array
     int    cycle = 0;
     double time  = 0.0;
     double dt    = 0.0;
+    int num_face_level = 0;
+    int * face_level = 0;
 
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
@@ -79,6 +81,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
 	     initial=true,
 	     cycle, time, dt,
 	     0,NULL,op_array_copy,
+	     num_face_level, face_level,
 	     testing);
 
 	}
@@ -114,6 +117,7 @@ CommBlock * EnzoFactory::create_block
  bool initial,
  int cycle, double time, double dt,
  int narray, char * array, int op_array,
+ int num_face_level, int * face_level,
  bool testing
  ) const throw()
 {
@@ -134,6 +138,7 @@ CommBlock * EnzoFactory::create_block
       initial,
       cycle,time,dt,
       narray, array, op_array,
+      num_face_level, face_level,
       testing);
 
   CommBlock * block = (*enzo_block_array)[index].ckLocal();
@@ -150,10 +155,11 @@ CommBlock * EnzoFactory::create_block
      index,
      nx,ny,nz,
      num_field_blocks,
-     initial,
      count_adapt,
+     initial,
      cycle, time, dt,
      narray, array, op_array,
+     num_face_level, face_level,
      testing);
 
   return enzo_block;
