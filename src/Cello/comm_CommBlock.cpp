@@ -127,7 +127,7 @@ CommBlock::CommBlock
 #endif
 	  int in3[3] = {ix,iy,iz};
 	  TRACE("Calling p_set_neighbor");
-	  p_set_neighbor (in3);
+	  p_set_face_level (in3,level_);
 	}
       }
     }
@@ -518,55 +518,6 @@ void CommBlock::delete_child(Index index)
     // erase by replacing occurences with self
     if (children_[i] == index) children_[i] = index_;
   }
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::p_set_face_level(int in3[3], int level)
-{
-  face_level_[IN3(in3)] = level;
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::p_set_neighbor(int in3[3])
-{
-  p_set_face_level(in3,level_);
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::p_delete_neighbor(int in3[3])
-{
-  p_set_face_level(in3,level_-1);
-}
-
-//----------------------------------------------------------------------
-
-bool CommBlock::is_neighbor (int in3[3]) const
-{ 
-  return (face_level_[IN3(in3)] == level_);
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::p_set_nibling(int in3[3])
-{
-  face_level_[IN3(in3)] = level_ + 1;
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::p_delete_nibling(int in3[3])
-{
-  face_level_[IN3(in3)] = level_;
-}
-
-//----------------------------------------------------------------------
-
-bool CommBlock::is_nibling (int in3[3]) const
-{ 
-  return (face_level(in3) == level_ + 1);
 }
 
 //======================================================================

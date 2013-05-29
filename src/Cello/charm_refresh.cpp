@@ -105,7 +105,7 @@ void CommBlock::refresh ()
 
 	  int if3[3] = {ifx,ify,ifz};
 
-	  if (! is_neighbor(if3)) {
+	  if (face_level(if3)==level_-1) {
 
 #ifdef CELLO_TRACE
 	    index_.print("not neighbor A");
@@ -117,6 +117,7 @@ void CommBlock::refresh ()
 
 	    // else check for adjacent fine neighbors
 
+	    
 	    int icxm,icym,iczm;
 	    int icxp,icyp,iczp;
 	    loop_limits_nibling_(&icxm,&icym,&iczm,
@@ -130,7 +131,7 @@ void CommBlock::refresh ()
 		for (icz=iczm; icz<=iczp; icz++) {
 		  Index index_nibling = 
 		    index_neighbor.index_child(icx,icy,icz);
-		  if (is_nibling(if3)) {
+		  if (face_level(if3)==level_+1) {
 		    ++num_niblings;
 		    refresh_fine(index_nibling, ifx,ify,ifz, icx,icy,icz);
 		  }

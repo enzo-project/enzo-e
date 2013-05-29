@@ -220,20 +220,12 @@ public: // interface
   void delete_child(Index index);
   bool is_child (const Index & index) const;
 
-  void p_set_face_level (int in3[3], int level);
-
-  void p_set_neighbor(int in3[3]);
-  void p_delete_neighbor(int in3[3]);
-  bool is_neighbor (int in3[3]) const ;
-
-  void p_set_nibling (int in3[3]);
-  void p_delete_nibling(int in3[3]);
-  bool is_nibling (int in3[3]) const ;
+  void p_set_face_level (int in3[3], int level)
+  { face_level_[IN3(in3)] = level; }
 
   int face_level (int if3[3]) const
-  {
-    return face_level_[IN3(if3)];
-  }
+  {  return face_level_[IN3(if3)];  }
+
   //----------------------------------------------------------------------
   // Big Three
   //----------------------------------------------------------------------

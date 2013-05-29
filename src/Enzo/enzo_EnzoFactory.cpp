@@ -56,8 +56,6 @@ CProxy_CommBlock EnzoFactory::create_block_array
     opts.setMap(array_map);
     enzo_block_array = CProxy_CommBlock::ckNew(opts);
 
-    int level;
-
     int count_adapt;
 
     bool initial;

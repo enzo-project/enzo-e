@@ -271,11 +271,11 @@ void CommBlock::refine()
 
 	Index index_neighbor = index_.index_neighbor(axis,face,na3[axis]);
 
-	if (is_neighbor(in3)) {
+	if (face_level(in3)==level_) {
 
 	  // new child is neighbor's nibling
 
-	  thisProxy[index_neighbor].p_set_nibling (in3);
+	  thisProxy[index_neighbor].p_set_face_level (in3,level_+1);
 
 	} else {
 
@@ -295,18 +295,15 @@ void CommBlock::refine()
 	int jc3[3] = {ic3[0],ic3[1],ic3[2]};
 	jc3[axis] = 1-jc3[axis];
 
-	if (is_nibling(ic3)) {
+	if (face_level(ic3)==level_+1) {
 	  
 	  Index index_nibling = index_neighbor.index_child(jc3);
 
-	  int in3[3] = {0};
- 	  in3[axis] = 2*face - 1; // (0,1) --> (+1,-1)
-
-	  thisProxy[index_child].p_set_neighbor (in3);
+	  thisProxy[index_child].p_set_face_level (in3,level_);
 
 	  in3[axis] = -in3[axis];
 
-	  thisProxy[index_nibling].p_set_neighbor (in3);
+	  thisProxy[index_nibling].p_set_face_level (in3,level_);
 	}
 
       }

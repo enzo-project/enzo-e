@@ -134,7 +134,6 @@ void SimulationCharm::p_output ()
   TRACE("SimulationCharm::p_output");
   TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
   if (block_sync_.done()) {
-    SimulationCharm * simulation = proxy_simulation.ckLocalBranch();
     performance()->start_region(perf_output);
     TRACE("SimulationCharm::p_output calling c_output");
     CkCallback callback (CkIndex_SimulationCharm::c_output(), thisProxy);
