@@ -90,7 +90,6 @@ public: // attributes
   double                     mesh_adapt_mass_min_overdensity;
   double                     mesh_adapt_mass_level_exponent;
   bool                       mesh_adapt_balance;
-  bool                       mesh_adapt_temp_face_level;
 
   std::vector<std::string>   method_sequence;
 

@@ -208,6 +208,8 @@ public: // interface
   /// Set whether to output 
   void set_monitor (bool lmonitor) { lmonitor_ = lmonitor; };
 
+  void check();
+
   //--------------------------------------------------
 
 private: // functions

@@ -5,43 +5,6 @@
 /// @date     2013-04-25
 /// @brief    Charm-related mesh adaptation control functions
 
-/// ADAPT
-///
-/// A mesh adaptation step involves evaluating refinement criteria
-/// (Refine objects) on each leaf CommBlock in the hierarchy to
-/// determine whether the CommBlock should refine, coarsen, or stay
-/// the same.
-///
-/// REFINE
-///
-/// Each CommBlock tagged for refinement creates refined child
-/// CommBlocks, and corresponding data are interpolated to the refined
-/// CommBlocks.  Any CommBlock that is refined communicates this
-/// information to its neighbors about its updated state.
-///
-/// COARSEN
-///
-/// Each CommBlock tagged for coarsening communicates with its parent,
-/// which, if all children are tagged for coarsening, will coarsen by
-/// deleting its children.  Corresponding data are restricted to
-/// coarsened CommBlocks.  Any CommBlock that is coarsened 
-/// tells its neighbors and parent about its updated state.
-///
-/// BALANCE
-///
-/// After "quiescence" (wait until no communication), a balancing
-/// phase is performed.  The mesh is traversed by levels, finest
-/// first, and any CommBlock that is adjacent to any CommBlock that
-/// has a grandchild is tagged for refinement.  Balancing a CommBlock
-/// can trigger further CommBlocks to require balancing, but only
-/// coarser ones, which will be handled in the next level.  A
-/// quiescence step is used between each level.
-///
-/// Typically only one mesh adaptation step is performed at a time,
-/// except when applying initial conditions.  In that case, several
-/// steps may be applied, up to a specified maximum 
-/// (Mesh:initial_max_level).
-///
 /// Maintain type (coarse,same,fine) of neighbor at all required faces
 /// Update when refining
 /// Update when coarsening
@@ -112,7 +75,7 @@ void CommBlock::p_adapt_begin()
 
   if (count_adapt_ > 0) {
 
-    p_adapt_start(count_adapt_);
+    p_adapt_start();
 
   } else {
 
@@ -123,7 +86,7 @@ void CommBlock::p_adapt_begin()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_adapt_start(int count)
+void CommBlock::p_adapt_start()
 {
   // Initialize child coarsening counter
   count_coarsen_ = 0;
@@ -133,12 +96,11 @@ void CommBlock::p_adapt_start(int count)
 
   if (count_adapt_-- > 0) {
 
-    int adapt = determine_adapt();
+    adapt_ = determine_adapt();
 
-    if (adapt == adapt_refine)  p_refine();
-    if (adapt == adapt_coarsen)   coarsen();
+    if (adapt_ == adapt_refine)  refine();
 
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_stop(), 
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_next(), 
 			  thisProxy[thisIndex]));
 
   } else {
@@ -146,6 +108,16 @@ void CommBlock::p_adapt_start(int count)
     CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(),
 			  thisProxy[thisIndex]));
   }
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::q_adapt_next()
+{
+  if (adapt_ == adapt_coarsen) coarsen();
+
+  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_stop(), 
+			thisProxy[thisIndex]));
 }
 
 //----------------------------------------------------------------------
@@ -177,15 +149,8 @@ int CommBlock::determine_adapt()
     const Config * config = simulation()->config();
     int mesh_max_level    = config->mesh_max_level;
 
-    // can't refine if we are at the maximum refinement level
-    if ((adapt == adapt_refine) && (level_ == mesh_max_level)) {
-      adapt = adapt_same;
-    }
-
-    // can't coarsen if we've been forced to refine to balance
-    if ((adapt == adapt_coarsen) && ! can_coarsen() ) {
-      adapt = adapt_same;
-    }
+    if ((adapt == adapt_refine)  && ! can_refine())  adapt = adapt_same;
+    if ((adapt == adapt_coarsen) && ! can_coarsen()) adapt = adapt_same;
 
     return adapt;
   }
@@ -217,14 +182,16 @@ int CommBlock::reduce_adapt_(int a1, int a2) const throw()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_refine()
+void CommBlock::refine()
 {
+
+  adapt_ = adapt_unknown;
 
 #ifdef CELLO_TRACE
   index_.print ("refine",-1,2);
 #endif /* CELLO_TRACE */
   
-  TRACE("CommBlock::p_refine()");
+  TRACE("CommBlock::refine()");
   int rank = simulation()->dimension();
   
   int nc = NC(rank);
@@ -240,7 +207,7 @@ void CommBlock::p_refine()
   int initial_cycle = simulation()->config()->initial_cycle;
   bool do_balance   = simulation()->config()->mesh_balance;
 
-  bool initial = initial_cycle == cycle();
+  bool initial = (initial_cycle == cycle());
 
   for (int ic=0; ic<nc; ic++) {
 
@@ -292,7 +259,7 @@ void CommBlock::p_refine()
       set_child(index_child);
 
       int values_child[3];
-      index_child.values(&values_child[0],&values_child[1],&values_child[2]);
+      index_child.values(values_child);
 
       // for each (axis,face)
 
@@ -301,7 +268,7 @@ void CommBlock::p_refine()
 	int face = ic3[axis];
 
 	int in3[3] = {0};
-	in3[axis] = 1-2*face; // (0,1) --> (+1,-1)
+	in3[axis] = 2*face-1; // (0,1) --> (+1,-1)
 
 	// update non-sibling neighbors
 
@@ -311,18 +278,13 @@ void CommBlock::p_refine()
 
 	  // new child is neighbor's nibling
 
-	  printf ("%s:%d set_nibling axis %d face %d\n",
-		  __FILE__,__LINE__,axis,face);
-
-	  
 #ifdef CELLO_TRACE
 	  index_neighbor.print("set_nibling A",-1,2);
 	  index_child.print   ("set_nibling B",-1,2);
 #endif /* CELLO_TRACE */
 
 	  // @@@ in3 untested
-	  thisProxy[index_neighbor].p_set_nibling
-	    (values_child,in3);
+	  thisProxy[index_neighbor].p_set_nibling (values_child,in3);
 
 	} else {
 
@@ -333,7 +295,7 @@ void CommBlock::p_refine()
 	    Index index_uncle = index_neighbor.index_parent();
 
 	    int values_this[3];
-	    index_.values (values_this,values_this+1,values_this+2);
+	    index_.values (values_this);
 	    
 	    thisProxy[index_uncle].p_balance(values_this);
 	  }
@@ -347,35 +309,19 @@ void CommBlock::p_refine()
 
 	Index index_nibling = index_neighbor.index_child(jc3);
 
-#ifdef CELLO_TRACE
-	index_neighbor.print ("is_nibling neighbor",-1,2);
-	index_.print         ("is_nibling parent  ",-1,2);
-	index_child.print    ("is_nibling child   ",-1,2);
-	index_nibling.print  ("is_nibling nibling ",-1,2);
-#endif /* CELLO_TRACE */
-
 	if (is_nibling(index_nibling,ic3)) {
 	  
 	  int values_nibling[3];
-	  index_nibling.values
-	    (&values_nibling[0],&values_nibling[1],&values_nibling[2]);
-
-#ifdef CELLO_TRACE
-	  index_nibling.print("set_neighbor A",-1,2);
-	  index_child.print  ("set_neighbor B",-1,2);
-#endif /* CELLO_TRACE */
+	  index_nibling.values (values_nibling);
 
 	  int in3[3] = {0};
- 	  in3[axis] = 1-2*face; // (0,1) --> (+1,-1)
+ 	  in3[axis] = 2*face - 1; // (0,1) --> (+1,-1)
 
-	  thisProxy[index_nibling].p_set_neighbor
-	    (values_child,in3);
+	  thisProxy[index_child].p_set_neighbor (values_nibling,in3);
 
 	  in3[axis] = -in3[axis];
 
-	  // @@@ in3 untested
-	  thisProxy[index_child].p_set_neighbor
-	    (values_nibling,in3);
+	  thisProxy[index_nibling].p_set_neighbor (values_child,in3);
 	}
 
       }
@@ -388,75 +334,79 @@ void CommBlock::p_refine()
 
 void CommBlock::p_balance(int values_child[3])
 {
-  p_refine();
+  refine();
+}
+
+//----------------------------------------------------------------------
+
+bool CommBlock::can_refine() const
+{
+  int max_level = simulation()->config()->mesh_max_level;
+  return (level_ < max_level);
 }
 
 //----------------------------------------------------------------------
 
 bool CommBlock::can_coarsen() const
 { 
-  if (use_face_level()) {
 
-    int refresh_rank = simulation()->config()->field_refresh_rank;
-    int rank = simulation()->dimension();
-    int if3m[3],if3p[3],if3[3];
+  if (level_ <= 0) return false;
 
-    loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
-			 if3p+0,if3p+1,if3p+2);
+  int refresh_rank = simulation()->config()->field_refresh_rank;
+  int rank = simulation()->dimension();
+  int if3m[3],if3p[3],if3[3];
 
-    for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
-      for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
-	for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
-	  int face_rank = rank - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
-	  if (face_rank >= refresh_rank) {
-	    int i=IN3(if3);
-	    if (face_level_[i] > level_) return false;
-	  }
+  loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
+		       if3p+0,if3p+1,if3p+2);
+
+  for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
+    for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
+      for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
+	int face_rank = rank - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
+	if (refresh_rank <= face_rank && face_rank < rank) {
+	  int i=IN3(if3);
+	  if (face_level_[i] > level_) return false;
 	}
       }
     }
-
-    return true;
-
-  } else {
-
-    for (int i=0; i<niblings_.size(); i++) 
-      if (niblings_[i] != index_) return false;
-    return true;
   }
+
+  return true;
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::coarsen()
 {
-  if (level_ > 0) {
 
-    Index index = thisIndex;
-    int icx,icy,icz;
-    index.child(level_,&icx,&icy,&icz);
-    index.set_level(level_ - 1);
-    index.clean();
+  adapt_ = adapt_unknown;
 
-    // <duplicated code: refactor me!>
-    Simulation * simulation = proxy_simulation.ckLocalBranch();
-    FieldDescr * field_descr = simulation->field_descr();
-    FieldBlock * field_block = block_->field_block();
-    Restrict * restrict = simulation->problem()->restrict();
+  if (level_ <= 0) return;
 
-    FieldFace field_face (field_block,field_descr);
+  Index index = thisIndex;
+  int icx,icy,icz;
+  index.child(level_,&icx,&icy,&icz);
+  index.set_level(level_ - 1);
+  index.clean();
 
-    field_face.set_restrict(restrict,icx,icy,icz);
-    field_face.set_face(0,0,0); // 0-face is full block
+  // <duplicated code: refactor me!>
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+  FieldBlock * field_block = block_->field_block();
+  Restrict * restrict = simulation->problem()->restrict();
 
-    int narray; 
-    char * array;
-    field_face.load(&narray, &array);
-    // </duplicated code>
+  FieldFace field_face (field_block,field_descr);
 
-    thisProxy[index].p_child_can_coarsen(icx,icy,icz,narray,array);
+  field_face.set_restrict(restrict,icx,icy,icz);
+  field_face.set_face(0,0,0); // 0-face is full block
 
-  }
+  int narray; 
+  char * array;
+  field_face.load(&narray, &array);
+  // </duplicated code>
+
+  thisProxy[index].p_child_can_coarsen(icx,icy,icz,narray,array);
+
 }
 
 //----------------------------------------------------------------------
@@ -548,7 +498,7 @@ void CommBlock::q_adapt_stop()
   thisProxy.doneInserting();
 
   if (thisIndex.is_root()) {
-    thisProxy.p_adapt_start(count_adapt_);
+    thisProxy.p_adapt_start();
   }
 }
 
@@ -564,10 +514,20 @@ void CommBlock::q_adapt_end()
 
   thisProxy.doneInserting();
   if (thisIndex.is_root()) {
+
     thisProxy.p_refresh_begin();
+
+    // Check parameters now that all should have been accessed
+    // (in particular Initial:foo:value, etc.)
+    if (cycle() == simulation()->config()->initial_cycle) {
+      simulation()->parameters()->check();
+    }
   };
-  
+
+
+
   TRACE ("END   PHASE ADAPT");
+  
 }
 
 //----------------------------------------------------------------------

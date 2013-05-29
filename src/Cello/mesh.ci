@@ -48,10 +48,13 @@ module mesh {
 
     entry void p_adapt_begin ();
     entry void q_adapt_end();
-    entry void p_adapt_start (int count_adapt);
+
+    entry void p_adapt_start ();
+    entry void q_adapt_next();
     entry void q_adapt_stop();
-    entry void p_refine ();
+
     entry void p_balance (int v3[3]);
+
     entry void p_set_neighbor(const int v3[3], int in3[3]);
     entry void p_set_nibling(const int v3[3], int in3[3]);
     entry void p_delete_neighbor(const int v3[3], int in3[3]);

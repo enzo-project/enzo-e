@@ -115,18 +115,20 @@ public:
   // unsigned value (int axis) const;
 
   /// Set the Index according to raw bit values
-  void set_values (int vx, int vy = 0, int vz = 0)
+  void set_values (int v3[3])
   {
-    v_[0] = vx;
-    v_[1] = vy;
-    v_[2] = vz;
+    v_[0] = v3[0];
+    v_[1] = v3[1];
+    v_[2] = v3[2];
   }
 
   /// Return the packed bit index for the given axis
-  void values (int * vx, int * vy, int * vz) const
-  { if (vx) *vx = v_[0];
-    if (vy) *vy = v_[1];
-    if (vz) *vz = v_[2]; }
+  void values (int v3[3]) const
+  { v3[0] = v_[0];
+    v3[1] = v_[1];
+    v3[2] = v_[2];
+  }
+
 
   /// Set the level for this node
   void set_level(int level);
@@ -195,7 +197,7 @@ public:
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     // ADDED SINCE OTHERWISE CkArrayIndex::index[] DOES NOT GET INITIALIZED
     int v3[3];
-    in.values(&v3[0],&v3[1],&v3[2]);
+    in.values(v3);
     index[0] = v3[0];
     index[1] = v3[1];
     index[2] = v3[2];

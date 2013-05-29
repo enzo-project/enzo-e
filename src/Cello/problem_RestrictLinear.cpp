@@ -56,8 +56,6 @@ int RestrictLinear::apply_
   const T * values_f, int nd3_f[3], int im3_f[3],  int n3_f[3])
 {
 
-  TRACE1 ("RestrictLinear apply values_f = %p",values_f);
-  TRACE1("in restruct values_f[0] = %f",values_f[0]);
   const int rank = (nd3_f[1] == 1) ? 1 : ((nd3_f[2] == 1) ? 2 : 3);
 
   const int dx = 1;
@@ -94,13 +92,6 @@ int RestrictLinear::apply_
 	    values_f[i_f + dx     ] +
 	    values_f[i_f +      dy] + 
 	    values_f[i_f + dx + dy] );
-
-	TRACE9("Restrict %f[%3d %3d] = %f[%3d %3d]-%f[%3d %3d]",
-	       values_c[ix_c] ,ix_c,iy_c,
-	       values_f[i_f],ix_f,iy_f,
-	       values_f[i_f+dx+dy],ix_f+1,iy_f+1);
-	TRACE4("          i_c %d i_f %d dx %d dy %d",
-	       i_c,i_f,dx,dy);
 
       }
     }

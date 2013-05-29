@@ -9,7 +9,6 @@ Mesh { root_blocks    = [1,1];
         root_size = [24,24];
        max_level = 5; 
        adapt {
-           temp_face_level = false;
            type = ["slope"];
        }
 }

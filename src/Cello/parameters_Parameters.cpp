@@ -130,8 +130,6 @@ void Parameters::write ( const char * file_name )
 	   file_name);
   }
 
-  std::map<std::string,Param *>::iterator it_param;
-
   // "Previous" groups are empty
   int n_prev = 0;
   std::string group_prev[MAX_GROUP_DEPTH];
@@ -146,6 +144,9 @@ void Parameters::write ( const char * file_name )
   int group_depth = 0;
 
   // Loop over parameters
+
+  std::map<std::string,Param *>::iterator it_param;
+
   for (it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
@@ -980,6 +981,7 @@ Param * Parameters::list_element_ (std::string parameter, int index) throw()
   Param * list = parameter_(parameter);
   Param * param = NULL;
   if (list != NULL) {
+    list->set_accessed();
     int list_length = list->value_list_->size();
     if (list != NULL && 0 <= index && index < list_length ) {
       param =  (*(list->value_list_))[index];
@@ -1007,6 +1009,7 @@ size_t Parameters::extract_groups_
   }
   return i_group;
 }
+
 //----------------------------------------------------------------------
 
 void Parameters::new_param_
@@ -1032,3 +1035,22 @@ void Parameters::new_param_
   }
   param_node = param_node->new_subnode(full_parameter);
 }
+
+//----------------------------------------------------------------------
+
+void Parameters::check()
+{
+  std::map<std::string,Param *>::iterator it_param;
+
+  for (it_param =  parameter_map_.begin();
+       it_param != parameter_map_.end();
+       ++it_param) {
+    if (it_param->second && ! it_param->second->accessed()) {
+      WARNING1 ("Parameters::check()",
+		"Parmeter \"%s\" not accessed",
+		it_param->first.c_str());
+    }
+  }
+}
+
+//----------------------------------------------------------------------

@@ -137,15 +137,18 @@ public: // interface
   /// Exit the adapt phase after QD
   void q_adapt_end ();
 
-  /// Begin a single adapt step
-  void p_adapt_start (int count_adapt);
-  /// End the adapt step after QD
+  /// Begin a single adapt refine step
+  void p_adapt_start ();
+  /// Start the adapt coarsen step
+  void q_adapt_next ();
+  /// Stop the adapt step
   void q_adapt_stop ();
   //  void adapt();
-  void p_refine();
+  void refine();
+  void coarsen();
   void p_balance(int v3[3]);
   bool can_coarsen() const;
-  void coarsen();
+  bool can_refine() const;
   void p_child_can_coarsen(int icx,int icy, int icz,
 			   int n, char * array);
   int determine_adapt();
@@ -314,7 +317,6 @@ public: // virtual functions
   /// Set CommBlock's time
   virtual void set_time (double time) throw()
   {
-    TRACE2("%p set_time(%20.15g)",this,time);
     time_  = time; }
 
   /// Set CommBlock's timestep
@@ -324,7 +326,6 @@ public: // virtual functions
   /// Initialize CommBlock
   virtual void initialize () throw()
   {
-    TRACE("CommBlock::initialize()\n");
   }
 
   /// Return the local simulation object
@@ -336,7 +337,7 @@ protected: // functions
   {
     char buffer[27];
     int v3[3];
-    index_.values(&v3[0],&v3[1],&v3[2]);
+    index_.values(v3);
     sprintf (buffer,"%08X-%08X-%08X",
 	     v3[0],v3[1],v3[2]);
     return buffer;
@@ -427,12 +428,6 @@ protected: // attributes
   /// list of child nodes
   std::vector<Index> children_;
 
-  /// list of neighbor nodes
-  std::vector<Index> neighbors_;
-
-  /// list of nibling nodes
-  std::vector<Index> niblings_;
-
   /// level of neighbors (and self) along each face
   std::vector<int> face_level_;
 
@@ -441,6 +436,9 @@ protected: // attributes
 
   /// Number of adapt steps in the adapt phase
   int count_adapt_;
+
+  /// Current adapt value for the block
+  int adapt_;
 
 #ifdef CONFIG_USE_CHARM
   /// Synchronization counter for ghost refresh

@@ -205,8 +205,6 @@ void FieldBlock::allocate_array
  ) throw()
 {
 
-  TRACE("FieldBlock::allocate_array");
-
   // Error check size
 
   if (! (size_[0] > 0 &&
@@ -280,9 +278,6 @@ void FieldBlock::allocate_array
 	   "Code error: array size was computed incorrectly");
   };
 
-    TRACE1("this = %p",this);
-  TRACE3("size = %d %d %d\n",size_[0],size_[1],size_[2]);
-  TRACE1("array_.size() = %d",array_.size());
 }
 
 //----------------------------------------------------------------------
@@ -300,8 +295,6 @@ void FieldBlock::reallocate_array
     return;
   }
   
-  TRACE("FieldBlock::deallocate_array");
-
   std::vector<int>  old_offsets;
   std::vector<char> old_array;
 
@@ -311,13 +304,9 @@ void FieldBlock::reallocate_array
   array_.clear();
   offsets_.clear();
 
-  TRACE2 ("ghosts %d -> %d",ghosts_allocated_,ghosts_allocated);
   ghosts_allocated_ = ghosts_allocated;
 
   allocate_array(field_descr,ghosts_allocated_);
-
-  TRACE2 ("sizeof old array,offsets = %d %d",old_array.size(),old_offsets.size());
-  TRACE2 ("sizeof new array,offsets = %d %d",array_.size(),offsets_.size());
 
   restore_array_ (field_descr, &old_array[0], old_offsets);
 }
@@ -326,10 +315,8 @@ void FieldBlock::reallocate_array
 
 void FieldBlock::deallocate_array () throw()
 {
-  TRACE("FieldBlock::deallocate_array");
   if ( array_allocated() ) {
 
-    TRACE("deallocating array_");
     array_.clear();
     offsets_.clear();
   }
@@ -422,7 +409,7 @@ void FieldBlock::refresh_ghosts
 
   void * handle_send;
   void * handle_recv;
-  TRACE2 ("ip,ip_remote = %d %d",ip,ip_remote);
+
   if (ip < ip_remote) { // send then receive
 
     // send 
@@ -770,9 +757,6 @@ void FieldBlock::restore_array_
     offset2 *= bytes_per_element;
 
     // determine array start
-
-    TRACE3 ("1 %p %d %d",array_from, offsets_from.at(id_field),offset1);
-    TRACE3 ("2 %p %d %d", &array_[0], offsets_.at(id_field), offset2);
 
     const char * array1 = array_from + offsets_from.at(id_field) + offset1;
     char       * array2 = &array_[0] + offsets_.at(id_field)     + offset2;
