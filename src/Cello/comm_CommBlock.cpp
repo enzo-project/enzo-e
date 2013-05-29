@@ -109,7 +109,7 @@ CommBlock::CommBlock
     index_.child(level_,&icx,&icy,&icz);
   }
 
-  bool periodic = simulation()->problem()->boundary()->is_periodic();
+  bool periodic = this->simulation()->problem()->boundary()->is_periodic();
   for (int ix=-ixp; ix<=ixp; ix++) {
     bool isx = ((ix==0) || (ix==-1&&icx==1) || (ix==1&&icx==0));
     for (int iy=-iyp; iy<=iyp; iy++) {

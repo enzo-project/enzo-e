@@ -13,6 +13,7 @@
 //----------------------------------------------------------------------
 
 #include <stdio.h>
+#include <math.h>
 #ifdef CONFIG_USE_CHARM
 #  include "pup_stl.h"
 #endif
