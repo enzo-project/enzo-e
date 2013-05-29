@@ -146,7 +146,7 @@ public: // interface
   //  void adapt();
   void refine();
   void coarsen();
-  void p_balance(int v3[3]);
+  void p_balance();
   bool can_coarsen() const;
   bool can_refine() const;
   void p_child_can_coarsen(int icx,int icy, int icz,
@@ -220,18 +220,19 @@ public: // interface
   void delete_child(Index index);
   bool is_child (const Index & index) const;
 
-  void p_set_neighbor(const int v3[3], int in3[3]);
-  void p_delete_neighbor(const int v3[3], int in3[3]);
-  bool is_neighbor (const Index & index, int in3[3]) const ;
+  void p_set_face_level (int in3[3], int level);
 
-  void p_set_nibling (const int v3[3], int in3[3]);
-  void p_delete_nibling(const int v3[3], int in3[3]);
-  bool is_nibling (const Index & index, int in3[3]) const ;
+  void p_set_neighbor(int in3[3]);
+  void p_delete_neighbor(int in3[3]);
+  bool is_neighbor (int in3[3]) const ;
 
-  int face_level (int ifx, int ify=0, int ifz=0) const
+  void p_set_nibling (int in3[3]);
+  void p_delete_nibling(int in3[3]);
+  bool is_nibling (int in3[3]) const ;
+
+  int face_level (int if3[3]) const
   {
-    int i = (ifx+1) + 3*((ify+1) + 3*(ifz+1));
-    return face_level_[i];
+    return face_level_[IN3(if3)];
   }
   //----------------------------------------------------------------------
   // Big Three

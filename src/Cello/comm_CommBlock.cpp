@@ -88,15 +88,13 @@ CommBlock::CommBlock
 
   initialize ();
 
-  // Initialize neighbor
+  // Initialize neighbor face levels to be same
 
   face_level_.resize(27);
   for (int i=0; i<27; i++) face_level_[i] = 0;
 
   int na3[3];
   size_forest(&na3[0],&na3[1],&na3[2]);
-
-  int v3[3];
 
   int ixp = (rank >= 1) ? 1 : 0;
   int iyp = (rank >= 2) ? 1 : 0;
@@ -123,14 +121,13 @@ CommBlock::CommBlock
 			     ((level_ == 0) || (isx && isy && isz)));
 	if (has_neighbor) {
 	  Index index = index_.index_neighbor(ix,iy,iz,na3,periodic);
-	  index.values(v3);
 #ifdef CELLO_TRACE
 	  index_.print("1 calling p_set_neighbor A");
 	  index.print ("1 calling p_set_neighbor B");
 #endif
 	  int in3[3] = {ix,iy,iz};
 	  TRACE("Calling p_set_neighbor");
-	  p_set_neighbor (v3,in3);
+	  p_set_neighbor (in3);
 	}
       }
     }
@@ -525,44 +522,51 @@ void CommBlock::delete_child(Index index)
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_set_neighbor(const int v3[3], int in3[3])
+void CommBlock::p_set_face_level(int in3[3], int level)
 {
-  face_level_[IN3(in3)] = level_;
+  face_level_[IN3(in3)] = level;
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_delete_neighbor(const int v3[3],int in3[3])
+void CommBlock::p_set_neighbor(int in3[3])
 {
-  face_level_[IN3(in3)] = level_ - 1;
+  p_set_face_level(in3,level_);
 }
 
 //----------------------------------------------------------------------
 
-bool CommBlock::is_neighbor (const Index & index, int in3[3]) const
+void CommBlock::p_delete_neighbor(int in3[3])
+{
+  p_set_face_level(in3,level_-1);
+}
+
+//----------------------------------------------------------------------
+
+bool CommBlock::is_neighbor (int in3[3]) const
 { 
   return (face_level_[IN3(in3)] == level_);
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_set_nibling(const int v3[3], int in3[3])
+void CommBlock::p_set_nibling(int in3[3])
 {
   face_level_[IN3(in3)] = level_ + 1;
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_delete_nibling(const int v3[3], int in3[3])
+void CommBlock::p_delete_nibling(int in3[3])
 {
   face_level_[IN3(in3)] = level_;
 }
 
 //----------------------------------------------------------------------
 
-bool CommBlock::is_nibling (const Index & index, int in3[3]) const
+bool CommBlock::is_nibling (int in3[3]) const
 { 
-  return (face_level_[IN3(in3)] == level_ + 1);
+  return (face_level(in3) == level_ + 1);
 }
 
 //======================================================================

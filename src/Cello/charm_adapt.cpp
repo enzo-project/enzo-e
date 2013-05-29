@@ -258,9 +258,6 @@ void CommBlock::refine()
 
       set_child(index_child);
 
-      int values_child[3];
-      index_child.values(values_child);
-
       // for each (axis,face)
 
       for (int axis=0; axis<rank; axis++) {
@@ -274,17 +271,11 @@ void CommBlock::refine()
 
 	Index index_neighbor = index_.index_neighbor(axis,face,na3[axis]);
 
-	if (is_neighbor(index_neighbor,in3)) {
+	if (is_neighbor(in3)) {
 
 	  // new child is neighbor's nibling
 
-#ifdef CELLO_TRACE
-	  index_neighbor.print("set_nibling A",-1,2);
-	  index_child.print   ("set_nibling B",-1,2);
-#endif /* CELLO_TRACE */
-
-	  // @@@ in3 untested
-	  thisProxy[index_neighbor].p_set_nibling (values_child,in3);
+	  thisProxy[index_neighbor].p_set_nibling (in3);
 
 	} else {
 
@@ -294,10 +285,7 @@ void CommBlock::refine()
 
 	    Index index_uncle = index_neighbor.index_parent();
 
-	    int values_this[3];
-	    index_.values (values_this);
-	    
-	    thisProxy[index_uncle].p_balance(values_this);
+	    thisProxy[index_uncle].p_balance();
 	  }
 
 	}
@@ -307,21 +295,18 @@ void CommBlock::refine()
 	int jc3[3] = {ic3[0],ic3[1],ic3[2]};
 	jc3[axis] = 1-jc3[axis];
 
-	Index index_nibling = index_neighbor.index_child(jc3);
-
-	if (is_nibling(index_nibling,ic3)) {
+	if (is_nibling(ic3)) {
 	  
-	  int values_nibling[3];
-	  index_nibling.values (values_nibling);
+	  Index index_nibling = index_neighbor.index_child(jc3);
 
 	  int in3[3] = {0};
  	  in3[axis] = 2*face - 1; // (0,1) --> (+1,-1)
 
-	  thisProxy[index_child].p_set_neighbor (values_nibling,in3);
+	  thisProxy[index_child].p_set_neighbor (in3);
 
 	  in3[axis] = -in3[axis];
 
-	  thisProxy[index_nibling].p_set_neighbor (values_child,in3);
+	  thisProxy[index_nibling].p_set_neighbor (in3);
 	}
 
       }
@@ -332,7 +317,7 @@ void CommBlock::refine()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_balance(int values_child[3])
+void CommBlock::p_balance()
 {
   refine();
 }
