@@ -190,6 +190,7 @@ void Config::read(Parameters * parameters) throw()
   // refresh if (face_rank >= rank)
 
   field_refresh_rank = parameters->value_integer ("Field:refresh:rank",0);
+  printf ("field_refresh_rank = %d\n",field_refresh_rank);
 
   // field refresh type == "quiescence" or "counter"
 

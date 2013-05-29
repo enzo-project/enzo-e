@@ -14,9 +14,11 @@ Mesh {
 }
 
 Stopping { 
-#	 cycle = 100; 
+	 cycle = 0; 
 	 time = 0.1;
 }
+
+Boundary { type = "periodic"; }
 
 Testing {
    cycle_final = 100; 
@@ -42,6 +44,7 @@ Initial {
 Field {
     ghosts = 4; # must be even for ProlongLinear
    refresh {
+#     rank = 0;
      type = "quiescence";
    }
 }

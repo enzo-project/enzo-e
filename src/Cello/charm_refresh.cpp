@@ -36,7 +36,7 @@ void CommBlock::p_refresh_begin()
   //  refresh(); 
 #endif
 
-  TRACE("CommBlock::p_refresh_begin");
+  TRACE("REFRESH CommBlock::p_refresh_begin");
 
   Performance * performance = simulation()->performance();
   if (! performance->is_region_active(perf_refresh)) {
@@ -53,7 +53,7 @@ void CommBlock::refresh ()
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  TRACE ("CommBlock::refresh() setting QD q_refresh_end()");
+  TRACE ("REFRESH CommBlock::refresh() setting QD q_refresh_end()");
 
   const Config * config = simulation->config();
 
@@ -61,7 +61,7 @@ void CommBlock::refresh ()
 
   if (refresh_type == "quiescence") {
 
-    TRACE("Setting refresh quiescence detection callback");
+    TRACE("REFRESH Setting refresh quiescence detection callback");
 
     CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
 			  thisProxy[thisIndex]));
@@ -69,7 +69,7 @@ void CommBlock::refresh ()
     if (! is_leaf()) return;
 
 #ifdef CELLO_TRACE
-    index_.print ("leaf",-1,2);
+    index_.print ("REFRESH-leaf",-1,2);
 #endif
 
   } 
@@ -85,7 +85,7 @@ void CommBlock::refresh ()
   int n3[3];
   size_forest(&n3[0],&n3[1],&n3[2]);
 
-  TRACE6 ("limits %d %d %d   %d %d %d",ifxm,ifym,ifzm,ifxp,ifyp,ifzp);
+  TRACE6 ("REFRESH limits %d %d %d   %d %d %d",ifxm,ifym,ifzm,ifxp,ifyp,ifzp);
 
   int refresh_rank = config->field_refresh_rank;
   bool refresh_type_counter = (refresh_type == "counter");
@@ -97,23 +97,32 @@ void CommBlock::refresh ()
     for (int ify=ifym; ify<=ifyp; ify++) {
       for (int ifz=ifzm; ifz<=ifzp; ifz++) {
 	int face_rank = rank - (abs(ifx) + abs(ify) + abs(ifz));
-	if (face_rank >= refresh_rank) {
-	  TRACE3("Calling refresh_same %d %d %d",ifx,ify,ifz);
+	if (refresh_rank <= face_rank && face_rank < rank) {
+
+	  TRACE3("REFRESH Calling refresh_same %d %d %d",ifx,ify,ifz);
 	  Index index_neighbor = index_.index_neighbor(ifx,ify,ifz,n3);
 
 	  // if no neighbor in level, refresh coarse neighbor
 
 	  int if3[3] = {ifx,ify,ifz};
 
+	  char buffer[40];
 	  if (face_level(if3)==level_-1) {
+	    sprintf (buffer,"refresh coarse (%d %d %d)",
+		     if3[0],if3[1],if3[2]);
+	    index_.print(buffer);
 
 #ifdef CELLO_TRACE
-	    index_.print("not neighbor A");
-	    index_neighbor.print("not neighbor A");
+	    index_.print("REFRESH not neighbor A");
+	    index_neighbor.print("REFRESH not neighbor A");
 #endif
 	    refresh_coarse(index_neighbor.index_parent(),ifx,ify,ifz);
 
-	  } else {
+	  } else if (face_level(if3)==level_+1) {
+
+	    sprintf (buffer,"refresh fine (%d %d %d)",
+		     if3[0],if3[1],if3[2]);
+	    index_.print(buffer);
 
 	    // else check for adjacent fine neighbors
 
@@ -124,28 +133,25 @@ void CommBlock::refresh ()
 				 &icxp,&icyp,&iczp,
 				 ifx,ify,ifz);
 
-	    int num_niblings = 0;
 	    int icx,icy,icz;
 	    for (icx=icxm; icx<=icxp; icx++) {
 	      for (icy=icym; icy<=icyp; icy++) {
 		for (icz=iczm; icz<=iczp; icz++) {
 		  Index index_nibling = 
 		    index_neighbor.index_child(icx,icy,icz);
-		  if (face_level(if3)==level_+1) {
-		    ++num_niblings;
 		    refresh_fine(index_nibling, ifx,ify,ifz, icx,icy,icz);
-		  }
 		}
 	      }
 	    }
-
+	  } else if (face_level(if3)==level_) {
+	    sprintf (buffer,"refresh same (%d %d %d)",
+		     if3[0],if3[1],if3[2]);
+	    index_.print(buffer);
 	    // otherwise update neighbor
 
-	    if (num_niblings == 0 && index_ != index_neighbor) {
 
-	      refresh_same(index_neighbor,ifx,ify,ifz);
+	    refresh_same(index_neighbor,ifx,ify,ifz);
 
-	    }
 	  }
 	}
       }
@@ -164,55 +170,16 @@ void CommBlock::refresh ()
 
 //----------------------------------------------------------------------
 
-void CommBlock::loop_limits_refresh_
-(int * ifxm, int * ifym, int * ifzm, int * ifxp, int * ifyp, int * ifzp)
-  const throw()
-{
-
-  Boundary * boundary = simulation()->problem()->boundary();
-
-  // which faces need to be refreshed?
-  bool on_boundary[3][2];
-  is_on_boundary (on_boundary);
-  TRACE6("is_on_boundary %d %d %d  %d %d %d",
-	 on_boundary[0][0],on_boundary[1][0],on_boundary[2][0],
-	 on_boundary[0][1],on_boundary[1][1],on_boundary[2][1]);
-
-  bool periodic = boundary->is_periodic();
-  if (periodic) {
-    for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
-	on_boundary[axis][face] = false;
-      }
-    }
-  }
-
-  // set face loop limits accordingly
-  (*ifxm) = on_boundary[0][0] ? 0 : -1;
-  (*ifym) = on_boundary[1][0] ? 0 : -1;
-  (*ifzm) = on_boundary[2][0] ? 0 : -1;
-  (*ifxp) = on_boundary[0][1] ? 0 : 1;
-  (*ifyp) = on_boundary[1][1] ? 0 : 1;
-  (*ifzp) = on_boundary[2][1] ? 0 : 1;
-
-  int rank = simulation()->dimension();
-  if (rank < 2) (*ifym) = (*ifyp) = 0;
-  if (rank < 3) (*ifzm) = (*ifzp) = 0;
-
-}
-
-//----------------------------------------------------------------------
-
 void CommBlock::refresh_same (Index index, 
 			      int ifx,  int ify,  int ifz)
 {
 
 #ifdef CELLO_TRACE
-  index_.print("refresh_same A",-1,2);
-  index.print("refresh_same B",-1,2);
+  index_.print("REFRESH refresh_same A",-1,2);
+  index.print("REFRESH refresh_same B",-1,2);
 #endif
 
-  TRACE3("ENTER refresh_same %d %d %d",ifx,ify,ifz);
+  TRACE3("REFRESH ENTER refresh_same %d %d %d",ifx,ify,ifz);
 
   // <duplicated code: refactor me!>
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -240,7 +207,7 @@ void CommBlock::refresh_fine
  int ifx, int ify, int ifz, 
  int icx, int icy, int icz)
 {
-  TRACE3("ENTER refresh_fine %d %d %d",ifx,ify,ifz);
+  TRACE3("REFRESH ENTER refresh_fine %d %d %d",ifx,ify,ifz);
 
   // <duplicated code: refactor me!>
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -262,7 +229,7 @@ void CommBlock::refresh_fine
 
   // send face data
 
-  TRACE6("Calling x_refresh_fine %d %d %d %d %d %d",
+  TRACE6("REFRESH Calling x_refresh_fine %d %d %d %d %d %d",
 	 ifx,ify,ifz, icx,icy,icz);
 
   ++loop_refresh_.stop();
@@ -275,35 +242,16 @@ void CommBlock::refresh_fine
 
 //----------------------------------------------------------------------
 
-void CommBlock::loop_limits_nibling_ 
-(int *icxm, int *icym, int *iczm,
- int *icxp, int *icyp, int *iczp,
- int ifx, int ify, int ifz) const throw()
-{
-  int rank = simulation()->dimension();
-
-  (*icxm) = (ifx == 0) ? 0 : (ifx+1)/2;
-  (*icxp) = (ifx == 0) ? 1 : (ifx+1)/2;
-  (*icym) = (ify == 0) ? 0 : (ify+1)/2;
-  (*icyp) = (ify == 0) ? 1 : (ify+1)/2;
-  (*iczm) = (ifz == 0) ? 0 : (ifz+1)/2;
-  (*iczp) = (ifz == 0) ? 1 : (ifz+1)/2;
-  if (rank < 2) (*icym) = (*icyp) = 0;
-  if (rank < 3) (*iczm) = (*iczp) = 0;
-}
-
-//----------------------------------------------------------------------
-
 void CommBlock::refresh_coarse 
 (
  Index index, 
  int ifx,  int ify,  int ifz)
 {
 
-  TRACE3("ENTER refresh_coarse %d %d %d",ifx,ify,ifz);
+  TRACE3("REFRESH ENTER refresh_coarse %d %d %d",ifx,ify,ifz);
 #ifdef CELLO_TRACE
-  index_.print("refresh_coarse A",-1,2);
-  index.print ("refresh_coarse B",-1,2);
+  index_.print("REFRESH refresh_coarse A",-1,2);
+  index.print ("REFRESH refresh_coarse B",-1,2);
 #endif
 
   // <duplicated code: refactor me!>
@@ -337,7 +285,7 @@ void CommBlock::refresh_coarse
 
 void CommBlock::x_refresh_same (int n, char * buffer, int ifx, int ify, int ifz)
 {
-  TRACE3 ("CommBlock::x_refresh_same(%d %d %d)",ifx,ify,ifz);
+  TRACE3 ("REFRESH CommBlock::x_refresh_same(%d %d %d)",ifx,ify,ifz);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -371,9 +319,9 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
 				int icx, int icy, int icz)
 {
 #ifdef CELLO_TRACE
-  index_.print("x_refresh_fine",-1,2);
+  index_.print("REFRESH x_refresh_fine",-1,2);
 #endif
-  TRACE6 ("CommBlock::x_refresh_fine(face %d %d %d  child  %d %d %d)",
+  TRACE6 ("REFRESH CommBlock::x_refresh_fine(face %d %d %d  child  %d %d %d)",
 	  ifx,ify,ifz,icx,icy,icz);
 
   // <duplicated code: refactor me!>
@@ -407,9 +355,9 @@ void CommBlock::x_refresh_coarse (int n, char * buffer,
 				int icx, int icy, int icz)
 {
 #ifdef CELLO_TRACE
-  index_.print("x_refresh_coarse",-1,2);
+  index_.print("REFRESH x_refresh_coarse",-1,2);
 #endif
-  TRACE6 ("CommBlock::x_refresh_coarse(face %d %d %d  child  %d %d %d)",
+  TRACE6 ("REFRESH CommBlock::x_refresh_coarse(face %d %d %d  child  %d %d %d)",
 	  ifx,ify,ifz,icx,icy,icz);
 
   // <duplicated code: refactor me!>
@@ -445,7 +393,7 @@ void CommBlock::q_refresh_end()
     performance->stop_region(perf_refresh);
   //  simulation()->performance()->stop_region(perf_refresh);
 
-  TRACE ("CommBlock::q_refresh_end() calling prepare()");
+  TRACE ("REFRESH CommBlock::q_refresh_end() calling prepare()");
   prepare();
 }
 

@@ -222,7 +222,12 @@ public: // interface
   bool is_child (const Index & index) const;
 
   void p_set_face_level (int if3[3], int level)
-  { face_level_[IF3(if3)] = level; }
+  { 
+    char buffer[80];
+    sprintf (buffer,"p_set_face_level (%d %d %d) = %d",if3[0],if3[1],if3[2],level);
+    index_.print(buffer);
+    face_level_[IF3(if3)] = level; 
+  }
 
   int face_level (int if3[3]) const
   {  return face_level_[IF3(if3)];  }
@@ -326,6 +331,8 @@ public: // virtual functions
   Simulation * simulation() const;
 
 protected: // functions
+
+  void debug_faces_(const char *, int *);
 
   std::string id_ () const throw ()
   {

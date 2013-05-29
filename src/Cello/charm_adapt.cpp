@@ -53,7 +53,7 @@ const char * adapt_name[] = {
 
 void CommBlock::p_adapt_begin()
 {
-  TRACE ("BEGIN PHASE ADAPT");
+  printf ("BEGIN PHASE ADAPT\n");
   Performance * performance = simulation()->performance();
   if (! performance->is_region_active(perf_adapt)) {
     performance->start_region(perf_adapt);
@@ -114,6 +114,7 @@ void CommBlock::p_adapt_start()
 
 void CommBlock::q_adapt_next()
 {
+  printf("ADAPT CommBlock::q_adapt_stop()\n");
   thisProxy.doneInserting();
 
   if (adapt_ == adapt_coarsen) coarsen();
@@ -313,6 +314,128 @@ void CommBlock::refine()
 
 //----------------------------------------------------------------------
 
+void CommBlock::initialize_face_level_(int num_face_level, int * face_level)
+{
+  face_level_.resize(num_face_level);
+
+  int rank_simulation = this->simulation()->dimension();
+  int rank_refresh = simulation()->config()->field_refresh_rank;
+
+  int na3[3];
+  size_forest (&na3[0],&na3[1],&na3[2]);
+  int ic3[3];
+  index_.child(level_,ic3+0,ic3+1,ic3+2);
+
+  int if3m[3], if3p[3], if3[3];
+  loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
+		       if3p+0,if3p+1,if3p+2);
+
+  printf ("%s:%d loop limits refresh %d %d %d  %d %d %d\n",
+	  __FILE__,__LINE__,
+	  if3m[0],if3m[1],if3m[2],
+	  if3p[0],if3p[1],if3p[2]);
+
+
+  debug_faces_("parent",face_level);
+
+  // Loop over all neighbors involved with communication
+
+  bool periodic = this->simulation()->problem()->boundary()->is_periodic();
+
+  for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
+    for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
+      for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
+
+	int rank_face = 
+	  rank_simulation - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
+
+	printf ("FACE rank %d %d %d\n",rank_refresh,rank_face,rank_simulation);
+	if (rank_refresh <= rank_face && rank_face < rank_simulation) {
+
+	  char buffer[40];
+	  sprintf (buffer,"FACE_LEVEL %d %d %d",if3[0],if3[1],if3[2]);
+	  index_.print(buffer);
+		   
+	  // negative direction
+
+	  int jf3[3] = {-if3[0],-if3[1],-if3[2]};
+
+	  Index index_neighbor = index_.index_neighbor
+	    (if3[0],if3[1],if3[2],na3,periodic);
+
+	  if (index_.index_parent() == index_neighbor.index_parent()) {
+
+	    // set self to sibling level
+	    p_set_face_level(if3,level_);
+
+	    // set sibling to self level
+
+	    thisProxy[index_neighbor].p_set_face_level(jf3,level_);
+
+	  } else {
+
+	    // internal face is sibling: same level as self
+
+	    // external face is cousin/nibling/uncle: same as parent face
+
+	    int face_level_parent = face_level[IF3(if3)];
+      
+	    // set self to neighbor level
+	    p_set_face_level(if3,face_level_parent);
+
+	    if (face_level_parent == level_ - 2) {
+
+	      // if neighbor is great uncle: force balance
+
+	      bool do_balance   = simulation()->config()->mesh_balance;
+	      if (do_balance) {
+		Index index_great_uncle = 
+		  index_neighbor.index_parent().index_parent();
+		thisProxy[index_great_uncle].p_balance();
+	      }
+
+	    } else if (face_level_parent == level_ - 1) {
+
+	      // if neighbor is uncle set face to self level
+
+	      Index index_uncle = index_neighbor.index_parent();
+
+	      thisProxy[index_uncle].p_set_face_level(jf3,level_);
+
+	    } else if (face_level_parent == level_) {
+
+	      // if neighbor is cousin set face to self level
+
+	      thisProxy[index_neighbor].p_set_face_level(jf3,level_);
+
+	    } else if (face_level_parent == level_ + 1) {
+
+	      // if neighbors are niblings set faces to self level 
+
+	      int ic3m[3],ic3p[3],ic3[3];
+	
+	      loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
+				   ic3p,ic3p+1,ic3p+2,
+				   if3[0],if3[1],if3[2]);
+	      for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
+		for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
+		  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
+		    Index index_nibling = 
+		      index_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
+		    thisProxy[index_nibling].p_set_face_level(jf3,level_);
+		  }
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void CommBlock::p_balance()
 {
   refine();
@@ -476,6 +599,7 @@ void CommBlock::x_refresh_child (int n, char * buffer,
 
 void CommBlock::q_adapt_stop()
 {
+  printf("ADAPT CommBlock::q_adapt_stop()\n");
   thisProxy.doneInserting();
 
   if (thisIndex.is_root()) {
@@ -487,13 +611,16 @@ void CommBlock::q_adapt_stop()
 
 void CommBlock::q_adapt_end()
 {
-  TRACE("ADAPT CommBlock::q_adapt_end()");
+  printf("ADAPT CommBlock::q_adapt_end()\n");
 
   Performance * performance = simulation()->performance();
   if (performance->is_region_active(perf_adapt))
     performance->stop_region(perf_adapt);
 
   thisProxy.doneInserting();
+
+  debug_faces_("child",&face_level_[0]);
+
   if (thisIndex.is_root()) {
 
     thisProxy.p_refresh_begin();
@@ -507,7 +634,7 @@ void CommBlock::q_adapt_end()
 
 
 
-  TRACE ("END   PHASE ADAPT");
+  printf ("END   PHASE ADAPT\n");
   
 }
 
