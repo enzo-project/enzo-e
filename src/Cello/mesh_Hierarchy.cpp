@@ -360,7 +360,7 @@ void Hierarchy::allocate_array_
        initial = true,
        cycle, time, dt,
        narray, array, op_array,
-       num_face_level, face_revel,
+       num_face_level, face_level,
        testing);
 
     // Store the data block in the block array

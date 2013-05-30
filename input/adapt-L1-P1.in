@@ -14,7 +14,7 @@ Mesh {
 }
 
 Stopping { 
-	 cycle = 0; 
+#	 cycle = 0; 
 	 time = 0.1;
 }
 

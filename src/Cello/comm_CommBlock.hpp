@@ -223,10 +223,17 @@ public: // interface
 
   void p_set_face_level (int if3[3], int level, int temp_line=0)
   { 
-    char buffer[80];
-    sprintf (buffer,"%d p_set_face_level (%d %d %d) = %d",temp_line,if3[0],if3[1],if3[2],level);
-    index_.print(buffer);
     face_level_[IF3(if3)] = level; 
+    if (! is_leaf()) {
+      for (int ic=0; ic<children_.size(); ic++) {
+	Index index_child = children_[ic];
+	if (index_child != index_) {
+#ifdef CONFIG_USE_CHARM
+	  thisProxy[index_child].p_set_face_level(if3,level,temp_line);
+#endif
+	}
+      }
+    } 
   }
 
   int face_level (int if3[3]) const

@@ -53,7 +53,7 @@ const char * adapt_name[] = {
 
 void CommBlock::p_adapt_begin()
 {
-  printf ("BEGIN PHASE ADAPT\n");
+  TRACE ("BEGIN PHASE ADAPT");
   Performance * performance = simulation()->performance();
   if (! performance->is_region_active(perf_adapt)) {
     performance->start_region(perf_adapt);
@@ -114,7 +114,7 @@ void CommBlock::p_adapt_start()
 
 void CommBlock::q_adapt_next()
 {
-  printf("ADAPT CommBlock::q_adapt_stop()\n");
+  TRACE("ADAPT CommBlock::q_adapt_stop()");
   thisProxy.doneInserting();
 
   if (adapt_ == adapt_coarsen) coarsen();
@@ -348,7 +348,6 @@ void CommBlock::face_level_update_new_( Index index_child )
 	  Index index_neighbor = index_.index_neighbor
 	    (if3[0],if3[1],if3[2],na3,periodic);
 	  int jf3[3] = {-if3[0],-if3[1],-if3[2]};
-	  printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
 	  thisProxy[index_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
 	}
       }
@@ -379,12 +378,10 @@ void CommBlock::face_level_update_new_( Index index_child )
 	  if (index_child.index_parent() == index_child_neighbor.index_parent()) {
 
 	    // set self to sibling level
-	    printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
 	    thisProxy[index_child].p_set_face_level(if3,level_+1,__LINE__);
 
 	    // set sibling to self level
 	    int jf3[3] = {-if3[0],-if3[1],-if3[2]};
-	    printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
 	    thisProxy[index_child_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
 
 	  } else {
@@ -396,7 +393,6 @@ void CommBlock::face_level_update_new_( Index index_child )
 	    int face_level = face_level_[IF3(if3)];
       
 	    // set child face to neighbor level
-	    printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
 	    /// @@@ face_level incorrect
 	    thisProxy[index_child].p_set_face_level(if3,face_level,__LINE__);
 
@@ -418,7 +414,6 @@ void CommBlock::face_level_update_new_( Index index_child )
 	      Index index_neighbor = index_child_neighbor.index_parent();
 
 	      int jf3[3] = {-if3[0],-if3[1],-if3[2]};
-	      printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
 	      thisProxy[index_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
 
 	    } else if (face_level == level_ + 1) {
@@ -426,7 +421,6 @@ void CommBlock::face_level_update_new_( Index index_child )
 	      // if neighbor is cousin set face to self level
 
 	      int jf3[3] = {-if3[0],-if3[1],-if3[2]};
-	      printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
 	      thisProxy[index_child_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
 
 	    } else if (face_level == level_ + 2) {
@@ -444,7 +438,6 @@ void CommBlock::face_level_update_new_( Index index_child )
 		  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
 		    Index index_nibling = 
 		      index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
-		    printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
 		    thisProxy[index_nibling].p_set_face_level(jf3,level_+1,__LINE__);
 		  }
 		}
@@ -622,7 +615,7 @@ void CommBlock::x_refresh_child (int n, char * buffer,
 
 void CommBlock::q_adapt_stop()
 {
-  printf("ADAPT CommBlock::q_adapt_stop()\n");
+  TRACE("ADAPT CommBlock::q_adapt_stop()");
   thisProxy.doneInserting();
 
   if (thisIndex.is_root()) {
@@ -634,7 +627,7 @@ void CommBlock::q_adapt_stop()
 
 void CommBlock::q_adapt_end()
 {
-  printf("ADAPT CommBlock::q_adapt_end()\n");
+  TRACE("ADAPT CommBlock::q_adapt_end()");
 
   Performance * performance = simulation()->performance();
   if (performance->is_region_active(perf_adapt))
@@ -657,7 +650,7 @@ void CommBlock::q_adapt_end()
 
 
 
-  printf ("END   PHASE ADAPT\n");
+  TRACE ("END   PHASE ADAPT");
   
 }
 
