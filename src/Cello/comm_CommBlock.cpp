@@ -39,13 +39,13 @@ CommBlock::CommBlock
   index_initial_(0),
   level_(index_.level()),
   children_(),
-  count_coarsen_(0),
-  count_adapt_(count_adapt),
-  adapt_(adapt_unknown),
 #ifdef CONFIG_USE_CHARM
   loop_refresh_(),
 #endif
-  face_level_()
+  face_level_(),
+  count_coarsen_(0),
+  count_adapt_(count_adapt),
+  adapt_(adapt_unknown)
 { 
 #ifdef CELLO_TRACE
   index.print ("CommBlock::CommBlock");
@@ -102,12 +102,6 @@ CommBlock::CommBlock
 
   int na3[3];
   size_forest(&na3[0],&na3[1],&na3[2]);
-
-  int ixp = (rank >= 1) ? 1 : 0;
-  int iyp = (rank >= 2) ? 1 : 0;
-  int izp = (rank >= 3) ? 1 : 0;
-    
-  int refresh_rank = this->simulation()->config()->field_refresh_rank;
 
   int icx=0,icy=0,icz=0;
   if (level_ > 0) {
@@ -607,6 +601,7 @@ Simulation * CommBlock::simulation() const
 
 void CommBlock::debug_faces_(const char * buffer, int * faces)
 {
+#ifdef CELLO_TRACE
   if (!faces) return;
   int imp[3] = {-1,1,0};
   int i0p[3] = { 0,1,0};
@@ -619,9 +614,10 @@ void CommBlock::debug_faces_(const char * buffer, int * faces)
   int ipm[3] = { 1,-1,0};
   index_.print(buffer);
   printf ("%s %2d %2d %2d\n",
-	  buffer, faces[IF3(imp)], faces[IF3(i0p)], faces[IF3(ipp)]);
+   	  buffer, faces[IF3(imp)], faces[IF3(i0p)], faces[IF3(ipp)]);
   printf ("%s %2d %2d %2d\n",
-	  buffer, faces[IF3(im0)], faces[IF3(i00)], faces[IF3(ip0)]);
+   	  buffer, faces[IF3(im0)], faces[IF3(i00)], faces[IF3(ip0)]);
   printf ("%s %2d %2d %2d\n",
-	  buffer, faces[IF3(imm)], faces[IF3(i0m)], faces[IF3(ipm)]);
+   	  buffer, faces[IF3(imm)], faces[IF3(i0m)], faces[IF3(ipm)]);
+#endif
 }

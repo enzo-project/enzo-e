@@ -217,7 +217,7 @@ void Performance::new_region (int         region_index,
 			      std::string region_name) throw()
 { 
   TRACE2 ("Performance::new_region (%d %s)",region_index,region_name.c_str());
-  if (region_index >= region_names_.size()) {
+  if ((size_t)region_index >= region_names_.size()) {
     region_names_.resize(region_index+1);
   }
 

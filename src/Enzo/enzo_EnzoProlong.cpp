@@ -57,6 +57,7 @@ int EnzoProlong::apply_
 ( T *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
   const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
 {
+  return 0;
   // int nd3_c[3];
   // int nd3_f[3];
   // field_block_f->size(&nd3_f[0],&nd3_f[1],&nd3_f[2]);

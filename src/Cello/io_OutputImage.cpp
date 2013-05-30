@@ -189,11 +189,6 @@ void OutputImage::write_block
   int ix,iy,iz;
   comm_block->index_forest(&ix,&iy,&iz);
 
-  // Start of array
-  int ixb0 = ix*nbx;
-  int iyb0 = iy*nby;
-  int izb0 = iz*nbz;
-
   // Index of (single) field to write
 
   it_field_->first();
@@ -223,11 +218,6 @@ void OutputImage::write_block
   int ixm,iym,izm; 
   int ixp,iyp,izp;
   extents_img_ (comm_block,&ixm,&ixp,&iym,&iyp,&izm,&izp);
-
-  // pixel extents of cells
-  int dbx = (ixp-ixm) / nbx;
-  int dby = (iyp-iym) / nby;
-  int dbz = (izp-izm) / nbz;
 
   double xm,ym,zm;
   double xp,yp,zp;
@@ -262,8 +252,8 @@ void OutputImage::write_block
 	int jym = iym +  iy   *(iyp-iym)/my;
 	int jyp = iym + (iy+1)*(iyp-iym)/my-1;
 	for (int iz=0; iz<mz; iz++) {
-	  int jzm = izm + iz    *(izp-izm)/mz;
-	  int jzp = izm + (iz+1)*(izp-izm)/mz-1;
+	  // int jzm = izm + iz    *(izp-izm)/mz;
+	  // int jzp = izm + (iz+1)*(izp-izm)/mz-1;
 	  int i=ix + ndx*(iy + ndy*iz);
 
 	  switch (field_descr->precision(index)) {

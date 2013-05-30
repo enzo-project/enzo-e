@@ -106,11 +106,7 @@ void CommBlock::refresh ()
 
 	  int if3[3] = {ifx,ify,ifz};
 
-	  char buffer[40];
-	  if (face_level(if3)==level_-1) {
-	    sprintf (buffer,"refresh coarse (%d %d %d)",
-		     if3[0],if3[1],if3[2]);
-	    index_.print(buffer);
+	  if (face_level(if3)==level_ - 1) {
 
 #ifdef CELLO_TRACE
 	    index_.print("REFRESH not neighbor A");
@@ -120,12 +116,7 @@ void CommBlock::refresh ()
 
 	  } else if (face_level(if3)==level_+1) {
 
-	    sprintf (buffer,"refresh fine (%d %d %d)",
-		     if3[0],if3[1],if3[2]);
-	    index_.print(buffer);
-
 	    // else check for adjacent fine neighbors
-
 	    
 	    int icxm,icym,iczm;
 	    int icxp,icyp,iczp;
@@ -144,11 +135,8 @@ void CommBlock::refresh ()
 	      }
 	    }
 	  } else if (face_level(if3)==level_) {
-	    sprintf (buffer,"refresh same (%d %d %d)",
-		     if3[0],if3[1],if3[2]);
-	    index_.print(buffer);
-	    // otherwise update neighbor
 
+	    // otherwise update neighbor
 
 	    refresh_same(index_neighbor,ifx,ify,ifz);
 

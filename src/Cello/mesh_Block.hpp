@@ -28,7 +28,7 @@ public: // interface
 	double zm, double zp) throw();
 
   /// Destructor
-  ~Block() throw();
+  virtual ~Block() throw();
 
   /// Copy constructor
   Block(const Block & block) throw();

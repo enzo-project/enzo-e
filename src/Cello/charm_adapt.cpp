@@ -91,9 +91,6 @@ void CommBlock::p_adapt_start()
   // Initialize child coarsening counter
   count_coarsen_ = 0;
 
-  // Inhibit coarsening on startup
-  int initial_cycle = simulation()->config()->initial_cycle;
-
   if (count_adapt_-- > 0) {
 
     adapt_ = determine_adapt();
@@ -149,12 +146,6 @@ int CommBlock::determine_adapt()
 
     }
 
-    const Config * config = simulation()->config();
-    int mesh_max_level    = config->mesh_max_level;
-
-    if ((adapt == adapt_refine)  && ! can_refine())  adapt = adapt_same;
-    if ((adapt == adapt_coarsen) && ! can_coarsen()) adapt = adapt_same;
-
     return adapt;
   }
 }
@@ -187,6 +178,7 @@ int CommBlock::reduce_adapt_(int a1, int a2) const throw()
 
 void CommBlock::refine()
 {
+  if (! can_refine()) return;
 
   adapt_ = adapt_unknown;
 
@@ -208,7 +200,6 @@ void CommBlock::refine()
   size_forest (&na3[0],&na3[1],&na3[2]);
 
   int initial_cycle = simulation()->config()->initial_cycle;
-  bool do_balance   = simulation()->config()->mesh_balance;
 
   bool initial = (initial_cycle == cycle());
 
@@ -266,98 +257,32 @@ void CommBlock::refine()
 
       face_level_update_new_(index_child);
 
-      // for (int axis=0; axis<rank; axis++) {
-
-      // 	int face = ic3[axis];
-
-      // 	int if3[3] = {0};
-      // 	if3[axis] = 2*face-1; // (0,1) --> (+1,-1)
-
-      // 	// update non-sibling neighbors
-
-      // 	Index index_neighbor = index_.index_neighbor(axis,face,na3[axis]);
-
-      // if (face_level(if3) == level_) {
-
-      //   // new child is neighbor's nibling
-
-      //   thisProxy[index_neighbor].p_set_face_level (if3,level_+1);
-
-      // } else if (face_level(if3) == level_ - 1) {
-
-      //   // no neighbor?  then uncle must refine
-
-      //   if (level_ > 0 && do_balance) {
-
-      //     Index index_uncle = index_neighbor.index_parent();
-
-      //     thisProxy[index_uncle].p_balance();
-      //   }
-
-      // } else if (face_level(ic3)==level_ + 1) {
-	  
-      //   int jc3[3] = {ic3[0],ic3[1],ic3[2]};
-      //   jc3[axis] = 1-jc3[axis];
-
-      //   Index index_nibling = index_neighbor.index_child(jc3);
-
-      //   thisProxy[index_child].p_set_face_level (if3,level_);
-
-      //   if3[axis] = -if3[axis];
-
-      //   thisProxy[index_nibling].p_set_face_level (if3,level_);
-      // }
-
-      // }
     }
   }
-  
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::face_level_update_new_( Index index_child )
 {
-  int rank_simulation = this->simulation()->dimension();
-  int rank_refresh = simulation()->config()->field_refresh_rank;
+  Simulation * simulation = this->simulation();
+
+  const int       rank         = simulation->dimension();
+  const Config *  config       = simulation->config();
+  const Problem * problem      = simulation->problem();
+  const int       rank_refresh = config->field_refresh_rank;
+  const bool      balance      = config->mesh_balance;
+  const bool      periodic     = problem->boundary()->is_periodic();
 
   int na3[3];
   size_forest (&na3[0],&na3[1],&na3[2]);
+
   int ic3[3];
   index_child.child(level_+1,ic3+0,ic3+1,ic3+2);
 
   int if3m[3], if3p[3], if3[3];
   loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
 		       if3p+0,if3p+1,if3p+2);
-
-  const bool periodic = this->simulation()->problem()->boundary()->is_periodic();
-
-  //--------------------------------------------------
-  // UPDATE NEIGHBOR FACE LEVELS
-  //--------------------------------------------------
-
-  for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
-    for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
-      for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
-
-	int rank_face = 
-	  rank_simulation - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
-
-	if (rank_refresh <= rank_face && rank_face < rank_simulation) {
-
-	  Index index_neighbor = index_.index_neighbor
-	    (if3[0],if3[1],if3[2],na3,periodic);
-	  int jf3[3] = {-if3[0],-if3[1],-if3[2]};
-	  thisProxy[index_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
-	}
-      }
-    }
-  }
-  //--------------------------------------------------
-  // UPDATE CHILD AND CHILD-NEIGHBOR FACE LEVELS
-  //--------------------------------------------------
-
-  //  debug_faces_("parent",&face_level_[0]);
 
   // Loop over all neighbors involved with communication
 
@@ -366,70 +291,68 @@ void CommBlock::face_level_update_new_( Index index_child )
       for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
 
 	int rank_face = 
-	  rank_simulation - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
+	  rank - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
 
-	if (rank_refresh <= rank_face && rank_face < rank_simulation) {
+	if (rank_refresh <= rank_face && rank_face < rank) {
 
-	  // negative direction
+	  // MY NEIGHBOR
+
+	  Index index_neighbor = index_.index_neighbor
+	    (if3[0],if3[1],if3[2],na3,periodic);
+
+	  int jf3[3] = {-if3[0],-if3[1],-if3[2]};
+
+	  thisProxy[index_neighbor].p_set_face_level (jf3,level_+1);
+
+	  // CHILD NEIGHBOR
 
 	  Index index_child_neighbor = index_child.index_neighbor
 	    (if3[0],if3[1],if3[2],na3,periodic);
 
-	  if (index_child.index_parent() == index_child_neighbor.index_parent()) {
+	  bool is_sibling = 
+	    index_child.index_parent() == index_child_neighbor.index_parent();
 
-	    // set self to sibling level
-	    thisProxy[index_child].p_set_face_level(if3,level_+1,__LINE__);
+	  if (is_sibling) {
 
-	    // set sibling to self level
-	    int jf3[3] = {-if3[0],-if3[1],-if3[2]};
-	    thisProxy[index_child_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
+	    // SIBLING
+
+	    thisProxy[index_child].p_set_face_level (if3,level_+1);
+
+	    thisProxy[index_child_neighbor].p_set_face_level (jf3,level_+1);
 
 	  } else {
 
-	    // internal face is sibling: same level as self
-
-	    // external face is cousin/nibling/uncle: same as parent face
-
 	    int face_level = face_level_[IF3(if3)];
       
-	    // set child face to neighbor level
-	    /// @@@ face_level incorrect
-	    thisProxy[index_child].p_set_face_level(if3,face_level,__LINE__);
+	    thisProxy[index_child].p_set_face_level (if3,face_level);
 
-	    if (face_level == level_ - 1) {
+	    if (face_level <= level_ - 1) {
 
-	      // if neighbor is coarse: force balance
+	      // GREAT UNCLE
 
-	      const bool balance = simulation()->config()->mesh_balance;
 	      if (balance) {
-		Index index_uncle = 
-		  index_child_neighbor.index_parent().index_parent();
-		thisProxy[index_uncle].p_balance();
+		Index index_uncle = index_neighbor.index_parent();
+		thisProxy[index_uncle].p_balance(jf3,level_+1);
 	      }
 
 	    } else if (face_level == level_) {
 
-	      // if neighbor is uncle set face to self level
+	      // UNCLE
 
-	      Index index_neighbor = index_child_neighbor.index_parent();
-
-	      int jf3[3] = {-if3[0],-if3[1],-if3[2]};
-	      thisProxy[index_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
+	      thisProxy[index_neighbor].p_set_face_level (jf3,level_+1);
 
 	    } else if (face_level == level_ + 1) {
 
-	      // if neighbor is cousin set face to self level
+	      // COUSIN
 
-	      int jf3[3] = {-if3[0],-if3[1],-if3[2]};
-	      thisProxy[index_child_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
+	      thisProxy[index_child_neighbor].p_set_face_level (jf3,level_+1);
 
 	    } else if (face_level == level_ + 2) {
 
-	      // if neighbors are niblings their faces to self level 
+	      // NIBLINGS
 
 	      int ic3m[3],ic3p[3],ic3[3];
 	
-	      int jf3[3] = {-if3[0],-if3[1],-if3[2]};
 	      loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
 				   ic3p,ic3p+1,ic3p+2,
 				   if3[0],if3[1],if3[2]);
@@ -438,7 +361,7 @@ void CommBlock::face_level_update_new_( Index index_child )
 		  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
 		    Index index_nibling = 
 		      index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
-		    thisProxy[index_nibling].p_set_face_level(jf3,level_+1,__LINE__);
+		    thisProxy[index_nibling].p_set_face_level (jf3,level_+1);
 		  }
 		}
 	      }
@@ -452,8 +375,9 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_balance()
+void CommBlock::p_balance(int if3[3], int level)
 {
+  p_set_face_level(if3,level);
   refine();
 }
 
@@ -462,14 +386,13 @@ void CommBlock::p_balance()
 bool CommBlock::can_refine() const
 {
   int max_level = simulation()->config()->mesh_max_level;
-  return (level_ < max_level);
+  return (is_leaf() && level_ < max_level);
 }
 
 //----------------------------------------------------------------------
 
 bool CommBlock::can_coarsen() const
 { 
-
   if (level_ <= 0) return false;
 
   int refresh_rank = simulation()->config()->field_refresh_rank;
@@ -498,10 +421,9 @@ bool CommBlock::can_coarsen() const
 
 void CommBlock::coarsen()
 {
-
+  if (! can_coarsen()) return;
+  
   adapt_ = adapt_unknown;
-
-  if (level_ <= 0) return;
 
   Index index = thisIndex;
   int icx,icy,icz;
@@ -602,7 +524,7 @@ void CommBlock::x_refresh_child (int n, char * buffer,
   field_face.store (n, buffer);
 
   // Will need counter if not using QD
-  // std::string refresh_type = simulation->config()->field_refresh_type;
+  // std::string refresh_type = config->field_refresh_type;
   
   // if (refresh_type == "counter") {
   //   if (loop_refresh_.done()) {

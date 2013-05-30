@@ -43,7 +43,9 @@ int ProlongLinear::apply
     ERROR1 ("ProlongLinear::apply()",
 	    "Unknown precision %d",
 	    precision);
-      }
+
+    return 0;
+  }
 }
 
 //----------------------------------------------------------------------
