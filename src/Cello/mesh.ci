@@ -56,7 +56,7 @@ module mesh {
 
     entry void p_balance ();
 
-    entry void p_set_face_level(int in3[3], int level);
+    entry void p_set_face_level(int in3[3], int level, int temp_line);
 //    entry void p_set_neighbor(int in3[3]);
 //    entry void p_set_nibling(int in3[3]);
 //    entry void p_delete_neighbor(int in3[3]);

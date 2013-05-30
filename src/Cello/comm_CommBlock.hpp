@@ -221,10 +221,10 @@ public: // interface
   void delete_child(Index index);
   bool is_child (const Index & index) const;
 
-  void p_set_face_level (int if3[3], int level)
+  void p_set_face_level (int if3[3], int level, int temp_line=0)
   { 
     char buffer[80];
-    sprintf (buffer,"p_set_face_level (%d %d %d) = %d",if3[0],if3[1],if3[2],level);
+    sprintf (buffer,"%d p_set_face_level (%d %d %d) = %d",temp_line,if3[0],if3[1],if3[2],level);
     index_.print(buffer);
     face_level_[IF3(if3)] = level; 
   }
@@ -355,7 +355,8 @@ protected: // functions
   /// Return the (lower) indices of the CommBlock in the level, 
   /// and the number of indices
 
-  void initialize_face_level_(int num_face_level, int * face_level);
+  /// Update face_level_[] for new child
+  void face_level_update_new_ (Index index_child);
 
 #ifdef CONFIG_USE_CHARM
 

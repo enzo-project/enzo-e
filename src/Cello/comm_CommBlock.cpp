@@ -98,7 +98,6 @@ CommBlock::CommBlock
   } else {
     face_level_.resize(num_face_level);
     for (int i=0; i<num_face_level; i++) face_level_[i] = face_level[i];
-    initialize_face_level_(num_face_level,face_level);
   }
 
   int na3[3];
@@ -114,34 +113,6 @@ CommBlock::CommBlock
   if (level_ > 0) {
     index_.child(level_,&icx,&icy,&icz);
   }
-
-  //   bool periodic = this->simulation()->problem()->boundary()->is_periodic();
-  //   for (int ix=-ixp; ix<=ixp; ix++) {
-  //     bool isx = ((ix==0) || (ix==-1&&icx==1) || (ix==1&&icx==0));
-  //     for (int iy=-iyp; iy<=iyp; iy++) {
-  //       bool isy = ((iy==0) || (iy==-1&&icy==1) || (iy==1&&icy==0));
-  //       for (int iz=-izp; iz<=izp; iz++) {
-  // 	bool isz = ((iz==0) || (iz==-1&&icz==1) || (iz==1&&icz==0));
-
-  // 	int face_rank = rank - (abs(ix)+abs(iy)+abs(iz));
-
-  // 	bool has_neighbor = ((refresh_rank <= face_rank && face_rank < rank) &&
-  // 			     ((level_ == 0) || (isx && isy && isz)));
-  // 	if (has_neighbor) {
-  // 	  Index index = index_.index_neighbor(ix,iy,iz,na3,periodic);
-  // #ifdef CELLO_TRACE
-  // 	  index_.print("1 calling p_set_neighbor A");
-  // 	  index.print ("1 calling p_set_neighbor B");
-  // #endif
-  // 	  int in3[3] = {ix,iy,iz};
-  // 	  TRACE("Calling p_set_neighbor");
-  // 	  p_set_face_level (in3,level_);
-  // 	}
-  //       }
-  //     }
-  //   }
-
-  // 
 
   if (narray != 0) {
     // copy any input data

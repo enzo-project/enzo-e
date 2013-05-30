@@ -262,7 +262,9 @@ void CommBlock::refine()
 
       set_child(index_child);
 
-      // for each (axis,face)
+      // update child and neighbor face_level[]
+
+      face_level_update_new_(index_child);
 
       // for (int axis=0; axis<rank; axis++) {
 
@@ -314,33 +316,25 @@ void CommBlock::refine()
 
 //----------------------------------------------------------------------
 
-void CommBlock::initialize_face_level_(int num_face_level, int * face_level)
+void CommBlock::face_level_update_new_( Index index_child )
 {
-  face_level_.resize(num_face_level);
-
   int rank_simulation = this->simulation()->dimension();
   int rank_refresh = simulation()->config()->field_refresh_rank;
 
   int na3[3];
   size_forest (&na3[0],&na3[1],&na3[2]);
   int ic3[3];
-  index_.child(level_,ic3+0,ic3+1,ic3+2);
+  index_child.child(level_+1,ic3+0,ic3+1,ic3+2);
 
   int if3m[3], if3p[3], if3[3];
   loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
 		       if3p+0,if3p+1,if3p+2);
 
-  printf ("%s:%d loop limits refresh %d %d %d  %d %d %d\n",
-	  __FILE__,__LINE__,
-	  if3m[0],if3m[1],if3m[2],
-	  if3p[0],if3p[1],if3p[2]);
+  const bool periodic = this->simulation()->problem()->boundary()->is_periodic();
 
-
-  debug_faces_("parent",face_level);
-
-  // Loop over all neighbors involved with communication
-
-  bool periodic = this->simulation()->problem()->boundary()->is_periodic();
+  //--------------------------------------------------
+  // UPDATE NEIGHBOR FACE LEVELS
+  //--------------------------------------------------
 
   for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
     for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
@@ -349,28 +343,49 @@ void CommBlock::initialize_face_level_(int num_face_level, int * face_level)
 	int rank_face = 
 	  rank_simulation - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
 
-	printf ("FACE rank %d %d %d\n",rank_refresh,rank_face,rank_simulation);
 	if (rank_refresh <= rank_face && rank_face < rank_simulation) {
-
-	  char buffer[40];
-	  sprintf (buffer,"FACE_LEVEL %d %d %d",if3[0],if3[1],if3[2]);
-	  index_.print(buffer);
-		   
-	  // negative direction
-
-	  int jf3[3] = {-if3[0],-if3[1],-if3[2]};
 
 	  Index index_neighbor = index_.index_neighbor
 	    (if3[0],if3[1],if3[2],na3,periodic);
+	  int jf3[3] = {-if3[0],-if3[1],-if3[2]};
+	  printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
+	  thisProxy[index_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
+	}
+      }
+    }
+  }
+  //--------------------------------------------------
+  // UPDATE CHILD AND CHILD-NEIGHBOR FACE LEVELS
+  //--------------------------------------------------
 
-	  if (index_.index_parent() == index_neighbor.index_parent()) {
+  //  debug_faces_("parent",&face_level_[0]);
+
+  // Loop over all neighbors involved with communication
+
+  for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
+    for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
+      for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
+
+	int rank_face = 
+	  rank_simulation - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
+
+	if (rank_refresh <= rank_face && rank_face < rank_simulation) {
+
+	  // negative direction
+
+	  Index index_child_neighbor = index_child.index_neighbor
+	    (if3[0],if3[1],if3[2],na3,periodic);
+
+	  if (index_child.index_parent() == index_child_neighbor.index_parent()) {
 
 	    // set self to sibling level
-	    p_set_face_level(if3,level_);
+	    printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
+	    thisProxy[index_child].p_set_face_level(if3,level_+1,__LINE__);
 
 	    // set sibling to self level
-
-	    thisProxy[index_neighbor].p_set_face_level(jf3,level_);
+	    int jf3[3] = {-if3[0],-if3[1],-if3[2]};
+	    printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
+	    thisProxy[index_child_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
 
 	  } else {
 
@@ -378,42 +393,49 @@ void CommBlock::initialize_face_level_(int num_face_level, int * face_level)
 
 	    // external face is cousin/nibling/uncle: same as parent face
 
-	    int face_level_parent = face_level[IF3(if3)];
+	    int face_level = face_level_[IF3(if3)];
       
-	    // set self to neighbor level
-	    p_set_face_level(if3,face_level_parent);
+	    // set child face to neighbor level
+	    printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
+	    /// @@@ face_level incorrect
+	    thisProxy[index_child].p_set_face_level(if3,face_level,__LINE__);
 
-	    if (face_level_parent == level_ - 2) {
+	    if (face_level == level_ - 1) {
 
-	      // if neighbor is great uncle: force balance
+	      // if neighbor is coarse: force balance
 
-	      bool do_balance   = simulation()->config()->mesh_balance;
-	      if (do_balance) {
-		Index index_great_uncle = 
-		  index_neighbor.index_parent().index_parent();
-		thisProxy[index_great_uncle].p_balance();
+	      const bool balance = simulation()->config()->mesh_balance;
+	      if (balance) {
+		Index index_uncle = 
+		  index_child_neighbor.index_parent().index_parent();
+		thisProxy[index_uncle].p_balance();
 	      }
 
-	    } else if (face_level_parent == level_ - 1) {
+	    } else if (face_level == level_) {
 
 	      // if neighbor is uncle set face to self level
 
-	      Index index_uncle = index_neighbor.index_parent();
+	      Index index_neighbor = index_child_neighbor.index_parent();
 
-	      thisProxy[index_uncle].p_set_face_level(jf3,level_);
+	      int jf3[3] = {-if3[0],-if3[1],-if3[2]};
+	      printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
+	      thisProxy[index_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
 
-	    } else if (face_level_parent == level_) {
+	    } else if (face_level == level_ + 1) {
 
 	      // if neighbor is cousin set face to self level
 
-	      thisProxy[index_neighbor].p_set_face_level(jf3,level_);
+	      int jf3[3] = {-if3[0],-if3[1],-if3[2]};
+	      printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
+	      thisProxy[index_child_neighbor].p_set_face_level(jf3,level_+1,__LINE__);
 
-	    } else if (face_level_parent == level_ + 1) {
+	    } else if (face_level == level_ + 2) {
 
-	      // if neighbors are niblings set faces to self level 
+	      // if neighbors are niblings their faces to self level 
 
 	      int ic3m[3],ic3p[3],ic3[3];
 	
+	      int jf3[3] = {-if3[0],-if3[1],-if3[2]};
 	      loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
 				   ic3p,ic3p+1,ic3p+2,
 				   if3[0],if3[1],if3[2]);
@@ -421,8 +443,9 @@ void CommBlock::initialize_face_level_(int num_face_level, int * face_level)
 		for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
 		  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
 		    Index index_nibling = 
-		      index_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
-		    thisProxy[index_nibling].p_set_face_level(jf3,level_);
+		      index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
+		    printf ("%s:%d p_set_face_level\n",__FILE__,__LINE__);
+		    thisProxy[index_nibling].p_set_face_level(jf3,level_+1,__LINE__);
 		  }
 		}
 	      }
