@@ -147,7 +147,7 @@ public: // interface
   //  void adapt();
   void refine();
   void coarsen();
-  void p_balance(int if3[3],int level);
+  void p_balance(int ic3[3], int if3[3],int level);
   bool can_coarsen() const;
   bool can_refine() const;
   void p_child_can_coarsen(int icx,int icy, int icz,
@@ -221,19 +221,22 @@ public: // interface
   void delete_child(Index index);
   bool is_child (const Index & index) const;
 
-  void p_set_face_level (int if3[3], int level)
+  void p_set_face_level (int if3[3], int level, int recurse)
+  { set_face_level(if3,level,recurse); }
+
+  void set_face_level (int if3[3], int level, int recurse)
   { 
     face_level_[IF3(if3)] = level; 
-    if (! is_leaf()) {
-      for (size_t ic=0; ic<children_.size(); ic++) {
-	Index index_child = children_[ic];
-	if (index_child != index_) {
-#ifdef CONFIG_USE_CHARM
-	  thisProxy[index_child].p_set_face_level(if3,level);
-#endif
-	}
-      }
-    } 
+     if (recurse && ! is_leaf()) {
+       for (size_t ic=0; ic<children_.size(); ic++) {
+ 	Index index_child = children_[ic];
+ 	if (index_child != index_) {
+ #ifdef CONFIG_USE_CHARM
+ 	  thisProxy[index_child].p_set_face_level(if3,level,recurse);
+ #endif
+ 	}
+       }
+     } 
   }
 
   int face_level (int if3[3]) const

@@ -5,34 +5,6 @@
 /// @date     2013-04-25
 /// @brief    Charm-related mesh adaptation control functions
 
-/// Maintain type (coarse,same,fine) of neighbor at all required faces
-/// Update when refining
-/// Update when coarsening
-/// Force balanced-refined shouldn't coarsen
-///     determine adapt
-///     neighbor update
-///     balance check
-///
-/// adapt: refine / coarsen at all levels
-///
-/// 1. determine adapt
-/// 2. refine / balance where necessary
-/// 3. QD
-/// 4. coarsen where possible
-/// 5. QD [optional?]
-///
-/// p_adapt_begin()
-///    adapt_ = determine_adapt 
-///    if (refine_) {
-///      tell known neighbors
-///      create children
-///      update children neighbors
-///      balance if necessary
-///    }
-///  each face stores relative level of finest grid
-///  0==same, -1==coarse, +1== fine
-
-
 #ifdef CONFIG_USE_CHARM
 
 #include "simulation.hpp"
@@ -74,13 +46,9 @@ void CommBlock::p_adapt_begin()
   }
 
   if (count_adapt_ > 0) {
-
     p_adapt_start();
-
   } else {
-
     q_adapt_end();
-
   }
 }
 
@@ -172,6 +140,14 @@ int CommBlock::reduce_adapt_(int a1, int a2) const throw()
     return adapt_same;
 
   }
+}
+
+//----------------------------------------------------------------------
+
+bool CommBlock::can_refine() const
+{
+  int max_level = simulation()->config()->mesh_max_level;
+  return (is_leaf() && level_ < max_level);
 }
 
 //----------------------------------------------------------------------
@@ -277,9 +253,6 @@ void CommBlock::face_level_update_new_( Index index_child )
   int na3[3];
   size_forest (&na3[0],&na3[1],&na3[2]);
 
-  int ic3[3];
-  index_child.child(level_+1,ic3+0,ic3+1,ic3+2);
-
   int if3m[3], if3p[3], if3[3];
   loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
 		       if3p+0,if3p+1,if3p+2);
@@ -302,7 +275,7 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 	  int jf3[3] = {-if3[0],-if3[1],-if3[2]};
 
-	  thisProxy[index_neighbor].p_set_face_level (jf3,level_+1);
+	  thisProxy[index_neighbor].p_set_face_level (jf3,level_+1,false);
 
 	  // CHILD NEIGHBOR
 
@@ -316,52 +289,69 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 	    // SIBLING
 
-	    thisProxy[index_child].p_set_face_level (if3,level_+1);
+	    thisProxy[index_child].p_set_face_level (if3,level_+1,false);
 
-	    thisProxy[index_child_neighbor].p_set_face_level (jf3,level_+1);
+	    thisProxy[index_child_neighbor].p_set_face_level (jf3,level_+1,false);
 
 	  } else {
 
 	    int face_level = face_level_[IF3(if3)];
       
-	    thisProxy[index_child].p_set_face_level (if3,face_level);
-
-	    if (face_level <= level_ - 1) {
+	    if (face_level == level_ - 1) {
 
 	      // GREAT UNCLE
 
 	      if (balance) {
 		Index index_uncle = index_neighbor.index_parent();
-		thisProxy[index_uncle].p_balance(jf3,level_+1);
+
+		thisProxy[index_child].p_set_face_level (if3,level_,false);
+
+		int ic3[3];
+		index_.child(level_,ic3+0,ic3+1,ic3+2);
+		if (if3[0] == -1) ic3[0] = 1;
+		if (if3[1] == -1) ic3[1] = 1;
+		if (if3[2] == -1) ic3[2] = 1;
+		if (if3[0] == +1) ic3[0] = 0;
+		if (if3[1] == +1) ic3[1] = 0;
+		if (if3[2] == +1) ic3[2] = 0;
+		thisProxy[index_uncle].p_balance        (ic3,jf3,level_+1);
+
 	      }
 
 	    } else if (face_level == level_) {
 
 	      // UNCLE
 
-	      thisProxy[index_neighbor].p_set_face_level (jf3,level_+1);
+	      thisProxy[index_child]   .p_set_face_level (if3,level_,false);
+
+	      thisProxy[index_neighbor].p_set_face_level (jf3,level_+1,true);
 
 	    } else if (face_level == level_ + 1) {
 
 	      // COUSIN
 
-	      thisProxy[index_child_neighbor].p_set_face_level (jf3,level_+1);
+	      thisProxy[index_child].         p_set_face_level (if3,level_+1,false);
+
+	      thisProxy[index_child_neighbor].p_set_face_level (jf3,level_+1,false);
 
 	    } else if (face_level == level_ + 2) {
 
 	      // NIBLINGS
 
+	      thisProxy[index_child].p_set_face_level (if3,level_+2,false);
+
 	      int ic3m[3],ic3p[3],ic3[3];
-	
 	      loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
 				   ic3p,ic3p+1,ic3p+2,
 				   if3[0],if3[1],if3[2]);
+
 	      for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
 		for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
 		  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
 		    Index index_nibling = 
 		      index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
-		    thisProxy[index_nibling].p_set_face_level (jf3,level_+1);
+
+		    thisProxy[index_nibling].p_set_face_level (jf3,level_+1,false);
 		  }
 		}
 	      }
@@ -375,18 +365,11 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_balance(int if3[3], int level)
+void CommBlock::p_balance(int ic3[3], int if3[3], int level)
 {
-  p_set_face_level(if3,level);
   refine();
-}
-
-//----------------------------------------------------------------------
-
-bool CommBlock::can_refine() const
-{
-  int max_level = simulation()->config()->mesh_max_level;
-  return (is_leaf() && level_ < max_level);
+  Index index_child = index_.index_child(ic3[0],ic3[1],ic3[2]);
+  thisProxy[index_child].p_set_face_level(if3,level,false);
 }
 
 //----------------------------------------------------------------------
@@ -568,12 +551,8 @@ void CommBlock::q_adapt_end()
     if (cycle() == simulation()->config()->initial_cycle) {
       simulation()->parameters()->check();
     }
-  };
-
-
-
+  }
   TRACE ("END   PHASE ADAPT");
-  
 }
 
 //----------------------------------------------------------------------

@@ -234,6 +234,27 @@ void OutputImage::write_block
 
     reduce_box_(ixm,ixp,iym,iyp,double(level+1));
 
+    if (comm_block->is_leaf()) {
+      int xm=(ixm+ixp)/2;
+      int ym=(iym+iyp)/2;
+      {
+	int if3[3] = {-1,0,0};
+	reduce_line_y_(ixm+1,ym-1,ym+1, comm_block->face_level(if3)+1);
+      }
+      {
+	int if3[3] = {1,0,0};
+	reduce_line_y_(ixp-1,ym-1,ym+1, comm_block->face_level(if3)+1);
+      }
+      {
+	int if3[3] = {0,-1,0};
+	reduce_line_x_(xm-1,xm+1,iym+1, comm_block->face_level(if3)+1);
+      }
+      {
+	int if3[3] = {0,1,0};
+	reduce_line_x_(xm-1,xm+1,iyp-1, comm_block->face_level(if3)+1);
+      }
+    }
+
   } else if (image_type_ == "data") {
 
     if (! comm_block->is_leaf()) return;
