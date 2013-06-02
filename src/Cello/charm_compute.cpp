@@ -20,10 +20,6 @@
 void SimulationCharm::c_compute()
 {
   
-#ifdef TEMP_SKIP_REFRESH
-  CkExit();
-#endif
-
   TRACE("SimulationCharm::c_compute()");
   if (cycle_ > 0 ) performance()->stop_region (perf_cycle);
 
@@ -46,7 +42,7 @@ void SimulationCharm::c_compute()
 
 void CommBlock::p_compute (int cycle, double time, double dt)
 {
-  TRACE ("BEGIN PHASE COMPUTE");
+  if (index_.is_root()) TRACE ("BEGIN PHASE COMPUTE");
   // set_cycle(cycle);
   // set_time(time);
   // set_dt(dt);
@@ -88,8 +84,8 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   TRACE ("CommBlock::compute() calling p_adapt(0)");
 
+  if (index_.is_root()) TRACE ("END   PHASE COMPUTE");
   p_adapt_begin();
-  TRACE ("END   PHASE COMPUTE");
 }
 
 // //----------------------------------------------------------------------

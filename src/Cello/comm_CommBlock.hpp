@@ -226,6 +226,12 @@ public: // interface
 
   void set_face_level (int if3[3], int level, int recurse)
   { 
+#ifdef DEBUG_ADAPT
+    char buffer[80];
+    sprintf (buffer,"SET_FACE %d %d %d = %d [%d]\n",if3[0],if3[1],if3[2],level,__LINE__);
+    index_.print(buffer,-1,2);
+#endif /* DEBUG_ADAPT */
+
     face_level_[IF3(if3)] = level; 
      if (recurse && ! is_leaf()) {
        for (size_t ic=0; ic<children_.size(); ic++) {

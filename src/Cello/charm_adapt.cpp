@@ -25,7 +25,7 @@ const char * adapt_name[] = {
 
 void CommBlock::p_adapt_begin()
 {
-  TRACE ("BEGIN PHASE ADAPT");
+   TRACE ("BEGIN PHASE ADAPT\n");
   Performance * performance = simulation()->performance();
   if (! performance->is_region_active(perf_adapt)) {
     performance->start_region(perf_adapt);
@@ -190,6 +190,7 @@ void CommBlock::refine()
 
     if ( ! is_child(index_child) ) {
 
+      //      printf ("TRACE %s:%d\n",__FILE__,__LINE__);
       // create child
 
       int num_field_blocks = 1;
@@ -209,6 +210,9 @@ void CommBlock::refine()
 
       field_face.set_prolong(prolong,ic3[0],ic3[1],ic3[2]);
       field_face.set_face(0,0,0); // 0-face is full block
+#ifdef FULL_GHOST
+      field_face.set_ghost(true,true,true);
+#endif
 
       field_face.load(&narray, &array);
 
@@ -241,6 +245,7 @@ void CommBlock::refine()
 
 void CommBlock::face_level_update_new_( Index index_child )
 {
+  //      printf ("TRACE %s:%d\n",__FILE__,__LINE__);
   Simulation * simulation = this->simulation();
 
   const int       rank         = simulation->dimension();
@@ -257,17 +262,28 @@ void CommBlock::face_level_update_new_( Index index_child )
   loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
 		       if3p+0,if3p+1,if3p+2);
 
+  if3m[0]=-1;
+  if3m[1]=-1;
+  if3m[2]=-1;
+  if3p[0]=+1;
+  if3p[1]=+1;
+  if3p[2]=+1;
+
   // Loop over all neighbors involved with communication
 
   for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
     for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
       for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
 
+
 	int rank_face = 
 	  rank - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
 
+	//	printf ("TRACE %s:%d  %d %d %d \n",__FILE__,__LINE__,rank_refresh,rank_face,rank);
+
 	if (rank_refresh <= rank_face && rank_face < rank) {
 
+	  //      printf ("TRACE %s:%d\n",__FILE__,__LINE__);
 	  // MY NEIGHBOR
 
 	  Index index_neighbor = index_.index_neighbor
@@ -289,9 +305,11 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 	    // SIBLING
 
-	    thisProxy[index_child].p_set_face_level (if3,level_+1,false);
+	    thisProxy[index_child].p_set_face_level 
+	      (if3,level_+1,false);
 
-	    thisProxy[index_child_neighbor].p_set_face_level (jf3,level_+1,false);
+	    thisProxy[index_child_neighbor].p_set_face_level 
+	      (jf3,level_+1,false);
 
 	  } else {
 
@@ -308,12 +326,14 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 		int ic3[3];
 		index_.child(level_,ic3+0,ic3+1,ic3+2);
+		// facing child
 		if (if3[0] == -1) ic3[0] = 1;
 		if (if3[1] == -1) ic3[1] = 1;
 		if (if3[2] == -1) ic3[2] = 1;
 		if (if3[0] == +1) ic3[0] = 0;
 		if (if3[1] == +1) ic3[1] = 0;
 		if (if3[2] == +1) ic3[2] = 0;
+
 		thisProxy[index_uncle].p_balance        (ic3,jf3,level_+1);
 
 	      }
@@ -330,9 +350,11 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 	      // COUSIN
 
-	      thisProxy[index_child].         p_set_face_level (if3,level_+1,false);
+	      thisProxy[index_child].         p_set_face_level 
+		(if3,level_+1,false);
 
-	      thisProxy[index_child_neighbor].p_set_face_level (jf3,level_+1,false);
+	      thisProxy[index_child_neighbor].p_set_face_level 
+		(jf3,level_+1,false);
 
 	    } else if (face_level == level_ + 2) {
 
@@ -348,10 +370,12 @@ void CommBlock::face_level_update_new_( Index index_child )
 	      for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
 		for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
 		  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
+
 		    Index index_nibling = 
 		      index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
 
-		    thisProxy[index_nibling].p_set_face_level (jf3,level_+1,false);
+		    thisProxy[index_nibling].p_set_face_level 
+		      (jf3,level_+1,false);
 		  }
 		}
 	      }
@@ -382,8 +406,14 @@ bool CommBlock::can_coarsen() const
   int rank = simulation()->dimension();
   int if3m[3],if3p[3],if3[3];
 
-  loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
-		       if3p+0,if3p+1,if3p+2);
+  // loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
+  // 		       if3p+0,if3p+1,if3p+2);
+  if3m[0]=-1;
+  if3m[1]=-1;
+  if3m[2]=-1;
+  if3p[0]=+1;
+  if3p[1]=+1;
+  if3p[2]=+1;
 
   for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
     for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
@@ -424,6 +454,9 @@ void CommBlock::coarsen()
 
   field_face.set_restrict(restrict,icx,icy,icz);
   field_face.set_face(0,0,0); // 0-face is full block
+#ifdef FULL_GHOST
+  field_face.set_ghost(true,true,true);
+#endif
 
   int narray; 
   char * array;
@@ -468,6 +501,9 @@ void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
   Restrict *   restrict = simulation->problem()->restrict();
   child_field_face.set_restrict(restrict,icx,icy,icz);
   child_field_face.set_face(0,0,0);
+#ifdef FULL_GHOST
+  child_field_face.set_ghost(true,true,true);
+#endif
    
   child_field_face.store (n, array);
   // </duplicated code>
@@ -501,19 +537,14 @@ void CommBlock::x_refresh_child (int n, char * buffer,
 
   // Full block data
   field_face.set_face(0,0,0);
+#ifdef FULL_GHOST
+  field_face.set_ghost(true,true,true);
+#endif
 
   field_face.set_restrict(restrict,icx,icy,icz);
    
   field_face.store (n, buffer);
 
-  // Will need counter if not using QD
-  // std::string refresh_type = config->field_refresh_type;
-  
-  // if (refresh_type == "counter") {
-  //   if (loop_refresh_.done()) {
-  //     q_refresh_end();
-  //   }
-  // }
 }
 
 //----------------------------------------------------------------------
@@ -544,6 +575,7 @@ void CommBlock::q_adapt_end()
 
   if (thisIndex.is_root()) {
 
+    if (index_.is_root()) TRACE ("END   PHASE ADAPT\n");
     thisProxy.p_refresh_begin();
 
     // Check parameters now that all should have been accessed
@@ -552,7 +584,6 @@ void CommBlock::q_adapt_end()
       simulation()->parameters()->check();
     }
   }
-  TRACE ("END   PHASE ADAPT");
 }
 
 //----------------------------------------------------------------------

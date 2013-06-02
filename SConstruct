@@ -8,7 +8,7 @@ import sys
 # (TEMPORARY) Whether to bypass Block refresh and jump to output
 # (for debugging adapt)
 
-skip_refresh = 0
+full_ghost = 1
 
 # Whether to print out messages with the TRACE() series of statements
 
@@ -123,7 +123,7 @@ define = {}
 
 # Temporary defines
 
-define_skip_refresh =        ['TEMP_SKIP_REFRESH']
+define_full_ghost =        ['FULL_GHOST']
 
 # Parallel type defines
 
@@ -216,7 +216,7 @@ if (use_gprof == 1):
   
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
-if (skip_refresh != 0):      defines = defines + define_skip_refresh
+if (full_ghost != 0):      defines = defines + define_full_ghost
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory

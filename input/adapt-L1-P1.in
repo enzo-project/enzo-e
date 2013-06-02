@@ -44,7 +44,7 @@ Initial {
 Field {
     ghosts = 4; # must be even for ProlongLinear
    refresh {
-#     rank = 0;
+     rank = 0;
      type = "quiescence";
    }
 }
@@ -55,32 +55,28 @@ Output {
       file_groups = ["density", "mesh"];
 
       density {
-#               name = ["adapt-L1-P1-density-%04d.png", "cycle"]; 
-#              schedule = ["cycle","interval", 25];
-             name = ["adapt-L1-P1-density-%f.png", "time"]; 
-              schedule = ["time","interval", 0.025];
-               };
-
-#      density { name = ["adapt-L1-P1-density-%04f.png", "time"]; 
-#              schedule = ["time","interval", 0.025];
-#      };
+#             image_ghost = true;
+#             name = ["adapt-L1-P1-density-%04d.png", "cycle"]; 
+#             schedule = ["cycle","interval", 1];
+            name = ["adapt-L1-P1-density-%f.png", "time"]; 
+            schedule = ["time","interval", 0.025];
+        };
 
       mesh {
 	type     = "image";
 	image_type  = "mesh";
 	image_reduce_type = "max";
         field_list = ["density"];
-	image_block_size  = 1;
+	image_block_size  = 5;
 #	image_size = [160,160];
-              schedule = ["time","interval", 0.025];
-             name = ["adapt-L1-P1-mesh-%f.png", "time"]; 
-#	schedule = ["cycle","interval", 25];
+       schedule = ["time","interval", 0.025];
+       name = ["adapt-L1-P1-mesh-%f.png", "time"]; 
+#	schedule = ["cycle","interval", 1];
 #        name = ["adapt-L1-P1-mesh-%04d.png","cycle"];
         colormap = [1.00, 1.00, 1.00,  
                     0.00, 1.00, 0.00, 
                     1.00, 0.00, 0.00, 
                     0.00, 0.00, 1.00];
-        
       }
 }
 

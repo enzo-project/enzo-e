@@ -85,7 +85,7 @@ void FieldFace::copy_(const FieldFace & field_face)
     face_[i] = field_face.face_[i];
     child_[i] = field_face.child_[i];
   }
-  prolong_ =  field_face.prolong_;
+  prolong_  =  field_face.prolong_;
   restrict_ =  field_face.restrict_;
 }
 //----------------------------------------------------------------------
@@ -196,6 +196,8 @@ void FieldFace::store (int n, char * array) throw()
 
   size_t index_array = 0;
 
+  const int index_density = field_descr_->field_id("density");
+
   for (size_t index_field=0; index_field<num_fields; index_field++) {
 
     precision_type precision = field_descr_->precision(index_field);
@@ -225,10 +227,16 @@ void FieldFace::store (int n, char * array) throw()
 
       int im3_array[3] = {0,0,0};
 
+      bool is_density = (index_field == index_density);
+
+      //      if (! is_density) field_block_->scale(index_field,4.0,field_descr_);
+
       index_array += prolong_->apply
 	(precision, 
 	 field_ghost,nd3,im3,       n3,
 	 array_ghost,nc3,im3_array, nc3);
+
+      //      if (! is_density) field_block_->scale(index_field,1.0/4.0,field_descr_);
 
     } else {
 

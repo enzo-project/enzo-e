@@ -544,11 +544,158 @@ int FieldBlock::field_size
 
 //----------------------------------------------------------------------
 
+void FieldBlock::mul (int id_1, int id_2, const FieldDescr * field_descr)
+{
+  printf ("FieldBlock::mul %d %d\n",id_1,id_2);
+  precision_type p1 = field_descr->precision(id_1);
+  precision_type p2 = field_descr->precision(id_2);
+  ASSERT ("FieldBlock::mul",
+	  "FieldBlock precisions must be constant",
+	  p1 == p2);
+
+  char * field_1 = field_unknowns(field_descr,id_1);
+  char * field_2 = field_unknowns(field_descr,id_2);
+  
+  switch (p1) {
+  case precision_single:
+    mul_((float *) field_1, (float *) field_2, field_descr);
+    break;
+  case precision_double:
+    mul_((double *) field_1,(double *) field_2, field_descr);
+    break;
+  default:
+    break;
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+template<class T>
+void FieldBlock::mul_ (T * field_1, T * field_2, const FieldDescr * field_descr)
+{
+  int nx,ny,nz;
+  size (&nx,&ny,&nz);
+  int gx,gy,gz;
+  field_descr->ghosts (0,&gx,&gy,&gz);
+  int ndx = (nx>1) ? nx+2*gx : 1;
+  int ndy = (ny>1) ? ny+2*gy : 1;
+  int ndz = (nz>1) ? nz+2*gz : 1;
+
+  for (int ix=0; ix<nx; ix++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int iz=0; iz<nz; iz++) {
+	int i=ix + ndx*(iy + ndy*iz);
+	field_1[i] *= field_2[i];
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlock::div (int id_1, int id_2, const FieldDescr * field_descr)
+{
+  printf ("FieldBlock::div %d %d\n",id_1,id_2);
+  precision_type p1 = field_descr->precision(id_1);
+  precision_type p2 = field_descr->precision(id_2);
+  ASSERT ("FieldBlock::div",
+	  "FieldBlock precisions must be constant",
+	  p1 == p2);
+
+  char * field_1 = field_unknowns(field_descr,id_1);
+  char * field_2 = field_unknowns(field_descr,id_2);
+  
+  switch (p1) {
+  case precision_single:
+    div_((float *) field_1, (float *) field_2, field_descr);
+    break;
+  case precision_double:
+    div_((double *) field_1,(double *) field_2, field_descr);
+    break;
+  default:
+    break;
+  }
+
+}
+
+
+//----------------------------------------------------------------------
+
+void FieldBlock::scale (int id, double value, const FieldDescr * field_descr)
+{
+  printf ("FieldBlock::scale %d %f\n",id,value);
+  precision_type p = field_descr->precision(id);
+
+  char * field = field_unknowns(field_descr,id);
+  
+  switch (p) {
+  case precision_single:
+    scale_((float *) field, value,field_descr);
+    break;
+  case precision_double:
+    scale_((double *) field,value, field_descr);
+    break;
+  default:
+    break;
+  }
+
+}
+
+
+//----------------------------------------------------------------------
+
+template<class T>
+void FieldBlock::div_ (T * field_1, T * field_2, const FieldDescr * field_descr)
+{
+  int nx,ny,nz;
+  size (&nx,&ny,&nz);
+  int gx,gy,gz;
+  field_descr->ghosts (0,&gx,&gy,&gz);
+  int ndx = (nx>1) ? nx+2*gx : 1;
+  int ndy = (ny>1) ? ny+2*gy : 1;
+  int ndz = (nz>1) ? nz+2*gz : 1;
+
+  for (int ix=0; ix<nx; ix++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int iz=0; iz<nz; iz++) {
+	int i=ix + ndx*(iy + ndy*iz);
+	field_1[i] /= field_2[i];
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+template<class T>
+void FieldBlock::scale_ (T * field, double value, const FieldDescr * field_descr)
+{
+  int nx,ny,nz;
+  size (&nx,&ny,&nz);
+  int gx,gy,gz;
+  field_descr->ghosts (0,&gx,&gy,&gz);
+  int ndx = (nx>1) ? nx+2*gx : 1;
+  int ndy = (ny>1) ? ny+2*gy : 1;
+  int ndz = (nz>1) ? nz+2*gz : 1;
+
+  for (int ix=0; ix<nx; ix++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int iz=0; iz<nz; iz++) {
+	int i=ix + ndx*(iy + ndy*iz);
+	field[i] *= value;
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void FieldBlock::print
 (const FieldDescr * field_descr,
  const char * message,
- double lower[3],
- double upper[3],
+ // double lower[3],
+ // double upper[3],
  bool use_file) const throw()
 {
 
@@ -613,42 +760,45 @@ void FieldBlock::print
      ny = (iyp-iym);
      nz = (izp-izm);
 
-     double hx,hy,hz;
+     //     double hx,hy,hz;
 
-     hx = (upper[0]-lower[0])/(nxd-2*gx);
-     hy = (upper[1]-lower[1])/(nyd-2*gy);
-     hz = (upper[2]-lower[2])/(nzd-2*gz);
+     // hx = (upper[0]-lower[0])/(nxd-2*gx);
+     // hy = (upper[1]-lower[1])/(nyd-2*gy);
+     // hz = (upper[2]-lower[2])/(nzd-2*gz);
 
      const char * array_offset = &array_[0]+offsets_[index_field];
      switch (field_descr->precision(index_field)) {
      case precision_single:
        print_((const float * ) array_offset,
-	      field_name, message, lower, fp,
+	      field_name, message, // lower,
+	      fp,
 	      ixm,iym,izm,
 	      ixp,iyp,izp,
 	      nx, ny, nz,
 	      gx, gy ,gz,
-	      hx, hy ,hz,
+	      //	      hx, hy ,hz,
 	      nxd,nyd);
        break;
      case precision_double:
        print_((const double * ) array_offset, 
-	      field_name, message, lower, fp,
+	      field_name, message, // lower,
+	      fp,
 	      ixm,iym,izm,
 	      ixp,iyp,izp,
 	      nx, ny, nz,
 	      gx, gy ,gz,
-	      hx, hy ,hz,
+	      //	      hx, hy ,hz,
 	      nxd,nyd);
        break;
      case precision_quadruple:
        print_((const long double * ) array_offset, 
-	      field_name, message, lower, fp,
+	      field_name, message, // lower,
+	      fp,
 	      ixm,iym,izm,
 	      ixp,iyp,izp,
 	      nx, ny, nz,
 	      gx, gy ,gz,
-	      hx, hy ,hz,
+	      //	      hx, hy ,hz,
 	      nxd,nyd);
        break;
      default:
@@ -666,13 +816,13 @@ void FieldBlock::print_
 (const T * field,
  const char * field_name,
  const char * message,
- double lower [3],
+ // double lower [3],
  FILE * fp,
  int ixm,int iym,int izm,
  int ixp,int iyp,int izp,
  int nx, int ny, int nz,
  int gx, int gy ,int gz,
- double hx, double hy ,double hz,
+ // double hx, double hy ,double hz,
  int nxd,int nyd) const
 {
 
@@ -687,9 +837,9 @@ void FieldBlock::print_
 	max = MAX(max,field[i]);
 	sum += field[i];
 #ifdef CELLO_DEBUG_VERBOSE
-	double x = hx*(ix-gx) + lower[axis_x];
-	double y = hy*(iy-gy) + lower[axis_y];
-	double z = hz*(iz-gz) + lower[axis_z];
+	// double x = hx*(ix-gx) + lower[axis_x];
+	// double y = hy*(iy-gy) + lower[axis_y];
+	// double z = hz*(iz-gz) + lower[axis_z];
 	if (isnan(field[i])) {
 	  fprintf(fp,"DEBUG: %s %s  %2d %2d %2d NAN\n",
 		  message,field_name,ix,iy,iz);

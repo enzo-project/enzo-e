@@ -22,6 +22,16 @@ int ProlongLinear::apply
   void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
   const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
 {
+  TRACE6("ProlongLinear fine   %d:%d %d:%d %d:%d",
+	 im3_f[0],n3_f[0]+im3_f[0],
+	 im3_f[1],n3_f[1]+im3_f[1],
+	 im3_f[2],n3_f[2]+im3_f[2]);
+
+  TRACE6("ProlongLinear coarse %d:%d %d:%d %d:%d",
+	 im3_c[0],n3_c[0]+im3_c[0],
+	 im3_c[1],n3_c[1]+im3_c[1],
+	 im3_c[2],n3_c[2]+im3_c[2]);
+
   switch (precision)  {
 
   case precision_single:
@@ -93,11 +103,14 @@ int ProlongLinear::apply_
       }
     }
 
-    return (sizeof(T) * n3_f[0]);
+    return (sizeof(T) * n3_c[0]);
 
 
   } else if (n3_f[2] == 1) {
 
+    T min=100, avg = 0, sum = 0, max=-100;
+    int ixmin=100,ixmax=-100,iymin=100,iymax=-100;
+    int count = 0;
     for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
       int ic_x = ix0/2;
       for (int iy0=0; iy0<n3_f[1]; iy0+=4) {
@@ -115,17 +128,25 @@ int ProlongLinear::apply_
 	    int i_f = (im3_f[0]+if_x) + nd3_f[0]*
 	      (       (im3_f[1]+if_y));
 
+	    ixmax=std::max(ixmax,im3_f[0]+if_x);
+	    iymax=std::max(iymax,im3_f[1]+if_y);
+	    ixmin=std::min(ixmin,im3_f[0]+if_x);
+	    iymin=std::min(iymin,im3_f[1]+if_y);
+
 	    values_f[i_f] = 
 	      ( c1[icx]*c1[icy]*values_c[i_c] +
 		c2[icx]*c1[icy]*values_c[i_c+dx_c] +
 		c1[icx]*c2[icy]*values_c[i_c     +dy_c] +
 		c2[icx]*c2[icy]*values_c[i_c+dx_c+dy_c]);
+	    min=std::min(min,values_f[i_f]);
+	    sum += values_f[i_f];
+	    max=std::max(max,values_f[i_f]);
+	    count++;
 	  }
 	}
       }
     }
-
-    return (sizeof(T) * n3_f[0]*n3_f[1]);
+    return (sizeof(T) * n3_c[0]*n3_c[1]);
 
   } else {
 
@@ -169,7 +190,7 @@ int ProlongLinear::apply_
       }
     }
   }
-  return (sizeof(T) * n3_f[0]*n3_f[1]*n3_f[2]);
+  return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
 
 }
 

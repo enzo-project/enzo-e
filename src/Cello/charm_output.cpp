@@ -104,7 +104,7 @@
 void CommBlock::p_output(CkReductionMsg * msg)
 {
 
-  TRACE ("BEGIN PHASE OUTPUT");
+  if (index_.is_root()) TRACE ("BEGIN PHASE OUTPUT");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   TRACE("CommBlock::p_output()");
@@ -308,7 +308,7 @@ void SimulationCharm::monitor_output()
 
   performance()->stop_region(perf_output);
 
-  TRACE ("END   PHASE OUTPUT");
+  if (group_process()->is_root()) TRACE ("END   PHASE OUTPUT");
   c_compute();
 }
 //======================================================================

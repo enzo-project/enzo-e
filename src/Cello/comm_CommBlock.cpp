@@ -115,6 +115,9 @@ CommBlock::CommBlock
 
     //    set "face" to full FieldBlock
     field_face.set_face(0,0,0);
+#ifdef FULL_GHOST
+    field_face.set_ghost(true,true,true);
+#endif
 
     //    set array operation if any
     switch (op_array) {
@@ -230,6 +233,9 @@ CommBlock::~CommBlock() throw ()
 
     //    set "face" to full FieldBlock
     field_face.set_face(0,0,0);
+#ifdef FULL_GHOST
+    field_face.set_ghost(true,true,true);
+#endif
 
     //    set restriction
     Restrict * restrict = simulation()->problem()->restrict();
@@ -505,9 +511,6 @@ void CommBlock::loop_limits_refresh_
   // which faces need to be refreshed?
   bool on_boundary[3][2];
   is_on_boundary (on_boundary);
-  TRACE6("REFRESH is_on_boundary %d %d %d  %d %d %d",
-	 on_boundary[0][0],on_boundary[1][0],on_boundary[2][0],
-	 on_boundary[0][1],on_boundary[1][1],on_boundary[2][1]);
 
   bool periodic = boundary->is_periodic();
   if (periodic) {
