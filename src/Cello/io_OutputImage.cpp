@@ -239,20 +239,36 @@ void OutputImage::write_block
       int ym=(iym+iyp)/2;
       {
 	int if3[3] = {-1,0,0};
-	reduce_line_y_(ixm+1,ym-1,ym+1, comm_block->face_level(if3)+1);
+	reduce_cube_(ixm+1,ixm+2,ym-1,ym+1, comm_block->face_level(if3)+1);
       }
       {
 	int if3[3] = {1,0,0};
-	reduce_line_y_(ixp-1,ym-1,ym+1, comm_block->face_level(if3)+1);
+	reduce_cube_(ixp-2,ixp-1,ym-1,ym+1, comm_block->face_level(if3)+1);
       }
       {
 	int if3[3] = {0,-1,0};
-	reduce_line_x_(xm-1,xm+1,iym+1, comm_block->face_level(if3)+1);
+	reduce_cube_(xm-1,xm+1,iym+1,iym+2, comm_block->face_level(if3)+1);
       }
       {
 	int if3[3] = {0,1,0};
-	reduce_line_x_(xm-1,xm+1,iyp-1, comm_block->face_level(if3)+1);
+	reduce_cube_(xm-1,xm+1,iyp-2,iyp-1, comm_block->face_level(if3)+1);
       }
+       {
+       	int if3[3] = {-1,-1,0};
+       	reduce_cube_(ixm+1,ixm+2,iym+1,iym+2, comm_block->face_level(if3)+1);
+       }
+       {
+       	int if3[3] = {1,-1,0};
+       	reduce_cube_(ixp-2,ixp-1,iym+1,iym+2, comm_block->face_level(if3)+1);
+       }
+       {
+       	int if3[3] = {-1,1,0};
+       	reduce_cube_(ixm+1,ixm+2,iyp-2,iyp-1, comm_block->face_level(if3)+1);
+       }
+       {
+       	int if3[3] = {1,1,0};
+       	reduce_cube_(ixp-2,ixp-1,iyp-2,iyp-1, comm_block->face_level(if3)+1);
+       }
     }
 
   } else if (image_type_ == "data") {
@@ -361,23 +377,14 @@ void OutputImage::update_remote  ( int n, char * buffer) throw()
   int ny = *p.i++;
 
   if (op_reduce_ == reduce_min) {
-
     for (int k=0; k<nx*ny; k++) data_[k] = std::min(data_[k],*p.d++);
-
   } else if (op_reduce_ == reduce_max) {
-
     for (int k=0; k<nx*ny; k++) data_[k] = std::max(data_[k],*p.d++);
-
   } else if (op_reduce_ == reduce_sum) {
-
     for (int k=0; k<nx*ny; k++) data_[k] += *p.d++;
-
   } else if (op_reduce_ == reduce_avg) {
-
     for (int k=0; k<nx*ny; k++) data_[k]  += *p.d++;
-
   } else if (op_reduce_ == reduce_set) {
-
     for (int k=0; k<nx*ny; k++) data_[k]  = *p.d++;
 
   }
@@ -565,6 +572,44 @@ void OutputImage::reduce_point_
     break;
   case reduce_set:
     *data = value;
+  }
+}
+
+//----------------------------------------------------------------------
+
+void OutputImage::reduce_line_(int ix0, int ix1, int iy0, int iy1, double value)
+{
+  if (ix1 < ix0) { int t = ix1; ix1 = ix0; ix0 = t; }
+  if (iy1 < iy0) { int t = iy1; iy1 = iy0; iy0 = t; }
+
+  int dx = ix1 - ix0;
+  int dy = iy1 - iy0;
+  double err = 0.0;
+  
+  if (dx >= dy) {
+    double derr = fabs(1.0*dy/dx);
+    int iy = iy0;
+    for (int ix = ix0; ix<=ix1; ix++) {
+      int i = ix + nxi_*iy;
+      reduce_point_(&data_[i],value);
+      err += derr;
+      if (err >= 0.5) {
+	++iy;
+	err -= 1.0;
+      }
+    }
+  } else {
+    double derr = fabs(1.0*dx/dy);
+    int ix = ix0;
+    for (int iy = iy0; iy<=iy1; iy++) {
+      int i = ix + nxi_*iy;
+      reduce_point_(&data_[i],value);
+      err += derr;
+      if (err >= 0.5) {
+	++ix;
+	err -= 1.0;
+      }
+    }
   }
 }
 

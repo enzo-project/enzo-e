@@ -119,6 +119,7 @@ private: // functions
 		     int *iym, int *iyp,
 		     int *izm, int *izp ) const;
 
+  void reduce_line_(int ixm, int ixp, int iym, int iyp, double value);
   void reduce_line_x_(int ixm, int ixp, int iy, double value);
   void reduce_line_y_(int ix, int iym, int iyp, double value);
   void reduce_box_(int ixm, int ixp, int iym, int iyp, double value);
