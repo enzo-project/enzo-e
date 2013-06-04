@@ -19,6 +19,7 @@ Mesh
 Field {
    ghosts = 4;
    refresh {
+     rank = 0;
      type = "quiescence";
    }
 }
@@ -46,7 +47,7 @@ Initial {
 #                              0.1/(0.4*0.1) ]; };
 # }
 
-Stopping { cycle = 0; }
+Stopping { cycle = 100; }
 
 Output {
 
@@ -58,6 +59,7 @@ Output {
       image_data {
 	type     = "image";
 	image_type  = "data";
+        image_ghost = true;
 	image_size  = [1024,1024];
         field_list = ["density"];
 	schedule = ["cycle","interval", 10];

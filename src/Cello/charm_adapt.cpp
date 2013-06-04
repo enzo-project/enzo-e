@@ -206,7 +206,6 @@ void CommBlock::refine()
 
     if ( ! is_child(index_child) ) {
 
-      //      printf ("TRACE %s:%d\n",__FILE__,__LINE__);
       // create child
 
       int num_field_blocks = 1;
@@ -236,6 +235,19 @@ void CommBlock::refine()
     
       const Factory * factory = simulation->factory();
 
+      int face_level[27];
+      
+      int if3[3],if3m[3],if3p[3];
+      for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+	for (if3[1]=-1; if3[1]<=1; if3[1]++) {
+	  for (if3[2]=-1; if3[2]<=1; if3[2]++) {
+	    int ip3[3];
+	    parent_face_(ip3,if3,ic3);
+	    face_level[IF3(if3)] = face_level_[IF3(ip3)];
+	  }
+	}
+      }
+      
       factory->create_block 
 	(&thisProxy, index_child,
 	 nx,ny,nz,
@@ -244,7 +256,7 @@ void CommBlock::refine()
 	 initial,
 	 cycle_,time_,dt_,
 	 narray, array, op_array,
-	 27,&face_level_[0],
+	 27,face_level,
 	 testing);
 
       set_child(index_child);
@@ -261,7 +273,6 @@ void CommBlock::refine()
 
 void CommBlock::face_level_update_new_( Index index_child )
 {
-  //      printf ("TRACE %s:%d\n",__FILE__,__LINE__);
   Simulation * simulation = this->simulation();
 
   const int       rank         = simulation->dimension();
@@ -291,15 +302,11 @@ void CommBlock::face_level_update_new_( Index index_child )
     for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
       for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
 
-
 	int rank_face = 
 	  rank - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
 
-	//	printf ("TRACE %s:%d  %d %d %d \n",__FILE__,__LINE__,rank_refresh,rank_face,rank);
-
 	if (rank_refresh <= rank_face && rank_face < rank) {
 
-	  //      printf ("TRACE %s:%d\n",__FILE__,__LINE__);
 	  // MY NEIGHBOR
 
 	  Index index_neighbor = index_.index_neighbor
@@ -327,8 +334,16 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 	  } else {
 
-	    int face_level = face_level_[IF3(if3)];
-      
+	    int icc3[3];
+	    index_child.child(level_+1,icc3+0,icc3+1,icc3+2);
+	    int ip3[3];
+	    parent_face_(ip3,if3,icc3);
+
+	    int face_level = face_level_[IF3(ip3)];
+
+	    // sprintf (buffer,"parent face %d %d %d  %d %d %d  %d",if3[0],if3[1],if3[2],ip3[0],ip3[1],ip3[2],face_level);
+	    // index_child.print(buffer,-1,2);
+
 	    if (face_level == level_ - 1) {
 
 	      // GREAT UNCLE
@@ -338,17 +353,18 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 		SET_FACE_LEVEL(index_child,if3,level_,false,__LINE__);
 
+		// facing child
 		int ic3[3];
 		index_.child(level_,ic3+0,ic3+1,ic3+2);
-		// facing child
-		if (if3[0] == -1) ic3[0] = 1;
-		if (if3[1] == -1) ic3[1] = 1;
-		if (if3[2] == -1) ic3[2] = 1;
-		if (if3[0] == +1) ic3[0] = 0;
-		if (if3[1] == +1) ic3[1] = 0;
-		if (if3[2] == +1) ic3[2] = 0;
+		int jc3[3] = {ic3[0],ic3[1],ic3[2]};
+		if (if3[0] == -1) jc3[0] = 1;
+		if (if3[1] == -1) jc3[1] = 1;
+		if (if3[2] == -1) jc3[2] = 1;
+		if (if3[0] == +1) jc3[0] = 0;
+		if (if3[1] == +1) jc3[1] = 0;
+		if (if3[2] == +1) jc3[2] = 0;
 
-		thisProxy[index_uncle].p_balance (ic3,jf3,level_+1);
+		thisProxy[index_uncle].p_balance (jc3,jf3,level_+1);
 
 	      }
 
@@ -411,6 +427,7 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
 #endif
 
   face_level_[IF3(if3)] = std::max(face_level_[IF3(if3)],level); 
+  //  face_level_[IF3(if3)] = level;
 
   if (recurse && ! is_leaf()) {
 
@@ -430,13 +447,7 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
 	int ic3[3];
 	index_child.child(level_+1,ic3,ic3+1,ic3+2);
 
-	bool face_adjacent = true;
-	if (if3[0] == -1 && ic3[0] != 0) face_adjacent = false;
-	if (if3[0] == +1 && ic3[0] != 1) face_adjacent = false;
-	if (if3[1] == -1 && ic3[1] != 0) face_adjacent = false;
-	if (if3[1] == +1 && ic3[1] != 1) face_adjacent = false;
-	if (if3[2] == -1 && ic3[2] != 0) face_adjacent = false;
-	if (if3[2] == +1 && ic3[2] != 1) face_adjacent = false;
+	bool face_adjacent = child_is_on_face_(if3,ic3);
 
 	if (face_adjacent) {
 
@@ -444,23 +455,12 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
 	  SET_FACE_LEVEL(index_child,if3,level,true,__LINE__);
 #endif
 
-	  int icm[3], icp[3], icf3[3];
-	  icm[0] = (if3[0] != 0) ? if3[0] : -ic3[0];
-	  icp[0] = (if3[0] != 0) ? if3[0] : 1-ic3[0];
-	  icm[1] = (if3[1] != 0) ? if3[1] : -ic3[1];
-	  icp[1] = (if3[1] != 0) ? if3[1] : 1-ic3[1];
-	  icm[2] = (if3[2] != 0) ? if3[2] : -ic3[2];
-	  icp[2] = (if3[2] != 0) ? if3[2] : 1-ic3[2];
-	
-	  Simulation * simulation = this->simulation();
-	  const int rank = simulation->dimension();
+	  int ic3m[3], ic3p[3], icf3[3];
+	  loop_limits_faces_(ic3m,ic3p,if3,ic3);
 
-	  if (rank < 2) { icm[1]=0; icp[1]=0; }
-	  if (rank < 3) { icm[2]=0; icp[2]=0; }
-
-	  for (icf3[0]=icm[0]; icf3[0]<=icp[0]; icf3[0]++) {
-	    for (icf3[1]=icm[1]; icf3[1]<=icp[1]; icf3[1]++) {
-	      for (icf3[2]=icm[2]; icf3[2]<=icp[2]; icf3[2]++) {
+	  for (icf3[0]=ic3m[0]; icf3[0]<=ic3p[0]; icf3[0]++) {
+	    for (icf3[1]=ic3m[1]; icf3[1]<=ic3p[1]; icf3[1]++) {
+	      for (icf3[2]=ic3m[2]; icf3[2]<=ic3p[2]; icf3[2]++) {
 #ifdef CONFIG_USE_CHARM
 		SET_FACE_LEVEL(index_child,icf3,level,true,__LINE__);
 #endif
@@ -471,6 +471,54 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
       }
     }
   } 
+}
+
+//----------------------------------------------------------------------
+
+bool CommBlock::child_is_on_face_(int if3[3], int ic3[3]) const
+{
+  bool face_adjacent = true;
+  if (if3[0] == -1 && ic3[0] != 0) face_adjacent = false;
+  if (if3[0] == +1 && ic3[0] != 1) face_adjacent = false;
+  if (if3[1] == -1 && ic3[1] != 0) face_adjacent = false;
+  if (if3[1] == +1 && ic3[1] != 1) face_adjacent = false;
+  if (if3[2] == -1 && ic3[2] != 0) face_adjacent = false;
+  if (if3[2] == +1 && ic3[2] != 1) face_adjacent = false;
+  return face_adjacent;
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::loop_limits_faces_ 
+(int ic3m[3], int ic3p[3], int if3[3], int ic3[3]) const
+{
+  ic3m[0] = (if3[0] != 0) ? if3[0] : -ic3[0];
+  ic3p[0] = (if3[0] != 0) ? if3[0] : 1-ic3[0];
+  ic3m[1] = (if3[1] != 0) ? if3[1] : -ic3[1];
+  ic3p[1] = (if3[1] != 0) ? if3[1] : 1-ic3[1];
+  ic3m[2] = (if3[2] != 0) ? if3[2] : -ic3[2];
+  ic3p[2] = (if3[2] != 0) ? if3[2] : 1-ic3[2];
+	
+  Simulation * simulation = this->simulation();
+  const int rank = simulation->dimension();
+
+  if (rank < 2) { ic3m[1]=0; ic3p[1]=0; }
+  if (rank < 3) { ic3m[2]=0; ic3p[2]=0; }
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::parent_face_(int ip3[3],int if3[3], int ic3[3]) const
+{
+  ip3[0] = if3[0];
+  ip3[1] = if3[1];
+  ip3[2] = if3[2];
+  if (if3[0] == +1 && ic3[0] == 0) ip3[0] = 0;
+  if (if3[0] == -1 && ic3[0] == 1) ip3[0] = 0;
+  if (if3[1] == +1 && ic3[1] == 0) ip3[1] = 0;
+  if (if3[1] == -1 && ic3[1] == 1) ip3[1] = 0;
+  if (if3[2] == +1 && ic3[2] == 0) ip3[2] = 0;
+  if (if3[2] == -1 && ic3[2] == 1) ip3[2] = 0;
 }
 
 //----------------------------------------------------------------------

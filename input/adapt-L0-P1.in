@@ -1,0 +1,20 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/adapt.incl"
+
+Mesh    {
+   root_size   = [512,512];
+   max_level   = 0; 
+}
+
+Initial {  max_level = 0; }
+
+Output {
+      density { 
+             name = ["adapt-L0-P1-density-%f.png", "time"]; 
+      };
+      mesh { 
+             name = ["adapt-L0-P1-mesh-%f.png", "time"]; 
+      }
+}

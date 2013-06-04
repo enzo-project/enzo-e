@@ -1,11 +1,11 @@
-`# Problem: 2D Implosion problem
+# Problem: 2D Implosion problem
 # Author:  James Bordner (jobordner@ucsd.edu)
 
-include "input/adapt-L1-P1.in"
+include "input/adapt.incl"
 
 Mesh    {
    root_size   = [64,64];
-    max_level   = 3; 
+   max_level   = 3; 
 }
 
 Initial {  max_level = 3; }
@@ -13,8 +13,8 @@ Initial {  max_level = 3; }
 Output {
       density { 
              name = ["adapt-L3-P1-density-%f.png", "time"]; 
-};
+      };
       mesh { 
              name = ["adapt-L3-P1-mesh-%f.png", "time"]; 
-     }
+      }
 }

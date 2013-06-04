@@ -228,6 +228,19 @@ public: // interface
 
   void set_face_level (int if3[3], int level, int recurse, int line);
 
+  /// Return limits of faces of the given child corresponding to the
+  /// given face of the parent
+  void loop_limits_faces_ 
+  (int icm3[3], int icp3[3], int if3[3], int ic3[3]) const;
+
+  /// Return whether the given face of the given child and its parent
+  /// intersect
+  bool child_is_on_face_(int if3[3],int ic3[3]) const;
+
+  /// Return the face of the parent corresponding to the given face
+  /// of the given child.  Inverse of loop_limits_faces_
+  void parent_face_(int ipf3[3],int if3[3], int ic3[3]) const;
+
   int face_level (int if3[3]) const
   {  return face_level_[IF3(if3)];  }
 

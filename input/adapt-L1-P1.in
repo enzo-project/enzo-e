@@ -1,88 +1,20 @@
 # Problem: 2D Implosion problem
 # Author:  James Bordner (jobordner@ucsd.edu)
 
-include "input/method_ppm-1.in"
+include "input/adapt.incl"
 
-Mesh {
+Mesh    {
    root_size   = [256,256];
-   root_blocks = [1,1];
    max_level   = 1; 
-   adapt {
-      type = ["slope"];
-      balance = true;
-   }
 }
 
-Stopping { 
-#	 cycle = 0; 
-	 time = 0.1;
-}
-
-Boundary { type = "periodic"; }
-
-Testing {
-   cycle_final = 100; 
-   time_final  = 0.108293093927205;
-}
-
-Initial {
-    density       { value = 
-    [ 0.125,  (x- 0.50)*(x- 0.50)+(y- 0.50)*(y- 0.50) <= 0.01,
-#      0.125,  (x- 0.75)*(x- 0.75)+(y- 0.25)*(y- 0.25) <= 0.01,
-#      0.125,  (x- 0.75)*(x- 0.75)+(y- 0.75)*(y- 0.75) <= 0.01,
-#      0.125,  (x- 0.25)*(x- 0.25)+(y- 0.75)*(y- 0.75) <= 0.01,
-                   1.000 ]; };
-    total_energy  { value = 
-    [ 0.14 / (0.4 * 0.1) , (x- 0.50)*(x- 0.50)+(y- 0.50)*(y- 0.50) <= 0.01,
-#      0.14 / (0.4 * 0.1) , (x- 0.75)*(x- 0.75)+(y- 0.25)*(y- 0.25) <= 0.01,
-#      0.14 / (0.4 * 0.1) , (x- 0.75)*(x- 0.75)+(y- 0.75)*(y- 0.75) <= 0.01,
-#      0.14 / (0.4 * 0.1) , (x- 0.25)*(x- 0.25)+(y- 0.75)*(y- 0.75) <= 0.01,
-                      1.0  / (0.4 * 1.0) ]; };
-    velocity_x    { value = [0.0]; };
-    velocity_y    { value = [0.0]; }
-}
-
-
-Initial {
-   max_level = 1;
-}
-
-Field {
-    ghosts = 4; # must be even for ProlongLinear
-   refresh {
-     rank = 0;
-     type = "quiescence";
-   }
-}
-
+Initial {  max_level = 1; }
 
 Output {
-
-      file_groups = ["density", "mesh"];
-
-      density {
-#             image_ghost = true;
-#             name = ["adapt-L1-P1-density-%04d.png", "cycle"]; 
-#             schedule = ["cycle","interval", 1];
-            name = ["adapt-L1-P1-density-%f.png", "time"]; 
-            schedule = ["time","interval", 0.025];
-        };
-
-      mesh {
-	type     = "image";
-	image_type  = "mesh";
-	image_reduce_type = "max";
-        field_list = ["density"];
-	image_block_size  = 5;
-#	image_size = [160,160];
-       schedule = ["time","interval", 0.025];
-       name = ["adapt-L1-P1-mesh-%f.png", "time"]; 
-#	schedule = ["cycle","interval", 1];
-#        name = ["adapt-L1-P1-mesh-%04d.png","cycle"];
-        colormap = [1.00, 1.00, 1.00,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00, 
-                    0.00, 0.00, 1.00];
+      density { 
+             name = ["adapt-L1-P1-density-%f.png", "time"]; 
+      };
+      mesh { 
+             name = ["adapt-L1-P1-mesh-%f.png", "time"]; 
       }
 }
-
