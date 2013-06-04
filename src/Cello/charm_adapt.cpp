@@ -7,6 +7,22 @@
 
 #ifdef CONFIG_USE_CHARM
 
+/* #define DEBUG_ADAPT */
+
+#ifdef DEBUG_ADAPT
+
+char buffer [80];
+
+#define SET_FACE_LEVEL(INDEX,IF3,LEVEL,RECURSE,LINE)		\
+  sprintf (buffer,"set_face_level(%d %d %d  = %d) [%d]",	\
+	   IF3[0],IF3[1],IF3[2],LEVEL,__LINE__);		\
+  INDEX.print(buffer,-1,2);					\
+  thisProxy[INDEX].p_set_face_level (IF3,LEVEL,RECURSE,LINE);
+#else /* DEBUG_ADAPT */
+#define SET_FACE_LEVEL(INDEX,IF3,LEVEL,RECURSE,LINE)		\
+  thisProxy[INDEX].p_set_face_level (IF3,LEVEL,RECURSE,LINE);
+#endif /* DEBUG_ADAPT */
+
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
@@ -262,12 +278,12 @@ void CommBlock::face_level_update_new_( Index index_child )
   loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
 		       if3p+0,if3p+1,if3p+2);
 
-  if3m[0]=-1;
-  if3m[1]=-1;
-  if3m[2]=-1;
-  if3p[0]=+1;
-  if3p[1]=+1;
-  if3p[2]=+1;
+  if3m[0] = (rank >= 1) ? -1 : 0;
+  if3m[1] = (rank >= 2) ? -1 : 0;
+  if3m[2] = (rank >= 3) ? -1 : 0;
+  if3p[0] = (rank >= 1) ? +1 : 0;
+  if3p[1] = (rank >= 2) ? +1 : 0;
+  if3p[2] = (rank >= 3) ? +1 : 0;
 
   // Loop over all neighbors involved with communication
 
@@ -291,7 +307,7 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 	  int jf3[3] = {-if3[0],-if3[1],-if3[2]};
 
-	  thisProxy[index_neighbor].p_set_face_level (jf3,level_+1,false);
+	  SET_FACE_LEVEL(index_neighbor,jf3,level_+1,false,__LINE__);
 
 	  // CHILD NEIGHBOR
 
@@ -305,11 +321,9 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 	    // SIBLING
 
-	    thisProxy[index_child].p_set_face_level 
-	      (if3,level_+1,false);
+	    SET_FACE_LEVEL(index_child,if3,level_+1,false,__LINE__);
 
-	    thisProxy[index_child_neighbor].p_set_face_level 
-	      (jf3,level_+1,false);
+	    SET_FACE_LEVEL(index_child_neighbor,jf3,level_+1,false,__LINE__);
 
 	  } else {
 
@@ -322,7 +336,7 @@ void CommBlock::face_level_update_new_( Index index_child )
 	      if (balance) {
 		Index index_uncle = index_neighbor.index_parent();
 
-		thisProxy[index_child].p_set_face_level (if3,level_,false);
+		SET_FACE_LEVEL(index_child,if3,level_,false,__LINE__);
 
 		int ic3[3];
 		index_.child(level_,ic3+0,ic3+1,ic3+2);
@@ -334,7 +348,7 @@ void CommBlock::face_level_update_new_( Index index_child )
 		if (if3[1] == +1) ic3[1] = 0;
 		if (if3[2] == +1) ic3[2] = 0;
 
-		thisProxy[index_uncle].p_balance        (ic3,jf3,level_+1);
+		thisProxy[index_uncle].p_balance (ic3,jf3,level_+1);
 
 	      }
 
@@ -342,25 +356,25 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 	      // UNCLE
 
-	      thisProxy[index_child]   .p_set_face_level (if3,level_,false);
+	      SET_FACE_LEVEL(index_child,if3,level_,false,__LINE__);
 
-	      thisProxy[index_neighbor].p_set_face_level (jf3,level_+1,true);
+	      // if (index_child_neighbor.index_parent() == index_neighbor) {
+		SET_FACE_LEVEL(index_neighbor,jf3,level_+1,true,__LINE__);
+	      // }
 
 	    } else if (face_level == level_ + 1) {
 
 	      // COUSIN
 
-	      thisProxy[index_child].         p_set_face_level 
-		(if3,level_+1,false);
+	      SET_FACE_LEVEL(index_child,if3,level_+1,false,__LINE__);
 
-	      thisProxy[index_child_neighbor].p_set_face_level 
-		(jf3,level_+1,false);
+	      SET_FACE_LEVEL(index_child_neighbor,jf3,level_+1,false,__LINE__);
 
 	    } else if (face_level == level_ + 2) {
 
 	      // NIBLINGS
 
-	      thisProxy[index_child].p_set_face_level (if3,level_+2,false);
+	      SET_FACE_LEVEL(index_child,if3,level_+2,false,__LINE__);
 
 	      int ic3m[3],ic3p[3],ic3[3];
 	      loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
@@ -374,8 +388,7 @@ void CommBlock::face_level_update_new_( Index index_child )
 		    Index index_nibling = 
 		      index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
 
-		    thisProxy[index_nibling].p_set_face_level 
-		      (jf3,level_+1,false);
+		    SET_FACE_LEVEL(index_nibling,jf3,level_+1,false,__LINE__);
 		  }
 		}
 	      }
@@ -387,13 +400,86 @@ void CommBlock::face_level_update_new_( Index index_child )
   }
 }
 
+
+void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
+{ 
+  // recurse = false;
+#ifdef DEBUG_ADAPT
+  char buffer[80];
+  sprintf (buffer,"SET_FACE_LEVEL(%d %d %d = %d [%d]",if3[0],if3[1],if3[2],level,line);
+  index_.print(buffer,-1,2);
+#endif
+
+  face_level_[IF3(if3)] = std::max(face_level_[IF3(if3)],level); 
+
+  if (recurse && ! is_leaf()) {
+
+    // Simulation * simulation = this->simulation();
+    // const int rank         = simulation->dimension();
+    // const int rank_refresh = config->field_refresh_rank;
+    // const int rank_face = abs(if3[0]) + abs(if3[1]) + abs(if3[2]);
+
+    // update children that share the same face
+
+    for (size_t ic=0; ic<children_.size(); ic++) {
+
+      Index index_child = children_[ic];
+
+      if (index_child != index_) {
+
+	int ic3[3];
+	index_child.child(level_+1,ic3,ic3+1,ic3+2);
+
+	bool face_adjacent = true;
+	if (if3[0] == -1 && ic3[0] != 0) face_adjacent = false;
+	if (if3[0] == +1 && ic3[0] != 1) face_adjacent = false;
+	if (if3[1] == -1 && ic3[1] != 0) face_adjacent = false;
+	if (if3[1] == +1 && ic3[1] != 1) face_adjacent = false;
+	if (if3[2] == -1 && ic3[2] != 0) face_adjacent = false;
+	if (if3[2] == +1 && ic3[2] != 1) face_adjacent = false;
+
+	if (face_adjacent) {
+
+#ifdef CONFIG_USE_CHARM
+	  SET_FACE_LEVEL(index_child,if3,level,true,__LINE__);
+#endif
+
+	  int icm[3], icp[3], icf3[3];
+	  icm[0] = (if3[0] != 0) ? if3[0] : -ic3[0];
+	  icp[0] = (if3[0] != 0) ? if3[0] : 1-ic3[0];
+	  icm[1] = (if3[1] != 0) ? if3[1] : -ic3[1];
+	  icp[1] = (if3[1] != 0) ? if3[1] : 1-ic3[1];
+	  icm[2] = (if3[2] != 0) ? if3[2] : -ic3[2];
+	  icp[2] = (if3[2] != 0) ? if3[2] : 1-ic3[2];
+	
+	  Simulation * simulation = this->simulation();
+	  const int rank = simulation->dimension();
+
+	  if (rank < 2) { icm[1]=0; icp[1]=0; }
+	  if (rank < 3) { icm[2]=0; icp[2]=0; }
+
+	  for (icf3[0]=icm[0]; icf3[0]<=icp[0]; icf3[0]++) {
+	    for (icf3[1]=icm[1]; icf3[1]<=icp[1]; icf3[1]++) {
+	      for (icf3[2]=icm[2]; icf3[2]<=icp[2]; icf3[2]++) {
+#ifdef CONFIG_USE_CHARM
+		SET_FACE_LEVEL(index_child,icf3,level,true,__LINE__);
+#endif
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  } 
+}
+
 //----------------------------------------------------------------------
 
 void CommBlock::p_balance(int ic3[3], int if3[3], int level)
 {
   refine();
-  Index index_child = index_.index_child(ic3[0],ic3[1],ic3[2]);
-  thisProxy[index_child].p_set_face_level(if3,level,false);
+  //  Index index_child = index_.index_child(ic3[0],ic3[1],ic3[2]);
+  //  SET_FACE_LEVEL(index_child,if3,level,false,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -408,12 +494,12 @@ bool CommBlock::can_coarsen() const
 
   // loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
   // 		       if3p+0,if3p+1,if3p+2);
-  if3m[0]=-1;
-  if3m[1]=-1;
-  if3m[2]=-1;
-  if3p[0]=+1;
-  if3p[1]=+1;
-  if3p[2]=+1;
+  if3m[0] = (rank >= 1) ? -1 : 0;
+  if3m[1] = (rank >= 2) ? -1 : 0;
+  if3m[2] = (rank >= 3) ? -1 : 0;
+  if3p[0] = (rank >= 1) ? +1 : 0;
+  if3p[1] = (rank >= 2) ? +1 : 0;
+  if3p[2] = (rank >= 3) ? +1 : 0;
 
   for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
     for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {

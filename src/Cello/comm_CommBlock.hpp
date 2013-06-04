@@ -221,29 +221,12 @@ public: // interface
   void delete_child(Index index);
   bool is_child (const Index & index) const;
 
-  void p_set_face_level (int if3[3], int level, int recurse)
-  { set_face_level(if3,level,recurse); }
-
-  void set_face_level (int if3[3], int level, int recurse)
-  { 
-#ifdef DEBUG_ADAPT
-    char buffer[80];
-    sprintf (buffer,"SET_FACE %d %d %d = %d [%d]\n",if3[0],if3[1],if3[2],level,__LINE__);
-    index_.print(buffer,-1,2);
-#endif /* DEBUG_ADAPT */
-
-    face_level_[IF3(if3)] = level; 
-     if (recurse && ! is_leaf()) {
-       for (size_t ic=0; ic<children_.size(); ic++) {
- 	Index index_child = children_[ic];
- 	if (index_child != index_) {
- #ifdef CONFIG_USE_CHARM
- 	  thisProxy[index_child].p_set_face_level(if3,level,recurse);
- #endif
- 	}
-       }
-     } 
+  void p_set_face_level (int if3[3], int level, int recurse, int line)
+  {
+    set_face_level(if3,level,recurse,line); 
   }
+
+  void set_face_level (int if3[3], int level, int recurse, int line);
 
   int face_level (int if3[3]) const
   {  return face_level_[IF3(if3)];  }
