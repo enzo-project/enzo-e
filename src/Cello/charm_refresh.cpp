@@ -31,7 +31,7 @@ void CommBlock::p_refresh_begin()
 void CommBlock::refresh ()
 {
 
-  if (index_.is_root()) TRACE("BEGIN PHASE REFRESH");
+  TRACE("BEGIN PHASE REFRESH");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -318,8 +318,19 @@ void CommBlock::q_refresh_end()
   char buffer[80];
   sprintf (buffer,"refresh-end-%d",cycle_);
   block()->field_block()->print(simulation()->field_descr(),buffer,true);
-  if (index_.is_root()) TRACE("END   PHASE REFRESH");
-  prepare();
+  TRACE("END   PHASE REFRESH");
+  
+  if (next_phase_ == phase_output) {
+    TRACE("refresh calling output");
+    prepare();
+  } else if (next_phase_ == phase_adapt) {
+    TRACE("refresh calling adapt");
+    p_adapt_begin();
+  } else {
+    ERROR1 ("CommBlock::q_refresh_end()",
+	    "Unknown next_phase %d",
+	    next_phase_);
+  }
 }
 
 //----------------------------------------------------------------------

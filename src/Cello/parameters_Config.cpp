@@ -502,6 +502,8 @@ void Config::read(Parameters * parameters) throw()
 
       output_image_reduce_type[index] = parameters->value_string("image_reduce_type","sum");
 
+      output_image_face_rank[index] = parameters->value_integer("image_face_rank",3);
+
       output_image_ghost[index] = parameters->value_logical("image_ghost",false);
 
       if (parameters->type("colormap") == parameter_list) {

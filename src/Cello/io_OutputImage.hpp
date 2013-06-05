@@ -33,6 +33,7 @@ public: // functions
 	      int image_size_x, int image_size_y,
 	      std::string image_reduce_type,
 	      int         image_block_size,
+	      int face_rank,
 	      bool ghost ) throw();
 
   /// OutputImage destructor: free allocated image data
@@ -152,6 +153,9 @@ private: // attributes
 
   /// Image type: data or mesh
   std::string image_type_;
+
+  /// Minimal rank of faces to include face level indicators 
+  int face_rank_;
 
   /// Whether to include ghost zones
   bool ghost_;

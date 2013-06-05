@@ -22,6 +22,7 @@ public: // interface
   /// Constructor
   InitialDefault(Parameters * parameters, 
 		 const FieldDescr * field_descr,
+		 bool is_periodic,
 		 int cycle, double time) throw();
 
   /// Destructor
@@ -115,6 +116,9 @@ private: // attributes
 
   /// number of masked values per field
   int * num_masks_;
+
+  /// Whether domain is periodic
+  bool periodic_;
 
 
 };

@@ -42,7 +42,7 @@ void SimulationCharm::c_compute()
 
 void CommBlock::p_compute (int cycle, double time, double dt)
 {
-  if (index_.is_root()) TRACE ("BEGIN PHASE COMPUTE");
+  TRACE ("BEGIN PHASE COMPUTE");
   // set_cycle(cycle);
   // set_time(time);
   // set_dt(dt);
@@ -84,8 +84,12 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   TRACE ("CommBlock::compute() calling p_adapt(0)");
 
-  if (index_.is_root()) TRACE ("END   PHASE COMPUTE");
-  p_adapt_begin();
+  TRACE ("END   PHASE COMPUTE");
+
+  next_phase_ = phase_adapt;
+
+  //  p_adapt_begin();
+  p_refresh_begin();
 }
 
 // //----------------------------------------------------------------------

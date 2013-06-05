@@ -21,6 +21,7 @@ OutputImage::OutputImage(int index,
 			 int image_size_x, int image_size_y,
 			 std::string image_reduce_type,
 			 int         image_block_size,
+			 int face_rank,
 			 bool ghost) throw ()
   : Output(index,factory),
     data_(),
@@ -29,6 +30,7 @@ OutputImage::OutputImage(int index,
     nyi_(image_size_y),
     png_(0),
     image_type_(image_type),
+    face_rank_(face_rank),
     ghost_(ghost)
 
 {
@@ -101,6 +103,7 @@ void OutputImage::pup (PUP::er &p)
   // p | *png_;
   if (p.isUnpacking()) png_ = 0;
   p | image_type_;
+  p | face_rank_;
   p | ghost_;
 }
 #endif
@@ -237,38 +240,42 @@ void OutputImage::write_block
     if (comm_block->is_leaf()) {
       int xm=(ixm+ixp)/2;
       int ym=(iym+iyp)/2;
-      {
-	int if3[3] = {-1,0,0};
-	reduce_cube_(ixm+1,ixm+2,ym-1,ym+1, comm_block->face_level(if3)+1);
+      if (face_rank_ <= 1) {
+	{
+	  int if3[3] = {-1,0,0};
+	  reduce_cube_(ixm+1,ixm+2,ym-1,ym+1, comm_block->face_level(if3)+1);
+	}
+	{
+	  int if3[3] = {1,0,0};
+	  reduce_cube_(ixp-2,ixp-1,ym-1,ym+1, comm_block->face_level(if3)+1);
+	}
+	{
+	  int if3[3] = {0,-1,0};
+	  reduce_cube_(xm-1,xm+1,iym+1,iym+2, comm_block->face_level(if3)+1);
+	}
+	{
+	  int if3[3] = {0,1,0};
+	  reduce_cube_(xm-1,xm+1,iyp-2,iyp-1, comm_block->face_level(if3)+1);
+	}
       }
-      {
-	int if3[3] = {1,0,0};
-	reduce_cube_(ixp-2,ixp-1,ym-1,ym+1, comm_block->face_level(if3)+1);
+      if (face_rank_ <= 0) {
+	{
+	  int if3[3] = {-1,-1,0};
+	  reduce_cube_(ixm+1,ixm+2,iym+1,iym+2, comm_block->face_level(if3)+1);
+	}
+	{
+	  int if3[3] = {1,-1,0};
+	  reduce_cube_(ixp-2,ixp-1,iym+1,iym+2, comm_block->face_level(if3)+1);
+	}
+	{
+	  int if3[3] = {-1,1,0};
+	  reduce_cube_(ixm+1,ixm+2,iyp-2,iyp-1, comm_block->face_level(if3)+1);
+	}
+	{
+	  int if3[3] = {1,1,0};
+	  reduce_cube_(ixp-2,ixp-1,iyp-2,iyp-1, comm_block->face_level(if3)+1);
+	}
       }
-      {
-	int if3[3] = {0,-1,0};
-	reduce_cube_(xm-1,xm+1,iym+1,iym+2, comm_block->face_level(if3)+1);
-      }
-      {
-	int if3[3] = {0,1,0};
-	reduce_cube_(xm-1,xm+1,iyp-2,iyp-1, comm_block->face_level(if3)+1);
-      }
-       {
-       	int if3[3] = {-1,-1,0};
-       	reduce_cube_(ixm+1,ixm+2,iym+1,iym+2, comm_block->face_level(if3)+1);
-       }
-       {
-       	int if3[3] = {1,-1,0};
-       	reduce_cube_(ixp-2,ixp-1,iym+1,iym+2, comm_block->face_level(if3)+1);
-       }
-       {
-       	int if3[3] = {-1,1,0};
-       	reduce_cube_(ixm+1,ixm+2,iyp-2,iyp-1, comm_block->face_level(if3)+1);
-       }
-       {
-       	int if3[3] = {1,1,0};
-       	reduce_cube_(ixp-2,ixp-1,iyp-2,iyp-1, comm_block->face_level(if3)+1);
-       }
     }
 
   } else if (image_type_ == "data") {

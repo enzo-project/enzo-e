@@ -30,7 +30,16 @@ class Simulation;
 // number of neighbors
 #define NN(rank) (2*(rank))
 
+enum phase_type {
+  phase_unknown,
+  phase_adapt,
+  phase_refresh,
+  phase_output,
+  phase_compute
+};
+
 enum array_type {
+  op_array_unknown,
   op_array_copy,
   op_array_restrict,
   op_array_prolong
@@ -458,6 +467,9 @@ protected: // attributes
 
   /// Current adapt value for the block
   int adapt_;
+
+  /// Phase to call after refresh
+  int next_phase_;
 
 };
 

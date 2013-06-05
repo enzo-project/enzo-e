@@ -486,7 +486,9 @@ Initial * Problem::create_initial_
   if (type == "file" || type == "restart") {
     return new InitialFile   (parameters,group_process,config->initial_cycle,config->initial_time);;
   } else if (type == "default") {
-    return new InitialDefault(parameters,field_descr,
+    bool is_periodic = (config->boundary_type == "periodic");
+
+    return new InitialDefault(parameters,field_descr,is_periodic,
 			      config->initial_cycle,config->initial_time);
   }
   return NULL;
@@ -608,6 +610,7 @@ Output * Problem::create_output_
     int         image_size_y     = config->output_image_size[index][1];
     int         image_block_size = config->output_image_block_size[index];
     bool        image_ghost      = config->output_image_ghost[index];
+    int         image_face_rank  = config->output_image_face_rank[index];
     int         max_level        = config->mesh_max_level;
     std::string image_reduce_type = config->output_image_reduce_type[index];
     output = new OutputImage (index,factory,group_process->size(),
@@ -618,6 +621,7 @@ Output * Problem::create_output_
 			      image_size_x,image_size_y,
 			      image_reduce_type,
 			      image_block_size,
+			      image_face_rank,
 			      image_ghost);
 
   } else if (name == "data") {

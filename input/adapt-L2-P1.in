@@ -4,17 +4,17 @@
 include "input/adapt.incl"
 
 Mesh    {
-   root_size   = [128,128];
+   root_size   = [256,256];
    max_level   = 2; 
 }
 
 Initial {  max_level = 2; }
 
 Output {
-      density { 
-             name = ["adapt-L2-P1-density-%f.png", "time"]; 
-      };
-      mesh { 
-             name = ["adapt-L2-P1-mesh-%f.png", "time"]; 
-      }
+      de { name = ["adapt-L2-P1-de-%f.png", "time"]; };
+      ie { name = ["adapt-L2-P1-ie-%f.png", "time"]; };
+      te { name = ["adapt-L2-P1-te-%f.png", "time"]; };
+      vx { name = ["adapt-L2-P1-vx-%f.png", "time"]; };
+      vy { name = ["adapt-L2-P1-vy-%f.png", "time"]; };
+      mesh { name = ["adapt-L2-P1-mesh-%f.png", "time"]; }
 }

@@ -74,12 +74,10 @@ Output {
 	image_type  = "mesh";
 	image_reduce_type = "max";
         field_list = ["density"];
-	image_block_size  = 5;
+	image_block_size  = 3;
 	schedule = ["cycle","interval", 10];
         colormap = [1.00, 1.00, 1.00,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00, 
-                    0.00, 0.00, 1.00];
+                    0.20, 0.20, 0.20];
         name = ["mesh-balanced-mesh.%02d.png","cycle"];
         
       };

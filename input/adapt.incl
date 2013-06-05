@@ -12,7 +12,7 @@ Mesh {
 }
 
 Stopping { 
-	 cycle = 2; 
+	 cycle = 10000; 
 	 time = 0.1;
 }
 
@@ -26,20 +26,20 @@ Testing {
 Initial {
     density       { value = 
     [
-       0.125, x + 2.0*y > 0.5,
-#      0.125,  (x- 0.50)*(x- 0.50)+(y- 0.50)*(y- 0.50) <= 0.05,
-#      0.125,  (x- 0.75)*(x- 0.75)+(y- 0.25)*(y- 0.25) <= 0.05,
-#      0.125,  (x- 0.75)*(x- 0.75)+(y- 0.75)*(y- 0.75) <= 0.05,
-#      0.125,  (x- 0.25)*(x- 0.25)+(y- 0.75)*(y- 0.75) <= 0.05,
-                   1.000 ]; };
+#       1.000, x > 0.5,
+      1.000,  (x- 0.50)*(x- 0.50)+(y- 0.50)*(y- 0.50) <= 0.01,
+#      1.000,  (x- 0.75)*(x- 0.75)+(y- 0.25)*(y- 0.25) <= 0.01,
+#      1.000,  (x- 0.75)*(x- 0.75)+(y- 0.75)*(y- 0.75) <= 0.01,
+#      1.000,  (x- 0.25)*(x- 0.25)+(y- 0.75)*(y- 0.75) <= 0.01,
+                   0.125 ]; };
     total_energy  { value = 
     [ 
-       0.14 / (0.4 * 0.1) , x  + 2.0*y > 0.5,
-#      0.14 / (0.4 * 0.1) , (x- 0.50)*(x- 0.50)+(y- 0.50)*(y- 0.50) <= 0.05,
-#      0.14 / (0.4 * 0.1) , (x- 0.75)*(x- 0.75)+(y- 0.25)*(y- 0.25) <= 0.05,
-#      0.14 / (0.4 * 0.1) , (x- 0.75)*(x- 0.75)+(y- 0.75)*(y- 0.75) <= 0.05,
-#      0.14 / (0.4 * 0.1) , (x- 0.25)*(x- 0.25)+(y- 0.75)*(y- 0.75) <= 0.05,
-                      1.0  / (0.4 * 1.0) ]; };
+#       1.0  / (0.4 * 1.0) , x  > 0.5,
+      1.0 / (0.4 * 1.0) , (x- 0.50)*(x- 0.50)+(y- 0.50)*(y- 0.50) <= 0.01,
+#      1.0 / (0.4 * 1.0) , (x- 0.75)*(x- 0.75)+(y- 0.25)*(y- 0.25) <= 0.01,
+#      1.0 / (0.4 * 1.0) , (x- 0.75)*(x- 0.75)+(y- 0.75)*(y- 0.75) <= 0.01,
+#      1.0 / (0.4 * 1.0) , (x- 0.25)*(x- 0.25)+(y- 0.75)*(y- 0.75) <= 0.01,
+                     0.14 / (0.4 * 0.1)  ]; };
     velocity_x    { value = [0.0]; };
     velocity_y    { value = [0.0]; }
 }
@@ -56,29 +56,57 @@ Field {
 
 Output {
 
-      file_groups = ["density", "mesh"];
+    file_groups = ["de", "mesh", "te", "vx", "vy"];
 
-      density {
-#             image_ghost = true;
-             name = ["adapt-L1-P1-density-%04d.png", "cycle"]; 
-             schedule = ["cycle","interval", 1];
-#            name = ["adapt-L1-P1-density-%f.png", "time"]; 
-#            schedule = ["time","interval", 0.025];
-        colormap = [1.00, 1.00, 1.00,  
+    de {
+
+       field_list = ["density"];
+       type     = "image";
+#       image_ghost = true;
+	schedule = ["time","interval", 0.01];
+       colormap = [1.00, 1.00, 1.00,  
                     0.00, 0.00, 0.00];
-        };
+    };
 
-      mesh {
+    te {
+
+       field_list = ["total_energy"];
+       type     = "image";
+#       image_ghost = true;
+	schedule = ["time","interval", 0.01];
+       colormap = [1.00, 1.00, 1.00,  
+                   0.00, 0.00, 0.00];
+    };
+
+    vx {
+
+       field_list = ["velocity_x"];
+       type     = "image";
+#       image_ghost = true;
+	schedule = ["time","interval", 0.01];
+       colormap = [1.00, 1.00, 1.00,  
+                   0.00, 0.00, 0.00];
+    };
+
+    vy {
+
+       field_list = ["velocity_y"];
+       type     = "image";
+#       image_ghost = true;
+	schedule = ["time","interval", 0.01];
+       colormap = [1.00, 1.00, 1.00,  
+                   0.00, 0.00, 0.00];
+    };
+
+    mesh {
+#        image_face_rank = 0;
 	type     = "image";
 	image_type  = "mesh";
 	image_reduce_type = "max";
         field_list = ["density"];
 	image_block_size  = 5;
 	image_size = [513,513];
-	schedule = ["cycle","interval", 1];
-        name = ["adapt-L1-P1-mesh-%04d.png","cycle"];
-#       schedule = ["time","interval", 0.025];
-#       name = ["adapt-L1-P1-mesh-%f.png", "time"]; 
+	schedule = ["time","interval", 0.01];
         colormap = [1.00, 1.00, 1.00,  
                     0.00, 1.00, 0.00, 
                     1.00, 0.00, 0.00, 

@@ -41,7 +41,7 @@ const char * adapt_name[] = {
 
 void CommBlock::p_adapt_begin()
 {
-   TRACE ("BEGIN PHASE ADAPT\n");
+  TRACE ("BEGIN PHASE ADAPT");
   Performance * performance = simulation()->performance();
   if (! performance->is_region_active(perf_adapt)) {
     performance->start_region(perf_adapt);
@@ -95,7 +95,7 @@ void CommBlock::p_adapt_start()
 
 void CommBlock::q_adapt_next()
 {
-  TRACE("ADAPT CommBlock::q_adapt_stop()");
+  TRACE("ADAPT CommBlock::q_adapt_next()");
   thisProxy.doneInserting();
 
   if (adapt_ == adapt_coarsen) coarsen();
@@ -707,9 +707,12 @@ void CommBlock::q_adapt_end()
 
   debug_faces_("child",&face_level_[0]);
 
+  TRACE ("END   PHASE ADAPT\n");
+
+  next_phase_ = phase_output;
+
   if (thisIndex.is_root()) {
 
-    if (index_.is_root()) TRACE ("END   PHASE ADAPT\n");
     thisProxy.p_refresh_begin();
 
     // Check parameters now that all should have been accessed

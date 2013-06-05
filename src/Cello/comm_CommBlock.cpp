@@ -45,7 +45,8 @@ CommBlock::CommBlock
   face_level_(),
   count_coarsen_(0),
   count_adapt_(count_adapt),
-  adapt_(adapt_unknown)
+  adapt_(adapt_unknown),
+  next_phase_(phase_output)
 { 
 #ifdef CELLO_TRACE
   index.print ("CommBlock::CommBlock");
@@ -178,6 +179,7 @@ void CommBlock::pup(PUP::er &p)
   p | count_coarsen_;
   p | count_adapt_;
   p | adapt_;
+  p | next_phase_;
   p | loop_refresh_;
   p | face_level_;
 
@@ -567,6 +569,7 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   level_ = comm_block.level_;
   count_adapt_ = comm_block.count_adapt_;
   adapt_ = comm_block.adapt_;
+  next_phase_ = comm_block.next_phase_;
 }
 
 //----------------------------------------------------------------------
