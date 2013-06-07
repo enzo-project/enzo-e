@@ -546,7 +546,6 @@ int FieldBlock::field_size
 
 void FieldBlock::mul (int id_1, int id_2, const FieldDescr * field_descr)
 {
-  printf ("FieldBlock::mul %d %d\n",id_1,id_2);
   precision_type p1 = field_descr->precision(id_1);
   precision_type p2 = field_descr->precision(id_2);
   ASSERT ("FieldBlock::mul",
@@ -596,7 +595,6 @@ void FieldBlock::mul_ (T * field_1, T * field_2, const FieldDescr * field_descr)
 
 void FieldBlock::div (int id_1, int id_2, const FieldDescr * field_descr)
 {
-  printf ("FieldBlock::div %d %d\n",id_1,id_2);
   precision_type p1 = field_descr->precision(id_1);
   precision_type p2 = field_descr->precision(id_2);
   ASSERT ("FieldBlock::div",
@@ -624,7 +622,6 @@ void FieldBlock::div (int id_1, int id_2, const FieldDescr * field_descr)
 
 void FieldBlock::scale (int id, double value, const FieldDescr * field_descr)
 {
-  printf ("FieldBlock::scale %d %f\n",id,value);
   precision_type p = field_descr->precision(id);
 
   char * field = field_unknowns(field_descr,id);

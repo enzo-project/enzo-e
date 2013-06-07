@@ -374,9 +374,7 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 	      SET_FACE_LEVEL(index_child,if3,level_,false,__LINE__);
 
-	      // if (index_child_neighbor.index_parent() == index_neighbor) {
-		SET_FACE_LEVEL(index_neighbor,jf3,level_+1,true,__LINE__);
-	      // }
+	      SET_FACE_LEVEL(index_neighbor,jf3,level_+1,true,__LINE__);
 
 	    } else if (face_level == level_ + 1) {
 

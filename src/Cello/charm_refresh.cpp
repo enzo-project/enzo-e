@@ -50,9 +50,17 @@ void CommBlock::refresh ()
 
   } 
 
+  int rank = simulation->dimension();
+
   int ifxm,ifym,ifzm;
   int ifxp,ifyp,ifzp;
   loop_limits_refresh_(&ifxm,&ifym,&ifzm,&ifxp,&ifyp,&ifzp);
+  ifxm = (rank >= 1) ? -1 : 0;
+  ifym = (rank >= 2) ? -1 : 0;
+  ifzm = (rank >= 3) ? -1 : 0;
+  ifxp = (rank >= 1) ? +1 : 0;
+  ifyp = (rank >= 2) ? +1 : 0;
+  ifzp = (rank >= 3) ? +1 : 0;
 
   // Forest size needed for Index
 
@@ -63,20 +71,23 @@ void CommBlock::refresh ()
   bool refresh_type_counter = (refresh_type == "counter");
   loop_refresh_.stop() = 0;
 
-  int rank = simulation->dimension();
-
   for (int ifx=ifxm; ifx<=ifxp; ifx++) {
     for (int ify=ifym; ify<=ifyp; ify++) {
       for (int ifz=ifzm; ifz<=ifzp; ifz++) {
 	int face_rank = rank - (abs(ifx) + abs(ify) + abs(ifz));
 	if (refresh_rank <= face_rank && face_rank < rank) {
 
-	  TRACE3("REFRESH Calling refresh_same %d %d %d",ifx,ify,ifz);
 	  Index index_neighbor = index_.index_neighbor(ifx,ify,ifz,n3);
 
 	  int if3[3] = {ifx,ify,ifz};
 
 	  if (face_level(if3)==level_ - 1) {       // COARSE
+
+	    int ic3[3];
+	    index_.child(level_,ic3+0,ic3+1,ic3+2);
+	    int ip3[3];
+	    parent_face_(ip3,if3,ic3);
+
 	    refresh_coarse(index_neighbor.index_parent(),ifx,ify,ifz);
 
 	  } else if (face_level(if3)==level_) {    // SAME

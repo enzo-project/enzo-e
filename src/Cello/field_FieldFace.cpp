@@ -229,14 +229,14 @@ void FieldFace::store (int n, char * array) throw()
 
       bool is_density = (index_field == index_density);
 
-      //      if (! is_density) field_block_->scale(index_field,4.0,field_descr_);
+      //      if (! is_density) field_block_->div(index_field,index_density,field_descr_);
 
       index_array += prolong_->apply
 	(precision, 
 	 field_ghost,nd3,im3,       n3,
 	 array_ghost,nc3,im3_array, nc3);
 
-      //      if (! is_density) field_block_->scale(index_field,1.0/4.0,field_descr_);
+      //      if (! is_density) field_block_->mul(index_field,index_density,field_descr_);
 
     } else {
 
