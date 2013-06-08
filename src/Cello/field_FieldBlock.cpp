@@ -709,8 +709,11 @@ void FieldBlock::print
    MPI_Comm_rank(MPI_COMM_WORLD,&ip);
 #endif
 
-   char filename [40];
+   char filename [80];
    sprintf (filename,"%s-%d.debug",message,ip);
+   printf ("DEBUG message = %s\n",message);
+   printf ("DEBUG filename = %s\n",filename);
+
    FILE * fp = fopen (filename,"w");
 
    ASSERT("FieldBlock::print",

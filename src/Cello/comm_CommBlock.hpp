@@ -183,8 +183,7 @@ public: // interface
 
   /// send ghost zones to coarse neighbor in given direction
   void refresh_coarse (Index index, 
-		       int ifx, int ify, int ifz,
-		       int icx, int icy, int icz);
+		       int ifx, int ify, int ifz);
 
   /// send ghost zones to fine neighbors in given direction
   void refresh_fine (Index index, 
@@ -238,19 +237,6 @@ public: // interface
   }
 
   void set_face_level (int if3[3], int level, int recurse, int line);
-
-  /// Return limits of faces of the given child corresponding to the
-  /// given face of the parent
-  void loop_limits_faces_ 
-  (int icm3[3], int icp3[3], int if3[3], int ic3[3]) const;
-
-  /// Return whether the given face of the given child and its parent
-  /// intersect
-  bool child_is_on_face_(int if3[3],int ic3[3]) const;
-
-  /// Return the face of the parent corresponding to the given face
-  /// of the given child.  Inverse of loop_limits_faces_
-  void parent_face_(int ipf3[3],int if3[3], int ic3[3]) const;
 
   int face_level (int if3[3]) const
   {  return face_level_[IF3(if3)];  }
@@ -354,6 +340,23 @@ public: // virtual functions
   Simulation * simulation() const;
 
 protected: // functions
+
+  /// Return the child adjacent to the given child in the direction of
+  /// the given face
+  void facing_child_(int jc3[3], int ic3[3], int if3[3]) const;
+
+  /// Return limits of faces of the given child corresponding to the
+  /// given face of the parent
+  void loop_limits_faces_ 
+  (int icm3[3], int icp3[3], int if3[3], int ic3[3]) const;
+
+  /// Return whether the given face of the given child and its parent
+  /// intersect
+  bool child_is_on_face_(int if3[3],int ic3[3]) const;
+
+  /// Return the face of the parent corresponding to the given face
+  /// of the given child.  Inverse of loop_limits_faces_
+  void parent_face_(int ipf3[3],int if3[3], int ic3[3]) const;
 
   void debug_faces_(const char *, int *);
 

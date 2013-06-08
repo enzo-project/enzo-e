@@ -57,7 +57,6 @@ int RefineSlope::apply
   field_block->cell_width(xm[1],xp[1],&h3[1]);
   field_block->cell_width(xm[2],xp[2],&h3[2]);
 
-
   for (size_t k=0; k<field_id_list_.size(); k++) {
 
     int id_field = field_id_list_[k];

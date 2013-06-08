@@ -406,9 +406,16 @@ void FieldFace::load_loop_limits_
 
       if ( prolong_ ) {
 	// adjust for child offset
-	n3[axis]  /= 2;;
+	n3[axis] /= 2; 
 	im3[axis] += child_[axis] * n3[axis];
+
+	if (! ghost_[axis]) {
+	  n3[axis] += ng3[axis]/2;
+	  im3[axis] -= child_[axis]*ng3[axis]/2;
+
+	}
       }
+
     }
 
     if (face_[axis] == -1 || face_[axis] == 1) {
@@ -456,12 +463,19 @@ void FieldFace::store_loop_limits_
 	im3[axis] = ng3[axis];
 	n3[axis]  = nd3[axis] - 2*ng3[axis];
 
+	if ( prolong_ ) {
+	  n3[axis] += ng3[axis];
+	  im3[axis] -= child_[axis]*ng3[axis];
+	}
+
       }
 
       if ( restrict_ ) {
 	n3[axis]  /= 2;;
 	im3[axis] += child_[axis] * n3[axis];
       }
+
+     
     }
 
     if (face_[axis] == -1 || face_[axis] == 1) {

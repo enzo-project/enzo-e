@@ -208,9 +208,6 @@ void CommBlock::refine()
 
       // create child
 
-      int num_field_blocks = 1;
-      bool testing = false;
-
       // <duplicated code: refactor me!>
       int narray = 0;  
       char * array = 0;
@@ -225,14 +222,18 @@ void CommBlock::refine()
 
       field_face.set_prolong(prolong,ic3[0],ic3[1],ic3[2]);
       field_face.set_face(0,0,0); // 0-face is full block
+      
 #ifdef FULL_GHOST
       field_face.set_ghost(true,true,true);
 #endif
 
       field_face.load(&narray, &array);
 
+      //       if (cycle_ > 0) index_.print("refine",-1,2,true);
+	
+
       // </duplicated code>
-    
+
       const Factory * factory = simulation->factory();
 
       int face_level[27];
@@ -248,6 +249,11 @@ void CommBlock::refine()
 	}
       }
       
+      int num_field_blocks = 1;
+      bool testing = false;
+
+      //       if (cycle_ > 0) printf ("load %d\n",narray);
+
       factory->create_block 
 	(&thisProxy, index_child,
 	 nx,ny,nz,
@@ -340,9 +346,6 @@ void CommBlock::face_level_update_new_( Index index_child )
 	    parent_face_(ip3,if3,icc3);
 
 	    int face_level = face_level_[IF3(ip3)];
-
-	    // sprintf (buffer,"parent face %d %d %d  %d %d %d  %d",if3[0],if3[1],if3[2],ip3[0],ip3[1],ip3[2],face_level);
-	    // index_child.print(buffer,-1,2);
 
 	    if (face_level == level_ - 1) {
 
@@ -453,14 +456,14 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
 	  SET_FACE_LEVEL(index_child,if3,level,true,__LINE__);
 #endif
 
-	  int ic3m[3], ic3p[3], icf3[3];
-	  loop_limits_faces_(ic3m,ic3p,if3,ic3);
+	  int ifc3m[3], ifc3p[3], ifc3[3];
+	  loop_limits_faces_(ifc3m,ifc3p,if3,ic3);
 
-	  for (icf3[0]=ic3m[0]; icf3[0]<=ic3p[0]; icf3[0]++) {
-	    for (icf3[1]=ic3m[1]; icf3[1]<=ic3p[1]; icf3[1]++) {
-	      for (icf3[2]=ic3m[2]; icf3[2]<=ic3p[2]; icf3[2]++) {
+	  for (ifc3[0]=ifc3m[0]; ifc3[0]<=ifc3p[0]; ifc3[0]++) {
+	    for (ifc3[1]=ifc3m[1]; ifc3[1]<=ifc3p[1]; ifc3[1]++) {
+	      for (ifc3[2]=ifc3m[2]; ifc3[2]<=ifc3p[2]; ifc3[2]++) {
 #ifdef CONFIG_USE_CHARM
-		SET_FACE_LEVEL(index_child,icf3,level,true,__LINE__);
+		SET_FACE_LEVEL(index_child,ifc3,level,true,__LINE__);
 #endif
 	      }
 	    }

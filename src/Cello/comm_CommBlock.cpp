@@ -110,6 +110,7 @@ CommBlock::CommBlock
   }
 
   if (narray != 0) {
+    
     // copy any input data
     FieldDescr * field_descr = this->simulation()->field_descr();
     FieldFace field_face (block()->field_block(),field_descr);
@@ -139,6 +140,14 @@ CommBlock::CommBlock
     }
 
     field_face.store(narray,array);
+
+    // if (cycle_ > 0 ) {
+    //   printf ("store %d\n",narray);
+    //   char buffer[80];
+    //   sprintf (buffer,"CB-%s",name().c_str());
+    //   block()->field_block()->print(field_descr,buffer,true);
+    // }
+
   }
 
 #ifdef CONFIG_USE_CHARM

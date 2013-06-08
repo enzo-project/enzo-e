@@ -148,9 +148,13 @@ public:
 
   void print (const char * msg = "\0",
 	      int max_level = -1,
-	      int rank = 3) const;
+	      int rank = 3,
+	      bool brief=false) const;
 
 private: // functions
+
+  int num_bits_(int value) const;
+  void print_bits_(int value, int nb) const;
 
   inline void copy_ (const Index & index)
   {

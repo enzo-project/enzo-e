@@ -88,33 +88,29 @@ void CommBlock::refresh ()
 	    int ip3[3];
 	    parent_face_(ip3,if3,ic3);
 
-	    refresh_coarse(index_neighbor.index_parent(),ifx,ify,ifz);
+	    refresh_coarse(index_neighbor.index_parent(),ip3[0],ip3[1],ip3[2]);
 
 	  } else if (face_level(if3)==level_) {    // SAME
+
 	    refresh_same(index_neighbor,ifx,ify,ifz);
 
 	  } else if (face_level(if3)==level_+1) {  // FINE
 	    
-	    int icxm,icym,iczm;
-	    int icxp,icyp,iczp;
-	    loop_limits_nibling_(&icxm,&icym,&iczm,
-				 &icxp,&icyp,&iczp,
+	    int ic3m[3];
+	    int ic3p[3];
+	    loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
+				 ic3p,ic3p+1,ic3p+2,
 				 ifx,ify,ifz);
-	    int icx,icy,icz;
-	    for (icx=icxm; icx<=icxp; icx++) {
-	      for (icy=icym; icy<=icyp; icy++) {
-		for (icz=iczm; icz<=iczp; icz++) {
+	    int ic3[3];
+	    for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
+	      for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
+		for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
 
-		  int ic3[3] = {icx,icy,icz};
-		  if (ifx == -1) ic3[0] = 1;
-		  if (ify == -1) ic3[1] = 1;
-		  if (ifz == -1) ic3[2] = 1;
-		  if (ifx == +1) ic3[0] = 0;
-		  if (ify == +1) ic3[1] = 0;
-		  if (ifz == +1) ic3[2] = 0;
+		  int jc3[3];
+		  facing_child_ (jc3,ic3,if3);
 
 		  Index index_nibling = 
-		    index_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
+		    index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
 		  
 		  refresh_fine(index_nibling, ifx,ify,ifz, ic3[0],ic3[1],ic3[2]);
 		}
@@ -138,6 +134,21 @@ void CommBlock::refresh ()
 
 //----------------------------------------------------------------------
 
+void CommBlock::facing_child_(int jc3[3], int ic3[3], int if3[3]) const
+{
+  jc3[0] = ic3[0];
+  jc3[1] = ic3[1];
+  jc3[2] = ic3[2];
+  if (if3[0]==-1) jc3[0] = 1;
+  if (if3[1]==-1) jc3[1] = 1;
+  if (if3[2]==-1) jc3[2] = 1;
+  if (if3[0]==+1) jc3[0] = 0;
+  if (if3[1]==+1) jc3[1] = 0;
+  if (if3[2]==+1) jc3[2] = 0;
+}
+
+//----------------------------------------------------------------------
+
 void CommBlock::refresh_coarse 
 (
  Index index, 
@@ -150,12 +161,16 @@ void CommBlock::refresh_coarse
   Restrict * restrict = simulation->problem()->restrict();
 
   int level = index_.level();
-  int icx,icy,icz;
-  index_.child(level,&icx,&icy,&icz);
+  int ic3[3];
+  index_.child(level,ic3,ic3+1,ic3+2);
+
+  // int if3[3] = {ifx,ify,ifz};
+  // int jc3[3];
+  // facing_child_(jc3,ic3,if3);
 
   FieldFace field_face (field_block,field_descr);
 
-  field_face.set_restrict(restrict,icx,icy,icz);
+  field_face.set_restrict(restrict,ic3[0],ic3[1],ic3[2]);
   field_face.set_face(ifx,ify,ifz);
 	  
   int n; 
@@ -166,7 +181,7 @@ void CommBlock::refresh_coarse
   ++loop_refresh_.stop();
 
   thisProxy[index].x_refresh_coarse (n,array,-ifx,-ify,-ifz,
-				     icx,icy,icz);
+				     ic3[0],ic3[1],ic3[2]);
 }
 
 //----------------------------------------------------------------------
@@ -305,7 +320,7 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
 
   Prolong *    prolong = simulation->problem()->prolong();
   field_face.set_prolong(prolong,icx,icy,icz);
-   
+
   field_face.store (n, buffer);
   // </duplicated code>
 
@@ -326,10 +341,8 @@ void CommBlock::q_refresh_end()
   if (performance->is_region_active(perf_refresh))
     performance->stop_region(perf_refresh);
 
-  char buffer[80];
-  sprintf (buffer,"refresh-end-%d",cycle_);
-  block()->field_block()->print(simulation()->field_descr(),buffer,true);
-  TRACE("END   PHASE REFRESH");
+  // char buffer[80];
+  // block()->field_block()->print(simulation()->field_descr(),buffer,true);
   
   if (next_phase_ == phase_output) {
     TRACE("refresh calling output");
