@@ -408,6 +408,12 @@ void FieldFace::load_loop_limits_
 	// adjust for child offset
 	n3[axis]  /= 2;;
 	im3[axis] += child_[axis] * n3[axis];
+
+	if (ghost_[axis]) {
+	  // correct centering for interpolating full coarse block to fine
+	  im3[axis] += (1-2*child_[axis]) * ng3[axis]/2 ;
+
+	}
       }
     }
 
@@ -433,6 +439,8 @@ void FieldFace::load_loop_limits_
   n3[0] = std::max(n3[0],1);
   n3[1] = std::max(n3[1],1);
   n3[2] = std::max(n3[2],1);
+  // printf ("load  i3 %c %d %d   n3 %d %d\n",
+  // 	  restrict_ ? '>' : (prolong_ ? '<' : '='),im3[0],im3[1],n3[0],n3[1]);
 }
 
 //----------------------------------------------------------------------
@@ -477,5 +485,7 @@ void FieldFace::store_loop_limits_
   n3[0] = std::max(n3[0],1);
   n3[1] = std::max(n3[1],1);
   n3[2] = std::max(n3[2],1);
+  // printf ("store i3 %c %d %d   n3 %d %d\n",
+  // 	  restrict_ ? '>' : (prolong_ ? '<' : '='),im3[0],im3[1],n3[0],n3[1]);
 }
 
