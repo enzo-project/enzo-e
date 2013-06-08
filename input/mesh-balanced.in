@@ -62,11 +62,12 @@ Output {
         image_ghost = true;
 	image_size  = [1024,1024];
         field_list = ["density"];
-	schedule = ["cycle","interval", 10];
-        colormap = [0.00, 0.00, 0.50,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00];
+	schedule = ["cycle","interval", 1];
+#        colormap = [0.00, 0.00, 0.50,  
+#                    0.00, 1.00, 0.00, 
+#                    1.00, 1.00, 0.00, 
+#                    1.00, 0.00, 0.00];
+          colormap = [0.0, 0.0, 0.0, 1.0, 1.0, 1.0];
         name = ["mesh-balanced-data.%02d.png","cycle"];
       };
       image_mesh {
@@ -75,7 +76,7 @@ Output {
 	image_reduce_type = "max";
         field_list = ["density"];
 	image_block_size  = 3;
-	schedule = ["cycle","interval", 10];
+	schedule = ["cycle","interval", 1];
         colormap = [1.00, 1.00, 1.00,  
                     0.20, 0.20, 0.20];
         name = ["mesh-balanced-mesh.%02d.png","cycle"];
