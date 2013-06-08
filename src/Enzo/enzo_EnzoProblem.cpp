@@ -156,6 +156,11 @@ Prolong * EnzoProblem::create_prolong_
     prolong = new EnzoProlong 
       (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
 
+  } else if (name == "MC1") {
+    
+    prolong = new EnzoProlongMC1
+      (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
+
   } else {
 
     prolong = Problem::create_prolong_(name,config);
