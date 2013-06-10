@@ -539,7 +539,7 @@ void OutputImage::image_write_ (double min, double max) throw()
 	g = (1-ratio)*map_g_[k] + ratio*map_g_[k+1];
 	b = (1-ratio)*map_b_[k] + ratio*map_b_[k+1];
 	a = (1-ratio)*map_a_[k] + ratio*map_a_[k+1];
-	if (value < 0.0) { r=1.0; g=0.0; b=0.0; }
+	//	if (value < 0.0) { r=1.0; g=0.0; b=0.0; }
       }
 
       // Plot pixel

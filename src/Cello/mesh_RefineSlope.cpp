@@ -103,14 +103,13 @@ void RefineSlope::evaluate_block_(T * array,
 				  double * h3)
 {
   // TEMPORARY: evaluate effect of including (some) ghost zones
-  const int p = 0;
   double slope;
   const int d3[3] = {1,nx,nx*ny};
   for (int axis=0; axis<rank; axis++) {
     int d = d3[axis];
-    for (int ix=-p; ix<nx+p; ix++) {
-      for (int iy=-p; iy<ny+p; iy++) {
-	for (int iz=-p; iz<nz+p; iz++) {
+    for (int ix=0; ix<nx; ix++) {
+      for (int iy=0; iy<ny; iy++) {
+	for (int iz=0; iz<nz; iz++) {
 	  int i = (gx+ix) + (nx+2*gx)*((gy+iy) + (ny+2*gy)*(gz+iz));
 	  slope = fabs((array[i+d] - array[i-d]) / (2.0*h3[axis]*array[i]));
 	  
