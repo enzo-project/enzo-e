@@ -104,6 +104,7 @@ public: // attributes
   std::vector<double>        output_image_colormap_alpha [MAX_FILE_GROUPS];
   std::vector<double>        output_image_colormap       [MAX_FILE_GROUPS];
   std::string                output_image_type           [MAX_FILE_GROUPS];
+  bool                       output_image_log            [MAX_FILE_GROUPS];
   std::vector<int>           output_image_size           [MAX_FILE_GROUPS];
   std::string                output_image_reduce_type    [MAX_FILE_GROUPS];
   bool                       output_image_ghost          [MAX_FILE_GROUPS];

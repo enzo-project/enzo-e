@@ -100,6 +100,12 @@ int ProlongLinear::apply_
 
 	values_f[i_f] = ( c1[icx]*values_c[i_c] + 
 			  c2[icx]*values_c[i_c+dx_c]);
+
+	if (positive_ && (values_f[i_f] < 0)) {
+	  // revert to linear
+	  int icc = i_c + (icx/2)*dx_c;
+	  values_f[i_f] = values_c[icc];	  
+	}
       }
     }
 
@@ -110,7 +116,6 @@ int ProlongLinear::apply_
 
     T min=100, avg = 0, sum = 0, max=-100;
     int ixmin=100,ixmax=-100,iymin=100,iymax=-100;
-    int count = 0;
     for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
       int ic_x = ix0/2;
       for (int iy0=0; iy0<n3_f[1]; iy0+=4) {
@@ -128,20 +133,16 @@ int ProlongLinear::apply_
 	    int i_f = (im3_f[0]+if_x) + nd3_f[0]*
 	      (       (im3_f[1]+if_y));
 
-	    ixmax=std::max(ixmax,im3_f[0]+if_x);
-	    iymax=std::max(iymax,im3_f[1]+if_y);
-	    ixmin=std::min(ixmin,im3_f[0]+if_x);
-	    iymin=std::min(iymin,im3_f[1]+if_y);
-
 	    values_f[i_f] = 
 	      ( c1[icx]*c1[icy]*values_c[i_c] +
 		c2[icx]*c1[icy]*values_c[i_c+dx_c] +
 		c1[icx]*c2[icy]*values_c[i_c     +dy_c] +
 		c2[icx]*c2[icy]*values_c[i_c+dx_c+dy_c]);
-	    min=std::min(min,values_f[i_f]);
-	    sum += values_f[i_f];
-	    max=std::max(max,values_f[i_f]);
-	    count++;
+	    if (positive_ && (values_f[i_f] < 0)) {
+	      // revert to linear
+	      int icc = i_c + (icx/2)*dx_c + (icy/2)*dy_c;
+	      values_f[i_f] = values_c[icc];	  
+	    }
 	  }
 	}
       }
@@ -183,6 +184,11 @@ int ProlongLinear::apply_
 		    c2[icx]*c1[icy]*c2[icz]*values_c[i_c+dx_c     +dz_c] +
 		    c1[icx]*c2[icy]*c2[icz]*values_c[i_c     +dy_c+dz_c] +
 		    c2[icx]*c2[icy]*c2[icz]*values_c[i_c+dx_c+dy_c+dz_c]);
+		if (positive_ && (values_f[i_f] < 0)) {
+		  // revert to linear
+		  int icc = i_c + (icx/2)*dx_c + (icy/2)*dy_c + (icz/2)*dz_c;
+		  values_f[i_f] = values_c[icc];	  
+		}
 	      }
 	    }
 	  }

@@ -34,6 +34,7 @@ public: // functions
 	      std::string image_reduce_type,
 	      int         image_block_size,
 	      int face_rank,
+	      bool image_log,
 	      bool ghost ) throw();
 
   /// OutputImage destructor: free allocated image data
@@ -156,6 +157,9 @@ private: // attributes
 
   /// Minimal rank of faces to include face level indicators 
   int face_rank_;
+
+  /// Whether to plot the log of the field
+  int image_log_;
 
   /// Whether to include ghost zones
   bool ghost_;

@@ -44,7 +44,11 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
-  { TRACEPUP; PUP::able::pup(p); }
+  {
+    TRACEPUP; PUP::able::pup(p); 
+    p | monotonic_;
+    p | positive_;
+  }
 
 #endif
 
@@ -55,12 +59,34 @@ public: // interface
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
     const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3]) = 0;
 
-private: // functions
+  /// Set whether interpolation should be monotonic
+  void set_monotonic (bool monotonic) 
+  { monotonic_ = monotonic; }
+
+  /// Return monotonicity setting
+  bool monotonic (bool monotonic) const
+  { return monotonic_; }
+
+  /// Set whether interpolation should be positive
+  void set_positive (bool positive) 
+  { positive_ = positive; }
+
+  /// Return positivity setting
+  bool positive (bool positive) const
+  { return positive_; }
+
+protected: // functions
 
 
-private: // attributes
+protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
+
+  /// Whether interpolation should be monotonic
+  bool monotonic_;
+
+  /// Whether interpolation should be positive
+  bool positive_;
 
 };
 

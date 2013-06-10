@@ -12,6 +12,7 @@ Initial {  max_level = 0; }
 
 Output {
       de { name = ["adapt-L0-P1-de-%f.png", "time"]; };
+      dl { name = ["adapt-L0-P1-dl-%f.png", "time"]; };
       ie { name = ["adapt-L0-P1-ie-%f.png", "time"]; };
       te { name = ["adapt-L0-P1-te-%f.png", "time"]; };
       vx { name = ["adapt-L0-P1-vx-%f.png", "time"]; };

@@ -78,15 +78,19 @@ int EnzoProlongMC1::apply_
 ( T *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
   const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
 {
-  int dx_c = 1;
-  int dy_c = nd3_c[0];
-  int dz_c = nd3_c[1];
+  const int dx_c = 1;
+  const int dy_c = nd3_c[0];
+  const int dz_c = nd3_c[1];
 
-  const double c1[4] = { 5.0*0.25, 3.0*0.25, 1.0*0.25, -1.0*0.25};
-  const double c2[4] = {-1.0*0.25, 1.0*0.25, 3.0*0.25,  5.0*0.25};
+  const int dx_f = 1;
+  const int dy_f = nd3_f[0];
+  const int dz_f = nd3_f[1];
 
+  const int rank = (nd3_f[2] > 1) ? 3 : ( (nd3_f[1] > 1) ? 2 : 1 );
 
-  int rank = (nd3_f[2] > 1) ? 3 : ( (nd3_f[1] > 1) ? 2 : 1 );
+  const int ndc = nd3_c[0]*nd3_c[1]*nd3_c[2];
+
+  T * work = new T [ ndc ];
 
   for (int i=0; i<rank; i++) {
     const char * xyz = "xyz";
@@ -94,26 +98,12 @@ int EnzoProlongMC1::apply_
 	     "fine array %c-axis %d must be twice the size of the coarse axis %d",
 	     xyz[i],n3_c[i],n3_f[i],
 	     n3_f[i]==n3_c[i]*2);
-
-    ASSERT2 ("EnzoProlongMC1::apply_",
-	     "fine grid %c-axis %d must be divisible by 4",
-	     xyz[i],n3_f[i],n3_f[i] % 4 == 0);
   }
 
   if (n3_f[1]==1) {
 
-    for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
-      int ic_x = ix0/2;
-      for (int ix=ix0; ix<ix0+4; ix++) {
-	int icx = ix-ix0;
-	int if_x = ix;
-
-	int i_c = im3_c[0]+ic_x;
-	int i_f = im3_f[0]+if_x;
-
-	values_f[i_f] = ( c1[icx]*values_c[i_c] + 
-			  c2[icx]*values_c[i_c+dx_c]);
-      }
+    for (int ix=0; ix<n3_c[0]-1; ix++) {
+      work[ix] = 0.5*(values_c[ix] + values_c[ix+dx_c]);
     }
 
     return (sizeof(T) * n3_c[0]);
@@ -121,104 +111,62 @@ int EnzoProlongMC1::apply_
 
   } else if (n3_f[2] == 1) {
 
-    T min=100, avg = 0, sum = 0, max=-100;
-    int ixmin=100,ixmax=-100,iymin=100,iymax=-100;
-    int count = 0;
-    for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
-      int ic_x = ix0/2;
-      for (int iy0=0; iy0<n3_f[1]; iy0+=4) {
-	int ic_y = iy0/2;
-
-	for (int ix=ix0; ix<ix0+4; ix++) {
-	  int icx = ix-ix0;
-	  int if_x = ix;
-	  for (int iy=iy0; iy<iy0+4; iy++) {
-	    int icy = iy-iy0;
-	    int if_y = iy;
-
-	    int i_c = (im3_c[0]+ic_x) + nd3_c[0]*
-	      (       (im3_c[1]+ic_y));
-	    int i_f = (im3_f[0]+if_x) + nd3_f[0]*
-	      (       (im3_f[1]+if_y));
-
-	    ixmax=std::max(ixmax,im3_f[0]+if_x);
-	    iymax=std::max(iymax,im3_f[1]+if_y);
-	    ixmin=std::min(ixmin,im3_f[0]+if_x);
-	    iymin=std::min(iymin,im3_f[1]+if_y);
-
-	    values_f[i_f] = 
-	      ( c1[icx]*c1[icy]*values_c[i_c] +
-		c2[icx]*c1[icy]*values_c[i_c+dx_c] +
-		c1[icx]*c2[icy]*values_c[i_c     +dy_c] +
-		c2[icx]*c2[icy]*values_c[i_c+dx_c+dy_c]);
-	    min=std::min(min,values_f[i_f]);
-	    sum += values_f[i_f];
-	    max=std::max(max,values_f[i_f]);
-	    count++;
-	    if (values_f[i_f] < 0.0) {
-	      printf ("EnzoProlongMC1 i_c = %d %d\n",
-		      (im3_c[0]+ic_x),(im3_c[1]+ic_y));
-	      printf ("EnzoProlongMC1 i_f = %d %d\n",
-		      (im3_f[0]+if_x),(im3_f[1]+if_y));
-	      printf ("EnzoProlongMC1 icx,icy = %d %d\n",icx,icy);
-	      printf ("EnzoProlongMC1 c1 = %f %f\n",c1[icx],c1[icy]);
-	      printf ("EnzoProlongMC1 c2 = %f %f\n",c2[icx],c2[icy]);
-	      printf ("EnzoProlongMC1 values_c = %f %f %f %f\n",
-		      values_c[i_c],
-		      values_c[i_c+dx_c],
-		      values_c[i_c+dy_c],
-		      values_c[i_c+dx_c+dy_c]);
-	      printf ("EnzoProlongMC1 values_f = %f\n",values_f[i_f]);
-	      
-	    }
-	  }
-	}
+    for (int ix_c=0; ix_c<n3_c[0]; ix_c++) {
+      for (int iy_c=0; iy_c<n3_c[1]; iy_c++) {
+	int i_c = ix_c + n3_c[0]*iy_c;
+	work[i_c] = 0.25*(values_c[i_c] + 
+			  values_c[i_c+dx_c] +
+			  values_c[i_c+dy_c] +
+			  values_c[i_c+dx_c+dy_c]);
       }
     }
+
+    for (int ix_c=0; ix_c<n3_c[0]; ix_c++) {
+      int ix_f = 2*ix_c;
+      for (int iy_c=0; iy_c<n3_c[1]; iy_c++) {
+	int iy_f = 2*iy_c;
+	int i_c = ix_c + n3_c[0]*iy_c;
+	int i_f = ix_f + n3_f[0]*iy_f;
+
+	int i00_c = i_c;
+	int i10_c = i_c + dx_c;
+	int i01_c = i_c +        dy_c;
+	int i11_c = i_c + dx_c + dy_c;
+
+	T fb = values_c[i00_c];
+
+	T df0 = std::min(fabs(fb - work[i00_c]),fabs(fb - work[i11_c]));
+	T df1 = std::min(fabs(fb - work[i10_c]),fabs(fb - work[i01_c]));
+
+	df0 = (fb-work[i00_c]) < 0.0 ? -df0 : df0;
+	df1 = (fb-work[i10_c]) < 0.0 ? -df1 : df1;
+
+	if ((work[i11_c]-fb)*(fb-work[i00_c]) < 0.0) df0 = 0.0;
+	if ((work[i01_c]-fb)*(fb-work[i10_c]) < 0.0) df1 = 0.0;
+
+	int i00_f = i_f;
+	int i10_f = i_f + dx_f;
+	int i01_f = i_f +        dy_f;
+	int i11_f = i_f + dx_f + dy_f;
+
+	T fx = df0 - df1;
+	T fy = df0 + df1;
+
+	values_f[i00_f]	= fb - 0.5*fx - 0.5*fy;
+	values_f[i10_f]	= fb + 0.5*fx - 0.5*fy;
+	values_f[i01_f]	= fb - 0.5*fx + 0.5*fy;
+	values_f[i11_f]	= fb + 0.5*fx + 0.5*fy;
+
+      }
+    }
+
     return (sizeof(T) * n3_c[0]*n3_c[1]);
 
   } else {
 
-    for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
-      int ic_x = ix0/2;
-      for (int iy0=0; iy0<n3_f[1]; iy0+=4) {
-	int ic_y = iy0/2;
-	for (int iz0=0; iz0<n3_f[2]; iz0+=4) {
-	  int ic_z = iz0/2;
-
-	  for (int ix=ix0; ix<ix0+4; ix++) {
-	    int icx = ix-ix0;
-	    int if_x = ix;
-	    for (int iy=iy0; iy<iy0+4; iy++) {
-	      int icy = iy-iy0;
-	      int if_y = iy;
-	      for (int iz=iz0; iz<iz0+4; iz++) {
-		int icz = iz-iz0;
-		int if_z = iz;
-
-		int i_c = (im3_c[0]+ic_x) + nd3_c[0]*
-		  (       (im3_c[1]+ic_y) + nd3_c[1]*
-			  (im3_c[2]+ic_z));
-		int i_f = (im3_f[0]+if_x) + nd3_f[0]*
-		  (       (im3_f[1]+if_y) + nd3_f[1]*
-			  (im3_f[2]+if_z));
-
-		values_f[i_f] = 
-		  ( c1[icx]*c1[icy]*c1[icz]*values_c[i_c] +
-		    c2[icx]*c1[icy]*c1[icz]*values_c[i_c+dx_c] +
-		    c1[icx]*c2[icy]*c1[icz]*values_c[i_c     +dy_c] +
-		    c2[icx]*c2[icy]*c1[icz]*values_c[i_c+dx_c+dy_c] +
-		    c1[icx]*c1[icy]*c2[icz]*values_c[i_c          +dz_c] +
-		    c2[icx]*c1[icy]*c2[icz]*values_c[i_c+dx_c     +dz_c] +
-		    c1[icx]*c2[icy]*c2[icz]*values_c[i_c     +dy_c+dz_c] +
-		    c2[icx]*c2[icy]*c2[icz]*values_c[i_c+dx_c+dy_c+dz_c]);
-	      }
-	    }
-	  }
-	}
-      }
-    }
+    return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
   }
-  return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
+
+  delete [] work;
 
 }  

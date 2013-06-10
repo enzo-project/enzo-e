@@ -196,7 +196,8 @@ void FieldFace::store (int n, char * array) throw()
 
   size_t index_array = 0;
 
-  const int index_density = field_descr_->field_id("density");
+  const int index_d  = field_descr_->field_id("density");
+  const int index_te = field_descr_->field_id("total_energy");
 
   for (size_t index_field=0; index_field<num_fields; index_field++) {
 
@@ -227,16 +228,14 @@ void FieldFace::store (int n, char * array) throw()
 
       int im3_array[3] = {0,0,0};
 
-      bool is_density = (index_field == index_density);
+      bool is_positive = (index_field == index_d || index_field == index_te);
 
-      //      if (! is_density) field_block_->div(index_field,index_density,field_descr_);
+      prolong_->set_positive(is_positive);
 
       index_array += prolong_->apply
 	(precision, 
 	 field_ghost,nd3,im3,       n3,
 	 array_ghost,nc3,im3_array, nc3);
-
-      //      if (! is_density) field_block_->mul(index_field,index_density,field_descr_);
 
     } else {
 

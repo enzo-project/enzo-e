@@ -22,6 +22,7 @@ OutputImage::OutputImage(int index,
 			 std::string image_reduce_type,
 			 int         image_block_size,
 			 int face_rank,
+			 bool image_log,
 			 bool ghost) throw ()
   : Output(index,factory),
     data_(),
@@ -30,6 +31,7 @@ OutputImage::OutputImage(int index,
     nyi_(image_size_y),
     png_(0),
     image_type_(image_type),
+    image_log_(image_log),
     face_rank_(face_rank),
     ghost_(ghost)
 
@@ -103,6 +105,7 @@ void OutputImage::pup (PUP::er &p)
   // p | *png_;
   if (p.isUnpacking()) png_ = 0;
   p | image_type_;
+  p | image_log_;
   p | face_rank_;
   p | ghost_;
 }
@@ -494,9 +497,16 @@ void OutputImage::image_write_ (double min, double max) throw()
   }
 
   // Ensure min and max fully enclose data
-  for (int i=0; i<m; i++) {
-    min = MIN(min,data_[i]);
-    max = MAX(max,data_[i]);
+  if (image_log_) {
+    for (int i=0; i<m; i++) {
+      min = MIN(min,log(data_[i]));
+      max = MAX(max,log(data_[i]));
+    }
+  } else {
+    for (int i=0; i<m; i++) {
+      min = MIN(min,data_[i]);
+      max = MAX(max,data_[i]);
+    }
   }
 
   TRACE1("image_write_() data_ = %p",data_);
@@ -510,7 +520,7 @@ void OutputImage::image_write_ (double min, double max) throw()
 
       int i = ix + mx*iy;
 
-      double value = data_[i];
+      double value = image_log_ ? log(data_[i]) : data_[i];
 
       double r=0.0,g=0.0,b=0.0,a=0.0;
 
