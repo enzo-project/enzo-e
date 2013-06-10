@@ -7,9 +7,9 @@ include "input/ppm.incl"
 Mesh 
 {
    root_rank = 2;
-   root_size   = [64,64];
+   root_size   = [32,32];
    root_blocks = [ 2, 2]; 
-   max_level   = 7; 
+   max_level   = 5; 
    adapt {
       type = ["slope"];
       balance = true;
@@ -24,7 +24,7 @@ Field {
    }
 }
 Initial {
-   max_level = 7;
+   max_level = 5;
       fields = [
 	"density",	
 	"velocity_x",
@@ -47,7 +47,7 @@ Initial {
 #                              0.1/(0.4*0.1) ]; };
 # }
 
-Stopping { cycle = 100; }
+Stopping { cycle = 10; }
 
 Output {
 
@@ -60,7 +60,7 @@ Output {
 	type     = "image";
 	image_type  = "data";
         image_ghost = true;
-	image_size  = [1024,1024];
+#	image_size  = [1024,1024];
         field_list = ["density"];
 	schedule = ["cycle","interval", 1];
 #        colormap = [0.00, 0.00, 0.50,  
@@ -76,6 +76,7 @@ Output {
 	image_reduce_type = "max";
         field_list = ["density"];
 	image_block_size  = 3;
+#	image_size  = [1025,1025];
 	schedule = ["cycle","interval", 1];
         colormap = [1.00, 1.00, 1.00,  
                     0.20, 0.20, 0.20];
