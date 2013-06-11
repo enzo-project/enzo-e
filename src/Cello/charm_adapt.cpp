@@ -222,10 +222,7 @@ void CommBlock::refine()
 
       field_face.set_prolong(prolong,ic3[0],ic3[1],ic3[2]);
       field_face.set_face(0,0,0); // 0-face is full block
-      
-#ifdef FULL_GHOST
       field_face.set_ghost(true,true,true);
-#endif
 
       field_face.load(&narray, &array);
 
@@ -252,8 +249,6 @@ void CommBlock::refine()
       int num_field_blocks = 1;
       bool testing = false;
 
-      //       if (cycle_ > 0) printf ("load %d\n",narray);
-
       factory->create_block 
 	(&thisProxy, index_child,
 	 nx,ny,nz,
@@ -266,8 +261,6 @@ void CommBlock::refine()
 	 testing);
 
       set_child(index_child);
-
-      // update child and neighbor face_level[]
 
       face_level_update_new_(index_child);
 
@@ -417,25 +410,13 @@ void CommBlock::face_level_update_new_( Index index_child )
   }
 }
 
+//----------------------------------------------------------------------
 
 void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
 { 
-  // recurse = false;
-#ifdef DEBUG_ADAPT
-  char buffer[80];
-  sprintf (buffer,"SET_FACE_LEVEL(%d %d %d = %d [%d]",if3[0],if3[1],if3[2],level,line);
-  index_.print(buffer,-1,2);
-#endif
-
-  face_level_[IF3(if3)] = std::max(face_level_[IF3(if3)],level); 
-  //  face_level_[IF3(if3)] = level;
+    face_level_[IF3(if3)] = std::max(face_level_[IF3(if3)],level); 
 
   if (recurse && ! is_leaf()) {
-
-    // Simulation * simulation = this->simulation();
-    // const int rank         = simulation->dimension();
-    // const int rank_refresh = config->field_refresh_rank;
-    // const int rank_face = abs(if3[0]) + abs(if3[1]) + abs(if3[2]);
 
     // update children that share the same face
 
@@ -452,9 +433,7 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
 
 	if (face_adjacent) {
 
-#ifdef CONFIG_USE_CHARM
 	  SET_FACE_LEVEL(index_child,if3,level,true,__LINE__);
-#endif
 
 	  int ifc3m[3], ifc3p[3], ifc3[3];
 	  loop_limits_faces_(ifc3m,ifc3p,if3,ic3);
@@ -462,9 +441,7 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
 	  for (ifc3[0]=ifc3m[0]; ifc3[0]<=ifc3p[0]; ifc3[0]++) {
 	    for (ifc3[1]=ifc3m[1]; ifc3[1]<=ifc3p[1]; ifc3[1]++) {
 	      for (ifc3[2]=ifc3m[2]; ifc3[2]<=ifc3p[2]; ifc3[2]++) {
-#ifdef CONFIG_USE_CHARM
 		SET_FACE_LEVEL(index_child,ifc3,level,true,__LINE__);
-#endif
 	      }
 	    }
 	  }
@@ -527,8 +504,6 @@ void CommBlock::parent_face_(int ip3[3],int if3[3], int ic3[3]) const
 void CommBlock::p_balance(int ic3[3], int if3[3], int level)
 {
   refine();
-  //  Index index_child = index_.index_child(ic3[0],ic3[1],ic3[2]);
-  //  SET_FACE_LEVEL(index_child,if3,level,false,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -541,8 +516,6 @@ bool CommBlock::can_coarsen() const
   int rank = simulation()->dimension();
   int if3m[3],if3p[3],if3[3];
 
-  // loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
-  // 		       if3p+0,if3p+1,if3p+2);
   if3m[0] = (rank >= 1) ? -1 : 0;
   if3m[1] = (rank >= 2) ? -1 : 0;
   if3m[2] = (rank >= 3) ? -1 : 0;
@@ -589,9 +562,7 @@ void CommBlock::coarsen()
 
   field_face.set_restrict(restrict,icx,icy,icz);
   field_face.set_face(0,0,0); // 0-face is full block
-#ifdef FULL_GHOST
   field_face.set_ghost(true,true,true);
-#endif
 
   int narray; 
   char * array;
@@ -607,7 +578,7 @@ void CommBlock::coarsen()
 void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
 				    int n, char * array)
 {
-  if (! can_coarsen()) return;
+      if (! can_coarsen()) return;
 
   // <duplicated code: refactor me!>
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -636,21 +607,25 @@ void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
   Restrict *   restrict = simulation->problem()->restrict();
   child_field_face.set_restrict(restrict,icx,icy,icz);
   child_field_face.set_face(0,0,0);
-#ifdef FULL_GHOST
   child_field_face.set_ghost(true,true,true);
-#endif
    
   child_field_face.store (n, array);
   // </duplicated code>
 
   int rank = simulation->dimension();
+  
+#ifdef DEBUG_ADAPT
+  char buffer[80];
+  sprintf (buffer,"count_coarsen %d : %d",count_coarsen_,NC(rank));
+  index_.print(buffer,-1,2,true);
+#endif
+
   if (++count_coarsen_ >= NC(rank)) {
     delete block_;
     block_ = child_block_;
     child_block_ = 0;
     for (size_t i=0; i<children_.size(); i++) {
       if (children_[i] != thisIndex) {
-	// Restricted child data is sent to parent when child destroyed
 	thisProxy[children_[i]].ckDestroy();
       }
     }
@@ -672,9 +647,7 @@ void CommBlock::x_refresh_child (int n, char * buffer,
 
   // Full block data
   field_face.set_face(0,0,0);
-#ifdef FULL_GHOST
   field_face.set_ghost(true,true,true);
-#endif
 
   field_face.set_restrict(restrict,icx,icy,icz);
    
