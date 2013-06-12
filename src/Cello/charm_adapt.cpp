@@ -271,114 +271,98 @@ void CommBlock::refine_face_level_update_( Index index_child )
   loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
 		       if3p+0,if3p+1,if3p+2);
 
-  if3m[0] = (rank >= 1) ? -1 : 0;
-  if3m[1] = (rank >= 2) ? -1 : 0;
-  if3m[2] = (rank >= 3) ? -1 : 0;
-  if3p[0] = (rank >= 1) ? +1 : 0;
-  if3p[1] = (rank >= 2) ? +1 : 0;
-  if3p[2] = (rank >= 3) ? +1 : 0;
-
   // Loop over all neighbors involved with communication
 
-  for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
-    for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
-      for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
+  ItFace it_face(rank,rank_refresh);
+  while (it_face.next(if3)) {
 
-	int rank_face = 
-	  rank - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
+    // MY NEIGHBOR
 
-	if (rank_refresh <= rank_face && rank_face < rank) {
+    Index index_neighbor = index_.index_neighbor
+      (if3[0],if3[1],if3[2],na3,periodic);
 
-	  // MY NEIGHBOR
+    int jf3[3] = {-if3[0],-if3[1],-if3[2]};
 
-	  Index index_neighbor = index_.index_neighbor
-	    (if3[0],if3[1],if3[2],na3,periodic);
+    SET_FACE_LEVEL(index_neighbor,jf3,level_+1,false,adapt_refine);
 
-	  int jf3[3] = {-if3[0],-if3[1],-if3[2]};
+    // CHILD NEIGHBOR
 
-	  SET_FACE_LEVEL(index_neighbor,jf3,level_+1,false,adapt_refine);
+    Index index_child_neighbor = index_child.index_neighbor
+      (if3[0],if3[1],if3[2],na3,periodic);
 
-	  // CHILD NEIGHBOR
+    bool is_sibling = 
+      index_child.index_parent() == index_child_neighbor.index_parent();
 
-	  Index index_child_neighbor = index_child.index_neighbor
-	    (if3[0],if3[1],if3[2],na3,periodic);
+    if (is_sibling) {
 
-	  bool is_sibling = 
-	    index_child.index_parent() == index_child_neighbor.index_parent();
+      // SIBLING
 
-	  if (is_sibling) {
+      SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_refine);
 
-	    // SIBLING
+      SET_FACE_LEVEL(index_child_neighbor,jf3,level_+1,false,adapt_refine);
 
-	    SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_refine);
+    } else {
 
-	    SET_FACE_LEVEL(index_child_neighbor,jf3,level_+1,false,adapt_refine);
+      int icc3[3];
+      index_child.child(level_+1,icc3+0,icc3+1,icc3+2);
+      int ip3[3];
+      parent_face_(ip3,if3,icc3);
 
-	  } else {
+      int face_level = face_level_[IF3(ip3)];
 
-	    int icc3[3];
-	    index_child.child(level_+1,icc3+0,icc3+1,icc3+2);
-	    int ip3[3];
-	    parent_face_(ip3,if3,icc3);
+      if (face_level == level_ - 1) {
 
-	    int face_level = face_level_[IF3(ip3)];
+	// GREAT UNCLE
 
-	    if (face_level == level_ - 1) {
+	if (balance) {
+	  Index index_uncle = index_neighbor.index_parent();
 
-	      // GREAT UNCLE
+	  SET_FACE_LEVEL(index_child,if3,level_,false,adapt_refine);
 
-	      if (balance) {
-		Index index_uncle = index_neighbor.index_parent();
+	  int ic3[3];
+	  index_.child(level_,ic3+0,ic3+1,ic3+2);
+	  int jc3[3];
+	  facing_child_(jc3,ic3,if3);
 
-		SET_FACE_LEVEL(index_child,if3,level_,false,adapt_refine);
+	  thisProxy[index_uncle].p_balance (jc3,jf3,level_+1);
 
-		int ic3[3];
-		index_.child(level_,ic3+0,ic3+1,ic3+2);
-		int jc3[3];
-		facing_child_(jc3,ic3,if3);
+	}
 
-		thisProxy[index_uncle].p_balance (jc3,jf3,level_+1);
+      } else if (face_level == level_) {
 
-	      }
+	// UNCLE
 
-	    } else if (face_level == level_) {
+	SET_FACE_LEVEL(index_child,if3,level_,false,adapt_refine);
 
-	      // UNCLE
+	SET_FACE_LEVEL(index_neighbor,jf3,level_+1,true,adapt_refine);
 
-	      SET_FACE_LEVEL(index_child,if3,level_,false,adapt_refine);
+      } else if (face_level == level_ + 1) {
 
-	      SET_FACE_LEVEL(index_neighbor,jf3,level_+1,true,adapt_refine);
+	// COUSIN
 
-	    } else if (face_level == level_ + 1) {
+	SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_refine);
 
-	      // COUSIN
+	SET_FACE_LEVEL(index_child_neighbor,jf3,level_+1,false,adapt_refine);
 
-	      SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_refine);
+      } else if (face_level == level_ + 2) {
 
-	      SET_FACE_LEVEL(index_child_neighbor,jf3,level_+1,false,adapt_refine);
+	// NIBLINGS
 
-	    } else if (face_level == level_ + 2) {
+	SET_FACE_LEVEL(index_child,if3,level_+2,false,adapt_refine);
 
-	      // NIBLINGS
+	int ic3m[3],ic3p[3],ic3[3];
+	loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
+			     ic3p,ic3p+1,ic3p+2,
+			     if3[0],if3[1],if3[2]);
 
-	      SET_FACE_LEVEL(index_child,if3,level_+2,false,adapt_refine);
+	for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
+	  for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
+	    for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
 
-	      int ic3m[3],ic3p[3],ic3[3];
-	      loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
-				   ic3p,ic3p+1,ic3p+2,
-				   if3[0],if3[1],if3[2]);
+	      Index index_nibling = 
+		index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
 
-	      for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
-		for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
-		  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
-
-		    Index index_nibling = 
-		      index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
-
-		    SET_FACE_LEVEL(index_nibling,jf3,level_+1,false,adapt_refine);
-		  }
-		}
-	      }
+	      SET_FACE_LEVEL(index_nibling,jf3,level_+1,false,adapt_refine);
 	    }
 	  }
 	}
@@ -497,23 +481,11 @@ bool CommBlock::can_coarsen() const
   int rank = simulation()->dimension();
   int if3m[3],if3p[3],if3[3];
 
-  if3m[0] = (rank >= 1) ? -1 : 0;
-  if3m[1] = (rank >= 2) ? -1 : 0;
-  if3m[2] = (rank >= 3) ? -1 : 0;
-  if3p[0] = (rank >= 1) ? +1 : 0;
-  if3p[1] = (rank >= 2) ? +1 : 0;
-  if3p[2] = (rank >= 3) ? +1 : 0;
+  ItFace it_face(rank,refresh_rank);
 
-  for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
-    for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
-      for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
-	int face_rank = rank - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
-	if (refresh_rank <= face_rank && face_rank < rank) {
-	  int i=IF3(if3);
-	  if (face_level_[i] > level_) return false;
-	}
-      }
-    }
+  while (it_face.next(if3)) {
+    int i=IF3(if3);
+    if (face_level_[i] > level_) return false;
   }
 
   return true;
@@ -689,114 +661,99 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
   loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
 		       if3p+0,if3p+1,if3p+2);
 
-  if3m[0] = (rank >= 1) ? -1 : 0;
-  if3m[1] = (rank >= 2) ? -1 : 0;
-  if3m[2] = (rank >= 3) ? -1 : 0;
-  if3p[0] = (rank >= 1) ? +1 : 0;
-  if3p[1] = (rank >= 2) ? +1 : 0;
-  if3p[2] = (rank >= 3) ? +1 : 0;
-
   // Loop over all neighbors involved with communication
 
-  for (if3[0]=if3m[0]; if3[0]<=if3p[0]; if3[0]++) {
-    for (if3[1]=if3m[1]; if3[1]<=if3p[1]; if3[1]++) {
-      for (if3[2]=if3m[2]; if3[2]<=if3p[2]; if3[2]++) {
+  ItFace it_face(rank,rank_refresh);
 
-	int rank_face = 
-	  rank - (abs(if3[0]) + abs(if3[1]) + abs(if3[2]));
+  while (it_face.next(if3)) {
 
-	if (rank_refresh <= rank_face && rank_face < rank) {
+    // MY NEIGHBOR
 
-	  // MY NEIGHBOR
+    Index index_neighbor = index_.index_neighbor
+      (if3[0],if3[1],if3[2],na3,periodic);
 
-	  Index index_neighbor = index_.index_neighbor
-	    (if3[0],if3[1],if3[2],na3,periodic);
+    int jf3[3] = {-if3[0],-if3[1],-if3[2]};
 
-	  int jf3[3] = {-if3[0],-if3[1],-if3[2]};
+    SET_FACE_LEVEL(index_neighbor,jf3,level_+1,false,adapt_coarsen);
 
-	  SET_FACE_LEVEL(index_neighbor,jf3,level_+1,false,adapt_coarsen);
+    // CHILD NEIGHBOR
 
-	  // CHILD NEIGHBOR
+    Index index_child_neighbor = index_child.index_neighbor
+      (if3[0],if3[1],if3[2],na3,periodic);
 
-	  Index index_child_neighbor = index_child.index_neighbor
-	    (if3[0],if3[1],if3[2],na3,periodic);
+    bool is_sibling = 
+      index_child.index_parent() == index_child_neighbor.index_parent();
 
-	  bool is_sibling = 
-	    index_child.index_parent() == index_child_neighbor.index_parent();
+    if (is_sibling) {
 
-	  if (is_sibling) {
+      // SIBLING
 
-	    // SIBLING
+      SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_coarsen);
 
-	    SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_coarsen);
+      SET_FACE_LEVEL(index_child_neighbor,jf3,level_+1,false,adapt_coarsen);
 
-	    SET_FACE_LEVEL(index_child_neighbor,jf3,level_+1,false,adapt_coarsen);
+    } else {
 
-	  } else {
+      int icc3[3];
+      index_child.child(level_+1,icc3+0,icc3+1,icc3+2);
+      int ip3[3];
+      parent_face_(ip3,if3,icc3);
 
-	    int icc3[3];
-	    index_child.child(level_+1,icc3+0,icc3+1,icc3+2);
-	    int ip3[3];
-	    parent_face_(ip3,if3,icc3);
+      int face_level = face_level_[IF3(ip3)];
 
-	    int face_level = face_level_[IF3(ip3)];
+      if (face_level == level_ - 1) {
 
-	    if (face_level == level_ - 1) {
+	// GREAT UNCLE
 
-	      // GREAT UNCLE
+	if (balance) {
+	  Index index_uncle = index_neighbor.index_parent();
 
-	      if (balance) {
-		Index index_uncle = index_neighbor.index_parent();
+	  SET_FACE_LEVEL(index_child,if3,level_,false,adapt_coarsen);
 
-		SET_FACE_LEVEL(index_child,if3,level_,false,adapt_coarsen);
+	  int ic3[3];
+	  index_.child(level_,ic3+0,ic3+1,ic3+2);
+	  int jc3[3];
+	  facing_child_(jc3,ic3,if3);
 
-		int ic3[3];
-		index_.child(level_,ic3+0,ic3+1,ic3+2);
-		int jc3[3];
-		facing_child_(jc3,ic3,if3);
+	  thisProxy[index_uncle].p_balance (jc3,jf3,level_+1);
 
-		thisProxy[index_uncle].p_balance (jc3,jf3,level_+1);
+	}
 
-	      }
+      } else if (face_level == level_) {
 
-	    } else if (face_level == level_) {
+	// UNCLE
 
-	      // UNCLE
+	SET_FACE_LEVEL(index_child,if3,level_,false,adapt_coarsen);
 
-	      SET_FACE_LEVEL(index_child,if3,level_,false,adapt_coarsen);
+	SET_FACE_LEVEL(index_neighbor,jf3,level_+1,true,adapt_coarsen);
 
-	      SET_FACE_LEVEL(index_neighbor,jf3,level_+1,true,adapt_coarsen);
+      } else if (face_level == level_ + 1) {
 
-	    } else if (face_level == level_ + 1) {
+	// COUSIN
 
-	      // COUSIN
+	SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_coarsen);
 
-	      SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_coarsen);
+	SET_FACE_LEVEL(index_child_neighbor,jf3,level_+1,false,adapt_coarsen);
 
-	      SET_FACE_LEVEL(index_child_neighbor,jf3,level_+1,false,adapt_coarsen);
+      } else if (face_level == level_ + 2) {
 
-	    } else if (face_level == level_ + 2) {
+	// NIBLINGS
 
-	      // NIBLINGS
+	SET_FACE_LEVEL(index_child,if3,level_+2,false,adapt_coarsen);
 
-	      SET_FACE_LEVEL(index_child,if3,level_+2,false,adapt_coarsen);
+	int ic3m[3],ic3p[3],ic3[3];
+	loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
+			     ic3p,ic3p+1,ic3p+2,
+			     if3[0],if3[1],if3[2]);
 
-	      int ic3m[3],ic3p[3],ic3[3];
-	      loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
-				   ic3p,ic3p+1,ic3p+2,
-				   if3[0],if3[1],if3[2]);
+	for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
+	  for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
+	    for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
 
-	      for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
-		for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
-		  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
+	      Index index_nibling = 
+		index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
 
-		    Index index_nibling = 
-		      index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
-
-		    SET_FACE_LEVEL(index_nibling,jf3,level_+1,false,adapt_coarsen);
-		  }
-		}
-	      }
+	      SET_FACE_LEVEL(index_nibling,jf3,level_+1,false,adapt_coarsen);
 	    }
 	  }
 	}

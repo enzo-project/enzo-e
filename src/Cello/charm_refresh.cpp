@@ -52,16 +52,6 @@ void CommBlock::refresh ()
 
   int rank = simulation->dimension();
 
-  int ifxm,ifym,ifzm;
-  int ifxp,ifyp,ifzp;
-  loop_limits_refresh_(&ifxm,&ifym,&ifzm,&ifxp,&ifyp,&ifzp);
-  ifxm = (rank >= 1) ? -1 : 0;
-  ifym = (rank >= 2) ? -1 : 0;
-  ifzm = (rank >= 3) ? -1 : 0;
-  ifxp = (rank >= 1) ? +1 : 0;
-  ifyp = (rank >= 2) ? +1 : 0;
-  ifzp = (rank >= 3) ? +1 : 0;
-
   // Forest size needed for Index
 
   int n3[3];
@@ -71,51 +61,46 @@ void CommBlock::refresh ()
   bool refresh_type_counter = (refresh_type == "counter");
   loop_refresh_.stop() = 0;
 
-  for (int ifx=ifxm; ifx<=ifxp; ifx++) {
-    for (int ify=ifym; ify<=ifyp; ify++) {
-      for (int ifz=ifzm; ifz<=ifzp; ifz++) {
-	int face_rank = rank - (abs(ifx) + abs(ify) + abs(ifz));
-	if (refresh_rank <= face_rank && face_rank < rank) {
+  ItFace it_face(rank,refresh_rank);
+  int if3[3];
+  while (it_face.next(if3)) {
 
-	  Index index_neighbor = index_.index_neighbor(ifx,ify,ifz,n3);
+    Index index_neighbor = index_.index_neighbor(if3[0],if3[1],if3[2],n3);
 
-	  int if3[3] = {ifx,ify,ifz};
+    if (face_level(if3)==level_ - 1) {       // COARSE
 
-	  if (face_level(if3)==level_ - 1) {       // COARSE
+      int ic3[3];
+      index_.child(level_,ic3+0,ic3+1,ic3+2);
+      int ip3[3];
+      parent_face_(ip3,if3,ic3);
 
-	    int ic3[3];
-	    index_.child(level_,ic3+0,ic3+1,ic3+2);
-	    int ip3[3];
-	    parent_face_(ip3,if3,ic3);
+      refresh_coarse(index_neighbor.index_parent(),ip3[0],ip3[1],ip3[2]);
 
-	    refresh_coarse(index_neighbor.index_parent(),ip3[0],ip3[1],ip3[2]);
+    } else if (face_level(if3)==level_) {    // SAME
 
-	  } else if (face_level(if3)==level_) {    // SAME
+      refresh_same(index_neighbor,if3[0],if3[1],if3[2]);
 
-	    refresh_same(index_neighbor,ifx,ify,ifz);
-
-	  } else if (face_level(if3)==level_+1) {  // FINE
+    } else if (face_level(if3)==level_+1) {  // FINE
 	    
-	    int ic3m[3];
-	    int ic3p[3];
-	    loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
-				 ic3p,ic3p+1,ic3p+2,
-				 ifx,ify,ifz);
-	    int ic3[3];
-	    for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
-	      for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
-		for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
+      int ic3m[3];
+      int ic3p[3];
+      loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
+			   ic3p,ic3p+1,ic3p+2,
+			   if3[0],if3[1],if3[2]);
+      int ic3[3];
+      for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
+	for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
+	  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
 
-		  int jc3[3];
-		  facing_child_ (jc3,ic3,if3);
+	    int jc3[3];
+	    facing_child_ (jc3,ic3,if3);
 
-		  Index index_nibling = 
-		    index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
+	    Index index_nibling = 
+	      index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
 		  
-		  refresh_fine(index_nibling, ifx,ify,ifz, ic3[0],ic3[1],ic3[2]);
-		}
-	      }
-	    }
+	    refresh_fine(index_nibling, 
+			 if3[0],if3[1],if3[2], 
+			 ic3[0],ic3[1],ic3[2]);
 	  }
 	}
       }
@@ -278,9 +263,6 @@ void CommBlock::q_refresh_end()
   if (performance->is_region_active(perf_refresh))
     performance->stop_region(perf_refresh);
 
-  // char buffer[80];
-  // block()->field_block()->print(simulation()->field_descr(),buffer,true);
-  
   if (next_phase_ == phase_output) {
     TRACE("refresh calling output");
     prepare();
