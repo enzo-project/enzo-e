@@ -362,7 +362,6 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   // BoundaryDimension[1] = ny + 2*ghost_depth[1];
   // BoundaryDimension[2] = nz + 2*ghost_depth[2];
 
-  
   DomainLeftEdge [0] = enzo_config->domain_lower[0];
   DomainLeftEdge [1] = enzo_config->domain_lower[1];
   DomainLeftEdge [2] = enzo_config->domain_lower[2];

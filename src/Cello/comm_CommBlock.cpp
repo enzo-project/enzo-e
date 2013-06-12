@@ -153,8 +153,12 @@ CommBlock::CommBlock
 
   }
 
-  if (initial) apply_initial_();
-
+  
+  if (initial) {
+    TRACE("Calling apply_initial()");
+    apply_initial_();
+  }
+  TRACE("END CommBlock()");
 #endif /* CONFIG_USE_CHARM */
 
 }
