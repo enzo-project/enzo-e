@@ -141,13 +141,6 @@ CommBlock::CommBlock
 
     field_face.store(narray,array);
 
-    // if (cycle_ > 0 ) {
-    //   printf ("store %d\n",narray);
-    //   char buffer[80];
-    //   sprintf (buffer,"CB-%s",name().c_str());
-    //   block()->field_block()->print(field_descr,buffer,true);
-    // }
-
   }
 
 #ifdef CONFIG_USE_CHARM

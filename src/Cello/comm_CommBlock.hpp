@@ -352,7 +352,7 @@ protected: // functions
 
   /// Return whether the given face of the given child and its parent
   /// intersect
-  bool child_is_on_face_(int if3[3],int ic3[3]) const;
+  bool child_is_on_face_(int ic3[3],int if3[3]) const;
 
   /// Return the face of the parent corresponding to the given face
   /// of the given child.  Inverse of loop_limits_faces_

@@ -410,7 +410,7 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int type)
 	int ic3[3];
 	index_child.child(level_+1,ic3,ic3+1,ic3+2);
 
-	bool face_adjacent = child_is_on_face_(if3,ic3);
+	bool face_adjacent = child_is_on_face_(ic3,if3);
 
 	if (face_adjacent) {
 
@@ -434,7 +434,7 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int type)
 
 //----------------------------------------------------------------------
 
-bool CommBlock::child_is_on_face_(int if3[3], int ic3[3]) const
+bool CommBlock::child_is_on_face_(int ic3[3], int if3[3]) const
 {
   bool face_adjacent = true;
   if (if3[0] == -1 && ic3[0] != 0) face_adjacent = false;
