@@ -228,16 +228,15 @@ public: // interface
 		      int index_field_set = 0) throw();
 #endif
 
-  void set_child(Index index);
   void delete_child(Index index);
   bool is_child (const Index & index) const;
 
-  void p_set_face_level (int if3[3], int level, int recurse, int line)
+  void p_set_face_level (int if3[3], int level, int recurse, int type)
   {
-    set_face_level(if3,level,recurse,line); 
+    set_face_level(if3,level,recurse,type); 
   }
 
-  void set_face_level (int if3[3], int level, int recurse, int line);
+  void set_face_level (int if3[3], int level, int recurse, int type);
 
   int face_level (int if3[3]) const
   {  return face_level_[IF3(if3)];  }
@@ -382,8 +381,11 @@ protected: // functions
   /// Return the (lower) indices of the CommBlock in the level, 
   /// and the number of indices
 
-  /// Update face_level_[] for new child
-  void face_level_update_new_ (Index index_child);
+  /// Update face_level_[] for refined Commblock
+  void refine_face_level_update_ (Index index_child);
+
+  /// Update face_level_[] for coarsened CommBlock
+  void coarsen_face_level_update_ (Index index_child);
 
 #ifdef CONFIG_USE_CHARM
 
