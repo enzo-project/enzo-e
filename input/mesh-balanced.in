@@ -52,38 +52,73 @@ Stopping { cycle = 100; }
 
 Output {
 
-#   file_groups = ["image_mesh"]; 
-#   file_groups = ["image_data"]; 
-   file_groups = ["image_mesh","image_data"]; 
-#   file_groups = []; 
+   file_groups = ["mesh","de","te","vx","vy"]; 
 
-      image_data {
+      de {
 	type     = "image";
 	image_type  = "data";
-        image_ghost = true;
 	image_size  = [1024,1024];
         field_list = ["density"];
 	schedule = ["cycle","interval", 10];
-        colormap = [0.00, 0.00, 0.50,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00];
-#          colormap = [0.0, 0.0, 0.0, 1.0, 1.0, 1.0];
-        name = ["mesh-balanced-data.%02d.png","cycle"];
+        colormap = [0.0, 0.0, 0.0,  
+                    1.0, 0.0, 0.0, 
+                    1.0, 1.0, 0.0, 
+                    1.0, 1.0, 1.0];
+        name = ["mesh-balanced-de.%03d.png","cycle"];
       };
-      image_mesh {
+      te {
 	type     = "image";
+	image_type  = "data";
+	image_size  = [1024,1024];
+        field_list = ["total_energy"];
+	schedule = ["cycle","interval", 10];
+        colormap = [0.0, 0.0, 0.0,  
+                    1.0, 0.0, 0.0, 
+                    1.0, 1.0, 0.0, 
+                    1.0, 1.0, 1.0];
+        name = ["mesh-balanced-te.%03d.png","cycle"];
+      };
+      vx {
+	type     = "image";
+	image_type  = "data";
+	image_size  = [1024,1024];
+        field_list = ["velocity_x"];
+	schedule = ["cycle","interval", 10];
+        colormap = [1.0, 0.0, 0.0,  
+                    0.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0];
+        name = ["mesh-balanced-vx.%03d.png","cycle"];
+      };
+      vy {
+	type     = "image";
+	image_type  = "data";
+	image_size  = [1024,1024];
+        field_list = ["velocity_y"];
+	schedule = ["cycle","interval", 10];
+        colormap = [1.0, 0.0, 0.0,  
+                    0.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0];
+        name = ["mesh-balanced-vy.%03d.png","cycle"];
+      };
+      mesh {
+	type     = "image";
+#        image_face_rank = 0;
 	image_type  = "mesh";
 	image_reduce_type = "max";
         field_list = ["density"];
-	image_block_size  = 3;
-	image_size  = [1025,1025];
+	image_block_size  = 5;
 	schedule = ["cycle","interval", 10];
-        colormap = [1.00, 1.00, 1.00,  
-                    0.20, 0.20, 0.20];
-        name = ["mesh-balanced-mesh.%02d.png","cycle"];
+        colormap = [1.0, 1.0, 1.0,  
+                    1.0, 1.0, 0.0,
+		    0.0, 1.0, 1.0,
+		    1.0, 0.0, 1.0,
+		    1.0, 0.0, 0.0,
+		    0.0, 1.0, 0.0,
+		    0.0, 0.0, 1.0];
+
+        name = ["mesh-balanced-mesh.%03d.png","cycle"];
         
       };
-
 }
+
 Performance { warnings = false; }

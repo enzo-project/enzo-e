@@ -60,6 +60,7 @@ class Tree;
 #include "mesh_Refine.hpp"
 #include "mesh_RefineSlope.hpp"
 #include "mesh_RefineMass.hpp"
+#include "mesh_ItFace.hpp"
 
 #endif /* _MESH_HPP */
 

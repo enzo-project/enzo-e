@@ -9,6 +9,7 @@
 #define COMM_COMMBLOCK_HPP
 
 class Block;
+class FieldFace;
 class Factory;
 class GroupProcess;
 class FieldDescr;
@@ -414,6 +415,21 @@ protected: // functions
   (int *icxm, int *icym, int *iczm,
    int *icxp, int *icyp, int *iczp,
    int ifx, int ify, int ifz) const throw();
+
+  FieldFace * load_face_(int * narray, char ** array,
+			 int ifx, int ify, int ifz,
+			 int icx, int icy, int icz,
+			 bool lgx, bool lgy, bool lgz,
+			 int op_array);
+  FieldFace * store_face_(int narray, char * array,
+			 int ifx, int ify, int ifz,
+			 int icx, int icy, int icz,
+			 bool lgx, bool lgy, bool lgz,
+			 int op_array);
+  FieldFace * create_face_(int ifx, int ify, int ifz,
+			   int icx, int icy, int icz,
+			   bool lgx, bool lgy, bool lgz,
+			   int op_array);
 
 protected: // attributes
 

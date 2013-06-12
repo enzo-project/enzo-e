@@ -206,35 +206,13 @@ void CommBlock::refine()
 
     if ( ! is_child(index_child) ) {
 
-      // create child
-
-      // <duplicated code: refactor me!>
       int narray = 0;  
       char * array = 0;
-      int op_array = op_array_prolong;
+      FieldFace * field_face = load_face_
+	(&narray,&array, 0,0,0,  ic3[0],ic3[1],ic3[2], 
+	 true,true,true, op_array_prolong);
 
-      Simulation * simulation = proxy_simulation.ckLocalBranch();
-      FieldDescr * field_descr = simulation->field_descr();
-      FieldBlock * field_block = block_->field_block();
-      Prolong * prolong = simulation->problem()->prolong();
-
-      FieldFace field_face (field_block,field_descr);
-
-      field_face.set_prolong(prolong,ic3[0],ic3[1],ic3[2]);
-      field_face.set_face(0,0,0); // 0-face is full block
-      
-#ifdef FULL_GHOST
-      field_face.set_ghost(true,true,true);
-#endif
-
-      field_face.load(&narray, &array);
-
-      //       if (cycle_ > 0) index_.print("refine",-1,2,true);
-	
-
-      // </duplicated code>
-
-      const Factory * factory = simulation->factory();
+      const Factory * factory = simulation()->factory();
 
       int face_level[27];
       
@@ -252,8 +230,6 @@ void CommBlock::refine()
       int num_field_blocks = 1;
       bool testing = false;
 
-      //       if (cycle_ > 0) printf ("load %d\n",narray);
-
       factory->create_block 
 	(&thisProxy, index_child,
 	 nx,ny,nz,
@@ -261,13 +237,13 @@ void CommBlock::refine()
 	 count_adapt_,
 	 initial,
 	 cycle_,time_,dt_,
-	 narray, array, op_array,
+	 narray, array, op_array_prolong,
 	 27,face_level,
 	 testing);
 
       set_child(index_child);
 
-      // update child and neighbor face_level[]
+      delete field_face;
 
       face_level_update_new_(index_child);
 
@@ -356,16 +332,10 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 		SET_FACE_LEVEL(index_child,if3,level_,false,__LINE__);
 
-		// facing child
 		int ic3[3];
 		index_.child(level_,ic3+0,ic3+1,ic3+2);
-		int jc3[3] = {ic3[0],ic3[1],ic3[2]};
-		if (if3[0] == -1) jc3[0] = 1;
-		if (if3[1] == -1) jc3[1] = 1;
-		if (if3[2] == -1) jc3[2] = 1;
-		if (if3[0] == +1) jc3[0] = 0;
-		if (if3[1] == +1) jc3[1] = 0;
-		if (if3[2] == +1) jc3[2] = 0;
+		int jc3[3];
+		facing_child_(jc3,ic3,if3);
 
 		thisProxy[index_uncle].p_balance (jc3,jf3,level_+1);
 
@@ -417,6 +387,7 @@ void CommBlock::face_level_update_new_( Index index_child )
   }
 }
 
+//----------------------------------------------------------------------
 
 void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
 { 
@@ -431,11 +402,6 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
   //  face_level_[IF3(if3)] = level;
 
   if (recurse && ! is_leaf()) {
-
-    // Simulation * simulation = this->simulation();
-    // const int rank         = simulation->dimension();
-    // const int rank_refresh = config->field_refresh_rank;
-    // const int rank_face = abs(if3[0]) + abs(if3[1]) + abs(if3[2]);
 
     // update children that share the same face
 
@@ -579,27 +545,89 @@ void CommBlock::coarsen()
   index.set_level(level_ - 1);
   index.clean();
 
-  // <duplicated code: refactor me!>
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation->field_descr();
-  FieldBlock * field_block = block_->field_block();
-  Restrict * restrict = simulation->problem()->restrict();
-
-  FieldFace field_face (field_block,field_descr);
-
-  field_face.set_restrict(restrict,icx,icy,icz);
-  field_face.set_face(0,0,0); // 0-face is full block
-#ifdef FULL_GHOST
-  field_face.set_ghost(true,true,true);
-#endif
-
   int narray; 
   char * array;
-  field_face.load(&narray, &array);
-  // </duplicated code>
+  FieldFace * field_face = load_face_(&narray,&array,
+				      0,0,0,
+				      icx,icy,icz,
+				      true,true,true,
+				      op_array_restrict);
+
 
   thisProxy[index].p_child_can_coarsen(icx,icy,icz,narray,array);
 
+  delete field_face;
+
+}
+
+//----------------------------------------------------------------------
+
+FieldFace * CommBlock::load_face_
+(
+ int * narray, char ** array, 
+ int ifx, int ify, int ifz,
+ int icx, int icy, int icz,
+ bool lgx, bool lgy, bool lgz,
+ int op_array_type
+)
+{
+  FieldFace * field_face = create_face_ (ifx,ify,ifz,
+					 icx,icy,icz,
+					 lgx,lgy,lgz,
+					 op_array_type);
+
+  field_face->load(narray, array);
+  return field_face;
+}
+
+//----------------------------------------------------------------------
+
+FieldFace * CommBlock::store_face_
+(
+ int narray, char * array, 
+ int ifx, int ify, int ifz,
+ int icx, int icy, int icz,
+ bool lgx, bool lgy, bool lgz,
+ int op_array_type
+)
+{
+  FieldFace * field_face = create_face_ (ifx,ify,ifz,
+					 icx,icy,icz,
+					 lgx,lgy,lgz,
+					 op_array_type);
+
+  field_face->store(narray, array);
+  delete field_face;
+  return NULL;
+}
+
+//----------------------------------------------------------------------
+
+FieldFace * CommBlock::create_face_
+(
+ int ifx, int ify, int ifz,
+ int icx, int icy, int icz,
+ bool lgx, bool lgy, bool lgz,
+ int op_array_type
+)
+{
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+  FieldBlock * field_block = block_->field_block();
+
+  FieldFace * field_face = new FieldFace (field_block,field_descr);
+
+  if (op_array_type == op_array_restrict) {
+    Restrict * restrict = simulation->problem()->restrict();
+    field_face->set_restrict(restrict,icx,icy,icz);
+  } else if (op_array_type == op_array_prolong) {
+    Prolong * prolong = simulation->problem()->prolong();
+    field_face->set_prolong(prolong,icx,icy,icz);
+  }
+
+  field_face->set_face(ifx,ify,ifz);
+  field_face->set_ghost(lgx,lgy,lgz);
+  return field_face;
 }
 
 //----------------------------------------------------------------------
@@ -609,12 +637,10 @@ void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
 {
   if (! can_coarsen()) return;
 
-  // <duplicated code: refactor me!>
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation->field_descr();
-
   // allocate child block if this is the first
   if (!child_block_) {
+
+    FieldDescr * field_descr = simulation()->field_descr();
     int nx,ny,nz;
     block_->field_block()->size(&nx,&ny,&nz);
     int num_field_blocks = block_->num_field_blocks();
@@ -631,26 +657,20 @@ void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
     child_block_->allocate(field_descr);
   }
 
-  FieldBlock * child_field_block = child_block_->field_block();
-  FieldFace child_field_face(child_field_block, field_descr);
-  Restrict *   restrict = simulation->problem()->restrict();
-  child_field_face.set_restrict(restrict,icx,icy,icz);
-  child_field_face.set_face(0,0,0);
-#ifdef FULL_GHOST
-  child_field_face.set_ghost(true,true,true);
-#endif
-   
-  child_field_face.store (n, array);
-  // </duplicated code>
+  store_face_(n,array,
+	      0,0,0,
+	      icx,icy,icz,
+	      true,true,true,
+	      op_array_restrict);
 
-  int rank = simulation->dimension();
+  int rank = simulation()->dimension();
+
   if (++count_coarsen_ >= NC(rank)) {
     delete block_;
     block_ = child_block_;
     child_block_ = 0;
     for (size_t i=0; i<children_.size(); i++) {
       if (children_[i] != thisIndex) {
-	// Restricted child data is sent to parent when child destroyed
 	thisProxy[children_[i]].ckDestroy();
       }
     }
@@ -662,24 +682,11 @@ void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
 void CommBlock::x_refresh_child (int n, char * buffer, 
 				int icx, int icy, int icz)
 {
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  FieldDescr * field_descr = simulation->field_descr();
-  FieldBlock * field_block = block_->field_block();
-  Restrict * restrict = simulation->problem()->restrict();
-
-  FieldFace field_face(field_block, field_descr);
-
-  // Full block data
-  field_face.set_face(0,0,0);
-#ifdef FULL_GHOST
-  field_face.set_ghost(true,true,true);
-#endif
-
-  field_face.set_restrict(restrict,icx,icy,icz);
-   
-  field_face.store (n, buffer);
-
+  store_face_(n,buffer,
+	      0,0,0,
+	      icx,icy,icz,
+	      true,true,true,
+	      op_array_restrict);
 }
 
 //----------------------------------------------------------------------
