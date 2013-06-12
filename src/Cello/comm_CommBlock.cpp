@@ -117,9 +117,7 @@ CommBlock::CommBlock
 
     //    set "face" to full FieldBlock
     field_face.set_face(0,0,0);
-#ifdef FULL_GHOST
     field_face.set_ghost(true,true,true);
-#endif
 
     //    set array operation if any
     switch (op_array) {
@@ -234,33 +232,17 @@ CommBlock::~CommBlock() throw ()
 
     // Send restricted data to parent 
 
-    // <duplicated code: refactor me!>
-    FieldBlock * field_block = block()->field_block();
-    FieldDescr * field_descr = simulation()->field_descr();
-    FieldFace field_face (field_block,field_descr);
+     int icx,icy,icz;
+     index_.child(level_,&icx,&icy,&icz);
 
-    //    set "face" to full FieldBlock
-    field_face.set_face(0,0,0);
-#ifdef FULL_GHOST
-    field_face.set_ghost(true,true,true);
-#endif
-
-    //    set restriction
-    Restrict * restrict = simulation()->problem()->restrict();
-    int icx,icy,icz;
-    index_.child(level_,&icx,&icy,&icz);
-    field_face.set_restrict(restrict,icx,icy,icz);
-
-    //    load array with data
     int n; 
     char * array;
-    field_face.load(&n,&array);
-    // </duplicated code>
-
-    //    send data to parent
+    fieldface * field_face = 
+      load_face_(&n,&array,0,0,0,icx,icy,icz,true,true,true,op_array_restrict);
 
     thisProxy[index_.index_parent()].x_refresh_child(n,array,icx,icy,icz);
-    
+
+    delete field_face;
   }
   if (block_) delete block_;
   block_ = 0;

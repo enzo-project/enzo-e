@@ -5,10 +5,9 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
-# (TEMPORARY) Whether to bypass Block refresh and jump to output
-# (for debugging adapt)
+# (TEMPORARY) Whether to include new coarsening code
 
-full_ghost = 1
+coarsen = 1
 
 # Whether to print out messages with the TRACE() series of statements
 
@@ -123,7 +122,7 @@ define = {}
 
 # Temporary defines
 
-define_full_ghost =        ['FULL_GHOST']
+define_coarsen =        ['COARSEN']
 
 # Parallel type defines
 
@@ -216,7 +215,7 @@ if (use_gprof == 1):
   
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
-if (full_ghost != 0):      defines = defines + define_full_ghost
+if (coarsen != 0):       defines = defines + define_coarsen
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
