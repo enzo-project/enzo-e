@@ -134,54 +134,29 @@ void CommBlock::refresh ()
 
 //----------------------------------------------------------------------
 
-void CommBlock::facing_child_(int jc3[3], int ic3[3], int if3[3]) const
-{
-  jc3[0] = ic3[0];
-  jc3[1] = ic3[1];
-  jc3[2] = ic3[2];
-  if (if3[0]==-1) jc3[0] = 1;
-  if (if3[1]==-1) jc3[1] = 1;
-  if (if3[2]==-1) jc3[2] = 1;
-  if (if3[0]==+1) jc3[0] = 0;
-  if (if3[1]==+1) jc3[1] = 0;
-  if (if3[2]==+1) jc3[2] = 0;
-}
-
-//----------------------------------------------------------------------
-
 void CommBlock::refresh_coarse 
 (
  Index index, 
  int ifx,  int ify,  int ifz)
 {
-  // <duplicated code: refactor me!>
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation->field_descr();
-  FieldBlock * field_block = block_->field_block();
-  Restrict * restrict = simulation->problem()->restrict();
 
   int level = index_.level();
   int ic3[3];
   index_.child(level,ic3,ic3+1,ic3+2);
 
-  // int if3[3] = {ifx,ify,ifz};
-  // int jc3[3];
-  // facing_child_(jc3,ic3,if3);
-
-  FieldFace field_face (field_block,field_descr);
-
-  field_face.set_restrict(restrict,ic3[0],ic3[1],ic3[2]);
-  field_face.set_face(ifx,ify,ifz);
-	  
-  int n; 
-  char * array;
-  field_face.load(&n, &array);
-  // </duplicated code>
+   int n; 
+   char * array;
+   FieldFace * field_face = load_face_(&n,&array,
+				       ifx,ify,ifz,
+				       ic3[0],ic3[1],ic3[2],
+				       false,false,false,
+				       op_array_restrict);
 
   ++loop_refresh_.stop();
 
   thisProxy[index].x_refresh_coarse (n,array,-ifx,-ify,-ifz,
 				     ic3[0],ic3[1],ic3[2]);
+  delete field_face;
 }
 
 //----------------------------------------------------------------------
@@ -190,22 +165,13 @@ void CommBlock::x_refresh_coarse (int n, char * buffer,
 				int ifx, int ify, int ifz,
 				int icx, int icy, int icz)
 {
-  // <duplicated code: refactor me!>
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation->field_descr();
-  FieldBlock * field_block = block_->field_block();
+  store_face_(n,buffer,
+	      ifx,ify,ifz,
+	      icx,icy,icz,
+	      false,false,false,
+	      op_array_restrict);
 
-  FieldFace field_face(field_block, field_descr);
-
-  field_face.set_face(ifx,ify,ifz);
-
-  Restrict *   restrict = simulation->problem()->restrict();
-  field_face.set_restrict(restrict,icx,icy,icz);
-   
-  field_face.store (n, buffer);
-  // </duplicated code>
-
-  std::string refresh_type = simulation->config()->field_refresh_type;
+  std::string refresh_type = simulation()->config()->field_refresh_type;
   
   if (refresh_type == "counter") {
     if (loop_refresh_.done()) {
@@ -219,23 +185,20 @@ void CommBlock::x_refresh_coarse (int n, char * buffer,
 void CommBlock::refresh_same (Index index, 
 			      int ifx,  int ify,  int ifz)
 {
-  // <duplicated code: refactor me!>
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation->field_descr();
-  FieldBlock * field_block = block_->field_block();
-
-  FieldFace field_face (field_block,field_descr);
-
-  field_face.set_face(ifx,ify,ifz);
-	  
   int n; 
   char * array;
-  field_face.load(&n, &array);
-  // </duplicated code>
+
+  FieldFace * field_face = load_face_ (&n,&array,
+				       ifx,ify,ifz,
+				       0,0,0,
+				       false,false,false,
+				       op_array_copy);
 
   ++loop_refresh_.stop();
 
   thisProxy[index].x_refresh_same (n,array,-ifx,-ify,-ifz);
+
+  delete field_face;
 }
 
 //----------------------------------------------------------------------
@@ -244,19 +207,12 @@ void CommBlock::x_refresh_same (int n, char * buffer, int ifx, int ify, int ifz)
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  FieldDescr * field_descr = simulation->field_descr();
-  FieldBlock * field_block = block_->field_block();
-
   if ( n != 0) {
-
-    // n == 0 is the call from self to ensure x_refresh_same()
-    // always gets called at least once
-
-    FieldFace field_face(field_block, field_descr);
-
-    field_face.set_face(ifx,ify,ifz);
-
-    field_face.store (n, buffer);
+    store_face_(n,buffer,
+		ifx,ify,ifz,
+		0,0,0,
+		false,false,false,
+		op_array_copy);
   }
 
   std::string refresh_type = simulation->config()->field_refresh_type;
@@ -275,31 +231,21 @@ void CommBlock::refresh_fine
  int ifx, int ify, int ifz, 
  int icx, int icy, int icz)
 {
-  // <duplicated code: refactor me!>
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation->field_descr();
-  FieldBlock * field_block = block_->field_block();
-  Prolong * prolong = simulation->problem()->prolong();
-
-  // pack face data
-
-  FieldFace field_face (field_block,field_descr);
-
-  field_face.set_face(ifx,ify,ifz);
-  field_face.set_prolong(prolong,icx,icy,icz);
-	  
   int n; 
   char * array;
-  field_face.load(&n, &array);
-  // </duplicated code>
 
-  // send face data
+  FieldFace * field_face = load_face_ (&n, &array,
+				       ifx,ify,ifz,
+				       icx,icy,icz,
+				       false,false,false,
+				       op_array_prolong);
 
   ++loop_refresh_.stop();
 
   thisProxy[index].x_refresh_fine (n,array,
 				   -ifx,-ify,-ifz,
 				   icx,icy,icz);
+  delete field_face;
 	  
 }
 
@@ -309,22 +255,13 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
 				int ifx, int ify, int ifz,
 				int icx, int icy, int icz)
 {
-  // <duplicated code: refactor me!>
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  FieldDescr * field_descr = simulation->field_descr();
-  FieldBlock * field_block = block_->field_block();
+  store_face_(n,buffer,
+	      ifx,ify,ifz,
+	      icx,icy,icz,
+	      false,false,false,
+	      op_array_prolong);
 
-  FieldFace field_face(field_block, field_descr);
-
-  field_face.set_face(ifx,ify,ifz);
-
-  Prolong *    prolong = simulation->problem()->prolong();
-  field_face.set_prolong(prolong,icx,icy,icz);
-
-  field_face.store (n, buffer);
-  // </duplicated code>
-
-  std::string refresh_type = simulation->config()->field_refresh_type;
+  std::string refresh_type = simulation()->config()->field_refresh_type;
   
   if (refresh_type == "counter") {
     if (loop_refresh_.done()) {

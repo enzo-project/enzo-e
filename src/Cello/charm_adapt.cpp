@@ -391,15 +391,7 @@ void CommBlock::face_level_update_new_( Index index_child )
 
 void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
 { 
-  // recurse = false;
-#ifdef DEBUG_ADAPT
-  char buffer[80];
-  sprintf (buffer,"SET_FACE_LEVEL(%d %d %d = %d [%d]",if3[0],if3[1],if3[2],level,line);
-  index_.print(buffer,-1,2);
-#endif
-
-  face_level_[IF3(if3)] = std::max(face_level_[IF3(if3)],level); 
-  //  face_level_[IF3(if3)] = level;
+    face_level_[IF3(if3)] = std::max(face_level_[IF3(if3)],level); 
 
   if (recurse && ! is_leaf()) {
 
@@ -418,9 +410,7 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
 
 	if (face_adjacent) {
 
-#ifdef CONFIG_USE_CHARM
 	  SET_FACE_LEVEL(index_child,if3,level,true,__LINE__);
-#endif
 
 	  int ifc3m[3], ifc3p[3], ifc3[3];
 	  loop_limits_faces_(ifc3m,ifc3p,if3,ic3);
@@ -428,9 +418,7 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int line)
 	  for (ifc3[0]=ifc3m[0]; ifc3[0]<=ifc3p[0]; ifc3[0]++) {
 	    for (ifc3[1]=ifc3m[1]; ifc3[1]<=ifc3p[1]; ifc3[1]++) {
 	      for (ifc3[2]=ifc3m[2]; ifc3[2]<=ifc3p[2]; ifc3[2]++) {
-#ifdef CONFIG_USE_CHARM
 		SET_FACE_LEVEL(index_child,ifc3,level,true,__LINE__);
-#endif
 	      }
 	    }
 	  }
@@ -493,8 +481,6 @@ void CommBlock::parent_face_(int ip3[3],int if3[3], int ic3[3]) const
 void CommBlock::p_balance(int ic3[3], int if3[3], int level)
 {
   refine();
-  //  Index index_child = index_.index_child(ic3[0],ic3[1],ic3[2]);
-  //  SET_FACE_LEVEL(index_child,if3,level,false,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -507,8 +493,6 @@ bool CommBlock::can_coarsen() const
   int rank = simulation()->dimension();
   int if3m[3],if3p[3],if3[3];
 
-  // loop_limits_refresh_(if3m+0,if3m+1,if3m+2,
-  // 		       if3p+0,if3p+1,if3p+2);
   if3m[0] = (rank >= 1) ? -1 : 0;
   if3m[1] = (rank >= 2) ? -1 : 0;
   if3m[2] = (rank >= 3) ? -1 : 0;
@@ -635,7 +619,7 @@ FieldFace * CommBlock::create_face_
 void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
 				    int n, char * array)
 {
-  if (! can_coarsen()) return;
+      if (! can_coarsen()) return;
 
   // allocate child block if this is the first
   if (!child_block_) {

@@ -55,7 +55,6 @@ public: // functions
   inline void insert_block() 
   {
     ++block_sync_;
-    TRACE2 ("++local count %d = %d",group_process_->rank(),block_sync_.stop());
   }
 
   /// Remove a CommBlock from this local branch
@@ -64,7 +63,6 @@ public: // functions
     WARNING("SimulationCharm::delete_block()",
 	    "Migrating CommBlocks will disturb local counts");
     --block_sync_; 
-    TRACE2 ("--local count %d = %d",group_process_->rank(),block_sync_.stop());
   }
 
   /// Call initialize()

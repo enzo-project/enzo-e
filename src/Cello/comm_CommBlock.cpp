@@ -567,6 +567,21 @@ void CommBlock::loop_limits_nibling_
 
 //----------------------------------------------------------------------
 
+void CommBlock::facing_child_(int jc3[3], int ic3[3], int if3[3]) const
+{
+  jc3[0] = ic3[0];
+  jc3[1] = ic3[1];
+  jc3[2] = ic3[2];
+  if (if3[0]==-1) jc3[0] = 1;
+  if (if3[1]==-1) jc3[1] = 1;
+  if (if3[2]==-1) jc3[2] = 1;
+  if (if3[0]==+1) jc3[0] = 0;
+  if (if3[1]==+1) jc3[1] = 0;
+  if (if3[2]==+1) jc3[2] = 0;
+}
+
+//----------------------------------------------------------------------
+
 void CommBlock::copy_(const CommBlock & comm_block) throw()
 {
   block_->copy_(*comm_block.block());
