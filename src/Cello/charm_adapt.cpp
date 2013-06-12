@@ -285,8 +285,6 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
     SET_FACE_LEVEL(index_neighbor,jf3,level_+1,false,adapt_refine);
 
-    // CHILD NEIGHBOR
-
     Index index_child_neighbor = index_child.index_neighbor
       (if3[0],if3[1],if3[2],na3,periodic);
 
@@ -295,7 +293,7 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
     if (is_sibling) {
 
-      // SIBLING
+      // CHILD SIBLING
 
       SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_refine);
 
@@ -312,7 +310,7 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
       if (face_level == level_ - 1) {
 
-	// GREAT UNCLE
+	// CHILD GREAT UNCLE
 
 	if (balance) {
 	  Index index_uncle = index_neighbor.index_parent();
@@ -330,7 +328,7 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
       } else if (face_level == level_) {
 
-	// UNCLE
+	// CHILD UNCLE
 
 	SET_FACE_LEVEL(index_child,if3,level_,false,adapt_refine);
 
@@ -338,7 +336,7 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
       } else if (face_level == level_ + 1) {
 
-	// COUSIN
+	// CHILD COUSIN
 
 	SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_refine);
 
@@ -346,7 +344,7 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
       } else if (face_level == level_ + 2) {
 
-	// NIBLINGS
+	// CHILD NIBLINGS
 
 	SET_FACE_LEVEL(index_child,if3,level_+2,false,adapt_refine);
 
@@ -676,8 +674,6 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
     SET_FACE_LEVEL(index_neighbor,jf3,level_+1,false,adapt_coarsen);
 
-    // CHILD NEIGHBOR
-
     Index index_child_neighbor = index_child.index_neighbor
       (if3[0],if3[1],if3[2],na3,periodic);
 
@@ -686,7 +682,7 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
     if (is_sibling) {
 
-      // SIBLING
+      // CHILD SIBLING
 
       SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_coarsen);
 
@@ -703,7 +699,7 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
       if (face_level == level_ - 1) {
 
-	// GREAT UNCLE
+	// CHILD GREAT UNCLE
 
 	if (balance) {
 	  Index index_uncle = index_neighbor.index_parent();
@@ -721,7 +717,7 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
       } else if (face_level == level_) {
 
-	// UNCLE
+	// CHILD UNCLE
 
 	SET_FACE_LEVEL(index_child,if3,level_,false,adapt_coarsen);
 
@@ -729,7 +725,7 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
       } else if (face_level == level_ + 1) {
 
-	// COUSIN
+	// CHILD COUSIN
 
 	SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_coarsen);
 
@@ -737,7 +733,7 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
       } else if (face_level == level_ + 2) {
 
-	// NIBLINGS
+	// CHILD NIBLINGS
 
 	SET_FACE_LEVEL(index_child,if3,level_+2,false,adapt_coarsen);
 
