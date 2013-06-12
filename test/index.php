@@ -98,7 +98,7 @@ function test_failed ($output_file) {
 
    //----------------------------------------------------------------------
 
-$types = array("charm","mpi");
+$types = array("charm");
   $num_types = sizeof($types);
 
   function tests($component,$testrun,$output,$test_name) {
@@ -561,6 +561,9 @@ test_summary("Mesh",
 	     array("Hierarchy",
 		   "Block",
 		   "Tree",
+		   "Index",
+		   "Tree",
+		   "ItFace",
 		   "TreeDensity",
 		   "Node",
 		   "NodeTrace",
@@ -569,6 +572,7 @@ test_summary("Mesh",
 		   "test_Block",
 		   "test_Index",
 		   "test_Tree",
+		   "test_ItFace",
 		   "test_TreeDensity",
 		   "test_Node",
 		   "test_NodeTrace",
@@ -688,11 +692,12 @@ echo "<h3>2D Serial</h3>";
 
 tests("Enzo","enzo-p","test_mesh-balanced","balanced");
 
-test_table ("mesh-balanced", array("mesh.00","data.00"), $types);
+test_table ("mesh-balanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
+test_table ("mesh-balanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
 
 tests("Enzo","enzo-p","test_mesh-unbalanced","unbalanced");
-
-test_table ("mesh-unbalanced", array("mesh.00","data.00"), $types);
+test_table ("mesh-unbalanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
+test_table ("mesh-unbalanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
 
 //======================================================================
 
@@ -703,37 +708,98 @@ echo "<h3>2D Serial</h3>";
 tests("Enzo","enzo-p","test_adapt-L1-P1","Level 1");
 
 test_table ("adapt-L1-P1-mesh",
-	    array("0.000000","0.025000","0.050000","0.075000","0.100000"), $types);
-test_table ("adapt-L1-P1-density",
-	    array("0.000000","0.025000","0.050000","0.075000","0.100000"), $types);
+	    array("0.000000","0.020000","0.040000",
+		  "0.060000","0.080000","0.100000"), $types);
+test_table ("adapt-L1-P1-de",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L1-P1-te",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L1-P1-vx",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L1-P1-vy",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
 
 tests("Enzo","enzo-p","test_adapt-L2-P1","Level 2");
 
 test_table ("adapt-L2-P1-mesh",
-	    array("0.000000","0.025000","0.050000","0.075000","0.100000"), $types);
-test_table ("adapt-L2-P1-density",
-	    array("0.000000","0.025000","0.050000","0.075000","0.100000"), $types);
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
+test_table ("adapt-L2-P1-de",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L2-P1-te",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L2-P1-vx",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L2-P1-vy",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
 
 tests("Enzo","enzo-p","test_adapt-L3-P1","Level 3");
 
 test_table ("adapt-L3-P1-mesh",
-	    array("0.000000","0.025000","0.050000","0.075000","0.100000"), $types);
-test_table ("adapt-L3-P1-density",
-	    array("0.000000","0.025000","0.050000","0.075000","0.100000"), $types);
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
+test_table ("adapt-L3-P1-de",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L3-P1-te",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L3-P1-vx",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L3-P1-vy",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
 
 tests("Enzo","enzo-p","test_adapt-L4-P1","Level 4");
 
 test_table ("adapt-L4-P1-mesh",
-	    array("0.000000","0.025000","0.050000","0.075000","0.100000"), $types);
-test_table ("adapt-L4-P1-density",
-	    array("0.000000","0.025000","0.050000","0.075000","0.100000"), $types);
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L4-P1-de",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L4-P1-te",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L4-P1-vx",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L4-P1-vy",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
 
 tests("Enzo","enzo-p","test_adapt-L5-P1","Level 5");
 
 test_table ("adapt-L5-P1-mesh",
-	    array("0.000000","0.025000","0.050000","0.075000","0.100000"), $types);
-test_table ("adapt-L5-P1-density",
-	    array("0.000000","0.025000","0.050000","0.075000","0.100000"), $types);
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L5-P1-de",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L5-P1-te",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L5-P1-vx",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L5-P1-vy",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
 
 
 //======================================================================
@@ -876,6 +942,7 @@ tests("Cello","test_Hierarchy","test_Hierarchy","");
 tests("Cello","test_Block","test_Block",""); 
 tests("Cello","test_Index","test_Index",""); 
 tests("Cello","test_Tree","test_Tree",""); 
+tests("Cello","test_ItFace","test_ItFace",""); 
 
 printf ("<img width=257 src=\"mpi/test_tree_1-initial.png\"></img>\n");
 printf ("<img width=257 src=\"mpi/test_tree_2-balanced.png\"></img>\n");
