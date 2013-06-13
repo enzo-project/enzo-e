@@ -283,7 +283,7 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
     int jf3[3] = {-if3[0],-if3[1],-if3[2]};
 
-    SET_FACE_LEVEL(index_neighbor,jf3,level_+1,false,adapt_refine);
+    // SET_FACE_LEVEL(index_neighbor,jf3,level_+1,false,adapt_refine);
 
     Index index_child_neighbor = index_child.index_neighbor
       (if3[0],if3[1],if3[2],na3,periodic);
@@ -475,6 +475,8 @@ bool CommBlock::can_coarsen() const
 { 
   if (level_ <= 0) return false;
 
+  if (! is_leaf() ) return false;
+
   int refresh_rank = simulation()->config()->field_refresh_rank;
   int rank = simulation()->dimension();
   int if3m[3],if3p[3],if3[3];
@@ -593,7 +595,11 @@ FieldFace * CommBlock::create_face_
 void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
 				    int n, char * array)
 {
+#ifdef COARSEN
+#else /* COARSEN */
+  // parent can never coarsen
   if (! can_coarsen()) return;
+#endif /* COARSEN */
 
   // allocate child block if this is the first
   if (!child_block_) {
@@ -667,12 +673,10 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
     // MY NEIGHBOR
 
-    Index index_neighbor = index_.index_neighbor
-      (if3[0],if3[1],if3[2],na3,periodic);
+     Index index_neighbor = index_.index_neighbor
+       (if3[0],if3[1],if3[2],na3,periodic);
 
     int jf3[3] = {-if3[0],-if3[1],-if3[2]};
-
-    SET_FACE_LEVEL(index_neighbor,jf3,level_+1,false,adapt_coarsen);
 
     Index index_child_neighbor = index_child.index_neighbor
       (if3[0],if3[1],if3[2],na3,periodic);
@@ -719,15 +723,15 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
 	// CHILD UNCLE
 
-	SET_FACE_LEVEL(index_child,if3,level_,false,adapt_coarsen);
+	SET_FACE_LEVEL(index_child,   if3,level_,  false,adapt_coarsen);
 
-	SET_FACE_LEVEL(index_neighbor,jf3,level_+1,true,adapt_coarsen);
+	SET_FACE_LEVEL(index_neighbor,jf3,level_+1,true, adapt_coarsen);
 
       } else if (face_level == level_ + 1) {
 
 	// CHILD COUSIN
 
-	SET_FACE_LEVEL(index_child,if3,level_+1,false,adapt_coarsen);
+	SET_FACE_LEVEL(index_child,         if3,level_+1,false,adapt_coarsen);
 
 	SET_FACE_LEVEL(index_child_neighbor,jf3,level_+1,false,adapt_coarsen);
 

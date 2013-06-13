@@ -237,7 +237,7 @@ CommBlock::~CommBlock() throw ()
 
     int n; 
     char * array;
-    fieldface * field_face = 
+    FieldFace * field_face = 
       load_face_(&n,&array,0,0,0,icx,icy,icz,true,true,true,op_array_restrict);
 
     thisProxy[index_.index_parent()].x_refresh_child(n,array,icx,icy,icz);
