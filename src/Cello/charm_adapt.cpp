@@ -277,12 +277,12 @@ void CommBlock::refine_face_level_update_( Index index_child )
   ItFace it_face(rank,rank_refresh);
   while (it_face.next(if3)) {
 
-    int jf3[3] = {-if3[0],-if3[1],-if3[2]};
-
     // MY NEIGHBOR
 
     Index index_neighbor = index_.index_neighbor
       (if3[0],if3[1],if3[2],na3,periodic);
+
+    int jf3[3] = {-if3[0],-if3[1],-if3[2]};
 
     SET_FACE_LEVEL(index_neighbor,jf3,level_+1,false,adapt_refine);
 
