@@ -348,11 +348,13 @@ void Index::print (const char * msg,
 		   int rank,
 		   bool brief) const
 {
+  brief=true;
+  rank = 2;
   if (max_level == -1) max_level = this->level();
 
   if (brief) {
     
-    PARALLEL_PRINTF ("INDEX %s: ", msg);
+    PARALLEL_PRINTF ("INDEX %p %s: ", this,msg);
 
     int nb = 0;
 

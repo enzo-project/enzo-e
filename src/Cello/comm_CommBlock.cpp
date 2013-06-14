@@ -43,11 +43,14 @@ CommBlock::CommBlock
   loop_refresh_(),
 #endif
   face_level_(),
+  child_face_level_(),
   count_coarsen_(0),
   count_adapt_(count_adapt),
   adapt_(adapt_unknown),
-  next_phase_(phase_output)
+  next_phase_(phase_output),
+  coarsened_(false)
 { 
+  //   index_.print("constructor",-1,2,true);
 #ifdef CELLO_TRACE
   index.print ("CommBlock::CommBlock");
   printf("CommBlock::CommBlock(n(%d %d %d)  num_field_blocks %d  count_adapt %d  initial %d)\n",
@@ -95,11 +98,15 @@ CommBlock::CommBlock
   if (num_face_level == 0) {
 
     face_level_.resize(27);
+    child_face_level_.resize(27);
     for (int i=0; i<27; i++) face_level_[i] = 0;
   } else {
     face_level_.resize(num_face_level);
+    child_face_level_.resize(num_face_level);
     for (int i=0; i<num_face_level; i++) face_level_[i] = face_level[i];
   }
+
+
 
   int na3[3];
   size_forest(&na3[0],&na3[1],&na3[2]);
@@ -183,9 +190,11 @@ void CommBlock::pup(PUP::er &p)
   p | count_coarsen_;
   p | count_adapt_;
   p | adapt_;
-  p | next_phase_;
   p | loop_refresh_;
   p | face_level_;
+  p | child_face_level_;
+  p | next_phase_;
+  p | coarsened_;
 
 }
 
@@ -573,6 +582,7 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   count_adapt_ = comm_block.count_adapt_;
   adapt_ = comm_block.adapt_;
   next_phase_ = comm_block.next_phase_;
+  coarsened_ = comm_block.coarsened_;
 }
 
 //----------------------------------------------------------------------

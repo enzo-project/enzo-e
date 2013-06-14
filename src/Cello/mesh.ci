@@ -60,7 +60,11 @@ module mesh {
 				int adapt_type);
 
     entry void p_child_can_coarsen(int icx,int icy,int icz,
-				   int n, char arr[n]);
+				   int na, char arr[na],
+				   int nf, int child_face_level[nf]);
+
+    entry void p_parent_coarsened();
+
 
     // refresh
 

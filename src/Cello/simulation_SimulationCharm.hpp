@@ -60,8 +60,6 @@ public: // functions
   /// Remove a CommBlock from this local branch
   inline void delete_block() 
   {
-    WARNING("SimulationCharm::delete_block()",
-	    "Migrating CommBlocks will disturb local counts");
     --block_sync_; 
   }
 

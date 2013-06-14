@@ -102,7 +102,7 @@ Output {
       };
       mesh {
 	type     = "image";
-#        image_face_rank = 0;
+        image_face_rank = 0;
 	image_type  = "mesh";
 	image_reduce_type = "max";
         field_list = ["density"];

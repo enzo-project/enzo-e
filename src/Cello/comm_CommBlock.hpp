@@ -161,7 +161,9 @@ public: // interface
   bool can_coarsen() const;
   bool can_refine() const;
   void p_child_can_coarsen(int icx,int icy, int icz,
-			   int n, char * array);
+			   int na, char * array,
+			   int nc, int * child_face_level);
+  void p_parent_coarsened();
   int determine_adapt();
   /// Update the depth of the given child
   void p_print(std::string message) {  
@@ -308,11 +310,12 @@ public: // interface
   /// Return whether this CommBlock is a leaf in the octree forest
   bool is_leaf() const
   {
+    bool value = true;
     for (size_t i = 0; i < children_.size(); i++) {
       // deleted children are replaced with thisProxy
-      if (children_.at(i) != index_) return false;    
+      if (children_.at(i) != index_) value = false;    
     }
-    return true;
+    return value;
   }
 
 
@@ -381,7 +384,7 @@ protected: // functions
   /// Return the (lower) indices of the CommBlock in the level, 
   /// and the number of indices
 
-  /// Update face_level_[] for refined Commblock
+  /// Update face_level_[] for given child in refined Commblock
   void refine_face_level_update_ (Index index_child);
 
   /// Update face_level_[] for coarsened CommBlock
@@ -482,6 +485,9 @@ protected: // attributes
   /// level of neighbors (and self) along each face
   std::vector<int> face_level_;
 
+  /// level of neighbors accumulated from children that can coarsen
+  std::vector<int> child_face_level_;
+
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;
 
@@ -493,6 +499,10 @@ protected: // attributes
 
   /// Phase to call after refresh
   int next_phase_;
+
+  /// whether CommBlock has been coarsened and should be deleted
+  bool coarsened_;
+  
 
 };
 

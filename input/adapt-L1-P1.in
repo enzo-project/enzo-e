@@ -4,7 +4,6 @@
 include "input/adapt.incl"
 
 Mesh    {
-   root_blocks = [2,2];
    root_size   = [512,512];
    max_level   = 1; 
 }

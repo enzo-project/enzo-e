@@ -714,11 +714,14 @@ void EnzoBlock::set_time (double time) throw ()
   //
   // (OldTime > time; error is about single-precision epsilon)
 
-  ASSERT2("EnzoBlock::set_time()",
-	 "set_time() may be called more than once or dt = 0.0\n"
-	  "Time_ = %15.8f time = %15.8f",
-	  Time_,time,
-	  Time_ == 0 || Time_ < time);
+  if (! (Time_ == 0 || Time_ < time)) {
+    index_.print("ERROR");
+    ASSERT2("EnzoBlock::set_time()",
+	    "set_time() may be called more than once or dt = 0.0\n"
+	    "Time_ = %15.8f time = %15.8f",
+	    Time_,time,
+	    Time_ == 0 || Time_ < time);
+  }
 
   //  WARNING("EnzoBlock::set_time","TEMPORARY");
   OldTime   = Time_;
