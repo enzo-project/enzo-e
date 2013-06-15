@@ -104,6 +104,7 @@
 void CommBlock::p_output(CkReductionMsg * msg)
 {
 
+  TRACE_DEBUG("p_output()");
   TRACE ("BEGIN PHASE OUTPUT");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -189,6 +190,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
 void CommBlock::p_write (int index_output)
 {
+  TRACE_DEBUG("p_output()");
   TRACE("OUTPUT CommBlock::p_write()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 

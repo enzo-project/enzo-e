@@ -579,7 +579,6 @@ void FieldBlock::mul_ (T * field_1, T * field_2, const FieldDescr * field_descr)
   field_descr->ghosts (0,&gx,&gy,&gz);
   int ndx = (nx>1) ? nx+2*gx : 1;
   int ndy = (ny>1) ? ny+2*gy : 1;
-  int ndz = (nz>1) ? nz+2*gz : 1;
 
   for (int ix=0; ix<nx; ix++) {
     for (int iy=0; iy<ny; iy++) {
@@ -651,7 +650,6 @@ void FieldBlock::div_ (T * field_1, T * field_2, const FieldDescr * field_descr)
   field_descr->ghosts (0,&gx,&gy,&gz);
   int ndx = (nx>1) ? nx+2*gx : 1;
   int ndy = (ny>1) ? ny+2*gy : 1;
-  int ndz = (nz>1) ? nz+2*gz : 1;
 
   for (int ix=0; ix<nx; ix++) {
     for (int iy=0; iy<ny; iy++) {
@@ -674,7 +672,6 @@ void FieldBlock::scale_ (T * field, double value, const FieldDescr * field_descr
   field_descr->ghosts (0,&gx,&gy,&gz);
   int ndx = (nx>1) ? nx+2*gx : 1;
   int ndy = (ny>1) ? ny+2*gy : 1;
-  int ndz = (nz>1) ? nz+2*gz : 1;
 
   for (int ix=0; ix<nx; ix++) {
     for (int iy=0; iy<ny; iy++) {

@@ -50,7 +50,7 @@ CommBlock::CommBlock
   next_phase_(phase_output),
   coarsened_(false)
 { 
-  //   index_.print("constructor",-1,2,true);
+  index_.print("constructor",-1,2);
 #ifdef CELLO_TRACE
   index.print ("CommBlock::CommBlock");
   printf("CommBlock::CommBlock(n(%d %d %d)  num_field_blocks %d  count_adapt %d  initial %d)\n",
@@ -60,6 +60,7 @@ CommBlock::CommBlock
   printf("CommBlock::CommBlock  l %d\n",level_);
 #endif
 
+  
 
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
@@ -88,8 +89,6 @@ CommBlock::CommBlock
 #endif
 
   // Perform any additional initialization for derived class 
-
-  int rank = this->simulation()->dimension();
 
   initialize ();
 
@@ -237,6 +236,7 @@ CommBlock::~CommBlock() throw ()
 { 
 #ifdef CONFIG_USE_CHARM
 
+  index_.print("destructor",-1,2);
   if (level_ > 0) {
 
     // Send restricted data to parent 

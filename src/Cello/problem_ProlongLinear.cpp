@@ -114,7 +114,6 @@ int ProlongLinear::apply_
 
   } else if (n3_f[2] == 1) {
 
-    T min=100, avg = 0, sum = 0, max=-100;
     int ixmin=100,ixmax=-100,iymin=100,iymax=-100;
     for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
       int ic_x = ix0/2;

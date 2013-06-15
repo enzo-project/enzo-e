@@ -7,7 +7,7 @@ import sys
 
 # (TEMPORARY) Whether to include new coarsening code
 
-coarsen = 1
+coarsen = 0
 
 # Whether to print out messages with the TRACE() series of statements
 

@@ -22,7 +22,7 @@ void SimulationCharm::c_compute()
   
   TRACE("SimulationCharm::c_compute()");
   if (cycle_ > 0 ) performance()->stop_region (perf_cycle);
-
+  printf ("TRACE c_compute()\n");
   if (stop_) {
     
     performance_write();
@@ -42,13 +42,17 @@ void SimulationCharm::c_compute()
 
 void CommBlock::p_compute (int cycle, double time, double dt)
 {
+  TRACE_DEBUG("p_compute");
   TRACE ("BEGIN PHASE COMPUTE");
   // set_cycle(cycle);
   // set_time(time);
   // set_dt(dt);
 
   TRACE3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
-  simulation()->performance()->start_region(perf_compute);
+  Performance * performance = simulation()->performance();
+  if (! performance->is_region_active(perf_compute)) {
+    performance->start_region(perf_compute);
+  }
 
 #ifdef CONFIG_USE_PROJECTIONS
   double time_start = CmiWallTimer();
@@ -80,15 +84,20 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   set_time  (time_  + dt_);
   
   
-  simulation()->performance()->stop_region(perf_compute);
+  //  simulation()->performance()->stop_region(perf_compute);
 
   TRACE ("CommBlock::compute() calling p_adapt(0)");
 
   TRACE ("END   PHASE COMPUTE");
 
+  //  Performance * performance = simulation()->performance();
+  if (performance->is_region_active(perf_compute))
+    performance->stop_region(perf_compute);
+
   next_phase_ = phase_adapt;
 
   //  p_adapt_begin();
+  
   p_refresh_begin();
 }
 

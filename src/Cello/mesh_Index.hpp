@@ -148,8 +148,9 @@ public:
 
   void print (const char * msg = "\0",
 	      int max_level = -1,
-	      int rank = 3,
-	      bool brief=false) const;
+	      int rank = 3) const;
+
+  std::string bit_string (int max_level,int rank) const;
 
 private: // functions
 

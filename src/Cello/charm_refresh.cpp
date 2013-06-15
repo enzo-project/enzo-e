@@ -18,6 +18,7 @@
 
 void CommBlock::p_refresh_begin() 
 {
+  TRACE_DEBUG("p_refresh_begin()");
   Performance * performance = simulation()->performance();
   if (! performance->is_region_active(perf_refresh)) {
     performance->start_region(perf_refresh);
@@ -49,6 +50,8 @@ void CommBlock::refresh ()
     if (! is_leaf()) return;
 
   } 
+
+  TRACE_DEBUG("refresh");
 
   int rank = simulation->dimension();
 
@@ -104,7 +107,10 @@ void CommBlock::refresh ()
 	  }
 	}
       }
+    } else {
+      index_.print("REFRESH ERROR");
     }
+
   }
 
   if (refresh_type_counter) {
@@ -259,6 +265,7 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
 
 void CommBlock::q_refresh_end()
 {
+  TRACE_DEBUG("q_refresh_end()");
   Performance * performance = simulation()->performance();
   if (performance->is_region_active(perf_refresh))
     performance->stop_region(perf_refresh);

@@ -196,8 +196,8 @@ void FieldFace::store (int n, char * array) throw()
 
   size_t index_array = 0;
 
-  const int index_d  = field_descr_->field_id("density");
-  const int index_te = field_descr_->field_id("total_energy");
+  const size_t index_d  = field_descr_->field_id("density");
+  const size_t index_te = field_descr_->field_id("total_energy");
 
   for (size_t index_field=0; index_field<num_fields; index_field++) {
 

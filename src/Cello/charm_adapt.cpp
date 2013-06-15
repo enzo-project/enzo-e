@@ -42,6 +42,7 @@ const char * adapt_name[] = {
 void CommBlock::p_adapt_begin()
 {
   TRACE ("BEGIN PHASE ADAPT");
+  TRACE_DEBUG("p_adapt_begin()");
   Performance * performance = simulation()->performance();
   if (! performance->is_region_active(perf_adapt)) {
     performance->start_region(perf_adapt);
@@ -98,8 +99,8 @@ void CommBlock::q_adapt_next()
   TRACE("ADAPT CommBlock::q_adapt_next()");
   thisProxy.doneInserting();
 
-  for (int i=0; i<child_face_level_.size(); i++) {
-    child_face_level_[i] = std::numeric_limits<int>::max();
+  for (size_t i=0; i<child_face_level_.size(); i++) {
+    child_face_level_[i] = face_level_unknown;
   }
 
   if (adapt_ == adapt_coarsen) coarsen();
@@ -220,7 +221,7 @@ void CommBlock::refine()
 
       int face_level[27];
       
-      int if3[3],if3m[3],if3p[3];
+      int if3[3];
       for (if3[0]=-1; if3[0]<=1; if3[0]++) {
 	for (if3[1]=-1; if3[1]<=1; if3[1]++) {
 	  for (if3[2]=-1; if3[2]<=1; if3[2]++) {
@@ -376,10 +377,14 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
 void CommBlock::set_face_level (int if3[3], int level, int recurse, int type)
 { 
-  if (type == adapt_refine) {
-    face_level_[IF3(if3)] = std::max(face_level_[IF3(if3)],level); 
+  int index_face = IF3(if3);
+
+  if (face_level_[index_face] == face_level_unknown) {
+    face_level_[index_face] = level;
+  } else if (type == adapt_refine) {
+    face_level_[index_face] = std::max(face_level_[index_face],level); 
   } else if (type == adapt_coarsen) {
-    face_level_[IF3(if3)] = std::min(face_level_[IF3(if3)],level); 
+    face_level_[index_face] = std::min(face_level_[index_face],level); 
   }
 
   if (recurse && ! is_leaf()) {
@@ -482,7 +487,7 @@ bool CommBlock::can_coarsen() const
 
   int refresh_rank = simulation()->config()->field_refresh_rank;
   int rank = simulation()->dimension();
-  int if3m[3],if3p[3],if3[3];
+  int if3[3];
 
   ItFace it_face(rank,refresh_rank);
 
@@ -659,6 +664,9 @@ void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
     block_ = child_block_;
     child_block_ = 0;
 
+    // need to update application so it knows where fields arrays are
+    initialize ();
+
     face_level_ = child_face_level_;
 
     for (size_t i=0; i<children_.size(); i++) {
@@ -688,7 +696,6 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
   const int  rank         = simulation->dimension();
   const int  rank_refresh = config->field_refresh_rank;
-  const bool balance      = config->mesh_balance;
   const bool periodic     = problem->boundary()->is_periodic();
 
   int na3[3];
@@ -711,7 +718,9 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
     bool is_sibling = 
       index_child.index_parent() == index_child_neighbor.index_parent();
 
-    if (! is_sibling) {
+    if (is_sibling) {
+
+    } else {
 
       int icc3[3];
       index_child.child(level_+1,icc3+0,icc3+1,icc3+2);
@@ -737,9 +746,9 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
       } else {
 	index_.print("index_");
 	index_child.print("index_child");
-	ERROR2("CommBlock::coarsen_face_level_update_()",
-	       "Unhandled level jump from index_[%d] to face_level[%d]",
-	       level_,face_level);
+	 ERROR5("CommBlock::coarsen_face_level_update_()",
+	        "Unhandled level jump from index_[%d] to face_level(%d %d %d)[%d]",
+	        level_,ip3[0],ip3[1],ip3[2],face_level);
       }
     }
 
@@ -774,7 +783,11 @@ void CommBlock::q_adapt_end()
 {
   TRACE("ADAPT CommBlock::q_adapt_end()");
 
-  if (coarsened_) thisProxy[thisIndex].ckDestroy();
+  TRACE_DEBUG("q_adapt_end");
+  if (coarsened_) {
+    TRACE_DEBUG("ckDestroy()");
+    thisProxy[thisIndex].ckDestroy();
+  }
 
   Performance * performance = simulation()->performance();
   if (performance->is_region_active(perf_adapt))

@@ -345,79 +345,51 @@ void Index::set_child(int level, int ix, int iy, int iz)
 
 void Index::print (const char * msg,
 		   int max_level,
-		   int rank,
-		   bool brief) const
+		   int rank) const
 {
-  brief=true;
-  rank = 2;
   if (max_level == -1) max_level = this->level();
-
-  if (brief) {
     
-    PARALLEL_PRINTF ("INDEX %p %s: ", this,msg);
+  PARALLEL_PRINTF ("INDEX %p %s: ", this,msg);
 
-    int nb = 0;
+  int nb = 0;
 
-    for (int axis=0; axis<rank; axis++) {
-      nb = std::max(nb,num_bits_(a_[axis].array));
-    }
-
-    for (int axis=0; axis<rank; axis++) {
-
-      print_bits_(a_[axis].array,nb);
-
-	PARALLEL_PRINTF (":");
-
-      for (int level=0; level<max_level; level++) {
-
-	int ic3[3];
-	child (level+1, &ic3[0], &ic3[1], &ic3[2]);
-	PARALLEL_PRINTF ("%d",ic3[axis]);
-	
-      }
-	PARALLEL_PRINTF (" ");
-      
-    }
-    PARALLEL_PRINTF ("\n");
-
-  } else {
-
-    PARALLEL_PRINTF ("INDEX %s: ", msg);
-
-    PARALLEL_PRINTF ("A [ ");
-    for (int axis=0; axis<rank; axis++) {
-      PARALLEL_PRINTF ("%d ",a_[axis].array);
-    }
-    PARALLEL_PRINTF ("] ");
-
-    PARALLEL_PRINTF ("T [ ");
-    int ic3[3];
-    for (int level = 0; level < max_level; level++) {
-      child (level+1, &ic3[0], &ic3[1], &ic3[2]);
-      for (int axis=0; axis<rank; axis++) {
-	PARALLEL_PRINTF ("%d",ic3[axis]);
-      }
-      PARALLEL_PRINTF (" ");
-    }
-    PARALLEL_PRINTF ("] ");
-
-    PARALLEL_PRINTF ("L [ %d ] ",a_[0].level + INDEX_MAX_LEVEL_AXIS_RANGE*
-		     (           a_[1].level + INDEX_MAX_LEVEL_AXIS_RANGE*
-				 a_[2].level ));
-
-    PARALLEL_PRINTF ("[%08X-%08X-%08X]",v_[0],v_[1],v_[2]);
-    PARALLEL_PRINTF ("\n");
+  for (int axis=0; axis<rank; axis++) {
+    nb = std::max(nb,num_bits_(a_[axis].array));
   }
+
+  for (int axis=0; axis<rank; axis++) {
+
+    print_bits_(a_[axis].array,nb);
+
+    PARALLEL_PRINTF (":");
+
+    for (int level=0; level<max_level; level++) {
+
+      int ic3[3];
+      child (level+1, &ic3[0], &ic3[1], &ic3[2]);
+      PARALLEL_PRINTF ("%d",ic3[axis]);
+	
+    }
+    PARALLEL_PRINTF (" ");
+      
+  }
+  PARALLEL_PRINTF ("\n");
+
   fflush(stdout);
 }
+
+//----------------------------------------------------------------------
 
 int Index::num_bits_(int value) const
 {
   int nb = 32;
   while ( --nb >= 0 && ! (value & (1 << nb))) 
     ;
+  return (std::max(nb,0));
 
 }
+
+//----------------------------------------------------------------------
 
 void Index::print_bits_(int value, int nb) const
 {
@@ -425,6 +397,39 @@ void Index::print_bits_(int value, int nb) const
     int bit = (value & ( 1 << i));
     printf ("%d",bit?1:0);
   }
+}
+
+//----------------------------------------------------------------------
+
+std::string Index::bit_string(int max_level,int rank) const
+{
+  std::string bits = "";
+
+  int nba = 0;
+  for (int axis=0; axis<rank; axis++) {
+    nba = std::max(nba,num_bits_(a_[axis].array));
+  }
+
+  for (int axis=0; axis<rank; axis++) {
+
+    for (int i=nba; i>=0; i--) {
+      int bit = (a_[axis].array & ( 1 << i));
+      bits = bits + (bit?"1":"0");
+    }
+
+    bits = bits + ":";
+
+    for (int level=0; level<max_level; level++) {
+
+      int ic3[3];
+      child (level+1, &ic3[0], &ic3[1], &ic3[2]);
+      bits = bits + (ic3[axis]?"1":"0");
+	
+    }
+    if (axis<rank-1) bits = bits + " ";
+      
+  }
+  return bits;
 }
 
 //======================================================================

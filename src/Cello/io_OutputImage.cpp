@@ -31,8 +31,8 @@ OutputImage::OutputImage(int index,
     nyi_(image_size_y),
     png_(0),
     image_type_(image_type),
-    image_log_(image_log),
     face_rank_(face_rank),
+    image_log_(image_log),
     ghost_(ghost)
 
 {
@@ -151,7 +151,7 @@ void OutputImage::open () throw()
   if (is_writer()) {
     // Create png object
     Monitor::instance()->print ("Output","writing image file %s", 
-			      file_name.c_str());
+				file_name.c_str());
     png_create_(file_name);
   }
 }
@@ -179,7 +179,7 @@ void OutputImage::write_block
 (
  const CommBlock * comm_block,
  const FieldDescr * field_descr
-) throw()
+ ) throw()
 // @param comm_block  Block to write
 // @param field_descr  Field descriptor
 {
@@ -199,12 +199,12 @@ void OutputImage::write_block
 
   it_field_->first();
 
-  int index = it_field_->value();
+  int index_field = it_field_->value();
 
-    // Get ghost depth
+  // Get ghost depth
 
   int gx,gy,gz;
-  field_descr->ghosts(index,&gx,&gy,&gz);
+  field_descr->ghosts(index_field,&gx,&gy,&gz);
 
   // FieldBlock array dimensions
   int ndx,ndy,ndz;
@@ -215,9 +215,9 @@ void OutputImage::write_block
   // add block contribution to image
 
   const char * field = (ghost_) ? 
-    field_block->field_values(index) :
-    field_block->field_unknowns(field_descr,index);
-    
+    field_block->field_values(index_field) :
+    field_block->field_unknowns(field_descr,index_field);
+
   int level = comm_block->level();
 
   // pixel extents of box
@@ -234,7 +234,6 @@ void OutputImage::write_block
   if (nby > 1) v *= (yp-ym);
   if (nbz > 1) v *= (zp-zm);
   TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),zp-zm,v);
-  
 
   if (image_type_ == "mesh") {
 
@@ -246,37 +245,45 @@ void OutputImage::write_block
       if (face_rank_ <= 1) {
 	{
 	  int if3[3] = {-1,0,0};
-	  reduce_cube_(ixm+1,ixm+2,ym-1,ym+1, comm_block->face_level(if3)+1);
+	  int face_level = comm_block->face_level(if3)+1;
+	  reduce_cube_(ixm+1,ixm+2,ym-1,ym+1, face_level);
 	}
 	{
 	  int if3[3] = {1,0,0};
-	  reduce_cube_(ixp-2,ixp-1,ym-1,ym+1, comm_block->face_level(if3)+1);
+	  int face_level = comm_block->face_level(if3)+1;
+	  reduce_cube_(ixp-2,ixp-1,ym-1,ym+1, face_level);
 	}
 	{
 	  int if3[3] = {0,-1,0};
-	  reduce_cube_(xm-1,xm+1,iym+1,iym+2, comm_block->face_level(if3)+1);
+	  int face_level = comm_block->face_level(if3)+1;
+	  reduce_cube_(xm-1,xm+1,iym+1,iym+2, face_level);
 	}
 	{
 	  int if3[3] = {0,1,0};
-	  reduce_cube_(xm-1,xm+1,iyp-2,iyp-1, comm_block->face_level(if3)+1);
+	  int face_level = comm_block->face_level(if3)+1;
+	  reduce_cube_(xm-1,xm+1,iyp-2,iyp-1, face_level);
 	}
       }
       if (face_rank_ <= 0) {
 	{
 	  int if3[3] = {-1,-1,0};
-	  reduce_cube_(ixm+1,ixm+2,iym+1,iym+2, comm_block->face_level(if3)+1);
+	  int face_level = comm_block->face_level(if3)+1;
+	  reduce_cube_(ixm+1,ixm+2,iym+1,iym+2, face_level);
 	}
 	{
 	  int if3[3] = {1,-1,0};
-	  reduce_cube_(ixp-2,ixp-1,iym+1,iym+2, comm_block->face_level(if3)+1);
+	  int face_level = comm_block->face_level(if3)+1;
+	  reduce_cube_(ixp-2,ixp-1,iym+1,iym+2, face_level);
 	}
 	{
 	  int if3[3] = {-1,1,0};
-	  reduce_cube_(ixm+1,ixm+2,iyp-2,iyp-1, comm_block->face_level(if3)+1);
+	  int face_level = comm_block->face_level(if3)+1;
+	  reduce_cube_(ixm+1,ixm+2,iyp-2,iyp-1, face_level);
 	}
 	{
 	  int if3[3] = {1,1,0};
-	  reduce_cube_(ixp-2,ixp-1,iyp-2,iyp-1, comm_block->face_level(if3)+1);
+	  int face_level = comm_block->face_level(if3)+1;
+	  reduce_cube_(ixp-2,ixp-1,iyp-2,iyp-1, face_level);
 	}
       }
     }
@@ -284,7 +291,7 @@ void OutputImage::write_block
   } else if (image_type_ == "data") {
 
     if (! comm_block->is_leaf()) return;
-      // for each cell
+    // for each cell
     TRACE3("OutputImage ixm,ixp,nbx %d %d %d",ixm,ixp,nbx);
     TRACE3("OutputImage iym,iyp,nby %d %d %d",iym,iyp,nby);
     TRACE3("OutputImage izm,izp,nbz %d %d %d",izm,izp,nbz);
@@ -303,7 +310,7 @@ void OutputImage::write_block
 	  // int jzp = izm + (iz+1)*(izp-izm)/mz-1;
 	  int i=ix + ndx*(iy + ndy*iz);
 
-	  switch (field_descr->precision(index)) {
+	  switch (field_descr->precision(index_field)) {
 
 	  case precision_single:
 	    reduce_cube_(jxm,jxp,jym,jyp, (((float*)field)[i]));
@@ -480,8 +487,8 @@ void OutputImage::image_write_ (double min, double max) throw()
   // error check min <= max
 
   ASSERT2("OutputImage::image_write_",
-	 "min %g is greater than max %g",
-	 min,max, (min <= max));
+	  "min %g is greater than max %g",
+	  min,max, (min <= max));
 
   // simplified variable names
 

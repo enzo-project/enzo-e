@@ -31,6 +31,19 @@ class Simulation;
 // number of neighbors
 #define NN(rank) (2*(rank))
 
+#include <limits>
+ const int face_level_unknown = std::numeric_limits<int>::max();
+//const int face_level_unknown = -1;
+
+// #define TRACE_DEBUG(msg) \
+//   {			 \
+//     char buffer[40];						   \
+//     sprintf (buffer,"TRACE(:%d %s cycle %d %d)",__LINE__,msg,cycle_,next_phase_);	\
+//     index_.print(buffer);						\
+//   }
+
+#define TRACE_DEBUG(msg) ;
+
 enum phase_type {
   phase_unknown,
   phase_adapt,
@@ -112,9 +125,8 @@ public: // interface
 
 #endif
 
-
   /// Index of the CommBlock
-  Index index() const { return index_; }
+  const Index & index() const { return index_; }
 
 #ifdef CONFIG_USE_CHARM
 
@@ -240,7 +252,7 @@ public: // interface
 
   void set_face_level (int if3[3], int level, int recurse, int type);
 
-  int face_level (int if3[3]) const
+  const int & face_level (int if3[3]) const
   {  return face_level_[IF3(if3)];  }
 
   //----------------------------------------------------------------------

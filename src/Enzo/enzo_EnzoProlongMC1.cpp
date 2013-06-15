@@ -164,6 +164,9 @@ int EnzoProlongMC1::apply_
 
   } else {
 
+    ERROR("EnzoProlongMC1",
+	  "3D not implemented yet");
+
     return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
   }
 
