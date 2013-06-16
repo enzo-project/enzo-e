@@ -39,5 +39,6 @@ module simulation {
 
     entry void p_output_write (int n, char buffer[n]);
 
+    entry void p_performance_reduce (CkReductionMsg * msg);
   };
 }

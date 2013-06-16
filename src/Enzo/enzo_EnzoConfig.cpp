@@ -60,6 +60,10 @@ void EnzoConfig::pup (PUP::er &p)
   p | enzo_interpolation_method;
 
   PUParray(p,enzo_sedov_array,3);
+  p | enzo_sedov_radius_relative;
+  p | enzo_sedov_pressure_in;
+  p | enzo_sedov_pressure_out;
+  p | enzo_sedov_density;
 
 }
 
@@ -128,6 +132,15 @@ void EnzoConfig::read(Parameters * parameters) throw()
   enzo_sedov_array[0] = parameters->list_value_integer (0,"Enzo:sedov:array",1);
   enzo_sedov_array[1] = parameters->list_value_integer (1,"Enzo:sedov:array",1);
   enzo_sedov_array[2] = parameters->list_value_integer (2,"Enzo:sedov:array",1);
+
+  enzo_sedov_radius_relative = 
+    parameters->value_float("Enzo:sedov:radius_relative",0.1);
+  enzo_sedov_pressure_in = 
+    parameters->value_float("Enzo:sedov:pressure_in",1.0);
+  enzo_sedov_pressure_out = 
+    parameters->value_float("Enzo:sedov:pressure_in",1e-5);
+  enzo_sedov_density = 
+    parameters->value_float("Enzo:sedov:density",1.0);
 
   enzo_interpolation_method = parameters->value_string 
     ("Enzo:interpolation_method","SecondOrderA");

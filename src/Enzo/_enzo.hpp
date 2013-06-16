@@ -46,6 +46,14 @@ enum bc_enum
 
 //----------------------------------------------------------------------
 
+enum hydro_type {
+  hydro_unknown,
+  hydro_ppm,
+  hydro_ppml
+};
+
+//----------------------------------------------------------------------
+
   const int field_undefined = -1;
 
 //----------------------------------------------------------------------
@@ -92,6 +100,7 @@ struct fluxes
 #include "enzo_EnzoBoundary.hpp"
 
 #include "enzo_EnzoInitialImplosion2.hpp"
+#include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"
 
 #include "enzo_EnzoMethodPpm.hpp"

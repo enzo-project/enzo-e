@@ -1,0 +1,60 @@
+   Output { 
+
+ file_groups = ["de","te","mesh"];
+
+    mesh {
+#        image_face_rank = 0;
+         name = ["sedov-mesh-%03d.png", "cycle"]; 
+	type     = "image";
+	image_type  = "mesh";
+	image_reduce_type = "max";
+	image_block_size  = 5;
+#	image_size = [513,513];
+#	image_size = [1201,1201];
+	schedule = ["cycle","interval", 100];
+        colormap = [1.00, 1.00, 1.00,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00, 
+                    0.00, 0.00, 1.00];
+      };
+
+      de {
+        axis = "z";    
+	type     = "image";
+        name     = ["sedov-de-%03d.png","cycle"];
+        field_list = ["density"];
+#	image_ghost = true;
+#	image_size = [1200,1200];
+	schedule = ["cycle","interval", 100];
+        colormap = [0.0, 0.0, 0.0,  
+                    1.0, 0.0, 0.0, 
+                    1.0, 1.0, 0.0, 
+                    1.0, 1.0, 1.0];
+        
+      };
+
+      te {
+    
+        axis = "z";    
+	type     = "image";
+        name     = ["sedov-te-%03d.png","cycle"];
+        field_list = ["total_energy"];
+#	image_ghost = true;
+	schedule = ["cycle","interval", 100];
+#	image_size = [1200,1200];
+#	image_size = [512,512];
+        colormap = [0.0, 0.0, 0.0,  
+                    1.0, 0.0, 0.0, 
+                    1.0, 1.0, 0.0, 
+                    1.0, 1.0, 1.0];
+        
+      };
+
+      data {
+        name = ["sedov-de-%03d-%03d.h5","cycle","proc"];
+	type     = "data";
+	schedule = ["cycle","interval", 100];
+      };
+
+   }
+

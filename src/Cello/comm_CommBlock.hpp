@@ -59,19 +59,6 @@ enum array_type {
   op_array_prolong
 };
 
-// enum neighbor_state {
-//   neighbor_state_unknown,
-//   neighbor_state_same,
-//   neighbor_state_coarse,
-//   neighbor_state_fine
-// };
-
-// rank NN NC NI
-// 0    0  1  1
-// 1    2  2  2=2*1
-// 2    4  4  8=4*2
-// 3    6  8  24=6*4
-
 #ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
 class CommBlock : public CBase_CommBlock
@@ -282,12 +269,7 @@ public: // interface
   void index_forest (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
 
   /// Return the name of the block
-  std::string name () const throw()
-  {
-    std::stringstream convert;
-    convert << "block_" << id_();
-    return convert.str();
-  }
+  std::string name () const throw();
 
   /// Return the size the CommBlock array
   void size_forest (int * nx, int * ny, int * nz) const throw();

@@ -52,6 +52,7 @@ private: // functions
 
   template <class T>
   void evaluate_block_(T * array, 
+		       int ndx, int ndy, int ndz,
 		       int nx, int ny, int nz,
 		       int gx, int gy, int gz,
 		       bool *any_refine,

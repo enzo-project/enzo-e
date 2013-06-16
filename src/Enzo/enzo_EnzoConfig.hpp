@@ -78,6 +78,10 @@ public: // attributes
   double                     enzo_gamma;
 
   int                        enzo_sedov_array[3];
+  double                     enzo_sedov_radius_relative;
+  double                     enzo_sedov_pressure_in;
+  double                     enzo_sedov_pressure_out;
+  double                     enzo_sedov_density;
 
   std::string                enzo_interpolation_method;
 };

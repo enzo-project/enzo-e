@@ -1,0 +1,23 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+Mesh {
+   adapt {
+      type = ["slope"];
+      fields = ["total_energy"];
+      balance = true;
+   };
+   max_level   = 5; 
+}
+
+Initial {  max_level = 5; }
+
+Field {
+    ghosts = 4; # must be even for ProlongLinear
+    prolong = "linear";
+   refresh {
+     rank = 0;
+     type = "quiescence";
+   }
+}
+

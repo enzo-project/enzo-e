@@ -446,25 +446,24 @@ void Simulation::performance_output()
   int num_counters =  performance_->num_counters();
   long long * counters = new long long [num_counters];
 
-  for (int ir = 0; ir < num_regions; ir++) {
-
-    performance_->region_counters(ir,counters);
-
-    for (int ic = 0; ic < num_counters; ic++) {
+  for (int ic = 0; ic < num_counters; ic++) {
     
-      int perf_counter = performance_->index_to_id(ic);
+    int perf_counter = performance_->index_to_id(ic);
+
+    for (int ir = 0; ir < num_regions; ir++) {
+
+      performance_->region_counters(ir,counters);
 
       monitor_->print("Performance","%s %s %lld",
-	      performance_->region_name(ir).c_str(),
-	      performance_->counter_name(perf_counter).c_str(),
-	      counters[ic]);  
+		      performance_->region_name(ir).c_str(),
+		      performance_->counter_name(perf_counter).c_str(),
+		      counters[ic]);  
     }
   }
 
   delete [] counters;
 
 }
-
 
 //----------------------------------------------------------------------
 

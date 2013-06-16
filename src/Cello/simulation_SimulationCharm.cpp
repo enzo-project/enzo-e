@@ -39,6 +39,30 @@ SimulationCharm::~SimulationCharm() throw()
 
 //----------------------------------------------------------------------
 
+//----------------------------------------------------------------------
+
+void SimulationCharm::performance_output()
+{
+  Simulation::performance_output();
+
+  int sum_blocks = block_sync_.stop();
+
+  CkCallback callback (CkIndex_SimulationCharm::p_performance_reduce(NULL), 
+		       thisProxy);
+  contribute (sizeof(int),&sum_blocks,CkReduction::sum_int,callback);
+
+}
+
+//----------------------------------------------------------------------
+
+void SimulationCharm::p_performance_reduce(CkReductionMsg * msg)
+{
+  int * num_blocks = (int *)msg->getData();
+  delete msg;
+  
+  monitor_->print("Performance","simulation num-blocks %d",
+		  *num_blocks);
+}
 // void SimulationCharm::run() throw()
 // {
 //   TRACE("SimulationCharm::run()");

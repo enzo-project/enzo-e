@@ -55,6 +55,7 @@ module enzo {
   PUPable EnzoProlongMC1;
   PUPable EnzoRestrict;
   PUPable EnzoInitialImplosion2;
+  PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;

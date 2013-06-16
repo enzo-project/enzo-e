@@ -130,7 +130,7 @@ public: // interface
   virtual void monitor_output();
 
   /// Output Performance information to stdout (root process data only)
-  void performance_output();
+  virtual void performance_output();
 
   /// Write performance information to disk (all process data)
   void performance_write();
@@ -153,6 +153,8 @@ public: // virtual functions
   /// Return a Hierarchy factory object
   virtual const Factory * factory () const throw();
   
+  int & perf_counter(int perf_region) {return perf_count_[perf_region]; }
+
 protected: // functions
 
   /// Initialize the Config object
@@ -238,6 +240,9 @@ protected: // attributes
 
   /// Processor stride for writing strict processor subset of performance data
   int performance_stride_;
+
+  /// Counter for knowing when to call Performance start() and stop()
+  int perf_count_[perf_last];
 
   /// Monitor object
   Monitor * monitor_;

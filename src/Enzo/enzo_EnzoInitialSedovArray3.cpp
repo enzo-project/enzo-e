@@ -18,13 +18,16 @@
 
 EnzoInitialSedovArray3::EnzoInitialSedovArray3 
 (const EnzoConfig * config) throw ()
-  : Initial(config->initial_cycle, config->initial_time) ,
-    hydro_(hydro_unknown)
+: Initial(config->initial_cycle, config->initial_time) ,
+  hydro_(hydro_unknown)
 {
   array_[0] = config->enzo_sedov_array[0];
   array_[1] = config->enzo_sedov_array[1];
   array_[2] = config->enzo_sedov_array[2];
-
+  radius_relative_ = config->enzo_sedov_radius_relative;
+  pressure_in_     = config->enzo_sedov_pressure_in;
+  pressure_out_    = config->enzo_sedov_pressure_out;
+  density_         = config->enzo_sedov_density;
   
   if (config->method_sequence[0] == "ppm") {
     hydro_ = hydro_ppm;
@@ -50,6 +53,14 @@ void EnzoInitialSedovArray3::pup (PUP::er &p)
   TRACEPUP;
 
   Initial::pup(p);
+
+  PUParray(p,array_,2);
+  p | radius_relative_;
+  p | pressure_in_;
+  p | pressure_out_;
+  p | density_;
+  p | hydro_;
+  
 }
 #endif
 
@@ -97,20 +108,20 @@ void EnzoInitialSedovArray3::enforce_block
 
   // Parameters
 
-  const double sedov_density = 1.0;
-  const double sedov_p_in  = 1e-5;
-  const double sedov_p_out = 1.0;
-  const double sedov_radius = 3.5 * hx;
+  const double sedov_radius = radius_relative_/array_[0];
   const double sedov_radius_2 = sedov_radius*sedov_radius;
 
-  const double sedov_te_in = sedov_p_in  / ((EnzoBlock::Gamma - 1.0) * sedov_density);
-  const double sedov_te_out= sedov_p_out / ((EnzoBlock::Gamma - 1.0) * sedov_density);
+  const double sedov_te_in = 
+    pressure_in_  / ((EnzoBlock::Gamma - 1.0) * density_);
+  const double sedov_te_out= 
+    pressure_out_ / ((EnzoBlock::Gamma - 1.0) * density_);
 
   int gx,gy,gz;
   field_descr->ghosts(0,&gx,&gy,&gz);
 
-  int ngx = nx + 2*gx;
-  int ngy = ny + 2*gy;
+  int ndx = nx + 2*gx;
+  int ndy = ny + 2*gy;
+  int ndz = nz + 2*gz;
 
   // clear all fields
 
@@ -118,10 +129,10 @@ void EnzoInitialSedovArray3::enforce_block
 
     enzo_float * field = (enzo_float *) field_block->field_values (iv);
 
-    for (int iz=gz; iz<nz+gz; iz++) {
-      for (int iy=gy; iy<ny+gy; iy++) {
-	for (int ix=gx; ix<nx+gx; ix++) {
-	  int i = INDEX(ix,iy,iz,ngx,ngy);
+    for (int iz=0; iz<ndz; iz++) {
+      for (int iy=0; iy<ndy; iy++) {
+	for (int ix=0; ix<ndx; ix++) {
+	  int i = INDEX(ix,iy,iz,ndx,ndy);
 	  field[i] = 0.0;
 	}
       }
@@ -130,12 +141,12 @@ void EnzoInitialSedovArray3::enforce_block
 
   // background 
 
-  for (int iz=gz; iz<nz+gz; iz++) {
-    for (int iy=gy; iy<ny+gy; iy++) {
-      for (int ix=gx; ix<nx+gx; ix++) {
+  for (int iz=0; iz<ndz; iz++) {
+    for (int iy=0; iy<ndy; iy++) {
+      for (int ix=0; ix<ndx; ix++) {
 
-	int i = INDEX(ix,iy,iz,ngx,ngy);
-	d[i]  = sedov_density;
+	int i = INDEX(ix,iy,iz,ndx,ndy);
+	d[i]  = density_;
 	if (hydro_ == hydro_ppm) te[i] = sedov_te_out;
 
       }
@@ -173,19 +184,19 @@ void EnzoInitialSedovArray3::enforce_block
 
 	// (explosion center xc,yc,zc)
 
-	for (int iz=gz; iz<nz+gz; iz++) {
+	for (int iz=0; iz<ndz; iz++) {
 	  double z = zbm + (iz - gz + 0.5)*hz - zc;
-	  for (int iy=gy; iy<ny+gy; iy++) {
+	  for (int iy=0; iy<ndy; iy++) {
 	    double y = ybm + (iy - gy + 0.5)*hy - yc;
-	    for (int ix=gx; ix<nx+gx; ix++) {
+	    for (int ix=0; ix<ndx; ix++) {
 	      double x = xbm + (ix - gx + 0.5)*hx - xc;
 	      double r2 = x*x + y*y + z*z;
 
-	      int i = INDEX(ix,iy,iz,ngx,ngy);
+	      int i = INDEX(ix,iy,iz,ndx,ndy);
 	  
 	      if (r2 < sedov_radius_2) {
 		if (hydro_ == hydro_ppm)  te[i] = sedov_te_in;
-		if (hydro_ == hydro_ppml) d[i] = sedov_density * 
+		if (hydro_ == hydro_ppml) d[i] = density_ * 
 					    (sedov_te_in / sedov_te_out);
 	      }
 	    }

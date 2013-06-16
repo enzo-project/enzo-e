@@ -33,6 +33,9 @@ inline T MAX(const T &a, const T &b)
 inline int INDEX(int ix,int iy,int iz,int nx,int ny) 
 {  return ix+nx*(iy+ny*iz); }
 
+inline int INDEX2(int ix,int iy,int nx) 
+{  return ix+nx*iy; }
+
 template <class T>
 inline void SWAP(T &a, T &b) 
 {  T t = a; a=b; b=t; }
@@ -81,7 +84,8 @@ enum perf_region {
   perf_adapt,
   perf_refresh,
   perf_compute,
-  perf_output
+  perf_output,
+  perf_last
 };
 
 // /// @enum component_enum

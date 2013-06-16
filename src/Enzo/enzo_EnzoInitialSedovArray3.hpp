@@ -8,12 +8,6 @@
 #ifndef ENZO_ENZO_INITIAL_SEDOV_ARRAY3_HPP
 #define ENZO_ENZO_INITIAL_SEDOV_ARRAY3_HPP
 
-enum hydro_type {
-  hydro_unknown,
-  hydro_ppm,
-  hydro_ppml
-};
-
 class EnzoInitialSedovArray3 : public Initial {
 
   /// @class    EnzoInitialSedovArray3
@@ -52,7 +46,17 @@ private: // attributes
   int array_[3];
 
   /// Whether PPM or PPML is used
-  hydro_type hydro_;
+  int hydro_;
+
+  /// Relative radius
+  double radius_relative_;
+
+  /// Internal and external pressure
+  double pressure_in_;
+  double pressure_out_;
+
+  /// initial density
+  double density_;
 
 };
 

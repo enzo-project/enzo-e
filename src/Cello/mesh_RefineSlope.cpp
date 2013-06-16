@@ -64,6 +64,10 @@ int RefineSlope::apply
     int gx,gy,gz;
     field_descr->ghosts(id_field, &gx,&gy,&gz);
 
+    int nxd = nx + 2*gx;
+    int nyd = ny + 2*gy;
+    int nzd = nz + 2*gz;
+
     precision_type precision = field_descr->precision(id_field);
 
     void * void_array = field_block->field_values(id_field);
@@ -71,11 +75,11 @@ int RefineSlope::apply
     // count number of times slope refine and coarsen conditions are satisified
     switch (precision) {
     case precision_single:
-      evaluate_block_((float*)void_array, nx,ny,nz,gx,gy,gz,
+      evaluate_block_((float*)void_array, nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
 		      &any_refine,&all_coarsen, rank,h3);
       break;
     case precision_double:
-      evaluate_block_((double*)void_array, nx,ny,nz,gx,gy,gz,
+      evaluate_block_((double*)void_array, nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
 		      &any_refine,&all_coarsen, rank,h3);
       break;
     default:
@@ -86,8 +90,10 @@ int RefineSlope::apply
     }
   }
 
-  return any_refine ?  
+  int refine_result =  any_refine ?  
     adapt_refine : (all_coarsen ? adapt_coarsen : adapt_same) ;
+
+  return refine_result;
 
 }
 
@@ -95,6 +101,7 @@ int RefineSlope::apply
 
 template <class T>
 void RefineSlope::evaluate_block_(T * array, 
+				  int ndx, int ndy, int ndz,
 				  int nx, int ny, int nz,
 				  int gx, int gy, int gz,
 				  bool *any_refine,
@@ -104,13 +111,14 @@ void RefineSlope::evaluate_block_(T * array,
 {
   // TEMPORARY: evaluate effect of including (some) ghost zones
   double slope;
-  const int d3[3] = {1,nx,nx*ny};
+  const int d3[3] = {1,ndx,ndx*ndy};
+  int ixr=0,iyr=0,izr=0;
   for (int axis=0; axis<rank; axis++) {
     int d = d3[axis];
     for (int ix=0; ix<nx; ix++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int iz=0; iz<nz; iz++) {
-	  int i = (gx+ix) + (nx+2*gx)*((gy+iy) + (ny+2*gy)*(gz+iz));
+	  int i = (gx+ix) + (ndx)*((gy+iy) + (ndy)*(gz+iz));
 	  slope = fabs((array[i+d] - array[i-d]) / (2.0*h3[axis]*array[i]));
 	  
 	  if (slope > slope_min_refine_)  *any_refine  = true;

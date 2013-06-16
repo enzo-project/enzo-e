@@ -85,6 +85,12 @@ public: // functions
   /// Stopping criteria and computation
   void c_compute ();
 
+  /// Output Performance information to stdout (root process data only)
+  virtual void performance_output();
+
+  /// Reduction for performance data
+  void p_performance_reduce (CkReductionMsg * msg);
+
   /// Updated Simulation function to call c_compute()
   void monitor_output();
 
