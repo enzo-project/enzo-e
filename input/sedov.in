@@ -32,5 +32,5 @@ Output { file_groups = ["de","te","mesh"]; }
 
 Enzo { sedov { radius_relative = 0.03; } }
 
-Stopping { cycle = 1000; }
+Stopping { cycle = 10; }
 
