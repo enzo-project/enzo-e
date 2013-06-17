@@ -6,8 +6,8 @@
 
 include "input/sedov-amr.incl"
 
-Mesh    {  max_level = 7; }
-Initial {  max_level = 7; }
+Mesh    {  max_level = 5; }
+Initial {  max_level = 5; }
 
 include "input/sedov-output.incl"
 
@@ -22,13 +22,15 @@ include "input/sedov-output.incl"
 # 2D PROBLEM
 
 include "input/sedov_array_2.incl"
-Mesh { root_size      = [24,24]; }
-Mesh { root_blocks    = [3,3]; }
+Mesh { root_size      = [64,64]; }
+Mesh { root_blocks    = [2,2]; }
 #Mesh { root_size      = [8,8]; }
 #Mesh { root_blocks    = [1,1]; }
-Enzo { sedov { array = [1,1]; } }
-Output { file_groups = ["de","te","mesh"]; }
+Enzo { sedov { array = [2,2]; } }
+# Output { file_groups = ["de","te","mesh"]; }
 # Output { file_groups = ["de","te","mesh","data"]; }
+Output { file_groups = ["mesh"]; }
+# Output{  mesh { image_mesh_color = "process"; }}
 
 Enzo { sedov { radius_relative = 0.03; } }
 

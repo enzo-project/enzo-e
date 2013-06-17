@@ -20,6 +20,7 @@ OutputImage::OutputImage(int index,
 			 std::string image_type,
 			 int image_size_x, int image_size_y,
 			 std::string image_reduce_type,
+			 std::string mesh_color_type,
 			 int         image_block_size,
 			 int face_rank,
 			 bool image_log,
@@ -41,6 +42,9 @@ OutputImage::OutputImage(int index,
   if (image_reduce_type=="avg") op_reduce_ = reduce_avg;
   if (image_reduce_type=="sum") op_reduce_ = reduce_sum;
   if (image_reduce_type=="set") op_reduce_ = reduce_set;
+
+  if (mesh_color_type=="level") mesh_color_   = mesh_color_level;
+  if (mesh_color_type=="process") mesh_color_ = mesh_color_process;
 
   TRACE1 ("OutputImage reduce %d",op_reduce_);
 
@@ -94,19 +98,20 @@ void OutputImage::pup (PUP::er &p)
   p | map_g_;
   p | map_b_;
   p | map_a_;
+  WARNING("OutputImage::pup","skipping data_");
+  if (p.isUnpacking()) data_ = 0;
   p | op_reduce_;
+  p | mesh_color_;
   p | axis_;
   p | nxi_;
   p | nyi_;
   p | nzi_;
-  WARNING("OutputImage::pup","skipping data_");
-  if (p.isUnpacking()) data_ = 0;
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   if (p.isUnpacking()) png_ = 0;
   p | image_type_;
-  p | image_log_;
   p | face_rank_;
+  p | image_log_;
   p | ghost_;
 }
 #endif
@@ -218,7 +223,9 @@ void OutputImage::write_block
     field_block->field_values(index_field) :
     field_block->field_unknowns(field_descr,index_field);
 
-  int level = comm_block->level();
+  double color = 0;
+  if (mesh_color_ == mesh_color_level)   color = comm_block->level()+1;
+  if (mesh_color_ == mesh_color_process) color = CkMyPe()+1;
 
   // pixel extents of box
   int ixm,iym,izm; 
@@ -237,7 +244,7 @@ void OutputImage::write_block
 
   if (image_type_ == "mesh") {
 
-    reduce_box_(ixm,ixp,iym,iyp,double(level+1));
+    reduce_box_(ixm,ixp,iym,iyp,color);
 
     if (comm_block->is_leaf()) {
       int xm=(ixm+ixp)/2;

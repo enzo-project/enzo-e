@@ -11,6 +11,13 @@
 class Factory;
 class FieldDescr;
 
+
+enum mesh_color_type {
+  mesh_color_unknown,
+  mesh_color_level,
+  mesh_color_process
+};
+
 class OutputImage : public Output {
 
   /// @class    OutputImage
@@ -32,6 +39,7 @@ public: // functions
 	      std::string image_type,
 	      int image_size_x, int image_size_y,
 	      std::string image_reduce_type,
+	      std::string image_mesh_color,
 	      int         image_block_size,
 	      int face_rank,
 	      bool image_log,
@@ -142,6 +150,9 @@ private: // attributes
 
   /// Reduction operation
   reduce_type op_reduce_;
+
+  /// Color
+  int mesh_color_;
 
   /// Axis along which to reduce
   axis_type axis_;

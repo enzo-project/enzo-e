@@ -614,6 +614,7 @@ Output * Problem::create_output_
     int         image_face_rank  = config->output_image_face_rank[index];
     int         max_level        = config->mesh_max_level;
     std::string image_reduce_type = config->output_image_reduce_type[index];
+    std::string image_mesh_color  = config->output_image_mesh_color[index];
     output = new OutputImage (index,factory,group_process->size(),
 			      nx,ny,nz, 
 			      nbx,nby,nbz, 
@@ -621,6 +622,7 @@ Output * Problem::create_output_
 			      image_type,
 			      image_size_x,image_size_y,
 			      image_reduce_type,
+			      image_mesh_color,
 			      image_block_size,
 			      image_face_rank,
 			      image_log,
