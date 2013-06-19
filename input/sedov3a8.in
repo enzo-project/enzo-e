@@ -1,0 +1,12 @@
+
+ include "input/sedov-amr.incl"
+ include "input/sedov-output.incl"
+ include "input/sedov_array_3.incl"
+
+ Mesh    {  max_level = 3; }
+ Initial {  max_level = 3; }
+
+ Mesh { root_size     = [64,64,64]; }
+ Mesh { root_blocks   = [2,2,2]; }
+ Enzo { sedov { array = [2,2,2]; } }
+ Output { file_groups = []; }

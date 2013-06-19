@@ -6,15 +6,15 @@
 
 include "input/sedov-amr.incl"
 
-Mesh    {  max_level = 5; }
-Initial {  max_level = 5; }
+Mesh    {  max_level = 3; }
+Initial {  max_level = 3; }
 
 include "input/sedov-output.incl"
 
 # 3D PROBLEM
 
  include "input/sedov_array_3.incl"
- Domain { upper = [1.0,1.0,0.5]; }
+ Domain { upper = [1.0, 1.0, 0.5]; }
  Mesh { root_size      = [64,64,32]; }
  Mesh { root_blocks    = [4,4,2]; }
  Enzo { sedov { array = [4,4,2]; } }
@@ -31,7 +31,7 @@ include "input/sedov-output.incl"
 #Output { file_groups = ["mesh"]; }
 # Output{  mesh { image_mesh_color = "process"; }}
 
-Enzo { sedov { radius_relative = 0.03; } }
+Enzo { sedov { radius_relative = 0.1; } }
 
-Stopping { cycle = 10; }
+Stopping { cycle = 3; }
 
