@@ -69,7 +69,10 @@ PARALLEL_MAIN_BEGIN
     char buffer [ERROR_LENGTH];
     sprintf (buffer, "\nUsage: %s %s <parameter-file>\n\n", 
 	     PARALLEL_RUN,PARALLEL_ARGV[0]);
-    ERROR("main",buffer);
+    for (int i=0; i<PARALLEL_ARGC; i++) {
+      PARALLEL_PRINTF("%d %s\n",i,PARALLEL_ARGV[i]);
+    }
+    ERROR("Main()",buffer);
   }
 
   // Read in parameters

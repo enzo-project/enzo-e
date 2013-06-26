@@ -11,7 +11,7 @@ coarsen = 0
 
 # Whether to print out messages with the TRACE() series of statements
 
-trace = 0
+trace = 1
 
 # Whether to enable displaying messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
@@ -87,7 +87,7 @@ if not env.GetOption('clean'):
 
      env = configure.Finish()
 
-use_papi = 1
+# use_papi = 0
 
 #-----------------------------------------------------------------------
 # COMMAND-LINE ARGUMENTS
@@ -321,6 +321,12 @@ if (use_papi):
 
 cpppath = cpppath + [hdf5_path + '/include']
 libpath = libpath + [hdf5_path + '/lib']
+
+#----------------------------------------------------------------------
+# LIBPNG PATHS
+#----------------------------------------------------------------------
+
+# libpath = libpath + [libpng_path + '/lib']
 
 #----------------------------------------------------------------------
 # FORTRAN LINK PATH

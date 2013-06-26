@@ -89,6 +89,8 @@ public: // interface
 		    int * nby = 0,
 		    int * nbz = 0) const throw()
   { 
+    printf ("num_blocks %d %d %d\n",blocking_[0],blocking_[1],blocking_[2]);
+    printf ("num_blocks %p %p %p\n",nbx,nby,nbz);
     if (nbx) *nbx = blocking_[0];
     if (nby) *nby = blocking_[1];
     if (nbz) *nbz = blocking_[2];

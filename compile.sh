@@ -16,7 +16,7 @@ if ($#argv >= 1) then
       foreach type (serial mpi charm)
       foreach prec (single double)
          set conf = $type
-         scons arch=$ARCH type=$type -c >& /dev/null
+         python scons.py arch=$ARCH type=$type -c >& /dev/null
          rm -rf test/$conf >& /dev/null
          rm -rf bin/$conf >& /dev/null
          rm -rf lib/$conf >& /dev/null
@@ -65,7 +65,7 @@ foreach prec ($PREC)
    printf "$configure" > test/COMPILING
 
    # clean
-#  scons arch=$arch type=$type prec=$prec -c >& /dev/null
+#  python scons.py arch=$arch type=$type prec=$prec -c >& /dev/null
 
    # make output directory for compilation and tests
 
@@ -87,9 +87,9 @@ foreach prec ($PREC)
 
    rm -f bin/$type/enzo-p
 
-   scons install-inc            >&  $dir/out.scons
-   scons -k -j$proc install-bin >>& $dir/out.scons
-   scons -k         $target     >>& $dir/out.scons
+   python scons.py install-inc            >&  $dir/out.scons
+   python scons.py -k -j$proc install-bin >>& $dir/out.scons
+   python scons.py -k         $target     >>& $dir/out.scons
 
    if (-e bin/$type/enzo-p) then
       echo "Success"
@@ -135,6 +135,14 @@ foreach prec ($PREC)
         endif
       end
 
+
+   endif
+
+   if ($CELLO_ARCH == "ncsa-bw") then
+       echo "Relinking with static libpng15.a..."
+      /u/sciteam/bordner/Charm/charm/bin/charmc -language charm++ -tracemode projections -o build/charm/Enzo/enzo-p -g -g build/charm/Enzo/enzo-p.o build/charm/Cello/main_enzo.o -Llib/charm -L/opt/cray/hdf5/default/cray/74/lib -lcharm -lenzo -lsimulation -lproblem -lcomm -lmesh -lfield -lio -ldisk -lmemory -lparameters -lerror -lmonitor -lparallel -lperformance -ltest -lcello -lexternal -lhdf5 -lz /u/sciteam/bordner/lib/libpng15.a -lgfortran
+
+       mv build/charm/Enzo/enzo-p bin/charm
 
    endif
    rm -f test/COMPILING
