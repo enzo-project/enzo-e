@@ -68,4 +68,5 @@
 
    Stopping {        cycle = 100;   } 
 
+ Enzo { sedov { radius_relative = 0.1; } }
 

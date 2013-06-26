@@ -7,10 +7,10 @@ Mesh {
       fields = ["total_energy"];
       balance = true;
    };
-   max_level   = 5; 
+   max_level   = 3; 
 }
 
-Initial {  max_level = 5; }
+Initial {  max_level = 3; }
 
 Field {
     ghosts = 4; # must be even for ProlongLinear
