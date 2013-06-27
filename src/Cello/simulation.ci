@@ -28,6 +28,7 @@ module simulation {
     entry SimulationCharm
       (const char filename[n], int n);
 
+    entry void q_initialize_forest ();
     entry void p_initialize_begin ();
     entry void q_initialize_end ();
 
