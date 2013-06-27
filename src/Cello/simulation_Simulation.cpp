@@ -162,7 +162,7 @@ void Simulation::initialize() throw()
 
   initialize_hierarchy_();
 
-#ifdef CONFIG_USE_CHARM
+#ifndef CONFIG_USE_CHARM
 
   // For Charm++ initialize_forest_ is called in charm_initialize
   // using QD to ensure that initialize_hierarchy() is called
