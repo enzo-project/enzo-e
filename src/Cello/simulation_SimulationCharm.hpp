@@ -66,6 +66,9 @@ public: // functions
   /// Call initialize()
   void p_initialize_begin();
 
+  /// Wait for all Hierarchy to be initialized before creating any CommBlocks
+  void q_initialize_forest();
+
   /// Wait for all local patches to be created before calling run
   void q_initialize_end();
 

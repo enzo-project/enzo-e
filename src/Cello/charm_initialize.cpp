@@ -30,10 +30,23 @@ void SimulationCharm::initialize() throw()
   Simulation::initialize();
 
   if (group_process_->is_root()) {
-  CkStartQD 
-    ( CkCallback(CkIndex_SimulationCharm::q_initialize_end(), thisProxy));
+    CkStartQD 
+      ( CkCallback(CkIndex_SimulationCharm::q_initialize_forest(), thisProxy));
   }
 
+}
+
+//----------------------------------------------------------------------
+
+void SimulationCharm::q_initialize_forest() 
+{
+  initialize_forest_();
+
+  if (group_process_->is_root()) {
+    CkStartQD 
+      ( CkCallback(CkIndex_SimulationCharm::q_initialize_end(), thisProxy));
+  
+  }
 }
 
 //----------------------------------------------------------------------

@@ -35,15 +35,6 @@ class Simulation;
  const int face_level_unknown = std::numeric_limits<int>::max();
 //const int face_level_unknown = -1;
 
-// #define TRACE_DEBUG(msg) \
-//   {			 \
-//     char buffer[40];						   \
-//     sprintf (buffer,"TRACE(:%d %s cycle %d %d)",__LINE__,msg,cycle_,next_phase_);	\
-//     index_.print(buffer);						\
-//   }
-
-#define TRACE_DEBUG(msg) ;
-
 enum phase_type {
   phase_unknown,
   phase_adapt,

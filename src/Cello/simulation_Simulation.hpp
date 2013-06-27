@@ -175,6 +175,9 @@ protected: // functions
   /// Initialize the hierarchy object
   void initialize_hierarchy_ () throw();
 
+  /// Initialize the forest of octrees
+  void initialize_forest_ () throw();
+
   /// Initialize the data object
   void initialize_data_descr_ () throw();
 

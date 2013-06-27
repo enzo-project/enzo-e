@@ -27,7 +27,6 @@ SimulationCharm::SimulationCharm
 {
   TRACE("SimulationCharm::SimulationCharm");
 
-  // derived class should call initialize()
 }
 
 //----------------------------------------------------------------------

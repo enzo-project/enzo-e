@@ -59,8 +59,6 @@ CommBlock::CommBlock
   printf("CommBlock::CommBlock  l %d\n",level_);
 #endif
 
-  
-
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
 

@@ -162,6 +162,16 @@ void Simulation::initialize() throw()
 
   initialize_hierarchy_();
 
+#ifdef CONFIG_USE_CHARM
+
+  // For Charm++ initialize_forest_ is called in charm_initialize
+  // using QD to ensure that initialize_hierarchy() is called
+  // on all processors before CommBlocks are created
+
+  initialize_forest_();
+
+#endif
+
 }
 
 //----------------------------------------------------------------------
@@ -171,8 +181,6 @@ void Simulation::finalize() throw()
   TRACE0;
 
   performance_->stop_region(perf_simulation);
-
-  PARALLEL_PRINTF("Tracing Simulation::finalize %d\n",group_process_->rank());
 
   performance_->end();
 
@@ -356,15 +364,20 @@ void Simulation::initialize_hierarchy_() throw()
   hierarchy_->set_root_size(config_->mesh_root_size[0],
 			    config_->mesh_root_size[1],
 			    config_->mesh_root_size[2]);
+}
 
-  // Don't allocate blocks if reading data from files
+//----------------------------------------------------------------------
 
+void Simulation::initialize_forest_() throw()
+{
 
 #ifdef CONFIG_USE_CHARM
   bool allocate_blocks = (group_process()->is_root());
 #else
   bool allocate_blocks = true;
 #endif
+
+  // Don't allocate blocks if reading data from files
 
   bool allocate_data = ! ( config_->initial_type == "file" || 
 			   config_->initial_type == "restart" );
@@ -470,8 +483,6 @@ void Simulation::performance_output()
 void Simulation::performance_write()
 {
   TRACE("Simulation::performance_write()");
-
-  PARALLEL_PRINTF("Tracing Simulation::performance_write %d\n",group_process_->rank());
 
   if (performance_name_ != "" && (group_process_->rank() % performance_stride_) == 0) {
 
