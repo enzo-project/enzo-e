@@ -257,13 +257,13 @@ public: // interface
 //----------------------------------------------------------------------
 
   /// Return the index of the root block containing this block
-  void index_forest (int * ibx = 0, int * iby = 0, int * ibz = 0) const throw();
+  void index_forest (int * ibx, int * iby = 0, int * ibz = 0) const throw();
 
   /// Return the name of the block
   std::string name () const throw();
 
   /// Return the size the CommBlock array
-  void size_forest (int * nx, int * ny, int * nz) const throw();
+  void size_forest (int * nx, int * ny = 0, int * nz = 0) const throw();
 
   /// Compute the lower extent of the CommBlock in the domain
   void lower(double * xm, double * ym = 0, double * zm = 0) const throw ();

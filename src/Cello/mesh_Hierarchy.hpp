@@ -85,15 +85,9 @@ public: // interface
   }
 
   /// Return the number of CommBlocks
-  size_t num_blocks(int * nbx = 0, 
+  size_t num_blocks(int * nbx, 
 		    int * nby = 0,
-		    int * nbz = 0) const throw()
-  { 
-    if (nbx) *nbx = blocking_[0];
-    if (nby) *nby = blocking_[1];
-    if (nbz) *nbz = blocking_[2];
-    return blocking_[0]*blocking_[1]*blocking_[2]; 
-  };
+		    int * nbz = 0) const throw();
 
   /// Deallocate local CommBlocks
   void deallocate_blocks() throw();

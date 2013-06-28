@@ -39,7 +39,6 @@ Simulation::Simulation
   hierarchy_(0),
   field_descr_(0)
 {
-
   if (!group_process_) {
     group_process_ = GroupProcess::create();
     is_group_process_new_ = true;

@@ -297,11 +297,9 @@ std::string CommBlock::name() const throw()
 
 //----------------------------------------------------------------------
 
-void CommBlock::size_forest (int * nx=0, int * ny=0, int * nz=0) const throw ()
+void CommBlock::size_forest (int * nx, int * ny, int * nz) const throw ()
 {
   simulation()->hierarchy()->num_blocks(nx,ny,nz);
-
-  TRACE3 ("size_forest = %d %d %d",*nx,*ny,*nz);
 }
 
 //----------------------------------------------------------------------
@@ -369,8 +367,6 @@ void CommBlock::index_global
 {
   index_forest(ix,iy,iz);
   size_forest (nx,ny,nz);
-  TRACE6("DEBUG INDEX A %d %d %d  %d %d %d",
-	 *ix,*iy,*iz,*nx,*ny,*nz);
 
   Index index = this->index();
 

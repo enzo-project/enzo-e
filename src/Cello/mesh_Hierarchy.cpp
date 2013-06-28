@@ -164,6 +164,17 @@ void Hierarchy::blocking (int * nbx, int * nby, int * nbz) const throw()
   if (nbz) (*nbz) = blocking_[2];
 }
 
+size_t Hierarchy::num_blocks(int * nbx, 
+			     int * nby,
+			     int * nbz) const throw()
+{ 
+  if (nbx) *nbx = blocking_[0];
+  if (nby) *nby = blocking_[1];
+  if (nbz) *nbz = blocking_[2];
+
+  return blocking_[0]*blocking_[1]*blocking_[2];
+}
+
 //----------------------------------------------------------------------
 
 void Hierarchy::deallocate_blocks() throw()

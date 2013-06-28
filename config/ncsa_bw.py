@@ -4,8 +4,8 @@ cc  = {}
 
 is_arch_valid = 1
 
-flags_arch = '-g'
-flags_link  = '-g'
+flags_arch = '-O3'
+flags_link  = '-O3'
 
 cc['charm']   = 'cc'
 cc['mpi']     = 'cc'

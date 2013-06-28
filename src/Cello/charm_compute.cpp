@@ -42,7 +42,6 @@ void SimulationCharm::c_compute()
 
 void CommBlock::p_compute (int cycle, double time, double dt)
 {
-  TRACE_DEBUG("p_compute");
   TRACE ("BEGIN PHASE COMPUTE");
   // set_cycle(cycle);
   // set_time(time);

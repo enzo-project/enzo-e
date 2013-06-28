@@ -42,7 +42,6 @@ const char * adapt_name[] = {
 void CommBlock::p_adapt_begin()
 {
   TRACE ("BEGIN PHASE ADAPT");
-  TRACE_DEBUG("p_adapt_begin()");
   Performance * performance = simulation()->performance();
   if (! performance->is_region_active(perf_adapt)) {
     performance->start_region(perf_adapt);
@@ -783,9 +782,7 @@ void CommBlock::q_adapt_end()
 {
   TRACE("ADAPT CommBlock::q_adapt_end()");
 
-  TRACE_DEBUG("q_adapt_end");
   if (coarsened_) {
-    TRACE_DEBUG("ckDestroy()");
     thisProxy[thisIndex].ckDestroy();
   }
 
