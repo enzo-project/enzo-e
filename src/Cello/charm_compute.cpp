@@ -22,7 +22,6 @@ void SimulationCharm::c_compute()
   
   TRACE("SimulationCharm::c_compute()");
   if (cycle_ > 0 ) performance()->stop_region (perf_cycle);
-  printf ("TRACE c_compute()\n");
   if (stop_) {
     
     performance_write();
