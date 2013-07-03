@@ -54,6 +54,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
     CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
     CkArrayOptions opts;
     opts.setMap(array_map);
+    TRACE_CHARM("ckNew(nbx,nby,nbz)");
     enzo_block_array = CProxy_CommBlock::ckNew(opts);
 
     int count_adapt;
@@ -92,6 +93,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
 
   } else {
 
+    TRACE_CHARM("ckNew()");
     enzo_block_array = CProxy_EnzoBlock::ckNew();
 
   }

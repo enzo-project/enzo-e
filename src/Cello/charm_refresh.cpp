@@ -273,6 +273,7 @@ void CommBlock::q_refresh_end()
     TRACE("refresh calling adapt");
     p_adapt_begin();
   } else {
+    index_.print("ERROR");
     ERROR1 ("CommBlock::q_refresh_end()",
 	    "Unknown next_phase %d",
 	    next_phase_);

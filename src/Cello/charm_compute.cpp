@@ -19,7 +19,6 @@
 
 void SimulationCharm::c_compute()
 {
-  
   TRACE("SimulationCharm::c_compute()");
   if (cycle_ > 0 ) performance()->stop_region (perf_cycle);
   if (stop_) {
@@ -53,7 +52,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   }
 
 #ifdef CONFIG_USE_PROJECTIONS
-  double time_start = CmiWallTimer();
+  //  double time_start = CmiWallTimer();
 #endif
 
   if (is_leaf()) {
@@ -71,7 +70,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   }
 
 #ifdef CONFIG_USE_PROJECTIONS
-  traceUserBracketEvent(10,time_start, CmiWallTimer());
+  //  traceUserBracketEvent(10,time_start, CmiWallTimer());
 #endif
 
   // Update CommBlock cycle and time to Simulation time and cycle

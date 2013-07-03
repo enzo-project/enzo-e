@@ -101,7 +101,6 @@
 #   define TRACEPUP							\
   { m2_(stdout,"TRACEPUP",__FILE__,__LINE__,"",				\
 	p.isPacking()?"isPacking":(p.isUnpacking()?"isUnpacking":"isSizing")); }
-
 #endif
 
 #else /* CELLO_TRACE */
@@ -132,10 +131,18 @@
 #ifdef CONFIG_USE_CHARM
 #   define TRACEPUP							\
   /* This space intentionally left blank */
-
 #endif
 
 #endif /* CELLO_TRACE */
+
+#ifdef CELLO_TRACE_CHARM
+#   define TRACE_CHARM(M)				\
+  { m2_(stdout,"TRACE_CHARM",__FILE__,__LINE__,"",M); }
+#else
+#   define TRACE_CHARM(M)				\
+  /* This space intentionally left blank */
+#endif
+
 
 //----------------------------------------------------------------------
 /// @def      DEBUG

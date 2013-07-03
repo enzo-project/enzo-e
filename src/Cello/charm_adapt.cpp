@@ -96,6 +96,7 @@ void CommBlock::p_adapt_start()
 void CommBlock::q_adapt_next()
 {
   TRACE("ADAPT CommBlock::q_adapt_next()");
+  TRACE_CHARM("doneInserting");
   thisProxy.doneInserting();
 
   for (size_t i=0; i<child_face_level_.size(); i++) {
@@ -782,10 +783,6 @@ void CommBlock::q_adapt_end()
 {
   TRACE("ADAPT CommBlock::q_adapt_end()");
 
-  if (coarsened_) {
-    thisProxy[thisIndex].ckDestroy();
-  }
-
   Performance * performance = simulation()->performance();
   if (performance->is_region_active(perf_adapt))
     performance->stop_region(perf_adapt);
@@ -795,6 +792,11 @@ void CommBlock::q_adapt_end()
   TRACE ("END   PHASE ADAPT\n");
 
   next_phase_ = phase_output;
+
+  if (coarsened_) {
+    TRACE_CHARM("ckDestroy()");
+    thisProxy[thisIndex].ckDestroy();
+  }
 
   if (thisIndex.is_root()) {
 

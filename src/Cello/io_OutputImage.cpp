@@ -43,7 +43,7 @@ OutputImage::OutputImage(int index,
   if (image_reduce_type=="sum") op_reduce_ = reduce_sum;
   if (image_reduce_type=="set") op_reduce_ = reduce_set;
 
-  if (mesh_color_type=="level") mesh_color_   = mesh_color_level;
+  if (mesh_color_type=="level")   mesh_color_ = mesh_color_level;
   if (mesh_color_type=="process") mesh_color_ = mesh_color_process;
 
   TRACE1 ("OutputImage reduce %d",op_reduce_);
@@ -295,7 +295,8 @@ void OutputImage::write_block
       }
     }
 
-  } else if (image_type_ == "data") {
+  }
+  // else if (image_type_ == "data") {
 
     if (! comm_block->is_leaf()) return;
     // for each cell
@@ -332,7 +333,7 @@ void OutputImage::write_block
 	}
       }
     }
-  }
+    //  }
 }
 
 //----------------------------------------------------------------------

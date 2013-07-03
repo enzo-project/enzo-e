@@ -29,29 +29,24 @@ void SimulationCharm::initialize() throw()
 
   Simulation::initialize();
 
-  if (group_process_->is_root()) {
-    CkStartQD 
-      ( CkCallback(CkIndex_SimulationCharm::q_initialize_forest(), thisProxy));
-  }
+  CkCallback callback (CkIndex_SimulationCharm::r_initialize_forest(), thisProxy);
+  contribute(0,0,CkReduction::concat,callback);
 
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::q_initialize_forest() 
+void SimulationCharm::r_initialize_forest() 
 {
   initialize_forest_();
 
-  if (group_process_->is_root()) {
-    CkStartQD 
-      ( CkCallback(CkIndex_SimulationCharm::q_initialize_end(), thisProxy));
-  
-  }
+  CkCallback callback (CkIndex_SimulationCharm::r_initialize_end(), thisProxy);
+  contribute(0,0,CkReduction::concat,callback);
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::q_initialize_end() 
+void SimulationCharm::r_initialize_end() 
 {
   if (group_process_->is_root()) {
     (*hierarchy()->block_array() ).p_adapt_begin();
