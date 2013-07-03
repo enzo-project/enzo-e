@@ -74,19 +74,17 @@ void CommBlock::refresh ()
       int ip3[3];
       parent_face_(ip3,if3,ic3);
 
-      refresh_coarse(index_neighbor.index_parent(),ip3[0],ip3[1],ip3[2]);
+      refresh_coarse(index_neighbor.index_parent(),ip3);
 
     } else if (face_level(if3)==level_) {    // SAME
 
-      refresh_same(index_neighbor,if3[0],if3[1],if3[2]);
+      refresh_same(index_neighbor,if3);
 
     } else if (face_level(if3)==level_+1) {  // FINE
 	    
       int ic3m[3];
       int ic3p[3];
-      loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
-			   ic3p,ic3p+1,ic3p+2,
-			   if3[0],if3[1],if3[2]);
+      loop_limits_nibling_(ic3m,ic3p,if3);
       int ic3[3];
       for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
 	for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
@@ -98,9 +96,7 @@ void CommBlock::refresh ()
 	    Index index_nibling = 
 	      index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
 		  
-	    refresh_fine(index_nibling, 
-			 if3[0],if3[1],if3[2], 
-			 ic3[0],ic3[1],ic3[2]);
+	    refresh_fine(index_nibling, if3,ic3);
 	  }
 	}
       }
@@ -115,17 +111,15 @@ void CommBlock::refresh ()
     // Prevent hang if single-CommBlock simulation
     ++loop_refresh_.stop();
 
-    x_refresh_same (0,0,0,0,0);
+    
+    x_refresh_same (0,0,0);
 
   }
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_coarse 
-(
- Index index, 
- int ifx,  int ify,  int ifz)
+void CommBlock::refresh_coarse ( Index index, int iface[3] )
 {
 
   int level = index_.level();
@@ -134,29 +128,29 @@ void CommBlock::refresh_coarse
 
    int n; 
    char * array;
+   bool lghost[3] = {false};
    FieldFace * field_face = load_face_(&n,&array,
-				       ifx,ify,ifz,
-				       ic3[0],ic3[1],ic3[2],
-				       false,false,false,
+				       iface, ic3,lghost,
 				       op_array_restrict);
 
   ++loop_refresh_.stop();
 
-  thisProxy[index].x_refresh_coarse (n,array,-ifx,-ify,-ifz,
-				     ic3[0],ic3[1],ic3[2]);
+  int jface[3] = {-iface[0], -iface[1], -iface[2]};
+
+  thisProxy[index].x_refresh_coarse (n,array,jface,ic3);
+
   delete field_face;
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::x_refresh_coarse (int n, char * buffer, 
-				int ifx, int ify, int ifz,
-				int icx, int icy, int icz)
+				  int iface[3], int ichild[3])
 {
+  bool lghost[3] = {false};
+
   store_face_(n,buffer,
-	      ifx,ify,ifz,
-	      icx,icy,icz,
-	      false,false,false,
+	      iface, ichild, lghost,
 	      op_array_restrict);
 
   std::string refresh_type = simulation()->config()->field_refresh_type;
@@ -170,36 +164,38 @@ void CommBlock::x_refresh_coarse (int n, char * buffer,
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_same (Index index, 
-			      int ifx,  int ify,  int ifz)
+void CommBlock::refresh_same (Index index, int iface[3])
 {
   int n; 
   char * array;
 
+  int ichild[3] = {0,0,0};
+  bool lghost[3] = {false,false,false};
+
   FieldFace * field_face = load_face_ (&n,&array,
-				       ifx,ify,ifz,
-				       0,0,0,
-				       false,false,false,
+				       iface, ichild, lghost,
 				       op_array_copy);
 
   ++loop_refresh_.stop();
 
-  thisProxy[index].x_refresh_same (n,array,-ifx,-ify,-ifz);
+  int jface[3] = {-iface[0], -iface[1], -iface[2]};
+
+  thisProxy[index].x_refresh_same (n,array,jface);
 
   delete field_face;
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::x_refresh_same (int n, char * buffer, int ifx, int ify, int ifz)
+void CommBlock::x_refresh_same (int n, char * buffer, int iface[3])
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   if ( n != 0) {
+    int ichild[3] = {0,0,0};
+    bool lghost[3] = {false,false,false};
     store_face_(n,buffer,
-		ifx,ify,ifz,
-		0,0,0,
-		false,false,false,
+		iface,ichild,lghost,
 		op_array_copy);
   }
 
@@ -215,24 +211,24 @@ void CommBlock::x_refresh_same (int n, char * buffer, int ifx, int ify, int ifz)
 //----------------------------------------------------------------------
 
 void CommBlock::refresh_fine 
-(Index index, 
- int ifx, int ify, int ifz, 
- int icx, int icy, int icz)
+(Index index, int iface[3], int ichild[3])
 {
   int n; 
   char * array;
 
+  bool lghost[3] = {false};
   FieldFace * field_face = load_face_ (&n, &array,
-				       ifx,ify,ifz,
-				       icx,icy,icz,
-				       false,false,false,
+				       iface,
+				       ichild,
+				       lghost,
 				       op_array_prolong);
 
   ++loop_refresh_.stop();
 
-  thisProxy[index].x_refresh_fine (n,array,
-				   -ifx,-ify,-ifz,
-				   icx,icy,icz);
+  int jface[3] = {-iface[0], -iface[1], -iface[2]};
+
+  thisProxy[index].x_refresh_fine (n,array, jface, ichild);
+
   delete field_face;
 	  
 }
@@ -240,13 +236,12 @@ void CommBlock::refresh_fine
 //----------------------------------------------------------------------
 
 void CommBlock::x_refresh_fine (int n, char * buffer, 
-				int ifx, int ify, int ifz,
-				int icx, int icy, int icz)
+				int iface[3],
+				int ichild[3])
 {
+  bool lghost[3] = {false};
   store_face_(n,buffer,
-	      ifx,ify,ifz,
-	      icx,icy,icz,
-	      false,false,false,
+	      iface, ichild, lghost,
 	      op_array_prolong);
 
   std::string refresh_type = simulation()->config()->field_refresh_type;

@@ -213,9 +213,10 @@ void CommBlock::refine()
 
       int narray = 0;  
       char * array = 0;
+      int iface[3] = {0,0,0};
+      bool lghost[3] = {true,true,true};
       FieldFace * field_face = load_face_
-	(&narray,&array, 0,0,0,  ic3[0],ic3[1],ic3[2], 
-	 true,true,true, op_array_prolong);
+	(&narray,&array, iface,ic3,lghost, op_array_prolong);
 
       const Factory * factory = simulation()->factory();
 
@@ -353,9 +354,7 @@ void CommBlock::refine_face_level_update_( Index index_child )
 	SET_FACE_LEVEL(index_child,if3,level_+2,false,adapt_refine);
 
 	int ic3m[3],ic3p[3],ic3[3];
-	loop_limits_nibling_(ic3m,ic3m+1,ic3m+2,
-			     ic3p,ic3p+1,ic3p+2,
-			     if3[0],if3[1],if3[2]);
+	loop_limits_nibling_(ic3m,ic3p, if3);
 
 	for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
 	  for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
@@ -441,11 +440,11 @@ bool CommBlock::child_is_on_face_(int ic3[3], int if3[3]) const
 void CommBlock::loop_limits_faces_ 
 (int ic3m[3], int ic3p[3], int if3[3], int ic3[3]) const
 {
-  ic3m[0] = (if3[0] != 0) ? if3[0] : -ic3[0];
+  ic3m[0] = (if3[0] != 0) ? if3[0] :  -ic3[0];
   ic3p[0] = (if3[0] != 0) ? if3[0] : 1-ic3[0];
-  ic3m[1] = (if3[1] != 0) ? if3[1] : -ic3[1];
+  ic3m[1] = (if3[1] != 0) ? if3[1] :  -ic3[1];
   ic3p[1] = (if3[1] != 0) ? if3[1] : 1-ic3[1];
-  ic3m[2] = (if3[2] != 0) ? if3[2] : -ic3[2];
+  ic3m[2] = (if3[2] != 0) ? if3[2] :  -ic3[2];
   ic3p[2] = (if3[2] != 0) ? if3[2] : 1-ic3[2];
 	
   Simulation * simulation = this->simulation();
@@ -508,25 +507,27 @@ void CommBlock::coarsen()
   adapt_ = adapt_unknown;
 
   Index index = thisIndex;
-  int icx,icy,icz;
-  index.child(level_,&icx,&icy,&icz);
+  int ichild[3];
+  index.child(level_,ichild,ichild+1,ichild+2);
   index.set_level(level_ - 1);
   index.clean();
 
   int narray; 
   char * array;
+  int iface[3] = {0,0,0};
+  bool lghost[3] = {true,true,true};
   FieldFace * field_face = load_face_(&narray,&array,
-				      0,0,0,
-				      icx,icy,icz,
-				      true,true,true,
+				      iface,
+				      ichild,
+				      lghost,
 				      op_array_restrict);
-
 
   int nf = face_level_.size();
   int face_level[nf];
   for (int i=0; i<nf; i++) face_level[i] = face_level_[i];
 
-  thisProxy[index].p_child_can_coarsen(icx,icy,icz,narray,array,
+  thisProxy[index].p_child_can_coarsen(ichild,
+				       narray,array,
 				       nf,face_level);
 
   delete field_face;
@@ -538,15 +539,11 @@ void CommBlock::coarsen()
 FieldFace * CommBlock::load_face_
 (
  int * narray, char ** array, 
- int ifx, int ify, int ifz,
- int icx, int icy, int icz,
- bool lgx, bool lgy, bool lgz,
+ int iface[3], int ichild[3], bool lghost[3],
  int op_array_type
 )
 {
-  FieldFace * field_face = create_face_ (ifx,ify,ifz,
-					 icx,icy,icz,
-					 lgx,lgy,lgz,
+  FieldFace * field_face = create_face_ (iface,ichild,lghost,
 					 op_array_type);
 
   field_face->load(narray, array);
@@ -558,15 +555,11 @@ FieldFace * CommBlock::load_face_
 FieldFace * CommBlock::store_face_
 (
  int narray, char * array, 
- int ifx, int ify, int ifz,
- int icx, int icy, int icz,
- bool lgx, bool lgy, bool lgz,
+ int iface[3], int ichild[3], bool lghost[3],
  int op_array_type
 )
 {
-  FieldFace * field_face = create_face_ (ifx,ify,ifz,
-					 icx,icy,icz,
-					 lgx,lgy,lgz,
+  FieldFace * field_face = create_face_ (iface,ichild,lghost,
 					 op_array_type);
 
   field_face->store(narray, array);
@@ -577,10 +570,7 @@ FieldFace * CommBlock::store_face_
 //----------------------------------------------------------------------
 
 FieldFace * CommBlock::create_face_
-(
- int ifx, int ify, int ifz,
- int icx, int icy, int icz,
- bool lgx, bool lgy, bool lgz,
+(int iface[3], int ichild[3], bool lghost[3],
  int op_array_type
 )
 {
@@ -592,20 +582,20 @@ FieldFace * CommBlock::create_face_
 
   if (op_array_type == op_array_restrict) {
     Restrict * restrict = simulation->problem()->restrict();
-    field_face->set_restrict(restrict,icx,icy,icz);
+    field_face->set_restrict(restrict,ichild[0],ichild[1],ichild[2]);
   } else if (op_array_type == op_array_prolong) {
     Prolong * prolong = simulation->problem()->prolong();
-    field_face->set_prolong(prolong,icx,icy,icz);
+    field_face->set_prolong(prolong,ichild[0],ichild[1],ichild[2]);
   }
 
-  field_face->set_face(ifx,ify,ifz);
-  field_face->set_ghost(lgx,lgy,lgz);
+  field_face->set_face(iface[0],iface[1],iface[2]);
+  field_face->set_ghost(lghost[0],lghost[1],lghost[2]);
   return field_face;
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
+void CommBlock::p_child_can_coarsen(int ichild[3],
 				    int na, char * array,
 				    int nf, int * child_face_level)
 {
@@ -635,22 +625,22 @@ void CommBlock::p_child_can_coarsen(int icx,int icy, int icz,
     child_block_->allocate(field_descr);
   }
 
+
+  int iface[3] = {0,0,0};
+  bool lghost[3] = {true,true,true};
   store_face_(na,array,
-    	      0,0,0,
-    	      icx,icy,icz,
-    	      true,true,true,
-    	      op_array_restrict);
+	      iface, ichild, lghost,
+	      op_array_restrict);
 
   int rank = simulation()->dimension();
   int refresh_rank = simulation()->config()->field_refresh_rank;
 
-  int ic3[3] = {icx,icy,icz};
   int if3[3];
   ItFace it_face (rank,refresh_rank);
 
   // update child_is_on_face_[] with subset of child's
   while (it_face.next(if3)) {
-    if (child_is_on_face_(ic3,if3)) {
+    if (child_is_on_face_(ichild,if3)) {
       int index_face = IF3(if3);
       child_face_level_[index_face] = 
 	std::min (child_face_level_[index_face],
@@ -743,12 +733,26 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
 	SET_FACE_LEVEL(index_child_neighbor,jf3,level_,false,adapt_coarsen);
 
+	int ic3m[3],ic3p[3],ic3[3];
+	loop_limits_nibling_(ic3m,ic3p, if3);
+
+	for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
+	  for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
+	    for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
+
+	      Index index_nibling = 
+		index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
+
+	      SET_FACE_LEVEL(index_nibling,jf3,level_+1,false,adapt_coarsen);
+	    }
+	  }
+	}
       } else {
 	index_.print("index_");
 	index_child.print("index_child");
-	 ERROR5("CommBlock::coarsen_face_level_update_()",
-	        "Unhandled level jump from index_[%d] to face_level(%d %d %d)[%d]",
-	        level_,ip3[0],ip3[1],ip3[2],face_level);
+	ERROR5("CommBlock::coarsen_face_level_update_()",
+	       "Unhandled level jump from index_[%d] to face_level(%d %d %d)[%d]",
+	       level_,ip3[0],ip3[1],ip3[2],face_level);
       }
     }
 
@@ -758,13 +762,13 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 //----------------------------------------------------------------------
 
 void CommBlock::x_refresh_child (int n, char * buffer, 
-				int icx, int icy, int icz)
+				int ichild[3])
 {
+  int iface[3] = {0,0,0};
+  bool lghost[3] = {true,true,true};
   store_face_(n,buffer,
-   	      0,0,0,
-   	      icx,icy,icz,
-   	      true,true,true,
-   	      op_array_restrict);
+	      iface, ichild, lghost,
+	      op_array_restrict);
 }
 
 //----------------------------------------------------------------------

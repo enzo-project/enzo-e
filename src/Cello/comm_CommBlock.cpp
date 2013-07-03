@@ -238,15 +238,18 @@ CommBlock::~CommBlock() throw ()
 
     // Send restricted data to parent 
 
-     int icx,icy,icz;
-     index_.child(level_,&icx,&icy,&icz);
+    int ichild[3];
+    index_.child(level_,ichild,ichild+1,ichild+2);
 
     int n; 
     char * array;
-    FieldFace * field_face = 
-      load_face_(&n,&array,0,0,0,icx,icy,icz,true,true,true,op_array_restrict);
+    int iface[3]={0,0,0};
+    bool lghost[3]={true,true,true};
 
-    thisProxy[index_.index_parent()].x_refresh_child(n,array,icx,icy,icz);
+    FieldFace * field_face = 
+      load_face_(&n,&array,iface,ichild,lghost,op_array_restrict);
+
+    thisProxy[index_.index_parent()].x_refresh_child(n,array,ichild);
 
     delete field_face;
   }
@@ -503,8 +506,7 @@ void CommBlock::delete_child(Index index)
 
 //======================================================================
 
-void CommBlock::loop_limits_refresh_
-(int * ifxm, int * ifym, int * ifzm, int * ifxp, int * ifyp, int * ifzp)
+void CommBlock::loop_limits_refresh_(int ifacemin[3], int ifacemax[3])
   const throw()
 {
 
@@ -524,36 +526,34 @@ void CommBlock::loop_limits_refresh_
   }
 
   // set face loop limits accordingly
-  (*ifxm) = on_boundary[0][0] ? 0 : -1;
-  (*ifym) = on_boundary[1][0] ? 0 : -1;
-  (*ifzm) = on_boundary[2][0] ? 0 : -1;
-  (*ifxp) = on_boundary[0][1] ? 0 : 1;
-  (*ifyp) = on_boundary[1][1] ? 0 : 1;
-  (*ifzp) = on_boundary[2][1] ? 0 : 1;
+  ifacemin[0] = on_boundary[0][0] ? 0 : -1;
+  ifacemin[1] = on_boundary[1][0] ? 0 : -1;
+  ifacemin[2] = on_boundary[2][0] ? 0 : -1;
+  ifacemax[0] = on_boundary[0][1] ? 0 : 1;
+  ifacemax[1] = on_boundary[1][1] ? 0 : 1;
+  ifacemax[2] = on_boundary[2][1] ? 0 : 1;
 
   int rank = simulation()->dimension();
-  if (rank < 2) (*ifym) = (*ifyp) = 0;
-  if (rank < 3) (*ifzm) = (*ifzp) = 0;
+  if (rank < 2) ifacemin[1] = ifacemax[1] = 0;
+  if (rank < 3) ifacemin[2] = ifacemax[2] = 0;
 
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::loop_limits_nibling_ 
-(int *icxm, int *icym, int *iczm,
- int *icxp, int *icyp, int *iczp,
- int ifx, int ify, int ifz) const throw()
+( int ichildmin[3],int ichildmax[3],int iface[3]) const throw()
 {
   int rank = simulation()->dimension();
 
-  (*icxm) = (ifx == 0) ? 0 : (ifx+1)/2;
-  (*icxp) = (ifx == 0) ? 1 : (ifx+1)/2;
-  (*icym) = (ify == 0) ? 0 : (ify+1)/2;
-  (*icyp) = (ify == 0) ? 1 : (ify+1)/2;
-  (*iczm) = (ifz == 0) ? 0 : (ifz+1)/2;
-  (*iczp) = (ifz == 0) ? 1 : (ifz+1)/2;
-  if (rank < 2) (*icym) = (*icyp) = 0;
-  if (rank < 3) (*iczm) = (*iczp) = 0;
+  ichildmin[0] = (iface[0] == 0) ? 0 : (iface[0]+1)/2;
+  ichildmax[0] = (iface[0] == 0) ? 1 : (iface[0]+1)/2;
+  ichildmin[1] = (iface[1] == 0) ? 0 : (iface[1]+1)/2;
+  ichildmax[1] = (iface[1] == 0) ? 1 : (iface[1]+1)/2;
+  ichildmin[2] = (iface[2] == 0) ? 0 : (iface[2]+1)/2;
+  ichildmax[2] = (iface[2] == 0) ? 1 : (iface[2]+1)/2;
+  if (rank < 2) ichildmin[1] = ichildmax[1] = 0;
+  if (rank < 3) ichildmin[2] = ichildmax[2] = 0;
 }
 
 //----------------------------------------------------------------------

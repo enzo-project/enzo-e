@@ -150,9 +150,9 @@ public: // interface
   void p_balance(int ic3[3], int if3[3],int level);
   bool can_coarsen() const;
   bool can_refine() const;
-  void p_child_can_coarsen(int icx,int icy, int icz,
+  void p_child_can_coarsen(int ichild[3],
 			   int na, char * array,
-			   int nc, int * child_face_level);
+			   int nf, int * child_face_level);
   void p_parent_coarsened();
   int determine_adapt();
   /// Update the depth of the given child
@@ -172,34 +172,25 @@ public: // interface
   void q_refresh_end ();
 
   /// send  ghost zones to given neighbor in same level
-  void refresh_same (Index index,  int ifx, int ify, int ifz);
+  void refresh_same (Index index,  int iface[3]);
 
   /// send ghost zones to coarse neighbor in given direction
-  void refresh_coarse (Index index, 
-		       int ifx, int ify, int ifz);
+  void refresh_coarse (Index index, int iface[3]);
 
   /// send ghost zones to fine neighbors in given direction
-  void refresh_fine (Index index, 
-		     int ifx, int ify, int ifz,  
-		     int icx, int icy, int icz);
+  void refresh_fine (Index index, int iface[3], int ichild[3]);
 
   /// Refresh a FieldFace in the same level
-  void x_refresh_same(int n, char buffer[],
-		      int ifx, int ify, int ifz);
+  void x_refresh_same(int n, char buffer[],  int iface[3]);
 
   /// Refresh a FieldFace in the next-coarser level
-  void x_refresh_coarse(int n, char buffer[],
-			int ifx, int ify, int ifz,
-			int icx, int icy, int icz);
+  void x_refresh_coarse(int n, char buffer[],int iface[3],int ichild[3]);
 
   /// Refresh a FieldFace in the next-finer level
-  void x_refresh_fine(int n, char buffer[],
-		      int ifx, int ify, int ifz,
-		      int icx, int icy, int icz);
+  void x_refresh_fine(int n, char buffer[],  int iface[3],int ichild[3]);
 
   /// Get restricted data from child when it is deleted
-  void x_refresh_child (int n, char buffer[],
-		       int icx, int icy, int icz);
+  void x_refresh_child (int n, char buffer[],int ichild[3]);
 
   //--------------------------------------------------
 
@@ -398,27 +389,20 @@ protected: // functions
 #endif
 
   void loop_limits_refresh_ 
-  (int *ifxm, int *ifym, int *ifzm,
-   int *ifxp, int *ifyp, int *ifzp) const throw();
+  (int ifacemin[3], int ifacemax[3]) const throw();
 
   void loop_limits_nibling_ 
-  (int *icxm, int *icym, int *iczm,
-   int *icxp, int *icyp, int *iczp,
-   int ifx, int ify, int ifz) const throw();
+  (int ichildmin[3],
+   int ichildmax[3],
+   int iface[3]) const throw();
 
   FieldFace * load_face_(int * narray, char ** array,
-			 int ifx, int ify, int ifz,
-			 int icx, int icy, int icz,
-			 bool lgx, bool lgy, bool lgz,
+			 int iface[3], int ichild[3], bool lghost[3],
 			 int op_array);
   FieldFace * store_face_(int narray, char * array,
-			 int ifx, int ify, int ifz,
-			 int icx, int icy, int icz,
-			 bool lgx, bool lgy, bool lgz,
+			 int iface[3], int ichild[3], bool lghost[3],
 			 int op_array);
-  FieldFace * create_face_(int ifx, int ify, int ifz,
-			   int icx, int icy, int icz,
-			   bool lgx, bool lgy, bool lgz,
+  FieldFace * create_face_(int iface[3], int ichild[3],  bool lghost[3],
 			   int op_array);
 
 protected: // attributes
