@@ -63,6 +63,9 @@ public: // functions
     --block_sync_; 
   }
 
+  inline int block_count() const
+  { return block_sync_.stop(); }
+
   /// Call initialize()
   void p_initialize_begin();
 

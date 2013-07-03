@@ -110,7 +110,7 @@ void RefineSlope::evaluate_block_(T * array,
 				  double * h3)
 {
   // TEMPORARY: evaluate effect of including (some) ghost zones
-  double slope;
+  T slope;
   const int d3[3] = {1,ndx,ndx*ndy};
   int ixr=0,iyr=0,izr=0;
   for (int axis=0; axis<rank; axis++) {

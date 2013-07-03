@@ -71,6 +71,7 @@ CommBlock::CommBlock
 
   block_ = new Block  (nx, ny, nz, num_field_blocks,
 		       xm, xp, ym, yp, zm, zp);
+
   // Allocate block data
   block_->allocate(field_descr);
   child_block_ = NULL;
@@ -316,7 +317,6 @@ void CommBlock::lower
   double xdp, ydp, zdp;
   simulation()->hierarchy()->lower(&xdm,&ydm,&zdm);
   simulation()->hierarchy()->upper(&xdp,&ydp,&zdp);
-
   double ax = 1.0*ix/nx;
   double ay = 1.0*iy/ny;
   double az = 1.0*iz/nz;

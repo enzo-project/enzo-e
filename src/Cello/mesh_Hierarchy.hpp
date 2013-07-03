@@ -58,6 +58,9 @@ public: // interface
   /// Set root-level grid size
   void set_root_size(int nx, int ny, int nz) throw ();
 
+  /// Set root-level grid size
+  void set_blocking(int nbx, int nby, int nbz) throw ();
+
   //----------------------------------------------------------------------
 
   /// Return dimension
@@ -114,8 +117,6 @@ public: // interface
   }
 
   void create_forest (FieldDescr   * field_descr,
-		      int nx, int ny, int nz,
-		      int nbx, int nby, int nbz,
 		      bool allocate_blocks,
 		      bool allocate_data,
 		      bool testing          = false,

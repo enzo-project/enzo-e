@@ -202,9 +202,9 @@ void EnzoInitialSedovArray3::enforce_block
 	    }
 	  }
 	}
-
       }
     }
   }
+  
 }
 

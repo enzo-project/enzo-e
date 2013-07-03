@@ -363,6 +363,11 @@ void Simulation::initialize_hierarchy_() throw()
   hierarchy_->set_root_size(config_->mesh_root_size[0],
 			    config_->mesh_root_size[1],
 			    config_->mesh_root_size[2]);
+
+  hierarchy_->set_blocking(config_->mesh_root_blocks[0],
+			   config_->mesh_root_blocks[1],
+			   config_->mesh_root_blocks[2]);
+
 }
 
 //----------------------------------------------------------------------
@@ -383,12 +388,6 @@ void Simulation::initialize_forest_() throw()
 
   hierarchy_->create_forest
     (field_descr_,
-     config_->mesh_root_size[0],
-     config_->mesh_root_size[1],
-     config_->mesh_root_size[2],
-     config_->mesh_root_blocks[0],
-     config_->mesh_root_blocks[1],
-     config_->mesh_root_blocks[2],
      allocate_blocks,
      allocate_data);
 }

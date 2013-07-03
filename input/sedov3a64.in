@@ -8,5 +8,5 @@
  Domain { upper =       [1.0,1.0,1.0]; }
  Output { file_groups = []; }
 
- Stopping { cycle = 3; }
+ Stopping { cycle = 1; }
 

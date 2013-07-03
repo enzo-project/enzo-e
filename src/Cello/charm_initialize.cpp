@@ -25,7 +25,6 @@ void SimulationCharm::p_initialize_begin()
 
 void SimulationCharm::initialize() throw()
 {
-  TRACE("SimulationCharm::initialize()");
 
   Simulation::initialize();
 
@@ -38,6 +37,7 @@ void SimulationCharm::initialize() throw()
 
 void SimulationCharm::r_initialize_forest() 
 {
+
   initialize_forest_();
 
   CkCallback callback (CkIndex_SimulationCharm::r_initialize_end(), thisProxy);
@@ -48,6 +48,7 @@ void SimulationCharm::r_initialize_forest()
 
 void SimulationCharm::r_initialize_end() 
 {
+ 
   if (group_process_->is_root()) {
     (*hierarchy()->block_array() ).p_adapt_begin();
   }

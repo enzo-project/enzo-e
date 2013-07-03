@@ -124,6 +124,23 @@ void Hierarchy::set_root_size(int nx, int ny, int nz) throw ()
 
 //----------------------------------------------------------------------
 
+void Hierarchy::set_blocking(int nx, int ny, int nz) throw ()
+{
+  TRACE3("Hierarchy::set_blocking(%d %d %d)",nx,ny,nz);
+
+  blocking_[0] = nx;
+  blocking_[1] = ny;
+  blocking_[2] = nz;
+  if (!layout_) {
+    layout_ = new Layout (blocking_[0],blocking_[1],blocking_[2]);
+    layout_->set_process_range(0,group_process_->size());
+  }
+
+
+}
+
+//----------------------------------------------------------------------
+
 int Hierarchy::dimension() const throw ()
 { 
   return dimension_; 
@@ -217,22 +234,11 @@ const Layout * Hierarchy::layout () const throw()
 void Hierarchy::create_forest
 (
  FieldDescr   * field_descr,
- int nx, int ny, int nz,
- int nbx, int nby, int nbz,
  bool allocate_blocks,
  bool allocate_data,
  bool testing,
  int process_first, int process_last_plus) throw()
 {
-  TRACE3("Hierarchy::create_forest() block size  %d %d %d",nx,ny,nz);
-  TRACE3("Hierarchy::create_forest() blocking    %d %d %d",nbx,nby,nbz);
-  set_root_size(nx,ny,nz);
-
-  layout_ = new Layout (nbx,nby,nbz);
-  layout_->set_process_range(0,group_process_->size());
-  blocking_[0] = nbx;
-  blocking_[1] = nby;
-  blocking_[2] = nbz;
 
   if (allocate_blocks) {
 #ifdef CONFIG_USE_CHARM
