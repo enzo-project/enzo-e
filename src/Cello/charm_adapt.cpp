@@ -775,6 +775,7 @@ void CommBlock::x_refresh_child (int n, char * buffer,
 
 void CommBlock::q_adapt_stop()
 {
+  thisProxy.doneInserting();
   TRACE("ADAPT CommBlock::q_adapt_stop()");
   if (thisIndex.is_root()) {
     thisProxy.p_adapt_start();
