@@ -7,11 +7,15 @@ import sys
 
 # (TEMPORARY) Whether to include new coarsening code
 
-coarsen = 0
+coarsen = 1
 
 # Whether to print out messages with the TRACE() series of statements
 
 trace = 0
+
+# Whether to print out messages with the TRACE_CHARM() series of statements
+
+trace_charm = 0
 
 # Whether to enable displaying messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
@@ -53,7 +57,7 @@ use_performance = 0
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
 
-use_projections = 1
+use_projections = 0
 
 # Triton MPI type (openmpi or mpich2)
 
@@ -145,6 +149,7 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 # Debugging defines
 
 define_trace =        ['CELLO_TRACE']
+define_trace_charm =  ['CELLO_TRACE_CHARM']
 define_debug =        ['CELLO_DEBUG']
 define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
 
@@ -215,6 +220,7 @@ if (use_gprof == 1):
   
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
+if (trace_charm != 0):   defines = defines + define_trace_charm
 if (coarsen != 0):       defines = defines + define_coarsen
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
@@ -326,7 +332,7 @@ libpath = libpath + [hdf5_path + '/lib']
 # LIBPNG PATHS
 #----------------------------------------------------------------------
 
-# libpath = libpath + [libpng_path + '/lib']
+libpath = libpath + [png_path + '/lib']
 
 #----------------------------------------------------------------------
 # FORTRAN LINK PATH
