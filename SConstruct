@@ -151,6 +151,7 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 define_trace =        ['CELLO_TRACE']
 define_trace_charm =  ['CELLO_TRACE_CHARM']
 define_debug =        ['CELLO_DEBUG']
+
 define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
 
 # Library defines
@@ -332,7 +333,7 @@ libpath = libpath + [hdf5_path + '/lib']
 # LIBPNG PATHS
 #----------------------------------------------------------------------
 
-libpath = libpath + [png_path + '/lib']
+#libpath = libpath + [png_path + '/lib']
 
 #----------------------------------------------------------------------
 # FORTRAN LINK PATH

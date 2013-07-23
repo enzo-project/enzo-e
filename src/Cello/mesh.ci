@@ -53,6 +53,7 @@ module mesh {
     entry void p_adapt_start ();
     entry void q_adapt_next();
     entry void q_adapt_stop();
+    entry void q_adapt_exit();
 
     entry void p_balance (int ic3[3], int if3[3], int level);
 

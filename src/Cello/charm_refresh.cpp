@@ -30,7 +30,6 @@ void CommBlock::p_refresh_begin()
 
 void CommBlock::refresh ()
 {
-
   TRACE("BEGIN PHASE REFRESH");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();

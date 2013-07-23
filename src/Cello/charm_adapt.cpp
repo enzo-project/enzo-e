@@ -96,7 +96,7 @@ void CommBlock::p_adapt_start()
 void CommBlock::q_adapt_next()
 {
   TRACE("ADAPT CommBlock::q_adapt_next()");
-  TRACE_CHARM("doneInserting");
+  //  TRACE_CHARM("doneInserting");
   thisProxy.doneInserting();
 
   for (size_t i=0; i<child_face_level_.size(); i++) {
@@ -506,11 +506,11 @@ void CommBlock::coarsen()
   
   adapt_ = adapt_unknown;
 
-  Index index = thisIndex;
+  Index index_parent = thisIndex;
   int ichild[3];
-  index.child(level_,ichild,ichild+1,ichild+2);
-  index.set_level(level_ - 1);
-  index.clean();
+  index_parent.child(level_,ichild,ichild+1,ichild+2);
+  index_parent.set_level(level_ - 1);
+  index_parent.clean();
 
   int narray; 
   char * array;
@@ -526,9 +526,8 @@ void CommBlock::coarsen()
   int face_level[nf];
   for (int i=0; i<nf; i++) face_level[i] = face_level_[i];
 
-  thisProxy[index].p_child_can_coarsen(ichild,
-				       narray,array,
-				       nf,face_level);
+  thisProxy[index_parent].p_child_can_coarsen
+    (ichild, narray,array, nf,face_level);
 
   delete field_face;
 
@@ -601,8 +600,7 @@ void CommBlock::p_child_can_coarsen(int ichild[3],
 {
 #ifdef COARSEN
 #else /* COARSEN */
-  // parent can never coarsen
-  if (! can_coarsen()) return;
+  return;
 #endif /* COARSEN */
 
   // allocate child block if this is the first
@@ -624,7 +622,6 @@ void CommBlock::p_child_can_coarsen(int ichild[3],
 
     child_block_->allocate(field_descr);
   }
-
 
   int iface[3] = {0,0,0};
   bool lghost[3] = {true,true,true};
@@ -775,6 +772,7 @@ void CommBlock::x_refresh_child (int n, char * buffer,
 
 void CommBlock::q_adapt_stop()
 {
+  //  TRACE_CHARM("doneInserting");
   thisProxy.doneInserting();
   TRACE("ADAPT CommBlock::q_adapt_stop()");
   if (thisIndex.is_root()) {
@@ -801,7 +799,22 @@ void CommBlock::q_adapt_end()
   if (coarsened_) {
     TRACE_CHARM("ckDestroy()");
     thisProxy[thisIndex].ckDestroy();
+    //    TRACE_CHARM("doneInserting");
+    thisProxy.doneInserting();
+    return;
+  } else {
+    //    TRACE_CHARM("doneInserting");
+    thisProxy.doneInserting();
   }
+
+  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(), 
+			thisProxy[thisIndex]));
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::q_adapt_exit()
+{
 
   if (thisIndex.is_root()) {
 

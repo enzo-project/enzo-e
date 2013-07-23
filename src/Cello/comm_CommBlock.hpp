@@ -135,8 +135,11 @@ public: // interface
   /// Begin the adapt phase of one or more adapt steps
   void p_adapt_begin();
 
-  /// Exit the adapt phase after QD
+  /// End the adapt phase after coarsening
   void q_adapt_end ();
+
+  /// Exit the adapt phase after QD
+  void q_adapt_exit ();
 
   /// Begin a single adapt refine step
   void p_adapt_start ();
