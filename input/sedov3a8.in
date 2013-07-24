@@ -8,5 +8,3 @@
  Enzo { sedov { array = [2,2,2]; } }
  Domain { upper =       [1.0,1.0,1.0]; }
  Output { file_groups = []; }
-
- Stopping { cycle = 3; }

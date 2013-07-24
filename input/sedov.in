@@ -33,5 +33,5 @@ include "input/sedov-output.incl"
 
 Enzo { sedov { radius_relative = 0.03; } }
 
-Stopping { cycle = 10; }
+Stopping { cycle = 5; }
 
