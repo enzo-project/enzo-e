@@ -65,8 +65,8 @@
 
    Boundary { type = "periodic" }
 
-   Stopping {        cycle = 100;   } 
-   Testing {   cycle_final = 100; }
+   Stopping {        cycle = 5;   } 
+   Testing {   cycle_final = 5; }
 
    Testing {  time_final  = 0.0;  }
 
