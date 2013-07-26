@@ -4,16 +4,16 @@
 
 # Default: 64^3 domain, 16^3 block sizes, with sedov blast in each block
 
-include "input/sedov-amr.incl"
+include "sedov-amr.incl"
 
 Mesh    {  max_level = 5; }
 Initial {  max_level = 5; }
 
-include "input/sedov-output.incl"
+include "sedov-output.incl"
 
 # 3D PROBLEM
 
- include "input/sedov_array_3.incl"
+ include "sedov_array_3.incl"
  Domain { upper = [1.0,1.0,0.5]; }
  Mesh { root_size      = [64,64,32]; }
  Mesh { root_blocks    = [4,4,2]; }
@@ -22,7 +22,7 @@ include "input/sedov-output.incl"
 
 # 2D PROBLEM
 
-# include "input/sedov_array_2.incl"
+# include "sedov_array_2.incl"
 # Mesh { root_size      = [64,64]; }
 # Mesh { root_blocks    = [2,2]; }
 # Enzo { sedov { array = [2,2]; } }

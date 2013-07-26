@@ -7,8 +7,6 @@
 
 #ifdef CONFIG_USE_CHARM
 
-// #define DEBUG_ADAPT
-
 #ifdef DEBUG_ADAPT
 
 char buffer [80];
@@ -31,10 +29,7 @@ char buffer [80];
 #include "charm_mesh.hpp"
 
 const char * adapt_name[] = {
-  "adapt_unknown",
-  "adapt_same",
-  "adapt_refine",
-  "adapt_coarsen"
+  "adapt_unknown", "adapt_same", "adapt_refine", "adapt_coarsen"
 };
 
 //======================================================================
@@ -55,10 +50,8 @@ void CommBlock::p_adapt_begin()
 
   if (cycle() == initial_cycle) {
     adapt_step_ = initial_max_level;
-  } else if (mesh_max_level > 0) {
-    adapt_step_ = 1;
-  } else {
-    adapt_step_ = 0;
+  } else  {
+    adapt_step_ = (mesh_max_level > 0) ? 1 : 0;
   }
 
   if (adapt_step_ > 0) {
@@ -72,7 +65,6 @@ void CommBlock::p_adapt_begin()
 
 void CommBlock::p_adapt_start()
 {
-  // Initialize child coarsening counter
   count_coarsen_ = 0;
 
   if (adapt_step_-- > 0) {
@@ -114,30 +106,25 @@ void CommBlock::q_adapt_next()
 
 int CommBlock::determine_adapt()
 {
-  // Only leaves can adapt
-
   if (! is_leaf()) return adapt_same;
 
-  else {
+  FieldDescr * field_descr = simulation()->field_descr();
 
-    FieldDescr * field_descr = simulation()->field_descr();
+  int index_refine = 0;
+  int adapt = adapt_unknown;
 
-    int index_refine = 0;
-    int adapt = adapt_unknown;
+  Problem * problem = simulation()->problem();
+  Refine * refine;
 
-    Problem * problem = simulation()->problem();
-    Refine * refine;
+  while ((refine = problem->refine(index_refine++))) {
 
-    while ((refine = problem->refine(index_refine++))) {
+    int adapt_step_ = refine->apply(this, field_descr);
 
-      int adapt_step_ = refine->apply(this, field_descr);
+    adapt = reduce_adapt_(adapt,adapt_step_);
 
-      adapt = reduce_adapt_(adapt,adapt_step_);
-
-    }
-
-    return adapt;
   }
+
+  return adapt;
 }
 
 //----------------------------------------------------------------------
@@ -180,20 +167,13 @@ void CommBlock::refine()
 
   adapt_ = adapt_unknown;
 
-#ifdef CELLO_TRACE
-  index_.print ("refine",-1,2);
-#endif /* CELLO_TRACE */
-  
-  TRACE("CommBlock::refine()");
   int rank = simulation()->dimension();
   
   int nc = NC(rank);
 
-  // block size
   int nx,ny,nz;
   block()->field_block()->size(&nx,&ny,&nz);
 
-  // forest size
   int na3[3];
   size_forest (&na3[0],&na3[1],&na3[2]);
 

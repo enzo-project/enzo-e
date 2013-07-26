@@ -2,8 +2,8 @@
  include "sedov-output.incl"
  include "sedov_array_2.incl"
 
- Mesh { root_size     = [256,256]; }
- Mesh { root_blocks   = [8,8]; }
- Enzo { sedov { array = [8,8]; } }
+ Mesh { root_size     = [1024,1024]; }
+ Mesh { root_blocks   = [32,32]; }
+ Enzo { sedov { array = [32,32]; } }
  Domain { upper =       [1.0,1.0]; }
 # Output { file_groups = []; }

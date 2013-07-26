@@ -51,8 +51,6 @@ void CommBlock::refresh ()
 
   int rank = simulation->dimension();
 
-  // Forest size needed for Index
-
   int n3[3];
   size_forest(&n3[0],&n3[1],&n3[2]);
 
@@ -110,7 +108,6 @@ void CommBlock::refresh ()
     // Prevent hang if single-CommBlock simulation
     ++loop_refresh_.stop();
 
-    
     x_refresh_same (0,0,0);
 
   }

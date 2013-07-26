@@ -1,11 +1,11 @@
 
-# include "input/sedov-amr.incl"
+# include "sedov-amr.incl"
 
-include "input/sedov-output.incl"
+include "sedov-output.incl"
 
 # 3D PROBLEM
 
- include "input/sedov_array_3.incl"
+ include "sedov_array_3.incl"
  Mesh { root_size      = [512,512,512]; }
  Mesh { root_blocks    = [4,4,4]; }
  Enzo { sedov { array = [4,4,4]; } }
@@ -13,7 +13,7 @@ include "input/sedov-output.incl"
 
 # 2D PROBLEM
 
-# include "input/sedov_array_2.incl"
+# include "sedov_array_2.incl"
 # Mesh { root_size      = [256,256]; }
 # Mesh { root_blocks    = [8,8]; }
 # Enzo { sedov { array = [8,8]; } }

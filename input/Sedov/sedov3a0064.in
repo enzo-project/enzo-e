@@ -1,6 +1,6 @@
- include "input/sedov-amr.incl"
- include "input/sedov-output.incl"
- include "input/sedov_array_3.incl"
+ include "sedov-amr.incl"
+ include "sedov-output.incl"
+ include "sedov_array_3.incl"
 
  Mesh { root_size     = [128,128,128]; }
  Mesh { root_blocks   = [4,4,4]; }

@@ -10,11 +10,7 @@
 #PBS -V
 # Start of user commands - comments start with a hash sign (#)
 
-cd $HOME/Cello/cello-src/input/Sedov
-
 P=0001
-charmrun=$HOME/Charm/charm/bin/charmrun
+T=2a
 
-$charmrun ++mpiexec +p$P bin/charm/enzo-p sedov2a$P.in >& out.sedov2a$P
-
-
+source include.sh
