@@ -944,19 +944,19 @@ tests("Cello","test_Index","test_Index","");
 tests("Cello","test_Tree","test_Tree",""); 
 tests("Cello","test_ItFace","test_ItFace",""); 
 
-printf ("<img width=257 src=\"mpi/test_tree_1-initial.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/test_tree_2-balanced.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/test_tree_3-merged.png\"></img></br>\n");
+printf ("<img width=257 src=\"charm/test_tree_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"charm/test_tree_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"charm/test_tree_3-merged.png\"></img></br>\n");
 
 tests("Cello","test_TreeDensity","test_TreeDensity",""); 
 
-printf ("<img width=257 src=\"mpi/density_xy_1-initial.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/density_xy_2-balanced.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/density_xy_3-coalesced.png\"></img></br>\n");
+printf ("<img width=257 src=\"charm/density_xy_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"charm/density_xy_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"charm/density_xy_3-coalesced.png\"></img></br>\n");
 
-printf ("<img width=257 src=\"mpi/density_3d_1-initial.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/density_3d_2-balanced.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/density_3d_3-coalesced.png\"></img></br>\n");
+printf ("<img width=257 src=\"charm/density_3d_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"charm/density_3d_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"charm/density_3d_3-coalesced.png\"></img></br>\n");
 
 tests("Cello","test_Node","test_Node",""); 
 tests("Cello","test_NodeTrace","test_NodeTrace",""); 

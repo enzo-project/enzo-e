@@ -7,15 +7,15 @@
 
 #ifdef CONFIG_USE_CHARM
 
-/* #define DEBUG_ADAPT */
+// #define DEBUG_ADAPT
 
 #ifdef DEBUG_ADAPT
 
 char buffer [80];
 
 #define SET_FACE_LEVEL(INDEX,IF3,LEVEL,RECURSE,TYPE)		\
-  sprintf (buffer,"set_face_level(%d %d %d  = %d) [%d]",	\
-	   IF3[0],IF3[1],IF3[2],LEVEL,TYPE);		\
+  sprintf (buffer,"set_face_level %d (%d %d %d  = %d) [%d]",	\
+	   __LINE__,IF3[0],IF3[1],IF3[2],LEVEL,TYPE);		\
   INDEX.print(buffer,-1,2);					\
   thisProxy[INDEX].p_set_face_level (IF3,LEVEL,RECURSE,TYPE);
 #else /* DEBUG_ADAPT */
@@ -54,14 +54,14 @@ void CommBlock::p_adapt_begin()
   int mesh_max_level    = config->mesh_max_level;
 
   if (cycle() == initial_cycle) {
-    count_adapt_ = initial_max_level;
+    adapt_step_ = initial_max_level;
   } else if (mesh_max_level > 0) {
-    count_adapt_ = 1;
+    adapt_step_ = 1;
   } else {
-    count_adapt_ = 0;
+    adapt_step_ = 0;
   }
 
-  if (count_adapt_ > 0) {
+  if (adapt_step_ > 0) {
     p_adapt_start();
   } else {
     q_adapt_end();
@@ -75,7 +75,7 @@ void CommBlock::p_adapt_start()
   // Initialize child coarsening counter
   count_coarsen_ = 0;
 
-  if (count_adapt_-- > 0) {
+  if (adapt_step_-- > 0) {
 
     adapt_ = determine_adapt();
 
@@ -96,8 +96,9 @@ void CommBlock::p_adapt_start()
 void CommBlock::q_adapt_next()
 {
   TRACE("ADAPT CommBlock::q_adapt_next()");
-  //  TRACE_CHARM("doneInserting");
-  thisProxy.doneInserting();
+  if (thisIndex.is_root()) {
+    thisArray->doneInserting();
+  }
 
   for (size_t i=0; i<child_face_level_.size(); i++) {
     child_face_level_[i] = face_level_unknown;
@@ -129,9 +130,9 @@ int CommBlock::determine_adapt()
 
     while ((refine = problem->refine(index_refine++))) {
 
-      int adapt_step = refine->apply(this, field_descr);
+      int adapt_step_ = refine->apply(this, field_descr);
 
-      adapt = reduce_adapt_(adapt,adapt_step);
+      adapt = reduce_adapt_(adapt,adapt_step_);
 
     }
 
@@ -240,7 +241,7 @@ void CommBlock::refine()
 	(&thisProxy, index_child,
 	 nx,ny,nz,
 	 num_field_blocks,
-	 count_adapt_,
+	 adapt_step_,
 	 initial,
 	 cycle_,time_,dt_,
 	 narray, array, op_array_prolong,
@@ -376,6 +377,7 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
 void CommBlock::set_face_level (int if3[3], int level, int recurse, int type)
 { 
+
   int index_face = IF3(if3);
 
   if (face_level_[index_face] == face_level_unknown) {
@@ -386,38 +388,49 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int type)
     face_level_[index_face] = std::min(face_level_[index_face],level); 
   }
 
-  if (recurse && ! is_leaf()) {
+  if (recurse) {
 
-    // update children that share the same face
+    if (type == adapt_refine && ! is_leaf()) {
 
-    for (size_t ic=0; ic<children_.size(); ic++) {
+      // update children that share the same face
 
-      Index index_child = children_[ic];
+      for (size_t ic=0; ic<children_.size(); ic++) {
 
-      if (index_child != index_) {
+	Index index_child = children_[ic];
 
-	int ic3[3];
-	index_child.child(level_+1,ic3,ic3+1,ic3+2);
+	if (index_child != index_) {
 
-	bool face_adjacent = child_is_on_face_(ic3,if3);
+	  int ic3[3];
+	  index_child.child(level_+1,ic3,ic3+1,ic3+2);
 
-	if (face_adjacent) {
+	  bool face_adjacent = child_is_on_face_(ic3,if3);
 
-	  SET_FACE_LEVEL(index_child,if3,level,true,adapt_refine);
+	  if (face_adjacent) {
 
-	  int ifc3m[3], ifc3p[3], ifc3[3];
-	  loop_limits_faces_(ifc3m,ifc3p,if3,ic3);
+	    SET_FACE_LEVEL(index_child,if3,level,false,adapt_refine);
 
-	  for (ifc3[0]=ifc3m[0]; ifc3[0]<=ifc3p[0]; ifc3[0]++) {
-	    for (ifc3[1]=ifc3m[1]; ifc3[1]<=ifc3p[1]; ifc3[1]++) {
-	      for (ifc3[2]=ifc3m[2]; ifc3[2]<=ifc3p[2]; ifc3[2]++) {
-		SET_FACE_LEVEL(index_child,ifc3,level,true,adapt_refine);
+	    int ifc3m[3], ifc3p[3], ifc3[3];
+	    loop_limits_faces_(ifc3m,ifc3p,if3,ic3);
+
+	    for (ifc3[0]=ifc3m[0]; ifc3[0]<=ifc3p[0]; ifc3[0]++) {
+	      for (ifc3[1]=ifc3m[1]; ifc3[1]<=ifc3p[1]; ifc3[1]++) {
+		for (ifc3[2]=ifc3m[2]; ifc3[2]<=ifc3p[2]; ifc3[2]++) {
+		  SET_FACE_LEVEL(index_child,ifc3,level,false,adapt_refine);
+		}
 	      }
 	    }
 	  }
 	}
       }
+    } else if (type == adapt_coarsen && level_ > 0) {
+      Index index_parent = index_.index_parent();
+      int ic3[3];
+      index_.child(level_,ic3+0,ic3+1,ic3+2);
+      int ip3[3];
+      parent_face_(ip3,if3,ic3);
+      SET_FACE_LEVEL(index_parent,ip3,level,false,adapt_coarsen);
     }
+
   } 
 }
 
@@ -724,11 +737,11 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
       } else if (face_level == level_) {
 
-	SET_FACE_LEVEL(index_neighbor,jf3,level_,true,adapt_coarsen);
+ 	SET_FACE_LEVEL(index_neighbor,jf3,level_,false,adapt_coarsen);
 	
       } else if (face_level == level_ + 1) {
 
-	SET_FACE_LEVEL(index_child_neighbor,jf3,level_,false,adapt_coarsen);
+	SET_FACE_LEVEL(index_child_neighbor,jf3,level_,true,adapt_coarsen);
 
 	int ic3m[3],ic3p[3],ic3[3];
 	loop_limits_nibling_(ic3m,ic3p, if3);
@@ -752,7 +765,6 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 	       level_,ip3[0],ip3[1],ip3[2],face_level);
       }
     }
-
   }
 }
 
@@ -776,6 +788,7 @@ void CommBlock::q_adapt_stop()
   thisProxy.doneInserting();
   TRACE("ADAPT CommBlock::q_adapt_stop()");
   if (thisIndex.is_root()) {
+    thisArray->doneInserting();
     thisProxy.p_adapt_start();
   }
 }
@@ -784,11 +797,11 @@ void CommBlock::q_adapt_stop()
 
 void CommBlock::q_adapt_end()
 {
-  TRACE("ADAPT CommBlock::q_adapt_end()");
+  // CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(), 
+  // 			thisProxy[thisIndex]));
 
-  Performance * performance = simulation()->performance();
-  if (performance->is_region_active(perf_adapt))
-    performance->stop_region(perf_adapt);
+  //  thisProxy.doneInserting();
+  TRACE("ADAPT CommBlock::q_adapt_end()");
 
   debug_faces_("child",&face_level_[0]);
 
@@ -799,7 +812,6 @@ void CommBlock::q_adapt_end()
   if (coarsened_) {
     TRACE_CHARM("ckDestroy()");
     thisProxy[thisIndex].ckDestroy();
-    //    TRACE_CHARM("doneInserting");
     thisProxy.doneInserting();
     return;
   } else {

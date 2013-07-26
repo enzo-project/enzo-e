@@ -150,12 +150,18 @@ public:
 	      int max_level = -1,
 	      int rank = 3) const;
 
+  void write (int ip,
+	      const char * msg = "\0",
+	      int max_level = -1,
+	      int rank = 3) const;
+
   std::string bit_string (int max_level,int rank) const;
 
 private: // functions
 
   int num_bits_(int value) const;
   void print_bits_(int value, int nb) const;
+  void write_bits_(FILE * fp, int value, int nb) const;
 
   inline void copy_ (const Index & index)
   {

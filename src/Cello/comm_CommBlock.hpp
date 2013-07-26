@@ -75,7 +75,7 @@ public: // interface
    Index index,
    int nx, int ny, int nz,
    int num_field_blocks,
-   int count_adapt,
+   int num_adapt_steps,
    bool initial,
    int cycle, double time, double dt,
    int narray, char * array, int op_array,
@@ -464,7 +464,7 @@ protected: // attributes
   int count_coarsen_;
 
   /// Number of adapt steps in the adapt phase
-  int count_adapt_;
+  int adapt_step_;
 
   /// Current adapt value for the block
   int adapt_;

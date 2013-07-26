@@ -20,8 +20,7 @@ Stopping {
 Boundary { type = "periodic"; }
 
 Testing {
-   cycle_final = 100; 
-   time_final  = 0.108293093927205;
+   time_final  = 0.10;
 }
 
 Initial {
@@ -31,12 +30,6 @@ Initial {
        1.000, 1.0*x + 2.0*y  > 2.0,
        1.000, 2.0*x - 1.0*y  < 0.0,
        1.000, 2.0*x - 1.0*y  > 1.0,
-#       1.000, x + 2.0*y >= 0.5,
-#       1.000, x + 2.0*y >= 0.5,
-#      1.000,  (x- 0.50)*(x- 0.50)+(y- 0.50)*(y- 0.50) <= 0.01,
-#      1.000,  (x- 0.75)*(x- 0.75)+(y- 0.25)*(y- 0.25) <= 0.01,
-#      1.000,  (x- 0.75)*(x- 0.75)+(y- 0.75)*(y- 0.75) <= 0.01,
-#      1.000,  (x- 0.25)*(x- 0.25)+(y- 0.75)*(y- 0.75) <= 0.01,
                    0.125 ]; };
     total_energy  { value = 
     [ 
@@ -44,11 +37,6 @@ Initial {
        1.0  / (0.4 * 1.0), 1.0*x + 2.0*y  > 2.0,
        1.0  / (0.4 * 1.0), 2.0*x - 1.0*y  < 0.0,
        1.0  / (0.4 * 1.0), 2.0*x - 1.0*y  > 1.0,
-#       1.0  / (0.4 * 1.0) , x  > 0.5,
-#      1.0 / (0.4 * 1.0) , (x- 0.50)*(x- 0.50)+(y- 0.50)*(y- 0.50) <= 0.01,
-#      1.0 / (0.4 * 1.0) , (x- 0.75)*(x- 0.75)+(y- 0.25)*(y- 0.25) <= 0.01,
-#      1.0 / (0.4 * 1.0) , (x- 0.75)*(x- 0.75)+(y- 0.75)*(y- 0.75) <= 0.01,
-#      1.0 / (0.4 * 1.0) , (x- 0.25)*(x- 0.25)+(y- 0.75)*(y- 0.75) <= 0.01,
                      0.14 / (0.4 * 0.1)  ]; };
     velocity_x    { value = [0.0]; };
     velocity_y    { value = [0.0]; }
@@ -58,10 +46,10 @@ Initial {
 Field {
     ghosts = 4; # must be even for ProlongLinear
     prolong = "linear";
-   refresh {
-     rank = 0;
-     type = "quiescence";
-   }
+    refresh {
+       rank = 0;
+       type = "quiescence";
+    }
 }
 
 
@@ -73,8 +61,7 @@ Output {
 
        field_list = ["density"];
        type     = "image";
-#       image_ghost = true;
-	schedule = ["time","interval", 0.01];
+       schedule = ["time","interval", 0.01];
        colormap = [0.0,0.0,0.0,
                    1.0,0.0,0.0,
                    1.0,1.0,0.0,
@@ -85,8 +72,7 @@ Output {
        image_log = true;
        field_list = ["density"];
        type     = "image";
-#       image_ghost = true;
-	schedule = ["time","interval", 0.01];
+       schedule = ["time","interval", 0.01];
        colormap = [0.0,0.0,0.0,
                    1.0,0.0,0.0,
                    1.0,1.0,0.0,
@@ -97,8 +83,7 @@ Output {
 
        field_list = ["total_energy"];
        type     = "image";
-#       image_ghost = true;
-	schedule = ["time","interval", 0.01];
+       schedule = ["time","interval", 0.01];
        colormap = [0.0,0.0,0.0,
                    1.0,0.0,0.0,
                    1.0,1.0,0.0,
@@ -109,8 +94,7 @@ Output {
 
        field_list = ["velocity_x"];
        type     = "image";
-#       image_ghost = true;
-	schedule = ["time","interval", 0.01];
+       schedule = ["time","interval", 0.01];
        colormap = [1.0,0.0,0.0,
                    0.0,0.0,0.0,
                    0.0,0.0,1.0];
@@ -120,15 +104,13 @@ Output {
 
        field_list = ["velocity_y"];
        type     = "image";
-#       image_ghost = true;
-	schedule = ["time","interval", 0.01];
+       schedule = ["time","interval", 0.01];
        colormap = [1.0,0.0,0.0,
                    0.0,0.0,0.0,
                    0.0,0.0,1.0];
     };
 
     mesh {
-#        image_face_rank = 0;
 	type     = "image";
 	image_type  = "mesh";
 	image_reduce_type = "max";

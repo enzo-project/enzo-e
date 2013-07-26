@@ -380,6 +380,48 @@ void Index::print (const char * msg,
 
 //----------------------------------------------------------------------
 
+void Index::write (int ip,
+		   const char * msg,
+		   int max_level,
+		   int rank) const
+{
+  char filename[80];
+  sprintf (filename,"index.%s.%d",msg,ip);
+  FILE * fp = fopen(filename,"a");
+
+  if (max_level == -1) max_level = this->level();
+    
+  fprintf (fp,"INDEX %p %s: ", this,msg);
+
+  int nb = 0;
+
+  for (int axis=0; axis<rank; axis++) {
+    nb = std::max(nb,num_bits_(a_[axis].array));
+  }
+
+  for (int axis=0; axis<rank; axis++) {
+
+    write_bits_(fp,a_[axis].array,nb);
+
+    fprintf (fp,":");
+
+    for (int level=0; level<max_level; level++) {
+
+      int ic3[3];
+      child (level+1, &ic3[0], &ic3[1], &ic3[2]);
+      fprintf (fp,"%d",ic3[axis]);
+	
+    }
+    fprintf (fp," ");
+      
+  }
+  fprintf (fp,"\n");
+
+  fflush(stdout);
+}
+
+//----------------------------------------------------------------------
+
 int Index::num_bits_(int value) const
 {
   int nb = 32;
@@ -395,7 +437,17 @@ void Index::print_bits_(int value, int nb) const
 {
   for (int i=nb; i>=0; i--) {
     int bit = (value & ( 1 << i));
-    printf ("%d",bit?1:0);
+    PARALLEL_PRINTF ("%d",bit?1:0);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Index::write_bits_(FILE * fp,int value, int nb) const
+{
+  for (int i=nb; i>=0; i--) {
+    int bit = (value & ( 1 << i));
+    fprintf (fp,"%d",bit?1:0);
   }
 }
 
