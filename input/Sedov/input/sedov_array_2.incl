@@ -65,5 +65,6 @@
 
    Boundary { type = "periodic" }
 
-   Stopping {        cycle = 100;   } 
+   Stopping {        cycle = 10;   } 
 
+ Enzo { sedov { radius_relative = 0.1; } }
