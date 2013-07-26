@@ -53,11 +53,13 @@ Stopping { cycle = 100; }
 Output {
 
    file_groups = ["mesh","de","te","vx","vy"]; 
+#   file_groups = []; 
 
       de {
 	type     = "image";
 	image_type  = "data";
 	image_size  = [1024,1024];
+#	image_ghost  = true;
         field_list = ["density"];
 	schedule = ["cycle","interval", 10];
         colormap = [0.0, 0.0, 0.0,  
@@ -70,6 +72,7 @@ Output {
 	type     = "image";
 	image_type  = "data";
 	image_size  = [1024,1024];
+#	image_ghost  = true;
         field_list = ["total_energy"];
 	schedule = ["cycle","interval", 10];
         colormap = [0.0, 0.0, 0.0,  
@@ -82,6 +85,7 @@ Output {
 	type     = "image";
 	image_type  = "data";
 	image_size  = [1024,1024];
+#	image_ghost  = true;
         field_list = ["velocity_x"];
 	schedule = ["cycle","interval", 10];
         colormap = [1.0, 0.0, 0.0,  
@@ -93,6 +97,7 @@ Output {
 	type     = "image";
 	image_type  = "data";
 	image_size  = [1024,1024];
+#	image_ghost  = true;
         field_list = ["velocity_y"];
 	schedule = ["cycle","interval", 10];
         colormap = [1.0, 0.0, 0.0,  

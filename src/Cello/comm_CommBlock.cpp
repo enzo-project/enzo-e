@@ -24,7 +24,7 @@ CommBlock::CommBlock
  Index index,
  int nx, int ny, int nz,             // Block cells
  int num_field_blocks,
- int count_adapt,
+ int num_adapt_steps,
  bool initial,
  int cycle, double time, double dt,
  int narray, char * array, int op_array,
@@ -45,7 +45,7 @@ CommBlock::CommBlock
   face_level_(),
   child_face_level_(),
   count_coarsen_(0),
-  count_adapt_(count_adapt),
+  adapt_step_(num_adapt_steps),
   adapt_(adapt_unknown),
   next_phase_(phase_output),
   coarsened_(false)
@@ -53,7 +53,7 @@ CommBlock::CommBlock
 #ifdef CELLO_TRACE
   index.print ("CommBlock::CommBlock");
   printf("CommBlock::CommBlock(n(%d %d %d)  num_field_blocks %d  count_adapt %d  initial %d)\n",
-	 nx,ny,nz,num_field_blocks,count_adapt,initial);
+	 nx,ny,nz,num_field_blocks,adapt_step_,initial);
 
   printf("CommBlock::CommBlock  n (%d %d %d)\n",nx,ny,nz);
   printf("CommBlock::CommBlock  l %d\n",level_);
@@ -185,7 +185,7 @@ void CommBlock::pup(PUP::er &p)
   p | level_;
   p | children_;
   p | count_coarsen_;
-  p | count_adapt_;
+  p | adapt_step_;
   p | adapt_;
   p | loop_refresh_;
   p | face_level_;
@@ -582,7 +582,7 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   time_  = comm_block.time_;
   dt_    = comm_block.dt_;
   level_ = comm_block.level_;
-  count_adapt_ = comm_block.count_adapt_;
+  adapt_step_ = comm_block.adapt_step_;
   adapt_ = comm_block.adapt_;
   next_phase_ = comm_block.next_phase_;
   coarsened_ = comm_block.coarsened_;

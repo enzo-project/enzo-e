@@ -115,7 +115,8 @@ void CommBlock::p_output(CkReductionMsg * msg)
   double dt_forest   = min_reduce[0];
   bool   stop_forest = min_reduce[1] == 1.0 ? true : false;
   set_dt   (dt_forest);
-  TRACE2("CommBlock::p_output(): dt=%f  stop=%d",dt_forest,stop_forest);
+  //  printf("DEBUG CommBlock::p_output(): cycle %d dt=%f min_reduce %25.15f stop %d\n",
+  //	 cycle_,dt_forest,min_reduce[1],stop_forest);
 
   delete msg;
 

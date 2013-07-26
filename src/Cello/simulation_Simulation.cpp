@@ -418,13 +418,13 @@ const Factory * Simulation::factory() const throw()
 
 void Simulation::update_state(int cycle, double time, double dt, double stop) 
 {
-  TRACE4 ("Simulation::update_state cycle %d time %f dt %f stop %f",
-	  cycle,time,dt,stop);
+  //  printf ("DEBUG %s:%d Simulation::update_state cycle %d time %f dt %f stop %24.15f\n",
+  //	  __FILE__,__LINE__, cycle,time,dt,stop);
  
   cycle_ = cycle;
   time_  = time;
   dt_    = dt;
-  stop_  = stop;
+  stop_  = stop != 0;
 }
 
 //----------------------------------------------------------------------
