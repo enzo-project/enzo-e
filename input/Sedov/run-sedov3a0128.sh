@@ -13,4 +13,4 @@
 P=0128
 T=3a
 
-source include.sh
+source $HOME/Cello/cello-src/input/Sedov/include.sh

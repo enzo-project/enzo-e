@@ -6,9 +6,9 @@ cd $HOME/Cello/cello-src/input/Sedov
 
 enzorun=$HOME/Cello/cello-src/bin/enzo-p
 charmrun=$HOME/Charm/charm/bin/charmrun
-input=input/sedov2a$P.in
-output=out.sedov2a$P
+input=input/sedov$T$P.in
+output=out.sedov$T$P
 
-$charmrun ++mpiexec +p$P bin/charm/enzo-p sedov2a$P.in >& out.sedov2a$P
+$charmrun ++mpiexec +p$P bin/charm/enzo-p sedov$T$P.in >& out.sedov$T$P
 
 
