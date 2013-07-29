@@ -1,0 +1,269 @@
+Charmrun> started all node programs in 9.646 seconds.
+Converse/Charm++ Commit ID: 
+Trace: traceroot: /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p
+Warning> Randomization of stack pointer is turned on in kernel, thread migration may not work! Run 'echo 0 > /proc/sys/kernel/randomize_va_space' as root to disable it, or try run with '+isomalloc_sync'.  
+Charm++> scheduler running in netpoll mode.
+CharmLB> Load balancer assumes all CPUs are same.
+Charm++> Running on 64 unique compute nodes (16-way SMP).
+Charm++> cpu topology info is gathered in 0.176 seconds.
+
+Charm++> Warning: the number of SMP threads is greater than the number of physical cores, use +CmiNoProcForComThread runtime option.
+
+UNIT TEST BEGIN
+0 00013.14  ==============================================
+0 00013.14  
+0 00013.14    .oooooo.             oooo  oooo            
+0 00013.14   d8P'  `Y8b            `888  `888            
+0 00013.14  888           .ooooo.   888   888   .ooooo.  
+0 00013.14  888          d88' `88b  888   888  d88' `88b 
+0 00013.14  888          888ooo888  888   888  888   888 
+0 00013.14  `88b    ooo  888    .o  888   888  888   888 
+0 00013.14   `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P' 
+0 00013.14  
+0 00013.14  A Parallel Adaptive Mesh Refinement Framework
+0 00013.14  
+0 00013.14                  James Bordner
+0 00013.14    Laboratory for Computational Astrophysics
+0 00013.14          San Diego Supercomputer Center
+0 00013.14       University of California, San Diego
+0 00013.14  
+0 00013.14  See 'LICENSE_CELLO' for software license information
+0 00013.14  
+0 00013.14  BEGIN CELLO: Jul 29 14:52:49
+0 00013.14 Define Simulation processors 1024
+0 00013.14 Define CELLO_ARCH gordon-gnu
+0 00013.14 Define CELLO_PREC double
+0 00013.14 Define CELLO_TYPE charm
+0 00013.14 Define CC           gcc
+0 00013.14 Define CFLAGS       -O3   
+0 00013.14 Define CPPDEFINES   CONFIG_USE_CHARM CONFIG_PRECISION_DOUBLE H5_USE_16_API NO_FREETYPE COARSEN CONFIG_USE_MEMORY
+0 00013.14 Define CPPPATH      #/include /home/ux452912/include
+0 00013.14 Define CXX          /home/ux452912/Charm/charm/bin/charmc -language charm++  
+0 00013.14 Define CXXFLAGS     -O3    
+0 00013.14 Define FORTRANFLAGS -O3   
+0 00013.14 Define FORTRAN      gfortran
+0 00013.14 Define FORTRANLIBS  gfortran
+0 00013.14 Define FORTRANPATH  #/include
+0 00013.14 Define LIBPATH      #/lib/charm /home/ux452912/lib 
+0 00013.14 Define LINKFLAGS    -O3  -rdynamic  
+0 00013.14  BEGIN ENZO-P
+0 00013.14 Memory bytes 1074230 bytes_high 1074285
+0 00013.15 test testing
+0 00013.15 ERROR parameters_Parameters.cpp:74  Parameters::read Error opening parameter file 'sedov3a1024.in' for reading
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(_Z2t_v+0x18) [0x617658]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(_ZN10Parameters4readEPKc+0x329) [0x60c5e9]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(_ZN10ParametersC1EPKcP7Monitor+0x11d) [0x60c81d]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(_ZN10SimulationC2EPKciPK12GroupProcess+0x1fd) [0x5c56cd]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(_ZN15SimulationCharmC2EPKci+0xb) [0x5c86cb]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(_ZN19EnzoSimulationCharmC2EPKci+0x16) [0x56f1f6]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(_ZN27CkIndex_EnzoSimulationCharm35_call_EnzoSimulationCharm_marshall1EPvS0_+0xaa) [0x47f1fa]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(CkCreateLocalGroup+0x20a) [0x4952ca]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(_Z12_createGroup10_ckGroupIDP8envelope+0xd2) [0x495532]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(CkCreateGroup+0x98) [0x4955f8]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(_ZN4MainC2EP8CkArgMsg+0x47a) [0x47f86a]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(_Z10_initCharmiPPc+0x2203) [0x48c0c3]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p [0x51b55d]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(ConverseInit+0xcd4) [0x51c304]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p(main+0x27) [0x47af87]
+0 00013.15 EXIT :0   /lib64/libc.so.6(__libc_start_main+0xf4) [0x32eec1d994]
+0 00013.15 EXIT :0   /home/ux452912/Cello/cello-src/input/Sedov/bin/charm/enzo-p [0x47bfb1]
+
+=====================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   EXIT CODE: 15
+=   CLEANING UP REMAINING PROCESSES
+=   YOU CAN IGNORE THE BELOW CLEANUP MESSAGES
+=====================================================================================
+[proxy:0:1@gcn-13-81.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:1@gcn-13-81.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:1@gcn-13-81.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:2@gcn-13-82.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:2@gcn-13-82.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:2@gcn-13-82.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:4@gcn-13-85.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:4@gcn-13-85.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:4@gcn-13-85.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:5@gcn-14-21.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:5@gcn-14-21.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:5@gcn-14-21.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:6@gcn-14-32.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:6@gcn-14-32.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:6@gcn-14-32.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:7@gcn-14-33.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:7@gcn-14-33.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:7@gcn-14-33.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:8@gcn-14-34.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:8@gcn-14-34.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:8@gcn-14-34.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:9@gcn-14-35.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:9@gcn-14-35.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:9@gcn-14-35.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:10@gcn-15-45.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:10@gcn-15-45.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:10@gcn-15-45.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:11@gcn-2-11.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:11@gcn-2-11.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:11@gcn-2-11.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:12@gcn-2-12.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:12@gcn-2-12.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:12@gcn-2-12.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:13@gcn-2-14.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:13@gcn-2-14.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:13@gcn-2-14.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:14@gcn-2-15.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:14@gcn-2-15.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:14@gcn-2-15.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:15@gcn-2-16.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:15@gcn-2-16.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:15@gcn-2-16.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:16@gcn-2-18.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:16@gcn-2-18.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:16@gcn-2-18.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:17@gcn-2-21.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:17@gcn-2-21.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:17@gcn-2-21.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:18@gcn-2-48.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:18@gcn-2-48.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:18@gcn-2-48.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:19@gcn-2-64.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:19@gcn-2-64.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:19@gcn-2-64.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:20@gcn-2-67.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:20@gcn-2-67.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:20@gcn-2-67.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:24@gcn-4-18.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:24@gcn-4-18.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:24@gcn-4-18.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:21@gcn-4-11.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:21@gcn-4-11.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:21@gcn-4-11.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:22@gcn-4-12.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:22@gcn-4-12.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:22@gcn-4-12.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:23@gcn-4-14.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:23@gcn-4-14.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:23@gcn-4-14.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:25@gcn-4-34.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:25@gcn-4-34.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:25@gcn-4-34.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:26@gcn-4-36.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:26@gcn-4-36.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:26@gcn-4-36.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:27@gcn-4-44.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:27@gcn-4-44.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:27@gcn-4-44.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:28@gcn-4-46.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:28@gcn-4-46.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:28@gcn-4-46.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:29@gcn-5-15.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:29@gcn-5-15.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:29@gcn-5-15.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:30@gcn-5-18.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:30@gcn-5-18.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:30@gcn-5-18.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:31@gcn-5-32.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:31@gcn-5-32.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:31@gcn-5-32.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:32@gcn-5-41.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:32@gcn-5-41.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:32@gcn-5-41.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:34@gcn-5-45.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:34@gcn-5-45.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:34@gcn-5-45.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:36@gcn-5-72.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:36@gcn-5-72.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:36@gcn-5-72.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:33@gcn-5-43.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:33@gcn-5-43.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:33@gcn-5-43.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:35@gcn-5-61.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:35@gcn-5-61.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:35@gcn-5-61.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:40@gcn-6-82.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:40@gcn-6-82.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:40@gcn-6-82.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:42@gcn-7-52.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:42@gcn-7-52.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:42@gcn-7-52.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:43@gcn-7-54.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:43@gcn-7-54.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:43@gcn-7-54.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:41@gcn-7-41.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:41@gcn-7-41.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:41@gcn-7-41.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:44@gcn-7-68.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:44@gcn-7-68.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:44@gcn-7-68.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:46@gcn-8-25.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:46@gcn-8-25.sdsc.edu] [proxy:0:48@gcn-8-34.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:48@gcn-8-34.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): [proxy:0:3@gcn-13-84.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:3@gcn-13-84.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:3@gcn-13-84.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:37@gcn-5-84.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:37@gcn-5-84.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:37@gcn-5-84.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:45@gcn-7-88.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:45@gcn-7-88.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:45@gcn-7-88.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:46@gcn-8-25.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:47@gcn-8-32.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:47@gcn-8-32.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:47@gcn-8-32.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:49@gcn-8-37.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:49@gcn-8-37.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): [proxy:0:53@gcn-8-67.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:53@gcn-8-67.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): [proxy:0:38@gcn-6-14.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:38@gcn-6-14.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:38@gcn-6-14.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:39@gcn-6-17.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:39@gcn-6-17.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:39@gcn-6-17.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+callback returned error status
+[proxy:0:48@gcn-8-34.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:50@gcn-8-44.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:50@gcn-8-44.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:50@gcn-8-44.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:51@gcn-8-46.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:51@gcn-8-46.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:51@gcn-8-46.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:52@gcn-8-47.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:52@gcn-8-47.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:52@gcn-8-47.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+callback returned error status
+[proxy:0:53@gcn-8-67.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+callback returned error status
+[proxy:0:49@gcn-8-37.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:54@gcn-8-73.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:54@gcn-8-73.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:54@gcn-8-73.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:59@gcn-9-31.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:59@gcn-9-31.sdsc.edu] [proxy:0:55@gcn-8-77.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:55@gcn-8-77.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:55@gcn-8-77.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:57@gcn-8-85.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:57@gcn-8-85.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:57@gcn-8-85.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:58@gcn-9-27.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:58@gcn-9-27.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:58@gcn-9-27.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:59@gcn-9-31.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:61@gcn-9-86.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:61@gcn-9-86.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:61@gcn-9-86.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:56@gcn-8-81.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:56@gcn-8-81.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:56@gcn-8-81.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:60@gcn-9-64.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:60@gcn-9-64.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:60@gcn-9-64.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:62@gcn-9-87.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:62@gcn-9-87.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:62@gcn-9-87.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:63@gcn-9-88.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:63@gcn-9-88.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:63@gcn-9-88.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[mpiexec@gcn-13-76.sdsc.edu] HYDT_bscu_wait_for_completion (./tools/bootstrap/utils/bscu_wait.c:70): one of the processes terminated badly; aborting
+[mpiexec@gcn-13-76.sdsc.edu] HYDT_bsci_wait_for_completion (./tools/bootstrap/src/bsci_wait.c:23): launcher returned error waiting for completion
+[mpiexec@gcn-13-76.sdsc.edu] HYD_pmci_wait_for_completion (./pm/pmiserv/pmiserv_pmci.c:191): launcher returned error waiting for completion
+[mpiexec@gcn-13-76.sdsc.edu] main (./ui/mpich/mpiexec.c:405): process manager error waiting for completion
