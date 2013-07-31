@@ -47,9 +47,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   TRACE3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
   Performance * performance = simulation()->performance();
-  if (! performance->is_region_active(perf_compute)) {
-    performance->start_region(perf_compute);
-  }
+  performance->start_region(perf_compute);
 
 #ifdef CONFIG_USE_PROJECTIONS
   //  double time_start = CmiWallTimer();
@@ -75,40 +73,20 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   // Update CommBlock cycle and time to Simulation time and cycle
 
-
   set_cycle (cycle_ + 1);
   TRACE1("Calling set_time (%f)",time_+dt_);
   set_time  (time_  + dt_);
   
-  
-  //  simulation()->performance()->stop_region(perf_compute);
-
   TRACE ("CommBlock::compute() calling p_adapt(0)");
 
   TRACE ("END   PHASE COMPUTE");
 
-  //  Performance * performance = simulation()->performance();
-  if (performance->is_region_active(perf_compute))
-    performance->stop_region(perf_compute);
+  performance->stop_region(perf_compute);
 
   next_phase_ = phase_adapt;
 
-  //  p_adapt_begin();
-  
   p_refresh_begin();
 }
-
-// //----------------------------------------------------------------------
-
-// void CommBlock::compute()
-// {
-//   TRACE ("CommBlock::compute()");
-
-//   Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-
-// }
-
 //----------------------------------------------------------------------
 
 #endif /* CONFIG_USE_CHARM */

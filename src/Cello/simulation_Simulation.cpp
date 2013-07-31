@@ -227,8 +227,10 @@ void Simulation::initialize_performance_() throw()
   timer_.start();
 
   for (size_t i=0; i<config_->performance_papi_counters.size(); i++) {
-    performance_->new_counter(counter_type_papi, config_->performance_papi_counters[i]);
+    performance_->new_counter(counter_type_papi, 
+			      config_->performance_papi_counters[i]);
   }
+
   performance_->begin();
 
   performance_->start_region(perf_simulation);
@@ -443,7 +445,6 @@ void Simulation::monitor_output()
   Memory * memory = Memory::instance();
   memory->reset_high();
 
-
 }
 
 
@@ -459,15 +460,14 @@ void Simulation::performance_output()
 
   for (int ic = 0; ic < num_counters; ic++) {
     
-    int perf_counter = performance_->index_to_id(ic);
-
     for (int ir = 0; ir < num_regions; ir++) {
 
       performance_->region_counters(ir,counters);
+      int index_counter = ir+num_regions*ic;
 
       monitor_->print("Performance","%s %s %lld",
 		      performance_->region_name(ir).c_str(),
-		      performance_->counter_name(perf_counter).c_str(),
+		      performance_->counter_name(ic).c_str(),
 		      counters[ic]);  
     }
   }
@@ -498,11 +498,9 @@ void Simulation::performance_write()
 
       for (int ic = 0; ic < num_counters; ic++) {
     
-	int perf_counter = performance_->index_to_id(ic);
-
 	fprintf (fp,"%s %s %lld\n",
 		 performance_->region_name(ir).c_str(),
-		 performance_->counter_name(perf_counter).c_str(),
+		 performance_->counter_name(ic).c_str(),
 		 counters[ic]);  
       }
     }

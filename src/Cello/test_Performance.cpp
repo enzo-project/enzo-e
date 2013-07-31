@@ -96,6 +96,9 @@ PARALLEL_MAIN_BEGIN
 
   performance->increment_counter(id_counter_1,50);
 
+  performance->stop_region(id_region_2);
+  performance->start_region(id_region_2);
+
   performance->increment_counter(id_counter_2,100);
 
 
@@ -117,8 +120,8 @@ PARALLEL_MAIN_BEGIN
 
   performance->region_counters(id_region_1,region_counters);
 
-  int index_counter_1 = performance->id_to_index(id_counter_1);
-  int index_counter_2 = performance->id_to_index(id_counter_2);
+  int index_counter_1 = id_counter_1;
+  int index_counter_2 = id_counter_2;
 
   
   unit_assert(region_counters[index_counter_1] == 10 + 50 + 10);
@@ -126,6 +129,7 @@ PARALLEL_MAIN_BEGIN
 
   performance->region_counters(id_region_2,region_counters);
 
+  printf ("%lld %d\n",region_counters[index_counter_1] , 50);
   unit_assert(region_counters[index_counter_1] == 50);
   unit_assert(region_counters[index_counter_2] == 100);
 
@@ -135,7 +139,7 @@ PARALLEL_MAIN_BEGIN
 
   for (int index_counter = 0; index_counter < num_counters; index_counter++) {
     
-    int id_counter = performance->index_to_id(index_counter);
+    int id_counter = index_counter;
 
     printf ("COUNTER %s VALUE %lld\n",
 	    performance->counter_name(id_counter).c_str(),

@@ -253,9 +253,10 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
 
 void CommBlock::q_refresh_end()
 {
-  Performance * performance = simulation()->performance();
-  if (performance->is_region_active(perf_refresh))
+  if (thisIndex.is_root()) {
+    Performance * performance = simulation()->performance();
     performance->stop_region(perf_refresh);
+  }
 
   if (next_phase_ == phase_output) {
     TRACE("refresh calling output");

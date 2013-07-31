@@ -42,22 +42,21 @@ SimulationCharm::~SimulationCharm() throw()
 
 void SimulationCharm::performance_output()
 {
-  //  Simulation::performance_output();
 
-  int num_regions  = performance_->num_regions();
-  int num_counters =  performance_->num_counters();
+  int nr  = performance_->num_regions();
+  int nc =  performance_->num_counters();
 
-  int n = num_regions * num_counters + 1;
+  int n = nr * nc + 1;
 
-  long long * counters_long_long = new long long [n];
+  long long * counters_long_long = new long long [nc];
   long *      counters_long = new long [n];
 
-  for (int ir = 0; ir < num_regions; ir++) {
+  for (int ir = 0; ir < nr; ir++) {
     performance_->region_counters(ir,counters_long_long);
-    for (int ic = 0; ic < num_counters; ic++) {
-      int index_counter = ir+num_regions*ic;
+    for (int ic = 0; ic < nc; ic++) {
+      int index_counter = ir+nr*ic;
       counters_long[index_counter] = 
-	(long) counters_long_long[index_counter];
+	(long) counters_long_long[ic];
     }
   }
 
@@ -76,30 +75,32 @@ void SimulationCharm::performance_output()
 
 void SimulationCharm::p_performance_reduce(CkReductionMsg * msg)
 {
-  int num_regions  = performance_->num_regions();
-  int num_counters =  performance_->num_counters();
+  int nr  = performance_->num_regions();
+  int nc =  performance_->num_counters();
 
-  int n = num_regions * num_counters + 1;
+  int n = nr * nc + 1;
 
-  long long * counters_long_long = new long long [n];
   long *      counters_long = (long * )msg->getData();
 
-  for (int ir = 0; ir < num_regions; ir++) {
-    performance_->region_counters(ir,counters_long_long);
-    for (int ic = 0; ic < num_counters; ic++) {
-      int perf_counter = performance_->index_to_id(ic);
-      int index_counter = ir+num_regions*ic;
-      monitor_->print("Performance","%s %s %ld",
-		      performance_->region_name(ir).c_str(),
-		      performance_->counter_name(perf_counter).c_str(),
-		      counters_long[ic]);  
+  for (int ir = 0; ir < nr; ir++) {
+    for (int ic = 0; ic < nc; ic++) {
+      int index_counter = ir+nr*ic;
+      bool do_print = 
+	(performance_->counter_type(ic) != counter_type_abs) ||
+	(ir == 0);
+	
+      if (do_print) {
+	monitor_->print("Performance","%s %s %ld",
+			performance_->region_name(ir).c_str(),
+			performance_->counter_name(ic).c_str(),
+			counters_long[index_counter]);
+      }
     }
   }
 
   monitor_->print("Performance","simulation num-blocks %d",
 		  counters_long[n-1]);
 
-  delete [] counters_long_long;
   delete msg;
 
 }

@@ -6,7 +6,7 @@
 /// @brief    Charm-related mesh adaptation control functions
 
 #ifdef CONFIG_USE_CHARM
-
+//#define DEBUG_ADAPT
 #ifdef DEBUG_ADAPT
 
 char buffer [80];
@@ -740,9 +740,9 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
       } else {
 	index_.print("index_");
 	index_child.print("index_child");
-	ERROR5("CommBlock::coarsen_face_level_update_()",
-	       "Unhandled level jump from index_[%d] to face_level(%d %d %d)[%d]",
-	       level_,ip3[0],ip3[1],ip3[2],face_level);
+	ERROR6("CommBlock::coarsen_face_level_update_()",
+	       "Unhandled level jump from level_[%d] to face_level(%d %d %d)[%d] = %d",
+	       level_,ip3[0],ip3[1],ip3[2],IF3(ip3),face_level);
       }
     }
   }
@@ -808,7 +808,13 @@ void CommBlock::q_adapt_end()
 void CommBlock::q_adapt_exit()
 {
 
+  Performance * performance = simulation()->performance();
+  if (performance->is_region_active(perf_adapt)) {
+    performance->stop_region(perf_adapt);
+  }
+
   if (thisIndex.is_root()) {
+
 
     thisProxy.p_refresh_begin();
 
