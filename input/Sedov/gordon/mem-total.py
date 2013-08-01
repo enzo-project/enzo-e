@@ -16,7 +16,7 @@ for i in range(len(files)):
       data[i] = data[i] + [float(line)]
    f.close()
 
-plt.title("Sedov Blast Array Weak Scaling\naverage heap use per process")
+plt.title("(DRAFT) Sedov Blast Array Weak Scaling\naverage heap use per process")
 plt.xlabel("Processors $P$")
 plt.ylabel("MBytes / process")
 

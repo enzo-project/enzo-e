@@ -17,7 +17,7 @@ for i in range(len(files)):
       data[i] = data[i] + [float(line)]
    f.close()
 
-plt.title("Sedov Blast Array Weak Scaling\nstartup time and time per cycle")
+plt.title("(DRAFT) Sedov Blast Array Weak Scaling\nstartup time and time per cycle")
 plt.xlabel("Processors $P$")
 plt.ylabel("Time T_P (s)")
 
@@ -36,7 +36,7 @@ plt.plot(x,y2,'go-', label="time per cycle")
 plt.xscale('log')
 plt.yscale('log')
 
-plt.legend(loc="lower right")
+plt.legend(loc="upper left")
 
 plt.grid(True)
 
