@@ -200,8 +200,8 @@ public: // interface
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
   void prepare();
 
-  /// Implementation of refresh
-  void refresh();
+  // /// Implementation of refresh
+  // void refresh();
 
   //==================================================
 
