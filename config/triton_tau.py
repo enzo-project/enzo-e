@@ -19,7 +19,7 @@ f90['serial'] = 'ifort'
 libpath_fortran = ''
 libs_fortran    = ['imf','ifcore','ifport','stdc++']
 
-charm_path = '/home/jobordner/public/charm/charm'
+charm_path = '/home/jobordner/Charm/charm'
 papi_path = ''
 hdf5_path = '/opt/hdf5/intel'
 

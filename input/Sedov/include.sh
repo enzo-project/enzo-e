@@ -12,14 +12,14 @@
 #
 #----------------------------------------------------------------------
 
-cello=$HOME/Cello/`cat CELLO`
-charm=$HOME/charm/`cat CHARM`
+cello=$HOME/Cello/cello-src
+charm=$HOME/Charm/charm
 
 cd $cello/input/Sedov
 
-enzorun=$cello/bin/enzo-p
+enzorun=$cello/bin/charm/enzo-p
 charmrun=$charm/bin/charmrun
-input=input/sedov$T$P.in
+input=sedov$T$P.in
 output=out.sedov$T$P
 
 $charmrun ++mpiexec +p$P $enzorun $input >& $output
