@@ -177,8 +177,11 @@ Performance::new_region (int         region_index,
 //----------------------------------------------------------------------
 
 void
-Performance::start_region(int id_region) throw()
+Performance::start_region(int id_region, std::string file, int line, void * block) throw()
 {
+  if (file != "") PARALLEL_PRINTF ("%d %s:%d %p start_region(%s)\n",
+				   CkMyPe(),file.c_str(),line,block,
+				   region_name_[id_region].c_str());
   TRACE1 ("Performance::start_region (%d)",id_region);
   // NOTE: similar to stop_region()
 
@@ -212,8 +215,12 @@ Performance::start_region(int id_region) throw()
 //----------------------------------------------------------------------
 
 void
-Performance::stop_region(int id_region) throw()
+Performance::stop_region(int id_region, std::string file, int line, void * block) throw()
 {
+  if (file != "") PARALLEL_PRINTF ("%d %s:%d %p stop_region(%s)\n",
+				   CkMyPe(),file.c_str(),line,block,
+				   region_name_[id_region].c_str());
+
   TRACE1 ("Performance::stop_region (%d)",id_region);
   // NOTE: similar to start_region()
 

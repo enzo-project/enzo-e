@@ -21,13 +21,6 @@ void CommBlock::p_refresh_begin()
   Performance * performance = simulation()->performance();
   performance->start_region(perf_refresh);
 
-//   refresh(); 
-// }
-
-// //----------------------------------------------------------------------
-
-// void CommBlock::refresh ()
-// {
   TRACE("BEGIN PHASE REFRESH");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -43,7 +36,10 @@ void CommBlock::p_refresh_begin()
     CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
 			  thisProxy[thisIndex]));
 
-    if (! is_leaf()) return;
+    if (! is_leaf()) {
+      performance->stop_region(perf_refresh);
+      return;
+    }
 
   } 
 
@@ -106,11 +102,13 @@ void CommBlock::p_refresh_begin()
     // Prevent hang if single-CommBlock simulation
     ++loop_refresh_.stop();
 
+    performance->stop_region(perf_refresh);
     x_refresh_same (0,0,0);
 
-  }
+  } else {
 
-  performance->stop_region(perf_refresh);
+    performance->stop_region(perf_refresh);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -202,12 +200,12 @@ void CommBlock::x_refresh_same (int n, char * buffer, int iface[3])
 
   std::string refresh_type = simulation->config()->field_refresh_type;
   
+  performance->stop_region(perf_refresh);
   if (refresh_type == "counter") {
     if (loop_refresh_.done()) {
       q_refresh_end();
     }
   }
-  performance->stop_region(perf_refresh);
 }
 
 //----------------------------------------------------------------------
@@ -264,11 +262,12 @@ void CommBlock::q_refresh_end()
 {
   Performance * performance = simulation()->performance();
   performance->start_region(perf_refresh);
-  if (thisIndex.is_root()) {
-    Performance * performance = simulation()->performance();
-    performance->stop_region(perf_refresh);
-  }
+  // if (thisIndex.is_root()) {
+  //   Performance * performance = simulation()->performance();
+  //   performance->stop_region(perf_refresh);
+  // }
 
+  performance->stop_region(perf_refresh);
   if (next_phase_ == phase_output) {
     TRACE("refresh calling output");
     prepare();
@@ -281,7 +280,6 @@ void CommBlock::q_refresh_end()
 	    "Unknown next_phase %d",
 	    next_phase_);
   }
-  performance->stop_region(perf_refresh);
 }
 
 //----------------------------------------------------------------------

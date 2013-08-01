@@ -85,6 +85,7 @@ enum perf_region {
   perf_refresh,
   perf_compute,
   perf_output,
+  perf_prepare,
   perf_last
 };
 

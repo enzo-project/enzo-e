@@ -125,10 +125,10 @@ public: // interface
   bool is_region_active(int index_region) throw();
 
   /// Start counters for a code region
-  void start_region(int index_region) throw();
+  void start_region(int index_region, std::string file="", int line=0,void * = 0) throw();
 
   /// Stop counters for a code region
-  void stop_region(int index_region) throw();
+  void stop_region(int index_region, std::string file="", int line=0, void * = 0) throw();
 
   /// Clear the counters for a code region
   void clear_region(int index_region) throw();

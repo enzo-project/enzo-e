@@ -27,9 +27,13 @@
 void CommBlock::prepare()
 {
 
+  Performance * performance = simulation()->performance();
+  performance->start_region(perf_prepare);
+
   TRACE1("CommBlock::prepare() %p",&thisProxy);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
+  
  //--------------------------------------------------
   // Enforce boundary conditions
   //--------------------------------------------------
@@ -87,6 +91,7 @@ void CommBlock::prepare()
   TRACE1("Calling contribute %d",2*sizeof(double));
   contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
 
+  performance->stop_region(perf_prepare);
 }
 
 #endif /* CONFIG_USE_CHARM */
