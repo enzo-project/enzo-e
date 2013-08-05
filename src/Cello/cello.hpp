@@ -75,20 +75,6 @@ enum reduce_enum {
 };
 typedef int reduce_type;
 
-/// @enum    perf_regions
-/// @brief   region ID's for the Simulation performance object
-enum perf_region {
-  perf_simulation,
-  perf_cycle,
-  perf_initial,
-  perf_adapt,
-  perf_refresh,
-  perf_compute,
-  perf_output,
-  perf_prepare,
-  perf_last
-};
-
 // /// @enum component_enum
 // /// @brief List of components
 // enum component_enum {
