@@ -1,0 +1,19 @@
+Charmrun> error 56 attaching to node:
+Timeout waiting for node-program to connect
+
+=====================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   EXIT CODE: 15
+=   CLEANING UP REMAINING PROCESSES
+=   YOU CAN IGNORE THE BELOW CLEANUP MESSAGES
+=====================================================================================
+[proxy:0:0@gcn-9-53.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:0@gcn-9-53.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:0@gcn-9-53.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[proxy:0:3@gcn-9-65.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:3@gcn-9-65.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:3@gcn-9-65.sdsc.edu] main (./pm/pmiserv/pmip.c:226): demux engine error waiting for event
+[mpiexec@gcn-9-53.sdsc.edu] HYDT_bscu_wait_for_completion (./tools/bootstrap/utils/bscu_wait.c:70): one of the processes terminated badly; aborting
+[mpiexec@gcn-9-53.sdsc.edu] HYDT_bsci_wait_for_completion (./tools/bootstrap/src/bsci_wait.c:23): launcher returned error waiting for completion
+[mpiexec@gcn-9-53.sdsc.edu] HYD_pmci_wait_for_completion (./pm/pmiserv/pmiserv_pmci.c:191): launcher returned error waiting for completion
+[mpiexec@gcn-9-53.sdsc.edu] main (./ui/mpich/mpiexec.c:405): process manager error waiting for completion

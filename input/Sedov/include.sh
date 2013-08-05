@@ -23,5 +23,6 @@ input=sedov$T$P.in
 output=out.sedov$T$P
 
 $charmrun ++mpiexec +p$P $enzorun $input >& $output
+# $charmrun +p$P $enzorun $input >& $output
 
 
