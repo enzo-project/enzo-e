@@ -17,8 +17,10 @@ Output { file_groups = ["density"]; }
 Output {
     density {     
         name = ["prac-demo-%06d.png", "cycle"]; 
-        colormap = [0.0, 0.0, 0.0,  
-                    1.0, 1.0, 1.0];
+       colormap = [0.0,0.0,0.0,
+                   1.0,0.0,0.0,
+                   1.0,1.0,0.0,
+                   1.0,1.0,1.0];
        }
 }
 Output { data { 

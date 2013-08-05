@@ -75,6 +75,7 @@ class EnzoBlock : public CommBlock
   // variables
 
 public:
+
   /// Boundary
 
   static int  BoundaryRank;
