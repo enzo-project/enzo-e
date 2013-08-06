@@ -42,52 +42,41 @@ public: // functions
     TRACEPUP;
     // NOTE: change this function whenever attributes change
     Simulation::pup(p);
-    p | block_loop_;
+    p | block_sync_;
   }
 
   /// Initialize the Charm++ Simulation
   virtual void initialize() throw();
 
-  /// Run the simulation
-  virtual void run() throw();
+  // /// Run the simulation
+  // virtual void run() throw();
 
   /// Add a new CommBlock to this local branch
   inline void insert_block() 
   {
-    WARNING("SimulationCharm::insert_block()",
-	    "Migrating CommBlocks will disturb local counts");
-    ++block_loop_;
-    TRACE2 ("++local count %d = %d",group_process_->rank(),block_loop_.stop());
+    ++block_sync_;
   }
 
   /// Remove a CommBlock from this local branch
   inline void delete_block() 
   {
-    WARNING("SimulationCharm::delete_block()",
-	    "Migrating CommBlocks will disturb local counts");
-    --block_loop_; 
-    TRACE2 ("--local count %d = %d",group_process_->rank(),block_loop_.stop());
+    --block_sync_; 
   }
 
+  inline int block_count() const
+  { return block_sync_.stop(); }
+
   /// Call initialize()
-  void p_initialize() { initialize(); }
+  void p_initialize_begin();
+
+  /// Wait for all Hierarchy to be initialized before creating any CommBlocks
+  void r_initialize_forest();
 
   /// Wait for all local patches to be created before calling run
-  void s_initialize();
-
-  /// Call initialization on Problem list of Initial objects
-  void p_initial ();
-  /// Implementation of initialization
-  void initial ();
-  /// Wait for all local patches to check in before proceeding to refresh
-  void s_initial();
-  /// Continue on to refresh after s_initial() synchronization
-  void c_initial();
-
+  void r_initialize_end();
 
   /// Call output on Problem list of Output objects
   void p_output ();
-  /// Continue on to p_refresh()
   void c_output ();
 
   /// Reduce output, using p_output_write to send data to writing processes
@@ -99,22 +88,21 @@ public: // functions
   /// proceed with next output
   void p_output_write (int n, char * buffer);
 
-  // /// Wait for all local patches to check in before proceeding
-  // void s_patch(CkCallback function);
-
-
-  /// Refresh ghost zones (Charm++ entry)
-  void p_refresh();
-
-  /// Refresh ghost zones
-  void refresh();
-
-  // Stopping criteria and computation
+  /// Stopping criteria and computation
   void c_compute ();
+
+  /// Output Performance information to stdout (root process data only)
+  virtual void performance_output();
+
+  /// Reduction for performance data
+  void p_performance_reduce (CkReductionMsg * msg);
+
+  /// Updated Simulation function to call c_compute()
+  void monitor_output();
 
 protected: // attributes
 
-  Loop block_loop_;
+  Sync block_sync_;
 
 };
 

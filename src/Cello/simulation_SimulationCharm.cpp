@@ -23,11 +23,10 @@ SimulationCharm::SimulationCharm
  const char         parameter_file[],
  int                n) throw ()
   : Simulation(parameter_file, n),
-    block_loop_(0)
+    block_sync_(0)
 {
   TRACE("SimulationCharm::SimulationCharm");
 
-  // derived class should call initialize()
 }
 
 //----------------------------------------------------------------------
@@ -39,72 +38,79 @@ SimulationCharm::~SimulationCharm() throw()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::initialize() throw()
-{
-  TRACE("SimulationCharm::initialize()");
-  Simulation::initialize();
-
-  WARNING("SimulationCharm::initialize()",
-	  "Calling StartLB for debugging load balancing()");
-
-  s_initialize();
-}
-
 //----------------------------------------------------------------------
 
-void SimulationCharm::s_initialize()
+void SimulationCharm::performance_output()
 {
-  TRACE("SimulationCharm::s_initialize()");
-  if (group_process_->is_root()) run();
-}
 
-//----------------------------------------------------------------------
+  int nr  = performance_->num_regions();
+  int nc =  performance_->num_counters();
 
-void SimulationCharm::run() throw()
-{
-  TRACE("SimulationCharm::run()");
-  initial();
-}
+  int n = nr * nc + 1;
 
-//----------------------------------------------------------------------
+  long long * counters_long_long = new long long [nc];
+  long *      counters_long = new long [n];
 
-void SimulationCharm::p_refresh()
-{
-  TRACE("SimulationCharm::p_refresh");
-  refresh();
-};
-
-void SimulationCharm::refresh()
-{
-  TRACE("SimulationCharm::refresh");
-  if (hierarchy()->group_process()->is_root()) 
-    hierarchy()->block_array()->p_refresh(); 
-}
-
-//----------------------------------------------------------------------
-
-void SimulationCharm::c_compute()
-{
-  TRACE("SimulationCharm::c_compute()");
-  if (stop_) {
-    
-    performance_.stop_region (id_cycle_);
-    performance_write();
-
-    proxy_main.p_exit(CkNumPes());
-
-  } else {
-
-    if (cycle_ > 0 ) performance_.stop_region (id_cycle_);
-
-    performance_.start_region (id_cycle_);
-
-    if (hierarchy()->group_process()->is_root()) 
-      hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
+  for (int ir = 0; ir < nr; ir++) {
+    performance_->region_counters(ir,counters_long_long);
+    for (int ic = 0; ic < nc; ic++) {
+      int index_counter = ir+nr*ic;
+      counters_long[index_counter] = 
+	(long) counters_long_long[ic];
+    }
   }
 
+  counters_long[n-1] = block_sync_.stop(); // number of CommBlocks
+
+  CkCallback callback (CkIndex_SimulationCharm::p_performance_reduce(NULL), 
+		       thisProxy);
+  contribute (n*sizeof(long),
+	      counters_long,CkReduction::sum_long,callback);
+  delete [] counters_long;
+  delete [] counters_long_long;
+
 }
 
+//----------------------------------------------------------------------
+
+void SimulationCharm::p_performance_reduce(CkReductionMsg * msg)
+{
+  int nr  = performance_->num_regions();
+  int nc =  performance_->num_counters();
+
+  int n = nr * nc + 1;
+
+  long *      counters_long = (long * )msg->getData();
+
+  for (int ir = 0; ir < nr; ir++) {
+    for (int ic = 0; ic < nc; ic++) {
+      int index_counter = ir+nr*ic;
+      bool do_print = 
+	(performance_->counter_type(ic) != counter_type_abs) ||
+	(ir == 0);
+	
+      if (do_print) {
+	monitor_->print("Performance","%s %s %ld",
+			performance_->region_name(ir).c_str(),
+			performance_->counter_name(ic).c_str(),
+			counters_long[index_counter]);
+      }
+    }
+  }
+
+  monitor_->print("Performance","simulation num-blocks %d",
+		  counters_long[n-1]);
+
+  delete msg;
+
+}
+// void SimulationCharm::run() throw()
+// {
+//   TRACE("SimulationCharm::run()");
+//   initial();
+// }
+
+//----------------------------------------------------------------------
 //======================================================================
 
 #endif /* CONFIG_USE_CHARM */

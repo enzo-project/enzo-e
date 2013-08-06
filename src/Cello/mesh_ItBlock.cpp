@@ -50,7 +50,7 @@ CommBlock * ItBlock::operator++ () throw()
 #else /* CONFIG_USE_CHARM */
 
   index1_ ++;
-  int nb = hierarchy_->num_local_blocks();
+  size_t nb = hierarchy_->num_local_blocks();
   if (index1_ > nb) index1_ = 0;
   return index1_ ? hierarchy_->local_block(index1_ - 1) : NULL;
 

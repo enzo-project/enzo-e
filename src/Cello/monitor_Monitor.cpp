@@ -92,7 +92,7 @@ void Monitor::header () const
   print ("Define","CELLO_ARCH %s",CELLO_ARCH);
   print ("Define","CELLO_PREC %s",CELLO_PREC);
   print ("Define","CELLO_TYPE %s",CELLO_TYPE);
-  
+
   print ("Define","CC           %s",CELLO_CC);
   print ("Define","CFLAGS       %s",CELLO_CFLAGS);
   print ("Define","CPPDEFINES   %s",CELLO_CPPDEFINES);
@@ -154,28 +154,18 @@ void Monitor::write
 
     char buffer_time[10];
 
-    //    snprintf (buffer_time,10,"%08.2f",timer_->value());
-    snprintf (buffer_time,10,"",timer_->value());
-
-    // get Component if any
-    char buffer_component[20];
-
-    if (strlen(component)>0) {
-      snprintf (buffer_component,20," %-11s ",component);
-    } else {
-      buffer_component[0] = 0;
-    }
+    snprintf (buffer_time,10,"%08.2f",timer_->value());
 
     // Print 
 
     if (fp == stdout) {
       PARALLEL_PRINTF 
 	("%s %s %s %s\n",
-	 buffer_process, buffer_time, buffer_component, buffer_message);
+	 buffer_process, buffer_time, component, buffer_message);
     } else {
       fprintf 
 	(fp,"%s %s %s %s\n",
-	 buffer_process, buffer_time, buffer_component, buffer_message);
+	 buffer_process, buffer_time, component, buffer_message);
     }
 
 #ifdef CELLO_DEBUG
@@ -186,7 +176,7 @@ void Monitor::write
       sprintf (file,"out.debug.%d",ip_);
       FILE * fdebug = fopen (file,"a");
       fprintf (fdebug,"%s %s %s %s\n",
-	 buffer_process, buffer_time, buffer_component, buffer_message);
+	 buffer_process, buffer_time, component, buffer_message);
       fclose(fdebug);
     }
 
@@ -217,28 +207,18 @@ void Monitor::write_verbatim
 
     char buffer_time[10];
 
-    //    snprintf (buffer_time,10,"%08.2f",timer_->value());
-    snprintf (buffer_time,10,"");
-
-    // get Component if any
-    char buffer_component[20];
-
-    if (strlen(component)>0) {
-      snprintf (buffer_component,20," %-11s ",component);
-    } else {
-      buffer_component[0] = 0;
-    }
+    snprintf (buffer_time,10,"%08.2f",timer_->value());
 
     // Print 
 
     if (fp == stdout) {
       PARALLEL_PRINTF 
 	("%s %s %s %s\n",
-	 buffer_process, buffer_time, buffer_component, message);
+	 buffer_process, buffer_time, component, message);
     } else {
       fprintf 
 	(fp,"%s %s %s %s\n",
-	 buffer_process, buffer_time, buffer_component, message);
+	 buffer_process, buffer_time, component, message);
     }
   }
 

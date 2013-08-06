@@ -23,12 +23,17 @@ PARALLEL_MAIN_BEGIN
   Factory * factory = new Factory;
   const int dimensions = 3;
   const int refinement = 2;
-  Hierarchy * hierarchy = factory->create_hierarchy(dimensions, refinement,0,1);
+  Hierarchy * hierarchy = factory->create_hierarchy
+    (
+#ifndef CONFIG_USE_CHARM
+NULL,
+#endif
+dimensions, refinement,0,1);
   unit_assert(hierarchy != NULL);
 
   FieldDescr field_descr;
 
-  hierarchy->create_forest(&field_descr,12,12,12,3,3,3);
+  hierarchy->create_forest(&field_descr,12,12,12,3,3,3, true, true);
 
   // Extents
 

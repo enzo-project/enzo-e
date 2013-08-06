@@ -33,24 +33,29 @@ void Config::pup (PUP::er &p)
 
   p | field_padding;
   p | field_precision;
-  p | field_refresh_corners;
-  p | field_refresh_edges;
-  p | field_refresh_faces;
+  p | field_refresh_rank;
+  p | field_refresh_type;
 
   p | initial_cycle;
   p | initial_type;
   p | initial_time;
-  p | initial_name;
-  PUParray(p,initial_value,MAX_FIELDS);
+  //  p | initial_name;
+  //  PUParray(p,initial_value,MAX_FIELDS);
+  p | initial_max_level;
 
   PUParray(p,mesh_root_blocks,3);
   p | mesh_root_rank;
   PUParray(p,mesh_root_size,3);
   p | mesh_max_level;
   p | mesh_balance;
-  p | mesh_refine_type;
-  p | mesh_refine_fields;
-  p | mesh_refine_slope_max;
+  p | mesh_adapt_type;
+  p | mesh_adapt_fields;
+  p | mesh_adapt_slope_min_refine;
+  p | mesh_adapt_slope_max_coarsen;
+  p | mesh_adapt_mass_min;
+  p | mesh_adapt_mass_level_exponent;
+  p | mesh_adapt_mass_min_overdensity;
+  p | mesh_adapt_balance;
 
   p | method_sequence;
 
@@ -60,8 +65,15 @@ void Config::pup (PUP::er &p)
   p | output_file_groups;
   PUParray (p,output_type,MAX_FILE_GROUPS);
   PUParray (p,output_image_axis,MAX_FILE_GROUPS);
+  PUParray (p,output_image_block_size,MAX_FILE_GROUPS);
   PUParray (p,output_image_colormap,MAX_FILE_GROUPS);
   PUParray (p,output_image_colormap_alpha,MAX_FILE_GROUPS);
+  PUParray (p,output_image_type,MAX_FILE_GROUPS);
+  PUParray (p,output_image_log,MAX_FILE_GROUPS);
+  PUParray (p,output_image_mesh_color,MAX_FILE_GROUPS);
+  PUParray (p,output_image_size,MAX_FILE_GROUPS);
+  PUParray (p,output_image_reduce_type,MAX_FILE_GROUPS);
+  PUParray (p,output_image_ghost,MAX_FILE_GROUPS);
   PUParray (p,output_field_list,MAX_FILE_GROUPS);
   PUParray (p,output_stride,MAX_FILE_GROUPS);
   PUParray (p,output_name,MAX_FILE_GROUPS);
@@ -76,6 +88,9 @@ void Config::pup (PUP::er &p)
   p | performance_papi_counters;
   p | performance_name;
   p | performance_stride;
+
+  p | prolong_type;
+  p | restrict_type;
 
   p | stopping_cycle;
   p | stopping_time;
@@ -166,10 +181,29 @@ void Config::read(Parameters * parameters) throw()
     ERROR1 ("Config::read()", "Unknown precision %s",
 	    precision_str.c_str());
   }
+  // face_rank = rank - ( |ix| + |iy| + |iz| )
+  //
+  // face_rank               0     1     2         0      1
+  //                    3D corner edge  face  2D corner edge
+  // refresh_rank == 0:      x     x     x         x      x  >= 0D faces
+  // refresh_rank == 1             x     x                x  >= 1D faces
+  // refresh_rank == 2                   x                   >= 2D faces
+  //
+  // refresh if (face_rank >= rank)
 
-  field_refresh_corners = parameters->value_logical ("Field:refresh:corners",true);
-  field_refresh_edges   = parameters->value_logical ("Field:refresh:edges",  true);
-  field_refresh_faces   = parameters->value_logical ("Field:refresh:faces",  true);
+  field_refresh_rank = parameters->value_integer ("Field:refresh:rank",0);
+
+  // field refresh type == "quiescence" or "counter"
+
+  field_refresh_type = parameters->value_string 
+    ("Field:refresh:type","counter");
+
+  if ( ! ((field_refresh_type == "quiescence") ||
+	  (field_refresh_type == "counter"))) {
+    ERROR1 ("Config::read()", 
+	    "Unknown Field:refresh:type %s (must be \"quiescence\" or \"counter\"",
+	    field_refresh_type.c_str());
+  }
 
   //--------------------------------------------------
   // Initial
@@ -179,8 +213,10 @@ void Config::read(Parameters * parameters) throw()
   initial_cycle = parameters->value_integer("Initial:cycle",0);
   initial_time  = parameters->value_float  ("Initial:time",0.0);
   initial_type  = parameters->value_string("Initial:type","default");
+  initial_max_level = parameters->value_integer("Initial:max_level",0);
 
   //  initial_name;
+
   //  initial_value
 
   //--------------------------------------------------
@@ -193,6 +229,8 @@ void Config::read(Parameters * parameters) throw()
   if (mesh_root_rank < 2) field_ghosts[1] = 0;
   if (mesh_root_rank < 3) field_ghosts[2] = 0;
   
+  //--------------------------------------------------
+
   mesh_root_blocks[0] = parameters->list_value_integer(0,"Mesh:root_blocks",1);
   mesh_root_blocks[1] = parameters->list_value_integer(1,"Mesh:root_blocks",1);
   mesh_root_blocks[2] = parameters->list_value_integer(2,"Mesh:root_blocks",1);
@@ -210,38 +248,64 @@ void Config::read(Parameters * parameters) throw()
   delete group_process;
 #endif
 
+  //--------------------------------------------------
+
   mesh_root_size[0] = parameters->list_value_integer(0,"Mesh:root_size",1);
   mesh_root_size[1] = parameters->list_value_integer(1,"Mesh:root_size",1);
   mesh_root_size[2] = parameters->list_value_integer(2,"Mesh:root_size",1);
 
+  //--------------------------------------------------
+
   mesh_max_level = parameters->value_integer("Mesh:max_level",0);
 
-  mesh_balance   = parameters->value_logical("Mesh:balance",true);
+  //--------------------------------------------------
 
-  int num_refine_type = parameters->list_length("Mesh:refine_type");
-  mesh_refine_type.resize(num_refine_type);
-  for (int i=0; i<num_refine_type; i++) {
-    mesh_refine_type[i] = parameters->list_value_string(i,"Mesh:refine_type");
+  mesh_balance   = parameters->value_logical("Mesh:adapt:balance",true);
+
+  //--------------------------------------------------
+
+  int num_adapt_type = parameters->list_length("Mesh:adapt:type");
+  mesh_adapt_type.resize(num_adapt_type);
+  for (int i=0; i<num_adapt_type; i++) {
+    mesh_adapt_type[i] = parameters->list_value_string(i,"Mesh:adapt:type");
   }
 
-  int num_refine_fields = parameters->list_length("Mesh:refine_fields");
-  mesh_refine_fields.resize(num_refine_fields);
-  for (int i=0; i<num_refine_fields; i++) {
-    mesh_refine_fields[i] = parameters->list_value_string
-      (i,"Mesh:refine_fields");
+  //--------------------------------------------------
+
+  int num_adapt_fields = parameters->list_length("Mesh:adapt:fields");
+
+  mesh_adapt_fields.resize(num_adapt_fields);
+
+  for (int i=0; i<num_adapt_fields; i++) {
+    mesh_adapt_fields[i] = parameters->list_value_string
+      (i,"Mesh:adapt:fields");
   }
 
-  int num_refine_slope_max = parameters->list_length("Mesh:refine_slope_max");
-  mesh_refine_slope_max.resize(num_refine_slope_max);
-  for (int i=0; i<num_refine_slope_max; i++) {
-    mesh_refine_slope_max[i] = parameters->list_value_float
-      (i,"Mesh:refine_slope_max",0.3);
-  }
+  //--------------------------------------------------
 
-  ASSERT ("Config::read",
-	  "Sizes of parameter lists Mesh:refine:slope_max and "
-	  "Mesh:refine:fields must be the same",
-	  num_refine_slope_max == num_refine_fields);
+  mesh_adapt_slope_min_refine = 
+    parameters->value_float ("Mesh:adapt:slope_min_refine",0.3);
+
+  mesh_adapt_slope_max_coarsen = 
+    parameters->value_float ("Mesh:adapt:slope_max_coarsen",0.15);
+
+  //--------------------------------------------------
+
+  // This parameter is typically computed ("internal" parameter in Enzo)
+  mesh_adapt_mass_min = 
+    parameters->value_float ("Mesh:adapt:mass_min",-1.0);
+
+  //--------------------------------------------------
+
+  mesh_adapt_mass_level_exponent = 
+    parameters->value_float ("Mesh:adapt:mass_level_exponent",0.0);
+  //--------------------------------------------------
+
+  mesh_adapt_mass_min_overdensity = 
+    parameters->value_float ("Mesh:adapt:mass_min_overdensity",1.5);
+
+  mesh_adapt_balance = 
+    parameters->value_logical ("Mesh:adapt:balance",true);
 
   //--------------------------------------------------
   // Method
@@ -414,6 +478,9 @@ void Config::read(Parameters * parameters) throw()
 
     if (output_type[index] == "image") {
 
+      WARNING1 ("Config::read()",
+		"output_image_axis[%d] set to z",index);
+
       output_image_axis[index] = "z";
 
       if (parameters->type("axis") != parameter_unknown) {
@@ -423,6 +490,26 @@ void Config::read(Parameters * parameters) throw()
 		output_file_groups[index].c_str(), axis.c_str(),
 		axis=="x" || axis=="y" || axis=="z");
       } 
+
+      output_image_block_size[index] = parameters->value_integer("image_block_size",1);
+
+      output_image_type[index] = parameters->value_string("image_type","data");
+
+      output_image_log[index] = parameters->value_logical("image_log",false);
+
+      output_image_mesh_color[index] = parameters->value_string("image_mesh_color","level");
+
+      output_image_size[index].resize(2);
+      output_image_size[index][0] = 
+	parameters->list_value_integer(0,"image_size",0);
+      output_image_size[index][1] = 
+	parameters->list_value_integer(1,"image_size",0);
+
+      output_image_reduce_type[index] = parameters->value_string("image_reduce_type","sum");
+
+      output_image_face_rank[index] = parameters->value_integer("image_face_rank",3);
+
+      output_image_ghost[index] = parameters->value_logical("image_ghost",false);
 
       if (parameters->type("colormap") == parameter_list) {
 	int size = parameters->list_length("colormap");
@@ -440,9 +527,7 @@ void Config::read(Parameters * parameters) throw()
 	    parameters->list_value_float(i,"colormap_alpha",0.0);
 	}
       }
-
     }
-
   }  
 
   //--------------------------------------------------
@@ -460,8 +545,13 @@ void Config::read(Parameters * parameters) throw()
     }
   }
 
-  performance_name   = parameters->value_string ("Performance:name","");
-  performance_stride = parameters->value_integer("Performance:stride",1);
+  performance_name     = parameters->value_string ("Performance:name","");
+  performance_stride   = parameters->value_integer("Performance:stride",1);
+  performance_warnings = parameters->value_logical("Performance:warnings",true);
+
+  prolong_type  = parameters->value_string ("Field:prolong","linear");
+
+  restrict_type  = parameters->value_string ("Field:restrict","linear");
 
   //--------------------------------------------------
   // Stopping

@@ -22,7 +22,7 @@ Output::Output (int index, const Factory * factory) throw()
     schedule_(new Schedule),
     process_(0),        // initialization below
 #ifdef CONFIG_USE_CHARM
-    loop_(1),        // default process-per-stride
+    sync_(1),        // default process-per-stride
 #endif
     index_(index),
     cycle_(0),
@@ -76,7 +76,7 @@ void Output::pup (PUP::er &p)
   if (up) schedule_ = new Schedule;
   p | *schedule_;
   p | process_;
-  p | loop_;
+  p | sync_;
   p | index_;
   p | cycle_;
   p | count_;

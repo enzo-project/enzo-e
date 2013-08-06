@@ -26,7 +26,8 @@ public: // interface
   Parameters(Monitor * monitor = 0) throw();
 
   /// Create a new Parameters object and read parameters from the given file
-  Parameters(const char * file_name, Monitor * monitor = 0) throw();
+  Parameters(const char * file_name, 
+	     Monitor * monitor = 0) throw();
 
   /// Copy constructor
   Parameters(const Parameters & parameters) throw();
@@ -54,6 +55,7 @@ public: // interface
     //    p | parameter_map_;
     p | *parameter_tree_;
     p | *monitor_; 
+    p | lmonitor_;
 
   }
 #endif
@@ -203,6 +205,11 @@ public: // interface
   /// Return the type of the given parameter
   parameter_type list_type(int, std::string) throw();
 
+  /// Set whether to output 
+  void set_monitor (bool lmonitor) { lmonitor_ = lmonitor; };
+
+  void check();
+
   //--------------------------------------------------
 
 private: // functions
@@ -271,6 +278,8 @@ private: // attributes
   /// Monitor object for parameters
   Monitor * monitor_; 
 
+  /// Whether monitor should output accessed parameters when requested
+  bool lmonitor_;
 };
 
 //----------------------------------------------------------------------

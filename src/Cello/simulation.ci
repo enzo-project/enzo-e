@@ -28,11 +28,9 @@ module simulation {
     entry SimulationCharm
       (const char filename[n], int n);
 
-    entry void p_initialize ();
-    entry void s_initialize ();
-
-    entry void s_initial ();
-    entry void c_initial ();
+    entry void p_initialize_begin ();
+    entry void r_initialize_forest ();
+    entry void r_initialize_end ();
 
     entry void p_output ();
     entry void c_output ();
@@ -41,7 +39,7 @@ module simulation {
     entry void c_write ();
 
     entry void p_output_write (int n, char buffer[n]);
-    entry void p_refresh ();
 
+    entry void p_performance_reduce (CkReductionMsg * msg);
   };
 }

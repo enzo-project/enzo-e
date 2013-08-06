@@ -8,6 +8,16 @@
 #ifndef _MESH_HPP
 #define _MESH_HPP
 
+/// @enum     adapt_type
+/// @brief    Mesh adaptation type: refine, coarsen, or stay the same
+
+enum adapt_type {
+  adapt_unknown,
+  adapt_same,
+  adapt_refine,
+  adapt_coarsen
+};
+
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
@@ -30,6 +40,8 @@
 
 class Tree;
 
+#include "mesh_Index.hpp"
+
 #include "mesh_Block.hpp"
 #include "mesh_Hierarchy.hpp"
 #include "mesh_Factory.hpp"
@@ -47,6 +59,8 @@ class Tree;
 // Refinement
 #include "mesh_Refine.hpp"
 #include "mesh_RefineSlope.hpp"
+#include "mesh_RefineMass.hpp"
+#include "mesh_ItFace.hpp"
 
 #endif /* _MESH_HPP */
 

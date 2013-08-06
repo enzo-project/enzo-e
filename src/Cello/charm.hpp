@@ -2,10 +2,13 @@
 
 #include "charm++.h"
 
-#include "_error.hpp"
+#include <string>
 
-#include "charm_Index.hpp"
-#include "charm_Loop.hpp"
+#include "_error.hpp"
+#include "mesh_Index.hpp"
+
+// #include "charm_Index.hpp"
+#include "charm_Sync.hpp"
 #include "charm_ArrayMap.hpp"
 
 #endif /* CONFIG_USE_CHARM */

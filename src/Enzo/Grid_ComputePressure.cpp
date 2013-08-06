@@ -34,6 +34,7 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
  
   /* Error Check */
 
+  TRACE3 ("time: %20.14g %20.14g %20.14g\n",OldTime,time,Time());
   if (time < OldTime || time > Time()) {
     fprintf(stderr, "requested time is outside available range.\n");
     return ENZO_FAIL;

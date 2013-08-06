@@ -16,5 +16,6 @@ serial-%:
 
 .PHONY: clean
 clean:
-	scons -c
+	python scons.py -c
+
 

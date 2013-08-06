@@ -13,6 +13,7 @@
 //----------------------------------------------------------------------
 
 #include <stdio.h>
+#include <math.h>
 #ifdef CONFIG_USE_CHARM
 #  include "pup_stl.h"
 #endif
@@ -31,6 +32,9 @@ inline T MAX(const T &a, const T &b)
 
 inline int INDEX(int ix,int iy,int iz,int nx,int ny) 
 {  return ix+nx*(iy+ny*iz); }
+
+inline int INDEX2(int ix,int iy,int nx) 
+{  return ix+nx*iy; }
 
 template <class T>
 inline void SWAP(T &a, T &b) 
@@ -66,7 +70,8 @@ enum reduce_enum {
   reduce_min,     /// Minimal value along the axis
   reduce_max,     /// Maximal value along the axis
   reduce_avg,     /// Average value along the axis
-  reduce_sum      /// Sum of values along the axis
+  reduce_sum,     /// Sum of values along the axis
+  reduce_set      /// Value of last processed (used for mesh plotting)
 };
 typedef int reduce_type;
 

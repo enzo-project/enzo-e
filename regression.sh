@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/bin/tcsh -f
 
 set target = test
 
@@ -16,7 +16,7 @@ set S = `date +"%S"`
 echo "END  time = $t s"
 
 
-foreach type (charm mpi)
+foreach type (charm)
 
    set arch = $CELLO_ARCH
    set prec = $CELLO_PREC

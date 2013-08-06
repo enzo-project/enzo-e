@@ -81,7 +81,7 @@ public: // functions
   {
     process_stride_ = stride; 
 #ifdef CONFIG_USE_CHARM
-    loop_.stop() = process_stride_;
+    sync_.stop() = process_stride_;
 #endif
   };
 
@@ -111,8 +111,8 @@ public: // functions
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Accessor function for the CHARM Loop class
-  Loop * loop() { return & loop_; };
+  /// Accessor function for the CHARM Sync class
+  Sync * sync() { return & sync_; };
 
 #endif
 
@@ -209,8 +209,8 @@ protected: // attributes
 
 #ifdef CONFIG_USE_CHARM
 
-  /// Loop for ending output
-  Loop loop_;
+  /// Sync for ending output
+  Sync sync_;
 
 #endif
 

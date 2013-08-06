@@ -13,15 +13,24 @@
 
 //----------------------------------------------------------------------
 
-Hierarchy::Hierarchy ( const Factory * factory,
-		       int dimension, int refinement,
-		       int process_first, int process_last_plus
-		       ) throw ()
-  : factory_((Factory *)factory),
-    dimension_(dimension),
-    refinement_(refinement),
-    layout_(0),
-    group_process_(GroupProcess::create(process_first,process_last_plus))
+Hierarchy::Hierarchy 
+(
+#ifndef CONFIG_USE_CHARM
+ Simulation * simulation,
+#endif
+ const Factory * factory,
+ int dimension, int refinement,
+ int process_first, int process_last_plus
+ ) throw ()
+  :
+#ifndef CONFIG_USE_CHARM
+  simulation_(simulation),
+#endif
+  factory_((Factory *)factory),
+  dimension_(dimension),
+  refinement_(refinement),
+  group_process_(GroupProcess::create(process_first,process_last_plus)),
+  layout_(0)
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
@@ -44,7 +53,7 @@ Hierarchy::~Hierarchy() throw()
 
 # else
 
-  for (int i=0; i<block_.size(); i++) {
+  for (size_t i=0; i<block_.size(); i++) {
     delete block_[i];
     block_[i] = 0;
   }
@@ -71,7 +80,7 @@ void Hierarchy::pup (PUP::er &p)
   if (p.isUnpacking()) block_array_ = new CProxy_CommBlock;
   p | *block_array_;
   p | block_exists_;
-  p | block_loop_;
+  p | block_sync_;
   PUParray(p,root_size_,3);
   PUParray(p,lower_,3);
   PUParray(p,upper_,3);
@@ -110,6 +119,23 @@ void Hierarchy::set_root_size(int nx, int ny, int nz) throw ()
   root_size_[0] = nx;
   root_size_[1] = ny;
   root_size_[2] = nz;
+
+}
+
+//----------------------------------------------------------------------
+
+void Hierarchy::set_blocking(int nx, int ny, int nz) throw ()
+{
+  TRACE3("Hierarchy::set_blocking(%d %d %d)",nx,ny,nz);
+
+  blocking_[0] = nx;
+  blocking_[1] = ny;
+  blocking_[2] = nz;
+  if (!layout_) {
+    layout_ = new Layout (blocking_[0],blocking_[1],blocking_[2]);
+    layout_->set_process_range(0,group_process_->size());
+  }
+
 
 }
 
@@ -155,6 +181,17 @@ void Hierarchy::blocking (int * nbx, int * nby, int * nbz) const throw()
   if (nbz) (*nbz) = blocking_[2];
 }
 
+size_t Hierarchy::num_blocks(int * nbx, 
+			     int * nby,
+			     int * nbz) const throw()
+{ 
+  if (nbx) *nbx = blocking_[0];
+  if (nby) *nby = blocking_[1];
+  if (nbz) *nbz = blocking_[2];
+
+  return blocking_[0]*blocking_[1]*blocking_[2];
+}
+
 //----------------------------------------------------------------------
 
 void Hierarchy::deallocate_blocks() throw()
@@ -197,27 +234,19 @@ const Layout * Hierarchy::layout () const throw()
 void Hierarchy::create_forest
 (
  FieldDescr   * field_descr,
- int nx, int ny, int nz,
- int nbx, int nby, int nbz,
  bool allocate_blocks,
+ bool allocate_data,
  bool testing,
  int process_first, int process_last_plus) throw()
 {
-  TRACE3("Hierarchy::create_forest() block size  %d %d %d",nx,ny,nz);
-  TRACE3("Hierarchy::create_forest() blocking    %d %d %d",nbx,nby,nbz);
-  set_root_size(nx,ny,nz);
 
-  layout_ = new Layout (nbx,nby,nbz);
-  layout_->set_process_range(0,group_process_->size());
-  blocking_[0] = nbx;
-  blocking_[1] = nby;
-  blocking_[2] = nbz;
-
+  if (allocate_blocks) {
 #ifdef CONFIG_USE_CHARM
-  allocate_array_(allocate_blocks,testing);
+    allocate_array_(allocate_data,testing);
 #else  /* CONFIG_USE_CHARM */
-  allocate_array_(allocate_blocks,testing,field_descr);
+    allocate_array_(allocate_data,testing,field_descr);
 #endif  /* CONFIG_USE_CHARM */
+  }
 }
 
 //----------------------------------------------------------------------
@@ -246,7 +275,7 @@ CommBlock * Hierarchy::local_block(size_t i) const throw()
 
 void Hierarchy::allocate_array_
 (
- bool allocate_blocks,
+ bool allocate_data,
  bool testing,
  const FieldDescr * field_descr
 ) throw()
@@ -289,11 +318,6 @@ void Hierarchy::allocate_array_
       
   }
 
-  // Determine size of each block
-  double xb = (upper_[0] - lower_[0]) / nbx;
-  double yb = (upper_[1] - lower_[1]) / nby;
-  double zb = (upper_[2] - lower_[2]) / nbz;
-
   // CREATE AND INITIALIZE NEW DATA BLOCKS
 
   int num_field_blocks = 1;
@@ -307,15 +331,12 @@ void Hierarchy::allocate_array_
   (*block_array_) = factory_->create_block_array
     (nbx,nby,nbz,
      mbx,mby,mbz,
-     lower_[0],lower_[1],lower_[2],
-     xb,yb,zb,
      num_field_blocks,
-     allocate_blocks,
+     allocate_data,
      testing);
     
-  block_exists_ = allocate_blocks;
-  block_loop_.stop() = nbx*nby*nbz;
-
+  block_exists_ = allocate_data;
+  block_sync_.stop() = nbx*nby*nbz;
 
 #else /* CONFIG_USE_CHARM */
 
@@ -326,25 +347,41 @@ void Hierarchy::allocate_array_
     // Get index of block ib in the forest
 
     int ibx,iby,ibz;
+
     layout_->block_indices (ip,ib, &ibx, &iby, &ibz);
 
     // create a new data block
 
-    CommBlock * block = factory_->create_block 
-      (ibx,iby,ibz,
-       nbx,nby,nbz,
+    int level;
+
+    Index index (ibx,iby,ibz);
+
+    int count_adapt;
+    bool initial;
+    int narray = 0;
+    char * array = 0;
+    int op_array = op_array_copy;
+    int cycle = 0;
+    double time = 0.0;
+    double dt = 0.0;
+    int num_face_level = 0;
+    int * face_level = 0;
+
+    CommBlock * comm_block = factory_->create_block 
+      (
+       simulation_,
+       index,
        mbx,mby,mbz,
-       lower_[0],lower_[1],lower_[2],
-       xb,yb,zb,
        num_field_blocks,
+       count_adapt = 0,
+       initial = true,
+       cycle, time, dt,
+       narray, array, op_array,
+       num_face_level, face_level,
        testing);
 
     // Store the data block in the block array
-    block_[ib] = block;
-
-    // Allocate data on the block
-
-    block->allocate(field_descr);
+    block_[ib] = comm_block;
 
   }
 #endif /* CONFIG_USE_CHARM */

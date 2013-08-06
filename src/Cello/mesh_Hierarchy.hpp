@@ -10,6 +10,8 @@
 
 
 class Factory;
+class Simulation;
+
 #ifdef CONFIG_USE_CHARM
 class CProxy_CommBlock;
 #endif
@@ -28,7 +30,11 @@ public: // interface
   Hierarchy() throw() { }
   
   /// Initialize a Hierarchy object
-  Hierarchy ( const Factory * factory,
+  Hierarchy (
+#ifndef CONFIG_USE_CHARM
+	     Simulation * simulation,
+#endif
+	     const Factory * factory,
 	      int dimension, int refinement,
 	      int process_first, int process_last_plus
 	      ) throw ();
@@ -51,6 +57,9 @@ public: // interface
   
   /// Set root-level grid size
   void set_root_size(int nx, int ny, int nz) throw ();
+
+  /// Set root-level grid size
+  void set_blocking(int nbx, int nby, int nbz) throw ();
 
   //----------------------------------------------------------------------
 
@@ -79,15 +88,9 @@ public: // interface
   }
 
   /// Return the number of CommBlocks
-  size_t num_blocks(int * nbx = 0, 
+  size_t num_blocks(int * nbx, 
 		    int * nby = 0,
-		    int * nbz = 0) const throw()
-  { 
-    if (nbx) *nbx = blocking_[0];
-    if (nby) *nby = blocking_[1];
-    if (nbz) *nbz = blocking_[2];
-    return blocking_[0]*blocking_[1]*blocking_[2]; 
-  };
+		    int * nbz = 0) const throw();
 
   /// Deallocate local CommBlocks
   void deallocate_blocks() throw();
@@ -114,9 +117,8 @@ public: // interface
   }
 
   void create_forest (FieldDescr   * field_descr,
-		      int nx, int ny, int nz,
-		      int nbx, int nby, int nbz,
-		      bool allocate_blocks  = true,
+		      bool allocate_blocks,
+		      bool allocate_data,
 		      bool testing          = false,
 		      int process_first     = 0, 
 		      int process_last_plus = -1) throw();
@@ -142,12 +144,18 @@ protected: // functions
 
   /// Allocate array, and optionally allocate element CommBlocks
   void allocate_array_
-  (bool allocate_blocks = true,
+  (bool allocate_data = true,
    bool testing = false,
    const FieldDescr * field_descr = 0) throw ();
 
 protected: // attributes
 
+#ifndef CONFIG_USE_CHARM
+  /// Simulation object (MPI only)
+  Simulation * simulation_;
+#endif
+
+  /// 
   /// Factory for creating Simulations, Hierarchies, Patches and Blocks
   /// [abstract factory design pattern]
   Factory * factory_;
@@ -164,7 +172,7 @@ protected: // attributes
 # ifdef CONFIG_USE_CHARM
   CProxy_CommBlock * block_array_;
   bool               block_exists_;
-  Loop               block_loop_;
+  Sync               block_sync_;
 # else
   std::vector<CommBlock * > block_;
 # endif

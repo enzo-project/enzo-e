@@ -233,21 +233,21 @@ bool test_fields
 	field_descr->ghosts(0, &gx, &gy, &gz);
 	float * v1 = (float *) (block->field_values(0));
 	test_result = test_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
-	unit_assert(test_result); 
+	unit_assert(test_result);  // @@@@
 	result = result && test_result;
 
 	// field 1
 	field_descr->ghosts(1, &gx, &gy, &gz);
 	double * v2 = (double *) (block->field_values(1));
 	test_result = test_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,mx,my,mz,gx,gy,gz,ND3);
-	unit_assert(test_result); 
+	unit_assert(test_result);  // @@@@
 	result = result && test_result;
 
 	// field 2
 	field_descr->ghosts(2, &gx, &gy, &gz);
 	long double * v3 = (long double *) (block->field_values(2));
 	test_result = test_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,mx,my,mz,gx,gy,gz,ND3);
-	unit_assert(test_result); 
+	unit_assert(test_result);  // @@@@
 	result = result && test_result;
  
       }
@@ -328,6 +328,8 @@ PARALLEL_MAIN_BEGIN
 
 	  FieldFace face_lower (block_lower,field_descr);
 	  FieldFace face_upper (block_upper,field_descr);
+	  face_lower.set_ghost(true,true,true);
+	  face_upper.set_ghost(true,true,true);
 
 	  int n;
 	  char * array;
@@ -386,7 +388,7 @@ PARALLEL_MAIN_BEGIN
   }
 
   unit_func("load/copy/store");
-  unit_assert(test_fields(field_descr,field_block,nbx,nby,nbz,mx,my,mz));
+  unit_assert(test_fields(field_descr,field_block,nbx,nby,nbz,mx,my,mz)); // @@@
 
   //----------------------------------------------------------------------	
   // clean up

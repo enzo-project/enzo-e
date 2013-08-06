@@ -1,0 +1,21 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/adapt.incl"
+
+Mesh    {
+   root_size   = [256,256];
+   max_level   = 2; 
+}
+
+Initial {  max_level = 2; }
+
+Output {
+      de { name = ["adapt-L2-P1-de-%f.png", "time"]; };
+      dl { name = ["adapt-L2-P1-dl-%f.png", "time"]; };
+      ie { name = ["adapt-L2-P1-ie-%f.png", "time"]; };
+      te { name = ["adapt-L2-P1-te-%f.png", "time"]; };
+      vx { name = ["adapt-L2-P1-vx-%f.png", "time"]; };
+      vy { name = ["adapt-L2-P1-vy-%f.png", "time"]; };
+      mesh { name = ["adapt-L2-P1-mesh-%f.png", "time"]; }
+}

@@ -52,10 +52,6 @@ int EnzoBlock::PPMFlatteningParameter;
 int EnzoBlock::PPMDiffusionParameter;
 int EnzoBlock::PPMSteepeningParameter;
 
-// Parallel
-
-//  int ProcessorNumber;
-
 // Numerics
 
 int EnzoBlock::DualEnergyFormalism;
@@ -97,53 +93,14 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 			   FieldDescr * field_descr)
 
 {
-
-  BoundaryRank = 0;
-  ComovingCoordinates = 0;
-  UseMinimumPressureSupport = 0;
-  MinimumPressureSupportParameter = 0;
-  ComovingBoxSize = 0;
-  HubbleConstantNow = 0;
-  OmegaMatterNow = 0;
-  OmegaLambdaNow = 0;
-  MaxExpansionRate = 0;
-  MultiSpecies = 0;
-  GravityOn = 0;
-  PressureFree = 0;
-  Gamma = 0;
-  GravitationalConstant = 0;
-  ProblemType = 0;
-  PPMFlatteningParameter = 0;
-  PPMDiffusionParameter = 0;
-  PPMSteepeningParameter = 0;
-  //    ProcessorNumber = 0;
-  DualEnergyFormalism = 0;
-  DualEnergyFormalismEta1 = 0;
-  DualEnergyFormalismEta2 = 0;
-  pressure_floor = 0;
-  density_floor = 0;
-  number_density_floor = 0;
-  temperature_floor = 0;
-  CourantSafetyNumber = 0;
-  InitialRedshift = 0;
-  InitialTimeInCodeUnits = 0;
-
-  //    Time = 0;
-  //    OldTime = 0;
-
-  // PPM
-
-  TRACE0;
   for (int i=0; i<NUM_FIELDS; i++) {
     field_index_[i] = field_undefined;
   }
-  TRACE0;
 
   GridRank = 0;
   NumberOfBaryonFields = 0;
 
   int i,j,k;
-
 
   for (i=0; i<MAX_DIMENSION; i++) {
     DomainLeftEdge [i] = 0;
@@ -162,10 +119,6 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   for (j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
     FieldType[j] = 0;
   }
-
-  //--------------------------------------------------
-  // parameter: Mesh : root_rank
-  //--------------------------------------------------
 
   ComovingCoordinates = enzo_config->enzo_cosmology;
   Gamma               = enzo_config->enzo_gamma;
@@ -211,16 +164,10 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   DualEnergyFormalismEta1   = enzo_config->enzo_ppm_dual_energy_eta_1;
   DualEnergyFormalismEta2   = enzo_config->enzo_ppm_dual_energy_eta_2;
 
-  //--------------------------------------------------
-  // parameter: Field : ghosts
-  // parameter: Field : fields
-  //--------------------------------------------------
-
   int gx = enzo_config->field_ghosts[0];
   int gy = enzo_config->field_ghosts[1];
   int gz = enzo_config->field_ghosts[2];
 
-  TRACE3("gx,gy,gz=%d %d %d",gx,gy,gz);
   if (GridRank < 1) gx = 0;
   if (GridRank < 2) gy = 0;
   if (GridRank < 3) gz = 0;
@@ -242,127 +189,116 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 	    MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields );
   }
 
-  // [ Ideally this should not be a loop ]
+  int field_id;
 
-  for (int field_index=0; field_index<NumberOfBaryonFields; field_index++) {
+  field_id = field_descr->field_id("density");
+  field_index_[field_density]  = field_id;
+  FieldType[field_id] = Density;
+  field_id = field_descr->field_id("velocity_x");
+  field_index_[field_velocity_x] = field_id;
+  FieldType[field_id] = Velocity1;
+  field_id = field_descr->field_id("velocity_y");
+  field_index_[field_velocity_y] = field_id;
+  FieldType[field_id] = Velocity2;
+  field_id = field_descr->field_id("velocity_z");
+  field_index_[field_velocity_z] = field_id;
+  FieldType[field_id] = Velocity3;
+  field_id = field_descr->field_id("total_energy");
+  field_index_[field_total_energy] = field_id;
+  FieldType[field_id] = TotalEnergy;
+  field_id = field_descr->field_id("internal_energy");
+  field_index_[field_internal_energy]  = field_id;
+  FieldType[field_id] = InternalEnergy;
+  field_id = field_descr->field_id("electron_density");
+  field_index_[field_color]  = field_id;
+  FieldType[field_id] = ElectronDensity;
 
-    std::string name = enzo_config->field_fields[field_index];
-
-    if        (name == "density") {
-      field_index_[field_density]  = field_index;
-      FieldType[field_index] = Density;
-    } else if (name == "velocity_x") {
-      field_index_[field_velocity_x] = field_index;
-      FieldType[field_index] = Velocity1;
-    } else if (name == "velocity_y") {
-      field_index_[field_velocity_y] = field_index;
-      FieldType[field_index] = Velocity2;
-    } else if (name == "velocity_z") {
-      field_index_[field_velocity_z] = field_index;
-      FieldType[field_index] = Velocity3;
-    } else if (name == "total_energy") {
-      field_index_[field_total_energy] = field_index;
-      FieldType[field_index] = TotalEnergy;
-    } else if (name == "internal_energy") {
-      field_index_[field_internal_energy]  = field_index;
-      FieldType[field_index] = InternalEnergy;
-    } else if (name == "electron_density") {
-      field_index_[field_color]  = field_index;
-      FieldType[field_index] = ElectronDensity;
-    } else if (name == "velox") {
-      field_index_[field_velox]  = field_index;
-      FieldType[field_index] = Velocity1;
-    } else if (name == "veloy") {
-      field_index_[field_veloy] = field_index;
-      FieldType[field_index] = Velocity2;
-    } else if (name == "veloz") {
-      field_index_[field_veloz] = field_index;
-      FieldType[field_index] = Velocity3;
-    } else if (name == "bfieldx") {
-      field_index_[field_bfieldx] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "bfieldy") {
-      field_index_[field_bfieldy] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "bfieldz") {
-      field_index_[field_bfieldz] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "dens_rx") {
-      field_index_[field_dens_rx] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "velox_rx") {
-      field_index_[field_velox_rx] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "veloy_rx") {
-      field_index_[field_veloy_rx] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "veloz_rx") {
-      field_index_[field_veloz_rx] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "bfieldx_rx") {
-      field_index_[field_bfieldx_rx] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "bfieldy_rx") {
-      field_index_[field_bfieldy_rx] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "bfieldz_rx") {
-      field_index_[field_bfieldz_rx] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "dens_ry") {
-      field_index_[field_dens_ry] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "velox_ry") {
-      field_index_[field_velox_ry] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "veloy_ry") {
-      field_index_[field_veloy_ry] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "veloz_ry") {
-      field_index_[field_veloz_ry] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "bfieldx_ry") {
-      field_index_[field_bfieldx_ry] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "bfieldy_ry") {
-      field_index_[field_bfieldy_ry] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "bfieldz_ry") {
-      field_index_[field_bfieldz_ry] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "dens_rz") {
-      field_index_[field_dens_rz] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "velox_rz") {
-      field_index_[field_velox_rz] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "veloy_rz") {
-      field_index_[field_veloy_rz] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "veloz_rz") {
-      field_index_[field_veloz_rz] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "bfieldx_rz") {
-      field_index_[field_bfieldx_rz] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "bfieldy_rz") {
-      field_index_[field_bfieldy_rz] = field_index;
-      FieldType[field_index] = 0;
-    } else if (name == "bfieldz_rz") {
-      field_index_[field_bfieldz_rz] = field_index;
-      FieldType[field_index] = 0;
-    } else {
-      FieldType[field_index] = 0;
-      WARNING1 ("EnzoBlock::EnzoBlock", 
-		"Unknown field type for field %s",
-		name.c_str());
-    }
-  }
+  field_id = field_descr->field_id("velox");
+  field_index_[field_velox]  = field_id;
+  FieldType[field_id] = Velocity1;
+  field_id = field_descr->field_id("veloy");
+  field_index_[field_veloy] = field_id;
+  FieldType[field_id] = Velocity2;
+  field_id = field_descr->field_id("veloz");
+  field_index_[field_veloz] = field_id;
+  FieldType[field_id] = Velocity3;
+  field_id = field_descr->field_id("bfieldx");
+  field_index_[field_bfieldx] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("bfieldy");
+  field_index_[field_bfieldy] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("bfieldz");
+  field_index_[field_bfieldz] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("dens_rx");
+  field_index_[field_dens_rx] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("velox_rx");
+  field_index_[field_velox_rx] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("veloy_rx");
+  field_index_[field_veloy_rx] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("veloz_rx");
+  field_index_[field_veloz_rx] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("bfieldx_rx");
+  field_index_[field_bfieldx_rx] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("bfieldy_rx");
+  field_index_[field_bfieldy_rx] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("bfieldz_rx");
+  field_index_[field_bfieldz_rx] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("dens_ry");
+  field_index_[field_dens_ry] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("velox_ry");
+  field_index_[field_velox_ry] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("veloy_ry");
+  field_index_[field_veloy_ry] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("veloz_ry");
+  field_index_[field_veloz_ry] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("bfieldx_ry");
+  field_index_[field_bfieldx_ry] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("bfieldy_ry");
+  field_index_[field_bfieldy_ry] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("bfieldz_ry");
+  field_index_[field_bfieldz_ry] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("dens_rz");
+  field_index_[field_dens_rz] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("velox_rz");
+  field_index_[field_velox_rz] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("veloy_rz");
+  field_index_[field_veloy_rz] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("veloz_rz");
+  field_index_[field_veloz_rz] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("bfieldx_rz");
+  field_index_[field_bfieldx_rz] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("bfieldy_rz");
+  field_index_[field_bfieldy_rz] = field_id;
+  FieldType[field_id] = 0;
+  field_id = field_descr->field_id("bfieldz_rz");
+  field_index_[field_bfieldz_rz] = field_id;
+  FieldType[field_id] = 0;
 
   // BoundaryDimension[0] = nx + 2*ghost_depth[0];
   // BoundaryDimension[1] = ny + 2*ghost_depth[1];
   // BoundaryDimension[2] = nz + 2*ghost_depth[2];
 
-  
   DomainLeftEdge [0] = enzo_config->domain_lower[0];
   DomainLeftEdge [1] = enzo_config->domain_lower[1];
   DomainLeftEdge [2] = enzo_config->domain_lower[2];
@@ -372,6 +308,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   DomainRightEdge[2] = enzo_config->domain_upper[2];
 
   CourantSafetyNumber = enzo_config->field_courant;
+  TRACE1("Courant = %f",EnzoBlock::CourantSafetyNumber);
 
   double time  = enzo_config->initial_time;
 
@@ -383,29 +320,53 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
 EnzoBlock::EnzoBlock
 (
- int ix, int iy, int iz,
- int nbx, int nby, int nbz,
+#ifndef CONFIG_USE_CHARM
+ Simulation * simulation,
+#endif
+ Index index,
  int nx, int ny, int nz,
- double xm, double ym, double zm,
- double xp, double yp, double zp,
- int num_field_blocks) throw()
-  : CommBlock (ix,iy,iz,
-	       nbx,nby,nbz,nx,ny,nz,xm,ym,zm,xp,yp,zp,
-	       num_field_blocks),
-    Time_(0),
-    CycleNumber(0),
+ int num_field_blocks,
+ int count_adapt,
+ bool initial,
+ int cycle, double time, double dt,
+ int narray, char * array, int op_array,
+ int num_face_level, int * face_level,
+ bool testing
+) throw()
+  : CommBlock 
+    (
+#ifndef CONFIG_USE_CHARM
+     simulation,
+#endif
+     index,
+     nx,ny,nz,
+     num_field_blocks,
+     count_adapt,
+     initial,
+     cycle, time, dt,
+     narray,  array, op_array,
+     num_face_level, face_level,
+     testing),
+    Time_(time),
+    CycleNumber(cycle),
     OldTime(0),
-    dt(0),
+    dt(dt),
     SubgridFluxes(0)
 {
-  TRACE("EnzoBlock::EnzoBlock()");
+  int mx,my,mz;
+  index.array(&mx,&my,&mz);
   initialize_enzo_();
+  initialize();
 }
 
 //----------------------------------------------------------------------
 
 void EnzoBlock::initialize_enzo_()
 {
+  // set_cycle(simulation()->cycle());
+  // set_time (simulation()->time());
+  // set_dt   (simulation()->dt());
+
   for (int i=0; i<MAX_DIMENSION; i++) {
     AccelerationField[i] = 0;
     GridLeftEdge[i] = 0;
@@ -419,7 +380,6 @@ void EnzoBlock::initialize_enzo_()
     BaryonField[j] = 0;
     OldBaryonField[j] = 0;
   }
-
 }
 //----------------------------------------------------------------------
 
@@ -671,6 +631,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 void EnzoBlock::set_cycle (int cycle_start) throw ()
 {
   CommBlock::set_cycle (cycle_start);
+  TRACE2("%p EnzoBlock::set_cycle(%d)",this,cycle_start);
 
   CycleNumber = cycle_start;
 }
@@ -679,6 +640,7 @@ void EnzoBlock::set_cycle (int cycle_start) throw ()
 
 void EnzoBlock::set_time (double time) throw ()
 {
+  TRACE2("%p EnzoBlock::set_time(%20.15g)",this,time);
   CommBlock::set_time (time);
 
   //  Setting OldTime = Time_ leads to an error in Grid_ComputePressure.C:38
@@ -689,9 +651,14 @@ void EnzoBlock::set_time (double time) throw ()
   //
   // (OldTime > time; error is about single-precision epsilon)
 
-  ASSERT("EnzoBlock::set_time",
-	 "Must be called only once per timestep to maintain OldTime consistency",
-	 Time_ == 0 || Time_ < time);
+  if (! (Time_ == 0 || Time_ < time)) {
+    index_.print("ERROR");
+    ASSERT2("EnzoBlock::set_time()",
+	    "set_time() may be called more than once or dt = 0.0\n"
+	    "Time_ = %15.8f time = %15.8f",
+	    Time_,time,
+	    Time_ == 0 || Time_ < time);
+  }
 
   //  WARNING("EnzoBlock::set_time","TEMPORARY");
   OldTime   = Time_;
@@ -713,9 +680,7 @@ void EnzoBlock::set_dt (double dt_param) throw ()
 
 void EnzoBlock::initialize () throw()
 {
-  TRACE ("Enter EnzoBlock::initialize()\n");
-
-  CommBlock::initialize();
+  TRACE ("EnzoBlock::initialize()\n");
 
   double xm,ym,zm;
 
@@ -739,6 +704,8 @@ void EnzoBlock::initialize () throw()
   GridDimension[0]  = nx + 2*gx;
   GridDimension[1]  = ny + 2*gy;
   GridDimension[2]  = nz + 2*gz;
+
+  TRACE("Initializing GridStartIndex");
 
   GridStartIndex[0] = gx;
   GridStartIndex[1] = gy;

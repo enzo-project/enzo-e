@@ -158,6 +158,11 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
   /* 5) calculate minimum timestep */
 
 
+  TRACE3("enzo_comm_block->GridStartIndex = %d %d %d",
+	 enzo_comm_block->GridStartIndex[0],
+	 enzo_comm_block->GridStartIndex[1],
+	 enzo_comm_block->GridStartIndex[2]);
+
   FORTRAN_NAME(calc_dt)(&EnzoBlock::GridRank, enzo_comm_block->GridDimension, enzo_comm_block->GridDimension+1,
 			enzo_comm_block->GridDimension+2,
 			enzo_comm_block->GridStartIndex, 
@@ -176,8 +181,12 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
 			velocity_z_field, 
 			&dtBaryons);
 
+  TRACE1("density_field = %f",density_field[0]);
+  TRACE1 ("dtBaryons: %f",dtBaryons);
+  TRACE1("Courant = %f",EnzoBlock::CourantSafetyNumber);
   dtBaryons *= EnzoBlock::CourantSafetyNumber;
- 
+
+  
   double dt = dtBaryons;
   //  dt = MIN(dtBaryons, dtParticles);
   //  dt = MIN(dt, dtViscous);
@@ -186,6 +195,12 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
 
   delete [] pressure_field;
 
+  if (dt==0) {
+    comm_block->index().print("DT=0");
+    FieldBlock * field_block = comm_block->block()->field_block();
+    field_block->print(field_descr,comm_block->name().c_str(),true);
+  }
+  
   return dt;
 }
 

@@ -235,9 +235,8 @@ double Schedule::update_timestep ( double time, double dt) const throw()
     time_start = time_interval_[0];
     time_step  = time_interval_[1];
     time_stop  = time_interval_[2];
-    WARNING("Schedule::update_timestep","time_stop not accessed");
     time_dump = time_start + index_*time_step;
-    if (time < time_dump && time_dump < time_next) {
+    if (time < time_dump && time_dump < time_next && time < time_stop) {
       new_dt = time_dump - time;
     }
     break;

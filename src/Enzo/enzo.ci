@@ -51,7 +51,11 @@ module enzo {
   PUPable EnzoConfig;
   PUPable EnzoBoundary;
   PUPable EnzoFactory;
+  PUPable EnzoProlong;
+  PUPable EnzoProlongMC1;
+  PUPable EnzoRestrict;
   PUPable EnzoInitialImplosion2;
+  PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
@@ -70,19 +74,16 @@ module enzo {
   array[Index] EnzoBlock : CommBlock {
 
     entry EnzoBlock
-      (int ibx, int iby, int ibz,
-       int nbx, int nby, int nbz,
+      (Index index,
        int nx, int ny, int nz,	
-       double xpm, double ypm, double zpm,
-       double xb, double yb, double zb,
-       int num_field_blocks);
+       int num_field_blocks,
+       int count_adapt,
+       bool initial,
+       int cycle, double time, double dt,
+       int n, char arr[n], int op_array,
+       int num_face_level, int face_level[num_face_level],
+       bool testing);     
 
-//    entry EnzoBlock
-//      (int nbx, int nby, int nbz,
-//       int nx, int ny, int nz,	
-//       double xpm, double ypm, double zpm,
-//       double xb, double yb, double zb,
-//       int num_field_blocks);
   };
 
 };

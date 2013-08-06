@@ -20,7 +20,7 @@ libpath_fortran = ''
 libs_fortran    = []
 
 
-charm_path = '/home/ux452912/charm/620/pgi/net/charm'
+charm_path = '/home/ux452912/Charm/charm'
 
 papi_path   = '/home/ux452912'
 hdf5_path   = '/opt/hdf5/pgi'

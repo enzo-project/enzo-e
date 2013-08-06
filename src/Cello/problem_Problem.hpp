@@ -28,7 +28,9 @@ class Input;
 class Method;
 class Output;
 class Parameters;
+class Prolong;
 class Refine;
+class Restrict;
 class Simulation;
 class Stopping;
 class Timestep;
@@ -70,46 +72,38 @@ public: // interface
   Boundary * boundary() const throw()  { return boundary_; }
 
   /// Return the ith initialization object
-  Initial *  initial(int i = -1) const throw()
+  Initial *  initial(int i) const throw()
   {
-    if (i == -1) i = index_initial_;
-    return (i < (int)initial_list_.size()) ? initial_list_[i] : NULL; 
+    return (0 <= i && i < (int)initial_list_.size()) ? initial_list_[i] : NULL; 
   }
 
   /// Return the ith refine object
   Refine *  refine(int i = -1) const throw()
   {
     if (i == -1) i = index_refine_;
-    return (i < (int)refine_list_.size()) ? refine_list_[i] : NULL; 
+    TRACE2("refine(%d) = %p",i,
+	  (0 <= i && i < (int)refine_list_.size()) ? refine_list_[i] : NULL);
+    return (0 <= i && i < (int)refine_list_.size()) ? refine_list_[i] : NULL; 
   }
 
   /// Return the ith output object
   Output * output(int i = -1) const throw()
   { 
     if (i == -1) i = index_output_;
-    return (i < (int)output_list_.size()) ? output_list_[i] : NULL; 
+    return (0 <= i && i < (int)output_list_.size()) ? output_list_[i] : NULL; 
   }
 
   /// Return the ith method object
   Method * method(size_t i) const throw() 
-  { return (i < method_list_.size()) ? method_list_[i] : NULL; }
+  { return (0 <= i && i < method_list_.size()) ? method_list_[i] : NULL; }
 
+  /// Return the prolong object
+  Prolong * prolong() const throw()  { return prolong_; }
+
+  /// Return the restrict object
+  Restrict * restrict() const throw()  { return restrict_; }
 
 #ifdef CONFIG_USE_CHARM
-
-  /// reset initial index to 0 (not needed, but mirrors initial_output() )
-  void initial_reset() throw()
-  { index_initial_ = -1; }
-
-  /// Process the next initial object if any, else proceed with simulation
-  void initial_next(Simulation * simulation) throw();
-
-  /// reset refine index to 0 (not needed, but mirrors refine_output() )
-  void refine_reset() throw()
-  { index_refine_ = -1; }
-
-  /// Process the next refine object if any, else proceed with simulation
-  void refine_next(Simulation * simulation) throw();
 
   /// reset output index to 0
   void output_reset() throw()
@@ -139,10 +133,12 @@ public: // interface
   /// Initialize the initial conditions object
   void initialize_initial(Config * config,
 			  Parameters * parameters,
+			  const FieldDescr * field_descr,
 			  const GroupProcess * group_process) throw();
 
   /// Initialize the refine object
-  void initialize_refine(Config * config ) throw();
+  void initialize_refine(Config * config,
+			 const FieldDescr * field_descr) throw();
 
   /// Initialize the stopping object
   void initialize_stopping(Config * config ) throw();
@@ -152,12 +148,18 @@ public: // interface
 
   /// Initialize the output objects
   void initialize_output(Config * config,
-			 FieldDescr * field_descr,
+			 const FieldDescr * field_descr,
 			 const GroupProcess * group_process,
 			 const Factory * factory) throw();
 
   /// Initialize the method objects
   void initialize_method(Config * config) throw();
+
+  /// Initialize the prolong objects
+  void initialize_prolong(Config * config) throw();
+
+  /// Initialize the restrict objects
+  void initialize_restrict(Config * config) throw();
 
 
 protected: // functions
@@ -174,11 +176,15 @@ protected: // functions
   (std::string name, 
    Parameters * parameters,
    Config * config,
+   const FieldDescr *,
    const GroupProcess * = 0) throw ();
 
   /// Create named refine object
   virtual Refine * create_refine_ 
-  (std::string name, Config * config, int index) throw ();
+  (std::string name, 
+   Config * config, 
+   const FieldDescr * field_descr,
+   int index) throw ();
 
   /// Create named method object
   virtual Method *   create_method_
@@ -195,6 +201,14 @@ protected: // functions
 
   /// Create named timestep object
   virtual Timestep * create_timestep_ 
+  (std::string name, Config * config) throw ();
+
+  /// Create named prolongation object
+  virtual Prolong * create_prolong_ 
+  (std::string name, Config * config) throw ();
+
+  /// Create named restrictation object
+  virtual Restrict * create_restrict_ 
   (std::string name, Config * config) throw ();
 
 private: // attributes
@@ -232,8 +246,11 @@ private: // attributes
   /// Output objects
   std::vector<Output *> output_list_;
 
-  /// Index of currently active Initial object
-  size_t index_initial_;
+  /// Prolongation object
+  Prolong * prolong_;
+
+  /// Restriction object
+  Restrict * restrict_;
 
   /// Index of currently active Refine object
   size_t index_refine_;

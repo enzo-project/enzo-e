@@ -47,6 +47,7 @@ private: // functions
   (std::string name, 
    Parameters * parameters,
    Config * config,
+   const FieldDescr *,
    const GroupProcess * group_process) throw ();
 
   /// Create named method object
@@ -54,6 +55,14 @@ private: // functions
 
   /// Create named timestep object
   virtual Timestep * create_timestep_
+  (std::string name, Config * config) throw ();
+
+  /// Create named interpolation object
+  virtual Prolong * create_prolong_
+  (std::string name, Config * config) throw ();
+
+  /// Create named restriction object
+  virtual Restrict * create_restrict_
   (std::string name, Config * config) throw ();
 
 };

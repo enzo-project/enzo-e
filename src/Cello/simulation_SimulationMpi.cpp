@@ -55,21 +55,23 @@ void SimulationMpi::run() throw()
 
   DEBUG("SimulationMpi::run() Initial");
 
-  Initial * initial = problem->initial();
-
   ItBlock it_block(hierarchy_);
 
   CommBlock * block;
 
-  while ((block = ++it_block)) {
+  int index_initial = 0;
+  while (Initial * initial = problem->initial(index_initial++)) {
+	 
+    while ((block = ++it_block)) {
 
-    initial->enforce_block(block, field_descr_, hierarchy_);
+      initial->enforce_block(block, field_descr_, hierarchy_);
 
-    block->set_cycle(cycle_);
-    block->set_time(time_);
+      block->set_cycle(cycle_);
+      block->set_time(time_);
 
-    block->initialize();
+      block->initialize();
 
+    }
   }
 
   // delete parameters in favor of config 
@@ -82,16 +84,11 @@ void SimulationMpi::run() throw()
 
   DEBUG("SimulationMpi::run() refresh, Boundary ");
 
-  double lower[3];
-  hierarchy_->lower(&lower[0], &lower[1], &lower[2]);
-  double upper[3];
-  hierarchy_->upper(&upper[0], &upper[1], &upper[2]);
-
   while ((block = ++it_block)) {
 
     bool is_boundary [3][2];
 
-    block->is_on_boundary (lower,upper,is_boundary);
+    block->is_on_boundary (is_boundary);
 
     refresh_ghost_(block,is_boundary);
 
@@ -197,7 +194,7 @@ void SimulationMpi::run() throw()
 
       bool is_boundary [3][2];
 
-      block->is_on_boundary (lower,upper,is_boundary);
+      block->is_on_boundary (is_boundary);
 
       refresh_ghost_(block,is_boundary);
 
@@ -397,7 +394,9 @@ void SimulationMpi::refresh_ghost_
   if (py == 1) SWAP(aym,ayp);
   if (pz == 1) SWAP(azm,azp);
 
-  if (field_descr_->refresh_face(2)) {
+  int refresh_rank = config()->field_refresh_rank;
+  int face_rank = dimension_ - 1;
+  if (face_rank >= refresh_rank) {
     // TRACE3("p %d %d %d",px,py,pz);
     // TRACE6("a %d %d  %d %d  %d %d",axm,axp,aym,ayp,azm,azp);
     if (axm) comm_block->refresh_ghosts(field_descr_,hierarchy_,+px,0,0);

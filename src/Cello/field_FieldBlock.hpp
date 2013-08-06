@@ -42,25 +42,19 @@ public: // interface
 
   void pup(PUP::er &p) 
   {
-
     TRACEPUP;
 
-    TRACE1("this = %p",this);
     PUParray(p,size_,3);
 
     p | array_;
     p | offsets_;
     p | ghosts_allocated_;
-
-    TRACE3("size = %d %d %d\n",size_[0],size_[1],size_[2]);
-    TRACE1("array_.size() = %d",array_.size());
-    TRACE1("offsets_.size() = %d",offsets_.size());
   }
 
 #endif
 
   /// Return size of fields on the block, assuming centered
-  void size(int * nx = 0, int * ny = 0, int * nz = 0) const throw();
+  void size(int * nx, int * ny = 0, int * nz = 0) const throw();
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
@@ -153,12 +147,20 @@ public: // interface
   int field_size (const FieldDescr * field_descr, int id_field, 
 		  int *nx = 0, int *ny = 0, int *nz = 0) const throw();
 
+  /// Multiply FieldBlock 1 by FieldBlock 2
+  void mul (int id_1, int id_2, const FieldDescr * field_descr);
+  /// Divide FieldBlock 1 by FieldBlock 2
+  void div (int id_1, int id_2, const FieldDescr * field_descr);
+  /// Multiply FieldBlock by a constant
+  void scale (int id_1, double scale, const FieldDescr * field_descr);
+
+
   //----------------------------------------------------------------------
 
   /// Print basic field characteristics for debugging
   void print (const FieldDescr * field_descr,
 	      const char * message,
-	      double lower[3], double upper[3],
+	      // double lower[3], double upper[3],
 	      bool use_file = false) const throw();
 
 private: // functions
@@ -179,6 +181,30 @@ private: // functions
 			const char       * array_from,
 			std::vector<int> & offsets_from )
     throw (std::out_of_range);
+
+
+  template <class T>
+  void print_
+  (const T * field,
+   const char * field_name,
+   const char * message,
+   //   double lower [3],
+   FILE * fp,
+   int ixm,int iym,int izm,
+   int ixp,int iyp,int izp,
+   int nx, int ny, int nz,
+   int gx, int gy ,int gz,
+   //   double hx, double hy ,double hz,
+   int nxd,int nyd) const;
+
+  template<class T>
+  void mul_ (T * field_1, T * field_2, const FieldDescr * field_descr);
+
+  template<class T>
+  void div_ (T * field_1, T * field_2, const FieldDescr * field_descr);
+
+  template<class T>
+  void scale_ (T * field, double value, const FieldDescr * field_descr);
 
   //----------------------------------------------------------------------
 

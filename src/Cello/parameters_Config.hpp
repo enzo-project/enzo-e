@@ -66,15 +66,15 @@ public: // attributes
   int                        field_ghosts[3];
   int                        field_padding;
   int                        field_precision;
-  bool                       field_refresh_corners;
-  bool                       field_refresh_edges;
-  bool                       field_refresh_faces;
+  int                        field_refresh_rank;
+  std::string                field_refresh_type;
 
   int                        initial_cycle;
   std::string                initial_type;
   double                     initial_time;
   std::vector<std::string>   initial_name;
-  std::vector<std::string>   initial_value [MAX_FIELDS];
+  // std::vector<std::string>   initial_value [MAX_FIELDS];
+  int                        initial_max_level;
 
   int                        mesh_root_blocks[3];
   int                        mesh_root_rank;
@@ -82,10 +82,14 @@ public: // attributes
   int                        mesh_max_level;
   bool                       mesh_balance;
 
-  std::vector<std::string>   mesh_refine_type ;
-  std::vector<std::string>   mesh_refine_fields ;
-  std::vector<double>        mesh_refine_slope_max;
-  
+  std::vector<std::string>   mesh_adapt_type ;
+  std::vector<std::string>   mesh_adapt_fields ;
+  double                     mesh_adapt_slope_min_refine;
+  double                     mesh_adapt_slope_max_coarsen;
+  double                     mesh_adapt_mass_min;
+  double                     mesh_adapt_mass_min_overdensity;
+  double                     mesh_adapt_mass_level_exponent;
+  bool                       mesh_adapt_balance;
 
   std::vector<std::string>   method_sequence;
 
@@ -96,8 +100,16 @@ public: // attributes
   std::string                output_type           [MAX_FILE_GROUPS];
 
   std::string                output_image_axis           [MAX_FILE_GROUPS];
+  int                        output_image_block_size     [MAX_FILE_GROUPS];
   std::vector<double>        output_image_colormap_alpha [MAX_FILE_GROUPS];
   std::vector<double>        output_image_colormap       [MAX_FILE_GROUPS];
+  std::string                output_image_type           [MAX_FILE_GROUPS];
+  bool                       output_image_log            [MAX_FILE_GROUPS];
+  std::string                output_image_mesh_color     [MAX_FILE_GROUPS];
+  std::vector<int>           output_image_size           [MAX_FILE_GROUPS];
+  std::string                output_image_reduce_type    [MAX_FILE_GROUPS];
+  bool                       output_image_ghost          [MAX_FILE_GROUPS];
+  int                        output_image_face_rank      [MAX_FILE_GROUPS];
   std::vector<std::string>   output_dir            [MAX_FILE_GROUPS];
   int                        output_stride         [MAX_FILE_GROUPS];
   std::vector<std::string>   output_field_list     [MAX_FILE_GROUPS];
@@ -112,6 +124,10 @@ public: // attributes
   std::vector<std::string>   performance_papi_counters;
   std::string                performance_name;
   int                        performance_stride;
+  bool                       performance_warnings;
+
+  std::string                prolong_type;
+  std::string                restrict_type;
 
   int                        stopping_cycle;
   double                     stopping_time;

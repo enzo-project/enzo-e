@@ -17,15 +17,17 @@ Problem::Problem() throw()
     timestep_(0),
     num_method_(0),
     num_output_(0),
-    index_initial_(0),
     index_output_(0)
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
+  
 }
 
 //----------------------------------------------------------------------
 
 Problem::~Problem() throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   deallocate_();
 }
 
@@ -78,9 +80,10 @@ void Problem::pup (PUP::er &p)
     p | output_list_[i]; // PUP::able
   }
 
-  p | index_initial_;
   p | index_output_;
 
+  p | prolong_; // PUP::able
+  p | restrict_; // PUP::able
 }
 
 #endif
@@ -89,6 +92,7 @@ void Problem::pup (PUP::er &p)
 
 void Problem::initialize_boundary(Config * config) throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
 
   std::string type = config->boundary_type;
 
@@ -104,10 +108,12 @@ void Problem::initialize_boundary(Config * config) throw()
 
 void Problem::initialize_initial(Config * config,
 				 Parameters * parameters,
+				 const FieldDescr * field_descr,
 				 const GroupProcess * group_process) throw()
 {
+
   Initial * initial = create_initial_
-    (config->initial_type,parameters,config,group_process);
+    (config->initial_type,parameters,config,field_descr,group_process);
 
   initial_list_.push_back( initial );
 
@@ -117,21 +123,26 @@ void Problem::initialize_initial(Config * config,
 	  "Initial type %s not recognized",
 	  config->initial_type.c_str(),
 	  initial != NULL);
+
 }
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_refine(Config * config) throw()
+void Problem::initialize_refine(Config * config,
+				const FieldDescr * field_descr) throw()
 {
-  for (size_t i=0; i<config->mesh_refine_type.size(); i++) {
+  TRACE1 ("num_refine_ = %d",num_refine_);
+    TRACE1("mesh_adapt_type.size() = %d", config->mesh_adapt_type.size());
+  for (size_t i=0; i<config->mesh_adapt_type.size(); i++) {
 
-    std::string name = config->mesh_refine_type[i];
+    std::string name = config->mesh_adapt_type[i];
 
-    Refine * refine = create_refine_ (name,config,i);
+    Refine * refine = create_refine_ (name,config,field_descr,i);
 
     if (refine) {
       refine_list_.push_back( refine );
       ++ num_refine_;
+      TRACE1("num_refine = %d",num_refine_);
     } else {
       ERROR1("Problem::initialize_refine",
 	     "Unknown Refine %s",name.c_str());
@@ -143,6 +154,7 @@ void Problem::initialize_refine(Config * config) throw()
 
 void Problem::initialize_stopping(Config * config) throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   stopping_ = create_stopping_("default",config);
 
   ASSERT("Problem::initialize_stopping",
@@ -154,9 +166,7 @@ void Problem::initialize_stopping(Config * config) throw()
 
 void Problem::initialize_timestep(Config * config) throw()
 {
-  //--------------------------------------------------
-  // parameter: Timestep : type
-  //--------------------------------------------------
+  TRACE1 ("num_refine_ = %d",num_refine_);
 
   timestep_ = create_timestep_(config->timestep_type,config);
 
@@ -168,13 +178,38 @@ void Problem::initialize_timestep(Config * config) throw()
 
 //----------------------------------------------------------------------
 
+void Problem::initialize_prolong(Config * config) throw()
+{
+  prolong_ = create_prolong_(config->prolong_type,config);
+
+  ASSERT1("Problem::initialize_prolong",
+	  "Prolong type %s not recognized",
+	  config->prolong_type.c_str(),
+	  prolong_ != NULL);
+}
+
+//----------------------------------------------------------------------
+
+void Problem::initialize_restrict(Config * config) throw()
+{
+  restrict_ = create_restrict_(config->restrict_type,config);
+
+  ASSERT1("Problem::initialize_restrict",
+	  "Restrict type %s not recognized",
+	  config->restrict_type.c_str(),
+	  restrict_ != NULL);
+}
+
+//----------------------------------------------------------------------
+
 void Problem::initialize_output
 (Config * config,
- FieldDescr * field_descr,
+ const FieldDescr * field_descr,
  const GroupProcess * group_process,
  const Factory * factory) throw()
 {
 
+  TRACE1 ("num_refine_ = %d",num_refine_);
   for (int index=0; index < config->num_file_groups; index++) {
 
     std::string file_group = config->output_file_groups [index];
@@ -364,7 +399,6 @@ void Problem::initialize_output
     output_list_.push_back(output); 
     ++ num_output_;
 
-
   } // (for index)
 
 }
@@ -373,6 +407,7 @@ void Problem::initialize_output
 
 void Problem::initialize_method(Config * config) throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
 
   for (size_t i=0; i<config->method_sequence.size(); i++) {
 
@@ -385,7 +420,6 @@ void Problem::initialize_method(Config * config) throw()
       method_list_.push_back(method); 
       ++ num_method_;
 
-
     } else {
       ERROR1("Problem::initialize_method",
 	     "Unknown Method %s",name.c_str());
@@ -397,6 +431,7 @@ void Problem::initialize_method(Config * config) throw()
 
 void Problem::deallocate_() throw()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   delete boundary_;      boundary_ = 0;
   num_initial_ = 0;
   for (size_t i=0; i<initial_list_.size(); i++) {
@@ -427,6 +462,7 @@ Boundary * Problem::create_boundary_
  ) throw ()
 {
   // No default Boundary object
+  TRACE1 ("num_refine_ = %d",num_refine_);
   return NULL;
 }
 
@@ -437,9 +473,11 @@ Initial * Problem::create_initial_
  std::string  type,
  Parameters * parameters,
  Config * config,
+ const FieldDescr * field_descr,
  const GroupProcess * group_process
  ) throw ()
 { 
+  TRACE1 ("num_refine_ = %d",num_refine_);
   //--------------------------------------------------
   // parameter: Initial : cycle
   // parameter: Initial : time
@@ -448,7 +486,10 @@ Initial * Problem::create_initial_
   if (type == "file" || type == "restart") {
     return new InitialFile   (parameters,group_process,config->initial_cycle,config->initial_time);;
   } else if (type == "default") {
-    return new InitialDefault(parameters,config->initial_cycle,config->initial_time);
+    bool is_periodic = (config->boundary_type == "periodic");
+
+    return new InitialDefault(parameters,field_descr,is_periodic,
+			      config->initial_cycle,config->initial_time);
   }
   return NULL;
 }
@@ -459,16 +500,33 @@ Refine * Problem::create_refine_
 (
  std::string  type,
  Config * config,
+ const FieldDescr * field_descr,
  int index
  ) throw ()
 { 
-  //--------------------------------------------------
-  // parameter: Refine : cycle
-  // parameter: Refine : time
-  //--------------------------------------------------
+  TRACE1 ("num_refine_ = %d",num_refine_);
+  TRACE3("mesh_root_size = %d %d %d",
+	 config->mesh_root_size[0],
+	 config->mesh_root_size[1],
+	 config->mesh_root_size[2]);
 
   if (type == "slope") {
-    return new RefineSlope (config->mesh_refine_slope_max[index]);
+    return new RefineSlope (field_descr,
+			    config->mesh_adapt_slope_min_refine,
+			    config->mesh_adapt_slope_max_coarsen,
+			    config->mesh_adapt_fields);
+  } else if (type == "mass") {
+    double root_cell_volume = 1.0;
+    for (int i=0; i<config->mesh_root_rank; i++) {
+      root_cell_volume *= 
+	(config->domain_upper[i] - config->domain_lower[i])
+	/ (config->mesh_root_size[i]);
+    }
+
+    return new RefineMass (config->mesh_adapt_mass_min,
+			   config->mesh_adapt_mass_level_exponent,
+			   config->mesh_adapt_mass_min_overdensity,
+			   root_cell_volume);
   }
   return NULL;
 }
@@ -484,6 +542,7 @@ Stopping * Problem::create_stopping_
 /// @param stop_cycle  Stopping cycle
 /// @param stop_time  Stopping time
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   return new Stopping(config->stopping_cycle,
 		      config->stopping_time);
 }
@@ -496,6 +555,7 @@ Timestep * Problem::create_timestep_
  Config * config
  ) throw ()
 { 
+  TRACE1 ("num_refine_ = %d",num_refine_);
   // No default timestep
   return NULL;
 }
@@ -504,6 +564,7 @@ Timestep * Problem::create_timestep_
 
 Method * Problem::create_method_ ( std::string  name ) throw ()
 {
+  TRACE1 ("num_refine_ = %d",num_refine_);
   TRACE1("Problem::create_method %s",name.c_str());
   // No default method
   return NULL;
@@ -524,6 +585,7 @@ Output * Problem::create_output_
 /// @param group_process Image output needs group process size
 { 
 
+  TRACE1 ("num_refine_ = %d",num_refine_);
   Output * output = NULL;
 
   if (name == "image") {
@@ -533,14 +595,38 @@ Output * Problem::create_output_
     // parameter: Mesh : root_blocks
     //--------------------------------------------------
 
-    int nx,ny;
+    int nx = config->mesh_root_size[0];
+    int ny = config->mesh_root_size[1];
+    int nz = config->mesh_root_size[2];
 
-    nx = config->mesh_root_size[0];
-    ny = config->mesh_root_size[1];
+    int nbx = config->mesh_root_blocks[0];
+    int nby = config->mesh_root_blocks[1];
+    int nbz = config->mesh_root_blocks[2];
 
     // NOTE: assumes cube for non-z axis images
 
-    output = new OutputImage (index,factory,group_process->size(),nx,ny);
+    std::string image_type       = config->output_image_type[index];
+    int         image_size_x     = config->output_image_size[index][0];
+    int         image_size_y     = config->output_image_size[index][1];
+    int         image_block_size = config->output_image_block_size[index];
+    bool        image_ghost      = config->output_image_ghost[index];
+    bool        image_log        = config->output_image_log[index];
+    int         image_face_rank  = config->output_image_face_rank[index];
+    int         max_level        = config->mesh_max_level;
+    std::string image_reduce_type = config->output_image_reduce_type[index];
+    std::string image_mesh_color  = config->output_image_mesh_color[index];
+    output = new OutputImage (index,factory,group_process->size(),
+			      nx,ny,nz, 
+			      nbx,nby,nbz, 
+			      max_level,
+			      image_type,
+			      image_size_x,image_size_y,
+			      image_reduce_type,
+			      image_mesh_color,
+			      image_block_size,
+			      image_face_rank,
+			      image_log,
+			      image_ghost);
 
   } else if (name == "data") {
 
@@ -556,3 +642,48 @@ Output * Problem::create_output_
 
 }
 
+//----------------------------------------------------------------------
+
+Prolong * Problem::create_prolong_ ( std::string  name ,
+				     Config * config) throw ()
+{
+  Prolong * prolong = 0;
+
+  if (name == "linear") {
+
+    prolong = new ProlongLinear;
+
+  } else {
+    
+    ERROR1("Problem::create_prolong_",
+	  "Unrecognized Field:prolong parameter %s",name.c_str());
+
+  }
+
+  return prolong;
+  
+}
+
+//----------------------------------------------------------------------
+
+Restrict * Problem::create_restrict_ ( std::string  name ,
+				     Config * config) throw ()
+{
+  Restrict * restrict = 0;
+
+  if (name == "linear") {
+
+    restrict = new RestrictLinear;
+
+  } else {
+    
+    ERROR1("Problem::create_restrict_",
+	  "Unrecognized Field:restrict parameter %s",name.c_str());
+
+  }
+
+  return restrict;
+  
+}
+
+//----------------------------------------------------------------------

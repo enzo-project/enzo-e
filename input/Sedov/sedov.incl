@@ -1,17 +1,17 @@
-# Problem: 3D array of Sedov blast problems for weak scaling tests
+# Problem: 2D array of Sedov blast problems for weak scaling tests
 # Author:  James Bordner (jobordner@ucsd.edu)
 
    Domain { 
-      lower = [0.0, 0.0, 0.0];
-      upper = [1.0, 1.0, 1.0];
+      lower = [0.0, 0.0];
+      upper = [1.0, 1.0];
    } 
 
    # The computational mesh is a single uniform grid
 
    Mesh { 
-      root_rank = 3;
-      root_blocks = [ 1, 1, 1];
-      root_size   = [64,64,64];
+      root_rank = 2;
+      root_blocks = [ 2, 2];
+      root_size   = [64,64];
    }
 
    # Field parameters include those concerning fields as a group, as
@@ -19,13 +19,12 @@
    
    Field {
 
-      ghosts = 3;
+      ghosts = 4;
 
       fields = [
 	"density",	
 	"velocity_x",
 	"velocity_y",
-	"velocity_z",
 	"total_energy",
 	"internal_energy"
       ] ;
@@ -62,26 +61,42 @@
      }
    }
 
-   Initial { type = "sedov_array_3d"; }
+   Initial { type = "sedov_array_2d"; }
 
    Boundary { type = "periodic" }
 
-   Stopping {        cycle = 100;   } 
-   Testing {   cycle_final = 100; }
+   Stopping {        cycle = 5;   } 
+   Testing {   cycle_final = 5; }
 
    Testing {  time_final  = 0.0;  }
 
    Output { 
 
-      file_groups = ["dx","dy","dz","data"];
+#      file_groups = ["dx","dy","dz","data","mesh"];
+#      file_groups = ["de","te","mesh","data"];
+ file_groups = ["de","te","mesh"];
 
-      dx {
+    mesh {
+#        image_face_rank = 0;
+         name = ["sedov-mesh-%03d.png", "cycle"]; 
+	type     = "image";
+	image_type  = "mesh";
+	image_reduce_type = "max";
+	image_block_size  = 5;
+	image_size = [513,513];
+	schedule = ["cycle","interval", 1];
+        colormap = [1.00, 1.00, 1.00,  
+                    0.00, 1.00, 0.00, 
+                    1.00, 0.00, 0.00, 
+                    0.00, 0.00, 1.00];
+      };
+
+      de {
     
 	type     = "image";
-        axis     = "x";
-        name     = ["dx%03d.png","cycle"];
+        name     = ["sedov-de-%03d.png","cycle"];
         field_list = ["density"];
-	schedule = ["cycle","interval", 10];
+	schedule = ["cycle","interval", 1];
         colormap = [0.00, 0.00, 0.50,  
                     0.00, 1.00, 0.00, 
                     1.00, 1.00, 0.00, 
@@ -89,12 +104,12 @@
         
       };
 
-      dy {
-        field_list = ["density"];
+      te {
+    
 	type     = "image";
-        axis     = "y";
-        name     = ["dy%03d.png","cycle"];
-	schedule = ["cycle","interval", 10];
+        name     = ["sedov-te-%03d.png","cycle"];
+        field_list = ["total_energy"];
+	schedule = ["cycle","interval", 1];
         colormap = [0.00, 0.00, 0.50,  
                     0.00, 1.00, 0.00, 
                     1.00, 1.00, 0.00, 
@@ -102,23 +117,10 @@
         
       };
 
-      dz {
-        field_list = ["density"];
-	type     = "image";
-        axis     = "z";
-        name     = ["dz%03d.png","cycle"];
-	schedule = ["cycle","interval", 10];
-        colormap = [0.00, 0.00, 0.50,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00];
-        
-      };
       data {
-#        field_list = ["density"];
-        name = ["d-%03d-%03d.h5","cycle","proc"];
+        name = ["sedov-de-%03d-%03d.h5","cycle","proc"];
 	type     = "data";
-	schedule = ["cycle","interval", 10];
+	schedule = ["cycle","interval", 1];
       };
 
    }

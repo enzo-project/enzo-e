@@ -64,10 +64,10 @@
 //----------------------------------------------------------------------
 /// @def      INCOMPLETE
 /// @brief    Placeholder for code that is incomplete
-#define INCOMPLETE(F)						\
-  {								\
-    m2_(stdout,"INCOMPLETE",__FILE__,__LINE__,F,"");	\
-  }
+#define INCOMPLETE(M)					\
+  { m2_(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M);  }
+#define INCOMPLETE1(M,A1)					\
+  { m2_(stdout,"INCOMPLETE",__FILE__,__LINE__,"",M,A1);  }
 
 //----------------------------------------------------------------------
 /// @def      TRACE
@@ -94,12 +94,13 @@
   { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7); }
 #   define TRACE8(M,A1,A2,A3,A4,A5,A6,A7,A8)				\
   { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
+#   define TRACE9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
+  { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8,A9); }
 
 #ifdef CONFIG_USE_CHARM
 #   define TRACEPUP							\
   { m2_(stdout,"TRACEPUP",__FILE__,__LINE__,"",				\
 	p.isPacking()?"isPacking":(p.isUnpacking()?"isUnpacking":"isSizing")); }
-
 #endif
 
 #else /* CELLO_TRACE */
@@ -124,14 +125,24 @@
   /* This space intentionally left blank */
 #   define TRACE8(M,A1,A2,A3,A4,A5,A6,A7,A8)	\
   /* This space intentionally left blank */
+#   define TRACE9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
+  /* This space intentionally left blank */
 
 #ifdef CONFIG_USE_CHARM
 #   define TRACEPUP							\
   /* This space intentionally left blank */
-
 #endif
 
 #endif /* CELLO_TRACE */
+
+#ifdef CELLO_TRACE_CHARM
+#   define TRACE_CHARM(M)				\
+  { m2_(stdout,"TRACE_CHARM",__FILE__,__LINE__,"",M); }
+#else
+#   define TRACE_CHARM(M)				\
+  /* This space intentionally left blank */
+#endif
+
 
 //----------------------------------------------------------------------
 /// @def      DEBUG
@@ -191,6 +202,9 @@
 //----------------------------------------------------------------------
 /// @def      ASSERT
 /// @brief    Equivalent to assert()
+
+// #ifdef CELLO_DEBUG
+
 #define ASSERT(F,M,A)							\
   {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M); t_(); } }
 #define ASSERT1(F,M,A1,A)						\
@@ -201,6 +215,21 @@
   {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3); t_(); } }
 #define ASSERT4(F,M,A1,A2,A3,A4,A)					\
   {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4); t_(); } }
+#define ASSERT5(F,M,A1,A2,A3,A4,A5,A)					\
+  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5); t_(); } }
+#define ASSERT6(F,M,A1,A2,A3,A4,A5,A6,A)				\
+  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6); t_(); } }
+
+// #else  /* CELLO_DEBUG */
+
+// #define ASSERT(F,M,A) /* NULL */
+// #define ASSERT1(F,M,A1,A)  /* NULL */
+// #define ASSERT2(F,M,A1,A2,A) /* NULL */
+// #define ASSERT3(F,M,A1,A2,A3,A) /* NULL */
+// #define ASSERT4(F,M,A1,A2,A3,A4,A) /* NULL */
+// #define ASSERT5(F,M,A1,A2,A3,A4,A5,A) /* NULL */
+
+// #endif /* CELLO_DEBUG */
 
 extern void m2_
 (FILE * fp,

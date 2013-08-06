@@ -74,6 +74,10 @@ public: // interface
   // ACCESSOR FUNCTIONS
   //----------------------------------------------------------------------
 
+  /// Return the dimensionality of the simulation
+  int dimension() const throw()
+  { return dimension_; }
+
   /// Return the Problem container object
   Problem *  problem() const throw()
   { return problem_; }
@@ -95,8 +99,8 @@ public: // interface
   { return field_descr_; }
 
   /// Return the performance object associated with each cycle
-  const Performance * performance() const throw()
-  { return &performance_; }
+  Performance * performance() throw()
+  { return performance_; }
 
   /// Return the group process object
   const GroupProcess * group_process() const throw()
@@ -123,10 +127,10 @@ public: // interface
   { return stop_; };
 
   /// Output Simulation information
-  void monitor_output();
+  virtual void monitor_output();
 
   /// Output Performance information to stdout (root process data only)
-  void performance_output();
+  virtual void performance_output();
 
   /// Write performance information to disk (all process data)
   void performance_write();
@@ -149,6 +153,8 @@ public: // virtual functions
   /// Return a Hierarchy factory object
   virtual const Factory * factory () const throw();
   
+  int & perf_counter(int perf_region) {return perf_count_[perf_region]; }
+
 protected: // functions
 
   /// Initialize the Config object
@@ -168,6 +174,9 @@ protected: // functions
 
   /// Initialize the hierarchy object
   void initialize_hierarchy_ () throw();
+
+  /// Initialize the forest of octrees
+  void initialize_forest_ () throw();
 
   /// Initialize the data object
   void initialize_data_descr_ () throw();
@@ -227,17 +236,16 @@ protected: // attributes
   Timer timer_;
 
   /// Simulation Performance object
-  Performance performance_;
-
-  /// Performance counter ids
-  int id_simulation_;
-  int id_cycle_;
+  Performance * performance_;
 
   /// Performance file name format (requires %d for process rank)
   std::string performance_name_;
 
   /// Processor stride for writing strict processor subset of performance data
   int performance_stride_;
+
+  /// Counter for knowing when to call Performance start() and stop()
+  int perf_count_[perf_last];
 
   /// Monitor object
   Monitor * monitor_;

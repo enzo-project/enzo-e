@@ -9,7 +9,9 @@
 
 //======================================================================
 
-ArrayMap::ArrayMap(int nx, int ny, int nz) {
+ArrayMap::ArrayMap(int nx, int ny, int nz) 
+  :  CBase_ArrayMap()
+{
   nx_ = nx;
   ny_ = ny;
   nz_ = nz;
@@ -22,13 +24,25 @@ ArrayMap::~ArrayMap() {
 
 int ArrayMap::procNum(int, const CkArrayIndex &idx) {
 
-  const int ix = idx.data()[0];
-  const int iy = idx.data()[1];
-  const int iz = idx.data()[2];
+  int v3[3];
 
-  TRACE3("ArrayMap  index = %d %d %d",ix,iy,iz);
-  TRACE3("ArrayMap  array = %d %d %d",nx_,ny_,nz_);
+  v3[0] = idx.data()[0];
+  v3[1] = idx.data()[1];
+  v3[2] = idx.data()[2];
+
+  Index in;
+  int ix,iy,iz;
+  in.set_values(v3);
+  in.array    (&ix,&iy,&iz);
+
+  TRACE3("ArrayMap  newindex = %d %d %d",ix,iy,iz);
+
+  
+  TRACE3("ArrayMap  size  = %d %d %d",nx_,ny_,nz_);
+
   int index = (ix + nx_*(iy + ny_*iz)) % CkNumPes();
+  TRACE1("ArrayMap  proc = %d",index);
+
   return index;
 }
 

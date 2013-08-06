@@ -24,9 +24,7 @@
    
    Field {
 
-#      refresh_faces   = true;
-#      refresh_edges   = true;
-#      refresh_corners = true;
+      refresh { rank = 1;  }; # refresh faces and edges not corners
 
       ghosts = 3;
 
@@ -129,7 +127,10 @@
 
    Testing
    {
-      time_final  = 0.1129506208626;  # 40 cycles
+# OLD TIME
+#      time_final  = 0.1129506208626;  # 40 cycles
+# TIME FOR UPDATED InitialDefault
+      time_final  = 0.115152062016876;
    }
 
    Output { 

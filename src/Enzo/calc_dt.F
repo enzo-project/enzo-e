@@ -133,8 +133,11 @@ c 	Here is Godunov's formula (to make sure ppm works with 0.8)
 c
                dt = min(dt, real(aye/((cs + abs(u(i,j,1)))/dx+
      &                       (cs + abs(v(i,j,1)))/dy) ))
-C               print*, i,j,p(i,j,1),d(i,j,1),
-C     &              u(i,j,1),v(i,j,1),dx,dy
+               if (i.eq.1.and.j.eq.1) then
+                  print*, 'calc_dt',i,j,u(i,j,1),v(i,j,1)
+                  print*, 'calc_dt',i,j,dx,dy
+                  print*, 'calc_dt',i,j,aye,cs,dt
+               endif
 c
 c       The way it was originally in enzo
 c

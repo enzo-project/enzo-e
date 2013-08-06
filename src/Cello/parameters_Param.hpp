@@ -128,7 +128,11 @@ public: // interface
   //  bool is_logical_expr() { return type_ == parameter_logical_expr; };
 
   /// Return whether the parameter has the given type
-  bool is_type (parameter_enum type) { return type_ == type; };
+  bool is_type (parameter_enum type) { return type_ == type; }
+
+  bool accessed () const { return value_accessed_; }
+
+  void set_accessed () { value_accessed_ = true; }
 
   /// Get an integer parameter
   int get_integer () 

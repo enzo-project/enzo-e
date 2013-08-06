@@ -11,6 +11,13 @@
 class Factory;
 class FieldDescr;
 
+
+enum mesh_color_type {
+  mesh_color_unknown,
+  mesh_color_level,
+  mesh_color_process
+};
+
 class OutputImage : public Output {
 
   /// @class    OutputImage
@@ -26,7 +33,17 @@ public: // functions
   OutputImage(int index,
 	      const Factory * factory,
 	      int process_count,
-	      int nrows, int ncols) throw();
+	      int nx0, int ny0, int nz0,
+	      int nxb, int nyb, int nzb,
+	      int max_level,
+	      std::string image_type,
+	      int image_size_x, int image_size_y,
+	      std::string image_reduce_type,
+	      std::string image_mesh_color,
+	      int         image_block_size,
+	      int face_rank,
+	      bool image_log,
+	      bool ghost ) throw();
 
   /// OutputImage destructor: free allocated image data
   virtual ~OutputImage() throw();
@@ -104,13 +121,21 @@ private: // functions
   /// Close the image data
   void image_close_ () throw();
 
-   /// Generate a PNG image of an array
-   template<class T>
-   void image_reduce_
-   ( T * array,
-     int nxd, int nyd, int nzd,   // Array dimensions
-     int nx,  int ny,  int nz,   // Array dimensions
-     int nx0, int ny0, int nz0) throw();
+   /// Generate a PNG image of array data
+  void reduce_point_ ( double * data, double value) throw();
+
+  void extents_img_ (const CommBlock * comm_block,
+		     int *ixm, int *ixp,
+		     int *iym, int *iyp,
+		     int *izm, int *izp ) const;
+
+  void reduce_line_(int ixm, int ixp, int iym, int iyp, double value);
+  void reduce_line_x_(int ixm, int ixp, int iy, double value);
+  void reduce_line_y_(int ix, int iym, int iyp, double value);
+  void reduce_box_(int ixm, int ixp, int iym, int iyp, double value);
+  void reduce_cube_(int ixm, int ixp, int iym, int iyp, double value);
+  
+
 
 private: // attributes
 
@@ -120,25 +145,35 @@ private: // attributes
   std::vector<double> map_b_;
   std::vector<double> map_a_;
 
-  /// Current image
+  /// Current image data
   double * data_;
 
   /// Reduction operation
   reduce_type op_reduce_;
 
+  /// Color
+  int mesh_color_;
+
   /// Axis along which to reduce
   axis_type axis_;
 
-  /// Current image columns
-  int nrows_;
-
-  /// Current image rows
-  int ncols_;
+  /// Current image size (depending on axis_)
+  int nxi_,nyi_,nzi_;
 
   /// Current pngwriter
   pngwriter * png_;
 
+  /// Image type: data or mesh
+  std::string image_type_;
 
+  /// Minimal rank of faces to include face level indicators 
+  int face_rank_;
+
+  /// Whether to plot the log of the field
+  int image_log_;
+
+  /// Whether to include ghost zones
+  bool ghost_;
 };
 
 #endif /* IO_OUTPUT_IMAGE_HPP */

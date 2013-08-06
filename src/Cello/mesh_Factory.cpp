@@ -9,10 +9,20 @@
 
 //----------------------------------------------------------------------
 
-Hierarchy * Factory::create_hierarchy (int dimension, int refinement,
-				       int process_first, int process_last_plus) const throw ()
+Hierarchy * Factory::create_hierarchy 
+(
+#ifndef CONFIG_USE_CHARM
+ Simulation * simulation,
+#endif
+ int dimension, int refinement,
+ int process_first, int process_last_plus) const throw ()
 {
-  return new Hierarchy (this,dimension,refinement,process_first, process_last_plus); 
+  return new Hierarchy 
+    (
+#ifndef CONFIG_USE_CHARM
+     simulation,
+#endif
+     this,dimension,refinement,process_first, process_last_plus); 
 }
 
 //----------------------------------------------------------------------
@@ -53,13 +63,13 @@ CProxy_CommBlock Factory::create_block_array
 (
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
- double xm, double ym, double zm,
- double xb, double yb, double zb,
  int num_field_blocks,
  bool allocate,
  bool testing
  ) const throw()
 {
+  TRACE8("Factory::create_block_array(na(%d %d %d) n(%d %d %d num_field_blocks %d  allocate %d",
+	 nbx,nby,nbz,nx,ny,nz,num_field_blocks,allocate);
 
   CProxy_CommBlock proxy_block;
 
@@ -70,21 +80,30 @@ CProxy_CommBlock Factory::create_block_array
     opts.setMap(array_map);
     proxy_block = CProxy_CommBlock::ckNew(opts);
 
+    int count_adapt;
+    bool initial;
+
+    int    cycle = 0;
+    double time  = 0.0;
+    double dt    = 0.0;
+    int num_face_level = 0;
+    int * face_level = 0;
+
     for (int ix=0; ix<nbx; ix++) {
       for (int iy=0; iy<nby; iy++) {
 	for (int iz=0; iz<nbz; iz++) {
 
 	  Index index(ix,iy,iz);
-	  index.set_level(0);
-	  index.clear();
 
 	  proxy_block[index].insert 
-	    (ix,iy,iz,
-	     nbx,nby,nbz,
+	    (index,
 	     nx,ny,nz,
-	     xm,ym,zm, 
-	     xb,yb,zb, 
 	     num_field_blocks,
+	     count_adapt = 0,
+	     initial = true,
+	     cycle,time,dt,
+	     0,NULL,op_array_copy,
+	     num_face_level, face_level,
 	     testing);
 
 	}
@@ -99,7 +118,7 @@ CProxy_CommBlock Factory::create_block_array
 
   }
 
-  TRACE1("Factor::create_block_array = %p",&proxy_block);
+  TRACE1("Factory::create_block_array = %p",&proxy_block);
   return proxy_block;
 }
 
@@ -108,48 +127,61 @@ CProxy_CommBlock Factory::create_block_array
 //----------------------------------------------------------------------
 CommBlock * Factory::create_block
 (
- int ibx, int iby, int ibz,
- int nbx, int nby, int nbz,
+#ifdef CONFIG_USE_CHARM
+ CProxy_CommBlock * block_array,
+#else /* CONFIG_USE_CHARM */
+ Simulation * simulation,
+#endif /* CONFIG_USE_CHARM */
+ Index index,
  int nx, int ny, int nz,
- double xm, double ym, double zm,
- double xb, double yb, double zb,
  int num_field_blocks,
+ int count_adapt,
+ bool initial,
+ int cycle, double time, double dt,
+ int narray, char * array, int op_array,
+ int num_face_level, int * face_level,
  bool testing
  ) const throw()
 {
+
+  TRACE6("Factory::create_block(n(%d %d %d)  num_field_blocks %d  count_adatp %d  initial %d)",
+	 nx,ny,nz,num_field_blocks,count_adapt,initial);
+
 #ifdef CONFIG_USE_CHARM
 
-  CProxy_CommBlock proxy_block = CProxy_CommBlock::ckNew();
-  Index index(0,0,0);
-  index.set_level(0);
-  index.clear();
-
-  proxy_block[index].insert
-    (0,0,0,
-     nbx,nby,nbz,
+  (*block_array)[index].insert
+    (
+     index,
      nx,ny,nz,
-     xm,ym,zm, 
-     xb,yb,zb, 
      num_field_blocks,
+     count_adapt,
+     initial,
+     cycle, time,dt,
+     narray, array,op_array,
+     num_face_level, face_level,
      testing);
 
-  proxy_block.doneInserting();
+  CommBlock * block = (*block_array)[index].ckLocal();
 
-  CommBlock * block = proxy_block[index].ckLocal();
-  //  ASSERT("Factory::create_block()","block is NULL",block != NULL);
+  ASSERT("Factory::create_block()","block is NULL",block != NULL);
 
   return block;
 
 #else /* CONFIG_USE_CHARM */
 
-  return new CommBlock 
-    (ibx,iby,ibz, 
-     nbx,nby,nbz,
-     nx,ny,nz,
-     xm,ym,zm, 
-     xb,yb,zb, 
-     num_field_blocks,
-     testing);
+   CommBlock * comm_block = new CommBlock 
+     (simulation,
+      index,
+      nx,ny,nz,
+      num_field_blocks,
+      count_adapt,
+      initial,
+      cycle, time, dt,
+      narray, array, op_array,
+     num_face_level, face_level,
+      testing);
+
+   return comm_block;
 
 #endif /* CONFIG_USE_CHARM */
 }

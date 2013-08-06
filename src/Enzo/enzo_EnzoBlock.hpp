@@ -63,6 +63,7 @@ class EnzoBlock : public CommBlock
   friend class EnzoTimestepPpm;
   friend class EnzoTimestepPpml;
   friend class EnzoInitialImplosion2;
+  friend class EnzoInitialSedovArray2;
   friend class EnzoInitialSedovArray3;
 
   //----------------------------------------------------------------------
@@ -74,6 +75,7 @@ class EnzoBlock : public CommBlock
   // variables
 
 public:
+
   /// Boundary
 
   static int  BoundaryRank;
@@ -160,12 +162,18 @@ public: // interface
   /// Initialize the EnzoBlock chare array
   EnzoBlock
   (
-   int ix, int iy, int iz,
-   int nbx, int nby, int nbz,
+#ifndef CONFIG_USE_CHARM
+   Simulation * simulation,
+#endif
+   Index index,
    int nx, int ny, int nz,
-   double xm, double ym, double zm,
-   double hx, double hy, double hz,
-   int num_field_blocks) throw();
+   int num_field_blocks,
+   int count_adapt,
+   bool initial,
+   int cycle, double time, double dt,
+   int narray, char * array, int op_array,
+   int num_face_level, int * face_level,
+   bool testing=false) throw();
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize a migrated EnzoBlock

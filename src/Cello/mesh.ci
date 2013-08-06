@@ -17,42 +17,68 @@ module mesh {
   PUPable OutputImage;
   PUPable OutputRestart;
   PUPable Problem;
+  PUPable ProlongLinear;
+  PUPable RestrictLinear;
   PUPable Refine;
   PUPable RefineSlope;
+  PUPable RefineMass;
   PUPable ItFieldList;
   PUPable ItFieldRange;
 
   array[Index] CommBlock {
 
     entry CommBlock
-      (int ibx, int iby, int ibz,
-       int nbx, int nby, int nbz,
+      (Index index,
        int nx, int ny, int nz,	
-       double xpm, double ypm, double zpm,
-       double xb, double yb, double zb,
        int num_field_blocks,
+       int count_adapt,
+       bool initial,
+        int cycle, double time, double dt,
+       int  n,     char arr[n],  int op_array,
+       int num_face_level, int face_level[num_face_level],
        bool testing);
 
-   entry CommBlock();	
+    entry CommBlock();	
 
-//    entry CommBlock
-//      (int nbx, int nby, int nbz,
-//       int nx, int ny, int nz,	
-//       double xpm, double ypm, double zpm,
-//       double xb, double yb, double zb,
-//       int num_field_blocks);
-
-    entry void p_initial();
-    entry void p_refresh();
     entry void p_write (int index_output);
     entry void p_compute(int cycle, double time, double dt);
-
-    entry void x_refresh(int n, char buffer[n], int fx, int fy, int fz);
-
     entry void p_read (int index_input);
-
     entry void p_output(CkReductionMsg * msg);
 
+    // adapt
+
+    entry void p_adapt_begin ();
+    entry void p_adapt_start ();
+    entry void q_adapt_next();
+    entry void q_adapt_stop();
+    entry void q_adapt_end();
+    entry void q_adapt_exit();
+
+    entry void p_balance (int ic3[3], int if3[3], int level);
+
+    entry void p_set_face_level(int if3[3], int level, int recurse, 
+				int adapt_type);
+
+    entry void p_child_can_coarsen(int ichild[3], 
+				   int na, char arr[na],
+				   int nf, int face_level[nf]);
+
+    entry void p_parent_coarsened();
+
+    // refresh
+
+    entry void p_refresh_begin();
+    entry void q_refresh_end();
+    entry void x_refresh_same(int n, char buffer[n], int iface[3]);
+    entry void x_refresh_fine(int n, char buffer[n],
+			      int iface[3],int ichild[3]);
+    entry void x_refresh_coarse(int n, char buffer[n],
+				int iface[3],
+				int ichild[3]);
+    entry void x_refresh_child(int n, char buffer[n],
+			       int ichild[3]);
+
+    entry void p_print(std::string);
   };
 }
 

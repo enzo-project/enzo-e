@@ -41,23 +41,28 @@ public: // interface
   virtual CProxy_CommBlock create_block_array
   (int nbx, int nby, int nbz,
    int nx, int ny, int nz,
-   double xm, double ym, double zm,
-   double hx, double hy, double hz,
-   int num_field_blocks = 1,
-   bool allocate = true,
+   int num_field_blocks,
+   bool allocate,
    bool testing=false) const throw();
-#else
+#endif
+
   /// Create a new CommBlock  [abstract factory design pattern]
   virtual CommBlock * create_block
-  (int ibx, int iby, int ibz,
-   int nbx, int nby, int nbz,
+  (
+#ifdef CONFIG_USE_CHARM
+   CProxy_CommBlock * block_array,
+#else
+   Simulation * simulation,
+#endif /* CONFIG_USE_CHARM */
+   Index index,
    int nx, int ny, int nz,
-   double xm, double ym, double zm,
-   double hx, double hy, double hz,
-   int num_field_blocks = 1,
+   int num_field_blocks,
+   int count_adapt,
+   bool initial,
+   int cycle, double time, double dt,
+   int narray, char * array, int op_array,
+   int num_face_level, int * face_level,
    bool testing=false) const throw();
-
-#endif
 
 };
 

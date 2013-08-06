@@ -32,16 +32,13 @@ Simulation::Simulation
   config_(0),
   problem_(0),
   timer_(),
-  performance_(),
-  id_simulation_(-1),
-  id_cycle_(-1),
+  performance_(NULL),
   performance_name_(""),
   performance_stride_(1),
   monitor_(0),
   hierarchy_(0),
   field_descr_(0)
 {
-
   if (!group_process_) {
     group_process_ = GroupProcess::create();
     is_group_process_new_ = true;
@@ -56,6 +53,7 @@ Simulation::Simulation
   monitor_->set_active(group_process_->is_root());
 #endif
 
+  monitor_->print("test","testing");
   parameters_ = new Parameters(parameter_file,monitor_);
 
 }
@@ -103,10 +101,8 @@ void Simulation::pup (PUP::er &p)
   if (up) problem_ = new Problem;
   p | * problem_;
 
-  p | performance_;
+  p | *performance_;
 
-  p | id_simulation_;
-  p | id_cycle_;
   p | performance_name_;
   p | performance_stride_;
 
@@ -144,20 +140,36 @@ void Simulation::initialize() throw()
 {
   TRACE("Simulation::initialize calling Simulation::initialize_config_()");
   initialize_config_();
+  parameters_->set_monitor(false);
+
   initialize_monitor_();
-  initialize_simulation_();
   initialize_performance_();
+  initialize_simulation_();
 
   initialize_data_descr_();
 
   problem_->initialize_boundary(config_);
-  problem_->initialize_initial (config_,parameters_,group_process_);
+  problem_->initialize_initial (config_,parameters_,field_descr_,
+				group_process_);
+  problem_->initialize_refine  (config_,field_descr_);
   problem_->initialize_stopping(config_);
   problem_->initialize_timestep(config_);
   problem_->initialize_output  (config_,field_descr_,group_process_,factory());
   problem_->initialize_method  (config_);
+  problem_->initialize_prolong (config_);
+  problem_->initialize_restrict (config_);
 
   initialize_hierarchy_();
+
+#ifndef CONFIG_USE_CHARM
+
+  // For Charm++ initialize_forest_ is called in charm_initialize
+  // using QD to ensure that initialize_hierarchy() is called
+  // on all processors before CommBlocks are created
+
+  initialize_forest_();
+
+#endif
 
 }
 
@@ -165,13 +177,11 @@ void Simulation::initialize() throw()
 
 void Simulation::finalize() throw()
 {
-  DEBUG0;
+  TRACE0;
 
-  performance_.stop_region(id_simulation_);
+  performance_->stop_region(perf_simulation);
 
-  PARALLEL_PRINTF("Tracing Simulation::finalize %d\n",group_process_->rank());
-
-  performance_.end();
+  performance_->end();
 
 
 }
@@ -201,9 +211,16 @@ void Simulation::initialize_simulation_() throw()
 void Simulation::initialize_performance_() throw()
 {
 
+  performance_ = new Performance (config_);
 
-  id_simulation_ = performance_.new_region("simulation");
-  id_cycle_      = performance_.new_region("cycle");
+  performance_->new_region(perf_simulation, "simulation");
+  performance_->new_region(perf_cycle,      "cycle");
+  performance_->new_region(perf_initial,    "initial");
+  performance_->new_region(perf_adapt,      "adapt");
+  performance_->new_region(perf_refresh,    "refresh");
+  performance_->new_region(perf_compute,    "compute");
+  performance_->new_region(perf_output,     "output");
+  performance_->new_region(perf_prepare,    "prepare");
 
   performance_name_   = config_->performance_name;
   performance_stride_ = config_->performance_stride;
@@ -211,11 +228,13 @@ void Simulation::initialize_performance_() throw()
   timer_.start();
 
   for (size_t i=0; i<config_->performance_papi_counters.size(); i++) {
-    performance_.new_counter(counter_type_papi, config_->performance_papi_counters[i]);
+    performance_->new_counter(counter_type_papi, 
+			      config_->performance_papi_counters[i]);
   }
-  performance_.begin();
 
-  performance_.start_region(id_simulation_);
+  performance_->begin();
+
+  performance_->start_region(perf_simulation);
 
 }
 
@@ -268,12 +287,6 @@ void Simulation::initialize_data_descr_() throw()
     field_descr_->set_ghosts (i,gx,gy,gz);
   }
 
-  // Set face dimensions to refresh
-
-  field_descr_->set_refresh_face(2,config_->field_refresh_faces);
-  field_descr_->set_refresh_face(1,config_->field_refresh_edges);
-  field_descr_->set_refresh_face(0,config_->field_refresh_corners);
-  
   // Default precision
 
   for (int i=0; i<field_descr_->field_count(); i++) {
@@ -323,8 +336,12 @@ void Simulation::initialize_hierarchy_() throw()
   //----------------------------------------------------------------------
 
   const int refinement = 2;
-  hierarchy_ = factory()->create_hierarchy (dimension_,refinement,
-					    0, group_process_->size());
+  hierarchy_ = factory()->create_hierarchy 
+    (
+#ifndef CONFIG_USE_CHARM
+     this,
+#endif
+     dimension_,refinement, 0, group_process_->size());
 
   // Domain extents
 
@@ -350,25 +367,32 @@ void Simulation::initialize_hierarchy_() throw()
 			    config_->mesh_root_size[1],
 			    config_->mesh_root_size[2]);
 
-  // Don't allocate blocks if reading data from files
+  hierarchy_->set_blocking(config_->mesh_root_blocks[0],
+			   config_->mesh_root_blocks[1],
+			   config_->mesh_root_blocks[2]);
 
-  bool allocate_blocks = ! ( config_->initial_type == "file" || 
-			     config_->initial_type == "restart" );
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::initialize_forest_() throw()
+{
 
 #ifdef CONFIG_USE_CHARM
-  if (group_process()->is_root())
+  bool allocate_blocks = (group_process()->is_root());
+#else
+  bool allocate_blocks = true;
 #endif
-    {
-      hierarchy_->create_forest
-	(field_descr_,
-	 config_->mesh_root_size[0],
-	 config_->mesh_root_size[1],
-	 config_->mesh_root_size[2],
-	 config_->mesh_root_blocks[0],
-	 config_->mesh_root_blocks[1],
-	 config_->mesh_root_blocks[2],
-	 allocate_blocks);
-    }
+
+  // Don't allocate blocks if reading data from files
+
+  bool allocate_data = ! ( config_->initial_type == "file" || 
+			   config_->initial_type == "restart" );
+
+  hierarchy_->create_forest
+    (field_descr_,
+     allocate_blocks,
+     allocate_data);
 }
 
 //----------------------------------------------------------------------
@@ -381,13 +405,14 @@ void Simulation::deallocate_() throw()
     { delete group_process_; group_process_ = 0; }
   delete hierarchy_;     hierarchy_ = 0;
   delete field_descr_;   field_descr_ = 0;
+  delete performance_;   performance_ = 0;
 }
 
 //----------------------------------------------------------------------
 
 const Factory * Simulation::factory() const throw()
 {
-  DEBUG("Simulation::factory()");
+  TRACE("Simulation::factory()");
   if (factory_ == NULL) factory_ = new Factory;
   return factory_;
 }
@@ -396,39 +421,30 @@ const Factory * Simulation::factory() const throw()
 
 void Simulation::update_state(int cycle, double time, double dt, double stop) 
 {
-  DEBUG4 ("Simulation::update_state cycle %d time %f dt %f stop %f",
-	  cycle,time,dt,stop);
+  //  printf ("DEBUG %s:%d Simulation::update_state cycle %d time %f dt %f stop %24.15f\n",
+  //	  __FILE__,__LINE__, cycle,time,dt,stop);
  
   cycle_ = cycle;
   time_  = time;
   dt_    = dt;
-  stop_  = stop;
+  stop_  = stop != 0;
 }
 
 //----------------------------------------------------------------------
 
 void Simulation::monitor_output()
 {
-  TRACE1("monitor = %p",monitor_);
-  monitor_->  print("", "-------------------------------------");
-  TRACE0;
+  TRACE("Simulation::monitor_output()");
 
+  monitor_-> print("", "-------------------------------------");
   monitor_-> print("Simulation", "cycle %04d", cycle_);
   monitor_-> print("Simulation", "time-sim %15.12f",time_);
   monitor_-> print("Simulation", "dt %15.12g", dt_);
-
-  TRACE0;
 
   performance_output ();
 
   Memory * memory = Memory::instance();
   memory->reset_high();
-
-# ifdef CONFIG_USE_CHARM
-
-  ((SimulationCharm *) this)->c_compute();
-
-# endif
 
 }
 
@@ -439,24 +455,21 @@ void Simulation::performance_output()
 {
   TRACE("Simulation::performance_output()");
 
-  int num_regions  = performance_.num_regions();
-  int num_counters =  performance_.num_counters();
+  int num_regions  = performance_->num_regions();
+  int num_counters =  performance_->num_counters();
   long long * counters = new long long [num_counters];
 
-  for (int index_region = 0; index_region < num_regions; index_region++) {
-
-    int id_region = index_region;
-
-    performance_.region_counters(index_region,counters);
-
-    for (int index_counter = 0; index_counter < num_counters; index_counter++) {
+  for (int ic = 0; ic < num_counters; ic++) {
     
-      int id_counter = performance_.index_to_id(index_counter);
+    for (int ir = 0; ir < num_regions; ir++) {
+
+      performance_->region_counters(ir,counters);
+      int index_counter = ir+num_regions*ic;
 
       monitor_->print("Performance","%s %s %lld",
-	      performance_.region_name(id_region).c_str(),
-	      performance_.counter_name(id_counter).c_str(),
-	      counters[index_counter]);  
+		      performance_->region_name(ir).c_str(),
+		      performance_->counter_name(ic).c_str(),
+		      counters[ic]);  
     }
   }
 
@@ -464,14 +477,11 @@ void Simulation::performance_output()
 
 }
 
-
 //----------------------------------------------------------------------
 
 void Simulation::performance_write()
 {
   TRACE("Simulation::performance_write()");
-
-  PARALLEL_PRINTF("Tracing Simulation::performance_write %d\n",group_process_->rank());
 
   if (performance_name_ != "" && (group_process_->rank() % performance_stride_) == 0) {
 
@@ -479,24 +489,20 @@ void Simulation::performance_write()
     sprintf (filename,performance_name_.c_str(),group_process_->rank());
     FILE * fp = fopen(filename,"w");
 
-    int num_regions  = performance_.num_regions();
-    int num_counters =  performance_.num_counters();
+    int num_regions  = performance_->num_regions();
+    int num_counters =  performance_->num_counters();
     long long * counters = new long long [num_counters];
 
-    for (int index_region = 0; index_region < num_regions; index_region++) {
+    for (int ir = 0; ir < num_regions; ir++) {
 
-      int id_region = index_region;
+      performance_->region_counters(ir,counters);
 
-      performance_.region_counters(index_region,counters);
-
-      for (int index_counter = 0; index_counter < num_counters; index_counter++) {
+      for (int ic = 0; ic < num_counters; ic++) {
     
-	int id_counter = performance_.index_to_id(index_counter);
-
 	fprintf (fp,"%s %s %lld\n",
-		 performance_.region_name(id_region).c_str(),
-		 performance_.counter_name(id_counter).c_str(),
-		 counters[index_counter]);  
+		 performance_->region_name(ir).c_str(),
+		 performance_->counter_name(ic).c_str(),
+		 counters[ic]);  
       }
     }
 

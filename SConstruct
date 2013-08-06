@@ -5,9 +5,17 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
+# (TEMPORARY) Whether to include new coarsening code
+
+coarsen = 1
+
 # Whether to print out messages with the TRACE() series of statements
 
 trace = 0
+
+# Whether to print out messages with the TRACE_CHARM() series of statements
+
+trace_charm = 0
 
 # Whether to enable displaying messages with the DEBUG() series of statements
 # Also writes messages to out.debug.<P> where P is the (physical) process rank
@@ -83,7 +91,7 @@ if not env.GetOption('clean'):
 
      env = configure.Finish()
 
-use_papi = 1
+# use_papi = 0
 
 #-----------------------------------------------------------------------
 # COMMAND-LINE ARGUMENTS
@@ -116,6 +124,10 @@ print
 
 define = {}
 
+# Temporary defines
+
+define_coarsen =        ['COARSEN']
+
 # Parallel type defines
 
 define["serial"] =    []
@@ -137,7 +149,9 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 # Debugging defines
 
 define_trace =        ['CELLO_TRACE']
+define_trace_charm =  ['CELLO_TRACE_CHARM']
 define_debug =        ['CELLO_DEBUG']
+
 define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
 
 # Library defines
@@ -191,6 +205,7 @@ if (use_projections == 1):
 if (use_performance == 1):
      defines = defines + define_performance
 
+flags_arch_cpp = ''
 flags_config = ''
 flags_cxx = ''
 flags_cc = ''
@@ -206,6 +221,8 @@ if (use_gprof == 1):
   
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
+if (trace_charm != 0):   defines = defines + define_trace_charm
+if (coarsen != 0):       defines = defines + define_coarsen
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
@@ -313,6 +330,12 @@ cpppath = cpppath + [hdf5_path + '/include']
 libpath = libpath + [hdf5_path + '/lib']
 
 #----------------------------------------------------------------------
+# LIBPNG PATHS
+#----------------------------------------------------------------------
+
+#libpath = libpath + [png_path + '/lib']
+
+#----------------------------------------------------------------------
 # FORTRAN LINK PATH
 #----------------------------------------------------------------------
 
@@ -326,7 +349,7 @@ libpath = libpath + [libpath_fortran]
 
 environ  = os.environ
 
-cxxflags = flags_arch
+cxxflags = flags_arch + ' ' + flags_arch_cpp
 cxxflags = cxxflags + ' ' + flags_cxx
 cxxflags = cxxflags + ' ' + flags_config
 if (type=="charm"): cxxflags = cxxflags + ' ' + flags_cxx_charm
@@ -341,7 +364,7 @@ fortranflags = fortranflags + ' ' + flags_fc
 fortranflags = fortranflags + ' ' + flags_config
 if (type=="charm"):fortranflags = fortranflags + ' ' + flags_fc_charm
 
-linkflags    = flags_arch
+linkflags    = flags_arch + ' ' + flags_arch_cpp
 linkflags    = linkflags + ' ' + flags_link
 linkflags    = linkflags + ' ' + flags_config
 if (type=="charm"):linkflags    = linkflags + ' ' + flags_link_charm

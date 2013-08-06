@@ -1,0 +1,17 @@
+
+# include "sedov-amr.incl"
+
+include "sedov-output.incl"
+
+# 3D PROBLEM
+
+ include "sedov_array_3.incl"
+ Mesh { root_size     = [512,512,512]; }
+ Mesh { root_blocks   = [4,4,4]; }
+ Enzo { sedov { array = [4,4,4]; } }
+ Output { file_groups = []; }
+
+Enzo { sedov { radius_relative = 0.1; } }
+
+Stopping { cycle = 10; }
+

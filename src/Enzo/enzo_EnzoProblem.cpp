@@ -93,6 +93,7 @@ Initial * EnzoProblem::create_initial_
  std::string  name,
  Parameters * parameters,
  Config * config,
+ const FieldDescr * field_descr,
  const GroupProcess * group_process
  ) throw ()
 {
@@ -109,10 +110,13 @@ Initial * EnzoProblem::create_initial_
 
   if (name == "implosion_2d") {
     initial = new EnzoInitialImplosion2(cycle,time);
+  } else if (name == "sedov_array_2d") {
+    initial = new EnzoInitialSedovArray2(static_cast<EnzoConfig *>(config));
   } else if (name == "sedov_array_3d") {
     initial = new EnzoInitialSedovArray3(static_cast<EnzoConfig *>(config));
   } else {
-    initial = Problem::create_initial_(name,parameters,config,group_process);
+    initial = Problem::create_initial_
+      (name,parameters,config,field_descr,group_process);
   }
 
   return initial;
@@ -129,9 +133,9 @@ Method * EnzoProblem::create_method_ ( std::string  name ) throw ()
 
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
-    method = new EnzoMethodPpm ();
+    method = new EnzoMethodPpm;
   } else if (name == "ppml") {
-    method = new EnzoMethodPpml();
+    method = new EnzoMethodPpml;
   } else {
     method = Problem::create_method_(name);
   }
@@ -139,4 +143,60 @@ Method * EnzoProblem::create_method_ ( std::string  name ) throw ()
   return method;
 }
 
+//----------------------------------------------------------------------
+
+Prolong * EnzoProblem::create_prolong_ 
+(
+ std::string  name,
+ Config * config ) throw ()
+{
+
+  Prolong * prolong = 0;
+
+  if (name == "enzo") {
+    
+    prolong = new EnzoProlong 
+      (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
+
+  } else if (name == "MC1") {
+    
+    prolong = new EnzoProlongMC1
+      (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
+
+  } else {
+
+    prolong = Problem::create_prolong_(name,config);
+
+  }
+
+  return prolong;
+  
+}
+
+//----------------------------------------------------------------------
+
+Restrict * EnzoProblem::create_restrict_ 
+(
+ std::string  name,
+ Config * config ) throw ()
+{
+
+  Restrict * restrict = 0;
+
+  if (name == "enzo") {
+    
+    restrict = new EnzoRestrict 
+      (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
+
+  } else {
+
+    restrict = Problem::create_restrict_(name,config);
+
+  }
+
+  return restrict;
+  
+}
+
+//----------------------------------------------------------------------
 

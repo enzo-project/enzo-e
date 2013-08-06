@@ -98,7 +98,7 @@ function test_failed ($output_file) {
 
    //----------------------------------------------------------------------
 
-$types = array("charm","mpi");
+$types = array("charm");
   $num_types = sizeof($types);
 
   function tests($component,$testrun,$output,$test_name) {
@@ -418,52 +418,51 @@ function test_table_blocks ($file_root,$cycle_array, $types)
        for ($index_cycle = 0; $index_cycle < sizeof($cycle_array); $index_cycle++) {
 	 $cycle = $cycle_array[$index_cycle];
 	 for ($col = 0; $col < $cols; $col++) {
-	   $block = $rows - 1 - $row + $rows*$col;
-
+	   $block = sprintf ("%08d-%08d-%08d",$rows - $row - 1,$col,0);
 	   echo "<td class=block> <img src=$type/${file_root}-$cycle-block_$block.png width=80></img> </td>";
 	 }
        }
        echo "</tr>";
      }
-   }
-   echo "</table></br>";
+  }
+  echo "</table></br>";
 }
 
-  function swf_movie ($filename, $last_image, $image_size)
-  {
-    global $types;
-    global $num_types;
-if (file_exists($last_image)) {
-  printf ("<OBJECT classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\"\n");
-  printf ("codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0\"\n");
-  printf ("WIDTH=\"$image_size\" HEIGHT=\"$image_size\"\n");
-  printf ("        id=\"implosion\" ALIGN=\"\">\n");
-printf ("     <PARAM NAME=$filename\n");
-printf ("            VALUE=\"$filename\">\n");
-printf ("     <PARAM NAME=quality VALUE=high>\n");
-printf ("     <PARAM NAME=bgcolor VALUE=#333399>\n");
-printf ("     <EMBED src=\"$filename\"\n");
-printf ("          quality=high\n");
-printf ("          bgcolor=#333399\n");
-printf ("          WIDTH=\"$image_size\" HEIGHT=\"$image_size\"\n");
-printf ("          NAME=\"$filename\" ALIGN=\"\"\n");
-printf ("          TYPE=\"application/x-shockwave-flash\"\n");
-printf ("          PLUGINSPAGE=\"http://www.macromedia.com/go/getflashplayer\">\n");
-printf ("       </EMBED>\n");
-printf ("      </OBJECT> \n");
-}  
-  }
+function swf_movie ($filename, $last_image, $image_size)
+{
+  global $types;
+  global $num_types;
+  if (file_exists($last_image)) {
+    printf ("<OBJECT classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\"\n");
+    printf ("codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0\"\n");
+    printf ("WIDTH=\"$image_size\" HEIGHT=\"$image_size\"\n");
+    printf ("        id=\"implosion\" ALIGN=\"\">\n");
+    printf ("     <PARAM NAME=$filename\n");
+    printf ("            VALUE=\"$filename\">\n");
+    printf ("     <PARAM NAME=quality VALUE=high>\n");
+    printf ("     <PARAM NAME=bgcolor VALUE=#333399>\n");
+    printf ("     <EMBED src=\"$filename\"\n");
+    printf ("          quality=high\n");
+    printf ("          bgcolor=#333399\n");
+    printf ("          WIDTH=\"$image_size\" HEIGHT=\"$image_size\"\n");
+    printf ("          NAME=\"$filename\" ALIGN=\"\"\n");
+    printf ("          TYPE=\"application/x-shockwave-flash\"\n");
+    printf ("          PLUGINSPAGE=\"http://www.macromedia.com/go/getflashplayer\">\n");
+    printf ("       </EMBED>\n");
+    printf ("      </OBJECT> \n");
+  }  
+}
 
 printf ("<table>\n");
 printf ("<tr>\n");
 
-  if (file_exists("COMPILING"))  {
-    printf ( "<th rowspan=2 class=compiling>");
-    printf ("<strong> COMPILING </strong>\n");
-    printf ("</th>");
-  } else { 
-    printf ("<th rowspan=2></th>\n"); 
-  }
+if (file_exists("COMPILING"))  {
+  printf ( "<th rowspan=2 class=compiling>");
+  printf ("<strong> COMPILING </strong>\n");
+  printf ("</th>");
+} else { 
+  printf ("<th rowspan=2></th>\n"); 
+}
   
 printf ( "<th colspan=$num_types class=fail>Missing</br>Executable</th>");
 printf ("<th></th>");
@@ -481,16 +480,16 @@ printf ( "</tr><tr>\n");
 
 for ($k = 0; $k < 6; $k ++) {
   for ($i = 0; $i < $num_types; ++$i) {
-     $type_active = "";
-     if (file_exists("COMPILING"))  {
-        $type_active = file_get_contents("COMPILING");
-     }
-     if ($type_active == $types[$i]) {
-        printf ("<th class=compiling>");
-     } else {
-        printf ("<th> ");
-     }
-     printf (" <a href=$types[$i]/out.scons>$types[$i]</a> </th>");
+    $type_active = "";
+    if (file_exists("COMPILING"))  {
+      $type_active = file_get_contents("COMPILING");
+    }
+    if ($type_active == $types[$i]) {
+      printf ("<th class=compiling>");
+    } else {
+      printf ("<th> ");
+    }
+    printf (" <a href=$types[$i]/out.scons>$types[$i]</a> </th>");
   }
   printf ("<th> </th>");
 }
@@ -507,6 +506,14 @@ test_summary("Enzo-PPML",
 	     array("method_ppml-1",
 		   "method_ppml-8"),
 	     array("enzo-p",  "enzo-p"));
+
+test_summary("Enzo-Mesh", 
+	     array("mesh-balanced", "mesh-unbalanced"),
+	     array("enzo-p",        "enzo-p"));
+
+test_summary("Enzo-AMR", 
+	     array("adapt-L1-P1", "adapt-L2-P1", "adapt-L3-P1", "adapt-L4-P1", "adapt-L5-P1"),
+	     array("enzo-p",      "enzo-p",      "enzo-p",      "enzo-p",      "enzo-p"));
 
 test_summary("Enzo-BC-2D", 
 	     array("boundary_reflecting-2d",
@@ -525,7 +532,7 @@ test_summary("Enzo-IC",
 	     array("enzo-p"));
 
 test_summary("Enzo-output", 
-	     array("stride-1","stride-2","stride-3"),
+	     array("output-stride-1","output-stride-2","output-stride-3"),
 	     array("enzo-p","enzo-p","enzo-p"));
 
 // Print row divider
@@ -554,13 +561,18 @@ test_summary("Mesh",
 	     array("Hierarchy",
 		   "Block",
 		   "Tree",
+		   "Index",
+		   "Tree",
+		   "ItFace",
 		   "TreeDensity",
 		   "Node",
 		   "NodeTrace",
 		   "ItNode"),
 	     array("test_Hierarchy",
 		   "test_Block",
+		   "test_Index",
 		   "test_Tree",
+		   "test_ItFace",
 		   "test_TreeDensity",
 		   "test_Node",
 		   "test_NodeTrace",
@@ -585,22 +597,22 @@ test_group("Enzo-PPM");
 
 Enzo-PPM tests serve to test basic PPM functionality in Enzo-P.  A
 small implosion problem is run for 400 cycles, first with
-one block (1,1) then eight blocks (2,4).
+  one block (1,1) then eight blocks (2,4).
 
-</p>
+  </p>
 
-Currently, "serial" results are incorrect for multiple blocks, which
-is to be expected.  There are errors in parallel CHARM++ and MPI with
-eight blocks because the final time after 400 cycles does not exactly
-match the time for the serial runs.  The results look qualitatively
-correct however, even at time 2.5 for 400<sup>2</sup>(over 13000
-cycles).
-</p>
+  Currently, "serial" results are incorrect for multiple blocks, which
+  is to be expected.  There are errors in parallel CHARM++ and MPI with
+  eight blocks because the final time after 400 cycles does not exactly
+  match the time for the serial runs.  The results look qualitatively
+  correct however, even at time 2.5 for 400<sup>2</sup>(over 13000
+							cycles).
+  </p>
 
-<?php
+  <?php
 
 
-echo "<h3>PPM (serial) </h3>";
+  echo "<h3>PPM (serial) </h3>";
 
 tests("Enzo","enzo-p","test_method_ppm-1","PPM 1 block");
 
@@ -636,7 +648,7 @@ tests("Enzo","enzo-p","test_checkpoint_ppm-8","test_restart_ppm-8","");
 test_table ("restart_ppm-8",
 	    array("000000","000200","000400"), $types);
 
-   //======================================================================
+//======================================================================
 
 
 test_group("Enzo-PPML");
@@ -647,9 +659,9 @@ Enzo-PPML tests serve to test basic PPML functionality in Enzo-P.  A
 small high-density sphere is run for 50 cycles, first with
   one block (1,1,1) then eight blocks (2,2,2).
 
-<?php
+  <?php
 
-echo "<h3>PPML (serial) </h3>";
+  echo "<h3>PPML (serial) </h3>";
 
 tests("Enzo","enzo-p","test_method_ppml-1","PPML 1 block");
 
@@ -674,7 +686,125 @@ test_table ("method_ppml-8-z",
 
 //======================================================================
 
-  test_group("Enzo-BC-2D");
+test_group("Enzo-Mesh");
+
+echo "<h3>2D Serial</h3>";
+
+tests("Enzo","enzo-p","test_mesh-balanced","balanced");
+
+test_table ("mesh-balanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
+test_table ("mesh-balanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
+
+tests("Enzo","enzo-p","test_mesh-unbalanced","unbalanced");
+test_table ("mesh-unbalanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
+test_table ("mesh-unbalanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
+
+//======================================================================
+
+test_group("Enzo-AMR");
+
+echo "<h3>2D Serial</h3>";
+
+tests("Enzo","enzo-p","test_adapt-L1-P1","Level 1");
+
+test_table ("adapt-L1-P1-mesh",
+	    array("0.000000","0.020000","0.040000",
+		  "0.060000","0.080000","0.100000"), $types);
+test_table ("adapt-L1-P1-de",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L1-P1-te",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L1-P1-vx",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L1-P1-vy",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
+tests("Enzo","enzo-p","test_adapt-L2-P1","Level 2");
+
+test_table ("adapt-L2-P1-mesh",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
+test_table ("adapt-L2-P1-de",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L2-P1-te",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L2-P1-vx",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L2-P1-vy",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
+
+tests("Enzo","enzo-p","test_adapt-L3-P1","Level 3");
+
+test_table ("adapt-L3-P1-mesh",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
+test_table ("adapt-L3-P1-de",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L3-P1-te",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L3-P1-vx",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L3-P1-vy",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
+
+tests("Enzo","enzo-p","test_adapt-L4-P1","Level 4");
+
+test_table ("adapt-L4-P1-mesh",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L4-P1-de",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L4-P1-te",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L4-P1-vx",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L4-P1-vy",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
+
+tests("Enzo","enzo-p","test_adapt-L5-P1","Level 5");
+
+test_table ("adapt-L5-P1-mesh",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L5-P1-de",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L5-P1-te",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L5-P1-vx",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+test_table ("adapt-L5-P1-vy",
+	    array("0.000000","0.020000","0.040000","0.060000",
+		  "0.080000","0.100000"), $types);
+
+
+
+//======================================================================
+
+test_group("Enzo-BC-2D");
 
 echo "<h3>2D Reflecting</h3>";
 
@@ -682,6 +812,7 @@ tests("Enzo","enzo-p","test_boundary_reflecting-2d","Reflecting 2D");
 
 test_table ("boundary_reflecting-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
+
 
 //----------------------------------------------------------------------
 
@@ -767,21 +898,21 @@ tests("Enzo","enzo-p","test_output-stride-3","");
 
 test_table_blocks ("output-stride-3",  array("00","10","20"), $types);
 
-   //======================================================================
+//======================================================================
 
 test_group("Disk");
 
 tests("Cello","test_FileHdf5", "test_FileHdf5","");
 tests("Cello","test_FileIfrit","test_FileIfrit","");
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 test_group("Error");
 
 tests("Cello","test_Error","test_Error","");
 
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 test_group("Field");
 
@@ -790,46 +921,48 @@ tests("Cello","test_FieldBlock","test_FieldBlock","");
 tests("Cello","test_FieldFace","test_FieldFace","");
 tests("Cello","test_ItField","test_ItField","");
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 test_group("Io");
 
 tests("Cello","test_ItReduce", "test_ItReduce","");
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 test_group("Memory");
 
 tests("Cello","test_Memory","test_Memory","");
 
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 test_group("Mesh");
 
 tests("Cello","test_Hierarchy","test_Hierarchy",""); 
 tests("Cello","test_Block","test_Block",""); 
+tests("Cello","test_Index","test_Index",""); 
 tests("Cello","test_Tree","test_Tree",""); 
+tests("Cello","test_ItFace","test_ItFace",""); 
 
-printf ("<img width=257 src=\"mpi/test_tree_1-initial.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/test_tree_2-balanced.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/test_tree_3-merged.png\"></img></br>\n");
+printf ("<img width=257 src=\"charm/test_tree_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"charm/test_tree_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"charm/test_tree_3-merged.png\"></img></br>\n");
 
 tests("Cello","test_TreeDensity","test_TreeDensity",""); 
 
-printf ("<img width=257 src=\"mpi/density_xy_1-initial.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/density_xy_2-balanced.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/density_xy_3-coalesced.png\"></img></br>\n");
+printf ("<img width=257 src=\"charm/density_xy_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"charm/density_xy_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"charm/density_xy_3-coalesced.png\"></img></br>\n");
 
-printf ("<img width=257 src=\"mpi/density_3d_1-initial.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/density_3d_2-balanced.png\"></img>\n");
-printf ("<img width=257 src=\"mpi/density_3d_3-coalesced.png\"></img></br>\n");
+printf ("<img width=257 src=\"charm/density_3d_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"charm/density_3d_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"charm/density_3d_3-coalesced.png\"></img></br>\n");
 
 tests("Cello","test_Node","test_Node",""); 
 tests("Cello","test_NodeTrace","test_NodeTrace",""); 
 tests("Cello","test_ItNode","test_ItNode",""); 
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 test_group("Monitor");
 
@@ -840,20 +973,20 @@ tests("Cello","test_Monitor","test_Monitor","");
 // printf ("<img src=\"monitor_image_3.png\"></img>\n");
 // printf ("<img src=\"monitor_image_4.png\"></img>\n");
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 test_group("Parallel");
 
 tests("Cello","test_GroupProcess","test_GroupProcess","");
 tests("Cello","test_Layout","test_Layout","");
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 test_group("Parameters");
 
 tests("Cello","test_Parameters","test_Parameters","");
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 test_group("Performance");
 
@@ -861,194 +994,6 @@ tests("Cello","test_Performance","test_Performance","");
 tests("Cello","test_Papi",       "test_Papi","");
 tests("Cello","test_Timer",       "test_Timer","");
 
-/* <hr> */
-/* <h2>Mesh Tests (Prototype Code)</h2> */
-
-/*   <h3>TreeK-D2-R2-L?</h3> */
-
-/*   <?php */
-/*   tests("Cello","test_TreeK","test_TreeK-D2-R2-L6", "2D L=6 r=2"); */
-/*   tests("Cello","test_TreeK","test_TreeK-D2-R2-L7", "2D L=7 r=2"); */
-/*   tests("Cello","test_TreeK","test_TreeK-D2-R2-L8", "2D L=8 r=2"); */
-/*   ?> */
-
-/* <table> */
-/* <tr> */
-/* <th>coalesce</th> */
-/* <th>levels = 6</th> */
-/*   <th>levels = 7</th> */
-/*   <th>levels = 8</th> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>false</th> */
-/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=6-0.png"></img></td> */
-/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=7-0.png"></img></td> */
-/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=8-0.png"></img></td> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>true</th> */
-/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=6-1.png"></img></td> */
-/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=7-1.png"></img></td> */
-/*   <td><img width=257 src="serial/TreeK-D=2-R=2-L=8-1.png"></img></td> */
-/*   </tr> */
-/*   </table></br> */
-
-/*   <h3>TreeK-D2-R4-L?</h3> */
-
-/*   <?php */
-/*   tests("Cello","test_TreeK","test_TreeK-D2-R4-L6", "2D L=6 r=4"); */
-/*   tests("Cello","test_TreeK","test_TreeK-D2-R4-L8", "2D L=8 r=4"); */
-/*   ?> */
-
-/* <table> */
-/* <tr> */
-/* <th>coalesce</th> */
-/* <th>levels = 6</th> */
-/*   <th>levels = 8</th> */
-/*   <!-- <th>levels = 10</th> --> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>false</th> */
-/*   <td><img width=257 src="serial/TreeK-D=2-R=4-L=6-0.png"></img></td> */
-/*   <td><img width=257 src="serial/TreeK-D=2-R=4-L=8-0.png"></img></td> */
-/*   <!-- <td><img width=257 src="serial/TreeK-D=2-R=4-L=10-0.png"></img></td> --> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>true</th> */
-/*   <td><img width=257 src="serial/TreeK-D=2-R=4-L=6-1.png"></img></td> */
-/*   <td><img width=257 src="serial/TreeK-D=2-R=4-L=8-1.png"></img></td> */
-/*   <!-- <td><img width=257 src="serial/TreeK-D=2-R=4-L=10-1.png"></img></td> --> */
-/*   </tr> */
-/*   </table></br> */
-
-/*   <h3>TreeK-D3-R2-L?</h3> */
-
-/*   <?php */
-/*   tests("Cello","test_TreeK","test_TreeK-D3-R2-L4", "3D L=4 r=2"); */
-/*   tests("Cello","test_TreeK","test_TreeK-D3-R2-L5", "3D L=5 r=2"); */
-/*   tests("Cello","test_TreeK","test_TreeK-D3-R2-L6", "3D L=6 r=2"); */
-/*    ?> */
-
-/* <table> */
-/* <tr> */
-/* <th>coalesce = false</th> */
-/*   <th>levels = 4</th> */
-/*   <th>levels = 5</th> */
-/*   <th>levels = 6</th> */
-/*   <!-- <th>levels = 7</th> --> */
-/*   <!-- <th>levels = 8</th> --> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>project = X</th> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-x-0.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-x-0.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-x-0.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-x-0.png"></img></td> --> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-x-0.png"></img></td> --> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>project = Y</th> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-y-0.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-y-0.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-y-0.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-y-0.png"></img></td> --> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-y-0.png"></img></td> --> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>project = Z</th> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-z-0.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-z-0.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-z-0.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-z-0.png"></img></td> --> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-z-0.png"></img></td> --> */
-/*   </tr> */
-/*   </table></br> */
-
-
-/*   <table> */
-/*   <tr> */
-/*   <th>coalesce = true</th> */
-/*   <th>levels = 4</th> */
-/*   <th>levels = 5</th> */
-/*   <th>levels = 6</th> */
-/*   <!-- <th>levels = 7</th> --> */
-/*   <!-- <th>levels = 8</th> --> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>project = X</th> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-x-1.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-x-1.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-x-1.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-x-1.png"></img></td> --> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-x-1.png"></img></td> --> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>project = Y</th> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-y-1.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-y-1.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-y-1.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-y-1.png"></img></td> --> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-y-1.png"></img></td> --> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>project = Z</th> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=4-z-1.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=5-z-1.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=2-L=6-z-1.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=7-z-1.png"></img></td> --> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=2-L=8-z-1.png"></img></td> --> */
-/*   </tr> */
-/*   </table></br> */
-
-
-/*   <h3>TreeK-D3-R4-L?</h3> */
-
-/*   <?php */
-/*   tests("Cello","test_TreeK","test_TreeK-D3-R4-L4", "3D L=4 r=4"); */
-/*   tests("Cello","test_TreeK","test_TreeK-D3-R4-L6", "3D L=6 r=4"); */
-/*   ?> */
-
-/* <table> */
-/* <tr> */
-/* <th></th> */
-/* <th colspan=2>coalesce = false</th> */
-/*   <th colspan=2>coalesce = true</th> */
-/*   </tr> */
-/*   <tr> */
-/*   <th></th> */
-/*   <th>levels = 4</th> */
-/*   <th>levels = 6</th> */
-/*   <!-- <th>levels = 8</th> --> */
-/*   <th>levels = 4</th> */
-/*   <th>levels = 6</th> */
-/*   <!-- <th>levels = 8</th> --> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>project = X</th> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-x-0.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-x-0.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-x-0.png"></img></td> --> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-x-1.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-x-1.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-x-1.png"></img></td> --> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>project =  Y</th> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-y-0.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-y-0.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-y-0.png"></img></td> --> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-y-1.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-y-1.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-y-1.png"></img></td> --> */
-/*   </tr> */
-/*   <tr> */
-/*   <th>project = Z</th> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-z-0.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-z-0.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-z-0.png"></img></td> --> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=4-z-1.png"></img></td> */
-/*   <td><img width=129 src="serial/TreeK-D=3-R=4-L=6-z-1.png"></img></td> */
-/*   <!-- <td><img width=129 src="serial/TreeK-D=3-R=4-L=8-z-1.png"></img></td> --> */
 ?>
   </br/>
   </body>

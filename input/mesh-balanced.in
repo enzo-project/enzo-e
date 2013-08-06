@@ -1,0 +1,129 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/ppm.incl"
+
+
+Mesh 
+{
+   root_rank = 2;
+   root_size   = [32,32];
+   root_blocks = [ 2, 2]; 
+   max_level   = 5; 
+   adapt {
+      type = ["slope"];
+      balance = true;
+      fields = ["density"];
+   }
+}
+
+Field {
+   ghosts = 4;
+   refresh {
+     rank = 0;
+     type = "quiescence";
+   }
+}
+Initial {
+   max_level = 5;
+      fields = [
+	"density",	
+	"velocity_x",
+	"velocity_y",
+	"total_energy",
+	"internal_energy"
+      ] ;
+}
+  Initial {
+     density       { value = [  1.0, "input/test_balance.png", 
+                                0.1 ]; };
+     total_energy  { value = [  0.1 / (0.4 * 0.1), "input/test_balance.png",
+                                1.0 / (0.4 * 1.0)  ]; };
+  }
+
+# Initial {
+#     density      { value = [ 1.0,           (x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) < 0.25,  
+#                              0.1 ]; };
+#     total_energy { value = [ 1.0/(0.4*1.0), (x- 0.5)*(x- 0.5) + (y- 0.5)*(y- 0.5) < 0.25,  
+#                              0.1/(0.4*0.1) ]; };
+# }
+
+Stopping { cycle = 100; }
+
+Output {
+
+   file_groups = ["mesh","de","te","vx","vy"]; 
+#   file_groups = []; 
+
+      de {
+	type     = "image";
+	image_type  = "data";
+	image_size  = [1024,1024];
+#	image_ghost  = true;
+        field_list = ["density"];
+	schedule = ["cycle","interval", 10];
+        colormap = [0.0, 0.0, 0.0,  
+                    1.0, 0.0, 0.0, 
+                    1.0, 1.0, 0.0, 
+                    1.0, 1.0, 1.0];
+        name = ["mesh-balanced-de.%03d.png","cycle"];
+      };
+      te {
+	type     = "image";
+	image_type  = "data";
+	image_size  = [1024,1024];
+#	image_ghost  = true;
+        field_list = ["total_energy"];
+	schedule = ["cycle","interval", 10];
+        colormap = [0.0, 0.0, 0.0,  
+                    1.0, 0.0, 0.0, 
+                    1.0, 1.0, 0.0, 
+                    1.0, 1.0, 1.0];
+        name = ["mesh-balanced-te.%03d.png","cycle"];
+      };
+      vx {
+	type     = "image";
+	image_type  = "data";
+	image_size  = [1024,1024];
+#	image_ghost  = true;
+        field_list = ["velocity_x"];
+	schedule = ["cycle","interval", 10];
+        colormap = [1.0, 0.0, 0.0,  
+                    0.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0];
+        name = ["mesh-balanced-vx.%03d.png","cycle"];
+      };
+      vy {
+	type     = "image";
+	image_type  = "data";
+	image_size  = [1024,1024];
+#	image_ghost  = true;
+        field_list = ["velocity_y"];
+	schedule = ["cycle","interval", 10];
+        colormap = [1.0, 0.0, 0.0,  
+                    0.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0];
+        name = ["mesh-balanced-vy.%03d.png","cycle"];
+      };
+      mesh {
+	type     = "image";
+        image_face_rank = 0;
+	image_type  = "mesh";
+	image_reduce_type = "max";
+        field_list = ["density"];
+	image_block_size  = 5;
+	schedule = ["cycle","interval", 10];
+        colormap = [1.0, 1.0, 1.0,  
+                    1.0, 1.0, 0.0,
+		    0.0, 1.0, 1.0,
+		    1.0, 0.0, 1.0,
+		    1.0, 0.0, 0.0,
+		    0.0, 1.0, 0.0,
+		    0.0, 0.0, 1.0];
+
+        name = ["mesh-balanced-mesh.%03d.png","cycle"];
+        
+      };
+}
+
+Performance { warnings = false; }

@@ -20,7 +20,7 @@ Parameters::Parameters(Monitor * monitor)
     parameter_tree_(new ParamNode("Cello")),
     monitor_(monitor)
 {
-  if (! monitor_) monitor_ = Monitor::instance();
+  if (! monitor_) lmonitor_ = false;
 
   for (int i=0; i<MAX_GROUP_DEPTH; i++) current_group_[i] = 0;
 }
@@ -35,7 +35,7 @@ Parameters::Parameters(const char * file_name,
     parameter_tree_(new ParamNode("Cello")),
     monitor_(monitor)
 {
-  if (! monitor_) monitor_ = Monitor::instance();
+  if (! monitor_) lmonitor_ = false;
   for (int i=0; i<MAX_GROUP_DEPTH; i++) current_group_[i] = 0;
   read(file_name);
 }
@@ -113,7 +113,7 @@ void Parameters::read ( const char * file_name )
 
   fclose(file_pointer);
 
-  monitor_->print ("Parameters","read in %s",file_name);
+  if (lmonitor_) monitor_->print ("Parameters","read in %s",file_name);
 }
 
 //----------------------------------------------------------------------
@@ -130,8 +130,6 @@ void Parameters::write ( const char * file_name )
 	   file_name);
   }
 
-  std::map<std::string,Param *>::iterator it_param;
-
   // "Previous" groups are empty
   int n_prev = 0;
   std::string group_prev[MAX_GROUP_DEPTH];
@@ -146,6 +144,9 @@ void Parameters::write ( const char * file_name )
   int group_depth = 0;
 
   // Loop over parameters
+
+  std::map<std::string,Param *>::iterator it_param;
+
   for (it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
@@ -879,6 +880,8 @@ void Parameters::monitor_access_
  int index
  ) throw()
 {
+  if (! lmonitor_) return;
+
   Param * param = 0;
 
   if (index == -1) {
@@ -908,7 +911,7 @@ void Parameters::monitor_access_
 		  parameter_name_(parameter).c_str(),
 		  index_string,
 	   value.c_str());
-  monitor_->print_verbatim("Parameters",buffer);
+  if (lmonitor_) monitor_->print_verbatim("Parameters",buffer);
 }
 
 //----------------------------------------------------------------------
@@ -921,7 +924,7 @@ void Parameters::monitor_write_ (std::string parameter) throw()
 	   parameter_name_(parameter).c_str(),
 	   param ? param->value_to_string().c_str() : "[undefined]");
 
-  monitor_->print_verbatim("Parameters",buffer);
+  if (lmonitor_) monitor_->print_verbatim("Parameters",buffer);
 }
 
 //----------------------------------------------------------------------
@@ -978,6 +981,7 @@ Param * Parameters::list_element_ (std::string parameter, int index) throw()
   Param * list = parameter_(parameter);
   Param * param = NULL;
   if (list != NULL) {
+    list->set_accessed();
     int list_length = list->value_list_->size();
     if (list != NULL && 0 <= index && index < list_length ) {
       param =  (*(list->value_list_))[index];
@@ -1005,6 +1009,7 @@ size_t Parameters::extract_groups_
   }
   return i_group;
 }
+
 //----------------------------------------------------------------------
 
 void Parameters::new_param_
@@ -1030,3 +1035,22 @@ void Parameters::new_param_
   }
   param_node = param_node->new_subnode(full_parameter);
 }
+
+//----------------------------------------------------------------------
+
+void Parameters::check()
+{
+  std::map<std::string,Param *>::iterator it_param;
+
+  for (it_param =  parameter_map_.begin();
+       it_param != parameter_map_.end();
+       ++it_param) {
+    if (it_param->second && ! it_param->second->accessed()) {
+      WARNING1 ("Parameters::check()",
+		"Parmeter \"%s\" not accessed",
+		it_param->first.c_str());
+    }
+  }
+}
+
+//----------------------------------------------------------------------

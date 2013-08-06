@@ -30,6 +30,10 @@
 #include "problem_InitialDefault.hpp"
 #include "problem_Boundary.hpp"
 #include "problem_Method.hpp"
+#include "problem_Prolong.hpp"
+#include "problem_ProlongLinear.hpp"
+#include "problem_Restrict.hpp"
+#include "problem_RestrictLinear.hpp"
 
 
 #endif /* _PROBLEM_HPP */

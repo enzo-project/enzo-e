@@ -21,9 +21,9 @@ if (type == "charm"):
 
 components.append(['enzo','simulation', 'problem',
 	      'comm', 'mesh', 'field',
-	      'io', 'disk','memory','parallel',
+	      'io', 'disk','memory',
 	      'parameters', 
-	      'error', 'monitor', 'performance',
+	      'error', 'monitor', 'parallel','performance',
 	      'test','cello','external'])
 
 if (use_papi):
@@ -41,6 +41,11 @@ libraries  = ['png','$FORTRANLIBS']
 includes = [Glob('*enzo*hpp'),'fortran.h']
 
 sources  = [Glob('enzo_*cpp'), 
+    	    'calcdiss.F',
+	    'calc_dt.F',
+	    'CosmologyGetUnits.cpp',
+	    'euler.F',
+	    'FindField.cpp',
 	    'Grid_ComputeGammaField.cpp',
 	    'Grid_ComputePressure.cpp',
 	    'Grid_ComputePressureDualEnergyFormalism.cpp',
@@ -51,19 +56,19 @@ sources  = [Glob('enzo_*cpp'),
 	    'Grid_SetMinimumSupport.cpp',
 	    'Grid_SolveHydroEquations.cpp',
 	    'Grid_SolveMHDEquations.cpp',
-	    'calcdiss.F',
-	    'calc_dt.F',
-	    'euler.F',
+	    'interp1d.F',
+	    'interp2d.F',
+	    'interp3d.F',
+	    'interpolate.F',
+	    'inteuler.F',
 	    'inteuler.F',
 	    'intvar.F',
+	    'int_lin3d.F',
+	    'ngpinterp.F',
+	    'cicinterp.F',
 	    'pgas2d_dual.F',
 	    'pgas2d.F',
 	    'ppm_de.F',
-	    'twoshock.F',
-	    'xeuler_sweep.F',
-	    'yeuler_sweep.F',
-	    'zeuler_sweep.F',
-	    'CosmologyGetUnits.cpp',
 	    'PPML_Conservative.F',
 	    'PPML_HLLD.F',
 	    'PPML_MAIN.F',
@@ -74,7 +79,13 @@ sources  = [Glob('enzo_*cpp'),
 	    'PPML_Primitive.F',
 	    'PPML_sub.F',
 	    'PPML_TimeStep.F',
-	    'FindField.cpp']
+	    'tscint1d.F',
+	    'tscint2d.F',
+	    'tscint3d.F',
+	    'twoshock.F',
+	    'xeuler_sweep.F',
+	    'yeuler_sweep.F',
+	    'zeuler_sweep.F']
 
 
 charm_main = []
@@ -96,11 +107,15 @@ libraries   = env.Library ('enzo', sources)
 
 test_enzo_p = env.Program (['enzo-p.cpp', charm_main])
 
-binaries = [test_enzo_p]
+test_enzo_prolong = env.Program (['test_Prolong.cpp', charm_main])
+
+binaries = [test_enzo_p, test_enzo_prolong]
 
 if (type == "charm"):
    env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
    env.CharmBuilder('enzo.def.h', 'enzo.ci',ARG = 'enzo')
+   env.CharmBuilder('main_enzo.decl.h','enzo_main.ci',ARG = 'main_enzo')
+   env.CharmBuilder('main_enzo.def.h', 'enzo_main.ci',ARG = 'main_enzo')
 
 #------------------------------
 # INSTALL

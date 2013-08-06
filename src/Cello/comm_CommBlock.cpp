@@ -12,75 +12,221 @@
 #include "main.hpp"
 #include "charm_simulation.hpp"
 
+#include "enzo.hpp" /* temp */
+
 //----------------------------------------------------------------------
 
 CommBlock::CommBlock
 (
- int ibx, int iby, int ibz,
- int nbx, int nby, int nbz,
- int nx, int ny, int nz,
- double xpm, double ypm, double zpm, // Domain begin
- double xb, double yb, double zb,    // CommBlock width
- int num_field_blocks,
- bool testing
-) throw ()
-  :
-#ifdef CONFIG_USE_CHARM
-   count_refresh_face_(0),
+#ifndef CONFIG_USE_CHARM
+ Simulation * simulation,
 #endif
-    cycle_(0),
-    time_(0),
-    dt_(0)
+ Index index,
+ int nx, int ny, int nz,             // Block cells
+ int num_field_blocks,
+ int num_adapt_steps,
+ bool initial,
+ int cycle, double time, double dt,
+ int narray, char * array, int op_array,
+ int num_face_level, int * face_level,
+ bool testing
+ ) throw ()
+  : 
+#ifndef CONFIG_USE_CHARM
+  simulation_(simulation),
+#endif
+  index_(index),
+  index_initial_(0),
+  level_(index_.level()),
+  children_(),
+#ifdef CONFIG_USE_CHARM
+  loop_refresh_(),
+#endif
+  face_level_(),
+  child_face_level_(),
+  count_coarsen_(0),
+  adapt_step_(num_adapt_steps),
+  adapt_(adapt_unknown),
+  next_phase_(phase_output),
+  coarsened_(false)
 { 
-  TRACE("CommBlock::CommBlock");
+#ifdef CELLO_TRACE
+  index.print ("CommBlock::CommBlock");
+  printf("CommBlock::CommBlock(n(%d %d %d)  num_field_blocks %d  count_adapt %d  initial %d)\n",
+	 nx,ny,nz,num_field_blocks,adapt_step_,initial);
+
+  printf("CommBlock::CommBlock  n (%d %d %d)\n",nx,ny,nz);
+  printf("CommBlock::CommBlock  l %d\n",level_);
+#endif
+
+  int ibx,iby,ibz;
+  index.array(&ibx,&iby,&ibz);
+
+  double xm,ym,zm;
+  lower(&xm,&ym,&zm);
+  double xp,yp,zp;
+  upper(&xp,&yp,&zp);
+
+  FieldDescr * field_descr = this->simulation()->field_descr();
 
   block_ = new Block  (nx, ny, nz, num_field_blocks,
-		       xpm+ibx*xb, xpm+(ibx+1)*xb,
-		       ypm+iby*yb, ypm+(iby+1)*yb,
-		       zpm+ibz*zb, zpm+(ibz+1)*zb);
+		       xm, xp, ym, yp, zm, zp);
 
-  initialize_(ibx,iby,ibz, nbx,nby,nbz, nx,ny,nz,
-	      xpm,ypm,zpm, xb,yb,zb,    testing);
+  // Allocate block data
+  block_->allocate(field_descr);
+  child_block_ = NULL;
+
+#ifdef CONFIG_USE_CHARM
+
+  // Call virtual functions to update state
+
+  set_cycle(cycle);
+  set_time (time);
+  set_dt   (dt);
+
+#endif
+
+  // Perform any additional initialization for derived class 
+
+  initialize ();
+
+  // Initialize neighbor face levels
+
+  if (num_face_level == 0) {
+
+    face_level_.resize(27);
+    child_face_level_.resize(27);
+    for (int i=0; i<27; i++) face_level_[i] = 0;
+  } else {
+    face_level_.resize(num_face_level);
+    child_face_level_.resize(num_face_level);
+    for (int i=0; i<num_face_level; i++) face_level_[i] = face_level[i];
+  }
+
+
+
+  int na3[3];
+  size_forest(&na3[0],&na3[1],&na3[2]);
+
+  int icx=0,icy=0,icz=0;
+  if (level_ > 0) {
+    index_.child(level_,&icx,&icy,&icz);
+  }
+
+  if (narray != 0) {
+    
+    // copy any input data
+    FieldDescr * field_descr = this->simulation()->field_descr();
+    FieldFace field_face (block()->field_block(),field_descr);
+
+    //    set "face" to full FieldBlock
+    field_face.set_face(0,0,0);
+    field_face.set_ghost(true,true,true);
+
+    //    set array operation if any
+    switch (op_array) {
+    case op_array_restrict:
+      {
+	Restrict * restrict = this->simulation()->problem()->restrict();
+	field_face.set_restrict(restrict,icx,icy,icz);
+      }
+      break;
+    case op_array_prolong:
+      {
+	Prolong * prolong = this->simulation()->problem()->prolong();
+	field_face.set_prolong(prolong,icx,icy,icz);
+      }
+      break;
+    default:
+      break;
+    }
+
+    field_face.store(narray,array);
+
+  }
+
+#ifdef CONFIG_USE_CHARM
+
+  if (! testing) {
+
+    // Count CommBlocks on each processor
+   
+    ((SimulationCharm *)simulation())->insert_block();
+
+  }
+
+  
+  if (initial) {
+    TRACE("Calling apply_initial()");
+    apply_initial_();
+  }
+  TRACE("END CommBlock()");
+#endif /* CONFIG_USE_CHARM */
 
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::initialize_
-(
- int ibx, int iby, int ibz,
- int nbx, int nby, int nbz,
- int nx, int ny, int nz,
- double xpm, double ypm, double zpm, // Domain begin
- double xb, double yb, double zb,   // CommBlock width
- bool testing
- )
- {
-   size_[0] = nbx;
-   size_[1] = nby;
-   size_[2] = nbz;
-
-   index_[0] = ibx;
-   index_[1] = iby;
-   index_[2] = ibz;
-
 #ifdef CONFIG_USE_CHARM
 
-   if (! testing) {
-     // Count CommBlocks on each processor
-   
-     SimulationCharm * simulation_charm  = 
-       dynamic_cast<SimulationCharm *> (proxy_simulation.ckLocalBranch());
+void CommBlock::pup(PUP::er &p)
+{
+  TRACEPUP;
 
-     TRACE1 ("simulation_charm = %p",simulation_charm);
-     TRACE1 ("simulation = %p",proxy_simulation.ckLocalBranch());
-     TRACE1 ("proxy_simulation = %p",&proxy_simulation);
-     if (simulation_charm) simulation_charm->insert_block();
-   }
+  CBase_CommBlock::pup(p);
+
+  p | *block_;
+  p | *child_block_;
+  p | index_;
+  p | cycle_;
+  p | time_;
+  p | dt_;
+  p | index_initial_;
+  p | level_;
+  p | children_;
+  p | count_coarsen_;
+  p | adapt_step_;
+  p | adapt_;
+  p | loop_refresh_;
+  p | face_level_;
+  p | child_face_level_;
+  p | next_phase_;
+  p | coarsened_;
+
+}
+
+#endif /* CONFIG_USE_CHARM */
+
+//----------------------------------------------------------------------
+
+void CommBlock::initialize_
+(
+ int nx, int ny, int nz,
+ bool testing
+ )
+{
+}
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+void CommBlock::apply_initial_() throw ()
+{
+
+  TRACE("CommBlock::apply_initial_()");
+  simulation()->performance()->start_region(perf_initial);
+  FieldDescr * field_descr = simulation()->field_descr();
+
+  // Apply initial conditions
+
+  index_initial_ = 0;
+  Problem * problem = simulation()->problem();
+  while (Initial * initial = problem->initial(index_initial_++)) {
+    initial->enforce_block(this,field_descr, simulation()->hierarchy());
+  }
+  simulation()->performance()->stop_region(perf_initial);
+}
 #endif
-
-
- }
 
 //----------------------------------------------------------------------
 
@@ -88,12 +234,31 @@ CommBlock::~CommBlock() throw ()
 { 
 #ifdef CONFIG_USE_CHARM
 
+  if (level_ > 0) {
+
+    // Send restricted data to parent 
+
+    int ichild[3];
+    index_.child(level_,ichild,ichild+1,ichild+2);
+
+    int n; 
+    char * array;
+    int iface[3]={0,0,0};
+    bool lghost[3]={true,true,true};
+
+    FieldFace * field_face = 
+      load_face_(&n,&array,iface,ichild,lghost,op_array_restrict);
+
+    thisProxy[index_.index_parent()].x_refresh_child(n,array,ichild);
+
+    delete field_face;
+  }
   if (block_) delete block_;
   block_ = 0;
+  if (child_block_) delete child_block_;
+  child_block_ = 0;
 
-  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
-
-  if (simulation_charm) simulation_charm->delete_block();
+  ((SimulationCharm *)simulation())->delete_block();
 #endif
 
 }
@@ -120,25 +285,115 @@ CommBlock & CommBlock::operator = (const CommBlock & block) throw ()
 
 void CommBlock::index_forest (int * ix, int * iy, int * iz) const throw ()
 {
-  if (ix) (*ix) = index_[0]; 
-  if (iy) (*iy) = index_[1]; 
-  if (iz) (*iz) = index_[2]; 
+  index_.array(ix,iy,iz);
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::size_forest (int * nx=0, int * ny=0, int * nz=0) const throw ()
+std::string CommBlock::name() const throw()
+
 {
-  if (nx) (*nx)=size_[0]; 
-  if (ny) (*ny)=size_[1]; 
-  if (nz) (*nz)=size_[2]; 
+  return std::string("Block ") + index_.bit_string(level_,simulation()->dimension());
+  //    std::stringstream convert;
+  //    convert << "block_" << id_();
+  //    return convert.str();
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::size_forest (int * nx, int * ny, int * nz) const throw ()
+{
+  simulation()->hierarchy()->num_blocks(nx,ny,nz);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::lower
+(double * xm, double * ym, double * zm) const throw ()
+{
+  int  ix, iy, iz;
+  int  nx, ny, nz;
+
+  index_global (&ix,&iy,&iz,&nx,&ny,&nz);
+
+  double xdm, ydm, zdm;
+  double xdp, ydp, zdp;
+  simulation()->hierarchy()->lower(&xdm,&ydm,&zdm);
+  simulation()->hierarchy()->upper(&xdp,&ydp,&zdp);
+  double ax = 1.0*ix/nx;
+  double ay = 1.0*iy/ny;
+  double az = 1.0*iz/nz;
+
+  double xbm = (1.0-ax)*xdm + ax*xdp;
+  double ybm = (1.0-ay)*ydm + ay*ydp;
+  double zbm = (1.0-az)*zdm + az*zdp;
+
+  if (xm) (*xm) = xbm;
+  if (ym) (*ym) = ybm;
+  if (zm) (*zm) = zbm;
+  TRACE6 ("DEBUG LOWER %d %d %d  %f %f %f",ix,iy,iz,*xm,*ym,*zm);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::upper
+(double * xp, double * yp, double * zp) const throw ()
+{
+  int  ix, iy, iz;
+  int  nx, ny, nz;
+
+  index_global (&ix,&iy,&iz,&nx,&ny,&nz);
+
+  double xdm, ydm, zdm;
+  double xdp, ydp, zdp;
+  simulation()->hierarchy()->lower(&xdm,&ydm,&zdm);
+  simulation()->hierarchy()->upper(&xdp,&ydp,&zdp);
+
+  double ax = 1.0*(ix+1)/nx;
+  double ay = 1.0*(iy+1)/ny;
+  double az = 1.0*(iz+1)/nz;
+
+  double xbp = (1.0-ax)*xdm + ax*xdp;
+  double ybp = (1.0-ay)*ydm + ay*ydp;
+  double zbp = (1.0-az)*zdm + az*zdp;
+
+  if (xp) (*xp) = xbp;
+  if (yp) (*yp) = ybp;
+  if (zp) (*zp) = zbp;
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::index_global
+( int *ix, int *iy, int *iz,
+  int *nx, int *ny, int *nz ) const
+{
+  index_forest(ix,iy,iz);
+  size_forest (nx,ny,nz);
+
+  Index index = this->index();
+
+  int level = index.level();
+  for (int i=0; i<level; i++) {
+    int bx,by,bz;
+    index.child(i+1,&bx,&by,&bz);
+    if (ix) (*ix) = ((*ix) << 1) | bx;
+    if (iy) (*iy) = ((*iy) << 1) | by;
+    if (iz) (*iz) = ((*iz) << 1) | bz;
+    if (nx) (*nx) <<= 1;
+    if (ny) (*ny) <<= 1;
+    if (nz) (*nz) <<= 1;
+  }
+  TRACE6("DEBUG INDEX B %d %d %d  %d %d %d",
+	 *ix,*iy,*iz,*nx,*ny,*nz);
 }
 
 //======================================================================
 // MPI FUNCTIONS
 //======================================================================
 
-#ifndef CONFIG_USE_CHARM
+#ifdef CONFIG_USE_CHARM
+#else /* CONFIG_USE_CHARM */
 
 void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
 			       const Hierarchy * hierarchy,
@@ -156,286 +411,34 @@ void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
 		       ibx,iby,ibz, fx,fy,fz);
 }
 
-#endif
-
-//======================================================================
-// CHARM FUNCTIONS
-//======================================================================
-
-#ifdef CONFIG_USE_CHARM
-
-void CommBlock::prepare()
-{
-
-  TRACE1("CommBlock::prepare() %p",&thisProxy);
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  //--------------------------------------------------
-  // Enforce boundary conditions
-  //--------------------------------------------------
-
-  bool is_boundary[3][2];
-  bool axm,axp,aym,ayp,azm,azp;
-  determine_boundary_(is_boundary,&axm,&axp,&aym,&ayp,&azm,&azp);
-  update_boundary_(is_boundary,axm,axp,aym,ayp,azm,azp);
-
-  FieldDescr * field_descr = simulation->field_descr();
-
-  //--------------------------------------------------
-  // Compute local dt
-  //--------------------------------------------------
-
-  Problem * problem = simulation->problem();
-
-  double dt_block;
-  Timestep * timestep = problem->timestep();
-
-  dt_block = timestep->evaluate(field_descr,this);
-
-  // Reduce timestep to coincide with scheduled output if needed
-
-  int index_output=0;
-  while (Output * output = problem->output(index_output++)) {
-    Schedule * schedule = output->schedule();
-    dt_block = schedule->update_timestep(time_,dt_block);
-  }
-
-
-  // Reduce timestep to not overshoot final time from stopping criteria
-
-  Stopping * stopping = problem->stopping();
-
-  double time_stop = stopping->stop_time();
-  double time_curr = time_;
-
-  dt_block = MIN (dt_block, (time_stop - time_curr));
-
-  //--------------------------------------------------
-  // Evaluate local stopping criteria
-  //--------------------------------------------------
-
-  int stop_block = stopping->complete(cycle_,time_);
-
-  //--------------------------------------------------
-  // Reduce to find CommBlock array minimum dt and stopping criteria
-  //--------------------------------------------------
-
-  double min_reduce[2];
-
-  min_reduce[0] = dt_block;
-  min_reduce[1] = stop_block ? 1.0 : 0.0;
-
-  CkCallback callback (CkIndex_CommBlock::p_output(NULL), thisProxy);
-  TRACE1("Calling contribute %d",2*sizeof(double));
-  contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
-
-}
 #endif /* CONFIG_USE_CHARM */
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void CommBlock::p_output(CkReductionMsg * msg)
-{
-
-  TRACE("CommBlock::p_output()");
-  double * min_reduce = (double * )msg->getData();
-
-  double dt_forest   = min_reduce[0];
-  bool   stop_forest = min_reduce[1] == 1.0 ? true : false;
-  set_dt   (dt_forest);
-  TRACE2("CommBlock::p_output(): dt=%f  stop=%d",dt_forest,stop_forest);
-
-  delete msg;
-
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  simulation->update_state(cycle_,time_,dt_forest,stop_forest);
-
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  // ??? HOW IS cycle_ and time_ update on all processors ensured before index() calls
-  // Simulation::p_output()?  Want last block?
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  
-
-  // "root" block calls Simulation::p_output()
-  //  if (index() == 0) {
-  //    proxy_simulation.p_output();
-  //  }
-
-  // Wait for all blocks to check in before calling Simulation::p_output()
-  // for next output
-
-  TRACE("CommBlock::p_output() calling SimulationCharm::p_output");
-  SimulationCharm * simulation_charm = proxy_simulation.ckLocalBranch();
-  simulation_charm->p_output();
-}
-#endif /* CONFIG_USE_CHARM */
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-//----------------------------------------------------------------------
-void CommBlock::p_compute (int cycle, double time, double dt)
-{
-  // set_cycle(cycle);
-  // set_time(time);
-  // set_dt(dt);
-
-  TRACE3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
-  compute();
-}
-#endif /* CONFIG_USE_CHARM */
-
-//----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
-
-void CommBlock::refresh ()
-{
-  TRACE ("CommBlock::refresh()");
-
-  bool is_boundary[3][2];
-
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  Boundary * boundary = simulation->problem()->boundary();
-  FieldDescr * field_descr = simulation->field_descr();
-  
-  bool periodic = boundary->is_periodic();
-
-  CProxy_CommBlock block_array = thisProxy;
-
-  //--------------------------------------------------
-  // Refresh
-  //--------------------------------------------------
-
-  int ibx,iby,ibz;
-
-  thisIndex.array(&ibx,&iby,&ibz);
-
-  int nbx = size_[0];
-  int nby = size_[1];
-  int nbz = size_[2];
-  
-  bool fx3[3],fy3[3],fz3[3];
-  determine_boundary_
-    (is_boundary,&fx3[0],&fx3[2],&fy3[0],&fy3[2],&fz3[0],&fz3[2]);
-  fx3[1]=true;
-  fy3[1]=true;
-  fz3[1]=true;
-  fx3[0] = fx3[0] && (periodic || ! is_boundary[axis_x][face_lower]);
-  fx3[2] = fx3[2] && (periodic || ! is_boundary[axis_x][face_upper]);
-  fy3[0] = fy3[0] && (periodic || ! is_boundary[axis_y][face_lower]);
-  fy3[2] = fy3[2] && (periodic || ! is_boundary[axis_y][face_upper]);
-  fz3[0] = fz3[0] && (periodic || ! is_boundary[axis_z][face_lower]);
-  fz3[2] = fz3[2] && (periodic || ! is_boundary[axis_z][face_upper]);
-  int ix3[3],iy3[3],iz3[3];
-  ix3[0] = (ibx - 1 + nbx) % nbx;
-  iy3[0] = (iby - 1 + nby) % nby;
-  iz3[0] = (ibz - 1 + nbz) % nbz;
-  ix3[1] = ibx;
-  iy3[1] = iby;
-  iz3[1] = ibz;
-  ix3[2] = (ibx + 1) % nbx;
-  iy3[2] = (iby + 1) % nby;
-  iz3[2] = (ibz + 1) % nbz;
-  
-  // Refresh face ghost zones
-
-  bool gx,gy,gz;
-  gx = false;
-  gy = false;
-  gz = false;
-
-  int fxl = 1;
-  int fyl = (nby==1 && ! periodic) ? 0 : 1;
-  int fzl = (nbz==1 && ! periodic) ? 0 : 1;
-
-  for (int fx=-fxl; fx<=fxl; fx++) {
-    for (int fy=-fyl; fy<=fyl; fy++) {
-      for (int fz=-fzl; fz<=fzl; fz++) {
-	int sum = abs(fx)+abs(fy)+abs(fz);
-	if ((fx3[fx+1] && fy3[fy+1] && fz3[fz+1]) &&
-	    ((sum==1 && field_descr->refresh_face(2)) ||
-	     (sum==2 && field_descr->refresh_face(1)) ||
-	     (sum==3 && field_descr->refresh_face(0)))) {
-
-	  FieldFace field_face (block_->field_block(),field_descr);
-
-	  field_face.set_face(fx,fy,fz);
-	  field_face.set_ghost(gx,gy,gz);
-	  
-	  DEBUG9("index %d %d %d  %d %d %d  %d %d %d",
-		 index_[0],index_[1],index_[2],
-		 ix3[fx+1],iy3[fy+1],iz3[fz+1],
-		 fx,fy,fz);
-
-	  int n; 
-	  char * array;
-	  field_face.load(&n, &array);
-
-	  Index index;
-
-	  index.set_array(ix3[fx+1],iy3[fy+1],iz3[fz+1]);
-	  index.set_level(0);
-	  index.clean();
-
-	  thisProxy[index].x_refresh (n,array,-fx,-fy,-fz);
-	}
-      }
-    }
-  }
-
-  // NOTE: x_refresh() calls compute, but if no incoming faces
-  // it will never get called.  So every block also calls
-  // x_refresh() itself with a null array
-
-  x_refresh (0,0,0, 0, 0);
-
-}
-#endif /* CONFIG_USE_CHARM */
-
-//----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
 
 void CommBlock::determine_boundary_
 (
  bool is_boundary[3][2],
- bool * fxm,
- bool * fxp,
- bool * fym,
- bool * fyp,
- bool * fzm,
- bool * fzp
+ bool * fxm, bool * fxp,
+ bool * fym, bool * fyp,
+ bool * fzm, bool * fzp
  )
 {
   
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  Hierarchy * hierarchy   = simulation->hierarchy();
-
-  double lower_h[3], upper_h[3];
-  hierarchy->lower(&lower_h[0],&lower_h[1],&lower_h[2]);
-  hierarchy->upper(&upper_h[0],&upper_h[1],&upper_h[2]);
-
   // return is_boundary[] array of faces on domain boundary
 
-  is_on_boundary(lower_h,upper_h,is_boundary);
+  is_on_boundary (is_boundary);
 
   int nx,ny,nz;
   block_->field_block()->size (&nx,&ny,&nz);
 
   // Determine in which directions we need to communicate or update boundary
 
-  if (fxm) *fxm = nx > 1;
-  if (fxp) *fxp = nx > 1;
-  if (fym) *fym = ny > 1;
-  if (fyp) *fyp = ny > 1;
-  if (fzm) *fzm = nz > 1;
-  if (fzp) *fzp = nz > 1;
+  if (fxm) *fxm = (nx > 1);
+  if (fxp) *fxp = (nx > 1);
+  if (fym) *fym = (ny > 1);
+  if (fyp) *fyp = (ny > 1);
+  if (fzm) *fzm = (nz > 1);
+  if (fzp) *fzp = (nz > 1);
 }
 
 #endif
@@ -445,22 +448,16 @@ void CommBlock::determine_boundary_
 
 #ifdef CONFIG_USE_CHARM
 
-void CommBlock::update_boundary_
-(
- bool is_boundary[3][2],
- bool fxm,
- bool fxp,
- bool fym,
- bool fyp,
- bool fzm,
- bool fzp
-)
+void CommBlock::update_boundary_ ()
 {
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  bool is_boundary[3][2];
+  bool fxm,fxp,fym,fyp,fzm,fzp;
 
-  Boundary * boundary = simulation->problem()->boundary();
-  const FieldDescr * field_descr = simulation->field_descr();
+  determine_boundary_(is_boundary,&fxm,&fxp,&fym,&fyp,&fzm,&fzp);
+
+  Boundary * boundary = simulation()->problem()->boundary();
+  const FieldDescr * field_descr = simulation()->field_descr();
 
 
   // Update boundaries
@@ -489,224 +486,160 @@ void CommBlock::update_boundary_
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
-void CommBlock::x_refresh (int n, char * buffer, int fx, int fy, int fz)
-{
-
-  TRACE ("CommBlock::x_refresh()");
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  FieldDescr * field_descr = simulation->field_descr();
-
-  if ( n != 0) {
-
-    // n == 0 is the call from self to ensure x_refresh()
-    // always gets called at least once
-
-    bool gx,gy,gz;
-    gx = false;
-    gy = false;
-    gz = false;
-
-    FieldFace field_face(block_->field_block(), field_descr);
-
-    field_face.set_face(fx,fy,fz);
-    field_face.set_ghost(gx,gy,gz);
-
-    field_face.store (n, buffer);
+bool CommBlock::is_child (const Index & index) const
+{ 
+  for (size_t i=0; i<children_.size(); i++) {
+    if (children_[i] == index) return true;
   }
-
-  //--------------------------------------------------
-  // Count incoming faces
-  // (SHOULD NOT RECOMPUTE EVERY CALL)
-  //--------------------------------------------------
-
-  int nx,ny,nz;
-  block_->field_block()->size (&nx,&ny,&nz);
-
-  // Determine axes that may be neighbors
-
-  bool fxm = nx > 1;
-  bool fxp = nx > 1;
-  bool fym = ny > 1;
-  bool fyp = ny > 1;
-  bool fzm = nz > 1;
-  bool fzp = nz > 1;
-
-  // Adjust for boundary faces
-
-  bool periodic = simulation->problem()->boundary()->is_periodic();
-
-  Hierarchy * hierarchy = simulation->hierarchy();
-
-  double lower[3], upper[3];
-  hierarchy->lower(&lower[0],&lower[1],&lower[2]);
-  hierarchy->upper(&upper[0],&upper[1],&upper[2]);
-
-  bool is_boundary[3][2];
-  is_on_boundary (lower,upper,is_boundary);
-
-  fxm = fxm && (periodic || ! is_boundary[axis_x][face_lower]);
-  fxp = fxp && (periodic || ! is_boundary[axis_x][face_upper]);
-  fym = fym && (periodic || ! is_boundary[axis_y][face_lower]);
-  fyp = fyp && (periodic || ! is_boundary[axis_y][face_upper]);
-  fzm = fzm && (periodic || ! is_boundary[axis_z][face_lower]);
-  fzp = fzp && (periodic || ! is_boundary[axis_z][face_upper]);
-
-  // Count total expected number of incoming faces
-
-  // self
-
-  int count = 1;
-
-  // faces
-
-  if (field_descr->refresh_face(2)) {
-    if ( fxm ) ++count;
-    if ( fxp ) ++count;
-    if ( fym ) ++count;
-    if ( fyp ) ++count;
-    if ( fzm ) ++count;
-    if ( fzp ) ++count;
-  }
-
-  // edges
-
-  if (field_descr->refresh_face(1)) {
-    if ( fxm && fym ) ++count;
-    if ( fxm && fyp ) ++count;
-    if ( fxp && fym ) ++count;
-    if ( fxp && fyp ) ++count;
-    if ( fym && fzm ) ++count;
-    if ( fym && fzp ) ++count;
-    if ( fyp && fzm ) ++count;
-    if ( fyp && fzp ) ++count;
-    if ( fzm && fxm ) ++count;
-    if ( fzm && fxp ) ++count;
-    if ( fzp && fxm ) ++count;
-    if ( fzp && fxp ) ++count;
-  }
-
-  // corners
-
-  if (field_descr->refresh_face(0)) {
-    if ( fxm && fym && fzm ) ++count;
-    if ( fxm && fym && fzp ) ++count;
-    if ( fxm && fyp && fzm ) ++count;
-    if ( fxm && fyp && fzp ) ++count;
-    if ( fxp && fym && fzm ) ++count;
-    if ( fxp && fym && fzp ) ++count;
-    if ( fxp && fyp && fzm ) ++count;
-    if ( fxp && fyp && fzp ) ++count;
-  }
-
-  //--------------------------------------------------
-  // Compute
-  //--------------------------------------------------
-
-  if (++count_refresh_face_ >= count) {
-    TRACE ("CommBlock::x_refresh() calling prepare()");
-    count_refresh_face_ = 0;
-    prepare();
-  }
+  return false;
 }
-#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
-void CommBlock::compute()
+void CommBlock::delete_child(Index index)
 {
-  TRACE ("CommBlock::compute()");
-
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
- #ifdef CONFIG_USE_PROJECTIONS
-   double time_start = CmiWallTimer();
- #endif
-
-  FieldDescr * field_descr = simulation->field_descr();
-
-  int index_method = 0;
-  while (Method * method = simulation->problem()->method(index_method++)) {
-    method -> compute_block (field_descr,this);
+  for (size_t i=0; i<children_.size(); i++) {
+    // erase by replacing occurences with self
+    if (children_[i] == index) children_[i] = index_;
   }
-
- #ifdef CONFIG_USE_PROJECTIONS
-   traceUserBracketEvent(10,time_start, CmiWallTimer());
- #endif
-
-  // Update CommBlock cycle and time to Simulation time and cycle
-
-  set_cycle (cycle_ + 1);
-
-  set_time  (time_  + dt_);
-  
-  // prepare for next cycle: Timestep, Stopping, Monitor, Output
-
-  TRACE ("CommBlock::compute() calling refresh()");
-  refresh();
-
 }
-#endif /* CONFIG_USE_CHARM */
 
 //======================================================================
+
+void CommBlock::loop_limits_refresh_(int ifacemin[3], int ifacemax[3])
+  const throw()
+{
+
+  Boundary * boundary = simulation()->problem()->boundary();
+
+  // which faces need to be refreshed?
+  bool on_boundary[3][2];
+  is_on_boundary (on_boundary);
+
+  bool periodic = boundary->is_periodic();
+  if (periodic) {
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+	on_boundary[axis][face] = false;
+      }
+    }
+  }
+
+  // set face loop limits accordingly
+  ifacemin[0] = on_boundary[0][0] ? 0 : -1;
+  ifacemin[1] = on_boundary[1][0] ? 0 : -1;
+  ifacemin[2] = on_boundary[2][0] ? 0 : -1;
+  ifacemax[0] = on_boundary[0][1] ? 0 : 1;
+  ifacemax[1] = on_boundary[1][1] ? 0 : 1;
+  ifacemax[2] = on_boundary[2][1] ? 0 : 1;
+
+  int rank = simulation()->dimension();
+  if (rank < 2) ifacemin[1] = ifacemax[1] = 0;
+  if (rank < 3) ifacemin[2] = ifacemax[2] = 0;
+
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::loop_limits_nibling_ 
+( int ichildmin[3],int ichildmax[3],int iface[3]) const throw()
+{
+  int rank = simulation()->dimension();
+
+  ichildmin[0] = (iface[0] == 0) ? 0 : (iface[0]+1)/2;
+  ichildmax[0] = (iface[0] == 0) ? 1 : (iface[0]+1)/2;
+  ichildmin[1] = (iface[1] == 0) ? 0 : (iface[1]+1)/2;
+  ichildmax[1] = (iface[1] == 0) ? 1 : (iface[1]+1)/2;
+  ichildmin[2] = (iface[2] == 0) ? 0 : (iface[2]+1)/2;
+  ichildmax[2] = (iface[2] == 0) ? 1 : (iface[2]+1)/2;
+  if (rank < 2) ichildmin[1] = ichildmax[1] = 0;
+  if (rank < 3) ichildmin[2] = ichildmax[2] = 0;
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::facing_child_(int jc3[3], int ic3[3], int if3[3]) const
+{
+  jc3[0] = ic3[0];
+  jc3[1] = ic3[1];
+  jc3[2] = ic3[2];
+  if (if3[0]==-1) jc3[0] = 1;
+  if (if3[1]==-1) jc3[1] = 1;
+  if (if3[2]==-1) jc3[2] = 1;
+  if (if3[0]==+1) jc3[0] = 0;
+  if (if3[1]==+1) jc3[1] = 0;
+  if (if3[2]==+1) jc3[2] = 0;
+}
+
+//----------------------------------------------------------------------
 
 void CommBlock::copy_(const CommBlock & comm_block) throw()
 {
   block_->copy_(*comm_block.block());
-  for (int i=0; i<3; i++) {
-    index_[i] = comm_block.index_[i];
-    size_[i] = comm_block.size_[i];
-  }
+  if (child_block_) child_block_->copy_(*comm_block.child_block());
 
   cycle_ = comm_block.cycle_;
-  time_ = comm_block.time_;
-  dt_ = comm_block.dt_;
-
-#ifdef CONFIG_USE_CHARM
-  count_refresh_face_ = comm_block.count_refresh_face_;
-#endif
-  
+  time_  = comm_block.time_;
+  dt_    = comm_block.dt_;
+  level_ = comm_block.level_;
+  adapt_step_ = comm_block.adapt_step_;
+  adapt_ = comm_block.adapt_;
+  next_phase_ = comm_block.next_phase_;
+  coarsened_ = comm_block.coarsened_;
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::is_on_boundary (double lower[3], double upper[3],
-				bool is_boundary[3][2]) throw()
+void CommBlock::is_on_boundary (bool is_boundary[3][2]) const throw()
 {
 
-  // // COMPARISON MAY BE INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+  Boundary * boundary = simulation()->problem()->boundary();
+  bool periodic = boundary->is_periodic();
 
-  // is_boundary[axis_x][face_lower] = 
-  //   (cello::err_abs(lower_[axis_x],lower[axis_x]) < 1e-6);
-  // is_boundary[axis_y][face_lower] = 
-  //   (cello::err_abs(lower_[axis_y],lower[axis_y]) < 1e-6);
-  // is_boundary[axis_z][face_lower] = 
-  //   (cello::err_abs(lower_[axis_z],lower[axis_z]) < 1e-6);
-  // is_boundary[axis_x][face_upper] = 
-  //   (cello::err_abs(upper_[axis_x],upper[axis_x]) < 1e-6);
-  // is_boundary[axis_y][face_upper] = 
-  //   (cello::err_abs(upper_[axis_y],upper[axis_y]) < 1e-6);
-  // is_boundary[axis_z][face_upper] = 
-  //   (cello::err_abs(upper_[axis_z],upper[axis_z]) < 1e-6);
-  is_boundary[0][0] = (index_[0] == 0);
-  is_boundary[1][0] = (index_[1] == 0);
-  is_boundary[2][0] = (index_[2] == 0);
-  is_boundary[0][1] = (index_[0] == size_[0] - 1);
-  is_boundary[1][1] = (index_[1] == size_[1] - 1);
-  is_boundary[2][1] = (index_[2] == size_[2] - 1);
-}
-//----------------------------------------------------------------------
-
-void CommBlock::allocate (const FieldDescr * field_descr) throw()
-{ 
-  block_->allocate(field_descr);
-    //    block_.field_block(i)->allocate_array(field_descr);
-    //    block_.field_block(i)->allocate_ghosts(field_descr);
+  int n3[3];
+  size_forest (&n3[0],&n3[1],&n3[2]);
+  
+  for (int axis=0; axis<3; axis++) {
+    for (int face=0; face<2; face++) {
+      is_boundary[axis][face] = 
+	index_.is_on_boundary(axis,face,n3[axis],periodic);
+    }
+  }
 }
 
 //----------------------------------------------------------------------
 
+Simulation * CommBlock::simulation() const
+{
+#ifdef CONFIG_USE_CHARM
+  return proxy_simulation.ckLocalBranch();
+#else /* CONFIG_USE_CHARM */
+  return simulation_;
+#endif /* CONFIG_USE_CHARM */
+}
+
+
+//----------------------------------------------------------------------
+
+void CommBlock::debug_faces_(const char * buffer, int * faces)
+{
+#ifdef CELLO_TRACE
+  if (!faces) return;
+  int imp[3] = {-1,1,0};
+  int i0p[3] = { 0,1,0};
+  int ipp[3] = { 1,1,0};
+  int im0[3] = {-1,0,0};
+  int i00[3] = { 0,0,0};
+  int ip0[3] = { 1,0,0};
+  int imm[3] = {-1,-1,0};
+  int i0m[3] = { 0,-1,0};
+  int ipm[3] = { 1,-1,0};
+  index_.print(buffer);
+  printf ("%s %2d %2d %2d\n",
+   	  buffer, faces[IF3(imp)], faces[IF3(i0p)], faces[IF3(ipp)]);
+  printf ("%s %2d %2d %2d\n",
+   	  buffer, faces[IF3(im0)], faces[IF3(i00)], faces[IF3(ip0)]);
+  printf ("%s %2d %2d %2d\n",
+   	  buffer, faces[IF3(imm)], faces[IF3(i0m)], faces[IF3(ipm)]);
+#endif
+}

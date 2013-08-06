@@ -3,7 +3,7 @@
 #
 # This file is used for developing the Cello / Enzo-P input grammar and syntax
 
-   include "implosion.incl"
+   include "input/implosion.incl"
 
    Initial {
        density       { value = [ 0.125,                x + y < 0.1517, 

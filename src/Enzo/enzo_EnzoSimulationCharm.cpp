@@ -61,7 +61,6 @@ void EnzoSimulationCharm::pup (PUP::er &p)
 void EnzoSimulationCharm::initialize() throw()
 {
   
-  
   TRACE("EnzoSimulationCharm::initialize calling EnzoSimulationCharm::initialize_config_()");
   initialize_config_();
 

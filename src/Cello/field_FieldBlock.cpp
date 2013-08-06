@@ -205,8 +205,6 @@ void FieldBlock::allocate_array
  ) throw()
 {
 
-  TRACE("FieldBlock::allocate_array");
-
   // Error check size
 
   if (! (size_[0] > 0 &&
@@ -280,9 +278,6 @@ void FieldBlock::allocate_array
 	   "Code error: array size was computed incorrectly");
   };
 
-    TRACE1("this = %p",this);
-  TRACE3("size = %d %d %d\n",size_[0],size_[1],size_[2]);
-  TRACE1("array_.size() = %d",array_.size());
 }
 
 //----------------------------------------------------------------------
@@ -300,8 +295,6 @@ void FieldBlock::reallocate_array
     return;
   }
   
-  TRACE("FieldBlock::deallocate_array");
-
   std::vector<int>  old_offsets;
   std::vector<char> old_array;
 
@@ -311,13 +304,9 @@ void FieldBlock::reallocate_array
   array_.clear();
   offsets_.clear();
 
-  TRACE2 ("ghosts %d -> %d",ghosts_allocated_,ghosts_allocated);
   ghosts_allocated_ = ghosts_allocated;
 
   allocate_array(field_descr,ghosts_allocated_);
-
-  TRACE2 ("sizeof old array,offsets = %d %d",old_array.size(),old_offsets.size());
-  TRACE2 ("sizeof new array,offsets = %d %d",array_.size(),offsets_.size());
 
   restore_array_ (field_descr, &old_array[0], old_offsets);
 }
@@ -326,10 +315,8 @@ void FieldBlock::reallocate_array
 
 void FieldBlock::deallocate_array () throw()
 {
-  TRACE("FieldBlock::deallocate_array");
   if ( array_allocated() ) {
 
-    TRACE("deallocating array_");
     array_.clear();
     offsets_.clear();
   }
@@ -422,7 +409,7 @@ void FieldBlock::refresh_ghosts
 
   void * handle_send;
   void * handle_recv;
-  TRACE2 ("ip,ip_remote = %d %d",ip,ip_remote);
+
   if (ip < ip_remote) { // send then receive
 
     // send 
@@ -557,11 +544,153 @@ int FieldBlock::field_size
 
 //----------------------------------------------------------------------
 
-void FieldBlock::print (const FieldDescr * field_descr,
-			const char * message,
-			double lower[3],
-			double upper[3],
-			bool use_file) const throw()
+void FieldBlock::mul (int id_1, int id_2, const FieldDescr * field_descr)
+{
+  precision_type p1 = field_descr->precision(id_1);
+  precision_type p2 = field_descr->precision(id_2);
+  ASSERT ("FieldBlock::mul",
+	  "FieldBlock precisions must be constant",
+	  p1 == p2);
+
+  char * field_1 = field_unknowns(field_descr,id_1);
+  char * field_2 = field_unknowns(field_descr,id_2);
+  
+  switch (p1) {
+  case precision_single:
+    mul_((float *) field_1, (float *) field_2, field_descr);
+    break;
+  case precision_double:
+    mul_((double *) field_1,(double *) field_2, field_descr);
+    break;
+  default:
+    break;
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+template<class T>
+void FieldBlock::mul_ (T * field_1, T * field_2, const FieldDescr * field_descr)
+{
+  int nx,ny,nz;
+  size (&nx,&ny,&nz);
+  int gx,gy,gz;
+  field_descr->ghosts (0,&gx,&gy,&gz);
+  int ndx = (nx>1) ? nx+2*gx : 1;
+  int ndy = (ny>1) ? ny+2*gy : 1;
+
+  for (int ix=0; ix<nx; ix++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int iz=0; iz<nz; iz++) {
+	int i=ix + ndx*(iy + ndy*iz);
+	field_1[i] *= field_2[i];
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlock::div (int id_1, int id_2, const FieldDescr * field_descr)
+{
+  precision_type p1 = field_descr->precision(id_1);
+  precision_type p2 = field_descr->precision(id_2);
+  ASSERT ("FieldBlock::div",
+	  "FieldBlock precisions must be constant",
+	  p1 == p2);
+
+  char * field_1 = field_unknowns(field_descr,id_1);
+  char * field_2 = field_unknowns(field_descr,id_2);
+  
+  switch (p1) {
+  case precision_single:
+    div_((float *) field_1, (float *) field_2, field_descr);
+    break;
+  case precision_double:
+    div_((double *) field_1,(double *) field_2, field_descr);
+    break;
+  default:
+    break;
+  }
+
+}
+
+
+//----------------------------------------------------------------------
+
+void FieldBlock::scale (int id, double value, const FieldDescr * field_descr)
+{
+  precision_type p = field_descr->precision(id);
+
+  char * field = field_unknowns(field_descr,id);
+  
+  switch (p) {
+  case precision_single:
+    scale_((float *) field, value,field_descr);
+    break;
+  case precision_double:
+    scale_((double *) field,value, field_descr);
+    break;
+  default:
+    break;
+  }
+
+}
+
+
+//----------------------------------------------------------------------
+
+template<class T>
+void FieldBlock::div_ (T * field_1, T * field_2, const FieldDescr * field_descr)
+{
+  int nx,ny,nz;
+  size (&nx,&ny,&nz);
+  int gx,gy,gz;
+  field_descr->ghosts (0,&gx,&gy,&gz);
+  int ndx = (nx>1) ? nx+2*gx : 1;
+  int ndy = (ny>1) ? ny+2*gy : 1;
+
+  for (int ix=0; ix<nx; ix++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int iz=0; iz<nz; iz++) {
+	int i=ix + ndx*(iy + ndy*iz);
+	field_1[i] /= field_2[i];
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+template<class T>
+void FieldBlock::scale_ (T * field, double value, const FieldDescr * field_descr)
+{
+  int nx,ny,nz;
+  size (&nx,&ny,&nz);
+  int gx,gy,gz;
+  field_descr->ghosts (0,&gx,&gy,&gz);
+  int ndx = (nx>1) ? nx+2*gx : 1;
+  int ndy = (ny>1) ? ny+2*gy : 1;
+
+  for (int ix=0; ix<nx; ix++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int iz=0; iz<nz; iz++) {
+	int i=ix + ndx*(iy + ndy*iz);
+	field[i] *= value;
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlock::print
+(const FieldDescr * field_descr,
+ const char * message,
+ // double lower[3],
+ // double upper[3],
+ bool use_file) const throw()
 {
 
 #ifndef CELLO_DEBUG
@@ -577,8 +706,11 @@ void FieldBlock::print (const FieldDescr * field_descr,
    MPI_Comm_rank(MPI_COMM_WORLD,&ip);
 #endif
 
-   char filename [40];
+   char filename [80];
    sprintf (filename,"%s-%d.debug",message,ip);
+   printf ("DEBUG message = %s\n",message);
+   printf ("DEBUG filename = %s\n",filename);
+
    FILE * fp = fopen (filename,"w");
 
    ASSERT("FieldBlock::print",
@@ -625,120 +757,46 @@ void FieldBlock::print (const FieldDescr * field_descr,
      ny = (iyp-iym);
      nz = (izp-izm);
 
-#ifdef CELLO_DEBUG_VERBOSE
-     double hx,hy,hz;
+     //     double hx,hy,hz;
 
-     hx = (upper[0]-lower[0])/(nxd-2*gx);
-     hy = (upper[1]-lower[1])/(nyd-2*gy);
-     hz = (upper[2]-lower[2])/(nzd-2*gz);
-#endif
+     // hx = (upper[0]-lower[0])/(nxd-2*gx);
+     // hy = (upper[1]-lower[1])/(nyd-2*gy);
+     // hz = (upper[2]-lower[2])/(nzd-2*gz);
 
      const char * array_offset = &array_[0]+offsets_[index_field];
      switch (field_descr->precision(index_field)) {
      case precision_single:
-       {
-	 const float * field = (const float * ) array_offset;
-	 float min = std::numeric_limits<float>::max();
-	 float max = std::numeric_limits<float>::min();
-	 double sum = 0.0;
-	 for (int iz=izm; iz<izp; iz++) {
-	   for (int iy=iym; iy<iyp; iy++) {
-	     for (int ix=ixm; ix<ixp; ix++) {
-	       int i = ix + nxd*(iy + nyd*iz);
-	       min = MIN(min,field[i]);
-	       max = MAX(max,field[i]);
-	       sum += field[i];
-#ifdef CELLO_DEBUG_VERBOSE
-	       double x = hx*(ix-gx) + lower[axis_x];
-	       double y = hy*(iy-gy) + lower[axis_y];
-	       double z = hz*(iz-gz) + lower[axis_z];
-	       if (isnan(field[i])) {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
-			 message,field_name,x,y,z,ix,iy,iz);
-	       } else {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %g\n",
-			 message,field_name,x,y,z,ix,iy,iz,field[i]);
-	       }
-#endif
-	     }
-	   }
-	 }
-	 double avg = sum / (nx*ny*nz);
-	 fprintf
-	   (fp,"%s [%s] %18.14g %18.14g %18.14g\n",
-	    message ? message : "", field_name, min,avg,max);
-
-       }
+       print_((const float * ) array_offset,
+	      field_name, message, // lower,
+	      fp,
+	      ixm,iym,izm,
+	      ixp,iyp,izp,
+	      nx, ny, nz,
+	      gx, gy ,gz,
+	      //	      hx, hy ,hz,
+	      nxd,nyd);
        break;
      case precision_double:
-       {
-	 const double * field = (const double * ) array_offset;
-	 double min = std::numeric_limits<double>::max();
-	 double max = std::numeric_limits<double>::min();
-	 double sum = 0.0;
-		  
-	 for (int iz=izm; iz<izp; iz++) {
-	   for (int iy=iym; iy<iyp; iy++) {
-	     for (int ix=ixm; ix<ixp; ix++) {
-	       int i = ix + nxd*(iy + nyd*iz);
-	       min = MIN(min,field[i]);
-	       max = MAX(max,field[i]);
-	       sum += field[i];
-#ifdef CELLO_DEBUG_VERBOSE
-	       double x = hx*(ix-gx) + lower[axis_x];
-	       double y = hy*(iy-gy) + lower[axis_y];
-	       double z = hz*(iz-gz) + lower[axis_z];
-	       if (isnan(field[i])) {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
-			 message,field_name,x,y,z,ix,iy,iz);
-	       } else {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %g\n",
-			 message,field_name,x,y,z,ix,iy,iz,field[i]);
-	       }
-#endif
-	     }
-	   }
-	 }
-	 double avg = sum / (nx*ny*nz);
-	 fprintf 
-	   (fp,"%s [%s] %18.14g %18.14g %18.14g\n",
-	    message ? message : "",field_name,min,avg,max);
-       }
+       print_((const double * ) array_offset, 
+	      field_name, message, // lower,
+	      fp,
+	      ixm,iym,izm,
+	      ixp,iyp,izp,
+	      nx, ny, nz,
+	      gx, gy ,gz,
+	      //	      hx, hy ,hz,
+	      nxd,nyd);
        break;
      case precision_quadruple:
-       {
-	 const long double * field = 
-	   (const long double * ) array_offset;
-	 long double min = std::numeric_limits<long double>::max();
-	 long double max = std::numeric_limits<long double>::min();
-	 long double sum = 0.0;
-	 for (int iz=izm; iz<izp; iz++) {
-	   for (int iy=iym; iy<iyp; iy++) {
-	     for (int ix=ixm; ix<ixp; ix++) {
-	       int i = ix + nxd*(iy + nyd*iz);
-	       min = MIN(min,field[i]);
-	       max = MAX(max,field[i]);
-	       sum += field[i];
-#ifdef CELLO_DEBUG_VERBOSE
-	       double x = hx*(ix-gx) + lower[axis_x];
-	       double y = hy*(iy-gy) + lower[axis_y];
-	       double z = hz*(iz-gz) + lower[axis_z];
-	       if (isnan(field[i])) {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d NAN\n",
-			 message,field_name,x,y,z,ix,iy,iz);
-	       } else {
-		 fprintf(fp,"DEBUG: %s %s  %g %g %g  %d %d %d %Lf\n",
-			 message,field_name,x,y,z,ix,iy,iz,field[i]);
-	       }
-#endif
-	     }
-	   }
-	 }
-	 long double avg = sum / (nx*ny*nz);
-	 fprintf 
-	   (fp,"%s [%s] %18.14Lf %18.14Lf %18.14Lf\n",
-	    message ? message : "",field_name,min,avg,max);
-       }
+       print_((const long double * ) array_offset, 
+	      field_name, message, // lower,
+	      fp,
+	      ixm,iym,izm,
+	      ixp,iyp,izp,
+	      nx, ny, nz,
+	      gx, gy ,gz,
+	      //	      hx, hy ,hz,
+	      nxd,nyd);
        break;
      default:
        ERROR("FieldBlock::print", "Unsupported precision");
@@ -748,6 +806,53 @@ void FieldBlock::print (const FieldDescr * field_descr,
    }
 
 #endif /* ifndef CELLO_DEBUG */
+}
+
+template <class T>
+void FieldBlock::print_
+(const T * field,
+ const char * field_name,
+ const char * message,
+ // double lower [3],
+ FILE * fp,
+ int ixm,int iym,int izm,
+ int ixp,int iyp,int izp,
+ int nx, int ny, int nz,
+ int gx, int gy ,int gz,
+ // double hx, double hy ,double hz,
+ int nxd,int nyd) const
+{
+
+  T min = std::numeric_limits<T>::max();
+  T max = std::numeric_limits<T>::min();
+  double sum = 0.0;
+  for (int iz=izm; iz<izp; iz++) {
+    for (int iy=iym; iy<iyp; iy++) {
+      for (int ix=ixm; ix<ixp; ix++) {
+	int i = ix + nxd*(iy + nyd*iz);
+	min = MIN(min,field[i]);
+	max = MAX(max,field[i]);
+	sum += field[i];
+#ifdef CELLO_DEBUG_VERBOSE
+	// double x = hx*(ix-gx) + lower[axis_x];
+	// double y = hy*(iy-gy) + lower[axis_y];
+	// double z = hz*(iz-gz) + lower[axis_z];
+	if (isnan(field[i])) {
+	  fprintf(fp,"DEBUG: %s %s  %2d %2d %2d NAN\n",
+		  message,field_name,ix,iy,iz);
+	} else {
+	  fprintf(fp,"DEBUG: %s %s  %2d %2d %2d %f\n",
+		  message,field_name,ix,iy,iz,field[i]);
+	}
+#endif
+      }
+    }
+  }
+  double avg = sum / (nx*ny*nz);
+  fprintf
+    (fp,"%s [%s] %18.14g %18.14g %18.14g\n",
+     message ? message : "", field_name, min,avg,max);
+
 }
 
 //----------------------------------------------------------------------
@@ -799,9 +904,6 @@ void FieldBlock::restore_array_
     offset2 *= bytes_per_element;
 
     // determine array start
-
-    TRACE3 ("1 %p %d %d",array_from, offsets_from.at(id_field),offset1);
-    TRACE3 ("2 %p %d %d", &array_[0], offsets_.at(id_field), offset2);
 
     const char * array1 = array_from + offsets_from.at(id_field) + offset1;
     char       * array2 = &array_[0] + offsets_.at(id_field)     + offset2;

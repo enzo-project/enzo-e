@@ -30,10 +30,6 @@ FieldDescr::FieldDescr ()
     min_action_(),
     max_action_()
 {
-  refresh_face_[0]=true;
-  refresh_face_[1]=true;
-  refresh_face_[2]=true;
-
 }
 
 //----------------------------------------------------------------------
@@ -381,20 +377,6 @@ void FieldDescr::set_ghosts(int id_field, int gx, int gy, int gz)
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_refresh_face(int face, bool value) throw()
-{
-  refresh_face_[face] = value;
-}
-
-//----------------------------------------------------------------------
-
-bool FieldDescr::refresh_face(int face) const throw()
-{
-  return refresh_face_[face];
-}
-
-//----------------------------------------------------------------------
-
 void FieldDescr::set_minimum 
 (
  int               id_field, 
@@ -423,9 +405,6 @@ void FieldDescr::set_maximum
 
 void FieldDescr::copy_(const FieldDescr & field_descr) throw()
 {
-  refresh_face_[0]=field_descr.refresh_face_[0];
-  refresh_face_[1]=field_descr.refresh_face_[1];
-  refresh_face_[2]=field_descr.refresh_face_[2];
   alignment_      = field_descr.alignment_;
   padding_        = field_descr.padding_;
   courant_        = field_descr.courant_;

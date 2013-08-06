@@ -1,0 +1,72 @@
+# Problem: 3D array of Sedov blast problems for weak scaling tests
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+   Domain { 
+      lower = [0.0, 0.0, 0.0];
+      upper = [1.0, 1.0, 1.0];
+   } 
+
+   # The computational mesh is a single uniform grid
+
+   Mesh { 
+      root_rank = 3;
+      root_blocks = [ 2, 2, 2];
+      root_size   = [64,64,64];
+   }
+
+   # Field parameters include those concerning fields as a group, as
+   # well as individual fields
+   
+   Field {
+
+      ghosts = 4;
+
+      fields = [
+	"density",	
+	"velocity_x",
+	"velocity_y",
+	"velocity_z",
+	"total_energy",
+	"internal_energy"
+      ] ;
+
+      # courant condition for fields
+
+      courant   = 0.8;
+
+      padding   = 0;
+      alignment = 8;    
+   }
+
+   Method {
+
+      # list of methods to apply and in what order
+ 
+      sequence = ["ppm"];
+
+   }
+
+   Timestep { type = "ppm"; }
+
+   Enzo {
+
+      gamma = 1.4;
+
+      ppm {
+
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+
+         dual_energy = false;
+     }
+   }
+
+   Initial { type = "sedov_array_3d"; }
+
+   Boundary { type = "periodic" }
+
+   Stopping {        cycle = 10;   } 
+
+ Enzo { sedov { radius_relative = 0.1; } }
+

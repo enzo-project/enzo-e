@@ -1,0 +1,28 @@
+
+# include "sedov-amr.incl"
+
+include "sedov-output.incl"
+
+# 3D PROBLEM
+
+ include "sedov_array_3.incl"
+ Mesh { root_size      = [512,512,512]; }
+ Mesh { root_blocks    = [4,4,4]; }
+ Enzo { sedov { array = [4,4,4]; } }
+ Output { file_groups = []; }
+
+# 2D PROBLEM
+
+# include "sedov_array_2.incl"
+# Mesh { root_size      = [256,256]; }
+# Mesh { root_blocks    = [8,8]; }
+# Enzo { sedov { array = [8,8]; } }
+# Output { file_groups = ["de","te","mesh"]; }
+# Output { file_groups = ["de","te","mesh","data"]; }
+#Output { file_groups = ["mesh"]; }
+# Output{  mesh { image_mesh_color = "process"; }}
+
+Enzo { sedov { radius_relative = 0.1; } }
+
+Stopping { cycle = 10; }
+

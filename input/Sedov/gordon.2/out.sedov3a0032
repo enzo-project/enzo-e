@@ -1,0 +1,358 @@
+Charmrun> started all node programs in 0.357 seconds.
+Converse/Charm++ Commit ID: 
+Trace: traceroot: /home/ux452912/Cello/cello-src/bin/charm/enzo-p
+Warning> Randomization of stack pointer is turned on in kernel, thread migration may not work! Run 'echo 0 > /proc/sys/kernel/randomize_va_space' as root to disable it, or try run with '+isomalloc_sync'.  
+Charm++> scheduler running in netpoll mode.
+CharmLB> Load balancer assumes all CPUs are same.
+Charm++> Running on 2 unique compute nodes (16-way SMP).
+Charm++> cpu topology info is gathered in 0.079 seconds.
+
+Charm++> Warning: the number of SMP threads is greater than the number of physical cores, use +CmiNoProcForComThread runtime option.
+
+UNIT TEST BEGIN
+0 00000.38  ==============================================
+0 00000.38  
+0 00000.38    .oooooo.             oooo  oooo            
+0 00000.38   d8P'  `Y8b            `888  `888            
+0 00000.38  888           .ooooo.   888   888   .ooooo.  
+0 00000.38  888          d88' `88b  888   888  d88' `88b 
+0 00000.38  888          888ooo888  888   888  888   888 
+0 00000.38  `88b    ooo  888    .o  888   888  888   888 
+0 00000.38   `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P' 
+0 00000.38  
+0 00000.38  A Parallel Adaptive Mesh Refinement Framework
+0 00000.38  
+0 00000.38                  James Bordner
+0 00000.38    Laboratory for Computational Astrophysics
+0 00000.38          San Diego Supercomputer Center
+0 00000.38       University of California, San Diego
+0 00000.38  
+0 00000.38  See 'LICENSE_CELLO' for software license information
+0 00000.38  
+0 00000.38  BEGIN CELLO: Aug 03 16:59:34
+0 00000.38 Define Simulation processors 32
+0 00000.38 Define CELLO_ARCH gordon-gnu
+0 00000.38 Define CELLO_PREC double
+0 00000.38 Define CELLO_TYPE charm
+0 00000.39 Define CC           gcc
+0 00000.39 Define CFLAGS       -O3   
+0 00000.39 Define CPPDEFINES   CONFIG_USE_CHARM CONFIG_PRECISION_DOUBLE H5_USE_16_API NO_FREETYPE COARSEN CONFIG_USE_MEMORY
+0 00000.39 Define CPPPATH      #/include /home/ux452912/include
+0 00000.39 Define CXX          /home/ux452912/Charm/charm/bin/charmc -language charm++  
+0 00000.39 Define CXXFLAGS     -O3    
+0 00000.39 Define FORTRANFLAGS -O3   
+0 00000.39 Define FORTRAN      gfortran
+0 00000.39 Define FORTRANLIBS  gfortran
+0 00000.39 Define FORTRANPATH  #/include
+0 00000.39 Define LIBPATH      #/lib/charm /home/ux452912/lib 
+0 00000.39 Define LINKFLAGS    -O3  -rdynamic  
+0 00000.39  BEGIN ENZO-P
+0 00000.39 Memory bytes 1052142 bytes_high 1052197
+0 00000.39 test testing
+0 00000.44 Parameters read in sedov3a0032.in
+0 00000.44 Parameters accessed Boundary:type "periodic"
+0 00000.44 Parameters accessed Domain:lower[0] 0.0000000000000
+0 00000.44 Parameters accessed Domain:upper[0] 1.0000000000000
+0 00000.44 Parameters accessed Domain:lower[1] 0.0000000000000
+0 00000.44 Parameters accessed Domain:upper[1] 1.0000000000000
+0 00000.44 Parameters accessed Domain:lower[2] 0.0000000000000
+0 00000.44 Parameters accessed Domain:upper[2] 0.50000000000000
+0 00000.44 Parameters accessed Field:fields[0] "density"
+0 00000.44 Parameters accessed Field:fields[1] "velocity_x"
+0 00000.44 Parameters accessed Field:fields[2] "velocity_y"
+0 00000.44 Parameters accessed Field:fields[3] "velocity_z"
+0 00000.44 Parameters accessed Field:fields[4] "total_energy"
+0 00000.44 Parameters accessed Field:fields[5] "internal_energy"
+0 00000.44 Parameters accessed Field:ghosts 4
+0 00000.44 Parameters accessed Field:ghosts 4
+0 00000.44 Parameters accessed Field:ghosts 4
+0 00000.44 Parameters accessed Field:alignment 8
+0 00000.44 Parameters accessed Field:density:centering[0] true [default]
+0 00000.44 Parameters accessed Field:density:centering[1] true [default]
+0 00000.44 Parameters accessed Field:density:centering[2] true [default]
+0 00000.44 Parameters accessed Field:velocity_x:centering[0] true [default]
+0 00000.44 Parameters accessed Field:velocity_x:centering[1] true [default]
+0 00000.44 Parameters accessed Field:velocity_x:centering[2] true [default]
+0 00000.44 Parameters accessed Field:velocity_y:centering[0] true [default]
+0 00000.44 Parameters accessed Field:velocity_y:centering[1] true [default]
+0 00000.44 Parameters accessed Field:velocity_y:centering[2] true [default]
+0 00000.44 Parameters accessed Field:velocity_z:centering[0] true [default]
+0 00000.44 Parameters accessed Field:velocity_z:centering[1] true [default]
+0 00000.44 Parameters accessed Field:velocity_z:centering[2] true [default]
+0 00000.44 Parameters accessed Field:total_energy:centering[0] true [default]
+0 00000.44 Parameters accessed Field:total_energy:centering[1] true [default]
+0 00000.44 Parameters accessed Field:total_energy:centering[2] true [default]
+0 00000.44 Parameters accessed Field:internal_energy:centering[0] true [default]
+0 00000.44 Parameters accessed Field:internal_energy:centering[1] true [default]
+0 00000.44 Parameters accessed Field:internal_energy:centering[2] true [default]
+0 00000.44 Parameters accessed Field:courant 0.80000000000000
+0 00000.44 Parameters accessed Field:padding 0
+0 00000.44 Parameters accessed Field:precision default [default]
+0 00000.44 Parameters accessed Field:refresh:rank 0
+0 00000.44 Parameters accessed Field:refresh:type "quiescence"
+0 00000.44 Parameters accessed Initial:cycle 0 [default]
+0 00000.44 Parameters accessed Initial:time 0.0000000000000 [default]
+0 00000.44 Parameters accessed Initial:type "sedov_array_3d"
+0 00000.44 Parameters accessed Initial:max_level 3
+0 00000.44 Parameters accessed Mesh:root_rank 3
+0 00000.44 Parameters accessed Mesh:root_blocks[0] 4
+0 00000.44 Parameters accessed Mesh:root_blocks[1] 4
+0 00000.44 Parameters accessed Mesh:root_blocks[2] 2
+0 00000.44 Parameters accessed Mesh:root_size[0] 128
+0 00000.44 Parameters accessed Mesh:root_size[1] 128
+0 00000.44 Parameters accessed Mesh:root_size[2] 64
+0 00000.44 Parameters accessed Mesh:max_level 3
+0 00000.44 Parameters accessed Mesh:adapt:balance true
+0 00000.44 Parameters accessed Mesh:adapt:type[0] "slope"
+0 00000.44 Parameters accessed Mesh:adapt:fields[0] "total_energy"
+0 00000.44 Parameters accessed Mesh:adapt:slope_min_refine 0.30000000000000 [default]
+0 00000.44 Parameters accessed Mesh:adapt:slope_max_coarsen 0.15000000000000 [default]
+0 00000.44 Parameters accessed Mesh:adapt:mass_min -1.0000000000000 [default]
+0 00000.44 Parameters accessed Mesh:adapt:mass_level_exponent 0.0000000000000 [default]
+0 00000.44 Parameters accessed Mesh:adapt:mass_min_overdensity 1.5000000000000 [default]
+0 00000.44 Parameters accessed Mesh:adapt:balance true
+0 00000.44 Parameters accessed Method:sequence[0] "ppm"
+0 00000.44 Parameters accessed Monitor:debug false [default]
+0 00000.44 Parameters accessed Performance:name  [default]
+0 00000.44 Parameters accessed Performance:stride 1 [default]
+0 00000.44 Parameters accessed Performance:warnings true [default]
+0 00000.44 Parameters accessed Field:prolong "linear"
+0 00000.44 Parameters accessed Field:restrict linear [default]
+0 00000.44 Parameters accessed Stopping:cycle 10
+0 00000.44 Parameters accessed Stopping:time 1.7976931348623E+308 [default]
+0 00000.44 Parameters accessed Testing:cycle_final 0 [default]
+0 00000.44 Parameters accessed Testing:time_final 0.0000000000000 [default]
+0 00000.44 Parameters accessed Timestep:type "ppm"
+0 00000.44 Parameters accessed Enzo:ppm:density_floor 1.0000000000000E-06 [default]
+0 00000.44 Parameters accessed Enzo:ppm:diffusion true
+0 00000.44 Parameters accessed Enzo:ppm:dual_energy false
+0 00000.44 Parameters accessed Enzo:ppm:dual_energy_eta_1 0.0010000000000000 [default]
+0 00000.44 Parameters accessed Enzo:ppm:dual_energy_eta_2 0.10000000000000 [default]
+0 00000.44 Parameters accessed Enzo:ppm:flattening 3
+0 00000.44 Parameters accessed Enzo:ppm:minimum_pressure_support_parameter 100 [default]
+0 00000.44 Parameters accessed Enzo:ppm:number_density_floor 1.0000000000000E-06 [default]
+0 00000.44 Parameters accessed Enzo:ppm:pressure_floor 1.0000000000000E-06 [default]
+0 00000.44 Parameters accessed Enzo:ppm:pressure_free false [default]
+0 00000.44 Parameters accessed Enzo:ppm:steepening true
+0 00000.44 Parameters accessed Enzo:ppm:temperature_floor 1.0000000000000E-06 [default]
+0 00000.44 Parameters accessed Enzo:ppm:use_minimum_pressure_support false [default]
+0 00000.44 Parameters accessed Enzo:cosmology false [default]
+0 00000.44 Parameters accessed Enzo:cosmology:comoving_box_size 64.000000000000 [default]
+0 00000.44 Parameters accessed Enzo:cosmology:hubble_constant_now 0.70100000000000 [default]
+0 00000.44 Parameters accessed Enzo:cosmology:initial_redshift 20.000000000000 [default]
+0 00000.44 Parameters accessed Enzo:cosmology:max_expansion_rate 0.010000000000000 [default]
+0 00000.44 Parameters accessed Enzo:cosmology:omega_lambda_now 0.72100000000000 [default]
+0 00000.44 Parameters accessed Enzo:cosmology:omega_matter_now 0.27900000000000 [default]
+0 00000.44 Parameters accessed Enzo:gamma 1.4000000000000
+0 00000.44 Parameters accessed Enzo:sedov:array[0] 4
+0 00000.44 Parameters accessed Enzo:sedov:array[1] 4
+0 00000.44 Parameters accessed Enzo:sedov:array[2] 2
+0 00000.44 Parameters accessed Enzo:sedov:radius_relative 0.10000000000000
+0 00000.44 Parameters accessed Enzo:sedov:pressure_in 1.0000000000000 [default]
+0 00000.44 Parameters accessed Enzo:sedov:pressure_in 1.0000000000000E-05 [default]
+0 00000.44 Parameters accessed Enzo:sedov:density 1.0000000000000 [default]
+0 00000.44 Parameters accessed Enzo:interpolation_method SecondOrderA [default]
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:data:name" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:data:schedule" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:data:type" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:de:axis" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:de:colormap" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:de:field_list" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:de:name" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:de:schedule" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:de:type" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:file_groups" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:mesh:colormap" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:mesh:image_block_size" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:mesh:image_reduce_type" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:mesh:image_type" not accessed
+0 00006.03 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:mesh:name" not accessed
+0 00006.04 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:mesh:schedule" not accessed
+0 00006.04 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:mesh:type" not accessed
+0 00006.04 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:te:axis" not accessed
+0 00006.04 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:te:colormap" not accessed
+0 00006.04 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:te:field_list" not accessed
+0 00006.04 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:te:name" not accessed
+0 00006.04 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:te:schedule" not accessed
+0 00006.04 WARNING parameters_Parameters.cpp:1051  Parameters::check() Parmeter "Output:te:type" not accessed
+0 00007.72  -------------------------------------
+0 00007.72 Simulation cycle 0000
+0 00007.72 Simulation time-sim  0.000000000000
+0 00007.72 Simulation dt 0.000220092253836
+0 00021.40 Performance simulation time-usec 232716508
+0 00021.40 Performance simulation bytes-curr 13506312392
+0 00021.40 Performance simulation bytes-high 13522678856
+0 00021.40 Performance simulation bytes-highest 13522678856
+0 00021.40 Performance cycle time-usec 0
+0 00021.40 Performance initial time-usec 94909651
+0 00021.40 Performance adapt time-usec 175694664
+0 00021.40 Performance refresh time-usec 25024737
+0 00021.40 Performance compute time-usec 0
+0 00021.40 Performance output time-usec 30896
+0 00021.40 Performance prepare time-usec 6562457
+0 00021.40 Performance simulation num-blocks 4384
+0 00024.47  -------------------------------------
+0 00024.47 Simulation cycle 0001
+0 00024.47 Simulation time-sim  0.000220092254
+0 00024.47 Simulation dt 0.000202698376261
+0 00038.23 Performance simulation time-usec 769245824
+0 00038.23 Performance simulation bytes-curr 14292795336
+0 00038.23 Performance simulation bytes-high 14309169864
+0 00038.23 Performance simulation bytes-highest 14309169864
+0 00038.23 Performance cycle time-usec 536528388
+0 00038.23 Performance initial time-usec 94909651
+0 00038.23 Performance adapt time-usec 213546461
+0 00038.23 Performance refresh time-usec 70427341
+0 00038.23 Performance compute time-usec 395336737
+0 00038.23 Performance output time-usec 61999
+0 00038.23 Performance prepare time-usec 13234972
+0 00038.23 Performance simulation num-blocks 4384
+0 00041.57  -------------------------------------
+0 00041.57 Simulation cycle 0002
+0 00041.57 Simulation time-sim  0.000422790630
+0 00041.57 Simulation dt 0.000188890862031
+0 00055.37 Performance simulation time-usec 1316784435
+0 00055.37 Performance simulation bytes-curr 14292795336
+0 00055.37 Performance simulation bytes-high 14391092680
+0 00055.37 Performance simulation bytes-highest 14391092680
+0 00055.37 Performance cycle time-usec 1084066988
+0 00055.37 Performance initial time-usec 94909651
+0 00055.37 Performance adapt time-usec 253431512
+0 00055.37 Performance refresh time-usec 116239300
+0 00055.37 Performance compute time-usec 793982352
+0 00055.37 Performance output time-usec 89087
+0 00055.37 Performance prepare time-usec 19972190
+0 00055.37 Performance simulation num-blocks 4384
+0 00058.57  -------------------------------------
+0 00058.57 Simulation cycle 0003
+0 00058.57 Simulation time-sim  0.000611681492
+0 00058.57 Simulation dt 0.000178012365632
+0 00072.38 Performance simulation time-usec 1861233845
+0 00072.38 Performance simulation bytes-curr 14292799432
+0 00072.38 Performance simulation bytes-high 14391092680
+0 00072.38 Performance simulation bytes-highest 14391092680
+0 00072.38 Performance cycle time-usec 1628516394
+0 00072.38 Performance initial time-usec 94909651
+0 00072.38 Performance adapt time-usec 293699312
+0 00072.38 Performance refresh time-usec 161106613
+0 00072.38 Performance compute time-usec 1194886907
+0 00072.38 Performance output time-usec 115706
+0 00072.38 Performance prepare time-usec 26732249
+0 00072.38 Performance simulation num-blocks 4384
+0 00075.66  -------------------------------------
+0 00075.66 Simulation cycle 0004
+0 00075.66 Simulation time-sim  0.000789693858
+0 00075.66 Simulation dt 0.000171000278555
+0 00089.00 Performance simulation time-usec 2408464186
+0 00089.00 Performance simulation bytes-curr 14292799432
+0 00089.00 Performance simulation bytes-high 14391096776
+0 00089.00 Performance simulation bytes-highest 14391096776
+0 00089.00 Performance cycle time-usec 2175746731
+0 00089.00 Performance initial time-usec 94909651
+0 00089.00 Performance adapt time-usec 333404152
+0 00089.00 Performance refresh time-usec 206135825
+0 00089.00 Performance compute time-usec 1596998434
+0 00089.00 Performance output time-usec 144107
+0 00089.00 Performance prepare time-usec 33688152
+0 00089.00 Performance simulation num-blocks 4384
+0 00092.79  -------------------------------------
+0 00092.79 Simulation cycle 0005
+0 00092.79 Simulation time-sim  0.000960694136
+0 00092.79 Simulation dt 0.000167561050678
+0 00106.90 Performance simulation time-usec 2957188297
+0 00106.90 Performance simulation bytes-curr 14292799432
+0 00106.90 Performance simulation bytes-high 14391096776
+0 00106.90 Performance simulation bytes-highest 14391096776
+0 00106.90 Performance cycle time-usec 2724470833
+0 00106.90 Performance initial time-usec 94909651
+0 00106.90 Performance adapt time-usec 372024213
+0 00106.90 Performance refresh time-usec 251426748
+0 00106.90 Performance compute time-usec 2002767281
+0 00106.90 Performance output time-usec 168786
+0 00106.90 Performance prepare time-usec 40665641
+0 00106.90 Performance simulation num-blocks 4384
+0 00110.06  -------------------------------------
+0 00110.06 Simulation cycle 0006
+0 00110.06 Simulation time-sim  0.001128255187
+0 00110.06 Simulation dt 0.000165503507185
+0 00124.14 Performance simulation time-usec 3510418894
+0 00124.14 Performance simulation bytes-curr 14292799432
+0 00124.14 Performance simulation bytes-high 14391096776
+0 00124.14 Performance simulation bytes-highest 14391096776
+0 00124.14 Performance cycle time-usec 3277701419
+0 00124.14 Performance initial time-usec 94909651
+0 00124.14 Performance adapt time-usec 410685438
+0 00124.14 Performance refresh time-usec 296346899
+0 00124.14 Performance compute time-usec 2410598656
+0 00124.14 Performance output time-usec 196919
+0 00124.14 Performance prepare time-usec 47695278
+0 00124.14 Performance simulation num-blocks 4384
+0 00127.44  -------------------------------------
+0 00127.44 Simulation cycle 0007
+0 00127.44 Simulation time-sim  0.001293758694
+0 00127.44 Simulation dt 0.000165058213765
+0 00141.67 Performance simulation time-usec 4066989508
+0 00141.67 Performance simulation bytes-curr 14292807624
+0 00141.67 Performance simulation bytes-high 14391096776
+0 00141.67 Performance simulation bytes-highest 14391096776
+0 00141.67 Performance cycle time-usec 3834272025
+0 00141.67 Performance initial time-usec 94909651
+0 00141.67 Performance adapt time-usec 450362348
+0 00141.67 Performance refresh time-usec 342087083
+0 00141.67 Performance compute time-usec 2819352416
+0 00141.67 Performance output time-usec 223081
+0 00141.67 Performance prepare time-usec 54839000
+0 00141.67 Performance simulation num-blocks 4384
+0 00144.96  -------------------------------------
+0 00144.96 Simulation cycle 0008
+0 00144.96 Simulation time-sim  0.001458816908
+0 00144.96 Simulation dt 0.0001654731369
+0 00159.07 Performance simulation time-usec 4627856465
+0 00159.07 Performance simulation bytes-curr 14292807624
+0 00159.07 Performance simulation bytes-high 14391104968
+0 00159.07 Performance simulation bytes-highest 14391104968
+0 00159.07 Performance cycle time-usec 4395138982
+0 00159.07 Performance initial time-usec 94909651
+0 00159.07 Performance adapt time-usec 491817488
+0 00159.07 Performance refresh time-usec 388519238
+0 00159.07 Performance compute time-usec 3229745705
+0 00159.07 Performance output time-usec 257360
+0 00159.07 Performance prepare time-usec 61987729
+0 00159.07 Performance simulation num-blocks 4384
+0 00162.40  -------------------------------------
+0 00162.40 Simulation cycle 0009
+0 00162.40 Simulation time-sim  0.001624290045
+0 00162.40 Simulation dt 0.000167030974473
+0 00176.57 Performance simulation time-usec 5186543739
+0 00176.57 Performance simulation bytes-curr 14292807624
+0 00176.57 Performance simulation bytes-high 14391104968
+0 00176.57 Performance simulation bytes-highest 14391104968
+0 00176.57 Performance cycle time-usec 4953826248
+0 00176.57 Performance initial time-usec 94909651
+0 00176.57 Performance adapt time-usec 532664043
+0 00176.57 Performance refresh time-usec 434425027
+0 00176.57 Performance compute time-usec 3640971874
+0 00176.57 Performance output time-usec 287605
+0 00176.57 Performance prepare time-usec 69034636
+0 00176.57 Performance simulation num-blocks 4384
+0 00179.82  -------------------------------------
+0 00179.82 Simulation cycle 0010
+0 00179.82 Simulation time-sim  0.001791321019
+0 00179.82 Simulation dt 0.000169086951378
+0 00179.82  END ENZO-P
+0 00179.82  END CELLO
+UNIT TEST END
+
+=====================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   EXIT CODE: 15
+=   CLEANING UP REMAINING PROCESSES
+=   YOU CAN IGNORE THE BELOW CLEANUP MESSAGES
+=====================================================================================
+[proxy:0:0@gcn-16-47.sdsc.edu] HYD_pmcd_pmip_control_cmd_cb (./pm/pmiserv/pmip_cb.c:928): assert (!closed) failed
+[proxy:0:0@gcn-16-47.sdsc.edu] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[proxy:0:0@gcn-16-47.sdsc.edu] main (./pm/pmiserv/pmip.c:276): demux engine error waiting for event
+[mpiexec@gcn-16-47.sdsc.edu] HYDT_bscu_wait_for_completion (./tools/bootstrap/utils/bscu_wait.c:70): one of the processes terminated badly; aborting
+[mpiexec@gcn-16-47.sdsc.edu] HYDT_bsci_wait_for_completion (./tools/bootstrap/src/bsci_wait.c:23): launcher returned error waiting for completion
+[mpiexec@gcn-16-47.sdsc.edu] HYD_pmci_wait_for_completion (./pm/pmiserv/pmiserv_pmci.c:191): launcher returned error waiting for completion
+[mpiexec@gcn-16-47.sdsc.edu] main (./ui/mpich/mpiexec.c:405): process manager error waiting for completion
