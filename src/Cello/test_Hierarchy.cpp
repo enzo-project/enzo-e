@@ -33,7 +33,9 @@ dimensions, refinement,0,1);
 
   FieldDescr field_descr;
 
-  hierarchy->create_forest(&field_descr,12,12,12,3,3,3, true, true);
+  hierarchy->set_root_size(12,12,12);
+  hierarchy->set_blocking(3,3,3);
+  hierarchy->create_forest(&field_descr, true, true);
 
   // Extents
 
