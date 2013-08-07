@@ -3,33 +3,47 @@
 
 include "input/prac-demo.in"
 
+Domain { 
+   lower = [0.0, 0.0];
+   upper = [1.6, 0.9];
+}
+
+Stopping { cycle = 10; }
+
   Initial {
      max_level = 3;
-     density       { value = [  1.0, "prac-demo-000400.png", 
+     density       { value = [  1.0, "input/Cello-1080.png", 
                                 0.1 ]; };
-     total_energy  { value = [  0.1 / (0.4 * 0.1), "prac-demo-000400.png", 
+     total_energy  { value = [  0.1 / (0.4 * 0.1), "input/Cello-1080.png", 
                                 1.0 / (0.4 * 1.0)  ]; };
   }
   Mesh {
+     root_size   = [1920,1080];
+     root_blocks = [240,135];
      max_level = 3;
        adapt {
            type = ["slope"];
+          fields = ["density"];
            slope_min_refine = 0.003;
            slope_max_coarsen = 0.0015;
        }
   }
 
 Field {
+    ghosts = 4; # must be even for ProlongLinear
   refresh {
       type = "quiescence";
   };
 }
 
 Output { 
-   file_groups = ["mesh","data"]; 
+   file_groups = ["mesh","density"]; 
 
-  data { name = ["prac-density-%06d.png", "cycle"]; 
-       image_ghost = true; } ;
+  density { name = ["prac-de-%04d.png", "cycle"]; 
+	schedule = ["cycle","interval", 10];
+	image_size = [1920,1080];
+       image_ghost = false; 
+  } ;
 
    mesh {
       	type     = "image";
@@ -37,7 +51,7 @@ Output {
 	image_reduce_type = "max";
         field_list = ["density"];
 	image_block_size  = 1;
-	schedule = ["cycle","interval", 100];
+	schedule = ["cycle","interval", 10];
         colormap = [1.00, 1.00, 1.00,  
                     0.00, 1.00, 0.00, 
                     1.00, 0.00, 0.00, 
