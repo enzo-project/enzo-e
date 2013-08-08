@@ -74,6 +74,9 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_image_size,MAX_FILE_GROUPS);
   PUParray (p,output_image_reduce_type,MAX_FILE_GROUPS);
   PUParray (p,output_image_ghost,MAX_FILE_GROUPS);
+  PUParray (p,output_image_specify_bounds,MAX_FILE_GROUPS);
+  PUParray (p,output_image_min,MAX_FILE_GROUPS);
+  PUParray (p,output_image_max,MAX_FILE_GROUPS);
   PUParray (p,output_field_list,MAX_FILE_GROUPS);
   PUParray (p,output_stride,MAX_FILE_GROUPS);
   PUParray (p,output_name,MAX_FILE_GROUPS);
@@ -491,13 +494,15 @@ void Config::read(Parameters * parameters) throw()
 		axis=="x" || axis=="y" || axis=="z");
       } 
 
-      output_image_block_size[index] = parameters->value_integer("image_block_size",1);
+      output_image_block_size[index] = 
+	parameters->value_integer("image_block_size",1);
 
       output_image_type[index] = parameters->value_string("image_type","data");
 
       output_image_log[index] = parameters->value_logical("image_log",false);
 
-      output_image_mesh_color[index] = parameters->value_string("image_mesh_color","level");
+      output_image_mesh_color[index] = 
+	parameters->value_string("image_mesh_color","level");
 
       output_image_size[index].resize(2);
       output_image_size[index][0] = 
@@ -505,17 +510,30 @@ void Config::read(Parameters * parameters) throw()
       output_image_size[index][1] = 
 	parameters->list_value_integer(1,"image_size",0);
 
-      output_image_reduce_type[index] = parameters->value_string("image_reduce_type","sum");
+      output_image_reduce_type[index] = 
+	parameters->value_string("image_reduce_type","sum");
 
-      output_image_face_rank[index] = parameters->value_integer("image_face_rank",3);
+      output_image_face_rank[index] = 
+	parameters->value_integer("image_face_rank",3);
 
-      output_image_ghost[index] = parameters->value_logical("image_ghost",false);
+      output_image_ghost[index] = 
+	parameters->value_logical("image_ghost",false);
+
+      output_image_specify_bounds[index] =
+	parameters->value_logical("image_specify_bounds",false);
+      output_image_min[index] =
+	parameters->value_float("image_min",0.0);
+      output_image_max[index] =
+	parameters->value_float("image_max",0.0);
+      PARALLEL_PRINTF ("output_image_max[index] = %f\n",output_image_max[index]);
+
 
       if (parameters->type("colormap") == parameter_list) {
 	int size = parameters->list_length("colormap");
 	output_image_colormap[index].resize(size);
 	for (int i=0; i<size; i++) {
-	  output_image_colormap[index][i] = parameters->list_value_float(i,"colormap",0.0);
+	  output_image_colormap[index][i] = 
+	    parameters->list_value_float(i,"colormap",0.0);
 	}
       }
 

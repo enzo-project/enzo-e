@@ -615,6 +615,11 @@ Output * Problem::create_output_
     int         max_level        = config->mesh_max_level;
     std::string image_reduce_type = config->output_image_reduce_type[index];
     std::string image_mesh_color  = config->output_image_mesh_color[index];
+    bool        image_specify_bounds =
+      config->output_image_specify_bounds[index];
+    double      image_min = config->output_image_min[index];
+    double      image_max = config->output_image_max[index];
+
     output = new OutputImage (index,factory,group_process->size(),
 			      nx,ny,nz, 
 			      nbx,nby,nbz, 
@@ -626,7 +631,9 @@ Output * Problem::create_output_
 			      image_block_size,
 			      image_face_rank,
 			      image_log,
-			      image_ghost);
+			      image_ghost,
+			      image_specify_bounds,
+			      image_min, image_max);
 
   } else if (name == "data") {
 
