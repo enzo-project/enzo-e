@@ -147,12 +147,18 @@ public: // interface
   void q_adapt_next ();
   /// Stop the adapt step
   void q_adapt_stop ();
-  //  void adapt();
+  /// entry call to refine() for balancing
+  void p_refine()
+  { refine(); }
+  /// the CommBlock must be refined
   void refine();
+  /// the CommBlock may be coarsened
   void coarsen();
-  void p_balance(int ic3[3], int if3[3],int level);
+  /// Determine whether the CommBlock can be coarsened
   bool can_coarsen() const;
+  /// Determine whether the CommBlock can be refined
   bool can_refine() const;
+
   void p_child_can_coarsen(int ichild[3],
 			   int na, char * array,
 			   int nf, int * child_face_level);

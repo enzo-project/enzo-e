@@ -196,8 +196,8 @@ void CommBlock::refine()
       char * array = 0;
       int iface[3] = {0,0,0};
       bool lghost[3] = {true,true,true};
-      FieldFace * field_face = load_face_
-	(&narray,&array, iface,ic3,lghost, op_array_prolong);
+      FieldFace * field_face = 
+	load_face_ (&narray,&array, iface,ic3,lghost, op_array_prolong);
 
       const Factory * factory = simulation()->factory();
 
@@ -308,7 +308,7 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
 	  Index index_uncle = index_neighbor.index_parent();
 
-	  thisProxy[index_uncle].p_balance (jc3,jf3,level_+1);
+	  thisProxy[index_uncle].p_refine();
 
 	}
 
@@ -464,13 +464,6 @@ void CommBlock::parent_face_(int ip3[3],int if3[3], int ic3[3]) const
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_balance(int ic3[3], int if3[3], int level)
-{
-  refine();
-}
-
-//----------------------------------------------------------------------
-
 bool CommBlock::can_coarsen() const
 { 
   if (level_ <= 0) return false;
@@ -509,11 +502,8 @@ void CommBlock::coarsen()
   char * array;
   int iface[3] = {0,0,0};
   bool lghost[3] = {true,true,true};
-  FieldFace * field_face = load_face_(&narray,&array,
-				      iface,
-				      ichild,
-				      lghost,
-				      op_array_restrict);
+  FieldFace * field_face = 
+    load_face_(&narray,&array, iface, ichild, lghost, op_array_restrict);
 
   int nf = face_level_.size();
   int face_level[nf];
@@ -618,9 +608,7 @@ void CommBlock::p_child_can_coarsen(int ichild[3],
 
   int iface[3] = {0,0,0};
   bool lghost[3] = {true,true,true};
-  store_face_(na,array,
-	      iface, ichild, lghost,
-	      op_array_restrict);
+  store_face_(na,array, iface, ichild, lghost, op_array_restrict);
 
   int rank = simulation()->dimension();
   int refresh_rank = simulation()->config()->field_refresh_rank;
@@ -750,14 +738,11 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
 //----------------------------------------------------------------------
 
-void CommBlock::x_refresh_child (int n, char * buffer, 
-				int ichild[3])
+void CommBlock::x_refresh_child (int n, char * buffer, int ichild[3])
 {
   int iface[3] = {0,0,0};
   bool lghost[3] = {true,true,true};
-  store_face_(n,buffer,
-	      iface, ichild, lghost,
-	      op_array_restrict);
+  store_face_(n,buffer, iface, ichild, lghost, op_array_restrict);
 }
 
 //----------------------------------------------------------------------
