@@ -8,7 +8,7 @@ Domain {
    upper = [1.6, 0.9];
 }
 
-Stopping { cycle = 10; }
+Stopping { cycle = 10000; }
 
   Initial {
      max_level = 3;
