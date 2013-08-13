@@ -24,10 +24,14 @@ OutputImage::OutputImage(int index,
 			 int         image_block_size,
 			 int face_rank,
 			 bool image_log,
-			 bool ghost) throw ()
+			 bool ghost,
+			 bool specify_bounds,
+			 double min, double max) throw ()
   : Output(index,factory),
     data_(),
     axis_(axis_z),
+    specify_bounds_(specify_bounds),
+    min_(min),max_(max),
     nxi_(image_size_x),
     nyi_(image_size_y),
     png_(0),
@@ -37,6 +41,7 @@ OutputImage::OutputImage(int index,
     ghost_(ghost)
 
 {
+  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
   if (image_reduce_type=="min") op_reduce_ = reduce_min;
   if (image_reduce_type=="max") op_reduce_ = reduce_max;
   if (image_reduce_type=="avg") op_reduce_ = reduce_avg;
@@ -103,6 +108,9 @@ void OutputImage::pup (PUP::er &p)
   p | op_reduce_;
   p | mesh_color_;
   p | axis_;
+  p | specify_bounds_;
+  p | min_;
+  p | max_;
   p | nxi_;
   p | nyi_;
   p | nzi_;
@@ -166,7 +174,8 @@ void OutputImage::open () throw()
 void OutputImage::close () throw()
 {
   TRACE("OutputImage::close()");
-  if (is_writer()) image_write_();
+  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min_,max_);
+  if (is_writer()) image_write_(min_,max_);
   image_close_();
   png_close_();
 }
@@ -490,39 +499,40 @@ void OutputImage::image_create_ () throw()
 
 void OutputImage::image_write_ (double min, double max) throw()
 {
-
-  DEBUG("image_write");
-  // error check min <= max
-
-  ASSERT2("OutputImage::image_write_",
-	  "min %g is greater than max %g",
-	  min,max, (min <= max));
-
+  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
   // simplified variable names
 
   int mx = nxi_;
   int my = nyi_;
   int m  = mx*my;
 
-  // Scale by data if min == max (default)
+  double min2=min;
+  double max2=max;
+  //  if (! specify_bounds_) {
 
-  if (min == max) {
-    min = std::numeric_limits<double>::max();
-    max = std::numeric_limits<double>::min();
-  }
+  min = std::numeric_limits<double>::max();
+  max = std::numeric_limits<double>::min();
 
-  // Ensure min and max fully enclose data
-  if (image_log_) {
-    for (int i=0; i<m; i++) {
-      min = MIN(min,log(data_[i]));
-      max = MAX(max,log(data_[i]));
+  // Compute min and max if needed
+  //  if (! specify_bounds_) {
+    if (image_log_) {
+      for (int i=0; i<m; i++) {
+	min = MIN(min,log(data_[i]));
+	max = MAX(max,log(data_[i]));
+      }
+    } else {
+      for (int i=0; i<m; i++) {
+	min = MIN(min,data_[i]);
+	max = MAX(max,data_[i]);
+      }
     }
-  } else {
-    for (int i=0; i<m; i++) {
-      min = MIN(min,data_[i]);
-      max = MAX(max,data_[i]);
-    }
+    //  }
+  //  }
+  if (specify_bounds_) {
+    min=min2;
+    max=max2;
   }
+  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
 
   TRACE1("image_write_() data_ = %p",data_);
   size_t n = map_r_.size();
@@ -566,11 +576,18 @@ void OutputImage::image_write_ (double min, double max) throw()
 	a = (1-ratio)*map_a_[k] + ratio*map_a_[k+1];
 	//	if (value < 0.0) { r=1.0; g=0.0; b=0.0; }
 
+	png_->plot      (ix+1, iy+1, 0.0, 0.0, 0.0);
+	png_->plot_blend(ix+1, iy+1, a, r,g,b);
+
+      } else {
+	
+	// red if out of bounds
+	PARALLEL_PRINTF ("OUT OF BOUNDS %d %d %f\n",ix,iy,value);
+	png_->plot(ix+1, iy+1, 1.0, 0.0, 0.0);
+
       }
 
       // Plot pixel
-      png_->plot(ix+1, iy+1, 0.0, 0.0, 0.0);
-      png_->plot_blend(ix+1, iy+1, a, r,g,b);
     }
   }      
 

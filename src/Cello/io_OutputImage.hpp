@@ -43,7 +43,9 @@ public: // functions
 	      int         image_block_size,
 	      int face_rank,
 	      bool image_log,
-	      bool ghost ) throw();
+	      bool ghost,
+	      bool specify_bounds,
+	      double min, double max) throw();
 
   /// OutputImage destructor: free allocated image data
   virtual ~OutputImage() throw();
@@ -63,7 +65,8 @@ public: // functions
 
   // Set the image colormap
   void set_colormap
-  (int n, double * map_r, double * map_g, double * map_b, double * map_a=0) throw();
+  (int n, double * map_r, double * map_g, double * map_b, double * map_a=0)
+  throw();
 
   // Set the axis for projecting
   void set_axis (axis_type axis) throw()
@@ -156,6 +159,13 @@ private: // attributes
 
   /// Axis along which to reduce
   axis_type axis_;
+
+  /// Whether to use given or computed min/max for colormap
+  bool specify_bounds_;
+
+  /// Minimum and maximum values if specified
+  double min_;
+  double max_;
 
   /// Current image size (depending on axis_)
   int nxi_,nyi_,nzi_;
