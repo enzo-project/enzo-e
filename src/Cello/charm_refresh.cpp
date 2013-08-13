@@ -16,7 +16,8 @@
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_refresh_begin() 
+// void CommBlock::p_refresh_begin() 
+void CommBlock::refresh_begin() 
 {
   Performance * performance = simulation()->performance();
   performance->start_region(perf_refresh);

@@ -41,7 +41,7 @@ OutputImage::OutputImage(int index,
     ghost_(ghost)
 
 {
-  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
+  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
   if (image_reduce_type=="min") op_reduce_ = reduce_min;
   if (image_reduce_type=="max") op_reduce_ = reduce_max;
   if (image_reduce_type=="avg") op_reduce_ = reduce_avg;
@@ -174,7 +174,7 @@ void OutputImage::open () throw()
 void OutputImage::close () throw()
 {
   TRACE("OutputImage::close()");
-  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min_,max_);
+  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min_,max_);
   if (is_writer()) image_write_(min_,max_);
   image_close_();
   png_close_();
@@ -499,7 +499,7 @@ void OutputImage::image_create_ () throw()
 
 void OutputImage::image_write_ (double min, double max) throw()
 {
-  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
+  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
   // simplified variable names
 
   int mx = nxi_;
@@ -532,7 +532,7 @@ void OutputImage::image_write_ (double min, double max) throw()
     min=min2;
     max=max2;
   }
-  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
+  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
 
   TRACE1("image_write_() data_ = %p",data_);
   size_t n = map_r_.size();

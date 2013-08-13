@@ -104,6 +104,70 @@ void CommBlock::q_adapt_next()
 
 //----------------------------------------------------------------------
 
+void CommBlock::q_adapt_stop()
+{
+  //  TRACE_CHARM("doneInserting");
+  thisProxy.doneInserting();
+  TRACE("ADAPT CommBlock::q_adapt_stop()");
+  if (thisIndex.is_root()) {
+    thisArray->doneInserting();
+    thisProxy.p_adapt_start();
+  }
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::q_adapt_end()
+{
+  // CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(), 
+  // 			thisProxy[thisIndex]));
+
+  //  thisProxy.doneInserting();
+  TRACE("ADAPT CommBlock::q_adapt_end()");
+
+  debug_faces_("child",&face_level_[0]);
+
+  TRACE ("END   PHASE ADAPT\n");
+
+  next_phase_ = phase_output;
+
+  if (coarsened_) {
+    TRACE_CHARM("ckDestroy()");
+    thisProxy[thisIndex].ckDestroy();
+    thisProxy.doneInserting();
+    return;
+  } else {
+    //    TRACE_CHARM("doneInserting");
+    thisProxy.doneInserting();
+  }
+
+  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(), 
+			thisProxy[thisIndex]));
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::q_adapt_exit()
+{
+
+  Performance * performance = simulation()->performance();
+  if (performance->is_region_active(perf_adapt)) {
+    performance->stop_region(perf_adapt);
+  }
+
+  if (thisIndex.is_root()) {
+
+    thisProxy.p_refresh_begin();
+    // Check parameters now that all should have been accessed
+    // (in particular Initial:foo:value, etc.)
+    if (cycle() == simulation()->config()->initial_cycle) {
+      simulation()->parameters()->check();
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 int CommBlock::determine_adapt()
 {
   if (! is_leaf()) return adapt_same;
@@ -743,72 +807,6 @@ void CommBlock::x_refresh_child (int n, char * buffer, int ichild[3])
   int iface[3] = {0,0,0};
   bool lghost[3] = {true,true,true};
   store_face_(n,buffer, iface, ichild, lghost, op_array_restrict);
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::q_adapt_stop()
-{
-  //  TRACE_CHARM("doneInserting");
-  thisProxy.doneInserting();
-  TRACE("ADAPT CommBlock::q_adapt_stop()");
-  if (thisIndex.is_root()) {
-    thisArray->doneInserting();
-    thisProxy.p_adapt_start();
-  }
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::q_adapt_end()
-{
-  // CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(), 
-  // 			thisProxy[thisIndex]));
-
-  //  thisProxy.doneInserting();
-  TRACE("ADAPT CommBlock::q_adapt_end()");
-
-  debug_faces_("child",&face_level_[0]);
-
-  TRACE ("END   PHASE ADAPT\n");
-
-  next_phase_ = phase_output;
-
-  if (coarsened_) {
-    TRACE_CHARM("ckDestroy()");
-    thisProxy[thisIndex].ckDestroy();
-    thisProxy.doneInserting();
-    return;
-  } else {
-    //    TRACE_CHARM("doneInserting");
-    thisProxy.doneInserting();
-  }
-
-  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(), 
-			thisProxy[thisIndex]));
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::q_adapt_exit()
-{
-
-  Performance * performance = simulation()->performance();
-  if (performance->is_region_active(perf_adapt)) {
-    performance->stop_region(perf_adapt);
-  }
-
-  if (thisIndex.is_root()) {
-
-
-    thisProxy.p_refresh_begin();
-
-    // Check parameters now that all should have been accessed
-    // (in particular Initial:foo:value, etc.)
-    if (cycle() == simulation()->config()->initial_cycle) {
-      simulation()->parameters()->check();
-    }
-  }
 }
 
 //----------------------------------------------------------------------

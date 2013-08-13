@@ -175,7 +175,9 @@ public: // interface
   //--------------------------------------------------
 
   /// Refresh ghost zones and apply boundary conditions
-  void p_refresh_begin();
+  void p_refresh_begin()
+  { refresh_begin(); }
+  void refresh_begin();
 
   /// Exit the refresh phase after QD
   void q_refresh_end ();
