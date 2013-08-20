@@ -13,16 +13,12 @@
 ///       compute stopping
 ///       contribute( >>>>> CommBlock::p_output() >>>>> )
    
-
-#ifdef CONFIG_USE_CHARM
-
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
-
 
 void CommBlock::prepare()
 {
@@ -93,5 +89,3 @@ void CommBlock::prepare()
 
   performance->stop_region(perf_prepare);
 }
-
-#endif /* CONFIG_USE_CHARM */

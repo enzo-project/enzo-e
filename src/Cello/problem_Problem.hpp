@@ -35,10 +35,7 @@ class Simulation;
 class Stopping;
 class Timestep;
 
-class Problem 
-#ifdef CONFIG_USE_CHARM
-  : public PUP::able
-#endif
+class Problem : public PUP::able
 {
 
   /// @class    Problem
@@ -53,9 +50,6 @@ public: // interface
   /// Destructor
   virtual ~Problem() throw();
 
-
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ function for determining the specific class in the class hierarchy
   PUPable_decl(Problem);
 
@@ -65,8 +59,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Return the boundary object
   Boundary * boundary() const throw()  { return boundary_; }
@@ -103,8 +95,6 @@ public: // interface
   /// Return the restrict object
   Restrict * restrict() const throw()  { return restrict_; }
 
-#ifdef CONFIG_USE_CHARM
-
   /// reset output index to 0
   void output_reset() throw()
   { index_output_ = -1; }
@@ -118,8 +108,6 @@ public: // interface
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
   void output_write (Simulation * simulation, int n, char * buffer) throw();
-
-#endif
 
   /// Return the stopping object
   Stopping *  stopping() const throw() { return stopping_; }

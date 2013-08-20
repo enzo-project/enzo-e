@@ -17,10 +17,7 @@
 
 class Parameters;
 
-class Config 
-#ifdef CONFIG_USE_CHARM
-  : public PUP::able 
-#endif
+class Config : public PUP::able 
 {
 
   /// @class    Config
@@ -32,8 +29,6 @@ public: // interface
   /// empty constructor for charm++ pup()
   Config() throw() {}
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(Config);
 
@@ -43,8 +38,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();

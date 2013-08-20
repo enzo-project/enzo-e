@@ -73,9 +73,10 @@ PARALLEL_MAIN_BEGIN
   // 			    &iposflag, &error);
 
   ProlongLinear prolong_linear;
+  int im3[3] = {0,0,0};
   prolong_linear.apply(precision_double,
-		       grid_fine,   nd3, nf3,
-		       grid_coarse, nd3, nc3);
+		       grid_fine,   nd3, im3,nf3,
+		       grid_coarse, nd3, im3,nc3);
 
   print_grid(grid_fine,nd3);
 		       
@@ -158,8 +159,8 @@ PARALLEL_MAIN_BEGIN
 
     double lower[3] = { 0.0, 0.0, 0.0 };
     double upper[3] = { 1.0, 1.0, 1.0 };
-    field_block_f.print(&field_descr,"AF-1", lower,upper);
-    field_block_c.print(&field_descr,"AC", lower,upper);
+    field_block_f.print(&field_descr,"AF-1");
+    field_block_c.print(&field_descr,"AC");
 
     char buffer[80];
     for (int icx=0; icx<2; icx++) {
@@ -169,14 +170,14 @@ PARALLEL_MAIN_BEGIN
 	// prolong_linear->apply
 	// 	(&field_block_f,&field_block_c, &field_descr, icx,icy,0);
 	sprintf (buffer,"ProlongLinear-%d%d0.out",icx,icy);
-	field_block_f.print(&field_descr,buffer, lower,upper);
+	field_block_f.print(&field_descr,buffer);
 
 	for (int id=0; id<md; id++) df[id]=11111.0;
 	for (int iv=0; iv<mv; iv++) vf[iv]=22222.0;
 	// enzo_prolong->apply
 	// 	(&field_block_f,&field_block_c, &field_descr, icx,icy,0);
 	sprintf (buffer,"EnzoProlong-%d%d0.out",icx,icy);
-	field_block_f.print(&field_descr,buffer, lower,upper);
+	field_block_f.print(&field_descr,buffer);
       }
     }
 
@@ -194,7 +195,5 @@ PARALLEL_MAIN_END
 
 
 //======================================================================
-#ifdef CONFIG_USE_CHARM
-#  include "enzo.def.h"
-#endif
+#include "enzo.def.h"
 //======================================================================

@@ -33,8 +33,6 @@ public: // interface
   virtual ~ItFieldRange () throw ()
   {}
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_decl(ItFieldRange);
 
@@ -43,8 +41,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Go to the first value
   virtual void first () throw()

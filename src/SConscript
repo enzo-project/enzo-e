@@ -1,5 +1,4 @@
 Import('env')
-Import('type')
 
 Import('bin_path')
 Import('inc_path')

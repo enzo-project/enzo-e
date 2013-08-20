@@ -162,9 +162,6 @@ public: // interface
   /// Initialize the EnzoBlock chare array
   EnzoBlock
   (
-#ifndef CONFIG_USE_CHARM
-   Simulation * simulation,
-#endif
    Index index,
    int nx, int ny, int nz,
    int num_field_blocks,
@@ -175,7 +172,6 @@ public: // interface
    int num_face_level, int * face_level,
    bool testing=false) throw();
 
-#ifdef CONFIG_USE_CHARM
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
     : CommBlock (m)
@@ -183,10 +179,6 @@ public: // interface
     TRACE("CkMigrateMessage");
     //    initialize();
   };
-
-#endif  /* CONFIG_USE_CHARM */
-
-#ifdef CONFIG_USE_CHARM
 
   /// Pack / unpack the EnzoBlock in a CHARM++ program
   void pup(PUP::er &p)
@@ -223,8 +215,6 @@ public: // interface
     TRACE ("END EnzoBlock::pup()");
 
   };
-
-#endif /*CONFIG_USE_CHARM */
 
   /// Implementation of initialization in constructors
   void initialize_enzo_();

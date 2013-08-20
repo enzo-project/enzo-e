@@ -59,14 +59,9 @@ use_performance = 0
 
 use_projections = 0
 
-# Triton MPI type (openmpi or mpich2)
-
-mpi_type = 'mpich2'
-
-# How many processors to run unit tests with in CHARM (MPI must be 8)
+# How many processors to run parallel unit tests
 
 ip_charm = '4'
-ip_mpi   = '8'
 
 #----------------------------------------------------------------------
 # AUTO CONFIGURATION
@@ -100,21 +95,17 @@ if not env.GetOption('clean'):
 # scons command line (overrides CELLO_* environment variables)
 
 arch = ARGUMENTS.get('arch','unknown')
-type = ARGUMENTS.get('type','unknown')
 prec = ARGUMENTS.get('prec','unknown')
 
 # use environment variable if scons command line not provided
 
 if (arch == 'unknown' and "CELLO_ARCH" in os.environ):
      arch = os.environ["CELLO_ARCH"]
-if (type == 'unknown' and "CELLO_TYPE" in os.environ):
-     type = os.environ["CELLO_TYPE"]
 if (prec == 'unknown' and "CELLO_PREC" in os.environ):
      prec = os.environ["CELLO_PREC"]
 
 print 
 print "    CELLO_ARCH scons arch=",arch
-print "    CELLO_TYPE scons type=",type
 print "    CELLO_PREC scons prec=",prec
 print 
 
@@ -127,12 +118,6 @@ define = {}
 # Temporary defines
 
 define_coarsen =        ['COARSEN']
-
-# Parallel type defines
-
-define["serial"] =    []
-define["mpi"]    =    ['CONFIG_USE_MPI']
-define["charm"]  =    ['CONFIG_USE_CHARM']
 
 # Precision defines
 
@@ -164,22 +149,6 @@ define_png   =        ['NO_FREETYPE']
 #----------------------------------------------------------------------
 
 defines     = []
-
-# Parallel type configuration
-
-if (type == 'serial' or type == 'mpi' or type == 'charm'):
-
-     defines = defines + define[type]
-
-else:
-     print "Unrecognized parallel type ",type
-     print
-     print "Valid types are 'serial', 'mpi', and 'charm'"
-     print
-     print "The type is set using the environment variable $CELLO_TYPE"
-     print "or by using 'scons type=<type>"
-     sys.exit(1)
-
 # Precision configuration
 
 if (prec == 'single' or prec == 'double'):
@@ -262,8 +231,7 @@ if (not is_arch_valid):
 
 charmc = charm_path + '/bin/charmc -language charm++ '
 
-cxx['charm']  = charmc + charm_perf + ' '
-# cc ['charm']  = charmc + charm_perf + ' '
+cxx = charmc + charm_perf + ' '
 
 if (balance == 1):
      flags_cxx_charm = flags_cxx_charm + ' -balancer ' + balancer
@@ -275,16 +243,9 @@ if (balance == 1):
 
 parallel_run_args = ""
 
-if (type == "serial"):
-     serial_run   = ""
-     parallel_run = ""
-elif (type == "mpi"):
-     serial_run   = ""
-     parallel_run = "mpirun -np " + ip_mpi
-elif (type == "charm"):
-     serial_run   = ""
-     parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
-     if (balance):  parallel_run_args = "+balancer " + balancer
+serial_run   = ""
+parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
+if (balance):  parallel_run_args = "+balancer " + balancer
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"
@@ -295,19 +256,16 @@ if (use_valgrind):
 # CELLO PATHS
 #======================================================================
 
-config = type
-
-bin_path = '#/bin/'+config
-lib_path = '#/lib/'+config
+bin_path = '#/bin'
+lib_path = '#/lib'
 inc_path = '#/include'
-test_path= 'test/'+config
+test_path= 'test'
 
 Export('bin_path')
 Export('lib_path')
 Export('inc_path')
 Export('test_path')
 Export('ip_charm')
-Export('ip_mpi')
 
 
 cpppath     = [inc_path]
@@ -352,38 +310,37 @@ environ  = os.environ
 cxxflags = flags_arch + ' ' + flags_arch_cpp
 cxxflags = cxxflags + ' ' + flags_cxx
 cxxflags = cxxflags + ' ' + flags_config
-if (type=="charm"): cxxflags = cxxflags + ' ' + flags_cxx_charm
+cxxflags = cxxflags + ' ' + flags_cxx_charm
 
 cflags   = flags_arch
 cflags   = cflags + ' ' + flags_cc
 cflags   = cflags + ' ' + flags_config
-if (type=="charm"):cflags   = cflags + ' ' + flags_cc_charm
+cflags   = cflags + ' ' + flags_cc_charm
 
 fortranflags = flags_arch
 fortranflags = fortranflags + ' ' + flags_fc
 fortranflags = fortranflags + ' ' + flags_config
-if (type=="charm"):fortranflags = fortranflags + ' ' + flags_fc_charm
+fortranflags = fortranflags + ' ' + flags_fc_charm
 
 linkflags    = flags_arch + ' ' + flags_arch_cpp
 linkflags    = linkflags + ' ' + flags_link
 linkflags    = linkflags + ' ' + flags_config
-if (type=="charm"):linkflags    = linkflags + ' ' + flags_link_charm
+linkflags    = linkflags + ' ' + flags_link_charm
 
 if not os.path.exists("include"):
      os.makedirs("include")
 cello_def = open ("include/auto_config.def", "w")
 
 cello_def.write ("#define CELLO_ARCH \""+arch+"\"\n")
-cello_def.write ("#define CELLO_TYPE \""+type+"\"\n")
 cello_def.write ("#define CELLO_PREC \""+prec+"\"\n")
-cello_def.write ("#define CELLO_CC           \""+cc[type]+"\"\n")	
+cello_def.write ("#define CELLO_CC           \""+cc+"\"\n")	
 cello_def.write ("#define CELLO_CFLAGS       \""+cflags+"\"\n")
 cello_def.write ("#define CELLO_CPPDEFINES   \""+" ".join(map(str,defines))+"\"\n")
 cello_def.write ("#define CELLO_CPPPATH      \""+" ".join(map(str,cpppath))+"\"\n")
-cello_def.write ("#define CELLO_CXX          \""+cxx[type]+"\"\n")	
+cello_def.write ("#define CELLO_CXX          \""+cxx+"\"\n")	
 cello_def.write ("#define CELLO_CXXFLAGS     \""+cxxflags+"\"\n")
 cello_def.write ("#define CELLO_FORTRANFLAGS \""+fortranflags+"\"\n")
-cello_def.write ("#define CELLO_FORTRAN      \""+f90[type]+"\"\n")
+cello_def.write ("#define CELLO_FORTRAN      \""+f90+"\"\n")
 cello_def.write ("#define CELLO_FORTRANLIBS  \""+" ".join(map(str,libs_fortran))+"\"\n")
 cello_def.write ("#define CELLO_FORTRANPATH  \""+" ".join(map(str,fortranpath))+"\"\n")
 cello_def.write ("#define CELLO_LIBPATH      \""+" ".join(map(str,libpath))+"\"\n")
@@ -392,15 +349,15 @@ cello_def.write ("#define CELLO_LINKFLAGS    \""+linkflags+"\"\n" )
 cello_def.close()
 
 env = Environment (
-     CC           = cc[type],	
+     CC           = cc,
      CFLAGS       = cflags,
      CPPDEFINES   = defines,
      CPPPATH      = cpppath,
-     CXX          = cxx[type],	
+     CXX          = cxx,
      CXXFLAGS     = cxxflags,
      ENV          = environ,
      FORTRANFLAGS = fortranflags,
-     FORTRAN      = f90[type],
+     FORTRAN      = f90,
      FORTRANLIBS  = libs_fortran,
      FORTRANPATH  = fortranpath,
      LIBPATH      = libpath,
@@ -410,34 +367,30 @@ env = Environment (
 # BUILDERS
 #======================================================================
 
-if (type == "charm"):
-     # include files moved to include here since they are generated in
-     # top-level directory
-     charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h `dirname $SOURCE`")
-     env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
+charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h `dirname $SOURCE`")
+env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 
 Export('env')
-Export('type')
 Export('parallel_run')
 Export('parallel_run_args')
 Export('serial_run')
 Export('use_papi')
 
-SConscript( 'src/SConscript',variant_dir='build/' + config )
-SConscript('test/SConscript',variant_dir = test_path )
+SConscript( 'src/SConscript',variant_dir='build')
+SConscript('test/SConscript')
 
 #======================================================================
 # CLEANING
 #======================================================================
 
-Clean('.','test/' + type + '-' + prec)
-Clean('.','bin/'  + type + '-' + prec)
-Clean('.','lib/'  + type + '-' + prec)
+#Clean('.','test')
+Clean('.','bin')
+Clean('.','lib')
 
-if (type == 'charm' and use_projections == 1):
-   Clean('.',Glob('bin/charm/*.projrc'))
-   Clean('.',Glob('bin/charm/*.log'))
-   Clean('.',Glob('bin/charm/*.sts'))
+if (use_projections == 1):
+   Clean('.',Glob('bin/*.projrc'))
+   Clean('.',Glob('bin/*.log'))
+   Clean('.',Glob('bin/*.sts'))
    Clean('.','charmrun')
 
 #======================================================================

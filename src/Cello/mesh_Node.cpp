@@ -13,19 +13,14 @@
 
 Node::Node() throw ()
   : 
-#ifdef CONFIG_USE_CHARM
   have_data_(0),
-#endif
   data_(0),
-#ifdef CONFIG_USE_CHARM
   size_(0),
-#endif
-    child_array_(0)
+  child_array_(0)
 {}
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
 void Node::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
@@ -48,7 +43,6 @@ void Node::pup (PUP::er &p)
   if (up) child_array_ = new Node[size_];
   PUParray(p,child_array_,size_);
 };
-#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 
@@ -61,9 +55,7 @@ Node::~Node() throw ()
 int Node::refine (int c)
 {
   if (child_array_ == 0) {
-#ifdef CONFIG_USE_CHARM
     size_ = c;
-#endif
     child_array_ = new Node [c];
   } else {
     ERROR ("Node::refine","Cannot refine a Node that has already been refined");
@@ -81,9 +73,7 @@ int Node::coarsen (int c)
       count += child_array_[i].coarsen(c);
     }
     delete [] child_array_;
-#ifdef CONFIG_USE_CHARM
     size_ = 0;
-#endif
     child_array_ = 0;
     count += c;
   }

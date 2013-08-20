@@ -178,13 +178,10 @@ private: // attributes
     };
 };
 
-#ifdef CONFIG_USE_CHARM
 #ifndef TEST
   PUPbytes(Index);
 #endif
-#endif /* CONFIG_USE_CHARM */
 
-#ifdef CONFIG_USE_CHARM
 #ifndef TEST
 // public:
 //   void pup(PUP::er &p) {
@@ -192,11 +189,8 @@ private: // attributes
 //   }
 PUPbytes(BIndex);
 #endif
-#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
-#ifdef CONFIG_USE_CHARM
-
 #ifndef TEST
 class CkArrayIndexIndex:public CkArrayIndex {
   Index index_;
@@ -221,5 +215,3 @@ public:
 };
 #endif
 #endif /* INDEX_HPP */
-
-#endif /* CONFIG_USE_CHARM */

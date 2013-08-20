@@ -40,7 +40,6 @@ public: // interface
   virtual ~File () throw()
   {}
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -49,7 +48,6 @@ public: // interface
     p | path_;
     p | name_;
   }
-#endif
 
   //--------------------------------------------------
   // Files

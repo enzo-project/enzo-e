@@ -21,8 +21,6 @@ public: // interface
   /// Constructor
   ProlongLinear() throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(ProlongLinear);
 
@@ -32,8 +30,6 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
   { TRACEPUP; PUP::able::pup(p); }
-
-#endif
 
   /// Prolong comm_block_Ht values to the child block given by (icx,icy,icz)
   virtual int apply

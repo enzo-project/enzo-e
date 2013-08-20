@@ -34,8 +34,6 @@ public: // interface
   /// Assignment operator
   EnzoConfig & operator= (const EnzoConfig & config) throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoConfig);
 
@@ -44,8 +42,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();

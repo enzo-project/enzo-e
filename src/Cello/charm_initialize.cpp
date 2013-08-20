@@ -5,8 +5,6 @@
 /// @date     2013-04-26
 /// @brief    Charm-related functions associated with initialization
 
-#ifdef CONFIG_USE_CHARM
-
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
@@ -55,5 +53,3 @@ void SimulationCharm::r_initialize_end()
 }
 
 //----------------------------------------------------------------------
-
-#endif /* CONFIG_USE_CHARM */

@@ -23,7 +23,6 @@ public: // interface
   /// Destructor
   ~ItFace() throw();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -33,7 +32,6 @@ public: // interface
     p | rank_simulation_;
     p | rank_limit_;
   }
-#endif
 
   /// Reduce another value
   bool next (int if3[3]) throw();

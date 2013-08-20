@@ -1,10 +1,8 @@
 Import('env')
 Import('parallel_run')
 Import('parallel_run_args')
-Import('type')
 Import('serial_run')
 Import('ip_charm')
-Import('ip_mpi')
 
 Import('bin_path')
 Import('test_path')
@@ -86,7 +84,8 @@ Clean(env_mv_out.RunSerial('test_TreeDensity.unit',
        '#/density_x_2-balanced.png',
        '#/density_3d_3-coalesced.png',
        '#/density_x_3-coalesced.png'])
-env.RunSerial('test_ItFace', bin_path + '/test_ItFace')
+
+env.RunSerial('test_ItFace.unit',    bin_path + '/test_ItFace')
 
 env.RunSerial('test_Node.unit',      bin_path + '/test_Node')
 env.RunSerial('test_NodeTrace.unit', bin_path + '/test_NodeTrace')
@@ -406,13 +405,7 @@ Clean(env_mv_out.RunParallel ('test_initial_png.unit',
 env.MakeMovie ("initial_png.swf","test_initial_png.unit", \
                 ARGS= test_path + "/initial_png-??.png");
 
-if (type == "serial"):
-   env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS='1')
-elif (type == "charm"):
-   env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_charm)
-else:
-   env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_mpi)
-
+env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_charm)
 
 output_stride_1_RUN = env.RunParallel (
    'test_output-stride-1.unit',

@@ -94,8 +94,6 @@ InitialDefault::~InitialDefault() throw()
 }
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void InitialDefault::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
@@ -114,8 +112,6 @@ void InitialDefault::pup (PUP::er &p)
   PUParray(p,num_masks_,num_fields_);
   p | periodic_;
 }
-
-#endif
 
 //----------------------------------------------------------------------
 

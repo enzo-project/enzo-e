@@ -14,14 +14,8 @@ balancer = 'RotateLB'
 flags_cxx_charm  = '-balancer ' + balancer
 flags_link_charm = '-rdynamic -module ' + balancer
 
-cc['charm']   = 'gcc'
-cc['mpi']     = 'mpicc'
-cc['serial']  = 'gcc'
-cxx['mpi']    = 'mpic++'
-cxx['serial'] = 'g++'
-f90['charm']  = 'gfortran'
-f90['mpi']    = 'gfortran'
-f90['serial'] = 'gfortran'
+cc   = 'gcc'
+f90  = 'gfortran'
 
 libpath_fortran = ''
 libs_fortran    = ['gfortran']

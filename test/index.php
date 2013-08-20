@@ -143,9 +143,9 @@ $types = array("charm");
 
       echo "<tr>\n";
 
-      echo "<th> $types[$i] </th>";
+      //      echo "<th> $types[$i] </th>";
 
-      $output_file = "$types[$i]/$output.unit";
+      $output_file = "$output.unit";
 
       test_output     ($output_file);
       test_date       ($output_file);
@@ -163,7 +163,7 @@ $types = array("charm");
 
     for ($i = 0; $i<$num_types; ++$i) {
       $type = $types[$i];
-      $output_file = "../test/$type/$output.unit";
+      $output_file = "../test/$output.unit";
       if (file_exists($output_file)) {
 	test($type,$testrun,"FAIL");
       }
@@ -181,7 +181,7 @@ function test($type,$testrun,$type) {
   $cols = "$4,$6,$7,$8,$9,$10";
   $rowtext = "</tr><tr>";
 
-  $output = "../test/$type/$testrun.unit";
+  $output = "../test/$testrun.unit";
   $count = exec("cat $output | grep $type | grep '0/' | wc -l");
   if ($count == 0) {
     #     echo "<strong >no ${ltype}ed tests</strong></br/>";
@@ -216,7 +216,7 @@ function test($type,$testrun,$type) {
 
     for ($test = 0; $test<sizeof($executables); ++$test) {
       $exe = $executables[$test];
-      $bin = "../bin/$type/$exe";
+      $bin = "../bin/$exe";
       if (! file_exists($bin)) {
         ++ $count_missing ;
       }
@@ -242,7 +242,7 @@ function summary_missing_output ($test_output, $executables)
 
     $count_missing = 0;
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/$types[$i]/test_$test_output[$test].unit";
+      $output = "../test/test_$test_output[$test].unit";
       if (! file_exists($output)) {
 	++ $count_missing;
       }
@@ -268,7 +268,7 @@ function summary_incomplete_output ( $test_output, $executables)
     $output_files = "";
     $num_output_files = 0;
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/$types[$i]/test_$test_output[$test].unit";
+      $output = "../test/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
       ++$num_output_files;
     }
@@ -290,7 +290,7 @@ function summary_failed_tests ($test_output, $executables)
 
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/$types[$i]/test_$test_output[$test].unit";
+      $output = "../test/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
     }
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
@@ -309,7 +309,7 @@ function summary_unfinished_tests ($test_output, $executables)
 
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/$types[$i]/test_$test_output[$test].unit";
+      $output = "../test/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
     }
 
@@ -331,7 +331,7 @@ function summary_passed_tests ($test_output, $executables)
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
       $output = $test_output[$test];
-      $output_files = "$output_files ../test/$types[$i]/test_$output.unit";
+      $output_files = "$output_files ../test/test_$output.unit";
     }
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
 
@@ -380,7 +380,7 @@ function test_table ($file_root,$size_array, $types)
 	  echo "<td>";
 	  $swf_file = "$type/$file_root.swf"; 
 	  $size_last = $size_array[sizeof($size_array)-1]; 
-	  $png_file_last = "$type/$file_root-$size_last.png"; 
+	  $png_file_last = "$file_root-$size_last.png"; 
 	  swf_movie($swf_file, 
 		    $png_file_last, 
 		    160); 
@@ -389,7 +389,7 @@ function test_table ($file_root,$size_array, $types)
 	// Show available image frames
 	for ($j = 0; $j < sizeof($size_array); ++$j) {
 	  $size = $size_array[$j];
-          $png_file = "$type/$file_root-$size.png"; 
+          $png_file = "$file_root-$size.png"; 
 
      	   printf ("<td><img width=160 src=$png_file></img></td>\n");  
      	 }  
@@ -419,7 +419,7 @@ function test_table_blocks ($file_root,$cycle_array, $types)
 	 $cycle = $cycle_array[$index_cycle];
 	 for ($col = 0; $col < $cols; $col++) {
 	   $block = sprintf ("%08d-%08d-%08d",$rows - $row - 1,$col,0);
-	   echo "<td class=block> <img src=$type/${file_root}-$cycle-block_$block.png width=80></img> </td>";
+	   echo "<td class=block> <img src=${file_root}-$cycle-block_$block.png width=80></img> </td>";
 	 }
        }
        echo "</tr>";
@@ -489,7 +489,7 @@ for ($k = 0; $k < 6; $k ++) {
     } else {
       printf ("<th> ");
     }
-    printf (" <a href=$types[$i]/out.scons>$types[$i]</a> </th>");
+    printf (" <a href=out.scons>$types[$i]</a> </th>");
   }
   printf ("<th> </th>");
 }
@@ -560,7 +560,6 @@ test_summary("Memory",array("Memory"),
 test_summary("Mesh",
 	     array("Hierarchy",
 		   "Block",
-		   "Tree",
 		   "Index",
 		   "Tree",
 		   "ItFace",
@@ -944,19 +943,19 @@ tests("Cello","test_Index","test_Index","");
 tests("Cello","test_Tree","test_Tree",""); 
 tests("Cello","test_ItFace","test_ItFace",""); 
 
-printf ("<img width=257 src=\"charm/test_tree_1-initial.png\"></img>\n");
-printf ("<img width=257 src=\"charm/test_tree_2-balanced.png\"></img>\n");
-printf ("<img width=257 src=\"charm/test_tree_3-merged.png\"></img></br>\n");
+printf ("<img width=257 src=\"test_tree_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"test_tree_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"test_tree_3-merged.png\"></img></br>\n");
 
 tests("Cello","test_TreeDensity","test_TreeDensity",""); 
 
-printf ("<img width=257 src=\"charm/density_xy_1-initial.png\"></img>\n");
-printf ("<img width=257 src=\"charm/density_xy_2-balanced.png\"></img>\n");
-printf ("<img width=257 src=\"charm/density_xy_3-coalesced.png\"></img></br>\n");
+printf ("<img width=257 src=\"density_xy_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"density_xy_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"density_xy_3-coalesced.png\"></img></br>\n");
 
-printf ("<img width=257 src=\"charm/density_3d_1-initial.png\"></img>\n");
-printf ("<img width=257 src=\"charm/density_3d_2-balanced.png\"></img>\n");
-printf ("<img width=257 src=\"charm/density_3d_3-coalesced.png\"></img></br>\n");
+printf ("<img width=257 src=\"density_3d_1-initial.png\"></img>\n");
+printf ("<img width=257 src=\"density_3d_2-balanced.png\"></img>\n");
+printf ("<img width=257 src=\"density_3d_3-coalesced.png\"></img></br>\n");
 
 tests("Cello","test_Node","test_Node",""); 
 tests("Cello","test_NodeTrace","test_NodeTrace",""); 

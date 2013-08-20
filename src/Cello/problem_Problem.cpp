@@ -33,8 +33,6 @@ Problem::~Problem() throw()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void Problem::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
@@ -85,8 +83,6 @@ void Problem::pup (PUP::er &p)
   p | prolong_; // PUP::able
   p | restrict_; // PUP::able
 }
-
-#endif
 
 //----------------------------------------------------------------------
 

@@ -61,7 +61,6 @@ public: // interface
   { INCOMPLETE("Param::operator =");
     return *this; };
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -77,7 +76,6 @@ public: // interface
     // *value_list_;
     // *value_expr_;
   }
-#endif
 
   /// Evaluate a floating-point expression given vectos x,y,z,t
   void evaluate_float  

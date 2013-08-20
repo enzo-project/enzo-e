@@ -18,9 +18,8 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#ifdef CONFIG_USE_CHARM
+
 #include "pup_stl.h"
-#endif
 
 //----------------------------------------------------------------------
 // Component class includes

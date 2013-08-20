@@ -19,8 +19,6 @@ EnzoMethodPpml::EnzoMethodPpml() : Method()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void EnzoMethodPpml::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
@@ -29,8 +27,6 @@ void EnzoMethodPpml::pup (PUP::er &p)
 
   Method::pup(p);
 }
-
-#endif
 
 //----------------------------------------------------------------------
 

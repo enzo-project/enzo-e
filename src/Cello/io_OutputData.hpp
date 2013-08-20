@@ -32,8 +32,6 @@ public: // functions
   /// Close the file if it is open
   virtual ~OutputData() throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_decl(OutputData);
 
@@ -42,8 +40,6 @@ public: // functions
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
 public: // virtual functions
 

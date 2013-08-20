@@ -24,8 +24,6 @@ InputData::~InputData() throw()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void InputData::pup (PUP::er &p)
 {
 
@@ -37,8 +35,6 @@ void InputData::pup (PUP::er &p)
 
   // this function intentionally left blank
 }
-
-#endif
 
 //======================================================================
 

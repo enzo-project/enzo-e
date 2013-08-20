@@ -21,19 +21,7 @@ GroupProcess * GroupProcess::create
 {
   GroupProcess * group = 0;
 
-#if defined(CONFIG_USE_MPI)
-
-  group = new GroupProcessMpi (process_first, process_last_plus);
-
-#elif defined(CONFIG_USE_CHARM)
-
   group = new GroupProcessCharm;
-
-#else
-
-  group = new GroupProcessSerial;
-
-#endif
 
   ASSERT("GroupProcess","process group creation failed",group != NULL);
 

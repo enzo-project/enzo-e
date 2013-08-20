@@ -25,8 +25,6 @@ EnzoProlongMC1::EnzoProlongMC1(std::string prolong_type) throw()
 }
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void EnzoProlongMC1::pup (PUP::er &p)
 {
   TRACEPUP;
@@ -35,8 +33,6 @@ void EnzoProlongMC1::pup (PUP::er &p)
 
   p | method_;
 }
-
-#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 

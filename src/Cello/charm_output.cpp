@@ -90,8 +90,6 @@
 ///          output_next()
 
 
-#ifdef CONFIG_USE_CHARM
-
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
@@ -313,8 +311,7 @@ void SimulationCharm::monitor_output()
   TRACE ("END   PHASE OUTPUT [SIMULATION]");
   c_compute();
 }
-//======================================================================
 
-#endif /* CONFIG_USE_CHARM */
+//======================================================================
 
 

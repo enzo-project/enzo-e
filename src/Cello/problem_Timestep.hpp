@@ -8,11 +8,7 @@
 #ifndef METHOD_TIMESTEP_HPP
 #define METHOD_TIMESTEP_HPP
 
-#ifdef CONFIG_USE_CHARM
 class Timestep : public PUP::able 
-#else
-class Timestep 
-#endif
 {
 
 
@@ -28,16 +24,12 @@ public: // interface
   /// Destructor
   virtual ~Timestep() throw() {}
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_abstract(Timestep);
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
   { TRACEPUP; PUP::able::pup(p); }
-
-#endif
 
 public: // virtual functions
 

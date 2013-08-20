@@ -5,8 +5,6 @@
 /// @date     2011-03-17
 /// @brief    Implementation of SimulationCharm user-dependent class member functions
 
-#ifdef CONFIG_USE_CHARM
-
 #include "cello.hpp"
 
 #include "simulation.hpp"
@@ -104,13 +102,6 @@ void SimulationCharm::p_performance_reduce(CkReductionMsg * msg)
   delete msg;
 
 }
-// void SimulationCharm::run() throw()
-// {
-//   TRACE("SimulationCharm::run()");
-//   initial();
-// }
 
 //----------------------------------------------------------------------
-//======================================================================
 
-#endif /* CONFIG_USE_CHARM */

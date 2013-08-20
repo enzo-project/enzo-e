@@ -50,8 +50,6 @@ public: // functions
   /// OutputImage destructor: free allocated image data
   virtual ~OutputImage() throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_decl(OutputImage);
 
@@ -60,8 +58,6 @@ public: // functions
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   // Set the image colormap
   void set_colormap

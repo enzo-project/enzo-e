@@ -23,8 +23,6 @@ public: // interface
 	      double slope_max_coarsen,
 	      std::vector<std::string> field_name_list) throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// default constructor
   RefineSlope () throw() : Refine() {};
 
@@ -41,7 +39,7 @@ public: // interface
     p | slope_max_coarsen_;
     p | field_id_list_;
   }
-#endif
+
   /// Evaluate the refinement criteria, updating the refinement field
   virtual int apply (CommBlock * comm_block,
 		     const FieldDescr * field_descr) throw();

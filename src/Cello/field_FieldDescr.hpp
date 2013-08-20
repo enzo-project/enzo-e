@@ -41,7 +41,6 @@ public: // functions
   /// Assignment operator
   FieldDescr & operator= (const FieldDescr & field_descr) throw();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -80,7 +79,6 @@ public: // functions
     p | min_action_;
     p | max_action_;
   }
-#endif
 
    // /// Set membership of a field in a group
    // void set_field_in_group(int id_field, int id_group) 

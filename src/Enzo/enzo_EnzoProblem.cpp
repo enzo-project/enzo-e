@@ -24,8 +24,6 @@ EnzoProblem::~EnzoProblem() throw ()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void EnzoProblem::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
@@ -34,8 +32,6 @@ void EnzoProblem::pup (PUP::er &p)
 
   Problem::pup(p);
 }
-
-#endif
 
 //======================================================================
 

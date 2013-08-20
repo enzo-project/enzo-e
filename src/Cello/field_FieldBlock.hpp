@@ -38,8 +38,6 @@ public: // interface
   /// Assignment operator
   FieldBlock & operator= (const FieldBlock & field_block) throw ();
 
-#ifdef CONFIG_USE_CHARM
-
   void pup(PUP::er &p) 
   {
     TRACEPUP;
@@ -50,8 +48,6 @@ public: // interface
     p | offsets_;
     p | ghosts_allocated_;
   }
-
-#endif
 
   /// Return size of fields on the block, assuming centered
   void size(int * nx, int * ny = 0, int * nz = 0) const throw();
@@ -116,32 +112,6 @@ public: // interface
   bool ghosts_allocated() const throw ()
   {  return ghosts_allocated_; }
 
-  // /// Allocate and clear ghost values if not already allocated
-  // void allocate_ghosts(const FieldDescr * field_descr) throw ();
-
-  // /// Deallocate ghost values if allocated
-  // void deallocate_ghosts(const FieldDescr * field_descr) throw ();
-
-
-#ifndef CONFIG_USE_CHARM /* MPI only */
-
-  /// Refresh ghost zones on an internal face
-  void refresh_ghosts(const FieldDescr * field_descr,
-		      const GroupProcess * group_process,
-		      const Layout * layout,
-		      int ibx, int iby, int ibz,
-		      int fx,  int fy,  int fz) throw();
-
-#endif
-
-  /// Split a block into 2, 4, or 8 subblocks; does not delete self
-  void split(bool split_x, bool split_y, bool split_z, 
-	     FieldBlock ** field_blocks) throw ();
-
-  /// Merge 2, 4, or 8 subblocks into a single block
-  FieldBlock * merge(bool merge_x, bool merge_y, bool merge_z, 
-		     FieldBlock ** field_blocks) throw ();
- 
   /// Return the number of elements (nx,ny,nz) along each axis, and total
   /// number of bytes n
   int field_size (const FieldDescr * field_descr, int id_field, 
@@ -160,7 +130,6 @@ public: // interface
   /// Print basic field characteristics for debugging
   void print (const FieldDescr * field_descr,
 	      const char * message,
-	      // double lower[3], double upper[3],
 	      bool use_file = false) const throw();
 
 private: // functions

@@ -5,8 +5,6 @@
 /// @date     2013-04-26
 /// @brief    Charm-related functions associated with refreshing ghost zones
 
-#ifdef CONFIG_USE_CHARM
-
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
@@ -284,5 +282,3 @@ void CommBlock::q_refresh_end()
 }
 
 //----------------------------------------------------------------------
-
-#endif /* CONFIG_USE_CHARM */

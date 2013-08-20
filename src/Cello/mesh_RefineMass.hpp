@@ -23,8 +23,6 @@ public: // interface
 	     double min_overdensity,
 	     double root_cell_volume) throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// default constructor
   RefineMass () throw() : Refine() {};
 
@@ -41,7 +39,6 @@ public: // interface
     p | level_exponent_;
     p | min_overdensity_;
   }
-#endif
 
   /// Evaluate the refinement criteria, updating the refinement field
   virtual int apply (CommBlock * comm_block,

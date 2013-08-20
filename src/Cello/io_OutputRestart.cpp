@@ -9,9 +9,7 @@
 
 #include "io.hpp"
 
-#ifdef CONFIG_USE_CHARM
 extern CProxy_SimulationCharm  proxy_simulation;
-#endif
 
 //----------------------------------------------------------------------
 
@@ -29,11 +27,6 @@ OutputRestart::OutputRestart
 
   set_process_stride(process_count);
 
-#ifndef CONFIG_USE_CHARM
-  WARNING("OutputRestart::OutputRestart",
-	  "Restart capability only implemented for Charm++");
-#endif
-
   TRACE1 ("index = %d",index_);
   TRACE2 ("config->output_dir[%d]=%p",index_,&config->output_dir[index_]);
   TRACE2 ("config->output_dir[%d][0]=%s",
@@ -50,8 +43,6 @@ OutputRestart::OutputRestart
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void OutputRestart::pup (PUP::er &p)
   {
     TRACEPUP;
@@ -63,16 +54,12 @@ void OutputRestart::pup (PUP::er &p)
     p | dir_args_;
   }
 
-#endif
-
 //======================================================================
 
 void OutputRestart::write_simulation ( const Simulation * simulation ) throw()
 {
 
   TRACE("OutputRestart::write_simulation()");
-
-#ifdef CONFIG_USE_CHARM
 
   // Write parameter file
 
@@ -90,12 +77,6 @@ void OutputRestart::write_simulation ( const Simulation * simulation ) throw()
     
     CkStartCheckpoint (dir_char,callback);
   }
-#else
-
-  ERROR("OutputRestart::OutputRestart",
-	"Restart capability only implemented for Charm++");
-#endif
-
 
 }
 

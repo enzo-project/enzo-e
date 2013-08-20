@@ -57,7 +57,6 @@ public: // interface
   /// Delete a Performance object
   ~Performance();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -84,7 +83,6 @@ public: // interface
     //    p | papi_counters_
     p | warnings_;
   }
-#endif
 
   /// Begin collecting performance data
   void begin() throw();

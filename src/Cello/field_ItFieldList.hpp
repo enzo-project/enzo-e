@@ -25,8 +25,6 @@ public: // interface
   virtual ~ItFieldList () throw()
   { }
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_decl(ItFieldList);
 
@@ -35,8 +33,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Append a value to the list of values
   void append (int value) 

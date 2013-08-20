@@ -11,8 +11,6 @@
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void EnzoFactory::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
@@ -22,8 +20,6 @@ void EnzoFactory::pup (PUP::er &p)
   Factory::pup(p);
 }
 
-#endif
-
 //----------------------------------------------------------------------
 
 IoBlock * EnzoFactory::create_io_block () const throw()
@@ -32,8 +28,6 @@ IoBlock * EnzoFactory::create_io_block () const throw()
 }
 
 //----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
 
 CProxy_CommBlock EnzoFactory::create_block_array
 (
@@ -101,17 +95,11 @@ CProxy_CommBlock EnzoFactory::create_block_array
   return enzo_block_array;
 }
 
-#endif /* CONFIG_USE_CHARM */
-
 //----------------------------------------------------------------------
 
 CommBlock * EnzoFactory::create_block
 (
-#ifdef CONFIG_USE_CHARM
  CProxy_CommBlock * block_array,
-#else
- Simulation * simulation,
-#endif /* CONFIG_USE_CHARM */
  Index index,
  int nx, int ny, int nz,
  int num_field_blocks,
@@ -127,46 +115,25 @@ CommBlock * EnzoFactory::create_block
 	 nx,ny,nz,num_field_blocks,count_adapt,initial);
 
 
-#ifdef CONFIG_USE_CHARM
-
   CProxy_EnzoBlock * enzo_block_array = (CProxy_EnzoBlock * ) block_array;
 
   (*enzo_block_array)[index].insert
-     (
-      index,
-      nx,ny,nz,
-      num_field_blocks,
-      count_adapt,
-      initial,
-      cycle,time,dt,
-      narray, array, op_array,
-      num_face_level, face_level,
-      testing);
-
-  CommBlock * block = (*enzo_block_array)[index].ckLocal();
-   TRACE1("block = %p",block);
-   //  ASSERT("Factory::create_block()","block is NULL",block != NULL);
-
-   return block;
-
-#else /* CONFIG_USE_CHARM */
-
-  EnzoBlock * enzo_block = new EnzoBlock 
     (
-     simulation,
      index,
      nx,ny,nz,
      num_field_blocks,
      count_adapt,
      initial,
-     cycle, time, dt,
+     cycle,time,dt,
      narray, array, op_array,
      num_face_level, face_level,
      testing);
 
-  return enzo_block;
-  
-#endif /* CONFIG_USE_CHARM */
+  CommBlock * block = (*enzo_block_array)[index].ckLocal();
+  TRACE1("block = %p",block);
+  //  ASSERT("Factory::create_block()","block is NULL",block != NULL);
+
+  return block;
 
 }
 

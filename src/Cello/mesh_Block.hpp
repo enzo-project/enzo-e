@@ -39,7 +39,6 @@ public: // interface
   /// Empty constructor
   Block() { }
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -56,8 +55,6 @@ public: // interface
     PUParray(p,upper_,3);
     // NOTE: change this function whenever attributes change
   }
-#endif
-  
 
   //----------------------------------------------------------------------
 

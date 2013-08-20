@@ -29,7 +29,6 @@ IoFieldBlock::IoFieldBlock() throw ()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
 void IoFieldBlock::pup (PUP::er &p)
 {
 
@@ -48,7 +47,6 @@ void IoFieldBlock::pup (PUP::er &p)
   //  p | *field_block_;
   p | field_index_;
 }
-#endif
 
 //----------------------------------------------------------------------
 

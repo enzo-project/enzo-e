@@ -25,7 +25,6 @@ public: // interface
   virtual ~IoBlock() throw()
   {}
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -37,7 +36,6 @@ public: // interface
     WARNING ("IoBlock::pup","skipping block_");
     //    p | *block_;
   }
-#endif
 
   /// Set block
   void set_block (CommBlock * block) throw()

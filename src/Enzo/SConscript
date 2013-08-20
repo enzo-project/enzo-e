@@ -3,7 +3,6 @@
 #------------------------------
 
 Import('env')
-Import('type')
 Import('use_papi')
 
 Import('bin_path')
@@ -16,8 +15,7 @@ Import('lib_path')
 
 components = []
 
-if (type == "charm"):
-	components.append(['charm'])
+components.append(['charm'])
 
 components.append(['enzo','simulation', 'problem',
 	      'comm', 'mesh', 'field',
@@ -89,9 +87,8 @@ sources  = [Glob('enzo_*cpp'),
 
 
 charm_main = []
-if (type == "charm"):
-   includes.append(['enzo.decl.h','enzo.def.h'])
-   charm_main = ['../Cello/main_enzo.cpp']
+includes.append(['enzo.decl.h','enzo.def.h'])
+charm_main = ['../Cello/main_enzo.cpp']
 
 #------------------------------
 # ENVIRONMENTS
@@ -111,11 +108,10 @@ test_enzo_prolong = env.Program (['test_Prolong.cpp', charm_main])
 
 binaries = [test_enzo_p, test_enzo_prolong]
 
-if (type == "charm"):
-   env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
-   env.CharmBuilder('enzo.def.h', 'enzo.ci',ARG = 'enzo')
-   env.CharmBuilder('main_enzo.decl.h','enzo_main.ci',ARG = 'main_enzo')
-   env.CharmBuilder('main_enzo.def.h', 'enzo_main.ci',ARG = 'main_enzo')
+env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
+env.CharmBuilder('enzo.def.h', 'enzo.ci',ARG = 'enzo')
+env.CharmBuilder('main_enzo.decl.h','enzo_main.ci',ARG = 'main_enzo')
+env.CharmBuilder('main_enzo.def.h', 'enzo_main.ci',ARG = 'main_enzo')
 
 #------------------------------
 # INSTALL

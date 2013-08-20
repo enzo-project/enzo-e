@@ -18,8 +18,6 @@ EnzoInitialImplosion2::EnzoInitialImplosion2
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void EnzoInitialImplosion2::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
@@ -28,7 +26,6 @@ void EnzoInitialImplosion2::pup (PUP::er &p)
 
   Initial::pup(p);
 }
-#endif
 
 //----------------------------------------------------------------------
 

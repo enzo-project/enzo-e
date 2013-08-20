@@ -20,13 +20,9 @@
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
 extern CProxy_SimulationCharm proxy_simulation;
-#endif
 
-#ifndef CONFIG_USE_CHARM
-#   include "enzo_finalize.hpp"
-#endif
+//----------------------------------------------------------------------
 
 PARALLEL_MAIN_BEGIN
 {
@@ -45,11 +41,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(ip,np);
 
-#ifdef CONFIG_USE_CHARM
   monitor_ = Monitor::instance();
-#else
-  Monitor * monitor_ = Monitor::instance();
-#endif
 
   monitor_->set_active (group_process->is_root());
   monitor_->header();
@@ -81,8 +73,6 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
   proxy_main     = thishandle;
 
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
@@ -90,36 +80,11 @@ PARALLEL_MAIN_BEGIN
 
   proxy_simulation.p_initialize_begin();
 
-
-  //--------------------------------------------------
-
-#else /* ! CONFIG_USE_CHARM */
-
-  Simulation * simulation = 
-    new EnzoSimulationMpi (parameter_file,group_process);
-
-  simulation->initialize();
-
-  simulation->run();
-
-  enzo_finalize(simulation);
-
-  delete simulation;
-  delete group_process;
-
-  unit_finalize();
-
-  PARALLEL_EXIT;
-
-#endif
-  //--------------------------------------------------
 }
 
 PARALLEL_MAIN_END
 
 
 //======================================================================
-#ifdef CONFIG_USE_CHARM
-#  include "enzo.def.h"
-#endif
+#include "enzo.def.h"
 //======================================================================

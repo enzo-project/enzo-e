@@ -61,7 +61,6 @@ private:
   /// Private destructor  of the Unit object [singleton design pattern]
   ~Unit();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -80,8 +79,6 @@ private:
     p | timer_;
 
   }
-#endif
-
 
 public:
 

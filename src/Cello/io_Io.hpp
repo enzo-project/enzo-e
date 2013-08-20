@@ -23,7 +23,6 @@ public: // interface
   virtual ~Io () throw ()
   {}
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -36,7 +35,6 @@ public: // interface
     p | data_name_;
 
   }
-#endif
 
 #include "_io_Io_common.hpp"
 

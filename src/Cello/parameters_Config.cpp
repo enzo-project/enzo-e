@@ -10,8 +10,6 @@
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void Config::pup (PUP::er &p)
 {
   TRACEPUP;
@@ -104,8 +102,6 @@ void Config::pup (PUP::er &p)
   p | timestep_type;
 
 }
-
-#endif
 
 //----------------------------------------------------------------------
 
@@ -237,19 +233,6 @@ void Config::read(Parameters * parameters) throw()
   mesh_root_blocks[0] = parameters->list_value_integer(0,"Mesh:root_blocks",1);
   mesh_root_blocks[1] = parameters->list_value_integer(1,"Mesh:root_blocks",1);
   mesh_root_blocks[2] = parameters->list_value_integer(2,"Mesh:root_blocks",1);
-
-#ifndef CONFIG_USE_CHARM
-  int root_blocks = mesh_root_blocks[0]*mesh_root_blocks[1]*mesh_root_blocks[2];
-  GroupProcess * group_process = GroupProcess::create();
-  ASSERT4 ("Config::read()",
-	   "Product of Mesh:root_blocks = [%d %d %d] must equal MPI_Comm_size",
-	   mesh_root_blocks[0],
-	   mesh_root_blocks[1],
-	   mesh_root_blocks[2],
-	   group_process->size(),
-	   root_blocks==group_process->size());
-  delete group_process;
-#endif
 
   //--------------------------------------------------
 

@@ -8,11 +8,7 @@
 #ifndef METHOD_METHOD_HPP
 #define METHOD_METHOD_HPP
 
-#ifdef CONFIG_USE_CHARM
 class Method : public PUP::able 
-#else
-class Method 
-#endif
 {
   /// @class    Method
   /// @ingroup  Method
@@ -27,16 +23,12 @@ public: // interface
   virtual ~Method() throw()
   {}
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_abstract(Method);
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   { TRACEPUP; PUP::able::pup(p); }
-
-#endif
 
 public: // virtual functions
 

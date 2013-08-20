@@ -5,8 +5,6 @@
 /// @date     2011-09-01
 /// @brief    Functions implementing CHARM++ compute-related functions
 
-#ifdef CONFIG_USE_CHARM
-
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
@@ -87,8 +85,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   p_refresh_begin();
 }
-//----------------------------------------------------------------------
 
-#endif /* CONFIG_USE_CHARM */
+//----------------------------------------------------------------------
 
 

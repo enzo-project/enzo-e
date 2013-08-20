@@ -18,9 +18,7 @@
 #include <vector>
 #include <memory>
 
-#ifdef CONFIG_USE_CHARM
-#  include "pup_stl.h"
-#endif
+#include "pup_stl.h"
 
 //----------------------------------------------------------------------
 // Component class includes

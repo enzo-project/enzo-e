@@ -52,16 +52,6 @@ bool Index::operator != (const Index & index) const
 
 //----------------------------------------------------------------------
 
-// #ifdef CONFIG_USE_CHARM
-// #ifndef TEST
-// void Index::pup(PUP::er &p) {
-//   p(v_,3);
-// }
-// #endif
-// #endif /* CONFIG_USE_CHARM */
-
-// //----------------------------------------------------------------------
-
 void Index::clear () 
 {
   for (int axis=0; axis<3; axis++) {

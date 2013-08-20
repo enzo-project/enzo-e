@@ -11,23 +11,14 @@
 
 Hierarchy * Factory::create_hierarchy 
 (
-#ifndef CONFIG_USE_CHARM
- Simulation * simulation,
-#endif
  int dimension, int refinement,
  int process_first, int process_last_plus) const throw ()
 {
   return new Hierarchy 
-    (
-#ifndef CONFIG_USE_CHARM
-     simulation,
-#endif
-     this,dimension,refinement,process_first, process_last_plus); 
+    (this,dimension,refinement,process_first, process_last_plus); 
 }
 
 //----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
 
 void Factory::pup (PUP::er &p)
 
@@ -38,8 +29,6 @@ void Factory::pup (PUP::er &p)
 
   // NOTE: change this function whenever attributes change
 }
-
-#endif
 
 //----------------------------------------------------------------------
 
@@ -57,7 +46,6 @@ IoFieldBlock * Factory::create_io_field_block () const throw()
 }
 
 //----------------------------------------------------------------------
-#ifdef CONFIG_USE_CHARM
 
 CProxy_CommBlock Factory::create_block_array
 (
@@ -122,16 +110,10 @@ CProxy_CommBlock Factory::create_block_array
   return proxy_block;
 }
 
-#endif
-
 //----------------------------------------------------------------------
 CommBlock * Factory::create_block
 (
-#ifdef CONFIG_USE_CHARM
  CProxy_CommBlock * block_array,
-#else /* CONFIG_USE_CHARM */
- Simulation * simulation,
-#endif /* CONFIG_USE_CHARM */
  Index index,
  int nx, int ny, int nz,
  int num_field_blocks,
@@ -146,8 +128,6 @@ CommBlock * Factory::create_block
 
   TRACE6("Factory::create_block(n(%d %d %d)  num_field_blocks %d  count_adatp %d  initial %d)",
 	 nx,ny,nz,num_field_blocks,count_adapt,initial);
-
-#ifdef CONFIG_USE_CHARM
 
   (*block_array)[index].insert
     (
@@ -167,22 +147,5 @@ CommBlock * Factory::create_block
 
   return block;
 
-#else /* CONFIG_USE_CHARM */
-
-   CommBlock * comm_block = new CommBlock 
-     (simulation,
-      index,
-      nx,ny,nz,
-      num_field_blocks,
-      count_adapt,
-      initial,
-      cycle, time, dt,
-      narray, array, op_array,
-     num_face_level, face_level,
-      testing);
-
-   return comm_block;
-
-#endif /* CONFIG_USE_CHARM */
 }
 

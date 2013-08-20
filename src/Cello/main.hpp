@@ -16,8 +16,6 @@
 ///     CHARM_MESH:       include Mesh component chare declarations
 ///     <default>         don't include any chare declarations
 
-#ifdef CONFIG_USE_CHARM
-
 #include "cello.hpp"
 
 #include "parallel.hpp"
@@ -89,4 +87,3 @@ private:
    Monitor * monitor_;
 
 };
-#endif

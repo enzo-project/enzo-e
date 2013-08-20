@@ -24,7 +24,6 @@ public: // interface
   virtual ~It() throw()
   {}
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -32,7 +31,6 @@ public: // interface
     // NOTE: change this function whenever attributes change
     p | index1_;
   }
-#endif
 
   /// Iterate through entities
   virtual T * operator++ () throw() = 0;

@@ -9,8 +9,6 @@
 #ifndef ENZO_ENZO_SIMULATION_CHARM_HPP
 #define ENZO_ENZO_SIMULATION_CHARM_HPP
 
-#ifdef CONFIG_USE_CHARM
-
 class EnzoSimulationCharm : public SimulationCharm
 			    
 {
@@ -50,7 +48,5 @@ private: // functions
   virtual void initialize_config_() throw();
 
 };
-
-#endif /* CONFIG_USE_CHARM */
 
 #endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */

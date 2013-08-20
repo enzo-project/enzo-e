@@ -22,8 +22,6 @@ public: // interface
   /// Constructor
   EnzoInitialImplosion2(int cycle, double time) throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialImplosion2);
 
@@ -32,8 +30,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Initialize the block
 

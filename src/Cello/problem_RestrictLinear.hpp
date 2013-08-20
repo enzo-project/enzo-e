@@ -21,8 +21,6 @@ public: // interface
   /// Constructor
   RestrictLinear() throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(RestrictLinear);
 
@@ -32,8 +30,6 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
   { TRACEPUP; PUP::able::pup(p); }
-
-#endif
 
   /// Restrict field_block_ft values to the child block given by (icx,icy,icz)
   int apply 

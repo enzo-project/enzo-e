@@ -1,8 +1,4 @@
-#ifdef CONFIG_USE_CHARM
 void Main::enzo_finalize (Simulation * simulation)
-#else
-void enzo_finalize (Simulation * simulation)
-#endif
 {
   const Config * config   = simulation->config();
   Monitor * monitor = simulation->monitor();

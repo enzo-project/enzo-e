@@ -17,8 +17,6 @@ EnzoTimestep::EnzoTimestep () throw()
 
 }
 
-#ifdef CONFIG_USE_CHARM
-
 //----------------------------------------------------------------------
 
 void EnzoTimestep::pup (PUP::er &p)
@@ -27,8 +25,6 @@ void EnzoTimestep::pup (PUP::er &p)
   // NOTE: change this function whenever attributes change
   Timestep::pup(p);
 }
-
-#endif
 
 //----------------------------------------------------------------------
 

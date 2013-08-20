@@ -48,14 +48,12 @@ class Sync {
   {}
 
   /// CHARM++ pack / unpack
-#ifdef CONFIG_USE_CHARM
   void pup(PUP::er &p)
   {
     TRACEPUP;
     p | index_stop_;
     p | index_curr_;
   }
-#endif
 
   /// Increment counter and return whether the CHARM++ parallel "sync" is done.
   inline bool done (int index = 1) throw()

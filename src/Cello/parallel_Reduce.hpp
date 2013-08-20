@@ -25,7 +25,6 @@ public: // interface
   virtual ~Reduce() throw()
   { /* EMPTY */ };
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -34,7 +33,6 @@ public: // interface
     WARNING("Reduce::pup","skipping group_process_ (alias)");
 
   }
-#endif
 
   /// Parallel int reduction of the stored local value
   virtual int reduce_int 

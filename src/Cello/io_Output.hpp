@@ -15,11 +15,7 @@ class ItField;
 class Schedule;
 class Simulation;
 
-#ifdef CONFIG_USE_CHARM
 class Output : public PUP::able 
-#else
-class Output 
-#endif
 {
 
   /// @class    Output
@@ -38,8 +34,6 @@ public: // functions
   /// Delete an Output object
   virtual ~Output() throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_abstract(Output);
 
@@ -48,8 +42,6 @@ public: // functions
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Set file name
   void set_filename (std::string filename,
@@ -80,9 +72,7 @@ public: // functions
   void set_process_stride (int stride) throw () 
   {
     process_stride_ = stride; 
-#ifdef CONFIG_USE_CHARM
     sync_.stop() = process_stride_;
-#endif
   };
 
   /// Return whether output is scheduled for this cycle
@@ -109,12 +99,8 @@ public: // functions
   void write_meta_group ( Io * io ) throw ()
   { write_meta_ (meta_type_group, io); }
 
-#ifdef CONFIG_USE_CHARM
-
   /// Accessor function for the CHARM Sync class
   Sync * sync() { return & sync_; };
-
-#endif
 
   /// Return the index id in the containing Problem
   int index() const throw() { return index_; }
@@ -207,12 +193,8 @@ protected: // attributes
   /// ID of this process
   int process_;
 
-#ifdef CONFIG_USE_CHARM
-
   /// Sync for ending output
   Sync sync_;
-
-#endif
 
   /// Index of this Output object in Simulation
   size_t index_;

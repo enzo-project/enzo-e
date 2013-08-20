@@ -39,7 +39,6 @@ public: // interface
   /// Delete a Parameters object (singleton design pattern)
   ~Parameters();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -58,7 +57,6 @@ public: // interface
     p | lmonitor_;
 
   }
-#endif
 
   /// Read in parameters from a file
   void read (const char * file_name);

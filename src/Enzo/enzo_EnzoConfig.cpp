@@ -22,8 +22,6 @@ EnzoConfig::~EnzoConfig() throw ()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void EnzoConfig::pup (PUP::er &p)
 {
   Config::pup(p);
@@ -66,8 +64,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | enzo_sedov_density;
 
 }
-
-#endif
 
 //----------------------------------------------------------------------
 

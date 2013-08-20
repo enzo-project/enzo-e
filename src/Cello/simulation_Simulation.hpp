@@ -17,15 +17,10 @@ class Parameters;
 class Performance;
 class Problem;
 
-#ifdef CONFIG_USE_CHARM
-#  include "mesh.decl.h"
-#  include "simulation.decl.h"
-#endif
+#include "mesh.decl.h"
+#include "simulation.decl.h"
 
-class Simulation 
-#ifdef CONFIG_USE_CHARM
-   : public CBase_Simulation 
-#endif
+class Simulation : public CBase_Simulation 
 {
   /// @class    Simulation
   /// @ingroup  Simulation
@@ -50,25 +45,19 @@ public: // interface
   // CHARM
   //==================================================
 
-#ifdef CONFIG_USE_CHARM
-
    /// Initialize an empty Simulation
    Simulation();
 
    /// Initialize a migrated Simulation
    Simulation (CkMigrateMessage *m);
 
-#endif
-
   //==================================================
 
   /// Destructor
   virtual ~Simulation() throw();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-#endif
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS

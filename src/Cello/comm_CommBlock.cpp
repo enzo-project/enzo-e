@@ -18,9 +18,6 @@
 
 CommBlock::CommBlock
 (
-#ifndef CONFIG_USE_CHARM
- Simulation * simulation,
-#endif
  Index index,
  int nx, int ny, int nz,             // Block cells
  int num_field_blocks,
@@ -32,16 +29,11 @@ CommBlock::CommBlock
  bool testing
  ) throw ()
   : 
-#ifndef CONFIG_USE_CHARM
-  simulation_(simulation),
-#endif
   index_(index),
   index_initial_(0),
   level_(index_.level()),
   children_(),
-#ifdef CONFIG_USE_CHARM
   loop_refresh_(),
-#endif
   face_level_(),
   child_face_level_(),
   count_coarsen_(0),
@@ -76,15 +68,11 @@ CommBlock::CommBlock
   block_->allocate(field_descr);
   child_block_ = NULL;
 
-#ifdef CONFIG_USE_CHARM
-
   // Call virtual functions to update state
 
   set_cycle(cycle);
   set_time (time);
   set_dt   (dt);
-
-#endif
 
   // Perform any additional initialization for derived class 
 
@@ -145,8 +133,6 @@ CommBlock::CommBlock
 
   }
 
-#ifdef CONFIG_USE_CHARM
-
   if (! testing) {
 
     // Count CommBlocks on each processor
@@ -155,19 +141,14 @@ CommBlock::CommBlock
 
   }
 
-  
   if (initial) {
     TRACE("Calling apply_initial()");
     apply_initial_();
   }
-  TRACE("END CommBlock()");
-#endif /* CONFIG_USE_CHARM */
 
 }
 
 //----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
 
 void CommBlock::pup(PUP::er &p)
 {
@@ -195,8 +176,6 @@ void CommBlock::pup(PUP::er &p)
 
 }
 
-#endif /* CONFIG_USE_CHARM */
-
 //----------------------------------------------------------------------
 
 void CommBlock::initialize_
@@ -209,7 +188,6 @@ void CommBlock::initialize_
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
 void CommBlock::apply_initial_() throw ()
 {
 
@@ -226,13 +204,11 @@ void CommBlock::apply_initial_() throw ()
   }
   simulation()->performance()->stop_region(perf_initial);
 }
-#endif
 
 //----------------------------------------------------------------------
 
 CommBlock::~CommBlock() throw ()
 { 
-#ifdef CONFIG_USE_CHARM
 
   if (level_ > 0) {
 
@@ -259,7 +235,6 @@ CommBlock::~CommBlock() throw ()
   child_block_ = 0;
 
   ((SimulationCharm *)simulation())->delete_block();
-#endif
 
 }
 
@@ -388,32 +363,7 @@ void CommBlock::index_global
 	 *ix,*iy,*iz,*nx,*ny,*nz);
 }
 
-//======================================================================
-// MPI FUNCTIONS
-//======================================================================
-
-#ifdef CONFIG_USE_CHARM
-#else /* CONFIG_USE_CHARM */
-
-void CommBlock::refresh_ghosts(const FieldDescr * field_descr,
-			       const Hierarchy * hierarchy,
-			       int fx, int fy, int fz,
-			       int index_field_set) throw()
-{
-  int ibx,iby,ibz;
-
-  index_forest(&ibx,&iby,&ibz);
-
-  block_->field_block(index_field_set)
-    -> refresh_ghosts (field_descr,
-		       hierarchy->group_process(),
-		       hierarchy->layout(),
-		       ibx,iby,ibz, fx,fy,fz);
-}
-
-#endif /* CONFIG_USE_CHARM */
-
-#ifdef CONFIG_USE_CHARM
+//----------------------------------------------------------------------
 
 void CommBlock::determine_boundary_
 (
@@ -441,12 +391,7 @@ void CommBlock::determine_boundary_
   if (fzp) *fzp = (nz > 1);
 }
 
-#endif
-
 //----------------------------------------------------------------------
-
-
-#ifdef CONFIG_USE_CHARM
 
 void CommBlock::update_boundary_ ()
 {
@@ -481,8 +426,6 @@ void CommBlock::update_boundary_ ()
     boundary->enforce(field_descr,this,face_upper,axis_z);
   }
 }
-
-#endif
 
 //----------------------------------------------------------------------
 
@@ -611,11 +554,7 @@ void CommBlock::is_on_boundary (bool is_boundary[3][2]) const throw()
 
 Simulation * CommBlock::simulation() const
 {
-#ifdef CONFIG_USE_CHARM
   return proxy_simulation.ckLocalBranch();
-#else /* CONFIG_USE_CHARM */
-  return simulation_;
-#endif /* CONFIG_USE_CHARM */
 }
 
 

@@ -5,8 +5,6 @@
 /// @date     2011-03-17
 /// @brief    Implementation of EnzoSimulationCharm user-dependent class member functions
 
-#ifdef CONFIG_USE_CHARM
-
 #include "cello.hpp"
 
 #include "enzo.hpp"
@@ -90,4 +88,3 @@ void EnzoSimulationCharm::initialize_config_() throw()
 
 //======================================================================
 
-#endif /* CONFIG_USE_CHARM */

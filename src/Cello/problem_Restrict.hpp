@@ -9,10 +9,7 @@
 #ifndef PROBLEM_RESTRICT_HPP
 #define PROBLEM_RESTRICT_HPP
 
-class Restrict 
-#ifdef CONFIG_USE_CHARM
-  : public PUP::able 
-#endif
+class Restrict : public PUP::able 
 
 {
   /// @class    Restrict
@@ -24,8 +21,6 @@ public: // interface
   /// Constructor
   Restrict() throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ PUP::able declaration
   PUPable_abstract(Restrict);
 
@@ -35,8 +30,6 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
   { TRACEPUP; PUP::able::pup(p); }
-
-#endif
 
   /// Restrict comm_block_f child values given by (icx,icy,icz) to the parent
   virtual int apply 

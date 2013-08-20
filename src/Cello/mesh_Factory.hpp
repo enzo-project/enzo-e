@@ -13,10 +13,7 @@ class Hierarchy;
 class IoBlock;
 class IoFieldBlock;
 
-class Factory
-#ifdef CONFIG_USE_CHARM
-  : public PUP::able 
-#endif
+class Factory : public PUP::able 
 {
   /// @class    Factory
   /// @ingroup  Mesh 
@@ -25,15 +22,11 @@ class Factory
 
 public: // interface
 
-#ifdef CONFIG_USE_CHARM
   Factory() throw() : PUP::able()
   { TRACE("Factory::Factory()"); }
-#endif
  
   /// Destructor (must be present to avoid possible vtable link errors)
   virtual ~Factory() throw() { }
-
-#ifdef CONFIG_USE_CHARM
 
   /// CHARM++ function for determining the specific class in the class hierarchy
   PUPable_decl(Factory);
@@ -46,15 +39,9 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   virtual void pup (PUP::er &p);
 
-#endif
-
-
   /// Create a new Hierarchy [abstract factory design pattern]
   virtual Hierarchy * create_hierarchy 
   (
-#ifndef CONFIG_USE_CHARM
-   Simulation * simulation,
-#endif
    int dimension, int refinement,
    int process_first, int process_last_plus) const throw ();
 
@@ -63,8 +50,6 @@ public: // interface
 
   /// Create an Input / Output accessor object for a FieldBlock
   virtual IoFieldBlock * create_io_field_block ( ) const throw();
-
-#ifdef CONFIG_USE_CHARM
 
   /// Create a new CHARM++ CommBlock array
   virtual CProxy_CommBlock create_block_array
@@ -75,16 +60,10 @@ public: // interface
    bool allocate,
    bool testing = false) const throw();
 
-#endif
-
   /// Create a new CommBlock
   virtual CommBlock * create_block
   (
-#ifdef CONFIG_USE_CHARM
    CProxy_CommBlock * block_array,
-#else
-   Simulation * simulation,
-#endif
    Index index,
    int nx, int ny, int nz,
    int num_field_blocks,

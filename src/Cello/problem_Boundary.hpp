@@ -9,11 +9,7 @@
 #define METHOD_BOUNDARY_HPP
 
 
-#ifdef CONFIG_USE_CHARM
 class Boundary : public PUP::able 
-#else
-class Boundary 
-#endif
 {
 
   /// @class    Boundary
@@ -28,17 +24,12 @@ public: // interface
   /// Destructor
   virtual ~Boundary() throw() {}
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_abstract(Boundary);
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
   { TRACEPUP; PUP::able::pup(p); };
-
-#endif
-
 
 public: // virtual functions
 

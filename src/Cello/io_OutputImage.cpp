@@ -91,8 +91,6 @@ OutputImage::~OutputImage() throw ()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void OutputImage::pup (PUP::er &p)
 {
   TRACEPUP;
@@ -122,7 +120,6 @@ void OutputImage::pup (PUP::er &p)
   p | image_log_;
   p | ghost_;
 }
-#endif
 
 //----------------------------------------------------------------------
 

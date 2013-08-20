@@ -25,7 +25,6 @@ public: // interface
   /// Destructor
   ~FileHdf5 () throw();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -53,7 +52,6 @@ public: // interface
     p | compress_level_;
     
   }
-#endif
 
   // Files
 

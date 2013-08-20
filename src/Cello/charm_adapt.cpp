@@ -5,8 +5,6 @@
 /// @date     2013-04-25
 /// @brief    Charm-related mesh adaptation control functions
 
-#ifdef CONFIG_USE_CHARM
-//#define DEBUG_ADAPT
 #ifdef DEBUG_ADAPT
 
 char buffer [80];
@@ -810,7 +808,4 @@ void CommBlock::x_refresh_child (int n, char * buffer, int ichild[3])
 }
 
 //----------------------------------------------------------------------
-  
-#endif /* CONFIG_USE_CHARM */
-
 

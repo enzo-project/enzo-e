@@ -19,8 +19,6 @@ EnzoBoundary::EnzoBoundary (boundary_type boundary_type) throw()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void EnzoBoundary::pup (PUP::er &p)
 {
 
@@ -34,8 +32,6 @@ void EnzoBoundary::pup (PUP::er &p)
   p | boundary_type_;
 
 }
-
-#endif
 
 //----------------------------------------------------------------------
 

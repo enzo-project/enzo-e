@@ -5,8 +5,6 @@
 /// @date     2011-08-10
 /// @brief    Implementation of main-level CHARM entry functions in main.ci
 
-#ifdef CONFIG_USE_CHARM
-
 #include "cello.hpp"
 #include "test.hpp"
 #include "parallel.hpp"
@@ -63,5 +61,3 @@ void Main::p_exit(int count)
 #endif
 
 //----------------------------------------------------------------------
-
-#endif

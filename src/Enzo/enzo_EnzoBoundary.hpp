@@ -36,8 +36,6 @@ public: // interface
   /// Create a new EnzoBoundary
   EnzoBoundary(boundary_type boundary_type) throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoBoundary);
   
@@ -47,8 +45,6 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
   
-#endif
-
 public: // virtual functions
 
   /// Enforce boundary conditions on block for a subet of faces

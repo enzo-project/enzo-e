@@ -9,8 +9,6 @@
 #ifndef SIMULATION_SIMULATION_CHARM_HPP
 #define SIMULATION_SIMULATION_CHARM_HPP
 
-#ifdef CONFIG_USE_CHARM
-
 class SimulationCharm : public Simulation
 			    
 {
@@ -105,7 +103,5 @@ protected: // attributes
   Sync block_sync_;
 
 };
-
-#endif /* CONFIG_USE_CHARM */
 
 #endif /* SIMULATION_SIMULATION_CHARM_HPP */

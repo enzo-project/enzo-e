@@ -60,16 +60,11 @@ Simulation::Simulation
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 Simulation::Simulation()
 { TRACE("Simulation()"); }
 
-#endif
-
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
 void Simulation::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
@@ -81,11 +76,7 @@ void Simulation::pup (PUP::er &p)
 
   p | factory_; // PUP::able
 
-  // if (up) parameters_ = new Parameters;
-  // p | * parameters_;
-
-  WARNING("Simulation::pup","config_ needs to be PUP::able");
-  p | config_;
+  p | config_; // PUPable
 
   p | parameter_file_;
 
@@ -115,17 +106,11 @@ void Simulation::pup (PUP::er &p)
   p | *field_descr_;
 }
 
-#endif
-
 //----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation (CkMigrateMessage *m)
   : CBase_Simulation(m)
 { TRACE("Simulation(CkMigrateMessage)"); }
-
-#endif
 
 //----------------------------------------------------------------------
 
@@ -161,15 +146,9 @@ void Simulation::initialize() throw()
 
   initialize_hierarchy_();
 
-#ifndef CONFIG_USE_CHARM
-
   // For Charm++ initialize_forest_ is called in charm_initialize
   // using QD to ensure that initialize_hierarchy() is called
   // on all processors before CommBlocks are created
-
-  initialize_forest_();
-
-#endif
 
 }
 
@@ -337,11 +316,7 @@ void Simulation::initialize_hierarchy_() throw()
 
   const int refinement = 2;
   hierarchy_ = factory()->create_hierarchy 
-    (
-#ifndef CONFIG_USE_CHARM
-     this,
-#endif
-     dimension_,refinement, 0, group_process_->size());
+    (dimension_,refinement, 0, group_process_->size());
 
   // Domain extents
 
@@ -378,11 +353,7 @@ void Simulation::initialize_hierarchy_() throw()
 void Simulation::initialize_forest_() throw()
 {
 
-#ifdef CONFIG_USE_CHARM
   bool allocate_blocks = (group_process()->is_root());
-#else
-  bool allocate_blocks = true;
-#endif
 
   // Don't allocate blocks if reading data from files
 

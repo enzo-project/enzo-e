@@ -320,9 +320,6 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
 EnzoBlock::EnzoBlock
 (
-#ifndef CONFIG_USE_CHARM
- Simulation * simulation,
-#endif
  Index index,
  int nx, int ny, int nz,
  int num_field_blocks,
@@ -335,9 +332,6 @@ EnzoBlock::EnzoBlock
 ) throw()
   : CommBlock 
     (
-#ifndef CONFIG_USE_CHARM
-     simulation,
-#endif
      index,
      nx,ny,nz,
      num_field_blocks,

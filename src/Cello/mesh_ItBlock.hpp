@@ -22,7 +22,6 @@ public: // interface
   /// Delete the ItBlock object
   virtual ~ItBlock () throw ();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -32,7 +31,6 @@ public: // interface
     WARNING("ItBlock::pup","skipping patch_ (aliased pointer)");
     // p | *patch_;
   }
-#endif
   
   /// Iterate through all local CommBlocks in the Patch
   CommBlock * operator++ () throw();

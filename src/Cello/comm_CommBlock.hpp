@@ -50,12 +50,8 @@ enum array_type {
   op_array_prolong
 };
 
-#ifdef CONFIG_USE_CHARM
 #include "mesh.decl.h"
 class CommBlock : public CBase_CommBlock
-#else
-class CommBlock
-#endif
 {
   /// @class    CommBlock
   /// @ingroup  Comm
@@ -69,9 +65,6 @@ public: // interface
   /// size, and number of field blocks
   CommBlock
   (
-#ifndef CONFIG_USE_CHARM
-   Simulation * simulation,
-#endif
    Index index,
    int nx, int ny, int nz,
    int num_field_blocks,
@@ -86,27 +79,17 @@ public: // interface
   /// Initialize an empty CommBlock
   CommBlock()  { };
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM pupper
   void pup(PUP::er &p);
 
-#endif
-
 //----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
 
   /// Initialize a migrated CommBlock
   CommBlock (CkMigrateMessage *m) 
     : CBase_CommBlock(m) { };
 
-#endif
-
   /// Index of the CommBlock
   const Index & index() const { return index_; }
-
-#ifdef CONFIG_USE_CHARM
 
   /// Initialize CommBlock for the simulation.
   void p_initial();
@@ -123,7 +106,6 @@ public: // interface
   /// Contribute block data to the Initial input object
   void p_read (int index_input = 0)
   {  INCOMPLETE("CommBlock::p_read");  }
-
 
   //--------------------------------------------------
   // ADAPT
@@ -208,19 +190,7 @@ public: // interface
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
   void prepare();
 
-  // /// Implementation of refresh
-  // void refresh();
-
   //==================================================
-
-#else /* ! CONFIG_USE_CHARM */
-
-  /// Refresh ghost data
-  void refresh_ghosts(const FieldDescr * field_descr,
-		      const Hierarchy * hierarchy,
-		      int fx, int fy, int fz,
-		      int index_field_set = 0) throw();
-#endif
 
   void delete_child(Index index);
   bool is_child (const Index & index) const;
@@ -377,8 +347,6 @@ protected: // functions
   /// Update face_level_[] for coarsened CommBlock
   void coarsen_face_level_update_ (Index index_child);
 
-#ifdef CONFIG_USE_CHARM
-
   /// Apply all initial conditions to this Block
   void apply_initial_() throw();
 
@@ -396,8 +364,6 @@ protected: // functions
 
   /// Update boundary conditions
   void update_boundary_ ();
-
-#endif
 
   void loop_limits_refresh_ 
   (int ifacemin[3], int ifacemax[3]) const throw();
@@ -417,11 +383,6 @@ protected: // functions
 			   int op_array);
 
 protected: // attributes
-
-#ifndef CONFIG_USE_CHARM
-  /// Pointer to parent simulation object (MPI only)
-  Simulation * simulation_;
-#endif
 
   /// Mesh Block that this CommBlock controls
   Block * block_;
@@ -457,10 +418,8 @@ protected: // attributes
   /// list of child nodes
   std::vector<Index> children_;
 
-#ifdef CONFIG_USE_CHARM
   /// Synchronization counter for ghost refresh
   Sync loop_refresh_;
-#endif
 
   /// level of neighbors (and self) along each face
   std::vector<int> face_level_;

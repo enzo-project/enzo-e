@@ -26,7 +26,6 @@ public: // interface
   {}
 
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -41,7 +40,6 @@ public: // interface
     //    if (p.isUnpacking()) hierarchy_ = new Hierarchy;
     //    p | *hierarchy_;
   }
-#endif
 
 #include "_io_Io_common.hpp"
 
