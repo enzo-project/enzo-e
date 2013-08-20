@@ -115,7 +115,10 @@ public: // interface
   void p_output(CkReductionMsg * msg);
 
   /// Begin the adapt phase of one or more adapt steps
-  void p_adapt_begin();
+  inline void p_adapt_begin()
+  { adapt_begin(); }
+
+  void adapt_begin();
 
   /// End the adapt phase after coarsening
   void q_adapt_end ();
@@ -149,7 +152,7 @@ public: // interface
   /// Update the depth of the given child
   void p_print(std::string message) {  
     index().print(message.c_str());
-    TRACE2("%s level %d",message.c_str(),level_);
+    TRACE2("%s level %d",message.c_str(),level());
   }
 
   //--------------------------------------------------
@@ -255,7 +258,7 @@ public: // interface
   double time() const throw() { return time_; };
 
   /// Return the level in the Hierarchy
-  int level() const throw() { return level_; };
+  int level() const throw() { return index_.level(); };
 
 
   /// Return the current timestep
@@ -406,14 +409,24 @@ protected: // attributes
   double dt_;
 
   //--------------------------------------------------
+
+#ifdef    TEMP_NEW_ADAPT
+  /// Indices of all neighboring CommBlocks
+  std::vector<Index> neighbor_index_;
+
+  /// Desired levels of all neighboring CommBlocks
+  std::vector<int> neighbor_level_;
+
+#else  /* TEMP_NEW_ADAPT */
+#endif /* TEMP_NEW_ADAPT */
   
   /// Index of current initialization routine
   int index_initial_;
 
   /// MESH REFINEMENT
 
-  /// Mesh refinement level
-  int level_;
+  // /// Mesh refinement level
+  // int level_;
 
   /// list of child nodes
   std::vector<Index> children_;

@@ -53,24 +53,27 @@ void CommBlock::refresh_begin()
 
   ItFace it_face(rank,refresh_rank);
   int if3[3];
+
+  const int level = this->level();
+
   while (it_face.next(if3)) {
 
     Index index_neighbor = index_.index_neighbor(if3[0],if3[1],if3[2],n3);
 
-    if (face_level(if3)==level_ - 1) {       // COARSE
+    if (face_level(if3)==level - 1) {       // COARSE
 
       int ic3[3];
-      index_.child(level_,ic3+0,ic3+1,ic3+2);
+      index_.child(level,ic3+0,ic3+1,ic3+2);
       int ip3[3];
       parent_face_(ip3,if3,ic3);
 
       refresh_coarse(index_neighbor.index_parent(),ip3);
 
-    } else if (face_level(if3)==level_) {    // SAME
+    } else if (face_level(if3)==level) {    // SAME
 
       refresh_same(index_neighbor,if3);
 
-    } else if (face_level(if3)==level_+1) {  // FINE
+    } else if (face_level(if3)==level+1) {  // FINE
 	    
       int ic3m[3];
       int ic3p[3];
@@ -272,7 +275,7 @@ void CommBlock::q_refresh_end()
     prepare();
   } else if (next_phase_ == phase_adapt) {
     TRACE("refresh calling adapt");
-    p_adapt_begin();
+    adapt_begin();
   } else {
     index_.print("ERROR");
     ERROR1 ("CommBlock::q_refresh_end()",

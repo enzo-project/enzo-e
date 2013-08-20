@@ -31,7 +31,6 @@ CommBlock::CommBlock
   : 
   index_(index),
   index_initial_(0),
-  level_(index_.level()),
   children_(),
   loop_refresh_(),
   face_level_(),
@@ -48,7 +47,7 @@ CommBlock::CommBlock
 	 nx,ny,nz,num_field_blocks,adapt_step_,initial);
 
   printf("CommBlock::CommBlock  n (%d %d %d)\n",nx,ny,nz);
-  printf("CommBlock::CommBlock  l %d\n",level_);
+  printf("CommBlock::CommBlock  l %d\n",level());
 #endif
 
   int ibx,iby,ibz;
@@ -92,13 +91,14 @@ CommBlock::CommBlock
   }
 
 
+  const int level = this->level();
 
   int na3[3];
   size_forest(&na3[0],&na3[1],&na3[2]);
 
   int icx=0,icy=0,icz=0;
-  if (level_ > 0) {
-    index_.child(level_,&icx,&icy,&icz);
+  if (level > 0) {
+    index_.child(level,&icx,&icy,&icz);
   }
 
   if (narray != 0) {
@@ -163,7 +163,6 @@ void CommBlock::pup(PUP::er &p)
   p | time_;
   p | dt_;
   p | index_initial_;
-  p | level_;
   p | children_;
   p | count_coarsen_;
   p | adapt_step_;
@@ -210,12 +209,14 @@ void CommBlock::apply_initial_() throw ()
 CommBlock::~CommBlock() throw ()
 { 
 
-  if (level_ > 0) {
+  const int level = this->level();
+
+  if (level > 0) {
 
     // Send restricted data to parent 
 
     int ichild[3];
-    index_.child(level_,ichild,ichild+1,ichild+2);
+    index_.child(level,ichild,ichild+1,ichild+2);
 
     int n; 
     char * array;
@@ -268,7 +269,7 @@ void CommBlock::index_forest (int * ix, int * iy, int * iz) const throw ()
 std::string CommBlock::name() const throw()
 
 {
-  return std::string("Block ") + index_.bit_string(level_,simulation()->dimension());
+  return std::string("Block ") + index_.bit_string(level(),simulation()->dimension());
   //    std::stringstream convert;
   //    convert << "block_" << id_();
   //    return convert.str();
@@ -348,7 +349,8 @@ void CommBlock::index_global
 
   Index index = this->index();
 
-  int level = index.level();
+  const int level = this->level();
+
   for (int i=0; i<level; i++) {
     int bx,by,bz;
     index.child(i+1,&bx,&by,&bz);
@@ -524,7 +526,6 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   cycle_ = comm_block.cycle_;
   time_  = comm_block.time_;
   dt_    = comm_block.dt_;
-  level_ = comm_block.level_;
   adapt_step_ = comm_block.adapt_step_;
   adapt_ = comm_block.adapt_;
   next_phase_ = comm_block.next_phase_;

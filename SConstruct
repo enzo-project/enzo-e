@@ -7,7 +7,7 @@ import sys
 
 # Whether to use new adapt or old adapt 
 
-new_adapt = 1
+new_adapt = 0
 
 # Whether to print out messages with the TRACE() series of statements
 
