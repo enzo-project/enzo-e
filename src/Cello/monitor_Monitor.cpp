@@ -51,7 +51,6 @@ void Monitor::header () const
   print ("","");
   print ("","A Parallel Adaptive Mesh Refinement Framework");
   print ("","");  
-  print ("","                James Bordner");
   print ("","  Laboratory for Computational Astrophysics");
   print ("","        San Diego Supercomputer Center");
   print ("","     University of California, San Diego");

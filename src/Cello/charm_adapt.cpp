@@ -643,11 +643,6 @@ void CommBlock::p_child_can_coarsen(int ichild[3],
 				    int na, char * array,
 				    int nf, int * child_face_level)
 {
-#ifdef COARSEN
-#else /* COARSEN */
-  return;
-#endif /* COARSEN */
-
   // allocate child block if this is the first
   if (!child_block_) {
 

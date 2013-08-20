@@ -5,9 +5,9 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
-# (TEMPORARY) Whether to include new coarsening code
+# Whether to use new adapt or old adapt 
 
-coarsen = 1
+new_adapt = 1
 
 # Whether to print out messages with the TRACE() series of statements
 
@@ -117,7 +117,7 @@ define = {}
 
 # Temporary defines
 
-define_coarsen =        ['COARSEN']
+define_new_adapt =    ['TEMP_NEW_ADAPT']
 
 # Precision defines
 
@@ -188,10 +188,10 @@ flags_link_charm = ''
 if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
   
+if (new_adapt != 0):     defines = defines + define_new_adapt
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
 if (trace_charm != 0):   defines = defines + define_trace_charm
-if (coarsen != 0):       defines = defines + define_coarsen
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
