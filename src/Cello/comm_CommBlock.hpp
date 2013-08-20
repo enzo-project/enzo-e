@@ -115,10 +115,10 @@ public: // interface
   void p_output(CkReductionMsg * msg);
 
   /// Begin the adapt phase of one or more adapt steps
+  void adapt_begin();
   inline void p_adapt_begin()
   { adapt_begin(); }
 
-  void adapt_begin();
 
   /// End the adapt phase after coarsening
   void q_adapt_end ();
@@ -127,7 +127,17 @@ public: // interface
   void q_adapt_exit ();
 
   /// Begin a single adapt refine step
-  void p_adapt_start ();
+
+#ifdef    TEMP_NEW_ADAPT
+  inline void p_adapt_start ()
+  { adapt_start_new(); }
+  void adapt_start_new();
+#else  /* TEMP_NEW_ADAPT */
+  inline void p_adapt_start ()
+  { adapt_start_old(); }
+  void adapt_start_old();
+#endif /* TEMP_NEW_ADAPT */
+
   /// Start the adapt coarsen step
   void q_adapt_next ();
   /// Stop the adapt step

@@ -34,10 +34,6 @@ const char * adapt_name[] = {
 
 void CommBlock::adapt_begin()
 {
-#ifdef TEMP_NEW_ADAPT
-
-#else /* TEMP_NEW_ADAPT */
-
 
   TRACE ("BEGIN PHASE ADAPT");
   Performance * performance = simulation()->performance();
@@ -57,8 +53,13 @@ void CommBlock::adapt_begin()
     adapt_step_ = (mesh_max_level > 0) ? 1 : 0;
   }
 
+#ifdef TEMP_NEW_ADAPT
+
+
+#else /* TEMP_NEW_ADAPT */
+
   if (adapt_step_ > 0) {
-    p_adapt_start();
+    adapt_start_old();
   } else {
     q_adapt_end();
   }
@@ -69,7 +70,16 @@ void CommBlock::adapt_begin()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_adapt_start()
+#ifdef TEMP_NEW_ADAPT
+
+void CommBlock::adapt_start_new ()
+{
+  INCOMPLETE("CommBlock::adapt_start_new()");
+}
+
+#else /* TEMP_NEW_ADAPT */
+
+void CommBlock::adapt_start_old ()
 {
   count_coarsen_ = 0;
 
@@ -88,6 +98,8 @@ void CommBlock::p_adapt_start()
 			  thisProxy[thisIndex]));
   }
 }
+
+#endif /* TEMP_NEW_ADAPT */
 
 //----------------------------------------------------------------------
 
@@ -654,7 +666,7 @@ FieldFace * CommBlock::create_face_
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_child_can_coarsen(int ichild[3],
+void CommBlock::p_child_can_coarsen(int ic3[3],
 				    int na, char * array,
 				    int nf, int * child_face_level)
 {
@@ -680,7 +692,7 @@ void CommBlock::p_child_can_coarsen(int ichild[3],
 
   int iface[3] = {0,0,0};
   bool lghost[3] = {true,true,true};
-  store_face_(na,array, iface, ichild, lghost, op_array_restrict);
+  store_face_(na,array, iface, ic3, lghost, op_array_restrict);
 
   int rank = simulation()->dimension();
   int refresh_rank = simulation()->config()->field_refresh_rank;
@@ -690,7 +702,7 @@ void CommBlock::p_child_can_coarsen(int ichild[3],
 
   // update child_is_on_face_[] with subset of child's
   while (it_face.next(if3)) {
-    if (child_is_on_face_(ichild,if3)) {
+    if (child_is_on_face_(ic3,if3)) {
       int index_face = IF3(if3);
       child_face_level_[index_face] = 
 	std::min (child_face_level_[index_face],
@@ -785,7 +797,7 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
 	SET_FACE_LEVEL(index_child_neighbor,jf3,level,true,adapt_coarsen);
 
-	int ic3m[3],ic3p[3],ic3[3];
+	int ic3[3],ic3m[3],ic3p[3];
 	loop_limits_nibling_(ic3m,ic3p, if3);
 
 	for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
@@ -812,11 +824,11 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 
 //----------------------------------------------------------------------
 
-void CommBlock::x_refresh_child (int n, char * buffer, int ichild[3])
+void CommBlock::x_refresh_child (int n, char * buffer, int ic3[3])
 {
-  int iface[3] = {0,0,0};
+  int  iface[3]  = {0,0,0};
   bool lghost[3] = {true,true,true};
-  store_face_(n,buffer, iface, ichild, lghost, op_array_restrict);
+  store_face_(n,buffer, iface, ic3, lghost, op_array_restrict);
 }
 
 //----------------------------------------------------------------------
