@@ -124,7 +124,9 @@ public: // interface
   void q_adapt_end ();
 
   /// Exit the adapt phase after QD
-  void q_adapt_exit ();
+  void adapt_exit();
+  inline void q_adapt_exit ()
+  { adapt_exit(); }
 
   /// Begin a single adapt refine step
 

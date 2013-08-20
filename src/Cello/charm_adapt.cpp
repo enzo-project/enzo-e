@@ -55,6 +55,11 @@ void CommBlock::adapt_begin()
 
 #ifdef TEMP_NEW_ADAPT
 
+  if (adapt_step_ > 0) {
+    adapt_start_new();
+  } else {
+    adapt_end();
+  }
 
 #else /* TEMP_NEW_ADAPT */
 
@@ -70,14 +75,19 @@ void CommBlock::adapt_begin()
 
 //----------------------------------------------------------------------
 
+//--------------------------------------------------
 #ifdef TEMP_NEW_ADAPT
+//--------------------------------------------------
 
 void CommBlock::adapt_start_new ()
 {
   INCOMPLETE("CommBlock::adapt_start_new()");
+  adapt_exit();
 }
 
+//--------------------------------------------------
 #else /* TEMP_NEW_ADAPT */
+//--------------------------------------------------
 
 void CommBlock::adapt_start_old ()
 {
@@ -99,7 +109,9 @@ void CommBlock::adapt_start_old ()
   }
 }
 
+//--------------------------------------------------
 #endif /* TEMP_NEW_ADAPT */
+//--------------------------------------------------
 
 //----------------------------------------------------------------------
 
@@ -165,7 +177,7 @@ void CommBlock::q_adapt_end()
 
 //----------------------------------------------------------------------
 
-void CommBlock::q_adapt_exit()
+void CommBlock::adapt_exit()
 {
 
   Performance * performance = simulation()->performance();
