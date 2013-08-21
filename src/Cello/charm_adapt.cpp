@@ -452,18 +452,20 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
 //----------------------------------------------------------------------
 
-void CommBlock::set_face_level (int if3[3], int level, int recurse, int type)
+void CommBlock::set_face_level (int if3[3], int level_face, int recurse, int type)
 { 
 
   int index_face = IF3(if3);
 
   if (face_level_[index_face] == face_level_unknown) {
-    face_level_[index_face] = level;
+    face_level_[index_face] = level_face;
   } else if (type == adapt_refine) {
-    face_level_[index_face] = std::max(face_level_[index_face],level); 
+    face_level_[index_face] = std::max(face_level_[index_face],level_face); 
   } else if (type == adapt_coarsen) {
-    face_level_[index_face] = std::min(face_level_[index_face],level); 
+    face_level_[index_face] = std::min(face_level_[index_face],level_face); 
   }
+
+  const int level = this->level();
 
   if (recurse) {
 
@@ -484,7 +486,7 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int type)
 
 	  if (face_adjacent) {
 
-	    SET_FACE_LEVEL(index_child,if3,level,false,adapt_refine);
+	    SET_FACE_LEVEL(index_child,if3,level_face,false,adapt_refine);
 
 	    int ifc3m[3], ifc3p[3], ifc3[3];
 	    loop_limits_faces_(ifc3m,ifc3p,if3,ic3);
@@ -492,7 +494,7 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int type)
 	    for (ifc3[0]=ifc3m[0]; ifc3[0]<=ifc3p[0]; ifc3[0]++) {
 	      for (ifc3[1]=ifc3m[1]; ifc3[1]<=ifc3p[1]; ifc3[1]++) {
 		for (ifc3[2]=ifc3m[2]; ifc3[2]<=ifc3p[2]; ifc3[2]++) {
-		  SET_FACE_LEVEL(index_child,ifc3,level,false,adapt_refine);
+		  SET_FACE_LEVEL(index_child,ifc3,level_face,false,adapt_refine);
 		}
 	      }
 	    }
@@ -505,7 +507,7 @@ void CommBlock::set_face_level (int if3[3], int level, int recurse, int type)
       index_.child(level,ic3+0,ic3+1,ic3+2);
       int ip3[3];
       parent_face_(ip3,if3,ic3);
-      SET_FACE_LEVEL(index_parent,ip3,level,false,adapt_coarsen);
+      SET_FACE_LEVEL(index_parent,ip3,level_face,false,adapt_coarsen);
     }
 
   } 

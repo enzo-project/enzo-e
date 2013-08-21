@@ -16,6 +16,8 @@ class FieldDescr;
 class Hierarchy;
 class Simulation;
 
+#include "parallel.def"
+
 // index for child blocks
 #define IC(icx,icy,icz)  (((icx)+2)%2) + 2*( (((icy)+2)%2) + 2*(((icz)+2)%2) )
 
@@ -270,8 +272,8 @@ public: // interface
   double time() const throw() { return time_; };
 
   /// Return the level in the Hierarchy
-  int level() const throw() { return index_.level(); };
-
+  int level() const throw() 
+  {  return index_.level(); };
 
   /// Return the current timestep
   double dt() const throw() { return dt_; };
@@ -436,9 +438,6 @@ protected: // attributes
   int index_initial_;
 
   /// MESH REFINEMENT
-
-  // /// Mesh refinement level
-  // int level_;
 
   /// list of child nodes
   std::vector<Index> children_;

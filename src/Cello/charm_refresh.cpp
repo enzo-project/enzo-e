@@ -275,7 +275,7 @@ void CommBlock::q_refresh_end()
     prepare();
   } else if (next_phase_ == phase_adapt) {
     TRACE("refresh calling adapt");
-    adapt_begin();
+    p_adapt_begin();
   } else {
     index_.print("ERROR");
     ERROR1 ("CommBlock::q_refresh_end()",
