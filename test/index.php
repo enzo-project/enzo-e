@@ -128,7 +128,6 @@ $types = array("charm");
     }
     echo "</th></tr>\n";
     echo "<tr>\n";
-    echo "   <th></th>";
     echo "   <th>Output</th>";
     echo "   <th>Date</th>";
     echo "   <th>Time</th>";
@@ -478,7 +477,7 @@ printf ( "<th colspan=$num_types class=pass>Passed</br>Tests</th>");
 printf ("<th></th>");
 printf ( "</tr><tr>\n");
 
-for ($k = 0; $k < 6; $k ++) {
+/*for ($k = 0; $k < 6; $k ++) {
   for ($i = 0; $i < $num_types; ++$i) {
     $type_active = "";
     if (file_exists("COMPILING"))  {
@@ -492,7 +491,7 @@ for ($k = 0; $k < 6; $k ++) {
     printf (" <a href=out.scons>$types[$i]</a> </th>");
   }
   printf ("<th> </th>");
-}
+  } */
 
 
 test_summary("Enzo-PPM",
@@ -508,12 +507,12 @@ test_summary("Enzo-PPML",
 	     array("enzo-p",  "enzo-p"));
 
 test_summary("Enzo-Mesh", 
-	     array("mesh-balanced", "mesh-unbalanced"),
-	     array("enzo-p",        "enzo-p"));
+	     array("mesh-balanced"),
+	     array("enzo-p"));
 
-test_summary("Enzo-AMR", 
-	     array("adapt-L1-P1", "adapt-L2-P1", "adapt-L3-P1", "adapt-L4-P1", "adapt-L5-P1"),
-	     array("enzo-p",      "enzo-p",      "enzo-p",      "enzo-p",      "enzo-p"));
+// test_summary("Enzo-AMR", 
+// 	     array("adapt-L1-P1", "adapt-L2-P1", "adapt-L3-P1", "adapt-L4-P1", "adapt-L5-P1"),
+// 	     array("enzo-p",      "enzo-p",      "enzo-p",      "enzo-p",      "enzo-p"));
 
 test_summary("Enzo-BC-2D", 
 	     array("boundary_reflecting-2d",
@@ -694,9 +693,9 @@ tests("Enzo","enzo-p","test_mesh-balanced","balanced");
 test_table ("mesh-balanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
 test_table ("mesh-balanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
 
-tests("Enzo","enzo-p","test_mesh-unbalanced","unbalanced");
-test_table ("mesh-unbalanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
-test_table ("mesh-unbalanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
+// tests("Enzo","enzo-p","test_mesh-unbalanced","unbalanced");
+// test_table ("mesh-unbalanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
+// test_table ("mesh-unbalanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
 
 //======================================================================
 
@@ -704,81 +703,81 @@ test_group("Enzo-AMR");
 
 echo "<h3>2D Serial</h3>";
 
-tests("Enzo","enzo-p","test_adapt-L1-P1","Level 1");
-
-test_table ("adapt-L1-P1-mesh",
-	    array("0.000000","0.020000","0.040000",
-		  "0.060000","0.080000","0.100000"), $types);
-test_table ("adapt-L1-P1-de",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L1-P1-te",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L1-P1-vx",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L1-P1-vy",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-
-tests("Enzo","enzo-p","test_adapt-L2-P1","Level 2");
-
-test_table ("adapt-L2-P1-mesh",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-
-test_table ("adapt-L2-P1-de",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L2-P1-te",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L2-P1-vx",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L2-P1-vy",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-
-
-tests("Enzo","enzo-p","test_adapt-L3-P1","Level 3");
-
-test_table ("adapt-L3-P1-mesh",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-
-test_table ("adapt-L3-P1-de",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L3-P1-te",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L3-P1-vx",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L3-P1-vy",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-
-
-tests("Enzo","enzo-p","test_adapt-L4-P1","Level 4");
-
-test_table ("adapt-L4-P1-mesh",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L4-P1-de",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L4-P1-te",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L4-P1-vx",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
-test_table ("adapt-L4-P1-vy",
-	    array("0.000000","0.020000","0.040000","0.060000",
-		  "0.080000","0.100000"), $types);
+// tests("Enzo","enzo-p","test_adapt-L1-P1","Level 1");
+// 
+// test_table ("adapt-L1-P1-mesh",
+// 	    array("0.000000","0.020000","0.040000",
+// 		  "0.060000","0.080000","0.100000"), $types);
+// test_table ("adapt-L1-P1-de",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L1-P1-te",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L1-P1-vx",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L1-P1-vy",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// 
+// tests("Enzo","enzo-p","test_adapt-L2-P1","Level 2");
+// 
+// test_table ("adapt-L2-P1-mesh",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// 
+// test_table ("adapt-L2-P1-de",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L2-P1-te",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L2-P1-vx",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L2-P1-vy",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// 
+// 
+// tests("Enzo","enzo-p","test_adapt-L3-P1","Level 3");
+// 
+// test_table ("adapt-L3-P1-mesh",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// 
+// test_table ("adapt-L3-P1-de",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L3-P1-te",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L3-P1-vx",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L3-P1-vy",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// 
+// 
+// tests("Enzo","enzo-p","test_adapt-L4-P1","Level 4");
+// 
+// test_table ("adapt-L4-P1-mesh",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L4-P1-de",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L4-P1-te",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L4-P1-vx",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
+// test_table ("adapt-L4-P1-vy",
+// 	    array("0.000000","0.020000","0.040000","0.060000",
+// 		  "0.080000","0.100000"), $types);
 
 
 tests("Enzo","enzo-p","test_adapt-L5-P1","Level 5");

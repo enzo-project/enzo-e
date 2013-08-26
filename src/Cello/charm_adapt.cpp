@@ -4,6 +4,14 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-25
 /// @brief    Charm-related mesh adaptation control functions
+///
+/// OLD
+///
+/// CommBlock::p_adapt_begin()
+///
+///    first called from charm_initialize.cpp by root Simulation
+///    subsequently called from q_refresh_end() when next_phase == phase_adapt
+
 
 #ifdef DEBUG_ADAPT
 
@@ -36,11 +44,23 @@ void CommBlock::adapt_begin()
 {
 
   TRACE ("BEGIN PHASE ADAPT");
-  Performance * performance = simulation()->performance();
-  if (! performance->is_region_active(perf_adapt)) {
-    performance->start_region(perf_adapt);
+
+  start_performance_(perf_adapt);
+
+  get_num_adapt_steps_();
+
+  if (adapt_step_ > 0) {
+    adapt_start();
+  } else {
+    q_adapt_end();
   }
 
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::get_num_adapt_steps_()
+{
   const Config * config = simulation()->config();
 
   int initial_cycle     = config->initial_cycle;
@@ -52,44 +72,11 @@ void CommBlock::adapt_begin()
   } else  {
     adapt_step_ = (mesh_max_level > 0) ? 1 : 0;
   }
-
-#ifdef TEMP_NEW_ADAPT
-
-  if (adapt_step_ > 0) {
-    adapt_start_new();
-  } else {
-    adapt_end();
-  }
-
-#else /* TEMP_NEW_ADAPT */
-
-  if (adapt_step_ > 0) {
-    adapt_start_old();
-  } else {
-    q_adapt_end();
-  }
-
-#endif /* TEMP_NEW_ADAPT */
-
 }
 
 //----------------------------------------------------------------------
 
-//--------------------------------------------------
-#ifdef TEMP_NEW_ADAPT
-//--------------------------------------------------
-
-void CommBlock::adapt_start_new ()
-{
-  INCOMPLETE("CommBlock::adapt_start_new()");
-  adapt_exit();
-}
-
-//--------------------------------------------------
-#else /* TEMP_NEW_ADAPT */
-//--------------------------------------------------
-
-void CommBlock::adapt_start_old ()
+void CommBlock::adapt_start ()
 {
   count_coarsen_ = 0;
 
@@ -108,10 +95,6 @@ void CommBlock::adapt_start_old ()
 			  thisProxy[thisIndex]));
   }
 }
-
-//--------------------------------------------------
-#endif /* TEMP_NEW_ADAPT */
-//--------------------------------------------------
 
 //----------------------------------------------------------------------
 
@@ -155,8 +138,6 @@ void CommBlock::q_adapt_end()
   //  thisProxy.doneInserting();
   TRACE("ADAPT CommBlock::q_adapt_end()");
 
-  debug_faces_("child",&face_level_[0]);
-
   TRACE ("END   PHASE ADAPT\n");
 
   next_phase_ = phase_output;
@@ -164,11 +145,11 @@ void CommBlock::q_adapt_end()
   if (coarsened_) {
     TRACE_CHARM("ckDestroy()");
     thisProxy[thisIndex].ckDestroy();
-    thisProxy.doneInserting();
+    //    thisProxy.doneInserting();
     return;
   } else {
     //    TRACE_CHARM("doneInserting");
-    thisProxy.doneInserting();
+    //    thisProxy.doneInserting();
   }
 
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(), 
@@ -180,10 +161,7 @@ void CommBlock::q_adapt_end()
 void CommBlock::adapt_exit()
 {
 
-  Performance * performance = simulation()->performance();
-  if (performance->is_region_active(perf_adapt)) {
-    performance->stop_region(perf_adapt);
-  }
+  stop_performance_(perf_adapt);
 
   if (thisIndex.is_root()) {
 
@@ -452,17 +430,17 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
 //----------------------------------------------------------------------
 
-void CommBlock::set_face_level (int if3[3], int level_face, int recurse, int type)
+void CommBlock::set_face_level(int if3[3],int face_level,int recurse,int type)
 { 
 
   int index_face = IF3(if3);
 
   if (face_level_[index_face] == face_level_unknown) {
-    face_level_[index_face] = level_face;
+    face_level_[index_face] = face_level;
   } else if (type == adapt_refine) {
-    face_level_[index_face] = std::max(face_level_[index_face],level_face); 
+    face_level_[index_face] = std::max(face_level_[index_face],face_level); 
   } else if (type == adapt_coarsen) {
-    face_level_[index_face] = std::min(face_level_[index_face],level_face); 
+    face_level_[index_face] = std::min(face_level_[index_face],face_level); 
   }
 
   const int level = this->level();
@@ -486,7 +464,7 @@ void CommBlock::set_face_level (int if3[3], int level_face, int recurse, int typ
 
 	  if (face_adjacent) {
 
-	    SET_FACE_LEVEL(index_child,if3,level_face,false,adapt_refine);
+	    SET_FACE_LEVEL(index_child,if3,face_level,false,adapt_refine);
 
 	    int ifc3m[3], ifc3p[3], ifc3[3];
 	    loop_limits_faces_(ifc3m,ifc3p,if3,ic3);
@@ -494,7 +472,7 @@ void CommBlock::set_face_level (int if3[3], int level_face, int recurse, int typ
 	    for (ifc3[0]=ifc3m[0]; ifc3[0]<=ifc3p[0]; ifc3[0]++) {
 	      for (ifc3[1]=ifc3m[1]; ifc3[1]<=ifc3p[1]; ifc3[1]++) {
 		for (ifc3[2]=ifc3m[2]; ifc3[2]<=ifc3p[2]; ifc3[2]++) {
-		  SET_FACE_LEVEL(index_child,ifc3,level_face,false,adapt_refine);
+                 SET_FACE_LEVEL(index_child,ifc3,face_level,false,adapt_refine);
 		}
 	      }
 	    }
@@ -507,7 +485,7 @@ void CommBlock::set_face_level (int if3[3], int level_face, int recurse, int typ
       index_.child(level,ic3+0,ic3+1,ic3+2);
       int ip3[3];
       parent_face_(ip3,if3,ic3);
-      SET_FACE_LEVEL(index_parent,ip3,level_face,false,adapt_coarsen);
+      SET_FACE_LEVEL(index_parent,ip3,face_level,false,adapt_coarsen);
     }
 
   } 
@@ -844,6 +822,3 @@ void CommBlock::x_refresh_child (int n, char * buffer, int ic3[3])
   bool lghost[3] = {true,true,true};
   store_face_(n,buffer, iface, ic3, lghost, op_array_restrict);
 }
-
-//----------------------------------------------------------------------
-

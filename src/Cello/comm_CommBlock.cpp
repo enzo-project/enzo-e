@@ -19,7 +19,7 @@
 CommBlock::CommBlock
 (
  Index index,
- int nx, int ny, int nz,             // Block cells
+ int nx, int ny, int nz,
  int num_field_blocks,
  int num_adapt_steps,
  bool initial,
@@ -28,7 +28,7 @@ CommBlock::CommBlock
  int num_face_level, int * face_level,
  bool testing
  ) throw ()
-  : 
+  :
   index_(index),
   index_initial_(0),
   children_(),
@@ -40,16 +40,7 @@ CommBlock::CommBlock
   adapt_(adapt_unknown),
   next_phase_(phase_output),
   coarsened_(false)
-{ 
-#ifdef CELLO_TRACE
-  index.print ("CommBlock::CommBlock");
-  printf("CommBlock::CommBlock(n(%d %d %d)  num_field_blocks %d  count_adapt %d  initial %d)\n",
-	 nx,ny,nz,num_field_blocks,adapt_step_,initial);
-
-  printf("CommBlock::CommBlock  n (%d %d %d)\n",nx,ny,nz);
-  printf("CommBlock::CommBlock  l %d\n",level());
-#endif
-
+{
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
 
@@ -64,6 +55,7 @@ CommBlock::CommBlock
 		       xm, xp, ym, yp, zm, zp);
 
   // Allocate block data
+
   block_->allocate(field_descr);
   child_block_ = NULL;
 
@@ -114,9 +106,9 @@ CommBlock::CommBlock
     //    set array operation if any
     switch (op_array) {
     case op_array_restrict:
-      {
+      {	
 	Restrict * restrict = this->simulation()->problem()->restrict();
-	field_face.set_restrict(restrict,icx,icy,icz);
+	field_face.set_restrict(restrict,icx,icy,icz);  
       }
       break;
     case op_array_prolong:
@@ -136,7 +128,6 @@ CommBlock::CommBlock
   if (! testing) {
 
     // Count CommBlocks on each processor
-   
     ((SimulationCharm *)simulation())->insert_block();
 
   }
@@ -162,14 +153,15 @@ void CommBlock::pup(PUP::er &p)
   p | cycle_;
   p | time_;
   p | dt_;
+  p | neighbor_index_;
   p | index_initial_;
   p | children_;
-  p | count_coarsen_;
-  p | adapt_step_;
-  p | adapt_;
   p | loop_refresh_;
   p | face_level_;
   p | child_face_level_;
+  p | count_coarsen_;
+  p | adapt_step_;
+  p | adapt_;
   p | next_phase_;
   p | coarsened_;
 
@@ -191,7 +183,7 @@ void CommBlock::apply_initial_() throw ()
 {
 
   TRACE("CommBlock::apply_initial_()");
-  simulation()->performance()->start_region(perf_initial);
+  start_performance_(perf_initial);
   FieldDescr * field_descr = simulation()->field_descr();
 
   // Apply initial conditions
@@ -201,7 +193,7 @@ void CommBlock::apply_initial_() throw ()
   while (Initial * initial = problem->initial(index_initial_++)) {
     initial->enforce_block(this,field_descr, simulation()->hierarchy());
   }
-  simulation()->performance()->stop_region(perf_initial);
+  stop_performance_(perf_initial);
 }
 
 //----------------------------------------------------------------------
@@ -241,46 +233,16 @@ CommBlock::~CommBlock() throw ()
 
 //----------------------------------------------------------------------
 
-CommBlock::CommBlock(const CommBlock & block) throw ()
-/// @param     block  Object being copied
-{
-  copy_(block);
-}
-
-//----------------------------------------------------------------------
-
-CommBlock & CommBlock::operator = (const CommBlock & block) throw ()
-/// @param     block  Source object of the assignment
-/// @return    The target assigned object
-{
-  copy_(block);
-  return *this;
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::index_forest (int * ix, int * iy, int * iz) const throw ()
-{
-  index_.array(ix,iy,iz);
-}
-
-//----------------------------------------------------------------------
-
 std::string CommBlock::name() const throw()
-
 {
-  return std::string("Block ") + index_.bit_string(level(),simulation()->dimension());
-  //    std::stringstream convert;
-  //    convert << "block_" << id_();
-  //    return convert.str();
+  int dim = simulation()->dimension();
+  return std::string("Block ") + index_.bit_string(level(),dim);
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::size_forest (int * nx, int * ny, int * nz) const throw ()
-{
-  simulation()->hierarchy()->num_blocks(nx,ny,nz);
-}
+{  simulation()->hierarchy()->num_blocks(nx,ny,nz); }
 
 //----------------------------------------------------------------------
 
@@ -561,25 +523,20 @@ Simulation * CommBlock::simulation() const
 
 //----------------------------------------------------------------------
 
-void CommBlock::debug_faces_(const char * buffer, int * faces)
+void CommBlock::start_performance_(int index_perf)
 {
-#ifdef CELLO_TRACE
-  if (!faces) return;
-  int imp[3] = {-1,1,0};
-  int i0p[3] = { 0,1,0};
-  int ipp[3] = { 1,1,0};
-  int im0[3] = {-1,0,0};
-  int i00[3] = { 0,0,0};
-  int ip0[3] = { 1,0,0};
-  int imm[3] = {-1,-1,0};
-  int i0m[3] = { 0,-1,0};
-  int ipm[3] = { 1,-1,0};
-  index_.print(buffer);
-  printf ("%s %2d %2d %2d\n",
-   	  buffer, faces[IF3(imp)], faces[IF3(i0p)], faces[IF3(ipp)]);
-  printf ("%s %2d %2d %2d\n",
-   	  buffer, faces[IF3(im0)], faces[IF3(i00)], faces[IF3(ip0)]);
-  printf ("%s %2d %2d %2d\n",
-   	  buffer, faces[IF3(imm)], faces[IF3(i0m)], faces[IF3(ipm)]);
-#endif
+  Performance * performance = simulation()->performance();
+  if (! performance->is_region_active(index_perf)) {
+    performance->start_region(index_perf);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::stop_performance_(int index_perf)
+{
+  Performance * performance = simulation()->performance();
+  if (performance->is_region_active(index_perf)) {
+    performance->stop_region(index_perf);
+  }
 }

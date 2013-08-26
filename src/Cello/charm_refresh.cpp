@@ -17,8 +17,9 @@
 // void CommBlock::p_refresh_begin() 
 void CommBlock::refresh_begin() 
 {
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_refresh);
+  start_performance_(perf_refresh);
+  // Performance * performance = simulation()->performance();
+  // performance->start_region(perf_refresh);
 
   TRACE("BEGIN PHASE REFRESH");
 
@@ -36,7 +37,8 @@ void CommBlock::refresh_begin()
 			  thisProxy[thisIndex]));
 
     if (! is_leaf()) {
-      performance->stop_region(perf_refresh);
+      stop_performance_(perf_refresh);
+      // performance->stop_region(perf_refresh);
       return;
     }
 
@@ -104,12 +106,14 @@ void CommBlock::refresh_begin()
     // Prevent hang if single-CommBlock simulation
     ++loop_refresh_.stop();
 
-    performance->stop_region(perf_refresh);
+    stop_performance_(perf_refresh);
+    // performance->stop_region(perf_refresh);
     x_refresh_same (0,0,0);
 
   } else {
 
-    performance->stop_region(perf_refresh);
+    stop_performance_(perf_refresh);
+    // performance->stop_region(perf_refresh);
   }
 }
 
@@ -143,8 +147,8 @@ void CommBlock::refresh_coarse ( Index index, int iface[3] )
 void CommBlock::x_refresh_coarse (int n, char * buffer, 
 				  int iface[3], int ichild[3])
 {
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_refresh);
+  start_performance_(perf_refresh);
+
   bool lghost[3] = {false};
 
   store_face_(n,buffer,
@@ -158,7 +162,9 @@ void CommBlock::x_refresh_coarse (int n, char * buffer,
       q_refresh_end();
     }
   }
-  performance->stop_region(perf_refresh);
+
+  stop_performance_(perf_refresh);
+
 }
 
 //----------------------------------------------------------------------
@@ -188,8 +194,8 @@ void CommBlock::refresh_same (Index index, int iface[3])
 
 void CommBlock::x_refresh_same (int n, char * buffer, int iface[3])
 {
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_refresh);
+  start_performance_(perf_refresh);
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   if ( n != 0) {
@@ -202,7 +208,8 @@ void CommBlock::x_refresh_same (int n, char * buffer, int iface[3])
 
   std::string refresh_type = simulation->config()->field_refresh_type;
   
-  performance->stop_region(perf_refresh);
+  stop_performance_(perf_refresh);
+
   if (refresh_type == "counter") {
     if (loop_refresh_.done()) {
       q_refresh_end();
@@ -241,8 +248,8 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
 				int iface[3],
 				int ichild[3])
 {
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_refresh);
+  start_performance_(perf_refresh);
+
   bool lghost[3] = {false};
   store_face_(n,buffer,
 	      iface, ichild, lghost,
@@ -255,21 +262,15 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
       q_refresh_end();
     }
   }
-  performance->stop_region(perf_refresh);
+
+  stop_performance_(perf_refresh);
+
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::q_refresh_end()
 {
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_refresh);
-  // if (thisIndex.is_root()) {
-  //   Performance * performance = simulation()->performance();
-  //   performance->stop_region(perf_refresh);
-  // }
-
-  performance->stop_region(perf_refresh);
   if (next_phase_ == phase_output) {
     TRACE("refresh calling output");
     prepare();

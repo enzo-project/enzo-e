@@ -328,10 +328,10 @@ Clean(env_mv_out.RunSerial ('test_mesh-balanced.unit',bin_path + '/enzo-p',
       [Glob('#/' + test_path + '/mesh-balanced*.png'),
        '#/input/mesh-balanced.in.out'])
 
-Clean(env_mv_out.RunSerial ('test_mesh-unbalanced.unit',bin_path + '/enzo-p', 
-		ARGS='input/mesh-unbalanced.in'),
-      [Glob('#/' + test_path + '/mesh-unbalanced*.png'),
-       '#/input/mesh-unbalanced.in.out'])
+# Clean(env_mv_out.RunSerial ('test_mesh-unbalanced.unit',bin_path + '/enzo-p', 
+# 		ARGS='input/mesh-unbalanced.in'),
+#       [Glob('#/' + test_path + '/mesh-unbalanced*.png'),
+#        '#/input/mesh-unbalanced.in.out'])
 
 #----------------------------------------------------------------------
 # AMR PPM
@@ -340,41 +340,41 @@ Clean(env_mv_out.RunSerial ('test_mesh-unbalanced.unit',bin_path + '/enzo-p',
 
 # serial
 
-Clean(env_mv_out.RunParallel ('test_adapt-L1-P1.unit',bin_path + '/enzo-p', 
-		ARGS='input/adapt-L1-P1.in'),
-      [Glob('#/' + test_path + '/adapt-L1-P1*.png'),
-       '#/input/adapt-L1-P1.in.out'])
-env.MakeMovie ("adapt-L1-P1-mesh.swf", "test_adapt-L1-P1-mesh.unit", \
-                ARGS= test_path + "/adapt-L1-P1-mesh-*.png");
-env.MakeMovie ("adapt-L1-P1-density.swf", "test_adapt-L1-P1-density.unit", \
-                ARGS= test_path + "/adapt-L1-P1-density-*.png");
-
-Clean(env_mv_out.RunParallel ('test_adapt-L2-P1.unit',bin_path + '/enzo-p', 
-		ARGS='input/adapt-L2-P1.in'),
-      [Glob('#/' + test_path + '/adapt-L2-P1*.png'),
-       '#/input/adapt-L2-P1.in.out'])
-env.MakeMovie ("adapt-L2-P1-mesh.swf", "test_adapt-L2-P1-mesh.unit", \
-                ARGS= test_path + "/adapt-L2-P1-mesh-*.png");
-env.MakeMovie ("adapt-L2-P1-density.swf", "test_adapt-L2-P1-density.unit", \
-                ARGS= test_path + "/adapt-L2-P1-density-*.png");
-
-Clean(env_mv_out.RunParallel ('test_adapt-L3-P1.unit',bin_path + '/enzo-p', 
-		ARGS='input/adapt-L3-P1.in'),
-      [Glob('#/' + test_path + '/adapt-L3-P1*.png'),
-       '#/input/adapt-L3-P1.in.out'])
-env.MakeMovie ("adapt-L3-P1-mesh.swf", "test_adapt-L3-P1-mesh.unit", \
-                ARGS= test_path + "/adapt-L3-P1-mesh-*.png");
-env.MakeMovie ("adapt-L3-P1-density.swf", "test_adapt-L3-P1-density.unit", \
-                ARGS= test_path + "/adapt-L3-P1-density-*.png");
-
-Clean(env_mv_out.RunParallel ('test_adapt-L4-P1.unit',bin_path + '/enzo-p', 
-		ARGS='input/adapt-L4-P1.in'),
-      [Glob('#/' + test_path + '/adapt-L4-P1*.png'),
-       '#/input/adapt-L4-P1.in.out'])
-env.MakeMovie ("adapt-L4-P1-mesh.swf", "test_adapt-L4-P1-mesh.unit", \
-                ARGS= test_path + "/adapt-L4-P1-mesh-*.png");
-env.MakeMovie ("adapt-L4-P1-density.swf", "test_adapt-L4-P1-density.unit", \
-                ARGS= test_path + "/adapt-L4-P1-density-*.png");
+# Clean(env_mv_out.RunParallel ('test_adapt-L1-P1.unit',bin_path + '/enzo-p', 
+# 		ARGS='input/adapt-L1-P1.in'),
+#       [Glob('#/' + test_path + '/adapt-L1-P1*.png'),
+#        '#/input/adapt-L1-P1.in.out'])
+# env.MakeMovie ("adapt-L1-P1-mesh.swf", "test_adapt-L1-P1-mesh.unit", \
+#                 ARGS= test_path + "/adapt-L1-P1-mesh-*.png");
+# env.MakeMovie ("adapt-L1-P1-density.swf", "test_adapt-L1-P1-density.unit", \
+#                 ARGS= test_path + "/adapt-L1-P1-density-*.png");
+# 
+# Clean(env_mv_out.RunParallel ('test_adapt-L2-P1.unit',bin_path + '/enzo-p', 
+# 		ARGS='input/adapt-L2-P1.in'),
+#       [Glob('#/' + test_path + '/adapt-L2-P1*.png'),
+#        '#/input/adapt-L2-P1.in.out'])
+# env.MakeMovie ("adapt-L2-P1-mesh.swf", "test_adapt-L2-P1-mesh.unit", \
+#                 ARGS= test_path + "/adapt-L2-P1-mesh-*.png");
+# env.MakeMovie ("adapt-L2-P1-density.swf", "test_adapt-L2-P1-density.unit", \
+#                 ARGS= test_path + "/adapt-L2-P1-density-*.png");
+# 
+# Clean(env_mv_out.RunParallel ('test_adapt-L3-P1.unit',bin_path + '/enzo-p', 
+# 		ARGS='input/adapt-L3-P1.in'),
+#       [Glob('#/' + test_path + '/adapt-L3-P1*.png'),
+#        '#/input/adapt-L3-P1.in.out'])
+# env.MakeMovie ("adapt-L3-P1-mesh.swf", "test_adapt-L3-P1-mesh.unit", \
+#                 ARGS= test_path + "/adapt-L3-P1-mesh-*.png");
+# env.MakeMovie ("adapt-L3-P1-density.swf", "test_adapt-L3-P1-density.unit", \
+#                 ARGS= test_path + "/adapt-L3-P1-density-*.png");
+# 
+# Clean(env_mv_out.RunParallel ('test_adapt-L4-P1.unit',bin_path + '/enzo-p', 
+# 		ARGS='input/adapt-L4-P1.in'),
+#       [Glob('#/' + test_path + '/adapt-L4-P1*.png'),
+#        '#/input/adapt-L4-P1.in.out'])
+# env.MakeMovie ("adapt-L4-P1-mesh.swf", "test_adapt-L4-P1-mesh.unit", \
+#                 ARGS= test_path + "/adapt-L4-P1-mesh-*.png");
+# env.MakeMovie ("adapt-L4-P1-density.swf", "test_adapt-L4-P1-density.unit", \
+#                 ARGS= test_path + "/adapt-L4-P1-density-*.png");
 
 Clean(env_mv_out.RunParallel ('test_adapt-L5-P1.unit',bin_path + '/enzo-p', 
 		ARGS='input/adapt-L5-P1.in'),

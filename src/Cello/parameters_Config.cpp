@@ -508,8 +508,6 @@ void Config::read(Parameters * parameters) throw()
 	parameters->value_float("image_min",0.0);
       output_image_max[index] =
 	parameters->value_float("image_max",0.0);
-      PARALLEL_PRINTF ("output_image_max[index] = %f\n",output_image_max[index]);
-
 
       if (parameters->type("colormap") == parameter_list) {
 	int size = parameters->list_length("colormap");

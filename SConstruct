@@ -5,10 +5,6 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
-# Whether to use new adapt or old adapt 
-
-new_adapt = 0
-
 # Whether to print out messages with the TRACE() series of statements
 
 trace = 0
@@ -117,7 +113,6 @@ define = {}
 
 # Temporary defines
 
-define_new_adapt =    ['TEMP_NEW_ADAPT']
 
 # Precision defines
 
@@ -188,7 +183,6 @@ flags_link_charm = ''
 if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
   
-if (new_adapt != 0):     defines = defines + define_new_adapt
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
 if (trace_charm != 0):   defines = defines + define_trace_charm
@@ -383,7 +377,6 @@ SConscript('test/SConscript')
 # CLEANING
 #======================================================================
 
-#Clean('.','test')
 Clean('.','bin')
 Clean('.','lib')
 

@@ -132,25 +132,23 @@ public: // interface
 
   /// Begin a single adapt refine step
 
-#ifdef    TEMP_NEW_ADAPT
   inline void p_adapt_start ()
-  { adapt_start_new(); }
-  void adapt_start_new();
-#else  /* TEMP_NEW_ADAPT */
-  inline void p_adapt_start ()
-  { adapt_start_old(); }
-  void adapt_start_old();
-#endif /* TEMP_NEW_ADAPT */
+  { adapt_start(); }
+
+  void adapt_start();
 
   /// Start the adapt coarsen step
   void q_adapt_next ();
   /// Stop the adapt step
   void q_adapt_stop ();
+
   /// entry call to refine() for balancing
   void p_refine()
   { refine(); }
-  /// the CommBlock must be refined
+
+  /// Refine the CommBlock
   void refine();
+
   /// the CommBlock may be coarsened
   void coarsen();
   /// Determine whether the CommBlock can be coarsened
@@ -229,11 +227,18 @@ public: // interface
   /// Destructor
   virtual ~CommBlock() throw();
 
+  //----------------------------------------------------------------------
+
   /// Copy constructor
-  CommBlock(const CommBlock & block) throw();
+  CommBlock(const CommBlock & block) throw ()
+  /// @param     block  Object being copied
+  {  copy_(block); }
 
   /// Assignment operator
-  CommBlock & operator= (const CommBlock & block) throw();
+  CommBlock & operator = (const CommBlock & block) throw ()
+  /// @param     block  Source object of the assignment
+  /// @return    The target assigned object
+  {  copy_(block);  return *this; }
 
   /// Return the Block associated with this CommBlock
   Block * block() throw() { return block_; };
@@ -246,7 +251,11 @@ public: // interface
 //----------------------------------------------------------------------
 
   /// Return the index of the root block containing this block
-  void index_forest (int * ibx, int * iby = 0, int * ibz = 0) const throw();
+  
+  inline void index_forest (int * ix, int * iy, int * iz) const throw ()
+  { index_.array(ix,iy,iz); }
+
+  // void index_forest (int * ibx, int * iby = 0, int * ibz = 0) const throw();
 
   /// Return the name of the block
   std::string name () const throw();
@@ -317,6 +326,13 @@ public: // virtual functions
   Simulation * simulation() const;
 
 protected: // functions
+
+  /// Determine the number of adapt steps (0, 1 or initial_max_level_)
+  void get_num_adapt_steps_();
+
+  /// Start and stop measuring CommBlock-based performance regions
+  void start_performance_(int index_perf);
+  void stop_performance_(int index_perf);
 
   /// Return the child adjacent to the given child in the direction of
   /// the given face
@@ -424,16 +440,9 @@ protected: // attributes
 
   //--------------------------------------------------
 
-#ifdef    TEMP_NEW_ADAPT
   /// Indices of all neighboring CommBlocks
   std::vector<Index> neighbor_index_;
 
-  /// Desired levels of all neighboring CommBlocks
-  std::vector<int> neighbor_level_;
-
-#else  /* TEMP_NEW_ADAPT */
-#endif /* TEMP_NEW_ADAPT */
-  
   /// Index of current initialization routine
   int index_initial_;
 
