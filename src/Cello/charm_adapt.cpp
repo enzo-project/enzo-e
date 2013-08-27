@@ -101,9 +101,9 @@ void CommBlock::adapt_start ()
 void CommBlock::q_adapt_next()
 {
   TRACE("ADAPT CommBlock::q_adapt_next()");
-  if (thisIndex.is_root()) {
-    thisArray->doneInserting();
-  }
+  // if (thisIndex.is_root()) {
+  //   thisArray->doneInserting();
+  // }
 
   for (size_t i=0; i<child_face_level_.size(); i++) {
     child_face_level_[i] = face_level_unknown;
@@ -120,7 +120,7 @@ void CommBlock::q_adapt_next()
 void CommBlock::q_adapt_stop()
 {
   //  TRACE_CHARM("doneInserting");
-  thisProxy.doneInserting();
+  //  thisProxy.doneInserting();
   TRACE("ADAPT CommBlock::q_adapt_stop()");
   if (thisIndex.is_root()) {
     thisArray->doneInserting();

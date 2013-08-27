@@ -579,7 +579,6 @@ void OutputImage::image_write_ (double min, double max) throw()
       } else {
 	
 	// red if out of bounds
-	PARALLEL_PRINTF ("OUT OF BOUNDS %d %d %f\n",ix,iy,value);
 	png_->plot(ix+1, iy+1, 1.0, 0.0, 0.0);
 
       }
