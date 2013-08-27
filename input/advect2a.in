@@ -1,0 +1,46 @@
+
+include "input/ppm.incl"
+include "input/Sedov/sedov-amr.incl"
+include "input/Sedov/sedov-output.incl"
+
+Mesh    {  max_level = 4; }
+Initial {  max_level = 4; }
+
+Mesh { adapt { slope_min_refine = 4.0;
+               slope_max_coarsen = 1.0; } }
+
+Mesh { root_size      = [32,32]; }
+Mesh { root_blocks    = [2,2]; }
+Boundary { type = "periodic"; }
+Initial {
+   density       { value = [ 1.0,
+                            (x - 0.25)*(x - 0.25) + (y - 0.25)*(y - 0.25) < 0.02,
+                            0.5 ]; };
+   total_energy  { value = [ 1.0 / (0.4 * 1.0), 
+                             (x - 0.25)*(x - 0.25) + (y - 0.25)*(y - 0.25) < 0.02,
+                             1.0  / (0.4 * 0.5) ]; };
+   velocity_x    { value = [1.0]; };
+   velocity_y    { value = [1.0]; };
+   internal_energy { value = [0.0]; }
+}
+
+Output { file_groups = ["de","te","mesh"]; 
+   de {
+          name = ["advect2a-de-%03d.png", "cycle"]; 
+      schedule = ["cycle","interval", 10 ]; 
+   };
+   te { 
+          name = ["advect2a-te-%03d.png","cycle"];
+      schedule = ["cycle","interval", 10 ]; 
+     };
+   mesh {
+          name = ["advect2a-mesh-%03d.png", "cycle"]; 
+      schedule = ["cycle","interval", 10 ]; 
+   }
+
+}
+
+# Output{  mesh { image_mesh_color = "process"; }}
+
+Stopping { cycle = 2000; }
+
