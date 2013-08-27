@@ -147,9 +147,6 @@ void CommBlock::q_adapt_end()
     thisProxy[thisIndex].ckDestroy();
     //    thisProxy.doneInserting();
     return;
-  } else {
-    //    TRACE_CHARM("doneInserting");
-    //    thisProxy.doneInserting();
   }
 
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(), 
