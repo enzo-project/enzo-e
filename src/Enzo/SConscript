@@ -108,10 +108,9 @@ test_enzo_prolong = env.Program (['test_Prolong.cpp', charm_main])
 
 binaries = [test_enzo_p, test_enzo_prolong]
 
-env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
-env.CharmBuilder('enzo.def.h', 'enzo.ci',ARG = 'enzo')
-env.CharmBuilder('main_enzo.decl.h','enzo_main.ci',ARG = 'main_enzo')
-env.CharmBuilder('main_enzo.def.h', 'enzo_main.ci',ARG = 'main_enzo')
+env.CharmBuilder(['enzo.decl.h','enzo.def.h'],'enzo.ci',ARG = 'enzo')
+env.CharmBuilder(['main_enzo.decl.h','main_enzo.def.h'],
+	'enzo_main.ci',ARG = 'main_enzo')
 
 #------------------------------
 # INSTALL

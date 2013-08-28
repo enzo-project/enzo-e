@@ -5,6 +5,10 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
+# Whether to use new adapt with Charm++ group's AMR algorithm
+
+new_adapt = 1
+
 # Whether to print out messages with the TRACE() series of statements
 
 trace = 0
@@ -113,6 +117,7 @@ define = {}
 
 # Temporary defines
 
+define_new_adapt = ['TEMP_NEW_ADAPT']
 
 # Precision defines
 
@@ -144,6 +149,7 @@ define_png   =        ['NO_FREETYPE']
 #----------------------------------------------------------------------
 
 defines     = []
+
 # Precision configuration
 
 if (prec == 'single' or prec == 'double'):
@@ -159,6 +165,11 @@ else:
 
 defines = defines + define_hdf5
 defines = defines + define_png
+
+# Temporary configurations
+
+if (new_adapt == 1): 
+   defines = defines + define_new_adapt
 
 charm_perf = ''
 

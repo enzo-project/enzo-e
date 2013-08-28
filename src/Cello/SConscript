@@ -140,30 +140,29 @@ sources_test =        [Glob('test_Unit*cpp')]
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
-env.CharmBuilder('main_enzo.decl.h','main_enzo.ci',ARG = 'main_enzo')
-env.CharmBuilder('main_enzo.def.h', 'main_enzo.ci',ARG = 'main_enzo')
+env.CharmBuilder(['main_enzo.decl.h','main_enzo.def.h'],
+	'main_enzo.ci',ARG = 'main_enzo')
+
+env.CharmBuilder(['main.decl.h','main.def.h'],
+	'main.ci',ARG = 'main')
+
+env.CharmBuilder (['main_simulation.decl.h','main_simulation.def.h'],
+        'main_simulation.ci', ARG = 'main_simulation')
+
+env.CharmBuilder(['main_mesh.decl.h','main_mesh.def.h'],
+	'main_mesh.ci',ARG = 'main_mesh')
+
+env.CharmBuilder(['mesh.decl.h','mesh.def.h'],
+	'mesh.ci',ARG = 'mesh')
+
+env.CharmBuilder(['simulation.decl.h','simulation.def.h'],
+	'simulation.ci',ARG='simulation')
+
 includes_main.append(['main_enzo.decl.h','main_enzo.def.h'])
-
-env.CharmBuilder('main.decl.h','main.ci',ARG = 'main')
-env.CharmBuilder('main.def.h', 'main.ci',ARG = 'main')
 includes_main.append(['main.decl.h','main.def.h'])
-
-env.CharmBuilder ('main_simulation.decl.h','main_simulation.ci',
-                  ARG = 'main_simulation')
-env.CharmBuilder ('main_simulation.def.h', 'main_simulation.ci',
-                  ARG = 'main_simulation')
 includes_main.append(['main_simulation.decl.h','main_simulation.def.h'])
-
-env.CharmBuilder('main_mesh.decl.h','main_mesh.ci',ARG = 'main_mesh')
-env.CharmBuilder('main_mesh.def.h', 'main_mesh.ci',ARG = 'main_mesh')
 includes_main.append(['main_mesh.decl.h','main_mesh.def.h'])
-
-env.CharmBuilder('mesh.decl.h','mesh.ci',ARG = 'mesh')
-env.CharmBuilder('mesh.def.h', 'mesh.ci',ARG = 'mesh')
 includes_mesh.append(['mesh.decl.h','mesh.def.h'])
-
-env.CharmBuilder('simulation.decl.h','simulation.ci',ARG='simulation')
-env.CharmBuilder('simulation.def.h', 'simulation.ci',ARG='simulation')
 includes_simulation.append(['simulation.decl.h','simulation.def.h'])
 
 #------------------------------
