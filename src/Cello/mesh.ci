@@ -45,7 +45,13 @@ module mesh {
     entry void p_read (int index_input);
     entry void p_output(CkReductionMsg * msg);
 
+    // NEW ADAPT
+    entry void p_get_neighbor_level(int if3[3], int level);
+    // OLD ADAPT
+
     // adapt
+//    entry void p_set_face_level(int if3[3], int level, int recurse, 
+//				int adapt_type);
 
     entry void p_adapt_begin ();
     entry void p_adapt_start ();
@@ -56,8 +62,6 @@ module mesh {
 
     entry void p_refine ();
 
-    entry void p_set_face_level(int if3[3], int level, int recurse, 
-				int adapt_type);
 
     entry void p_child_can_coarsen(int ichild[3], 
 				   int na, char arr[na],

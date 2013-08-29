@@ -7,7 +7,7 @@ import sys
 
 # Whether to use new adapt with Charm++ group's AMR algorithm
 
-new_adapt = 0
+new_adapt = 1
 
 # Whether to print out messages with the TRACE() series of statements
 

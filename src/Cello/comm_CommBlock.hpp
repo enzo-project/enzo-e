@@ -212,7 +212,10 @@ public: // interface
 
 #ifdef TEMP_NEW_ADAPT
 
-  void neighbor_level (int if3[3], int level);
+  void create_mesh();
+  void adapt_mesh();
+  void notify_neighbors();
+  void p_get_neighbor_level (int if3[3], int level);
 
 #else /* TEMP_NEW_ADAPT */
 

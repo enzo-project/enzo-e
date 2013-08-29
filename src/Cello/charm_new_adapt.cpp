@@ -64,13 +64,13 @@
 char buffer [80];
 
 #define SET_FACE_LEVEL(INDEX,IF3,LEVEL)		\
-  sprintf (buffer,"p_neighbor_level %d (%d  = %d) [%d]",	\
+  sprintf (buffer,"p_get_neighbor_level %d (%d  = %d) [%d]",	\
 	   __LINE__,IF3[0],IF3[1],IF3[2]);		\
   INDEX.print(buffer,-1,2);					\
-  thisProxy[INDEX].p_neighbor_level (IF3,LEVEL);
+  thisProxy[INDEX].p_get_neighbor_level (IF3,LEVEL);
 #else /* DEBUG_ADAPT */
 #define SET_FACE_LEVEL(INDEX,IF3,LEVEL)		\
-  thisProxy[INDEX].p_neighbor_level (IF3,LEVEL);
+  thisProxy[INDEX].p_get_neighbor_level (IF3,LEVEL);
 #endif /* DEBUG_ADAPT */
 
 #include "simulation.hpp"
@@ -86,7 +86,7 @@ const char * adapt_name[] = {
 
 //======================================================================
 
-void create_mesh()
+void CommBlock::create_mesh()
 {
   adapt_ = determine_adapt();
 
@@ -95,7 +95,7 @@ void create_mesh()
 
 //----------------------------------------------------------------------
 
-void adapt_mesh()
+void CommBlock::adapt_mesh()
 {
   adapt_ = determine_adapt();
 
@@ -104,13 +104,13 @@ void adapt_mesh()
 
 //----------------------------------------------------------------------
 
-void notify_neighbors()
+void CommBlock::notify_neighbors()
 {
 }
 
 //----------------------------------------------------------------------
 
-void p_neighbor_level(int level)
+void CommBlock::p_get_neighbor_level(int if3[3], int level)
 {
 }
 
@@ -417,7 +417,7 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
     int jf3[3] = {-if3[0],-if3[1],-if3[2]};
 
-    SET_FACE_LEVEL(index_neighbor,jf3,level+1,false,adapt_refine);
+    SET_FACE_LEVEL(index_neighbor,jf3,level+1);
 
     Index index_child_neighbor = index_child.index_neighbor
       (if3[0],if3[1],if3[2],na3,periodic);
@@ -429,9 +429,9 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
       // CHILD SIBLING
 
-      SET_FACE_LEVEL(index_child,if3,level+1,false,adapt_refine);
+      SET_FACE_LEVEL(index_child,if3,level+1);
 
-      SET_FACE_LEVEL(index_child_neighbor,jf3,level+1,false,adapt_refine);
+      SET_FACE_LEVEL(index_child_neighbor,jf3,level+1);
 
     } else {
 
@@ -449,7 +449,7 @@ void CommBlock::refine_face_level_update_( Index index_child )
 	if (balance) {
 
 	  // not level-1 since balancing will force great uncle to be refined
-	  SET_FACE_LEVEL(index_child,if3,level,false,adapt_refine);
+	  SET_FACE_LEVEL(index_child,if3,level);
 
 	  int ic3[3];
 	  index_.child(level,ic3+0,ic3+1,ic3+2);
@@ -466,23 +466,23 @@ void CommBlock::refine_face_level_update_( Index index_child )
 
 	// CHILD UNCLE
 
-	SET_FACE_LEVEL(index_child,if3,level,false,adapt_refine);
+	SET_FACE_LEVEL(index_child,if3,level);
 
-	SET_FACE_LEVEL(index_neighbor,jf3,level+1,true,adapt_refine);
+	SET_FACE_LEVEL(index_neighbor,jf3,level+1);
 
       } else if (face_level == level + 1) {
 
 	// CHILD COUSIN
 
-	SET_FACE_LEVEL(index_child,if3,level+1,false,adapt_refine);
+	SET_FACE_LEVEL(index_child,if3,level+1);
 
-	SET_FACE_LEVEL(index_child_neighbor,jf3,level+1,false,adapt_refine);
+	SET_FACE_LEVEL(index_child_neighbor,jf3,level+1);
 
       } else if (face_level == level + 2) {
 
 	// CHILD NIBLINGS
 
-	SET_FACE_LEVEL(index_child,if3,level+2,false,adapt_refine);
+	SET_FACE_LEVEL(index_child,if3,level+2);
 
 	int ic3m[3],ic3p[3],ic3[3];
 	loop_limits_nibling_(ic3m,ic3p, if3);
@@ -494,76 +494,13 @@ void CommBlock::refine_face_level_update_( Index index_child )
 	      Index index_nibling = 
 		index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
 
-	      SET_FACE_LEVEL(index_nibling,jf3,level+1,false,adapt_refine);
+	      SET_FACE_LEVEL(index_nibling,jf3,level+1);
 	    }
 	  }
 	}
       }
     }
   }
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::set_face_level(int if3[3],int face_level,int recurse,int type)
-{ 
-
-  int index_face = IF3(if3);
-
-  if (face_level_[index_face] == face_level_unknown) {
-    face_level_[index_face] = face_level;
-  } else if (type == adapt_refine) {
-    face_level_[index_face] = std::max(face_level_[index_face],face_level); 
-  } else if (type == adapt_coarsen) {
-    face_level_[index_face] = std::min(face_level_[index_face],face_level); 
-  }
-
-  const int level = this->level();
-
-  if (recurse) {
-
-    if (type == adapt_refine && ! is_leaf()) {
-
-      // update children that share the same face
-
-      for (size_t ic=0; ic<children_.size(); ic++) {
-
-	Index index_child = children_[ic];
-
-	if (index_child != index_) {
-
-	  int ic3[3];
-	  index_child.child(level+1,ic3,ic3+1,ic3+2);
-
-	  bool face_adjacent = child_is_on_face_(ic3,if3);
-
-	  if (face_adjacent) {
-
-	    SET_FACE_LEVEL(index_child,if3,face_level,false,adapt_refine);
-
-	    int ifc3m[3], ifc3p[3], ifc3[3];
-	    loop_limits_faces_(ifc3m,ifc3p,if3,ic3);
-
-	    for (ifc3[0]=ifc3m[0]; ifc3[0]<=ifc3p[0]; ifc3[0]++) {
-	      for (ifc3[1]=ifc3m[1]; ifc3[1]<=ifc3p[1]; ifc3[1]++) {
-		for (ifc3[2]=ifc3m[2]; ifc3[2]<=ifc3p[2]; ifc3[2]++) {
-                 SET_FACE_LEVEL(index_child,ifc3,face_level,false,adapt_refine);
-		}
-	      }
-	    }
-	  }
-	}
-      }
-    } else if (type == adapt_coarsen && level > 0) {
-      Index index_parent = index_.index_parent();
-      int ic3[3];
-      index_.child(level,ic3+0,ic3+1,ic3+2);
-      int ip3[3];
-      parent_face_(ip3,if3,ic3);
-      SET_FACE_LEVEL(index_parent,ip3,face_level,false,adapt_coarsen);
-    }
-
-  } 
 }
 
 //----------------------------------------------------------------------
@@ -854,15 +791,15 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 	
 	Index index_uncle = index_neighbor.index_parent();
 
-	SET_FACE_LEVEL(index_uncle,jf3,level,false,adapt_coarsen);
+	SET_FACE_LEVEL(index_uncle,jf3,level);
 
       } else if (face_level == level) {
 
- 	SET_FACE_LEVEL(index_neighbor,jf3,level,false,adapt_coarsen);
+ 	SET_FACE_LEVEL(index_neighbor,jf3,level);
 	
       } else if (face_level == level + 1) {
 
-	SET_FACE_LEVEL(index_child_neighbor,jf3,level,true,adapt_coarsen);
+	SET_FACE_LEVEL(index_child_neighbor,jf3,level);
 
 	int ic3[3],ic3m[3],ic3p[3];
 	loop_limits_nibling_(ic3m,ic3p, if3);
@@ -874,7 +811,7 @@ void CommBlock::coarsen_face_level_update_( Index index_child )
 	      Index index_nibling = 
 		index_child_neighbor.index_child(ic3[0],ic3[1],ic3[2]);
 
-	      SET_FACE_LEVEL(index_nibling,jf3,level+1,false,adapt_coarsen);
+	      SET_FACE_LEVEL(index_nibling,jf3,level+1);
 	    }
 	  }
 	}
