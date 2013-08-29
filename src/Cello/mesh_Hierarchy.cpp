@@ -23,15 +23,19 @@ Hierarchy::Hierarchy
   factory_((Factory *)factory),
   dimension_(dimension),
   refinement_(refinement),
+  num_blocks_(0),
+  block_array_(NULL),
+  block_exists_(false),
+  block_sync_(),
   group_process_(GroupProcess::create(process_first,process_last_plus)),
   layout_(0)
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
   for (int i=0; i<3; i++) {
+    root_size_[i] = 1;
     lower_[i] = 0.0;
     upper_[i] = 1.0;
-    root_size_[i] = 1;
     blocking_[i] = 0;
   }
 }
@@ -59,8 +63,17 @@ void Hierarchy::pup (PUP::er &p)
   p | dimension_;
   p | refinement_;
   p | num_blocks_;
-  if (up) block_array_ = new CProxy_CommBlock;
-  p | *block_array_;
+
+  // block_array_ is NULL on non-root processes
+  bool allocated=(block_array_ != NULL);
+  p|allocated;
+  if (allocated) {
+    if (up) block_array_=new CProxy_CommBlock;
+    p|*block_array_;
+  } else {
+    block_array_ = NULL;
+  }
+
   p | block_exists_;
   p | block_sync_;
   PUParray(p,root_size_,3);

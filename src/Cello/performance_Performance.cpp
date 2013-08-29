@@ -224,7 +224,6 @@ Performance::stop_region(int id_region, std::string file, int line, void * block
   TRACE1 ("Performance::stop_region (%d)",id_region);
   // NOTE: similar to start_region()
 
-  printf ("DEBUG region_name_.size() = %d\n",region_name_.size());
   TRACE1("Performance::stop_region %s",region_name_[id_region].c_str());
 
   int index_region = id_region;
