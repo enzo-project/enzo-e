@@ -5,25 +5,72 @@
 /// @date     2013-04-25
 /// @brief    Charm-related mesh adaptation control functions
 ///
+/// create_mesh()
+///
 /// 1. Apply refinement criteria
 /// 2. Notify neighbors of intent
 /// 3. Update intent based on neighbor's (goto 2)
 /// 4. After quiescence, insert() / delete() array elements
 /// 5. After contribute(), doneInserting()
 
+/// adapt_mesh()
+///
+/// 1. Apply refinement criteria
+/// 2. Notify neighbors of intent
+/// 3. Update intent based on neighbor's (goto 2)
+/// 4. After quiescence, insert() / delete() array elements
+///
+/// 1. Apply refinement criteria
+///
+///    adapt_mesh() or create_mesh()
+///
+///    Call determine_adapt() to decide whether each existing leaf
+///    block should COARSEN, REFINE or stay the SAME.  If REFINE,
+///    create new child blocks, including upsampled data if refining.
+///    If creating initial mesh, the new CommBlocks will apply initial
+///    conditions, and recursively call create_mesh.  After
+///    quiescence, proceed to next AMR step.
+///
+/// 2. Notify all neighbors of intent
+///
+///    notify_neighbors()
+///
+///    If REFINE or SAME, loop over all neighbors and call
+///    index_neighbor.p_set_face_level() to notify them of intended
+///    level.
+///
+/// 3. Update intent based on neighbor's (goto 2)
+///
+///    p_set_face_level() updates intended level based on neighbors
+///    intended level.  If intended level changes, call
+///    notify_neighbors() to notify all neighbors of updated intent
+///
+/// 4. After quiescence, insert() / delete() array elements
+///
+///    q_adapt_finalize()
+///
+///    After quiescence, all refinement decisions are known.  All
+///    REFINE elements should already be created, so only COARSEN
+///    needs to be called on elements that are to be coarsened.  Since
+///    all REFINE elements are created, a call to doneInserting() is
+///    performed on the chare array.
+///
+///----------------------------------------------------------------------
+
+#ifdef TEMP_NEW_ADAPT
 
 #ifdef DEBUG_ADAPT
 
 char buffer [80];
 
-#define SET_FACE_LEVEL(INDEX,IF3,LEVEL,RECURSE,TYPE)		\
-  sprintf (buffer,"set_face_level %d (%d %d %d  = %d) [%d]",	\
-	   __LINE__,IF3[0],IF3[1],IF3[2],LEVEL,TYPE);		\
+#define SET_FACE_LEVEL(INDEX,IF3,LEVEL)		\
+  sprintf (buffer,"p_neighbor_level %d (%d  = %d) [%d]",	\
+	   __LINE__,IF3[0],IF3[1],IF3[2]);		\
   INDEX.print(buffer,-1,2);					\
-  thisProxy[INDEX].p_set_face_level (IF3,LEVEL,RECURSE,TYPE);
+  thisProxy[INDEX].p_neighbor_level (IF3,LEVEL);
 #else /* DEBUG_ADAPT */
-#define SET_FACE_LEVEL(INDEX,IF3,LEVEL,RECURSE,TYPE)		\
-  thisProxy[INDEX].p_set_face_level (IF3,LEVEL,RECURSE,TYPE);
+#define SET_FACE_LEVEL(INDEX,IF3,LEVEL)		\
+  thisProxy[INDEX].p_neighbor_level (IF3,LEVEL);
 #endif /* DEBUG_ADAPT */
 
 #include "simulation.hpp"
@@ -38,6 +85,37 @@ const char * adapt_name[] = {
 };
 
 //======================================================================
+
+void create_mesh()
+{
+  adapt_ = determine_adapt();
+
+  notify_neighbors();
+}
+
+//----------------------------------------------------------------------
+
+void adapt_mesh()
+{
+  adapt_ = determine_adapt();
+
+  notify_neighbors();
+}
+
+//----------------------------------------------------------------------
+
+void notify_neighbors()
+{
+}
+
+//----------------------------------------------------------------------
+
+void p_neighbor_level(int level)
+{
+}
+
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 
 void CommBlock::adapt_begin()
 {
@@ -819,3 +897,6 @@ void CommBlock::x_refresh_child (int n, char * buffer, int ic3[3])
   bool lghost[3] = {true,true,true};
   store_face_(n,buffer, iface, ic3, lghost, op_array_restrict);
 }
+
+#endif /* #ifdef TEMP_NEW_ADAPT */
+

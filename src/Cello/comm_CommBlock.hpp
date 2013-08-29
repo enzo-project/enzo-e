@@ -210,12 +210,18 @@ public: // interface
   void delete_child(Index index);
   bool is_child (const Index & index) const;
 
+#ifdef TEMP_NEW_ADAPT
+
+  void neighbor_level (int if3[3], int level);
+
+#else /* TEMP_NEW_ADAPT */
+
   void p_set_face_level (int if3[3], int level, int recurse, int type)
-  {
-    set_face_level(if3,level,recurse,type); 
-  }
+  {  set_face_level(if3,level,recurse,type);  }
 
   void set_face_level (int if3[3], int level, int recurse, int type);
+
+#endif /* TEMP_NEW_ADAPT */
 
   const int & face_level (int if3[3]) const
   {  return face_level_[IF3(if3)];  }
@@ -417,6 +423,7 @@ protected: // functions
 
 protected: // attributes
 
+  /// Whether block exists
   /// Mesh Block that this CommBlock controls
   Block * block_;
 

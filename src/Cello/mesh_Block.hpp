@@ -110,11 +110,9 @@ private: // attributes
   std::vector<FieldBlock *> field_block_;
 
   /// Lower extent of the box associated with the block [computable]
-  /// B
   double lower_[3];
 
   /// Upper extent of the box associated with the block [computable]
-  /// B
   double upper_[3];
 
   // NOTE: change pup() function whenever attributes change

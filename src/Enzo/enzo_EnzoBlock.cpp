@@ -308,7 +308,6 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   DomainRightEdge[2] = enzo_config->domain_upper[2];
 
   CourantSafetyNumber = enzo_config->field_courant;
-  TRACE1("Courant = %f",EnzoBlock::CourantSafetyNumber);
 
   double time  = enzo_config->initial_time;
 
@@ -375,10 +374,91 @@ void EnzoBlock::initialize_enzo_()
     OldBaryonField[j] = 0;
   }
 }
+
 //----------------------------------------------------------------------
 
 EnzoBlock::~EnzoBlock() throw ()
 {
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::pup(PUP::er &p)
+{ 
+
+  TRACEPUP;
+  TRACE ("BEGIN EnzoBlock::pup()");
+
+  CommBlock::pup(p);
+
+
+  p | Time_;
+  p | CycleNumber;
+  p | OldTime;
+  p | dt;
+
+  WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
+  WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
+
+  PUParray(p,GridLeftEdge,MAX_DIMENSION); 
+  PUParray(p,GridDimension,MAX_DIMENSION); 
+  PUParray(p,GridStartIndex,MAX_DIMENSION); 
+  PUParray(p,GridEndIndex,MAX_DIMENSION); 
+  PUParray(p,CellWidth,MAX_DIMENSION);
+
+  if (p.isUnpacking()) {
+    for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
+      BaryonField[field] = (enzo_float *)block_->field_block(0)->field_values(field);
+    }
+  }
+
+  WARNING("EnzoBlock::pup()", "skipping OldBaryonField[] [not used]");
+
+  if (index_.is_root()) {
+    // static EnzoBlock variables
+    p | BoundaryRank;
+    PUParray(p,BoundaryDimension,MAX_DIMENSION);
+    PUParray(p,BoundaryFieldType,MAX_NUMBER_OF_BARYON_FIELDS);
+    //    bc_enum *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
+    //    enzo_float *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2]; 
+    p | ComovingCoordinates;
+    p | UseMinimumPressureSupport;
+    p | MinimumPressureSupportParameter;
+    p | ComovingBoxSize;
+    p | HubbleConstantNow;
+    p | OmegaMatterNow;
+    p | OmegaLambdaNow;
+    p | MaxExpansionRate;
+    p | MultiSpecies;
+    p | GravityOn;
+    p | PressureFree;
+    p | Gamma;
+    p | GravitationalConstant;
+    p | ProblemType;
+    p | PPMFlatteningParameter;
+    p | PPMDiffusionParameter;
+    p | PPMSteepeningParameter;
+    p | DualEnergyFormalism;
+    p | DualEnergyFormalismEta1;
+    p | DualEnergyFormalismEta2;
+    p | pressure_floor;
+    p | density_floor;
+    p | number_density_floor;
+    p | temperature_floor;
+    p | CourantSafetyNumber;
+    p | InitialRedshift;
+    p | InitialTimeInCodeUnits;
+    PUParray(p,DomainLeftEdge,MAX_DIMENSION);
+    PUParray(p,DomainRightEdge,MAX_DIMENSION);
+    PUParray(p,field_index_,NUM_FIELDS);
+    p | GridRank;
+    PUParray(p,ghost_depth,MAX_DIMENSION);
+    p | NumberOfBaryonFields;      // active baryon fields
+    PUParray(p,FieldType,MAX_NUMBER_OF_BARYON_FIELDS);
+  }
+
+  TRACE ("END EnzoBlock::pup()");
+
 }
 
 //======================================================================

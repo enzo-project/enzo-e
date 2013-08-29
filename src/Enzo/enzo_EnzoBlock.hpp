@@ -181,40 +181,7 @@ public: // interface
   };
 
   /// Pack / unpack the EnzoBlock in a CHARM++ program
-  void pup(PUP::er &p)
-  { 
-
-    TRACEPUP;
-    TRACE ("BEGIN EnzoBlock::pup()");
-
-    CommBlock::pup(p);
-
-
-    p | Time_;
-    p | CycleNumber;
-    p | OldTime;
-    p | dt;
-
-    WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
-    WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
-
-    PUParray(p,GridLeftEdge,MAX_DIMENSION); 
-    PUParray(p,GridDimension,MAX_DIMENSION); 
-    PUParray(p,GridStartIndex,MAX_DIMENSION); 
-    PUParray(p,GridEndIndex,MAX_DIMENSION); 
-    PUParray(p,CellWidth,MAX_DIMENSION);
-
-    if (p.isUnpacking()) {
-      for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-	BaryonField[field] = (enzo_float *)block_->field_block(0)->field_values(field);
-      }
-    }
-
-    WARNING("EnzoBlock::pup()", "skipping OldBaryonField[] [not used]");
-
-    TRACE ("END EnzoBlock::pup()");
-
-  };
+  void pup(PUP::er &p);
 
   /// Implementation of initialization in constructors
   void initialize_enzo_();

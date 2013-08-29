@@ -54,11 +54,12 @@ void Hierarchy::pup (PUP::er &p)
 
   bool up = p.isUnpacking();
 
+  if (up) factory_ = new Factory;
   p | *factory_;
   p | dimension_;
   p | refinement_;
   p | num_blocks_;
-  if (p.isUnpacking()) block_array_ = new CProxy_CommBlock;
+  if (up) block_array_ = new CProxy_CommBlock;
   p | *block_array_;
   p | block_exists_;
   p | block_sync_;
@@ -67,6 +68,7 @@ void Hierarchy::pup (PUP::er &p)
   PUParray(p,upper_,3);
 
   if (up) group_process_ = GroupProcess::create();
+  if (up) layout_ = new Layout;
   p | *layout_;
   PUParray(p,blocking_,3);
 

@@ -92,6 +92,7 @@ void Simulation::pup (PUP::er &p)
   if (up) problem_ = new Problem;
   p | * problem_;
 
+  if (up) performance_ = new Performance;
   p | *performance_;
 
   p | performance_name_;

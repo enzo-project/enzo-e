@@ -12,6 +12,7 @@
 ///    first called from charm_initialize.cpp by root Simulation
 ///    subsequently called from q_refresh_end() when next_phase == phase_adapt
 
+#ifndef TEMP_NEW_ADAPT
 
 #ifdef DEBUG_ADAPT
 
@@ -819,3 +820,6 @@ void CommBlock::x_refresh_child (int n, char * buffer, int ic3[3])
   bool lghost[3] = {true,true,true};
   store_face_(n,buffer, iface, ic3, lghost, op_array_restrict);
 }
+
+#endif /* ifndef TEMP_NEW_ADAPT */
+

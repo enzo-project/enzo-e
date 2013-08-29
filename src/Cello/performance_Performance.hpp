@@ -51,6 +51,8 @@ class Performance {
 
 public: // interface
 
+  Performance() {};
+
   /// Initialize a Performance object
   Performance(Config *);
 
@@ -64,7 +66,7 @@ public: // interface
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     WARNING("Performance::pup",
 	    "skipping Performance");
-    return;
+    //    return;
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     
     // NOTE: change this function whenever attributes change

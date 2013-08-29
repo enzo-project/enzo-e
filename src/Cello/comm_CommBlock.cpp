@@ -147,8 +147,21 @@ void CommBlock::pup(PUP::er &p)
 
   CBase_CommBlock::pup(p);
 
+  bool up = p.isUnpacking();
+
+  if (up) block_ = new Block;
   p | *block_;
-  p | *child_block_;
+
+  // child_block_ may be NULL
+  bool allocated=(child_block_ != NULL);
+  p|allocated;
+  if (allocated) {
+    if (up) child_block_=new Block;
+    p|*child_block_;
+  } else {
+    child_block_ = NULL;
+  }
+
   p | index_;
   p | cycle_;
   p | time_;
