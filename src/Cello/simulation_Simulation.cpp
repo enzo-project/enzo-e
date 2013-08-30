@@ -193,6 +193,7 @@ void Simulation::initialize_performance_() throw()
 
   performance_ = new Performance (config_);
 
+  performance_->new_region(perf_unknown,    "unknown");
   performance_->new_region(perf_simulation, "simulation");
   performance_->new_region(perf_cycle,      "cycle");
   performance_->new_region(perf_initial,    "initial");

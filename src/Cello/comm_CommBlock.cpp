@@ -196,7 +196,7 @@ void CommBlock::apply_initial_() throw ()
 {
 
   TRACE("CommBlock::apply_initial_()");
-  start_performance_(perf_initial);
+  switch_performance_(perf_initial,__FILE__,__LINE__);
   FieldDescr * field_descr = simulation()->field_descr();
 
   // Apply initial conditions
@@ -206,7 +206,7 @@ void CommBlock::apply_initial_() throw ()
   while (Initial * initial = problem->initial(index_initial_++)) {
     initial->enforce_block(this,field_descr, simulation()->hierarchy());
   }
-  stop_performance_(perf_initial);
+  //  stop_performance_(perf_initial);
 }
 
 //----------------------------------------------------------------------
@@ -536,20 +536,27 @@ Simulation * CommBlock::simulation() const
 
 //----------------------------------------------------------------------
 
-void CommBlock::start_performance_(int index_perf)
+void CommBlock::start_performance_(int index_region, 
+		   std::string file, int line)
 {
   Performance * performance = simulation()->performance();
-  if (! performance->is_region_active(index_perf)) {
-    performance->start_region(index_perf);
-  }
+  performance->start_region(index_region,file,line);
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::stop_performance_(int index_perf)
+void CommBlock::stop_performance_(int index_region, 
+		   std::string file, int line)
 {
   Performance * performance = simulation()->performance();
-  if (performance->is_region_active(index_perf)) {
-    performance->stop_region(index_perf);
-  }
+  performance->stop_region(index_region,file,line);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::switch_performance_(int index_region, 
+		   std::string file, int line)
+{
+  Performance * performance = simulation()->performance();
+  performance->switch_region(index_region,file,line);
 }

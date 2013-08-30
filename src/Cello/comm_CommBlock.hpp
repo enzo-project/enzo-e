@@ -116,11 +116,22 @@ public: // interface
   /// Entry function after prepare() to call Simulation::p_output()
   void p_output(CkReductionMsg * msg);
 
-  /// Begin the adapt phase of one or more adapt steps
-  void adapt_begin();
+#ifdef TEMP_NEW_ADAPT
+
+  void p_create_mesh() { create_mesh(); }
+  void create_mesh();
+
+  void adapt_mesh();
+  void notify_neighbors(int level);
+  void p_get_neighbor_level (int if3[3], int level);
+
+#else /* TEMP_NEW_ADAPT */
+
   inline void p_adapt_begin()
   { adapt_begin(); }
 
+  /// Begin the adapt phase of one or more adapt steps
+  void adapt_begin();
 
   /// End the adapt phase after coarsening
   void q_adapt_end ();
@@ -142,6 +153,11 @@ public: // interface
   /// Stop the adapt step
   void q_adapt_stop ();
 
+  void p_set_face_level (int if3[3], int level, int recurse, int type)
+  {  set_face_level(if3,level,recurse,type);  }
+
+  void set_face_level (int if3[3], int level, int recurse, int type);
+
   /// entry call to refine() for balancing
   void p_refine()
   { refine(); }
@@ -160,12 +176,18 @@ public: // interface
 			   int na, char * array,
 			   int nf, int * child_face_level);
   void p_parent_coarsened();
+
+#endif /* TEMP_NEW_ADAPT */
+
   int determine_adapt();
   /// Update the depth of the given child
   void p_print(std::string message) {  
     index().print(message.c_str());
     TRACE2("%s level %d",message.c_str(),level());
   }
+
+  const int & face_level (int if3[3]) const
+  {  return face_level_[IF3(if3)];  }
 
   //--------------------------------------------------
   // REFRESH
@@ -209,25 +231,6 @@ public: // interface
 
   void delete_child(Index index);
   bool is_child (const Index & index) const;
-
-#ifdef TEMP_NEW_ADAPT
-
-  void create_mesh();
-  void adapt_mesh();
-  void notify_neighbors();
-  void p_get_neighbor_level (int if3[3], int level);
-
-#else /* TEMP_NEW_ADAPT */
-
-  void p_set_face_level (int if3[3], int level, int recurse, int type)
-  {  set_face_level(if3,level,recurse,type);  }
-
-  void set_face_level (int if3[3], int level, int recurse, int type);
-
-#endif /* TEMP_NEW_ADAPT */
-
-  const int & face_level (int if3[3]) const
-  {  return face_level_[IF3(if3)];  }
 
   //----------------------------------------------------------------------
   // Big Three
@@ -336,12 +339,20 @@ public: // virtual functions
 
 protected: // functions
 
+#ifdef TEMP_NEW_ADAPT
+  int CommBlock::desired_level_(int level_maximum)
+#endif /* TEMP_NEW_ADAPT */
+
   /// Determine the number of adapt steps (0, 1 or initial_max_level_)
   void get_num_adapt_steps_();
 
   /// Start and stop measuring CommBlock-based performance regions
-  void start_performance_(int index_perf);
-  void stop_performance_(int index_perf);
+  void start_performance_(int index_region, 
+		   std::string file="", int line=0);
+  void stop_performance_(int index_region, 
+		   std::string file="", int line=0);
+  void switch_performance_(int index_region, 
+		   std::string file="", int line=0);
 
   /// Return the child adjacent to the given child in the direction of
   /// the given face

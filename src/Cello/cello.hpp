@@ -73,28 +73,6 @@ enum reduce_enum {
 };
 typedef int reduce_type;
 
-// /// @enum component_enum
-// /// @brief List of components
-// enum component_enum {
-//   component_undefined,
-//   component_charm,
-//   component_disk,
-//   component_first = component_disk,
-//   component_error,
-//   component_field,
-//   component_memory,
-//   component_mesh,
-//   component_method,
-//   component_monitor,
-//   component_parallel,
-//   component_parameters,
-//   component_particles,
-//   component_performance,
-//   component_portal,
-//   component_simulation,
-//   num_components = component_simulation
-// };
-
 // extern const char * component_name [];
 /// @enum precision_enum
 /// @brief list of known floating-point precision

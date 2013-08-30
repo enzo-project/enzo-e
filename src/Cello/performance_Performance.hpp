@@ -31,6 +31,7 @@ enum index_enum {
 /// @enum    perf_regions
 /// @brief   region ID's for the Simulation performance object
 enum perf_region {
+  perf_unknown,
   perf_simulation,
   perf_cycle,
   perf_initial,
@@ -84,6 +85,7 @@ public: // interface
 	    "skipping Performance:papi_counters_");
     //    p | papi_counters_
     p | warnings_;
+    p | index_region_current_;
   }
 
   /// Begin collecting performance data
@@ -139,10 +141,27 @@ public: // interface
   bool is_region_active(int index_region) throw();
 
   /// Start counters for a code region
-  void start_region(int index_region, std::string file="", int line=0,void * = 0) throw();
+  void start_region(int index_region, 
+		    std::string file="", int line=0,void * block = 0) throw();
 
   /// Stop counters for a code region
-  void stop_region(int index_region, std::string file="", int line=0, void * = 0) throw();
+  void stop_region(int index_region, 
+		   std::string file="", int line=0, void * block = 0) throw();
+
+  /// Stop current region and start new region
+  inline void switch_region(int index_region, 
+		     std::string file="", int line=0, void * block = 0) throw()
+  {
+    if (index_region == perf_simulation || index_region == perf_cycle) {
+      stop_region(index_region);
+      start_region(index_region);
+    } else if (index_region != index_region_current_) {
+      if (index_region_current_ != perf_unknown) 
+	stop_region(index_region_current_,file,line,block);
+      start_region(index_region,file,line,block);
+      index_region_current_ = index_region;
+    }
+  }
 
   /// Clear the counters for a code region
   void clear_region(int index_region) throw();
@@ -205,6 +224,8 @@ private: // attributes
   /// Whether to output warning messages
   bool warnings_;
 
+  /// Last region index started
+  int index_region_current_;
 };
 
 #endif /* PERFORMANCE_PERFORMANCE_HPP */

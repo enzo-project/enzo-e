@@ -18,7 +18,10 @@
 void SimulationCharm::c_compute()
 {
   TRACE("SimulationCharm::c_compute()");
-  if (cycle_ > 0 ) performance()->stop_region (perf_cycle);
+  if (cycle_ > 0 ) {
+    //    performance()->stop_region (perf_output,__FILE__,__LINE__);
+    performance()->stop_region (perf_cycle,__FILE__,__LINE__);
+  }
   if (stop_) {
     
     performance_write();
@@ -27,7 +30,8 @@ void SimulationCharm::c_compute()
 
   } else {
 
-    performance()->start_region (perf_cycle);
+    performance()->switch_region (perf_compute,__FILE__,__LINE__);
+    performance()->start_region (perf_cycle,__FILE__,__LINE__);
 
     if (hierarchy()->group_process()->is_root()) 
       hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
@@ -44,8 +48,6 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   // set_dt(dt);
 
   TRACE3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_compute);
 
 #ifdef CONFIG_USE_PROJECTIONS
   //  double time_start = CmiWallTimer();
@@ -79,7 +81,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   TRACE ("END   PHASE COMPUTE");
 
-  performance->stop_region(perf_compute);
+  //  performance->stop_region(perf_compute);
 
   next_phase_ = phase_adapt;
 

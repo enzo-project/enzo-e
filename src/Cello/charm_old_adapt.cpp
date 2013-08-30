@@ -46,7 +46,7 @@ void CommBlock::adapt_begin()
 
   TRACE ("BEGIN PHASE ADAPT");
 
-  start_performance_(perf_adapt);
+  switch_performance_(perf_adapt,__FILE__,__LINE__);
 
   get_num_adapt_steps_();
 
@@ -159,7 +159,7 @@ void CommBlock::q_adapt_end()
 void CommBlock::adapt_exit()
 {
 
-  stop_performance_(perf_adapt);
+  //  stop_performance_(perf_adapt);
 
   if (thisIndex.is_root()) {
 

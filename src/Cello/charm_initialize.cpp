@@ -46,9 +46,12 @@ void SimulationCharm::r_initialize_forest()
 
 void SimulationCharm::r_initialize_end() 
 {
- 
   if (group_process_->is_root()) {
+#ifdef TEMP_NEW_ADAPT
+    (*hierarchy()->block_array() ).p_create_mesh();
+#else /* TEMP_NEW_ADAPT */
     (*hierarchy()->block_array() ).p_adapt_begin();
+#endif /* TEMP_NEW_ADAPT */
   }
 }
 

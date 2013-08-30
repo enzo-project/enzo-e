@@ -11,6 +11,12 @@
 
 #include "performance.hpp"
 
+#define TRACE_PERFORMANCE
+
+#ifdef TRACE_PERFORMANCE
+static long long time_start = 0;
+#endif /* TRACE_PERFORMANCE */
+
 Performance::Performance (Config * config)
   : papi_(),
     counter_name_(),
@@ -21,7 +27,8 @@ Performance::Performance (Config * config)
     region_started_(),
     region_index_(),
     papi_counters_(0),
-    warnings_(config ? config->performance_warnings : true)
+    warnings_(config ? config->performance_warnings : true),
+    index_region_current_(perf_unknown)
 
 {
 
@@ -179,9 +186,13 @@ Performance::new_region (int         region_index,
 void
 Performance::start_region(int id_region, std::string file, int line, void * block) throw()
 {
-  if (file != "") PARALLEL_PRINTF ("%d %s:%d %p start_region(%s)\n",
-				   CkMyPe(),file.c_str(),line,block,
-				   region_name_[id_region].c_str());
+#ifdef TRACE_PERFORMANCE  
+  if (time_start == 0) time_start = time_real_();
+  PARALLEL_PRINTF ("%d %6.4f %s:%d %p start_region(%s)\n",
+		   CkMyPe(),1.0e-6*(time_real_()-time_start),file.c_str(),line,block,
+		   region_name_[id_region].c_str());
+#endif
+
   TRACE1 ("Performance::start_region (%d)",id_region);
   // NOTE: similar to stop_region()
 
@@ -194,9 +205,16 @@ Performance::start_region(int id_region, std::string file, int line, void * bloc
     region_started_[index_region] = true;
 
   } else if (warnings_) {
-    WARNING1 ("Performance::start_region",
-	     "Region %s already started",
-	     region_name_[id_region].c_str());
+    if (file == "") {
+      WARNING1 ("Performance::start_region",
+		"Region %s already started",
+		region_name_[id_region].c_str());
+    } else {
+      WARNING3 ("Performance::start_region",
+		"Region %s already started %s %d",
+		region_name_[id_region].c_str(),
+		file.c_str(),line);
+    }
     return;
   }
 
@@ -217,9 +235,12 @@ Performance::start_region(int id_region, std::string file, int line, void * bloc
 void
 Performance::stop_region(int id_region, std::string file, int line, void * block) throw()
 {
-  if (file != "") PARALLEL_PRINTF ("%d %s:%d %p stop_region(%s)\n",
-				   CkMyPe(),file.c_str(),line,block,
-				   region_name_[id_region].c_str());
+#ifdef TRACE_PERFORMANCE
+  if (time_start == 0) time_start = time_real_();
+  PARALLEL_PRINTF ("%d %6.4f %s:%d %p stop_region(%s)\n",
+		   CkMyPe(),1.0e-6*(time_real_()-time_start),file.c_str(),line,block,
+		   region_name_[id_region].c_str());
+#endif /* TRACE_PERFORMANCE */
 
   TRACE1 ("Performance::stop_region (%d)",id_region);
   // NOTE: similar to start_region()
@@ -233,9 +254,16 @@ Performance::stop_region(int id_region, std::string file, int line, void * block
     region_started_[index_region] = false;
 
   } else if (warnings_) {
-    WARNING1 ("Performance::stop_region",
-	     "Region %s already stopped",
-	     region_name_[id_region].c_str());
+    if (file == "") {
+      WARNING1 ("Performance::stop_region",
+		"Region %s already stopped",
+		region_name_[id_region].c_str());
+    } else {
+      WARNING3 ("Performance::stop_region",
+		"Region %s already stopped %s %d",
+		region_name_[id_region].c_str(),
+		file.c_str(),line);
+    }
     return;
   }
 
