@@ -57,8 +57,11 @@
 ///
 ///----------------------------------------------------------------------
 
+/* #define CELLO_TRACE */
+
 #ifdef TEMP_NEW_ADAPT
 
+//--------------------------------------------------
 #ifdef DEBUG_ADAPT
 
 char buffer [80];
@@ -71,7 +74,9 @@ char buffer [80];
 #else /* DEBUG_ADAPT */
 #define SET_FACE_LEVEL(INDEX,IF3,LEVEL)		\
   thisProxy[INDEX].p_get_neighbor_level (IF3,LEVEL);
+
 #endif /* DEBUG_ADAPT */
+//--------------------------------------------------
 
 #include "simulation.hpp"
 #include "mesh.hpp"
@@ -88,22 +93,32 @@ const char * adapt_name[] = {
 
 void CommBlock::create_mesh()
 {
-  level_maximum = simulation()->config()->initial_max_level;
+  TRACE("create_mesh()");
+  int level_maximum = simulation()->config()->initial_max_level;
 
-  int level_desired_ = desired_level_(level_maximum);
+  level_desired_ = desired_level_(level_maximum);
 
-  notify_neighbors(level_desired);
+  notify_neighbors(level_desired_);
+
+  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
+			thisProxy[thisIndex]));
+
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::adapt_mesh()
 {
+  TRACE("adapt_mesh()");
   int level_maximum = simulation()->config()->mesh_max_level;
 
-  int level_desired_ = desired_level_(level_maximum);
+  level_desired_ = desired_level_(level_maximum);
 
-  notify_neighbors(level_desired);
+  notify_neighbors(level_desired_);
+
+  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
+			thisProxy[thisIndex]));
+
 }
 
 //----------------------------------------------------------------------
@@ -117,6 +132,18 @@ int CommBlock::desired_level_(int level_maximum)
   if (adapt_ == adapt_refine  && level < level_maximum) 
       ++level;
   return level;
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::q_adapt_end()
+{
+  TRACE0;
+  next_phase_ = phase_output;
+  if (thisIndex.is_root()) {
+
+    thisProxy.p_refresh_begin();
+  }
 }
 
 //----------------------------------------------------------------------

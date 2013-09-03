@@ -125,6 +125,8 @@ public: // interface
   void notify_neighbors(int level);
   void p_get_neighbor_level (int if3[3], int level);
 
+  void q_adapt_end ();
+
 #else /* TEMP_NEW_ADAPT */
 
   inline void p_adapt_begin()
@@ -340,7 +342,7 @@ public: // virtual functions
 protected: // functions
 
 #ifdef TEMP_NEW_ADAPT
-  int CommBlock::desired_level_(int level_maximum)
+  int desired_level_(int level_maximum);
 #endif /* TEMP_NEW_ADAPT */
 
   /// Determine the number of adapt steps (0, 1 or initial_max_level_)
@@ -446,8 +448,14 @@ protected: // attributes
 
   //--------------------------------------------------
 
+  /// Index of this CommBlock in the octree forest
   Index index_;
 
+#ifdef TEMP_NEW_ADAPT  
+  /// Desired level for the next cycle
+  int level_desired_;
+#endif /* TEMP_NEW_ADAPT */
+  
   //--------------------------------------------------
 
   /// Current cycle number

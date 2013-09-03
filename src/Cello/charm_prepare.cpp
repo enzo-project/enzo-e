@@ -12,6 +12,8 @@
 ///       compute dt
 ///       compute stopping
 ///       contribute( >>>>> CommBlock::p_output() >>>>> )
+
+#define TRACE_CELLO
    
 #include "simulation.hpp"
 #include "mesh.hpp"
@@ -81,7 +83,7 @@ void CommBlock::prepare()
 
   min_reduce[0] = dt_block;
   min_reduce[1] = stop_block ? 1.0 : 0.0;
-
+  
   CkCallback callback (CkIndex_CommBlock::p_output(NULL), thisProxy);
   TRACE1("Calling contribute %d",2*sizeof(double));
   contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);

@@ -11,7 +11,7 @@
 
 #include "performance.hpp"
 
-#define TRACE_PERFORMANCE
+/* #define TRACE_PERFORMANCE */
 
 #ifdef TRACE_PERFORMANCE
 static long long time_start = 0;

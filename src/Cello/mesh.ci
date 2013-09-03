@@ -47,28 +47,29 @@ module mesh {
 
     // @@@@@@@@@@@@@@@@@@@@ NEW ADAPT @@@@@@@@@@@@@@@@@@@@
 
-/*
+
     entry void p_create_mesh();
     entry void p_get_neighbor_level(int if3[3], int level);
-*/
+
 
     // @@@@@@@@@@@@@@@@@@@@ OLD ADAPT @@@@@@@@@@@@@@@@@@@@
 
-
+/*
     entry void p_set_face_level(int if3[3], int level, int recurse, 
 				int adapt_type);
     entry void p_adapt_begin ();
     entry void p_adapt_start ();
     entry void q_adapt_next();
     entry void q_adapt_stop();
-    entry void q_adapt_end();
     entry void q_adapt_exit();
     entry void p_child_can_coarsen(int ichild[3], 
 				   int na, char arr[na],
 				   int nf, int face_level[nf]);
     entry void p_parent_coarsened();
     entry void p_refine ();
+*/
 
+    entry void q_adapt_end();
 
     //@@@@@@@@@@@@@@@@@@@				
 

@@ -89,6 +89,7 @@
 ///          output.finalize()
 ///          output_next()
 
+#define TRACE_OUTPUT
 
 #include "simulation.hpp"
 #include "mesh.hpp"

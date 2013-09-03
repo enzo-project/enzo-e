@@ -30,8 +30,8 @@ void SimulationCharm::c_compute()
 
   } else {
 
-    performance()->switch_region (perf_compute,__FILE__,__LINE__);
     performance()->start_region (perf_cycle,__FILE__,__LINE__);
+    performance()->switch_region (perf_compute,__FILE__,__LINE__);
 
     if (hierarchy()->group_process()->is_root()) 
       hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
