@@ -25,14 +25,8 @@ EnzoSimulationCharm::EnzoSimulationCharm
 {
 
   TRACE("EnzoSimulationCharm::EnzoSimulationCharm()");
-  //  monitor_->set_active(true);
+
   problem_ = new EnzoProblem;
-
-// #ifdef CONFIG_USE_PROJECTIONS
-//   traceRegisterUserEvent("Compute",10);
-// #endif
-
-//  initialize();
 
 }
 

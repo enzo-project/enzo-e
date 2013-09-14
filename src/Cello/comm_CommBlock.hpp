@@ -122,6 +122,8 @@ public: // interface
   void create_mesh();
 
   void adapt_mesh();
+  void refine();
+  void coarsen();
   void notify_neighbors(int level);
   void p_get_neighbor_level (int if3[3], int level);
 
@@ -318,6 +320,10 @@ public: // interface
 
 public: // virtual functions
 
+  /// Set state
+  inline void set_state (int cycle, double time, double dt)
+  { set_cycle(cycle); set_time(time); set_dt(dt); }
+
   /// Set CommBlock's cycle
   virtual void set_cycle (int cycle) throw()
   { cycle_ = cycle;}
@@ -384,8 +390,6 @@ protected: // functions
 	     v3[0],v3[1],v3[2]);
     return buffer;
   }
-
-  void initialize_  ( int nx, int ny, int nz,    bool testing);
 
   /// Allocate and copy in attributes from give CommBlock
   void copy_(const CommBlock & block) throw();

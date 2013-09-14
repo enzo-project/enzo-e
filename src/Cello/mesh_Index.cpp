@@ -191,6 +191,12 @@ bool Index::is_on_boundary (int axis, int face, int narray, bool periodic) const
 
 //----------------------------------------------------------------------
 
+Index Index::index_neighbor (int if3[3], int n3[3], bool periodic) const
+{
+  return index_neighbor(if3[0],if3[1],if3[2],n3,periodic);
+}
+//----------------------------------------------------------------------
+
 Index Index::index_neighbor (int ix, int iy, int iz, int n3[3], bool periodic) const
 {
   TRACE6("index_neighbor ix iy iz  %d %d %d  n3 %d %d %d",

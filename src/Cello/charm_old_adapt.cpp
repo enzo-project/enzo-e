@@ -269,8 +269,6 @@ void CommBlock::refine()
       FieldFace * field_face = 
 	load_face_ (&narray,&array, iface,ic3,lghost, op_array_prolong);
 
-      const Factory * factory = simulation()->factory();
-
       int face_level[27];
       
       int if3[3];
@@ -287,6 +285,8 @@ void CommBlock::refine()
       int num_field_blocks = 1;
       bool testing = false;
 
+      const Factory * factory = simulation()->factory();
+
       factory->create_block 
 	(&thisProxy, index_child,
 	 nx,ny,nz,
@@ -298,9 +298,9 @@ void CommBlock::refine()
 	 27,face_level,
 	 testing);
 
-      children_.push_back(index_child);
-
       delete field_face;
+
+      children_.push_back(index_child);
 
       refine_face_level_update_(index_child);
 

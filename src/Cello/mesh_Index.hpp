@@ -80,6 +80,8 @@ public:
   Index index_neighbor 
   (int ix, int iy, int iz, int n3[3], bool periodic=false) const;
 
+  Index index_neighbor (int if3[3], int n3[3], bool periodic=false) const;
+
   inline Index index_uncle 
   (int axis, int face, int narray, bool periodic=false) const
   {  return index_parent().index_neighbor(axis,face, narray, periodic); }

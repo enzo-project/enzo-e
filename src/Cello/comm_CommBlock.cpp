@@ -49,7 +49,7 @@ CommBlock::CommBlock
   double xp,yp,zp;
   upper(&xp,&yp,&zp);
 
-  FieldDescr * field_descr = this->simulation()->field_descr();
+  FieldDescr * field_descr = simulation()->field_descr();
 
   block_ = new Block  (nx, ny, nz, num_field_blocks,
 		       xm, xp, ym, yp, zm, zp);
@@ -61,9 +61,7 @@ CommBlock::CommBlock
 
   // Call virtual functions to update state
 
-  set_cycle(cycle);
-  set_time (time);
-  set_dt   (dt);
+  set_state (cycle,time,dt);
 
   // Perform any additional initialization for derived class 
 
@@ -89,14 +87,12 @@ CommBlock::CommBlock
   size_forest(&na3[0],&na3[1],&na3[2]);
 
   int icx=0,icy=0,icz=0;
-  if (level > 0) {
-    index_.child(level,&icx,&icy,&icz);
-  }
+  if (level > 0) index_.child(level,&icx,&icy,&icz);
 
   if (narray != 0) {
     
     // copy any input data
-    FieldDescr * field_descr = this->simulation()->field_descr();
+    FieldDescr * field_descr = simulation()->field_descr();
     FieldFace field_face (block()->field_block(),field_descr);
 
     //    set "face" to full FieldBlock
@@ -104,38 +100,31 @@ CommBlock::CommBlock
     field_face.set_ghost(true,true,true);
 
     //    set array operation if any
+
+    Problem * problem = simulation()->problem();
+
     switch (op_array) {
+
     case op_array_restrict:
-      {	
-	Restrict * restrict = this->simulation()->problem()->restrict();
-	field_face.set_restrict(restrict,icx,icy,icz);  
-      }
+      field_face.set_restrict(problem->restrict(),icx,icy,icz);  
       break;
+
     case op_array_prolong:
-      {
-	Prolong * prolong = this->simulation()->problem()->prolong();
-	field_face.set_prolong(prolong,icx,icy,icz);
-      }
+      field_face.set_prolong(problem->prolong(),icx,icy,icz);
       break;
+
     default:
       break;
+
     }
 
     field_face.store(narray,array);
 
   }
 
-  if (! testing) {
+  if (! testing) ((SimulationCharm *)simulation())->insert_block();
 
-    // Count CommBlocks on each processor
-    ((SimulationCharm *)simulation())->insert_block();
-
-  }
-
-  if (initial) {
-    TRACE("Calling apply_initial()");
-    apply_initial_();
-  }
+  if (initial) apply_initial_();
 
 }
 
@@ -163,6 +152,9 @@ void CommBlock::pup(PUP::er &p)
   }
 
   p | index_;
+#ifdef TEMP_NEW_REFINE
+  p | level_desired_;
+#endif
   p | cycle_;
   p | time_;
   p | dt_;
@@ -178,16 +170,6 @@ void CommBlock::pup(PUP::er &p)
   p | next_phase_;
   p | coarsened_;
 
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::initialize_
-(
- int nx, int ny, int nz,
- bool testing
- )
-{
 }
 
 //----------------------------------------------------------------------

@@ -60,7 +60,7 @@ void CommBlock::refresh_begin()
 
     Index index_neighbor = index_.index_neighbor(if3[0],if3[1],if3[2],n3);
 
-    if (face_level(if3)==level - 1) {       // COARSE
+    if (face_level(if3) == level-1) {       // COARSE
 
       int ic3[3];
       index_.child(level,ic3+0,ic3+1,ic3+2);
@@ -69,11 +69,11 @@ void CommBlock::refresh_begin()
 
       refresh_coarse(index_neighbor.index_parent(),ip3);
 
-    } else if (face_level(if3)==level) {    // SAME
+    } else if (face_level(if3) == level) {    // SAME
 
       refresh_same(index_neighbor,if3);
 
-    } else if (face_level(if3)==level+1) {  // FINE
+    } else if (face_level(if3) == level+1) {  // FINE
 	    
       int ic3m[3];
       int ic3p[3];
@@ -122,6 +122,7 @@ void CommBlock::refresh_coarse ( Index index, int iface[3] )
 
   int level = index_.level();
   int ic3[3];
+  TRACE1("REFRESH level = %d",level);
   index_.child(level,ic3,ic3+1,ic3+2);
 
    int n; 
