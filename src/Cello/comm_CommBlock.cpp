@@ -69,17 +69,35 @@ CommBlock::CommBlock
 
   // Initialize neighbor face levels
 
+  const int rank = simulation()->dimension();
   if (num_face_level == 0) {
 
     face_level_.resize(27);
-    child_face_level_.resize(27);
+    child_face_level_.resize(NC(rank)*27);
+
     for (int i=0; i<27; i++) face_level_[i] = 0;
+    for (int i=0; i<NC(rank)*27; i++) face_level_[i] = 0;
+
   } else {
+
     face_level_.resize(num_face_level);
-    child_face_level_.resize(num_face_level);
+    child_face_level_.resize(NC(rank)*num_face_level);
+
     for (int i=0; i<num_face_level; i++) face_level_[i] = face_level[i];
+    initialize_child_face_levels_();
+
   }
 
+#ifdef CELLO_TRACE
+  ItFace it_face(rank,0);
+  int if3[3];
+  std::string bits = index_.bit_string(3,2);
+  while (it_face.next(if3)) {
+    PARALLEL_PRINTF ("%s CommBlock face_level(%d %d %d) = %d\n",
+		     bits.c_str(),if3[0],if3[1],if3[2],face_level_[IF3(if3)]);
+    
+  }
+#endif  
 
   const int level = this->level();
 

@@ -68,7 +68,7 @@ char buffer [80];
 
 #define PUT_NEIGHBOR_LEVEL(INDEX,IF3,LEVEL)		\
   sprintf (buffer,"p_get_neighbor_level %d (%d  = %d) [%d]",	\
-	   __LINE__,IF3[0],IF3[1],IF3[2]);		\
+	   __LINE__,IF3[0],IF3[1],IF3[2]);			\
   INDEX.print(buffer,-1,2);					\
   thisProxy[INDEX].p_get_neighbor_level (IF3,LEVEL);
 #else /* DEBUG_ADAPT */
@@ -155,9 +155,29 @@ int CommBlock::desired_level_(int level_maximum)
 
 void CommBlock::initialize_child_face_levels_()
 {
+  const int  rank         = simulation()->dimension();
+  const int  rank_refresh = simulation()->config()->field_refresh_rank;
   int ic3[3];
   ItChild it_child(simulation()->dimension());
-
+  int na3[3];
+  size_forest (&na3[0],&na3[1],&na3[2]);
+  const bool periodic = simulation()->problem()->boundary()->is_periodic();
+  int level = this->level();
+  while (it_child.next(ic3)) {
+    Index index_child = index_.index_child(ic3);
+    int if3[3];
+    ItFace it_face(rank,0);
+    while (it_face.next(if3)) {
+      int ip3[3];
+      parent_face_(ip3,if3,ic3);
+      Index in = index_child.index_neighbor
+	(if3,na3,periodic);
+      Index inp = in.index_parent();
+      int level_child = (inp == thisIndex) ? 
+	level + 1 : face_level_[IF3(ip3)];
+      child_face_level_[ICF3(ic3,if3)] = level_child;
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -198,20 +218,16 @@ void CommBlock::refine()
   int nx,ny,nz;
   block()->field_block()->size(&nx,&ny,&nz);
 
-  int na3[3];
-  size_forest (&na3[0],&na3[1],&na3[2]);
-  const bool periodic = simulation()->problem()->boundary()->is_periodic();
-
   int initial_cycle = simulation()->config()->initial_cycle;
 
   bool initial = (initial_cycle == cycle());
 
-  for (int ic=0; ic<NC(rank); ic++) {
+  initialize_child_face_levels_();
 
-    int ic3[3];
-    ic3[0] = (ic & 1) >> 0;
-    ic3[1] = (ic & 2) >> 1;
-    ic3[2] = (ic & 4) >> 2;
+  int ic3[3];
+  ItChild it_child (rank);
+
+  while (it_child.next(ic3)) {
 
     Index index_child = index_.index_child(ic3);
 
@@ -224,29 +240,12 @@ void CommBlock::refine()
       FieldFace * field_face = 
 	load_face_ (&narray,&array, iface,ic3,lghost, op_array_prolong);
 
-      int face_level[27];
-      
-      int if3[3];
-      for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-	for (if3[1]=-1; if3[1]<=1; if3[1]++) {
-	  for (if3[2]=-1; if3[2]<=1; if3[2]++) {
-	    int ip3[3];
-	    parent_face_(ip3,if3,ic3);
-	    Index in = index_child.index_neighbor
-	      (if3,na3,periodic);
-	    Index inp = in.index_parent();
-	    int level = (inp == thisIndex) ? 
-	      this->level() + 1 : face_level_[IF3(ip3)];
- 	    face_level[IF3(if3)] = level;
-	  }
-	}
-      }
-      
       int num_field_blocks = 1;
       bool testing = false;
 
       const Factory * factory = simulation()->factory();
 
+      int if3[3] = {-1,-1,-1};
       factory->create_block 
 	(&thisProxy, index_child,
 	 nx,ny,nz,
@@ -255,7 +254,7 @@ void CommBlock::refine()
 	 initial,
 	 cycle_,time_,dt_,
 	 narray, array, op_array_prolong,
-	 27,face_level,
+	 27,&child_face_level_[27*IC3(ic3)],
 	 testing);
 
       delete field_face;

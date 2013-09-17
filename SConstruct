@@ -12,7 +12,7 @@ new_adapt = 1
 
 # Whether to print out messages with the TRACE() series of statements
 
-trace = 0
+trace = 1
 
 # Whether to print out messages with the TRACE_CHARM() series of statements
 
