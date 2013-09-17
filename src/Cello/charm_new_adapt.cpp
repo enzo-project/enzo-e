@@ -166,7 +166,7 @@ void CommBlock::initialize_child_face_levels_()
   while (it_child.next(ic3)) {
     Index index_child = index_.index_child(ic3);
     int if3[3];
-    ItFace it_face(rank,0);
+    ItFace it_face(rank,rank_refresh);
     while (it_face.next(if3)) {
       int ip3[3];
       parent_face_(ip3,if3,ic3);
@@ -177,7 +177,30 @@ void CommBlock::initialize_child_face_levels_()
 	level + 1 : face_level_[IF3(ip3)];
       child_face_level_[ICF3(ic3,if3)] = level_child;
     }
+#ifdef CELLO_TRACE
+      std::string bits = index_child.bit_string(level+1,2);
+    while (it_face.next(if3)) {
+      PARALLEL_PRINTF ("%s initialize_child_face_levels(%d %d %d) = %d\n",
+		       bits.c_str(),if3[0],if3[1],if3[2],
+		       child_face_level_[ICF3(ic3,if3)]);
+    
+    }
+#endif  
   }
+#ifdef CELLO_TRACE
+  while (it_child.next(ic3)) {
+    Index index_child = index_.index_child(ic3);
+    int if3[3];
+    ItFace it_face(rank,rank_refresh);
+    std::string bits = index_child.bit_string(level+1,2);
+    while (it_face.next(if3)) {
+      PARALLEL_PRINTF ("%s initialize_child_face_levels(%d %d %d) = %d\n",
+		       bits.c_str(),if3[0],if3[1],if3[2],
+		       child_face_level_[ICF3(ic3,if3)]);
+    
+    }
+  }
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -245,7 +268,6 @@ void CommBlock::refine()
 
       const Factory * factory = simulation()->factory();
 
-      int if3[3] = {-1,-1,-1};
       factory->create_block 
 	(&thisProxy, index_child,
 	 nx,ny,nz,

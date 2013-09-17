@@ -111,7 +111,7 @@ public:
   void array (int * ix, int *iy, int *iz) const;
 
   /// Return the level of this node
-  int level () const;
+  int level() const;
 
   /// Return the packed bit index for the given axis
   // unsigned value (int axis) const;
