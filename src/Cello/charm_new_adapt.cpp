@@ -153,6 +153,15 @@ int CommBlock::desired_level_(int level_maximum)
 
 //----------------------------------------------------------------------
 
+void CommBlock::initialize_child_face_levels_()
+{
+  int ic3[3];
+  ItChild it_child(simulation()->dimension());
+
+}
+
+//----------------------------------------------------------------------
+
 void CommBlock::q_adapt_end()
 {
 #ifdef CELLO_TRACE

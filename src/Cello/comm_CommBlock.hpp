@@ -348,7 +348,14 @@ public: // virtual functions
 protected: // functions
 
 #ifdef TEMP_NEW_ADAPT
+
+  /// Return the CommBlock's desired refinement level based on
+  /// local refinement criteria
   int desired_level_(int level_maximum);
+
+  /// Initialize child face levels given own face levels
+  void initialize_child_face_levels_();
+
 #endif /* TEMP_NEW_ADAPT */
 
   /// Determine the number of adapt steps (0, 1 or initial_max_level_)
