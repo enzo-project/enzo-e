@@ -88,17 +88,6 @@ CommBlock::CommBlock
 
   }
 
-#ifdef CELLO_TRACE
-  ItFace it_face(rank,0);
-  int if3[3];
-  std::string bits = index_.bit_string(level(),2);
-  while (it_face.next(if3)) {
-    PARALLEL_PRINTF ("%s CommBlock face_level(%d %d %d) = %d\n",
-		     bits.c_str(),if3[0],if3[1],if3[2],face_level_[IF3(if3)]);
-    
-  }
-#endif  
-
   const int level = this->level();
 
   int na3[3];

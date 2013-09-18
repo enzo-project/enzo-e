@@ -49,7 +49,7 @@ module mesh {
 
 
     entry void p_create_mesh();
-    entry void p_get_neighbor_level(int if3[3], int level);
+    entry void p_get_neighbor_level(int ic3[3], int if3[3], int level);
 
 
     // @@@@@@@@@@@@@@@@@@@@ OLD ADAPT @@@@@@@@@@@@@@@@@@@@

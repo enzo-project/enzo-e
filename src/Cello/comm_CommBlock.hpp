@@ -128,7 +128,7 @@ public: // interface
   void refine();
   void coarsen();
   void notify_neighbors(int level);
-  void p_get_neighbor_level (int if3[3], int level);
+  void p_get_neighbor_level (int ic3[3], int if3[3], int level);
 
   void q_adapt_end ();
 
