@@ -69,7 +69,6 @@ CProxy_CommBlock Factory::create_block_array
     proxy_block = CProxy_CommBlock::ckNew(opts);
 
     int count_adapt;
-    bool initial;
 
     int    cycle = 0;
     double time  = 0.0;
@@ -88,7 +87,6 @@ CProxy_CommBlock Factory::create_block_array
 	     nx,ny,nz,
 	     num_field_blocks,
 	     count_adapt = 0,
-	     initial = true,
 	     cycle,time,dt,
 	     0,NULL,op_array_copy,
 	     num_face_level, face_level,
@@ -118,7 +116,6 @@ CommBlock * Factory::create_block
  int nx, int ny, int nz,
  int num_field_blocks,
  int count_adapt,
- bool initial,
  int cycle, double time, double dt,
  int narray, char * array, int op_array,
  int num_face_level, int * face_level,
@@ -126,8 +123,9 @@ CommBlock * Factory::create_block
  ) const throw()
 {
 
-  TRACE6("Factory::create_block(n(%d %d %d)  num_field_blocks %d  count_adatp %d  initial %d)",
-	 nx,ny,nz,num_field_blocks,count_adapt,initial);
+  TRACE3("Factory::create_block(%d %d %d)",nx,ny,nz);
+  TRACE2("Factory::create_block(num_field_blocks %d  count_adapt %d)",
+	 num_field_blocks,count_adapt);
 
   (*block_array)[index].insert
     (
@@ -135,7 +133,6 @@ CommBlock * Factory::create_block
      nx,ny,nz,
      num_field_blocks,
      count_adapt,
-     initial,
      cycle, time,dt,
      narray, array,op_array,
      num_face_level, face_level,

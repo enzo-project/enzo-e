@@ -22,7 +22,6 @@ CommBlock::CommBlock
  int nx, int ny, int nz,
  int num_field_blocks,
  int num_adapt_steps,
- bool initial,
  int cycle, double time, double dt,
  int narray, char * array, int op_array,
  int num_face_level, int * face_level,
@@ -130,6 +129,9 @@ CommBlock::CommBlock
   }
 
   if (! testing) ((SimulationCharm *)simulation())->insert_block();
+
+  int initial_cycle = simulation()->config()->initial_cycle;
+  bool initial = (initial_cycle == cycle);
 
   if (initial) apply_initial_();
 

@@ -78,7 +78,6 @@ module enzo {
        int nx, int ny, int nz,	
        int num_field_blocks,
        int count_adapt,
-       bool initial,
        int cycle, double time, double dt,
        int n, char arr[n], int op_array,
        int num_face_level, int face_level[num_face_level],

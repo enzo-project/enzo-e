@@ -232,10 +232,6 @@ void CommBlock::refine()
   int nx,ny,nz;
   block()->field_block()->size(&nx,&ny,&nz);
 
-  int initial_cycle = simulation()->config()->initial_cycle;
-
-  bool initial = (initial_cycle == cycle());
-
   initialize_child_face_levels_();
 
   int ic3[3];
@@ -264,7 +260,6 @@ void CommBlock::refine()
 	 nx,ny,nz,
 	 num_field_blocks,
 	 adapt_step_,
-	 initial,
 	 cycle_,time_,dt_,
 	 narray, array, op_array_prolong,
 	 27,&child_face_level_[27*IC3(ic3)],
