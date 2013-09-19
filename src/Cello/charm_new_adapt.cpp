@@ -108,9 +108,6 @@ void CommBlock::create_mesh()
 
   level_desired_ = desired_level_(level_maximum);
 
-  char buffer[40];
-  sprintf (buffer,"ADAPT notify_neighbors(%d): create_mesh()",level_desired_);
-  index_.print(buffer,-1,2);
   notify_neighbors(level_desired_);
 
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
@@ -129,9 +126,6 @@ void CommBlock::adapt_mesh()
 
     level_desired_ = desired_level_(level_maximum);
 
-    char buffer[40];
-    sprintf (buffer,"ADAPT notify_neighbors(%d): adapt_mesh()",level_desired_);
-    index_.print(buffer,-1,2);
     notify_neighbors(level_desired_);
   }
 
@@ -146,17 +140,18 @@ int CommBlock::desired_level_(int level_maximum)
 {
   TRACE_ADAPT("ADAPT A3 desired_level_()");
   int level = this->level();
+  int level_desired = level;
+
   adapt_ = determine_adapt();
+
   if (adapt_ == adapt_coarsen && level > 0) 
-    --level;
-  if (adapt_ == adapt_refine  && level < level_maximum) 
-      ++level;
-#ifdef CELLO_TRACE
-  char buffer[40];
-  sprintf (buffer,"ADAPT desired level %d",level);
-  index_.print(buffer,-1,2);
-#endif
-  return level;
+    level_desired = level - 1;
+  else if (adapt_ == adapt_refine  && level < level_maximum) 
+    level_desired = level + 1;
+  else if (adapt_ == adapt_same)
+    level_desired = level;
+
+  return level_desired;
 }
 
 //----------------------------------------------------------------------
@@ -166,25 +161,35 @@ void CommBlock::initialize_child_face_levels_()
   TRACE_ADAPT("ADAPT A4 initialize_child_face_levels_()");
   const int  rank         = simulation()->dimension();
   const int  rank_refresh = simulation()->config()->field_refresh_rank;
-  int ic3[3];
-  ItChild it_child(simulation()->dimension());
   int na3[3];
   size_forest (&na3[0],&na3[1],&na3[2]);
   const bool periodic = simulation()->problem()->boundary()->is_periodic();
-  int level = this->level();
+  const int level = this->level();
+
+  // For each child
+
+  int ic3[3];
+  ItChild it_child(simulation()->dimension());
+
   while (it_child.next(ic3)) {
     Index index_child = index_.index_child(ic3);
+
+    // For each child face
+
     int if3[3];
     ItFace it_face(rank,rank_refresh);
+
     while (it_face.next(if3)) {
+
       int ip3[3];
       parent_face_(ip3,if3,ic3);
-      Index in = index_child.index_neighbor
-	(if3,na3,periodic);
+      Index in = index_child.index_neighbor (if3,na3,periodic);
       Index inp = in.index_parent();
-      int level_child = (inp == thisIndex) ? 
+
+      int child_face_level = (inp == thisIndex) ? 
 	level + 1 : face_level_[IF3(ip3)];
-      child_face_level_[ICF3(ic3,if3)] = level_child;
+
+      child_face_level_[ICF3(ic3,if3)] = child_face_level;
     }
   }
 #ifdef CELLO_TRACE
@@ -315,11 +320,17 @@ void CommBlock::refine()
   int ic3[3];
   ItChild it_child (rank);
 
+  // For each new child
+
   while (it_child.next(ic3)) {
 
     Index index_child = index_.index_child(ic3);
 
+    // If child doesn't exist yet
+
     if ( ! is_child(index_child) ) {
+
+      // Prolong data
 
       int narray = 0;  
       char * array = 0;
@@ -332,6 +343,8 @@ void CommBlock::refine()
       bool testing = false;
 
       const Factory * factory = simulation()->factory();
+
+      // Create child block
 
       factory->create_block 
 	(&thisProxy, index_child,
@@ -367,11 +380,8 @@ void CommBlock::notify_neighbors(int level)
   // refinement level
   if (adapt_ != adapt_coarsen) {
 
-    char buffer[80];
-    sprintf (buffer,"ADAPT notify_neighbors %d",level);
-    index_.print(buffer,-1,2);
-    Simulation * simulation = this->simulation();
-    Problem * problem       = simulation->problem();
+    const Simulation * simulation = this->simulation();
+    const Problem * problem       = simulation->problem();
     const Config *  config  = simulation->config();
     const int  rank         = simulation->dimension();
     const int  rank_refresh = config->field_refresh_rank;
@@ -392,18 +402,24 @@ void CommBlock::notify_neighbors(int level)
 	(if3[0],if3[1],if3[2],na3,periodic);
 
       const int face_level = face_level_[IF3(if3)];
+
       if (face_level == this_level - 1) {
+
 	// neighbor is in coarser level: triggers refine
-	sprintf(buffer,	"ADAPT notify_neighbors coarse level %d  %d %d",
-		level,if3[0],if3[1]);
-	index_.print(buffer,-1,2);
+
 	in = in.index_parent();
 	PUT_NEIGHBOR_LEVEL(in,ic3,if3,level);
+
       } else if (face_level == this_level) {
+
 	// neighbor is in same level
+
 	PUT_NEIGHBOR_LEVEL(in,ic3,if3,level);
+
       } else if (face_level == this_level + 1) {
+
 	// neighbor is in finer level
+
 	int ic3m[3],ic3p[3];
 	loop_limits_nibling_(ic3m,ic3p, if3);
 	for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
