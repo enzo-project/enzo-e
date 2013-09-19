@@ -343,9 +343,10 @@ void Index::print (const char * msg,
 		   int max_level,
 		   int rank) const
 {
-  if (max_level == -1) max_level = this->level();
-    
-  PARALLEL_PRINTF ("INDEX %p %s: ", this,msg);
+  const int level = this->level();
+  if (max_level == -1) max_level = level;
+
+  PARALLEL_PRINTF ("INDEX %d %d: ",level,max_level);
 
   int nb = 0;
 
@@ -359,17 +360,20 @@ void Index::print (const char * msg,
 
     PARALLEL_PRINTF (":");
 
-    for (int level=0; level<max_level; level++) {
-
+    for (int i=0; i<max_level; i++) {
+      if (i < level) {
       int ic3[3];
-      child (level+1, &ic3[0], &ic3[1], &ic3[2]);
+      child (i+1, &ic3[0], &ic3[1], &ic3[2]);
       PARALLEL_PRINTF ("%d",ic3[axis]);
+      } else PARALLEL_PRINTF (" ");
 	
     }
     PARALLEL_PRINTF (" ");
       
   }
-  PARALLEL_PRINTF ("\n");
+
+
+  PARALLEL_PRINTF ("%s\n",msg);
 
   fflush(stdout);
 }
