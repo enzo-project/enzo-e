@@ -75,7 +75,7 @@ CommBlock::CommBlock
     child_face_level_.resize(NC(rank)*27);
 
     for (int i=0; i<27; i++) face_level_[i] = 0;
-    for (int i=0; i<NC(rank)*27; i++) face_level_[i] = 0;
+    for (int i=0; i<NC(rank)*27; i++) child_face_level_[i] = 0;
 
   } else {
 
