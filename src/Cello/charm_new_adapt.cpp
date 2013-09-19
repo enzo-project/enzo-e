@@ -57,7 +57,16 @@
 ///
 ///----------------------------------------------------------------------
 
-/* #define CELLO_TRACE */
+
+#define CELLO_TRACE
+
+#ifdef CELLO_TRACE
+#define TRACE_ADAPT(MSG)			\
+  index_.print(MSG,(simulation()->config()->mesh_max_level+1),2);
+#else
+#define TRACE_ADAPT(MSG)			\
+  ; 
+#endif
 
 #ifdef TEMP_NEW_ADAPT
 
@@ -93,9 +102,8 @@ const char * adapt_name[] = {
 
 void CommBlock::create_mesh()
 {
-#ifdef CELLO_TRACE
-  index_.print("ADAPT create_mesh()",-1,2);
-#endif
+  TRACE_ADAPT("A1 create_mesh()");
+
   int level_maximum = simulation()->config()->initial_max_level;
 
   level_desired_ = desired_level_(level_maximum);
@@ -114,9 +122,8 @@ void CommBlock::create_mesh()
 
 void CommBlock::adapt_mesh()
 {
-#ifdef CELLO_TRACE
-  index_.print("ADAPT adapt_mesh()",-1,2);
-#endif
+  TRACE_ADAPT("ADAPT A2 adapt_mesh()");
+
   if (is_leaf()) {
     int level_maximum = simulation()->config()->mesh_max_level;
 
@@ -137,6 +144,7 @@ void CommBlock::adapt_mesh()
 
 int CommBlock::desired_level_(int level_maximum)
 {
+  TRACE_ADAPT("ADAPT A3 desired_level_()");
   int level = this->level();
   adapt_ = determine_adapt();
   if (adapt_ == adapt_coarsen && level > 0) 
@@ -155,6 +163,7 @@ int CommBlock::desired_level_(int level_maximum)
 
 void CommBlock::initialize_child_face_levels_()
 {
+  TRACE_ADAPT("ADAPT A4 initialize_child_face_levels_()");
   const int  rank         = simulation()->dimension();
   const int  rank_refresh = simulation()->config()->field_refresh_rank;
   int ic3[3];
@@ -198,12 +207,7 @@ void CommBlock::initialize_child_face_levels_()
 
 void CommBlock::q_adapt_end()
 {
-#ifdef CELLO_TRACE
-  char buffer[80];
-  sprintf (buffer,"ADAPT q_adapt_end() level %d desired %d",
-	   level(),level_desired_);
-  index_.print(buffer,-1,2);
-#endif
+  TRACE_ADAPT("ADAPT B1 q_adapt_end()");
 
   int level = this->level();
 
@@ -221,10 +225,7 @@ void CommBlock::q_adapt_end()
 void CommBlock::refine()
 {
 
-#ifdef CELLO_TRACE
-  index_.print("ADAPT refine()",-1,2);
-#endif
-
+  TRACE_ADAPT("ADAPT B2 refine()");
   adapt_ = adapt_unknown;
 
   const int rank = simulation()->dimension();
@@ -277,15 +278,14 @@ void CommBlock::refine()
 
 void CommBlock::coarsen()
 {
-#ifdef CELLO_TRACE
-  TRACE("ADAPT coarsen()");
-#endif
+  TRACE_ADAPT("ADAPT B3 coarsen()");
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::notify_neighbors(int level)
 {
+  TRACE_ADAPT("ADAPT A4 notify_neighbors()");
   // Loop over all neighobrs and (if not coarsening) tell them desired
   // refinement level
   if (adapt_ != adapt_coarsen) {
@@ -350,6 +350,7 @@ void CommBlock::p_get_neighbor_level(int ic3[3],  int if3[3],
 				     int level_neighbor_new)
 {
   
+  TRACE_ADAPT("ADAPT A5 get_neighbor_level_()");
   int jf3[3] = {-if3[0], -if3[1], -if3[2]};
 
   int level_neighbor_current = face_level_[IF3(jf3)];
@@ -397,6 +398,8 @@ void CommBlock::p_get_neighbor_level(int ic3[3],  int if3[3],
 
 int CommBlock::determine_adapt()
 {
+  TRACE_ADAPT("ADAPT A6 determine_adapt()");
+
   if (! is_leaf()) return adapt_same;
 
   FieldDescr * field_descr = simulation()->field_descr();
@@ -422,7 +425,8 @@ int CommBlock::determine_adapt()
 
 void CommBlock::x_refresh_child (int n, char * buffer, int ic3[3])
 {
-  TRACE("ADAPT x_refresh_child");
+  TRACE_ADAPT("ADAPT B4 x_refresh_child()");
+
   int  iface[3]  = {0,0,0};
   bool lghost[3] = {true,true,true};
   store_face_(n,buffer, iface, ic3, lghost, op_array_restrict);
@@ -432,6 +436,7 @@ void CommBlock::x_refresh_child (int n, char * buffer, int ic3[3])
 
 void CommBlock::parent_face_(int ip3[3],int if3[3], int ic3[3]) const
 {
+  TRACE_ADAPT("ADAPT c1 parent_face_()");
   ip3[0] = if3[0];
   ip3[1] = if3[1];
   ip3[2] = if3[2];
@@ -452,6 +457,7 @@ FieldFace * CommBlock::load_face_
  int op_array_type
  )
 {
+  TRACE_ADAPT("ADAPT c2 load_face_()");
   FieldFace * field_face = create_face_ (iface,ichild,lghost, op_array_type);
 
   field_face->load(narray, array);
@@ -467,6 +473,7 @@ FieldFace * CommBlock::store_face_
  int op_array_type
  )
 {
+  TRACE_ADAPT("ADAPT c3 store_face_()");
   FieldFace * field_face = create_face_ (iface,ichild,lghost, op_array_type);
 
   field_face->store(narray, array);
@@ -481,6 +488,7 @@ FieldFace * CommBlock::create_face_
  int op_array_type
  )
 {
+  TRACE_ADAPT("ADAPT c4 create_face_()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
   FieldBlock * field_block = block_->field_block();
@@ -504,6 +512,7 @@ FieldFace * CommBlock::create_face_
 
 int CommBlock::reduce_adapt_(int a1, int a2) const throw()
 {
+  TRACE_ADAPT("ADAPT c5 reduce_adapt_()");
   if (a1 == adapt_unknown) return a2;
   if (a2 == adapt_unknown) return a1;
 
@@ -529,6 +538,7 @@ int CommBlock::reduce_adapt_(int a1, int a2) const throw()
 void CommBlock::loop_limits_faces_ 
 (int ic3m[3], int ic3p[3], int if3[3], int ic3[3]) const
 {
+  TRACE_ADAPT("ADAPT c6 loop_limits_faces_()");
   ic3m[0] = (if3[0] != 0) ? if3[0] :  -ic3[0];
   ic3p[0] = (if3[0] != 0) ? if3[0] : 1-ic3[0];
   ic3m[1] = (if3[1] != 0) ? if3[1] :  -ic3[1];
