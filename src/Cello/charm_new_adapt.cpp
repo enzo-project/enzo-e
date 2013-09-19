@@ -205,6 +205,83 @@ void CommBlock::initialize_child_face_levels_()
 
 //----------------------------------------------------------------------
 
+void CommBlock::p_get_neighbor_level(int ic3[3],  int if3[3], 
+				     int level_neighbor_new)
+{
+  
+  TRACE_ADAPT("ADAPT A5 get_neighbor_level_()");
+  int jf3[3] = {-if3[0], -if3[1], -if3[2]};
+
+  int level_neighbor_current = face_level_[IF3(jf3)];
+
+  // Update face_level_
+
+  face_level_[IF3(jf3)] = level_neighbor_new;
+
+  // update face_level on all faces 
+  //--------------------------------------------------
+
+  // update child_face_level_
+  //--------------------------------------------------
+
+  // int icm3[3],icp3[3],jc3[3];
+  // loop_limits_faces_ (icm3,icp3,jf3,ic3);
+  // for (jc3[0]=icm3[0]; jc3[0]<=icp3[0]; jc3[0]++) {
+  // for (jc3[1]=icm3[1]; jc3[1]<=icp3[1]; jc3[1]++) {
+  // for (jc3[2]=icm3[2]; jc3[2]<=icp3[2]; jc3[2]++) {
+  //   child_face_level_[ICF3(jc3,jf3)] = level_neighbor_new;
+  // }
+  // }
+  // }
+
+  if (level_neighbor_new  > level_desired_ + 1) {
+
+    // update child_face_level
+
+    child_face_level_[ICF3(ic3,jf3)] = level_neighbor_new;
+  }
+
+  // Adjust level_desired_ if necessary, and notify neighbors
+
+  TRACE0;
+  if (level_neighbor_new  > level_desired_ + 1) {
+
+    level_desired_ = level_neighbor_new - 1;
+
+    notify_neighbors(level_desired_);
+
+  }
+}
+
+//----------------------------------------------------------------------
+
+int CommBlock::determine_adapt()
+{
+  TRACE_ADAPT("ADAPT A6 determine_adapt()");
+
+  if (! is_leaf()) return adapt_same;
+
+  FieldDescr * field_descr = simulation()->field_descr();
+
+  int index_refine = 0;
+  int adapt = adapt_unknown;
+
+  Problem * problem = simulation()->problem();
+  Refine * refine;
+
+  while ((refine = problem->refine(index_refine++))) {
+
+    int adapt_step_ = refine->apply(this, field_descr);
+
+    adapt = reduce_adapt_(adapt,adapt_step_);
+
+  }
+
+  return adapt;
+}
+
+//----------------------------------------------------------------------
+
 void CommBlock::q_adapt_end()
 {
   TRACE_ADAPT("ADAPT B1 q_adapt_end()");
@@ -342,83 +419,6 @@ void CommBlock::notify_neighbors(int level)
       }
     }
   }
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::p_get_neighbor_level(int ic3[3],  int if3[3], 
-				     int level_neighbor_new)
-{
-  
-  TRACE_ADAPT("ADAPT A5 get_neighbor_level_()");
-  int jf3[3] = {-if3[0], -if3[1], -if3[2]};
-
-  int level_neighbor_current = face_level_[IF3(jf3)];
-
-  // Update face_level_
-
-  face_level_[IF3(jf3)] = level_neighbor_new;
-
-  // update face_level on all faces 
-  //--------------------------------------------------
-
-  // update child_face_level_
-  //--------------------------------------------------
-
-  // int icm3[3],icp3[3],jc3[3];
-  // loop_limits_faces_ (icm3,icp3,jf3,ic3);
-  // for (jc3[0]=icm3[0]; jc3[0]<=icp3[0]; jc3[0]++) {
-  // for (jc3[1]=icm3[1]; jc3[1]<=icp3[1]; jc3[1]++) {
-  // for (jc3[2]=icm3[2]; jc3[2]<=icp3[2]; jc3[2]++) {
-  //   child_face_level_[ICF3(jc3,jf3)] = level_neighbor_new;
-  // }
-  // }
-  // }
-
-  if (level_neighbor_new  > level_desired_ + 1) {
-
-    // update child_face_level
-
-    child_face_level_[ICF3(ic3,jf3)] = level_neighbor_new;
-  }
-
-  // Adjust level_desired_ if necessary, and notify neighbors
-
-  TRACE0;
-  if (level_neighbor_new  > level_desired_ + 1) {
-
-    level_desired_ = level_neighbor_new - 1;
-
-    notify_neighbors(level_desired_);
-
-  }
-}
-
-//----------------------------------------------------------------------
-
-int CommBlock::determine_adapt()
-{
-  TRACE_ADAPT("ADAPT A6 determine_adapt()");
-
-  if (! is_leaf()) return adapt_same;
-
-  FieldDescr * field_descr = simulation()->field_descr();
-
-  int index_refine = 0;
-  int adapt = adapt_unknown;
-
-  Problem * problem = simulation()->problem();
-  Refine * refine;
-
-  while ((refine = problem->refine(index_refine++))) {
-
-    int adapt_step_ = refine->apply(this, field_descr);
-
-    adapt = reduce_adapt_(adapt,adapt_step_);
-
-  }
-
-  return adapt;
 }
 
 //----------------------------------------------------------------------
