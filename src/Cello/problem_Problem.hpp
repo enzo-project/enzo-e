@@ -73,8 +73,6 @@ public: // interface
   Refine *  refine(int i = -1) const throw()
   {
     if (i == -1) i = index_refine_;
-    TRACE2("refine(%d) = %p",i,
-	  (0 <= i && i < (int)refine_list_.size()) ? refine_list_[i] : NULL);
     return (0 <= i && i < (int)refine_list_.size()) ? refine_list_[i] : NULL; 
   }
 

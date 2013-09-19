@@ -496,7 +496,7 @@ protected: // attributes
   /// Synchronization counter for ghost refresh
   Sync loop_refresh_;
 
-  /// level of neighbors (and self) along each face
+  /// current level of neighbors along each face
   std::vector<int> face_level_;
 
   /// level of neighbors accumulated from children that can coarsen
