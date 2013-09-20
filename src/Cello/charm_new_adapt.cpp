@@ -57,7 +57,6 @@
 ///
 ///----------------------------------------------------------------------
 
-
 #define CELLO_TRACE
 
 #ifdef CELLO_TRACE
@@ -112,7 +111,6 @@ void CommBlock::create_mesh()
 
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
 			thisProxy[thisIndex]));
-
 }
 
 //----------------------------------------------------------------------
@@ -131,7 +129,6 @@ void CommBlock::adapt_mesh()
 
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
 			thisProxy[thisIndex]));
-
 }
 
 //----------------------------------------------------------------------
@@ -166,46 +163,25 @@ void CommBlock::initialize_child_face_levels_()
   const bool periodic = simulation()->problem()->boundary()->is_periodic();
   const int level = this->level();
 
-  // For each child
-
   int ic3[3];
   ItChild it_child(simulation()->dimension());
 
+  // For each child
   while (it_child.next(ic3)) {
     Index index_child = index_.index_child(ic3);
-
-    // For each child face
-
     int if3[3];
     ItFace it_face(rank,rank_refresh);
-
+    // For each child face
     while (it_face.next(if3)) {
-
       int ip3[3];
       parent_face_(ip3,if3,ic3);
       Index in = index_child.index_neighbor (if3,na3,periodic);
       Index inp = in.index_parent();
-
       int child_face_level = (inp == thisIndex) ? 
 	level + 1 : face_level_[IF3(ip3)];
-
       child_face_level_[ICF3(ic3,if3)] = child_face_level;
     }
   }
-#ifdef CELLO_TRACE
-  while (it_child.next(ic3)) {
-    Index index_child = index_.index_child(ic3);
-    int if3[3];
-    ItFace it_face(rank,rank_refresh);
-    std::string bits = index_child.bit_string(level+1,2);
-    while (it_face.next(if3)) {
-      PARALLEL_PRINTF ("%s initialize_child_face_levels(%d %d %d) = %d\n",
-		       bits.c_str(),if3[0],if3[1],if3[2],
-		       child_face_level_[ICF3(ic3,if3)]);
-    
-    }
-  }
-#endif  
 }
 
 //----------------------------------------------------------------------
