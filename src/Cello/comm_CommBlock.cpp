@@ -40,6 +40,8 @@ CommBlock::CommBlock
   next_phase_(phase_output),
   coarsened_(false)
 {
+  TRACE_ADAPT("ADAPT A0 CommBlock()");
+
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
 
@@ -86,6 +88,8 @@ CommBlock::CommBlock
     initialize_child_face_levels_();
 
   }
+
+  debug_faces_("CommBlock");
 
   const int level = this->level();
 
@@ -135,6 +139,7 @@ CommBlock::CommBlock
 
   if (initial) apply_initial_();
 
+  if (initial && level>0) create_mesh();
 }
 
 //----------------------------------------------------------------------
@@ -453,18 +458,18 @@ void CommBlock::loop_limits_refresh_(int ifacemin[3], int ifacemax[3])
 //----------------------------------------------------------------------
 
 void CommBlock::loop_limits_nibling_ 
-( int ichildmin[3],int ichildmax[3],int iface[3]) const throw()
+( int ic3m[3],int ic3p[3],int if3[3]) const throw()
 {
   int rank = simulation()->dimension();
 
-  ichildmin[0] = (iface[0] == 0) ? 0 : (iface[0]+1)/2;
-  ichildmax[0] = (iface[0] == 0) ? 1 : (iface[0]+1)/2;
-  ichildmin[1] = (iface[1] == 0) ? 0 : (iface[1]+1)/2;
-  ichildmax[1] = (iface[1] == 0) ? 1 : (iface[1]+1)/2;
-  ichildmin[2] = (iface[2] == 0) ? 0 : (iface[2]+1)/2;
-  ichildmax[2] = (iface[2] == 0) ? 1 : (iface[2]+1)/2;
-  if (rank < 2) ichildmin[1] = ichildmax[1] = 0;
-  if (rank < 3) ichildmin[2] = ichildmax[2] = 0;
+  ic3m[0] = (if3[0] == 0) ? 0 : (if3[0]+1)/2;
+  ic3p[0] = (if3[0] == 0) ? 1 : (if3[0]+1)/2;
+  ic3m[1] = (if3[1] == 0) ? 0 : (if3[1]+1)/2;
+  ic3p[1] = (if3[1] == 0) ? 1 : (if3[1]+1)/2;
+  ic3m[2] = (if3[2] == 0) ? 0 : (if3[2]+1)/2;
+  ic3p[2] = (if3[2] == 0) ? 1 : (if3[2]+1)/2;
+  if (rank < 2) ic3m[1] = ic3p[1] = 0;
+  if (rank < 3) ic3m[2] = ic3p[2] = 0;
 }
 
 //----------------------------------------------------------------------

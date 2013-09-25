@@ -8,6 +8,16 @@
 #ifndef COMM_COMMBLOCK_HPP
 #define COMM_COMMBLOCK_HPP
 
+#define CELLO_TRACE
+
+#ifdef CELLO_TRACE
+#define TRACE_ADAPT(MSG)			\
+  index_.print(MSG,(simulation()->config()->mesh_max_level+1),2);
+#else
+#define TRACE_ADAPT(MSG)			\
+  ; 
+#endif
+
 class Block;
 class FieldFace;
 class Factory;
@@ -19,7 +29,7 @@ class Simulation;
 #include "parallel.def"
 
 // index for child blocks
-#define IC3(ic3)  (ic3[0] + 2*( ic3[1] + 2*( ic3[2])))
+#define IC3(ic3)  ( ((ic3[0]+2)%2) + 2*( ((ic3[1]+2)%2) + 2*( ((ic3[2]+2)%2) )))
 
 // number of children
 #define NC(rank) (1<<(rank))
@@ -127,7 +137,8 @@ public: // interface
   void refine();
   void coarsen();
   void notify_neighbors(int level);
-  void p_get_neighbor_level (int ic3[3], int if3[3], int level);
+  void p_get_neighbor_level (int ic3[3], int if3[3],
+			     int level_now, int level_new);
 
   void q_adapt_end ();
 
@@ -378,7 +389,7 @@ protected: // functions
   /// Return limits of faces of the given child corresponding to the
   /// given face of the parent
   void loop_limits_faces_ 
-  (int icm3[3], int icp3[3], int if3[3], int ic3[3]) const;
+  (int ifm3[3], int ifp3[3], int if3[3], int ic3[3]) const;
 
   /// Return whether the given face of the given child and its parent
   /// intersect
@@ -388,7 +399,7 @@ protected: // functions
   /// of the given child.  Inverse of loop_limits_faces_
   void parent_face_(int ipf3[3],int if3[3], int ic3[3]) const;
 
-  void debug_faces_(const char *, int *);
+  void debug_faces_(const char *);
 
   std::string id_ () const throw ()
   {
@@ -436,10 +447,7 @@ protected: // functions
   void loop_limits_refresh_ 
   (int ifacemin[3], int ifacemax[3]) const throw();
 
-  void loop_limits_nibling_ 
-  (int ichildmin[3],
-   int ichildmax[3],
-   int iface[3]) const throw();
+  void loop_limits_nibling_ (int ic3m[3], int ic3p[3], int if3[3]) const throw();
 
   FieldFace * load_face_(int * narray, char ** array,
 			 int iface[3], int ichild[3], bool lghost[3],

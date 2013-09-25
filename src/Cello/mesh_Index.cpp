@@ -100,8 +100,6 @@ Index Index::index_child (int icx, int icy, int icz) const
 
 Index Index::index_neighbor (int axis, int face, int narray, bool periodic) const
 {
-  TRACE3("index_neighbor axis %d  face %d  narray %d",
-	 axis,face,narray);
   if (face == 0) face = -1;
 
   Index index = *this;
@@ -137,13 +135,6 @@ Index Index::index_neighbor (int axis, int face, int narray, bool periodic) cons
 
   index.a_[axis].array = array;
   index.a_[axis].tree = tree;
-
-#ifdef CELLO_TRACE
-  char buffer[40];
-  sprintf (buffer,"index_neighbor(axis %d face %d)",axis,face);
-  this->print(buffer);
-  index.print(buffer);
-#endif
 
   return index;
 }
@@ -199,9 +190,6 @@ Index Index::index_neighbor (int if3[3], int n3[3], bool periodic) const
 
 Index Index::index_neighbor (int ix, int iy, int iz, int n3[3], bool periodic) const
 {
-  TRACE6("index_neighbor ix iy iz  %d %d %d  n3 %d %d %d",
-	 ix,iy,iz,n3[0],n3[1],n3[2]);
-
   Index index = *this;
 
   int i3[3] = {ix,iy,iz};
@@ -235,13 +223,6 @@ Index Index::index_neighbor (int ix, int iy, int iz, int n3[3], bool periodic) c
     index.a_[axis].array = array;
     index.a_[axis].tree  = tree;
   }
-
-#ifdef CELLO_TRACE
-  char buffer[40];
-  sprintf (buffer,"index_neighbor(ix iy iz %d %d %d)",ix,iy,iz);
-  this->print(buffer);
-  index.print(buffer);
-#endif
 
   return index;
 }
@@ -341,12 +322,13 @@ void Index::set_child(int level, int ix, int iy, int iz)
 
 void Index::print (const char * msg,
 		   int max_level,
-		   int rank) const
+		   int rank,
+		   bool no_nl) const
 {
   const int level = this->level();
   if (max_level == -1) max_level = level;
 
-  PARALLEL_PRINTF ("INDEX %d %d: ",level,max_level);
+  //  PARALLEL_PRINTF ("INDEX %d %d: ",level,max_level);
 
   int nb = 0;
 
@@ -354,6 +336,7 @@ void Index::print (const char * msg,
     nb = std::max(nb,num_bits_(a_[axis].array));
   }
 
+  PARALLEL_PRINTF ("[ ");
   for (int axis=0; axis<rank; axis++) {
 
     print_bits_(a_[axis].array,nb);
@@ -371,9 +354,10 @@ void Index::print (const char * msg,
     PARALLEL_PRINTF (" ");
       
   }
+  PARALLEL_PRINTF ("] ");
 
 
-  PARALLEL_PRINTF ("%s\n",msg);
+  PARALLEL_PRINTF ( (no_nl ? "%s " : "%s\n"),msg);
 
   fflush(stdout);
 }
@@ -455,6 +439,8 @@ void Index::write_bits_(FILE * fp,int value, int nb) const
 
 std::string Index::bit_string(int max_level,int rank) const
 {
+  if (max_level == -1) max_level = this->level();
+
   std::string bits = "";
 
   int nba = 0;

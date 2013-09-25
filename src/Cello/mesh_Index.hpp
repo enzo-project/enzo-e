@@ -150,7 +150,8 @@ public:
 
   void print (const char * msg = "\0",
 	      int max_level = -1,
-	      int rank = 3) const;
+	      int rank = 3,
+	      bool no_nl = false) const;
 
   void write (int ip,
 	      const char * msg = "\0",

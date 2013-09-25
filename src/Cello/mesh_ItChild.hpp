@@ -39,9 +39,9 @@ public: // interface
   /// Go to next child, returning false when done
   bool next (int ic3[3]) throw()
   {
-    do {
-      increment_() ;
-    } while (!valid_());
+
+    increment_() ;
+
     ic3[0] = rank_simulation_ >= 1 ? ic3_[0] : 0;
     ic3[1] = rank_simulation_ >= 2 ? ic3_[1] : 0;
     ic3[2] = rank_simulation_ >= 3 ? ic3_[2] : 0;
@@ -101,10 +101,6 @@ private: // functions
     ic3_[1] = 0;
     ic3_[2] = 0;
   }
-
-  /// Whether the current child rank is valid
-  bool valid_() const
-  { return true; }
 
 private: // attributes
 
