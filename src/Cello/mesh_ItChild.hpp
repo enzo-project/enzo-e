@@ -18,14 +18,19 @@ class ItChild {
 public: // interface
 
   /// Constructor
-  ItChild(int rank_simulation) throw()
+  ItChild(int rank, int * if3=0) throw()
     : ic3_(),
-      rank_simulation_(rank_simulation)
-  { reset(); }
+      rank_(rank)
+  { reset();
+    for (int i=0; i<rank_; i++) {
+      if3_[i] = if3 ? if3[i] : 0;
+    }
+  }
 
   /// Destructor
   ~ItChild() throw()
-  {}
+  {
+  }
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
@@ -33,18 +38,21 @@ public: // interface
     // NOTE: change this function whenever attributes change
     TRACEPUP;
     PUParray(p,ic3_,3);
-    p | rank_simulation_;
+    PUParray(p,if3_,3);
+    p | rank_;
   }
 
   /// Go to next child, returning false when done
   bool next (int ic3[3]) throw()
   {
 
-    increment_() ;
+    do {
+      increment_() ;
+    } while (!valid_());
 
-    ic3[0] = rank_simulation_ >= 1 ? ic3_[0] : 0;
-    ic3[1] = rank_simulation_ >= 2 ? ic3_[1] : 0;
-    ic3[2] = rank_simulation_ >= 3 ? ic3_[2] : 0;
+    ic3[0] = rank_ >= 1 ? ic3_[0] : 0;
+    ic3[1] = rank_ >= 2 ? ic3_[1] : 0;
+    ic3[2] = rank_ >= 3 ? ic3_[2] : 0;
     return (!is_reset());
   }
 
@@ -64,28 +72,29 @@ public: // interface
   /// Return the current value of the reduction operator
   void value(int ic3[3]) const throw()
   {
-  ic3[0] = ic3_[0];
-  ic3[0] = ic3_[0];
-  ic3[0] = ic3_[0];
+    ic3[0] = ic3_[0];
+    ic3[0] = ic3_[0];
+    ic3[0] = ic3_[0];
   };
 
 private: // functions
 
   /// go to the next 
+
   void increment_()
   {
     if (is_reset()) {
       set_first_();
     } else {
-      if (rank_simulation_ >= 1 && ic3_[0] < 1) {
+      if (rank_ >= 1 && ic3_[0] < 1) {
 	++ic3_[0];
       }	else {
 	ic3_[0] = 0;
-	if (rank_simulation_ >= 2 && ic3_[1] < 1) {
+	if (rank_ >= 2 && ic3_[1] < 1) {
 	  ++ic3_[1];
 	} else {
 	  ic3_[1] = 0;
-	  if (rank_simulation_ >= 3 && ic3_[2] < 1) {
+	  if (rank_ >= 3 && ic3_[2] < 1) {
 	    ++ic3_[2];
 	  } else {
 	    reset();
@@ -95,11 +104,28 @@ private: // functions
     }
   }
 
+  /// Go to the first child
   void set_first_()
   {
     ic3_[0] = 0;
     ic3_[1] = 0;
     ic3_[2] = 0;
+  }
+
+  /// Whether the current face rank is valid
+  bool valid_() const
+  {
+    if (is_reset()) return true;
+
+    bool valid = true;
+    if (rank_ >= 0 && if3_[0] == -1 && ic3_[0] != 0) valid = false;
+    if (rank_ >= 0 && if3_[0] ==  1 && ic3_[0] != 1) valid = false;
+    if (rank_ >= 1 && if3_[1] == -1 && ic3_[1] != 0) valid = false;
+    if (rank_ >= 1 && if3_[1] ==  1 && ic3_[1] != 1) valid = false;
+    if (rank_ >= 2 && if3_[2] == -1 && ic3_[2] != 0) valid = false;
+    if (rank_ >= 2 && if3_[2] ==  1 && ic3_[2] != 1) valid = false;
+
+    return valid;
   }
 
 private: // attributes
@@ -110,7 +136,10 @@ private: // attributes
   int ic3_[3];
 
   /// simulation rank
-  int rank_simulation_;
+  int rank_;
+
+  /// Adjacency face
+  int if3_[3];
 
 };
 
