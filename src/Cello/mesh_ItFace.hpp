@@ -18,7 +18,7 @@ class ItFace {
 public: // interface
 
   /// Constructor
-  ItFace(int rank_simulation, int rank_limit) throw();
+  ItFace(int rank, int rank_limit, const int * ic3=0) throw();
 
   /// Destructor
   ~ItFace() throw();
@@ -29,8 +29,9 @@ public: // interface
     // NOTE: change this function whenever attributes change
     TRACEPUP;
     PUParray(p,if3_,3);
-    p | rank_simulation_;
+    p | rank_;
     p | rank_limit_;
+    p | ic3_;
   }
 
   /// Reduce another value
@@ -46,9 +47,11 @@ public: // interface
 
 private: // functions
 
-  /// go to the next 
+  /// go to the next face
   void increment_();
 
+
+  /// go to the first face
   void set_first_();
 
   /// Whether the current face rank is valid
@@ -61,8 +64,11 @@ private: // attributes
   /// Current face
   int if3_[3];
 
+  /// Adjacency child
+  std::vector<int> ic3_;
+
   /// simulation rank
-  int rank_simulation_;
+  int rank_;
 
   /// face rank limit
   int rank_limit_;

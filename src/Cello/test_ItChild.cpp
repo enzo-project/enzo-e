@@ -12,6 +12,8 @@
 
 void clear (bool * c, int n) {for (int i=0; i<n; i++) c[i]=0; }
 
+#define IC(ix,iy,iz) ( ((ix+2)%2) + 2*( ((iy+2)%2) + 2*( ((iz+2)%2) )))
+
 PARALLEL_MAIN_BEGIN
 {
 
@@ -38,7 +40,7 @@ PARALLEL_MAIN_BEGIN
     ++count;
   }
   unit_assert(count == 2);
-  unit_assert(ic[0] && ic[1]);
+  unit_assert(ic[IC(0,0,0)] && ic[IC(1,0,0)]);
 
   // 1D -1
   count = 0;
@@ -51,7 +53,7 @@ PARALLEL_MAIN_BEGIN
     ++count;
   }
   unit_assert(count == 1);
-  unit_assert(ic[0] && ! ic[1]);
+  unit_assert(ic[IC(0,0,0)] && ! ic[IC(1,0,0)]);
 
   // 1D +1
   count = 0;
@@ -63,7 +65,7 @@ PARALLEL_MAIN_BEGIN
     ++count;
   }
   unit_assert(count == 1);
-  unit_assert(! ic[0] && ic[1]);
+  unit_assert(! ic[IC(0,0,0)] && ic[IC(1,0,0)]);
 
   //--------------------------------------------------
 
@@ -80,7 +82,7 @@ PARALLEL_MAIN_BEGIN
     ++count;
   }
   unit_assert(count == 4);
-  unit_assert(ic[0] && ic[1] && ic[2] && ic[3]);
+  unit_assert(ic[IC(0,0,0)] && ic[IC(1,0,0)] && ic[IC(0,1,0)] && ic[IC(1,1,0)]);
 
   // 2D 0 1
 
@@ -95,7 +97,7 @@ PARALLEL_MAIN_BEGIN
     ++count;
   }
   unit_assert(count == 2);
-  unit_assert(ic[2] && ic[3]);
+  unit_assert(ic[IC(0,1,0)] && ic[IC(1,1,0)]);
 
 
   // 2D 1 -1
@@ -111,7 +113,7 @@ PARALLEL_MAIN_BEGIN
     ++count;
   }
   unit_assert(count == 1);
-  unit_assert(ic[1]);
+  unit_assert(ic[IC(1,0,0)]);
 
 
   //--------------------------------------------------
@@ -125,8 +127,8 @@ PARALLEL_MAIN_BEGIN
     ++count;
   }
   unit_assert(count == 8);
-  unit_assert(ic[0] && ic[1] && ic[2] && ic[3] &&
-	      ic[4] && ic[5] && ic[6] && ic[7]);
+  unit_assert(ic[IC(0,0,0)] && ic[IC(1,0,0)] && ic[IC(0,1,0)] && ic[IC(1,1,0)]
+           && ic[IC(0,0,1)] && ic[IC(1,0,1)] && ic[IC(1,1,0)] && ic[IC(1,1,1)]);
 
   // 2D 0 0 -1
 
@@ -142,7 +144,7 @@ PARALLEL_MAIN_BEGIN
     ++count;
   }
   unit_assert(count == 4);
-  unit_assert(ic[0] && ic[1] && ic[2] && ic[3]);
+  unit_assert(ic[IC(0,0,0)] && ic[IC(1,0,0)] && ic[IC(0,1,0)] && ic[IC(1,1,0)]);
 
 
   // 2D 1 0 1
@@ -176,7 +178,7 @@ PARALLEL_MAIN_BEGIN
     ++count;
   }
   unit_assert(count == 1);
-  unit_assert(ic[0]);
+  unit_assert(ic[IC(0,0,0)]);
 
 
   //--------------------------------------------------

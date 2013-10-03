@@ -18,13 +18,12 @@ class ItChild {
 public: // interface
 
   /// Constructor
-  ItChild(int rank, int * if3=0) throw()
+  ItChild(int rank, const int * if3=0) throw()
     : ic3_(),
       rank_(rank)
   { reset();
-    for (int i=0; i<rank_; i++) {
-      if3_[i] = if3 ? if3[i] : 0;
-    }
+    for (int i=0;     i<3; i++) 
+      if3_[i] = (if3 && i<rank_) ? if3[i] : 0;
   }
 
   /// Destructor
@@ -135,11 +134,11 @@ private: // attributes
   /// Current child
   int ic3_[3];
 
-  /// simulation rank
-  int rank_;
-
   /// Adjacency face
   int if3_[3];
+
+  /// simulation rank
+  int rank_;
 
 };
 
