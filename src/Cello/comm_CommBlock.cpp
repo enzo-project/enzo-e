@@ -33,7 +33,9 @@ CommBlock::CommBlock
   children_(),
   loop_refresh_(),
   face_level_(),
+  face_level_new_(),
   child_face_level_(),
+  child_face_level_new_(),
   count_coarsen_(0),
   adapt_step_(num_adapt_steps),
   adapt_(adapt_unknown),
@@ -85,9 +87,15 @@ CommBlock::CommBlock
     child_face_level_.resize(NC(rank)*num_face_level);
 
     for (int i=0; i<num_face_level; i++) face_level_[i] = face_level[i];
-    initialize_child_face_levels_();
 
   }
+
+  //  face_level_new_.resize(face_level_.size());
+  face_level_new_ = face_level_;
+  //  child_face_level_new_.resize(child_face_level_.size());
+  child_face_level_new_ = child_face_level_;
+
+  initialize_child_face_levels_();
 
   debug_faces_("CommBlock");
 
@@ -135,11 +143,11 @@ CommBlock::CommBlock
   if (! testing) ((SimulationCharm *)simulation())->insert_block();
 
   int initial_cycle = simulation()->config()->initial_cycle;
-  bool initial = (initial_cycle == cycle);
+  bool is_first_cycle = (initial_cycle == cycle);
 
-  if (initial) apply_initial_();
+  if (is_first_cycle) apply_initial_();
 
-  if (initial && level>0) create_mesh();
+  //  if (initial && level>0) create_mesh();
 }
 
 //----------------------------------------------------------------------
@@ -177,7 +185,9 @@ void CommBlock::pup(PUP::er &p)
   p | children_;
   p | loop_refresh_;
   p | face_level_;
+  p | face_level_new_;
   p | child_face_level_;
+  p | child_face_level_new_;
   p | count_coarsen_;
   p | adapt_step_;
   p | adapt_;
@@ -458,7 +468,7 @@ void CommBlock::loop_limits_refresh_(int ifacemin[3], int ifacemax[3])
 //----------------------------------------------------------------------
 
 void CommBlock::loop_limits_nibling_ 
-( int ic3m[3],int ic3p[3],int if3[3]) const throw()
+( int ic3m[3],int ic3p[3], const int if3[3]) const throw()
 {
   int rank = simulation()->dimension();
 
@@ -474,17 +484,21 @@ void CommBlock::loop_limits_nibling_
 
 //----------------------------------------------------------------------
 
-void CommBlock::facing_child_(int jc3[3], int ic3[3], int if3[3]) const
+void CommBlock::facing_child_(int jc3[3], const int ic3[3], const int if3[3]) const
 {
-  jc3[0] = ic3[0];
-  jc3[1] = ic3[1];
-  jc3[2] = ic3[2];
-  if (if3[0]==-1) jc3[0] = 1;
-  if (if3[1]==-1) jc3[1] = 1;
-  if (if3[2]==-1) jc3[2] = 1;
-  if (if3[0]==+1) jc3[0] = 0;
-  if (if3[1]==+1) jc3[1] = 0;
-  if (if3[2]==+1) jc3[2] = 0;
+  jc3[0] = if3[0] ? 1 - ic3[0] : ic3[0];
+  jc3[1] = if3[1] ? 1 - ic3[1] : ic3[1];
+  jc3[2] = if3[2] ? 1 - ic3[2] : ic3[2];
+  // if (if3[0]) jc3[0] = 1 - jc3[0];
+  // if (if3[0]) jc3[0] = 1 - jc3[0];
+  // if (if3[0]) jc3[0] = 1 - jc3[0];
+  // if (if3[1]==-1) jc3[1] = 1;
+  // if (if3[2]==-1) jc3[2] = 1;
+  // if (if3[0]==+1) jc3[0] = 0;
+  // if (if3[1]==+1) jc3[1] = 0;
+  // if (if3[2]==+1) jc3[2] = 0;
+  TRACE9("facing_child %d %d %d  child %d %d %d  face %d %d %d",
+	 jc3[0],jc3[1],jc3[2],ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2]);
 }
 
 //----------------------------------------------------------------------

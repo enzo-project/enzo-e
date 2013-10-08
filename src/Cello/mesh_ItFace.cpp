@@ -9,7 +9,9 @@
 
 //----------------------------------------------------------------------
 
-ItFace::ItFace(int rank, int rank_limit, const int * ic3) throw()
+ItFace::ItFace(int rank, int rank_limit, 
+	       const int * ic3,
+	       const int * ipf3) throw()
   : rank_(rank),
     rank_limit_(rank_limit),
     ic3_()
@@ -17,9 +19,13 @@ ItFace::ItFace(int rank, int rank_limit, const int * ic3) throw()
   reset();
   if (ic3) {
     ic3_.resize(3);
-    for (int i=0; i<3; i++) {
-      ic3_[i] = i < rank ? ic3[i] : 0;
-    }
+    for (int i=0; i<rank; i++) ic3_[i] = ic3[i];
+    for (int i=rank; i<3; i++) ic3_[i] = 0;
+  }
+  if (ipf3) {
+    ipf3_.resize(3);
+    for (int i=0; i<rank; i++)  ipf3_[i] = ipf3[i];
+    for (int i=rank; i<3; i++)  ipf3_[i] = ipf3[i];
   }
 }
 
@@ -40,7 +46,7 @@ bool ItFace::next (int if3[3]) throw()
   if3[0] = rank_ >= 1 ? if3_[0] : 0;
   if3[1] = rank_ >= 2 ? if3_[1] : 0;
   if3[2] = rank_ >= 3 ? if3_[2] : 0;
-
+  
   return (!is_reset());
 }
 
@@ -110,22 +116,50 @@ bool ItFace::valid_() const
   if (is_reset()) return true;
   int rank_face = rank_ - 
     (abs(if3_[0]) + abs(if3_[1]) + abs(if3_[2]));
-  bool in_range = (rank_limit_ <= rank_face && rank_face < rank_);
-  bool on_face = true;
-  if (ic3_.size() >= 1 && rank_ >= 1) {
-    if  (if3_[0] == -1 && ic3_[0] != 0) on_face = false;
-    if  (if3_[0] ==  1 && ic3_[0] != 1) on_face = false;
+  bool l_range = (rank_limit_ <= rank_face && rank_face < rank_);
+  bool l_face = true;
+  bool l_parent = true;
+  if (ic3_.size() > 0) {
+    if (ipf3_.size() == 0) {
+      // Face must be adjacent to child
+      if (ic3_.size() >= 1 && rank_ >= 1) {
+	if  (if3_[0] == -1 && ic3_[0] != 0) l_face = false;
+	if  (if3_[0] ==  1 && ic3_[0] != 1) l_face = false;
+      }
+      if (ic3_.size() >= 2 && rank_ >= 2) {
+	if  (if3_[1] == -1 && ic3_[1] != 0) l_face = false;
+	if  (if3_[1] ==  1 && ic3_[1] != 1) l_face = false;
+      }
+      if (ic3_.size() >= 3 && rank_ >= 3) {
+	if  (if3_[2] == -1 && ic3_[2] != 0) l_face = false;
+	if  (if3_[2] ==  1 && ic3_[2] != 1) l_face = false;
+      }
+    } else {
+
+      // Face must be adjacent to same parent's face
+      if (ipf3_.size() >= 1) {
+	if (ipf3_[0] != 0 && (if3_[0] != ipf3_[0])) l_parent = false; 
+	if (ipf3_[0] == 0 && 
+	    ((ic3_[0] == 0 && if3_[0] == -1) ||
+	     (ic3_[0] == 1 && if3_[0] ==  1))) l_parent = false;
+      }
+      if (ipf3_.size() >= 2) {
+
+	if (ipf3_[1] != 0 && (if3_[1] != ipf3_[1])) l_parent = false; 
+	if (ipf3_[1] == 0 && 
+	    ((ic3_[1] == 0 && if3_[1] == -1) ||
+	     (ic3_[1] == 1 && if3_[1] ==  1))) l_parent = false;
+      }
+      if (ipf3_.size() >= 3) {
+	if (ipf3_[2] != 0 && (if3_[2] != ipf3_[2]))  l_parent = false; 
+	if (ipf3_[2] == 0 && 
+	    ((ic3_[2] == 0 && if3_[2] == -1) ||
+	     (ic3_[2] == 1 && if3_[2] ==  1))) l_parent = false;
+      }
+    }
   }
-  if (ic3_.size() >= 2 && rank_ >= 2) {
-    if  (if3_[1] == -1 && ic3_[1] != 0) on_face = false;
-    if  (if3_[1] ==  1 && ic3_[1] != 1) on_face = false;
-  }
-  if (ic3_.size() >= 3 && rank_ >= 3) {
-    if  (if3_[2] == -1 && ic3_[2] != 0) on_face = false;
-    if  (if3_[2] ==  1 && ic3_[2] != 1) on_face = false;
-  }
-  
-  return (on_face && in_range);
+
+  return (l_face && l_range && l_parent);
 }
 //======================================================================
 

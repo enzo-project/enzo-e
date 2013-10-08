@@ -13,9 +13,9 @@
 
 enum adapt_type {
   adapt_unknown,
+  adapt_coarsen,
   adapt_same,
-  adapt_refine,
-  adapt_coarsen
+  adapt_refine
 };
 
 //----------------------------------------------------------------------

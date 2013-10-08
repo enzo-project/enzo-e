@@ -76,11 +76,9 @@ int EnzoProlongMC1::apply_
 {
   const int dx_c = 1;
   const int dy_c = nd3_c[0];
-  const int dz_c = nd3_c[1];
 
   const int dx_f = 1;
   const int dy_f = nd3_f[0];
-  const int dz_f = nd3_f[1];
 
   const int rank = (nd3_f[2] > 1) ? 3 : ( (nd3_f[1] > 1) ? 2 : 1 );
 

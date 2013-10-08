@@ -18,7 +18,8 @@ class ItFace {
 public: // interface
 
   /// Constructor
-  ItFace(int rank, int rank_limit, const int * ic3=0) throw();
+  ItFace(int rank, int rank_limit, 
+	 const int * ic3=0, const int * if3=0) throw();
 
   /// Destructor
   ~ItFace() throw();
@@ -32,6 +33,7 @@ public: // interface
     p | rank_;
     p | rank_limit_;
     p | ic3_;
+    p | ipf3_;
   }
 
   /// Reduce another value
@@ -66,6 +68,9 @@ private: // attributes
 
   /// Adjacency child
   std::vector<int> ic3_;
+
+  /// Parent face
+  std::vector<int> ipf3_;
 
   /// simulation rank
   int rank_;

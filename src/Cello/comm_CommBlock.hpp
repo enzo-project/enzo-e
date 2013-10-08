@@ -8,8 +8,6 @@
 #ifndef COMM_COMMBLOCK_HPP
 #define COMM_COMMBLOCK_HPP
 
-#define CELLO_TRACE
-
 #ifdef CELLO_TRACE
 #define TRACE_ADAPT(MSG)			\
   index_.print(MSG,(simulation()->config()->mesh_max_level+1),2);
@@ -47,7 +45,7 @@ class Simulation;
 #define NN(rank) (2*(rank))
 
 #include <limits>
- const int face_level_unknown = std::numeric_limits<int>::max();
+// const int face_level_unknown = std::numeric_limits<int>::max();
 //const int face_level_unknown = -1;
 
 enum phase_type {
@@ -137,9 +135,11 @@ public: // interface
   void refine();
   void coarsen();
   void notify_neighbors(int level);
-  void p_get_neighbor_level (int ic3[3], int if3[3],
+  void p_get_neighbor_level (Index index_debug,
+			     int ic3[3], int if3[3],
 			     int level_now, int level_new);
 
+  void q_adapt_next ();
   void q_adapt_end ();
 
 #else /* TEMP_NEW_ADAPT */
@@ -203,8 +203,47 @@ public: // interface
     TRACE2("%s level %d",message.c_str(),level());
   }
 
-  const int & face_level (int if3[3]) const
+  const int & face_level (const int if3[3]) const
   {  return face_level_[IF3(if3)];  }
+  const int & face_level_new (const int if3[3]) const
+  {  return face_level_new_[IF3(if3)];  }
+
+  const int & child_face_level (const int ic3[3], const int if3[3]) const
+  {
+    check_child_(ic3,"CommBlock::child_face_level()",__FILE__,__LINE__);
+    check_face_ (if3,"CommBlock::child_face_level()",__FILE__,__LINE__);
+    return child_face_level_[ICF3(ic3,if3)];  }
+  const int & child_face_level_new (const int ic3[3], const int if3[3]) const
+  {
+    check_child_(ic3,"CommBlock::child_face_level()",__FILE__,__LINE__);
+    check_face_ (if3,"CommBlock::child_face_level()",__FILE__,__LINE__);
+    return child_face_level_new_[ICF3(ic3,if3)];  }
+
+  void set_face_level (const int if3[3], int level)
+  {  face_level_[IF3(if3)] = level;  }
+  void set_face_level_new (const int if3[3], int level)
+  {  face_level_new_[IF3(if3)] = 
+      std::max(face_level_new_[IF3(if3)],level);  }
+
+  void set_child_face_level (const int ic3[3], const int if3[3], int level)
+  {
+    check_child_(ic3,"CommBlock::set_child_face_level()",__FILE__,__LINE__);
+    check_face_ (if3,"CommBlock::set_child_face_level()",__FILE__,__LINE__);
+    child_face_level_[ICF3(ic3,if3)] = level;  
+  }
+  void set_child_face_level_new (const int ic3[3], const int if3[3], int level)
+  {
+    check_child_(ic3,"CommBlock::set_child_face_level()",__FILE__,__LINE__);
+    check_face_ (if3,"CommBlock::set_child_face_level()",__FILE__,__LINE__);
+    child_face_level_new_[ICF3(ic3,if3)] = 
+      std::max(child_face_level_new_[ICF3(ic3,if3)],level);  
+  }
+
+  void update_levels_ ()
+  {
+    face_level_ =       face_level_new_;
+    child_face_level_ = child_face_level_new_;
+  }
 
   //--------------------------------------------------
   // REFRESH
@@ -360,6 +399,8 @@ public: // virtual functions
 
 protected: // functions
 
+  Index neighbor_ (const int if3[3], Index * ind = 0) const;
+
 #ifdef TEMP_NEW_ADAPT
 
   /// Return the CommBlock's desired refinement level based on
@@ -384,20 +425,38 @@ protected: // functions
 
   /// Return the child adjacent to the given child in the direction of
   /// the given face
-  void facing_child_(int jc3[3], int ic3[3], int if3[3]) const;
+  void facing_child_(int jc3[3], const int ic3[3], const int if3[3]) const;
 
   /// Return limits of faces of the given child corresponding to the
   /// given face of the parent
-  void loop_limits_faces_ 
-  (int ifm3[3], int ifp3[3], int if3[3], int ic3[3]) const;
+  // void loop_limits_faces_ 
+  // (int ifm3[3], int ifp3[3], const int if3[3], const int ic3[3]) const;
 
   /// Return whether the given face of the given child and its parent
   /// intersect
-  bool child_is_on_face_(int ic3[3],int if3[3]) const;
+  bool child_is_on_face_(const int ic3[3],const int if3[3]) const;
 
   /// Return the face of the parent corresponding to the given face
   /// of the given child.  Inverse of loop_limits_faces_
-  void parent_face_(int ipf3[3],int if3[3], int ic3[3]) const;
+  void parent_face_(int ipf3[3],const int if3[3], const int ic3[3]) const;
+
+  void check_child_(const int ic3[3], const char * msg, const char * file, int line) const 
+  {
+    ASSERT5 (msg, "child %d %d %d out of range in file %s line %d",
+	     ic3[0],ic3[1],ic3[2],file,line,
+	     0 <= ic3[0] && ic3[0] <= 1 &&
+	     0 <= ic3[1] && ic3[1] <= 1 &&
+	     0 <= ic3[2] && ic3[2] <= 1);
+  }
+
+  void check_face_(const int if3[3], const char * msg, const char * file, int line) const 
+  {
+    ASSERT5 (msg, "face %d %d %d out of range in file %s line %d",
+	     if3[0],if3[1],if3[2],file,line,
+	     -1 <= if3[0] && if3[0] <= 1 &&
+	     -1 <= if3[1] && if3[1] <= 1 &&
+	     -1 <= if3[2] && if3[2] <= 1);
+  }
 
   void debug_faces_(const char *);
 
@@ -447,7 +506,7 @@ protected: // functions
   void loop_limits_refresh_ 
   (int ifacemin[3], int ifacemax[3]) const throw();
 
-  void loop_limits_nibling_ (int ic3m[3], int ic3p[3], int if3[3]) const throw();
+  void loop_limits_nibling_ (int ic3m[3], int ic3p[3], const int if3[3]) const throw();
 
   FieldFace * load_face_(int * narray, char ** array,
 			 int iface[3], int ichild[3], bool lghost[3],
@@ -474,7 +533,7 @@ protected: // attributes
 
 #ifdef TEMP_NEW_ADAPT  
   /// Desired level for the next cycle
-  int level_desired_;
+  int level_new_;
 #endif /* TEMP_NEW_ADAPT */
   
   //--------------------------------------------------
@@ -507,8 +566,14 @@ protected: // attributes
   /// current level of neighbors along each face
   std::vector<int> face_level_;
 
-  /// level of neighbors accumulated from children that can coarsen
+  /// new level of neighbors along each face
+  std::vector<int> face_level_new_;
+
+  /// current level of neighbors accumulated from children that can coarsen
   std::vector<int> child_face_level_;
+
+  /// new level of neighbors accumulated from children that can coarsen
+  std::vector<int> child_face_level_new_;
 
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;

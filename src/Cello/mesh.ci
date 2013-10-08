@@ -48,7 +48,7 @@ module mesh {
 
 
     entry void p_create_mesh();
-    entry void p_get_neighbor_level(int ic3[3], int if3[3],
+    entry void p_get_neighbor_level(Index index,int ic3[3], int if3[3],
 				    int level_now, int level_new);
 
 
@@ -59,7 +59,6 @@ module mesh {
 				int adapt_type);
     entry void p_adapt_begin ();
     entry void p_adapt_start ();
-    entry void q_adapt_next();
     entry void q_adapt_stop();
     entry void q_adapt_exit();
     entry void p_child_can_coarsen(int ichild[3], 
@@ -69,6 +68,7 @@ module mesh {
     entry void p_refine ();
 */
 
+    entry void q_adapt_next();
     entry void q_adapt_end();
 
     //@@@@@@@@@@@@@@@@@@@				

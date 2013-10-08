@@ -26,6 +26,7 @@ PARALLEL_MAIN_BEGIN
   int count;
   int if3[3];
   int ic3[3];
+  int ipf3[3];
   bool iface[27];
   
   // -------- 1D --------
@@ -129,14 +130,52 @@ PARALLEL_MAIN_BEGIN
   ic3[0] = 1;
   ic3[1] = 1;
   ic3[2] = 0;
-  ItFace it_face21_110 (2,1,ic3); 
-  while (it_face21_110.next(if3)) {
+  ItFace it_face21_11 (2,1,ic3); 
+  while (it_face21_11.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
   }
   unit_assert(count == 2);
   unit_assert(iface[IF(0, 1, 0)] && 
 	      iface[IF(1, 0, 0)]);
+
+
+  count = 0;
+  clear(iface,27);
+  unit_func("ItFace(2,1,child(1,1),face(1,0))");
+  ic3[0] = 1;
+  ic3[1] = 1;
+  ic3[2] = 0;
+  ipf3[0] = 1;
+  ipf3[1] = 0;
+  ipf3[2] = 0;
+  ItFace it_face21_11_10 (2,1,ic3,ipf3); 
+  while (it_face21_11_10.next(if3)) {
+    iface[IF3(if3)] = true;
+    printf ("set %d %d %d\n",if3[0],if3[1],if3[2]); 
+    ++count;
+  }
+  unit_assert(count == 1);
+  unit_assert(iface[IF(1, 0, 0)]);
+
+
+  count = 0;
+  clear(iface,27);
+  unit_func("ItFace(2,0,child(1,1),face(1,0))");
+  ic3[0] = 1;
+  ic3[1] = 1;
+  ic3[2] = 0;
+  ipf3[0] = 1;
+  ipf3[1] = 0;
+  ipf3[2] = 0;
+  ItFace it_face20_11_10 (2,0,ic3,ipf3); 
+  while (it_face20_11_10.next(if3)) {
+    iface[IF3(if3)] = true;
+    printf ("set %d %d %d\n",if3[0],if3[1],if3[2]); 
+    ++count;
+  }
+  unit_assert(count == 2);
+  unit_assert(iface[IF(1, 0, 0)] && iface[IF(1,-1,0)]);
 
   // -------- 3D --------
 
@@ -224,6 +263,41 @@ PARALLEL_MAIN_BEGIN
   unit_assert(iface[IF( 0, 0,-1)] && 
 	      iface[IF( 0, 1, 0)] &&
 	      iface[IF( 1, 0, 0)]);
+
+  count = 0;
+  clear(iface,27);
+  unit_func("ItFace(3,1,child(0,1,1),face(0,0,1))");
+  ic3[0] = 0;
+  ic3[1] = 1;
+  ic3[2] = 1;
+  ipf3[0] = 0;
+  ipf3[1] = 0;
+  ipf3[2] = 1;
+  ItFace it_face31_011_001 (3,1,ic3,ipf3); 
+  while (it_face31_011_001.next(if3)) {
+    iface[IF3(if3)] = true;
+    ++count;
+  }
+  unit_assert(count == 3);
+  unit_assert(iface[IF(0,0,1)] && iface[IF(0,-1,1)] &&
+	      iface[IF(1,0,1)]);
+
+  count = 0;
+  clear(iface,27);
+  unit_func("ItFace(3,0,child(1,0,0),face(1,1,0))");
+  ic3[0] = 1;
+  ic3[1] = 1;
+  ic3[2] = 0;
+  ipf3[0] = 1;
+  ipf3[1] = -1;
+  ipf3[2] = 0;
+  ItFace it_face30_100_110 (3,0,ic3,ipf3); 
+  while (it_face30_100_110.next(if3)) {
+    iface[IF3(if3)] = true;
+    ++count;
+  }
+  unit_assert(count == 2);
+  unit_assert(iface[IF(1,-1,0)] && iface[IF(1,-1,1)]);
 
   //--------------------------------------------------
 

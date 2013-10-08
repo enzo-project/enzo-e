@@ -17,7 +17,7 @@
 
 void SimulationCharm::c_compute()
 {
-  TRACE("SimulationCharm::c_compute()");
+
   if (cycle_ > 0 ) {
     //    performance()->stop_region (perf_output,__FILE__,__LINE__);
     performance()->stop_region (perf_cycle,__FILE__,__LINE__);
@@ -42,7 +42,10 @@ void SimulationCharm::c_compute()
 
 void CommBlock::p_compute (int cycle, double time, double dt)
 {
-  TRACE ("BEGIN PHASE COMPUTE");
+#ifdef CELLO_TRACE
+  index_.print("BEGIN PHASE COMPUTE p_compute()",-1,2);
+#endif
+
   // set_cycle(cycle);
   // set_time(time);
   // set_dt(dt);

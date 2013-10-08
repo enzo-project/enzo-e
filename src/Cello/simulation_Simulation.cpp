@@ -437,8 +437,6 @@ void Simulation::performance_output()
     for (int ir = 0; ir < num_regions; ir++) {
 
       performance_->region_counters(ir,counters);
-      int index_counter = ir+num_regions*ic;
-
       monitor_->print("Performance","%s %s %lld",
 		      performance_->region_name(ir).c_str(),
 		      performance_->counter_name(ic).c_str(),

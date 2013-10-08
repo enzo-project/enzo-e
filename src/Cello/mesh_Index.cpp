@@ -65,7 +65,6 @@ void Index::clear ()
 
 Index Index::index_parent () const
 {
-  TRACE1("index_parent level %d",level());
   Index index = *this;
   int level = index.level();
   if (level > 0) {
@@ -82,17 +81,10 @@ Index Index::index_parent () const
 
 Index Index::index_child (int icx, int icy, int icz) const
 {
-  TRACE4("index_child level %d  %d %d %d",level(),icx,icy,icz);
   Index index = *this;
   int level = index.level();
   index.set_level(level+1);
   index.set_child (level+1,icx,icy,icz);
-#ifdef CELLO_TRACE
-  char buffer[40];
-  sprintf (buffer,"index_child(ix iy iz %d %d %d)",icx,icy,icz);
-  this->print(buffer);
-  index.print(buffer);
-#endif
   return index;
 }
 
@@ -111,7 +103,6 @@ Index Index::index_neighbor (int axis, int face, int narray, bool periodic) cons
 
   int level = index.level();
   int shift_level = (1 << (INDEX_MAX_TREE_BITS - level));
-  TRACE2("shift level %d %0X",level,shift_level);
 
   tree += face*shift_level; 
 
@@ -121,16 +112,8 @@ Index Index::index_neighbor (int axis, int face, int narray, bool periodic) cons
 
     tree &= ~(shift_overflow);
 
-    TRACE2("array change= %d %d",array,(narray + array + face) % narray);
-
-      // if (!periodic) {
-      //   // return self index if on boundary
-      //   if ( ! ((0 <= array+face) && (array+face < narray))) return index;
-      // }
-
     array = (narray + array + face) % narray;
 
-    TRACE3("array %d  face %d  narray %d",array,face,narray);
   }
 
   index.a_[axis].array = array;
@@ -145,9 +128,6 @@ bool Index::is_on_boundary (int axis, int face, int narray, bool periodic) const
 {
   if (periodic) return false;
 
-  TRACE4("is_on_boundary axis %d  face %d  narray %d period %d", 
-	 axis,face,narray,periodic);
-
   if (face == 0) face = -1;
 
   int level = this->level();
@@ -157,7 +137,6 @@ bool Index::is_on_boundary (int axis, int face, int narray, bool periodic) const
   // update tree bits
 
   int shift_level = (1 << (INDEX_MAX_TREE_BITS - level));
-  TRACE2("shift level %d %0X",level,shift_level);
 
   tree += face*shift_level; 
 
@@ -168,8 +147,6 @@ bool Index::is_on_boundary (int axis, int face, int narray, bool periodic) const
     if (narray == 1) return true;
 
     tree &= ~(shift_overflow);
-
-    TRACE2("array change= %d %d",array,(narray + array + face) % narray);
 
     return ! ((0 <= array+face) && (array+face < narray) );
 
@@ -214,8 +191,6 @@ Index Index::index_neighbor (int ix, int iy, int iz, int n3[3], bool periodic) c
     if (tree & shift_overflow) {
 
       tree &= ~(shift_overflow);
-
-      TRACE2("array change= %d %d",array,(n3[axis] + array + i3[axis]) % n3[axis]);
 
       array = (n3[axis] + array + i3[axis]) % n3[axis];
 
@@ -326,6 +301,7 @@ void Index::print (const char * msg,
 		   bool no_nl) const
 {
   const int level = this->level();
+
   if (max_level == -1) max_level = level;
 
   //  PARALLEL_PRINTF ("INDEX %d %d: ",level,max_level);
@@ -439,6 +415,8 @@ void Index::write_bits_(FILE * fp,int value, int nb) const
 
 std::string Index::bit_string(int max_level,int rank) const
 {
+  const int level = this->level();
+
   if (max_level == -1) max_level = this->level();
 
   std::string bits = "";
@@ -457,12 +435,14 @@ std::string Index::bit_string(int max_level,int rank) const
 
     bits = bits + ":";
 
-    for (int level=0; level<max_level; level++) {
+    for (int i=0; i<max_level; i++) {
 
-      int ic3[3];
-      child (level+1, &ic3[0], &ic3[1], &ic3[2]);
-      bits = bits + (ic3[axis]?"1":"0");
-	
+      if (i < level) {
+	int ic3[3];
+	child (i+1, &ic3[0], &ic3[1], &ic3[2]);
+	bits = bits + (ic3[axis]?"1":"0");
+      } else 
+	bits = bits + " ";
     }
     if (axis<rank-1) bits = bits + " ";
       
