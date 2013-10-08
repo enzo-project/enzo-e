@@ -37,6 +37,7 @@ CommBlock::CommBlock
   child_face_level_(),
   child_face_level_new_(),
   count_coarsen_(0),
+  level_count_(index.level()),
   adapt_step_(num_adapt_steps),
   adapt_(adapt_unknown),
   next_phase_(phase_output),

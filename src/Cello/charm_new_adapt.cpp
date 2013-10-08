@@ -262,16 +262,17 @@ void CommBlock::q_adapt_end()
 #endif
   next_phase_ = phase_output;
   if (thisIndex.is_root()) {
+   thisArray->doneInserting();
 
-    // int initial_cycle = simulation()->config()->initial_cycle;
-    // bool is_first_cycle = (initial_cycle == cycle);
+   const int initial_cycle = simulation()->config()->initial_cycle;
+   const bool is_first_cycle = (initial_cycle == cycle());
+   const int level_maximum = simulation()->config()->initial_max_level;
 
-    // if (is_first_cycle) {
-    //   if (level_comm_Coh
-    // }
-
-    thisArray->doneInserting();
-    thisProxy.p_refresh_begin();
+   if (is_first_cycle && level_count_++ < level_maximum) {
+     thisProxy.p_create_mesh();
+   } else {
+     thisProxy.p_refresh_begin();
+   }
   }
   
 }

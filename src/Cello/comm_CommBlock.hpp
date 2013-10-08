@@ -578,6 +578,9 @@ protected: // attributes
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;
 
+  /// Counter for initial mesh creation
+  int level_count_;
+
   /// Number of adapt steps in the adapt phase
   int adapt_step_;
 

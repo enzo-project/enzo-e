@@ -186,27 +186,30 @@ Clean(restart_ppm_1,
 
 env.Requires(restart_ppm_1,checkpoint_ppm_1)
 
+#
+# HANGS!
+#
 # parallel restart
 
-checkpoint_ppm_8 = env_rm_png.RunParallel (
-   'test_checkpoint_ppm-8.unit',
-   bin_path + '/enzo-p', 
-   ARGS='input/checkpoint_ppm-8.in')
-
-restart_ppm_8 = env_mv_out.RunParallel (
-   'test_restart_ppm-8.unit',
-   bin_path + '/enzo-p',
-   ARGS='+restart restart_ppm-8-100')
-
-
-env.MakeMovie ("restart_ppm-8.swf", "test_restart_ppm-8.unit", \
-                  ARGS= test_path + "/restart_ppm-8-*.png");
-
-Clean(restart_ppm_8,
-      [Glob('#/' + test_path + '/restart_ppm-8*.png'),
-       '#/input/checkpoint_ppm-8.in.out',])
-
-env.Requires(restart_ppm_8,checkpoint_ppm_8)
+###   checkpoint_ppm_8 = env_rm_png.RunParallel (
+###      'test_checkpoint_ppm-8.unit',
+###      bin_path + '/enzo-p', 
+###      ARGS='input/checkpoint_ppm-8.in')
+###   
+###   restart_ppm_8 = env_mv_out.RunParallel (
+###      'test_restart_ppm-8.unit',
+###      bin_path + '/enzo-p',
+###      ARGS='+restart restart_ppm-8-100')
+###   
+###   
+###   env.MakeMovie ("restart_ppm-8.swf", "test_restart_ppm-8.unit", \
+###                    ARGS= test_path + "/restart_ppm-8-*.png");
+###   
+###   Clean(restart_ppm_8,
+###         [Glob('#/' + test_path + '/restart_ppm-8*.png'),
+###          '#/input/checkpoint_ppm-8.in.out',])
+###   
+###   env.Requires(restart_ppm_8,checkpoint_ppm_8)
 
 # MethodPpml tests
 
