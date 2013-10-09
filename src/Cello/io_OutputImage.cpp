@@ -318,15 +318,15 @@ void OutputImage::write_block
     //@@@@@@@@@@
     // DEBUG
     //@@@@@@@@@@
-    float savef=0.0;
-    double saved=0.0;
-    if (field_descr->precision(index_field) == precision_single) {
-      savef = ((float*)field)[0];
-      ((float*)field)[0] = 0.0;
-    } else {
-      saved = ((double*)field)[0];
-      ((double*)field)[0] = 0.0;
-    }
+    // float savef=0.0;
+    // double saved=0.0;
+    // if (field_descr->precision(index_field) == precision_single) {
+    //   savef = ((float*)field)[0];
+    //   ((float*)field)[0] = 0.0;
+    // } else {
+    //   saved = ((double*)field)[0];
+    //   ((double*)field)[0] = 0.0;
+    // }
 
     int mx = ghost_ ? ndx : nbx;
     int my = ghost_ ? ndy : nby;
@@ -357,12 +357,11 @@ void OutputImage::write_block
 	}
       }
     }
-    if (field_descr->precision(index_field) == precision_single) {
-      
-      ((float*)field)[0] = savef;
-    } else {
-      ((double*)field)[0] = saved;
-    }
+    // if (field_descr->precision(index_field) == precision_single) {
+    //   ((float*)field)[0] = savef;
+    // } else {
+    //   ((double*)field)[0] = saved;
+    // }
   }
 }
 
