@@ -57,12 +57,18 @@ OutputImage::OutputImage(int index,
 
   TRACE1 ("image_block_size factor = %d",nl);
 
+  if (ghost_) {
+    if (nx0>1) nx0*=2;
+    if (ny0>1) ny0*=2;
+    if (nz0>1) nz0*=2;
+  }
+  PARALLEL_PRINTF ("SIZE %d %d %d\n",nxi_,nyi_,nzi_);
   if (nxi_ == 0) nxi_ = (image_type_ == "mesh") ? 2*nl * nxb + 1 : nl * nx0;
   if (nyi_ == 0) nyi_ = (image_type_ == "mesh") ? 2*nl * nyb + 1 : nl * ny0;
   if (nzi_ == 0) nzi_ = (image_type_ == "mesh") ? 2*nl * nzb + 1 : nl * nz0;
 
   TRACE2("OutputImage nl,max_level %d %d",nl,max_level);
-  TRACE3("OutputImage nxi,nyi,nzi %d %d %d",nxi_,nyi_,nzi_);
+  PARALLEL_PRINTF("OutputImage nxi,nyi,nzi %d %d %d\n",nxi_,nyi_,nzi_);
   
   // Override default Output::process_stride_: only root writes
   set_process_stride(process_count);
@@ -309,6 +315,19 @@ void OutputImage::write_block
     TRACE3("OutputImage iym,iyp,nby %d %d %d",iym,iyp,nby);
     TRACE3("OutputImage izm,izp,nbz %d %d %d",izm,izp,nbz);
 
+    //@@@@@@@@@@
+    // DEBUG
+    //@@@@@@@@@@
+    float savef=0.0;
+    double saved=0.0;
+    if (field_descr->precision(index_field) == precision_single) {
+      savef = ((float*)field)[0];
+      ((float*)field)[0] = 0.0;
+    } else {
+      saved = ((double*)field)[0];
+      ((double*)field)[0] = 0.0;
+    }
+
     int mx = ghost_ ? ndx : nbx;
     int my = ghost_ ? ndy : nby;
     int mz = ghost_ ? ndz : nbz;
@@ -337,6 +356,12 @@ void OutputImage::write_block
 
 	}
       }
+    }
+    if (field_descr->precision(index_field) == precision_single) {
+      
+      ((float*)field)[0] = savef;
+    } else {
+      ((double*)field)[0] = saved;
     }
   }
 }
@@ -511,18 +536,18 @@ void OutputImage::image_write_ (double min, double max) throw()
 
   // Compute min and max if needed
   //  if (! specify_bounds_) {
-    if (image_log_) {
-      for (int i=0; i<m; i++) {
-	min = MIN(min,log(data_[i]));
-	max = MAX(max,log(data_[i]));
-      }
-    } else {
-      for (int i=0; i<m; i++) {
-	min = MIN(min,data_[i]);
-	max = MAX(max,data_[i]);
-      }
+  if (image_log_) {
+    for (int i=0; i<m; i++) {
+      min = MIN(min,log(data_[i]));
+      max = MAX(max,log(data_[i]));
     }
-    //  }
+  } else {
+    for (int i=0; i<m; i++) {
+      min = MIN(min,data_[i]);
+      max = MAX(max,data_[i]);
+    }
+  }
+  //  }
   //  }
   if (specify_bounds_) {
     min=min2;
