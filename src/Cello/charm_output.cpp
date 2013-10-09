@@ -135,7 +135,7 @@ void SimulationCharm::p_output ()
 {
   TRACE("SimulationCharm::p_output");
   TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
-  if (block_sync_.done()) {
+  if (block_sync_.next()) {
     TRACE("SimulationCharm::p_output calling c_output");
     CkCallback callback (CkIndex_SimulationCharm::c_output(), thisProxy);
     contribute(0,0,CkReduction::concat,callback);
@@ -208,7 +208,7 @@ void SimulationCharm::s_write()
 {
   TRACE("SimulationCharm::s_write()");
   TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
-  if (block_sync_.done()) {
+  if (block_sync_.next()) {
     CkCallback callback (CkIndex_SimulationCharm::c_write(), thisProxy);
     contribute(0,0,CkReduction::concat,callback);
 
@@ -289,7 +289,7 @@ void Problem::output_write
     output->update_remote(n, buffer);
   }
 
-  if (output->sync()->done()) {
+  if (output->sync()->next()) {
 
     output->close();
 

@@ -162,7 +162,7 @@ void CommBlock::x_refresh_coarse (int n, char * buffer,
   std::string refresh_type = simulation()->config()->field_refresh_type;
   
   if (refresh_type == "counter") {
-    if (loop_refresh_.done()) {
+    if (loop_refresh_.next()) {
       q_refresh_end();
     }
   }
@@ -215,7 +215,7 @@ void CommBlock::x_refresh_same (int n, char * buffer, int iface[3])
   //  stop_performance_(perf_refresh);
 
   if (refresh_type == "counter") {
-    if (loop_refresh_.done()) {
+    if (loop_refresh_.next()) {
       q_refresh_end();
     }
   }
@@ -262,7 +262,7 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
   std::string refresh_type = simulation()->config()->field_refresh_type;
   
   if (refresh_type == "counter") {
-    if (loop_refresh_.done()) {
+    if (loop_refresh_.next()) {
       q_refresh_end();
     }
   }

@@ -32,6 +32,7 @@ CommBlock::CommBlock
   index_initial_(0),
   children_(),
   loop_refresh_(),
+  sync_coarsen_(),
   face_level_(),
   face_level_new_(),
   child_face_level_(),
@@ -185,6 +186,7 @@ void CommBlock::pup(PUP::er &p)
   p | index_initial_;
   p | children_;
   p | loop_refresh_;
+  p | sync_coarsen_;
   p | face_level_;
   p | face_level_new_;
   p | child_face_level_;

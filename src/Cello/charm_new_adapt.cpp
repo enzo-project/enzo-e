@@ -107,9 +107,9 @@ const char * adapt_str[] = {"unknown","coarsen","same","refine"};
 // #define DEBUG_ADAPT
 
 //--------------------------------------------------
-#ifdef DEBUG_ADAPT
-
 char buffer [100];
+
+#ifdef DEBUG_ADAPT
 
 #define PUT_NEIGHBOR_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
   {									\
@@ -145,6 +145,10 @@ char buffer [100];
 
 void CommBlock::create_mesh()
 {
+
+  const int rank = simulation()->dimension();
+  sync_coarsen_.stop() = NC(rank);
+
 #ifdef CELLO_TRACE
   index_.print("BEGIN ADAPT create_mesh()",-1,2);
 #endif
@@ -168,6 +172,10 @@ void CommBlock::create_mesh()
 
 void CommBlock::adapt_mesh()
 {
+
+  const int rank = simulation()->dimension();
+  sync_coarsen_.stop() = NC(rank);
+
 #ifdef CELLO_TRACE
   index_.print("BEGIN ADAPT adapt_mesh()",-1,2);
 #endif
@@ -236,6 +244,11 @@ void CommBlock::q_adapt_next()
 {
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
 			thisProxy[thisIndex]));
+
+
+  if (sync_coarsen_.is_done()) {
+    index_.print ("ADAPT COARSEN parent can coarsen",-1,2);
+  }
 
   update_levels_();
 
@@ -339,7 +352,14 @@ void CommBlock::refine()
 
 void CommBlock::coarsen()
 {
-  TRACE_ADAPT("ADAPT coarsen()");
+  
+  PARALLEL_PRINTF("ADAPT coarsen()\n");
+  if (level() > 0) {
+    Index index_parent = index_.index_parent();
+    int ic3[3] = {0};
+    index_.child(level(),ic3+0,ic3+1,ic3+2);
+    thisProxy[index_parent].p_child_can_coarsen(ic3);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -579,6 +599,17 @@ void CommBlock::p_get_neighbor_level
 
     if (level_face_new  > level + 1) {
 
+      if (level_new_ < level) {
+	// cannot coarsen
+	if (level > 0) {
+	  Index index_parent = index_.index_parent();
+	  int ic3[3] = {0};
+	  index_.child(level,ic3+0,ic3+1,ic3+2);
+	  thisProxy[index_parent].p_child_cannot_coarsen(ic3);
+	}
+	
+      }
+
       level_new_ = level_face_new - 1;
 
       notify_neighbors(level_new_);
@@ -600,6 +631,49 @@ void CommBlock::p_get_neighbor_level
   }
 
   debug_faces_("p_get_neighbor stop");
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_child_can_coarsen(int ic3[3])
+{
+  sprintf (buffer,"ADAPT COARSEN child %d %d %d can coarsen %d",
+	   ic3[0],ic3[1],ic3[2],sync_coarsen_.index());
+  index_.print(buffer,-1,2);
+  sync_coarsen_.next();
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_child_cannot_coarsen(int ic3[3])
+{
+  sprintf (buffer,"ADAPT COARSEN child %d %d %d cannot coarsen %d",
+	   ic3[0],ic3[1],ic3[2],sync_coarsen_.index());
+  index_.print(buffer,-1,2);
+ 
+  sync_coarsen_.add_index(-1);
+}
+//----------------------------------------------------------------------
+
+void CommBlock::p_request_data()
+{
+#ifdef DEBUG_ADAPT
+  index_.print("ADAPT COARSEN p_request_data",-1,2);
+#endif
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_get_child_data
+(
+ int ic3[3],
+ int na, char * array,
+ int nf, int * child_face_level
+ )
+{
+#ifdef DEBUG_ADAPT
+  index_.print("ADAPT COARSEN p_get_child_data",-1,2);
+#endif
 }
 
 //----------------------------------------------------------------------

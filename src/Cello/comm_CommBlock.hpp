@@ -139,6 +139,18 @@ public: // interface
 			     int ic3[3], int if3[3],
 			     int level_now, int level_new);
 
+  /// Child notifies parent that it can (or cannot) coarsen
+  void p_child_can_coarsen(int ic3[3]);
+  void p_child_cannot_coarsen(int ic3[3]);
+
+  /// Parent requests data from child if all children can coarsen
+  void p_request_data();
+
+  /// Child sends restricted data to parent
+  void p_get_child_data(int ic3[3],
+			int na, char * array,
+			int nf, int * child_face_level);
+
   void q_adapt_next ();
   void q_adapt_end ();
 
@@ -562,6 +574,9 @@ protected: // attributes
 
   /// Synchronization counter for ghost refresh
   Sync loop_refresh_;
+
+  /// Synchronization counter for ghost refresh
+  Sync sync_coarsen_;
 
   /// current level of neighbors along each face
   std::vector<int> face_level_;

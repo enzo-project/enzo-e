@@ -56,12 +56,19 @@ class Sync {
   }
 
   /// Increment counter and return whether the CHARM++ parallel "sync" is done.
-  inline bool done (int index = 1) throw()
+  inline bool next (int index = 1) throw()
   {
+    printf ("next(%d)\n",index_curr_);
     if (index_stop_ > 0) {
-      index_curr_ = (index_stop_ + index_curr_ - index) % index_stop_;  
+      index_curr_ = (index_stop_ + (index_curr_-1) + index) % index_stop_ + 1;  
     }
-    return index_curr_ == 0;
+    return index_curr_ == index_stop_;
+  }
+
+  inline bool is_done () const throw()
+  {
+    printf ("is_done(%d)\n",index_curr_);
+    return (index_curr_ == index_stop_);
   }
 
   inline int operator = (int value) { index_stop_ = value; return index_stop_; }
@@ -72,6 +79,8 @@ class Sync {
 
   /// Return the current CHARM++ parallel "sync" index
   inline int index() const throw() { return index_curr_; }
+  /// Set the current index
+  void add_index(int value) { index_curr_ += value; }
   /// Return the upper-limit on the CHARM++ parallel "sync"
   inline int stop() const throw()  { return index_stop_; }
   /// Access to the upper-limit on the CHARM++ parallel "sync"
