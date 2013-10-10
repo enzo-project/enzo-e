@@ -405,12 +405,12 @@ void CommBlock::notify_neighbors(int level_new)
 	parent_face_(op3,of3,ic3);
 
 	// avoid redundant calls
-	//	if (op3[0]==of3[0] && op3[1]==of3[1] && op3[2]==of3[2]) {
+		if (op3[0]==of3[0] && op3[1]==of3[1] && op3[2]==of3[2]) {
 
 	  Index index_uncle = index_neighbor.index_parent();
 	  PUT_NEIGHBOR_LEVEL(index_uncle,ic3,of3,level,level_new,"send-coarse");
 
-	  //	}
+		}
 
       } else if (level_face == level + 1) {
 
@@ -514,6 +514,7 @@ void CommBlock::p_get_neighbor_level
       // child face levels are used.  The neighbor level for the
       // unique face and unique child facing the sending child is
       // updated.
+
 
       set_face_level_new (of3, level_face_new);
 
