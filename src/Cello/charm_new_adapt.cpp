@@ -407,12 +407,14 @@ void CommBlock::notify_neighbors(int level_new)
 	parent_face_(op3,of3,ic3);
 
 	// avoid redundant calls
-		if (op3[0]==of3[0] && op3[1]==of3[1] && op3[2]==of3[2]) {
+	if (op3[0]==of3[0] && 
+	    op3[1]==of3[1] && 
+	    op3[2]==of3[2]) {
 
 	  Index index_uncle = index_neighbor.index_parent();
 	  PUT_NEIGHBOR_LEVEL(index_uncle,ic3,of3,level,level_new,"send-coarse");
 
-		}
+	}
 
       } else if (level_face == level + 1) {
 
@@ -520,26 +522,39 @@ void CommBlock::p_get_neighbor_level
 
       set_face_level_new (of3, level_face_new);
 
-      // ItChild it_child (rank,of3);
-      // int jc3[3];
-      // while (it_child.next(jc3)) {
-
+      ItChild it_child (rank,of3);
       int jc3[3];
-      facing_child_(jc3,ic3,if3);
-      TRACE9("recv-fine facing child %d %d %d  child %d %d %d  face %d %d %d",
-	     jc3[0],jc3[1],jc3[2],ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2]);
+      Index index_neighbor = neighbor_(of3).index_child(ic3);
+      while (it_child.next(jc3)) {
 
-      // int jf3[3];
-      // ItFace it_face (rank,rank_refresh,jc3,of3);
+	Index index_child = index_.index_child(jc3);
+	// int jc3[3];
+	// facing_child_(jc3,ic3,if3);
+	TRACE9("recv-fine facing child %d %d %d  child %d %d %d  face %d %d %d",
+	       jc3[0],jc3[1],jc3[2],ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2]);
+
+	int jf3[3];
+	ItFace it_face (rank,rank_refresh,jc3,of3);
       
 
-      // while (it_face.next(jf3)) {
-	TRACE3("recv-fine it_face %d %d %d",
-	       of3[0],of3[1],of3[2]);
-	set_child_face_level_new(jc3,of3,level_face_new);
-      // }
+	std::string n1_str = index_neighbor.bit_string(3,2);			
 
-      // }
+	TRACE1("recv-fine index_neighbor %s",n1_str.c_str());
+
+	while (it_face.next(jf3)) {
+	  TRACE3("recv-fine it_face %d %d %d",
+		 jf3[0],jf3[1],jf3[2]);
+	  Index in = neighbor_(jf3,&index_child);
+
+	  std::string n2_str = in.bit_string(3,2);			
+	  TRACE1("recv-fine in %s",n2_str.c_str());
+	  
+	  if (in == index_neighbor) {
+	    set_child_face_level_new(jc3,jf3,level_face_new);
+	  }
+	}
+       
+      }
 
     } else if (level == level_face + 1) {
 

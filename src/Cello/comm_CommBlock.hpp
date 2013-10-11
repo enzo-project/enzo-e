@@ -248,6 +248,8 @@ public: // interface
   }
   void set_child_face_level_new (const int ic3[3], const int if3[3], int level)
   {
+    TRACE7("set_child_face_level_new child %d %d %d  face %d %d %d  level %d",
+	   ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2],level);
     check_child_(ic3,"CommBlock::set_child_face_level()",__FILE__,__LINE__);
     check_face_ (if3,"CommBlock::set_child_face_level()",__FILE__,__LINE__);
     child_face_level_new_[ICF3(ic3,if3)] = 
