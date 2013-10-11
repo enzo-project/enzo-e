@@ -261,7 +261,7 @@ void CommBlock::q_adapt_next()
 #endif
 
   if (level() < level_new_) refine();
-  if (level() > level_new_) coarsen();
+  if (sync_coarsen_.is_done()) coarsen();
 
 }
 
@@ -352,8 +352,10 @@ void CommBlock::refine()
 
 void CommBlock::coarsen()
 {
-  
-  PARALLEL_PRINTF("ADAPT coarsen()\n");
+  return;
+#ifdef DEBUG_ADAPT  
+  index_.print("ADAPT COARSEN coarsen()");
+#endif
   if (level() > 0) {
     Index index_parent = index_.index_parent();
     int ic3[3] = {0};
@@ -600,16 +602,16 @@ void CommBlock::p_get_neighbor_level
 
     if (level_face_new  > level + 1) {
 
-      if (level_new_ < level) {
-	// cannot coarsen
-	if (level > 0) {
-	  Index index_parent = index_.index_parent();
-	  int ic3[3] = {0};
-	  index_.child(level,ic3+0,ic3+1,ic3+2);
-	  thisProxy[index_parent].p_child_cannot_coarsen(ic3);
-	}
+      // if (level_new_ < level) {
+      // 	// cannot coarsen
+      // 	if (level > 0) {
+      // 	  Index index_parent = index_.index_parent();
+      // 	  int ic3[3] = {0};
+      // 	  index_.child(level,ic3+0,ic3+1,ic3+2);
+      // 	  thisProxy[index_parent].p_child_cannot_coarsen(ic3);
+      // 	}
 	
-      }
+      // }
 
       level_new_ = level_face_new - 1;
 
@@ -638,22 +640,37 @@ void CommBlock::p_get_neighbor_level
 
 void CommBlock::p_child_can_coarsen(int ic3[3])
 {
-  sprintf (buffer,"ADAPT COARSEN child %d %d %d can coarsen %d",
-	   ic3[0],ic3[1],ic3[2],sync_coarsen_.index());
+#ifdef DEBUG_ADAPT
+  Index index_child = index_.index_child(ic3);
+  std::string bit_str = index_child.bit_string(3,2);			
+  
+  sprintf (buffer,"ADAPT COARSEN child %s can coarsen %d",
+	   bit_str.c_str(),sync_coarsen_.index());
   index_.print(buffer,-1,2);
-  sync_coarsen_.next();
+#endif
+  if (sync_coarsen_.next()) {
+    index_.print("ADAPT COARSEN parent can coarsen");
+    // all children can coarsen, so initiate coarsening
+    const int rank = simulation()->dimension();
+    ItChild it_child (rank);
+    int ic3[3];
+    while (it_child.next(ic3)) {
+      Index index_child = index_.index_child(ic3);
+      thisProxy[index_child].p_request_data();
+    }
+  }
 }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-void CommBlock::p_child_cannot_coarsen(int ic3[3])
-{
-  sprintf (buffer,"ADAPT COARSEN child %d %d %d cannot coarsen %d",
-	   ic3[0],ic3[1],ic3[2],sync_coarsen_.index());
-  index_.print(buffer,-1,2);
+// void CommBlock::p_child_cannot_coarsen(int ic3[3])
+// {
+//   sprintf (buffer,"ADAPT COARSEN child %d %d %d cannot coarsen %d",
+// 	   ic3[0],ic3[1],ic3[2],sync_coarsen_.index());
+//   index_.print(buffer,-1,2);
  
-  sync_coarsen_.add_index(-1);
-}
+//   sync_coarsen_.add_index(-1);
+// }
 //----------------------------------------------------------------------
 
 void CommBlock::p_request_data()
@@ -661,6 +678,29 @@ void CommBlock::p_request_data()
 #ifdef DEBUG_ADAPT
   index_.print("ADAPT COARSEN p_request_data",-1,2);
 #endif
+
+  const int level = this->level();
+
+  Index index_parent = index_.index_parent();
+  int ic3[3];
+  index_parent.child(level,ic3,ic3+1,ic3+2);
+
+  int narray; 
+  char * array;
+  int iface[3] = {0,0,0};
+  bool lghost[3] = {true,true,true};
+  FieldFace * field_face = 
+    load_face_(&narray,&array, iface, ic3, lghost, op_array_restrict);
+
+  int nf = face_level_.size();
+  int face_level[nf];
+  for (int i=0; i<nf; i++) face_level[i] = face_level_[i];
+
+  thisProxy[index_parent].p_get_child_data
+    (ic3, narray,array, nf,face_level);
+
+  delete field_face;
+  
 }
 
 //----------------------------------------------------------------------
@@ -675,6 +715,25 @@ void CommBlock::p_get_child_data
 #ifdef DEBUG_ADAPT
   index_.print("ADAPT COARSEN p_get_child_data",-1,2);
 #endif
+  if (sync_coarsen_.next()) {
+    const int rank = simulation()->dimension();
+    ItChild it_child (rank);
+    int ic3[3];
+    while (it_child.next(ic3)) {
+      Index index_child = index_.index_child(ic3);
+      thisProxy[index_child].p_delete();
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_delete()
+{
+#ifdef DEBUG_ADAPT
+  index_.print("ADAPT COARSEN p_delete",-1,2);
+#endif
+  thisProxy[thisIndex].ckDestroy();
 }
 
 //----------------------------------------------------------------------

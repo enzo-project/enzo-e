@@ -62,13 +62,11 @@ OutputImage::OutputImage(int index,
     if (ny0>1) ny0*=2;
     if (nz0>1) nz0*=2;
   }
-  PARALLEL_PRINTF ("SIZE %d %d %d\n",nxi_,nyi_,nzi_);
   if (nxi_ == 0) nxi_ = (image_type_ == "mesh") ? 2*nl * nxb + 1 : nl * nx0;
   if (nyi_ == 0) nyi_ = (image_type_ == "mesh") ? 2*nl * nyb + 1 : nl * ny0;
   if (nzi_ == 0) nzi_ = (image_type_ == "mesh") ? 2*nl * nzb + 1 : nl * nz0;
 
   TRACE2("OutputImage nl,max_level %d %d",nl,max_level);
-  PARALLEL_PRINTF("OutputImage nxi,nyi,nzi %d %d %d\n",nxi_,nyi_,nzi_);
   
   // Override default Output::process_stride_: only root writes
   set_process_stride(process_count);

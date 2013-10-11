@@ -58,7 +58,6 @@ class Sync {
   /// Increment counter and return whether the CHARM++ parallel "sync" is done.
   inline bool next (int index = 1) throw()
   {
-    printf ("next(%d)\n",index_curr_);
     if (index_stop_ > 0) {
       index_curr_ = (index_stop_ + (index_curr_-1) + index) % index_stop_ + 1;  
     }
@@ -67,7 +66,6 @@ class Sync {
 
   inline bool is_done () const throw()
   {
-    printf ("is_done(%d)\n",index_curr_);
     return (index_curr_ == index_stop_);
   }
 

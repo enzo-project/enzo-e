@@ -141,7 +141,7 @@ public: // interface
 
   /// Child notifies parent that it can (or cannot) coarsen
   void p_child_can_coarsen(int ic3[3]);
-  void p_child_cannot_coarsen(int ic3[3]);
+  // void p_child_cannot_coarsen(int ic3[3]);
 
   /// Parent requests data from child if all children can coarsen
   void p_request_data();
@@ -150,6 +150,9 @@ public: // interface
   void p_get_child_data(int ic3[3],
 			int na, char * array,
 			int nf, int * child_face_level);
+
+  /// Parent tells child to delete itself
+  void p_delete();
 
   void q_adapt_next ();
   void q_adapt_end ();
