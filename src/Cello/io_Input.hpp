@@ -66,7 +66,7 @@ public: // functions
   void set_process_stride (int stride) throw () 
   {
     process_stride_ = stride; 
-    sync_.stop() = process_stride_;
+    sync_.set_stop(process_stride_);
   };
 
   /// Accessor function for the CHARM Sync class

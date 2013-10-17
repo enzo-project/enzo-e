@@ -83,7 +83,7 @@ void InitialFile::enforce_block
 
   File * file = input_->file();
   int num_blocks = file->group_count();
-  block_sync_.stop() = num_blocks;
+  block_sync_.set_stop(num_blocks);
 
   for (int i = 0; i<num_blocks; i++) {
 

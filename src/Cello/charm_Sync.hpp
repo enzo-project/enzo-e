@@ -78,11 +78,14 @@ class Sync {
   /// Return the current CHARM++ parallel "sync" index
   inline int index() const throw() { return index_curr_; }
   /// Set the current index
+  void set_index(int value) { index_curr_ = value; }
   void add_index(int value) { index_curr_ += value; }
   /// Return the upper-limit on the CHARM++ parallel "sync"
   inline int stop() const throw()  { return index_stop_; }
   /// Access to the upper-limit on the CHARM++ parallel "sync"
-  inline int & stop () throw ()    { return index_stop_; }
+  inline void set_stop (int stop) throw ()    { index_stop_ = stop; }
+  inline void add_stop (int inc = 1) throw () { index_stop_ += inc; }
+  inline void clear () throw () { index_curr_ = 0; }
 
 private:
 

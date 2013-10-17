@@ -51,7 +51,7 @@ void CommBlock::refresh_begin()
 
   int refresh_rank = config->field_refresh_rank;
   bool refresh_type_counter = (refresh_type == "counter");
-  loop_refresh_.stop() = 0;
+  loop_refresh_.set_stop(0);
 
   ItFace it_face(rank,refresh_rank);
   int if3[3];
@@ -107,7 +107,7 @@ void CommBlock::refresh_begin()
   if (refresh_type_counter) {
 
     // Prevent hang if single-CommBlock simulation
-    ++loop_refresh_.stop();
+    loop_refresh_.add_stop();
 
     //    stop_performance_(perf_refresh);
     // performance->stop_region(perf_refresh);
@@ -137,7 +137,7 @@ void CommBlock::refresh_coarse ( Index index, int iface[3] )
 				       iface, ic3,lghost,
 				       op_array_restrict);
 
-  ++loop_refresh_.stop();
+   loop_refresh_.add_stop();
 
   int jface[3] = {-iface[0], -iface[1], -iface[2]};
 
@@ -185,7 +185,7 @@ void CommBlock::refresh_same (Index index, int iface[3])
 				       iface, ichild, lghost,
 				       op_array_copy);
 
-  ++loop_refresh_.stop();
+  loop_refresh_.add_stop();
 
   int jface[3] = {-iface[0], -iface[1], -iface[2]};
 
@@ -236,7 +236,7 @@ void CommBlock::refresh_fine
 				       lghost,
 				       op_array_prolong);
 
-  ++loop_refresh_.stop();
+  loop_refresh_.add_stop();
 
   int jface[3] = {-iface[0], -iface[1], -iface[2]};
 

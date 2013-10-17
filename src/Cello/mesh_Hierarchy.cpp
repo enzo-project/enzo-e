@@ -280,7 +280,7 @@ void Hierarchy::allocate_array_
      testing);
     
   block_exists_ = allocate_data;
-  block_sync_.stop() = nbx*nby*nbz;
+  block_sync_.set_stop(nbx*nby*nbz);
 
 }
 

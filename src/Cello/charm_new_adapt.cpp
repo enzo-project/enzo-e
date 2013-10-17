@@ -70,7 +70,6 @@
 ///    neighbor lists.  New child blocks call create_mesh() if at
 ///    start.
 ///
-///
 ///--------------------------------------------------
 ///
 ///    can_coarsen()
@@ -111,9 +110,17 @@ char buffer [100];
 
 #ifdef DEBUG_ADAPT
 
+#define TRACE_LEVEL_NEW(msg)						\
+  {									\
+    sprintf (buffer,"ADAPT TRACE line %d %s level_new %d level %d",	\
+	     __LINE__, msg,level_new_,this->level());			\
+    index_.print(buffer,-1,2);						\
+  }
+ 
+
 #define PUT_NEIGHBOR_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
   {									\
-    std::string bit_str = INDEX.bit_string(3,2);			\
+    std::string bit_str = INDEX.bit_string(-1,2);			\
     sprintf (buffer,"%s %s p_get_neighbor_level() "			\
 	     "face %2d %2d %2d  child %d %d %d  "			\
 	     "%d -> %d :%d",						\
@@ -121,16 +128,18 @@ char buffer [100];
 	     IF3[0],IF3[1],IF3[2],					\
 	     IC3[0],IC3[1],IC3[2],					\
 	     LEVEL_NOW,LEVEL_NEW,__LINE__);				\
-    index_.print(buffer,3,2);						\
+    index_.print(buffer,-1,2);						\
     check_child_(IC3,"PUT_NEIGHBOR_LEVEL",__FILE__,__LINE__);		\
     check_face_(IF3,"PUT_NEIGHBOR_LEVEL",__FILE__,__LINE__);		\
     thisProxy[INDEX].p_get_neighbor_level				\
       (index_,IC3,IF3,LEVEL_NOW,LEVEL_NEW);				\
   }
 #else /* DEBUG_ADAPT */
+
+#define TRACE_LEVEL_NEW(msg)	/* NULL */
+
 #define PUT_NEIGHBOR_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
   thisProxy[INDEX].p_get_neighbor_level (index_,IC3,IF3,LEVEL_NOW,LEVEL_NEW);
-
 #endif /* DEBUG_ADAPT */
 //--------------------------------------------------
 
@@ -146,18 +155,18 @@ char buffer [100];
 void CommBlock::create_mesh()
 {
 
-  const int rank = simulation()->dimension();
-  sync_coarsen_.stop() = NC(rank);
+  TRACE_ADAPT("BEGIN ADAPT create_mesh()");
 
-#ifdef CELLO_TRACE
-  index_.print("BEGIN ADAPT create_mesh()",-1,2);
-#endif
+  const int rank = simulation()->dimension();
+  sync_coarsen_.set_stop(NC(rank));
+  sync_coarsen_.clear();
 
   if (is_leaf()) {
 
     int level_maximum = simulation()->config()->initial_max_level;
 
     level_new_ = desired_level_(level_maximum);
+    TRACE_LEVEL_NEW("create_mesh");
 
     notify_neighbors(level_new_);
 
@@ -173,18 +182,16 @@ void CommBlock::create_mesh()
 void CommBlock::adapt_mesh()
 {
 
-  const int rank = simulation()->dimension();
-  sync_coarsen_.stop() = NC(rank);
+  TRACE_ADAPT("BEGIN ADAPT adapt_mesh()");
 
-#ifdef CELLO_TRACE
-  index_.print("BEGIN ADAPT adapt_mesh()",-1,2);
-#endif
+  sync_coarsen_.clear();
 
   if (is_leaf()) {
 
     int level_maximum = simulation()->config()->mesh_max_level;
 
     level_new_ = desired_level_(level_maximum);
+    TRACE_LEVEL_NEW("adapt_mesh");
 
     notify_neighbors(level_new_);
 
@@ -242,26 +249,21 @@ int CommBlock::determine_adapt()
 
 void CommBlock::q_adapt_next()
 {
+  TRACE_ADAPT("ADAPT q_adapt_next()");
+
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
 			thisProxy[thisIndex]));
-
-
-  if (sync_coarsen_.is_done()) {
-    index_.print ("ADAPT COARSEN parent can coarsen",-1,2);
-  }
 
   update_levels_();
 
   debug_faces_("q_adapt_next");
-
   
-#ifdef DEBUG_ADAPT
-  sprintf (buffer,"ADAPT q_adapt_next() %d -> %d",level(),level_new_);
-  index_.print(buffer,-1,2);
-#endif
+  TRACE_LEVEL_NEW("q_adapt_next");
 
-  if (level() < level_new_) refine();
-  if (sync_coarsen_.is_done()) coarsen();
+  if (is_leaf()) {
+    if (level() < level_new_) refine();
+    if (level() > level_new_) coarsen();
+  }
 
 }
 
@@ -270,11 +272,13 @@ void CommBlock::q_adapt_next()
 void CommBlock::q_adapt_end()
 {
 
-#ifdef DEBUG_ADAPT
-  index_.print("ADAPT q_adapt_end",-1,2);
-#endif
+
+  TRACE_ADAPT("ADAPT q_adapt_end");
+
   next_phase_ = phase_output;
+
   if (thisIndex.is_root()) {
+
    thisArray->doneInserting();
 
    const int initial_cycle = simulation()->config()->initial_cycle;
@@ -287,7 +291,6 @@ void CommBlock::q_adapt_end()
      thisProxy.p_refresh_begin();
    }
   }
-  
 }
 //----------------------------------------------------------------------
 
@@ -295,6 +298,7 @@ void CommBlock::refine()
 {
 
   TRACE_ADAPT("ADAPT refine()");
+
   adapt_ = adapt_unknown;
 
   const int rank = simulation()->dimension();
@@ -352,18 +356,32 @@ void CommBlock::refine()
 
 void CommBlock::coarsen()
 {
-  return;
-#ifdef DEBUG_ADAPT  
-  index_.print("ADAPT COARSEN coarsen()");
-#endif
+  
+  TRACE_ADAPT("ADAPT COARSEN coarsen()");
+
   if (level() > 0) {
-    Index index_parent = index_.index_parent();
-    int ic3[3] = {0};
-    index_.child(level(),ic3+0,ic3+1,ic3+2);
-    thisProxy[index_parent].p_child_can_coarsen(ic3);
+
+    // check that there are no fine-level neighbors
+    const int level = this->level();
+    const int  rank         = simulation()->dimension();
+    const int  rank_refresh = simulation()->config()->field_refresh_rank;
+    ItFace it_face(rank,rank_refresh);
+    int of3[3];
+    bool can_coarsen = true;
+    while (it_face.next(of3)) {
+      Index in = neighbor_(of3);
+      const int level_face = face_level (of3);
+      if (level < level_face) can_coarsen = false;
+    }
+
+    if (can_coarsen) {
+      Index index_parent = index_.index_parent();
+      int ic3[3] = {0};
+      index_.child(level,ic3+0,ic3+1,ic3+2);
+      thisProxy[index_parent].p_child_can_coarsen(ic3);
+    }
   }
 }
-
 //----------------------------------------------------------------------
 
 void CommBlock::notify_neighbors(int level_new)
@@ -429,7 +447,7 @@ void CommBlock::notify_neighbors(int level_new)
     	}
 
       } else {
-	std::string bit_str = index_.bit_string(3,2);
+	std::string bit_str = index_.bit_string(-1,2);
 	WARNING3 ("CommBlock::notify_neighbor()",
 		"%s level %d and face level %d differ by more than 1",
 		bit_str.c_str(),level,level_face);
@@ -451,13 +469,14 @@ void CommBlock::p_get_neighbor_level
  )
 {
   debug_faces_("p_get_neighbor start");
+
   const int level        = this->level();
 
   const int of3[3] = {-if3[0],-if3[1],-if3[2] };
   const int rank = simulation()->dimension();
   const int rank_refresh = simulation()->config()->field_refresh_rank;
 
-  const std::string bit_str = index_debug.bit_string(3,2);			
+  const std::string bit_str = index_debug.bit_string(-1,2);			
 
   if (is_leaf()) {
 
@@ -471,7 +490,7 @@ void CommBlock::p_get_neighbor_level
 	       if3[0],if3[1],if3[2],					
 	       ic3[0],ic3[1],ic3[2],					
 	       level_face,level_face_new);					
-      index_.print(buffer,3,2);						
+      index_.print(buffer,-1,2);
 #endif
   
       // (X) RECV-SAME: Face and level are received from unique
@@ -489,16 +508,14 @@ void CommBlock::p_get_neighbor_level
 	ItFace it_face (rank,rank_refresh,jc3,of3);
 
 	while (it_face.next(jf3)) {
-	  
 	  set_child_face_level_new(jc3,jf3,level_face_new);
 	}
-
       }
 
     } else if (level == level_face - 1) {
 
 #ifdef DEBUG_ADAPT
-      std::string bit_str = index_debug.bit_string(3,2);			
+
       sprintf (buffer,"%s %s p_get_neighbor_level() face %2d %2d %2d "
 	       "child %d %d %d  "
 	       "%d -> %d",
@@ -506,7 +523,7 @@ void CommBlock::p_get_neighbor_level
 	       if3[0],if3[1],if3[2],					
 	       ic3[0],ic3[1],ic3[2],					
 	       level_face,level_face_new);					
-      index_.print(buffer,3,2);						
+      index_.print(buffer,-1,2);						
 #endif
   
       // (*) RECV-FINE: Face, level, and sender child indices are
@@ -518,7 +535,6 @@ void CommBlock::p_get_neighbor_level
       // child face levels are used.  The neighbor level for the
       // unique face and unique child facing the sending child is
       // updated.
-
 
       set_face_level_new (of3, level_face_new);
 
@@ -535,9 +551,8 @@ void CommBlock::p_get_neighbor_level
 
 	int jf3[3];
 	ItFace it_face (rank,rank_refresh,jc3,of3);
-      
 
-	std::string n1_str = index_neighbor.bit_string(3,2);			
+	std::string n1_str = index_neighbor.bit_string(-1,2);			
 
 	TRACE1("recv-fine index_neighbor %s",n1_str.c_str());
 
@@ -546,7 +561,7 @@ void CommBlock::p_get_neighbor_level
 		 jf3[0],jf3[1],jf3[2]);
 	  Index in = neighbor_(jf3,&index_child);
 
-	  std::string n2_str = in.bit_string(3,2);			
+	  std::string n2_str = in.bit_string(-1,2);			
 	  TRACE1("recv-fine in %s",n2_str.c_str());
 	  
 	  if (in == index_neighbor) {
@@ -559,7 +574,6 @@ void CommBlock::p_get_neighbor_level
     } else if (level == level_face + 1) {
 
 #ifdef DEBUG_ADAPT
-      std::string bit_str = index_debug.bit_string(3,2);			
       sprintf (buffer,"%s %s p_get_neighbor_level() face %2d %2d %2d "
 	       "child %d %d %d  "
 	       "%d -> %d",
@@ -567,7 +581,7 @@ void CommBlock::p_get_neighbor_level
 	       if3[0],if3[1],if3[2],					
 	       ic3[0],ic3[1],ic3[2],					
 	       level_face,level_face_new);					
-      index_.print(buffer,3,2);						
+      index_.print(buffer,-1,2);						
 #endif
   
       // ( ) RECV-COARSE: Face and level are received from unique
@@ -595,17 +609,8 @@ void CommBlock::p_get_neighbor_level
 		   ic3[0],ic3[1],ic3[2],kf3[0],kf3[1],kf3[2]);
 	    set_child_face_level_new(ic3,kf3,level_face_new);
 	  }
-
 	}
-
       }
-
-      // Update child_face_level_
-
-      // while (it_face.next(jf3)) {
-      // 	set_child_face_level_new(ic3,jf3,level_face_new);
-      // }
-
 
     } else  {
 
@@ -614,21 +619,12 @@ void CommBlock::p_get_neighbor_level
 		level,level_face);
     }
 
+    if (level < level_face_new - 1) {
 
-    if (level_face_new  > level + 1) {
-
-      // if (level_new_ < level) {
-      // 	// cannot coarsen
-      // 	if (level > 0) {
-      // 	  Index index_parent = index_.index_parent();
-      // 	  int ic3[3] = {0};
-      // 	  index_.child(level,ic3+0,ic3+1,ic3+2);
-      // 	  thisProxy[index_parent].p_child_cannot_coarsen(ic3);
-      // 	}
-	
-      // }
-
+	// cannot coarsen
+	sync_coarsen_.set_index(-1);
       level_new_ = level_face_new - 1;
+      TRACE_LEVEL_NEW("p_get_neighbor_level");
 
       notify_neighbors(level_new_);
 
@@ -655,16 +651,9 @@ void CommBlock::p_get_neighbor_level
 
 void CommBlock::p_child_can_coarsen(int ic3[3])
 {
-#ifdef DEBUG_ADAPT
-  Index index_child = index_.index_child(ic3);
-  std::string bit_str = index_child.bit_string(3,2);			
-  
-  sprintf (buffer,"ADAPT COARSEN child %s can coarsen %d",
-	   bit_str.c_str(),sync_coarsen_.index());
-  index_.print(buffer,-1,2);
-#endif
+  TRACE_ADAPT("p_child_can_coarsen()");
+
   if (sync_coarsen_.next()) {
-    index_.print("ADAPT COARSEN parent can coarsen");
     // all children can coarsen, so initiate coarsening
     const int rank = simulation()->dimension();
     ItChild it_child (rank);
@@ -676,23 +665,19 @@ void CommBlock::p_child_can_coarsen(int ic3[3])
   }
 }
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// void CommBlock::p_child_cannot_coarsen(int ic3[3])
-// {
-//   sprintf (buffer,"ADAPT COARSEN child %d %d %d cannot coarsen %d",
-// 	   ic3[0],ic3[1],ic3[2],sync_coarsen_.index());
-//   index_.print(buffer,-1,2);
- 
-//   sync_coarsen_.add_index(-1);
-// }
+void CommBlock::p_child_cannot_coarsen()
+{
+  sync_coarsen_.add_index(-1);
+}
+
 //----------------------------------------------------------------------
 
 void CommBlock::p_request_data()
 {
-#ifdef DEBUG_ADAPT
-  index_.print("ADAPT COARSEN p_request_data",-1,2);
-#endif
+
+  TRACE_ADAPT("ADAPT COARSEN p_request_data");
 
   const int level = this->level();
 
@@ -727,9 +712,8 @@ void CommBlock::p_get_child_data
  int nf, int * child_face_level
  )
 {
-#ifdef DEBUG_ADAPT
-  index_.print("ADAPT COARSEN p_get_child_data",-1,2);
-#endif
+  TRACE_ADAPT("ADAPT COARSEN p_get_child_data");
+
   if (sync_coarsen_.next()) {
     const int rank = simulation()->dimension();
     ItChild it_child (rank);
@@ -738,6 +722,7 @@ void CommBlock::p_get_child_data
       Index index_child = index_.index_child(ic3);
       thisProxy[index_child].p_delete();
     }
+    children_.clear();
   }
 }
 
@@ -745,9 +730,8 @@ void CommBlock::p_get_child_data
 
 void CommBlock::p_delete()
 {
-#ifdef DEBUG_ADAPT
-  index_.print("ADAPT COARSEN p_delete",-1,2);
-#endif
+  TRACE_ADAPT("ADAPT COARSEN p_delete");
+
   thisProxy[thisIndex].ckDestroy();
 }
 
@@ -908,46 +892,21 @@ FieldFace * CommBlock::create_face_
 
 //----------------------------------------------------------------------
 
-int CommBlock::reduce_adapt_(int a1, int a2) const throw()
-{
-  int adapt = adapt_unknown;
-
-  if (a1 == adapt_unknown) 
-    adapt = a2;
-  else if (a2 == adapt_unknown) 
-    adapt = a1;
-  else if ((a1 == adapt_coarsen) && (a2 == adapt_coarsen))
-    adapt = adapt_coarsen;
-  else if ((a1 == adapt_refine)  || (a2 == adapt_refine))
-    adapt = adapt_refine;
-  else
-    adapt = adapt_same;
-
-  PARALLEL_PRINTF("reduce_adapt(%d,%d) = %d\n",a1,a2,adapt);
-  if (adapt != std::max(a1,a2)) {
-    WARNING3("reduce_adapt()",
-	     "reduce_adapt(%d,%d) != %d",a1,a2,std::max(a1,a2));
-  }
-  return adapt;
-
-}
-
-//----------------------------------------------------------------------
-
 void CommBlock::debug_faces_(const char * mesg)
 {
 #ifndef DEBUG_ADAPT
   return;
 #endif
+
   TRACE_ADAPT(mesg);
   int if3[3] = {0};
   int ic3[3] = {0};
 
   for (ic3[1]=1; ic3[1]>=0; ic3[1]--) {
     for (if3[1]=1; if3[1]>=-1; if3[1]--) {
-#ifdef DEBUG_ADAPT
-      index_.print(mesg,(simulation()->config()->mesh_max_level+1),2,true);
-#endif
+
+      index_.print(mesg,-1,2,true);
+
       for (if3[0]=-1; if3[0]<=1; if3[0]++) {
 	PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level(if3));
       }

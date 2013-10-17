@@ -10,7 +10,7 @@
 
 #ifdef CELLO_TRACE
 #define TRACE_ADAPT(MSG)			\
-  index_.print(MSG,(simulation()->config()->mesh_max_level+1),2);
+  index_.print(MSG,-1,2);
 #else
 #define TRACE_ADAPT(MSG)			\
   ; 
@@ -141,7 +141,7 @@ public: // interface
 
   /// Child notifies parent that it can (or cannot) coarsen
   void p_child_can_coarsen(int ic3[3]);
-  // void p_child_cannot_coarsen(int ic3[3]);
+  void p_child_cannot_coarsen();
 
   /// Parent requests data from child if all children can coarsen
   void p_request_data();
@@ -489,9 +489,6 @@ protected: // functions
 
   /// Allocate and copy in attributes from give CommBlock
   void copy_(const CommBlock & block) throw();
-
-  /// Return adapt_coarsen, adapt_refine, or adapt_same given two adapt results
-  int reduce_adapt_ (int a1, int a2) const throw();
 
   /// Return the (lower) indices of the CommBlock in the level, 
   /// and the number of indices
