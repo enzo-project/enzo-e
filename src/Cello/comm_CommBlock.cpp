@@ -149,7 +149,6 @@ CommBlock::CommBlock
 
   if (is_first_cycle) apply_initial_();
 
-  //  if (initial && level>0) create_mesh();
 }
 
 //----------------------------------------------------------------------
@@ -328,6 +327,7 @@ void CommBlock::index_global
 ( int *ix, int *iy, int *iz,
   int *nx, int *ny, int *nz ) const
 {
+  
   index_forest(ix,iy,iz);
   size_forest (nx,ny,nz);
 

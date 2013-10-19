@@ -47,12 +47,13 @@ module mesh {
     // @@@@@@@@@@@@@@@@@@@@ NEW ADAPT @@@@@@@@@@@@@@@@@@@@
 
 
-    entry void p_create_mesh();
+    entry void p_adapt_mesh();
     entry void p_get_neighbor_level(Index index,int ic3[3], int if3[3],
 				    int level_now, int level_new);
-    entry void p_child_can_coarsen(int ic3[3]);
+    entry void p_child_can_coarsen();
     entry void p_child_cannot_coarsen();
-    entry void p_request_data();
+    entry void p_parent_can_coarsen();
+    entry void p_parent_cannot_coarsen();
     entry void p_get_child_data(int ic3[3],
 				int na, char arr[na],
 				int nf, int child_face_level[nf]);

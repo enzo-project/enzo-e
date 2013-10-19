@@ -61,7 +61,12 @@ class Sync {
     if (index_stop_ > 0) {
       index_curr_ = (index_stop_ + (index_curr_-1) + index) % index_stop_ + 1;  
     }
-    return index_curr_ == index_stop_;
+    if (index_curr_ == index_stop_) {
+      index_curr_ = 0;
+      return true;
+    } else {
+      return false;
+    }
   }
 
   inline bool is_done () const throw()

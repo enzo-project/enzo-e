@@ -33,7 +33,7 @@
 #define WARNING7(F,M,A1,A2,A3,A4,A5,A6,A7)				\
   { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7);  }
 #define WARNING8(F,M,A1,A2,A3,A4,A5,A6,A7,A8)				\
-  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,
+  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8); }
 
 //----------------------------------------------------------------------
 /// @def      UNTESTED

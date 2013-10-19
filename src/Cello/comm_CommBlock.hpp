@@ -128,29 +128,27 @@ public: // interface
 
 #ifdef TEMP_NEW_ADAPT
 
-  void p_create_mesh() { create_mesh(); }
-  void create_mesh();
-
+  void p_adapt_mesh() { adapt_mesh(); }
   void adapt_mesh();
-  void refine();
-  void coarsen();
+
   void notify_neighbors(int level);
   void p_get_neighbor_level (Index index_debug,
 			     int ic3[3], int if3[3],
 			     int level_now, int level_new);
 
   /// Child notifies parent that it can (or cannot) coarsen
-  void p_child_can_coarsen(int ic3[3]);
+  void p_child_can_coarsen();
   void p_child_cannot_coarsen();
-
-  /// Parent requests data from child if all children can coarsen
-  void p_request_data();
-
+  /// Parent notifies children whether it can or cannot coarsen
+  void p_parent_can_coarsen();
+  void p_parent_cannot_coarsen();
   /// Child sends restricted data to parent
   void p_get_child_data(int ic3[3],
 			int na, char * array,
 			int nf, int * child_face_level);
 
+  void refine();
+  void coarsen();
   /// Parent tells child to delete itself
   void p_delete();
 
@@ -427,6 +425,9 @@ protected: // functions
   /// Initialize child face levels given own face levels
   void initialize_child_face_levels_();
 
+  /// Delete child after its data has been received
+  void delete_child_(Index index_child);
+
 #endif /* TEMP_NEW_ADAPT */
 
   /// Determine the number of adapt steps (0, 1 or initial_max_level_)
@@ -455,7 +456,7 @@ protected: // functions
 
   /// Return the face of the parent corresponding to the given face
   /// of the given child.  Inverse of loop_limits_faces_
-  void parent_face_(int ipf3[3],const int if3[3], const int ic3[3]) const;
+  bool parent_face_(int ipf3[3],const int if3[3], const int ic3[3]) const;
 
   void check_child_(const int ic3[3], const char * msg, const char * file, int line) const 
   {
@@ -522,13 +523,13 @@ protected: // functions
 
   void loop_limits_nibling_ (int ic3m[3], int ic3p[3], const int if3[3]) const throw();
 
-  FieldFace * load_face_(int * narray, char ** array,
-			 int iface[3], int ichild[3], bool lghost[3],
+  FieldFace * load_face_(int * n, char ** a,
+			 int if3[3], int ic3[3], bool lg3[3],
 			 int op_array);
-  FieldFace * store_face_(int narray, char * array,
-			 int iface[3], int ichild[3], bool lghost[3],
-			 int op_array);
-  FieldFace * create_face_(int iface[3], int ichild[3],  bool lghost[3],
+  void store_face_(int n, char * a,
+		   int if3[3], int ic3[3], bool lg3[3],
+		   int op_array);
+  FieldFace * create_face_(int if3[3], int ic3[3],  bool lg3[3],
 			   int op_array);
 
 protected: // attributes
@@ -594,6 +595,9 @@ protected: // attributes
 
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;
+
+  /// Whether self (if leaf) or parent (if not leaf) can coarsen
+  bool can_coarsen_;
 
   /// Counter for initial mesh creation
   int level_count_;
