@@ -191,6 +191,7 @@ void CommBlock::pup(PUP::er &p)
   p | child_face_level_;
   p | child_face_level_new_;
   p | count_coarsen_;
+  p | level_count_;
   p | adapt_step_;
   p | adapt_;
   p | next_phase_;

@@ -138,10 +138,8 @@ public: // interface
 
   /// Child notifies parent that it can (or cannot) coarsen
   void p_child_can_coarsen();
-  void p_child_cannot_coarsen();
   /// Parent notifies children whether it can or cannot coarsen
   void p_parent_can_coarsen();
-  void p_parent_cannot_coarsen();
   /// Child sends restricted data to parent
   void p_get_child_data(int ic3[3],
 			int na, char * array,
@@ -595,9 +593,6 @@ protected: // attributes
 
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;
-
-  /// Whether self (if leaf) or parent (if not leaf) can coarsen
-  bool can_coarsen_;
 
   /// Counter for initial mesh creation
   int level_count_;

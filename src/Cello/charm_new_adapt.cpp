@@ -161,7 +161,6 @@ void CommBlock::adapt_mesh()
   const int rank = simulation()->dimension();
   sync_coarsen_.set_stop(NC(rank));
   sync_coarsen_.clear();
-  can_coarsen_ = false;
 
   if (is_leaf()) {
 
@@ -224,10 +223,6 @@ int CommBlock::determine_adapt()
 
   }
 
-  if (adapt == adapt_coarsen) {
-    thisProxy[index_.index_parent()].p_child_can_coarsen();
-  }
-
   return adapt;
 }
 
@@ -248,9 +243,12 @@ void CommBlock::q_adapt_next()
   TRACE_LEVEL_NEW("q_adapt_next");
 
   if (is_leaf()) {
-    if (level() < level_new_) refine();
+    if (level() < level_new_) 
+      refine();
+    else if (level() > level_new_) {
+      thisProxy[index_.index_parent()].p_child_can_coarsen();
+    }
   }
-  if (can_coarsen_) coarsen();
 }
 
 //----------------------------------------------------------------------
@@ -679,12 +677,6 @@ void CommBlock::p_get_neighbor_level
 
     if (level < level_face_new - 1) {
 
-      // cannot coarsen
-      if (level_new_ < level) {
-	sync_coarsen_.set_index(-1);
-	thisProxy[index_.index_parent()].p_child_cannot_coarsen();
-      }
-
       // restrict new level to within 1 of neighbor
       level_new_ = level_face_new - 1;
       TRACE_LEVEL_NEW("p_get_neighbor_level");
@@ -720,11 +712,7 @@ void CommBlock::p_child_can_coarsen()
 
   if (sync_coarsen_.next()) {
   
-    // all children can coarsen, so parent can coarsen
-
-    can_coarsen_ = true;
-
-    // notify children
+    // notify children parent can coarsen
 
     const int rank = simulation()->dimension();
     ItChild it_child (rank);
@@ -738,34 +726,12 @@ void CommBlock::p_child_can_coarsen()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_child_cannot_coarsen()
-{
-  TRACE_ADAPT("ADAPT COARSEN p_child_cannot_coarsen()");
-  sync_coarsen_.add_index(-1);
-
-  can_coarsen_ = false;
-
-  // notify children
-
-  const int rank = simulation()->dimension();
-  ItChild it_child (rank);
-  int oc3[3];
-  while (it_child.next(oc3)) {
-    Index index_child = index_.index_child(oc3);
-    thisProxy[index_child].p_parent_cannot_coarsen();
-  }
-}
-
-//----------------------------------------------------------------------
-
 void CommBlock::p_parent_can_coarsen()
 
 // parent and all siblings can coarsen
 {
 
   TRACE_ADAPT("ADAPT COARSEN p_parent_can_coarsen()");
-
-  can_coarsen_ = true;
 
   const int level = this->level();
   if (level_new_ != level - 1) {
@@ -774,14 +740,6 @@ void CommBlock::p_parent_can_coarsen()
     notify_neighbors(level_new_);
   }
 
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::p_parent_cannot_coarsen()
-{
-  TRACE_ADAPT("ADAPT COARSEN p_parent_cannot_coarsen()");
-  can_coarsen_ = false;
 }
 
 //----------------------------------------------------------------------
