@@ -103,17 +103,23 @@
 
 const char * adapt_str[] = {"unknown","coarsen","same","refine"};
 
-// #define DEBUG_ADAPT
+#define DEBUG_ADAPT
 
 //--------------------------------------------------
 char buffer [100];
 
 #ifdef DEBUG_ADAPT
 
-#define TRACE_LEVEL_NEW(msg)						\
+#define TRACE_LEVEL_NEW(msg,LEVEL_FACE)					\
   {									\
-    sprintf (buffer,"ADAPT TRACE line %d %s level_new %d level %d",	\
-	     __LINE__, msg,level_new_,this->level());			\
+    if (LEVEL_FACE >=0 )						\
+      sprintf (buffer,							\
+	       "ADAPT TRACE line %d %s level_new %d level %d LEVEL_FACE %d", \
+	       __LINE__, msg,level_new_,this->level(),LEVEL_FACE);	\
+    else								\
+      sprintf (buffer,							\
+	       "ADAPT TRACE line %d %s level_new %d level %d",		\
+	       __LINE__, msg,level_new_,this->level());			\
     index_.print(buffer,-1,2);						\
   }
  
@@ -136,7 +142,7 @@ char buffer [100];
   }
 #else /* DEBUG_ADAPT */
 
-#define TRACE_LEVEL_NEW(msg)	/* NULL */
+#define TRACE_LEVEL_NEW(msg,LEVEL)	/* NULL */
 
 #define PUT_NEIGHBOR_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
   thisProxy[INDEX].p_get_neighbor_level (index_,IC3,IF3,LEVEL_NOW,LEVEL_NEW);
@@ -172,7 +178,7 @@ void CommBlock::adapt_mesh()
       simulation()->config()->mesh_max_level;
 
     level_new_ = desired_level_(level_maximum);
-    TRACE_LEVEL_NEW("adapt_mesh");
+    TRACE_LEVEL_NEW("adapt_mesh",-1);
     TRACE("calling notify_neighbors()");
     notify_neighbors(level_new_);
 
@@ -230,7 +236,7 @@ int CommBlock::determine_adapt()
 
 void CommBlock::q_adapt_next()
 {
-  sprintf (buffer,"ADAPT q_adapt_next(level_new = %d)",level_new_);
+  sprintf (buffer,"ADAPT DEBUG q_adapt_next(level_new = %d)",level_new_);
   TRACE_ADAPT(buffer);
 
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
@@ -240,12 +246,13 @@ void CommBlock::q_adapt_next()
 
   debug_faces_("q_adapt_next");
   
-  TRACE_LEVEL_NEW("q_adapt_next");
+  TRACE_LEVEL_NEW("q_adapt_next",-1);
 
   if (is_leaf()) {
     if (level() < level_new_) 
       refine();
     else if (level() > level_new_) {
+      index_.print("Calling p_child_can_coarsen");
       thisProxy[index_.index_parent()].p_child_can_coarsen();
     }
   }
@@ -337,49 +344,12 @@ void CommBlock::refine()
 
 //----------------------------------------------------------------------
 
-void CommBlock::coarsen()
-{
-
-  // send data to parent
-
-  TRACE_ADAPT("ADAPT COARSEN coarsen()");
-
-  const int level = this->level();
-
-  if (level > 0 && is_leaf()) {
-
-    // get parent index and child index ic3 in parent
-    Index index_parent = index_.index_parent();
-    index_parent.print("ADAPT index_parent");
-    TRACE1("ADAPT level = %d",level);
-    int ic3[3] = {1,1,1};
-    index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
-    sprintf (buffer,"ADAPT COARSEN index_child %d %d %d",ic3[0],ic3[1],ic3[2]);
-    index_.print(buffer);
-
-    // copy block data
-    int narray; 
-    char * array;
-    int iface[3] = {0,0,0};
-    bool lghost[3] = {true,true,true};
-    FieldFace * field_face = 
-      load_face_(&narray,&array, iface, ic3, lghost, op_array_restrict);
-
-    // copy face levels
-    int nf = face_level_.size();
-    int face_level[nf];
-    for (int i=0; i<nf; i++) face_level[i] = face_level_[i];
-
-    // send child data to parent
-    TRACE2("ADAPT COARSEN narray = %d nf = %d",narray,nf);
-    thisProxy[index_parent].p_get_child_data
-      (ic3, narray,array, nf,face_level);
-
-    delete field_face;
+// void CommBlock::coarsen()
+// {
 
 
-  }
-}
+//   }
+// }
  
 //----------------------------------------------------------------------
 
@@ -446,7 +416,7 @@ void CommBlock::notify_neighbors(int level_new)
 {
   // Loop over all neighobrs and (if not coarsening) tell them desired
   // refinement level
-  //  if (adapt_ != adapt_coarsen) {
+  //    if (adapt_ != adapt_coarsen) {
   if (1) {
 
     const int level        = this->level();
@@ -675,16 +645,29 @@ void CommBlock::p_get_neighbor_level
 		level,level_face);
     }
 
-    if (level < level_face_new - 1) {
+    TRACE_LEVEL_NEW("A p_get_neighbor_level",level_face_new);
+    if (level_new_ < level_face_new - 1) {
 
       // restrict new level to within 1 of neighbor
       level_new_ = level_face_new - 1;
-      TRACE_LEVEL_NEW("p_get_neighbor_level");
 
+      TRACE_LEVEL_NEW("B p_get_neighbor_level",level_face_new);
       // notify neighbors of updated level
       TRACE("calling notify_neighbors()");
       notify_neighbors(level_new_);
 
+    }
+
+    // Ensure don't coarsen if any siblings don't coarsen
+
+    // if coarsening
+    bool is_sibling = (index_debug.index_parent() == index_.index_parent());
+    bool is_coarsening = level_face_new < level;
+    sprintf (buffer,"ADAPT COARSEN match siblings is_sibling %d is_coarsening %d level %d level_face %d level new %d",
+	     is_sibling,is_coarsening,level,level_face_new,level_new_);
+    TRACE_ADAPT(buffer);
+    if (is_coarsening && is_sibling) {
+      level_new_ = std::max(level_new_,level_face_new);
     }
 
   } else { // not a leaf
@@ -707,6 +690,7 @@ void CommBlock::p_get_neighbor_level
 //----------------------------------------------------------------------
 
 void CommBlock::p_child_can_coarsen()
+// this block can coarsen: notify parent
 {
   TRACE_ADAPT("ADAPT COARSEN p_child_can_coarsen()");
 
@@ -727,19 +711,57 @@ void CommBlock::p_child_can_coarsen()
 //----------------------------------------------------------------------
 
 void CommBlock::p_parent_can_coarsen()
-
-// parent and all siblings can coarsen
+// parent can coarsen: get child data
 {
 
   TRACE_ADAPT("ADAPT COARSEN p_parent_can_coarsen()");
 
   const int level = this->level();
-  if (level_new_ != level - 1) {
-    level_new_ = level - 1;
-    TRACE("calling notify_neighbors()");
-    notify_neighbors(level_new_);
-  }
+  
+  const int rank = simulation()->dimension();
+  ItChild it_child (rank);
+  int ic3[3];
+  while (it_child.next(ic3)) {
 
+    Index index_child = index_.index_child(ic3);
+
+    // send data to parent
+
+    TRACE_ADAPT("ADAPT COARSEN coarsen()");
+
+    if (level > 0 && is_leaf()) {
+
+      // get parent index and child index ic3 in parent
+      Index index_parent = index_.index_parent();
+      index_parent.print("ADAPT index_parent");
+      TRACE1("ADAPT level = %d",level);
+      int ic3[3] = {1,1,1};
+      index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
+      sprintf (buffer,"ADAPT COARSEN index_child %d %d %d",ic3[0],ic3[1],ic3[2]);
+      index_.print(buffer);
+
+      // copy block data
+      int narray; 
+      char * array;
+      int iface[3] = {0,0,0};
+      bool lghost[3] = {true,true,true};
+      FieldFace * field_face = 
+	load_face_(&narray,&array, iface, ic3, lghost, op_array_restrict);
+
+      // copy face levels
+      int nf = face_level_.size();
+      int face_level[nf];
+      for (int i=0; i<nf; i++) face_level[i] = face_level_[i];
+
+      // send child data to parent
+      TRACE2("ADAPT COARSEN narray = %d nf = %d",narray,nf);
+      thisProxy[index_parent].p_get_child_data
+	(ic3, narray,array, nf,face_level);
+
+      delete field_face;
+
+    }
+  }
 }
 
 //----------------------------------------------------------------------
