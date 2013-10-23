@@ -146,7 +146,6 @@ public: // interface
 			int nf, int * child_face_level);
 
   void refine();
-  void coarsen();
   /// Parent tells child to delete itself
   void p_delete();
 
