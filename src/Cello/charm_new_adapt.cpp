@@ -105,6 +105,8 @@ const char * adapt_str[] = {"unknown","coarsen","same","refine"};
 
 #define DEBUG_ADAPT
 
+#define ENABLE_COARSEN
+
 //--------------------------------------------------
 char buffer [256];
 
@@ -167,6 +169,10 @@ void CommBlock::adapt_mesh()
   const int rank = simulation()->dimension();
   sync_coarsen_.set_stop(NC(rank));
   sync_coarsen_.clear();
+
+  // Assume neighbors coarsen unless updated otherwise
+  // for (int i=0; i<27; i++) face_level_new_[i] = std::max(face_level_[i] - 1,0);
+  // for (int i=0; i<NC(rank)*27; i++) child_face_level_new_[i] = std::max(child_face_level_[i] - 1,0);
 
   if (is_leaf()) {
 
@@ -249,12 +255,13 @@ void CommBlock::q_adapt_next()
   TRACE_LEVEL_NEW("q_adapt_next",-1);
 
   if (is_leaf()) {
-    if (level() < level_new_) 
-      refine();
+    if (level() < level_new_) refine();
+#ifdef ENABLE_COARSEN
     else if (level() > level_new_) {
       index_.print("Calling p_child_can_coarsen");
       thisProxy[index_.index_parent()].p_child_can_coarsen();
     }
+#endif
   }
 }
 
@@ -761,8 +768,6 @@ void CommBlock::p_get_child_data
   Index index_child = index_.index_child(ic3);
 
   delete_child_(index_child);
-
-  //  notify_neighbors_(level());
 
 }
 
