@@ -276,6 +276,7 @@ void CommBlock::q_adapt_end()
 
   if (thisIndex.is_root()) {
 
+    TRACE_ADAPT("ADAPT q_adapt_end doneInserting()");
    thisArray->doneInserting();
 
    const int initial_cycle = simulation()->config()->initial_cycle;
@@ -616,16 +617,21 @@ void CommBlock::p_get_neighbor_level
     // Don't coarsen if any siblings don't coarsen
 
     // if coarsening
-    bool is_sibling = (index_debug.index_parent() == index_.index_parent());
-    bool is_coarsening = level_new_ < level;
-    bool is_finer_neighbor = level_face_new > level_new;
-    sprintf (buffer,"ADAPT COARSEN %s match siblings sibling / coarsening / fine neighbor %d %d %d  level %d level_face %d level new %d",
-	     bit_str.c_str(),is_sibling,is_coarsening,is_finer_neighbor,level,level_face_new,level_new);
-    TRACE_ADAPT(buffer);
-    if (is_coarsening && is_sibling && is_finer_neighbor) {
-      level_new = level;
+    if (level > 0 && index_debug.level() == level) {
+#ifdef DEBUG_ADAPT      
+      index_.print("index_.index_parent()");
+      index_debug.print("index_debug.index_parent()");
+#endif
+      bool is_sibling = (index_debug.index_parent() == index_.index_parent());
+      bool is_coarsening = level_new_ < level;
+      bool is_finer_neighbor = level_face_new > level_new;
+      sprintf (buffer,"ADAPT COARSEN %s match siblings sibling / coarsening / fine neighbor %d %d %d  level %d level_face %d level new %d",
+	       bit_str.c_str(),is_sibling,is_coarsening,is_finer_neighbor,level,level_face_new,level_new);
+      TRACE_ADAPT(buffer);
+      if (is_coarsening && is_sibling && is_finer_neighbor) {
+	level_new = level;
+      }
     }
-
     // notify neighbors if level_new has changed
     if (level_new != level_new_) {
       level_new_ = level_new;
@@ -680,49 +686,41 @@ void CommBlock::p_parent_can_coarsen()
 
   const int level = this->level();
   
-  const int rank = simulation()->dimension();
-  ItChild it_child (rank);
-  int ic3[3];
-  while (it_child.next(ic3)) {
+  // send data to parent
 
-    Index index_child = index_.index_child(ic3);
+  TRACE_ADAPT("ADAPT COARSEN coarsen()");
 
-    // send data to parent
+  if (level > 0 && is_leaf()) {
 
-    TRACE_ADAPT("ADAPT COARSEN coarsen()");
+    // get parent index and child index ic3 in parent
+    Index index_parent = index_.index_parent();
+    index_parent.print("ADAPT index_parent");
+    TRACE1("ADAPT level = %d",level);
+    int ic3[3] = {1,1,1};
+    index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
+    sprintf (buffer,"ADAPT COARSEN index_child %d %d %d",ic3[0],ic3[1],ic3[2]);
+    index_.print(buffer);
 
-    if (level > 0 && is_leaf()) {
+    // copy block data
+    int narray; 
+    char * array;
+    int iface[3] = {0,0,0};
+    bool lghost[3] = {true,true,true};
+    FieldFace * field_face = 
+      load_face_(&narray,&array, iface, ic3, lghost, op_array_restrict);
 
-      // get parent index and child index ic3 in parent
-      Index index_parent = index_.index_parent();
-      index_parent.print("ADAPT index_parent");
-      TRACE1("ADAPT level = %d",level);
-      int ic3[3] = {1,1,1};
-      index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
-      sprintf (buffer,"ADAPT COARSEN index_child %d %d %d",ic3[0],ic3[1],ic3[2]);
-      index_.print(buffer);
+    // copy face levels
+    int nf = face_level_.size();
+    int face_level[nf];
+    for (int i=0; i<nf; i++) face_level[i] = face_level_[i];
 
-      // copy block data
-      int narray; 
-      char * array;
-      int iface[3] = {0,0,0};
-      bool lghost[3] = {true,true,true};
-      FieldFace * field_face = 
-	load_face_(&narray,&array, iface, ic3, lghost, op_array_restrict);
+    // send child data to parent
+    TRACE2("ADAPT COARSEN narray = %d nf = %d",narray,nf);
+    thisProxy[index_parent].p_get_child_data
+      (ic3, narray,array, nf,face_level);
 
-      // copy face levels
-      int nf = face_level_.size();
-      int face_level[nf];
-      for (int i=0; i<nf; i++) face_level[i] = face_level_[i];
+    delete field_face;
 
-      // send child data to parent
-      TRACE2("ADAPT COARSEN narray = %d nf = %d",narray,nf);
-      thisProxy[index_parent].p_get_child_data
-	(ic3, narray,array, nf,face_level);
-
-      delete field_face;
-
-    }
   }
 }
 

@@ -62,6 +62,11 @@ void CommBlock::refresh_begin()
 
     Index index_neighbor = index_.index_neighbor(if3[0],if3[1],if3[2],n3);
 
+    TRACE0;
+    TRACE4("ADAPT CRASH if3 %d %d %d level %d",if3[0],if3[1],if3[2],level);
+#ifdef CELLO_TRACE
+    index_.print("ADAPT CRASH");
+#endif
     if (face_level(if3) == level-1) {       // COARSE
 
       int ic3[3];

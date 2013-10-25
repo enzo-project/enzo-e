@@ -125,6 +125,9 @@ CommBlock * EnzoFactory::create_block
      num_face_level, face_level,
      testing);
 
+#ifdef CELLO_TRACE
+  index.print("ADAPT REFINE insert()");
+#endif
   CommBlock * block = (*enzo_block_array)[index].ckLocal();
   TRACE1("block = %p",block);
   //  ASSERT("Factory::create_block()","block is NULL",block != NULL);
