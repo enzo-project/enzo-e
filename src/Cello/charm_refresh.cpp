@@ -12,6 +12,8 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+static char buffer[256];
+
 //----------------------------------------------------------------------
 
 // void CommBlock::p_refresh_begin() 
@@ -20,7 +22,8 @@ void CommBlock::refresh_begin()
   switch_performance_(perf_refresh,__FILE__,__LINE__);
 
 #ifdef CELLO_TRACE
-  index_.print("BEGIN PHASE REFRESH",-1,2);
+  sprintf (buffer,"BEGIN PHASE REFRESH(%p)",this);
+   index_.print(buffer,-1,2);
 #endif
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -30,8 +33,6 @@ void CommBlock::refresh_begin()
   std::string refresh_type = config->field_refresh_type;
 
   if (refresh_type == "quiescence") {
-
-    TRACE("REFRESH Setting refresh quiescence detection callback");
 
     CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
 			  thisProxy[thisIndex]));
@@ -101,7 +102,6 @@ void CommBlock::refresh_begin()
 	}
       }
     } else {
-      char buffer[80];
       sprintf (buffer,"REFRESH ERROR face %d %d %d level %d",
 	       if3[0],if3[1],if3[2],level);
       index_.print(buffer);

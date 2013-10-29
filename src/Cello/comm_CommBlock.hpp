@@ -12,7 +12,8 @@
 
 #ifdef CELLO_TRACE
 #define TRACE_ADAPT(MSG)			\
-  index_.print(MSG,-1,2);
+  index_.print(MSG,-1,2);			\
+  TRACE1("this = %p",this);
 #else
 #define TRACE_ADAPT(MSG)			\
   ; 
@@ -211,8 +212,12 @@ public: // interface
   int determine_adapt();
   /// Update the depth of the given child
   void p_print(std::string message) {  
-    index().print(message.c_str());
-    TRACE2("%s level %d",message.c_str(),level());
+#ifdef DEBUG_ADAPT
+    char buffer[255];
+    sprintf (buffer,"%s [%p]",message.c_str(),this);
+    index().print(buffer);
+    TRACE2("%s level %d",buffer,level());
+#endif
   }
 
   const int & face_level (const int if3[3]) const

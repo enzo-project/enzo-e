@@ -305,7 +305,8 @@ void OutputImage::write_block
       }
     }
 
-  } else if (image_type_ == "data") {
+  }
+    //  } else if (image_type_ == "data") {
 
     if (! comm_block->is_leaf()) return;
     // for each cell
@@ -360,7 +361,7 @@ void OutputImage::write_block
     // } else {
     //   ((double*)field)[0] = saved;
     // }
-  }
+    //  }
 }
 
 //----------------------------------------------------------------------

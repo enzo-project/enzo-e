@@ -103,12 +103,10 @@
 
 const char * adapt_str[] = {"unknown","coarsen","same","refine"};
 
-#define DEBUG_ADAPT
-
-#define ENABLE_COARSEN
+// #define DEBUG_ADAPT
 
 //--------------------------------------------------
-char buffer [256];
+static char buffer [256];
 
 #ifdef DEBUG_ADAPT
 
@@ -203,7 +201,10 @@ int CommBlock::desired_level_(int level_maximum)
 
   adapt_ = determine_adapt();
 
-  if (adapt_ == adapt_coarsen && level > 0) 
+  const int initial_cycle = simulation()->config()->initial_cycle;
+  const bool is_first_cycle = (initial_cycle == cycle());
+
+  if (adapt_ == adapt_coarsen && level > 0 && ! is_first_cycle) 
     level_desired = level - 1;
   else if (adapt_ == adapt_refine  && level < level_maximum) 
     level_desired = level + 1;
@@ -245,8 +246,11 @@ void CommBlock::q_adapt_next()
   sprintf (buffer,"ADAPT DEBUG q_adapt_next(level_new = %d)",level_new_);
   TRACE_ADAPT(buffer);
 
-  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
-			thisProxy[thisIndex]));
+  if (! is_leaf() || level() <= level_new_) {
+    // Defer QD for CommBlocks that may possibly coarsen until known
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
+			  thisProxy[thisIndex]));
+  }
 
   update_levels_();
 
@@ -255,13 +259,15 @@ void CommBlock::q_adapt_next()
   TRACE_LEVEL_NEW("q_adapt_next",-1);
 
   if (is_leaf()) {
-    if (level() < level_new_) refine();
-#ifdef ENABLE_COARSEN
-    else if (level() > level_new_) {
-      index_.print("Calling p_child_can_coarsen");
+    if (level() < level_new_) {
+      refine();
+    } else if (level() > level_new_) {
+#ifdef DEBUG_ADAPT
+      sprintf (buffer,"Calling p_child_can_coarsen cycle %d",cycle());
+      index_.print(buffer);
+#endif
       thisProxy[index_.index_parent()].p_child_can_coarsen();
     }
-#endif
   }
 }
 
@@ -276,18 +282,20 @@ void CommBlock::q_adapt_end()
 
   if (thisIndex.is_root()) {
 
-    TRACE_ADAPT("ADAPT q_adapt_end doneInserting()");
-   thisArray->doneInserting();
+    thisArray->doneInserting();
 
-   const int initial_cycle = simulation()->config()->initial_cycle;
-   const bool is_first_cycle = (initial_cycle == cycle());
-   const int level_maximum = simulation()->config()->initial_max_level;
+    const int initial_cycle = simulation()->config()->initial_cycle;
+    const bool is_first_cycle = (initial_cycle == cycle());
+    const int level_maximum = simulation()->config()->initial_max_level;
 
-   if (is_first_cycle && level_count_++ < level_maximum) {
-     thisProxy.p_adapt_mesh();
-   } else {
-     thisProxy.p_refresh_begin();
-   }
+    if (is_first_cycle && level_count_++ < level_maximum) {
+      thisProxy.p_adapt_mesh();
+    } else {
+#ifdef DEBUG_ADAPT
+      index_.print("Calling thisProxy.p_refresh_begin()");
+#endif
+      thisProxy.p_refresh_begin();
+    }
   }
 }
 //----------------------------------------------------------------------
@@ -694,12 +702,13 @@ void CommBlock::p_parent_can_coarsen()
 
     // get parent index and child index ic3 in parent
     Index index_parent = index_.index_parent();
-    index_parent.print("ADAPT index_parent");
     TRACE1("ADAPT level = %d",level);
     int ic3[3] = {1,1,1};
     index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
+#ifdef DEBUG_ADAPT
     sprintf (buffer,"ADAPT COARSEN index_child %d %d %d",ic3[0],ic3[1],ic3[2]);
     index_.print(buffer);
+#endif
 
     // copy block data
     int narray; 
@@ -749,11 +758,6 @@ void CommBlock::p_get_child_data
   int of3[3];
   while (it_face.next(of3)) {
     int level_child = child_face_level[IF3(of3)];
-    if (level_child < 0 || level_child > 4) {
-      WARNING8("CommBlock::p_get_child_data",
-	      "level_child %d index %d for child %d %d %d  face %d %d %d out of range",
-	       level_child,ICF3(ic3,of3),ic3[0],ic3[1],ic3[2],of3[0],of3[1],of3[2]);
-    }
     set_child_face_level(ic3,of3,level_child);
     int opf3[3];
     if (parent_face_(opf3,of3,ic3)) {

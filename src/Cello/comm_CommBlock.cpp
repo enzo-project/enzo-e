@@ -44,8 +44,6 @@ CommBlock::CommBlock
   next_phase_(phase_output),
   coarsened_(false)
 {
-  TRACE_ADAPT("ADAPT A0 CommBlock()");
-
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
 
@@ -222,7 +220,6 @@ void CommBlock::apply_initial_() throw ()
 
 CommBlock::~CommBlock() throw ()
 { 
-
   const int level = this->level();
 
   if (level > 0) {
