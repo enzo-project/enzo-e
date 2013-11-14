@@ -300,10 +300,19 @@ void Index::print (const char * msg,
 		   int rank,
 		   bool no_nl) const
 {
+#ifdef CELLO_DEBUG
+  char buffer[40];
+  sprintf(buffer,"out.debug.%03d",CkMyPe());
+  FILE * fp = fopen (buffer,"a");
+#endif
+
   const int level = this->level();
 
   if (max_level == -1) max_level = level;
 
+  // #ifdef CELLO_DEBUG
+  // fprintf (fp,"INDEX %d %d: ",level,max_level);
+  // #endif
   //  PARALLEL_PRINTF ("INDEX %d %d: ",level,max_level);
 
   int nb = 0;
@@ -312,30 +321,62 @@ void Index::print (const char * msg,
     nb = std::max(nb,num_bits_(a_[axis].array));
   }
 
+#ifdef CELLO_DEBUG
+  fprintf (fp,"[ ");
+#endif
   PARALLEL_PRINTF ("[ ");
   for (int axis=0; axis<rank; axis++) {
 
-    print_bits_(a_[axis].array,nb);
+  for (int i=nb; i>=0; i--) {
+    int bit = (a_[axis].array & ( 1 << i));
+#ifdef CELLO_DEBUG
+    if (fp != NULL) fprintf (fp,"%d",bit?1:0);
+#endif
+    PARALLEL_PRINTF ("%d",bit?1:0);
+  }
 
+#ifdef CELLO_DEBUG
+    fprintf (fp,":");
+#endif
     PARALLEL_PRINTF (":");
 
     for (int i=0; i<max_level; i++) {
       if (i < level) {
       int ic3[3];
       child (i+1, &ic3[0], &ic3[1], &ic3[2]);
+#ifdef CELLO_DEBUG
+      fprintf (fp,"%d",ic3[axis]);
+#endif
       PARALLEL_PRINTF ("%d",ic3[axis]);
-      } else PARALLEL_PRINTF (" ");
+      } else {
+#ifdef CELLO_DEBUG
+	fprintf (fp," ");
+#endif
+	PARALLEL_PRINTF (" ");
+      }
 	
     }
+#ifdef CELLO_DEBUG
+    fprintf (fp," ");
+#endif
     PARALLEL_PRINTF (" ");
       
   }
+#ifdef CELLO_DEBUG
+  fprintf (fp,"] ");
+#endif
   PARALLEL_PRINTF ("] ");
 
 
+#ifdef CELLO_DEBUG
+  fprintf (fp, (no_nl ? "%s " : "%s\n"),msg);
+#endif
   PARALLEL_PRINTF ( (no_nl ? "%s " : "%s\n"),msg);
 
   fflush(stdout);
+#ifdef CELLO_DEBUG
+  fclose (fp);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -361,7 +402,10 @@ void Index::write (int ip,
 
   for (int axis=0; axis<rank; axis++) {
 
-    write_bits_(fp,a_[axis].array,nb);
+    for (int i=nb; i>=0; i--) {
+      int bit = (a_[axis].array & ( 1 << i));
+      fprintf (fp,"%d",bit?1:0);
+    }
 
     fprintf (fp,":");
 
@@ -389,26 +433,6 @@ int Index::num_bits_(int value) const
     ;
   return (std::max(nb,0));
 
-}
-
-//----------------------------------------------------------------------
-
-void Index::print_bits_(int value, int nb) const
-{
-  for (int i=nb; i>=0; i--) {
-    int bit = (value & ( 1 << i));
-    PARALLEL_PRINTF ("%d",bit?1:0);
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Index::write_bits_(FILE * fp,int value, int nb) const
-{
-  for (int i=nb; i>=0; i--) {
-    int bit = (value & ( 1 << i));
-    fprintf (fp,"%d",bit?1:0);
-  }
 }
 
 //----------------------------------------------------------------------

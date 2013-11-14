@@ -163,9 +163,7 @@ public:
 private: // functions
 
   int num_bits_(int value) const;
-  void print_bits_(int value, int nb) const;
-  void write_bits_(FILE * fp, int value, int nb) const;
-
+	
   inline void copy_ (const Index & index)
   {
     a_[0] = index.a_[0];

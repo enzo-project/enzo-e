@@ -105,6 +105,8 @@ void CommBlock::refresh_begin()
       sprintf (buffer,"REFRESH ERROR face %d %d %d level %d",
 	       if3[0],if3[1],if3[2],level);
       index_.print(buffer);
+      ERROR("CommBlock::refresh_begin()",
+	    "Refresh error");
     }
 
   }

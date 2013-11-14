@@ -185,6 +185,7 @@ void CommBlock::adapt_mesh()
 
   }
 
+  index_.print("BEGIN q_adapt_next()");
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_next(), 
 			thisProxy[thisIndex]));
 }
@@ -240,13 +241,12 @@ int CommBlock::determine_adapt()
 
 void CommBlock::q_adapt_next()
 {
+  index_.print("END   q_adapt_next()");
   sprintf (buffer,"ADAPT DEBUG q_adapt_next(level_new = %d)",level_new_);
   TRACE_ADAPT(buffer);
 
   //  if (! is_leaf() || level() <= level_new_) {
     // Defer QD for CommBlocks that may possibly coarsen until known
-  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
-			thisProxy[thisIndex]));
     //  }
 
   update_levels_();
@@ -266,6 +266,9 @@ void CommBlock::q_adapt_next()
       thisProxy[index_.index_parent()].p_child_can_coarsen();
     }
   }
+    index_.print("BEGIN q_adapt_end()");
+  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
+			thisProxy[thisIndex]));
 }
 
 //----------------------------------------------------------------------
@@ -273,6 +276,7 @@ void CommBlock::q_adapt_next()
 void CommBlock::q_adapt_end()
 {
 
+  index_.print("END   q_adapt_end()");
   if (delete_) {
     thisProxy[thisIndex].ckDestroy();
     return;
@@ -281,12 +285,11 @@ void CommBlock::q_adapt_end()
   sprintf (buffer,"END ADAPT adapt_mesh(%p)",this);
   index_.print(buffer,-1,2);
 
-  
-  TRACE_ADAPT("ADAPT q_adapt_end");
-
   next_phase_ = phase_output;
 
   if (thisIndex.is_root()) {
+
+    index_.print("DEBUG doneInserting()");
 
     thisArray->doneInserting();
 

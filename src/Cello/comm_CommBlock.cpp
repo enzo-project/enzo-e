@@ -148,13 +148,10 @@ CommBlock::CommBlock
 
   if (is_first_cycle) {
     apply_initial_();
-  } else {
-
+  } else if (level > 0) {
     CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
 			  thisProxy[thisIndex]));
   }
-  
-
 }
 
 //----------------------------------------------------------------------

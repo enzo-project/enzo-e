@@ -52,17 +52,22 @@ public: // functions
   /// Add a new CommBlock to this local branch
   inline void insert_block() 
   {
+    PARALLEL_PRINTF ("%d: ++block_sync_ %d\n",  CkMyPe(),block_sync_.stop());
     ++block_sync_;
   }
 
   /// Remove a CommBlock from this local branch
   inline void delete_block() 
   {
+    PARALLEL_PRINTF ("%d: --block_sync_ %d\n",  CkMyPe(),block_sync_.stop());
     --block_sync_; 
   }
 
   inline int block_count() const
-  { return block_sync_.stop(); }
+  { 
+    PARALLEL_PRINTF ("%d: block_sync_ %d\n",  CkMyPe(),block_sync_.stop());
+    return block_sync_.stop(); 
+  }
 
   /// Call initialize()
   void p_initialize_begin();
