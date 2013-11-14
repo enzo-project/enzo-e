@@ -280,11 +280,14 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
 
 void CommBlock::q_refresh_end()
 {
+
+  sprintf (buffer,"END PHASE REFRESH(%p)",this);
   if (next_phase_ == phase_output) {
-    TRACE("refresh calling output");
+    index_.print(buffer,-1,2);
+    index_.print("refresh calling output");
     prepare();
   } else if (next_phase_ == phase_adapt) {
-    TRACE("refresh calling adapt");
+    index_.print("refresh calling adapt");
 #ifdef TEMP_NEW_ADAPT
     adapt_mesh();
 #else /* TEMP_NEW_ADAPT */

@@ -42,7 +42,8 @@ CommBlock::CommBlock
   adapt_step_(num_adapt_steps),
   adapt_(adapt_unknown),
   next_phase_(phase_output),
-  coarsened_(false)
+  coarsened_(false),
+  delete_(false)
 {
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
@@ -145,7 +146,14 @@ CommBlock::CommBlock
   int initial_cycle = simulation()->config()->initial_cycle;
   bool is_first_cycle = (initial_cycle == cycle);
 
-  if (is_first_cycle) apply_initial_();
+  if (is_first_cycle) {
+    apply_initial_();
+  } else {
+
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
+			  thisProxy[thisIndex]));
+  }
+  
 
 }
 
@@ -194,6 +202,7 @@ void CommBlock::pup(PUP::er &p)
   p | adapt_;
   p | next_phase_;
   p | coarsened_;
+  p | delete_;
 
 }
 
@@ -509,13 +518,14 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   block_->copy_(*comm_block.block());
   if (child_block_) child_block_->copy_(*comm_block.child_block());
 
-  cycle_ = comm_block.cycle_;
-  time_  = comm_block.time_;
-  dt_    = comm_block.dt_;
+  cycle_      = comm_block.cycle_;
+  time_       = comm_block.time_;
+  dt_         = comm_block.dt_;
   adapt_step_ = comm_block.adapt_step_;
-  adapt_ = comm_block.adapt_;
+  adapt_      = comm_block.adapt_;
   next_phase_ = comm_block.next_phase_;
-  coarsened_ = comm_block.coarsened_;
+  coarsened_  = comm_block.coarsened_;
+  delete_     = comm_block.delete_;
 }
 
 //----------------------------------------------------------------------

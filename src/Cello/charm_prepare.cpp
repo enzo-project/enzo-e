@@ -24,7 +24,7 @@
 
 void CommBlock::prepare()
 {
-
+  index_.print("BEGIN prepare()");
   switch_performance_(perf_prepare,__FILE__,__LINE__);
 
   TRACE1("CommBlock::prepare() %p",&thisProxy);
@@ -86,6 +86,7 @@ void CommBlock::prepare()
   
   CkCallback callback (CkIndex_CommBlock::p_output(NULL), thisProxy);
   TRACE1("Calling contribute %d",2*sizeof(double));
+  index_.print("contribute()");
   contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
 
   //  performance->stop_region(perf_prepare);

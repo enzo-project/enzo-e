@@ -622,7 +622,9 @@ protected: // attributes
 
   /// whether CommBlock has been coarsened and should be deleted
   bool coarsened_;
-  
+
+  /// Whether CommBlock is marked for deletion
+  bool delete_;
 
 };
 

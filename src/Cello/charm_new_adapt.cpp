@@ -161,16 +161,13 @@ static char buffer [256];
 void CommBlock::adapt_mesh()
 {
 
-  sprintf (buffer,"BEGIN ADAPT adapt_mesh(%d)",cycle_);
+  sprintf (buffer,"BEGIN ADAPT adapt_mesh(%p)",this);
   TRACE_ADAPT(buffer);
+  index_.print(buffer,-1,2);
 
   const int rank = simulation()->dimension();
   sync_coarsen_.set_stop(NC(rank));
   sync_coarsen_.clear();
-
-  // Assume neighbors coarsen unless updated otherwise
-  // for (int i=0; i<27; i++) face_level_new_[i] = std::max(face_level_[i] - 1,0);
-  // for (int i=0; i<NC(rank)*27; i++) child_face_level_new_[i] = std::max(child_face_level_[i] - 1,0);
 
   if (is_leaf()) {
 
@@ -246,11 +243,11 @@ void CommBlock::q_adapt_next()
   sprintf (buffer,"ADAPT DEBUG q_adapt_next(level_new = %d)",level_new_);
   TRACE_ADAPT(buffer);
 
-  if (! is_leaf() || level() <= level_new_) {
+  //  if (! is_leaf() || level() <= level_new_) {
     // Defer QD for CommBlocks that may possibly coarsen until known
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
-			  thisProxy[thisIndex]));
-  }
+  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
+			thisProxy[thisIndex]));
+    //  }
 
   update_levels_();
 
@@ -276,6 +273,15 @@ void CommBlock::q_adapt_next()
 void CommBlock::q_adapt_end()
 {
 
+  if (delete_) {
+    thisProxy[thisIndex].ckDestroy();
+    return;
+  }
+
+  sprintf (buffer,"END ADAPT adapt_mesh(%p)",this);
+  index_.print(buffer,-1,2);
+
+  
   TRACE_ADAPT("ADAPT q_adapt_end");
 
   next_phase_ = phase_output;
@@ -779,7 +785,8 @@ void CommBlock::p_delete()
 {
   TRACE_ADAPT("ADAPT COARSEN p_delete()");
 
-  thisProxy[thisIndex].ckDestroy();
+  //  thisProxy[thisIndex].ckDestroy();
+  delete_ = true;
 }
 
 //----------------------------------------------------------------------

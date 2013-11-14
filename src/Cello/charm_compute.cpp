@@ -43,8 +43,8 @@ void SimulationCharm::c_compute()
 void CommBlock::p_compute (int cycle, double time, double dt)
 {
 #ifdef CELLO_TRACE
-  index_.print("BEGIN PHASE COMPUTE p_compute()",-1,2);
 #endif
+  index_.print("BEGIN PHASE COMPUTE p_compute()",-1,2);
 
   // set_cycle(cycle);
   // set_time(time);
