@@ -45,6 +45,7 @@ CommBlock::CommBlock
   coarsened_(false),
   delete_(false)
 {
+  index_.print("CommBlock()");
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
 
@@ -226,6 +227,8 @@ void CommBlock::apply_initial_() throw ()
 
 CommBlock::~CommBlock() throw ()
 { 
+  index_.print("~CommBlock()");
+
   const int level = this->level();
 
   if (level > 0) {

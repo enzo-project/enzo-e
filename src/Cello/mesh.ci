@@ -39,6 +39,7 @@ module mesh {
 
     entry CommBlock();	
 
+    entry void p_hello (std::string);
     entry void p_write (int index_output);
     entry void p_compute(int cycle, double time, double dt);
     entry void p_read (int index_input);

@@ -106,6 +106,11 @@ public: // interface
   /// Index of the CommBlock
   const Index & index() const { return index_; }
 
+  /// Print a hello message for debugging
+  void p_hello(std::string message)
+  { 
+    index_.print(message.c_str());
+  }
   /// Initialize CommBlock for the simulation.
   void p_initial();
 

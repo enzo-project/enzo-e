@@ -102,6 +102,7 @@
 
 void CommBlock::p_output(CkReductionMsg * msg)
 {
+  
   switch_performance_ (perf_output,__FILE__,__LINE__);
 
   index_.print("BEGIN PHASE OUTPUT");

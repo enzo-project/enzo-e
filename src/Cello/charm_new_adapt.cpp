@@ -103,7 +103,7 @@
 
 const char * adapt_str[] = {"unknown","coarsen","same","refine"};
 
-// #define DEBUG_ADAPT
+#define DEBUG_ADAPT
 
 //--------------------------------------------------
 static char buffer [256];
@@ -278,7 +278,9 @@ void CommBlock::q_adapt_end()
 
   index_.print("END   q_adapt_end()");
   if (delete_) {
+    index_.print("ckDestroy()");
     thisProxy[thisIndex].ckDestroy();
+    //     thisArray->doneInserting();
     return;
   }
 
@@ -296,6 +298,8 @@ void CommBlock::q_adapt_end()
     const int initial_cycle = simulation()->config()->initial_cycle;
     const bool is_first_cycle = (initial_cycle == cycle());
     const int level_maximum = simulation()->config()->initial_max_level;
+
+    thisProxy.p_hello("Hello: q_adapt_end()");
 
     if (is_first_cycle && level_count_++ < level_maximum) {
       thisProxy.p_adapt_mesh();
