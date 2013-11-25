@@ -280,7 +280,12 @@ void CommBlock::q_adapt_end()
   if (delete_) {
     index_.print("ckDestroy()");
     thisProxy[thisIndex].ckDestroy();
+
+    index_.print("DEBUG doneInserting()");
+    thisArray->doneInserting();
+
     //     thisArray->doneInserting();
+
     return;
   }
 
@@ -288,6 +293,10 @@ void CommBlock::q_adapt_end()
   index_.print(buffer,-1,2);
 
   next_phase_ = phase_output;
+
+  //  index_.print("DEBUG doneInserting()");
+
+  //  thisArray->doneInserting();
 
   if (thisIndex.is_root()) {
 
