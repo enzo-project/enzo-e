@@ -290,12 +290,7 @@ void CommBlock::q_refresh_end()
     prepare();
   } else if (next_phase_ == phase_adapt) {
     index_.print("refresh calling adapt");
-#ifdef TEMP_NEW_ADAPT
     adapt_mesh();
-#else /* TEMP_NEW_ADAPT */
-    adapt_begin();
-#endif /* TEMP_NEW_ADAPT */
-
   } else {
     index_.print("ERROR");
     ERROR1 ("CommBlock::q_refresh_end()",

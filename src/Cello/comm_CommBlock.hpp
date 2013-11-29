@@ -134,8 +134,6 @@ public: // interface
   /// Entry function after prepare() to call Simulation::p_output()
   void p_output(CkReductionMsg * msg);
 
-#ifdef TEMP_NEW_ADAPT
-
   void p_adapt_mesh() { adapt_mesh(); }
   void adapt_mesh();
 
@@ -159,60 +157,6 @@ public: // interface
 
   void q_adapt_next ();
   void q_adapt_end ();
-
-#else /* TEMP_NEW_ADAPT */
-
-  inline void p_adapt_begin()
-  { adapt_begin(); }
-
-  /// Begin the adapt phase of one or more adapt steps
-  void adapt_begin();
-
-  /// End the adapt phase after coarsening
-  void q_adapt_end ();
-
-  /// Exit the adapt phase after QD
-  void adapt_exit();
-  inline void q_adapt_exit ()
-  { adapt_exit(); }
-
-  /// Begin a single adapt refine step
-
-  inline void p_adapt_start ()
-  { adapt_start(); }
-
-  void adapt_start();
-
-  /// Start the adapt coarsen step
-  void q_adapt_next ();
-  /// Stop the adapt step
-  void q_adapt_stop ();
-
-  void p_set_face_level (int if3[3], int level, int recurse, int type)
-  {  set_face_level(if3,level,recurse,type);  }
-
-  void set_face_level (int if3[3], int level, int recurse, int type);
-
-  /// entry call to refine() for balancing
-  void p_refine()
-  { refine(); }
-
-  /// Refine the CommBlock
-  void refine();
-
-  /// the CommBlock may be coarsened
-  void coarsen();
-  /// Determine whether the CommBlock can be coarsened
-  bool can_coarsen() const;
-  /// Determine whether the CommBlock can be refined
-  bool can_refine() const;
-
-  void p_child_can_coarsen(int ichild[3],
-			   int na, char * array,
-			   int nf, int * child_face_level);
-  void p_parent_coarsened();
-
-#endif /* TEMP_NEW_ADAPT */
 
   int determine_adapt();
   /// Update the depth of the given child
@@ -433,8 +377,6 @@ protected: // functions
 
   Index neighbor_ (const int if3[3], Index * ind = 0) const;
 
-#ifdef TEMP_NEW_ADAPT
-
   /// Return the CommBlock's desired refinement level based on
   /// local refinement criteria
   int desired_level_(int level_maximum);
@@ -444,8 +386,6 @@ protected: // functions
 
   /// Delete child after its data has been received
   void delete_child_(Index index_child);
-
-#endif /* TEMP_NEW_ADAPT */
 
   /// Determine the number of adapt steps (0, 1 or initial_max_level_)
   void get_num_adapt_steps_();
@@ -563,10 +503,8 @@ protected: // attributes
   /// Index of this CommBlock in the octree forest
   Index index_;
 
-#ifdef TEMP_NEW_ADAPT  
   /// Desired level for the next cycle
   int level_new_;
-#endif /* TEMP_NEW_ADAPT */
   
   //--------------------------------------------------
 

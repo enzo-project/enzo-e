@@ -116,10 +116,6 @@ print
 
 define = {}
 
-# Temporary defines
-
-define_new_adapt = ['TEMP_NEW_ADAPT']
-
 # Precision defines
 
 define["single"] =    ['CONFIG_PRECISION_SINGLE']
@@ -166,11 +162,6 @@ else:
 
 defines = defines + define_hdf5
 defines = defines + define_png
-
-# Temporary configurations
-
-if (new_adapt == 1): 
-   defines = defines + define_new_adapt
 
 charm_perf = ''
 

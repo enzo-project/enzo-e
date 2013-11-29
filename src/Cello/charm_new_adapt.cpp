@@ -99,8 +99,6 @@
 ///
 ///----------------------------------------------------------------------
 
-#ifdef TEMP_NEW_ADAPT
-
 const char * adapt_str[] = {"unknown","coarsen","same","refine"};
 
 #define DEBUG_ADAPT
@@ -1001,5 +999,4 @@ void CommBlock::debug_faces_(const char * mesg)
     }
   }
 }
-#endif /* #ifdef TEMP_NEW_ADAPT */
 
