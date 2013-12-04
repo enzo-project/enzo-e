@@ -264,7 +264,7 @@ void CommBlock::q_adapt_next()
       thisProxy[index_.index_parent()].p_child_can_coarsen();
     }
   }
-    index_.print("BEGIN q_adapt_end()");
+  index_.print("BEGIN q_adapt_end()");
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
 			thisProxy[thisIndex]));
 }
@@ -397,74 +397,68 @@ void CommBlock::delete_child_(Index index_child)
 
 void CommBlock::notify_neighbors(int level_new)
 {
-  // Loop over all neighobrs and (if not coarsening) tell them desired
-  // refinement level
-  //    if (adapt_ != adapt_coarsen) {
-  if (1) {
+  const int level        = this->level();
+  const int rank         = simulation()->dimension();
+  const int rank_refresh = simulation()->config()->field_refresh_rank;
 
-    const int level        = this->level();
-    const int rank         = simulation()->dimension();
-    const int rank_refresh = simulation()->config()->field_refresh_rank;
+  ItFace it_face(rank,rank_refresh);
+  int of3[3];
 
-    ItFace it_face(rank,rank_refresh);
-    int of3[3];
+  while (it_face.next(of3)) {
 
-    while (it_face.next(of3)) {
+    int ic3[3] = {0,0,0};
 
-      int ic3[3] = {0,0,0};
+    Index index_neighbor = neighbor_(of3);
 
-      Index index_neighbor = neighbor_(of3);
+    const int level_face = face_level (of3);
 
-      const int level_face = face_level (of3);
+    if (level_face == level) {
 
-      if (level_face == level) {
+      // (X) SEND-SAME: Face and level are sent to unique
+      // neighboring block in the same level
 
-	// (X) SEND-SAME: Face and level are sent to unique
-	// neighboring block in the same level
+      PUT_NEIGHBOR_LEVEL(index_neighbor,ic3,of3,level,level_new,"send-same");
 
-	PUT_NEIGHBOR_LEVEL(index_neighbor,ic3,of3,level,level_new,"send-same");
+    } else if (level_face == level - 1) {
 
-      } else if (level_face == level - 1) {
-
-	// (X) SEND-COARSE: Face, level, and child indices are sent to
-	// unique neighboring block in the next-coarser level
+      // (X) SEND-COARSE: Face, level, and child indices are sent to
+      // unique neighboring block in the next-coarser level
 
 
-	index_.child (level,&ic3[0],&ic3[1],&ic3[2]);
+      index_.child (level,&ic3[0],&ic3[1],&ic3[2]);
 
-	int op3[3];
-	parent_face_(op3,of3,ic3);
+      int op3[3];
+      parent_face_(op3,of3,ic3);
 
-	// avoid redundant calls
-	if (op3[0]==of3[0] && 
-	    op3[1]==of3[1] && 
-	    op3[2]==of3[2]) {
+      // avoid redundant calls
+      if (op3[0]==of3[0] && 
+	  op3[1]==of3[1] && 
+	  op3[2]==of3[2]) {
 
-	  Index index_uncle = index_neighbor.index_parent();
-	  PUT_NEIGHBOR_LEVEL(index_uncle,ic3,of3,level,level_new,"send-coarse");
+	Index index_uncle = index_neighbor.index_parent();
+	PUT_NEIGHBOR_LEVEL(index_uncle,ic3,of3,level,level_new,"send-coarse");
 
-	}
-
-      } else if (level_face == level + 1) {
-
-	// (X) SEND_FINE: Face and level are sent to all nibling
-	// blocks in the next-finer level along the face.
-
-	const int if3[3] = {-of3[0],-of3[1],-of3[2]};
-	ItChild it_child(rank,if3);
-	while (it_child.next(ic3)) {
-	  Index index_nibling = index_neighbor.index_child(ic3);
-	  PUT_NEIGHBOR_LEVEL(index_nibling,ic3,of3,level,level_new,"send-fine");
-    	}
-
-      } else {
-	std::string bit_str = index_.bit_string(-1,2);
-	WARNING3 ("CommBlock::notify_neighbor()",
-		"%s level %d and face level %d differ by more than 1",
-		bit_str.c_str(),level,level_face);
       }
 
+    } else if (level_face == level + 1) {
+
+      // (X) SEND_FINE: Face and level are sent to all nibling
+      // blocks in the next-finer level along the face.
+
+      const int if3[3] = {-of3[0],-of3[1],-of3[2]};
+      ItChild it_child(rank,if3);
+      while (it_child.next(ic3)) {
+	Index index_nibling = index_neighbor.index_child(ic3);
+	PUT_NEIGHBOR_LEVEL(index_nibling,ic3,of3,level,level_new,"send-fine");
+      }
+
+    } else {
+      std::string bit_str = index_.bit_string(-1,2);
+      WARNING3 ("CommBlock::notify_neighbor()",
+		"%s level %d and face level %d differ by more than 1",
+		bit_str.c_str(),level,level_face);
     }
+
   }
 }
 
