@@ -310,10 +310,10 @@ void Index::print (const char * msg,
 
   if (max_level == -1) max_level = level;
 
-  // #ifdef CELLO_DEBUG
-  // fprintf (fp,"INDEX %d %d: ",level,max_level);
-  // #endif
-  //  PARALLEL_PRINTF ("INDEX %d %d: ",level,max_level);
+#ifdef CELLO_DEBUG
+  fprintf (fp,"%p ",this);
+#endif
+  PARALLEL_PRINTF ("%p ",this);
 
   int nb = 0;
 
@@ -321,6 +321,7 @@ void Index::print (const char * msg,
     nb = std::max(nb,num_bits_(a_[axis].array));
   }
 
+  
 #ifdef CELLO_DEBUG
   fprintf (fp,"[ ");
 #endif

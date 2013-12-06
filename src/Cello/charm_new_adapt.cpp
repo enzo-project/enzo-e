@@ -280,7 +280,7 @@ void CommBlock::q_adapt_end()
     thisProxy[thisIndex].ckDestroy();
 
     index_.print("DEBUG doneInserting()");
-    thisArray->doneInserting();
+    //    thisArray->doneInserting();
 
     //     thisArray->doneInserting();
 
