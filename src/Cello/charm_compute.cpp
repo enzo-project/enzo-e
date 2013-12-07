@@ -42,9 +42,9 @@ void SimulationCharm::c_compute()
 
 void CommBlock::p_compute (int cycle, double time, double dt)
 {
-#ifdef CELLO_TRACE
-#endif
-  index_.print("BEGIN PHASE COMPUTE p_compute()",-1,2);
+// #ifdef CELLO_TRACE
+//   index_.print("BEGIN PHASE COMPUTE p_compute()",-1,2);
+// #endif
 
   // set_cycle(cycle);
   // set_time(time);
@@ -58,9 +58,9 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   if (is_leaf()) {
 
-#ifdef CELLO_TRACE
-    index_.print("p_compute");
-#endif    
+// #ifdef CELLO_TRACE
+//     index_.print("p_compute");
+// #endif    
     FieldDescr * field_descr = simulation()->field_descr();
     int index_method = 0;
     while (Method * method = simulation()->problem()->method(index_method++)) {

@@ -21,10 +21,10 @@ void CommBlock::refresh_begin()
 {
   switch_performance_(perf_refresh,__FILE__,__LINE__);
 
-#ifdef CELLO_TRACE
-  sprintf (buffer,"BEGIN PHASE REFRESH(%p)",this);
-   index_.print(buffer,-1,2);
-#endif
+// #ifdef CELLO_TRACE
+//   sprintf (buffer,"BEGIN PHASE REFRESH(%p)",this);
+//    index_.print(buffer,-1,2);
+// #endif
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -65,9 +65,9 @@ void CommBlock::refresh_begin()
 
     TRACE0;
     TRACE4("ADAPT CRASH if3 %d %d %d level %d",if3[0],if3[1],if3[2],level);
-#ifdef CELLO_TRACE
-    index_.print("ADAPT CRASH");
-#endif
+// #ifdef CELLO_TRACE
+//     index_.print("ADAPT CRASH");
+// #endif
     if (face_level(if3) == level-1) {       // COARSE
 
       int ic3[3];
@@ -283,16 +283,16 @@ void CommBlock::x_refresh_fine (int n, char * buffer,
 void CommBlock::q_refresh_end()
 {
 
-  sprintf (buffer,"END PHASE REFRESH(%p)",this);
+  // sprintf (buffer,"END PHASE REFRESH(%p)",this);
   if (next_phase_ == phase_output) {
-    index_.print(buffer,-1,2);
-    index_.print("refresh calling output");
+    // index_.print(buffer,-1,2);
+    // index_.print("refresh calling output");
     prepare();
   } else if (next_phase_ == phase_adapt) {
-    index_.print("refresh calling adapt");
+    // index_.print("refresh calling adapt");
     adapt_mesh();
   } else {
-    index_.print("ERROR");
+    // index_.print("ERROR");
     ERROR1 ("CommBlock::q_refresh_end()",
 	    "Unknown next_phase %d",
 	    next_phase_);

@@ -5,11 +5,6 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
-# Whether to use new adapt with Charm++ group's AMR algorithm
-# [ Remember to edit src/Cello/mesh.ci accordingly ]
-
-new_adapt = 1
-
 # Whether to print out messages with the TRACE() series of statements
 
 trace = 0
@@ -23,7 +18,7 @@ trace_charm = 0
 # Still requires the "DEBUG" group to be enabled in Monitor (that is
 # Monitor::is_active("DEBUG") must be true for any output)
 
-debug = 1
+debug = 0
 
 # Whether to periodically print all field values.  See
 # src/Field/field_FieldBlock.cpp
