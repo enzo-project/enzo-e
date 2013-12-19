@@ -18,6 +18,16 @@
 void SimulationCharm::c_compute()
 {
 
+
+#ifdef CELLO_DEBUG
+      char buffer[40];
+      sprintf(buffer,"out.debug.%03d",CkMyPe());
+      FILE * fp = fopen (buffer,"a");
+      fprintf (fp,"%s:%d cycle %03d\n",
+	       __FILE__,__LINE__,cycle_);
+      fclose(fp);
+#endif
+
   if (cycle_ > 0 ) {
     //    performance()->stop_region (perf_output,__FILE__,__LINE__);
     performance()->stop_region (perf_cycle,__FILE__,__LINE__);

@@ -249,7 +249,9 @@ void CommBlock::q_adapt_next()
 
   update_levels_();
 
-  debug_faces_("q_adapt_next");
+  sprintf (buffer,"q_adapt_next %d",cycle());
+
+  debug_faces_(buffer);
   
   TRACE_LEVEL_NEW("q_adapt_next",-1);
 
@@ -684,6 +686,16 @@ void CommBlock::p_child_can_coarsen()
 // this block can coarsen: notify parent
 {
   TRACE_ADAPT("ADAPT COARSEN p_child_can_coarsen()");
+
+#ifdef CELLO_DEBUG
+  char buffer[40];
+  sprintf(buffer,"out.debug.%03d",CkMyPe());
+  FILE * fp = fopen (buffer,"a");
+  fprintf (fp,"p_child_can_coarsen() sync_coarsen_ = %d/%d %d\n",
+	   sync_coarsen_.index(),sync_coarsen_.stop(),sync_coarsen_.is_done());
+  fclose(fp);
+#endif
+  
 
   if (sync_coarsen_.next()) {
   
