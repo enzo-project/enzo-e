@@ -606,16 +606,17 @@ void CommBlock::p_get_neighbor_level
 
 	ItChild it_child (rank,jf3);
 
-	while (it_child.next(ic3)) {
+	int jc3[3];
+	while (it_child.next(jc3)) {
 
 	  int kf3[3];
 
-	  ItFace it_face (rank,rank_refresh,ic3,jf3);
+	  ItFace it_face (rank,rank_refresh,jc3,jf3);
 
 	  while (it_face.next(kf3)) {
 	    TRACE6("recv-fine: child %d %d %d  face %d %d %d",
-		   ic3[0],ic3[1],ic3[2],kf3[0],kf3[1],kf3[2]);
-	    set_child_face_level_new(ic3,kf3,level_face_new);
+		   jc3[0],jc3[1],jc3[2],kf3[0],kf3[1],kf3[2]);
+	    set_child_face_level_new(jc3,kf3,level_face_new);
 	  }
 	}
       }
@@ -627,7 +628,12 @@ void CommBlock::p_get_neighbor_level
 		level,level_face);
     }
 
-    TRACE_LEVEL_NEW("A p_get_neighbor_level",level_face_new);
+    char buffer2[256];
+    sprintf (buffer2, "A p_get_neighbor_level ic3 %d %d %d  if3 %2d %2d %2d",
+	     ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2]);
+	     
+    TRACE_LEVEL_NEW(buffer2,level_face_new);
+
     if (level_new < level_face_new - 1) {
 
       // restrict new level to within 1 of neighbor
