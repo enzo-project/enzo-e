@@ -159,10 +159,6 @@ static char buffer [256];
 void CommBlock::adapt_mesh()
 {
 
-  // sprintf (buffer,"BEGIN ADAPT adapt_mesh(%p)",this);
-  // TRACE_ADAPT(buffer);
-  // index_.print(buffer,-1,2);
-
   const int rank = simulation()->dimension();
   sync_coarsen_.set_stop(NC(rank));
   sync_coarsen_.clear();
@@ -177,13 +173,11 @@ void CommBlock::adapt_mesh()
       simulation()->config()->mesh_max_level;
 
     level_new_ = desired_level_(level_maximum);
-    TRACE_LEVEL_NEW("adapt_mesh",-1);
-    TRACE("calling notify_neighbors()");
+
     notify_neighbors(level_new_);
 
   }
 
-  // index_.print("BEGIN q_adapt_next()");
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_next(), 
 			thisProxy[thisIndex]));
 }
@@ -239,34 +233,17 @@ int CommBlock::determine_adapt()
 
 void CommBlock::q_adapt_next()
 {
-  // index_.print("END   q_adapt_next()");
-  // sprintf (buffer,"ADAPT DEBUG q_adapt_next(level_new = %d)",level_new_);
-  // TRACE_ADAPT(buffer);
-
-  //  if (! is_leaf() || level() <= level_new_) {
-    // Defer QD for CommBlocks that may possibly coarsen until known
-    //  }
 
   update_levels_();
-
-  sprintf (buffer,"q_adapt_next %d",cycle());
-
-  debug_faces_(buffer);
-  
-  TRACE_LEVEL_NEW("q_adapt_next",-1);
 
   if (is_leaf()) {
     if (level() < level_new_) {
       refine();
     } else if (level() > level_new_) {
-// #ifdef DEBUG_ADAPT
-//       sprintf (buffer,"Calling p_child_can_coarsen cycle %d",cycle());
-//       index_.print(buffer);
-// #endif
       thisProxy[index_.index_parent()].p_child_can_coarsen();
     }
   }
-  // index_.print("BEGIN q_adapt_end()");
+
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
 			thisProxy[thisIndex]));
 }
@@ -276,32 +253,16 @@ void CommBlock::q_adapt_next()
 void CommBlock::q_adapt_end()
 {
 
-  // index_.print("END   q_adapt_end()");
   if (delete_) {
-    // index_.print("ckDestroy()");
-    //thisProxy[thisIndex].ckDestroy();
+
     ckDestroy();
-
-    // index_.print("DEBUG doneInserting()");
-    //    thisArray->doneInserting();
-
-    //     thisArray->doneInserting();
 
     return;
   }
 
-  // sprintf (buffer,"END ADAPT adapt_mesh(%p)",this);
-  // index_.print(buffer,-1,2);
-
   next_phase_ = phase_output;
 
-  //  index_.print("DEBUG doneInserting()");
-
-  //  thisArray->doneInserting();
-
   if (thisIndex.is_root()) {
-
-    // index_.print("DEBUG doneInserting()");
 
     thisArray->doneInserting();
 
@@ -309,14 +270,9 @@ void CommBlock::q_adapt_end()
     const bool is_first_cycle = (initial_cycle == cycle());
     const int level_maximum = simulation()->config()->initial_max_level;
 
-    // thisProxy.p_hello("Hello: q_adapt_end()");
-
     if (is_first_cycle && level_count_++ < level_maximum) {
       thisProxy.p_adapt_mesh();
     } else {
-// #ifdef DEBUG_ADAPT
-//       index_.print("Calling thisProxy.p_refresh_begin()");
-// #endif
       thisProxy.p_refresh_begin();
     }
   }
@@ -325,8 +281,6 @@ void CommBlock::q_adapt_end()
 
 void CommBlock::refine()
 {
-
-  TRACE_ADAPT("ADAPT refine()");
 
   adapt_ = adapt_unknown;
 
@@ -385,10 +339,6 @@ void CommBlock::refine()
 
 void CommBlock::delete_child_(Index index_child)
 {
-  // std::string bit_str = index_child.bit_string(-1,2);
-  // sprintf (buffer,"ADAPT COARSEN delete_child_(%s)",bit_str.c_str());
-  // TRACE_ADAPT(buffer);
-
   thisProxy[index_child].p_delete();
 
   if (sync_coarsen_.next()) {
@@ -417,14 +367,14 @@ void CommBlock::notify_neighbors(int level_new)
 
     if (level_face == level) {
 
-      // (X) SEND-SAME: Face and level are sent to unique
+      // SEND-SAME: Face and level are sent to unique
       // neighboring block in the same level
 
       PUT_NEIGHBOR_LEVEL(index_neighbor,ic3,of3,level,level_new,"send-same");
 
     } else if (level_face == level - 1) {
 
-      // (X) SEND-COARSE: Face, level, and child indices are sent to
+      // SEND-COARSE: Face, level, and child indices are sent to
       // unique neighboring block in the next-coarser level
 
 
@@ -445,7 +395,7 @@ void CommBlock::notify_neighbors(int level_new)
 
     } else if (level_face == level + 1) {
 
-      // (X) SEND_FINE: Face and level are sent to all nibling
+      // SEND-FINE: Face and level are sent to all nibling
       // blocks in the next-finer level along the face.
 
       const int if3[3] = {-of3[0],-of3[1],-of3[2]};
@@ -469,7 +419,7 @@ void CommBlock::notify_neighbors(int level_new)
 
 void CommBlock::p_get_neighbor_level
 (
- Index index_debug,
+ Index index_debug,   // index of the calling neighbor
  int ic3[3],
  int if3[3], 
  int level_face,
@@ -485,24 +435,11 @@ void CommBlock::p_get_neighbor_level
   const int rank = simulation()->dimension();
   const int rank_refresh = simulation()->config()->field_refresh_rank;
 
-  const std::string bit_str = index_debug.bit_string(-1,2);			
-
   if (is_leaf()) {
 
     if (level == level_face) {
 
-// #ifdef DEBUG_ADAPT
-//       sprintf (buffer,"%s %s p_get_neighbor_level() face %2d %2d %2d "
-// 	       "child %d %d %d  "
-// 	       "%d -> %d",
-// 	       "recv-same",bit_str.c_str(),					
-// 	       if3[0],if3[1],if3[2],					
-// 	       ic3[0],ic3[1],ic3[2],					
-// 	       level_face,level_face_new);					
-//       index_.print(buffer,-1,2);
-// #endif
-  
-      // (X) RECV-SAME: Face and level are received from unique
+      // RECV-SAME: Face and level are received from unique
       // neighbor.  Unique face level is updated, and levels on
       // possibly multiple faces of multiple children are updated.
 
@@ -523,26 +460,14 @@ void CommBlock::p_get_neighbor_level
 
     } else if (level == level_face - 1) {
 
-// #ifdef DEBUG_ADAPT
-//       sprintf (buffer,"%s %s p_get_neighbor_level() face %2d %2d %2d "
-// 	       "child %d %d %d  "
-// 	       "%d -> %d",
-// 	       "recv-fine",bit_str.c_str(),					
-// 	       if3[0],if3[1],if3[2],					
-// 	       ic3[0],ic3[1],ic3[2],					
-// 	       level_face,level_face_new);					
-//       index_.print(buffer,-1,2);						
-// #endif
-  
-      // (*) RECV-FINE: Face, level, and sender child indices are
-      // received from possibly non-unique neighbor for the
-      // corresponding face.  If neighbor level indicates the neighbor
-      // needs to refine, then refinement is triggered in this block
-      // as well.  Face levels are ignored, since the face either
-      // stays the same, or refinement is triggered, in which case the
-      // child face levels are used.  The neighbor level for the
-      // unique face and unique child facing the sending child is
-      // updated.
+      // RECV-FINE: Face, level, and sender child indices are received
+      // from possibly non-unique neighbor for the corresponding face.
+      // If neighbor level indicates the neighbor needs to refine,
+      // then refinement is triggered in this block as well.  Face
+      // levels are ignored, since the face either stays the same, or
+      // refinement is triggered, in which case the child face levels
+      // are used.  The neighbor level for the unique face and unique
+      // child facing the sending child is updated.
 
       set_face_level_new (of3, level_face_new);
 
@@ -552,26 +477,14 @@ void CommBlock::p_get_neighbor_level
       while (it_child.next(jc3)) {
 
 	Index index_child = index_.index_child(jc3);
-	// int jc3[3];
-	// facing_child_(jc3,ic3,if3);
-	TRACE9("recv-fine facing child %d %d %d  child %d %d %d  face %d %d %d",
-	       jc3[0],jc3[1],jc3[2],ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2]);
 
 	int jf3[3];
 	ItFace it_face (rank,rank_refresh,jc3,of3);
 
-	std::string n1_str = index_neighbor.bit_string(-1,2);			
-
-	TRACE1("recv-fine index_neighbor %s",n1_str.c_str());
-
 	while (it_face.next(jf3)) {
-	  TRACE3("recv-fine it_face %d %d %d",
-		 jf3[0],jf3[1],jf3[2]);
+
 	  Index in = neighbor_(jf3,&index_child);
 
-	  std::string n2_str = in.bit_string(-1,2);			
-	  TRACE1("recv-fine in %s",n2_str.c_str());
-	  
 	  if (in == index_neighbor) {
 	    set_child_face_level_new(jc3,jf3,level_face_new);
 	  }
@@ -581,18 +494,7 @@ void CommBlock::p_get_neighbor_level
 
     } else if (level == level_face + 1) {
 
-// #ifdef DEBUG_ADAPT
-//       sprintf (buffer,"%s %s p_get_neighbor_level() face %2d %2d %2d "
-// 	       "child %d %d %d  "
-// 	       "%d -> %d",
-// 	       "recv-coarse",bit_str.c_str(),					
-// 	       if3[0],if3[1],if3[2],					
-// 	       ic3[0],ic3[1],ic3[2],					
-// 	       level_face,level_face_new);					
-//       index_.print(buffer,-1,2);						
-// #endif
-  
-      // ( ) RECV-COARSE: Face and level are received from unique
+      // RECV-COARSE: Face and level are received from unique
       // neighbor.  Possibly multiple faces of block are updated
       // corresponding to the coarse neighbor's face.  Levels of
       // possibly multiple faces of possibly multiple child faces are
@@ -614,8 +516,6 @@ void CommBlock::p_get_neighbor_level
 	  ItFace it_face (rank,rank_refresh,jc3,jf3);
 
 	  while (it_face.next(kf3)) {
-	    TRACE6("recv-fine: child %d %d %d  face %d %d %d",
-		   jc3[0],jc3[1],jc3[2],kf3[0],kf3[1],kf3[2]);
 	    set_child_face_level_new(jc3,kf3,level_face_new);
 	  }
 	}
@@ -628,42 +528,34 @@ void CommBlock::p_get_neighbor_level
 		level,level_face);
     }
 
-    char buffer2[256];
-    sprintf (buffer2, "A p_get_neighbor_level ic3 %d %d %d  if3 %2d %2d %2d",
-	     ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2]);
-	     
-    TRACE_LEVEL_NEW(buffer2,level_face_new);
-
     if (level_new < level_face_new - 1) {
 
       // restrict new level to within 1 of neighbor
       level_new = level_face_new - 1;
 
-      TRACE_LEVEL_NEW("B p_get_neighbor_level",level_face_new);
-      // notify neighbors of updated level
-      TRACE("calling notify_neighbors()");
-
     }
 
     // Don't coarsen if any siblings don't coarsen
 
-    // if coarsening
-    if (level > 0 && index_debug.level() == level) {
-// #ifdef DEBUG_ADAPT      
-//       index_.print("index_.index_parent()");
-//       index_debug.print("index_debug.index_parent()");
-// #endif
-      bool is_sibling = (index_debug.index_parent() == index_.index_parent());
-      bool is_coarsening = level_new_ < level;
-      bool is_finer_neighbor = level_face_new > level_new;
-      // sprintf (buffer,"ADAPT COARSEN %s match siblings sibling / coarsening / fine neighbor %d %d %d  level %d level_face %d level new %d",
-      // 	       bit_str.c_str(),is_sibling,is_coarsening,is_finer_neighbor,level,level_face_new,level_new);
-      // TRACE_ADAPT(buffer);
-      if (is_coarsening && is_sibling && is_finer_neighbor) {
-	level_new = level;
-      }
+    bool is_refined = (level > 0);
+    bool is_sibling = (index_debug.index_parent() == index_.index_parent());
+    bool is_coarsening = level_new_ < level;
+    bool is_finer_neighbor = level_face_new > level_new;
+
+    sprintf (buffer,"refined %d coarsening %d sibling %d finer %d",
+	     is_refined, is_coarsening, is_sibling, is_finer_neighbor);
+
+    index_.print(buffer);
+
+    if (is_refined && is_coarsening && is_sibling && is_finer_neighbor) {
+
+      index_.print("DEBUG not coarsening");
+
+      level_new = level;
     }
+
     // notify neighbors if level_new has changed
+
     if (level_new != level_new_) {
       level_new_ = level_new;
       notify_neighbors(level_new);
@@ -682,8 +574,6 @@ void CommBlock::p_get_neighbor_level
       PUT_NEIGHBOR_LEVEL(index_nibling,ic3,if3,level_face,level_face_new,"RECURSE");
     }
   }
-
-  debug_faces_("p_get_neighbor stop");
 }
 
 //----------------------------------------------------------------------
@@ -691,17 +581,6 @@ void CommBlock::p_get_neighbor_level
 void CommBlock::p_child_can_coarsen()
 // this block can coarsen: notify parent
 {
-  TRACE_ADAPT("ADAPT COARSEN p_child_can_coarsen()");
-
-#ifdef CELLO_DEBUG
-  char buffer[40];
-  sprintf(buffer,"out.debug.%03d",CkMyPe());
-  FILE * fp = fopen (buffer,"a");
-  fprintf (fp,"p_child_can_coarsen() sync_coarsen_ = %d/%d %d\n",
-	   sync_coarsen_.index(),sync_coarsen_.stop(),sync_coarsen_.is_done());
-  fclose(fp);
-#endif
-  
 
   if (sync_coarsen_.next()) {
   
@@ -723,25 +602,15 @@ void CommBlock::p_parent_can_coarsen()
 // parent can coarsen: get child data
 {
 
-  TRACE_ADAPT("ADAPT COARSEN p_parent_can_coarsen()");
-
   const int level = this->level();
   
   // send data to parent
 
-  TRACE_ADAPT("ADAPT COARSEN coarsen()");
-
   if (level > 0 && is_leaf()) {
 
-    // get parent index and child index ic3 in parent
     Index index_parent = index_.index_parent();
-    TRACE1("ADAPT level = %d",level);
     int ic3[3] = {1,1,1};
     index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
-// #ifdef DEBUG_ADAPT
-//     sprintf (buffer,"ADAPT COARSEN index_child %d %d %d",ic3[0],ic3[1],ic3[2]);
-//     index_.print(buffer);
-// #endif
 
     // copy block data
     int narray; 
@@ -757,7 +626,6 @@ void CommBlock::p_parent_can_coarsen()
     for (int i=0; i<nf; i++) face_level[i] = face_level_[i];
 
     // send child data to parent
-    TRACE2("ADAPT COARSEN narray = %d nf = %d",narray,nf);
     thisProxy[index_parent].p_get_child_data
       (ic3, narray,array, nf,face_level);
 
@@ -775,10 +643,6 @@ void CommBlock::p_get_child_data
  int nf, int * child_face_level
  )
 {
-  TRACE_ADAPT("ADAPT COARSEN p_get_child_data()");
-  
-
-  TRACE2("ADAPT COARSEN narray = %d nf = %d",na,nf);
   // copy array
   int iface[3] = {0,0,0};
   bool lghost[3] = {true,true,true};
@@ -798,8 +662,6 @@ void CommBlock::p_get_child_data
     }
   }
 
-  // sprintf (buffer,"ADAPT COARSEN index_child %d %d %d",ic3[0],ic3[1],ic3[2]);
-  // TRACE_ADAPT(buffer);
   Index index_child = index_.index_child(ic3);
 
   delete_child_(index_child);
@@ -810,9 +672,6 @@ void CommBlock::p_get_child_data
 
 void CommBlock::p_delete()
 {
-  TRACE_ADAPT("ADAPT COARSEN p_delete()");
-
-  //  thisProxy[thisIndex].ckDestroy();
   delete_ = true;
 }
 
@@ -825,8 +684,6 @@ void CommBlock::x_refresh_child
  int    ic3[3]
  )
 {
-  TRACE_ADAPT("ADAPT B4 x_refresh_child()");
-
   int  iface[3]  = {0,0,0};
   bool lghost[3] = {true,true,true};
   store_face_(n,buffer, iface, ic3, lghost, op_array_restrict);
@@ -836,7 +693,6 @@ void CommBlock::x_refresh_child
 
 void CommBlock::initialize_child_face_levels_()
 {
-  TRACE_ADAPT("ADAPT A4 initialize_child_face_levels_()");
   const int  rank         = simulation()->dimension();
   const int  rank_refresh = simulation()->config()->field_refresh_rank;
   const int level = this->level();
@@ -873,8 +729,6 @@ void CommBlock::initialize_child_face_levels_()
   }
 
   child_face_level_new_ = child_face_level_;
-
-  debug_faces_("init_child ");
 }
 
 //----------------------------------------------------------------------
@@ -890,8 +744,7 @@ Index CommBlock::neighbor_
   int na3[3];
   size_forest (&na3[0],&na3[1],&na3[2]);
   const bool periodic  = simulation()->problem()->boundary()->is_periodic();
-  Index in = index.index_neighbor
-    (of3[0],of3[1],of3[2],na3,periodic);
+  Index in = index.index_neighbor (of3[0],of3[1],of3[2],na3,periodic);
   return in;
 }
 
@@ -968,86 +821,4 @@ FieldFace * CommBlock::create_face_
   return field_face;
 }
 
-//----------------------------------------------------------------------
-
-void CommBlock::debug_faces_(const char * mesg)
-{
-#ifndef DEBUG_ADAPT
-  return;
-#endif
-
-
-
-  TRACE_ADAPT(mesg);
-  int if3[3] = {0};
-  int ic3[3] = {0};
-
-  for (ic3[1]=1; ic3[1]>=0; ic3[1]--) {
-    for (if3[1]=1; if3[1]>=-1; if3[1]--) {
-
-      index_.print(mesg,-1,2,true);
-
-#ifdef CELLO_DEBUG
-      char buffer[40];
-      sprintf(buffer,"out.debug.%03d",CkMyPe());
-      FILE * fp = fopen (buffer,"a");
-#endif
-
-
-      for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-#ifdef CELLO_DEBUG
-	fprintf (fp,(ic3[1]==1) ? "%d " : "  ",face_level(if3));
-#endif
-	PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level(if3));
-      }
-#ifdef CELLO_DEBUG
-	fprintf (fp,"| ");
-#endif
-      PARALLEL_PRINTF ("| ") ;
-      for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-#ifdef CELLO_DEBUG
-	fprintf (fp,(ic3[1]==1) ? "%d " : "  ",face_level_new(if3));
-#endif
-	PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level_new(if3));
-      }
-#ifdef CELLO_DEBUG
-	fprintf (fp,"| ");
-#endif
-      PARALLEL_PRINTF ("| ");
-      for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
-	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-#ifdef CELLO_DEBUG
-	fprintf (fp,"%d ",child_face_level(ic3,if3));
-#endif
-	    PARALLEL_PRINTF ("%d ",child_face_level(ic3,if3));
-	  }
-	}
-      }
-#ifdef CELLO_DEBUG
-	fprintf (fp,"| ");
-#endif
-      PARALLEL_PRINTF ("| ");
-      for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
-	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-#ifdef CELLO_DEBUG
-	fprintf (fp,"%d ",child_face_level_new(ic3,if3));
-#endif
-	    PARALLEL_PRINTF ("%d ",child_face_level_new(ic3,if3));
-	  }
-	}
-      }
-#ifdef CELLO_DEBUG
-	fprintf (fp,"\n");
-#endif
-      PARALLEL_PRINTF ("\n");
-      fflush(stdout);
-#ifdef CELLO_DEBUG
-      fclose (fp);
-#endif
-
-    }
-  }
-}
 

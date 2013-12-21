@@ -433,7 +433,84 @@ protected: // functions
 	     -1 <= if3[2] && if3[2] <= 1);
   }
 
-  void debug_faces_(const char *);
+  void debug_faces_(const char * mesg)
+  {
+#ifndef DEBUG_ADAPT
+    return;
+#endif
+
+    TRACE_ADAPT(mesg);
+    int if3[3] = {0};
+    int ic3[3] = {0};
+
+    for (ic3[1]=1; ic3[1]>=0; ic3[1]--) {
+      for (if3[1]=1; if3[1]>=-1; if3[1]--) {
+
+	index_.print(mesg,-1,2,true);
+
+#ifdef CELLO_DEBUG
+	char buffer[40];
+	sprintf(buffer,"out.debug.%03d",CkMyPe());
+	FILE * fp = fopen (buffer,"a");
+#endif
+
+
+	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+#ifdef CELLO_DEBUG
+	  fprintf (fp,(ic3[1]==1) ? "%d " : "  ",face_level(if3));
+#endif
+	  PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level(if3));
+	}
+#ifdef CELLO_DEBUG
+	fprintf (fp,"| ");
+#endif
+	PARALLEL_PRINTF ("| ") ;
+	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+#ifdef CELLO_DEBUG
+	  fprintf (fp,(ic3[1]==1) ? "%d " : "  ",face_level_new(if3));
+#endif
+	  PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level_new(if3));
+	}
+#ifdef CELLO_DEBUG
+	fprintf (fp,"| ");
+#endif
+	PARALLEL_PRINTF ("| ");
+	for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
+	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+	    for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+#ifdef CELLO_DEBUG
+	      fprintf (fp,"%d ",child_face_level(ic3,if3));
+#endif
+	      PARALLEL_PRINTF ("%d ",child_face_level(ic3,if3));
+	    }
+	  }
+	}
+#ifdef CELLO_DEBUG
+	fprintf (fp,"| ");
+#endif
+	PARALLEL_PRINTF ("| ");
+	for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
+	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+	    for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+#ifdef CELLO_DEBUG
+	      fprintf (fp,"%d ",child_face_level_new(ic3,if3));
+#endif
+	      PARALLEL_PRINTF ("%d ",child_face_level_new(ic3,if3));
+	    }
+	  }
+	}
+#ifdef CELLO_DEBUG
+	fprintf (fp,"\n");
+#endif
+	PARALLEL_PRINTF ("\n");
+	fflush(stdout);
+#ifdef CELLO_DEBUG
+	fclose (fp);
+#endif
+
+      }
+    }
+  }
 
   std::string id_ () const throw ()
   {
