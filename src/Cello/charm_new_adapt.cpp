@@ -125,7 +125,7 @@ static char buffer [256];
 #define PUT_NEIGHBOR_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
   {									\
     std::string bit_str = INDEX.bit_string(-1,2);			\
-    sprintf (buffer,"%s %s p_get_neighbor_level() "			\
+    sprintf (buffer,"%12s %8s p_get_neighbor_level() "			\
 	     "face %2d %2d %2d  child %d %d %d  "			\
 	     "%d -> %d :%d",						\
 	     MSG,bit_str.c_str(),					\
@@ -528,22 +528,20 @@ void CommBlock::p_get_neighbor_level
 		level,level_face);
     }
 
-    if (level_new < level_face_new - 1) {
-
-      // restrict new level to within 1 of neighbor
-      level_new = level_face_new - 1;
-
-    }
-
     // Don't coarsen if any siblings don't coarsen
 
     bool is_refined = (level > 0);
     bool is_sibling = (index_debug.index_parent() == index_.index_parent());
-    bool is_coarsening = level_new_ < level;
+    bool is_coarsening = level_new < level;
     bool is_finer_neighbor = level_face_new > level_new;
 
     sprintf (buffer,"refined %d coarsening %d sibling %d finer %d",
 	     is_refined, is_coarsening, is_sibling, is_finer_neighbor);
+
+    index_.print(buffer);
+
+    sprintf (buffer,"level %d level_new_ %d level_new %d level_face_new %d",
+	     level, level_new_, level_new, level_face_new);
 
     index_.print(buffer);
 
@@ -554,11 +552,18 @@ void CommBlock::p_get_neighbor_level
       level_new = level;
     }
 
+    if (level_new < level_face_new - 1) {
+
+      // restrict new level to within 1 of neighbor
+      level_new = level_face_new - 1;
+
+    }
+
     // notify neighbors if level_new has changed
 
     if (level_new != level_new_) {
       level_new_ = level_new;
-      notify_neighbors(level_new);
+      notify_neighbors(level_new_);
     }
 
   } else { // not a leaf
