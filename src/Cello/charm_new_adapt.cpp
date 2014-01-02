@@ -203,6 +203,11 @@ int CommBlock::desired_level_(int level_maximum)
     level_desired = level;
   }
 
+#ifdef DEBUG_ADAPT
+  sprintf (buffer,"desired level %d",level_desired);
+  index_.print(buffer,-1,2);
+#endif
+
   return level_desired;
 }
 
@@ -233,6 +238,11 @@ int CommBlock::determine_adapt()
 
 void CommBlock::q_adapt_next()
 {
+
+#ifdef DEBUG_ADAPT
+  sprintf (buffer,"DEBUG next level %d",level_new_);
+  index_.print(buffer,-1,2);
+#endif
 
   update_levels_();
 
@@ -531,23 +541,32 @@ void CommBlock::p_get_neighbor_level
     // Don't coarsen if any siblings don't coarsen
 
     bool is_refined = (level > 0);
-    bool is_sibling = (index_debug.index_parent() == index_.index_parent());
+    bool is_sibling = is_refined ? (index_debug.index_parent() == index_.index_parent()) : false;
     bool is_coarsening = level_new < level;
     bool is_finer_neighbor = level_face_new > level_new;
 
-    sprintf (buffer,"refined %d coarsening %d sibling %d finer %d",
-	     is_refined, is_coarsening, is_sibling, is_finer_neighbor);
+#ifdef DEBUG_ADAPT
+    sprintf (buffer,":%d face %d %d %d  child %d %d %d",
+	     __LINE__,if3[0],if3[1],if3[2],ic3[0],ic3[1],ic3[2]);
 
-    index_.print(buffer);
+    index_.print(buffer,-1,2);
 
-    sprintf (buffer,"level %d level_new_ %d level_new %d level_face_new %d",
-	     level, level_new_, level_new, level_face_new);
+    sprintf (buffer,":%d refined %d coarsening %d sibling %d finer %d",
+	     __LINE__,is_refined, is_coarsening, is_sibling, is_finer_neighbor);
 
-    index_.print(buffer);
+    index_.print(buffer,-1,2);
+
+    sprintf (buffer,":%d level %d level_new_ %d level_new %d level_face_new %d",
+	     __LINE__,level, level_new_, level_new, level_face_new);
+
+    index_.print(buffer,-1,2);
+#endif
 
     if (is_refined && is_coarsening && is_sibling && is_finer_neighbor) {
 
+#ifdef DEBUG_ADAPT
       index_.print("DEBUG not coarsening");
+#endif
 
       level_new = level;
     }

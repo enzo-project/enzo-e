@@ -45,7 +45,9 @@ CommBlock::CommBlock
   coarsened_(false),
   delete_(false)
 {
+#ifdef CELLO_DEBUG
   index_.print("CommBlock()");
+#endif
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
 
@@ -227,7 +229,9 @@ void CommBlock::apply_initial_() throw ()
 
 CommBlock::~CommBlock() throw ()
 { 
+#ifdef CELLO_DEBUG
   index_.print("~CommBlock()");
+#endif
 
   const int level = this->level();
 

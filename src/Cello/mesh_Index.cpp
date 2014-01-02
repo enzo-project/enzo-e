@@ -313,7 +313,7 @@ void Index::print (const char * msg,
 // #ifdef CELLO_DEBUG
 //   fprintf (fp,"%p ",this);
 // #endif
-  // PARALLEL_PRINTF ("%p ",this);
+//   PARALLEL_PRINTF ("%p ",this);
 
   int nb = 0;
 
@@ -393,8 +393,8 @@ void Index::write (int ip,
 
   if (max_level == -1) max_level = this->level();
     
-  //  fprintf (fp,"INDEX %p %s: ", this,msg);
-  fprintf (fp,"INDEX %s: ",msg);
+  // fprintf (fp,"INDEX %p %s: ", this,msg);
+  fprintf (fp,"INDEX %s: ", msg);
 
   int nb = 0;
 

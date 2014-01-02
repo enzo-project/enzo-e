@@ -52,20 +52,26 @@ public: // functions
   /// Add a new CommBlock to this local branch
   inline void insert_block() 
   {
+#ifdef CELLO_DEBUG
     PARALLEL_PRINTF ("%d: ++block_sync_ %d\n",  CkMyPe(),block_sync_.stop());
+#endif
     ++block_sync_;
   }
 
   /// Remove a CommBlock from this local branch
   inline void delete_block() 
   {
+#ifdef CELLO_DEBUG
     PARALLEL_PRINTF ("%d: --block_sync_ %d\n",  CkMyPe(),block_sync_.stop());
+#endif
     --block_sync_; 
   }
 
   inline int block_count() const
   { 
+#ifdef CELLO_DEBUG
     PARALLEL_PRINTF ("%d: block_sync_ %d\n",  CkMyPe(),block_sync_.stop());
+#endif
     return block_sync_.stop(); 
   }
 
