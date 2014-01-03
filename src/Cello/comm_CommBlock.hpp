@@ -134,10 +134,20 @@ public: // interface
   /// Entry function after prepare() to call Simulation::p_output()
   void p_output(CkReductionMsg * msg);
 
+  /// Entry function for initiating mesh adaptation
   void p_adapt_mesh() { adapt_mesh(); }
+
+  /// Entry function for ensuring p_adapt_mesh() is called before p_get_neighbor_level() calls 
+  void p_adapt_called(int if3[3]);
+
   void adapt_mesh();
 
-  void notify_neighbors(int level);
+  /// Notify all neighbors of updated new level
+  void notify_neighbors();
+
+  /// Notify given neighbor of updated new level
+  void notify_neighbor_(int of3[3]);
+
   void p_get_neighbor_level (Index index_debug,
 			     int ic3[3], int if3[3],
 			     int level_now, int level_new);
