@@ -7,7 +7,7 @@ import sys
 
 # Whether to print out messages with the TRACE() series of statements
 
-trace = 1
+trace = 0
 
 # Whether to print out messages with the TRACE_CHARM() series of statements
 
@@ -18,7 +18,7 @@ trace_charm = 0
 # Still requires the "DEBUG" group to be enabled in Monitor (that is
 # Monitor::is_active("DEBUG") must be true for any output)
 
-debug = 1
+debug = 0
 
 # Whether to periodically print all field values.  See
 # src/Field/field_FieldBlock.cpp

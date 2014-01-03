@@ -134,20 +134,13 @@ public: // interface
   /// Entry function after prepare() to call Simulation::p_output()
   void p_output(CkReductionMsg * msg);
 
-  /// Entry function for initiating mesh adaptation
   void p_adapt_mesh() { adapt_mesh(); }
 
-  /// Entry function for ensuring p_adapt_mesh() is called before p_get_neighbor_level() calls 
-  void p_adapt_called(int if3[3]);
+  void q_adapt_called();
 
   void adapt_mesh();
 
-  /// Notify all neighbors of updated new level
-  void notify_neighbors();
-
-  /// Notify given neighbor of updated new level
-  void notify_neighbor_(int of3[3]);
-
+  void notify_neighbors(int level);
   void p_get_neighbor_level (Index index_debug,
 			     int ic3[3], int if3[3],
 			     int level_now, int level_new);
@@ -443,6 +436,9 @@ protected: // functions
 	     -1 <= if3[2] && if3[2] <= 1);
   }
 
+  /// Reset sync_adapt_ to the number of neighbors
+  void reset_sync_adapt_();
+  
   void debug_faces_(const char * mesg)
   {
 #ifndef DEBUG_ADAPT
@@ -622,6 +618,9 @@ protected: // attributes
 
   /// Synchronization counter for ghost refresh
   Sync sync_coarsen_;
+
+  /// Synchronization counter for adapt_mesh() being called
+  Sync sync_adapt_;
 
   /// current level of neighbors along each face
   std::vector<int> face_level_;
