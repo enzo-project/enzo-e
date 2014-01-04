@@ -136,7 +136,7 @@ public: // interface
 
   void p_adapt_mesh() { adapt_mesh(); }
 
-  void q_adapt_called();
+  void q_adapt_called(CkReductionMsg * msg);
 
   void adapt_mesh();
 
@@ -436,9 +436,6 @@ protected: // functions
 	     -1 <= if3[2] && if3[2] <= 1);
   }
 
-  /// Reset sync_adapt_ to the number of neighbors
-  void reset_sync_adapt_();
-  
   void debug_faces_(const char * mesg)
   {
 #ifndef DEBUG_ADAPT
@@ -618,9 +615,6 @@ protected: // attributes
 
   /// Synchronization counter for ghost refresh
   Sync sync_coarsen_;
-
-  /// Synchronization counter for adapt_mesh() being called
-  Sync sync_adapt_;
 
   /// current level of neighbors along each face
   std::vector<int> face_level_;

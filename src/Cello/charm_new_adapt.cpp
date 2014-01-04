@@ -170,8 +170,8 @@ void CommBlock::adapt_mesh()
 #endif
 
 #ifdef    TEMP_NEW
-  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_called(), 
-			thisProxy[thisIndex]));
+  // CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_called(), 
+  // 			thisProxy[thisIndex]));
 #else  /* TEMP_NEW */
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_next(), 
 			thisProxy[thisIndex]));
@@ -200,17 +200,24 @@ void CommBlock::adapt_mesh()
 
   }
 
+#ifdef    TEMP_NEW
+  CkCallback callback (CkIndex_CommBlock::q_adapt_called(NULL), thisProxy);
+  contribute( callback);
+#endif
+
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::q_adapt_called()
+void CommBlock::q_adapt_called(CkReductionMsg * msg)
 {
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_next(), 
 			thisProxy[thisIndex]));
 
 
-  notify_neighbors(level_new_);
+  if (is_leaf()) {
+    notify_neighbors(level_new_);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -276,8 +283,6 @@ void CommBlock::q_adapt_next()
 #endif
 
   update_levels_();
-
-  reset_sync_adapt_();
 
   if (is_leaf()) {
     if (level() < level_new_) {
@@ -878,68 +883,3 @@ FieldFace * CommBlock::create_face_
   return field_face;
 }
 
-//----------------------------------------------------------------------
-
-void CommBlock::reset_sync_adapt_()
-{
-  sync_adapt_.set_stop(0);
-
-  const int level        = this->level();
-  const int rank         = simulation()->dimension();
-  const int rank_refresh = simulation()->config()->field_refresh_rank;
-
-  ItFace it_face(rank,rank_refresh);
-  int of3[3];
-
-  while (it_face.next(of3)) {
-
-    int ic3[3] = {0,0,0};
-
-    const int level_face = face_level (of3);
-
-#ifdef DEBUG_ADAPT
-    sprintf (buffer,"reset_sync_adapt (%d %d %d) level %d",of3[0],of3[1],of3[2],level_face);
-    index_.print(buffer,-1,2);
-#endif
-    if (level_face == level) {
-
-      // same-level face
-
-      sync_adapt_.add_stop();
-
-    } else if (level_face == level - 1) {
-
-      // coarser-level face
-
-      index_.child (level,&ic3[0],&ic3[1],&ic3[2]);
-
-      int op3[3];
-      parent_face_(op3,of3,ic3);
-
-      // avoid redundant calls
-      if (op3[0]==of3[0] && 
-	  op3[1]==of3[1] && 
-	  op3[2]==of3[2]) {
-
-	sync_adapt_.add_stop();
-
-      }
-
-    } else if (level_face == level + 1) {
-
-      // finer-level face
-
-      const int if3[3] = {-of3[0],-of3[1],-of3[2]};
-      ItChild it_child(rank,if3);
-      while (it_child.next(ic3)) {
-	sync_adapt_.add_stop();
-      }
-
-    }
-  
-  }
-#ifdef DEBUG_ADAPT
-  sprintf (buffer,"reset_sync_adapt %d",sync_adapt_.stop());
-  index_.print(buffer,-1,2);
-#endif
-}

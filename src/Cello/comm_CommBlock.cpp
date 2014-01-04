@@ -33,7 +33,6 @@ CommBlock::CommBlock
   children_(),
   loop_refresh_(),
   sync_coarsen_(),
-  sync_adapt_(),
   face_level_(),
   face_level_new_(),
   child_face_level_(),
@@ -145,8 +144,6 @@ CommBlock::CommBlock
 
   }
 
-  reset_sync_adapt_();
-
   if (! testing) ((SimulationCharm *)simulation())->insert_block();
 
   int initial_cycle = simulation()->config()->initial_cycle;
@@ -195,7 +192,6 @@ void CommBlock::pup(PUP::er &p)
   p | children_;
   p | loop_refresh_;
   p | sync_coarsen_;
-  p | sync_adapt_;
   p | face_level_;
   p | face_level_new_;
   p | child_face_level_;
