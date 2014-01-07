@@ -185,7 +185,6 @@ void Problem::output_next(Simulation * simulation) throw()
   }
 }
 
-
 //----------------------------------------------------------------------
 
 void CommBlock::p_write (int index_output)
@@ -213,7 +212,6 @@ void SimulationCharm::s_write()
     contribute(0,0,CkReduction::concat,callback);
 
   }
-
 }
 
 //----------------------------------------------------------------------

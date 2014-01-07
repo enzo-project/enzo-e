@@ -45,7 +45,7 @@ use_gprof = 0
 use_valgrind = 0
 
 # Whether to use Cello Performance class for collecting performance data
-# (currently requires global reductions, and may not be fully function)
+# (currently requires global reductions, and may not be fully functional)
 # (basic time data on root processor is still output)
 
 use_performance = 0
