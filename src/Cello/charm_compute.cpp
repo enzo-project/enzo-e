@@ -98,7 +98,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   next_phase_ = phase_adapt;
 
-  p_refresh_begin();
+  refresh_begin();
 }
 
 //----------------------------------------------------------------------
