@@ -28,7 +28,7 @@ debug_verbose = 0
 # Whether to track dynamic memory statistics.  Can be useful, but can
 # cause problems on some systems that also override new [] () / delete [] ()
 
-memory = 1
+memory = 0
 
 # Enable charm++ dynamic load balancing
 

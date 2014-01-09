@@ -449,7 +449,6 @@ void CommBlock::p_get_neighbor_level
  int level_face_new
  )
 {
-
   int level_new = level_new_;
 
   const int level        = this->level();
@@ -553,8 +552,8 @@ void CommBlock::p_get_neighbor_level
 
     // Don't coarsen if any siblings don't coarsen
 
-    bool is_refined = (level > 0);
-    bool is_sibling = is_refined ? (index_debug.index_parent() == index_.index_parent()) : false;
+    bool is_sibling = (level > 0) ? (index_debug.index_parent() == index_.index_parent()) : false;
+    bool is_nephew = (index_debug.level() > 1) ? (index_debug.index_parent().index_parent() == index_.index_parent()) : false;
     bool is_coarsening = level_new < level;
     bool is_finer_neighbor = level_face_new > level_new;
 
@@ -565,8 +564,8 @@ void CommBlock::p_get_neighbor_level
 
     index_.print(buffer,-1,2);
 
-    sprintf (buffer,":%d refined %d coarsening %d sibling %d finer %d",
-	     __LINE__,is_refined, is_coarsening, is_sibling, is_finer_neighbor);
+    sprintf (buffer,":%d coarsening %d sibling %d finer %d",
+	     __LINE__, is_coarsening, is_sibling, is_finer_neighbor);
 
     index_.print(buffer,-1,2);
 
@@ -576,7 +575,11 @@ void CommBlock::p_get_neighbor_level
     index_.print(buffer,-1,2);
 #endif
 
-    if (is_refined && is_coarsening && is_sibling && is_finer_neighbor ) {
+    // sprintf (buffer,"DEBUG c%d s%d a%d n%d",is_coarsening,is_sibling,is_finer_neighbor,is_nephew);
+    // index_.print(buffer,-1,2);
+    // PARALLEL_PRINTF("DEBUG %s:%d\n",__FILE__,__LINE__);
+
+    if (is_coarsening && ((is_sibling && is_finer_neighbor) || is_nephew )) {
 
 #ifdef DEBUG_ADAPT
       index_.print("DEBUG not coarsening");
