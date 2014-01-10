@@ -66,9 +66,9 @@ CProxy_CommBlock EnzoFactory::create_block_array
 	  Index index(ix,iy,iz);
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
-#ifdef CELLO_DEBUG
+	  // #ifdef CELLO_DEBUG
 	  index.print("DEBUG insert()");
-#endif
+	  // #endif
 	  enzo_block_array[index].insert 
 	    (index,
 	     nx,ny,nz,

@@ -278,6 +278,10 @@ void CommBlock::q_adapt_end()
 
   if (delete_) {
 
+    // #ifdef CELLO_DEBUG
+    index_.print("DEBUG ckDestroy()");
+  // #endif
+
     ckDestroy();
 
     return;
@@ -552,8 +556,9 @@ void CommBlock::p_get_neighbor_level
 
     // Don't coarsen if any siblings don't coarsen
 
-    bool is_sibling = (level > 0) ? (index_debug.index_parent() == index_.index_parent()) : false;
-    bool is_nephew = (index_debug.level() > 1) ? (index_debug.index_parent().index_parent() == index_.index_parent()) : false;
+      bool is_sibling = (index_.level() > 0 && index_debug.level() > 0) ? (index_debug.index_parent() == index_.index_parent()) : false;
+
+    bool is_nephew = (index_.level() > 0 && index_debug.level() > 1) ? (index_debug.index_parent().index_parent() == index_.index_parent()) : false;
     bool is_coarsening = level_new < level;
     bool is_finer_neighbor = level_face_new > level_new;
 
