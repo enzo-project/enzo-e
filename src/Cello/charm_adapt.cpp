@@ -254,14 +254,16 @@ void CommBlock::q_adapt_next()
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
 			thisProxy[thisIndex]));
 
-#ifdef DEBUG_ADAPT
+  //#ifdef DEBUG_ADAPT
   sprintf (buffer,"DEBUG next level %d",level_new_);
   index_.print(buffer,-1,2);
-#endif
+  //#endif
 
   update_levels_();
 
   if (is_leaf()) {
+    sprintf (buffer,"level %d level_new_ %d",level(),level_new_);
+    index_.print(buffer);
     if (level() < level_new_) {
       refine();
     } else if (level() > level_new_) {

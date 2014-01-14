@@ -54,7 +54,7 @@ PARALLEL_MAIN_BEGIN
 		  memory->bytes(), memory->bytes_high());
 
 
-  // open parameter file, calling usage() if invalid
+  // open parameter file, displaying usage if invalid
 
   if (PARALLEL_ARGC != 2) {
     // Print usage if wrong number of arguments
@@ -67,9 +67,7 @@ PARALLEL_MAIN_BEGIN
     ERROR("Main()",buffer);
   }
 
-  // Read in parameters
-
-  char * parameter_file = PARALLEL_ARGV[1];
+  const char * parameter_file = PARALLEL_ARGV[1];
 
   //--------------------------------------------------
 

@@ -58,15 +58,15 @@ CommBlock::CommBlock
 
   FieldDescr * field_descr = simulation()->field_descr();
 
-  block_ = new Block  (nx, ny, nz, num_field_blocks,
-		       xm, xp, ym, yp, zm, zp);
-
   // Allocate block data
 
+  block_ = new Block  (nx, ny, nz, num_field_blocks,
+		       xm, xp, ym, yp, zm, zp);
   block_->allocate(field_descr);
+
   child_block_ = NULL;
 
-  // Call virtual functions to update state
+  // Update state
 
   set_state (cycle,time,dt);
 
