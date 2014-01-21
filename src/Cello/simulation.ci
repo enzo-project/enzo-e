@@ -13,33 +13,31 @@ module simulation {
 
   group [migratable] Simulation {
 
-    entry Simulation
-      (const char filename[n], int n);
+    entry Simulation (const char filename[n], int n); // [S0]
 
   };
 
   /// Initial mapping of array elements
   group [migratable] ArrayMap : CkArrayMap {
-    entry ArrayMap(int, int, int);
+    entry ArrayMap(int, int, int); // [A0]
   };
 
   group [migratable] SimulationCharm : Simulation {
 
-    entry SimulationCharm
-      (const char filename[n], int n);
+    entry SimulationCharm (const char filename[n], int n); // [SC0]
 
-    entry void p_initialize_begin ();
-    entry void r_initialize_forest ();
-    entry void r_initialize_end ();
+    entry void p_initialize_begin ();  // [SC1]
+    entry void r_initialize_forest (); // [SC2]
+    entry void r_initialize_end ();    // [SC3]
 
-    entry void p_output ();
-    entry void c_output ();
+    entry void p_output (); // [SC4]
+    entry void c_output (); // [SC5]
 
-    entry void s_write ();
-    entry void c_write ();
+    entry void s_write (); // [SC6]
+    entry void c_write (); // [SC7]
 
-    entry void p_output_write (int n, char buffer[n]);
+    entry void p_output_write (int n, char buffer[n]); // [SC8]
 
-    entry void p_performance_reduce (CkReductionMsg * msg);
+    entry void p_performance_reduce (CkReductionMsg * msg); // [SC9]
   };
 }

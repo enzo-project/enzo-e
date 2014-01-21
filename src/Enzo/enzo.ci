@@ -66,14 +66,14 @@ module enzo {
   extern module mesh;
 
   group [migratable] EnzoSimulationCharm : SimulationCharm {
-    entry EnzoSimulationCharm
+    entry EnzoSimulationCharm // [ESC0]
       (const char filename[n], int n);
 
   }
 
   array[Index] EnzoBlock : CommBlock {
 
-    entry EnzoBlock
+    entry EnzoBlock // [EB0]
       (Index index,
        int nx, int ny, int nz,	
        int num_field_blocks,

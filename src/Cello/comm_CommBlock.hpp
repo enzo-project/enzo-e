@@ -259,7 +259,7 @@ public: // interface
 
   //==================================================
 
-  void delete_child(Index index);
+  // void delete_child(Index index);
   bool is_child (const Index & index) const;
 
   //----------------------------------------------------------------------
@@ -332,17 +332,19 @@ public: // interface
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) const throw();
 
-  /// Return whether this CommBlock is a leaf in the octree forest
-  bool is_leaf() const
+  /// Determine whether this CommBlock is a leaf and store the result
+  void set_leaf()
   {
     bool value = true;
     for (size_t i = 0; i < children_.size(); i++) {
       // deleted children are replaced with thisProxy
       if (children_.at(i) != index_) value = false;    
     }
-    return value;
+    is_leaf_ = value;
   }
 
+  /// Return whether this CommBlock is a leaf in the octree forest
+  bool is_leaf() const { return is_leaf_; }
 
 public: // virtual functions
 
@@ -643,6 +645,10 @@ protected: // attributes
 
   /// Whether CommBlock is marked for deletion
   bool delete_;
+
+  /// Whether CommBlock is a leaf node during adapt phase (stored not
+  /// computed to avoid race condition bug #30
+  bool is_leaf_;
 
 };
 

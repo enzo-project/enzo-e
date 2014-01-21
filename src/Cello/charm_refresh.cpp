@@ -37,7 +37,7 @@ void CommBlock::refresh_begin()
     CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
 			  thisProxy[thisIndex]));
 
-    if (! is_leaf()) {
+    if (! is_leaf_) {
       //      stop_performance_(perf_refresh);
       // performance->stop_region(perf_refresh);
       return;
@@ -102,9 +102,10 @@ void CommBlock::refresh_begin()
 	}
       }
     } else {
-      sprintf (buffer,"REFRESH ERROR face %d %d %d level %d",
-	       if3[0],if3[1],if3[2],level);
+      sprintf (buffer,"REFRESH ERROR face (%d %d %d) level %d face_level %d phase %d",
+	       if3[0],if3[1],if3[2],level,face_level(if3),next_phase_);
       index_.print(buffer);
+      
       ERROR("CommBlock::refresh_begin()",
 	    "Refresh error");
     }

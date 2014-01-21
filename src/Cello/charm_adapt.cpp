@@ -159,6 +159,8 @@ static char buffer [256];
 void CommBlock::adapt_mesh()
 {
 
+  set_leaf();
+
   const int rank = simulation()->dimension();
   sync_coarsen_.set_stop(NC(rank));
   sync_coarsen_.clear();
@@ -215,10 +217,10 @@ int CommBlock::desired_level_(int level_maximum)
     level_desired = level;
   }
 
-#ifdef DEBUG_ADAPT
+  // #ifdef DEBUG_ADAPT
   sprintf (buffer,"desired level %d",level_desired);
   index_.print(buffer,-1,2);
-#endif
+  // #endif
 
   return level_desired;
 }
@@ -254,16 +256,18 @@ void CommBlock::q_adapt_next()
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
 			thisProxy[thisIndex]));
 
-  //#ifdef DEBUG_ADAPT
+  // #ifdef DEBUG_ADAPT
   sprintf (buffer,"DEBUG next level %d",level_new_);
   index_.print(buffer,-1,2);
-  //#endif
+  // #endif
 
   update_levels_();
 
   if (is_leaf()) {
+    // #ifdef DEBUG_ADAPT
     sprintf (buffer,"level %d level_new_ %d",level(),level_new_);
     index_.print(buffer);
+    // #endif
     if (level() < level_new_) {
       refine();
     } else if (level() > level_new_) {
@@ -278,11 +282,13 @@ void CommBlock::q_adapt_next()
 void CommBlock::q_adapt_end()
 {
 
+  set_leaf();
+
   if (delete_) {
 
     // #ifdef CELLO_DEBUG
     index_.print("DEBUG ckDestroy()");
-  // #endif
+    // #endif
 
     ckDestroy();
 

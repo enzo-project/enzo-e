@@ -436,13 +436,13 @@ bool CommBlock::is_child (const Index & index) const
 
 //----------------------------------------------------------------------
 
-void CommBlock::delete_child(Index index)
-{
-  for (size_t i=0; i<children_.size(); i++) {
-    // erase by replacing occurences with self
-    if (children_[i] == index) children_[i] = index_;
-  }
-}
+// void CommBlock::delete_child(Index index)
+// {
+//   for (size_t i=0; i<children_.size(); i++) {
+//     // erase by replacing occurences with self
+//     if (children_[i] == index) children_[i] = index_;
+//   }
+// }
 
 //======================================================================
 

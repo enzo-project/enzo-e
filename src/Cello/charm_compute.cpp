@@ -66,7 +66,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   //  double time_start = CmiWallTimer();
 #endif
 
-  if (is_leaf()) {
+  if (is_leaf_) {
 
 // #ifdef CELLO_TRACE
 //     index_.print("p_compute");
