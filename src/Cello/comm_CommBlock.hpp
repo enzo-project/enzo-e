@@ -240,6 +240,10 @@ public: // interface
   /// send ghost zones to fine neighbors in given direction
   void refresh_fine (Index index, int iface[3], int ichild[3]);
 
+
+  /// Refresh a FieldFace in same, next-coarser, or next-finer level
+  void x_refresh(int n, char buffer[],  char rtype, int iface[3], int ichild[3]);
+
   /// Refresh a FieldFace in the same level
   void x_refresh_same(int n, char buffer[],  int iface[3]);
 

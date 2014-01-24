@@ -66,6 +66,8 @@ module mesh {
 
     entry void p_refresh_begin(); // [CB14]
     entry void q_refresh_end(); // [CB15]
+    entry void x_refresh(int n, char buffer[n],  char rtype, 
+			 int iface[3], int ichild[3]); // [CB21]
     entry void x_refresh_same(int n, char buffer[n], int iface[3]); // [CB16]
     entry void x_refresh_fine(int n, char buffer[n], // [CB17]
 			      int iface[3],int ichild[3]);

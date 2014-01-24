@@ -43,8 +43,10 @@ CommBlock::CommBlock
   adapt_(adapt_unknown),
   next_phase_(phase_output),
   coarsened_(false),
-  delete_(false)
+  delete_(false),
+  is_leaf_(true)
 {
+
 #ifdef CELLO_DEBUG
   index_.print("CommBlock()");
 #endif
