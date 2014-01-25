@@ -211,7 +211,7 @@ void Output::write_meta_ ( meta_type type_meta, Io * io ) throw ()
 void Output::write_simulation_
 ( const Simulation * simulation ) throw()
 {
-  write_hierarchy (simulation->hierarchy(), simulation->field_descr());
+  write_hierarchy(simulation->hierarchy(), simulation->field_descr());
 }
 
 //----------------------------------------------------------------------

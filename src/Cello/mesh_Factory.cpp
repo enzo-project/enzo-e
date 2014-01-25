@@ -82,7 +82,7 @@ CProxy_CommBlock Factory::create_block_array
 
 	  Index index(ix,iy,iz);
 
-	  proxy_block[index].insert 
+	  proxy_block[index].insert   // L001
 	    (index,
 	     nx,ny,nz,
 	     num_field_blocks,

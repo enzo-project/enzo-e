@@ -27,7 +27,7 @@
 ///       if (output)
 ///          output->init()
 ///          output->open()
-///          output->write_simulation()
+///          output write_simulation()
 ///       else
 ///          simulation()->monitor_output()
 ///
@@ -49,7 +49,7 @@
 ///       memory.reset_high()
 ///       >>>>> c_compute() >>>>>
 ///
-///    CommBlock::p_write()
+///    CommBlock  p_write()
 ///       output.write_block(this)
 ///       simulation_charm.s_write()
 ///

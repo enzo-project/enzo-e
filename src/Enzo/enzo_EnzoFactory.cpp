@@ -45,7 +45,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
 
   if (allocate) {
 
-    CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
+    CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz); // @A0-1@
     CkArrayOptions opts;
     opts.setMap(array_map);
     TRACE_CHARM("ckNew(nbx,nby,nbz)");
