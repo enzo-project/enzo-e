@@ -231,30 +231,24 @@ public: // interface
   /// Exit the refresh phase after QD
   void q_refresh_end ();
 
-  /// send  ghost zones to given neighbor in same level
-  void refresh_same (Index index,  int iface[3]);
+  // /// send  ghost zones to given neighbor in same level
+  // void refresh_same (Index index,  int iface[3]);
 
-  /// send ghost zones to coarse neighbor in given direction
-  void refresh_coarse (Index index, int iface[3]);
+  // /// send ghost zones to coarse neighbor in given direction
+  // void refresh_coarse (Index index, int iface[3]);
 
-  /// send ghost zones to fine neighbors in given direction
-  void refresh_fine (Index index, int iface[3], int ichild[3]);
+  // /// send ghost zones to fine neighbors in given direction
+  // void refresh_fine (Index index, int iface[3], int ichild[3]);
+
+  void refresh (int type_refresh, Index index, int if3[3], int ic3[3]);
 
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
-  void x_refresh(int n, char buffer[],  char rtype, int iface[3], int ichild[3]);
-
-  /// Refresh a FieldFace in the same level
-  void x_refresh_same(int n, char buffer[],  int iface[3]);
-
-  /// Refresh a FieldFace in the next-coarser level
-  void x_refresh_coarse(int n, char buffer[],int iface[3],int ichild[3]);
-
-  /// Refresh a FieldFace in the next-finer level
-  void x_refresh_fine(int n, char buffer[],  int iface[3],int ichild[3]);
+  void x_refresh(int n, char buffer[],  int type_refresh, 
+		 int if3[3], int ic3[3]);
 
   /// Get restricted data from child when it is deleted
-  void x_refresh_child (int n, char buffer[],int ichild[3]);
+  void x_refresh_child (int n, char buffer[],int ic3[3]);
 
   //--------------------------------------------------
 
