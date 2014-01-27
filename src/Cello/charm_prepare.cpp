@@ -11,7 +11,7 @@
 ///       update_boundary_()
 ///       compute dt
 ///       compute stopping
-///       contribute( >>>>> CommBlock::p_output() >>>>> )
+///       contribute( >>>>> CommBlock::r_output() >>>>> )
 
 #define TRACE_CELLO
    
@@ -84,7 +84,7 @@ void CommBlock::prepare()
   min_reduce[0] = dt_block;
   min_reduce[1] = stop_block ? 1.0 : 0.0;
   
-  CkCallback callback (CkIndex_CommBlock::p_output(NULL), thisProxy);
+  CkCallback callback (CkIndex_CommBlock::r_output(NULL), thisProxy);
   TRACE1("Calling contribute %d",2*sizeof(double));
   // char buffer[80];
   // sprintf (buffer,"contribute() cycle %d",simulation->cycle());

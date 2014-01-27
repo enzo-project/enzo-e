@@ -179,14 +179,14 @@ void CommBlock::adapt_mesh()
 
   }
 
-  CkCallback callback (CkIndex_CommBlock::q_adapt_called(NULL), thisProxy);
+  CkCallback callback (CkIndex_CommBlock::r_adapt_called(NULL), thisProxy);
   contribute( callback);
 
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::q_adapt_called(CkReductionMsg * msg)
+void CommBlock::r_adapt_called(CkReductionMsg * msg)
 {
   if (is_leaf()) {
     notify_neighbors(level_new_);

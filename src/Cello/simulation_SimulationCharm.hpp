@@ -86,12 +86,12 @@ public: // functions
 
   /// Call output on Problem list of Output objects
   void p_output ();
-  void c_output ();
+  void r_output ();
 
   /// Reduce output, using p_output_write to send data to writing processes
   void s_write();
   /// Continue on to Problem::output_wait()
-  void c_write();
+  void r_write();
 
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
@@ -104,7 +104,7 @@ public: // functions
   virtual void performance_output();
 
   /// Reduction for performance data
-  void p_performance_reduce (CkReductionMsg * msg);
+  void r_performance_reduce (CkReductionMsg * msg);
 
   /// Updated Simulation function to call compute()
   void monitor_output();

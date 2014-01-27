@@ -126,12 +126,13 @@ public: // interface
   // ADAPT
   //--------------------------------------------------
 
-  /// Entry function after prepare() to call Simulation::p_output()
-  void p_output(CkReductionMsg * msg);
+  /// Entry function after prepare() to call Simulation::r_output()
+  void r_output(CkReductionMsg * msg);
 
   void p_adapt_mesh() { adapt_mesh(); }
 
-  void q_adapt_called(CkReductionMsg * msg);
+  void r_adapt_called(CkReductionMsg * msg);
+
   void adapt_called();
 
   void adapt_mesh();

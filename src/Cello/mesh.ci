@@ -42,13 +42,13 @@ module mesh {
     entry void p_write (int index_output); // [CB1]
     entry void p_compute(int cycle, double time, double dt); // [CB2]
     entry void p_read (int index_input); // [CB3]
-    entry void p_output(CkReductionMsg * msg); // [CB4]
+    entry void r_output(CkReductionMsg * msg); // [CB4]
 
     // @@@@@@@@@@@@@@@@@@@@ NEW ADAPT @@@@@@@@@@@@@@@@@@@@
 
 
     entry void p_adapt_mesh(); // [CB5]
-    entry void q_adapt_called(CkReductionMsg * msg); // [CB6]
+    entry void r_adapt_called(CkReductionMsg * msg); // [CB6]
 
     entry void p_get_neighbor_level(Index index,int ic3[3], int if3[3], // [CB7]
 				    int level_now, int level_new);

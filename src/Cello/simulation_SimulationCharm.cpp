@@ -59,7 +59,7 @@ void SimulationCharm::performance_output()
 
   counters_long[n-1] = block_sync_.stop(); // number of CommBlocks
 
-  CkCallback callback (CkIndex_SimulationCharm::p_performance_reduce(NULL), 
+  CkCallback callback (CkIndex_SimulationCharm::r_performance_reduce(NULL), 
 		       thisProxy);
   contribute (n*sizeof(long),
 	      counters_long,CkReduction::sum_long,callback);
@@ -70,7 +70,7 @@ void SimulationCharm::performance_output()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_performance_reduce(CkReductionMsg * msg)
+void SimulationCharm::r_performance_reduce(CkReductionMsg * msg)
 {
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
