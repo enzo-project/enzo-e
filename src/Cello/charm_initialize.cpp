@@ -14,10 +14,10 @@
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_initialize_begin() 
-{
-  initialize();  // virtual: calls EnzoSimulationCharm::initialize()
-}
+// void SimulationCharm::p_initialize_begin() 
+// {
+//   initialize();  // virtual: calls EnzoSimulationCharm::initialize()
+// }
 
 //----------------------------------------------------------------------
 

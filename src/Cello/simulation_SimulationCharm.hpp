@@ -76,7 +76,7 @@ public: // functions
   }
 
   /// Call initialize()
-  void p_initialize_begin();
+  // void p_initialize_begin();
 
   /// Wait for all Hierarchy to be initialized before creating any CommBlocks
   void r_initialize_forest();
@@ -98,7 +98,7 @@ public: // functions
   void p_output_write (int n, char * buffer);
 
   /// Stopping criteria and computation
-  void c_compute ();
+  void compute ();
 
   /// Output Performance information to stdout (root process data only)
   virtual void performance_output();
@@ -106,7 +106,7 @@ public: // functions
   /// Reduction for performance data
   void p_performance_reduce (CkReductionMsg * msg);
 
-  /// Updated Simulation function to call c_compute()
+  /// Updated Simulation function to call compute()
   void monitor_output();
 
 protected: // attributes

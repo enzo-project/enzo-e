@@ -52,57 +52,49 @@ CProxy_CommBlock Factory::create_block_array
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  int num_field_blocks,
- bool allocate,
  bool testing
  ) const throw()
 {
-  TRACE8("Factory::create_block_array(na(%d %d %d) n(%d %d %d num_field_blocks %d  allocate %d",
-	 nbx,nby,nbz,nx,ny,nz,num_field_blocks,allocate);
+  TRACE7("Factory::create_block_array(na(%d %d %d) n(%d %d %d num_field_blocks %d",
+	 nbx,nby,nbz,nx,ny,nz,num_field_blocks);
 
   CProxy_CommBlock proxy_block;
 
-  if (allocate) {
+  CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
+  CkArrayOptions opts;
+  opts.setMap(array_map);
+  proxy_block = CProxy_CommBlock::ckNew(opts);
 
-    CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
-    CkArrayOptions opts;
-    opts.setMap(array_map);
-    proxy_block = CProxy_CommBlock::ckNew(opts);
+  int count_adapt;
 
-    int count_adapt;
+  int    cycle = 0;
+  double time  = 0.0;
+  double dt    = 0.0;
+  int num_face_level = 0;
+  int * face_level = 0;
 
-    int    cycle = 0;
-    double time  = 0.0;
-    double dt    = 0.0;
-    int num_face_level = 0;
-    int * face_level = 0;
+  for (int ix=0; ix<nbx; ix++) {
+    for (int iy=0; iy<nby; iy++) {
+      for (int iz=0; iz<nbz; iz++) {
 
-    for (int ix=0; ix<nbx; ix++) {
-      for (int iy=0; iy<nby; iy++) {
-	for (int iz=0; iz<nbz; iz++) {
+	Index index(ix,iy,iz);
 
-	  Index index(ix,iy,iz);
+	proxy_block[index].insert   // @L001@
+	  (index,
+	   nx,ny,nz,
+	   num_field_blocks,
+	   count_adapt = 0,
+	   cycle,time,dt,
+	   0,NULL,op_array_copy,
+	   num_face_level, face_level,
+	   testing);
 
-	  proxy_block[index].insert   // L001
-	    (index,
-	     nx,ny,nz,
-	     num_field_blocks,
-	     count_adapt = 0,
-	     cycle,time,dt,
-	     0,NULL,op_array_copy,
-	     num_face_level, face_level,
-	     testing);
-
-	}
       }
     }
-
-    proxy_block.doneInserting();
-
-  } else {
-
-    proxy_block = CProxy_CommBlock::ckNew();
-
   }
+
+  proxy_block.doneInserting();
+
 
   TRACE1("Factory::create_block_array = %p",&proxy_block);
   return proxy_block;
@@ -127,7 +119,7 @@ CommBlock * Factory::create_block
   TRACE2("Factory::create_block(num_field_blocks %d  count_adapt %d)",
 	 num_field_blocks,count_adapt);
 
-  (*block_array)[index].insert
+  (*block_array)[index].insert   // @L002@
     (
      index,
      nx,ny,nz,

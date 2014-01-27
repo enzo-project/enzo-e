@@ -276,7 +276,6 @@ void Hierarchy::allocate_array_
     (nbx,nby,nbz,
      mbx,mby,mbz,
      num_field_blocks,
-     allocate_data,
      testing);
     
   block_exists_ = allocate_data;

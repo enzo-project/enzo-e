@@ -28,6 +28,7 @@ EnzoSimulationCharm::EnzoSimulationCharm
 
   problem_ = new EnzoProblem;
 
+  initialize();
 }
 
 //----------------------------------------------------------------------

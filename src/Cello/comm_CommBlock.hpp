@@ -132,6 +132,7 @@ public: // interface
   void p_adapt_mesh() { adapt_mesh(); }
 
   void q_adapt_called(CkReductionMsg * msg);
+  void adapt_called();
 
   void adapt_mesh();
 

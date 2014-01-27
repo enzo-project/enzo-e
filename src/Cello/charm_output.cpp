@@ -307,7 +307,7 @@ void SimulationCharm::monitor_output()
 
   TRACE ("END   PHASE OUTPUT [SIMULATION]");
 
-  c_compute();
+  compute();
 }
 
 //======================================================================

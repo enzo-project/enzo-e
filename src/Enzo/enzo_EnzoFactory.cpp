@@ -34,65 +34,54 @@ CProxy_CommBlock EnzoFactory::create_block_array
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  int num_field_blocks,
- bool allocate,
  bool testing
  ) const throw()
 {
-  TRACE8("EnzoFactory::create_block_array(na(%d %d %d) n(%d %d %d num_field_blocks %d  allocate %d",
-	 nbx,nby,nbz,nx,ny,nz,num_field_blocks,allocate);
+  TRACE7("EnzoFactory::create_block_array(na(%d %d %d) n(%d %d %d num_field_blocks %d",	 nbx,nby,nbz,nx,ny,nz,num_field_blocks);
 
   CProxy_EnzoBlock enzo_block_array;
 
-  if (allocate) {
+  CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
+  CkArrayOptions opts;
+  opts.setMap(array_map);
+  TRACE_CHARM("ckNew(nbx,nby,nbz)");
+  enzo_block_array = CProxy_CommBlock::ckNew(opts);
 
-    CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz); // @A0-1@
-    CkArrayOptions opts;
-    opts.setMap(array_map);
-    TRACE_CHARM("ckNew(nbx,nby,nbz)");
-    enzo_block_array = CProxy_CommBlock::ckNew(opts);
+  int count_adapt;
 
-    int count_adapt;
+  int    cycle = 0;
+  double time  = 0.0;
+  double dt    = 0.0;
+  int num_face_level = 0;
+  int * face_level = 0;
 
-    int    cycle = 0;
-    double time  = 0.0;
-    double dt    = 0.0;
-    int num_face_level = 0;
-    int * face_level = 0;
+  for (int ix=0; ix<nbx; ix++) {
+    for (int iy=0; iy<nby; iy++) {
+      for (int iz=0; iz<nbz; iz++) {
 
-    for (int ix=0; ix<nbx; ix++) {
-      for (int iy=0; iy<nby; iy++) {
-	for (int iz=0; iz<nbz; iz++) {
+	Index index(ix,iy,iz);
 
-	  Index index(ix,iy,iz);
+	TRACE3 ("inserting %d %d %d",ix,iy,iz);
+#ifdef CELLO_DEBUG
+	index.print("DEBUG insert()");
+#endif
+	enzo_block_array[index].insert 
+	  (index,
+	   nx,ny,nz,
+	   num_field_blocks,
+	   count_adapt = 0,
+	   cycle, time, dt,
+	   0,NULL,op_array_copy,
+	   num_face_level, face_level,
+	   testing);
 
-	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
-	  // #ifdef CELLO_DEBUG
-	  // #ifdef CELLO_DEBUG
-	  index.print("DEBUG insert()");
-	  // #endif
-	  // #endif
-	  enzo_block_array[index].insert 
-	    (index,
-	     nx,ny,nz,
-	     num_field_blocks,
-	     count_adapt = 0,
-	     cycle, time, dt,
-	     0,NULL,op_array_copy,
-	     num_face_level, face_level,
-	     testing);
-
-	}
       }
     }
-
-    enzo_block_array.doneInserting();
-
-  } else {
-
-    TRACE_CHARM("ckNew()");
-    enzo_block_array = CProxy_EnzoBlock::ckNew();
-
   }
+
+  enzo_block_array.doneInserting();
+
+
   TRACE1("EnzoFactory::create_block_array = %p",&enzo_block_array);
   return enzo_block_array;
 }

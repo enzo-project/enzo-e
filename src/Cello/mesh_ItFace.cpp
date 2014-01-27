@@ -12,9 +12,11 @@
 ItFace::ItFace(int rank, int rank_limit, 
 	       const int * ic3,
 	       const int * ipf3) throw()
-  : rank_(rank),
-    rank_limit_(rank_limit),
-    ic3_()
+  : if3_(),
+    ic3_(),
+    ipf3_(),
+    rank_(rank),
+    rank_limit_(rank_limit)
 {
   reset();
   if (ic3) {

@@ -57,7 +57,6 @@ public: // interface
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int num_field_blocks,
-   bool allocate,
    bool testing = false) const throw();
 
   /// Create a new CommBlock

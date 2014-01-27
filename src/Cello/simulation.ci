@@ -26,7 +26,7 @@ module simulation {
 
     entry SimulationCharm (const char filename[n], int n); // [SC0]
 
-    entry void p_initialize_begin ();  // [SC1]
+//    entry void p_initialize_begin ();  // [SC1]
     entry void r_initialize_forest (); // [SC2]
     entry void r_initialize_end ();    // [SC3]
 

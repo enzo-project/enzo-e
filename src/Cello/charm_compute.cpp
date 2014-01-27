@@ -15,7 +15,7 @@
 //======================================================================
 
 
-void SimulationCharm::c_compute()
+void SimulationCharm::compute()
 {
 
 

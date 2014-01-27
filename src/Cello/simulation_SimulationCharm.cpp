@@ -24,7 +24,6 @@ SimulationCharm::SimulationCharm
     block_sync_(0)
 {
   TRACE("SimulationCharm::SimulationCharm");
-
 }
 
 //----------------------------------------------------------------------

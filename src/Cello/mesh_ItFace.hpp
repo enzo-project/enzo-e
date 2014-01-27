@@ -30,10 +30,10 @@ public: // interface
     // NOTE: change this function whenever attributes change
     TRACEPUP;
     PUParray(p,if3_,3);
-    p | rank_;
-    p | rank_limit_;
     p | ic3_;
     p | ipf3_;
+    p | rank_;
+    p | rank_limit_;
   }
 
   /// Reduce another value
