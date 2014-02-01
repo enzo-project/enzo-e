@@ -15,7 +15,8 @@ class FieldDescr;
 enum mesh_color_type {
   mesh_color_unknown,
   mesh_color_level,
-  mesh_color_process
+  mesh_color_process,
+  mesh_color_neighbor,
 };
 
 class OutputImage : public Output {

@@ -32,98 +32,91 @@ void CommBlock::refresh_begin()
 
   std::string refresh_type = config->field_refresh_type;
 
-  if (refresh_type == "quiescence") {
+  if (is_leaf()) {
 
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
-			  thisProxy[thisIndex]));
+    int rank = simulation->dimension();
 
-    if (! is_leaf()) {
-      //      stop_performance_(perf_refresh);
-      // performance->stop_region(perf_refresh);
-      return;
-    }
+    int n3[3];
+    size_forest(&n3[0],&n3[1],&n3[2]);
 
-  } 
+    int refresh_rank = config->field_refresh_rank;
+    bool refresh_type_counter = (refresh_type == "counter");
+    loop_refresh_.set_stop(0);
 
-  int rank = simulation->dimension();
+    ItFace it_face(rank,refresh_rank);
+    int if3[3];
 
-  int n3[3];
-  size_forest(&n3[0],&n3[1],&n3[2]);
+    const int level = this->level();
 
-  int refresh_rank = config->field_refresh_rank;
-  bool refresh_type_counter = (refresh_type == "counter");
-  loop_refresh_.set_stop(0);
+    while (it_face.next(if3)) {
 
-  ItFace it_face(rank,refresh_rank);
-  int if3[3];
+      Index index_neighbor = index_.index_neighbor(if3[0],if3[1],if3[2],n3);
 
-  const int level = this->level();
+      TRACE0;
 
-  while (it_face.next(if3)) {
+      if (face_level(if3) == level-1) {       // COARSE
 
-    Index index_neighbor = index_.index_neighbor(if3[0],if3[1],if3[2],n3);
+	int ic3[3];
+	index_.child(level,ic3+0,ic3+1,ic3+2);
+	int ip3[3];
+	parent_face_(ip3,if3,ic3);
 
-    TRACE0;
+	refresh(refresh_coarse,index_neighbor.index_parent(),ip3,ic3);
 
-    if (face_level(if3) == level-1) {       // COARSE
+      } else if (face_level(if3) == level) {    // SAME
 
-      int ic3[3];
-      index_.child(level,ic3+0,ic3+1,ic3+2);
-      int ip3[3];
-      parent_face_(ip3,if3,ic3);
+	int ic3[3] = {0,0,0};
+	refresh(refresh_same,index_neighbor,if3,ic3);
 
-      refresh(refresh_coarse,index_neighbor.index_parent(),ip3,ic3);
-
-    } else if (face_level(if3) == level) {    // SAME
-
-      int ic3[3] = {0,0,0};
-      refresh(refresh_same,index_neighbor,if3,ic3);
-
-    } else if (face_level(if3) == level+1) {  // FINE
+      } else if (face_level(if3) == level+1) {  // FINE
 	    
-      int ic3m[3];
-      int ic3p[3];
-      loop_limits_nibling_(ic3m,ic3p,if3);
-      int ic3[3];
-      for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
-	for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
-	  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
+	int ic3m[3];
+	int ic3p[3];
+	loop_limits_nibling_(ic3m,ic3p,if3);
+	int ic3[3];
+	for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
+	  for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
+	    for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
 
-	    int jc3[3];
-	    facing_child_ (jc3,ic3,if3);
+	      int jc3[3];
+	      facing_child_ (jc3,ic3,if3);
 
-	    Index index_nibling = 
-	      index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
+	      Index index_nibling = 
+		index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
 		  
-	    refresh(refresh_fine,index_nibling, if3,ic3);
+	      refresh(refresh_fine,index_nibling, if3,ic3);
+	    }
 	  }
 	}
-      }
-    } else {
-      sprintf (buffer,"REFRESH ERROR face (%d %d %d) level %d face_level %d phase %d",
-	       if3[0],if3[1],if3[2],level,face_level(if3),next_phase_);
-      index_.print(buffer);
+      } else {
+	sprintf (buffer,"REFRESH ERROR face (%d %d %d) level %d face_level %d phase %d",
+		 if3[0],if3[1],if3[2],level,face_level(if3),next_phase_);
+	index_.print(buffer);
       
-      ERROR("CommBlock::refresh_begin()",
-	    "Refresh error");
+	ERROR("CommBlock::refresh_begin()",
+	      "Refresh error");
+      }
+
     }
 
+    if (refresh_type_counter) {
+
+      // Prevent hang if single-CommBlock simulation
+      loop_refresh_.add_stop();
+
+      //    stop_performance_(perf_refresh);
+      // performance->stop_region(perf_refresh);
+      x_refresh (0,0,0,0,0);
+
+    }
   }
+  if (refresh_type == "quiescence") {
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
+    			  thisProxy[thisIndex]));
+    //    contribute (CkCallback(CkIndex_CommBlock::q_refresh_end(),
+    //			   thisProxy[thisIndex]));
+  } 
 
-  if (refresh_type_counter) {
-
-    // Prevent hang if single-CommBlock simulation
-    loop_refresh_.add_stop();
-
-    //    stop_performance_(perf_refresh);
-    // performance->stop_region(perf_refresh);
-    x_refresh (0,0,0,0,0);
-
-  } else {
-
-    //    stop_performance_(perf_refresh);
-    // performance->stop_region(perf_refresh);
-  }
 }
 
 //----------------------------------------------------------------------
@@ -170,6 +163,7 @@ void CommBlock::refresh ( int type_refresh, Index index,
   loop_refresh_.add_stop();
   delete field_face;
 }
+
 //----------------------------------------------------------------------
 
 void CommBlock::x_refresh (int n, char * buffer, int type_refresh,
@@ -215,100 +209,13 @@ void CommBlock::x_refresh (int n, char * buffer, int type_refresh,
 
 //----------------------------------------------------------------------
 
-// void CommBlock::x_refresh_coarse (int n, char * buffer, 
-//  				  int iface[3], int ichild[3])
-// {
-//   switch_performance_(perf_refresh,__FILE__,__LINE__);
-
-//   bool lghost[3] = {false};
-
-//   store_face_(n,buffer,
-//  	      iface, ichild, lghost,
-//  	      op_array_restrict);
-
-//   std::string refresh_type = simulation()->config()->field_refresh_type;
-  
-//   if (refresh_type == "counter") {
-//     if (loop_refresh_.next()) {
-//       q_refresh_end();
-//     }
-//   }
-
-//   //  stop_performance_(perf_refresh);
-
-// }
-
-//----------------------------------------------------------------------
-
-// void CommBlock::x_refresh_same (int n, char * buffer, int iface[3])
-// {
-//   switch_performance_(perf_refresh,__FILE__,__LINE__);
-
-//   Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-//   if ( n != 0) {
-//     int ichild[3] = {0,0,0};
-//     bool lghost[3] = {false,false,false};
-//     store_face_(n,buffer,
-//  		iface,ichild,lghost,
-//  		op_array_copy);
-//   }
-
-//   std::string refresh_type = simulation->config()->field_refresh_type;
-  
-//   //  stop_performance_(perf_refresh);
-
-//   if (refresh_type == "counter") {
-//     if (loop_refresh_.next()) {
-//       q_refresh_end();
-//     }
-//   }
-// }
-
-// //----------------------------------------------------------------------
-
-// void CommBlock::x_refresh_fine (int n, char * buffer, 
-//  				int iface[3],
-//  				int ichild[3])
-// {
-//   switch_performance_(perf_refresh,__FILE__,__LINE__);
-
-//   bool lghost[3] = {false};
-//   store_face_(n,buffer,
-//  	      iface, ichild, lghost,
-//  	      op_array_prolong);
-
-//   std::string refresh_type = simulation()->config()->field_refresh_type;
-  
-//   if (refresh_type == "counter") {
-//     if (loop_refresh_.next()) {
-//       q_refresh_end();
-//     }
-//   }
-
-//   //  stop_performance_(perf_refresh);
-
-// }
-
-//----------------------------------------------------------------------
-
 void CommBlock::q_refresh_end()
 {
-
-  // sprintf (buffer,"END PHASE REFRESH(%p)",this);
-  if (next_phase_ == phase_output) {
-    // index_.print(buffer,-1,2);
-    // index_.print("refresh calling output");
-    prepare();
-  } else if (next_phase_ == phase_adapt) {
-    // index_.print("refresh calling adapt");
-    adapt_mesh();
-  } else {
-    // index_.print("ERROR");
-    ERROR1 ("CommBlock::q_refresh_end()",
-	    "Unknown next_phase %d",
-	    next_phase_);
-  }
+  if      (next_phase_ == phase_output)  prepare();
+  else if (next_phase_ == phase_adapt)   adapt_mesh();
+  else ERROR1 ("CommBlock::q_refresh_end()",
+	       "Unknown next_phase %d",
+	       next_phase_);
 }
 
 //----------------------------------------------------------------------

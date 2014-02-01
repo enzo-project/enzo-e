@@ -38,13 +38,13 @@ void SimulationCharm::r_initialize_forest()
 
   initialize_forest_();
 
-  CkCallback callback (CkIndex_SimulationCharm::r_initialize_end(), thisProxy);
+  CkCallback callback (CkIndex_SimulationCharm::r_initialize_hierarchy(), thisProxy);
   contribute(0,0,CkReduction::concat,callback);
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::r_initialize_end() 
+void SimulationCharm::r_initialize_hierarchy() 
 {
   if (group_process_->is_root()) {
     (*hierarchy()->block_array() ).p_adapt_mesh();

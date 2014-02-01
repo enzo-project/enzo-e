@@ -82,7 +82,7 @@ public: // functions
   void r_initialize_forest();
 
   /// Wait for all local patches to be created before calling run
-  void r_initialize_end();
+  void r_initialize_hierarchy();
 
   /// Call output on Problem list of Output objects
   void p_output ();

@@ -20,7 +20,7 @@ OutputImage::OutputImage(int index,
 			 std::string image_type,
 			 int image_size_x, int image_size_y,
 			 std::string image_reduce_type,
-			 std::string mesh_color_type,
+			 std::string image_mesh_color,
 			 int         image_block_size,
 			 int face_rank,
 			 bool image_log,
@@ -42,14 +42,26 @@ OutputImage::OutputImage(int index,
 
 {
   //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
-  if (image_reduce_type=="min") op_reduce_ = reduce_min;
-  if (image_reduce_type=="max") op_reduce_ = reduce_max;
-  if (image_reduce_type=="avg") op_reduce_ = reduce_avg;
-  if (image_reduce_type=="sum") op_reduce_ = reduce_sum;
-  if (image_reduce_type=="set") op_reduce_ = reduce_set;
+  if      (image_reduce_type=="min") { op_reduce_ = reduce_min; } 
+  else if (image_reduce_type=="max") { op_reduce_ = reduce_max; }
+  else if (image_reduce_type=="avg") { op_reduce_ = reduce_avg; }
+  else if (image_reduce_type=="sum") { op_reduce_ = reduce_sum; }
+  else if (image_reduce_type=="set") { op_reduce_ = reduce_set; }
+  else {
+    ERROR1 ("OutputImage::OutputImage()",
+	    "Unrecognized output_image_reduce_type %s",
+	    image_reduce_type.c_str());
+  }
 
-  if (mesh_color_type=="level")   mesh_color_ = mesh_color_level;
-  if (mesh_color_type=="process") mesh_color_ = mesh_color_process;
+  PARALLEL_PRINTF ("image_mesh_color = %s\n",image_mesh_color.c_str());
+  if      (image_mesh_color=="level")   mesh_color_ = mesh_color_level;
+  else if (image_mesh_color=="process") mesh_color_ = mesh_color_process;
+  else if (image_mesh_color=="neighbor") mesh_color_ = mesh_color_neighbor;
+  else {
+    ERROR1 ("OutputImage::OutputImage()",
+	    "Unrecognized output_image_mesh_color %s",
+	    image_mesh_color.c_str());
+  }
 
   TRACE1 ("OutputImage reduce %d",op_reduce_);
 
@@ -236,6 +248,7 @@ void OutputImage::write_block
   double color = 0;
   if (mesh_color_ == mesh_color_level)   color = comm_block->level()+1;
   if (mesh_color_ == mesh_color_process) color = CkMyPe()+1;
+  if (mesh_color_ == mesh_color_neighbor) color = comm_block->count_neighbors();
 
   // pixel extents of box
   int ixm,iym,izm; 

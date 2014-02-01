@@ -132,6 +132,7 @@ public: // interface
   void p_adapt_mesh() { adapt_mesh(); }
 
   void r_adapt_called(CkReductionMsg * msg);
+  void q_adapt_called();
 
   void adapt_called();
 
@@ -142,16 +143,11 @@ public: // interface
 			     int ic3[3], int if3[3],
 			     int level_now, int level_new);
 
-  /// Child notifies parent that it can (or cannot) coarsen
-  void p_child_can_coarsen();
-  /// Parent notifies children whether it can or cannot coarsen
-  void p_parent_can_coarsen();
   /// Child sends restricted data to parent
   void p_get_child_data(int ic3[3],
 			int na, char * array,
 			int nf, int * child_face_level);
 
-  void refine();
   /// Parent tells child to delete itself
   void p_delete();
 
@@ -224,6 +220,9 @@ public: // interface
   //--------------------------------------------------
   // REFRESH
   //--------------------------------------------------
+
+  /// neighbor synchronization
+  void p_sync(int phase, int count);
 
   /// Refresh ghost zones and apply boundary conditions
   void p_refresh_begin()
@@ -373,7 +372,14 @@ public: // virtual functions
   /// Return the local simulation object
   Simulation * simulation() const;
 
+  int count_neighbors() const;
+
 protected: // functions
+
+  void sync_(int phase, int count);
+  void coarsen_();
+  void refine_();
+  void adapt_called_();
 
   Index neighbor_ (const int if3[3], Index * ind = 0) const;
 
@@ -596,8 +602,8 @@ protected: // attributes
 
   //--------------------------------------------------
 
-  /// Indices of all neighboring CommBlocks
-  std::vector<Index> neighbor_index_;
+  // /// Indices of all neighboring CommBlocks
+  // std::vector<Index> neighbor_index_;
 
   /// Index of current initialization routine
   int index_initial_;
@@ -612,6 +618,10 @@ protected: // attributes
 
   /// Synchronization counter for ghost refresh
   Sync sync_coarsen_;
+
+  /// Synchronization counter for p_sync
+  int  count_sync_;
+  int  max_sync_;
 
   /// current level of neighbors along each face
   std::vector<int> face_level_;

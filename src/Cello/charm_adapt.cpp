@@ -159,7 +159,6 @@ static char buffer [256];
 
 void CommBlock::adapt_mesh()
 {
-
   set_leaf();
 
   const int rank = simulation()->dimension();
@@ -177,22 +176,99 @@ void CommBlock::adapt_mesh()
 
     level_new_ = desired_level_(level_maximum);
 
+  //  CkCallback ;
+  //  contribute(CkCallback(CkIndex_CommBlock::r_adapt_called(NULL), thisProxy));
+  //  CkStartQD(CkCallback (CkIndex_CommBlock::q_adapt_called(), thisProxy));
+  //  p_sync(phase_adapt_called);
+
+    sync_(phase_adapt,count_neighbors()+1);
+
+    const int level        = this->level();
+    const int rank_refresh = simulation()->config()->field_refresh_rank;
+
+    ItFace it_face(rank,rank_refresh);
+    int of3[3];
+
+    while (it_face.next(of3)) {
+
+      int ic3[3] = {0,0,0};
+
+      Index index_neighbor = neighbor_(of3);
+
+      const int level_face = face_level (of3);
+
+      if (level_face == level) {
+
+	// SEND-SAME: Face and level are sent to unique
+	// neighboring block in the same level
+
+	thisProxy[index_neighbor].p_sync(phase_adapt,0);
+
+      } else if (level_face == level - 1) {
+
+	// SEND-COARSE: Face, level, and child indices are sent to
+	// unique neighboring block in the next-coarser level
+
+
+	index_.child (level,&ic3[0],&ic3[1],&ic3[2]);
+
+	int op3[3];
+	parent_face_(op3,of3,ic3);
+
+	// avoid redundant calls
+	if (op3[0]==of3[0] && 
+	    op3[1]==of3[1] && 
+	    op3[2]==of3[2]) {
+
+	  Index index_uncle = index_neighbor.index_parent();
+	  thisProxy[index_uncle].p_sync(phase_adapt,0);
+
+	}
+
+      } else if (level_face == level + 1) {
+
+	// SEND-FINE: Face and level are sent to all nibling
+	// blocks in the next-finer level along the face.
+
+	const int if3[3] = {-of3[0],-of3[1],-of3[2]};
+	ItChild it_child(rank,if3);
+	while (it_child.next(ic3)) {
+	  Index index_nibling = index_neighbor.index_child(ic3);
+	  thisProxy[index_nibling].p_sync(phase_adapt,0);
+	}
+
+      } else {
+	std::string bit_str = index_.bit_string(-1,2);
+	WARNING3 ("CommBlock::adapt_mesh()",
+		  "%s level %d and face level %d differ by more than 1",
+		  bit_str.c_str(),level,level_face);
+      }
+
+    }
+  } else {
+    adapt_called_();
   }
-
-  CkCallback callback (CkIndex_CommBlock::r_adapt_called(NULL), thisProxy);
-  contribute( callback);
-
 }
 
-//----------------------------------------------------------------------
+  //----------------------------------------------------------------------
 
-void CommBlock::r_adapt_called(CkReductionMsg * msg)
+  void CommBlock::r_adapt_called(CkReductionMsg * msg)
+{
+  delete msg;
+  adapt_called_();
+}
+
+void CommBlock::q_adapt_called() { adapt_called_(); }
+
+void CommBlock::adapt_called_()
 {
   if (is_leaf()) {
     notify_neighbors(level_new_);
   }
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_next(), 
-			thisProxy[thisIndex]));
+  			thisProxy[thisIndex]));
+  //  contribute (CkCallback(CkIndex_CommBlock::q_adapt_next(), 
+  //			 thisProxy[thisIndex]));
 }
 
 //----------------------------------------------------------------------
@@ -264,21 +340,21 @@ void CommBlock::q_adapt_next()
     sprintf (buffer,"level %d level_new_ %d",level(),level_new_);
     index_.print(buffer);
 #endif
-    if (level() < level_new_) {
-      refine();
-    } else if (level() > level_new_) {
-      thisProxy[index_.index_parent()].p_child_can_coarsen();
-    }
+    if (level() < level_new_) refine_();
+    if (level() > level_new_) coarsen_();
   }
-  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
-			thisProxy[thisIndex]));
+
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
+    			thisProxy[thisIndex]));
+    // contribute (CkCallback(CkIndex_CommBlock::q_adapt_end(NULL), 
+    //  			 thisProxy[thisIndex]));
+
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::q_adapt_end()
 {
-
   set_leaf();
 
   if (delete_) {
@@ -311,7 +387,7 @@ void CommBlock::q_adapt_end()
 }
 //----------------------------------------------------------------------
 
-void CommBlock::refine()
+void CommBlock::refine_()
 {
 
   adapt_ = adapt_unknown;
@@ -445,6 +521,22 @@ void CommBlock::notify_neighbors(int level_new)
 		bit_str.c_str(),level,level_face);
     }
 
+  }
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::p_sync (int phase, int count) {sync_(phase,count); }
+void CommBlock::sync_ (int phase, int count)
+{
+  if (count != 0) {
+    max_sync_ = count;
+  }
+  ++count_sync_;
+  if (max_sync_ > 0 && count_sync_ >= max_sync_) {
+    max_sync_ = 0;
+    count_sync_ = 0;
+    if (phase == phase_adapt_called) adapt_called_() ;
   }
 }
 
@@ -586,10 +678,6 @@ void CommBlock::p_get_neighbor_level
     index_.print(buffer,-1,2);
 #endif
 
-    // sprintf (buffer,"DEBUG c%d s%d a%d n%d",is_coarsening,is_sibling,is_finer_neighbor,is_nephew);
-    // index_.print(buffer,-1,2);
-    // PARALLEL_PRINTF("DEBUG %s:%d\n",__FILE__,__LINE__);
-
     if (is_coarsening && ((is_sibling && is_finer_neighbor) || is_nephew )) {
 
 #ifdef DEBUG_ADAPT
@@ -609,6 +697,9 @@ void CommBlock::p_get_neighbor_level
     // notify neighbors if level_new has changed
 
     if (level_new != level_new_) {
+      ASSERT2 ("CommBlock::p_get_neighbor_level()",
+	       "level_new %d level_new_ %d\n", level_new,level_new_,
+	       level_new > level_new_);
       level_new_ = level_new;
       notify_neighbors(level_new_);
     }
@@ -631,28 +722,7 @@ void CommBlock::p_get_neighbor_level
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_child_can_coarsen()
-// this block can coarsen: notify parent
-{
-
-  if (sync_coarsen_.next()) {
-  
-    // notify children parent can coarsen
-
-    const int rank = simulation()->dimension();
-    ItChild it_child (rank);
-    int oc3[3];
-    while (it_child.next(oc3)) {
-      Index index_child = index_.index_child(oc3);
-      thisProxy[index_child].p_parent_can_coarsen();
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::p_parent_can_coarsen()
-// parent can coarsen: get child data
+void CommBlock::coarsen_()
 {
 
   const int level = this->level();
