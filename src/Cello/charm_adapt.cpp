@@ -372,7 +372,7 @@ void CommBlock::q_adapt_end()
 
   if (thisIndex.is_root()) {
 
-    thisArray->doneInserting();
+    //    thisArray->doneInserting();
 
     const int initial_cycle = simulation()->config()->initial_cycle;
     const bool is_first_cycle = (initial_cycle == cycle());
