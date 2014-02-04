@@ -26,7 +26,9 @@ void SimulationCharm::initialize() throw()
 
   Simulation::initialize();
 
-  CkCallback callback (CkIndex_SimulationCharm::r_initialize_forest(), thisProxy);
+  CkCallback callback 
+    (CkIndex_SimulationCharm::r_initialize_forest(), thisProxy);
+
   contribute(0,0,CkReduction::concat,callback);
 
 }
@@ -38,7 +40,9 @@ void SimulationCharm::r_initialize_forest()
 
   initialize_forest_();
 
-  CkCallback callback (CkIndex_SimulationCharm::r_initialize_hierarchy(), thisProxy);
+  CkCallback callback 
+    (CkIndex_SimulationCharm::r_initialize_hierarchy(), thisProxy);
+
   contribute(0,0,CkReduction::concat,callback);
 }
 

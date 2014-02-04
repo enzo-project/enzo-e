@@ -165,7 +165,19 @@ void CommBlock::adapt_mesh()
   sync_coarsen_.set_stop(NC(rank));
   sync_coarsen_.clear();
 
-  if (is_leaf()) {
+  neighbor_sync_(phase_adapt_called);
+
+}
+
+void CommBlock::neighbor_sync_(int phase_type)
+{
+  if (!is_leaf()) {
+
+    if (phase_type == phase_adapt_called) adapt_called_() ;
+    if (phase_type == phase_adapt_next)   adapt_next_() ;
+    if (phase_type == phase_adapt_end)    adapt_end_() ;
+
+  } else {
 
     const int initial_cycle = simulation()->config()->initial_cycle;
     const bool is_first_cycle = (initial_cycle == cycle());
@@ -176,14 +188,10 @@ void CommBlock::adapt_mesh()
 
     level_new_ = desired_level_(level_maximum);
 
-  //  CkCallback ;
-  //  contribute(CkCallback(CkIndex_CommBlock::r_adapt_called(NULL), thisProxy));
-  //  CkStartQD(CkCallback (CkIndex_CommBlock::q_adapt_called(), thisProxy));
-  //  p_sync(phase_adapt_called);
-
-    sync_(phase_adapt,count_neighbors()+1);
+    sync_(phase_type,count_neighbors()+1);
 
     const int level        = this->level();
+    const int rank = simulation()->dimension();
     const int rank_refresh = simulation()->config()->field_refresh_rank;
 
     ItFace it_face(rank,rank_refresh);
@@ -202,7 +210,7 @@ void CommBlock::adapt_mesh()
 	// SEND-SAME: Face and level are sent to unique
 	// neighboring block in the same level
 
-	thisProxy[index_neighbor].p_sync(phase_adapt,0);
+	thisProxy[index_neighbor].p_sync(phase_type,0);
 
       } else if (level_face == level - 1) {
 
@@ -221,7 +229,7 @@ void CommBlock::adapt_mesh()
 	    op3[2]==of3[2]) {
 
 	  Index index_uncle = index_neighbor.index_parent();
-	  thisProxy[index_uncle].p_sync(phase_adapt,0);
+	  thisProxy[index_uncle].p_sync(phase_type,0);
 
 	}
 
@@ -234,7 +242,7 @@ void CommBlock::adapt_mesh()
 	ItChild it_child(rank,if3);
 	while (it_child.next(ic3)) {
 	  Index index_nibling = index_neighbor.index_child(ic3);
-	  thisProxy[index_nibling].p_sync(phase_adapt,0);
+	  thisProxy[index_nibling].p_sync(phase_type,0);
 	}
 
       } else {
@@ -245,12 +253,10 @@ void CommBlock::adapt_mesh()
       }
 
     }
-  } else {
-    adapt_called_();
   }
 }
 
-  //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
   void CommBlock::r_adapt_called(CkReductionMsg * msg)
 {
@@ -265,10 +271,15 @@ void CommBlock::adapt_called_()
   if (is_leaf()) {
     notify_neighbors(level_new_);
   }
+
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_next(), 
-  			thisProxy[thisIndex]));
+    			thisProxy[thisIndex]));
+
   //  contribute (CkCallback(CkIndex_CommBlock::q_adapt_next(), 
   //			 thisProxy[thisIndex]));
+
+  //    neighbor_sync_(phase_adapt_next);
+
 }
 
 //----------------------------------------------------------------------
@@ -325,7 +336,8 @@ int CommBlock::determine_adapt()
 
 //----------------------------------------------------------------------
 
-void CommBlock::q_adapt_next()
+void CommBlock::q_adapt_next() { adapt_next_(); }
+void CommBlock::adapt_next_()
 {
 
 #ifdef DEBUG_ADAPT
@@ -344,29 +356,34 @@ void CommBlock::q_adapt_next()
     if (level() > level_new_) coarsen_();
   }
 
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
-    			thisProxy[thisIndex]));
+  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
+			thisProxy[thisIndex]));
     // contribute (CkCallback(CkIndex_CommBlock::q_adapt_end(NULL), 
     //  			 thisProxy[thisIndex]));
 
+  //    neighbor_sync_(phase_adapt_end);
+
+  //  adapt_end_();
+  //  p_sync(phase_adapt_end,
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::q_adapt_end()
+void CommBlock::q_adapt_end() { adapt_end_(); }
+void CommBlock::adapt_end_()
 {
   set_leaf();
 
-  if (delete_) {
+   if (delete_) {
 
-#ifdef CELLO_DEBUG
-    index_.print("DEBUG ckDestroy()");
-#endif
+ #ifdef CELLO_DEBUG
+     index_.print("DEBUG ckDestroy()");
+ #endif
 
-    ckDestroy();
+     ckDestroy();
 
-    return;
-  }
+     return;
+   }
 
   next_phase_ = phase_output;
 
@@ -530,13 +547,15 @@ void CommBlock::p_sync (int phase, int count) {sync_(phase,count); }
 void CommBlock::sync_ (int phase, int count)
 {
   if (count != 0) {
-    max_sync_ = count;
+    max_sync_[phase] = count;
   }
-  ++count_sync_;
-  if (max_sync_ > 0 && count_sync_ >= max_sync_) {
-    max_sync_ = 0;
-    count_sync_ = 0;
+  ++count_sync_[phase];
+  if (max_sync_[phase] > 0 && count_sync_[phase] >= max_sync_[phase]) {
+    max_sync_[phase] = 0;
+    count_sync_[phase] = 0;
     if (phase == phase_adapt_called) adapt_called_() ;
+    if (phase == phase_adapt_next)   adapt_next_() ;
+    if (phase == phase_adapt_end)    adapt_end_() ;
   }
 }
 
@@ -795,7 +814,16 @@ void CommBlock::p_get_child_data
 
 void CommBlock::p_delete()
 {
-  delete_ = true;
+
+// #ifdef CELLO_DEBUG
+//     index_.print("DEBUG ckDestroy()");
+// #endif
+
+    //    ckDestroy();
+
+    //    return;
+    //  }
+      delete_ = true;
 }
 
 //----------------------------------------------------------------------

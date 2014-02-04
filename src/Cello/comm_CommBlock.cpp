@@ -33,8 +33,8 @@ CommBlock::CommBlock
   children_(),
   loop_refresh_(),
   sync_coarsen_(),
-  count_sync_(0),
-  max_sync_(0),
+  count_sync_(),
+  max_sync_(),
   face_level_(),
   face_level_new_(),
   child_face_level_(),
@@ -77,6 +77,11 @@ CommBlock::CommBlock
   // Perform any additional initialization for derived class 
 
   initialize ();
+
+  for (int i=0; i<3; i++) {
+    count_sync_[i] = 0;
+    max_sync_[i] = 0;
+  }
 
   // Initialize neighbor face levels
 
@@ -156,10 +161,14 @@ CommBlock::CommBlock
   if (is_first_cycle) {
     apply_initial_();
   } else if (level > 0) {
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
-        			  thisProxy[thisIndex]));
+
+             CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
+        			   thisProxy[thisIndex]));
     //    contribute (CkCallback(CkIndex_CommBlock::q_adapt_end(NULL), 
     //    			   thisProxy[thisIndex]));
+
+    //    adapt_end_();
+
   }
 }
 
@@ -198,8 +207,8 @@ void CommBlock::pup(PUP::er &p)
   p | children_;
   p | loop_refresh_;
   p | sync_coarsen_;
-  p | count_sync_;
-  p | max_sync_;
+  PUParray(p,count_sync_, 3);
+  PUParray(p,max_sync_, 3);
   p | face_level_;
   p | face_level_new_;
   p | child_face_level_;

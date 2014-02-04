@@ -376,6 +376,9 @@ public: // virtual functions
 
 protected: // functions
 
+  void adapt_next_ ();
+  void neighbor_sync_(int phase);
+  void adapt_end_();
   void sync_(int phase, int count);
   void coarsen_();
   void refine_();
@@ -620,8 +623,8 @@ protected: // attributes
   Sync sync_coarsen_;
 
   /// Synchronization counter for p_sync
-  int  count_sync_;
-  int  max_sync_;
+  int  count_sync_[3]; // > phase_adapt_end
+  int  max_sync_[3];   // > phase_adapt_end
 
   /// current level of neighbors along each face
   std::vector<int> face_level_;
