@@ -39,6 +39,12 @@ Simulation::Simulation
   hierarchy_(0),
   field_descr_(0)
 {
+#ifdef CELLO_DEBUG
+    char buffer[40];
+    sprintf(buffer,"out.debug.%03d",CkMyPe());
+    fp_debug_ = fopen (buffer,"w");
+#endif
+
   if (!group_process_) {
     group_process_ = GroupProcess::create();
     is_group_process_new_ = true;
@@ -72,7 +78,16 @@ void Simulation::pup (PUP::er &p)
   TRACEPUP;
 
   CBase_Simulation::pup(p);
+
   bool up = p.isUnpacking();
+
+#ifdef CELLO_DEBUG
+  if (up) {
+    char buffer[40];
+    sprintf(buffer,"out.debug.%03d",CkMyPe());
+    fp_debug_ = fopen (buffer,"w");
+  }
+#endif
 
   p | factory_; // PUP::able
 
@@ -362,10 +377,11 @@ void Simulation::initialize_forest_() throw()
   bool allocate_data = ! ( config_->initial_type == "file" || 
 			   config_->initial_type == "restart" );
 
-  hierarchy_->create_forest
-    (field_descr_,
-     allocate_blocks,
-     allocate_data);
+  if (allocate_blocks) {
+    hierarchy_->create_forest
+      (field_descr_,
+       allocate_data);
+  }
 }
 
 //----------------------------------------------------------------------

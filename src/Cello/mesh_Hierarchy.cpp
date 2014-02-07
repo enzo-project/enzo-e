@@ -219,68 +219,51 @@ const Layout * Hierarchy::layout () const throw()
 void Hierarchy::create_forest
 (
  FieldDescr   * field_descr,
- bool allocate_blocks,
  bool allocate_data,
  bool testing,
  int process_first, int process_last_plus) throw()
 {
 
-  if (allocate_blocks) {
-    allocate_array_(allocate_data,testing);
-  }
-}
 
-//----------------------------------------------------------------------
+    // Get number of blocks in the forest
 
-void Hierarchy::allocate_array_
-(
- bool allocate_data,
- bool testing,
- const FieldDescr * field_descr
-) throw()
-  // NOTE: field_descr only needed for MPI; may be null for CHARM++
-{
+    int nbx,nby,nbz;
+    layout_->block_count (&nbx, &nby, &nbz);
 
-  // Get number of blocks in the forest
+    // determine block size
+    int mbx = root_size_[0] / nbx;
+    int mby = root_size_[1] / nby;
+    int mbz = root_size_[2] / nbz;
 
-  int nbx,nby,nbz;
-  layout_->block_count (&nbx, &nby, &nbz);
+    // Check that blocks evenly subdivide forest
+    if (! ((nbx*mbx == root_size_[0]) &&
+	   (nby*mby == root_size_[1]) &&
+	   (nbz*mbz == root_size_[2]))) {
 
-  // determine block size
-  int mbx = root_size_[0] / nbx;
-  int mby = root_size_[1] / nby;
-  int mbz = root_size_[2] / nbz;
-
-  // Check that blocks evenly subdivide forest
-  if (! ((nbx*mbx == root_size_[0]) &&
-	 (nby*mby == root_size_[1]) &&
-	 (nbz*mbz == root_size_[2]))) {
-
-    ERROR6("Forest::allocate_array_()",  
-	   "CommBlocks must evenly subdivide forest: "
-	   "forest size = (%d %d %d)  block count = (%d %d %d)",
-	   root_size_[0],root_size_[1],root_size_[2],
-	   nbx,nby,nbz);
+      ERROR6("Forest::allocate_array_()",  
+	     "CommBlocks must evenly subdivide forest: "
+	     "forest size = (%d %d %d)  block count = (%d %d %d)",
+	     root_size_[0],root_size_[1],root_size_[2],
+	     nbx,nby,nbz);
       
-  }
+    }
 
-  // CREATE AND INITIALIZE NEW DATA BLOCKS
+    // CREATE AND INITIALIZE NEW DATA BLOCKS
 
-  int num_field_blocks = 1;
+    int num_field_blocks = 1;
 
-  TRACE("Allocating block_array_");
+    TRACE("Allocating block_array_");
 
-  block_array_ = new CProxy_CommBlock;
+    block_array_ = new CProxy_CommBlock;
 
-  (*block_array_) = factory_->create_block_array
-    (nbx,nby,nbz,
-     mbx,mby,mbz,
-     num_field_blocks,
-     testing);
+    (*block_array_) = factory_->create_block_array
+      (nbx,nby,nbz,
+       mbx,mby,mbz,
+       num_field_blocks,
+       testing);
     
-  block_exists_ = allocate_data;
-  block_sync_.set_stop(nbx*nby*nbz);
+    block_exists_ = allocate_data;
+    block_sync_.set_stop(nbx*nby*nbz);
 
 }
-
 

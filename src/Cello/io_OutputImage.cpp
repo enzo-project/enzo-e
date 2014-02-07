@@ -53,10 +53,9 @@ OutputImage::OutputImage(int index,
 	    image_reduce_type.c_str());
   }
 
-  PARALLEL_PRINTF ("image_mesh_color = %s\n",image_mesh_color.c_str());
   if      (image_mesh_color=="level")   mesh_color_ = mesh_color_level;
   else if (image_mesh_color=="process") mesh_color_ = mesh_color_process;
-  else if (image_mesh_color=="neighbor") mesh_color_ = mesh_color_neighbor;
+  //  else if (image_mesh_color=="neighbor") mesh_color_ = mesh_color_neighbor;
   else {
     ERROR1 ("OutputImage::OutputImage()",
 	    "Unrecognized output_image_mesh_color %s",
@@ -248,7 +247,7 @@ void OutputImage::write_block
   double color = 0;
   if (mesh_color_ == mesh_color_level)   color = comm_block->level()+1;
   if (mesh_color_ == mesh_color_process) color = CkMyPe()+1;
-  if (mesh_color_ == mesh_color_neighbor) color = comm_block->count_neighbors();
+  //  if (mesh_color_ == mesh_color_neighbor) color = comm_block->count_neighbors();
 
   // pixel extents of box
   int ixm,iym,izm; 

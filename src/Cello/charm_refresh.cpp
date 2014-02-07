@@ -23,7 +23,7 @@ void CommBlock::refresh_begin()
 
 // #ifdef CELLO_TRACE
 //   sprintf (buffer,"BEGIN PHASE REFRESH(%p)",this);
-//    index_.print(buffer,-1,2);
+//    index_.print(buffer,-1,2,false,simulation());
 // #endif
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -91,7 +91,7 @@ void CommBlock::refresh_begin()
       } else {
 	sprintf (buffer,"REFRESH ERROR face (%d %d %d) level %d face_level %d phase %d",
 		 if3[0],if3[1],if3[2],level,face_level(if3),next_phase_);
-	index_.print(buffer);
+	index_.print(buffer,-1,2,false,simulation);
       
 	ERROR("CommBlock::refresh_begin()",
 	      "Refresh error");
@@ -101,27 +101,28 @@ void CommBlock::refresh_begin()
 
     if (refresh_type_counter) {
 
-      // Prevent hang if single-CommBlock simulation
       loop_refresh_.add_stop();
 
-      //    stop_performance_(perf_refresh);
-      // performance->stop_region(perf_refresh);
-      x_refresh (0,0,0,0,0);
+      refresh_(0,0,0,0,0);
 
     }
   }
   if (refresh_type == "quiescence") {
+
+    // --------------------------------------------------
+    // ENTRY: #1 CommBlock::refresh_begin()-> CommBlock::q_refresh_end()
+    // ENTRY: quiescence if refresh_type == quiescence
+    // --------------------------------------------------
     CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
     			  thisProxy[thisIndex]));
-    //    contribute (CkCallback(CkIndex_CommBlock::q_refresh_end(),
-    //			   thisProxy[thisIndex]));
+    // --------------------------------------------------
   } 
 
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh ( int type_refresh, Index index, 
+void CommBlock::refresh ( int type_refresh, Index index_neighbor, 
 			  int iface[3], int ichild[3] )
 {
 
@@ -158,7 +159,19 @@ void CommBlock::refresh ( int type_refresh, Index index,
 
   int jface[3] = {-iface[0], -iface[1], -iface[2]};
 
-  thisProxy[index].x_refresh (n,array, type_refresh, jface, ichild);
+#ifdef CELLO_DEBUG
+  // std::string bit_str = index_neighbor.bit_string(-1,2);
+  // sprintf (buffer," -> %s",bit_str.c_str());
+  // index_.print(buffer,-1,2,false,simulation());
+#endif  
+
+  // --------------------------------------------------
+  // ENTRY: #2 CommBlock::refresh()-> CommBlock::x_refresh()
+  // ENTRY: neighbor
+  // --------------------------------------------------
+  thisProxy[index_neighbor].x_refresh 
+    (n,array, type_refresh, jface, ichild);
+  // --------------------------------------------------
 
   loop_refresh_.add_stop();
   delete field_face;
@@ -166,8 +179,8 @@ void CommBlock::refresh ( int type_refresh, Index index,
 
 //----------------------------------------------------------------------
 
-void CommBlock::x_refresh (int n, char * buffer, int type_refresh,
-			   int iface[3], int ichild[3])
+void CommBlock::refresh_ (int n, char * buffer, int type_refresh,
+			  int iface[3], int ichild[3])
 {
   switch_performance_(perf_refresh,__FILE__,__LINE__);
 
@@ -202,17 +215,17 @@ void CommBlock::x_refresh (int n, char * buffer, int type_refresh,
 
   if (refresh_type == "counter") {
     if (loop_refresh_.next()) {
-      q_refresh_end();
+      refresh_end_();
     }
   }
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::q_refresh_end()
+void CommBlock::refresh_end_()
 {
   if      (next_phase_ == phase_output)  prepare();
-  else if (next_phase_ == phase_adapt)   adapt_mesh();
+  else if (next_phase_ == phase_adapt)   adapt_mesh_();
   else ERROR1 ("CommBlock::q_refresh_end()",
 	       "Unknown next_phase %d",
 	       next_phase_);

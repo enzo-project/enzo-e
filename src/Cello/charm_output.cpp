@@ -4,90 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-01
 /// @brief    Functions implementing CHARM++ output-related functions
-///
-/// This file contains member functions for various CHARM++ chares and
-/// classes used for Output in a CHARM++ simulation.  Functions are
-/// listed in roughly the order of flow-of-control.
-///
-///    OUTPUT
-///
-///    CommBlock::r_output()
-///       simulation->update_state(dt,stop)
-///       simulation_charm->p_output()
-///
-///    SimulationCharm::p_output()
-///       if (block_sync_.done())
-///          contribute(SimulationCharm::r_output())
-///
-///    SimulationCharm::r_output()
-///       problem()->output_reset()   
-///       problem()->output_next()   
-///
-///    Problem::output_next()
-///       if (output)
-///          output->init()
-///          output->open()
-///          output write_simulation()
-///       else
-///          simulation()->monitor_output()
-///
-///    Output::write_simulation() [virtual]
-///       write_simulation_()
-///
-///    Output::write_simulation_()
-///       write_hierarchy()
-///
-///    Output::write_hierarchy() [virtual]
-///       write_hierarchy_()
-///
-///    Output::write_hierarchy_()
-///       if (is_root())
-///          block_array.p_write()
-///
-///    Simulation::monitor_output()
-///       performance_output()
-///       memory.reset_high()
-///       >>>>> c_compute() >>>>>
-///
-///    CommBlock  p_write()
-///       output.write_block(this)
-///       simulation_charm.s_write()
-///
-///    Output::write_block() [virtual]
-///       write_block_()
-///
-///    Output::write_block_()
-///       write_field_block()
-///
-///    Output::write_field_block() [virtual]
-///
-///    Simulation::s_write()
-///       if (block_sync.done())
-///          contribute (SimulationCharm::r_write())
-///
-///    SimulationCharm::r_write()
-///       problem()->output_wait()
-///
-///    Problem::output_wait()
-///       if (ip==writer)
-///          proxy_simulation[ip].p_output_write()
-///       else
-///          output.prepare_remote()
-///          proxy_simulaion[ip_writer].p_output_write()
-///          output.close()
-///          output.cleanup_remote()
-///          output.finalize()
-///          output_next()
-///
-///    SimulationCharm::p_output_write()
-///       problem.output_write()
-///
-///    Problem::output_write()
-///       output().update_remote()
-///       if (output->sync().done())
-///          output.close()
-///          output.finalize()
-///          output_next()
 
 #define TRACE_OUTPUT
 
@@ -105,7 +21,7 @@ void CommBlock::r_output(CkReductionMsg * msg)
   
   switch_performance_ (perf_output,__FILE__,__LINE__);
 
-  // index_.print("BEGIN PHASE OUTPUT");
+  // index_.print("BEGIN PHASE OUTPUT",-1,2,false,simulation());
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   TRACE("CommBlock::r_output()");
@@ -121,24 +37,27 @@ void CommBlock::r_output(CkReductionMsg * msg)
 
   simulation->update_state(cycle_,time_,dt_forest,stop_forest);
 
-  // Wait for all blocks to check in before calling Simulation::p_output()
-  // for next output
-
-  TRACE("CommBlock::r_output() calling SimulationCharm::p_output");
+  TRACE("CommBlock::r_output() calling SimulationCharm::output");
   SimulationCharm * simulation_charm = proxy_simulation.ckLocalBranch();
-  simulation_charm->p_output();
+
+  simulation_charm->output();
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_output ()
+void SimulationCharm::output ()
 {
-  TRACE("SimulationCharm::p_output");
+  TRACE("SimulationCharm::output");
   TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
   if (block_sync_.next()) {
-    TRACE("SimulationCharm::p_output calling r_output");
+    TRACE("SimulationCharm::output calling r_output");
     CkCallback callback (CkIndex_SimulationCharm::r_output(), thisProxy);
+    // --------------------------------------------------
+    // ENTRY: #1 SimulationCharm::output()-> SimulationCharm::r_output()
+    // ENTRY: contribute() if block_sync_.next()
+    // --------------------------------------------------
     contribute(0,0,CkReduction::concat,callback);
+    // --------------------------------------------------
   }
 }
 
@@ -198,18 +117,26 @@ void CommBlock::p_write (int index_output)
   output->write_block(this,field_descr);
 
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
-  simulation_charm->s_write();
+
+  simulation_charm->write_();
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::s_write()
+void SimulationCharm::write_()
 {
-  TRACE("SimulationCharm::s_write()");
+  TRACE("SimulationCharm::write_()");
   TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
   if (block_sync_.next()) {
+
     CkCallback callback (CkIndex_SimulationCharm::r_write(), thisProxy);
+
+    // --------------------------------------------------
+    // ENTRY: #2 SimulationCharm::write_()-> SimulationCharm::r_write()
+    // ENTRY: contribute() if block_sync_.next()
+    // --------------------------------------------------
     contribute(0,0,CkReduction::concat,callback);
+    // --------------------------------------------------
 
   }
 }
@@ -234,7 +161,12 @@ void Problem::output_wait(Simulation * simulation) throw()
 
   if (ip == ip_writer) {
 
+    // --------------------------------------------------
+    // ENTRY: #3 Problem::output_wait()-> SimulationCharm::p_output_write()
+    // ENTRY: writer Simulation if is writer
+    // --------------------------------------------------
     proxy_simulation[ip].p_output_write(0,0);
+    // --------------------------------------------------
 
   } else {
 
@@ -245,7 +177,12 @@ void Problem::output_wait(Simulation * simulation) throw()
 
     // Remote call to receive data
 
+    // --------------------------------------------------
+    // ENTRY: #4 Problem::output_wait()-> SimulationCharm::p_output_write()
+    // ENTRY: writer Simulation if not writer
+    // --------------------------------------------------
     proxy_simulation[ip_writer].p_output_write (n, buffer);
+    // --------------------------------------------------
 
     // Close up file
 

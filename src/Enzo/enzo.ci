@@ -83,6 +83,8 @@ module enzo {
        int num_face_level, int face_level[num_face_level],
        bool testing);     
 
+    entry EnzoBlock();
+
   };
 
 };

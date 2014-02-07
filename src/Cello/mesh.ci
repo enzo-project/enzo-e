@@ -49,13 +49,9 @@ module mesh {
 
     entry void p_sync ( int phase, int count);
     entry void p_adapt_mesh(); // [CB5]
-    entry void r_adapt_called(CkReductionMsg * msg); // [CB6]
-    entry void q_adapt_called(); // [CB6]
 
     entry void p_get_neighbor_level(Index index,int ic3[3], int if3[3], // [CB7]
 				    int level_now, int level_new);
-//    entry void p_child_can_coarsen(); // [CB8]
-//    entry void p_parent_can_coarsen(); // [CB9]
     entry void p_get_child_data(int ic3[3], // [CB10]
 				int na, char arr[na],
 				int nf, int child_face_level[nf]);
@@ -75,7 +71,6 @@ module mesh {
     entry void x_refresh_child(int n, char buffer[n], // [CB19]
 			       int ichild[3]);
 
-    entry void p_print(std::string); // [CB20]
   };
 }
 

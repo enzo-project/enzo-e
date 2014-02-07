@@ -144,6 +144,11 @@ public: // virtual functions
   
   int & perf_counter(int perf_region) {return perf_count_[perf_region]; }
 
+#ifdef CELLO_DEBUG
+  FILE * fp_debug() { return fp_debug_; }
+#endif
+
+
 protected: // functions
 
   /// Initialize the Config object
@@ -173,6 +178,11 @@ protected: // functions
   void deallocate_() throw();
 
 protected: // attributes
+
+#ifdef CELLO_DEBUG  
+  FILE * fp_debug_;
+#endif
+
 
   //----------------------------------------------------------------------
   // SIMULATION PARAMETERS

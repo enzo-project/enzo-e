@@ -97,7 +97,6 @@ public: // interface
   }
 
   void create_forest (FieldDescr   * field_descr,
-		      bool allocate_blocks,
 		      bool allocate_data,
 		      bool testing          = false,
 		      int process_first     = 0, 
@@ -119,14 +118,6 @@ public: // interface
 
   const GroupProcess * group_process()  const throw()
   { return group_process_; };
-
-protected: // functions
-
-  /// Allocate array, and optionally allocate element CommBlocks
-  void allocate_array_
-  (bool allocate_data = true,
-   bool testing = false,
-   const FieldDescr * field_descr = 0) throw ();
 
 protected: // attributes
 

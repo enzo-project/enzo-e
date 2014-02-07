@@ -31,6 +31,9 @@ SimulationCharm::SimulationCharm
 SimulationCharm::~SimulationCharm() throw()
 {
   TRACE("SimulationCharm::~SimulationCharm()");
+#ifdef CELLO_DEBUG
+  fclose (fp_debug_);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -59,10 +62,15 @@ void SimulationCharm::performance_output()
 
   counters_long[n-1] = block_sync_.stop(); // number of CommBlocks
 
+  // --------------------------------------------------
+  // ENTRY: #1 SimulationCharm::performance_output() -> SimulationCharm::r_performance_reduce()
+  // ENTRY: contribute()
+  // --------------------------------------------------
   CkCallback callback (CkIndex_SimulationCharm::r_performance_reduce(NULL), 
 		       thisProxy);
-  contribute (n*sizeof(long),
-	      counters_long,CkReduction::sum_long,callback);
+  contribute (n*sizeof(long), counters_long,CkReduction::sum_long,callback);
+  // --------------------------------------------------
+
   delete [] counters_long;
   delete [] counters_long_long;
 

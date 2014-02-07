@@ -54,7 +54,6 @@ void EnzoSimulationCharm::pup (PUP::er &p)
 void EnzoSimulationCharm::initialize() throw()
 {
   
-  TRACE("EnzoSimulationCharm::initialize calling EnzoSimulationCharm::initialize_config_()");
   initialize_config_();
 
   SimulationCharm::initialize();
@@ -73,12 +72,10 @@ const Factory * EnzoSimulationCharm::factory() const throw()
 
 void EnzoSimulationCharm::initialize_config_() throw()
 {
-  TRACE("BEGIN EnzoSimulationCharm::initialize_config_");
   if (config_ == NULL) config_ = new EnzoConfig;
 
-  TRACE("EnzoSimulationCharm::initialize_config_ calling EnzoConfig::read()");
   static_cast<EnzoConfig*>(config_)->read(parameters_);
-  TRACE("END   EnzoSimulationCharm::initialize_config_");
+
 }
 
 //======================================================================

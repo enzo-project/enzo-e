@@ -50,8 +50,9 @@ CommBlock::CommBlock
 {
 
 #ifdef CELLO_DEBUG
-  index_.print("CommBlock()");
+  index_.print("CommBlock()",-1,2,false,simulation());
 #endif
+
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
 
@@ -162,13 +163,13 @@ CommBlock::CommBlock
     apply_initial_();
   } else if (level > 0) {
 
-             CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
-        			   thisProxy[thisIndex]));
-    //    contribute (CkCallback(CkIndex_CommBlock::q_adapt_end(NULL), 
-    //    			   thisProxy[thisIndex]));
-
-    //    adapt_end_();
-
+    // --------------------------------------------------
+    // ENTRY: #1 CommBlock::CommBlock() -> CommBlock::q_adapt_end()
+    // ENTRY: quiescence if level > 0
+    // --------------------------------------------------
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
+			  thisProxy[thisIndex]));
+    // --------------------------------------------------
   }
 }
 
@@ -247,7 +248,7 @@ void CommBlock::apply_initial_() throw ()
 CommBlock::~CommBlock() throw ()
 { 
 #ifdef CELLO_DEBUG
-  index_.print("~CommBlock()");
+  index_.print("~CommBlock()",-1,2,false,simulation());
 #endif
 
   const int level = this->level();
@@ -267,7 +268,12 @@ CommBlock::~CommBlock() throw ()
     FieldFace * field_face = 
       load_face_(&n,&array,iface,ichild,lghost,op_array_restrict);
 
+    // --------------------------------------------------
+    // ENTRY: #2 CommBlock::~CommBlock()-> CommBlock::x_refresh_child()
+    // ENTRY: parent if level > 0
+    // --------------------------------------------------
     thisProxy[index_.index_parent()].x_refresh_child(n,array,ichild);
+    // --------------------------------------------------
 
     delete field_face;
   }
@@ -463,47 +469,47 @@ bool CommBlock::is_child (const Index & index) const
 
 //======================================================================
 
-int CommBlock::count_neighbors() const
-{
-  if (! is_leaf()) return 0;
-  int level = this->level();
-  const int rank         = simulation()->dimension();
-  const int rank_refresh = simulation()->config()->field_refresh_rank;
-  const bool periodic    = simulation()->problem()->boundary()->is_periodic();
-  ItFace it_face (rank,rank_refresh);
-  int num_neighbors = 0;
-  int ic3[3] = {0,0,0};
-  int of3[3];
-  while (it_face.next(of3)) {
-    Index index_neighbor = neighbor_(of3);
-    const int level_face = face_level (of3);
-    if (level_face == level) { // SAME
-      ++num_neighbors;
-    } else if (level_face == level - 1) { // COARSE
-      index_.child (level,&ic3[0],&ic3[1],&ic3[2]);
-      int op3[3];
-      parent_face_(op3,of3,ic3);
-      if (op3[0]==of3[0] && op3[1]==of3[1] && op3[2]==of3[2]) 
-	++num_neighbors;
-    } else if (level_face == level + 1) { // FINE
-      const int if3[3] = {-of3[0],-of3[1],-of3[2]};
-      ItChild it_child(rank,if3);
-      while (it_child.next(ic3)) 
-	++num_neighbors;
-    } else {
-      ERROR2 ("CommBlock::count_neighbors()",
-	      "level_face %d level %d",
-	      level_face,level);
-    }
-  }
-#ifdef CELLO_DEBUG
-  char buffer[255];
-  sprintf (buffer,"count_neighbors = %d",num_neighbors);
-  index_.print(buffer);
-#endif
-  return num_neighbors;
+// int CommBlock::count_neighbors() const
+// {
+//   if (! is_leaf()) return 0;
+//   int level = this->level();
+//   const int rank         = simulation()->dimension();
+//   const int rank_refresh = simulation()->config()->field_refresh_rank;
+//   const bool periodic    = simulation()->problem()->boundary()->is_periodic();
+//   ItFace it_face (rank,rank_refresh);
+//   int num_neighbors = 0;
+//   int ic3[3] = {0,0,0};
+//   int of3[3];
+//   while (it_face.next(of3)) {
+//     Index index_neighbor = neighbor_(of3);
+//     const int level_face = face_level (of3);
+//     if (level_face == level) { // SAME
+//       ++num_neighbors;
+//     } else if (level_face == level - 1) { // COARSE
+//       index_.child (level,&ic3[0],&ic3[1],&ic3[2]);
+//       int op3[3];
+//       parent_face_(op3,of3,ic3);
+//       if (op3[0]==of3[0] && op3[1]==of3[1] && op3[2]==of3[2]) 
+// 	++num_neighbors;
+//     } else if (level_face == level + 1) { // FINE
+//       const int if3[3] = {-of3[0],-of3[1],-of3[2]};
+//       ItChild it_child(rank,if3);
+//       while (it_child.next(ic3)) 
+// 	++num_neighbors;
+//     } else {
+//       ERROR2 ("CommBlock::count_neighbors()",
+// 	      "level_face %d level %d",
+// 	      level_face,level);
+//     }
+//   }
+// #ifdef CELLO_DEBUG
+//   char buffer[255];
+//   sprintf (buffer,"count_neighbors = %d",num_neighbors);
+//   index_.print(buffer,-1,2,false,simulation());
+// #endif
+//   return num_neighbors;
 
-}
+// }
 //----------------------------------------------------------------------
 
 void CommBlock::loop_limits_refresh_(int ifacemin[3], int ifacemax[3])
@@ -645,3 +651,79 @@ void CommBlock::switch_performance_(int index_region,
   Performance * performance = simulation()->performance();
   performance->switch_region(index_region,file,line);
 }
+
+//----------------------------------------------------------------------
+
+void CommBlock::debug_faces_(const char * mesg)
+{
+#ifndef DEBUG_ADAPT
+  return;
+#endif
+
+#ifdef CELLO_DEBUG
+  FILE * fp_debug = simulation()->fp_debug();
+#endif
+  TRACE_ADAPT(mesg);
+  int if3[3] = {0};
+  int ic3[3] = {0};
+
+  for (ic3[1]=1; ic3[1]>=0; ic3[1]--) {
+    for (if3[1]=1; if3[1]>=-1; if3[1]--) {
+
+      index_.print(mesg,-1,2,false,simulation());
+
+      for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+#ifdef CELLO_DEBUG
+	fprintf (fp_debug,(ic3[1]==1) ? "%d " : "  ",face_level(if3));
+#endif
+	PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level(if3));
+      }
+#ifdef CELLO_DEBUG
+      fprintf (fp_debug,"| ");
+#endif
+      PARALLEL_PRINTF ("| ") ;
+      for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+#ifdef CELLO_DEBUG
+	fprintf (fp_debug,(ic3[1]==1) ? "%d " : "  ",face_level_new(if3));
+#endif
+	PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level_new(if3));
+      }
+#ifdef CELLO_DEBUG
+      fprintf (fp_debug,"| ");
+#endif
+      PARALLEL_PRINTF ("| ");
+      for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
+	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+#ifdef CELLO_DEBUG
+	    fprintf (fp_debug,"%d ",child_face_level(ic3,if3));
+#endif
+	    PARALLEL_PRINTF ("%d ",child_face_level(ic3,if3));
+	  }
+	}
+      }
+#ifdef CELLO_DEBUG
+      fprintf (fp_debug,"| ");
+#endif
+      PARALLEL_PRINTF ("| ");
+      for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
+	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
+#ifdef CELLO_DEBUG
+	    fprintf (fp_debug,"%d ",child_face_level_new(ic3,if3));
+#endif
+	    PARALLEL_PRINTF ("%d ",child_face_level_new(ic3,if3));
+	  }
+	}
+      }
+#ifdef CELLO_DEBUG
+      fprintf (fp_debug,"\n");
+      fflush(fp_debug);
+#endif
+      PARALLEL_PRINTF ("\n");
+      fflush(stdout);
+
+    }
+  }
+}
+

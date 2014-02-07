@@ -73,8 +73,13 @@ PARALLEL_MAIN_BEGIN
 
   proxy_main     = thishandle;
 
+  // --------------------------------------------------
+  // ENTRY: #1 Main::Main() -> EnzoSimulationCharm::EnzoSimulationCharm()
+  // ENTRY: create
+  // --------------------------------------------------
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
     (parameter_file, strlen(parameter_file)+1);
+  // --------------------------------------------------
 
 }
 

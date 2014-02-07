@@ -41,11 +41,17 @@ CProxy_CommBlock EnzoFactory::create_block_array
 
   CProxy_EnzoBlock enzo_block_array;
 
+  // --------------------------------------------------
+  // ENTRY: #1 Factory::create_block_array() -> ArrayMap::ArrayMap()
+  // ENTRY: create
+  // --------------------------------------------------
   CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
+  // --------------------------------------------------
+
   CkArrayOptions opts;
   opts.setMap(array_map);
   TRACE_CHARM("ckNew(nbx,nby,nbz)");
-  enzo_block_array = CProxy_CommBlock::ckNew(opts);
+  enzo_block_array = CProxy_EnzoBlock::ckNew(opts);
 
   int count_adapt;
 
@@ -62,9 +68,11 @@ CProxy_CommBlock EnzoFactory::create_block_array
 	Index index(ix,iy,iz);
 
 	TRACE3 ("inserting %d %d %d",ix,iy,iz);
-#ifdef CELLO_DEBUG
-	index.print("DEBUG insert()");
-#endif
+
+	// --------------------------------------------------
+	// ENTRY: #2 EnzoFactory::create_block_array() -> EnzoBlock::EnzoBlock()
+	// ENTRY: level == 0 block array insert
+	// --------------------------------------------------
 	enzo_block_array[index].insert 
 	  (index,
 	   nx,ny,nz,
@@ -74,6 +82,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
 	   0,NULL,op_array_copy,
 	   num_face_level, face_level,
 	   testing);
+	// --------------------------------------------------
 
       }
     }
@@ -98,7 +107,8 @@ CommBlock * EnzoFactory::create_block
  int cycle, double time, double dt,
  int narray, char * array, int op_array,
  int num_face_level, int * face_level,
- bool testing
+ bool testing,
+ Simulation * simulation
  ) const throw()
 {
   TRACE3("EnzoFactory::create_block(%d %d %d)",nx,ny,nz);
@@ -109,8 +119,13 @@ CommBlock * EnzoFactory::create_block
   CProxy_EnzoBlock * enzo_block_array = (CProxy_EnzoBlock * ) block_array;
 
 #ifdef CELLO_DEBUG
-  index.print("DEBUG insert()");
+  index.print("DEBUG insert()",-1,2,false,simulation);
 #endif
+
+  // --------------------------------------------------
+  // ENTRY: #3 EnzoFactory::create_block() -> EnzoBlock::EnzoBlock()
+  // ENTRY: level > 0 block array insert
+  // --------------------------------------------------
   (*enzo_block_array)[index].insert
     (
      index,
@@ -121,11 +136,12 @@ CommBlock * EnzoFactory::create_block
      narray, array, op_array,
      num_face_level, face_level,
      testing);
+  // --------------------------------------------------
 
 #ifdef CELLO_TRACE
-  index.print("ADAPT REFINE insert()");
+  index.print("ADAPT REFINE insert()",-1,2,false,simulation);
 #endif
-  CommBlock * block = (*enzo_block_array)[index].ckLocal();
+  EnzoBlock * block = (*enzo_block_array)[index].ckLocal();
   TRACE1("block = %p",block);
   //  ASSERT("Factory::create_block()","block is NULL",block != NULL);
 

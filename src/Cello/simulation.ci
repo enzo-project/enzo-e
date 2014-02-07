@@ -26,11 +26,10 @@ module simulation {
 
     entry SimulationCharm (const char filename[n], int n); // [SC0]
 
-//    entry void p_initialize_begin ();  // [SC1]
     entry void r_initialize_forest (); // [SC2]
     entry void r_initialize_hierarchy ();    // [SC3]
 
-    entry void p_output (); // [SC4]
+//    entry void p_output (); // [SC4]
     entry void r_output (); // [SC5]
 
     entry void s_write (); // [SC6]

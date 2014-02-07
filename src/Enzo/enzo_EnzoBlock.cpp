@@ -344,8 +344,6 @@ EnzoBlock::EnzoBlock
     dt(dt),
     SubgridFluxes(0)
 {
-  int mx,my,mz;
-  index.array(&mx,&my,&mz);
   initialize_enzo_();
   initialize();
 }
@@ -724,7 +722,7 @@ void EnzoBlock::set_time (double time) throw ()
   // (OldTime > time; error is about single-precision epsilon)
 
   if (! (Time_ == 0 || Time_ < time)) {
-    index_.print("ERROR");
+    index_.print("ERROR",-1,2,false,simulation());
     ASSERT2("EnzoBlock::set_time()",
 	    "set_time() may be called more than once or dt = 0.0\n"
 	    "Time_ = %15.8f time = %15.8f",

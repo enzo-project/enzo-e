@@ -298,12 +298,12 @@ void Index::set_child(int level, int ix, int iy, int iz)
 void Index::print (const char * msg,
 		   int max_level,
 		   int rank,
-		   bool no_nl) const
+		   bool no_nl,
+		   void * simulation
+) const
 {
 #ifdef CELLO_DEBUG
-  char buffer[40];
-  sprintf(buffer,"out.debug.%03d",CkMyPe());
-  FILE * fp = fopen (buffer,"a");
+  FILE * fp_debug = ((Simulation *)simulation)->fp_debug();
 #endif
 
   const int level = this->level();
@@ -311,7 +311,7 @@ void Index::print (const char * msg,
   if (max_level == -1) max_level = level;
 
 // #ifdef CELLO_DEBUG
-//   fprintf (fp,"%p ",this);
+//   fprintf (fp_debug,"%p ",this);
 // #endif
 //   PARALLEL_PRINTF ("%p ",this);
 
@@ -323,7 +323,7 @@ void Index::print (const char * msg,
 
   
 #ifdef CELLO_DEBUG
-  fprintf (fp,"[ ");
+  fprintf (fp_debug,"[ ");
 #endif
   PARALLEL_PRINTF ("[ ");
   for (int axis=0; axis<rank; axis++) {
@@ -331,13 +331,13 @@ void Index::print (const char * msg,
   for (int i=nb; i>=0; i--) {
     int bit = (a_[axis].array & ( 1 << i));
 #ifdef CELLO_DEBUG
-    if (fp != NULL) fprintf (fp,"%d",bit?1:0);
+    if (fp_debug != NULL) fprintf (fp_debug,"%d",bit?1:0);
 #endif
     PARALLEL_PRINTF ("%d",bit?1:0);
   }
 
 #ifdef CELLO_DEBUG
-    fprintf (fp,":");
+    fprintf (fp_debug,":");
 #endif
     PARALLEL_PRINTF (":");
 
@@ -346,37 +346,37 @@ void Index::print (const char * msg,
       int ic3[3];
       child (i+1, &ic3[0], &ic3[1], &ic3[2]);
 #ifdef CELLO_DEBUG
-      fprintf (fp,"%d",ic3[axis]);
+      fprintf (fp_debug,"%d",ic3[axis]);
 #endif
       PARALLEL_PRINTF ("%d",ic3[axis]);
       } else {
 #ifdef CELLO_DEBUG
-	fprintf (fp," ");
+	fprintf (fp_debug," ");
 #endif
 	PARALLEL_PRINTF (" ");
       }
 	
     }
 #ifdef CELLO_DEBUG
-    fprintf (fp," ");
+    fprintf (fp_debug," ");
 #endif
     PARALLEL_PRINTF (" ");
       
   }
 #ifdef CELLO_DEBUG
-  fprintf (fp,"] ");
+  fprintf (fp_debug,"] ");
 #endif
   PARALLEL_PRINTF ("] ");
 
 
 #ifdef CELLO_DEBUG
-  fprintf (fp, (no_nl ? "%s " : "%s\n"),msg);
+  fprintf (fp_debug, (no_nl ? "%s " : "%s\n"),msg);
 #endif
   PARALLEL_PRINTF ( (no_nl ? "%s " : "%s\n"),msg);
 
   fflush(stdout);
 #ifdef CELLO_DEBUG
-  fclose (fp);
+  fflush(fp_debug);
 #endif
 }
 
@@ -423,7 +423,7 @@ void Index::write (int ip,
   }
   fprintf (fp,"\n");
 
-  fflush(stdout);
+  fflush(fp);
 }
 
 //----------------------------------------------------------------------

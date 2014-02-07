@@ -192,7 +192,6 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
   delete [] pressure_field;
 
   if (dt==0) {
-    comm_block->index().print("DT=0");
     FieldBlock * field_block = comm_block->block()->field_block();
     field_block->print(field_descr,comm_block->name().c_str(),true);
   }

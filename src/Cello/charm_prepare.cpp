@@ -24,7 +24,7 @@
 
 void CommBlock::prepare()
 {
-  // index_.print("BEGIN prepare()");
+  // index_.print("BEGIN prepare()",-1,2,false,simulation());
   switch_performance_(perf_prepare,__FILE__,__LINE__);
 
   TRACE1("CommBlock::prepare() %p",&thisProxy);
@@ -85,11 +85,13 @@ void CommBlock::prepare()
   min_reduce[1] = stop_block ? 1.0 : 0.0;
   
   CkCallback callback (CkIndex_CommBlock::r_output(NULL), thisProxy);
-  TRACE1("Calling contribute %d",2*sizeof(double));
-  // char buffer[80];
-  // sprintf (buffer,"contribute() cycle %d",simulation->cycle());
-  // index_.print(buffer);
+
+  // --------------------------------------------------
+  // ENTRY: #1 CommBlock::prepare()-> CommBlock::r_output()
+  // ENTRY: contribute()
+  // --------------------------------------------------
   contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
+  // --------------------------------------------------
 
   //  performance->stop_region(perf_prepare);
 }

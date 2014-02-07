@@ -60,7 +60,13 @@ CProxy_CommBlock Factory::create_block_array
 
   CProxy_CommBlock proxy_block;
 
+  // --------------------------------------------------
+  // ENTRY: #1 Factory::create_block_array() -> ArrayMap::ArrayMap()
+  // ENTRY: create
+  // --------------------------------------------------
   CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
+  // --------------------------------------------------
+
   CkArrayOptions opts;
   opts.setMap(array_map);
   proxy_block = CProxy_CommBlock::ckNew(opts);
@@ -79,7 +85,11 @@ CProxy_CommBlock Factory::create_block_array
 
 	Index index(ix,iy,iz);
 
-	proxy_block[index].insert   // @L001@
+	// --------------------------------------------------
+	// ENTRY: #2 Factory::create_block_array() -> CommBlock::CommBlock()
+	// ENTRY: level == 0 block array insert
+	// --------------------------------------------------
+	proxy_block[index].insert
 	  (index,
 	   nx,ny,nz,
 	   num_field_blocks,
@@ -88,6 +98,7 @@ CProxy_CommBlock Factory::create_block_array
 	   0,NULL,op_array_copy,
 	   num_face_level, face_level,
 	   testing);
+	// --------------------------------------------------
 
       }
     }
@@ -111,7 +122,8 @@ CommBlock * Factory::create_block
  int cycle, double time, double dt,
  int narray, char * array, int op_array,
  int num_face_level, int * face_level,
- bool testing
+ bool testing,
+ Simulation * simulation
  ) const throw()
 {
 
@@ -119,7 +131,11 @@ CommBlock * Factory::create_block
   TRACE2("Factory::create_block(num_field_blocks %d  count_adapt %d)",
 	 num_field_blocks,count_adapt);
 
-  (*block_array)[index].insert   // @L002@
+  // --------------------------------------------------
+  // ENTRY: #3 Factory::create_block() -> CommBlock::CommBlock()
+  // ENTRY: level > 0 block array insert
+  // --------------------------------------------------
+  (*block_array)[index].insert
     (
      index,
      nx,ny,nz,
@@ -129,6 +145,7 @@ CommBlock * Factory::create_block
      narray, array,op_array,
      num_face_level, face_level,
      testing);
+  // --------------------------------------------------
 
   CommBlock * block = (*block_array)[index].ckLocal();
 

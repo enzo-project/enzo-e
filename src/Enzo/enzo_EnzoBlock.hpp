@@ -171,6 +171,9 @@ public: // interface
    int num_face_level, int * face_level,
    bool testing=false) throw();
 
+  /// Initialize an empty EnzoBlock
+  EnzoBlock()  { };
+
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
     : CommBlock (m)

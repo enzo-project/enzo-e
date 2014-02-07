@@ -148,10 +148,11 @@ public:
   /// Set the child indicies of this node in the parent
   void set_child(int level, int ix, int iy=0, int iz=0);
 
-  void print (const char * msg = "\0",
-	      int max_level = -1,
-	      int rank = 3,
-	      bool no_nl = false) const;
+  void print (const char * msg,
+	      int max_level,
+	      int rank,
+	      bool no_nl,
+	      void * simulation = 0) const;
 
   void write (int ip,
 	      const char * msg = "\0",

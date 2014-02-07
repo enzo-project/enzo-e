@@ -27,7 +27,9 @@ public: // functions
   ~SimulationCharm() throw();
 
   /// CHARM++ Constructor
-  SimulationCharm() {}
+  SimulationCharm() 
+  {
+  }
 
   /// CHARM++ Migration constructor
   SimulationCharm(CkMigrateMessage*m)
@@ -75,9 +77,6 @@ public: // functions
     return block_sync_.stop(); 
   }
 
-  /// Call initialize()
-  // void p_initialize_begin();
-
   /// Wait for all Hierarchy to be initialized before creating any CommBlocks
   void r_initialize_forest();
 
@@ -85,11 +84,14 @@ public: // functions
   void r_initialize_hierarchy();
 
   /// Call output on Problem list of Output objects
-  void p_output ();
+  void output ();
+
   void r_output ();
 
   /// Reduce output, using p_output_write to send data to writing processes
-  void s_write();
+  void s_write() { write_(); };
+  void write_();
+
   /// Continue on to Problem::output_wait()
   void r_write();
 
@@ -109,6 +111,7 @@ public: // functions
   /// Updated Simulation function to call compute()
   void monitor_output();
 
+ 
 protected: // attributes
 
   Sync block_sync_;

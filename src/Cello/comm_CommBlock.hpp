@@ -129,14 +129,14 @@ public: // interface
   /// Entry function after prepare() to call Simulation::r_output()
   void r_output(CkReductionMsg * msg);
 
-  void p_adapt_mesh() { adapt_mesh(); }
+  void p_adapt_mesh() { adapt_mesh_(); }
 
-  void r_adapt_called(CkReductionMsg * msg);
-  void q_adapt_called();
+  //  void r_adapt_called(CkReductionMsg * msg);
+  //  void q_adapt_called() { adapt_called_(); }
 
   void adapt_called();
 
-  void adapt_mesh();
+  void adapt_mesh_();
 
   void notify_neighbors(int level);
   void p_get_neighbor_level (Index index_debug,
@@ -155,15 +155,6 @@ public: // interface
   void q_adapt_end ();
 
   int determine_adapt();
-  /// Update the depth of the given child
-  void p_print(std::string message) {  
-#ifdef DEBUG_ADAPT
-    char buffer[255];
-    sprintf (buffer,"%s [%p]",message.c_str(),this);
-    index().print(buffer);
-    TRACE2("%s level %d",buffer,level());
-#endif
-  }
 
   const int & face_level (const int if3[3]) const
   {  return face_level_[IF3(if3)];  }
@@ -230,7 +221,8 @@ public: // interface
   void refresh_begin();
 
   /// Exit the refresh phase after QD
-  void q_refresh_end ();
+  void q_refresh_end () { refresh_end_(); }
+  void refresh_end_ ();
 
   // /// send  ghost zones to given neighbor in same level
   // void refresh_same (Index index,  int iface[3]);
@@ -246,7 +238,10 @@ public: // interface
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
   void x_refresh(int n, char buffer[],  int type_refresh, 
-		 int if3[3], int ic3[3]);
+		 int if3[3], int ic3[3]) 
+  {
+    refresh_(n,buffer,type_refresh,if3,ic3);
+  }
 
   /// Get restricted data from child when it is deleted
   void x_refresh_child (int n, char buffer[],int ic3[3]);
@@ -372,14 +367,19 @@ public: // virtual functions
   /// Return the local simulation object
   Simulation * simulation() const;
 
-  int count_neighbors() const;
+  //  int count_neighbors() const;
 
 protected: // functions
 
+  void refresh_(int n, char buffer[],  int type_refresh, 
+		int if3[3], int ic3[3]);
   void adapt_next_ ();
+
+  /// call_phase_(phase) if not a leaf; 
   void neighbor_sync_(int phase);
   void adapt_end_();
   void sync_(int phase, int count);
+  void call_phase_ (int phase);
   void coarsen_();
   void refine_();
   void adapt_called_();
@@ -442,84 +442,7 @@ protected: // functions
 	     -1 <= if3[2] && if3[2] <= 1);
   }
 
-  void debug_faces_(const char * mesg)
-  {
-#ifndef DEBUG_ADAPT
-    return;
-#endif
-
-    TRACE_ADAPT(mesg);
-    int if3[3] = {0};
-    int ic3[3] = {0};
-
-    for (ic3[1]=1; ic3[1]>=0; ic3[1]--) {
-      for (if3[1]=1; if3[1]>=-1; if3[1]--) {
-
-	index_.print(mesg,-1,2,true);
-
-#ifdef CELLO_DEBUG
-	char buffer[40];
-	sprintf(buffer,"out.debug.%03d",CkMyPe());
-	FILE * fp = fopen (buffer,"a");
-#endif
-
-
-	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-#ifdef CELLO_DEBUG
-	  fprintf (fp,(ic3[1]==1) ? "%d " : "  ",face_level(if3));
-#endif
-	  PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level(if3));
-	}
-#ifdef CELLO_DEBUG
-	fprintf (fp,"| ");
-#endif
-	PARALLEL_PRINTF ("| ") ;
-	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-#ifdef CELLO_DEBUG
-	  fprintf (fp,(ic3[1]==1) ? "%d " : "  ",face_level_new(if3));
-#endif
-	  PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level_new(if3));
-	}
-#ifdef CELLO_DEBUG
-	fprintf (fp,"| ");
-#endif
-	PARALLEL_PRINTF ("| ");
-	for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
-	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-	    for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-#ifdef CELLO_DEBUG
-	      fprintf (fp,"%d ",child_face_level(ic3,if3));
-#endif
-	      PARALLEL_PRINTF ("%d ",child_face_level(ic3,if3));
-	    }
-	  }
-	}
-#ifdef CELLO_DEBUG
-	fprintf (fp,"| ");
-#endif
-	PARALLEL_PRINTF ("| ");
-	for (ic3[0]=0; ic3[0]<2; ic3[0]++) {
-	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-	    for (if3[0]=-1; if3[0]<=1; if3[0]++) {
-#ifdef CELLO_DEBUG
-	      fprintf (fp,"%d ",child_face_level_new(ic3,if3));
-#endif
-	      PARALLEL_PRINTF ("%d ",child_face_level_new(ic3,if3));
-	    }
-	  }
-	}
-#ifdef CELLO_DEBUG
-	fprintf (fp,"\n");
-#endif
-	PARALLEL_PRINTF ("\n");
-	fflush(stdout);
-#ifdef CELLO_DEBUG
-	fclose (fp);
-#endif
-
-      }
-    }
-  }
+  void debug_faces_(const char * mesg);
 
   std::string id_ () const throw ()
   {

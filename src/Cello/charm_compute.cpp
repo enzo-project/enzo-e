@@ -20,12 +20,7 @@ void SimulationCharm::compute()
 
 
 #ifdef CELLO_DEBUG
-      char buffer[40];
-      sprintf(buffer,"out.debug.%03d",CkMyPe());
-      FILE * fp = fopen (buffer,"a");
-      fprintf (fp,"%s:%d cycle %03d\n",
-	       __FILE__,__LINE__,cycle_);
-      fclose(fp);
+  fprintf (fp_debug(),"%s:%d cycle %03d\n", __FILE__,__LINE__,cycle_);
 #endif
 
   if (cycle_ > 0 ) {
@@ -36,7 +31,12 @@ void SimulationCharm::compute()
     
     performance_write();
 
+    // --------------------------------------------------
+    // ENTRY: #1 SimulationCharm::compute()-> Main::p_exit()
+    // ENTRY: Main if stop
+    // --------------------------------------------------
     proxy_main.p_exit(CkNumPes());
+    // --------------------------------------------------
 
   } else {
 
@@ -44,7 +44,13 @@ void SimulationCharm::compute()
     performance()->switch_region (perf_compute,__FILE__,__LINE__);
 
     if (hierarchy()->group_process()->is_root()) 
+      
+      // --------------------------------------------------
+      // ENTRY: #2 SimulationCharm::compute()-> CommBlock::p_compute()
+      // ENTRY: Block Array if Simulation is_root()
+      // --------------------------------------------------
       hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
+      // --------------------------------------------------
   }
 }
 
@@ -53,7 +59,7 @@ void SimulationCharm::compute()
 void CommBlock::p_compute (int cycle, double time, double dt)
 {
 // #ifdef CELLO_TRACE
-//   index_.print("BEGIN PHASE COMPUTE p_compute()",-1,2);
+//   index_.print("BEGIN PHASE COMPUTE p_compute()",-1,2,false,simulation());
 // #endif
 
   // set_cycle(cycle);
@@ -69,7 +75,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   if (is_leaf_) {
 
 // #ifdef CELLO_TRACE
-//     index_.print("p_compute");
+//     index_.print("p_compute",-1,2,false,simulation());
 // #endif    
     FieldDescr * field_descr = simulation()->field_descr();
     int index_method = 0;
