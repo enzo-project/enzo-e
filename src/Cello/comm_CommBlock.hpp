@@ -129,6 +129,7 @@ public: // interface
   /// Entry function after prepare() to call Simulation::r_output()
   void r_output(CkReductionMsg * msg);
 
+  void r_adapt_mesh() { adapt_mesh_(); }
   void p_adapt_mesh() { adapt_mesh_(); }
 
   //  void r_adapt_called(CkReductionMsg * msg);
@@ -514,7 +515,7 @@ protected: // attributes
 
   /// Desired level for the next cycle
   int level_new_;
-  
+
   //--------------------------------------------------
 
   /// Current cycle number

@@ -309,26 +309,52 @@ void CommBlock::adapt_end_()
 
   next_phase_ = phase_output;
 
-  if (thisIndex.is_root()) {
+  const int initial_cycle = simulation()->config()->initial_cycle;
+  const bool is_first_cycle = (initial_cycle == cycle());
+  const int level_maximum = simulation()->config()->initial_max_level;
 
-    //    thisArray->doneInserting();
+  bool adapt_again = (is_first_cycle && adapt_step_++ < level_maximum);
 
-    const int initial_cycle = simulation()->config()->initial_cycle;
-    const bool is_first_cycle = (initial_cycle == cycle());
-    const int level_maximum = simulation()->config()->initial_max_level;
+  // #define NEW_Q_ADAPT_END
 
-    if (is_first_cycle && level_count_++ < level_maximum) {
-      // ENTRY: #7 CommBlock::adapt_end_()-> CommBlock::p_adapt_mesh()
-      // ENTRY: block array if (is_root && create)
-      // ENTRY: adapt phase
-      thisProxy.p_adapt_mesh();
-    } else {
-      // ENTRY: #8 CommBlock::adapt_end_()-> CommBlock::p_refresh_begin()
-      // ENTRY: block array if (is_root && not create)
-      // ENTRY: adapt phase
-      thisProxy.p_refresh_begin();
-    }
+#ifdef NEW_Q_ADAPT_END
+
+  if (adapt_again) {
+    // ENTRY: #7 CommBlock::adapt_end_()-> CommBlock::p_adapt_mesh()
+    // ENTRY: block array if (is_root && create)
+    // ENTRY: adapt phase
+
+    //    if (thisIndex.is_root()) thisProxy.p_adapt_mesh();
+
+    adapt_mesh_();
+
+  } else {
+    //    if (thisIndex.is_root()) {
+    // ENTRY: #8 CommBlock::adapt_end_()-> CommBlock::p_refresh_begin()
+    // ENTRY: block array if (is_root && not create)
+    // ENTRY: adapt phase
+    refresh_begin();
+    //    }
   }
+
+#else
+
+  if (adapt_again) {
+    // ENTRY: #7 CommBlock::adapt_end_()-> CommBlock::p_adapt_mesh()
+    // ENTRY: block array if (is_root && create)
+    // ENTRY: adapt phase
+
+    if (thisIndex.is_root()) thisProxy.p_adapt_mesh();
+
+  } else {
+    // ENTRY: #8 CommBlock::adapt_end_()-> CommBlock::p_refresh_begin()
+    // ENTRY: block array if (is_root && not create)
+    // ENTRY: adapt phase
+
+    if (thisIndex.is_root()) thisProxy.p_refresh_begin();
+  }
+#endif
+
 }
 
 //----------------------------------------------------------------------
@@ -375,7 +401,7 @@ void CommBlock::refine_()
 	(&thisProxy, index_child,
 	 nx,ny,nz,
 	 num_field_blocks,
-	 adapt_step_,
+	 adapt_step_ + 1,
 	 cycle_,time_,dt_,
 	 narray, array, op_array_prolong,
 	 27,&child_face_level_[27*IC3(ic3)],
@@ -526,7 +552,7 @@ void CommBlock::call_phase_ (int phase)
 
 void CommBlock::p_get_neighbor_level
 (
- Index index_debug,   // index of the calling neighbor
+ Index index_caller,   // index of the calling neighbor
  int ic3[3],
  int if3[3], 
  int level_face,
@@ -636,9 +662,9 @@ void CommBlock::p_get_neighbor_level
 
     // Don't coarsen if any siblings don't coarsen
 
-      bool is_sibling = (index_.level() > 0 && index_debug.level() > 0) ? (index_debug.index_parent() == index_.index_parent()) : false;
+      bool is_sibling = (index_.level() > 0 && index_caller.level() > 0) ? (index_caller.index_parent() == index_.index_parent()) : false;
 
-    bool is_nephew = (index_.level() > 0 && index_debug.level() > 1) ? (index_debug.index_parent().index_parent() == index_.index_parent()) : false;
+    bool is_nephew = (index_.level() > 0 && index_caller.level() > 1) ? (index_caller.index_parent().index_parent() == index_.index_parent()) : false;
     bool is_coarsening = level_new < level;
     bool is_finer_neighbor = level_face_new > level_new;
 
@@ -697,7 +723,7 @@ void CommBlock::p_get_neighbor_level
     while (it_child.next(jc3)) {
       Index index_nibling = index_neighbor.index_child(jc3);
       
-      index_.print("p_get_neighbor_level() recurse",-1,2,false,simulation());
+      //      index_.print("p_get_neighbor_level() recurse",-1,2,false,simulation());
       // --------------------------------------------------
       // ENTRY: #13 CommBlock::p_get_neighbor_level()-> CommBlock::p_get_neighbor_level()
       // ENTRY: non-leaf recurse on children

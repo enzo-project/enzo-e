@@ -49,6 +49,7 @@ module mesh {
 
     entry void p_sync ( int phase, int count);
     entry void p_adapt_mesh(); // [CB5]
+    entry void r_adapt_mesh(); // [CB22]
 
     entry void p_get_neighbor_level(Index index,int ic3[3], int if3[3], // [CB7]
 				    int level_now, int level_new);

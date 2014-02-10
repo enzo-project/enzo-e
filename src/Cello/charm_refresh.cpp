@@ -19,6 +19,7 @@ static char buffer[256];
 // void CommBlock::p_refresh_begin() 
 void CommBlock::refresh_begin() 
 {
+
   switch_performance_(perf_refresh,__FILE__,__LINE__);
 
 // #ifdef CELLO_TRACE
@@ -225,7 +226,22 @@ void CommBlock::refresh_ (int n, char * buffer, int type_refresh,
 void CommBlock::refresh_end_()
 {
   if      (next_phase_ == phase_output)  prepare();
-  else if (next_phase_ == phase_adapt)   adapt_mesh_();
+  else if (next_phase_ == phase_adapt) {
+
+    //    adapt_mesh_();
+
+  // --------------------------------------------------
+  // ENTRY: #3 CommBlock::refresh_end_() -> r_adapt_mesh()
+  // ENTRY: contribute
+  // --------------------------------------------------
+  CkCallback callback 
+    (CkIndex_CommBlock::r_adapt_mesh(), thisProxy);
+  contribute(0,0,CkReduction::concat,callback);
+  // --------------------------------------------------
+    
+
+
+  }
   else ERROR1 ("CommBlock::q_refresh_end()",
 	       "Unknown next_phase %d",
 	       next_phase_);
