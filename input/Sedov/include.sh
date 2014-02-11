@@ -17,7 +17,7 @@ charm=$HOME/Charm/charm
 
 cd $cello/input/Sedov
 
-enzorun=$cello/bin/charm/enzo-p
+enzorun=$cello/bin/enzo-p
 charmrun=$charm/bin/charmrun
 input=sedov$T$P.in
 output=out.sedov$T$P
