@@ -102,7 +102,12 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   //  performance->stop_region(perf_compute);
 
-  next_phase_ = phase_adapt;
+  int adapt_interval = simulation()->config()->mesh_adapt_interval;
+  if (adapt_interval && ((cycle_ % adapt_interval) == 0)) {
+    next_phase_ = phase_adapt;
+  } else {
+    next_phase_ = phase_output;
+  }
 
   refresh_begin();
 }
