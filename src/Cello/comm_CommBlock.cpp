@@ -208,8 +208,8 @@ void CommBlock::pup(PUP::er &p)
   p | children_;
   p | loop_refresh_;
   p | sync_coarsen_;
-  PUParray(p,count_sync_, 3);
-  PUParray(p,max_sync_, 3);
+  PUParray(p,count_sync_, PHASE_SYNC_SIZE);
+  PUParray(p,max_sync_, PHASE_SYNC_SIZE);
   p | face_level_;
   p | face_level_new_;
   p | child_face_level_;

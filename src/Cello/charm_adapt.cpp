@@ -57,7 +57,7 @@ void CommBlock::adapt_mesh_()
   sync_coarsen_.set_stop(NC(rank));
   sync_coarsen_.clear();
 
-  neighbor_sync_(phase_adapt_called);
+  neighbor_sync_(phase_sync_adapt_called);
 
 }
 
@@ -543,9 +543,11 @@ void CommBlock::sync_ (int phase, int count)
 
 void CommBlock::call_phase_ (int phase)
 {
-    if (phase == phase_adapt_called) adapt_called_() ;
-    if (phase == phase_adapt_next)   adapt_next_() ;
-    if (phase == phase_adapt_end)    adapt_end_() ;
+    if (phase == phase_sync_adapt_called) adapt_called_() ;
+    if (phase == phase_sync_adapt_next)   adapt_next_() ;
+    if (phase == phase_sync_adapt_end)    adapt_end_() ;
+    if (phase == phase_sync_adapt_end)    adapt_end_() ;
+    if (phase == phase_sync_refresh)      refresh_end_();
 }
 
 //----------------------------------------------------------------------

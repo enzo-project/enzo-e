@@ -41,7 +41,6 @@ void CommBlock::refresh_begin()
     size_forest(&n3[0],&n3[1],&n3[2]);
 
     int refresh_rank = config->field_refresh_rank;
-    bool refresh_type_counter = (refresh_type == "counter");
     loop_refresh_.set_stop(0);
 
     ItFace it_face(rank,refresh_rank);
@@ -100,13 +99,6 @@ void CommBlock::refresh_begin()
 
     }
 
-    if (refresh_type_counter) {
-
-      loop_refresh_.add_stop();
-
-      refresh_(0,0,0,0,0);
-
-    }
   }
   if (refresh_type == "quiescence") {
 
@@ -117,7 +109,11 @@ void CommBlock::refresh_begin()
     CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
     			  thisProxy[thisIndex]));
     // --------------------------------------------------
-  } 
+  }  else if ((refresh_type == "counter")) {
+
+    neighbor_sync_(phase_sync_refresh);
+
+  }
 
 }
 
@@ -212,13 +208,6 @@ void CommBlock::refresh_ (int n, char * buffer, int type_refresh,
 
   }
 
-  std::string refresh_type = simulation()->config()->field_refresh_type;
-
-  if (refresh_type == "counter") {
-    if (loop_refresh_.next()) {
-      refresh_end_();
-    }
-  }
 }
 
 //----------------------------------------------------------------------

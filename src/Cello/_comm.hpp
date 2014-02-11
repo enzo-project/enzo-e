@@ -8,6 +8,17 @@
 #ifndef _COMM_HPP
 #define _COMM_HPP
 
+/// @enum     phase_sync_type
+/// @brief    adapt phase for p_join()
+enum phase_sync_type {
+  phase_sync_unknown,
+  phase_sync_adapt_called,
+  phase_sync_adapt_next,
+  phase_sync_adapt_end,
+  phase_sync_refresh
+};
+#define PHASE_SYNC_SIZE 5
+
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------

@@ -547,8 +547,8 @@ protected: // attributes
   Sync sync_coarsen_;
 
   /// Synchronization counter for p_sync
-  int  count_sync_[3]; // > phase_adapt_end
-  int  max_sync_[3];   // > phase_adapt_end
+  int  count_sync_[PHASE_SYNC_SIZE]; // > phase_adapt_end
+  int  max_sync_[PHASE_SYNC_SIZE];   // > phase_adapt_end
 
   /// current level of neighbors along each face
   std::vector<int> face_level_;

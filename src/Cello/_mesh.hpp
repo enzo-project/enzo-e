@@ -8,15 +8,6 @@
 #ifndef _MESH_HPP
 #define _MESH_HPP
 
-/// @enum     phase_adapt_type
-/// @brief    adapt phase for p_join()
-enum phase_adapt_type {
-  phase_adapt_unknown,
-  phase_adapt_called,
-  phase_adapt_next,
-  phase_adapt_end
-};
-
 /// @enum     adapt_type
 /// @brief    Mesh adaptation type: refine, coarsen, or stay the same
 
