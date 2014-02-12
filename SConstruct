@@ -283,7 +283,7 @@ libpath = libpath + [hdf5_path + '/lib']
 # LIBPNG PATHS
 #----------------------------------------------------------------------
 
-#libpath = libpath + [png_path + '/lib']
+libpath = libpath + [png_path + '/lib']
 
 #----------------------------------------------------------------------
 # FORTRAN LINK PATH

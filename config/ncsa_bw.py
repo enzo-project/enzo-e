@@ -1,3 +1,5 @@
+import os
+
 f90 = {}
 cxx = {}
 cc  = {}
@@ -13,11 +15,11 @@ f90  = 'ftn'
 libpath_fortran = ''
 libs_fortran    = ['gfortran']
 
-#libpng_path  = '/u/sciteam/bordner'
 
 charm_path = '/u/sciteam/bordner/Charm/charm'
 papi_path  = '/u/sciteam/bordner'
-hdf5_path  = '/opt/cray/hdf5/default/gnu/48'
+png_path  = '/u/sciteam/bordner'
+hdf5_path  = os.environ["CRAY_HDF5_DIR"]
 
 if (type == "mpi"):
    parallel_run = "aprun -n 8"

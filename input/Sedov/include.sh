@@ -12,10 +12,13 @@ charm=$HOME/Charm/charm
 
 cd $cello/input/Sedov
 
+P0=`printf "%04d" $P`
 enzorun=$cello/bin/enzo-p
 charmrun=$charm/bin/charmrun
-input=sedov$T$P.in
-output=out.sedov$T$P
+input=sedov$T$P0.in
+output=out.sedov$T$P0
+
+
 
 if [ $H == "sdsc-gordon" ]; then
 
@@ -23,7 +26,11 @@ if [ $H == "sdsc-gordon" ]; then
 
 elif [ $H == "ncsa-bw" ]; then
 
-    aprun -n 64 $enzorun $input >& $output
+
+    . /opt/modules/default/init/bash
+    module swap PrgEnv-cray PrgEnv-gnu
+
+   aprun -n $P -d 2 $enzorun $input >& $output
 
 fi
 
