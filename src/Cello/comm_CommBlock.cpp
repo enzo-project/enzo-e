@@ -29,6 +29,7 @@ CommBlock::CommBlock
  ) throw ()
   :
   index_(index),
+  stop_(0),
   index_initial_(0),
   children_(),
   loop_refresh_(),
@@ -203,6 +204,7 @@ void CommBlock::pup(PUP::er &p)
   p | cycle_;
   p | time_;
   p | dt_;
+  p | stop_;
   //  p | neighbor_index_;
   p | index_initial_;
   p | children_;
@@ -591,6 +593,7 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   cycle_      = comm_block.cycle_;
   time_       = comm_block.time_;
   dt_         = comm_block.dt_;
+  stop_       = comm_block.stop_;
   adapt_step_ = comm_block.adapt_step_;
   adapt_      = comm_block.adapt_;
   next_phase_ = comm_block.next_phase_;

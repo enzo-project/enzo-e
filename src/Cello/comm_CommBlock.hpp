@@ -323,6 +323,9 @@ public: // interface
 
   /// Return the current timestep
   double dt() const throw() { return dt_; };
+
+  /// Return the current stopping criteria
+  bool stop() const throw() { return stop_; };
  
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) const throw();
@@ -353,12 +356,15 @@ public: // virtual functions
 
   /// Set CommBlock's time
   virtual void set_time (double time) throw()
-  {
-    time_  = time; }
+  { time_  = time; }
 
   /// Set CommBlock's timestep
   virtual void set_dt (double dt) throw()
   { dt_  = dt; }
+
+  /// Set CommBlock's stopping criteria
+  virtual void set_stop (double stop) throw()
+  { stop_  = stop; }
 
   /// Initialize CommBlock
   virtual void initialize () throw()
@@ -371,6 +377,8 @@ public: // virtual functions
   //  int count_neighbors() const;
 
 protected: // functions
+
+  void output_();
 
   void refresh_(int n, char buffer[],  int type_refresh, 
 		int if3[3], int ic3[3]);
@@ -526,6 +534,9 @@ protected: // attributes
 
   /// Current timestep
   double dt_;
+
+  /// Current stopping criteria
+  bool stop_;
 
   //--------------------------------------------------
 

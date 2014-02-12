@@ -24,74 +24,72 @@
 
 void CommBlock::prepare()
 {
-  // index_.print("BEGIN prepare()",-1,2,false,simulation());
   switch_performance_(perf_prepare,__FILE__,__LINE__);
 
   TRACE1("CommBlock::prepare() %p",&thisProxy);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  
  //--------------------------------------------------
   // Enforce boundary conditions
   //--------------------------------------------------
 
   update_boundary_();
 
-  FieldDescr * field_descr = simulation->field_descr();
 
-  //--------------------------------------------------
-  // Compute local dt
-  //--------------------------------------------------
+  int stopping_interval = simulation->config()->stopping_interval;
+  bool stopping_reduce = ((cycle_ % stopping_interval) == 0);
 
-  Problem * problem = simulation->problem();
+  if (stopping_reduce) {
+    // Compute local dt
 
-  double dt_block;
-  Timestep * timestep = problem->timestep();
+    Problem * problem = simulation->problem();
 
-  dt_block = timestep->evaluate(field_descr,this);
-  TRACE1("dt_block = %f",dt_block);
+    Timestep * timestep = problem->timestep();
 
-  // Reduce timestep to coincide with scheduled output if needed
+    const FieldDescr * field_descr = simulation->field_descr();
+    double dt_block = timestep->evaluate(field_descr,this);
+    TRACE1("dt_block = %f",dt_block);
 
-  int index_output=0;
-  while (Output * output = problem->output(index_output++)) {
-    Schedule * schedule = output->schedule();
-    dt_block = schedule->update_timestep(time_,dt_block);
+    // Reduce timestep to coincide with scheduled output if needed
+
+    int index_output=0;
+    while (Output * output = problem->output(index_output++)) {
+      Schedule * schedule = output->schedule();
+      dt_block = schedule->update_timestep(time_,dt_block);
+    }
+
+    // Reduce timestep to not overshoot final time from stopping criteria
+
+    Stopping * stopping = problem->stopping();
+
+    double time_stop = stopping->stop_time();
+    double time_curr = time_;
+
+    dt_block = MIN (dt_block, (time_stop - time_curr));
+
+    // Evaluate local stopping criteria
+
+    int stop_block = stopping->complete(cycle_,time_);
+
+    // Reduce to find CommBlock array minimum dt and stopping criteria
+
+    double min_reduce[2];
+
+    min_reduce[0] = dt_block;
+    min_reduce[1] = stop_block ? 1.0 : 0.0;
+
+    // --------------------------------------------------
+    // ENTRY: #1 CommBlock::prepare()-> CommBlock::r_output()
+    // ENTRY: contribute()
+    // --------------------------------------------------
+    CkCallback callback (CkIndex_CommBlock::r_output(NULL), thisProxy);
+    contribute(2*sizeof(double), min_reduce, CkReduction::min_double, callback);
+    // --------------------------------------------------
+
+  } else {
+
+    output_();
+
   }
-
-
-  // Reduce timestep to not overshoot final time from stopping criteria
-
-  Stopping * stopping = problem->stopping();
-
-  double time_stop = stopping->stop_time();
-  double time_curr = time_;
-
-  dt_block = MIN (dt_block, (time_stop - time_curr));
-
-  //--------------------------------------------------
-  // Evaluate local stopping criteria
-  //--------------------------------------------------
-
-  int stop_block = stopping->complete(cycle_,time_);
-
-  //--------------------------------------------------
-  // Reduce to find CommBlock array minimum dt and stopping criteria
-  //--------------------------------------------------
-
-  double min_reduce[2];
-
-  min_reduce[0] = dt_block;
-  min_reduce[1] = stop_block ? 1.0 : 0.0;
-  
-  CkCallback callback (CkIndex_CommBlock::r_output(NULL), thisProxy);
-
-  // --------------------------------------------------
-  // ENTRY: #1 CommBlock::prepare()-> CommBlock::r_output()
-  // ENTRY: contribute()
-  // --------------------------------------------------
-  contribute( 2*sizeof(double), min_reduce, CkReduction::min_double, callback);
-  // --------------------------------------------------
-
   //  performance->stop_region(perf_prepare);
 }

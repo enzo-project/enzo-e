@@ -244,6 +244,9 @@ void Simulation::initialize_config_() throw()
     TRACE("Simulation::initialize_config_ calling Config::read()");
     config_->read(parameters_);
   }
+  if (group_process()->is_root()) {
+    parameters_->write("parameters.out");
+  }
   TRACE("END   Simulation::initialize_config_");
 }
 

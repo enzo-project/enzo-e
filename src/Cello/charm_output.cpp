@@ -18,26 +18,29 @@
 
 void CommBlock::r_output(CkReductionMsg * msg)
 {
-  
-  switch_performance_ (perf_output,__FILE__,__LINE__);
-
-  // index_.print("BEGIN PHASE OUTPUT",-1,2,false,simulation());
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  TRACE("CommBlock::r_output()");
   double * min_reduce = (double * )msg->getData();
 
-  double dt_forest   = min_reduce[0];
-  bool   stop_forest = min_reduce[1] == 1.0 ? true : false;
-  set_dt   (dt_forest);
-  //  printf("DEBUG CommBlock::r_output(): cycle %d dt=%f min_reduce %25.15f stop %d\n",
-  //	 cycle_,dt_forest,min_reduce[1],stop_forest);
+  dt_   = min_reduce[0];
+  stop_ = min_reduce[1] == 1.0 ? true : false;
 
   delete msg;
 
-  simulation->update_state(cycle_,time_,dt_forest,stop_forest);
+  output_();
+}
 
-  TRACE("CommBlock::r_output() calling SimulationCharm::output");
+//----------------------------------------------------------------------
+
+void CommBlock::output_()
+{
+  switch_performance_ (perf_output,__FILE__,__LINE__);
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  set_dt   (dt_);
+  set_stop (stop_);
+
+  simulation->update_state(cycle_,time_,dt_,stop_);
+
   SimulationCharm * simulation_charm = proxy_simulation.ckLocalBranch();
 
   simulation_charm->output();
@@ -47,10 +50,8 @@ void CommBlock::r_output(CkReductionMsg * msg)
 
 void SimulationCharm::output ()
 {
-  TRACE("SimulationCharm::output");
-  TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
   if (block_sync_.next()) {
-    TRACE("SimulationCharm::output calling r_output");
+
     CkCallback callback (CkIndex_SimulationCharm::r_output(), thisProxy);
     // --------------------------------------------------
     // ENTRY: #1 SimulationCharm::output()-> SimulationCharm::r_output()
@@ -65,7 +66,6 @@ void SimulationCharm::output ()
 
 void SimulationCharm::r_output()
 {
-  TRACE("OUTPUT SimulationCharm::r_output()");
   problem()->output_reset();
   problem()->output_next(this);
 }
@@ -74,7 +74,6 @@ void SimulationCharm::r_output()
 
 void Problem::output_next(Simulation * simulation) throw()
 {
-  TRACE("OUTPUT Problem::output_next()");
   int cycle   = simulation->cycle();
   double time = simulation->time();
 
@@ -108,7 +107,6 @@ void Problem::output_next(Simulation * simulation) throw()
 
 void CommBlock::p_write (int index_output)
 {
-  TRACE("OUTPUT CommBlock::p_write()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -125,8 +123,6 @@ void CommBlock::p_write (int index_output)
 
 void SimulationCharm::write_()
 {
-  TRACE("SimulationCharm::write_()");
-  TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
   if (block_sync_.next()) {
 
     CkCallback callback (CkIndex_SimulationCharm::r_write(), thisProxy);
@@ -152,11 +148,9 @@ void SimulationCharm::r_write()
 
 void Problem::output_wait(Simulation * simulation) throw()
 {
-  TRACE("OUTPUT Problem::output_wait()");
   Output * output = this->output(index_output_);
 
   int ip       = CkMyPe();
-  TRACE1 ("output = %p",output);
   int ip_writer = output->process_writer();
 
   if (ip == ip_writer) {
@@ -205,8 +199,7 @@ void Problem::output_wait(Simulation * simulation) throw()
 
 void SimulationCharm::p_output_write (int n, char * buffer)
 {
-  TRACE("OUTPUT SimulationCharm::p_output_write()");
-  problem()->output_write(this,n,buffer);
+  problem()->output_write(this,n,buffer); 
 }
 
 //----------------------------------------------------------------------
@@ -218,7 +211,6 @@ void Problem::output_write
 ) throw()
 {
   Output * output = this->output(index_output_);
-  TRACE2("OUTPUT Problem::output_write() %d %p",n,output);
 
   if (n != 0) {
     output->update_remote(n, buffer);
@@ -239,10 +231,7 @@ void Problem::output_write
 
 void SimulationCharm::monitor_output()
 {
-  TRACE("Simulation::monitor_output()");
   Simulation::monitor_output();
-
-  TRACE ("END   PHASE OUTPUT [SIMULATION]");
 
   compute();
 }
