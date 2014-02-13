@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     charm_prepare.cpp
+/// @file     charm_stopping.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-26
 /// @brief    Charm-related functions associated with initialization
 ///
-///    PREPARE
+///    STOPPING
 ///        
-///    CommBlock::prepare()
+///    CommBlock::stopping()
 ///       update_boundary_()
 ///       compute dt
 ///       compute stopping
@@ -22,11 +22,13 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-void CommBlock::prepare()
-{
-  switch_performance_(perf_prepare,__FILE__,__LINE__);
+//----------------------------------------------------------------------
 
-  TRACE1("CommBlock::prepare() %p",&thisProxy);
+void CommBlock::begin_stopping()
+{
+  switch_performance_(perf_stopping,__FILE__,__LINE__);
+
+  TRACE1("CommBlock::stopping() %p",&thisProxy);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
  //--------------------------------------------------
@@ -34,7 +36,6 @@ void CommBlock::prepare()
   //--------------------------------------------------
 
   update_boundary_();
-
 
   int stopping_interval = simulation->config()->stopping_interval;
   bool stopping_reduce = ((cycle_ % stopping_interval) == 0);
@@ -79,17 +80,48 @@ void CommBlock::prepare()
     min_reduce[1] = stop_block ? 1.0 : 0.0;
 
     // --------------------------------------------------
-    // ENTRY: #1 CommBlock::prepare()-> CommBlock::r_output()
+    // ENTRY: #1 CommBlock::stopping()-> CommBlock::r_stopping()
     // ENTRY: contribute()
     // --------------------------------------------------
-    CkCallback callback (CkIndex_CommBlock::r_output(NULL), thisProxy);
+    CkCallback callback (CkIndex_CommBlock::r_stopping(NULL), thisProxy);
     contribute(2*sizeof(double), min_reduce, CkReduction::min_double, callback);
     // --------------------------------------------------
 
   } else {
 
-    output_();
+    stopping_();
 
   }
-  //  performance->stop_region(perf_prepare);
+
 }
+
+//----------------------------------------------------------------------
+
+void CommBlock::r_stopping(CkReductionMsg * msg)
+{
+  double * min_reduce = (double * )msg->getData();
+
+  dt_   = min_reduce[0];
+  stop_ = min_reduce[1] == 1.0 ? true : false;
+
+  delete msg;
+
+  stopping_();
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::stopping_()
+{
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  set_dt   (dt_);
+  set_stop (stop_);
+
+  simulation->update_state(cycle_,time_,dt_,stop_);
+
+  SimulationCharm * simulation_charm = proxy_simulation.ckLocalBranch();
+
+  simulation_charm->begin_output();
+}
+

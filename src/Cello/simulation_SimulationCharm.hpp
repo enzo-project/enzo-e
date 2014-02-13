@@ -84,7 +84,7 @@ public: // functions
   void r_initialize_hierarchy();
 
   /// Call output on Problem list of Output objects
-  void output ();
+  void begin_output ();
 
   void r_output ();
 

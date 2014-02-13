@@ -16,40 +16,10 @@
 
 //----------------------------------------------------------------------
 
-void CommBlock::r_output(CkReductionMsg * msg)
+void SimulationCharm::begin_output ()
 {
-  double * min_reduce = (double * )msg->getData();
+  performance()->switch_region(perf_output,__FILE__,__LINE__);
 
-  dt_   = min_reduce[0];
-  stop_ = min_reduce[1] == 1.0 ? true : false;
-
-  delete msg;
-
-  output_();
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::output_()
-{
-  switch_performance_ (perf_output,__FILE__,__LINE__);
-
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  set_dt   (dt_);
-  set_stop (stop_);
-
-  simulation->update_state(cycle_,time_,dt_,stop_);
-
-  SimulationCharm * simulation_charm = proxy_simulation.ckLocalBranch();
-
-  simulation_charm->output();
-}
-
-//----------------------------------------------------------------------
-
-void SimulationCharm::output ()
-{
   if (block_sync_.next()) {
 
     CkCallback callback (CkIndex_SimulationCharm::r_output(), thisProxy);

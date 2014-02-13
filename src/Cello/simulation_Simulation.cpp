@@ -216,7 +216,7 @@ void Simulation::initialize_performance_() throw()
   performance_->new_region(perf_refresh,    "refresh");
   performance_->new_region(perf_compute,    "compute");
   performance_->new_region(perf_output,     "output");
-  performance_->new_region(perf_prepare,    "prepare");
+  performance_->new_region(perf_stopping,   "stopping");
 
   performance_name_   = config_->performance_name;
   performance_stride_ = config_->performance_stride;

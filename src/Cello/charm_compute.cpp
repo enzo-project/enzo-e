@@ -24,7 +24,6 @@ void SimulationCharm::compute()
 #endif
 
   if (cycle_ > 0 ) {
-    //    performance()->stop_region (perf_output,__FILE__,__LINE__);
     performance()->stop_region (perf_cycle,__FILE__,__LINE__);
   }
   if (stop_) {

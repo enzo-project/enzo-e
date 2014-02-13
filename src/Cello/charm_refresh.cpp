@@ -179,8 +179,6 @@ void CommBlock::refresh ( int type_refresh, Index index_neighbor,
 void CommBlock::refresh_ (int n, char * buffer, int type_refresh,
 			  int iface[3], int ichild[3])
 {
-  switch_performance_(perf_refresh,__FILE__,__LINE__);
-
   if (type_refresh == refresh_coarse) { // coarse
 
     bool lghost[3] = {false};
@@ -214,7 +212,7 @@ void CommBlock::refresh_ (int n, char * buffer, int type_refresh,
 
 void CommBlock::refresh_end_()
 {
-  if      (next_phase_ == phase_output)  prepare();
+  if      (next_phase_ == phase_output)  begin_stopping();
   else if (next_phase_ == phase_adapt) {
 
     //    adapt_mesh_();

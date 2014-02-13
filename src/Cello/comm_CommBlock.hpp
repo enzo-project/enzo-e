@@ -126,9 +126,6 @@ public: // interface
   // ADAPT
   //--------------------------------------------------
 
-  /// Entry function after prepare() to call Simulation::r_output()
-  void r_output(CkReductionMsg * msg);
-
   void r_adapt_mesh() { adapt_mesh_(); }
   void p_adapt_mesh() { adapt_mesh_(); }
 
@@ -250,7 +247,10 @@ public: // interface
   //--------------------------------------------------
 
   /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
-  void prepare();
+  void begin_stopping();
+  /// Entry function after begin_stopping() to call Simulation::r_stopping()
+  void r_stopping(CkReductionMsg * msg);
+
 
   //==================================================
 
@@ -378,7 +378,7 @@ public: // virtual functions
 
 protected: // functions
 
-  void output_();
+  void stopping_();
 
   void refresh_(int n, char buffer[],  int type_refresh, 
 		int if3[3], int ic3[3]);
