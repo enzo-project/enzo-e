@@ -226,10 +226,10 @@ void Output::write_hierarchy_
   if (hierarchy->group_process()->is_root())
 
     // --------------------------------------------------
-    // ENTRY: #1 Output::write_hierarchy_()-> CommBlock::p_write()
+    // ENTRY: #1 Output::write_hierarchy_()-> CommBlock::p_output_write()
     // ENTRY: Block array if Simulation is root
     // --------------------------------------------------
-    hierarchy->block_array()->p_write(index_);
+    hierarchy->block_array()->p_output_write(index_);
     // --------------------------------------------------
 
 }

@@ -39,39 +39,62 @@ module mesh {
 
     entry CommBlock();	 // [CB0]
 
-    entry void p_write (int index_output); // [CB1]
-    entry void p_compute(int cycle, double time, double dt); // [CB2]
-    entry void p_read (int index_input); // [CB3]
-    entry void r_stopping (CkReductionMsg * msg); // [CB4]
+    //--------------------------------------------------
+    // *** OUTPUT ***
+    //--------------------------------------------------
 
-    // @@@@@@@@@@@@@@@@@@@@ NEW ADAPT @@@@@@@@@@@@@@@@@@@@
+    entry void p_output_write (int index_output); // [CB1]
+    entry void p_output_read (int index_input); // [CB3]
+
+    //--------------------------------------------------
+    // *** COMPUTE ***
+    //--------------------------------------------------
+
+    entry void p_compute_enter(int cycle, double time, double dt); // [CB2]
+
+    //--------------------------------------------------
+    // *** STOPPING ***
+    //--------------------------------------------------
+
+    entry void r_stopping_compute_timestep (CkReductionMsg * msg); // [CB4]
+
+    //--------------------------------------------------
+    // *** CONTROL ***
+    //--------------------------------------------------
+
+    entry [expedited] void p_control_sync ( int phase, int count);
+
+    //--------------------------------------------------
+    // *** ADAPT ***
+    //--------------------------------------------------
+
+    entry void p_adapt_enter();   // [CB5]
+    entry void r_adapt_enter();   // [CB22]
+
+    entry void p_adapt_delete();  // [CB11]
+    entry void q_adapt_exit();    // [CB13]
+    entry void q_adapt_next();    // [CB12]
+
+    entry void p_adapt_recv_neighbor_level  // [CB7]
+      (Index index,int ic3[3], int if3[3], int level_now, int level_new);
+
+    entry void p_adapt_send_child_data // [CB10]
+      (int ic3[3], int na, char arr[na], int nf, int child_face_level[nf]);
 
 
-    entry [expedited] void p_sync ( int phase, int count);
-    entry void p_adapt_mesh(); // [CB5]
-    entry void r_adapt_mesh(); // [CB22]
+    //--------------------------------------------------
+    // *** REFRESH
+    //--------------------------------------------------
 
-    entry void p_get_neighbor_level(Index index,int ic3[3], int if3[3], // [CB7]
-				    int level_now, int level_new);
-    entry void p_get_child_data(int ic3[3], // [CB10]
-				int na, char arr[na],
-				int nf, int child_face_level[nf]);
-    entry void p_delete(); // [CB11]
+    entry void p_refresh_enter();         // [CB14]
+    entry void q_refresh_exit();          // [CB15]
 
-    entry void q_adapt_next(); // [CB12]
-    entry void q_adapt_end(); // [CB13]
+    entry [expedited] void x_refresh_face // [CB21]
+      (int n, char buffer[n],  char rtype, int iface[3], int ichild[3]);
 
-    // refresh
-
-    entry void p_refresh_begin(); // [CB14]
-    entry void q_refresh_end(); // [CB15]
-
-    entry [expedited] void x_refresh(int n, char buffer[n],  char rtype, 
-			 int iface[3], int ichild[3]); // [CB21]
-
-    entry void x_refresh_child(int n, char buffer[n], // [CB19]
-			       int ichild[3]);
-
+    entry void x_refresh_child            // [CB19]
+      (int n, char buffer[n], int ichild[3]);
+ 
   };
 }
 

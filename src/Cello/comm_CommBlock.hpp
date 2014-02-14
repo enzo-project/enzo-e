@@ -5,8 +5,6 @@
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @brief    [\ref Comm] Declaration of the CommBlock class
 
-// #define DEBUG_USE_MAX
-
 #ifndef COMM_COMMBLOCK_HPP
 #define COMM_COMMBLOCK_HPP
 
@@ -27,51 +25,15 @@ class FieldDescr;
 class Hierarchy;
 class Simulation;
 
-#include "parallel.def"
+//----------------------------------------------------------------------
 
-// index for child blocks
-#define IC3(ic3)  ( ((ic3[0]+2)%2) + 2*( ((ic3[1]+2)%2) + 2*( ((ic3[2]+2)%2) )))
-
-// number of children
-#define NC(rank) (1<<(rank))
-
-// index for neighbors (axis,face)
-#define IN(axis,face)  ((face) + 2*(axis))
-
-// index for face (ix,iy,iz)
-#define IF3(if3)  ((if3[0]+1) + 3*((if3[1]+1) + 3*(if3[2]+1)))
-
-// index for child ic3[] face if3[]
-#define ICF3(ic3,if3)  (IF3(if3) + 27*IC3(ic3))
-
-// number of neighbors
-#define NN(rank) (2*(rank))
-
-#include <limits>
-// const int face_level_unknown = std::numeric_limits<int>::max();
-//const int face_level_unknown = -1;
-
-enum phase_type {
-  phase_unknown,
-  phase_adapt,
-  phase_refresh,
-  phase_output,
-  phase_compute
-};
-
-enum array_type {
-  op_array_unknown,
-  op_array_copy,
-  op_array_restrict,
-  op_array_prolong
-};
-
-#include "mesh.decl.h"
 class CommBlock : public CBase_CommBlock
 {
   /// @class    CommBlock
   /// @ingroup  Comm
-  /// @brief    [\ref Comm] Handles parallel communication and synchronization of mesh Blocks
+  ///
+  /// @brief [\ref Comm] Handles parallel communication and
+  /// synchronization of mesh Blocks
 
   friend class IoBlock;
 
@@ -89,182 +51,10 @@ public: // interface
    int narray, char * array, int op_array,
    int num_face_level, int * face_level,
    bool testing=false
-) throw();
-
-  /// Initialize an empty CommBlock
-  CommBlock()  { };
-
-  /// CHARM pupper
-  void pup(PUP::er &p);
-
-//----------------------------------------------------------------------
-
-  /// Initialize a migrated CommBlock
-  CommBlock (CkMigrateMessage *m) 
-    : CBase_CommBlock(m) { };
-
-  /// Index of the CommBlock
-  const Index & index() const { return index_; }
-
-  /// Initialize CommBlock for the simulation.
-  void p_initial();
-
-  // /// Call current Initial::enforce() on the block
-  // void p_initial_enforce();
-
-  /// Apply the numerical methods on the block
-  void p_compute(int cycle, double time, double dt);
-
-  /// Contribute block data to ith output object in the simulation
-  void p_write (int index_output);
-
-  /// Contribute block data to the Initial input object
-  void p_read (int index_input = 0)
-  {  INCOMPLETE("CommBlock::p_read");  }
-
-  //--------------------------------------------------
-  // ADAPT
-  //--------------------------------------------------
-
-  void r_adapt_mesh() { adapt_mesh_(); }
-  void p_adapt_mesh() { adapt_mesh_(); }
-
-  //  void r_adapt_called(CkReductionMsg * msg);
-  //  void q_adapt_called() { adapt_called_(); }
-
-  void adapt_called();
-
-  void adapt_mesh_();
-
-  void notify_neighbors(int level);
-  void p_get_neighbor_level (Index index_debug,
-			     int ic3[3], int if3[3],
-			     int level_now, int level_new);
-
-  /// Child sends restricted data to parent
-  void p_get_child_data(int ic3[3],
-			int na, char * array,
-			int nf, int * child_face_level);
-
-  /// Parent tells child to delete itself
-  void p_delete();
-
-  void q_adapt_next ();
-  void q_adapt_end ();
-
-  int determine_adapt();
-
-  const int & face_level (const int if3[3]) const
-  {  return face_level_[IF3(if3)];  }
-  const int & face_level_new (const int if3[3]) const
-  {  return face_level_new_[IF3(if3)];  }
-
-  const int & child_face_level (const int ic3[3], const int if3[3]) const
-  {
-    check_child_(ic3,"CommBlock::child_face_level()",__FILE__,__LINE__);
-    check_face_ (if3,"CommBlock::child_face_level()",__FILE__,__LINE__);
-    return child_face_level_[ICF3(ic3,if3)];  }
-  const int & child_face_level_new (const int ic3[3], const int if3[3]) const
-  {
-    check_child_(ic3,"CommBlock::child_face_level()",__FILE__,__LINE__);
-    check_face_ (if3,"CommBlock::child_face_level()",__FILE__,__LINE__);
-    return child_face_level_new_[ICF3(ic3,if3)];  }
-
-  void set_face_level (const int if3[3], int level)
-  {  face_level_[IF3(if3)] = level;  }
-  void set_face_level_new (const int if3[3], int level)
-  {
-#ifdef DEBUG_USE_MAX
-    face_level_new_[IF3(if3)] = std::max(face_level_new_[IF3(if3)],level);  
-#else
-    face_level_new_[IF3(if3)] = level;  
-#endif
-  }
-
-  void set_child_face_level (const int ic3[3], const int if3[3], int level)
-  {
-    check_child_(ic3,"CommBlock::set_child_face_level()",__FILE__,__LINE__);
-    check_face_ (if3,"CommBlock::set_child_face_level()",__FILE__,__LINE__);
-    child_face_level_[ICF3(ic3,if3)] = level;  
-  }
-  void set_child_face_level_new (const int ic3[3], const int if3[3], int level)
-  {
-    TRACE7("set_child_face_level_new child %d %d %d  face %d %d %d  level %d",
-	   ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2],level);
-    check_child_(ic3,"CommBlock::set_child_face_level()",__FILE__,__LINE__);
-    check_face_ (if3,"CommBlock::set_child_face_level()",__FILE__,__LINE__);
-#ifdef DEBUG_USE_MAX
-    child_face_level_new_[ICF3(ic3,if3)] = std::max(child_face_level_new_[ICF3(ic3,if3)],level);  
-#else
-    child_face_level_new_[ICF3(ic3,if3)] = level;
-#endif
-  }
-
-  void update_levels_ ()
-  {
-    face_level_ =       face_level_new_;
-    child_face_level_ = child_face_level_new_;
-  }
-
-  //--------------------------------------------------
-  // REFRESH
-  //--------------------------------------------------
-
-  /// neighbor synchronization
-  void p_sync(int phase, int count);
-
-  /// Refresh ghost zones and apply boundary conditions
-  void p_refresh_begin()
-  { refresh_begin(); }
-  void refresh_begin();
-
-  /// Exit the refresh phase after QD
-  void q_refresh_end () { refresh_end_(); }
-  void refresh_end_ ();
-
-  // /// send  ghost zones to given neighbor in same level
-  // void refresh_same (Index index,  int iface[3]);
-
-  // /// send ghost zones to coarse neighbor in given direction
-  // void refresh_coarse (Index index, int iface[3]);
-
-  // /// send ghost zones to fine neighbors in given direction
-  // void refresh_fine (Index index, int iface[3], int ichild[3]);
-
-  void refresh (int type_refresh, Index index, int if3[3], int ic3[3]);
-
-
-  /// Refresh a FieldFace in same, next-coarser, or next-finer level
-  void x_refresh(int n, char buffer[],  int type_refresh, 
-		 int if3[3], int ic3[3]) 
-  {
-    refresh_(n,buffer,type_refresh,if3,ic3);
-  }
-
-  /// Get restricted data from child when it is deleted
-  void x_refresh_child (int n, char buffer[],int ic3[3]);
-
-  //--------------------------------------------------
-
-  /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
-  void begin_stopping();
-  /// Entry function after begin_stopping() to call Simulation::r_stopping()
-  void r_stopping(CkReductionMsg * msg);
-
-
-  //==================================================
-
-  // void delete_child(Index index);
-  bool is_child (const Index & index) const;
-
-  //----------------------------------------------------------------------
-  // Big Three
-  //----------------------------------------------------------------------
+   ) throw();
 
   /// Destructor
   virtual ~CommBlock() throw();
-
-  //----------------------------------------------------------------------
 
   /// Copy constructor
   CommBlock(const CommBlock & block) throw ()
@@ -277,22 +67,99 @@ public: // interface
   /// @return    The target assigned object
   {  copy_(block);  return *this; }
 
-  /// Return the Block associated with this CommBlock
-  Block * block() throw() { return block_; };
-  const Block * block() const throw() { return block_; };
 
-  /// Return the child Block associated with this CommBlock
-  Block * child_block() throw() { return child_block_; };
-  const Block * child_block() const throw() { return child_block_; };
+  //----------------------------------------------------------------------
+  // CHARM
+  //----------------------------------------------------------------------
+
+  /// Initialize an empty CommBlock
+  CommBlock()  { };
+
+  /// Initialize a migrated CommBlock
+  CommBlock (CkMigrateMessage *m) : CBase_CommBlock(m) { };
+
+  /// CHARM pupper
+  void pup(PUP::er &p);
+
+  //----------------------------------------------------------------------
+  // ACCESS METHODS
+  //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
+  
+  /// Return the Block associated with this CommBlock
+  inline Block * block() throw()
+  { return block_; };
+  inline const Block * block() const throw()   
+  { return block_; };
+
+  /// Return the child Block associated with this CommBlock
+  inline Block * child_block() throw()   
+  { return child_block_; };
+  inline const Block * child_block() const throw()  
+  { return child_block_; };
 
   /// Return the index of the root block containing this block
-  
   inline void index_forest (int * ix, int * iy, int * iz) const throw ()
   { index_.array(ix,iy,iz); }
 
-  // void index_forest (int * ibx, int * iby = 0, int * ibz = 0) const throw();
+  /// Return the current cycle number
+  int cycle() const throw() 
+  { return cycle_; };
+
+  /// Return the current time
+  double time() const throw()   
+  { return time_; };
+
+  /// Return the level in the Hierarchy
+  int level() const throw() 
+  {  return index_.level(); };
+
+  /// Return the current timestep
+  double dt() const throw() 
+  { return dt_; };
+
+  /// Return the current stopping criteria
+  bool stop() const throw() 
+  { return stop_; };
+
+  /// Return whether this CommBlock is a leaf in the octree forest
+  bool is_leaf() const 
+  { return is_leaf_; }
+
+  /// Index of the CommBlock
+  const Index & index() const 
+  { return index_; }
+
+  const int & face_level (const int if3[3]) const
+  { return face_level_[IF3(if3)]; }
+
+  const int & face_level_new (const int if3[3]) const
+  { return face_level_new_[IF3(if3)]; }
+
+  const int & child_face_level (const int ic3[3], const int if3[3]) const
+  { return child_face_level_[ICF3(ic3,if3)]; }
+
+  const int & child_face_level_new (const int ic3[3], const int if3[3]) const
+  { return child_face_level_new_[ICF3(ic3,if3)]; }
+
+  void set_face_level (const int if3[3], int level)
+  { face_level_[IF3(if3)] = level; }
+
+  void set_face_level_new (const int if3[3], int level)
+  { face_level_new_[IF3(if3)] = level; }
+
+  void set_child_face_level (const int ic3[3], const int if3[3], int level)
+  { child_face_level_[ICF3(ic3,if3)] = level;  }
+
+  void set_child_face_level_new (const int ic3[3], const int if3[3], int level)
+  { child_face_level_new_[ICF3(ic3,if3)] = level; }
+
+  //----------------------------------------------------------------------
+  // GENERAL
+  //----------------------------------------------------------------------
+
+  Index neighbor_ (const int if3[3], Index * ind = 0) const;
 
   /// Return the name of the block
   std::string name () const throw();
@@ -308,25 +175,8 @@ public: // interface
 
   /// Return the index of this CommBlock in global coordinates for its level
   void index_global
-  ( int *ix, int *iy, int *iz,  
-    int *nx, int *ny, int *nz ) const;
+  ( int *ix, int *iy, int *iz,  int *nx, int *ny, int *nz ) const;
 
-  /// Return the current cycle number
-  int cycle() const throw() { return cycle_; };
-
-  /// Return the current time
-  double time() const throw() { return time_; };
-
-  /// Return the level in the Hierarchy
-  int level() const throw() 
-  {  return index_.level(); };
-
-  /// Return the current timestep
-  double dt() const throw() { return dt_; };
-
-  /// Return the current stopping criteria
-  bool stop() const throw() { return stop_; };
- 
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) const throw();
 
@@ -341,14 +191,151 @@ public: // interface
     is_leaf_ = value;
   }
 
-  /// Return whether this CommBlock is a leaf in the octree forest
-  bool is_leaf() const { return is_leaf_; }
+  void update_levels_ ()
+  {
+    face_level_ =       face_level_new_;
+    child_face_level_ = child_face_level_new_;
+  }
 
-public: // virtual functions
+  bool is_child_ (const Index & index) const
+  { 
+    for (size_t i=0; i<children_.size(); i++) {
+      if (children_[i] == index) return true;
+    }
+    return false;
+  }
+
+  /// Initialize child face levels given own face levels
+  void initialize_child_face_levels_();
+
+  //--------------------------------------------------
+  // COMPUTE
+  //--------------------------------------------------
+
+  /// Apply the numerical methods on the block
+  void p_compute_enter(int cycle, double time, double dt);
+
+  //--------------------------------------------------
+  // OUTPUT
+  //--------------------------------------------------
+
+  /// Contribute block data to ith output object in the simulation
+  void p_output_write (int index_output);
+
+  /// Contribute block data to the Initial input object
+  void p_output_read (int index_input = 0)
+  {  INCOMPLETE("CommBlock::p_output_read"); }
+
+  //--------------------------------------------------
+  // ADAPT
+  //--------------------------------------------------
+
+  void r_adapt_enter() 
+  {      adapt_enter_(); }
+  void p_adapt_enter() 
+  {      adapt_enter_(); }
+  void q_adapt_next ();
+  void q_adapt_exit ()  
+  {      adapt_exit_(); }
+
+  /// Parent tells child to delete itself
+  void p_adapt_delete();
+  void p_adapt_recv_neighbor_level 
+  (Index index_debug, int ic3[3], int if3[3], int level_now, int level_new);
+  void p_adapt_send_child_data
+  (int ic3[3],int na, char * array, int nf, int * child_face_level);
+
+  void adapt_send_neighbors_levels(int level);
+
+protected:
+  void adapt_enter_();
+  void adapt_next_ ();
+  void adapt_exit_();
+  void adapt_coarsen_();
+  void adapt_refine_();
+  void adapt_called_();
+  int adapt_compute_desired_level_(int level_maximum);
+  void adapt_delete_child_(Index index_child);
+public:
+
+  //--------------------------------------------------
+  // CONTROL AND SYNCHRONIZATION
+  //--------------------------------------------------
+
+  /// neighbor synchronization
+  void p_control_sync(int phase, int count) 
+  {      control_sync_(phase,count); }
+
+protected:
+  void control_sync_neighbor_(int phase);
+  void control_sync_(int phase, int count);
+  void control_call_phase_ (int phase);
+public:
+
+  //--------------------------------------------------
+  // REFRESH
+  //--------------------------------------------------
+
+  /// Refresh ghost zones and apply boundary conditions
+  void p_refresh_enter()  
+  {      refresh_enter_(); }
+
+  /// Exit the refresh phase after QD
+  void q_refresh_exit () 
+  {      refresh_exit_(); }
+
+  /// Refresh a FieldFace in same, next-coarser, or next-finer level
+  void x_refresh_face
+  (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]) 
+  {      refresh_face_(n,buffer,type_refresh,if3,ic3); }
+
+  /// Get restricted data from child when it is deleted
+  void x_refresh_child (int n, char buffer[],int ic3[3]);
+
+protected:
+  void refresh_enter_();
+  void refresh_exit_ ();
+  void refresh_face_
+  (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]);
+  void refresh_face (int type_refresh, Index index, int if3[3], int ic3[3]);
+public:
+
+  //--------------------------------------------------
+  // STOPPING
+  //--------------------------------------------------
+
+  /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
+  void stopping_enter_();
+  /// Entry method after begin_stopping() to call Simulation::r_stopping()
+  void r_stopping_compute_timestep(CkReductionMsg * msg);
+  void stopping_exit_();
+
+  //--------------------------------------------------
+  // PERFORMANCE
+  //--------------------------------------------------
+
+protected:
+  /// Start and stop measuring CommBlock-based performance regions
+  void performance_start_
+  (int index_region, std::string file="", int line=0);
+  void performance_stop_
+  (int index_region, std::string file="", int line=0);
+  void performance_switch_
+  (int index_region, std::string file="", int line=0);
+public:
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   /// Set state
-  inline void set_state (int cycle, double time, double dt)
-  { set_cycle(cycle); set_time(time); set_dt(dt); }
+  inline void set_state (int cycle, double time, double dt, bool stop)
+  { 
+    set_cycle(cycle);
+    set_time(time); 
+    set_dt(dt); 
+    set_stop(stop); 
+  }
+
+public: // virtual functions
 
   /// Set CommBlock's cycle
   virtual void set_cycle (int cycle) throw()
@@ -368,8 +355,7 @@ public: // virtual functions
 
   /// Initialize CommBlock
   virtual void initialize () throw()
-  {
-  }
+  {  }
 
   /// Return the local simulation object
   Simulation * simulation() const;
@@ -378,43 +364,6 @@ public: // virtual functions
 
 protected: // functions
 
-  void stopping_();
-
-  void refresh_(int n, char buffer[],  int type_refresh, 
-		int if3[3], int ic3[3]);
-  void adapt_next_ ();
-
-  /// call_phase_(phase) if not a leaf; 
-  void neighbor_sync_(int phase);
-  void adapt_end_();
-  void sync_(int phase, int count);
-  void call_phase_ (int phase);
-  void coarsen_();
-  void refine_();
-  void adapt_called_();
-
-  Index neighbor_ (const int if3[3], Index * ind = 0) const;
-
-  /// Return the CommBlock's desired refinement level based on
-  /// local refinement criteria
-  int desired_level_(int level_maximum);
-
-  /// Initialize child face levels given own face levels
-  void initialize_child_face_levels_();
-
-  /// Delete child after its data has been received
-  void delete_child_(Index index_child);
-
-  /// Determine the number of adapt steps (0, 1 or initial_max_level_)
-  void get_num_adapt_steps_();
-
-  /// Start and stop measuring CommBlock-based performance regions
-  void start_performance_(int index_region, 
-		   std::string file="", int line=0);
-  void stop_performance_(int index_region, 
-		   std::string file="", int line=0);
-  void switch_performance_(int index_region, 
-		   std::string file="", int line=0);
 
   /// Return the child adjacent to the given child in the direction of
   /// the given face
@@ -557,9 +506,9 @@ protected: // attributes
   /// Synchronization counter for ghost refresh
   Sync sync_coarsen_;
 
-  /// Synchronization counter for p_sync
-  int  count_sync_[PHASE_SYNC_SIZE]; // > phase_adapt_end
-  int  max_sync_[PHASE_SYNC_SIZE];   // > phase_adapt_end
+  /// Synchronization counter for p_control_!sync
+  int  count_sync_[PHASE_SYNC_SIZE];
+  int  max_sync_[PHASE_SYNC_SIZE];
 
   /// current level of neighbors along each face
   std::vector<int> face_level_;

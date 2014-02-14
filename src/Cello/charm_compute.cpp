@@ -45,27 +45,27 @@ void SimulationCharm::compute()
     if (hierarchy()->group_process()->is_root()) 
       
       // --------------------------------------------------
-      // ENTRY: #2 SimulationCharm::compute()-> CommBlock::p_compute()
+      // ENTRY: #2 SimulationCharm::compute()-> CommBlock::p_compute_enter()
       // ENTRY: Block Array if Simulation is_root()
       // --------------------------------------------------
-      hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
+      hierarchy()->block_array()->p_compute_enter(cycle_,time_,dt_);
       // --------------------------------------------------
   }
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_compute (int cycle, double time, double dt)
+void CommBlock::p_compute_enter (int cycle, double time, double dt)
 {
 // #ifdef CELLO_TRACE
-//   index_.print("BEGIN PHASE COMPUTE p_compute()",-1,2,false,simulation());
+//   index_.print("BEGIN PHASE COMPUTE p_compute_enter()",-1,2,false,simulation());
 // #endif
 
   // set_cycle(cycle);
   // set_time(time);
   // set_dt(dt);
 
-  TRACE3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
+  TRACE3 ("CommBlock::p_compute_enter() cycle %d time %f dt %f",cycle,time,dt);
 
 #ifdef CONFIG_USE_PROJECTIONS
   //  double time_start = CmiWallTimer();
@@ -74,7 +74,7 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   if (is_leaf_) {
 
 // #ifdef CELLO_TRACE
-//     index_.print("p_compute",-1,2,false,simulation());
+//     index_.print("p_compute_enter",-1,2,false,simulation());
 // #endif    
     FieldDescr * field_descr = simulation()->field_descr();
     int index_method = 0;
@@ -105,10 +105,10 @@ void CommBlock::p_compute (int cycle, double time, double dt)
   if (adapt_interval && ((cycle_ % adapt_interval) == 0)) {
     next_phase_ = phase_adapt;
   } else {
-    next_phase_ = phase_output;
+    next_phase_ = phase_stopping;
   }
 
-  refresh_begin();
+  refresh_enter_();
 }
 
 //----------------------------------------------------------------------

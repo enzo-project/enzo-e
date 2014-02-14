@@ -104,10 +104,10 @@ void Input::read_hierarchy
   if (hierarchy->group_process()->is_root())
 
     // --------------------------------------------------
-    // ENTRY: #1 Input::read_hierarchy()-> CommBlock::p_read()
+    // ENTRY: #1 Input::read_hierarchy()-> CommBlock::p_output_read()
     // ENTRY: Block array if Simulation is root
     // --------------------------------------------------
-    hierarchy->block_array()->p_read (index_charm_);
+    hierarchy->block_array()->p_output_read (index_charm_);
     // --------------------------------------------------
 
 }

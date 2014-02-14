@@ -75,7 +75,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_write (int index_output)
+void CommBlock::p_output_write (int index_output)
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 

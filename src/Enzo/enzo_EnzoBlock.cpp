@@ -710,16 +710,7 @@ void EnzoBlock::set_cycle (int cycle_start) throw ()
 
 void EnzoBlock::set_time (double time) throw ()
 {
-  TRACE2("%p EnzoBlock::set_time(%20.15g)",this,time);
   CommBlock::set_time (time);
-
-  //  Setting OldTime = Time_ leads to an error in Grid_ComputePressure.C:38
-  //  "requested time is outside available range"
-  //        Grid_ComputePressure.cpp:37   OldTime =     0.046079162508249283
-  //        Grid_ComputePressure.cpp:38      time =     0.046079158782958984
-  //        Grid_ComputePressure.cpp:39      Time =     0.046079158782958984
-  //
-  // (OldTime > time; error is about single-precision epsilon)
 
   if (! (Time_ == 0 || Time_ < time)) {
     index_.print("ERROR",-1,2,false,simulation());
@@ -730,9 +721,7 @@ void EnzoBlock::set_time (double time) throw ()
 	    Time_ == 0 || Time_ < time);
   }
 
-  //  WARNING("EnzoBlock::set_time","TEMPORARY");
   OldTime   = Time_;
-  //  OldTime   = time;
   Time_     = time;
 
 }
@@ -744,6 +733,13 @@ void EnzoBlock::set_dt (double dt_param) throw ()
   CommBlock::set_dt (dt_param);
 
   dt = dt_param;
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::set_stop (bool stop) throw ()
+{
+  CommBlock::set_stop (stop);
 }
 
 //----------------------------------------------------------------------

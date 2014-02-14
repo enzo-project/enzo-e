@@ -16,11 +16,10 @@ static char buffer[256];
 
 //----------------------------------------------------------------------
 
-// void CommBlock::p_refresh_begin() 
-void CommBlock::refresh_begin() 
+void CommBlock::refresh_enter_() 
 {
 
-  switch_performance_(perf_refresh,__FILE__,__LINE__);
+  performance_switch_(perf_refresh,__FILE__,__LINE__);
 
 // #ifdef CELLO_TRACE
 //   sprintf (buffer,"BEGIN PHASE REFRESH(%p)",this);
@@ -61,12 +60,13 @@ void CommBlock::refresh_begin()
 	int ip3[3];
 	parent_face_(ip3,if3,ic3);
 
-	refresh(refresh_coarse,index_neighbor.index_parent(),ip3,ic3);
+	refresh_face
+	  (refresh_coarse,index_neighbor.index_parent(),ip3,ic3);
 
       } else if (face_level(if3) == level) {    // SAME
 
 	int ic3[3] = {0,0,0};
-	refresh(refresh_same,index_neighbor,if3,ic3);
+	refresh_face (refresh_same,index_neighbor,if3,ic3);
 
       } else if (face_level(if3) == level+1) {  // FINE
 	    
@@ -84,7 +84,7 @@ void CommBlock::refresh_begin()
 	      Index index_nibling = 
 		index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
 		  
-	      refresh(refresh_fine,index_nibling, if3,ic3);
+	      refresh_face (refresh_fine,index_nibling, if3,ic3);
 	    }
 	  }
 	}
@@ -93,7 +93,7 @@ void CommBlock::refresh_begin()
 		 if3[0],if3[1],if3[2],level,face_level(if3),next_phase_);
 	index_.print(buffer,-1,2,false,simulation);
       
-	ERROR("CommBlock::refresh_begin()",
+	ERROR("CommBlock::refresh_enter_()",
 	      "Refresh error");
       }
 
@@ -103,15 +103,15 @@ void CommBlock::refresh_begin()
   if (refresh_type == "quiescence") {
 
     // --------------------------------------------------
-    // ENTRY: #1 CommBlock::refresh_begin()-> CommBlock::q_refresh_end()
+    // ENTRY: #1 CommBlock::refresh_enter_()-> CommBlock::q_refresh_exit()
     // ENTRY: quiescence if refresh_type == quiescence
     // --------------------------------------------------
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_exit(),
     			  thisProxy[thisIndex]));
     // --------------------------------------------------
   }  else if ((refresh_type == "counter")) {
 
-    neighbor_sync_(phase_sync_refresh);
+    control_sync_neighbor_(phase_sync_refresh);
 
   }
 
@@ -119,8 +119,11 @@ void CommBlock::refresh_begin()
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh ( int type_refresh, Index index_neighbor, 
-			  int iface[3], int ichild[3] )
+void CommBlock::refresh_face
+( int type_refresh,
+  Index index_neighbor,
+  int iface[3],
+  int ichild[3] )
 {
 
   int n; 
@@ -163,10 +166,10 @@ void CommBlock::refresh ( int type_refresh, Index index_neighbor,
 #endif  
 
   // --------------------------------------------------
-  // ENTRY: #2 CommBlock::refresh()-> CommBlock::x_refresh()
+  // ENTRY: #2 CommBlock::refresh_face()-> CommBlock::x_refresh_face()
   // ENTRY: neighbor
   // --------------------------------------------------
-  thisProxy[index_neighbor].x_refresh 
+  thisProxy[index_neighbor].x_refresh_face
     (n,array, type_refresh, jface, ichild);
   // --------------------------------------------------
 
@@ -176,8 +179,8 @@ void CommBlock::refresh ( int type_refresh, Index index_neighbor,
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_ (int n, char * buffer, int type_refresh,
-			  int iface[3], int ichild[3])
+void CommBlock::refresh_face_ (int n, char * buffer, int type_refresh,
+			       int iface[3], int ichild[3])
 {
   if (type_refresh == refresh_coarse) { // coarse
 
@@ -210,26 +213,38 @@ void CommBlock::refresh_ (int n, char * buffer, int type_refresh,
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_end_()
+void CommBlock::x_refresh_child 
+(
+ int    n, 
+ char * buffer, 
+ int    ic3[3]
+ )
 {
-  if      (next_phase_ == phase_output)  begin_stopping();
+  int  iface[3]  = {0,0,0};
+  bool lghost[3] = {true,true,true};
+  store_face_(n,buffer, iface, ic3, lghost, op_array_restrict);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::refresh_exit_()
+{
+  if      (next_phase_ == phase_stopping)  stopping_enter_();
   else if (next_phase_ == phase_adapt) {
 
-    //    adapt_mesh_();
-
   // --------------------------------------------------
-  // ENTRY: #3 CommBlock::refresh_end_() -> r_adapt_mesh()
+  // ENTRY: #3 CommBlock::refresh_exit_() -> r_adapt_mesh()
   // ENTRY: contribute
   // --------------------------------------------------
   CkCallback callback 
-    (CkIndex_CommBlock::r_adapt_mesh(), thisProxy);
+    (CkIndex_CommBlock::r_adapt_enter(), thisProxy);
   contribute(0,0,CkReduction::concat,callback);
   // --------------------------------------------------
     
 
 
   }
-  else ERROR1 ("CommBlock::q_refresh_end()",
+  else ERROR1 ("CommBlock::q_refresh_exit()",
 	       "Unknown next_phase %d",
 	       next_phase_);
 }

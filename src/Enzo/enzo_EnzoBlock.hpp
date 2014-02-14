@@ -301,6 +301,9 @@ public: // interface
   /// Set EnzoBlock's dt
   virtual void set_dt (double dt) throw();
 
+  /// Set EnzoBlock's stopping criteria
+  virtual void set_stop (bool stop) throw();
+
   /// Initialize EnzoBlock
   virtual void initialize () throw();
 

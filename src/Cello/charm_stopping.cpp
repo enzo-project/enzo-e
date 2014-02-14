@@ -24,9 +24,9 @@
 
 //----------------------------------------------------------------------
 
-void CommBlock::begin_stopping()
+void CommBlock::stopping_enter_()
 {
-  switch_performance_(perf_stopping,__FILE__,__LINE__);
+  performance_switch_(perf_stopping,__FILE__,__LINE__);
 
   TRACE1("CommBlock::stopping() %p",&thisProxy);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -80,16 +80,16 @@ void CommBlock::begin_stopping()
     min_reduce[1] = stop_block ? 1.0 : 0.0;
 
     // --------------------------------------------------
-    // ENTRY: #1 CommBlock::stopping()-> CommBlock::r_stopping()
+    // ENTRY: #1 CommBlock::stopping()-> CommBlock::r_stopping_compute_timestep()
     // ENTRY: contribute()
     // --------------------------------------------------
-    CkCallback callback (CkIndex_CommBlock::r_stopping(NULL), thisProxy);
+    CkCallback callback (CkIndex_CommBlock::r_stopping_compute_timestep(NULL), thisProxy);
     contribute(2*sizeof(double), min_reduce, CkReduction::min_double, callback);
     // --------------------------------------------------
 
   } else {
 
-    stopping_();
+    stopping_exit_();
 
   }
 
@@ -97,7 +97,7 @@ void CommBlock::begin_stopping()
 
 //----------------------------------------------------------------------
 
-void CommBlock::r_stopping(CkReductionMsg * msg)
+void CommBlock::r_stopping_compute_timestep(CkReductionMsg * msg)
 {
   double * min_reduce = (double * )msg->getData();
 
@@ -106,12 +106,12 @@ void CommBlock::r_stopping(CkReductionMsg * msg)
 
   delete msg;
 
-  stopping_();
+  stopping_exit_();
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::stopping_()
+void CommBlock::stopping_exit_()
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 

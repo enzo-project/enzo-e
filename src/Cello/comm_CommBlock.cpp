@@ -44,7 +44,7 @@ CommBlock::CommBlock
   level_count_(index.level()),
   adapt_step_(num_adapt_steps),
   adapt_(adapt_unknown),
-  next_phase_(phase_output),
+  next_phase_(phase_stopping),
   coarsened_(false),
   delete_(false),
   is_leaf_(true)
@@ -74,7 +74,7 @@ CommBlock::CommBlock
 
   // Update state
 
-  set_state (cycle,time,dt);
+  set_state (cycle,time,dt,stop_);
 
   // Perform any additional initialization for derived class 
 
@@ -165,10 +165,10 @@ CommBlock::CommBlock
   } else if (level > 0) {
 
     // --------------------------------------------------
-    // ENTRY: #1 CommBlock::CommBlock() -> CommBlock::q_adapt_end()
+    // ENTRY: #1 CommBlock::CommBlock() -> CommBlock::q_adapt_exit()
     // ENTRY: quiescence if level > 0
     // --------------------------------------------------
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_end(), 
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(), 
 			  thisProxy[thisIndex]));
     // --------------------------------------------------
   }
@@ -232,7 +232,9 @@ void CommBlock::apply_initial_() throw ()
 {
 
   TRACE("CommBlock::apply_initial_()");
-  switch_performance_(perf_initial,__FILE__,__LINE__);
+
+  performance_switch_(perf_initial,__FILE__,__LINE__);
+
   FieldDescr * field_descr = simulation()->field_descr();
 
   // Apply initial conditions
@@ -242,7 +244,7 @@ void CommBlock::apply_initial_() throw ()
   while (Initial * initial = problem->initial(index_initial_++)) {
     initial->enforce_block(this,field_descr, simulation()->hierarchy());
   }
-  //  stop_performance_(perf_initial);
+  //  performance_stop_(perf_initial);
 }
 
 //----------------------------------------------------------------------
@@ -287,6 +289,11 @@ CommBlock::~CommBlock() throw ()
   ((SimulationCharm *)simulation())->delete_block();
 
 }
+
+//----------------------------------------------------------------------
+
+Simulation * CommBlock::simulation() const
+{ return proxy_simulation.ckLocalBranch(); }
 
 //----------------------------------------------------------------------
 
@@ -447,16 +454,6 @@ void CommBlock::update_boundary_ ()
   if ( fzp && is_boundary[axis_z][face_upper] ) {
     boundary->enforce(field_descr,this,face_upper,axis_z);
   }
-}
-
-//----------------------------------------------------------------------
-
-bool CommBlock::is_child (const Index & index) const
-{ 
-  for (size_t i=0; i<children_.size(); i++) {
-    if (children_[i] == index) return true;
-  }
-  return false;
 }
 
 //----------------------------------------------------------------------
@@ -622,15 +619,24 @@ void CommBlock::is_on_boundary (bool is_boundary[3][2]) const throw()
 
 //----------------------------------------------------------------------
 
-Simulation * CommBlock::simulation() const
+Index CommBlock::neighbor_ 
+(
+ const int of3[3],
+ Index *   ind
+ ) const
 {
-  return proxy_simulation.ckLocalBranch();
-}
+  Index index = (ind != 0) ? (*ind) : index_;
 
+  int na3[3];
+  size_forest (&na3[0],&na3[1],&na3[2]);
+  const bool periodic  = simulation()->problem()->boundary()->is_periodic();
+  Index in = index.index_neighbor (of3[0],of3[1],of3[2],na3,periodic);
+  return in;
+}
 
 //----------------------------------------------------------------------
 
-void CommBlock::start_performance_(int index_region, 
+void CommBlock::performance_start_(int index_region, 
 		   std::string file, int line)
 {
   Performance * performance = simulation()->performance();
@@ -639,7 +645,7 @@ void CommBlock::start_performance_(int index_region,
 
 //----------------------------------------------------------------------
 
-void CommBlock::stop_performance_(int index_region, 
+void CommBlock::performance_stop_(int index_region, 
 		   std::string file, int line)
 {
   Performance * performance = simulation()->performance();
@@ -648,7 +654,7 @@ void CommBlock::stop_performance_(int index_region,
 
 //----------------------------------------------------------------------
 
-void CommBlock::switch_performance_(int index_region, 
+void CommBlock::performance_switch_(int index_region, 
 		   std::string file, int line)
 {
   Performance * performance = simulation()->performance();
