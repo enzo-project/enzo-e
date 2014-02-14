@@ -81,8 +81,9 @@ void CommBlock::adapt_called_()
 
   // --------------------------------------------------
   // ENTRY: #4 CommBlock::adapt_called_()-> CommBlock::q_adapt_next()
-  // ENTRY: quiescence
-  // ENTRY: adapt phase
+  // ENTRY: sync:  quiescence
+  // ENTRY: phase: adapt
+  // ENTRY: if:    true
   // --------------------------------------------------
   CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_next(), 
     			thisProxy[thisIndex]));
@@ -621,7 +622,7 @@ void CommBlock::adapt_coarsen_()
     // send child data to parent
 
     // --------------------------------------------------
-    // ENTRY: #14 CommBlock::coarsen_()-> CommBlock::p_adapt_send_child_data()
+    // ENTRY: #14 CommBlock::adapt_coarsen_()-> CommBlock::p_adapt_send_child_data()
     // ENTRY: parent if leaf() and level > 0
     // ENTRY: adapt phase
     // --------------------------------------------------

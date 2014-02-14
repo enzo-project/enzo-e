@@ -272,11 +272,13 @@ CommBlock::~CommBlock() throw ()
     FieldFace * field_face = 
       load_face_(&n,&array,iface,ichild,lghost,op_array_restrict);
 
+    const Index index_parent = index_.index_parent();
+
     // --------------------------------------------------
     // ENTRY: #2 CommBlock::~CommBlock()-> CommBlock::x_refresh_child()
     // ENTRY: parent if level > 0
     // --------------------------------------------------
-    thisProxy[index_.index_parent()].x_refresh_child(n,array,ichild);
+    thisProxy[index_parent].x_refresh_child(n,array,ichild);
     // --------------------------------------------------
 
     delete field_face;

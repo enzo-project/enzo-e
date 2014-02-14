@@ -25,10 +25,8 @@ void SimulationCharm::initialize() throw()
   // --------------------------------------------------
   CkCallback callback 
     (CkIndex_SimulationCharm::r_initialize_forest(), thisProxy);
-  // --------------------------------------------------
-
   contribute(0,0,CkReduction::concat,callback);
-
+  // --------------------------------------------------
 }
 
 //----------------------------------------------------------------------
