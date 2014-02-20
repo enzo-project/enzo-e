@@ -638,29 +638,26 @@ Index CommBlock::neighbor_
 
 //----------------------------------------------------------------------
 
-void CommBlock::performance_start_(int index_region, 
-		   std::string file, int line)
+void CommBlock::performance_start_
+(int index_region, std::string file, int line)
 {
-  Performance * performance = simulation()->performance();
-  performance->start_region(index_region,file,line);
+  simulation()->performance()->start_region(index_region,file,line);
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::performance_stop_(int index_region, 
-		   std::string file, int line)
+void CommBlock::performance_stop_
+(int index_region, std::string file, int line)
 {
-  Performance * performance = simulation()->performance();
-  performance->stop_region(index_region,file,line);
+  simulation()->performance()->stop_region(index_region,file,line);
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::performance_switch_(int index_region, 
-		   std::string file, int line)
+void CommBlock::performance_switch_
+(int index_region, std::string file, int line)
 {
-  Performance * performance = simulation()->performance();
-  performance->switch_region(index_region,file,line);
+  simulation()->performance()->switch_region(index_region,file,line);
 }
 
 //----------------------------------------------------------------------

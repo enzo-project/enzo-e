@@ -51,6 +51,9 @@ static char buffer [256];
 
 void CommBlock::adapt_enter_()
 {
+
+  performance_switch_ (perf_adapt,__FILE__,__LINE__);
+  
   set_leaf();
 
   const int rank = simulation()->dimension();

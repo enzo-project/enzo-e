@@ -99,8 +99,6 @@ void CommBlock::p_compute_enter (int cycle, double time, double dt)
 
   TRACE ("END   PHASE COMPUTE");
 
-  //  performance->stop_region(perf_compute);
-
   int adapt_interval = simulation()->config()->mesh_adapt_interval;
   if (adapt_interval && ((cycle_ % adapt_interval) == 0)) {
     next_phase_ = phase_adapt;
