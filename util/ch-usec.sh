@@ -22,5 +22,5 @@ usec $1 output
 usec $1 stopping
 
 cd perf
-ch-plot-usec.py
+$HOME/Cello/cello-src/util/ch-plot-usec.py
 

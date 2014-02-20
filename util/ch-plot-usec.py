@@ -31,7 +31,7 @@ plt.ylabel("Time (s)")
 for i in range(len(file)):
 
    f = loadtxt('usec-'+file[i]+'.data',dtype=int)
-   plt.plot(f[:,0],10e-6*f[:,1], label=file[i])
+   plt.plot(f[:,0],1e-6*f[:,1], label=file[i])
 
 plt.legend(loc="upper left")
 

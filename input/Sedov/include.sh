@@ -4,6 +4,7 @@
 #    P=%04d     number of processors
 #    T=[2a|3a]  type: 2D amr or unigrid
 #    H=["sdsc-gordon"|"sdsc-bw"]
+#    V=[0|1|2|3] (see log 2014-02-18)
 #
 #----------------------------------------------------------------------
 

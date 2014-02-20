@@ -87,6 +87,8 @@ void SimulationCharm::r_performance_reduce(CkReductionMsg * msg)
 
   long *      counters_long = (long * )msg->getData();
 
+  delete msg;
+
   for (int ir = 0; ir < nr; ir++) {
     for (int ic = 0; ic < nc; ic++) {
       int index_counter = ir+nr*ic;
@@ -105,8 +107,6 @@ void SimulationCharm::r_performance_reduce(CkReductionMsg * msg)
 
   monitor_->print("Performance","simulation num-blocks %d",
 		  counters_long[n-1]);
-
-  delete msg;
 
 }
 

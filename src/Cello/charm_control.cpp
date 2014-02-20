@@ -137,10 +137,10 @@ void CommBlock::control_sync_neighbor_(int phase)
 
 void CommBlock::control_call_phase_ (int phase)
 {
-    if (phase == phase_sync_adapt_called) adapt_called_() ;
-    if (phase == phase_sync_adapt_next)   adapt_next_() ;
-    if (phase == phase_sync_adapt_exit)   adapt_exit_() ;
-    if (phase == phase_sync_refresh)      refresh_exit_();
+  if (phase == phase_sync_adapt_called) adapt_called_() ;
+  if (phase == phase_sync_adapt_next)   adapt_next_() ;
+  if (phase == phase_sync_adapt_exit)   adapt_exit_() ;
+  if (phase == phase_sync_refresh)      refresh_exit_();
 }
 
 //======================================================================
