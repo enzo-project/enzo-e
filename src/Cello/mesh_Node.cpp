@@ -2,10 +2,7 @@
 
 /// @file     mesh_Node.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
-/// @brief    
-///
-/// 
+/// @date     2012-01-26
 
 #include "mesh.hpp"
 
@@ -15,8 +12,7 @@ Node::Node() throw ()
   : 
   have_data_(0),
   data_(0),
-  size_(0),
-  child_array_(0)
+  child_array_()
 {}
 
 //----------------------------------------------------------------------
@@ -39,9 +35,7 @@ void Node::pup (PUP::er &p)
     if (up) data_ = (void *) new CProxy_CommBlock;
     p | *((CProxy_CommBlock *)data_);
   }
-  p | size_;
-  if (up) child_array_ = new Node[size_];
-  PUParray(p,child_array_,size_);
+  p | child_array_;
 };
 
 //----------------------------------------------------------------------
@@ -54,9 +48,8 @@ Node::~Node() throw ()
 
 int Node::refine (int c)
 {
-  if (child_array_ == 0) {
-    size_ = c;
-    child_array_ = new Node [c];
+  if (child_array_.size() == 0) {
+    child_array_.resize(c);
   } else {
     ERROR ("Node::refine","Cannot refine a Node that has already been refined");
   }
@@ -68,13 +61,11 @@ int Node::refine (int c)
 int Node::coarsen (int c)
 {
   int count = 0;
-  if (child_array_ != 0) {
+  if (child_array_.size() != 0) {
     for (int i=0; i<c; i++) {
       count += child_array_[i].coarsen(c);
     }
-    delete [] child_array_;
-    size_ = 0;
-    child_array_ = 0;
+    child_array_.resize(0);
     count += c;
   }
   return count;
@@ -82,9 +73,9 @@ int Node::coarsen (int c)
 
 //----------------------------------------------------------------------
 
-Node * Node::child (int k) const
+Node * Node::child (int k)
 {
-  return (child_array_ != 0) ? &child_array_[k] : 0;
+  return (child_array_.size() != 0) ? &child_array_.at(k) : 0;
 }
 
 //======================================================================

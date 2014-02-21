@@ -43,11 +43,11 @@ public: // interface
   int coarsen (int num_children);
 
   /// return the kth child Node
-  Node * child (int k) const;
+  Node * child (int k);
 
   /// return whether the node is a leaf node
   bool is_leaf () const
-  { return (child_array_ == 0); }
+  { return (child_array_.size() == 0); }
 
 private: // functions
 
@@ -64,7 +64,7 @@ private: // attributes
   char size_; 
 
   /// Array of child nodes
-  Node * child_array_;
+  std::vector<Node> child_array_;
 
 };
 
