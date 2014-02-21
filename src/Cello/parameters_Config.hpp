@@ -69,6 +69,8 @@ public: // attributes
   // std::vector<std::string>   initial_value [MAX_FIELDS];
   int                        initial_max_level;
 
+  bool                       memory_active;
+
   int                        mesh_root_blocks[3];
   int                        mesh_root_rank;
   int                        mesh_root_size[3];

@@ -157,6 +157,9 @@ protected: // functions
   /// Initialize the Problem object
   void initialize_problem_ () throw();
 
+  /// Initialize the Memory object
+  void initialize_memory_ () throw();
+
   /// Initialize global simulation parameters
   void initialize_simulation_ () throw();
 

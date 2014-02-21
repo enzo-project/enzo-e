@@ -144,6 +144,7 @@ void Simulation::initialize() throw()
   parameters_->set_monitor(false);
 
   initialize_monitor_();
+  initialize_memory_();
   initialize_performance_();
   initialize_simulation_();
 
@@ -201,6 +202,14 @@ void Simulation::initialize_simulation_() throw()
   dt_ = 0;
 }
 
+//----------------------------------------------------------------------
+
+void Simulation::initialize_memory_() throw()
+{
+  Memory * memory = Memory::instance();
+  if (memory) memory->set_active(config_->memory_active);
+  
+}
 //----------------------------------------------------------------------
 
 void Simulation::initialize_performance_() throw()
@@ -435,8 +444,7 @@ void Simulation::monitor_output()
 
   performance_output ();
 
-  Memory * memory = Memory::instance();
-  memory->reset_high();
+  Memory::instance()->reset_high();
 
 }
 

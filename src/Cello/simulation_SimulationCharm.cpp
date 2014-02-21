@@ -89,12 +89,14 @@ void SimulationCharm::r_performance_reduce(CkReductionMsg * msg)
 
   delete msg;
 
+  int index_region_cycle = performance_->region_index("cycle");
+
   for (int ir = 0; ir < nr; ir++) {
     for (int ic = 0; ic < nc; ic++) {
       int index_counter = ir+nr*ic;
       bool do_print = 
 	(performance_->counter_type(ic) != counter_type_abs) ||
-	(ir == 0);
+	(ir == index_region_cycle);
 	
       if (do_print) {
 	monitor_->print("Performance","%s %s %ld",

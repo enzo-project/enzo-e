@@ -41,6 +41,8 @@ void Config::pup (PUP::er &p)
   //  PUParray(p,initial_value,MAX_FIELDS);
   p | initial_max_level;
 
+  p | memory_active;
+
   PUParray(p,mesh_root_blocks,3);
   p | mesh_root_rank;
   PUParray(p,mesh_root_size,3);
@@ -219,6 +221,12 @@ void Config::read(Parameters * parameters) throw()
   //  initial_name;
 
   //  initial_value
+
+  //--------------------------------------------------
+  // Memory
+  //--------------------------------------------------
+
+  memory_active = parameters->value_logical("Memory:active",true);
 
   //--------------------------------------------------
   // Mesh
