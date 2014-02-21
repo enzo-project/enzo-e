@@ -302,7 +302,12 @@ Simulation * CommBlock::simulation() const
 std::string CommBlock::name() const throw()
 {
   int dim = simulation()->dimension();
-  return std::string("Block-") + index_.bit_string(level(),dim);
+  int nb3[3] = {1,1,1};
+  simulation()->hierarchy()->blocking(nb3,nb3+1,nb3+2);
+  int nb  = std::max( std::max (nb3[0],nb3[1]),nb3[2]);
+  int bits = 0;
+  while (nb/=2) ++bits;
+  return std::string("Block-") + index_.bit_string(level(),dim,bits);
 }
 
 //----------------------------------------------------------------------

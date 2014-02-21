@@ -336,12 +336,14 @@ void Index::print (const char * msg,
     PARALLEL_PRINTF ("%d",bit?1:0);
   }
 
-#ifdef CELLO_DEBUG
-    fprintf (fp_debug,":");
-#endif
-    PARALLEL_PRINTF (":");
-
     for (int i=0; i<max_level; i++) {
+      if (i==0) {
+#ifdef CELLO_DEBUG
+	fprintf (fp_debug,":");
+#endif
+	PARALLEL_PRINTF (":");
+      }
+
       if (i < level) {
       int ic3[3];
       child (i+1, &ic3[0], &ic3[1], &ic3[2]);
@@ -409,10 +411,9 @@ void Index::write (int ip,
       fprintf (fp,"%d",bit?1:0);
     }
 
-    fprintf (fp,":");
-
     for (int level=0; level<max_level; level++) {
 
+      if (level == 0) fprintf (fp,":");
       int ic3[3];
       child (level+1, &ic3[0], &ic3[1], &ic3[2]);
       fprintf (fp,"%d",ic3[axis]);
@@ -439,7 +440,7 @@ int Index::num_bits_(int value) const
 
 //----------------------------------------------------------------------
 
-std::string Index::bit_string(int max_level,int rank) const
+std::string Index::bit_string(int max_level,int rank, int num_bits) const
 {
   const int level = this->level();
 
@@ -448,22 +449,22 @@ std::string Index::bit_string(int max_level,int rank) const
   std::string bits = "";
   const std::string separator = "_";
 
-  int nba = 0;
-  for (int axis=0; axis<rank; axis++) {
-    nba = std::max(nba,num_bits_(a_[axis].array));
-  }
+  if (num_bits == 0) {
+    for (int axis=0; axis<rank; axis++) {
+      num_bits = std::max (num_bits,num_bits_(a_[axis].array));
+    }
+  } else --num_bits;
 
   for (int axis=0; axis<rank; axis++) {
 
-    for (int i=nba; i>=0; i--) {
+    for (int i=num_bits; i>=0; i--) {
       int bit = (a_[axis].array & ( 1 << i));
       bits = bits + (bit?"1":"0");
     }
 
-    bits = bits + ":";
-
     for (int i=0; i<max_level; i++) {
 
+      if (i == 0) bits = bits + ":";
       if (i < level) {
 	int ic3[3];
 	child (i+1, &ic3[0], &ic3[1], &ic3[2]);

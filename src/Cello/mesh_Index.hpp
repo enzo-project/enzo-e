@@ -159,7 +159,7 @@ public:
 	      int max_level = -1,
 	      int rank = 3) const;
 
-  std::string bit_string (int max_level,int rank) const;
+  std::string bit_string (int max_level,int rank, int bits = 0) const;
 
 private: // functions
 
