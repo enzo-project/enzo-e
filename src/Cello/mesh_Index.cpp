@@ -446,6 +446,7 @@ std::string Index::bit_string(int max_level,int rank) const
   if (max_level == -1) max_level = this->level();
 
   std::string bits = "";
+  const std::string separator = "_";
 
   int nba = 0;
   for (int axis=0; axis<rank; axis++) {
@@ -468,9 +469,9 @@ std::string Index::bit_string(int max_level,int rank) const
 	child (i+1, &ic3[0], &ic3[1], &ic3[2]);
 	bits = bits + (ic3[axis]?"1":"0");
       } else 
-	bits = bits + " ";
+	bits = bits + separator;
     }
-    if (axis<rank-1) bits = bits + " ";
+    if (axis<rank-1) bits = bits + separator;
       
   }
   return bits;

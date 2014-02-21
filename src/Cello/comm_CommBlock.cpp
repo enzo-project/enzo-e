@@ -302,7 +302,7 @@ Simulation * CommBlock::simulation() const
 std::string CommBlock::name() const throw()
 {
   int dim = simulation()->dimension();
-  return std::string("Block ") + index_.bit_string(level(),dim);
+  return std::string("Block-") + index_.bit_string(level(),dim);
 }
 
 //----------------------------------------------------------------------

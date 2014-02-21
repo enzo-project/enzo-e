@@ -30,13 +30,13 @@ plt.ylabel("Time (s)")
 
 for i in range(len(file)):
 
-   f = loadtxt('usec-'+file[i]+'.data',dtype=int)
+   f = loadtxt('time-'+file[i]+'.data',dtype=int)
    plt.plot(f[:,0],1e-6*f[:,1], label=file[i])
 
 plt.legend(loc="upper left")
 
 plt.grid(True)
 
-print ("Writing 'usec.pdf'")
+print ("Writing 'time.pdf'")
 
-plt.savefig("usec.pdf", format='pdf')
+plt.savefig("time.pdf", format='pdf')
