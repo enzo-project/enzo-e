@@ -48,7 +48,6 @@ private:
 
 public: // interface
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -64,7 +63,6 @@ public: // interface
     // p |  group_active_;
 
   }
-#endif
 
   /// Return an instance of a Monitor object
   static Monitor * instance()

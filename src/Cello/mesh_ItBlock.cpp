@@ -24,8 +24,6 @@ ItBlock::~ItBlock ( ) throw ()
 
 CommBlock * ItBlock::operator++ () throw()
 {
-#ifdef CONFIG_USE_CHARM
-  //
   CommBlock * block;
   int nbx,nby,nbz;
   hierarchy_->root_size(&nbx,&nby,&nbz);
@@ -47,14 +45,6 @@ CommBlock * ItBlock::operator++ () throw()
   // assert: index1_ != 0 implies (block != NULL)
   return index1_ ? block : NULL;
 
-#else /* CONFIG_USE_CHARM */
-
-  index1_ ++;
-  size_t nb = hierarchy_->num_local_blocks();
-  if (index1_ > nb) index1_ = 0;
-  return index1_ ? hierarchy_->local_block(index1_ - 1) : NULL;
-
-#endif /* CONFIG_USE_CHARM */
 }
 
 //----------------------------------------------------------------------

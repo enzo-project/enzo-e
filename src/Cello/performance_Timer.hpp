@@ -26,7 +26,6 @@ public: // interface
   {
   }
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -49,7 +48,6 @@ public: // interface
     TRACE0;
     // tz_ only there for gettimeofday() calls: value is never used
   }
-#endif
 
   /// Start the timer
   void start() throw()

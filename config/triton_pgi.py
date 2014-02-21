@@ -7,14 +7,8 @@ is_arch_valid = 1
 flags_arch = '-Ktrap=fp -g -O3'
 flags_link = '-pgf90libs'
 
-cc['charm']   = 'pgcc'
-cc['mpi']     = 'mpicc'
-cc['serial']  = 'pgcc'
-cxx['mpi']    = 'mpicxx'
-cxx['serial'] = 'pgCC'
-f90['charm']  = 'pgf90'
-f90['mpi']    = 'pgf90'
-f90['serial'] = 'pgf90'
+cc   = 'pgcc'
+f90  = 'pgf90'
 
 libpath_fortran = ''
 libs_fortran    = []

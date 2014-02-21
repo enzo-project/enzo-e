@@ -8,10 +8,7 @@
 #ifndef METHOD_INITIAL_HPP
 #define METHOD_INITIAL_HPP
 
-class Initial
-#ifdef CONFIG_USE_CHARM
-  : public PUP::able 
-#endif
+class Initial : public PUP::able 
 {
 
   /// @class    Initial
@@ -32,8 +29,6 @@ public: // interface
   virtual ~Initial() throw()
   {} ;
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(Initial);
 
@@ -43,8 +38,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Initial time
   double time() const throw() { return time_; }

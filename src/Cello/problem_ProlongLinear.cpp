@@ -72,7 +72,6 @@ int ProlongLinear::apply_
   const double c1[4] = { 5.0*0.25, 3.0*0.25, 1.0*0.25, -1.0*0.25};
   const double c2[4] = {-1.0*0.25, 1.0*0.25, 3.0*0.25,  5.0*0.25};
 
-
   int rank = (nd3_f[2] > 1) ? 3 : ( (nd3_f[1] > 1) ? 2 : 1 );
 
   for (int i=0; i<rank; i++) {
@@ -114,12 +113,10 @@ int ProlongLinear::apply_
 
   } else if (n3_f[2] == 1) {
 
-    int ixmin=100,ixmax=-100,iymin=100,iymax=-100;
     for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
       int ic_x = ix0/2;
       for (int iy0=0; iy0<n3_f[1]; iy0+=4) {
 	int ic_y = iy0/2;
-
 	for (int ix=ix0; ix<ix0+4; ix++) {
 	  int icx = ix-ix0;
 	  int if_x = ix;

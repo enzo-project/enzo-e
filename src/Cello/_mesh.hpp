@@ -13,9 +13,16 @@
 
 enum adapt_type {
   adapt_unknown,
+  adapt_coarsen,
   adapt_same,
-  adapt_refine,
-  adapt_coarsen
+  adapt_refine
+};
+
+enum refresh_type {
+  refresh_unknown,
+  refresh_coarse,
+  refresh_same,
+  refresh_fine
 };
 
 //----------------------------------------------------------------------
@@ -28,9 +35,7 @@ enum adapt_type {
 #include <vector>
 #include <memory>
 
-#ifdef CONFIG_USE_CHARM
-#  include "pup_stl.h"
-#endif
+#include "pup_stl.h"
 
 //----------------------------------------------------------------------
 // Component class includes
@@ -61,6 +66,7 @@ class Tree;
 #include "mesh_RefineSlope.hpp"
 #include "mesh_RefineMass.hpp"
 #include "mesh_ItFace.hpp"
+#include "mesh_ItChild.hpp"
 
 #endif /* _MESH_HPP */
 

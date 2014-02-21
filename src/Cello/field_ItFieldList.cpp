@@ -10,8 +10,6 @@
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void ItFieldList::pup (PUP::er &p)
 {
 
@@ -23,5 +21,3 @@ void ItFieldList::pup (PUP::er &p)
   p | values_;
 
 }
-
-#endif

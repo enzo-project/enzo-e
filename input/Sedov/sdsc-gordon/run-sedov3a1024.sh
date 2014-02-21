@@ -12,5 +12,6 @@
 
 P=1024
 T=3a
+H="sdsc-gordon"
 
 source $HOME/Cello/cello-src/input/Sedov/include.sh

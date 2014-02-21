@@ -27,7 +27,7 @@ public: // interface
   virtual ~ReduceCharm() throw()
   { /* EMPTY */ };
 
-#ifdef CONFIG_USE_CHARM
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -36,7 +36,6 @@ public: // interface
     // NOTE: change this function whenever attributes change
     // this function deliberately empty
   }
-#endif
 
   /// Local reduction of the given value
   virtual int reduce_int

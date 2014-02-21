@@ -7,14 +7,8 @@ is_arch_valid = 1
 flags_arch = '-g'
 flags_link  = ''
 
-cc['charm']   = 'icc'
-cc['mpi']     = 'mpicc'
-cc['serial']  = 'icc'
-cxx['mpi']    = 'mpicxx'
-cxx['serial'] = 'icpc'
-f90['charm']  = 'ifort'
-f90['mpi']    = 'ifort'
-f90['serial'] = 'ifort'
+cc   = 'icc'
+f90  = 'ifort'
 
 libpath_fortran = ''
 libs_fortran    = ['imf','ifcore','ifport','stdc++']

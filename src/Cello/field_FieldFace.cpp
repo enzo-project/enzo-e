@@ -90,7 +90,6 @@ void FieldFace::copy_(const FieldFace & field_face)
 }
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
 void FieldFace::pup (PUP::er &p)
 {
 
@@ -111,7 +110,7 @@ void FieldFace::pup (PUP::er &p)
   p | *restrict_;  // PUPable
   p | *prolong_;  // PUPable
 }
-#endif
+
 //======================================================================
 
 void FieldFace::load ( int * n, char ** array) throw()

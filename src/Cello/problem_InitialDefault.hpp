@@ -28,16 +28,12 @@ public: // interface
   /// Destructor
   virtual ~InitialDefault() throw();
 
-#ifdef CONFIG_USE_CHARM
-
   PUPable_decl(InitialDefault);
 
   InitialDefault(CkMigrateMessage *m) : Initial (m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Read initialization values from Initial group in parameter file
 

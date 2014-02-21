@@ -39,7 +39,6 @@ public: // interface
   /// Empty constructor
   Block() { }
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -56,8 +55,6 @@ public: // interface
     PUParray(p,upper_,3);
     // NOTE: change this function whenever attributes change
   }
-#endif
-  
 
   //----------------------------------------------------------------------
 
@@ -113,11 +110,9 @@ private: // attributes
   std::vector<FieldBlock *> field_block_;
 
   /// Lower extent of the box associated with the block [computable]
-  /// B
   double lower_[3];
 
   /// Upper extent of the box associated with the block [computable]
-  /// B
   double upper_[3];
 
   // NOTE: change pup() function whenever attributes change

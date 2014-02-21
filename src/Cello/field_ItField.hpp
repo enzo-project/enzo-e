@@ -9,10 +9,7 @@
 #ifndef FIELD_IT_FIELD_HPP
 #define FIELD_IT_FIELD_HPP
 
-class ItField 
-#ifdef CONFIG_USE_CHARM
-  : public PUP::able 
-#endif
+class ItField : public PUP::able 
 {
 
   /// @class    ItField
@@ -29,9 +26,6 @@ public: // interface
   virtual ~ItField () throw()
   { }
 
-
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_abstract(ItField);
 
@@ -40,8 +34,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) { PUP::able::pup(p); };
-
-#endif
 
   /// Go to the first value
   virtual void first () throw() = 0;

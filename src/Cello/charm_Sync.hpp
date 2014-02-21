@@ -48,22 +48,30 @@ class Sync {
   {}
 
   /// CHARM++ pack / unpack
-#ifdef CONFIG_USE_CHARM
   void pup(PUP::er &p)
   {
     TRACEPUP;
     p | index_stop_;
     p | index_curr_;
   }
-#endif
 
   /// Increment counter and return whether the CHARM++ parallel "sync" is done.
-  inline bool done (int index = 1) throw()
+  inline bool next (int index = 1) throw()
   {
     if (index_stop_ > 0) {
-      index_curr_ = (index_stop_ + index_curr_ - index) % index_stop_;  
+      index_curr_ = (index_stop_ + (index_curr_-1) + index) % index_stop_ + 1;  
     }
-    return index_curr_ == 0;
+    if (index_curr_ == index_stop_) {
+      index_curr_ = 0;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  inline bool is_done () const throw()
+  {
+    return (index_curr_ == index_stop_);
   }
 
   inline int operator = (int value) { index_stop_ = value; return index_stop_; }
@@ -74,10 +82,15 @@ class Sync {
 
   /// Return the current CHARM++ parallel "sync" index
   inline int index() const throw() { return index_curr_; }
+  /// Set the current index
+  void set_index(int value) { index_curr_ = value; }
+  void add_index(int value) { index_curr_ += value; }
   /// Return the upper-limit on the CHARM++ parallel "sync"
   inline int stop() const throw()  { return index_stop_; }
   /// Access to the upper-limit on the CHARM++ parallel "sync"
-  inline int & stop () throw ()    { return index_stop_; }
+  inline void set_stop (int stop) throw ()    { index_stop_ = stop; }
+  inline void add_stop (int inc = 1) throw () { index_stop_ += inc; }
+  inline void clear () throw () { index_curr_ = 0; }
 
 private:
 

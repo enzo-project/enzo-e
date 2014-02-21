@@ -9,10 +9,7 @@
 #ifndef MESH_REFINE_HPP
 #define MESH_REFINE_HPP
 
-class Refine 
-#ifdef CONFIG_USE_CHARM
-  : public PUP::able 
-#endif
+class Refine : public PUP::able 
 {
 
   /// @class    Refine
@@ -24,7 +21,6 @@ public: // interface
   /// Constructor
   Refine() throw() {};
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ PUP::able declaration
   PUPable_decl(Refine);
 
@@ -38,7 +34,6 @@ public: // interface
     PUP::able::pup(p);
     // NOTE: change this function whenever attributes change
   }
-#endif
   
   /// Evaluate the refinement criteria, updating the refinement field
   virtual int apply (CommBlock * comm_block,

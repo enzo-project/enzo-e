@@ -44,8 +44,6 @@ EnzoInitialSedovArray3::EnzoInitialSedovArray3
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void EnzoInitialSedovArray3::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
@@ -62,7 +60,6 @@ void EnzoInitialSedovArray3::pup (PUP::er &p)
   p | hydro_;
   
 }
-#endif
 
 //----------------------------------------------------------------------
 void EnzoInitialSedovArray3::enforce_block

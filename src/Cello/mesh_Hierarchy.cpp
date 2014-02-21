@@ -15,29 +15,27 @@
 
 Hierarchy::Hierarchy 
 (
-#ifndef CONFIG_USE_CHARM
- Simulation * simulation,
-#endif
  const Factory * factory,
  int dimension, int refinement,
  int process_first, int process_last_plus
  ) throw ()
   :
-#ifndef CONFIG_USE_CHARM
-  simulation_(simulation),
-#endif
   factory_((Factory *)factory),
   dimension_(dimension),
   refinement_(refinement),
+  num_blocks_(0),
+  block_array_(NULL),
+  block_exists_(false),
+  block_sync_(),
   group_process_(GroupProcess::create(process_first,process_last_plus)),
   layout_(0)
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
   for (int i=0; i<3; i++) {
+    root_size_[i] = 1;
     lower_[i] = 0.0;
     upper_[i] = 1.0;
-    root_size_[i] = 1;
     blocking_[i] = 0;
   }
 }
@@ -46,25 +44,12 @@ Hierarchy::Hierarchy
 
 Hierarchy::~Hierarchy() throw()
 {
-# ifdef CONFIG_USE_CHARM
-
   deallocate_blocks();
   delete group_process_; group_process_ = 0;
-
-# else
-
-  for (size_t i=0; i<block_.size(); i++) {
-    delete block_[i];
-    block_[i] = 0;
-  }
-
-# endif
 }
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-  /// CHARM++ Pack / Unpack function
 void Hierarchy::pup (PUP::er &p)
 {
     
@@ -73,12 +58,22 @@ void Hierarchy::pup (PUP::er &p)
 
   bool up = p.isUnpacking();
 
+  if (up) factory_ = new Factory;
   p | *factory_;
   p | dimension_;
   p | refinement_;
   p | num_blocks_;
-  if (p.isUnpacking()) block_array_ = new CProxy_CommBlock;
-  p | *block_array_;
+
+  // block_array_ is NULL on non-root processes
+  bool allocated=(block_array_ != NULL);
+  p|allocated;
+  if (allocated) {
+    if (up) block_array_=new CProxy_CommBlock;
+    p|*block_array_;
+  } else {
+    block_array_ = NULL;
+  }
+
   p | block_exists_;
   p | block_sync_;
   PUParray(p,root_size_,3);
@@ -86,11 +81,11 @@ void Hierarchy::pup (PUP::er &p)
   PUParray(p,upper_,3);
 
   if (up) group_process_ = GroupProcess::create();
+  if (up) layout_ = new Layout;
   p | *layout_;
   PUParray(p,blocking_,3);
 
 }
-#endif
 
 //----------------------------------------------------------------------
 
@@ -197,22 +192,12 @@ size_t Hierarchy::num_blocks(int * nbx,
 void Hierarchy::deallocate_blocks() throw()
 {
 
-#ifdef CONFIG_USE_CHARM
-
   if (block_exists_) {
     block_array_->ckDestroy();
     delete block_array_; block_array_ = 0;
     block_exists_ = false;
   }
 
-#else
-
-  for (size_t i=0; i<block_.size(); i++) {
-    delete block_[i];
-    block_[i] = 0;
-  }
-
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -234,157 +219,51 @@ const Layout * Hierarchy::layout () const throw()
 void Hierarchy::create_forest
 (
  FieldDescr   * field_descr,
- bool allocate_blocks,
  bool allocate_data,
  bool testing,
  int process_first, int process_last_plus) throw()
 {
 
-  if (allocate_blocks) {
-#ifdef CONFIG_USE_CHARM
-    allocate_array_(allocate_data,testing);
-#else  /* CONFIG_USE_CHARM */
-    allocate_array_(allocate_data,testing,field_descr);
-#endif  /* CONFIG_USE_CHARM */
-  }
-}
 
-//----------------------------------------------------------------------
+    // Get number of blocks in the forest
 
-#ifdef CONFIG_USE_CHARM
-#else  /* CONFIG_USE_CHARM */
-size_t Hierarchy::num_local_blocks() const  throw()
-{
-  int rank = group_process_->rank();
-  return layout_->local_count(rank);
-}
-#endif  /* CONFIG_USE_CHARM */
+    int nbx,nby,nbz;
+    layout_->block_count (&nbx, &nby, &nbz);
 
-//----------------------------------------------------------------------
+    // determine block size
+    int mbx = root_size_[0] / nbx;
+    int mby = root_size_[1] / nby;
+    int mbz = root_size_[2] / nbz;
 
-#ifdef CONFIG_USE_CHARM
-#else  /* CONFIG_USE_CHARM */
-CommBlock * Hierarchy::local_block(size_t i) const throw()
-{
-  return (i < block_.size()) ? block_[i] : 0;
+    // Check that blocks evenly subdivide forest
+    if (! ((nbx*mbx == root_size_[0]) &&
+	   (nby*mby == root_size_[1]) &&
+	   (nbz*mbz == root_size_[2]))) {
 
-}
-#endif  /* CONFIG_USE_CHARM */
-
-//----------------------------------------------------------------------
-
-void Hierarchy::allocate_array_
-(
- bool allocate_data,
- bool testing,
- const FieldDescr * field_descr
-) throw()
-  // NOTE: field_descr only needed for MPI; may be null for CHARM++
-{
-
-#ifdef CONFIG_USE_CHARM
-
-
-#else /* CONFIG_USE_CHARM */
-
-  // determine local block count nb
-  int nb = num_local_blocks();
-
-  // create local blocks
-  block_.resize(nb);
-
-#endif /* CONFIG_USE_CHARM */
-
-  // Get number of blocks in the forest
-
-  int nbx,nby,nbz;
-  layout_->block_count (&nbx, &nby, &nbz);
-
-  // determine block size
-  int mbx = root_size_[0] / nbx;
-  int mby = root_size_[1] / nby;
-  int mbz = root_size_[2] / nbz;
-
-  // Check that blocks evenly subdivide forest
-  if (! ((nbx*mbx == root_size_[0]) &&
-	 (nby*mby == root_size_[1]) &&
-	 (nbz*mbz == root_size_[2]))) {
-
-    ERROR6("Forest::allocate_array_()",  
-	   "CommBlocks must evenly subdivide forest: "
-	   "forest size = (%d %d %d)  block count = (%d %d %d)",
-	   root_size_[0],root_size_[1],root_size_[2],
-	   nbx,nby,nbz);
+      ERROR6("Forest::allocate_array_()",  
+	     "CommBlocks must evenly subdivide forest: "
+	     "forest size = (%d %d %d)  block count = (%d %d %d)",
+	     root_size_[0],root_size_[1],root_size_[2],
+	     nbx,nby,nbz);
       
-  }
+    }
 
-  // CREATE AND INITIALIZE NEW DATA BLOCKS
+    // CREATE AND INITIALIZE NEW DATA BLOCKS
 
-  int num_field_blocks = 1;
+    int num_field_blocks = 1;
 
-#ifdef CONFIG_USE_CHARM
+    TRACE("Allocating block_array_");
 
-  TRACE("Allocating block_array_");
+    block_array_ = new CProxy_CommBlock;
 
-  block_array_ = new CProxy_CommBlock;
-
-  (*block_array_) = factory_->create_block_array
-    (nbx,nby,nbz,
-     mbx,mby,mbz,
-     num_field_blocks,
-     allocate_data,
-     testing);
-    
-  block_exists_ = allocate_data;
-  block_sync_.stop() = nbx*nby*nbz;
-
-#else /* CONFIG_USE_CHARM */
-
-  int ip = group_process_->rank();
-
-  for (int ib=0; ib<nb; ib++) {
-
-    // Get index of block ib in the forest
-
-    int ibx,iby,ibz;
-
-    layout_->block_indices (ip,ib, &ibx, &iby, &ibz);
-
-    // create a new data block
-
-    int level;
-
-    Index index (ibx,iby,ibz);
-
-    int count_adapt;
-    bool initial;
-    int narray = 0;
-    char * array = 0;
-    int op_array = op_array_copy;
-    int cycle = 0;
-    double time = 0.0;
-    double dt = 0.0;
-    int num_face_level = 0;
-    int * face_level = 0;
-
-    CommBlock * comm_block = factory_->create_block 
-      (
-       simulation_,
-       index,
+    (*block_array_) = factory_->create_block_array
+      (nbx,nby,nbz,
        mbx,mby,mbz,
        num_field_blocks,
-       count_adapt = 0,
-       initial = true,
-       cycle, time, dt,
-       narray, array, op_array,
-       num_face_level, face_level,
        testing);
+    
+    block_exists_ = allocate_data;
+    block_sync_.set_stop(nbx*nby*nbz);
 
-    // Store the data block in the block array
-    block_[ib] = comm_block;
-
-  }
-#endif /* CONFIG_USE_CHARM */
 }
-
 

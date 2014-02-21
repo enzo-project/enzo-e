@@ -1,35 +1,13 @@
-# Problem: 2D Implosion problem
-# Author:  James Bordner (jobordner@ucsd.edu)
-
-
 # Default: 64^3 domain, 16^3 block sizes, with sedov blast in each block
 
 include "sedov-amr.incl"
-
-Mesh    {  max_level = 5; }
-Initial {  max_level = 5; }
-
+include "sedov-max_level.incl"
 include "sedov-output.incl"
+include "sedov-rank.incl"
 
-# 3D PROBLEM
-
- include "sedov_array_3.incl"
- Domain { upper = [1.0,1.0,0.5]; }
- Mesh { root_size      = [64,64,32]; }
- Mesh { root_blocks    = [4,4,2]; }
- Enzo { sedov { array = [4,4,2]; } }
- Output { file_groups = []; }
 
 # 2D PROBLEM
 
-# include "sedov_array_2.incl"
-# Mesh { root_size      = [64,64]; }
-# Mesh { root_blocks    = [2,2]; }
-# Enzo { sedov { array = [2,2]; } }
-# Output { file_groups = ["de","te","mesh"]; }
-# Output { file_groups = ["de","te","mesh","data"]; }
-#Output { file_groups = ["mesh"]; }
-# Output{  mesh { image_mesh_color = "process"; }}
 
 Enzo { sedov { radius_relative = 0.03; } }
 

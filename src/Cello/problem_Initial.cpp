@@ -13,13 +13,9 @@
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
 extern CProxy_SimulationCharm  proxy_simulation;
-#endif
 
 //----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
 
 void Initial::pup (PUP::er &p)
 {
@@ -34,7 +30,6 @@ void Initial::pup (PUP::er &p)
 
 }
 
-#endif
 
 //----------------------------------------------------------------------
 
@@ -52,21 +47,6 @@ void Initial::enforce_hierarchy_
  const FieldDescr * field_descr
  ) throw()
 {
-#ifdef CONFIG_USE_CHARM
-
-  // if (hierarchy->group_process()->is_root()) {
-  //   hierarchy->block_array()->p_initial();
-  // }
-
-#else /* CONFIG_USE_CHARM */
-
-  ItBlock it_block (hierarchy);
-  while (CommBlock * block = ++it_block) {
-    // NO OFFSET: ASSUMES ROOT PATCH
-    enforce_block (block, field_descr, hierarchy);
-  }
-
-#endif /* CONFIG_USE_CHARM */
 
 }
 

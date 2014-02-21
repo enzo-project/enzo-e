@@ -27,7 +27,6 @@ protected: //
 
 public: // interface
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -36,7 +35,6 @@ public: // interface
     p | count_;
     p | value_;
   }
-#endif
 
   /// Static factory for creating ItReduce objects
   static ItReduce * create (reduce_enum reduce);

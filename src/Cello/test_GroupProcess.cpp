@@ -123,12 +123,7 @@ PARALLEL_MAIN_BEGIN
       group_process->send_end(handle_send);
       group_process->recv_end(handle_recv);
 
-#ifdef CONFIG_USE_CHARM
       unit_assert(unit_incomplete);
-#else
-      unit_assert(test_array(array_source,n+1,rank,rank));
-      unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
-#endif
 
     }
   }
@@ -164,38 +159,7 @@ PARALLEL_MAIN_BEGIN
       unit_assert(unit_incomplete);
 #endif
 
-#ifndef CONFIG_USE_CHARM
-
-      int rank_source = (rank+1)%size;
-      int rank_dest   = (rank-1+size)%size;
-      int array_size  = n*sizeof(double);
-
-      void * handle_send = 
-	group_process->send_begin (rank_source, array_source, array_size);
-      void * handle_recv = 
-	group_process->recv_begin (rank_dest,   array_dest,   array_size);
-
-      int counter = 0;
-      while ( ! group_process->test(handle_recv) ||
-	      ! group_process->test(handle_send) ) {
-	// spinwait
-	++ counter;
-      }
-
-      // assert recv completed and send completed
-
-      group_process->send_end(handle_send);
-      group_process->recv_end(handle_recv);
-
-      unit_func(blocking_send ? "send [blocking]" : "send [nonblocking]");
-
-      unit_assert(test_array(array_source,n+1,rank,rank));
-
-      unit_func(blocking_recv ? "recv [blocking]" : "recv [nonblocking]");
-      unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
-#else
       unit_assert(unit_incomplete);
-#endif
 
     }
   }

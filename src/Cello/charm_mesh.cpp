@@ -3,6 +3,4 @@
 
 #include "charm_mesh.hpp"
 
-#ifdef CONFIG_USE_CHARM
-#  include "mesh.def.h"
-#endif
+#include "mesh.def.h"

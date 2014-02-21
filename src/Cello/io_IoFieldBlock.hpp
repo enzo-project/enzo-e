@@ -26,11 +26,8 @@ public: // interface
   virtual ~IoFieldBlock() throw()
   {}
 
-
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-#endif
 
   /// Set FieldIndex
   void set_field_index (int field_index) throw()

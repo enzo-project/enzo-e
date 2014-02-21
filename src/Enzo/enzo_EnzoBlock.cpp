@@ -308,7 +308,6 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   DomainRightEdge[2] = enzo_config->domain_upper[2];
 
   CourantSafetyNumber = enzo_config->field_courant;
-  TRACE1("Courant = %f",EnzoBlock::CourantSafetyNumber);
 
   double time  = enzo_config->initial_time;
 
@@ -320,14 +319,10 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
 EnzoBlock::EnzoBlock
 (
-#ifndef CONFIG_USE_CHARM
- Simulation * simulation,
-#endif
  Index index,
  int nx, int ny, int nz,
  int num_field_blocks,
  int count_adapt,
- bool initial,
  int cycle, double time, double dt,
  int narray, char * array, int op_array,
  int num_face_level, int * face_level,
@@ -335,14 +330,10 @@ EnzoBlock::EnzoBlock
 ) throw()
   : CommBlock 
     (
-#ifndef CONFIG_USE_CHARM
-     simulation,
-#endif
      index,
      nx,ny,nz,
      num_field_blocks,
      count_adapt,
-     initial,
      cycle, time, dt,
      narray,  array, op_array,
      num_face_level, face_level,
@@ -353,8 +344,6 @@ EnzoBlock::EnzoBlock
     dt(dt),
     SubgridFluxes(0)
 {
-  int mx,my,mz;
-  index.array(&mx,&my,&mz);
   initialize_enzo_();
   initialize();
 }
@@ -381,10 +370,91 @@ void EnzoBlock::initialize_enzo_()
     OldBaryonField[j] = 0;
   }
 }
+
 //----------------------------------------------------------------------
 
 EnzoBlock::~EnzoBlock() throw ()
 {
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::pup(PUP::er &p)
+{ 
+
+  TRACEPUP;
+  TRACE ("BEGIN EnzoBlock::pup()");
+
+  CommBlock::pup(p);
+
+
+  p | Time_;
+  p | CycleNumber;
+  p | OldTime;
+  p | dt;
+
+  WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
+  WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
+
+  PUParray(p,GridLeftEdge,MAX_DIMENSION); 
+  PUParray(p,GridDimension,MAX_DIMENSION); 
+  PUParray(p,GridStartIndex,MAX_DIMENSION); 
+  PUParray(p,GridEndIndex,MAX_DIMENSION); 
+  PUParray(p,CellWidth,MAX_DIMENSION);
+
+  if (p.isUnpacking()) {
+    for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
+      BaryonField[field] = (enzo_float *)block_->field_block(0)->field_values(field);
+    }
+  }
+
+  WARNING("EnzoBlock::pup()", "skipping OldBaryonField[] [not used]");
+
+  if (index_.is_root()) {
+    // static EnzoBlock variables
+    p | BoundaryRank;
+    PUParray(p,BoundaryDimension,MAX_DIMENSION);
+    PUParray(p,BoundaryFieldType,MAX_NUMBER_OF_BARYON_FIELDS);
+    //    bc_enum *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
+    //    enzo_float *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2]; 
+    p | ComovingCoordinates;
+    p | UseMinimumPressureSupport;
+    p | MinimumPressureSupportParameter;
+    p | ComovingBoxSize;
+    p | HubbleConstantNow;
+    p | OmegaMatterNow;
+    p | OmegaLambdaNow;
+    p | MaxExpansionRate;
+    p | MultiSpecies;
+    p | GravityOn;
+    p | PressureFree;
+    p | Gamma;
+    p | GravitationalConstant;
+    p | ProblemType;
+    p | PPMFlatteningParameter;
+    p | PPMDiffusionParameter;
+    p | PPMSteepeningParameter;
+    p | DualEnergyFormalism;
+    p | DualEnergyFormalismEta1;
+    p | DualEnergyFormalismEta2;
+    p | pressure_floor;
+    p | density_floor;
+    p | number_density_floor;
+    p | temperature_floor;
+    p | CourantSafetyNumber;
+    p | InitialRedshift;
+    p | InitialTimeInCodeUnits;
+    PUParray(p,DomainLeftEdge,MAX_DIMENSION);
+    PUParray(p,DomainRightEdge,MAX_DIMENSION);
+    PUParray(p,field_index_,NUM_FIELDS);
+    p | GridRank;
+    PUParray(p,ghost_depth,MAX_DIMENSION);
+    p | NumberOfBaryonFields;      // active baryon fields
+    PUParray(p,FieldType,MAX_NUMBER_OF_BARYON_FIELDS);
+  }
+
+  TRACE ("END EnzoBlock::pup()");
+
 }
 
 //======================================================================
@@ -640,19 +710,10 @@ void EnzoBlock::set_cycle (int cycle_start) throw ()
 
 void EnzoBlock::set_time (double time) throw ()
 {
-  TRACE2("%p EnzoBlock::set_time(%20.15g)",this,time);
   CommBlock::set_time (time);
 
-  //  Setting OldTime = Time_ leads to an error in Grid_ComputePressure.C:38
-  //  "requested time is outside available range"
-  //        Grid_ComputePressure.cpp:37   OldTime =     0.046079162508249283
-  //        Grid_ComputePressure.cpp:38      time =     0.046079158782958984
-  //        Grid_ComputePressure.cpp:39      Time =     0.046079158782958984
-  //
-  // (OldTime > time; error is about single-precision epsilon)
-
   if (! (Time_ == 0 || Time_ < time)) {
-    index_.print("ERROR");
+    index_.print("ERROR",-1,2,false,simulation());
     ASSERT2("EnzoBlock::set_time()",
 	    "set_time() may be called more than once or dt = 0.0\n"
 	    "Time_ = %15.8f time = %15.8f",
@@ -660,9 +721,7 @@ void EnzoBlock::set_time (double time) throw ()
 	    Time_ == 0 || Time_ < time);
   }
 
-  //  WARNING("EnzoBlock::set_time","TEMPORARY");
   OldTime   = Time_;
-  //  OldTime   = time;
   Time_     = time;
 
 }
@@ -674,6 +733,13 @@ void EnzoBlock::set_dt (double dt_param) throw ()
   CommBlock::set_dt (dt_param);
 
   dt = dt_param;
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::set_stop (bool stop) throw ()
+{
+  CommBlock::set_stop (stop);
 }
 
 //----------------------------------------------------------------------

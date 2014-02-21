@@ -20,14 +20,18 @@ OutputImage::OutputImage(int index,
 			 std::string image_type,
 			 int image_size_x, int image_size_y,
 			 std::string image_reduce_type,
-			 std::string mesh_color_type,
+			 std::string image_mesh_color,
 			 int         image_block_size,
 			 int face_rank,
 			 bool image_log,
-			 bool ghost) throw ()
+			 bool ghost,
+			 bool specify_bounds,
+			 double min, double max) throw ()
   : Output(index,factory),
     data_(),
     axis_(axis_z),
+    specify_bounds_(specify_bounds),
+    min_(min),max_(max),
     nxi_(image_size_x),
     nyi_(image_size_y),
     png_(0),
@@ -37,14 +41,26 @@ OutputImage::OutputImage(int index,
     ghost_(ghost)
 
 {
-  if (image_reduce_type=="min") op_reduce_ = reduce_min;
-  if (image_reduce_type=="max") op_reduce_ = reduce_max;
-  if (image_reduce_type=="avg") op_reduce_ = reduce_avg;
-  if (image_reduce_type=="sum") op_reduce_ = reduce_sum;
-  if (image_reduce_type=="set") op_reduce_ = reduce_set;
+  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
+  if      (image_reduce_type=="min") { op_reduce_ = reduce_min; } 
+  else if (image_reduce_type=="max") { op_reduce_ = reduce_max; }
+  else if (image_reduce_type=="avg") { op_reduce_ = reduce_avg; }
+  else if (image_reduce_type=="sum") { op_reduce_ = reduce_sum; }
+  else if (image_reduce_type=="set") { op_reduce_ = reduce_set; }
+  else {
+    ERROR1 ("OutputImage::OutputImage()",
+	    "Unrecognized output_image_reduce_type %s",
+	    image_reduce_type.c_str());
+  }
 
-  if (mesh_color_type=="level")   mesh_color_ = mesh_color_level;
-  if (mesh_color_type=="process") mesh_color_ = mesh_color_process;
+  if      (image_mesh_color=="level")   mesh_color_ = mesh_color_level;
+  else if (image_mesh_color=="process") mesh_color_ = mesh_color_process;
+  //  else if (image_mesh_color=="neighbor") mesh_color_ = mesh_color_neighbor;
+  else {
+    ERROR1 ("OutputImage::OutputImage()",
+	    "Unrecognized output_image_mesh_color %s",
+	    image_mesh_color.c_str());
+  }
 
   TRACE1 ("OutputImage reduce %d",op_reduce_);
 
@@ -52,12 +68,16 @@ OutputImage::OutputImage(int index,
 
   TRACE1 ("image_block_size factor = %d",nl);
 
+  if (ghost_) {
+    if (nx0>1) nx0*=2;
+    if (ny0>1) ny0*=2;
+    if (nz0>1) nz0*=2;
+  }
   if (nxi_ == 0) nxi_ = (image_type_ == "mesh") ? 2*nl * nxb + 1 : nl * nx0;
   if (nyi_ == 0) nyi_ = (image_type_ == "mesh") ? 2*nl * nyb + 1 : nl * ny0;
   if (nzi_ == 0) nzi_ = (image_type_ == "mesh") ? 2*nl * nzb + 1 : nl * nz0;
 
   TRACE2("OutputImage nl,max_level %d %d",nl,max_level);
-  TRACE3("OutputImage nxi,nyi,nzi %d %d %d",nxi_,nyi_,nzi_);
   
   // Override default Output::process_stride_: only root writes
   set_process_stride(process_count);
@@ -86,8 +106,6 @@ OutputImage::~OutputImage() throw ()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void OutputImage::pup (PUP::er &p)
 {
   TRACEPUP;
@@ -103,6 +121,9 @@ void OutputImage::pup (PUP::er &p)
   p | op_reduce_;
   p | mesh_color_;
   p | axis_;
+  p | specify_bounds_;
+  p | min_;
+  p | max_;
   p | nxi_;
   p | nyi_;
   p | nzi_;
@@ -114,7 +135,6 @@ void OutputImage::pup (PUP::er &p)
   p | image_log_;
   p | ghost_;
 }
-#endif
 
 //----------------------------------------------------------------------
 
@@ -166,7 +186,8 @@ void OutputImage::open () throw()
 void OutputImage::close () throw()
 {
   TRACE("OutputImage::close()");
-  if (is_writer()) image_write_();
+  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min_,max_);
+  if (is_writer()) image_write_(min_,max_);
   image_close_();
   png_close_();
 }
@@ -226,6 +247,7 @@ void OutputImage::write_block
   double color = 0;
   if (mesh_color_ == mesh_color_level)   color = comm_block->level()+1;
   if (mesh_color_ == mesh_color_process) color = CkMyPe()+1;
+  //  if (mesh_color_ == mesh_color_neighbor) color = comm_block->count_neighbors();
 
   // pixel extents of box
   int ixm,iym,izm; 
@@ -296,13 +318,26 @@ void OutputImage::write_block
     }
 
   }
-  // else if (image_type_ == "data") {
+    //  } else if (image_type_ == "data") {
 
     if (! comm_block->is_leaf()) return;
     // for each cell
     TRACE3("OutputImage ixm,ixp,nbx %d %d %d",ixm,ixp,nbx);
     TRACE3("OutputImage iym,iyp,nby %d %d %d",iym,iyp,nby);
     TRACE3("OutputImage izm,izp,nbz %d %d %d",izm,izp,nbz);
+
+    //@@@@@@@@@@
+    // DEBUG
+    //@@@@@@@@@@
+    // float savef=0.0;
+    // double saved=0.0;
+    // if (field_descr->precision(index_field) == precision_single) {
+    //   savef = ((float*)field)[0];
+    //   ((float*)field)[0] = 0.0;
+    // } else {
+    //   saved = ((double*)field)[0];
+    //   ((double*)field)[0] = 0.0;
+    // }
 
     int mx = ghost_ ? ndx : nbx;
     int my = ghost_ ? ndy : nby;
@@ -333,6 +368,11 @@ void OutputImage::write_block
 	}
       }
     }
+    // if (field_descr->precision(index_field) == precision_single) {
+    //   ((float*)field)[0] = savef;
+    // } else {
+    //   ((double*)field)[0] = saved;
+    // }
     //  }
 }
 
@@ -490,28 +530,22 @@ void OutputImage::image_create_ () throw()
 
 void OutputImage::image_write_ (double min, double max) throw()
 {
-
-  DEBUG("image_write");
-  // error check min <= max
-
-  ASSERT2("OutputImage::image_write_",
-	  "min %g is greater than max %g",
-	  min,max, (min <= max));
-
+  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
   // simplified variable names
 
   int mx = nxi_;
   int my = nyi_;
   int m  = mx*my;
 
-  // Scale by data if min == max (default)
+  double min2=min;
+  double max2=max;
+  //  if (! specify_bounds_) {
 
-  if (min == max) {
-    min = std::numeric_limits<double>::max();
-    max = std::numeric_limits<double>::min();
-  }
+  min = std::numeric_limits<double>::max();
+  max = std::numeric_limits<double>::min();
 
-  // Ensure min and max fully enclose data
+  // Compute min and max if needed
+  //  if (! specify_bounds_) {
   if (image_log_) {
     for (int i=0; i<m; i++) {
       min = MIN(min,log(data_[i]));
@@ -523,6 +557,13 @@ void OutputImage::image_write_ (double min, double max) throw()
       max = MAX(max,data_[i]);
     }
   }
+  //  }
+  //  }
+  if (specify_bounds_) {
+    min=min2;
+    max=max2;
+  }
+  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
 
   TRACE1("image_write_() data_ = %p",data_);
   size_t n = map_r_.size();
@@ -566,11 +607,17 @@ void OutputImage::image_write_ (double min, double max) throw()
 	a = (1-ratio)*map_a_[k] + ratio*map_a_[k+1];
 	//	if (value < 0.0) { r=1.0; g=0.0; b=0.0; }
 
+	png_->plot      (ix+1, iy+1, 0.0, 0.0, 0.0);
+	png_->plot_blend(ix+1, iy+1, a, r,g,b);
+
+      } else {
+	
+	// red if out of bounds
+	png_->plot(ix+1, iy+1, 1.0, 0.0, 0.0);
+
       }
 
       // Plot pixel
-      png_->plot(ix+1, iy+1, 0.0, 0.0, 0.0);
-      png_->plot_blend(ix+1, iy+1, a, r,g,b);
     }
   }      
 

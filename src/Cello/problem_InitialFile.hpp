@@ -33,16 +33,12 @@ public: // interface
   /// Destructor
   virtual ~InitialFile() throw();
 
-#ifdef CONFIG_USE_CHARM
-
   PUPable_decl(InitialFile);
 
   InitialFile(CkMigrateMessage *m) : Initial (m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Read initialization values from Initial group in parameter file
 
@@ -72,10 +68,8 @@ private: // attributes
   /// Associated Input object
   Input * input_;
 
-#ifdef CONFIG_USE_CHARM
   /// Counter for reading blocks from current patch
   Sync block_sync_;
-#endif
 };
 
 #endif /* METHOD_INITIAL_FILE_HPP */

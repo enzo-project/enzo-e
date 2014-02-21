@@ -9,14 +9,8 @@ flags_arch = '-g'
 #flags_arch = '-O3'
 flags_link  = '-g'
 
-cc['charm']   = 'icc'
-cc['mpi']     = 'mpicc'
-cc['serial']  = 'icc'
-cxx['mpi']    = 'mpicxx'
-cxx['serial'] = 'icpc'
-f90['charm']  = 'ifort'
-f90['mpi']    = 'ifort'
-f90['serial'] = 'ifort'
+cc   = 'icc'
+f90  = 'ifort'
 
 libpath_fortran = ''
 libs_fortran    = ['imf','ifcore','ifport','stdc++','intlc']

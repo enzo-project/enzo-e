@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -q normal
-#PBS -l nodes=1:ppn=16:native
-#PBS -l walltime=0:10:00
-#PBS -N sedov3a0004
+#PBS -l nodes=2:ppn=16:native
+#PBS -l walltime=1:00:00
+#PBS -N sedov3a0032
 #PBS -o out.stdout
 #PBS -e out.stderr
 #PBS -M jobordner@ucsd.edu
@@ -10,7 +10,8 @@
 #PBS -V
 # Start of user commands - comments start with a hash sign (#)
 
-P=0004
+P=0032
 T=3a
+H="sdsc-gordon"
 
 source $HOME/Cello/cello-src/input/Sedov/include.sh

@@ -25,7 +25,6 @@ public: // interface
   virtual ~IoLayout() throw()
   {}
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -40,10 +39,7 @@ public: // interface
     //    p | *layout_;
   }
 
-#endif
-
 #include "_io_Io_common.hpp"
-
   
 private: // functions
 

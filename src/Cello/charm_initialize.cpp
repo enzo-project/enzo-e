@@ -5,8 +5,6 @@
 /// @date     2013-04-26
 /// @brief    Charm-related functions associated with initialization
 
-#ifdef CONFIG_USE_CHARM
-
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
@@ -16,21 +14,19 @@
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_initialize_begin() 
-{
-  initialize();  // virtual: calls EnzoSimulationCharm::initialize()
-}
-
-//----------------------------------------------------------------------
-
 void SimulationCharm::initialize() throw()
 {
 
   Simulation::initialize();
 
-  CkCallback callback (CkIndex_SimulationCharm::r_initialize_forest(), thisProxy);
+  // --------------------------------------------------
+  // ENTRY: #1 SimulationCharm::initialize() -> SimulationCharm::r_initialize_forest()
+  // ENTRY: callback
+  // --------------------------------------------------
+  CkCallback callback 
+    (CkIndex_SimulationCharm::r_initialize_forest(), thisProxy);
   contribute(0,0,CkReduction::concat,callback);
-
+  // --------------------------------------------------
 }
 
 //----------------------------------------------------------------------
@@ -40,20 +36,30 @@ void SimulationCharm::r_initialize_forest()
 
   initialize_forest_();
 
-  CkCallback callback (CkIndex_SimulationCharm::r_initialize_end(), thisProxy);
+  // --------------------------------------------------
+  // ENTRY: #2 SimulationCharm::r_initialize_forest() -> SimulationCharm::r_initialize_hierarchy()
+  // ENTRY: callback   
+  // --------------------------------------------------
+  CkCallback callback 
+    (CkIndex_SimulationCharm::r_initialize_hierarchy(), thisProxy);
+  // --------------------------------------------------
+
   contribute(0,0,CkReduction::concat,callback);
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::r_initialize_end() 
+void SimulationCharm::r_initialize_hierarchy() 
 {
- 
   if (group_process_->is_root()) {
-    (*hierarchy()->block_array() ).p_adapt_begin();
+    
+    // --------------------------------------------------
+    // ENTRY: #3 SimulationCharm::r_initialize_hierarchy() -> CommBlock::p_adapt_mesh()
+    // ENTRY: Block Array if Simulation is_root()
+    // --------------------------------------------------
+    (*hierarchy()->block_array() ).p_adapt_enter();
+    // --------------------------------------------------
   }
 }
 
 //----------------------------------------------------------------------
-
-#endif /* CONFIG_USE_CHARM */

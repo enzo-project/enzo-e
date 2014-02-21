@@ -14,10 +14,8 @@ class Hierarchy;
 class ItField;
 class Simulation;
 
-class Input
-#ifdef CONFIG_USE_CHARM
-  : public PUP::able 
-#endif
+class Input : public PUP::able 
+
 {
 
   /// @class    Input
@@ -36,8 +34,6 @@ public: // functions
   /// Delete an Input object
   virtual ~Input() throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_abstract(Input);
 
@@ -46,8 +42,6 @@ public: // functions
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Set file name
   void set_filename (std::string filename,
@@ -72,20 +66,14 @@ public: // functions
   void set_process_stride (int stride) throw () 
   {
     process_stride_ = stride; 
-#ifdef CONFIG_USE_CHARM
-    sync_.stop() = process_stride_;
-#endif
+    sync_.set_stop(process_stride_);
   };
-
-#ifdef CONFIG_USE_CHARM
 
   /// Accessor function for the CHARM Sync class
   Sync * sync() { return & sync_; };
 
   /// Set the index of this input in its simulation
   void set_index_charm(int index_charm) { index_charm_ = index_charm; }
-
-#endif
 
 public: // virtual functions
 
@@ -166,15 +154,11 @@ protected: // attributes
   /// ID of this process
   int process_;
 
-#ifdef CONFIG_USE_CHARM
-
   /// Sync for ending input
   Sync sync_;
 
   /// Index of this Input object in Simulation
   size_t index_charm_;
-
-#endif
 
   /// Simulation cycle for next IO
   int cycle_;

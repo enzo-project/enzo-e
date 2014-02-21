@@ -19,7 +19,6 @@ public: // interface
   /// Constructor
   Papi() throw();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -28,7 +27,6 @@ public: // interface
     WARNING("PerformancePapi::pup","skipping");
     return;
   }
-#endif
 
   //----------------------------------------------------------------------
   // global control

@@ -33,7 +33,7 @@
 #define WARNING7(F,M,A1,A2,A3,A4,A5,A6,A7)				\
   { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7);  }
 #define WARNING8(F,M,A1,A2,A3,A4,A5,A6,A7,A8)				\
-  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,
+  { m2_(stdout,"WARNING",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8); }
 
 //----------------------------------------------------------------------
 /// @def      UNTESTED
@@ -96,12 +96,9 @@
   { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
 #   define TRACE9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
   { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8,A9); }
-
-#ifdef CONFIG_USE_CHARM
 #   define TRACEPUP							\
   { m2_(stdout,"TRACEPUP",__FILE__,__LINE__,"",				\
 	p.isPacking()?"isPacking":(p.isUnpacking()?"isUnpacking":"isSizing")); }
-#endif
 
 #else /* CELLO_TRACE */
 
@@ -128,10 +125,8 @@
 #   define TRACE9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
   /* This space intentionally left blank */
 
-#ifdef CONFIG_USE_CHARM
 #   define TRACEPUP							\
   /* This space intentionally left blank */
-#endif
 
 #endif /* CELLO_TRACE */
 

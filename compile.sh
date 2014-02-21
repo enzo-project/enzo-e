@@ -1,7 +1,6 @@
 #!/bin/tcsh -f
 
 set ARCH = $CELLO_ARCH
-set TYPE = $CELLO_TYPE
 set PREC = $CELLO_PREC
 
 set log = "log.compile"
@@ -13,14 +12,10 @@ if ($#argv >= 1) then
    if ($argv[1] == "clean") then
       set d = `date +"%Y-%m-%d %H:%M:%S"`
       printf "$d %-14s" "cleaning..."
-      foreach type (serial mpi charm)
       foreach prec (single double)
-         set conf = $type
-         python scons.py arch=$ARCH type=$type -c >& /dev/null
-         rm -rf test/$conf >& /dev/null
-         rm -rf bin/$conf >& /dev/null
-         rm -rf lib/$conf >& /dev/null
-      end
+         python scons.py arch=$ARCH -c >& /dev/null
+         rm -rf bin >& /dev/null
+         rm -rf lib >& /dev/null
       end
       rm -rf include >& /dev/null
       rm -f test/COMPILING
@@ -41,7 +36,6 @@ if ($#argv >= 1) then
 endif
 
 echo "ARCH = $ARCH"
-echo "TYPE = $TYPE"
 echo "PREC = $PREC"
 echo "target = $target"
 
@@ -49,49 +43,44 @@ set d = `date +"%Y-%m-%d %H:%M:%S"`
 echo "$d BEGIN"
 
 foreach arch ($ARCH)
-foreach type ($TYPE)
 foreach prec ($PREC)
 
-    echo "arch = $arch  type = $type  prec = $prec"
-
-   set conf = $type
+    echo "arch = $arch  prec = $prec"
 
    rm -f "test/*/running.$arch.$prec"
 
-   set configure = $arch-$type-$prec
-   set configure_print = `printf "%s %s %s" $arch $type $prec`
+   set configure = $arch-$prec
+   set configure_print = `printf "%s %s %s" $arch $prec`
 
 
    printf "$configure" > test/COMPILING
 
    # clean
-#  python scons.py arch=$arch type=$type prec=$prec -c >& /dev/null
+#  python scons.py arch=$arch prec=$prec -c >& /dev/null
 
    # make output directory for compilation and tests
 
-   set dir = test/$conf
-   if (! -d $dir) mkdir $dir
+   set dir = test
 
    # COMPILE
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
-   printf "$d %-14s %-14s" "$arch $type $prec" "compiling..."
-   printf "$d %-14s %-14s" "$arch $type $prec" "compiling..." >> $log
+   printf "$d %-14s %-14s" "$arch $prec" "compiling..."
+   printf "$d %-14s %-14s" "$arch $prec" "compiling..." >> $log
 
    touch "$dir/running.$arch.$prec"
 
    setenv CELLO_ARCH $arch
-   setenv CELLO_TYPE $type
    setenv CELLO_PREC $prec
 
-   rm -f bin/$type/enzo-p
+   rm -f bin/enzo-p
 
    python scons.py install-inc            >&  $dir/out.scons
    python scons.py -k -j$proc install-bin >>& $dir/out.scons
    python scons.py -Q -k      $target     >>& $dir/out.scons
 
-   if (-e bin/$type/enzo-p) then
+   if (-e bin/enzo-p) then
       echo "Success"
    else
       echo "FAIL"
@@ -147,7 +136,6 @@ foreach prec ($PREC)
    endif
    rm -f test/COMPILING
 
-end
 end
 end
 

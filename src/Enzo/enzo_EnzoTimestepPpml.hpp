@@ -19,8 +19,6 @@ public: // interface
   /// Create a new EnzoTimestepPpml
   EnzoTimestepPpml() throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoTimestepPpml);
   
@@ -30,8 +28,6 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
   
-#endif
-
 public: // virtual functions
 
   /// Evaluate the timestep for the block

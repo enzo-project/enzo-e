@@ -6,8 +6,6 @@
 /// @brief    Implementation of the GroupProcessCharm class
 
 
-#ifdef CONFIG_USE_CHARM
-
 //----------------------------------------------------------------------
 
 #include "cello.hpp"
@@ -129,5 +127,3 @@ void GroupProcessCharm::bulk_wait(void * handle) const throw()
 }
 
 //======================================================================
-
-#endif /* CONFIG_USE_CHARM */

@@ -36,10 +36,8 @@ public: // interface
   /// Assignment operator
   FieldFace & operator= (const FieldFace & FieldFace) throw();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p);
-#endif
 
   //----------------------------------------------------------------------
 

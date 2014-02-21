@@ -14,9 +14,7 @@
 Input::Input (const Factory * factory) throw()
   : file_(0),           // Initialization deferred
     process_(0),        // initialization below
-#ifdef CONFIG_USE_CHARM
     sync_(0),
-#endif
     cycle_(0),
     time_(0),
     file_name_(""),     // set_filename()
@@ -46,8 +44,6 @@ Input::~Input () throw()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void Input::pup (PUP::er &p)
 {
 
@@ -75,8 +71,6 @@ void Input::pup (PUP::er &p)
   p | *io_field_block_;
   p | process_stride_;
 }
-
-#endif
 
 //----------------------------------------------------------------------
 
@@ -107,19 +101,15 @@ void Input::read_hierarchy
 ) throw()
 {
 
-#  ifdef CONFIG_USE_CHARM
-
   if (hierarchy->group_process()->is_root())
-    hierarchy->block_array()->p_read (index_charm_);
 
-#  else /* CONFIG_USE_CHARM */
+    // --------------------------------------------------
+    // ENTRY: #1 Input::read_hierarchy()-> CommBlock::p_output_read()
+    // ENTRY: Block array if Simulation is root
+    // --------------------------------------------------
+    hierarchy->block_array()->p_output_read (index_charm_);
+    // --------------------------------------------------
 
-  ItBlock it_block (hierarchy);
-  while (CommBlock * block = ++it_block) {
-    read_block (block, "NAME",field_descr);
-  }
-
-#  endif /* CONFIG_USE_CHARM */
 }
 
 //----------------------------------------------------------------------

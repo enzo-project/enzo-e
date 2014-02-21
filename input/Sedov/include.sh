@@ -3,12 +3,8 @@
 #
 #    P=%04d     number of processors
 #    T=[2a|3a]  type: 2D amr or unigrid
-#
-#----------------------------------------------------------------------
-# FILES
-#
-#  CELLO: e.g. cello-src.infiniband
-#  CHARM: e.g. 650/gnu/infiniband/charm-6.5.0
+#    H=["sdsc-gordon"|"sdsc-bw"]
+#    V=[0|1|2|3] (see log 2014-02-18)
 #
 #----------------------------------------------------------------------
 
@@ -17,12 +13,27 @@ charm=$HOME/Charm/charm
 
 cd $cello/input/Sedov
 
-enzorun=$cello/bin/charm/enzo-p
+P0=`printf "%04d" $P`
+enzorun=$cello/bin/enzo-p
 charmrun=$charm/bin/charmrun
-input=sedov$T$P.in
-output=out.sedov$T$P
+input=sedov$T$P0.in
+output=out.sedov$T$P0
 
-$charmrun ++mpiexec +p$P $enzorun $input >& $output
-# $charmrun +p$P $enzorun $input >& $output
+
+
+if [ $H == "sdsc-gordon" ]; then
+
+   $charmrun ++mpiexec +p$P $enzorun $input >& $output
+
+elif [ $H == "ncsa-bw" ]; then
+
+
+    . /opt/modules/default/init/bash
+    module swap PrgEnv-cray PrgEnv-gnu
+
+   aprun -n $P -d 2 $enzorun $input >& $output
+
+fi
+
 
 

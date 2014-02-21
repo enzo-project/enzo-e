@@ -5,8 +5,6 @@
 /// @date     2011-09-01
 /// @brief    Functions implementing CHARM++ compute-related functions
 
-#ifdef CONFIG_USE_CHARM
-
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
@@ -17,47 +15,74 @@
 //======================================================================
 
 
-void SimulationCharm::c_compute()
+void SimulationCharm::compute()
 {
-  TRACE("SimulationCharm::c_compute()");
-  if (cycle_ > 0 ) performance()->stop_region (perf_cycle);
+
+#ifdef TRACE_MEMORY
+  trace_mem_ = Memory::instance()->bytes();
+#endif
+
+#ifdef CELLO_DEBUG
+  fprintf (fp_debug(),"%s:%d cycle %03d\n", __FILE__,__LINE__,cycle_);
+#endif
+
+  if (cycle_ > 0 ) {
+    performance()->stop_region (perf_cycle,__FILE__,__LINE__);
+  }
   if (stop_) {
     
     performance_write();
 
+    // --------------------------------------------------
+    // ENTRY: #1 SimulationCharm::compute()-> Main::p_exit()
+    // ENTRY: Main if stop
+    // --------------------------------------------------
     proxy_main.p_exit(CkNumPes());
+    // --------------------------------------------------
 
   } else {
 
-    performance()->start_region (perf_cycle);
+    performance()->start_region (perf_cycle,__FILE__,__LINE__);
+    performance()->switch_region (perf_compute,__FILE__,__LINE__);
 
     if (hierarchy()->group_process()->is_root()) 
-      hierarchy()->block_array()->p_compute(cycle_,time_,dt_);
+      
+      // --------------------------------------------------
+      // ENTRY: #2 SimulationCharm::compute()-> CommBlock::p_compute_enter()
+      // ENTRY: Block Array if Simulation is_root()
+      // --------------------------------------------------
+      hierarchy()->block_array()->p_compute_enter(cycle_,time_,dt_);
+      // --------------------------------------------------
   }
+#ifdef TRACE_MEMORY
+  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
+  PARALLEL_PRINTF ("memory compute %lld\n",trace_mem_);
+#endif
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_compute (int cycle, double time, double dt)
+void CommBlock::p_compute_enter (int cycle, double time, double dt)
 {
-  TRACE ("BEGIN PHASE COMPUTE");
+// #ifdef CELLO_TRACE
+//   index_.print("BEGIN PHASE COMPUTE p_compute_enter()",-1,2,false,simulation());
+// #endif
+
   // set_cycle(cycle);
   // set_time(time);
   // set_dt(dt);
 
-  TRACE3 ("CommBlock::p_compute() cycle %d time %f dt %f",cycle,time,dt);
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_compute);
+  TRACE3 ("CommBlock::p_compute_enter() cycle %d time %f dt %f",cycle,time,dt);
 
 #ifdef CONFIG_USE_PROJECTIONS
   //  double time_start = CmiWallTimer();
 #endif
 
-  if (is_leaf()) {
+  if (is_leaf_) {
 
-#ifdef CELLO_TRACE
-    index_.print("p_compute");
-#endif    
+// #ifdef CELLO_TRACE
+//     index_.print("p_compute_enter",-1,2,false,simulation());
+// #endif    
     FieldDescr * field_descr = simulation()->field_descr();
     int index_method = 0;
     while (Method * method = simulation()->problem()->method(index_method++)) {
@@ -81,14 +106,16 @@ void CommBlock::p_compute (int cycle, double time, double dt)
 
   TRACE ("END   PHASE COMPUTE");
 
-  performance->stop_region(perf_compute);
+  int adapt_interval = simulation()->config()->mesh_adapt_interval;
+  if (adapt_interval && ((cycle_ % adapt_interval) == 0)) {
+    next_phase_ = phase_adapt;
+  } else {
+    next_phase_ = phase_stopping;
+  }
 
-  next_phase_ = phase_adapt;
-
-  p_refresh_begin();
+  refresh_enter_();
 }
-//----------------------------------------------------------------------
 
-#endif /* CONFIG_USE_CHARM */
+//----------------------------------------------------------------------
 
 

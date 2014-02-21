@@ -41,7 +41,6 @@ public: // interface
   {
   }
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -50,9 +49,7 @@ public: // interface
     p | num_counters_;
     PUParray(p,counters_start_,num_counters_);
     PUParray(p,counters_stop_,num_counters_);
-    
   }
-#endif
 
 private: // attributes
 

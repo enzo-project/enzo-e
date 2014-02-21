@@ -21,8 +21,6 @@ public: // interface
   /// Constructor
   EnzoRestrict(std::string method) throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoRestrict);
 
@@ -31,8 +29,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Restrict field_block_c values to the child block given by (icx,icy,icz)
   int apply 

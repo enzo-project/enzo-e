@@ -33,7 +33,6 @@ public: // interface
   /// Destructor
   virtual ~ItNode() throw();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -47,7 +46,6 @@ public: // interface
     p | node_trace_;
     p | reset_;
   }
-#endif
 
   /// Iterate through all leaf Nodes in the Tree
   Node * next_leaf () throw();

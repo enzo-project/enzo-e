@@ -19,9 +19,6 @@ public: // interface
   /// Create a new EnzoMethodPpm object
   EnzoMethodPpm();
 
-
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPpm);
   
@@ -31,8 +28,6 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
   
-#endif
-
   /// Apply the method to advance a block one timestep 
   virtual void compute_block(FieldDescr *, CommBlock * block) throw();
 

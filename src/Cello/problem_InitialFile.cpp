@@ -18,13 +18,9 @@ InitialFile::InitialFile
   : Initial (cycle,time),
     parameters_(parameters),
     group_process_((GroupProcess * )group_process),
-    input_(0)
-#ifdef CONFIG_USE_CHARM
-  , block_sync_(0)
-#endif
+    input_(0),
+    block_sync_(0)
 {
-#ifdef CONFIG_USE_CHARM
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -35,8 +31,6 @@ InitialFile::~InitialFile() throw()
 }
 
 //----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
 
 void InitialFile::pup (PUP::er &p)
 {
@@ -56,8 +50,6 @@ void InitialFile::pup (PUP::er &p)
   p | block_sync_;
 
 }
-
-#endif
 
 //----------------------------------------------------------------------
 
@@ -91,9 +83,7 @@ void InitialFile::enforce_block
 
   File * file = input_->file();
   int num_blocks = file->group_count();
-#ifdef CONFIG_USE_CHARM
-  block_sync_.stop() = num_blocks;
-#endif
+  block_sync_.set_stop(num_blocks);
 
   for (int i = 0; i<num_blocks; i++) {
 

@@ -18,8 +18,6 @@ EnzoMethodPpm::EnzoMethodPpm () : Method()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void EnzoMethodPpm::pup (PUP::er &p)
 {
 
@@ -30,8 +28,6 @@ void EnzoMethodPpm::pup (PUP::er &p)
   Method::pup(p);
 
 }
-
-#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 

@@ -126,4 +126,4 @@ Output {
       };
 }
 
-Performance { warnings = false; }
+Performance { warnings = true; }

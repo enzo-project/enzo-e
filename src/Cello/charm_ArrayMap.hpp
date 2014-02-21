@@ -24,7 +24,6 @@ public:
   ~ArrayMap();
   int procNum(int, const CkArrayIndex &idx);
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ migration constructor for PUP::able
   ArrayMap (CkMigrateMessage *m) : CBase_ArrayMap(m) {}
 
@@ -37,7 +36,6 @@ public:
     p | ny_;
     p | nz_;
   }
-#endif
 
 private:
 

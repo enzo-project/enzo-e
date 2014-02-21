@@ -364,111 +364,6 @@ void FieldBlock::deallocate_array () throw()
 //   }
 // }
 
-//----------------------------------------------------------------------
-// MPI functions
-//----------------------------------------------------------------------
-
-#ifndef CONFIG_USE_CHARM
-
-void FieldBlock::refresh_ghosts
-(
- const FieldDescr   * field_descr,
- const GroupProcess * group_process,
- const Layout       * layout,
- int ibx, int iby, int ibz,
- int fx, int fy, int fz) throw()
-
-{
-
-  if ( ! ghosts_allocated() ) {
-    ERROR("FieldBlock::refresh_ghosts",
-	    "Called with ghosts not allocated");
-    // allocate_ghosts(field_descr);
-  }
-
-  // Send face
-
-  int ip_remote = layout->process3((ibx+fx),(iby+fy),(ibz+fz));
-
-  // Transfer face data via FieldFace objects
-
-  FieldFace face_send (this,field_descr);
-  FieldFace face_recv (this,field_descr);
-
-  face_send.set_face(fx,fy,fz);
-  face_recv.set_face(fx,fy,fz);
-
-  int n;
-
-  char * array_send = face_send.allocate();
-  char * array_recv = face_recv.allocate();
-
-  face_send.load(&n, &array_send);
-
-  int ip = group_process->rank();
-
-  void * handle_send;
-  void * handle_recv;
-
-  if (ip < ip_remote) { // send then receive
-
-    // send 
-
-    handle_send = group_process->send_begin (ip_remote, array_send, n);
-    group_process->wait(handle_send);
-    group_process->send_end (handle_send);
-
-    // receive
-
-    handle_recv = group_process->recv_begin (ip_remote, array_recv, n);
-    group_process->wait(handle_recv);
-    group_process->recv_end (handle_recv);
-
-  } else if (ip > ip_remote) {  // receive then send
-
-    // receive
-
-    handle_recv = group_process->recv_begin (ip_remote, array_recv,n);
-    group_process->wait(handle_recv);
-    group_process->recv_end (handle_recv);
-
-    // send 
-    handle_send = group_process->send_begin (ip_remote, array_send,n);
-    group_process->wait(handle_send);
-    group_process->send_end (handle_send);
-
-  } else {
-
-    for (int i=0; i<n; i++) array_recv[i] = array_send[i];
-
-  }
-
-  face_recv.store(n, array_recv);
-
-}
-
-#endif
-
-//----------------------------------------------------------------------
-
-void FieldBlock::split
-(
- bool split_x, bool split_y, bool split_z,
- FieldBlock ** new_field_blocks ) throw ()
-{
-}
-
-//----------------------------------------------------------------------
-
-FieldBlock * FieldBlock::merge
-(
- bool merge_x, bool merge_y, bool merge_z,
- FieldBlock ** field_blocks ) throw ()
-{
-  FieldBlock * new_field_block = 0;
-  return new_field_block;
-}
-
 //======================================================================
 
 int FieldBlock::adjust_padding_
@@ -699,12 +594,7 @@ void FieldBlock::print
 
   int ip=0;
 
-#ifdef CONFIG_USE_CHARM
    ip=CkMyPe();
-#endif
-#ifdef CONFIG_USE_MPI
-   MPI_Comm_rank(MPI_COMM_WORLD,&ip);
-#endif
 
    char filename [80];
    sprintf (filename,"%s-%d.debug",message,ip);

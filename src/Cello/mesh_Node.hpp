@@ -23,17 +23,13 @@ public: // interface
   /// Destructor
   ~Node() throw();
 
-#ifdef CONFIG_USE_CHARM
   void pup (PUP::er &p);
-#endif
 
   /// Set the data payload for the Node
   void set_data(void * data)
   { data_ = data;
-#ifdef CONFIG_USE_CHARM
     have_data_ = data != NULL;
-#endif
-}
+  }
 
   /// Return the data for the given Node
   void * data() const
@@ -47,32 +43,28 @@ public: // interface
   int coarsen (int num_children);
 
   /// return the kth child Node
-  Node * child (int k) const;
+  Node * child (int k);
 
   /// return whether the node is a leaf node
   bool is_leaf () const
-  { return (child_array_ == 0); }
+  { return (child_array_.size() == 0); }
 
 private: // functions
 
 
 private: // attributes
 
-#ifdef CONFIG_USE_CHARM
   /// Whether data_ is null
   bool have_data_;
-#endif
 
   /// Pointer to the data payload for the Node
   void * data_;
 
-#ifdef CONFIG_USE_CHARM
   /// Number of children: used for CHARM++ pup()
   char size_; 
-#endif
 
   /// Array of child nodes
-  Node * child_array_;
+  std::vector<Node> child_array_;
 
 };
 

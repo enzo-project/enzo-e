@@ -17,10 +17,7 @@
 
 class Parameters;
 
-class Config 
-#ifdef CONFIG_USE_CHARM
-  : public PUP::able 
-#endif
+class Config : public PUP::able 
 {
 
   /// @class    Config
@@ -32,8 +29,6 @@ public: // interface
   /// empty constructor for charm++ pup()
   Config() throw() {}
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(Config);
 
@@ -43,8 +38,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();
@@ -76,6 +69,8 @@ public: // attributes
   // std::vector<std::string>   initial_value [MAX_FIELDS];
   int                        initial_max_level;
 
+  bool                       memory_active;
+
   int                        mesh_root_blocks[3];
   int                        mesh_root_rank;
   int                        mesh_root_size[3];
@@ -90,6 +85,7 @@ public: // attributes
   double                     mesh_adapt_mass_min_overdensity;
   double                     mesh_adapt_mass_level_exponent;
   bool                       mesh_adapt_balance;
+  int                        mesh_adapt_interval;
 
   std::vector<std::string>   method_sequence;
 
@@ -110,6 +106,9 @@ public: // attributes
   std::string                output_image_reduce_type    [MAX_FILE_GROUPS];
   bool                       output_image_ghost          [MAX_FILE_GROUPS];
   int                        output_image_face_rank      [MAX_FILE_GROUPS];
+  bool                       output_image_specify_bounds [MAX_FILE_GROUPS];
+  double                     output_image_min            [MAX_FILE_GROUPS];
+  double                     output_image_max            [MAX_FILE_GROUPS];
   std::vector<std::string>   output_dir            [MAX_FILE_GROUPS];
   int                        output_stride         [MAX_FILE_GROUPS];
   std::vector<std::string>   output_field_list     [MAX_FILE_GROUPS];
@@ -131,6 +130,7 @@ public: // attributes
 
   int                        stopping_cycle;
   double                     stopping_time;
+  int                        stopping_interval;
 
   int                        testing_cycle_final;
   double                     testing_time_final;

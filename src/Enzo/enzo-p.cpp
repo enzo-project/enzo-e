@@ -20,13 +20,9 @@
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
 extern CProxy_SimulationCharm proxy_simulation;
-#endif
 
-#ifndef CONFIG_USE_CHARM
-#   include "enzo_finalize.hpp"
-#endif
+//----------------------------------------------------------------------
 
 PARALLEL_MAIN_BEGIN
 {
@@ -45,11 +41,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(ip,np);
 
-#ifdef CONFIG_USE_CHARM
   monitor_ = Monitor::instance();
-#else
-  Monitor * monitor_ = Monitor::instance();
-#endif
 
   monitor_->set_active (group_process->is_root());
   monitor_->header();
@@ -62,7 +54,7 @@ PARALLEL_MAIN_BEGIN
 		  memory->bytes(), memory->bytes_high());
 
 
-  // open parameter file, calling usage() if invalid
+  // open parameter file, displaying usage if invalid
 
   if (PARALLEL_ARGC != 2) {
     // Print usage if wrong number of arguments
@@ -75,51 +67,25 @@ PARALLEL_MAIN_BEGIN
     ERROR("Main()",buffer);
   }
 
-  // Read in parameters
-
-  char * parameter_file = PARALLEL_ARGV[1];
+  const char * parameter_file = PARALLEL_ARGV[1];
 
   //--------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
 
   proxy_main     = thishandle;
 
+  // --------------------------------------------------
+  // ENTRY: #1 Main::Main() -> EnzoSimulationCharm::EnzoSimulationCharm()
+  // ENTRY: create
+  // --------------------------------------------------
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
     (parameter_file, strlen(parameter_file)+1);
+  // --------------------------------------------------
 
-  proxy_simulation.p_initialize_begin();
-
-
-  //--------------------------------------------------
-
-#else /* ! CONFIG_USE_CHARM */
-
-  Simulation * simulation = 
-    new EnzoSimulationMpi (parameter_file,group_process);
-
-  simulation->initialize();
-
-  simulation->run();
-
-  enzo_finalize(simulation);
-
-  delete simulation;
-  delete group_process;
-
-  unit_finalize();
-
-  PARALLEL_EXIT;
-
-#endif
-  //--------------------------------------------------
 }
 
 PARALLEL_MAIN_END
 
 
 //======================================================================
-#ifdef CONFIG_USE_CHARM
-#  include "enzo.def.h"
-#endif
+#include "enzo.def.h"
 //======================================================================

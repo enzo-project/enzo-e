@@ -36,7 +36,6 @@ class GroupProcess
   virtual ~GroupProcess() throw()
   {}
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -45,7 +44,6 @@ class GroupProcess
     p | size_;
     p | rank_;
   }
-#endif
 
   //--------------------------------------------------
   // Shared with GroupThread, but removed from deleted common "Group"

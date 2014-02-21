@@ -52,7 +52,6 @@ private: // No copy or assign
 
 public: // interface
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -62,7 +61,6 @@ public: // interface
     WARNING("ParamNode::pup","skipping subnodes_ [ map<string,Param*> ]");
     //    p | subnodes_;
   }
-#endif
 
   /// Return the node name
   std::string name() const {return name_;};

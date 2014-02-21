@@ -27,58 +27,74 @@ module mesh {
 
   array[Index] CommBlock {
 
-    entry CommBlock
+    entry CommBlock // [CB0]
       (Index index,
        int nx, int ny, int nz,	
        int num_field_blocks,
        int count_adapt,
-       bool initial,
-        int cycle, double time, double dt,
+       int cycle, double time, double dt,
        int  n,     char arr[n],  int op_array,
        int num_face_level, int face_level[num_face_level],
        bool testing);
 
-    entry CommBlock();	
+    entry CommBlock();	 // [CB0]
 
-    entry void p_write (int index_output);
-    entry void p_compute(int cycle, double time, double dt);
-    entry void p_read (int index_input);
-    entry void p_output(CkReductionMsg * msg);
+    //--------------------------------------------------
+    // *** OUTPUT ***
+    //--------------------------------------------------
 
-    // adapt
+    entry void p_output_write (int index_output); // [CB1]
+    entry void p_output_read (int index_input); // [CB3]
 
-    entry void p_adapt_begin ();
-    entry void p_adapt_start ();
-    entry void q_adapt_next();
-    entry void q_adapt_stop();
-    entry void q_adapt_end();
-    entry void q_adapt_exit();
+    //--------------------------------------------------
+    // *** COMPUTE ***
+    //--------------------------------------------------
 
-    entry void p_balance (int ic3[3], int if3[3], int level);
+    entry void p_compute_enter(int cycle, double time, double dt); // [CB2]
 
-    entry void p_set_face_level(int if3[3], int level, int recurse, 
-				int adapt_type);
+    //--------------------------------------------------
+    // *** STOPPING ***
+    //--------------------------------------------------
 
-    entry void p_child_can_coarsen(int ichild[3], 
-				   int na, char arr[na],
-				   int nf, int face_level[nf]);
+    entry void r_stopping_compute_timestep (CkReductionMsg * msg); // [CB4]
 
-    entry void p_parent_coarsened();
+    //--------------------------------------------------
+    // *** CONTROL ***
+    //--------------------------------------------------
 
-    // refresh
+    entry [expedited] void p_control_sync ( int phase, int count);
 
-    entry void p_refresh_begin();
-    entry void q_refresh_end();
-    entry void x_refresh_same(int n, char buffer[n], int iface[3]);
-    entry void x_refresh_fine(int n, char buffer[n],
-			      int iface[3],int ichild[3]);
-    entry void x_refresh_coarse(int n, char buffer[n],
-				int iface[3],
-				int ichild[3]);
-    entry void x_refresh_child(int n, char buffer[n],
-			       int ichild[3]);
+    //--------------------------------------------------
+    // *** ADAPT ***
+    //--------------------------------------------------
 
-    entry void p_print(std::string);
+    entry void p_adapt_enter();   // [CB5]
+    entry void r_adapt_enter();   // [CB22]
+
+    entry void p_adapt_delete();  // [CB11]
+    entry void q_adapt_exit();    // [CB13]
+    entry void q_adapt_next();    // [CB12]
+
+    entry void p_adapt_recv_neighbor_level  // [CB7]
+      (Index index,int ic3[3], int if3[3], int level_now, int level_new);
+
+    entry void p_adapt_send_child_data // [CB10]
+      (int ic3[3], int na, char arr[na], int nf, int child_face_level[nf]);
+
+
+    //--------------------------------------------------
+    // *** REFRESH
+    //--------------------------------------------------
+
+    entry void p_refresh_enter();         // [CB14]
+    entry void q_refresh_exit();          // [CB15]
+
+    entry [expedited] void x_refresh_face // [CB21]
+      (int n, char buffer[n],  char rtype, int iface[3], int ichild[3]);
+
+    entry void x_refresh_child            // [CB19]
+      (int n, char buffer[n], int ichild[3]);
+ 
   };
 }
 

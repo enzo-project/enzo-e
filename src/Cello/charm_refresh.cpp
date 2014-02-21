@@ -5,8 +5,6 @@
 /// @date     2013-04-26
 /// @brief    Charm-related functions associated with refreshing ghost zones
 
-#ifdef CONFIG_USE_CHARM
-
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
@@ -14,14 +12,21 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+static char buffer[256];
+
 //----------------------------------------------------------------------
 
-void CommBlock::p_refresh_begin() 
+void CommBlock::refresh_enter_() 
 {
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_refresh);
+#ifdef TRACE_MEMORY
+  trace_mem_ = Memory::instance()->bytes();
+#endif
+  performance_switch_(perf_refresh,__FILE__,__LINE__);
 
-  TRACE("BEGIN PHASE REFRESH");
+// #ifdef CELLO_TRACE
+//   sprintf (buffer,"BEGIN PHASE REFRESH(%p)",this);
+//    index_.print(buffer,-1,2,false,simulation());
+// #endif
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -29,259 +34,226 @@ void CommBlock::p_refresh_begin()
 
   std::string refresh_type = config->field_refresh_type;
 
-  if (refresh_type == "quiescence") {
+  if (is_leaf()) {
 
-    TRACE("REFRESH Setting refresh quiescence detection callback");
+    int rank = simulation->dimension();
 
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_end(),
-			  thisProxy[thisIndex]));
+    int n3[3];
+    size_forest(&n3[0],&n3[1],&n3[2]);
 
-    if (! is_leaf()) {
-      performance->stop_region(perf_refresh);
-      return;
-    }
+    int refresh_rank = config->field_refresh_rank;
+    loop_refresh_.set_stop(0);
 
-  } 
+    ItFace it_face(rank,refresh_rank);
+    int if3[3];
 
-  int rank = simulation->dimension();
+    const int level = this->level();
 
-  int n3[3];
-  size_forest(&n3[0],&n3[1],&n3[2]);
+    while (it_face.next(if3)) {
 
-  int refresh_rank = config->field_refresh_rank;
-  bool refresh_type_counter = (refresh_type == "counter");
-  loop_refresh_.stop() = 0;
+      Index index_neighbor = index_.index_neighbor(if3[0],if3[1],if3[2],n3);
 
-  ItFace it_face(rank,refresh_rank);
-  int if3[3];
-  while (it_face.next(if3)) {
+      TRACE0;
 
-    Index index_neighbor = index_.index_neighbor(if3[0],if3[1],if3[2],n3);
+      if (face_level(if3) == level-1) {       // COARSE
 
-    if (face_level(if3)==level_ - 1) {       // COARSE
+	int ic3[3];
+	index_.child(level,ic3+0,ic3+1,ic3+2);
+	int ip3[3];
+	parent_face_(ip3,if3,ic3);
 
-      int ic3[3];
-      index_.child(level_,ic3+0,ic3+1,ic3+2);
-      int ip3[3];
-      parent_face_(ip3,if3,ic3);
+	refresh_face
+	  (refresh_coarse,index_neighbor.index_parent(),ip3,ic3);
 
-      refresh_coarse(index_neighbor.index_parent(),ip3);
+      } else if (face_level(if3) == level) {    // SAME
 
-    } else if (face_level(if3)==level_) {    // SAME
+	int ic3[3] = {0,0,0};
+	refresh_face (refresh_same,index_neighbor,if3,ic3);
 
-      refresh_same(index_neighbor,if3);
-
-    } else if (face_level(if3)==level_+1) {  // FINE
+      } else if (face_level(if3) == level+1) {  // FINE
 	    
-      int ic3m[3];
-      int ic3p[3];
-      loop_limits_nibling_(ic3m,ic3p,if3);
-      int ic3[3];
-      for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
-	for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
-	  for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
+	int ic3m[3];
+	int ic3p[3];
+	loop_limits_nibling_(ic3m,ic3p,if3);
+	int ic3[3];
+	for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
+	  for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
+	    for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
 
-	    int jc3[3];
-	    facing_child_ (jc3,ic3,if3);
+	      int jc3[3];
+	      facing_child_ (jc3,ic3,if3);
 
-	    Index index_nibling = 
-	      index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
+	      Index index_nibling = 
+		index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
 		  
-	    refresh_fine(index_nibling, if3,ic3);
+	      refresh_face (refresh_fine,index_nibling, if3,ic3);
+	    }
 	  }
 	}
+      } else {
+	sprintf (buffer,"REFRESH ERROR face (%d %d %d) level %d face_level %d phase %d",
+		 if3[0],if3[1],if3[2],level,face_level(if3),next_phase_);
+	index_.print(buffer,-1,2,false,simulation);
+      
+	ERROR("CommBlock::refresh_enter_()",
+	      "Refresh error");
       }
-    } else {
-      index_.print("REFRESH ERROR");
+
     }
 
   }
+  if (refresh_type == "quiescence") {
 
-  if (refresh_type_counter) {
+    // --------------------------------------------------
+    // ENTRY: #1 CommBlock::refresh_enter_()-> CommBlock::q_refresh_exit()
+    // ENTRY: quiescence if refresh_type == quiescence
+    // --------------------------------------------------
+    CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_exit(),
+    			  thisProxy[thisIndex]));
+    // --------------------------------------------------
+  }  else if ((refresh_type == "counter")) {
 
-    // Prevent hang if single-CommBlock simulation
-    ++loop_refresh_.stop();
+    control_sync_neighbor_(phase_sync_refresh);
 
-    performance->stop_region(perf_refresh);
-    x_refresh_same (0,0,0);
-
-  } else {
-
-    performance->stop_region(perf_refresh);
   }
+
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_coarse ( Index index, int iface[3] )
+void CommBlock::refresh_face
+( int type_refresh,
+  Index index_neighbor,
+  int iface[3],
+  int ichild[3] )
 {
 
-  int level = index_.level();
-  int ic3[3];
-  index_.child(level,ic3,ic3+1,ic3+2);
-
-   int n; 
-   char * array;
-   bool lghost[3] = {false};
-   FieldFace * field_face = load_face_(&n,&array,
-				       iface, ic3,lghost,
-				       op_array_restrict);
-
-  ++loop_refresh_.stop();
-
-  int jface[3] = {-iface[0], -iface[1], -iface[2]};
-
-  thisProxy[index].x_refresh_coarse (n,array,jface,ic3);
-
-  delete field_face;
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::x_refresh_coarse (int n, char * buffer, 
-				  int iface[3], int ichild[3])
-{
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_refresh);
-  bool lghost[3] = {false};
-
-  store_face_(n,buffer,
-	      iface, ichild, lghost,
-	      op_array_restrict);
-
-  std::string refresh_type = simulation()->config()->field_refresh_type;
-  
-  if (refresh_type == "counter") {
-    if (loop_refresh_.done()) {
-      q_refresh_end();
-    }
-  }
-  performance->stop_region(perf_refresh);
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::refresh_same (Index index, int iface[3])
-{
   int n; 
   char * array;
 
-  int ichild[3] = {0,0,0};
   bool lghost[3] = {false,false,false};
 
-  FieldFace * field_face = load_face_ (&n,&array,
-				       iface, ichild, lghost,
-				       op_array_copy);
+  FieldFace * field_face;
 
-  ++loop_refresh_.stop();
+  int type_op_array;
+
+  if (type_refresh == refresh_coarse) {
+
+    int level = index_.level();
+    index_.child(level,ichild,ichild+1,ichild+2);
+
+    type_op_array = op_array_restrict;
+
+  } else if (type_refresh == refresh_same) {
+
+    type_op_array = op_array_copy;
+
+
+  } else if (type_refresh == refresh_fine) {
+
+    type_op_array = op_array_prolong;
+
+  }
+
+  field_face = load_face_ (&n, &array,
+			   iface, ichild, lghost,
+			   type_op_array);
 
   int jface[3] = {-iface[0], -iface[1], -iface[2]};
 
-  thisProxy[index].x_refresh_same (n,array,jface);
+#ifdef CELLO_DEBUG
+  // std::string bit_str = index_neighbor.bit_string(-1,2);
+  // sprintf (buffer," -> %s",bit_str.c_str());
+  // index_.print(buffer,-1,2,false,simulation());
+#endif  
 
+  // --------------------------------------------------
+  // ENTRY: #2 CommBlock::refresh_face()-> CommBlock::x_refresh_face()
+  // ENTRY: neighbor
+  // --------------------------------------------------
+  thisProxy[index_neighbor].x_refresh_face
+    (n,array, type_refresh, jface, ichild);
+  // --------------------------------------------------
+
+  loop_refresh_.add_stop();
   delete field_face;
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::x_refresh_same (int n, char * buffer, int iface[3])
+void CommBlock::refresh_face_ (int n, char * buffer, int type_refresh,
+			       int iface[3], int ichild[3])
 {
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_refresh);
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  if (type_refresh == refresh_coarse) { // coarse
 
-  if ( n != 0) {
-    int ichild[3] = {0,0,0};
-    bool lghost[3] = {false,false,false};
+    bool lghost[3] = {false};
+
     store_face_(n,buffer,
-		iface,ichild,lghost,
-		op_array_copy);
-  }
+		iface, ichild, lghost,
+		op_array_restrict);
 
-  std::string refresh_type = simulation->config()->field_refresh_type;
-  
-  performance->stop_region(perf_refresh);
-  if (refresh_type == "counter") {
-    if (loop_refresh_.done()) {
-      q_refresh_end();
+  } else if (type_refresh == refresh_same) { // same
+
+    if ( n != 0) {
+      bool lghost[3] = {false,false,false};
+      store_face_(n,buffer,
+		  iface,ichild,lghost,
+		  op_array_copy);
     }
+
+  } else if (type_refresh == refresh_fine) {
+
+    bool lghost[3] = {false};
+    store_face_(n,buffer,
+		iface, ichild, lghost,
+		op_array_prolong);
+
+
   }
+
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_fine 
-(Index index, int iface[3], int ichild[3])
+void CommBlock::x_refresh_child 
+(
+ int    n, 
+ char * buffer, 
+ int    ic3[3]
+ )
 {
-  int n; 
-  char * array;
-
-  bool lghost[3] = {false};
-  FieldFace * field_face = load_face_ (&n, &array,
-				       iface,
-				       ichild,
-				       lghost,
-				       op_array_prolong);
-
-  ++loop_refresh_.stop();
-
-  int jface[3] = {-iface[0], -iface[1], -iface[2]};
-
-  thisProxy[index].x_refresh_fine (n,array, jface, ichild);
-
-  delete field_face;
-	  
+  int  iface[3]  = {0,0,0};
+  bool lghost[3] = {true,true,true};
+  store_face_(n,buffer, iface, ic3, lghost, op_array_restrict);
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::x_refresh_fine (int n, char * buffer, 
-				int iface[3],
-				int ichild[3])
+void CommBlock::refresh_exit_()
 {
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_refresh);
-  bool lghost[3] = {false};
-  store_face_(n,buffer,
-	      iface, ichild, lghost,
-	      op_array_prolong);
+#ifdef TRACE_MEMORY
+  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
+  PARALLEL_PRINTF ("memory refresh %lld\n",trace_mem_);
+#endif
 
-  std::string refresh_type = simulation()->config()->field_refresh_type;
-  
-  if (refresh_type == "counter") {
-    if (loop_refresh_.done()) {
-      q_refresh_end();
-    }
+  if      (next_phase_ == phase_stopping)  stopping_enter_();
+  else if (next_phase_ == phase_adapt) {
+
+  // --------------------------------------------------
+  // ENTRY: #3 CommBlock::refresh_exit_() -> r_adapt_mesh()
+  // ENTRY: contribute
+  // --------------------------------------------------
+  CkCallback callback 
+    (CkIndex_CommBlock::r_adapt_enter(), thisProxy);
+  contribute(0,0,CkReduction::concat,callback);
+  // --------------------------------------------------
+    
+
+
   }
-  performance->stop_region(perf_refresh);
+  else ERROR1 ("CommBlock::q_refresh_exit()",
+	       "Unknown next_phase %d",
+	       next_phase_);
 }
 
 //----------------------------------------------------------------------
-
-void CommBlock::q_refresh_end()
-{
-  Performance * performance = simulation()->performance();
-  performance->start_region(perf_refresh);
-  // if (thisIndex.is_root()) {
-  //   Performance * performance = simulation()->performance();
-  //   performance->stop_region(perf_refresh);
-  // }
-
-  performance->stop_region(perf_refresh);
-  if (next_phase_ == phase_output) {
-    TRACE("refresh calling output");
-    prepare();
-  } else if (next_phase_ == phase_adapt) {
-    TRACE("refresh calling adapt");
-    p_adapt_begin();
-  } else {
-    index_.print("ERROR");
-    ERROR1 ("CommBlock::q_refresh_end()",
-	    "Unknown next_phase %d",
-	    next_phase_);
-  }
-}
-
-//----------------------------------------------------------------------
-
-#endif /* CONFIG_USE_CHARM */

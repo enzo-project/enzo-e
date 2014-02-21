@@ -162,20 +162,18 @@ public: // interface
   /// Initialize the EnzoBlock chare array
   EnzoBlock
   (
-#ifndef CONFIG_USE_CHARM
-   Simulation * simulation,
-#endif
    Index index,
    int nx, int ny, int nz,
    int num_field_blocks,
    int count_adapt,
-   bool initial,
    int cycle, double time, double dt,
    int narray, char * array, int op_array,
    int num_face_level, int * face_level,
    bool testing=false) throw();
 
-#ifdef CONFIG_USE_CHARM
+  /// Initialize an empty EnzoBlock
+  EnzoBlock()  { };
+
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
     : CommBlock (m)
@@ -184,47 +182,8 @@ public: // interface
     //    initialize();
   };
 
-#endif  /* CONFIG_USE_CHARM */
-
-#ifdef CONFIG_USE_CHARM
-
   /// Pack / unpack the EnzoBlock in a CHARM++ program
-  void pup(PUP::er &p)
-  { 
-
-    TRACEPUP;
-    TRACE ("BEGIN EnzoBlock::pup()");
-
-    CommBlock::pup(p);
-
-
-    p | Time_;
-    p | CycleNumber;
-    p | OldTime;
-    p | dt;
-
-    WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
-    WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
-
-    PUParray(p,GridLeftEdge,MAX_DIMENSION); 
-    PUParray(p,GridDimension,MAX_DIMENSION); 
-    PUParray(p,GridStartIndex,MAX_DIMENSION); 
-    PUParray(p,GridEndIndex,MAX_DIMENSION); 
-    PUParray(p,CellWidth,MAX_DIMENSION);
-
-    if (p.isUnpacking()) {
-      for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-	BaryonField[field] = (enzo_float *)block_->field_block(0)->field_values(field);
-      }
-    }
-
-    WARNING("EnzoBlock::pup()", "skipping OldBaryonField[] [not used]");
-
-    TRACE ("END EnzoBlock::pup()");
-
-  };
-
-#endif /*CONFIG_USE_CHARM */
+  void pup(PUP::er &p);
 
   /// Implementation of initialization in constructors
   void initialize_enzo_();
@@ -341,6 +300,9 @@ public: // interface
 
   /// Set EnzoBlock's dt
   virtual void set_dt (double dt) throw();
+
+  /// Set EnzoBlock's stopping criteria
+  virtual void set_stop (bool stop) throw();
 
   /// Initialize EnzoBlock
   virtual void initialize () throw();

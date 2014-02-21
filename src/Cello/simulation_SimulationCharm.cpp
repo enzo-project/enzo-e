@@ -5,8 +5,6 @@
 /// @date     2011-03-17
 /// @brief    Implementation of SimulationCharm user-dependent class member functions
 
-#ifdef CONFIG_USE_CHARM
-
 #include "cello.hpp"
 
 #include "simulation.hpp"
@@ -26,7 +24,6 @@ SimulationCharm::SimulationCharm
     block_sync_(0)
 {
   TRACE("SimulationCharm::SimulationCharm");
-
 }
 
 //----------------------------------------------------------------------
@@ -34,6 +31,9 @@ SimulationCharm::SimulationCharm
 SimulationCharm::~SimulationCharm() throw()
 {
   TRACE("SimulationCharm::~SimulationCharm()");
+#ifdef CELLO_DEBUG
+  fclose (fp_debug_);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -62,10 +62,15 @@ void SimulationCharm::performance_output()
 
   counters_long[n-1] = block_sync_.stop(); // number of CommBlocks
 
-  CkCallback callback (CkIndex_SimulationCharm::p_performance_reduce(NULL), 
+  // --------------------------------------------------
+  // ENTRY: #1 SimulationCharm::performance_output() -> SimulationCharm::r_performance_reduce()
+  // ENTRY: contribute()
+  // --------------------------------------------------
+  CkCallback callback (CkIndex_SimulationCharm::r_performance_reduce(NULL), 
 		       thisProxy);
-  contribute (n*sizeof(long),
-	      counters_long,CkReduction::sum_long,callback);
+  contribute (n*sizeof(long), counters_long,CkReduction::sum_long,callback);
+  // --------------------------------------------------
+
   delete [] counters_long;
   delete [] counters_long_long;
 
@@ -73,7 +78,7 @@ void SimulationCharm::performance_output()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_performance_reduce(CkReductionMsg * msg)
+void SimulationCharm::r_performance_reduce(CkReductionMsg * msg)
 {
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
@@ -82,13 +87,17 @@ void SimulationCharm::p_performance_reduce(CkReductionMsg * msg)
 
   long *      counters_long = (long * )msg->getData();
 
+  delete msg;
+
+  int index_region_cycle = performance_->region_index("cycle");
+
   for (int ir = 0; ir < nr; ir++) {
     for (int ic = 0; ic < nc; ic++) {
       int index_counter = ir+nr*ic;
       bool do_print = 
 	(performance_->counter_type(ic) != counter_type_abs) ||
-	(ir == 0);
-	
+	(ir == index_region_cycle);
+      do_print=true;
       if (do_print) {
 	monitor_->print("Performance","%s %s %ld",
 			performance_->region_name(ir).c_str(),
@@ -101,16 +110,7 @@ void SimulationCharm::p_performance_reduce(CkReductionMsg * msg)
   monitor_->print("Performance","simulation num-blocks %d",
 		  counters_long[n-1]);
 
-  delete msg;
-
 }
-// void SimulationCharm::run() throw()
-// {
-//   TRACE("SimulationCharm::run()");
-//   initial();
-// }
 
 //----------------------------------------------------------------------
-//======================================================================
 
-#endif /* CONFIG_USE_CHARM */

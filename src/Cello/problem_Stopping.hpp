@@ -27,7 +27,6 @@ public: // interface
   virtual ~Stopping()
   {}
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -37,7 +36,6 @@ public: // interface
     p | stop_time_;
 
   }
-#endif
 
   /// Return whether the simulation is done
   virtual bool complete (int    curr_cycle,

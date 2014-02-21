@@ -17,15 +17,10 @@ class Parameters;
 class Performance;
 class Problem;
 
-#ifdef CONFIG_USE_CHARM
-#  include "mesh.decl.h"
-#  include "simulation.decl.h"
-#endif
+#include "mesh.decl.h"
+#include "simulation.decl.h"
 
-class Simulation 
-#ifdef CONFIG_USE_CHARM
-   : public CBase_Simulation 
-#endif
+class Simulation : public CBase_Simulation 
 {
   /// @class    Simulation
   /// @ingroup  Simulation
@@ -50,25 +45,19 @@ public: // interface
   // CHARM
   //==================================================
 
-#ifdef CONFIG_USE_CHARM
-
    /// Initialize an empty Simulation
    Simulation();
 
    /// Initialize a migrated Simulation
    Simulation (CkMigrateMessage *m);
 
-#endif
-
   //==================================================
 
   /// Destructor
   virtual ~Simulation() throw();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-#endif
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
@@ -155,6 +144,11 @@ public: // virtual functions
   
   int & perf_counter(int perf_region) {return perf_count_[perf_region]; }
 
+#ifdef CELLO_DEBUG
+  FILE * fp_debug() { return fp_debug_; }
+#endif
+
+
 protected: // functions
 
   /// Initialize the Config object
@@ -162,6 +156,9 @@ protected: // functions
 
   /// Initialize the Problem object
   void initialize_problem_ () throw();
+
+  /// Initialize the Memory object
+  void initialize_memory_ () throw();
 
   /// Initialize global simulation parameters
   void initialize_simulation_ () throw();
@@ -184,6 +181,11 @@ protected: // functions
   void deallocate_() throw();
 
 protected: // attributes
+
+#ifdef CELLO_DEBUG  
+  FILE * fp_debug_;
+#endif
+
 
   //----------------------------------------------------------------------
   // SIMULATION PARAMETERS
@@ -209,9 +211,6 @@ protected: // attributes
 
   /// Current cycle
   int cycle_;
-
-  // /// Current level (currently only used in lcaperf)
-  // int level_;
 
   /// Current time
   double time_;

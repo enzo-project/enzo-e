@@ -26,7 +26,6 @@ public: // interface
   virtual ~ItReduceSum () throw ()
   {}
   
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -34,7 +33,6 @@ public: // interface
     // NOTE: change this function whenever attributes change
     ItReduce::pup(p);
   }
-#endif
 
   /// Reduce another value
   virtual void next (double value) throw()

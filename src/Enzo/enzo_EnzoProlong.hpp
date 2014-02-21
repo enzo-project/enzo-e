@@ -21,8 +21,6 @@ public: // interface
   /// Constructor
   EnzoProlong(std::string method) throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoProlong);
 
@@ -31,8 +29,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
   /// Prolong comm_block_Ht values to the child block given by (icx,icy,icz)
 

@@ -39,6 +39,12 @@ Simulation::Simulation
   hierarchy_(0),
   field_descr_(0)
 {
+#ifdef CELLO_DEBUG
+    char buffer[40];
+    sprintf(buffer,"out.debug.%03d",CkMyPe());
+    fp_debug_ = fopen (buffer,"w");
+#endif
+
   if (!group_process_) {
     group_process_ = GroupProcess::create();
     is_group_process_new_ = true;
@@ -60,16 +66,11 @@ Simulation::Simulation
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 Simulation::Simulation()
 { TRACE("Simulation()"); }
 
-#endif
-
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
 void Simulation::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
@@ -77,15 +78,20 @@ void Simulation::pup (PUP::er &p)
   TRACEPUP;
 
   CBase_Simulation::pup(p);
+
   bool up = p.isUnpacking();
+
+#ifdef CELLO_DEBUG
+  if (up) {
+    char buffer[40];
+    sprintf(buffer,"out.debug.%03d",CkMyPe());
+    fp_debug_ = fopen (buffer,"w");
+  }
+#endif
 
   p | factory_; // PUP::able
 
-  // if (up) parameters_ = new Parameters;
-  // p | * parameters_;
-
-  WARNING("Simulation::pup","config_ needs to be PUP::able");
-  p | config_;
+  p | config_; // PUPable
 
   p | parameter_file_;
 
@@ -101,6 +107,7 @@ void Simulation::pup (PUP::er &p)
   if (up) problem_ = new Problem;
   p | * problem_;
 
+  if (up) performance_ = new Performance;
   p | *performance_;
 
   p | performance_name_;
@@ -115,17 +122,11 @@ void Simulation::pup (PUP::er &p)
   p | *field_descr_;
 }
 
-#endif
-
 //----------------------------------------------------------------------
-
-#ifdef CONFIG_USE_CHARM
 
 Simulation::Simulation (CkMigrateMessage *m)
   : CBase_Simulation(m)
 { TRACE("Simulation(CkMigrateMessage)"); }
-
-#endif
 
 //----------------------------------------------------------------------
 
@@ -143,6 +144,7 @@ void Simulation::initialize() throw()
   parameters_->set_monitor(false);
 
   initialize_monitor_();
+  initialize_memory_();
   initialize_performance_();
   initialize_simulation_();
 
@@ -161,15 +163,9 @@ void Simulation::initialize() throw()
 
   initialize_hierarchy_();
 
-#ifndef CONFIG_USE_CHARM
-
   // For Charm++ initialize_forest_ is called in charm_initialize
   // using QD to ensure that initialize_hierarchy() is called
   // on all processors before CommBlocks are created
-
-  initialize_forest_();
-
-#endif
 
 }
 
@@ -208,11 +204,20 @@ void Simulation::initialize_simulation_() throw()
 
 //----------------------------------------------------------------------
 
+void Simulation::initialize_memory_() throw()
+{
+  Memory * memory = Memory::instance();
+  if (memory) memory->set_active(config_->memory_active);
+  
+}
+//----------------------------------------------------------------------
+
 void Simulation::initialize_performance_() throw()
 {
 
   performance_ = new Performance (config_);
 
+  performance_->new_region(perf_unknown,    "unknown");
   performance_->new_region(perf_simulation, "simulation");
   performance_->new_region(perf_cycle,      "cycle");
   performance_->new_region(perf_initial,    "initial");
@@ -220,7 +225,7 @@ void Simulation::initialize_performance_() throw()
   performance_->new_region(perf_refresh,    "refresh");
   performance_->new_region(perf_compute,    "compute");
   performance_->new_region(perf_output,     "output");
-  performance_->new_region(perf_prepare,    "prepare");
+  performance_->new_region(perf_stopping,   "stopping");
 
   performance_name_   = config_->performance_name;
   performance_stride_ = config_->performance_stride;
@@ -247,6 +252,9 @@ void Simulation::initialize_config_() throw()
     config_ = new Config;
     TRACE("Simulation::initialize_config_ calling Config::read()");
     config_->read(parameters_);
+  }
+  if (group_process()->is_root()) {
+    parameters_->write("parameters.out");
   }
   TRACE("END   Simulation::initialize_config_");
 }
@@ -337,11 +345,7 @@ void Simulation::initialize_hierarchy_() throw()
 
   const int refinement = 2;
   hierarchy_ = factory()->create_hierarchy 
-    (
-#ifndef CONFIG_USE_CHARM
-     this,
-#endif
-     dimension_,refinement, 0, group_process_->size());
+    (dimension_,refinement, 0, group_process_->size());
 
   // Domain extents
 
@@ -378,21 +382,18 @@ void Simulation::initialize_hierarchy_() throw()
 void Simulation::initialize_forest_() throw()
 {
 
-#ifdef CONFIG_USE_CHARM
   bool allocate_blocks = (group_process()->is_root());
-#else
-  bool allocate_blocks = true;
-#endif
 
   // Don't allocate blocks if reading data from files
 
   bool allocate_data = ! ( config_->initial_type == "file" || 
 			   config_->initial_type == "restart" );
 
-  hierarchy_->create_forest
-    (field_descr_,
-     allocate_blocks,
-     allocate_data);
+  if (allocate_blocks) {
+    hierarchy_->create_forest
+      (field_descr_,
+       allocate_data);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -443,8 +444,7 @@ void Simulation::monitor_output()
 
   performance_output ();
 
-  Memory * memory = Memory::instance();
-  memory->reset_high();
+  Memory::instance()->reset_high();
 
 }
 
@@ -464,8 +464,6 @@ void Simulation::performance_output()
     for (int ir = 0; ir < num_regions; ir++) {
 
       performance_->region_counters(ir,counters);
-      int index_counter = ir+num_regions*ic;
-
       monitor_->print("Performance","%s %s %lld",
 		      performance_->region_name(ir).c_str(),
 		      performance_->counter_name(ic).c_str(),

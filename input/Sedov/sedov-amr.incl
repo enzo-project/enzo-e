@@ -6,6 +6,7 @@ Mesh {
       type = ["slope"];
       fields = ["total_energy"];
       balance = true;
+      interval = 0; # 0 == TURN OFF DYNAMIC ADAPT
    };
    max_level   = 3; 
 }
@@ -17,7 +18,8 @@ Field {
     prolong = "linear";
    refresh {
      rank = 0;
-     type = "quiescence";
+#     type = "quiescence";
+     type = "counter";
    }
 }
 

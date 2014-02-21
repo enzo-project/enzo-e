@@ -19,16 +19,12 @@ EnzoTimestepPpml::EnzoTimestepPpml () throw()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void EnzoTimestepPpml::pup (PUP::er &p)
 {
   TRACEPUP;
   // NOTE: change this function whenever attributes change
   Timestep::pup(p);
 }
-
-#endif
 
 //----------------------------------------------------------------------
 

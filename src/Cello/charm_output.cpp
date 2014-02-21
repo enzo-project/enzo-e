@@ -4,93 +4,8 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-01
 /// @brief    Functions implementing CHARM++ output-related functions
-///
-/// This file contains member functions for various CHARM++ chares and
-/// classes used for Output in a CHARM++ simulation.  Functions are
-/// listed in roughly the order of flow-of-control.
-///
-///    OUTPUT
-///
-///    CommBlock::p_output()
-///       simulation->update_state(dt,stop)
-///       simulation_charm->p_output()
-///
-///    SimulationCharm::p_output()
-///       if (block_sync_.done())
-///          contribute(SimulationCharm::c_output())
-///
-///    SimulationCharm::c_output()
-///       problem()->output_reset()   
-///       problem()->output_next()   
-///
-///    Problem::output_next()
-///       if (output)
-///          output->init()
-///          output->open()
-///          output->write_simulation()
-///       else
-///          simulation()->monitor_output()
-///
-///    Output::write_simulation() [virtual]
-///       write_simulation_()
-///
-///    Output::write_simulation_()
-///       write_hierarchy()
-///
-///    Output::write_hierarchy() [virtual]
-///       write_hierarchy_()
-///
-///    Output::write_hierarchy_()
-///       if (is_root())
-///          block_array.p_write()
-///
-///    Simulation::monitor_output()
-///       performance_output()
-///       memory.reset_high()
-///       >>>>> c_compute() >>>>>
-///
-///    CommBlock::p_write()
-///       output.write_block(this)
-///       simulation_charm.s_write()
-///
-///    Output::write_block() [virtual]
-///       write_block_()
-///
-///    Output::write_block_()
-///       write_field_block()
-///
-///    Output::write_field_block() [virtual]
-///
-///    Simulation::s_write()
-///       if (block_sync.done())
-///          contribute (SimulationCharm::c_write())
-///
-///    SimulationCharm::c_write()
-///       problem()->output_wait()
-///
-///    Problem::output_wait()
-///       if (ip==writer)
-///          proxy_simulation[ip].p_output_write()
-///       else
-///          output.prepare_remote()
-///          proxy_simulaion[ip_writer].p_output_write()
-///          output.close()
-///          output.cleanup_remote()
-///          output.finalize()
-///          output_next()
-///
-///    SimulationCharm::p_output_write()
-///       problem.output_write()
-///
-///    Problem::output_write()
-///       output().update_remote()
-///       if (output->sync().done())
-///          output.close()
-///          output.finalize()
-///          output_next()
 
-
-#ifdef CONFIG_USE_CHARM
+#define TRACE_OUTPUT
 
 #include "simulation.hpp"
 #include "mesh.hpp"
@@ -101,53 +16,30 @@
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_output(CkReductionMsg * msg)
+void SimulationCharm::begin_output ()
 {
+#ifdef TRACE_MEMORY
+  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
+#endif
 
-  TRACE ("BEGIN PHASE OUTPUT");
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  performance()->switch_region(perf_output,__FILE__,__LINE__);
 
-  TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
+  if (block_sync_.next()) {
 
-  TRACE("CommBlock::p_output()");
-  double * min_reduce = (double * )msg->getData();
-
-  double dt_forest   = min_reduce[0];
-  bool   stop_forest = min_reduce[1] == 1.0 ? true : false;
-  set_dt   (dt_forest);
-  //  printf("DEBUG CommBlock::p_output(): cycle %d dt=%f min_reduce %25.15f stop %d\n",
-  //	 cycle_,dt_forest,min_reduce[1],stop_forest);
-
-  delete msg;
-
-  simulation->update_state(cycle_,time_,dt_forest,stop_forest);
-
-  // Wait for all blocks to check in before calling Simulation::p_output()
-  // for next output
-
-  TRACE("CommBlock::p_output() calling SimulationCharm::p_output");
-  SimulationCharm * simulation_charm = proxy_simulation.ckLocalBranch();
-  simulation_charm->p_output();
-}
-
-//----------------------------------------------------------------------
-
-void SimulationCharm::p_output ()
-{
-  TRACE("SimulationCharm::p_output");
-  if (block_sync_.done()) {
-    performance()->start_region(perf_output);
-    TRACE("SimulationCharm::p_output calling c_output");
-    CkCallback callback (CkIndex_SimulationCharm::c_output(), thisProxy);
+    CkCallback callback (CkIndex_SimulationCharm::r_output(), thisProxy);
+    // --------------------------------------------------
+    // ENTRY: #1 SimulationCharm::output()-> SimulationCharm::r_output()
+    // ENTRY: contribute() if block_sync_.next()
+    // --------------------------------------------------
     contribute(0,0,CkReduction::concat,callback);
+    // --------------------------------------------------
   }
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::c_output()
+void SimulationCharm::r_output()
 {
-  TRACE("OUTPUT SimulationCharm::c_output()");
   problem()->output_reset();
   problem()->output_next(this);
 }
@@ -156,7 +48,6 @@ void SimulationCharm::c_output()
 
 void Problem::output_next(Simulation * simulation) throw()
 {
-  TRACE("OUTPUT Problem::output_next()");
   int cycle   = simulation->cycle();
   double time = simulation->time();
 
@@ -186,12 +77,10 @@ void Problem::output_next(Simulation * simulation) throw()
   }
 }
 
-
 //----------------------------------------------------------------------
 
-void CommBlock::p_write (int index_output)
+void CommBlock::p_output_write (int index_output)
 {
-  TRACE("OUTPUT CommBlock::p_write()");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -200,26 +89,31 @@ void CommBlock::p_write (int index_output)
   output->write_block(this,field_descr);
 
   SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
-  simulation_charm->s_write();
+
+  simulation_charm->write_();
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::s_write()
+void SimulationCharm::write_()
 {
-  TRACE("SimulationCharm::s_write()");
-  TRACE2 ("block_sync: %d/%d",block_sync_.index(),block_sync_.stop());
-  if (block_sync_.done()) {
-    CkCallback callback (CkIndex_SimulationCharm::c_write(), thisProxy);
+  if (block_sync_.next()) {
+
+    CkCallback callback (CkIndex_SimulationCharm::r_write(), thisProxy);
+
+    // --------------------------------------------------
+    // ENTRY: #2 SimulationCharm::write_()-> SimulationCharm::r_write()
+    // ENTRY: contribute() if block_sync_.next()
+    // --------------------------------------------------
     contribute(0,0,CkReduction::concat,callback);
+    // --------------------------------------------------
 
   }
-
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::c_write()
+void SimulationCharm::r_write()
 {
   problem()->output_wait(this);
 }
@@ -228,16 +122,19 @@ void SimulationCharm::c_write()
 
 void Problem::output_wait(Simulation * simulation) throw()
 {
-  TRACE("OUTPUT Problem::output_wait()");
   Output * output = this->output(index_output_);
 
   int ip       = CkMyPe();
-  TRACE1 ("output = %p",output);
   int ip_writer = output->process_writer();
 
   if (ip == ip_writer) {
 
+    // --------------------------------------------------
+    // ENTRY: #3 Problem::output_wait()-> SimulationCharm::p_output_write()
+    // ENTRY: writer Simulation if is writer
+    // --------------------------------------------------
     proxy_simulation[ip].p_output_write(0,0);
+    // --------------------------------------------------
 
   } else {
 
@@ -248,7 +145,12 @@ void Problem::output_wait(Simulation * simulation) throw()
 
     // Remote call to receive data
 
+    // --------------------------------------------------
+    // ENTRY: #4 Problem::output_wait()-> SimulationCharm::p_output_write()
+    // ENTRY: writer Simulation if not writer
+    // --------------------------------------------------
     proxy_simulation[ip_writer].p_output_write (n, buffer);
+    // --------------------------------------------------
 
     // Close up file
 
@@ -271,8 +173,7 @@ void Problem::output_wait(Simulation * simulation) throw()
 
 void SimulationCharm::p_output_write (int n, char * buffer)
 {
-  TRACE("OUTPUT SimulationCharm::p_output_write()");
-  problem()->output_write(this,n,buffer);
+  problem()->output_write(this,n,buffer); 
 }
 
 //----------------------------------------------------------------------
@@ -284,13 +185,12 @@ void Problem::output_write
 ) throw()
 {
   Output * output = this->output(index_output_);
-  TRACE2("OUTPUT Problem::output_write() %d %p",n,output);
 
   if (n != 0) {
     output->update_remote(n, buffer);
   }
 
-  if (output->sync()->done()) {
+  if (output->sync()->next()) {
 
     output->close();
 
@@ -305,16 +205,16 @@ void Problem::output_write
 
 void SimulationCharm::monitor_output()
 {
-  TRACE("Simulation::monitor_output()");
   Simulation::monitor_output();
 
-  performance()->stop_region(perf_output);
+#ifdef TRACE_MEMORY
+  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
+  PARALLEL_PRINTF ("memory output %lld\n",trace_mem_);
+#endif
 
-  TRACE ("END   PHASE OUTPUT [SIMULATION]");
-  c_compute();
+  compute();
 }
-//======================================================================
 
-#endif /* CONFIG_USE_CHARM */
+//======================================================================
 
 

@@ -51,12 +51,7 @@ enum parallel_enum {
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef CONFIG_USE_MPI
-#  include <mpi.h>
-#endif
-#ifdef CONFIG_USE_CHARM
-#  include "charm++.h"
-#endif
+#include "charm++.h"
 
 //----------------------------------------------------------------------
 // Component class includes

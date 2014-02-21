@@ -94,8 +94,6 @@ InitialDefault::~InitialDefault() throw()
 }
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void InitialDefault::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
@@ -108,14 +106,14 @@ void InitialDefault::pup (PUP::er &p)
 
   if (up) parameters_ = new Parameters;
   p | *parameters_;
+  if (up) field_descr_ = new FieldDescr;
+  p | *((FieldDescr *) field_descr_);
   p | num_fields_;
   WARNING("InitialDefault::pup","mask_[][] not pupped");
-  p | *((FieldDescr *) field_descr_);
+  if (up) num_masks_ = new int[num_fields_];
   PUParray(p,num_masks_,num_fields_);
   p | periodic_;
 }
-
-#endif
 
 //----------------------------------------------------------------------
 

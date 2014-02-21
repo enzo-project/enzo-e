@@ -23,8 +23,6 @@ public: // interface
   /// Destructor
   ~EnzoProblem() throw();
 
-#ifdef CONFIG_USE_CHARM
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoProblem);
 
@@ -33,8 +31,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
 private: // functions
 

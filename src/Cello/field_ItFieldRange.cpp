@@ -10,8 +10,6 @@
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void ItFieldRange::pup (PUP::er &p)
 {
 
@@ -24,5 +22,3 @@ void ItFieldRange::pup (PUP::er &p)
   p | last_;
 
 }
-
-#endif

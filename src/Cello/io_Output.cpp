@@ -11,9 +11,7 @@
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
 extern CProxy_SimulationCharm  proxy_simulation;
-#endif
 
 //----------------------------------------------------------------------
 
@@ -21,9 +19,7 @@ Output::Output (int index, const Factory * factory) throw()
   : file_(0),           // Initialization deferred
     schedule_(new Schedule),
     process_(0),        // initialization below
-#ifdef CONFIG_USE_CHARM
     sync_(1),        // default process-per-stride
-#endif
     index_(index),
     cycle_(0),
     count_(0),
@@ -57,8 +53,6 @@ Output::~Output () throw()
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void Output::pup (PUP::er &p)
 {
 
@@ -91,7 +85,6 @@ void Output::pup (PUP::er &p)
   p | process_stride_;
 
 }
-#endif
 
 //----------------------------------------------------------------------
 
@@ -218,7 +211,7 @@ void Output::write_meta_ ( meta_type type_meta, Io * io ) throw ()
 void Output::write_simulation_
 ( const Simulation * simulation ) throw()
 {
-  write_hierarchy (simulation->hierarchy(), simulation->field_descr());
+  write_hierarchy(simulation->hierarchy(), simulation->field_descr());
 }
 
 //----------------------------------------------------------------------
@@ -229,19 +222,15 @@ void Output::write_hierarchy_
  const FieldDescr * field_descr
  ) throw()
 {
-#ifdef CONFIG_USE_CHARM
 
   if (hierarchy->group_process()->is_root())
-    hierarchy->block_array()->p_write(index_);
 
-#else /* CONFIG_USE_CHARM */
-
-  ItBlock it_block (hierarchy);
-  while (const CommBlock * block = ++it_block) {
-    write_block (block, field_descr);
-  }
-
-#endif /* CONFIG_USE_CHARM */
+    // --------------------------------------------------
+    // ENTRY: #1 Output::write_hierarchy_()-> CommBlock::p_output_write()
+    // ENTRY: Block array if Simulation is root
+    // --------------------------------------------------
+    hierarchy->block_array()->p_output_write(index_);
+    // --------------------------------------------------
 
 }
 

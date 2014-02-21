@@ -33,7 +33,6 @@ public: // functions
   /// Create an uninitialized Schedule object with the given file_name format
   Schedule() throw();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -50,7 +49,6 @@ public: // functions
     p | time_skip_;
     p | index_;
   }
-#endif
 
   /// Set cycle interval (start, step, stop)
   void set_cycle_interval

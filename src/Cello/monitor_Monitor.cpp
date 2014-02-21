@@ -51,7 +51,6 @@ void Monitor::header () const
   print ("","");
   print ("","A Parallel Adaptive Mesh Refinement Framework");
   print ("","");  
-  print ("","                James Bordner");
   print ("","  Laboratory for Computational Astrophysics");
   print ("","        San Diego Supercomputer Center");
   print ("","     University of California, San Diego");
@@ -75,12 +74,6 @@ void Monitor::header () const
 	 t->tm_min,
 	 t->tm_sec);
 
-  // Print all compile-time configuration setings
-
-  //  print ("Define","CELLO_ARCH = %s",CELLO_ARCH);
-  //  print ("Define","CELLO_PREC = %s",CELLO_PREC);
-  //  print ("Define","CELLO_TYPE = %s",CELLO_TYPE);
-
   // Print all recognized configuration settings
 
   GroupProcess * group_process = GroupProcess::create();
@@ -91,7 +84,6 @@ void Monitor::header () const
 
   print ("Define","CELLO_ARCH %s",CELLO_ARCH);
   print ("Define","CELLO_PREC %s",CELLO_PREC);
-  print ("Define","CELLO_TYPE %s",CELLO_TYPE);
 
   print ("Define","CC           %s",CELLO_CC);
   print ("Define","CFLAGS       %s",CELLO_CFLAGS);
@@ -168,19 +160,19 @@ void Monitor::write
 	 buffer_process, buffer_time, component, buffer_message);
     }
 
-#ifdef CELLO_DEBUG
-    // Write DEBUG messagess to file
+// #ifdef CELLO_DEBUG
+//     // Write DEBUG messagess to file
 
-    if (strcmp(component,"DEBUG")==0) {
-      char file[20];
-      sprintf (file,"out.debug.%d",ip_);
-      FILE * fdebug = fopen (file,"a");
-      fprintf (fdebug,"%s %s %s %s\n",
-	 buffer_process, buffer_time, component, buffer_message);
-      fclose(fdebug);
-    }
+//     if (strcmp(component,"DEBUG")==0) {
+//       char file[20];
+//       sprintf (file,"out.debug.%d",ip_);
+//       FILE * fdebug = fopen (file,"a");
+//       fprintf (fdebug,"%s %s %s %s\n",
+// 	 buffer_process, buffer_time, component, buffer_message);
+//       fclose(fdebug);
+//     }
 
-#endif
+// #endif
 
   }
 

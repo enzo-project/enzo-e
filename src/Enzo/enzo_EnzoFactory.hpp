@@ -22,8 +22,6 @@ public: // interface
   : Factory()
   { TRACE ("EnzoFactory::EnzoFactory()"); }
 
-#ifdef CONFIG_USE_CHARM
-
   PUPable_decl(EnzoFactory);
 
   EnzoFactory(CkMigrateMessage *m) : Factory (m) {}
@@ -31,38 +29,29 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   virtual void pup (PUP::er &p);
 
-#endif
-
   /// Create the Input / Output accessor object for EnzoBlock
   virtual IoBlock * create_io_block () const throw();
 
-#ifdef CONFIG_USE_CHARM
   /// Create a new CHARM++ CommBlock array [abstract factory design pattern]
   virtual CProxy_CommBlock create_block_array
   (int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int num_field_blocks,
-   bool allocate,
    bool testing=false) const throw();
-#endif
 
   /// Create a new CommBlock  [abstract factory design pattern]
   virtual CommBlock * create_block
   (
-#ifdef CONFIG_USE_CHARM
    CProxy_CommBlock * block_array,
-#else
-   Simulation * simulation,
-#endif /* CONFIG_USE_CHARM */
    Index index,
    int nx, int ny, int nz,
    int num_field_blocks,
    int count_adapt,
-   bool initial,
    int cycle, double time, double dt,
    int narray, char * array, int op_array,
    int num_face_level, int * face_level,
-   bool testing=false) const throw();
+   bool testing=false,
+   Simulation * simulation = 0) const throw();
 
 };
 

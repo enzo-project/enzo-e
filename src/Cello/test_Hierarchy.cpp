@@ -24,11 +24,7 @@ PARALLEL_MAIN_BEGIN
   const int dimensions = 3;
   const int refinement = 2;
   Hierarchy * hierarchy = factory->create_hierarchy
-    (
-#ifndef CONFIG_USE_CHARM
-NULL,
-#endif
-dimensions, refinement,0,1);
+    (dimensions, refinement,0,1);
   unit_assert(hierarchy != NULL);
 
   FieldDescr field_descr;

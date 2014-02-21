@@ -8,8 +8,6 @@
 #ifndef PARALLEL_GROUP_PROCESS_CHARM_HPP
 #define PARALLEL_GROUP_PROCESS_CHARM_HPP
 
-#ifdef CONFIG_USE_CHARM
-
 class GroupProcessCharm : public GroupProcess {
 
   /// @class    GroupProcessCharm
@@ -26,7 +24,6 @@ public: // interface
   virtual ~GroupProcessCharm() throw()
   {}
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
@@ -36,7 +33,6 @@ public: // interface
     p | process_last_plus_;
     // NOTE: change this function whenever attributes change
   }
-#endif
 
 public: // interface (Group)
 
@@ -106,8 +102,6 @@ private: // attributes
   int process_last_plus_;
 
 };
-
-#endif /* CONFIG_USE_CHARM */
 
 #endif /* PARALLEL_GROUP_PROCESS_CHARM_HPP */
 

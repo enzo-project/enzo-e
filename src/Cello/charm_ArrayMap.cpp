@@ -9,7 +9,7 @@
 
 //======================================================================
 
-ArrayMap::ArrayMap(int nx, int ny, int nz) 
+ArrayMap::ArrayMap(int nx, int ny, int nz)
   :  CBase_ArrayMap()
 {
   nx_ = nx;

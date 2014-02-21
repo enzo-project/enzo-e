@@ -10,8 +10,6 @@
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void Config::pup (PUP::er &p)
 {
   TRACEPUP;
@@ -43,6 +41,8 @@ void Config::pup (PUP::er &p)
   //  PUParray(p,initial_value,MAX_FIELDS);
   p | initial_max_level;
 
+  p | memory_active;
+
   PUParray(p,mesh_root_blocks,3);
   p | mesh_root_rank;
   PUParray(p,mesh_root_size,3);
@@ -56,6 +56,7 @@ void Config::pup (PUP::er &p)
   p | mesh_adapt_mass_level_exponent;
   p | mesh_adapt_mass_min_overdensity;
   p | mesh_adapt_balance;
+  p | mesh_adapt_interval;
 
   p | method_sequence;
 
@@ -74,6 +75,9 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_image_size,MAX_FILE_GROUPS);
   PUParray (p,output_image_reduce_type,MAX_FILE_GROUPS);
   PUParray (p,output_image_ghost,MAX_FILE_GROUPS);
+  PUParray (p,output_image_specify_bounds,MAX_FILE_GROUPS);
+  PUParray (p,output_image_min,MAX_FILE_GROUPS);
+  PUParray (p,output_image_max,MAX_FILE_GROUPS);
   PUParray (p,output_field_list,MAX_FILE_GROUPS);
   PUParray (p,output_stride,MAX_FILE_GROUPS);
   PUParray (p,output_name,MAX_FILE_GROUPS);
@@ -94,6 +98,7 @@ void Config::pup (PUP::er &p)
 
   p | stopping_cycle;
   p | stopping_time;
+  p | stopping_interval;
 
   p | testing_cycle_final;
   p | testing_time_final;
@@ -101,8 +106,6 @@ void Config::pup (PUP::er &p)
   p | timestep_type;
 
 }
-
-#endif
 
 //----------------------------------------------------------------------
 
@@ -220,6 +223,12 @@ void Config::read(Parameters * parameters) throw()
   //  initial_value
 
   //--------------------------------------------------
+  // Memory
+  //--------------------------------------------------
+
+  memory_active = parameters->value_logical("Memory:active",true);
+
+  //--------------------------------------------------
   // Mesh
   //--------------------------------------------------
 
@@ -234,19 +243,6 @@ void Config::read(Parameters * parameters) throw()
   mesh_root_blocks[0] = parameters->list_value_integer(0,"Mesh:root_blocks",1);
   mesh_root_blocks[1] = parameters->list_value_integer(1,"Mesh:root_blocks",1);
   mesh_root_blocks[2] = parameters->list_value_integer(2,"Mesh:root_blocks",1);
-
-#ifndef CONFIG_USE_CHARM
-  int root_blocks = mesh_root_blocks[0]*mesh_root_blocks[1]*mesh_root_blocks[2];
-  GroupProcess * group_process = GroupProcess::create();
-  ASSERT4 ("Config::read()",
-	   "Product of Mesh:root_blocks = [%d %d %d] must equal MPI_Comm_size",
-	   mesh_root_blocks[0],
-	   mesh_root_blocks[1],
-	   mesh_root_blocks[2],
-	   group_process->size(),
-	   root_blocks==group_process->size());
-  delete group_process;
-#endif
 
   //--------------------------------------------------
 
@@ -306,6 +302,9 @@ void Config::read(Parameters * parameters) throw()
 
   mesh_adapt_balance = 
     parameters->value_logical ("Mesh:adapt:balance",true);
+
+  mesh_adapt_interval = 
+    parameters->value_integer ("Mesh:adapt:interval",1);
 
   //--------------------------------------------------
   // Method
@@ -491,13 +490,15 @@ void Config::read(Parameters * parameters) throw()
 		axis=="x" || axis=="y" || axis=="z");
       } 
 
-      output_image_block_size[index] = parameters->value_integer("image_block_size",1);
+      output_image_block_size[index] = 
+	parameters->value_integer("image_block_size",1);
 
       output_image_type[index] = parameters->value_string("image_type","data");
 
       output_image_log[index] = parameters->value_logical("image_log",false);
 
-      output_image_mesh_color[index] = parameters->value_string("image_mesh_color","level");
+      output_image_mesh_color[index] = 
+	parameters->value_string("image_mesh_color","level");
 
       output_image_size[index].resize(2);
       output_image_size[index][0] = 
@@ -505,17 +506,28 @@ void Config::read(Parameters * parameters) throw()
       output_image_size[index][1] = 
 	parameters->list_value_integer(1,"image_size",0);
 
-      output_image_reduce_type[index] = parameters->value_string("image_reduce_type","sum");
+      output_image_reduce_type[index] = 
+	parameters->value_string("image_reduce_type","sum");
 
-      output_image_face_rank[index] = parameters->value_integer("image_face_rank",3);
+      output_image_face_rank[index] = 
+	parameters->value_integer("image_face_rank",3);
 
-      output_image_ghost[index] = parameters->value_logical("image_ghost",false);
+      output_image_ghost[index] = 
+	parameters->value_logical("image_ghost",false);
+
+      output_image_specify_bounds[index] =
+	parameters->value_logical("image_specify_bounds",false);
+      output_image_min[index] =
+	parameters->value_float("image_min",0.0);
+      output_image_max[index] =
+	parameters->value_float("image_max",0.0);
 
       if (parameters->type("colormap") == parameter_list) {
 	int size = parameters->list_length("colormap");
 	output_image_colormap[index].resize(size);
 	for (int i=0; i<size; i++) {
-	  output_image_colormap[index][i] = parameters->list_value_float(i,"colormap",0.0);
+	  output_image_colormap[index][i] = 
+	    parameters->list_value_float(i,"colormap",0.0);
 	}
       }
 
@@ -561,6 +573,8 @@ void Config::read(Parameters * parameters) throw()
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
   stopping_time  = parameters->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
+  stopping_interval = parameters->value_integer
+    ( "Stopping:interval" , 1);
 
   //--------------------------------------------------
   // Testing

@@ -9,10 +9,7 @@
 #ifndef PROBLEM_PROLONG_HPP
 #define PROBLEM_PROLONG_HPP
 
-class Prolong 
-#ifdef CONFIG_USE_CHARM
-  : public PUP::able 
-#endif
+class Prolong : public PUP::able 
 
 {
 
@@ -24,17 +21,6 @@ public: // interface
 
   /// Constructor
   Prolong() throw();
-
-  /// Destructor
-  // ~Prolong() throw();
-
-  // /// Copy constructor
-  // Prolong(const Prolong & prolong) throw();
-
-  // /// Assignment operator
-  // Prolong & operator= (const Prolong & prolong) throw();
-
-#ifdef CONFIG_USE_CHARM
 
   /// CHARM++ PUP::able declaration
   PUPable_abstract(Prolong);
@@ -49,8 +35,6 @@ public: // interface
     p | monotonic_;
     p | positive_;
   }
-
-#endif
 
   /// Prolong comm_block_Ht values to the child block given by (icx,icy,icz)
 

@@ -18,22 +18,23 @@ class ItFace {
 public: // interface
 
   /// Constructor
-  ItFace(int rank_simulation, int rank_limit) throw();
+  ItFace(int rank, int rank_limit, 
+	 const int * ic3=0, const int * if3=0) throw();
 
   /// Destructor
   ~ItFace() throw();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
     // NOTE: change this function whenever attributes change
     TRACEPUP;
     PUParray(p,if3_,3);
-    p | rank_simulation_;
+    p | ic3_;
+    p | ipf3_;
+    p | rank_;
     p | rank_limit_;
   }
-#endif
 
   /// Reduce another value
   bool next (int if3[3]) throw();
@@ -48,9 +49,11 @@ public: // interface
 
 private: // functions
 
-  /// go to the next 
+  /// go to the next face
   void increment_();
 
+
+  /// go to the first face
   void set_first_();
 
   /// Whether the current face rank is valid
@@ -63,8 +66,14 @@ private: // attributes
   /// Current face
   int if3_[3];
 
+  /// Adjacency child
+  std::vector<int> ic3_;
+
+  /// Parent face
+  std::vector<int> ipf3_;
+
   /// simulation rank
-  int rank_simulation_;
+  int rank_;
 
   /// face rank limit
   int rank_limit_;

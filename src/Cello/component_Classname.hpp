@@ -29,14 +29,12 @@ public: // interface
   /// Assignment operator
   Classname & operator= (const Classname & classname) throw();
 
-#ifdef CONFIG_USE_CHARM
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
   }
-#endif
   
 private: // functions
 

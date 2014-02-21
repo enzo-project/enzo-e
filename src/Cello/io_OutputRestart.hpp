@@ -30,8 +30,6 @@ public: // functions
   /// Destructor
   ~OutputRestart() throw()  { }
 
-#ifdef CONFIG_USE_CHARM
-
   /// Charm++ PUP::able declarations
   PUPable_decl(OutputRestart);
 
@@ -40,8 +38,6 @@ public: // functions
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-#endif
 
 public: // virtual functions
 

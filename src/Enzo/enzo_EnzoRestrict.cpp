@@ -15,8 +15,6 @@ EnzoRestrict::EnzoRestrict(std::string restrict_type) throw()
 }
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-
 void EnzoRestrict::pup (PUP::er &p)
 {
   TRACEPUP;
@@ -24,8 +22,6 @@ void EnzoRestrict::pup (PUP::er &p)
   Restrict::pup(p);
 
 }
-
-#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
 

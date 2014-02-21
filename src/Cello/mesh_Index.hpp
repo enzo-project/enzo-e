@@ -80,6 +80,8 @@ public:
   Index index_neighbor 
   (int ix, int iy, int iz, int n3[3], bool periodic=false) const;
 
+  Index index_neighbor (int if3[3], int n3[3], bool periodic=false) const;
+
   inline Index index_uncle 
   (int axis, int face, int narray, bool periodic=false) const
   {  return index_parent().index_neighbor(axis,face, narray, periodic); }
@@ -109,7 +111,7 @@ public:
   void array (int * ix, int *iy, int *iz) const;
 
   /// Return the level of this node
-  int level () const;
+  int level() const;
 
   /// Return the packed bit index for the given axis
   // unsigned value (int axis) const;
@@ -146,23 +148,23 @@ public:
   /// Set the child indicies of this node in the parent
   void set_child(int level, int ix, int iy=0, int iz=0);
 
-  void print (const char * msg = "\0",
-	      int max_level = -1,
-	      int rank = 3) const;
+  void print (const char * msg,
+	      int max_level,
+	      int rank,
+	      bool no_nl,
+	      void * simulation = 0) const;
 
   void write (int ip,
 	      const char * msg = "\0",
 	      int max_level = -1,
 	      int rank = 3) const;
 
-  std::string bit_string (int max_level,int rank) const;
+  std::string bit_string (int max_level,int rank, int bits = 0) const;
 
 private: // functions
 
   int num_bits_(int value) const;
-  void print_bits_(int value, int nb) const;
-  void write_bits_(FILE * fp, int value, int nb) const;
-
+	
   inline void copy_ (const Index & index)
   {
     a_[0] = index.a_[0];
@@ -178,13 +180,10 @@ private: // attributes
     };
 };
 
-#ifdef CONFIG_USE_CHARM
 #ifndef TEST
   PUPbytes(Index);
 #endif
-#endif /* CONFIG_USE_CHARM */
 
-#ifdef CONFIG_USE_CHARM
 #ifndef TEST
 // public:
 //   void pup(PUP::er &p) {
@@ -192,11 +191,8 @@ private: // attributes
 //   }
 PUPbytes(BIndex);
 #endif
-#endif /* CONFIG_USE_CHARM */
 
 //----------------------------------------------------------------------
-#ifdef CONFIG_USE_CHARM
-
 #ifndef TEST
 class CkArrayIndexIndex:public CkArrayIndex {
   Index index_;
@@ -221,5 +217,3 @@ public:
 };
 #endif
 #endif /* INDEX_HPP */
-
-#endif /* CONFIG_USE_CHARM */
