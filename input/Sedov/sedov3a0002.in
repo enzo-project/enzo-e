@@ -1,7 +1,0 @@
- include "sedov-amr.incl"
- include "sedov-output.incl"
- include "sedov_array_3.incl"
-
- Mesh { root_size     = [64,32,32]; }
-
- Output { file_groups = []; }

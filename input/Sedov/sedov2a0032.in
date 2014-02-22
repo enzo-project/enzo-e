@@ -1,9 +1,0 @@
- include "sedov-amr.incl"
- include "sedov-output.incl"
- include "sedov_array_2.incl"
-
- Mesh { root_size     = [256,128]; }
- Mesh { root_blocks   = [8,4]; }
- Enzo { sedov { array = [8,4]; } }
- Domain { upper =       [1.0,0.5]; }
-# Output { file_groups = []; }

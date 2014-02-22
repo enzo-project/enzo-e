@@ -1,27 +1,27 @@
 .PHONY: dimension-%
 dimension-%:
-	ln -sf config-dimension-$*.incl config-dimension.incl
+	ln -sf config/config-dimension-$*.incl config-dimension.incl
 .PHONY: max-level-%
 max-level-%:
-	ln -sf config-max-level-$*.incl config-max-level.incl
+	ln -sf config/config-max-level-$*.incl config-max-level.incl
 .PHONY: stopping-cycle-%
 stopping-cycle-%:
-	ln -sf config-stopping-cycle-$*.incl config-stopping-cycle.incl
+	ln -sf config/config-stopping-cycle-$*.incl config-stopping-cycle.incl
 .PHONY: refresh-%
 refresh-%:
-	ln -sf config-refresh-$*.incl config-refresh.incl
+	ln -sf config/config-refresh-$*.incl config-refresh.incl
 .PHONY: output-%
 output-%:
-	ln -sf config-output-$*.incl config-output.incl
+	ln -sf config/config-output-$*.incl config-output.incl
 
 .PHONY: processors-%
 processors-%:
-	ln -sf config2-processors-$*.incl config2-processors.incl
-	ln -sf config3-processors-$*.incl config3-processors.incl
+	ln -sf config/config2-processors-$*.incl config2-processors.incl
+	ln -sf config/config3-processors-$*.incl config3-processors.incl
 .PHONY: root-size-%
 root-size-%:
-	ln -sf config2-root-size-$*.incl config2-root-size.incl
-	ln -sf config3-root-size-$*.incl config3-root-size.incl
+	ln -sf config/config2-root-size-$*.incl config2-root-size.incl
+	ln -sf config/config3-root-size-$*.incl config3-root-size.incl
 
 .PHONY: default
 default:
@@ -53,6 +53,7 @@ clean:
 	-@rm -f config3-root-size.incl
 	-@rm -f config-max-level.incl
 	-@rm -f config-stopping-cycle.incl
+	-@rm -f config-refresh.incl
 	-@rm -f config-output.incl
 
 

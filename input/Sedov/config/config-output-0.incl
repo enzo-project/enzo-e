@@ -1,0 +1,8 @@
+# FILE: output-0
+
+Output {
+   file_groups = [];
+   mesh { schedule = ["cycle","interval", 0]; }
+   de   { schedule = ["cycle","interval", 0]; }
+   te   { schedule = ["cycle","interval", 0]; }
+}
