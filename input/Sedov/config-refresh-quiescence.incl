@@ -1,0 +1,7 @@
+# FILE: refresh-quiescence
+
+Field {
+    refresh {
+       type = "quiescence";
+    }
+}

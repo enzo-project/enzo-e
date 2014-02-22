@@ -1,0 +1,3 @@
+# FILE: root-size = 128
+
+Mesh { root_size = [ 128,128,128 ]; }

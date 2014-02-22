@@ -1,0 +1,3 @@
+# FILE: root-size = 64
+
+Mesh { root_size = [ 64,64 ]; }

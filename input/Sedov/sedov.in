@@ -1,15 +1,9 @@
 # Default: 64^3 domain, 16^3 block sizes, with sedov blast in each block
 
-include "sedov-amr.incl"
-include "sedov-max_level.incl"
-include "sedov-output.incl"
-include "sedov-rank.incl"
+include "config-default.incl"
 
-
-# 2D PROBLEM
-
-
-Enzo { sedov { radius_relative = 0.03; } }
-
-Stopping { cycle = 5; }
-
+include "config-dimension.incl"
+include "config-max-level.incl"
+include "config-refresh.incl"
+include "config-stopping-cycle.incl"
+include "config-output.incl"

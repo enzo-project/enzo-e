@@ -1,0 +1,7 @@
+# FILE: refresh-counter
+
+Field {
+    refresh {
+       type = "counter";
+    }
+}

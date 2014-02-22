@@ -32,7 +32,7 @@ memory = 1
 
 # Whether to trace memory usage in different components
 
-trace_memory = 1
+trace_memory = 0
 
 # Enable charm++ dynamic load balancing
 

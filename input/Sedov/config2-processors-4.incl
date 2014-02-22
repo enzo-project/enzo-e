@@ -1,0 +1,6 @@
+# FILE: processors-4
+
+ Mesh { root_blocks   = [2,2]; }
+ Enzo { sedov { array = [2,2]; } }
+ Domain { upper =       [1.0,1.0]; }
+

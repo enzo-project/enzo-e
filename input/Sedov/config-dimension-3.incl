@@ -1,0 +1,28 @@
+# FILE: dimension-3
+
+include "config3-processors.incl"
+include "config3-root-size.incl"
+
+Domain { 
+   lower = [0.0, 0.0, 0.0];
+   upper = [1.0, 1.0, 1.0];
+} 
+
+Mesh { 
+   root_rank = 3;
+}
+
+Field {
+
+   fields = [
+        "density",	
+	"velocity_x",
+	"velocity_y",
+	"velocity_z",
+	"total_energy",
+	"internal_energy"
+      ] ;
+}
+
+Initial { type = "sedov_array_3d"; }
+

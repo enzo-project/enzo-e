@@ -1,0 +1,90 @@
+# FILE: config-default
+
+Mesh {
+   adapt {
+      type = ["slope"];
+      fields = ["total_energy"];
+      balance = true;
+   };
+}
+
+Field {
+    ghosts = 4; # must be even for ProlongLinear
+    prolong = "linear";
+    refresh {
+       rank = 0;
+    };
+    courant   = 0.8;
+    padding   = 0;
+    alignment = 8;
+}
+   Method {
+
+#^^^
+      # list of methods to apply and in what order
+ 
+      sequence = ["ppm"];
+
+   }
+
+   Timestep { type = "ppm"; }
+
+   Enzo {
+
+      gamma = 1.4;
+
+      ppm {
+
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+
+         dual_energy = false;
+     }
+   }
+
+   Boundary { type = "periodic" }
+ Enzo { sedov { radius_relative = 0.1; } }
+
+   Output { 
+
+    mesh {
+         name = ["sedov-mesh-%03d.png", "cycle"]; 
+         type     = "image";
+         image_type  = "mesh";
+         image_reduce_type = "max";
+	 image_block_size  = 5;
+#	image_size = [513,513];
+#	image_size = [1201,1201];
+          colormap = [1.00, 1.00, 1.00,  
+                     0.00, 1.00, 0.00, 
+                     1.00, 0.00, 0.00, 
+                     0.00, 0.00, 1.00];
+      };
+
+      de {
+        axis = "z";    
+	type     = "image";
+        name     = ["sedov-de-%03d.png","cycle"];
+        field_list = ["density"];
+        colormap = [0.0, 0.0, 0.0,  
+                    0.0, 1.0, 0.0, 
+                    1.0, 1.0, 0.0, 
+                    1.0, 1.0, 1.0];
+        
+      };
+
+      te {
+    
+        axis = "z";    
+	type     = "image";
+        name     = ["sedov-te-%03d.png","cycle"];
+        field_list = ["total_energy"];
+        colormap = [0.0, 0.0, 0.0,  
+                    1.0, 0.0, 0.0, 
+                    1.0, 1.0, 0.0, 
+                    1.0, 1.0, 1.0];
+        
+      };
+   }
+

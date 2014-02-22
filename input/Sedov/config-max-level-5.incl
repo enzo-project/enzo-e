@@ -1,0 +1,4 @@
+# FILE: max-level-5
+
+Mesh    { max_level = 5;}
+Initial { max_level = 5; }
