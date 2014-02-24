@@ -2,7 +2,7 @@
 
 Output {
    file_groups = [];
-   mesh { schedule = ["cycle","interval", 0]; }
-   de   { schedule = ["cycle","interval", 0]; }
+   mesh { schedule = ["cycle","interval", 0]; };
+   de   { schedule = ["cycle","interval", 0]; };
    te   { schedule = ["cycle","interval", 0]; }
 }

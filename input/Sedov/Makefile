@@ -28,7 +28,7 @@ default:
 	-@$(MAKE) dimension-3
 	-@$(MAKE) processors-8
 	-@$(MAKE) root-size-32
-	-@$(MAKE) max-level-1
+	-@$(MAKE) max-level-3
 	-@$(MAKE) stopping-cycle-5
 	-@$(MAKE) refresh-counter
 	-@$(MAKE) output-1
