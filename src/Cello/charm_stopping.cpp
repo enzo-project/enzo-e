@@ -42,9 +42,10 @@ void CommBlock::stopping_enter_()
   update_boundary_();
 
   int stopping_interval = simulation->config()->stopping_interval;
-  bool stopping_reduce = ((cycle_ % stopping_interval) == 0);
+  bool stopping_reduce = stopping_interval ? 
+    ((cycle_ % stopping_interval) == 0) : false;
 
-  if (stopping_reduce) {
+  if (stopping_reduce || dt_==0.0) {
     // Compute local dt
 
     Problem * problem = simulation->problem();
@@ -119,6 +120,7 @@ void CommBlock::stopping_exit_()
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
+  PARALLEL_PRINTF ("%d dt = %d\n",CkMyPe(),dt_);
   set_dt   (dt_);
   set_stop (stop_);
 

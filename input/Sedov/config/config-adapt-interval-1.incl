@@ -1,4 +1,5 @@
-#
+# FILE: adapt-interval-1
+
 Mesh {
    adapt {
       interval = 1; # 0 == TURN OFF DYNAMIC ADAPT

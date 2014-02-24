@@ -1,0 +1,7 @@
+# FILE: adapt-interval-5
+
+Mesh {
+   adapt {
+      interval = 5; # 0 == TURN OFF DYNAMIC ADAPT
+   }
+}

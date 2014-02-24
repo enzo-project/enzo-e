@@ -7,6 +7,12 @@ max-level-%:
 .PHONY: stopping-cycle-%
 stopping-cycle-%:
 	ln -sf config/config-stopping-cycle-$*.incl config-stopping-cycle.incl
+.PHONY: stopping-interval-%
+stopping-interval-%:
+	ln -sf config/config-stopping-interval-$*.incl config-stopping-interval.incl
+.PHONY: adapt-interval-%
+adapt-interval-%:
+	ln -sf config/config-adapt-interval-$*.incl config-adapt-interval.incl
 .PHONY: refresh-%
 refresh-%:
 	ln -sf config/config-refresh-$*.incl config-refresh.incl
@@ -30,6 +36,8 @@ default:
 	-@$(MAKE) root-size-32
 	-@$(MAKE) max-level-3
 	-@$(MAKE) stopping-cycle-5
+	-@$(MAKE) stopping-interval-1
+	-@$(MAKE) adapt-interval-1
 	-@$(MAKE) refresh-counter
 	-@$(MAKE) output-0
 .PHONY: show-config
@@ -41,6 +49,8 @@ show-config:
 	-@grep FILE config3-root-size.incl
 	-@grep FILE config-max-level.incl
 	-@grep FILE config-stopping-cycle.incl
+	-@grep FILE config-stopping-interval.incl
+	-@grep FILE config-adapt-interval.incl
 	-@grep FILE config-refresh.incl
 	-@grep FILE config-output.incl
 
@@ -53,6 +63,8 @@ clean:
 	-@rm -f config3-root-size.incl
 	-@rm -f config-max-level.incl
 	-@rm -f config-stopping-cycle.incl
+	-@rm -f config-stopping-interval.incl
+	-@rm -f config-adapt-interval.incl
 	-@rm -f config-refresh.incl
 	-@rm -f config-output.incl
 

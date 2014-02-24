@@ -1,0 +1,4 @@
+# FILE: stopping-interval-1
+
+Stopping { interval = 1; }
+

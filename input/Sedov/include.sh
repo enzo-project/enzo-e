@@ -30,6 +30,10 @@ if [ $H == "sdsc-gordon" ]; then
 
    $charmrun ++mpiexec +p$P ./enzo-p $input >& $output
 
+elif [ $H == "sdsc-gedeckt" ]; then
+
+   $charmrun +p$P ./enzo-p $input >& $output
+
 elif [ $H == "ncsa-bw" ]; then
 
     . /opt/modules/default/init/bash
