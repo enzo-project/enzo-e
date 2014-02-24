@@ -31,7 +31,7 @@ default:
 	-@$(MAKE) max-level-3
 	-@$(MAKE) stopping-cycle-5
 	-@$(MAKE) refresh-counter
-	-@$(MAKE) output-1
+	-@$(MAKE) output-0
 .PHONY: show-config
 show-config:
 	-@grep FILE config-dimension.incl

@@ -2,36 +2,40 @@
 # INPUT FROM CALLING SCRIPT
 #
 #    P=%04d     number of processors
-#    T=[2a|3a]  type: 2D amr or unigrid
 #    H=["sdsc-gordon"|"sdsc-bw"]
-#    V=[0|1|2|3] (see log 2014-02-18)
 #
 #----------------------------------------------------------------------
 
+P0=`printf "%04d" $P`
+
 cello=$HOME/Cello/cello-src
 charm=$HOME/Charm/charm
+rundir=$cello/input/Sedov/run.$P0
 
-cd $cello/input/Sedov
+rm -rf $rundir
+mkdir $rundir
+cd $rundir
 
-P0=`printf "%04d" $P`
 enzorun=$cello/bin/enzo-p
 charmrun=$charm/bin/charmrun
-input=sedov$T$P0.in
-output=out.sedov$T$P0
+input=sedov.in
+output=out.sedov
 
-
+cp -r ../$input .
+cp -r ../config .
+cp -r ../config*-*.incl .
+cp $enzorun .
 
 if [ $H == "sdsc-gordon" ]; then
 
-   $charmrun ++mpiexec +p$P $enzorun $input >& $output
+   $charmrun ++mpiexec +p$P ./enzo-p $input >& $output
 
 elif [ $H == "ncsa-bw" ]; then
 
-
     . /opt/modules/default/init/bash
-    module swap PrgEnv-cray PrgEnv-gnu
+   source $HOME/bin/cmod.sh
 
-   aprun -n $P -d 2 $enzorun $input >& $output
+   aprun -n $P -d 2 ./enzo-p $input >& $output
 
 fi
 
