@@ -24,16 +24,18 @@ void SimulationCharm::initialize() throw()
   // ENTRY: callback
   // --------------------------------------------------
   CkCallback callback 
-    (CkIndex_SimulationCharm::r_initialize_forest(), thisProxy);
+    (CkIndex_SimulationCharm::r_initialize_forest(NULL), thisProxy);
   contribute(0,0,CkReduction::concat,callback);
   // --------------------------------------------------
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::r_initialize_forest() 
+void SimulationCharm::r_initialize_forest(CkReductionMsg * msg) 
 {
 
+  delete msg;
+  
   initialize_forest_();
 
   // --------------------------------------------------
@@ -41,7 +43,7 @@ void SimulationCharm::r_initialize_forest()
   // ENTRY: callback   
   // --------------------------------------------------
   CkCallback callback 
-    (CkIndex_SimulationCharm::r_initialize_hierarchy(), thisProxy);
+    (CkIndex_SimulationCharm::r_initialize_hierarchy(NULL), thisProxy);
   // --------------------------------------------------
 
   contribute(0,0,CkReduction::concat,callback);
@@ -49,8 +51,10 @@ void SimulationCharm::r_initialize_forest()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::r_initialize_hierarchy() 
+void SimulationCharm::r_initialize_hierarchy(CkReductionMsg * msg) 
 {
+  delete msg;
+
   if (group_process_->is_root()) {
     
     // --------------------------------------------------

@@ -120,7 +120,6 @@ void CommBlock::stopping_exit_()
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  PARALLEL_PRINTF ("%d dt = %d\n",CkMyPe(),dt_);
   set_dt   (dt_);
   set_stop (stop_);
 
@@ -130,7 +129,6 @@ void CommBlock::stopping_exit_()
 
 #ifdef TRACE_MEMORY
   trace_mem_ = Memory::instance()->bytes() - trace_mem_;
-  PARALLEL_PRINTF ("memory stopping %lld\n",trace_mem_);
 #endif
 
   simulation_charm->begin_output();

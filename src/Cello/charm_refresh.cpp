@@ -244,7 +244,7 @@ void CommBlock::refresh_exit_()
   // ENTRY: contribute
   // --------------------------------------------------
   CkCallback callback 
-    (CkIndex_CommBlock::r_adapt_enter(), thisProxy);
+    (CkIndex_CommBlock::r_adapt_enter(NULL), thisProxy);
   contribute(0,0,CkReduction::concat,callback);
   // --------------------------------------------------
     

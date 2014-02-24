@@ -26,7 +26,7 @@ void SimulationCharm::begin_output ()
 
   if (block_sync_.next()) {
 
-    CkCallback callback (CkIndex_SimulationCharm::r_output(), thisProxy);
+    CkCallback callback (CkIndex_SimulationCharm::r_output(NULL), thisProxy);
     // --------------------------------------------------
     // ENTRY: #1 SimulationCharm::output()-> SimulationCharm::r_output()
     // ENTRY: contribute() if block_sync_.next()
@@ -38,8 +38,11 @@ void SimulationCharm::begin_output ()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::r_output()
+void SimulationCharm::r_output(CkReductionMsg * msg)
 {
+
+  delete msg;
+
   problem()->output_reset();
   problem()->output_next(this);
 }
@@ -99,7 +102,7 @@ void SimulationCharm::write_()
 {
   if (block_sync_.next()) {
 
-    CkCallback callback (CkIndex_SimulationCharm::r_write(), thisProxy);
+    CkCallback callback (CkIndex_SimulationCharm::r_write(NULL), thisProxy);
 
     // --------------------------------------------------
     // ENTRY: #2 SimulationCharm::write_()-> SimulationCharm::r_write()
@@ -113,8 +116,10 @@ void SimulationCharm::write_()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::r_write()
+void SimulationCharm::r_write(CkReductionMsg * msg)
 {
+  delete msg;
+
   problem()->output_wait(this);
 }
 

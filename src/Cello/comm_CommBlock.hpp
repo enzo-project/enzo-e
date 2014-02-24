@@ -230,7 +230,7 @@ public: // interface
   // ADAPT
   //--------------------------------------------------
 
-  void r_adapt_enter() 
+  void r_adapt_enter(CkReductionMsg * msg) 
   {      adapt_enter_(); }
   void p_adapt_enter() 
   {      adapt_enter_(); }

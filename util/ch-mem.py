@@ -6,12 +6,8 @@ import matplotlib.pyplot as plt
 
 color = ['r','g','b','y','c','m']
 
-file = [
-    'adapt',
-    'refresh',
-    'compute',
-    'output',
-    'stopping']
+#file = [ 'adapt', 'refresh', 'compute', 'output', 'stopping']
+file = [ 'all']
 
 plt.title("Bytes per Block")
 plt.xlabel("Block")

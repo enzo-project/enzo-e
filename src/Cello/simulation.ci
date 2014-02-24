@@ -26,13 +26,13 @@ module simulation {
 
     entry SimulationCharm (const char filename[n], int n); // [SC0]
 
-    entry void r_initialize_forest ();    // [SC2]
-    entry void r_initialize_hierarchy (); // [SC3]
+    entry void r_initialize_forest (CkReductionMsg * msg);    // [SC2]
+    entry void r_initialize_hierarchy (CkReductionMsg * msg); // [SC3]
 
-    entry void r_output (); // [SC5]
+    entry void r_output (CkReductionMsg * msg); // [SC5]
 
     entry void s_write (); // [SC6]
-    entry void r_write (); // [SC7]
+    entry void r_write (CkReductionMsg * msg); // [SC7]
 
     entry void p_output_write (int n, char buffer[n]); // [SC8]
 

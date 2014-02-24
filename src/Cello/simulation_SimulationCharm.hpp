@@ -78,22 +78,22 @@ public: // functions
   }
 
   /// Wait for all Hierarchy to be initialized before creating any CommBlocks
-  void r_initialize_forest();
+  void r_initialize_forest(CkReductionMsg * msg);
 
   /// Wait for all local patches to be created before calling run
-  void r_initialize_hierarchy();
+  void r_initialize_hierarchy(CkReductionMsg * msg);
 
   /// Call output on Problem list of Output objects
   void begin_output ();
 
-  void r_output ();
+  void r_output (CkReductionMsg * msg);
 
   /// Reduce output, using p_output_write to send data to writing processes
   void s_write() { write_(); };
   void write_();
 
   /// Continue on to Problem::output_wait()
-  void r_write();
+  void r_write(CkReductionMsg * msg);
 
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output

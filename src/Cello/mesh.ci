@@ -69,7 +69,7 @@ module mesh {
     //--------------------------------------------------
 
     entry void p_adapt_enter();   // [CB5]
-    entry void r_adapt_enter();   // [CB22]
+    entry void r_adapt_enter(CkReductionMsg * msg);   // [CB22]
 
     entry void p_adapt_delete();  // [CB11]
     entry void q_adapt_exit();    // [CB13]
