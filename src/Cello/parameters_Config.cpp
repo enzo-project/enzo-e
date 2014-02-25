@@ -208,6 +208,10 @@ void Config::read(Parameters * parameters) throw()
 	    field_refresh_type.c_str());
   }
 
+  prolong_type   = parameters->value_string ("Field:prolong","linear");
+
+  restrict_type  = parameters->value_string ("Field:restrict","linear");
+
   //--------------------------------------------------
   // Initial
   //--------------------------------------------------
@@ -265,6 +269,28 @@ void Config::read(Parameters * parameters) throw()
   for (int i=0; i<num_adapt_type; i++) {
     mesh_adapt_type[i] = parameters->list_value_string(i,"Mesh:adapt:type");
   }
+
+  //--------------------------------------------------
+
+  std::string sync;
+
+  mesh_sync_adapt_enter = parameters->value_string 
+    ("Mesh:sync:adapt_enter","array");
+
+  mesh_sync_adapt_next = parameters->value_string 
+    ("Mesh:sync:adapt_next","quiescence");
+
+  mesh_sync_adapt_called = parameters->value_string 
+    ("Mesh:sync:adapt_called","neighbor");
+
+  mesh_sync_adapt_exit = parameters->value_string 
+    ("Mesh:sync:adapt_exit","quiescence");
+
+  mesh_sync_refresh_enter = parameters->value_string 
+    ("Mesh:sync:refresh_enter","array");
+
+  mesh_sync_refresh_exit = parameters->value_string 
+    ("Mesh:sync:refresh_exit","contribute");
 
   //--------------------------------------------------
 
@@ -560,10 +586,6 @@ void Config::read(Parameters * parameters) throw()
   performance_name     = parameters->value_string ("Performance:name","");
   performance_stride   = parameters->value_integer("Performance:stride",1);
   performance_warnings = parameters->value_logical("Performance:warnings",true);
-
-  prolong_type  = parameters->value_string ("Field:prolong","linear");
-
-  restrict_type  = parameters->value_string ("Field:restrict","linear");
 
   //--------------------------------------------------
   // Stopping

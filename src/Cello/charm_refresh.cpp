@@ -113,7 +113,7 @@ void CommBlock::refresh_enter_()
     // --------------------------------------------------
   }  else if ((refresh_type == "counter")) {
 
-    control_sync_neighbor_(phase_sync_refresh);
+    control_sync_neighbor_(phase_sync_refresh_exit);
 
   }
 
@@ -236,24 +236,21 @@ void CommBlock::refresh_exit_()
   PARALLEL_PRINTF ("memory refresh %lld\n",trace_mem_);
 #endif
 
-  if      (next_phase_ == phase_stopping)  stopping_enter_();
-  else if (next_phase_ == phase_adapt) {
+  if      (next_phase_ == phase_stopping)  {
 
-  // --------------------------------------------------
-  // ENTRY: #3 CommBlock::refresh_exit_() -> r_adapt_mesh()
-  // ENTRY: contribute
-  // --------------------------------------------------
-  CkCallback callback 
-    (CkIndex_CommBlock::r_adapt_enter(NULL), thisProxy);
-  contribute(0,0,CkReduction::concat,callback);
-  // --------------------------------------------------
-    
+    stopping_enter_();
 
+  }  else if (next_phase_ == phase_adapt) {
 
-  }
-  else ERROR1 ("CommBlock::q_refresh_exit()",
+    control_sync(phase_sync_adapt_enter);
+
+  } else {
+
+    ERROR1 ("CommBlock::q_refresh_exit()",
 	       "Unknown next_phase %d",
 	       next_phase_);
+
+  }
 }
 
 //----------------------------------------------------------------------

@@ -86,6 +86,12 @@ public: // attributes
   double                     mesh_adapt_mass_level_exponent;
   bool                       mesh_adapt_balance;
   int                        mesh_adapt_interval;
+  std::string                mesh_sync_adapt_enter;
+  std::string                mesh_sync_adapt_called;
+  std::string                mesh_sync_adapt_next;
+  std::string                mesh_sync_adapt_exit;
+  std::string                mesh_sync_refresh_enter;
+  std::string                mesh_sync_refresh_exit;
 
   std::vector<std::string>   method_sequence;
 

@@ -230,13 +230,39 @@ public: // interface
   // ADAPT
   //--------------------------------------------------
 
-  void r_adapt_enter(CkReductionMsg * msg) 
-  {      adapt_enter_(); }
   void p_adapt_enter() 
   {      adapt_enter_(); }
-  void q_adapt_next ();
+  void q_adapt_enter() 
+  {      adapt_enter_(); }
+  void r_adapt_enter(CkReductionMsg * msg) 
+  {      delete msg;
+         adapt_enter_(); }
+
+  void p_adapt_next ()
+  {      adapt_next_(); }
+  void q_adapt_next ()
+  {      adapt_next_(); }
+  void r_adapt_next (CkReductionMsg * msg)
+  {      delete msg;
+         adapt_next_(); }
+
+  void p_adapt_called() 
+  {      adapt_called_(); }
+  void q_adapt_called() 
+  {      adapt_called_(); }
+  void r_adapt_called(CkReductionMsg * msg) 
+  {      delete msg; 
+         adapt_called_(); 
+  }
+
+  void p_adapt_exit ()  
+  {      adapt_exit_(); }
   void q_adapt_exit ()  
   {      adapt_exit_(); }
+  void r_adapt_exit (CkReductionMsg * msg)  
+  {      delete msg;
+         adapt_exit_(); }
+
 
   /// Parent tells child to delete itself
   void p_adapt_delete();
@@ -262,13 +288,16 @@ public:
   // CONTROL AND SYNCHRONIZATION
   //--------------------------------------------------
 
-  /// neighbor synchronization
-  void p_control_sync(int phase, int count) 
-  {      control_sync_(phase,count); }
+  /// Syncronize before continuing with next phase
+  void control_sync(int phase);
+
+  /// synchronize with count other chares
+  void p_control_sync_count(int phase, int count) 
+  {      control_sync_count_(phase,count); }
 
 protected:
   void control_sync_neighbor_(int phase);
-  void control_sync_(int phase, int count);
+  void control_sync_count_(int phase, int count);
   void control_call_phase_ (int phase);
 public:
 
@@ -279,10 +308,18 @@ public:
   /// Refresh ghost zones and apply boundary conditions
   void p_refresh_enter()  
   {      refresh_enter_(); }
+  void q_refresh_enter()  
+  {      refresh_enter_(); }
+  void r_refresh_enter(CkReductionMsg * msg)  
+  {      delete msg; refresh_enter_(); }
 
   /// Exit the refresh phase after QD
+  void p_refresh_exit () 
+  {      refresh_exit_(); }
   void q_refresh_exit () 
   {      refresh_exit_(); }
+  void r_refresh_exit (CkReductionMsg * msg) 
+  {      delete msg;  refresh_exit_(); }
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
   void x_refresh_face

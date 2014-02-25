@@ -62,18 +62,29 @@ module mesh {
     // *** CONTROL ***
     //--------------------------------------------------
 
-    entry [expedited] void p_control_sync ( int phase, int count);
+    entry [expedited] void p_control_sync_count ( int phase, int count);
 
     //--------------------------------------------------
     // *** ADAPT ***
     //--------------------------------------------------
 
     entry void p_adapt_enter();   // [CB5]
-    entry void r_adapt_enter(CkReductionMsg * msg);   // [CB22]
+    entry void q_adapt_enter();
+    entry void r_adapt_enter(CkReductionMsg *);   // [CB22]
+
+    entry void p_adapt_exit();    // [CB13]
+    entry void q_adapt_exit();    // [CB13]
+    entry void r_adapt_exit(CkReductionMsg *);
+
+    entry void p_adapt_next();    // [CB12]
+    entry void q_adapt_next();    // [CB12]
+    entry void r_adapt_next(CkReductionMsg *);
+
+    entry void p_adapt_called();
+    entry void q_adapt_called();
+    entry void r_adapt_called(CkReductionMsg *);
 
     entry void p_adapt_delete();  // [CB11]
-    entry void q_adapt_exit();    // [CB13]
-    entry void q_adapt_next();    // [CB12]
 
     entry void p_adapt_recv_neighbor_level  // [CB7]
       (Index index,int ic3[3], int if3[3], int level_now, int level_new);
@@ -87,7 +98,12 @@ module mesh {
     //--------------------------------------------------
 
     entry void p_refresh_enter();         // [CB14]
+    entry void q_refresh_enter();
+    entry void r_refresh_enter(CkReductionMsg *);
+
+    entry void p_refresh_exit();
     entry void q_refresh_exit();          // [CB15]
+    entry void r_refresh_exit(CkReductionMsg *);
 
     entry [expedited] void x_refresh_face // [CB21]
       (int n, char buffer[n],  char rtype, int iface[3], int ichild[3]);

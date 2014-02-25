@@ -74,7 +74,7 @@ void CommBlock::adapt_enter_()
 
   level_new_ = adapt_compute_desired_level_(level_maximum);
 
-  control_sync_neighbor_(phase_sync_adapt_called);
+  control_sync (phase_sync_adapt_called);
 
 }
 
@@ -87,15 +87,7 @@ void CommBlock::adapt_called_()
     adapt_send_neighbors_levels(level_new_);
   }
 
-  // --------------------------------------------------
-  // ENTRY: #4 CommBlock::adapt_called_()-> CommBlock::q_adapt_next()
-  // ENTRY: sync:  quiescence
-  // ENTRY: phase: adapt
-  // ENTRY: if:    true
-  // --------------------------------------------------
-  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_next(), 
-    			thisProxy[thisIndex]));
-  // --------------------------------------------------
+  control_sync (phase_sync_adapt_next);
 
 }
 
@@ -136,17 +128,11 @@ int CommBlock::adapt_compute_desired_level_(int level_maximum)
     level_desired = level;
   }
 
-#ifdef DEBUG_ADAPT
-  // sprintf (buffer,"desired level %d",level_desired);
-  // index_.print(buffer,-1,2,false,simulation());
-#endif
-
   return level_desired;
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::q_adapt_next() { adapt_next_(); }
 void CommBlock::adapt_next_()
 {
 
@@ -168,15 +154,7 @@ void CommBlock::adapt_next_()
     if (level() > level_new_) adapt_coarsen_();
   }
 
-  // --------------------------------------------------
-  // ENTRY: #5 CommBlock::adapt_next_()-> CommBlock::q_adapt_exit()
-  // ENTRY: quiescence
-  // ENTRY: adapt phase
-  // --------------------------------------------------
-  CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(), 
-			thisProxy[thisIndex]));
-  // --------------------------------------------------
-
+  control_sync (phase_sync_adapt_exit);
 }
 
 //----------------------------------------------------------------------
@@ -215,36 +193,20 @@ void CommBlock::adapt_exit_()
 
   bool adapt_again = (is_first_cycle && adapt_step_++ < level_maximum);
 
-  // #define NEW_Q_ADAPT_END
-
-#ifdef NEW_Q_ADAPT_END
-
-  if (adapt_again) {
-
-    adapt_enter_();
-
-  } else {
-
-    refresh_enter();
-  }
-
-#else
-
   if (adapt_again) {
     // ENTRY: #7 CommBlock::adapt_exit_()-> CommBlock::p_adapt_enter()
     // ENTRY: block array if (is_root && create)
     // ENTRY: adapt phase
 
-    if (thisIndex.is_root()) thisProxy.p_adapt_enter();
+    control_sync (phase_sync_adapt_enter);
 
   } else {
     // ENTRY: #8 CommBlock::adapt_exit_()-> CommBlock::p_refresh_enter()
     // ENTRY: block array if (is_root && not create)
     // ENTRY: adapt phase
 
-    if (thisIndex.is_root()) thisProxy.p_refresh_enter();
+    control_sync (phase_sync_refresh_enter);
   }
-#endif
 
 }
 
@@ -536,24 +498,6 @@ void CommBlock::p_adapt_recv_neighbor_level
     bool is_coarsening = level_new < level;
     bool is_finer_neighbor = level_face_new > level_new;
 
-
-#ifdef DEBUG_ADAPT
-    // sprintf (buffer,":%d face %d %d %d  child %d %d %d",
-    // 	     __LINE__,if3[0],if3[1],if3[2],ic3[0],ic3[1],ic3[2]);
-
-    // index_.print(buffer,-1,2,false,simulation());
-
-    // sprintf (buffer,":%d coarsening %d sibling %d finer %d",
-    // 	     __LINE__, is_coarsening, is_sibling, is_finer_neighbor);
-
-    // index_.print(buffer,-1,2,false,simulation());
-
-    // sprintf (buffer,":%d level %d level_new_ %d level_new %d level_face_new %d",
-    // 	     __LINE__,level, level_new_, level_new, level_face_new);
-
-    // index_.print(buffer,-1,2,false,simulation());
-#endif
-
     if (is_coarsening && ((is_sibling && is_finer_neighbor) || is_nephew )) {
 
 #ifdef DEBUG_ADAPT
@@ -686,16 +630,7 @@ void CommBlock::p_adapt_send_child_data
 
 void CommBlock::p_adapt_delete()
 {
-
-// #ifdef CELLO_DEBUG
-//     index_.print("DEBUG ckDestroy()",-1,2,false,simulation());
-// #endif
-
-    //    ckDestroy();
-
-    //    return;
-    //  }
-      delete_ = true;
+  delete_ = true;
 }
 
 //======================================================================

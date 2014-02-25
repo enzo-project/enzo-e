@@ -57,7 +57,7 @@ use_performance = 0
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
 
-use_projections = 1
+use_projections = 0
 
 # How many processors to run parallel unit tests
 

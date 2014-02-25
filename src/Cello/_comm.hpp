@@ -56,11 +56,13 @@ enum array_type {
 enum phase_sync_type {
   phase_sync_unknown,
   phase_sync_adapt_called,
+  phase_sync_adapt_enter,
   phase_sync_adapt_next,
   phase_sync_adapt_exit,
-  phase_sync_refresh
+  phase_sync_refresh_enter,
+  phase_sync_refresh_exit
 };
-#define PHASE_SYNC_SIZE 5
+#define PHASE_SYNC_SIZE 7
 
 //----------------------------------------------------------------------
 // System includes
