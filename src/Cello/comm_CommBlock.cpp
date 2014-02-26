@@ -637,7 +637,7 @@ Index CommBlock::neighbor_
   int na3[3];
   size_forest (&na3[0],&na3[1],&na3[2]);
   const bool periodic  = simulation()->problem()->boundary()->is_periodic();
-  Index in = index.index_neighbor (of3[0],of3[1],of3[2],na3,periodic);
+  Index in = index.index_neighbor (of3,na3);
   return in;
 }
 

@@ -90,40 +90,6 @@ Index Index::index_child (int icx, int icy, int icz) const
 
 //----------------------------------------------------------------------
 
-Index Index::index_neighbor (int axis, int face, int narray, bool periodic) const
-{
-  if (face == 0) face = -1;
-
-  Index index = *this;
-
-  int array = index.a_[axis].array;
-  int tree  = index.a_[axis].tree;
-
-  // update tree bits
-
-  int level = index.level();
-  int shift_level = (1 << (INDEX_MAX_TREE_BITS - level));
-
-  tree += face*shift_level; 
-
-  int shift_overflow = (1 << INDEX_MAX_TREE_BITS);
-
-  if (tree & shift_overflow) {
-
-    tree &= ~(shift_overflow);
-
-    array = (narray + array + face) % narray;
-
-  }
-
-  index.a_[axis].array = array;
-  index.a_[axis].tree = tree;
-
-  return index;
-}
-
-//----------------------------------------------------------------------
-
 bool Index::is_on_boundary (int axis, int face, int narray, bool periodic) const
 {
   if (periodic) return false;
@@ -159,17 +125,54 @@ bool Index::is_on_boundary (int axis, int face, int narray, bool periodic) const
 
 //----------------------------------------------------------------------
 
-Index Index::index_neighbor (int if3[3], int n3[3], bool periodic) const
+bool Index::is_on_boundary 
+(
+ const int if3[3],
+ const int n3[3], 
+ bool periodic
+ ) const
 {
-  return index_neighbor(if3[0],if3[1],if3[2],n3,periodic);
-}
-//----------------------------------------------------------------------
+  if (periodic) return false;
 
-Index Index::index_neighbor (int ix, int iy, int iz, int n3[3], bool periodic) const
-{
   Index index = *this;
 
-  int i3[3] = {ix,iy,iz};
+  const int level = this->level();
+
+  for (int axis = 0; axis < 3; axis++) {
+    
+    if (n3[axis] > 1) {
+      int array = a_[axis].array;
+      int tree  = a_[axis].tree;
+
+      // update tree bits
+
+      int shift_level = (1 << (INDEX_MAX_TREE_BITS - level));
+
+      tree += if3[axis]*shift_level; 
+
+      // update array if necessary
+
+      int shift_overflow = (1 << INDEX_MAX_TREE_BITS);
+
+      if (tree & shift_overflow) {
+
+	tree &= ~(shift_overflow);
+
+	if ( ! ((0 <= array+if3[axis]) && (array+if3[axis] < n3[axis])) )
+	  return true;
+    
+      }
+    }
+  }
+
+  return false;
+}
+
+//----------------------------------------------------------------------
+
+Index Index::index_neighbor (const int if3[3], const int n3[3]) const
+{
+  Index index = *this;
 
   const int level = index.level();
 
@@ -182,7 +185,7 @@ Index Index::index_neighbor (int ix, int iy, int iz, int n3[3], bool periodic) c
 
     int shift_level = (1 << (INDEX_MAX_TREE_BITS - level));
 
-    tree += i3[axis]*shift_level; 
+    tree += if3[axis]*shift_level; 
 
     // update array if necessary
 
@@ -192,13 +195,12 @@ Index Index::index_neighbor (int ix, int iy, int iz, int n3[3], bool periodic) c
 
       tree &= ~(shift_overflow);
 
-      array = (n3[axis] + array + i3[axis]) % n3[axis];
+      array = (n3[axis] + array + if3[axis]) % n3[axis];
 
     }
     index.a_[axis].array = array;
     index.a_[axis].tree  = tree;
   }
-
   return index;
 }
 
@@ -302,18 +304,27 @@ void Index::print (const char * msg,
 		   void * simulation
 ) const
 {
+
+  print_(stdout,msg,max_level,rank,no_nl);
+
 #ifdef CELLO_DEBUG
   FILE * fp_debug = ((Simulation *)simulation)->fp_debug();
+  print_(fp_debug,msg,max_level,rank,no_nl);
 #endif
+}
+
+//----------------------------------------------------------------------
+
+void Index::print_ (FILE * fp,
+		    const char * msg,
+		    int max_level,
+		    int rank,
+		    bool no_nl) const
+{
 
   const int level = this->level();
 
   if (max_level == -1) max_level = level;
-
-// #ifdef CELLO_DEBUG
-//   fprintf (fp_debug,"%p ",this);
-// #endif
-//   PARALLEL_PRINTF ("%p ",this);
 
   int nb = 0;
 
@@ -321,65 +332,37 @@ void Index::print (const char * msg,
     nb = std::max(nb,num_bits_(a_[axis].array));
   }
 
-  
-#ifdef CELLO_DEBUG
-  fprintf (fp_debug,"[ ");
-#endif
-  PARALLEL_PRINTF ("[ ");
+  fprintf (fp,"[ ");
   for (int axis=0; axis<rank; axis++) {
 
-  for (int i=nb; i>=0; i--) {
-    int bit = (a_[axis].array & ( 1 << i));
-#ifdef CELLO_DEBUG
-    if (fp_debug != NULL) fprintf (fp_debug,"%d",bit?1:0);
-#endif
-    PARALLEL_PRINTF ("%d",bit?1:0);
-  }
+    for (int i=nb; i>=0; i--) {
+      int bit = (a_[axis].array & ( 1 << i));
+      if (fp != NULL) fprintf (fp,"%d",bit?1:0);
+    }
 
     for (int i=0; i<max_level; i++) {
       if (i==0) {
-#ifdef CELLO_DEBUG
-	fprintf (fp_debug,":");
-#endif
-	PARALLEL_PRINTF (":");
+	fprintf (fp,":");
       }
 
       if (i < level) {
-      int ic3[3];
-      child (i+1, &ic3[0], &ic3[1], &ic3[2]);
-#ifdef CELLO_DEBUG
-      fprintf (fp_debug,"%d",ic3[axis]);
-#endif
-      PARALLEL_PRINTF ("%d",ic3[axis]);
+	int ic3[3];
+	child (i+1, &ic3[0], &ic3[1], &ic3[2]);
+	fprintf (fp,"%d",ic3[axis]);
       } else {
-#ifdef CELLO_DEBUG
-	fprintf (fp_debug," ");
-#endif
-	PARALLEL_PRINTF (" ");
+	fprintf (fp," ");
       }
 	
     }
-#ifdef CELLO_DEBUG
-    fprintf (fp_debug," ");
-#endif
-    PARALLEL_PRINTF (" ");
+    fprintf (fp," ");
       
   }
-#ifdef CELLO_DEBUG
-  fprintf (fp_debug,"] ");
-#endif
-  PARALLEL_PRINTF ("] ");
+  fprintf (fp,"] ");
 
 
-#ifdef CELLO_DEBUG
-  fprintf (fp_debug, (no_nl ? "%s " : "%s\n"),msg);
-#endif
-  PARALLEL_PRINTF ( (no_nl ? "%s " : "%s\n"),msg);
+  fprintf (fp, (no_nl ? "%s " : "%s\n"),msg);
 
-  fflush(stdout);
-#ifdef CELLO_DEBUG
-  fflush(fp_debug);
-#endif
+  fflush(fp);
 }
 
 //----------------------------------------------------------------------
