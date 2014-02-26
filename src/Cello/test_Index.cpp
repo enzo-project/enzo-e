@@ -29,6 +29,7 @@ PARALLEL_MAIN_BEGIN
 		     {0,1,0},
 		     {0,0,1},
 		     {0,1,1},
+		     {1,0,1},
 		     {1,1,0},
 		     {1,1,1} };
   index->set_child(1,0,0,0);
@@ -36,15 +37,19 @@ PARALLEL_MAIN_BEGIN
   index->set_child(3,0,1,0);
   index->set_child(4,0,0,1);
   index->set_child(5,0,1,1);
-  index->set_child(6,1,1,0);
-  index->set_child(7,1,1,1);
-  index->set_level(7);
+  index->set_child(6,1,0,1);
+  index->set_child(7,1,1,0);
+  index->set_child(8,1,1,1);
+
+  const int max_level = 7;
+  index->set_level(max_level);
+
   index->clean();
   unit_func ("set_child()");
 
-  int ic3[3];
-  for (int level = 1; level < 7; level++) {
+  for (int level = 1; level < max_level; level++) {
 
+    int ic3[3];
     index->child(level,&ic3[0],&ic3[1],&ic3[2]);
     
     unit_assert(ic3[0] == trace[level-1][0] && 
@@ -55,12 +60,11 @@ PARALLEL_MAIN_BEGIN
 
   int na3[] = { 3,3,3};
 
-  for (int level = 0; level < 7; level++) {
+  for (int level = 0; level < max_level; level++) {
 
     Index i1,i2;
     i1 = *index;
     i2 = *index;
-    int ic3[3];
 
     i1.set_array(1,0,2);
     i1.set_level(level);
@@ -68,6 +72,7 @@ PARALLEL_MAIN_BEGIN
 
     if (level > 0) {
 
+      int ic3[3];
       index->child(level,&ic3[0],&ic3[1],&ic3[2]);
     
       unit_assert(ic3[0] == trace[level-1][0] && 
@@ -90,70 +95,62 @@ PARALLEL_MAIN_BEGIN
 
     }
 
-    for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
+    int f1[3]; // outward face
 
-	
-	//--------------------------------------------------
- 	unit_func("index_neighbor(axis,face)");
+    for (f1[0]=-1; f1[0]<=1; f1[0]++) {
+      for (f1[1]=-1; f1[1]<=1; f1[1]++) {
+	for (f1[2]=-1; f1[2]<=1; f1[2]++) {
 
-	// neighbor is not the same as self
-	Index in = i1.index_neighbor(axis,face,na3[axis]);
-	unit_assert(in != i1);
+	  if ( (f1[0]==0 && f1[1]==0 && f1[2]==0) ) continue;
 
-	unit_assert(in.level() == level);
+	  //--------------------------------------------------
+	  unit_func("index_neighbor()");
 
-	// neighbor's corresponding neighbor is self
-	Index in2 = in.index_neighbor(axis,1-face,na3[axis]);
-	unit_assert(in2 == i1);
+	  // neighbor is not the same as self
+	  Index n1 = i1.index_neighbor(f1,na3);
+	  unit_assert(n1 != i1);
 
-	//--------------------------------------------------
-	unit_func("index_neighbor(ix,iy,iz)");
+	  unit_assert(n1.level() == level);
 
-	int i3[3] ;
-	i3[0] = 0;
-	i3[1] = 0;
-	i3[2] = 0;
-	i3[axis] = face*2-1;
+	  // neighbor's corresponding neighbor is self
+	  int f2[3] = { -f1[0], -f1[1], -f1[2] };
+	  Index n2 = n1.index_neighbor(f2, na3);
 
-	// neighbor is not the same as self
-	Index ina = i1.index_neighbor(axis,face,na3[axis]);
-	Index inb = i1.index_neighbor(i3[0],i3[1],i3[2],na3);
-	unit_assert (ina == inb);
+	  unit_assert(n2 == i1);
 
-	//--------------------------------------------------
+	  //--------------------------------------------------
 
-	if (level > 0) {
+	  if (level > 0) {
 
-	  unit_func ("index_uncle");
-	  Index iu = i1.index_uncle  (axis,face,na3[axis]);
+	    unit_func ("index_parent");
+	    Index p1 = i1.index_parent();
+	    unit_assert (p1.level() == i1.level() - 1);
 
-	  unit_assert(i1 != iu);
-	  unit_assert(iu.level() == level - 1);
+	    unit_func ("index_child");
+	    int c1[3]; // child in parent
+	    i1.child(level,&c1[0],&c1[1],&c1[2]);
+	    Index i2 = p1.index_child(c1);
+	    unit_assert (i1 == i2);
 
-	  unit_func ("index_nibling");
+	    unit_func ("uncle");
 
-	  i1.child(level,&ic3[0],&ic3[1],&ic3[2]);
+	    int c2[3]; // facing child
+	    c2[0] = (f1[0]==0) ? c1[0] : 1-c1[0];
+	    c2[1] = (f1[1]==0) ? c1[1] : 1-c1[1];
+	    c2[2] = (f1[2]==0) ? c1[2] : 1-c1[2];
 
-	  Index ii = iu.index_nibling(axis,1-face,ic3,na3[axis]);
+	    int fp[3]; // parent face
+	    fp[0] = ((f1[0]==1&&c1[0]==0)||(f1[0]==-1&&c1[0]==1)) ? 0 : f1[0];
+	    fp[1] = ((f1[1]==1&&c1[1]==0)||(f1[1]==-1&&c1[1]==1)) ? 0 : f1[1];
+	    fp[2] = ((f1[2]==1&&c1[2]==0)||(f1[2]==-1&&c1[2]==1)) ? 0 : f1[2];
 
-	  // uncle's corresponding nibling is self
-	  unit_assert(i1 == ii); // XXXXX
+	    Index u1 = i1.index_neighbor(f1,na3).index_parent();
+	    Index u2 = i1.index_parent().index_neighbor(fp,na3);
+	    unit_assert(i1 != u1);
+	    unit_assert(u1.level() == level - 1);
+	    unit_assert(u1 == u2);
 
-	}
-
-      }
-    }
-
-    unit_func("index_neighbor(ix,iy,iz)");
-    for (int ix = -1; ix <= 1; ix++) {
-      for (int iy = -1; iy <= 1; iy++) {
-	for (int iz = -1; iz <= 1; iz++) {
-	  Index in = i1.index_neighbor(ix,iy,iz,na3);
-	  if ( ! (ix==0 && iy==0 && iz==0)) unit_assert(in != i1);
-	  unit_assert(in.level() == level);
-	  Index in2 = in.index_neighbor(-ix,-iy,-iz,na3);
-	  unit_assert(in2 == i1);
+	  }
 	}
       }
     }
@@ -161,26 +158,6 @@ PARALLEL_MAIN_BEGIN
   }
   
 
-  //	index_uncle (int axis, int face, int narray) const
-  // 	index_nibling (int axis, int face, int ic3[3], int narray) const
-  //void 	child (int level, int *icx, int *icy, int *icz) const
-  // 	child index of this node in parent
-  //bool 	is_root () const
-  //void 	array (int *ix, int *iy, int *iz) const
-  // 	Return the indices of the level-0 node containing this node.
-  //int 	level () const
-  // 	Return the level of this node.
-  //unsigned 	value (int axis) const
-  // 	Return the packed bit index for the given axis.
-  //void 	set_level (int level)
-  // 	Set the level for this node.
-  //void 	clean ()
-  //void 	set_array (int ix, int iy, int iz)
-  // 	Accumulate array part of an index.
-  //int 	tree (int axis) const
-  // 	Return the packed tree bits for the given axis.
-  //void 	set_child (int level, int ix, int iy=0, int iz=0)
-  //--------------------------------------------------
 
   unit_finalize();
 

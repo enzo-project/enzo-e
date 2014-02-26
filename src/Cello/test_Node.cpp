@@ -27,8 +27,9 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert (root != NULL);
 
-  unit_func("sizeof(Node) <= 32");
-  unit_assert (sizeof(*root) <= 32);
+  unit_func("sizeof(Node) <= 48");
+  unit_assert (sizeof(*root) <= 48);
+  printf ("%d\n",sizeof(*root));
 
   unit_func("is_leaf()");
   unit_assert (root->is_leaf() == true);
