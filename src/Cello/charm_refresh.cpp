@@ -33,8 +33,6 @@ void CommBlock::refresh_enter_()
   
   const Config * config = simulation->config();
 
-  std::string refresh_type = config->field_refresh_type;
-
   if (is_leaf()) {
 
     int rank = simulation->dimension();

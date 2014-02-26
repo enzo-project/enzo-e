@@ -60,7 +60,6 @@ public: // attributes
   int                        field_padding;
   int                        field_precision;
   int                        field_refresh_rank;
-  std::string                field_refresh_type;
 
   int                        initial_cycle;
   std::string                initial_type;

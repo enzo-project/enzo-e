@@ -21,7 +21,6 @@ Field {
    ghosts = 4;
    refresh {
      rank = 0;
-     type = "quiescence";
    }
 }
 Initial {

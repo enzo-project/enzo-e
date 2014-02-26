@@ -32,7 +32,6 @@ void Config::pup (PUP::er &p)
   p | field_padding;
   p | field_precision;
   p | field_refresh_rank;
-  p | field_refresh_type;
 
   p | initial_cycle;
   p | initial_type;
@@ -195,18 +194,6 @@ void Config::read(Parameters * parameters) throw()
   // refresh if (face_rank >= rank)
 
   field_refresh_rank = parameters->value_integer ("Field:refresh:rank",0);
-
-  // field refresh type == "quiescence" or "counter"
-
-  field_refresh_type = parameters->value_string 
-    ("Field:refresh:type","counter");
-
-  if ( ! ((field_refresh_type == "quiescence") ||
-	  (field_refresh_type == "counter"))) {
-    ERROR1 ("Config::read()", 
-	    "Unknown Field:refresh:type %s (must be \"quiescence\" or \"counter\"",
-	    field_refresh_type.c_str());
-  }
 
   prolong_type   = parameters->value_string ("Field:prolong","linear");
 

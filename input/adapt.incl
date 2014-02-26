@@ -48,7 +48,6 @@ Field {
     prolong = "linear";
     refresh {
        rank = 0;
-       type = "quiescence";
     }
 }
 
