@@ -107,20 +107,8 @@ void CommBlock::refresh_enter_()
       }
     }
   }
-  if (refresh_type == "quiescence") {
 
-    // --------------------------------------------------
-    // ENTRY: #1 CommBlock::refresh_enter_()-> CommBlock::q_refresh_exit()
-    // ENTRY: quiescence if refresh_type == quiescence
-    // --------------------------------------------------
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_refresh_exit(),
-    			  thisProxy[thisIndex]));
-    // --------------------------------------------------
-  }  else if ((refresh_type == "counter")) {
-
-    control_sync_neighbor_(phase_sync_refresh_exit);
-
-  }
+  control_sync (phase_sync_refresh_exit);
 
 }
 
@@ -247,7 +235,7 @@ void CommBlock::refresh_exit_()
 
   }  else if (next_phase_ == phase_adapt) {
 
-    control_sync(phase_sync_adapt_enter);
+    control_sync (phase_sync_adapt_enter);
 
   } else {
 

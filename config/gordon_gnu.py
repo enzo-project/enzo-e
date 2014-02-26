@@ -18,3 +18,4 @@ charm_path = '/home/ux452912/Charm/charm'
 
 papi_path  = '/home/ux452912'
 hdf5_path  = '/home/ux452912'
+png_path   = '/usr/lib64'
