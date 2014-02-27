@@ -95,7 +95,6 @@ void SimulationCharm::r_performance_reduce(CkReductionMsg * msg)
       bool do_print = 
 	(performance_->counter_type(ic) != counter_type_abs) ||
 	(ir == index_region_cycle);
-      do_print=true;
       if (do_print) {
 	monitor_->print("Performance","%s %s %ld",
 			performance_->region_name(ir).c_str(),

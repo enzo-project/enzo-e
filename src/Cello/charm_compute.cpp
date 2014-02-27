@@ -72,6 +72,8 @@ void CommBlock::p_compute_enter (int cycle, double time, double dt)
   // set_time(time);
   // set_dt(dt);
 
+  performance_switch_(perf_compute,__FILE__,__LINE__);
+
   TRACE3 ("CommBlock::p_compute_enter() cycle %d time %f dt %f",cycle,time,dt);
 
 #ifdef CONFIG_USE_PROJECTIONS

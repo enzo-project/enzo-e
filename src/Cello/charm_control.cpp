@@ -12,6 +12,8 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+// #define TRACE_CONTROL
+
 const char * phase_string [] = {
   "unknown",
   "adapt_called",
@@ -161,6 +163,11 @@ void CommBlock::control_sync_count_ (int phase, int count)
   if (0 < max_sync_[phase] && max_sync_[phase] <= count_sync_[phase]) {
     max_sync_[phase] = 0;
     count_sync_[phase] = 0;
+#ifdef TRACE_CONTROL
+    char buffer[255];
+    sprintf (buffer,"calling phase %s",phase_string[phase]);
+    index_.print(buffer,-1,3,false,simulation());
+#endif
     control_call_phase_(phase);
   }
 }
@@ -171,6 +178,11 @@ void CommBlock::control_sync_neighbor_(int phase)
 {
   if (!is_leaf()) {
 
+#ifdef TRACE_CONTROL
+    char buffer[255];
+    sprintf (buffer,"calling phase %s",phase_string[phase]);
+    index_.print(buffer,-1,3,false,simulation());
+#endif
     control_call_phase_ (phase);
 
   } else {
@@ -275,13 +287,28 @@ void CommBlock::control_sync_neighbor_(int phase)
 
 void CommBlock::control_call_phase_ (int phase)
 {
-  if (phase == phase_sync_adapt_called)  adapt_called_() ;
-  if (phase == phase_sync_adapt_enter)   adapt_enter_() ;
-  if (phase == phase_sync_adapt_next)    adapt_next_() ;
-  if (phase == phase_sync_adapt_exit)    adapt_exit_() ;
-  if (phase == phase_sync_refresh_enter) refresh_enter_() ;
-  if (phase == phase_sync_refresh_exit)  refresh_exit_();
+#ifdef TRACE_CONTROL
+  char buffer[255];
+  sprintf (buffer,"called phase %s",phase_string[phase]);
+  index_.print(buffer,-1,3,false,simulation());
+#endif
+  if (phase == phase_sync_adapt_called) {
+    adapt_called_() ;
+  } else if (phase == phase_sync_adapt_enter) {
+    adapt_enter_() ;
+  } else if (phase == phase_sync_adapt_next) {
+    adapt_next_() ;
+  } else if (phase == phase_sync_adapt_exit) {
+    adapt_exit_() ;
+  } else if (phase == phase_sync_refresh_enter) {
+    refresh_enter_() ;
+  } else if (phase == phase_sync_refresh_exit) {
+    refresh_exit_();
+  } else {
+    ERROR1 ("CommBlock::control_call_phase_()",  
+	    "Unknown phase: phase %s", 
+	    phase_string[phase]);    
+  }
 }
-
 //======================================================================
 

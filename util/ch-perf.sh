@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if ("x$2" == "x"); then
+if [ -z $1 ]; then
     echo "Usage: $0 <enzo-p output>"
     exit 1
 fi
