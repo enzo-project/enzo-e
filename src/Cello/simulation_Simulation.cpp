@@ -433,24 +433,6 @@ void Simulation::update_state(int cycle, double time, double dt, double stop)
 
 //----------------------------------------------------------------------
 
-void Simulation::monitor_output()
-{
-  TRACE("Simulation::monitor_output()");
-
-  monitor_-> print("", "-------------------------------------");
-  monitor_-> print("Simulation", "cycle %04d", cycle_);
-  monitor_-> print("Simulation", "time-sim %15.12f",time_);
-  monitor_-> print("Simulation", "dt %15.12g", dt_);
-
-  performance_output ();
-
-  Memory::instance()->reset_high();
-
-}
-
-
-//----------------------------------------------------------------------
-
 void Simulation::performance_output()
 {
   TRACE("Simulation::performance_output()");

@@ -213,7 +213,13 @@ public: // interface
   //--------------------------------------------------
 
   /// Apply the numerical methods on the block
-  void p_compute_enter(int cycle, double time, double dt);
+  void p_compute_enter(int cycle, double time, double dt)
+  { compute_enter_(cycle, time, dt); }
+
+protected:
+  void compute_enter_(int cycle, double time, double dt);
+  void compute_exit_();
+public:
 
   //--------------------------------------------------
   // OUTPUT

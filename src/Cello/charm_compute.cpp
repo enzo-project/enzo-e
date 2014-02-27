@@ -13,56 +13,9 @@
 #include "charm_mesh.hpp"
 
 //======================================================================
-
-
-void SimulationCharm::compute()
-{
-
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes();
-#endif
-
-#ifdef CELLO_DEBUG
-  fprintf (fp_debug(),"%s:%d cycle %03d\n", __FILE__,__LINE__,cycle_);
-#endif
-
-  if (cycle_ > 0 ) {
-    performance()->stop_region (perf_cycle,__FILE__,__LINE__);
-  }
-  if (stop_) {
-    
-    performance_write();
-
-    // --------------------------------------------------
-    // ENTRY: #1 SimulationCharm::compute()-> Main::p_exit()
-    // ENTRY: Main if stop
-    // --------------------------------------------------
-    proxy_main.p_exit(CkNumPes());
-    // --------------------------------------------------
-
-  } else {
-
-    performance()->start_region (perf_cycle,__FILE__,__LINE__);
-    performance()->switch_region (perf_compute,__FILE__,__LINE__);
-
-    if (hierarchy()->group_process()->is_root()) 
-      
-      // --------------------------------------------------
-      // ENTRY: #2 SimulationCharm::compute()-> CommBlock::p_compute_enter()
-      // ENTRY: Block Array if Simulation is_root()
-      // --------------------------------------------------
-      hierarchy()->block_array()->p_compute_enter(cycle_,time_,dt_);
-      // --------------------------------------------------
-  }
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
-  PARALLEL_PRINTF ("memory compute %lld\n",trace_mem_);
-#endif
-}
-
 //----------------------------------------------------------------------
 
-void CommBlock::p_compute_enter (int cycle, double time, double dt)
+void CommBlock::compute_enter_ (int cycle, double time, double dt)
 {
 // #ifdef CELLO_TRACE
 //   index_.print("BEGIN PHASE COMPUTE p_compute_enter()",-1,2,false,simulation());
@@ -115,6 +68,13 @@ void CommBlock::p_compute_enter (int cycle, double time, double dt)
     next_phase_ = phase_stopping;
   }
 
+  compute_exit_();
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::compute_exit_ ()
+{
   refresh_enter_();
 }
 

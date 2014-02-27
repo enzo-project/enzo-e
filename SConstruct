@@ -18,7 +18,7 @@ trace_charm = 0
 # Still requires the "DEBUG" group to be enabled in Monitor (that is
 # Monitor::is_active("DEBUG") mustb e true for any output)
 
-debug = 1
+debug = 0
 
 # Whether to periodically print all field values.  See
 # src/Field/field_FieldBlock.cpp
@@ -57,7 +57,7 @@ use_performance = 0
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
 
-use_projections = 1
+use_projections = 0
 
 # How many processors to run parallel unit tests
 

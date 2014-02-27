@@ -75,7 +75,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
   } else {
 
-    simulation->monitor_output();
+    ((SimulationCharm *)simulation)->output_exit();
 
   }
 }
@@ -208,17 +208,67 @@ void Problem::output_write
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::monitor_output()
+void SimulationCharm::output_exit()
 {
-  Simulation::monitor_output();
+  TRACE("Simulation::monitor_output()");
+
+  monitor_-> print("", "-------------------------------------");
+  monitor_-> print("Simulation", "cycle %04d", cycle_);
+  monitor_-> print("Simulation", "time-sim %15.12f",time_);
+  monitor_-> print("Simulation", "dt %15.12g", dt_);
+
+  performance_output ();
+
+  Memory::instance()->reset_high();
 
 #ifdef TRACE_MEMORY
   trace_mem_ = Memory::instance()->bytes() - trace_mem_;
   PARALLEL_PRINTF ("memory output %lld\n",trace_mem_);
 #endif
 
-  compute();
+#ifdef TRACE_MEMORY
+  trace_mem_ = Memory::instance()->bytes();
+#endif
+
+#ifdef CELLO_DEBUG
+  fprintf (fp_debug(),"%s:%d cycle %03d\n", __FILE__,__LINE__,cycle_);
+#endif
+
+  if (cycle_ > 0 ) {
+    performance()->stop_region (perf_cycle,__FILE__,__LINE__);
+  }
+
+  if (stop_) {
+    
+    performance_write();
+
+    // --------------------------------------------------
+    // ENTRY: #1 SimulationCharm::compute()-> Main::p_exit()
+    // ENTRY: Main if stop
+    // --------------------------------------------------
+    proxy_main.p_exit(CkNumPes());
+    // --------------------------------------------------
+
+  } else {
+
+    performance()->start_region (perf_cycle,__FILE__,__LINE__);
+    performance()->switch_region (perf_compute,__FILE__,__LINE__);
+
+    if (hierarchy()->group_process()->is_root()) 
+      
+      // --------------------------------------------------
+      // ENTRY: #2 SimulationCharm::compute()-> CommBlock::p_compute_enter()
+      // ENTRY: Block Array if Simulation is_root()
+      // --------------------------------------------------
+      hierarchy()->block_array()->p_compute_enter(cycle_,time_,dt_);
+      // --------------------------------------------------
+  }
+#ifdef TRACE_MEMORY
+  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
+  PARALLEL_PRINTF ("memory compute %lld\n",trace_mem_);
+#endif
 }
+
 
 //======================================================================
 

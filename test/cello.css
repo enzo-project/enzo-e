@@ -41,6 +41,9 @@ th {
 th.block {
     padding: 0px 0px;   
 }
+th.divider {
+    background-color:green;
+}
 td.pass       {  color: #007;  background-color: #fff; }
 /* th.pass       {  color: #007;  background-color: #fff; }
  */td.incomplete {  color: #000;  background-color: #fff; }

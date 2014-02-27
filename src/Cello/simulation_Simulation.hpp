@@ -115,9 +115,6 @@ public: // interface
   bool stop() const throw() 
   { return stop_; };
 
-  /// Output Simulation information
-  virtual void monitor_output();
-
   /// Output Performance information to stdout (root process data only)
   virtual void performance_output();
 

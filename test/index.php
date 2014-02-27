@@ -462,7 +462,6 @@ if (file_exists("COMPILING"))  {
 } else { 
   printf ("<th rowspan=2></th>\n"); 
 }
-  
 printf ( "<th colspan=$num_types class=fail>Missing</br>Executable</th>");
 printf ("<th></th>");
 printf ( "<th colspan=$num_types class=fail>Missing</br>Output</th>");
@@ -475,7 +474,7 @@ printf ( "<th colspan=$num_types class=unfinished>Unfinished</br>Tests</th>");
 printf ("<th></th>");
 printf ( "<th colspan=$num_types class=pass>Passed</br>Tests</th>");
 printf ("<th></th>");
-printf ( "</tr><tr>\n");
+printf ( "</tr>\n");
 
 /*for ($k = 0; $k < 6; $k ++) {
   for ($i = 0; $i < $num_types; ++$i) {
@@ -493,20 +492,38 @@ printf ( "</tr><tr>\n");
   printf ("<th> </th>");
   } */
 
+//----------------------------------------------------------------------
+// Print row divider
+//----------------------------------------------------------------------
+printf ("<tr><th class=divider></th>");
+for ($k = 0; $k < 5; $k ++) {
+  printf ("<th class=divider></th>");
+  for ($i = 0; $i < $num_types; ++$i) {
+    printf ("<th class=divider> </th>");
+  }
+}
+printf ("<th class=divider></th>\n");
+printf ("</tr>\n");
 
-test_summary("Enzo-PPM",
+// printf ("<th rowspan=9>Enzo</th>\n"); 
+//----------------------------------------------------------------------
+
+test_summary("Method PPM",
 	     array("method_ppm-1",
-		   "method_ppm-8",
-                   "checkpoint_ppm-1",
-		   "checkpoint_ppm-8"),
-	     array("enzo-p",  "enzo-p", "enzo-p", "enzo-p"));
+		   "method_ppm-8"),
+	     array("enzo-p",  "enzo-p"));
 
-test_summary("Enzo-PPML",
+test_summary("Method-PPML",
 	     array("method_ppml-1",
 		   "method_ppml-8"),
 	     array("enzo-p",  "enzo-p"));
 
-test_summary("Enzo-Mesh", 
+test_summary("Checkpoint",
+	     array("checkpoint_ppm-1",
+		   "checkpoint_ppm-8"),
+	     array("enzo-p",  "enzo-p"));
+
+test_summary("Mesh", 
 	     array("mesh-balanced"),
 	     array("enzo-p"));
 
@@ -514,36 +531,38 @@ test_summary("Enzo-Mesh",
 // 	     array("adapt-L1-P1", "adapt-L2-P1", "adapt-L3-P1", "adapt-L4-P1", "adapt-L5-P1"),
 // 	     array("enzo-p",      "enzo-p",      "enzo-p",      "enzo-p",      "enzo-p"));
 
-test_summary("Enzo-BC-2D", 
+test_summary("Boundary-2D", 
 	     array("boundary_reflecting-2d",
 		   "boundary_periodic-2d",
 		   "boundary_outflow-2d"),
 	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
 
-test_summary("Enzo-BC-3D",
+test_summary("Boundary-3D",
 	     array("boundary_reflecting-3d",
 		   "boundary_periodic-3d",
 		   "boundary_outflow-3d"),
 	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
 
-test_summary("Enzo-IC", 
+test_summary("Initial", 
 	     array("initial_png"),
 	     array("enzo-p"));
 
-test_summary("Enzo-output", 
+test_summary("Output", 
 	     array("output-stride-1","output-stride-2","output-stride-3"),
 	     array("enzo-p","enzo-p","enzo-p"));
 
+//----------------------------------------------------------------------
 // Print row divider
-
-printf ("<tr><th></th>");
+//----------------------------------------------------------------------
+printf ("<tr><th class=divider></th>");
 for ($k = 0; $k < 6; $k ++) {
+  printf ("<th class=divider></th>");
   for ($i = 0; $i < $num_types; ++$i) {
-    printf ("<th> </th>");
+    printf ("<th class=divider> </th>");
   }
-  printf ("<th></th>");
 }
 printf ("</tr>\n");
+//----------------------------------------------------------------------
 
 
 test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
@@ -589,11 +608,11 @@ printf ("</tr></table></br>\n");
 
 //======================================================================
 
-test_group("Enzo-PPM");
+test_group("Method-PPM");
 
 ?>
 
-Enzo-PPM tests serve to test basic PPM functionality in Enzo-P.  A
+Method-PPM tests serve to test basic PPM functionality in Enzo-P.  A
 small implosion problem is run for 400 cycles, first with
   one block (1,1) then eight blocks (2,4).
 
@@ -626,34 +645,14 @@ tests("Enzo","enzo-p","test_method_ppm-8","PPM 8 blocks");
 test_table ("method_ppm-8",
 	    array("000000","000200","000400"), $types);
 
-//----------------------------------------------------------------------
-
-echo "<h3>PPM (serial checkpoint / restart) </h3>";
-
-
-tests("Enzo","enzo-p","test_checkpoint_ppm-1","test_restart_ppm-1","");
-
-test_table ("restart_ppm-1",
-	    array("000000","000200","000400"), $types);
-
-//----------------------------------------------------------------------
-
-echo "<h3>PPM (parallel checkpoint / restart) </h3>";
-
-
-tests("Enzo","enzo-p","test_checkpoint_ppm-8","test_restart_ppm-8","");
-
-test_table ("restart_ppm-8",
-	    array("000000","000200","000400"), $types);
-
 //======================================================================
 
 
-test_group("Enzo-PPML");
+test_group("Method-PPML");
 
 ?>
 
-Enzo-PPML tests serve to test basic PPML functionality in Enzo-P.  A
+Method-PPML tests serve to test basic PPML functionality in Enzo-P.  A
 small high-density sphere is run for 50 cycles, first with
   one block (1,1,1) then eight blocks (2,2,2).
 
@@ -684,7 +683,28 @@ test_table ("method_ppml-8-z",
 
 //======================================================================
 
-test_group("Enzo-Mesh");
+test_group("Checkpoint");
+
+echo "<h3>Serial checkpoint/restart </h3>";
+
+
+tests("Enzo","enzo-p","test_checkpoint_ppm-1","test_restart_ppm-1","");
+
+test_table ("restart_ppm-1",
+	    array("000000","000200","000400"), $types);
+
+//----------------------------------------------------------------------
+
+echo "<h3>Parallel checkpoint/restart) </h3>";
+
+
+tests("Enzo","enzo-p","test_checkpoint_ppm-8","test_restart_ppm-8","");
+
+test_table ("restart_ppm-8",
+	    array("000000","000200","000400"), $types);
+
+
+test_group("Mesh");
 
 echo "<h3>2D Serial</h3>";
 
@@ -802,7 +822,7 @@ test_table ("adapt-L5-P1-vy",
 
 //======================================================================
 
-test_group("Enzo-BC-2D");
+test_group("Boundary-2D");
 
 echo "<h3>2D Reflecting</h3>";
 
@@ -832,7 +852,7 @@ test_table ("boundary_outflow-2d",
 
 //======================================================================
 
-test_group("Enzo-BC-3D");
+test_group("Boundary-3D");
 
 echo "<h3>3D Reflecting</h3>";
 
@@ -861,7 +881,7 @@ test_table ("boundary_outflow-3d",
 
 //----------------------------------------------------------------------
 
-test_group("Enzo-IC");
+test_group("Initial");
 
 
 echo "<h3>png mask initial conditions</h3>";
@@ -873,7 +893,7 @@ test_table ("initial_png",
 
 //----------------------------------------------------------------------
 
-test_group("Enzo-output");
+test_group("Output");
 
 
 echo "<h3>Process stride</h3>";

@@ -85,6 +85,7 @@ public: // functions
 
   /// Call output on Problem list of Output objects
   void begin_output ();
+  void output_exit();
 
   void r_output (CkReductionMsg * msg);
 
@@ -107,9 +108,6 @@ public: // functions
 
   /// Reduction for performance data
   void r_performance_reduce (CkReductionMsg * msg);
-
-  /// Updated Simulation function to call compute()
-  void monitor_output();
 
  
 protected: // attributes

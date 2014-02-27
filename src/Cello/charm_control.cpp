@@ -49,10 +49,6 @@ void CommBlock::control_sync(int phase)
 	    phase_string[phase]);    
   }
 
-  if (index().is_root()) {
-    PARALLEL_PRINTF ("DEBUG: %s %s\n",phase_string[phase],sync_type.c_str());
-  }
-
   if (sync_type == "contribute") {
 
     CkCallback cb;
