@@ -242,6 +242,8 @@ test_class_size   = env.Program (['test_class_size.cpp',objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_index        = env.Program (['test_Index.cpp',objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
+test_schedule     = env.Program (['test_Schedule.cpp', objs_io],
+                                 LIBS=[libs_io,    libs_test]) 
 
 test_memory       = env.Program ('test_Memory.cpp',     LIBS=[libs_memory, libs_test])
 test_monitor      = env.Program ('test_Monitor.cpp',    LIBS=[libs_monitor,libs_test])
@@ -289,7 +291,7 @@ binaries_field = [test_field_block,
 
 binaries_io    = [test_it_reduce]
 binaries_memory  = [test_memory]
-binaries_mesh = [ test_block,test_hierarchy,test_tree,test_tree_density,test_node,test_node_trace,test_it_node,test_index,test_it_face,test_it_child]
+binaries_mesh = [ test_block,test_hierarchy,test_tree,test_tree_density,test_node,test_node_trace,test_it_node,test_index,test_schedule,test_it_face,test_it_child]
 binaries_monitor = [test_monitor]
 binaries_parallel = [test_group_process,test_layout]
 

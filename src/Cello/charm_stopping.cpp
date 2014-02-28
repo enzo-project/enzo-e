@@ -42,10 +42,12 @@ void CommBlock::stopping_enter_()
   update_boundary_();
 
   int stopping_interval = simulation->config()->stopping_interval;
+
   bool stopping_reduce = stopping_interval ? 
     ((cycle_ % stopping_interval) == 0) : false;
 
   if (stopping_reduce || dt_==0.0) {
+
     // Compute local dt
 
     Problem * problem = simulation->problem();
@@ -131,6 +133,7 @@ void CommBlock::stopping_exit_()
   trace_mem_ = Memory::instance()->bytes() - trace_mem_;
 #endif
 
-  simulation_charm->begin_output();
+  output_enter_();
+
 }
 

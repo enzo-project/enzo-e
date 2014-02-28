@@ -22,6 +22,8 @@ const char * phase_string [] = {
   "adapt_exit",
   "refresh_enter",
   "refresh_exit"
+  "output_enter",
+  "output_exit"
 };
 
 //----------------------------------------------------------------------
@@ -43,6 +45,10 @@ void CommBlock::control_sync(int phase)
     sync_type = simulation()->config()->mesh_sync_refresh_enter;
   } else if (phase == phase_sync_refresh_exit) {
     sync_type = simulation()->config()->mesh_sync_refresh_exit;
+  } else if (phase == phase_sync_output_enter) {
+    sync_type = simulation()->config()->mesh_sync_output_enter;
+  } else if (phase == phase_sync_output_exit) {
+    sync_type = simulation()->config()->mesh_sync_output_exit;
   } else {
     ERROR1 ("CommBlock::control_sync()",
 	    "Unknown phase: phase %s",
@@ -65,6 +71,10 @@ void CommBlock::control_sync(int phase)
       cb = CkCallback (CkIndex_CommBlock::r_refresh_enter(NULL), thisProxy);
     } else if (phase == phase_sync_refresh_exit) {
       cb = CkCallback (CkIndex_CommBlock::r_refresh_exit(NULL), thisProxy);
+    } else if (phase == phase_sync_output_enter) {
+      cb = CkCallback (CkIndex_CommBlock::r_output_enter(NULL), thisProxy);
+    } else if (phase == phase_sync_output_exit) {
+      cb = CkCallback (CkIndex_CommBlock::r_output_exit(NULL), thisProxy);
     } else {
       ERROR2 ("CommBlock::control_sync()",  
 	      "Unknown phase: phase %s sync type %s", 
@@ -78,17 +88,29 @@ void CommBlock::control_sync(int phase)
     CkCallback cb;
 
     if (phase == phase_sync_adapt_enter) {
-      cb = CkCallback (CkIndex_CommBlock::q_adapt_enter(), thisProxy[thisIndex]);
+      cb = CkCallback (CkIndex_CommBlock::q_adapt_enter(),
+		       thisProxy[thisIndex]);
     } else if (phase == phase_sync_adapt_next) {
-      cb = CkCallback (CkIndex_CommBlock::q_adapt_next(), thisProxy[thisIndex]);
+      cb = CkCallback (CkIndex_CommBlock::q_adapt_next(),
+		       thisProxy[thisIndex]);
     } else if (phase == phase_sync_adapt_called) {
-      cb = CkCallback (CkIndex_CommBlock::q_adapt_called(), thisProxy[thisIndex]);
+      cb = CkCallback (CkIndex_CommBlock::q_adapt_called(),
+		       thisProxy[thisIndex]);
     } else if (phase == phase_sync_adapt_exit) {
-      cb = CkCallback (CkIndex_CommBlock::q_adapt_exit(), thisProxy[thisIndex]);
+      cb = CkCallback (CkIndex_CommBlock::q_adapt_exit(),
+		       thisProxy[thisIndex]);
     } else if (phase == phase_sync_refresh_enter) {
-      cb = CkCallback (CkIndex_CommBlock::q_refresh_enter(), thisProxy[thisIndex]);
+      cb = CkCallback (CkIndex_CommBlock::q_refresh_enter(),
+		       thisProxy[thisIndex]);
     } else if (phase == phase_sync_refresh_exit) {
-      cb = CkCallback (CkIndex_CommBlock::q_refresh_exit(), thisProxy[thisIndex]);
+      cb = CkCallback (CkIndex_CommBlock::q_refresh_exit(),
+		       thisProxy[thisIndex]);
+    } else if (phase == phase_sync_output_enter) {
+      cb = CkCallback (CkIndex_CommBlock::q_output_enter(),
+		       thisProxy[thisIndex]);
+    } else if (phase == phase_sync_output_exit) {
+      cb = CkCallback (CkIndex_CommBlock::q_output_exit(),
+		       thisProxy[thisIndex]);
     } else {
       ERROR2 ("CommBlock::control_sync()",  
 	      "Unknown phase: phase %s sync type %s", 
@@ -115,6 +137,10 @@ void CommBlock::control_sync(int phase)
       if (index().is_root()) thisProxy.p_refresh_enter();
     } else if (phase == phase_sync_refresh_exit) {
       if (index().is_root()) thisProxy.p_refresh_exit();
+    } else if (phase == phase_sync_output_enter) {
+      if (index().is_root()) thisProxy.p_output_enter();
+    } else if (phase == phase_sync_output_exit) {
+      if (index().is_root()) thisProxy.p_output_exit();
     } else {
       ERROR2 ("CommBlock::control_sync()",  
 	      "Unknown phase: phase %s sync type %s", 
@@ -135,6 +161,10 @@ void CommBlock::control_sync(int phase)
       refresh_enter_();
     } else if (phase == phase_sync_refresh_exit) {
       refresh_exit_();
+    } else if (phase == phase_sync_output_enter) {
+      output_enter_();
+    } else if (phase == phase_sync_output_exit) {
+      output_exit_();
     } else {
       ERROR2 ("CommBlock::control_sync()",  
 	      "Unknown phase: phase %s sync type %s", 
@@ -300,6 +330,10 @@ void CommBlock::control_call_phase_ (int phase)
     refresh_enter_() ;
   } else if (phase == phase_sync_refresh_exit) {
     refresh_exit_();
+  } else if (phase == phase_sync_output_enter) {
+    output_enter_() ;
+  } else if (phase == phase_sync_output_exit) {
+    output_exit_();
   } else {
     ERROR1 ("CommBlock::control_call_phase_()",  
 	    "Unknown phase: phase %s", 

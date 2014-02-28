@@ -5,7 +5,8 @@
 */
 
 BODY {
-  background-image: url("cello-bg.png");  
+/*  background-image: url("cello-bg.png");   */
+background-color: grey;
 }
 
 /* header { background: #fff url(cello-hr.png) no-repeat;
@@ -13,8 +14,9 @@ BODY {
 } */
 
 
-hr {background: #fff url(cello-hr.png); height: 6px}
+/* hr {background: #fff url(cello-hr.png); height: 6px} */
 
+hr { height:10px}
 h1 { text-align: center; }
 tr {
     background-color: #aaa;
@@ -48,7 +50,7 @@ td.pass       {  color: #007;  background-color: #fff; }
 /* th.pass       {  color: #007;  background-color: #fff; }
  */td.incomplete {  color: #000;  background-color: #fff; }
 /* th.incomplete {  color: #000;  background-color: #fff; } */
-td.unfinished {  color: #070;  background-color: #fff; }
+td.unfinished {  color: #070;  background-color: #ff0; }
 /* th.unfinished {  color: #070;  background-color: #fff; } */
 td.FAIL       {  color: #000;  background-color: #f77;}
 /* th.FAIL       {  color: #000;  background-color: #f77; } */

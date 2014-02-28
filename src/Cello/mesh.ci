@@ -43,6 +43,14 @@ module mesh {
     // *** OUTPUT ***
     //--------------------------------------------------
 
+    entry void p_output_enter();
+    entry void q_output_enter();
+    entry void r_output_enter(CkReductionMsg *);
+
+    entry void p_output_exit();
+    entry void q_output_exit();
+    entry void r_output_exit(CkReductionMsg *);
+
     entry void p_output_write (int index_output); // [CB1]
     entry void p_output_read (int index_input); // [CB3]
 
@@ -50,7 +58,13 @@ module mesh {
     // *** COMPUTE ***
     //--------------------------------------------------
 
-    entry void p_compute_enter(int cycle, double time, double dt); // [CB2]
+    entry void p_compute_enter();
+    entry void q_compute_enter();
+    entry void r_compute_enter(CkReductionMsg *);
+
+    entry void p_compute_exit();
+    entry void q_compute_exit();
+    entry void r_compute_exit(CkReductionMsg *);
 
     //--------------------------------------------------
     // *** STOPPING ***

@@ -198,10 +198,7 @@ void CommBlock::refresh_face_ (int n, char * buffer, int type_refresh,
     store_face_(n,buffer,
 		iface, ichild, lghost,
 		op_array_prolong);
-
-
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -227,7 +224,7 @@ void CommBlock::refresh_exit_()
   PARALLEL_PRINTF ("memory refresh %lld\n",trace_mem_);
 #endif
 
-  if      (next_phase_ == phase_stopping)  {
+  if (next_phase_ == phase_stopping) {
 
     stopping_enter_();
 

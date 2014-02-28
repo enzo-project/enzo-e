@@ -10,7 +10,7 @@
 
 #ifdef CELLO_TRACE
 #define TRACE_ADAPT(MSG)			\
-  index_.print(MSG,-1,2);			\
+  index_.print(MSG,-1,2,false,simulation());	\
   TRACE1("this = %p",this);
 #else
 #define TRACE_ADAPT(MSG)			\
@@ -212,12 +212,22 @@ public: // interface
   // COMPUTE
   //--------------------------------------------------
 
-  /// Apply the numerical methods on the block
-  void p_compute_enter(int cycle, double time, double dt)
-  { compute_enter_(cycle, time, dt); }
+  void p_compute_enter()
+  {      compute_enter_(); }
+  void q_compute_enter()
+  {      compute_enter_(); }
+  void r_compute_enter(CkReductionMsg * msg)
+  {      compute_enter_(); delete msg; }
+
+  void p_compute_exit()
+  {      compute_exit_(); }
+  void q_compute_exit()
+  {      compute_exit_(); }
+  void r_compute_exit(CkReductionMsg * msg)
+  {      compute_exit_(); delete msg; }
 
 protected:
-  void compute_enter_(int cycle, double time, double dt);
+  void compute_enter_();
   void compute_exit_();
 public:
 
@@ -225,12 +235,31 @@ public:
   // OUTPUT
   //--------------------------------------------------
 
+  void p_output_enter()
+  {      output_enter_(); }
+  void q_output_enter()
+  {      output_enter_(); }
+  void r_output_enter(CkReductionMsg * msg)
+  {      output_enter_(); delete msg;}
+
+  void p_output_exit()
+  {      output_exit_(); }
+  void q_output_exit()
+  {      output_exit_(); }
+  void r_output_exit(CkReductionMsg * msg)
+  {      output_exit_(); delete msg; }
+
   /// Contribute block data to ith output object in the simulation
   void p_output_write (int index_output);
 
   /// Contribute block data to the Initial input object
   void p_output_read (int index_input = 0)
   {  INCOMPLETE("CommBlock::p_output_read"); }
+
+protected:
+  void output_enter_();
+  void output_exit_();
+public:
 
   //--------------------------------------------------
   // ADAPT
@@ -241,33 +270,28 @@ public:
   void q_adapt_enter() 
   {      adapt_enter_(); }
   void r_adapt_enter(CkReductionMsg * msg) 
-  {      delete msg;
-         adapt_enter_(); }
+  {      adapt_enter_(); delete msg;}
 
   void p_adapt_next ()
   {      adapt_next_(); }
   void q_adapt_next ()
   {      adapt_next_(); }
   void r_adapt_next (CkReductionMsg * msg)
-  {      delete msg;
-         adapt_next_(); }
+  {      adapt_next_(); delete msg; }
 
   void p_adapt_called() 
   {      adapt_called_(); }
   void q_adapt_called() 
   {      adapt_called_(); }
   void r_adapt_called(CkReductionMsg * msg) 
-  {      delete msg; 
-         adapt_called_(); 
-  }
+  {      adapt_called_(); delete msg; }
 
   void p_adapt_exit ()  
   {      adapt_exit_(); }
   void q_adapt_exit ()  
   {      adapt_exit_(); }
   void r_adapt_exit (CkReductionMsg * msg)  
-  {      delete msg;
-         adapt_exit_(); }
+  {      adapt_exit_(); delete msg;}
 
 
   /// Parent tells child to delete itself
@@ -317,7 +341,7 @@ public:
   void q_refresh_enter()  
   {      refresh_enter_(); }
   void r_refresh_enter(CkReductionMsg * msg)  
-  {      delete msg; refresh_enter_(); }
+  {      refresh_enter_(); delete msg; }
 
   /// Exit the refresh phase after QD
   void p_refresh_exit () 
@@ -325,7 +349,7 @@ public:
   void q_refresh_exit () 
   {      refresh_exit_(); }
   void r_refresh_exit (CkReductionMsg * msg) 
-  {      delete msg;  refresh_exit_(); }
+  {      refresh_exit_(); delete msg;  }
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
   void x_refresh_face

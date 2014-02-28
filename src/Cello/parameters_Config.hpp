@@ -91,6 +91,8 @@ public: // attributes
   std::string                mesh_sync_adapt_exit;
   std::string                mesh_sync_refresh_enter;
   std::string                mesh_sync_refresh_exit;
+  std::string                mesh_sync_output_enter;
+  std::string                mesh_sync_output_exit;
 
   std::vector<std::string>   method_sequence;
 

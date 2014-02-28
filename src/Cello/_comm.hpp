@@ -60,9 +60,11 @@ enum phase_sync_type {
   phase_sync_adapt_next,
   phase_sync_adapt_exit,
   phase_sync_refresh_enter,
-  phase_sync_refresh_exit
+  phase_sync_refresh_exit,
+  phase_sync_output_enter,
+  phase_sync_output_exit
 };
-#define PHASE_SYNC_SIZE 7
+#define PHASE_SYNC_SIZE 9
 
 //----------------------------------------------------------------------
 // System includes

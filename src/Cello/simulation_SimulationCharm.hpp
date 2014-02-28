@@ -86,8 +86,9 @@ public: // functions
   /// Call output on Problem list of Output objects
   void begin_output ();
   void output_exit();
+  void r_output(CkReductionMsg * msg);
 
-  void r_output (CkReductionMsg * msg);
+  //  void r_output (CkReductionMsg * msg);
 
   /// Reduce output, using p_output_write to send data to writing processes
   void s_write() { write_(); };
@@ -103,7 +104,10 @@ public: // functions
   /// Stopping criteria and computation
   void compute ();
 
-  /// Output Performance information to stdout (root process data only)
+  /// Output Performance information to stdout
+  void p_performance_output()
+  { performance_output(); }
+
   virtual void performance_output();
 
   /// Reduction for performance data

@@ -114,6 +114,8 @@ bool Schedule::write_this_cycle ( int cycle, double time ) throw()
 
   if (! active_) return false;
 
+  const double tol = cello::machine_epsilon(precision_single);
+
   double time_start;
   double time_step;
   double time_stop;
@@ -147,16 +149,16 @@ bool Schedule::write_this_cycle ( int cycle, double time ) throw()
 	    "Unknown schedule type for active Schedule object");
   }
 
-  if (skip) return false;
-
-  const double eps = cello::machine_epsilon(precision_single);
+  if (skip) {
+    return false;
+  }
 
   switch (schedule_type_) {
 
   case schedule_type_time_list:
     // time_list_
     time_dump = time_list_[index_];
-    if (time_dump <= time*(1+eps)) { // <= to round-off error
+    if (cello::err_abs(time,time_dump) < tol) { // <= to round-off error
       result = true;
       active_ = (++index_ < time_list_.size());
     }
@@ -169,32 +171,31 @@ bool Schedule::write_this_cycle ( int cycle, double time ) throw()
     time_step  = time_interval_[1];
     time_stop  = time_interval_[2];
     time_dump = time_start + index_*time_step;
-    if (time_dump <= time*(1+eps)) { // <= to round-off error
+    if (cello::err_abs(time,time_dump) < tol) { // <= to round-off error
       result = true;
-      active_ = (time_start + (++index_)*time_step <= time_stop*(1+eps));
+      active_ = (time_start + (++index_)*time_step <= time_stop*(1+tol));
     }
     break;
 
   case schedule_type_cycle_list:
-    // cycle_list_
-    cycle_dump = cycle_list_[index_];
-    if (cycle_dump <= cycle*(1+eps)) { // <= to round-off error
-      result = true;
-      active_ = (++index_ < cycle_list_.size());
+
+    for (size_t i=0; i<cycle_list_.size(); i++) {
+      if (cycle == cycle_list_[i]) {
+	result = true;
+	break;
+      }
     }
     break;
 
   case schedule_type_cycle_interval:
-    // cycle_interval_
-    // deactive if we've reached the end
-    cycle_start = cycle_interval_[0];
-    cycle_step  = cycle_interval_[1];
-    cycle_stop  = cycle_interval_[2];
-    cycle_dump = cycle_start + index_*cycle_step;
-    if (cycle_dump <= cycle*(1+eps)) { // <= to round-off error
-      result = true;
-      // <= to round-off error
-      active_ = (cycle_start + (++index_)*cycle_step <= cycle_stop*(1+eps));
+    {
+      cycle_start = cycle_interval_[0];
+      cycle_step  = cycle_interval_[1];
+      cycle_stop  = cycle_interval_[2];
+
+      bool in_range = (cycle_start <= cycle && cycle <= cycle_stop);
+      result = in_range && ( ((cycle-cycle_start) % cycle_step) == 0);
+
     }
     break;
   default:

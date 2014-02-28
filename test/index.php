@@ -452,7 +452,7 @@ function swf_movie ($filename, $last_image, $image_size)
   }  
 }
 
-printf ("<table>\n");
+printf ("<center><table>\n");
 printf ("<tr>\n");
 
 if (file_exists("COMPILING"))  {
@@ -602,9 +602,10 @@ test_summary("Parameters",array("Parameters"),
 	     array("test_Parameters")); 
 test_summary("Performance",array("Papi", "Performance","Timer"),
 	     array("test_Papi","test_Performance","test_Timer")); 
+test_summary("Schedule",array("Schedule"),
+	     array("test_Schedule")); 
 
-
-printf ("</tr></table></br>\n");
+printf ("</tr></table></center></br>\n");
 
 //======================================================================
 
@@ -1011,6 +1012,12 @@ test_group("Performance");
 tests("Cello","test_Performance","test_Performance","");
 tests("Cello","test_Papi",       "test_Papi","");
 tests("Cello","test_Timer",       "test_Timer","");
+
+//----------------------------------------------------------------------
+
+test_group("Schedule");
+
+tests("Cello","test_Schedule","test_Schedule","");
 
 ?>
   </br/>

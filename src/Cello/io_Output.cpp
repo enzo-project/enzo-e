@@ -92,7 +92,9 @@ bool Output::is_scheduled (int cycle, double time)
 {
   cycle_ = cycle;
   time_  = time;
-  return schedule()->write_this_cycle(cycle_,time_);
+  int scheduled = schedule()->write_this_cycle(cycle_,time_);
+    
+  return scheduled;
 }
 
 //----------------------------------------------------------------------

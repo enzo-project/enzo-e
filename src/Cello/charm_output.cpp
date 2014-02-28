@@ -16,6 +16,38 @@
 
 //----------------------------------------------------------------------
 
+void CommBlock::output_enter_ ()
+{
+  
+  int cycle   = simulation()->cycle();
+  double time = simulation()->time();
+
+  Output * output;
+
+  // skip over unscheduled outputs
+
+  int index_output = -1;
+
+  char buffer[255];
+  bool is_scheduled;
+  do {
+    output = simulation()->problem()->output(++index_output);
+
+  } while (output && ! output->is_scheduled(cycle, time));
+
+  if (output != NULL) {
+
+    proxy_simulation.ckLocalBranch() -> begin_output();
+
+  } else {
+
+    output_exit_();
+
+  }
+}
+
+//----------------------------------------------------------------------
+
 void SimulationCharm::begin_output ()
 {
 #ifdef TRACE_MEMORY
@@ -60,8 +92,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
   do {
 
-    ++index_output_;
-    output = this->output(index_output_);
+    output = this->output(++index_output_);
 
   } while (output && ! output->is_scheduled(cycle, time));
 
@@ -210,30 +241,6 @@ void Problem::output_write
 
 void SimulationCharm::output_exit()
 {
-  TRACE("Simulation::monitor_output()");
-
-  monitor_-> print("", "-------------------------------------");
-  monitor_-> print("Simulation", "cycle %04d", cycle_);
-  monitor_-> print("Simulation", "time-sim %15.12f",time_);
-  monitor_-> print("Simulation", "dt %15.12g", dt_);
-
-  performance_output ();
-
-  Memory::instance()->reset_high();
-
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
-  PARALLEL_PRINTF ("memory output %lld\n",trace_mem_);
-#endif
-
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes();
-#endif
-
-#ifdef CELLO_DEBUG
-  fprintf (fp_debug(),"%s:%d cycle %03d\n", __FILE__,__LINE__,cycle_);
-#endif
-
   if (cycle_ > 0 ) {
     performance()->stop_region (perf_cycle,__FILE__,__LINE__);
   }
@@ -255,13 +262,7 @@ void SimulationCharm::output_exit()
     performance()->switch_region (perf_compute,__FILE__,__LINE__);
 
     if (hierarchy()->group_process()->is_root()) 
-      
-      // --------------------------------------------------
-      // ENTRY: #2 SimulationCharm::compute()-> CommBlock::p_compute_enter()
-      // ENTRY: Block Array if Simulation is_root()
-      // --------------------------------------------------
-      hierarchy()->block_array()->p_compute_enter(cycle_,time_,dt_);
-      // --------------------------------------------------
+      hierarchy()->block_array()->p_output_exit();
   }
 #ifdef TRACE_MEMORY
   trace_mem_ = Memory::instance()->bytes() - trace_mem_;
@@ -269,6 +270,26 @@ void SimulationCharm::output_exit()
 #endif
 }
 
+//----------------------------------------------------------------------
+
+void CommBlock::output_exit_()
+{
+  if (index_.is_root()) {
+
+    proxy_simulation.p_performance_output();
+
+    Memory::instance()->reset_high();
+
+    Monitor * monitor = simulation()->monitor();
+    monitor-> print("", "-------------------------------------");
+    monitor-> print("Simulation", "cycle %04d", cycle_);
+    monitor-> print("Simulation", "time-sim %15.12f",time_);
+    monitor-> print("Simulation", "dt %15.12g", dt_);
+  }
+
+
+  compute_enter_();
+}
 
 //======================================================================
 

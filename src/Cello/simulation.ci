@@ -29,13 +29,13 @@ module simulation {
     entry void r_initialize_forest (CkReductionMsg * msg);    // [SC2]
     entry void r_initialize_hierarchy (CkReductionMsg * msg); // [SC3]
 
-    entry void r_output (CkReductionMsg * msg); // [SC5]
-
     entry void s_write (); // [SC6]
     entry void r_write (CkReductionMsg * msg); // [SC7]
 
+    entry void r_output(CkReductionMsg * msg);
     entry void p_output_write (int n, char buffer[n]); // [SC8]
 
+    entry void p_performance_output ();
     entry void r_performance_reduce (CkReductionMsg * msg); // [SC9]
   };
 }

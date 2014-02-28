@@ -57,6 +57,15 @@ void Config::pup (PUP::er &p)
   p | mesh_adapt_balance;
   p | mesh_adapt_interval;
 
+  p | mesh_sync_adapt_enter;
+  p | mesh_sync_adapt_called;
+  p | mesh_sync_adapt_next;
+  p | mesh_sync_adapt_exit;
+  p | mesh_sync_refresh_enter;
+  p | mesh_sync_refresh_exit;
+  p | mesh_sync_output_enter;
+  p | mesh_sync_output_exit;
+
   p | method_sequence;
 
   p | monitor_debug;
@@ -278,6 +287,12 @@ void Config::read(Parameters * parameters) throw()
 
   mesh_sync_refresh_exit = parameters->value_string 
     ("Mesh:sync:refresh_exit","contribute");
+
+  mesh_sync_output_enter = parameters->value_string 
+    ("Mesh:sync:output_enter","array");
+
+  mesh_sync_output_exit = parameters->value_string 
+    ("Mesh:sync:output_exit","none");
 
   //--------------------------------------------------
 
