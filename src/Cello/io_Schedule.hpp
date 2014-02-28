@@ -47,7 +47,6 @@ public: // functions
     p | time_interval_;
     p | time_list_;
     p | time_skip_;
-    p | index_;
   }
 
   /// Set cycle interval (start, step, stop)
@@ -111,9 +110,6 @@ protected: // attributes
 
   /// List of times to skip even if scheduled
   std::vector<double> time_skip_;
-
-  /// Index of time or cycle interval or list for next output
-  size_t index_;
 
 };
 

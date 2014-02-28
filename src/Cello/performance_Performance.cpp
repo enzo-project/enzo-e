@@ -209,11 +209,11 @@ Performance::start_region(int id_region, std::string file, int line, void * bloc
       WARNING1 ("Performance::start_region",
 		"Region %s already started",
 		region_name_[id_region].c_str());
-    } else {
-      WARNING3 ("Performance::start_region",
-		"Region %s already started %s %d",
-		region_name_[id_region].c_str(),
-		file.c_str(),line);
+    // } else {
+    //   WARNING3 ("Performance::start_region",
+    // 		"Region %s already started %s %d",
+    // 		region_name_[id_region].c_str(),
+    // 		file.c_str(),line);
     }
     return;
   }

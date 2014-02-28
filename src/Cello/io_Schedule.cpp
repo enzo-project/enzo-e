@@ -17,8 +17,7 @@ Schedule::Schedule () throw()
     cycle_interval_(),
     cycle_list_(),
     time_interval_(),
-    time_list_(),
-    index_(0)
+    time_list_()
 {
 }
 
@@ -109,12 +108,11 @@ void Schedule::set_time_list (std::vector<double> time_list) throw()
 
 bool Schedule::write_this_cycle ( int cycle, double time ) throw()
 {
-
   bool result = false;
 
   if (! active_) return false;
 
-  const double tol = cello::machine_epsilon(precision_single);
+  const double tol = 2*cello::machine_epsilon(precision_single);
 
   double time_start;
   double time_step;
@@ -156,24 +154,29 @@ bool Schedule::write_this_cycle ( int cycle, double time ) throw()
   switch (schedule_type_) {
 
   case schedule_type_time_list:
+
     // time_list_
-    time_dump = time_list_[index_];
-    if (cello::err_abs(time,time_dump) < tol) { // <= to round-off error
-      result = true;
-      active_ = (++index_ < time_list_.size());
+    for (size_t i=0; i<time_list_.size(); i++) {
+      if (cello::err_abs(time,time_list_[i]) < tol) {
+	result = true;
+	break;
+      }
     }
     break;
 
   case schedule_type_time_interval:
-    // time_interval_
-    // deactive if we've reached the end
-    time_start = time_interval_[0];
-    time_step  = time_interval_[1];
-    time_stop  = time_interval_[2];
-    time_dump = time_start + index_*time_step;
-    if (cello::err_abs(time,time_dump) < tol) { // <= to round-off error
-      result = true;
-      active_ = (time_start + (++index_)*time_step <= time_stop*(1+tol));
+    {
+      time_start = time_interval_[0];
+      time_step  = time_interval_[1];
+      time_stop  = time_interval_[2];
+
+      bool in_range = (time_start <= time && time <= time_stop);
+
+      double ratio = (time - time_start) / time_step;
+      bool below_tol = (cello::err_abs(round(ratio),ratio) < tol);
+
+      result = in_range && below_tol;
+
     }
     break;
 
@@ -214,35 +217,44 @@ double Schedule::update_timestep ( double time, double dt) const throw()
 
   double new_dt = dt;
 
+  const double time_next  = time + dt;
+
   double time_start;
   double time_step;
   double time_stop;
   double time_dump;
-  double time_next;
-
-  time_next = time + dt;
 
   switch (schedule_type_) {
 
   case schedule_type_time_list:
-    time_dump = time_list_[index_];
-    if (time < time_dump && time_dump < time_next) {
-      new_dt = time_dump - time;
+
+    for (size_t i=0; i<cycle_list_.size(); i++) {
+      time_dump = time_list_[i];
+      if (time < time_dump && time_dump < time_next) {
+	new_dt = time_dump - time;
+	break;
+      }
     }
     break;
 
   case schedule_type_time_interval:
     // time_interval_
-    time_start = time_interval_[0];
-    time_step  = time_interval_[1];
-    time_stop  = time_interval_[2];
-    time_dump = time_start + index_*time_step;
-    if (time < time_dump && time_dump < time_next && time < time_stop) {
-      new_dt = time_dump - time;
+    {
+      time_start = time_interval_[0];
+      time_step  = time_interval_[1];
+      time_stop  = time_interval_[2];
+
+      double ratio      = (time - time_start) / time_step;
+      double ratio_next = (time_next - time_start) / time_step;
+
+      if ((round(ratio) == round(ratio_next)) &&
+	  ratio < 1.0 && ratio_next > 1.0) {
+	time_dump = time_start + round(ratio)*time_step;
+	new_dt = time_dump - time;
+      }
     }
     break;
   default:
-    // NOP
     break;
   }
   return new_dt;

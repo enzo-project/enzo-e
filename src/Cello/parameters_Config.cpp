@@ -456,41 +456,55 @@ void Config::read(Parameters * parameters) throw()
       if (length == 3) { // step
 	if (var_is_int) {
 	  output_schedule_start[index] = 0;
-	  output_schedule_step[index]  = parameters->list_value_integer(2,"schedule");
+	  output_schedule_step[index]
+	    = parameters->list_value_integer(2,"schedule");
 	  output_schedule_stop[index]  = max_int;
 	} else {
 	  output_schedule_start[index] = 0.0;
-	  output_schedule_step[index]  = parameters->list_value_float(2,"schedule");
+	  output_schedule_step[index]  
+	    = parameters->list_value_float(2,"schedule");
 	  output_schedule_stop[index]  = max_double;
 	}
       } else if (length == 4) { // start, step
 	if (var_is_int) {
-	  output_schedule_start[index] = parameters->list_value_integer(2,"schedule");
-	  output_schedule_step[index]  = parameters->list_value_integer(3,"schedule");
+	  output_schedule_start[index] 
+	    = parameters->list_value_integer(2,"schedule");
+	  output_schedule_step[index]  
+	    = parameters->list_value_integer(3,"schedule");
 	  output_schedule_stop[index]  = max_int;
 	} else {
-	  output_schedule_start[index] = parameters->list_value_float(2,"schedule");
-	  output_schedule_step[index]  = parameters->list_value_float(3,"schedule");
+	  output_schedule_start[index]
+	    = parameters->list_value_float(2,"schedule");
+	  output_schedule_step[index]
+	    = parameters->list_value_float(3,"schedule");
 	  output_schedule_stop[index]  = max_double;
 	}
       } else if (length == 5) { // start, step, stop
 	if (var_is_int) {
-	  output_schedule_start[index] = parameters->list_value_integer(2,"schedule");
-	  output_schedule_step[index]  = parameters->list_value_integer(3,"schedule");
-	  output_schedule_stop[index]  = parameters->list_value_integer(4,"schedule");
+	  output_schedule_start[index]
+	    = parameters->list_value_integer(2,"schedule");
+	  output_schedule_step[index]
+	    = parameters->list_value_integer(3,"schedule");
+	  output_schedule_stop[index]
+	    = parameters->list_value_integer(4,"schedule");
 	} else {
-	  output_schedule_start[index] = parameters->list_value_float(2,"schedule");
-	  output_schedule_step[index]  = parameters->list_value_float(3,"schedule");
-	  output_schedule_stop[index]  = parameters->list_value_float(4,"schedule");
+	  output_schedule_start[index]
+	    = parameters->list_value_float(2,"schedule");
+	  output_schedule_step[index]
+	    = parameters->list_value_float(3,"schedule");
+	  output_schedule_stop[index]
+	    = parameters->list_value_float(4,"schedule");
 	}
       }
     } else if (output_schedule_type[index] == "list") {
       output_schedule_list[index].resize(length-2);
       for (int i=2; i<length; i++) {
 	if (var_is_int) {
-	  output_schedule_list[index][i-2] = parameters->list_value_integer(i,"schedule");
+	  output_schedule_list[index][i-2]
+	    = parameters->list_value_integer(i,"schedule");
 	} else {
-	  output_schedule_list[index][i-2] = parameters->list_value_float(i,"schedule");
+	  output_schedule_list[index][i-2]
+	    = parameters->list_value_float(i,"schedule");
 	}
       }
     } else {

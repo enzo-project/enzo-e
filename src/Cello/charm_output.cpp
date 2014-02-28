@@ -35,6 +35,8 @@ void CommBlock::output_enter_ ()
 
   } while (output && ! output->is_scheduled(cycle, time));
 
+  TRACE2("output_enter %d %p",index_output,output);
+
   if (output != NULL) {
 
     proxy_simulation.ckLocalBranch() -> begin_output();
@@ -54,8 +56,11 @@ void SimulationCharm::begin_output ()
   trace_mem_ = Memory::instance()->bytes() - trace_mem_;
 #endif
 
+  TRACE("SimulationCharm::begin_output()");
   performance()->switch_region(perf_output,__FILE__,__LINE__);
 
+  TRACE2("block_sync %d/%d",block_sync_.index(),block_sync_.stop());
+  
   if (block_sync_.next()) {
 
     CkCallback callback (CkIndex_SimulationCharm::r_output(NULL), thisProxy);
@@ -241,39 +246,15 @@ void Problem::output_write
 
 void SimulationCharm::output_exit()
 {
-  if (cycle_ > 0 ) {
-    performance()->stop_region (perf_cycle,__FILE__,__LINE__);
-  }
-
-  if (stop_) {
-    
-    performance_write();
-
-    // --------------------------------------------------
-    // ENTRY: #1 SimulationCharm::compute()-> Main::p_exit()
-    // ENTRY: Main if stop
-    // --------------------------------------------------
-    proxy_main.p_exit(CkNumPes());
-    // --------------------------------------------------
-
-  } else {
-
-    performance()->start_region (perf_cycle,__FILE__,__LINE__);
-    performance()->switch_region (perf_compute,__FILE__,__LINE__);
-
-    if (hierarchy()->group_process()->is_root()) 
-      hierarchy()->block_array()->p_output_exit();
-  }
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
-  PARALLEL_PRINTF ("memory compute %lld\n",trace_mem_);
-#endif
+  if (hierarchy()->group_process()->is_root()) 
+    hierarchy()->block_array()->p_output_exit();
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::output_exit_()
 {
+  TRACE("CommBlock::output_exit_()");
   if (index_.is_root()) {
 
     proxy_simulation.p_performance_output();

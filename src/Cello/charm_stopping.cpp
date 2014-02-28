@@ -127,13 +127,32 @@ void CommBlock::stopping_exit_()
 
   simulation->update_state(cycle_,time_,dt_,stop_);
 
-  SimulationCharm * simulation_charm = proxy_simulation.ckLocalBranch();
+  if (cycle_ > 0 ) {
+    performance_stop_(perf_cycle,__FILE__,__LINE__);
+  }
+  performance_start_ (perf_cycle,__FILE__,__LINE__);
 
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
-#endif
+  if (stop_) {
+    proxy_simulation.p_stopping_exit();
+  }
 
   output_enter_();
 
 }
 
+//----------------------------------------------------------------------
+
+void SimulationCharm::p_stopping_exit()
+{
+  if (block_sync_.next()) {
+
+    performance_write();
+
+    // --------------------------------------------------
+    // ENTRY: #1 SimulationCharm::compute()-> Main::p_exit()
+    // ENTRY: Main if stop
+    // --------------------------------------------------
+    proxy_main.p_exit(CkNumPes());
+    // --------------------------------------------------
+  }
+}

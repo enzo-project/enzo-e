@@ -101,8 +101,10 @@ public: // functions
   /// proceed with next output
   void p_output_write (int n, char * buffer);
 
-  /// Stopping criteria and computation
+  void p_stopping_exit();
+
   void compute ();
+
 
   /// Output Performance information to stdout
   void p_performance_output()
