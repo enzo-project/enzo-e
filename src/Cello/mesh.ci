@@ -72,6 +72,18 @@ module mesh {
 
     entry void r_stopping_compute_timestep (CkReductionMsg * msg); // [CB4]
 
+    entry void p_stopping_enter();
+    entry void q_stopping_enter();
+    entry void r_stopping_enter(CkReductionMsg *);
+
+    entry void p_stopping_exit();
+    entry void q_stopping_exit();
+    entry void r_stopping_exit(CkReductionMsg *);
+
+    entry void p_exit();
+    entry void q_exit();
+    entry void r_exit(CkReductionMsg *);
+
     //--------------------------------------------------
     // *** CONTROL ***
     //--------------------------------------------------

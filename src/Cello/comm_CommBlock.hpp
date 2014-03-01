@@ -371,11 +371,41 @@ public:
   // STOPPING
   //--------------------------------------------------
 
-  /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
-  void stopping_enter_();
   /// Entry method after begin_stopping() to call Simulation::r_stopping()
   void r_stopping_compute_timestep(CkReductionMsg * msg);
+
+  /// Enter the stopping phase
+  void p_stopping_enter () 
+  {      stopping_enter_(); }
+  void q_stopping_enter () 
+  {      stopping_enter_(); }
+  void r_stopping_enter (CkReductionMsg * msg) 
+  {      stopping_enter_(); delete msg;  }
+
+  /// Enter the stopping phase
+  void p_stopping_exit () 
+  {      stopping_exit_(); }
+  void q_stopping_exit () 
+  {      stopping_exit_(); }
+  void r_stopping_exit (CkReductionMsg * msg) 
+  {      stopping_exit_(); delete msg;  }
+
+protected:
+  void stopping_enter_();
   void stopping_exit_();
+public:
+
+  /// Exit the stopping phase to exit
+  void p_exit () 
+  {      exit_(); }
+  void q_exit () 
+  {      exit_(); }
+  void r_exit (CkReductionMsg * msg) 
+  {      exit_(); delete msg;  }
+
+protected:
+  void exit_();
+public:
 
   //--------------------------------------------------
   // PERFORMANCE

@@ -226,7 +226,7 @@ void CommBlock::refresh_exit_()
 
   if (next_phase_ == phase_stopping) {
 
-    stopping_enter_();
+    control_sync(phase_sync_stopping_enter);
 
   }  else if (next_phase_ == phase_adapt) {
 

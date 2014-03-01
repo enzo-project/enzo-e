@@ -133,26 +133,26 @@ void CommBlock::stopping_exit_()
   performance_start_ (perf_cycle,__FILE__,__LINE__);
 
   if (stop_) {
-    proxy_simulation.p_stopping_exit();
+    control_sync(phase_sync_exit);
+  } else {
+    control_sync(phase_sync_output_enter);
   }
-
-  output_enter_();
 
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_stopping_exit()
+void CommBlock::exit_()
 {
-  if (block_sync_.next()) {
+  if (index_.is_root()) {
 
-    performance_write();
+    simulation()->performance_write();
 
     // --------------------------------------------------
     // ENTRY: #1 SimulationCharm::compute()-> Main::p_exit()
     // ENTRY: Main if stop
     // --------------------------------------------------
-    proxy_main.p_exit(CkNumPes());
+    proxy_main.p_exit(1);
     // --------------------------------------------------
   }
 }

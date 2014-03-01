@@ -62,9 +62,14 @@ enum phase_sync_type {
   phase_sync_refresh_enter,
   phase_sync_refresh_exit,
   phase_sync_output_enter,
-  phase_sync_output_exit
+  phase_sync_output_exit,
+  phase_sync_compute_enter,
+  phase_sync_compute_exit,
+  phase_sync_stopping_enter,
+  phase_sync_stopping_exit,
+  phase_sync_exit
 };
-#define PHASE_SYNC_SIZE 9
+#define PHASE_SYNC_SIZE 14
 
 //----------------------------------------------------------------------
 // System includes

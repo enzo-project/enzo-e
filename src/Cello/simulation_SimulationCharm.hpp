@@ -101,8 +101,6 @@ public: // functions
   /// proceed with next output
   void p_output_write (int n, char * buffer);
 
-  void p_stopping_exit();
-
   void compute ();
 
 

@@ -57,6 +57,11 @@ void CommBlock::adapt_enter_()
   trace_mem_ = Memory::instance()->bytes();
 #endif
 
+  int adapt_interval = simulation()->config()->mesh_adapt_interval;
+  bool do_adapt = ((adapt_interval && ((cycle_ % adapt_interval) == 0)));
+
+  if (! do_adapt) adapt_exit_();
+
   performance_switch_ (perf_adapt,__FILE__,__LINE__);
   
   set_leaf();
@@ -194,16 +199,10 @@ void CommBlock::adapt_exit_()
   bool adapt_again = (is_first_cycle && adapt_step_++ < level_maximum);
 
   if (adapt_again) {
-    // ENTRY: #7 CommBlock::adapt_exit_()-> CommBlock::p_adapt_enter()
-    // ENTRY: block array if (is_root && create)
-    // ENTRY: adapt phase
 
     control_sync (phase_sync_adapt_enter);
 
   } else {
-    // ENTRY: #8 CommBlock::adapt_exit_()-> CommBlock::p_refresh_enter()
-    // ENTRY: block array if (is_root && not create)
-    // ENTRY: adapt phase
 
     control_sync (phase_sync_refresh_enter);
   }

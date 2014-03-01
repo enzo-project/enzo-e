@@ -46,21 +46,17 @@ void CommBlock::compute_enter_ ()
   
   TRACE ("END   PHASE COMPUTE");
 
-  compute_exit_();
+  control_sync (phase_sync_compute_exit);
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::compute_exit_ ()
 {
-  int adapt_interval = simulation()->config()->mesh_adapt_interval;
-  if (adapt_interval && ((cycle_ % adapt_interval) == 0)) {
-    next_phase_ = phase_adapt;
-  } else {
-    next_phase_ = phase_stopping;
-  }
 
-  refresh_enter_();
+  next_phase_ = phase_adapt;
+
+  control_sync(phase_sync_refresh_enter);
 }
 
 //----------------------------------------------------------------------

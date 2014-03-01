@@ -268,8 +268,7 @@ void CommBlock::output_exit_()
     monitor-> print("Simulation", "dt %15.12g", dt_);
   }
 
-
-  compute_enter_();
+  control_sync(phase_sync_compute_enter);
 }
 
 //======================================================================
