@@ -14,9 +14,9 @@
 
 //======================================================================
 
-void CommBlock::compute_enter_ ()
+void CommBlock::compute_begin_ ()
 {
-  performance_switch_(perf_compute,__FILE__,__LINE__);
+
 
 #ifdef CONFIG_USE_PROJECTIONS
   //  double time_start = CmiWallTimer();
@@ -47,16 +47,6 @@ void CommBlock::compute_enter_ ()
   TRACE ("END   PHASE COMPUTE");
 
   control_sync (phase_sync_compute_exit);
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::compute_exit_ ()
-{
-
-  next_phase_ = phase_adapt;
-
-  control_sync(phase_sync_refresh_enter);
 }
 
 //----------------------------------------------------------------------

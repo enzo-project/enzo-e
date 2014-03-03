@@ -16,19 +16,11 @@ static char buffer[256];
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_enter_() 
+void CommBlock::refresh_begin_() 
 {
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes();
-#endif
-  performance_switch_(perf_refresh,__FILE__,__LINE__);
-
-// #ifdef CELLO_TRACE
-//   sprintf (buffer,"BEGIN PHASE REFRESH(%p)",this);
-//    index_.print(buffer,-1,2,false,simulation());
-// #endif
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
+
   bool is_periodic = simulation->problem()->boundary()->is_periodic();
   
   const Config * config = simulation->config();
@@ -98,7 +90,7 @@ void CommBlock::refresh_enter_()
 		   if3[0],if3[1],if3[2],level,face_level(if3),next_phase_);
 	  index_.print(buffer,-1,2,false,simulation);
       
-	  ERROR("CommBlock::refresh_enter_()",
+	  ERROR("CommBlock::refresh_begin_()",
 		"Refresh error");
 	}
 
@@ -213,32 +205,6 @@ void CommBlock::x_refresh_child
   int  iface[3]  = {0,0,0};
   bool lghost[3] = {true,true,true};
   store_face_(n,buffer, iface, ic3, lghost, op_array_restrict);
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::refresh_exit_()
-{
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
-  PARALLEL_PRINTF ("memory refresh %lld\n",trace_mem_);
-#endif
-
-  if (next_phase_ == phase_stopping) {
-
-    control_sync(phase_sync_stopping_enter);
-
-  }  else if (next_phase_ == phase_adapt) {
-
-    control_sync (phase_sync_adapt_enter);
-
-  } else {
-
-    ERROR1 ("CommBlock::q_refresh_exit()",
-	       "Unknown next_phase %d",
-	       next_phase_);
-
-  }
 }
 
 //----------------------------------------------------------------------

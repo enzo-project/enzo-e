@@ -24,15 +24,9 @@
 
 //----------------------------------------------------------------------
 
-void CommBlock::stopping_enter_()
+void CommBlock::stopping_begin_()
 {
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes();
-#endif
 
-  performance_switch_(perf_stopping,__FILE__,__LINE__);
-
-  TRACE1("CommBlock::stopping() %p",&thisProxy);
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
  //--------------------------------------------------
@@ -114,30 +108,6 @@ void CommBlock::r_stopping_compute_timestep(CkReductionMsg * msg)
   delete msg;
 
   stopping_exit_();
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::stopping_exit_()
-{
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  set_dt   (dt_);
-  set_stop (stop_);
-
-  simulation->update_state(cycle_,time_,dt_,stop_);
-
-  if (cycle_ > 0 ) {
-    performance_stop_(perf_cycle,__FILE__,__LINE__);
-  }
-  performance_start_ (perf_cycle,__FILE__,__LINE__);
-
-  if (stop_) {
-    control_sync(phase_sync_exit);
-  } else {
-    control_sync(phase_sync_output_enter);
-  }
-
 }
 
 //----------------------------------------------------------------------

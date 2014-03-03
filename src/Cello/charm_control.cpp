@@ -33,6 +33,201 @@ const char * phase_string [] = {
 
 //----------------------------------------------------------------------
 
+void CommBlock::adapt_enter_()
+{
+  TRACE("ENTER PHASE ADAPT") ;
+
+  performance_switch_ (perf_adapt,__FILE__,__LINE__);
+
+  adapt_begin_();
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::adapt_exit_()
+{
+
+  TRACE("EXIT   PHASE ADAPT") ;
+
+  set_leaf();
+
+  if (delete_) {
+
+    // --------------------------------------------------
+    // ENTRY: #6 SimulationCharm::adapt_exit_() -> ckDestroy()
+    // ENTRY: if delete
+    // ENTRY: adapt phase
+    // --------------------------------------------------
+    ckDestroy();
+    // --------------------------------------------------
+
+    return;
+  }
+
+  next_phase_ = phase_stopping;
+
+  const int initial_cycle = simulation()->config()->initial_cycle;
+  const bool is_first_cycle = (initial_cycle == cycle());
+  const int level_maximum = simulation()->config()->initial_max_level;
+
+  bool adapt_again = (is_first_cycle && adapt_step_++ < level_maximum);
+
+  if (adapt_again) {
+
+    control_sync (phase_sync_adapt_enter);
+
+  } else {
+
+    control_sync (phase_sync_refresh_enter);
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::compute_enter_ ()
+{
+  TRACE("ENTER PHASE COMPUTE");
+
+  performance_switch_(perf_compute,__FILE__,__LINE__);
+
+  compute_begin_();
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::compute_exit_ ()
+{
+
+  TRACE("EXIT   PHASE COMPUTE") ;
+
+  next_phase_ = phase_adapt;
+
+  control_sync(phase_sync_refresh_enter);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::refresh_enter_() 
+{
+  TRACE ("ENTER PHASE REFRESH");
+
+  performance_switch_(perf_refresh,__FILE__,__LINE__);
+
+  refresh_begin_();
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::refresh_exit_()
+{
+
+  TRACE("EXIT   PHASE REFRESH") ;
+
+#ifdef TRACE_MEMORY
+  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
+  PARALLEL_PRINTF ("memory refresh %lld\n",trace_mem_);
+#endif
+
+  if (next_phase_ == phase_stopping) {
+
+    control_sync(phase_sync_stopping_enter);
+
+  }  else if (next_phase_ == phase_adapt) {
+
+    control_sync (phase_sync_adapt_enter);
+
+  } else {
+
+    ERROR1 ("CommBlock::q_refresh_exit()",
+	       "Unknown next_phase %d",
+	       next_phase_);
+
+  }
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::stopping_enter_()
+{
+
+  TRACE ("ENTER PHASE STOPPING");
+
+  performance_switch_(perf_stopping,__FILE__,__LINE__);
+
+  stopping_begin_();
+
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::stopping_exit_()
+{
+
+  TRACE("EXIT   PHASE STOPPING") ;
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  set_dt   (dt_);
+  set_stop (stop_);
+
+  simulation->update_state(cycle_,time_,dt_,stop_);
+
+  if (cycle_ > 0 ) {
+    performance_stop_(perf_cycle,__FILE__,__LINE__);
+  }
+  performance_start_ (perf_cycle,__FILE__,__LINE__);
+
+  if (stop_) {
+
+    control_sync(phase_sync_exit);
+
+  } else {
+
+    control_sync(phase_sync_output_enter);
+
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::output_enter_ ()
+{
+
+  TRACE ("ENTER PHASE OUTPUT");
+
+  performance_switch_ (perf_output,__FILE__,__LINE__);
+
+  output_begin_();
+
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::output_exit_()
+{
+
+  TRACE("EXIT   PHASE OUTPUT") ;
+
+  if (index_.is_root()) {
+
+    proxy_simulation.p_performance_output();
+
+    Memory::instance()->reset_high();
+
+    Monitor * monitor = simulation()->monitor();
+    monitor-> print("", "-------------------------------------");
+    monitor-> print("Simulation", "cycle %04d", cycle_);
+    monitor-> print("Simulation", "time-sim %15.12f",time_);
+    monitor-> print("Simulation", "dt %15.12g", dt_);
+  }
+
+  control_sync(phase_sync_compute_enter);
+}
+
+//======================================================================
+
 void CommBlock::control_sync(int phase)
 {
   

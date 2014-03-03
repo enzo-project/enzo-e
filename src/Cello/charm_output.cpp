@@ -16,9 +16,9 @@
 
 //----------------------------------------------------------------------
 
-void CommBlock::output_enter_ ()
+void CommBlock::output_begin_ ()
 {
-  
+
   int cycle   = simulation()->cycle();
   double time = simulation()->time();
 
@@ -248,27 +248,6 @@ void SimulationCharm::output_exit()
 {
   if (hierarchy()->group_process()->is_root()) 
     hierarchy()->block_array()->p_output_exit();
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::output_exit_()
-{
-  TRACE("CommBlock::output_exit_()");
-  if (index_.is_root()) {
-
-    proxy_simulation.p_performance_output();
-
-    Memory::instance()->reset_high();
-
-    Monitor * monitor = simulation()->monitor();
-    monitor-> print("", "-------------------------------------");
-    monitor-> print("Simulation", "cycle %04d", cycle_);
-    monitor-> print("Simulation", "time-sim %15.12f",time_);
-    monitor-> print("Simulation", "dt %15.12g", dt_);
-  }
-
-  control_sync(phase_sync_compute_enter);
 }
 
 //======================================================================

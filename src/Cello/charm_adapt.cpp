@@ -50,37 +50,36 @@ static char buffer [256];
 
 //======================================================================
 
-void CommBlock::adapt_enter_()
+void CommBlock::adapt_begin_()
 {
-
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes();
-#endif
 
   int adapt_interval = simulation()->config()->mesh_adapt_interval;
   bool do_adapt = ((adapt_interval && ((cycle_ % adapt_interval) == 0)));
 
-  if (! do_adapt) adapt_exit_();
+  if (! do_adapt) {
 
-  performance_switch_ (perf_adapt,__FILE__,__LINE__);
-  
-  set_leaf();
+    adapt_exit_();
 
-  const int rank = simulation()->dimension();
-  sync_coarsen_.set_stop(NC(rank));
-  sync_coarsen_.clear();
+  } else {
 
-  const int initial_cycle = simulation()->config()->initial_cycle;
-  const bool is_first_cycle = (initial_cycle == cycle());
+ 
+    set_leaf();
 
-  int level_maximum = is_first_cycle ? 
-    simulation()->config()->initial_max_level :
-    simulation()->config()->mesh_max_level;
+    const int rank = simulation()->dimension();
+    sync_coarsen_.set_stop(NC(rank));
+    sync_coarsen_.clear();
 
-  level_new_ = adapt_compute_desired_level_(level_maximum);
+    const int initial_cycle = simulation()->config()->initial_cycle;
+    const bool is_first_cycle = (initial_cycle == cycle());
 
-  control_sync (phase_sync_adapt_called);
+    int level_maximum = is_first_cycle ? 
+      simulation()->config()->initial_max_level :
+      simulation()->config()->mesh_max_level;
 
+    level_new_ = adapt_compute_desired_level_(level_maximum);
+
+    control_sync (phase_sync_adapt_called);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -160,53 +159,6 @@ void CommBlock::adapt_next_()
   }
 
   control_sync (phase_sync_adapt_exit);
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::adapt_exit_()
-{
-  set_leaf();
-
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
-  PARALLEL_PRINTF ("memory adapt %lld\n",trace_mem_);
-#endif
-
-  if (delete_) {
-
-#ifdef CELLO_DEBUG
-    index_.print("DEBUG ckDestroy()",-1,2,false,simulation());
-#endif
-
-    // --------------------------------------------------
-    // ENTRY: #6 SimulationCharm::adapt_exit_() -> ckDestroy()
-    // ENTRY: if delete
-    // ENTRY: adapt phase
-    // --------------------------------------------------
-    ckDestroy();
-    // --------------------------------------------------
-
-    return;
-  }
-
-  next_phase_ = phase_stopping;
-
-  const int initial_cycle = simulation()->config()->initial_cycle;
-  const bool is_first_cycle = (initial_cycle == cycle());
-  const int level_maximum = simulation()->config()->initial_max_level;
-
-  bool adapt_again = (is_first_cycle && adapt_step_++ < level_maximum);
-
-  if (adapt_again) {
-
-    control_sync (phase_sync_adapt_enter);
-
-  } else {
-
-    control_sync (phase_sync_refresh_enter);
-  }
-
 }
 
 //----------------------------------------------------------------------
@@ -737,13 +689,18 @@ FieldFace * CommBlock::create_face_
   FieldFace * field_face = new FieldFace (field_block,field_descr);
 
   if (op_array_type == op_array_restrict) {
+
     field_face->set_restrict(problem->restrict(),ic3[0],ic3[1],ic3[2]);
+
   } else if (op_array_type == op_array_prolong) {
+
     field_face->set_prolong(problem->prolong(),  ic3[0],ic3[1],ic3[2]);
+
   }
 
   field_face->set_face (if3[0],if3[1],if3[2]);
   field_face->set_ghost(lg3[0],lg3[1],lg3[2]);
+
   return field_face;
 }
 

@@ -228,6 +228,7 @@ public: // interface
 
 protected:
   void compute_enter_();
+  void compute_begin_();
   void compute_exit_();
 public:
 
@@ -258,6 +259,7 @@ public:
 
 protected:
   void output_enter_();
+  void output_begin_();
   void output_exit_();
 public:
 
@@ -305,6 +307,7 @@ public:
 
 protected:
   void adapt_enter_();
+  void adapt_begin_ ();
   void adapt_next_ ();
   void adapt_exit_();
   void adapt_coarsen_();
@@ -361,6 +364,7 @@ public:
 
 protected:
   void refresh_enter_();
+  void refresh_begin_();
   void refresh_exit_ ();
   void refresh_face_
   (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]);
@@ -392,6 +396,7 @@ public:
 
 protected:
   void stopping_enter_();
+  void stopping_begin_();
   void stopping_exit_();
 public:
 
