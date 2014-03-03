@@ -60,7 +60,7 @@ void Config::pup (PUP::er &p)
   p | mesh_sync_adapt_enter;
   p | mesh_sync_adapt_called;
   p | mesh_sync_adapt_next;
-  p | mesh_sync_adapt_exit;
+  p | mesh_sync_adapt_end;
   p | mesh_sync_refresh_enter;
   p | mesh_sync_refresh_exit;
   p | mesh_sync_output_enter;
@@ -284,8 +284,8 @@ void Config::read(Parameters * parameters) throw()
   mesh_sync_adapt_called = parameters->value_string 
     ("Mesh:sync:adapt_called","neighbor");
 
-  mesh_sync_adapt_exit = parameters->value_string 
-    ("Mesh:sync:adapt_exit","quiescence");
+  mesh_sync_adapt_end = parameters->value_string 
+    ("Mesh:sync:adapt_end","quiescence");
 
   mesh_sync_refresh_enter = parameters->value_string 
     ("Mesh:sync:refresh_enter","array");

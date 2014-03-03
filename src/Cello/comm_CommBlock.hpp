@@ -288,12 +288,12 @@ public:
   void r_adapt_called(CkReductionMsg * msg) 
   {      adapt_called_(); delete msg; }
 
-  void p_adapt_exit ()  
-  {      adapt_exit_(); }
-  void q_adapt_exit ()  
-  {      adapt_exit_(); }
-  void r_adapt_exit (CkReductionMsg * msg)  
-  {      adapt_exit_(); delete msg;}
+  void p_adapt_end ()  
+  {      adapt_end_(); }
+  void q_adapt_end ()  
+  {      adapt_end_(); }
+  void r_adapt_end (CkReductionMsg * msg)  
+  {      adapt_end_(); delete msg;}
 
 
   /// Parent tells child to delete itself
@@ -306,9 +306,11 @@ public:
   void adapt_send_neighbors_levels(int level);
 
 protected:
+  bool do_adapt_();
   void adapt_enter_();
   void adapt_begin_ ();
   void adapt_next_ ();
+  void adapt_end_ ();
   void adapt_exit_();
   void adapt_coarsen_();
   void adapt_refine_();

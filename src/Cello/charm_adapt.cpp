@@ -53,33 +53,33 @@ static char buffer [256];
 void CommBlock::adapt_begin_()
 {
 
+  set_leaf();
+
+  const int rank = simulation()->dimension();
+  sync_coarsen_.set_stop(NC(rank));
+  sync_coarsen_.clear();
+
+  const int initial_cycle = simulation()->config()->initial_cycle;
+  const bool is_first_cycle = (initial_cycle == cycle());
+
+  int level_maximum = is_first_cycle ? 
+    simulation()->config()->initial_max_level :
+    simulation()->config()->mesh_max_level;
+
+  level_new_ = adapt_compute_desired_level_(level_maximum);
+
+  control_sync (phase_sync_adapt_called);
+}
+
+//----------------------------------------------------------------------
+
+bool CommBlock::do_adapt_()
+{
+
   int adapt_interval = simulation()->config()->mesh_adapt_interval;
-  bool do_adapt = ((adapt_interval && ((cycle_ % adapt_interval) == 0)));
 
-  if (! do_adapt) {
+  return ((adapt_interval && ((cycle_ % adapt_interval) == 0)));
 
-    adapt_exit_();
-
-  } else {
-
- 
-    set_leaf();
-
-    const int rank = simulation()->dimension();
-    sync_coarsen_.set_stop(NC(rank));
-    sync_coarsen_.clear();
-
-    const int initial_cycle = simulation()->config()->initial_cycle;
-    const bool is_first_cycle = (initial_cycle == cycle());
-
-    int level_maximum = is_first_cycle ? 
-      simulation()->config()->initial_max_level :
-      simulation()->config()->mesh_max_level;
-
-    level_new_ = adapt_compute_desired_level_(level_maximum);
-
-    control_sync (phase_sync_adapt_called);
-  }
 }
 
 //----------------------------------------------------------------------
@@ -158,7 +158,29 @@ void CommBlock::adapt_next_()
     if (level() > level_new_) adapt_coarsen_();
   }
 
-  control_sync (phase_sync_adapt_exit);
+  control_sync (phase_sync_adapt_end);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::adapt_end_()
+{
+  set_leaf();
+
+  if (delete_) {
+
+    // --------------------------------------------------
+    // ENTRY: #6 SimulationCharm::adapt_exit_() -> ckDestroy()
+    // ENTRY: if delete
+    // ENTRY: adapt phase
+    // --------------------------------------------------
+    ckDestroy();
+    // --------------------------------------------------
+
+    return;
+  }
+
+  adapt_exit_();
 }
 
 //----------------------------------------------------------------------

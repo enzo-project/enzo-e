@@ -58,7 +58,7 @@ enum phase_sync_type {
   phase_sync_adapt_called,
   phase_sync_adapt_enter,
   phase_sync_adapt_next,
-  phase_sync_adapt_exit,
+  phase_sync_adapt_end,
   phase_sync_refresh_enter,
   phase_sync_refresh_exit,
   phase_sync_output_enter,

@@ -98,9 +98,9 @@ module mesh {
     entry void q_adapt_enter();
     entry void r_adapt_enter(CkReductionMsg *);   // [CB22]
 
-    entry void p_adapt_exit();    // [CB13]
-    entry void q_adapt_exit();    // [CB13]
-    entry void r_adapt_exit(CkReductionMsg *);
+    entry void p_adapt_end();    // [CB13]
+    entry void q_adapt_end();    // [CB13]
+    entry void r_adapt_end(CkReductionMsg *);
 
     entry void p_adapt_next();    // [CB12]
     entry void q_adapt_next();    // [CB12]

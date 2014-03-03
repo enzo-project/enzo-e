@@ -164,13 +164,8 @@ CommBlock::CommBlock
     apply_initial_();
   } else if (level > 0) {
 
-    // --------------------------------------------------
-    // ENTRY: #1 CommBlock::CommBlock() -> CommBlock::q_adapt_exit()
-    // ENTRY: quiescence if level > 0
-    // --------------------------------------------------
-    CkStartQD (CkCallback(CkIndex_CommBlock::q_adapt_exit(), 
-			  thisProxy[thisIndex]));
-    // --------------------------------------------------
+    control_sync (phase_sync_adapt_end);
+
   }
 }
 

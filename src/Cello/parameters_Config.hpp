@@ -88,7 +88,7 @@ public: // attributes
   std::string                mesh_sync_adapt_enter;
   std::string                mesh_sync_adapt_called;
   std::string                mesh_sync_adapt_next;
-  std::string                mesh_sync_adapt_exit;
+  std::string                mesh_sync_adapt_end;
   std::string                mesh_sync_refresh_enter;
   std::string                mesh_sync_refresh_exit;
   std::string                mesh_sync_output_enter;
