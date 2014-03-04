@@ -248,7 +248,7 @@ double Schedule::update_timestep ( double time, double dt) const throw()
       double ratio_next = (time_next - time_start) / time_step;
 
       if ((round(ratio) == round(ratio_next)) &&
-	  ratio < 1.0 && ratio_next > 1.0) {
+	  ratio < round(ratio) && ratio_next > round(ratio)) {
 	time_dump = time_start + round(ratio)*time_step;
 	new_dt = time_dump - time;
       }
