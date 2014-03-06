@@ -149,6 +149,17 @@ public: // attributes
 
   std::string                timestep_type;
 
+protected: // functions
+
+  void read_schedule_(Parameters * parameters,
+		      const std::string group,
+		      std::string type,
+		      std::string var,
+		      double * start,
+		      double * stop,
+		      double * step,
+		      std::vector<double> list);
+
 };
 
 #endif /* PARAMETERS_CONFIG_HPP */
