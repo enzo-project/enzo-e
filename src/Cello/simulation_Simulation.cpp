@@ -35,6 +35,7 @@ Simulation::Simulation
   performance_(NULL),
   performance_name_(""),
   performance_stride_(1),
+  projections_tracing_(1),
   monitor_(0),
   hierarchy_(0),
   field_descr_(0)
@@ -112,6 +113,12 @@ void Simulation::pup (PUP::er &p)
 
   p | performance_name_;
   p | performance_stride_;
+
+  p | projections_tracing_;
+  if (up) projections_schedule_on_ = new Schedule;
+  p | *projections_schedule_on_;
+  if (up) projections_schedule_off_ = new Schedule;
+  p | *projections_schedule_off_;
 
   if (up) monitor_ = Monitor::instance();
 
@@ -241,8 +248,40 @@ void Simulation::initialize_performance_() throw()
 
   performance_->start_region(perf_simulation);
 
+  // initialize projections schedule
+
+
+  std::string var;
+  std::string type;
+  double start;
+  double stop;
+  double step;
+  std::vector<double> list;
+
+  var   = config_->projections_schedule_on_var;
+  type  = config_->projections_schedule_on_type;
+  start = config_->projections_schedule_on_start;
+  stop  = config_->projections_schedule_on_stop;
+  step  = config_->projections_schedule_on_step;
+  list  = config_->projections_schedule_on_list;
+
+  projections_schedule_on_ =
+    Schedule::create(var,type,start,stop,step,list);
+
+  var   = config_->projections_schedule_off_var;
+  type  = config_->projections_schedule_off_type;
+  start = config_->projections_schedule_off_start;
+  stop  = config_->projections_schedule_off_stop;
+  step  = config_->projections_schedule_off_step;
+  list  = config_->projections_schedule_off_list;
+
+  projections_schedule_off_ =
+    Schedule::create(var,type,start,stop,step,list);
+
+
 }
 
+//----------------------------------------------------------------------
 //----------------------------------------------------------------------
 
 void Simulation::initialize_config_() throw()

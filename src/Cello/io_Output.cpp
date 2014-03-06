@@ -17,7 +17,7 @@ extern CProxy_SimulationCharm  proxy_simulation;
 
 Output::Output (int index, const Factory * factory) throw()
   : file_(0),           // Initialization deferred
-    schedule_(new Schedule),
+    schedule_(0),
     process_(0),        // initialization below
     sync_(1),        // default process-per-stride
     index_(index),
@@ -84,6 +84,15 @@ void Output::pup (PUP::er &p)
   p | *io_field_block_;
   p | process_stride_;
 
+}
+
+
+//----------------------------------------------------------------------
+
+void Output::set_schedule (Schedule * schedule) throw()
+{ 
+  if (schedule_) delete schedule_;
+  schedule_ = schedule;
 }
 
 //----------------------------------------------------------------------

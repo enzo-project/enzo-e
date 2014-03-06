@@ -16,6 +16,7 @@ class Monitor;
 class Parameters;
 class Performance;
 class Problem;
+class Schedule;
 
 #include "mesh.decl.h"
 #include "simulation.decl.h"
@@ -121,6 +122,11 @@ public: // interface
   /// Write performance information to disk (all process data)
   void performance_write();
 
+  Schedule * projections_schedule_on()
+  {return projections_schedule_on_; };
+  Schedule * projections_schedule_off()
+  {return projections_schedule_off_; };
+
 public: // virtual functions
 
   /// Update Simulation state, including cycle, time, timestep, and stopping criteria
@@ -144,7 +150,12 @@ public: // virtual functions
 #ifdef CELLO_DEBUG
   FILE * fp_debug() { return fp_debug_; }
 #endif
-
+  
+  void set_projections_tracing( bool tracing)
+  { projections_tracing_ = tracing; }
+  
+  bool projections_tracing() const
+  { return projections_tracing_; }
 
 protected: // functions
 
@@ -176,6 +187,12 @@ protected: // functions
   void initialize_data_descr_ () throw();
 
   void deallocate_() throw();
+
+  Schedule * create_schedule_(std::string var,
+			      std::string type,
+			      double start,
+			      double stop,
+			      double step);
 
 protected: // attributes
 
@@ -242,6 +259,12 @@ protected: // attributes
 
   /// Counter for knowing when to call Performance start() and stop()
   int perf_count_[perf_last];
+
+  /// Schedule for projections on / off
+
+  bool projections_tracing_;
+  Schedule * projections_schedule_on_;
+  Schedule * projections_schedule_off_;
 
   /// Monitor object
   Monitor * monitor_;

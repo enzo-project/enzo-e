@@ -136,6 +136,20 @@ public: // attributes
   std::string                performance_name;
   int                        performance_stride;
   bool                       performance_warnings;
+  // schedule for turning on / off Projections monitoring
+
+  std::string                projections_schedule_on_type;
+  std::string                projections_schedule_on_var;
+  double                     projections_schedule_on_start;
+  double                     projections_schedule_on_stop;
+  double                     projections_schedule_on_step;
+  std::vector<double>        projections_schedule_on_list;
+  std::string                projections_schedule_off_type;
+  std::string                projections_schedule_off_var;
+  double                     projections_schedule_off_start;
+  double                     projections_schedule_off_stop;
+  double                     projections_schedule_off_step;
+  std::vector<double>        projections_schedule_off_list;
 
   std::string                prolong_type;
   std::string                restrict_type;
@@ -153,12 +167,12 @@ protected: // functions
 
   void read_schedule_(Parameters * parameters,
 		      const std::string group,
-		      std::string type,
-		      std::string var,
+		      std::string * type,
+		      std::string * var,
 		      double * start,
 		      double * stop,
 		      double * step,
-		      std::vector<double> list);
+		      std::vector<double> & list);
 
 };
 

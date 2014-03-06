@@ -258,55 +258,15 @@ void Problem::initialize_output
     // Scheduling parameters
     //--------------------------------------------------
 
-    bool var_cycle,var_time;
 
-    var_cycle = (config->output_schedule_var[index] == "cycle");
-    var_time  = (config->output_schedule_var[index] == "time");
+    output->set_schedule
+      (Schedule::create( config->output_schedule_var[index],
+			config->output_schedule_type[index],
+			config->output_schedule_start[index],
+			config->output_schedule_stop[index],
+			config->output_schedule_step[index],
+			 config->output_schedule_list[index]));
 
-    bool type_interval,type_list;
-
-    type_interval = config->output_schedule_type[index] == "interval";
-    type_list     = config->output_schedule_type[index] == "list";
-
-    
-    if (type_interval) {
-
-      if (var_cycle) {
-
-	int start = config->output_schedule_start[index];
-	int stop  = config->output_schedule_stop[index];
-	int step  = config->output_schedule_step[index];
-
-	output->schedule()->set_cycle_interval(start,step,stop);
-
-      } else if (var_time) {
-
-	double start = config->output_schedule_start[index];
-	double stop  = config->output_schedule_stop[index];
-	double step  = config->output_schedule_step[index];
-
-	output->schedule()->set_time_interval(start,step,stop);
-      }
-
-    } else if (type_list) {
-
-      if (var_cycle) {
-
-	int size = config->output_schedule_list[index].size();
-	std::vector<int> list;
-	list.resize(size);
-	for (int i=0; i<size; i++) {
-	  list[i] = (int) config->output_schedule_list[index][i];
-	}
-	output->schedule()->set_cycle_list(list);
-
-      } else if (var_time) {
-
-	output->schedule()->set_time_list(config->output_schedule_list[index]);
-
-      }
-
-    }
 
     //--------------------------------------------------
     // Image parameters

@@ -66,6 +66,9 @@ public: // functions
   Schedule * schedule() throw() 
   { return schedule_; };
 
+  /// Set schedule
+  void set_schedule (Schedule * schedule) throw();
+
   int process_stride () const throw () 
   { return process_stride_; };
 

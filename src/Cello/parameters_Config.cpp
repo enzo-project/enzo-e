@@ -106,6 +106,19 @@ void Config::pup (PUP::er &p)
   p | performance_name;
   p | performance_stride;
 
+  p | projections_schedule_on_type;
+  p | projections_schedule_on_var;
+  p | projections_schedule_on_start;
+  p | projections_schedule_on_stop;
+  p | projections_schedule_on_step;
+  p | projections_schedule_on_list;
+  p | projections_schedule_off_type;
+  p | projections_schedule_off_var;
+  p | projections_schedule_off_start;
+  p | projections_schedule_off_stop;
+  p | projections_schedule_off_step;
+  p | projections_schedule_off_list;
+
   p | prolong_type;
   p | restrict_type;
 
@@ -451,16 +464,14 @@ void Config::read(Parameters * parameters) throw()
 	    (parameters->type("schedule") != parameter_unknown));
 
 
-    read_schedule_(parameters,
-		   output_file_groups[index],
-		   output_schedule_type[index],
-		   output_schedule_var[index],
+    read_schedule_(parameters, output_file_groups[index],
+		   &output_schedule_type[index],
+		   &output_schedule_var[index],
 		   &output_schedule_start[index],
 		   &output_schedule_stop[index],
 		   &output_schedule_step[index],
 		   output_schedule_list[index]
 		   );
-
 
     // Image 
 
@@ -552,6 +563,40 @@ void Config::read(Parameters * parameters) throw()
   performance_stride   = parameters->value_integer("Performance:stride",1);
   performance_warnings = parameters->value_logical("Performance:warnings",true);
 
+  //
+  parameters->group_set(0,"Performance");
+  parameters->group_set(1,"projections");
+
+  parameters->group_set(2,"on");
+  read_schedule_(parameters,"on",
+		 &projections_schedule_on_type,
+		 &projections_schedule_on_var,
+		 &projections_schedule_on_start,
+		 &projections_schedule_on_stop,
+		 &projections_schedule_on_step,
+		 projections_schedule_on_list);
+  printf ("schedule type %s, var %s, start %f, stop %f, step %f\n",
+	  projections_schedule_on_type.c_str(),
+	  projections_schedule_on_var.c_str(),
+	  projections_schedule_on_start,
+	  projections_schedule_on_stop,
+	  projections_schedule_on_step);
+	  
+  parameters->group_set(2,"off");
+  read_schedule_(parameters,"off",
+		 &projections_schedule_off_type,
+		 &projections_schedule_off_var,
+		 &projections_schedule_off_start,
+		 &projections_schedule_off_stop,
+		 &projections_schedule_off_step,
+		 projections_schedule_off_list);
+  printf ("schedule type %s, var %s, start %f, stop %f, step %f\n",
+	  projections_schedule_off_type.c_str(),
+	  projections_schedule_off_var.c_str(),
+	  projections_schedule_off_start,
+	  projections_schedule_off_stop,
+	  projections_schedule_off_step);
+
   //--------------------------------------------------
   // Stopping
   //--------------------------------------------------
@@ -584,39 +629,44 @@ void Config::read(Parameters * parameters) throw()
 
 void Config::read_schedule_(Parameters * parameters,
 			    const std::string group,
-			    std::string type,
-			    std::string var,
+			    std::string * type,
+			    std::string * var,
 			    double * start,
 			    double * stop,
 			    double * step,
-			    std::vector<double> list)
+			    std::vector<double> & list)
 {
   // ASSUMES schedule PARAMETER IN CURRENT GROUP
 
   int length = parameters->list_length("schedule");
 
+  if (length == 0) {
+    (*type) = "none";
+    return;
+  }
+
   ASSERT1("Config::read","Incorrect 'schedule' for parameter group %s",
 	  group.c_str(), (length >= 3));
 
-  var  = parameters->list_value_string(0,"schedule");
-  type = parameters->list_value_string(1,"schedule");
+  (*var)  = parameters->list_value_string(0,"schedule");
+  (*type) = parameters->list_value_string(1,"schedule");
 
   bool var_is_int = true;
 
-  if (var == "cycle") {
+  if ((*var) == "cycle") {
     var_is_int = true;
-  } else if (var == "time") {
+  } else if ((*var) == "time") {
     var_is_int = false;
   } else {
     ERROR2 ("Config::read",
 	    "Schedule variable %s is not recognized for parameter group %s",
-	    var.c_str(),group.c_str());
+	    (*var).c_str(),group.c_str());
   }
 
   const int    max_int    = std::numeric_limits<int>::max();
   const double max_double = std::numeric_limits<double>::max();
 
-  if (type == "interval") {
+  if ((*type) == "interval") {
     if (length == 3) { // step
       if (var_is_int) {
 	(*start) = 0;
@@ -648,7 +698,7 @@ void Config::read_schedule_(Parameters * parameters,
 	(*stop)  = parameters->list_value_float(4,"schedule");
       }
     }
-  } else if (type == "list") {
+  } else if ((*type) == "list") {
     list.resize(length-2);
     for (int i=2; i<length; i++) {
       if (var_is_int) {
@@ -660,8 +710,9 @@ void Config::read_schedule_(Parameters * parameters,
   } else {
     ERROR2 ("Config::read",
 	    "Schedule type %s is not recognized for parameter group %s",
-	    type.c_str(),group.c_str());
+	    (*type).c_str(),group.c_str());
   }
+
 }
 
 //======================================================================

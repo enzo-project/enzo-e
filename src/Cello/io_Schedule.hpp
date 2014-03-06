@@ -85,6 +85,10 @@ public: // functions
   void set_skip_time (double time) throw()
   { time_skip_.push_back(time); }
 
+  static Schedule * create (std::string var, std::string type,
+			    double start,double stop,double step,
+			    std::vector<double> list);
+
 protected: // attributes
 
   /// Whether Schedule is currently active
