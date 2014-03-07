@@ -46,7 +46,6 @@ CommBlock::CommBlock
   adapt_(adapt_unknown),
   next_phase_(phase_stopping),
   coarsened_(false),
-  delete_(false),
   is_leaf_(true)
 {
 
@@ -217,7 +216,6 @@ void CommBlock::pup(PUP::er &p)
   p | adapt_;
   p | next_phase_;
   p | coarsened_;
-  p | delete_;
 
 }
 
@@ -460,59 +458,6 @@ void CommBlock::update_boundary_ ()
 
 //----------------------------------------------------------------------
 
-// void CommBlock::delete_child(Index index)
-// {
-//   for (size_t i=0; i<children_.size(); i++) {
-//     // erase by replacing occurences with self
-//     if (children_[i] == index) children_[i] = index_;
-//   }
-// }
-
-//======================================================================
-
-// int CommBlock::count_neighbors() const
-// {
-//   if (! is_leaf()) return 0;
-//   int level = this->level();
-//   const int rank         = simulation()->dimension();
-//   const int rank_refresh = simulation()->config()->field_refresh_rank;
-//   const bool periodic    = simulation()->problem()->boundary()->is_periodic();
-//   ItFace it_face (rank,rank_refresh);
-//   int num_neighbors = 0;
-//   int ic3[3] = {0,0,0};
-//   int of3[3];
-//   while (it_face.next(of3)) {
-//     Index index_neighbor = neighbor_(of3);
-//     const int level_face = face_level (of3);
-//     if (level_face == level) { // SAME
-//       ++num_neighbors;
-//     } else if (level_face == level - 1) { // COARSE
-//       index_.child (level,&ic3[0],&ic3[1],&ic3[2]);
-//       int op3[3];
-//       parent_face_(op3,of3,ic3);
-//       if (op3[0]==of3[0] && op3[1]==of3[1] && op3[2]==of3[2]) 
-// 	++num_neighbors;
-//     } else if (level_face == level + 1) { // FINE
-//       const int if3[3] = {-of3[0],-of3[1],-of3[2]};
-//       ItChild it_child(rank,if3);
-//       while (it_child.next(ic3)) 
-// 	++num_neighbors;
-//     } else {
-//       ERROR2 ("CommBlock::count_neighbors()",
-// 	      "level_face %d level %d",
-// 	      level_face,level);
-//     }
-//   }
-// #ifdef CELLO_DEBUG
-//   char buffer[255];
-//   sprintf (buffer,"count_neighbors = %d",num_neighbors);
-//   index_.print(buffer,-1,2,false,simulation());
-// #endif
-//   return num_neighbors;
-
-// }
-//----------------------------------------------------------------------
-
 void CommBlock::loop_limits_refresh_(int ifacemin[3], int ifacemax[3])
   const throw()
 {
@@ -597,7 +542,6 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   adapt_      = comm_block.adapt_;
   next_phase_ = comm_block.next_phase_;
   coarsened_  = comm_block.coarsened_;
-  delete_     = comm_block.delete_;
 }
 
 //----------------------------------------------------------------------

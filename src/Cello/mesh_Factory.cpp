@@ -151,8 +151,6 @@ CommBlock * Factory::create_block
 
   ASSERT("Factory::create_block()","block is NULL",block != NULL);
 
-  block_array->doneInserting();
-
   return block;
 
 }

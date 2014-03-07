@@ -644,9 +644,6 @@ protected: // attributes
   /// whether CommBlock has been coarsened and should be deleted
   bool coarsened_;
 
-  /// Whether CommBlock is marked for deletion
-  bool delete_;
-
   /// Whether CommBlock is a leaf node during adapt phase (stored not
   /// computed to avoid race condition bug #30
   bool is_leaf_;
