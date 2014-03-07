@@ -51,6 +51,7 @@ void EnzoInitialSedovArray2::pup (PUP::er &p)
 
   Initial::pup(p);
 
+  PUParray(p,array_,2);
   p | radius_relative_;
   p | pressure_in_;
   p | pressure_out_;

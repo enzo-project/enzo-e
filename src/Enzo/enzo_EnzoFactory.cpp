@@ -145,8 +145,6 @@ CommBlock * EnzoFactory::create_block
   TRACE1("block = %p",block);
   //  ASSERT("Factory::create_block()","block is NULL",block != NULL);
 
-  enzo_block_array->doneInserting();
-
   return block;
 
 }
