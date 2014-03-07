@@ -14,6 +14,12 @@
 
 // #define TRACE_CONTROL
 
+#ifdef CELLO_VERBOSE
+#   define VERBOSE(A) if (CkMyPe()==0){PARALLEL_PRINTF (A "\n"); fflush(stdout);}
+#else
+#   define VERBOSE(A) ;
+#endif
+
 const char * phase_string [] = {
   "unknown",
   "adapt_called",
@@ -35,7 +41,7 @@ const char * phase_string [] = {
 
 void CommBlock::adapt_enter_()
 {
-  TRACE("ENTER PHASE ADAPT") ;
+  VERBOSE("ENTER PHASE ADAPT") ;
 
   performance_switch_ (perf_adapt,__FILE__,__LINE__);
 
@@ -55,7 +61,7 @@ void CommBlock::adapt_enter_()
 void CommBlock::adapt_exit_()
 {
 
-  TRACE("EXIT   PHASE ADAPT") ;
+  VERBOSE("EXIT   PHASE ADAPT") ;
 
   next_phase_ = phase_stopping;
 
@@ -80,7 +86,7 @@ void CommBlock::adapt_exit_()
 
 void CommBlock::compute_enter_ ()
 {
-  TRACE("ENTER PHASE COMPUTE");
+  VERBOSE("ENTER PHASE COMPUTE");
 
   performance_switch_(perf_compute,__FILE__,__LINE__);
 
@@ -92,7 +98,7 @@ void CommBlock::compute_enter_ ()
 void CommBlock::compute_exit_ ()
 {
 
-  TRACE("EXIT   PHASE COMPUTE") ;
+  VERBOSE("EXIT   PHASE COMPUTE") ;
 
   next_phase_ = phase_adapt;
 
@@ -103,7 +109,7 @@ void CommBlock::compute_exit_ ()
 
 void CommBlock::refresh_enter_() 
 {
-  TRACE ("ENTER PHASE REFRESH");
+  VERBOSE ("ENTER PHASE REFRESH");
 
   performance_switch_(perf_refresh,__FILE__,__LINE__);
 
@@ -115,7 +121,7 @@ void CommBlock::refresh_enter_()
 void CommBlock::refresh_exit_()
 {
 
-  TRACE("EXIT   PHASE REFRESH") ;
+  VERBOSE("EXIT   PHASE REFRESH") ;
 
   if (next_phase_ == phase_stopping) {
 
@@ -137,7 +143,7 @@ void CommBlock::refresh_exit_()
 void CommBlock::stopping_enter_()
 {
 
-  TRACE ("ENTER PHASE STOPPING");
+  VERBOSE ("ENTER PHASE STOPPING");
 
   performance_switch_(perf_stopping,__FILE__,__LINE__);
 
@@ -150,6 +156,7 @@ void CommBlock::stopping_enter_()
 void CommBlock::stopping_exit_()
 {
 
+  VERBOSE ("EXIT  PHASE STOPPING");
   if (stop_) {
 
     control_sync(phase_sync_exit);
@@ -167,7 +174,7 @@ void CommBlock::stopping_exit_()
 void CommBlock::output_enter_ ()
 {
 
-  TRACE ("ENTER PHASE OUTPUT");
+  VERBOSE ("ENTER PHASE OUTPUT");
 
   performance_switch_ (perf_output,__FILE__,__LINE__);
 
@@ -180,7 +187,7 @@ void CommBlock::output_enter_ ()
 void CommBlock::output_exit_()
 {
 
-  TRACE("EXIT   PHASE OUTPUT") ;
+  VERBOSE("EXIT   PHASE OUTPUT") ;
 
   if (index_.is_root()) {
 
