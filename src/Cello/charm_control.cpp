@@ -15,7 +15,7 @@
 // #define TRACE_CONTROL
 
 #ifdef CELLO_VERBOSE
-#   define VERBOSE(A) if (CkMyPe()==0){PARALLEL_PRINTF (A "\n"); fflush(stdout);}
+#   define VERBOSE(A) if (index_.is_root()){PARALLEL_PRINTF (A "\n"); fflush(stdout);}
 #else
 #   define VERBOSE(A) ;
 #endif
