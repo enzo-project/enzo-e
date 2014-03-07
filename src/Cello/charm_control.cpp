@@ -12,13 +12,17 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-// #define TRACE_CONTROL
-
 #ifdef CELLO_VERBOSE
-#   define VERBOSE(A) if (index_.is_root()){PARALLEL_PRINTF (A "\n"); fflush(stdout);}
+#   define VERBOSE(A)				\
+  if (index_.is_root()) {			\
+    Monitor * monitor = simulation()->monitor();	\
+    monitor->print("Control", A);		\
+  } 
 #else
 #   define VERBOSE(A) ;
 #endif
+
+// #define TRACE_CONTROL
 
 const char * phase_string [] = {
   "unknown",
@@ -41,7 +45,8 @@ const char * phase_string [] = {
 
 void CommBlock::adapt_enter_()
 {
-  VERBOSE("ENTER PHASE ADAPT") ;
+
+  VERBOSE("adapt_enter_");
 
   performance_switch_ (perf_adapt,__FILE__,__LINE__);
 
@@ -61,8 +66,6 @@ void CommBlock::adapt_enter_()
 void CommBlock::adapt_exit_()
 {
 
-  VERBOSE("EXIT   PHASE ADAPT") ;
-
   next_phase_ = phase_stopping;
 
   const int initial_cycle = simulation()->config()->initial_cycle;
@@ -70,6 +73,8 @@ void CommBlock::adapt_exit_()
   const int level_maximum = simulation()->config()->initial_max_level;
 
   bool adapt_again = (is_first_cycle && adapt_step_++ < level_maximum);
+
+  VERBOSE("adapt-exit");
 
   if (adapt_again) {
 
@@ -86,7 +91,7 @@ void CommBlock::adapt_exit_()
 
 void CommBlock::compute_enter_ ()
 {
-  VERBOSE("ENTER PHASE COMPUTE");
+  VERBOSE("compute-enter");
 
   performance_switch_(perf_compute,__FILE__,__LINE__);
 
@@ -98,7 +103,7 @@ void CommBlock::compute_enter_ ()
 void CommBlock::compute_exit_ ()
 {
 
-  VERBOSE("EXIT   PHASE COMPUTE") ;
+  VERBOSE("compute-exit");
 
   next_phase_ = phase_adapt;
 
@@ -109,7 +114,7 @@ void CommBlock::compute_exit_ ()
 
 void CommBlock::refresh_enter_() 
 {
-  VERBOSE ("ENTER PHASE REFRESH");
+  VERBOSE("refresh-enter");
 
   performance_switch_(perf_refresh,__FILE__,__LINE__);
 
@@ -121,11 +126,11 @@ void CommBlock::refresh_enter_()
 void CommBlock::refresh_exit_()
 {
 
-  VERBOSE("EXIT   PHASE REFRESH") ;
+  VERBOSE("refresh-exit");
 
   if (next_phase_ == phase_stopping) {
 
-    control_sync(phase_sync_stopping_enter);
+    control_sync(phase_sync_output_enter);
 
   }  else if (next_phase_ == phase_adapt) {
 
@@ -143,7 +148,7 @@ void CommBlock::refresh_exit_()
 void CommBlock::stopping_enter_()
 {
 
-  VERBOSE ("ENTER PHASE STOPPING");
+  VERBOSE("stopping-enter");
 
   performance_switch_(perf_stopping,__FILE__,__LINE__);
 
@@ -156,14 +161,15 @@ void CommBlock::stopping_enter_()
 void CommBlock::stopping_exit_()
 {
 
-  VERBOSE ("EXIT  PHASE STOPPING");
+  VERBOSE("stopping-exit");
+
   if (stop_) {
 
     control_sync(phase_sync_exit);
 
   } else {
 
-    control_sync(phase_sync_output_enter);
+    control_sync(phase_sync_compute_enter);
 
   }
 
@@ -174,7 +180,7 @@ void CommBlock::stopping_exit_()
 void CommBlock::output_enter_ ()
 {
 
-  VERBOSE ("ENTER PHASE OUTPUT");
+  VERBOSE("output-enter");
 
   performance_switch_ (perf_output,__FILE__,__LINE__);
 
@@ -187,7 +193,7 @@ void CommBlock::output_enter_ ()
 void CommBlock::output_exit_()
 {
 
-  VERBOSE("EXIT   PHASE OUTPUT") ;
+  VERBOSE("output-exit");
 
   if (index_.is_root()) {
 
@@ -195,14 +201,14 @@ void CommBlock::output_exit_()
 
     Memory::instance()->reset_high();
 
-    Monitor * monitor = simulation()->monitor();
+    Monitor * monitor = simulation()->monitor();	\
     monitor-> print("", "-------------------------------------");
     monitor-> print("Simulation", "cycle %04d", cycle_);
     monitor-> print("Simulation", "time-sim %15.12f",time_);
     monitor-> print("Simulation", "dt %15.12g", dt_);
   }
 
-  control_sync(phase_sync_compute_enter);
+  control_sync(phase_sync_stopping_enter);
 }
 
 //======================================================================

@@ -575,13 +575,8 @@ void Config::read(Parameters * parameters) throw()
 		 &projections_schedule_on_stop,
 		 &projections_schedule_on_step,
 		 projections_schedule_on_list);
-  printf ("schedule type %s, var %s, start %f, stop %f, step %f\n",
-	  projections_schedule_on_type.c_str(),
-	  projections_schedule_on_var.c_str(),
-	  projections_schedule_on_start,
-	  projections_schedule_on_stop,
-	  projections_schedule_on_step);
-	  
+
+  
   parameters->group_set(2,"off");
   read_schedule_(parameters,"off",
 		 &projections_schedule_off_type,
@@ -590,12 +585,6 @@ void Config::read(Parameters * parameters) throw()
 		 &projections_schedule_off_stop,
 		 &projections_schedule_off_step,
 		 projections_schedule_off_list);
-  printf ("schedule type %s, var %s, start %f, stop %f, step %f\n",
-	  projections_schedule_off_type.c_str(),
-	  projections_schedule_off_var.c_str(),
-	  projections_schedule_off_start,
-	  projections_schedule_off_stop,
-	  projections_schedule_off_step);
 
   //--------------------------------------------------
   // Stopping
