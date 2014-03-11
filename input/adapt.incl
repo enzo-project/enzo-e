@@ -43,6 +43,26 @@ Initial {
 }
 
 
+Initial {
+    density       { value = 
+    [
+       1.000, 1.0*x + 2.0*y  < 1.0,
+       1.000, 1.0*x + 2.0*y  > 2.0,
+       1.000, 2.0*x - 1.0*y  < 0.0,
+       1.000, 2.0*x - 1.0*y  > 1.0,
+                   0.125 ]; };
+    total_energy  { value = 
+    [ 
+       1.0  / (0.4 * 1.0), 1.0*x + 2.0*y  < 1.0,
+       1.0  / (0.4 * 1.0), 1.0*x + 2.0*y  > 2.0,
+       1.0  / (0.4 * 1.0), 2.0*x - 1.0*y  < 0.0,
+       1.0  / (0.4 * 1.0), 2.0*x - 1.0*y  > 1.0,
+                     0.14 / (0.4 * 0.1)  ]; };
+    velocity_x    { value = [0.0]; };
+    velocity_y    { value = [0.0]; }
+}
+
+
 Field {
     ghosts = 4; # must be even for ProlongLinear
     prolong = "linear";
@@ -57,56 +77,46 @@ Output {
     file_groups = ["de", "dl", "mesh", "te", "vx", "vy"];
 
     de {
-
        field_list = ["density"];
        type     = "image";
-       schedule = ["time","interval", 0.01];
-       colormap = [0.0,0.0,0.0,
-                   1.0,0.0,0.0,
-                   1.0,1.0,0.0,
-                   1.0,1.0,1.0];
+       schedule = ["cycle","interval", 10];
+       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
+	image_min = 1.0;
+	image_max = 2.0;
 
     };
     dl {
        image_log = true;
        field_list = ["density"];
        type     = "image";
-       schedule = ["time","interval", 0.01];
-       colormap = [0.0,0.0,0.0,
-                   1.0,0.0,0.0,
-                   1.0,1.0,0.0,
-                   1.0,1.0,1.0];
+       schedule = ["cycle","interval", 10];
+       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
+	image_min = 1.0;
+	image_max = 2.0;
     };
 
     te {
 
        field_list = ["total_energy"];
        type     = "image";
-       schedule = ["time","interval", 0.01];
-       colormap = [0.0,0.0,0.0,
-                   1.0,0.0,0.0,
-                   1.0,1.0,0.0,
-                   1.0,1.0,1.0];
+       schedule = ["cycle","interval", 10];
+       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     };
 
     vx {
 
        field_list = ["velocity_x"];
        type     = "image";
-       schedule = ["time","interval", 0.01];
-       colormap = [1.0,0.0,0.0,
-                   0.0,0.0,0.0,
-                   0.0,0.0,1.0];
+       schedule = ["cycle","interval", 10];
+       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     };
 
     vy {
 
        field_list = ["velocity_y"];
        type     = "image";
-       schedule = ["time","interval", 0.01];
-       colormap = [1.0,0.0,0.0,
-                   0.0,0.0,0.0,
-                   0.0,0.0,1.0];
+       schedule = ["cycle","interval", 10];
+       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     };
 
     mesh {
@@ -116,11 +126,11 @@ Output {
         field_list = ["density"];
 	image_block_size  = 5;
 	image_size = [513,513];
-	schedule = ["time","interval", 0.01];
-        colormap = [1.00, 1.00, 1.00,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00, 
-                    0.00, 0.00, 1.00];
+	schedule = ["cycle","interval", 10];
+        image_specify_bounds = true;
+	image_min = 0.0;
+	image_max = 6.0;
+       colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.2,0.2,1.0,  0.2,0.0,0.5];
       }
 }
 

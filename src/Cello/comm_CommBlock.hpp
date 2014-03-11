@@ -342,19 +342,19 @@ public:
 
   /// Refresh ghost zones and apply boundary conditions
   void p_refresh_enter()  
-  {      refresh_enter_(); }
+  { PARALLEL_PRINTF("p_refresh_enter\n");      refresh_enter_(); }
   void q_refresh_enter()  
-  {      refresh_enter_(); }
+  { PARALLEL_PRINTF("q_refresh_enter\n");      refresh_enter_(); }
   void r_refresh_enter(CkReductionMsg * msg)  
-  {      refresh_enter_(); delete msg; }
+  { PARALLEL_PRINTF("r_refresh_enter\n");     refresh_enter_(); delete msg; }
 
   /// Exit the refresh phase after QD
   void p_refresh_exit () 
-  {      refresh_exit_(); }
+  { PARALLEL_PRINTF("p_refresh_exit\n");      refresh_exit_(); }
   void q_refresh_exit () 
-  {      refresh_exit_(); }
+  { PARALLEL_PRINTF("q_refresh_exit\n");      refresh_exit_(); }
   void r_refresh_exit (CkReductionMsg * msg) 
-  {      refresh_exit_(); delete msg;  }
+  { PARALLEL_PRINTF("r_refresh_exit\n");      refresh_exit_(); delete msg;  }
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
   void x_refresh_face

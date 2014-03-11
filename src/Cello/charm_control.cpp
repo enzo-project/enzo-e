@@ -21,7 +21,7 @@ const char * phase_string [] = {
   "adapt_next",
   "adapt_end",
   "refresh_enter",
-  "refresh_exit"
+  "refresh_exit",
   "output_enter",
   "output_exit",
   "compute_enter",
@@ -202,7 +202,7 @@ void CommBlock::output_exit_()
 
 void CommBlock::control_sync(int phase)
 {
-  
+
   std::string sync_type;
 
   if (phase == phase_sync_adapt_enter) {
@@ -235,6 +235,12 @@ void CommBlock::control_sync(int phase)
     ERROR2 ("CommBlock::control_sync()",
 	    "Unknown phase: phase %s (%d)",
 	    phase_string[phase],phase);    
+  }
+
+  if (index_.is_root()){
+    char buffer[255];
+    sprintf (buffer,"control_sync(%s) %s",phase_string[phase],sync_type.c_str());
+    PARALLEL_PRINTF(buffer); fflush(stdout);
   }
 
   if (sync_type == "contribute") {
