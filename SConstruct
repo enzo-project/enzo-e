@@ -5,9 +5,13 @@ import sys
 # USER CONFIGURATION
 #----------------------------------------------------------------------
 
-# Whether to print out messages with the TRACE() series of statements
+# Whether to print out detailed messages with the TRACE() series of statements
 
 trace = 0
+
+# Whether to trace main phases
+
+verbose = 1
 
 # Whether to print out messages with the TRACE_CHARM() series of statements
 
@@ -131,6 +135,7 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 # Debugging defines
 
 define_trace =        ['CELLO_TRACE']
+define_verbose =      ['CELLO_VERBOSE']
 define_trace_charm =  ['CELLO_TRACE_CHARM']
 define_debug =        ['CELLO_DEBUG']
 
@@ -188,6 +193,7 @@ if (use_gprof == 1):
   
 if (use_papi != 0):      defines = defines + define_papi
 if (trace != 0):         defines = defines + define_trace
+if (verbose != 0):       defines = defines + define_verbose
 if (trace_charm != 0):   defines = defines + define_trace_charm
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose

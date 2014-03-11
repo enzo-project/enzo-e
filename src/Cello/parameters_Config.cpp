@@ -106,6 +106,19 @@ void Config::pup (PUP::er &p)
   p | performance_name;
   p | performance_stride;
 
+  p | projections_schedule_on_type;
+  p | projections_schedule_on_var;
+  p | projections_schedule_on_start;
+  p | projections_schedule_on_stop;
+  p | projections_schedule_on_step;
+  p | projections_schedule_on_list;
+  p | projections_schedule_off_type;
+  p | projections_schedule_off_var;
+  p | projections_schedule_off_start;
+  p | projections_schedule_off_stop;
+  p | projections_schedule_off_step;
+  p | projections_schedule_off_list;
+
   p | prolong_type;
   p | restrict_type;
 
@@ -450,88 +463,15 @@ void Config::read(Parameters * parameters) throw()
 	    output_file_groups[index].c_str(),
 	    (parameters->type("schedule") != parameter_unknown));
 
-    int length = parameters->list_length("schedule");
-    ASSERT1("Config::read","Incorrect 'schedule' for Output group %s",
-	    output_file_groups[index].c_str(), (length >= 3));
 
-    output_schedule_var[index]  = parameters->list_value_string(0,"schedule");
-    output_schedule_type[index] = parameters->list_value_string(1,"schedule");
-
-    bool var_is_int = true;
-
-    if (output_schedule_var[index] == "cycle") {
-      var_is_int = true;
-    } else if (output_schedule_var[index] == "time") {
-      var_is_int = false;
-    } else {
-      ERROR2 ("Config::read",
-	      "Schedule variable %s is not recognized for output file group %s",
-	      output_schedule_var[index].c_str(),output_file_groups[index].c_str());
-    }
-
-    const int    max_int    = std::numeric_limits<int>::max();
-    const double max_double = std::numeric_limits<double>::max();
-
-    if (output_schedule_type[index] == "interval") {
-      if (length == 3) { // step
-	if (var_is_int) {
-	  output_schedule_start[index] = 0;
-	  output_schedule_step[index]
-	    = parameters->list_value_integer(2,"schedule");
-	  output_schedule_stop[index]  = max_int;
-	} else {
-	  output_schedule_start[index] = 0.0;
-	  output_schedule_step[index]  
-	    = parameters->list_value_float(2,"schedule");
-	  output_schedule_stop[index]  = max_double;
-	}
-      } else if (length == 4) { // start, step
-	if (var_is_int) {
-	  output_schedule_start[index] 
-	    = parameters->list_value_integer(2,"schedule");
-	  output_schedule_step[index]  
-	    = parameters->list_value_integer(3,"schedule");
-	  output_schedule_stop[index]  = max_int;
-	} else {
-	  output_schedule_start[index]
-	    = parameters->list_value_float(2,"schedule");
-	  output_schedule_step[index]
-	    = parameters->list_value_float(3,"schedule");
-	  output_schedule_stop[index]  = max_double;
-	}
-      } else if (length == 5) { // start, step, stop
-	if (var_is_int) {
-	  output_schedule_start[index]
-	    = parameters->list_value_integer(2,"schedule");
-	  output_schedule_step[index]
-	    = parameters->list_value_integer(3,"schedule");
-	  output_schedule_stop[index]
-	    = parameters->list_value_integer(4,"schedule");
-	} else {
-	  output_schedule_start[index]
-	    = parameters->list_value_float(2,"schedule");
-	  output_schedule_step[index]
-	    = parameters->list_value_float(3,"schedule");
-	  output_schedule_stop[index]
-	    = parameters->list_value_float(4,"schedule");
-	}
-      }
-    } else if (output_schedule_type[index] == "list") {
-      output_schedule_list[index].resize(length-2);
-      for (int i=2; i<length; i++) {
-	if (var_is_int) {
-	  output_schedule_list[index][i-2]
-	    = parameters->list_value_integer(i,"schedule");
-	} else {
-	  output_schedule_list[index][i-2]
-	    = parameters->list_value_float(i,"schedule");
-	}
-      }
-    } else {
-      ERROR2 ("Config::read",
-	      "Schedule type %s is not recognized for output file group %s",
-	      output_schedule_type[index].c_str(),output_file_groups[index].c_str());
-    }
+    read_schedule_(parameters, output_file_groups[index],
+		   &output_schedule_type[index],
+		   &output_schedule_var[index],
+		   &output_schedule_start[index],
+		   &output_schedule_stop[index],
+		   &output_schedule_step[index],
+		   output_schedule_list[index]
+		   );
 
     // Image 
 
@@ -623,6 +563,29 @@ void Config::read(Parameters * parameters) throw()
   performance_stride   = parameters->value_integer("Performance:stride",1);
   performance_warnings = parameters->value_logical("Performance:warnings",true);
 
+  //
+  parameters->group_set(0,"Performance");
+  parameters->group_set(1,"projections");
+
+  parameters->group_set(2,"on");
+  read_schedule_(parameters,"on",
+		 &projections_schedule_on_type,
+		 &projections_schedule_on_var,
+		 &projections_schedule_on_start,
+		 &projections_schedule_on_stop,
+		 &projections_schedule_on_step,
+		 projections_schedule_on_list);
+
+  
+  parameters->group_set(2,"off");
+  read_schedule_(parameters,"off",
+		 &projections_schedule_off_type,
+		 &projections_schedule_off_var,
+		 &projections_schedule_off_start,
+		 &projections_schedule_off_stop,
+		 &projections_schedule_off_step,
+		 projections_schedule_off_list);
+
   //--------------------------------------------------
   // Stopping
   //--------------------------------------------------
@@ -648,6 +611,97 @@ void Config::read(Parameters * parameters) throw()
   timestep_type = parameters->value_string("Timestep:type","default");
 
   TRACE("END   Config::read()");
+
+}
+
+//======================================================================
+
+void Config::read_schedule_(Parameters * parameters,
+			    const std::string group,
+			    std::string * type,
+			    std::string * var,
+			    double * start,
+			    double * stop,
+			    double * step,
+			    std::vector<double> & list)
+{
+  // ASSUMES schedule PARAMETER IN CURRENT GROUP
+
+  int length = parameters->list_length("schedule");
+
+  if (length == 0) {
+    (*type) = "none";
+    return;
+  }
+
+  ASSERT1("Config::read","Incorrect 'schedule' for parameter group %s",
+	  group.c_str(), (length >= 3));
+
+  (*var)  = parameters->list_value_string(0,"schedule");
+  (*type) = parameters->list_value_string(1,"schedule");
+
+  bool var_is_int = true;
+
+  if ((*var) == "cycle") {
+    var_is_int = true;
+  } else if ((*var) == "time") {
+    var_is_int = false;
+  } else {
+    ERROR2 ("Config::read",
+	    "Schedule variable %s is not recognized for parameter group %s",
+	    (*var).c_str(),group.c_str());
+  }
+
+  const int    max_int    = std::numeric_limits<int>::max();
+  const double max_double = std::numeric_limits<double>::max();
+
+  if ((*type) == "interval") {
+    if (length == 3) { // step
+      if (var_is_int) {
+	(*start) = 0;
+	(*step)  = parameters->list_value_integer(2,"schedule");
+	(*stop)  = max_int;
+      } else {
+	(*start) = 0.0;
+	(*step)  = parameters->list_value_float(2,"schedule");
+	(*stop)  = max_double;
+      }
+    } else if (length == 4) { // start, step
+      if (var_is_int) {
+	(*start) = parameters->list_value_integer(2,"schedule");
+	(*step)  = parameters->list_value_integer(3,"schedule");
+	(*stop)  = max_int;
+      } else {
+	(*start) = parameters->list_value_float(2,"schedule");
+	(*step)  = parameters->list_value_float(3,"schedule");
+	(*stop)  = max_double;
+      }
+    } else if (length == 5) { // start, step, stop
+      if (var_is_int) {
+	(*start) = parameters->list_value_integer(2,"schedule");
+	(*step)  = parameters->list_value_integer(3,"schedule");
+	(*stop)  = parameters->list_value_integer(4,"schedule");
+      } else {
+	(*start) = parameters->list_value_float(2,"schedule");
+	(*step)  = parameters->list_value_float(3,"schedule");
+	(*stop)  = parameters->list_value_float(4,"schedule");
+      }
+    }
+  } else if ((*type) == "list") {
+    list.resize(length-2);
+    for (int i=2; i<length; i++) {
+      if (var_is_int) {
+	list[i-2] = parameters->list_value_integer(i,"schedule");
+      } else {
+	list[i-2] = parameters->list_value_float(i,"schedule");
+      }
+    }
+  } else {
+    ERROR2 ("Config::read",
+	    "Schedule type %s is not recognized for parameter group %s",
+	    (*type).c_str(),group.c_str());
+  }
+
 }
 
 //======================================================================

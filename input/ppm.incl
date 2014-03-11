@@ -109,3 +109,9 @@
 
    }
 
+#    Performance {
+#       projections {
+#        on  { schedule = ["cycle", "list",      20]; };
+#        off { schedule = ["cycle", "list",  10 ]; }
+#       }
+#    }

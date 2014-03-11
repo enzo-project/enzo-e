@@ -13,17 +13,27 @@ Domain {
 
 # Define the computational domain
 
+Initial { max_level = 5; }
 Mesh { 
    root_rank   = 2;
-   root_size   = [ 256,256 ];
-   root_blocks = [   2,  4 ];
+   root_size   = [ 128,128 ];
+   root_blocks = [   4,  4 ];
+   max_level = 5;
+
+   adapt {
+      slope_min_refine  = 5.0;
+      slope_max_coarsen = 2.0;
+      type = ["slope"];
+      balance = true;
+      fields = ["density"];
+   };
 }
 
 # Declare fields, ghost zone depth, and CFL condition
 
 Field {
 
-   ghosts  = 3;
+   ghosts  = 4;
    courant = 0.8;
 
    fields = [ 
@@ -69,7 +79,7 @@ Initial {
    total_energy  { value = [  0.14 / (0.4 * 0.1), "input/Cello.png",
                               1.0  / (0.4 * 1.0)  ]; };
    velocity_x    { value = [ 0.0 ]; };
-   velocity_y    { value = [ 0.0 ]; }
+   velocity_y    { value = [ 0.0 ]; };
 }
 
 # Define boundary conditions
@@ -79,7 +89,7 @@ Boundary { type = "reflecting" }
 # Define stopping criteria
 
 Stopping {
-   cycle = 50;
+   cycle = 10000;
 }
 
 Testing {
@@ -91,16 +101,30 @@ Testing {
 
 Output { 
 
-   file_groups = [ "cycle_group" ];
+   file_groups = [ "de", "mesh" ];
 
-   cycle_group {
+   de {
       field_list = [ "density" ];
       type       = "image";
-      name       = [ "initial_png-%02d.png","cycle" ];
+      name       = [ "nsf-demo-de.%04d.png","cycle" ];
+      schedule   = [ "cycle","interval", 10 ];
+      image_size = [512,512];
+      colormap = [0.00, 0.00, 0.00,  
+                  1.00, 0.00, 0.00, 
+                  1.00, 1.00, 0.00, 
+                  1.00, 1.00, 1.00];
+   };
+   mesh {
+      field_list = [ "density" ];
+      type       = "image";
+      image_type = "mesh";
+      image_reduce_type = "max";
+      image_size = [513,513];
+      name       = [ "nsf-demo-mesh.%04d.png","cycle" ];
       schedule   = [ "cycle","interval", 10 ];
       colormap = [0.00, 0.00, 0.00,  
                   1.00, 0.00, 0.00, 
                   1.00, 1.00, 0.00, 
                   1.00, 1.00, 1.00];
-   }
+  }
 }

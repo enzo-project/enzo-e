@@ -260,3 +260,61 @@ double Schedule::update_timestep ( double time, double dt) const throw()
   return new_dt;
 }
 
+//======================================================================
+
+// static
+Schedule * Schedule::create 
+(std::string var,
+ std::string type,
+ double start,
+ double stop,
+ double step,
+ std::vector<double> list)
+{
+  Schedule * schedule = new Schedule;
+
+  bool var_cycle,var_time;
+
+  var_cycle = (var == "cycle");
+  var_time  = (var == "time");
+
+  bool type_interval,type_list;
+
+  type_interval = type == "interval";
+  type_list     = type == "list";
+
+    
+  if (type_interval) {
+
+    if (var_cycle) {
+
+      schedule->set_cycle_interval(start,step,stop);
+      
+    } else if (var_time) {
+
+      schedule->set_time_interval(start,step,stop);
+    }
+
+  } else if (type_list) {
+
+    if (var_cycle) {
+
+      int size = list.size();
+      std::vector<int> list_int;
+      list_int.resize(size);
+      for (int i=0; i<size; i++) {
+	list_int[i] = (int) list[i];
+      }
+      schedule->set_cycle_list(list_int);
+
+    } else if (var_time) {
+
+      schedule->set_time_list(list);
+
+    }
+
+  }
+  
+  return schedule;
+
+}

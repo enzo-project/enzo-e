@@ -119,6 +119,35 @@ void CommBlock::r_stopping_compute_timestep(CkReductionMsg * msg)
   }
   performance_start_ (perf_cycle,__FILE__,__LINE__);
 
+#ifdef CONFIG_USE_PROJECTIONS  
+  bool was_off = (simulation->projections_tracing() == false);
+  bool was_on  = (simulation->projections_tracing() == true);
+  bool turn_on = simulation->
+    projections_schedule_on()->write_this_cycle(cycle_,time_);
+  bool turn_off = simulation->
+    projections_schedule_off()->write_this_cycle(cycle_,time_);
+
+  if (was_off && turn_on) {
+
+    simulation->monitor()->print
+      ("Performance","turning projections logging ON\n");
+
+    simulation->set_projections_tracing(true);
+
+    traceBegin();
+
+  } else if (was_on && turn_off) {
+
+    simulation->monitor()->print
+      ("Performance","turning projections logging OFF\n");
+
+    simulation->set_projections_tracing(false);
+
+    traceEnd();
+
+  }
+#endif
+
   stopping_exit_();
 
 }

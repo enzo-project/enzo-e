@@ -97,6 +97,7 @@ void Monitor::header () const
   print ("Define","FORTRANPATH  %s",CELLO_FORTRANPATH);
   print ("Define","LIBPATH      %s",CELLO_LIBPATH);
   print ("Define","LINKFLAGS    %s",CELLO_LINKFLAGS);
+
 }
 
 //----------------------------------------------------------------------
@@ -154,6 +155,7 @@ void Monitor::write
       PARALLEL_PRINTF 
 	("%s %s %s %s\n",
 	 buffer_process, buffer_time, component, buffer_message);
+      fflush(stdout);
     } else {
       fprintf 
 	(fp,"%s %s %s %s\n",
@@ -207,6 +209,7 @@ void Monitor::write_verbatim
       PARALLEL_PRINTF 
 	("%s %s %s %s\n",
 	 buffer_process, buffer_time, component, message);
+      fflush(stdout);
     } else {
       fprintf 
 	(fp,"%s %s %s %s\n",
