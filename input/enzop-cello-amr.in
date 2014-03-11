@@ -1,0 +1,33 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/adapt.incl"
+Stopping { cycle = 10; }
+Mesh    { 
+   root_size   = [32,32];
+   max_level   = 5; 
+}
+
+Initial {
+    density       { value = [ 1.0+x, "input/enzop-cello-full.png",  0.125 ]; };
+    total_energy  { value = 
+    [ 
+       (1.0 + x)  / (0.4 * 1.0), "input/enzop-cello-full.png", 0.14 / (0.4 * 0.1)  ]; };
+    velocity_x    { value = [0.0]; };
+    velocity_y    { value = [0.0]; };
+
+    max_level = 5;
+}
+
+
+Boundary { type = "periodic"; }
+
+Output {
+      de { name = ["nsf-de-%05d.png", "cycle"]; };
+      dl { name = ["nsf-dl-%05d.png", "cycle"]; };
+      ie { name = ["nsf-ie-%05d.png", "cycle"]; };
+      te { name = ["nsf-te-%05d.png", "cycle"]; };
+      vx { name = ["nsf-vx-%05d.png", "cycle"]; };
+      vy { name = ["nsf-vy-%05d.png", "cycle"]; };
+      mesh { name = ["nsf-mesh-%05d.png", "cycle"];       }
+}
