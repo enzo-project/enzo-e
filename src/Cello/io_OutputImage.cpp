@@ -317,8 +317,7 @@ void OutputImage::write_block
       }
     }
 
-  }
-    //  } else if (image_type_ == "data") {
+  } else if (image_type_ == "data") {
 
     if (! comm_block->is_leaf()) return;
     // for each cell
@@ -374,9 +373,9 @@ void OutputImage::write_block
     //   ((double*)field)[0] = saved;
     // }
     //  }
+  }
 }
-
-//----------------------------------------------------------------------
+  //----------------------------------------------------------------------
 
 void OutputImage::write_field_block
 (
@@ -528,7 +527,7 @@ void OutputImage::image_create_ () throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::image_write_ (double min, double max) throw()
+void OutputImage::image_write_ (double min_color, double max_color) throw()
 {
   //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
   // simplified variable names
@@ -537,34 +536,38 @@ void OutputImage::image_write_ (double min, double max) throw()
   int my = nyi_;
   int m  = mx*my;
 
-  double min2=min;
-  double max2=max;
   //  if (! specify_bounds_) {
 
-  min = std::numeric_limits<double>::max();
-  max = std::numeric_limits<double>::min();
+  double min_val = std::numeric_limits<double>::max();
+  double max_val = std::numeric_limits<double>::min();
 
-  // Compute min and max if needed
+  //    Compute min and max if needed
   //  if (! specify_bounds_) {
   if (image_log_) {
     for (int i=0; i<m; i++) {
-      min = MIN(min,log(data_[i]));
-      max = MAX(max,log(data_[i]));
+      min_val = MIN(min_val,log(data_[i]));
+      max_val = MAX(max_val,log(data_[i]));
     }
   } else {
     for (int i=0; i<m; i++) {
-      min = MIN(min,data_[i]);
-      max = MAX(max,data_[i]);
+      min_val = MIN(min_val,data_[i]);
+      max_val = MAX(max_val,data_[i]);
     }
   }
   //  }
-  //  }
-  if (specify_bounds_) {
-    min=min2;
-    max=max2;
-  }
-  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
 
+  double min,max;
+
+  if (specify_bounds_) {
+    min = min_color;
+    max = max_color;
+  } else {
+    min = min_val;
+    max = max_val;
+  }
+
+  PARALLEL_PRINTF ("%s:%d %s val %f %f  bound %f %f\n",
+		   __FILE__,__LINE__,file_name_.c_str(),min_val,max_val,min,max);
   TRACE1("image_write_() data_ = %p",data_);
   size_t n = map_r_.size();
 
@@ -580,6 +583,10 @@ void OutputImage::image_write_ (double min, double max) throw()
 
       double r=0.0,g=0.0,b=0.0,a=0.0;
 
+	if (value < min) value = min;
+	if (value > max) value = max;
+
+
       if (min <= value && value <= max) {
 
 	// map v to lower colormap index
@@ -594,9 +601,12 @@ void OutputImage::image_write_ (double min, double max) throw()
 	double hi = min + (k+1)*(max-min)/(n-1);
 
 	// should be in bounds, but force if not due to rounding error
-	if (value < lo) value = lo;
-	if (value > hi) value = hi;
 
+	// if (value < lo) { 
+	//   r=1.0; g=1.0; a=1.0;
+	// } else if (value > hi) {
+	//   r=0.0; g=0.0; a=0.0;
+	// } else {
 	// interpolate colormap
 
 	double ratio = (value - lo) / (hi-lo);
@@ -606,7 +616,7 @@ void OutputImage::image_write_ (double min, double max) throw()
 	b = (1-ratio)*map_b_[k] + ratio*map_b_[k+1];
 	a = (1-ratio)*map_a_[k] + ratio*map_a_[k+1];
 	//	if (value < 0.0) { r=1.0; g=0.0; b=0.0; }
-
+	// }
 	png_->plot      (ix+1, iy+1, 0.0, 0.0, 0.0);
 	png_->plot_blend(ix+1, iy+1, a, r,g,b);
 
