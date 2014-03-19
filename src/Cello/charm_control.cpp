@@ -13,10 +13,10 @@
 #include "charm_mesh.hpp"
 
 #ifdef CELLO_VERBOSE
-#   define VERBOSE(A)				\
-  if (index_.is_root()) {			\
+#   define VERBOSE(A)					\
+  if (index_.is_root()) {				\
     Monitor * monitor = simulation()->monitor();	\
-    monitor->print("Control", A);		\
+    monitor->print("Control", A);			\
   } 
 #else
 #   define VERBOSE(A) ;
@@ -248,12 +248,6 @@ void CommBlock::control_sync(int phase)
     ERROR2 ("CommBlock::control_sync()",
 	    "Unknown phase: phase %s (%d)",
 	    phase_string[phase],phase);    
-  }
-
-  if (index_.is_root()){
-    char buffer[255];
-    sprintf (buffer,"control_sync(%s) %s",phase_string[phase],sync_type.c_str());
-    PARALLEL_PRINTF(buffer); fflush(stdout);
   }
 
   if (sync_type == "contribute") {

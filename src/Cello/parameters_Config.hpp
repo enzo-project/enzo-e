@@ -136,6 +136,7 @@ public: // attributes
   std::string                performance_name;
   int                        performance_stride;
   bool                       performance_warnings;
+
   // schedule for turning on / off Projections monitoring
 
   std::string                projections_schedule_on_type;

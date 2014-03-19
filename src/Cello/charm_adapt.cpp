@@ -165,9 +165,23 @@ void CommBlock::adapt_next_()
 
 void CommBlock::adapt_end_()
 {
-  if (index_.is_root()) {
-    thisProxy.doneInserting();
+  if (delete_) {
+
+    // --------------------------------------------------
+    // ENTRY: #6 SimulationCharm::adapt_exit_() -> ckDestroy()
+    // ENTRY: if delete
+    // ENTRY: adapt phase
+    // --------------------------------------------------
+    ckDestroy();
+    // --------------------------------------------------
+
+    return;
   }
+
+  //  if (index_.is_root()) {
+  //    thisProxy.doneInserting();
+  //  }
+
   set_leaf();
 
   adapt_exit_();
@@ -593,13 +607,14 @@ void CommBlock::p_adapt_send_child_data
 
 void CommBlock::p_adapt_delete()
 {
-    // --------------------------------------------------
-    // ENTRY: #6 SimulationCharm::adapt_exit_() -> ckDestroy()
-    // ENTRY: if delete
-    // ENTRY: adapt phase
-    // --------------------------------------------------
-    ckDestroy();
-    // --------------------------------------------------
+  delete_ = true;
+    // // --------------------------------------------------
+    // // ENTRY: #6 SimulationCharm::adapt_exit_() -> ckDestroy()
+    // // ENTRY: if delete
+    // // ENTRY: adapt phase
+    // // --------------------------------------------------
+    // ckDestroy();
+    // // --------------------------------------------------
 }
 
 //======================================================================

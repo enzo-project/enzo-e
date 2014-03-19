@@ -342,19 +342,19 @@ public:
 
   /// Refresh ghost zones and apply boundary conditions
   void p_refresh_enter()  
-  { PARALLEL_PRINTF("p_refresh_enter\n");      refresh_enter_(); }
+  { refresh_enter_(); }
   void q_refresh_enter()  
-  { PARALLEL_PRINTF("q_refresh_enter\n");      refresh_enter_(); }
+  { refresh_enter_(); }
   void r_refresh_enter(CkReductionMsg * msg)  
-  { PARALLEL_PRINTF("r_refresh_enter\n");     refresh_enter_(); delete msg; }
+  { refresh_enter_(); delete msg; }
 
   /// Exit the refresh phase after QD
   void p_refresh_exit () 
-  { PARALLEL_PRINTF("p_refresh_exit\n");      refresh_exit_(); }
+  { refresh_exit_(); }
   void q_refresh_exit () 
-  { PARALLEL_PRINTF("q_refresh_exit\n");      refresh_exit_(); }
+  { refresh_exit_(); }
   void r_refresh_exit (CkReductionMsg * msg) 
-  { PARALLEL_PRINTF("r_refresh_exit\n");      refresh_exit_(); delete msg;  }
+  { refresh_exit_(); delete msg;  }
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
   void x_refresh_face
@@ -643,6 +643,9 @@ protected: // attributes
 
   /// whether CommBlock has been coarsened and should be deleted
   bool coarsened_;
+
+  /// Whether CommBlock is marked for deletion
+  bool delete_;
 
   /// Whether CommBlock is a leaf node during adapt phase (stored not
   /// computed to avoid race condition bug #30

@@ -46,6 +46,7 @@ CommBlock::CommBlock
   adapt_(adapt_unknown),
   next_phase_(phase_stopping),
   coarsened_(false),
+  delete_(false),
   is_leaf_(true)
 {
 
@@ -216,6 +217,7 @@ void CommBlock::pup(PUP::er &p)
   p | adapt_;
   p | next_phase_;
   p | coarsened_;
+  p | delete_;
 
 }
 
@@ -542,6 +544,7 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   adapt_      = comm_block.adapt_;
   next_phase_ = comm_block.next_phase_;
   coarsened_  = comm_block.coarsened_;
+  delete_     = comm_block.delete_;
 }
 
 //----------------------------------------------------------------------
