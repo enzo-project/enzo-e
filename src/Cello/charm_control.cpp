@@ -46,7 +46,7 @@ const char * phase_string [] = {
 void CommBlock::adapt_enter_()
 {
 
-  VERBOSE("adapt_enter_");
+  VERBOSE("adapt_enter");
 
   performance_switch_ (perf_adapt,__FILE__,__LINE__);
 

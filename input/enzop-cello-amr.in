@@ -2,7 +2,7 @@
 # Author:  James Bordner (jobordner@ucsd.edu)
 
 include "input/adapt.incl"
-Stopping { cycle = 10; }
+Stopping { cycle = 10000; }
 Mesh    { 
    root_size   = [32,32];
    max_level   = 5; 
@@ -16,18 +16,29 @@ Initial {
     velocity_x    { value = [0.0]; };
     velocity_y    { value = [0.0]; };
 
-    max_level = 5;
+    max_level = 7;
 }
 
 
 Boundary { type = "periodic"; }
 
 Output {
-      de { name = ["nsf-de-%05d.png", "cycle"]; };
-      dl { name = ["nsf-dl-%05d.png", "cycle"]; };
-      ie { name = ["nsf-ie-%05d.png", "cycle"]; };
-      te { name = ["nsf-te-%05d.png", "cycle"]; };
-      vx { name = ["nsf-vx-%05d.png", "cycle"]; };
-      vy { name = ["nsf-vy-%05d.png", "cycle"]; };
-      mesh { name = ["nsf-mesh-%05d.png", "cycle"];       }
+     file_groups = ["de","mesh","dm"];
+      dm {
+           name = ["enzo-dm-%05d.png", "cycle"]; 
+           schedule = ["cycle","interval", 5];
+           image_reduce_type = "max";
+	   image_type = "data+mesh";
+          };
+      de {
+           name = ["enzo-de-%05d.png", "cycle"]; 
+           schedule = ["cycle","interval", 5];
+           image_reduce_type = "max";
+	   image_type = "data";
+          };
+      mesh { name = ["enzo-mesh-%05d.png", "cycle"];
+           schedule = ["cycle","interval", 5];
+	   image_type = "mesh";
+       };
+
 }

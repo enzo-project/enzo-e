@@ -106,6 +106,12 @@ public: // virtual functions
 
 private: // functions
 
+  bool type_is_mesh () const
+  { return (image_type_ == "mesh" || image_type_ == "data+mesh"); }
+
+  bool type_is_data () const
+  { return (image_type_ == "data" || image_type_ == "data+mesh"); }
+
   /// Create the png file object
   void png_create_ (std::string filename) throw();
 
@@ -122,20 +128,26 @@ private: // functions
   void image_close_ () throw();
 
    /// Generate a PNG image of array data
-  void reduce_point_ ( double * data, double value) throw();
+  void reduce_point_ ( double * data, 
+		       double value, double alpha=1.0) throw();
 
   void extents_img_ (const CommBlock * comm_block,
 		     int *ixm, int *ixp,
 		     int *iym, int *iyp,
 		     int *izm, int *izp ) const;
 
-  void reduce_line_(int ixm, int ixp, int iym, int iyp, double value);
-  void reduce_line_x_(int ixm, int ixp, int iy, double value);
-  void reduce_line_y_(int ix, int iym, int iyp, double value);
-  void reduce_box_(int ixm, int ixp, int iym, int iyp, double value);
-  void reduce_cube_(int ixm, int ixp, int iym, int iyp, double value);
-  
+  void reduce_line_(double * data, int ixm, int ixp, int iym, int iyp, 
+		    double value, double alpha=1.0);
+  void reduce_line_x_(double * data, int ixm, int ixp, int iy, 
+		      double value, double alpha=1.0);
+  void reduce_line_y_(double * data, int ix, int iym, int iyp, 
+		      double value, double alpha=1.0);
+  void reduce_box_(double * data, int ixm, int ixp, int iym, int iyp, 
+		   double value, double alpha=1.0);
+  void reduce_cube_(double * data, int ixm, int ixp, int iym, int iyp, 
+		    double value, double alpha=1.0);
 
+  double data_(int i) const ;
 
 private: // attributes
 
@@ -145,8 +157,11 @@ private: // attributes
   std::vector<double> map_b_;
   std::vector<double> map_a_;
 
-  /// Current image data
-  double * data_;
+  /// Current image for data
+  double * image_data_;
+
+  /// Current image for mesh
+  double * image_mesh_;
 
   /// Reduction operation
   reduce_type op_reduce_;
@@ -181,6 +196,9 @@ private: // attributes
 
   /// Whether to include ghost zones
   bool ghost_;
+
+  /// Maximum mesh level
+  int max_level_;
 };
 
 #endif /* IO_OUTPUT_IMAGE_HPP */
