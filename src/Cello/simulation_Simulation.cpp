@@ -426,7 +426,7 @@ void Simulation::initialize_forest_() throw()
   // Don't allocate blocks if reading data from files
 
   bool allocate_data = ! ( config_->initial_type == "file" || 
-			   config_->initial_type == "restart" );
+			   config_->initial_type == "checkpoint" );
 
   if (allocate_blocks) {
     hierarchy_->create_forest

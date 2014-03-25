@@ -148,30 +148,21 @@
 	type = "image";
 	schedule = ["cycle","interval", 2];
         axis = "x";
-        colormap = [0.00, 0.00, 0.50,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00];
+        include "input/colormap_blackbody.incl";
       };
       d_y {
         field_list = ["density"];
 	type = "image";
 	schedule = ["cycle","interval", 2];
         axis = "y";
-        colormap = [0.00, 0.00, 0.50,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00];
+        include "input/colormap_blackbody.incl";
       };
       d_z {
         field_list = ["density"];
 	type = "image";
 	schedule = ["cycle","interval", 2];
         axis = "z";
-        colormap = [0.00, 0.00, 0.50,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00];
+        include "input/colormap_blackbody.incl";
       };
    }
 

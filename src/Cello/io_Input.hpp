@@ -181,12 +181,8 @@ protected: // attributes
   /// I/O FieldBlock data accessor
   IoFieldBlock * io_field_block_;
 
-private: // attributes
-
   /// Only processes with id's divisible by process_stride_ reads
   /// (1: all processes read; 2: 0,2,4,... read; np: root process reads)
-  /// Private so that setting must be made through set_process_stride(),
-
   int process_stride_;
 };
 

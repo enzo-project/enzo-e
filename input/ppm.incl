@@ -94,11 +94,7 @@
         field_list = ["density"];
 	type     = "image";
 	schedule = ["cycle","interval", 10];
-        colormap = [0.00, 0.00, 0.50,  
-                    0.00, 1.00, 0.00, 
-                    1.00, 1.00, 0.00, 
-                    1.00, 0.00, 0.00];
-        
+        include "input/colormap_blackbody.incl";
       };
 
       data {
@@ -108,10 +104,3 @@
       };
 
    }
-
-#    Performance {
-#       projections {
-#        on  { schedule = ["cycle", "list",      20]; };
-#        off { schedule = ["cycle", "list",  10 ]; }
-#       }
-#    }

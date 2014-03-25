@@ -15,7 +15,7 @@ module mesh {
   PUPable InputData;
   PUPable OutputData;
   PUPable OutputImage;
-  PUPable OutputRestart;
+  PUPable OutputCheckpoint;
   PUPable Problem;
   PUPable ProlongLinear;
   PUPable RestrictLinear;

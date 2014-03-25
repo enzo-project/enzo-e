@@ -51,13 +51,9 @@ public: // functions
 
     // NOTE: change this function whenever attributes change
     p | field_name_;
-    //    p | field_id_;
-    WARNING("FieldDescr::pup",
-	    "Skipping field_id_ [ p|field_id_ is an error in PGI due to const ]");
+    p | field_id_;
     p | group_name_;
-    //    p | group_id_;
-    WARNING("FieldDescr::pup",
-	    "Skipping group_id_ [ p|group_id_ is an error in PGI due to const ]");
+    p | group_id_;
     p | alignment_;
     p | padding_;
     p | courant_;
@@ -73,7 +69,6 @@ public: // functions
       if (up) ghosts_[i] = new int[3];
       PUParray(p,ghosts_[i],3);
     }
-
     p | min_value_;
     p | max_value_;
     p | min_action_;
@@ -200,13 +195,13 @@ private: // attributes
   std::vector<std::string> field_name_;
 
   /// Index of each field in field_name_
-  std::map<const std::string,int> field_id_;
+  std::map<std::string,int> field_id_;
 
   /// String identifying each group
   std::vector<std::string> group_name_;
 
   /// Index of each group in group_name_
-  std::map<const std::string,int> group_id_;
+  std::map<std::string,int> group_id_;
 
   /// alignment of start of each field in bytes
   int alignment_;

@@ -1,40 +1,40 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     io_OutputRestart.hpp 
+/// @file     io_OutputCheckpoint.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     2011-09-26
-/// @brief    [\ref Io] Declaration for the OutputRestart class
+/// @brief    [\ref Io] Declaration for the OutputCheckpoint class
 
-#ifndef IO_OUTPUT_RESTART_HPP
-#define IO_OUTPUT_RESTART_HPP
+#ifndef IO_OUTPUT_CHECKPOINT_HPP
+#define IO_OUTPUT_CHECKPOINT_HPP
 
 class ItField;
 
-class OutputRestart : public Output {
+class OutputCheckpoint : public Output {
 
-  /// @class    OutputRestart
+  /// @class    OutputCheckpoint
   /// @ingroup  Io
-  /// @brief [\ref Io] class for reading and writing Restart files
+  /// @brief [\ref Io] class for reading and writing Checkpoint files
 
 public: // functions
 
   /// Empty constructor for Charm++ pup()
-  OutputRestart() throw() { }
+  OutputCheckpoint() throw() { }
 
-  /// Create an uninitialized OutputRestart object
-  OutputRestart(int index, 
+  /// Create an uninitialized OutputCheckpoint object
+  OutputCheckpoint(int index, 
 		const Factory * factory, 
 		Config * config, 
 		int process_count) throw();
 
   /// Destructor
-  ~OutputRestart() throw()  { }
+  ~OutputCheckpoint() throw()  { }
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(OutputRestart);
+  PUPable_decl(OutputCheckpoint);
 
   /// Charm++ PUP::able migration constructor
-  OutputRestart (CkMigrateMessage *m) : Output (m) { }
+  OutputCheckpoint (CkMigrateMessage *m) : Output (m) { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -69,4 +69,4 @@ private:
 
 };
 
-#endif /* IO_OUTPUT_RESTART_HPP */
+#endif /* IO_OUTPUT_CHECKPOINT_HPP */

@@ -313,40 +313,6 @@ void Problem::initialize_output
 
       }
 
-      // R G B A
-
-      // COLORMAP_ALPHA
-
-      n = config->output_image_colormap_alpha[index].size() / 4;
-
-      if (n > 0) {
-
-	double * r = new double [n];
-	double * g = new double [n];
-	double * b = new double [n];
-	double * a = new double [n];
-
-	for (int i=0; i<n; i++) {
-
-	  int ir=4*i+0;
-	  int ig=4*i+1;
-	  int ib=4*i+2;
-	  int ia=4*i+3;
-
-	  r[i] = config->output_image_colormap_alpha[index][ir];
-	  g[i] = config->output_image_colormap_alpha[index][ig];
-	  b[i] = config->output_image_colormap_alpha[index][ib];
-	  a[i] = config->output_image_colormap_alpha[index][ia];
-
-	}
-
-	output_image->set_colormap(n,r,g,b,a);
-
-	delete r;
-	delete g;
-	delete b;
-	delete a;
-      }
     }
 
     // Add the initialized Output object to the Simulation's list of
@@ -439,7 +405,7 @@ Initial * Problem::create_initial_
   // parameter: Initial : time
   //--------------------------------------------------
 
-  if (type == "file" || type == "restart") {
+  if (type == "file" || type == "checkpoint") {
     return new InitialFile   (parameters,group_process,config->initial_cycle,config->initial_time);;
   } else if (type == "default") {
     bool is_periodic = (config->boundary_type == "periodic");
@@ -595,9 +561,9 @@ Output * Problem::create_output_
 
     output = new OutputData (index,factory,config);
 
-  } else if (name == "restart") {
+  } else if (name == "checkpoint") {
 
-    output = new OutputRestart (index,factory,config,group_process->size());
+    output = new OutputCheckpoint (index,factory,config,group_process->size());
 
   }
 

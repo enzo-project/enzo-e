@@ -13,7 +13,7 @@ trace = 0
 
 verbose = 1
 
-# Whether to print out messages with the TRACE_CHARM() series of statements
+# Whether to print out messages with the TRACE_CHARM() and TRACEPUP() series of statements
 
 trace_charm = 0
 

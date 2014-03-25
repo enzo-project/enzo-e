@@ -109,7 +109,6 @@ public: // attributes
 
   std::string                output_image_axis           [MAX_FILE_GROUPS];
   int                        output_image_block_size     [MAX_FILE_GROUPS];
-  std::vector<double>        output_image_colormap_alpha [MAX_FILE_GROUPS];
   std::vector<double>        output_image_colormap       [MAX_FILE_GROUPS];
   std::string                output_image_type           [MAX_FILE_GROUPS];
   bool                       output_image_log            [MAX_FILE_GROUPS];

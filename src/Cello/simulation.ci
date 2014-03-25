@@ -32,6 +32,7 @@ module simulation {
     entry void s_write (); // [SC6]
     entry void r_write (CkReductionMsg * msg); // [SC7]
 
+    entry void p_begin_output();
     entry void r_output(CkReductionMsg * msg);
     entry void p_output_write (int n, char buffer[n]); // [SC8]
 

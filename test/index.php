@@ -691,7 +691,7 @@ echo "<h3>Serial checkpoint/restart </h3>";
 
 tests("Enzo","enzo-p","test_checkpoint_ppm-1","test_restart_ppm-1","");
 
-test_table ("restart_ppm-1",
+test_table ("checkpoint_ppm-1",
 	    array("000000","000200","000400"), $types);
 
 //----------------------------------------------------------------------
@@ -701,7 +701,7 @@ echo "<h3>Parallel checkpoint/restart) </h3>";
 
 tests("Enzo","enzo-p","test_checkpoint_ppm-8","test_restart_ppm-8","");
 
-test_table ("restart_ppm-8",
+test_table ("checkpoint_ppm-8",
 	    array("000000","000200","000400"), $types);
 
 

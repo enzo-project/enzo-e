@@ -193,14 +193,11 @@ void CommBlock::pup(PUP::er &p)
   }
 
   p | index_;
-#ifdef TEMP_NEW_REFINE
-  p | level_desired_;
-#endif
+  p | level_new_;
   p | cycle_;
   p | time_;
   p | dt_;
   p | stop_;
-  //  p | neighbor_index_;
   p | index_initial_;
   p | children_;
   p | loop_refresh_;
@@ -218,6 +215,7 @@ void CommBlock::pup(PUP::er &p)
   p | next_phase_;
   p | coarsened_;
   p | delete_;
+  p | is_leaf_;
 
 }
 

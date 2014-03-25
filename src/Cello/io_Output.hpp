@@ -202,7 +202,6 @@ protected: // attributes
   /// Index of this Output object in Simulation
   size_t index_;
 
-
   /// Simulation cycle for next IO
   int cycle_;
 
@@ -227,12 +226,8 @@ protected: // attributes
   /// I/O FieldBlock data accessor
   IoFieldBlock * io_field_block_;
 
-protected: // attributes
-
   /// Only processes with id's divisible by process_stride_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
-  /// Private so that setting must be made through set_process_stride(),
-
   int process_stride_;
 
 

@@ -84,6 +84,8 @@ public: // functions
   void r_initialize_hierarchy(CkReductionMsg * msg);
 
   /// Call output on Problem list of Output objects
+  void p_begin_output()
+  { begin_output(); }
   void begin_output ();
   void output_exit();
   void r_output(CkReductionMsg * msg);

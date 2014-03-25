@@ -7,16 +7,16 @@ Mesh { root_blocks    = [2,4]; }
 
 Output {
 
-  file_groups = ["density","restart"];
+  file_groups = ["density","checkpoint"];
 
   density {
-     name = ["restart_ppm-8-%06d.png", "cycle"];
+     name = ["checkpoint_ppm-8-%06d.png", "cycle"];
   };
 
-  restart {
+  checkpoint {
 
-     type  = "restart";
-     dir   = ["restart_ppm-8-%d","cycle"];
+     type  = "checkpoint";
+     dir   = ["checkpoint_ppm-8-%d","cycle"];
      schedule = ["cycle","list",100];
   }
 }

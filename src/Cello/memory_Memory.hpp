@@ -54,6 +54,26 @@ private: // interface
 
 public: // interface
 
+  void pup(PUP::er &p)
+  {
+    p | is_active_;
+    p | do_allocate_fill_; 
+    p | allocate_fill_value_;
+    p | do_deallocate_fill_; 
+    p | deallocate_fill_value_;
+    p | max_group_id_;
+    WARNING ("Memory::pup()","Skipping curr_group_");
+    //    p | curr_group_;
+    WARNING ("Memory::pup()","Skipping group_names_");
+    //  group_names_ [MEMORY_MAX_NUM_GROUPS + 1];
+    PUParray(p,limit_,MEMORY_MAX_NUM_GROUPS + 1);
+    PUParray(p,bytes_,MEMORY_MAX_NUM_GROUPS + 1);
+    PUParray(p,bytes_high_,MEMORY_MAX_NUM_GROUPS + 1);
+    PUParray(p,bytes_highest_,MEMORY_MAX_NUM_GROUPS + 1);
+    PUParray(p,new_calls_,MEMORY_MAX_NUM_GROUPS + 1);
+    PUParray(p,delete_calls_,MEMORY_MAX_NUM_GROUPS + 1);
+  }
+
   /// Allocate memory
   void * allocate ( size_t size ) throw ();
 

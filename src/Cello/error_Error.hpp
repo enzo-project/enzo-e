@@ -72,6 +72,7 @@
 //----------------------------------------------------------------------
 /// @def      TRACE
 /// @brief    Trace file name and location to stdout
+
 #ifdef CELLO_TRACE
 
 #   define TRACE(M)					\
@@ -96,9 +97,6 @@
   { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8); }
 #   define TRACE9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
   { m2_(stdout,"TRACE",__FILE__,__LINE__,"", M,A1,A2,A3,A4,A5,A6,A7,A8,A9); }
-#   define TRACEPUP							\
-  { m2_(stdout,"TRACEPUP",__FILE__,__LINE__,"",				\
-	p.isPacking()?"isPacking":(p.isUnpacking()?"isUnpacking":"isSizing")); }
 
 #else /* CELLO_TRACE */
 
@@ -125,16 +123,19 @@
 #   define TRACE9(M,A1,A2,A3,A4,A5,A6,A7,A8,A9)				\
   /* This space intentionally left blank */
 
-#   define TRACEPUP							\
-  /* This space intentionally left blank */
 
 #endif /* CELLO_TRACE */
 
 #ifdef CELLO_TRACE_CHARM
 #   define TRACE_CHARM(M)				\
   { m2_(stdout,"TRACE_CHARM",__FILE__,__LINE__,"",M); }
+#   define TRACEPUP							\
+  { m2_(stdout,"TRACEPUP",__FILE__,__LINE__,"",				\
+	p.isPacking()?"isPacking":(p.isUnpacking()?"isUnpacking":"isSizing")); }
 #else
 #   define TRACE_CHARM(M)				\
+  /* This space intentionally left blank */
+#   define TRACEPUP							\
   /* This space intentionally left blank */
 #endif
 

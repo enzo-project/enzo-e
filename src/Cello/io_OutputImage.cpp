@@ -1,4 +1,4 @@
-// See LICENSE_CELLO file for license and copyright information
+// See License_CELLO file for license and copyright information
 
 /// @file     io_OutputImage.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -87,17 +87,14 @@ OutputImage::OutputImage(int index,
   map_r_.resize(2);
   map_g_.resize(2);
   map_b_.resize(2);
-  map_a_.resize(2);
 
   map_r_[0] = 0.0;
   map_g_[0] = 0.0;
   map_b_[0] = 0.0;
-  map_a_[0] = 1.0;
 
   map_r_[1] = 1.0;
   map_g_[1] = 1.0;
   map_b_[1] = 1.0;
-  map_a_[1] = 1.0;
 }
 
 //----------------------------------------------------------------------
@@ -117,9 +114,9 @@ void OutputImage::pup (PUP::er &p)
   p | map_r_;
   p | map_g_;
   p | map_b_;
-  p | map_a_;
-  WARNING("OutputImage::pup","skipping data_");
+  WARNING("OutputImage::pup","skipping image_data_");
   if (p.isUnpacking()) image_data_ = 0;
+  WARNING("OutputImage::pup","skipping image_mesh_");
   if (p.isUnpacking()) image_mesh_ = 0;
   p | op_reduce_;
   p | mesh_color_;
@@ -143,20 +140,18 @@ void OutputImage::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 void OutputImage::set_colormap
-(int n, double * map_r, double * map_g, double * map_b, double * map_a) throw()
+(int n, double * map_r, double * map_g, double * map_b) throw()
 {
   // Copy rbg lists
 
   map_r_.resize(n);
   map_g_.resize(n);
   map_b_.resize(n);
-  map_a_.resize(n);
 
   for (int i=0; i<n; i++) {
     map_r_[i] = map_r[i];
     map_g_[i] = map_g[i];
     map_b_[i] = map_b[i];
-    map_a_[i] = map_a ? map_a[i] : 1.0;
   }
 
 }
@@ -626,11 +621,10 @@ void OutputImage::image_write_ (double min_color, double max_color) throw()
 	r = (1-ratio)*map_r_[k] + ratio*map_r_[k+1];
 	g = (1-ratio)*map_g_[k] + ratio*map_g_[k+1];
 	b = (1-ratio)*map_b_[k] + ratio*map_b_[k+1];
-	a = (1-ratio)*map_a_[k] + ratio*map_a_[k+1];
 	//	if (value < 0.0) { r=1.0; g=0.0; b=0.0; }
 	// }
-	png_->plot      (ix+1, iy+1, 0.0, 0.0, 0.0);
-	png_->plot_blend(ix+1, iy+1, a, r,g,b);
+	png_->plot      (ix+1, iy+1, r,g,b);
+	//	png_->plot_blend(ix+1, iy+1, a, r,g,b);
 
       } else {
 	
@@ -650,7 +644,7 @@ void OutputImage::image_write_ (double min_color, double max_color) throw()
 double OutputImage::data_(int index) const
 {
   if (type_is_mesh() && type_is_data())
-    return image_data_[index] + 0.1*image_mesh_[index];
+    return image_data_[index] + 0.2*image_mesh_[index];
   else if (type_is_data()) 
     return image_data_[index];
   else  if (type_is_mesh()) 

@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     io_OutputRestart.cpp
+/// @file     io_OutputCheckpoint.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-02-02
-/// @brief    Implementation of writing restart dumps
+/// @brief    Implementation of writing checkpoint dumps
 ///
 /// 
 
@@ -13,7 +13,7 @@ extern CProxy_SimulationCharm  proxy_simulation;
 
 //----------------------------------------------------------------------
 
-OutputRestart::OutputRestart
+OutputCheckpoint::OutputCheckpoint
 (
  int index,
  const Factory * factory,
@@ -43,7 +43,7 @@ OutputRestart::OutputRestart
 
 //----------------------------------------------------------------------
 
-void OutputRestart::pup (PUP::er &p)
+void OutputCheckpoint::pup (PUP::er &p)
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
@@ -56,29 +56,29 @@ void OutputRestart::pup (PUP::er &p)
 
 //======================================================================
 
-void OutputRestart::write_simulation ( const Simulation * simulation ) throw()
+void OutputCheckpoint::write_simulation ( const Simulation * simulation ) throw()
 {
 
-  TRACE("OutputRestart::write_simulation()");
+  TRACE("OutputCheckpoint::write_simulation()");
 
   // Write parameter file
 
   bool is_root = simulation->group_process()->is_root();
 
-  if (is_root) {
+  //  if (is_root) {
 
     std::string dir_name = expand_file_name_(&dir_name_,&dir_args_);
     char dir_char[255];
     strcpy(dir_char,dir_name.c_str());
 
     // --------------------------------------------------
-    // ENTRY: #1 OutputRestart::write_simulation()-> SimulationCharm::s_write()
+    // ENTRY: #1 OutputCheckpoint::write_simulation()-> SimulationCharm::s_write()
     // ENTRY: checkpoint if Simulation is root
     // --------------------------------------------------
     CkCallback callback(CkIndex_SimulationCharm::s_write(),proxy_simulation);
     CkStartCheckpoint (dir_char,callback);
     // --------------------------------------------------
-  }
+    //  }
 
 }
 

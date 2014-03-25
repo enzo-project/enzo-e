@@ -66,7 +66,6 @@ void Output::pup (PUP::er &p)
 
   WARNING ("Output::pup","skipping file_");
   //    p | *file_;
-  WARNING ("Output::pup","skipping schedule_");
   if (up) schedule_ = new Schedule;
   p | *schedule_;
   p | process_;

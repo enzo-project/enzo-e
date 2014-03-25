@@ -2,10 +2,10 @@
 # Author:  James Bordner (jobordner@ucsd.edu)
 
 include "input/adapt.incl"
-Stopping { cycle = 10000; }
+Stopping { cycle = 40000; }
 Mesh    { 
    root_size   = [32,32];
-   max_level   = 5; 
+   max_level   = 7; 
 }
 
 Initial {
@@ -23,12 +23,13 @@ Initial {
 Boundary { type = "periodic"; }
 
 Output {
-     file_groups = ["de","mesh","dm"];
+     file_groups = ["dm"];
       dm {
            name = ["enzo-dm-%05d.png", "cycle"]; 
            schedule = ["cycle","interval", 5];
            image_reduce_type = "max";
 	   image_type = "data+mesh";
+           image_size = [2049,2049];
           };
       de {
            name = ["enzo-de-%05d.png", "cycle"]; 

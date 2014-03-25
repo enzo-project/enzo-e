@@ -30,6 +30,7 @@ public:
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    TRACEPUP;
     CBase_ArrayMap::pup(p);
     // NOTE: change this function whenever attributes change
     p | nx_;
