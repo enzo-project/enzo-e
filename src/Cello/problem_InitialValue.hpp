@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_InitialDefault.hpp
+/// @file     method_InitialValue.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Jan  4 19:26:38 PST 2011
 /// @brief    [\ref Method] Default initialization method
@@ -8,29 +8,29 @@
 #ifndef METHOD_INITIAL_DEFAULT_HPP
 #define METHOD_INITIAL_DEFAULT_HPP
 
-class InitialDefault : public Initial {
+class InitialValue : public Initial {
 
-  /// @class    InitialDefault
+  /// @class    InitialValue
   /// @ingroup  Method
   /// @brief    [\ref Method] Default initialization method
 
 public: // interface
 
   /// CHARM++ constructor
-  InitialDefault() throw() { }
+  InitialValue() throw() { }
   
   /// Constructor
-  InitialDefault(Parameters * parameters, 
+  InitialValue(Parameters * parameters, 
 		 const FieldDescr * field_descr,
 		 bool is_periodic,
 		 int cycle, double time) throw();
 
   /// Destructor
-  virtual ~InitialDefault() throw();
+  virtual ~InitialValue() throw();
 
-  PUPable_decl(InitialDefault);
+  PUPable_decl(InitialValue);
 
-  InitialDefault(CkMigrateMessage *m) : Initial (m) {}
+  InitialValue(CkMigrateMessage *m) : Initial (m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

@@ -27,7 +27,7 @@
 #include "problem_Timestep.hpp"
 #include "problem_Initial.hpp"
 #include "problem_InitialFile.hpp"
-#include "problem_InitialDefault.hpp"
+#include "problem_InitialValue.hpp"
 #include "problem_Boundary.hpp"
 #include "problem_Method.hpp"
 #include "problem_Prolong.hpp"

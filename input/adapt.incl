@@ -87,22 +87,23 @@ Output {
        field_list = ["density"];
        type     = "image";
        schedule = ["cycle","interval", 10];
-#       image_size = [1025,1025];
        include "input/colormap_blackbody.incl"
         image_specify_bounds = true;
-	image_min = 0.0;
-	image_max = 3.0;
 
+    };
+    dl {
+       field_list = ["density"];
+       image_log = true;
+       type     = "image";
+       schedule = ["cycle","interval", 10];
+       include "input/colormap_blackbody.incl"
     };
     dm {
        field_list = ["density"];
        type     = "image";
        schedule = ["cycle","interval", 10];
-#       image_size = [1025,1025];
        include "input/colormap_blackbody.incl"
        image_specify_bounds = true;
-	image_min = 0.1;
-	image_max = 3.1;
     };
 
     te {
@@ -134,7 +135,7 @@ Output {
 	image_type  = "data+mesh";
 	image_reduce_type = "max";
         field_list = ["density"];
-	image_block_size  = 5;
+#	image_block_size  = 5;
 #	image_size = [1025,1025];
 	schedule = ["cycle","interval", 10];
         image_specify_bounds = true;

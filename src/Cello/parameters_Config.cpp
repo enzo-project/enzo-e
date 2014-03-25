@@ -444,8 +444,7 @@ void Config::read(Parameters * parameters) throw()
 	output_name[index][i] = parameters->list_value_string(i,"name","");
       }
     }
-    //  output_axis
-    //  output_colormap
+
     if (parameters->type("field_list") == parameter_list) {
       int length = parameters->list_length("field_list");
       output_field_list[index].resize(length);

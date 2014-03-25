@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_InitialDefault.cpp
+/// @file     method_InitialValue.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-02-16
-/// @brief    Implementation of the InitialDefault class
+/// @brief    Implementation of the InitialValue class
 
 #include "cello.hpp"
 
@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-InitialDefault::InitialDefault
+InitialValue::InitialValue
 (Parameters * parameters,
  const FieldDescr * field_descr,
  bool is_periodic,
@@ -75,7 +75,7 @@ InitialDefault::InitialDefault
 
 //----------------------------------------------------------------------
 
-InitialDefault::~InitialDefault() throw()
+InitialValue::~InitialValue() throw()
 {
   for (int index_field = 0; index_field<num_fields_; index_field++) {
     for (int index_mask = 0; index_mask<num_masks_[index_field]; index_mask++) {
@@ -94,7 +94,7 @@ InitialDefault::~InitialDefault() throw()
 }
 //----------------------------------------------------------------------
 
-void InitialDefault::pup (PUP::er &p)
+void InitialValue::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
 
@@ -109,7 +109,7 @@ void InitialDefault::pup (PUP::er &p)
   if (up) field_descr_ = new FieldDescr;
   p | *((FieldDescr *) field_descr_);
   p | num_fields_;
-  WARNING("InitialDefault::pup","mask_[][] not pupped");
+  WARNING("InitialValue::pup","mask_[][] not pupped");
   if (up) num_masks_ = new int[num_fields_];
   PUParray(p,num_masks_,num_fields_);
   p | periodic_;
@@ -117,7 +117,7 @@ void InitialDefault::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void InitialDefault::enforce_block
+void InitialValue::enforce_block
 (
  CommBlock        * comm_block,
  const FieldDescr * field_descr,
@@ -126,7 +126,7 @@ void InitialDefault::enforce_block
 {
   // Initialize Fields according to parameters
 
-  ASSERT("InitialDefault::enforce_block",
+  ASSERT("InitialValue::enforce_block",
 	 "CommBlock does not exist",
 	 comm_block != NULL);
   
@@ -167,7 +167,7 @@ void InitialDefault::enforce_block
 
       int list_length = parameters_->list_length("value");
 
-      ASSERT1("InitialDefault::enforce_block",
+      ASSERT1("InitialValue::enforce_block",
 	     "Length of list parameter Initial:%s:value must be odd",
 	     field_name.c_str(),
 	     (list_length % 2) == 1);
@@ -206,12 +206,12 @@ void InitialDefault::enforce_block
       }
 
     } else if (parameter_type == parameter_unknown) {
-      WARNING1("InitialDefault::enforce_block",  
+      WARNING1("InitialValue::enforce_block",  
 	       "Uninitialized field %s",
 	       field_name.c_str());
       
     } else {
-      ERROR2("InitialDefault::enforce_block",
+      ERROR2("InitialValue::enforce_block",
 	     "Illegal parameter type %s when initializing field %s",
 	     parameter_type_name[parameter_type],field_name.c_str());
     }
@@ -231,7 +231,7 @@ void InitialDefault::enforce_block
 
 //======================================================================
 
-void InitialDefault::allocate_xyzt_
+void InitialValue::allocate_xyzt_
 (
  CommBlock * comm_block,
  int index_field,
@@ -317,7 +317,7 @@ void InitialDefault::allocate_xyzt_
 
 //----------------------------------------------------------------------
 
-void InitialDefault::copy_values_ 
+void InitialValue::copy_values_ 
 (
  const FieldDescr * field_descr,
  FieldBlock *       field_block,
@@ -369,7 +369,7 @@ void InitialDefault::copy_values_
 //----------------------------------------------------------------------
 
 template<class T>
-void InitialDefault::copy_precision_
+void InitialValue::copy_precision_
 (T * field,
  bool * mask,
  int offset,
@@ -392,7 +392,7 @@ void InitialDefault::copy_precision_
 //----------------------------------------------------------------------
 
 template<class T>
-void InitialDefault::copy_precision_
+void InitialValue::copy_precision_
 (T * field,
  int offset,
  double * value,
@@ -410,7 +410,7 @@ void InitialDefault::copy_precision_
 
 //----------------------------------------------------------------------
 
-void InitialDefault::evaluate_float_ 
+void InitialValue::evaluate_float_ 
 (FieldBlock * field_block, int index_value, std::string field_name, 
  int n, double * value, double * deflt,
  double * x, double * y, double * z, double * t) throw ()
@@ -424,7 +424,7 @@ void InitialDefault::evaluate_float_
   if (value_type != parameter_float_expr &&
       value_type != parameter_float) {
 	  	      
-    ERROR1("InitialDefault::evaluate_float_", 
+    ERROR1("InitialValue::evaluate_float_", 
 	   "Odd-index elements of %s must be floating-point expressions",
 	   field_name.c_str());
   }
@@ -442,7 +442,7 @@ void InitialDefault::evaluate_float_
 
 //----------------------------------------------------------------------
 
-void InitialDefault::evaluate_mask_ 
+void InitialValue::evaluate_mask_ 
 (const Hierarchy * hierarchy,
  const CommBlock * comm_block,
  FieldBlock * field_block, 
@@ -485,7 +485,7 @@ void InitialDefault::evaluate_mask_
 
     {
       field_block->size(&nxb,&nyb,&nzb);
-      ASSERT1("InitialDefault::evaluate_logical",
+      ASSERT1("InitialValue::evaluate_logical",
 	      "mask file %s requires problem to be 2D",
 	      field_name.c_str(),
 	      nyb > 1 && nzb == 1);
@@ -501,7 +501,7 @@ void InitialDefault::evaluate_mask_
     break;
 
   default:
-    ERROR3("InitialDefault::evaluate_mask",
+    ERROR3("InitialValue::evaluate_mask",
 	   "Even-index element %d of %s is of illegal type %d",
 	   index_value,field_name.c_str(),value_type);
     break;
@@ -510,7 +510,7 @@ void InitialDefault::evaluate_mask_
 
 //----------------------------------------------------------------------
 
-void InitialDefault::evaluate_mask_png_
+void InitialValue::evaluate_mask_png_
 (
  bool            * mask_block, int nxb, int nyb,
  bool            * mask_png,   int nx,  int ny,
@@ -580,7 +580,7 @@ void InitialDefault::evaluate_mask_png_
 
 //----------------------------------------------------------------------
 
-void InitialDefault::create_mask_
+void InitialValue::create_mask_
 ( bool ** mask,  int * nx, int * ny, std::string pngfile)
 {
   pngwriter png;

@@ -410,7 +410,7 @@ Initial * Problem::create_initial_
   } else if (type == "default") {
     bool is_periodic = (config->boundary_type == "periodic");
 
-    return new InitialDefault(parameters,field_descr,is_periodic,
+    return new InitialValue(parameters,field_descr,is_periodic,
 			      config->initial_cycle,config->initial_time);
   }
   return NULL;

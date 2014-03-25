@@ -10,7 +10,7 @@ module mesh {
   PUPable Config;
   PUPable Factory;
   PUPable Initial;
-  PUPable InitialDefault;
+  PUPable InitialValue;
   PUPable InitialFile;
   PUPable InputData;
   PUPable OutputData;

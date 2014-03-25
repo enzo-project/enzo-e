@@ -11,9 +11,9 @@ Mesh    {
 Initial {  max_level = 5; }
 
 Output {
+     file_groups = ["de","dl","te","vx","vy","mesh"];
       de { name = ["adapt-L5-P1-de-%f.png", "time"]; };
       dl { name = ["adapt-L5-P1-dl-%f.png", "time"]; };
-      ie { name = ["adapt-L5-P1-ie-%f.png", "time"]; };
       te { name = ["adapt-L5-P1-te-%f.png", "time"]; };
       vx { name = ["adapt-L5-P1-vx-%f.png", "time"]; };
       vy { name = ["adapt-L5-P1-vy-%f.png", "time"]; };
