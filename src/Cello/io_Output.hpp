@@ -75,7 +75,7 @@ public: // functions
   void set_process_stride (int stride) throw () 
   {
     process_stride_ = stride; 
-    sync_.set_stop(process_stride_);
+    sync_write_.set_stop(process_stride_);
   };
 
   /// Return whether output is scheduled for this cycle
@@ -102,8 +102,8 @@ public: // functions
   void write_meta_group ( Io * io ) throw ()
   { write_meta_ (meta_type_group, io); }
 
-  /// Accessor function for the CHARM Sync class
-  Sync * sync() { return & sync_; };
+  /// Accessor function for Charm synchronization of writers
+  Sync * sync_write () { return & sync_write_; };
 
   /// Return the index id in the containing Problem
   int index() const throw() { return index_; }
@@ -161,6 +161,13 @@ public: // virtual functions
 
 protected:
 
+  /// Return the filename for the file format and given arguments
+  std::string expand_file_name_
+  (const std::string * file_name,
+   const std::vector<std::string> * file_args) const throw();
+
+private:
+
   /// "Loop" over writing the Hierarchy in the Simulation
   void write_simulation_ (const Simulation * simulation ) throw();
 
@@ -173,13 +180,6 @@ protected:
   void write_block_
   ( const CommBlock * block, 
     const FieldDescr * field_descr) throw();
-
-  /// Return the filename for the file format and given arguments
-  std::string expand_file_name_
-  (const std::string * file_name,
-   const std::vector<std::string> * file_args) const throw();
-
-private:
 
   /// Implementation of write_meta() and write_meta_group()
   void write_meta_ ( meta_type type, Io * io ) throw();
@@ -196,8 +196,8 @@ protected: // attributes
   /// ID of this process
   int process_;
 
-  /// Sync for ending output
-  Sync sync_;
+  /// Sync for waiting for writers
+  Sync sync_write_;
 
   /// Index of this Output object in Simulation
   size_t index_;

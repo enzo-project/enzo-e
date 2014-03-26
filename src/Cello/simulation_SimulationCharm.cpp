@@ -21,7 +21,8 @@ SimulationCharm::SimulationCharm
  const char         parameter_file[],
  int                n) throw ()
   : Simulation(parameter_file, n),
-    block_sync_(0)
+    sync_output_begin_(0),
+    sync_output_write_(0)
 {
   TRACE("SimulationCharm::SimulationCharm");
 }
@@ -37,6 +38,31 @@ SimulationCharm::~SimulationCharm() throw()
 }
 
 //----------------------------------------------------------------------
+
+void SimulationCharm::insert_block() 
+{
+#ifdef CELLO_DEBUG
+  PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %d\n",
+		   CkMyPe(),sync_output_begin_.stop(),hierarchy()->num_blocks());
+#endif
+  hierarchy()->increment_block_count(1);
+  ++sync_output_begin_;
+  ++sync_output_write_;
+}
+
+//----------------------------------------------------------------------
+
+void SimulationCharm::delete_block() 
+{
+#ifdef CELLO_DEBUG
+  PARALLEL_PRINTF ("%d: --block_sync_ %d %d\n",
+		   CkMyPe(),sync_output_begin_.stop(),
+		   hierarchy()->num_blocks());
+#endif
+  hierarchy()->increment_block_count(-1);
+  --sync_output_begin_;
+  --sync_output_write_;
+}
 
 //----------------------------------------------------------------------
 
@@ -60,7 +86,7 @@ void SimulationCharm::performance_output()
     }
   }
 
-  counters_long[n-1] = block_sync_.stop(); // number of CommBlocks
+  counters_long[n-1] = hierarchy()->num_blocks(); // number of CommBlocks
 
   // --------------------------------------------------
   // ENTRY: #1 SimulationCharm::performance_output() -> SimulationCharm::r_performance_reduce()

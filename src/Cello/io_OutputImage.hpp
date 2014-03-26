@@ -69,7 +69,6 @@ public: // functions
   void set_axis (axis_type axis) throw()
   { axis_ = axis; };
 
-
 public: // virtual functions
 
   /// Prepare for accumulating block data

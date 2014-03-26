@@ -441,7 +441,7 @@ c
 
             do i=i1-1, i2+1
 
-               is = i + sign(two, pslice(i+1,j) - pslice(i-1,j))
+               is = i + nint(sign(two, pslice(i+1,j) - pslice(i-1,j)))
 
                omega(i) = max(0.0, omega1 * (omega2 
      &              - (pslice(i+1,j) - pslice(i-1,j))
@@ -494,8 +494,8 @@ c
                if (de2 .ne. 0.0) dee = de1/de2
                omega_tilde = max( dpp , dee )
 c
-               ism = i + sign(two, dp1)        ! post-shock
-               isp = i - sign(two, dp1)        ! upstream
+               ism = i + nint(sign(two, dp1))        ! post-shock
+               isp = i - nint(sign(two, dp1))        ! upstream
                s   =   - sign(one, dp1)        ! i+s - zone upstream from i
                if (dp1 .eq. 0.0) s = 0.0
 c

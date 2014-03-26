@@ -19,7 +19,7 @@ Output::Output (int index, const Factory * factory) throw()
   : file_(0),           // Initialization deferred
     schedule_(0),
     process_(0),        // initialization below
-    sync_(1),        // default process-per-stride
+    sync_write_(1),     // default process-per-stride
     index_(index),
     cycle_(0),
     count_(0),
@@ -69,7 +69,7 @@ void Output::pup (PUP::er &p)
   if (up) schedule_ = new Schedule;
   p | *schedule_;
   p | process_;
-  p | sync_;
+  p | sync_write_;
   p | index_;
   p | cycle_;
   p | count_;

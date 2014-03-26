@@ -91,10 +91,11 @@ public: // interface
   /// Return the total number of blocks
   size_t num_blocks() const throw()
   { 
-    WARNING("Hierarchy::num_blocks()",
-	    "num_blocks_ initialization not implemented for AMR");
     return num_blocks_; 
   }
+
+  void increment_block_count(int increment)
+  { num_blocks_ += increment; }
 
   void create_forest (FieldDescr   * field_descr,
 		      bool allocate_data,

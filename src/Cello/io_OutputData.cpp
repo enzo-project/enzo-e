@@ -88,7 +88,7 @@ void OutputData::write_hierarchy
 
   write_meta (&io_hierarchy);
 
-  write_hierarchy_(hierarchy, field_descr);
+  Output::write_hierarchy(hierarchy, field_descr);
 
 }
 
@@ -116,7 +116,7 @@ void OutputData::write_block
 
   // Call write(block) on base Output object
 
-  write_block_(block,field_descr);
+  Output::write_block(block,field_descr);
 
   file_->group_close();
 

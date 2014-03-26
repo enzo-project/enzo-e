@@ -202,7 +202,7 @@ void OutputImage::finalize () throw()
 
 void OutputImage::write_block
 (
- const CommBlock * comm_block,
+ const CommBlock *  comm_block,
  const FieldDescr * field_descr
  ) throw()
 // @param comm_block  Block to write
@@ -228,14 +228,14 @@ void OutputImage::write_block
 
   // Get ghost depth
 
-  int gx,gy,gz;
-  field_descr->ghosts(index_field,&gx,&gy,&gz);
+  int ngx,ngy,ngz;
+  field_descr->ghosts(index_field,&ngx,&ngy,&ngz);
 
   // FieldBlock array dimensions
   int ndx,ndy,ndz;
-  ndx = nbx + 2*gx;
-  ndy = nby + 2*gy;
-  ndz = nbz + 2*gz;
+  ndx = nbx + 2*ngx;
+  ndy = nby + 2*ngy;
+  ndz = nbz + 2*ngz;
 
   // add block contribution to image
 
@@ -259,24 +259,6 @@ void OutputImage::write_block
   TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),zp-zm,v);
 
   if (type_is_data() && comm_block->is_leaf()) {
-
-    // for each cell
-    TRACE3("OutputImage ixm,ixp,nbx %d %d %d",ixm,ixp,nbx);
-    TRACE3("OutputImage iym,iyp,nby %d %d %d",iym,iyp,nby);
-    TRACE3("OutputImage izm,izp,nbz %d %d %d",izm,izp,nbz);
-
-    //@@@@@@@@@@
-    // DEBUG
-    //@@@@@@@@@@
-    // float savef=0.0;
-    // double saved=0.0;
-    // if (field_descr->precision(index_field) == precision_single) {
-    //   savef = ((float*)field)[0];
-    //   ((float*)field)[0] = 0.0;
-    // } else {
-    //   saved = ((double*)field)[0];
-    //   ((double*)field)[0] = 0.0;
-    // }
 
     int mx = ghost_ ? ndx : nbx;
     int my = ghost_ ? ndy : nby;
@@ -302,8 +284,6 @@ void OutputImage::write_block
 	    reduce_cube_(image_data_,jxm,jxp,jym,jyp,(((double *)field)[i]));
 	    break;
 	  }
-
-
 	}
       }
     }
@@ -318,8 +298,6 @@ void OutputImage::write_block
     if (mesh_color_ == mesh_color_level)   value = (1.0+comm_block->level()) / (max_level_);
     if (mesh_color_ == mesh_color_process) value = (1.0+CkMyPe())/(CkNumPes());
 					     
-    //  if (mesh_color_ == mesh_color_neighbor) color = comm_block->count_neighbors();
-
     reduce_box_(image_mesh_,ixm,ixp,iym,iyp,value,alpha);
 
     if (comm_block->is_leaf()) { // ) {
@@ -377,7 +355,7 @@ void OutputImage::write_block
 
 void OutputImage::write_field_block
 (
- const FieldBlock * Fieldblock,  
+ const FieldBlock * field_block,  
  const FieldDescr * field_descr,
  int field_index) throw()
 {
@@ -649,10 +627,11 @@ double OutputImage::data_(int index) const
     return image_data_[index];
   else  if (type_is_mesh()) 
     return min_ + max_*image_mesh_[index];
-  else
+  else {
     ERROR ("OutputImage::data_()",
 	   "image_type is neither mesh nor data");
-    
+    return 0.0;
+  }
 }
 
 //----------------------------------------------------------------------

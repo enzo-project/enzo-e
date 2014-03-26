@@ -28,18 +28,18 @@ void CommBlock::output_begin_ ()
 
   int index_output = -1;
 
-  char buffer[255];
-  bool is_scheduled;
   do {
     output = simulation()->problem()->output(++index_output);
 
   } while (output && ! output->is_scheduled(cycle, time));
 
+  // invariant: (output == NULL) || output->is_scheduled()
+
   TRACE2("output_enter %d %p",index_output,output);
 
   if (output != NULL) {
 
-    proxy_simulation.ckLocalBranch() -> begin_output();
+    ((SimulationCharm * )simulation()) -> begin_output();
 
   } else {
 
@@ -59,14 +59,15 @@ void SimulationCharm::begin_output ()
   TRACE("SimulationCharm::begin_output()");
   performance()->switch_region(perf_output,__FILE__,__LINE__);
 
-  TRACE2("block_sync %d/%d",block_sync_.index(),block_sync_.stop());
+  TRACE2("block_sync %d/%d",
+	 sync_output_begin_.index(),sync_output_begin_.stop());
   
-  if (block_sync_.next()) {
+  if (sync_output_begin_.next()) {
 
     CkCallback callback (CkIndex_SimulationCharm::r_output(NULL), thisProxy);
     // --------------------------------------------------
     // ENTRY: #1 SimulationCharm::output()-> SimulationCharm::r_output()
-    // ENTRY: contribute() if block_sync_.next()
+    // ENTRY: contribute() if sync_output_begin_.next()
     // --------------------------------------------------
     contribute(0,0,CkReduction::concat,callback);
     // --------------------------------------------------
@@ -120,29 +121,25 @@ void Problem::output_next(Simulation * simulation) throw()
 
 void CommBlock::p_output_write (int index_output)
 {
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  FieldDescr * field_descr = simulation->field_descr();
-  Output * output = simulation->problem()->output(index_output);
+  FieldDescr * field_descr = simulation()->field_descr();
+  Output * output = simulation()->problem()->output(index_output);
 
   output->write_block(this,field_descr);
 
-  SimulationCharm * simulation_charm  = proxy_simulation.ckLocalBranch();
-
-  simulation_charm->write_();
+  ((SimulationCharm *) simulation())->write_();
 }
 
 //----------------------------------------------------------------------
 
 void SimulationCharm::write_()
 {
-  if (block_sync_.next()) {
+  if (sync_output_write_.next()) {
 
     CkCallback callback (CkIndex_SimulationCharm::r_write(NULL), thisProxy);
 
     // --------------------------------------------------
     // ENTRY: #2 SimulationCharm::write_()-> SimulationCharm::r_write()
-    // ENTRY: contribute() if block_sync_.next()
+    // ENTRY: contribute() if sync_output_write_.next()
     // --------------------------------------------------
     contribute(0,0,CkReduction::concat,callback);
     // --------------------------------------------------
@@ -231,7 +228,7 @@ void Problem::output_write
     output->update_remote(n, buffer);
   }
 
-  if (output->sync()->next()) {
+  if (output->sync_write()->next()) {
 
     output->close();
 

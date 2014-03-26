@@ -42,7 +42,8 @@ public: // functions
     TRACEPUP;
     // NOTE: change this function whenever attributes change
     Simulation::pup(p);
-    p | block_sync_;
+    p | sync_output_begin_;
+    p | sync_output_write_;
   }
 
   /// Initialize the Charm++ Simulation
@@ -52,30 +53,10 @@ public: // functions
   // virtual void run() throw();
 
   /// Add a new CommBlock to this local branch
-  inline void insert_block() 
-  {
-#ifdef CELLO_DEBUG
-    PARALLEL_PRINTF ("%d: ++block_sync_ %d\n",  CkMyPe(),block_sync_.stop());
-#endif
-    ++block_sync_;
-  }
+  void insert_block() ;
 
   /// Remove a CommBlock from this local branch
-  inline void delete_block() 
-  {
-#ifdef CELLO_DEBUG
-    PARALLEL_PRINTF ("%d: --block_sync_ %d\n",  CkMyPe(),block_sync_.stop());
-#endif
-    --block_sync_; 
-  }
-
-  inline int block_count() const
-  { 
-#ifdef CELLO_DEBUG
-    PARALLEL_PRINTF ("%d: block_sync_ %d\n",  CkMyPe(),block_sync_.stop());
-#endif
-    return block_sync_.stop(); 
-  }
+  void delete_block() ;
 
   /// Wait for all Hierarchy to be initialized before creating any CommBlocks
   void r_initialize_forest(CkReductionMsg * msg);
@@ -118,7 +99,8 @@ public: // functions
  
 protected: // attributes
 
-  Sync block_sync_;
+  Sync sync_output_begin_;
+  Sync sync_output_write_;
 
 #ifdef TRACE_MEMORY
   int trace_mem_;

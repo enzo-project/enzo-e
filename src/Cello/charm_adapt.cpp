@@ -14,9 +14,9 @@ const char * adapt_str[] = {"unknown","coarsen","same","refine"};
 
 //--------------------------------------------------
 
-static char buffer [256];
-
 #ifdef DEBUG_ADAPT
+
+static char buffer [256];
 
 #define PUT_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
   {								\
