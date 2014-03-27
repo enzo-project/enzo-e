@@ -55,9 +55,9 @@ OutputImage::OutputImage(int index,
 	    image_reduce_type.c_str());
   }
 
-  if      (image_mesh_color=="level")   mesh_color_ = mesh_color_level;
-  else if (image_mesh_color=="process") mesh_color_ = mesh_color_process;
-  //  else if (image_mesh_color=="neighbor") mesh_color_ = mesh_color_neighbor;
+  if      (image_mesh_color=="level")   mesh_color_type_ = mesh_color_level;
+  else if (image_mesh_color=="process") mesh_color_type_ = mesh_color_process;
+  //  else if (image_mesh_color=="neighbor") mesh_color_type_ = mesh_color_neighbor;
   else {
     ERROR1 ("OutputImage::OutputImage()",
 	    "Unrecognized output_image_mesh_color %s",
@@ -119,7 +119,7 @@ void OutputImage::pup (PUP::er &p)
   WARNING("OutputImage::pup","skipping image_mesh_");
   if (p.isUnpacking()) image_mesh_ = 0;
   p | op_reduce_;
-  p | mesh_color_;
+  p | mesh_color_type_;
   p | axis_;
   p | specify_bounds_;
   p | min_;
@@ -291,14 +291,13 @@ void OutputImage::write_block
 
   if (type_is_mesh()) {
 
-    double alpha = 0.1;
+    double alpha = 1.0;
 
     // value for mesh
     double value = 0;
-    if (mesh_color_ == mesh_color_level)   value = (1.0+comm_block->level()) / (max_level_);
-    if (mesh_color_ == mesh_color_process) value = (1.0+CkMyPe())/(CkNumPes());
+    value = mesh_color_(comm_block->level());
 					     
-    reduce_box_(image_mesh_,ixm,ixp,iym,iyp,value,alpha);
+    reduce_box_(image_mesh_,ixm,ixp,iym,iyp,value);
 
     if (comm_block->is_leaf()) { // ) {
       int xm=(ixm+ixp)/2;
@@ -306,51 +305,60 @@ void OutputImage::write_block
       if (face_rank_ <= 1) {
 	{
 	  int if3[3] = {-1,0,0};
-	  int face_level = comm_block->face_level(if3)+1;
-	  reduce_cube_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_level);
+	  int face_level = comm_block->face_level(if3);
+	  double face_color = mesh_color_(face_level);
+	  reduce_cube_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
 	}
 	{
 	  int if3[3] = {1,0,0};
-	  int face_level = comm_block->face_level(if3)+1;
-	  reduce_cube_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_level);
+	  int face_level = comm_block->face_level(if3);
+	  double face_color = mesh_color_(face_level);
+	  reduce_cube_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
 	}
 	{
 	  int if3[3] = {0,-1,0};
-	  int face_level = comm_block->face_level(if3)+1;
-	  reduce_cube_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_level);
+	  int face_level = comm_block->face_level(if3);
+	  double face_color = mesh_color_(face_level);
+	  reduce_cube_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
 	}
 	{
 	  int if3[3] = {0,1,0};
-	  int face_level = comm_block->face_level(if3)+1;
-	  reduce_cube_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_level);
+	  int face_level = comm_block->face_level(if3);
+	  double face_color = mesh_color_(face_level);
+	  reduce_cube_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
 	}
       }
       if (face_rank_ <= 0) {
 	{
 	  int if3[3] = {-1,-1,0};
-	  int face_level = comm_block->face_level(if3)+1;
-	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_level);
+	  int face_level = comm_block->face_level(if3);
+	  double face_color = mesh_color_(face_level);
+	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
 	}
 	{
 	  int if3[3] = {1,-1,0};
-	  int face_level = comm_block->face_level(if3)+1;
-	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_level);
+	  int face_level = comm_block->face_level(if3);
+	  double face_color = mesh_color_(face_level);
+	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
 	}
 	{
 	  int if3[3] = {-1,1,0};
-	  int face_level = comm_block->face_level(if3)+1;
-	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_level);
+	  int face_level = comm_block->face_level(if3);
+	  double face_color = mesh_color_(face_level);
+	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
 	}
 	{
 	  int if3[3] = {1,1,0};
-	  int face_level = comm_block->face_level(if3)+1;
-	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_level);
+	  int face_level = comm_block->face_level(if3);
+	  double face_color = mesh_color_(face_level);
+	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
 	}
       }
     }
 
   }
 }
+
 //----------------------------------------------------------------------
 
 void OutputImage::write_field_block
@@ -450,6 +458,22 @@ void OutputImage::cleanup_remote  (int * n, char ** buffer) throw()
 
 
 //======================================================================
+
+double OutputImage::mesh_color_(int level) const
+{
+  if (mesh_color_type_ == mesh_color_level) {
+    return (1.0+level);
+  } else if (mesh_color_type_ == mesh_color_process) {
+    return (1.0+CkMyPe())/(CkNumPes());
+  } else {
+    ERROR1 ("OutputImage::mesh_color_()",
+	    "Unknown mesh_color_type_ %d",
+	    mesh_color_type_);
+    return 0;
+  }
+}
+
+//----------------------------------------------------------------------
 
 void OutputImage::png_create_ (std::string filename) throw()
 {
@@ -626,7 +650,7 @@ double OutputImage::data_(int index) const
   else if (type_is_data()) 
     return image_data_[index];
   else  if (type_is_mesh()) 
-    return min_ + max_*image_mesh_[index];
+    return image_mesh_[index];
   else {
     ERROR ("OutputImage::data_()",
 	   "image_type is neither mesh nor data");

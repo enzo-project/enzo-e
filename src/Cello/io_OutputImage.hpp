@@ -105,6 +105,9 @@ public: // virtual functions
 
 private: // functions
 
+  /// value associated with the given mesh level
+  double mesh_color_(int level) const;
+
   bool type_is_mesh () const
   { return (image_type_ == "mesh" || image_type_ == "data+mesh"); }
 
@@ -165,7 +168,7 @@ private: // attributes
   reduce_type op_reduce_;
 
   /// Color
-  int mesh_color_;
+  int mesh_color_type_;
 
   /// Axis along which to reduce
   axis_type axis_;
