@@ -14,7 +14,6 @@
 InitialValue::InitialValue
 (Parameters * parameters,
  const FieldDescr * field_descr,
- bool is_periodic,
  int cycle, double time) throw ()
   : Initial (cycle, time),
     parameters_(parameters),
@@ -23,8 +22,7 @@ InitialValue::InitialValue
     nx_(0),
     ny_(0),
     num_fields_(field_descr->field_count()),
-    num_masks_(NULL),
-    periodic_(is_periodic)
+    num_masks_(NULL)
 {
   parameters_->group_set(0,"Initial");
 
@@ -112,7 +110,6 @@ void InitialValue::pup (PUP::er &p)
   WARNING("InitialValue::pup","mask_[][] not pupped");
   if (up) num_masks_ = new int[num_fields_];
   PUParray(p,num_masks_,num_fields_);
-  p | periodic_;
 }
 
 //----------------------------------------------------------------------
@@ -295,24 +292,6 @@ void InitialValue::allocate_xyzt_
       }
     }
   }
-   if (0 && periodic_) {
-     double dx = xp-xm;
-     double dy = yp-ym;
-     double dz = zp-zm;
-     for (int iz=0; iz<(*nz); iz++) {
-       for (int iy=0; iy<(*ny); iy++) {
-   	for (int ix=0; ix<(*nx); ix++) {
-   	  int i=ix + (*nx)*(iy + (*ny)*iz);
-   	  if ((*x)[i] <= xm) (*x)[i] += dx;
-   	  if ((*y)[i] <= ym) (*y)[i] += dy;
-   	  if ((*z)[i] <= zm) (*z)[i] += dz;
-   	  if ((*x)[i] >= xp) (*x)[i] -= dx;
-   	  if ((*y)[i] >= yp) (*y)[i] -= dy;
-   	  if ((*z)[i] >= zp) (*z)[i] -= dz;
-   	}
-       }
-     }
-   }
 }
 
 //----------------------------------------------------------------------

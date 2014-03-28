@@ -267,7 +267,7 @@ public: // interface
     int &HDINum);
 
   /// Copy the current baryon fields to the old baryon fields
-  int SetExternalBoundaryValues();
+  //  int SetExternalBoundaryValues();
 
   /// Set the energy to provide minimal pressure support
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient);
@@ -276,14 +276,14 @@ public: // interface
   int SolveHydroEquations ( int CycleNumber, enzo_float time, enzo_float dt);
 
   /// Set external boundary values
-  int SetExternalBoundary
-  ( int FieldRank, 
-    int GridDims[], 
-    int GridOffset[], 
-    int StartIndex[], 
-    int EndIndex[], 
-    enzo_float *Field, 
-    int FieldType);
+  // int SetExternalBoundary
+  // ( int FieldRank, 
+  //   int GridDims[], 
+  //   int GridOffset[], 
+  //   int StartIndex[], 
+  //   int EndIndex[], 
+  //   enzo_float *Field, 
+  //   int FieldType);
 
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
   int SolveMHDEquations(FieldDescr *,  enzo_float dt);

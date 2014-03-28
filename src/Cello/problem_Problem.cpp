@@ -10,16 +10,10 @@
 //----------------------------------------------------------------------
 
 Problem::Problem() throw()
-  : boundary_(0),
-    num_initial_(0),
-    num_refine_(0),
-    stopping_(0),
+  : stopping_(0),
     timestep_(0),
-    num_method_(0),
-    num_output_(0),
     index_output_(0)
 {
-  TRACE1 ("num_refine_ = %d",num_refine_);
   
 }
 
@@ -27,7 +21,6 @@ Problem::Problem() throw()
 
 Problem::~Problem() throw()
 {
-  TRACE1 ("num_refine_ = %d",num_refine_);
   deallocate_();
 }
 
@@ -41,21 +34,29 @@ void Problem::pup (PUP::er &p)
 
   PUP::able::pup(p);
 
+  bool pk = p.isPacking();
   bool up = p.isUnpacking();
 
-  p | boundary_; // PUP::able
+  int n;
 
-  p | num_initial_;
-  TRACE1 ("num_initial_ = %d",num_initial_);
-  if (up) initial_list_.resize(num_initial_);
-  for (int i=0; i<num_initial_; i++) {
+  if (pk) n=boundary_list_.size();
+  p | n;
+  if (up) boundary_list_.resize(n);
+  for (int i=0; i<n; i++) {
+    p | boundary_list_[i]; // PUP::able
+  }
+
+  if (pk) n=initial_list_.size();
+  p | n;
+  if (up) initial_list_.resize(n);
+  for (int i=0; i<n; i++) {
     p | initial_list_[i]; // PUP::able
   }
 
-  p | num_refine_;
-  TRACE1 ("num_refine_ = %d",num_refine_);
-  if (up) refine_list_.resize(num_refine_);
-  for (int i=0; i<num_refine_; i++) {
+  if (pk) n=refine_list_.size();
+  p | n;
+  if (up) refine_list_.resize(n);
+  for (int i=0; i<n; i++) {
     p | refine_list_[i]; // PUP::able
   }
 
@@ -64,40 +65,45 @@ void Problem::pup (PUP::er &p)
 
   p | timestep_; // PUP::able
 
-  p | num_method_;
-  TRACE1 ("num_method_ = %d",num_method_);
-  if (up) method_list_.resize(num_method_);
-  for (int i=0; i<num_method_; i++) {
+  if (pk) n=method_list_.size();
+  p | n;
+  if (up) method_list_.resize(n);
+  for (int i=0; i<n; i++) {
     p | method_list_[i]; // PUP::able
   }
 
-  p | num_output_;
-  TRACE1 ("num_output_ = %d",num_output_);
-  if (up) output_list_.resize(num_output_);
-  for (int i=0; i<num_output_; i++) {
+  if (pk) n=output_list_.size();
+  p | n;
+  if (up) output_list_.resize(n);
+  for (int i=0; i<n; i++) {
     p | output_list_[i]; // PUP::able
   }
 
-  p | index_output_;
-
   p | prolong_; // PUP::able
   p | restrict_; // PUP::able
+
+  p | index_refine_;
+  p | index_output_;
+  p | index_boundary_;
 }
 
 //----------------------------------------------------------------------
 
 void Problem::initialize_boundary(Config * config) throw()
 {
-  TRACE1 ("num_refine_ = %d",num_refine_);
+  for (size_t index=0; index < config->boundary_type.size(); index++) {
 
-  std::string type = config->boundary_type;
+    std::string type = config->boundary_type[index];
 
-  boundary_ = create_boundary_(type,config);
+    Boundary * boundary = create_boundary_(type,config);
 
-  ASSERT1("Problem::initialize_boundary",
+    ASSERT1("Problem::initialize_boundary",
 	  "Boundary type %s not recognized",
-	  type.c_str(),
-	  boundary_ != NULL);
+	  type.c_str(),  boundary != NULL);
+
+    boundary_list_.push_back(boundary);
+  }
+
 }
 
 //----------------------------------------------------------------------
@@ -113,8 +119,6 @@ void Problem::initialize_initial(Config * config,
 
   initial_list_.push_back( initial );
 
-  ++ num_initial_;
-
   ASSERT1("Problem::initialize_initial",
 	  "Initial type %s not recognized",
 	  config->initial_type.c_str(),
@@ -127,8 +131,6 @@ void Problem::initialize_initial(Config * config,
 void Problem::initialize_refine(Config * config,
 				const FieldDescr * field_descr) throw()
 {
-  TRACE1 ("num_refine_ = %d",num_refine_);
-    TRACE1("mesh_adapt_type.size() = %d", config->mesh_adapt_type.size());
   for (size_t i=0; i<config->mesh_adapt_type.size(); i++) {
 
     std::string name = config->mesh_adapt_type[i];
@@ -137,8 +139,6 @@ void Problem::initialize_refine(Config * config,
 
     if (refine) {
       refine_list_.push_back( refine );
-      ++ num_refine_;
-      TRACE1("num_refine = %d",num_refine_);
     } else {
       ERROR1("Problem::initialize_refine",
 	     "Unknown Refine %s",name.c_str());
@@ -150,7 +150,6 @@ void Problem::initialize_refine(Config * config,
 
 void Problem::initialize_stopping(Config * config) throw()
 {
-  TRACE1 ("num_refine_ = %d",num_refine_);
   stopping_ = create_stopping_("default",config);
 
   ASSERT("Problem::initialize_stopping",
@@ -162,8 +161,6 @@ void Problem::initialize_stopping(Config * config) throw()
 
 void Problem::initialize_timestep(Config * config) throw()
 {
-  TRACE1 ("num_refine_ = %d",num_refine_);
-
   timestep_ = create_timestep_(config->timestep_type,config);
 
   ASSERT1("Problem::initialize_timestep",
@@ -205,7 +202,6 @@ void Problem::initialize_output
  const Factory * factory) throw()
 {
 
-  TRACE1 ("num_refine_ = %d",num_refine_);
   for (int index=0; index < config->num_file_groups; index++) {
 
     std::string file_group = config->output_file_groups [index];
@@ -319,7 +315,6 @@ void Problem::initialize_output
     // output objects
 
     output_list_.push_back(output); 
-    ++ num_output_;
 
   } // (for index)
 
@@ -329,8 +324,6 @@ void Problem::initialize_output
 
 void Problem::initialize_method(Config * config) throw()
 {
-  TRACE1 ("num_refine_ = %d",num_refine_);
-
   for (size_t i=0; i<config->method_sequence.size(); i++) {
 
     std::string name = config->method_sequence[i];
@@ -340,7 +333,6 @@ void Problem::initialize_method(Config * config) throw()
     if (method) {
 
       method_list_.push_back(method); 
-      ++ num_method_;
 
     } else {
       ERROR1("Problem::initialize_method",
@@ -353,23 +345,21 @@ void Problem::initialize_method(Config * config) throw()
 
 void Problem::deallocate_() throw()
 {
-  TRACE1 ("num_refine_ = %d",num_refine_);
-  delete boundary_;      boundary_ = 0;
-  num_initial_ = 0;
+  for (size_t i=0; i<boundary_list_.size(); i++) {
+    delete boundary_list_[i];    boundary_list_[i] = 0;
+  }
+
   for (size_t i=0; i<initial_list_.size(); i++) {
     delete initial_list_[i];    initial_list_[i] = 0;
   }
-  num_refine_ = 0;
   for (size_t i=0; i<refine_list_.size(); i++) {
     delete refine_list_[i];    refine_list_[i] = 0;
   }
   delete stopping_;      stopping_ = 0;
   delete timestep_;      timestep_ = 0;
-  num_output_ = 0;
   for (size_t i=0; i<output_list_.size(); i++) {
     delete output_list_[i];    output_list_[i] = 0;
   }
-  num_method_ = 0;
   for (size_t i=0; i<method_list_.size(); i++) {
     delete method_list_[i];    method_list_[i] = 0;
   }
@@ -384,7 +374,6 @@ Boundary * Problem::create_boundary_
  ) throw ()
 {
   // No default Boundary object
-  TRACE1 ("num_refine_ = %d",num_refine_);
   return NULL;
 }
 
@@ -399,7 +388,6 @@ Initial * Problem::create_initial_
  const GroupProcess * group_process
  ) throw ()
 { 
-  TRACE1 ("num_refine_ = %d",num_refine_);
   //--------------------------------------------------
   // parameter: Initial : cycle
   // parameter: Initial : time
@@ -408,9 +396,7 @@ Initial * Problem::create_initial_
   if (type == "file" || type == "checkpoint") {
     return new InitialFile   (parameters,group_process,config->initial_cycle,config->initial_time);;
   } else if (type == "default") {
-    bool is_periodic = (config->boundary_type == "periodic");
-
-    return new InitialValue(parameters,field_descr,is_periodic,
+    return new InitialValue(parameters,field_descr,
 			      config->initial_cycle,config->initial_time);
   }
   return NULL;
@@ -426,7 +412,6 @@ Refine * Problem::create_refine_
  int index
  ) throw ()
 { 
-  TRACE1 ("num_refine_ = %d",num_refine_);
   TRACE3("mesh_root_size = %d %d %d",
 	 config->mesh_root_size[0],
 	 config->mesh_root_size[1],
@@ -464,7 +449,6 @@ Stopping * Problem::create_stopping_
 /// @param stop_cycle  Stopping cycle
 /// @param stop_time  Stopping time
 {
-  TRACE1 ("num_refine_ = %d",num_refine_);
   return new Stopping(config->stopping_cycle,
 		      config->stopping_time);
 }
@@ -477,7 +461,6 @@ Timestep * Problem::create_timestep_
  Config * config
  ) throw ()
 { 
-  TRACE1 ("num_refine_ = %d",num_refine_);
   // No default timestep
   return NULL;
 }
@@ -486,7 +469,6 @@ Timestep * Problem::create_timestep_
 
 Method * Problem::create_method_ ( std::string  name ) throw ()
 {
-  TRACE1 ("num_refine_ = %d",num_refine_);
   TRACE1("Problem::create_method %s",name.c_str());
   // No default method
   return NULL;
@@ -507,7 +489,6 @@ Output * Problem::create_output_
 /// @param group_process Image output needs group process size
 { 
 
-  TRACE1 ("num_refine_ = %d",num_refine_);
   Output * output = NULL;
 
   if (name == "image") {

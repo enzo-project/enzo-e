@@ -77,11 +77,10 @@ public:
 
   /// Whether the face is on the domain boundary
   bool is_on_boundary 
-  (int axis, int face, int narray, bool periodic=false) const;
+  (int axis, int face, int narray) const;
 
   /// Whether the face is on the domain boundary
-  bool is_on_boundary (const int if3[3], const int n3[3], 
-		       bool periodic=false) const;
+  bool is_on_boundary (const int if3[3], const int n3[3]) const;
 
   /// child index of this node in parent
   void child (int level, int * icx, int * icy, int * icz) const;

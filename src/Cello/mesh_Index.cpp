@@ -90,9 +90,8 @@ Index Index::index_child (int icx, int icy, int icz) const
 
 //----------------------------------------------------------------------
 
-bool Index::is_on_boundary (int axis, int face, int narray, bool periodic) const
+bool Index::is_on_boundary (int axis, int face, int narray) const
 {
-  if (periodic) return false;
 
   if (face == 0) face = -1;
 
@@ -128,13 +127,9 @@ bool Index::is_on_boundary (int axis, int face, int narray, bool periodic) const
 bool Index::is_on_boundary 
 (
  const int if3[3],
- const int n3[3], 
- bool periodic
+ const int n3[3]
  ) const
 {
-  if (periodic) return false;
-
-  Index index = *this;
 
   const int level = this->level();
 

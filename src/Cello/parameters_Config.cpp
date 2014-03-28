@@ -14,7 +14,11 @@ void Config::pup (PUP::er &p)
 {
   TRACEPUP;
   // NOTE: change this function whenever attributes change
+  p | boundary_list;
   p | boundary_type;
+  p | boundary_axis;
+  p | boundary_face;
+  p | boundary_mask;
 
   PUParray(p,domain_lower,3);
   PUParray(p,domain_upper,3);
@@ -142,7 +146,44 @@ void Config::read(Parameters * parameters) throw()
   // Boundary
   //--------------------------------------------------
 
-  boundary_type = parameters->value_string("Boundary:type","");
+  if (parameters->type("Boundary:list") != parameter_list) {
+
+    // default name if not explicit
+    boundary_list.resize(1);
+    boundary_list[0] = "boundary";
+
+    boundary_type.resize(1);
+    boundary_type[0] = parameters->value_string("Boundary:type","unknown");
+
+    boundary_axis.resize(1);
+    std::string axis_str = parameters->value_string("Boundary:axis","all");
+    if      (axis_str == "all") { boundary_axis[0] = -1; }
+    else if (axis_str == "x")   { boundary_axis[0] = 0; }
+    else if (axis_str == "y")   { boundary_axis[0] = 1; }
+    else if (axis_str == "z")   { boundary_axis[0] = 2; }
+    else {
+      ERROR1 ("Config::read()", "Unknown Boundary:axis %s",
+	      axis_str.c_str());
+    }
+
+    std::string face_str = parameters->value_string("Boundary:face","all");
+    boundary_face.resize(1);
+    if      (face_str == "all")   { boundary_face[0] = -1; }
+    else if (face_str == "lower") { boundary_face[0] = 0; }
+    else if (face_str == "upper") { boundary_face[0] = 1; }
+    else {
+      ERROR1 ("Config::read()", "Unknown Boundary:face %s",
+	      face_str.c_str());
+    }
+
+    boundary_mask.resize(1);
+    boundary_mask[0] = (parameters->type("Boundary:mask") 
+		     == parameter_logical_expr);
+
+  } else {
+    ERROR("Config::read()",
+	       "Multiple Boundary conditions not implemented yet");
+  }
 
   //--------------------------------------------------
   // Domain
@@ -230,9 +271,9 @@ void Config::read(Parameters * parameters) throw()
   //--------------------------------------------------
 
   TRACE("Parameters: Initial");
+  initial_type  = parameters->value_string("Initial:type","default");
   initial_cycle = parameters->value_integer("Initial:cycle",0);
   initial_time  = parameters->value_float  ("Initial:time",0.0);
-  initial_type  = parameters->value_string("Initial:type","default");
   initial_max_level = parameters->value_integer("Initial:max_level",0);
 
   //  initial_name;

@@ -396,63 +396,53 @@ void CommBlock::index_global
 
 void CommBlock::determine_boundary_
 (
- bool is_boundary[3][2],
+ bool bndry[3][2],
  bool * fxm, bool * fxp,
  bool * fym, bool * fyp,
  bool * fzm, bool * fzp
  )
 {
-  
-  // return is_boundary[] array of faces on domain boundary
+  // return bndry[] array of faces on domain boundary
 
-  is_on_boundary (is_boundary);
+  is_on_boundary (bndry);
 
   int nx,ny,nz;
   block_->field_block()->size (&nx,&ny,&nz);
 
   // Determine in which directions we need to communicate or update boundary
 
-  if (fxm) *fxm = (nx > 1);
-  if (fxp) *fxp = (nx > 1);
-  if (fym) *fym = (ny > 1);
-  if (fyp) *fyp = (ny > 1);
-  if (fzm) *fzm = (nz > 1);
-  if (fzp) *fzp = (nz > 1);
+  if (fxm && bndry[0][0]) *fxm = (nx > 1);
+  if (fxp && bndry[0][1]) *fxp = (nx > 1);
+  if (fym && bndry[1][0]) *fym = (ny > 1);
+  if (fyp && bndry[1][1]) *fyp = (ny > 1);
+  if (fzm && bndry[2][0]) *fzm = (nz > 1);
+  if (fzp && bndry[2][1]) *fzp = (nz > 1);
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::update_boundary_ ()
 {
-
   bool is_boundary[3][2];
   bool fxm,fxp,fym,fyp,fzm,fzp;
 
   determine_boundary_(is_boundary,&fxm,&fxp,&fym,&fyp,&fzm,&fzp);
 
-  Boundary * boundary = simulation()->problem()->boundary();
   const FieldDescr * field_descr = simulation()->field_descr();
 
+  int index = 0;
+  Problem * problem = simulation()->problem();
+  Boundary * boundary;
 
-  // Update boundaries
+  while ((boundary = problem->boundary(index++))) {
+    // Update boundaries
 
-  if ( fxm && is_boundary[axis_x][face_lower] ) {
-    boundary->enforce(field_descr,this,face_lower,axis_x);
-  }
-  if ( fxp && is_boundary[axis_x][face_upper] ) {
-    boundary->enforce(field_descr,this,face_upper,axis_x);
-  }
-  if ( fym && is_boundary[axis_y][face_lower] ) {
-    boundary->enforce(field_descr,this,face_lower,axis_y);
-  }
-  if ( fyp && is_boundary[axis_y][face_upper] ) {
-    boundary->enforce(field_descr,this,face_upper,axis_y);
-  }
-  if ( fzm && is_boundary[axis_z][face_lower] ) {
-    boundary->enforce(field_descr,this,face_lower,axis_z);
-  }
-  if ( fzp && is_boundary[axis_z][face_upper] ) {
-    boundary->enforce(field_descr,this,face_upper,axis_z);
+    if ( fxm ) boundary->enforce(field_descr,this,face_lower,axis_x);
+    if ( fxp ) boundary->enforce(field_descr,this,face_upper,axis_x);
+    if ( fym ) boundary->enforce(field_descr,this,face_lower,axis_y);
+    if ( fyp ) boundary->enforce(field_descr,this,face_upper,axis_y);
+    if ( fzm ) boundary->enforce(field_descr,this,face_lower,axis_z);
+    if ( fzp ) boundary->enforce(field_descr,this,face_upper,axis_z);
   }
 }
 
@@ -462,20 +452,20 @@ void CommBlock::loop_limits_refresh_(int ifacemin[3], int ifacemax[3])
   const throw()
 {
 
-  Boundary * boundary = simulation()->problem()->boundary();
+  // Boundary * boundary = simulation()->problem()->boundary();
 
   // which faces need to be refreshed?
   bool on_boundary[3][2];
   is_on_boundary (on_boundary);
 
-  bool periodic = boundary->is_periodic();
-  if (periodic) {
+  // bool periodic = boundary->is_periodic();
+  // if (periodic) {
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
 	on_boundary[axis][face] = false;
       }
     }
-  }
+  // }
 
   // set face loop limits accordingly
   ifacemin[0] = on_boundary[0][0] ? 0 : -1;
@@ -550,8 +540,8 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
 void CommBlock::is_on_boundary (bool is_boundary[3][2]) const throw()
 {
 
-  Boundary * boundary = simulation()->problem()->boundary();
-  bool periodic = boundary->is_periodic();
+  // Boundary * boundary = simulation()->problem()->boundary();
+  // bool periodic = boundary->is_periodic();
 
   int n3[3];
   size_forest (&n3[0],&n3[1],&n3[2]);
@@ -559,7 +549,7 @@ void CommBlock::is_on_boundary (bool is_boundary[3][2]) const throw()
   for (int axis=0; axis<3; axis++) {
     for (int face=0; face<2; face++) {
       is_boundary[axis][face] = 
-	index_.is_on_boundary(axis,face,n3[axis],periodic);
+	index_.is_on_boundary(axis,face,n3[axis]);
     }
   }
 }
@@ -576,7 +566,7 @@ Index CommBlock::neighbor_
 
   int na3[3];
   size_forest (&na3[0],&na3[1],&na3[2]);
-  const bool periodic  = simulation()->problem()->boundary()->is_periodic();
+  // const bool periodic  = simulation()->problem()->boundary()->is_periodic();
   Index in = index.index_neighbor (of3,na3);
   return in;
 }

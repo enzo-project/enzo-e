@@ -21,8 +21,6 @@ void CommBlock::refresh_begin_()
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  bool is_periodic = simulation->problem()->boundary()->is_periodic();
-  
   const Config * config = simulation->config();
 
   if (is_leaf()) {
@@ -42,7 +40,7 @@ void CommBlock::refresh_begin_()
 
     while (it_face.next(if3)) {
 
-      bool on_boundary = index_.is_on_boundary (if3,n3,is_periodic);
+      bool on_boundary = index_.is_on_boundary (if3,n3);
 
       if ( ! on_boundary) {
 

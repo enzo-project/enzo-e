@@ -61,23 +61,26 @@ public: // interface
   void pup (PUP::er &p);
 
   /// Return the boundary object
-  Boundary * boundary() const throw()  { return boundary_; }
+  Boundary * boundary(int i) const throw()
+  { if (i==-1) i = index_boundary_;
+    return (0 <= i && i < (int)boundary_list_.size()) ? boundary_list_[i] : NULL; 
+  }
 
   /// Return the ith initialization object
-  Initial *  initial(int i) const throw()
+  Initial *  initial(size_t i) const throw()
   {
-    return (0 <= i && i < (int)initial_list_.size()) ? initial_list_[i] : NULL; 
+    return (0 <= i && i < initial_list_.size()) ? initial_list_[i] : NULL; 
   }
 
   /// Return the ith refine object
-  Refine *  refine(int i = -1) const throw()
+  Refine *  refine(int i) const throw()
   {
     if (i == -1) i = index_refine_;
     return (0 <= i && i < (int)refine_list_.size()) ? refine_list_[i] : NULL; 
   }
 
   /// Return the ith output object
-  Output * output(int i = -1) const throw()
+  Output * output(int i) const throw()
   { 
     if (i == -1) i = index_output_;
     return (0 <= i && i < (int)output_list_.size()) ? output_list_[i] : NULL; 
@@ -199,17 +202,11 @@ protected: // functions
 
 private: // attributes
 
-  /// Boundary conditions object
-  Boundary * boundary_;
-
-  /// Length of initial_list_ vector [CHARM++]
-  int num_initial_;
+  /// Boundary conditions object for each (axis,face)
+  std::vector<Boundary *> boundary_list_;
 
   /// Initial conditions object
   std::vector<Initial *> initial_list_;
-
-  /// Length of refine_list vector [CHARM++]
-  int num_refine_;
 
   /// Refinement criteria objects
   std::vector<Refine *> refine_list_;
@@ -220,14 +217,8 @@ private: // attributes
   /// Time-step computation
   Timestep * timestep_;
 
-  /// Length of method_list_ vector [CHARM++]
-  int num_method_;
-
   /// List of method objects
   std::vector<Method *> method_list_;
-
-  /// Length of output_list_ vector [CHARM++]
-  int num_output_;
 
   /// Output objects
   std::vector<Output *> output_list_;
@@ -243,6 +234,9 @@ private: // attributes
 
   /// Index of currently active Output object
   size_t index_output_;
+
+  /// Index of currently active Boundary object
+  size_t index_boundary_;
 
 };
 

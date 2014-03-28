@@ -46,7 +46,11 @@ public: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  std::string                boundary_type;
+  std::vector<std::string>   boundary_list;
+  std::vector<std::string>   boundary_type;
+  std::vector<int>           boundary_axis;
+  std::vector<int>           boundary_face;
+  std::vector<int>           boundary_mask;
 
   double                     domain_lower[3];
   double                     domain_upper[3];
@@ -65,7 +69,6 @@ public: // attributes
   std::string                initial_type;
   double                     initial_time;
   std::vector<std::string>   initial_name;
-  // std::vector<std::string>   initial_value [MAX_FIELDS];
   int                        initial_max_level;
 
   bool                       memory_active;
