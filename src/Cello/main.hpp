@@ -78,19 +78,20 @@ public:
   /// Exit the program
   void p_exit(int count);
 
-  void q_output_enter();
-  void q_output_exit();
+  void q_adapt_enter();
+  void q_adapt_called();
+  void q_adapt_end();
+  void q_adapt_next();
+  void q_adapt_exit();
   void q_compute_enter();
   void q_compute_exit();
+  void q_output_enter ();
+  void q_output_exit();
+  void q_refresh_enter();
+  void q_refresh_exit();
   void q_stopping_enter();
   void q_stopping_exit();
   void q_exit();
-  void q_adapt_enter();
-  void q_adapt_end();
-  void q_adapt_next();
-  void q_adapt_called();
-  void q_refresh_enter();
-  void q_refresh_exit();
 
   /// Finalize the simulation
   void enzo_finalize(Simulation * simulation);

@@ -110,6 +110,10 @@ module mesh {
     entry void q_adapt_called();
     entry void r_adapt_called(CkReductionMsg *);
 
+    entry void p_adapt_exit();   // [CB5]
+    entry void q_adapt_exit();
+    entry void r_adapt_exit(CkReductionMsg *);   // [CB22]
+
     entry void p_adapt_delete();  // [CB11]
 
     entry void p_adapt_recv_neighbor_level  // [CB7]

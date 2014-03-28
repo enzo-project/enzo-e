@@ -45,12 +45,13 @@ private: // functions
   
   void allocate_xyzt_(CommBlock * block,
 		      int index_field,
+		      const FieldBlock * field_block,
 		      const FieldDescr * field_descr,
 		      int * mx, int * my, int * mz,
 		      double ** value, double ** vdeflt,
 		      bool ** mask, bool ** rdeflt,
 		      double ** x, double ** y, double ** z,
-		      double ** t) throw();
+		      double * t) throw();
 
   void copy_values_ (
 		     const FieldDescr * field_descr,
@@ -62,7 +63,7 @@ private: // functions
   void evaluate_float_ (FieldBlock * field_block, int index_field, 
 			std::string field_name,
 			int n, double * value, double * vdeflt,
-			double * x, double * y, double * z, double * t) throw();
+			double * x, double * y, double * z, double t) throw();
 
   void evaluate_mask_ (const Hierarchy * hierarchy,
 		       const CommBlock * block,
@@ -71,7 +72,7 @@ private: // functions
 		       std::string field_name,
 		       const FieldDescr * field_descr,			
 		       int n, bool * value, bool * vdeflt,
-		       double * x, double * y, double * z, double * t) throw();
+		       double * x, double * y, double * z, double t) throw();
 
   /// Read in a PNG file and create an integer array using r + b + g values
   void create_mask_ (bool ** mask, int * nx, int * ny ,

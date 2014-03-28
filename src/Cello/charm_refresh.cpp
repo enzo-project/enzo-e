@@ -92,7 +92,7 @@ void CommBlock::refresh_begin_()
     }
   }
 
-  control_sync (phase_sync_refresh_exit);
+  control_sync (sync_refresh_exit);
 
 }
 

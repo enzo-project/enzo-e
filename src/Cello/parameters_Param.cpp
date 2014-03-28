@@ -153,14 +153,14 @@ void Param::evaluate_float
  double *           x, 
  double *           y, 
  double *           z, 
- double *           t)
+ double             t)
 /// @param node Head node of the tree defining the floating-point expression
 /// @param n Length of the result buffer
 /// @param result Array in which to store the expression evaluations
 /// @param x Array of X spatial values
 /// @param y Array of Y spatial values
 /// @param z Array of Z spatial values
-/// @param t Array of time values
+/// @param t time value
 {
   double * left  = NULL;
   double * right = NULL;
@@ -210,7 +210,7 @@ void Param::evaluate_float
     case 'x':	for (i=0; i<n; i++) result[i] = x[i]; break;
     case 'y':	for (i=0; i<n; i++) result[i] = y[i]; break;
     case 'z':	for (i=0; i<n; i++) result[i] = z[i]; break;
-    case 't':	for (i=0; i<n; i++) result[i] = t[i]; break;
+    case 't':	for (i=0; i<n; i++) result[i] = t;    break;
     default:
       ERROR1("Param::evaluate_float",
 	     "unknown variable %c in floating-point expression",
@@ -242,7 +242,7 @@ void Param::evaluate_logical
  double *           x, 
  double *           y, 
  double *           z, 
- double *           t)
+ double             t)
 /// @param node Head node of the tree defining the floating-point expression
 /// @param n Length of the result buffer
 /// @param result Array in which to store the expression evaluations

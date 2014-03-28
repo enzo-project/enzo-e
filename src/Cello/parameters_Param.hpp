@@ -85,7 +85,7 @@ public: // interface
     double *           x, 
     double *           y, 
     double *           z, 
-    double *           t);
+    double             t);
 
   /// Evaluate a logical expression given vectos x,y,z,t
   void evaluate_logical  
@@ -95,7 +95,7 @@ public: // interface
     double *           x, 
     double *           y, 
     double *           z, 
-    double *           t);
+    double             t);
 
   /// Set the parameter type and value
   void set(struct param_struct * param);

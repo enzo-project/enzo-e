@@ -401,15 +401,15 @@ void Parameters::evaluate_float
  double    * x, 
  double    * y, 
  double    * z, 
- double    * t) throw()
+ double    t) throw()
 /// @param   parameter Parameter name
 /// @param   n         Length of variable arrays
 /// @param   result    Output array of evaluated floating point parameters values if it exists, or deflt if not
 /// @param   deflt     Array of default values
-/// @param   x         Array of X values
-/// @param   y         Array of Y values
-/// @param   z         Array of Z values
-/// @param   t         Array of T values
+/// @param   x         Array of x values
+/// @param   y         Array of y values
+/// @param   z         Array of z values
+/// @param   t         t value
 {
   Param * param = parameter_(parameter);
   ASSERT1 ("Parameters::evaluate_float",
@@ -436,7 +436,7 @@ void Parameters::evaluate_logical
  double    * x, 
  double    * y, 
  double    * z, 
- double    * t) throw()
+ double    t) throw()
 /// @param   parameter Parameter name
 /// @param   n         Length of variable arrays
 /// @param   result    Output array of evaluated logical parameters values if it exists, or deflt if not
@@ -444,7 +444,7 @@ void Parameters::evaluate_logical
 /// @param   x         Array of X values
 /// @param   y         Array of Y values
 /// @param   z         Array of Z values
-/// @param   t         Array of T values
+/// @param   t         T value
 {
   Param * param = parameter_(parameter);
   ASSERT1 ("Parameters::evaluate_logical",
@@ -679,7 +679,7 @@ void Parameters::list_evaluate_float
  double    * x, 
  double    * y, 
  double    * z, 
- double    * t
+ double    t
  ) throw()
 /// @param   index     Index into the list
 /// @param   parameter Parameter name
@@ -689,7 +689,7 @@ void Parameters::list_evaluate_float
 /// @param   x         Array of X values
 /// @param   y         Array of Y values
 /// @param   z         Array of Z values
-/// @param   t         Array of T values
+/// @param   t         T value
 {
 
   Param * param = list_element_(parameter,index);
@@ -719,7 +719,7 @@ void Parameters::list_evaluate_logical
  double    * x, 
  double    * y, 
  double    * z, 
- double    * t) throw()
+ double    t) throw()
 /// @param   index     Index into the list
 /// @param   parameter Parameter name
 /// @param   n         Length of variable arrays

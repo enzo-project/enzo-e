@@ -133,7 +133,7 @@ void InitialValue::enforce_block
 
   FieldBlock *       field_block = comm_block->block()->field_block();
 
-  double *value=0, *vdeflt=0, *x=0, *y=0, *z=0, *t=0;
+  double *value=0, *vdeflt=0, *x=0, *y=0, *z=0, t;
   bool * mask=0, *rdeflt=0;
   int n, nx=0,ny=0,nz=0;
 
@@ -171,7 +171,9 @@ void InitialValue::enforce_block
 
       // Allocate arrays if needed
       if (value == NULL) {
-	allocate_xyzt_(comm_block,index_field,field_descr,
+	allocate_xyzt_(comm_block,index_field,
+		       field_block,
+		       field_descr,
 		       &nx,&ny,&nz,
 		       &value, &vdeflt,
 		       &mask,&rdeflt,
@@ -222,7 +224,6 @@ void InitialValue::enforce_block
     delete [] x;
     delete [] y;
     delete [] z;
-    delete [] t;
   }
 }
 
@@ -232,15 +233,14 @@ void InitialValue::allocate_xyzt_
 (
  CommBlock * comm_block,
  int index_field,
+ const FieldBlock * field_block,
  const FieldDescr * field_descr,
  int * nx, int * ny, int * nz,
  double ** value, double ** vdeflt,
  bool   ** mask,bool   ** rdeflt,
- double ** x, double ** y, double ** z, double ** t
+ double ** x, double ** y, double ** z, double * t
  ) throw()
 {
-
-  FieldBlock * field_block = comm_block->block()->field_block();
 
   // Get field size
 
@@ -263,7 +263,6 @@ void InitialValue::allocate_xyzt_
   (*x)      = new double [n];
   (*y)      = new double [n];
   (*z)      = new double [n];
-  (*t)      = new double [n];
 
   double xm, xp, ym, yp, zm, zp;
 
@@ -275,7 +274,8 @@ void InitialValue::allocate_xyzt_
 			  ym,yp,&hy,
 			  zm,zp,&hz);
 
-  double time = comm_block->time();
+  *t = comm_block->time();
+
   // Initialize arrays
   for (int iz=0; iz<(*nz); iz++) {
     for (int iy=0; iy<(*ny); iy++) {
@@ -288,7 +288,6 @@ void InitialValue::allocate_xyzt_
 	(*x)[i]      = xm + (ix-gx+0.5)*hx;
 	(*y)[i]      = ym + (iy-gy+0.5)*hy;
 	(*z)[i]      = zm + (iz-gz+0.5)*hz;
-	(*t)[i]      = time;
       }
     }
   }
@@ -392,7 +391,7 @@ void InitialValue::copy_precision_
 void InitialValue::evaluate_float_ 
 (FieldBlock * field_block, int index_value, std::string field_name, 
  int n, double * value, double * deflt,
- double * x, double * y, double * z, double * t) throw ()
+ double * x, double * y, double * z, double t) throw ()
 {
 
   // parameter: Initial : <field> : value
@@ -429,7 +428,7 @@ void InitialValue::evaluate_mask_
  std::string field_name, 
  const FieldDescr * field_descr,
  int n, bool * mask, bool * deflt,
- double * x, double * y, double * z, double * t) throw ()
+ double * x, double * y, double * z, double t) throw ()
 {
 
   // parameter: Initial : <field> : value

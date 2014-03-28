@@ -68,7 +68,7 @@ void CommBlock::adapt_begin_()
 
   level_new_ = adapt_compute_desired_level_(level_maximum);
 
-  control_sync (phase_sync_adapt_called);
+  control_sync (sync_adapt_called);
 }
 
 //----------------------------------------------------------------------
@@ -91,7 +91,7 @@ void CommBlock::adapt_called_()
     adapt_send_neighbors_levels(level_new_);
   }
 
-  control_sync (phase_sync_adapt_next);
+  control_sync (sync_adapt_next);
 
 }
 
@@ -158,7 +158,7 @@ void CommBlock::adapt_next_()
     if (level() > level_new_) adapt_coarsen_();
   }
 
-  control_sync (phase_sync_adapt_end);
+  control_sync (sync_adapt_end);
 }
 
 //----------------------------------------------------------------------
@@ -184,7 +184,7 @@ void CommBlock::adapt_end_()
 
   set_leaf();
 
-  adapt_exit_();
+  control_sync(sync_adapt_exit);
 }
 
 //----------------------------------------------------------------------

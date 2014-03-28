@@ -15,19 +15,21 @@ mainmodule main {
 
      entry void p_exit (int count_blocks);
 
-     entry void q_output_enter();
-     entry void q_output_exit();
+     entry void q_adapt_enter();
+     entry void q_adapt_called();
+     entry void q_adapt_end();
+     entry void q_adapt_next();
+     entry void q_adapt_exit();
      entry void q_compute_enter();
      entry void q_compute_exit();
+     entry void q_output_enter ();
+     entry void q_output_exit();
+     entry void q_refresh_enter();
+     entry void q_refresh_exit();
      entry void q_stopping_enter();
      entry void q_stopping_exit();
      entry void q_exit();
-     entry void q_adapt_enter();
-     entry void q_adapt_end();
-     entry void q_adapt_next();
-     entry void q_adapt_called();
-     entry void q_refresh_enter();
-     entry void q_refresh_exit();
+
   };
 
 };

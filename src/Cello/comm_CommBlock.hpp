@@ -295,6 +295,13 @@ public:
   void r_adapt_end (CkReductionMsg * msg)  
   {      adapt_end_(); delete msg;}
 
+  void p_adapt_exit() 
+  {      adapt_exit_(); }
+  void q_adapt_exit() 
+  {      adapt_exit_(); }
+  void r_adapt_exit(CkReductionMsg * msg) 
+  {      adapt_exit_(); delete msg;}
+
 
   /// Parent tells child to delete itself
   void p_adapt_delete();
@@ -342,19 +349,19 @@ public:
 
   /// Refresh ghost zones and apply boundary conditions
   void p_refresh_enter()  
-  { refresh_enter_(); }
+  {      refresh_enter_(); }
   void q_refresh_enter()  
-  { refresh_enter_(); }
+  {      refresh_enter_(); }
   void r_refresh_enter(CkReductionMsg * msg)  
-  { refresh_enter_(); delete msg; }
+  {      refresh_enter_(); delete msg; }
 
   /// Exit the refresh phase after QD
   void p_refresh_exit () 
-  { refresh_exit_(); }
+  {      refresh_exit_(); }
   void q_refresh_exit () 
-  { refresh_exit_(); }
+  {      refresh_exit_(); }
   void r_refresh_exit (CkReductionMsg * msg) 
-  { refresh_exit_(); delete msg;  }
+  {      refresh_exit_(); delete msg;  }
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
   void x_refresh_face
@@ -610,9 +617,9 @@ protected: // attributes
   /// Synchronization counter for ghost refresh
   Sync sync_coarsen_;
 
-  /// Synchronization counter for p_control_!sync
-  int  count_sync_[PHASE_SYNC_SIZE];
-  int  max_sync_[PHASE_SYNC_SIZE];
+  /// Synchronization counter for p_control_sync
+  int  count_sync_[SYNC_SIZE];
+  int  max_sync_[SYNC_SIZE];
 
   /// current level of neighbors along each face
   std::vector<int> face_level_;

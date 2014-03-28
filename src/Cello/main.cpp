@@ -57,101 +57,97 @@ void Main::q_output_enter()
 #endif
 }
 
- void Main::q_output_exit()
- {
+void Main::q_output_exit()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_output_exit();
 #endif
-   //  q_output_exit();
- }
+}
 
- void Main::q_compute_enter()
- {
+void Main::q_compute_enter()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_compute_enter();
 #endif
-   //  q_compute_enter();
- }
+}
 
- void Main::q_compute_exit()
- {
+void Main::q_compute_exit()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_compute_exit();
 #endif
-  // q_compute_exit();
- }
+}
 
- void Main::q_stopping_enter()
- {
+void Main::q_stopping_enter()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_stopping_enter();
 #endif
-  // q_stopping_enter();
- }
+}
 
- void Main::q_stopping_exit()
- {
+void Main::q_stopping_exit()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_stopping_exit();
 #endif
-  // q_stopping_exit();
- }
+}
 
- void Main::q_exit()
- {
+void Main::q_exit()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_exit();
 #endif
-  // q_exit();
- }
+}
 
- void Main::q_adapt_enter()
- {
+void Main::q_adapt_enter()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_adapt_enter();
 #endif
-  // q_adapt_enter();
- }
+}
 
- void Main::q_adapt_end()
- {
+void Main::q_adapt_end()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_adapt_end();
 #endif
-  // q_adapt_end();
- }
+}
 
- void Main::q_adapt_next()
- {
+void Main::q_adapt_next()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_adapt_next();
 #endif
-  // q_adapt_next();
- }
+}
 
- void Main::q_adapt_called()
- {
+void Main::q_adapt_called()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_adapt_called();
 #endif
-  // q_adapt_called();
- }
+}
 
- void Main::q_refresh_enter()
- {
+void Main::q_adapt_exit()
+{
+#ifdef CHARM_ENZO
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_adapt_exit();
+#endif
+}
+
+
+void Main::q_refresh_enter()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_refresh_enter();
 #endif
-  // q_refresh_enter();
- }
+}
 
- void Main::q_refresh_exit()
- {
+void Main::q_refresh_exit()
+{
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_refresh_exit();
 #endif
-  // q_refresh_exit();
- }
+}
 
 //----------------------------------------------------------------------
 

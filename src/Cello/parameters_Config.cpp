@@ -61,19 +61,20 @@ void Config::pup (PUP::er &p)
   p | mesh_adapt_balance;
   p | mesh_adapt_interval;
 
-  p | mesh_sync_adapt_enter;
-  p | mesh_sync_adapt_called;
-  p | mesh_sync_adapt_next;
-  p | mesh_sync_adapt_end;
-  p | mesh_sync_refresh_enter;
-  p | mesh_sync_refresh_exit;
-  p | mesh_sync_output_enter;
-  p | mesh_sync_output_exit;
-  p | mesh_sync_compute_enter;
-  p | mesh_sync_compute_exit;
-  p | mesh_sync_stopping_enter;
-  p | mesh_sync_stopping_exit;
-  p | mesh_sync_exit;
+  p | control_sync_adapt_enter;
+  p | control_sync_adapt_called;
+  p | control_sync_adapt_end;
+  p | control_sync_adapt_exit;
+  p | control_sync_adapt_next;
+  p | control_sync_compute_enter;
+  p | control_sync_compute_exit;
+  p | control_sync_exit;
+  p | control_sync_output_enter;
+  p | control_sync_output_exit;
+  p | control_sync_refresh_enter;
+  p | control_sync_refresh_exit;
+  p | control_sync_stopping_enter;
+  p | control_sync_stopping_exit;
 
   p | method_sequence;
 
@@ -326,46 +327,34 @@ void Config::read(Parameters * parameters) throw()
 
   //--------------------------------------------------
 
-  std::string sync;
-
-  mesh_sync_adapt_enter = parameters->value_string 
-    ("Mesh:sync:adapt_enter","array");
-
-  mesh_sync_adapt_next = parameters->value_string 
-    ("Mesh:sync:adapt_next","quiescence");
-
-  mesh_sync_adapt_called = parameters->value_string 
-    ("Mesh:sync:adapt_called","neighbor");
-
-  mesh_sync_adapt_end = parameters->value_string 
-    ("Mesh:sync:adapt_end","quiescence");
-
-  mesh_sync_refresh_enter = parameters->value_string 
-    ("Mesh:sync:refresh_enter","array");
-
-  mesh_sync_refresh_exit = parameters->value_string 
-    ("Mesh:sync:refresh_exit","contribute");
-
-  mesh_sync_output_enter = parameters->value_string 
-    ("Mesh:sync:output_enter","array");
-
-  mesh_sync_output_exit = parameters->value_string 
-    ("Mesh:sync:output_exit","none");
-
-  mesh_sync_compute_enter = parameters->value_string 
-    ("Mesh:sync:compute_enter","none");
-
-  mesh_sync_compute_exit = parameters->value_string 
-    ("Mesh:sync:compute_exit","none");
-
-  mesh_sync_stopping_enter = parameters->value_string 
-    ("Mesh:sync:stopping_enter","none");
-
-  mesh_sync_stopping_exit = parameters->value_string 
-    ("Mesh:sync:stopping_exit","none");
-
-  mesh_sync_exit = parameters->value_string 
-    ("Mesh:sync:exit","contribute");
+  control_sync_adapt_enter = parameters->value_string
+    ("Control:sync:adapt_enter","array");
+  control_sync_adapt_called = parameters->value_string
+    ("Control:sync:adapt_called","neighbor");
+  control_sync_adapt_end = parameters->value_string
+    ("Control:sync:adapt_end","quiescence");
+  control_sync_adapt_next = parameters->value_string
+    ("Control:sync:adapt_next","quiescence");
+  control_sync_adapt_exit = parameters->value_string
+    ("Control:sync:adapt_exit","none");
+  control_sync_compute_enter = parameters->value_string
+    ("Control:sync:compute_enter","none");
+  control_sync_compute_exit = parameters->value_string
+    ("Control:sync:compute_exit","none");
+  control_sync_exit = parameters->value_string
+    ("Control:sync:exit = parameters","contribute");
+  control_sync_output_enter = parameters->value_string
+    ("Control:sync:output_enter","array");
+  control_sync_output_exit = parameters->value_string
+    ("Control:sync:output_exit","none");
+  control_sync_refresh_enter = parameters->value_string
+    ("Control:sync:refresh_enter","array");
+  control_sync_refresh_exit = parameters->value_string
+    ("Control:sync:refresh_exit","contribute");
+  control_sync_stopping_enter = parameters->value_string
+    ("Control:sync:stopping_enter","none");
+  control_sync_stopping_exit = parameters->value_string
+    ("Control:sync:stopping_exit","none");
 
   //--------------------------------------------------
 

@@ -51,25 +51,26 @@ enum array_type {
   op_array_prolong
 };
 
-/// @enum     phase_sync_type
+/// @enum     sync_type
 /// @brief    adapt phase for p_join()
-enum phase_sync_type {
-  phase_sync_unknown,
-  phase_sync_adapt_called,
-  phase_sync_adapt_enter,
-  phase_sync_adapt_next,
-  phase_sync_adapt_end,
-  phase_sync_refresh_enter,
-  phase_sync_refresh_exit,
-  phase_sync_output_enter,
-  phase_sync_output_exit,
-  phase_sync_compute_enter,
-  phase_sync_compute_exit,
-  phase_sync_stopping_enter,
-  phase_sync_stopping_exit,
-  phase_sync_exit
+enum sync_type {
+  sync_unknown,
+  sync_adapt_enter,
+  sync_adapt_called,
+  sync_adapt_next,
+  sync_adapt_end,
+  sync_adapt_exit,
+  sync_compute_enter,
+  sync_compute_exit,
+  sync_output_enter,
+  sync_output_exit,
+  sync_refresh_enter,
+  sync_refresh_exit,
+  sync_stopping_enter,
+  sync_stopping_exit,
+  sync_exit,
 };
-#define PHASE_SYNC_SIZE 14
+#define SYNC_SIZE 15
 
 //----------------------------------------------------------------------
 // System includes

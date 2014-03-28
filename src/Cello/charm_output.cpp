@@ -35,7 +35,7 @@ void CommBlock::output_begin_ ()
 
   // invariant: (output == NULL) || output->is_scheduled()
 
-  TRACE2("output_enter %d %p",index_output,output);
+  TRACE2("output_begin %d %p",index_output,output);
 
   if (output != NULL) {
 

@@ -119,7 +119,7 @@ public: // interface
    double    * x, 
    double    * y, 
    double    * z, 
-   double    * t)
+   double    t)
     throw();
 
   /// Evaluate the logical-valued parameter expression
@@ -132,7 +132,7 @@ public: // interface
    double    * x, 
    double    * y, 
    double    * z, 
-   double    * t)
+   double    t)
     throw();
 
   /// Evaluate the floating-point valued list element expression
@@ -146,7 +146,7 @@ public: // interface
    double    * x, 
    double    * y, 
    double    * z, 
-   double    * t
+   double    t
    )    
     throw();
 
@@ -161,7 +161,7 @@ public: // interface
    double    * x, 
    double    * y, 
    double    * z, 
-   double    * t
+   double    t
    )    
     throw();
 
