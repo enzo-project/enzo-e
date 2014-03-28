@@ -40,59 +40,55 @@ void CommBlock::refresh_begin_()
 
     while (it_face.next(if3)) {
 
-      bool on_boundary = index_.is_on_boundary (if3,n3);
 
-      if ( ! on_boundary) {
+      Index index_neighbor = index_.index_neighbor(if3,n3);
 
-	Index index_neighbor = index_.index_neighbor(if3,n3);
+      TRACE0;
 
-	TRACE0;
+      if (face_level(if3) == level-1) {       // COARSE
 
-	if (face_level(if3) == level-1) {       // COARSE
+	int ic3[3];
+	index_.child(level,ic3+0,ic3+1,ic3+2);
+	int ip3[3];
+	parent_face_(ip3,if3,ic3);
 
-	  int ic3[3];
-	  index_.child(level,ic3+0,ic3+1,ic3+2);
-	  int ip3[3];
-	  parent_face_(ip3,if3,ic3);
+	refresh_face
+	  (refresh_coarse,index_neighbor.index_parent(),ip3,ic3);
 
-	  refresh_face
-	    (refresh_coarse,index_neighbor.index_parent(),ip3,ic3);
+      } else if (face_level(if3) == level) {    // SAME
 
-	} else if (face_level(if3) == level) {    // SAME
+	int ic3[3] = {0,0,0};
+	refresh_face (refresh_same,index_neighbor,if3,ic3);
 
-	  int ic3[3] = {0,0,0};
-	  refresh_face (refresh_same,index_neighbor,if3,ic3);
-
-	} else if (face_level(if3) == level+1) {  // FINE
+      } else if (face_level(if3) == level+1) {  // FINE
 	    
-	  int ic3m[3];
-	  int ic3p[3];
-	  loop_limits_nibling_(ic3m,ic3p,if3);
-	  int ic3[3];
-	  for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
-	    for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
-	      for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
+	int ic3m[3];
+	int ic3p[3];
+	loop_limits_nibling_(ic3m,ic3p,if3);
+	int ic3[3];
+	for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
+	  for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
+	    for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
 
-		int jc3[3];
-		facing_child_ (jc3,ic3,if3);
+	      int jc3[3];
+	      facing_child_ (jc3,ic3,if3);
 
-		Index index_nibling = 
-		  index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
+	      Index index_nibling = 
+		index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
 		  
-		refresh_face (refresh_fine,index_nibling, if3,ic3);
-	      }
+	      refresh_face (refresh_fine,index_nibling, if3,ic3);
 	    }
 	  }
-	} else {
-	  sprintf (buffer,"REFRESH ERROR face (%d %d %d) level %d face_level %d phase %d",
-		   if3[0],if3[1],if3[2],level,face_level(if3),next_phase_);
-	  index_.print(buffer,-1,2,false,simulation);
-      
-	  ERROR("CommBlock::refresh_begin_()",
-		"Refresh error");
 	}
-
+      } else {
+	sprintf (buffer,"REFRESH ERROR face (%d %d %d) level %d face_level %d phase %d",
+		 if3[0],if3[1],if3[2],level,face_level(if3),next_phase_);
+	index_.print(buffer,-1,2,false,simulation);
+      
+	ERROR("CommBlock::refresh_begin_()",
+	      "Refresh error");
       }
+
     }
   }
 
