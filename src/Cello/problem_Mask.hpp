@@ -18,16 +18,16 @@ class Mask {
 public: // interface
 
   /// Constructor
-  Mask() throw();
+  Mask() throw() {};
 
   /// Destructor
-  ~Mask() throw();
+  ~Mask() throw() {};
 
   /// Copy constructor
-  Mask(const Mask & Mask) throw();
+  Mask(const Mask & Mask) throw() {};
 
   /// Assignment operator
-  Mask & operator= (const Mask & Mask) throw();
+  Mask & operator= (const Mask & Mask) throw() {};
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
@@ -36,15 +36,11 @@ public: // interface
     // NOTE: change this function whenever attributes change
   }
 
-  virtual void evaluate
-  (const Hierarchy * hierarchy,
-   const CommBlock * comm_block,
-   FieldBlock * field_block, 
-   int index_field,  int index_value,
-   std::string field_name, 
-   const FieldDescr * field_descr,
-   int n, bool * mask, bool * deflt,
-   double * x, double * y, double * z, double t) throw () = 0;
+  /// Evaluate mask at a point
+  virtual bool evaluate (int ix, int iy, int iz) const = 0;
+
+  /// Return mask values in an array
+  virtual void evaluate (bool * mask, int ndx, int ndy, int ndz) const = 0;
 
   
 private: // functions

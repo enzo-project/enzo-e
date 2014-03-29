@@ -18,11 +18,11 @@ InitialValue::InitialValue
   : Initial (cycle, time),
     parameters_(parameters),
     field_descr_(field_descr),
+    num_fields_(field_descr->field_count()),
+    num_masks_(NULL),
     mask_(0),
     nx_(0),
-    ny_(0),
-    num_fields_(field_descr->field_count()),
-    num_masks_(NULL)
+    ny_(0)
 {
   parameters_->group_set(0,"Initial");
 
@@ -58,10 +58,10 @@ InitialValue::InitialValue
 	  if (parameters_->list_type(index_value,"value") == parameter_string) {
 	    std::string file 
 	      = parameters_->list_value_string(index_value,"value","default");
-	    create_mask_ (&mask_[index_field][index_mask],
-			  &nx_[index_field][index_mask],
-			  &ny_[index_field][index_mask],
-			     file);
+	    create_mask_png_ (&mask_[index_field][index_mask],
+			      &nx_[index_field][index_mask],
+			      &ny_[index_field][index_mask],
+			      file);
 			   
 	  
 	  }
@@ -176,7 +176,7 @@ void InitialValue::enforce_block
 		       field_descr,
 		       &nx,&ny,&nz,
 		       &value, &vdeflt,
-		       &mask,&rdeflt,
+		       &mask,  &rdeflt,
 		       &x,&y,&z,&t);
       }
 
@@ -558,7 +558,7 @@ void InitialValue::evaluate_mask_png_
 
 //----------------------------------------------------------------------
 
-void InitialValue::create_mask_
+void InitialValue::create_mask_png_
 ( bool ** mask,  int * nx, int * ny, std::string pngfile)
 {
   pngwriter png;

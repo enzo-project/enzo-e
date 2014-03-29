@@ -75,8 +75,8 @@ private: // functions
 		       double * x, double * y, double * z, double t) throw();
 
   /// Read in a PNG file and create an integer array using r + b + g values
-  void create_mask_ (bool ** mask, int * nx, int * ny ,
-		     std::string pngfile);
+  void create_mask_png_ (bool ** mask, int * nx, int * ny ,
+			 std::string pngfile);
 
   /// Create a mask for the block given mask_[][]
   void evaluate_mask_png_ ( bool            * mask_block, int nxb, int nyb,
@@ -100,18 +100,20 @@ private: // attributes
   /// Field descriptor
   const FieldDescr * field_descr_;
 
-  /// Masks for fields and values: mask_[index_field][index_value]
-  bool *** mask_;
-
-  /// Size of the masks
-  int **nx_;
-  int **ny_;
-
   /// number of fields
   int num_fields_;
 
   /// number of masked values per field
   int * num_masks_;
+
+  /// Masks for fields and values: mask_[index_field][index_value]
+  bool *** mask_;
+
+  Mask *** mask_list_;
+
+  /// Size of the masks
+  int **nx_;
+  int **ny_;
 
 };
 

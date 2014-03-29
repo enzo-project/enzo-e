@@ -453,7 +453,9 @@ void Parameters::evaluate_logical
   if (param != NULL) {
     param->evaluate_logical(param->value_expr_,n,result,x,y,z,t);
   } else {
-    for (int i=0; i<n; i++) result[i] = deflt[i];
+    WARNING("Parameters::evaluate_logical",
+	    "param is NULL but deflt not set");
+  //   for (int i=0; i<n; i++) result[i] = deflt[i];
   }
   // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // sprintf_expression (param->value_expr_,deflt_string);
@@ -699,8 +701,8 @@ void Parameters::list_evaluate_float
 	   ( ! param || param->is_type(parameter_float_expr)));
   if (param != NULL) {
     param->evaluate_float(param->value_expr_,n,result,x,y,z,t);
-  } else {
-    for (int i=0; i<n; i++) result[i] = deflt[i];
+  // } else {
+  //   for (int i=0; i<n; i++) result[i] = deflt[i];
   }
   // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // sprintf_expression (param->value_expr_,deflt_string);
@@ -738,7 +740,9 @@ void Parameters::list_evaluate_logical
   if (param != NULL) {
     param->evaluate_logical(param->value_expr_,n,result,x,y,z,t);
   } else {
-    for (int i=0; i<n; i++) result[i] = deflt[i];
+    WARNING("Parameters::list_evaluate_logical",
+	    "param is NULL but deflt not set");
+  //   for (int i=0; i<n; i++) result[i] = deflt[i];
   }
   // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // sprintf_expression (param->value_expr_,deflt_string);

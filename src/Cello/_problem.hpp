@@ -22,8 +22,10 @@
 // Component class includes
 //----------------------------------------------------------------------
 
-// #include "problem_Mask.hpp"
-// #include "problem_MaskValue.hpp"
+#include "problem_Mask.hpp"
+#include "problem_MaskExpr.hpp"
+//#include "problem_MaskPng.hpp"
+//#include "problem_ExprValue.hpp"
 #include "problem_Problem.hpp"
 #include "problem_Stopping.hpp"
 #include "problem_Timestep.hpp"

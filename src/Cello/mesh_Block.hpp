@@ -68,6 +68,9 @@ public: // interface
   /// Return the ith Field block
   FieldBlock * field_block (int i=0) throw();
 
+  /// Return the x,y,z,t coordinates of field cell centers
+  void field_cells (double * x, double * y, double * z) const;
+
   /// Return domain lower extent
   /// B
   inline void lower(double * x, 

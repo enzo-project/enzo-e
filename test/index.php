@@ -164,7 +164,7 @@ $types = array("charm");
       $type = $types[$i];
       $output_file = "../test/$output.unit";
       if (file_exists($output_file)) {
-	test($type,$testrun,"FAIL");
+	test($type,$output_file,"FAIL");
       }
     }
 
@@ -174,18 +174,17 @@ $types = array("charm");
 
    //----------------------------------------------------------------------
 
-function test($type,$testrun,$type) {
+function test($type,$output,$type) {
   $ltype = strtolower($type);
 
   $cols = "$4,$6,$7,$8,$9,$10";
   $rowtext = "</tr><tr>";
 
-  $output = "../test/$testrun.unit";
   $count = exec("cat $output | grep $type | grep '0/' | wc -l");
   if ($count == 0) {
-    #     echo "<strong >no ${ltype}ed tests</strong></br/>";
+    //         echo "<strong >no ${ltype}ed tests in $output</strong></br/>";
   } else {
-    echo "<th class=$type><strong>$type ${ltype}ed</strong></th> ";
+    echo "<th class=$type><strong>${ltype}ed</strong></th> ";
     system ("grep '0/' $output | sort | uniq | awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}'");
     echo "</tr><tr></tr>";
   }
@@ -602,6 +601,8 @@ test_summary("Parameters",array("Parameters"),
 	     array("test_Parameters")); 
 test_summary("Performance",array("Papi", "Performance","Timer"),
 	     array("test_Papi","test_Performance","test_Timer")); 
+test_summary("Problem",array("Mask"),
+	     array("test_Mask")); 
 test_summary("Schedule",array("Schedule"),
 	     array("test_Schedule")); 
 
@@ -692,7 +693,7 @@ echo "<h3>Serial checkpoint/restart </h3>";
 tests("Enzo","enzo-p","test_checkpoint_ppm-1","test_restart_ppm-1","");
 
 test_table ("checkpoint_ppm-1",
-	    array("000000","000200","000400"), $types);
+	    array("000200","000400"), $types);
 
 //----------------------------------------------------------------------
 
@@ -702,7 +703,7 @@ echo "<h3>Parallel checkpoint/restart) </h3>";
 tests("Enzo","enzo-p","test_checkpoint_ppm-8","test_restart_ppm-8","");
 
 test_table ("checkpoint_ppm-8",
-	    array("000000","000200","000400"), $types);
+	    array("000200","000400"), $types);
 
 
 test_group("Mesh");
@@ -1012,6 +1013,12 @@ test_group("Performance");
 tests("Cello","test_Performance","test_Performance","");
 tests("Cello","test_Papi",       "test_Papi","");
 tests("Cello","test_Timer",       "test_Timer","");
+
+//----------------------------------------------------------------------
+
+test_group("Problem");
+
+tests("Cello","test_Mask","test_Mask","");
 
 //----------------------------------------------------------------------
 

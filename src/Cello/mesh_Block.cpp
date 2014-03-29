@@ -88,6 +88,31 @@ FieldBlock * Block::field_block (int i) throw()
   return field_block_.at(i); 
 }
 
+//----------------------------------------------------------------------
+
+void Block::field_cells (double * x, double * y, double * z) const
+{
+  double xm,ym,zm;
+  this->lower(&xm,&ym,&zm);
+  double xp,yp,zp;
+  this->upper(&xp,&yp,&zp);
+  double hx,hy,hz;
+  field_block()->cell_width(xm,xp,&hx, ym,yp,&hy, zm,zp,&hz);
+    
+  int nx,ny,nz;
+  field_block()->size(&nx,&ny,&nz);
+
+  for (int ix=0; ix<nx; ix++) {
+    x[ix] = xm + (ix+0.5)*hx;
+  }
+  for (int iy=0; iy<ny; iy++) {
+    y[iy] = ym + (iy+0.5)*hy;
+  }
+  for (int iz=0; iz<nz; iz++) {
+    z[iz] = zm + (iz+0.5)*hz;
+  }
+}
+
 //======================================================================
 
 void Block::copy_(const Block & block) throw()
