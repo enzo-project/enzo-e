@@ -76,17 +76,10 @@ Output {
 
     file_groups = ["de", "dm", "mesh", "te", "vx", "vy"];
 
-    data {
-        name = ["adapt-%02d-%06d.h5", "proc","cycle"]; 
-        field_list = ["density"];
-	type     = "data";
-	schedule = ["cycle","interval", 100];
-      };
-
     de {
        field_list = ["density"];
        type     = "image";
-       schedule = ["cycle","interval", 10];
+       schedule = ["time","interval", 0.02];
        include "input/colormap_blackbody.incl"
         image_specify_bounds = true;
 
@@ -95,13 +88,13 @@ Output {
        field_list = ["density"];
        image_log = true;
        type     = "image";
-       schedule = ["cycle","interval", 10];
+       schedule = ["time","interval", 0.02];
        include "input/colormap_blackbody.incl"
     };
     dm {
        field_list = ["density"];
        type     = "image";
-       schedule = ["cycle","interval", 10];
+       schedule = ["time","interval", 0.02];
        include "input/colormap_blackbody.incl"
        image_specify_bounds = true;
     };
@@ -110,7 +103,7 @@ Output {
 
        field_list = ["total_energy"];
        type     = "image";
-       schedule = ["cycle","interval", 10];
+       schedule = ["time","interval", 0.02];
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     };
 
@@ -118,7 +111,7 @@ Output {
 
        field_list = ["velocity_x"];
        type     = "image";
-       schedule = ["cycle","interval", 10];
+       schedule = ["time","interval", 0.02];
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     };
 
@@ -126,7 +119,7 @@ Output {
 
        field_list = ["velocity_y"];
        type     = "image";
-       schedule = ["cycle","interval", 10];
+       schedule = ["time","interval", 0.02];
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     };
 
@@ -137,7 +130,7 @@ Output {
         field_list = ["density"];
 #	image_block_size  = 5;
 #	image_size = [1025,1025];
-	schedule = ["cycle","interval", 10];
+	schedule = ["time","interval", 0.02];
         image_specify_bounds = true;
 	image_min = 0.0;
 	image_max = 6.0;
