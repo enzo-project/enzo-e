@@ -2,7 +2,7 @@
 
 /// @file     test_Mask.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2010-04-02
+/// @date     2014-03-29
 /// @brief    Test program for the Mask class
 
 #include <fstream>
@@ -57,8 +57,7 @@ PARALLEL_MAIN_BEGIN
 
   double x[nx], y[ny], z[nz];
 
-  Mask * mask = new MaskExpr (&parameters, "Group:value_x_lt_y",1,
-			      t, nx,xm,xp, ny,ym,yp,  nz,zm,zp);
+  Mask * mask = new MaskExpr (&parameters, "Group:value_x_lt_y",1);
 
   unit_func ("Mask()");
   unit_assert (mask != NULL);
@@ -72,7 +71,7 @@ PARALLEL_MAIN_BEGIN
   for (int ix=0; ix<nx; ix++) {
     for (int iy=0; iy<ny; iy++) {
       for (int iz=0; iz<nz; iz++) {
-	unit_assert (mask->evaluate(ix,iy,iz) == 
+	unit_assert (mask->evaluate(t,x[ix],y[iy],z[iz]) == 
 		     (x[ix] +0.5*t < 2*y[iy]-z[iz]));
       }
     }
@@ -80,7 +79,7 @@ PARALLEL_MAIN_BEGIN
 
   bool bitmask[nx*ny*nz];
 
-  mask->evaluate(bitmask,nx,ny,nz);
+  mask->evaluate(bitmask,t,nx,nx,x,ny,ny,y,nz,nz,z);
 
   unit_func ("evaluate(mask,nx,ny,nz)");
 

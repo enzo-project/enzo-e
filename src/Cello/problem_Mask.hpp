@@ -21,7 +21,7 @@ public: // interface
   Mask() throw() {};
 
   /// Destructor
-  ~Mask() throw() {};
+  virtual ~Mask() throw() {};
 
   /// Copy constructor
   Mask(const Mask & Mask) throw() {};
@@ -37,10 +37,13 @@ public: // interface
   }
 
   /// Evaluate mask at a point
-  virtual bool evaluate (int ix, int iy, int iz) const = 0;
+  virtual bool evaluate (double t, double x, double y, double z) const = 0;
 
   /// Return mask values in an array
-  virtual void evaluate (bool * mask, int ndx, int ndy, int ndz) const = 0;
+  virtual void evaluate (bool * mask, double t,
+			 int ndx, int nx, double * x,
+			 int ndy, int ny, double * y,
+			 int ndz, int nz, double * z) const = 0;
 
   
 private: // functions

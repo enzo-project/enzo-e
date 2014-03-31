@@ -18,24 +18,25 @@ class MaskExpr : public Mask {
 public: // interface
 
   /// Constructor
-  MaskExpr() throw() : Mask() { };
+  MaskExpr() throw() : Mask() 
+  { };
 
   /// Destructor
-  ~MaskExpr() throw();
+  virtual ~MaskExpr() throw() 
+  { };
 
   /// Copy constructor
-  MaskExpr(const MaskExpr & mask) throw();
+  MaskExpr(const MaskExpr & mask) throw() 
+  {copy_(mask); }
 
   /// Assignment operator
-  MaskExpr & operator= (const MaskExpr & mask) throw();
+  MaskExpr & operator= (const MaskExpr & mask) throw()
+  {   copy_(mask); return *this; }
+;
 
   MaskExpr(Parameters * parameters,
 	   const std::string parameter_name,
-	   int index_parameter,
-	   double time,
-	   int nx, double xmin, double xmax,
-	   int ny=1, double ymin=0, double ymax=0,
-	   int nz=1, double zmin=0, double zmax=0) throw();
+	   int index_parameter) throw();
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
@@ -46,8 +47,14 @@ public: // interface
     // NOTE: change this function whenever attributes change
   }
 
-  virtual bool evaluate (int ix, int iy, int iz) const;
-  virtual void evaluate (bool * mask, int ndx, int ndy, int ndz) const;
+  /// Evaluate mask at a point
+  virtual bool evaluate (double t, double x, double y, double z) const;
+
+  /// Return mask values in an array
+  virtual void evaluate (bool * mask, double t,
+			 int ndx, int nx, double * x,
+			 int ndy, int ny, double * y,
+			 int ndz, int nz, double * z) const;
   
 private: // functions
 
@@ -60,10 +67,6 @@ private: // attributes
   Parameters * parameters_;
   std::string parameter_name_;
   int index_parameter_;
-  int nx_,ny_,nz_;
-  double time_;
-  double xmin_,ymin_,zmin_;
-  double xmax_,ymax_,zmax_;
 
 
 };
