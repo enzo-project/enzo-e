@@ -149,14 +149,19 @@ void Config::read(Parameters * parameters) throw()
 
   if (parameters->type("Boundary:list") != parameter_list) {
 
-    // default name if not explicit
-    boundary_list.resize(1);
-    boundary_list[0] = "boundary";
+    const int num_boundary = 1;
 
-    boundary_type.resize(1);
+    boundary_list.resize(num_boundary);
+    boundary_type.resize(num_boundary);
+    boundary_axis.resize(num_boundary);
+    boundary_face.resize(num_boundary);
+    boundary_mask.resize(num_boundary);
+
+    // default name if not explicit
+
+    boundary_list[0] = "boundary";
     boundary_type[0] = parameters->value_string("Boundary:type","unknown");
 
-    boundary_axis.resize(1);
     std::string axis_str = parameters->value_string("Boundary:axis","all");
     if      (axis_str == "all") { boundary_axis[0] = -1; }
     else if (axis_str == "x")   { boundary_axis[0] = 0; }
@@ -168,7 +173,6 @@ void Config::read(Parameters * parameters) throw()
     }
 
     std::string face_str = parameters->value_string("Boundary:face","all");
-    boundary_face.resize(1);
     if      (face_str == "all")   { boundary_face[0] = -1; }
     else if (face_str == "lower") { boundary_face[0] = 0; }
     else if (face_str == "upper") { boundary_face[0] = 1; }
@@ -177,13 +181,46 @@ void Config::read(Parameters * parameters) throw()
 	      face_str.c_str());
     }
 
-    boundary_mask.resize(1);
     boundary_mask[0] = (parameters->type("Boundary:mask") 
 		     == parameter_logical_expr);
 
   } else {
-    ERROR("Config::read()",
-	       "Multiple Boundary conditions not implemented yet");
+
+    const int num_boundary = parameters->list_length("Boundary:list");
+    boundary_list.resize(num_boundary);
+    boundary_type.resize(num_boundary);
+    boundary_axis.resize(num_boundary);
+    boundary_face.resize(num_boundary);
+    boundary_mask.resize(num_boundary);
+
+    for (int index=0; index<num_boundary; index++) {
+
+      std::string prefix = "Boundary:" + boundary_list[index] + ":";
+      boundary_type[index] = parameters->list_value_string(index,prefix+"type","unknown");
+
+      std::string axis_str = parameters->list_value_string(index,prefix+"axis","all");
+      if      (axis_str == "all") { boundary_axis[index] = -1; }
+      else if (axis_str == "x")   { boundary_axis[index] = 0; }
+      else if (axis_str == "y")   { boundary_axis[index] = 1; }
+      else if (axis_str == "z")   { boundary_axis[index] = 2; }
+      else {
+	ERROR2 ("Config::read()", "Unknown %s %s",
+		(prefix+"axis").c_str(),axis_str.c_str());
+      }
+
+      std::string face_str = parameters->list_value_string(index,prefix+"face","all");
+      if      (face_str == "all")   { boundary_face[index] = -1; }
+      else if (face_str == "lower") { boundary_face[index] = 0; }
+      else if (face_str == "upper") { boundary_face[index] = 1; }
+      else {
+	ERROR2 ("Config::read()", "Unknown %s %s",
+		(prefix+"face").c_str(),face_str.c_str());
+      }
+
+      boundary_mask[index] = (parameters->type(prefix+"mask") 
+			  == parameter_logical_expr);
+    }
+
   }
 
   //--------------------------------------------------
