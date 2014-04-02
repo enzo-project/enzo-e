@@ -62,7 +62,9 @@ void EnzoBoundary::enforce
     enforce(field_descr,comm_block,face,axis_z);
   } else {
 
-    FieldBlock * field_block = comm_block->block()->field_block();
+    Block * block = comm_block->block();
+
+    FieldBlock * field_block = block->field_block();
     if ( ! field_block->ghosts_allocated() ) {
       ERROR("EnzoBoundary::enforce",
 	    "Function called with ghosts not allocated");
@@ -70,13 +72,13 @@ void EnzoBoundary::enforce
 
     switch (boundary_type_) {
     case boundary_type_reflecting:
-      enforce_reflecting_(field_descr, field_block,face,axis);
+      enforce_reflecting_(field_descr, field_block,comm_block,face,axis);
       break;
     case boundary_type_outflow:
-      enforce_outflow_   (field_descr, field_block,face,axis);
+      enforce_outflow_   (field_descr, field_block,comm_block,face,axis);
       break;
     case boundary_type_inflow:
-      enforce_inflow_    (field_descr, field_block,face,axis);
+      enforce_inflow_    (field_descr, field_block,comm_block,face,axis);
       break;
     case boundary_type_periodic:
       // Periodic handled by ghost refresh
@@ -95,15 +97,32 @@ void EnzoBoundary::enforce_reflecting_
 (
  const FieldDescr * field_descr,
  FieldBlock       * field_block,
+ CommBlock        * comm_block,
  face_enum face,
  axis_enum axis
  ) const throw()
 {
 
+  Block * block = comm_block->block();
+
   int nx,ny,nz;
-  int gx,gy,gz;
   field_block->size(&nx,&ny,&nz);
+
+  double * x = new double [nx];
+  double * y = new double [ny];
+  double * z = new double [nz];
+
+  block->field_cells(x,y,z);
+
+  double xm,ym,zm;
+  double xp,yp,zp;
+  block -> lower(&xm,&ym,&zm);
+  block -> upper(&xp,&yp,&zp);
+
+  double t = comm_block->time();
+
   for (int field = 0; field < field_descr->field_count(); field++) {
+    int gx,gy,gz;
     field_descr->ghosts(field,&gx,&gy,&gz);
     void * array = field_block->field_values(field);
     bool vx =      (field_descr->field_name(field) == "velocity_x");
@@ -113,22 +132,29 @@ void EnzoBoundary::enforce_reflecting_
     switch (precision) {
     case precision_single:
       enforce_reflecting_precision_(face,axis, (float *)array,
-				    nx,ny,nz, gx,gy,gz,  vx,vy,vz);
+				    nx,ny,nz, gx,gy,gz,  vx,vy,vz,
+				    x,y,z,    xm,ym,zm, xp,yp,zp, t);
       break;
     case precision_double:
       enforce_reflecting_precision_(face,axis, (double *)array,
-				    nx,ny,nz, gx,gy,gz,  vx,vy,vz);
+				    nx,ny,nz, gx,gy,gz,  vx,vy,vz,
+				    x,y,z,    xm,ym,zm, xp,yp,zp, t);
       break;
     case precision_extended80:
     case precision_extended96:
     case precision_quadruple:
       enforce_reflecting_precision_(face,axis, (long double *)array,
-				    nx,ny,nz, gx,gy,gz, vx,vy,vz);
+				    nx,ny,nz, gx,gy,gz, vx,vy,vz,
+				    x,y,z,    xm,ym,zm, xp,yp,zp, t);
       break;
     default:
       break;
     }
   }
+
+  delete [] x;
+  delete [] y;
+  delete [] z;
 }
 
 //----------------------------------------------------------------------
@@ -141,7 +167,11 @@ void EnzoBoundary::enforce_reflecting_precision_
  T * array,
  int nx,int ny,int nz,
  int gx,int gy,int gz,
- bool vx,bool vy,bool vz
+ bool vx,bool vy,bool vz,
+ double *x, double *y, double *z,
+ double xm, double ym, double zm,
+ double xp, double yp, double zp,
+ double t
  ) const throw()
 {
   int mx = nx + 2*gx;
@@ -160,7 +190,8 @@ void EnzoBoundary::enforce_reflecting_precision_
 	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix+ig,  iy,iz,mx,my);
 	    int i_external = INDEX(ix-ig-1,iy,iz,mx,my);
-	    array[i_external] = sign*array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,xm,y[iy],z[iz]))
+	      array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -173,7 +204,8 @@ void EnzoBoundary::enforce_reflecting_precision_
 	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix-ig,  iy,iz,mx,my);
 	    int i_external = INDEX(ix+ig+1,iy,iz,mx,my);
-	    array[i_external] = sign*array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,xp,y[iy],z[iz]))
+	      array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -189,7 +221,8 @@ void EnzoBoundary::enforce_reflecting_precision_
 	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix,iy+ig,  iz,mx,my);
 	    int i_external = INDEX(ix,iy-ig-1,iz,mx,my);
-	    array[i_external] = sign*array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,x[ix],ym,z[iz]))
+	      array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -202,7 +235,8 @@ void EnzoBoundary::enforce_reflecting_precision_
 	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix,iy-ig,  iz,mx,my);
 	    int i_external = INDEX(ix,iy+ig+1,iz,mx,my);
-	    array[i_external] = sign*array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,x[ix],yp,z[iz]))
+	      array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -218,7 +252,8 @@ void EnzoBoundary::enforce_reflecting_precision_
 	  for (iy=0; iy<my; iy++) {
 	    int i_internal = INDEX(ix,iy,iz+ig,  mx,my);
 	    int i_external = INDEX(ix,iy,iz-ig-1,mx,my);
-	    array[i_external] = sign*array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,x[ix],y[iy],zm))
+	      array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -231,7 +266,8 @@ void EnzoBoundary::enforce_reflecting_precision_
 	  for (iy=0; iy<my; iy++) {
 	    int i_internal = INDEX(ix,iy,iz-ig,  mx,my);
 	    int i_external = INDEX(ix,iy,iz+ig+1,mx,my);
-	    array[i_external] = sign*array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,x[ix],y[iy],zp))
+	      array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -242,6 +278,7 @@ void EnzoBoundary::enforce_reflecting_precision_
     ERROR("EnzoBoundary::enforce_reflecting_precision_",
 	  "Cannot be called with face_all");
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -250,37 +287,60 @@ void EnzoBoundary::enforce_outflow_
 (
  const FieldDescr * field_descr,
  FieldBlock       * field_block,
+ CommBlock        * comm_block,
  face_enum face,
  axis_enum axis
  ) const throw()
 {
 
+  Block * block = comm_block->block();
+
   int nx,ny,nz;
-  int gx,gy,gz;
   field_block->size(&nx,&ny,&nz);
+
+  double * x = new double [nx];
+  double * y = new double [ny];
+  double * z = new double [nz];
+
+  block->field_cells(x,y,z);
+
+  double xm,ym,zm;
+  double xp,yp,zp;
+  block -> lower(&xm,&ym,&zm);
+  block -> upper(&xp,&yp,&zp);
+
+  double t = comm_block->time();
+
   for (int field = 0; field < field_descr->field_count(); field++) {
+    int gx,gy,gz;
     field_descr->ghosts(field,&gx,&gy,&gz);
     void * array = field_block->field_values(field);
     precision_type precision = field_descr->precision(field);
     switch (precision) {
     case precision_single:
       enforce_outflow_precision_(face,axis, (float *)array,
-				 nx,ny,nz, gx,gy,gz);
+				 nx,ny,nz, gx,gy,gz,
+				 x,y,z,    xm,ym,zm, xp,yp,zp, t);
       break;
     case precision_double:
       enforce_outflow_precision_(face,axis, (double *)array,
-				 nx,ny,nz, gx,gy,gz);
+				 nx,ny,nz, gx,gy,gz,
+				 x,y,z,    xm,ym,zm, xp,yp,zp, t);
       break;
     case precision_extended80:
     case precision_extended96:
     case precision_quadruple:
       enforce_outflow_precision_(face,axis, (long double *)array,
-				 nx,ny,nz, gx,gy,gz);
+				 nx,ny,nz, gx,gy,gz,
+				 x,y,z,    xm,ym,zm, xp,yp,zp, t);
       break;
     default:
       break;
     }
   }
+  delete [] x;
+  delete [] y;
+  delete [] z;
 }
 
 //----------------------------------------------------------------------
@@ -292,7 +352,12 @@ void EnzoBoundary::enforce_outflow_precision_
  axis_enum axis,
  T * array,
  int nx,int ny,int nz,
- int gx,int gy,int gz) const throw()
+ int gx,int gy,int gz,
+ double * x, double * y, double * z,
+ double xm, double ym, double zm,
+ double xp, double yp, double zp,
+ double t
+) const throw()
 {
   int mx = nx + 2*gx;
   int my = ny + 2*gy;
@@ -300,8 +365,7 @@ void EnzoBoundary::enforce_outflow_precision_
 
   int ix,iy,iz,ig;
 
-  if (face == face_lower && 
-      axis == axis_x) {
+  if (face == face_lower && axis == axis_x) {
     if (nx > 1) {
       ix = gx;
       for (ig=0; ig<gx; ig++) {
@@ -309,13 +373,13 @@ void EnzoBoundary::enforce_outflow_precision_
 	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix,     iy,iz,mx,my);
 	    int i_external = INDEX(ix-ig-1,iy,iz,mx,my);
-	    array[i_external] = array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,xm,y[iy],z[iz]))
+	      array[i_external] = array[i_internal];
 	  }
 	}
       }
     }
-  } else if (face == face_upper && 
-	     axis == axis_x) {
+  } else if (face == face_upper && axis == axis_x) {
     if (nx > 1) {
       ix = nx+gx-1;
       for (ig=0; ig<gx; ig++) {
@@ -323,13 +387,13 @@ void EnzoBoundary::enforce_outflow_precision_
 	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix,     iy,iz,mx,my);
 	    int i_external = INDEX(ix+ig+1,iy,iz,mx,my);
-	    array[i_external] = array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,xp,y[iy],z[iz]))
+	      array[i_external] = array[i_internal];
 	  }
 	}
       }
     }
-  } else if (face == face_lower && 
-	     axis == axis_y) {
+  } else if (face == face_lower && axis == axis_y) {
     if (ny > 1) {
       iy = gy;
       for (ig=0; ig<gy; ig++) {
@@ -337,13 +401,13 @@ void EnzoBoundary::enforce_outflow_precision_
 	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix,iy,     iz,mx,my);
 	    int i_external = INDEX(ix,iy-ig-1,iz,mx,my);
-	    array[i_external] = array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,x[ix],ym,z[iz]))
+	      array[i_external] = array[i_internal];
 	  }
 	}
       }
     }
-  } else if (face == face_upper && 
-	     axis == axis_y) {
+  } else if (face == face_upper && axis == axis_y) {
     if (ny > 1) {
       iy = ny+gy-1;
       for (ig=0; ig<gy; ig++) {
@@ -351,13 +415,13 @@ void EnzoBoundary::enforce_outflow_precision_
 	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix,iy,     iz,mx,my);
 	    int i_external = INDEX(ix,iy+ig+1,iz,mx,my);
-	    array[i_external] = array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,x[ix],yp,z[iz]))
+	      array[i_external] = array[i_internal];
 	  }
 	}
       }
     }
-  } else if (face == face_lower && 
-	     axis == axis_z) {
+  } else if (face == face_lower && axis == axis_z) {
     if (nz > 1) {
       iz = gz;
       for (ig=0; ig<gz; ig++) {
@@ -365,13 +429,13 @@ void EnzoBoundary::enforce_outflow_precision_
 	  for (iy=0; iy<my; iy++) {
 	    int i_internal = INDEX(ix,iy,iz,     mx,my);
 	    int i_external = INDEX(ix,iy,iz-ig-1,mx,my);
-	    array[i_external] = array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,x[ix],y[iy],zm))
+	      array[i_external] = array[i_internal];
 	  }
 	}
       }
     }
-  } else if (face == face_upper && 
-	     axis == axis_z) {
+  } else if (face == face_upper && axis == axis_z) {
     if (nz > 1) {
       iz = nz+gz-1;
       for (ig=0; ig<gz; ig++) {
@@ -379,7 +443,8 @@ void EnzoBoundary::enforce_outflow_precision_
 	  for (iy=0; iy<my; iy++) {
 	    int i_internal = INDEX(ix,iy,iz,     mx,my);
 	    int i_external = INDEX(ix,iy,iz+ig+1,mx,my);
-	    array[i_external] = array[i_internal];
+	    if (! mask_ || mask_->evaluate(t,x[ix],y[iy],zp))
+	      array[i_external] = array[i_internal];
 	  }
 	}
       }
@@ -395,7 +460,8 @@ void EnzoBoundary::enforce_outflow_precision_
 void EnzoBoundary::enforce_inflow_
 (
  const FieldDescr * field_descr,
- FieldBlock * field_block,
+ FieldBlock       * field_block,
+ CommBlock        * comm_block,
  face_enum face,
  axis_enum axis
  ) const throw()

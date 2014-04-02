@@ -1,0 +1,44 @@
+include "input/dots.incl"
+
+Mesh { 
+   root_size   = [200, 200];
+}
+
+Boundary { 
+   list = ["Rx","Ox","Px","Py"];
+   Ox {
+     type = "outflow";
+     axis = "x";
+     mask = y <= 0.333;
+   };
+   Rx {
+     type = "reflecting";
+     axis = "x";
+     mask = 0.333 < y && y <= 0.666;
+   };
+   Px {
+     type = "periodic";
+     axis = "x";
+     mask = 0.666 < y;
+   };
+   Py {
+     type = "periodic";
+     axis = "y";
+   }
+}
+
+Initial {
+    density       { value = [ 1.0, (0.2 <= x && x < 0.4),  0.125 ]; };
+    total_energy  { value = [ 1.0  / (0.4 * 1.0) ,
+                                   (0.2 <= x && x < 0.4),  0.14 / (0.4 * 0.1)]; };
+    velocity_x    { value = [0.0]; };
+    velocity_y    { value = [0.0]; }
+}
+
+Output { 
+   cycle_step {  
+      name = ["boundary_masked-2d-%04d.png","cycle"]; 
+     include "input/colormap_blackbody.incl"
+   } 
+}
+

@@ -61,7 +61,8 @@ protected: // functions
   /// Enforce reflecting boundary conditions on a boundary face
   void enforce_reflecting_
   ( const FieldDescr * field_descr,
-    FieldBlock * field_block,
+    FieldBlock       * field_block,
+    CommBlock        * comm_block,
     face_enum face, 
     axis_enum axis) const throw();
 
@@ -73,14 +74,19 @@ protected: // functions
     T * array,
     int nx,int ny,int nz,
     int gx,int gy,int gz,
-    bool vx,bool vy,bool vz) const throw();
+    bool vx,bool vy,bool vz,
+    double * x, double * y, double * z,
+    double xm, double ym, double zm,
+    double xp, double yp, double zp,
+    double t) const throw();
 
   //--------------------------------------------------
 
   /// Enforce outflow boundary conditions on a boundary face
   void enforce_outflow_
   ( const FieldDescr * field_descr,
-    FieldBlock * field_block, 
+    FieldBlock       * field_block, 
+    CommBlock        * comm_block,
     face_enum face, 
     axis_enum axis) const throw();
 
@@ -91,14 +97,19 @@ protected: // functions
     axis_enum axis,
     T * array,
     int nx,int ny,int nz,
-    int gx,int gy,int gz) const throw();
+    int gx,int gy,int gz,
+    double * x, double * y, double * z,
+    double xm, double ym, double zm,
+    double xp, double yp, double zp,
+    double t) const throw();
 
   //--------------------------------------------------
 
   /// Enforce inflow boundary conditions on a boundary face
   void enforce_inflow_
   ( const FieldDescr * field_descr,
-    FieldBlock * field_block, 
+    FieldBlock       * field_block, 
+    CommBlock        * comm_block,
     face_enum face, 
     axis_enum axis) const throw();
 

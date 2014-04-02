@@ -19,13 +19,13 @@ Boundary {
    P { 
         type = "periodic";
 	axis = "x";
-	mask = (0.25 < y && y < 0.75);
+#	mask = (0.25 < y && y < 0.75);
      };
-   Ox { 
-        type = "outflow";
-	axis = "x";
-	mask = ! (0.25 < y && y < 0.75);
-     };
+#   Ox { 
+#        type = "outflow";
+#	axis = "x";
+#	mask = ! (0.25 < y && y < 0.75);
+#     };
    Oy { 
         type = "outflow";
 	axis = "y";
@@ -36,5 +36,5 @@ Boundary {
 	axis = "y";
 	face = "upper";
      };
-   list = ["Ox","Oy","P","R"];
+   list = ["Oy","P","R"];
 }
