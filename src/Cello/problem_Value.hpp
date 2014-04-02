@@ -17,16 +17,24 @@ class Value {
 public: // interface
 
   /// Constructor
-  Value() throw();
+  Value() throw()
+  : mask_list_() 
+  { };
 
   /// Destructor
-  ~Value() throw();
+  ~Value() throw() { };
 
   /// Copy constructor
-  Value(const Value & Value) throw();
+  Value(const Value & value) throw()
+  { copy_(value); }
 
   /// Assignment operator
-  Value & operator= (const Value & Value) throw();
+  Value & operator= (const Value & value) throw()
+  { copy_(value); return *this; }
+
+  Value(Parameters * parameters,
+	const std::string parameter_name) throw();
+
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
@@ -35,22 +43,28 @@ public: // interface
     // NOTE: change this function whenever attributes change
   }
 
-  virtual void evaluate
-  (FieldBlock * field_block, int index_field) throw ();
+  void evaluate
+  (double * values, 
+   double t,
+   int ndx, int nx, double * x,
+   int ndy, int ny, double * y,
+   int ndz, int nz, double * z) throw ();
 
-  
+  double evaluate (double t, double x, double y, double z) throw ();
+
 private: // functions
 
+  void copy_(const Value & value) throw();
 
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
   /// List of scalar expressions
-  std::vector<ScalarExpr *> scalar_expr_;
+  std::vector<ScalarExpr *> scalar_expr_list_;
 
   /// List of masks for each scalar expression
-  std::vector<Mask *> mask_;
+  std::vector<Mask *> mask_list_;
 
 };
 

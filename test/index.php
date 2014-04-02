@@ -601,8 +601,8 @@ test_summary("Parameters",array("Parameters"),
 	     array("test_Parameters")); 
 test_summary("Performance",array("Papi", "Performance","Timer"),
 	     array("test_Papi","test_Performance","test_Timer")); 
-test_summary("Problem",array("Mask"),
-	     array("test_Mask")); 
+test_summary("Problem",array("Mask","Value"),
+	     array("test_Mask","test_Value")); 
 test_summary("Schedule",array("Schedule"),
 	     array("test_Schedule")); 
 
@@ -1019,6 +1019,7 @@ tests("Cello","test_Timer",       "test_Timer","");
 test_group("Problem");
 
 tests("Cello","test_Mask","test_Mask","");
+tests("Cello","test_Value","test_Value","");
 
 //----------------------------------------------------------------------
 

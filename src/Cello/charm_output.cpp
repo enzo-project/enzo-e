@@ -18,7 +18,6 @@
 
 void CommBlock::output_begin_ ()
 {
-
   int cycle   = simulation()->cycle();
   double time = simulation()->time();
 

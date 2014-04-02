@@ -79,23 +79,23 @@ public: // interface
 
   /// Evaluate a floating-point expression given vectos x,y,z,t
   void evaluate_float  
-  ( struct node_expr * node, 
-    int                n, 
+  ( int                n, 
     double *           result, 
     double *           x, 
     double *           y, 
     double *           z, 
-    double             t);
+    double             t,
+    struct node_expr * node = 0 );
 
   /// Evaluate a logical expression given vectos x,y,z,t
   void evaluate_logical  
-  ( struct node_expr * node, 
-    int                n, 
+  ( int                n, 
     bool *             result, 
     double *           x, 
     double *           y, 
     double *           z, 
-    double             t);
+    double             t,
+    struct node_expr * node = 0);
 
   /// Set the parameter type and value
   void set(struct param_struct * param);
@@ -103,27 +103,6 @@ public: // interface
   /// Write the parameter to the file
   void write(FILE * file_pointer,
 	     std::string parameter);
-
-  //  /// Return whether the parameter is an integer
-  //  bool is_integer()      { return type_ == parameter_integer; };
-  //
-  //  /// Return whether the parameter is a floating-point number
-  //  bool is_float()       { return type_ == parameter_float; };
-  //
-  //  /// Return whether the parameter is a logical
-  //  bool is_logical()      { return type_ == parameter_logical; };
-  //
-  //  /// Return whether the parameter is a string
-  //  bool is_string()       { return type_ == parameter_string; };
-  //
-  //  /// Return whether the parameter is a list
-  //  bool is_list()         { return type_ == parameter_list; };
-  //
-  //  /// Return whether the parameter is a floating-point expression
-  //  bool is_float_expr()  { return type_ == parameter_float_expr; };
-  //
-  //  /// Return whether the parameter is a logical expression
-  //  bool is_logical_expr() { return type_ == parameter_logical_expr; };
 
   /// Return whether the parameter has the given type
   bool is_type (parameter_enum type) { return type_ == type; }
@@ -136,7 +115,7 @@ public: // interface
   int get_integer () 
   { value_accessed_ = true; return value_integer_; }
 
-  /// Get a floating-point parameter (note that floating-point parameters are doubles)
+  /// Get a floating-point (double) parameter
   double get_float  () 
   { value_accessed_ = true; return value_float_; }
 
@@ -165,7 +144,7 @@ private: // functions
     value_integer_ = value; 
   };
 
-  /// Set a floating-point parameter (note that floating-point parameters are doubles)
+  /// Set a floating-point (double) parameter
   void set_float_  (double value) 
   { 
     type_ = parameter_float; 

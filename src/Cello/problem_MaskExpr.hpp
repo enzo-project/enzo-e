@@ -18,7 +18,8 @@ class MaskExpr : public Mask {
 public: // interface
 
   /// Constructor
-  MaskExpr() throw() : Mask() 
+  MaskExpr() throw() 
+  : Mask() , param_(0)
   { };
 
   /// Destructor
@@ -32,18 +33,21 @@ public: // interface
   /// Assignment operator
   MaskExpr & operator= (const MaskExpr & mask) throw()
   {   copy_(mask); return *this; }
-;
 
-  MaskExpr(Parameters * parameters,
-	   const std::string parameter_name,
-	   int index_parameter) throw();
+
+  /// Clone the object
+  virtual Mask * clone() const
+  { return (new MaskExpr(*this)); }
+
+  MaskExpr(Param * param) throw();
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
     Mask::pup(p);
-    
+
+    WARNING("MaskExpr::pup()","UNFINISHED");
     // NOTE: change this function whenever attributes change
   }
 
@@ -64,9 +68,7 @@ private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  Parameters * parameters_;
-  std::string parameter_name_;
-  int index_parameter_;
+  Param * param_;
 
 
 };

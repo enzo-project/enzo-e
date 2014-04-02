@@ -147,13 +147,13 @@ std::string Param::value_to_string ()
 //----------------------------------------------------------------------
 
 void Param::evaluate_float
-(struct node_expr * node, 
- int                n, 
+(int                n, 
  double *           result, 
  double *           x, 
  double *           y, 
  double *           z, 
- double             t)
+ double             t,
+ struct node_expr * node)
 /// @param node Head node of the tree defining the floating-point expression
 /// @param n Length of the result buffer
 /// @param result Array in which to store the expression evaluations
@@ -162,6 +162,8 @@ void Param::evaluate_float
 /// @param z Array of Z spatial values
 /// @param t time value
 {
+  if (node == 0) node = value_expr_;
+
   double * left  = NULL;
   double * right = NULL;
 
@@ -169,11 +171,11 @@ void Param::evaluate_float
 
   if (node->left) {
     left = new double [n];
-    evaluate_float(node->left,n,left,x,y,z,t);
+    evaluate_float(n,left,x,y,z,t,node->left);
   }
   if (node->right) {
     right = new double [n];
-    evaluate_float(node->right,n,right,x,y,z,t);
+    evaluate_float(n,right,x,y,z,t,node->right);
   }
       
   int i;
@@ -236,13 +238,13 @@ void Param::evaluate_float
 //----------------------------------------------------------------------
 
 void Param::evaluate_logical
-(struct node_expr * node, 
- int                n, 
+(int                n, 
  bool   *           result, 
  double *           x, 
  double *           y, 
  double *           z, 
- double             t)
+ double             t,
+ struct node_expr * node)
 /// @param node Head node of the tree defining the floating-point expression
 /// @param n Length of the result buffer
 /// @param result Array in which to store the expression evaluations
@@ -251,6 +253,8 @@ void Param::evaluate_logical
 /// @param z Array of Z spatial values
 /// @param t Array of time values
 {
+  if (node == 0) node = value_expr_;
+
   double * left_float  = NULL;
   double * right_float = NULL;
   bool * left_logical  = NULL;
@@ -266,16 +270,16 @@ void Param::evaluate_logical
 	node->op_value == enum_op_or) {
       // left node is a logical operation
       left_logical = new bool [n];
-      evaluate_logical(node->left,n,left_logical,x,y,z,t);
+      evaluate_logical(n,left_logical,x,y,z,t,node->left);
     } else {
       // left node is a floating-point operation
       left_float = new double [n];
-      evaluate_float(node->left,n,left_float,x,y,z,t);
+      evaluate_float(n,left_float,x,y,z,t,node->left);
     }
   } else {
     // left node is a floating-point operation
     left_float = new double [n];
-    evaluate_float(node->left,n,left_float,x,y,z,t);
+    evaluate_float(n,left_float,x,y,z,t,node->left);
   }
 
   // Recurse on left subtree
@@ -287,16 +291,16 @@ void Param::evaluate_logical
 	node->op_value == enum_op_or) {
       // right node is a logical operation
       right_logical = new bool [n];
-      evaluate_logical(node->right,n,right_logical,x,y,z,t);
+      evaluate_logical(n,right_logical,x,y,z,t,node->right);
     } else {
       // right node is a floating-point operation
       right_float = new double [n];
-      evaluate_float(node->right,n,right_float,x,y,z,t);
+      evaluate_float(n,right_float,x,y,z,t,node->right);
     }
   } else {
     // right node is a floating-point operation
     right_float = new double [n];
-    evaluate_float(node->right,n,right_float,x,y,z,t);
+    evaluate_float(n,right_float,x,y,z,t,node->right);
   }
       
   int i;

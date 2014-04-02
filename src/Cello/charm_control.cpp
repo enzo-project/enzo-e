@@ -91,29 +91,6 @@ void CommBlock::adapt_exit_()
 
 //----------------------------------------------------------------------
 
-void CommBlock::compute_enter_ ()
-{
-  VERBOSE("compute_enter");
-
-  performance_switch_(perf_compute,__FILE__,__LINE__);
-
-  compute_begin_();
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::compute_exit_ ()
-{
-
-  VERBOSE("compute_exit");
-
-  next_phase_ = phase_adapt;
-
-  control_sync(sync_refresh_enter);
-}
-
-//----------------------------------------------------------------------
-
 void CommBlock::refresh_enter_() 
 {
   VERBOSE("refresh_enter");
@@ -147,34 +124,25 @@ void CommBlock::refresh_exit_()
 
 //----------------------------------------------------------------------
 
-void CommBlock::stopping_enter_()
+void CommBlock::compute_enter_ ()
 {
+  VERBOSE("compute_enter");
 
-  VERBOSE("stopping_enter");
+  performance_switch_(perf_compute,__FILE__,__LINE__);
 
-  performance_switch_(perf_stopping,__FILE__,__LINE__);
-
-  stopping_begin_();
-
+  compute_begin_();
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::stopping_exit_()
+void CommBlock::compute_exit_ ()
 {
 
-  VERBOSE("stopping_exit");
+  VERBOSE("compute_exit");
 
-  if (stop_) {
+  next_phase_ = phase_adapt;
 
-    control_sync(sync_exit);
-
-  } else {
-
-    control_sync(sync_compute_enter);
-
-  }
-
+  control_sync(sync_refresh_enter);
 }
 
 //----------------------------------------------------------------------
@@ -211,6 +179,38 @@ void CommBlock::output_exit_()
   }
 
   control_sync(sync_stopping_enter);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::stopping_enter_()
+{
+
+  VERBOSE("stopping_enter");
+
+  performance_switch_(perf_stopping,__FILE__,__LINE__);
+
+  stopping_begin_();
+
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::stopping_exit_()
+{
+
+  VERBOSE("stopping_exit");
+
+  if (stop_) {
+
+    control_sync(sync_exit);
+
+  } else {
+
+    control_sync(sync_compute_enter);
+
+  }
+
 }
 
 //======================================================================

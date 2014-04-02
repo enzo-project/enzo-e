@@ -112,7 +112,8 @@ void CommBlock::r_stopping_compute_timestep(CkReductionMsg * msg)
   set_dt   (dt_);
   set_stop (stop_);
 
-  simulation->update_state(cycle_,time_,dt_,stop_);
+  simulation->set_dt(dt_);
+  simulation->set_stop(stop_);
 
   if (cycle_ > 0 ) {
     performance_stop_(perf_cycle,__FILE__,__LINE__);

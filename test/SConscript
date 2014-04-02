@@ -125,6 +125,7 @@ env.RunSerial('test_Timer.unit',       bin_path + '/test_Timer')
 #----------------------------------------------------------------------
 
 env.RunSerial('test_Mask.unit', bin_path + '/test_Mask')
+env.RunSerial('test_Value.unit', bin_path + '/test_Value')
 
 #----------------------------------------------------------------------
 # SIMULATION COMPONENT    

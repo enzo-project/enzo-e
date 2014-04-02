@@ -100,6 +100,15 @@ public: // interface
   Monitor * monitor() const throw()
   { return monitor_; }
 
+  void set_cycle(int cycle) throw()
+  { cycle_ = cycle; }
+  void set_time(double time) throw()
+  { time_ = time; }
+  void set_dt(double dt) throw()
+  { dt_ = dt; }
+  void set_stop(bool stop) throw()
+  { stop_ = stop; }
+
   /// Return the current cycle number
   int cycle() const throw() 
   { return cycle_; };

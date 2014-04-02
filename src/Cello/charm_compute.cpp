@@ -43,7 +43,8 @@ void CommBlock::compute_begin_ ()
 
   set_cycle (cycle_ + 1);
   set_time  (time_  + dt_);
-  
+  simulation()->set_cycle(cycle_);
+  simulation()->set_time(time_);
   TRACE ("END   PHASE COMPUTE");
 
   control_sync (sync_compute_exit);

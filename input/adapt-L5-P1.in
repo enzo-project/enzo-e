@@ -8,6 +8,9 @@ Mesh    {
    max_level   = 5; 
 }
 
+# include "input/initial_star.incl"
+include "input/initial_square.incl"
+
 Initial {  max_level = 5; }
 
 Output {

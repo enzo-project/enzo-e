@@ -23,45 +23,7 @@ Testing {
    time_final  = 0.10;
 }
 
-Initial {
-    density       { value = 
-    [
-       1.000, 1.0*x + 2.0*y  < 1.0,
-       1.000, 1.0*x + 2.0*y  > 2.0,
-       1.000, 2.0*x - 1.0*y  < 0.0,
-       1.000, 2.0*x - 1.0*y  > 1.0,
-                   0.125 ]; };
-    total_energy  { value = 
-    [ 
-       1.0  / (0.4 * 1.0), 1.0*x + 2.0*y  < 1.0,
-       1.0  / (0.4 * 1.0), 1.0*x + 2.0*y  > 2.0,
-       1.0  / (0.4 * 1.0), 2.0*x - 1.0*y  < 0.0,
-       1.0  / (0.4 * 1.0), 2.0*x - 1.0*y  > 1.0,
-                     0.14 / (0.4 * 0.1)  ]; };
-    velocity_x    { value = [0.0]; };
-    velocity_y    { value = [0.0]; }
-}
-
-
-Initial {
-    density       { value = 
-    [
-       1.000, 1.0*x + 2.0*y  < 1.0,
-       1.000, 1.0*x + 2.0*y  > 2.0,
-       1.000, 2.0*x - 1.0*y  < 0.0,
-       1.000, 2.0*x - 1.0*y  > 1.0,
-                   0.125 ]; };
-    total_energy  { value = 
-    [ 
-       1.0  / (0.4 * 1.0), 1.0*x + 2.0*y  < 1.0,
-       1.0  / (0.4 * 1.0), 1.0*x + 2.0*y  > 2.0,
-       1.0  / (0.4 * 1.0), 2.0*x - 1.0*y  < 0.0,
-       1.0  / (0.4 * 1.0), 2.0*x - 1.0*y  > 1.0,
-                     0.14 / (0.4 * 0.1)  ]; };
-    velocity_x    { value = [0.0]; };
-    velocity_y    { value = [0.0]; }
-}
-
+include "input/initial_square.incl"
 
 Field {
     ghosts = 4; # must be even for ProlongLinear
@@ -81,8 +43,6 @@ Output {
        type     = "image";
        schedule = ["time","interval", 0.02];
        include "input/colormap_blackbody.incl"
-        image_specify_bounds = true;
-
     };
     dl {
        field_list = ["density"];

@@ -17,33 +17,55 @@ class ScalarExpr {
 public: // interface
 
   /// Constructor
-  ScalarExpr() throw();
+  ScalarExpr() throw()
+  : param_(0)
+  { }
 
   /// Destructor
-  ~ScalarExpr() throw();
+  ~ScalarExpr() throw()
+  { }
 
   /// Copy constructor
-  ScalarExpr(const ScalarExpr & scalar_expr) throw();
+  ScalarExpr(const ScalarExpr & scalar_expr) throw()
+  { copy_(scalar_expr); }
 
   /// Assignment operator
-  ScalarExpr & operator= (const ScalarExpr & scalar_expr) throw();
+  ScalarExpr & operator= (const ScalarExpr & scalar_expr) throw()
+  { copy_(scalar_expr); return *this; }
+
+  /// Clone the object
+  virtual ScalarExpr * clone() const
+  { return (new ScalarExpr(*this)); }
+  
+  ScalarExpr(Param * param) throw();
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
+    WARNING("MaskExpr::pup()","UNFINISHED");
     // NOTE: change this function whenever attributes change
   }
 
-  virtual void evaluate
-  (FieldBlock * field_block, int index_field) throw ();
+  /// Evaluate mask at a point
+  double evaluate (double t, double x, double y, double z,
+		   Mask * mask = 0, double deflt = 0) const;
+
+  /// Return mask values in an array
+  void evaluate (double *value, double t,
+		 int ndx, int nx, double * x,
+		 int ndy, int ny, double * y,
+		 int ndz, int nz, double * z, 
+		 Mask * mask = 0, double * deflt = 0) const;
 
   
 private: // functions
 
+  void copy_(const ScalarExpr & scalar_expr) throw();
 
 private: // attributes
 
+  Param * param_;
 
 };
 

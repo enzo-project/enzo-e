@@ -224,7 +224,7 @@ int Parameters::value_integer
 /// @param   deflt     Default parameter value
 /// @return  Return integer parameter value if it exists, deflt if not
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
 
   ASSERT1 ("Parameters::value_integer",
 	   "Parameter %s is not an integer", parameter.c_str(),
@@ -244,7 +244,7 @@ void Parameters::set_integer
 /// @param   parameter Parameter name
 /// @param   value     Value to set the parameter
 {
-  Param * param = parameter_(parameter_name_(parameter));
+  Param * param = this->param(parameter_name_(parameter));
 
   ASSERT1 ("Parameters::set_integer",
 	   "Parameter %s is not an integer", parameter.c_str(),
@@ -268,7 +268,7 @@ double Parameters::value_float
 /// @param   deflt     Default parameter value
 /// @return  Return floating point (double) parameter value if it exists, deflt if not
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
 
   ASSERT1 ("Parameters::value_float",
 	   "Parameter %s is not a float", parameter.c_str(),
@@ -289,7 +289,7 @@ void Parameters::set_float
 /// @param   parameter Parameter name
 /// @param   value     Value to set the parameter
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
 
   ASSERT1 ("Parameters::set_float",
 	   "Parameter %s is not a float", parameter.c_str(),
@@ -313,7 +313,7 @@ bool Parameters::value_logical
 /// @param   deflt     Default parameter value
 /// @return  Return logical parameter value if it exists, deflt if not
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
 
   ASSERT1 ("Parameters::value_logical",
 	   "Parameter %s is not a logical", parameter.c_str(),
@@ -333,7 +333,7 @@ void Parameters::set_logical
 /// @param   parameter Parameter name
 /// @param   value     Value to set the parameter
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
 
   ASSERT1 ("Parameters::set_logical",
 	   "Parameter %s is not logical", parameter.c_str(),
@@ -357,7 +357,7 @@ const char * Parameters::value_string
 /// @param   deflt     Default parameter value
 /// @return  Return string parameter value if it exists, deflt if not
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
 
   ASSERT1 ("Parameters::value_string",
 	   "Parameter %s is not a string", parameter.c_str(),
@@ -375,7 +375,7 @@ void Parameters::set_string
 /// @param   parameter Parameter name
 /// @param   value     Value to set the parameter
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
 
   ASSERT1 ("Parameters::set_string_string",
 	   "Parameter %s is not a string", parameter.c_str(),
@@ -411,12 +411,12 @@ void Parameters::evaluate_float
 /// @param   z         Array of z values
 /// @param   t         t value
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
   ASSERT1 ("Parameters::evaluate_float",
 	   "Parameter %s is not a floating-point expression", parameter.c_str(),
 	   ( ! param || param->is_type(parameter_float_expr)));
   if (param != NULL) {
-    param->evaluate_float(param->value_expr_,n,result,x,y,z,t);
+    param->evaluate_float(n,result,x,y,z,t);
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
@@ -446,12 +446,12 @@ void Parameters::evaluate_logical
 /// @param   z         Array of Z values
 /// @param   t         T value
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
   ASSERT1 ("Parameters::evaluate_logical",
 	   "Parameter %s is not a logical expression", parameter.c_str(),
 	   (! param || param->is_type(parameter_logical_expr)));
   if (param != NULL) {
-    param->evaluate_logical(param->value_expr_,n,result,x,y,z,t);
+    param->evaluate_logical(n,result,x,y,z,t);
   } else {
     WARNING("Parameters::evaluate_logical",
 	    "param is NULL but deflt not set");
@@ -467,7 +467,7 @@ void Parameters::evaluate_logical
 int Parameters::list_length(std::string parameter)
 /// @param   parameter Parameter name
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
   ASSERT1 ("Parameters::list_length",
 	   "Parameter %s is not a list", parameter.c_str(),
 	   ( ! param || param->is_type(parameter_list)));
@@ -485,7 +485,7 @@ int Parameters::list_value_integer
 /// @param   deflt     Default parameter value
 /// @return  Return integer list parameter element value if it exists, deflt if not
 {
-  Param * param = list_element_(parameter,index);
+  Param * param = this->param(parameter,index);
   ASSERT2 ("Parameters::list_value_integer",
 	   "Parameter %s[%d] is not an integer", 
 	   parameter.c_str(),index,
@@ -507,7 +507,7 @@ double Parameters::list_value_float
 /// @param   deflt     Default parameter value
 /// @return  Return floating point (double) list parameter element value if it exists, deflt if not
 {
-  Param * param = list_element_(parameter,index);
+  Param * param = this->param(parameter,index);
   ASSERT2 ("Parameters::list_value_float",
 	   "Parameter %s[%d] is not a float", 
 	   parameter.c_str(),index,
@@ -530,7 +530,7 @@ bool Parameters::list_value_logical
 /// @param   deflt     Default parameter value
 /// @return  Return logical list parameter element value if it exists, deflt if not
 {
-  Param * param = list_element_(parameter,index);
+  Param * param = this->param(parameter,index);
   ASSERT2 ("Parameters::list_value_logical",
 	   "Parameter %s[%d] is not a logical", 
 	   parameter.c_str(),index,
@@ -552,7 +552,7 @@ const char * Parameters::list_value_string
 /// @param   deflt     Default parameter value
 /// @return  Return string list parameter element value if it exists, deflt if not
 {
-  Param * param = list_element_ (parameter,index);
+  Param * param = this->param (parameter,index);
   ASSERT2 ("Parameters::list_value_string",
 	   "Parameter %s[%d] is not a string",
 	   parameter.c_str(),index,
@@ -569,7 +569,7 @@ void Parameters::set_list_length
  int         length
  )
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
 
   ASSERT1 ("Parameters::set_list_length",
 	   "Parameter %s is not a list", parameter.c_str(),
@@ -598,7 +598,7 @@ void Parameters::set_list_integer
  int         value
 ) throw()
 {
-  Param * param = list_element_(parameter,index);
+  Param * param = this->param(parameter,index);
 
   if ( ! param ) {
     param = new Param;
@@ -619,7 +619,7 @@ void Parameters::set_list_float
 ) throw()
 {
 
-  Param * param = list_element_(parameter,index);
+  Param * param = this->param(parameter,index);
 
   if ( ! param ) {
     param = new Param;
@@ -639,7 +639,7 @@ void Parameters::set_list_logical
  bool        value
 ) throw()
 {
-  Param * param = list_element_(parameter,index);
+  Param * param = this->param(parameter,index);
 
   if ( ! param ) {
     param = new Param;
@@ -659,7 +659,7 @@ void Parameters::set_list_string
  const char * value
 ) throw()
 {
-  Param * param = list_element_(parameter,index);
+  Param * param = this->param(parameter,index);
 
   if ( ! param ) {
     param = new Param;
@@ -694,13 +694,13 @@ void Parameters::list_evaluate_float
 /// @param   t         T value
 {
 
-  Param * param = list_element_(parameter,index);
+  Param * param = this->param(parameter,index);
   ASSERT2 ("Parameters::list_evaluate_float",
 	   "Parameter %s[%d] is not a floating-point expression",
 	   parameter.c_str(),index,
 	   ( ! param || param->is_type(parameter_float_expr)));
   if (param != NULL) {
-    param->evaluate_float(param->value_expr_,n,result,x,y,z,t);
+    param->evaluate_float(n,result,x,y,z,t);
   // } else {
   //   for (int i=0; i<n; i++) result[i] = deflt[i];
   }
@@ -732,13 +732,13 @@ void Parameters::list_evaluate_logical
 /// @param   z         Array of Z values
 /// @param   t         Array of T values
 {
-  Param * param = list_element_(parameter,index);
+  Param * param = this->param(parameter,index);
   ASSERT2 ("Parameters::list_evaluate_logical",
 	   "Parameter %s[%d] is not a logical",
 	   parameter.c_str(),index,
 	   ( ! param || param->is_type(parameter_logical_expr)));
   if (param != NULL) {
-    param->evaluate_logical(param->value_expr_,n,result,x,y,z,t);
+    param->evaluate_logical(n,result,x,y,z,t);
   } else {
     WARNING("Parameters::list_evaluate_logical",
 	    "param is NULL but deflt not set");
@@ -849,7 +849,7 @@ parameter_type Parameters::type
 /// @param   parameter Parameter name
 /// @return  Return type of the given parameter
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
   return param ? param->type() : parameter_unknown ;
 }
 
@@ -864,7 +864,7 @@ parameter_type Parameters::list_type
 /// @param   parameter Parameter name
 /// @return  Return type of the given parameter
 {
-  Param * list = parameter_(parameter);
+  Param * list = this->param(parameter);
   Param * param = NULL;
   if (list != NULL) {
     int list_length = list->value_list_->size();
@@ -890,10 +890,10 @@ void Parameters::monitor_access_
 
   if (index == -1) {
     // not a list element
-    param = parameter_(parameter);
+    param = this->param(parameter);
   } else {
     // a list element
-    param = list_element_(parameter,index);
+    param = this->param(parameter,index);
   }
 
   std::string value;
@@ -922,7 +922,7 @@ void Parameters::monitor_access_
 
 void Parameters::monitor_write_ (std::string parameter) throw()
 {
-  Param * param = parameter_(parameter);
+  Param * param = this->param(parameter);
   char buffer[MONITOR_LENGTH];
   sprintf (buffer,"Parameter write %s = %s",
 	   parameter_name_(parameter).c_str(),
@@ -980,18 +980,23 @@ int Parameters::readline_
 
 //----------------------------------------------------------------------
 
-Param * Parameters::list_element_ (std::string parameter, int index) throw()
+/// Return the Param pointer for the specified parameter
+Param * Parameters::param (std::string parameter, int index)
 {
-  Param * list = parameter_(parameter);
-  Param * param = NULL;
-  if (list != NULL) {
-    list->set_accessed();
-    int list_length = list->value_list_->size();
-    if (list != NULL && 0 <= index && index < list_length ) {
-      param =  (*(list->value_list_))[index];
+  if (index == -1) {
+    return parameter_map_[parameter_name_(parameter)];
+  } else {
+    Param * list = this->param(parameter);
+    Param * param = NULL;
+    if (list != NULL) {
+      list->set_accessed();
+      int list_length = list->value_list_->size();
+      if (list != NULL && 0 <= index && index < list_length ) {
+	param =  (*(list->value_list_))[index];
+      }
     }
+    return param;
   }
-  return param;
 }
 
 //----------------------------------------------------------------------

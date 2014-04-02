@@ -53,10 +53,6 @@ public: // virtual functions
 			 face_enum face = face_all,
 			 axis_enum axis = axis_all) const throw(); 
 
-  /// Whether boundary conditions are periodic (handled by ghost refresh)
-  virtual bool is_periodic() const throw()
-  { return boundary_type_ == boundary_type_periodic; };
-
 protected: // functions
 
   //--------------------------------------------------

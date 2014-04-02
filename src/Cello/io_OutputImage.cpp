@@ -43,7 +43,6 @@ OutputImage::OutputImage(int index,
     max_level_(max_level)
 
 {
-  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
   if      (image_reduce_type=="min") { op_reduce_ = reduce_min; } 
   else if (image_reduce_type=="max") { op_reduce_ = reduce_max; }
   else if (image_reduce_type=="avg") { op_reduce_ = reduce_avg; }
@@ -185,7 +184,6 @@ void OutputImage::open () throw()
 void OutputImage::close () throw()
 {
   TRACE("OutputImage::close()");
-  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min_,max_);
   if (is_writer()) image_write_(min_,max_);
   image_close_();
   png_close_();
@@ -575,8 +573,6 @@ void OutputImage::image_write_ (double min_color, double max_color) throw()
     max = max_val;
   }
 
-  PARALLEL_PRINTF ("%s:%d %s val %f %f  bound %f %f\n",
-		   __FILE__,__LINE__,file_name_.c_str(),min_val,max_val,min,max);
   TRACE2("image_write_() image_data_ = %p image_mesh_ = %p",image_data_,image_mesh_);
   size_t n = map_r_.size();
 

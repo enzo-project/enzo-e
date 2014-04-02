@@ -24,6 +24,9 @@
 
 #include "problem_Mask.hpp"
 #include "problem_MaskExpr.hpp"
+#include "problem_MaskPng.hpp"
+#include "problem_ScalarExpr.hpp"
+#include "problem_Value.hpp"
 //#include "problem_MaskPng.hpp"
 //#include "problem_ExprValue.hpp"
 #include "problem_Problem.hpp"

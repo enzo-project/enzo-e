@@ -27,7 +27,10 @@ public: // interface
   Mask(const Mask & Mask) throw() {};
 
   /// Assignment operator
-  Mask & operator= (const Mask & Mask) throw() {};
+  Mask & operator= (const Mask & Mask) throw() {return *this; }
+
+  /// Clone the object
+  virtual Mask * clone() const = 0;
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)

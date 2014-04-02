@@ -208,6 +208,9 @@ public: // interface
 
   void check();
 
+  /// Return the Param pointer for the specified parameter
+  Param * param (std::string parameter, int index = -1);
+
   //--------------------------------------------------
 
 private: // functions
@@ -233,12 +236,6 @@ private: // functions
     }
     return parameter_name;
   }
-
-  /// Return the Param pointer for the specified parameter
-  Param * parameter_ (std::string parameter)
-  {
-    return parameter_map_[parameter_name_(parameter)];
-  };
 
   /// Return the Param pointer for the specified list parameter element
   Param * list_element_ (std::string parameter, int index) throw();
