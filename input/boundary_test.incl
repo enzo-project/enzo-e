@@ -1,0 +1,40 @@
+# File:    boundary_test.incl
+# Author:  James Bordner (jobordner@ucsd.edu)
+# Date:    2014-04-01
+# Brief:   test boundary conditions for heterogenious types with masks
+#
+# O outflow
+# P periodic
+# R reflecting
+#
+#   +RRRRRRRR+
+#   O        O
+#   P        P
+#   P        P
+#   O        O
+#   +OOOOOOOO+
+
+
+Boundary {
+   Ox { 
+        type = "outflow";
+	axis = "x";
+	mask = ! (0.25 < y && y < 0.75);
+     };
+   Oy { 
+        type = "outflow";
+	face = "lower";
+	mask = ! (0.25 < y && y < 0.75);
+     };
+   P { 
+        type = "periodic";
+	axis = "x";
+	mask = (0.25 < y && y < 0.75);
+     };
+   R {
+        type = "reflecting";
+	axis = "y";
+	face = "upper";
+     };
+   list = ["Ox","Oy","P","R"];
+}
