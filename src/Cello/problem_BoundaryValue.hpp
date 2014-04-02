@@ -40,9 +40,6 @@ public: // virtual functions
 			face_enum face = face_all,
 			axis_enum axis = axis_all) const throw() = 0;
 
-  /// Whether BoundaryValue conditions are periodic (handled by ghost refresh)
-  virtual bool is_periodic() const throw() = 0;
-
 };
 
 #endif /* PROBLEM_BOUNDARY_VALUE_HPP */

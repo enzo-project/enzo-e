@@ -451,33 +451,13 @@ void CommBlock::update_boundary_ ()
 void CommBlock::loop_limits_refresh_(int ifacemin[3], int ifacemax[3])
   const throw()
 {
-
-  // Boundary * boundary = simulation()->problem()->boundary();
-
-  // which faces need to be refreshed?
-  bool on_boundary[3][2];
-  is_on_boundary (on_boundary);
-
-  // bool periodic = boundary->is_periodic();
-  // if (periodic) {
-    for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
-	on_boundary[axis][face] = false;
-      }
-    }
-  // }
-
-  // set face loop limits accordingly
-  ifacemin[0] = on_boundary[0][0] ? 0 : -1;
-  ifacemin[1] = on_boundary[1][0] ? 0 : -1;
-  ifacemin[2] = on_boundary[2][0] ? 0 : -1;
-  ifacemax[0] = on_boundary[0][1] ? 0 : 1;
-  ifacemax[1] = on_boundary[1][1] ? 0 : 1;
-  ifacemax[2] = on_boundary[2][1] ? 0 : 1;
-
   int rank = simulation()->dimension();
-  if (rank < 2) ifacemin[1] = ifacemax[1] = 0;
-  if (rank < 3) ifacemin[2] = ifacemax[2] = 0;
+  ifacemin[0] = (rank >= 1) ? -1 : 0;
+  ifacemax[0] = (rank >= 1) ? -1 : 0;
+  ifacemin[1] = (rank >= 2) ? -1 : 0;
+  ifacemax[1] = (rank >= 2) ? -1 : 0;
+  ifacemin[2] = (rank >= 3) ? -1 : 0;
+  ifacemax[2] = (rank >= 3) ? -1 : 0;
 
 }
 
