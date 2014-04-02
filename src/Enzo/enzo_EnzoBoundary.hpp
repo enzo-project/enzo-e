@@ -34,7 +34,8 @@ class EnzoBoundary : public Boundary {
 public: // interface
 
   /// Create a new EnzoBoundary
-  EnzoBoundary(boundary_type boundary_type) throw();
+  EnzoBoundary(axis_enum axis, face_enum face, Mask * mask, 
+	       boundary_type boundary_type) throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoBoundary);

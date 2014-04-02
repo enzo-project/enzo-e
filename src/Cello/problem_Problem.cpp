@@ -89,13 +89,14 @@ void Problem::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_boundary(Config * config) throw()
+void Problem::initialize_boundary(Config * config, 
+				  Parameters * parameters) throw()
 {
   for (size_t index=0; index < config->boundary_type.size(); index++) {
 
     std::string type = config->boundary_type[index];
 
-    Boundary * boundary = create_boundary_(type,config);
+    Boundary * boundary = create_boundary_(type,index,config,parameters);
 
     ASSERT1("Problem::initialize_boundary",
 	  "Boundary type %s not recognized",
@@ -115,7 +116,7 @@ void Problem::initialize_initial(Config * config,
 {
 
   Initial * initial = create_initial_
-    (config->initial_type,parameters,config,field_descr,group_process);
+    (config->initial_type,config,parameters,field_descr,group_process);
 
   initial_list_.push_back( initial );
 
@@ -369,11 +370,24 @@ void Problem::deallocate_() throw()
 
 Boundary * Problem::create_boundary_
 (
- std::string  name,
- Config * config
+ std::string type,
+ int index,
+ Config * config,
+ Parameters * parameters
  ) throw ()
 {
-  // No default Boundary object
+  if (type == "value") {
+    Mask * mask = 0;
+    if (config->boundary_mask[index]) {
+      std::string param_str = "Boundary:" + config->boundary_list[index] + ":mask";
+      Param * param = parameters->param(param_str);
+      mask = Mask::create(param,parameters);
+    }
+    axis_enum axis = (axis_enum) config->boundary_axis[index];
+    face_enum face = (face_enum) config->boundary_face[index];
+
+    return new BoundaryValue (axis,face,mask);
+  }
   return NULL;
 }
 
@@ -382,8 +396,8 @@ Boundary * Problem::create_boundary_
 Initial * Problem::create_initial_
 (
  std::string  type,
- Parameters * parameters,
  Config * config,
+ Parameters * parameters,
  const FieldDescr * field_descr,
  const GroupProcess * group_process
  ) throw ()

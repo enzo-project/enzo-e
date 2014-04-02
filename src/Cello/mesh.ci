@@ -7,23 +7,26 @@
 
 module mesh {
 
+  PUPable BoundaryValue;
   PUPable Config;
   PUPable Factory;
   PUPable Initial;
-  PUPable InitialValue;
   PUPable InitialFile;
+  PUPable InitialValue;
   PUPable InputData;
-  PUPable OutputData;
-  PUPable OutputImage;
-  PUPable OutputCheckpoint;
-  PUPable Problem;
-  PUPable ProlongLinear;
-  PUPable RestrictLinear;
-  PUPable Refine;
-  PUPable RefineSlope;
-  PUPable RefineMass;
   PUPable ItFieldList;
   PUPable ItFieldRange;
+  PUPable MaskPng;
+  PUPable MaskExpr;
+  PUPable OutputCheckpoint;
+  PUPable OutputData;
+  PUPable OutputImage;
+  PUPable Problem;
+  PUPable ProlongLinear;
+  PUPable Refine;
+  PUPable RefineMass;
+  PUPable RefineSlope;
+  PUPable RestrictLinear;
 
   array[Index] CommBlock {
 

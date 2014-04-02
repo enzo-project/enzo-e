@@ -396,6 +396,17 @@ function test_table ($file_root,$size_array, $types)
     echo "</table></br>";
 }
 
+function binary ($value,$count)
+{
+  $strval = "";
+  while ($count > 0) {
+    $bit = (int)$value % 2;
+    $strval = "$bit".$strval;
+    $value = $value >> 1;
+    $count = $count - 1;
+  }
+  return $strval; 
+}
 function test_table_blocks ($file_root,$cycle_array, $types)
 {
   echo "<table>";
@@ -416,8 +427,9 @@ function test_table_blocks ($file_root,$cycle_array, $types)
        for ($index_cycle = 0; $index_cycle < sizeof($cycle_array); $index_cycle++) {
 	 $cycle = $cycle_array[$index_cycle];
 	 for ($col = 0; $col < $cols; $col++) {
-	   $block = sprintf ("%08d-%08d-%08d",$rows - $row - 1,$col,0);
-	   echo "<td class=block> <img src=${file_root}-$cycle-block_$block.png width=80></img> </td>";
+	   $rbin = binary($rows - $row - 1,2);
+	   $cbin = binary($col,2);
+	   echo "<td class=block> <img src=${file_root}-$cycle-Block-${rbin}_${cbin}.png width=80></img> </td>";
 	 }
        }
        echo "</tr>";

@@ -43,6 +43,11 @@ public: // interface
 	  double xm, double xp,
 	  double ym, double yp) throw();
 
+  PUPable_decl(MaskPng);
+
+  MaskPng(CkMigrateMessage *m) : Mask (m) {}
+
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {

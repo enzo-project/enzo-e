@@ -36,30 +36,34 @@ private: // functions
 
   /// Create named boundary conditions object
   virtual Boundary * create_boundary_ 
-  (std::string name, Config * config) throw ();
+  (std::string type,
+   int index,
+   Config * config,
+   Parameters * parameters
+   ) throw ();
 
   /// Create named initialization object
   virtual Initial *  create_initial_ 
-  (std::string name, 
+  (std::string type, 
    Parameters * parameters,
    Config * config,
    const FieldDescr *,
    const GroupProcess * group_process) throw ();
 
   /// Create named method object
-  virtual Method *   create_method_ (std::string name) throw ();
+  virtual Method *   create_method_ (std::string type) throw ();
 
   /// Create named timestep object
   virtual Timestep * create_timestep_
-  (std::string name, Config * config) throw ();
+  (std::string type, Config * config) throw ();
 
   /// Create named interpolation object
   virtual Prolong * create_prolong_
-  (std::string name, Config * config) throw ();
+  (std::string type, Config * config) throw ();
 
   /// Create named restriction object
   virtual Restrict * create_restrict_
-  (std::string name, Config * config) throw ();
+  (std::string type, Config * config) throw ();
 
 };
 

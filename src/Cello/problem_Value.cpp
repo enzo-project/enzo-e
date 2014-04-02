@@ -35,20 +35,7 @@ Value::Value(Parameters * parameters,
 
       if (index+1 < list_length) {
 	param = parameters->param(parameter_name,index+1);
-	Mask * mask = NULL;
-	if ((param->type() == parameter_logical_expr)) {
-	  mask = new MaskExpr(param);
-	} else if ((param->type() == parameter_string)) {
-	  double xm = parameters->list_value_float(0,"Domain:lower",0.0);
-	  double xp = parameters->list_value_float(0,"Domain:upper",0.0);
-	  double ym = parameters->list_value_float(1,"Domain:lower",0.0);
-	  double yp = parameters->list_value_float(1,"Domain:upper",0.0);
-	  mask = new MaskPng(param->get_string(),xm,xp,ym,yp);
-	} else {
-	  ERROR2("Value::Value",
-		 "Element %d of list parameter %s is not a logical expression or a string",
-		 index+1,parameter_name.c_str());
-	}
+	Mask * mask = Mask::create(param,parameters);
 	mask_list_.push_back(mask);
       } else {
 	mask_list_.push_back(NULL);

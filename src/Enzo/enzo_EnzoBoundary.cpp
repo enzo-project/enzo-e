@@ -11,11 +11,12 @@
 
 //----------------------------------------------------------------------
 
-EnzoBoundary::EnzoBoundary (boundary_type boundary_type) throw()
-  : Boundary(),
+EnzoBoundary::EnzoBoundary 
+(axis_enum axis, face_enum face, Mask * mask,
+ boundary_type boundary_type) throw()
+  : Boundary(axis,face,mask),
     boundary_type_ (boundary_type)
-{ 
-}
+{  }
 
 //----------------------------------------------------------------------
 
@@ -43,6 +44,10 @@ void EnzoBoundary::enforce
  axis_enum     axis 
  ) const throw()
 {
+  if ( ! applies_(axis,face)) {
+    return;
+  }
+
   if (face == face_all) {
     // WARNING: recursive
     enforce(field_descr,comm_block,face_lower,axis);
@@ -56,11 +61,13 @@ void EnzoBoundary::enforce
     // WARNING: recursive
     enforce(field_descr,comm_block,face,axis_z);
   } else {
+
     FieldBlock * field_block = comm_block->block()->field_block();
     if ( ! field_block->ghosts_allocated() ) {
       ERROR("EnzoBoundary::enforce",
 	    "Function called with ghosts not allocated");
     }
+
     switch (boundary_type_) {
     case boundary_type_reflecting:
       enforce_reflecting_(field_descr, field_block,face,axis);

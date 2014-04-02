@@ -9,7 +9,7 @@
 #ifndef PROBLEM_MASK_HPP
 #define PROBLEM_MASK_HPP
 
-class Mask {
+class Mask : public PUP::able {
 
   /// @class    Mask
   /// @ingroup  Problem
@@ -32,10 +32,21 @@ public: // interface
   /// Clone the object
   virtual Mask * clone() const = 0;
 
+  /// Create a new object of the appropriate subclass
+  static Mask * create(Param * param, Parameters * parameters);
+
+  /// CHARM++ PUP::able declaration
+  PUPable_abstract(Mask);
+
+  /// CHARM++ migration constructor for PUP::able
+  Mask (CkMigrateMessage *m) : PUP::able(m)
+  {  }
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
+    PUP::able::pup(p); 
     // NOTE: change this function whenever attributes change
   }
 

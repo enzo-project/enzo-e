@@ -18,7 +18,14 @@ class BoundaryValue : public Boundary
 public: // interface
 
   /// Create a new BoundaryValue
-  BoundaryValue() throw() {}
+  BoundaryValue() throw() 
+  : Boundary ()
+  {}
+
+  /// Create a new BoundaryValue
+  BoundaryValue(axis_enum axis, face_enum face, Mask * mask) throw() 
+    : Boundary(axis,face,mask)
+  { }
 
   /// Destructor
   virtual ~BoundaryValue() throw() {}
@@ -39,7 +46,7 @@ public: // virtual functions
   virtual void enforce (const FieldDescr * field_descr,
 			CommBlock * block,
 			face_enum face = face_all,
-			axis_enum axis = axis_all) const throw() = 0;
+			axis_enum axis = axis_all) const throw();
 
 };
 

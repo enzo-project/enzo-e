@@ -41,6 +41,10 @@ public: // interface
 
   MaskExpr(Param * param) throw();
 
+  PUPable_decl(MaskExpr);
+
+  MaskExpr(CkMigrateMessage *m) : Mask (m) {}
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {

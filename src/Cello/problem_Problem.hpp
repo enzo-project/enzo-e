@@ -117,7 +117,8 @@ public: // interface
   Timestep * timestep() const throw()  { return timestep_; }
 
   /// Initialize the boundary conditions object
-  void initialize_boundary(Config * config) throw();
+  void initialize_boundary(Config * config, 
+			   Parameters * parameters) throw();
 
   /// Initialize the initial conditions object
   void initialize_initial(Config * config,
@@ -158,47 +159,51 @@ protected: // functions
 
   /// Create named boundary object
   virtual Boundary * create_boundary_
-  (std::string name, Config * config) throw ();
+  (std::string type,
+   int index,
+   Config * config,
+   Parameters * parameters
+   ) throw ();
 
   /// Create named initialization object
   virtual Initial *  create_initial_ 
-  (std::string name, 
-   Parameters * parameters,
+  (std::string type, 
    Config * config,
+   Parameters * parameters,
    const FieldDescr *,
    const GroupProcess * = 0) throw ();
 
   /// Create named refine object
   virtual Refine * create_refine_ 
-  (std::string name, 
+  (std::string type, 
    Config * config, 
    const FieldDescr * field_descr,
    int index) throw ();
 
   /// Create named method object
   virtual Method *   create_method_
-  (std::string name) throw ();
+  (std::string type) throw ();
 
   /// Create named output object
   virtual Output *   create_output_  
-  (std::string name, int index, Config * config,
+  (std::string type, int index, Config * config,
    const GroupProcess *, const Factory * ) throw ();
 
   /// Create named stopping object
   virtual Stopping * create_stopping_ 
-  (std::string name, Config * config) throw ();
+  (std::string type, Config * config) throw ();
 
   /// Create named timestep object
   virtual Timestep * create_timestep_ 
-  (std::string name, Config * config) throw ();
+  (std::string type, Config * config) throw ();
 
   /// Create named prolongation object
   virtual Prolong * create_prolong_ 
-  (std::string name, Config * config) throw ();
+  (std::string type, Config * config) throw ();
 
   /// Create named restrictation object
   virtual Restrict * create_restrict_ 
-  (std::string name, Config * config) throw ();
+  (std::string type, Config * config) throw ();
 
 private: // attributes
 

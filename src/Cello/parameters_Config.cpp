@@ -163,19 +163,19 @@ void Config::read(Parameters * parameters) throw()
     boundary_type[0] = parameters->value_string("Boundary:type","unknown");
 
     std::string axis_str = parameters->value_string("Boundary:axis","all");
-    if      (axis_str == "all") { boundary_axis[0] = -1; }
-    else if (axis_str == "x")   { boundary_axis[0] = 0; }
-    else if (axis_str == "y")   { boundary_axis[0] = 1; }
-    else if (axis_str == "z")   { boundary_axis[0] = 2; }
+    if      (axis_str == "all") { boundary_axis[0] = axis_all; }
+    else if (axis_str == "x")   { boundary_axis[0] = axis_x; }
+    else if (axis_str == "y")   { boundary_axis[0] = axis_y; }
+    else if (axis_str == "z")   { boundary_axis[0] = axis_z; }
     else {
       ERROR1 ("Config::read()", "Unknown Boundary:axis %s",
 	      axis_str.c_str());
     }
 
     std::string face_str = parameters->value_string("Boundary:face","all");
-    if      (face_str == "all")   { boundary_face[0] = -1; }
-    else if (face_str == "lower") { boundary_face[0] = 0; }
-    else if (face_str == "upper") { boundary_face[0] = 1; }
+    if      (face_str == "all")   { boundary_face[0] = face_all; }
+    else if (face_str == "lower") { boundary_face[0] = face_lower; }
+    else if (face_str == "upper") { boundary_face[0] = face_upper; }
     else {
       ERROR1 ("Config::read()", "Unknown Boundary:face %s",
 	      face_str.c_str());
@@ -201,19 +201,19 @@ void Config::read(Parameters * parameters) throw()
       std::string prefix = "Boundary:" + boundary_list[index] + ":";
       boundary_type[index] = parameters->value_string(prefix+"type","unknown");
       std::string axis_str = parameters->value_string(prefix+"axis","all");
-      if      (axis_str == "all") { boundary_axis[index] = -1; }
-      else if (axis_str == "x")   { boundary_axis[index] = 0; }
-      else if (axis_str == "y")   { boundary_axis[index] = 1; }
-      else if (axis_str == "z")   { boundary_axis[index] = 2; }
+      if      (axis_str == "all") { boundary_axis[index] = axis_all; }
+      else if (axis_str == "x")   { boundary_axis[index] = axis_x; }
+      else if (axis_str == "y")   { boundary_axis[index] = axis_y; }
+      else if (axis_str == "z")   { boundary_axis[index] = axis_z; }
       else {
 	ERROR2 ("Config::read()", "Unknown %s %s",
 		(prefix+"axis").c_str(),axis_str.c_str());
       }
 
       std::string face_str = parameters->value_string(prefix+"face","all");
-      if      (face_str == "all")   { boundary_face[index] = -1; }
-      else if (face_str == "lower") { boundary_face[index] = 0; }
-      else if (face_str == "upper") { boundary_face[index] = 1; }
+      if      (face_str == "all")   { boundary_face[index] = face_all; }
+      else if (face_str == "lower") { boundary_face[index] = face_lower; }
+      else if (face_str == "upper") { boundary_face[index] = face_upper; }
       else {
 	ERROR2 ("Config::read()", "Unknown %s %s",
 		(prefix+"face").c_str(),face_str.c_str());

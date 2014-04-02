@@ -36,27 +36,37 @@ void EnzoProblem::pup (PUP::er &p)
 //======================================================================
 
 Boundary * EnzoProblem::create_boundary_
-(
- std::string  name,
- Config * config
+(std::string type,
+ int index,
+ Config * config,
+ Parameters * parameters
  ) throw ()
-/// @param name   Name of boundary condition to use
+/// @param type   Type of boundary condition to use
 {
+
+  Mask * mask = 0;
+  if (config->boundary_mask[index]) {
+    std::string param_str = "Boundary:" + config->boundary_list[index] + ":mask";
+    Param * param = parameters->param(param_str);
+    mask = Mask::create(param,parameters);
+  }
+  axis_enum axis = (axis_enum) config->boundary_axis[index];
+  face_enum face = (face_enum) config->boundary_face[index];
 
   Boundary * boundary = 0;
 
-  if (       name == "reflecting") { 
-    boundary = new EnzoBoundary (boundary_type_reflecting);
-  } else if (name == "outflow") {
-    boundary = new EnzoBoundary (boundary_type_outflow);
-  } else if (name == "inflow") {
-    boundary = new EnzoBoundary (boundary_type_inflow);
-  } else if (name == "periodic") {
-    boundary = new EnzoBoundary (boundary_type_periodic);
+  if (       type == "reflecting") { 
+    boundary = new EnzoBoundary (axis,face,mask,boundary_type_reflecting);
+  } else if (type == "outflow") {
+    boundary = new EnzoBoundary (axis,face,mask,boundary_type_outflow);
+  } else if (type == "inflow") {
+    boundary = new EnzoBoundary (axis,face,mask,boundary_type_inflow);
+  } else if (type == "periodic") {
+    boundary = new EnzoBoundary (axis,face,mask,boundary_type_periodic);
   } else {
-    boundary = Problem::create_boundary_(name,config);
+    boundary = Problem::create_boundary_(type,index,config,parameters);
   }
-	     
+
   return boundary;
 }
 
@@ -64,19 +74,19 @@ Boundary * EnzoProblem::create_boundary_
 
 Timestep * EnzoProblem::create_timestep_
 (
- std::string  name,
+ std::string  type,
  Config * config
  ) throw ()
-/// @param name   Name of the timestep method to create
+/// @param type   Type of the timestep method to create
 {
   Timestep * timestep = 0;
 
-  if (name == "ppml") {
+  if (type == "ppml") {
     timestep = new EnzoTimestepPpml;
-  } else if (name == "ppm") {
+  } else if (type == "ppm") {
     timestep = new EnzoTimestep;
   } else {
-    timestep = Problem::create_timestep_(name,config);
+    timestep = Problem::create_timestep_(type,config);
   }
 
   return timestep;
@@ -86,7 +96,7 @@ Timestep * EnzoProblem::create_timestep_
 
 Initial * EnzoProblem::create_initial_ 
 (
- std::string  name,
+ std::string  type,
  Parameters * parameters,
  Config * config,
  const FieldDescr * field_descr,
@@ -104,15 +114,15 @@ Initial * EnzoProblem::create_initial_
   int cycle   = config->initial_cycle;
   double time = config->initial_time;
 
-  if (name == "implosion_2d") {
+  if (type == "implosion_2d") {
     initial = new EnzoInitialImplosion2(cycle,time);
-  } else if (name == "sedov_array_2d") {
+  } else if (type == "sedov_array_2d") {
     initial = new EnzoInitialSedovArray2(static_cast<EnzoConfig *>(config));
-  } else if (name == "sedov_array_3d") {
+  } else if (type == "sedov_array_3d") {
     initial = new EnzoInitialSedovArray3(static_cast<EnzoConfig *>(config));
   } else {
     initial = Problem::create_initial_
-      (name,parameters,config,field_descr,group_process);
+      (type,config,parameters,field_descr,group_process);
   }
 
   return initial;
@@ -121,19 +131,19 @@ Initial * EnzoProblem::create_initial_
 
 //----------------------------------------------------------------------
 
-Method * EnzoProblem::create_method_ ( std::string  name ) throw ()
-/// @param name   Name of the method to create
+Method * EnzoProblem::create_method_ ( std::string  type ) throw ()
+/// @param type   Type of the method to create
 {
 
   Method * method = 0;
 
-  TRACE1("EnzoProblem::create_method %s",name.c_str());
-  if (name == "ppm") {
+  TRACE1("EnzoProblem::create_method %s",type.c_str());
+  if (type == "ppm") {
     method = new EnzoMethodPpm;
-  } else if (name == "ppml") {
+  } else if (type == "ppml") {
     method = new EnzoMethodPpml;
   } else {
-    method = Problem::create_method_(name);
+    method = Problem::create_method_(type);
   }
 
   return method;
@@ -143,25 +153,25 @@ Method * EnzoProblem::create_method_ ( std::string  name ) throw ()
 
 Prolong * EnzoProblem::create_prolong_ 
 (
- std::string  name,
+ std::string  type,
  Config * config ) throw ()
 {
 
   Prolong * prolong = 0;
 
-  if (name == "enzo") {
+  if (type == "enzo") {
     
     prolong = new EnzoProlong 
       (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
 
-  } else if (name == "MC1") {
+  } else if (type == "MC1") {
     
     prolong = new EnzoProlongMC1
       (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
 
   } else {
 
-    prolong = Problem::create_prolong_(name,config);
+    prolong = Problem::create_prolong_(type,config);
 
   }
 
@@ -173,20 +183,20 @@ Prolong * EnzoProblem::create_prolong_
 
 Restrict * EnzoProblem::create_restrict_ 
 (
- std::string  name,
+ std::string  type,
  Config * config ) throw ()
 {
 
   Restrict * restrict = 0;
 
-  if (name == "enzo") {
+  if (type == "enzo") {
     
     restrict = new EnzoRestrict 
       (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
 
   } else {
 
-    restrict = Problem::create_restrict_(name,config);
+    restrict = Problem::create_restrict_(type,config);
 
   }
 
