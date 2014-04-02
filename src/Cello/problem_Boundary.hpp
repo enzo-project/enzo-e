@@ -27,6 +27,10 @@ public: // interface
   /// Charm++ PUP::able declarations
   PUPable_abstract(Boundary);
 
+  /// CHARM++ migration constructor for PUP::able
+  Boundary (CkMigrateMessage *m) : PUP::able(m)
+  {  }
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
   { TRACEPUP; PUP::able::pup(p); };

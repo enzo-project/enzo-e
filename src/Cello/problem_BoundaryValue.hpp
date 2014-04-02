@@ -8,8 +8,7 @@
 #ifndef PROBLEM_BOUNDARY_VALUE_HPP
 #define PROBLEM_BOUNDARY_VALUE_HPP
 
-
-class BoundaryValue : public PUP::able 
+class BoundaryValue : public Boundary
 {
 
   /// @class    BoundaryValue
@@ -25,7 +24,9 @@ public: // interface
   virtual ~BoundaryValue() throw() {}
 
   /// Charm++ PUP::able declarations
-  PUPable_abstract(BoundaryValue);
+  PUPable_decl(BoundaryValue);
+
+  BoundaryValue(CkMigrateMessage *m) : Boundary (m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 

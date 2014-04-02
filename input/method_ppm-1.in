@@ -7,3 +7,4 @@ Mesh { root_blocks    = [1,1]; }
 
 Output { density { name = ["method_ppm-1-%06d.png", "cycle"]; } }
 Output { data    { name = ["method_ppm-1-%02d-%06d.h5", "proc","cycle"]; } }
+include "input/boundary_test.incl"

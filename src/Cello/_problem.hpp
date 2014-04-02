@@ -36,6 +36,7 @@
 #include "problem_InitialFile.hpp"
 #include "problem_InitialValue.hpp"
 #include "problem_Boundary.hpp"
+#include "problem_BoundaryValue.hpp"
 #include "problem_Method.hpp"
 #include "problem_Prolong.hpp"
 #include "problem_ProlongLinear.hpp"

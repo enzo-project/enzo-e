@@ -195,10 +195,12 @@ void Config::read(Parameters * parameters) throw()
 
     for (int index=0; index<num_boundary; index++) {
 
-      std::string prefix = "Boundary:" + boundary_list[index] + ":";
-      boundary_type[index] = parameters->list_value_string(index,prefix+"type","unknown");
+      boundary_list[index] = parameters->list_value_string
+	(index,"Boundary:list","unknown");
 
-      std::string axis_str = parameters->list_value_string(index,prefix+"axis","all");
+      std::string prefix = "Boundary:" + boundary_list[index] + ":";
+      boundary_type[index] = parameters->value_string(prefix+"type","unknown");
+      std::string axis_str = parameters->value_string(prefix+"axis","all");
       if      (axis_str == "all") { boundary_axis[index] = -1; }
       else if (axis_str == "x")   { boundary_axis[index] = 0; }
       else if (axis_str == "y")   { boundary_axis[index] = 1; }
@@ -208,7 +210,7 @@ void Config::read(Parameters * parameters) throw()
 		(prefix+"axis").c_str(),axis_str.c_str());
       }
 
-      std::string face_str = parameters->list_value_string(index,prefix+"face","all");
+      std::string face_str = parameters->value_string(prefix+"face","all");
       if      (face_str == "all")   { boundary_face[index] = -1; }
       else if (face_str == "lower") { boundary_face[index] = 0; }
       else if (face_str == "upper") { boundary_face[index] = 1; }
@@ -219,6 +221,10 @@ void Config::read(Parameters * parameters) throw()
 
       boundary_mask[index] = (parameters->type(prefix+"mask") 
 			  == parameter_logical_expr);
+      printf ("DEBUG %s:%d %s\n",__FILE__,__LINE__,boundary_type[index].c_str());
+      printf ("DEBUG %s:%d %d\n",__FILE__,__LINE__,boundary_axis[index]);
+      printf ("DEBUG %s:%d %d\n",__FILE__,__LINE__,boundary_face[index]);
+      //      printf ("DEBUG %s:%d %s\n",__FILE__,__LINE__,boundary_mask[index]);
     }
 
   }

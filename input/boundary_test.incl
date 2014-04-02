@@ -16,6 +16,11 @@
 
 
 Boundary {
+   P { 
+        type = "periodic";
+	axis = "x";
+	mask = (0.25 < y && y < 0.75);
+     };
    Ox { 
         type = "outflow";
 	axis = "x";
@@ -23,13 +28,8 @@ Boundary {
      };
    Oy { 
         type = "outflow";
+	axis = "y";
 	face = "lower";
-	mask = ! (0.25 < y && y < 0.75);
-     };
-   P { 
-        type = "periodic";
-	axis = "x";
-	mask = (0.25 < y && y < 0.75);
      };
    R {
         type = "reflecting";
