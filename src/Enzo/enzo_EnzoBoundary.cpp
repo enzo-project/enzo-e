@@ -49,16 +49,11 @@ void EnzoBoundary::enforce
   }
 
   if (face == face_all) {
-    // WARNING: recursive
     enforce(field_descr,comm_block,face_lower,axis);
-    // WARNING: recursive
     enforce(field_descr,comm_block,face_upper,axis);
   } else if (axis == axis_all) {
-    // WARNING: recursive
     enforce(field_descr,comm_block,face,axis_x);
-    // WARNING: recursive
     enforce(field_descr,comm_block,face,axis_y);
-    // WARNING: recursive
     enforce(field_descr,comm_block,face,axis_z);
   } else {
 

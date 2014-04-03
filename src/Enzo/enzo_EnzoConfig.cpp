@@ -27,10 +27,6 @@ void EnzoConfig::pup (PUP::er &p)
   Config::pup(p);
   TRACEPUP;
   // NOTE: change this function whenever attributes change
-  p | boundary_type;
-
-  PUParray(p,domain_lower,3);
-  PUParray(p,domain_upper,3);
 
   p | enzo_ppm_density_floor;
   p | enzo_ppm_diffusion;

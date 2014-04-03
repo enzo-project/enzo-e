@@ -42,8 +42,6 @@ public: // interface
   void pup (PUP::er &p) 
   { TRACEPUP; 
     PUP::able::pup(p); 
-    bool up = p.isUnpacking();
-    bool pk = p.isPacking();
     int axis=axis_;
     p | axis;
     axis_ = (axis_enum)axis;

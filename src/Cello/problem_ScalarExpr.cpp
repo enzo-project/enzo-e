@@ -13,17 +13,22 @@
 
 ScalarExpr::ScalarExpr
 (Param * param) throw()
-  : param_(param)
+  : param_(param),
+    value_(0)
 {
-  printf ("DEBUG %s:%d %p\n",__FILE__,__LINE__,param_);
+  if (param_->type() == parameter_float) {
+    value_ = param_->get_float();
+    param_ = 0;
+  }
 }
 
 //----------------------------------------------------------------------
 
 void ScalarExpr::copy_(const ScalarExpr & scalar_expr) throw()
 {
-  printf ("DEBUG %s:%d %p\n",__FILE__,__LINE__,param_);
-  param_ = new Param(*scalar_expr.param_);
+ 
+  param_ = (scalar_expr.param_) ? new Param(*scalar_expr.param_) : 0;
+  value_ = scalar_expr.value_;
 }
 
 //----------------------------------------------------------------------
@@ -32,10 +37,12 @@ double ScalarExpr::evaluate (double t, double x, double y, double z,
 			     Mask * mask, double deflt) const
 {
   double value;
-  printf ("DEBUG %s:%d %p\n",__FILE__,__LINE__,param_);
   bool m = mask ? mask->evaluate(t,x,y,z) : true;
   if (m) {
-    param_->evaluate_float(1,&value,&x,&y,&z,t);
+    if (param_)
+      param_->evaluate_float(1,&value,&x,&y,&z,t);
+    else
+      value = value_;
   } else {
     value = deflt;
   }
@@ -78,7 +85,12 @@ void ScalarExpr::evaluate (double * value, double t,
 
   int n=nx*ny*nz;
 
-  param_->evaluate_float(n, value_temp, x,y,z,t);
+  if (param_)
+    param_->evaluate_float(n, value_temp, x,y,z,t);
+  else {
+    for (int i=0; i<n; i++) value_temp[i]=value_;
+  }
+
 
   if (mask) {
     for (int ix=0; ix<nx; ix++) {

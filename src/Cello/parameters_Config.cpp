@@ -14,11 +14,13 @@ void Config::pup (PUP::er &p)
 {
   TRACEPUP;
   // NOTE: change this function whenever attributes change
-  p | boundary_list;
-  p | boundary_type;
-  p | boundary_axis;
-  p | boundary_face;
-  p | boundary_mask;
+  p | num_boundary;
+  PUParray(p,boundary_list,MAX_BOUNDARY);
+  PUParray(p,boundary_type,MAX_BOUNDARY);
+  PUParray(p,boundary_axis,MAX_BOUNDARY);
+  PUParray(p,boundary_face,MAX_BOUNDARY);
+  PUParray(p,boundary_mask,MAX_BOUNDARY);
+  PUParray(p,boundary_field_list,MAX_BOUNDARY);
 
   PUParray(p,domain_lower,3);
   PUParray(p,domain_upper,3);
@@ -40,8 +42,6 @@ void Config::pup (PUP::er &p)
   p | initial_cycle;
   p | initial_type;
   p | initial_time;
-  //  p | initial_name;
-  //  PUParray(p,initial_value,MAX_FIELDS);
   p | initial_max_level;
 
   p | memory_active;
@@ -149,82 +149,104 @@ void Config::read(Parameters * parameters) throw()
 
   if (parameters->type("Boundary:list") != parameter_list) {
 
-    const int num_boundary = 1;
-
-    boundary_list.resize(num_boundary);
-    boundary_type.resize(num_boundary);
-    boundary_axis.resize(num_boundary);
-    boundary_face.resize(num_boundary);
-    boundary_mask.resize(num_boundary);
+    num_boundary = 1;
+    int ib = 0;
 
     // default name if not explicit
 
-    boundary_list[0] = "boundary";
-    boundary_type[0] = parameters->value_string("Boundary:type","unknown");
+    boundary_list[ib] = "boundary";
+    boundary_type[ib] = parameters->value_string("Boundary:type","unknown");
 
     std::string axis_str = parameters->value_string("Boundary:axis","all");
-    if      (axis_str == "all") { boundary_axis[0] = axis_all; }
-    else if (axis_str == "x")   { boundary_axis[0] = axis_x; }
-    else if (axis_str == "y")   { boundary_axis[0] = axis_y; }
-    else if (axis_str == "z")   { boundary_axis[0] = axis_z; }
+    if      (axis_str == "all") { boundary_axis[ib] = axis_all; }
+    else if (axis_str == "x")   { boundary_axis[ib] = axis_x; }
+    else if (axis_str == "y")   { boundary_axis[ib] = axis_y; }
+    else if (axis_str == "z")   { boundary_axis[ib] = axis_z; }
     else {
       ERROR1 ("Config::read()", "Unknown Boundary:axis %s",
 	      axis_str.c_str());
     }
 
     std::string face_str = parameters->value_string("Boundary:face","all");
-    if      (face_str == "all")   { boundary_face[0] = face_all; }
-    else if (face_str == "lower") { boundary_face[0] = face_lower; }
-    else if (face_str == "upper") { boundary_face[0] = face_upper; }
+    if      (face_str == "all")   { boundary_face[ib] = face_all; }
+    else if (face_str == "lower") { boundary_face[ib] = face_lower; }
+    else if (face_str == "upper") { boundary_face[ib] = face_upper; }
     else {
       ERROR1 ("Config::read()", "Unknown Boundary:face %s",
 	      face_str.c_str());
     }
 
-    boundary_mask[0] = (parameters->type("Boundary:mask") 
+    boundary_mask[ib] = (parameters->type("Boundary:mask") 
 		     == parameter_logical_expr);
+
+    std::string param_str = "Boundary:field_list";
+    int field_list_type = parameters->type(param_str);
+    if (field_list_type == parameter_list) {
+      const int n = parameters->list_length(param_str);
+      boundary_field_list[ib].resize(n);
+      for (int index=0; index<n; index++) {
+	boundary_field_list[ib][index] = parameters->list_value_string 
+	  (index,param_str);
+      }
+    } else if (field_list_type == parameter_string) {
+      boundary_field_list[ib].resize(1);
+      boundary_field_list[ib][0] = parameters->value_string(param_str);
+    } else if (field_list_type != parameter_unknown) {
+      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
+	      field_list_type,param_str.c_str());
+    }
+	
 
   } else {
 
-    const int num_boundary = parameters->list_length("Boundary:list");
-    boundary_list.resize(num_boundary);
-    boundary_type.resize(num_boundary);
-    boundary_axis.resize(num_boundary);
-    boundary_face.resize(num_boundary);
-    boundary_mask.resize(num_boundary);
+    num_boundary = parameters->list_length("Boundary:list");
 
-    for (int index=0; index<num_boundary; index++) {
+    for (int ib=0; ib<num_boundary; ib++) {
 
-      boundary_list[index] = parameters->list_value_string
-	(index,"Boundary:list","unknown");
+      boundary_list[ib] = parameters->list_value_string
+	(ib,"Boundary:list","unknown");
 
-      std::string prefix = "Boundary:" + boundary_list[index] + ":";
-      boundary_type[index] = parameters->value_string(prefix+"type","unknown");
+      std::string prefix = "Boundary:" + boundary_list[ib] + ":";
+      boundary_type[ib] = parameters->value_string(prefix+"type","unknown");
       std::string axis_str = parameters->value_string(prefix+"axis","all");
-      if      (axis_str == "all") { boundary_axis[index] = axis_all; }
-      else if (axis_str == "x")   { boundary_axis[index] = axis_x; }
-      else if (axis_str == "y")   { boundary_axis[index] = axis_y; }
-      else if (axis_str == "z")   { boundary_axis[index] = axis_z; }
+      if      (axis_str == "all") { boundary_axis[ib] = axis_all; }
+      else if (axis_str == "x")   { boundary_axis[ib] = axis_x; }
+      else if (axis_str == "y")   { boundary_axis[ib] = axis_y; }
+      else if (axis_str == "z")   { boundary_axis[ib] = axis_z; }
       else {
 	ERROR2 ("Config::read()", "Unknown %s %s",
 		(prefix+"axis").c_str(),axis_str.c_str());
       }
 
       std::string face_str = parameters->value_string(prefix+"face","all");
-      if      (face_str == "all")   { boundary_face[index] = face_all; }
-      else if (face_str == "lower") { boundary_face[index] = face_lower; }
-      else if (face_str == "upper") { boundary_face[index] = face_upper; }
+      if      (face_str == "all")   { boundary_face[ib] = face_all; }
+      else if (face_str == "lower") { boundary_face[ib] = face_lower; }
+      else if (face_str == "upper") { boundary_face[ib] = face_upper; }
       else {
 	ERROR2 ("Config::read()", "Unknown %s %s",
 		(prefix+"face").c_str(),face_str.c_str());
       }
 
-      boundary_mask[index] = (parameters->type(prefix+"mask") 
+      boundary_mask[ib] = (parameters->type(prefix+"mask") 
 			  == parameter_logical_expr);
-      printf ("DEBUG %s:%d %s\n",__FILE__,__LINE__,boundary_type[index].c_str());
-      printf ("DEBUG %s:%d %d\n",__FILE__,__LINE__,boundary_axis[index]);
-      printf ("DEBUG %s:%d %d\n",__FILE__,__LINE__,boundary_face[index]);
-      //      printf ("DEBUG %s:%d %s\n",__FILE__,__LINE__,boundary_mask[index]);
+
+      std::string param_str = prefix+"field_list";
+      int field_list_type = parameters->type(param_str);
+      if (field_list_type == parameter_list) {
+	const int n = parameters->list_length(param_str);
+	boundary_field_list[ib].resize(n);
+	for (int index=0; index<n; index++) {
+	  boundary_field_list[ib][index] = parameters->list_value_string 
+	    (index,param_str);
+	}
+      } else if (field_list_type == parameter_string) {
+	boundary_field_list[ib].resize(1);
+	boundary_field_list[ib][0] = parameters->value_string(param_str);
+      } else if (field_list_type != parameter_unknown) {
+	ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
+		field_list_type,param_str.c_str());
+      }
+	
     }
 
   }

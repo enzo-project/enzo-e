@@ -15,6 +15,10 @@
 /* Maximum number of output file groups specified in the configuration file */
 #define MAX_FILE_GROUPS 10
 
+/* Maximum number of Boundary groups specified in the configuration file */
+
+#define MAX_BOUNDARY 10
+
 class Parameters;
 
 class Config : public PUP::able 
@@ -46,11 +50,13 @@ public: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  std::vector<std::string>   boundary_list;
-  std::vector<std::string>   boundary_type;
-  std::vector<int>           boundary_axis;
-  std::vector<int>           boundary_face;
-  std::vector<int>           boundary_mask;
+  int                        num_boundary;
+  std::string                boundary_list[MAX_BOUNDARY];
+  std::string                boundary_type[MAX_BOUNDARY];
+  int                        boundary_axis[MAX_BOUNDARY];
+  int                        boundary_face[MAX_BOUNDARY];
+  int                        boundary_mask[MAX_BOUNDARY];
+  std::vector<std::string>   boundary_field_list[MAX_BOUNDARY];
 
   double                     domain_lower[3];
   double                     domain_upper[3];

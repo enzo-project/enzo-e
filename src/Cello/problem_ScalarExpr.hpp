@@ -18,7 +18,8 @@ public: // interface
 
   /// Constructor
   ScalarExpr() throw()
-  : param_(0)
+  : param_(0),
+    value_(0)
   { }
 
   /// Destructor
@@ -44,6 +45,7 @@ public: // interface
   {
     TRACEPUP;
     WARNING("MaskExpr::pup()","UNFINISHED");
+    p | value_;
     // NOTE: change this function whenever attributes change
   }
 
@@ -65,7 +67,11 @@ private: // functions
 
 private: // attributes
 
+  /// Value if param_ type is precision_float_expr
   Param * param_;
+
+  /// Value if param_ type is precision_float
+  double value_;
 
 };
 

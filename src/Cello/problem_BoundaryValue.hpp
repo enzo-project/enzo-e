@@ -19,12 +19,13 @@ public: // interface
 
   /// Create a new BoundaryValue
   BoundaryValue() throw() 
-  : Boundary ()
+  : Boundary (), value_(0) 
   {}
 
   /// Create a new BoundaryValue
-  BoundaryValue(axis_enum axis, face_enum face, Mask * mask) throw() 
-    : Boundary(axis,face,mask)
+  BoundaryValue(axis_enum axis, face_enum face, Value * value, 
+		std::vector<std::string> field_list) throw() 
+    : Boundary(axis,face,0), value_(value), field_list_(field_list)
   { }
 
   /// Destructor
@@ -47,6 +48,19 @@ public: // virtual functions
 			CommBlock * block,
 			face_enum face = face_all,
 			axis_enum axis = axis_all) const throw();
+
+protected: // functions
+
+  template <class T>
+  void copy_(T * field, double * value,
+	     int ndx, int ndy, int ndz,
+	     int nx,  int ny,  int nz,
+	     int ix0, int iy0, int iz0) const throw ();
+
+protected: // attributes
+
+  Value * value_;
+  std::vector<std::string> field_list_;
 
 };
 

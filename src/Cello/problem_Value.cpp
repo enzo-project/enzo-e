@@ -14,16 +14,19 @@
 Value::Value(Parameters * parameters,
 	     const std::string parameter_name) throw()
 {
-  if (parameters->type(parameter_name) == parameter_float_expr) {
+  const int param_type = parameters->type(parameter_name);
+
+  if (param_type == parameter_float_expr || 
+      param_type == parameter_float ) {
 
     Param * param = parameters->param(parameter_name);
 
-    double v,x=1.0,y=2.0,z=3.0,t=7.0;
-    param->evaluate_float(1,&v,&x,&y,&z,t);
     ScalarExpr * scalar_expr = new ScalarExpr(param);
     scalar_expr_list_.push_back(scalar_expr);
 
-  }  else if (parameters->type(parameter_name) == parameter_list) {
+    mask_list_.push_back(NULL);
+
+  }  else if (param_type == parameter_list) {
 
     const int list_length = parameters->list_length(parameter_name);
     for (int index=0; index<list_length; index+=2) {
@@ -42,9 +45,9 @@ Value::Value(Parameters * parameters,
       }
     }
   } else {
-    ERROR1("Value::Value",
-	   "Parameter %s is not an expression or a list of expressions",
-	   parameter_name.c_str());
+    ERROR2("Value::Value",
+	   "Parameter %s is of incorrect type %d",
+	   parameter_name.c_str(),param_type);
   }
 }
 
@@ -55,6 +58,7 @@ double Value::evaluate (double t, double x, double y, double z) throw ()
   double value = 0.0;
   for (int index = (int)scalar_expr_list_.size()-1; index>=0; index--) {
     value = scalar_expr_list_[index]->evaluate(t,x,y,z,mask_list_[index], value);
+    printf ("DEBUG %s:%d %f\n",__FILE__,__LINE__,value);
   }
   return value;
 }
@@ -71,6 +75,8 @@ void Value::evaluate
   for (int index = (int)scalar_expr_list_.size()-1; index>=0; index--) {
     scalar_expr_list_[index]->evaluate
       (values,t,ndx,nx,x,ndy,ny,y,ndz,nz,z,mask_list_[index], values);
+    printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
+    for (int i=0; i<nx*ny*nz; i++) printf ("%f\n",values[i]);
   }
 }
 
