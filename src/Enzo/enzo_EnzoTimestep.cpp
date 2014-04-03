@@ -193,7 +193,7 @@ double EnzoTimestep::evaluate ( const FieldDescr * field_descr,
 
   if (dt==0) {
     FieldBlock * field_block = comm_block->block()->field_block();
-    field_block->print(field_descr,comm_block->name().c_str(),true);
+    field_block->print(comm_block->name().c_str(),true);
   }
   
   return dt;

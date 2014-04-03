@@ -99,10 +99,10 @@ void FieldFace::pup (PUP::er &p)
 
   bool up = p.isUnpacking();
 
-  if (up) field_block_ = new FieldBlock;
-  p | *field_block_;
   if (up) field_descr_ = new FieldDescr;
   p | *field_descr_;
+  if (up) field_block_ = new FieldBlock;
+  p | *field_block_;
   p | array_;
   PUParray(p,face_,3);
   PUParray(p,ghost_,3);
@@ -131,7 +131,7 @@ void FieldFace::load ( int * n, char ** array) throw()
 
     int nd3[3],ng3[3],im3[3],n3[3];
 
-    field_block_->field_size(field_descr_,index_field,&nd3[0],&nd3[1],&nd3[2]);
+    field_block_->field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
     field_descr_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     load_loop_limits_ (im3,n3, nd3,ng3);
@@ -208,7 +208,7 @@ void FieldFace::store (int n, char * array) throw()
 
     int nd3[3],ng3[3],im3[3],n3[3];
 
-    field_block_->field_size(field_descr_,index_field,&nd3[0],&nd3[1],&nd3[2]);
+    field_block_->field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
     field_descr_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     store_loop_limits_ (im3,n3, nd3,ng3);
@@ -290,7 +290,7 @@ char * FieldFace::allocate () throw()
 
     int nd3[3];
     int field_bytes = field_block_->field_size 
-      (field_descr_,index_field, &nd3[0], &nd3[1], &nd3[2]);
+      (index_field, &nd3[0], &nd3[1], &nd3[2]);
 
     int ng3[3];
     field_descr_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);

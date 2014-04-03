@@ -62,11 +62,9 @@ public: // interface
 
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
-  char * field_unknowns ( const FieldDescr * field_descr,
-			  int id_field) throw (std::out_of_range);
+  char * field_unknowns ( int id_field) throw (std::out_of_range);
 
-  const char * field_unknowns ( const FieldDescr * field_descr,
-				int id_field) const throw (std::out_of_range);
+  const char * field_unknowns ( int id_field) const throw (std::out_of_range);
 
   /// Return raw pointer to the array of all fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
@@ -79,12 +77,8 @@ public: // interface
 		  double ym=0, double yp=0, double * hy=0,
 		  double zm=0, double zp=0, double * hz=0) const throw ();
 
-  // /// Return the associated field faces object
-  // FieldFaces * field_faces(const FieldDescr * field_descr) throw ();
-
   /// Clear specified array(s) to specified value
-  void clear ( const FieldDescr * field_descr,
-	       float value = 0.0, 
+  void clear ( float value = 0.0, 
 	       int id_field_first = -1, 
 	       int id_field_last  = -1) throw();
  
@@ -114,22 +108,20 @@ public: // interface
 
   /// Return the number of elements (nx,ny,nz) along each axis, and total
   /// number of bytes n
-  int field_size (const FieldDescr * field_descr, int id_field, 
-		  int *nx = 0, int *ny = 0, int *nz = 0) const throw();
+  int field_size (int id_field, int *nx=0, int *ny=0, int *nz=0) const throw();
 
   /// Multiply FieldBlock 1 by FieldBlock 2
-  void mul (int id_1, int id_2, const FieldDescr * field_descr);
+  void mul (int id_1, int id_2);
   /// Divide FieldBlock 1 by FieldBlock 2
-  void div (int id_1, int id_2, const FieldDescr * field_descr);
+  void div (int id_1, int id_2);
   /// Multiply FieldBlock by a constant
-  void scale (int id_1, double scale, const FieldDescr * field_descr);
+  void scale (int id_1, double scale);
 
 
   //----------------------------------------------------------------------
 
   /// Print basic field characteristics for debugging
-  void print (const FieldDescr * field_descr,
-	      const char * message,
+  void print (const char * message,
 	      bool use_file = false) const throw();
 
 private: // functions
@@ -146,8 +138,7 @@ private: // functions
 
   /// Move (not copy) array to array_ and offsets to
   /// offsets_
-  void restore_array_ ( const FieldDescr * field_descr,
-			const char       * array_from,
+  void restore_array_ ( const char       * array_from,
 			std::vector<int> & offsets_from )
     throw (std::out_of_range);
 
@@ -167,17 +158,20 @@ private: // functions
    int nxd,int nyd) const;
 
   template<class T>
-  void mul_ (T * field_1, T * field_2, const FieldDescr * field_descr);
+  void mul_ (T * field_1, T * field_2);
 
   template<class T>
-  void div_ (T * field_1, T * field_2, const FieldDescr * field_descr);
+  void div_ (T * field_1, T * field_2);
 
   template<class T>
-  void scale_ (T * field, double value, const FieldDescr * field_descr);
+  void scale_ (T * field, double value);
 
   //----------------------------------------------------------------------
 
 private: // attributes
+
+  /// Pointer to the associated field descriptor
+  const FieldDescr * field_descr_;
 
   /// Size of fields on the block, assuming centered
   int size_[3];

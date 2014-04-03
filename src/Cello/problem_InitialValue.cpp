@@ -155,7 +155,7 @@ void InitialValue::enforce_block
 
     if (parameter_type == parameter_float) {
 
-      field_block->clear(field_descr,parameters_->value_float("value",0.0), 
+      field_block->clear(parameters_->value_float("value",0.0), 
 			 index_field);
 
     } else if (parameter_type == parameter_list) {
@@ -308,7 +308,7 @@ void InitialValue::copy_values_
 
   // Copy the floating-point values to the field where mask values are true
 
-  void * field = field_block->field_unknowns(field_descr,index_field);
+  void * field = field_block->field_unknowns(index_field);
 
   // Determine allocated array size
 

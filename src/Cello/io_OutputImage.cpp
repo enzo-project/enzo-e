@@ -239,7 +239,7 @@ void OutputImage::write_block
 
   const char * field = (ghost_) ? 
     field_block->field_values(index_field) :
-    field_block->field_unknowns(field_descr,index_field);
+    field_block->field_unknowns(index_field);
 
   // pixel extents of box
   int ixm,iym,izm; 
