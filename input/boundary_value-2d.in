@@ -1,0 +1,70 @@
+include "input/dots.incl"
+
+Mesh { 
+   max_level   = 3; 
+   root_size   = [32, 32];
+   root_blocks = [4,4];
+   adapt {
+      type = ["slope"];
+      fields = ["density"];
+      balance = true;
+   }
+}
+
+Field {
+    ghosts = 4; # must be even for ProlongLinear
+    prolong = "linear";
+    refresh {
+       rank = 0;
+    }
+}
+
+Stopping { cycle = 2000; }
+
+Boundary { 
+   list = ["R","D"];
+   R {
+      type = "reflecting";
+   };
+   D {
+      type = "value";
+      value = 0.5 + 0.5*y;
+      field_list = ["density"];
+      axis = "x";
+      face = "lower";
+   }
+}
+
+Initial {
+   max_level   = 3; 
+    density       { value = [ 1.0, (0.2 <= x && x < 0.4),  0.125 ]; };
+    total_energy  { value = [ 1.0  / (0.4 * 1.0) ,
+                                   (0.2 <= x && x < 0.4),  0.14 / (0.4 * 0.1)]; };
+    velocity_x    { value = [0.0]; };
+    velocity_y    { value = [0.0]; };
+    internal_energy { value = 0.0; }
+}
+
+Output { 
+   file_groups = ["cycle_step","mesh"];
+
+   cycle_step {  
+      name = ["boundary_masked-2d-%04d.png","cycle"]; 
+      include "input/colormap_blackbody.incl"
+   } ;
+    mesh {
+	type     = "image";
+	name = ["boundary_masked-mesh-2d-%04d.png","cycle"];
+	image_type  = "data+mesh";
+	image_reduce_type = "max";
+        field_list = ["density"];
+#	image_block_size  = 5;
+#	image_size = [1025,1025];
+	schedule = ["cycle","interval", 10];
+        image_specify_bounds = true;
+	image_min = 0.0;
+	image_max = 6.0;
+       include "input/colormap_blackbody.incl"
+      }
+}
+
