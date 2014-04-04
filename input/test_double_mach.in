@@ -1,0 +1,142 @@
+# Problem: 2D double mach reflection
+#
+#  From http://www.astro.virginia.edu/VITA/ATHENA/dmr.html:
+#
+# Domain
+#     0.0 ≤ x ≤ 4.0, 0.0 ≤ y ≤ 1.0 
+# Boundary conditions
+# 
+#     The inner x boundary is simply an "inflow" condition, in which the
+#     ghost zone fluid values are set by the initial conditions in the
+#     post-shock region.
+# 
+#     The outer x boundary is a simple outflow condition. 
+# 
+#     The lower y boundary is constructed to mimic the wedge that the
+#     shock is being driven into. For x ≥ x0, this y boundary is a
+#     reflecting wall. For x < x0, the lower y ghost zone fluid values
+#     are set by the initial post-shock conditions. Here, we take x0 to
+#     be 1/6.
+# 
+#     The upper y boundary is constructed to follow the flow of the
+#     diagonal shock such that there is no interaction between the shock
+#     and this boundary. Given the initial condtions here, the
+#     intersection of the diagonal shock and the upper boundary at time
+#     t occurs at xs(t) = x0 + (1+20t)/31/2 (see "Fluid and Shock
+#     Properties" below). For x ≥ xs(t), the upper y ghost zone values
+#     are set by the initial pre-shock conditions. For x < xs(t), the
+#     ghost zone values are set by the initial post-shock conditions.
+# 
+# Equation of state
+# 
+#     Adiabatic with γ = 1.4 
+# 
+# Initial density
+# 
+#     The shock is initially set up to be inclined at an angle of 60º to
+#     the x-axis, and has a Mach number of 10.
+# 
+#     Therefore, the initial density is 8.0 for x < x0 + y(1/31/2) and
+#     is 1.4 for x ≥ x0 + y(1/31/2)
+# 
+# Initial pressure
+# 
+#     P = 116.5 for x < x0 + y(1/31/2), P = 1.0 for x ≥ x0 + y(1/31/2)
+# 
+# Initial velocity
+# 
+#     vx = 8.25 cos(30º) for x < x0 + y(1/31/2) 
+#     vy = -8.25 sin(30º) for x < x0 + y(1/31/2) 
+#     All velocities are zero for x ≥ x0 + y(1/31/2) 
+# 
+# MHD Components
+# 
+#     There is no MHD version of this test. 
+# 
+# Fluid and Shock Properties
+# 
+#     Given the initial conditions described above, the sound speed of
+#     the pre-shock gas is 1, and the shock speed is 10. Given the
+#     geometry, the intersection of this diagonal shock with the upper y
+#     boundary moves at a speed of 10/cos(30º). The movement of this
+#     intersection is the reason for the changing upper y boundary
+#     condition at the position xs(t) = x0 + (1+20t)/31/2 as described
+#     above. This shock is driven by a contact discontinuity that is
+#     initialized with velocity 8.25 pointing downward with respect to
+#     the horizontal by 30º.
+ 
+ 
+   Domain { 
+      lower = [0.0, 0.0];
+      upper = [4.0, 1.0];
+   } 
+
+   # The computational mesh is a single uniform grid
+
+   Mesh { 
+      root_rank = 2;
+      root_size = [320,80];
+   }
+
+   Field {
+
+      ghosts = 3;
+
+      refresh { rank = 0;  };
+
+      fields = [
+	"density",	
+	"velocity_x",
+	"velocity_y",
+	"total_energy",
+	"internal_energy"
+      ] ;
+
+      # courant condition for fields
+
+      courant   = 0.8;
+
+      padding   = 0;
+      alignment = 8;    
+   }
+
+   Method {
+      sequence = ["ppm"];
+   }
+
+   Timestep { type = "ppm"; }
+
+   Enzo {
+
+      gamma = 1.4;
+
+      ppm {
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+         dual_energy = false;
+     }
+   }
+
+   Stopping {        cycle = 400;   } 
+
+   Output { 
+
+   file_groups = ["density"];
+
+      density {
+        field_list = ["density"];
+	type     = "image";
+	schedule = ["cycle","interval", 10];
+        include "input/colormap_blackbody.incl";
+      };
+
+
+   }
+
+include "input/problem_double_mach.incl"
+
+Output { 
+   density { name = ["double-mach-8-%06d.png", "cycle"]; } 
+}
+
