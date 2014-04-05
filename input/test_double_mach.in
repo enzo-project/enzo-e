@@ -75,7 +75,8 @@
 
    Mesh { 
       root_rank = 2;
-      root_size = [320,80];
+      root_blocks = [4,1];
+      root_size = [1200,300];
    }
 
    Field {
@@ -118,17 +119,32 @@
      }
    }
 
-   Stopping {        cycle = 400;   } 
+   Stopping {        cycle = 1000;   } 
 
    Output { 
 
-   file_groups = ["density"];
+   file_groups = ["de_png"];
 
-      density {
+      de_png {
+        name = ["double-mach-de-%06d.png", "cycle"]; 
         field_list = ["density"];
 	type     = "image";
 	schedule = ["cycle","interval", 10];
-        include "input/colormap_blackbody.incl";
+        include "input/colormap_rainbow.incl";
+      };
+
+      de_h5 {
+        name = ["double-mach-de-%06d.h5", "cycle"]; 
+        field_list = ["density"];
+	type     = "data";
+	schedule = ["cycle","interval", 10];
+      };
+
+      te_h5 {
+        name = ["double-mach-te-%06d.h5", "cycle"]; 
+        field_list = ["total_energy"];
+	type     = "data";
+	schedule = ["cycle","interval", 10];
       };
 
 
@@ -136,7 +152,4 @@
 
 include "input/problem_double_mach.incl"
 
-Output { 
-   density { name = ["double-mach-8-%06d.png", "cycle"]; } 
-}
 

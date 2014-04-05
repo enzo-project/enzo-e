@@ -11,7 +11,8 @@
 
 //----------------------------------------------------------------------
 
-OutputImage::OutputImage(int index,
+OutputImage::OutputImage(const FieldDescr * field_descr,
+			 int index,
 			 const Factory * factory,
 			 int process_count,
 			 int nx0, int ny0, int nz0,
@@ -67,8 +68,6 @@ OutputImage::OutputImage(int index,
 
   int nl = image_block_size * (1 << max_level_); // image size factor
 
-  TRACE1 ("image_block_size factor = %d",nl);
-
   if (ghost_) {
     if (nx0>1) nx0*=2;
     if (ny0>1) ny0*=2;
@@ -78,7 +77,13 @@ OutputImage::OutputImage(int index,
   if (nyi_ == 0) nyi_ = (type_is_mesh()) ? 2*nl * nyb + 1 : nl * ny0;
   if (nzi_ == 0) nzi_ = (type_is_mesh()) ? 2*nl * nzb + 1 : nl * nz0;
 
-  TRACE2("OutputImage nl,max_level %d %d",nl,max_level);
+  int ngx,ngy,ngz;
+  field_descr->ghosts(0,&ngx,&ngy,&ngz);
+  if (! type_is_mesh() && ghost_) {
+    nxi_ += 2*nxb*ngx*nl;
+    nyi_ += 2*nyb*ngy*nl;
+    nzi_ += 2*nzb*ngz*nl;
+  }
   
   // Override default Output::process_stride_: only root writes
   set_process_stride(process_count);

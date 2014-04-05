@@ -44,10 +44,10 @@ void MaskExpr::evaluate (bool * mask, double t,
 	  ndx,ndy,ndz,nx,ny,nz,
 	  (ndx >= nx) && (ndy >= ny) && (ndz >= nz));
 
+  bool * mask_temp = new bool [nx*ny*nz];
   double * x = new double [nx*ny*nz];
   double * y = new double [nx*ny*nz];
   double * z = new double [nx*ny*nz];
-  bool * mask_temp = new bool [nx*ny*nz];
   for (int ix=0; ix<nx; ix++) {
     for (int iy=0; iy<ny; iy++) {
       for (int iz=0; iz<nz; iz++) {
@@ -74,9 +74,9 @@ void MaskExpr::evaluate (bool * mask, double t,
     }
   }
 
-  delete [] mask_temp;
   delete [] z;
   delete [] y;
   delete [] x;
+  delete [] mask_temp;
 
 }

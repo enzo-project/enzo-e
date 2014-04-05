@@ -69,7 +69,8 @@ public: // interface
   FieldBlock * field_block (int i=0) throw();
 
   /// Return the x,y,z,t coordinates of field cell centers
-  void field_cells (double * x, double * y, double * z) const;
+  void field_cells (double * x, double * y, double * z,
+		    int gx = 0, int gy = 0, int gz = 0) const;
 
   /// Return domain lower extent
   /// B

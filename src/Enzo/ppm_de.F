@@ -159,6 +159,8 @@ C      print*, 'colindex = ',colindex
       if (max(in,jn,kn) .gt. MAX_ANY_SINGLE_DIRECTION) then
          write(6,*) 'PPM_DE: A grid dimension is too long.'
          write(6,*) '   (increase MAX_ANY_SINGLE_DIRECTION.)'
+         write(6,*) 'in=',in,'jn=',jn,'kn=',kn,'max=',
+     *        MAX_ANY_SINGLE_DIRECTION
          stop 
       endif
 c

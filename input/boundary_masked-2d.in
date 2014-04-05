@@ -24,23 +24,23 @@ Stopping { cycle = 2000; }
 Boundary { 
    list = ["Rx","Ox","Px","Py"];
    Ox {
-     type = "outflow";
      axis = "x";
-     mask = y <= 0.333;
+     type = "outflow";
+     mask = (y <= 0.333);
    };
    Rx {
-     type = "reflecting";
      axis = "x";
-     mask = 0.333 < y && y <= 0.666;
+     type = "reflecting";
+     mask = (0.333 < y && y <= 0.666);
    };
    Px {
-     type = "periodic";
      axis = "x";
-     mask = 0.666 < y;
+     type = "periodic";
+     mask = (0.666 < y);
    };
    Py {
-     type = "periodic";
      axis = "y";
+     type = "periodic";
    }
 }
 

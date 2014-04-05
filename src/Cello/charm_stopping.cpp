@@ -29,9 +29,6 @@ void CommBlock::stopping_begin_()
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
- //--------------------------------------------------
-  // Enforce boundary conditions
-  //--------------------------------------------------
 
   update_boundary_();
 

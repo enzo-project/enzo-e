@@ -9,71 +9,94 @@ Initial {
 
 
    density {
-        value = [8.0, x < 0.16667 + 0.57735*y, 1.0];
+        value = [8.0, 
+                       (x < 0.16667 + 0.57735*y), 
+                 1.0];
    };
    velocity_x {
-      value = [ 8.25*0.5,  x < 0.16667 + 0.57735*y, 0.0 ]; 
+      value = [ 8.25*0.5,  
+                       (x < 0.16667 + 0.57735*y),
+                0.0 ]; 
    };
    velocity_y {
-      value = [-8.25*0.8660253,  x < 0.16667 + 0.57735*y, 0.0]; 
+      value = [-8.25*0.8660253,  
+                       (x < 0.16667 + 0.57735*y),
+                0.0]; 
    };
    total_energy {
-      value = [116.5 / (0.4 + 8.0) + 68.0625, x < 0.16667 + 0.57735*y, 1.0 / (0.4 + 1.0)]; 
+      value = [116.5 / (0.4 + 8.0) + 68.0625, 
+                       (x < 0.16667 + 0.57735*y), 
+                 1.0 / (0.4 + 1.0)]; 
    };
 }
 
 Boundary {
 
-   list = ["density_preshock",
-           "velocity_x_preshock",
-           "velocity_y_preshock",
-	   "total_energy_preshock",
-	   "postshock_outflow",
-	   "reflecting" ];
+   list = [
+	   "outflow",
+	   "reflecting",
+           "d_pre",
+           "vx_pre",
+           "vy_pre",
+	   "te_pre"
 
-   density_preshock {
-      type = "value";
-      field_list = "density";
-      value = [ 8.0, (y <= 0.001 && x < 0.16667) || (x <= 0.001) 
-                       ||(y >= 0.999) && (x < 0.57735*(1.0 + 20.0*t)) ];
-   };
+ ];
 
-   velocity_x_preshock {
-      type = "value";
-      field_list = "velocity_x";
-      value = [ 8.25*0.5,
-                     (y <= 0.001 && x < 0.16667) ||
-                     (x <= 0.001) ||
-                     (y >= 0.999 && x < 0.57735*(1.0 + 20.0* t)) ];
-   };
-
-   velocity_y_preshock {
-      type = "value";
-      field_list = ["velocity_y"];
-      value = [ -8.25*0.8660253,
-                     (y <= 0.001 && x < 0.16667) ||
-                     (x <= 0.001) ||
-                     (y >= 0.999 && x < 0.57735*(1.0 + 20.0* t)) ];
-   };
-   total_energy_preshock {
-      type = "value";
-      field_list = "total_energy";
-      value = [ 116.5 / (0.4 + 8.0) + 68.0625,
-                     (y <= 0.001 && x < 0.16667) ||
-                     (x <= 0.001) ||
-                     (y >= 0.999 && x < 0.57735*(1.0 + 20.0* t)) ];
-   };
-   postshock_outflow {
+   outflow {
       type = "outflow";
-      mask = [ (y >= 0.999 && x >= 0.57735*(1.0 + 20.0* t)) ||
-               (x >= 0.999) ];
+      mask = [ (x >= 4.0) || 
+               (y >= 1.0 && (x >= 0.744017 + 11.547* t))];
    };
    reflecting {
       type = "reflecting";
       axis = "y";
       face = "lower";
-      mask = (x >= 0.16667);
-   }      
+      mask = (x >= 0.166667);
+   };
 
-      
+   d_pre {
+      type = "value";
+      field_list = "density";
+      value = [ 8.0, 
+                 ((x < 0.166667) && (y < 0.0) ) ||
+                  (x < 0.0) ||
+                  ((x < 0.744017 + 11.547*t) && (y >= 1.0))
+              ];
+    };
+
+   te_pre {
+      type = "value";
+      field_list = "total_energy";
+      value = [ 116.5 / (0.4 + 8.0) + 68.0625,
+                 ( (x < 0.166667) && (y <= 0.0) ) ||
+                   (x < 0.0) ||
+                  ((x < 0.744017 + 11.547*t) && (y >= 1.0))
+               ];
+    };
+
+   vx_pre {
+      type = "value";
+      field_list = "velocity_x";
+      value = [ 8.25*0.5,
+                 ((x < 0.166667) && (y <= 0.0) ) ||
+                  (x <= 0.0) ||
+		  ((x < 0.744017 + 11.547*t) && (y >= 1.0))
+               ];
+    };
+
+   vy_pre {
+      type = "value";
+      field_list = "velocity_y";
+      value = [ -8.25*0.8660253,
+                 ((x < 0.166667) && (y <= 0.0) ) ||
+                  (x <= 0.0) ||
+		  ((x < 0.744017 + 11.547*t) && (y >= 1.0))
+               ];
+    };
+
+   outflow {
+      type = "outflow";
+      mask = [ (x >= 4.0) || 
+               (y >= 1.0 && (x >= 0.744017 + 11.547* t))];
+   };
 }

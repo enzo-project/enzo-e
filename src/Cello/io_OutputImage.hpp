@@ -31,7 +31,8 @@ public: // functions
   OutputImage() throw() {}
 
   /// Create an uninitialized OutputImage object
-  OutputImage(int index,
+  OutputImage(const FieldDescr * field_descr,
+	      int index,
 	      const Factory * factory,
 	      int process_count,
 	      int nx0, int ny0, int nz0,

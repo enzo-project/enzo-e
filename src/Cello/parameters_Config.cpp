@@ -201,6 +201,11 @@ void Config::read(Parameters * parameters) throw()
 
     num_boundary = parameters->list_length("Boundary:list");
 
+    ASSERT2 ("Config::read()", 
+	     "Too many boundary conditions: %d must not be more than %d",
+	     num_boundary,MAX_BOUNDARY,
+	     num_boundary <= MAX_BOUNDARY);
+
     for (int ib=0; ib<num_boundary; ib++) {
 
       boundary_list[ib] = parameters->list_value_string

@@ -58,26 +58,8 @@ double Value::evaluate (double t, double x, double y, double z) throw ()
   double value = 0.0;
   for (int index = (int)scalar_expr_list_.size()-1; index>=0; index--) {
     value = scalar_expr_list_[index]->evaluate(t,x,y,z,mask_list_[index], value);
-    printf ("DEBUG %s:%d %f\n",__FILE__,__LINE__,value);
   }
   return value;
-}
-
-//----------------------------------------------------------------------
-
-void Value::evaluate
-(double * values, 
- double t,
- int ndx, int nx, double * x,
- int ndy, int ny, double * y,
- int ndz, int nz, double * z) throw ()
-{
-  for (int index = (int)scalar_expr_list_.size()-1; index>=0; index--) {
-    scalar_expr_list_[index]->evaluate
-      (values,t,ndx,nx,x,ndy,ny,y,ndz,nz,z,mask_list_[index], values);
-    printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
-    for (int i=0; i<nx*ny*nz; i++) printf ("%f\n",values[i]);
-  }
 }
 
 //----------------------------------------------------------------------

@@ -211,7 +211,6 @@ void FileHdf5::data_create
 
   // Create dataspace
 
-
   data_space_id_ = create_data_space_ (nxd,nyd,nzd,nx,ny,nz);
   mem_space_id_  = create_mem_space_  (nxd,nyd,nzd,nx,ny,nz);
 

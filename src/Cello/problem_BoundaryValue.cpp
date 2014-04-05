@@ -33,13 +33,6 @@ void BoundaryValue::enforce
 
     int nx,ny,nz;
     field_block->size(&nx,&ny,&nz);
-    
-
-    double * x = new double [nx];
-    double * y = new double [ny];
-    double * z = new double [nz];
-
-    block->field_cells(x,y,z);
 
     double xm,ym,zm;
     double xp,yp,zp;
@@ -53,13 +46,21 @@ void BoundaryValue::enforce
       int index_field = field_descr->field_id(field_list_[index]);
       int gx,gy,gz;
       field_descr->ghosts(index_field,&gx,&gy,&gz);
+
+
       int ndx=nx+2*gx;
       int ndy=ny+2*gy;
       int ndz=nz+2*gz;
+
+      double * x = new double [ndx];
+      double * y = new double [ndy];
+      double * z = new double [ndz];
+
+      block->field_cells(x,y,z,gx,gy,gz);
+
       void * array = field_block->field_values(index_field);
       precision_type precision = field_descr->precision(index_field);
       int ix0=0 ,iy0=0,iz0=0;
-      nx=ndx, ny=ndy, nz=ndz;
 
       if (axis == axis_x) nx=gx;
       if (axis == axis_y) ny=gy;
@@ -70,32 +71,34 @@ void BoundaryValue::enforce
 	if (axis == axis_z) iz0 = ndz - gz;
       }
 
-      double * v = new double [nx*ny*nz];
-
-      value_->evaluate(v, t,
-		       nx,nx,x+ix0,
-		       ny,ny,y+iy0,
-		       nz,nz,z+iz0);
-
+      int i0=ix0 + ndx*(iy0 + ndy*iz0);
       switch (precision) {
       case precision_single:
-	copy_((float *)array,v,ndx,ndy,ndz,nx,ny,nz,ix0,iy0,iz0);
-	break;
+	value_->evaluate((float *)array+i0, t, 
+			 ndx,nx,x+ix0, 
+			 ndy,ny,y+iy0,
+			 ndz,nz,z+iz0);
+       	break;
       case precision_double:
-	copy_((double *)array,v,ndx,ndy,ndz,nx,ny,nz,ix0,iy0,iz0);
-	break;
+	value_->evaluate((double *)array+i0, t, 
+			 ndx,nx,x+ix0, 
+			 ndy,ny,y+iy0,
+			 ndz,nz,z+iz0);
+       	break;
       case precision_extended80:
       case precision_extended96:
       case precision_quadruple:
-	copy_((long double *)array,v,ndx,ndy,ndz,nx,ny,nz,ix0,iy0,iz0);
-	break;
+	value_->evaluate((long double *)array+i0, t, 
+			 ndx,nx,x+ix0, 
+			 ndy,ny,y+iy0,
+			 ndz,nz,z+iz0);
+       	break;
       }
 
-      delete [] v;
+      delete [] x;
+      delete [] y;
+      delete [] z;
     }
-    delete [] x;
-    delete [] y;
-    delete [] z;
   }
 }
 

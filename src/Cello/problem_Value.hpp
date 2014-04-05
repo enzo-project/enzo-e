@@ -43,12 +43,18 @@ public: // interface
     // NOTE: change this function whenever attributes change
   }
 
+  template <class T>
   void evaluate
-  (double * values, 
-   double t,
+  (T * values, double t,
    int ndx, int nx, double * x,
    int ndy, int ny, double * y,
-   int ndz, int nz, double * z) throw ();
+   int ndz, int nz, double * z) throw ()
+  {
+    for (int index = (int)scalar_expr_list_.size()-1; index>=0; index--) {
+      scalar_expr_list_[index]->evaluate
+	(values,t,ndx,nx,x,ndy,ny,y,ndz,nz,z,mask_list_[index], values);
+    }
+  }
 
   double evaluate (double t, double x, double y, double z) throw ();
 

@@ -436,7 +436,6 @@ void CommBlock::update_boundary_ ()
 
   while ((boundary = problem->boundary(index++))) {
     // Update boundaries
-
     if ( fxm ) boundary->enforce(field_descr,this,face_lower,axis_x);
     if ( fxp ) boundary->enforce(field_descr,this,face_upper,axis_x);
     if ( fym ) boundary->enforce(field_descr,this,face_lower,axis_y);

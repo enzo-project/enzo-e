@@ -17,7 +17,7 @@
 
 /* Maximum number of Boundary groups specified in the configuration file */
 
-#define MAX_BOUNDARY 10
+#define MAX_BOUNDARY 50
 
 class Parameters;
 

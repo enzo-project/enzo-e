@@ -208,7 +208,8 @@ void Problem::initialize_output
     std::string file_group = config->output_file_groups [index];
     std::string type       = config->output_type[index];
 
-    Output * output = create_output_ (type,index, config,group_process,factory);
+    Output * output = create_output_ 
+      (type,index, config,field_descr,group_process,factory);
 
     if (output == NULL) {
       ERROR2("Problem::initialize_output",
@@ -377,7 +378,8 @@ Boundary * Problem::create_boundary_
  ) throw ()
 {
   if (type == "value") {
-    std::string param_str = "Boundary:" + config->boundary_list[index] + ":value";
+    std::string param_str = 
+      "Boundary:" + config->boundary_list[index] + ":value";
     int param_type = parameters->type(param_str);
     if (! (param_type == parameter_list ||
 	   param_type == parameter_float ||
@@ -500,6 +502,7 @@ Output * Problem::create_output_
  std::string    name,
  int index,
  Config *  config,
+ const FieldDescr * field_descr,
  const GroupProcess * group_process,
  const Factory * factory
  ) throw ()
@@ -541,7 +544,8 @@ Output * Problem::create_output_
     double      image_min = config->output_image_min[index];
     double      image_max = config->output_image_max[index];
 
-    output = new OutputImage (index,factory,group_process->size(),
+    output = new OutputImage (field_descr,
+			      index,factory,group_process->size(),
 			      nx,ny,nz, 
 			      nbx,nby,nbz, 
 			      max_level,

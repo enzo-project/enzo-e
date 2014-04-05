@@ -90,7 +90,8 @@ FieldBlock * Block::field_block (int i) throw()
 
 //----------------------------------------------------------------------
 
-void Block::field_cells (double * x, double * y, double * z) const
+void Block::field_cells (double * x, double * y, double * z,
+			 int gx, int gy, int gz) const
 {
   double xm,ym,zm;
   this->lower(&xm,&ym,&zm);
@@ -102,15 +103,17 @@ void Block::field_cells (double * x, double * y, double * z) const
   int nx,ny,nz;
   field_block()->size(&nx,&ny,&nz);
 
-  for (int ix=0; ix<nx; ix++) {
-    x[ix] = xm + (ix+0.5)*hx;
-  }
-  for (int iy=0; iy<ny; iy++) {
-    y[iy] = ym + (iy+0.5)*hy;
-  }
-  for (int iz=0; iz<nz; iz++) {
-    z[iz] = zm + (iz+0.5)*hz;
-  }
+  int ixm = -gx;
+  int iym = -gy;
+  int izm = -gz;
+
+  int ixp = nx+gx;
+  int iyp = ny+gy;
+  int izp = nz+gz;
+  
+  for (int ix=ixm; ix<ixp; ix++) x[ix-ixm] = xm + (ix+0.5)*hx;
+  for (int iy=iym; iy<iyp; iy++) y[iy-iym] = ym + (iy+0.5)*hy;
+  for (int iz=izm; iz<izp; iz++) z[iz-izm] = zm + (iz+0.5)*hz;
 }
 
 //======================================================================
