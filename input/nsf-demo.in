@@ -20,14 +20,17 @@ Mesh {
    root_blocks = [   4,  4 ];
    max_level = 5;
 
-   adapt {
-      slope_min_refine  = 5.0;
-      slope_max_coarsen = 2.0;
-      type = ["slope"];
-      balance = true;
-      fields = ["density"];
-   };
 }
+
+Adapt {
+   list = ["slope"];
+   slope {
+       type = "slope";
+       field_list = ["density"];
+       min_refine = 5.0;
+       max_coarsen = 2.0; 
+   }
+} 
 
 # Declare fields, ghost zone depth, and CFL condition
 

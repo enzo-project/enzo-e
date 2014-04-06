@@ -128,6 +128,7 @@ public: // interface
 
   /// Initialize the refine object
   void initialize_refine(Config * config,
+			 Parameters * parameters,
 			 const FieldDescr * field_descr) throw();
 
   /// Initialize the stopping object
@@ -177,6 +178,7 @@ protected: // functions
   virtual Refine * create_refine_ 
   (std::string type, 
    Config * config, 
+   Parameters * parameters,
    const FieldDescr * field_descr,
    int index) throw ();
 

@@ -4,7 +4,10 @@
 include "input/mesh-balanced.in"
 
 
-Mesh { adapt { balance = false; } }
+
+Adapt {
+   balanced = false;
+} 
 
 Output {
       de   { name = ["mesh-unbalanced-de.%03d.png","cycle"];  };

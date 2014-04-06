@@ -18,9 +18,9 @@ class RefineMass : public Refine {
 public: // interface
 
   /// Constructor
-  RefineMass(double min_mass,
+  RefineMass(double min_refine,
+	     double max_coarsen,
 	     double level_exponent,
-	     double min_overdensity,
 	     double root_cell_volume) throw();
 
   /// default constructor
@@ -35,9 +35,9 @@ public: // interface
   {
     // NOTE: change this function whenever attributes change
     Refine::pup(p);
-    p | min_;
+    p | min_refine_;
+    p | max_coarsen_;
     p | level_exponent_;
-    p | min_overdensity_;
   }
 
   /// Evaluate the refinement criteria, updating the refinement field
@@ -49,13 +49,13 @@ public: // interface
 private:
 
   /// Minimum allowed mass before refinement kicks in
-  double min_;
+  double min_refine_;
 
   /// Minimum allowed mass before refinement kicks in
+  double max_coarsen_;
+
   double level_exponent_;
 
-  /// Minimum allowed mass overdensity before refinement kicks in
-  double min_overdensity_;
 };
 
 #endif /* MESH_REFINE_MASS_HPP */

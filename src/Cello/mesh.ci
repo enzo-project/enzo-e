@@ -24,6 +24,7 @@ module mesh {
   PUPable Problem;
   PUPable ProlongLinear;
   PUPable Refine;
+  PUPable RefineMask;
   PUPable RefineMass;
   PUPable RefineSlope;
   PUPable RestrictLinear;

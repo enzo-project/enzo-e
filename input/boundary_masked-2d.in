@@ -4,12 +4,17 @@ Mesh {
    max_level   = 5; 
    root_size   = [32, 32];
    root_blocks = [4,4];
-   adapt {
-      type = ["slope"];
-      fields = ["density"];
-      balance = true;
-   }
 }
+
+Adapt {
+   list = ["slope"];
+   slope {
+       type = "slope";
+       field_list = ["density"];
+       min_refine = 4.0;
+       max_coarsen = 1.0; 
+   }
+} 
 
 Field {
     ghosts = 4; # must be even for ProlongLinear

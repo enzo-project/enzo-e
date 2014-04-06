@@ -38,7 +38,11 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
-  { TRACEPUP; PUP::able::pup(p); };
+  { TRACEPUP; 
+    PUP::able::pup(p); 
+    p | *value_;
+    p | field_list_;
+  };
 
 public: // virtual functions
 

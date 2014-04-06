@@ -23,9 +23,10 @@ void BoundaryValue::enforce
     enforce(field_descr,comm_block,face,axis_y);
     enforce(field_descr,comm_block,face,axis_z);
   } else {
-    Block * block = comm_block->block();
 
+    Block * block = comm_block->block();
     FieldBlock * field_block = block->field_block();
+
     if ( ! field_block->ghosts_allocated() ) {
       ERROR("EnzoBoundary::enforce",
 	    "Function called with ghosts not allocated");

@@ -1,58 +1,57 @@
 include "input/dots.incl"
 
 Mesh { 
-#   max_level   = 3; 
-   root_size   = [256, 256];
-   root_blocks = [1,1];
-#   adapt {
-#      type = ["slope"];
-#      fields = ["density"];
-#      balance = true;
-#   }
+   max_level   = 3; 
+   root_size   = [32, 32];
+   root_blocks = [4,4];
 }
 
-# Field {
-#     ghosts = 4; # must be even for ProlongLinear
-#     prolong = "linear";
-#     refresh {
-#        rank = 0;
-#     }
-# }
+Adapt {
+   list = ["slope"];
+   slope {
+       type = "slope";
+       field_list = ["density"];
+       min_refine = 4.0;
+       max_coarsen = 1.0; 
+   }
+} 
+
+Field {
+    ghosts = 4; # must be even for ProlongLinear
+    prolong = "linear";
+    refresh {
+       rank = 0;
+    }
+}
 
 Stopping { cycle = 2000; }
 
 Boundary { 
-   list = ["default","rho","e"];
-   default {
-      type = "outflow";
+   list = ["R","D"];
+   R {
+      type = "reflecting";
    };
-   rho {
+   D {
       type = "value";
-      value = 1.125 + sin(y*5.0);
+      value = 0.5 + 0.5*y;
       field_list = ["density"];
-      axis = "x";
-      face = "lower";
-   };
-   e {
-      type = "value";
-      value = (0.14 + y*(1.0 - 0.14)) / (0.4 * (1.125 + sin(y*5.0)));
-      field_list = ["total_energy"];
       axis = "x";
       face = "lower";
    }
 }
 
 Initial {
-#    max_level   = 3; 
-    density       { value = [ 0.125 ]; };
-    total_energy  { value = [  0.14 / (0.4 * 0.125)]; };
+   max_level   = 3; 
+    density       { value = [ 1.0, (0.2 <= x && x < 0.4),  0.125 ]; };
+    total_energy  { value = [ 1.0  / (0.4 * 1.0) ,
+                                   (0.2 <= x && x < 0.4),  0.14 / (0.4 * 0.1)]; };
     velocity_x    { value = [0.0]; };
     velocity_y    { value = [0.0]; };
     internal_energy { value = 0.0; }
 }
 
 Output { 
-   file_groups = ["cycle_step"];
+   file_groups = ["cycle_step","mesh"];
 
    cycle_step {  
       name = ["boundary_masked-2d-%04d.png","cycle"]; 

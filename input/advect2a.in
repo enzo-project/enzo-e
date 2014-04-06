@@ -6,8 +6,16 @@ include "input/Sedov/sedov-output.incl"
 Mesh    {  max_level = 4; }
 Initial {  max_level = 4; }
 
-Mesh { adapt { slope_min_refine = 4.0;
-               slope_max_coarsen = 1.0; } }
+
+Adapt {
+   list = ["slope"];
+   slope {
+       type = "slope";
+       field_list = ["density"];
+       min_refine = 4.0;
+       max_coarsen = 1.0; 
+   }
+} 
 
 Mesh { root_size      = [32,32]; }
 Mesh { root_blocks    = [2,2]; }

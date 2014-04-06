@@ -10,12 +10,17 @@ Mesh
    root_size   = [32,32];
    root_blocks = [ 2, 2]; 
    max_level   = 5; 
-   adapt {
-      type = ["slope"];
-      balance = true;
-      fields = ["density"];
-   }
 }
+
+Adapt {
+   list = ["slope"];
+   slope {
+       type = "slope";
+       field_list = ["density"];
+       min_refine = 4.0;
+       max_coarsen = 1.0; 
+   }
+} 
 
 Field {
    ghosts = 4;

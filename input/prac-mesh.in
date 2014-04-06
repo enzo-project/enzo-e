@@ -21,13 +21,17 @@ Stopping { cycle = 1000; }
      root_size   = [512,256];
      root_blocks = [32,16];
      max_level = 3;
-       adapt {
-           type = ["slope"];
-          fields = ["density"];
-           slope_min_refine = 0.003;
-           slope_max_coarsen = 0.0015;
-       }
   }
+
+Adapt {
+   list = ["slope"];
+   slope {
+       type = "slope";
+       field_list = ["density"];
+       min_refine = 0.003;
+       max_coarsen = 0.0015; 
+   }
+} 
 
 Field {
     ghosts = 4; # must be even for ProlongLinear

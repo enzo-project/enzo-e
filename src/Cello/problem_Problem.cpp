@@ -92,7 +92,7 @@ void Problem::pup (PUP::er &p)
 void Problem::initialize_boundary(Config * config, 
 				  Parameters * parameters) throw()
 {
-  for (size_t index=0; index < config->num_boundary; index++) {
+  for (int index=0; index < config->num_boundary; index++) {
 
     std::string type = config->boundary_type[index];
 
@@ -130,19 +130,21 @@ void Problem::initialize_initial(Config * config,
 //----------------------------------------------------------------------
 
 void Problem::initialize_refine(Config * config,
+				Parameters * parameters,
 				const FieldDescr * field_descr) throw()
 {
-  for (size_t i=0; i<config->mesh_adapt_type.size(); i++) {
+  for (int i=0; i<config->num_adapt; i++) {
 
-    std::string name = config->mesh_adapt_type[i];
+    std::string name = config->adapt_type[i];
 
-    Refine * refine = create_refine_ (name,config,field_descr,i);
+    Refine * refine = create_refine_ 
+      (name,config,parameters,field_descr,i);
 
     if (refine) {
       refine_list_.push_back( refine );
     } else {
       ERROR1("Problem::initialize_refine",
-	     "Unknown Refine %s",name.c_str());
+	     "Cannot create Adapt type %s",name.c_str());
     }
   }
 }
@@ -426,33 +428,43 @@ Initial * Problem::create_initial_
 
 Refine * Problem::create_refine_
 (
- std::string  type,
- Config * config,
+ std::string        type,
+ Config *           config,
+ Parameters *       parameters,
  const FieldDescr * field_descr,
- int index
+ int                index
  ) throw ()
 { 
-  TRACE3("mesh_root_size = %d %d %d",
-	 config->mesh_root_size[0],
-	 config->mesh_root_size[1],
-	 config->mesh_root_size[2]);
-
+  
   if (type == "slope") {
-    return new RefineSlope (field_descr,
-			    config->mesh_adapt_slope_min_refine,
-			    config->mesh_adapt_slope_max_coarsen,
-			    config->mesh_adapt_fields);
+
+    return new RefineSlope 
+      (field_descr,
+       config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_field_list[index]);
+
+  } else if (type == "mask") {
+
+    std::string param_str = "Refine:" + config->adapt_list[index] + ":value";
+
+    return new RefineMask (parameters, param_str);
+
   } else if (type == "mass") {
+
     double root_cell_volume = 1.0;
     for (int i=0; i<config->mesh_root_rank; i++) {
-      root_cell_volume *= 
-	(config->domain_upper[i] - config->domain_lower[i])
-	/ (config->mesh_root_size[i]);
+      double upper = config->domain_upper[i] ;
+      double lower = config->domain_lower[i];
+      int     root = config->mesh_root_size[i];
+
+      root_cell_volume *= (upper - lower) / (root);
+
     }
 
-    return new RefineMass (config->mesh_adapt_mass_min,
-			   config->mesh_adapt_mass_level_exponent,
-			   config->mesh_adapt_mass_min_overdensity,
+    return new RefineMass (config->adapt_min_refine[index],
+			   config->adapt_max_coarsen[index],
+			   config->adapt_level_exponent[index],
 			   root_cell_volume);
   }
   return NULL;

@@ -76,7 +76,7 @@ void CommBlock::adapt_begin_()
 bool CommBlock::do_adapt_()
 {
 
-  int adapt_interval = simulation()->config()->mesh_adapt_interval;
+  int adapt_interval = simulation()->config()->adapt_interval;
 
   return ((adapt_interval && ((cycle_ % adapt_interval) == 0)));
 

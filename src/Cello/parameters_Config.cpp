@@ -50,16 +50,16 @@ void Config::pup (PUP::er &p)
   p | mesh_root_rank;
   PUParray(p,mesh_root_size,3);
   p | mesh_max_level;
-  p | mesh_balance;
-  p | mesh_adapt_type;
-  p | mesh_adapt_fields;
-  p | mesh_adapt_slope_min_refine;
-  p | mesh_adapt_slope_max_coarsen;
-  p | mesh_adapt_mass_min;
-  p | mesh_adapt_mass_level_exponent;
-  p | mesh_adapt_mass_min_overdensity;
-  p | mesh_adapt_balance;
-  p | mesh_adapt_interval;
+
+  p | adapt_balance;
+  p | adapt_interval;
+  p | num_adapt;
+  PUParray(p,adapt_list,MAX_ADAPT);
+  PUParray(p,adapt_type,MAX_ADAPT);
+  PUParray(p,adapt_field_list,MAX_ADAPT);
+  PUParray(p,adapt_min_refine,MAX_ADAPT);
+  PUParray(p,adapt_max_coarsen,MAX_ADAPT);
+  PUParray(p,adapt_level_exponent,MAX_ADAPT);
 
   p | control_sync_adapt_enter;
   p | control_sync_adapt_called;
@@ -212,7 +212,9 @@ void Config::read(Parameters * parameters) throw()
 	(ib,"Boundary:list","unknown");
 
       std::string prefix = "Boundary:" + boundary_list[ib] + ":";
+
       boundary_type[ib] = parameters->value_string(prefix+"type","unknown");
+
       std::string axis_str = parameters->value_string(prefix+"axis","all");
       if      (axis_str == "all") { boundary_axis[ib] = axis_all; }
       else if (axis_str == "x")   { boundary_axis[ib] = axis_x; }
@@ -385,18 +387,6 @@ void Config::read(Parameters * parameters) throw()
 
   //--------------------------------------------------
 
-  mesh_balance   = parameters->value_logical("Mesh:adapt:balance",true);
-
-  //--------------------------------------------------
-
-  int num_adapt_type = parameters->list_length("Mesh:adapt:type");
-  mesh_adapt_type.resize(num_adapt_type);
-  for (int i=0; i<num_adapt_type; i++) {
-    mesh_adapt_type[i] = parameters->list_value_string(i,"Mesh:adapt:type");
-  }
-
-  //--------------------------------------------------
-
   control_sync_adapt_enter = parameters->value_string
     ("Control:sync:adapt_enter","array");
   control_sync_adapt_called = parameters->value_string
@@ -428,43 +418,53 @@ void Config::read(Parameters * parameters) throw()
 
   //--------------------------------------------------
 
-  int num_adapt_fields = parameters->list_length("Mesh:adapt:fields");
+  adapt_balance = 
+    parameters->value_logical ("Adapt:balance",true);
 
-  mesh_adapt_fields.resize(num_adapt_fields);
+  adapt_interval = 
+    parameters->value_integer ("Adapt:interval",1);
 
-  for (int i=0; i<num_adapt_fields; i++) {
-    mesh_adapt_fields[i] = parameters->list_value_string
-      (i,"Mesh:adapt:fields");
+  num_adapt = parameters->list_length("Adapt:list");
+
+  for (int ia=0; ia<num_adapt; ia++) {
+
+    adapt_list[ia] = parameters->list_value_string
+      (ia,"Adapt:list","unknown");
+
+    std::string prefix = "Adapt:" + adapt_list[ia] + ":";
+
+    printf ("%s\n",(prefix+"type").c_str());
+    adapt_type[ia] = parameters->value_string(prefix+"type","unknown");
+
+    std::string param_str = prefix + "field_list";
+    int field_list_type = parameters->type(param_str);
+    if (field_list_type == parameter_list) {
+      const int n = parameters->list_length(param_str);
+      adapt_field_list[ia].resize(n);
+      for (int index=0; index<n; index++) {
+	adapt_field_list[ia][index] = parameters->list_value_string 
+	  (index,param_str);
+      }
+    } else if (field_list_type == parameter_string) {
+      adapt_field_list[ia].resize(1);
+      adapt_field_list[ia][0] = parameters->value_string(param_str);
+    } else if (field_list_type != parameter_unknown) {
+      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
+	      field_list_type,param_str.c_str());
+    }
+
+    //--------------------------------------------------
+
+    adapt_min_refine[ia] = 
+      parameters->value_float (prefix + "min_refine",0.3);
+
+    adapt_max_coarsen[ia] = 
+      parameters->value_float (prefix + "max_coarsen",0.5*adapt_min_refine[ia]);
+    
+    adapt_level_exponent[ia] = 
+      parameters->value_float (prefix + "level_exponent",0.0);
+
   }
-
-  //--------------------------------------------------
-
-  mesh_adapt_slope_min_refine = 
-    parameters->value_float ("Mesh:adapt:slope_min_refine",0.3);
-
-  mesh_adapt_slope_max_coarsen = 
-    parameters->value_float ("Mesh:adapt:slope_max_coarsen",0.15);
-
-  //--------------------------------------------------
-
-  // This parameter is typically computed ("internal" parameter in Enzo)
-  mesh_adapt_mass_min = 
-    parameters->value_float ("Mesh:adapt:mass_min",-1.0);
-
-  //--------------------------------------------------
-
-  mesh_adapt_mass_level_exponent = 
-    parameters->value_float ("Mesh:adapt:mass_level_exponent",0.0);
-  //--------------------------------------------------
-
-  mesh_adapt_mass_min_overdensity = 
-    parameters->value_float ("Mesh:adapt:mass_min_overdensity",1.5);
-
-  mesh_adapt_balance = 
-    parameters->value_logical ("Mesh:adapt:balance",true);
-
-  mesh_adapt_interval = 
-    parameters->value_integer ("Mesh:adapt:interval",1);
 
   //--------------------------------------------------
   // Method

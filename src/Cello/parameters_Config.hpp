@@ -15,6 +15,9 @@
 /* Maximum number of output file groups specified in the configuration file */
 #define MAX_FILE_GROUPS 10
 
+/* Maximum number of adapt groups specified in the configuration file */
+#define MAX_ADAPT 10
+
 /* Maximum number of Boundary groups specified in the configuration file */
 
 #define MAX_BOUNDARY 50
@@ -83,17 +86,16 @@ public: // attributes
   int                        mesh_root_rank;
   int                        mesh_root_size[3];
   int                        mesh_max_level;
-  bool                       mesh_balance;
 
-  std::vector<std::string>   mesh_adapt_type ;
-  std::vector<std::string>   mesh_adapt_fields ;
-  double                     mesh_adapt_slope_min_refine;
-  double                     mesh_adapt_slope_max_coarsen;
-  double                     mesh_adapt_mass_min;
-  double                     mesh_adapt_mass_min_overdensity;
-  double                     mesh_adapt_mass_level_exponent;
-  bool                       mesh_adapt_balance;
-  int                        mesh_adapt_interval;
+  int                        adapt_interval;
+  bool                       adapt_balance;
+  int                        num_adapt;
+  std::string                adapt_list[MAX_ADAPT];
+  std::string                adapt_type[MAX_ADAPT];
+  std::vector<std::string>   adapt_field_list[MAX_ADAPT];
+  double                     adapt_min_refine[MAX_ADAPT];
+  double                     adapt_max_coarsen[MAX_ADAPT];
+  double                     adapt_level_exponent[MAX_ADAPT];
 
   std::string                control_sync_adapt_enter;
   std::string                control_sync_adapt_called;

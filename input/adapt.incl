@@ -5,10 +5,14 @@ include "input/method_ppm-1.in"
 
 Mesh {
    root_blocks = [2,2];
-   adapt {
-      type = ["slope"];
-      fields = ["density"];
-      balance = true;
+}
+
+Adapt {
+   balance = true;
+   list = ["slope"];
+   slope {
+      type = "slope";
+      field_list = ["density"];
    }
 }
 

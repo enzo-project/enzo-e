@@ -11,13 +11,13 @@
 
 RefineMass::RefineMass
 (
- double min,
+ double min_refine,
+ double max_coarsen,
  double level_exponent,
- double min_overdensity,
  double root_cell_volume) throw ()
-  : min_(min),
-    level_exponent_(level_exponent),
-    min_overdensity_(min_overdensity)
+  : min_refine_(min_refine),
+    max_coarsen_(max_coarsen),
+    level_exponent_(level_exponent)
   // ENZO non-cosmology
 
   //    MinimumMassForRefinement[0] = MinimumOverDensityForRefinement[0];
@@ -41,9 +41,6 @@ RefineMass::RefineMass
   TRACE("RefineSlope::RefineSlope");
   WARNING ("RefineMass::RefineMass()",
 	   "Assuming non-Cosmology problem for RefineMass");
-  if (min_ == -1.0) {
-    min_ = min_overdensity * root_cell_volume;
-  }
 
 }
 
@@ -63,8 +60,8 @@ int RefineMass::apply
   WARNING ("RefineMass::RefineMass()",
 	   "Assuming level==0 for level_exponent");
 
-  double mass_min_refine  = min_ * pow(2.0,level*level_exponent_);
-  double mass_max_coarsen = mass_min_refine / 2.0;
+  double mass_min_refine  = min_refine_ * pow(2.0,level*level_exponent_);
+  double mass_max_coarsen = max_coarsen_* pow(2.0,level*level_exponent_);
 
   int nx,ny,nz;
   field_block->size(&nx,&ny,&nz);
