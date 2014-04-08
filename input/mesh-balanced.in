@@ -65,7 +65,7 @@ Output {
 	image_size  = [1024,1024];
 #	image_ghost  = true;
         field_list = ["density"];
-	schedule = ["cycle","interval", 10];
+        include "input/schedule_cycle_10.incl"
         colormap = [0.0, 0.0, 0.0,  
                     1.0, 0.0, 0.0, 
                     1.0, 1.0, 0.0, 
@@ -78,7 +78,7 @@ Output {
 	image_size  = [1024,1024];
 #	image_ghost  = true;
         field_list = ["total_energy"];
-	schedule = ["cycle","interval", 10];
+        include "input/schedule_cycle_10.incl"
         colormap = [0.0, 0.0, 0.0,  
                     1.0, 0.0, 0.0, 
                     1.0, 1.0, 0.0, 
@@ -91,7 +91,7 @@ Output {
 	image_size  = [1024,1024];
 #	image_ghost  = true;
         field_list = ["velocity_x"];
-	schedule = ["cycle","interval", 10];
+        include "input/schedule_cycle_10.incl"
         colormap = [1.0, 0.0, 0.0,  
                     0.0, 0.0, 0.0,
                     0.0, 0.0, 1.0];
@@ -103,7 +103,7 @@ Output {
 	image_size  = [1024,1024];
 #	image_ghost  = true;
         field_list = ["velocity_y"];
-	schedule = ["cycle","interval", 10];
+        include "input/schedule_cycle_10.incl"
         colormap = [1.0, 0.0, 0.0,  
                     0.0, 0.0, 0.0,
                     0.0, 0.0, 1.0];
@@ -116,7 +116,7 @@ Output {
 	image_reduce_type = "max";
         field_list = ["density"];
 	image_block_size  = 5;
-	schedule = ["cycle","interval", 10];
+        include "input/schedule_cycle_10.incl"
         colormap = [1.0, 1.0, 1.0,  
                     1.0, 1.0, 0.0,
 		    0.0, 1.0, 1.0,

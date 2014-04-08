@@ -93,14 +93,14 @@
       density {
         field_list = ["density"];
 	type     = "image";
-	schedule = ["cycle","interval", 10];
+        include "input/schedule_cycle_10.incl"
         include "input/colormap_blackbody.incl";
       };
 
       data {
         field_list = ["density"];
 	type     = "data";
-	schedule = ["cycle","interval", 100];
+        include "input/schedule_cycle_100.incl"
       };
 
    }

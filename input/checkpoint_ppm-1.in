@@ -17,6 +17,7 @@ Output {
 
      type  = "checkpoint";
      dir   = ["checkpoint_ppm-1-%d","cycle"];
-     schedule = ["cycle","list",100];
+
+     schedule { var = "cycle"; type ="list"; value=100;};
   }
 }

@@ -9,6 +9,7 @@
 #include "parameters.hpp"
 
 //----------------------------------------------------------------------
+#define NEW_SCHEDULE
 
 void Config::pup (PUP::er &p)
 {
@@ -95,6 +96,7 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_stride,MAX_FILE_GROUPS);
   PUParray (p,output_name,MAX_FILE_GROUPS);
   PUParray (p,output_dir,MAX_FILE_GROUPS);
+  p | index_schedule_;
   PUParray (p,output_schedule_type,MAX_FILE_GROUPS);
   PUParray (p,output_schedule_var,MAX_FILE_GROUPS);
   PUParray (p,output_schedule_start,MAX_FILE_GROUPS);
@@ -626,14 +628,22 @@ void Config::read_output_ (Parameters * parameters) throw()
       }
     }
       
-    //  output_schedule
+    // //  output_schedule
 
-    ASSERT1("Config::read",
-	   "'schedule' is not defined for output file group %s",
-	    output_file_groups[index].c_str(),
-	    (parameters->type("schedule") != parameter_unknown));
+    // ASSERT1("Config::read",
+    // 	   "'schedule' is not defined for output file group %s",
+    // 	    output_file_groups[index].c_str(),
+    // 	    (parameters->type("schedule") != parameter_unknown));
 
 
+#ifdef NEW_SCHEDULE
+
+    parameters->group_push("schedule");
+    output_schedule_index[index] = 
+      read_schedule_new_(parameters, output_file_groups[index]);
+    parameters->group_pop();
+
+#else
     read_schedule_(parameters, output_file_groups[index],
 		   &output_schedule_type[index],
 		   &output_schedule_var[index],
@@ -642,6 +652,7 @@ void Config::read_output_ (Parameters * parameters) throw()
 		   &output_schedule_step[index],
 		   output_schedule_list[index]
 		   );
+#endif
 
     // Image 
 
@@ -810,6 +821,7 @@ void Config::read_schedule_(Parameters * parameters,
 {
   // ASSUMES schedule PARAMETER IN CURRENT GROUP
 
+  // Schedule
   int length = parameters->list_length("schedule");
 
   if (length == 0) {
@@ -885,6 +897,87 @@ void Config::read_schedule_(Parameters * parameters,
 	    (*type).c_str(),group.c_str());
   }
 
+}
+
+//----------------------------------------------------------------------
+
+int Config::read_schedule_new_(Parameters * p,
+				const std::string group)
+{
+  int index = index_schedule_;
+  printf ("%s:%d\n",__FILE__,__LINE__);
+  ASSERT ("Config::read_schedule_()",
+	  "number of schedule''s is greater than MAX_SCHEDULE",
+	  index < MAX_SCHEDULE);
+
+  printf ("%s:%d\n",__FILE__,__LINE__);
+  int n=p->group_count();
+  printf ("groups %d\n",n);
+  for (int i=0; i<n; i++) {
+    printf ("group %s\n",p->group(i).c_str());
+  }
+
+  printf ("group = %s\n",group.c_str());
+  std::string var = p->value_string("var","none");
+  printf ("%s:%d\n",__FILE__,__LINE__);
+  printf ("%s:%d %s\n",__FILE__,__LINE__,var.c_str());
+
+  output_schedule_var[index] = var;
+  printf ("%s:%d\n",__FILE__,__LINE__);
+
+  bool var_is_int = true;
+
+  if      (output_schedule_var[index] == "cycle") var_is_int = true;
+  else if (output_schedule_var[index] == "time")  var_is_int = false;
+  else {
+    ERROR2 ("Config::read",
+	    "Schedule variable %s is not recognized for parameter group %s",
+	    output_schedule_var[index].c_str(),group.c_str());
+  }
+
+  printf ("%s:%d\n",__FILE__,__LINE__);
+  output_schedule_type[index] = p->value_string("type","none");
+  printf ("%s:%d\n",__FILE__,__LINE__);
+
+  const int    max_int    = std::numeric_limits<int>::max();
+  const double max_double = std::numeric_limits<double>::max();
+
+  if (output_schedule_type[index] == "interval") {
+    if (var_is_int) {
+  printf ("%s:%d\n",__FILE__,__LINE__);
+      output_schedule_start[index] = p->value("start",0);
+      output_schedule_step[index]  = p->value("step",1);
+      output_schedule_stop[index]  = p->value("stop",max_int);
+  printf ("%s:%d\n",__FILE__,__LINE__);
+    } else {
+  printf ("%s:%d\n",__FILE__,__LINE__);
+      output_schedule_start[index] = p->value("start",0.0);
+      output_schedule_step[index]  = p->value("step",1.0);
+      output_schedule_stop[index]  = p->value("stop",max_double);
+  printf ("%s:%d\n",__FILE__,__LINE__);
+    }
+  } else if (output_schedule_type[index] == "list") {
+  printf ("%s:%d\n",__FILE__,__LINE__);
+    int n = p->list_length("value");
+  printf ("%s:%d\n",__FILE__,__LINE__);
+    output_schedule_list[index].resize(n);
+  printf ("%s:%d\n",__FILE__,__LINE__);
+    if (var_is_int) {
+      for (int i=0; i<n; i++) {
+	output_schedule_list[index][i] = p->value(i,"value",0);
+      }
+    } else {
+      for (int i=0; i<n; i++) {
+	output_schedule_list[index][i] = p->value(i,"value",0.0);
+      }
+    }
+  } else {
+    ERROR2 ("Config::read",
+	    "Schedule type %s is not recognized for parameter group %s",
+	    output_schedule_type[index].c_str(),group.c_str());
+  }
+
+  return index_schedule_++;
 }
 
 //======================================================================

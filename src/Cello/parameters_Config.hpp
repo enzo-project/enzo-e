@@ -15,6 +15,9 @@
 /* Maximum number of output file groups specified in the configuration file */
 #define MAX_FILE_GROUPS 10
 
+/* Maximum number of schedules */
+#define MAX_SCHEDULE 10
+
 /* Maximum number of adapt groups specified in the configuration file */
 #define MAX_ADAPT 10
 
@@ -34,7 +37,8 @@ class Config : public PUP::able
 public: // interface
 
   /// empty constructor for charm++ pup()
-  Config() throw() {}
+  Config() throw() 
+  : index_schedule_(0) {}
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(Config);
@@ -132,16 +136,18 @@ public: // attributes
   bool                       output_image_specify_bounds [MAX_FILE_GROUPS];
   double                     output_image_min            [MAX_FILE_GROUPS];
   double                     output_image_max            [MAX_FILE_GROUPS];
+  int                        output_schedule_index [MAX_FILE_GROUPS];
   std::vector<std::string>   output_dir            [MAX_FILE_GROUPS];
   int                        output_stride         [MAX_FILE_GROUPS];
   std::vector<std::string>   output_field_list     [MAX_FILE_GROUPS];
   std::vector<std::string>   output_name           [MAX_FILE_GROUPS];
-  std::string                output_schedule_type  [MAX_FILE_GROUPS];
-  std::string                output_schedule_var   [MAX_FILE_GROUPS];
-  double                     output_schedule_start [MAX_FILE_GROUPS];
-  double                     output_schedule_stop  [MAX_FILE_GROUPS];
-  double                     output_schedule_step  [MAX_FILE_GROUPS];
-  std::vector<double>        output_schedule_list  [MAX_FILE_GROUPS];
+  int                        index_schedule_;
+  std::string                output_schedule_type  [MAX_SCHEDULE];
+  std::string                output_schedule_var   [MAX_SCHEDULE];
+  double                     output_schedule_start [MAX_SCHEDULE];
+  double                     output_schedule_stop  [MAX_SCHEDULE];
+  double                     output_schedule_step  [MAX_SCHEDULE];
+  std::vector<double>        output_schedule_list  [MAX_SCHEDULE];
 
   std::vector<std::string>   performance_papi_counters;
   std::string                performance_name;
@@ -202,6 +208,9 @@ protected: // functions
 		      double * stop,
 		      double * step,
 		      std::vector<double> & list);
+
+  int read_schedule_new_(Parameters * parameters,
+		      const std::string group   );
 
 };
 

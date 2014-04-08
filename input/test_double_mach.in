@@ -129,7 +129,7 @@
         name = ["double-mach-de-%06d.png", "cycle"]; 
         field_list = ["density"];
 	type     = "image";
-	schedule = ["cycle","interval", 10];
+	include "input/schedule_new.incl"
         include "input/colormap_rainbow.incl";
       };
 
@@ -137,14 +137,14 @@
         name = ["double-mach-de-%06d.h5", "cycle"]; 
         field_list = ["density"];
 	type     = "data";
-	schedule = ["cycle","interval", 10];
+	include "input/schedule_new.incl"
       };
 
       te_h5 {
         name = ["double-mach-te-%06d.h5", "cycle"]; 
         field_list = ["total_energy"];
 	type     = "data";
-	schedule = ["cycle","interval", 10];
+	include "input/schedule_new.incl"
       };
 
 

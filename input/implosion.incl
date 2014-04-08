@@ -73,6 +73,6 @@
          field_list = ["density"];
          type     = "image";
          name     = ["implosion-d-%05d.png","cycle"];
-         schedule = ["cycle","interval", 10];
+         include "input/schedule_cycle_10.incl"
       }
    }

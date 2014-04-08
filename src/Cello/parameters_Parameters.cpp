@@ -315,8 +315,15 @@ bool Parameters::value_logical
 {
   Param * param = this->param(parameter);
 
-  ASSERT1 ("Parameters::value_logical",
-	   "Parameter %s is not a logical", parameter.c_str(),
+  if (! param) {
+    WARNING1("Parameters::value_logical","Param %s is null",
+	  parameter.c_str());
+    return deflt;
+  }
+
+  ASSERT2 ("Parameters::value_logical",
+	   "Parameter %s is type %d not a logical",
+	   parameter.c_str(),param->type(),
 	   ( ! param || param->is_type(parameter_logical)));
 
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];

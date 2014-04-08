@@ -25,15 +25,15 @@ Output { file_groups = ["de","te","mesh"];
 Output { file_groups = ["de","te","mesh"]; 
    de {
           name = ["advect2u-de-%03d.png", "cycle"]; 
-      schedule = ["cycle","interval", 10 ]; 
+      include "schedule_cycle_10.incl"
    };
    te { 
           name = ["advect2u-te-%03d.png","cycle"];
-      schedule = ["cycle","interval", 10 ]; 
+      include "schedule_cycle_10.incl"
      };
    mesh {
           name = ["advect2u-mesh-%03d.png", "cycle"]; 
-      schedule = ["cycle","interval", 10 ]; 
+      include "schedule_cycle_10.incl"
    }
 }
 

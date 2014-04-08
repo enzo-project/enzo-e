@@ -26,19 +26,19 @@ Output {
      file_groups = ["dm"];
       dm {
            name = ["enzo-dm-%05d.png", "cycle"]; 
-           schedule = ["cycle","interval", 5];
+           include "input/schedule_cycle_10.incl"
            image_reduce_type = "max";
 	   image_type = "data+mesh";
            image_size = [2049,2049];
           };
       de {
            name = ["enzo-de-%05d.png", "cycle"]; 
-           schedule = ["cycle","interval", 5];
+           include "input/schedule_cycle_10.incl"
            image_reduce_type = "max";
 	   image_type = "data";
           };
       mesh { name = ["enzo-mesh-%05d.png", "cycle"];
-           schedule = ["cycle","interval", 5];
+           include "input/schedule_cycle_10.incl"
 	   image_type = "mesh";
        };
 

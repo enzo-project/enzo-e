@@ -10,7 +10,7 @@ Output {
 
    cycle_dump {  
       type = "data";            
-      schedule = ["cycle","interval", 10];
+      include "input/schedule_cycle_10.incl"
       name = ["output-data-p%02d-c%04d.h5","proc","cycle"]; 
    } ;
 

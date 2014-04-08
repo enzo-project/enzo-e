@@ -14,7 +14,7 @@ Output {
        stride = 2;
        name = ["output-stride-2-p%1d-%02d.h5","proc","cycle"];
        field_list = ["density"];
-       schedule = ["cycle","interval",10];
+       include "input/schedule_cycle_10.incl"
     }
 
 }

@@ -77,7 +77,7 @@
       cycle_step {
          field_list = ["density"];
          type     = "image";
-         schedule = ["cycle","interval", 10];
+         include "input/schedule_cycle_10.incl"
          colormap = [0.00, 0.00, 1.00,
                      0.00, 1.00, 0.00,
                      1.00, 1.00, 0.00,

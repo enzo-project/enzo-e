@@ -65,7 +65,7 @@ Output {
         field_list = ["density"];
 #	image_block_size  = 5;
 #	image_size = [1025,1025];
-	schedule = ["cycle","interval", 10];
+        include "schedule_cycle_10.incl"
         image_specify_bounds = true;
 	image_min = 0.0;
 	image_max = 6.0;

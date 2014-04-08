@@ -38,20 +38,20 @@ Output {
     de {
        field_list = ["density"];
        type     = "image";
-       schedule = ["time","interval", 0.02];
+       
        include "input/colormap_blackbody.incl"
     };
     dl {
        field_list = ["density"];
        image_log = true;
        type     = "image";
-       schedule = ["time","interval", 0.02];
+       include "input/schedule_time_0.02.incl"
        include "input/colormap_blackbody.incl"
     };
     dm {
        field_list = ["density"];
        type     = "image";
-       schedule = ["time","interval", 0.02];
+       include "input/schedule_time_0.02.incl"
        include "input/colormap_blackbody.incl"
        image_specify_bounds = true;
     };
@@ -60,7 +60,7 @@ Output {
 
        field_list = ["total_energy"];
        type     = "image";
-       schedule = ["time","interval", 0.02];
+       include "input/schedule_time_0.02.incl"
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     };
 
@@ -68,7 +68,7 @@ Output {
 
        field_list = ["velocity_x"];
        type     = "image";
-       schedule = ["time","interval", 0.02];
+       include "input/schedule_time_0.02.incl"
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     };
 
@@ -76,7 +76,7 @@ Output {
 
        field_list = ["velocity_y"];
        type     = "image";
-       schedule = ["time","interval", 0.02];
+       include "input/schedule_time_0.02.incl"
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
     };
 
@@ -87,7 +87,7 @@ Output {
         field_list = ["density"];
 #	image_block_size  = 5;
 #	image_size = [1025,1025];
-	schedule = ["time","interval", 0.02];
+        include "input/schedule_time_0.02.incl"
         image_specify_bounds = true;
 	image_min = 0.0;
 	image_max = 6.0;
