@@ -1,0 +1,6 @@
+schedule {
+    type = "interval";
+    var  = "time";
+    step = 0.02;
+};
+
