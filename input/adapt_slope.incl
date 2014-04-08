@@ -1,0 +1,8 @@
+Adapt {
+   balance = true;
+   list = ["slope"];
+   slope {
+      type = "slope";
+      field_list = ["density"];
+   }
+}

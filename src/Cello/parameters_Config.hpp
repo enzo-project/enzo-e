@@ -77,7 +77,6 @@ public: // attributes
   int                        initial_cycle;
   std::string                initial_type;
   double                     initial_time;
-  std::vector<std::string>   initial_name;
   int                        initial_max_level;
 
   bool                       memory_active;
@@ -177,6 +176,23 @@ public: // attributes
   std::string                timestep_type;
 
 protected: // functions
+
+  /// Read boundary-related values from the Parameters object
+  void read_boundary_    (Parameters * parameters) throw();
+  void read_domain_      (Parameters * parameters) throw();
+  void read_field_       (Parameters * parameters) throw();
+  void read_initial_     (Parameters * parameters) throw();
+  void read_memory_      (Parameters * parameters) throw();
+  void read_mesh_        (Parameters * parameters) throw();
+  void read_control_     (Parameters * parameters) throw();
+  void read_adapt_       (Parameters * parameters) throw();
+  void read_method_      (Parameters * parameters) throw();
+  void read_monitor_     (Parameters * parameters) throw();
+  void read_output_      (Parameters * parameters) throw();
+  void read_performance_ (Parameters * parameters) throw();
+  void read_stopping_    (Parameters * parameters) throw();
+  void read_testing_     (Parameters * parameters) throw();
+  void read_timestep_    (Parameters * parameters) throw();
 
   void read_schedule_(Parameters * parameters,
 		      const std::string group,

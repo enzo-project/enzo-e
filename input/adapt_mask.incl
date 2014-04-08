@@ -1,0 +1,14 @@
+Domain {
+   lower = [-2.0, -2.0];
+   upper = [ 2.0,  2.0];
+}
+
+Adapt {
+   list = ["MASK"];
+
+   MASK {
+      type = "mask";
+      value = [ 6.0, (x - cos(t))*(x - cos(t)) + (y - sin(t))*(y - sin(t)) <= 0.1, 0.0 ];
+   }
+   
+}

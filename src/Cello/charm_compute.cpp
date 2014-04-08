@@ -40,6 +40,11 @@ void CommBlock::compute_begin_ ()
 #endif
 
   // Update CommBlock cycle and time to Simulation time and cycle
+  // if (cycle_>460) {
+  //   char buffer[80];
+  //   sprintf (buffer,"time %f dt %f cycle %d\n",time_,dt_,cycle_);
+  //   index_.print(buffer,-1,2,false,simulation());
+  // }
 
   set_cycle (cycle_ + 1);
   set_time  (time_  + dt_);

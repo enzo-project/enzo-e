@@ -350,9 +350,9 @@ void Parameters::set_logical
 
 //----------------------------------------------------------------------
 
-const char * Parameters::value_string 
-( std::string  parameter,
-  const char * deflt ) throw()
+std::string Parameters::value_string 
+( std::string parameter,
+  std::string deflt ) throw()
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
 /// @return  Return string parameter value if it exists, deflt if not
@@ -543,10 +543,10 @@ bool Parameters::list_value_logical
 
 //----------------------------------------------------------------------
 
-const char * Parameters::list_value_string 
+std::string Parameters::list_value_string 
 ( int index,
-  std::string   parameter,
-  const char *  deflt ) throw()
+  std::string parameter,
+  std::string deflt ) throw()
 /// @param   index     Index of the string list parameter element
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value

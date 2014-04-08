@@ -16,11 +16,10 @@ S [-]?
 
 #include "parse.tab.h"
 
- void yyerror(char *s);
-
  int    lineno       = 1;
 
 
+char linebuf[500];
 
   struct bufstack {
     /* Adopted from "flex & bison", John Levine, O'Reilly Pub,  pp.28-30 */
@@ -166,11 +165,16 @@ include[ \t]*[\"<] { BEGIN IFILE; }
 
 . {  }
 
+\n.* {strncpy (linebuf,yytext+1,sizeof(linebuf));
+yyless(1);
+}
+
 %%
 
 void yyerror(char *s)
 {
-  fprintf(stderr, "\n\nERROR: %s in line %d\n\n\n", s,lineno);
+  fprintf(stderr, "\n\nERROR: %s at '%s' in line %d:\n\n   \"%s\"\n\n\n",
+		  s, yytext,lineno,linebuf);
   exit(1);
 }
 

@@ -1,0 +1,30 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/adapt.incl"
+
+include "input/adapt_mask.incl"
+
+Mesh    { 
+   root_size   = [32,32];
+   max_level   = 5; 
+}
+
+include "input/initial_constant.incl"
+
+Initial {  max_level = 5 }
+
+Stopping { 
+   time = 2.0*3.14159265358979323; 
+#   cycle = 470;
+}
+
+Output {
+     file_groups = ["mesh","de"];
+      de   { name = ["test_adapt-mask-de-%06d.png",   "cycle"]; 
+	schedule = ["cycle","interval", 10];
+};
+      mesh { name = ["test_adapt-mask-mesh-%06d.png", "cycle"];
+	schedule = ["cycle","interval", 10];
+ }
+}

@@ -64,6 +64,32 @@ public: // interface
   void write (const char * file_name);
 
 
+  int value (std::string s, int deflt) throw()
+  { return value_integer(s,deflt); }
+
+  int value (std::string s, double deflt) throw()
+  { return value_float(s,deflt); }
+
+  int value (std::string s, bool deflt) throw()
+  { return value_logical(s,deflt); }
+
+  std::string value (std::string s, std::string deflt) throw()
+  { return value_string(s,deflt); }
+
+  int value (int i,std::string s, int deflt) throw()
+  { return list_value_integer(i,s,deflt); }
+
+  int value (int i,std::string s, double deflt) throw()
+  { return list_value_float(i,s,deflt); }
+
+  int value (int i,std::string s, bool deflt) throw()
+  { return list_value_logical(i,s,deflt); }
+
+  std::string value (int i,std::string s, const char * deflt) throw()
+  { return list_value_string(i,s,deflt); }
+  std::string value (int i,std::string s, std::string deflt) throw()
+  { return list_value_string(i,s,deflt); }
+
   /// Return the integer-valued parameter
   int value_integer (std::string , int deflt = 0) throw();
   /// Return the floating-point valued parameter
@@ -71,7 +97,7 @@ public: // interface
   /// Return the logical-valued parameter
   bool value_logical (std::string , bool deflt = false) throw();
   /// Return the string-valued parameter
-  const char * value_string ( std::string , const char * deflt = "") throw();
+  std::string value_string ( std::string , std::string deflt = "") throw();
 
   /// Return the length of the list parameter
   int list_length (std::string parameter);
@@ -82,7 +108,7 @@ public: // interface
   /// Access a logical list element
   bool list_value_logical (int ,std::string , bool deflt = false) throw();
   /// Access a string list element
-  const char * list_value_string (int,std::string,const char * d= "") throw();
+  std::string list_value_string (int,std::string, std::string d= "") throw();
 
   /// Assign a value to the integer-valued parameter
   void set_integer ( std::string parameter, int value ) throw();
@@ -285,6 +311,8 @@ extern "C" {
   /// C function for printing parameters to stdout
   void cello_parameters_print();
 }
+
+//----------------------------------------------------------------------
 
 #endif /* PARAMETERS_PARAMETERS_HPP */
 

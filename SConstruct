@@ -1,69 +1,98 @@
 import os
 import sys
 
-#----------------------------------------------------------------------
+#======================================================================
 # USER CONFIGURATION
-#----------------------------------------------------------------------
+#======================================================================
 
+#----------------------------------------------------------------------
 # Whether to print out detailed messages with the TRACE() series of statements
+#----------------------------------------------------------------------
 
 trace = 0
 
+#----------------------------------------------------------------------
 # Whether to trace main phases
+#----------------------------------------------------------------------
 
 verbose = 1
 
-# Whether to print out messages with the TRACE_CHARM() and TRACEPUP() series of statements
+#----------------------------------------------------------------------
+# Whether to print out messages with the TRACE_CHARM() and TRACEPUP()
+#  series of statements
+#----------------------------------------------------------------------
 
 trace_charm = 0
 
-# Whether to enable displaying messages with the DEBUG() series of statements
-# Also writes messages to out.debug.<P> where P is the (physical) process rank
-# Still requires the "DEBUG" group to be enabled in Monitor (that is
-# Monitor::is_active("DEBUG") mustb e true for any output)
+#----------------------------------------------------------------------
+# Whether to enable displaying messages with the DEBUG() series of
+# statements Also writes messages to out.debug.<P> where P is the
+# (physical) process rank Still requires the "DEBUG" group to be
+# enabled in Monitor (that is Monitor::is_active("DEBUG") mustb e true
+# for any output)
+#----------------------------------------------------------------------
 
 debug = 0
 
+#----------------------------------------------------------------------
 # Whether to periodically print all field values.  See
 # src/Field/field_FieldBlock.cpp
+#----------------------------------------------------------------------
 
 debug_verbose = 0
 
+#----------------------------------------------------------------------
 # Whether to track dynamic memory statistics.  Can be useful, but can
-# cause problems on some systems that also override new [] () / delete [] ()
+# cause problems on some systems that also override new [] () / delete
+# [] ()
+#----------------------------------------------------------------------
 
 memory = 1
 
+#----------------------------------------------------------------------
 # Whether to trace memory usage in different components
+#----------------------------------------------------------------------
 
 trace_memory = 0
 
+#----------------------------------------------------------------------
 # Enable charm++ dynamic load balancing
+#----------------------------------------------------------------------
 
 balance = 0
 
 balancer = 'RotateLB'  # For testing only
 
+#----------------------------------------------------------------------
 # Whether to compile with -pg to use gprof for performance profiling
+#----------------------------------------------------------------------
 
 use_gprof = 0
 
+#----------------------------------------------------------------------
 # Whether to run the test programs using valgrind to check for memory leaks
+#----------------------------------------------------------------------
 
 use_valgrind = 0
 
-# Whether to use Cello Performance class for collecting performance data
-# (currently requires global reductions, and may not be fully functional)
-# (basic time data on root processor is still output)
+#----------------------------------------------------------------------
+# Whether to use Cello Performance class for collecting performance
+# data (currently requires global reductions, and may not be fully
+# functional) (basic time data on root processor is still output)
+#----------------------------------------------------------------------
 
 use_performance = 0
 
+#----------------------------------------------------------------------
 # Whether to compile the CHARM++ version for use with the Projections
 # performance tool.
+#----------------------------------------------------------------------
 
 use_projections = 0
 
+#----------------------------------------------------------------------
 # How many processors to run parallel unit tests
+#----------------------------------------------------------------------
 
 ip_charm = '4'
 

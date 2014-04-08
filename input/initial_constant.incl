@@ -1,0 +1,7 @@
+
+Initial {
+    density       { value = 1.0; };
+    total_energy  { value = 1.0  / (0.4 * 1.0); };
+    velocity_x    { value = 0.0; };
+    velocity_y    { value = 0.0; }
+}

@@ -440,8 +440,6 @@ const char * op_name[] = {
  /* %token ATAN2 FMOD HYPOT NEXTAFTER POW REMAINDER SCALB */
 
 %%
-
-
 file : /* nothing */
  | file group { }
  ;
@@ -642,6 +640,7 @@ vle:
  | cle AND vle { $$ = new_node_operation (new_node_logical($1), enum_op_and,$3); }
  | vle AND vle { $$ = new_node_operation ($1, enum_op_and,$3); }
 ;
+
 
 %%
 

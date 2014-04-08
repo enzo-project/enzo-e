@@ -31,10 +31,6 @@ void Config::pup (PUP::er &p)
   p | field_courant;
   p | field_fields;
   PUParray(p,field_ghosts,3);
-  if (p.isUnpacking()) {
-    TRACE3 ("gx,gy,gz = %d %d %d",field_ghosts[0],field_ghosts[1],field_ghosts[2]);
-  }
-
   p | field_padding;
   p | field_precision;
   p | field_refresh_rank;
@@ -142,6 +138,31 @@ void Config::pup (PUP::er &p)
 void Config::read(Parameters * parameters) throw()
 {
   TRACE("BEGIN Config::read()");
+
+  read_boundary_(parameters);
+  read_domain_(parameters);
+  read_field_(parameters);
+  read_initial_(parameters);
+  read_memory_(parameters);
+  read_mesh_(parameters);
+  read_control_(parameters);
+  read_adapt_(parameters);
+  read_method_(parameters);
+  read_monitor_(parameters);
+  read_output_(parameters);
+  read_performance_(parameters);
+  read_stopping_(parameters);
+  read_testing_(parameters);
+  read_timestep_(parameters);
+
+  TRACE("END   Config::read()");
+
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_boundary_ (Parameters * parameters) throw()
+{
 
   //--------------------------------------------------
   // Boundary
@@ -257,7 +278,12 @@ void Config::read(Parameters * parameters) throw()
     }
 
   }
+}
 
+//----------------------------------------------------------------------
+
+void Config::read_domain_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Domain
   //--------------------------------------------------
@@ -267,6 +293,12 @@ void Config::read(Parameters * parameters) throw()
     domain_upper[i] = parameters->list_value_float(i, "Domain:upper", 0.0);
   }
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_field_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Field
   //--------------------------------------------------
@@ -339,6 +371,12 @@ void Config::read(Parameters * parameters) throw()
 
   restrict_type  = parameters->value_string ("Field:restrict","linear");
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_initial_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Initial
   //--------------------------------------------------
@@ -353,12 +391,24 @@ void Config::read(Parameters * parameters) throw()
 
   //  initial_value
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_memory_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Memory
   //--------------------------------------------------
 
   memory_active = parameters->value_logical("Memory:active",true);
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_mesh_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Mesh
   //--------------------------------------------------
@@ -385,8 +435,12 @@ void Config::read(Parameters * parameters) throw()
 
   mesh_max_level = parameters->value_integer("Mesh:max_level",0);
 
-  //--------------------------------------------------
+}
 
+//----------------------------------------------------------------------
+
+void Config::read_control_ (Parameters * parameters) throw()
+{
   control_sync_adapt_enter = parameters->value_string
     ("Control:sync:adapt_enter","array");
   control_sync_adapt_called = parameters->value_string
@@ -416,56 +470,63 @@ void Config::read(Parameters * parameters) throw()
   control_sync_stopping_exit = parameters->value_string
     ("Control:sync:stopping_exit","none");
 
-  //--------------------------------------------------
+}
 
-  adapt_balance = 
-    parameters->value_logical ("Adapt:balance",true);
+//----------------------------------------------------------------------
 
-  adapt_interval = 
-    parameters->value_integer ("Adapt:interval",1);
+void Config::read_adapt_ (Parameters * p) throw()
+{
 
-  num_adapt = parameters->list_length("Adapt:list");
+  adapt_balance  = p->value ("Adapt:balance",true);
+  adapt_interval = p->value ("Adapt:interval",1);
+
+  num_adapt = p->list_length("Adapt:list");
 
   for (int ia=0; ia<num_adapt; ia++) {
 
-    adapt_list[ia] = parameters->list_value_string
-      (ia,"Adapt:list","unknown");
+    printf ("%s:%d\n",__FILE__,__LINE__);
+    adapt_list[ia] = p->list_value_string (ia,"Adapt:list","unknown");
+    printf ("%s:%d\n",__FILE__,__LINE__);
 
     std::string prefix = "Adapt:" + adapt_list[ia] + ":";
+    printf ("%s:%d\n",__FILE__,__LINE__);
 
-    printf ("%s\n",(prefix+"type").c_str());
-    adapt_type[ia] = parameters->value_string(prefix+"type","unknown");
+    adapt_type[ia] = p->value_string(prefix+"type","unknown");
+    printf ("%s:%d\n",__FILE__,__LINE__);
 
     std::string param_str = prefix + "field_list";
-    int field_list_type = parameters->type(param_str);
-    if (field_list_type == parameter_list) {
-      const int n = parameters->list_length(param_str);
+
+    int type = p->type(param_str);
+
+    if (type == parameter_list) {
+      const int n = p->list_length(param_str);
       adapt_field_list[ia].resize(n);
       for (int index=0; index<n; index++) {
-	adapt_field_list[ia][index] = parameters->list_value_string 
-	  (index,param_str);
+	adapt_field_list[ia][index] = p->value(index,param_str,"none");
       }
-    } else if (field_list_type == parameter_string) {
+    } else if (type == parameter_string) {
       adapt_field_list[ia].resize(1);
-      adapt_field_list[ia][0] = parameters->value_string(param_str);
-    } else if (field_list_type != parameter_unknown) {
+      adapt_field_list[ia][0] = p->value(param_str,"none");
+    } else if (type != parameter_unknown) {
       ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
-	      field_list_type,param_str.c_str());
+	      type,param_str.c_str());
     }
 
     //--------------------------------------------------
 
-    adapt_min_refine[ia] = 
-      parameters->value_float (prefix + "min_refine",0.3);
-
-    adapt_max_coarsen[ia] = 
-      parameters->value_float (prefix + "max_coarsen",0.5*adapt_min_refine[ia]);
-    
-    adapt_level_exponent[ia] = 
-      parameters->value_float (prefix + "level_exponent",0.0);
+    adapt_min_refine[ia] = p->value (prefix + "min_refine",0.3);
+    double deflt = 0.5*adapt_min_refine[ia];
+    adapt_max_coarsen[ia] =    p->value (prefix + "max_coarsen",deflt);
+    adapt_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
 
   }
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_method_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Method
   //--------------------------------------------------
@@ -478,12 +539,24 @@ void Config::read(Parameters * parameters) throw()
     method_sequence[i] = parameters->list_value_string(i,"Method:sequence");
   }
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_monitor_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Monitor
   //--------------------------------------------------
 
   monitor_debug = parameters->value_logical("Monitor:debug",false);
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_output_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Output
   //--------------------------------------------------
@@ -633,6 +706,12 @@ void Config::read(Parameters * parameters) throw()
     }
   }  
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_performance_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Performance
   //--------------------------------------------------
@@ -675,6 +754,12 @@ void Config::read(Parameters * parameters) throw()
 		 &projections_schedule_off_step,
 		 projections_schedule_off_list);
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_stopping_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Stopping
   //--------------------------------------------------
@@ -686,6 +771,12 @@ void Config::read(Parameters * parameters) throw()
   stopping_interval = parameters->value_integer
     ( "Stopping:interval" , 1);
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_testing_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Testing
   //--------------------------------------------------
@@ -693,14 +784,17 @@ void Config::read(Parameters * parameters) throw()
   testing_cycle_final = parameters->value_integer("Testing:cycle_final",0);
   testing_time_final  = parameters->value_float  ("Testing:time_final", 0.0);
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_timestep_ (Parameters * parameters) throw()
+{
   //--------------------------------------------------
   // Timestep
   //--------------------------------------------------
 
   timestep_type = parameters->value_string("Timestep:type","default");
-
-  TRACE("END   Config::read()");
-
 }
 
 //======================================================================

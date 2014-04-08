@@ -6,6 +6,7 @@ include "input/Sedov/sedov-output.incl"
 Mesh    {  max_level = 4; }
 Initial {  max_level = 4; }
 
+include "adapt_slope.incl"
 
 Adapt {
    list = ["slope"];

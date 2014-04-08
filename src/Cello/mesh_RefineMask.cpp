@@ -53,13 +53,13 @@ int RefineMask::apply
 		   ny,ny,y,
 		   nz,nz,z);
 
-  double max_level = 0.0;
+  double level = 0.0;
 
   for (int ix=0; ix<nx; ix++) {
     for (int iy=0; iy<ny; iy++) {
       for (int iz=0; iz<nz; iz++) {
 	int i=ix + nx*(iy + ny*iz);
-	max_level = std::max(max_level,v[i]);
+	level = std::max(level,v[i]);
       }
     }
   }
@@ -70,7 +70,8 @@ int RefineMask::apply
   delete [] y;
   delete [] x;
 
-  return max_level;
+  return (level > comm_block->level()) ? adapt_refine :
+    (level < comm_block->level()) ? adapt_coarsen : adapt_same;
 }
 
 //======================================================================

@@ -712,13 +712,20 @@ void EnzoBlock::set_time (double time) throw ()
 {
   CommBlock::set_time (time);
 
+  //  if (cycle_ > 460) {
+  //    char buffer[255];
+  //    sprintf (buffer,"set_time %15.12f %15.12f",Time_,time);
+  //    index_.print(buffer,-1,2,false,simulation());
+  //  }
+
+  //  if (! (Time_ == 0 || Time_ < time)) {
   if (! (Time_ == 0 || Time_ < time)) {
     index_.print("ERROR",-1,2,false,simulation());
     ASSERT2("EnzoBlock::set_time()",
-	    "set_time() may be called more than once or dt = 0.0\n"
-	    "Time_ = %15.8f time = %15.8f",
-	    Time_,time,
-	    Time_ == 0 || Time_ < time);
+   	    "set_time() may be called more than once or dt = 0.0\n"
+   	    "Time_ = %15.8f time = %15.8f",
+   	    Time_,time,
+   	    Time_ == 0 || Time_ < time);
   }
 
   OldTime   = Time_;

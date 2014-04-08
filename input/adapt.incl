@@ -7,14 +7,7 @@ Mesh {
    root_blocks = [2,2];
 }
 
-Adapt {
-   balance = true;
-   list = ["slope"];
-   slope {
-      type = "slope";
-      field_list = ["density"];
-   }
-}
+include "input/adapt_slope.incl"
 
 Stopping { 
 	 cycle = 10000; 
