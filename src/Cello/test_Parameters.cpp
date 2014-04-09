@@ -312,9 +312,9 @@ void check_parameters(Parameters * parameters)
   unit_assert(parameters->group_depth()==1);
   unit_assert(parameters->group(0)=="String");
 
-  unit_assert(strcmp(parameters->value_string("str1"),"testing")==0);
-  unit_assert(strcmp(parameters->value_string("str2","blah"),"one")==0);
-  unit_assert(strcmp(parameters->value_string("none","blah"),"blah")==0);
+  unit_assert(parameters->value_string("str1") == "testing");
+  unit_assert(parameters->value_string("str2","blah") == "one");
+  unit_assert(parameters->value_string("none","blah") == "blah");
 
   // const char *s, *sd = "blah";
   // parameters->value("str1",parameter_string,&s);
@@ -331,11 +331,11 @@ void check_parameters(Parameters * parameters)
   //--------------------------------------------------
 
   parameters->set_string("str1","yahoo");
-  unit_assert (strcmp(parameters->value_string("str1"),"yahoo")==0);
+  unit_assert (parameters->value_string("str1") == "yahoo");
   parameters->set_string("str1","testing");
 
   parameters->set_string("none_str","hello");
-  unit_assert (strcmp(parameters->value_string("none_str"),"hello")==0);
+  unit_assert (parameters->value_string("none_str") == "hello");
 
   //--------------------------------------------------
   unit_func("evaluate_float");
@@ -436,7 +436,7 @@ void check_parameters(Parameters * parameters)
   unit_func("list_value_string");
   //--------------------------------------------------
 
-  unit_assert(strcmp(parameters->list_value_string(3,"num1"),"string")==0);
+  unit_assert(parameters->list_value_string(3,"num1") == "string");
 
   //--------------------------------------------------
   unit_func("list_evaluate_float");
@@ -474,7 +474,7 @@ void check_parameters(Parameters * parameters)
   unit_assert(parameters->list_value_float  (1,"list")==24.0);
   unit_assert(parameters->list_value_logical(2,"list")==true);
   unit_assert(parameters->list_value_logical(3,"list")==false);
-  unit_assert(strcmp(parameters->list_value_string (4,"list"),"a string")==0);
+  unit_assert(parameters->list_value_string (4,"list") == "a string");
 
   //--------------------------------------------------
   unit_func("group_count");
@@ -485,7 +485,7 @@ void check_parameters(Parameters * parameters)
   // parameters->read ("test.in");
   const int NUM_GROUPS = 8;
   struct {
-    const char * group;
+    std::string group;
     int count;
   } child_count[NUM_GROUPS] = {
     {"Float",       4 + 1},
@@ -505,7 +505,7 @@ void check_parameters(Parameters * parameters)
   for (int i=0; i<NUM_GROUPS; i++) {
     parameters->group_set(0,child_count[i].group);
     printf ("count %s %d %d\n",
-	    child_count[i].group,
+	    child_count[i].group.c_str(),
 	    parameters->group_count(),
 	    child_count[i].count);
     unit_assert (parameters->group_count() == child_count[i].count);
