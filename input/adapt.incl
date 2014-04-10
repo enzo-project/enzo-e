@@ -38,7 +38,7 @@ Output {
     de {
        field_list = ["density"];
        type     = "image";
-       
+       include "input/schedule_time_0.02.incl"
        include "input/colormap_blackbody.incl"
     };
     dl {

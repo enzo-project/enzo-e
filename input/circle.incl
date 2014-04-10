@@ -76,7 +76,6 @@
          field_list = ["density"];
          type     = "image";
          include "input/schedule_cycle_10.incl"
-         schedule = ["cycle","interval", 10];
         colormap = [0.00, 0.00, 0.50,  
                     0.00, 1.00, 0.00, 
                     1.00, 1.00, 0.00, 

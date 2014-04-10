@@ -80,7 +80,7 @@
          name      = ["DEFERRED"];
          field_list = ["density"];
          type     = "image";
-         schedule = ["cycle", "interval", 1];
+         schedule {var = "cycle"; type = "interval"; step = 1;};
          colormap = [0.00, 0.00, 0.50,  
                      0.00, 1.00, 0.00, 
                      1.00, 1.00, 0.00, 
