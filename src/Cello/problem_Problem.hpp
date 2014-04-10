@@ -114,7 +114,9 @@ public: // interface
   Stopping *  stopping() const throw() { return stopping_; }
 
   /// Return the timestep control object
-  Timestep * timestep() const throw()  { return timestep_; }
+  Timestep * timestep(int i) const throw()  {
+    return (0 <= i && i < (int)timestep_list_.size()) ? timestep_list_[i] : NULL; 
+  }
 
   /// Initialize the boundary conditions object
   void initialize_boundary(Config * config, 
@@ -223,7 +225,7 @@ private: // attributes
   Stopping * stopping_;
 
   /// Time-step computation
-  Timestep * timestep_;
+  std::vector<Timestep *> timestep_list_;
 
   /// List of method objects
   std::vector<Method *> method_list_;

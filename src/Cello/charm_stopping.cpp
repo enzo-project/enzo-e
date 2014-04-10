@@ -42,12 +42,15 @@ void CommBlock::stopping_begin_()
     // Compute local dt
 
     Problem * problem = simulation->problem();
-
-    Timestep * timestep = problem->timestep();
-
     const FieldDescr * field_descr = simulation->field_descr();
-    double dt_block = timestep->evaluate(field_descr,this);
-    TRACE1("dt_block = %f",dt_block);
+
+    int index = 0;
+    Timestep * timestep;
+    double dt_block = std::numeric_limits<double>::max();
+    while ((timestep = problem->timestep(index++))) {
+      dt_block = std::min(dt_block,timestep->evaluate(field_descr,this));
+    }
+
 
     // Reduce timestep to coincide with scheduled output if needed
 

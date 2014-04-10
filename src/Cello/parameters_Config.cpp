@@ -805,7 +805,17 @@ void Config::read_timestep_ (Parameters * parameters) throw()
   // Timestep
   //--------------------------------------------------
 
-  timestep_type = parameters->value_string("Timestep:type","default");
+  if (parameters->type("Timestep:type") == parameter_string) {
+    num_timestep=1;
+    timestep_type.resize(num_timestep);
+    timestep_type[0] = parameters->value_string("Timestep:type","default");
+  } else if (parameters->type("Timestep:type") == parameter_list) {
+    num_timestep = parameters->list_length("Timestep:type");
+    timestep_type.resize(num_timestep);
+    for (int i=0; i<num_timestep; i++) {
+      timestep_type[i] = parameters->list_value_string(i,"Timestep:type","default");
+    }
+  }
 }
 
 //======================================================================

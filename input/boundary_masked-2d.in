@@ -27,30 +27,27 @@ Field {
 Stopping { cycle = 2000; }
 
 Boundary { 
-   list = ["Rx","Ox","Px","Py"];
-   Ox {
-     axis = "x";
+   list = ["out_x","reflect_x","period_x","period_y"];
+
+   out_x {
      type = "outflow";
      mask = (y <= 0.333);
    };
-   Rx {
-     axis = "x";
+   reflect_x {
      type = "reflecting";
      mask = (0.333 < y && y <= 0.666);
    };
-   Px {
-     axis = "x";
+   period_x {
      type = "periodic";
      mask = (0.666 < y);
    };
-   Py {
-     axis = "y";
+   period_y {
      type = "periodic";
    }
 }
 
 Initial {
-   max_level   = 5; 
+#    max_level   = 3; 
     density       { value = [ 1.0, (0.2 <= x && x < 0.4),  0.125 ]; };
     total_energy  { value = [ 1.0  / (0.4 * 1.0) ,
                                    (0.2 <= x && x < 0.4),  0.14 / (0.4 * 0.1)]; };
@@ -59,7 +56,8 @@ Initial {
 }
 
 Output { 
-   file_groups = ["cycle_step","mesh"];
+#   file_groups = ["cycle_step","mesh"];
+   file_groups = ["cycle_step"];
 
    cycle_step {  
       name = ["boundary_masked-2d-%04d.png","cycle"]; 
@@ -73,7 +71,7 @@ Output {
         field_list = ["density"];
 #	image_block_size  = 5;
 #	image_size = [1025,1025];
-        include "schedule_cycle_10.incl"
+        include "input/schedule_cycle_10.incl"
         image_specify_bounds = true;
 	image_min = 0.0;
 	image_max = 6.0;

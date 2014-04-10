@@ -11,7 +11,6 @@
 
 Problem::Problem() throw()
   : stopping_(0),
-    timestep_(0),
     index_output_(0)
 {
   
@@ -63,7 +62,12 @@ void Problem::pup (PUP::er &p)
   if (up) stopping_ = new Stopping;
   p | *stopping_;
 
-  p | timestep_; // PUP::able
+  if (pk) n=timestep_list_.size();
+  p | n;
+  if (up) timestep_list_.resize(n);
+  for (int i=0; i<n; i++) {
+    p | timestep_list_[i]; // PUP::able
+  }
 
   if (pk) n=method_list_.size();
   p | n;
@@ -164,12 +168,19 @@ void Problem::initialize_stopping(Config * config) throw()
 
 void Problem::initialize_timestep(Config * config) throw()
 {
-  timestep_ = create_timestep_(config->timestep_type,config);
+  for (int i=0; i<config->num_timestep; i++) {
 
-  ASSERT1("Problem::initialize_timestep",
-	  "Timestep type %s not recognized",
-	  config->timestep_type.c_str(),
-	  timestep_ != NULL);
+    std::string type = config->timestep_type[i];
+
+    Timestep * timestep = create_timestep_(type,config);
+
+    if (timestep) {
+      timestep_list_.push_back( timestep );
+    } else {
+      ERROR1("Problem::initialize_timestep",
+	     "Cannot create Timestep type %s",type.c_str());
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -360,7 +371,9 @@ void Problem::deallocate_() throw()
     delete refine_list_[i];    refine_list_[i] = 0;
   }
   delete stopping_;      stopping_ = 0;
-  delete timestep_;      timestep_ = 0;
+  for (size_t i=0; i<timestep_list_.size(); i++) {
+    delete timestep_list_[i];     timestep_list_[i] = 0;
+  }
   for (size_t i=0; i<output_list_.size(); i++) {
     delete output_list_[i];    output_list_[i] = 0;
   }

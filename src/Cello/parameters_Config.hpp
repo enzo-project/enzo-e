@@ -179,7 +179,8 @@ public: // attributes
   int                        testing_cycle_final;
   double                     testing_time_final;
 
-  std::string                timestep_type;
+  int                        num_timestep;
+  std::vector<std::string>   timestep_type;
 
 protected: // functions
 
