@@ -222,7 +222,10 @@ public: // interface
 
   /// Clear all groups
   void group_clear() throw();
-  
+
+  /// Return the full name of the parameter including group
+  std::string full_name (std::string parameter) throw();
+
   /// Return the type of the given parameter
   parameter_type type(std::string) throw();
 

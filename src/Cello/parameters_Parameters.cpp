@@ -476,7 +476,7 @@ int Parameters::list_length(std::string parameter)
 {
   Param * param = this->param(parameter);
   ASSERT1 ("Parameters::list_length",
-	   "Parameter %s is not a list", parameter.c_str(),
+	   "Parameter %s is not a list", full_name(parameter).c_str(),
 	   ( ! param || param->is_type(parameter_list)));
   return (param != NULL) ? (param->value_list_)->size() : 0;
 }
@@ -849,6 +849,18 @@ void Parameters::group_clear() throw ()
   current_group_depth_ = 0;
 }
 
+//----------------------------------------------------------------------
+
+std::string Parameters::full_name(std::string parameter) throw()
+{
+  std::string full_name = "";
+  for (int i=0; i<current_group_depth_; i++) {
+    if (current_group_[i]) full_name = full_name + current_group_[i] + ":";
+  }
+  full_name = full_name + parameter;
+  return full_name;
+
+}
 //----------------------------------------------------------------------
 
 parameter_type Parameters::type
