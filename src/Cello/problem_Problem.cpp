@@ -512,7 +512,8 @@ Timestep * Problem::create_timestep_
 
 //----------------------------------------------------------------------
 
-Method * Problem::create_method_ ( std::string  name ) throw ()
+Method * Problem::create_method_ 
+( std::string  name) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());
   // No default method

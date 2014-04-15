@@ -131,17 +131,22 @@ Initial * EnzoProblem::create_initial_
 
 //----------------------------------------------------------------------
 
-Method * EnzoProblem::create_method_ ( std::string  type ) throw ()
+Method * EnzoProblem::create_method_ 
+( std::string  type,  Config * config) throw ()
 /// @param type   Type of the method to create
 {
 
   Method * method = 0;
+
+  EnzoConfig * enzo_config = (EnzoConfig *) config;
 
   TRACE1("EnzoProblem::create_method %s",type.c_str());
   if (type == "ppm") {
     method = new EnzoMethodPpm;
   } else if (type == "ppml") {
     method = new EnzoMethodPpml;
+  } else if (type == "heat") {
+    method = new EnzoMethodHeat(enzo_config->enzo_method_heat_alpha);
   } else {
     method = Problem::create_method_(type);
   }
@@ -152,9 +157,8 @@ Method * EnzoProblem::create_method_ ( std::string  type ) throw ()
 //----------------------------------------------------------------------
 
 Prolong * EnzoProblem::create_prolong_ 
-(
- std::string  type,
- Config * config ) throw ()
+( std::string  type,
+  Config *     config ) throw ()
 {
 
   Prolong * prolong = 0;

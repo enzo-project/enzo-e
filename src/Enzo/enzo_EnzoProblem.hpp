@@ -51,7 +51,8 @@ private: // functions
    const GroupProcess * group_process) throw ();
 
   /// Create named method object
-  virtual Method *   create_method_ (std::string type) throw ();
+  virtual Method * create_method_ 
+  (std::string type, Config * config) throw ();
 
   /// Create named timestep object
   virtual Timestep * create_timestep_

@@ -366,6 +366,18 @@ void CommBlock::upper
 
 //----------------------------------------------------------------------
 
+void CommBlock::cell_width 
+(double * dx, double * dy, double * dz) const throw()
+{ 
+  double xm,ym,zm;
+  lower(&xm,&ym,&zm);
+  double xp,yp,zp;
+  upper(&xp,&yp,&zp);
+  block()->field_block()->cell_width(xm,xp,dx, ym,yp,dy, zm,zp,dz);
+}
+
+//----------------------------------------------------------------------
+
 void CommBlock::index_global
 ( int *ix, int *iy, int *iz,
   int *nx, int *ny, int *nz ) const

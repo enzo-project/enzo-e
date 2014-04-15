@@ -50,6 +50,8 @@ public: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
+  // EnzoMethodPpm
+
   double                     enzo_ppm_density_floor;
   bool                       enzo_ppm_diffusion;
   bool                       enzo_ppm_dual_energy;
@@ -64,6 +66,9 @@ public: // attributes
   float                      enzo_ppm_temperature_floor;
   bool                       enzo_ppm_use_minimum_pressure_support;
 
+  double                     enzo_gamma;
+
+  // Cosmology (NOT ACCESSED)
   bool                       enzo_cosmology;
   double                     enzo_cosmology_comoving_box_size;
   double                     enzo_cosmology_hubble_constant_now;
@@ -71,15 +76,19 @@ public: // attributes
   double                     enzo_cosmology_max_expansion_rate;
   double                     enzo_cosmology_omega_lamda_now;
   double                     enzo_cosmology_omega_matter_now;
-  double                     enzo_gamma;
 
+  // EnzoInitialSedovArray[23]
   int                        enzo_sedov_array[3];
   double                     enzo_sedov_radius_relative;
   double                     enzo_sedov_pressure_in;
   double                     enzo_sedov_pressure_out;
   double                     enzo_sedov_density;
 
+  // EnzoProlong
   std::string                enzo_interpolation_method;
+
+  // EnzoMethodHeat
+  double                     enzo_method_heat_alpha;
 };
 
 #endif /* PARAMETERS_ENZO_CONFIG_HPP */

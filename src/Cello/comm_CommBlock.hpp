@@ -119,6 +119,11 @@ public: // interface
   double dt() const throw() 
   { return dt_; };
 
+  /// Return current cell widths
+  void cell_width 
+  (double * dx, double * dy = 0, double * dz = 0)
+  const throw();
+
   /// Return the current stopping criteria
   bool stop() const throw() 
   { return stop_; };
