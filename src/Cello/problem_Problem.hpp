@@ -15,7 +15,6 @@
 ///    Output:      List of output functions
 ///    Refinement:  How the mesh hierarchy is to be refined
 ///    Stopping:    Stopping criteria
-///    Timestep:    Timestepping control
 
 #ifndef PROBLEM_PROBLEM_HPP
 #define PROBLEM_PROBLEM_HPP
@@ -33,7 +32,6 @@ class Refine;
 class Restrict;
 class Simulation;
 class Stopping;
-class Timestep;
 
 class Problem : public PUP::able
 {
@@ -113,10 +111,10 @@ public: // interface
   /// Return the stopping object
   Stopping *  stopping() const throw() { return stopping_; }
 
-  /// Return the timestep control object
-  Timestep * timestep(int i) const throw()  {
-    return (0 <= i && i < (int)timestep_list_.size()) ? timestep_list_[i] : NULL; 
-  }
+  // /// Return the timestep control object
+  // Timestep * timestep(int i) const throw()  {
+  //   return (0 <= i && i < (int)timestep_list_.size()) ? timestep_list_[i] : NULL; 
+  // }
 
   /// Initialize the boundary conditions object
   void initialize_boundary(Config * config, 
@@ -136,8 +134,8 @@ public: // interface
   /// Initialize the stopping object
   void initialize_stopping(Config * config ) throw();
 
-  /// Initialize the timestep object
-  void initialize_timestep(Config * config) throw();
+  // /// Initialize the timestep object
+  // void initialize_timestep(Config * config) throw();
 
   /// Initialize the output objects
   void initialize_output(Config * config,
@@ -186,7 +184,7 @@ protected: // functions
 
   /// Create named method object
   virtual Method *   create_method_
-  (std::string type) throw ();
+  (std::string type, Config * config) throw ();
 
   /// Create named output object
   virtual Output *   create_output_  
@@ -198,9 +196,9 @@ protected: // functions
   virtual Stopping * create_stopping_ 
   (std::string type, Config * config) throw ();
 
-  /// Create named timestep object
-  virtual Timestep * create_timestep_ 
-  (std::string type, Config * config) throw ();
+  // /// Create named timestep object
+  // virtual Timestep * create_timestep_ 
+  // (std::string type, Config * config) throw ();
 
   /// Create named prolongation object
   virtual Prolong * create_prolong_ 
@@ -224,8 +222,8 @@ private: // attributes
   /// Stopping criteria
   Stopping * stopping_;
 
-  /// Time-step computation
-  std::vector<Timestep *> timestep_list_;
+  // /// Time-step computation
+  // std::vector<Timestep *> timestep_list_;
 
   /// List of method objects
   std::vector<Method *> method_list_;

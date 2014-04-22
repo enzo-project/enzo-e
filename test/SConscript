@@ -149,7 +149,9 @@ env.RunSerial('parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/pro
 # TEST FULL APPLICATION
 #----------------------------------------------------------------------
 
+#----------------------------------------------------------------------
 # MethodPpm tests
+#----------------------------------------------------------------------
 
 # serial
 Clean(env_mv_out.RunSerial ('test_method_ppm-1.unit',bin_path + '/enzo-p', 
@@ -172,7 +174,35 @@ Clean(env_mv_out.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-p',
 env.MakeMovie ("method_ppm-8.swf", "test_method_ppm-8.unit", \
                 ARGS= test_path + "/method_ppm-8-*.png");
 
+#----------------------------------------------------------------------
+# MethodHeat tests
+#----------------------------------------------------------------------
+
+# serial
+Clean(env_mv_out.RunSerial ('test_method_heat-1.unit',bin_path + '/enzo-p', 
+		ARGS='input/method_heat-1.in'),
+      [Glob('#/' + test_path + '/method_heat-1*.png'),
+       Glob('#/' + test_path + '/method_heat-1*.h5'),
+        '#/input/method_heat-1.in.out'])
+
+env.MakeMovie ("method_heat-1.swf", "test_method_heat-1.unit", \
+                ARGS= test_path + "/method_heat-1*.png");
+
+# parallel
+
+Clean(env_mv_out.RunParallel ('test_method_heat-8.unit',bin_path + '/enzo-p', 
+		ARGS='input/method_heat-8.in'),
+      [Glob('#/' + test_path + '/method_heat-8*.png'),
+      Glob('#/' + test_path + '/method_heat-8*.h5'),
+      '#/input/method_heat-8.in.out'])
+
+env.MakeMovie ("method_heat-8.swf", "test_method_heat-8.unit", \
+                ARGS= test_path + "/method_heat-8-*.png");
+
+
+#----------------------------------------------------------------------
 # serial restart
+#----------------------------------------------------------------------
 
 
 checkpoint_ppm_1 = env_rm_png.RunSerial (

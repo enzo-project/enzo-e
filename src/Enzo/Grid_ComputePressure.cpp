@@ -75,6 +75,9 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
     for (i = 0; i < size; i++) {
  
       total_energy  = BaryonField[TENum][i];
+      
+      //      if (i==0) printf ("%s:%d total_energy %f\n",__FILE__,__LINE__,total_energy);
+
       density       = BaryonField[DensNum][i];
       velocity1     = BaryonField[Vel1Num][i];
       if (GridRank > 1)
@@ -87,7 +90,7 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
       gas_energy    = total_energy - 0.5*(velocity1*velocity1 +
 					  velocity2*velocity2 +
 					  velocity3*velocity3);
- 
+
       pressure[i] = (Gamma - 1.0)*density*gas_energy;
 
       if (pressure[i] < pressure_floor)

@@ -519,14 +519,19 @@ printf ("</tr>\n");
 // printf ("<th rowspan=9>Enzo</th>\n"); 
 //----------------------------------------------------------------------
 
-test_summary("Method PPM",
+test_summary("Method-ppm",
 	     array("method_ppm-1",
 		   "method_ppm-8"),
 	     array("enzo-p",  "enzo-p"));
 
-test_summary("Method-PPML",
+test_summary("Method-ppml",
 	     array("method_ppml-1",
 		   "method_ppml-8"),
+	     array("enzo-p",  "enzo-p"));
+
+test_summary("Method-heat",
+	     array("method_heat-1",
+		   "method_heat-8"),
 	     array("enzo-p",  "enzo-p"));
 
 test_summary("Checkpoint",
@@ -623,7 +628,7 @@ printf ("</tr></table></center></br>\n");
 
 //======================================================================
 
-test_group("Method-PPM");
+test_group("Method-ppm");
 
 ?>
 
@@ -631,14 +636,14 @@ Method-PPM tests serve to test basic PPM functionality in Enzo-P.  A
 small implosion problem is run for 400 cycles, first with
   one block (1,1) then eight blocks (2,4).
 
-  </p>
+  /* </p> */
 
-  Currently, "serial" results are incorrect for multiple blocks, which
-  is to be expected.  There are errors in parallel CHARM++ and MPI with
-  eight blocks because the final time after 400 cycles does not exactly
-  match the time for the serial runs.  The results look qualitatively
-  correct however, even at time 2.5 for 400<sup>2</sup>(over 13000
-							cycles).
+  /* Currently, "serial" results are incorrect for multiple blocks, which */
+  /* is to be expected.  There are errors in parallel CHARM++ and MPI with */
+  /* eight blocks because the final time after 400 cycles does not exactly */
+  /* match the time for the serial runs.  The results look qualitatively */
+  /* correct however, even at time 2.5 for 400<sup>2</sup>(over 13000 */
+  /* 							cycles). */
   </p>
 
   <?php
@@ -663,7 +668,7 @@ test_table ("method_ppm-8",
 //======================================================================
 
 
-test_group("Method-PPML");
+test_group("Method-ppml");
 
 ?>
 
@@ -695,6 +700,34 @@ test_table ("method_ppml-8-y",
 test_table ("method_ppml-8-z",
 	    array("0000","0010","0020","0030","0040"), $types);
 
+
+//======================================================================
+
+test_group("Method-heat");
+
+?>
+
+Method-heat tests serve to test basic functionality of the "heat" method
+in Enzo-P.
+
+  </p>
+
+  <?php
+
+
+  echo "<h3>HEAT (serial) </h3>";
+
+tests("Enzo","enzo-p","test_method_heat-1","HEAT 1 block");
+
+test_table ("method_heat-1",
+	    array("000000","000200","000400"), $types);
+
+  echo "<h3>HEAT (parallel) </h3>";
+
+tests("Enzo","enzo-p","test_method_heat-8","HEAT 1 block");
+
+test_table ("method_heat-8",
+	    array("000000","000200","000400"), $types);
 
 //======================================================================
 

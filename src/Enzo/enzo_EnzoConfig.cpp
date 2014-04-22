@@ -51,13 +51,15 @@ void EnzoConfig::pup (PUP::er &p)
   p | enzo_cosmology_omega_matter_now;
   p | enzo_gamma;
 
-  p | enzo_interpolation_method;
-
   PUParray(p,enzo_sedov_array,3);
   p | enzo_sedov_radius_relative;
   p | enzo_sedov_pressure_in;
   p | enzo_sedov_pressure_out;
   p | enzo_sedov_density;
+
+  p | enzo_interpolation_method;
+
+  p | enzo_method_heat_alpha;
 
 }
 
@@ -136,6 +138,10 @@ void EnzoConfig::read(Parameters * parameters) throw()
 
   enzo_interpolation_method = parameters->value_string 
     ("Enzo:interpolation_method","SecondOrderA");
+
+
+  enzo_method_heat_alpha = parameters->value_float 
+    ("Enzo:heat:alpha",1.0);
 
   TRACE("END   EnzoConfig::read()");
 }

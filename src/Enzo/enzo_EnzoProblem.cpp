@@ -70,29 +70,29 @@ Boundary * EnzoProblem::create_boundary_
   return boundary;
 }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-Timestep * EnzoProblem::create_timestep_
-(
- std::string  type,
- Config * config
- ) throw ()
-/// @param type   Type of the timestep method to create
-{
-  Timestep * timestep = 0;
+// Timestep * EnzoProblem::create_timestep_
+// (
+//  std::string  type,
+//  Config * config
+//  ) throw ()
+// /// @param type   Type of the timestep method to create
+// {
+//   // Timestep * timestep = 0;
 
-  if (type == "ppml") {
-    timestep = new EnzoTimestepPpml;
-  } else if (type == "ppm") {
-    timestep = new EnzoTimestep;
-  } else {
-    timestep = Problem::create_timestep_(type,config);
-  }
+//   // if (type == "ppml") {
+//   //   timestep = new EnzoTimestepPpml;
+//   // } else if (type == "ppm") {
+//   //   timestep = new EnzoTimestep;
+//   // } else {
+//   //   timestep = Problem::create_timestep_(type,config);
+//   // }
 
-  return timestep;
-}
+//   return NULL;
+// }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
 Initial * EnzoProblem::create_initial_ 
 (
@@ -146,9 +146,10 @@ Method * EnzoProblem::create_method_
   } else if (type == "ppml") {
     method = new EnzoMethodPpml;
   } else if (type == "heat") {
-    method = new EnzoMethodHeat(enzo_config->enzo_method_heat_alpha);
+    method = new EnzoMethodHeat(enzo_config->enzo_method_heat_alpha,
+				enzo_config->field_courant);
   } else {
-    method = Problem::create_method_(type);
+    method = Problem::create_method_(type,config);
   }
 
   return method;
