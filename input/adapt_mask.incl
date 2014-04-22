@@ -1,3 +1,5 @@
+# File:    adapt_mask.incl
+
 Domain {
    lower = [-2.0, -2.0];
    upper = [ 2.0,  2.0];

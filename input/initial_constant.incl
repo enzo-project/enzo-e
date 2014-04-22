@@ -1,3 +1,4 @@
+# File:    initial_constant.incl
 
 Initial {
     density       { value = 1.0; };
