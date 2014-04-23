@@ -1,0 +1,91 @@
+# File:    heat.incl
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+   # Domain is the two dimensional box 0 < x,y < 1.0
+
+   Domain { 
+      lower = [0.0, 0.0];
+      upper = [1.0, 1.0];
+   } 
+
+   # The computational mesh is a single uniform grid
+
+   Mesh { 
+      root_rank = 2;
+      root_size = [80,80];
+   }
+
+   # Field parameters include those concerning fields as a group, as
+   # well as individual fields
+   
+   Field {
+
+      ghosts = 3;
+
+      refresh { rank = 1;  }; # refresh edges not corners
+
+      fields = ["temperature"];
+
+      # courant condition for fields
+
+      courant   = 0.8;
+
+      padding   = 0;
+      alignment = 8;    
+   }
+
+   Method {
+
+      # list of methods to apply and in what order
+ 
+      sequence = ["ppm"];
+
+   }
+
+   Timestep { type = "ppm"; }
+
+   Enzo {
+
+      gamma = 1.4;
+
+      ppm {
+
+         # method-specific parameters
+
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+
+         dual_energy = false;
+     }
+   }
+
+   Initial {
+       temperature  {
+            value = [ 0.125, x + y < 0.5,  1.0 ]; };
+   }
+
+   Boundary { type = "reflecting" }
+
+   Stopping {        cycle = 400;   } 
+   Testing {   cycle_final = 400; }
+
+# OLD TIME
+#   Testing {  time_final  = 1.03693807162344;  } 
+# TIME FOR UPDATED InitialDefault
+   Testing {  time_final  = 1.04044035635889; }
+
+   Output { 
+
+      file_groups = ["temperature"];
+
+      temperature {
+        field_list = ["temperature"];
+	type     = "image";
+        include "input/schedule_cycle_10.incl"
+        include "input/colormap_blackbody.incl";
+      };
+
+
+   }
