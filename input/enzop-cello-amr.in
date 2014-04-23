@@ -5,7 +5,7 @@ include "input/adapt.incl"
 Stopping { cycle = 40000; }
 Mesh    { 
    root_size   = [32,32];
-   max_level   = 7; 
+   max_level   = 3; 
 }
 
 Initial {
@@ -16,7 +16,7 @@ Initial {
     velocity_x    { value = [0.0]; };
     velocity_y    { value = [0.0]; };
 
-    max_level = 7;
+    max_level = 3;
 }
 
 

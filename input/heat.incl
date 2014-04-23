@@ -29,7 +29,7 @@
 
       # courant condition for fields
 
-      courant   = 0.8;
+      courant   = 0.5;
 
       padding   = 0;
       alignment = 8;    
