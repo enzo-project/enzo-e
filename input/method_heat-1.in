@@ -39,7 +39,7 @@ Output {
 Stopping { cycle = 1000; }
 Testing  {
     cycle_final = 1000;
-    time_final  = 0.03125;
+    time_final  = 0.0390624999999993;
 }
 
 

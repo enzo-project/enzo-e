@@ -4,10 +4,7 @@
 ###
 ### This file tests the #include preprocessing command
 
-   Domain { 
-      lower = [0.0, 0.0, 0.0];
-      upper = [1.0, 1.0, 1.0];
-   } 
+   include "input/domain-3d-01.incl"
 
    Mesh { 
       root_rank   = 3;

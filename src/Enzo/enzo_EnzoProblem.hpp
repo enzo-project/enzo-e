@@ -45,8 +45,8 @@ private: // functions
   /// Create named initialization object
   virtual Initial *  create_initial_ 
   (std::string type, 
-   Parameters * parameters,
    Config * config,
+   Parameters * parameters,
    const FieldDescr *,
    const GroupProcess * group_process) throw ();
 

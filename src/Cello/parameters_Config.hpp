@@ -55,40 +55,11 @@ public: // interface
 
 public: // attributes
 
+  // REVIEW: rev 3505
+
   // NOTE: change pup() function whenever attributes change
 
-  int                        num_boundary;
-  std::string                boundary_list[MAX_BOUNDARY];
-  std::string                boundary_type[MAX_BOUNDARY];
-  int                        boundary_axis[MAX_BOUNDARY];
-  int                        boundary_face[MAX_BOUNDARY];
-  int                        boundary_mask[MAX_BOUNDARY];
-  std::vector<std::string>   boundary_field_list[MAX_BOUNDARY];
-
-  double                     domain_lower[3];
-  double                     domain_upper[3];
-
-  int                        num_fields;
-  int                        field_alignment;
-  std::vector<int>           field_centering [3];
-  double                     field_courant;
-  std::vector<std::string>   field_fields;
-  int                        field_ghosts[3];
-  int                        field_padding;
-  int                        field_precision;
-  int                        field_refresh_rank;
-
-  int                        initial_cycle;
-  std::string                initial_type;
-  double                     initial_time;
-  int                        initial_max_level;
-
-  bool                       memory_active;
-
-  int                        mesh_root_blocks[3];
-  int                        mesh_root_rank;
-  int                        mesh_root_size[3];
-  int                        mesh_max_level;
+  // Adapt
 
   int                        adapt_interval;
   bool                       adapt_balance;
@@ -99,6 +70,18 @@ public: // attributes
   double                     adapt_min_refine[MAX_ADAPT];
   double                     adapt_max_coarsen[MAX_ADAPT];
   double                     adapt_level_exponent[MAX_ADAPT];
+
+  // Boundary
+
+  int                        num_boundary;
+  std::string                boundary_list[MAX_BOUNDARY];
+  std::string                boundary_type[MAX_BOUNDARY];
+  int                        boundary_axis[MAX_BOUNDARY];
+  int                        boundary_face[MAX_BOUNDARY];
+  int                        boundary_mask[MAX_BOUNDARY];
+  std::vector<std::string>   boundary_field_list[MAX_BOUNDARY];
+
+  // Control
 
   std::string                control_sync_adapt_enter;
   std::string                control_sync_adapt_called;
@@ -115,9 +98,52 @@ public: // attributes
   std::string                control_sync_stopping_enter;
   std::string                control_sync_stopping_exit;
 
+  // Domain
+
+  double                     domain_lower[3];
+  double                     domain_upper[3];
+
+  // Field
+
+  int                        num_fields;
+  int                        field_alignment;
+  std::vector<int>           field_centering [3];
+  double                     field_courant;
+  std::vector<std::string>   field_fields;
+  int                        field_ghosts[3];
+  int                        field_padding;
+  int                        field_precision;
+  int                        field_refresh_rank;
+  std::string                prolong_type;
+  std::string                restrict_type;
+
+  // Initial
+
+  int                        initial_cycle;
+  std::string                initial_type;
+  double                     initial_time;
+  int                        initial_max_level;
+
+  // Memory
+
+  bool                       memory_active;
+
+  // Mesh
+
+  int                        mesh_root_blocks[3];
+  int                        mesh_root_rank;
+  int                        mesh_root_size[3];
+  int                        mesh_max_level;
+
+  // Method
+
   std::vector<std::string>   method_sequence;
 
+  // Monitor
+
   bool                       monitor_debug;
+
+  // Output
 
   int                        num_file_groups;
   std::vector<std::string>   output_file_groups;
@@ -149,68 +175,56 @@ public: // attributes
   double                     output_schedule_step  [MAX_SCHEDULE];
   std::vector<double>        output_schedule_list  [MAX_SCHEDULE];
 
+  // Performance
+
   std::vector<std::string>   performance_papi_counters;
   std::string                performance_name;
   int                        performance_stride;
   bool                       performance_warnings;
 
-  // schedule for turning on / off Projections monitoring
+  // std::string                projections_schedule_on_type;
+  // std::string                projections_schedule_on_var;
+  // double                     projections_schedule_on_start;
+  // double                     projections_schedule_on_stop;
+  // double                     projections_schedule_on_step;
+  // std::vector<double>        projections_schedule_on_list;
+  // std::string                projections_schedule_off_type;
+  // std::string                projections_schedule_off_var;
+  // double                     projections_schedule_off_start;
+  // double                     projections_schedule_off_stop;
+  // double                     projections_schedule_off_step;
+  // std::vector<double>        projections_schedule_off_list;
 
-  std::string                projections_schedule_on_type;
-  std::string                projections_schedule_on_var;
-  double                     projections_schedule_on_start;
-  double                     projections_schedule_on_stop;
-  double                     projections_schedule_on_step;
-  std::vector<double>        projections_schedule_on_list;
-  std::string                projections_schedule_off_type;
-  std::string                projections_schedule_off_var;
-  double                     projections_schedule_off_start;
-  double                     projections_schedule_off_stop;
-  double                     projections_schedule_off_step;
-  std::vector<double>        projections_schedule_off_list;
-
-  std::string                prolong_type;
-  std::string                restrict_type;
+  // Stopping
 
   int                        stopping_cycle;
   double                     stopping_time;
   int                        stopping_interval;
 
+  // Testing
+
   int                        testing_cycle_final;
   double                     testing_time_final;
-
-  int                        num_timestep;
-  std::vector<std::string>   timestep_type;
 
 protected: // functions
 
   /// Read boundary-related values from the Parameters object
+  void read_adapt_       (Parameters * parameters) throw();
   void read_boundary_    (Parameters * parameters) throw();
+  void read_control_     (Parameters * parameters) throw();
   void read_domain_      (Parameters * parameters) throw();
   void read_field_       (Parameters * parameters) throw();
   void read_initial_     (Parameters * parameters) throw();
   void read_memory_      (Parameters * parameters) throw();
   void read_mesh_        (Parameters * parameters) throw();
-  void read_control_     (Parameters * parameters) throw();
-  void read_adapt_       (Parameters * parameters) throw();
   void read_method_      (Parameters * parameters) throw();
   void read_monitor_     (Parameters * parameters) throw();
   void read_output_      (Parameters * parameters) throw();
   void read_performance_ (Parameters * parameters) throw();
   void read_stopping_    (Parameters * parameters) throw();
   void read_testing_     (Parameters * parameters) throw();
-  void read_timestep_    (Parameters * parameters) throw();
 
-  void read_schedule_(Parameters * parameters,
-		      const std::string group,
-		      std::string * type,
-		      std::string * var,
-		      double * start,
-		      double * stop,
-		      double * step,
-		      std::vector<double> & list);
-
-  int read_schedule_new_(Parameters * parameters,
+  int read_schedule_(Parameters * parameters,
 		      const std::string group   );
 
 };

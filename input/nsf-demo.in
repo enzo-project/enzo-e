@@ -6,10 +6,7 @@
 
 # Define the problem domain to be 0.0 < x,y < 1.0
 
-Domain { 
-   lower = [ 0.0, 0.0 ];
-   upper = [ 1.0, 1.0 ];
-} 
+include "input/domain-2d-01.incl"
 
 # Define the computational domain
 

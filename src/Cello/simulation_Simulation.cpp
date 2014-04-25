@@ -247,35 +247,35 @@ void Simulation::initialize_performance_() throw()
 
   performance_->start_region(perf_simulation);
 
-  // initialize projections schedule
+  // // initialize projections schedule
 
 
-  std::string var;
-  std::string type;
-  double start;
-  double stop;
-  double step;
-  std::vector<double> list;
+  // std::string var;
+  // std::string type;
+  // double start;
+  // double stop;
+  // double step;
+  // std::vector<double> list;
 
-  var   = config_->projections_schedule_on_var;
-  type  = config_->projections_schedule_on_type;
-  start = config_->projections_schedule_on_start;
-  stop  = config_->projections_schedule_on_stop;
-  step  = config_->projections_schedule_on_step;
-  list  = config_->projections_schedule_on_list;
+  // var   = config_->projections_schedule_on_var;
+  // type  = config_->projections_schedule_on_type;
+  // start = config_->projections_schedule_on_start;
+  // stop  = config_->projections_schedule_on_stop;
+  // step  = config_->projections_schedule_on_step;
+  // list  = config_->projections_schedule_on_list;
 
-  projections_schedule_on_ =
-    Schedule::create(var,type,start,stop,step,list);
+  // projections_schedule_on_ =
+  //   Schedule::create(var,type,start,stop,step,list);
 
-  var   = config_->projections_schedule_off_var;
-  type  = config_->projections_schedule_off_type;
-  start = config_->projections_schedule_off_start;
-  stop  = config_->projections_schedule_off_stop;
-  step  = config_->projections_schedule_off_step;
-  list  = config_->projections_schedule_off_list;
+  // var   = config_->projections_schedule_off_var;
+  // type  = config_->projections_schedule_off_type;
+  // start = config_->projections_schedule_off_start;
+  // stop  = config_->projections_schedule_off_stop;
+  // step  = config_->projections_schedule_off_step;
+  // list  = config_->projections_schedule_off_list;
 
-  projections_schedule_off_ =
-    Schedule::create(var,type,start,stop,step,list);
+  // projections_schedule_off_ =
+  //   Schedule::create(var,type,start,stop,step,list);
 
 
 }

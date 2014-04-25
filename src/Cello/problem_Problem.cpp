@@ -166,25 +166,6 @@ void Problem::initialize_stopping(Config * config) throw()
 
 //----------------------------------------------------------------------
 
-// void Problem::initialize_timestep(Config * config) throw()
-// {
-//   for (int i=0; i<config->num_timestep; i++) {
-
-//     std::string type = config->timestep_type[i];
-
-//     Timestep * timestep = create_timestep_(type,config);
-
-//     if (timestep) {
-//       timestep_list_.push_back( timestep );
-//     } else {
-//       ERROR1("Problem::initialize_timestep",
-// 	     "Cannot create Timestep type %s",type.c_str());
-//     }
-//   }
-// }
-
-//----------------------------------------------------------------------
-
 void Problem::initialize_prolong(Config * config) throw()
 {
   prolong_ = create_prolong_(config->prolong_type,config);
@@ -392,9 +373,9 @@ Boundary * Problem::create_boundary_
  Parameters * parameters
  ) throw ()
 {
-  if (type == "value") {
+  if (type == "inflow") {
     std::string param_str = 
-      "Boundary:" + config->boundary_list[index] + ":value";
+      "Boundary:" + config->boundary_list[index] + ":inflow";
     int param_type = parameters->type(param_str);
     if (! (param_type == parameter_list ||
 	   param_type == parameter_float ||
@@ -407,7 +388,8 @@ Boundary * Problem::create_boundary_
     axis_enum axis = (axis_enum) config->boundary_axis[index];
     face_enum face = (face_enum) config->boundary_face[index];
 
-    return new BoundaryValue (axis,face,value,config->boundary_field_list[index]);
+    return new BoundaryValue (axis,face,value,
+			      config->boundary_field_list[index]);
   }
   return NULL;
 }
@@ -429,10 +411,13 @@ Initial * Problem::create_initial_
   //--------------------------------------------------
 
   if (type == "file" || type == "checkpoint") {
-    return new InitialFile   (parameters,group_process,config->initial_cycle,config->initial_time);;
+    return new InitialFile   (parameters,group_process,
+			      config->initial_cycle,
+			      config->initial_time);;
   } else if (type == "default") {
     return new InitialValue(parameters,field_descr,
-			      config->initial_cycle,config->initial_time);
+			      config->initial_cycle,
+			    config->initial_time);
   }
   return NULL;
 }

@@ -1,8 +1,6 @@
-# File:    implosion.incl
+### File:    problem_implosion.incl
 ### Problem: 2D Implosion problem
 ### Author:  James Bordner (jobordner@ucsd.edu)
-###
-### This file tests the #include preprocessing command
 
    Domain { 
       lower = [0.0, 0.0];
@@ -50,14 +48,8 @@
      }
    }
 
-   Initial {
-       density       { value = [ 0.125,                x + y < 0.1517,
-                                 1.0 ]; };
-       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.1517,
-	                         1.0  / (0.4 * 1.0) ]; };
-       velocity_x    { value = [0.0]; };
-       velocity_y    { value = [0.0]; }
-   }
+# Initial conditions deferred to test_implosion-code.in or
+# test_implosion-value.in
 
    Boundary { type = "reflecting" }
 

@@ -3,10 +3,7 @@
     ###    Date: 2011-10-27
     ###  Author: James Bordner (jobordner@ucsd.edu)
 
-   Domain { 
-      lower = [0.0, 0.0];
-      upper = [1.0, 1.0];
-   } 
+#include "input/domain-2d-01.incl"
 
 
    Mesh {

@@ -59,8 +59,6 @@ Boundary * EnzoProblem::create_boundary_
     boundary = new EnzoBoundary (axis,face,mask,boundary_type_reflecting);
   } else if (type == "outflow") {
     boundary = new EnzoBoundary (axis,face,mask,boundary_type_outflow);
-  } else if (type == "inflow") {
-    boundary = new EnzoBoundary (axis,face,mask,boundary_type_inflow);
   } else if (type == "periodic") {
     boundary = new EnzoBoundary (axis,face,mask,boundary_type_periodic);
   } else {
@@ -70,35 +68,13 @@ Boundary * EnzoProblem::create_boundary_
   return boundary;
 }
 
-// //----------------------------------------------------------------------
-
-// Timestep * EnzoProblem::create_timestep_
-// (
-//  std::string  type,
-//  Config * config
-//  ) throw ()
-// /// @param type   Type of the timestep method to create
-// {
-//   // Timestep * timestep = 0;
-
-//   // if (type == "ppml") {
-//   //   timestep = new EnzoTimestepPpml;
-//   // } else if (type == "ppm") {
-//   //   timestep = new EnzoTimestep;
-//   // } else {
-//   //   timestep = Problem::create_timestep_(type,config);
-//   // }
-
-//   return NULL;
-// }
-
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 Initial * EnzoProblem::create_initial_ 
 (
  std::string  type,
- Parameters * parameters,
  Config * config,
+ Parameters * parameters,
  const FieldDescr * field_descr,
  const GroupProcess * group_process
  ) throw ()
