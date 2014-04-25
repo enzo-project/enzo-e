@@ -550,9 +550,8 @@ test_summary("Mesh",
 test_summary("Boundary-2D", 
 	     array("boundary_reflecting-2d",
 		   "boundary_periodic-2d",
-		   "boundary_outflow-2d",
-		   "boundary_reflecting_periodic-2d"),
-	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p"));
+		   "boundary_outflow-2d"),
+	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
 
 test_summary("Boundary-3D",
 	     array("boundary_reflecting-3d",
@@ -896,15 +895,6 @@ echo "<h3>2D Outflow</h3>";
 tests("Enzo","enzo-p","test_boundary_outflow-2d","Outflow 2D");
 
 test_table ("boundary_outflow-2d",
-	    array("0000","0100","0200","0300","0400"), $types);
-
-//----------------------------------------------------------------------
-
-echo "<h3>2D Reflecting (x-axis) Periodic (y-axis)</h3>";
-  
-tests("Enzo","enzo-p","test_boundary_reflecting_periodic-2d","Reflecting_Periodic 2D");
-
-test_table ("boundary_reflecting_periodic-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
 
 //======================================================================
