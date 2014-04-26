@@ -1,12 +1,4 @@
 Initial {
-      fields = [
-	"density",	
-	"velocity_x",
-	"velocity_y",
-	"total_energy",
-	"internal_energy"
-      ] ;
-
 
    density {
         value = [8.0, 
@@ -39,8 +31,7 @@ Boundary {
            "vx_pre",
            "vy_pre",
 	   "te_pre"
-
- ];
+         ];
 
    outflow {
       type = "outflow";
