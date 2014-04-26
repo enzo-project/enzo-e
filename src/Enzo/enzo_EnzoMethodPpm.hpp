@@ -29,7 +29,12 @@ public: // interface
   void pup (PUP::er &p);
   
   /// Apply the method to advance a block one timestep 
-  virtual void compute_block(FieldDescr *, CommBlock * block) throw();
+  virtual void compute(FieldDescr *, CommBlock * comm_block) throw();
+
+  /// Compute maximum timestep for this method
+  virtual double timestep (const FieldDescr *, CommBlock * comm_block) const throw();
+
+  virtual std::string name() const throw() { return "ppm"; }
 
 };
 

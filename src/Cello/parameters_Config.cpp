@@ -9,44 +9,16 @@
 #include "parameters.hpp"
 
 //----------------------------------------------------------------------
-#define NEW_SCHEDULE
 
 void Config::pup (PUP::er &p)
 {
+  // REVIEW: rev 3505
+
   TRACEPUP;
+
   // NOTE: change this function whenever attributes change
-  p | num_boundary;
-  PUParray(p,boundary_list,MAX_BOUNDARY);
-  PUParray(p,boundary_type,MAX_BOUNDARY);
-  PUParray(p,boundary_axis,MAX_BOUNDARY);
-  PUParray(p,boundary_face,MAX_BOUNDARY);
-  PUParray(p,boundary_mask,MAX_BOUNDARY);
-  PUParray(p,boundary_field_list,MAX_BOUNDARY);
 
-  PUParray(p,domain_lower,3);
-  PUParray(p,domain_upper,3);
-
-  p | num_fields;
-  p | field_alignment;
-  PUParray(p,field_centering,3);
-  p | field_courant;
-  p | field_fields;
-  PUParray(p,field_ghosts,3);
-  p | field_padding;
-  p | field_precision;
-  p | field_refresh_rank;
-
-  p | initial_cycle;
-  p | initial_type;
-  p | initial_time;
-  p | initial_max_level;
-
-  p | memory_active;
-
-  PUParray(p,mesh_root_blocks,3);
-  p | mesh_root_rank;
-  PUParray(p,mesh_root_size,3);
-  p | mesh_max_level;
+  // Adapt
 
   p | adapt_balance;
   p | adapt_interval;
@@ -57,6 +29,18 @@ void Config::pup (PUP::er &p)
   PUParray(p,adapt_min_refine,MAX_ADAPT);
   PUParray(p,adapt_max_coarsen,MAX_ADAPT);
   PUParray(p,adapt_level_exponent,MAX_ADAPT);
+
+  // Boundary
+
+  p | num_boundary;
+  PUParray(p,boundary_list,MAX_BOUNDARY);
+  PUParray(p,boundary_type,MAX_BOUNDARY);
+  PUParray(p,boundary_axis,MAX_BOUNDARY);
+  PUParray(p,boundary_face,MAX_BOUNDARY);
+  PUParray(p,boundary_mask,MAX_BOUNDARY);
+  PUParray(p,boundary_field_list,MAX_BOUNDARY);
+
+  // Control
 
   p | control_sync_adapt_enter;
   p | control_sync_adapt_called;
@@ -73,9 +57,52 @@ void Config::pup (PUP::er &p)
   p | control_sync_stopping_enter;
   p | control_sync_stopping_exit;
 
+  // Domain
+
+  PUParray(p,domain_lower,3);
+  PUParray(p,domain_upper,3);
+
+  // Field
+
+  p | num_fields;
+  p | field_alignment;
+  PUParray(p,field_centering,3);
+  p | field_courant;
+  p | field_fields;
+  PUParray(p,field_ghosts,3);
+  p | field_padding;
+  p | field_precision;
+  p | field_refresh_rank;
+  p | prolong_type;
+  p | restrict_type;
+
+  // Initial
+
+  p | initial_cycle;
+  p | initial_type;
+  p | initial_time;
+  p | initial_max_level;
+
+  // Memory
+
+  p | memory_active;
+
+  // Mesh
+
+  PUParray(p,mesh_root_blocks,3);
+  p | mesh_root_rank;
+  PUParray(p,mesh_root_size,3);
+  p | mesh_max_level;
+
+  // Method
+
   p | method_sequence;
 
+  // Monitor
+
   p | monitor_debug;
+
+  // Output
 
   p | num_file_groups;
   p | output_file_groups;
@@ -89,9 +116,11 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_image_size,MAX_FILE_GROUPS);
   PUParray (p,output_image_reduce_type,MAX_FILE_GROUPS);
   PUParray (p,output_image_ghost,MAX_FILE_GROUPS);
+  PUParray (p,output_image_face_rank,MAX_FILE_GROUPS);
   PUParray (p,output_image_specify_bounds,MAX_FILE_GROUPS);
   PUParray (p,output_image_min,MAX_FILE_GROUPS);
   PUParray (p,output_image_max,MAX_FILE_GROUPS);
+  PUParray (p,output_schedule_index,MAX_FILE_GROUPS);
   PUParray (p,output_field_list,MAX_FILE_GROUPS);
   PUParray (p,output_stride,MAX_FILE_GROUPS);
   PUParray (p,output_name,MAX_FILE_GROUPS);
@@ -104,34 +133,36 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_schedule_step,MAX_FILE_GROUPS);
   PUParray (p,output_schedule_list,MAX_FILE_GROUPS);
 
+  // Performance
+
   p | performance_papi_counters;
   p | performance_name;
   p | performance_stride;
+  p | performance_warnings;
 
-  p | projections_schedule_on_type;
-  p | projections_schedule_on_var;
-  p | projections_schedule_on_start;
-  p | projections_schedule_on_stop;
-  p | projections_schedule_on_step;
-  p | projections_schedule_on_list;
-  p | projections_schedule_off_type;
-  p | projections_schedule_off_var;
-  p | projections_schedule_off_start;
-  p | projections_schedule_off_stop;
-  p | projections_schedule_off_step;
-  p | projections_schedule_off_list;
+  // p | projections_schedule_on_type;
+  // p | projections_schedule_on_var;
+  // p | projections_schedule_on_start;
+  // p | projections_schedule_on_stop;
+  // p | projections_schedule_on_step;
+  // p | projections_schedule_on_list;
+  // p | projections_schedule_off_type;
+  // p | projections_schedule_off_var;
+  // p | projections_schedule_off_start;
+  // p | projections_schedule_off_stop;
+  // p | projections_schedule_off_step;
+  // p | projections_schedule_off_list;
 
-  p | prolong_type;
-  p | restrict_type;
+  // Stopping
 
   p | stopping_cycle;
   p | stopping_time;
   p | stopping_interval;
 
+  // Testing
+
   p | testing_cycle_final;
   p | testing_time_final;
-
-  p | timestep_type;
 
 }
 
@@ -155,7 +186,6 @@ void Config::read(Parameters * parameters) throw()
   read_performance_(parameters);
   read_stopping_(parameters);
   read_testing_(parameters);
-  read_timestep_(parameters);
 
   TRACE("END   Config::read()");
 
@@ -170,39 +200,54 @@ void Config::read_boundary_ (Parameters * parameters) throw()
   // Boundary
   //--------------------------------------------------
 
-  if (parameters->type("Boundary:list") != parameter_list) {
+  const bool multi_boundary =
+    (parameters->type("Boundary:list") == parameter_list);
+  
 
-    num_boundary = 1;
-    int ib = 0;
+  num_boundary = multi_boundary ? 
+    parameters->list_length("Boundary:list") : 1;
 
-    // default name if not explicit
 
-    boundary_list[ib] = "boundary";
-    boundary_type[ib] = parameters->value_string("Boundary:type","unknown");
+  ASSERT2 ("Config::read()", 
+	   "Too many boundary conditions: %d must not be more than %d",
+	   num_boundary,MAX_BOUNDARY,
+	   num_boundary <= MAX_BOUNDARY);
 
-    std::string axis_str = parameters->value_string("Boundary:axis","all");
+  for (int ib=0; ib<num_boundary; ib++) {
+
+    boundary_list[ib] = multi_boundary ?
+      parameters->list_value_string(ib,"Boundary:list","unknown") : "boundary";
+
+    std::string prefix = "Boundary:";
+
+    if (multi_boundary)
+      prefix = prefix + boundary_list[ib] + ":";
+
+    boundary_type[ib] = parameters->value_string(prefix+"type","unknown");
+
+    std::string axis_str = parameters->value_string(prefix+"axis","all");
     if      (axis_str == "all") { boundary_axis[ib] = axis_all; }
     else if (axis_str == "x")   { boundary_axis[ib] = axis_x; }
     else if (axis_str == "y")   { boundary_axis[ib] = axis_y; }
     else if (axis_str == "z")   { boundary_axis[ib] = axis_z; }
     else {
-      ERROR1 ("Config::read()", "Unknown Boundary:axis %s",
-	      axis_str.c_str());
+      ERROR2 ("Config::read()", "Unknown %s %s",
+	      (prefix+"axis").c_str(),axis_str.c_str());
     }
 
-    std::string face_str = parameters->value_string("Boundary:face","all");
+    std::string face_str = parameters->value_string(prefix+"face","all");
     if      (face_str == "all")   { boundary_face[ib] = face_all; }
     else if (face_str == "lower") { boundary_face[ib] = face_lower; }
     else if (face_str == "upper") { boundary_face[ib] = face_upper; }
     else {
-      ERROR1 ("Config::read()", "Unknown Boundary:face %s",
-	      face_str.c_str());
+      ERROR2 ("Config::read()", "Unknown %s %s",
+	      (prefix+"face").c_str(),face_str.c_str());
     }
 
-    boundary_mask[ib] = (parameters->type("Boundary:mask") 
-		     == parameter_logical_expr);
+    boundary_mask[ib] = (parameters->type(prefix+"mask") 
+			 == parameter_logical_expr);
 
-    std::string param_str = "Boundary:field_list";
+    std::string param_str = prefix+"field_list";
     int field_list_type = parameters->type(param_str);
     if (field_list_type == parameter_list) {
       const int n = parameters->list_length(param_str);
@@ -219,67 +264,8 @@ void Config::read_boundary_ (Parameters * parameters) throw()
 	      field_list_type,param_str.c_str());
     }
 	
-
-  } else {
-
-    num_boundary = parameters->list_length("Boundary:list");
-
-    ASSERT2 ("Config::read()", 
-	     "Too many boundary conditions: %d must not be more than %d",
-	     num_boundary,MAX_BOUNDARY,
-	     num_boundary <= MAX_BOUNDARY);
-
-    for (int ib=0; ib<num_boundary; ib++) {
-
-      boundary_list[ib] = parameters->list_value_string
-	(ib,"Boundary:list","unknown");
-
-      std::string prefix = "Boundary:" + boundary_list[ib] + ":";
-
-      boundary_type[ib] = parameters->value_string(prefix+"type","unknown");
-
-      std::string axis_str = parameters->value_string(prefix+"axis","all");
-      if      (axis_str == "all") { boundary_axis[ib] = axis_all; }
-      else if (axis_str == "x")   { boundary_axis[ib] = axis_x; }
-      else if (axis_str == "y")   { boundary_axis[ib] = axis_y; }
-      else if (axis_str == "z")   { boundary_axis[ib] = axis_z; }
-      else {
-	ERROR2 ("Config::read()", "Unknown %s %s",
-		(prefix+"axis").c_str(),axis_str.c_str());
-      }
-
-      std::string face_str = parameters->value_string(prefix+"face","all");
-      if      (face_str == "all")   { boundary_face[ib] = face_all; }
-      else if (face_str == "lower") { boundary_face[ib] = face_lower; }
-      else if (face_str == "upper") { boundary_face[ib] = face_upper; }
-      else {
-	ERROR2 ("Config::read()", "Unknown %s %s",
-		(prefix+"face").c_str(),face_str.c_str());
-      }
-
-      boundary_mask[ib] = (parameters->type(prefix+"mask") 
-			  == parameter_logical_expr);
-
-      std::string param_str = prefix+"field_list";
-      int field_list_type = parameters->type(param_str);
-      if (field_list_type == parameter_list) {
-	const int n = parameters->list_length(param_str);
-	boundary_field_list[ib].resize(n);
-	for (int index=0; index<n; index++) {
-	  boundary_field_list[ib][index] = parameters->list_value_string 
-	    (index,param_str);
-	}
-      } else if (field_list_type == parameter_string) {
-	boundary_field_list[ib].resize(1);
-	boundary_field_list[ib][0] = parameters->value_string(param_str);
-      } else if (field_list_type != parameter_unknown) {
-	ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
-		field_list_type,param_str.c_str());
-      }
-	
-    }
-
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -387,7 +373,9 @@ void Config::read_initial_ (Parameters * parameters) throw()
   initial_type  = parameters->value_string("Initial:type","default");
   initial_cycle = parameters->value_integer("Initial:cycle",0);
   initial_time  = parameters->value_float  ("Initial:time",0.0);
-  initial_max_level = parameters->value_integer("Initial:max_level",0);
+
+  const int max_level = parameters->value_integer("Mesh:max_level",0);
+  initial_max_level = parameters->value_integer("Initial:max_level",max_level);
 
   //  initial_name;
 
@@ -636,23 +624,10 @@ void Config::read_output_ (Parameters * parameters) throw()
     // 	    (parameters->type("schedule") != parameter_unknown));
 
 
-#ifdef NEW_SCHEDULE
-
     parameters->group_push("schedule");
     output_schedule_index[index] = 
-      read_schedule_new_(parameters, output_file_groups[index]);
+      read_schedule_(parameters, output_file_groups[index]);
     parameters->group_pop();
-
-#else
-    read_schedule_(parameters, output_file_groups[index],
-		   &output_schedule_type[index],
-		   &output_schedule_var[index],
-		   &output_schedule_start[index],
-		   &output_schedule_stop[index],
-		   &output_schedule_step[index],
-		   output_schedule_list[index]
-		   );
-#endif
 
     // Image 
 
@@ -743,27 +718,27 @@ void Config::read_performance_ (Parameters * parameters) throw()
   performance_warnings = parameters->value_logical("Performance:warnings",true);
 
   //
-  parameters->group_set(0,"Performance");
-  parameters->group_set(1,"projections");
+  // parameters->group_set(0,"Performance");
+  // parameters->group_set(1,"projections");
 
-  parameters->group_set(2,"on");
-  read_schedule_(parameters,"on",
-		 &projections_schedule_on_type,
-		 &projections_schedule_on_var,
-		 &projections_schedule_on_start,
-		 &projections_schedule_on_stop,
-		 &projections_schedule_on_step,
-		 projections_schedule_on_list);
+  // parameters->group_set(2,"on");
+  // read_schedule_(parameters,"on",
+  // 		 &projections_schedule_on_type,
+  // 		 &projections_schedule_on_var,
+  // 		 &projections_schedule_on_start,
+  // 		 &projections_schedule_on_stop,
+  // 		 &projections_schedule_on_step,
+  // 		 projections_schedule_on_list);
 
   
-  parameters->group_set(2,"off");
-  read_schedule_(parameters,"off",
-		 &projections_schedule_off_type,
-		 &projections_schedule_off_var,
-		 &projections_schedule_off_start,
-		 &projections_schedule_off_stop,
-		 &projections_schedule_off_step,
-		 projections_schedule_off_list);
+  // parameters->group_set(2,"off");
+  // read_schedule_(parameters,"off",
+  // 		 &projections_schedule_off_type,
+  // 		 &projections_schedule_off_var,
+  // 		 &projections_schedule_off_start,
+  // 		 &projections_schedule_off_stop,
+  // 		 &projections_schedule_off_step,
+  // 		 projections_schedule_off_list);
 
 }
 
@@ -797,143 +772,20 @@ void Config::read_testing_ (Parameters * parameters) throw()
 
 }
 
-//----------------------------------------------------------------------
-
-void Config::read_timestep_ (Parameters * parameters) throw()
-{
-  //--------------------------------------------------
-  // Timestep
-  //--------------------------------------------------
-
-  if (parameters->type("Timestep:type") == parameter_string) {
-    num_timestep=1;
-    timestep_type.resize(num_timestep);
-    timestep_type[0] = parameters->value_string("Timestep:type","default");
-  } else if (parameters->type("Timestep:type") == parameter_list) {
-    num_timestep = parameters->list_length("Timestep:type");
-    timestep_type.resize(num_timestep);
-    for (int i=0; i<num_timestep; i++) {
-      timestep_type[i] = parameters->list_value_string(i,"Timestep:type","default");
-    }
-  }
-}
-
 //======================================================================
 
-void Config::read_schedule_(Parameters * parameters,
-			    const std::string group,
-			    std::string * type,
-			    std::string * var,
-			    double * start,
-			    double * stop,
-			    double * step,
-			    std::vector<double> & list)
-{
-  // ASSUMES schedule PARAMETER IN CURRENT GROUP
-
-  // Schedule
-  int length = parameters->list_length("schedule");
-
-  if (length == 0) {
-    (*type) = "none";
-    return;
-  }
-
-  ASSERT1("Config::read","Incorrect 'schedule' for parameter group %s",
-	  group.c_str(), (length >= 3));
-
-  (*var)  = parameters->list_value_string(0,"schedule");
-  (*type) = parameters->list_value_string(1,"schedule");
-
-  bool var_is_int = true;
-
-  if ((*var) == "cycle") {
-    var_is_int = true;
-  } else if ((*var) == "time") {
-    var_is_int = false;
-  } else {
-    ERROR2 ("Config::read",
-	    "Schedule variable %s is not recognized for parameter group %s",
-	    (*var).c_str(),group.c_str());
-  }
-
-  const int    max_int    = std::numeric_limits<int>::max();
-  const double max_double = std::numeric_limits<double>::max();
-
-  if ((*type) == "interval") {
-    if (length == 3) { // step
-      if (var_is_int) {
-	(*start) = 0;
-	(*step)  = parameters->list_value_integer(2,"schedule");
-	(*stop)  = max_int;
-      } else {
-	(*start) = 0.0;
-	(*step)  = parameters->list_value_float(2,"schedule");
-	(*stop)  = max_double;
-      }
-    } else if (length == 4) { // start, step
-      if (var_is_int) {
-	(*start) = parameters->list_value_integer(2,"schedule");
-	(*step)  = parameters->list_value_integer(3,"schedule");
-	(*stop)  = max_int;
-      } else {
-	(*start) = parameters->list_value_float(2,"schedule");
-	(*step)  = parameters->list_value_float(3,"schedule");
-	(*stop)  = max_double;
-      }
-    } else if (length == 5) { // start, step, stop
-      if (var_is_int) {
-	(*start) = parameters->list_value_integer(2,"schedule");
-	(*step)  = parameters->list_value_integer(3,"schedule");
-	(*stop)  = parameters->list_value_integer(4,"schedule");
-      } else {
-	(*start) = parameters->list_value_float(2,"schedule");
-	(*step)  = parameters->list_value_float(3,"schedule");
-	(*stop)  = parameters->list_value_float(4,"schedule");
-      }
-    }
-  } else if ((*type) == "list") {
-    list.resize(length-2);
-    for (int i=2; i<length; i++) {
-      if (var_is_int) {
-	list[i-2] = parameters->list_value_integer(i,"schedule");
-      } else {
-	list[i-2] = parameters->list_value_float(i,"schedule");
-      }
-    }
-  } else {
-    ERROR2 ("Config::read",
-	    "Schedule type %s is not recognized for parameter group %s",
-	    (*type).c_str(),group.c_str());
-  }
-
-}
-
-//----------------------------------------------------------------------
-
-int Config::read_schedule_new_(Parameters * p,
-				const std::string group)
+int Config::read_schedule_(Parameters * p, const std::string group)
 {
   int index = index_schedule_;
-  printf ("%s:%d\n",__FILE__,__LINE__);
   ASSERT ("Config::read_schedule_()",
 	  "number of schedule''s is greater than MAX_SCHEDULE",
 	  index < MAX_SCHEDULE);
 
-  printf ("%s:%d\n",__FILE__,__LINE__);
   int n=p->group_count();
-  printf ("groups %d\n",n);
-  for (int i=0; i<n; i++) {
-    printf ("group %s\n",p->group(i).c_str());
-  }
 
-  printf ("group = %s\n",group.c_str());
   std::string var = p->value_string("var","none");
-  printf ("%s:%d\n",__FILE__,__LINE__);
-  printf ("%s:%d %s\n",__FILE__,__LINE__,var.c_str());
 
   output_schedule_var[index] = var;
-  printf ("%s:%d\n",__FILE__,__LINE__);
 
   bool var_is_int = true;
 
@@ -945,33 +797,24 @@ int Config::read_schedule_new_(Parameters * p,
 	    output_schedule_var[index].c_str(),group.c_str());
   }
 
-  printf ("%s:%d\n",__FILE__,__LINE__);
   output_schedule_type[index] = p->value_string("type","none");
-  printf ("%s:%d\n",__FILE__,__LINE__);
 
   const int    max_int    = std::numeric_limits<int>::max();
   const double max_double = std::numeric_limits<double>::max();
 
   if (output_schedule_type[index] == "interval") {
     if (var_is_int) {
-  printf ("%s:%d\n",__FILE__,__LINE__);
       output_schedule_start[index] = p->value("start",0);
       output_schedule_step[index]  = p->value("step",1);
       output_schedule_stop[index]  = p->value("stop",max_int);
-  printf ("%s:%d\n",__FILE__,__LINE__);
     } else {
-  printf ("%s:%d\n",__FILE__,__LINE__);
       output_schedule_start[index] = p->value("start",0.0);
       output_schedule_step[index]  = p->value("step",1.0);
       output_schedule_stop[index]  = p->value("stop",max_double);
-  printf ("%s:%d\n",__FILE__,__LINE__);
     }
   } else if (output_schedule_type[index] == "list") {
-  printf ("%s:%d\n",__FILE__,__LINE__);
     int n = p->list_length("value");
-  printf ("%s:%d\n",__FILE__,__LINE__);
     output_schedule_list[index].resize(n);
-  printf ("%s:%d\n",__FILE__,__LINE__);
     if (var_is_int) {
       for (int i=0; i<n; i++) {
 	output_schedule_list[index][i] = p->value(i,"value",0);

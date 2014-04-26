@@ -1,0 +1,46 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/heat.incl"
+
+Mesh { root_blocks    = [1,1]; }
+
+Method {
+    sequence = ["heat"]; 
+}
+
+Enzo {
+    heat { alpha = 1.0; }
+}
+
+Field {
+   
+   fields = ["temperature"];
+}
+
+Initial {
+   temperature  { 
+      value = [ 100.0, (x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) < 0.05,  10.0 ];
+   }
+}
+
+Boundary {
+   temperature { type = "value";
+      value = 0.0;
+   }
+} 
+
+Output {
+   temperature {
+     schedule { step = 10; }
+   }
+}
+
+Stopping { cycle = 1000; }
+Testing  {
+    cycle_final = 1000;
+    time_final  = 0.0390624999999993;
+}
+
+
+Output { temperature { name = ["method_heat-1-%06d.png", "cycle"]; } }

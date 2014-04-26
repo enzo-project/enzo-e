@@ -16,7 +16,10 @@ background-color: grey;
 
 /* hr {background: #fff url(cello-hr.png); height: 6px} */
 
-hr { height:10px}
+
+hr { border: 0; height: 10px; background-image: -webkit-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0)); background-image: -moz-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0)); background-image: -ms-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0)); background-image: -o-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0)); }
+
+
 h1 { text-align: center; }
 tr {
     background-color: #aaa;
@@ -44,7 +47,7 @@ th.block {
     padding: 0px 0px;   
 }
 th.divider {
-    background-color:green;
+    background-color:black;
 }
 td.pass       {  color: #007;  background-color: #fff; }
 /* th.pass       {  color: #007;  background-color: #fff; }

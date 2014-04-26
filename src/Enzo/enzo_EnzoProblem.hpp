@@ -45,8 +45,8 @@ private: // functions
   /// Create named initialization object
   virtual Initial *  create_initial_ 
   (std::string type, 
-   Parameters * parameters,
    Config * config,
+   Parameters * parameters,
    const FieldDescr *,
    const GroupProcess * group_process) throw ();
 
@@ -54,9 +54,9 @@ private: // functions
   virtual Method * create_method_ 
   (std::string type, Config * config) throw ();
 
-  /// Create named timestep object
-  virtual Timestep * create_timestep_
-  (std::string type, Config * config) throw ();
+  // /// Create named timestep object
+  // virtual Timestep * create_timestep_
+  // (std::string type, Config * config) throw ();
 
   /// Create named interpolation object
   virtual Prolong * create_prolong_

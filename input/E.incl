@@ -1,8 +1,6 @@
+# File:    E.incl
 
-   Domain { 
-      lower = [0.0, 0.0];
-      upper = [1.0, 1.0];
-   } 
+#include "input/domain-2d-01.incl"
 
    Mesh {
       root_rank   = 2;

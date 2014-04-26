@@ -3,12 +3,12 @@
 #
 # This file is used for developing the Cello / Enzo-P input grammar and syntax
 
-   include "input/implosion.incl"
+   include "input/problem_implosion.incl"
 
    Initial { type = "implosion_2d" }
 
    Output { 
       cycle_step {
-         name = ["implosion-code-%05d","cycle"];
+         name = ["implosion-code-%05d.png","cycle"];
       }
    }

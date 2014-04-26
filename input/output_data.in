@@ -1,5 +1,5 @@
 
-include "input/implosion.incl"
+include "input/problem_implosion.incl"
 
 Mesh {
   root_blocks = [2,2];

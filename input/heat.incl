@@ -1,4 +1,4 @@
-# File:    ppm.incl
+# File:    heat.incl
 # Problem: 2D Implosion problem
 # Author:  James Bordner (jobordner@ucsd.edu)
 
@@ -20,19 +20,13 @@
 
       ghosts = 3;
 
-      refresh { rank = 0;  }; # refresh edges not corners
+      refresh { rank = 1;  }; # refresh edges not corners
 
-      fields = [
-	"density",	
-	"velocity_x",
-	"velocity_y",
-	"total_energy",
-	"internal_energy"
-      ] ;
+      fields = ["temperature"];
 
       # courant condition for fields
 
-      courant   = 0.8;
+      courant   = 0.5;
 
       padding   = 0;
       alignment = 8;    
@@ -65,13 +59,8 @@
    }
 
    Initial {
-       density       { value = [ 0.125,                x + y < 0.5,
-                                 1.0 ]; };
-       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.5,
-	                         1.0  / (0.4 * 1.0) ]; };
-       velocity_x    { value = [0.0]; };
-       velocity_y    { value = [0.0]; };
-       internal_energy { value = [0.0]; }
+       temperature  {
+            value = [ 0.125, x + y < 0.5,  1.0 ]; };
    }
 
    Boundary { type = "reflecting" }
@@ -86,19 +75,14 @@
 
    Output { 
 
-      file_groups = ["density","data"];
+      file_groups = ["temperature"];
 
-      density {
-        field_list = ["density"];
+      temperature {
+        field_list = ["temperature"];
 	type     = "image";
         include "input/schedule_cycle_10.incl"
         include "input/colormap_blackbody.incl";
       };
 
-      data {
-        field_list = ["density"];
-	type     = "data";
-        include "input/schedule_cycle_100.incl"
-      };
 
    }

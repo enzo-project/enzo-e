@@ -1,3 +1,5 @@
+# File:    colormap_rainbow.incl
+
  colormap = [
               0.0, 0.0, 0.0,
               0.0, 0.0, 1.0,

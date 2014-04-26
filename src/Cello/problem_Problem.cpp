@@ -62,12 +62,12 @@ void Problem::pup (PUP::er &p)
   if (up) stopping_ = new Stopping;
   p | *stopping_;
 
-  if (pk) n=timestep_list_.size();
-  p | n;
-  if (up) timestep_list_.resize(n);
-  for (int i=0; i<n; i++) {
-    p | timestep_list_[i]; // PUP::able
-  }
+  // if (pk) n=timestep_list_.size();
+  // p | n;
+  // if (up) timestep_list_.resize(n);
+  // for (int i=0; i<n; i++) {
+  //   p | timestep_list_[i]; // PUP::able
+  // }
 
   if (pk) n=method_list_.size();
   p | n;
@@ -162,25 +162,6 @@ void Problem::initialize_stopping(Config * config) throw()
   ASSERT("Problem::initialize_stopping",
 	  "Stopping object not successfully created",
 	  stopping_ != NULL);
-}
-
-//----------------------------------------------------------------------
-
-void Problem::initialize_timestep(Config * config) throw()
-{
-  for (int i=0; i<config->num_timestep; i++) {
-
-    std::string type = config->timestep_type[i];
-
-    Timestep * timestep = create_timestep_(type,config);
-
-    if (timestep) {
-      timestep_list_.push_back( timestep );
-    } else {
-      ERROR1("Problem::initialize_timestep",
-	     "Cannot create Timestep type %s",type.c_str());
-    }
-  }
 }
 
 //----------------------------------------------------------------------
@@ -343,7 +324,7 @@ void Problem::initialize_method(Config * config) throw()
 
     std::string name = config->method_sequence[i];
 
-    Method * method = create_method_(name);
+    Method * method = create_method_(name, config);
 
     if (method) {
 
@@ -371,9 +352,9 @@ void Problem::deallocate_() throw()
     delete refine_list_[i];    refine_list_[i] = 0;
   }
   delete stopping_;      stopping_ = 0;
-  for (size_t i=0; i<timestep_list_.size(); i++) {
-    delete timestep_list_[i];     timestep_list_[i] = 0;
-  }
+  // for (size_t i=0; i<timestep_list_.size(); i++) {
+  //   delete timestep_list_[i];     timestep_list_[i] = 0;
+  // }
   for (size_t i=0; i<output_list_.size(); i++) {
     delete output_list_[i];    output_list_[i] = 0;
   }
@@ -392,9 +373,9 @@ Boundary * Problem::create_boundary_
  Parameters * parameters
  ) throw ()
 {
-  if (type == "value") {
+  if (type == "inflow") {
     std::string param_str = 
-      "Boundary:" + config->boundary_list[index] + ":value";
+      "Boundary:" + config->boundary_list[index] + ":inflow";
     int param_type = parameters->type(param_str);
     if (! (param_type == parameter_list ||
 	   param_type == parameter_float ||
@@ -407,7 +388,8 @@ Boundary * Problem::create_boundary_
     axis_enum axis = (axis_enum) config->boundary_axis[index];
     face_enum face = (face_enum) config->boundary_face[index];
 
-    return new BoundaryValue (axis,face,value,config->boundary_field_list[index]);
+    return new BoundaryValue (axis,face,value,
+			      config->boundary_field_list[index]);
   }
   return NULL;
 }
@@ -429,10 +411,13 @@ Initial * Problem::create_initial_
   //--------------------------------------------------
 
   if (type == "file" || type == "checkpoint") {
-    return new InitialFile   (parameters,group_process,config->initial_cycle,config->initial_time);;
+    return new InitialFile   (parameters,group_process,
+			      config->initial_cycle,
+			      config->initial_time);;
   } else if (type == "default") {
     return new InitialValue(parameters,field_descr,
-			      config->initial_cycle,config->initial_time);
+			      config->initial_cycle,
+			    config->initial_time);
   }
   return NULL;
 }
@@ -500,20 +485,20 @@ Stopping * Problem::create_stopping_
 
 //----------------------------------------------------------------------
 
-Timestep * Problem::create_timestep_ 
-(
- std::string  type,
- Config * config
- ) throw ()
-{ 
-  // No default timestep
-  return NULL;
-}
+// Timestep * Problem::create_timestep_ 
+// (
+//  std::string  type,
+//  Config * config
+//  ) throw ()
+// { 
+//   // No default timestep
+//   return NULL;
+// }
 
 //----------------------------------------------------------------------
 
 Method * Problem::create_method_ 
-( std::string  name) throw ()
+( std::string  name, Config * config) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());
   // No default method

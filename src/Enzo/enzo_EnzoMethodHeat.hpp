@@ -20,7 +20,7 @@ class EnzoMethodHeat : public Method {
 public: // interface
 
   /// Create a new EnzoMethodHeat object
-  EnzoMethodHeat(double alpha);
+  EnzoMethodHeat(double alpha, double courant);
 
   EnzoMethodHeat() {};
 
@@ -34,18 +34,31 @@ public: // interface
   void pup (PUP::er &p);
   
   /// Apply the method to advance a block one timestep 
-  virtual void compute_block(FieldDescr *, CommBlock * block) throw();
+  virtual void compute(FieldDescr *, CommBlock * comm_block) throw();
+
+  /// Compute maximum timestep for this method
+  virtual double timestep (const FieldDescr *, CommBlock * comm_block) const throw();
+
+  virtual std::string name() const throw() { return "heat"; }
+
+protected: // methods
 
   template <class T>
-  void compute 
+  void compute_
   (T * Unew,
    int ndx, int ndy, int ndz,
    int nx,  int ny,  int nz,
-   double dt, double dx, double dy, double dz) const throw();
+   int gx,  int gy,  int gz,
+   double dt, double dx, double dy, double dz,
+   int dim) const throw();
 
 protected: // attributes
 
+  /// Thermal diffusivity
   double alpha_;
+
+  /// Courant safety number
+  double courant_;
 
 };
 

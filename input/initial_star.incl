@@ -1,3 +1,5 @@
+# File:    initial_star.incl
+
    Initial {
        density       { value = [ 0.125,  (0.01*x*x+y*y < 0.01) || 
        0.01*(x*x - 3.4641*x*y + 3.0*y*y) + (y*y + 3.4641*x*y +3.0*x*x) < 0.04 ||

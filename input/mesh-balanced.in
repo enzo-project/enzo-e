@@ -53,6 +53,8 @@ Initial {
 # }
 
 Stopping { cycle = 100; }
+Testing  { cycle_final = 100; 
+           time_final  = 0.01506600525463; }
 
 Output {
 

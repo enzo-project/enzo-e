@@ -11,11 +11,11 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodHeat::EnzoMethodHeat (double alpha) 
+EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant) 
   : Method(),
-    alpha_(alpha)
+    alpha_(alpha),
+    courant_(courant)
 {
-  printf ("%s:%d Created EnzoMethodHeat\n",__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -29,11 +29,14 @@ void EnzoMethodHeat::pup (PUP::er &p)
 
   Method::pup(p);
 
+  p | alpha_;
+  p | courant_;
+
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodHeat::compute_block
+void EnzoMethodHeat::compute
 (
  FieldDescr * field_descr, CommBlock * comm_block) throw()
 {
@@ -41,64 +44,129 @@ void EnzoMethodHeat::compute_block
   FieldBlock * field_block =      block->field_block();
 
   const int id_temp   = field_descr->field_id ("temperature");
+  void * temp   = field_block->field_values (id_temp);
 
-  void * temp   = field_block->field_unknowns (id_temp);
+  int nx,ny,nz;
+  field_block->size(&nx,&ny,&nz);
 
-  int ndx,ndy,ndz;
-  field_block->size(&ndx,&ndy,&ndz);
+  int gx,gy,gz;
+  field_descr->ghosts (id_temp,&gx,&gy,&gz);
 
-  int ngx,ngy,ngz;
-  field_descr->ghosts (id_temp,&ngx,&ngy,&ngz);
+  int ndx = nx+2*gx;
+  int ndy = ny+2*gy;
+  int ndz = nz+2*gz;
 
-  int nx = ndx-2*ngx;
-  int ny = ndy-2*ngy;
-  int nz = ndz-2*ngz;
+  double dt = comm_block->dt();
 
-  double dt,dx,dy,dz;
+  double dx,dy,dz;
   comm_block->cell_width (&dx,&dy,&dz);
 
   const int precision = field_descr->precision (id_temp);
 
+  const int dim = comm_block->simulation()->dimension();
+
   switch (precision) {
   case precision_single:
-    compute ((float*)  temp, ndx,ndy,ndz, nx,ny,nz, dt, dx,dy,dz);
+    compute_ ((float*)  temp, ndx,ndy,ndz, nx,ny,nz, gx,gy,gz, dt, dx,dy,dz, dim);
     break;
   case precision_double:
-    compute ((double*) temp, ndx,ndy,ndz, nx,ny,nz, dt, dx,dy,dz);
+    compute_ ((double*) temp, ndx,ndy,ndz, nx,ny,nz, gx,gy,gz, dt, dx,dy,dz, dim);
     break;
   default:
     break;
   }
 }
 
+//----------------------------------------------------------------------
+
+double EnzoMethodHeat::timestep
+(
+ const FieldDescr * field_descr,
+ CommBlock *        comm_block
+ ) const throw()
+{
+  
+  double dx = std::numeric_limits<double>::max();
+  double dy = std::numeric_limits<double>::max();
+  double dz = std::numeric_limits<double>::max();
+  comm_block->cell_width (&dx,&dy,&dz);
+
+  const int dim = comm_block->simulation()->dimension();
+  double dm = dx;
+  if (dim >= 2) dm = std::min(dm,dy);
+  if (dim >= 3) dm = std::min(dm,dz);
+
+  return 0.5*courant_*dm*dm/alpha_;
+}
+
+//======================================================================
+
 template <class T>
-void EnzoMethodHeat::compute 
+void EnzoMethodHeat::compute_
 (T * Unew, 
  int ndx, int ndy, int ndz,
  int nx,  int ny,  int nz, 
- double dt, double dx, double dy, double dz) const throw()
+ int gx,  int gy,  int gz, 
+ double dt, double dx, double dy, double dz,
+ int dim) const throw()
 {
-  {
-    const int idx = 1;
-    const int idy = ndx;
-    const int idz = ndx*ndy;
-    double dxi = 1.0/dx;
-    double dyi = 1.0/dy;
-    double dzi = 1.0/dz;
-    T * U = new T [ndx*ndy*ndz];
-    for (int i=0; i<ndx*ndy*ndz; i++) U[i]=Unew[i];
-    
-    for (int ix=0; ix<nx; ix++) {
-      for (int iy=0; iy<ny; iy++) {
-	for (int iz=0; iz<nz; iz++) {
+
+  const int idx = 1;
+  const int idy = ndx;
+  const int idz = ndx*ndy;
+
+  double dxi = 1.0/(dx*dx);
+  double dyi = 1.0/(dy*dy);
+  double dzi = 1.0/(dz*dz);
+
+  T * U = new T [ndx*ndy*ndz];
+  for (int i=0; i<ndx*ndy*ndz; i++) U[i]=Unew[i];
+
+  if (dim == 1) {
+
+    for (int ix=gx; ix<nx+gx; ix++) {
+
+      int i = ix;
+
+      double Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
+
+      Unew[i] = U[i] + alpha_*dt*(Uxx);
+
+    }
+
+  } else if (dim == 2) {
+
+    for (int iy=gy; iy<ny+gy; iy++) {
+      for (int ix=gy; ix<nx+gy; ix++) {
+
+	int i = ix + ndx*iy;
+
+	double Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
+	double Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
+	
+	Unew[i] = U[i] + alpha_*dt*(Uxx + Uyy);
+
+      }
+    }
+
+  } else if (dim == 3) {
+
+    for (int iz=gz; iz<nz+gz; iz++) {
+      for (int iy=gy; iy<ny+gy; iy++) {
+	for (int ix=gx; ix<nx+gx; ix++) {
+
 	  int i = ix + ndx*(iy + ndy*iz);
+
 	  double Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
 	  double Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
 	  double Uzz = dzi*(U[i-idz] - 2*U[i] + U[i+idz]);
+
 	  Unew[i] = U[i] + alpha_*dt*(Uxx + Uyy + Uzz);
+
 	}
       }
     }
-    delete [] U;
   }
+  delete [] U;
+
 }
