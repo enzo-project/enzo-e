@@ -48,7 +48,7 @@ Boundary {
    };
 
    d_pre {
-      type = "value";
+      type = "inflow";
       field_list = "density";
       value = [ 8.0, 
                  ((x < 0.166667) && (y < 0.0) ) ||
@@ -58,7 +58,7 @@ Boundary {
     };
 
    te_pre {
-      type = "value";
+      type = "inflow";
       field_list = "total_energy";
       value = [ 116.5 / (0.4 + 8.0) + 68.0625,
                  ( (x < 0.166667) && (y <= 0.0) ) ||
@@ -68,7 +68,7 @@ Boundary {
     };
 
    vx_pre {
-      type = "value";
+      type = "inflow";
       field_list = "velocity_x";
       value = [ 8.25*0.5,
                  ((x < 0.166667) && (y <= 0.0) ) ||
@@ -78,7 +78,7 @@ Boundary {
     };
 
    vy_pre {
-      type = "value";
+      type = "inflow";
       field_list = "velocity_y";
       value = [ -8.25*0.8660253,
                  ((x < 0.166667) && (y <= 0.0) ) ||

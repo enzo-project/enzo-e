@@ -375,7 +375,7 @@ Boundary * Problem::create_boundary_
 {
   if (type == "inflow") {
     std::string param_str = 
-      "Boundary:" + config->boundary_list[index] + ":inflow";
+      "Boundary:" + config->boundary_list[index] + ":value";
     int param_type = parameters->type(param_str);
     if (! (param_type == parameter_list ||
 	   param_type == parameter_float ||

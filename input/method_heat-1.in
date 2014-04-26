@@ -25,7 +25,7 @@ Initial {
 }
 
 Boundary {
-   temperature { type = "value";
+   temperature { type = "inflow";
       value = 0.0;
    }
 } 
