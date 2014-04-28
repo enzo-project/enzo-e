@@ -236,19 +236,19 @@ if (trace_memory != 0):  defines = defines + define_trace_memory
 is_arch_valid = 0
 sys.path.append("./config");
 
-if   (arch == "linux-gnu"):    from linux_gnu    import *
-elif (arch == "linux-gprof"):  from linux_gprof  import *
-elif (arch == "linux-mpe"):    from linux_mpe    import *
-elif (arch == "linux-tau"):    from linux_tau    import *
-elif (arch == "ncsa-bw"):      from ncsa_bw      import *
-elif (arch == "triton-gnu"):   from triton_gnu   import *
-elif (arch == "triton-intel"): from triton_intel import *
-elif (arch == "triton-mpe"):   from triton_mpe   import *
-elif (arch == "triton-pgi"):   from triton_pgi   import *
-elif (arch == "triton-tau"):   from triton_tau   import *
-elif (arch == "gordon-gnu"):   from gordon_gnu   import *
-elif (arch == "gordon-pgi"):   from gordon_pgi   import *
-elif (arch == "gordon-intel"): from gordon_intel   import *
+if   (arch == "linux_gnu"):    from linux_gnu    import *
+elif (arch == "linux_gprof"):  from linux_gprof  import *
+elif (arch == "linux_mpe"):    from linux_mpe    import *
+elif (arch == "linux_tau"):    from linux_tau    import *
+elif (arch == "ncsa_bw"):      from ncsa_bw      import *
+elif (arch == "triton_gnu"):   from triton_gnu   import *
+elif (arch == "triton_intel"): from triton_intel import *
+elif (arch == "triton_mpe"):   from triton_mpe   import *
+elif (arch == "triton_pgi"):   from triton_pgi   import *
+elif (arch == "triton_tau"):   from triton_tau   import *
+elif (arch == "gordon_gnu"):   from gordon_gnu   import *
+elif (arch == "gordon_pgi"):   from gordon_pgi   import *
+elif (arch == "gordon_intel"): from gordon_intel   import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
