@@ -5,7 +5,7 @@ include "input/heat.incl"
 
 Mesh { root_blocks    = [2,4]; }
 Method {
-    sequence = ["heat"]; 
+    list = ["heat"]; 
 }
 Enzo {
     heat { alpha = 1.0; }

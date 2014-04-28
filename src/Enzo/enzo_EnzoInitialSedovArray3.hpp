@@ -41,9 +41,6 @@ private: // attributes
   /// Size of the array of Sedov blasts
   int array_[3];
 
-  /// Whether PPM or PPML is used
-  int hydro_;
-
   /// Relative radius
   double radius_relative_;
 

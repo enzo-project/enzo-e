@@ -35,11 +35,11 @@ Field {
     ];
 }
 
-# Define sequence of numerical methods
+# Define list of numerical methods
 
 Method {
 
-   sequence = [ "ppm" ];
+   list = [ "ppm" ];
 
 }
 

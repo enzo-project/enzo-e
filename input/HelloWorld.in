@@ -29,7 +29,7 @@
 
    Method {
 
-      sequence = ["ppm"];
+      list = ["ppm"];
 
    }
 

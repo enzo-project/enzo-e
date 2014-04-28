@@ -137,7 +137,7 @@ public: // attributes
 
   // Method
 
-  std::vector<std::string>   method_sequence;
+  std::vector<std::string>   method_list;
 
   // Monitor
 

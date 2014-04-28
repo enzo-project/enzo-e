@@ -96,7 +96,7 @@ void Config::pup (PUP::er &p)
 
   // Method
 
-  p | method_sequence;
+  p | method_list;
 
   // Monitor
 
@@ -523,10 +523,10 @@ void Config::read_method_ (Parameters * parameters) throw()
  
   TRACE("Parameters: Method");
 
-  int size = parameters->list_length("Method:sequence");
-  method_sequence.resize(size);
+  int size = parameters->list_length("Method:list");
+  method_list.resize(size);
   for (int i=0; i<size; i++) {
-    method_sequence[i] = parameters->list_value_string(i,"Method:sequence");
+    method_list[i] = parameters->list_value_string(i,"Method:list");
   }
 
 }

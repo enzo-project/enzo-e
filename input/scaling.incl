@@ -43,7 +43,7 @@
 
       # list of methods to apply and in what order
  
-      sequence = ["ppm"];
+      list = ["ppm"];
 
    }
 

@@ -50,10 +50,6 @@ private: // attributes
 
   /// initial density
   double density_;
-
-  /// Whether PPM or PPML is used
-  int hydro_;
-
 };
 
 #endif /* ENZO_ENZO_INITIAL_SEDOV_ARRAY2_HPP */

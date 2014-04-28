@@ -102,7 +102,7 @@
    }
 
    Method {
-      sequence = ["ppm"];
+      list = ["ppm"];
    }
 
    Timestep { type = "ppm"; }

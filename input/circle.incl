@@ -30,7 +30,7 @@ include "input/domain-2d-01.incl"
 
    Method {
 
-      sequence = ["ppm"];
+      list = ["ppm"];
 
    }
 

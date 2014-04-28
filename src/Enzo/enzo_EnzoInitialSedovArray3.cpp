@@ -18,8 +18,7 @@
 
 EnzoInitialSedovArray3::EnzoInitialSedovArray3 
 (const EnzoConfig * config) throw ()
-: Initial(config->initial_cycle, config->initial_time) ,
-  hydro_(hydro_unknown)
+: Initial(config->initial_cycle, config->initial_time) 
 {
   array_[0] = config->enzo_sedov_array[0];
   array_[1] = config->enzo_sedov_array[1];
@@ -28,18 +27,6 @@ EnzoInitialSedovArray3::EnzoInitialSedovArray3
   pressure_in_     = config->enzo_sedov_pressure_in;
   pressure_out_    = config->enzo_sedov_pressure_out;
   density_         = config->enzo_sedov_density;
-  
-  if (config->method_sequence[0] == "ppm") {
-    hydro_ = hydro_ppm;
-    TRACE("hydro_ppm");
-  } else if (config->method_sequence[0] == "ppml") {
-    hydro_ = hydro_ppml;
-    TRACE("hydro_ppml");
-  } else {
-    ERROR1("EnzoInitialSedovArray3::EnzoInitialSedovArray3",
-	  "Unknown method %s",config->method_sequence[0].c_str());
-  }
-					  
 }
 
 //----------------------------------------------------------------------
@@ -57,7 +44,6 @@ void EnzoInitialSedovArray3::pup (PUP::er &p)
   p | pressure_in_;
   p | pressure_out_;
   p | density_;
-  p | hydro_;
   
 }
 
@@ -85,9 +71,9 @@ void EnzoInitialSedovArray3::enforce_block
     (field_descr->field_id("density"));
   
   enzo_float * te = 0;
-  if (hydro_ == hydro_ppm) 
-    te = (enzo_float *) field_block->field_values
-      (field_descr->field_id("total_energy"));
+
+  te = (enzo_float *) field_block->field_values
+    (field_descr->field_id("total_energy"));
 
   int nx,ny,nz;
   field_block->size(&nx,&ny,&nz);
@@ -144,7 +130,7 @@ void EnzoInitialSedovArray3::enforce_block
 
 	int i = INDEX(ix,iy,iz,ndx,ndy);
 	d[i]  = density_;
-	if (hydro_ == hydro_ppm) te[i] = sedov_te_out;
+	te[i] = sedov_te_out;
 
       }
     }
@@ -192,9 +178,7 @@ void EnzoInitialSedovArray3::enforce_block
 	      int i = INDEX(ix,iy,iz,ndx,ndy);
 	  
 	      if (r2 < sedov_radius_2) {
-		if (hydro_ == hydro_ppm)  te[i] = sedov_te_in;
-		if (hydro_ == hydro_ppml) d[i] = density_ * 
-					    (sedov_te_in / sedov_te_out);
+		te[i] = sedov_te_in;
 	      }
 	    }
 	  }
