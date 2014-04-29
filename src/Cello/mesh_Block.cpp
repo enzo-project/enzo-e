@@ -11,7 +11,8 @@
 
 //----------------------------------------------------------------------
 
-Block::Block(int nx, int ny, int nz,
+Block::Block(FieldDescr * field_descr,
+	     int nx, int ny, int nz,
 	     int num_field_blocks,
 	     double xm, double xp,
 	     double ym, double yp,
@@ -22,7 +23,7 @@ Block::Block(int nx, int ny, int nz,
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);
   for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i] = new FieldBlock (nx,ny,nz);
+    field_block_[i] = new FieldBlock (field_descr,nx,ny,nz);
   }
   lower_[0] = xm;
   lower_[1] = ym;
@@ -70,22 +71,8 @@ Block & Block::operator= (const Block & block) throw ()
 void Block::allocate (const FieldDescr * field_descr) throw()
 {
   for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i]->allocate_array(field_descr,true);
+    field_block_[i]->allocate_array(true);
   }
-}
-
-//----------------------------------------------------------------------
-
-const FieldBlock * Block::field_block (int i) const throw()
-{ 
-  return field_block_.at(i);
-}
-
-//----------------------------------------------------------------------
-
-FieldBlock * Block::field_block (int i) throw()
-{ 
-  return field_block_.at(i); 
 }
 
 //----------------------------------------------------------------------

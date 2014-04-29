@@ -474,15 +474,11 @@ void Config::read_adapt_ (Parameters * p) throw()
 
   for (int ia=0; ia<num_adapt; ia++) {
 
-    printf ("%s:%d\n",__FILE__,__LINE__);
     adapt_list[ia] = p->list_value_string (ia,"Adapt:list","unknown");
-    printf ("%s:%d\n",__FILE__,__LINE__);
 
     std::string prefix = "Adapt:" + adapt_list[ia] + ":";
-    printf ("%s:%d\n",__FILE__,__LINE__);
 
     adapt_type[ia] = p->value_string(prefix+"type","unknown");
-    printf ("%s:%d\n",__FILE__,__LINE__);
 
     std::string param_str = prefix + "field_list";
 

@@ -21,7 +21,8 @@ class Block {
 public: // interface
 
   /// Constructor
-  Block(int nx, int ny, int nz,
+  Block(FieldDescr * field_descr,
+	int nx, int ny, int nz,
 	int num_field_blocks,
 	double xm, double xp,
 	double ym, double yp,
@@ -63,10 +64,16 @@ public: // interface
   { return num_field_blocks_; }
 
   /// Return the ith Field block
-  const FieldBlock * field_block (int i=0) const throw();
+  const FieldBlock * field_block (int i=0) const throw()
+  { return field_block_.at(i); }
 
   /// Return the ith Field block
-  FieldBlock * field_block (int i=0) throw();
+  FieldBlock * field_block (int i=0) throw()
+  { return field_block_.at(i); }
+
+  /// Return the ith Field descriptor
+  const FieldDescr * field_descr (int i=0) const throw()
+  { return field_block_.at(i)->field_descr(); }
 
   /// Return the x,y,z,t coordinates of field cell centers
   void field_cells (double * x, double * y, double * z,

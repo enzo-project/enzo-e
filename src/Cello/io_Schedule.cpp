@@ -131,10 +131,10 @@ bool Schedule::write_this_cycle ( int cycle, double time ) throw()
   switch (schedule_type_) {
   case schedule_type_time_list:
   case schedule_type_time_interval:
-
     for (size_t i=0; i<time_skip_.size(); i++) {
       if (time_skip_.at(i)==time) skip = true;
     }
+
     break;
   case schedule_type_cycle_list:
   case schedule_type_cycle_interval:
@@ -178,6 +178,7 @@ bool Schedule::write_this_cycle ( int cycle, double time ) throw()
       result = in_range && below_tol;
 
     }
+
     break;
 
   case schedule_type_cycle_list:

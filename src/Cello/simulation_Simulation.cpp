@@ -35,7 +35,7 @@ Simulation::Simulation
   performance_(NULL),
   performance_name_(""),
   performance_stride_(1),
-  projections_tracing_(1),
+  // projections_tracing_(1),
   monitor_(0),
   hierarchy_(0),
   field_descr_(0)
@@ -114,11 +114,11 @@ void Simulation::pup (PUP::er &p)
   p | performance_name_;
   p | performance_stride_;
 
-  p | projections_tracing_;
-  if (up) projections_schedule_on_ = new Schedule;
-  p | *projections_schedule_on_;
-  if (up) projections_schedule_off_ = new Schedule;
-  p | *projections_schedule_off_;
+  // p | projections_tracing_;
+  // if (up) projections_schedule_on_ = new Schedule;
+  // p | *projections_schedule_on_;
+  // if (up) projections_schedule_off_ = new Schedule;
+  // p | *projections_schedule_off_;
 
   if (up) monitor_ = Monitor::instance();
 
@@ -127,6 +127,7 @@ void Simulation::pup (PUP::er &p)
 
   if (up) field_descr_ = new FieldDescr;
   p | *field_descr_;
+  
 }
 
 //----------------------------------------------------------------------
@@ -460,9 +461,6 @@ const Factory * Simulation::factory() const throw()
 
 void Simulation::update_state(int cycle, double time, double dt, double stop) 
 {
-  //  printf ("DEBUG %s:%d Simulation::update_state cycle %d time %f dt %f stop %24.15f\n",
-  //	  __FILE__,__LINE__, cycle,time,dt,stop);
- 
   cycle_ = cycle;
   time_  = time;
   dt_    = dt;

@@ -76,7 +76,7 @@ PARALLEL_MAIN_BEGIN
   double xpp,ypp,zpp;
   xpp =  1.0;  ypp =  2.0, zpp =  3.0;
 
-  FieldBlock * field_block = new FieldBlock(nx,ny,nz);
+  FieldBlock * field_block = new FieldBlock(field_descr, nx,ny,nz);
   //----------------------------------------------------------------------
 
   unit_class("FieldBlock");
@@ -102,7 +102,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("allocate_array");
 
-  field_block->allocate_array(field_descr, false);
+  field_block->allocate_array(false);
 
   size_t array_size_without_ghosts = field_block->array_size();
 
@@ -114,7 +114,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("reallocate_array");
 
-  field_block->reallocate_array(field_descr, true);
+  field_block->reallocate_array(true);
 
   size_t array_size_with_ghosts = field_block->array_size();
 
@@ -137,7 +137,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("allocate_array");
 
-  field_block->allocate_array(field_descr,true);
+  field_block->allocate_array(true);
 
   unit_assert(field_block->array() != 0);
   unit_assert(field_block->array_allocated());
@@ -145,7 +145,7 @@ PARALLEL_MAIN_BEGIN
 
   
   //----------------------------------------------------------------------
-  field_block->reallocate_array(field_descr, false);
+  field_block->reallocate_array(false);
 
 
   float       *v1,*u1;
@@ -220,7 +220,7 @@ PARALLEL_MAIN_BEGIN
 
   // with ghosts
 
-  field_block->reallocate_array(field_descr,true);
+  field_block->reallocate_array(true);
 
   v1 =  (float *)      field_block->field_values(i1);
   v2 = (double *)      field_block->field_values(i2);
@@ -483,7 +483,7 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
   unit_func("reallocate_ghosts");
 
-  field_block->reallocate_array(field_descr, false);
+  field_block->reallocate_array(false);
 
   v1    = 
     (float *) field_block->field_values(i1);

@@ -131,10 +131,10 @@ public: // interface
   /// Write performance information to disk (all process data)
   void performance_write();
 
-  Schedule * projections_schedule_on()
-  {return projections_schedule_on_; };
-  Schedule * projections_schedule_off()
-  {return projections_schedule_off_; };
+  // Schedule * projections_schedule_on()
+  // {return projections_schedule_on_; };
+  // Schedule * projections_schedule_off()
+  // {return projections_schedule_off_; };
 
 public: // virtual functions
 
@@ -160,11 +160,11 @@ public: // virtual functions
   FILE * fp_debug() { return fp_debug_; }
 #endif
   
-  void set_projections_tracing( bool tracing)
-  { projections_tracing_ = tracing; }
+  // void set_projections_tracing( bool tracing)
+  // { projections_tracing_ = tracing; }
   
-  bool projections_tracing() const
-  { return projections_tracing_; }
+  // bool projections_tracing() const
+  // { return projections_tracing_; }
 
 protected: // functions
 
@@ -269,11 +269,11 @@ protected: // attributes
   /// Counter for knowing when to call Performance start() and stop()
   int perf_count_[perf_last];
 
-  /// Schedule for projections on / off
+  // /// Schedule for projections on / off
 
-  bool projections_tracing_;
-  Schedule * projections_schedule_on_;
-  Schedule * projections_schedule_off_;
+  // bool projections_tracing_;
+  // Schedule * projections_schedule_on_;
+  // Schedule * projections_schedule_off_;
 
   /// Monitor object
   Monitor * monitor_;

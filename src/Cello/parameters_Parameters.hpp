@@ -67,7 +67,7 @@ public: // interface
   int value (std::string s, int deflt) throw()
   { return value_integer(s,deflt); }
 
-  int value (std::string s, double deflt) throw()
+  double value (std::string s, double deflt) throw()
   { return value_float(s,deflt); }
 
   int value (std::string s, bool deflt) throw()
@@ -79,7 +79,7 @@ public: // interface
   int value (int i,std::string s, int deflt) throw()
   { return list_value_integer(i,s,deflt); }
 
-  int value (int i,std::string s, double deflt) throw()
+  double value (int i,std::string s, double deflt) throw()
   { return list_value_float(i,s,deflt); }
 
   int value (int i,std::string s, bool deflt) throw()

@@ -10,8 +10,12 @@
 
 //----------------------------------------------------------------------
 
-FieldBlock::FieldBlock ( int nx, int ny, int nz ) throw()
-  : field_descr_(0),
+FieldBlock::FieldBlock 
+(
+ FieldDescr * field_descr,
+ int nx, int ny, int nz 
+ ) throw()
+  : field_descr_(field_descr),
     array_(),
     offsets_(),
     ghosts_allocated_(true)
@@ -49,6 +53,25 @@ FieldBlock & FieldBlock::operator= ( const FieldBlock & field_block ) throw ()
   INCOMPLETE("FieldBlock::operator=");
   return *this;
 }
+
+//----------------------------------------------------------------------
+
+void FieldBlock::pup(PUP::er &p)
+{
+  TRACEPUP;
+
+  bool up = p.isUnpacking();
+
+  if (up) field_descr_ = new FieldDescr;
+  p | *field_descr_;
+
+  PUParray(p,size_,3);
+
+  p | array_;
+  p | offsets_;
+  p | ghosts_allocated_;
+}
+
 
 //----------------------------------------------------------------------
 
@@ -200,11 +223,8 @@ void FieldBlock::clear
 
 //----------------------------------------------------------------------
 
-void FieldBlock::allocate_array
-( const FieldDescr * field_descr, bool ghosts_allocated ) throw()
+void FieldBlock::allocate_array ( bool ghosts_allocated ) throw()
 {
-
-  field_descr_ = field_descr;
 
   // Error check size
 
@@ -219,7 +239,7 @@ void FieldBlock::allocate_array
   if (array_allocated() ) {
     WARNING ("FieldBlock::allocate_array",
 	     "Array already allocated: calling reallocate()");
-    reallocate_array(field_descr,ghosts_allocated);
+    reallocate_array(ghosts_allocated);
     return;
   }
 
@@ -285,14 +305,13 @@ void FieldBlock::allocate_array
 
 void FieldBlock::reallocate_array
 (
- const FieldDescr * field_descr,
  bool               ghosts_allocated
  ) throw()
 {
   if (! array_allocated() ) {
     WARNING ("FieldBlock::reallocate_array",
 	     "Array not allocated yet: calling allocate()");
-    allocate_array(field_descr,ghosts_allocated);
+    allocate_array(ghosts_allocated);
     return;
   }
   
@@ -307,7 +326,7 @@ void FieldBlock::reallocate_array
 
   ghosts_allocated_ = ghosts_allocated;
 
-  allocate_array(field_descr,ghosts_allocated_);
+  allocate_array(ghosts_allocated_);
 
   restore_array_ (&old_array[0], old_offsets);
 }
@@ -330,7 +349,7 @@ void FieldBlock::deallocate_array () throw()
 
 //----------------------------------------------------------------------
 
-// void FieldBlock::allocate_ghosts(const FieldDescr * field_descr) throw ()
+// void FieldBlock::allocate_ghosts(FieldDescr * field_descr) throw ()
 // {
 //   if (! ghosts_allocated() ) {
 
@@ -342,7 +361,7 @@ void FieldBlock::deallocate_array () throw()
 
 // //----------------------------------------------------------------------
 
-// void FieldBlock::deallocate_ghosts(const FieldDescr * field_descr) throw ()
+// void FieldBlock::deallocate_ghosts(FieldDescr * field_descr) throw ()
 // {
 //   if ( ghosts_allocated() ) {
 

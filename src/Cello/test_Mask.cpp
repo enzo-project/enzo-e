@@ -53,7 +53,9 @@ PARALLEL_MAIN_BEGIN
   const double yp =  2.0;
   const double zp =  3.0;
   const double t =   7.0;
-  Block block(nx,ny,nz, 1,  xm,xp,ym,yp,zm,zp);
+  FieldDescr * field_descr = new FieldDescr;
+
+  Block block(field_descr,nx,ny,nz, 1,  xm,xp,ym,yp,zm,zp);
 
   double x[nx], y[ny], z[nz];
 

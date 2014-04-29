@@ -27,7 +27,8 @@ class FieldBlock {
 public: // interface
 
   /// Create a new uninitialized FieldBlock object
-  FieldBlock(int nx=0, int ny=1, int nz=1) throw();
+  FieldBlock(FieldDescr * field_descr = 0,
+	     int nx=0, int ny=1, int nz=1) throw();
 
   /// Deconstructor
   ~FieldBlock() throw();
@@ -38,16 +39,7 @@ public: // interface
   /// Assignment operator
   FieldBlock & operator= (const FieldBlock & field_block) throw ();
 
-  void pup(PUP::er &p) 
-  {
-    TRACEPUP;
-
-    PUParray(p,size_,3);
-
-    p | array_;
-    p | offsets_;
-    p | ghosts_allocated_;
-  }
+  void pup(PUP::er &p) ;
 
   /// Return size of fields on the block, assuming centered
   void size(int * nx, int * ny = 0, int * nz = 0) const throw();
@@ -91,13 +83,11 @@ public: // interface
   { return array_.size(); }
 
   /// Allocate storage for the field block
-  void allocate_array(const FieldDescr * field_descr,
-		      bool ghosts_allocated = false) throw();
+  void allocate_array(bool ghosts_allocated = false) throw();
 
   /// Reallocate storage for the field block, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
-  void reallocate_array(const FieldDescr * field_descr,
-			bool ghosts_allocated = false) throw();
+  void reallocate_array(bool ghosts_allocated = false) throw();
 
   /// Deallocate storage for the field block
   void deallocate_array() throw();
@@ -117,6 +107,8 @@ public: // interface
   /// Multiply FieldBlock by a constant
   void scale (int id_1, double scale);
 
+
+  const FieldDescr * field_descr() { return field_descr_; }
 
   //----------------------------------------------------------------------
 
@@ -171,7 +163,7 @@ private: // functions
 private: // attributes
 
   /// Pointer to the associated field descriptor
-  const FieldDescr * field_descr_;
+  FieldDescr * field_descr_;
 
   /// Size of fields on the block, assuming centered
   int size_[3];

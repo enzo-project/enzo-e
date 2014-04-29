@@ -90,6 +90,7 @@ public: // interface
   /// Return the Block associated with this CommBlock
   inline Block * block() throw()
   { return block_; };
+
   inline const Block * block() const throw()   
   { return block_; };
 

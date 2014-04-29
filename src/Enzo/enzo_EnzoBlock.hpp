@@ -69,7 +69,7 @@ class EnzoBlock : public CommBlock
   //----------------------------------------------------------------------
   // functions
 
-  static void initialize (EnzoConfig * enzo_config, FieldDescr *);
+  static void initialize (EnzoConfig * enzo_config, FieldDescr * field_descr);
 
   //----------------------------------------------------------------------
   // variables

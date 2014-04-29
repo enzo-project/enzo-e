@@ -66,8 +66,11 @@ CommBlock::CommBlock
 
   // Allocate block data
 
-  block_ = new Block  (nx, ny, nz, num_field_blocks,
-		       xm, xp, ym, yp, zm, zp);
+  block_ = new Block  (field_descr,
+		       nx, ny, nz, 
+		       num_field_blocks,
+		       xm,xp, ym,yp, zm,zp);
+
   block_->allocate(field_descr);
 
   child_block_ = NULL;
@@ -419,7 +422,7 @@ void CommBlock::determine_boundary_
   is_on_boundary (bndry);
 
   int nx,ny,nz;
-  block_->field_block()->size (&nx,&ny,&nz);
+  block()->field_block()->size (&nx,&ny,&nz);
 
   // Determine in which directions we need to communicate or update boundary
 

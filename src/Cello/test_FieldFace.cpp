@@ -172,13 +172,13 @@ void init_fields
 
 	// Create the FaceBlock object
 
-	field_block[index_block] = new FieldBlock (mx, my, mz);
+	field_block[index_block] = new FieldBlock (field_descr, mx, my, mz);
 
 	FieldBlock * block = field_block[index_block];
 
 	// Allocate field blocks including ghosts
 
-	block->allocate_array(field_descr,true);
+	block->allocate_array(true);
 
 	// Initialize fields
 
