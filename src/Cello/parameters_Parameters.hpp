@@ -70,7 +70,7 @@ public: // interface
   double value (std::string s, double deflt) throw()
   { return value_float(s,deflt); }
 
-  int value (std::string s, bool deflt) throw()
+  bool value (std::string s, bool deflt) throw()
   { return value_logical(s,deflt); }
 
   std::string value (std::string s, std::string deflt) throw()
@@ -82,7 +82,7 @@ public: // interface
   double value (int i,std::string s, double deflt) throw()
   { return list_value_float(i,s,deflt); }
 
-  int value (int i,std::string s, bool deflt) throw()
+  bool value (int i,std::string s, bool deflt) throw()
   { return list_value_logical(i,s,deflt); }
 
   std::string value (int i,std::string s, const char * deflt) throw()
