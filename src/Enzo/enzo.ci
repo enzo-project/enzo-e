@@ -61,8 +61,6 @@ module enzo {
   PUPable EnzoMethodPpml;
   PUPable EnzoMethodHeat;
   PUPable EnzoProblem;
-//  PUPable EnzoTimestep;
-//  PUPable EnzoTimestepPpml;
 
   extern module mesh;
 

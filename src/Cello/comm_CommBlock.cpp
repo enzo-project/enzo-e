@@ -71,6 +71,7 @@ CommBlock::CommBlock
 		       num_field_blocks,
 		       xm,xp, ym,yp, zm,zp);
 
+
   block_->allocate(field_descr);
 
   child_block_ = NULL;
@@ -439,7 +440,7 @@ void CommBlock::determine_boundary_
 void CommBlock::update_boundary_ ()
 {
   bool is_boundary[3][2];
-  bool fxm,fxp,fym,fyp,fzm,fzp;
+  bool fxm=0,fxp=0,fym=0,fyp=0,fzm=0,fzp=0;
 
   determine_boundary_(is_boundary,&fxm,&fxp,&fym,&fyp,&fzm,&fzp);
 

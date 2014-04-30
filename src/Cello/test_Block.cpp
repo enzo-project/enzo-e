@@ -19,8 +19,10 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("CommBlock");
 
+  FieldDescr * field_descr = new FieldDescr;
+
   Block * block = new Block 
-    (3,4,5,1,
+    (field_descr,3,4,5,1,
      -1.0, 2.0,
      -2.0, 4.0,
      -3.0, 6.0);
