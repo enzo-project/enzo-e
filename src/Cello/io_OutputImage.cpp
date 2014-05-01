@@ -647,7 +647,7 @@ void OutputImage::image_write_ (double min_color, double max_color) throw()
 double OutputImage::data_(int index) const
 {
   if (type_is_mesh() && type_is_data())
-    return image_data_[index] + 0.2*image_mesh_[index];
+    return (image_data_[index] + 0.2*image_mesh_[index])/1.2;
   else if (type_is_data()) 
     return image_data_[index];
   else  if (type_is_mesh()) 

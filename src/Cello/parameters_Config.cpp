@@ -810,6 +810,11 @@ int Config::read_schedule_(Parameters * p, const std::string group)
     }
   } else if (output_schedule_type[index] == "list") {
     int n = p->list_length("value");
+    if (n == 0) {
+      ERROR1 ("Config::read",
+	      "Schedule variable %s has length 0",
+	      (group + ":list").c_str());
+    }
     output_schedule_list[index].resize(n);
     if (var_is_int) {
       for (int i=0; i<n; i++) {

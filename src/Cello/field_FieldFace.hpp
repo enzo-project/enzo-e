@@ -111,6 +111,16 @@ private: // functions
   void store_loop_limits_
   (int im3[3], int n3[3], int nd3[3], int ng3[3]);
 
+  /// Compute loop limits for load_
+  void load_loop_limits_
+  (int im3[3], int n3[3], int nd3[3], int ng3[3]);
+
+  /// Compute loop limits for load_
+  void new_loop_limits_
+  (int im3[3], int n3[3], int nd3[3], int ng3[3], int op_type);
+
+  void check_new_( int im3[3],int n3[3], int nd3[3], int ng3[3],int op_type);
+
   /// Set child indices if prolongation or restriction is required
   inline void set_child_ (int icx, int icy = 0, int icz = 0)
   {
@@ -130,10 +140,6 @@ private: // functions
   template<class T>
   size_t store_ (T * field_ghosts,  const T * array_ghosts, 
 			   int nd3[3], int nf3[3], int im3[3]) throw();
-
-  /// Compute loop limits for load_
-  void load_loop_limits_
-  (int im3[3], int n3[3], int nd3[3], int ng3[3]);
 
 private: // attributes
 

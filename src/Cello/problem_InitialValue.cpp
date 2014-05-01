@@ -6,7 +6,7 @@
 /// @brief    Implementation of the InitialValue class
 
 #include "cello.hpp"
-
+#include <errno.h>
 #include "problem.hpp"
 
 //----------------------------------------------------------------------
@@ -565,7 +565,12 @@ void InitialValue::create_mask_png_
 
   // Open the PNG file
 
+  errno = 0;
   png.readfromfile(pngfile.c_str());
+  ASSERT1 ("InitialValue::create_mash_png_()",
+	   "Cannot read PNG file %s",
+	   pngfile.c_str(),
+	   errno == 0);
 
   // Get the PNG file size
 

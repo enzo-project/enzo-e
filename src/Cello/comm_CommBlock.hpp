@@ -313,7 +313,7 @@ public:
   void p_adapt_delete();
   void p_adapt_recv_neighbor_level 
   (Index index_debug, int ic3[3], int if3[3], int level_now, int level_new);
-  void p_adapt_send_child_data
+  void p_adapt_recv_child_data
   (int ic3[3],int na, char * array, int nf, int * child_face_level);
 
   void adapt_send_neighbors_levels(int level);

@@ -3,6 +3,8 @@
 Adapt {
    balance = true;
    list = ["slope"];
+   min_refine = 200.0;
+   max_coarsen = 100.0;
    slope {
       type = "slope";
       field_list = ["density"];

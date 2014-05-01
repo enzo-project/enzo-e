@@ -60,9 +60,6 @@ private: // attributes
   /// Pointer to the data payload for the Node
   void * data_;
 
-  /// Number of children: used for CHARM++ pup()
-  char size_; 
-
   /// Array of child nodes
   std::vector<Node> child_array_;
 

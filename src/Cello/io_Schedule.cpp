@@ -182,7 +182,6 @@ bool Schedule::write_this_cycle ( int cycle, double time ) throw()
     break;
 
   case schedule_type_cycle_list:
-
     for (size_t i=0; i<cycle_list_.size(); i++) {
       if (cycle == cycle_list_[i]) {
 	result = true;

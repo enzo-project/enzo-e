@@ -123,7 +123,7 @@ module mesh {
     entry void p_adapt_recv_neighbor_level  // [CB7]
       (Index index,int ic3[3], int if3[3], int level_now, int level_new);
 
-    entry void p_adapt_send_child_data // [CB10]
+    entry void p_adapt_recv_child_data // [CB10]
       (int ic3[3], int na, char arr[na], int nf, int child_face_level[nf]);
 
 

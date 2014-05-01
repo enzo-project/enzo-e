@@ -192,6 +192,8 @@ void CommBlock::adapt_end_()
 void CommBlock::adapt_refine_()
 {
 
+  // index_.print("REFINE",-1,2,false,simulation());
+
   adapt_ = adapt_unknown;
 
   const int rank = simulation()->dimension();
@@ -529,6 +531,7 @@ void CommBlock::p_adapt_recv_neighbor_level
 
 void CommBlock::adapt_coarsen_()
 {
+  // index_.print("COARSEN",-1,2,false,simulation());
 
   const int level = this->level();
   
@@ -544,7 +547,8 @@ void CommBlock::adapt_coarsen_()
     int narray; 
     char * array;
     int iface[3] = {0,0,0};
-    bool lghost[3] = {true,true,true};
+    //    bool lghost[3] = {true,true,true};
+    bool lghost[3] = {false,false,false};
     FieldFace * field_face = 
       load_face_(&narray,&array, iface, ic3, lghost, op_array_restrict);
 
@@ -556,11 +560,11 @@ void CommBlock::adapt_coarsen_()
     // send child data to parent
 
     // --------------------------------------------------
-    // ENTRY: #14 CommBlock::adapt_coarsen_()-> CommBlock::p_adapt_send_child_data()
+    // ENTRY: #14 CommBlock::adapt_coarsen_()-> CommBlock::p_adapt_recv_child_data()
     // ENTRY: parent if leaf() and level > 0
     // ENTRY: adapt phase
     // --------------------------------------------------
-    thisProxy[index_parent].p_adapt_send_child_data
+    thisProxy[index_parent].p_adapt_recv_child_data
       (ic3, narray,array, nf,face_level);
     // --------------------------------------------------
 
@@ -571,7 +575,7 @@ void CommBlock::adapt_coarsen_()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_adapt_send_child_data
+void CommBlock::p_adapt_recv_child_data
 (
  int ic3[3],
  int na, char * array,
@@ -580,7 +584,7 @@ void CommBlock::p_adapt_send_child_data
 {
   // copy array
   int iface[3] = {0,0,0};
-  bool lghost[3] = {true,true,true};
+  bool lghost[3] = {false,false,false};
   store_face_(na,array, iface, ic3, lghost, op_array_restrict);
 
   // copy child face level and face level

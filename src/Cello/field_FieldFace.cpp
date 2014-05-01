@@ -10,6 +10,11 @@
 #include "problem_Prolong.hpp"
 #include "problem_Restrict.hpp"
 
+enum enum_op {
+  op_unknown,
+  op_load,
+  op_store
+};
 //----------------------------------------------------------------------
 
 FieldFace::FieldFace() throw()
@@ -195,9 +200,6 @@ void FieldFace::store (int n, char * array) throw()
 
   size_t index_array = 0;
 
-  const size_t index_d  = field_descr_->field_id("density");
-  const size_t index_te = field_descr_->field_id("total_energy");
-
   for (size_t index_field=0; index_field<num_fields; index_field++) {
 
     precision_type precision = field_descr_->precision(index_field);
@@ -226,10 +228,6 @@ void FieldFace::store (int n, char * array) throw()
       int nc3[3] = { (n3[0]+1)/2, (n3[1]+1)/2,(n3[2]+1)/2 };
 
       int im3_array[3] = {0,0,0};
-
-      bool is_positive = (index_field == index_d || index_field == index_te);
-
-      prolong_->set_positive(is_positive);
 
       index_array += prolong_->apply
 	(precision, 
@@ -445,6 +443,7 @@ void FieldFace::load_loop_limits_
   n3[0] = std::max(n3[0],1);
   n3[1] = std::max(n3[1],1);
   n3[2] = std::max(n3[2],1);
+  check_new_(im3,n3,nd3,ng3,op_load);
 }
 
 //----------------------------------------------------------------------
@@ -476,15 +475,14 @@ void FieldFace::store_loop_limits_
       }
 
       if ( restrict_ ) {
+	n3[axis] /= 2;
+	im3[axis] += child_[axis] * n3[axis];
 	if (ghost_[axis]) {
 	  // correct centering for interpolating full coarse block to fine
-	  n3[axis] /= 2;
-	  im3[axis] += child_[axis] * n3[axis];
-	   //UNTESTD
+	  //im3[axis] += child_[axis] * n3[axis];
+	  //UNTESTD
 	  // im3[axis] += (1-2*child_[axis]) * ng3[axis]/2 ;
-	} else {
-	  n3[axis]  /= 2;
-	  im3[axis] += child_[axis] * n3[axis];
+	  // n3[axis] += ng3[axis];
 	}
       }
 
@@ -507,5 +505,173 @@ void FieldFace::store_loop_limits_
   n3[0] = std::max(n3[0],1);
   n3[1] = std::max(n3[1],1);
   n3[2] = std::max(n3[2],1);
+
+  check_new_(im3,n3,nd3,ng3,op_store);
 }
 
+void FieldFace::check_new_( int im3[3],int n3[3], int nd3[3], int ng3[3],int op_type)
+{
+  int IM3[3]={im3[0],im3[1],im3[2]};
+  int N3[3] ={ n3[0], n3[1], n3[2]};
+  int ND3[3]={nd3[0],nd3[1],nd3[2]};
+  int NG3[3]={ng3[0],ng3[1],ng3[2]};
+  new_loop_limits_ (IM3,N3,ND3,NG3,op_type);
+
+  im3[0] = IM3[0];
+  im3[1] = IM3[1];
+  im3[2] = IM3[2];
+  n3[0] = N3[0];
+  n3[1] = N3[1];
+  n3[2] = N3[2];
+  nd3[0] = ND3[0];
+  nd3[1] = ND3[1];
+  nd3[2] = ND3[2];
+  ng3[0] = NG3[0];
+  ng3[1] = NG3[1];
+  ng3[2] = NG3[2];
+  return;
+
+  bool l_im = ((im3[0]==IM3[0])&&(im3[1]==IM3[1])&&(im3[2]==IM3[2]));
+  bool l_n  = (( n3[0]==N3[0] )&&( n3[1]==N3[1] )&&( n3[2]==N3[2]));
+  bool l_nd = ((nd3[0]==ND3[0])&&(nd3[1]==ND3[1])&&(nd3[2]==ND3[2]));
+  bool l_ng = ((ng3[0]==NG3[0])&&(ng3[1]==NG3[1])&&(ng3[2]==NG3[2]));
+
+  if (! (l_im && l_n && l_nd && l_ng)) {
+    printf ("MISMATCH type %s\n",op_type == op_load ? "load" : "store");
+    printf ("MISMATCH im %d %d %d  IM %d %d %d\n",
+	    im3[0],im3[1],im3[2],  IM3[0],IM3[1],IM3[2]);
+    printf ("MISMATCH  n %d %d %d   N %d %d %d\n",
+	     n3[0], n3[1], n3[2],   N3[0], N3[1], N3[2]);
+    printf ("MISMATCH nd %d %d %d  ND %d %d %d\n",
+	    nd3[0],nd3[1],nd3[2],  ND3[0],ND3[1],ND3[2]);
+    printf ("MISMATCH ng %d %d %d  NG %d %d %d\n",
+	    ng3[0],ng3[1],ng3[2],  NG3[0],NG3[1],NG3[2]);
+    printf ("MISMATCH prolong %p  restrict %p\n",prolong_,restrict_);
+    printf ("MISMATCH child %d %d %d\n",child_[0],child_[1],child_[2]);
+    printf ("MISMATCH ghost %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
+    printf ("MISMATCH  face %d %d %d\n",face_[0],face_[1],face_[2]);
+    printf ("MISMATCH\n");
+  }
+}
+//----------------------------------------------------------------------
+
+void FieldFace::new_loop_limits_
+( int im3[3],int n3[3], int nd3[3], int ng3[3], int op_type)
+{
+  im3[0]=0;
+  im3[1]=0;
+  im3[2]=0;
+  n3[0]=0;
+  n3[1]=0;
+  n3[2]=0;
+  if (!prolong_ && !restrict_) {
+    for (int axis=0; axis<3; axis++) {
+      if (face_[axis] == 0) {
+	if ( ! ghost_[axis] ) {
+	  im3[axis] = ng3[axis];
+	  n3[axis]  = nd3[axis] - 2*ng3[axis];
+	} else {
+	  im3[axis] = 0;
+	  n3 [axis] = nd3[axis];
+	}
+      } else if (face_[axis] == -1) {
+	if (op_type == op_load) {
+	  im3[axis] = ng3[axis];
+	  n3 [axis] = ng3[axis];
+	} else {
+	  im3[axis] = 0;
+	  n3 [axis] = ng3[axis];
+	}      
+      } else if (face_[axis] == +1) {
+	if (op_type == op_load) {
+	  im3[axis] = nd3[axis]-2*ng3[axis];
+	  n3 [axis] = ng3[axis];
+	} else {
+	  im3[axis] = nd3[axis]-ng3[axis];
+	  n3 [axis] = ng3[axis];
+	}      
+      }
+    }
+  } else if (prolong_) {
+    for (int axis=0; axis<3; axis++) {
+      int co = child_[axis]*(nd3[axis]-2*ng3[axis])/2;
+      if (face_[axis] == 0) {
+	if ( ! ghost_[axis] ) {
+	  if (op_type == op_load) {
+	    im3[axis] = ng3[axis] + co;
+	    n3[axis] = (nd3[axis]-2*ng3[axis])/2;
+	  } else {
+	    im3[axis] = ng3[axis];
+	    n3[axis]  = nd3[axis]-2*ng3[axis];
+	  }
+	} else {
+	  if (op_type == op_load) {
+	    im3[axis] = ng3[axis]/2 + co;
+	    n3[axis] = nd3[axis]/2;
+	  } else {
+	    im3[axis] = 0;
+	    n3[axis]  = nd3[axis];
+	  }
+	}
+      } else if (face_[axis] == -1) {
+	if (op_type == op_load) {
+	  im3[axis] = ng3[axis];
+	  n3[axis]  = ng3[axis]/2;
+	} else {
+	  im3[axis] = 0;
+	  n3[axis]  = ng3[axis];
+	}
+      } else if (face_[axis] == +1) {
+	if (op_type == op_load) {
+	  im3[axis] = nd3[axis]-3*ng3[axis]/2;
+ 	  n3[axis]  = ng3[axis]/2;
+	} else {
+	  im3[axis] = nd3[axis]-ng3[axis];
+ 	  n3[axis]  = ng3[axis];
+	}
+      }
+    }
+  } else if (restrict_) {
+    for (int axis=0; axis<3; axis++) {
+      int co = child_[axis]*(nd3[axis]-2*ng3[axis])/2;
+      if (face_[axis] == 0) {
+	if ( ! ghost_[axis] ) {
+	  if (op_type == op_load) {
+	    im3[axis] = ng3[axis];
+	    n3[axis]  = nd3[axis]-2*ng3[axis];
+	  } else {
+	    im3[axis] = ng3[axis] + co;
+	    n3[axis] = (nd3[axis]-2*ng3[axis])/2;
+	  }
+	} else {
+	  if (op_type == op_load) {
+	    im3[axis] = 0;
+	    n3[axis]  = nd3[axis];
+	  } else {
+	    im3[axis] = ng3[axis]/2 + co;
+	    n3[axis] = nd3[axis]/2;
+	  }
+	}
+      } else if (face_[axis] == -1) {
+	if (op_type == op_load) {
+	  im3[axis] = ng3[axis];
+	  n3[axis]  = 2*ng3[axis];
+	} else {
+	  im3[axis] = 0;
+	  n3[axis]  = ng3[axis];
+	}
+      } else if (face_[axis] == +1) {
+	if (op_type == op_load) {
+	  im3[axis] = nd3[axis]-3*ng3[axis];
+ 	  n3[axis]  = 2*ng3[axis];
+	} else {
+	  im3[axis] = nd3[axis]-ng3[axis];
+ 	  n3[axis]  = ng3[axis];
+	}
+      }
+    }
+  }
+  n3[0] = std::max(n3[0],1);
+  n3[1] = std::max(n3[1],1);
+  n3[2] = std::max(n3[2],1);
+}

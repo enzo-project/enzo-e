@@ -2,10 +2,10 @@
 # Author:  James Bordner (jobordner@ucsd.edu)
 
 include "input/adapt.incl"
-Stopping { cycle = 40000; }
+Stopping { cycle = 1000; }
 Mesh    { 
    root_size   = [32,32];
-   max_level   = 3; 
+   max_level   = 6; 
 }
 
 Initial {
@@ -15,15 +15,13 @@ Initial {
        (1.0 + x)  / (0.4 * 1.0), "input/enzop-cello-full.png", 0.14 / (0.4 * 0.1)  ]; };
     velocity_x    { value = [0.0]; };
     velocity_y    { value = [0.0]; };
-
-    max_level = 3;
 }
 
 
 Boundary { type = "periodic"; }
 
 Output {
-     file_groups = ["dm"];
+     file_groups = ["dm","mesh"];
       dm {
            name = ["enzo-dm-%05d.png", "cycle"]; 
            include "input/schedule_cycle_10.incl"
@@ -36,10 +34,17 @@ Output {
            include "input/schedule_cycle_10.incl"
            image_reduce_type = "max";
 	   image_type = "data";
+           image_size = [2049,2049];
           };
       mesh { name = ["enzo-mesh-%05d.png", "cycle"];
            include "input/schedule_cycle_10.incl"
 	   image_type = "mesh";
        };
 
+}
+Adapt {
+   slope {
+      max_coarsen = 100.0;
+      min_refine  = 200.0;
+   }
 }
