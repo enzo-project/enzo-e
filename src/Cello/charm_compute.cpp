@@ -30,7 +30,7 @@ void CommBlock::compute_begin_ ()
     int index_method = 0;
     while ((method = problem->method(index_method++) )) {
 
-      method -> compute (field_descr,this);
+      method -> compute (this);
 
     }
   }

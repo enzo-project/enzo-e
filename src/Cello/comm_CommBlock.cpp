@@ -225,6 +225,11 @@ void CommBlock::pup(PUP::er &p)
 
 //----------------------------------------------------------------------
 
+const FieldDescr * CommBlock::field_descr() throw()
+{ return block_->field_block()->field_descr(); }
+
+//----------------------------------------------------------------------
+
 void CommBlock::apply_initial_() throw ()
 {
 

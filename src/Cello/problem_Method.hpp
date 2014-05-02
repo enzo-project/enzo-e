@@ -35,10 +35,10 @@ public: // virtual functions
   /// Apply the method to advance a block one timestep 
 
   virtual void compute
-  ( FieldDescr * field_descr, CommBlock * comm_block) throw() = 0; 
+  ( CommBlock * comm_block) throw() = 0; 
 
   /// Compute maximum timestep for this method
-  virtual double timestep (const FieldDescr *, CommBlock * comm_block) const throw() = 0;
+  virtual double timestep (CommBlock * comm_block) const throw() = 0;
 
   virtual std::string name() const throw() = 0;
 

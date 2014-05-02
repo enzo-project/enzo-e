@@ -31,8 +31,9 @@ void EnzoMethodPpml::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 void EnzoMethodPpml::compute
-( FieldDescr * field_descr,  CommBlock * comm_block ) throw()
+( CommBlock * comm_block ) throw()
 {
+  const FieldDescr * field_descr = comm_block->field_descr();
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
   enzo_block->SolveMHDEquations ( field_descr, comm_block->dt() );
 }
@@ -41,7 +42,6 @@ void EnzoMethodPpml::compute
 
 double EnzoMethodPpml::timestep
 (
- const FieldDescr * field_descr,
  CommBlock *        comm_block
  ) const throw()
 {

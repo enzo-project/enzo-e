@@ -91,6 +91,8 @@ public: // interface
   inline Block * block() throw()
   { return block_; };
 
+  const FieldDescr * field_descr() throw();
+
   inline const Block * block() const throw()   
   { return block_; };
 

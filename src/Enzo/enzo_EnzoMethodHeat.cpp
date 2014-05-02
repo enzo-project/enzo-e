@@ -37,11 +37,11 @@ void EnzoMethodHeat::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 void EnzoMethodHeat::compute
-(
- FieldDescr * field_descr, CommBlock * comm_block) throw()
+( CommBlock * comm_block) throw()
 {
   Block            * block = comm_block->block();
   FieldBlock * field_block =      block->field_block();
+  const FieldDescr * field_descr = comm_block->field_descr();
 
   const int id_temp   = field_descr->field_id ("temperature");
   void * temp   = field_block->field_values (id_temp);
@@ -81,7 +81,6 @@ void EnzoMethodHeat::compute
 
 double EnzoMethodHeat::timestep
 (
- const FieldDescr * field_descr,
  CommBlock *        comm_block
  ) const throw()
 {

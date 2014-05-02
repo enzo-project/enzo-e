@@ -49,7 +49,7 @@ void CommBlock::stopping_begin_()
     double dt_block = std::numeric_limits<double>::max();
     while ((method = problem->method(index++))) {
       //      printf ("%s:%d timestep %s\n",__FILE__,__LINE__,method->name().c_str());
-      dt_block = std::min(dt_block,method->timestep(field_descr,this));
+      dt_block = std::min(dt_block,method->timestep(this));
     }
 
 

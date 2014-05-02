@@ -32,10 +32,10 @@ void EnzoMethodPpm::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 void EnzoMethodPpm::compute
-(
- FieldDescr * field_descr, CommBlock * comm_block) throw()
+( CommBlock * comm_block) throw()
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+
   enzo_block->SolveHydroEquations 
     ( comm_block->cycle(), comm_block->time(), comm_block->dt() );
 }
@@ -44,10 +44,11 @@ void EnzoMethodPpm::compute
 
 double EnzoMethodPpm::timestep
 (
- const FieldDescr * field_descr,
  CommBlock *        comm_block
  ) const throw()
 {
+
+  const FieldDescr * field_descr = comm_block->field_descr();
 
   EnzoBlock * enzo_comm_block = static_cast<EnzoBlock*> (comm_block);
   FieldBlock * field_block = enzo_comm_block->block()->field_block();

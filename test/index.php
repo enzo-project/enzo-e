@@ -723,7 +723,7 @@ test_table ("method_heat-1",
 
   echo "<h3>HEAT (parallel) </h3>";
 
-tests("Enzo","enzo-p","test_method_heat-8","HEAT 1 block");
+tests("Enzo","enzo-p","test_method_heat-8","HEAT 8 block");
 
 test_table ("method_heat-8",
 	    array("000000","000200","000400"), $types);

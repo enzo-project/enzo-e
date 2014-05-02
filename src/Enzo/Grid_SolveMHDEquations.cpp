@@ -23,7 +23,7 @@
 
 int EnzoBlock::SolveMHDEquations
 (
- FieldDescr * field_descr,
+ const FieldDescr * field_descr,
  enzo_float dt
  )
 {
