@@ -94,14 +94,26 @@ typedef int precision_type;
 #   define SCALAR_DEFINED
 #endif
 #ifdef CONFIG_PRECISION_DOUBLE
-#   define default_precision precision_double
 #   ifdef SCALAR_DEFINED
-#      error Both CONFIG_PRECISION_SINGLE and CONFIG_PRECISION_DOUBLE defined
+#      define SCALAR_ERROR
 #   endif
+#   define default_precision precision_double
 #   define SCALAR_DEFINED
 #endif
+#ifdef CONFIG_PRECISION_QUAD
+#   ifdef SCALAR_DEFINED
+#      define SCALAR_ERROR
+#   endif
+#   define default_precision precision_quad
+#   define SCALAR_DEFINED
+#endif
+
 #ifndef SCALAR_DEFINED
 #   error Neither CONFIG_PRECISION_SINGLE nor CONFIG_PRECISION_DOUBLE defined
+#endif
+
+#ifdef ERROR_SCALAR
+#   error Multiple CONFIG_PRECISION_<SIZE> defined
 #endif
 
 namespace cello {

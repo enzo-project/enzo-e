@@ -301,6 +301,11 @@ Simulation * CommBlock::simulation() const
 
 //----------------------------------------------------------------------
 
+int CommBlock::dimension() const
+{ return simulation()->dimension(); }
+
+//----------------------------------------------------------------------
+
 std::string CommBlock::name() const throw()
 {
   int dim = simulation()->dimension();

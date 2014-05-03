@@ -12,9 +12,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant) 
-  : Method(),
-    alpha_(alpha),
-    courant_(courant)
+  : Method(), alpha_(alpha), courant_(courant)
 {
 }
 
@@ -36,131 +34,104 @@ void EnzoMethodHeat::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodHeat::compute
-( CommBlock * comm_block) throw()
+void EnzoMethodHeat::compute ( CommBlock * comm_block) throw()
 {
-  Block            * block = comm_block->block();
-  FieldBlock * field_block =      block->field_block();
-  const FieldDescr * field_descr = comm_block->field_descr();
 
-  const int id_temp   = field_descr->field_id ("temperature");
-  void * temp   = field_block->field_values (id_temp);
+  initialize_(comm_block);
 
-  int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  const int id = field_id_["temperature"];
+  void *     t = field_array_[id];
+  const int  p = field_precision_[id];
 
-  int gx,gy,gz;
-  field_descr->ghosts (id_temp,&gx,&gy,&gz);
-
-  int ndx = nx+2*gx;
-  int ndy = ny+2*gy;
-  int ndz = nz+2*gz;
-
-  double dt = comm_block->dt();
-
-  double dx,dy,dz;
-  comm_block->cell_width (&dx,&dy,&dz);
-
-  const int precision = field_descr->precision (id_temp);
-
-  const int dim = comm_block->simulation()->dimension();
-
-  switch (precision) {
-  case precision_single:
-    compute_ ((float*)  temp, ndx,ndy,ndz, nx,ny,nz, gx,gy,gz, dt, dx,dy,dz, dim);
-    break;
-  case precision_double:
-    compute_ ((double*) temp, ndx,ndy,ndz, nx,ny,nz, gx,gy,gz, dt, dx,dy,dz, dim);
-    break;
-  default:
-    break;
-  }
+  if      (p == precision_single)    compute_ ((float*)  t);
+  else if (p == precision_double)    compute_ ((double*) t);
+  else if (p == precision_quadruple) compute_ ((long double*) t);
+  else 
+    ERROR1("EnzoMethodHeat()", "precision %d not recognized", p);
 }
 
 //----------------------------------------------------------------------
 
-double EnzoMethodHeat::timestep
-(
- CommBlock *        comm_block
- ) const throw()
+double EnzoMethodHeat::timestep ( CommBlock * comm_block ) throw()
 {
-  
-  double dx = std::numeric_limits<double>::max();
-  double dy = std::numeric_limits<double>::max();
-  double dz = std::numeric_limits<double>::max();
-  comm_block->cell_width (&dx,&dy,&dz);
+  initialize_(comm_block);
+  double h = hx_;
+  if (rank_ >= 2) h = std::min(h,hy_);
+  if (rank_ >= 3) h = std::min(h,hz_);
 
-  const int dim = comm_block->simulation()->dimension();
-  double dm = dx;
-  if (dim >= 2) dm = std::min(dm,dy);
-  if (dim >= 3) dm = std::min(dm,dz);
-
-  return 0.5*courant_*dm*dm/alpha_;
+  return 0.5*courant_*h*h/alpha_;
 }
 
 //======================================================================
 
 template <class T>
-void EnzoMethodHeat::compute_
-(T * Unew, 
- int ndx, int ndy, int ndz,
- int nx,  int ny,  int nz, 
- int gx,  int gy,  int gz, 
- double dt, double dx, double dy, double dz,
- int dim) const throw()
+void EnzoMethodHeat::compute_ (T * Unew) const throw()
 {
 
+  const int id = field_id_.at("temperature");
+
+  const int gx = gx_[id];
+  const int gy = gy_[id];
+  const int gz = gz_[id];
+
+  const int mx = mx_[id];
+  const int my = my_[id];
+  const int mz = mz_[id];
+
+  // Initialize array increments
   const int idx = 1;
-  const int idy = ndx;
-  const int idz = ndx*ndy;
+  const int idy = mx;
+  const int idz = mx*my;
 
-  double dxi = 1.0/(dx*dx);
-  double dyi = 1.0/(dy*dy);
-  double dzi = 1.0/(dz*dz);
+  // Precompute ratios
+  double dxi = 1.0/(hx_*hx_);
+  double dyi = 1.0/(hy_*hy_);
+  double dzi = 1.0/(hz_*hz_);
 
-  T * U = new T [ndx*ndy*ndz];
-  for (int i=0; i<ndx*ndy*ndz; i++) U[i]=Unew[i];
+  const int m = mx*my*mz;
+  T * U = new T [m];
+  for (int i=0; i<m; i++) U[i]=Unew[i];
 
-  if (dim == 1) {
+  if (rank_ == 1) {
 
-    for (int ix=gx; ix<nx+gx; ix++) {
+    for (int ix=gx; ix<nx_+gx; ix++) {
 
       int i = ix;
 
       double Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
 
-      Unew[i] = U[i] + alpha_*dt*(Uxx);
+      Unew[i] = U[i] + alpha_*dt_*(Uxx);
 
     }
 
-  } else if (dim == 2) {
+  } else if (rank_ == 2) {
 
-    for (int iy=gy; iy<ny+gy; iy++) {
-      for (int ix=gy; ix<nx+gy; ix++) {
+    for (int iy=gy; iy<ny_+gy; iy++) {
+      for (int ix=gy; ix<nx_+gy; ix++) {
 
-	int i = ix + ndx*iy;
+	int i = ix + mx*iy;
 
 	double Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
 	double Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
 	
-	Unew[i] = U[i] + alpha_*dt*(Uxx + Uyy);
+	Unew[i] = U[i] + alpha_*dt_*(Uxx + Uyy);
 
       }
     }
 
-  } else if (dim == 3) {
+  } else if (rank_ == 3) {
 
-    for (int iz=gz; iz<nz+gz; iz++) {
-      for (int iy=gy; iy<ny+gy; iy++) {
-	for (int ix=gx; ix<nx+gx; ix++) {
+    for (int iz=gz; iz<nz_+gz; iz++) {
+      for (int iy=gy; iy<ny_+gy; iy++) {
+	for (int ix=gx; ix<nx_+gx; ix++) {
 
-	  int i = ix + ndx*(iy + ndy*iz);
+	  int i = ix + mx*(iy + my*iz);
 
 	  double Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
 	  double Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
 	  double Uzz = dzi*(U[i-idz] - 2*U[i] + U[i+idz]);
 
-	  Unew[i] = U[i] + alpha_*dt*(Uxx + Uyy + Uzz);
+	  Unew[i] = U[i] + alpha_*dt_*(Uxx + Uyy + Uzz);
 
 	}
       }

@@ -37,20 +37,14 @@ public: // interface
   virtual void compute( CommBlock * comm_block) throw();
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( CommBlock * comm_block) const throw();
+  virtual double timestep ( CommBlock * comm_block) throw();
 
   virtual std::string name() const throw() { return "heat"; }
 
 protected: // methods
 
   template <class T>
-  void compute_
-  (T * Unew,
-   int ndx, int ndy, int ndz,
-   int nx,  int ny,  int nz,
-   int gx,  int gy,  int gz,
-   double dt, double dx, double dy, double dz,
-   int dim) const throw();
+  void compute_ (T * Unew ) const throw();
 
 protected: // attributes
 

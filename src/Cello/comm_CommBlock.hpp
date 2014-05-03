@@ -479,6 +479,9 @@ public: // virtual functions
   /// Return the local simulation object
   Simulation * simulation() const;
 
+  /// Return the dimension of the Simulation
+  int dimension() const;
+
   //  int count_neighbors() const;
 
 protected: // functions

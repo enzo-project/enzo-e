@@ -31,8 +31,7 @@ void EnzoMethodPpm::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPpm::compute
-( CommBlock * comm_block) throw()
+void EnzoMethodPpm::compute ( CommBlock * comm_block) throw()
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 
@@ -42,10 +41,7 @@ void EnzoMethodPpm::compute
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPpm::timestep
-(
- CommBlock *        comm_block
- ) const throw()
+double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
 {
 
   const FieldDescr * field_descr = comm_block->field_descr();
