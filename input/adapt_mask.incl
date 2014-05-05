@@ -5,7 +5,7 @@ Domain {
    upper = [ 2.0,  2.0];
 }
 
-Adapt {
+Mesh {
    list = ["MASK"];
 
    MASK {

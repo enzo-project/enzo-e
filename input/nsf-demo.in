@@ -19,7 +19,7 @@ Mesh {
 
 }
 
-Adapt {
+Mesh {
    list = ["slope"];
    slope {
        type = "slope";
@@ -36,7 +36,7 @@ Field {
    ghosts  = 4;
    courant = 0.8;
 
-   fields = [ 
+   list = [ 
       "density",
       "velocity_x",
       "velocity_y",

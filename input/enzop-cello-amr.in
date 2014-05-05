@@ -42,7 +42,7 @@ Output {
        };
 
 }
-Adapt {
+Mesh {
    slope {
       max_coarsen = 100.0;
       min_refine  = 200.0;

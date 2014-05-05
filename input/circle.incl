@@ -16,7 +16,7 @@ include "input/domain-2d-01.incl"
 
       ghosts = 3;
 
-      fields = [
+      list = [
         "density",
         "velocity_x",
         "velocity_y",

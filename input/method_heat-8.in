@@ -12,7 +12,7 @@ Enzo {
 }
 Field {
    
-   fields = ["temperature"];
+   list = ["temperature"];
 }
 
 Initial {

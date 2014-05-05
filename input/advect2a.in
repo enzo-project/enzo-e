@@ -8,9 +8,9 @@ Initial {  max_level = 4; }
 
 include "adapt_slope.incl"
 
-Adapt {
-   list = ["slope"];
-   slope {
+Mesh {
+   list = ["SLOPE"];
+   SLOPE {
        type = "slope";
        field_list = ["density"];
        min_refine = 4.0;

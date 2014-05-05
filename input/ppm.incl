@@ -22,7 +22,7 @@
 
       refresh { rank = 0;  }; # refresh edges not corners
 
-      fields = [
+      list = [
 	"density",	
 	"velocity_x",
 	"velocity_y",

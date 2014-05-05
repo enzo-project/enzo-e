@@ -12,7 +12,7 @@ Mesh
    max_level   = 5; 
 }
 
-Adapt {
+Mesh {
    list = ["slope"];
    slope {
        type = "slope";
@@ -30,7 +30,7 @@ Field {
 }
 Initial {
    max_level = 5;
-      fields = [
+      list = [
 	"density",	
 	"velocity_x",
 	"velocity_y",

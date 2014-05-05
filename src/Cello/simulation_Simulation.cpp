@@ -320,8 +320,8 @@ void Simulation::initialize_data_descr_() throw()
 
   // Add data fields
 
-  for (size_t i=0; i<config_->field_fields.size(); i++) {
-    field_descr_->insert_field (config_->field_fields[i]);
+  for (size_t i=0; i<config_->field_list.size(); i++) {
+    field_descr_->insert_field (config_->field_list[i]);
   }
 
   // Define default ghost zone depth for all fields, default value of 1

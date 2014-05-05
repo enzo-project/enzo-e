@@ -23,7 +23,8 @@ Stopping { cycle = 1000; }
      max_level = 3;
   }
 
-Adapt {
+
+Mesh {
    list = ["slope"];
    slope {
        type = "slope";

@@ -176,7 +176,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   ghost_depth[1] = gy;
   ghost_depth[2] = gz;
 
-  NumberOfBaryonFields = enzo_config->field_fields.size();
+  NumberOfBaryonFields = enzo_config->field_list.size();
 
   // Check NumberOfBaryonFields
 

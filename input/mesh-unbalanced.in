@@ -5,7 +5,7 @@ include "input/mesh-balanced.in"
 
 
 
-Adapt {
+Mesh {
    balanced = false;
 } 
 

@@ -32,9 +32,6 @@ void BoundaryValue::enforce
 	    "Function called with ghosts not allocated");
     }
 
-    int nx,ny,nz;
-    field_block->size(&nx,&ny,&nz);
-
     double xm,ym,zm;
     double xp,yp,zp;
     block -> lower(&xm,&ym,&zm);
@@ -43,6 +40,9 @@ void BoundaryValue::enforce
     double t = comm_block->time();
 
     for (int index = 0; index < field_list_.size(); index++) {
+
+      int nx,ny,nz;
+      field_block->size(&nx,&ny,&nz);
 
       int index_field = field_descr->field_id(field_list_[index]);
       int gx,gy,gz;
@@ -61,11 +61,17 @@ void BoundaryValue::enforce
 
       void * array = field_block->field_values(index_field);
       precision_type precision = field_descr->precision(index_field);
+
       int ix0=0 ,iy0=0,iz0=0;
+
+      nx = ndx;
+      ny = ndy;
+      nz = ndz;
 
       if (axis == axis_x) nx=gx;
       if (axis == axis_y) ny=gy;
       if (axis == axis_z) nz=gz;
+
       if (face == face_upper) {
 	if (axis == axis_x) ix0 = ndx - gx;
 	if (axis == axis_y) iy0 = ndy - gy;
@@ -73,6 +79,7 @@ void BoundaryValue::enforce
       }
 
       int i0=ix0 + ndx*(iy0 + ndy*iz0);
+
       switch (precision) {
       case precision_single:
 	value_->evaluate((float *)array+i0, t, 

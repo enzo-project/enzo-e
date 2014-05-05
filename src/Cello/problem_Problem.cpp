@@ -137,9 +137,9 @@ void Problem::initialize_refine(Config * config,
 				Parameters * parameters,
 				const FieldDescr * field_descr) throw()
 {
-  for (int i=0; i<config->num_adapt; i++) {
+  for (int i=0; i<config->num_mesh; i++) {
 
-    std::string name = config->adapt_type[i];
+    std::string name = config->mesh_type[i];
 
     Refine * refine = create_refine_ 
       (name,config,parameters,field_descr,i);
@@ -148,7 +148,7 @@ void Problem::initialize_refine(Config * config,
       refine_list_.push_back( refine );
     } else {
       ERROR1("Problem::initialize_refine",
-	     "Cannot create Adapt type %s",name.c_str());
+	     "Cannot create Mesh type %s",name.c_str());
     }
   }
 }
@@ -414,9 +414,9 @@ Initial * Problem::create_initial_
     return new InitialFile   (parameters,group_process,
 			      config->initial_cycle,
 			      config->initial_time);;
-  } else if (type == "default") {
+  } else if (type == "value") {
     return new InitialValue(parameters,field_descr,
-			      config->initial_cycle,
+			    config->initial_cycle,
 			    config->initial_time);
   }
   return NULL;
@@ -433,18 +433,19 @@ Refine * Problem::create_refine_
  int                index
  ) throw ()
 { 
-  
+
+  printf ("Problem::create_refine_ %s\n",type.c_str());
   if (type == "slope") {
 
     return new RefineSlope 
       (field_descr,
-       config->adapt_min_refine[index],
-       config->adapt_max_coarsen[index],
-       config->adapt_field_list[index]);
+       config->mesh_min_refine[index],
+       config->mesh_max_coarsen[index],
+       config->mesh_field_list[index]);
 
   } else if (type == "mask") {
 
-    std::string param_str = "Adapt:" + config->adapt_list[index] + ":value";
+    std::string param_str = "Mesh:" + config->mesh_list[index] + ":value";
 
     return new RefineMask (parameters, param_str);
 
@@ -460,9 +461,9 @@ Refine * Problem::create_refine_
 
     }
 
-    return new RefineMass (config->adapt_min_refine[index],
-			   config->adapt_max_coarsen[index],
-			   config->adapt_level_exponent[index],
+    return new RefineMass (config->mesh_min_refine[index],
+			   config->mesh_max_coarsen[index],
+			   config->mesh_level_exponent[index],
 			   root_cell_volume);
   }
   return NULL;

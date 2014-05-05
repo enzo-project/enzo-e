@@ -19,7 +19,7 @@
 #define MAX_SCHEDULE 10
 
 /* Maximum number of adapt groups specified in the configuration file */
-#define MAX_ADAPT 10
+#define MAX_MESH_GROUPS 10
 
 /* Maximum number of Boundary groups specified in the configuration file */
 
@@ -59,18 +59,6 @@ public: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  // Adapt
-
-  int                        adapt_interval;
-  bool                       adapt_balance;
-  int                        num_adapt;
-  std::string                adapt_list[MAX_ADAPT];
-  std::string                adapt_type[MAX_ADAPT];
-  std::vector<std::string>   adapt_field_list[MAX_ADAPT];
-  double                     adapt_min_refine[MAX_ADAPT];
-  double                     adapt_max_coarsen[MAX_ADAPT];
-  double                     adapt_level_exponent[MAX_ADAPT];
-
   // Boundary
 
   int                        num_boundary;
@@ -109,7 +97,7 @@ public: // attributes
   int                        field_alignment;
   std::vector<int>           field_centering [3];
   double                     field_courant;
-  std::vector<std::string>   field_fields;
+  std::vector<std::string>   field_list;
   int                        field_ghosts[3];
   int                        field_padding;
   int                        field_precision;
@@ -134,6 +122,15 @@ public: // attributes
   int                        mesh_root_rank;
   int                        mesh_root_size[3];
   int                        mesh_max_level;
+  int                        mesh_adapt_interval;
+  int                        num_mesh;
+  std::string                mesh_list[MAX_MESH_GROUPS];
+  std::string                mesh_type[MAX_MESH_GROUPS];
+  std::vector<std::string>   mesh_field_list[MAX_MESH_GROUPS];
+  double                     mesh_min_refine[MAX_MESH_GROUPS];
+  double                     mesh_max_coarsen[MAX_MESH_GROUPS];
+  double                     mesh_level_exponent[MAX_MESH_GROUPS];
+
 
   // Method
 
@@ -209,7 +206,6 @@ public: // attributes
 protected: // functions
 
   /// Read boundary-related values from the Parameters object
-  void read_adapt_       (Parameters * parameters) throw();
   void read_boundary_    (Parameters * parameters) throw();
   void read_control_     (Parameters * parameters) throw();
   void read_domain_      (Parameters * parameters) throw();

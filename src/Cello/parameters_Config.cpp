@@ -18,18 +18,6 @@ void Config::pup (PUP::er &p)
 
   // NOTE: change this function whenever attributes change
 
-  // Adapt
-
-  p | adapt_balance;
-  p | adapt_interval;
-  p | num_adapt;
-  PUParray(p,adapt_list,MAX_ADAPT);
-  PUParray(p,adapt_type,MAX_ADAPT);
-  PUParray(p,adapt_field_list,MAX_ADAPT);
-  PUParray(p,adapt_min_refine,MAX_ADAPT);
-  PUParray(p,adapt_max_coarsen,MAX_ADAPT);
-  PUParray(p,adapt_level_exponent,MAX_ADAPT);
-
   // Boundary
 
   p | num_boundary;
@@ -68,7 +56,7 @@ void Config::pup (PUP::er &p)
   p | field_alignment;
   PUParray(p,field_centering,3);
   p | field_courant;
-  p | field_fields;
+  p | field_list;
   PUParray(p,field_ghosts,3);
   p | field_padding;
   p | field_precision;
@@ -93,6 +81,15 @@ void Config::pup (PUP::er &p)
   p | mesh_root_rank;
   PUParray(p,mesh_root_size,3);
   p | mesh_max_level;
+  p | mesh_adapt_interval;
+  p | num_mesh;
+  PUParray(p,mesh_list,MAX_MESH_GROUPS);
+  PUParray(p,mesh_type,MAX_MESH_GROUPS);
+  PUParray(p,mesh_field_list,MAX_MESH_GROUPS);
+  PUParray(p,mesh_min_refine,MAX_MESH_GROUPS);
+  PUParray(p,mesh_max_coarsen,MAX_MESH_GROUPS);
+  PUParray(p,mesh_level_exponent,MAX_MESH_GROUPS);
+
 
   // Method
 
@@ -168,24 +165,23 @@ void Config::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void Config::read(Parameters * parameters) throw()
+void Config::read(Parameters * p) throw()
 {
   TRACE("BEGIN Config::read()");
 
-  read_boundary_(parameters);
-  read_domain_(parameters);
-  read_field_(parameters);
-  read_initial_(parameters);
-  read_memory_(parameters);
-  read_mesh_(parameters);
-  read_control_(parameters);
-  read_adapt_(parameters);
-  read_method_(parameters);
-  read_monitor_(parameters);
-  read_output_(parameters);
-  read_performance_(parameters);
-  read_stopping_(parameters);
-  read_testing_(parameters);
+  read_boundary_(p);
+  read_domain_(p);
+  read_field_(p);
+  read_initial_(p);
+  read_memory_(p);
+  read_mesh_(p);
+  read_control_(p);
+  read_method_(p);
+  read_monitor_(p);
+  read_output_(p);
+  read_performance_(p);
+  read_stopping_(p);
+  read_testing_(p);
 
   TRACE("END   Config::read()");
 
@@ -193,7 +189,7 @@ void Config::read(Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Config::read_boundary_ (Parameters * parameters) throw()
+void Config::read_boundary_ (Parameters * p) throw()
 {
 
   //--------------------------------------------------
@@ -201,11 +197,11 @@ void Config::read_boundary_ (Parameters * parameters) throw()
   //--------------------------------------------------
 
   const bool multi_boundary =
-    (parameters->type("Boundary:list") == parameter_list);
+    (p->type("Boundary:list") == parameter_list);
   
 
   num_boundary = multi_boundary ? 
-    parameters->list_length("Boundary:list") : 1;
+    p->list_length("Boundary:list") : 1;
 
 
   ASSERT2 ("Config::read()", 
@@ -216,16 +212,16 @@ void Config::read_boundary_ (Parameters * parameters) throw()
   for (int ib=0; ib<num_boundary; ib++) {
 
     boundary_list[ib] = multi_boundary ?
-      parameters->list_value_string(ib,"Boundary:list","unknown") : "boundary";
+      p->list_value_string(ib,"Boundary:list","unknown") : "boundary";
 
     std::string prefix = "Boundary:";
 
     if (multi_boundary)
       prefix = prefix + boundary_list[ib] + ":";
 
-    boundary_type[ib] = parameters->value_string(prefix+"type","unknown");
+    boundary_type[ib] = p->value_string(prefix+"type","unknown");
 
-    std::string axis_str = parameters->value_string(prefix+"axis","all");
+    std::string axis_str = p->value_string(prefix+"axis","all");
     if      (axis_str == "all") { boundary_axis[ib] = axis_all; }
     else if (axis_str == "x")   { boundary_axis[ib] = axis_x; }
     else if (axis_str == "y")   { boundary_axis[ib] = axis_y; }
@@ -235,7 +231,7 @@ void Config::read_boundary_ (Parameters * parameters) throw()
 	      (prefix+"axis").c_str(),axis_str.c_str());
     }
 
-    std::string face_str = parameters->value_string(prefix+"face","all");
+    std::string face_str = p->value_string(prefix+"face","all");
     if      (face_str == "all")   { boundary_face[ib] = face_all; }
     else if (face_str == "lower") { boundary_face[ib] = face_lower; }
     else if (face_str == "upper") { boundary_face[ib] = face_upper; }
@@ -244,21 +240,21 @@ void Config::read_boundary_ (Parameters * parameters) throw()
 	      (prefix+"face").c_str(),face_str.c_str());
     }
 
-    boundary_mask[ib] = (parameters->type(prefix+"mask") 
+    boundary_mask[ib] = (p->type(prefix+"mask") 
 			 == parameter_logical_expr);
 
     std::string param_str = prefix+"field_list";
-    int field_list_type = parameters->type(param_str);
+    int field_list_type = p->type(param_str);
     if (field_list_type == parameter_list) {
-      const int n = parameters->list_length(param_str);
+      const int n = p->list_length(param_str);
       boundary_field_list[ib].resize(n);
       for (int index=0; index<n; index++) {
-	boundary_field_list[ib][index] = parameters->list_value_string 
+	boundary_field_list[ib][index] = p->list_value_string 
 	  (index,param_str);
       }
     } else if (field_list_type == parameter_string) {
       boundary_field_list[ib].resize(1);
-      boundary_field_list[ib][0] = parameters->value_string(param_str);
+      boundary_field_list[ib][0] = p->value_string(param_str);
     } else if (field_list_type != parameter_unknown) {
       ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
 	      field_list_type,param_str.c_str());
@@ -270,48 +266,48 @@ void Config::read_boundary_ (Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Config::read_domain_ (Parameters * parameters) throw()
+void Config::read_domain_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Domain
   //--------------------------------------------------
 
   for (int i=0; i<3; i++)  {
-    domain_lower[i] = parameters->list_value_float(i, "Domain:lower", 0.0);
-    domain_upper[i] = parameters->list_value_float(i, "Domain:upper", 0.0);
+    domain_lower[i] = p->list_value_float(i, "Domain:lower", 0.0);
+    domain_upper[i] = p->list_value_float(i, "Domain:upper", 1.0);
   }
 
 }
 
 //----------------------------------------------------------------------
 
-void Config::read_field_ (Parameters * parameters) throw()
+void Config::read_field_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Field
   //--------------------------------------------------
 
-  num_fields = parameters->list_length("Field:fields"); 
+  num_fields = p->list_length("Field:list"); 
 
   ASSERT2 ("Config::read","Number of fields %d exceeds MAX_FIELDS %d",
 	   num_fields, MAX_FIELDS, num_fields <= MAX_FIELDS);
 
-  field_fields.resize(num_fields);
+  field_list.resize(num_fields);
   for (int i=0; i<num_fields; i++) {
-    field_fields[i] = parameters->list_value_string(i, "Field:fields");
+    field_list[i] = p->list_value_string(i, "Field:list");
   }
 
-  if (parameters->type("Field:ghosts") == parameter_integer) {
-    field_ghosts[0] = parameters->value_integer("Field:ghosts",0);
-    field_ghosts[1] = parameters->value_integer("Field:ghosts",0);
-    field_ghosts[2] = parameters->value_integer("Field:ghosts",0);
-  } else if (parameters->type("Field:ghosts") == parameter_list) {
-    field_ghosts[0] = parameters->list_value_integer(0,"Field:ghosts",0);
-    field_ghosts[1] = parameters->list_value_integer(1,"Field:ghosts",0);
-    field_ghosts[2] = parameters->list_value_integer(2,"Field:ghosts",0);
+  if (p->type("Field:ghosts") == parameter_integer) {
+    field_ghosts[0] = p->value_integer("Field:ghosts",0);
+    field_ghosts[1] = p->value_integer("Field:ghosts",0);
+    field_ghosts[2] = p->value_integer("Field:ghosts",0);
+  } else if (p->type("Field:ghosts") == parameter_list) {
+    field_ghosts[0] = p->list_value_integer(0,"Field:ghosts",0);
+    field_ghosts[1] = p->list_value_integer(1,"Field:ghosts",0);
+    field_ghosts[2] = p->list_value_integer(2,"Field:ghosts",0);
   }
 
-  field_alignment = parameters->value_integer("Field:alignment",8);
+  field_alignment = p->value_integer("Field:alignment",8);
 
   field_centering[0].resize(num_fields);
   field_centering[1].resize(num_fields);
@@ -319,21 +315,21 @@ void Config::read_field_ (Parameters * parameters) throw()
   for (int i=0; i<num_fields; i++) {
 
     std::string param_name = 
-      std::string("Field:") + field_fields[i] + ":centering";
+      std::string("Field:") + field_list[i] + ":centering";
 
-    field_centering[0][i] = parameters->list_value_logical(0,param_name,true);
-    field_centering[1][i] = parameters->list_value_logical(1,param_name,true);
-    field_centering[2][i] = parameters->list_value_logical(2,param_name,true);
+    field_centering[0][i] = p->list_value_logical(0,param_name,true);
+    field_centering[1][i] = p->list_value_logical(1,param_name,true);
+    field_centering[2][i] = p->list_value_logical(2,param_name,true);
     
   }
 
-  field_courant = parameters->value_float  ("Field:courant",0.6);
+  field_courant = p->value_float  ("Field:courant",0.6);
 
-  field_padding = parameters->value_integer("Field:padding",0);
+  field_padding = p->value_integer("Field:padding",0);
 
   // Field precision
 
-  std::string precision_str = parameters->value_string("Field:precision","default");
+  std::string precision_str = p->value_string("Field:precision","default");
 
   if      (precision_str == "default")   field_precision = precision_default;
   else if (precision_str == "single")    field_precision = precision_single;
@@ -353,29 +349,29 @@ void Config::read_field_ (Parameters * parameters) throw()
   //
   // refresh if (face_rank >= rank)
 
-  field_refresh_rank = parameters->value_integer ("Field:refresh:rank",0);
+  field_refresh_rank = p->value_integer ("Field:refresh:rank",0);
 
-  prolong_type   = parameters->value_string ("Field:prolong","linear");
+  prolong_type   = p->value_string ("Field:prolong","linear");
 
-  restrict_type  = parameters->value_string ("Field:restrict","linear");
+  restrict_type  = p->value_string ("Field:restrict","linear");
 
 }
 
 //----------------------------------------------------------------------
 
-void Config::read_initial_ (Parameters * parameters) throw()
+void Config::read_initial_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Initial
   //--------------------------------------------------
 
   TRACE("Parameters: Initial");
-  initial_type  = parameters->value_string("Initial:type","default");
-  initial_cycle = parameters->value_integer("Initial:cycle",0);
-  initial_time  = parameters->value_float  ("Initial:time",0.0);
+  initial_type  = p->value_string("Initial:type","value");
+  initial_cycle = p->value_integer("Initial:cycle",0);
+  initial_time  = p->value_float  ("Initial:time",0.0);
 
-  const int max_level = parameters->value_integer("Mesh:max_level",0);
-  initial_max_level = parameters->value_integer("Initial:max_level",max_level);
+  const int max_level = p->value_integer("Mesh:max_level",0);
+  initial_max_level = p->value_integer("Initial:max_level",max_level);
 
   //  initial_name;
 
@@ -385,100 +381,58 @@ void Config::read_initial_ (Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Config::read_memory_ (Parameters * parameters) throw()
+void Config::read_memory_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Memory
   //--------------------------------------------------
 
-  memory_active = parameters->value_logical("Memory:active",true);
+  memory_active = p->value_logical("Memory:active",true);
 
 }
 
 //----------------------------------------------------------------------
 
-void Config::read_mesh_ (Parameters * parameters) throw()
+void Config::read_mesh_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Mesh
   //--------------------------------------------------
 
   TRACE("Parameters: Mesh");
-  mesh_root_rank = parameters->value_integer("Mesh:root_rank",0);
+  mesh_root_rank = p->value_integer("Mesh:root_rank",0);
 
   if (mesh_root_rank < 2) field_ghosts[1] = 0;
   if (mesh_root_rank < 3) field_ghosts[2] = 0;
   
   //--------------------------------------------------
 
-  mesh_root_blocks[0] = parameters->list_value_integer(0,"Mesh:root_blocks",1);
-  mesh_root_blocks[1] = parameters->list_value_integer(1,"Mesh:root_blocks",1);
-  mesh_root_blocks[2] = parameters->list_value_integer(2,"Mesh:root_blocks",1);
+  mesh_root_blocks[0] = p->list_value_integer(0,"Mesh:root_blocks",1);
+  mesh_root_blocks[1] = p->list_value_integer(1,"Mesh:root_blocks",1);
+  mesh_root_blocks[2] = p->list_value_integer(2,"Mesh:root_blocks",1);
 
   //--------------------------------------------------
 
-  mesh_root_size[0] = parameters->list_value_integer(0,"Mesh:root_size",1);
-  mesh_root_size[1] = parameters->list_value_integer(1,"Mesh:root_size",1);
-  mesh_root_size[2] = parameters->list_value_integer(2,"Mesh:root_size",1);
+  mesh_root_size[0] = p->list_value_integer(0,"Mesh:root_size",1);
+  mesh_root_size[1] = p->list_value_integer(1,"Mesh:root_size",1);
+  mesh_root_size[2] = p->list_value_integer(2,"Mesh:root_size",1);
 
   //--------------------------------------------------
 
-  mesh_max_level = parameters->value_integer("Mesh:max_level",0);
+  mesh_max_level = p->value_integer("Mesh:max_level",0);
 
-}
 
-//----------------------------------------------------------------------
+  mesh_adapt_interval = p->value ("Mesh:adapt_interval",1);
 
-void Config::read_control_ (Parameters * parameters) throw()
-{
-  control_sync_adapt_enter = parameters->value_string
-    ("Control:sync:adapt_enter","array");
-  control_sync_adapt_called = parameters->value_string
-    ("Control:sync:adapt_called","neighbor");
-  control_sync_adapt_end = parameters->value_string
-    ("Control:sync:adapt_end","quiescence");
-  control_sync_adapt_next = parameters->value_string
-    ("Control:sync:adapt_next","quiescence");
-  control_sync_adapt_exit = parameters->value_string
-    ("Control:sync:adapt_exit","none");
-  control_sync_compute_enter = parameters->value_string
-    ("Control:sync:compute_enter","none");
-  control_sync_compute_exit = parameters->value_string
-    ("Control:sync:compute_exit","none");
-  control_sync_exit = parameters->value_string
-    ("Control:sync:exit = parameters","contribute");
-  control_sync_output_enter = parameters->value_string
-    ("Control:sync:output_enter","array");
-  control_sync_output_exit = parameters->value_string
-    ("Control:sync:output_exit","none");
-  control_sync_refresh_enter = parameters->value_string
-    ("Control:sync:refresh_enter","array");
-  control_sync_refresh_exit = parameters->value_string
-    ("Control:sync:refresh_exit","contribute");
-  control_sync_stopping_enter = parameters->value_string
-    ("Control:sync:stopping_enter","none");
-  control_sync_stopping_exit = parameters->value_string
-    ("Control:sync:stopping_exit","none");
+  num_mesh = p->list_length("Mesh:list");
 
-}
+  for (int ia=0; ia<num_mesh; ia++) {
 
-//----------------------------------------------------------------------
+    mesh_list[ia] = p->list_value_string (ia,"Mesh:list","unknown");
 
-void Config::read_adapt_ (Parameters * p) throw()
-{
+    std::string prefix = "Mesh:" + mesh_list[ia] + ":";
 
-  adapt_balance  = p->value ("Adapt:balance",true);
-  adapt_interval = p->value ("Adapt:interval",1);
-
-  num_adapt = p->list_length("Adapt:list");
-
-  for (int ia=0; ia<num_adapt; ia++) {
-
-    adapt_list[ia] = p->list_value_string (ia,"Adapt:list","unknown");
-
-    std::string prefix = "Adapt:" + adapt_list[ia] + ":";
-
-    adapt_type[ia] = p->value_string(prefix+"type","unknown");
+    mesh_type[ia] = p->value_string(prefix+"type","unknown");
 
     std::string param_str = prefix + "field_list";
 
@@ -486,13 +440,13 @@ void Config::read_adapt_ (Parameters * p) throw()
 
     if (type == parameter_list) {
       const int n = p->list_length(param_str);
-      adapt_field_list[ia].resize(n);
+      mesh_field_list[ia].resize(n);
       for (int index=0; index<n; index++) {
-	adapt_field_list[ia][index] = p->value(index,param_str,"none");
+	mesh_field_list[ia][index] = p->value(index,param_str,"none");
       }
     } else if (type == parameter_string) {
-      adapt_field_list[ia].resize(1);
-      adapt_field_list[ia][0] = p->value(param_str,"none");
+      mesh_field_list[ia].resize(1);
+      mesh_field_list[ia][0] = p->value(param_str,"none");
     } else if (type != parameter_unknown) {
       ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
 	      type,param_str.c_str());
@@ -500,10 +454,10 @@ void Config::read_adapt_ (Parameters * p) throw()
 
     //--------------------------------------------------
 
-    adapt_min_refine[ia] = p->value (prefix + "min_refine",0.3);
-    double deflt = 0.5*adapt_min_refine[ia];
-    adapt_max_coarsen[ia] =    p->value (prefix + "max_coarsen",deflt);
-    adapt_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
+    mesh_min_refine[ia] = p->value (prefix + "min_refine",0.3);
+    double deflt = 0.5*mesh_min_refine[ia];
+    mesh_max_coarsen[ia] =    p->value (prefix + "max_coarsen",deflt);
+    mesh_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
 
   }
 
@@ -511,7 +465,42 @@ void Config::read_adapt_ (Parameters * p) throw()
 
 //----------------------------------------------------------------------
 
-void Config::read_method_ (Parameters * parameters) throw()
+void Config::read_control_ (Parameters * p) throw()
+{
+  control_sync_adapt_enter = p->value_string
+    ("Control:sync:adapt_enter","array");
+  control_sync_adapt_called = p->value_string
+    ("Control:sync:adapt_called","neighbor");
+  control_sync_adapt_end = p->value_string
+    ("Control:sync:adapt_end","quiescence");
+  control_sync_adapt_next = p->value_string
+    ("Control:sync:adapt_next","quiescence");
+  control_sync_adapt_exit = p->value_string
+    ("Control:sync:adapt_exit","none");
+  control_sync_compute_enter = p->value_string
+    ("Control:sync:compute_enter","none");
+  control_sync_compute_exit = p->value_string
+    ("Control:sync:compute_exit","none");
+  control_sync_exit = p->value_string
+    ("Control:sync:exit = p","contribute");
+  control_sync_output_enter = p->value_string
+    ("Control:sync:output_enter","array");
+  control_sync_output_exit = p->value_string
+    ("Control:sync:output_exit","none");
+  control_sync_refresh_enter = p->value_string
+    ("Control:sync:refresh_enter","array");
+  control_sync_refresh_exit = p->value_string
+    ("Control:sync:refresh_exit","contribute");
+  control_sync_stopping_enter = p->value_string
+    ("Control:sync:stopping_enter","none");
+  control_sync_stopping_exit = p->value_string
+    ("Control:sync:stopping_exit","none");
+
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_method_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Method
@@ -519,42 +508,42 @@ void Config::read_method_ (Parameters * parameters) throw()
  
   TRACE("Parameters: Method");
 
-  int size = parameters->list_length("Method:list");
+  int size = p->list_length("Method:list");
   method_list.resize(size);
   for (int i=0; i<size; i++) {
-    method_list[i] = parameters->list_value_string(i,"Method:list");
+    method_list[i] = p->list_value_string(i,"Method:list");
   }
 
 }
 
 //----------------------------------------------------------------------
 
-void Config::read_monitor_ (Parameters * parameters) throw()
+void Config::read_monitor_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Monitor
   //--------------------------------------------------
 
-  monitor_debug = parameters->value_logical("Monitor:debug",false);
+  monitor_debug = p->value_logical("Monitor:debug",false);
 
 }
 
 //----------------------------------------------------------------------
 
-void Config::read_output_ (Parameters * parameters) throw()
+void Config::read_output_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Output
   //--------------------------------------------------
 
-  parameters->group_set(0,"Output");
+  p->group_set(0,"Output");
 
-  num_file_groups = parameters->list_length("file_groups");
+  num_file_groups = p->list_length("file_groups");
 
   ASSERT2 ("Config::read","Number of file groups %d exceeds MAX_FILE_GROUPS %d",
 	   num_file_groups, MAX_FILE_GROUPS, num_file_groups <= MAX_FILE_GROUPS);
 
-  parameters->group_set(0,"Output");
+  p->group_set(0,"Output");
 
 
   output_file_groups.resize(num_file_groups);
@@ -564,11 +553,11 @@ void Config::read_output_ (Parameters * parameters) throw()
     TRACE1 ("index = %d",index);
 
     output_file_groups[index] = 
-      parameters->list_value_string (index,"Output:file_groups","unknown");
+      p->list_value_string (index,"Output:file_groups","unknown");
 
-    parameters->group_set(1,output_file_groups[index]);
+    p->group_set(1,output_file_groups[index]);
 
-    output_type[index] = parameters->value_string("type","unknown");
+    output_type[index] = p->value_string("type","unknown");
 
     if (output_type[index] == "unknown") {
       ERROR1("Config::read",
@@ -576,39 +565,39 @@ void Config::read_output_ (Parameters * parameters) throw()
 	     output_file_groups[index].c_str());
     }
 
-    output_stride[index] = parameters->value_integer("stride",0);
+    output_stride[index] = p->value_integer("stride",0);
 
-    if (parameters->type("dir") == parameter_string) {
+    if (p->type("dir") == parameter_string) {
       output_dir[index].resize(1);
-      output_dir[index][0] = parameters->value_string("dir","");
-    } else if (parameters->type("dir") == parameter_list) {
-      int size = parameters->list_length("dir");
+      output_dir[index][0] = p->value_string("dir","");
+    } else if (p->type("dir") == parameter_list) {
+      int size = p->list_length("dir");
       if (size > 0) output_dir[index].resize(size);
       for (int i=0; i<size; i++) {
-	output_dir[index][i] = parameters->list_value_string(i,"dir","");
+	output_dir[index][i] = p->list_value_string(i,"dir","");
 	TRACE3("output_dir[%d][%d] = %s",index,i,output_dir[index][i].c_str());
       }
     }
 
     TRACE1("index = %d",index);
-    if (parameters->type("name") == parameter_string) {
+    if (p->type("name") == parameter_string) {
       TRACE0;
       output_name[index].resize(1);
-      output_name[index][0] = parameters->value_string("name","");
-    } else if (parameters->type("name") == parameter_list) {
-      int size = parameters->list_length("name");
+      output_name[index][0] = p->value_string("name","");
+    } else if (p->type("name") == parameter_list) {
+      int size = p->list_length("name");
       TRACE1("size = %d",size);
       if (size > 0) output_name[index].resize(size);
       for (int i=0; i<size; i++) {
-	output_name[index][i] = parameters->list_value_string(i,"name","");
+	output_name[index][i] = p->list_value_string(i,"name","");
       }
     }
 
-    if (parameters->type("field_list") == parameter_list) {
-      int length = parameters->list_length("field_list");
+    if (p->type("field_list") == parameter_list) {
+      int length = p->list_length("field_list");
       output_field_list[index].resize(length);
       for (int i=0; i<length; i++) {
-	output_field_list[index][i] = parameters->list_value_string(i,"field_list","");
+	output_field_list[index][i] = p->list_value_string(i,"field_list","");
       }
     }
       
@@ -617,13 +606,13 @@ void Config::read_output_ (Parameters * parameters) throw()
     // ASSERT1("Config::read",
     // 	   "'schedule' is not defined for output file group %s",
     // 	    output_file_groups[index].c_str(),
-    // 	    (parameters->type("schedule") != parameter_unknown));
+    // 	    (p->type("schedule") != parameter_unknown));
 
 
-    parameters->group_push("schedule");
+    p->group_push("schedule");
     output_schedule_index[index] = 
-      read_schedule_(parameters, output_file_groups[index]);
-    parameters->group_pop();
+      read_schedule_(p, output_file_groups[index]);
+    p->group_pop();
 
     // Image 
 
@@ -636,8 +625,8 @@ void Config::read_output_ (Parameters * parameters) throw()
 
       output_image_axis[index] = "z";
 
-      if (parameters->type("axis") != parameter_unknown) {
-	std::string axis = parameters->value_string("axis");
+      if (p->type("axis") != parameter_unknown) {
+	std::string axis = p->value_string("axis");
 	ASSERT2("Problem::initialize_output",
 		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
 		output_file_groups[index].c_str(), axis.c_str(),
@@ -645,43 +634,43 @@ void Config::read_output_ (Parameters * parameters) throw()
       } 
 
       output_image_block_size[index] = 
-	parameters->value_integer("image_block_size",1);
+	p->value_integer("image_block_size",1);
 
-      output_image_type[index] = parameters->value_string("image_type","data");
+      output_image_type[index] = p->value_string("image_type","data");
 
-      output_image_log[index] = parameters->value_logical("image_log",false);
+      output_image_log[index] = p->value_logical("image_log",false);
 
       output_image_mesh_color[index] = 
-	parameters->value_string("image_mesh_color","level");
+	p->value_string("image_mesh_color","level");
 
       output_image_size[index].resize(2);
       output_image_size[index][0] = 
-	parameters->list_value_integer(0,"image_size",0);
+	p->list_value_integer(0,"image_size",0);
       output_image_size[index][1] = 
-	parameters->list_value_integer(1,"image_size",0);
+	p->list_value_integer(1,"image_size",0);
 
       output_image_reduce_type[index] = 
-	parameters->value_string("image_reduce_type","sum");
+	p->value_string("image_reduce_type","sum");
 
       output_image_face_rank[index] = 
-	parameters->value_integer("image_face_rank",3);
+	p->value_integer("image_face_rank",3);
 
       output_image_ghost[index] = 
-	parameters->value_logical("image_ghost",false);
+	p->value_logical("image_ghost",false);
 
       output_image_specify_bounds[index] =
-	parameters->value_logical("image_specify_bounds",false);
+	p->value_logical("image_specify_bounds",false);
       output_image_min[index] =
-	parameters->value_float("image_min",0.0);
+	p->value_float("image_min",0.0);
       output_image_max[index] =
-	parameters->value_float("image_max",0.0);
+	p->value_float("image_max",0.0);
 
-      if (parameters->type("colormap") == parameter_list) {
-	int size = parameters->list_length("colormap");
+      if (p->type("colormap") == parameter_list) {
+	int size = p->list_length("colormap");
 	output_image_colormap[index].resize(size);
 	for (int i=0; i<size; i++) {
 	  output_image_colormap[index][i] = 
-	    parameters->list_value_float(i,"colormap",0.0);
+	    p->list_value_float(i,"colormap",0.0);
 	}
       }
 
@@ -692,33 +681,33 @@ void Config::read_output_ (Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Config::read_performance_ (Parameters * parameters) throw()
+void Config::read_performance_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Performance
   //--------------------------------------------------
 
-  if (parameters->type("Performance:papi:counters") == parameter_list) {
-    int length = parameters->list_length("Performance:papi:counters");
+  if (p->type("Performance:papi:counters") == parameter_list) {
+    int length = p->list_length("Performance:papi:counters");
     performance_papi_counters.resize(length);
     for (int i=0; i<length; i++) {
-      performance_papi_counters[i] = parameters->list_value_string
+      performance_papi_counters[i] = p->list_value_string
 	(i,"Performance:papi:counters","");
       TRACE2("performance_papi_counters[%d] = %s",
 	     i,performance_papi_counters[i].c_str());
     }
   }
 
-  performance_name     = parameters->value_string ("Performance:name","");
-  performance_stride   = parameters->value_integer("Performance:stride",1);
-  performance_warnings = parameters->value_logical("Performance:warnings",true);
+  performance_name     = p->value_string ("Performance:name","");
+  performance_stride   = p->value_integer("Performance:stride",1);
+  performance_warnings = p->value_logical("Performance:warnings",true);
 
   //
-  // parameters->group_set(0,"Performance");
-  // parameters->group_set(1,"projections");
+  // p->group_set(0,"Performance");
+  // p->group_set(1,"projections");
 
-  // parameters->group_set(2,"on");
-  // read_schedule_(parameters,"on",
+  // p->group_set(2,"on");
+  // read_schedule_(p,"on",
   // 		 &projections_schedule_on_type,
   // 		 &projections_schedule_on_var,
   // 		 &projections_schedule_on_start,
@@ -727,8 +716,8 @@ void Config::read_performance_ (Parameters * parameters) throw()
   // 		 projections_schedule_on_list);
 
   
-  // parameters->group_set(2,"off");
-  // read_schedule_(parameters,"off",
+  // p->group_set(2,"off");
+  // read_schedule_(p,"off",
   // 		 &projections_schedule_off_type,
   // 		 &projections_schedule_off_var,
   // 		 &projections_schedule_off_start,
@@ -740,31 +729,31 @@ void Config::read_performance_ (Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Config::read_stopping_ (Parameters * parameters) throw()
+void Config::read_stopping_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Stopping
   //--------------------------------------------------
 
-  stopping_cycle = parameters->value_integer
+  stopping_cycle = p->value_integer
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
-  stopping_time  = parameters->value_float
+  stopping_time  = p->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
-  stopping_interval = parameters->value_integer
+  stopping_interval = p->value_integer
     ( "Stopping:interval" , 1);
 
 }
 
 //----------------------------------------------------------------------
 
-void Config::read_testing_ (Parameters * parameters) throw()
+void Config::read_testing_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Testing
   //--------------------------------------------------
 
-  testing_cycle_final = parameters->value_integer("Testing:cycle_final",0);
-  testing_time_final  = parameters->value_float  ("Testing:time_final", 0.0);
+  testing_cycle_final = p->value_integer("Testing:cycle_final",0);
+  testing_time_final  = p->value_float  ("Testing:time_final", 0.0);
 
 }
 

@@ -26,7 +26,7 @@ Field {
    ghosts  = 3;
    courant = 0.8;
 
-   fields = [ 
+   list = [ 
       "density",
       "velocity_x",
       "velocity_y",

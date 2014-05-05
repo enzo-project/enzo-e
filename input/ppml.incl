@@ -27,7 +27,7 @@
 
       ghosts = 3;
 
-      fields = [
+      list = [
          "density",
 	 "velox",
          "veloy",
