@@ -15,10 +15,11 @@ f90  = 'ftn'
 libpath_fortran = ''
 libs_fortran    = ['gfortran']
 
+home_path = os.environ["HOME"]
 
-charm_path = '/u/sciteam/bordner/Charm/charm'
-papi_path  = '/u/sciteam/bordner'
-png_path  = '/u/sciteam/bordner'
+charm_path = home + '/Charm/charm'
+papi_path  = home
+png_path   = home
 hdf5_path  = os.environ["CRAY_HDF5_DIR"]
 
 if (type == "mpi"):

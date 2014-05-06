@@ -1,3 +1,5 @@
+import os 
+
 f90 = {}
 cxx = {}
 cc  = {}
@@ -14,7 +16,9 @@ f90  = 'gfortran'
 libpath_fortran = ''
 libs_fortran    = ['gfortran']
 
-charm_path = '/home/jobordner/public/charm/charm'
+home = os.environ['HOME']
+
+charm_path = home + '/Charm/charm'
 
 papi_path  = ''
 hdf5_path  = '/opt/hdf5/gnu'

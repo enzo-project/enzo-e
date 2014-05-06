@@ -1,3 +1,5 @@
+import os
+
 f90 = {}
 cxx = {}
 cc  = {}
@@ -13,7 +15,9 @@ f90  = 'ifort'
 libpath_fortran = ''
 libs_fortran    = ['imf','ifcore','ifport','stdc++']
 
-charm_path = '/home/jobordner/Charm/charm'
+home = os.environ['HOME']
+
+charm_path = home + '/Charm/charm'
 papi_path = ''
 hdf5_path = '/opt/hdf5/intel'
 
@@ -23,6 +27,6 @@ hdf5_path = '/opt/hdf5/intel'
 # Below are updates for TAU
 #---------
 
-TAU_PATH = '/home/jobordner/x86_64/bin/'
+TAU_PATH = home + '/x86_64/bin'
 cc['mpi']     = TAU_PATH + 'tau_cc.sh'
 cxx['mpi']    = TAU_PATH + 'tau_cxx.sh'

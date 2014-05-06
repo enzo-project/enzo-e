@@ -1,3 +1,5 @@
+import os
+
 f90 = {}
 cxx = {}
 cc  = {}
@@ -10,10 +12,12 @@ flags_link  = ''
 cc   = 'icc'
 f90  = 'ifort'
 
-libpath_fortran = '/home/jobordner/lib'
+home = os.environ['HOME']
+
+libpath_fortran = home + '/lib'
 libs_fortran    = ['imf','ifcore','ifport','stdc++','lmpe', 'mpe']
 
 
-charm_path = '/home/jobordner/public/charm/charm'
+charm_path = home + '/Charm/charm'
 papi_path = ''
 hdf5_path = '/opt/hdf5/intel'

@@ -1,3 +1,5 @@
+import os
+
 f90 = {}
 cxx = {}
 cc  = {}
@@ -15,7 +17,7 @@ f90  = 'ifort'
 libpath_fortran = ''
 libs_fortran    = ['imf','ifcore','ifport','stdc++','intlc']
 
-charm_path = '/home/ux452912/Charm/charm'
+charm_path = home + '/Charm/charm'
 
-papi_path = '/home/ux452912'
+papi_path = home
 hdf5_path = '/opt/hdf5/intel'
