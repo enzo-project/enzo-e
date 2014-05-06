@@ -51,7 +51,7 @@ Initial {
 }
 
 Output { 
-   file_groups = ["cycle_step","mesh"];
+   list = ["cycle_step","mesh"];
 
    cycle_step {  
       name = ["boundary_masked-2d-%04d.png","cycle"]; 

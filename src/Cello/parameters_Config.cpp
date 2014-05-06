@@ -101,34 +101,34 @@ void Config::pup (PUP::er &p)
 
   // Output
 
-  p | num_file_groups;
-  p | output_file_groups;
-  PUParray (p,output_type,MAX_FILE_GROUPS);
-  PUParray (p,output_image_axis,MAX_FILE_GROUPS);
-  PUParray (p,output_image_block_size,MAX_FILE_GROUPS);
-  PUParray (p,output_image_colormap,MAX_FILE_GROUPS);
-  PUParray (p,output_image_type,MAX_FILE_GROUPS);
-  PUParray (p,output_image_log,MAX_FILE_GROUPS);
-  PUParray (p,output_image_mesh_color,MAX_FILE_GROUPS);
-  PUParray (p,output_image_size,MAX_FILE_GROUPS);
-  PUParray (p,output_image_reduce_type,MAX_FILE_GROUPS);
-  PUParray (p,output_image_ghost,MAX_FILE_GROUPS);
-  PUParray (p,output_image_face_rank,MAX_FILE_GROUPS);
-  PUParray (p,output_image_specify_bounds,MAX_FILE_GROUPS);
-  PUParray (p,output_image_min,MAX_FILE_GROUPS);
-  PUParray (p,output_image_max,MAX_FILE_GROUPS);
-  PUParray (p,output_schedule_index,MAX_FILE_GROUPS);
-  PUParray (p,output_field_list,MAX_FILE_GROUPS);
-  PUParray (p,output_stride,MAX_FILE_GROUPS);
-  PUParray (p,output_name,MAX_FILE_GROUPS);
-  PUParray (p,output_dir,MAX_FILE_GROUPS);
+  p | num_output;
+  p | output_list;
+  PUParray (p,output_type,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_axis,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_block_size,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_colormap,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_type,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_log,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_mesh_color,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_size,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_reduce_type,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_ghost,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_face_rank,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_specify_bounds,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_min,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_image_max,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_schedule_index,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_field_list,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_stride,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_name,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_dir,MAX_OUTPUT_GROUPS);
   p | index_schedule_;
-  PUParray (p,output_schedule_type,MAX_FILE_GROUPS);
-  PUParray (p,output_schedule_var,MAX_FILE_GROUPS);
-  PUParray (p,output_schedule_start,MAX_FILE_GROUPS);
-  PUParray (p,output_schedule_stop,MAX_FILE_GROUPS);
-  PUParray (p,output_schedule_step,MAX_FILE_GROUPS);
-  PUParray (p,output_schedule_list,MAX_FILE_GROUPS);
+  PUParray (p,output_schedule_type,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_schedule_var,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_schedule_start,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_schedule_stop,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_schedule_step,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_schedule_list,MAX_OUTPUT_GROUPS);
 
   // Performance
 
@@ -366,7 +366,7 @@ void Config::read_initial_ (Parameters * p) throw()
   //--------------------------------------------------
 
   TRACE("Parameters: Initial");
-  initial_type  = p->value_string("Initial:type","value");
+  initial_type  = p->value_string ("Initial:type","value");
   initial_cycle = p->value_integer("Initial:cycle",0);
   initial_time  = p->value_float  ("Initial:time",0.0);
 
@@ -538,31 +538,31 @@ void Config::read_output_ (Parameters * p) throw()
 
   p->group_set(0,"Output");
 
-  num_file_groups = p->list_length("file_groups");
+  num_output = p->list_length("list");
 
-  ASSERT2 ("Config::read","Number of file groups %d exceeds MAX_FILE_GROUPS %d",
-	   num_file_groups, MAX_FILE_GROUPS, num_file_groups <= MAX_FILE_GROUPS);
+  ASSERT2 ("Config::read","Number of file groups %d exceeds MAX_OUTPUT_GROUPS %d",
+	   num_output, MAX_OUTPUT_GROUPS, num_output <= MAX_OUTPUT_GROUPS);
 
   p->group_set(0,"Output");
 
 
-  output_file_groups.resize(num_file_groups);
+  output_list.resize(num_output);
 
-  for (int index=0; index<num_file_groups; index++) {
+  for (int index=0; index<num_output; index++) {
 
     TRACE1 ("index = %d",index);
 
-    output_file_groups[index] = 
-      p->list_value_string (index,"Output:file_groups","unknown");
+    output_list[index] = 
+      p->list_value_string (index,"Output:list","unknown");
 
-    p->group_set(1,output_file_groups[index]);
+    p->group_set(1,output_list[index]);
 
     output_type[index] = p->value_string("type","unknown");
 
     if (output_type[index] == "unknown") {
       ERROR1("Config::read",
 	     "Output:%s:type parameter is undefined",
-	     output_file_groups[index].c_str());
+	     output_list[index].c_str());
     }
 
     output_stride[index] = p->value_integer("stride",0);
@@ -605,13 +605,13 @@ void Config::read_output_ (Parameters * p) throw()
 
     // ASSERT1("Config::read",
     // 	   "'schedule' is not defined for output file group %s",
-    // 	    output_file_groups[index].c_str(),
+    // 	    output_list[index].c_str(),
     // 	    (p->type("schedule") != parameter_unknown));
 
 
     p->group_push("schedule");
     output_schedule_index[index] = 
-      read_schedule_(p, output_file_groups[index]);
+      read_schedule_(p, output_list[index]);
     p->group_pop();
 
     // Image 
@@ -629,7 +629,7 @@ void Config::read_output_ (Parameters * p) throw()
 	std::string axis = p->value_string("axis");
 	ASSERT2("Problem::initialize_output",
 		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
-		output_file_groups[index].c_str(), axis.c_str(),
+		output_list[index].c_str(), axis.c_str(),
 		axis=="x" || axis=="y" || axis=="z");
       } 
 

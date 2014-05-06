@@ -7,7 +7,7 @@ Mesh { root_blocks    = [2,4]; }
 
 Output {
 
-    file_groups = ["stride"];
+    list = ["stride"];
 
     stride {
        type = "data";

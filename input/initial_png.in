@@ -91,7 +91,7 @@ Testing {
 
 Output { 
 
-   file_groups = [ "cycle_group" ];
+   list = [ "cycle_group" ];
 
    cycle_group {
       field_list = [ "density" ];

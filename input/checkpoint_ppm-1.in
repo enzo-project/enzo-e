@@ -7,7 +7,7 @@ Mesh { root_blocks    = [1,1]; }
 
 Output {
 
-  file_groups = ["density","checkpoint"];
+  list = ["density","checkpoint"];
 
   density {
      name = ["checkpoint_ppm-1-%06d.png", "cycle"];

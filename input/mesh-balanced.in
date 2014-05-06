@@ -58,8 +58,8 @@ Testing  { cycle_final = 100;
 
 Output {
 
-   file_groups = ["mesh","de","te","vx","vy"]; 
-#   file_groups = []; 
+   list = ["mesh","de","te","vx","vy"]; 
+#   list = []; 
 
       de {
 	type     = "image";

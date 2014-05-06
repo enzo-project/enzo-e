@@ -13,7 +13,7 @@
 #define MAX_FIELDS      30
 
 /* Maximum number of output file groups specified in the configuration file */
-#define MAX_FILE_GROUPS 10
+#define MAX_OUTPUT_GROUPS 10
 
 /* Maximum number of schedules */
 #define MAX_SCHEDULE 10
@@ -142,28 +142,28 @@ public: // attributes
 
   // Output
 
-  int                        num_file_groups;
-  std::vector<std::string>   output_file_groups;
-  std::string                output_type           [MAX_FILE_GROUPS];
+  int                        num_output;
+  std::vector<std::string>   output_list;
+  std::string                output_type           [MAX_OUTPUT_GROUPS];
 
-  std::string                output_image_axis           [MAX_FILE_GROUPS];
-  int                        output_image_block_size     [MAX_FILE_GROUPS];
-  std::vector<double>        output_image_colormap       [MAX_FILE_GROUPS];
-  std::string                output_image_type           [MAX_FILE_GROUPS];
-  bool                       output_image_log            [MAX_FILE_GROUPS];
-  std::string                output_image_mesh_color     [MAX_FILE_GROUPS];
-  std::vector<int>           output_image_size           [MAX_FILE_GROUPS];
-  std::string                output_image_reduce_type    [MAX_FILE_GROUPS];
-  bool                       output_image_ghost          [MAX_FILE_GROUPS];
-  int                        output_image_face_rank      [MAX_FILE_GROUPS];
-  bool                       output_image_specify_bounds [MAX_FILE_GROUPS];
-  double                     output_image_min            [MAX_FILE_GROUPS];
-  double                     output_image_max            [MAX_FILE_GROUPS];
-  int                        output_schedule_index [MAX_FILE_GROUPS];
-  std::vector<std::string>   output_dir            [MAX_FILE_GROUPS];
-  int                        output_stride         [MAX_FILE_GROUPS];
-  std::vector<std::string>   output_field_list     [MAX_FILE_GROUPS];
-  std::vector<std::string>   output_name           [MAX_FILE_GROUPS];
+  std::string                output_image_axis           [MAX_OUTPUT_GROUPS];
+  int                        output_image_block_size     [MAX_OUTPUT_GROUPS];
+  std::vector<double>        output_image_colormap       [MAX_OUTPUT_GROUPS];
+  std::string                output_image_type           [MAX_OUTPUT_GROUPS];
+  bool                       output_image_log            [MAX_OUTPUT_GROUPS];
+  std::string                output_image_mesh_color     [MAX_OUTPUT_GROUPS];
+  std::vector<int>           output_image_size           [MAX_OUTPUT_GROUPS];
+  std::string                output_image_reduce_type    [MAX_OUTPUT_GROUPS];
+  bool                       output_image_ghost          [MAX_OUTPUT_GROUPS];
+  int                        output_image_face_rank      [MAX_OUTPUT_GROUPS];
+  bool                       output_image_specify_bounds [MAX_OUTPUT_GROUPS];
+  double                     output_image_min            [MAX_OUTPUT_GROUPS];
+  double                     output_image_max            [MAX_OUTPUT_GROUPS];
+  int                        output_schedule_index [MAX_OUTPUT_GROUPS];
+  std::vector<std::string>   output_dir            [MAX_OUTPUT_GROUPS];
+  int                        output_stride         [MAX_OUTPUT_GROUPS];
+  std::vector<std::string>   output_field_list     [MAX_OUTPUT_GROUPS];
+  std::vector<std::string>   output_name           [MAX_OUTPUT_GROUPS];
   int                        index_schedule_;
   std::string                output_schedule_type  [MAX_SCHEDULE];
   std::string                output_schedule_var   [MAX_SCHEDULE];

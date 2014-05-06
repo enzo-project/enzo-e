@@ -83,7 +83,7 @@
 
    Output { 
 
-      file_groups = ["density","data"];
+      list = ["density","data"];
 
       density {
         name = ["density-%0d.png","cycle"];

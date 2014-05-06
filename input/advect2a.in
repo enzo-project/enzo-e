@@ -33,7 +33,7 @@ Initial {
    internal_energy { value = [0.0]; }
 }
 
-Output { file_groups = ["de","te","mesh"]; 
+Output { list = ["de","te","mesh"]; 
    de {
           name = ["advect2a-de-%03d.png", "cycle"]; 
       include "schedule_cycle_10.incl"

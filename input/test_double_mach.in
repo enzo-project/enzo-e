@@ -124,7 +124,7 @@
 
    Output { 
 
-   file_groups = ["de_png","mesh"];
+   list = ["de_png","mesh"];
 
 
     mesh {

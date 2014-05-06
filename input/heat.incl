@@ -75,7 +75,7 @@
 
    Output { 
 
-      file_groups = ["temperature"];
+      list = ["temperature"];
 
       temperature {
         field_list = ["temperature"];

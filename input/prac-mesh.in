@@ -39,7 +39,7 @@ Field {
 }
 
 Output { 
-   file_groups = ["mesh","density"]; 
+   list = ["mesh","density"]; 
 
   density { name = ["prac-de-%04d.png", "cycle"]; 
 	include "input/schedule_cycle_1.incl"

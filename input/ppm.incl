@@ -86,7 +86,7 @@
 
    Output { 
 
-      file_groups = ["density","data"];
+      list = ["density","data"];
 
       density {
         field_list = ["density"];

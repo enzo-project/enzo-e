@@ -68,7 +68,7 @@ include "input/domain-2d-01.incl"
 
    Output { 
 
-      file_groups = ["cycle_step"];
+      list = ["cycle_step"];
 
       cycle_step {
          field_list = ["density"];

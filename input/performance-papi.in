@@ -5,7 +5,7 @@ include "input/ppm.incl"
 
 Mesh { root_blocks    = [2,4]; }
 
-Output { file_groups = [] }
+Output { list = [] }
 Stopping { cycle = 10; }
 
 Performance {

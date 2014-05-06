@@ -34,7 +34,7 @@ Field {
 
 Output {
 
-    file_groups = ["de", "dm", "mesh", "te", "vx", "vy"];
+    list = ["de", "dm", "mesh", "te", "vx", "vy"];
 
     de {
        field_list = ["density"];

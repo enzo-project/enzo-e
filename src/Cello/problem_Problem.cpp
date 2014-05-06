@@ -197,9 +197,8 @@ void Problem::initialize_output
  const Factory * factory) throw()
 {
 
-  for (int index=0; index < config->num_file_groups; index++) {
+  for (int index=0; index < config->num_output; index++) {
 
-    std::string file_group = config->output_file_groups [index];
     std::string type       = config->output_type[index];
 
     Output * output = create_output_ 
@@ -208,7 +207,7 @@ void Problem::initialize_output
     if (output == NULL) {
       ERROR2("Problem::initialize_output",
 	     "Unknown parameter type Output:%s:type = %s",
-	     file_group.c_str(),type.c_str());
+	     config->output_list[index].c_str(),type.c_str());
     }
 
     if (config->output_name[index].size() > 0) {

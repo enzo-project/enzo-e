@@ -101,7 +101,7 @@ Testing {
 
 Output { 
 
-   file_groups = [ "de", "mesh" ];
+   list = [ "de", "mesh" ];
 
    de {
       field_list = [ "density" ];

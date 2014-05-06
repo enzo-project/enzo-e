@@ -134,7 +134,7 @@
 
    Output { 
 
-      file_groups = ["d_x","d_y","d_z","dump"];
+      list = ["d_x","d_y","d_z","dump"];
 
       dump {
         field_list = ["density"];

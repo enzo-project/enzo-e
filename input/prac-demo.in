@@ -13,7 +13,7 @@ Mesh { root_blocks    = [16,16];
                                 1.0 / (0.4 * 1.0)  ]; };
   }
 
-Output { file_groups = ["density"]; }
+Output { list = ["density"]; }
 Output {
     density {     
         name = ["prac-demo-%06d.png", "cycle"]; 

@@ -21,8 +21,8 @@ Initial {
    internal_energy { value = [0.0]; }
 }
 
-Output { file_groups = ["de","te","mesh"]; 
-Output { file_groups = ["de","te","mesh"]; 
+Output { list = ["de","te","mesh"]; 
+Output { list = ["de","te","mesh"]; 
    de {
           name = ["advect2u-de-%03d.png", "cycle"]; 
       include "schedule_cycle_10.incl"

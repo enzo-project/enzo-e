@@ -21,7 +21,7 @@ Initial {
 Boundary { type = "periodic"; }
 
 Output {
-     file_groups = ["dm","mesh"];
+     list = ["dm","mesh"];
       dm {
            name = ["enzo-dm-%05d.png", "cycle"]; 
            include "input/schedule_cycle_10.incl"

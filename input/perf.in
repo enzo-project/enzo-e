@@ -9,4 +9,4 @@ Stopping {
    cycle = 10;
 }
 
-Output {file_groups = []; }
+Output {list = []; }
