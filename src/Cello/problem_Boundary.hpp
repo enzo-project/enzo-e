@@ -60,6 +60,8 @@ public: // virtual functions
 			face_enum face = face_all,
 			axis_enum axis = axis_all) const throw() = 0;
 
+  virtual bool is_periodic() const throw() = 0;
+
 protected: // protected functions
 
   /// Return whether the boundary condition applies for the given axis and face

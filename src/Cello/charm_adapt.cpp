@@ -430,7 +430,6 @@ void CommBlock::p_adapt_recv_neighbor_level
 	    set_child_face_level_new(jc3,jf3,level_face_new);
 	  }
 	}
-       
       }
 
     } else if (level == level_face + 1) {

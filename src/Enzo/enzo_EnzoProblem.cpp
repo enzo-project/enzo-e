@@ -59,8 +59,6 @@ Boundary * EnzoProblem::create_boundary_
     boundary = new EnzoBoundary (axis,face,mask,boundary_type_reflecting);
   } else if (type == "outflow") {
     boundary = new EnzoBoundary (axis,face,mask,boundary_type_outflow);
-  } else if (type == "periodic") {
-    boundary = new EnzoBoundary (axis,face,mask,boundary_type_periodic);
   } else {
     boundary = Problem::create_boundary_(type,index,config,parameters);
   }

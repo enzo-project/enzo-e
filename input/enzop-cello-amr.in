@@ -4,8 +4,8 @@
 include "input/adapt.incl"
 Stopping { cycle = 1000; }
 Mesh    { 
-   root_size   = [32,32];
-   max_level   = 6; 
+   root_size   = [16,16];
+   max_level   = 7; 
 }
 
 Initial {
@@ -21,30 +21,24 @@ Initial {
 Boundary { type = "periodic"; }
 
 Output {
-     list = ["dm","mesh"];
-      dm {
-           name = ["enzo-dm-%05d.png", "cycle"]; 
-           include "input/schedule_cycle_10.incl"
-           image_reduce_type = "max";
-	   image_type = "data+mesh";
-           image_size = [2049,2049];
-          };
+     list = ["de","mesh"];
       de {
            name = ["enzo-de-%05d.png", "cycle"]; 
            include "input/schedule_cycle_10.incl"
            image_reduce_type = "max";
 	   image_type = "data";
-           image_size = [2049,2049];
+           image_size = [1024,1024];
           };
       mesh { name = ["enzo-mesh-%05d.png", "cycle"];
            include "input/schedule_cycle_10.incl"
 	   image_type = "mesh";
+	   image_size = [1025,1025];
        };
 
 }
 Mesh {
    slope {
-      max_coarsen = 100.0;
-      min_refine  = 200.0;
+      max_coarsen = 5.0;
+      min_refine  = 20.0;
    }
 }

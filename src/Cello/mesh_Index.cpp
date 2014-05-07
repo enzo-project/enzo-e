@@ -259,15 +259,12 @@ void Index::clean ()
 void Index::set_array(int ix, int iy, int iz)
 { 
   // right-bits = array
-#ifdef CHECK_BOUNDS
-  if ( !((0 <= ix && ix < INDEX_MAX_ARRAY_INDEX) ||
-	 (0 <= iy && iy < INDEX_MAX_ARRAY_INDEX) ||
-	 (0 <= iz && iz < INDEX_MAX_ARRAY_INDEX)) ) {
-    printf ("%s:%d  ERROR: out of range (%d %d %d)\n",
-	    __FILE__,__LINE__,ix,iy,iz);
-    //      return -1;
-  }
-#endif
+  ASSERT4 ("Index::set_array",
+	   "Array size (%d %d %d) out of range (maximum %d)",
+	   ix,iy,iz,INDEX_MAX_ARRAY_INDEX,
+	   ((0 <= ix && ix < INDEX_MAX_ARRAY_INDEX) &&
+	    (0 <= iy && iy < INDEX_MAX_ARRAY_INDEX) &&
+	    (0 <= iz && iz < INDEX_MAX_ARRAY_INDEX)));
   a_[0].array = ix;
   a_[1].array = iy;
   a_[2].array = iz;

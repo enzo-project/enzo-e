@@ -389,6 +389,8 @@ Boundary * Problem::create_boundary_
 
     return new BoundaryValue (axis,face,value,
 			      config->boundary_field_list[index]);
+  } else if (type == "periodic") {
+    return new BoundaryPeriodic;
   }
   return NULL;
 }

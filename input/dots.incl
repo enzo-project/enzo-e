@@ -36,8 +36,6 @@
 
    }
 
-   Timestep { type = "ppm"; }
-
    Enzo {
 
       gamma = 1.4;

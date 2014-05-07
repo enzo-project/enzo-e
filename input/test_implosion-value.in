@@ -3,7 +3,80 @@
 #
 # This file is used for developing the Cello / Enzo-P input grammar and syntax
 
-   include "input/problem_implosion.incl"
+   Domain { 
+      lower = [0.0, 0.0];
+      upper = [0.3, 0.3];
+   } 
+
+   Field {
+
+     
+     list = [
+        "density",   "velocity_x",  "velocity_y",
+        "total_energy", "internal_energy"
+      ] ;
+
+      ghosts = 4;
+
+      courant   = 0.8;
+
+   }
+
+
+   Mesh { 
+      root_rank = 2;
+      root_size = [50,50];
+      root_blocks = [2,2];
+      max_level = 3;
+      list = ["SLOPE"];
+      SLOPE {
+         type = "slope";
+	 field_list = ["density"];
+	 max_refine  = 5.0;
+	 min_coarsen = 2.0
+      }
+   }
+
+   Method {
+
+      list = ["ppm"];
+
+   }
+
+   Enzo {
+
+      gamma = 1.4;
+
+      ppm {
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+         dual_energy = false;
+     }
+   }
+
+# Initial conditions deferred to test_implosion-code.in or
+# test_implosion-value.in
+
+   Boundary { type = "reflecting" }
+
+   Stopping {
+      time  = 2.5;
+      cycle = 100000;
+   }
+
+   Output { 
+
+      list = ["cycle_step"];
+
+      cycle_step {
+         field_list = ["density"];
+         type     = "image";
+         name     = ["implosion-d-%05d.png","cycle"];
+         include "input/schedule_cycle_10.incl"
+      }
+   }
+
 
    Initial {
        density       { value = [ 0.125,                x + y < 0.1517, 

@@ -53,6 +53,8 @@ public: // virtual functions
 			face_enum face = face_all,
 			axis_enum axis = axis_all) const throw();
 
+  bool is_periodic() const throw() { return false; }
+
 protected: // functions
 
   template <class T>

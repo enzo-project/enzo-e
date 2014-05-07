@@ -72,12 +72,6 @@ void EnzoBoundary::enforce
     case boundary_type_outflow:
       enforce_outflow_   (field_descr, field_block,comm_block,face,axis);
       break;
-    case boundary_type_inflow:
-      enforce_inflow_    (field_descr, field_block,comm_block,face,axis);
-      break;
-    case boundary_type_periodic:
-      // Periodic handled by ghost refresh
-      break;
     default:
       ERROR("EnzoBoundary::enforce",
 	    "Undefined boundary type");
@@ -448,20 +442,6 @@ void EnzoBoundary::enforce_outflow_precision_
     ERROR("EnzoBoundary::enforce_outflow_precision_",
 	  "Cannot be called with face_all");
   }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBoundary::enforce_inflow_
-(
- const FieldDescr * field_descr,
- FieldBlock       * field_block,
- CommBlock        * comm_block,
- face_enum face,
- axis_enum axis
- ) const throw()
-{
-  INCOMPLETE("EnzoBoundary::enforce_inflow");
 }
 
 //----------------------------------------------------------------------

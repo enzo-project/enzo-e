@@ -36,18 +36,18 @@
 #     The shock is initially set up to be inclined at an angle of 60º to
 #     the x-axis, and has a Mach number of 10.
 # 
-#     Therefore, the initial density is 8.0 for x < x0 + y(1/31/2) and
-#     is 1.4 for x ≥ x0 + y(1/31/2)
+#     Therefore, the initial density is 8.0 for x < x0 + y(1.0/sqrt(3.0)) and
+#     is 1.4 for x ≥ x0 + y(1.0/sqrt(3.0))
 # 
 # Initial pressure
 # 
-#     P = 116.5 for x < x0 + y(1/31/2), P = 1.0 for x ≥ x0 + y(1/31/2)
+#     P = 116.5 for x < x0 + y(1.0/sqrt(3.0)), P = 1.0 for x ≥ x0 + y(1.0/sqrt(3.0))
 # 
 # Initial velocity
 # 
-#     vx = 8.25 cos(30º) for x < x0 + y(1/31/2) 
-#     vy = -8.25 sin(30º) for x < x0 + y(1/31/2) 
-#     All velocities are zero for x ≥ x0 + y(1/31/2) 
+#     vx = 8.25 cos(30º) for x < x0 + y(1.0/sqrt(3.0)) 
+#     vy = -8.25 sin(30º) for x < x0 + y(1.0/sqrt(3.0)) 
+#     All velocities are zero for x ≥ x0 + y(1.0/sqrt(3.0)) 
 # 
 # MHD Components
 # 
@@ -73,17 +73,26 @@
 
    # The computational mesh is a single uniform grid
 
-   Mesh { 
+   Mesh {
       root_rank = 2;
+      root_size = [96,24];
       root_blocks = [4,1];
-      root_size = [1200,300];
+      max_level = 5; 
+      balance = true;
+      list = ["SLOPE"];
+      SLOPE {
+         type = "slope";
+         field_list = ["density"];
+         min_refine  = 5.0;
+         max_coarsen = 2.0;
+      }
    }
+
+   Stopping { cycle = 10000;   } 
 
    Field {
 
-      ghosts = 3;
-
-      refresh { rank = 0;  };
+      ghosts = 4;  # required for ProlongLinear :-/
 
       list = [
 	"density",	
@@ -105,8 +114,6 @@
       list = ["ppm"];
    }
 
-   Timestep { type = "ppm"; }
-
    Enzo {
 
       gamma = 1.4;
@@ -119,84 +126,120 @@
      }
    }
 
-   Stopping { cycle = 1000;   } 
-
 
    Output { 
 
-   list = ["de_png","mesh"];
+      list = ["de_png","mesh"];
 
 
-    mesh {
-	type     = "image";
-        name = ["double-mach-mesh-%06d.png", "cycle"];
-	image_type  = "mesh";
-	image_reduce_type = "max";
-	image_size = [1025,257];
-	include "input/schedule_cycle_25.incl"
-        image_specify_bounds = true;
-	image_min = 0.0;
-	image_max = 6.0;
-        include "input/colormap_rainbow.incl"
+       mesh {
+           type     = "image";
+           name = ["doublemach-mesh-%04d.png", "count"];
+           image_type  = "mesh";
+           image_reduce_type = "max";
+           image_size = [1025,257];
+           include "input/schedule_cycle_25.incl"
+           image_specify_bounds = true;
+           image_min = 0.0;
+           image_max = 6.0;
+           include "input/colormap_rainbow.incl"
+         };
+
+         de_png {
+           name = ["doublemach-de-%04d.png", "count"]; 
+           field_list = ["density"];
+           image_size = [1024,256];
+           type     = "image";
+           include "input/schedule_cycle_25.incl"
+           include "input/colormap_blackbody.incl";
+         };
+      }
+
+   Initial {
+   
+      density {
+           value = [8.0, 
+                          (x <= 0.16667 + 0.57735*y), 
+                    1.4];
       };
-
-      de_png {
-        name = ["double-mach-de-%06d.png", "cycle"]; 
-        field_list = ["density"];
-	type     = "image";
-	include "input/schedule_cycle_25.incl"
-        include "input/colormap_blackbody.incl";
+      velocity_x {
+         value = [ 8.25*0.8660253,
+                          (x <= 0.16667 + 0.57735*y),
+                   0.0 ]; 
       };
-
-      te_png {
-        name = ["double-mach-te-%06d.png", "cycle"]; 
-        field_list = ["total_energy"];
-	type     = "image";
-	include "input/schedule_cycle_25.incl"
-        include "input/colormap_blackbody.incl";
+      velocity_y {
+         value = [-8.25*0.5,
+                          (x <= 0.16667 + 0.57735*y),
+                   0.0]; 
       };
-      vx_png {
-        name = ["double-mach-vx-%06d.png", "cycle"]; 
-        field_list = ["total_energy"];
-	type     = "image";
-	include "input/schedule_cycle_25.incl"
-        include "input/colormap_blackbody.incl";
+      total_energy {
+         value = [116.5 / (0.4 * 8.0) + 34.03125,
+                          (x <= 0.16667 + 0.57735*y), 
+                    1.0 / (0.4 * 1.4)]; 
       };
-      vy_png {
-        name = ["double-mach-vy-%06d.png", "cycle"]; 
-        field_list = ["total_energy"];
-	type     = "image";
-	include "input/schedule_cycle_25.incl"
-        include "input/colormap_blackbody.incl";
-      };
-
-      de_h5 {
-        name = ["double-mach-de-%06d.h5", "cycle"]; 
-        field_list = ["density"];
-	type     = "data";
-	include "input/schedule_cycle_25.incl"
-      };
-
-      te_h5 {
-        name = ["double-mach-te-%06d.h5", "cycle"]; 
-        field_list = ["total_energy"];
-	type     = "data";
-	include "input/schedule_cycle_25.incl"
-      };
-
-
    }
 
-include "input/problem_double_mach.incl"
+Boundary {
 
-include "input/adapt_slope.incl"
-Mesh { SLOPE { min_refine = 5.0; }}
-Mesh {
-   root_size = [96,24];
-   max_level = 5; 
-#   root_size = [1200,300];
-#   root_size = [800,200];
-#   max_level = 0
+   list = [
+           "OUT",
+           "REFLECT",
+           "DENSITY",
+           "VELOCITY_X",
+           "VELOCITY_Y",
+           "TOTAL_ENERGY"
+         ];
+
+   OUT {
+      type = "outflow";
+      mask = [ (x >= 4.0) || 
+               (y >= 1.0 && (x >= 0.744017 + 11.547* t))];
+   };
+   REFLECT {
+      type = "reflecting";
+      axis = "y";
+      face = "lower";
+      mask = (x >= 0.166667);
+   };
+
+   DENSITY {
+      type = "inflow";
+      field_list = "density";
+      value = [ 8.0, 
+                 ((x <= 0.166667) && (y <= 0.0) ) ||
+                  (x <= 0.0) ||
+                  ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
+              ];
+    };
+
+   VELOCITY_X {
+      type = "inflow";
+      field_list = "velocity_x";
+      value = [ 8.25*0.8660253,
+                 ((x <= 0.166667) && (y <= 0.0) ) ||
+                  (x <= 0.0) ||
+                  ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
+               ];
+    };
+
+   VELOCITY_Y {
+      type = "inflow";
+      field_list = "velocity_y";
+      value = [ -8.25*0.5,
+                 ((x <= 0.166667) && (y <= 0.0) ) ||
+                  (x <= 0.0) ||
+                  ((x < 0.744017 + 11.547*t) && (y >= 1.0))
+               ];
+    };
+
+   TOTAL_ENERGY {
+      type = "inflow";
+      field_list = "total_energy";
+      value = [ 116.5 / (0.4 * 8.0) + 34.03125,
+                 ( (x <= 0.166667) && (y <= 0.0) ) ||
+                   (x <= 0.0) ||
+                  ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
+               ];
+    };
 }
-
 

@@ -14,10 +14,6 @@
       root_size = [32,32,32];
    }
 
-   Timestep {
-      type = "ppml";
-   }
-
    # Field parameters include those concerning fields as a group, as
    # well as individual fields
    

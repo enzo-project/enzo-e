@@ -15,11 +15,7 @@
 enum boundary_enum {
   boundary_type_undefined,   // 0 is an undefined boundary
   boundary_type_reflecting,
-  boundary_type_outflow,
-  boundary_type_inflow,
-  boundary_type_periodic,
-  boundary_type_file, // boundary conditions to be read from a file
-  boundary_type_code  // boundary conditions to be computed from code
+  boundary_type_outflow
 };
 typedef int boundary_type;
 
@@ -53,6 +49,8 @@ public: // virtual functions
 			 CommBlock * block,
 			 face_enum face = face_all,
 			 axis_enum axis = axis_all) const throw(); 
+
+  bool is_periodic() const throw() { return false; }
 
 protected: // functions
 
