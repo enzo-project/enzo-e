@@ -34,8 +34,6 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( CommBlock * comm_block) throw();
 
-  virtual std::string name() const throw() { return "ppm"; }
-
 };
 
 #endif /* ENZO_ENZO_METHOD_PPM_HPP */

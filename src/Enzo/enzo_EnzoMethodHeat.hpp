@@ -39,8 +39,6 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( CommBlock * comm_block) throw();
 
-  virtual std::string name() const throw() { return "heat"; }
-
 protected: // methods
 
   template <class T>

@@ -62,8 +62,6 @@ public: // virtual functions
   /// Compute maximum timestep for this method
   virtual double timestep (CommBlock * comm_block) throw() = 0;
 
-  virtual std::string name() const throw() = 0;
-
 protected: // functions
 
   /// Get CommBlock attributes that typical methods will need
