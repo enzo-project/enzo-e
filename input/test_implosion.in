@@ -91,6 +91,6 @@
 
    Output { 
       cycle_step {
-         name = ["implosion-value-%05d.png","cycle"];
+         name = ["implosion-%05d.png","cycle"];
       }
    }

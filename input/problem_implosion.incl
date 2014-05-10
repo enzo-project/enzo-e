@@ -48,7 +48,7 @@
    }
 
 # Initial conditions deferred to test_implosion-code.in or
-# test_implosion-value.in
+# test_implosion.in
 
    Boundary { type = "reflecting" }
 

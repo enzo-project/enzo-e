@@ -143,7 +143,7 @@ env.RunSerial('parse_list.unit',       bin_path + '/test_Parse', ARGS='input/par
 env.RunSerial('parse_logical.unit',    bin_path + '/test_Parse', ARGS='input/parse_logical.in')
 env.RunSerial('parse_scalar.unit',     bin_path + '/test_Parse', ARGS='input/parse_scalar.in')
 env.RunSerial('parse_include.unit',    bin_path + '/test_Parse', ARGS='input/parse_include.in')
-env.RunSerial('parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/test_implosion-value.in')
+env.RunSerial('parse_implosion.unit',  bin_path + '/test_Parse', ARGS='input/test_implosion.in')
 
 #----------------------------------------------------------------------
 # TEST FULL APPLICATION
