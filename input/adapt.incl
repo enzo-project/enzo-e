@@ -92,7 +92,7 @@ Output {
         image_specify_bounds = true;
 	image_min = 0.0;
 	image_max = 6.0;
-       include "input/colormap_blackbody.incl"
+        include "input/colormap_rainbow.incl"
       }
 }
 
