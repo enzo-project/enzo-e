@@ -1,0 +1,58 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/adapt.incl"
+Stopping { cycle = 1000; }
+Mesh    { 
+   root_size   = [64,32];
+   root_blocks = [4,2];
+   max_level   = 6; 
+}
+
+Boundary { type = "periodic"; }
+
+Output {
+     list = ["temp","mesh"];
+    temp {
+       name = ["heat-temp-%05d.png", "cycle"];
+       field_list = ["temperature"];
+#       image_log = true;
+       type     = "image";
+       include "input/schedule_cycle_100.incl"
+       include "input/colormap_blackbody.incl"
+        image_specify_bounds = true;
+	image_min = 0.0;
+	image_max = 1.0;
+         image_size = [1024,512];
+
+    };
+      mesh { name = ["heat-mesh-%05d.png", "cycle"];
+          field_list = ["temperature"];
+           include "input/schedule_cycle_100.incl"
+	   image_type = "mesh";
+           image_size = [1025,513];
+       };
+
+}
+
+Method {
+  list = ["heat"]; 
+  heat { alpha = 1.0; } 
+}
+
+Field { list = ["temperature"]; courant = 0.5; }
+Initial {
+   temperature { value = [ 1.0, "input/enzop-cello-half.png",  0.01 ]; };
+ }
+# File:    adapt_slope.incl
+
+Mesh {
+   balance = true;
+   list = ["slope"];
+   slope {
+      type = "slope";
+      max_coarsen = 10.0;
+      min_refine  = 20.0;
+      field_list = ["temperature"];
+   }
+}
