@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     charm_refresh.cpp
+/// @file     control_refresh.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-26
 /// @brief    Charm-related functions associated with refreshing ghost zones

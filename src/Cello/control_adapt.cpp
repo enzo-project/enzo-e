@@ -1,7 +1,7 @@
 
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     charm_new_adapt.cpp
+/// @file     control_adapt.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-25
 /// @brief    Charm-related mesh adaptation control functions

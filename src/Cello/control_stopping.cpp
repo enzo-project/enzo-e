@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     charm_stopping.cpp
+/// @file     control_stopping.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-26
 /// @brief    Charm-related functions associated with initialization
