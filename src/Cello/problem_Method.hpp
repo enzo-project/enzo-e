@@ -70,21 +70,40 @@ protected: // functions
 
 protected: // attributes
 
-  CommBlock * comm_block_;
+  /// Dimensional rank of the CommBlock: 1, 2, or 3
   int rank_;
+
+  /// Size of the CommBlock array excluding ghost zones
   int nx_,ny_,nz_;
-  std::vector<int> gx_;
-  std::vector<int> gy_;
-  std::vector<int> gz_;
+
+  /// Number of ghost zones for each field variable
+  std::vector<int> gx_, gy_, gz_;
+
+  /// Cell widths
   double hx_,hy_,hz_;
+
+  /// Time step
   double dt_;
+
+  /// Extents of the CommBlock excluding ghost zones
   double xm_,xp_,ym_,yp_,zm_,zp_;
 
+  /// Number of field variables in the CommBlock
   int field_count_;
+
+  /// Dimensionality of the CommBlock array including ghosts
   std::vector<int> mx_,my_,mz_;
+
+  /// Names of the CommBlock field variables
   std::vector<std::string> field_name_;
+
+  /// Starting addresses of the CommBlock field variables
   std::vector<void *> field_array_;
+
+  /// CommBlock field variable id's
   std::map<std::string,int> field_id_;
+
+  /// Precision for each CommBlock field variables
   std::vector<int> field_precision_;
 
 };

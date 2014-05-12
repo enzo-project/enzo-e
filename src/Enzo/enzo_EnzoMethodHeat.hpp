@@ -31,7 +31,7 @@ public: // interface
   EnzoMethodHeat (CkMigrateMessage *m) {}
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  void pup (PUP::er &p) ;
   
   /// Apply the method to advance a block one timestep 
   virtual void compute( CommBlock * comm_block) throw();

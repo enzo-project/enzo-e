@@ -52,43 +52,43 @@ public: // attributes
 
   // EnzoMethodPpm
 
-  double                     enzo_ppm_density_floor;
-  bool                       enzo_ppm_diffusion;
-  bool                       enzo_ppm_dual_energy;
-  double                     enzo_ppm_dual_energy_eta_1;
-  double                     enzo_ppm_dual_energy_eta_2;
-  int                        enzo_ppm_flattening;
-  int                        enzo_ppm_minimum_pressure_support_parameter;
-  double                     enzo_ppm_number_density_floor;
-  double                     enzo_ppm_pressure_floor;
-  bool                       enzo_ppm_pressure_free;
-  bool                       enzo_ppm_steepening;
-  float                      enzo_ppm_temperature_floor;
-  bool                       enzo_ppm_use_minimum_pressure_support;
+  double                     ppm_density_floor;
+  bool                       ppm_diffusion;
+  bool                       ppm_dual_energy;
+  double                     ppm_dual_energy_eta_1;
+  double                     ppm_dual_energy_eta_2;
+  int                        ppm_flattening;
+  int                        ppm_minimum_pressure_support_parameter;
+  double                     ppm_number_density_floor;
+  double                     ppm_pressure_floor;
+  bool                       ppm_pressure_free;
+  bool                       ppm_steepening;
+  float                      ppm_temperature_floor;
+  bool                       ppm_use_minimum_pressure_support;
 
-  double                     enzo_gamma;
+  double                     field_gamma;
 
   // Cosmology (NOT ACCESSED)
-  bool                       enzo_cosmology;
-  double                     enzo_cosmology_comoving_box_size;
-  double                     enzo_cosmology_hubble_constant_now;
-  double                     enzo_cosmology_initial_redshift;
-  double                     enzo_cosmology_max_expansion_rate;
-  double                     enzo_cosmology_omega_lamda_now;
-  double                     enzo_cosmology_omega_matter_now;
+  bool                       cosmology;
+  double                     cosmology_comoving_box_size;
+  double                     cosmology_hubble_constant_now;
+  double                     cosmology_initial_redshift;
+  double                     cosmology_max_expansion_rate;
+  double                     cosmology_omega_lamda_now;
+  double                     cosmology_omega_matter_now;
 
   // EnzoInitialSedovArray[23]
-  int                        enzo_sedov_array[3];
-  double                     enzo_sedov_radius_relative;
-  double                     enzo_sedov_pressure_in;
-  double                     enzo_sedov_pressure_out;
-  double                     enzo_sedov_density;
+  int                        sedov_array[3];
+  double                     sedov_radius_relative;
+  double                     sedov_pressure_in;
+  double                     sedov_pressure_out;
+  double                     sedov_density;
 
   // EnzoProlong
-  std::string                enzo_interpolation_method;
+  std::string                interpolation_method;
 
   // EnzoMethodHeat
-  double                     enzo_method_heat_alpha;
+  double                     method_heat_alpha;
 };
 
 #endif /* PARAMETERS_ENZO_CONFIG_HPP */

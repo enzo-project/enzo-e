@@ -34,6 +34,7 @@
       # courant condition for fields
 
       courant   = 0.8;
+      gamma = 1.4;
 
       padding   = 0;
       alignment = 1;
@@ -44,12 +45,6 @@
       # list of methods to apply and in what order
  
       list = ["ppm"];
-
-   }
-
-   Enzo {
-
-      gamma = 1.4;
 
       ppm {
 

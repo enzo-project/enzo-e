@@ -20,13 +20,13 @@ EnzoInitialSedovArray3::EnzoInitialSedovArray3
 (const EnzoConfig * config) throw ()
 : Initial(config->initial_cycle, config->initial_time) 
 {
-  array_[0] = config->enzo_sedov_array[0];
-  array_[1] = config->enzo_sedov_array[1];
-  array_[2] = config->enzo_sedov_array[2];
-  radius_relative_ = config->enzo_sedov_radius_relative;
-  pressure_in_     = config->enzo_sedov_pressure_in;
-  pressure_out_    = config->enzo_sedov_pressure_out;
-  density_         = config->enzo_sedov_density;
+  array_[0] = config->sedov_array[0];
+  array_[1] = config->sedov_array[1];
+  array_[2] = config->sedov_array[2];
+  radius_relative_ = config->sedov_radius_relative;
+  pressure_in_     = config->sedov_pressure_in;
+  pressure_out_    = config->sedov_pressure_out;
+  density_         = config->sedov_density;
 }
 
 //----------------------------------------------------------------------

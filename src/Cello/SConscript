@@ -69,7 +69,7 @@ libs_simulation  = ['simulation','problem']
 libs_test        = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
-libs_all = ['charm','simulation','problem','mesh','comm','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
+libs_all = ['charm','control','simulation','problem','mesh','comm','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
 libs_field  = libs_all
 libs_io     = libs_all
 libs_mesh   = libs_all
@@ -190,6 +190,7 @@ sources_performance.append(["main.cpp"])
 objs_cello = env.Object(sources_cello)
 objs_charm = env.Object(sources_charm)
 objs_comm = env.Object(sources_comm)
+objs_control = env.Object(sources_control)
 objs_disk = env.Object(sources_disk)
 objs_error = env.Object(sources_error)
 objs_field = env.Object(sources_field)
@@ -268,6 +269,7 @@ test_papi        = env.Program('test_Papi.cpp',
 
 libraries_charm   = env.Library ('charm',   objs_charm)
 libraries_comm    = env.Library ('comm',   objs_comm)
+libraries_control = env.Library ('control', objs_control)
 libraries_disk   = env.Library ('disk',   objs_disk)
 libraries_error  = env.Library ('error',  objs_error)
 libraries_field  = env.Library ('field',  objs_field)
@@ -319,6 +321,8 @@ env.Alias('install-lib',env.Install (lib_path,lib_cello))
 
 env.Alias('install-inc',env.Install (inc_path,includes_charm))
 env.Alias('install-lib',env.Install (lib_path,libraries_charm))
+
+env.Alias('install-lib',env.Install (lib_path,libraries_control))
 
 env.Alias('install-inc',env.Install (inc_path,includes_comm))
 env.Alias('install-lib',env.Install (lib_path,libraries_comm))

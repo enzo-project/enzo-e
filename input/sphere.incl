@@ -26,18 +26,13 @@
       ] ;
 
       courant   = 0.8;
+      gamma = 1.4;
 
    }
 
    Method {
 
       list = ["ppm"];
-
-   }
-
-   Enzo {
-
-      gamma = 1.4;
 
       ppm {
          diffusion   = true;

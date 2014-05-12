@@ -16,6 +16,7 @@
 
       ghosts  = 3;
       courant = 0.8;
+      gamma = 1.4;
 
       list = [
         "density",
@@ -31,13 +32,6 @@
 
       list = ["ppm"];
 
-   }
-
-   Enzo {
-
-      gamma = 1.4;
-
-      ppm {
          diffusion   = true;
          flattening  = 3;
          steepening  = true;

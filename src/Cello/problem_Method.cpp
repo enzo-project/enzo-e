@@ -12,8 +12,6 @@
 void Method::initialize_ ( CommBlock * comm_block) throw()
 {
 
-  comm_block_ = comm_block;
-
   Block * block = comm_block -> block();
   block->lower(&xm_,&ym_,&zm_);
   block->upper(&xp_,&yp_,&zp_);

@@ -120,8 +120,8 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
     FieldType[j] = 0;
   }
 
-  ComovingCoordinates = enzo_config->enzo_cosmology;
-  Gamma               = enzo_config->enzo_gamma;
+  ComovingCoordinates = enzo_config->cosmology;
+  Gamma               = enzo_config->field_gamma;
 
   GridRank            = enzo_config->mesh_root_rank;
 
@@ -142,27 +142,27 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
   // PPM parameters
 
-  InitialRedshift   = enzo_config->enzo_cosmology_initial_redshift;
-  HubbleConstantNow = enzo_config->enzo_cosmology_hubble_constant_now;
-  OmegaLambdaNow    = enzo_config->enzo_cosmology_omega_lamda_now;
-  OmegaMatterNow    = enzo_config->enzo_cosmology_omega_matter_now;
-  MaxExpansionRate  = enzo_config->enzo_cosmology_max_expansion_rate;
-  ComovingBoxSize   = enzo_config->enzo_cosmology_comoving_box_size;
+  InitialRedshift   = enzo_config->cosmology_initial_redshift;
+  HubbleConstantNow = enzo_config->cosmology_hubble_constant_now;
+  OmegaLambdaNow    = enzo_config->cosmology_omega_lamda_now;
+  OmegaMatterNow    = enzo_config->cosmology_omega_matter_now;
+  MaxExpansionRate  = enzo_config->cosmology_max_expansion_rate;
+  ComovingBoxSize   = enzo_config->cosmology_comoving_box_size;
 
-  PressureFree              = enzo_config->enzo_ppm_pressure_free;
-  UseMinimumPressureSupport = enzo_config->enzo_ppm_use_minimum_pressure_support;
+  PressureFree              = enzo_config->ppm_pressure_free;
+  UseMinimumPressureSupport = enzo_config->ppm_use_minimum_pressure_support;
   MinimumPressureSupportParameter = 
-    enzo_config->enzo_ppm_minimum_pressure_support_parameter;
-  PPMFlatteningParameter    = enzo_config->enzo_ppm_flattening;
-  PPMDiffusionParameter     = enzo_config->enzo_ppm_diffusion;
-  PPMSteepeningParameter    = enzo_config->enzo_ppm_steepening;
-  pressure_floor            = enzo_config->enzo_ppm_pressure_floor;
-  density_floor             = enzo_config->enzo_ppm_density_floor;
-  temperature_floor         = enzo_config->enzo_ppm_temperature_floor;
-  number_density_floor      = enzo_config->enzo_ppm_number_density_floor;
-  DualEnergyFormalism       = enzo_config->enzo_ppm_dual_energy;
-  DualEnergyFormalismEta1   = enzo_config->enzo_ppm_dual_energy_eta_1;
-  DualEnergyFormalismEta2   = enzo_config->enzo_ppm_dual_energy_eta_2;
+    enzo_config->ppm_minimum_pressure_support_parameter;
+  PPMFlatteningParameter    = enzo_config->ppm_flattening;
+  PPMDiffusionParameter     = enzo_config->ppm_diffusion;
+  PPMSteepeningParameter    = enzo_config->ppm_steepening;
+  pressure_floor            = enzo_config->ppm_pressure_floor;
+  density_floor             = enzo_config->ppm_density_floor;
+  temperature_floor         = enzo_config->ppm_temperature_floor;
+  number_density_floor      = enzo_config->ppm_number_density_floor;
+  DualEnergyFormalism       = enzo_config->ppm_dual_energy;
+  DualEnergyFormalismEta1   = enzo_config->ppm_dual_energy_eta_1;
+  DualEnergyFormalismEta2   = enzo_config->ppm_dual_energy_eta_2;
 
   int gx = enzo_config->field_ghosts[0];
   int gy = enzo_config->field_ghosts[1];

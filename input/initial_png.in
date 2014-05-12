@@ -33,6 +33,7 @@ Field {
       "total_energy",
       "internal_energy"
     ];
+    gamma = 1.4;
 }
 
 # Define list of numerical methods
@@ -40,14 +41,6 @@ Field {
 Method {
 
    list = [ "ppm" ];
-
-}
-
-# Initialize Enzo-P method parameters
-
-Enzo {
-
-   gamma = 1.4;
 
    ppm {
       diffusion   = true;

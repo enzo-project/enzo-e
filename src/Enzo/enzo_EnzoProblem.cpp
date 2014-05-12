@@ -120,7 +120,7 @@ Method * EnzoProblem::create_method_
   } else if (type == "ppml") {
     method = new EnzoMethodPpml;
   } else if (type == "heat") {
-    method = new EnzoMethodHeat(enzo_config->enzo_method_heat_alpha,
+    method = new EnzoMethodHeat(enzo_config->method_heat_alpha,
 				enzo_config->field_courant);
   } else {
     method = Problem::create_method_(type,config);
@@ -141,12 +141,12 @@ Prolong * EnzoProblem::create_prolong_
   if (type == "enzo") {
     
     prolong = new EnzoProlong 
-      (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
+      (static_cast<EnzoConfig *>(config)->interpolation_method);
 
   } else if (type == "MC1") {
     
     prolong = new EnzoProlongMC1
-      (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
+      (static_cast<EnzoConfig *>(config)->interpolation_method);
 
   } else {
 
@@ -171,7 +171,7 @@ Restrict * EnzoProblem::create_restrict_
   if (type == "enzo") {
     
     restrict = new EnzoRestrict 
-      (static_cast<EnzoConfig *>(config)->enzo_interpolation_method);
+      (static_cast<EnzoConfig *>(config)->interpolation_method);
 
   } else {
 
