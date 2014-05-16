@@ -26,13 +26,13 @@
       root_rank = 2;
       root_size = [48,48];
       root_blocks = [2,2];
-      max_level = 3;
+      max_level = 4;
       list = ["SLOPE"];
       SLOPE {
          type = "slope";
 	 field_list = ["density"];
-	 max_refine  = 5.0;
-	 min_coarsen = 2.0
+	 max_refine  =10.0;
+	 min_coarsen = 4.0
       }
    }
 
@@ -55,7 +55,7 @@
 
    Stopping {
       time  = 2.5;
-      cycle = 10;
+      cycle = 2000;
    }
 
    Output { 
@@ -70,7 +70,7 @@
                      1.0,0.0,0.0,
                      1.0,1.0,0.0,
                      1.0,1.0,1.0];
-         name     = ["implosion-d-%05d.png","cycle"];
+         name     = ["implosion-d-%03d.png","count"];
          schedule {
             type = "interval";
             var =  "cycle";
@@ -88,7 +88,7 @@
                      0.0, 1.0, 0.0,
                      1.0, 1.0, 0.0,
                      1.0, 0.0, 0.0 ];
-         name     = ["implosion-mesh-%05d.png","cycle"];
+         name     = ["implosion-mesh-%03d.png","count"];
 	 image_size = [513,513];
          schedule {
             type = "interval";

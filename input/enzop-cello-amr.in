@@ -2,7 +2,7 @@
 # Author:  James Bordner (jobordner@ucsd.edu)
 
 include "input/adapt.incl"
-Stopping { cycle = 1000; }
+Stopping { cycle = 2000; }
 Mesh    { 
    root_size   = [16,16];
    max_level   = 7; 
