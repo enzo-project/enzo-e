@@ -2,8 +2,6 @@
 # DIRECTORIES
 #------------------------------
 
-SConscript('Grackle/SConscript')
-
 #------------------------------
 # IMPORTS
 #------------------------------
@@ -21,11 +19,8 @@ Import('lib_path')
 # SOURCE
 #------------------------------
 
-includes_png = [Glob('png*h')]
-sources_png  = [Glob('png*cpp')]
-
-includes_expreval = [Glob('ExprEval/*h')]
-sources_expreval  = [Glob('ExprEval/*cpp')]
+includes_grackle = [Glob('*h'),Glob('*def')]
+sources_grackle  = [Glob('*C')]
 
 #------------------------------
 # ENVIRONMENTS
@@ -35,16 +30,12 @@ sources_expreval  = [Glob('ExprEval/*cpp')]
 # TARGETS
 #------------------------------
 
-libraries_png      = env.Library ('external', sources_png)
-libraries_expreval = env.Library ('expreval', sources_expreval)
+libraries_grackle      = env.Library ('grackle', sources_grackle)
 
 
 #------------------------------
 # INSTALL
 #------------------------------
 
-env.Alias('install-inc',env.Install (inc_path,includes_png))
-env.Alias('install-lib',env.Install (lib_path,libraries_png))
-
-env.Alias('install-inc',env.Install (inc_path,includes_expreval))
-env.Alias('install-lib',env.Install (lib_path,libraries_expreval))
+env.Alias('install-inc',env.Install (inc_path,includes_grackle))
+env.Alias('install-lib',env.Install (lib_path,libraries_grackle))

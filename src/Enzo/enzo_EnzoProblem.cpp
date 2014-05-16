@@ -122,6 +122,8 @@ Method * EnzoProblem::create_method_
   } else if (type == "heat") {
     method = new EnzoMethodHeat(enzo_config->method_heat_alpha,
 				enzo_config->field_courant);
+  } else if (type == "grackle") {
+    method = new EnzoMethodGrackle((EnzoConfig *)config);
   } else {
     method = Problem::create_method_(type,config);
   }

@@ -30,7 +30,7 @@ if (use_papi):
 
 components.append(['hdf5','z'])
 
-libraries  = ['png','$FORTRANLIBS']
+libraries  = ['png','grackle','$FORTRANLIBS']
 
 #------------------------------
 # SOURCE

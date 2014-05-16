@@ -294,8 +294,6 @@ void OutputImage::write_block
 
   if (type_is_mesh()) {
 
-    double alpha = 1.0;
-
     // value for mesh
     double value = 0;
     value = mesh_color_(comm_block->level());
@@ -591,10 +589,10 @@ void OutputImage::image_write_ (double min_color, double max_color) throw()
 
       double value = image_log_ ? log(data_(i)) : data_(i);
 
-      double r=0.0,g=0.0,b=0.0,a=0.0;
+      double r=0.0,g=0.0,b=0.0;
 
-	if (value < min) value = min;
-	if (value > max) value = max;
+      if (value < min) value = min;
+      if (value > max) value = max;
 
 
       if (min <= value && value <= max) {
@@ -778,8 +776,6 @@ void OutputImage::reduce_box_(double * data,int ixm, int ixp, int iym, int iyp,
 
 void OutputImage::reduce_cube_(double * data, int ixm, int ixp, int iym, int iyp, double value, double alpha)
 {
-  if (ixm > ixp || iym >iyp) return;
-
   for (int ix=ixm; ix<=ixp; ++ix) {
     for (int iy=iym; iy<=iyp; ++iy) {
       int i = ix + nxi_*iy;

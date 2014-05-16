@@ -39,7 +39,7 @@ void BoundaryValue::enforce
 
     double t = comm_block->time();
 
-    for (int index = 0; index < field_list_.size(); index++) {
+    for (size_t index = 0; index < field_list_.size(); index++) {
 
       int nx,ny,nz;
       field_block->size(&nx,&ny,&nz);

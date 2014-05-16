@@ -117,12 +117,10 @@ bool Schedule::write_this_cycle ( int cycle, double time ) throw()
   double time_start;
   double time_step;
   double time_stop;
-  double time_dump;
 
   int cycle_start;
   int cycle_step;
   int cycle_stop;
-  int cycle_dump;
 
   // Check if this cycle or time is to be skipped
 

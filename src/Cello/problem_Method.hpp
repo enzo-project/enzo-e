@@ -56,8 +56,7 @@ public: // virtual functions
 
   /// Apply the method to advance a block one timestep 
 
-  virtual void compute
-  ( CommBlock * comm_block) throw() = 0; 
+  virtual void compute ( CommBlock * comm_block) throw() = 0; 
 
   /// Compute maximum timestep for this method
   virtual double timestep (CommBlock * comm_block) throw() = 0;

@@ -60,6 +60,7 @@ module enzo {
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
   PUPable EnzoMethodHeat;
+  PUPable EnzoMethodGrackle;
   PUPable EnzoProblem;
 
   extern module mesh;

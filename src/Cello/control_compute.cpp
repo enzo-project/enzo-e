@@ -24,7 +24,6 @@ void CommBlock::compute_begin_ ()
 
   if (is_leaf_) {
 
-    FieldDescr * field_descr = simulation()->field_descr();
     const Problem * problem = simulation()->problem();
     Method * method;
     int index_method = 0;

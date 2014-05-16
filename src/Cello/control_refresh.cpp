@@ -114,21 +114,26 @@ void CommBlock::refresh_face
 
   int type_op_array;
 
-  if (type_refresh == refresh_coarse) {
+  int level = index_.level();
+  switch (type_refresh) {
+  case refresh_coarse:
 
-    int level = index_.level();
     index_.child(level,ichild,ichild+1,ichild+2);
 
     type_op_array = op_array_restrict;
-
-  } else if (type_refresh == refresh_same) {
+    break;
+  case refresh_same:
 
     type_op_array = op_array_copy;
-
-
-  } else if (type_refresh == refresh_fine) {
-
+    break;
+  case refresh_fine:
     type_op_array = op_array_prolong;
+    break;
+  default:
+    ERROR1("CommBlock::refresh_face()",
+	   "Unknown type_refresh %d",
+	   type_refresh);
+    type_op_array = op_array_unknown;
 
   }
 

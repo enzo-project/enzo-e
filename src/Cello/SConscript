@@ -59,6 +59,7 @@ libs_disk        = ['disk'] + libs_error + ['hdf5']
 libs_performance = ['performance', 'memory','parameters'] + libs_error + libs_papi
 libs_parallel    = ['parallel'] +libs_error
 libs_field       = ['field', 'mesh','comm', 'mesh', 'io'] + libs_parallel + ['cello']
+libs_particle    = ['particle']
 libs_main        = ['main']
 libs_memory      = ['memory'] +   libs_error
 libs_mesh        = ['mesh','comm','mesh','field','io','disk'] + libs_parallel + libs_external + ['cello','png','hdf5']
@@ -69,8 +70,9 @@ libs_simulation  = ['simulation','problem']
 libs_test        = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
-libs_all = ['charm','control','simulation','problem','mesh','comm','mesh','field','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
+libs_all = ['charm','control','simulation','problem','mesh','comm','mesh','field','particle','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
 libs_field  = libs_all
+libs_particle = libs_all
 libs_io     = libs_all
 libs_mesh   = libs_all
 
@@ -98,6 +100,7 @@ includes_comm =        [Glob('*comm*hpp')]
 includes_disk =        [Glob('*disk*hpp')]
 includes_error =       [Glob('*error*hpp')]
 includes_field =       [Glob('*field*hpp')]
+includes_particle =    [Glob('*particle*hpp')]
 includes_io =          [Glob('*io*hpp')]
 includes_main =        ['main.hpp']
 includes_memory =      [Glob('*memory*hpp')]
@@ -117,6 +120,7 @@ sources_control =     [Glob('control*cpp')]
 sources_disk =        [Glob('disk*cpp')]
 sources_error =       [Glob('error*cpp')]
 sources_field =       [Glob('field*cpp')]
+sources_particle =    [Glob('particle*cpp')]
 sources_io =          [Glob('io*cpp')]
 sources_main =        [Glob('main*cpp')]
 sources_memory =      [Glob('memory*cpp')]
@@ -179,6 +183,7 @@ includes_simulation.append(['simulation.decl.h','simulation.def.h'])
 sources_disk.append(['main.cpp'])
 sources_error.append(['main.cpp'])
 sources_field.append(['main_simulation.cpp'])
+sources_particle.append(['main_simulation.cpp'])
 sources_io.append(['main_simulation.cpp'])
 sources_memory.append(["main.cpp"])
 sources_mesh.append(['main_mesh.cpp'])
@@ -194,6 +199,7 @@ objs_control = env.Object(sources_control)
 objs_disk = env.Object(sources_disk)
 objs_error = env.Object(sources_error)
 objs_field = env.Object(sources_field)
+objs_particle = env.Object(sources_particle)
 objs_io = env.Object(sources_io)
 objs_main = env.Object(sources_main)
 objs_memory = env.Object(sources_memory)
@@ -273,6 +279,7 @@ libraries_control = env.Library ('control', objs_control)
 libraries_disk   = env.Library ('disk',   objs_disk)
 libraries_error  = env.Library ('error',  objs_error)
 libraries_field  = env.Library ('field',  objs_field)
+libraries_particle = env.Library ('particle',  objs_particle)
 libraries_io     = env.Library ('io',     objs_io)
 libraries_main   = env.Library ('main',   objs_main)
 libraries_memory = env.Library ('memory', objs_memory)
@@ -338,6 +345,9 @@ env.Alias('install-lib',env.Install (lib_path,libraries_error))
 env.Alias('install-bin',env.Install (bin_path,binaries_field))
 env.Alias('install-inc',env.Install (inc_path,includes_field))
 env.Alias('install-lib',env.Install (lib_path,libraries_field))
+
+env.Alias('install-inc',env.Install (inc_path,includes_particle))
+env.Alias('install-lib',env.Install (lib_path,libraries_particle))
 
 env.Alias('install-bin',env.Install (bin_path,binaries_io))
 env.Alias('install-inc',env.Install (inc_path,includes_io))

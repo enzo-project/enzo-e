@@ -2,7 +2,7 @@ import os
 
 is_arch_valid = 1
 
-flags_arch       = '-O3'
+flags_arch       = '-Wall -O3'
 
 # -rdynamic: required for backtraces
 flags_link_charm = ' -rdynamic'

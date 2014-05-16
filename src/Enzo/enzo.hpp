@@ -23,13 +23,13 @@
 //----------------------------------------------------------------------
 
 #include "cello.hpp"
-
 #include "charm.hpp"
 
 #include "_error.hpp"
 #include "_monitor.hpp"
 #include "_parallel.hpp"
 #include "_memory.hpp"
+#include "_particle.hpp"
 #include "_parameters.hpp"
 #include "_performance.hpp"
 #include "_field.hpp"

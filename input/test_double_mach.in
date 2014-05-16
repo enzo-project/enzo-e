@@ -125,7 +125,7 @@
 
    Output { 
 
-      list = ["de_png","mesh"];
+      list = ["de_png","mesh","de_hdf5"];
 
 
        mesh {
@@ -148,6 +148,11 @@
            type     = "image";
            include "input/schedule_cycle_25.incl"
            include "input/colormap_blackbody.incl";
+         };
+         de_hdf5 {
+           name = ["doublemach-p%02d-c%04d.h5", "proc","count"]; 
+           type     = "data";
+           include "input/schedule_cycle_25.incl"
          };
       }
 

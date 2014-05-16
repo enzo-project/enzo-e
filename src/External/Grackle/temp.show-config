@@ -1,0 +1,9 @@
+
+   MACHINE: Generic Linux
+   MACHINE-NAME: linux-gnu
+
+   CONFIG_PRECISION  [precision-{32,64}]                     : 64
+   CONFIG_INTEGERS  [integers-{32,64}]                       : 64
+   CONFIG_OPT  [opt-{warn,debug,cudadebug,high,aggressive}]  : high
+   CONFIG_SHARED  [shared-{yes,no}]                          : yes
+

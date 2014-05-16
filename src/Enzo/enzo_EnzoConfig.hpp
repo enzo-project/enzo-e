@@ -89,6 +89,53 @@ public: // attributes
 
   // EnzoMethodHeat
   double                     method_heat_alpha;
+
+  // EnzoMethodGrackle
+  double method_grackle_gamma;
+  bool   method_grackle_with_radiative_cooling;
+  bool   method_grackle_primordial_chemistry;
+  bool   method_grackle_metal_cooling;
+  bool   method_grackle_h2_formation_on_dust;
+
+  bool   method_grackle_cmb_temperature_floor;
+  std::string method_grackle_data_file;
+
+  int    method_grackle_three_body_rate;
+  int    method_grackle_cie_cooling;
+  int    method_grackle_h2_optical_depth_approximation;
+
+  int    method_grackle_photoelectric_heating;
+  double method_grackle_photoelectric_heating_rate;
+
+  int    method_grackle_UVbackground;
+
+  double method_grackle_UVbackground_redshift_on;
+  double method_grackle_UVbackground_redshift_off;
+  double method_grackle_UVbackground_redshift_fullon;
+  double method_grackle_UVbackground_redshift_drop;
+
+  int    method_grackle_Compton_xray_heating;
+
+  double method_grackle_LWbackground_intensity;
+  int    method_grackle_LWbackground_sawtooth_suppression;
+
+  double method_grackle_HydrogenFractionByMass;
+  double method_grackle_DeuteriumToHydrogenRatio;
+  double method_grackle_SolarMetalFractionByMass;
+  int    method_grackle_NumberOfTemperatureBins;
+  int    method_grackle_ih2co;
+  int    method_grackle_ipiht;
+  double method_grackle_TemperatureStart;
+  double method_grackle_TemperatureEnd;
+  int    method_grackle_comp_xray;
+  int    method_grackle_temp_xray;
+  int    method_grackle_CaseBRecombination;
+  int    method_grackle_NumberOfDustTemperatureBins;
+  double method_grackle_DustTemperatureStart;
+  double method_grackle_DustTemperatureEnd;
+
+  double method_grackle_cloudy_electron_fraction_factor;
+  
 };
 
 #endif /* PARAMETERS_ENZO_CONFIG_HPP */
