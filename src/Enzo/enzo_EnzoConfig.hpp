@@ -69,20 +69,20 @@ public: // attributes
   double                     field_gamma;
 
   // Cosmology (NOT ACCESSED)
-  bool                       cosmology;
-  double                     cosmology_comoving_box_size;
-  double                     cosmology_hubble_constant_now;
-  double                     cosmology_initial_redshift;
-  double                     cosmology_max_expansion_rate;
-  double                     cosmology_omega_lamda_now;
-  double                     cosmology_omega_matter_now;
+  bool                       physics_cosmology;
+  double                     physics_cosmology_comoving_box_size;
+  double                     physics_cosmology_hubble_constant_now;
+  double                     physics_cosmology_initial_redshift;
+  double                     physics_cosmology_max_expansion_rate;
+  double                     physics_cosmology_omega_lamda_now;
+  double                     physics_cosmology_omega_matter_now;
 
   // EnzoInitialSedovArray[23]
-  int                        sedov_array[3];
-  double                     sedov_radius_relative;
-  double                     sedov_pressure_in;
-  double                     sedov_pressure_out;
-  double                     sedov_density;
+  int                        initial_sedov_array[3];
+  double                     initial_sedov_radius_relative;
+  double                     initial_sedov_pressure_in;
+  double                     initial_sedov_pressure_out;
+  double                     initial_sedov_density;
 
   // EnzoProlong
   std::string                interpolation_method;
@@ -91,6 +91,10 @@ public: // attributes
   double                     method_heat_alpha;
 
   // EnzoMethodGrackle
+
+  // Units
+
+  code_units method_grackle_units;
   double method_grackle_gamma;
   bool   method_grackle_with_radiative_cooling;
   bool   method_grackle_primordial_chemistry;

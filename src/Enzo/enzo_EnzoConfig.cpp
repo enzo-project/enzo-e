@@ -44,19 +44,19 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | field_gamma;
 
-  p | cosmology;
-  p | cosmology_comoving_box_size;
-  p | cosmology_hubble_constant_now;
-  p | cosmology_initial_redshift;
-  p | cosmology_max_expansion_rate;
-  p | cosmology_omega_lamda_now;
-  p | cosmology_omega_matter_now;
+  p | physics_cosmology;
+  p | physics_cosmology_comoving_box_size;
+  p | physics_cosmology_hubble_constant_now;
+  p | physics_cosmology_initial_redshift;
+  p | physics_cosmology_max_expansion_rate;
+  p | physics_cosmology_omega_lamda_now;
+  p | physics_cosmology_omega_matter_now;
 
-  PUParray(p,sedov_array,3);
-  p | sedov_radius_relative;
-  p | sedov_pressure_in;
-  p | sedov_pressure_out;
-  p | sedov_density;
+  PUParray(p,initial_sedov_array,3);
+  p | initial_sedov_radius_relative;
+  p | initial_sedov_pressure_in;
+  p | initial_sedov_pressure_out;
+  p | initial_sedov_density;
 
   p | interpolation_method;
 
@@ -110,35 +110,35 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:ppm:use_minimum_pressure_support",false);
 
 
-  cosmology = p->value_logical ("Method:cosmology",false);
-  cosmology_comoving_box_size = p->value_float
+  physics_cosmology = p->value_logical ("Method:cosmology",false);
+  physics_cosmology_comoving_box_size = p->value_float
     ("Method:cosmology:comoving_box_size", 64.0);
-  cosmology_hubble_constant_now = p->value_float
+  physics_cosmology_hubble_constant_now = p->value_float
     ("Method:cosmology:hubble_constant_now",0.701);
-  cosmology_initial_redshift = p->value_float
+  physics_cosmology_initial_redshift = p->value_float
     ("Method:cosmology:initial_redshift",  20.0);;
-  cosmology_max_expansion_rate = p->value_float
+  physics_cosmology_max_expansion_rate = p->value_float
     ("Method:cosmology:max_expansion_rate", 0.01);
-  cosmology_omega_lamda_now = p->value_float
+  physics_cosmology_omega_lamda_now = p->value_float
     ("Method:cosmology:omega_lambda_now",   0.721);
-  cosmology_omega_matter_now = p->value_float
+  physics_cosmology_omega_matter_now = p->value_float
     ("Method:cosmology:omega_matter_now",   0.279);
 
   field_gamma = p->value_float ("Field:gamma",5.0/3.0);
 
   TRACE1("field_gamma = %f",field_gamma);
 
-  sedov_array[0] = p->list_value_integer (0,"Initial:sedov:array",1);
-  sedov_array[1] = p->list_value_integer (1,"Initial:sedov:array",1);
-  sedov_array[2] = p->list_value_integer (2,"Initial:sedov:array",1);
+  initial_sedov_array[0] = p->list_value_integer (0,"Initial:sedov:array",1);
+  initial_sedov_array[1] = p->list_value_integer (1,"Initial:sedov:array",1);
+  initial_sedov_array[2] = p->list_value_integer (2,"Initial:sedov:array",1);
 
-  sedov_radius_relative = 
+  initial_sedov_radius_relative = 
     p->value_float("Initial:sedov:radius_relative",0.1);
-  sedov_pressure_in = 
+  initial_sedov_pressure_in = 
     p->value_float("Initial:sedov:pressure_in",1.0);
-  sedov_pressure_out = 
+  initial_sedov_pressure_out = 
     p->value_float("Initial:sedov:pressure_in",1e-5);
-  sedov_density = 
+  initial_sedov_density = 
     p->value_float("Initial:sedov:density",1.0);
 
   interpolation_method = p->value_string 

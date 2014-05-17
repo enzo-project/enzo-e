@@ -120,7 +120,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
     FieldType[j] = 0;
   }
 
-  ComovingCoordinates = enzo_config->cosmology;
+  ComovingCoordinates = enzo_config->physics_cosmology;
   Gamma               = enzo_config->field_gamma;
 
   GridRank            = enzo_config->mesh_root_rank;
@@ -142,12 +142,12 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
   // PPM parameters
 
-  InitialRedshift   = enzo_config->cosmology_initial_redshift;
-  HubbleConstantNow = enzo_config->cosmology_hubble_constant_now;
-  OmegaLambdaNow    = enzo_config->cosmology_omega_lamda_now;
-  OmegaMatterNow    = enzo_config->cosmology_omega_matter_now;
-  MaxExpansionRate  = enzo_config->cosmology_max_expansion_rate;
-  ComovingBoxSize   = enzo_config->cosmology_comoving_box_size;
+  InitialRedshift   = enzo_config->physics_cosmology_initial_redshift;
+  HubbleConstantNow = enzo_config->physics_cosmology_hubble_constant_now;
+  OmegaLambdaNow    = enzo_config->physics_cosmology_omega_lamda_now;
+  OmegaMatterNow    = enzo_config->physics_cosmology_omega_matter_now;
+  MaxExpansionRate  = enzo_config->physics_cosmology_max_expansion_rate;
+  ComovingBoxSize   = enzo_config->physics_cosmology_comoving_box_size;
 
   PressureFree              = enzo_config->ppm_pressure_free;
   UseMinimumPressureSupport = enzo_config->ppm_use_minimum_pressure_support;
