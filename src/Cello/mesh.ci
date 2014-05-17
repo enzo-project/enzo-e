@@ -29,6 +29,8 @@ module mesh {
   PUPable RefineMass;
   PUPable RefineSlope;
   PUPable RestrictLinear;
+  PUPable ScheduleList;
+  PUPable ScheduleInterval;
 
   array[Index] CommBlock {
 

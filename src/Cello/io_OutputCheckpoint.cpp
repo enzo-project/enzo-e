@@ -63,22 +63,17 @@ void OutputCheckpoint::write_simulation ( const Simulation * simulation ) throw(
 
   // Write parameter file
 
-  bool is_root = simulation->group_process()->is_root();
+  std::string dir_name = expand_file_name_(&dir_name_,&dir_args_);
+  char dir_char[255];
+  strcpy(dir_char,dir_name.c_str());
 
-  //  if (is_root) {
-
-    std::string dir_name = expand_file_name_(&dir_name_,&dir_args_);
-    char dir_char[255];
-    strcpy(dir_char,dir_name.c_str());
-
-    // --------------------------------------------------
-    // ENTRY: #1 OutputCheckpoint::write_simulation()-> SimulationCharm::s_write()
-    // ENTRY: checkpoint if Simulation is root
-    // --------------------------------------------------
-    CkCallback callback(CkIndex_SimulationCharm::s_write(),proxy_simulation);
-    CkStartCheckpoint (dir_char,callback);
-    // --------------------------------------------------
-    //  }
+  // --------------------------------------------------
+  // ENTRY: #1 OutputCheckpoint::write_simulation()-> SimulationCharm::s_write()
+  // ENTRY: checkpoint if Simulation is root
+  // --------------------------------------------------
+  CkCallback callback(CkIndex_SimulationCharm::s_write(),proxy_simulation);
+  CkStartCheckpoint (dir_char,callback);
+  // --------------------------------------------------
 
 }
 

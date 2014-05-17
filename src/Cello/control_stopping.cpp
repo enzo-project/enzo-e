@@ -42,13 +42,11 @@ void CommBlock::stopping_begin_()
     // Compute local dt
 
     Problem * problem = simulation->problem();
-    const FieldDescr * field_descr = simulation->field_descr();
 
     int index = 0;
     Method * method;
     double dt_block = std::numeric_limits<double>::max();
     while ((method = problem->method(index++))) {
-      //      printf ("%s:%d timestep %s\n",__FILE__,__LINE__,method->name().c_str());
       dt_block = std::min(dt_block,method->timestep(this));
     }
 

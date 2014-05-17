@@ -252,10 +252,10 @@ void Problem::initialize_output
 
     output->set_schedule
       (Schedule::create( config->output_schedule_var[index],
-			config->output_schedule_type[index],
-			config->output_schedule_start[index],
-			config->output_schedule_stop[index],
-			config->output_schedule_step[index],
+			 config->output_schedule_type[index],
+			 config->output_schedule_start[index],
+			 config->output_schedule_stop[index],
+			 config->output_schedule_step[index],
 			 config->output_schedule_list[index]));
 
 

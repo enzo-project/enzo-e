@@ -49,6 +49,8 @@ enum meta_type {
 #include "io_OutputCheckpoint.hpp"
 
 #include "io_Schedule.hpp"
+#include "io_ScheduleList.hpp"
+#include "io_ScheduleInterval.hpp"
 
 
 #endif /* _IO_HPP */
