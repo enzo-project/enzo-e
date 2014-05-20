@@ -19,7 +19,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Schedule");
 
-  Schedule * schedule = new Schedule;
+  ScheduleInterval * schedule = new ScheduleInterval;
 
   unit_assert (schedule != NULL);
 

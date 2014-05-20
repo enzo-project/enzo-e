@@ -27,10 +27,7 @@ void ScheduleInterval::set_cycle_interval
  int cycle_stop
 ) throw()
 {
-  if (type_ != schedule_type_unknown) {
-    WARNING ("ScheduleInterval::set_cycle_interval",
-	     "Resetting Schedule scheduling");
-  }
+  type_ = schedule_type_cycle;
 
   cycle_interval_.clear();
 
@@ -46,10 +43,7 @@ void ScheduleInterval::set_cycle_interval
 void ScheduleInterval::set_time_interval
   (double time_start, double time_step, double time_stop) throw()
 {
-  if (type_ != schedule_type_unknown) {
-    WARNING ("Schedule::set_time_interval",
-	     "Resetting Output scheduling");
-  }
+  type_ = schedule_type_time;
 
   time_interval_.clear();
 
@@ -140,13 +134,17 @@ double ScheduleInterval::update_timestep ( double time, double dt) const throw()
       time_step  = time_interval_[1];
       time_stop  = time_interval_[2];
 
-      double ratio      = (time - time_start) / time_step;
-      double ratio_next = (time_next - time_start) / time_step;
+      bool in_range = (time_start <= time && time <= time_stop);
 
-      if ((round(ratio) == round(ratio_next)) &&
-	  ratio < round(ratio) && ratio_next > round(ratio)) {
-	time_dump = time_start + round(ratio)*time_step;
-	new_dt = time_dump - time;
+      if (in_range) {
+	double ratio      = (time - time_start) / time_step;
+	double ratio_next = (time_next - time_start) / time_step;
+
+	if ((round(ratio) == round(ratio_next)) &&
+	    ratio < round(ratio) && ratio_next > round(ratio)) {
+	  time_dump = time_start + round(ratio)*time_step;
+	  new_dt = time_dump - time;
+	}
       }
     }
     break;
