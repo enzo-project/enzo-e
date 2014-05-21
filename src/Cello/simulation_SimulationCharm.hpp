@@ -80,6 +80,9 @@ public: // functions
   /// Continue on to Problem::output_wait()
   void r_write(CkReductionMsg * msg);
 
+  /// Continue on to Problem::output_wait() from checkpoint
+  void r_write_checkpoint();
+
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
   void p_output_write (int n, char * buffer);

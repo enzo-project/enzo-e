@@ -12,8 +12,6 @@
 #include "main.hpp"
 #include "charm_simulation.hpp"
 
-#include "enzo.hpp" /* temp */
-
 //----------------------------------------------------------------------
 
 CommBlock::CommBlock

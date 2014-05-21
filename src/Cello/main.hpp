@@ -59,7 +59,9 @@ public:
 
   /// Migration constructor
   Main(CkMigrateMessage * m)
-    : CBase_Main(m)
+    : CBase_Main(m),
+      count_exit_(0),
+      count_checkpoint_(0)
   { 
     TRACE("Main::Main(CkMigrateMessage)");
   }
@@ -70,6 +72,7 @@ public:
     TRACEPUP;
     CBase_Main::pup(p);
     p|count_exit_;
+    p|count_checkpoint_;
     WARNING ("Main::pup","skipping monitor_");
     if (p.isUnpacking()) monitor_ = Monitor::instance();
     //    p|*monitor_;
@@ -77,6 +80,8 @@ public:
 
   /// Exit the program
   void p_exit(int count);
+
+  void p_checkpoint (int count, std::string dir_name);
 
   void q_adapt_enter();
   void q_adapt_called();
@@ -99,6 +104,7 @@ public:
 private:
 
    int count_exit_; 
+   int count_checkpoint_; 
    Monitor * monitor_;
 
 };

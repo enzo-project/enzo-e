@@ -157,6 +157,13 @@ void SimulationCharm::r_write(CkReductionMsg * msg)
 
 //----------------------------------------------------------------------
 
+void SimulationCharm::r_write_checkpoint()
+{
+  problem()->output_wait(this);
+}
+
+//----------------------------------------------------------------------
+
 void Problem::output_wait(Simulation * simulation) throw()
 {
   Output * output = this->output(index_output_);
@@ -175,7 +182,7 @@ void Problem::output_wait(Simulation * simulation) throw()
 
   } else {
 
-    int n=1;  char * buffer = 0;
+    int n=0;  char * buffer = 0;
 
     // Copy / alias buffer array of data to send
     output->prepare_remote(&n,&buffer);
