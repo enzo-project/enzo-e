@@ -52,8 +52,6 @@ Simulation::Simulation
   }
 
   monitor_ = Monitor::instance();
-  monitor_->set_process_rank(group_process_->rank());
-  //  monitor_->set_active(group_process_->is_root());
 #ifdef CELLO_DEBUG
   monitor_->set_active(true);
 #else
@@ -121,6 +119,7 @@ void Simulation::pup (PUP::er &p)
   // p | *projections_schedule_off_;
 
   if (up) monitor_ = Monitor::instance();
+  p | *monitor_;
 
   if (up) hierarchy_ = new Hierarchy;
   p | *hierarchy_;

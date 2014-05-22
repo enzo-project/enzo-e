@@ -68,7 +68,6 @@ void SimulationCharm::delete_block()
 
 void SimulationCharm::performance_output()
 {
-
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 

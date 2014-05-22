@@ -766,8 +766,6 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 	  "number of schedule''s is greater than MAX_SCHEDULE",
 	  index < MAX_SCHEDULE);
 
-  int n=p->group_count();
-
   std::string var = p->value_string("var","none");
 
   output_schedule_var[index] = var;
