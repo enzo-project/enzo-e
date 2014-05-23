@@ -62,7 +62,14 @@ void Hierarchy::pup (PUP::er &p)
   p | *factory_;
   p | dimension_;
   p | refinement_;
+
   p | num_blocks_;
+  // clear if unpacking: load balancing expects num_blocks_ to be
+  // updated by CommBlock(CkMigrateMessage) and ~CommBlock(), but
+  // checkpoint / restart then double-counts Blocks.  This
+  // still doesn't seem to fix checkpoint / restart since Enzo-P
+  // still hangs on restart at cycle 110 during I/O
+  if (up) num_blocks_ = 0;
 
   // block_array_ is NULL on non-root processes
   bool allocated=(block_array_ != NULL);

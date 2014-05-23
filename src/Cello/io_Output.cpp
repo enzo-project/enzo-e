@@ -232,7 +232,7 @@ void Output::write_hierarchy_
  ) throw()
 {
 
-  if (hierarchy->group_process()->is_root())
+  if (hierarchy->group_process()->is_root()) {
 
     // --------------------------------------------------
     // ENTRY: #1 Output::write_hierarchy_()-> CommBlock::p_output_write()
@@ -240,7 +240,7 @@ void Output::write_hierarchy_
     // --------------------------------------------------
     hierarchy->block_array()->p_output_write(index_);
     // --------------------------------------------------
-
+  }
 }
 
 //----------------------------------------------------------------------
@@ -251,7 +251,6 @@ void Output::write_block_
  const FieldDescr * field_descr
  ) throw()
 {
-    TRACE("Output::write_block_()");
   // Write fields
 
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {

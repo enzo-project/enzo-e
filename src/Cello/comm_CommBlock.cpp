@@ -48,6 +48,9 @@ CommBlock::CommBlock
   is_leaf_(true)
 {
 
+  // Enable Charm++ AtSync() dynamic load balancing
+  usesAtSync = CmiTrue;
+
 #ifdef CELLO_DEBUG
   index_.print("CommBlock()",-1,2,false,simulation());
 #endif
@@ -158,6 +161,7 @@ CommBlock::CommBlock
   }
 
   if (! testing) ((SimulationCharm *)simulation())->insert_block();
+  printf ("CommBlock(m) insert_block(%d)\n",simulation()->hierarchy()->num_blocks());
 
   int initial_cycle = simulation()->config()->initial_cycle;
   bool is_first_cycle = (initial_cycle == cycle);
@@ -289,8 +293,19 @@ CommBlock::~CommBlock() throw ()
   child_block_ = 0;
 
   ((SimulationCharm *)simulation())->delete_block();
+  printf ("DEBUG %s:%d CommBlock(m) delete_block(%d)\n",
+	  __FILE__,__LINE__,simulation()->hierarchy()->num_blocks());
 
 }
+
+//----------------------------------------------------------------------
+
+CommBlock::CommBlock (CkMigrateMessage *m) : CBase_CommBlock(m)
+{ 
+  printf ("DEBUG %s:%d CommBlock(CkMigrateMessage*)\n",__FILE__,__LINE__); 
+  ((SimulationCharm *)simulation())->insert_block();
+  printf ("DEBUG %s:%d CommBlock(m) insert_block(%d)\n",__FILE__,__LINE__,simulation()->hierarchy()->num_blocks());
+};
 
 //----------------------------------------------------------------------
 

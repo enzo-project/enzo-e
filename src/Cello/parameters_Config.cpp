@@ -18,6 +18,10 @@ void Config::pup (PUP::er &p)
 
   // NOTE: change this function whenever attributes change
 
+  // Balance
+
+  p | balance_interval;
+
   // Boundary
 
   p | num_boundary;
@@ -169,6 +173,7 @@ void Config::read(Parameters * p) throw()
 {
   TRACE("BEGIN Config::read()");
 
+  read_balance_(p);
   read_boundary_(p);
   read_domain_(p);
   read_field_(p);
@@ -186,6 +191,19 @@ void Config::read(Parameters * p) throw()
   TRACE("END   Config::read()");
 
 }
+
+//----------------------------------------------------------------------
+
+void Config::read_balance_ (Parameters * p) throw()
+{
+
+  //--------------------------------------------------
+  // Boundary
+  //--------------------------------------------------
+
+  balance_interval = p->value_integer("Balance:interval",0);
+
+}  
 
 //----------------------------------------------------------------------
 
@@ -486,7 +504,7 @@ void Config::read_control_ (Parameters * p) throw()
   control_sync_output_enter = p->value_string
     ("Control:sync:output_enter","array");
   control_sync_output_exit = p->value_string
-    ("Control:sync:output_exit","none");
+    ("Control:sync:output_exit","contribute");
   control_sync_refresh_enter = p->value_string
     ("Control:sync:refresh_enter","array");
   control_sync_refresh_exit = p->value_string
@@ -494,7 +512,7 @@ void Config::read_control_ (Parameters * p) throw()
   control_sync_stopping_enter = p->value_string
     ("Control:sync:stopping_enter","none");
   control_sync_stopping_exit = p->value_string
-    ("Control:sync:stopping_exit","none");
+    ("Control:sync:stopping_exit","contribute");
 
 }
 

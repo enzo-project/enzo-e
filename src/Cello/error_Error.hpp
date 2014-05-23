@@ -129,9 +129,13 @@
 #ifdef CELLO_TRACE_CHARM
 #   define TRACE_CHARM(M)				\
   { m2_(stdout,"TRACE_CHARM",__FILE__,__LINE__,"",M); }
-#   define TRACEPUP							\
-  { m2_(stdout,"TRACEPUP",__FILE__,__LINE__,"",				\
-	p.isPacking()?"isPacking":(p.isUnpacking()?"isUnpacking":"isSizing")); }
+#   define TRACEPUP				\
+  { m2_(stdout,"TRACEPUP",__FILE__,__LINE__,"",	\
+	"%s %s %s %s",					\
+	p.isPacking()   ?"Packing"   : "",		\
+	p.isUnpacking() ?"Unpacking" : "",		\
+	p.isSizing()    ?"Sizing"    : "",		\
+	p.isDeleting()  ?"Deleting"  : ""); }
 #else
 #   define TRACE_CHARM(M)				\
   /* This space intentionally left blank */

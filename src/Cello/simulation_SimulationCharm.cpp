@@ -41,6 +41,7 @@ SimulationCharm::~SimulationCharm() throw()
 
 void SimulationCharm::insert_block() 
 {
+ 
 #ifdef CELLO_DEBUG
   PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %d\n",
 		   CkMyPe(),sync_output_begin_.stop(),hierarchy()->num_blocks());

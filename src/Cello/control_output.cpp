@@ -51,6 +51,7 @@ void CommBlock::output_begin_ ()
 
 void SimulationCharm::begin_output ()
 {
+
 #ifdef TRACE_MEMORY
   trace_mem_ = Memory::instance()->bytes() - trace_mem_;
 #endif
@@ -77,7 +78,7 @@ void SimulationCharm::begin_output ()
 
 void SimulationCharm::r_output(CkReductionMsg * msg)
 {
-
+ 
   delete msg;
 
   problem()->output_reset();
@@ -88,6 +89,7 @@ void SimulationCharm::r_output(CkReductionMsg * msg)
 
 void Problem::output_next(Simulation * simulation) throw()
 {
+
   int cycle   = simulation->cycle();
   double time = simulation->time();
 
@@ -166,6 +168,7 @@ void SimulationCharm::r_write_checkpoint()
 
 void Problem::output_wait(Simulation * simulation) throw()
 {
+  
   Output * output = this->output(index_output_);
 
   int ip       = CkMyPe();

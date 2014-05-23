@@ -27,6 +27,8 @@ void ScheduleList::set_cycle_list (std::vector<int> cycle_list) throw()
 	     "Resetting Output scheduling");
   }
 
+  type_ = schedule_type_cycle;
+
   cycle_list_.clear();
 
   cycle_list_ = cycle_list;
@@ -39,10 +41,13 @@ void ScheduleList::set_cycle_list (std::vector<int> cycle_list) throw()
 
 void ScheduleList::set_time_list (std::vector<double> time_list) throw()
 {
+
   if (type_ != schedule_type_unknown) {
     WARNING ("ScheduleList::set_time_list",
 	     "Resetting Output scheduling");
   }
+
+  type_ = schedule_type_time;
 
   time_list_.clear();
 

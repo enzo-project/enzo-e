@@ -175,9 +175,9 @@ EnzoMethodGrackle::EnzoMethodGrackle (EnzoConfig * c)
   chemistry_.use_grackle = true;
   chemistry_.Gamma = c->method_grackle_gamma;
 
-chemistry_.with_radiative_cooling         = TRUE;
-chemistry_.primordial_chemistry           = FALSE;  // off
-chemistry_.metal_cooling                  = FALSE;
+  chemistry_.with_radiative_cooling         = TRUE;
+  chemistry_.primordial_chemistry           = FALSE;  // off
+  chemistry_.metal_cooling                  = FALSE;
   chemistry_.h2_on_dust                     = FALSE;
 
   chemistry_.cmb_temperature_floor          = TRUE;   // use CMB floor.
@@ -285,6 +285,7 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
 double EnzoMethodGrackle::timestep ( CommBlock * comm_block ) throw()
 {
   initialize_(comm_block);
+  return std::numeric_limits<double>::max();
 }
 
 //======================================================================

@@ -22,7 +22,7 @@ verbose = 1
 #  series of statements
 #----------------------------------------------------------------------
 
-trace_charm = 0
+trace_charm = 1
 
 #----------------------------------------------------------------------
 # Whether to enable displaying messages with the DEBUG() series of
@@ -59,7 +59,7 @@ trace_memory = 0
 # Enable charm++ dynamic load balancing
 #----------------------------------------------------------------------
 
-balance = 0
+balance = 1
 
 balancer = 'RotateLB'  # For testing only
 

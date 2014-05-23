@@ -435,7 +435,6 @@ Refine * Problem::create_refine_
  ) throw ()
 { 
 
-  printf ("Problem::create_refine_ %s\n",type.c_str());
   if (type == "slope") {
 
     return new RefineSlope 

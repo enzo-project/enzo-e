@@ -53,8 +53,10 @@ public: // functions
   { return active_; };
 
   /// Set whether the Schedule object is type or not
-  void set_type(bool type) throw()
-  { type_ = type; };
+  void set_type(int type) throw()
+  {
+    type_ = type; 
+  };
 
   /// Return whether the output object is type
   int type() const throw()  { return type_; };
