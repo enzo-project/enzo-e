@@ -293,8 +293,6 @@ CommBlock::~CommBlock() throw ()
   child_block_ = 0;
 
   ((SimulationCharm *)simulation())->delete_block();
-  printf ("DEBUG %s:%d CommBlock(m) delete_block(%d)\n",
-	  __FILE__,__LINE__,simulation()->hierarchy()->num_blocks());
 
 }
 
@@ -302,9 +300,7 @@ CommBlock::~CommBlock() throw ()
 
 CommBlock::CommBlock (CkMigrateMessage *m) : CBase_CommBlock(m)
 { 
-  printf ("DEBUG %s:%d CommBlock(CkMigrateMessage*)\n",__FILE__,__LINE__); 
   ((SimulationCharm *)simulation())->insert_block();
-  printf ("DEBUG %s:%d CommBlock(m) insert_block(%d)\n",__FILE__,__LINE__,simulation()->hierarchy()->num_blocks());
 };
 
 //----------------------------------------------------------------------

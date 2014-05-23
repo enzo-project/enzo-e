@@ -56,7 +56,7 @@ void Hierarchy::pup (PUP::er &p)
   TRACEPUP;
   // NOTE: change this function whenever attributes change
 
-  bool up = p.isUnpacking();
+  const bool up = p.isUnpacking();
 
   if (up) factory_ = new Factory;
   p | *factory_;
@@ -66,9 +66,8 @@ void Hierarchy::pup (PUP::er &p)
   p | num_blocks_;
   // clear if unpacking: load balancing expects num_blocks_ to be
   // updated by CommBlock(CkMigrateMessage) and ~CommBlock(), but
-  // checkpoint / restart then double-counts Blocks.  This
-  // still doesn't seem to fix checkpoint / restart since Enzo-P
-  // still hangs on restart at cycle 110 during I/O
+  // checkpoint / restart then double-counts Blocks.
+
   if (up) num_blocks_ = 0;
 
   // block_array_ is NULL on non-root processes

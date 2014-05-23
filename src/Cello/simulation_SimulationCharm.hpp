@@ -44,6 +44,16 @@ public: // functions
     Simulation::pup(p);
     p | sync_output_begin_;
     p | sync_output_write_;
+
+  // clear sync if unpacking: load balancing expects syncs to be
+  // updated by CommBlock(CkMigrateMessage) (increment) and
+  // ~CommBlock() (decrement), but checkpoint / restart then
+  // double-counts Blocks.
+
+    const bool up = p.isUnpacking();
+
+    if (up) sync_output_begin_.set_stop(0);
+    if (up) sync_output_write_.set_stop(0);
   }
 
   /// Initialize the Charm++ Simulation

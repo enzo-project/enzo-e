@@ -5,7 +5,13 @@
 /// @date     2011-09-01
 /// @brief    Functions implementing CHARM++ output-related functions
 
-#define TRACE_OUTPUT
+/* #define TRACE_OUTPUT */
+
+#ifdef TRACE_OUTPUT
+#  define TRACE_LOCAL(M) printf ("TRACE Output %s:%d" M "\n", __FILE__,__LINE__); fflush(stdout);
+#else
+#  define TRACE_LOCAL(M) /*  */
+#endif
 
 #include "simulation.hpp"
 #include "mesh.hpp"
@@ -18,6 +24,8 @@
 
 void CommBlock::output_begin_ ()
 {
+  TRACE_LOCAL("CommBlock::output_begin_()");
+
   int cycle   = simulation()->cycle();
   double time = simulation()->time();
 
@@ -52,16 +60,14 @@ void CommBlock::output_begin_ ()
 void SimulationCharm::begin_output ()
 {
 
+  TRACE_LOCAL("CommBlock::output_begin()");
+
 #ifdef TRACE_MEMORY
   trace_mem_ = Memory::instance()->bytes() - trace_mem_;
 #endif
 
-  TRACE("SimulationCharm::begin_output()");
   performance()->switch_region(perf_output,__FILE__,__LINE__);
 
-  TRACE2("block_sync %d/%d",
-	 sync_output_begin_.index(),sync_output_begin_.stop());
-  
   if (sync_output_begin_.next()) {
 
     CkCallback callback (CkIndex_SimulationCharm::r_output(NULL), thisProxy);
@@ -79,6 +85,8 @@ void SimulationCharm::begin_output ()
 void SimulationCharm::r_output(CkReductionMsg * msg)
 {
  
+  TRACE_LOCAL("SimulationCharm::r_output()");
+
   delete msg;
 
   problem()->output_reset();
@@ -89,6 +97,8 @@ void SimulationCharm::r_output(CkReductionMsg * msg)
 
 void Problem::output_next(Simulation * simulation) throw()
 {
+
+  TRACE_LOCAL("Problem::output_next()");
 
   int cycle   = simulation->cycle();
   double time = simulation->time();
@@ -122,6 +132,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
 void CommBlock::p_output_write (int index_output)
 {
+  TRACE_LOCAL("CommBlock::p_output_write()");
   FieldDescr * field_descr = simulation()->field_descr();
   Output * output = simulation()->problem()->output(index_output);
 
@@ -134,6 +145,7 @@ void CommBlock::p_output_write (int index_output)
 
 void SimulationCharm::write_()
 {
+  TRACE_LOCAL("SimulationCharm::write_()");
   if (sync_output_write_.next()) {
 
     CkCallback callback (CkIndex_SimulationCharm::r_write(NULL), thisProxy);
@@ -152,6 +164,7 @@ void SimulationCharm::write_()
 
 void SimulationCharm::r_write(CkReductionMsg * msg)
 {
+  TRACE_LOCAL("SimulationCharm::r_write()");
   delete msg;
 
   problem()->output_wait(this);
@@ -168,6 +181,7 @@ void SimulationCharm::r_write_checkpoint()
 
 void Problem::output_wait(Simulation * simulation) throw()
 {
+  TRACE_LOCAL("Problem::output_wait()");
   
   Output * output = this->output(index_output_);
 
@@ -220,6 +234,7 @@ void Problem::output_wait(Simulation * simulation) throw()
 
 void SimulationCharm::p_output_write (int n, char * buffer)
 {
+  TRACE_LOCAL("SimulationCharm::p_output_write()");
   problem()->output_write(this,n,buffer); 
 }
 
@@ -231,6 +246,7 @@ void Problem::output_write
  int n, char * buffer
 ) throw()
 {
+  TRACE_LOCAL("Problem::output_write()");
   Output * output = this->output(index_output_);
 
   if (n != 0) {
@@ -252,6 +268,7 @@ void Problem::output_write
 
 void SimulationCharm::output_exit()
 {
+  TRACE_LOCAL("SimulationCharm::output_exit()");
   if (hierarchy()->group_process()->is_root()) 
     hierarchy()->block_array()->p_output_exit();
 }
