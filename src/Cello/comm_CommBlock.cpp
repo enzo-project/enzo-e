@@ -161,7 +161,6 @@ CommBlock::CommBlock
   }
 
   if (! testing) ((SimulationCharm *)simulation())->insert_block();
-  printf ("CommBlock(m) insert_block(%d)\n",simulation()->hierarchy()->num_blocks());
 
   int initial_cycle = simulation()->config()->initial_cycle;
   bool is_first_cycle = (initial_cycle == cycle);

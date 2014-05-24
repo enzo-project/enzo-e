@@ -212,6 +212,7 @@ void OutputImage::write_block
 // @param field_descr  Field descriptor
 {
 
+  if (!comm_block->is_leaf()) return
   TRACE("OutputImage::write_block()");
   const FieldBlock * field_block = comm_block->block()->field_block();
 
@@ -298,6 +299,7 @@ void OutputImage::write_block
     double value = 0;
     value = mesh_color_(comm_block->level());
 					     
+    reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value,0.5);
     reduce_box_(image_mesh_,ixm,ixp,iym,iyp,value);
 
     if (comm_block->is_leaf()) { // ) {
@@ -668,10 +670,10 @@ void OutputImage::reduce_point_
 {
   switch (op_reduce_) {
   case reduce_min:
-    *data = std::min(*data,value); 
+    *data = std::min(*data,alpha*value); 
     break;
   case reduce_max:
-    *data = std::max(*data,value); 
+    *data = std::max(*data,alpha*value); 
     break;
   case reduce_avg:
   case reduce_sum:

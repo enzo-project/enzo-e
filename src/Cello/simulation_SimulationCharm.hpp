@@ -99,15 +99,15 @@ public: // functions
 
   void compute ();
 
+  void p_monitor();
 
-  /// Output Performance information to stdout
-  void p_performance_output()
-  { performance_output(); }
+  void p_monitor_performance()
+  { monitor_performance(); };
 
-  virtual void performance_output();
+  virtual void monitor_performance();
 
   /// Reduction for performance data
-  void r_performance_reduce (CkReductionMsg * msg);
+  void r_monitor_performance (CkReductionMsg * msg);
 
  
 protected: // attributes

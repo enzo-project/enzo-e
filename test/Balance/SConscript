@@ -1,0 +1,143 @@
+Import('env')
+Import('parallel_run')
+Import('serial_run')
+Import('ip_charm')
+
+Import('bin_path')
+Import('test_path')
+
+#----------------------------------------------------------------------
+# defines
+#----------------------------------------------------------------------
+
+date_cmd = 'echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
+
+run_balance_greedy_comm = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer GreedyCommLB > $TARGET 2>&1; $COPY")
+env.Append(BUILDERS = { 'RunBalanceGreedyComm' : run_balance_greedy_comm } )
+env_mv_greedy_comm  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/GreedyComm; mv `ls *.png *.h5` ' + test_path + '/Balance/GreedyComm; mv '+test_path+'/Balance/test_balance_greedy_comm.unit '+test_path)
+
+run_balance_greedy = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer GreedyLB > $TARGET 2>&1; $COPY")
+env.Append(BUILDERS = { 'RunBalanceGreedy' : run_balance_greedy } )
+env_mv_greedy  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Greedy; mv `ls *.png *.h5` ' + test_path + '/Balance/Greedy; mv '+test_path+'/Balance/test_balance_greedy.unit '+test_path)
+
+run_balance_hybrid = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer HybridLB > $TARGET 2>&1; $COPY")
+env.Append(BUILDERS = { 'RunBalanceHybrid' : run_balance_hybrid } )
+env_mv_hybrid  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Hybrid; mv `ls *.png *.h5` ' + test_path + '/Balance/Hybrid; mv '+test_path+'/Balance/test_balance_hybrid.unit '+test_path)
+
+run_balance_neighbor = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer NeighborLB > $TARGET 2>&1; $COPY")
+env.Append(BUILDERS = { 'RunBalanceNeighbor' : run_balance_neighbor } )
+env_mv_neighbor  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Neighbor; mv `ls *.png *.h5` ' + test_path + '/Balance/Neighbor; mv '+test_path+'/Balance/test_balance_neighbor.unit '+test_path)
+
+run_balance_rand_cent = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer RandCentLB > $TARGET 2>&1; $COPY")
+env.Append(BUILDERS = { 'RunBalanceRandCent' : run_balance_rand_cent } )
+env_mv_rand_cent  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/RandCent; mv `ls *.png *.h5` ' + test_path + '/Balance/RandCent; mv '+test_path+'/Balance/test_balance_rand_cent.unit '+test_path)
+
+run_balance_refine_comm = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer RefineCommLB > $TARGET 2>&1; $COPY")
+env.Append(BUILDERS = { 'RunBalanceRefineComm' : run_balance_refine_comm } )
+env_mv_refine_comm  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/RefineComm; mv `ls *.png *.h5` ' + test_path + '/Balance/RefineComm; mv '+test_path+'/Balance/test_balance_refine_comm.unit '+test_path)
+
+run_balance_refine = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer RefineLB > $TARGET 2>&1; $COPY")
+env.Append(BUILDERS = { 'RunBalanceRefine' : run_balance_refine } )
+env_mv_refine  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Refine; mv `ls *.png *.h5` ' + test_path + '/Balance/Refine; mv '+test_path+'/Balance/test_balance_refine.unit '+test_path)
+
+run_balance_rotate = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer RotateLB > $TARGET 2>&1; $COPY")
+env.Append(BUILDERS = { 'RunBalanceRotate' : run_balance_rotate } )
+env_mv_rotate  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Rotate; mv `ls *.png *.h5` ' + test_path + '/Balance/Rotate; mv '+test_path+'/Balance/test_balance_rotate.unit '+test_path)
+
+
+
+
+
+
+#----------------------------------------------------------------------
+# Load Balancing
+#----------------------------------------------------------------------
+
+# GreedyCommLB
+
+balance_greedy_comm = env_mv_greedy_comm.RunBalanceGreedyComm (
+   'test_balance_greedy_comm.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/load-balance-4.in')
+
+Clean(balance_greedy_comm,
+      [Glob('#/' + test_path + '/Balance/balance*png'),
+       '#/input/parameters.out',])
+
+# GreedyLB
+
+balance_greedy = env_mv_greedy.RunBalanceGreedy (
+   'test_balance_greedy.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/load-balance-4.in')
+
+Clean(balance_greedy,
+      [Glob('#/' + test_path + '/Balance/balance*png'),
+       '#/input/parameters.out',])
+
+# HybridLB
+
+balance_hybrid = env_mv_hybrid.RunBalanceHybrid (
+   'test_balance_hybrid.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/load-balance-4.in')
+
+Clean(balance_hybrid,
+      [Glob('#/' + test_path + '/Balance/balance*png'),
+       '#/input/parameters.out',])
+
+# NeighborLB
+
+balance_neighbor = env_mv_neighbor.RunBalanceNeighbor (
+   'test_balance_neighbor.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/load-balance-4.in')
+
+Clean(balance_neighbor,
+      [Glob('#/' + test_path + '/Balance/balance*png'),
+       '#/input/parameters.out',])
+
+# RandCentLB
+
+balance_rand_cent = env_mv_rand_cent.RunBalanceRandCent (
+   'test_balance_rand_cent.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/load-balance-4.in')
+
+Clean(balance_rand_cent,
+      [Glob('#/' + test_path + '/Balance/balance*png'),
+       '#/input/parameters.out',])
+
+# RefineCommLB
+
+balance_refine_comm = env_mv_refine_comm.RunBalanceRefineComm (
+   'test_balance_refine_comm.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/load-balance-4.in')
+
+Clean(balance_refine_comm,
+      [Glob('#/' + test_path + '/Balance/balance*png'),
+       '#/input/parameters.out',])
+
+# RefineLB
+
+balance_refine = env_mv_refine.RunBalanceRefine (
+   'test_balance_refine.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/load-balance-4.in')
+
+Clean(balance_refine,
+      [Glob('#/' + test_path + '/Balance/balance*png'),
+       '#/input/parameters.out',])
+
+# RotateLB
+
+balance_rotate = env_mv_rotate.RunBalanceRotate (
+   'test_balance_rotate.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/load-balance-4.in')
+
+Clean(balance_rotate,
+      [Glob('#/' + test_path + '/Balance/balance*png'),
+       '#/input/parameters.out',])
+

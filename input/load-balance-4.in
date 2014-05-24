@@ -1,0 +1,54 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/adapt.incl"
+
+Balance { interval = 10; }
+
+Stopping { cycle = 100; }
+
+Mesh    { 
+   root_size   = [16,16];
+   root_blocks = [4,4];
+   max_level   = 7; 
+}
+
+Initial {
+    density       { value = [ 1.0+x, "input/enzop-cello-full.png",  0.125 ]; };
+    total_energy  { value = 
+    [ 
+       (1.0 + x)  / (0.4 * 1.0), "input/enzop-cello-full.png", 0.14 / (0.4 * 0.1)  ]; };
+    velocity_x    { value = [0.0]; };
+    velocity_y    { value = [0.0]; };
+}
+
+
+Boundary { type = "periodic"; }
+
+Output {
+     list = ["mesh","de"];
+      de {
+           name = ["balance-de-%05d.png", "cycle"]; 
+           include "input/schedule_cycle_10.incl"
+           image_reduce_type = "max";
+	   image_type = "data";
+           image_size = [1024,1024];
+          };
+      mesh {
+           name = ["balance-mesh-%05d.png", "cycle"]; 
+           include "input/schedule_cycle_10.incl"
+	   image_type = "mesh";
+	   image_size = [1025,1025];
+           image_specify_bounds = true;
+           image_min = 0.0;
+           image_max = 1.0;
+           image_mesh_color = "process";
+       };
+
+}
+Mesh {
+   slope {
+      max_coarsen = 5.0;
+      min_refine  = 20.0;
+   }
+}

@@ -22,7 +22,7 @@ verbose = 1
 #  series of statements
 #----------------------------------------------------------------------
 
-trace_charm = 1
+trace_charm = 0
 
 #----------------------------------------------------------------------
 # Whether to enable displaying messages with the DEBUG() series of
@@ -61,7 +61,33 @@ trace_memory = 0
 
 balance = 1
 
-balancer = 'RotateLB'  # For testing only
+# balancer =  # Uses a greedy algorithm that always assigns
+# the heaviest object to the least loaded processor.
+
+# balancer =  # Extends the greedy algorithm to take the
+# communication graph into account.
+
+# balancer = 'TopoCentLB' # Extends the greedy algorithm to take
+# processor topology into account.
+
+# balancer = 'RefineLB' # Moves objects away from the most overloaded
+# processors to reach average, limits the number of objects migrated.
+
+# balancer = 'RefineSwapLB' # Moves objects away from the most
+# overloaded processors to reach average. In case it cannot migrate an
+# object from an overloaded processor to an underloaded processor, it
+# swaps objects to reduce the load on the overloaded processor. This
+# strategy limits the number of objects migrated.
+
+balancer = [
+'GreedyCommLB',
+'GreedyLB', 
+'HybridLB',
+'NeighborLB',
+'RandCentLB',
+'RefineCommLB',
+'RefineLB',
+'RotateLB']
 
 #----------------------------------------------------------------------
 # Whether to compile with -pg to use gprof for performance profiling
@@ -267,18 +293,15 @@ charmc = charm_path + '/bin/charmc -language charm++ '
 cxx = charmc + charm_perf + ' '
 
 if (balance == 1):
-     flags_cxx_charm = flags_cxx_charm + ' -balancer ' + balancer
-     flags_link_charm = flags_link_charm + ' -module ' + balancer
+     flags_cxx_charm = flags_cxx_charm + " -balancer " + " -balancer ".join(balancer)
+     flags_link_charm = flags_link_charm + " -module " + " -module ".join(balancer)
 
 #======================================================================
 # UNIT TEST SETTINGS
 #======================================================================
 
-parallel_run_args = ""
-
 serial_run   = ""
 parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
-if (balance):  parallel_run_args = "+balancer " + balancer
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"
@@ -405,7 +428,6 @@ env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 
 Export('env')
 Export('parallel_run')
-Export('parallel_run_args')
 Export('serial_run')
 Export('use_papi')
 

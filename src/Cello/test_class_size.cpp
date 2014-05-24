@@ -37,7 +37,6 @@ PARALLEL_MAIN_BEGIN
   printf ("%4ld sizeof(Problem)\n",sizeof(Problem));
   printf ("%4ld sizeof(Simulation)\n",sizeof(Simulation));
   printf ("%4ld sizeof(Stopping)\n",sizeof(Stopping));
-  printf ("%4ld sizeof(Timestep)\n",sizeof(Timestep));
   printf ("%4ld sizeof(Tree)\n",sizeof(Tree));
 
   //--------------------------------------------------
