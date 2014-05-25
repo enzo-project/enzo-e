@@ -51,9 +51,6 @@ void CommBlock::output_begin_ ()
 
 void SimulationCharm::begin_output ()
 {
-#ifdef TRACE_MEMORY
-  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
-#endif
 
   TRACE("SimulationCharm::begin_output()");
   performance()->switch_region(perf_output,__FILE__,__LINE__);

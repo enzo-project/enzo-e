@@ -388,12 +388,12 @@ void EnzoBlock::pup(PUP::er &p)
   CommBlock::pup(p);
 
 
-  p | Time_;
   p | CycleNumber;
   p | OldTime;
   p | dt;
-
   WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
+  p | Time_;
+
   WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
 
   PUParray(p,GridLeftEdge,MAX_DIMENSION); 

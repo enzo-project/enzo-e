@@ -611,9 +611,6 @@ protected: // attributes
 
   //--------------------------------------------------
 
-  // /// Indices of all neighboring CommBlocks
-  // std::vector<Index> neighbor_index_;
-
   /// Index of current initialization routine
   int index_initial_;
 
@@ -669,9 +666,6 @@ protected: // attributes
   /// computed to avoid race condition bug #30
   bool is_leaf_;
 
-#ifdef TRACE_MEMORY
-  int trace_mem_;
-#endif
 };
 
 #endif /* COMM_COMMBLOCK_HPP */
