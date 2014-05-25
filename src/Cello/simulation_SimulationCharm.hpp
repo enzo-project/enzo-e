@@ -115,6 +115,10 @@ protected: // attributes
   Sync sync_output_begin_;
   Sync sync_output_write_;
 
+#ifdef TRACE_MEMORY
+  int trace_mem_;
+#endif
+
 };
 
 #endif /* SIMULATION_SIMULATION_CHARM_HPP */
