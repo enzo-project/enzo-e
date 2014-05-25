@@ -56,9 +56,7 @@ public: // interface
 
     // // NOTE: change this function whenever attributes change
     // p |  *timer_;
-    // p |  active_;
-    // WARNING("Monitor::pup","ip_ may change");
-    // p |  ip_;
+    p |  active_;
     // p |  group_default_;
     // p |  group_active_;
 
@@ -69,11 +67,6 @@ public: // interface
   { 
     return & instance_;
   };
-
-  /// Set the processor's rank 
-  /// (note cannot use GroupProcess since Monitor object created at startup)
-  void set_process_rank (int ip)
-  { ip_ = ip; }
 
   /// Set whether the monitor is active for text output.  Useful for
   /// parallel, e.g. "monitor->set_active(parallel->is_root())"
@@ -117,9 +110,6 @@ private: // attributes
 
   /// Whether monitoring is activated.  Used for e.g. ip != 0.
   bool active_;
-
-  /// Owning processor's rank
-  int ip_;
 
   /// Whether default is to output all groups or output no groups
   bool group_default_;

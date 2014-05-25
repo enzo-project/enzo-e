@@ -362,7 +362,7 @@ function test_table ($file_root,$size_array, $types)
   $show_flash = 0;
   echo "<table>";
   echo "<tr>";
-  echo "<th>$file_root</th>";
+  //  echo "<th>$file_root</th>";
   if ($show_flash) echo "<th>animation</th>";
   for ($j = 0; $j < sizeof($size_array); ++$j) {
       $size = $size_array[$j];
@@ -372,7 +372,7 @@ function test_table ($file_root,$size_array, $types)
     for ($i = 0; $i < sizeof($types); ++$i) {
       echo "<tr>";
       $type = $types[$i];
-     	printf ("<th>$type</th>\n"); 
+      //     	printf ("<th>$type</th>\n"); 
 	// Show movie file if available
 	if ($show_flash) {
 	  echo "<td>";
@@ -547,17 +547,29 @@ test_summary("Mesh",
 // 	     array("adapt-L1-P1", "adapt-L2-P1", "adapt-L3-P1", "adapt-L4-P1", "adapt-L5-P1"),
 // 	     array("enzo-p",      "enzo-p",      "enzo-p",      "enzo-p",      "enzo-p"));
 
+test_summary("Balance", 
+	     array("balance_rand_cent",
+		   "balance_greedy",
+		   "balance_greedy_comm",
+		   "balance_refine",
+		   "balance_refine_comm",
+		   "balance_rotate",
+		   "balance_neighbor",
+		   "balance_hybrid"),
+	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p",
+		   "enzo-p", "enzo-p", "enzo-p", "enzo-p"));
+
 test_summary("Boundary-2D", 
 	     array("boundary_reflecting-2d",
 		   "boundary_periodic-2d",
 		   "boundary_outflow-2d"),
-	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
+	     array("enzo-p", "enzo-p", "enzo-p"));
 
 test_summary("Boundary-3D",
 	     array("boundary_reflecting-3d",
 		   "boundary_periodic-3d",
 		   "boundary_outflow-3d"),
-	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p"));
+	     array("enzo-p", "enzo-p", "enzo-p"));
 
 test_summary("Initial", 
 	     array("initial_png"),
@@ -865,6 +877,57 @@ test_table ("adapt-L5-P1-vy",
 	    array("0.000000","0.020000","0.040000","0.060000",
 		  "0.080000","0.100000"), $types);
 
+
+
+//======================================================================
+
+test_group("Balance");
+
+// echo "<h3>Greedy</h3>";
+// echo "<h3>GreedyComm</h3>";
+// echo "<h3>Hybrid</h3>";
+// echo "<h3>Neighbor</h3>";
+// echo "<h3>RandCent</h3>";
+// echo "<h3>Refine</h3>";
+// echo "<h3>RefineCom</h3>";
+echo "<h3>Rotate</h3>";
+tests("Enzo","enzo-p","test_balance_rotate","Rotate");
+ test_table ("Balance/Rotate/balance-mesh",
+	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+
+// tests("Enzo","enzo-p","test_balance_greedy","Greedy");
+// tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm");
+// tests("Enzo","enzo-p","test_balance_hybrid","Hybrid);
+// tests("Enzo","enzo-p","test_balance_neighbor","Neighbor");
+// tests("Enzo","enzo-p","test_balance_rand_cent","RandCent");
+// tests("Enzo","enzo-p","test_balance_refine","Refine");
+// tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm");
+
+
+echo "<h3>GreedyComm</h3>";
+tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm");
+test_table ("Balance/GreedyComm/balance-mesh",
+	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+echo "<h3>Hybrid</h3>";
+tests("Enzo","enzo-p","test_balance_hybrid","Hybrid");
+test_table ("Balance/Hybrid/balance-mesh",
+	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+echo "<h3>Neighbor</h3>";
+tests("Enzo","enzo-p","test_balance_neighbor","Neighbor");
+test_table ("Balance/Neighbor/balance-mesh",
+	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+echo "<h3>RandCent</h3>";
+tests("Enzo","enzo-p","test_balance_rand_cent","RandCent");
+test_table ("Balance/RandCent/balance-mesh",
+	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+echo "<h3>Refine</h3>";
+tests("Enzo","enzo-p","test_balance_refine","Refine");
+test_table ("Balance/Refine/balance-mesh",
+	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+echo "<h3>RefineComm</h3>";
+tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm");
+test_table ("Balance/RefineComm/balance-mesh",
+	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
 
 
 //======================================================================

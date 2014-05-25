@@ -68,7 +68,7 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
      the timestep and finally the implied timestep. */
  
   /* special loop for no interpolate. */
- 
+
   // WARNING: floating point comparison
   if (time == Time())
 

@@ -44,6 +44,16 @@ public: // functions
     Simulation::pup(p);
     p | sync_output_begin_;
     p | sync_output_write_;
+
+  // clear sync if unpacking: load balancing expects syncs to be
+  // updated by CommBlock(CkMigrateMessage) (increment) and
+  // ~CommBlock() (decrement), but checkpoint / restart then
+  // double-counts Blocks.
+
+    const bool up = p.isUnpacking();
+
+    if (up) sync_output_begin_.set_stop(0);
+    if (up) sync_output_write_.set_stop(0);
   }
 
   /// Initialize the Charm++ Simulation
@@ -80,21 +90,24 @@ public: // functions
   /// Continue on to Problem::output_wait()
   void r_write(CkReductionMsg * msg);
 
+  /// Continue on to Problem::output_wait() from checkpoint
+  void r_write_checkpoint();
+
   /// Receive data from non-writing process, write to disk, close, and
   /// proceed with next output
   void p_output_write (int n, char * buffer);
 
   void compute ();
 
+  void p_monitor();
 
-  /// Output Performance information to stdout
-  void p_performance_output()
-  { performance_output(); }
+  void p_monitor_performance()
+  { monitor_performance(); };
 
-  virtual void performance_output();
+  virtual void monitor_performance();
 
   /// Reduction for performance data
-  void r_performance_reduce (CkReductionMsg * msg);
+  void r_monitor_performance (CkReductionMsg * msg);
 
  
 protected: // attributes

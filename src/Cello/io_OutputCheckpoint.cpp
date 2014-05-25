@@ -7,9 +7,10 @@
 ///
 /// 
 
-#include "io.hpp"
 
-extern CProxy_SimulationCharm  proxy_simulation;
+   
+#include "io.hpp"
+#include "main.hpp"
 
 //----------------------------------------------------------------------
 
@@ -58,22 +59,11 @@ void OutputCheckpoint::pup (PUP::er &p)
 
 void OutputCheckpoint::write_simulation ( const Simulation * simulation ) throw()
 {
-
   TRACE("OutputCheckpoint::write_simulation()");
 
-  // Write parameter file
-
   std::string dir_name = expand_file_name_(&dir_name_,&dir_args_);
-  char dir_char[255];
-  strcpy(dir_char,dir_name.c_str());
 
-  // --------------------------------------------------
-  // ENTRY: #1 OutputCheckpoint::write_simulation()-> SimulationCharm::s_write()
-  // ENTRY: checkpoint if Simulation is root
-  // --------------------------------------------------
-  CkCallback callback(CkIndex_SimulationCharm::s_write(),proxy_simulation);
-  CkStartCheckpoint (dir_char,callback);
-  // --------------------------------------------------
+  proxy_main.p_checkpoint(CkNumPes(),dir_name);
 
 }
 

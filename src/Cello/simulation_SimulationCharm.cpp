@@ -41,6 +41,7 @@ SimulationCharm::~SimulationCharm() throw()
 
 void SimulationCharm::insert_block() 
 {
+ 
 #ifdef CELLO_DEBUG
   PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %d\n",
 		   CkMyPe(),sync_output_begin_.stop(),hierarchy()->num_blocks());
@@ -66,9 +67,19 @@ void SimulationCharm::delete_block()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::performance_output()
+void SimulationCharm::p_monitor()
 {
+  monitor()-> print("", "-------------------------------------");
+  monitor()-> print("Simulation", "cycle %04d", cycle_);
+  monitor()-> print("Simulation", "time-sim %15.12f",time_);
+  monitor()-> print("Simulation", "dt %15.12g", dt_);
+  proxy_simulation.p_monitor_performance();
+}
 
+//----------------------------------------------------------------------
+
+void SimulationCharm::monitor_performance()
+{
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
@@ -89,10 +100,10 @@ void SimulationCharm::performance_output()
   counters_long[n-1] = hierarchy()->num_blocks(); // number of CommBlocks
 
   // --------------------------------------------------
-  // ENTRY: #1 SimulationCharm::performance_output() -> SimulationCharm::r_performance_reduce()
+  // ENTRY: #1 SimulationCharm::monitor_performance() -> SimulationCharm::r_monitor_performance()
   // ENTRY: contribute()
   // --------------------------------------------------
-  CkCallback callback (CkIndex_SimulationCharm::r_performance_reduce(NULL), 
+  CkCallback callback (CkIndex_SimulationCharm::r_monitor_performance(NULL), 
 		       thisProxy);
   contribute (n*sizeof(long), counters_long,CkReduction::sum_long,callback);
   // --------------------------------------------------
@@ -104,7 +115,7 @@ void SimulationCharm::performance_output()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::r_performance_reduce(CkReductionMsg * msg)
+void SimulationCharm::r_monitor_performance(CkReductionMsg * msg)
 {
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
@@ -122,7 +133,7 @@ void SimulationCharm::r_performance_reduce(CkReductionMsg * msg)
 	(performance_->counter_type(ic) != counter_type_abs) ||
 	(ir == index_region_cycle);
       if (do_print) {
-	monitor_->print("Performance","%s %s %ld",
+	monitor()->print("Performance","%s %s %ld",
 			performance_->region_name(ir).c_str(),
 			performance_->counter_name(ic).c_str(),
 			counters_long[index_counter]);
@@ -130,8 +141,10 @@ void SimulationCharm::r_performance_reduce(CkReductionMsg * msg)
     }
   }
 
-  monitor_->print("Performance","simulation num-blocks %d",
+  monitor()->print("Performance","simulation num-blocks %d",
 		  counters_long[n-1]);
+
+  Memory::instance()->reset_high();
 
   delete msg;
 

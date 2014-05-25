@@ -73,10 +73,10 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Initialize an empty CommBlock
-  CommBlock()  { };
+  CommBlock()  { printf ("CommBlock()\n"); };
 
   /// Initialize a migrated CommBlock
-  CommBlock (CkMigrateMessage *m) : CBase_CommBlock(m) { };
+  CommBlock (CkMigrateMessage *m);
 
   /// CHARM pupper
   void pup(PUP::er &p);
@@ -414,6 +414,7 @@ public:
 protected:
   void stopping_enter_();
   void stopping_begin_();
+  void stopping_balance_();
   void stopping_exit_();
 public:
 
@@ -483,6 +484,8 @@ public: // virtual functions
   int dimension() const;
 
   //  int count_neighbors() const;
+
+  void ResumeFromSync();
 
 protected: // functions
 

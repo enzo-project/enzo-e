@@ -387,6 +387,7 @@ void EnzoBlock::pup(PUP::er &p)
 
   CommBlock::pup(p);
 
+  p | Time_;
 
   p | CycleNumber;
   p | OldTime;
@@ -394,7 +395,16 @@ void EnzoBlock::pup(PUP::er &p)
   WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
   p | Time_;
 
-  WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
+  static bool warn1 = true;
+  if (warn1) {
+    WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
+    warn1=false;
+  }
+  static bool warn2 = true;
+  if (warn2) {
+    WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
+    warn2=false;
+  }
 
   PUParray(p,GridLeftEdge,MAX_DIMENSION); 
   PUParray(p,GridDimension,MAX_DIMENSION); 
@@ -408,7 +418,11 @@ void EnzoBlock::pup(PUP::er &p)
     }
   }
 
-  WARNING("EnzoBlock::pup()", "skipping OldBaryonField[] [not used]");
+  static bool warn3 = true;
+  if (warn3) {
+    warn3=false;
+    WARNING("EnzoBlock::pup()", "skipping OldBaryonField[] [not used]");
+  }
 
   if (index_.is_root()) {
     // static EnzoBlock variables

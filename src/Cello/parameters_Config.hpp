@@ -59,6 +59,9 @@ public: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
+  // Balance (dynamic load balancing)
+
+  int                        balance_interval; // 0 for none
   // Boundary
 
   int                        num_boundary;
@@ -206,6 +209,7 @@ public: // attributes
 protected: // functions
 
   /// Read boundary-related values from the Parameters object
+  void read_balance_     (Parameters * parameters) throw();
   void read_boundary_    (Parameters * parameters) throw();
   void read_control_     (Parameters * parameters) throw();
   void read_domain_      (Parameters * parameters) throw();

@@ -12,8 +12,6 @@
 #include "main.hpp"
 #include "charm_simulation.hpp"
 
-#include "enzo.hpp" /* temp */
-
 //----------------------------------------------------------------------
 
 CommBlock::CommBlock
@@ -49,6 +47,9 @@ CommBlock::CommBlock
   delete_(false),
   is_leaf_(true)
 {
+
+  // Enable Charm++ AtSync() dynamic load balancing
+  usesAtSync = CmiTrue;
 
 #ifdef CELLO_DEBUG
   index_.print("CommBlock()",-1,2,false,simulation());
@@ -293,6 +294,13 @@ CommBlock::~CommBlock() throw ()
   ((SimulationCharm *)simulation())->delete_block();
 
 }
+
+//----------------------------------------------------------------------
+
+CommBlock::CommBlock (CkMigrateMessage *m) : CBase_CommBlock(m)
+{ 
+  ((SimulationCharm *)simulation())->insert_block();
+};
 
 //----------------------------------------------------------------------
 

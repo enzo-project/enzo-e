@@ -56,13 +56,19 @@ void Hierarchy::pup (PUP::er &p)
   TRACEPUP;
   // NOTE: change this function whenever attributes change
 
-  bool up = p.isUnpacking();
+  const bool up = p.isUnpacking();
 
   if (up) factory_ = new Factory;
   p | *factory_;
   p | dimension_;
   p | refinement_;
+
   p | num_blocks_;
+  // clear if unpacking: load balancing expects num_blocks_ to be
+  // updated by CommBlock(CkMigrateMessage) and ~CommBlock(), but
+  // checkpoint / restart then double-counts Blocks.
+
+  if (up) num_blocks_ = 0;
 
   // block_array_ is NULL on non-root processes
   bool allocated=(block_array_ != NULL);

@@ -212,6 +212,7 @@ void OutputImage::write_block
 // @param field_descr  Field descriptor
 {
 
+  if (!comm_block->is_leaf()) return
   TRACE("OutputImage::write_block()");
   const FieldBlock * field_block = comm_block->block()->field_block();
 
@@ -298,6 +299,7 @@ void OutputImage::write_block
     double value = 0;
     value = mesh_color_(comm_block->level());
 					     
+    reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value,0.5);
     reduce_box_(image_mesh_,ixm,ixp,iym,iyp,value);
 
     if (comm_block->is_leaf()) { // ) {
@@ -500,8 +502,6 @@ void OutputImage::png_close_ () throw()
 
 void OutputImage::image_create_ () throw()
 {
-  DEBUG("image_create_");
-
   ASSERT("OutputImage::image_create_",
 	 "image_ already created",
 	 image_data_ == NULL || image_mesh_ == NULL);
@@ -539,44 +539,42 @@ void OutputImage::image_create_ () throw()
 
 void OutputImage::image_write_ (double min_color, double max_color) throw()
 {
-  //  PARALLEL_PRINTF ("line %d min=%f max=%f\n",__LINE__,min,max);
   // simplified variable names
 
   int mx = nxi_;
   int my = nyi_;
   int m  = mx*my;
 
-  //  if (! specify_bounds_) {
-
-  double min_val = std::numeric_limits<double>::max();
-  double max_val = std::numeric_limits<double>::min();
-
-  //    Compute min and max if needed
-  //  if (! specify_bounds_) {
-  if (image_log_) {
-    for (int i=0; i<m; i++) {
-      min_val = MIN(min_val,log(data_(i)));
-      max_val = MAX(max_val,log(data_(i)));
-    }
-  } else {
-    for (int i=0; i<m; i++) {
-      min_val = MIN(min_val,data_(i));
-      max_val = MAX(max_val,data_(i));
-    }
-  }
-  //  }
-
   double min,max;
 
   if (specify_bounds_) {
+
     min = min_color;
     max = max_color;
+
   } else {
+
+    double min_val = std::numeric_limits<double>::max();
+    double max_val = std::numeric_limits<double>::min();
+
+    // Compute min and max
+
+    if (image_log_) {
+      for (int i=0; i<m; i++) {
+	min_val = MIN(min_val,log(data_(i)));
+	max_val = MAX(max_val,log(data_(i)));
+      }
+    } else {
+      for (int i=0; i<m; i++) {
+	min_val = MIN(min_val,data_(i));
+	max_val = MAX(max_val,data_(i));
+      }
+    }
+
     min = min_val;
     max = max_val;
   }
 
-  TRACE2("image_write_() image_data_ = %p image_mesh_ = %p",image_data_,image_mesh_);
   size_t n = map_r_.size();
 
   // loop over pixels (ix,iy)
@@ -598,7 +596,7 @@ void OutputImage::image_write_ (double min_color, double max_color) throw()
       if (min <= value && value <= max) {
 
 	// map v to lower colormap index
-	size_t k = size_t((n - 1)*(value - min) / (max-min));
+	size_t k =  (n - 1)*(value - min) / (max-min);
 
 	// prevent k == map_.size()-1, which happens if value == max
 
@@ -610,22 +608,13 @@ void OutputImage::image_write_ (double min_color, double max_color) throw()
 
 	// should be in bounds, but force if not due to rounding error
 
-	// if (value < lo) { 
-	//   r=1.0; g=1.0; a=1.0;
-	// } else if (value > hi) {
-	//   r=0.0; g=0.0; a=0.0;
-	// } else {
-	// interpolate colormap
-
 	double ratio = (value - lo) / (hi-lo);
 
 	r = (1-ratio)*map_r_[k] + ratio*map_r_[k+1];
 	g = (1-ratio)*map_g_[k] + ratio*map_g_[k+1];
 	b = (1-ratio)*map_b_[k] + ratio*map_b_[k+1];
-	//	if (value < 0.0) { r=1.0; g=0.0; b=0.0; }
-	// }
+
 	png_->plot      (ix+1, iy+1, r,g,b);
-	//	png_->plot_blend(ix+1, iy+1, a, r,g,b);
 
       } else {
 	
@@ -681,10 +670,10 @@ void OutputImage::reduce_point_
 {
   switch (op_reduce_) {
   case reduce_min:
-    *data = std::min(*data,value); 
+    *data = std::min(*data,alpha*value); 
     break;
   case reduce_max:
-    *data = std::max(*data,value); 
+    *data = std::max(*data,alpha*value); 
     break;
   case reduce_avg:
   case reduce_sum:

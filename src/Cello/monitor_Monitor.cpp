@@ -15,8 +15,7 @@ Monitor Monitor::instance_; // singleton design pattern)
 
 Monitor::Monitor()
   : timer_(new Timer),
-    active_(true),
-    ip_(0)
+    active_(true)
 { 
   timer_->start();
 
@@ -141,7 +140,7 @@ void Monitor::write
 
     char buffer_process[MONITOR_LENGTH] = "";
     
-    sprintf (buffer_process,"%0d",ip_);
+    sprintf (buffer_process,"%0d",CkMyPe());
 
     // Get time
 
@@ -167,7 +166,7 @@ void Monitor::write
 
 //     if (strcmp(component,"DEBUG")==0) {
 //       char file[20];
-//       sprintf (file,"out.debug.%d",ip_);
+//       sprintf (file,"out.debug.%d",CkMyPe());
 //       FILE * fdebug = fopen (file,"a");
 //       fprintf (fdebug,"%s %s %s %s\n",
 // 	 buffer_process, buffer_time, component, buffer_message);
@@ -195,7 +194,7 @@ void Monitor::write_verbatim
 
     char buffer_process[MONITOR_LENGTH] = "";
     
-    sprintf (buffer_process,"%0d",ip_);
+    sprintf (buffer_process,"%0d",CkMyPe());
 
     // Get time
 

@@ -48,6 +48,33 @@ void Main::p_exit(int count)
   }
 }
 
+
+//----------------------------------------------------------------------
+
+void Main::p_checkpoint(int count, std::string dir_name)
+{
+  
+  count_checkpoint_++;
+  if (count_checkpoint_ >= count) {
+    count_checkpoint_ = 0;
+    // Write parameter file
+
+    char dir_char[255];
+    strcpy(dir_char,dir_name.c_str());
+
+    // --------------------------------------------------
+    // ENTRY: #1 OutputCheckpoint::write_simulation()-> SimulationCharm::s_write()
+    // ENTRY: checkpoint if Simulation is root
+    // --------------------------------------------------
+#ifdef CHARM_ENZO
+    CkCallback callback(CkIndex_SimulationCharm::r_write_checkpoint(),proxy_simulation);
+    CkStartCheckpoint (dir_char,callback);
+#endif
+  }
+  // --------------------------------------------------
+}
+
+
 //----------------------------------------------------------------------
 
 void Main::q_output_enter()

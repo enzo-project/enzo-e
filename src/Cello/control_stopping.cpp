@@ -13,14 +13,23 @@
 ///       compute stopping
 ///       contribute( >>>>> CommBlock::r_output() >>>>> )
 
-#define TRACE_CELLO
-   
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
+
+#ifdef CELLO_VERBOSE
+#   define VERBOSE(A)					\
+  if (index_.is_root()) {				\
+    Monitor * monitor = simulation()->monitor();	\
+    monitor->print("Control", A);			\
+  } 
+#else
+#   define VERBOSE(A) ;
+#endif
+
 
 //----------------------------------------------------------------------
 
@@ -89,7 +98,7 @@ void CommBlock::stopping_begin_()
 
   } else {
 
-    stopping_exit_();
+    stopping_balance_();
 
   }
 
@@ -99,6 +108,7 @@ void CommBlock::stopping_begin_()
 
 void CommBlock::r_stopping_compute_timestep(CkReductionMsg * msg)
 {
+
   double * min_reduce = (double * )msg->getData();
 
   dt_   = min_reduce[0];
@@ -148,8 +158,31 @@ void CommBlock::r_stopping_compute_timestep(CkReductionMsg * msg)
   }
 #endif
 
-  stopping_exit_();
+  stopping_balance_();
 
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::stopping_balance_()
+{
+
+  int balance_interval =  simulation()->config()->balance_interval;
+  
+  if (balance_interval && ((cycle_ % balance_interval) == 0)) {
+    VERBOSE("balance_enter");
+    AtSync();
+  } else {
+    stopping_exit_();
+  }
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::ResumeFromSync()
+{
+  VERBOSE("balance_exit");
+  stopping_exit_();
 }
 
 //----------------------------------------------------------------------

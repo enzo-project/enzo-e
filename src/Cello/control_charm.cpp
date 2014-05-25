@@ -165,17 +165,10 @@ void CommBlock::output_exit_()
 
   VERBOSE("output_exit");
 
+  
   if (index_.is_root()) {
 
-    proxy_simulation.p_performance_output();
-
-    Memory::instance()->reset_high();
-
-    Monitor * monitor = simulation()->monitor();	\
-    monitor-> print("", "-------------------------------------");
-    monitor-> print("Simulation", "cycle %04d", cycle_);
-    monitor-> print("Simulation", "time-sim %15.12f",time_);
-    monitor-> print("Simulation", "dt %15.12g", dt_);
+    proxy_simulation[0].p_monitor();
   }
 
   control_sync(sync_stopping_enter);

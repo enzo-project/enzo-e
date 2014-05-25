@@ -30,7 +30,7 @@ public: // functions
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
-    ScheduleInterval::pup(p);
+    Schedule::pup(p);
     // NOTE: change this function whenever attributes change
     p | cycle_interval_;
     p | time_interval_;

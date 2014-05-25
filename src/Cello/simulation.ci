@@ -31,13 +31,15 @@ module simulation {
 
     entry void s_write (); // [SC6]
     entry void r_write (CkReductionMsg * msg); // [SC7]
+    entry void r_write_checkpoint ();
 
     entry void p_begin_output();
     entry void r_output(CkReductionMsg * msg);
     entry void p_output_write (int n, char buffer[n]); // [SC8]
 
-    entry void p_performance_output ();
-    entry void r_performance_reduce (CkReductionMsg * msg); // [SC9]
+    entry void p_monitor ();
+    entry void p_monitor_performance();
+    entry void r_monitor_performance (CkReductionMsg * msg); // [SC9]
 
   };
 }

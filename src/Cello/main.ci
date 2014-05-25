@@ -15,6 +15,8 @@ mainmodule main {
 
      entry void p_exit (int count_blocks);
 
+     entry void p_checkpoint(int count, std::string dir);
+
      entry void q_adapt_enter();
      entry void q_adapt_called();
      entry void q_adapt_end();

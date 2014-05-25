@@ -1,11 +1,14 @@
 Import('env')
 Import('parallel_run')
-Import('parallel_run_args')
 Import('serial_run')
 Import('ip_charm')
 
 Import('bin_path')
 Import('test_path')
+
+#----------------------------------------------------------------------
+SConscript('Balance/SConscript')
+#----------------------------------------------------------------------
 
 env['COPY'] = ''
 
@@ -15,7 +18,7 @@ date_cmd = 'echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
 hdf5_to_png  = Builder(action = 'test/cello-h5topng.sh $ARGS');
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_serial   = Builder(action = date_cmd + serial_run   +  "$SOURCE $ARGS> $TARGET 2>&1; $COPY")
-run_parallel = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS " + parallel_run_args + " > $TARGET 2>&1; $COPY")
+run_parallel = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $COPY")
 make_movie   = Builder(action = "png2swf -r 5 -o $TARGET ${ARGS} ")
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
@@ -225,30 +228,27 @@ Clean(restart_ppm_1,
 
 env.Requires(restart_ppm_1,checkpoint_ppm_1)
 
-#
-# HANGS!
-#
 # parallel restart
 
-# checkpoint_ppm_8 = env_rm_png.RunParallel (
-#    'test_checkpoint_ppm-8.unit',
-#    bin_path + '/enzo-p', 
-#    ARGS='input/checkpoint_ppm-8.in')
-# 
-# restart_ppm_8 = env_mv_out.RunParallel (
-#    'test_restart_ppm-8.unit',
-#    bin_path + '/enzo-p',
-#    ARGS='+restart checkpoint_ppm-8-100')
-# 
-# 
-# env.MakeMovie ("restart_ppm-8.swf", "test_restart_ppm-8.unit", \
-#                  ARGS= test_path + "/checkpoint_ppm-8-*.png");
+checkpoint_ppm_8 = env_rm_png.RunParallel (
+   'test_checkpoint_ppm-8.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/checkpoint_ppm-8.in')
 
-# Clean(restart_ppm_8,
-#       [Glob('#/' + test_path + '/checkpoint_ppm-8*.png'),
-#        '#/input/checkpoint_ppm-8.in.out',])
-# 
-# env.Requires(restart_ppm_8,checkpoint_ppm_8)
+restart_ppm_8 = env_mv_out.RunParallel (
+   'test_restart_ppm-8.unit',
+   bin_path + '/enzo-p',
+   ARGS='+restart checkpoint_ppm-8-100')
+
+
+env.MakeMovie ("restart_ppm-8.swf", "test_restart_ppm-8.unit", \
+                 ARGS= test_path + "/checkpoint_ppm-8-*.png");
+
+Clean(restart_ppm_8,
+      [Glob('#/' + test_path + '/checkpoint_ppm-8*.png'),
+       '#/input/checkpoint_ppm-8.in.out',])
+
+env.Requires(restart_ppm_8,checkpoint_ppm_8)
 
 # MethodPpml tests
 

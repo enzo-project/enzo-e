@@ -20,15 +20,24 @@ Stopping {
 }
 
 Output {
-     list = ["mesh"];
-      de   { name = ["test_adapt-mask-de-%06d.png",   "cycle"]; 
-         include "input/schedule_cycle_10.incl"
-};
-      mesh { name = ["test_adapt-mask-mesh-%06d.png", "cycle"];
+     list = ["mesh","proc"];
+      mesh { name = ["adapt-mask-mesh-%06d.png", "cycle"];
 	image_type  = "mesh";
 	include "input/colormap_rainbow.incl"
 	image_min = 1.0;
 	image_max = 6.0;
          include "input/schedule_cycle_10.incl"
+      };
+      proc {
+        name = ["adapt-mask-proc-%06d.png", "cycle"];
+	type     = "image";
+	image_type  = "mesh";
+	image_reduce_type = "max";
+        include "input/schedule_time_0.02.incl"
+        image_specify_bounds = true;
+        image_mesh_color = "process";
+	image_min = 0.0;
+	image_max = 6.0;
+        include "input/colormap_rainbow.incl"
  }
 }
