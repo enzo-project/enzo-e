@@ -4,6 +4,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-26
 /// @brief    Charm-related functions associated with initialization
+/// @ingroup  Control
 
 #include "simulation.hpp"
 #include "mesh.hpp"

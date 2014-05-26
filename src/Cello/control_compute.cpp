@@ -4,6 +4,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-01
 /// @brief    Functions implementing CHARM++ compute-related functions
+/// @ingroup  Control
 
 #include "simulation.hpp"
 #include "mesh.hpp"

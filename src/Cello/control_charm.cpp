@@ -4,6 +4,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2014-02-13
 /// @brief    Functions controling control flow of charm entry functions
+/// @ingroup  Control
 
 #include "simulation.hpp"
 #include "mesh.hpp"
