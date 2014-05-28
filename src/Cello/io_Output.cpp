@@ -108,7 +108,7 @@ bool Output::is_scheduled (int cycle, double time)
 
 double Output::update_timestep (double time, double dt) const throw ()
 {
-  return schedule_->update_timestep(time,dt); 
+  return schedule_->update_timestep(time,dt);
 }
 
 //======================================================================

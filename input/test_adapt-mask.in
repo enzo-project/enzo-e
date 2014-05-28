@@ -16,7 +16,7 @@ Initial {  max_level = 5 }
 
 Stopping { 
    time = 2.0*3.14159265358979323; 
-#   cycle = 470;
+   cycle = 470;
 }
 
 Output {

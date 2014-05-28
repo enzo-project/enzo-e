@@ -31,7 +31,7 @@ static char buffer [256];
     index_.print(buffer,-1,2,false,simulation());		\
     check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);		\
     check_face_(IF3,"PUT_LEVEL",__FILE__,__LINE__);		\
-    thisProxy[INDEX].p_adapt_recv_neighbor_level				\
+    thisProxy[INDEX].p_adapt_recv_neighbor_level		\
       (index_,IC3,IF3,LEVEL_NOW,LEVEL_NEW);			\
   }
 #else /* DEBUG_ADAPT */
@@ -150,10 +150,6 @@ void CommBlock::adapt_next_()
   update_levels_();
 
   if (is_leaf()) {
-#ifdef DEBUG_ADAPT
-    // sprintf (buffer,"level %d level_new_ %d",level(),level_new_);
-    // index_.print(buffer,-1,2,false,simulation());
-#endif
     if (level() < level_new_) adapt_refine_();
     if (level() > level_new_) adapt_coarsen_();
   }
@@ -290,15 +286,7 @@ void CommBlock::adapt_send_neighbors_levels(int level_new)
       // SEND-SAME: Face and level are sent to unique
       // neighboring block in the same level
 
-      // --------------------------------------------------
-      // ENTRY: #10 CommBlock::adapt_send_neighbors_levels()-> CommBlock::p_adapt_recv_neighbor_level()
-      // ENTRY: same-level neighbor
-      // ENTRY: adapt phase
-      // --------------------------------------------------
-      thisProxy[index_neighbor].p_adapt_recv_neighbor_level 
-	(index_,ic3,of3,level,level_new);
-      //      PUT_LEVEL (index_neighbor,ic3,of3,level,level_new,"send-same");
-      // --------------------------------------------------
+      PUT_LEVEL (index_neighbor,ic3,of3,level,level_new,"send-same");
 
     } else if (level_face == level - 1) {
 
@@ -317,13 +305,7 @@ void CommBlock::adapt_send_neighbors_levels(int level_new)
 
 	Index index_uncle = index_neighbor.index_parent();
 
-	// --------------------------------------------------
-	// ENTRY: #11 CommBlock::adapt_send_neighbors_levels()-> CommBlock::p_adapt_recv_neighbor_level()
-	// ENTRY: coarse-level neighbor
-	// ENTRY: adapt phase
-	// --------------------------------------------------
 	PUT_LEVEL (index_uncle,ic3,of3,level,level_new,"send-coarse");
-	// --------------------------------------------------
 
       }
 
@@ -337,13 +319,7 @@ void CommBlock::adapt_send_neighbors_levels(int level_new)
       while (it_child.next(ic3)) {
 	Index index_nibling = index_neighbor.index_child(ic3);
 
-	// --------------------------------------------------
-	// ENTRY: #12 CommBlock::adapt_send_neighbors_levels()-> CommBlock::p_adapt_recv_neighbor_level()
-	// ENTRY: fine-level neighbor
-	// ENTRY: adapt phase
-	// --------------------------------------------------
 	PUT_LEVEL (index_nibling,ic3,of3,level,level_new,"send-fine");
-	// --------------------------------------------------
 
       }
 
@@ -470,16 +446,19 @@ void CommBlock::p_adapt_recv_neighbor_level
 
     // Don't coarsen if any siblings don't coarsen
 
-      bool is_sibling = (index_.level() > 0 && index_caller.level() > 0) ? (index_caller.index_parent() == index_.index_parent()) : false;
+    bool is_sibling = (index_.level() > 0 && index_caller.level() > 0) ?
+      (index_caller.index_parent() == index_.index_parent()) : false;
 
-    bool is_nephew = (index_.level() > 0 && index_caller.level() > 1) ? (index_caller.index_parent().index_parent() == index_.index_parent()) : false;
+    bool is_nephew = (index_.level() > 0 && index_caller.level() > 1) ?
+      (index_caller.index_parent().index_parent() == index_.index_parent()) : false;
     bool is_coarsening = level_new < level;
     bool is_finer_neighbor = level_face_new > level_new;
 
+    if (is_coarsening) printf ("COARSE %d %d %d %d\n",is_coarsening,is_sibling,is_finer_neighbor,is_nephew);
     if (is_coarsening && ((is_sibling && is_finer_neighbor) || is_nephew )) {
 
 #ifdef DEBUG_ADAPT
-      // index_.print("DEBUG not coarsening",-1,2,false,simulation());
+      index_.print("DEBUG not coarsening",-1,2,false,simulation());
 #endif
 
       level_new = level;
