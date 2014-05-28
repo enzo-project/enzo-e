@@ -60,7 +60,6 @@ void CommBlock::stopping_begin_()
       dt_block = std::min(dt_block,method->timestep(this));
     }
 
-
     // Reduce timestep to coincide with scheduled output if needed
 
     int index_output=0;
@@ -89,13 +88,10 @@ void CommBlock::stopping_begin_()
     min_reduce[0] = dt_block;
     min_reduce[1] = stop_block ? 1.0 : 0.0;
 
-    // --------------------------------------------------
-    // ENTRY: #1 CommBlock::stopping()-> CommBlock::r_stopping_compute_timestep()
-    // ENTRY: contribute()
-    // --------------------------------------------------
-    CkCallback callback (CkIndex_CommBlock::r_stopping_compute_timestep(NULL), thisProxy);
+    CkCallback callback (CkIndex_CommBlock::r_stopping_compute_timestep(NULL),
+			 thisProxy);
+
     contribute(2*sizeof(double), min_reduce, CkReduction::min_double, callback);
-    // --------------------------------------------------
 
   } else {
 

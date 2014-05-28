@@ -111,6 +111,13 @@ double Output::update_timestep (double time, double dt) const throw ()
   return schedule_->update_timestep(time,dt);
 }
 
+//----------------------------------------------------------------------
+
+void Output::next () throw()
+{
+  schedule_->next(); 
+}
+
 //======================================================================
 
 std::string Output::expand_file_name_

@@ -13,7 +13,8 @@
 
 Schedule::Schedule () throw()
   : active_(false),
-    type_(schedule_type_unknown)
+    type_(schedule_type_unknown),
+    last_(-1)
 {
 }
 
@@ -37,7 +38,6 @@ Schedule * Schedule::create
 
   type_interval = type == "interval";
   type_list     = type == "list";
-
     
   Schedule * schedule = 0;
 

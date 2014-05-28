@@ -50,6 +50,8 @@ public: // virtual functions
   /// Whether to perform IO this cycle
   virtual bool write_this_cycle ( int cycle, double time ) throw();
 
+  virtual double time_next() const throw()
+  { return ((int(time_list_.size()) > last_+1) ? time_list_.at(last_+1) : -1.0); }
 
 protected: // attributes
   /// List of cycles to perform schedule

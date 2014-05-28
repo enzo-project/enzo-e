@@ -32,8 +32,12 @@ public: // functions
     TRACEPUP;
     Schedule::pup(p);
     // NOTE: change this function whenever attributes change
-    p | cycle_interval_;
-    p | time_interval_;
+    p | cycle_start_;
+    p | cycle_step_;
+    p | cycle_stop_;
+    p | time_start_;
+    p | time_step_;
+    p | time_stop_;
   }
 
   /// Set cycle interval (start, step, stop)
@@ -50,15 +54,20 @@ public:  // virtual functions
   virtual double update_timestep(double time, double dt) const throw();
 
   /// Whether to perform IO this cycle
-  bool write_this_cycle ( int cycle, double time ) throw();
+  virtual bool write_this_cycle ( int cycle, double time ) throw();
+
+  virtual double time_next() const throw()
+  { return time_start_ + (last_ + 1)*time_step_; };
 
 protected: // attributes
 
-  /// cycle start, step, and stop of schedule
-  std::vector<int> cycle_interval_;
+  int cycle_start_;
+  int cycle_step_;
+  int cycle_stop_;
 
-  /// time start, step, and stop of schedule
-  std::vector<double> time_interval_;
+  double time_start_;
+  double time_step_;
+  double time_stop_;
 };
 
 #endif /* IO_SCHEDULE_HPP */

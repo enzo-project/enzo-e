@@ -121,6 +121,7 @@ void Problem::output_next(Simulation * simulation) throw()
     output->init();
     output->open();
     output->write_simulation(simulation);
+    output->next();
 
   } else {
 

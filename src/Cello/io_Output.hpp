@@ -108,6 +108,8 @@ public: // functions
   /// Return the index id in the containing Problem
   int index() const throw() { return index_; }
 
+  /// Advance to next scheduled output
+  void next() throw();
 
 public: // virtual functions
 

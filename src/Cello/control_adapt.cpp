@@ -5,20 +5,21 @@
 /// @date     2013-04-25
 /// @brief    Charm-related mesh adaptation control functions
 /// @ingroup  Control
-///
+
+/// This file controls adaptive mesh refinement on a distributed
+/// forest of octrees.
+
 ///----------------------------------------------------------------------
 
-const char * adapt_str[] = {"unknown","coarsen","same","refine"};
-
+//--------------------------------------------------
 // #define DEBUG_ADAPT
-
 //--------------------------------------------------
 
 #ifdef DEBUG_ADAPT
 
 static char buffer [256];
 
-#define PUT_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
+#   define PUT_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
   {								\
     std::string bit_str = INDEX.bit_string(-1,2);		\
     sprintf (buffer,"%12s %8s "					\
@@ -36,7 +37,7 @@ static char buffer [256];
   }
 #else /* DEBUG_ADAPT */
 
-#define PUT_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)		\
+#   define PUT_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)		\
   thisProxy[INDEX].p_adapt_recv_neighbor_level (index_,IC3,IF3,LEVEL_NOW,LEVEL_NEW);
 #endif /* DEBUG_ADAPT */
 //--------------------------------------------------
@@ -107,7 +108,7 @@ int CommBlock::adapt_compute_desired_level_(int level_maximum)
   int level = this->level();
   int level_desired = level;
 
-  FieldDescr * field_descr = simulation()->field_descr();
+  const FieldDescr * field_descr = simulation()->field_descr();
 
   int index_refine = 0;
 
@@ -188,7 +189,7 @@ void CommBlock::adapt_end_()
 void CommBlock::adapt_refine_()
 {
 
-  // index_.print("REFINE",-1,2,false,simulation());
+  index_.print("REFINE",-1,2,false,simulation());
 
   adapt_ = adapt_unknown;
 
@@ -454,7 +455,6 @@ void CommBlock::p_adapt_recv_neighbor_level
     bool is_coarsening = level_new < level;
     bool is_finer_neighbor = level_face_new > level_new;
 
-    if (is_coarsening) printf ("COARSE %d %d %d %d\n",is_coarsening,is_sibling,is_finer_neighbor,is_nephew);
     if (is_coarsening && ((is_sibling && is_finer_neighbor) || is_nephew )) {
 
 #ifdef DEBUG_ADAPT
@@ -509,8 +509,7 @@ void CommBlock::p_adapt_recv_neighbor_level
 
 void CommBlock::adapt_coarsen_()
 {
-  // index_.print("COARSEN",-1,2,false,simulation());
-
+  index_.print("COARSEN",-1,2,false,simulation());
   const int level = this->level();
   
   // send data to parent
@@ -698,7 +697,7 @@ FieldFace * CommBlock::create_face_
  )
 {
   Problem * problem        = simulation()->problem();
-  FieldDescr * field_descr = simulation()->field_descr();
+  const FieldDescr * field_descr = simulation()->field_descr();
   FieldBlock * field_block = block_->field_block();
 
   FieldFace * field_face = new FieldFace (field_block,field_descr);

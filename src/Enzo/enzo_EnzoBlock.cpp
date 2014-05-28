@@ -392,7 +392,11 @@ void EnzoBlock::pup(PUP::er &p)
   p | CycleNumber;
   p | OldTime;
   p | dt;
-  WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
+  static bool warn0 = true;
+  if (warn0) {
+    WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
+    warn0=false;
+  }
   p | Time_;
 
   static bool warn1 = true;

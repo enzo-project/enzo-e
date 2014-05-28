@@ -42,6 +42,7 @@ public: // functions
 
     p | active_;
     p | type_;
+    p | last_;
   }
 
   /// Set whether the Schedule object is active or not
@@ -61,6 +62,9 @@ public: // functions
   /// Return whether the output object is type
   int type() const throw()  { return type_; };
 
+  /// Advance to next scheduled output
+  void next () throw () { ++last_; };
+
 public: // virtual functions
 
   /// Reduce timestep if next write time is between time and time + dt
@@ -68,6 +72,8 @@ public: // virtual functions
 
   /// Whether to perform IO this cycle
   virtual bool write_this_cycle ( int cycle, double time ) throw() = 0;
+
+  virtual double time_next() const throw() = 0;
 
 public: // static functions
 
@@ -81,6 +87,8 @@ protected: // attributes
   bool active_;
 
   schedule_type type_;
+
+  int last_;
 };
 
 #endif /* IO_SCHEDULE_HPP */
