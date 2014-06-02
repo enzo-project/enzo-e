@@ -314,6 +314,8 @@ void Index::print_ (FILE * fp,
 		    bool no_nl) const
 {
 
+  std::string buffer;
+
   const int level = this->level();
 
   if (max_level == -1) max_level = level;
@@ -324,36 +326,38 @@ void Index::print_ (FILE * fp,
     nb = std::max(nb,num_bits_(a_[axis].array));
   }
 
-  fprintf (fp,"[ ");
+  buffer = buffer + "[ ";
   for (int axis=0; axis<rank; axis++) {
 
     for (int i=nb; i>=0; i--) {
       int bit = (a_[axis].array & ( 1 << i));
-      if (fp != NULL) fprintf (fp,"%d",bit?1:0);
+      if (fp != NULL) buffer = buffer + (bit?"1":"0");
     }
 
     for (int i=0; i<max_level; i++) {
       if (i==0) {
-	fprintf (fp,":");
+	buffer = buffer + ":";
       }
 
       if (i < level) {
 	int ic3[3];
 	child (i+1, &ic3[0], &ic3[1], &ic3[2]);
-	fprintf (fp,"%d",ic3[axis]);
+	buffer = buffer + (ic3[axis] ? "1":"0");
       } else {
-	fprintf (fp," ");
+	buffer = buffer + " ";
       }
 	
     }
-    fprintf (fp," ");
+    buffer = buffer + " ";
       
   }
-  fprintf (fp,"] ");
+  buffer = buffer + "] ";
 
+  buffer = buffer + msg;
 
-  fprintf (fp, (no_nl ? "%s " : "%s\n"),msg);
+  if (! no_nl) buffer = buffer + "\n";
 
+  fprintf (fp,buffer.c_str());
   fflush(fp);
 }
 

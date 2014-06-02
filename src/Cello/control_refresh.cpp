@@ -19,7 +19,11 @@ static char buffer[256];
 
 void CommBlock::refresh_begin_() 
 {
-
+  if (delete_) {
+    sprintf (buffer,"CommBlock::refresh_begin_ called on deleted CommBlock");
+    index_.print(buffer,-1,2,false,simulation());
+    return;
+  }
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   const Config * config = simulation->config();

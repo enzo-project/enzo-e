@@ -452,7 +452,7 @@ void CommBlock::control_sync_count_ (int phase, int count)
 #ifdef TRACE_CONTROL
     char buffer[255];
     sprintf (buffer,"calling phase %s",phase_string[phase]);
-    index_.print(buffer,-1,3,false,simulation());
+    index_.print(buffer,-1,2,false,simulation());
 #endif
     control_call_phase_(phase);
   }
@@ -467,7 +467,7 @@ void CommBlock::control_sync_neighbor_(int phase)
 #ifdef TRACE_CONTROL
     char buffer[255];
     sprintf (buffer,"calling phase %s",phase_string[phase]);
-    index_.print(buffer,-1,3,false,simulation());
+    index_.print(buffer,-1,2,false,simulation());
 #endif
     control_call_phase_ (phase);
 
@@ -576,7 +576,7 @@ void CommBlock::control_call_phase_ (int phase)
 #ifdef TRACE_CONTROL
   char buffer[255];
   sprintf (buffer,"called phase %s",phase_string[phase]);
-  index_.print(buffer,-1,3,false,simulation());
+  index_.print(buffer,-1,2,false,simulation());
 #endif
   if (phase == sync_adapt_called) {
     adapt_called_() ;

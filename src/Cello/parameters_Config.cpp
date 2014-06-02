@@ -323,6 +323,10 @@ void Config::read_field_ (Parameters * p) throw()
     field_ghosts[0] = p->list_value_integer(0,"Field:ghosts",0);
     field_ghosts[1] = p->list_value_integer(1,"Field:ghosts",0);
     field_ghosts[2] = p->list_value_integer(2,"Field:ghosts",0);
+  } else {
+    field_ghosts[0] = 0;
+    field_ghosts[1] = 0;
+    field_ghosts[2] = 0;
   }
 
   field_alignment = p->value_integer("Field:alignment",8);

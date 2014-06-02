@@ -11,10 +11,6 @@
 
 //----------------------------------------------------------------------
 
-extern CProxy_SimulationCharm  proxy_simulation;
-
-//----------------------------------------------------------------------
-
 Output::Output (int index, const Factory * factory) throw()
   : file_(0),           // Initialization deferred
     schedule_(0),

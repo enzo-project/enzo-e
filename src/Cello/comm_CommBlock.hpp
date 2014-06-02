@@ -188,17 +188,6 @@ public: // interface
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) const throw();
 
-  /// Determine whether this CommBlock is a leaf and store the result
-  void set_leaf()
-  {
-    bool value = true;
-    for (size_t i = 0; i < children_.size(); i++) {
-      // deleted children are replaced with thisProxy
-      if (children_.at(i) != index_) value = false;    
-    }
-    is_leaf_ = value;
-  }
-
   void update_levels_ ()
   {
     face_level_ =       face_level_new_;

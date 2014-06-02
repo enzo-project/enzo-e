@@ -54,8 +54,6 @@ static char buffer [256];
 void CommBlock::adapt_begin_()
 {
 
-  set_leaf();
-
   const int rank = simulation()->dimension();
   sync_coarsen_.set_stop(NC(rank));
   sync_coarsen_.clear();
@@ -169,6 +167,7 @@ void CommBlock::adapt_end_()
     // ENTRY: if delete
     // ENTRY: adapt phase
     // --------------------------------------------------
+    index_.print("DESTROY",-1,2,false,simulation());
     ckDestroy();
     // --------------------------------------------------
 
@@ -178,8 +177,6 @@ void CommBlock::adapt_end_()
   //  if (index_.is_root()) {
   //    thisProxy.doneInserting();
   //  }
-
-  set_leaf();
 
   control_sync(sync_adapt_exit);
 }
@@ -216,6 +213,7 @@ void CommBlock::adapt_refine_()
       char * array = 0;
       int iface[3] = {0,0,0};
       bool lghost[3] = {true,true,true};
+      
       FieldFace * field_face = 
 	load_face_ (&narray,&array, iface,ic3,lghost, op_array_prolong);
 
@@ -243,7 +241,7 @@ void CommBlock::adapt_refine_()
 
     }
   }
-  set_leaf();
+  is_leaf_ = false;
 }
 
 //----------------------------------------------------------------------
@@ -582,12 +580,14 @@ void CommBlock::p_adapt_recv_child_data
 
   adapt_delete_child_(index_child);
 
+  is_leaf_ = true;
 }
 
 //----------------------------------------------------------------------
 
 void CommBlock::p_adapt_delete()
 {
+  index_.print("DELETING",-1,2,false,simulation());
   delete_ = true;
     // // --------------------------------------------------
     // // ENTRY: #6 SimulationCharm::adapt_exit_() -> ckDestroy()
@@ -669,7 +669,6 @@ FieldFace * CommBlock::load_face_
  )
 {
   FieldFace * field_face = create_face_ (if3,ic3,lg3, op_array_type);
-
   field_face->load(n, a);
   return field_face;
 }

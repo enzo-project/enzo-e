@@ -336,7 +336,6 @@ size_t FieldFace::load_
   int nd3[3], int n3[3],int im3[3] ) throw()
 {
 
-
   for (int iz=0; iz <n3[2]; iz++)  {
     int kz = iz+im3[2];
     for (int iy=0; iy < n3[1]; iy++) {
@@ -437,13 +436,10 @@ void FieldFace::load_loop_limits_
       }
     }
   }
-  // if (restrict_ && ghost_[0]==true) {
-  //   printf ("load  i3 %d %d  n3 %d %d\n",im3[0],im3[1],ng3[0],ng3[1]);
-  // }
   n3[0] = std::max(n3[0],1);
   n3[1] = std::max(n3[1],1);
   n3[2] = std::max(n3[2],1);
-  check_new_(im3,n3,nd3,ng3,op_load);
+  //  check_new_(im3,n3,nd3,ng3,op_load);
 }
 
 //----------------------------------------------------------------------
@@ -499,14 +495,11 @@ void FieldFace::store_loop_limits_
     }
 
   }
-  // if (restrict_ && ghost_[0]==true) {
-  //   printf ("store i3 %d %d  n3 %d %d\n",im3[0],im3[1],ng3[0],ng3[1]);
-  // }
   n3[0] = std::max(n3[0],1);
   n3[1] = std::max(n3[1],1);
   n3[2] = std::max(n3[2],1);
 
-  check_new_(im3,n3,nd3,ng3,op_store);
+  //  check_new_(im3,n3,nd3,ng3,op_store);
 }
 
 void FieldFace::check_new_( int im3[3],int n3[3], int nd3[3], int ng3[3],int op_type)

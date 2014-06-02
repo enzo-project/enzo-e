@@ -103,7 +103,7 @@ double ScheduleInterval::update_timestep ( double time, double dt) const throw()
 
       if (in_range) {
 
-	int time_next = this->time_next();
+	double time_next = this->time_next();
 
 	if (time < time_next && time_next < time + dt) {
 	  new_dt = time_next - time;
