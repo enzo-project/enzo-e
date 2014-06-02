@@ -3,7 +3,9 @@
 
 include "input/ppm.incl"
 
-Mesh { root_blocks    = [2,4]; }
+Mesh { root_blocks    = [4,4]; }
+
+include "input/adapt_slope.incl"
 
 Output {
 
