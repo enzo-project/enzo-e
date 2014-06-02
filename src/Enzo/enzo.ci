@@ -48,20 +48,21 @@ module enzo {
   readonly int EnzoBlock::NumberOfBaryonFields;      // active baryon fields
   readonly int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
-  PUPable EnzoConfig;
   PUPable EnzoBoundary;
+  PUPable EnzoConfig;
   PUPable EnzoFactory;
-  PUPable EnzoProlong;
-  PUPable EnzoProlongMC1;
-  PUPable EnzoRestrict;
   PUPable EnzoInitialImplosion2;
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
+  PUPable EnzoMethodGrackle;
+  PUPable EnzoMethodHeat;
+  PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
-  PUPable EnzoMethodHeat;
-  PUPable EnzoMethodGrackle;
   PUPable EnzoProblem;
+  PUPable EnzoProlong;
+  PUPable EnzoProlongMC1;
+  PUPable EnzoRestrict;
 
   extern module mesh;
 

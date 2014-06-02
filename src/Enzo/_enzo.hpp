@@ -104,6 +104,7 @@ struct fluxes
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"
 
+#include "enzo_EnzoMethodNull.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodHeat.hpp"

@@ -112,7 +112,7 @@ Method * EnzoProblem::create_method_
 
   Method * method = 0;
 
-  EnzoConfig * enzo_config = (EnzoConfig *) config;
+  EnzoConfig * c = (EnzoConfig *) config;
 
   TRACE1("EnzoProblem::create_method %s",type.c_str());
   if (type == "ppm") {
@@ -120,10 +120,11 @@ Method * EnzoProblem::create_method_
   } else if (type == "ppml") {
     method = new EnzoMethodPpml;
   } else if (type == "heat") {
-    method = new EnzoMethodHeat(enzo_config->method_heat_alpha,
-				enzo_config->field_courant);
+    method = new EnzoMethodHeat(c->method_heat_alpha,c->field_courant);
+  } else if (type == "null") {
+    method = new EnzoMethodNull(c->method_null_dt);
   } else if (type == "grackle") {
-    method = new EnzoMethodGrackle((EnzoConfig *)config);
+    method = new EnzoMethodGrackle(c);
   } else {
     method = Problem::create_method_(type,config);
   }

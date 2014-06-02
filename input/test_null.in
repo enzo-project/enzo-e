@@ -1,0 +1,58 @@
+# Input file to test the Null method
+
+Domain {
+   lower = [-2.0, -2.0];
+   upper = [ 2.0,  2.0];
+}
+
+Boundary {
+   type = "periodic";
+}
+
+Stopping {
+   time  = 62.831858406;
+}
+
+Initial {
+   test { value = 0.0; }
+}
+
+Mesh {
+   root_rank = 2;
+   root_size = [64,64];
+   root_blocks = [2,2];
+   max_level = 5;
+   list = ["rotate"];
+   rotate {
+      type = "mask";
+      value = [ 6.0, 
+                 (x - cos(t))*(x - cos(t)) + (y - sin(t))*(y - sin(t)) <= 0.1,
+                0.0 ];
+   }
+}
+
+Field {
+   list = ["test"];  # required since ghost zones taken from first field
+   ghosts = 4;
+}
+
+Method { list = ["null"]; null { dt = 0.01; }}
+
+Output {
+   list = ["MESH"];
+
+   MESH {
+      type = "image";
+      name = ["null-mesh-%03d.png","cycle"];
+      schedule {
+         type = "interval";
+         var  = "cycle";
+         step = 10;
+      };
+      image_type = "mesh";
+      image_reduce_type = "max";
+      image_block_size = 5;
+      colormap = [0.0, 0.0, 0.0,
+                  1.0, 1.0, 1.0];
+   }
+}

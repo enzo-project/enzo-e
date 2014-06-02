@@ -62,6 +62,8 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_heat_alpha;
 
+  p | method_null_dt;
+
   // Grackle cooling parameters
 
 
@@ -145,8 +147,9 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Field:interpolation_method","SecondOrderA");
 
 
-  method_heat_alpha = p->value_float 
-    ("Method:heat:alpha",1.0);
+  method_heat_alpha = p->value_float ("Method:heat:alpha",1.0);
+
+  method_null_dt = p->value_float ("Method:null:dt",0.0);
 
   /// Grackle parameters
 

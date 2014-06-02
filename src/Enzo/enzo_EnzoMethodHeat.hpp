@@ -3,8 +3,8 @@
 /// @file     enzo_EnzoMethodHeat.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Apr  1 16:14:38 PDT 2010
-/// @brief    [\ref Enzo] Declaration of EnzoMethodForwardEuler
-///           forward Euler
+/// @brief    [\ref Enzo] Declaration of EnzoMethodHeat
+///           forward Euler solver for the heat equation
 
 #ifndef ENZO_ENZO_METHOD_HEAT_HPP
 #define ENZO_ENZO_METHOD_HEAT_HPP

@@ -90,6 +90,9 @@ public: // attributes
   // EnzoMethodHeat
   double                     method_heat_alpha;
 
+  // EnzoMethodNull
+  double                     method_null_dt;
+
   // EnzoMethodGrackle
 
   // Units
