@@ -67,7 +67,7 @@ void CommBlock::adapt_begin_()
 
   level_new_ = adapt_compute_desired_level_(level_maximum);
 
-  control_sync (sync_adapt_called);
+  control_sync (sync_adapt_called,"neighbor");
 }
 
 //----------------------------------------------------------------------
@@ -90,7 +90,7 @@ void CommBlock::adapt_called_()
     adapt_send_neighbors_levels(level_new_);
   }
 
-  control_sync (sync_adapt_next);
+  control_sync (sync_adapt_next,"quiescence");
 
 }
 
@@ -153,7 +153,7 @@ void CommBlock::adapt_next_()
     if (level() > level_new_) adapt_coarsen_();
   }
 
-  control_sync (sync_adapt_end);
+  control_sync (sync_adapt_end,"quiescence");
 }
 
 //----------------------------------------------------------------------
@@ -178,7 +178,7 @@ void CommBlock::adapt_end_()
   //    thisProxy.doneInserting();
   //  }
 
-  control_sync(sync_adapt_exit);
+  control_sync(sync_adapt_exit,"none");
 }
 
 //----------------------------------------------------------------------

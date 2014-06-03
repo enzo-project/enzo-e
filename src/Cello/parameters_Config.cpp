@@ -32,23 +32,6 @@ void Config::pup (PUP::er &p)
   PUParray(p,boundary_mask,MAX_BOUNDARY);
   PUParray(p,boundary_field_list,MAX_BOUNDARY);
 
-  // Control
-
-  p | control_sync_adapt_enter;
-  p | control_sync_adapt_called;
-  p | control_sync_adapt_end;
-  p | control_sync_adapt_exit;
-  p | control_sync_adapt_next;
-  p | control_sync_compute_enter;
-  p | control_sync_compute_exit;
-  p | control_sync_exit;
-  p | control_sync_output_enter;
-  p | control_sync_output_exit;
-  p | control_sync_refresh_enter;
-  p | control_sync_refresh_exit;
-  p | control_sync_stopping_enter;
-  p | control_sync_stopping_exit;
-
   // Domain
 
   PUParray(p,domain_lower,3);
@@ -180,7 +163,6 @@ void Config::read(Parameters * p) throw()
   read_initial_(p);
   read_memory_(p);
   read_mesh_(p);
-  read_control_(p);
   read_method_(p);
   read_monitor_(p);
   read_output_(p);
@@ -482,41 +464,6 @@ void Config::read_mesh_ (Parameters * p) throw()
     mesh_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
 
   }
-
-}
-
-//----------------------------------------------------------------------
-
-void Config::read_control_ (Parameters * p) throw()
-{
-  control_sync_adapt_enter = p->value_string
-    ("Control:sync:adapt_enter","array");
-  control_sync_adapt_called = p->value_string
-    ("Control:sync:adapt_called","neighbor");
-  control_sync_adapt_end = p->value_string
-    ("Control:sync:adapt_end","quiescence");
-  control_sync_adapt_next = p->value_string
-    ("Control:sync:adapt_next","quiescence");
-  control_sync_adapt_exit = p->value_string
-    ("Control:sync:adapt_exit","none");
-  control_sync_compute_enter = p->value_string
-    ("Control:sync:compute_enter","none");
-  control_sync_compute_exit = p->value_string
-    ("Control:sync:compute_exit","none");
-  control_sync_exit = p->value_string
-    ("Control:sync:exit = p","contribute");
-  control_sync_output_enter = p->value_string
-    ("Control:sync:output_enter","array");
-  control_sync_output_exit = p->value_string
-    ("Control:sync:output_exit","contribute");
-  control_sync_refresh_enter = p->value_string
-    ("Control:sync:refresh_enter","array");
-  control_sync_refresh_exit = p->value_string
-    ("Control:sync:refresh_exit","contribute");
-  control_sync_stopping_enter = p->value_string
-    ("Control:sync:stopping_enter","none");
-  control_sync_stopping_exit = p->value_string
-    ("Control:sync:stopping_exit","contribute");
 
 }
 

@@ -72,23 +72,6 @@ public: // attributes
   int                        boundary_mask[MAX_BOUNDARY];
   std::vector<std::string>   boundary_field_list[MAX_BOUNDARY];
 
-  // Control
-
-  std::string                control_sync_adapt_enter;
-  std::string                control_sync_adapt_called;
-  std::string                control_sync_adapt_end;
-  std::string                control_sync_adapt_next;
-  std::string                control_sync_adapt_exit;
-  std::string                control_sync_compute_enter;
-  std::string                control_sync_compute_exit;
-  std::string                control_sync_exit;
-  std::string                control_sync_output_enter;
-  std::string                control_sync_output_exit;
-  std::string                control_sync_refresh_enter;
-  std::string                control_sync_refresh_exit;
-  std::string                control_sync_stopping_enter;
-  std::string                control_sync_stopping_exit;
-
   // Domain
 
   double                     domain_lower[3];
@@ -211,7 +194,6 @@ protected: // functions
   /// Read boundary-related values from the Parameters object
   void read_balance_     (Parameters * parameters) throw();
   void read_boundary_    (Parameters * parameters) throw();
-  void read_control_     (Parameters * parameters) throw();
   void read_domain_      (Parameters * parameters) throw();
   void read_field_       (Parameters * parameters) throw();
   void read_initial_     (Parameters * parameters) throw();

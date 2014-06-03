@@ -169,7 +169,7 @@ CommBlock::CommBlock
     apply_initial_();
   } else if (level > 0) {
 
-    control_sync (sync_adapt_end);
+    control_sync (sync_adapt_end,"quiescence");
 
   }
 }

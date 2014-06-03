@@ -328,7 +328,7 @@ public:
   //--------------------------------------------------
 
   /// Syncronize before continuing with next phase
-  void control_sync(int phase);
+  void control_sync(int phase, std::string sync);
 
   /// synchronize with count other chares
   void p_control_sync_count(int phase, int count) 

@@ -58,7 +58,7 @@ void CommBlock::adapt_enter_()
     
   } else {
 
-    control_sync(sync_adapt_exit);
+    control_sync(sync_adapt_exit,"none");
 
   }
 }
@@ -81,11 +81,11 @@ void CommBlock::adapt_exit_()
 
   if (adapt_again) {
 
-    control_sync (sync_adapt_enter);
+    control_sync (sync_adapt_enter,"array");
 
   } else {
 
-    control_sync (sync_refresh_enter);
+    control_sync (sync_refresh_enter,"array");
   }
 
 }
@@ -110,11 +110,11 @@ void CommBlock::refresh_exit_()
 
   if (next_phase_ == phase_stopping) {
 
-    control_sync(sync_output_enter);
+    control_sync(sync_output_enter,"array");
 
   }  else if (next_phase_ == phase_adapt) {
 
-    control_sync (sync_adapt_enter);
+    control_sync (sync_adapt_enter,"array");
 
   } else {
 
@@ -143,7 +143,7 @@ void CommBlock::compute_exit_ ()
 
   next_phase_ = phase_adapt;
 
-  control_sync(sync_refresh_enter);
+  control_sync(sync_refresh_enter,"array");
 }
 
 //----------------------------------------------------------------------
@@ -172,7 +172,7 @@ void CommBlock::output_exit_()
     proxy_simulation[0].p_monitor();
   }
 
-  control_sync(sync_stopping_enter);
+  control_sync(sync_stopping_enter,"none");
 }
 
 //----------------------------------------------------------------------
@@ -197,11 +197,11 @@ void CommBlock::stopping_exit_()
 
   if (stop_) {
 
-    control_sync(sync_exit);
+    control_sync(sync_exit,"contribute");
 
   } else {
 
-    control_sync(sync_compute_enter);
+    control_sync(sync_compute_enter,"none");
 
   }
 
@@ -209,46 +209,8 @@ void CommBlock::stopping_exit_()
 
 //======================================================================
 
-void CommBlock::control_sync(int phase)
+void CommBlock::control_sync(int phase, std::string sync)
 {
-
-  std::string sync;
-
-  const Config * config = simulation()->config();
-
-  if (      phase == sync_adapt_enter) {
-    sync = config->control_sync_adapt_enter;
-  } else if (phase == sync_adapt_next) {
-    sync = config->control_sync_adapt_next;
-  } else if (phase == sync_adapt_called) {
-    sync = config->control_sync_adapt_called;
-  } else if (phase == sync_adapt_end) {
-    sync = config->control_sync_adapt_end;
-  } else if (phase == sync_adapt_exit) {
-    sync = config->control_sync_adapt_exit;
-  } else if (phase == sync_refresh_enter) {
-    sync = config->control_sync_refresh_enter;
-  } else if (phase == sync_refresh_exit) {
-    sync = config->control_sync_refresh_exit;
-  } else if (phase == sync_output_enter) {
-    sync = config->control_sync_output_enter;
-  } else if (phase == sync_output_exit) {
-    sync = config->control_sync_output_exit;
-  } else if (phase == sync_compute_enter) {
-    sync = config->control_sync_compute_enter;
-  } else if (phase == sync_compute_exit) {
-    sync = config->control_sync_compute_exit;
-  } else if (phase == sync_stopping_enter) {
-    sync = config->control_sync_stopping_enter;
-  } else if (phase == sync_stopping_exit) {
-    sync = config->control_sync_stopping_exit;
-  } else if (phase == sync_exit) {
-    sync = config->control_sync_exit;
-  } else {
-    ERROR2 ("CommBlock::control_sync()",
-	    "Unknown phase: phase %s (%d)",
-	    phase_string[phase],phase);    
-  }
 
   if (sync == "contribute") {
 
