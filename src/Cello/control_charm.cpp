@@ -457,13 +457,7 @@ void CommBlock::control_sync_neighbor_(int phase)
 	// SEND-SAME: Face and level are sent to unique
 	// neighboring block in the same level
 
-	//--------------------------------------------------
-	// ENTRY: #1 CommBlock::control_sync_neighbor_() -> p_control_sync_count()
-	// ENTRY: same-level neighbor
-	// ENTRY: adapt phase
-	//--------------------------------------------------
 	thisProxy[index_neighbor].p_control_sync_count(phase,0);
-	//--------------------------------------------------
 
 	++num_neighbors;
 
@@ -485,13 +479,7 @@ void CommBlock::control_sync_neighbor_(int phase)
 
 	  Index index_uncle = index_neighbor.index_parent();
 
-	  //--------------------------------------------------
-	  // ENTRY: #2 CommBlock::control_sync_neighbor_() -> p_control_sync_count()
-	  // ENTRY: coarse-level neighbor
-	  // ENTRY: adapt phase
-	  //--------------------------------------------------
 	  thisProxy[index_uncle].p_control_sync_count(phase,0);
-	  //--------------------------------------------------
 
 	  ++num_neighbors;
 
@@ -507,13 +495,7 @@ void CommBlock::control_sync_neighbor_(int phase)
 	while (it_child.next(ic3)) {
 	  Index index_nibling = index_neighbor.index_child(ic3);
 
-	  // --------------------------------------------------
-	  // ENTRY: #3 CommBlock::control_sync_neighbor_() -> p_control_sync_count()
-	  // ENTRY: fine-level neighbor
-	  // ENTRY: adapt phase
-	  // --------------------------------------------------
 	  thisProxy[index_nibling].p_control_sync_count(phase,0);
-	  // --------------------------------------------------
 
 	  ++num_neighbors;
 	}
