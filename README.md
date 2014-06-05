@@ -1,9 +1,7 @@
 # README #
-
+![counter](http://cello-project.org/counter-bitbucket-cello-project.png)
  
 ### What is this repository for? ###
-
-* Quick summary
 
    The purpose of the Enzo-P/Cello project is to develop an
    astrophysics and cosmology software application "Enzo-P", which is
@@ -19,29 +17,18 @@
    other scientific fields to develop AMR applications capable of
    running on "Petascale-and-beyond" HPC platforms.
 
-* Version
-
-    Enzo-P/Cello is currently in V1.0beta.  It is usable as a hydrodynamics
-    solver, but still has several known issues that need to be corrected
-
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+   Enzo-P/Cello is currently in V1.0beta.  It still has several known 
+   issues that need to be addressed before it can be used for scientific
+   research, though it is still usable as a hydrodynamics solver, 
+   especcially in an educational setting.
 
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
+   For information on how to build Enzo-P/Cello, as well as installing the 
+   Charm++ parallel programming system on which it is build, please see the
+   [FAQ Presentation](http://client64-249.sdsc.edu/cello/1405-enzop.pdf)
 
 ### Who do I talk to? ###
 
-* Repo owner or admin
-* Other community or team contact
+   Please contact James at jobordner@ucsd.edu if you have any questions or
+   wish to contribute!
