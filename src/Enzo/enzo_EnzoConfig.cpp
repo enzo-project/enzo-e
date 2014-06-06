@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     parameters_EnzoConfig.cpp
+/// @file     enzo_EnzoConfig.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-10-03
 /// @brief    Implementation of the EnzoConfig class 

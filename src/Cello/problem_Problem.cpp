@@ -477,8 +477,7 @@ Stopping * Problem::create_stopping_
  Config * config
  ) throw ()
 /// @param type   Type of the stopping method to create (ignored)
-/// @param stop_cycle  Stopping cycle
-/// @param stop_time  Stopping time
+/// @param config  Configuration parameter class
 {
   return new Stopping(config->stopping_cycle,
 		      config->stopping_time);
@@ -518,8 +517,12 @@ Output * Problem::create_output_
  const GroupProcess * group_process,
  const Factory * factory
  ) throw ()
-/// @param name          Name of Output object to create
-/// @param group_process Image output needs group process size
+/// @param name           Name of Output object to create
+/// @param index          Index of output object in Object list
+/// @param config         Configuration parameter object
+/// @param field_descr    Field descriptor 
+/// @param group_process  Group process for group size
+/// @param factory        Factory object for creating Io objects of correct type
 { 
 
   Output * output = NULL;

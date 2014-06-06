@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     control_control.cpp
+/// @file     control_charm.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2014-02-13
 /// @brief    Functions controling control flow of charm entry functions

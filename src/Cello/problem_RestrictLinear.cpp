@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_RestrictLinear.cpp
+/// @file     problem_RestrictLinear.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-05-10
 /// @brief    Implentation of default linear restriction

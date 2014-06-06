@@ -10,7 +10,7 @@
 
 class Config;
 
-/// @enum     type_counter
+/// @enum     counter_type_enum
 /// @brief    Counter value type
 enum counter_type_enum {
   counter_type_unknown,
@@ -28,7 +28,7 @@ enum index_enum {
   index_bytes_highest_
 };
   
-/// @enum    perf_regions
+/// @enum    perf_region
 /// @brief   region ID's for the Simulation performance object
 enum perf_region {
   perf_unknown,

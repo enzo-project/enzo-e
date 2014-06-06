@@ -2,8 +2,8 @@
 
 /// @file     charm_ArrayMap.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
-/// @brief    [\ref Charm] Declaration of the ArrayMap class
+/// @date     2013-04-22
+/// @brief    [\ref Parallel] Declaration of the ArrayMap class
 ///
 
 #ifndef CHARM_ARRAY_MAP_HPP
@@ -15,7 +15,7 @@ class ArrayMap: public CBase_ArrayMap {
 
   /// @class    ArrayMap
   /// @ingroup  Charm
-  /// @brief    [\ref Charm] 
+  /// @brief    [\ref Parallel] 
 
 public:
   int *mapping;

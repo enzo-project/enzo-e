@@ -3,7 +3,7 @@
 /// @file     _parallel.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-16
-/// @brief    Private include file for the \ref Parallel component
+/// @brief    [\ref Parallel] Private include file for the Parallel component
 
 #ifndef _PARALLEL_HPP
 #define _PARALLEL_HPP
@@ -23,7 +23,7 @@ enum enum_reduce_op {
 };
 
 /// @enum enum_reduce_type
-/// @bried data type to reduce
+/// @brief data type to reduce
 enum enum_reduce_type {
   reduce_type_int,
   reduce_type_double

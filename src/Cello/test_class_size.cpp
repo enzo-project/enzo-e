@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_Class_Size.cpp
+/// @file     test_class_size.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
 /// @brief    Test program for the Class_Size class

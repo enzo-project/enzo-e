@@ -3,7 +3,7 @@
 /// @file     error.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2008-03-18
-/// @brief    Include file for the \ref Error component
+/// @brief    [\ref Error] Include file for the Error component
 
 #ifndef ERROR_HPP
 #define ERROR_HPP

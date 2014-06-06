@@ -1,20 +1,20 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_EnzoProlongMC1.hpp
+/// @file     enzo_EnzoProlongMC1.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-05-09
-/// @brief    [\ref Field] Declaration of the EnzoProlongMC1 class
+/// @brief    [\ref Problem] Declaration of the EnzoProlongMC1 class
 ///
 /// This class serves to encapsulate Enzo's interpolate() function
 
-#ifndef FIELD_ENZO_PROLONG_MC1_HPP
-#define FIELD_ENZO_PROLONG_MC1_HPP
+#ifndef PROBLEM_ENZO_PROLONG_MC1_HPP
+#define PROBLEM_ENZO_PROLONG_MC1_HPP
 
 class EnzoProlongMC1 : public Prolong {
 
   /// @class    EnzoProlongMC1
-  /// @ingroup  Field
-  /// @brief    [\ref ] 
+  /// @ingroup  Problem
+  /// @brief    [\ref Problem] 
 
 public: // interface
 
@@ -53,5 +53,5 @@ private: // attributes
 
 };
 
-#endif /* FIELD_ENZO_PROLONG_MC1_HPP */
+#endif /* PROBLEM_ENZO_PROLONG_MC1_HPP */
 

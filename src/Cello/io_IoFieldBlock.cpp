@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     Io_IoFieldBlock.cpp
+/// @file     io_IoFieldBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-10-06
 /// @brief    Implementation of the IoFieldBlock class

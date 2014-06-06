@@ -42,6 +42,9 @@ Boundary * EnzoProblem::create_boundary_
  Parameters * parameters
  ) throw ()
 /// @param type   Type of boundary condition to use
+/// @param index  Index of the Boundary object to use
+/// @param config Configuration parameters object
+/// @param parameters Parameters object (for evaluating expressions)
 {
 
   Mask * mask = 0;
@@ -108,6 +111,7 @@ Initial * EnzoProblem::create_initial_
 Method * EnzoProblem::create_method_ 
 ( std::string  type,  Config * config) throw ()
 /// @param type   Type of the method to create
+/// @param config Configuration parameters class
 {
 
   Method * method = 0;

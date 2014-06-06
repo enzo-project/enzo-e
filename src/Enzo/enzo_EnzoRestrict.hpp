@@ -1,20 +1,20 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_EnzoRestrict.hpp
+/// @file     enzo_EnzoRestrict.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-05-10
-/// @brief    [\ref Field] Declaration of the EnzoRestrict class
+/// @brief    [\ref Problem] Declaration of the EnzoRestrict class
 ///
 /// This class serves to encapsulate Enzo's restriction operations
 
-#ifndef FIELD_ENZO_RESTRICT_HPP
-#define FIELD_ENZO_RESTRICT_HPP
+#ifndef PROBLEM_ENZO_RESTRICT_HPP
+#define PROBLEM_ENZO_RESTRICT_HPP
 
 class EnzoRestrict : public Restrict {
 
   /// @class    EnzoRestrict
-  /// @ingroup  Field
-  /// @brief    [\ref ] 
+  /// @ingroup  Problem
+  /// @brief    [\ref Problem] 
 
 public: // interface
 
@@ -49,5 +49,5 @@ private: // attributes
 
 };
 
-#endif /* FIELD_ENZO_RESTRICT_HPP */
+#endif /* PROBLEM_ENZO_RESTRICT_HPP */
 

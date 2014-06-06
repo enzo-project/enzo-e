@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_functions.cpp
+/// @file     mesh_functions.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-01-12
 /// @brief    Supplemental functions for Mesh test programs
@@ -576,11 +576,13 @@ void tree_to_png (Tree * tree, std::string filename,
 /// @param tree is the 2D or 3D tree from which to generate the image
 /// @param filename is the name of the image file, including extension
 /// @param nx,ny are the size of the image
-/// @param thx,thy,thz   are the rotation angles around x, y, and z axes
+/// @param level_lower,level_upper are limits on the mesh levels
+/// @param theta,phi,psi   are the rotation angles around x, y, and z axes
 /// @param scale is the scaling factor of the image
 /// @param ortho determines whether to generate an orthographic or
 /// perspective projection
 /// @param falloff refers to color blending with respect to levels: (level) ^ (-falloff)
+/// @param target whether to use "targeted refinement"
 {
 
   bool fill_blocks = (theta==0.0 && phi==0.0 && psi==0 && tree->dimension()==2);

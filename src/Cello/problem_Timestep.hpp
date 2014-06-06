@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_Timestep.hpp 
+/// @file     problem_Timestep.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    [\ref Method] Declaration for the Timestep component
+/// @brief    [\ref Problem] Declaration for the Timestep component
 
-#ifndef METHOD_TIMESTEP_HPP
-#define METHOD_TIMESTEP_HPP
+#ifndef PROBLEM_TIMESTEP_HPP
+#define PROBLEM_TIMESTEP_HPP
 
 class Timestep : public PUP::able 
 {
@@ -40,4 +40,4 @@ public: // virtual functions
 
 };
 
-#endif /* METHOD_TIMESTEP_HPP */
+#endif /* PROBLEM_TIMESTEP_HPP */

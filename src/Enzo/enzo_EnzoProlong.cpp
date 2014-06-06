@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_EnzoProlong.cpp
+/// @file     enzo_EnzoProlong.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-05-09
 /// @brief    Implentation of Enzo's prolongation

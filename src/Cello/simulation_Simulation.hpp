@@ -27,7 +27,7 @@ class Simulation : public CBase_Simulation
   /// @ingroup  Simulation
   /// @brief    [\ref Simulation] Class specifying a simulation to run
   ///
-  /// @detailed A Simulation object encapsulates a single simulation,
+  /// @details A Simulation object encapsulates a single simulation,
   /// and Simulation objects are replicated across processes.  Simulations
   /// are defined as groups in CHARM++.
 

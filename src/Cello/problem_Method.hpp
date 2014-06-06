@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_Method.hpp 
+/// @file     problem_Method.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    [\ref Method] Declaration for the Method class
+/// @brief    [\ref Problem] Declaration for the Method class
 
-#ifndef METHOD_METHOD_HPP
-#define METHOD_METHOD_HPP
+#ifndef PROBLEM_METHOD_HPP
+#define PROBLEM_METHOD_HPP
 
 class Method : public PUP::able 
 {
@@ -107,4 +107,4 @@ protected: // attributes
 
 };
 
-#endif /* METHOD_METHOD_HPP */
+#endif /* PROBLEM_METHOD_HPP */

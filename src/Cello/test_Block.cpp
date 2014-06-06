@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_CommBlock.cpp
+/// @file     test_Block.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Mar  1 20:42:57 UTC 2011
 /// @brief    Test program for the CommBlock class
@@ -35,8 +35,8 @@ PARALLEL_MAIN_BEGIN
   double lower[3];
   double upper[3];
 
-  block->lower(&lower[0],&lower[1],&lower[2]);
-  block->upper(&upper[0],&upper[1],&upper[2]);
+  block->lower(lower+0,lower+1,lower+2);
+  block->upper(upper+0,upper+1,upper+2);
 
   unit_func("lower");
   unit_assert(lower[0] == -1.0);

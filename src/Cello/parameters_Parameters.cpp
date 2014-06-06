@@ -63,7 +63,7 @@ Parameters::~Parameters()
 //----------------------------------------------------------------------
 
 void Parameters::read ( const char * file_name )
-/// @param    file_pointer An opened input parameter file or stdin
+/// @param    file_name An opened input parameter file or stdin
 {
 
   FILE * file_pointer = fopen(file_name,"r");
@@ -119,7 +119,7 @@ void Parameters::read ( const char * file_name )
 //----------------------------------------------------------------------
 
 void Parameters::write ( const char * file_name )
-/// @param    file_pointer An opened output parameter file or stdout
+/// @param  file_name   An opened output parameter file or stdout
 {
 
   FILE * file_pointer = fopen(file_name,"w");

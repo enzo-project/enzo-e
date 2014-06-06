@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_EnzoRestrict.cpp
+/// @file     enzo_EnzoRestrict.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-05-10
 /// @brief    Implentation of Enzo's restriction operators

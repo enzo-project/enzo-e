@@ -61,6 +61,7 @@ bool Tree::node_neighbor
  int iy,
  int iz) const
 /// @param node_trace  Node trace of the node
+/// @param neighbor_trace  Object defining the NodeTrace of the Node's neighbor
 /// @param ix,iy,iz    Direction of the neighbor we wish to find
 ///
 /// This function works by starting at the given node, traversing

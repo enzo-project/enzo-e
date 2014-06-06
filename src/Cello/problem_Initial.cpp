@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     io_Problem.cpp
+/// @file     problem_Initial.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Mar 16 09:53:31 PDT 2011
 /// @brief    Implementation of the Problem class

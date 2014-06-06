@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     parameters_EnzoConfig.hpp
+/// @file     enzo_EnzoConfig.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-10-02
 /// @brief    [\ref Parameters] Declaration of the EnzoConfig class

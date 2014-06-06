@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_ProlongLinear.cpp
+/// @file     problem_ProlongLinear.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-05-09
 /// @brief    Implentation of default linear prolongation

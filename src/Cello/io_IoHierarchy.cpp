@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     Io_IoHierarchy.cpp
+/// @file     io_IoHierarchy.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-10-06
 /// @brief    Implementation of the IoHierarchy class

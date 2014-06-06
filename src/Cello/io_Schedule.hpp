@@ -9,7 +9,7 @@
 #define IO_SCHEDULE_HPP
 
 //----------------------------------------------------------------------
-/// @enum     schedule_type
+/// @enum     schedule_enum
 /// @brief    Scheduling types
 
 enum schedule_enum {

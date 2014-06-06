@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_InitialFile.hpp
+/// @file     problem_InitialFile.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Jan  4 19:26:38 PST 2011
 /// @brief    [\ref Problem] Declaration of the InitialFile class

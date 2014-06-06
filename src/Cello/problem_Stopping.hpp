@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_Stopping.hpp
+/// @file     problem_Stopping.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
 /// @brief    [\ref Method] Declaration of the Stopping class
 
-#ifndef METHOD_STOPPING_HPP
-#define METHOD_STOPPING_HPP
+#ifndef PROBLEM_STOPPING_HPP
+#define PROBLEM_STOPPING_HPP
 
 class Stopping {
 
@@ -73,5 +73,5 @@ protected:
 
 };
 
-#endif /* METHOD_STOPPING_HPP */
+#endif /* PROBLEM_STOPPING_HPP */
 

@@ -87,7 +87,7 @@ PARALLEL_MAIN_BEGIN
 
   int size[3];
 
-  field_block->size(&size[0],&size[1],&size[2]);
+  field_block->size(size+0,size+1,size+2);
 
   unit_assert(size[0]==nx && size[1]==ny && size[2]==nz);
 

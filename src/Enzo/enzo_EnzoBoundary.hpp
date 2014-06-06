@@ -10,7 +10,7 @@
 
 //----------------------------------------------------------------------
 
-/// @enum     boundary_type_enum
+/// @enum     boundary_enum
 /// @brief    External boundary condition types
 enum boundary_enum {
   boundary_type_undefined,   // 0 is an undefined boundary

@@ -3,7 +3,7 @@
 /// @file     charm_Sync.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-03-12
-/// @brief    [\ref Charm] Declaration of the CHARM Sync class
+/// @brief    [\ref Parallel] Declaration of the CHARM Sync class
 ///
 /// This class is used to simplify control flow of CHARM++ programs.
 ///
@@ -37,7 +37,7 @@ class Sync {
 
   /// @class    Sync
   /// @ingroup  Charm
-  /// @brief    [\ref Charm] 
+  /// @brief    [\ref Parallel] 
 
  public:
    /// Create a CHARM++ "Sync" object

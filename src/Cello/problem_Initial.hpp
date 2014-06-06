@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_Initial.hpp 
+/// @file     problem_Initial.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    [\ref Method] Declaration for the Initial component
+/// @brief    [\ref Problem] Declaration for the Initial component
 
 #ifndef METHOD_INITIAL_HPP
 #define METHOD_INITIAL_HPP

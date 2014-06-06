@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_InitialValue.hpp
+/// @file     problem_InitialValue.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Jan  4 19:26:38 PST 2011
-/// @brief    [\ref Method] Default initialization method
+/// @brief    [\ref Problem] Default initialization method
 
 #ifndef METHOD_INITIAL_DEFAULT_HPP
 #define METHOD_INITIAL_DEFAULT_HPP

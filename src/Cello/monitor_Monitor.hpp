@@ -11,7 +11,7 @@
 #define MONITOR_MONITOR_HPP
 
 //----------------------------------------------------------------------
-/// @def    MONITOR_LENGTH 255
+/// @def    MONITOR_LENGTH
 /// @brief  Maximum length of monitor text output
 
 #define MONITOR_LENGTH 255

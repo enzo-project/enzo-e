@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     Io_IoLayout.cpp
+/// @file     io_IoLayout.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-03-28
 /// @brief    Implementation of the IoLayout class
