@@ -58,7 +58,9 @@ function test_time ($output_file) {
 
 function test_duration ($output_file) {
   if (file_exists($output_file)) {
-    system("cat $output-file | awk '/UNIT TEST END/ {print $4};");
+    echo "<td class=pass>";
+    system("awk '/END CELLO/ {print $2}' < $output_file");
+    echo "</td>";
   } else {
     echo "<td></td>";
   }
@@ -131,6 +133,7 @@ $types = array("charm");
     echo "   <th>Output</th>";
     echo "   <th>Date</th>";
     echo "   <th>Time</th>";
+    echo "   <th>Duration</th>";
     echo "   <th>Failed</th>";
     echo "   <th>Unfinished</th>";
     echo "   <th>Passed</th>";
@@ -149,6 +152,7 @@ $types = array("charm");
       test_output     ($output_file);
       test_date       ($output_file);
       test_time       ($output_file);
+      test_duration   ($output_file);
       test_failed     ($output_file);
       test_unfinished ($output_file);
       test_passed     ($output_file);
@@ -904,6 +908,10 @@ tests("Enzo","enzo-p","test_balance_rotate","Rotate");
 // tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm");
 
 
+echo "<h3>Greedy</h3>";
+tests("Enzo","enzo-p","test_balance_greedy","Greedy");
+test_table ("Balance/Greedy/balance-mesh",
+	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
 echo "<h3>GreedyComm</h3>";
 tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm");
 test_table ("Balance/GreedyComm/balance-mesh",

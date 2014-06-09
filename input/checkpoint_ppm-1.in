@@ -7,6 +7,10 @@ Mesh { root_blocks    = [1,1]; }
 
 include "input/adapt_slope.incl"
 
+Testing {
+   time_final = 0.102248490019701;
+}
+
 Output {
 
   list = ["density","checkpoint"];
@@ -22,3 +26,4 @@ Output {
      schedule { var = "cycle"; type ="list"; value=[100,200,300];};
   }
 }
+
