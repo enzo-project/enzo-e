@@ -106,6 +106,8 @@ void CommBlock::stopping_begin_()
 void CommBlock::r_stopping_compute_timestep(CkReductionMsg * msg)
 {
 
+  ++age_;
+
   double * min_reduce = (double * )msg->getData();
 
   dt_   = min_reduce[0];

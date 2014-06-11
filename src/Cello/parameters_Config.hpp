@@ -55,13 +55,14 @@ public: // interface
 
 public: // attributes
 
-  // REVIEW: rev 3539
+  // REVIEW: rev 3563 2014-06-10
 
   // NOTE: change pup() function whenever attributes change
 
   // Balance (dynamic load balancing)
 
   int                        balance_interval; // 0 for none
+
   // Boundary
 
   int                        num_boundary;

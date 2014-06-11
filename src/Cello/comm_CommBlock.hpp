@@ -118,6 +118,9 @@ public: // interface
   int level() const throw() 
   {  return index_.level(); };
 
+  int age() const throw()
+  { return age_; };
+
   /// Return the current timestep
   double dt() const throw() 
   { return dt_; };
@@ -658,6 +661,8 @@ protected: // attributes
   /// computed to avoid race condition bug #30
   bool is_leaf_;
 
+  /// Age of the CommBlock in cycles (for OutputImage)
+  int age_;
 };
 
 #endif /* COMM_COMMBLOCK_HPP */

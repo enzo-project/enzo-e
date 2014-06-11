@@ -45,7 +45,8 @@ CommBlock::CommBlock
   next_phase_(phase_stopping),
   coarsened_(false),
   delete_(false),
-  is_leaf_(true)
+  is_leaf_(true),
+  age_(0.0)
 {
 
   // Enable Charm++ AtSync() dynamic load balancing
@@ -221,6 +222,7 @@ void CommBlock::pup(PUP::er &p)
   p | coarsened_;
   p | delete_;
   p | is_leaf_;
+  p | age_;
 
 }
 

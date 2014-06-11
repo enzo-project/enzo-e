@@ -17,6 +17,7 @@ enum mesh_color_type {
   mesh_color_level,
   mesh_color_process,
   mesh_color_neighbor,
+  mesh_color_age
 };
 
 class OutputImage : public Output {
@@ -107,7 +108,7 @@ public: // virtual functions
 private: // functions
 
   /// value associated with the given mesh level
-  double mesh_color_(int level) const;
+  double mesh_color_(int level, int age) const;
 
   bool type_is_mesh () const
   { return (image_type_ == "mesh" || image_type_ == "data+mesh"); }

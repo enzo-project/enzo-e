@@ -16,7 +16,7 @@
 
    # Field parameters include those concerning fields as a group, as
    # well as individual fields
-   
+
    Field {
 
       refresh { rank = 1;  }; # refresh faces and edges not corners
@@ -25,33 +25,17 @@
 
       list = [
          "density",
-	 "velox",
-         "veloy",
-         "veloz",
-         "bfieldx",
-	 "bfieldy",
-         "bfieldz",
+         "velox",       "veloy",       "veloz",
+         "bfieldx",     "bfieldy",     "bfieldz",
          "dens_rx",
-         "velox_rx",
-         "veloy_rx",
-         "veloz_rx",
-         "bfieldx_rx",
-         "bfieldy_rx",
-         "bfieldz_rx",
+         "velox_rx",    "veloy_rx",    "veloz_rx",
+          "bfieldx_rx",  "bfieldy_rx",  "bfieldz_rx",
          "dens_ry",
-         "velox_ry",
-         "veloy_ry",
-         "veloz_ry",
-         "bfieldx_ry",
-         "bfieldy_ry",
-         "bfieldz_ry",
+         "velox_ry",    "veloy_ry",    "veloz_ry",
+         "bfieldx_ry",  "bfieldy_ry",  "bfieldz_ry",
          "dens_rz",
-         "velox_rz",
-         "veloy_rz",
-         "veloz_rz",
-         "bfieldx_rz",
-         "bfieldy_rz",
-         "bfieldz_rz"
+         "velox_rz",    "veloy_rz",    "veloz_rz",
+         "bfieldx_rz",  "bfieldy_rz",  "bfieldz_rz"
       ] ;
 
       # courant condition for fields
@@ -60,22 +44,22 @@
       gamma = 1.4;
 
       padding   = 0;
-      alignment = 8;    
+      alignment = 8;
    }
 
    Method {
 
       # list of methods to apply and in what order
- 
+
       list = ["ppml"];
 
    }
 
    Initial {
-       density { 
-         value = [ 1.0, (x- 0.5)*(x- 0.5) + 
+       density {
+         value = [ 1.0, (x- 0.5)*(x- 0.5) +
                         (y- 0.5)*(y- 0.5) +
-                        (z- 0.5)*(z- 0.5) < 0.05,  
+                        (z- 0.5)*(z- 0.5) < 0.05,
                   0.1 ]; };
        velox { value = 0.0; };
        veloy { value = 0.0; };
@@ -108,7 +92,7 @@
        bfieldy_rz { value = 0.0; };
        bfieldz_rz { value = 0.0; };
 
-   }	
+   }
 
    Boundary { type = "reflecting" }
 
@@ -123,35 +107,35 @@
       time_final  = 0.115152062016876;
    }
 
-   Output { 
+   Output {
 
       list = ["d_x","d_y","d_z","dump"];
 
       dump {
         field_list = ["density"];
-	type = "data";
-#	schedule { var = "cycle"; type="list"; value=[0,1];};
-	include "input/schedule_cycle_2.incl"
+        type = "data";
+#        schedule { var = "cycle"; type="list"; value=[0,1];};
+        include "input/schedule_cycle_2.incl"
       };
 
       d_x {
         field_list = ["density"];
-	type = "image";
-	include "input/schedule_cycle_2.incl"
+        type = "image";
+        include "input/schedule_cycle_2.incl"
         axis = "x";
         include "input/colormap_blackbody.incl";
       };
       d_y {
         field_list = ["density"];
-	type = "image";
-	include "input/schedule_cycle_2.incl"
+        type = "image";
+        include "input/schedule_cycle_2.incl"
         axis = "y";
         include "input/colormap_blackbody.incl";
       };
       d_z {
         field_list = ["density"];
-	type = "image";
-	include "input/schedule_cycle_2.incl"
+        type = "image";
+        include "input/schedule_cycle_2.incl"
         axis = "z";
         include "input/colormap_blackbody.incl";
       };

@@ -8,6 +8,9 @@
 
 /// This file controls adaptive mesh refinement on a distributed
 /// forest of octrees.
+///
+/// adapt_begin_()
+///
 
 //--------------------------------------------------
 // #define DEBUG_ADAPT
@@ -15,7 +18,7 @@
 
 #ifdef DEBUG_ADAPT
 
-static char buffer [256];
+    static char buffer [256];
 
 #   define PUT_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
   {								\
@@ -49,6 +52,11 @@ static char buffer [256];
 
 //======================================================================
 
+/// @brief First function in the adapt phase: apply local refinement criteria.
+/// 
+/// adapt_begin_() computes the local desired refinement level using
+/// adapt_compute_desired_level_(), after which it calls
+/// adapt_called_() with nearest-neighbor synchronization.
 void CommBlock::adapt_begin_()
 {
 
@@ -70,23 +78,15 @@ void CommBlock::adapt_begin_()
 
 //----------------------------------------------------------------------
 
-bool CommBlock::do_adapt_()
-{
-
-  int adapt_interval = simulation()->config()->mesh_adapt_interval;
-
-  return ((adapt_interval && ((cycle_ % adapt_interval) == 0)));
-
-}
-
-//----------------------------------------------------------------------
-
+/// @brief Second step of the adapt phase: tell neighbors desired level.
+///
+/// Call adapt_send_neighbors_levels() to send neighbors desired
+/// levels, after which adapt_next_() is called with quiescence
+/// detection.
 void CommBlock::adapt_called_()
 
 {
-  if (is_leaf()) {
-    adapt_send_neighbors_levels(level_new_);
-  }
+  adapt_send_neighbors_levels(level_new_);
 
   control_sync (sync_adapt_next,"quiescence");
 
@@ -94,46 +94,13 @@ void CommBlock::adapt_called_()
 
 //----------------------------------------------------------------------
 
-int CommBlock::adapt_compute_desired_level_(int level_maximum)
-{
-
-  if (! is_leaf()) return adapt_same;
-
-  adapt_ = adapt_unknown;
-
-  int level = this->level();
-  int level_desired = level;
-
-  const FieldDescr * field_descr = simulation()->field_descr();
-
-  int index_refine = 0;
-
-  Problem * problem = simulation()->problem();
-  Refine * refine;
-
-  while ((refine = problem->refine(index_refine++))) {
-
-    adapt_ = std::max(adapt_,refine->apply(this, field_descr));
-
-  }
-
-  const int initial_cycle = simulation()->config()->initial_cycle;
-  const bool is_first_cycle = (initial_cycle == cycle());
-
-  if (adapt_ == adapt_coarsen && level > 0 && ! is_first_cycle) 
-    level_desired = level - 1;
-  else if (adapt_ == adapt_refine  && level < level_maximum) 
-    level_desired = level + 1;
-  else {
-    adapt_ = adapt_same;
-    level_desired = level;
-  }
-
-  return level_desired;
-}
-
-//----------------------------------------------------------------------
-
+/// @brief Third step of the adapt phase: coarsen or refine according
+/// to desired level.
+///
+/// Call update_levels_() to finalize face and child face levels,
+/// then, if a leaf, refine or coarsen according to desired level
+/// determined in adapt_called_().  Afterward, all CommBlocks call
+/// adapt_end_().
 void CommBlock::adapt_next_()
 {
 
@@ -156,27 +123,86 @@ void CommBlock::adapt_next_()
 
 //----------------------------------------------------------------------
 
+/// @brief Fourth step of the adapt phase: delete self if CommBlock has
+/// been coarsened
+///
+/// This step deletes itself if it has been coarsened in this adapt
+/// phase, then exits the adapt phase by directly calling adapt_exit_().
+/// This is a separate phase since the quiescence call of this function
+/// from the previous adapt_next_() step includes CommBlock's that have
+/// been deleted.  
 void CommBlock::adapt_end_()
 {
   if (delete_) {
 
-    // --------------------------------------------------
-    // ENTRY: #6 SimulationCharm::adapt_exit_() -> ckDestroy()
-    // ENTRY: if delete
-    // ENTRY: adapt phase
-    // --------------------------------------------------
     index_.print("DESTROY",-1,2,false,simulation());
     ckDestroy();
-    // --------------------------------------------------
 
     return;
+  } else {
+
+    control_sync(sync_adapt_exit,"quiescence");
+  }
+}
+
+//----------------------------------------------------------------------
+
+/// @brief Return whether the adapt phase should be called this cycle.
+bool CommBlock::do_adapt_()
+{
+
+  int adapt_interval = simulation()->config()->mesh_adapt_interval;
+
+  return ((adapt_interval && ((cycle_ % adapt_interval) == 0)));
+
+}
+
+//----------------------------------------------------------------------
+
+/// @brief Determine whether this CommBlock should refine, coarsen, or stay the same.
+///
+/// Return if not a leaf; otherwise, apply all Refine refinement
+/// criteria to the CommBlock, and set level_desired accordingly:
+/// level+1 if it needs to refine, level - 1 if it can coarsen,
+/// or level.
+///
+/// @return The desired level based on local refinement criteria.
+int CommBlock::adapt_compute_desired_level_(int level_maximum)
+{
+
+  if (! is_leaf()) return adapt_same;
+
+  adapt_ = adapt_unknown;
+
+  int level = this->level();
+  int level_desired = level;
+
+  const FieldDescr * field_descr = simulation()->field_descr();
+
+
+  Problem * problem = simulation()->problem();
+  Refine * refine;
+
+  int index_refine = 0;
+  while ((refine = problem->refine(index_refine++))) {
+
+    adapt_ = std::max(adapt_,refine->apply(this, field_descr));
+
   }
 
-  //  if (index_.is_root()) {
-  //    thisProxy.doneInserting();
-  //  }
+  const int initial_cycle = simulation()->config()->initial_cycle;
+  const bool is_first_cycle = (initial_cycle == cycle());
 
-  control_sync(sync_adapt_exit,"none");
+  if (adapt_ == adapt_coarsen && level > 0 && ! is_first_cycle) 
+    level_desired = level - 1;
+  else if (adapt_ == adapt_refine  && level < level_maximum) 
+    level_desired = level + 1;
+  else {
+    adapt_ = adapt_same;
+    level_desired = level;
+  }
+
+  return level_desired;
 }
 
 //----------------------------------------------------------------------
@@ -263,6 +289,8 @@ void CommBlock::adapt_delete_child_(Index index_child)
 
 void CommBlock::adapt_send_neighbors_levels(int level_new)
 {
+  if (!is_leaf()) return;
+
   const int level        = this->level();
   const int rank         = simulation()->dimension();
   const int rank_refresh = simulation()->config()->field_refresh_rank;
@@ -579,6 +607,7 @@ void CommBlock::p_adapt_recv_child_data
   adapt_delete_child_(index_child);
 
   is_leaf_ = true;
+  age_ = 0;
 }
 
 //----------------------------------------------------------------------

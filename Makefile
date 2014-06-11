@@ -5,6 +5,9 @@ default: enzop-8
 enzop-%:
 	python scons.py -j$* bin/enzo-p
 
+.PHONY: doc
+doc:
+	$(MAKE) -C src doc
 
 .PHONY: clean
 clean:
