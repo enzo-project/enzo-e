@@ -21,6 +21,8 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+// #define CELLO_VERBOSE
+
 #ifdef CELLO_VERBOSE
 #   define VERBOSE(A)					\
   if (index_.is_root()) {				\

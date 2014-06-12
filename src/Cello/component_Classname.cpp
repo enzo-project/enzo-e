@@ -18,13 +18,6 @@ Classname::Classname() throw ()
 
 //----------------------------------------------------------------------
 
-Classname::~Classname() throw ()
-{
-  INCOMPLETE("Classname::~Classname");
-}
-
-//----------------------------------------------------------------------
-
 Classname::Classname(const Classname & classname) throw ()
 /// @param     classname  Object being copied
 {
@@ -39,6 +32,20 @@ Classname & Classname::operator= (const Classname & classname) throw ()
 {
   INCOMPLETE("Classname::operator=");
   return *this;
+}
+
+//----------------------------------------------------------------------
+
+Classname::~Classname() throw ()
+{
+  INCOMPLETE("Classname::~Classname");
+}
+
+/// CHARM++ Pack / Unpack function
+void Classname::pup (PUP::er &p)
+{
+  TRACEPUP;
+  // NOTE: change this function whenever attributes change
 }
 
 //======================================================================

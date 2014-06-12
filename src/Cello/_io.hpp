@@ -28,6 +28,9 @@ enum meta_type {
 // Component class includes
 //----------------------------------------------------------------------
 
+#include "io_Colormap.hpp"
+#include "io_ColormapRGB.hpp"
+
 #include "io_Io.hpp"
 #include "io_IoHierarchy.hpp"
 #include "io_IoLayout.hpp"

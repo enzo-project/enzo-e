@@ -70,7 +70,7 @@ libs_simulation  = ['simulation','problem']
 libs_test        = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
-libs_all = ['charm','control','simulation','problem','mesh','comm','mesh','field','particle','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi
+libs_all = ['charm','control','simulation','problem','mesh','comm','mesh','field','particle','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi # gtest
 libs_field  = libs_all
 libs_particle = libs_all
 libs_io     = libs_all
@@ -219,6 +219,10 @@ test_error        = env.Program ('test_Error.cpp',      LIBS=[libs_error, libs_t
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM++
 # test_FieldBlock -lsimulation -lfield -lmethod -lmesh -lio -lparallel -ldisk -lparameters -lperformance -lmemory -lerror -lcello -ltest -lparallel -lerror -lmonitor -lhdf5 -lexternal -lpng -lpapi
+
+# test_colormap    = env.Program (['gtest_Colormap.cpp', objs_io],
+#                                  LIBS=[libs_io,    libs_test]) 
+
 test_field_block  = env.Program (['test_FieldBlock.cpp', objs_field],
                                  LIBS=[libs_field, libs_test])
 test_field_descr  = env.Program (['test_FieldDescr.cpp', objs_field], 
@@ -304,7 +308,7 @@ binaries_field = [test_field_block,
                   test_field_face,
                   test_it_field]
 binaries_problem = [test_mask,test_value]
-binaries_io    = [test_it_reduce]
+binaries_io    = [test_it_reduce] # gtest_colormap
 binaries_memory  = [test_memory]
 binaries_mesh = [ test_block,test_hierarchy,test_tree,test_tree_density,test_node,test_node_trace,test_it_node,test_index,test_schedule,test_it_face,test_it_child]
 binaries_monitor = [test_monitor]

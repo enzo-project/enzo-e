@@ -86,6 +86,8 @@ void CommBlock::refresh_begin_()
 	  }
 	}
       } else {
+
+	debug_faces_("REFRESH ERROR");
 	sprintf (buffer,"REFRESH ERROR face (%d %d %d) level %d face_level %d phase %d",
 		 if3[0],if3[1],if3[2],level,face_level(if3),next_phase_);
 	index_.print(buffer,-1,2,false,simulation);

@@ -686,7 +686,7 @@ void FieldBlock::print
      // hz = (upper[2]-lower[2])/(nzd-2*gz);
 
      const char * array_offset = &array_[0]+offsets_[index_field];
-     switch (field_descr->precision(index_field)) {
+     switch (field_descr_->precision(index_field)) {
      case precision_single:
        print_((const float * ) array_offset,
 	      field_name, message, // lower,

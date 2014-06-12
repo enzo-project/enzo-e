@@ -48,7 +48,6 @@ OutputImage::OutputImage(const FieldDescr * field_descr,
   else if (image_reduce_type=="max") { op_reduce_ = reduce_max; }
   else if (image_reduce_type=="avg") { op_reduce_ = reduce_avg; }
   else if (image_reduce_type=="sum") { op_reduce_ = reduce_sum; }
-  else if (image_reduce_type=="set") { op_reduce_ = reduce_set; }
   else {
     ERROR1 ("OutputImage::OutputImage()",
 	    "Unrecognized output_image_reduce_type %s",
@@ -58,7 +57,6 @@ OutputImage::OutputImage(const FieldDescr * field_descr,
   if      (image_mesh_color=="level")   mesh_color_type_ = mesh_color_level;
   else if (image_mesh_color=="process") mesh_color_type_ = mesh_color_process;
   else if (image_mesh_color=="age")     mesh_color_type_ = mesh_color_age;
-  //  else if (image_mesh_color=="neighbor") mesh_color_type_ = mesh_color_neighbor;
   else {
     ERROR1 ("OutputImage::OutputImage()",
 	    "Unrecognized output_image_mesh_color %s",
@@ -300,8 +298,11 @@ void OutputImage::write_block
     double value = 0;
     value = mesh_color_(comm_block->level(),comm_block->age());
 					     
-    reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value,0.5);
-    reduce_box_(image_mesh_,ixm,ixp,iym,iyp,value);
+    reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value);
+    reduce_type reduce_save = op_reduce_;
+    op_reduce_ = reduce_set;
+    reduce_box_ (image_mesh_,ixm,ixp,iym,iyp,1.0-value);
+    op_reduce_ = reduce_save;
 
     if (comm_block->is_leaf()) { // ) {
       int xm=(ixm+ixp)/2;

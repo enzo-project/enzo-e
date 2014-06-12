@@ -12,6 +12,8 @@
 #include "main.hpp"
 #include "charm_simulation.hpp"
 
+// #define DEBUG_ADAPT
+
 //----------------------------------------------------------------------
 
 CommBlock::CommBlock
@@ -111,14 +113,10 @@ CommBlock::CommBlock
 
   }
 
-  //  face_level_new_.resize(face_level_.size());
   face_level_new_ = face_level_;
-  //  child_face_level_new_.resize(child_face_level_.size());
   child_face_level_new_ = child_face_level_;
 
   initialize_child_face_levels_();
-
-  debug_faces_("CommBlock");
 
   const int level = this->level();
 
@@ -648,7 +646,7 @@ void CommBlock::debug_faces_(const char * mesg)
   for (ic3[1]=1; ic3[1]>=0; ic3[1]--) {
     for (if3[1]=1; if3[1]>=-1; if3[1]--) {
 
-      index_.print(mesg,-1,2,false,simulation());
+      index_.print(mesg,-1,2,true,simulation());
 
       for (if3[0]=-1; if3[0]<=1; if3[0]++) {
 #ifdef CELLO_DEBUG

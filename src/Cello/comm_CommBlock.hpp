@@ -194,7 +194,9 @@ public: // interface
   void update_levels_ ()
   {
     face_level_ =       face_level_new_;
+    //    for (int i=0; i<face_level_new_.size(); i++) face_level_new_[i]=0;
     child_face_level_ = child_face_level_new_;
+    //    for (int i=0; i<child_face_level_new_.size(); i++) child_face_level_new_[i]=0;
   }
 
   bool is_child_ (const Index & index) const

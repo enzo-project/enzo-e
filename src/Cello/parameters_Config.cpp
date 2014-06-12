@@ -570,14 +570,6 @@ void Config::read_output_ (Parameters * p) throw()
       }
     }
       
-    // //  output_schedule
-
-    // ASSERT1("Config::read",
-    // 	   "'schedule' is not defined for output file group %s",
-    // 	    output_list[index].c_str(),
-    // 	    (p->type("schedule") != parameter_unknown));
-
-
     p->group_push("schedule");
     output_schedule_index[index] = 
       read_schedule_(p, output_list[index]);

@@ -135,7 +135,9 @@ void CommBlock::adapt_end_()
 {
   if (delete_) {
 
+#ifdef DEBUG_ADAPT
     index_.print("DESTROY",-1,2,false,simulation());
+#endif
     ckDestroy();
 
     return;
@@ -210,7 +212,9 @@ int CommBlock::adapt_compute_desired_level_(int level_maximum)
 void CommBlock::adapt_refine_()
 {
 
+#ifdef DEBUG_ADAPT
   index_.print("REFINE",-1,2,false,simulation());
+#endif
 
   adapt_ = adapt_unknown;
 
@@ -272,13 +276,7 @@ void CommBlock::adapt_refine_()
 
 void CommBlock::adapt_delete_child_(Index index_child)
 {
-  // --------------------------------------------------
-  // ENTRY: #9 CommBlock::adapt_delete_child_()-> CommBlock::p_adapt_delete()
-  // ENTRY: child block
-  // ENTRY: adapt phase
-  // --------------------------------------------------
   thisProxy[index_child].p_adapt_delete();
-  // --------------------------------------------------
 
   if (sync_coarsen_.next()) {
     children_.clear();
@@ -360,6 +358,15 @@ void CommBlock::adapt_send_neighbors_levels(int level_new)
 
 //----------------------------------------------------------------------
 
+/// @brief Entry function for receiving desired level of a neighbor
+///
+// level_face
+// level_face_new
+// level_new
+// level_new_
+// level
+
+
 void CommBlock::p_adapt_recv_neighbor_level
 (
  Index index_caller,   // index of the calling neighbor
@@ -369,6 +376,19 @@ void CommBlock::p_adapt_recv_neighbor_level
  int level_face_new
  )
 {
+
+#ifdef DEBUG_ADAPT
+  std::string bit_str = index_caller.bit_string(-1,2);
+  sprintf (buffer,"%12s %8s "					
+	     "if3 %2d %2d %2d  ic3 %d %d %d  "			
+	     "%d <- %d",					
+	     "recv",bit_str.c_str(),				
+	     if3[0],if3[1],if3[2],				
+	     ic3[0],ic3[1],ic3[2],				
+	   level_face,level_face_new);			
+  index_.print(buffer,-1,2,false,simulation());		
+#endif
+
   int level_new = level_new_;
 
   const int level        = this->level();
@@ -515,12 +535,6 @@ void CommBlock::p_adapt_recv_neighbor_level
     int jc3[3];
     while (it_child.next(jc3)) {
       Index index_nibling = index_neighbor.index_child(jc3);
-      
-      //      index_.print("p_adapt_recv_neighbor_level() recurse",-1,2,false,simulation());
-      // --------------------------------------------------
-      // ENTRY: #13 CommBlock::p_adapt_recv_neighbor_level()-> CommBlock::p_get_neighbor_level()
-      // ENTRY: non-leaf recurse on children
-      // ENTRY: adapt phase
       // --------------------------------------------------
       PUT_LEVEL (index_nibling,ic3,if3,level_face,level_face_new,"RECURSE");
       // --------------------------------------------------
@@ -533,7 +547,9 @@ void CommBlock::p_adapt_recv_neighbor_level
 
 void CommBlock::adapt_coarsen_()
 {
+#ifdef DEBUG_ADAPT
   index_.print("COARSEN",-1,2,false,simulation());
+#endif
   const int level = this->level();
   
   // send data to parent
@@ -559,11 +575,6 @@ void CommBlock::adapt_coarsen_()
     for (int i=0; i<nf; i++) face_level[i] = face_level_[i];
 
     // send child data to parent
-
-    // --------------------------------------------------
-    // ENTRY: #14 CommBlock::adapt_coarsen_()-> CommBlock::p_adapt_recv_child_data()
-    // ENTRY: parent if leaf() and level > 0
-    // ENTRY: adapt phase
     // --------------------------------------------------
     thisProxy[index_parent].p_adapt_recv_child_data
       (ic3, narray,array, nf,face_level);
@@ -614,7 +625,9 @@ void CommBlock::p_adapt_recv_child_data
 
 void CommBlock::p_adapt_delete()
 {
+#ifdef DEBUG_ADAPT
   index_.print("DELETING",-1,2,false,simulation());
+#endif
   delete_ = true;
     // // --------------------------------------------------
     // // ENTRY: #6 SimulationCharm::adapt_exit_() -> ckDestroy()

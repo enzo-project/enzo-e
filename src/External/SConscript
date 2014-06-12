@@ -27,6 +27,9 @@ sources_png  = [Glob('png*cpp')]
 includes_expreval = [Glob('ExprEval/*h')]
 sources_expreval  = [Glob('ExprEval/*cpp')]
 
+# includes_gtest = [Glob('Gtest/*h')]
+# sources_gtest  = [Glob('Gtest/*cpp')]
+
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
@@ -37,6 +40,7 @@ sources_expreval  = [Glob('ExprEval/*cpp')]
 
 libraries_png      = env.Library ('external', sources_png)
 libraries_expreval = env.Library ('expreval', sources_expreval)
+# libraries_gtest = env.Library ('gtest', sources_gtest)
 
 
 #------------------------------
@@ -48,3 +52,6 @@ env.Alias('install-lib',env.Install (lib_path,libraries_png))
 
 env.Alias('install-inc',env.Install (inc_path,includes_expreval))
 env.Alias('install-lib',env.Install (lib_path,libraries_expreval))
+
+# env.Alias('install-inc',env.Install (inc_path,includes_gtest))
+# env.Alias('install-lib',env.Install (lib_path,libraries_gtest))

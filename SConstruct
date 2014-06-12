@@ -15,14 +15,14 @@ trace = 0
 # Whether to trace main phases
 #----------------------------------------------------------------------
 
-verbose = 1
+verbose = 0
 
 #----------------------------------------------------------------------
 # Whether to print out messages with the TRACE_CHARM() and TRACEPUP()
 #  series of statements
 #----------------------------------------------------------------------
 
-trace_charm = 1
+trace_charm = 0
 
 #----------------------------------------------------------------------
 # Whether to enable displaying messages with the DEBUG() series of

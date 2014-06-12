@@ -20,21 +20,17 @@ public: // interface
   /// Constructor
   Classname() throw();
 
-  /// Destructor
-  ~Classname() throw();
-
   /// Copy constructor
   Classname(const Classname & classname) throw();
 
   /// Assignment operator
   Classname & operator= (const Classname & classname) throw();
 
+  /// Destructor
+  ~Classname() throw();
+
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-  }
+  void pup (PUP::er &p);
   
 private: // functions
 
