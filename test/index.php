@@ -638,6 +638,8 @@ test_summary("Problem",array("Mask","Value"),
 	     array("test_Mask","test_Value")); 
 test_summary("Schedule",array("Schedule"),
 	     array("test_Schedule")); 
+test_summary("Colormap",array("Colormap"),
+	     array("test_Colormap")); 
 
 printf ("</tr></table></center></br>\n");
 
@@ -1142,6 +1144,12 @@ tests("Cello","test_Value","test_Value","");
 test_group("Schedule");
 
 tests("Cello","test_Schedule","test_Schedule","");
+
+//----------------------------------------------------------------------
+
+test_group("Colormap");
+
+tests("Cello","test_Colormap","test_Colormap","");
 
 ?>
   </br/>

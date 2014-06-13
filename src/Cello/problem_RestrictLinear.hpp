@@ -29,7 +29,7 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
-  { TRACEPUP; PUP::able::pup(p); }
+  { TRACEPUP; Restrict::pup(p); }
 
   /// Restrict field_block_ft values to the child block given by (icx,icy,icz)
   int apply 

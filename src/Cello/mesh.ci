@@ -10,6 +10,7 @@ module mesh {
   PUPable BoundaryPeriodic;
   PUPable BoundaryValue;
   PUPable Config;
+  PUPable ColormapRGB;
   PUPable Factory;
   PUPable Initial;
   PUPable InitialFile;

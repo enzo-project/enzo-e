@@ -29,7 +29,7 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
-  { TRACEPUP; PUP::able::pup(p); }
+  { TRACEPUP; Prolong::pup(p); }
 
   /// Prolong comm_block_Ht values to the child block given by (icx,icy,icz)
   virtual int apply

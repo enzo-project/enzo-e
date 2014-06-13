@@ -60,7 +60,8 @@ env.RunSerial('test_ItField.unit',   bin_path + '/test_ItField')
 # IO COMPONENT        
 #----------------------------------------------------------------------
 env.RunSerial('test_Schedule.unit',     bin_path + '/test_Schedule')
-env.RunSerial('test_ItReduce.unit',      bin_path + '/test_ItReduce')
+env.RunSerial('test_ItReduce.unit',     bin_path + '/test_ItReduce')
+env.RunSerial('test_Colormap.unit',     bin_path + '/test_Colormap')
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # MEMORY COMPONENT        

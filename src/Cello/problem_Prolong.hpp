@@ -31,7 +31,8 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
   {
-    TRACEPUP; PUP::able::pup(p); 
+    TRACEPUP;
+    PUP::able::pup(p); 
     p | monotonic_;
     p | positive_;
   }

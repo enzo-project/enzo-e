@@ -8,9 +8,7 @@
 #ifndef IO_COLOR_MAP_HPP
 #define IO_COLOR_MAP_HPP
 
-class FieldBlock;
-
-class Colormap {
+class Colormap : public PUP::able {
 
   /// @class    Colormap
   /// @ingroup  Io
@@ -27,10 +25,14 @@ public: // interface
     max_(std::numeric_limits<double>::max())
   {}
 
+  /// CHARM++ PUP::able declaration
+  PUPable_abstract(Colormap);
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
+    PUP::able::pup(p); 
     // NOTE: change this function whenever attributes change
     p | min_;
     p | max_;
@@ -49,11 +51,16 @@ public: // interface
 public: // virtual functions
 
   /// Pre-compute the color map for the FieldBlock
-  virtual void apply (FieldBlock * field_block) = 0;
+  virtual void load (int ndx, int ndy, int ndz,
+		     int nx,  int ny,  int nz,
+		     float * array) = 0;
+  /// Pre-compute the color map for the FieldBlock
+  virtual void load (int ndx, int ndy, int ndz,
+		     int nx,  int ny,  int nz,
+		     double * array) = 0;
 
   /// Return pre-computed color (kr,kg,kb) for index (ix,iy,iz)
-  virtual void color (char * kr, char * kg, char * kb,
-		      int    ix, int    iy, int    iz) = 0;
+  virtual void apply (double * kr, double * kg, double * kb) = 0;
 
 protected: // attributes
 

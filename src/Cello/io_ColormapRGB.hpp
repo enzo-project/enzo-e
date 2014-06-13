@@ -21,6 +21,16 @@ public: // interface
   /// Constructor
   ColormapRGB() throw();
 
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(ColormapRGB);
+
+  /// CHARM++ migration constructor
+  ColormapRGB(CkMigrateMessage *m) {}
+
+  /// Constructor
+  ColormapRGB(std::vector<double> rgb) throw()
+    : Colormap() { rgb_ = rgb; }
+
   /// Copy constructor
   ColormapRGB(const ColormapRGB & color_mapRGB) throw() ;
 
@@ -37,28 +47,40 @@ public: // interface
 
 public: // virtual functions
 
-  /// Pre-compute the color mapRGB for the FieldBlock
-  virtual void apply (FieldBlock * field_block);
+  /// Pre-compute the color map for the FieldBlock
+  virtual void load (int ndx, int ndy, int ndz,
+		     int nx,  int ny,  int nz,
+		     float * array);
+  //  { load_(ndx,ndy,ndz,nx,ny,nz,array); }
+  virtual void load (int ndx, int ndy, int ndz,
+		     int nx,  int ny,  int nz,
+		     double * array);
+  //  { load_(ndx,ndy,ndz,nx,ny,nz,array); }
 
   /// Return pre-computed color (kr,kg,kb) for index (ix,iy,iz)
-  virtual void color (char * kr, char * kg, char * kb,
-		      int    ix, int    iy, int    iz);
+  virtual void apply (double * kr, double * kg, double * kb);
   
+protected: // attributes
+
+  //  template<class T>
+  //  void load_ (int ndx, int ndy, int ndz,
+  //	      int nx,  int ny,  int nz,
+  //	      T * array);
+
 protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  /// Dimensions of the pre-computed color mapping
+  std::vector<double> rgb_;
 
-  int nx,ny,nz;
+  int precision_;
 
-  /// Red component of the color mapping
-  char * r_;
-  /// Green component of the color mapping
-  char * g_;
-  /// Blue component of the color mapping
-  char * b_;
-
+  union {
+    double * vd_;
+    float  * vf_;
+  };
+  int ndx_,ndy_,ndz_;
+  int nx_,ny_,nz_;
 };
 
 #endif /* IO_COLORMAP_RGB_HPP */
