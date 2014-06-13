@@ -74,7 +74,7 @@ void CommBlock::adapt_exit_()
 
   const int initial_cycle = simulation()->config()->initial_cycle;
   const bool is_first_cycle = (initial_cycle == cycle());
-  const int level_maximum = simulation()->config()->initial_max_level;
+  const int level_maximum = simulation()->config()->mesh_max_level;
 
   bool adapt_again = (is_first_cycle && adapt_step_++ < level_maximum);
 

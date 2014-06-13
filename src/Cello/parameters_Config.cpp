@@ -56,7 +56,6 @@ void Config::pup (PUP::er &p)
   p | initial_cycle;
   p | initial_type;
   p | initial_time;
-  p | initial_max_level;
 
   // Memory
 
@@ -316,6 +315,7 @@ void Config::read_field_ (Parameters * p) throw()
   field_centering[0].resize(num_fields);
   field_centering[1].resize(num_fields);
   field_centering[2].resize(num_fields);
+
   for (int i=0; i<num_fields; i++) {
 
     std::string param_name = 
@@ -370,12 +370,11 @@ void Config::read_initial_ (Parameters * p) throw()
   //--------------------------------------------------
 
   TRACE("Parameters: Initial");
-  initial_type  = p->value_string ("Initial:type","value");
   initial_cycle = p->value_integer("Initial:cycle",0);
+  initial_type  = p->value_string ("Initial:type","value");
   initial_time  = p->value_float  ("Initial:time",0.0);
 
   const int max_level = p->value_integer("Mesh:max_level",0);
-  initial_max_level = p->value_integer("Initial:max_level",max_level);
 
   //  initial_name;
 

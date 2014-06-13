@@ -411,7 +411,7 @@ Initial * Problem::create_initial_
   // parameter: Initial : time
   //--------------------------------------------------
 
-  if (type == "file" || type == "checkpoint") {
+  if (type == "file") {
     return new InitialFile   (parameters,group_process,
 			      config->initial_cycle,
 			      config->initial_time);;

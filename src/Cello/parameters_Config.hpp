@@ -97,7 +97,6 @@ public: // attributes
   int                        initial_cycle;
   std::string                initial_type;
   double                     initial_time;
-  int                        initial_max_level;
 
   // Memory
 
