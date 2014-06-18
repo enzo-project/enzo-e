@@ -307,12 +307,13 @@ public:
 
   /// Parent tells child to delete itself
   void p_adapt_delete();
-  void p_adapt_recv_neighbor_level 
-  (Index index_debug, int ic3[3], int if3[3], int level_now, int level_new);
-  void p_adapt_recv_child_data
+  void p_adapt_recv_level 
+  (Index index_debug, int ic3[3], int if3[3], int level_now, int level_new,
+   int call_count);
+  void p_adapt_recv_child
   (int ic3[3],int na, char * array, int nf, int * child_face_level);
 
-  void adapt_send_neighbors_levels(int level);
+  void adapt_send_neighbors_levels(int level,int call_count=0);
 
 protected:
   bool do_adapt_();
@@ -665,6 +666,11 @@ protected: // attributes
 
   /// Age of the CommBlock in cycles (for OutputImage)
   int age_;
+
+  /// Counters for received face levels
+  std::vector<int> face_level_count_;
+
+  
 };
 
 #endif /* COMM_COMMBLOCK_HPP */

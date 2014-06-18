@@ -40,11 +40,7 @@ Simulation::Simulation
   hierarchy_(0),
   field_descr_(0)
 {
-#ifdef CELLO_DEBUG
-    char buffer[40];
-    sprintf(buffer,"out.debug.%03d",CkMyPe());
-    fp_debug_ = fopen (buffer,"w");
-#endif
+  debug_open();
 
   if (!group_process_) {
     group_process_ = GroupProcess::create();

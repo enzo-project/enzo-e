@@ -17,75 +17,134 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
-  const int nx = 10;
-  const int ny = 12;
-  const int nz = 3;
+  const int nx = 101;
+  const int ny = 1;
+  const int nz = 1;
 
-  const int ndx = nx + 2;
-  const int ndy = ny + 2;
-  const int ndz = nz + 2;
+  const int n = nx*ny*nz;
+
+  const int gx = 1;
+  const int gy = 0;
+  const int gz = 0;
+
+  const int ndx = nx + 2*gx;
+  const int ndy = ny + 2*gy;
+  const int ndz = nz + 2*gz;
 
   const int nd = ndx*ndy*ndz;
 
-  float  * field = new float [nd];
+  float  * array = new float [nd];
 
-  float field_min = std::numeric_limits<float>::max();
-  float field_max = std::numeric_limits<float>::min();
-  for (int ix=1; ix<=nx; ix++) {
-    for (int iy=1; iy<=ny; iy++) {
-      for (int iz=1; iz<=nz; iz++) {
+  float array_min = std::numeric_limits<float>::max();
+  float array_max = std::numeric_limits<float>::min();
+  for (int ix=gx; ix<nx+gx; ix++) {
+    for (int iy=gy; iy<ny+gy; iy++) {
+      for (int iz=gz; iz<nz+gz; iz++) {
 	int i = ix + ndx*(iy + ndy*iz);
-	field[i] = ix+iy+iz;
-	field_min = std::min(field[i],field_min);
-	field_max = std::max(field[i],field_max);
+	array[i] = 2.*ix+7.*iy+19.*iz;
+	array_min = std::min(array[i],array_min);
+	array_max = std::max(array[i],array_max);
       }
     }
   }
 
-
-  //--------------------------------------------------
-
-  // Simple greyscale color map
-
-  double array[] = {0.0,0.0,0.0,  1.0,1.0,1.0};
-  std::vector<double> rgb(array,array+(sizeof(array)/sizeof(double)));
-  ColormapRGB * colormap = new ColormapRGB(rgb);
+  double * r = new double[n];
+  double * g = new double[n];
+  double * b = new double[n];
 
   unit_class("ColormapRGB");
+
+  //--------------------------------------------------
+  // Simple greyscale color map
+
+  double rgb_2_array[] = {0.0,0.0,0.0,  1.0,1.0,1.0};
+  std::vector<double> rgb_2(rgb_2_array,
+			  rgb_2_array+(sizeof(rgb_2_array)/sizeof(double)));
+  ColormapRGB * colormap_2 = new ColormapRGB(rgb_2);
+
   unit_func("ColormapRGB");
-  unit_assert (colormap != NULL);
+  unit_assert (colormap_2 != NULL);
 
   unit_func("set_limit");
-  colormap->set_limit(field_min,field_max);
-  unit_func("load");
-
-  colormap->load (ndx,ndy,ndz, nx,ny,nz, &field[1+ndx*(1+ndy*1)]);
-
-  int n = nx*ny*nz;
-  double *r, *g, *b;
-  r = new double [n];
-  g = new double [n];
-  b = new double [n];
+  colormap_2->set_limit(array_min,array_max);
 
   unit_func("apply");
 
-  colormap->apply (r,g,b);
+  colormap_2->apply (r,g,b, ndx,ndy,ndz, nx,ny,nz, &array[gx+ndx*(gy+ndy*gz)]);
 
-  unit_assert(r[0]==0.0);
-  unit_assert(g[0]==0.0);
-  unit_assert(b[0]==0.0);
+  unit_assert(r[ 0 ]==0.0);
+  unit_assert(g[ 0 ]==0.0);
+  unit_assert(b[ 0 ]==0.0);
   unit_assert(r[n-1]==1.0);
   unit_assert(g[n-1]==1.0);
   unit_assert(b[n-1]==1.0);
 
-  // add more checks of interior values
-  unit_assert(false);
+  unit_func("set_limit");
+  
+  colormap_2->set_limit(array_min,2*array_max-array_min);
 
+  colormap_2->apply (r,g,b, ndx,ndy,ndz, nx,ny,nz, &array[gx+ndx*(gy+ndy*gz)]);
+  unit_assert(r[ 0 ]==0.0);
+  unit_assert(g[ 0 ]==0.0);
+  unit_assert(b[ 0 ]==0.0);
+  unit_assert(r[n-1]==0.5);
+  unit_assert(g[n-1]==0.5);
+  unit_assert(b[n-1]==0.5);
 
   //--------------------------------------------------
-  // add more complicated tests
-  unit_assert(false);
+  // Mixed colormap
+
+  double rgb_3_array[] = {0.0,0.0,0.0,  1.0,0.5,0.25, 0.0, 0.0, 0.0};
+  std::vector<double> rgb_3(rgb_3_array,
+			    rgb_3_array+(sizeof(rgb_3_array)/sizeof(double)));
+  ColormapRGB * colormap_3 = new ColormapRGB(rgb_3);
+
+  unit_func("ColormapRGB");
+  unit_assert (colormap_3 != NULL);
+
+  unit_func("set_limit");
+  colormap_3->set_limit(array_min,array_max);
+
+  unit_func("apply");
+
+  colormap_3->apply (r,g,b, ndx,ndy,ndz, nx,ny,nz, &array[gx+ndx*(gy+ndy*gz)]);
+
+  const int mx=(nx+1)/2-1;
+  const int my=(ny+1)/2-1;
+  const int mz=(nz+1)/2-1;
+  const int m = mx+ndx*(my + ndy*mz);
+
+  unit_assert(r[ 0 ]==0.0);
+  unit_assert(g[ 0 ]==0.0);
+  unit_assert(b[ 0 ]==0.0);
+  unit_assert(r[ m ]==1.0);
+  unit_assert(g[ m ]==0.5);
+  unit_assert(b[ m ]==0.25);
+  unit_assert(r[n-1]==0.0);
+  unit_assert(g[n-1]==0.0);
+  unit_assert(b[n-1]==0.0);
+
+  unit_func("set_limit");
+  
+  colormap_3->set_limit(array_min,2*array_max-array_min);
+
+  colormap_3->apply (r,g,b, ndx,ndy,ndz, nx,ny,nz, &array[gx+ndx*(gy+ndy*gz)]);
+  unit_assert(r[ 0 ]==0.0);
+  unit_assert(g[ 0 ]==0.0);
+  unit_assert(b[ 0 ]==0.0);
+  unit_assert(r[ m ]==0.5);
+  unit_assert(g[ m ]==0.25);
+  unit_assert(b[ m ]==0.125);
+  unit_assert(r[n-1]==1.0);
+  unit_assert(g[n-1]==0.5);
+  unit_assert(b[n-1]==0.25);
+
   //--------------------------------------------------
+
+  delete [] r;
+  delete [] g;
+  delete [] b;
+
 
   unit_finalize();
 

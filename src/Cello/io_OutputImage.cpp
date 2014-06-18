@@ -211,7 +211,8 @@ void OutputImage::write_block
 // @param field_descr  Field descriptor
 {
 
-  if (!comm_block->is_leaf()) return
+  if (!comm_block->is_leaf()) return;
+
   TRACE("OutputImage::write_block()");
   const FieldBlock * field_block = comm_block->block()->field_block();
 
@@ -259,7 +260,7 @@ void OutputImage::write_block
   if (nbx > 1) v *= (xp-xm);
   if (nby > 1) v *= (yp-ym);
   if (nbz > 1) v *= (zp-zm);
-  TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),zp-zm,v);
+  TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),(zp-zm),v);
 
   if (type_is_data() && comm_block->is_leaf()) {
 

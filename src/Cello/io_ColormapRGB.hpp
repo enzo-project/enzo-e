@@ -47,40 +47,26 @@ public: // interface
 
 public: // virtual functions
 
-  /// Pre-compute the color map for the FieldBlock
-  virtual void load (int ndx, int ndy, int ndz,
-		     int nx,  int ny,  int nz,
-		     float * array);
-  //  { load_(ndx,ndy,ndz,nx,ny,nz,array); }
-  virtual void load (int ndx, int ndy, int ndz,
-		     int nx,  int ny,  int nz,
-		     double * array);
-  //  { load_(ndx,ndy,ndz,nx,ny,nz,array); }
+  /// Apply the colormap to the supplied float array, returning results in kr[],kg[],kb[]
+  virtual void apply (double * kr, double * kg, double * kb,
+		      int ndx, int ndy, int ndz,
+		      int nx,  int ny,  int nz,
+		      float * array);
 
-  /// Return pre-computed color (kr,kg,kb) for index (ix,iy,iz)
-  virtual void apply (double * kr, double * kg, double * kb);
+  /// Apply the colormap to the supplied double array, returning results in kr[],kg[],kb[]
+  virtual void apply (double * kr, double * kg, double * kb,
+		      int ndx, int ndy, int ndz,
+		      int nx,  int ny,  int nz,
+		      double * array);
   
 protected: // attributes
 
-  //  template<class T>
-  //  void load_ (int ndx, int ndy, int ndz,
-  //	      int nx,  int ny,  int nz,
-  //	      T * array);
 
 protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
   std::vector<double> rgb_;
-
-  int precision_;
-
-  union {
-    double * vd_;
-    float  * vf_;
-  };
-  int ndx_,ndy_,ndz_;
-  int nx_,ny_,nz_;
 };
 
 #endif /* IO_COLORMAP_RGB_HPP */

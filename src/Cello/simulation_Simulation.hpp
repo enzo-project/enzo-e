@@ -159,6 +159,21 @@ public: // virtual functions
 #ifdef CELLO_DEBUG
   FILE * fp_debug() { return fp_debug_; }
 #endif
+
+  void debug_open() {
+#ifdef CELLO_DEBUG
+    char buffer[40];
+    sprintf(buffer,"out.debug.%03d",CkMyPe());
+    fp_debug_ = fopen (buffer,"w");
+#endif
+  }
+
+  void debug_close() {
+#ifdef CELLO_DEBUG
+    fclose(fp_debug_);
+    fp_debug_ = 0;
+#endif
+  }
   
   // void set_projections_tracing( bool tracing)
   // { projections_tracing_ = tracing; }

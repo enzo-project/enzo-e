@@ -20,26 +20,26 @@
 
     static char buffer [256];
 
-#   define PUT_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
+#   define PUT_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG,COUNT)	\
   {								\
     std::string bit_str = INDEX.bit_string(-1,2);		\
-    sprintf (buffer,"%12s %8s "					\
+    sprintf (buffer,"%12s %8s [%d]"				\
 	     "if3 %2d %2d %2d  ic3 %d %d %d  "			\
 	     "%d -> %d :%d",					\
-	     MSG,bit_str.c_str(),				\
+	     MSG,bit_str.c_str(),COUNT,				\
 	     IF3[0],IF3[1],IF3[2],				\
 	     IC3[0],IC3[1],IC3[2],				\
 	     LEVEL_NOW,LEVEL_NEW,__LINE__);			\
     index_.print(buffer,-1,2,false,simulation());		\
     check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);		\
     check_face_(IF3,"PUT_LEVEL",__FILE__,__LINE__);		\
-    thisProxy[INDEX].p_adapt_recv_neighbor_level		\
-      (index_,IC3,IF3,LEVEL_NOW,LEVEL_NEW);			\
+    thisProxy[INDEX].p_adapt_recv_level		\
+      (index_,IC3,IF3,LEVEL_NOW,LEVEL_NEW,COUNT);	\
   }
 #else /* DEBUG_ADAPT */
 
-#   define PUT_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)		\
-  thisProxy[INDEX].p_adapt_recv_neighbor_level (index_,IC3,IF3,LEVEL_NOW,LEVEL_NEW);
+#   define PUT_LEVEL(INDEX,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG,COUNT)		\
+  thisProxy[INDEX].p_adapt_recv_level (index_,IC3,IF3,LEVEL_NOW,LEVEL_NEW,COUNT);
 #endif /* DEBUG_ADAPT */
 //--------------------------------------------------
 
@@ -63,9 +63,6 @@ void CommBlock::adapt_begin_()
   const int rank = simulation()->dimension();
   sync_coarsen_.set_stop(NC(rank));
   sync_coarsen_.clear();
-
-  const int initial_cycle = simulation()->config()->initial_cycle;
-  const bool is_first_cycle = (initial_cycle == cycle());
 
   int level_maximum = simulation()->config()->mesh_max_level;
 
@@ -141,6 +138,9 @@ void CommBlock::adapt_end_()
     return;
   } else {
 
+    for (int i=0; i<face_level_count_.size(); i++)
+      face_level_count_[i] = 0;
+
     control_sync(sync_adapt_exit,"quiescence");
   }
 }
@@ -165,6 +165,8 @@ bool CommBlock::do_adapt_()
 /// criteria to the CommBlock, and set level_desired accordingly:
 /// level+1 if it needs to refine, level - 1 if it can coarsen,
 /// or level.
+///
+/// @param[in]  level_maximum   Maximum level to refine
 ///
 /// @return The desired level based on local refinement criteria.
 int CommBlock::adapt_compute_desired_level_(int level_maximum)
@@ -268,6 +270,9 @@ void CommBlock::adapt_refine_()
     }
   }
   is_leaf_ = false;
+#ifdef DEBUG_ADAPT
+  index_.print("adapt_refine leaf=0",-1,2,false,simulation());
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -283,7 +288,7 @@ void CommBlock::adapt_delete_child_(Index index_child)
 
 //----------------------------------------------------------------------
 
-void CommBlock::adapt_send_neighbors_levels(int level_new)
+void CommBlock::adapt_send_neighbors_levels(int level_new, int call_count)
 {
   if (!is_leaf()) return;
 
@@ -307,7 +312,7 @@ void CommBlock::adapt_send_neighbors_levels(int level_new)
       // SEND-SAME: Face and level are sent to unique
       // neighboring block in the same level
 
-      PUT_LEVEL (index_neighbor,ic3,of3,level,level_new,"send-same");
+      PUT_LEVEL (index_neighbor,ic3,of3,level,level_new,"send-same",call_count);
 
     } else if (level_face == level - 1) {
 
@@ -326,7 +331,7 @@ void CommBlock::adapt_send_neighbors_levels(int level_new)
 
 	Index index_uncle = index_neighbor.index_parent();
 
-	PUT_LEVEL (index_uncle,ic3,of3,level,level_new,"send-coarse");
+	PUT_LEVEL (index_uncle,ic3,of3,level,level_new,"send-coarse",call_count);
 
       }
 
@@ -340,7 +345,7 @@ void CommBlock::adapt_send_neighbors_levels(int level_new)
       while (it_child.next(ic3)) {
 	Index index_nibling = index_neighbor.index_child(ic3);
 
-	PUT_LEVEL (index_nibling,ic3,of3,level,level_new,"send-fine");
+	PUT_LEVEL (index_nibling,ic3,of3,level,level_new,"send-fine",call_count);
 
       }
 
@@ -358,34 +363,40 @@ void CommBlock::adapt_send_neighbors_levels(int level_new)
 
 /// @brief Entry function for receiving desired level of a neighbor
 ///
+/// @param 
 // level_face
 // level_face_new
 // level_new
 // level_new_
 // level
-
-
-void CommBlock::p_adapt_recv_neighbor_level
+void CommBlock::p_adapt_recv_level
 (
  Index index_caller,   // index of the calling neighbor
  int ic3[3],
  int if3[3], 
  int level_face,
- int level_face_new
+ int level_face_new,
+ int call_count
  )
 {
 
 #ifdef DEBUG_ADAPT
   std::string bit_str = index_caller.bit_string(-1,2);
-  sprintf (buffer,"%12s %8s "					
-	     "if3 %2d %2d %2d  ic3 %d %d %d  "			
-	     "%d <- %d",					
-	     "recv",bit_str.c_str(),				
-	     if3[0],if3[1],if3[2],				
-	     ic3[0],ic3[1],ic3[2],				
+  sprintf (buffer,"%12s %8s [%d:%d]"
+	   "if3 %2d %2d %2d  ic3 %d %d %d  "			
+	   "%d <- %d",					
+	   "recv",bit_str.c_str(),call_count,face_level_count_[IF3(if3)],
+	   if3[0],if3[1],if3[2],				
+	   ic3[0],ic3[1],ic3[2],				
 	   level_face,level_face_new);			
   index_.print(buffer,-1,2,false,simulation());		
 #endif
+
+  if (face_level_count_[IF3(if3)] > level_face_new) {
+    return;
+  } else {
+    face_level_count_[IF3(if3)] = level_face_new;
+  }
 
   int level_new = level_new_;
 
@@ -516,11 +527,11 @@ void CommBlock::p_adapt_recv_neighbor_level
     // notify neighbors if level_new has changed
 
     if (level_new != level_new_) {
-      ASSERT2 ("CommBlock::p_adapt_recv_neighbor_level()",
+      ASSERT2 ("CommBlock::p_adapt_recv_level()",
 	       "level_new %d level_new_ %d\n", level_new,level_new_,
 	       level_new > level_new_);
       level_new_ = level_new;
-      adapt_send_neighbors_levels(level_new_);
+      adapt_send_neighbors_levels(level_new_,call_count+1);
     }
 
   } else { // not a leaf
@@ -534,7 +545,8 @@ void CommBlock::p_adapt_recv_neighbor_level
     while (it_child.next(jc3)) {
       Index index_nibling = index_neighbor.index_child(jc3);
       // --------------------------------------------------
-      PUT_LEVEL (index_nibling,ic3,if3,level_face,level_face_new,"RECURSE");
+      PUT_LEVEL (index_nibling,ic3,if3,level_face,level_face_new,"RECURSE",
+		 call_count);
       // --------------------------------------------------
 
     }
@@ -574,7 +586,7 @@ void CommBlock::adapt_coarsen_()
 
     // send child data to parent
     // --------------------------------------------------
-    thisProxy[index_parent].p_adapt_recv_child_data
+    thisProxy[index_parent].p_adapt_recv_child
       (ic3, narray,array, nf,face_level);
     // --------------------------------------------------
 
@@ -585,7 +597,7 @@ void CommBlock::adapt_coarsen_()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_adapt_recv_child_data
+void CommBlock::p_adapt_recv_child
 (
  int ic3[3],
  int na, char * array,
@@ -616,6 +628,9 @@ void CommBlock::p_adapt_recv_child_data
   adapt_delete_child_(index_child);
 
   is_leaf_ = true;
+#ifdef DEBUG_ADAPT
+  index_.print("p_adapt_recv_child leaf=1",-1,2,false,simulation());
+#endif
   age_ = 0;
 }
 

@@ -50,17 +50,17 @@ public: // interface
 
 public: // virtual functions
 
-  /// Pre-compute the color map for the FieldBlock
-  virtual void load (int ndx, int ndy, int ndz,
-		     int nx,  int ny,  int nz,
-		     float * array) = 0;
-  /// Pre-compute the color map for the FieldBlock
-  virtual void load (int ndx, int ndy, int ndz,
-		     int nx,  int ny,  int nz,
-		     double * array) = 0;
+  /// Apply the colormap to the supplied float array, returning results in kr[],kg[],kb[]
+  virtual void apply (double * kr, double * kg, double * kb,
+		      int ndx, int ndy, int ndz,
+		      int nx,  int ny,  int nz,
+		      float * array) = 0;
 
-  /// Return pre-computed color (kr,kg,kb) for index (ix,iy,iz)
-  virtual void apply (double * kr, double * kg, double * kb) = 0;
+  /// Apply the colormap to the supplied double array, returning results in kr[],kg[],kb[]
+  virtual void apply (double * kr, double * kg, double * kb,
+		      int ndx, int ndy, int ndz,
+		      int nx,  int ny,  int nz,
+		      double * array) = 0;
 
 protected: // attributes
 

@@ -270,6 +270,10 @@ void Problem::output_write
 
 void SimulationCharm::output_exit()
 {
+  // reset debug output files to limit file size
+  debug_close();
+  debug_open();
+
   TRACE_LOCAL("SimulationCharm::output_exit()");
   if (hierarchy()->group_process()->is_root()) 
     hierarchy()->block_array()->p_output_exit();

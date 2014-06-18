@@ -48,7 +48,8 @@ CommBlock::CommBlock
   coarsened_(false),
   delete_(false),
   is_leaf_(true),
-  age_(0.0)
+  age_(0),
+  face_level_count_()
 {
 
   // Enable Charm++ AtSync() dynamic load balancing
@@ -99,24 +100,28 @@ CommBlock::CommBlock
   if (num_face_level == 0) {
 
     face_level_.resize(27);
+    face_level_count_.resize(27);
     child_face_level_.resize(NC(rank)*27);
 
     for (int i=0; i<27; i++) face_level_[i] = 0;
-    for (int i=0; i<NC(rank)*27; i++) child_face_level_[i] = 0;
 
   } else {
 
     face_level_.resize(num_face_level);
+    face_level_count_.resize(num_face_level);
     child_face_level_.resize(NC(rank)*num_face_level);
 
     for (int i=0; i<num_face_level; i++) face_level_[i] = face_level[i];
 
   }
 
-  face_level_new_ = face_level_;
-  child_face_level_new_ = child_face_level_;
+  for (int i=0; i<face_level_count_.size(); i++) face_level_count_[i] = 0;
+  for (int i=0; i<child_face_level_.size(); i++) child_face_level_[i] = 0;
 
   initialize_child_face_levels_();
+
+  face_level_new_ = face_level_;
+  child_face_level_new_ = child_face_level_;
 
   const int level = this->level();
 
@@ -171,6 +176,8 @@ CommBlock::CommBlock
     control_sync (sync_adapt_end,"quiescence");
 
   }
+
+  debug_faces_("CommBlock()");
 }
 
 //----------------------------------------------------------------------
@@ -221,6 +228,7 @@ void CommBlock::pup(PUP::er &p)
   p | delete_;
   p | is_leaf_;
   p | age_;
+  p | face_level_count_;
 
 }
 
