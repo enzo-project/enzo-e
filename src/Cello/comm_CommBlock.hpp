@@ -649,9 +649,6 @@ protected: // attributes
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;
 
-  /// Counter for initial mesh creation
-  int level_count_;
-
   /// Number of adapt steps in the adapt phase
   int adapt_step_;
 
@@ -674,8 +671,8 @@ protected: // attributes
   /// Age of the CommBlock in cycles (for OutputImage)
   int age_;
 
-  /// Counters for received face levels
-  std::vector<int> face_level_count_;
+  /// Last face level received from given face
+  std::vector<int> face_level_last_;
 
   /// String for storing bit ID
   std::string name_;

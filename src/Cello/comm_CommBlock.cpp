@@ -41,7 +41,6 @@ CommBlock::CommBlock
   child_face_level_(),
   child_face_level_new_(),
   count_coarsen_(0),
-  level_count_(index.level()),
   adapt_step_(num_adapt_steps),
   adapt_(adapt_unknown),
   next_phase_(phase_stopping),
@@ -49,7 +48,7 @@ CommBlock::CommBlock
   delete_(false),
   is_leaf_(true),
   age_(0),
-  face_level_count_(),
+  face_level_last_(),
   name_(name())
 {
 
@@ -105,7 +104,7 @@ CommBlock::CommBlock
   if (num_face_level == 0) {
 
     face_level_.resize(27);
-    face_level_count_.resize(27);
+    face_level_last_.resize(27);
     child_face_level_.resize(NC(rank)*27);
 
     for (int i=0; i<27; i++) face_level_[i] = 0;
@@ -113,14 +112,14 @@ CommBlock::CommBlock
   } else {
 
     face_level_.resize(num_face_level);
-    face_level_count_.resize(num_face_level);
+    face_level_last_.resize(num_face_level);
     child_face_level_.resize(NC(rank)*num_face_level);
 
     for (int i=0; i<num_face_level; i++) face_level_[i] = face_level[i];
 
   }
 
-  for (int i=0; i<face_level_count_.size(); i++) face_level_count_[i] = 0;
+  for (int i=0; i<face_level_last_.size(); i++) face_level_last_[i] = 0;
   for (int i=0; i<child_face_level_.size(); i++) child_face_level_[i] = 0;
 
   initialize_child_face_levels_();
@@ -178,11 +177,13 @@ CommBlock::CommBlock
     apply_initial_();
   } else if (level > 0) {
 
+    //    thisProxy.doneInserting();
     control_sync (sync_adapt_end,"quiescence");
 
   }
 
   debug_faces_("CommBlock()");
+
 }
 
 //----------------------------------------------------------------------
@@ -225,7 +226,6 @@ void CommBlock::pup(PUP::er &p)
   p | child_face_level_;
   p | child_face_level_new_;
   p | count_coarsen_;
-  p | level_count_;
   p | adapt_step_;
   p | adapt_;
   p | next_phase_;
@@ -233,7 +233,7 @@ void CommBlock::pup(PUP::er &p)
   p | delete_;
   p | is_leaf_;
   p | age_;
-  p | face_level_count_;
+  p | face_level_last_;
   p | name_;
 
   if (up) debug_faces_("PUP");

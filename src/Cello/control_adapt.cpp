@@ -160,8 +160,8 @@ void CommBlock::adapt_end_()
     return;
   } else {
 
-    for (size_t i=0; i<face_level_count_.size(); i++)
-      face_level_count_[i] = 0;
+    for (size_t i=0; i<face_level_last_.size(); i++)
+      face_level_last_[i] = 0;
 
     const int rank = simulation()->dimension();
     sync_coarsen_.set_stop(NC(rank));
@@ -414,14 +414,14 @@ void CommBlock::p_adapt_recv_level
  Index index_send,
  int ic3[3],
  int if3[3], 
- int level_face,
+ int level_face_curr,
  int level_face_new
  )
 {
 
-  if (index_send.level() != level_face) {
-    PARALLEL_PRINTF ("%d level mismatch between index_send (%d) and level_face (%d)",
-		     __LINE__,index_send.level(), level_face);
+  if (index_send.level() != level_face_curr) {
+    PARALLEL_PRINTF ("%d level mismatch between index_send (%d) and level_face_curr (%d)",
+		     __LINE__,index_send.level(), level_face_curr);
     index_.print("index_",-1,2,false,simulation());
     index_send.print("index_",-1,2,false,simulation());
   }
@@ -431,17 +431,17 @@ void CommBlock::p_adapt_recv_level
   sprintf (buffer,"%12s %8s [%d]"
 	   "if3 %2d %2d %2d  ic3 %d %d %d  "			
 	   "%d <- %d",					
-	   "recv",bit_str.c_str(),face_level_count_[IF3(if3)],
+	   "recv",bit_str.c_str(),face_level_last_[IF3(if3)],
 	   if3[0],if3[1],if3[2],				
 	   ic3[0],ic3[1],ic3[2],				
-	   level_face,level_face_new);			
+	   level_face_curr,level_face_new);			
   index_.print(buffer,-1,2,false,simulation());		
 #endif
 
-  if (face_level_count_[IF3(if3)] > level_face_new) {
+  if (face_level_last_[IF3(if3)] > level_face_new) {
     return;
   } else {
-    face_level_count_[IF3(if3)] = level_face_new;
+    face_level_last_[IF3(if3)] = level_face_new;
   }
 
   int level_new = level_new_;
@@ -452,19 +452,19 @@ void CommBlock::p_adapt_recv_level
 
   if ( ! is_leaf()) {
 
-    adapt_recv_recurse(if3,ic3,level_face,level_face_new,index_send);
+    adapt_recv_recurse(if3,ic3,level_face_curr,level_face_new,index_send);
 
   } else {
 
-    if (level_face == level) {
+    if (level_face_curr == level) {
 
       adapt_recv_same(of3,level_face_new);
 
-    } else if ( level_face == level + 1 ) {
+    } else if ( level_face_curr == level + 1 ) {
 
       adapt_recv_fine(of3,ic3,level_face_new);
 
-    } else if ( level_face == level - 1 ) {
+    } else if ( level_face_curr == level - 1 ) {
 
       adapt_recv_coarse(of3,ic3,level_face_new);
 
@@ -472,7 +472,7 @@ void CommBlock::p_adapt_recv_level
 
       WARNING2 ("CommBlock::notify_neighbor()",
 		"level %d and face level %d differ by more than 1",
-		level,level_face);
+		level,level_face_curr);
     }
 
     //
@@ -650,7 +650,7 @@ void CommBlock::adapt_recv_fine(const int of3[3], const int ic3[3],int level_fac
 
 void CommBlock::adapt_recv_recurse(const int if3[3], 
 				   const int ic3[3], 
-				   int level_face, int level_face_new,
+				   int level_face_curr, int level_face_new,
 				   Index index_send)
 {
   const int rank = simulation()->dimension();
@@ -658,7 +658,7 @@ void CommBlock::adapt_recv_recurse(const int if3[3],
 #ifdef DEBUG_ADAPT
   sprintf (buffer,"Recurse called: ic3 (%d %d %d) if3 (%d %d %d) level %d -> %d",
 	   ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2],
-	   level_face,level_face_new);
+	   level_face_curr,level_face_new);
   index_.print(buffer,-1,2,false,simulation());
 #endif    
 
@@ -671,7 +671,7 @@ void CommBlock::adapt_recv_recurse(const int if3[3],
   while (it_child.next(jc3)) {
     Index index_child = index_.index_child(jc3);
     // --------------------------------------------------
-    PUT_LEVEL (index_send,index_child,ic3,if3,level_face,level_face_new,"RECURSE");
+    PUT_LEVEL (index_send,index_child,ic3,if3,level_face_curr,level_face_new,"RECURSE");
     // --------------------------------------------------
 
   }
