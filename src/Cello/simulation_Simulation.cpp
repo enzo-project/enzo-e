@@ -76,13 +76,7 @@ void Simulation::pup (PUP::er &p)
 
   bool up = p.isUnpacking();
 
-#ifdef CELLO_DEBUG
-  if (up) {
-    char buffer[40];
-    sprintf(buffer,"out.debug.%03d",CkMyPe());
-    fp_debug_ = fopen (buffer,"w");
-  }
-#endif
+  if (up) debug_open();
 
   p | factory_; // PUP::able
 

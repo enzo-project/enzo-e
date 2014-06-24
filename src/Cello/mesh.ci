@@ -125,8 +125,7 @@ module mesh {
     entry void p_adapt_delete();  // [CB11]
 
     entry void p_adapt_recv_level  // [CB7]
-      (Index index,int ic3[3], int if3[3], int level_now, int level_new,
-       int count);
+      (Index index,int ic3[3], int if3[3], int level_now, int level_new);
 
     entry void p_adapt_recv_child // [CB10]
       (int ic3[3], int na, char arr[na], int nf, int child_face_level[nf]);

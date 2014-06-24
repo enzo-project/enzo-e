@@ -67,7 +67,7 @@ public:
   
   Index index_parent () const;
 
-  Index index_child (int ic3[3]) const
+  Index index_child (const int ic3[3]) const
   { return index_child(ic3[0],ic3[1],ic3[2]); }
 
   Index index_child (int icx, int icy, int icz) const;
@@ -99,7 +99,7 @@ public:
   // unsigned value (int axis) const;
 
   /// Set the Index according to raw bit values
-  void set_values (int v3[3])
+  void set_values (const int v3[3])
   {
     v_[0] = v3[0];
     v_[1] = v3[1];
@@ -144,15 +144,24 @@ public:
 
   std::string bit_string (int max_level,int rank, int bits = 0) const;
 
+  /// Comparison operator required for Charm++ pup()
+  friend bool operator < (const Index & x, const Index & y) {
+    if (x.v_[2] < y.v_[2]) return true;
+    if (x.v_[2] > y.v_[2]) return false;
+    if (x.v_[1] < y.v_[1]) return true;
+    if (x.v_[1] > y.v_[1]) return false;
+    return  (x.v_[0] < y.v_[0]);
+  }
+
 private: // functions
 
   int num_bits_(int value) const;
 	
   inline void copy_ (const Index & index)
   {
-    a_[0] = index.a_[0];
-    a_[1] = index.a_[1];
-    a_[2] = index.a_[2];
+    v_[0] = index.v_[0];
+    v_[1] = index.v_[1];
+    v_[2] = index.v_[2];
   }
 
   void print_ (FILE * fp,

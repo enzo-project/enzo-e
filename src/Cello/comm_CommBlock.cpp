@@ -12,7 +12,7 @@
 #include "main.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_ADAPT
+#define DEBUG_ADAPT
 
 //----------------------------------------------------------------------
 
@@ -49,7 +49,8 @@ CommBlock::CommBlock
   delete_(false),
   is_leaf_(true),
   age_(0),
-  face_level_count_()
+  face_level_count_(),
+  name_(name())
 {
 
   // Enable Charm++ AtSync() dynamic load balancing
@@ -89,6 +90,11 @@ CommBlock::CommBlock
 
   initialize ();
 
+  const int rank = simulation()->dimension();
+  
+  sync_coarsen_.set_stop(NC(rank));
+  sync_coarsen_.clear();
+
   for (int i=0; i<3; i++) {
     count_sync_[i] = 0;
     max_sync_[i] = 0;
@@ -96,7 +102,6 @@ CommBlock::CommBlock
 
   // Initialize neighbor face levels
 
-  const int rank = simulation()->dimension();
   if (num_face_level == 0) {
 
     face_level_.resize(27);
@@ -229,7 +234,9 @@ void CommBlock::pup(PUP::er &p)
   p | is_leaf_;
   p | age_;
   p | face_level_count_;
+  p | name_;
 
+  if (up) debug_faces_("PUP");
 }
 
 //----------------------------------------------------------------------
@@ -330,7 +337,7 @@ std::string CommBlock::name() const throw()
   int nb  = std::max( std::max (nb3[0],nb3[1]),nb3[2]);
   int bits = 0;
   while (nb/=2) ++bits;
-  return std::string("Block-") + index_.bit_string(level(),dim,bits);
+  return "B" + index_.bit_string(level(),dim,bits);
 }
 
 //----------------------------------------------------------------------

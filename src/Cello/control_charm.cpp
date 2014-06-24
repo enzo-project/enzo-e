@@ -15,6 +15,7 @@
 
 #ifdef CELLO_VERBOSE
 #   define VERBOSE(A)					\
+  fprintf (simulation()->fp_debug(),"[%s] %d TRACE %s\n",name_.c_str(),__LINE__,A); \
   if (index_.is_root()) {				\
     Monitor * monitor = simulation()->monitor();	\
     monitor->print("Control", A);			\
@@ -22,8 +23,6 @@
 #else
 #   define VERBOSE(A) ;
 #endif
-
-// #define TRACE_CONTROL
 
 const char * phase_string [] = {
   "unknown",
@@ -53,6 +52,8 @@ void CommBlock::adapt_enter_()
   performance_switch_ (perf_adapt,__FILE__,__LINE__);
 
   if ( do_adapt_()) {
+
+    VERBOSE("adapt_enter");
 
     adapt_begin_();
     
@@ -411,10 +412,8 @@ void CommBlock::control_sync_count_ (int phase, int count)
   if (0 < max_sync_[phase] && max_sync_[phase] <= count_sync_[phase]) {
     max_sync_[phase] = 0;
     count_sync_[phase] = 0;
-#ifdef TRACE_CONTROL
-    char buffer[255];
-    sprintf (buffer,"calling phase %s",phase_string[phase]);
-    index_.print(buffer,-1,2,false,simulation());
+#ifdef CELLO_DEBUG
+  fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_string[phase]);
 #endif
     control_call_phase_(phase);
   }
@@ -426,10 +425,8 @@ void CommBlock::control_sync_neighbor_(int phase)
 {
   if (!is_leaf()) {
 
-#ifdef TRACE_CONTROL
-    char buffer[255];
-    sprintf (buffer,"calling phase %s",phase_string[phase]);
-    index_.print(buffer,-1,2,false,simulation());
+#ifdef CELLO_DEBUG
+  fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_string[phase]);
 #endif
     control_call_phase_ (phase);
 
@@ -517,10 +514,8 @@ void CommBlock::control_sync_neighbor_(int phase)
 
 void CommBlock::control_call_phase_ (int phase)
 {
-#ifdef TRACE_CONTROL
-  char buffer[255];
-  sprintf (buffer,"called phase %s",phase_string[phase]);
-  index_.print(buffer,-1,2,false,simulation());
+#ifdef CELLO_DEBUG
+  fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_string[phase]);
 #endif
   if (phase == sync_adapt_called) {
     adapt_called_() ;

@@ -161,20 +161,6 @@ void Monitor::write
 	 buffer_process, buffer_time, component, buffer_message);
     }
 
-// #ifdef CELLO_DEBUG
-//     // Write DEBUG messagess to file
-
-//     if (strcmp(component,"DEBUG")==0) {
-//       char file[20];
-//       sprintf (file,"out.debug.%d",CkMyPe());
-//       FILE * fdebug = fopen (file,"a");
-//       fprintf (fdebug,"%s %s %s %s\n",
-// 	 buffer_process, buffer_time, component, buffer_message);
-//       fclose(fdebug);
-//     }
-
-// #endif
-
   }
 
 }

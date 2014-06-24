@@ -13,15 +13,16 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-static char buffer[256];
+// static char buffer[256];
 
 //----------------------------------------------------------------------
 
 void CommBlock::refresh_begin_() 
 {
   if (delete_) {
-    sprintf (buffer,"CommBlock::refresh_begin_ called on deleted CommBlock");
-    index_.print(buffer,-1,2,false,simulation());
+    WARNING1("refresh_begin_()",
+	     "%s: refresh called on deleted CommBlock",
+	     name_.c_str());
     return;
   }
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -87,13 +88,10 @@ void CommBlock::refresh_begin_()
 	}
       } else {
 
-	debug_faces_("REFRESH ERROR");
-	sprintf (buffer,"REFRESH ERROR face (%d %d %d) level %d face_level %d phase %d is_leaf %d",
-		 if3[0],if3[1],if3[2],level,face_level(if3),next_phase_,is_leaf());
-	index_.print(buffer,-1,2,false,simulation);
-      
-	ERROR("CommBlock::refresh_begin_()",
-	      "Refresh error");
+	index_.print("ERROR Refresh",-1,2,false,simulation);
+	ERROR8("CommBlock::refresh_begin_()",
+	       "%s: REFRESH ERROR: face (%d %d %d) level %d face_level %d phase %d is_leaf %dRefresh error",
+	       name_.c_str(),if3[0],if3[1],if3[2],level,face_level(if3),next_phase_,is_leaf());
       }
 
     }
@@ -149,12 +147,6 @@ void CommBlock::refresh_face
 			   type_op_array);
 
   int jface[3] = {-iface[0], -iface[1], -iface[2]};
-
-#ifdef CELLO_DEBUG
-  // std::string bit_str = index_neighbor.bit_string(-1,2);
-  // sprintf (buffer," -> %s",bit_str.c_str());
-  // index_.print(buffer,-1,2,false,simulation());
-#endif  
 
   // --------------------------------------------------
   // ENTRY: #2 CommBlock::refresh_face()-> CommBlock::x_refresh_face()

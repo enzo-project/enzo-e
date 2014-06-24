@@ -163,7 +163,7 @@ public: // virtual functions
   void debug_open() {
 #ifdef CELLO_DEBUG
     char buffer[40];
-    sprintf(buffer,"out.debug.%03d",CkMyPe());
+    sprintf(buffer,"out.debug.%03d-%03d",CkMyPe(),cycle_);
     fp_debug_ = fopen (buffer,"w");
 #endif
   }

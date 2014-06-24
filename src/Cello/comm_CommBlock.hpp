@@ -308,12 +308,19 @@ public:
   /// Parent tells child to delete itself
   void p_adapt_delete();
   void p_adapt_recv_level 
-  (Index index_debug, int ic3[3], int if3[3], int level_now, int level_new,
-   int call_count);
+  (Index index_debug, int ic3[3], int if3[3], int level_now, int level_new);
   void p_adapt_recv_child
   (int ic3[3],int na, char * array, int nf, int * child_face_level);
 
-  void adapt_send_neighbors_levels(int level,int call_count=0);
+  void adapt_recv_same   (const int of3[3],int level_face_new);
+  void adapt_recv_coarse (const int of3[3],const int ic3[3],int level_face_new);
+  void adapt_recv_fine   (const int of3[3],const int ic3[3],int level_face_new);
+  void adapt_recv_recurse(const int if3[3],const int ic3[3],
+			  int level_face,
+			  int level_face_new,
+			  Index index_send);
+
+  void adapt_send_neighbors_levels(int level);
 
 protected:
   bool do_adapt_();
@@ -670,7 +677,8 @@ protected: // attributes
   /// Counters for received face levels
   std::vector<int> face_level_count_;
 
-  
+  /// String for storing bit ID
+  std::string name_;
 };
 
 #endif /* COMM_COMMBLOCK_HPP */

@@ -357,7 +357,7 @@ void Index::print_ (FILE * fp,
 
   if (! no_nl) buffer = buffer + "\n";
 
-  fprintf (fp,buffer.c_str());
+  fprintf (fp,"%s",buffer.c_str());
   fflush(fp);
 }
 

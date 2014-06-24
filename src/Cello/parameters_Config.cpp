@@ -414,6 +414,11 @@ void Config::read_mesh_ (Parameters * p) throw()
   mesh_root_blocks[1] = p->list_value_integer(1,"Mesh:root_blocks",1);
   mesh_root_blocks[2] = p->list_value_integer(2,"Mesh:root_blocks",1);
 
+  ASSERT4 ("Config::read_mesh_()",
+	   "Number of root blocks %d x %d x %d must not be less than number of processes %d",
+	   mesh_root_blocks[0],mesh_root_blocks[1],mesh_root_blocks[2],CkNumPes(),
+	   mesh_root_blocks[0]*mesh_root_blocks[1]*mesh_root_blocks[2] >= CkNumPes());
+
   //--------------------------------------------------
 
   mesh_root_size[0] = p->list_value_integer(0,"Mesh:root_size",1);

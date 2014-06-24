@@ -15,14 +15,14 @@ trace = 0
 # Whether to trace main phases
 #----------------------------------------------------------------------
 
-verbose = 0
+verbose = 1
 
 #----------------------------------------------------------------------
 # Whether to print out messages with the TRACE_CHARM() and TRACEPUP()
 #  series of statements
 #----------------------------------------------------------------------
 
-trace_charm = 0
+trace_charm = 1
 
 #----------------------------------------------------------------------
 # Whether to enable displaying messages with the DEBUG() series of
@@ -32,7 +32,7 @@ trace_charm = 0
 # for any output)
 #----------------------------------------------------------------------
 
-debug = 0
+debug = 1
 
 #----------------------------------------------------------------------
 # Whether to periodically print all field values.  See

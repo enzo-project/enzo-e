@@ -302,7 +302,7 @@ void OutputImage::write_block
     reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value);
     reduce_type reduce_save = op_reduce_;
     op_reduce_ = reduce_set;
-    reduce_box_ (image_mesh_,ixm,ixp,iym,iyp,1.0-value);
+    reduce_box_ (image_mesh_,ixm,ixp,iym,iyp,0.0);
     op_reduce_ = reduce_save;
 
     if (comm_block->is_leaf()) { // ) {
