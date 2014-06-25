@@ -36,10 +36,10 @@ CommBlock::CommBlock
   sync_coarsen_(),
   count_sync_(),
   max_sync_(),
-  face_level_(),
-  face_level_new_(),
-  child_face_level_(),
-  child_face_level_new_(),
+  face_level_curr_(),
+  face_level_next_(),
+  child_face_level_curr_(),
+  child_face_level_next_(),
   count_coarsen_(0),
   adapt_step_(num_adapt_steps),
   adapt_(adapt_unknown),
@@ -103,29 +103,29 @@ CommBlock::CommBlock
 
   if (num_face_level == 0) {
 
-    face_level_.resize(27);
+    face_level_curr_.resize(27);
     face_level_last_.resize(27);
-    child_face_level_.resize(NC(rank)*27);
+    child_face_level_curr_.resize(NC(rank)*27);
 
-    for (int i=0; i<27; i++) face_level_[i] = 0;
+    for (int i=0; i<27; i++) face_level_curr_[i] = 0;
 
   } else {
 
-    face_level_.resize(num_face_level);
+    face_level_curr_.resize(num_face_level);
     face_level_last_.resize(num_face_level);
-    child_face_level_.resize(NC(rank)*num_face_level);
+    child_face_level_curr_.resize(NC(rank)*num_face_level);
 
-    for (int i=0; i<num_face_level; i++) face_level_[i] = face_level[i];
+    for (int i=0; i<num_face_level; i++) face_level_curr_[i] = face_level[i];
 
   }
 
   for (int i=0; i<face_level_last_.size(); i++) face_level_last_[i] = 0;
-  for (int i=0; i<child_face_level_.size(); i++) child_face_level_[i] = 0;
+  for (int i=0; i<child_face_level_curr_.size(); i++) child_face_level_curr_[i] = 0;
 
   initialize_child_face_levels_();
 
-  face_level_new_ = face_level_;
-  child_face_level_new_ = child_face_level_;
+  face_level_next_ = face_level_curr_;
+  child_face_level_next_ = child_face_level_curr_;
 
   const int level = this->level();
 
@@ -177,7 +177,7 @@ CommBlock::CommBlock
     apply_initial_();
   } else if (level > 0) {
 
-    //    thisProxy.doneInserting();
+    thisProxy.doneInserting();
     control_sync (sync_adapt_end,"quiescence");
 
   }
@@ -210,7 +210,7 @@ void CommBlock::pup(PUP::er &p)
   }
 
   p | index_;
-  p | level_new_;
+  p | level_next_;
   p | cycle_;
   p | time_;
   p | dt_;
@@ -221,10 +221,10 @@ void CommBlock::pup(PUP::er &p)
   p | sync_coarsen_;
   PUParray(p,count_sync_, SYNC_SIZE);
   PUParray(p,max_sync_,   SYNC_SIZE);
-  p | face_level_;
-  p | face_level_new_;
-  p | child_face_level_;
-  p | child_face_level_new_;
+  p | face_level_curr_;
+  p | face_level_next_;
+  p | child_face_level_curr_;
+  p | child_face_level_next_;
   p | count_coarsen_;
   p | adapt_step_;
   p | adapt_;
@@ -307,6 +307,8 @@ CommBlock::~CommBlock() throw ()
   child_block_ = 0;
 
   ((SimulationCharm *)simulation())->delete_block();
+
+  thisProxy.doneInserting();
 
 }
 
@@ -675,9 +677,9 @@ void CommBlock::debug_faces_(const char * mesg)
       PARALLEL_PRINTF ("| ") ;
       for (if3[0]=-1; if3[0]<=1; if3[0]++) {
 #ifdef CELLO_DEBUG
-	fprintf (fp_debug,(ic3[1]==1) ? "%d " : "  ",face_level_new(if3));
+	fprintf (fp_debug,(ic3[1]==1) ? "%d " : "  ",face_level_next(if3));
 #endif
-	PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level_new(if3));
+	PARALLEL_PRINTF ((ic3[1]==1) ? "%d " : "  ",face_level_next(if3));
       }
 #ifdef CELLO_DEBUG
       fprintf (fp_debug,"| ");
@@ -701,9 +703,9 @@ void CommBlock::debug_faces_(const char * mesg)
 	for (if3[0]=-1; if3[0]<=1; if3[0]++) {
 	  for (if3[0]=-1; if3[0]<=1; if3[0]++) {
 #ifdef CELLO_DEBUG
-	    fprintf (fp_debug,"%d ",child_face_level_new(ic3,if3));
+	    fprintf (fp_debug,"%d ",child_face_level_next(ic3,if3));
 #endif
-	    PARALLEL_PRINTF ("%d ",child_face_level_new(ic3,if3));
+	    PARALLEL_PRINTF ("%d ",child_face_level_next(ic3,if3));
 	  }
 	}
       }

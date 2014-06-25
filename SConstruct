@@ -9,7 +9,7 @@ import sys
 # Whether to print out detailed messages with the TRACE() series of statements
 #----------------------------------------------------------------------
 
-trace = 0
+trace = 1
 
 #----------------------------------------------------------------------
 # Whether to trace main phases

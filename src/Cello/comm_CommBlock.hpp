@@ -143,28 +143,28 @@ public: // interface
   { return index_; }
 
   const int & face_level (const int if3[3]) const
-  { return face_level_[IF3(if3)]; }
+  { return face_level_curr_[IF3(if3)]; }
 
-  const int & face_level_new (const int if3[3]) const
-  { return face_level_new_[IF3(if3)]; }
+  const int & face_level_next (const int if3[3]) const
+  { return face_level_next_[IF3(if3)]; }
 
   const int & child_face_level (const int ic3[3], const int if3[3]) const
-  { return child_face_level_[ICF3(ic3,if3)]; }
+  { return child_face_level_curr_[ICF3(ic3,if3)]; }
 
-  const int & child_face_level_new (const int ic3[3], const int if3[3]) const
-  { return child_face_level_new_[ICF3(ic3,if3)]; }
+  const int & child_face_level_next (const int ic3[3], const int if3[3]) const
+  { return child_face_level_next_[ICF3(ic3,if3)]; }
 
-  void set_face_level (const int if3[3], int level)
-  { face_level_[IF3(if3)] = level; }
+  void set_face_level_curr (const int if3[3], int level)
+  { face_level_curr_[IF3(if3)] = level; }
 
-  void set_face_level_new (const int if3[3], int level)
-  { face_level_new_[IF3(if3)] = level; }
+  void set_face_level_next (const int if3[3], int level)
+  { face_level_next_[IF3(if3)] = level; }
 
-  void set_child_face_level (const int ic3[3], const int if3[3], int level)
-  { child_face_level_[ICF3(ic3,if3)] = level;  }
+  void set_child_face_level_curr (const int ic3[3], const int if3[3], int level)
+  { child_face_level_curr_[ICF3(ic3,if3)] = level;  }
 
-  void set_child_face_level_new (const int ic3[3], const int if3[3], int level)
-  { child_face_level_new_[ICF3(ic3,if3)] = level; }
+  void set_child_face_level_next (const int ic3[3], const int if3[3], int level)
+  { child_face_level_next_[ICF3(ic3,if3)] = level; }
 
   //----------------------------------------------------------------------
   // GENERAL
@@ -193,10 +193,10 @@ public: // interface
 
   void update_levels_ ()
   {
-    face_level_ =       face_level_new_;
-    //    for (int i=0; i<face_level_new_.size(); i++) face_level_new_[i]=0;
-    child_face_level_ = child_face_level_new_;
-    //    for (int i=0; i<child_face_level_new_.size(); i++) child_face_level_new_[i]=0;
+    face_level_curr_ =       face_level_next_;
+    //    for (int i=0; i<face_level_next_.size(); i++) face_level_next_[i]=0;
+    child_face_level_curr_ = child_face_level_next_;
+    //    for (int i=0; i<child_face_level_next_.size(); i++) child_face_level_next_[i]=0;
   }
 
   bool is_child_ (const Index & index) const
@@ -320,7 +320,7 @@ public:
 			  int level_face_new,
 			  Index index_send);
 
-  void adapt_send_neighbors_levels(int level);
+  void adapt_send_level();
 
 protected:
   bool do_adapt_();
@@ -598,7 +598,7 @@ protected: // attributes
   Index index_;
 
   /// Desired level for the next cycle
-  int level_new_;
+  int level_next_;
 
   //--------------------------------------------------
 
@@ -635,16 +635,16 @@ protected: // attributes
   int  max_sync_[SYNC_SIZE];
 
   /// current level of neighbors along each face
-  std::vector<int> face_level_;
+  std::vector<int> face_level_curr_;
 
   /// new level of neighbors along each face
-  std::vector<int> face_level_new_;
+  std::vector<int> face_level_next_;
 
   /// current level of neighbors accumulated from children that can coarsen
-  std::vector<int> child_face_level_;
+  std::vector<int> child_face_level_curr_;
 
   /// new level of neighbors accumulated from children that can coarsen
-  std::vector<int> child_face_level_new_;
+  std::vector<int> child_face_level_next_;
 
   /// Can coarsen only if all children can coarsen
   int count_coarsen_;

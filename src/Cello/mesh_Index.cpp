@@ -296,7 +296,6 @@ void Index::print (const char * msg,
 		   void * simulation
 ) const
 {
-
   print_(stdout,msg,max_level,rank,no_nl);
 
 #ifdef CELLO_DEBUG

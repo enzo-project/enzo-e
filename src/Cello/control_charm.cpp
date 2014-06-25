@@ -408,6 +408,10 @@ void CommBlock::control_sync_count_ (int phase, int count)
   if (count != 0)  max_sync_[phase] = count;
 
   ++count_sync_[phase];
+#ifdef CELLO_DEBUG
+  fprintf (simulation()->fp_debug(),"%d %s counting %d/%d leaf %d %s\n",__LINE__,name_.c_str(),
+	   count_sync_[phase],max_sync_[phase],is_leaf(),phase_string[phase]);
+#endif
 
   if (0 < max_sync_[phase] && max_sync_[phase] <= count_sync_[phase]) {
     max_sync_[phase] = 0;
@@ -454,6 +458,10 @@ void CommBlock::control_sync_neighbor_(int phase)
 	// SEND-SAME: Face and level are sent to unique
 	// neighboring block in the same level
 
+#ifdef CELLO_DEBUG
+	  fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
+	    __LINE__,name_.c_str(), phase_string[phase], is_leaf(),index_neighbor.bit_string(-1,2).c_str());
+#endif
 	thisProxy[index_neighbor].p_control_sync_count(phase,0);
 
 	++num_neighbors;
@@ -476,6 +484,10 @@ void CommBlock::control_sync_neighbor_(int phase)
 
 	  Index index_uncle = index_neighbor.index_parent();
 
+#ifdef CELLO_DEBUG
+	  fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
+	    __LINE__,name_.c_str(), phase_string[phase], is_leaf(),index_uncle.bit_string(-1,2).c_str());
+#endif
 	  thisProxy[index_uncle].p_control_sync_count(phase,0);
 
 	  ++num_neighbors;
@@ -492,6 +504,10 @@ void CommBlock::control_sync_neighbor_(int phase)
 	while (it_child.next(ic3)) {
 	  Index index_nibling = index_neighbor.index_child(ic3);
 
+#ifdef CELLO_DEBUG
+	  fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
+	    __LINE__,name_.c_str(), phase_string[phase], is_leaf(),index_nibling.bit_string(-1,2).c_str());
+#endif
 	  thisProxy[index_nibling].p_control_sync_count(phase,0);
 
 	  ++num_neighbors;
