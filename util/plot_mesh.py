@@ -12,8 +12,9 @@ import matplotlib.pyplot as plt
 # 0          t = 0.25
 #
 def decode_block(block_name):
+    prefix="B"
     dimension = block_name.count("_") + 1
-    indices = block_name[6:].split("_")
+    indices = block_name[len(prefix):].split("_")
     lower=[0,0,0]
     upper=[0,0,0]
     level=[0,0,0]
@@ -54,27 +55,54 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 xmin=10000; xmax=0
 ymin=10000; ymax=0
-colormap = ['red','orange','yellow','green','blue','magenta']
+colormap = ['red','orange','yellow','green','blue','magenta','cyan']
 lines = []
 for line in fileinput.input():
       lines.append(line)
-for plotlevel in xrange(0,10):
+max_level = 10
+
+for plotlevel in xrange(0,max_level):
 
 
       for line in lines:
         [level,lower, upper] = decode_block(line.split()[0])
         if (level == plotlevel):
+            nc = len(colormap)
             r = matplotlib.patches.Rectangle ( (lower[0],lower[1]), 
                                                (upper[0]-lower[0]), 
                                                (upper[1]-lower[1]), 
                                                fill=False,
-                                               edgecolor=colormap[level])
+                                               edgecolor=colormap[level % nc])
             xmin = min(xmin,lower[0])
             ymin = min(ymin,lower[1])
             xmax = max(xmax,upper[0])
             ymax = max(ymax,upper[1])
             ax.add_patch(r)
 
+xsize = xmax - xmin
+ysize = ymax - ymin
+dsize = abs(xsize - ysize)
+
+# 1:1 aspect ratio
+if (xsize > ysize):
+    ymin -= 0.5*dsize
+    ymax += 0.5*dsize
+    ysize = ymax - ymin
+elif (ysize > xsize):
+    xmin -= 0.5*dsize
+    xmax += 0.5*dsize
+    xsize = xmax - xmin
+
+# add border
+
+r=0.2*xsize
+xmin -= r
+ymin -= r
+xmax += r
+ymax += r
+
+plt.axes().set_aspect('equal','datalim')
+    
 plt.xlim([xmin,xmax])
 plt.ylim([ymin,ymax])
 plt.show()

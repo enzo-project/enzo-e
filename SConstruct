@@ -9,20 +9,20 @@ import sys
 # Whether to print out detailed messages with the TRACE() series of statements
 #----------------------------------------------------------------------
 
-trace = 1
+trace = 0
 
 #----------------------------------------------------------------------
 # Whether to trace main phases
 #----------------------------------------------------------------------
 
-verbose = 1
+verbose = 0
 
 #----------------------------------------------------------------------
 # Whether to print out messages with the TRACE_CHARM() and TRACEPUP()
 #  series of statements
 #----------------------------------------------------------------------
 
-trace_charm = 1
+trace_charm = 0
 
 #----------------------------------------------------------------------
 # Whether to enable displaying messages with the DEBUG() series of
@@ -32,7 +32,7 @@ trace_charm = 1
 # for any output)
 #----------------------------------------------------------------------
 
-debug = 1
+debug = 0
 
 #----------------------------------------------------------------------
 # Whether to periodically print all field values.  See

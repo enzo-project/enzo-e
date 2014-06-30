@@ -12,33 +12,35 @@
 /// adapt_begin_()
 
 //--------------------------------------------------
-#define DEBUG_ADAPT
+// #define DEBUG_ADAPT
 //--------------------------------------------------
 
 #ifdef DEBUG_ADAPT
 
 static char buffer [256];
 
-#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
-  {								\
-    std::string bit_str = INDEX_RECV.bit_string(-1,2);		\
-    sprintf (buffer,"%12s %8s"					\
-	     "if3 %2d %2d %2d  ic3 %d %d %d  "			\
-	     "%d -> %d :%d",					\
-	     MSG,bit_str.c_str(),				\
-	     IF3[0],IF3[1],IF3[2],				\
-	     IC3[0],IC3[1],IC3[2],				\
-	     LEVEL_NOW,LEVEL_NEW,__LINE__);			\
-    INDEX_SEND.print(buffer,-1,2,false,simulation());		\
-    check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);		\
-    check_face_(IF3,"PUT_LEVEL",__FILE__,__LINE__);		\
+#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
+  {									\
+    std::string bit_str = INDEX_RECV.bit_string(-1,2);			\
+    sprintf (buffer,"%s %s"						\
+	     "if3 %2d %2d %2d  ic3 %d %d %d  "				\
+	     "%d -> %d :%d",						\
+	     MSG,bit_str.c_str(),					\
+	     IF3[0],IF3[1],IF3[2],					\
+	     IC3[0],IC3[1],IC3[2],					\
+	     LEVEL_NOW,LEVEL_NEW,__LINE__);				\
+    INDEX_SEND.print(buffer,-1,2,false,simulation());			\
+    check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);			\
+    check_face_(IF3,"PUT_LEVEL",__FILE__,__LINE__);			\
     thisProxy[INDEX_RECV].p_adapt_recv_level				\
       (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW);			\
   }
 #else /* DEBUG_ADAPT */
 
-#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG)	\
-  thisProxy[INDEX_RECV].p_adapt_recv_level (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW);
+#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
+  {									\
+thisProxy[INDEX_RECV].p_adapt_recv_level (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW); \
+}
 #endif /* DEBUG_ADAPT */
 
 
@@ -113,6 +115,7 @@ void CommBlock::adapt_called_()
 void CommBlock::adapt_next_()
 {
 
+  debug_faces_("adapt_next");
   trace("adapt_next 3");
 
 #ifdef DEBUG_ADAPT
@@ -144,7 +147,7 @@ void CommBlock::adapt_next_()
 /// been deleted.  
 void CommBlock::adapt_end_()
 {
-  trace("adapt_next 4");
+  trace("adapt_end 4");
 
   if (index_.is_root()) {
     thisProxy.doneInserting();
@@ -426,22 +429,24 @@ void CommBlock::p_adapt_recv_level
     index_send.print("index_",-1,2,false,simulation());
   }
 
+  const bool skip_face_update = face_level_last_[ICF3(ic3,if3)] > level_face_new;
+
 #ifdef DEBUG_ADAPT
   std::string bit_str = index_send.bit_string(-1,2);
-  sprintf (buffer,"%12s %s [%d]"
-	   "if3 %2d %2d %2d  ic3 %d %d %d  "			
-	   "%d <- %d",					
-	   "recv",bit_str.c_str(),face_level_last_[IF3(if3)],
-	   if3[0],if3[1],if3[2],				
+  sprintf (buffer,"%s %s"
+	   "%d => %d if3 %2d %2d %2d  ic3 %d %d %d  "			
+	   "%d <- %d [%d] %s",					
+	   "recv",bit_str.c_str(),
+	   level(), level_next_,if3[0],if3[1],if3[2],				
 	   ic3[0],ic3[1],ic3[2],				
-	   level_face_curr,level_face_new);			
+	   level_face_curr,level_face_new,face_level_last_[ICF3(ic3,if3)],skip_face_update ? "SKIP" : "");
   index_.print(buffer,-1,2,false,simulation());		
 #endif
 
-  if (face_level_last_[IF3(if3)] > level_face_new) {
+  if (skip_face_update) {
     return;
   } else {
-    face_level_last_[IF3(if3)] = level_face_new;
+    face_level_last_[ICF3(ic3,if3)] = level_face_new;
   }
 
   int level_next = level_next_;
@@ -655,6 +660,8 @@ void CommBlock::adapt_recv_recurse(const int if3[3],
 	   ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2],
 	   level_face_curr,level_face_new);
   index_.print(buffer,-1,2,false,simulation());
+  ERROR("CommBlock::adapt_recv_recurse()",
+	 "Recurse should not be called");
 #endif    
 
   // Forward to children if internal node
@@ -746,7 +753,7 @@ void CommBlock::p_adapt_recv_child
 
   is_leaf_=true;
 #ifdef DEBUG_ADAPT
-  index_.print("p_adapt_recv_child=1",-1,2,false,simulation());
+  index_.print("p_adapt_recv_child is_leaf=1",-1,2,false,simulation());
 #endif
 
   adapt_delete_child_(index_child);
