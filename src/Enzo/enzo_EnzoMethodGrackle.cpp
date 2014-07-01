@@ -158,9 +158,9 @@
 //    return 0;
 //  }
 
+// #include <string.h>
 
 #include "cello.hpp"
-
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
@@ -172,25 +172,25 @@ EnzoMethodGrackle::EnzoMethodGrackle (EnzoConfig * c)
 
   /// Initialize parameters
 
-  chemistry_.use_grackle = true;
-  chemistry_.Gamma = c->method_grackle_gamma;
+  chemistry_.use_grackle            = true;
+  chemistry_.Gamma                  = c->method_grackle_gamma;
 
-  chemistry_.with_radiative_cooling         = TRUE;
-  chemistry_.primordial_chemistry           = FALSE;  // off
-  chemistry_.metal_cooling                  = FALSE;
-  chemistry_.h2_on_dust                     = FALSE;
+  chemistry_.with_radiative_cooling = c->method_grackle_with_radiative_cooling;
+  chemistry_.primordial_chemistry   = c->method_grackle_primordial_chemistry;
+  chemistry_.metal_cooling          = c->method_grackle_metal_cooling;
+  chemistry_.h2_on_dust             = c->method_grackle_h2_formation_on_dust;
+  chemistry_.cmb_temperature_floor  = c->method_grackle_cmb_temperature_floor;
+  chemistry_.grackle_data_file      = strdup(c->method_grackle_data_file.c_str());
+  chemistry_.three_body_rate        = c->method_grackle_three_body_rate;
+  chemistry_.cie_cooling            = c->method_grackle_cie_cooling;
+  chemistry_.h2_optical_depth_approximation = c->method_grackle_h2_optical_depth_approximation;
 
-  chemistry_.cmb_temperature_floor          = TRUE;   // use CMB floor.
-  chemistry_.grackle_data_file              = "";
+  chemistry_.photoelectric_heating  = c->method_grackle_photoelectric_heating;
 
-  chemistry_.three_body_rate                = 0;   // ABN02
-  chemistry_.cie_cooling                    = 1;
-  chemistry_.h2_optical_depth_approximation = 1;
+  chemistry_.photoelectric_heating_rate     
+    = c->method_grackle_photoelectric_heating_rate;
 
-  chemistry_.photoelectric_heating          = 0;
-  chemistry_.photoelectric_heating_rate     = 8.5e-26;  // ergs cm-3 s-1
-
-  chemistry_.UVbackground                   = 0;
+  chemistry_.UVbackground           = c->method_grackle_UVbackground;
 
   chemistry_.UVbackground_table.Nz     = 0;
   chemistry_.UVbackground_table.z      = NULL;
@@ -206,47 +206,41 @@ EnzoMethodGrackle::EnzoMethodGrackle (EnzoConfig * c)
   chemistry_.UVbackground_table.piHeII = NULL;
   chemistry_.UVbackground_table.piHeI  = NULL;
 
-  chemistry_.UVbackground_redshift_on      = 7.0;
-  chemistry_.UVbackground_redshift_off     = 0.0;
-  chemistry_.UVbackground_redshift_fullon  = 6.0;
-  chemistry_.UVbackground_redshift_drop    = 0.0;
+  chemistry_.UVbackground_redshift_on   = c->method_grackle_UVbackground_redshift_on;
+  chemistry_.UVbackground_redshift_off  = c->method_grackle_UVbackground_redshift_off;
+  chemistry_.UVbackground_redshift_fullon  
+    = c->method_grackle_UVbackground_redshift_fullon;
+  chemistry_.UVbackground_redshift_drop = c->method_grackle_UVbackground_redshift_drop;
 
-  chemistry_.Compton_xray_heating   = 0;
+  chemistry_.Compton_xray_heating   = c->method_grackle_Compton_xray_heating;
 
-  chemistry_.LWbackground_intensity = 0.0;   // [in units of 10^21 erg/s/cm^2/Hz/sr]
-  chemistry_.LWbackground_sawtooth_suppression = 0;
+  chemistry_.LWbackground_intensity = c->method_grackle_LWbackground_intensity;
 
-  chemistry_.HydrogenFractionByMass       = 0.76;
-  /* The DToHRatio is by mass in the code, so multiply by 2. */
-  chemistry_.DeuteriumToHydrogenRatio     = 2.0*3.4e-5; // Burles & Tytler 1998
-  chemistry_.SolarMetalFractionByMass     = 0.02041;
-  chemistry_.NumberOfTemperatureBins      = 600;
-  chemistry_.ih2co                        = 1;
-  chemistry_.ipiht                        = 1;
-  chemistry_.TemperatureStart             = 1.0;
-  chemistry_.TemperatureEnd               = 1.0e9;
-  chemistry_.comp_xray                    = 0;
-  chemistry_.temp_xray                    = 0;
-  chemistry_.CaseBRecombination           = 0; // default to case A rates
-  chemistry_.NumberOfDustTemperatureBins  = 250;
-  chemistry_.DustTemperatureStart         = 1.0;
-  chemistry_.DustTemperatureEnd           = 1500.0;
+  chemistry_.LWbackground_sawtooth_suppression 
+    = c->method_grackle_LWbackground_sawtooth_suppression;
 
-  chemistry_.cloudy_metal.grid_rank        = 0;
-  chemistry_.cloudy_electron_fraction_factor = 9.153959e-3; // Cloudy 07.02 abundances
+  chemistry_.HydrogenFractionByMass = c->method_grackle_HydrogenFractionByMass;
+  chemistry_.DeuteriumToHydrogenRatio
+    = c->method_grackle_DeuteriumToHydrogenRatio;
+  chemistry_.SolarMetalFractionByMass     
+    = c->method_grackle_SolarMetalFractionByMass;
+  chemistry_.NumberOfTemperatureBins      
+    = c->method_grackle_NumberOfTemperatureBins;
+  chemistry_.ih2co                  = c->method_grackle_ih2co;
+  chemistry_.ipiht                  = c->method_grackle_ipiht;
+  chemistry_.TemperatureStart       = c->method_grackle_TemperatureStart;
+  chemistry_.TemperatureEnd         = c->method_grackle_TemperatureEnd;
+  chemistry_.comp_xray              = c->method_grackle_comp_xray;
+  chemistry_.temp_xray              = c->method_grackle_temp_xray;
+  chemistry_.CaseBRecombination     = c->method_grackle_CaseBRecombination;
+  chemistry_.NumberOfDustTemperatureBins  
+    = c->method_grackle_NumberOfDustTemperatureBins;
+  chemistry_.DustTemperatureStart   = c->method_grackle_DustTemperatureStart;
+  chemistry_.DustTemperatureEnd     = c->method_grackle_DustTemperatureEnd;
 
-  
-///  chemistry_data chemistry = set_default_chemistry_parameters();
-///  chemistry_.use_grackle = 1;            // chemistry on
-///  chemistry_.with_radiative_cooling = 1; // cooling on
-///  chemistry_.primordial_chemistry = 3;   // molecular network with H, He, D
-///  chemistry_.metal_cooling = 1;          // metal cooling on
-///  chemistry_.UVbackground = 1;           // UV background on
-///  chemistry_.grackle_data_file = "../../input/CloudyData_UVB=HM2012.h5";
-
-  // Set expansion factor to 1 for non-cosmological simulation.
-///  gr_float initial_redshift = 100.;
-///  gr_float a_value = 1. / (1. + initial_redshift);
+  chemistry_.cloudy_metal.grid_rank = c->mesh_root_rank;
+  chemistry_.cloudy_electron_fraction_factor 
+    = c->method_grackle_cloudy_electron_fraction_factor;
 }
 
 //----------------------------------------------------------------------

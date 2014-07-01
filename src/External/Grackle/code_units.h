@@ -21,5 +21,16 @@ typedef struct
   gr_float time_units;
   gr_float velocity_units;
   gr_float a_units;
+#ifdef CONFIG_USE_CHARM
+  void pup (PUP::er &p)
+  {
+  p | comoving_coordinates;
+  p | density_units;
+  p | length_units;
+  p | time_units;
+  p | velocity_units;
+  p | a_units;
+}
+#endif
 } code_units;
 #endif

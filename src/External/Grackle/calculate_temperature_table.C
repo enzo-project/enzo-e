@@ -16,6 +16,7 @@
 #include <math.h>
 #include "grackle_macros.h"
 #include "grackle_types.h"
+#include "grackle.h"
 #include "chemistry_data.h"
 #include "code_units.h"
 #include "phys_constants.h"
@@ -75,16 +76,16 @@ int calculate_temperature(chemistry_data &my_chemistry,
     for (ti = 0; ti < ti_max; ti++) {
 
       muold = munew;
-      temperature[i] = max((my_chemistry.Gamma - 1.) * 
+      temperature[i] = std::max((my_chemistry.Gamma - 1.) * 
                            internal_energy[i] *
                            munew * temperature_units,
                            my_chemistry.TemperatureStart);
       logtem = log(temperature[i]);
-      logtem = max(logtem, logtem0);
-      logtem = min(logtem, logtem9);
+      logtem = std::max(logtem, logtem0);
+      logtem = std::min(logtem, logtem9);
 
-      index = min(my_chemistry.NumberOfTemperatureBins - 2,
-                  max(0, (int) ((logtem-logtem0)/dlogtem)));
+      index = std::min((const int) my_chemistry.NumberOfTemperatureBins - 2,
+                  std::max(0, (int) ((logtem-logtem0)/dlogtem)));
       t1 = (logtem0 + (index)     * dlogtem);
       t2 = (logtem0 + (index + 1) * dlogtem);
       tdef = (logtem - t1) / (t2 - t1);

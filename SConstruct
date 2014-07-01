@@ -201,6 +201,10 @@ define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
 define_hdf5  =        ['H5_USE_16_API']
 define_png   =        ['NO_FREETYPE']
 
+# Charm defines
+
+define_charm =        ['CONFIG_USE_CHARM']  # used for Grackle 
+
 #----------------------------------------------------------------------
 # ASSEMBLE DEFINES
 #----------------------------------------------------------------------
@@ -254,6 +258,7 @@ if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
 if (trace_memory != 0):  defines = defines + define_trace_memory
+defines = defines + define_charm
 
 #======================================================================
 # ARCHITECTURE SETTINGS

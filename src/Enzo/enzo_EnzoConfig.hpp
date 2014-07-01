@@ -95,10 +95,8 @@ public: // attributes
 
   // EnzoMethodGrackle
 
-  // Units
-
   code_units method_grackle_units;
-  double method_grackle_gamma;
+  double method_grackle_gamma;  // initialized
   bool   method_grackle_with_radiative_cooling;
   bool   method_grackle_primordial_chemistry;
   bool   method_grackle_metal_cooling;

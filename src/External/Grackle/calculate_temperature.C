@@ -16,6 +16,7 @@
 #include <math.h>
 #include "grackle_macros.h"
 #include "grackle_types.h"
+#include "grackle.h"
 #include "chemistry_data.h"
 #include "code_units.h"
 #include "phys_constants.h"
@@ -127,8 +128,8 @@ int calculate_temperature(chemistry_data &my_chemistry,
  
     /* Ignore deuterium. */
  
-    temperature[i] *= temperature_units / max(number_density, tiny_number);
-    temperature[i] = max(temperature[i], MINIMUM_TEMPERATURE);
+    temperature[i] *= temperature_units / std::max(number_density, tiny_number);
+    temperature[i] = std::max(temperature[i], MINIMUM_TEMPERATURE);
   }
  
   return SUCCESS;

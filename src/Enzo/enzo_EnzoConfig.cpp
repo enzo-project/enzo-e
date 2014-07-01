@@ -68,11 +68,7 @@ void EnzoConfig::pup (PUP::er &p)
 
   // Units
 
-  //  p | code_units method_grackle_units;
-
-  WARNING("EnzoConfig::pup()",
-	  "skipping method_grackle_units (type 'code_units' struct)");
-
+  p | method_grackle_units;
   p | method_grackle_gamma;
   p | method_grackle_with_radiative_cooling;
   p | method_grackle_primordial_chemistry;

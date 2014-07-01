@@ -16,6 +16,7 @@
 #include <math.h>
 #include "grackle_macros.h"
 #include "grackle_types.h"
+#include "grackle.h"
 #include "chemistry_data.h"
 #include "code_units.h"
 #include "phys_constants.h"
@@ -72,7 +73,7 @@ int calculate_pressure(chemistry_data &my_chemistry,
  
       if (number_density == 0)
 	number_density = tiny_number;
-      temp = max(temperature_units * pressure[i] / (number_density + nH2), 1);
+      temp = std::max(temperature_units * pressure[i] / (number_density + nH2), 1.0);
  
       /* Only do full computation if there is a reasonable amount of H2.
 	 The second term in GammaH2Inverse accounts for the vibrational
