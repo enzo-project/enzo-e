@@ -66,6 +66,59 @@ void EnzoConfig::pup (PUP::er &p)
 
   // Grackle cooling parameters
 
+  // Units
+
+  //  p | code_units method_grackle_units;
+
+  WARNING("EnzoConfig::pup()",
+	  "skipping method_grackle_units (type 'code_units' struct)");
+
+  p | method_grackle_gamma;
+  p | method_grackle_with_radiative_cooling;
+  p | method_grackle_primordial_chemistry;
+  p | method_grackle_metal_cooling;
+  p | method_grackle_h2_formation_on_dust;
+
+  p | method_grackle_cmb_temperature_floor;
+  p | method_grackle_data_file;
+
+  p | method_grackle_three_body_rate;
+  p | method_grackle_cie_cooling;
+  p | method_grackle_h2_optical_depth_approximation;
+
+  p | method_grackle_photoelectric_heating;
+  p | method_grackle_photoelectric_heating_rate;
+
+  p | method_grackle_UVbackground;
+
+  p | method_grackle_UVbackground_redshift_on;
+  p | method_grackle_UVbackground_redshift_off;
+  p | method_grackle_UVbackground_redshift_fullon;
+  p | method_grackle_UVbackground_redshift_drop;
+
+  p | method_grackle_Compton_xray_heating;
+
+  p | method_grackle_LWbackground_intensity;
+  p | method_grackle_LWbackground_sawtooth_suppression;
+
+  p | method_grackle_HydrogenFractionByMass;
+  p | method_grackle_DeuteriumToHydrogenRatio;
+  p | method_grackle_SolarMetalFractionByMass;
+  p | method_grackle_NumberOfTemperatureBins;
+  p | method_grackle_ih2co;
+  p | method_grackle_ipiht;
+  p | method_grackle_TemperatureStart;
+  p | method_grackle_TemperatureEnd;
+  p | method_grackle_comp_xray;
+  p | method_grackle_temp_xray;
+  p | method_grackle_CaseBRecombination;
+  p | method_grackle_NumberOfDustTemperatureBins;
+  p | method_grackle_DustTemperatureStart;
+  p | method_grackle_DustTemperatureEnd;
+
+  p | method_grackle_cloudy_electron_fraction_factor;
+
+
 
 }
 
