@@ -96,6 +96,12 @@ balancer = [
 use_gprof = 0
 
 #----------------------------------------------------------------------
+# Whether to compile with the Grackle chemistry and cooling library
+#----------------------------------------------------------------------
+
+use_grackle = 1
+
+#----------------------------------------------------------------------
 # Whether to run the test programs using valgrind to check for memory leaks
 #----------------------------------------------------------------------
 
@@ -179,6 +185,10 @@ define = {}
 define["single"] =    ['CONFIG_PRECISION_SINGLE']
 define["double"] =    ['CONFIG_PRECISION_DOUBLE']
 
+# Grackle defines
+
+define_grackle   = ['CONFIG_USE_GRACKLE']
+
 # Performance defines
 
 define_memory =       ['CONFIG_USE_MEMORY']
@@ -251,6 +261,7 @@ if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
   
 if (use_papi != 0):      defines = defines + define_papi
+if (use_grackle != 0):   defines = defines + define_grackle
 if (trace != 0):         defines = defines + define_trace
 if (verbose != 0):       defines = defines + define_verbose
 if (trace_charm != 0):   defines = defines + define_trace_charm

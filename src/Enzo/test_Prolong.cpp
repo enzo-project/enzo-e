@@ -112,15 +112,15 @@ PARALLEL_MAIN_BEGIN
     const int md = mxd*myd;
     const int mv = mxv*myv;
 
-    FieldBlock field_block_f (nx,ny);
-    FieldBlock field_block_c (nx,ny);
+    FieldBlock field_block_f (&field_descr);
+    FieldBlock field_block_c (&field_descr);
 
-    field_block_f.allocate_array(&field_descr, true);
+    field_block_f.allocate_array(true);
 
     double * df = (double *) field_block_f.field_values(i_d);
     float  * vf = (float  *) field_block_f.field_values(i_v);
 
-    field_block_c.allocate_array(&field_descr, true);
+    field_block_c.allocate_array(true);
 
     double * dc = (double *) field_block_c.field_values(i_d);
     float * vc  = (float *) field_block_c.field_values(i_v);
@@ -159,8 +159,8 @@ PARALLEL_MAIN_BEGIN
 
     double lower[3] = { 0.0, 0.0, 0.0 };
     double upper[3] = { 1.0, 1.0, 1.0 };
-    field_block_f.print(&field_descr,"AF-1");
-    field_block_c.print(&field_descr,"AC");
+    field_block_f.print("AF-1");
+    field_block_c.print("AC");
 
     char buffer[80];
     for (int icx=0; icx<2; icx++) {
@@ -170,14 +170,14 @@ PARALLEL_MAIN_BEGIN
 	// prolong_linear->apply
 	// 	(&field_block_f,&field_block_c, &field_descr, icx,icy,0);
 	sprintf (buffer,"ProlongLinear-%d%d0.out",icx,icy);
-	field_block_f.print(&field_descr,buffer);
+	field_block_f.print(buffer);
 
 	for (int id=0; id<md; id++) df[id]=11111.0;
 	for (int iv=0; iv<mv; iv++) vf[iv]=22222.0;
 	// enzo_prolong->apply
-	// 	(&field_block_f,&field_block_c, &field_descr, icx,icy,0);
+	// 	(&field_block_f,&field_block_c,  icx,icy,0);
 	sprintf (buffer,"EnzoProlong-%d%d0.out",icx,icy);
-	field_block_f.print(&field_descr,buffer);
+	field_block_f.print(buffer);
       }
     }
 

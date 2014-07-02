@@ -317,13 +317,17 @@ void Problem::initialize_output
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_method(Config * config) throw()
+void Problem::initialize_method
+(
+ Config * config,
+ const FieldDescr * field_descr
+ ) throw()
 {
   for (size_t i=0; i<config->method_list.size(); i++) {
 
     std::string name = config->method_list[i];
 
-    Method * method = create_method_(name, config);
+    Method * method = create_method_(name, config, field_descr);
 
     if (method) {
 
@@ -498,7 +502,9 @@ Stopping * Problem::create_stopping_
 //----------------------------------------------------------------------
 
 Method * Problem::create_method_ 
-( std::string  name, Config * config) throw ()
+( std::string  name,
+  Config * config,
+  const FieldDescr * field_descr) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());
   // No default method

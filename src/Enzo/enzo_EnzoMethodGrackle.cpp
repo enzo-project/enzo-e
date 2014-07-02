@@ -80,28 +80,6 @@
 //  grid_dimension[0] = field_size;
 //  grid_end[0] = field_size - 1;
 //
-//  density       = new gr_float[field_size];
-//  energy        = new gr_float[field_size];
-//  x_velocity    = new gr_float[field_size];
-//  y_velocity    = new gr_float[field_size];
-//  z_velocity    = new gr_float[field_size];
-//  // for primordial_chemistry >= 1
-//  HI_density    = new gr_float[field_size];
-//  HII_density   = new gr_float[field_size];
-//  HeI_density   = new gr_float[field_size];
-//  HeII_density  = new gr_float[field_size];
-//  HeIII_density = new gr_float[field_size];
-//  e_density     = new gr_float[field_size];
-//  // for primordial_chemistry >= 2
-//  HM_density    = new gr_float[field_size];
-//  H2I_density   = new gr_float[field_size];
-//  H2II_density  = new gr_float[field_size];
-//  // for primordial_chemistry >= 3
-//  DI_density    = new gr_float[field_size];
-//  DII_density   = new gr_float[field_size];
-//  HDI_density   = new gr_float[field_size];
-//  // for metal_cooling = 1
-//  metal_density = new gr_float[field_size];
 //
 //  // set temperature units
 //  gr_float temperature_units =  mh * pow(units.a_units * 
@@ -160,37 +138,95 @@
 
 // #include <string.h>
 
+#ifdef CONFIG_USE_GRACKLE
+
 #include "cello.hpp"
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
 
-EnzoMethodGrackle::EnzoMethodGrackle (EnzoConfig * c)
+EnzoMethodGrackle::EnzoMethodGrackle 
+(EnzoConfig * config,
+ const FieldDescr * field_descr)
   : Method(), chemistry_()
 {
   printf ("EnzoMethodGrackle()\n");
 
   /// Initialize parameters
 
-  chemistry_.use_grackle            = true;
-  chemistry_.Gamma                  = c->method_grackle_gamma;
+  initialize_units_(config);
+  initialize_chemistry_(config);
+  initialize_fields_(field_descr);
+}
 
-  chemistry_.with_radiative_cooling = c->method_grackle_with_radiative_cooling;
-  chemistry_.primordial_chemistry   = c->method_grackle_primordial_chemistry;
-  chemistry_.metal_cooling          = c->method_grackle_metal_cooling;
-  chemistry_.h2_on_dust             = c->method_grackle_h2_formation_on_dust;
-  chemistry_.cmb_temperature_floor  = c->method_grackle_cmb_temperature_floor;
-  chemistry_.grackle_data_file      = strdup(c->method_grackle_data_file.c_str());
-  chemistry_.three_body_rate        = c->method_grackle_three_body_rate;
-  chemistry_.cie_cooling            = c->method_grackle_cie_cooling;
-  chemistry_.h2_optical_depth_approximation = c->method_grackle_h2_optical_depth_approximation;
+//----------------------------------------------------------------------
 
-  chemistry_.photoelectric_heating  = c->method_grackle_photoelectric_heating;
+void EnzoMethodGrackle::pup (PUP::er &p)
+{
+
+  // NOTE: change this function whenever attributes change
+
+  TRACEPUP;
+
+  Method::pup(p);
+
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGrackle::initialize_units_(EnzoConfig * config)
+{
+  INCOMPLETE("EnzoMethodGrackle::initialize_units_()");
+
+  code_units my_units;
+  my_units.comoving_coordinates 
+    = config->physics_cosmology; // 1 if cosmological sim, 0 if not
+  my_units.density_units = 1.67e-24;
+  my_units.length_units = 1.0;
+  my_units.time_units = 1.0e12;
+  my_units.velocity_units = my_units.length_units / my_units.time_units;
+  my_units.a_units = 1.0; // units for the expansion factor
+  
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGrackle::initialize_chemistry_(EnzoConfig * config)
+{
+
+  INCOMPLETE("EnzoMethodGrackle::initialize_chemistry_()");
+
+  chemistry_.use_grackle = true;
+
+  chemistry_.Gamma
+    = config->method_grackle_chemistry.Gamma;
+  chemistry_.with_radiative_cooling
+    = config->method_grackle_chemistry.with_radiative_cooling;
+  chemistry_.primordial_chemistry
+    = config->method_grackle_chemistry.primordial_chemistry;
+  chemistry_.metal_cooling
+    = config->method_grackle_chemistry.metal_cooling;
+  chemistry_.h2_on_dust
+    = config->method_grackle_chemistry.h2_on_dust;
+  chemistry_.cmb_temperature_floor
+    = config->method_grackle_chemistry.cmb_temperature_floor;
+  chemistry_.grackle_data_file
+    = strdup(config->method_grackle_chemistry.grackle_data_file);
+  chemistry_.three_body_rate
+    = config->method_grackle_chemistry.three_body_rate;
+  chemistry_.cie_cooling
+    = config->method_grackle_chemistry.cie_cooling;
+  chemistry_.h2_optical_depth_approximation
+    = config->method_grackle_chemistry.h2_optical_depth_approximation;
+
+  chemistry_.photoelectric_heating
+    = config->method_grackle_chemistry.photoelectric_heating;
 
   chemistry_.photoelectric_heating_rate     
-    = c->method_grackle_photoelectric_heating_rate;
+    = config->method_grackle_chemistry.photoelectric_heating_rate;
 
-  chemistry_.UVbackground           = c->method_grackle_UVbackground;
+  chemistry_.UVbackground
+    = config->method_grackle_chemistry.UVbackground;
 
   chemistry_.UVbackground_table.Nz     = 0;
   chemistry_.UVbackground_table.z      = NULL;
@@ -206,54 +242,64 @@ EnzoMethodGrackle::EnzoMethodGrackle (EnzoConfig * c)
   chemistry_.UVbackground_table.piHeII = NULL;
   chemistry_.UVbackground_table.piHeI  = NULL;
 
-  chemistry_.UVbackground_redshift_on   = c->method_grackle_UVbackground_redshift_on;
-  chemistry_.UVbackground_redshift_off  = c->method_grackle_UVbackground_redshift_off;
+  chemistry_.UVbackground_redshift_on
+    = config->method_grackle_chemistry.UVbackground_redshift_on;
+  chemistry_.UVbackground_redshift_off
+    = config->method_grackle_chemistry.UVbackground_redshift_off;
   chemistry_.UVbackground_redshift_fullon  
-    = c->method_grackle_UVbackground_redshift_fullon;
-  chemistry_.UVbackground_redshift_drop = c->method_grackle_UVbackground_redshift_drop;
+    = config->method_grackle_chemistry.UVbackground_redshift_fullon;
+  chemistry_.UVbackground_redshift_drop
+    = config->method_grackle_chemistry.UVbackground_redshift_drop;
 
-  chemistry_.Compton_xray_heating   = c->method_grackle_Compton_xray_heating;
+  chemistry_.Compton_xray_heating
+    = config->method_grackle_chemistry.Compton_xray_heating;
 
-  chemistry_.LWbackground_intensity = c->method_grackle_LWbackground_intensity;
+  chemistry_.LWbackground_intensity
+    = config->method_grackle_chemistry.LWbackground_intensity;
 
   chemistry_.LWbackground_sawtooth_suppression 
-    = c->method_grackle_LWbackground_sawtooth_suppression;
+    = config->method_grackle_chemistry.LWbackground_sawtooth_suppression;
 
-  chemistry_.HydrogenFractionByMass = c->method_grackle_HydrogenFractionByMass;
+  chemistry_.HydrogenFractionByMass
+    = config->method_grackle_chemistry.HydrogenFractionByMass;
   chemistry_.DeuteriumToHydrogenRatio
-    = c->method_grackle_DeuteriumToHydrogenRatio;
+    = config->method_grackle_chemistry.DeuteriumToHydrogenRatio;
   chemistry_.SolarMetalFractionByMass     
-    = c->method_grackle_SolarMetalFractionByMass;
+    = config->method_grackle_chemistry.SolarMetalFractionByMass;
   chemistry_.NumberOfTemperatureBins      
-    = c->method_grackle_NumberOfTemperatureBins;
-  chemistry_.ih2co                  = c->method_grackle_ih2co;
-  chemistry_.ipiht                  = c->method_grackle_ipiht;
-  chemistry_.TemperatureStart       = c->method_grackle_TemperatureStart;
-  chemistry_.TemperatureEnd         = c->method_grackle_TemperatureEnd;
-  chemistry_.comp_xray              = c->method_grackle_comp_xray;
-  chemistry_.temp_xray              = c->method_grackle_temp_xray;
-  chemistry_.CaseBRecombination     = c->method_grackle_CaseBRecombination;
+    = config->method_grackle_chemistry.NumberOfTemperatureBins;
+  chemistry_.ih2co
+    = config->method_grackle_chemistry.ih2co;
+  chemistry_.ipiht
+    = config->method_grackle_chemistry.ipiht;
+  chemistry_.TemperatureStart
+    = config->method_grackle_chemistry.TemperatureStart;
+  chemistry_.TemperatureEnd
+    = config->method_grackle_chemistry.TemperatureEnd;
+  chemistry_.comp_xray
+    = config->method_grackle_chemistry.comp_xray;
+  chemistry_.temp_xray
+    = config->method_grackle_chemistry.temp_xray;
+  chemistry_.CaseBRecombination
+    = config->method_grackle_chemistry.CaseBRecombination;
   chemistry_.NumberOfDustTemperatureBins  
-    = c->method_grackle_NumberOfDustTemperatureBins;
-  chemistry_.DustTemperatureStart   = c->method_grackle_DustTemperatureStart;
-  chemistry_.DustTemperatureEnd     = c->method_grackle_DustTemperatureEnd;
+    = config->method_grackle_chemistry.NumberOfDustTemperatureBins;
+  chemistry_.DustTemperatureStart
+    = config->method_grackle_chemistry.DustTemperatureStart;
+  chemistry_.DustTemperatureEnd
+    = config->method_grackle_chemistry.DustTemperatureEnd;
 
-  chemistry_.cloudy_metal.grid_rank = c->mesh_root_rank;
+  chemistry_.cloudy_metal.grid_rank
+    = config->mesh_root_rank;
   chemistry_.cloudy_electron_fraction_factor 
-    = c->method_grackle_cloudy_electron_fraction_factor;
+    = config->method_grackle_chemistry.cloudy_electron_fraction_factor;
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGrackle::pup (PUP::er &p)
+void EnzoMethodGrackle::initialize_fields_(const FieldDescr * field_descr)
 {
-
-  // NOTE: change this function whenever attributes change
-
-  TRACEPUP;
-
-  Method::pup(p);
-
+  INCOMPLETE("EnzoMethodGrackle::initialize_fields_()");
 }
 
 //----------------------------------------------------------------------
@@ -283,3 +329,5 @@ double EnzoMethodGrackle::timestep ( CommBlock * comm_block ) throw()
 }
 
 //======================================================================
+
+#endif /* CONFIG_USE_GRACKLE */

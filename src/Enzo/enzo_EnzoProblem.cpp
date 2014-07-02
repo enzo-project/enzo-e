@@ -109,14 +109,16 @@ Initial * EnzoProblem::create_initial_
 //----------------------------------------------------------------------
 
 Method * EnzoProblem::create_method_ 
-( std::string  type,  Config * config) throw ()
+( std::string  type,  
+  Config * config,
+  const FieldDescr * field_descr) throw ()
 /// @param type   Type of the method to create
 /// @param config Configuration parameters class
 {
 
   Method * method = 0;
 
-  EnzoConfig * c = (EnzoConfig *) config;
+  EnzoConfig * enzo_config = (EnzoConfig *) config;
 
   TRACE1("EnzoProblem::create_method %s",type.c_str());
   if (type == "ppm") {
@@ -124,13 +126,16 @@ Method * EnzoProblem::create_method_
   } else if (type == "ppml") {
     method = new EnzoMethodPpml;
   } else if (type == "heat") {
-    method = new EnzoMethodHeat(c->method_heat_alpha,c->field_courant);
+    method = new EnzoMethodHeat(enzo_config->method_heat_alpha,
+				enzo_config->field_courant);
   } else if (type == "null") {
-    method = new EnzoMethodNull(c->method_null_dt);
+    method = new EnzoMethodNull(enzo_config->method_null_dt);
+#ifdef CONFIG_USE_GRACKLE
   } else if (type == "grackle") {
-    method = new EnzoMethodGrackle(c);
+    method = new EnzoMethodGrackle(enzo_config,field_descr);
+#endif /* CONFIG_USE_GRACKLE */
   } else {
-    method = Problem::create_method_(type,config);
+    method = Problem::create_method_(type,config, field_descr);
   }
 
   return method;

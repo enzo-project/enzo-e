@@ -78,7 +78,9 @@ foreach prec ($PREC)
 
    python scons.py install-inc            >&  $dir/out.scons
    python scons.py -k -j$proc install-bin >>& $dir/out.scons
-   python scons.py -Q -k      $target     | tee $dir/out.scons
+   python scons.py -Q -k      $target     |& tee $dir/out.scons
+
+   util/parse_error.sh
 
    if (-e bin/enzo-p) then
       echo "Success"

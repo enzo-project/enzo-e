@@ -64,8 +64,8 @@ public: // interface
     p | max_group_id_;
     WARNING ("Memory::pup()","Skipping curr_group_");
     //    p | curr_group_;
-    WARNING ("Memory::pup()","Skipping group_names_");
-    //  group_names_ [MEMORY_MAX_NUM_GROUPS + 1];
+    //    WARNING ("Memory::pup()","Skipping group_names_");
+    PUParray(p,group_names_ ,MEMORY_MAX_NUM_GROUPS + 1);
     PUParray(p,limit_,MEMORY_MAX_NUM_GROUPS + 1);
     PUParray(p,bytes_,MEMORY_MAX_NUM_GROUPS + 1);
     PUParray(p,bytes_high_,MEMORY_MAX_NUM_GROUPS + 1);
@@ -208,7 +208,7 @@ private: // attributes
   std::stack<memory_group_handle> curr_group_;
 
   /// Array of known group names
-  char * group_names_ [MEMORY_MAX_NUM_GROUPS + 1];
+  std::string group_names_ [MEMORY_MAX_NUM_GROUPS + 1];
 
   /// Limit on number of bytes to allocate.  Currently not checked.
   long long limit_   [MEMORY_MAX_NUM_GROUPS + 1];

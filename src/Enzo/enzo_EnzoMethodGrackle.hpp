@@ -11,6 +11,8 @@
 #ifndef ENZO_ENZO_METHOD_GRACKLE_HPP
 #define ENZO_ENZO_METHOD_GRACKLE_HPP
 
+#ifdef CONFIG_USE_GRACKLE
+
 class EnzoMethodGrackle : public Method {
 
   /// @class    EnzoMethodGrackle
@@ -22,7 +24,7 @@ class EnzoMethodGrackle : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle(EnzoConfig *);
+  EnzoMethodGrackle(EnzoConfig *, const FieldDescr * field_descr);
 
   /// Create a new EnzoMethodGrackle object
   EnzoMethodGrackle() : Method() {};
@@ -47,10 +49,22 @@ public: // interface
 
 protected: // methods
 
+  void initialize_chemistry_(EnzoConfig * c);
+  void initialize_units_(EnzoConfig * c);
+  void initialize_fields_(const FieldDescr * field_descr);
+
 protected: // attributes
+
+  /// Grackle struct defining code units
+  code_units units_;
 
   /// Grackle struct defining chemistry data
   chemistry_data chemistry_;
+
+  /// Field id's
+  std::map<std::string,int> field_;
 };
+
+#endif /* CONFIG_USE_GRACKLE */
 
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */

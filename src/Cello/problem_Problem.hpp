@@ -144,7 +144,8 @@ public: // interface
 			 const Factory * factory) throw();
 
   /// Initialize the method objects
-  void initialize_method(Config * config) throw();
+  void initialize_method(Config * config, 
+			 const FieldDescr * field_descr) throw();
 
   /// Initialize the prolong objects
   void initialize_prolong(Config * config) throw();
@@ -184,7 +185,9 @@ protected: // functions
 
   /// Create named method object
   virtual Method *   create_method_
-  (std::string type, Config * config) throw ();
+  (std::string type, 
+   Config * config, 
+   const FieldDescr * field_descr) throw ();
 
   /// Create named output object
   virtual Output *   create_output_  

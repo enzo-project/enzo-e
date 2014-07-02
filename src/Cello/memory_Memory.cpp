@@ -44,7 +44,7 @@ void Memory::initialize_() throw ()
   deallocate_fill_value_ = 0xdd;
 
   for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
-    group_names_ [i] = 0;
+    group_names_ [i] = "";
     limit_       [i] = 0;
     bytes_       [i] = 0;
     bytes_high_  [i] = 0;
@@ -52,8 +52,8 @@ void Memory::initialize_() throw ()
     new_calls_   [i] = 0;
     delete_calls_[i] = 0;
   }
-  group_names_[0] = strdup("");       // MEMORY LEAK
-  group_names_[1] = strdup("memory"); // MEMORY LEAK
+  group_names_[0] = "";
+  group_names_[1] = "memory";
 
 #endif
 }
@@ -65,9 +65,7 @@ void Memory::finalize_() throw ()
   // WARNING: not called by end of program
 
 #ifdef CONFIG_USE_MEMORY
-  for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
-    delete [] group_names_[i];
-  }
+  // 
 #endif
 }
 
@@ -164,7 +162,7 @@ void Memory::new_group ( memory_group_handle group_id, const char * group_name )
   ASSERT ("Memory::new_group()","group_id out of range",
 	  1 <= group_id && group_id <= MEMORY_MAX_NUM_GROUPS);
 
-  group_names_[group_id] = strdup(group_name);
+  group_names_[group_id] = group_name;
 
   max_group_id_  = MAX(max_group_id_, group_id);
 
@@ -246,11 +244,11 @@ memory_group_handle Memory::current_group (const char ** group_name) throw ()
 
   memory_group_handle current = curr_group_.top();
 
-  if (group_names_[current] == 0) {
-    group_names_[current] = strdup("");
+  if (group_names_[current].size() == 0) {
+    group_names_[current] = "";
   }
 
-  *group_name = group_names_[current];
+  *group_name = group_names_[current].c_str();
   return current;
 
 #else
@@ -378,8 +376,8 @@ void Memory::print () throw ()
 #ifdef CONFIG_USE_MEMORY
   for (memory_group_handle i=0; i<= max_group_id_; i++) {
     Monitor * monitor = Monitor::instance();
-    if (i == 0 || group_names_[i] != NULL) {
-      monitor->print ("Memory","Group %s",i ? group_names_[i]: "Total");
+    if (i == 0 || group_names_[i] != "") {
+      monitor->print ("Memory","Group %s",i ? group_names_[i].c_str(): "Total");
       monitor->print ("Memory","  limit         = %ld",long(limit_[i]));
       monitor->print ("Memory","  bytes         = %ld",long(bytes_[i]));
       monitor->print ("Memory","  bytes_high    = %ld",long(bytes_high_[i]));
