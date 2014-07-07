@@ -132,7 +132,7 @@ Method * EnzoProblem::create_method_
     method = new EnzoMethodNull(enzo_config->method_null_dt);
 #ifdef CONFIG_USE_GRACKLE
   } else if (type == "grackle") {
-    method = new EnzoMethodGrackle(enzo_config,field_descr);
+    method = new EnzoMethodGrackle(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
   } else {
     method = Problem::create_method_(type,config, field_descr);

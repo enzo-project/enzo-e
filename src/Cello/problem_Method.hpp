@@ -66,11 +66,104 @@ protected: // functions
   /// Get CommBlock attributes that typical methods will need
   void initialize_(CommBlock * comm_block) throw();
 
+  /// Return the rank of the initialized CommBlock
+  int rank() const 
+  { return rank_; }
 
-protected: // attributes
+  /// Dimensions of the initialized CommBlock array
+  void array_dimension (int id, int *mx, int *my, int *mz) const {
+    ASSERT2 ("Method::dimensions()",
+	    "id out of bounds: %d not between 0 and %d",
+	     id,field_array_.size()-1,
+	     0 <= id && id < (int)field_array_.size());
+    if (mx) (*mx) = mx_.at(id);
+    if (my) (*my) = my_.at(id);
+    if (mz) (*mz) = mz_.at(id);
+  }
 
-  /// Dimensional rank of the CommBlock: 1, 2, or 3
-  int rank_;
+  /// Size of the initialized CommBlock array (excluding ghost zones)
+  void array_size (int *nx, int *ny, int *nz) const {
+    if (nx) (*nx) = nx_;
+    if (ny) (*ny) = ny_;
+    if (nz) (*nz) = nz_;
+  }
+
+  void ghost_depth (int id, int *gx, int *gy, int *gz) const {
+    ASSERT2 ("Method::ghost_depth()",
+	    "id out of bounds: %d not between 0 and %d",
+	     id,field_array_.size()-1,
+	     0 <= id && id < (int)field_array_.size());
+    if (gx) (*gx) = gx_.at(id);
+    if (gy) (*gy) = gy_.at(id);
+    if (gz) (*gz) = gz_.at(id);
+  }
+
+  void cell_width (double * hx, double * hy, double * hz) const
+  {
+    if (hx) (*hx) = hx_;
+    if (hy) (*hy) = hy_;
+    if (hz) (*hz) = hz_;
+  }
+
+  double time_step() const
+  { return dt_; }
+
+  void lower (double * xm, double * ym, double * zm) const
+  {
+    if (xm) (*xm) = xm_;
+    if (ym) (*ym) = ym_;
+    if (zm) (*zm) = zm_;
+  }
+
+   void upper (double * xp, double * yp, double * zp) const
+   {
+     if (xp) (*xp) = xp_;
+     if (yp) (*yp) = yp_;
+     if (zp) (*zp) = zp_;
+   }
+
+  void * field_array (int id) const
+  {
+    ASSERT2 ("Method::field_array()",
+	    "id out of bounds: %d not between 0 and %d",
+	     id,field_array_.size()-1,
+	     0 <= id && id < (int)field_array_.size());
+    return field_array_.at(id);
+  }
+  void * field_array (int id)
+  {
+    ASSERT2 ("Method::field_array()",
+	    "id out of bounds: %d not between 0 and %d",
+	     id,field_array_.size()-1,
+	     0 <= id && id < (int)field_array_.size());
+    return field_array_.at(id);
+  }
+
+  int field_id (std::string field) const {
+    if (field_id_.find(field) != field_id_.end()) {
+      return field_id_.at(field);
+    } else return -1;
+  }
+
+  int field_precision(int id) const
+  { 
+    ASSERT2 ("Method::field_precision()",
+	    "id out of bounds: %d not between 0 and %d",
+	     id,field_array_.size()-1,
+	     0 <= id && id < (int)field_array_.size());
+    return field_precision_.at(id);
+  }
+
+ private: // attributes (deliberately not accessible to derived classes)
+
+   /// Dimensional rank of the CommBlock: 1, 2, or 3
+   int rank_;
+
+   /// Number of field variables in the CommBlock
+   int field_count_;
+
+   /// Dimensionality of the CommBlock array including ghosts
+   std::vector<int> mx_,my_,mz_;
 
   /// Size of the CommBlock array excluding ghost zones
   int nx_,ny_,nz_;
@@ -86,12 +179,6 @@ protected: // attributes
 
   /// Extents of the CommBlock excluding ghost zones
   double xm_,xp_,ym_,yp_,zm_,zp_;
-
-  /// Number of field variables in the CommBlock
-  int field_count_;
-
-  /// Dimensionality of the CommBlock array including ghosts
-  std::vector<int> mx_,my_,mz_;
 
   /// Names of the CommBlock field variables
   std::vector<std::string> field_name_;

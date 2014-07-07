@@ -11,7 +11,6 @@
 #ifndef ENZO_ENZO_METHOD_GRACKLE_HPP
 #define ENZO_ENZO_METHOD_GRACKLE_HPP
 
-#ifdef CONFIG_USE_GRACKLE
 
 class EnzoMethodGrackle : public Method {
 
@@ -23,24 +22,24 @@ class EnzoMethodGrackle : public Method {
 
 public: // interface
 
+  /// Charm++ PUP::able declarations
+  PUPable_decl(EnzoMethodGrackle);
+  /// CHARM++ Pack / Unpack function
+  void pup (PUP::er &p) ;
+
   /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle(EnzoConfig *, const FieldDescr * field_descr);
+  EnzoMethodGrackle(EnzoConfig *);
 
   /// Create a new EnzoMethodGrackle object
   EnzoMethodGrackle() : Method() {};
 
   /// Destructor
   virtual ~EnzoMethodGrackle() throw() {};
-
-  /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodGrackle);
-  
+ 
   /// Charm++ PUP::able migration constructor
   EnzoMethodGrackle (CkMigrateMessage *m) {}
 
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p) ;
-  
+
   /// Apply the method to advance a block one timestep 
   virtual void compute( CommBlock * comm_block) throw();
 
@@ -49,11 +48,9 @@ public: // interface
 
 protected: // methods
 
-  void initialize_chemistry_(EnzoConfig * c);
-  void initialize_units_(EnzoConfig * c);
-  void initialize_fields_(const FieldDescr * field_descr);
-
 protected: // attributes
+
+#ifdef CONFIG_USE_GRACKLE
 
   /// Grackle struct defining code units
   code_units units_;
@@ -61,10 +58,9 @@ protected: // attributes
   /// Grackle struct defining chemistry data
   chemistry_data chemistry_;
 
-  /// Field id's
-  std::map<std::string,int> field_;
+#endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
+
 };
 
-#endif /* CONFIG_USE_GRACKLE */
-
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
+

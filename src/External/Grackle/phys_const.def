@@ -1,3 +1,4 @@
+#include "cello_interface.h"
 
 #ifdef CONFIG_BFLOAT_4
 

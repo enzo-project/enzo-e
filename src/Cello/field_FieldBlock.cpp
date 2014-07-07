@@ -87,14 +87,14 @@ void FieldBlock::size( int * nx, int * ny, int * nz ) const throw()
 char * FieldBlock::field_values ( int id_field ) 
   throw (std::out_of_range)
 {
-  char * field = 0;
-  if (unsigned(id_field) < offsets_.size()) {
-    field = &array_[0] + offsets_[id_field];
-  }
   ASSERT3 ("FieldBlock::field_values()",
 	   "Trying to access invalid field id %d out of %d in FieldBlock %p",
 	   id_field,offsets_.size(),this,
-	   field != NULL);
+	   0 <= id_field && id_field < offsets_.size());
+  char * field = 0;
+  if (0 <= id_field && id_field < (int)offsets_.size()) {
+    field = &array_[0] + offsets_[id_field];
+  }
   return field;
 }
 
@@ -103,7 +103,7 @@ char * FieldBlock::field_values ( int id_field )
 const char * FieldBlock::field_values ( int id_field ) const 
   throw (std::out_of_range)
 {
-  return (unsigned(id_field) < offsets_.size()) ? 
+  return (0 <= id_field && id_field < offsets_.size()) ? 
     &array_[0] + offsets_[id_field] : NULL;
 }
 

@@ -18,6 +18,8 @@
 #   include "charm++.h"
 #endif
 
+#include "cello_interface.h"
+
 #include "grackle_types.h"
 #include "code_units.h"
 #include "chemistry_data.h"

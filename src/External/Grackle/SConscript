@@ -20,7 +20,7 @@ Import('lib_path')
 #------------------------------
 
 includes_grackle = [Glob('*h'),Glob('*def')]
-sources_grackle  = [Glob('*C')]
+sources_grackle  = [Glob('*C'),Glob('*F')]
 
 #------------------------------
 # ENVIRONMENTS

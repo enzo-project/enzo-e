@@ -13,6 +13,9 @@
 
 #ifndef __GRACKLE_MACROS_H_
 #define __GRACKLE_MACROS_H_
+
+#include "cello_interface.h"
+
 /***********************************************************************
 /  
 / MACRO DEFINITIONS AND PARAMETERS
@@ -43,44 +46,45 @@
 #define HDF5_R8  H5T_NATIVE_DOUBLE
 #define HDF5_R16 H5T_NATIVE_LDOUBLE
 
-/* Precision-dependent definitions */
-
-#define LARGE_INTS
-
-#ifdef CONFIG_PRECISION_SINGLE
-#  define CONFIG_BFLOAT_4
-#endif
-#ifdef CONFIG_PRECISION_DOUBLE
-#  define CONFIG_BFLOAT_8
-#endif
-
-
-#ifdef SMALL_INTS
-#define ISYM "d"
-#define nint(A) ( (int) ((A) + 0.5*sign(A)) )
-#define nlongint(A) ( (long long) ((A) + 0.5*sign(A)) )
-#define ABS(A) abs((int) (A))
-#endif
-
-#ifdef LARGE_INTS
-#define ISYM "lld"
-#define nint(A) ( (long long) ((A) + 0.5*sign(A)) )
-#define nlongint(A) ( (long long) ((A) + 0.5*sign(A)) )
-#define ABS(A) labs((long long) (A))
-#endif
-
+/* Floating-point precision defines */
 
 #ifdef CONFIG_BFLOAT_4
 #define FSYM "f"
 #define ESYM "e"
 #endif
-
 #ifdef CONFIG_BFLOAT_8
 #define FSYM "lf"
 #define ESYM "le"
 #endif
+#if defined(SMALL_INTS) && defined(LARGE_INTS)
+#   error "LARGE_INTS and SMALL_INTS" are both defined
+#endif
+#if !defined(SMALL_INTS) && !defined(LARGE_INTS)
+#   error "Neither LARGE_INTS nor SMALL_INTS" are defined
+#endif
 
 #define GSYM "g"
+
+/* Integer size defines */
+
+#ifdef SMALL_INTS
+#  define ISYM "d"
+#  define nint(A) ( (int) ((A) + 0.5*sign(A)) )
+#  define nlongint(A) ( (long long) ((A) + 0.5*sign(A)) )
+#  define ABS(A) abs((int) (A))
+#endif
+#ifdef LARGE_INTS
+#  define ISYM "lld"
+#  define nint(A) ( (long long) ((A) + 0.5*sign(A)) )
+#  define nlongint(A) ( (long long) ((A) + 0.5*sign(A)) )
+#  define ABS(A) labs((long long) (A))
+#endif
+#if defined(SMALL_INTS) && defined(LARGE_INTS)
+#   error "LARGE_INTS and SMALL_INTS" are both defined
+#endif
+#if !defined(SMALL_INTS) && !defined(LARGE_INTS)
+#   error "Neither LARGE_INTS nor SMALL_INTS" are defined
+#endif
 
 /* Standard definitions (well, fairly standard) */
 

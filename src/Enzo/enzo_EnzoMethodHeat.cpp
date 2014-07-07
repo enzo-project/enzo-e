@@ -39,9 +39,9 @@ void EnzoMethodHeat::compute ( CommBlock * comm_block) throw()
 
   initialize_(comm_block);
 
-  const int id = field_id_["temperature"];
-  void *     t = field_array_[id];
-  const int  p = field_precision_[id];
+  const int id = field_id ("temperature");
+  void *     t = field_array (id);
+  const int  p = field_precision (id);
 
   if      (p == precision_single)    compute_ ((float*)  t);
   else if (p == precision_double)    compute_ ((double*) t);
@@ -55,11 +55,18 @@ void EnzoMethodHeat::compute ( CommBlock * comm_block) throw()
 double EnzoMethodHeat::timestep ( CommBlock * comm_block ) throw()
 {
   initialize_(comm_block);
-  double h = hx_;
-  if (rank_ >= 2) h = std::min(h,hy_);
-  if (rank_ >= 3) h = std::min(h,hz_);
 
-  return 0.5*courant_*h*h/alpha_;
+  const int rank = this->rank();
+
+  double hx,hy,hz;
+  cell_width (&hx,&hy,&hz);
+
+  double h_min = std::numeric_limits<double>::max();
+  if (rank >= 1) h_min = std::min(h_min,hx);
+  if (rank >= 2) h_min = std::min(h_min,hy);
+  if (rank >= 3) h_min = std::min(h_min,hz);
+
+  return 0.5*courant_*h_min*h_min/alpha_;
 }
 
 //======================================================================
@@ -68,15 +75,16 @@ template <class T>
 void EnzoMethodHeat::compute_ (T * Unew) const throw()
 {
 
-  const int id = field_id_.at("temperature");
+  const int id = field_id ("temperature");
 
-  const int gx = gx_[id];
-  const int gy = gy_[id];
-  const int gz = gz_[id];
+  int gx,gy,gz;
+  ghost_depth (id,&gx,&gy,&gz);
 
-  const int mx = mx_[id];
-  const int my = my_[id];
-  const int mz = mz_[id];
+  int mx,my,mz;
+  array_dimension (id,&mx,&my,&mz);
+
+  int nx,ny,nz;
+  array_size (&nx,&ny,&nz);
 
   // Initialize array increments
   const int idx = 1;
@@ -84,46 +92,53 @@ void EnzoMethodHeat::compute_ (T * Unew) const throw()
   const int idz = mx*my;
 
   // Precompute ratios
-  double dxi = 1.0/(hx_*hx_);
-  double dyi = 1.0/(hy_*hy_);
-  double dzi = 1.0/(hz_*hz_);
+  double hx,hy,hz;
+  cell_width (&hx,&hy,&hz);
+  double dxi = 1.0/(hx*hx);
+  double dyi = 1.0/(hy*hy);
+  double dzi = 1.0/(hz*hz);
 
   const int m = mx*my*mz;
+
+  const int rank = this->rank();
+
+  const double dt = time_step();
+
   T * U = new T [m];
   for (int i=0; i<m; i++) U[i]=Unew[i];
 
-  if (rank_ == 1) {
+  if (rank == 1) {
 
-    for (int ix=gx; ix<nx_+gx; ix++) {
+    for (int ix=gx; ix<nx+gx; ix++) {
 
       int i = ix;
 
       double Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
 
-      Unew[i] = U[i] + alpha_*dt_*(Uxx);
+      Unew[i] = U[i] + alpha_*dt*(Uxx);
 
     }
 
-  } else if (rank_ == 2) {
+  } else if (rank == 2) {
 
-    for (int iy=gy; iy<ny_+gy; iy++) {
-      for (int ix=gy; ix<nx_+gy; ix++) {
+    for (int iy=gy; iy<ny+gy; iy++) {
+      for (int ix=gy; ix<nx+gy; ix++) {
 
 	int i = ix + mx*iy;
 
 	double Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
 	double Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
 	
-	Unew[i] = U[i] + alpha_*dt_*(Uxx + Uyy);
+	Unew[i] = U[i] + alpha_*dt*(Uxx + Uyy);
 
       }
     }
 
-  } else if (rank_ == 3) {
+  } else if (rank == 3) {
 
-    for (int iz=gz; iz<nz_+gz; iz++) {
-      for (int iy=gy; iy<ny_+gy; iy++) {
-	for (int ix=gx; ix<nx_+gx; ix++) {
+    for (int iz=gz; iz<nz+gz; iz++) {
+      for (int iy=gy; iy<ny+gy; iy++) {
+	for (int ix=gx; ix<nx+gx; ix++) {
 
 	  int i = ix + mx*(iy + my*iz);
 
@@ -131,7 +146,7 @@ void EnzoMethodHeat::compute_ (T * Unew) const throw()
 	  double Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
 	  double Uzz = dzi*(U[i-idz] - 2*U[i] + U[i+idz]);
 
-	  Unew[i] = U[i] + alpha_*dt_*(Uxx + Uyy + Uzz);
+	  Unew[i] = U[i] + alpha_*dt*(Uxx + Uyy + Uzz);
 
 	}
       }

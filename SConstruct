@@ -187,7 +187,7 @@ define["double"] =    ['CONFIG_PRECISION_DOUBLE']
 
 # Grackle defines
 
-define_grackle   = ['CONFIG_USE_GRACKLE']
+define_grackle   = ['CONFIG_USE_GRACKLE','SMALL_INTS']
 
 # Performance defines
 
