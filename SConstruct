@@ -334,6 +334,7 @@ inc_path = '#/include'
 test_path= 'test'
 
 Export('bin_path')
+Export('grackle_path')
 Export('lib_path')
 Export('inc_path')
 Export('test_path')
@@ -398,6 +399,9 @@ linkflags    = flags_arch + ' ' + flags_arch_cpp
 linkflags    = linkflags + ' ' + flags_link
 linkflags    = linkflags + ' ' + flags_config
 linkflags    = linkflags + ' ' + flags_link_charm
+
+if (prec == 'double'):
+    fortranflags = fortranflags + ' ' + flags_prec
 
 if not os.path.exists("include"):
      os.makedirs("include")

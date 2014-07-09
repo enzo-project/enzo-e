@@ -2,7 +2,9 @@
 # DIRECTORIES
 #------------------------------
 
-SConscript('Grackle/SConscript')
+
+Import('grackle_path')
+SConscript(grackle_path + '/SConscript')
 
 #------------------------------
 # IMPORTS

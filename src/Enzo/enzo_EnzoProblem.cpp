@@ -97,6 +97,10 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialSedovArray2(static_cast<EnzoConfig *>(config));
   } else if (type == "sedov_array_3d") {
     initial = new EnzoInitialSedovArray3(static_cast<EnzoConfig *>(config));
+#ifdef CONFIG_USE_GRACKLE
+  } else if (type == "grackle_test") {
+    initial = new EnzoInitialGrackleTest(static_cast<EnzoConfig *>(config));
+#endif /* CONFIG_USE_GRACKLE */
   } else {
     initial = Problem::create_initial_
       (type,config,parameters,field_descr,group_process);

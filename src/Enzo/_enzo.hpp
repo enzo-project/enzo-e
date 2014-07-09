@@ -101,6 +101,7 @@ struct fluxes
 // #include "enzo_EnzoTimestepPpml.hpp"
 #include "enzo_EnzoBoundary.hpp"
 
+#include "enzo_EnzoInitialGrackleTest.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"

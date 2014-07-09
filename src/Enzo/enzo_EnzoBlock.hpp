@@ -62,6 +62,7 @@ class EnzoBlock : public CommBlock
   friend class EnzoTimestep;
   friend class EnzoTimestepPpm;
   friend class EnzoTimestepPpml;
+  friend class EnzoInitialGrackleTest;
   friend class EnzoInitialImplosion2;
   friend class EnzoInitialSedovArray2;
   friend class EnzoInitialSedovArray3;

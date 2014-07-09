@@ -6,7 +6,7 @@ set H0 = `date +"%H"`
 set M0 = `date +"%M"`
 set S0 = `date +"%S"`
 
-./compile.sh clean
+# ./compile.sh clean
 
 set H = `date +"%H"`
 set M = `date +"%M"`

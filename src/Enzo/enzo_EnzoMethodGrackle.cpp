@@ -63,8 +63,10 @@ void EnzoMethodGrackle::pup (PUP::er &p)
 void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
 {
 #ifdef CONFIG_USE_GRACKLE
-  printf ("EnzoMethodGrackle::compute()\n");
+
   initialize_(comm_block);
+
+  FieldBlock * field_block = comm_block->block()->field_block();
 
   // ASSUMES ALL ARRAYS ARE THE SAME SIZE
   gr_int m[3];
@@ -84,48 +86,43 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
 
   gr_int rank = this->rank();
 
-  gr_float * density = (gr_float *) field_array(field_id("density"));
-  gr_float * energy  = (gr_float *) field_array(field_id("energy"));
-  gr_float * x_velocity = (gr_float *) field_array(field_id("x_velocity"));
-  gr_float * y_velocity = (gr_float *) field_array(field_id("y_velocity"));
-  gr_float * z_velocity = (gr_float *) field_array(field_id("z_velocity"));
-  gr_float * HI_density = (gr_float *) field_array(field_id("HI_density"));
-  gr_float * HII_density = (gr_float *) field_array(field_id("HII_density"));
-  gr_float * HM_density = (gr_float *) field_array(field_id("HM_density"));
-  gr_float * HeI_density = (gr_float *) field_array(field_id("HeI_density"));
-  gr_float * HeII_density = (gr_float *) field_array(field_id("HeII_density"));
-  gr_float * HeIII_density = (gr_float *) field_array(field_id("HeIII_density"));
-  gr_float * H2I_density = (gr_float *) field_array(field_id("H2I_density"));
-  gr_float * H2II_density = (gr_float *) field_array(field_id("H2II_density"));
-  gr_float * DI_density = (gr_float *) field_array(field_id("DI_density"));
-  gr_float * DII_density = (gr_float *) field_array(field_id("DII_density"));
-  gr_float * HDI_density = (gr_float *) field_array(field_id("HDI_density"));
-  gr_float * e_density = (gr_float *) field_array(field_id("e_density"));
-  gr_float * metal_density = (gr_float *) field_array(field_id("metal_density"));
+  gr_float * density       = (gr_float *) field_block->field_values("density");
+  gr_float * energy        = (gr_float *) field_block->field_values("internal_energy");
+  gr_float * velocity_x    = (gr_float *) field_block->field_values("velocity_x");
+  gr_float * velocity_y    = (gr_float *) field_block->field_values("velocity_y");
+  gr_float * velocity_z    = (gr_float *) field_block->field_values("velocity_z");
+  gr_float * HI_density    = (gr_float *) field_block->field_values("HI_density");
+  gr_float * HII_density   = (gr_float *) field_block->field_values("HII_density");
+  gr_float * HM_density    = (gr_float *) field_block->field_values("HM_density");
+  gr_float * HeI_density   = (gr_float *) field_block->field_values("HeI_density");
+  gr_float * HeII_density  = (gr_float *) field_block->field_values("HeII_density");
+  gr_float * HeIII_density = (gr_float *) field_block->field_values("HeIII_density");
+  gr_float * H2I_density   = (gr_float *) field_block->field_values("H2I_density");
+  gr_float * H2II_density  = (gr_float *) field_block->field_values("H2II_density");
+  gr_float * DI_density    = (gr_float *) field_block->field_values("DI_density");
+  gr_float * DII_density   = (gr_float *) field_block->field_values("DII_density");
+  gr_float * HDI_density   = (gr_float *) field_block->field_values("HDI_density");
+  gr_float * e_density     = (gr_float *) field_block->field_values("e_density");
+  gr_float * metal_density = (gr_float *) field_block->field_values("metal_density");
+  gr_float * cooling_time  = (gr_float *) field_block->field_values("cooling_time");
+  gr_float * temperature   = (gr_float *) field_block->field_values("temperature");
+  gr_float * pressure      = (gr_float *) field_block->field_values("pressure");
+  gr_float * gamma         = (gr_float *) field_block->field_values("gamma");
 
   double dt = time_step();
 
-  printf ("density %p e_density %p\n",density,e_density);
   if (solve_chemistry
       (chemistry_, units_,
        a_value, dt,
        rank, m,
-       grid_start, grid_end,
-       density, 
-       energy,
-       x_velocity,
-       y_velocity,
-       z_velocity,
-       HI_density,
-       HII_density,
+       grid_start,  grid_end,
+       density,     energy,
+       velocity_x,  velocity_y,   velocity_z,
+       HI_density,  HII_density,
        HM_density,
-       HeI_density,
-       HeII_density,
-       HeIII_density,
-       H2I_density,
-       H2II_density,
-       DI_density,
-       DII_density,
+       HeI_density, HeII_density, HeIII_density,
+       H2I_density, H2II_density,
+       DI_density,  DII_density,
        HDI_density,
        e_density,
        metal_density) == 0) {
@@ -133,33 +130,22 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
 	  "Error in solve_chemistry");
   }
 
-  printf ("%s:%d TRACE exited solve_chemistry()\n",
-	  __FILE__,__LINE__); fflush(stdout);
-
   if (calculate_cooling_time
       (chemistry_, units_,
        a_value,
        rank, m,
-       grid_start, grid_end,
-       (gr_float *) field_array(field_id("density")), 
-       (gr_float *) field_array(field_id("energy")),
-       (gr_float *) field_array(field_id("x_velocity")), 
-       (gr_float *) field_array(field_id("y_velocity")), 
-       (gr_float *) field_array(field_id("z_velocity")),
-       (gr_float *) field_array(field_id("HI_density")), 
-       (gr_float *) field_array(field_id("HII_density")), 
-       (gr_float *) field_array(field_id("HM_density")),
-       (gr_float *) field_array(field_id("HeI_density")), 
-       (gr_float *) field_array(field_id("HeII_density")), 
-       (gr_float *) field_array(field_id("HeIII_density")),
-       (gr_float *) field_array(field_id("H2I_density")), 
-       (gr_float *) field_array(field_id("H2II_density")),
-       (gr_float *) field_array(field_id("DI_density")), 
-       (gr_float *) field_array(field_id("DII_density")), 
-       (gr_float *) field_array(field_id("HDI_density")),
-       (gr_float *) field_array(field_id("e_density")), 
-       (gr_float *) field_array(field_id("metal_density")), 
-       (gr_float *) field_array(field_id("cooling_time"))) == 0) {
+       grid_start,  grid_end,
+       density,     energy,
+       velocity_x,  velocity_y,   velocity_z,
+       HI_density,  HII_density,
+       HM_density,
+       HeI_density, HeII_density, HeIII_density,
+       H2I_density, H2II_density,
+       DI_density,  DII_density,
+       HDI_density,
+       e_density,
+       metal_density,
+       cooling_time) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
 	  "Error in calculate_cooling_time.\n");
   }
@@ -167,22 +153,16 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
   if (calculate_temperature
       (chemistry_, units_,
        rank, m,
-       (gr_float *) field_array(field_id("density")), 
-       (gr_float *) field_array(field_id("energy")),
-       (gr_float *) field_array(field_id("HI_density")), 
-       (gr_float *) field_array(field_id("HII_density")), 
-       (gr_float *) field_array(field_id("HM_density")),
-       (gr_float *) field_array(field_id("HeI_density")), 
-       (gr_float *) field_array(field_id("HeII_density")), 
-       (gr_float *) field_array(field_id("HeIII_density")),
-       (gr_float *) field_array(field_id("H2I_density")), 
-       (gr_float *) field_array(field_id("H2II_density")),
-       (gr_float *) field_array(field_id("DI_density")), 
-       (gr_float *) field_array(field_id("DII_density")), 
-       (gr_float *) field_array(field_id("HDI_density")),
-       (gr_float *) field_array(field_id("e_density")), 
-       (gr_float *) field_array(field_id("metal_density")), 
-       (gr_float *) field_array(field_id("temperature"))) == 0) {
+       density,     energy,
+       HI_density,  HII_density,
+       HM_density,
+       HeI_density, HeII_density, HeIII_density,
+       H2I_density, H2II_density,
+       DI_density,  DII_density,
+       HDI_density,
+       e_density,
+       metal_density,
+       temperature) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
 	  "Error in calculate_temperature.\n");
   }
@@ -190,22 +170,16 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
   if (calculate_pressure
       (chemistry_, units_,
        rank, m,
-       (gr_float *) field_array(field_id("density")), 
-       (gr_float *) field_array(field_id("energy")),
-       (gr_float *) field_array(field_id("HI_density")), 
-       (gr_float *) field_array(field_id("HII_density")), 
-       (gr_float *) field_array(field_id("HM_density")),
-       (gr_float *) field_array(field_id("HeI_density")), 
-       (gr_float *) field_array(field_id("HeII_density")), 
-       (gr_float *) field_array(field_id("HeIII_density")),
-       (gr_float *) field_array(field_id("H2I_density")), 
-       (gr_float *) field_array(field_id("H2II_density")),
-       (gr_float *) field_array(field_id("DI_density")), 
-       (gr_float *) field_array(field_id("DII_density")), 
-       (gr_float *) field_array(field_id("HDI_density")),
-       (gr_float *) field_array(field_id("e_density")), 
-       (gr_float *) field_array(field_id("metal_density")),
-       (gr_float *) field_array(field_id("pressure"))) == 0) {
+       density,     energy,
+       HI_density,  HII_density,
+       HM_density,
+       HeI_density, HeII_density,  HeIII_density,
+       H2I_density, H2II_density,
+       DI_density,  DII_density,
+       HDI_density,
+       e_density,
+       metal_density,
+       pressure) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
 	  "Error in calculate_pressure.\n");
   }
@@ -213,22 +187,16 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
   if (calculate_gamma
       (chemistry_, units_,
        rank, m,
-       (gr_float *) field_array(field_id("density")),
-       (gr_float *) field_array(field_id("energy")),
-       (gr_float *) field_array(field_id("HI_density")),
-       (gr_float *) field_array(field_id("HII_density")),
-       (gr_float *) field_array(field_id("HM_density")),
-       (gr_float *) field_array(field_id("HeI_density")),
-       (gr_float *) field_array(field_id("HeII_density")),
-       (gr_float *) field_array(field_id("HeIII_density")),
-       (gr_float *) field_array(field_id("H2I_density")),
-       (gr_float *) field_array(field_id("H2II_density")),
-       (gr_float *) field_array(field_id("DI_density")),
-       (gr_float *) field_array(field_id("DII_density")),
-       (gr_float *) field_array(field_id("HDI_density")),
-       (gr_float *) field_array(field_id("e_density")),
-       (gr_float *) field_array(field_id("metal_density")),
-       (gr_float *) field_array(field_id("gamma"))) == 0) {
+       density,     energy,
+       HI_density,  HII_density,
+       HM_density,
+       HeI_density, HeII_density,  HeIII_density,
+       H2I_density, H2II_density,
+       DI_density,  DII_density,
+       HDI_density,
+       e_density,
+       metal_density,
+       gamma) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
 	  "Error in calculate_gamma.\n");
   }

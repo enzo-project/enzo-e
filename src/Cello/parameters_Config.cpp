@@ -374,8 +374,6 @@ void Config::read_initial_ (Parameters * p) throw()
   initial_type  = p->value_string ("Initial:type","value");
   initial_time  = p->value_float  ("Initial:time",0.0);
 
-  const int max_level = p->value_integer("Mesh:max_level",0);
-
   //  initial_name;
 
   //  initial_value

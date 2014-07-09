@@ -1,23 +1,22 @@
 import os
 
-f90 = {}
-cxx = {}
-cc  = {}
-
 is_arch_valid = 1
 
-# flags_arch = '-g -Wall'
-flags_arch = '-O3'
+flags_arch = '-O3 -Wall -g'
 flags_link  = '-rdynamic'
 
 cc   = 'gcc'
 f90  = 'gfortran'
 
+flags_prec      = '-fdefault-real-8 -fdefault-double-8'
+
+home = os.environ['HOME']
+
 libpath_fortran = ''
 libs_fortran    = ['gfortran']
 
-charm_path = home + '/Charm/charm'
-
-papi_path  = home
-hdf5_path  = home
-png_path   = '/usr/lib64'
+charm_path   = home + '/Charm/charm'
+papi_path    = home
+hdf5_path    = home
+png_path     = '/usr/lib64'
+grackle_path = home + '/Grackle/src/clib'

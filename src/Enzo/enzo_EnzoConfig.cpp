@@ -11,6 +11,8 @@
 //----------------------------------------------------------------------
 
 EnzoConfig::EnzoConfig() throw ()
+  : method_grackle_units(),
+    method_grackle_chemistry()
 {
 }
 

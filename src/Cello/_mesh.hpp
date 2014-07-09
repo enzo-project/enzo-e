@@ -58,7 +58,7 @@ class Tree;
 
 // Iterators
 #include "mesh_It.hpp"
-#include "mesh_ItBlock.hpp"
+// #include "mesh_ItBlock.hpp"
 #include "mesh_ItNode.hpp"
 
 // Refinement

@@ -23,15 +23,13 @@ if ($#argv >= 1) then
       rm -rf build
       printf "done\n"
       exit
-   else if ($argv[1] == "enzo-p") then
-     set target = bin/enzo-p
    else if ($argv[1] == "compile") then
      set target = install-bin
    else if ($argv[1] == "test") then
      set target = ""
    else
-     echo "Usage: $0 [clean|compile|test|enzo-p]"
-     exit(1)
+     # assume enzo-p
+     set target = bin/enzo-p
    endif
 endif
 
@@ -76,10 +74,11 @@ foreach prec ($PREC)
 
    rm -f bin/enzo-p
 
-   python scons.py install-inc            >&  $dir/out.scons
-   python scons.py -Q -k      $target     |& tee $dir/out.scons
+   python scons.py install-inc    >&  $dir/out.scons
+   python scons.py -k -Q $target |& tee $dir/out.scons
 
-   util/parse_error.sh
+   util/parse_error.awk   < $dir/out.scons >  errors.org
+   util/parse_warning.awk < $dir/out.scons >> errors.org
 
    if (-e bin/enzo-p) then
       echo "Success"
