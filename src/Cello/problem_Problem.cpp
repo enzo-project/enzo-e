@@ -168,11 +168,11 @@ void Problem::initialize_stopping(Config * config) throw()
 
 void Problem::initialize_prolong(Config * config) throw()
 {
-  prolong_ = create_prolong_(config->prolong_type,config);
+  prolong_ = create_prolong_(config->field_prolong_type,config);
 
   ASSERT1("Problem::initialize_prolong",
 	  "Prolong type %s not recognized",
-	  config->prolong_type.c_str(),
+	  config->field_prolong_type.c_str(),
 	  prolong_ != NULL);
 }
 
@@ -180,11 +180,11 @@ void Problem::initialize_prolong(Config * config) throw()
 
 void Problem::initialize_restrict(Config * config) throw()
 {
-  restrict_ = create_restrict_(config->restrict_type,config);
+  restrict_ = create_restrict_(config->field_restrict_type,config);
 
   ASSERT1("Problem::initialize_restrict",
 	  "Restrict type %s not recognized",
-	  config->restrict_type.c_str(),
+	  config->field_restrict_type.c_str(),
 	  restrict_ != NULL);
 }
 

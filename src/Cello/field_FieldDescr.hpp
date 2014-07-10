@@ -52,8 +52,7 @@ public: // functions
     // NOTE: change this function whenever attributes change
     p | field_name_;
     p | field_id_;
-    p | group_name_;
-    p | group_id_;
+    p | groups_;
     p | alignment_;
     p | padding_;
     p | courant_;
@@ -113,11 +112,6 @@ public: // functions
   /// Insert a new field
   int insert_field(const std::string & name_field) throw();
 
-  /// Insert a new group
-  void insert_group(const std::string & name_group) throw();
-
-  //----------------------------------------------------------------------
-
   /// Return the number of fields
   int field_count() const throw();
 
@@ -130,23 +124,27 @@ public: // functions
   /// Return the integer handle for the named field
   int field_id(const std::string & name) const throw();
 
-  /// Return the number of groups
-  int group_count() const throw();
+  //----------------------------------------------------------------------
+  // Groups
+  //----------------------------------------------------------------------
 
-  /// Return name of the ith group
-  std::string group_name(int id_group) const throw(std::out_of_range);
+  /// Add the field to a group
+  void add_to_group(std::string field,
+		    std::string group) throw(std::out_of_range);
 
-  /// Return whether the group has been inserted
-  bool is_group(const std::string & name) const throw();
+  /// Return whether the given field is in the given group
+  bool is_in_group(std::string field,
+		   std::string group) const throw(std::out_of_range);
 
-  /// Return the integer handle for the named group
-  int group_id(const std::string & name) const throw();
+  /// Return the number of groups that the field belongs to
+  int num_groups(std::string field) const;
 
+  /// Return the ith field in the group
+  std::string field_in_group (std::string group, int i);
 
-   // /// Return whether the given field is in the given group
-   // bool field_in_group(int id_field, int id_group) 
-   //   const throw(std::out_of_range);
-
+  //----------------------------------------------------------------------
+  // Properties
+  //----------------------------------------------------------------------
 
   /// alignment in bytes of fields in memory
   int alignment() const throw();
@@ -198,10 +196,7 @@ private: // attributes
   std::map<std::string,int> field_id_;
 
   /// String identifying each group
-  std::vector<std::string> group_name_;
-
-  /// Index of each group in group_name_
-  std::map<std::string,int> group_id_;
+  std::set<std::pair<std::string,std::string> > groups_;
 
   /// alignment of start of each field in bytes
   int alignment_;

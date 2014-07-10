@@ -6,6 +6,25 @@
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Mon Oct  5 15:10:56 PDT 2009
 /// @brief     Cello main
+///
+/// \mainpage <a href="http://cello-project.org">Enzo-P / Cello</a>
+///
+/// Cello is an object-oriented adaptive mesh refinement (AMR)
+/// software framework for high performance scientific applications.
+/// The framework is scalable, easy to use, and portable across
+/// systems ranging from laptops and PC's to the largest HPC systems
+/// available, including Blue Waters, the National Science
+/// Foundation's Cray petascale supercomputer at the University of
+/// Illinois at Urbana-Champaign.  Cello's mesh refinement uses the
+/// highly-scalable "forest-of-octrees" approach, and the Charm++
+/// parallel programming system enables its high parallel scalability.
+///
+/// Development of Cello is driven by the Enzo, a parallel
+/// computational astrophysics and cosmology application The goal is
+/// to efficiently map Enzo's multi-resolution multi-physics
+/// capabilities onto large parallel computers with potentially
+/// millions of computational units. This "petascale" incarnation of
+/// Enzo being built on the Cello framework is called Enzo-P.
 
 //----------------------------------------------------------------------
 

@@ -95,51 +95,88 @@ PARALLEL_MAIN_BEGIN
   unit_assert(field_descr->field_name(info.field_velocity_z)   == "velocity_z");
   unit_assert(field_descr->field_name(info.field_total_energy) == "total_energy");
 
+  //----------------------------------------------------------------------
   // Groups
+  //----------------------------------------------------------------------
 
-  unit_func("insert_group");
-  unit_assert(field_descr->group_count()==0);
-  field_descr->insert_group("density");
-  unit_assert(field_descr->group_count()==1);
-  field_descr->insert_group("vector");
-  unit_func("group_count");
-  unit_assert(field_descr->group_count()==2);
+  unit_func("num_groups");
+  unit_assert(field_descr->num_groups("density")==0);
 
-  unit_func("group_id");
-
-  info.group_density = field_descr->group_id("density");
-  info.group_vector   = field_descr->group_id("vector");
-
-  unit_assert(field_descr->group_id("density") == info.group_density);
-  unit_assert(field_descr->group_id("vector")   == info.group_vector);
-
-  unit_func("is_group");
-
-  unit_assert(field_descr->is_group("vector"));
-  unit_assert(! field_descr->is_group("not_a_group"));
-
-  unit_func("group_name");
-
-  unit_assert(field_descr->group_name(info.group_density) == "density");
-  unit_assert(field_descr->group_name(info.group_vector)    == "vector");
-
-  // Fields and groups
-
-  // unit_func("set_field_in_group");
-  // field_descr->set_field_in_group(info.field_density,  info.group_density);
-  // field_descr->set_field_in_group(info.field_velocity_x,info.group_vector);
-  // field_descr->set_field_in_group(info.field_velocity_y,info.group_vector);
-  // field_descr->set_field_in_group(info.field_velocity_z,info.group_vector);
-
-  // unit_assert(field_descr->field_in_group(info.field_density,   info.group_density));
-  // unit_assert(field_descr->field_in_group(info.field_velocity_x,info.group_vector));
-  // unit_assert(field_descr->field_in_group(info.field_velocity_y,info.group_vector));
-  // unit_assert(! field_descr->field_in_group(info.field_velocity_y,  info.group_density));
-  // unit_assert(! field_descr->field_in_group(info.field_total_energy,info.group_density));
-  // unit_assert(! field_descr->field_in_group(info.field_density,     info.group_vector));
-  // unit_assert(! field_descr->field_in_group(info.field_total_energy,info.group_vector));
+  unit_func("add_to_group()");
+  field_descr->add_to_group("density",   "group_1");
+  unit_func("num_groups");
+  unit_assert(field_descr->num_groups("density")==1);
 
 
+  unit_func("add_to_group()");
+  field_descr->add_to_group("velocity_x","group_2");
+
+  unit_func("add_to_group()");
+  field_descr->add_to_group("velocity_y","group_2");
+  unit_func("add_to_group()");
+  field_descr->add_to_group("velocity_z","group_2");
+
+  unit_func("add_to_group()");
+  field_descr->add_to_group("density",   "group_3");
+
+  unit_func("add_to_group()");
+  field_descr->add_to_group("velocity_x","group_3");
+
+  unit_func("add_to_group()");
+  field_descr->add_to_group("velocity_y","group_3");
+
+  unit_func("add_to_group()");
+  field_descr->add_to_group("velocity_z","group_3");
+
+  unit_func("num_groups");
+  unit_assert(field_descr->num_groups("density")==2);
+  unit_assert(field_descr->num_groups("velocity_x")==2);
+  unit_assert(field_descr->num_groups("velocity_y")==2);
+  unit_assert(field_descr->num_groups("velocity_z")==2);
+  unit_assert(field_descr->num_groups("not_a_field")==0);
+
+  unit_func("is_in_group()");
+
+  // non-field tests
+  unit_assert(field_descr->is_in_group("not_a_field", "group_1") == false);
+  unit_assert(field_descr->is_in_group("not_a_field", "group_2") == false);
+
+  // non-group tests
+  unit_assert(field_descr->is_in_group("density",    "not_a_group") == false);
+  unit_assert(field_descr->is_in_group("velocity_x", "not_a_group") == false);
+  unit_assert(field_descr->is_in_group("velocity_y", "not_a_group") == false);
+  unit_assert(field_descr->is_in_group("velocity_z", "not_a_group") == false);
+
+  // non-field and non-group
+  unit_assert(field_descr->is_in_group("not_a_field", "not_a_group") == false);
+  unit_assert(field_descr->is_in_group("not_a_field", "not_a_group") == false);
+
+
+  // group 1 tests
+  unit_assert(field_descr->is_in_group("density",   "group_1") == true);
+  unit_assert(field_descr->is_in_group("velocity_x","group_1") == false);
+  unit_assert(field_descr->is_in_group("velocity_y","group_1") == false);
+  unit_assert(field_descr->is_in_group("velocity_z","group_1") == false);
+
+  // group 2 tests
+  unit_assert(field_descr->is_in_group("density",   "group_2") == false);
+  unit_assert(field_descr->is_in_group("velocity_x","group_2") == true);
+  unit_assert(field_descr->is_in_group("velocity_y","group_2") == true);
+  unit_assert(field_descr->is_in_group("velocity_z","group_2") == true);
+
+  // group 3 tests
+  unit_assert(field_descr->is_in_group("density",   "group_3") == true);
+  unit_assert(field_descr->is_in_group("velocity_x","group_3") == true);
+  unit_assert(field_descr->is_in_group("velocity_y","group_3") == true);
+  unit_assert(field_descr->is_in_group("velocity_z","group_3") == true);
+
+  unit_func("field_in_group()");
+
+  std::string g1_0 = field_descr->field_in_group("group_1",0);
+  std::string g1_1 = field_descr->field_in_group("group_1",1);
+  unit_assert(g1_0 == "density");
+  unit_assert(g1_1 == "");
+  
   //----------------------------------------------------------------------
   // Global attributes
   //----------------------------------------------------------------------
@@ -305,22 +342,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(field_descr_assign.field_name(info.field_velocity_z)   == "velocity_z");
   unit_assert(field_descr_assign.field_name(info.field_total_energy) == "total_energy");
 
-  unit_func("assign:group_id");
-  unit_assert(field_descr_assign.group_id("density") == info.group_density);
-  unit_assert(field_descr_assign.group_id("vector")   == info.group_vector);
-
-  unit_func("assign:group_name");
-  unit_assert(field_descr_assign.group_name(info.group_density) == "density");
-  unit_assert(field_descr_assign.group_name(info.group_vector)    == "vector");
-
-  // unit_func("assign:field_in_group");
-  // unit_assert(field_descr_assign.field_in_group(info.field_density,   info.group_density));
-  // unit_assert(field_descr_assign.field_in_group(info.field_velocity_x,info.group_vector));
-  // unit_assert(field_descr_assign.field_in_group(info.field_velocity_y,info.group_vector));
-  // unit_assert(! field_descr_assign.field_in_group(info.field_velocity_y,  info.group_density));
-  // unit_assert(! field_descr_assign.field_in_group(info.field_total_energy,info.group_density));
-  // unit_assert(! field_descr_assign.field_in_group(info.field_density,     info.group_vector));
-  // unit_assert(! field_descr_assign.field_in_group(info.field_total_energy,info.group_vector));
 
   unit_func("assign:alignment");
   unit_assert(field_descr_assign.alignment() == 4);
@@ -398,21 +419,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(field_descr_copy.field_name(info.field_velocity_z)   == "velocity_z");
   unit_assert(field_descr_copy.field_name(info.field_total_energy) == "total_energy");
 
-  unit_func("copy:group_id");
-
-  unit_assert(field_descr_copy.group_id("density") == info.group_density);
-  unit_assert(field_descr_copy.group_id("vector")   == info.group_vector);
-
-  unit_assert(field_descr_copy.group_name(info.group_density) == "density");
-  unit_assert(field_descr_copy.group_name(info.group_vector)    == "vector");
-
-  // unit_assert(field_descr_copy.field_in_group(info.field_density,   info.group_density));
-  // unit_assert(field_descr_copy.field_in_group(info.field_velocity_x,info.group_vector));
-  // unit_assert(field_descr_copy.field_in_group(info.field_velocity_y,info.group_vector));
-  // unit_assert(! field_descr_copy.field_in_group(info.field_velocity_y,  info.group_density));
-  // unit_assert(! field_descr_copy.field_in_group(info.field_total_energy,info.group_density));
-  // unit_assert(! field_descr_copy.field_in_group(info.field_density,     info.group_vector));
-  // unit_assert(! field_descr_copy.field_in_group(info.field_total_energy,info.group_vector));
 
   unit_func("copy:alignment");
   unit_assert(field_descr_copy.alignment() == 4);

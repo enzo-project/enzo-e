@@ -115,7 +115,7 @@ protected: // attributes
   Sync sync_output_begin_;
   Sync sync_output_write_;
 
-#ifdef TRACE_MEMORY
+#ifdef CONFIG_USE_MEMORY
   int trace_mem_;
 #endif
 

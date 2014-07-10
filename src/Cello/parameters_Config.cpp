@@ -48,8 +48,9 @@ void Config::pup (PUP::er &p)
   p | field_padding;
   p | field_precision;
   p | field_refresh_rank;
-  p | prolong_type;
-  p | restrict_type;
+  p | field_prolong_type;
+  p | field_restrict_type;
+  p | field_group_list;
 
   // Initial
 
@@ -316,15 +317,31 @@ void Config::read_field_ (Parameters * p) throw()
   field_centering[1].resize(num_fields);
   field_centering[2].resize(num_fields);
 
-  for (int i=0; i<num_fields; i++) {
+  field_group_list.resize(num_fields);
 
-    std::string param_name = 
-      std::string("Field:") + field_list[i] + ":centering";
+  std::string param;
 
-    field_centering[0][i] = p->list_value_logical(0,param_name,true);
-    field_centering[1][i] = p->list_value_logical(1,param_name,true);
-    field_centering[2][i] = p->list_value_logical(2,param_name,true);
-    
+  for (int index_field=0; index_field<num_fields; index_field++) {
+
+    param = std::string("Field:") + field_list[index_field] + ":centering";
+
+    field_centering[0][index_field] = p->list_value_logical(0,param,true);
+    field_centering[1][index_field] = p->list_value_logical(1,param,true);
+    field_centering[2][index_field] = p->list_value_logical(2,param,true);
+
+    param =  std::string("Field:") + field_list[index_field] + ":group_list";
+
+    if (p->type(param) == parameter_list)  {
+      int num_groups = p->list_length(param);
+      field_group_list[index_field].resize(p->list_length(param));
+      for (int index_group=0; index_group<num_groups; index_group++) {
+	field_group_list[index_field][index_group] = p->list_value_string(index_group,param);
+      }
+    } else if (p->type(param) == parameter_string) {
+      field_group_list[index_field].resize(1);
+      field_group_list[index_field][0] = p->value_string(param);
+    }
+
   }
 
   field_courant = p->value_float  ("Field:courant",0.6);
@@ -355,9 +372,9 @@ void Config::read_field_ (Parameters * p) throw()
 
   field_refresh_rank = p->value_integer ("Field:refresh:rank",0);
 
-  prolong_type   = p->value_string ("Field:prolong","linear");
+  field_prolong_type   = p->value_string ("Field:prolong","linear");
 
-  restrict_type  = p->value_string ("Field:restrict","linear");
+  field_restrict_type  = p->value_string ("Field:restrict","linear");
 
 }
 

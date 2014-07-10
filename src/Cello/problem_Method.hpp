@@ -122,6 +122,26 @@ protected: // functions
      if (zp) (*zp) = zp_;
    }
 
+  int num_fields() const
+  { return field_name_.size(); }
+
+  std::string field_name (int id) const
+  {
+    ASSERT2 ("Method::field_name()",
+	    "id out of bounds: %d not between 0 and %d",
+	     id,field_name_.size()-1,
+	     0 <= id && id < (int)field_name_.size());
+    return field_name_.at(id);
+  }
+  std::string field_name (int id)
+  {
+    ASSERT2 ("Method::field_name()",
+	    "id out of bounds: %d not between 0 and %d",
+	     id,field_name_.size()-1,
+	     0 <= id && id < (int)field_name_.size());
+    return field_name_.at(id);
+  }
+
   void * field_array (int id) const
   {
     ASSERT2 ("Method::field_array()",

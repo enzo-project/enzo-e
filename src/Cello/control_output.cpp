@@ -63,7 +63,7 @@ void SimulationCharm::begin_output ()
 
   TRACE_LOCAL("CommBlock::output_begin()");
 
-#ifdef TRACE_MEMORY
+#ifdef CONFIG_USE_MEMORY
   trace_mem_ = Memory::instance()->bytes() - trace_mem_;
 #endif
 

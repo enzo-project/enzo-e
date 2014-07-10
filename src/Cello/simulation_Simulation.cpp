@@ -357,6 +357,19 @@ void Simulation::initialize_data_descr_() throw()
 
   }
 
+  // groups
+
+  int num_fields = config_->field_group_list.size();
+  for (size_t index_field=0; index_field<num_fields; index_field++) {
+    std::string field = config_->field_list[index_field];
+    int num_groups = config_->field_group_list[index_field].size();
+   
+    for (size_t index_group=0; index_group<num_groups; index_group++) {
+      std::string group = config_->field_group_list[index_field][index_group];
+      field_descr_->add_to_group(field,group);
+    }
+  }
+
 }
 //----------------------------------------------------------------------
 

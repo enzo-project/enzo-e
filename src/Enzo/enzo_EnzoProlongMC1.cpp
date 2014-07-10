@@ -9,18 +9,18 @@
 
 #include "cello.hpp"
 
-EnzoProlongMC1::EnzoProlongMC1(std::string prolong_type) throw()
+EnzoProlongMC1::EnzoProlongMC1(std::string type) throw()
   : Prolong ()
 {
-  if      (prolong_type == "ThirdOrderA")  method_ = 0;
-  else if (prolong_type == "SecondOrderA") method_ = 1;
-  else if (prolong_type == "SecondOrderB") method_ = 2;
-  else if (prolong_type == "SecondOrderC") method_ = 3;
-  else if (prolong_type == "FirstOrderA")  method_ = 4;
+  if      (type == "ThirdOrderA")  method_ = 0;
+  else if (type == "SecondOrderA") method_ = 1;
+  else if (type == "SecondOrderB") method_ = 2;
+  else if (type == "SecondOrderC") method_ = 3;
+  else if (type == "FirstOrderA")  method_ = 4;
   else {
     ERROR1("EnzoProlongMC1::EnzoProlongMC1",
 	  "Unrecognized interpolation method %s",
-	   prolong_type.c_str());
+	   type.c_str());
   }
 }
 //----------------------------------------------------------------------

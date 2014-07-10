@@ -50,12 +50,6 @@ debug_verbose = 0
 memory = 1
 
 #----------------------------------------------------------------------
-# Whether to trace memory usage in different components
-#----------------------------------------------------------------------
-
-trace_memory = 1
-
-#----------------------------------------------------------------------
 # Enable charm++ dynamic load balancing
 #----------------------------------------------------------------------
 
@@ -192,7 +186,6 @@ define_grackle   = ['CONFIG_USE_GRACKLE','SMALL_INTS']
 # Performance defines
 
 define_memory =       ['CONFIG_USE_MEMORY']
-define_trace_memory = ['TRACE_MEMORY']
 define_projections =  ['CONFIG_USE_PROJECTIONS']
 define_performance =  ['CONFIG_USE_PERFORMANCE']
 define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
@@ -268,7 +261,6 @@ if (trace_charm != 0):   defines = defines + define_trace_charm
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
-if (trace_memory != 0):  defines = defines + define_trace_memory
 defines = defines + define_charm
 
 #======================================================================

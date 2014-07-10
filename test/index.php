@@ -433,7 +433,7 @@ function test_table_blocks ($file_root,$cycle_array, $types)
 	 for ($col = 0; $col < $cols; $col++) {
 	   $rbin = binary($rows - $row - 1,2);
 	   $cbin = binary($col,2);
-	   echo "<td class=block> <img src=${file_root}-$cycle-Block-${rbin}_${cbin}.png width=80></img> </td>";
+	   echo "<td class=block> <img src=${file_root}-$cycle-B${rbin}_${cbin}.png width=80></img> </td>";
 	 }
        }
        echo "</tr>";

@@ -15,9 +15,7 @@ FieldDescr::FieldDescr ()
   throw ()
   : field_name_(),
     field_id_(),
-    group_name_(),
-    group_id_(),
-    // field_in_group_(),
+    groups_(),
     alignment_(1),
     padding_(0),
     courant_(1),
@@ -105,51 +103,50 @@ int FieldDescr::field_id(const std::string & name) const
 
 //----------------------------------------------------------------------
 
-int FieldDescr::group_count() const 
-  throw()
+void FieldDescr::add_to_group
+(
+ std::string field,
+ std::string group
+ ) throw(std::out_of_range)
 {
-  return group_name_.size(); 
+  std::pair<std::string,std::string> value(field,group);
+  groups_.insert(value);
 }
 
 //----------------------------------------------------------------------
 
-std::string FieldDescr::group_name(int id_group) const 
-  throw(std::out_of_range)
+bool FieldDescr::is_in_group
+(
+ std::string field,
+ std::string group
+ ) const throw(std::out_of_range)
 {
-  return group_name_[id_group];
+  std::pair<std::string,std::string> value(field,group);
+  return groups_.find(value) != groups_.end();
 }
 
-//----------------------------------------------------------------------
-
-bool FieldDescr::is_group(const std::string & name) const
-  throw()
-{ 
-  return (group_id_.find(name) != group_id_.end());
-}
-
-//----------------------------------------------------------------------
-
-int FieldDescr::group_id(const std::string & name) const
-  throw()
+int FieldDescr::num_groups(std::string field) const
 {
-  std::map<const std::string,int>::const_iterator it;
-  it=group_id_.find(name);
-  if (it != group_id_.end()) {
-    return it->second;
-  } else {
-    return -1;
+  int count = 0;
+  std::set<std::pair<std::string,std::string> >::iterator it;
+  for (it=groups_.begin(); it != groups_.end(); it++) {
+    if (it->first == field) ++count;
   }
-  //  return group_id_[name];
+  return count;
 }
 
-//----------------------------------------------------------------------
-
-// bool FieldDescr::field_in_group(int id_field, int id_group) const 
-//   throw(std::out_of_range)
-// {
-//   int_set_type t = field_in_group_.at(id_field);
-//   return t.find(id_group) != t.end();
-// }
+std::string FieldDescr::field_in_group (std::string group, int index_field)
+{
+  int count = 0;
+  std::set<std::pair<std::string,std::string> >::iterator it;
+  for (it=groups_.begin(); it != groups_.end(); it++) {
+    if (it->second == group) {
+      if (count == index_field) return it->first;
+      ++count;
+    }
+  }
+  return "";
+}
 
 //----------------------------------------------------------------------
 
@@ -296,23 +293,6 @@ int FieldDescr::insert_field(const std::string & field_name) throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::insert_group(const std::string & group_name) throw()
-{
-  int id = group_count();
-  group_name_.push_back(group_name);
-  group_id_[group_name] = id;
-}
-
-//----------------------------------------------------------------------
-
-// void FieldDescr::set_field_in_group(int id_field, int id_group) 
-//   throw(std::out_of_range)
-// {
-//   field_in_group_.at(id_field).insert(id_group);
-// }
-
-//----------------------------------------------------------------------
-
 void FieldDescr::set_alignment(int alignment) throw()
 {
   alignment_ = alignment;
@@ -410,9 +390,7 @@ void FieldDescr::copy_(const FieldDescr & field_descr) throw()
   courant_        = field_descr.courant_;
   field_name_     = field_descr.field_name_;
   field_id_       = field_descr.field_id_;
-  group_name_     = field_descr.group_name_;
-  group_id_       = field_descr.group_id_;
-  // field_in_group_ = field_descr.field_in_group_;
+  groups_         = field_descr.groups_;
   precision_      = field_descr.precision_;
   centering_.clear();
   for (size_t i=0; i<field_descr.centering_.size(); i++) {
@@ -433,4 +411,5 @@ void FieldDescr::copy_(const FieldDescr & field_descr) throw()
   min_action_     = field_descr.min_action_;
   max_action_     = field_descr.max_action_;
 }
+
 

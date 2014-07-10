@@ -89,8 +89,9 @@ public: // attributes
   int                        field_padding;
   int                        field_precision;
   int                        field_refresh_rank;
-  std::string                prolong_type;
-  std::string                restrict_type;
+  std::string                field_prolong_type;
+  std::string                field_restrict_type;
+  std::vector< std::vector<std::string> >  field_group_list;
 
   // Initial
 

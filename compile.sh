@@ -29,7 +29,7 @@ if ($#argv >= 1) then
      set target = ""
    else
      # assume enzo-p
-     set target = bin/enzo-p
+     set target = $argv[1]
    endif
 endif
 
@@ -53,9 +53,6 @@ foreach prec ($PREC)
 
    printf "$configure" > test/COMPILING
 
-   # clean
-#  python scons.py arch=$arch prec=$prec -c >& /dev/null
-
    # make output directory for compilation and tests
 
    set dir = test
@@ -75,7 +72,7 @@ foreach prec ($PREC)
    rm -f bin/enzo-p
 
    python scons.py install-inc    >&  $dir/out.scons
-   python scons.py -k -Q $target |& tee $dir/out.scons
+   python scons.py -j $proc -k -Q $target |& tee $dir/out.scons
 
    util/parse_error.awk   < $dir/out.scons >  errors.org
    util/parse_warning.awk < $dir/out.scons >> errors.org
