@@ -25,6 +25,7 @@ typedef long                gr_int;  // Grackle int
 #  error "Must define CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD]"
 #endif
 
+/* #include "enzo_typedefs_30.hpp" */
 
 #endif /* ENZO_TYPEDEFS_HPP */
 

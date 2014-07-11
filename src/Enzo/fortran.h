@@ -1,4 +1,5 @@
 #include "enzo_defines.hpp"
+/* #include "fortran_types.def" */
 
 #define DEBUG_MESSAGE            CALL f_warning(__FILE__,__LINE__)
 #define ERROR_MESSAGE            CALL f_error(__FILE__,__LINE__)

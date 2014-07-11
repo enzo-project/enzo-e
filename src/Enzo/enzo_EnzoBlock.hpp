@@ -61,6 +61,7 @@ class EnzoBlock : public CommBlock
   friend class EnzoSimulationMpi;
   friend class EnzoTimestep;
   friend class EnzoTimestepPpm;
+  friend class EnzoTimestepPpm30;
   friend class EnzoTimestepPpml;
   friend class EnzoInitialGrackleTest;
   friend class EnzoInitialImplosion2;
@@ -219,6 +220,9 @@ public: // interface
   /// Compute the pressure field at the given time
   int ComputePressure(enzo_float time, enzo_float *pressure);
 
+  /// Compute the pressure field at the given time (Enzo 3.0)
+  int ComputePressure30(enzo_float time, enzo_float *pressure);
+
   /// Compute the temperature field
   int ComputeTemperatureField(enzo_float *temperature);
 
@@ -276,6 +280,9 @@ public: // interface
   /// Solve the hydro equations, saving subgrid fluxes
   int SolveHydroEquations ( int CycleNumber, enzo_float time, enzo_float dt);
 
+  /// Solve the hydro equations, saving subgrid fluxes
+  int SolveHydroEquations30 ( int CycleNumber );
+
   /// Set external boundary values
   // int SetExternalBoundary
   // ( int FieldRank, 
@@ -317,7 +324,10 @@ public: // attributes (YIKES!)
   int CycleNumber;
 
   enzo_float OldTime;
-  enzo_float dt;
+  union {
+    enzo_float dt;
+    enzo_float dtFixed;
+  };
 
   /// cell cntr acceleration at n+1/2
   enzo_float *AccelerationField[MAX_DIMENSION]; 

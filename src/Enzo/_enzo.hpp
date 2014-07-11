@@ -10,28 +10,35 @@
 
 //----------------------------------------------------------------------
 
-#include "enzo_defines.hpp"
-#include "enzo_typedefs.hpp"
-#include "enzo_fortran.hpp"
-
-//----------------------------------------------------------------------
-
 #define OMEGA_TOLERANCE 1.0e-5
  
 #ifdef CONFIG_PRECISION_SINGLE
 #   define ETA_TOLERANCE 1.0e-5
 #   define ENZO_HUGE_VAL HUGE_VALF
 #   define scalar_type_enzo_float scalar_type_float
+#   define CONFIG_BFLOAT_4
+#   define CONFIG_PFLOAT_4
 #endif
 #ifdef CONFIG_PRECISION_DOUBLE
 #   define ETA_TOLERANCE 1.0e-10
 #   define ENZO_HUGE_VAL HUGE_VAL
 #   define scalar_type_enzo_float scalar_type_double
+#   define CONFIG_BFLOAT_8
+#   define CONFIG_PFLOAT_8
 #endif
 #ifdef CONFIG_PRECISION_QUAD
 #   define ETA_TOLERANCE 1.0e-20
 #   define ENZO_HUGE_VAL HUGE_VALL
+#   define CONFIG_BFLOAT_16
+#   define CONFIG_PFLOAT_16
 #endif
+
+//----------------------------------------------------------------------
+
+// #include "macros_and_parameters.h"
+#include "enzo_defines.hpp"
+#include "enzo_typedefs.hpp"
+#include "enzo_fortran.hpp"
 
 //----------------------------------------------------------------------
 
@@ -49,6 +56,7 @@ enum bc_enum
 enum hydro_type {
   hydro_unknown,
   hydro_ppm,
+  hydro_ppm3,
   hydro_ppml
 };
 
@@ -108,6 +116,7 @@ struct fluxes
 
 #include "enzo_EnzoMethodNull.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
+//#include "enzo_EnzoMethodPpm30.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"

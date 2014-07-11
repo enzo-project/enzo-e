@@ -174,6 +174,10 @@ print
 
 define = {}
 
+# Global defines
+
+define_cello =        ['CONFIG_USE_CELLO']
+
 # Precision defines
 
 define["single"] =    ['CONFIG_PRECISION_SINGLE']
@@ -252,7 +256,8 @@ flags_link_charm = ''
 
 if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
-  
+
+ 
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 if (trace != 0):         defines = defines + define_trace
@@ -261,7 +266,9 @@ if (trace_charm != 0):   defines = defines + define_trace_charm
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
+
 defines = defines + define_charm
+defines = defines + define_cello
 
 #======================================================================
 # ARCHITECTURE SETTINGS

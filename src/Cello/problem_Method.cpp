@@ -31,6 +31,8 @@ void Method::initialize_ ( CommBlock * comm_block) throw()
   my_             .resize(field_count_);
   mz_             .resize(field_count_);
 
+  field_block -> size(&nx_,&ny_,&nz_);
+
   for (int id=0; id<field_count_; id++) {
     field_descr->ghosts (id,&gx_[id],&gy_[id],&gz_[id]);
     field_name_[id] = field_descr->field_name(id);
@@ -41,8 +43,6 @@ void Method::initialize_ ( CommBlock * comm_block) throw()
     my_[id] = ny_+2*gy_[id];
     mz_[id] = nz_+2*gz_[id];
   }
-
-  field_block -> size(&nx_,&ny_,&nz_);
 
 
   rank_ = comm_block->dimension();

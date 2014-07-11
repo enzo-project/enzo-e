@@ -127,6 +127,8 @@ Method * EnzoProblem::create_method_
   TRACE1("EnzoProblem::create_method %s",type.c_str());
   if (type == "ppm") {
     method = new EnzoMethodPpm;
+  // } else if (type == "ppm_30") {
+  //   method = new EnzoMethodPpm30;
   } else if (type == "ppml") {
     method = new EnzoMethodPpml;
   } else if (type == "heat") {

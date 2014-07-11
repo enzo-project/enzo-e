@@ -16,6 +16,14 @@ extern "C" void FORTRAN_NAME(calc_dt)
    enzo_float *d, enzo_float *p, enzo_float *u, enzo_float *v, enzo_float *w,
    enzo_float *dt);
  
+// extern "C" void FORTRAN_NAME(calc_dt_30)(
+//                   int *rank, int *idim, int *jdim, int *kdim,
+//                   int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
+// 			     hydro_method *ihydro, float *C2,
+//                   FLOAT *dx, FLOAT *dy, FLOAT *dz, float *vgx, float *vgy,
+//                              float *vgz, float *gamma, int *ipfree, float *aye,
+//                   float *d, float *p, float *u, float *v, float *w,
+// 			     float *dt, float *dtviscous);
  
 extern "C" void FORTRAN_NAME(calc_dt_ppml)
   (int *idim, int *jdim, int *kdim,

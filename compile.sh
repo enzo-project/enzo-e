@@ -72,7 +72,7 @@ foreach prec ($PREC)
    rm -f bin/enzo-p
 
    python scons.py install-inc    >&  $dir/out.scons
-   python scons.py -j $proc -k -Q $target |& tee $dir/out.scons
+   python scons.py -j $proc -Q $target |& tee $dir/out.scons
 
    util/parse_error.awk   < $dir/out.scons >  errors.org
    util/parse_warning.awk < $dir/out.scons >> errors.org
