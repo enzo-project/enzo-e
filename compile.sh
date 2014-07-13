@@ -8,6 +8,8 @@ set proc = 8
 
 set target = "install-bin"
 
+set k_switch = "-k"
+
 if ($#argv >= 1) then
    if ($argv[1] == "clean") then
       set d = `date +"%Y-%m-%d %H:%M:%S"`
@@ -29,6 +31,7 @@ if ($#argv >= 1) then
      set target = ""
    else
      # assume enzo-p
+     set k_switch = ""
      set target = $argv[1]
    endif
 endif
@@ -72,7 +75,7 @@ foreach prec ($PREC)
    rm -f bin/enzo-p
 
    python scons.py install-inc    >&  $dir/out.scons
-   python scons.py -k -j $proc -Q $target |& tee $dir/out.scons
+   python scons.py $k_switch -j $proc -Q $target |& tee $dir/out.scons
 
    util/parse_error.awk   < $dir/out.scons >  errors.org
    util/parse_warning.awk < $dir/out.scons >> errors.org

@@ -64,11 +64,6 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    WARNING("Performance::pup",
-	    "skipping Performance");
-    //    return;
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     
     // NOTE: change this function whenever attributes change
     p | papi_;
@@ -78,9 +73,9 @@ public: // interface
     p | region_name_;
     p | region_counters_;
     p | region_started_;
-    WARNING("Performance::pup",
-	    "skipping Performance:region_index_");
-    //    p | region_index_;
+    //    WARNING("Performance::pup",
+    //	    "skipping Performance:region_index_");
+    p | region_index_;
     WARNING("Performance::pup",
 	    "skipping Performance:papi_counters_");
     //    p | papi_counters_
@@ -216,7 +211,7 @@ private: // attributes
   std::vector< int > region_started_;
 
   /// mapping of region name to index
-  std::map<const std::string,int> region_index_;
+  std::map<std::string,int> region_index_;
 
   /// Array for storing PAPI counter values
   long long * papi_counters_;

@@ -52,7 +52,7 @@ public: // functions
     // NOTE: change this function whenever attributes change
     p | field_name_;
     p | field_id_;
-    p | groups_;
+    // p | groups_;
     p | alignment_;
     p | padding_;
     p | courant_;
@@ -164,7 +164,7 @@ public: // functions
     throw(std::out_of_range);
 
   /// Return precision of given field
-  precision_type precision(int id_field) const throw(std::out_of_range);
+  int precision(int id_field) const throw(std::out_of_range);
 
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();
@@ -208,7 +208,7 @@ private: // attributes
   double courant_;
 
   /// Precision of each field
-  std::vector<precision_type> precision_;
+  std::vector<int> precision_;
 
   /// cell centering for each field
   std::vector<bool *> centering_;

@@ -10,7 +10,7 @@ include "input/adapt_slope.incl"
 Testing {
    time_final = 0.102248490019701;
 }
-
+Stopping { cycle = 11; }
 Output {
 
   list = ["density","checkpoint"];
@@ -23,6 +23,6 @@ Output {
 
      type  = "checkpoint";
      dir   = ["checkpoint_ppm-8-%d","cycle"];
-     schedule { var = "cycle"; type ="list"; value=[100,200,300];};
+     schedule { var = "cycle"; type ="list"; value=[10,100,200,300];};
   }
 }

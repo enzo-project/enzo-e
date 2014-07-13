@@ -72,8 +72,10 @@ void EnzoConfig::pup (PUP::er &p)
 
   // Units
 
-  p | method_grackle_units;
-  p | method_grackle_chemistry;
+  WARNING("EnzoConfig::pup", "skipping method_grackle_units");
+  //  p | method_grackle_units;
+  WARNING("EnzoConfig::pup", "skipping method_grackle_units");
+  //  p | method_grackle_chemistry;
 
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -167,69 +169,94 @@ void EnzoConfig::read(Parameters * p) throw()
 
   /// Grackle parameters
 
-  method_grackle_units.comoving_coordinates 
-    = p->value_logical ("Method:cosmology",false);
-
-  method_grackle_units.density_units             // 1 m_H/cc
-    = p->value_float("Method:grackle:density_units",1.67e-24);
-
-  method_grackle_units.length_units              // 1 kpc
-    = p->value_float("Method:grackle:density_units",3.086e21);
-
-  method_grackle_units.time_units                // 1 Myr
-    = p->value_float("Method:grackle:density_units",3.15569e13);
-
-  method_grackle_units.a_units   // units for the expansion factor
-    = p->value_float("Method:grackle:density_units",1.0);
-
-  // computed
-  method_grackle_units.velocity_units 
-    = method_grackle_units.length_units / method_grackle_units.time_units;
-
-  method_grackle_units.velocity_units = 
-    method_grackle_units.length_units / method_grackle_units.time_units;
-
-  method_grackle_chemistry = set_default_chemistry_parameters();
-
-  method_grackle_chemistry.Gamma = p->value_float
-    ("Method:grackle:gamma",method_grackle_chemistry.Gamma);
+  bool uses_grackle = false;
+  for (size_t i=0; i<method_list.size(); i++) {
+    if (method_list[i] == "grackle") uses_grackle=true;
+  }
   
-  method_grackle_chemistry.with_radiative_cooling =p->value_logical
-    ("Method:grackle:with_radiative_cooling",
-     method_grackle_chemistry.with_radiative_cooling);
+  // Defaults alert PUP::er() to ignore
+  method_grackle_chemistry.use_grackle = uses_grackle;
 
-  method_grackle_chemistry.primordial_chemistry = p->value_logical
-    ("Method:grackle:multi_species",method_grackle_chemistry.primordial_chemistry);
+  if (uses_grackle) {
 
-  method_grackle_chemistry.metal_cooling = p->value_logical
-    ("Method:grackle:metal_cooling",method_grackle_chemistry.metal_cooling);
+    method_grackle_units.comoving_coordinates 
+      = p->value_logical ("Method:cosmology",false);
 
-  method_grackle_chemistry.h2_on_dust = p->value_logical
-    ("Method:grackle:h2_on_dust",method_grackle_chemistry.h2_on_dust);
+    method_grackle_units.density_units             // 1 m_H/cc
+      = p->value_float("Method:grackle:density_units",1.67e-24);
 
-  method_grackle_chemistry.cmb_temperature_floor = p->value_logical
-    ("Method:grackle:cmb_temperature_floor",method_grackle_chemistry.cmb_temperature_floor);
+    method_grackle_units.length_units              // 1 kpc
+      = p->value_float("Method:grackle:density_units",3.086e21);
 
-  method_grackle_chemistry.grackle_data_file 
-    = strdup(p->value_string
-	     ("Method:grackle:data_file",
-	      method_grackle_chemistry.grackle_data_file).c_str());
+    method_grackle_units.time_units                // 1 Myr
+      = p->value_float("Method:grackle:density_units",3.15569e13);
 
-  method_grackle_chemistry.cie_cooling = p->value_integer
-    ("Method:grackle:cie_cooling",method_grackle_chemistry.cie_cooling);
+    method_grackle_units.a_units   // units for the expansion factor
+      = p->value_float("Method:grackle:density_units",1.0);
 
-  method_grackle_chemistry.h2_optical_depth_approximation = p->value_integer
-    ("Method:grackle:h2_optical_depth_approximation",method_grackle_chemistry.h2_optical_depth_approximation);
+    // computed
+    method_grackle_units.velocity_units 
+      = method_grackle_units.length_units / method_grackle_units.time_units;
 
-  method_grackle_chemistry.photoelectric_heating = p->value_integer
-    ("Method:grackle:photoelectric_heating",method_grackle_chemistry.photoelectric_heating);
+    method_grackle_units.velocity_units = 
+      method_grackle_units.length_units / method_grackle_units.time_units;
 
-  method_grackle_chemistry.photoelectric_heating_rate = p->value_float
-    ("Method:grackle:photoelectric_heating_rate",method_grackle_chemistry.photoelectric_heating_rate);
+  
+    method_grackle_chemistry.set_default_chemistry_parameters();
 
-  method_grackle_chemistry.UVbackground = p->value_integer
-    ("Method:grackle:UVbackground",method_grackle_chemistry.UVbackground);
+    method_grackle_chemistry.Gamma = p->value_float
+      ("Method:grackle:gamma",method_grackle_chemistry.Gamma);
+  
+    method_grackle_chemistry.with_radiative_cooling =p->value_logical
+      ("Method:grackle:with_radiative_cooling",
+       method_grackle_chemistry.with_radiative_cooling);
 
+    method_grackle_chemistry.primordial_chemistry = p->value_logical
+      ("Method:grackle:multi_species",method_grackle_chemistry.primordial_chemistry);
+
+    method_grackle_chemistry.metal_cooling = p->value_logical
+      ("Method:grackle:metal_cooling",method_grackle_chemistry.metal_cooling);
+
+    method_grackle_chemistry.h2_on_dust = p->value_logical
+      ("Method:grackle:h2_on_dust",method_grackle_chemistry.h2_on_dust);
+
+    method_grackle_chemistry.cmb_temperature_floor = p->value_logical
+      ("Method:grackle:cmb_temperature_floor",method_grackle_chemistry.cmb_temperature_floor);
+
+    method_grackle_chemistry.grackle_data_file 
+      = strdup(p->value_string
+	       ("Method:grackle:data_file",
+		method_grackle_chemistry.grackle_data_file).c_str());
+
+    method_grackle_chemistry.cie_cooling = p->value_integer
+      ("Method:grackle:cie_cooling",method_grackle_chemistry.cie_cooling);
+
+    method_grackle_chemistry.h2_optical_depth_approximation = p->value_integer
+      ("Method:grackle:h2_optical_depth_approximation",method_grackle_chemistry.h2_optical_depth_approximation);
+
+    method_grackle_chemistry.photoelectric_heating = p->value_integer
+      ("Method:grackle:photoelectric_heating",method_grackle_chemistry.photoelectric_heating);
+
+    method_grackle_chemistry.photoelectric_heating_rate = p->value_float
+      ("Method:grackle:photoelectric_heating_rate",method_grackle_chemistry.photoelectric_heating_rate);
+
+    method_grackle_chemistry.UVbackground = p->value_integer
+      ("Method:grackle:UVbackground",method_grackle_chemistry.UVbackground);
+
+    // initialize chemistry data: required here since EnzoMethodGrackle may not be used
+
+    const gr_float a_value = 
+      1. / (1. + physics_cosmology_initial_redshift);
+
+  
+    printf ("TRACE %s:%d calling initialize_chemistry_data\n");
+
+    if (initialize_chemistry_data
+	(method_grackle_chemistry, method_grackle_units, a_value) == 0) {
+      ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
+	    "Error in initialize_chemistry_data");
+    }
+  }  
 #endif /* CONFIG_USE_GRACKLE */
 
   //======================================================================

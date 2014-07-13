@@ -59,7 +59,6 @@ module enzo {
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
-//   PUPable EnzoMethodPpm30;
   PUPable EnzoMethodPpml;
   PUPable EnzoProblem;
   PUPable EnzoProlong;

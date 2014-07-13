@@ -31,6 +31,7 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
+    TRACEPUP;
     PUP::able::pup(p);
     // NOTE: change this function whenever attributes change
   }

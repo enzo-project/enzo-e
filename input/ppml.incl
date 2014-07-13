@@ -104,7 +104,7 @@
 # OLD TIME
 #      time_final  = 0.1129506208626;  # 40 cycles
 # TIME FOR UPDATED InitialDefault
-      time_final  = 0.115152062016876;
+      time_final  = 0.115152057844972;
    }
 
    Output {

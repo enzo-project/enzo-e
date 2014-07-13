@@ -33,7 +33,11 @@ public: // interface
   ItField (CkMigrateMessage *m) : PUP::able(m) {}
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p) { PUP::able::pup(p); };
+  void pup (PUP::er &p) 
+  {
+    TRACEPUP;
+    PUP::able::pup(p); 
+  };
 
   /// Go to the first value
   virtual void first () throw() = 0;

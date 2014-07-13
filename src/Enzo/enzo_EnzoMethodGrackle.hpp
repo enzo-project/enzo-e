@@ -53,10 +53,10 @@ protected: // attributes
 #ifdef CONFIG_USE_GRACKLE
 
   /// Grackle struct defining code units
-  code_units units_;
+  code_units * units_;
 
   /// Grackle struct defining chemistry data
-  chemistry_data chemistry_;
+  chemistry_data * chemistry_;
 
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
 

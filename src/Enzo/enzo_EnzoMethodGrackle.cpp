@@ -14,8 +14,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
 (EnzoConfig * config)
   : Method()
 #ifdef CONFIG_USE_GRACKLE
-  , chemistry_(),
-    units_()
+  , chemistry_(0),
+    units_(0)
 #endif /* CONFIG_USE_GRACKLE */
 
 {
@@ -23,14 +23,17 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
   /// Initialize parameters
 
-  units_     = config->method_grackle_units;
-  chemistry_ = config->method_grackle_chemistry;
+  units_     = & config->method_grackle_units;
+  chemistry_ = & config->method_grackle_chemistry;
 
   const gr_float a_value = 
     1. / (1. + config->physics_cosmology_initial_redshift);
 
+  
+  printf ("TRACE %s:%d calling initialize_chemistry_data\n");
+
   if (initialize_chemistry_data
-      (chemistry_, units_, a_value) == 0) {
+      (*chemistry_, *units_, a_value) == 0) {
     ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
 	  "Error in initialize_chemistry_data");
   }
@@ -51,8 +54,8 @@ void EnzoMethodGrackle::pup (PUP::er &p)
 
   Method::pup(p);
 
-  p | chemistry_;
-  p | units_;
+  p | *chemistry_;
+  p | *units_;
 
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -112,7 +115,7 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
   double dt = time_step();
 
   if (solve_chemistry
-      (chemistry_, units_,
+      (*chemistry_, *units_,
        a_value, dt,
        rank, m,
        grid_start,  grid_end,
@@ -131,7 +134,7 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
   }
 
   if (calculate_cooling_time
-      (chemistry_, units_,
+      (*chemistry_, *units_,
        a_value,
        rank, m,
        grid_start,  grid_end,
@@ -151,7 +154,7 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
   }
 
   if (calculate_temperature
-      (chemistry_, units_,
+      (*chemistry_, *units_,
        rank, m,
        density,     energy,
        HI_density,  HII_density,
@@ -168,7 +171,7 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
   }
 
   if (calculate_pressure
-      (chemistry_, units_,
+      (*chemistry_, *units_,
        rank, m,
        density,     energy,
        HI_density,  HII_density,
@@ -185,7 +188,7 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
   }
 
   if (calculate_gamma
-      (chemistry_, units_,
+      (*chemistry_, *units_,
        rank, m,
        density,     energy,
        HI_density,  HII_density,

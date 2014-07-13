@@ -56,6 +56,7 @@ public: // interface
 
   void pup(PUP::er &p)
   {
+    TRACEPUP;
     p | is_active_;
     p | do_allocate_fill_; 
     p | allocate_fill_value_;

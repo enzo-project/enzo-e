@@ -20,6 +20,7 @@ RefineMask::RefineMask(Parameters * parameters,
 void RefineMask::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
+  TRACEPUP;
   Refine::pup(p);
   p | *value_;
 }
