@@ -754,19 +754,18 @@ echo "<h3>Serial checkpoint/restart </h3>";
 
 
 tests("Enzo","enzo-p","test_checkpoint_ppm-1","Checkpoint P=1","");
-test_table ("checkpoint_ppm-1",  array("000200","000400"), $types);
 tests("Enzo","enzo-p","test_restart_ppm-1","Restart P=1","");
-test_table ("restart_ppm-1",  array("000200","000400"), $types);
+test_table ("checkpoint_ppm-1",  array("000200","000400"), $types);
 
 //----------------------------------------------------------------------
 
 echo "<h3>Parallel checkpoint/restart) </h3>";
 
 
-tests("Enzo","enzo-p","test_checkpoint_ppm-8","test_restart_ppm-8","");
 
-test_table ("checkpoint_ppm-8",
-	    array("000200","000400"), $types);
+tests("Enzo","enzo-p","test_checkpoint_ppm-8","Checkpoint P=8","");
+tests("Enzo","enzo-p","test_restart_ppm-8","Restart P=8","");
+test_table ("checkpoint_ppm-8",  array("000200","000400"), $types);
 
 
 test_group("Mesh");
