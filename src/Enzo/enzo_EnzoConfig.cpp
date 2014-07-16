@@ -72,9 +72,7 @@ void EnzoConfig::pup (PUP::er &p)
 
   // Units
 
-  WARNING("EnzoConfig::pup", "skipping method_grackle_units");
   p | method_grackle_units;
-  WARNING("EnzoConfig::pup", "skipping method_grackle_units");
   p | method_grackle_chemistry;
 
 #endif /* CONFIG_USE_GRACKLE */

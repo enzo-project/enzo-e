@@ -4,10 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-02-02
 /// @brief    Implementation of writing checkpoint dumps
-///
-/// 
-
-
    
 #include "io.hpp"
 #include "main.hpp"

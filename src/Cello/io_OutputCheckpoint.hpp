@@ -8,8 +8,6 @@
 #ifndef IO_OUTPUT_CHECKPOINT_HPP
 #define IO_OUTPUT_CHECKPOINT_HPP
 
-class ItField;
-
 class OutputCheckpoint : public Output {
 
   /// @class    OutputCheckpoint
