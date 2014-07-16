@@ -125,26 +125,10 @@ public: // functions
   int field_id(const std::string & name) const throw();
 
   //----------------------------------------------------------------------
-  // Groups
-  //----------------------------------------------------------------------
-
-  /// Add the field to a group
-  void add_to_group(std::string field,
-		    std::string group) throw(std::out_of_range);
-
-  /// Return whether the given field is in the given group
-  bool is_in_group(std::string field,
-		   std::string group) const throw(std::out_of_range);
-
-  /// Return the number of groups that the field belongs to
-  int num_groups(std::string field) const;
-
-  /// Return the ith field in the group
-  std::string field_in_group (std::string group, int i);
-
-  //----------------------------------------------------------------------
   // Properties
   //----------------------------------------------------------------------
+
+  Grouping * groups () { return & groups_; }
 
   /// alignment in bytes of fields in memory
   int alignment() const throw();
@@ -196,7 +180,7 @@ private: // attributes
   std::map<std::string,int> field_id_;
 
   /// String identifying each group
-  std::set<std::pair<std::string,std::string> > groups_;
+  Grouping groups_;
 
   /// alignment of start of each field in bytes
   int alignment_;

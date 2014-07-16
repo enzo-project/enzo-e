@@ -28,7 +28,7 @@ if ($#argv >= 1) then
    else if ($argv[1] == "compile") then
      set target = install-bin
    else if ($argv[1] == "test") then
-     set target = ""
+     set target = "test"
    else
      # assume enzo-p
      set k_switch = ""
@@ -80,7 +80,7 @@ foreach prec ($PREC)
    util/parse_error.awk   < $dir/out.scons >  errors.org
    util/parse_warning.awk < $dir/out.scons >> errors.org
 
-   if (-e bin/enzo-p) then
+   if (-e $target) then
       echo "Success"
    else
       echo "FAIL"
@@ -93,7 +93,7 @@ foreach prec ($PREC)
 
    # TESTS
 
-   if ($target == "") then
+   if ($target == "test") then
   
       # count crashes
 

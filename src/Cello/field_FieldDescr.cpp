@@ -103,53 +103,6 @@ int FieldDescr::field_id(const std::string & name) const
 
 //----------------------------------------------------------------------
 
-void FieldDescr::add_to_group
-(
- std::string field,
- std::string group
- ) throw(std::out_of_range)
-{
-  std::pair<std::string,std::string> value(field,group);
-  groups_.insert(value);
-}
-
-//----------------------------------------------------------------------
-
-bool FieldDescr::is_in_group
-(
- std::string field,
- std::string group
- ) const throw(std::out_of_range)
-{
-  std::pair<std::string,std::string> value(field,group);
-  return groups_.find(value) != groups_.end();
-}
-
-int FieldDescr::num_groups(std::string field) const
-{
-  int count = 0;
-  std::set<std::pair<std::string,std::string> >::iterator it;
-  for (it=groups_.begin(); it != groups_.end(); it++) {
-    if (it->first == field) ++count;
-  }
-  return count;
-}
-
-std::string FieldDescr::field_in_group (std::string group, int index_field)
-{
-  int count = 0;
-  std::set<std::pair<std::string,std::string> >::iterator it;
-  for (it=groups_.begin(); it != groups_.end(); it++) {
-    if (it->second == group) {
-      if (count == index_field) return it->first;
-      ++count;
-    }
-  }
-  return "";
-}
-
-//----------------------------------------------------------------------
-
 int FieldDescr::alignment() const throw()
 {
   return alignment_;

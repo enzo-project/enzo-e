@@ -99,81 +99,73 @@ PARALLEL_MAIN_BEGIN
   // Groups
   //----------------------------------------------------------------------
 
-  unit_func("num_groups");
-  unit_assert(field_descr->num_groups("density")==0);
+  unit_func("Grouping::size()");
+  unit_assert(field_descr->groups()->size("group_1")==0);
 
-  unit_func("add_to_group()");
-  field_descr->add_to_group("density",   "group_1");
-  unit_func("num_groups");
-  unit_assert(field_descr->num_groups("density")==1);
+  unit_func("Grouping::add()");
+  field_descr->groups()->add("density",   "group_1");
+  unit_func("Grouping::size()");
 
+  unit_func("Grouping::add()");
+  field_descr->groups()->add("velocity_x","group_2");
+  unit_func("Grouping::add()");
+  field_descr->groups()->add("velocity_y","group_2");
+  unit_func("Grouping::add()");
+  field_descr->groups()->add("velocity_z","group_2");
 
-  unit_func("add_to_group()");
-  field_descr->add_to_group("velocity_x","group_2");
+  unit_func("Grouping::add()");
+  field_descr->groups()->add("density",   "group_3");
+  unit_func("Grouping::add()");
+  field_descr->groups()->add("velocity_x","group_3");
+  unit_func("Grouping::add()");
+  field_descr->groups()->add("velocity_y","group_3");
+  unit_func("Grouping::add()");
+  field_descr->groups()->add("velocity_z","group_3");
 
-  unit_func("add_to_group()");
-  field_descr->add_to_group("velocity_y","group_2");
-  unit_func("add_to_group()");
-  field_descr->add_to_group("velocity_z","group_2");
+  unit_func("Grouping::size()");
+  unit_assert(field_descr->groups()->size("group_1")==1);
+  unit_assert(field_descr->groups()->size("group_2")==3);
+  unit_assert(field_descr->groups()->size("group_3")==4);
 
-  unit_func("add_to_group()");
-  field_descr->add_to_group("density",   "group_3");
-
-  unit_func("add_to_group()");
-  field_descr->add_to_group("velocity_x","group_3");
-
-  unit_func("add_to_group()");
-  field_descr->add_to_group("velocity_y","group_3");
-
-  unit_func("add_to_group()");
-  field_descr->add_to_group("velocity_z","group_3");
-
-  unit_func("num_groups");
-  unit_assert(field_descr->num_groups("density")==2);
-  unit_assert(field_descr->num_groups("velocity_x")==2);
-  unit_assert(field_descr->num_groups("velocity_y")==2);
-  unit_assert(field_descr->num_groups("velocity_z")==2);
-  unit_assert(field_descr->num_groups("not_a_field")==0);
-
-  unit_func("is_in_group()");
+  unit_func("Grouping::is_in()");
 
   // non-field tests
-  unit_assert(field_descr->is_in_group("not_a_field", "group_1") == false);
-  unit_assert(field_descr->is_in_group("not_a_field", "group_2") == false);
+  unit_assert(field_descr->groups()->is_in("not_a_field", "group_1") == false);
+  unit_assert(field_descr->groups()->is_in("not_a_field", "group_2") == false);
 
   // non-group tests
-  unit_assert(field_descr->is_in_group("density",    "not_a_group") == false);
-  unit_assert(field_descr->is_in_group("velocity_x", "not_a_group") == false);
-  unit_assert(field_descr->is_in_group("velocity_y", "not_a_group") == false);
-  unit_assert(field_descr->is_in_group("velocity_z", "not_a_group") == false);
+  unit_assert(field_descr->groups()->is_in("density",    "not_a_group") == false);
+  unit_assert(field_descr->groups()->is_in("velocity_x", "not_a_group") == false);
+  unit_assert(field_descr->groups()->is_in("velocity_y", "not_a_group") == false);
+  unit_assert(field_descr->groups()->is_in("velocity_z", "not_a_group") == false);
 
   // non-field and non-group
-  unit_assert(field_descr->is_in_group("not_a_field", "not_a_group") == false);
-  unit_assert(field_descr->is_in_group("not_a_field", "not_a_group") == false);
+  unit_assert(field_descr->groups()->is_in("not_a_field", "not_a_group") == false);
+  unit_assert(field_descr->groups()->is_in("not_a_field", "not_a_group") == false);
 
 
   // group 1 tests
-  unit_assert(field_descr->is_in_group("density",   "group_1") == true);
-  unit_assert(field_descr->is_in_group("velocity_x","group_1") == false);
-  unit_assert(field_descr->is_in_group("velocity_y","group_1") == false);
-  unit_assert(field_descr->is_in_group("velocity_z","group_1") == false);
+  unit_assert(field_descr->groups()->is_in("density",   "group_1") == true);
+  unit_assert(field_descr->groups()->is_in("velocity_x","group_1") == false);
+  unit_assert(field_descr->groups()->is_in("velocity_y","group_1") == false);
+  unit_assert(field_descr->groups()->is_in("velocity_z","group_1") == false);
 
   // group 2 tests
-  unit_assert(field_descr->is_in_group("density",   "group_2") == false);
-  unit_assert(field_descr->is_in_group("velocity_x","group_2") == true);
-  unit_assert(field_descr->is_in_group("velocity_y","group_2") == true);
-  unit_assert(field_descr->is_in_group("velocity_z","group_2") == true);
+  unit_assert(field_descr->groups()->is_in("density",   "group_2") == false);
+  unit_assert(field_descr->groups()->is_in("velocity_x","group_2") == true);
+  unit_assert(field_descr->groups()->is_in("velocity_y","group_2") == true);
+  unit_assert(field_descr->groups()->is_in("velocity_z","group_2") == true);
 
   // group 3 tests
-  unit_assert(field_descr->is_in_group("density",   "group_3") == true);
-  unit_assert(field_descr->is_in_group("velocity_x","group_3") == true);
-  unit_assert(field_descr->is_in_group("velocity_y","group_3") == true);
-  unit_assert(field_descr->is_in_group("velocity_z","group_3") == true);
+  unit_assert(field_descr->groups()->is_in("density",   "group_3") == true);
+  unit_assert(field_descr->groups()->is_in("velocity_x","group_3") == true);
+  unit_assert(field_descr->groups()->is_in("velocity_y","group_3") == true);
+  unit_assert(field_descr->groups()->is_in("velocity_z","group_3") == true);
 
   unit_func("field_in_group()");
 
-  std::string g1_0 = field_descr->field_in_group("group_1",0);
-  std::string g1_1 = field_descr->field_in_group("group_1",1);
+  std::string g1_0 = field_descr->groups()->item("group_1",0);
+  std::string g1_1 = field_descr->groups()->item("group_1",1);
   unit_assert(g1_0 == "density");
   unit_assert(g1_1 == "");
   

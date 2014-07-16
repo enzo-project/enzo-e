@@ -28,6 +28,7 @@
 class FieldBlock;
 class FieldFace;
 
+#include "field_Grouping.hpp"
 #include "field_ItField.hpp"
 #include "field_ItFieldList.hpp"
 #include "field_ItFieldRange.hpp"
