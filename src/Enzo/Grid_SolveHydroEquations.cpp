@@ -10,10 +10,13 @@
 
 #include "enzo.hpp"
 
-int EnzoBlock::SolveHydroEquations (int CycleNumber, enzo_float time, enzo_float dt)
+int EnzoBlock::SolveHydroEquations 
+(
+ int        CycleNumber,
+ enzo_float time,
+ enzo_float dt
+ )
 {
-  // @@@@ ASSUME UNIGIRD PROBLEM @@@@
-
   int NumberOfSubgrids = 0;
 
   /* initialize */

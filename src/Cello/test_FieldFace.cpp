@@ -326,8 +326,8 @@ PARALLEL_MAIN_BEGIN
 	  if (axis==axis_y) {iym=-1; iyp=+1; }
 	  if (axis==axis_z) {izm=-1; izp=+1; }
 
-	  FieldFace face_lower (block_lower,field_descr);
-	  FieldFace face_upper (block_upper,field_descr);
+	  FieldFace face_lower (block_lower);
+	  FieldFace face_upper (block_upper);
 	  face_lower.set_ghost(true,true,true);
 	  face_upper.set_ghost(true,true,true);
 

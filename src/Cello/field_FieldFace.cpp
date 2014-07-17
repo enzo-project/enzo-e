@@ -19,7 +19,6 @@ enum enum_op {
 
 FieldFace::FieldFace() throw()
   : field_block_(0),
-    field_descr_(0),
     array_(),
     restrict_(0),
     prolong_(0)
@@ -35,11 +34,9 @@ FieldFace::FieldFace() throw()
 
 FieldFace::FieldFace 
 (
- FieldBlock * field_block,
- const FieldDescr * field_descr
+ FieldBlock * field_block
  ) throw()
   : field_block_(field_block),
-    field_descr_((FieldDescr*)field_descr),
     array_(),
     restrict_(0),
     prolong_(0)
@@ -62,7 +59,6 @@ FieldFace::~FieldFace() throw ()
 
 FieldFace::FieldFace(const FieldFace & field_face) throw ()
   : field_block_(field_face.field_block_),
-    field_descr_(field_face.field_descr_),
     array_()
 {
   copy_(field_face);
@@ -104,8 +100,6 @@ void FieldFace::pup (PUP::er &p)
 
   bool up = p.isUnpacking();
 
-  if (up) field_descr_ = new FieldDescr;
-  p | *field_descr_;
   if (up) field_block_ = new FieldBlock;
   p | *field_block_;
   p | array_;
@@ -122,13 +116,13 @@ void FieldFace::load ( int * n, char ** array) throw()
 {
   if (array_.size() == 0)  allocate ();
 
-  const size_t num_fields = field_descr_->field_count();
+  const size_t num_fields = field_block_->field_count();
 
   size_t index_array = 0;
 
   for (size_t index_field=0; index_field < num_fields; index_field++) {
   
-    precision_type precision = field_descr_->precision(index_field);
+    precision_type precision = field_block_->precision(index_field);
 
     const void * field_face = field_block_->field_values(index_field);
 
@@ -137,7 +131,7 @@ void FieldFace::load ( int * n, char ** array) throw()
     int nd3[3],ng3[3],im3[3],n3[3];
 
     field_block_->field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
-    field_descr_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field_block_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     load_loop_limits_ (im3,n3, nd3,ng3);
 
@@ -196,13 +190,13 @@ void FieldFace::load ( int * n, char ** array) throw()
 void FieldFace::store (int n, char * array) throw()
 {
 
-  const size_t num_fields = field_descr_->field_count();
+  const size_t num_fields = field_block_->field_count();
 
   size_t index_array = 0;
 
   for (size_t index_field=0; index_field<num_fields; index_field++) {
 
-    precision_type precision = field_descr_->precision(index_field);
+    precision_type precision = field_block_->precision(index_field);
 
     char * field_ghost = field_block_->field_values(index_field);
     
@@ -211,7 +205,7 @@ void FieldFace::store (int n, char * array) throw()
     int nd3[3],ng3[3],im3[3],n3[3];
 
     field_block_->field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
-    field_descr_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field_block_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     store_loop_limits_ (im3,n3, nd3,ng3);
 
@@ -274,7 +268,7 @@ void FieldFace::store (int n, char * array) throw()
 
 char * FieldFace::allocate () throw()
 {
-  size_t num_fields = field_descr_->field_count();
+  size_t num_fields = field_block_->field_count();
 
   int array_size = 0;
 
@@ -282,7 +276,7 @@ char * FieldFace::allocate () throw()
 
     // Need element size for alignment adjust below
 
-    precision_type precision = field_descr_->precision(index_field);
+    precision_type precision = field_block_->precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
 
@@ -291,7 +285,7 @@ char * FieldFace::allocate () throw()
       (index_field, &nd3[0], &nd3[1], &nd3[2]);
 
     int ng3[3];
-    field_descr_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field_block_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     int n_old = nd3[0]*nd3[1]*nd3[2];
 

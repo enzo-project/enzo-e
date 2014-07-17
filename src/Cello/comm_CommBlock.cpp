@@ -138,8 +138,7 @@ CommBlock::CommBlock
   if (narray != 0) {
     
     // copy any input data
-    FieldDescr * field_descr = simulation()->field_descr();
-    FieldFace field_face (block()->field_block(),field_descr);
+    FieldFace field_face (block()->field_block());
 
     //    set "face" to full FieldBlock
     field_face.set_face(0,0,0);

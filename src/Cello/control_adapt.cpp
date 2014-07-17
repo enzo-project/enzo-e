@@ -210,7 +210,6 @@ int CommBlock::adapt_compute_desired_level_(int level_maximum)
 
   const FieldDescr * field_descr = simulation()->field_descr();
 
-
   Problem * problem = simulation()->problem();
   Refine * refine;
 
@@ -869,10 +868,9 @@ FieldFace * CommBlock::create_face_
  )
 {
   Problem * problem        = simulation()->problem();
-  const FieldDescr * field_descr = simulation()->field_descr();
   FieldBlock * field_block = block_->field_block();
 
-  FieldFace * field_face = new FieldFace (field_block,field_descr);
+  FieldFace * field_face = new FieldFace (field_block);
 
   if (op_array_type == op_array_restrict) {
 

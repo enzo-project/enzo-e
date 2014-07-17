@@ -29,6 +29,7 @@ if ($#argv >= 1) then
      set target = install-bin
    else if ($argv[1] == "test") then
      set target = "test"
+     set proc = 1
    else
      # assume enzo-p
      set k_switch = ""
