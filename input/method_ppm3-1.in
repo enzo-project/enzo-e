@@ -1,0 +1,11 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/ppm.incl"
+
+Mesh { root_blocks    = [1,1]; }
+
+Method { list = ["ppm","ppm3"]; }
+
+Output { density { name = ["method_ppm3-1-%06d.png", "cycle"]; } }
+Output { data    { name = ["method_ppm3-1-%02d-%06d.h5", "proc","cycle"]; } }

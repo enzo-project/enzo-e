@@ -272,18 +272,11 @@ public: // interface
   /// Set the energy to provide minimal pressure support
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient);
 
-  /// Solve the hydro equations, saving subgrid fluxes
+  /// Solve the hydro equations using PPM
   int SolveHydroEquations ( int CycleNumber, enzo_float time, enzo_float dt);
 
-  /// Set external boundary values
-  // int SetExternalBoundary
-  // ( int FieldRank, 
-  //   int GridDims[], 
-  //   int GridOffset[], 
-  //   int StartIndex[], 
-  //   int EndIndex[], 
-  //   enzo_float *Field, 
-  //   int FieldType);
+  /// Solve the hydro equations using Enzo 3.0 PPM
+  int SolveHydroEquations3 ( int CycleNumber, enzo_float time, enzo_float dt);
 
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
   int SolveMHDEquations(const FieldDescr *,  enzo_float dt);

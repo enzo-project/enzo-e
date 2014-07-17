@@ -105,8 +105,6 @@ struct fluxes
 
 #include "enzo_IoEnzoBlock.hpp"
 
-// #include "enzo_EnzoTimestep.hpp"
-// #include "enzo_EnzoTimestepPpml.hpp"
 #include "enzo_EnzoBoundary.hpp"
 
 #include "enzo_EnzoInitialGrackleTest.hpp"
@@ -116,7 +114,6 @@ struct fluxes
 
 #include "enzo_EnzoMethodNull.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
-//#include "enzo_EnzoMethodPpm30.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
@@ -125,6 +122,7 @@ struct fluxes
 #include "enzo_EnzoProlongMC1.hpp"
 #include "enzo_EnzoRestrict.hpp"
 
+#include "enzo3_EnzoMethodPpm3.hpp"
 
 #endif /* ENZO_PRIVATE_HPP */
 

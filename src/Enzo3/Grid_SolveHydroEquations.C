@@ -277,6 +277,7 @@ int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
     
     int UseGammaField = FALSE;
     float *GammaField = NULL;
+
     if (HydroMethod == Zeus_Hydro && MultiSpecies > 1) {
       UseGammaField = TRUE;
       GammaField = new float[size];

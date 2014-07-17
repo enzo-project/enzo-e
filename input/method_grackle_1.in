@@ -1,0 +1,111 @@
+ Boundary {
+     type = "periodic";
+ }
+
+ Domain {
+     lower = [ 0.0, 0.0 ];
+     upper = [ 1.0, 1.0 ];
+ }
+
+ Field {
+     alignment = 8;
+     courant = 0.80;
+     gamma = 1.400;
+     ghosts = 3;
+     list = [ "density", 
+              "internal_energy",
+              "total_energy",
+              "velocity_x",
+              "velocity_y",
+              "velocity_z",
+              "HI_density",
+              "HII_density",
+              "HM_density",
+              "HeI_density",
+              "HeII_density",
+              "HeIII_density",
+              "H2I_density",
+              "H2II_density",
+              "DI_density",
+              "DII_density",
+              "HDI_density",
+              "e_density",
+              "metal_density",
+              "cooling_time",
+              "temperature",
+              "pressure",
+              "gamma"
+     ];
+
+     HI_density {
+       group_list = "color";
+     };
+     HII_density {
+       group_list = ["color"];
+     };
+     padding = 0;
+     refresh {
+         rank = 0;
+     };
+ }
+
+ Initial {
+   type = "grackle_test";
+ }
+
+ Mesh {
+     root_blocks = [ 2, 4 ];
+     root_rank = 2;
+     root_size = [ 80, 80 ];
+ }
+
+ Method {
+     list = [ "grackle","ppm" ];
+
+     grackle {
+        data_file = "input/CloudyData_UVB=HM2012.h5";
+     };
+
+     ppm {
+        diffusion   = true;
+        flattening  = 3;
+        steepening  = true;
+        dual_energy = true;
+     }
+ }
+
+ Output {
+     data {
+         field_list = [ "density" ];
+         name = [ "method_grackle-1-%02d-%06d.h5", "proc", "cycle" ];
+         schedule {
+             step = 100;
+             type = "interval";
+             var = "cycle";
+         };
+         type = "data";
+     };
+     density {
+         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
+         field_list = [
+            "density"
+          ];
+         name = [ "method_grackle-1-%06d.png", "cycle" ];
+         schedule {
+             step = 10;
+             type = "interval";
+             var = "cycle";
+         };
+         type = "image";
+     };
+     list = [ "density", "data" ];
+ }
+
+ Stopping {
+     cycle = 400;
+ }
+
+ Testing {
+     cycle_final = 400;
+     time_final = 1.0404403563589;
+ }

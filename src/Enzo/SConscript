@@ -36,9 +36,9 @@ libraries  = ['png','grackle','$FORTRANLIBS']
 # SOURCE
 #------------------------------
 
-includes = [Glob('*enzo*hpp'),'fortran.h']
+includes = [Glob('*enzo*hpp'),'fortran.h','enzo3_fortran_types.h']
 
-sources  = [Glob('enzo_*cpp'), 
+sources  = [Glob('enzo_*cpp'),
     	    'calcdiss.F',
 	    'calc_dt.F',
 	    'CosmologyGetUnits.cpp',
@@ -84,6 +84,10 @@ sources  = [Glob('enzo_*cpp'),
 	    'yeuler_sweep.F',
 	    'zeuler_sweep.F']
 
+
+# Enzo3
+
+sources.append([Glob('enzo3_*cpp'),Glob('enzo3_*F')])
 
 charm_main = []
 includes.append(['enzo.decl.h','enzo.def.h'])
