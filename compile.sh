@@ -34,7 +34,13 @@ if ($#argv >= 1) then
      set k_switch = ""
      set target = $argv[1]
    endif
+else
+  # assume enzo-p
+  set k_switch = ""
+  set target = "bin/enzo-p"
 endif
+
+echo "k_switch = $k_switch"
 
 echo "ARCH = $ARCH"
 echo "PREC = $PREC"

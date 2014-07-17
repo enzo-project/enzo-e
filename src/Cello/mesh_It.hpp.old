@@ -29,21 +29,23 @@ public: // interface
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
-    p | index1_;
   }
 
+  /// Reset the iterator to the first element
+  virtual void reset() throw() = 0;
+
   /// Iterate through entities
-  virtual T * operator++ () throw() = 0;
+  virtual bool next () throw() = 0;
 
   /// Return whether the iteration is complete
   virtual bool done() const throw() = 0;
 
+  /// Return the current item
+  virtual T * value () const throw() = 0;
+
 
 protected: // attributes
 
-  /// Index of the current entity plus 1, or 0 if between iterations
-  /// Always in the range 0 <= index1_ <= number of local patchs
-  size_t index1_;
 };
 
 #endif /* MESH_IT_HPP */
