@@ -228,6 +228,17 @@ PARALLEL_MAIN_BEGIN
   v4 = (double *)      field_block->field_values(i4);
   v5 = (long double *) field_block->field_values(i5);
   
+  unit_assert(field_block->field_values(i1) == 
+	      field_block->field_values("f1"));
+  unit_assert(field_block->field_values(i2) == 
+	      field_block->field_values("f2"));
+  unit_assert(field_block->field_values(i3) == 
+	      field_block->field_values("f3"));
+  unit_assert(field_block->field_values(i4) == 
+	      field_block->field_values("f4"));
+  unit_assert(field_block->field_values(i5) == 
+	      field_block->field_values("f5"));
+
   unit_assert(v1 != 0);
   unit_assert(v2 != 0);
   unit_assert(v3 != 0);
