@@ -308,7 +308,7 @@ void InitialValue::copy_values_
 
   // Copy the floating-point values to the field where mask values are true
 
-  void * field = field_block->field_unknowns(index_field);
+  void * field = field_block->unknowns(index_field);
 
   // Determine allocated array size
 

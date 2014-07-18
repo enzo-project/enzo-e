@@ -154,13 +154,13 @@ PARALLEL_MAIN_BEGIN
   double      *v4,*u4;
   long double *v5,*u5;
 
-  unit_func("field_values");  // without ghosts
+  unit_func("values");  // without ghosts
   
-  v1 = (float *)       field_block->field_values(i1);
-  v2 = (double *)      field_block->field_values(i2);
-  v3 = (double *)      field_block->field_values(i3);
-  v4 = (double *)      field_block->field_values(i4);
-  v5 = (long double *) field_block->field_values(i5);
+  v1 = (float *)       field_block->values(i1);
+  v2 = (double *)      field_block->values(i2);
+  v3 = (double *)      field_block->values(i3);
+  v4 = (double *)      field_block->values(i4);
+  v5 = (long double *) field_block->values(i5);
   
   // field sizes without ghosts
 
@@ -190,14 +190,14 @@ PARALLEL_MAIN_BEGIN
 
   //----------------------------------------------------------------------
 
-  unit_func("field_unknowns");  // without ghosts
+  unit_func("unknowns");  // without ghosts
 
   typedef float type_f1;
-  u1 = (type_f1 *)      field_block->field_unknowns(i1);
-  u2 = (double *)       field_block->field_unknowns(i2);
-  u3 = (double *)       field_block->field_unknowns(i3);
-  u4 = (double *)       field_block->field_unknowns(i4);
-  u5 = (long double *)  field_block->field_unknowns(i5);
+  u1 = (type_f1 *)      field_block->unknowns(i1);
+  u2 = (double *)       field_block->unknowns(i2);
+  u3 = (double *)       field_block->unknowns(i3);
+  u4 = (double *)       field_block->unknowns(i4);
+  u5 = (long double *)  field_block->unknowns(i5);
 
   unit_assert(u1 != 0);
   unit_assert(u2 != 0);
@@ -216,8 +216,8 @@ PARALLEL_MAIN_BEGIN
   unit_assert (nb4 == sizeof (double)* nu4);
 
   // unknown field
-  unit_assert (field_block->field_unknowns (1000) == NULL);
-  unit_assert (field_block->field_unknowns ("not a field") == NULL);
+  unit_assert (field_block->unknowns (1000) == NULL);
+  unit_assert (field_block->unknowns ("not a field") == NULL);
 
 
   //----------------------------------------------------------------------
@@ -226,22 +226,22 @@ PARALLEL_MAIN_BEGIN
 
   field_block->reallocate_array(true);
 
-  v1 =  (float *)      field_block->field_values(i1);
-  v2 = (double *)      field_block->field_values(i2);
-  v3 = (double *)      field_block->field_values(i3);
-  v4 = (double *)      field_block->field_values(i4);
-  v5 = (long double *) field_block->field_values(i5);
+  v1 =  (float *)      field_block->values(i1);
+  v2 = (double *)      field_block->values(i2);
+  v3 = (double *)      field_block->values(i3);
+  v4 = (double *)      field_block->values(i4);
+  v5 = (long double *) field_block->values(i5);
   
-  unit_assert(field_block->field_values(i1) == 
-	      field_block->field_values("f1"));
-  unit_assert(field_block->field_values(i2) == 
-	      field_block->field_values("f2"));
-  unit_assert(field_block->field_values(i3) == 
-	      field_block->field_values("f3"));
-  unit_assert(field_block->field_values(i4) == 
-	      field_block->field_values("f4"));
-  unit_assert(field_block->field_values(i5) == 
-	      field_block->field_values("f5"));
+  unit_assert(field_block->values(i1) == 
+	      field_block->values("f1"));
+  unit_assert(field_block->values(i2) == 
+	      field_block->values("f2"));
+  unit_assert(field_block->values(i3) == 
+	      field_block->values("f3"));
+  unit_assert(field_block->values(i4) == 
+	      field_block->values("f4"));
+  unit_assert(field_block->values(i5) == 
+	      field_block->values("f5"));
 
   unit_assert(v1 != 0);
   unit_assert(v2 != 0);
@@ -260,16 +260,16 @@ PARALLEL_MAIN_BEGIN
   unit_assert (nb4 == sizeof (double) * nv4);
 
   // unknown field
-  unit_assert (field_block->field_values (1000) == NULL);
-  unit_assert (field_block->field_values ("not a field") == NULL);
+  unit_assert (field_block->values (1000) == NULL);
+  unit_assert (field_block->values ("not a field") == NULL);
 
-  unit_func("field_unknowns");  // with ghosts
+  unit_func("unknowns");  // with ghosts
 
-  u1 = (float *)       field_block->field_unknowns(i1);
-  u2 = (double *)      field_block->field_unknowns(i2);
-  u3 = (double *)      field_block->field_unknowns(i3);
-  u4 = (double *)      field_block->field_unknowns(i4);
-  u5 = (long double *) field_block->field_unknowns(i5);
+  u1 = (float *)       field_block->unknowns(i1);
+  u2 = (double *)      field_block->unknowns(i2);
+  u3 = (double *)      field_block->unknowns(i3);
+  u4 = (double *)      field_block->unknowns(i4);
+  u5 = (long double *) field_block->unknowns(i5);
 
   unit_assert(u1 != 0);
   unit_assert(u2 != 0);
@@ -505,15 +505,15 @@ PARALLEL_MAIN_BEGIN
   field_block->reallocate_array(false);
 
   v1    = 
-    (float *) field_block->field_values(i1);
+    (float *) field_block->values(i1);
   v2 = 
-    (double *) field_block->field_values(i2);
+    (double *) field_block->values(i2);
   v3 = 
-    (double *) field_block->field_values(i3);
+    (double *) field_block->values(i3);
   v4 = 
-    (double *) field_block->field_values(i4);
+    (double *) field_block->values(i4);
   v5 =
-    (long double *) field_block->field_values(i5);
+    (long double *) field_block->values(i5);
 
   unit_assert(3.0 == v2[(nx+1)*ny*nz-1]);
   unit_assert(4.0 == v3[0] );

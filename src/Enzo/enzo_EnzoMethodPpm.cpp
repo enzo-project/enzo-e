@@ -59,20 +59,20 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
     // enzo_comm_block->field_block()->print (field_descr,"dump",lower,upper);
 
   int index = enzo_comm_block->index(field_density);
-  density_field = (enzo_float *)field_block->field_values(index);
+  density_field = (enzo_float *)field_block->values(index);
 
   if (EnzoBlock::GridRank >= 1) {
     index = enzo_comm_block->index(field_velocity_x);
-    velocity_x_field = (enzo_float *) field_block->field_values(index);
+    velocity_x_field = (enzo_float *) field_block->values(index);
   }
 
   if (EnzoBlock::GridRank >= 2) {
     index = enzo_comm_block->index(field_velocity_y);
-    velocity_y_field = (enzo_float *) field_block->field_values(index);
+    velocity_y_field = (enzo_float *) field_block->values(index);
   }
   if (EnzoBlock::GridRank >= 3){
     index = enzo_comm_block->index(field_velocity_z);
-    velocity_z_field = (enzo_float *) field_block->field_values(index);
+    velocity_z_field = (enzo_float *) field_block->values(index);
   }
 
   enzo_float a = 1, dadt;

@@ -244,8 +244,8 @@ void OutputImage::write_block
   // add block contribution to image
 
   const char * field = (ghost_) ? 
-    field_block->field_values(index_field) :
-    field_block->field_unknowns(index_field);
+    field_block->values(index_field) :
+    field_block->unknowns(index_field);
 
   // pixel extents of box
   int ixm,iym,izm; 

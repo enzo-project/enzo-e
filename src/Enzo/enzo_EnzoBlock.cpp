@@ -418,7 +418,7 @@ void EnzoBlock::pup(PUP::er &p)
 
   if (p.isUnpacking()) {
     for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-      BaryonField[field] = (enzo_float *)block_->field_block(0)->field_values(field);
+      BaryonField[field] = (enzo_float *)block_->field_block(0)->values(field);
     }
   }
 
@@ -820,7 +820,7 @@ void EnzoBlock::initialize () throw()
   // Initialize BaryonField[] pointers
 
   for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-    BaryonField[field] = (enzo_float *)block_->field_block(0)->field_values(field);
+    BaryonField[field] = (enzo_float *)block_->field_block(0)->values(field);
   }
 
   TRACE ("Exit  EnzoBlock::initialize()\n");

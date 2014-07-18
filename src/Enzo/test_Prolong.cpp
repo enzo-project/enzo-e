@@ -117,13 +117,13 @@ PARALLEL_MAIN_BEGIN
 
     field_block_f.allocate_array(true);
 
-    double * df = (double *) field_block_f.field_values(i_d);
-    float  * vf = (float  *) field_block_f.field_values(i_v);
+    double * df = (double *) field_block_f.values(i_d);
+    float  * vf = (float  *) field_block_f.values(i_v);
 
     field_block_c.allocate_array(true);
 
-    double * dc = (double *) field_block_c.field_values(i_d);
-    float * vc  = (float *) field_block_c.field_values(i_v);
+    double * dc = (double *) field_block_c.values(i_d);
+    float * vc  = (float *) field_block_c.values(i_v);
 
     //--------------------------------------------------
 

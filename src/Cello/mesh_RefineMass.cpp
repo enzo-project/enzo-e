@@ -71,7 +71,7 @@ int RefineMass::apply
 
   precision_type precision = field_descr->precision(0);
 
-  void * void_array = field_block->field_values(0);
+  void * void_array = field_block->values(0);
 
   //  int num_fields = field_descr->field_count();
 

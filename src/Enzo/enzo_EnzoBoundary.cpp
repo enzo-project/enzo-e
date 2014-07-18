@@ -113,7 +113,7 @@ void EnzoBoundary::enforce_reflecting_
   for (int field = 0; field < field_descr->field_count(); field++) {
     int gx,gy,gz;
     field_descr->ghosts(field,&gx,&gy,&gz);
-    void * array = field_block->field_values(field);
+    void * array = field_block->values(field);
     bool vx =      (field_descr->field_name(field) == "velocity_x");
     bool vy =      (field_descr->field_name(field) == "velocity_y");
     bool vz =      (field_descr->field_name(field) == "velocity_z");
@@ -303,7 +303,7 @@ void EnzoBoundary::enforce_outflow_
   for (int field = 0; field < field_descr->field_count(); field++) {
     int gx,gy,gz;
     field_descr->ghosts(field,&gx,&gy,&gz);
-    void * array = field_block->field_values(field);
+    void * array = field_block->values(field);
     precision_type precision = field_descr->precision(field);
     switch (precision) {
     case precision_single:

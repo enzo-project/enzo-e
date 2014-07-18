@@ -111,13 +111,13 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) throw()
     enzo_float * by_field = 0;
     enzo_float * bz_field = 0;
 
-    d_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_density));
-    vx_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_velox));
-    vy_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_veloy));
-    vz_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_veloz));
-    bx_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_bfieldx));
-    by_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_bfieldy));
-    bz_field = (enzo_float *)field_block->field_values(enzo_comm_block->index(field_bfieldz));
+    d_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_density));
+    vx_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_velox));
+    vy_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_veloy));
+    vz_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_veloz));
+    bx_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_bfieldx));
+    by_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_bfieldy));
+    bz_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_bfieldz));
 
 
     // DEBUG

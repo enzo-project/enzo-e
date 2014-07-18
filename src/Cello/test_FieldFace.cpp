@@ -61,7 +61,7 @@ double init_value (int ix, int iy, int iz,
 //----------------------------------------------------------------------
 
 template<class T>
-void init_field(T * field_values,
+void init_field(T * values,
 		int ibx, int iby, int ibz,
 		int nbx, int nby, int nbz,
 		int index_field, 
@@ -79,7 +79,7 @@ void init_field(T * field_values,
     for (int iy = 0; iy < mdy; iy++) {
       for (int ix = 0; ix < mdx; ix++) {
 	int i = ix + mdx * (iy + mdy * iz);
-	field_values[i] = init_value(ix,iy,iz,
+	values[i] = init_value(ix,iy,iz,
 				     gx,gy,gz,
 				     mdx,mdy,mdz,
 				     ibx,iby,ibz,
@@ -94,7 +94,7 @@ void init_field(T * field_values,
 //----------------------------------------------------------------------
 
 template<class T>
-bool test_field(T * field_values,
+bool test_field(T * values,
 		int ibx, int iby, int ibz,
 		int nbx, int nby, int nbz,
 		int index_field, 
@@ -120,8 +120,8 @@ bool test_field(T * field_values,
 				  nbx,nby,nbz,
 				  index_field,
 				  MD3,ND3);
-	//	printf ("%p test\n",field_values+i);
-	if (field_values[i] != value) result = false;
+	//	printf ("%p test\n",values+i);
+	if (values[i] != value) result = false;
       }
     }
   }
@@ -140,7 +140,7 @@ bool test_field(T * field_values,
 				    nbx,nby,nbz,
 				    index_field,
 				    MD3,ND3);
-	  printf ("%d %d %d  %07g %07g\n",ix,iy,iz,double(field_values[i]),value);
+	  printf ("%d %d %d  %07g %07g\n",ix,iy,iz,double(values[i]),value);
 	}
       }
     }
@@ -186,17 +186,17 @@ void init_fields
 
 	// field 0
 	field_descr->ghosts(0, &gx, &gy, &gz);
-	float * v1 = (float *) (block->field_values(0));
+	float * v1 = (float *) (block->values(0));
 	init_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
 
 	// field 1
 	field_descr->ghosts(1, &gx, &gy, &gz);
-	double * v2 = (double *) (block->field_values(1));
+	double * v2 = (double *) (block->values(1));
 	init_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,mx,my,mz,gx,gy,gz,ND3);
 
 	// field 2
 	field_descr->ghosts(2, &gx, &gy, &gz);
-	long double * v3 = (long double *) (block->field_values(2));
+	long double * v3 = (long double *) (block->values(2));
 	init_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,mx,my,mz,gx,gy,gz,ND3);
  
       }
@@ -231,21 +231,21 @@ bool test_fields
 
 	// field 0
 	field_descr->ghosts(0, &gx, &gy, &gz);
-	float * v1 = (float *) (block->field_values(0));
+	float * v1 = (float *) (block->values(0));
 	test_result = test_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
 	result = result && test_result;
 
 	// field 1
 	field_descr->ghosts(1, &gx, &gy, &gz);
-	double * v2 = (double *) (block->field_values(1));
+	double * v2 = (double *) (block->values(1));
 	test_result = test_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
 	result = result && test_result;
 
 	// field 2
 	field_descr->ghosts(2, &gx, &gy, &gz);
-	long double * v3 = (long double *) (block->field_values(2));
+	long double * v3 = (long double *) (block->values(2));
 	test_result = test_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
 	result = result && test_result;

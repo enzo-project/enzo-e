@@ -84,16 +84,16 @@ void FieldBlock::size( int * nx, int * ny, int * nz ) const throw()
 
 //----------------------------------------------------------------------
 
-const char * FieldBlock::field_values ( int id_field ) const 
+const char * FieldBlock::values ( int id_field ) const 
   throw (std::out_of_range)
 {
   return (const char *)
-    ((FieldBlock *)this) -> field_values(id_field);
+    ((FieldBlock *)this) -> values(id_field);
 }
 
 //----------------------------------------------------------------------
 
-char * FieldBlock::field_values ( int id_field ) 
+char * FieldBlock::values ( int id_field ) 
   throw (std::out_of_range)
 {
   char * values = 0;
@@ -105,16 +105,16 @@ char * FieldBlock::field_values ( int id_field )
 
 //----------------------------------------------------------------------
 
-const char * FieldBlock::field_unknowns ( int id_field ) const
+const char * FieldBlock::unknowns ( int id_field ) const
   throw (std::out_of_range)
 {
   return (const char *)
-    ((FieldBlock *)this) -> field_unknowns(id_field);
+    ((FieldBlock *)this) -> unknowns(id_field);
 }
 
 //----------------------------------------------------------------------
 
-char * FieldBlock::field_unknowns ( int id_field  )
+char * FieldBlock::unknowns ( int id_field  )
   throw (std::out_of_range)
 {
   char * unknowns = 0;
@@ -478,8 +478,8 @@ void FieldBlock::mul (int id_1, int id_2)
 	  "FieldBlock precisions must be constant",
 	  p1 == p2);
 
-  char * field_1 = field_unknowns(id_1);
-  char * field_2 = field_unknowns(id_2);
+  char * field_1 = unknowns(id_1);
+  char * field_2 = unknowns(id_2);
   
   switch (p1) {
   case precision_single:
@@ -526,8 +526,8 @@ void FieldBlock::div (int id_1, int id_2)
 	  "FieldBlock precisions must be constant",
 	  p1 == p2);
 
-  char * field_1 = field_unknowns(id_1);
-  char * field_2 = field_unknowns(id_2);
+  char * field_1 = unknowns(id_1);
+  char * field_2 = unknowns(id_2);
   
   switch (p1) {
   case precision_single:
@@ -549,7 +549,7 @@ void FieldBlock::scale (int id, double value)
 {
   precision_type p = field_descr_->precision(id);
 
-  char * field = field_unknowns(id);
+  char * field = unknowns(id);
   
   switch (p) {
   case precision_single:

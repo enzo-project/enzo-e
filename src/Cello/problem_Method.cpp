@@ -37,7 +37,7 @@ void Method::initialize_ ( CommBlock * comm_block) throw()
     field_descr->ghosts (id,&gx_[id],&gy_[id],&gz_[id]);
     field_name_[id] = field_descr->field_name(id);
     field_id_[field_name_[id]] = id;
-    field_array_[id] = field_block->field_values(id);
+    field_array_[id] = field_block->values(id);
     field_precision_[id] = field_descr->precision (id);
     mx_[id] = nx_+2*gx_[id];
     my_[id] = ny_+2*gy_[id];

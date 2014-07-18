@@ -124,7 +124,7 @@ void FieldFace::load ( int * n, char ** array) throw()
   
     precision_type precision = field_block_->precision(index_field);
 
-    const void * field_face = field_block_->field_values(index_field);
+    const void * field_face = field_block_->values(index_field);
 
     void * array_face  = &array_[index_array];
 
@@ -198,7 +198,7 @@ void FieldFace::store (int n, char * array) throw()
 
     precision_type precision = field_block_->precision(index_field);
 
-    char * field_ghost = field_block_->field_values(index_field);
+    char * field_ghost = field_block_->values(index_field);
     
     char * array_ghost  = array + index_array;
 

@@ -56,10 +56,10 @@ void EnzoInitialImplosion2::enforce_block
   int index_velocity_y      = 2;
   int index_total_energy    = 3;
  
-  enzo_float *  d = (enzo_float *) field_block->field_values(index_density);
-  enzo_float * vx = (enzo_float *) field_block->field_values(index_velocity_x);
-  enzo_float * vy = (enzo_float *) field_block->field_values(index_velocity_y);
-  enzo_float * te = (enzo_float *) field_block->field_values(index_total_energy);
+  enzo_float *  d = (enzo_float *) field_block->values(index_density);
+  enzo_float * vx = (enzo_float *) field_block->values(index_velocity_x);
+  enzo_float * vy = (enzo_float *) field_block->values(index_velocity_y);
+  enzo_float * te = (enzo_float *) field_block->values(index_total_energy);
 
   // Block size (excluding ghosts)
   int nx,ny;

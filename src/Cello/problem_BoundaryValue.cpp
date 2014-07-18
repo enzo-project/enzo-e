@@ -59,7 +59,7 @@ void BoundaryValue::enforce
 
       block->field_cells(x,y,z,gx,gy,gz);
 
-      void * array = field_block->field_values(index_field);
+      void * array = field_block->values(index_field);
       precision_type precision = field_descr->precision(index_field);
 
       int ix0=0 ,iy0=0,iz0=0;

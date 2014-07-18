@@ -72,8 +72,8 @@ int EnzoRestrict::apply_
 
   // for (int index=0; index<field_descr->field_count(); index++) {
 
-  //   enzo_float * values_f = (enzo_float *) field_block_f->field_values(index);
-  //   enzo_float * values_c = (enzo_float *) field_block_c->field_values(index);
+  //   enzo_float * values_f = (enzo_float *) field_block_f->values(index);
+  //   enzo_float * values_c = (enzo_float *) field_block_c->values(index);
 
   //   int i3m_f[3];
   //   int i3m_c[3];
