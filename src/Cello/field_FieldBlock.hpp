@@ -59,8 +59,12 @@ public: // interface
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
   char * field_unknowns ( int id_field) throw (std::out_of_range);
+  char * field_unknowns (std::string name) throw (std::out_of_range)
+  { return field_unknowns (field_descr_->field_id(name)); }
 
   const char * field_unknowns ( int id_field) const throw (std::out_of_range);
+  const char * field_unknowns (std::string name) const throw (std::out_of_range)
+  { return field_unknowns (field_descr_->field_id(name)); }
 
   /// Return raw pointer to the array of all fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,

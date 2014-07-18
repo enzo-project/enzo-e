@@ -84,27 +84,23 @@ void FieldBlock::size( int * nx, int * ny, int * nz ) const throw()
 
 //----------------------------------------------------------------------
 
-char * FieldBlock::field_values ( int id_field ) 
+const char * FieldBlock::field_values ( int id_field ) const 
   throw (std::out_of_range)
 {
-  ASSERT3 ("FieldBlock::field_values()",
-	   "Trying to access invalid field id %d out of %d in FieldBlock %p",
-	   id_field,offsets_.size(),this,
-	   0 <= id_field && id_field < offsets_.size());
-  char * field = 0;
-  if (0 <= id_field && id_field < (int)offsets_.size()) {
-    field = &array_[0] + offsets_[id_field];
-  }
-  return field;
+  return (const char *)
+    ((FieldBlock *)this) -> field_values(id_field);
 }
 
 //----------------------------------------------------------------------
 
-const char * FieldBlock::field_values ( int id_field ) const 
+char * FieldBlock::field_values ( int id_field ) 
   throw (std::out_of_range)
 {
-  return (0 <= id_field && id_field < offsets_.size()) ? 
-    &array_[0] + offsets_[id_field] : NULL;
+  char * values = 0;
+  if (0 <= id_field && id_field < field_count()) {
+    values = &array_[0] + offsets_[id_field];
+  }
+  return values;
 }
 
 //----------------------------------------------------------------------
@@ -121,32 +117,34 @@ const char * FieldBlock::field_unknowns ( int id_field ) const
 char * FieldBlock::field_unknowns ( int id_field  )
   throw (std::out_of_range)
 {
-  char * field_unknowns = &array_[0] + offsets_[id_field];
+  char * unknowns = 0;
 
-  if (field_descr_ == NULL) return NULL;
+  if (0 <= id_field && id_field < field_count()) {
 
-  if ( ghosts_allocated() ) {
+    unknowns = &array_[0] + offsets_[id_field];
 
-    int gx,gy,gz;
-    field_descr_->ghosts(id_field,&gx,&gy,&gz);
+    if ( ghosts_allocated() ) {
 
-    bool cx,cy,cz;
-    field_descr_->centering(id_field,&cx,&cy,&cz);
+      int gx,gy,gz;
+      field_descr_->ghosts(id_field,&gx,&gy,&gz);
 
-    int nx,ny,nz;
-    size(&nx,&ny,&nz);
+      bool cx,cy,cz;
+      field_descr_->centering(id_field,&cx,&cy,&cz);
 
-    nx += 2*gx + (cx?0:1);
-    ny += 2*gy + (cy?0:1);
-    nz += 2*gz + (cz?0:1);
+      int nx,ny,nz;
+      size(&nx,&ny,&nz);
 
-    precision_type precision = field_descr_->precision(id_field);
-    int bytes_per_element = cello::sizeof_precision (precision);
+      nx += 2*gx + (cx?0:1);
+      ny += 2*gy + (cy?0:1);
+      nz += 2*gz + (cz?0:1);
 
-    field_unknowns += bytes_per_element * (gx + nx*(gy + ny*gz));
-  } 
+      precision_type precision = field_descr_->precision(id_field);
+      int bytes_per_element = cello::sizeof_precision (precision);
 
-  return field_unknowns;
+      unknowns += bytes_per_element * (gx + nx*(gy + ny*gz));
+    } 
+  }
+  return unknowns;
 }
 
 //----------------------------------------------------------------------

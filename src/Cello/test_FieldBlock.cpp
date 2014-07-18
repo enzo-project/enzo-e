@@ -215,6 +215,10 @@ PARALLEL_MAIN_BEGIN
   unit_assert (nb3 == sizeof (double)* nu3);
   unit_assert (nb4 == sizeof (double)* nu4);
 
+  // unknown field
+  unit_assert (field_block->field_unknowns (1000) == NULL);
+  unit_assert (field_block->field_unknowns ("not a field") == NULL);
+
 
   //----------------------------------------------------------------------
 
@@ -254,6 +258,10 @@ PARALLEL_MAIN_BEGIN
   unit_assert (nb2 == sizeof (double) * nv2);
   unit_assert (nb3 == sizeof (double) * nv3);
   unit_assert (nb4 == sizeof (double) * nv4);
+
+  // unknown field
+  unit_assert (field_block->field_values (1000) == NULL);
+  unit_assert (field_block->field_values ("not a field") == NULL);
 
   unit_func("field_unknowns");  // with ghosts
 

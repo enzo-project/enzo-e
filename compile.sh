@@ -34,11 +34,13 @@ if ($#argv >= 1) then
      # assume enzo-p
      set k_switch = ""
      set target = $argv[1]
+     rm $target
    endif
 else
   # assume enzo-p
   set k_switch = ""
   set target = "bin/enzo-p"
+  rm $target
 endif
 
 echo "k_switch = $k_switch"
