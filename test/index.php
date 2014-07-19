@@ -898,7 +898,7 @@ test_group("Balance");
 echo "<h3>Rotate</h3>";
 tests("Enzo","enzo-p","test_balance_rotate","Rotate");
  test_table ("Balance/Rotate/balance-mesh",
-	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
 // tests("Enzo","enzo-p","test_balance_greedy","Greedy");
 // tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm");
@@ -912,32 +912,31 @@ tests("Enzo","enzo-p","test_balance_rotate","Rotate");
 echo "<h3>Greedy</h3>";
 tests("Enzo","enzo-p","test_balance_greedy","Greedy");
 test_table ("Balance/Greedy/balance-mesh",
-	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>GreedyComm</h3>";
 tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm");
 test_table ("Balance/GreedyComm/balance-mesh",
-	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>Hybrid</h3>";
 tests("Enzo","enzo-p","test_balance_hybrid","Hybrid");
 test_table ("Balance/Hybrid/balance-mesh",
-	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>Neighbor</h3>";
 tests("Enzo","enzo-p","test_balance_neighbor","Neighbor");
 test_table ("Balance/Neighbor/balance-mesh",
-	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>RandCent</h3>";
 tests("Enzo","enzo-p","test_balance_rand_cent","RandCent");
 test_table ("Balance/RandCent/balance-mesh",
-	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>Refine</h3>";
 tests("Enzo","enzo-p","test_balance_refine","Refine");
 test_table ("Balance/Refine/balance-mesh",
-	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
+	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>RefineComm</h3>";
 tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm");
 test_table ("Balance/RefineComm/balance-mesh",
-	     array("00000","00010","00020","00030","00040","00050","00100"), $types);
-
+	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
 //======================================================================
 

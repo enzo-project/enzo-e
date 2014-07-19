@@ -659,9 +659,10 @@ void CommBlock::adapt_recv_recurse(const int if3[3],
 	   ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2],
 	   level_face_curr,level_face_new);
   index_.print(buffer,-1,2,false,simulation());
+#endif    
+
   ERROR("CommBlock::adapt_recv_recurse()",
 	 "Recurse should not be called");
-#endif    
 
   // Forward to children if internal node
     

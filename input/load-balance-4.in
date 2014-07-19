@@ -3,12 +3,12 @@
 
 include "input/adapt.incl"
 
-Balance { interval = 10; }
+Balance { interval = 1; }
 
-Stopping { cycle = 100; }
+Stopping { cycle = 20; }
 
-Testing { cycle_final = 100;
-          time_final = 0.00587334950946841; 
+Testing { cycle_final = 20;
+          time_final = 0.00135310094366044;
         }
 
 Mesh    { 
@@ -33,14 +33,14 @@ Output {
      list = ["mesh","de"];
       de {
            name = ["balance-de-%05d.png", "cycle"]; 
-           include "input/schedule_cycle_10.incl"
+           include "input/schedule_cycle_2.incl"
            image_reduce_type = "max";
 	   image_type = "data";
            image_size = [1024,1024];
           };
       mesh {
            name = ["balance-mesh-%05d.png", "cycle"]; 
-           include "input/schedule_cycle_10.incl"
+           include "input/schedule_cycle_2.incl"
 	   image_type = "mesh";
 	   image_size = [1025,1025];
            image_specify_bounds = true;
