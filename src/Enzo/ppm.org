@@ -2,6 +2,12 @@
 ** [[file:enzo_EnzoMethodPpm.cpp][EnzoMethodPpm()]]
 *** [[file:Grid_SolveHydroEquations.cpp][SolveHydroEquations()]]
 **** [[file:Grid_IdentifyPhysicalQuantities.cpp][IdentifyPhysicalQuantities()]]
+**** [[file:FindField.cpp][FindField()]]
+**** [[file:enzo_EnzoBlock.cpp::CosmologyComputeExpansionFactor][CosmologyComputeExpansionFactor()]]
+**** [[file:ppm_de.F][ppm_de()]]
+***** [[file:xeuler_sweep.F][xeuler_sweep()]]
+***** [[file:yeuler_sweep.F][yeuler_sweep()]]
+***** [[file:zeuler_sweep.F][zeuler_sweep()]]
 * PPM3 Files
 ** [[file:enzo3_EnzoMethodPpm3.cpp][EnzoMethodPpm3()]]
 *** [[file:enzo3_SolveHydroEquations3.cpp][SolveHydroEquations3()]]

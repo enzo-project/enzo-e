@@ -52,7 +52,7 @@ public: // functions
     // NOTE: change this function whenever attributes change
     p | field_name_;
     p | field_id_;
-    // p | groups_;
+    p | groups_;
     p | alignment_;
     p | padding_;
     p | courant_;

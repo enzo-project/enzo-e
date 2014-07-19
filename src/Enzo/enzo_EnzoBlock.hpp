@@ -21,7 +21,7 @@ enum field_type {
   field_bfieldz_rx,
   field_bfieldz_ry,
   field_bfieldz_rz,
-  field_color,
+  field_colour,
   field_density,
   field_dens_rx,
   field_dens_ry,
@@ -154,8 +154,13 @@ public:
   // Fields
 
   static int NumberOfBaryonFields;      // active baryon fields
-
   static int FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+  
+  /// Number of colour fields
+  static int ncolour;
+
+  /// Colour field offsets (assumes single global FieldDescr)
+  static std::vector<int> coloff;
 
 public: // interface
 

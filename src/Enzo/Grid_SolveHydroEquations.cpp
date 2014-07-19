@@ -21,9 +21,10 @@ int EnzoBlock::SolveHydroEquations
   /* initialize */
 
   int dim, i,j,  size;
-  int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num, coloff[MAX_COLOR];
+  int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num;
   long long GridGlobalStart[MAX_DIMENSION];
   enzo_float a = 1, dadt;
+  int * coloff = new int [ncolour];
 
   enzo_float *colourpt = NULL;
 
@@ -57,7 +58,7 @@ int EnzoBlock::SolveHydroEquations
       return ENZO_FAIL;
     }
 
-    /* Set Offsets from the first field (here assumed to be the electron
+   /* Set Offsets from the first field (here assumed to be the electron
        density) to the other multi-species fields. */
 
     colourpt = BaryonField[ColourNum];
@@ -67,11 +68,11 @@ int EnzoBlock::SolveHydroEquations
 
   }
 
-  // Initialize color field
+  // Initialize colour field
 
   //  NumberOfColours = 1;
-  //  ColourNum       = field_color;
-  //  colourpt        = BaryonField[field_color];
+  //  ColourNum       = field_colour;
+  //  colourpt        = BaryonField[field_colour];
   //  coloff[0]       = 0;
 
   /* Add metallicity as a colour variable. */
@@ -92,7 +93,9 @@ int EnzoBlock::SolveHydroEquations
 
   /* Get easy to handle pointers for each variable. */
 
-  enzo_float *density     = BaryonField[DensNum];
+  //  enzo_float *density     = BaryonField[DensNum];
+  FieldBlock * field_block = block()->field_block();
+  enzo_float * density = (enzo_float*) field_block->values("density");
   enzo_float *totalenergy = BaryonField[TENum];
   enzo_float *gasenergy   = BaryonField[GENum];
 
@@ -393,6 +396,7 @@ int EnzoBlock::SolveHydroEquations
     delete SubgridFluxes[i];
   }
   delete [] SubgridFluxes;
+  delete [] coloff;
 
   return ENZO_SUCCESS;
 

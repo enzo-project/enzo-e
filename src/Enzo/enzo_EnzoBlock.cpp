@@ -82,9 +82,10 @@ int EnzoBlock::ghost_depth[MAX_DIMENSION];
 
 // Fields
 
-int EnzoBlock::NumberOfBaryonFields;      // active baryon fields
-
+int EnzoBlock::NumberOfBaryonFields;
 int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+int EnzoBlock::ncolour;
+std::vector<int> EnzoBlock::coloff;
 
 //----------------------------------------------------------------------
 
@@ -210,7 +211,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   field_index_[field_internal_energy]  = field_id;
   FieldType[field_id] = InternalEnergy;
   field_id = field_descr->field_id("electron_density");
-  field_index_[field_color]  = field_id;
+  field_index_[field_colour]  = field_id;
   FieldType[field_id] = ElectronDensity;
 
   field_id = field_descr->field_id("velox");
@@ -313,6 +314,12 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
   InitialTimeInCodeUnits = time;
 
+  ncolour = field_descr->groups()->size("colour");
+
+  if (ncolour > 0) 
+    coloff.resize(ncolour); 
+  else  
+    coloff.clear();
 } // void initialize()
 
 //----------------------------------------------------------------------
@@ -469,6 +476,8 @@ void EnzoBlock::pup(PUP::er &p)
     PUParray(p,ghost_depth,MAX_DIMENSION);
     p | NumberOfBaryonFields;      // active baryon fields
     PUParray(p,FieldType,MAX_NUMBER_OF_BARYON_FIELDS);
+    p | ncolour;
+    p | coloff;
   }
 
   TRACE ("END EnzoBlock::pup()");
@@ -580,8 +589,8 @@ void EnzoBlock::write(FILE * fp) throw ()
     fprintf (fp,"EnzoBlock: field_velocity_y %d\n", field_index_[field_velocity_y]);
   if (field_index_[field_velocity_z] != field_undefined) 
     fprintf (fp,"EnzoBlock: field_velocity_z %d\n", field_index_[field_velocity_z]);
-  if (field_index_[field_color] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_color %d\n", field_index_[field_color]);
+  if (field_index_[field_colour] != field_undefined) 
+    fprintf (fp,"EnzoBlock: field_colour %d\n", field_index_[field_colour]);
 
   if (field_index_[field_velox] != field_undefined)
     fprintf (fp,"EnzoBlock: field_velox %d\n", field_index_[field_velox]);
@@ -711,7 +720,12 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   fprintf (fp,"EnzoBlock: SubgridFluxes %p\n", SubgridFluxes);
   
-
+  fprintf (fp,"EnzoBlock: ncolour_ %d\n", ncolour);
+  
+  for (int i=0; i<ncolour; i++) {
+    fprintf (fp,"EnzoBlock: coloff_[%d] %d\n", i,coloff[i]);
+  }
+    
 }
 
 //----------------------------------------------------------------------
@@ -822,6 +836,8 @@ void EnzoBlock::initialize () throw()
   for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
     BaryonField[field] = (enzo_float *)block_->field_block(0)->values(field);
   }
+
+  
 
   TRACE ("Exit  EnzoBlock::initialize()\n");
 }
