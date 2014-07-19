@@ -205,9 +205,9 @@ c
             enddo
          endif
          do ic=1, ncolor
+            offset = coloff(ic)+((k-1)*jn+(j-1))*in
             do i=1, in
-               colslice(i,j,ic) = 
-     &              colorpt(coloff(ic)+((k-1)*jn+j-1)*in+i)
+               colslice(i,j,ic) = colorpt(offset+i)
             enddo
          enddo
       enddo
