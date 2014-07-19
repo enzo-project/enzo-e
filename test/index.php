@@ -2,26 +2,26 @@
 <head>
 <title>Enzo-P / Cello Test Results</title>
 <link href="cello.css" rel="stylesheet" type="text/css">
-<?php
-if (file_exists("COMPILING")) {
-  echo "<meta http-equiv=\"refresh\" content=20>";
-}
-?>
+   <?php
+   if (file_exists("COMPILING")) {
+     echo "<meta http-equiv=\"refresh\" content=20>";
+   }
+   ?>
    </head>
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
 
    <h2><center><?php system ("hg branch") ?> branch </center> </h2>
 
-   <?php
+ <?php
 
-   //----------------------------------------------------------------------
+     //----------------------------------------------------------------------
 
    function test_group($testgroup) {
-   printf ("<hr><a name=\"$testgroup\"><h2>$testgroup Tests</h2>");
- }
+     printf ("<hr><a name=\"$testgroup\"><h2>$testgroup Tests</h2>");
+     }
 
-   //----------------------------------------------------------------------
+     //----------------------------------------------------------------------
 
    function test_output ($output_file) {
      if (file_exists($output_file)) {
@@ -32,7 +32,7 @@ if (file_exists("COMPILING")) {
      }
    }
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 function test_date ($output_file) {
   if (file_exists($output_file)) {
@@ -43,7 +43,7 @@ function test_date ($output_file) {
   }
 }
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 function test_time ($output_file) {
   if (file_exists($output_file)) {
@@ -54,7 +54,7 @@ function test_time ($output_file) {
   }
 }  
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 function test_duration ($output_file) {
   if (file_exists($output_file)) {
@@ -66,7 +66,7 @@ function test_duration ($output_file) {
   }
 }  
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 function test_passed ($output_file) {
   if (file_exists($output_file)) {
@@ -78,7 +78,7 @@ function test_passed ($output_file) {
   }
 }
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 function test_unfinished ($output_file) {
   if (file_exists($output_file)) {
@@ -88,7 +88,7 @@ function test_unfinished ($output_file) {
   }
 }
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 function test_failed ($output_file) {
   if (file_exists($output_file)) {
@@ -98,12 +98,12 @@ function test_failed ($output_file) {
   }
 }
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 $types = array("charm");
-  $num_types = sizeof($types);
+$num_types = sizeof($types);
 
-  function tests($component,$testrun,$output,$test_name) {
+function tests($component,$testrun,$output,$test_name) {
 
   global $types;
   global $num_types;
@@ -176,7 +176,7 @@ $types = array("charm");
   }
 };
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 function test($type,$output,$type) {
   $ltype = strtolower($type);
@@ -197,20 +197,20 @@ function test($type,$output,$type) {
 
 ?>
 
-  <hr>
+<hr>
 
-  <h2>Test Summary</h2>
+<h2>Test Summary</h2>
 
-  <?php
+<?php
 
-   //----------------------------------------------------------------------
+ //----------------------------------------------------------------------
 
-  function summary_missing_executable ($test_output, $executables)
+function summary_missing_executable ($test_output, $executables, $state)
 {
   global $types;
   global $num_types;
 
-    for ($i = 0; $i<$num_types; ++$i) {
+  for ($i = 0; $i<$num_types; ++$i) {
 
     $type = $types[$i];
 
@@ -220,7 +220,7 @@ function test($type,$output,$type) {
       $exe = $executables[$test];
       $bin = "../bin/$exe";
       if (! file_exists($bin)) {
-        ++ $count_missing ;
+	++ $count_missing ;
       }
     }
 
@@ -230,12 +230,11 @@ function test($type,$output,$type) {
       printf ("<td class=fail>$count_missing</td>");
     }
   }
-  printf ("<th></th>");
 }
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-function summary_missing_output ($test_output, $executables)
+function summary_missing_output ($test_output, $executables, $state)
 {
   global $types;
   global $num_types;
@@ -255,12 +254,11 @@ function summary_missing_output ($test_output, $executables)
       printf ("<td class=fail>$count_missing</td>");
     }
   }
-  printf ("<th></th>");
 }
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-function summary_incomplete_output ( $test_output, $executables)
+function summary_incomplete_output ( $test_output, $executables, $state)
 {
   global $types;
   global $num_types;
@@ -278,12 +276,11 @@ function summary_incomplete_output ( $test_output, $executables)
     system("cat $output_files | awk 'BEGIN{e=0;}; /UNIT TEST END/ {e=e+1};END{if ($num_output_files==e) {print \"<td></td>\"} else {print \"<td class=fail>\"$num_output_files - e\"</td>\";}}'");
 
   }
-  printf ("<th></th>");
 }
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-function summary_failed_tests ($test_output, $executables)
+function summary_failed_tests ($test_output, $executables, $state)
 {
   global $types;
   global $num_types;
@@ -297,12 +294,11 @@ function summary_failed_tests ($test_output, $executables)
     }
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
   }
-  printf ("<th></th>");
 }
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-function summary_unfinished_tests ($test_output, $executables)
+function summary_unfinished_tests ($test_output, $executables, $state)
 {
   global $types;
   global $num_types;
@@ -317,12 +313,11 @@ function summary_unfinished_tests ($test_output, $executables)
 
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /incomplete/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=unfinished>\",c,\"</td>\";}} '");
   }
-  printf ("<th></th>");
 }
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-function summary_passed_tests ($test_output, $executables)
+function summary_passed_tests ($test_output, $executables, $state)
 {
 
   global $types;
@@ -338,25 +333,32 @@ function summary_passed_tests ($test_output, $executables)
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
 
   }
-  printf ("<th></th>");
 }
 
-   //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-  function test_summary($component,$test_output,$executables)
+function test_summary($component,$test_output,$executables)
 {
+
   printf ("<tr><th><a href=\"#$component\">$component</a></th>\n");
 
   global $types;
 
   // Missing executable
 
-  summary_missing_executable ($test_output, $executables);
-  summary_missing_output     ($test_output, $executables);
-  summary_incomplete_output  ($test_output, $executables);
-  summary_failed_tests       ($test_output, $executables);
-  summary_unfinished_tests   ($test_output, $executables);
-  summary_passed_tests       ($test_output, $executables);
+  $state = "running";
+
+  summary_missing_executable ($test_output, $executables, $state);
+  printf ("<th></th>");
+  summary_missing_output     ($test_output, $executables, $state);
+  printf ("<th></th>");
+  summary_incomplete_output  ($test_output, $executables, $state);
+  printf ("<th></th>");
+  summary_failed_tests       ($test_output, $executables, $state);
+  printf ("<th></th>");
+  summary_unfinished_tests   ($test_output, $executables, $state);
+  printf ("<th></th>");
+  summary_passed_tests       ($test_output, $executables, $state);
 
   printf ("</tr>\n");
 }
@@ -369,35 +371,35 @@ function test_table ($file_root,$size_array, $types)
   //  echo "<th>$file_root</th>";
   if ($show_flash) echo "<th>animation</th>";
   for ($j = 0; $j < sizeof($size_array); ++$j) {
+    $size = $size_array[$j];
+    printf ("<th>$size</th>\n");
+  }
+  echo "</tr>";
+  for ($i = 0; $i < sizeof($types); ++$i) {
+    echo "<tr>";
+    $type = $types[$i];
+    //     	printf ("<th>$type</th>\n"); 
+    // Show movie file if available
+    if ($show_flash) {
+      echo "<td>";
+      $swf_file = "$type/$file_root.swf"; 
+      $size_last = $size_array[sizeof($size_array)-1]; 
+      $png_file_last = "$file_root-$size_last.png"; 
+      swf_movie($swf_file, 
+		$png_file_last, 
+		160); 
+      echo "</td>";
+    }
+    // Show available image frames
+    for ($j = 0; $j < sizeof($size_array); ++$j) {
       $size = $size_array[$j];
-      printf ("<th>$size</th>\n");
-    }
-    echo "</tr>";
-    for ($i = 0; $i < sizeof($types); ++$i) {
-      echo "<tr>";
-      $type = $types[$i];
-      //     	printf ("<th>$type</th>\n"); 
-	// Show movie file if available
-	if ($show_flash) {
-	  echo "<td>";
-	  $swf_file = "$type/$file_root.swf"; 
-	  $size_last = $size_array[sizeof($size_array)-1]; 
-	  $png_file_last = "$file_root-$size_last.png"; 
-	  swf_movie($swf_file, 
-		    $png_file_last, 
-		    160); 
-	  echo "</td>";
-	}
-	// Show available image frames
-	for ($j = 0; $j < sizeof($size_array); ++$j) {
-	  $size = $size_array[$j];
-          $png_file = "$file_root-$size.png"; 
+      $png_file = "$file_root-$size.png"; 
 
-     	   printf ("<td><img width=160 src=$png_file></img></td>\n");  
-     	 }  
-     	 echo "</tr>";  
-    }
-    echo "</table></br>";
+      printf ("<td><img width=160 src=$png_file></img></td>\n");  
+    }  
+    echo "</tr>";  
+  }
+  echo "</table></br>";
 }
 
 function binary ($value,$count)
@@ -417,29 +419,43 @@ function test_table_blocks ($file_root,$cycle_array, $types)
   $rows = 2;
   $cols = 4;
   for ($i = 0; $i < sizeof($types); ++$i) {
-     $type = $types[$i];
-     echo "<tr><th>$file_root</th>";
-     for ($index_cycle = 0; $index_cycle < sizeof($cycle_array); $index_cycle++) {
-       $cycle = $cycle_array[$index_cycle];
-       echo "<th colspan = $cols class=block>$cycle</th> ";
-     }
-     echo " </tr>";
-     for ($row = 0; $row < $rows; $row++) {
-       echo "<tr>";
-       echo "<td>$type</td>";
+    $type = $types[$i];
+    echo "<tr><th>$file_root</th>";
+    for ($index_cycle = 0; $index_cycle < sizeof($cycle_array); $index_cycle++) {
+      $cycle = $cycle_array[$index_cycle];
+      echo "<th colspan = $cols class=block>$cycle</th> ";
+    }
+    echo " </tr>";
+    for ($row = 0; $row < $rows; $row++) {
+      echo "<tr>";
+      echo "<td>$type</td>";
        
-       for ($index_cycle = 0; $index_cycle < sizeof($cycle_array); $index_cycle++) {
-	 $cycle = $cycle_array[$index_cycle];
-	 for ($col = 0; $col < $cols; $col++) {
-	   $rbin = binary($rows - $row - 1,2);
-	   $cbin = binary($col,2);
-	   echo "<td class=block> <img src=${file_root}-$cycle-B${rbin}_${cbin}.png width=80></img> </td>";
-	 }
-       }
-       echo "</tr>";
-     }
+      for ($index_cycle = 0; $index_cycle < sizeof($cycle_array); $index_cycle++) {
+	$cycle = $cycle_array[$index_cycle];
+	for ($col = 0; $col < $cols; $col++) {
+	  $rbin = binary($rows - $row - 1,2);
+	  $cbin = binary($col,2);
+	  echo "<td class=block> <img src=${file_root}-$cycle-B${rbin}_${cbin}.png width=80></img> </td>";
+	}
+      }
+      echo "</tr>";
+    }
   }
   echo "</table></br>";
+}
+
+function row_divider($num_types)
+{
+  printf ("<tr>");
+  printf ("<th class=divider></th>");
+  for ($k = 0; $k < 5; $k ++) {
+    printf ("<th class=divider></th>");
+    for ($i = 0; $i < $num_types; ++$i) {
+      printf ("<th class=divider> </th>");
+    }
+  }
+  printf ("<th class=divider></th>");
+  printf ("</tr>\n");
 }
 
 function swf_movie ($filename, $last_image, $image_size)
@@ -471,11 +487,11 @@ printf ("<center><table>\n");
 printf ("<tr>\n");
 
 if (file_exists("COMPILING"))  {
-  printf ( "<th rowspan=2 class=compiling>");
+  printf ( "<th class=compiling>");
   printf ("<strong> COMPILING </strong>\n");
   printf ("</th>");
 } else { 
-  printf ("<th rowspan=2></th>\n"); 
+  printf ("<th></th>\n"); 
 }
 printf ( "<th colspan=$num_types class=fail>Missing</br>Executable</th>");
 printf ("<th></th>");
@@ -488,21 +504,20 @@ printf ("<th></th>");
 printf ( "<th colspan=$num_types class=unfinished>Unfinished</br>Tests</th>");
 printf ("<th></th>");
 printf ( "<th colspan=$num_types class=pass>Passed</br>Tests</th>");
-printf ("<th></th>");
 printf ( "</tr>\n");
 
 /*for ($k = 0; $k < 6; $k ++) {
   for ($i = 0; $i < $num_types; ++$i) {
-    $type_active = "";
-    if (file_exists("COMPILING"))  {
-      $type_active = file_get_contents("COMPILING");
-    }
-    if ($type_active == $types[$i]) {
-      printf ("<th class=compiling>");
-    } else {
-      printf ("<th> ");
-    }
-    printf (" <a href=out.scons>$types[$i]</a> </th>");
+  $type_active = "";
+  if (file_exists("COMPILING"))  {
+  $type_active = file_get_contents("COMPILING");
+  }
+  if ($type_active == $types[$i]) {
+  printf ("<th class=compiling>");
+  } else {
+  printf ("<th> ");
+  }
+  printf (" <a href=out.scons>$types[$i]</a> </th>");
   }
   printf ("<th> </th>");
   } */
@@ -510,15 +525,7 @@ printf ( "</tr>\n");
 //----------------------------------------------------------------------
 // Print row divider
 //----------------------------------------------------------------------
-printf ("<tr><th class=divider></th>");
-for ($k = 0; $k < 5; $k ++) {
-  printf ("<th class=divider></th>");
-  for ($i = 0; $i < $num_types; ++$i) {
-    printf ("<th class=divider> </th>");
-  }
-}
-printf ("<th class=divider></th>\n");
-printf ("</tr>\n");
+row_divider($num_types);
 
 // printf ("<th rowspan=9>Enzo</th>\n"); 
 //----------------------------------------------------------------------
@@ -586,14 +593,17 @@ test_summary("Output",
 //----------------------------------------------------------------------
 // Print row divider
 //----------------------------------------------------------------------
-printf ("<tr><th class=divider></th>");
-for ($k = 0; $k < 6; $k ++) {
+printf ("<tr>");
+printf ("<th class=divider></th>");
+for ($k = 0; $k < 5; $k ++) {
   printf ("<th class=divider></th>");
   for ($i = 0; $i < $num_types; ++$i) {
     printf ("<th class=divider> </th>");
   }
 }
+printf ("<th class=divider></th>");
 printf ("</tr>\n");
+
 //----------------------------------------------------------------------
 
 
@@ -727,19 +737,19 @@ test_group("Method-heat");
 Method-heat tests serve to test basic functionality of the "heat" method
 in Enzo-P.
 
-  </p>
+</p>
 
-  <?php
+<?php
 
 
-  echo "<h3>HEAT (serial) </h3>";
+echo "<h3>HEAT (serial) </h3>";
 
 tests("Enzo","enzo-p","test_method_heat-1","HEAT 1 block");
 
 test_table ("method_heat-1",
 	    array("000000","000200","000400"), $types);
 
-  echo "<h3>HEAT (parallel) </h3>";
+echo "<h3>HEAT (parallel) </h3>";
 
 tests("Enzo","enzo-p","test_method_heat-8","HEAT 8 block");
 
@@ -897,8 +907,8 @@ test_group("Balance");
 // echo "<h3>RefineCom</h3>";
 echo "<h3>Rotate</h3>";
 tests("Enzo","enzo-p","test_balance_rotate","Rotate");
- test_table ("Balance/Rotate/balance-mesh",
-	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
+test_table ("Balance/Rotate/balance-mesh",
+	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
 // tests("Enzo","enzo-p","test_balance_greedy","Greedy");
 // tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm");
@@ -912,31 +922,31 @@ tests("Enzo","enzo-p","test_balance_rotate","Rotate");
 echo "<h3>Greedy</h3>";
 tests("Enzo","enzo-p","test_balance_greedy","Greedy");
 test_table ("Balance/Greedy/balance-mesh",
-	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>GreedyComm</h3>";
 tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm");
 test_table ("Balance/GreedyComm/balance-mesh",
-	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>Hybrid</h3>";
 tests("Enzo","enzo-p","test_balance_hybrid","Hybrid");
 test_table ("Balance/Hybrid/balance-mesh",
-	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>Neighbor</h3>";
 tests("Enzo","enzo-p","test_balance_neighbor","Neighbor");
 test_table ("Balance/Neighbor/balance-mesh",
-	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>RandCent</h3>";
 tests("Enzo","enzo-p","test_balance_rand_cent","RandCent");
 test_table ("Balance/RandCent/balance-mesh",
-	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>Refine</h3>";
 tests("Enzo","enzo-p","test_balance_refine","Refine");
 test_table ("Balance/Refine/balance-mesh",
-	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>RefineComm</h3>";
 tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm");
 test_table ("Balance/RefineComm/balance-mesh",
-	     array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
 //======================================================================
 
@@ -1150,6 +1160,6 @@ test_group("Colormap");
 tests("Cello","test_Colormap","test_Colormap","");
 
 ?>
-  </br/>
-  </body>
-  </html>
+</br/>
+</body>
+</html>
