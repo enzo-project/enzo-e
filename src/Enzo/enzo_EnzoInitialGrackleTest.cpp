@@ -128,6 +128,11 @@ void EnzoInitialGrackleTest::enforce_block
                                          units_->length_units /
                                          units_->time_units, 2) / kboltz;
 
+  const double density_out = 1.0;
+  const double density_in  = 0.125;
+  const double pressure_out = 1.0;
+  const double pressure_in  = 0.14;
+  
   double tiny_number = 1e-20;
   for (int iy=gy; iy<ny+gy; iy++) {
     double y = ym + (iy - gy + 0.5)*hy;
@@ -135,7 +140,11 @@ void EnzoInitialGrackleTest::enforce_block
       double x = xm + (ix - gx + 0.5)*hx;
       int i = INDEX(ix,iy,0,ngx,ngy);
 
-      density[i] = (x + y < 1.0) ? 1.0 : 0.1;
+      const bool in = (x + y < 0.3) ;
+
+      density[i] = in ? density_in : density_out;
+      internal_energy[i] = in ? (pressure_in) / (0.4 * density[i]) 
+	:                       (pressure_out) / (0.4 * density[i]) ;
 
       HI_density[i]    = density[i] * chemistry_->HydrogenFractionByMass;
       HII_density[i]   = density[i] * tiny_number;
@@ -156,8 +165,6 @@ void EnzoInitialGrackleTest::enforce_block
       velocity_y[i] = 0.0;
       velocity_z[i] = 0.0;
 
-      // initilize internal energy (here 1000 K for no reason)
-      internal_energy[i] = 1000. / temperature_units;
     }
   }
 }

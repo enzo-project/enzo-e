@@ -156,12 +156,6 @@ public:
   static int NumberOfBaryonFields;      // active baryon fields
   static int FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
   
-  /// Number of colour fields
-  static int ncolour;
-
-  /// Colour field offsets (assumes single global FieldDescr)
-  static std::vector<int> coloff;
-
 public: // interface
 
   /// Initialize the EnzoBlock chare array

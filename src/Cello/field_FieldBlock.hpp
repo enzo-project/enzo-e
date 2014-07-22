@@ -144,22 +144,6 @@ public: // interface
   { return field_descr_->field_id(name); }
 
   //----------------------------------------------------------------------
-  // Groups
-  //----------------------------------------------------------------------
-
-  //----------------------------------------------------------------------
-  // Groups
-  //----------------------------------------------------------------------
-
-  /// Add the field to a group
-  void add_to_group(const std::string field,
-		    const std::string group) throw(std::out_of_range);
-
-  /// Return whether the given field is in the given group
-  bool is_in_group(const std::string field,
-		   const std::string group) const throw(std::out_of_range);
-
-  //----------------------------------------------------------------------
   // Properties
   //----------------------------------------------------------------------
 

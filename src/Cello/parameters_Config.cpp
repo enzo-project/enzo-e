@@ -317,8 +317,6 @@ void Config::read_field_ (Parameters * p) throw()
   field_centering[1].resize(num_fields);
   field_centering[2].resize(num_fields);
 
-  field_group_list.resize(num_fields);
-
   std::string param;
 
   for (int index_field=0; index_field<num_fields; index_field++) {
@@ -329,19 +327,66 @@ void Config::read_field_ (Parameters * p) throw()
     field_centering[1][index_field] = p->list_value_logical(1,param,true);
     field_centering[2][index_field] = p->list_value_logical(2,param,true);
 
-    param =  std::string("Field:") + field_list[index_field] + ":group_list";
+  }
+
+  // Add fields to groups (Field : <field_name> : group_list)
+
+  field_group_list.resize(num_fields);
+
+  for (int index_field=0; index_field<num_fields; index_field++) {
+
+    std::string field = field_list[index_field];
+
+    param =  std::string("Field:") + field + ":group_list";
 
     if (p->type(param) == parameter_list)  {
+      // group_list is a list
       int num_groups = p->list_length(param);
-      field_group_list[index_field].resize(p->list_length(param));
       for (int index_group=0; index_group<num_groups; index_group++) {
-	field_group_list[index_field][index_group] = p->list_value_string(index_group,param);
+	std::string group = p->list_value_string(index_group,param);
+	    printf ("field %s group %s\n",field.c_str(),group.c_str());
+	field_group_list[index_field].push_back(group);
       }
     } else if (p->type(param) == parameter_string) {
-      field_group_list[index_field].resize(1);
-      field_group_list[index_field][0] = p->value_string(param);
+      // group_list is a string
+      std::string group = p->value_string(param);
+	    printf ("field %s group %s\n",field.c_str(),group.c_str());
+      field_group_list[index_field].push_back(group);
     }
+  }
 
+  // Add fields to groups (Group : <group_name> : field_list)
+
+  int num_groups = p->list_length("Group:list"); 
+
+  for (size_t index_group = 0; index_group < num_groups; index_group++) {
+
+    std::string group = p->list_value_string(index_group, "Group:list") ;
+
+    param = std::string("Group:") + group + ":field_list";
+
+    if (p->type(param) == parameter_list) {
+      // field_list is a list
+      for (size_t i=0; i<num_fields; i++) {
+	std::string field = p->list_value_string(i,param);
+	for (int index_field = 0; index_field < num_fields; index_field++) {
+	  if (field_list[index_field] == field) {
+	    printf ("field %s group %s\n",field.c_str(),group.c_str());
+	    field_group_list[index_field].push_back(group);
+	  }
+	}
+      }
+    } else if (p->type(param) == parameter_string) {
+      // field_list is a string
+      std::string field = p->value_string(param);
+      for (int index_field = 0; index_field < num_fields; index_field++) {
+	if (field_list[index_field] == field) {
+	    printf ("field %s group %s\n",field.c_str(),group.c_str());
+	  field_group_list[index_field].push_back(group);
+	}
+      }
+    }
+    
   }
 
   field_courant = p->value_float  ("Field:courant",0.6);

@@ -84,8 +84,6 @@ int EnzoBlock::ghost_depth[MAX_DIMENSION];
 
 int EnzoBlock::NumberOfBaryonFields;
 int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-int EnzoBlock::ncolour;
-std::vector<int> EnzoBlock::coloff;
 
 //----------------------------------------------------------------------
 
@@ -314,12 +312,6 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
   InitialTimeInCodeUnits = time;
 
-  ncolour = field_descr->groups()->size("colour");
-
-  if (ncolour > 0) 
-    coloff.resize(ncolour); 
-  else  
-    coloff.clear();
 } // void initialize()
 
 //----------------------------------------------------------------------
@@ -476,8 +468,6 @@ void EnzoBlock::pup(PUP::er &p)
     PUParray(p,ghost_depth,MAX_DIMENSION);
     p | NumberOfBaryonFields;      // active baryon fields
     PUParray(p,FieldType,MAX_NUMBER_OF_BARYON_FIELDS);
-    p | ncolour;
-    p | coloff;
   }
 
   TRACE ("END EnzoBlock::pup()");
@@ -720,12 +710,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   fprintf (fp,"EnzoBlock: SubgridFluxes %p\n", SubgridFluxes);
   
-  fprintf (fp,"EnzoBlock: ncolour_ %d\n", ncolour);
-  
-  for (int i=0; i<ncolour; i++) {
-    fprintf (fp,"EnzoBlock: coloff_[%d] %d\n", i,coloff[i]);
-  }
-    
 }
 
 //----------------------------------------------------------------------

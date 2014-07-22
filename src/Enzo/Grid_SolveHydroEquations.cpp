@@ -24,9 +24,37 @@ int EnzoBlock::SolveHydroEquations
   int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num;
   long long GridGlobalStart[MAX_DIMENSION];
   enzo_float a = 1, dadt;
-  int * coloff = new int [ncolour];
 
-  enzo_float *colourpt = NULL;
+  const FieldDescr * field_descr = block()->field_descr();
+  FieldBlock *       field_block = block()->field_block();
+
+  //------------------------------
+  // Prepare colour field parameters
+  //------------------------------
+
+  // ncolour: number of colour fields
+
+  int    ncolour  = field_descr->groups()->size("colour");
+
+  // colourpt: the color 'array' (contains all color fields)
+  enzo_float * colourpt = (enzo_float *) field_block->array();
+
+  // coloff: offsets into the color array (for each color field)
+  int * coloff   = new int [ncolour];
+  int index_colour = 0;
+  for (size_t index_field = 0;
+       index_field < field_descr->field_count();
+       index_field++) {
+    std::string field = field_descr->field_name(index_field);
+    if (field_descr->groups()->is_in(field,"colour")) {
+      coloff[index_colour++] 
+	= (enzo_float *)(field_block->values(index_field)) - colourpt;
+    }
+
+  }
+
+  // No subgrids, so colindex is NULL
+  int *colindex         = NULL;
 
   /* Compute size (in enzo_floats) of the current grid. */
 
@@ -42,59 +70,10 @@ int EnzoBlock::SolveHydroEquations
     return ENZO_FAIL;
   }
 
-  /* If multi-species being used, then treat them as colour variables
-     (note: the solver has been modified to treat these as density vars). */
-
-  int NumberOfColours = 0;
-  int ColourNum = -1;
-
-  if (MultiSpecies > 0) {
-
-    NumberOfColours = 6 + 3*(MultiSpecies-1);
-
-    if ((ColourNum =
-	 FindField(ElectronDensity, FieldType, NumberOfBaryonFields)) < 0) {
-      fprintf(stderr, "Could not find ElectronDensity.\n");
-      return ENZO_FAIL;
-    }
-
-   /* Set Offsets from the first field (here assumed to be the electron
-       density) to the other multi-species fields. */
-
-    colourpt = BaryonField[ColourNum];
-
-    for (i = 0; i < NumberOfColours; i++)
-      coloff[i] = BaryonField[ColourNum+i] - colourpt;
-
-  }
-
-  // Initialize colour field
-
-  //  NumberOfColours = 1;
-  //  ColourNum       = field_colour;
-  //  colourpt        = BaryonField[field_colour];
-  //  coloff[0]       = 0;
-
-  /* Add metallicity as a colour variable. */
-
-  int MetalNum;
-
-  if ((MetalNum = FindField(Metallicity, FieldType, NumberOfBaryonFields)) != -1) {
-    if (colourpt == NULL) {
-      colourpt = BaryonField[MetalNum];
-      ColourNum = MetalNum;
-    }
-
-    coloff[NumberOfColours++] = BaryonField[MetalNum  ] - colourpt;
-    coloff[NumberOfColours++] = BaryonField[MetalNum+1] - colourpt;
-    coloff[NumberOfColours++] = BaryonField[MetalNum+2] - colourpt;
-
-  }
-
-  /* Get easy to handle pointers for each variable. */
+  /* Initialize field pointers */
 
   //  enzo_float *density     = BaryonField[DensNum];
-  FieldBlock * field_block = block()->field_block();
+
   enzo_float * density = (enzo_float*) field_block->values("density");
   enzo_float *totalenergy = BaryonField[TENum];
   enzo_float *gasenergy   = BaryonField[GENum];
@@ -210,17 +189,17 @@ int EnzoBlock::SolveHydroEquations
   }
 
   /* allocate temporary space for solver (enough to fit 31 of the largest
-     possible 2d slices plus 4*NumberOfColours). */
+     possible 2d slices plus 4*ncolour). */
 
   int tempsize = MAX(MAX(GridDimension[0]*GridDimension[1],
 			 GridDimension[1]*GridDimension[2]),
 		     GridDimension[2]*GridDimension[0]);
-  enzo_float *temp = new enzo_float[tempsize*(31+NumberOfColours*4)];
+  enzo_float *temp = new enzo_float[tempsize*(31+ncolour*4)];
 
   /* create and fill in arrays which are easier for the solver to
      understand. */
 
-  size = NumberOfSubgrids*3*(18+2*NumberOfColours) + 1;
+  size = NumberOfSubgrids*3*(18+2*ncolour) + 1;
   int * array = new int[size];
   for (int i=0; i<size; i++) array[i] = 0;
 
@@ -236,97 +215,9 @@ int EnzoBlock::SolveHydroEquations
   int *vindex    = array + NumberOfSubgrids*3*12;
   int *windex    = array + NumberOfSubgrids*3*14;
   int *geindex   = array + NumberOfSubgrids*3*16;
-  int *colindex  = array + NumberOfSubgrids*3*18;
 
   enzo_float standard[1];
   //    enzo_float *standard = SubgridFluxes[0]->LeftFluxes[0][0];
-
-  for (int subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
-    for (dim = 0; dim < GridRank; dim++) {
-
-      /* Set i,j dimensions of 2d flux slice (this works even if we
-	 are in 1 or 2d) the correspond to the dimensions of the global
-	 indicies.  I.e. for dim = 0, the plane is dims 1,2
-	 for dim = 1, the plane is dims 0,2
-	 for dim = 2, the plane is dims 0,1 */
-
-      int idim = (dim == 0) ? 1 : 0;
-      int jdim = (dim == 2) ? 1 : 2;
-
-      /* Set the index (along the dimension perpindicular to the flux
-	 plane) of the left and right flux planes.  The index is zero
-	 based from the left side of the entire grid. */
-
-      leftface[subgrid*3+dim] =
-	SubgridFluxes[subgrid]->LeftFluxStartGlobalIndex[dim][dim] -
-	GridGlobalStart[dim];
-      rightface[subgrid*3+dim] =
-	SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][dim] -
-	GridGlobalStart[dim];   // (+1 done by fortran code)
-
-      /* set the start and end indicies (zero based on entire grid)
-	 of the 2d flux plane. */
-
-      istart[subgrid*3+dim] =
-	SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][idim] -
-	GridGlobalStart[idim];
-      jstart[subgrid*3+dim] =
-	SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][jdim] -
-	GridGlobalStart[jdim];
-      iend[subgrid*3+dim] =
-	SubgridFluxes[subgrid]->RightFluxEndGlobalIndex[dim][idim] -
-	GridGlobalStart[idim];
-      jend[subgrid*3+dim] =
-	SubgridFluxes[subgrid]->RightFluxEndGlobalIndex[dim][jdim] -
-	GridGlobalStart[jdim];
-
-      /* Compute offset from the standard pointer to the start of
-	 each set of flux data.  This is done to compensate for
-	 fortran's inability to handle arrays of pointers or structs.
-	 NOTE: This pointer arithmatic is illegal; some other way should
-	 be found to do it (like write higher level ppm stuff in c++). */
-
-      dindex[subgrid*6+dim*2] =
-	SubgridFluxes[subgrid]->LeftFluxes[DensNum][dim] - standard;
-      dindex[subgrid*6+dim*2+1] =
-	SubgridFluxes[subgrid]->RightFluxes[DensNum][dim] - standard;
-      Eindex[subgrid*6+dim*2] =
-	SubgridFluxes[subgrid]->LeftFluxes[TENum][dim] - standard;
-      Eindex[subgrid*6+dim*2+1] =
-	SubgridFluxes[subgrid]->RightFluxes[TENum][dim] - standard;
-      uindex[subgrid*6+dim*2] =
-	SubgridFluxes[subgrid]->LeftFluxes[Vel1Num][dim] - standard;
-      uindex[subgrid*6+dim*2+1] =
-	SubgridFluxes[subgrid]->RightFluxes[Vel1Num][dim] - standard;
-
-      if (GridRank > 1) {
-	vindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[Vel2Num][dim] - standard;
-	vindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[Vel2Num][dim] - standard;
-      }
-      if (GridRank > 2) {
-	windex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[Vel3Num][dim] - standard;
-	windex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[Vel3Num][dim] - standard;
-      }
-
-      if (DualEnergyFormalism) {
-	geindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[GENum][dim] - standard;
-	geindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[GENum][dim] - standard;
-      }
-
-      for (i = 0; i < NumberOfColours; i++) {
-	colindex[i*NumberOfSubgrids*6 + subgrid*6 + dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[ColourNum+i][dim] - standard;
-	colindex[i*NumberOfSubgrids*6 + subgrid*6 + dim*2 + 1] =
-	  SubgridFluxes[subgrid]->RightFluxes[ColourNum+i][dim] - standard;
-      }
-
-    }
 
   /* If using comoving coordinates, multiply dx by a(n+1/2).
      In one fell swoop, this recasts the equations solved by solver
@@ -380,7 +271,7 @@ int EnzoBlock::SolveHydroEquations
      istart, iend, jstart, jend,
      standard, dindex, Eindex, uindex, vindex, windex,
      geindex, temp,
-     &NumberOfColours, colourpt, coloff, colindex
+     &ncolour, colourpt, coloff, colindex
      );
 
   /* deallocate temporary space for solver */

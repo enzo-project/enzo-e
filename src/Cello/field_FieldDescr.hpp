@@ -129,6 +129,7 @@ public: // functions
   //----------------------------------------------------------------------
 
   Grouping * groups () { return & groups_; }
+  const Grouping * groups () const { return & groups_; }
 
   /// alignment in bytes of fields in memory
   int alignment() const throw();

@@ -1,21 +1,28 @@
 #!/bin/tcsh -f
+    
+set arch = $CELLO_ARCH
+set prec = $CELLO_PREC
 
-set ARCH = $CELLO_ARCH
-set PREC = $CELLO_PREC
+  # initialize time
 
-set log = "log.compile"
-set proc = 8
+    set H0 = `date +"%H"`
+    set M0 = `date +"%M"`
+    set S0 = `date +"%S"`
 
-set target = "install-bin"
+    set log = "log.build"
 
-set k_switch = "-k"
+    set proc = 8
 
-if ($#argv >= 1) then
+    # set default target
+
+    set target = "install-bin"
+    set k_switch = "-k"
+    if ($#argv >= 1) then
    if ($argv[1] == "clean") then
       set d = `date +"%Y-%m-%d %H:%M:%S"`
       printf "$d %-14s" "cleaning..."
       foreach prec (single double)
-         python scons.py arch=$ARCH -c >& /dev/null
+         python scons.py arch=$arch -c >& /dev/null
          rm -rf bin >& /dev/null
          rm -rf lib >& /dev/null
       end
@@ -30,32 +37,24 @@ if ($#argv >= 1) then
    else if ($argv[1] == "test") then
      set target = "test"
      set proc = 1
+     set k_switch = "-k"
    else
      # assume enzo-p
      set k_switch = ""
      set target = $argv[1]
      rm $target
    endif
-else
+    else
   # assume enzo-p
   set k_switch = ""
   set target = "bin/enzo-p"
   rm $target
-endif
+    endif
 
-echo "k_switch = $k_switch"
+    set d = `date +"%Y-%m-%d %H:%M:%S"`
+    echo "$d BEGIN"
 
-echo "ARCH = $ARCH"
-echo "PREC = $PREC"
-echo "target = $target"
-
-set d = `date +"%Y-%m-%d %H:%M:%S"`
-echo "$d BEGIN"
-
-foreach arch ($ARCH)
-foreach prec ($PREC)
-
-    echo "arch = $arch  prec = $prec"
+   echo "BEGIN Enzo-P/Cello ${0}: arch = $arch  prec = $prec  target = $target"
 
    rm -f "test/*/running.$arch.$prec"
 
@@ -103,7 +102,10 @@ foreach prec ($PREC)
    # TESTS
 
    if ($target == "test") then
-  
+
+      #recursively call script to clean
+#      $0 clean
+
       # count crashes
 
       cat $dir/*unit |grep FAIL      | grep "0/" | sort > $dir/fail.$configure
@@ -145,11 +147,16 @@ foreach prec ($PREC)
    endif
    rm -f test/COMPILING
 
-end
-end
+cp test/out.scons out.scons.$arch-$prec
 
-set d = `date +"%Y-%m-%d %H:%M:%S"`
-echo "$d END"
+set H1 = `date +"%H"`
+set M1 = `date +"%M"`
+set S1 = `date +"%S"`
+
+@ t = ($S1 - $S0) + 60 * ( ( $M1 - $M0) + 60 * ( $H1 - $H0) )
+
+echo "END   Enzo-P/Cello ${0}: arch = $arch  prec = $prec  target = $target time = ${t}s"
+
 
 
 
