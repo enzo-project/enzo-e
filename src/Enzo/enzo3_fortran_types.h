@@ -24,8 +24,6 @@
 #define CMPLX_PREC complex*8
       integer, parameter :: RKIND=4
 #endif
-
-
 #ifdef CONFIG_BFLOAT_8
 #define R_PREC real*8
 #define CMPLX_PREC complex*16

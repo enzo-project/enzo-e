@@ -93,7 +93,7 @@ use_gprof = 0
 # Whether to compile with the Grackle chemistry and cooling library
 #----------------------------------------------------------------------
 
-use_grackle = 1
+use_grackle = 0
 
 #----------------------------------------------------------------------
 # Whether to run the test programs using valgrind to check for memory leaks
@@ -207,6 +207,7 @@ define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
 # Library defines
 
 define_hdf5  =        ['H5_USE_16_API']
+
 define_png   =        ['NO_FREETYPE']
 
 # Charm defines
@@ -278,6 +279,8 @@ defines = defines + define_cello
 # ARCHITECTURE SETTINGS
 #======================================================================
 
+mpi_path = '' # this is a hack to compile on gordon with parallel HDF5
+
 is_arch_valid = 0
 sys.path.append("./config");
 
@@ -338,6 +341,7 @@ test_path= 'test'
 
 Export('bin_path')
 Export('grackle_path')
+Export('use_grackle')
 Export('lib_path')
 Export('inc_path')
 Export('test_path')
@@ -360,8 +364,11 @@ if (use_papi):
 # HDF5 PATHS
 #----------------------------------------------------------------------
 
-cpppath = cpppath + [hdf5_path + '/include']
+cpppath = cpppath + [hdf5_path + '/include' ]
 libpath = libpath + [hdf5_path + '/lib']
+
+if (mpi_path != ''):
+   cpppath = cpppath + [mpi_path + '/include']
 
 #----------------------------------------------------------------------
 # LIBPNG PATHS

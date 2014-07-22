@@ -11,8 +11,10 @@
 //----------------------------------------------------------------------
 
 EnzoConfig::EnzoConfig() throw ()
+#ifdef CONFIG_USE_GRACKLE
   : method_grackle_units(),
     method_grackle_chemistry()
+#endif
 {
 }
 

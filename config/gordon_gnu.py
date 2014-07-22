@@ -15,8 +15,11 @@ home = os.environ['HOME']
 libpath_fortran = ''
 libs_fortran    = ['gfortran']
 
-charm_path   = home + '/Charm/charm'
-papi_path    = home
-hdf5_path    = home
-png_path     = '/usr/lib64'
+home = os.environ["HOME"]
+charm_path = home + '/Charm/charm'
+papi_path  = home
+hdf5_path  = os.environ['HDF5HOME']
+mpi_path   = os.environ['MPIHOME']
+
+png_path   = '/usr/lib64'
 grackle_path = home + '/Grackle/src/clib'

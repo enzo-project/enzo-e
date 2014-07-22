@@ -4,6 +4,7 @@
 
 Import('env')
 Import('use_papi')
+Import('use_grackle')
 
 Import('bin_path')
 Import('inc_path')
@@ -30,7 +31,9 @@ if (use_papi):
 
 components.append(['hdf5','z'])
 
-libraries  = ['png','grackle','$FORTRANLIBS']
+libraries  = ['png','$FORTRANLIBS']
+
+if (use_grackle):  libraries.append('grackle')
 
 #------------------------------
 # SOURCE

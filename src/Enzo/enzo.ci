@@ -54,8 +54,8 @@ module enzo {
   PUPable EnzoInitialImplosion2;
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
-  PUPable EnzoInitialGrackleTest;
-  PUPable EnzoMethodGrackle;
+//  PUPable EnzoInitialGrackleTest;
+//  PUPable EnzoMethodGrackle;
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
