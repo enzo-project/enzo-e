@@ -48,7 +48,7 @@ public: // interface
 private: // functions
 
   template <class T>
-  void evaluate_block_(T * u, T * v, T * w,
+  void evaluate_block_(const T * u, const T * v, const T * w,
 		       int ndx, int ndy, int ndz,
 		       int nx, int ny, int nz,
 		       int gx, int gy, int gz,

@@ -79,10 +79,10 @@
       root_blocks = [4,1];
       max_level = 5; 
       balance = true;
-      list = ["SLOPE"];
-      SLOPE {
-         type = "slope";
-         field_list = ["density"];
+      list = ["SHEAR"];
+      SHEAR {
+         type = "shear";
+#          field_list = ["density"];
          min_refine  = 5.0;
          max_coarsen = 2.0;
       }
@@ -125,7 +125,8 @@
 
    Output { 
 
-      list = ["de_png","mesh","de_hdf5"];
+#      list = ["de_png","mesh","de_hdf5"];
+      list = ["de_png","mesh"];
 
 
        mesh {
