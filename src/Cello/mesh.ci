@@ -29,6 +29,7 @@ module mesh {
   PUPable RefineMask;
   PUPable RefineMass;
   PUPable RefineSlope;
+  PUPable RefineShear;
   PUPable RestrictLinear;
   PUPable ScheduleList;
   PUPable ScheduleInterval;

@@ -64,6 +64,7 @@ class Tree;
 // Refinement
 #include "mesh_Refine.hpp"
 #include "mesh_RefineSlope.hpp"
+#include "mesh_RefineShear.hpp"
 #include "mesh_RefineMass.hpp"
 #include "mesh_RefineMask.hpp"
 #include "mesh_ItFace.hpp"

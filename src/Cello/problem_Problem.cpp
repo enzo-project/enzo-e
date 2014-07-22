@@ -447,6 +447,13 @@ Refine * Problem::create_refine_
        config->mesh_max_coarsen[index],
        config->mesh_field_list[index]);
 
+  } else if (type == "shear") {
+
+    return new RefineShear 
+      (field_descr,
+       config->mesh_min_refine[index],
+       config->mesh_max_coarsen[index]);
+
   } else if (type == "mask") {
 
     std::string param_str = "Mesh:" + config->mesh_list[index] + ":value";
