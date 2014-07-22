@@ -182,10 +182,11 @@ define_cello =        ['CONFIG_USE_CELLO']
 
 define["single"] =    ['CONFIG_PRECISION_SINGLE']
 define["double"] =    ['CONFIG_PRECISION_DOUBLE']
+define_int_size  =    ['SMALL_INTS']
 
 # Grackle defines
 
-define_grackle   = ['CONFIG_USE_GRACKLE','SMALL_INTS']
+define_grackle   = ['CONFIG_USE_GRACKLE']
 
 # Performance defines
 
@@ -212,6 +213,7 @@ define_png   =        ['NO_FREETYPE']
 
 define_charm =        ['CONFIG_USE_CHARM']  # used for Grackle 
 
+# 
 #----------------------------------------------------------------------
 # ASSEMBLE DEFINES
 #----------------------------------------------------------------------
@@ -230,6 +232,8 @@ else:
      print "The precision is set using the environment variable $CELLO_PREC"
      print "or by using 'scons prec=<precision>"
      sys.exit(1)
+
+defines = defines + define_int_size
 
 defines = defines + define_hdf5
 defines = defines + define_png
