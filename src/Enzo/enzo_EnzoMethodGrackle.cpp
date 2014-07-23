@@ -65,7 +65,13 @@ void EnzoMethodGrackle::pup (PUP::er &p)
 
 void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
 {
-#ifdef CONFIG_USE_GRACKLE
+#ifndef CONFIG_USE_GRACKLE
+
+  ERROR("EnzoMethodGrackle::compute()",
+	"Trying to use method 'grackle' with "
+	"Grackle configuration turned off!");
+
+#else /* CONFIG_USE_GRACKLE */
 
   initialize_(comm_block);
 

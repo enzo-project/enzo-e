@@ -20,7 +20,7 @@ set prec = $CELLO_PREC
     if ($#argv >= 1) then
    if ($argv[1] == "clean") then
       set d = `date +"%Y-%m-%d %H:%M:%S"`
-      printf "$d %-14s" "cleaning..."
+      printf "$d %-14s cleaning..."
       foreach prec (single double)
          python scons.py arch=$arch -c >& /dev/null
          rm -rf bin >& /dev/null
@@ -54,7 +54,10 @@ set prec = $CELLO_PREC
     set d = `date +"%Y-%m-%d %H:%M:%S"`
     echo "$d BEGIN"
 
-   echo "BEGIN Enzo-P/Cello ${0}: arch = $arch  prec = $prec  target = $target"
+    echo "BEGIN Enzo-P/Cello ${0}"
+    echo "arch = $arch"
+    echo "prec = $prec"
+    echo "target = $target"
 
    rm -f "test/*/running.$arch.$prec"
 
@@ -72,8 +75,8 @@ set prec = $CELLO_PREC
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
-   printf "$d %-14s %-14s" "$arch $prec" "compiling..."
-   printf "$d %-14s %-14s" "$arch $prec" "compiling..." >> $log
+   printf "$d %-14s %-14s" "compiling..."
+   printf "$d %-14s %-14s" "compiling..." >> $log
 
    touch "$dir/running.$arch.$prec"
 

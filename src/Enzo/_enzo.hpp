@@ -111,12 +111,16 @@ struct fluxes
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"
+#include "enzo_EnzoInitialTurbulence.hpp"
+
+#include "enzo_EnzoRefineShock.hpp"
 
 #include "enzo_EnzoMethodNull.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
+#include "enzo_EnzoMethodTurbulence.hpp"
 
 #include "enzo_EnzoProlong.hpp"
 #include "enzo_EnzoProlongMC1.hpp"

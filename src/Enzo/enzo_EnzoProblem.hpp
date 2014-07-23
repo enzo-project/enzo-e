@@ -50,6 +50,14 @@ private: // functions
    const FieldDescr *,
    const GroupProcess * group_process) throw ();
 
+  /// Create named refine object
+  virtual Refine * create_refine_ 
+  (std::string type, 
+   Config * config, 
+   Parameters * parameters,
+   const FieldDescr * field_descr,
+   int index) throw ();
+
   /// Create named method object
   virtual Method * create_method_ 
   (std::string type, Config * config, const FieldDescr *) throw ();

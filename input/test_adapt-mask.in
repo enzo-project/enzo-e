@@ -23,7 +23,7 @@ Stopping {
 }
 
 Output {
-     file_groups = ["mesh"];
+     list = ["mesh"];
       de   { name = ["test_adapt-mask-de-%06d.png",   "cycle"]; 
          include "input/schedule_cycle_10.incl"
      };

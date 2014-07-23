@@ -116,6 +116,8 @@ public: // attributes
   std::vector<std::string>   mesh_field_list[MAX_MESH_GROUPS];
   double                     mesh_min_refine[MAX_MESH_GROUPS];
   double                     mesh_max_coarsen[MAX_MESH_GROUPS];
+  double                     mesh_min_refine2[MAX_MESH_GROUPS];
+  double                     mesh_max_coarsen2[MAX_MESH_GROUPS];
   double                     mesh_level_exponent[MAX_MESH_GROUPS];
 
 

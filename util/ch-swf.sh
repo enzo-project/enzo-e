@@ -1,13 +1,13 @@
-#!/bin/tcsh -f
+#!/bin/bash
 
-foreach file (*.png)
-   echo $file
+#foreach file (*.png)
+#   echo $file
 #   convert -resize 1600 $file temp.png
 #   convert -crop 1600x900+0+350 temp.png $file:r-crop.png
-end
+#end
 
-png2swf *mesh*.png -r 20 -o mesh.swf
-png2swf *de*.png -r 20 -o de.swf
-png2swf *te*.png -r 20 -o te.swf
+out=$1
+shift
+png2swf $@ -r 20 -o $out.swf
 
 

@@ -51,15 +51,10 @@ void EnzoInitialImplosion2::enforce_block
   WARNING("EnzoInitialImplosion2::enforce_block",
 	  "hard-coded field index ordering");
 
-  int index_density         = 0;
-  int index_velocity_x      = 1;
-  int index_velocity_y      = 2;
-  int index_total_energy    = 3;
- 
-  enzo_float *  d = (enzo_float *) field_block->values(index_density);
-  enzo_float * vx = (enzo_float *) field_block->values(index_velocity_x);
-  enzo_float * vy = (enzo_float *) field_block->values(index_velocity_y);
-  enzo_float * te = (enzo_float *) field_block->values(index_total_energy);
+  enzo_float *  d = (enzo_float *) field_block->values("density");
+  enzo_float * vx = (enzo_float *) field_block->values("velocity_x");
+  enzo_float * vy = (enzo_float *) field_block->values("velocity_y");
+  enzo_float * te = (enzo_float *) field_block->values("total_energy");
 
   // Block size (excluding ghosts)
   int nx,ny;
@@ -77,7 +72,7 @@ void EnzoInitialImplosion2::enforce_block
 
   // Ghost depths
   int gx,gy;
-  field_descr->ghosts(index_density,&gx,&gy);
+  field_descr->ghosts(0,&gx,&gy);
 
   // WARNING("EnzoInitialImplosion2",
   // 		  "Assumes same ghost zone depth for all fields");

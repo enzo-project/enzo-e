@@ -8,8 +8,6 @@
 #ifndef ENZO_ENZO_INITIAL_GRACKLE_TEST_HPP
 #define ENZO_ENZO_INITIAL_GRACKLE_TEST_HPP
 
-#ifdef CONFIG_USE_GRACKLE
-
 class EnzoInitialGrackleTest : public Initial {
 
   /// @class    EnzoInitialGrackleTest
@@ -44,12 +42,14 @@ public: // interface
 
 private:
 
+#ifdef CONFIG_USE_GRACKLE
+
   const code_units      * units_;
   const chemistry_data  * chemistry_;
+
+#endif
   
 };
-
-#endif /* CONFIG_USE_GRACKLE */
 
 #endif /* ENZO_ENZO_INITIAL_GRACKLE_TEST_HPP */
 

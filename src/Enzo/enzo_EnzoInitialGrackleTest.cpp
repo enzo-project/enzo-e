@@ -9,15 +9,15 @@
 
 #include "enzo.hpp"
 
-#ifdef CONFIG_USE_GRACKLE
-
 //----------------------------------------------------------------------
 
 EnzoInitialGrackleTest::EnzoInitialGrackleTest 
 (const EnzoConfig * config) throw ()
-  : Initial(config->initial_cycle, config->initial_time),
-    chemistry_(& config->method_grackle_chemistry),
+  : Initial(config->initial_cycle, config->initial_time)
+#ifdef CONFIG_USE_GRACKLE
+    ,chemistry_(& config->method_grackle_chemistry),
     units_(& config->method_grackle_units)
+#endif
 { 
 }
 
@@ -42,6 +42,13 @@ void EnzoInitialGrackleTest::enforce_block
  ) throw()
 
 {
+#ifndef CONFIG_USE_GRACKLE
+
+  ERROR("EnzoInitialGrackleTest::compute()",
+	"Trying to use Initialization 'grackle_test' with "
+	"Grackle configuration turned off!");
+
+#else /* CONFIG_USE_GRACKLE */
 
   ASSERT("EnzoInitialGrackleTest",
 	 "CommBlock does not exist",
@@ -167,6 +174,5 @@ void EnzoInitialGrackleTest::enforce_block
 
     }
   }
-}
-
 #endif /* CONFIG_USE_GRACKLE */
+}

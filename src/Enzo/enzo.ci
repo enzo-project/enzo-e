@@ -51,19 +51,27 @@ module enzo {
   PUPable EnzoBoundary;
   PUPable EnzoConfig;
   PUPable EnzoFactory;
+
   PUPable EnzoInitialImplosion2;
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
-//  PUPable EnzoInitialGrackleTest;
-//  PUPable EnzoMethodGrackle;
+  PUPable EnzoInitialGrackleTest;
+  PUPable EnzoInitialTurbulence;
+
+  PUPable EnzoRefineShock;
+
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
   PUPable EnzoMethodPpm3;
+  PUPable EnzoMethodGrackle;
+  PUPable EnzoMethodTurbulence;
+
   PUPable EnzoProblem;
   PUPable EnzoProlong;
   PUPable EnzoProlongMC1;
+
   PUPable EnzoRestrict;
 
   extern module mesh;

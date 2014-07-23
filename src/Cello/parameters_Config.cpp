@@ -75,6 +75,8 @@ void Config::pup (PUP::er &p)
   PUParray(p,mesh_field_list,MAX_MESH_GROUPS);
   PUParray(p,mesh_min_refine,MAX_MESH_GROUPS);
   PUParray(p,mesh_max_coarsen,MAX_MESH_GROUPS);
+  PUParray(p,mesh_min_refine2,MAX_MESH_GROUPS);
+  PUParray(p,mesh_max_coarsen2,MAX_MESH_GROUPS);
   PUParray(p,mesh_level_exponent,MAX_MESH_GROUPS);
 
 
@@ -522,9 +524,26 @@ void Config::read_mesh_ (Parameters * p) throw()
 
     //--------------------------------------------------
 
-    mesh_min_refine[ia] = p->value (prefix + "min_refine",0.3);
-    double deflt = 0.5*mesh_min_refine[ia];
-    mesh_max_coarsen[ia] =    p->value (prefix + "max_coarsen",deflt);
+    if (p->type(prefix + "min_refine") == parameter_float) {
+
+      mesh_min_refine[ia]  = p->value (prefix + "min_refine",0.3);
+      mesh_max_coarsen[ia] = p->value (prefix + "max_coarsen",
+				       0.5*mesh_min_refine[ia]);
+
+    } else if (p->type(prefix + "min_refine") == parameter_list) {
+
+      double deflt;
+
+      mesh_min_refine[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
+      mesh_max_coarsen[ia] = p->list_value_float (0,prefix + "max_coarsen",
+					    0.5*mesh_min_refine[ia]);
+
+      mesh_min_refine2[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
+      mesh_max_coarsen2[ia] = p->list_value_float (1,prefix + "max_coarsen",
+					     0.5*mesh_min_refine2[ia]);
+
+    }
+
     mesh_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
 
   }

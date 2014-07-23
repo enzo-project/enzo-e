@@ -91,16 +91,20 @@ Initial * EnzoProblem::create_initial_
   int cycle   = config->initial_cycle;
   double time = config->initial_time;
 
+  EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
+
   if (type == "implosion_2d") {
     initial = new EnzoInitialImplosion2(cycle,time);
   } else if (type == "sedov_array_2d") {
-    initial = new EnzoInitialSedovArray2(static_cast<EnzoConfig *>(config));
+    initial = new EnzoInitialSedovArray2(enzo_config);
   } else if (type == "sedov_array_3d") {
-    initial = new EnzoInitialSedovArray3(static_cast<EnzoConfig *>(config));
+    initial = new EnzoInitialSedovArray3(enzo_config);
 #ifdef CONFIG_USE_GRACKLE
   } else if (type == "grackle_test") {
-    initial = new EnzoInitialGrackleTest(static_cast<EnzoConfig *>(config));
+    initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
+  } else if (type == "turbulence") {
+    initial = new EnzoInitialTurbulence(cycle,time);
   } else {
     initial = Problem::create_initial_
       (type,config,parameters,field_descr,group_process);
@@ -109,6 +113,35 @@ Initial * EnzoProblem::create_initial_
   return initial;
 
 }
+
+//----------------------------------------------------------------------
+
+Refine * EnzoProblem::create_refine_
+(
+ std::string        type,
+ Config *           config,
+ Parameters *       parameters,
+ const FieldDescr * field_descr,
+ int                index
+ ) throw ()
+{ 
+
+  EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
+
+  if (type == "shock") {
+
+    return new EnzoRefineShock 
+      (field_descr,
+       config->mesh_min_refine[index],
+       config->mesh_max_coarsen[index],
+       config->mesh_min_refine2[index],
+       config->mesh_max_coarsen2[index],
+       enzo_config->field_gamma);
+  } else {
+    return Problem::create_refine_(type,config,parameters,field_descr,index);
+  }
+}
+
 
 //----------------------------------------------------------------------
 
@@ -140,6 +173,8 @@ Method * EnzoProblem::create_method_
   } else if (type == "grackle") {
     method = new EnzoMethodGrackle(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
+  } else if (type == "turbulence") {
+    method = new EnzoMethodTurbulence;
   } else {
     method = Problem::create_method_(type,config, field_descr);
   }
