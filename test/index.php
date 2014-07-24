@@ -205,7 +205,7 @@ function test($type,$output,$type) {
 
  //----------------------------------------------------------------------
 
-function summary_missing_executable ($test_output, $executables, $state)
+function summary_missing_executable ($test_output, $executables, $state, $dir)
 {
   global $types;
   global $num_types;
@@ -234,7 +234,7 @@ function summary_missing_executable ($test_output, $executables, $state)
 
 //----------------------------------------------------------------------
 
-function summary_missing_output ($test_output, $executables, $state)
+function summary_missing_output ($test_output, $executables, $state, $dir)
 {
   global $types;
   global $num_types;
@@ -243,7 +243,7 @@ function summary_missing_output ($test_output, $executables, $state)
 
     $count_missing = 0;
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/test_$test_output[$test].unit";
+      $output = "../$dir/test_$test_output[$test].unit";
       if (! file_exists($output)) {
 	++ $count_missing;
       }
@@ -258,7 +258,7 @@ function summary_missing_output ($test_output, $executables, $state)
 
 //----------------------------------------------------------------------
 
-function summary_incomplete_output ( $test_output, $executables, $state)
+function summary_incomplete_output ( $test_output, $executables, $state, $dir)
 {
   global $types;
   global $num_types;
@@ -268,7 +268,7 @@ function summary_incomplete_output ( $test_output, $executables, $state)
     $output_files = "";
     $num_output_files = 0;
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/test_$test_output[$test].unit";
+      $output = "../$dir/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
       ++$num_output_files;
     }
@@ -280,7 +280,7 @@ function summary_incomplete_output ( $test_output, $executables, $state)
 
 //----------------------------------------------------------------------
 
-function summary_failed_tests ($test_output, $executables, $state)
+function summary_failed_tests ($test_output, $executables, $state, $dir)
 {
   global $types;
   global $num_types;
@@ -289,7 +289,7 @@ function summary_failed_tests ($test_output, $executables, $state)
 
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/test_$test_output[$test].unit";
+      $output = "../$dir/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
     }
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
@@ -298,7 +298,7 @@ function summary_failed_tests ($test_output, $executables, $state)
 
 //----------------------------------------------------------------------
 
-function summary_unfinished_tests ($test_output, $executables, $state)
+function summary_unfinished_tests ($test_output, $executables, $state, $dir)
 {
   global $types;
   global $num_types;
@@ -307,7 +307,7 @@ function summary_unfinished_tests ($test_output, $executables, $state)
 
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "../test/test_$test_output[$test].unit";
+      $output = "../$dir/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
     }
 
@@ -317,7 +317,7 @@ function summary_unfinished_tests ($test_output, $executables, $state)
 
 //----------------------------------------------------------------------
 
-function summary_passed_tests ($test_output, $executables, $state)
+function summary_passed_tests ($test_output, $executables, $state, $dir)
 {
 
   global $types;
@@ -328,7 +328,7 @@ function summary_passed_tests ($test_output, $executables, $state)
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
       $output = $test_output[$test];
-      $output_files = "$output_files ../test/test_$output.unit";
+      $output_files = "$output_files ../$dir/test_$output.unit";
     }
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
 
@@ -337,7 +337,7 @@ function summary_passed_tests ($test_output, $executables, $state)
 
 //----------------------------------------------------------------------
 
-function test_summary($component,$test_output,$executables)
+function test_summary($component,$test_output,$executables, $dir)
 {
 
   printf ("<tr><th><a href=\"#$component\">$component</a></th>\n");
@@ -348,17 +348,17 @@ function test_summary($component,$test_output,$executables)
 
   $state = "running";
 
-  summary_missing_executable ($test_output, $executables, $state);
+  summary_missing_executable ($test_output, $executables, $state, $dir);
   printf ("<th></th>");
-  summary_missing_output     ($test_output, $executables, $state);
+  summary_missing_output     ($test_output, $executables, $state, $dir);
   printf ("<th></th>");
-  summary_incomplete_output  ($test_output, $executables, $state);
+  summary_incomplete_output  ($test_output, $executables, $state, $dir);
   printf ("<th></th>");
-  summary_failed_tests       ($test_output, $executables, $state);
+  summary_failed_tests       ($test_output, $executables, $state, $dir);
   printf ("<th></th>");
-  summary_unfinished_tests   ($test_output, $executables, $state);
+  summary_unfinished_tests   ($test_output, $executables, $state, $dir);
   printf ("<th></th>");
-  summary_passed_tests       ($test_output, $executables, $state);
+  summary_passed_tests       ($test_output, $executables, $state, $dir);
 
   printf ("</tr>\n");
 }
@@ -533,26 +533,26 @@ row_divider($num_types);
 test_summary("Method-ppm",
 	     array("method_ppm-1",
 		   "method_ppm-8"),
-	     array("enzo-p",  "enzo-p"));
+	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Method-ppml",
 	     array("method_ppml-1",
 		   "method_ppml-8"),
-	     array("enzo-p",  "enzo-p"));
+	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Method-heat",
 	     array("method_heat-1",
 		   "method_heat-8"),
-	     array("enzo-p",  "enzo-p"));
+	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Checkpoint",
 	     array("checkpoint_ppm-1",
 		   "checkpoint_ppm-8"),
-	     array("enzo-p",  "enzo-p"));
+	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Mesh", 
 	     array("mesh-balanced"),
-	     array("enzo-p"));
+	     array("enzo-p"),'test');
 
 // test_summary("Enzo-AMR", 
 // 	     array("adapt-L1-P1", "adapt-L2-P1", "adapt-L3-P1", "adapt-L4-P1", "adapt-L5-P1"),
@@ -568,27 +568,27 @@ test_summary("Balance",
 		   "balance_neighbor",
 		   "balance_hybrid"),
 	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p",
-		   "enzo-p", "enzo-p", "enzo-p", "enzo-p"));
+		   "enzo-p", "enzo-p", "enzo-p", "enzo-p"),'test/Balance');
 
 test_summary("Boundary-2D", 
 	     array("boundary_reflecting-2d",
 		   "boundary_periodic-2d",
 		   "boundary_outflow-2d"),
-	     array("enzo-p", "enzo-p", "enzo-p"));
+	     array("enzo-p", "enzo-p", "enzo-p"),'test');
 
 test_summary("Boundary-3D",
 	     array("boundary_reflecting-3d",
 		   "boundary_periodic-3d",
 		   "boundary_outflow-3d"),
-	     array("enzo-p", "enzo-p", "enzo-p"));
+	     array("enzo-p", "enzo-p", "enzo-p"),'test');
 
 test_summary("Initial", 
 	     array("initial_png"),
-	     array("enzo-p"));
+	     array("enzo-p"),'test');
 
 test_summary("Output", 
 	     array("output-stride-1","output-stride-2","output-stride-3"),
-	     array("enzo-p","enzo-p","enzo-p"));
+	     array("enzo-p","enzo-p","enzo-p"),'test');
 
 //----------------------------------------------------------------------
 // Print row divider
@@ -608,15 +608,15 @@ printf ("</tr>\n");
 
 
 test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
-	     array("test_FileHdf5","test_FileIfrit")); 
+	     array("test_FileHdf5","test_FileIfrit"),'test'); 
 test_summary("Error",array(    "Error"),
-	     array("test_Error")); 
+	     array("test_Error"),'test'); 
 test_summary("Field",array("FieldBlock","FieldDescr","FieldFace","ItField"),
-	     array("test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField")); 
+	     array("test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField"),'test'); 
 test_summary("Io",array("ItReduce"),
-	     array("test_ItReduce")); 
+	     array("test_ItReduce"),'test'); 
 test_summary("Memory",array("Memory"),
-	     array("test_Memory")); 
+	     array("test_Memory"),'test'); 
 test_summary("Mesh",
 	     array("Hierarchy",
 		   "Block",
@@ -635,21 +635,21 @@ test_summary("Mesh",
 		   "test_TreeDensity",
 		   "test_Node",
 		   "test_NodeTrace",
-		   "test_ItNode")); 
+		   "test_ItNode"),'test'); 
 test_summary("Monitor",array("Monitor"),
-	     array("test_Monitor")); 
+	     array("test_Monitor"),'test'); 
 test_summary("Parallel",array("GroupProcess","Layout"),
-	     array("test_GroupProcess","test_Layout")); 
+	     array("test_GroupProcess","test_Layout"),'test'); 
 test_summary("Parameters",array("Parameters"),
-	     array("test_Parameters")); 
+	     array("test_Parameters"),'test'); 
 test_summary("Performance",array("Papi", "Performance","Timer"),
-	     array("test_Papi","test_Performance","test_Timer")); 
+	     array("test_Papi","test_Performance","test_Timer"),'test'); 
 test_summary("Problem",array("Mask","Value"),
-	     array("test_Mask","test_Value")); 
+	     array("test_Mask","test_Value"),'test'); 
 test_summary("Schedule",array("Schedule"),
-	     array("test_Schedule")); 
+	     array("test_Schedule"),'test'); 
 test_summary("Colormap",array("Colormap"),
-	     array("test_Colormap")); 
+	     array("test_Colormap"),'test'); 
 
 printf ("</tr></table></center></br>\n");
 
