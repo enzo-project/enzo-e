@@ -81,11 +81,3 @@ void EnzoMethodPressure::compute_(CommBlock * comm_block)
   }
 }
 
-  //----------------------------------------------------------------------
-
-double EnzoMethodPressure::timestep ( CommBlock * comm_block ) throw()
-{
-
-
-  return std::numeric_limits<double>::max();
-}

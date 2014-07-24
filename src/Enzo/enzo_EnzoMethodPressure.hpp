@@ -31,9 +31,6 @@ public: // interface
   /// Apply the method to advance a block one timestep 
   virtual void compute( CommBlock * comm_block) throw();
 
-  /// Compute maximum timestep for this method
-  virtual double timestep ( CommBlock * comm_block) throw();
-
 private: // functions
 
   template <typename T>

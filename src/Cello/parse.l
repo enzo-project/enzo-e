@@ -187,7 +187,7 @@ int cello_new_file(const char * filename)
   if (fp == NULL) {
     printf ("%s:%d Parse Error: cannot open file %s\n",
 	    __FILE__,__LINE__,filename);
-    exit(1);
+    PARALLEL_EXIT;
   }
 
   if (curbs != NULL) curbs->lineno = yylineno;

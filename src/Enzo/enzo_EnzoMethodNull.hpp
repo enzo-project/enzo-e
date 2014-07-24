@@ -31,7 +31,7 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
-  { TRACEPUP; p | dt_; }
+  { TRACEPUP; Method::pup(p); p | dt_; }
   
   /// Apply the method to advance a block one timestep 
   virtual void compute( CommBlock * comm_block) throw()

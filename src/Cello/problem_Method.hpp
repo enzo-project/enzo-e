@@ -59,7 +59,8 @@ public: // virtual functions
   virtual void compute ( CommBlock * comm_block) throw() = 0; 
 
   /// Compute maximum timestep for this method
-  virtual double timestep (CommBlock * comm_block) throw() = 0;
+  virtual double timestep (CommBlock * comm_block) throw() 
+  { return std::numeric_limits<double>::max(); }
 
 protected: // functions
 
