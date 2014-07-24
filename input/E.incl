@@ -17,7 +17,8 @@
         "velocity_x",
         "velocity_y",
         "total_energy",
-        "internal_energy"
+        "internal_energy",
+	"pressure"
       ] ;
 
       courant   = 0.8;
