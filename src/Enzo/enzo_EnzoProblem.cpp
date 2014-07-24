@@ -175,6 +175,8 @@ Method * EnzoProblem::create_method_
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "turbulence") {
     method = new EnzoMethodTurbulence;
+  } else if (type == "pressure") {
+    method = new EnzoMethodPressure (enzo_config->field_gamma);
   } else {
     method = Problem::create_method_(type,config, field_descr);
   }

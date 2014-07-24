@@ -103,25 +103,32 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
 
   // @@@ WARNING: should have temporary Field capability
 
-  enzo_float * pressure_field = new enzo_float[size];
-  for (int i=0; i<size; i++) pressure_field[i] = 0;
+  // enzo_float * pressure_field = new enzo_float[size];
+  // for (int i=0; i<size; i++) pressure_field[i] = 0;
 
+  enzo_float * pressure_field = (enzo_float *) field_block->values("pressure");
   int  result;
-  if (EnzoBlock::DualEnergyFormalism) {
-    result = enzo_comm_block->ComputePressureDualEnergyFormalism
-      (enzo_comm_block->Time(), pressure_field);
-    //    printf ("%s:%d pressure %f\n",__FILE__,__LINE__,pressure_field[0]);
-  }
-  else {
-    result = enzo_comm_block->ComputePressure
-      (enzo_comm_block->Time(), pressure_field);
-    //    printf ("%s:%d pressure %f\n",__FILE__,__LINE__,pressure_field[0]);
-  }
- 
-  if (result == ENZO_FAIL) {
-    fprintf(stderr, "Error in grid->ComputePressure.\n");
-    exit(EXIT_FAILURE);
-  }
+  // if (EnzoBlock::DualEnergyFormalism) {
+  //   result = enzo_comm_block->ComputePressureDualEnergyFormalism
+  //     (enzo_comm_block->Time(), pressure_field);
+  //   //    printf ("%s:%d pressure %f\n",__FILE__,__LINE__,pressure_field[0]);
+  // }
+  // else {
+  //   result = enzo_comm_block->ComputePressure
+  //     (enzo_comm_block->Time(), pressure_field);
+  //   //    printf ("%s:%d pressure %f\n",__FILE__,__LINE__,pressure_field[0]);
+  // }
+  // if (result == ENZO_FAIL) {
+  //   fprintf(stderr, "Error in grid->ComputePressure.\n");
+  //   exit(EXIT_FAILURE);
+  // }
+
+  WARNING("EnzoMethodPpm::timestep",
+	  "using untested EnzoMethodPressure");
+
+  EnzoMethodPressure method_pressure (EnzoBlock::Gamma);
+  method_pressure.compute(enzo_comm_block);
+
  
   /* 2) Calculate dt from particles. */
  
@@ -207,7 +214,7 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
   //   dt = MIN(dt, dtAcceleration);
   //  dt = MIN(dt, dtExpansion);
 
-  delete [] pressure_field;
+  //  delete [] pressure_field;
 
   if (dt<=0.0) {
     FieldBlock * field_block = comm_block->block()->field_block();

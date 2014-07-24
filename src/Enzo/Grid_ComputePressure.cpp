@@ -99,7 +99,10 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
     } // end of loop
  
   else
- 
+
+    //    WARNING("EnzoBlock::ComputePressure()",
+    //	    "Accessing OldBaryonField");
+	    
     /* general case: */
  
     for (i = 0; i < size; i++) {
