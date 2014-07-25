@@ -89,7 +89,7 @@ CommBlock::CommBlock
 
   initialize ();
 
-  const int rank = simulation()->dimension();
+  const int rank = this->rank();
   
   sync_coarsen_.set_stop(NC(rank));
   sync_coarsen_.clear();
@@ -325,20 +325,20 @@ Simulation * CommBlock::simulation() const
 
 //----------------------------------------------------------------------
 
-int CommBlock::dimension() const
-{ return simulation()->dimension(); }
+int CommBlock::rank() const
+{ return simulation()->rank(); }
 
 //----------------------------------------------------------------------
 
 std::string CommBlock::name() const throw()
 {
-  int dim = simulation()->dimension();
+  const int rank = this->rank();
   int nb3[3] = {1,1,1};
   simulation()->hierarchy()->blocking(nb3,nb3+1,nb3+2);
   int nb  = std::max( std::max (nb3[0],nb3[1]),nb3[2]);
   int bits = 0;
   while (nb/=2) ++bits;
-  return "B" + index_.bit_string(level(),dim,bits);
+  return "B" + index_.bit_string(level(),rank,bits);
 }
 
 //----------------------------------------------------------------------
@@ -524,7 +524,7 @@ void CommBlock::loop_limits_refresh_(int ifacemin[3], int ifacemax[3])
   ifacemax[1] = on_boundary[1][1] ? 0 : 1;
   ifacemax[2] = on_boundary[2][1] ? 0 : 1;
 
-  int rank = simulation()->dimension();
+  const int rank = this->rank();
   if (rank < 2) ifacemin[1] = ifacemax[1] = 0;
   if (rank < 3) ifacemin[2] = ifacemax[2] = 0;
 
@@ -535,7 +535,7 @@ void CommBlock::loop_limits_refresh_(int ifacemin[3], int ifacemax[3])
 void CommBlock::loop_limits_nibling_ 
 ( int ic3m[3],int ic3p[3], const int if3[3]) const throw()
 {
-  int rank = simulation()->dimension();
+  const int rank = this->rank();
 
   ic3m[0] = (if3[0] == 0) ? 0 : (if3[0]+1)/2;
   ic3p[0] = (if3[0] == 0) ? 1 : (if3[0]+1)/2;

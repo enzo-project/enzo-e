@@ -71,7 +71,7 @@ void ColormapRGB::apply (double * r, double * g, double * b,
 	int ik = ix+nx*(iy + ny*iz);
 	double v = array[iv];
 	// map v to lower colormap index
-	size_t k =  (n - 1)*(v - min_) / (max_-min_);
+	int k =  (n - 1)*(v - min_) / (max_-min_);
 	// prevent k == map_.size()-1, which happens if value == max
 	if (k > n - 2) k = n-2;
 	// linear interpolate colormap values
@@ -105,7 +105,7 @@ void ColormapRGB::apply (double * r, double * g, double * b,
 	int ik = ix+nx*(iy + ny*iz);
 	double v = array[iv];
 	// map v to lower colormap index
-	size_t k =  (n - 1)*(v - min_) / (max_-min_);
+	int k =  (n - 1)*(v - min_) / (max_-min_);
 	// prevent k == map_.size()-1, which happens if value == max
 	if (k > n - 2) k = n-2;
 	// linear interpolate colormap values

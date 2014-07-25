@@ -42,7 +42,7 @@ public: // interface
   /// Create a new Hierarchy [abstract factory design pattern]
   virtual Hierarchy * create_hierarchy 
   (
-   int dimension, int refinement,
+   int rank, int refinement,
    int process_first, int process_last_plus) const throw ();
 
   /// Create an Input / Output accessor object for CommBlock

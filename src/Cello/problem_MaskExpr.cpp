@@ -40,7 +40,7 @@ void MaskExpr::evaluate (bool * mask, double t,
 {
 
   ASSERT6("MaskExpr::evaluate",
-	  "mask dimension (%d %d %d) needs to be at least (%d %d %d)",
+	  "mask size (%d %d %d) needs to be at least (%d %d %d)",
 	  ndx,ndy,ndz,nx,ny,nz,
 	  (ndx >= nx) && (ndy >= ny) && (ndz >= nz));
 

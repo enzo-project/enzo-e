@@ -331,7 +331,7 @@ void levels_to_tree
   timer.start();
 
   int r = tree->refinement();
-  int d = tree->dimension();
+  int d = tree->rank();
   int r2d=r;
   if (d>1) r2d *= r;
   if (d>2) r2d *= r;
@@ -585,7 +585,7 @@ void tree_to_png (Tree * tree, std::string filename,
 /// @param target whether to use "targeted refinement"
 {
 
-  bool fill_blocks = (theta==0.0 && phi==0.0 && psi==0 && tree->dimension()==2);
+  bool fill_blocks = (theta==0.0 && phi==0.0 && psi==0 && tree->rank()==2);
     
   pngwriter png (nx+1,ny+1,0,filename.c_str());
 
@@ -609,7 +609,7 @@ void tree_to_png (Tree * tree, std::string filename,
 
   ItNode it_node (tree,level_lower,level_upper);
   int r = tree->refinement();
-  int d = tree->dimension();
+  int d = tree->rank();
   double rinv = 1.0/r;
   int count = 0;
   bool done = false;

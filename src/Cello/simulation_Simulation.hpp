@@ -64,9 +64,9 @@ public: // interface
   // ACCESSOR FUNCTIONS
   //----------------------------------------------------------------------
 
-  /// Return the dimensionality of the simulation
-  int dimension() const throw()
-  { return dimension_; }
+  /// Return the rank of the simulation
+  int rank() const throw()
+  { return rank_; }
 
   /// Return the Problem container object
   Problem *  problem() const throw()
@@ -244,8 +244,8 @@ protected: // attributes
   /// Whether the group_process_ object was allocated inside Simulation
   bool is_group_process_new_;
 
-  /// Dimension or rank of the simulation
-  int  dimension_; 
+  /// Rank of the simulation
+  int  rank_; 
 
   /// Current cycle
   int cycle_;

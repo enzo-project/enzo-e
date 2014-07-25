@@ -284,19 +284,15 @@ mpi_path = '' # this is a hack to compile on gordon with parallel HDF5
 is_arch_valid = 0
 sys.path.append("./config");
 
-if   (arch == "linux_gnu"):    from linux_gnu    import *
+
+if   (arch == "gordon_gnu"):   from gordon_gnu   import *
+elif (arch == "gordon_intel"): from gordon_intel import *
+elif (arch == "gordon_pgi"):   from gordon_pgi   import *
+elif (arch == "linux_gnu"):    from linux_gnu    import *
 elif (arch == "linux_gprof"):  from linux_gprof  import *
 elif (arch == "linux_mpe"):    from linux_mpe    import *
 elif (arch == "linux_tau"):    from linux_tau    import *
 elif (arch == "ncsa_bw"):      from ncsa_bw      import *
-elif (arch == "triton_gnu"):   from triton_gnu   import *
-elif (arch == "triton_intel"): from triton_intel import *
-elif (arch == "triton_mpe"):   from triton_mpe   import *
-elif (arch == "triton_pgi"):   from triton_pgi   import *
-elif (arch == "triton_tau"):   from triton_tau   import *
-elif (arch == "gordon_gnu"):   from gordon_gnu   import *
-elif (arch == "gordon_pgi"):   from gordon_pgi   import *
-elif (arch == "gordon_intel"): from gordon_intel   import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS

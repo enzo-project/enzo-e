@@ -25,13 +25,12 @@ void CommBlock::refresh_begin_()
 	     name_.c_str());
     return;
   }
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  const Config * config = simulation->config();
+  const Config * config = simulation()->config();
 
   if (is_leaf()) {
 
-    int rank = simulation->dimension();
+    int rank = this->rank();
 
     int n3[3];
     size_forest(&n3[0],&n3[1],&n3[2]);
@@ -88,7 +87,7 @@ void CommBlock::refresh_begin_()
 	}
       } else {
 
-	index_.print("ERROR Refresh",-1,2,false,simulation);
+	index_.print("ERROR Refresh",-1,2,false,simulation());
 	debug_faces_("refresh");
 	ERROR8("CommBlock::refresh_begin_()",
 	       "%s: REFRESH ERROR: face (%d %d %d) level %d face_level %d phase %d is_leaf %",

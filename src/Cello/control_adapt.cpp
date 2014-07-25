@@ -166,7 +166,7 @@ void CommBlock::adapt_end_()
     for (size_t i=0; i<face_level_last_.size(); i++)
       face_level_last_[i] = 0;
 
-    const int rank = simulation()->dimension();
+    const int rank = this->rank();
     sync_coarsen_.set_stop(NC(rank));
     sync_coarsen_.clear();
 
@@ -246,7 +246,7 @@ void CommBlock::adapt_refine_()
 
   adapt_ = adapt_unknown;
 
-  const int rank = simulation()->dimension();
+  const int rank = this->rank();
   
   int nx,ny,nz;
   block()->field_block()->size(&nx,&ny,&nz);
@@ -324,7 +324,7 @@ void CommBlock::adapt_send_level()
   if (!is_leaf()) return;
 
   const int level        = this->level();
-  const int rank         = simulation()->dimension();
+  const int rank         = this->rank();
   const int rank_refresh = simulation()->config()->field_refresh_rank;
 
   ItFace it_face(rank,rank_refresh);
@@ -551,7 +551,7 @@ void CommBlock::adapt_recv_same(const int of3[3],int level_face_new)
   // neighbor.  Unique face level is updated, and levels on
   // possibly multiple faces of multiple children are updated.
 
-  const int rank = simulation()->dimension();
+  const int rank = this->rank();
   const int rank_refresh = simulation()->config()->field_refresh_rank;
 
   set_face_level_next (of3, level_face_new);
@@ -579,7 +579,7 @@ void CommBlock::adapt_recv_coarse(const int of3[3], const int ic3[3], int level_
   // possibly multiple faces of possibly multiple child faces are
   // updated.
 
-  const int rank = simulation()->dimension();
+  const int rank = this->rank();
   const int rank_refresh = simulation()->config()->field_refresh_rank;
 
   ItFace it_face (rank,rank_refresh,ic3,of3);
@@ -617,7 +617,7 @@ void CommBlock::adapt_recv_fine(const int of3[3], const int ic3[3],int level_fac
   // are used.  The neighbor level for the unique face and unique
   // child facing the sending child is updated.
 
-  const int rank = simulation()->dimension();
+  const int rank = this->rank();
   const int rank_refresh = simulation()->config()->field_refresh_rank;
 
 
@@ -652,7 +652,7 @@ void CommBlock::adapt_recv_recurse(const int if3[3],
 				   int level_face_curr, int level_face_new,
 				   Index index_send)
 {
-  const int rank = simulation()->dimension();
+  const int rank = this->rank();
 
 #ifdef DEBUG_ADAPT
   sprintf (buffer,"Recurse called: ic3 (%d %d %d) if3 (%d %d %d) level %d -> %d",
@@ -736,7 +736,7 @@ void CommBlock::p_adapt_recv_child
   store_face_(na,array, iface, ic3, lghost, op_array_restrict);
 
   // copy child face level and face level
-  const int rank = simulation()->dimension();
+  const int rank = this->rank();
   const int  rank_refresh = simulation()->config()->field_refresh_rank;
   ItFace  it_face(rank,rank_refresh);
   int of3[3];
@@ -775,12 +775,12 @@ void CommBlock::p_adapt_delete()
 
 void CommBlock::initialize_child_face_levels_()
 {
-  const int  rank         = simulation()->dimension();
+  const int  rank         = this->rank();
   const int  rank_refresh = simulation()->config()->field_refresh_rank;
   const int level = this->level();
 
   int ic3[3];
-  ItChild it_child(simulation()->dimension());
+  ItChild it_child(rank);
 
   // For each child
 

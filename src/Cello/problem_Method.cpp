@@ -45,7 +45,7 @@ void Method::initialize_ ( CommBlock * comm_block) throw()
   }
 
 
-  rank_ = comm_block->dimension();
+  rank_ = comm_block->rank();
 
   dt_ = comm_block->dt();
 

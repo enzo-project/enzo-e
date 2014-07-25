@@ -39,8 +39,8 @@ PARALLEL_MAIN_BEGIN
   unit_assert (tree != NULL);
 
   //--------------------------------------------------
-  unit_func("dimension()");
-  unit_assert (tree->dimension() == 2);
+  unit_func("rank()");
+  unit_assert (tree->rank() == 2);
   
   //--------------------------------------------------
   unit_func("refinement()");

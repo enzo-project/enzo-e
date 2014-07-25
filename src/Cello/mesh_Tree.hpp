@@ -40,7 +40,7 @@ public: // interface
   }
 
   /// Return the dimensionality of the tree
-  int dimension() const
+  int rank() const
   { return d_; }
 
   /// Return the refinement level of the tree

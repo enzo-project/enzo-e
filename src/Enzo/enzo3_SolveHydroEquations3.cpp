@@ -18,8 +18,8 @@
 int EnzoBlock::SolveHydroEquations3
   (
    int CycleNumber,
-   double time,
-   double dt
+   enzo_float time,
+   enzo_float dt
    )
 {
 

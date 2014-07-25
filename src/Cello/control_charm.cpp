@@ -437,7 +437,7 @@ void CommBlock::control_sync_neighbor_(int phase)
   } else {
 
     const int level        = this->level();
-    const int rank = simulation()->dimension();
+    const int rank = this->rank();
     const int rank_refresh = simulation()->config()->field_refresh_rank;
 
     ItFace it_face(rank,rank_refresh);

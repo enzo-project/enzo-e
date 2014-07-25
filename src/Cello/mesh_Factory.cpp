@@ -11,11 +11,11 @@
 
 Hierarchy * Factory::create_hierarchy 
 (
- int dimension, int refinement,
+ int rank, int refinement,
  int process_first, int process_last_plus) const throw ()
 {
   return new Hierarchy 
-    (this,dimension,refinement,process_first, process_last_plus); 
+    (this,rank,refinement,process_first, process_last_plus); 
 }
 
 //----------------------------------------------------------------------

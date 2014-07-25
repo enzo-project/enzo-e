@@ -482,8 +482,8 @@ public: // virtual functions
   /// Return the local simulation object
   Simulation * simulation() const;
 
-  /// Return the dimension of the Simulation
-  int dimension() const;
+  /// Return the rank of the Simulation
+  int rank() const;
 
   //  int count_neighbors() const;
 

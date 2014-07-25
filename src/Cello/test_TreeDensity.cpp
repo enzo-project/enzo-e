@@ -58,7 +58,7 @@ PARALLEL_MAIN_BEGIN
     (file_name, group_name, field_name, &nx, &ny, &nz, min_level,max_level,
      refine,tol);
 
-  int dimension = nz==1?2:3;
+  int rank = nz==1?2:3;
   int refinement=2;
 
   // --------------------------------------------------
@@ -77,7 +77,7 @@ PARALLEL_MAIN_BEGIN
   // int * zones_per_block = new int [max_level+1];
   // // compute number of zones in a block at each level
 
-  // int r2d = (dimension == 2) ? 4 : 8;
+  // int r2d = (rank == 2) ? 4 : 8;
   // for (int i=0; i<=max_level; i++) {
   //   zones_per_block[i]=n;
   //   n/=r2d;
@@ -89,7 +89,7 @@ PARALLEL_MAIN_BEGIN
 
   Timer timer;
   timer.start();
-  Tree tree (dimension,refinement);
+  Tree tree (rank,refinement);
 
   levels_to_tree (&tree, levels,nx,ny,nz);
 
@@ -128,7 +128,7 @@ PARALLEL_MAIN_BEGIN
   double scale = 0.6;
   double a90 = 0.5*M_PI;
 
-  if (dimension == 2) {
+  if (rank == 2) {
     timer.clear();  timer.start();
     tree_to_png (&tree,"density_2d_1-initial.png",
 		 mx,my, min_level,max_level, 0.0,0.0,0.0, scale, true, falloff);
@@ -146,7 +146,7 @@ PARALLEL_MAIN_BEGIN
 	       mx,my, min_level,max_level, 0.0,0.0,0.0, 1.0, true,falloff);
     TRACE1 ("Time = %f",timer.value());
 
-  if (dimension == 3) {
+  if (rank == 3) {
     timer.clear();  timer.start();
     hdf5_to_png (file_name,group_name,field_name,"density_field.png",
 		 mx,my, min_level,max_level, th,ph,ps, scale, false, falloff);
@@ -177,7 +177,7 @@ PARALLEL_MAIN_BEGIN
   tree_to_png (&tree,"density_xy_1-initial.png",
 	       mx,my, min_level,max_level, 0.0,0.0,0.0, 1.0, true,0);
     TRACE1 ("Time = %f",timer.value());
-  if (dimension == 3) {
+  if (rank == 3) {
     timer.clear();  timer.start();
     tree_to_png (&tree,"density_yz_1-initial.png",
 		 mx,my, min_level,max_level, 0.0,-a90,a90, 1.0, true,0);
@@ -262,7 +262,7 @@ PARALLEL_MAIN_BEGIN
 	       mx,my, min_level,max_level, 0.0,0.0,0.0, 1.0, true,0);
     TRACE1 ("Time = %f",timer.value());
 
-  if (dimension == 3) {
+  if (rank == 3) {
     timer.clear();  timer.start();
     tree_to_png (&tree,"density_yz_3-coalesced.png",
 		 mx,my, min_level,max_level, 0.0,-a90,a90, 1.0, true,0);
@@ -305,7 +305,7 @@ PARALLEL_MAIN_BEGIN
 		 mx,my, min_level,max_level, 0.0,0.0,0.0, 1.0, true,0,target);
 
 
-    if (dimension == 3) {
+    if (rank == 3) {
       timer.clear();  timer.start();
       tree_to_png (&tree,"density_yz_4-targeted.png",
 		   mx,my, min_level,max_level, 0.0,-a90,a90, 1.0, true,0);

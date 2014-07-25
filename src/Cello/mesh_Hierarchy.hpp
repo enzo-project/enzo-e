@@ -30,7 +30,7 @@ public: // interface
   /// Initialize a Hierarchy object
   Hierarchy (
 	     const Factory * factory,
-	     int dimension, int refinement,
+	     int rank, int refinement,
 	     int process_first, int process_last_plus
 	     ) throw ();
 
@@ -56,8 +56,8 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Return dimension
-  int dimension() const throw ();
+  /// Return rank
+  int rank() const throw ();
 
   /// Return domain lower extent
   void lower(double * x, double * y = 0, double * z = 0) const throw ();
@@ -104,7 +104,7 @@ public: // interface
 		      int process_last_plus = -1) throw();
 
 
-  /// Return the number of CommBlocks along each dimension
+  /// Return the number of CommBlocks along each rank
   void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
 
   /// Return the factory object associated with the Hierarchy
@@ -126,8 +126,8 @@ protected: // attributes
   /// [abstract factory design pattern]
   Factory * factory_;
 
-  /// Dimension of the hierarchy [ used for Charm++ pup() of Tree ]
-  int dimension_;
+  /// Rank of the hierarchy [ used for Charm++ pup() of Tree ]
+  int rank_;
   
   /// Refinement of the hierarchy [ used for Charm++ pup() of Tree ]
   int refinement_;

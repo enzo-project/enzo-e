@@ -327,7 +327,7 @@ void Tree::balance ()
       NodeTrace neighbor_trace (root_);
       bool is_neighbor;
 
-      for (int i = 0; i < 2*dimension(); i++) {
+      for (int i = 0; i < 2*rank(); i++) {
 	bool do_refine;
 	do {
 	  is_neighbor = 
@@ -368,7 +368,7 @@ void Tree::coalesce ()
   // Repeatedly coarsen nodes with children but no grandchildren
   int passes = 0;
   int r2d = 1;
-  for (int i=0; i<dimension(); i++) r2d *= refinement();
+  for (int i=0; i<rank(); i++) r2d *= refinement();
 
   int count;
 

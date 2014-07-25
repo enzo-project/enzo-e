@@ -24,7 +24,7 @@ Simulation::Simulation
   parameter_file_(parameter_file),
   group_process_((GroupProcess *)group_process),
   is_group_process_new_(false),
-  dimension_(0),
+  rank_(0),
   cycle_(0),
   time_(0.0),
   dt_(0),
@@ -87,7 +87,7 @@ void Simulation::pup (PUP::er &p)
   if (up) group_process_ = GroupProcess::create();
 
   p | is_group_process_new_;
-  p | dimension_; 
+  p | rank_; 
   p | cycle_;
   p | time_;
   p | dt_;
@@ -183,15 +183,15 @@ void Simulation::finalize() throw()
 void Simulation::initialize_simulation_() throw()
 {
 
-  dimension_ = config_->mesh_root_rank;
+  rank_ = config_->mesh_root_rank;
   
   ASSERT ("Simulation::initialize_simulation_()", 
 	  "Parameter 'Mesh:root_rank' must be specified",
-	  dimension_ != 0);
+	  rank_ != 0);
   
   ASSERT ("Simulation::initialize_simulation_()", 
 	  "Parameter 'Mesh:root_rank' must be 1, 2, or 3",
-	  (1 <= dimension_) && (dimension_ <= 3));
+	  (1 <= rank_) && (rank_ <= 3));
 
   cycle_ = config_->initial_cycle;
   time_  = config_->initial_time;
@@ -386,7 +386,7 @@ void Simulation::initialize_hierarchy_() throw()
 
   const int refinement = 2;
   hierarchy_ = factory()->create_hierarchy 
-    (dimension_,refinement, 0, group_process_->size());
+    (rank_,refinement, 0, group_process_->size());
 
   // Domain extents
 

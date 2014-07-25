@@ -47,13 +47,41 @@ void EnzoInitialTurbulence::enforce_block
   FieldBlock * field_block = comm_block->block()->field_block();
 
   enzo_float *  d = (enzo_float *) field_block->values("density");
-  enzo_float * ax = (enzo_float *) field_block->values("acceleration_x");
-  enzo_float * ay = (enzo_float *) field_block->values("acceleration_y");
-  enzo_float * az = (enzo_float *) field_block->values("acceleration_z");
+  enzo_float *  p = (enzo_float *) field_block->values("pressure");
+  enzo_float * ax = (enzo_float *) field_block->values("driving_x");
+  enzo_float * ay = (enzo_float *) field_block->values("driving_y");
+  enzo_float * az = (enzo_float *) field_block->values("driving_z");
   enzo_float * vx = (enzo_float *) field_block->values("velocity_x");
   enzo_float * vy = (enzo_float *) field_block->values("velocity_y");
   enzo_float * vz = (enzo_float *) field_block->values("velocity_z");
   enzo_float * te = (enzo_float *) field_block->values("total_energy");
+
+  const int rank = comm_block->simulation()->rank();
+
+  ASSERT("EnzoInitializeTurbulence::enforce_block()",
+	 "Missing Field 'density'", d);
+  ASSERT("EnzoInitializeTurbulence::enforce_block()",
+	 "Missing Field 'pressure'",p);
+  if (rank >= 1)
+    ASSERT("EnzoInitializeTurbulence::enforce_block()",
+	   "Missing Field 'driving_x'", ax);
+  if (rank >= 2)
+    ASSERT("EnzoInitializeTurbulence::enforce_block()",
+	   "Missing Field 'driving_y'",  ay);
+  if (rank >= 3)
+    ASSERT("EnzoInitializeTurbulence::enforce_block()",
+	   "Missing Field 'driving_z'",  az);
+  if (rank >= 1)
+    ASSERT("EnzoInitializeTurbulence::enforce_block()",
+	   "Missing Field 'velocity_x'", vx);
+  if (rank >= 2)
+    ASSERT("EnzoInitializeTurbulence::enforce_block()",
+	   "Missing Field 'velocity_y'", vy);
+  if (rank >= 3)
+    ASSERT("EnzoInitializeTurbulence::enforce_block()",
+	   "Missing Field 'velocity_z'",  vz);
+  ASSERT("EnzoInitializeTurbulence::enforce_block()",
+	 "Missing Field 'total_energy'",  te);
 
   int nx,ny,nz;
   field_block->size(&nx,&ny,&nz);
@@ -85,14 +113,9 @@ void EnzoInitialTurbulence::enforce_block
       for (int ix=gx; ix<nx+gx; ix++) {
 	double x = xm + (ix - gx + 0.5)*hx;
 	int i = ix + ndx*(iy + ndy*iz);
-	d[i]  = 0.125;
-	vx[i] = 0.0;
-	if (vy) vy[i] = 0.0;
-	if (vz) vz[i] = 0.0;
+	d[i]  = 1.0;
 	ax[i] = 0.0;
-	if (ay) ay[i] = 0.0;
-	if (az) az[i] = 0.0;
-	te[i] = 0.14 / ((EnzoBlock::Gamma - 1.0) * d[i]);
+	te[i] = p[i] / ((EnzoBlock::Gamma - 1.0) * d[i]);
       }
     }
   }
