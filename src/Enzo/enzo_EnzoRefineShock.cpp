@@ -42,6 +42,10 @@ int EnzoRefineShock::apply
 
   int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
 
+  // compute pressure using the EnzoMethodPressure class
+  EnzoMethodPressure method_pressure (EnzoBlock::Gamma);
+  method_pressure.compute(comm_block);
+
   Block * block = comm_block->block();
   double xm[3],xp[3];
   block->lower(&xm[0],&xm[1],&xm[2]);
@@ -118,9 +122,6 @@ void EnzoRefineShock::evaluate_block_
  bool * all_coarsen, 
  int rank)
 {
-  ERROR("EnzoRefineShock::evaluate_block_()",
-	"Not implemented yet: need to compute pressure");
-
   const int d3[3] = {1, ndx, ndx*ndy};
 
   for (int axis=0; axis<rank; axis++) {
