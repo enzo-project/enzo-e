@@ -38,7 +38,7 @@ void EnzoInitialTurbulence::enforce_block
 
 {
 
-  INCOMPLETE("EnzoInitialTurbulence::enforce_block()");
+  //  INCOMPLETE("EnzoInitialTurbulence::enforce_block()");
 
   ASSERT("EnzoInitialTurbulence",
 	 "CommBlock does not exist",
@@ -56,7 +56,7 @@ void EnzoInitialTurbulence::enforce_block
   enzo_float * vz = (enzo_float *) field_block->values("velocity_z");
   enzo_float * te = (enzo_float *) field_block->values("total_energy");
 
-  const int rank = comm_block->simulation()->rank();
+  int rank = comm_block->simulation()->rank();
 
   ASSERT("EnzoInitializeTurbulence::enforce_block()",
 	 "Missing Field 'density'", d);
@@ -99,8 +99,6 @@ void EnzoInitialTurbulence::enforce_block
 
   int gx,gy,gz;
   field_descr->ghosts(0,&gx,&gy,&gz);
-  WARNING("EnzoInitialTurbulence",
-	  "Assumes same ghost zone depth for all fields");
 
   int ndx = nx + 2*gx;
   int ndy = ny + 2*gy;
@@ -119,4 +117,30 @@ void EnzoInitialTurbulence::enforce_block
       }
     }
   }
+
+  // initialize velocities using turboinit
+
+  int Nx,Ny,Nz;
+  comm_block->simulation()->hierarchy()->root_size (&Nx, &Ny, &Nz);
+
+  // assumes cubical domain
+
+  ASSERT3 ("EnzoInitialTurbulence::enforce_block()",
+	   "Root grid mesh dimensions %d %d %d must be equal or 1",
+	   Nx,Ny,Nz,
+	   (Ny==1) || 
+	   ((Nz==1) && (Nx == Ny)) ||
+	   (Nx == Ny && Ny == Nz));
+
+  int ix,iy,iz;
+  comm_block->index().array(&ix,&iy,&iz);
+
+  int ox = ix * nx;
+  int oy = iy * ny;
+  int oz = iz * nz;
+
+  FORTRAN_NAME(turboinit)
+    (&rank, &Nx, (enzo_float *)vx, (enzo_float *)vy, (enzo_float*)vz,
+     &ndx,&ndy,&ndz,
+     &ox,&oy,&oz);
 }

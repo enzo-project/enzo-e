@@ -33,7 +33,7 @@ void EnzoMethodTurbulence::pup (PUP::er &p)
 
 void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
 {
-  INCOMPLETE("EnzoMethodTurbulence::compute()");
+  //  INCOMPLETE("EnzoMethodTurbulence::compute()");
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 

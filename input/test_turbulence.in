@@ -1,0 +1,105 @@
+ Domain {
+     lower = [ 0.0, 0.0, 0.0 ];
+     upper = [ 1.0, 1.0, 1.0 ];
+ }
+
+ Mesh {
+     list = [ "shock", "shear" ];
+     shock { type = "shock"; };
+     shear { type = "shear"; };
+#     max_level = 2;
+     root_rank = 3;
+     root_blocks = [ 4, 4, 4 ];
+     root_size = [ 64, 64, 64 ];
+ }
+
+ Initial {
+     type = "turbulence";
+ }
+
+ Boundary {
+   type = "periodic";
+ }
+
+ Stopping {
+     cycle = 100;
+ }
+
+ Method {
+     list = [ "ppm" ];
+     ppm {
+         diffusion = true;
+         dual_energy = false;
+         flattening = 3;
+         steepening = true;
+     };
+ }
+
+ Field {
+     alignment = 8;
+     courant = 0.800;
+     gamma = 1.40;
+     ghosts = 4;
+     list = [ "density", 
+              "velocity_x",
+              "velocity_y", 
+              "velocity_z", 
+              "driving_x",
+              "driving_y", 
+              "driving_z", 
+              "total_energy",
+              "internal_energy",
+              "pressure" ];
+     padding = 0;
+ }
+
+
+ Output {
+     list = [ "de_png", "mesh", "hdf5" ];
+     hdf5 {
+         name = [ "turbulence-p%02d-c%04d.h5", "proc", "count" ];
+         schedule {
+             step = 25;
+             type = "interval";
+             var = "cycle";
+         };
+         type = "data";
+     };
+     de_png {
+         colormap = [ 0.0, 0.0, 0.0, 
+                      1.0, 0.0, 0.0,
+                      1.0, 1.0, 0.0, 
+                      1.0, 1.0, 1.0 ];
+         field_list = [ "density" ];
+         image_size = [ 1024, 256 ];
+         name = [ "turbulence-de-%04d.png", "count" ];
+         schedule {
+             step = 25;
+             type = "interval";
+             var = "cycle";
+         };
+         type = "image";
+     };
+     mesh {
+         colormap = [ 0.0, 0.0, 0.0, 
+                      0.0, 0.0, 1.0, 
+                      0.0, 1.0, 1.0, 
+                      0.0, 1.0, 0.0, 
+                      1.0, 1.0, 0.0, 
+                      1.0, 0.0, 0.0 ];
+         image_max = 6.0;
+         image_min = 0.0;
+         image_reduce_type = "max";
+         image_size = [ 1025, 257 ];
+         image_specify_bounds = true;
+         image_type = "mesh";
+         name = [ "turbulence-mesh-%04d.png", "count" ];
+         schedule {
+             step = 25;
+             type = "interval";
+             var = "cycle";
+         };
+         type = "image";
+     };
+ }
+
