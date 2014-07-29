@@ -83,9 +83,6 @@ void EnzoInitialTurbulence::enforce_block
   ASSERT("EnzoInitializeTurbulence::enforce_block()",
 	 "Missing Field 'total_energy'",  te);
 
-  int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
-
   double xm,ym,zm;
   comm_block->block()->lower(&xm,&ym,&zm);
 
@@ -97,6 +94,8 @@ void EnzoInitialTurbulence::enforce_block
 			  ym,yp,&hy,
 			  zm,zp,&hz);
 
+  int nx,ny,nz;
+  field_block->size(&nx,&ny,&nz);
   int gx,gy,gz;
   field_descr->ghosts(0,&gx,&gy,&gz);
 
