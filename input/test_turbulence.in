@@ -10,7 +10,7 @@
 #     max_level = 2;
      root_rank = 3;
      root_blocks = [ 4, 4, 4 ];
-     root_size = [ 64, 64, 64 ];
+     root_size = [ 128, 128, 128 ];
  }
 
  Initial {
@@ -55,7 +55,7 @@
 
 
  Output {
-     list = [ "de_png", "mesh", "hdf5" ];
+     list = [ "de_png", "mesh" ];
      hdf5 {
          name = [ "turbulence-p%02d-c%04d.h5", "proc", "count" ];
          schedule {
@@ -71,7 +71,7 @@
                       1.0, 1.0, 0.0, 
                       1.0, 1.0, 1.0 ];
          field_list = [ "density" ];
-         image_size = [ 1024, 256 ];
+         image_size = [ 1024, 1024 ];
          name = [ "turbulence-de-%04d.png", "count" ];
          schedule {
              step = 25;
@@ -90,7 +90,7 @@
          image_max = 6.0;
          image_min = 0.0;
          image_reduce_type = "max";
-         image_size = [ 1025, 257 ];
+         image_size = [ 1025, 1025 ];
          image_specify_bounds = true;
          image_type = "mesh";
          name = [ "turbulence-mesh-%04d.png", "count" ];
