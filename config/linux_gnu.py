@@ -8,7 +8,8 @@ flags_link_charm = ' -rdynamic' # required for backtraces
 cc  = 'gcc '
 f90 = 'gfortran'
 
-flags_prec      = '-fdefault-real-8 -fdefault-double-8'
+flags_prec_single = '-fdefault-real-4 -fdefault-double-8'
+flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
 
 libpath_fortran = '.'
 libs_fortran    = ['gfortran']

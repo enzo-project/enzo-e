@@ -11,6 +11,9 @@ flags_arch       = '-g -pg -O3 -Wall'
 
 balancer = 'RotateLB'
 
+flags_prec_single = '-fdefault-real-4 -fdefault-double-8'
+flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
+
 flags_cxx_charm  = '-balancer ' + balancer
 flags_link_charm = '-rdynamic -module ' + balancer
 

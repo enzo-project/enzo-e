@@ -407,7 +407,9 @@ linkflags    = linkflags + ' ' + flags_config
 linkflags    = linkflags + ' ' + flags_link_charm
 
 if (prec == 'double'):
-    fortranflags = fortranflags + ' ' + flags_prec
+    fortranflags = fortranflags + ' ' + flags_prec_double
+if (prec == 'single'):
+    fortranflags = fortranflags + ' ' + flags_prec_single
 
 if not os.path.exists("include"):
      os.makedirs("include")

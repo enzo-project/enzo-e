@@ -9,6 +9,9 @@ is_arch_valid = 1
 flags_arch = '-O3'
 flags_link  = '-O3'
 
+flags_prec_single = ''
+flags_prec_double = ''
+
 cc   = 'cc'
 f90  = 'ftn'
 

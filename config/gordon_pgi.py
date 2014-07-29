@@ -10,7 +10,9 @@ f90  = 'pgf90'
 
 libpath_fortran = ''
 libs_fortran    = []
-flags_prec      = '-Mr8'
+
+flags_prec_single = '-Mr4'
+flags_prec_double = '-Mr8'
 
 home = os.environ['HOME']
 

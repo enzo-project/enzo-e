@@ -10,6 +10,9 @@ is_arch_valid = 1
 flags_arch = '-O3 -Wall'
 flags_link = '-rdynamic -lpthread'
 
+flags_prec_single = '-fdefault-real-4 -fdefault-double-8'
+flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
+
 cc   = 'gcc'
 f90  = 'gfortran'
 
