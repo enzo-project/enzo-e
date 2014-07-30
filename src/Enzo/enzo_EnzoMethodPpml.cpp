@@ -103,27 +103,13 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) throw()
     /* Call fortran routine to do calculation. */
  
     FieldBlock * field_block = enzo_comm_block->block()->field_block();
-    enzo_float * d_field    = 0;
-    enzo_float * vx_field = 0;
-    enzo_float * vy_field = 0;
-    enzo_float * vz_field = 0;
-    enzo_float * bx_field = 0;
-    enzo_float * by_field = 0;
-    enzo_float * bz_field = 0;
-
-    d_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_density));
-    vx_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_velox));
-    vy_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_veloy));
-    vz_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_veloz));
-    bx_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_bfieldx));
-    by_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_bfieldy));
-    bz_field = (enzo_float *)field_block->values(enzo_comm_block->index(field_bfieldz));
-
-
-    // DEBUG
-    // double lower[3] = {0,0,0};
-    // double upper[3] = {1,1,1};
-    // enzo_comm_block->field_block()->print (field_descr,"dump",lower,upper);
+    enzo_float * d  = (enzo_float *) field_block->values("density");
+    enzo_float * vx = (enzo_float *) field_block->values("velox");
+    enzo_float * vy = (enzo_float *) field_block->values("veloy");
+    enzo_float * vz = (enzo_float *) field_block->values("veloz");
+    enzo_float * bx = (enzo_float *) field_block->values("bfieldx");
+    enzo_float * by = (enzo_float *) field_block->values("bfieldy");
+    enzo_float * bz = (enzo_float *) field_block->values("bfieldz");
 
     FORTRAN_NAME(calc_dt_ppml)
       (enzo_comm_block->GridDimension, 
@@ -138,9 +124,9 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) throw()
        &enzo_comm_block->CellWidth[0], 
        &enzo_comm_block->CellWidth[1], 
        &enzo_comm_block->CellWidth[2],
-       d_field,
-       vx_field, vy_field, vz_field,
-       bx_field, by_field, bz_field,
+       d,
+       vx, vy, vz,
+       bx, by, bz,
        &dtBaryons);
 //     else
 //       FORTRAN_NAME(calc_dt)(&GridRank, GridDimension, GridDimension+1,
@@ -153,14 +139,14 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) throw()
 //                           CellWidth[0], CellWidth[1], CellWidth[2],
 //                                GridVelocity, GridVelocity+1, GridVelocity+2,
 //                                &Gamma, &PressureFree, &afloat,
-//                           BaryonField[DensNum], pressure_field,
+//                           BaryonField[DensNum], pressure,
 //                                BaryonField[Vel1Num], BaryonField[Vel2Num],
 //                                BaryonField[Vel3Num], &dtBaryons, &dtViscous);
  
     /* Clean up */
  
     // if (HydroMethod != PPML_Isothermal3D)
-    //   delete pressure_field;
+    //   delete pressure;
  
     /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
  

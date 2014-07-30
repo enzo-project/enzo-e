@@ -44,22 +44,11 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
 
   EnzoBlock * enzo_comm_block = static_cast<EnzoBlock*> (comm_block);
   FieldBlock * field_block = enzo_comm_block->block()->field_block();
-  enzo_float * density_field    = 0;
-  enzo_float * velocity_x_field = 0;
-  enzo_float * velocity_y_field = 0;
-  enzo_float * velocity_z_field = 0;
 
-  int index = enzo_comm_block->index(field_density);
-  density_field = (enzo_float *)field_block->values(index);
-
-  int rank = EnzoBlock::GridRank;
-
-  if (rank >= 1) velocity_x_field =
-		   (enzo_float *) field_block->values("velocity_x");
-  if (rank >= 2) velocity_y_field =
-		   (enzo_float *) field_block->values("velocity_y");
-  if (rank >= 3) velocity_z_field =
-		   (enzo_float *) field_block->values("velocity_z");
+  enzo_float * density    = (enzo_float *)field_block->values("density");
+  enzo_float * velocity_x = (enzo_float *)field_block->values("velocity_x");
+  enzo_float * velocity_y = (enzo_float *)field_block->values("velocity_y");
+  enzo_float * velocity_z = (enzo_float *)field_block->values("velocity_z");
 
   enzo_float a = 1, dadt;
   
@@ -75,7 +64,7 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
   EnzoMethodPressure method_pressure (EnzoBlock::Gamma);
   method_pressure.compute(enzo_comm_block);
 
-  enzo_float * pressure_field = (enzo_float *) field_block->values("pressure");
+  enzo_float * pressure = (enzo_float *) field_block->values("pressure");
 
  
   /* 2) Calculate dt from particles. */
@@ -104,10 +93,10 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
 			&enzo_comm_block->CellWidth[1], 
 			&enzo_comm_block->CellWidth[2],
 			&EnzoBlock::Gamma, &EnzoBlock::PressureFree, &a,
-			density_field, pressure_field,
-			velocity_x_field, 
-			velocity_y_field, 
-			velocity_z_field, 
+			density, pressure,
+			velocity_x, 
+			velocity_y, 
+			velocity_z, 
 			&dtBaryons);
 
   TRACE1 ("dtBaryons: %f",dtBaryons);

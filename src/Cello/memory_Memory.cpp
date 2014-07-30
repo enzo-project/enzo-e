@@ -244,9 +244,9 @@ memory_group_handle Memory::current_group (const char ** group_name) throw ()
 
   memory_group_handle current = curr_group_.top();
 
-  if (group_names_[current].size() == 0) {
-    group_names_[current] = "";
-  }
+  //  if (group_names_[current].size() == 0) {
+  //    group_names_[current] = "";
+  //  }
 
   *group_name = group_names_[current].c_str();
   return current;

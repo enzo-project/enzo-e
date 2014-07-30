@@ -97,9 +97,7 @@ module enzo {
 
     entry EnzoBlock();
 
-    entry void p_method_turbulence_sum(CkReductionMsg *msg);
-    entry void p_method_turbulence_min(CkReductionMsg *msg);
-    entry void p_method_turbulence_max(CkReductionMsg *msg);
+    entry void p_method_turbulence_end(CkReductionMsg *msg);
 
   };
 

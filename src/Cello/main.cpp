@@ -84,12 +84,16 @@ void Main::q_output_enter()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void Main::q_output_exit()
 {
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_output_exit();
 #endif
 }
+
+//----------------------------------------------------------------------
 
 void Main::q_compute_enter()
 {
@@ -98,12 +102,16 @@ void Main::q_compute_enter()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void Main::q_compute_exit()
 {
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_compute_exit();
 #endif
 }
+
+//----------------------------------------------------------------------
 
 void Main::q_stopping_enter()
 {
@@ -112,12 +120,16 @@ void Main::q_stopping_enter()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void Main::q_stopping_exit()
 {
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_stopping_exit();
 #endif
 }
+
+//----------------------------------------------------------------------
 
 void Main::q_exit()
 {
@@ -126,12 +138,16 @@ void Main::q_exit()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void Main::q_adapt_enter()
 {
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_adapt_enter();
 #endif
 }
+
+//----------------------------------------------------------------------
 
 void Main::q_adapt_end()
 {
@@ -140,12 +156,16 @@ void Main::q_adapt_end()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void Main::q_adapt_next()
 {
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_adapt_next();
 #endif
 }
+
+//----------------------------------------------------------------------
 
 void Main::q_adapt_called()
 {
@@ -154,6 +174,8 @@ void Main::q_adapt_called()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void Main::q_adapt_exit()
 {
 #ifdef CHARM_ENZO
@@ -161,6 +183,7 @@ void Main::q_adapt_exit()
 #endif
 }
 
+//----------------------------------------------------------------------
 
 void Main::q_refresh_enter()
 {
@@ -169,11 +192,48 @@ void Main::q_refresh_enter()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void Main::q_refresh_exit()
 {
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->q_refresh_exit();
 #endif
+}
+
+//----------------------------------------------------------------------
+
+// SEE enzo_EnzoMethodTurbulence.cpp for context
+CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
+{
+  TRACE("EnzoBlock::r_method_turbulence()");
+  long double * values = (long double * )msgs[0]->getData();
+  long double accum[9] = { 0.0 };
+  accum[7] = std::numeric_limits<double>::min();
+  accum[8] = std::numeric_limits<double>::max();
+
+  for (int i=0; i<n; i++) {
+    double long * values = (double long *) msgs[i]->getData();
+    accum [0] += values[0];
+    accum [1] += values[1];
+    accum [2] += values[2];
+    accum [3] += values[3];
+    accum [4] += values[4];
+    accum [5] += values[5];
+    accum [6] += values[6];
+    accum [7] = std::min(accum[7],values[7]);
+    accum [8] = std::max(accum[8],values[8]);
+  }
+  return CkReductionMsg::buildNew(9*sizeof(long double),accum);
+}
+
+//----------------------------------------------------------------------
+
+CkReduction::reducerType r_method_turbulence_type;
+
+void register_method_turbulence(void)
+{
+  r_method_turbulence_type = CkReduction::addReducer(r_method_turbulence); 
 }
 
 //----------------------------------------------------------------------

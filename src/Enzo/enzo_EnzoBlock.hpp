@@ -305,17 +305,15 @@ public: /// entry methods
 
   // Compute sum, min, and max of g values for EnzoMethodTurbulence
   void method_turbulence_begin();
+
+  // Perform the necessary reductions
+  CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs);
+
   // Compute sum, min, and max of g values for EnzoMethodTurbulence
-  void method_turbulence_end();
-  // Sum computed values over processes for EnzoMethodTurbulence
-  void p_method_turbulence_sum(CkReductionMsg *msg);
-  // Min computed values over processes for EnzoMethodTurbulence
-  void p_method_turbulence_min(CkReductionMsg *msg);
-  // Max computed values over processes for EnzoMethodTurbulence
-  void p_method_turbulence_max(CkReductionMsg *msg);
+  void p_method_turbulence_end(CkReductionMsg *msg);
 
   /// Data for turbulence reductions
-  long double method_turbulence_data [9];
+  double method_turbulence_data [9];
 
 private: // attributes
 

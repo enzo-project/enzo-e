@@ -26,7 +26,7 @@
  }
 
  Method {
-     list = [ "ppm" ];
+     list = [ "ppm" , "turbulence"];
      ppm {
          diffusion = true;
          dual_energy = false;
@@ -49,13 +49,14 @@
               "driving_z", 
               "total_energy",
               "internal_energy",
+              "temperature",
               "pressure" ];
      padding = 0;
  }
 
 
  Output {
-     list = [ "de_png", "mesh" ];
+     list = [ "de_png" ];
      hdf5 {
          name = [ "turbulence-p%02d-c%04d.h5", "proc", "count" ];
          schedule {
@@ -71,7 +72,7 @@
                       1.0, 1.0, 0.0, 
                       1.0, 1.0, 1.0 ];
          field_list = [ "density" ];
-         image_size = [ 1024, 1024 ];
+#          image_size = [ 1024, 1024 ];
          name = [ "turbulence-de-%04d.png", "count" ];
          schedule {
              step = 25;

@@ -428,6 +428,8 @@ void EnzoBlock::pup(PUP::er &p)
   }
 
   if (index_.is_root()) {
+
+    PUParray(p,method_turbulence_data,9);
     // static EnzoBlock variables
     p | BoundaryRank;
     PUParray(p,BoundaryDimension,MAX_DIMENSION);

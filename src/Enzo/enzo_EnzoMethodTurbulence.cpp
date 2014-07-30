@@ -9,6 +9,8 @@
 
 #include "enzo.hpp"
 
+#include "enzo.decl.h"
+
 //----------------------------------------------------------------------
 
 EnzoMethodTurbulence::EnzoMethodTurbulence () : Method()
@@ -33,6 +35,8 @@ void EnzoMethodTurbulence::pup (PUP::er &p)
 
 void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
 {
+  TRACE("EnzoMethodTurbulence::compute()");
+
   //  INCOMPLETE("EnzoMethodTurbulence::compute()");
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
@@ -56,29 +60,28 @@ void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
   field_block->ghosts(0,&gx,&gy,&gz);
   int ndx = nx + 2*gx;
   int ndy = ny + 2*gy;
-  int ndz = nz + 2*gz;
 
-  const int n = sizeof(enzo_block->method_turbulence_data)/sizeof(long double);
-  long double * g = enzo_block->method_turbulence_data;
+  const int n = sizeof(enzo_block->method_turbulence_data)/sizeof(double);
+  double * g = enzo_block->method_turbulence_data;
   
   ASSERT1 ("EnzoMethodTurbulence::compute()",
 	   "Size of EnzoBlock::method_turbulence_data array %d must be at least 9",
 	   n, n >= 9);
 
-  g[7] = std::numeric_limits<double>::min();
-  g[8] = std::numeric_limits<double>::max();
+  for (int i=0; i<7; i++) g[i] = 0.0;
+  g[7] = std::numeric_limits<double>::max();
+  g[8] = std::numeric_limits<double>::min();
 
   const int rank = comm_block->rank();
 
-  for (int id=0; id<rank; id++) {
+  for (int iz=gz; iz<gz+nz; iz++) {
+    for (int iy=gy; iy<gy+ny; iy++) {
+      for (int ix=gx; ix<gx+nx; ix++) {
 
-    for (int iz=gz; iz<gz+nz; iz++) {
-      for (int iy=gy; iy<gy+ny; iy++) {
-	for (int ix=gx; ix<gx+nx; ix++) {
+	int i = ix + ndx*(iy + ndy*iz);
 
-	  int i = ix + ndx*(iy + ndy*iz);
-
-	  enzo_float d  = density[i];
+	enzo_float d  = density[i];
+	for (int id=0; id<rank; id++) {
 	  enzo_float v  = velocity[id][i];
 	  enzo_float v2 = v*v;
 	  enzo_float a  = driving[id][i];
@@ -90,11 +93,11 @@ void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
 	  g[3] += v2*ti;
 	  g[4] += v2*d;
 	  g[5] += v2;
-	  g[6] += d*d;
-	  g[7] = std::min(g[7],(long double) d);
-	  g[8] = std::max(g[8],(long double) d);
-
 	}
+	g[6] += d*d;
+	g[7] = std::min(g[7],(double) d);
+	g[8] = std::max(g[8],(double) d);
+
       }
     }
   }
@@ -104,44 +107,56 @@ void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
 
 //----------------------------------------------------------------------
 
+extern CkReduction::reducerType r_method_turbulence_type;
+
 void EnzoBlock::method_turbulence_begin()
 {
-  const int n = 7 * sizeof(long double);
-  long double * g = method_turbulence_data;
-  //  CkCallback cb(CkIndex_EnzoBlock::p_method_turbulence_sum(NULL),  thisProxy);
-  //  contribute(n,&g[0],CkReduction::sum_long_double,cb);
+  TRACE("EnzoMethodTurbulence::r_method_turbulence_type()");
+  const int n = 9 * sizeof(double);
+  double * g = method_turbulence_data;
+  CkCallback cb (CkIndex_EnzoBlock::p_method_turbulence_end(NULL),thisProxy);
+  contribute(n,&g,r_method_turbulence_type,cb);
 }
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_method_turbulence_sum(CkReductionMsg *msg)
-{
-  
-  const int n = 1 * sizeof(double);
-  long double * g = method_turbulence_data;
-  //  CkCallback cb(CkIndex_EnzoBlock::p_method_turbulence_min(NULL),  thisProxy);
-  //  contribute(n,&g[7],CkReduction::sum_long_double,cb);
-}
+// SEE main.cpp for implementation
+
+// CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_method_turbulence_min(CkReductionMsg *msg)
+void EnzoBlock::p_method_turbulence_end(CkReductionMsg * msg)
 {
-  const int n = 1 * sizeof(double);
-  long double * g = method_turbulence_data;
-  //  CkCallback cb(CkIndex_EnzoBlock::p_method_turbulence_max(NULL),  thisProxy);
-  //  contribute(n,&g[8],CkReduction::min_long_double,cb);
-}
+  TRACE("EnzoMethodTurbulence::p_method_turbulence_end()");
+  double * g = method_turbulence_data;
+  if (((CommBlock *)this)->index().is_root()) {
+    simulation()->monitor()->print ("Method","sum v*a*d   = %lg",g[0]);
+    simulation()->monitor()->print ("Method","sum a*a*d   = %lg",g[1]);
+    simulation()->monitor()->print ("Method","sum v*v*d/t = %lg",g[2]);
+    simulation()->monitor()->print ("Method","sum v*v/t   = %lg",g[3]);
+    simulation()->monitor()->print ("Method","sum v*v*d   = %lg",g[4]);
+    simulation()->monitor()->print ("Method","sum v*v     = %lg",g[5]);
+    simulation()->monitor()->print ("Method","sum d*d     = %lg",g[6]);
+    simulation()->monitor()->print ("Method","min d       = %lg",g[7]);
+    simulation()->monitor()->print ("Method","max d       = %lg",g[8]);
 
-//----------------------------------------------------------------------
+    int nx,ny,nz;
+    simulation()->hierarchy()->root_size(&nx,&ny,&nz);
+    int n = nx*ny*nz;
 
-void EnzoBlock::p_method_turbulence_max(CkReductionMsg *msg)
-{
-  //
-}
+    simulation()->monitor()->print 
+      ("Method","kinetic energy          %lg", 0.50*g[4]/n);
 
-//----------------------------------------------------------------------
-
-void EnzoBlock::method_turbulence_end()
-{
+    simulation()->monitor()->print 
+      ("Method","mass weighted rms Mach  %lg",sqrt(g[2]/n));
+    simulation()->monitor()->print
+      ("Method","volume weighed rms Mach %lg",sqrt(g[3]/n));
+    simulation()->monitor()->print
+      ("Method","rms Velocity            %lg",sqrt(g[5]/n));
+    simulation()->monitor()->print
+      ("Method","Density variance        %lg", sqrt(g[6]/n));
+    simulation()->monitor()->print
+      ("Method","min/max Density         %lg",g[7]/g[8]);                  
+  }
 }

@@ -117,7 +117,7 @@ void EnzoInitialTurbulence::enforce_block
     }
   }
 
-  // initialize velocities using turboinit
+  // initialize driving fields using turboinit
 
   int Nx,Ny,Nz;
   comm_block->simulation()->hierarchy()->root_size (&Nx, &Ny, &Nz);
@@ -139,7 +139,7 @@ void EnzoInitialTurbulence::enforce_block
   int oz = iz * nz;
 
   FORTRAN_NAME(turboinit)
-    (&rank, &Nx, (enzo_float *)vx, (enzo_float *)vy, (enzo_float*)vz,
+    (&rank, &Nx, (enzo_float *)ax, (enzo_float *)ay, (enzo_float*)az,
      &ndx,&ndy,&ndz,
      &ox,&oy,&oz);
 }
