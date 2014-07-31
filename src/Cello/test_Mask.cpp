@@ -94,7 +94,7 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  PARALLEL_EXIT;
+  exit_();
 }
 
 PARALLEL_MAIN_END

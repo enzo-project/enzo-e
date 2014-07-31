@@ -63,7 +63,7 @@ PARALLEL_MAIN_BEGIN
   delete hierarchy;
   delete factory;
 
-  PARALLEL_EXIT;
+  exit_();
 }
 
 PARALLEL_MAIN_END

@@ -30,7 +30,7 @@ PARALLEL_MAIN_BEGIN
   if (!(PARALLEL_ARGC == 5 || PARALLEL_ARGC == 6)) {
     PARALLEL_PRINTF("Usage: %s <file_name> [ <group_name> ] <field_name> <min_level> <max_level>\n\n",PARALLEL_ARGV[0]);
     unit_assert(false);
-    PARALLEL_EXIT;
+    exit_();
   }
 
   char * file_name = 0;
@@ -345,7 +345,7 @@ PARALLEL_MAIN_BEGIN
 
   delete [] levels;
 
-  PARALLEL_EXIT;
+  exit_();
 }
 
 PARALLEL_MAIN_END

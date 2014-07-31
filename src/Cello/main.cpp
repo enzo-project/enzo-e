@@ -30,22 +30,26 @@ void Main::p_exit(int count)
   count_exit_++;
   if (count_exit_ >= count) {
     count_exit_ = 0;
+    exit_();
+  }
+}
+
+void Main::exit_()
+{
 
 #ifdef CHARM_ENZO
 
-    Simulation * simulation = proxy_simulation.ckLocalBranch();
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-    enzo_finalize(simulation);
+  enzo_finalize(simulation);
 
 #endif
 
-    monitor_->print ("","END CELLO");
-    //    unit_finalize();
-    // Fake unit_init() for index.php (test.hpp is not included since
-    // enzo.ci and test.ci conflict)
-    PARALLEL_PRINTF ("UNIT TEST END\n");
-    PARALLEL_EXIT;
-  }
+  Monitor::instance()->print ("","END CELLO");
+  //    unit_finalize();
+  // Fake unit_init() for index.php (test.hpp is not included since
+  // enzo.ci and test.ci conflict)
+  PARALLEL_EXIT;
 }
 
 

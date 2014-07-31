@@ -101,7 +101,11 @@ public:
   /// Finalize the simulation
   void enzo_finalize(Simulation * simulation);
 
-private:
+private: // functions
+
+  void exit_ ();
+
+private: // attributes
 
    int count_exit_; 
    int count_checkpoint_; 

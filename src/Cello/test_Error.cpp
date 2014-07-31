@@ -39,7 +39,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_finalize();
 
-  PARALLEL_EXIT;
+  exit_();
 
 }
 

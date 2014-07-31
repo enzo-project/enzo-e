@@ -25,6 +25,6 @@ PARALLEL_MAIN_BEGIN
     
   cello_parameters_print();
   unit_finalize();
-  PARALLEL_EXIT;
+  exit_();
 }
 PARALLEL_MAIN_END

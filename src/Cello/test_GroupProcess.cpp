@@ -51,7 +51,7 @@ PARALLEL_MAIN_BEGIN
   int np = 0;
   if (PARALLEL_ARGC != 2) {
     PARALLEL_PRINTF ("Usage: %s <num-procs>\n",PARALLEL_ARGV[0]);
-    PARALLEL_EXIT;
+    exit_();
   } else {
     np = atoi(PARALLEL_ARGV[1]);
   }
@@ -211,7 +211,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_finalize();
 
-  PARALLEL_EXIT;
+  exit_();
 
 }
 
