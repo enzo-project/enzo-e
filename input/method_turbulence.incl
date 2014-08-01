@@ -1,0 +1,143 @@
+ Domain {
+     lower = [ 0.0, 0.0, 0.0 ];
+     upper = [ 1.0, 1.0, 1.0 ];
+ }
+
+ Mesh {
+     list = [ "shock", "shear" ];
+     shock { type = "shock"; };
+     shear { type = "shear"; };
+     root_rank = 3;
+ }
+
+ Initial {
+     type = "turbulence";
+ }
+
+ Boundary {
+   type = "periodic";
+ }
+
+ Stopping {
+     cycle = 1;
+ }
+
+ Method {
+     list = [ "ppm" , "turbulence"];
+     ppm {
+         diffusion = true;
+         dual_energy = false;
+         flattening = 3;
+         steepening = true;
+     };
+     turbulence {
+         density     = 1.0000000000000;
+         temperature = 1.0000000000000;
+         mach_number = 10.0;
+         e_dot       = -1.0;
+     }
+ }
+
+ Field {
+     alignment = 8;
+     courant = 0.800;
+     gamma = 1.001;
+     ghosts = 4;
+     list = [ "density", 
+              "velocity_x",
+              "velocity_y", 
+              "velocity_z", 
+              "driving_x",
+              "driving_y", 
+              "driving_z", 
+              "total_energy",
+              "internal_energy",
+              "temperature",
+              "pressure" ];
+     padding = 0;
+ }
+
+
+ Output {
+     list = [ "de_png" , 
+              "vx_png", "vy_png", "vz_png",
+              "p_png", "te_png", "mesh", "checkpoint" ];
+
+     checkpoint {
+          include "input/schedule_cycle_100.incl"
+          dir   = ["turbulence-checkpoint-%d","count"];
+          type = "checkpoint";
+     };
+
+     hdf5 {
+         name = [ "turbulence-p%02d-c%04d.h5", "proc", "count" ];
+         include "input/schedule_cycle_25.incl"
+         type = "data";
+     };
+     de_png {
+         include "input/colormap_rainbow.incl"
+         field_list = [ "density" ];
+         image_size = [ 1024, 1024 ];
+         name = [ "turbulence-de-%04d.png", "count" ];
+         include "input/schedule_cycle_25.incl"
+         type = "image";
+     };
+     vx_png {
+         include "input/colormap_rainbow.incl"
+         field_list = [ "velocity_x" ];
+         image_size = [ 1024, 1024 ];
+         name = [ "turbulence-vx-%04d.png", "count" ];
+         include "input/schedule_cycle_25.incl"
+         type = "image";
+     };
+     vy_png {
+         include "input/colormap_rainbow.incl"
+         field_list = [ "velocity_y" ];
+         image_size = [ 1024, 1024 ];
+         name = [ "turbulence-vy-%04d.png", "count" ];
+         include "input/schedule_cycle_25.incl"
+         type = "image";
+     };
+     vz_png {
+         include "input/colormap_rainbow.incl"
+         field_list = [ "velocity_z" ];
+         image_size = [ 1024, 1024 ];
+         name = [ "turbulence-vz-%04d.png", "count" ];
+         include "input/schedule_cycle_25.incl"
+         type = "image";
+     };
+     p_png {
+         include "input/colormap_rainbow.incl"
+         field_list = [ "pressure" ];
+         image_size = [ 1024, 1024 ];
+         name = [ "turbulence-p-%04d.png", "count" ];
+         include "input/schedule_cycle_25.incl"
+         type = "image";
+     };
+     te_png {
+         include "input/colormap_rainbow.incl"
+         field_list = [ "total_energy" ];
+         image_size = [ 1024, 1024 ];
+         name = [ "turbulence-te-%04d.png", "count" ];
+         include "input/schedule_cycle_25.incl"
+         type = "image";
+     };
+     mesh {
+         colormap = [ 0.0, 0.0, 0.0, 
+                      0.0, 0.0, 1.0, 
+                      0.0, 1.0, 1.0, 
+                      0.0, 1.0, 0.0, 
+                      1.0, 1.0, 0.0, 
+                      1.0, 0.0, 0.0 ];
+         image_max = 6.0;
+         image_min = 0.0;
+         image_reduce_type = "max";
+         image_size = [ 1025, 1025 ];
+         image_specify_bounds = true;
+         image_type = "mesh";
+         name = [ "turbulence-mesh-%04d.png", "count" ];
+         include "input/schedule_cycle_25.incl"
+         type = "image";
+     };
+ }
+
