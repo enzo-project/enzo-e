@@ -1,5 +1,6 @@
 import os
 import sys
+import subprocess
 
 #======================================================================
 # USER CONFIGURATION
@@ -429,6 +430,7 @@ cello_def.write ("#define CELLO_FORTRANLIBS  \""+" ".join(map(str,libs_fortran))
 cello_def.write ("#define CELLO_FORTRANPATH  \""+" ".join(map(str,fortranpath))+"\"\n")
 cello_def.write ("#define CELLO_LIBPATH      \""+" ".join(map(str,libpath))+"\"\n")
 cello_def.write ("#define CELLO_LINKFLAGS    \""+linkflags+"\"\n" )
+cello_def.write ("#define CELLO_CHANGESET    \""+subprocess.check_output(["hg", "id", "--id"]).rstrip()+"\"\n" )
 
 cello_def.close()
 
