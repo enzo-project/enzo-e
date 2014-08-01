@@ -157,7 +157,7 @@ public:
 
   static int NumberOfBaryonFields;      // active baryon fields
   static int FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-  
+
 public: // interface
 
   /// Initialize the EnzoBlock chare array
@@ -314,7 +314,7 @@ public: /// entry methods
 
   /// Data for turbulence reductions
   double method_turbulence_data [9];
-
+  
 private: // attributes
 
   enzo_float Time_;

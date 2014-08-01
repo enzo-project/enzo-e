@@ -23,16 +23,17 @@ void CommBlock::compute_begin_ ()
   //  double time_start = CmiWallTimer();
 #endif
 
-  if (is_leaf_) {
+  const Problem * problem = simulation()->problem();
+  int index_method = 0;
+  Method * method;
+  while ((method = problem->method(index_method++) )) {
 
-    const Problem * problem = simulation()->problem();
-    Method * method;
-    int index_method = 0;
-    while ((method = problem->method(index_method++) )) {
+    // Remember currently active Method to returne from reductions
+    set_method (method);
 
-      method -> compute (this);
+    // Apply the method to the CommBlock
+    method -> compute (this);
 
-    }
   }
 
 #ifdef CONFIG_USE_PROJECTIONS

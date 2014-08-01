@@ -42,7 +42,6 @@
 extern CProxy_SimulationCharm proxy_simulation;
 
 //----------------------------------------------------------------------
-
 PARALLEL_MAIN_BEGIN
 {
 

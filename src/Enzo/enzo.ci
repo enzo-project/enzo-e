@@ -68,6 +68,7 @@ module enzo {
   PUPable EnzoMethodGrackle;
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodPressure;
+  PUPable EnzoMethodTemperature;
 
   PUPable EnzoProblem;
   PUPable EnzoProlong;

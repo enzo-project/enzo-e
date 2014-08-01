@@ -31,6 +31,8 @@ void EnzoMethodPpm::pup (PUP::er &p)
 
 void EnzoMethodPpm::compute ( CommBlock * comm_block) throw()
 {
+  if (!comm_block->is_leaf()) return;
+
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 
   enzo_block->SolveHydroEquations 

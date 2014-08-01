@@ -24,6 +24,17 @@ extern CProxy_SimulationCharm proxy_simulation;
 
 //----------------------------------------------------------------------
 
+CkReduction::reducerType r_method_turbulence_type;
+
+extern CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs);
+
+void register_method_turbulence(void)
+{
+  r_method_turbulence_type = CkReduction::addReducer(r_method_turbulence); 
+}
+
+//----------------------------------------------------------------------
+
 void Main::p_exit(int count)
 {
   DEBUG("Main::p_exit");
@@ -210,14 +221,12 @@ void Main::q_refresh_exit()
 // SEE enzo_EnzoMethodTurbulence.cpp for context
 CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
 {
-  TRACE("EnzoBlock::r_method_turbulence()");
-  long double * values = (long double * )msgs[0]->getData();
-  long double accum[9] = { 0.0 };
-  accum[7] = std::numeric_limits<double>::min();
-  accum[8] = std::numeric_limits<double>::max();
+  double accum[9] = { 0.0 };
+  accum[7] = std::numeric_limits<double>::max();
+  accum[8] = std::numeric_limits<double>::min();
 
   for (int i=0; i<n; i++) {
-    double long * values = (double long *) msgs[i]->getData();
+    double * values = (double *) msgs[i]->getData();
     accum [0] += values[0];
     accum [1] += values[1];
     accum [2] += values[2];
@@ -228,16 +237,7 @@ CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
     accum [7] = std::min(accum[7],values[7]);
     accum [8] = std::max(accum[8],values[8]);
   }
-  return CkReductionMsg::buildNew(9*sizeof(long double),accum);
-}
-
-//----------------------------------------------------------------------
-
-CkReduction::reducerType r_method_turbulence_type;
-
-void register_method_turbulence(void)
-{
-  r_method_turbulence_type = CkReduction::addReducer(r_method_turbulence); 
+  return CkReductionMsg::buildNew(9*sizeof(double),accum);
 }
 
 //----------------------------------------------------------------------

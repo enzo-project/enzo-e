@@ -7,6 +7,7 @@
 
 mainmodule main_enzo {
 
+  initnode void register_method_turbulence(void);
   extern module simulation;
   extern module enzo;
   extern module mesh;

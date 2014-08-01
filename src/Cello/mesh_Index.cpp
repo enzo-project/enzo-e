@@ -272,8 +272,12 @@ void Index::set_array(int ix, int iy, int iz)
 
 //----------------------------------------------------------------------
 
-int Index::tree (int axis) const
-{ return a_[axis].tree; }
+void Index::tree (int * bx, int * by, int *bz) const
+{
+  if (bx) (*bx) = a_[0].tree; 
+  if (by) (*by) = a_[1].tree; 
+  if (bz) (*bz) = a_[2].tree; 
+}
   
 //----------------------------------------------------------------------
 
@@ -293,8 +297,7 @@ void Index::print (const char * msg,
 		   int max_level,
 		   int rank,
 		   bool no_nl,
-		   void * simulation
-) const
+		   void * simulation ) const
 {
   print_(stdout,msg,max_level,rank,no_nl);
 

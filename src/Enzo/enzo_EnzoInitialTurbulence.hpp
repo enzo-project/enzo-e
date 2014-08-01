@@ -17,16 +17,33 @@ class EnzoInitialTurbulence : public Initial {
 public: // interface
 
   /// CHARM++ constructor
-  EnzoInitialTurbulence() throw() { }
+  EnzoInitialTurbulence(double density_initial,
+			double pressure_initial,
+			double temperature_initial,
+			double gamma) throw() 
+    : Initial(),
+      density_initial_(density_initial),
+      pressure_initial_(pressure_initial),
+      temperature_initial_(temperature_initial)
+  { }
   
   /// Constructor
-  EnzoInitialTurbulence(int cycle, double time) throw();
+  EnzoInitialTurbulence(int cycle, double time,
+			double density_initial,
+			double pressure_initial,
+			double temperature_initial,
+			double gamma) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialTurbulence);
 
   /// CHARM++ migration constructor
-  EnzoInitialTurbulence(CkMigrateMessage *m) : Initial (m) {}
+  EnzoInitialTurbulence(CkMigrateMessage *m) 
+    : Initial (m), 
+      density_initial_(0),
+      pressure_initial_(0),
+      temperature_initial_(0)
+  {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -39,6 +56,14 @@ public: // interface
    const FieldDescr * field_descr,
    const Hierarchy * hierarchy
    ) throw();
+
+
+private: // attributes
+
+  double density_initial_;
+  double pressure_initial_;
+  double temperature_initial_;
+  double gamma_;
 
 };
 

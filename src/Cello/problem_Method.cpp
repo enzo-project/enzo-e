@@ -5,7 +5,7 @@
 /// @date     2014-05-02
 /// @brief    Implentation of the Method class
 
-#include "problem.hpp"
+#include "simulation.hpp"
 
 //----------------------------------------------------------------------
 
@@ -13,8 +13,14 @@ void Method::initialize_ ( CommBlock * comm_block) throw()
 {
 
   Block * block = comm_block -> block();
-  block->lower(&xm_,&ym_,&zm_);
-  block->upper(&xp_,&yp_,&zp_);
+
+  block->lower(&xbm_,&ybm_,&zbm_);
+  block->upper(&xbp_,&ybp_,&zbp_);
+
+  Hierarchy * hierarchy = comm_block->simulation()->hierarchy();
+
+  hierarchy->lower(&xdm_,&ydm_,&zdm_);
+  hierarchy->upper(&xdp_,&ydp_,&zdp_);
 
   FieldBlock       * field_block = block      -> field_block();
   const FieldDescr * field_descr = comm_block -> field_descr();
@@ -31,7 +37,9 @@ void Method::initialize_ ( CommBlock * comm_block) throw()
   my_             .resize(field_count_);
   mz_             .resize(field_count_);
 
-  field_block -> size(&nx_,&ny_,&nz_);
+  field_block -> size(&nbx_,&nby_,&nbz_);
+
+  hierarchy->root_size(&ndx_,&ndy_,&ndz_);
 
   for (int id=0; id<field_count_; id++) {
     field_descr->ghosts (id,&gx_[id],&gy_[id],&gz_[id]);
@@ -39,9 +47,9 @@ void Method::initialize_ ( CommBlock * comm_block) throw()
     field_id_[field_name_[id]] = id;
     field_array_[id] = field_block->values(id);
     field_precision_[id] = field_descr->precision (id);
-    mx_[id] = nx_+2*gx_[id];
-    my_[id] = ny_+2*gy_[id];
-    mz_[id] = nz_+2*gz_[id];
+    mx_[id] = nbx_+2*gx_[id];
+    my_[id] = nby_+2*gy_[id];
+    mz_[id] = nbz_+2*gz_[id];
   }
 
 

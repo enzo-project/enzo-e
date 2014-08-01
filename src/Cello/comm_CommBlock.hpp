@@ -18,11 +18,12 @@
 #endif
 
 class Block;
-class FieldFace;
 class Factory;
-class GroupProcess;
 class FieldDescr;
+class FieldFace;
+class GroupProcess;
 class Hierarchy;
+class Method;
 class Simulation;
 
 //----------------------------------------------------------------------
@@ -102,7 +103,7 @@ public: // interface
   inline const Block * child_block() const throw()  
   { return child_block_; };
 
-  /// Return the index of the root block containing this block
+  /// Return the index of the root block containing this block 
   inline void index_forest (int * ix, int * iy, int * iz) const throw ()
   { index_.array(ix,iy,iz); }
 
@@ -227,6 +228,15 @@ public: // interface
   {      compute_exit_(); }
   void r_compute_exit(CkReductionMsg * msg)
   {      compute_exit_(); delete msg; }
+
+  /// Set the currently-active Method.  Used to resume a Method's
+  /// computation after a reduction
+  void set_method (Method * method) throw()
+  { method_ = method; }
+
+  /// Return the currently-active Method
+  Method * method () throw()
+  { return method_; }
 
 protected:
   void compute_enter_();
@@ -676,6 +686,10 @@ protected: // attributes
 
   /// String for storing bit ID
   std::string name_;
+
+  /// Currently-active Method
+  Method * method_;
+
 };
 
 #endif /* COMM_COMMBLOCK_HPP */

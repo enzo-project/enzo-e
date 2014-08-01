@@ -104,7 +104,12 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "turbulence") {
-    initial = new EnzoInitialTurbulence(cycle,time);
+    initial = new EnzoInitialTurbulence 
+      (cycle,time, 
+       enzo_config->initial_turbulence_density,
+       enzo_config->initial_turbulence_pressure,
+       enzo_config->initial_turbulence_temperature,
+       enzo_config->field_gamma);
   } else {
     initial = Problem::create_initial_
       (type,config,parameters,field_descr,group_process);
@@ -165,20 +170,30 @@ Method * EnzoProblem::create_method_
   } else if (type == "ppml") {
     method = new EnzoMethodPpml;
   } else if (type == "heat") {
-    method = new EnzoMethodHeat(enzo_config->method_heat_alpha,
-				enzo_config->field_courant);
+    method = new EnzoMethodHeat
+      (enzo_config->method_heat_alpha,
+       enzo_config->field_courant);
   } else if (type == "null") {
-    method = new EnzoMethodNull(enzo_config->method_null_dt);
+    method = new EnzoMethodNull
+      (enzo_config->method_null_dt);
 #ifdef CONFIG_USE_GRACKLE
   } else if (type == "grackle") {
-    method = new EnzoMethodGrackle(enzo_config);
+    method = new EnzoMethodGrackle (enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "turbulence") {
-    method = new EnzoMethodTurbulence;
+    method = new EnzoMethodTurbulence 
+      (enzo_config->method_turbulence_edot,
+       enzo_config->initial_turbulence_density,
+       enzo_config->method_turbulence_mach_number);
   } else if (type == "pressure") {
     method = new EnzoMethodPressure (enzo_config->field_gamma);
+  } else if (type == "temperature") {
+    method = new EnzoMethodTemperature 
+      (enzo_config->ppm_density_floor,
+       enzo_config->ppm_temperature_floor,
+       enzo_config->ppm_mol_weight);
   } else {
-    method = Problem::create_method_(type,config, field_descr);
+    method = Problem::create_method_ (type,config, field_descr);
   }
 
   return method;

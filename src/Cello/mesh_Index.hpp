@@ -124,8 +124,8 @@ public:
   /// Accumulate array part of an index
   void set_array(int ix, int iy, int iz);
 
-  /// Return the packed tree bits for the given axis
-  int tree (int axis) const;
+  /// Return the packed tree bits for each axis
+  void tree (int * bx = 0, int *by = 0, int *bz = 0) const;
   
   /// Set the child indicies of this node in the parent
   void set_child(int level, int ix, int iy=0, int iz=0);

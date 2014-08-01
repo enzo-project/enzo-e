@@ -12,8 +12,16 @@
 //----------------------------------------------------------------------
 
 EnzoInitialTurbulence::EnzoInitialTurbulence 
-(int init_cycle, double init_time) throw ()
-  : Initial(init_cycle, init_time) 
+(int init_cycle, double init_time, 
+ double density_initial,
+ double pressure_initial,
+ double temperature_initial,
+ double gamma) throw ()
+  : Initial(init_cycle, init_time),
+    density_initial_(density_initial),
+    pressure_initial_(pressure_initial),
+    temperature_initial_(temperature_initial),
+    gamma_(gamma)
 { }
 
 //----------------------------------------------------------------------
@@ -25,6 +33,12 @@ void EnzoInitialTurbulence::pup (PUP::er &p)
   TRACEPUP;
 
   Initial::pup(p);
+
+  p | density_initial_;
+  p | pressure_initial_;
+  p | temperature_initial_;
+  p | gamma_;
+
 }
 
 //----------------------------------------------------------------------
@@ -38,6 +52,8 @@ void EnzoInitialTurbulence::enforce_block
 
 {
 
+  if (!comm_block->is_leaf()) return;
+
   //  INCOMPLETE("EnzoInitialTurbulence::enforce_block()");
 
   ASSERT("EnzoInitialTurbulence",
@@ -48,12 +64,14 @@ void EnzoInitialTurbulence::enforce_block
 
   enzo_float *  d = (enzo_float *) field_block->values("density");
   enzo_float *  p = (enzo_float *) field_block->values("pressure");
-  enzo_float * ax = (enzo_float *) field_block->values("driving_x");
-  enzo_float * ay = (enzo_float *) field_block->values("driving_y");
-  enzo_float * az = (enzo_float *) field_block->values("driving_z");
-  enzo_float * vx = (enzo_float *) field_block->values("velocity_x");
-  enzo_float * vy = (enzo_float *) field_block->values("velocity_y");
-  enzo_float * vz = (enzo_float *) field_block->values("velocity_z");
+  enzo_float *  t = (enzo_float *) field_block->values("temperature");
+  enzo_float * a3[3] = { (enzo_float *) field_block->values("driving_x"),
+			 (enzo_float *) field_block->values("driving_y"),
+			 (enzo_float *) field_block->values("driving_z") };
+  enzo_float * v3[3] = { (enzo_float *) field_block->values("velocity_x"),
+			 (enzo_float *) field_block->values("velocity_y"),
+			 (enzo_float *) field_block->values("velocity_z") };
+
   enzo_float * te = (enzo_float *) field_block->values("total_energy");
 
   int rank = comm_block->simulation()->rank();
@@ -62,24 +80,26 @@ void EnzoInitialTurbulence::enforce_block
 	 "Missing Field 'density'", d);
   ASSERT("EnzoInitializeTurbulence::enforce_block()",
 	 "Missing Field 'pressure'",p);
+  ASSERT("EnzoInitializeTurbulence::enforce_block()",
+	 "Missing Field 'temperature'",t);
   if (rank >= 1)
     ASSERT("EnzoInitializeTurbulence::enforce_block()",
-	   "Missing Field 'driving_x'", ax);
+	   "Missing Field 'driving_x'", a3[0]);
   if (rank >= 2)
     ASSERT("EnzoInitializeTurbulence::enforce_block()",
-	   "Missing Field 'driving_y'",  ay);
+	   "Missing Field 'driving_y'",  a3[1]);
   if (rank >= 3)
     ASSERT("EnzoInitializeTurbulence::enforce_block()",
-	   "Missing Field 'driving_z'",  az);
+	   "Missing Field 'driving_z'",  a3[2]);
   if (rank >= 1)
     ASSERT("EnzoInitializeTurbulence::enforce_block()",
-	   "Missing Field 'velocity_x'", vx);
+	   "Missing Field 'velocity_x'", v3[0]);
   if (rank >= 2)
     ASSERT("EnzoInitializeTurbulence::enforce_block()",
-	   "Missing Field 'velocity_y'", vy);
+	   "Missing Field 'velocity_y'", v3[1]);
   if (rank >= 3)
     ASSERT("EnzoInitializeTurbulence::enforce_block()",
-	   "Missing Field 'velocity_z'",  vz);
+	   "Missing Field 'velocity_z'",  v3[2]);
   ASSERT("EnzoInitializeTurbulence::enforce_block()",
 	 "Missing Field 'total_energy'",  te);
 
@@ -103,20 +123,6 @@ void EnzoInitialTurbulence::enforce_block
   int ndy = ny + 2*gy;
   int ndz = nz + 2*gz;
 
-  for (int iz=gz; iz<nz+gz; iz++) {
-    double z = zm + (iz - gz + 0.5)*hz;
-    for (int iy=gy; iy<ny+gy; iy++) {
-      double y = ym + (iy - gy + 0.5)*hy;
-      for (int ix=gx; ix<nx+gx; ix++) {
-	double x = xm + (ix - gx + 0.5)*hx;
-	int i = ix + ndx*(iy + ndy*iz);
-	d[i]  = 1.0;
-	ax[i] = 0.0;
-	te[i] = p[i] / ((EnzoBlock::Gamma - 1.0) * d[i]);
-      }
-    }
-  }
-
   // initialize driving fields using turboinit
 
   int Nx,Ny,Nz;
@@ -131,15 +137,68 @@ void EnzoInitialTurbulence::enforce_block
 	   ((Nz==1) && (Nx == Ny)) ||
 	   (Nx == Ny && Ny == Nz));
 
-  int ix,iy,iz;
-  comm_block->index().array(&ix,&iy,&iz);
+  // scale by level
+  for (int i=0; i<comm_block->level(); i++) Nx  *= 2;
 
-  int ox = ix * nx;
-  int oy = iy * ny;
-  int oz = iz * nz;
+  // compute offsets
+  Index index = comm_block->index();
+
+  int ix,iy,iz;
+  index.array(&ix,&iy,&iz);
+
+  int bx,by,bz;
+  index.tree(&bx,&by,&bz);
+
+  int o3[3] = { ix * nx, iy * ny, iz * nz };
+
+  int level = index.level();
+
+  unsigned mask = 1 << (INDEX_MAX_TREE_BITS - 1);
+
+  for (int i=0; i<level; i++) {
+    bool mx = (mask & bx);
+    bool my = (mask & by);
+    bool mz = (mask & bz);
+    o3[0] = 2*o3[0] + (mx ? nx : 0);
+    o3[1] = 2*o3[1] + (my ? ny : 0);
+    o3[2] = 2*o3[2] + (mz ? nz : 0);
+    mask = mask >> 1;
+  }
 
   FORTRAN_NAME(turboinit)
-    (&rank, &Nx, (enzo_float *)ax, (enzo_float *)ay, (enzo_float*)az,
+    (&rank, &Nx, 
+     (enzo_float *)v3[0],
+     (enzo_float *)v3[1],
+     (enzo_float *)v3[2],
      &ndx,&ndy,&ndz,
-     &ox,&oy,&oz);
+     &o3[0],&o3[1],&o3[2]);
+
+  for (int i=0; i<ndx*ndy*ndz; i++) {
+    a3[0][i] = v3[0][i];
+    a3[1][i] = v3[1][i];
+    a3[2][i] = v3[2][i];
+  }
+
+  for (int iz=0; iz<nz+2*gz; iz++) {
+    for (int iy=0; iy<ny+2*gy; iy++) {
+      for (int ix=0; ix<nx+2*gx; ix++) {
+	int i = ix + ndx*(iy + ndy*iz);
+	d[i]  = density_initial_;
+	if (pressure_initial_) {
+	  p[i] = pressure_initial_;
+	  te[i] = pressure_initial_ / (gamma_ - 1) / d[i];
+	}
+	if (temperature_initial_) {
+	  te[i] = temperature_initial_ / (gamma_ - 1);
+	}
+	for (int id=0; id<rank; id++) {
+	  te[i] += 0.5*v3[id][i]*v3[id][i];
+	}
+      }
+    }
+  }
+  if (temperature_initial_) {
+    EnzoMethodPressure method_pressure(gamma_);
+    method_pressure.compute(comm_block);
+  }
 }

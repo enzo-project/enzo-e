@@ -7,8 +7,6 @@
 
 mainmodule main {
 
-  initnode void register_method_turbulence(void);
-
   readonly CProxy_Main proxy_main;
 
   mainchare [migratable] Main {

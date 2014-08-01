@@ -65,6 +65,9 @@ void EnzoMethodGrackle::pup (PUP::er &p)
 
 void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
 {
+
+  if (!comm_block->is_leaf()) return;
+
 #ifndef CONFIG_USE_GRACKLE
 
   ERROR("EnzoMethodGrackle::compute()",

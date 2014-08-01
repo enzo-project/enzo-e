@@ -37,6 +37,8 @@ void EnzoMethodHeat::pup (PUP::er &p)
 void EnzoMethodHeat::compute ( CommBlock * comm_block) throw()
 {
 
+  if (!comm_block->is_leaf()) return;
+
   initialize_(comm_block);
 
   const int id = field_id ("temperature");
@@ -84,7 +86,7 @@ void EnzoMethodHeat::compute_ (T * Unew) const throw()
   array_dimension (id,&mx,&my,&mz);
 
   int nx,ny,nz;
-  array_size (&nx,&ny,&nz);
+  block_size (&nx,&ny,&nz);
 
   // Initialize array increments
   const int idx = 1;

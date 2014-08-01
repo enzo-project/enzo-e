@@ -32,6 +32,9 @@ void EnzoMethodPpml::pup (PUP::er &p)
 
 void EnzoMethodPpml::compute ( CommBlock * comm_block ) throw()
 {
+
+  if (!comm_block->is_leaf()) return;
+
   const FieldDescr * field_descr = comm_block->field_descr();
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
   enzo_block->SolveMHDEquations ( field_descr, comm_block->dt() );

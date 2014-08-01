@@ -168,19 +168,6 @@ public: // attributes
   int                        performance_stride;
   bool                       performance_warnings;
 
-  // std::string                projections_schedule_on_type;
-  // std::string                projections_schedule_on_var;
-  // double                     projections_schedule_on_start;
-  // double                     projections_schedule_on_stop;
-  // double                     projections_schedule_on_step;
-  // std::vector<double>        projections_schedule_on_list;
-  // std::string                projections_schedule_off_type;
-  // std::string                projections_schedule_off_var;
-  // double                     projections_schedule_off_start;
-  // double                     projections_schedule_off_stop;
-  // double                     projections_schedule_off_step;
-  // std::vector<double>        projections_schedule_off_list;
-
   // Stopping
 
   int                        stopping_cycle;

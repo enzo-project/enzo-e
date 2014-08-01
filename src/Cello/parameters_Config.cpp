@@ -126,19 +126,6 @@ void Config::pup (PUP::er &p)
   p | performance_stride;
   p | performance_warnings;
 
-  // p | projections_schedule_on_type;
-  // p | projections_schedule_on_var;
-  // p | projections_schedule_on_start;
-  // p | projections_schedule_on_stop;
-  // p | projections_schedule_on_step;
-  // p | projections_schedule_on_list;
-  // p | projections_schedule_off_type;
-  // p | projections_schedule_off_var;
-  // p | projections_schedule_off_start;
-  // p | projections_schedule_off_stop;
-  // p | projections_schedule_off_step;
-  // p | projections_schedule_off_list;
-
   // Stopping
 
   p | stopping_cycle;
@@ -727,10 +714,6 @@ void Config::read_output_ (Parameters * p) throw()
 
 void Config::read_performance_ (Parameters * p) throw()
 {
-  //--------------------------------------------------
-  // Performance
-  //--------------------------------------------------
-
   if (p->type("Performance:papi:counters") == parameter_list) {
     int length = p->list_length("Performance:papi:counters");
     performance_papi_counters.resize(length);
@@ -746,59 +729,26 @@ void Config::read_performance_ (Parameters * p) throw()
   performance_stride   = p->value_integer("Performance:stride",1);
   performance_warnings = p->value_logical("Performance:warnings",true);
 
-  //
-  // p->group_set(0,"Performance");
-  // p->group_set(1,"projections");
-
-  // p->group_set(2,"on");
-  // read_schedule_(p,"on",
-  // 		 &projections_schedule_on_type,
-  // 		 &projections_schedule_on_var,
-  // 		 &projections_schedule_on_start,
-  // 		 &projections_schedule_on_stop,
-  // 		 &projections_schedule_on_step,
-  // 		 projections_schedule_on_list);
-
-  
-  // p->group_set(2,"off");
-  // read_schedule_(p,"off",
-  // 		 &projections_schedule_off_type,
-  // 		 &projections_schedule_off_var,
-  // 		 &projections_schedule_off_start,
-  // 		 &projections_schedule_off_stop,
-  // 		 &projections_schedule_off_step,
-  // 		 projections_schedule_off_list);
-
 }
 
 //----------------------------------------------------------------------
 
 void Config::read_stopping_ (Parameters * p) throw()
 {
-  //--------------------------------------------------
-  // Stopping
-  //--------------------------------------------------
-
   stopping_cycle = p->value_integer
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
   stopping_time  = p->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
   stopping_interval = p->value_integer
     ( "Stopping:interval" , 1);
-
 }
 
 //----------------------------------------------------------------------
 
 void Config::read_testing_ (Parameters * p) throw()
 {
-  //--------------------------------------------------
-  // Testing
-  //--------------------------------------------------
-
   testing_cycle_final = p->value_integer("Testing:cycle_final",0);
   testing_time_final  = p->value_float  ("Testing:time_final", 0.0);
-
 }
 
 //======================================================================

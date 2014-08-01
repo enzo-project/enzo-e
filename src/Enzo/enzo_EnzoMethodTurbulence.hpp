@@ -17,7 +17,9 @@ class EnzoMethodTurbulence : public Method {
 public: // interface
 
   /// Create a new EnzoMethodTurbulence object
-  EnzoMethodTurbulence();
+  EnzoMethodTurbulence(double density_initial,
+		       double edot,
+		       double mach_number);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodTurbulence);
@@ -30,6 +32,26 @@ public: // interface
   
   /// Apply the method to advance a block one timestep 
   virtual void compute( CommBlock * comm_block) throw();
+
+  /// Resume computation after a reduction
+  virtual void compute_resume ( CommBlock * comm_block,
+				CkReductionMsg * msg) throw(); 
+
+private: // methods
+
+  template <class T>
+  void compute_resume_ (CommBlock * comm_block, CkReductionMsg * msg) throw();
+
+private: // attributes
+
+  // Initial density
+  double density_initial_;
+
+  // Corresponds to Enzo "RandomForcingEdot" parameter
+  double edot_;
+
+  // Mach number
+  double mach_number_;
 
 };
 

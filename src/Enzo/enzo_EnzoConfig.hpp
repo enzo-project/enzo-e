@@ -63,8 +63,9 @@ public: // attributes
   double                     ppm_pressure_floor;
   bool                       ppm_pressure_free;
   bool                       ppm_steepening;
-  float                      ppm_temperature_floor;
+  double                     ppm_temperature_floor;
   bool                       ppm_use_minimum_pressure_support;
+  double                     ppm_mol_weight;
 
   double                     field_gamma;
 
@@ -84,6 +85,10 @@ public: // attributes
   double                     initial_sedov_pressure_out;
   double                     initial_sedov_density;
 
+  double                     initial_turbulence_density;
+  double                     initial_turbulence_pressure;
+  double                     initial_turbulence_temperature;
+
   // EnzoProlong
   std::string                interpolation_method;
 
@@ -92,6 +97,10 @@ public: // attributes
 
   // EnzoMethodNull
   double                     method_null_dt;
+
+  // EnzoMethodTurbulence
+  double                     method_turbulence_edot;
+  double                     method_turbulence_mach_number;
 
 #ifdef CONFIG_USE_GRACKLE
 

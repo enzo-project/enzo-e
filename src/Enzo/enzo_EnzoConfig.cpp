@@ -62,11 +62,16 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_sedov_pressure_out;
   p | initial_sedov_density;
 
+  p | initial_turbulence_density;
+  p | initial_turbulence_pressure;
+  p | initial_turbulence_temperature;
+
   p | interpolation_method;
 
   p | method_heat_alpha;
 
   p | method_null_dt;
+  p | method_turbulence_edot;
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -85,7 +90,6 @@ void EnzoConfig::pup (PUP::er &p)
 
 void EnzoConfig::read(Parameters * p) throw()
 {
-
   TRACE("BEGIN EnzoConfig::read()");
 
   // Read Cello parameters
@@ -155,13 +159,28 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_sedov_density = 
     p->value_float("Initial:sedov:density",1.0);
 
+  initial_turbulence_density = p->value_float 
+    ("Method:turbulence:density",1.0);
+
+  // Must specify pressure or temperature
+  initial_turbulence_pressure =    p->value_float 
+    ("Method:turbulence:pressure",   0.0);
+  initial_turbulence_temperature = p->value_float 
+    ("Method:turbulence:temperature",0.0);
+
   interpolation_method = p->value_string 
     ("Field:interpolation_method","SecondOrderA");
 
+  method_heat_alpha = p->value_float 
+    ("Method:heat:alpha",1.0);
 
-  method_heat_alpha = p->value_float ("Method:heat:alpha",1.0);
+  method_null_dt = p->value_float 
+    ("Method:null:dt",0.0);
 
-  method_null_dt = p->value_float ("Method:null:dt",0.0);
+  method_turbulence_edot = p->value_float
+    ("Method:turbulence:edot",-1.0);
+  method_turbulence_mach_number = p->value_float 
+    ("Method:turbulence:mach_number",0.0);
 
   //======================================================================
 
@@ -247,9 +266,6 @@ void EnzoConfig::read(Parameters * p) throw()
 
     const gr_float a_value = 
       1. / (1. + physics_cosmology_initial_redshift);
-
-  
-    printf ("TRACE %s:%d calling initialize_chemistry_data\n");
 
     if (initialize_chemistry_data
 	(method_grackle_chemistry, method_grackle_units, a_value) == 0) {

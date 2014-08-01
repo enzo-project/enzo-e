@@ -49,7 +49,8 @@ CommBlock::CommBlock
   is_leaf_(true),
   age_(0),
   face_level_last_(),
-  name_(name())
+  name_(name()),
+  method_(0)
 {
 
   // Enable Charm++ AtSync() dynamic load balancing
@@ -234,6 +235,8 @@ void CommBlock::pup(PUP::er &p)
   p | age_;
   p | face_level_last_;
   p | name_;
+
+  // SKIP method_: initialized when needed
 
   if (up) debug_faces_("PUP");
 }

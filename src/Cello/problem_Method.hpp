@@ -19,11 +19,13 @@ public: // interface
   /// Create a new Method
   Method () throw()
   : rank_(0),
-    nx_(0),ny_(0),nz_(0),
+    nbx_(0),nby_(0),nbz_(0),
+    ndx_(0),ndy_(0),ndz_(0),
     gx_(0),gy_(0),gz_(0),
     hx_(0),hy_(0),hz_(0),
     dt_(0),
-    xm_(0),xp_(0),ym_(0),yp_(0),zm_(0),zp_(0)
+    xbm_(0),xbp_(0),ybm_(0),ybp_(0),zbm_(0),zbp_(0),
+    xdm_(0),xdp_(0),ydm_(0),ydp_(0),zdm_(0),zdp_(0)
   {}
 
   /// Destructor
@@ -38,18 +40,6 @@ public: // interface
   { TRACEPUP;
     PUP::able::pup(p);
     WARNING ("Method::pup()","Skipping Method: attributes refreshed when needed");
-    // p | rank_;
-    // p | mx_; p | my_; p | mz_;
-    // p | nx_; p | ny_; p | nz_;
-    // p | gx_; p | gy_; p | gz_;
-    // p | hx_; p | hy_; p | hz_;
-    // p | dt_;
-    // p | xm_; p | ym_; p | zm_;
-    // p | xp_; p | yp_; p | zp_;
-    // p | precision_;
-    // p | field_name_;
-    // p | field_array_;
-    // p | field_id_;
   }
 
 public: // virtual functions
@@ -57,6 +47,13 @@ public: // virtual functions
   /// Apply the method to advance a block one timestep 
 
   virtual void compute ( CommBlock * comm_block) throw() = 0; 
+
+  /// Resume computation after a reduction
+  virtual void compute_resume ( CommBlock * comm_block,
+				CkReductionMsg * msg) throw()
+  {
+    /* This function intentionally empty */
+  }
 
   /// Compute maximum timestep for this method
   virtual double timestep (CommBlock * comm_block) throw() 
@@ -83,11 +80,19 @@ protected: // functions
   }
 
   /// Size of the initialized CommBlock array (excluding ghost zones)
-  void array_size (int *nx, int *ny, int *nz) const {
-    if (nx) (*nx) = nx_;
-    if (ny) (*ny) = ny_;
-    if (nz) (*nz) = nz_;
+  void block_size (int *nbx, int *nby, int *nbz) const {
+    if (nbx) (*nbx) = nbx_;
+    if (nby) (*nby) = nby_;
+    if (nbz) (*nbz) = nbz_;
   }
+
+  /// Number of cells along each dimension of the root-level of the domain 
+  void domain_size (int *ndx, int *ndy, int *ndz) const {
+    if (ndx) (*ndx) = ndx_;
+    if (ndy) (*ndy) = ndy_;
+    if (ndz) (*ndz) = ndz_;
+  }
+
 
   void ghost_depth (int id, int *gx, int *gy, int *gz) const {
     ASSERT2 ("Method::ghost_depth()",
@@ -109,18 +114,32 @@ protected: // functions
   double time_step() const
   { return dt_; }
 
-  void lower (double * xm, double * ym, double * zm) const
+  void lower_block (double * xbm, double * ybm, double * zbm) const
   {
-    if (xm) (*xm) = xm_;
-    if (ym) (*ym) = ym_;
-    if (zm) (*zm) = zm_;
+    if (xbm) (*xbm) = xbm_;
+    if (ybm) (*ybm) = ybm_;
+    if (zbm) (*zbm) = zbm_;
   }
 
-   void upper (double * xp, double * yp, double * zp) const
+   void upper_block (double * xbp, double * ybp, double * zbp) const
    {
-     if (xp) (*xp) = xp_;
-     if (yp) (*yp) = yp_;
-     if (zp) (*zp) = zp_;
+     if (xbp) (*xbp) = xbp_;
+     if (ybp) (*ybp) = ybp_;
+     if (zbp) (*zbp) = zbp_;
+   }
+
+  void lower_domain (double * xdm, double * ydm, double * zdm) const
+  {
+    if (xdm) (*xdm) = xdm_;
+    if (ydm) (*ydm) = ydm_;
+    if (zdm) (*zdm) = zdm_;
+  }
+
+   void upper_domain (double * xdp, double * ydp, double * zdp) const
+   {
+     if (xdp) (*xdp) = xdp_;
+     if (ydp) (*ydp) = ydp_;
+     if (zdp) (*zdp) = zdp_;
    }
 
   int num_fields() const
@@ -186,8 +205,11 @@ protected: // functions
    /// Dimensionality of the CommBlock array including ghosts
    std::vector<int> mx_,my_,mz_;
 
-  /// Size of the CommBlock array excluding ghost zones
-  int nx_,ny_,nz_;
+  /// Number of cells (excluding ghost cells) in the Block
+  int nbx_,nby_,nbz_;
+
+  /// Number of cells (excluding ghost cells) in the domain
+  int ndx_,ndy_,ndz_;
 
   /// Number of ghost zones for each field variable
   std::vector<int> gx_, gy_, gz_;
@@ -199,7 +221,10 @@ protected: // functions
   double dt_;
 
   /// Extents of the CommBlock excluding ghost zones
-  double xm_,xp_,ym_,yp_,zm_,zp_;
+  double xbm_,xbp_,ybm_,ybp_,zbm_,zbp_;
+
+  /// Extents of the Domain excluding ghost zones
+  double xdm_,xdp_,ydm_,ydp_,zdm_,zdp_;
 
   /// Names of the CommBlock field variables
   std::vector<std::string> field_name_;
