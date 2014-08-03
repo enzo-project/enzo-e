@@ -12,6 +12,10 @@
 
  Initial {
      type = "turbulence";
+     turbulence {
+         density     = 1.0000000000000;
+         temperature = 1.0000000000000;
+     }
  }
 
  Boundary {
@@ -31,8 +35,6 @@
          steepening = true;
      };
      turbulence {
-         density     = 1.0000000000000;
-         temperature = 1.0000000000000;
          mach_number = 10.0;
          e_dot       = -1.0;
      }

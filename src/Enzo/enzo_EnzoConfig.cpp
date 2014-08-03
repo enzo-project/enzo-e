@@ -160,13 +160,22 @@ void EnzoConfig::read(Parameters * p) throw()
     p->value_float("Initial:sedov:density",1.0);
 
   initial_turbulence_density = p->value_float 
-    ("Method:turbulence:density",1.0);
+    ("Initial:turbulence:density",1.0);
 
   // Must specify pressure or temperature
   initial_turbulence_pressure =    p->value_float 
-    ("Method:turbulence:pressure",   0.0);
+    ("Initial:turbulence:pressure",   0.0);
   initial_turbulence_temperature = p->value_float 
-    ("Method:turbulence:temperature",0.0);
+    ("Initial:turbulence:temperature",0.0);
+
+  ASSERT ("EnzoConfig::read",
+	  "Either Initial:turbulence:pressure or Initial:turbulence:temperature must be defined",
+	  ! ((initial_turbulence_pressure == 0.0) &&
+	     (initial_turbulence_temperature == 0.0)));
+  ASSERT ("EnzoConfig::read",
+	  "Initial:turbulence:pressure and Initial:turbulence:temperature cannot both be defined",
+	  ! ((initial_turbulence_pressure != 0.0) &&
+	     (initial_turbulence_temperature != 0.0)));
 
   interpolation_method = p->value_string 
     ("Field:interpolation_method","SecondOrderA");
