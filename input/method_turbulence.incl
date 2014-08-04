@@ -12,6 +12,10 @@
 
  Initial {
      type = "turbulence";
+     turbulence {
+         density     = 1.0000000000000;
+         temperature = 1.0000000000000;
+     }
  }
 
  Boundary {
@@ -19,7 +23,7 @@
  }
 
  Stopping {
-     cycle = 1;
+     cycle = 1000;
  }
 
  Method {
@@ -31,8 +35,6 @@
          steepening = true;
      };
      turbulence {
-         density     = 1.0000000000000;
-         temperature = 1.0000000000000;
          mach_number = 10.0;
          e_dot       = -1.0;
      }
@@ -67,6 +69,7 @@
           include "input/schedule_cycle_100.incl"
           dir   = ["turbulence-checkpoint-%d","count"];
           type = "checkpoint";
+	  schedule { start = 100; }
      };
 
      hdf5 {

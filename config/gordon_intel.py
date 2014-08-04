@@ -10,8 +10,8 @@ flags_link  = ''
 cc   = 'icc'
 f90  = 'ifort'
 
-flags_prec_single = '-real-size-4 -double-size-8'
-flags_prec_double = '-real-size-8 -double-size-8'
+flags_prec_single = '-r4'
+flags_prec_double = '-r8'
 
 libpath_fortran = ''
 libs_fortran    = ['imf','ifcore','ifport','stdc++','intlc']

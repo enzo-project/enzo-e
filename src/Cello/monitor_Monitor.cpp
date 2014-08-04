@@ -96,7 +96,7 @@ void Monitor::header () const
   print ("Define","FORTRANPATH  %s",CELLO_FORTRANPATH);
   print ("Define","LIBPATH      %s",CELLO_LIBPATH);
   print ("Define","LINKFLAGS    %s",CELLO_LINKFLAGS);
-  print ("Define","CHANGESET    %s",CELLO_CHANGESET);
+  //  print ("Define","CHANGESET    %s",CELLO_CHANGESET);
 
 }
 

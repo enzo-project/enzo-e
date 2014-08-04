@@ -21,7 +21,8 @@ charm_path = home + '/Charm/charm'
 papi_path  = home
 #hdf5_path  = os.environ['HDF5HOME']
 hdf5_path  = home + '/public'
-mpi_path   = os.environ['MPIHOME']
+#mpi_path   = os.environ['MPIHOME']
+mpi_path   = home + '/public'
 
 png_path   = '/usr/lib64'
 grackle_path = home + '/Grackle/src/clib'
