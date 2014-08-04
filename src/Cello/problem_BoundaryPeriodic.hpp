@@ -19,7 +19,13 @@ public: // interface
 
   /// Create a new BoundaryPeriodic
   BoundaryPeriodic() throw() 
-  {}
+  {
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+	periodicity_[axis][face] = true;
+      }
+    }
+  }
 
   /// Destructor
   virtual ~BoundaryPeriodic() throw() {}
@@ -44,8 +50,6 @@ public: // virtual functions
 			face_enum face = face_all,
 			axis_enum axis = axis_all) const throw()
   { };
-
-  bool is_periodic() const throw() { return true; }
 
 };
 

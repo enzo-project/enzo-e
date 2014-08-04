@@ -440,7 +440,8 @@ void CommBlock::control_sync_neighbor_(int phase)
     const int rank = this->rank();
     const int rank_refresh = simulation()->config()->field_refresh_rank;
 
-    ItFace it_face(rank,rank_refresh);
+    ItFace it_face = this->it_face();
+
     int of3[3];
 
     int num_neighbors = 0;

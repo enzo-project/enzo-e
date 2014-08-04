@@ -31,10 +31,15 @@ PARALLEL_MAIN_BEGIN
   
   // -------- 1D --------
 
+  int rank = 1;
+  int rank_limit = 0;
+  bool periodic[3][2] = {{true,true},{true,true},{true,true}};
+  int n3[3] = { 4, 4, 4 };
+  Index index;
   count = 0;
   clear(iface,27);
   unit_func("ItFace(1,0)");
-  ItFace it_face10 (1,0); 
+  ItFace it_face10 (1,0,periodic,n3,index); 
   while (it_face10.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -48,7 +53,7 @@ PARALLEL_MAIN_BEGIN
   ic3[0] = 0;
   ic3[1] = 0;
   ic3[2] = 0;
-  ItFace it_face10_0 (1,0,ic3); 
+  ItFace it_face10_0 (1,0,periodic,n3,index,ic3); 
   while (it_face10_0.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -62,7 +67,7 @@ PARALLEL_MAIN_BEGIN
   ic3[0] = 1;
   ic3[1] = 0;
   ic3[2] = 0;
-  ItFace it_face10_1 (1,0,ic3); 
+  ItFace it_face10_1 (1,0,periodic,n3,index,ic3); 
   while (it_face10_1.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -75,7 +80,7 @@ PARALLEL_MAIN_BEGIN
   count = 0;
   clear(iface,27);
   unit_func("ItFace(2,0)");
-  ItFace it_face20 (2,0); 
+  ItFace it_face20 (2,0,periodic,n3,index);
   while (it_face20.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -88,7 +93,7 @@ PARALLEL_MAIN_BEGIN
   ic3[0] = 0;
   ic3[1] = 0;
   ic3[2] = 0;
-  ItFace it_face20_00 (2,0,ic3); 
+  ItFace it_face20_00 (2,0,periodic,n3,index,ic3); 
   while (it_face20_00.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -104,7 +109,7 @@ PARALLEL_MAIN_BEGIN
   ic3[0] = 0;
   ic3[1] = 1;
   ic3[2] = 0;
-  ItFace it_face20_01 (2,0,ic3); 
+  ItFace it_face20_01 (2,0,periodic,n3,index,ic3); 
   while (it_face20_01.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -117,7 +122,7 @@ PARALLEL_MAIN_BEGIN
   count = 0;
   clear(iface,27);
   unit_func("ItFace(2,1)");
-  ItFace it_face21 (2,1); 
+  ItFace it_face21 (2,1,periodic,n3,index); 
   while (it_face21.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -130,7 +135,7 @@ PARALLEL_MAIN_BEGIN
   ic3[0] = 1;
   ic3[1] = 1;
   ic3[2] = 0;
-  ItFace it_face21_11 (2,1,ic3); 
+  ItFace it_face21_11 (2,1,periodic,n3,index,ic3); 
   while (it_face21_11.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -149,7 +154,7 @@ PARALLEL_MAIN_BEGIN
   ipf3[0] = 1;
   ipf3[1] = 0;
   ipf3[2] = 0;
-  ItFace it_face21_11_10 (2,1,ic3,ipf3); 
+  ItFace it_face21_11_10 (2,1,periodic,n3,index,ic3,ipf3); 
   while (it_face21_11_10.next(if3)) {
     iface[IF3(if3)] = true;
     printf ("set %d %d %d\n",if3[0],if3[1],if3[2]); 
@@ -168,7 +173,7 @@ PARALLEL_MAIN_BEGIN
   ipf3[0] = 1;
   ipf3[1] = 0;
   ipf3[2] = 0;
-  ItFace it_face20_11_10 (2,0,ic3,ipf3); 
+  ItFace it_face20_11_10 (2,0,periodic,n3,index,ic3,ipf3); 
   while (it_face20_11_10.next(if3)) {
     iface[IF3(if3)] = true;
     printf ("set %d %d %d\n",if3[0],if3[1],if3[2]); 
@@ -182,7 +187,7 @@ PARALLEL_MAIN_BEGIN
   count = 0;
   clear(iface,27);
   unit_func("ItFace(3,0)");
-  ItFace it_face30 (3,0); 
+  ItFace it_face30 (3,0,periodic,n3,index);
   while (it_face30.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -195,7 +200,7 @@ PARALLEL_MAIN_BEGIN
   ic3[1] = 0;
   ic3[2] = 1;
   unit_func("ItFace(3,0,child(1,0,1))");
-  ItFace it_face30_101 (3,0,ic3); 
+  ItFace it_face30_101 (3,0,periodic,n3,index,ic3); 
   while (it_face30_101.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -212,7 +217,7 @@ PARALLEL_MAIN_BEGIN
   count = 0;
   clear(iface,27);
   unit_func("ItFace(3,1)");
-  ItFace it_face31 (3,1); 
+  ItFace it_face31 (3,1,periodic,n3,index); 
   while (it_face31.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -225,7 +230,7 @@ PARALLEL_MAIN_BEGIN
   ic3[1] = 0;
   ic3[2] = 1;
   unit_func("ItFace(3,1,child(0,0,1))");
-  ItFace it_face31_001 (3,1,ic3); 
+  ItFace it_face31_001 (3,1,periodic,n3,index,ic3); 
   while (it_face31_001.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -241,7 +246,7 @@ PARALLEL_MAIN_BEGIN
   count = 0;
   clear(iface,27);
   unit_func("ItFace(3,2)");
-  ItFace it_face32 (3,2); 
+  ItFace it_face32 (3,2,periodic,n3,index); 
   while (it_face32.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -254,7 +259,7 @@ PARALLEL_MAIN_BEGIN
   ic3[1] = 1;
   ic3[2] = 0;
   unit_func("ItFace(3,2,child_110)");
-  ItFace it_face32_110 (3,2,ic3); 
+  ItFace it_face32_110 (3,2,periodic,n3,index,ic3); 
   while (it_face32_110.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -273,7 +278,7 @@ PARALLEL_MAIN_BEGIN
   ipf3[0] = 0;
   ipf3[1] = 0;
   ipf3[2] = 1;
-  ItFace it_face31_011_001 (3,1,ic3,ipf3); 
+  ItFace it_face31_011_001 (3,1,periodic,n3,index,ic3,ipf3); 
   while (it_face31_011_001.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;
@@ -291,7 +296,7 @@ PARALLEL_MAIN_BEGIN
   ipf3[0] = 1;
   ipf3[1] = -1;
   ipf3[2] = 0;
-  ItFace it_face30_100_110 (3,0,ic3,ipf3); 
+  ItFace it_face30_100_110 (3,0,periodic,n3,index,ic3,ipf3); 
   while (it_face30_100_110.next(if3)) {
     iface[IF3(if3)] = true;
     ++count;

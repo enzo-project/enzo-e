@@ -22,7 +22,6 @@ int EnzoBlock::SolveHydroEquations
 
   int dim, i,j,  size;
   int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num;
-  long long GridGlobalStart[MAX_DIMENSION];
   enzo_float a = 1, dadt;
 
   const FieldDescr * field_descr = block()->field_descr();
@@ -42,7 +41,7 @@ int EnzoBlock::SolveHydroEquations
   // coloff: offsets into the color array (for each color field)
   int * coloff   = new int [ncolour];
   int index_colour = 0;
-  for (size_t index_field = 0;
+  for (int index_field = 0;
        index_field < field_descr->field_count();
        index_field++) {
     std::string field = field_descr->field_name(index_field);
@@ -170,14 +169,6 @@ int EnzoBlock::SolveHydroEquations
       }
 
   } // end of loop over subgrids
-
-    /* compute global start index for left edge of entire grid
-       (including boundary zones) */
-
-  for (dim = 0; dim < GridRank; dim++)
-    GridGlobalStart[dim] =
-      NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/CellWidth[dim]) -
-      GridStartIndex[dim];
 
   /* fix grid quantities so they are defined to at least 3 dims */
 

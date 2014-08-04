@@ -68,6 +68,32 @@ public: // interface
   /// Return root-level grid size
   void root_size(int * nx, int * ny = 0, int * nz = 0) const throw ();
 
+  /// Set the periodicity of boundary conditions for domain faces
+  inline void set_periodicity (int pxm,   int pxp, 
+			       int pym=0, int pyp=0, 
+			       int pzm=0, int pzp=0)
+  {
+    periodicity_[0][0] = pxm;
+    periodicity_[0][1] = pxp;
+    periodicity_[1][0] = pym;
+    periodicity_[1][1] = pyp;
+    periodicity_[2][0] = pzm;
+    periodicity_[2][1] = pzp;
+  }
+
+  /// Return the periodicity of the boundary conditions for domain faces
+  void periodicity (int * pxm,   int * pxp, 
+		    int * pym=0, int * pyp=0, 
+		    int * pzm=0, int * pzp=0)
+  {
+    if (pxm) (*pxm) = periodicity_[0][0];
+    if (pxp) (*pxp) = periodicity_[0][1];
+    if (pym) (*pym) = periodicity_[1][0];
+    if (pyp) (*pyp) = periodicity_[1][1];
+    if (pzm) (*pzm) = periodicity_[2][0];
+    if (pzp) (*pzp) = periodicity_[2][1];
+  }
+
   //----------------------------------------------------------------------
 
   /// Return whether CommBlocks have been allocated or not
@@ -157,6 +183,9 @@ protected: // attributes
   /// How the Forest is distributed into CommBlocks
   int blocking_[3];
 
+  /// Periodicity of boundary conditions on faces
+  bool periodicity_[3][2];
+  
 };
 
 

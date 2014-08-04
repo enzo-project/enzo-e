@@ -9,14 +9,19 @@
 
 //----------------------------------------------------------------------
 
-ItFace::ItFace(int rank, int rank_limit, 
+ItFace::ItFace(int rank, 
+	       int rank_limit,
+	       bool periodic[3][2],
+	       int n3[3],
+	       Index index,
 	       const int * ic3,
 	       const int * ipf3) throw()
   : if3_(),
     ic3_(),
     ipf3_(),
     rank_(rank),
-    rank_limit_(rank_limit)
+    rank_limit_(rank_limit),
+    index_(index)
 {
   reset();
   if (ic3) {
@@ -28,6 +33,12 @@ ItFace::ItFace(int rank, int rank_limit,
     ipf3_.resize(3);
     for (int i=0; i<rank; i++)  ipf3_[i] = ipf3[i];
     for (int i=rank; i<3; i++)  ipf3_[i] = ipf3[i];
+  }
+  for (int axis=0; axis<3; axis++) {
+    n3_[axis] = n3[axis];
+    for (int face=0; face<2; face++) {
+      periodicity_[axis][face] = periodic[axis][face];
+    }
   }
 }
 
@@ -161,7 +172,22 @@ bool ItFace::valid_() const
     }
   }
 
-  return (l_face && l_range && l_parent);
+  bool l_periodic = true;
+  // Return false if on boundary and not periodic
+  if (index_.is_on_boundary(if3_,n3_)) {
+    if (if3_[0] == -1 && ! periodicity_[0][0]) l_periodic = false;
+    if (if3_[0] == +1 && ! periodicity_[0][1]) l_periodic = false;
+    if (if3_[1] == -1 && ! periodicity_[1][0]) l_periodic = false;
+    if (if3_[1] == +1 && ! periodicity_[1][1]) l_periodic = false;
+    if (if3_[2] == -1 && ! periodicity_[2][0]) l_periodic = false;
+    if (if3_[2] == +1 && ! periodicity_[2][1]) l_periodic = false;
+  }
+
+  // TEMPORARY
+  // WARNING("ItFace::is_valid()", "Setting l_periodic to true for testing");
+  l_periodic = true;
+
+  return (l_face && l_range && l_parent && l_periodic);
 }
 //======================================================================
 

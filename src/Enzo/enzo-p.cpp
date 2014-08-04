@@ -99,6 +99,8 @@ PARALLEL_MAIN_BEGIN
     (parameter_file, strlen(parameter_file)+1);
   // --------------------------------------------------
 
+  unit_finalize();
+
 }
 
 PARALLEL_MAIN_END

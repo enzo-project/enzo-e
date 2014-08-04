@@ -248,6 +248,21 @@ const FieldDescr * CommBlock::field_descr() throw()
 
 //----------------------------------------------------------------------
 
+ItFace CommBlock::it_face(const int * ic3,
+			  const int * if3) throw()
+{
+  const Config * config = simulation()->config();
+  int rank = this->rank();
+  int refresh_rank = config->field_refresh_rank;
+  int n3[3];
+  size_forest(&n3[0],&n3[1],&n3[2]);
+  bool periodic[3][2];
+  periodicity(periodic);
+  return ItFace (rank,refresh_rank,periodic,n3,index_,ic3,if3);
+}
+
+//======================================================================
+
 void CommBlock::apply_initial_() throw ()
 {
 
@@ -500,37 +515,19 @@ void CommBlock::update_boundary_ ()
 
 //----------------------------------------------------------------------
 
-void CommBlock::loop_limits_refresh_(int ifacemin[3], int ifacemax[3])
-  const throw()
+void CommBlock::periodicity (bool p32[3][2]) const
 {
-
-  // Boundary * boundary = simulation()->problem()->boundary();
-
-  // which faces need to be refreshed?
-  bool on_boundary[3][2];
-  is_on_boundary (on_boundary);
-
-  // bool periodic = boundary->is_periodic();
-  // if (periodic) {
-    for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
-	on_boundary[axis][face] = false;
-      }
+  for (int axis=0; axis<3; axis++) {
+    for (int face=0; face<2; face++) {
+      p32[axis][face] = false;
     }
-  // }
-
-  // set face loop limits accordingly
-  ifacemin[0] = on_boundary[0][0] ? 0 : -1;
-  ifacemin[1] = on_boundary[1][0] ? 0 : -1;
-  ifacemin[2] = on_boundary[2][0] ? 0 : -1;
-  ifacemax[0] = on_boundary[0][1] ? 0 : 1;
-  ifacemax[1] = on_boundary[1][1] ? 0 : 1;
-  ifacemax[2] = on_boundary[2][1] ? 0 : 1;
-
-  const int rank = this->rank();
-  if (rank < 2) ifacemin[1] = ifacemax[1] = 0;
-  if (rank < 3) ifacemin[2] = ifacemax[2] = 0;
-
+  }
+  int index_boundary = 0;
+  Problem * problem = simulation()->problem();
+  Boundary * boundary;
+  while ( (boundary = problem->boundary(index_boundary++)) ) {
+    boundary->periodicity(p32);
+  }
 }
 
 //----------------------------------------------------------------------

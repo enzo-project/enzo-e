@@ -20,7 +20,7 @@ public: // interface
   /// Create a new BoundaryValue
   BoundaryValue() throw() 
   : Boundary (), value_(0) 
-  {}
+  {  }
 
   /// Create a new BoundaryValue
   BoundaryValue(axis_enum axis, face_enum face, Value * value, 
@@ -52,8 +52,6 @@ public: // virtual functions
 			CommBlock * block,
 			face_enum face = face_all,
 			axis_enum axis = axis_all) const throw();
-
-  bool is_periodic() const throw() { return false; }
 
 protected: // functions
 

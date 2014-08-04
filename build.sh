@@ -83,8 +83,6 @@ set prec = $CELLO_PREC
    setenv CELLO_ARCH $arch
    setenv CELLO_PREC $prec
 
-   rm -f bin/enzo-p
-
    python scons.py install-inc    >&  $dir/out.scons
    python scons.py $k_switch -j $proc -Q $target |& tee $dir/out.scons
 

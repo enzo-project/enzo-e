@@ -26,25 +26,22 @@ void CommBlock::refresh_begin_()
     return;
   }
 
-  const Config * config = simulation()->config();
+  bool periodic[3][2];
+  periodicity(periodic);
 
   if (is_leaf()) {
-
-    int rank = this->rank();
 
     int n3[3];
     size_forest(&n3[0],&n3[1],&n3[2]);
 
-    int refresh_rank = config->field_refresh_rank;
     loop_refresh_.set_stop(0);
 
-    ItFace it_face(rank,refresh_rank);
+    ItFace it_face = this->it_face();
     int if3[3];
 
     const int level = this->level();
 
     while (it_face.next(if3)) {
-
 
       Index index_neighbor = index_.index_neighbor(if3,n3);
 

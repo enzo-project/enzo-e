@@ -21,6 +21,7 @@ class Block;
 class Factory;
 class FieldDescr;
 class FieldFace;
+class ItFace;
 class GroupProcess;
 class Hierarchy;
 class Method;
@@ -85,8 +86,6 @@ public: // interface
   //----------------------------------------------------------------------
   // ACCESS METHODS
   //----------------------------------------------------------------------
-
-//----------------------------------------------------------------------
   
   /// Return the Block associated with this CommBlock
   inline Block * block() throw()
@@ -192,6 +191,9 @@ public: // interface
   /// Return which block faces lie along a domain boundary
   void is_on_boundary (bool boundary[3][2]) const throw();
 
+  /// Return which faces are periodic
+  void periodicity (bool periodic[3][2]) const;
+
   void update_levels_ ()
   {
     face_level_curr_ =       face_level_next_;
@@ -210,6 +212,11 @@ public: // interface
 
   /// Initialize child face levels given own face levels
   void initialize_child_face_levels_();
+
+  /// Return an iterator over faces
+
+  ItFace it_face(const int * ic3=0,
+		 const int * if3=0) throw();
 
   //--------------------------------------------------
   // COMPUTE
@@ -390,6 +397,10 @@ public:
 
   /// Get restricted data from child when it is deleted
   void x_refresh_child (int n, char buffer[],int ic3[3]);
+
+  /// Whether the given face should be refreshed 
+  /// (false if boundary and not periodic)
+  bool do_refresh(int if3[3]) const;
 
 protected:
   void refresh_enter_();
@@ -578,9 +589,6 @@ protected: // functions
 
   /// Update boundary conditions
   void update_boundary_ ();
-
-  void loop_limits_refresh_ 
-  (int ifacemin[3], int ifacemax[3]) const throw();
 
   void loop_limits_nibling_ (int ic3m[3], int ic3p[3], const int if3[3]) const throw();
 

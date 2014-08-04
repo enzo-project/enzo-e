@@ -18,8 +18,13 @@ class ItFace {
 public: // interface
 
   /// Constructor
-  ItFace(int rank, int rank_limit, 
-	 const int * ic3=0, const int * if3=0) throw();
+  ItFace(int rank,
+	 int rank_limit,
+	 bool periodic[3][2],
+	 int n3[3],
+	 Index index,
+	 const int * ic3=0,
+	 const int * if3=0) throw();
 
   /// Destructor
   ~ItFace() throw();
@@ -32,8 +37,14 @@ public: // interface
     PUParray(p,if3_,3);
     p | ic3_;
     p | ipf3_;
+    p | index_;
     p | rank_;
     p | rank_limit_;
+    for (int i=0; i<3; i++) {
+      PUParray (p,periodicity_[i],2);
+    }
+    PUParray (p,n3_,3);
+    p | index_;
   }
 
   /// Reduce another value
@@ -77,6 +88,15 @@ private: // attributes
 
   /// face rank limit
   int rank_limit_;
+
+  /// Periodicity
+  int periodicity_[3][2];
+
+  /// Size of the hierarchy forest
+  int n3_[3];
+
+  /// Index
+  Index index_;
 
 };
 

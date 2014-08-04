@@ -21,12 +21,24 @@ public: // interface
   /// Create a new Boundary
   Boundary() throw() 
   : axis_(axis_all), face_(face_all), mask_(0)
-  {  }
+  {
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+	periodicity_[axis][face] = false;
+      }
+    }
+  }
 
   /// Create a new Boundary
   Boundary(axis_enum axis, face_enum face, Mask * mask) throw() 
   : axis_(axis), face_(face), mask_(mask)
-  {   }
+  {
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+	periodicity_[axis][face] = false;
+      }
+    }
+  }
 
   /// Destructor
   virtual ~Boundary() throw() {delete mask_;}
@@ -49,6 +61,7 @@ public: // interface
     p | face;
     face_ = (face_enum)face;
     p | mask_;
+    for (int axis=0; axis<3; axis++) PUParray(p,periodicity_[axis],2);
   };
 
 public: // virtual functions
@@ -60,7 +73,14 @@ public: // virtual functions
 			face_enum face = face_all,
 			axis_enum axis = axis_all) const throw() = 0;
 
-  virtual bool is_periodic() const throw() = 0;
+  /// Return which faces are periodic
+  void periodicity(bool p32[3][2]) const throw() {
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+	p32[axis][face] = periodicity_[axis][face];
+      }
+    }
+  }
 
 protected: // protected functions
 
@@ -79,6 +99,9 @@ protected: // protected attributes
 
   /// Mask object for boundary conditions (NULL == true)
   Mask * mask_;
+
+  /// Periodicity of boundary condition faces
+  bool periodicity_[3][2];
 
 };
 
