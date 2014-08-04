@@ -23,7 +23,7 @@
  }
 
  Stopping {
-     cycle = 1;
+     cycle = 1000;
  }
 
  Method {
@@ -69,6 +69,7 @@
           include "input/schedule_cycle_100.incl"
           dir   = ["turbulence-checkpoint-%d","count"];
           type = "checkpoint";
+	  schedule { start = 100; }
      };
 
      hdf5 {

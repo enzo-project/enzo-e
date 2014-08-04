@@ -86,7 +86,9 @@ struct fluxes
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "grackle.h"
+#ifdef CONFIG_USE_GRACKLE
+#   include "grackle.h"
+#endif
 
 //----------------------------------------------------------------------
 

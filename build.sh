@@ -156,7 +156,7 @@ set H1 = `date +"%H"`
 set M1 = `date +"%M"`
 set S1 = `date +"%S"`
 
-@ t = ($S1 - $S0) + 60 * ( ( $M1 - $M0) + 60 * ( $H1 - $H0) )
+set t = `echo "( $S1 - $S0 ) + 60 * ( ( $M1 - $M0 ) + 60 * ( $H1 - $H0) )" | bc`
 
 echo "END   Enzo-P/Cello ${0}: arch = $arch  prec = $prec  target = $target time = ${t}s"
 
