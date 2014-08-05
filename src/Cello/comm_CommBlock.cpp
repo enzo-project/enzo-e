@@ -120,8 +120,10 @@ CommBlock::CommBlock
 
   }
 
-  for (int i=0; i<face_level_last_.size(); i++) face_level_last_[i] = 0;
-  for (int i=0; i<child_face_level_curr_.size(); i++) child_face_level_curr_[i] = 0;
+  for (size_t i=0; i<face_level_last_.size(); i++) 
+    face_level_last_[i] = 0;
+  for (size_t i=0; i<child_face_level_curr_.size(); i++) 
+    child_face_level_curr_[i] = 0;
 
   initialize_child_face_levels_();
 

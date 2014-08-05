@@ -3,21 +3,22 @@
 set arch = $CELLO_ARCH
 set prec = $CELLO_PREC
 
-  # initialize time
+# initialize time
 
-    set H0 = `date +"%H"`
-    set M0 = `date +"%M"`
-    set S0 = `date +"%S"`
+set H0 = `date +"%H"`
+set M0 = `date +"%M"`
+set S0 = `date +"%S"`
 
-    set log = "log.build"
+set log = "log.build"
 
-    set proc = 8
+set proc = 8
 
-    # set default target
+# set default target
 
-    set target = "install-bin"
-    set k_switch = "-k"
-    if ($#argv >= 1) then
+set target = "install-bin"
+set k_switch = "-k"
+
+if ($#argv >= 1) then
    if ($argv[1] == "clean") then
       set d = `date +"%Y-%m-%d %H:%M:%S"`
       printf "$d %-14s cleaning..."
@@ -33,120 +34,118 @@ set prec = $CELLO_PREC
       printf "done\n"
       exit
    else if ($argv[1] == "compile") then
-     set target = install-bin
+      set target = install-bin
    else if ($argv[1] == "test") then
-     set target = "test"
-     set proc = 1
-     set k_switch = "-k"
+      set target = "test"
+      set proc = 1
+      set k_switch = "-k"
    else
-     # assume enzo-p
-     set k_switch = ""
-     set target = $argv[1]
-     rm $target
+      # assume enzo-p
+      set k_switch = ""
+      set target = $argv[1]
+      rm $target
    endif
-    else
-  # assume enzo-p
-  set k_switch = ""
-  set target = "bin/enzo-p"
-  rm $target
-    endif
+else
+   # assume enzo-p
+   set k_switch = ""
+   set target = "bin/enzo-p"
+   rm $target
+endif
 
-    set d = `date +"%Y-%m-%d %H:%M:%S"`
-    echo "$d BEGIN"
+set d = `date +"%Y-%m-%d %H:%M:%S"`
+echo "$d BEGIN"
 
-    echo "BEGIN Enzo-P/Cello ${0}"
-    echo "arch = $arch"
-    echo "prec = $prec"
-    echo "target = $target"
+echo "BEGIN Enzo-P/Cello ${0}"
+echo "arch = $arch"
+echo "prec = $prec"
+echo "target = $target"
 
-   rm -f "test/*/running.$arch.$prec"
+rm -f "test/*/running.$arch.$prec"
 
-   set configure = $arch-$prec
-   set configure_print = `printf "%s %s %s" $arch $prec`
+set configure = $arch-$prec
+set configure_print = `printf "%s %s %s" $arch $prec`
 
+printf "$configure" > test/COMPILING
 
-   printf "$configure" > test/COMPILING
+# make output directory for compilation and tests
 
-   # make output directory for compilation and tests
+set dir = test
 
-   set dir = test
+# COMPILE
 
-   # COMPILE
+set d = `date +"%Y-%m-%d %H:%M:%S"`
+
+printf "$d %-14s %-14s" "compiling..."
+printf "$d %-14s %-14s" "compiling..." >> $log
+
+touch "$dir/running.$arch.$prec"
+
+setenv CELLO_ARCH $arch
+setenv CELLO_PREC $prec
+
+python scons.py install-inc    >&  $dir/out.scons
+python scons.py $k_switch -j $proc -Q $target |& tee $dir/out.scons
+
+util/parse_error.awk   < $dir/out.scons >  errors.org
+util/parse_warning.awk < $dir/out.scons >> errors.org
+
+if (-e $target) then
+   echo "Success"
+else
+   echo "FAIL"
+endif
+
+rm -f "$dir/running.$arch.$prec"
+
+printf "done\n"
+printf "done\n" >> $log
+
+# TESTS
+
+if ($target == "test") then
+
+   # count crashes
+
+   grep FAIL $dir/*unit       | grep "0/" | sort > $dir/fail.$configure
+   grep incomplete $dir/*unit | grep "0/" | sort > $dir/incomplete.$configure
+   grep pass $dir/*unit       | grep "0/" | sort > $dir/pass.$configure
+
+   set f = `wc -l $dir/fail.$configure`
+   set i = `wc -l $dir/incomplete.$configure`
+   set p = `wc -l $dir/pass.$configure`
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
-   printf "$d %-14s %-14s" "compiling..."
-   printf "$d %-14s %-14s" "compiling..." >> $log
+   set line = "$d ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
 
-   touch "$dir/running.$arch.$prec"
+   printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" \
+        $line | tee $log
 
-   setenv CELLO_ARCH $arch
-   setenv CELLO_PREC $prec
+   foreach test ($dir/*unit)
+      set test_begin = `grep "UNIT TEST BEGIN" $test | wc -l`
+      set test_end   = `grep "UNIT TEST END"   $test | wc -l`
 
-   python scons.py install-inc    >&  $dir/out.scons
-   python scons.py $k_switch -j $proc -Q $target |& tee $dir/out.scons
+      @ crash = $test_begin - $test_end
 
-   util/parse_error.awk   < $dir/out.scons >  errors.org
-   util/parse_warning.awk < $dir/out.scons >> errors.org
-
-   if (-e $target) then
-      echo "Success"
-   else
-      echo "FAIL"
-   endif
-
-   rm -f "$dir/running.$arch.$prec"
-
-   printf "done\n"
-   printf "done\n" >> $log
-
-   # TESTS
-
-   if ($target == "test") then
-
-      #recursively call script to clean
-#      $0 clean
-
-      # count crashes
-
-      cat $dir/*unit |grep FAIL      | grep "0/" | sort > $dir/fail.$configure
-      cat $dir/*unit |grep incomplete| grep "0/" | sort > $dir/incomplete.$configure
-      cat $dir/*unit |grep pass      | grep "0/" | sort > $dir/pass.$configure
-      set f = `cat $dir/fail.$configure | wc -l`
-      set i = `cat $dir/incomplete.$configure | wc -l`
-      set p = `cat $dir/pass.$configure | wc -l`
-
-      set d = `date +"%Y-%m-%d %H:%M:%S"`
-
-      set line = "$d ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
-
-      printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" $line
-      printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" $line >> $log
-
-      foreach test ($dir/*unit)
-        set test_begin = `grep "UNIT TEST BEGIN" $test | wc -l`
-        set test_end   = `grep "UNIT TEST END" $test | wc -l`
-
-        @ crash = $test_begin - $test_end
-
-        if ($crash != 0) then
-           set line = "   CRASH: $test\n"
-           printf "$line"
-           printf "$line" >> $log
-        endif
-      end
+      if ($crash != 0) then
+         set line = "   CRASH: $test\n"
+         printf "$line"
+         printf "$line" >> $log
+      endif
+   end
 
 
-   endif
+endif
 
-   if ($CELLO_ARCH == "ncsa-bw") then
-       echo "Relinking with static libpng15.a..."
-      /u/sciteam/bordner/Charm/charm/bin/charmc -language charm++ -tracemode projections -o build/charm/Enzo/enzo-p -g -g build/charm/Enzo/enzo-p.o build/charm/Cello/main_enzo.o -Llib/charm -L/opt/cray/hdf5/default/cray/74/lib -lcharm -lenzo -lsimulation -lproblem -lcomm -lmesh -lfield -lio -ldisk -lmemory -lparameters -lerror -lmonitor -lparallel -lperformance -ltest -lcello -lexternal -lhdf5 -lz /u/sciteam/bordner/lib/libpng15.a -lgfortran
+if ($CELLO_ARCH == "ncsa-bw") then
+   echo "Relinking with static libpng15.a..."
+   /u/sciteam/bordner/Charm/charm/bin/charmc -language charm++ -tracemode projections -o build/charm/Enzo/enzo-p -g -g build/charm/Enzo/enzo-p.o build/charm/Cello/main_enzo.o -Llib/charm -L/opt/cray/hdf5/default/cray/74/lib -lcharm -lenzo -lsimulation -lproblem -lcomm -lmesh -lfield -lio -ldisk -lmemory -lparameters -lerror -lmonitor -lparallel -lperformance -ltest -lcello -lexternal -lhdf5 -lz /u/sciteam/bordner/lib/libpng15.a -lgfortran
 
-       mv build/charm/Enzo/enzo-p bin/charm
+   mv build/charm/Enzo/enzo-p bin/charm
 
-   endif
-   rm -f test/COMPILING
+endif
+
+rm -f test/COMPILING
 
 cp test/out.scons out.scons.$arch-$prec
 
