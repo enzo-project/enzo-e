@@ -168,14 +168,21 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_turbulence_temperature = p->value_float 
     ("Initial:turbulence:temperature",0.0);
 
-  ASSERT ("EnzoConfig::read",
-	  "Either Initial:turbulence:pressure or Initial:turbulence:temperature must be defined",
-	  ! ((initial_turbulence_pressure == 0.0) &&
-	     (initial_turbulence_temperature == 0.0)));
-  ASSERT ("EnzoConfig::read",
-	  "Initial:turbulence:pressure and Initial:turbulence:temperature cannot both be defined",
-	  ! ((initial_turbulence_pressure != 0.0) &&
-	     (initial_turbulence_temperature != 0.0)));
+  bool uses_turbulence = false;
+  for (size_t i=0; i<method_list.size(); i++) {
+    if (method_list[i] == "turbulence") uses_turbulence=true;
+  }
+
+  if (uses_turbulence) {
+    ASSERT ("EnzoConfig::read",
+	    "Either Initial:turbulence:pressure or Initial:turbulence:temperature must be defined",
+	    ! ((initial_turbulence_pressure == 0.0) &&
+	       (initial_turbulence_temperature == 0.0)));
+    ASSERT ("EnzoConfig::read",
+	    "Initial:turbulence:pressure and Initial:turbulence:temperature cannot both be defined",
+	    ! ((initial_turbulence_pressure != 0.0) &&
+	       (initial_turbulence_temperature != 0.0)));
+  }
 
   interpolation_method = p->value_string 
     ("Field:interpolation_method","SecondOrderA");

@@ -19,6 +19,7 @@ Boundary { type = "periodic"; }
 
 Testing {
    time_final  = 0.10;
+   cycle_final = 0;
 }
 
 include "input/initial_square.incl"

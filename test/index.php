@@ -24,9 +24,10 @@
      //----------------------------------------------------------------------
 
    function test_output ($output_file) {
-     if (file_exists($output_file)) {
-       $output_html = "<a href=\"$output_file\">$output.unit</a>";
-       system("cat $output_file | awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$output_file'>incomplete</a></td>\"; if (c!=0) print \"<td class=pass><a href='$output_file'>complete</a></td>\"}'");
+     $file="$output_file";
+     if (file_exists($file)) {
+       $output_html = "<a href=\"$file\">$output.unit</a>";
+       system("cat $file | awk 'BEGIN{c=0}; /END CELLO/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$file'>incomplete</a></td>\"; if (c!=0) print \"<td class=pass><a href='$file'>complete</a></td>\"}'");
      } else {
        echo "<td></td>";
      }
@@ -103,7 +104,7 @@ function test_failed ($output_file) {
 $types = array("charm");
 $num_types = sizeof($types);
 
-function tests($component,$testrun,$output,$test_name) {
+function tests($component,$testrun,$output,$test_name,$dir) {
 
   global $types;
   global $num_types;
@@ -149,7 +150,12 @@ function tests($component,$testrun,$output,$test_name) {
 
       $output_file = "$output.unit";
 
-      test_output     ($output_file);
+      if ($dir != "") {
+	$file = "$dir/$output_file";
+      } else {
+	$file = "$output_file";
+      }
+      test_output     ($file);
       test_date       ($output_file);
       test_time       ($output_file);
       test_duration   ($output_file);
@@ -166,7 +172,7 @@ function tests($component,$testrun,$output,$test_name) {
 
     for ($i = 0; $i<$num_types; ++$i) {
       $type = $types[$i];
-      $output_file = "../test/$output.unit";
+      $output_file = "../test/$dir/$output.unit";
       if (file_exists($output_file)) {
 	test($type,$output_file,"FAIL");
       }
@@ -273,7 +279,7 @@ function summary_incomplete_output ( $test_output, $executables, $state, $dir)
       ++$num_output_files;
     }
 
-    system("cat $output_files | awk 'BEGIN{e=0;}; /UNIT TEST END/ {e=e+1};END{if ($num_output_files==e) {print \"<td></td>\"} else {print \"<td class=fail>\"$num_output_files - e\"</td>\";}}'");
+    system("cat $output_files | awk 'BEGIN{e=0;}; /END CELLO/ {e=e+1};END{if ($num_output_files==e) {print \"<td></td>\"} else {print \"<td class=fail>\"$num_output_files - e\"</td>\";}}'");
 
   }
 }
@@ -678,7 +684,7 @@ small implosion problem is run for 400 cycles, first with
 
   echo "<h3>PPM (serial) </h3>";
 
-tests("Enzo","enzo-p","test_method_ppm-1","PPM 1 block");
+tests("Enzo","enzo-p","test_method_ppm-1","PPM 1 block","");
 
 test_table ("method_ppm-1",
 	    array("000000","000200","000400"), $types);
@@ -687,7 +693,7 @@ test_table ("method_ppm-1",
 
 echo "<h3>PPM (parallel) </h3>";
 
-tests("Enzo","enzo-p","test_method_ppm-8","PPM 8 blocks");
+tests("Enzo","enzo-p","test_method_ppm-8","PPM 8 blocks","");
 
 test_table ("method_ppm-8",
 	    array("000000","000200","000400"), $types);
@@ -707,7 +713,7 @@ small high-density sphere is run for 50 cycles, first with
 
   echo "<h3>PPML (serial) </h3>";
 
-tests("Enzo","enzo-p","test_method_ppml-1","PPML 1 block");
+tests("Enzo","enzo-p","test_method_ppml-1","PPML 1 block","");
 
 test_table ("method_ppml-1-x",
 	    array("0000","0010","0020","0030","0040"), $types);
@@ -718,7 +724,7 @@ test_table ("method_ppml-1-z",
 
 echo "<h3>PPML (parallel) </h3>";
 
-tests("Enzo","enzo-p","test_method_ppml-8","PPML 8 blocks");
+tests("Enzo","enzo-p","test_method_ppml-8","PPML 8 blocks","");
 
 test_table ("method_ppml-8-x",
 	    array("0000","0010","0020","0030","0040"), $types);
@@ -744,14 +750,14 @@ in Enzo-P.
 
 echo "<h3>HEAT (serial) </h3>";
 
-tests("Enzo","enzo-p","test_method_heat-1","HEAT 1 block");
+tests("Enzo","enzo-p","test_method_heat-1","HEAT 1 block","");
 
 test_table ("method_heat-1",
 	    array("000000","000200","000400"), $types);
 
 echo "<h3>HEAT (parallel) </h3>";
 
-tests("Enzo","enzo-p","test_method_heat-8","HEAT 8 block");
+tests("Enzo","enzo-p","test_method_heat-8","HEAT 8 block","");
 
 test_table ("method_heat-8",
 	    array("000000","000200","000400"), $types);
@@ -782,12 +788,12 @@ test_group("Mesh");
 
 echo "<h3>2D Serial</h3>";
 
-tests("Enzo","enzo-p","test_mesh-balanced","balanced");
+tests("Enzo","enzo-p","test_mesh-balanced","balanced","");
 
 test_table ("mesh-balanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
 test_table ("mesh-balanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
 
-// tests("Enzo","enzo-p","test_mesh-unbalanced","unbalanced");
+// tests("Enzo","enzo-p","test_mesh-unbalanced","unbalanced","");
 // test_table ("mesh-unbalanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
 // test_table ("mesh-unbalanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
 
@@ -797,7 +803,7 @@ test_group("Enzo-AMR");
 
 echo "<h3>2D Serial</h3>";
 
-// tests("Enzo","enzo-p","test_adapt-L1-P1","Level 1");
+// tests("Enzo","enzo-p","test_adapt-L1-P1","Level 1","");
 // 
 // test_table ("adapt-L1-P1-mesh",
 // 	    array("0.000000","0.020000","0.040000",
@@ -815,7 +821,7 @@ echo "<h3>2D Serial</h3>";
 // 	    array("0.000000","0.020000","0.040000","0.060000",
 // 		  "0.080000","0.100000"), $types);
 // 
-// tests("Enzo","enzo-p","test_adapt-L2-P1","Level 2");
+// tests("Enzo","enzo-p","test_adapt-L2-P1","Level 2","");
 // 
 // test_table ("adapt-L2-P1-mesh",
 // 	    array("0.000000","0.020000","0.040000","0.060000",
@@ -835,7 +841,7 @@ echo "<h3>2D Serial</h3>";
 // 		  "0.080000","0.100000"), $types);
 // 
 // 
-// tests("Enzo","enzo-p","test_adapt-L3-P1","Level 3");
+// tests("Enzo","enzo-p","test_adapt-L3-P1","Level 3","");
 // 
 // test_table ("adapt-L3-P1-mesh",
 // 	    array("0.000000","0.020000","0.040000","0.060000",
@@ -855,7 +861,7 @@ echo "<h3>2D Serial</h3>";
 // 		  "0.080000","0.100000"), $types);
 // 
 // 
-// tests("Enzo","enzo-p","test_adapt-L4-P1","Level 4");
+// tests("Enzo","enzo-p","test_adapt-L4-P1","Level 4","");
 // 
 // test_table ("adapt-L4-P1-mesh",
 // 	    array("0.000000","0.020000","0.040000","0.060000",
@@ -874,7 +880,7 @@ echo "<h3>2D Serial</h3>";
 // 		  "0.080000","0.100000"), $types);
 
 
-tests("Enzo","enzo-p","test_adapt-L5-P1","Level 5");
+tests("Enzo","enzo-p","test_adapt-L5-P1","Level 5","");
 
 test_table ("adapt-L5-P1-mesh",
 	    array("0.000000","0.020000","0.040000","0.060000",
@@ -906,45 +912,45 @@ test_group("Balance");
 // echo "<h3>Refine</h3>";
 // echo "<h3>RefineCom</h3>";
 echo "<h3>Rotate</h3>";
-tests("Enzo","enzo-p","test_balance_rotate","Rotate");
+tests("Enzo","enzo-p","test_balance_rotate","Rotate","");
 test_table ("Balance/Rotate/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
-// tests("Enzo","enzo-p","test_balance_greedy","Greedy");
-// tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm");
-// tests("Enzo","enzo-p","test_balance_hybrid","Hybrid);
-// tests("Enzo","enzo-p","test_balance_neighbor","Neighbor");
-// tests("Enzo","enzo-p","test_balance_rand_cent","RandCent");
-// tests("Enzo","enzo-p","test_balance_refine","Refine");
-// tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm");
+// tests("Enzo","enzo-p","test_balance_greedy","Greedy","");
+// tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm","");
+// tests("Enzo","enzo-p","test_balance_hybrid","Hybrid,"");
+// tests("Enzo","enzo-p","test_balance_neighbor","Neighbor","");
+// tests("Enzo","enzo-p","test_balance_rand_cent","RandCent","");
+// tests("Enzo","enzo-p","test_balance_refine","Refine","");
+// tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm","");
 
 
 echo "<h3>Greedy</h3>";
-tests("Enzo","enzo-p","test_balance_greedy","Greedy");
+tests("Enzo","enzo-p","test_balance_greedy","Greedy","Balance");
 test_table ("Balance/Greedy/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>GreedyComm</h3>";
-tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm");
+tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm","Balance");
 test_table ("Balance/GreedyComm/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>Hybrid</h3>";
-tests("Enzo","enzo-p","test_balance_hybrid","Hybrid");
+tests("Enzo","enzo-p","test_balance_hybrid","Hybrid","Balance");
 test_table ("Balance/Hybrid/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>Neighbor</h3>";
-tests("Enzo","enzo-p","test_balance_neighbor","Neighbor");
+tests("Enzo","enzo-p","test_balance_neighbor","Neighbor","Balance");
 test_table ("Balance/Neighbor/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>RandCent</h3>";
-tests("Enzo","enzo-p","test_balance_rand_cent","RandCent");
+tests("Enzo","enzo-p","test_balance_rand_cent","RandCent","Balance");
 test_table ("Balance/RandCent/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>Refine</h3>";
-tests("Enzo","enzo-p","test_balance_refine","Refine");
+tests("Enzo","enzo-p","test_balance_refine","Refine","Balance");
 test_table ("Balance/Refine/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 echo "<h3>RefineComm</h3>";
-tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm");
+tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm","Balance");
 test_table ("Balance/RefineComm/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
@@ -954,7 +960,7 @@ test_group("Boundary-2D");
 
 echo "<h3>2D Reflecting</h3>";
 
-tests("Enzo","enzo-p","test_boundary_reflecting-2d","Reflecting 2D");
+tests("Enzo","enzo-p","test_boundary_reflecting-2d","Reflecting 2D","");
 
 test_table ("boundary_reflecting-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
@@ -964,7 +970,7 @@ test_table ("boundary_reflecting-2d",
 
 echo "<h3>2D Periodic</h3>";
 
-tests("Enzo","enzo-p","test_boundary_periodic-2d","Periodic 2D");
+tests("Enzo","enzo-p","test_boundary_periodic-2d","Periodic 2D","");
 
 test_table ("boundary_periodic-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
@@ -973,7 +979,7 @@ test_table ("boundary_periodic-2d",
 
 echo "<h3>2D Outflow</h3>";
   
-tests("Enzo","enzo-p","test_boundary_outflow-2d","Outflow 2D");
+tests("Enzo","enzo-p","test_boundary_outflow-2d","Outflow 2D","");
 
 test_table ("boundary_outflow-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
@@ -984,7 +990,7 @@ test_group("Boundary-3D");
 
 echo "<h3>3D Reflecting</h3>";
 
-tests("Enzo","enzo-p","test_boundary_reflecting-3d","Reflecting 3D");
+tests("Enzo","enzo-p","test_boundary_reflecting-3d","Reflecting 3D","");
 
 test_table ("boundary_reflecting-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
@@ -993,7 +999,7 @@ test_table ("boundary_reflecting-3d",
 
 echo "<h3>3D Periodic</h3>";
 
-tests("Enzo", "enzo-p","test_boundary_periodic-3d","Periodic 3D");
+tests("Enzo", "enzo-p","test_boundary_periodic-3d","Periodic 3D","");
 
 test_table ("boundary_periodic-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
@@ -1002,7 +1008,7 @@ test_table ("boundary_periodic-3d",
 
 echo "<h3>3D Outflow</h3>";
 
-tests("Enzo","enzo-p","test_boundary_outflow-3d","Outflow 3D");
+tests("Enzo","enzo-p","test_boundary_outflow-3d","Outflow 3D","");
 
 test_table ("boundary_outflow-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
@@ -1014,7 +1020,7 @@ test_group("Initial");
 
 echo "<h3>png mask initial conditions</h3>";
 
-tests("Enzo","enzo-p","test_initial_png","");
+tests("Enzo","enzo-p","test_initial_png","","");
 
 test_table ("initial_png",
 	    array("00","10","20","30","40", "50"), $types);
@@ -1028,19 +1034,19 @@ echo "<h3>Process stride</h3>";
 
 echo "<h3>Stride 1</h3>";
 
-tests("Enzo","enzo-p","test_output-stride-1","");
+tests("Enzo","enzo-p","test_output-stride-1","","");
 
 test_table_blocks ("output-stride-1", array("00","10","20"),$types);
 
 echo "<h3>Stride 2</h3>";
 
-tests("Enzo","enzo-p","test_output-stride-2","");
+tests("Enzo","enzo-p","test_output-stride-2","","");
 
 test_table_blocks ("output-stride-2",  array("00","10","20"), $types);
 
 echo "<h3>Stride 3</h3>";
 
-tests("Enzo","enzo-p","test_output-stride-3","");
+tests("Enzo","enzo-p","test_output-stride-3","","");
 
 test_table_blocks ("output-stride-3",  array("00","10","20"), $types);
 
@@ -1048,53 +1054,53 @@ test_table_blocks ("output-stride-3",  array("00","10","20"), $types);
 
 test_group("Disk");
 
-tests("Cello","test_FileHdf5", "test_FileHdf5","");
-tests("Cello","test_FileIfrit","test_FileIfrit","");
+tests("Cello","test_FileHdf5", "test_FileHdf5","","");
+tests("Cello","test_FileIfrit","test_FileIfrit","","");
 
 //----------------------------------------------------------------------
 
 test_group("Error");
 
-tests("Cello","test_Error","test_Error","");
+tests("Cello","test_Error","test_Error","","");
 
 
 //----------------------------------------------------------------------
 
 test_group("Field");
 
-tests("Cello","test_FieldDescr","test_FieldDescr","");
-tests("Cello","test_FieldBlock","test_FieldBlock","");
-tests("Cello","test_FieldFace","test_FieldFace","");
-tests("Cello","test_ItField","test_ItField","");
+tests("Cello","test_FieldDescr","test_FieldDescr","","");
+tests("Cello","test_FieldBlock","test_FieldBlock","","");
+tests("Cello","test_FieldFace","test_FieldFace","","");
+tests("Cello","test_ItField","test_ItField","","");
 
 //----------------------------------------------------------------------
 
 test_group("Io");
 
-tests("Cello","test_ItReduce", "test_ItReduce","");
+tests("Cello","test_ItReduce", "test_ItReduce","","");
 
 //----------------------------------------------------------------------
 
 test_group("Memory");
 
-tests("Cello","test_Memory","test_Memory","");
+tests("Cello","test_Memory","test_Memory","","");
 
 
 //----------------------------------------------------------------------
 
 test_group("Mesh");
 
-tests("Cello","test_Hierarchy","test_Hierarchy",""); 
-tests("Cello","test_Block","test_Block",""); 
-tests("Cello","test_Index","test_Index",""); 
-tests("Cello","test_Tree","test_Tree",""); 
-tests("Cello","test_ItFace","test_ItFace",""); 
+tests("Cello","test_Hierarchy","test_Hierarchy","",""); 
+tests("Cello","test_Block","test_Block","",""); 
+tests("Cello","test_Index","test_Index","",""); 
+tests("Cello","test_Tree","test_Tree","",""); 
+tests("Cello","test_ItFace","test_ItFace","",""); 
 
 printf ("<img width=257 src=\"test_tree_1-initial.png\"></img>\n");
 printf ("<img width=257 src=\"test_tree_2-balanced.png\"></img>\n");
 printf ("<img width=257 src=\"test_tree_3-merged.png\"></img></br>\n");
 
-tests("Cello","test_TreeDensity","test_TreeDensity",""); 
+tests("Cello","test_TreeDensity","test_TreeDensity","",""); 
 
 printf ("<img width=257 src=\"density_xy_1-initial.png\"></img>\n");
 printf ("<img width=257 src=\"density_xy_2-balanced.png\"></img>\n");
@@ -1104,15 +1110,15 @@ printf ("<img width=257 src=\"density_3d_1-initial.png\"></img>\n");
 printf ("<img width=257 src=\"density_3d_2-balanced.png\"></img>\n");
 printf ("<img width=257 src=\"density_3d_3-coalesced.png\"></img></br>\n");
 
-tests("Cello","test_Node","test_Node",""); 
-tests("Cello","test_NodeTrace","test_NodeTrace",""); 
-tests("Cello","test_ItNode","test_ItNode",""); 
+tests("Cello","test_Node","test_Node","",""); 
+tests("Cello","test_NodeTrace","test_NodeTrace","",""); 
+tests("Cello","test_ItNode","test_ItNode","",""); 
 
 //----------------------------------------------------------------------
 
 test_group("Monitor");
 
-tests("Cello","test_Monitor","test_Monitor","");
+tests("Cello","test_Monitor","test_Monitor","","");
 
 // printf ("<img src=\"monitor_image_1.png\"></img>\n");
 // printf ("<img src=\"monitor_image_2.png\"></img>\n");
@@ -1123,41 +1129,41 @@ tests("Cello","test_Monitor","test_Monitor","");
 
 test_group("Parallel");
 
-tests("Cello","test_GroupProcess","test_GroupProcess","");
-tests("Cello","test_Layout","test_Layout","");
+tests("Cello","test_GroupProcess","test_GroupProcess","","");
+tests("Cello","test_Layout","test_Layout","","");
 
 //----------------------------------------------------------------------
 
 test_group("Parameters");
 
-tests("Cello","test_Parameters","test_Parameters","");
+tests("Cello","test_Parameters","test_Parameters","","");
 
 //----------------------------------------------------------------------
 
 test_group("Performance");
 
-tests("Cello","test_Performance","test_Performance","");
-tests("Cello","test_Papi",       "test_Papi","");
-tests("Cello","test_Timer",       "test_Timer","");
+tests("Cello","test_Performance","test_Performance","","");
+tests("Cello","test_Papi",       "test_Papi","","");
+tests("Cello","test_Timer",       "test_Timer","","");
 
 //----------------------------------------------------------------------
 
 test_group("Problem");
 
-tests("Cello","test_Mask","test_Mask","");
-tests("Cello","test_Value","test_Value","");
+tests("Cello","test_Mask","test_Mask","","");
+tests("Cello","test_Value","test_Value","","");
 
 //----------------------------------------------------------------------
 
 test_group("Schedule");
 
-tests("Cello","test_Schedule","test_Schedule","");
+tests("Cello","test_Schedule","test_Schedule","","");
 
 //----------------------------------------------------------------------
 
 test_group("Colormap");
 
-tests("Cello","test_Colormap","test_Colormap","");
+tests("Cello","test_Colormap","test_Colormap","","");
 
 ?>
 </br/>
