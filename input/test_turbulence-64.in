@@ -5,3 +5,6 @@ Mesh {
      root_blocks = [ 4, 4, 4 ];
      root_size = [ 128, 128, 128 ];
 }
+
+Stopping { cycle = 1000; }
+

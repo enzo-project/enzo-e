@@ -61,15 +61,22 @@
 
 
  Output {
-     list = [ "de_png" , 
+
+     # NOTE: checkpoint should be first in list as workaround for bug #55
+
+     list = [ "checkpoint", "de_png" , 
               "vx_png", "vy_png", "vz_png",
-              "p_png", "te_png", "mesh", "checkpoint" ];
+              "p_png", "te_png", "mesh"  ];
 
      checkpoint {
-          include "input/schedule_cycle_100.incl"
           dir   = ["turbulence-checkpoint-%d","count"];
           type = "checkpoint";
-	  schedule { start = 100; }
+          schedule {
+             type = "interval";
+             var =  "cycle";
+             start = 100;
+             step = 100;
+         };
      };
 
      hdf5 {
