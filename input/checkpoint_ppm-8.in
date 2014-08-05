@@ -13,7 +13,9 @@ Testing {
 
 Output {
 
-  list = ["density","checkpoint"];
+  # NOTE: checkpoint must come first as workaround for bug #55
+
+  list = ["checkpoint", "density"];
 
   density {
      name = ["checkpoint_ppm-8-%06d.png", "cycle"];
