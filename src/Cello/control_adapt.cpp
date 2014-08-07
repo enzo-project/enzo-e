@@ -79,6 +79,8 @@ void CommBlock::adapt_begin_()
 {
   trace("adapt_begin 1");
 
+  simulation()->set_phase(phase_adapt);
+
   int level_maximum = simulation()->config()->mesh_max_level;
 
   level_next_ = adapt_compute_desired_level_(level_maximum);

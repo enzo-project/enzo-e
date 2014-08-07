@@ -14,6 +14,19 @@
 
 // #define DEBUG_ADAPT
 
+// KEEP CONSISTENT WITH _comm.hpp: phase_type
+const char * phase_name[9] = {
+  "phase_unknown",
+  "phase_initial",
+  "phase_adapt",
+  "phase_compute",
+  "phase_refresh",
+  "phase_stopping",
+  "phase_output",
+  "phase_restart",
+  "phase_balance"
+};
+
 //----------------------------------------------------------------------
 
 CommBlock::CommBlock

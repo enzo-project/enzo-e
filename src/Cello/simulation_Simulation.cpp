@@ -29,6 +29,7 @@ Simulation::Simulation
   time_(0.0),
   dt_(0),
   stop_(false),
+  phase_(phase_unknown),
   config_(0),
   problem_(0),
   timer_(),
@@ -80,7 +81,7 @@ void Simulation::pup (PUP::er &p)
 
   p | factory_; // PUP::able
 
-  p | config_; // PUPable
+  p | config_;
 
   p | parameter_file_;
 
@@ -92,6 +93,7 @@ void Simulation::pup (PUP::er &p)
   p | time_;
   p | dt_;
   p | stop_;
+  p | phase_;
 
   if (up) problem_ = new Problem;
   p | * problem_;
@@ -116,7 +118,10 @@ void Simulation::pup (PUP::er &p)
 
   if (up) field_descr_ = new FieldDescr;
   p | *field_descr_;
-  
+
+  if (up && (phase_ == phase_restart)) {
+    monitor_->print ("Simulation","restarting");
+  }
 }
 
 //----------------------------------------------------------------------

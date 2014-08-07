@@ -133,8 +133,7 @@ public: // attributes
 
   int                        num_output;
   std::vector<std::string>   output_list;
-  std::string                output_type           [MAX_OUTPUT_GROUPS];
-
+  std::string                output_type                 [MAX_OUTPUT_GROUPS];
   std::string                output_image_axis           [MAX_OUTPUT_GROUPS];
   int                        output_image_block_size     [MAX_OUTPUT_GROUPS];
   std::vector<double>        output_image_colormap       [MAX_OUTPUT_GROUPS];
@@ -168,6 +167,10 @@ public: // attributes
   int                        performance_stride;
   bool                       performance_warnings;
 
+  // Restart
+
+  std::string                restart_file;
+
   // Stopping
 
   int                        stopping_cycle;
@@ -193,6 +196,7 @@ protected: // functions
   void read_monitor_     (Parameters * parameters) throw();
   void read_output_      (Parameters * parameters) throw();
   void read_performance_ (Parameters * parameters) throw();
+  void read_restart_     (Parameters * parameters) throw();
   void read_stopping_    (Parameters * parameters) throw();
   void read_testing_     (Parameters * parameters) throw();
 

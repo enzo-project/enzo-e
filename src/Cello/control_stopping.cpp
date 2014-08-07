@@ -41,6 +41,7 @@ void CommBlock::stopping_begin_()
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
+  simulation->set_phase(phase_stopping);
 
   update_boundary_();
 
@@ -172,6 +173,7 @@ void CommBlock::stopping_balance_()
   
   if (balance_interval && ((cycle_ % balance_interval) == 0)) {
     VERBOSE("balance_enter");
+    simulation()->set_phase (phase_balance);
     AtSync();
   } else {
     stopping_exit_();

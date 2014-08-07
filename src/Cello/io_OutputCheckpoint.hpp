@@ -57,13 +57,22 @@ public: // virtual functions
     int field_index) throw()
   { /* EMPTY */ }
 
-private:
+private: // private functions
 
-  /// Name of the parameter file to write, including format arguments 
+  /// Read the restart_file_ and update Simulation::config() with
+  /// updated values
+  void update_config_();
+
+  private: // attributes
+
+  /// Name of the checkpoint directory, including format arguments 
   std::string dir_name_;
 
   /// Format strings for dir_name_, if any ("cycle", "time", etc.)
   std::vector<std::string> dir_args_;
+
+  /// Name of parameter file to read on restart for updated parameters
+  std::string restart_file_;
 
 };
 

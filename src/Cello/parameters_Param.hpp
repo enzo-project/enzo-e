@@ -68,13 +68,27 @@ public: // interface
     // NOTE: change this function whenever attributes change
     p | type_;
     p | value_accessed_;
-    WARNING("Param::pup","skipping value_* [union including pointers]");
-    // value_integer_; 
-    // value_float_; 
-    // value_logical_; 
-    // *value_string_;
-    // *value_list_;
-    // *value_expr_;
+    if (type_ == parameter_integer) {
+      p | value_integer_;
+    } else if (type_ == parameter_float) {
+      p | value_float_;
+    } else if (type_ == parameter_logical) {
+      p | value_logical_; 
+    } else if (type_ == parameter_string) {
+      // *value_string_;
+      WARNING("Param::pup","skipping value_string");
+    } else if (type_ == parameter_list) {
+      // *value_list_;
+      WARNING("Param::pup","skipping value_list");
+    } else if (type_ == parameter_logical_expr) {
+      // *value_expr_;
+      WARNING("Param::pup","skipping value_logical_expr");
+    } else if (type_ == parameter_float_expr) {
+      // *value_expr_;
+      WARNING("Param::pup","skipping value_float_expr");
+    } else if (type_ == parameter_unknown) {
+      ERROR("Param::pup","parameter type is unknown");
+    }
   }
 
   /// Evaluate a floating-point expression given vectos x,y,z,t

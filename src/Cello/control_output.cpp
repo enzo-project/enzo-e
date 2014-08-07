@@ -25,6 +25,9 @@
 
 void CommBlock::output_begin_ ()
 {
+
+  simulation()->set_phase(phase_output);
+
   TRACE_LOCAL("CommBlock::output_begin_()");
 
   int cycle   = simulation()->cycle();
@@ -98,6 +101,8 @@ void SimulationCharm::r_output(CkReductionMsg * msg)
 
 void Problem::output_next(Simulation * simulation) throw()
 {
+
+  simulation->set_phase(phase_output);
 
   TRACE_LOCAL("Problem::output_next()");
 

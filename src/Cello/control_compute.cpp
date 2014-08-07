@@ -18,10 +18,11 @@
 void CommBlock::compute_begin_ ()
 {
 
-
 #ifdef CONFIG_USE_PROJECTIONS
   //  double time_start = CmiWallTimer();
 #endif
+
+  simulation()->set_phase(phase_compute);
 
   const Problem * problem = simulation()->problem();
   int index_method = 0;

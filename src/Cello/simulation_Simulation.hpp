@@ -125,16 +125,19 @@ public: // interface
   bool stop() const throw() 
   { return stop_; };
 
+  /// Return the current phase of the simulation
+  int phase() const throw() 
+  { return phase_; };
+
+  /// Return the current phase of the simulation
+  void set_phase(int phase) const throw() 
+  { phase_ = phase; };
+
   /// Output Performance information to stdout (root process data only)
   virtual void performance_output();
 
   /// Write performance information to disk (all process data)
   void performance_write();
-
-  // Schedule * projections_schedule_on()
-  // {return projections_schedule_on_; };
-  // Schedule * projections_schedule_off()
-  // {return projections_schedule_off_; };
 
 public: // virtual functions
 
@@ -224,7 +227,6 @@ protected: // attributes
   FILE * fp_debug_;
 #endif
 
-
   //----------------------------------------------------------------------
   // SIMULATION PARAMETERS
   //----------------------------------------------------------------------
@@ -258,6 +260,9 @@ protected: // attributes
 
   /// Current stopping criteria
   bool stop_;
+
+  /// Current phase of the cycle
+  mutable int phase_;
 
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS

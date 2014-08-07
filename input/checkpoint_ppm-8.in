@@ -8,23 +8,31 @@ Mesh { root_blocks    = [4,4]; }
 include "input/adapt_slope.incl"
 
 Testing {
-   time_final = 0.102248490269335;
+   time_final = 0.00632951818516996;
+   cycle_final = 20;
 }
+
+Stopping { cycle = 20; }
 
 Output {
 
   # NOTE: checkpoint must come first as workaround for bug #55
 
-  list = ["checkpoint", "density"];
+  list = ["checkpoint","density"];
 
   density {
      name = ["checkpoint_ppm-8-%06d.png", "cycle"];
   };
 
+
   checkpoint {
 
      type  = "checkpoint";
      dir   = ["checkpoint_ppm-8-%d","cycle"];
-     schedule { var = "cycle"; type ="list"; value=[100,200,300];};
+     schedule { var = "cycle"; type ="list"; value=[10,20];};
   }
+}
+
+Restart {
+   file = "input/restart.in";
 }

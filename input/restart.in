@@ -1,0 +1,8 @@
+Field {
+    courant   = 0.5;
+}
+
+Testing {
+   time_final = 0.00525035579180278;
+}
+

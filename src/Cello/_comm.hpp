@@ -34,6 +34,7 @@
 // Enums
 //----------------------------------------------------------------------
 
+// KEEP CONSISTENT WITH comm_CommBlock.cpp: phase_string
 enum phase_type {
   phase_unknown,
   phase_initial,
@@ -41,8 +42,12 @@ enum phase_type {
   phase_compute,
   phase_refresh,
   phase_stopping,
-  phase_output
+  phase_output,
+  phase_restart,
+  phase_balance
 };
+
+extern const char * phase_name[9];
 
 enum array_type {
   op_array_unknown,

@@ -18,6 +18,8 @@
 void SimulationCharm::initialize() throw()
 {
 
+  set_phase(phase_initial);
+
   Simulation::initialize();
 
   // --------------------------------------------------

@@ -19,6 +19,9 @@
 
 void CommBlock::refresh_begin_() 
 {
+
+  simulation()->set_phase(phase_refresh);
+
   if (delete_) {
     WARNING1("refresh_begin_()",
 	     "%s: refresh called on deleted CommBlock",

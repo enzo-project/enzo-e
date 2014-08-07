@@ -79,7 +79,6 @@ void Config::pup (PUP::er &p)
   PUParray(p,mesh_max_coarsen2,MAX_MESH_GROUPS);
   PUParray(p,mesh_level_exponent,MAX_MESH_GROUPS);
 
-
   // Method
 
   p | method_list;
@@ -126,6 +125,10 @@ void Config::pup (PUP::er &p)
   p | performance_stride;
   p | performance_warnings;
 
+  // Restart
+
+  p | restart_file;
+
   // Stopping
 
   p | stopping_cycle;
@@ -156,6 +159,7 @@ void Config::read(Parameters * p) throw()
   read_monitor_(p);
   read_output_(p);
   read_performance_(p);
+  read_restart_(p);
   read_stopping_(p);
   read_testing_(p);
 
@@ -333,13 +337,11 @@ void Config::read_field_ (Parameters * p) throw()
       int num_groups = p->list_length(param);
       for (int index_group=0; index_group<num_groups; index_group++) {
 	std::string group = p->list_value_string(index_group,param);
-	    printf ("field %s group %s\n",field.c_str(),group.c_str());
 	field_group_list[index_field].push_back(group);
       }
     } else if (p->type(param) == parameter_string) {
       // group_list is a string
       std::string group = p->value_string(param);
-	    printf ("field %s group %s\n",field.c_str(),group.c_str());
       field_group_list[index_field].push_back(group);
     }
   }
@@ -348,7 +350,7 @@ void Config::read_field_ (Parameters * p) throw()
 
   int num_groups = p->list_length("Group:list"); 
 
-  for (size_t index_group = 0; index_group < num_groups; index_group++) {
+  for (int index_group = 0; index_group < num_groups; index_group++) {
 
     std::string group = p->list_value_string(index_group, "Group:list") ;
 
@@ -356,11 +358,10 @@ void Config::read_field_ (Parameters * p) throw()
 
     if (p->type(param) == parameter_list) {
       // field_list is a list
-      for (size_t i=0; i<num_fields; i++) {
+      for (int i=0; i<num_fields; i++) {
 	std::string field = p->list_value_string(i,param);
 	for (int index_field = 0; index_field < num_fields; index_field++) {
 	  if (field_list[index_field] == field) {
-	    printf ("field %s group %s\n",field.c_str(),group.c_str());
 	    field_group_list[index_field].push_back(group);
 	  }
 	}
@@ -370,7 +371,6 @@ void Config::read_field_ (Parameters * p) throw()
       std::string field = p->value_string(param);
       for (int index_field = 0; index_field < num_fields; index_field++) {
 	if (field_list[index_field] == field) {
-	    printf ("field %s group %s\n",field.c_str(),group.c_str());
 	  field_group_list[index_field].push_back(group);
 	}
       }
@@ -519,8 +519,6 @@ void Config::read_mesh_ (Parameters * p) throw()
 
     } else if (p->type(prefix + "min_refine") == parameter_list) {
 
-      double deflt;
-
       mesh_min_refine[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
       mesh_max_coarsen[ia] = p->list_value_float (0,prefix + "max_coarsen",
 					    0.5*mesh_min_refine[ia]);
@@ -528,7 +526,6 @@ void Config::read_mesh_ (Parameters * p) throw()
       mesh_min_refine2[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
       mesh_max_coarsen2[ia] = p->list_value_float (1,prefix + "max_coarsen",
 					     0.5*mesh_min_refine2[ia]);
-
     }
 
     mesh_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
@@ -729,6 +726,13 @@ void Config::read_performance_ (Parameters * p) throw()
   performance_stride   = p->value_integer("Performance:stride",1);
   performance_warnings = p->value_logical("Performance:warnings",true);
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_restart_ (Parameters * p) throw()
+{
+  restart_file = p->value_string("Restart:file","");
 }
 
 //----------------------------------------------------------------------

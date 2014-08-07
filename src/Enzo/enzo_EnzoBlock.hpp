@@ -312,9 +312,6 @@ public: /// entry methods
   // Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
-  /// Data for turbulence reductions
-  double method_turbulence_data [9];
-  
 private: // attributes
 
   enzo_float Time_;
@@ -348,6 +345,10 @@ public: // attributes (YIKES!)
   enzo_float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; 
   /// pointers to old arrays
   enzo_float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; 
+
+  /// Data for turbulence reductions
+  double method_turbulence_data [9];
+  
 
 };
 
