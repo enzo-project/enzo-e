@@ -116,8 +116,9 @@ typedef int precision_type;
 #   error Multiple CONFIG_PRECISION_<SIZE> defined
 #endif
 
+/// Namespace for global functions
 namespace cello {
-
+  
   int sizeof_precision       (precision_type);
   int is_precision_supported (precision_type);
   double machine_epsilon     (precision_type);

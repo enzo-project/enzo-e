@@ -165,7 +165,7 @@ include[ \t]*[\"<] { BEGIN IFILE; }
 
 . {  }
 
-\n.* {strncpy (linebuf,yytext+1,sizeof(linebuf));
+\n.* { lineno++; strncpy (linebuf,yytext+1,sizeof(linebuf));
 yyless(1);
 }
 
@@ -187,7 +187,7 @@ int cello_new_file(const char * filename)
   if (fp == NULL) {
     printf ("%s:%d Parse Error: cannot open file %s\n",
 	    __FILE__,__LINE__,filename);
-    PARALLEL_EXIT;
+    exit(1);
   }
 
   if (curbs != NULL) curbs->lineno = yylineno;

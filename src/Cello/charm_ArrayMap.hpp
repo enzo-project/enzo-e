@@ -4,7 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-22
 /// @brief    [\ref Parallel] Declaration of the ArrayMap class
-///
 
 #ifndef CHARM_ARRAY_MAP_HPP
 #define CHARM_ARRAY_MAP_HPP
@@ -15,7 +14,7 @@ class ArrayMap: public CBase_ArrayMap {
 
   /// @class    ArrayMap
   /// @ingroup  Charm
-  /// @brief    [\ref Parallel] 
+  /// @brief    [\ref Parallel] Class for mapping CommBlock's to processors
 
 public:
   int *mapping;

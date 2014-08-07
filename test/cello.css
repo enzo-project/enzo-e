@@ -44,11 +44,13 @@ td {
 }
 th {    padding: 2px 3px;       text-align: center;}
 td.block {    border-width: 0px;    padding: 0px 0px;   }
+td.noexec     {  color: #000;  background-color: #fa7;}
+td.noout      {  color: #000;  background-color: #fa7;}
+td.incomplete {  color: #300;  background-color: #f77; }
 td.FAIL       {  color: #000;  background-color: #f77;}
-td.incomplete {  color: #000;  background-color: #fff; }
+td.unfinished {  color: #000;  background-color: #fa7; }
+td.pass       {  color: #030;  background-color: #7f7; }
 td.inverse    {  color: #fff;  background-color: #000; }
-td.pass       {  color: #007;  background-color: #fff; }
-td.unfinished {  color: #FA0;  background-color: #fff; }
 th.block {    padding: 0px 0px;   }
 th.divider {    background-color:black;}
 th.running {    background-color:yellow;  }

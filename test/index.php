@@ -2,6 +2,7 @@
 <head>
 <title>Enzo-P / Cello Test Results</title>
 <link href="cello.css" rel="stylesheet" type="text/css">
+
    <?php
    if (file_exists("COMPILING")) {
      echo "<meta http-equiv=\"refresh\" content=20>";
@@ -156,12 +157,12 @@ function tests($component,$testrun,$output,$test_name,$dir) {
 	$file = "$output_file";
       }
       test_output     ($file);
-      test_date       ($output_file);
-      test_time       ($output_file);
-      test_duration   ($output_file);
-      test_failed     ($output_file);
-      test_unfinished ($output_file);
-      test_passed     ($output_file);
+      test_date       ($file);
+      test_time       ($file);
+      test_duration   ($file);
+      test_failed     ($file);
+      test_unfinished ($file);
+      test_passed     ($file);
 
       echo "</tr>\n";
     }
@@ -191,9 +192,7 @@ function test($type,$output,$type) {
   $rowtext = "</tr><tr>";
 
   $count = exec("cat $output | grep $type | grep '0/' | wc -l");
-  if ($count == 0) {
-    //         echo "<strong >no ${ltype}ed tests in $output</strong></br/>";
-  } else {
+  if ($count != 0) {
     echo "<th class=$type><strong>${ltype}ed</strong></th> ";
     system ("grep '0/' $output | sort | uniq | awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}'");
     echo "</tr><tr></tr>";
@@ -233,7 +232,7 @@ function summary_missing_executable ($test_output, $executables, $state, $dir)
     if ($count_missing == 0) {
       printf ("<td></td>");
     } else {
-      printf ("<td class=fail>$count_missing</td>");
+      printf ("<td class=noexec>$count_missing</td>");
     }
   }
 }
@@ -257,7 +256,7 @@ function summary_missing_output ($test_output, $executables, $state, $dir)
     if ($count_missing == 0) {
       printf ("<td></td>");
     } else {
-      printf ("<td class=fail>$count_missing</td>");
+      printf ("<td class=noout>$count_missing</td>");
     }
   }
 }
@@ -279,7 +278,7 @@ function summary_incomplete_output ( $test_output, $executables, $state, $dir)
       ++$num_output_files;
     }
 
-    system("cat $output_files | awk 'BEGIN{e=0;}; /END CELLO/ {e=e+1};END{if ($num_output_files==e) {print \"<td></td>\"} else {print \"<td class=fail>\"$num_output_files - e\"</td>\";}}'");
+    system("cat $output_files | awk 'BEGIN{e=0;}; /END CELLO/ {e=e+1};END{if ($num_output_files==e) {print \"<td></td>\"} else {print \"<td class=incomplete>\"$num_output_files - e\"</td>\";}}'");
 
   }
 }
@@ -512,28 +511,8 @@ printf ("<th></th>");
 printf ( "<th colspan=$num_types class=pass>Passed</br>Tests</th>");
 printf ( "</tr>\n");
 
-/*for ($k = 0; $k < 6; $k ++) {
-  for ($i = 0; $i < $num_types; ++$i) {
-  $type_active = "";
-  if (file_exists("COMPILING"))  {
-  $type_active = file_get_contents("COMPILING");
-  }
-  if ($type_active == $types[$i]) {
-  printf ("<th class=compiling>");
-  } else {
-  printf ("<th> ");
-  }
-  printf (" <a href=out.scons>$types[$i]</a> </th>");
-  }
-  printf ("<th> </th>");
-  } */
-
-//----------------------------------------------------------------------
-// Print row divider
 //----------------------------------------------------------------------
 row_divider($num_types);
-
-// printf ("<th rowspan=9>Enzo</th>\n"); 
 //----------------------------------------------------------------------
 
 test_summary("Method-ppm",
@@ -560,16 +539,12 @@ test_summary("Mesh",
 	     array("mesh-balanced"),
 	     array("enzo-p"),'test');
 
-// test_summary("Enzo-AMR", 
-// 	     array("adapt-L1-P1", "adapt-L2-P1", "adapt-L3-P1", "adapt-L4-P1", "adapt-L5-P1"),
-// 	     array("enzo-p",      "enzo-p",      "enzo-p",      "enzo-p",      "enzo-p"));
-
 test_summary("Balance", 
 	     array("balance_rand_cent",
 		   "balance_greedy",
-		   "balance_greedy_comm",
+		   //		   "balance_greedy_comm",
 		   "balance_refine",
-		   "balance_refine_comm",
+		   //		   "balance_refine_comm",
 		   "balance_rotate",
 		   "balance_neighbor",
 		   "balance_hybrid"),
@@ -597,19 +572,7 @@ test_summary("Output",
 	     array("enzo-p","enzo-p","enzo-p"),'test');
 
 //----------------------------------------------------------------------
-// Print row divider
-//----------------------------------------------------------------------
-printf ("<tr>");
-printf ("<th class=divider></th>");
-for ($k = 0; $k < 5; $k ++) {
-  printf ("<th class=divider></th>");
-  for ($i = 0; $i < $num_types; ++$i) {
-    printf ("<th class=divider> </th>");
-  }
-}
-printf ("<th class=divider></th>");
-printf ("</tr>\n");
-
+row_divider($num_types);
 //----------------------------------------------------------------------
 
 
@@ -706,8 +669,8 @@ test_group("Method-ppml");
 ?>
 
 Method-PPML tests serve to test basic PPML functionality in Enzo-P.  A
-small high-density sphere is run for 50 cycles, first with
-  one block (1,1,1) then eight blocks (2,2,2).
+small high-density sphere is run for 50 cycles, first with one 
+block (1,1,1) then eight blocks (2,2,2).
 
   <?php
 
@@ -793,92 +756,11 @@ tests("Enzo","enzo-p","test_mesh-balanced","balanced","");
 test_table ("mesh-balanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
 test_table ("mesh-balanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
 
-// tests("Enzo","enzo-p","test_mesh-unbalanced","unbalanced","");
-// test_table ("mesh-unbalanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
-// test_table ("mesh-unbalanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
-
 //======================================================================
 
 test_group("Enzo-AMR");
 
 echo "<h3>2D Serial</h3>";
-
-// tests("Enzo","enzo-p","test_adapt-L1-P1","Level 1","");
-// 
-// test_table ("adapt-L1-P1-mesh",
-// 	    array("0.000000","0.020000","0.040000",
-// 		  "0.060000","0.080000","0.100000"), $types);
-// test_table ("adapt-L1-P1-de",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L1-P1-te",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L1-P1-vx",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L1-P1-vy",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// 
-// tests("Enzo","enzo-p","test_adapt-L2-P1","Level 2","");
-// 
-// test_table ("adapt-L2-P1-mesh",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// 
-// test_table ("adapt-L2-P1-de",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L2-P1-te",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L2-P1-vx",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L2-P1-vy",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// 
-// 
-// tests("Enzo","enzo-p","test_adapt-L3-P1","Level 3","");
-// 
-// test_table ("adapt-L3-P1-mesh",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// 
-// test_table ("adapt-L3-P1-de",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L3-P1-te",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L3-P1-vx",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L3-P1-vy",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// 
-// 
-// tests("Enzo","enzo-p","test_adapt-L4-P1","Level 4","");
-// 
-// test_table ("adapt-L4-P1-mesh",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L4-P1-de",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L4-P1-te",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L4-P1-vx",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-// test_table ("adapt-L4-P1-vy",
-// 	    array("0.000000","0.020000","0.040000","0.060000",
-// 		  "0.080000","0.100000"), $types);
-
 
 tests("Enzo","enzo-p","test_adapt-L5-P1","Level 5","");
 
@@ -904,55 +786,53 @@ test_table ("adapt-L5-P1-vy",
 
 test_group("Balance");
 
-// echo "<h3>Greedy</h3>";
-// echo "<h3>GreedyComm</h3>";
-// echo "<h3>Hybrid</h3>";
-// echo "<h3>Neighbor</h3>";
-// echo "<h3>RandCent</h3>";
-// echo "<h3>Refine</h3>";
-// echo "<h3>RefineCom</h3>";
 echo "<h3>Rotate</h3>";
-tests("Enzo","enzo-p","test_balance_rotate","Rotate","");
+
+tests("Enzo","enzo-p","test_balance_rotate","Rotate","Balance");
 test_table ("Balance/Rotate/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
-// tests("Enzo","enzo-p","test_balance_greedy","Greedy","");
-// tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm","");
-// tests("Enzo","enzo-p","test_balance_hybrid","Hybrid,"");
-// tests("Enzo","enzo-p","test_balance_neighbor","Neighbor","");
-// tests("Enzo","enzo-p","test_balance_rand_cent","RandCent","");
-// tests("Enzo","enzo-p","test_balance_refine","Refine","");
-// tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm","");
-
-
 echo "<h3>Greedy</h3>";
+
 tests("Enzo","enzo-p","test_balance_greedy","Greedy","Balance");
 test_table ("Balance/Greedy/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
-echo "<h3>GreedyComm</h3>";
-tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm","Balance");
-test_table ("Balance/GreedyComm/balance-mesh",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+
+// echo "<h3>GreedyComm</h3>";
+
+// tests("Enzo","enzo-p","test_balance_greedy_comm","GreedyComm","Balance");
+// test_table ("Balance/GreedyComm/balance-mesh",
+// 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+
 echo "<h3>Hybrid</h3>";
+
 tests("Enzo","enzo-p","test_balance_hybrid","Hybrid","Balance");
 test_table ("Balance/Hybrid/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+
 echo "<h3>Neighbor</h3>";
+
 tests("Enzo","enzo-p","test_balance_neighbor","Neighbor","Balance");
 test_table ("Balance/Neighbor/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+
 echo "<h3>RandCent</h3>";
+
 tests("Enzo","enzo-p","test_balance_rand_cent","RandCent","Balance");
 test_table ("Balance/RandCent/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+
 echo "<h3>Refine</h3>";
+
 tests("Enzo","enzo-p","test_balance_refine","Refine","Balance");
 test_table ("Balance/Refine/balance-mesh",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
-echo "<h3>RefineComm</h3>";
-tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm","Balance");
-test_table ("Balance/RefineComm/balance-mesh",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+
+// echo "<h3>RefineComm</h3>";
+
+// tests("Enzo","enzo-p","test_balance_refine_comm","RefineComm","Balance");
+// test_table ("Balance/RefineComm/balance-mesh",
+// 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
 //======================================================================
 
@@ -961,26 +841,18 @@ test_group("Boundary-2D");
 echo "<h3>2D Reflecting</h3>";
 
 tests("Enzo","enzo-p","test_boundary_reflecting-2d","Reflecting 2D","");
-
 test_table ("boundary_reflecting-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
-
-
-//----------------------------------------------------------------------
 
 echo "<h3>2D Periodic</h3>";
 
 tests("Enzo","enzo-p","test_boundary_periodic-2d","Periodic 2D","");
-
 test_table ("boundary_periodic-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
 
-//----------------------------------------------------------------------
-
 echo "<h3>2D Outflow</h3>";
-  
-tests("Enzo","enzo-p","test_boundary_outflow-2d","Outflow 2D","");
 
+tests("Enzo","enzo-p","test_boundary_outflow-2d","Outflow 2D","");
 test_table ("boundary_outflow-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
 
@@ -991,25 +863,18 @@ test_group("Boundary-3D");
 echo "<h3>3D Reflecting</h3>";
 
 tests("Enzo","enzo-p","test_boundary_reflecting-3d","Reflecting 3D","");
-
 test_table ("boundary_reflecting-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
-
-//----------------------------------------------------------------------
 
 echo "<h3>3D Periodic</h3>";
 
 tests("Enzo", "enzo-p","test_boundary_periodic-3d","Periodic 3D","");
-
 test_table ("boundary_periodic-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
-
-//----------------------------------------------------------------------
 
 echo "<h3>3D Outflow</h3>";
 
 tests("Enzo","enzo-p","test_boundary_outflow-3d","Outflow 3D","");
-
 test_table ("boundary_outflow-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
 
@@ -1017,11 +882,9 @@ test_table ("boundary_outflow-3d",
 
 test_group("Initial");
 
-
 echo "<h3>png mask initial conditions</h3>";
 
 tests("Enzo","enzo-p","test_initial_png","","");
-
 test_table ("initial_png",
 	    array("00","10","20","30","40", "50"), $types);
 
@@ -1029,25 +892,19 @@ test_table ("initial_png",
 
 test_group("Output");
 
-
-echo "<h3>Process stride</h3>";
-
 echo "<h3>Stride 1</h3>";
 
 tests("Enzo","enzo-p","test_output-stride-1","","");
-
 test_table_blocks ("output-stride-1", array("00","10","20"),$types);
 
 echo "<h3>Stride 2</h3>";
 
 tests("Enzo","enzo-p","test_output-stride-2","","");
-
 test_table_blocks ("output-stride-2",  array("00","10","20"), $types);
 
 echo "<h3>Stride 3</h3>";
 
 tests("Enzo","enzo-p","test_output-stride-3","","");
-
 test_table_blocks ("output-stride-3",  array("00","10","20"), $types);
 
 //======================================================================
@@ -1119,11 +976,6 @@ tests("Cello","test_ItNode","test_ItNode","","");
 test_group("Monitor");
 
 tests("Cello","test_Monitor","test_Monitor","","");
-
-// printf ("<img src=\"monitor_image_1.png\"></img>\n");
-// printf ("<img src=\"monitor_image_2.png\"></img>\n");
-// printf ("<img src=\"monitor_image_3.png\"></img>\n");
-// printf ("<img src=\"monitor_image_4.png\"></img>\n");
 
 //----------------------------------------------------------------------
 

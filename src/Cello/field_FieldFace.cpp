@@ -430,10 +430,10 @@ void FieldFace::load_loop_limits_
       }
     }
   }
-  n3[0] = std::max(n3[0],1);
-  n3[1] = std::max(n3[1],1);
-  n3[2] = std::max(n3[2],1);
-  //  check_new_(im3,n3,nd3,ng3,op_load);
+  // Adjust n3 for axes > rank
+  if (nd3[0] == 1) n3[0] = 1;
+  if (nd3[1] == 1) n3[1] = 1;
+  if (nd3[2] == 1) n3[2] = 1;
 }
 
 //----------------------------------------------------------------------

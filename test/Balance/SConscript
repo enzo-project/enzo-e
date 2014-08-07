@@ -12,9 +12,9 @@ Import('test_path')
 
 date_cmd = 'echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
 
-run_balance_greedy_comm = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer GreedyCommLB > $TARGET 2>&1; $COPY")
-env.Append(BUILDERS = { 'RunBalanceGreedyComm' : run_balance_greedy_comm } )
-env_mv_greedy_comm  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/GreedyComm; mv `ls *.png *.h5` ' + test_path + '/Balance/GreedyComm')
+# run_balance_greedy_comm = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer GreedyCommLB > $TARGET 2>&1; $COPY")
+# env.Append(BUILDERS = { 'RunBalanceGreedyComm' : run_balance_greedy_comm } )
+# env_mv_greedy_comm  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/GreedyComm; mv `ls *.png *.h5` ' + test_path + '/Balance/GreedyComm')
 
 run_balance_greedy = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer GreedyLB > $TARGET 2>&1; $COPY")
 env.Append(BUILDERS = { 'RunBalanceGreedy' : run_balance_greedy } )
@@ -32,9 +32,9 @@ run_balance_rand_cent = Builder(action = date_cmd + parallel_run + " $SOURCE $AR
 env.Append(BUILDERS = { 'RunBalanceRandCent' : run_balance_rand_cent } )
 env_mv_rand_cent  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/RandCent; mv `ls *.png *.h5` ' + test_path + '/Balance/RandCent')
 
-run_balance_refine_comm = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer RefineCommLB > $TARGET 2>&1; $COPY")
-env.Append(BUILDERS = { 'RunBalanceRefineComm' : run_balance_refine_comm } )
-env_mv_refine_comm  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/RefineComm; mv `ls *.png *.h5` ' + test_path + '/Balance/RefineComm')
+#run_balance_refine_comm = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer RefineCommLB > $TARGET 2>&1; $COPY")
+#env.Append(BUILDERS = { 'RunBalanceRefineComm' : run_balance_refine_comm } )
+#env_mv_refine_comm  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/RefineComm; mv `ls *.png *.h5` ' + test_path + '/Balance/RefineComm')
 
 run_balance_refine = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer RefineLB > $TARGET 2>&1; $COPY")
 env.Append(BUILDERS = { 'RunBalanceRefine' : run_balance_refine } )
@@ -51,14 +51,14 @@ env_mv_rotate  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Rotate; mv
 
 # GreedyCommLB
 
-balance_greedy_comm = env_mv_greedy_comm.RunBalanceGreedyComm (
-   'test_balance_greedy_comm.unit',
-   bin_path + '/enzo-p', 
-   ARGS='input/load-balance-4.in')
+# balance_greedy_comm = env_mv_greedy_comm.RunBalanceGreedyComm (
+#    'test_balance_greedy_comm.unit',
+#    bin_path + '/enzo-p', 
+#    ARGS='input/load-balance-4.in')
 
-Clean(balance_greedy_comm,
-      [Glob('#/' + test_path + '/Balance/balance*png'),
-       '#/input/parameters.out',])
+# Clean(balance_greedy_comm,
+#       [Glob('#/' + test_path + '/Balance/balance*png'),
+#        '#/input/parameters.out',])
 
 # GreedyLB
 
@@ -106,14 +106,14 @@ Clean(balance_rand_cent,
 
 # RefineCommLB
 
-balance_refine_comm = env_mv_refine_comm.RunBalanceRefineComm (
-   'test_balance_refine_comm.unit',
-   bin_path + '/enzo-p', 
-   ARGS='input/load-balance-4.in')
+# balance_refine_comm = env_mv_refine_comm.RunBalanceRefineComm (
+#    'test_balance_refine_comm.unit',
+#    bin_path + '/enzo-p', 
+#    ARGS='input/load-balance-4.in')
 
-Clean(balance_refine_comm,
-      [Glob('#/' + test_path + '/Balance/balance*png'),
-       '#/input/parameters.out',])
+# Clean(balance_refine_comm,
+#       [Glob('#/' + test_path + '/Balance/balance*png'),
+#        '#/input/parameters.out',])
 
 # RefineLB
 

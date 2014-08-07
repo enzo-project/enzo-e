@@ -136,9 +136,9 @@ sources_test =        [Glob('test_Unit*cpp')]
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # WHEN parse.y or parse.l change:
 # 1. Uncomment below
-# 2. scons -u type=serial install-bin
-# 3. cp build/serial/Cello/lex.yy.c src/Cello
-# 4. cp build/serial/Cello/parse.tab.? src/Cello
+# 2. scons install-bin
+# 3. cp build/Cello/lex.yy.c src/Cello
+# 4. cp build/Cello/parse.tab.? src/Cello
 # 5. Recomment below
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # env.CFile(target = 'lex.yy.c', source = 'parse.l')
