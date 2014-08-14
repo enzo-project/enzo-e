@@ -83,20 +83,21 @@ public:
 
   void p_checkpoint (int count, std::string dir_name);
 
-  void q_adapt_enter();
-  void q_adapt_called();
-  void q_adapt_end();
-  void q_adapt_next();
-  void q_adapt_exit();
-  void q_compute_enter();
-  void q_compute_exit();
-  void q_output_enter ();
-  void q_output_exit();
-  void q_refresh_enter();
-  void q_refresh_exit();
-  void q_stopping_enter();
-  void q_stopping_exit();
-  void q_exit();
+  void p_initial_exit();
+  void p_adapt_enter();
+  void p_adapt_called();
+  void p_adapt_end();
+  void p_adapt_next();
+  void p_adapt_exit();
+  void p_compute_enter();
+  void p_compute_exit();
+  void p_output_enter ();
+  void p_output_exit();
+  void p_refresh_enter();
+  void p_refresh_exit();
+  void p_stopping_enter();
+  void p_stopping_exit();
+  void p_exit();
 
   /// Finalize the simulation
   void enzo_finalize(Simulation * simulation);

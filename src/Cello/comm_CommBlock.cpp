@@ -15,16 +15,26 @@
 // #define DEBUG_ADAPT
 
 // KEEP CONSISTENT WITH _comm.hpp: phase_type
-const char * phase_name[9] = {
-  "phase_unknown",
-  "phase_initial",
-  "phase_adapt",
-  "phase_compute",
-  "phase_refresh",
-  "phase_stopping",
-  "phase_output",
-  "phase_restart",
-  "phase_balance"
+const char * phase_name[] = {
+  "unknown",
+  "initial_enter",
+  "initial_exit",
+  "adapt_enter",
+  "adapt_called",
+  "adapt_next",
+  "adapt_end",
+  "adapt_exit",
+  "compute_enter",
+  "compute_exit",
+  "refresh_enter",
+  "refresh_exit",
+  "stopping_enter",
+  "stopping_exit",
+  "output_enter",
+  "output_exit",
+  "restart",
+  "balance",
+  "exit"
 };
 
 //----------------------------------------------------------------------
@@ -56,7 +66,8 @@ CommBlock::CommBlock
   count_coarsen_(0),
   adapt_step_(num_adapt_steps),
   adapt_(adapt_unknown),
-  next_phase_(phase_stopping),
+  next_phase_(phase_stopping_enter),
+  index_cycle_phase_(0),
   coarsened_(false),
   delete_(false),
   is_leaf_(true),
@@ -65,7 +76,6 @@ CommBlock::CommBlock
   name_(name()),
   method_(0)
 {
-
   // Enable Charm++ AtSync() dynamic load balancing
   usesAtSync = CmiTrue;
 
@@ -190,10 +200,12 @@ CommBlock::CommBlock
 
   if (is_first_cycle) {
     apply_initial_();
-  } else if (level > 0) {
+  }
 
+  if (level > 0) {
     thisProxy.doneInserting();
-    control_sync (sync_adapt_end,"quiescence");
+    index_cycle_phase_ = 1; // KEEP CONSISTENT WITH cycle_phase[] in control_charm.cpp:30
+    control_sync (phase_adapt_end,"quiescence",false,__FILE__,__LINE__);
 
   }
 
@@ -234,8 +246,8 @@ void CommBlock::pup(PUP::er &p)
   p | children_;
   p | loop_refresh_;
   p | sync_coarsen_;
-  PUParray(p,count_sync_, SYNC_SIZE);
-  PUParray(p,max_sync_,   SYNC_SIZE);
+  PUParray(p,count_sync_, PHASE_COUNT);
+  PUParray(p,max_sync_,   PHASE_COUNT);
   p | face_level_curr_;
   p | face_level_next_;
   p | child_face_level_curr_;
@@ -244,6 +256,7 @@ void CommBlock::pup(PUP::er &p)
   p | adapt_step_;
   p | adapt_;
   p | next_phase_;
+  p | index_cycle_phase_;
   p | coarsened_;
   p | delete_;
   p | is_leaf_;
@@ -595,6 +608,7 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   adapt_step_ = comm_block.adapt_step_;
   adapt_      = comm_block.adapt_;
   next_phase_ = comm_block.next_phase_;
+  index_cycle_phase_ = comm_block.index_cycle_phase_;
   coarsened_  = comm_block.coarsened_;
   delete_     = comm_block.delete_;
 }

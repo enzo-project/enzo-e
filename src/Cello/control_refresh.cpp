@@ -20,6 +20,17 @@
 void CommBlock::refresh_begin_() 
 {
 
+  if (is_leaf() && children_.size() != 0) {
+    WARNING2("CommBlock::refresh_begin_()",
+	     "%s: is_leaf() && children_.size() == %d: setting is_leaf_ = false",
+	     name_.c_str(),children_.size());
+    is_leaf_ = false;
+  } else if (! is_leaf() && children_.size() == 0) {
+    WARNING1("CommBlock::refresh_begin_()",
+	     "%s: !is_leaf() && children_.size() == 0: setting is_leaf_ = true",
+	     name_.c_str());
+    is_leaf_ = true;
+  }
   simulation()->set_phase(phase_refresh);
 
   if (delete_) {
@@ -90,14 +101,15 @@ void CommBlock::refresh_begin_()
 	index_.print("ERROR Refresh",-1,2,false,simulation());
 	debug_faces_("refresh");
 	ERROR8("CommBlock::refresh_begin_()",
-	       "%s: REFRESH ERROR: face (%d %d %d) level %d face_level %d phase %d is_leaf %",
+	       "%s: REFRESH ERROR: face (%d %d %d) level %d face_level %d phase %d is_leaf %d",
 	       name_.c_str(),if3[0],if3[1],if3[2],level,face_level(if3),next_phase_,is_leaf());
       }
 
     }
   }
 
-  control_sync (sync_refresh_exit,"contribute");
+  //  control_sync (phase_refresh_exit,"contribute",true,__FILE__,__LINE__);
+  control_next();
 
 }
 

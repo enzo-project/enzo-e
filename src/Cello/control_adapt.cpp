@@ -85,7 +85,7 @@ void CommBlock::adapt_begin_()
 
   level_next_ = adapt_compute_desired_level_(level_maximum);
 
-  control_sync (sync_adapt_called,"neighbor");
+  control_sync (phase_adapt_called,"neighbor",false,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -101,7 +101,7 @@ void CommBlock::adapt_called_()
 
   adapt_send_level();
 
-  control_sync (sync_adapt_next,"quiescence");
+  control_sync (phase_adapt_next,"quiescence",false,__FILE__,__LINE__);
 
 }
 
@@ -134,7 +134,7 @@ void CommBlock::adapt_next_()
     if (level() > level_next_) adapt_coarsen_();
   }
 
-  control_sync (sync_adapt_end,"quiescence");
+  control_sync (phase_adapt_end,"quiescence",false,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -172,8 +172,26 @@ void CommBlock::adapt_end_()
     sync_coarsen_.set_stop(NC(rank));
     sync_coarsen_.clear();
 
-    control_sync(sync_adapt_exit,"quiescence");
   }
+
+  next_phase_ = phase_stopping;
+
+  const int initial_cycle = simulation()->config()->initial_cycle;
+  const bool is_first_cycle = (initial_cycle == cycle());
+  const int level_maximum = simulation()->config()->mesh_max_level;
+
+  bool adapt_again = (is_first_cycle && (adapt_step_++ < level_maximum));
+
+  if (adapt_again) {
+
+    control_sync (phase_adapt_enter,"array",false,__FILE__,__LINE__);
+
+  } else {
+
+    control_sync (phase_adapt_exit,"quiescence",true,__FILE__,__LINE__);
+    //    control_next ();
+  }
+
 }
 
 //----------------------------------------------------------------------
@@ -286,7 +304,7 @@ void CommBlock::adapt_refine_()
 	(&thisProxy, index_child,
 	 nx,ny,nz,
 	 num_field_blocks,
-	 adapt_step_ + 1,
+	 adapt_step_,
 	 cycle_,time_,dt_,
 	 narray, array, op_array_prolong,
 	 27,&child_face_level_curr_[27*IC3(ic3)],

@@ -24,23 +24,48 @@
 #   define VERBOSE(A) ;
 #endif
 
-const char * phase_string [] = {
-  "unknown",
-  "adapt_enter",
-  "adapt_called",
-  "adapt_next",
-  "adapt_end",
-  "adapt_exit",
-  "compute_enter",
-  "compute_exit",
-  "output_enter",
-  "output_exit",
-  "refresh_enter",
-  "refresh_exit",
-  "stopping_enter",
-  "stopping_exit",
-  "exit"
+//--------------------------------------------------
+
+const int cycle_phase[] = {
+  phase_adapt_enter,
+  phase_adapt_exit,
+  phase_refresh_enter,
+  phase_refresh_exit,
+  phase_output_enter,
+  phase_output_exit,
+  phase_stopping_enter,
+  phase_stopping_exit,
+  phase_compute_enter,
+  phase_compute_exit,
+  phase_refresh_enter,
+  phase_refresh_exit
 };
+
+const char * cycle_sync[] = {
+  "array",      // phase_adapt_enter
+  "quiescence", // phase_adapt_exit
+  "array",      // phase_refresh_enter
+  "contribute", // phase_refresh_exit
+  "array",      // phase_output_enter
+  "none",       // phase_output_exit
+  "none",       // phase_stopping_enter
+  "none",       // phase_stopping_exit
+  "none",       // phase_compute_enter
+  "none",       // phase_compute_exit
+  "array",      // phase_refresh_enter
+  "contribute"  // phase_refresh_exit
+};
+
+#define CYCLE_PHASE_COUNT (sizeof(cycle_phase) / sizeof(cycle_phase[0]))
+
+
+//----------------------------------------------------------------------
+
+void CommBlock::initial_exit_()
+{
+  //  control_sync(phase_adapt_enter,"array",true,__FILE__,__LINE__);
+  control_next();
+}
 
 //----------------------------------------------------------------------
 
@@ -59,7 +84,8 @@ void CommBlock::adapt_enter_()
     
   } else {
 
-    control_sync(sync_adapt_exit,"none");
+    // control_sync(phase_adapt_exit,"none",true,__FILE__,__LINE__);
+    control_next();
 
   }
 }
@@ -71,23 +97,8 @@ void CommBlock::adapt_exit_()
 
   VERBOSE("adapt_exit");
 
-  next_phase_ = phase_stopping;
-
-  const int initial_cycle = simulation()->config()->initial_cycle;
-  const bool is_first_cycle = (initial_cycle == cycle());
-  const int level_maximum = simulation()->config()->mesh_max_level;
-
-  bool adapt_again = (is_first_cycle && adapt_step_++ < level_maximum);
-
-
-  if (adapt_again) {
-
-    control_sync (sync_adapt_enter,"array");
-
-  } else {
-
-    control_sync (sync_refresh_enter,"array");
-  }
+  // control_sync (phase_refresh_enter,"array",true,__FILE__,__LINE__);
+  control_next();
 
 }
 
@@ -111,15 +122,17 @@ void CommBlock::refresh_exit_()
 
   if (next_phase_ == phase_stopping) {
 
-    control_sync(sync_output_enter,"array");
+    //    control_sync(phase_output_enter,"array",true,__FILE__,__LINE__);
+    control_next();
 
   }  else if (next_phase_ == phase_adapt) {
 
-    control_sync (sync_adapt_enter,"array");
+    // control_sync (phase_adapt_enter,"array",true,__FILE__,__LINE__);
+    control_next();
 
   } else {
 
-    ERROR1 ("CommBlock::q_refresh_exit()", 
+    ERROR1 ("CommBlock::refresh_exit()", 
 	    "Unknown next_phase %d", next_phase_);
   }
 }
@@ -144,7 +157,8 @@ void CommBlock::compute_exit_ ()
 
   next_phase_ = phase_adapt;
 
-  control_sync(sync_refresh_enter,"array");
+  // control_sync(phase_refresh_enter,"array",true,__FILE__,__LINE__);  
+  control_next();
 }
 
 //----------------------------------------------------------------------
@@ -173,7 +187,8 @@ void CommBlock::output_exit_()
     proxy_simulation[0].p_monitor();
   }
 
-  control_sync(sync_stopping_enter,"none");
+  // control_sync(phase_stopping_enter,"none",true,__FILE__,__LINE__);
+  control_next();
 }
 
 //----------------------------------------------------------------------
@@ -198,11 +213,12 @@ void CommBlock::stopping_exit_()
 
   if (stop_) {
 
-    control_sync(sync_exit,"contribute");
+    control_sync(phase_exit,"contribute",false,__FILE__,__LINE__);
 
   } else {
 
-    control_sync(sync_compute_enter,"none");
+    // control_sync(phase_compute_enter,"none",true,__FILE__,__LINE__);
+    control_next();
 
   }
 
@@ -210,47 +226,66 @@ void CommBlock::stopping_exit_()
 
 //======================================================================
 
-void CommBlock::control_sync(int phase, std::string sync)
+void CommBlock::control_next()
 {
+  int phase          = cycle_phase[index_cycle_phase_];
+  std::string sync   = cycle_sync[index_cycle_phase_];
+  index_cycle_phase_ = (index_cycle_phase_ + 1) % CYCLE_PHASE_COUNT;
+
+  control_sync(phase,sync,false,__FILE__,__LINE__);
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::control_sync(int phase, std::string sync, bool next_phase, const char * file, int line)
+{
+
+  if (next_phase) {
+    phase = cycle_phase[index_cycle_phase_];
+    sync  = cycle_sync[index_cycle_phase_];
+    index_cycle_phase_ = (index_cycle_phase_ + 1) % CYCLE_PHASE_COUNT;
+  }
+  
+  if (sync == "quiescence") sync = "main-qd";
 
   if (sync == "contribute") {
 
     CkCallback cb;
 
-    if (       phase == sync_adapt_enter) {
+    if (                     phase == phase_initial_exit) {
+      cb = CkCallback (CkIndex_CommBlock::r_initial_exit(NULL), thisProxy);
+    } else if (              phase == phase_adapt_enter) {
       cb = CkCallback (CkIndex_CommBlock::r_adapt_enter(NULL), thisProxy);
-    } else if (phase == sync_adapt_next) {
+    } else if (              phase == phase_adapt_next) {
       cb = CkCallback (CkIndex_CommBlock::r_adapt_next(NULL), thisProxy);
-    } else if (phase == sync_adapt_called) {
+    } else if (              phase == phase_adapt_called) {
       cb = CkCallback (CkIndex_CommBlock::r_adapt_called(NULL), thisProxy);
-    } else if (phase == sync_adapt_end) {
+    } else if (              phase == phase_adapt_end) {
       cb = CkCallback (CkIndex_CommBlock::r_adapt_end(NULL), thisProxy);
-    } else if (phase == sync_adapt_exit) {
+    } else if (              phase == phase_adapt_exit) {
       cb = CkCallback (CkIndex_CommBlock::r_adapt_exit(NULL), thisProxy);
-    } else if (phase == sync_adapt_exit) {
-      cb = CkCallback (CkIndex_CommBlock::r_adapt_exit(NULL), thisProxy);
-    } else if (phase == sync_refresh_enter) {
+    } else if (              phase == phase_refresh_enter) {
       cb = CkCallback (CkIndex_CommBlock::r_refresh_enter(NULL), thisProxy);
-    } else if (phase == sync_refresh_exit) {
+    } else if (              phase == phase_refresh_exit) {
       cb = CkCallback (CkIndex_CommBlock::r_refresh_exit(NULL), thisProxy);
-    } else if (phase == sync_output_enter) {
+    } else if (              phase == phase_output_enter) {
       cb = CkCallback (CkIndex_CommBlock::r_output_enter(NULL), thisProxy);
-    } else if (phase == sync_output_exit) {
+    } else if (              phase == phase_output_exit) {
       cb = CkCallback (CkIndex_CommBlock::r_output_exit(NULL), thisProxy);
-    } else if (phase == sync_compute_enter) {
+    } else if (              phase == phase_compute_enter) {
       cb = CkCallback (CkIndex_CommBlock::r_compute_enter(NULL), thisProxy);
-    } else if (phase == sync_compute_exit) {
+    } else if (              phase == phase_compute_exit) {
       cb = CkCallback (CkIndex_CommBlock::r_compute_exit(NULL), thisProxy);
-    } else if (phase == sync_stopping_enter) {
+    } else if (              phase == phase_stopping_enter) {
       cb = CkCallback (CkIndex_CommBlock::r_stopping_enter(NULL), thisProxy);
-    } else if (phase == sync_stopping_exit) {
+    } else if (              phase == phase_stopping_exit) {
       cb = CkCallback (CkIndex_CommBlock::r_stopping_exit(NULL), thisProxy);
-    } else if (phase == sync_exit) {
+    } else if (              phase == phase_exit) {
       cb = CkCallback (CkIndex_CommBlock::r_exit(NULL), thisProxy);
     } else {
       ERROR2 ("CommBlock::control_sync()",  
 	      "Unknown phase: phase %s sync type %s", 
-	      phase_string[phase],sync.c_str());    
+	      phase_name[phase],sync.c_str());    
     }
 
     contribute(cb);
@@ -259,52 +294,55 @@ void CommBlock::control_sync(int phase, std::string sync)
 
     CkCallback cb;
 
-    if (phase == sync_adapt_enter) {
-      cb = CkCallback (CkIndex_CommBlock::q_adapt_enter(),
+    if (                     phase == phase_initial_exit) {
+      cb = CkCallback (CkIndex_CommBlock::p_initial_exit(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_adapt_next) {
-      cb = CkCallback (CkIndex_CommBlock::q_adapt_next(),
+    } else if (              phase == phase_adapt_enter) {
+      cb = CkCallback (CkIndex_CommBlock::p_adapt_enter(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_adapt_called) {
-      cb = CkCallback (CkIndex_CommBlock::q_adapt_called(),
+    } else if (              phase == phase_adapt_next) {
+      cb = CkCallback (CkIndex_CommBlock::p_adapt_next(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_adapt_end) {
-      cb = CkCallback (CkIndex_CommBlock::q_adapt_end(),
+    } else if (              phase == phase_adapt_called) {
+      cb = CkCallback (CkIndex_CommBlock::p_adapt_called(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_adapt_exit) {
-      cb = CkCallback (CkIndex_CommBlock::q_adapt_exit(),
+    } else if (              phase == phase_adapt_end) {
+      cb = CkCallback (CkIndex_CommBlock::p_adapt_end(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_refresh_enter) {
-      cb = CkCallback (CkIndex_CommBlock::q_refresh_enter(),
+    } else if (              phase == phase_adapt_exit) {
+      cb = CkCallback (CkIndex_CommBlock::p_adapt_exit(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_refresh_exit) {
-      cb = CkCallback (CkIndex_CommBlock::q_refresh_exit(),
+    } else if (              phase == phase_refresh_enter) {
+      cb = CkCallback (CkIndex_CommBlock::p_refresh_enter(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_output_enter) {
-      cb = CkCallback (CkIndex_CommBlock::q_output_enter(),
+    } else if (              phase == phase_refresh_exit) {
+      cb = CkCallback (CkIndex_CommBlock::p_refresh_exit(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_output_exit) {
-      cb = CkCallback (CkIndex_CommBlock::q_output_exit(),
+    } else if (              phase == phase_output_enter) {
+      cb = CkCallback (CkIndex_CommBlock::p_output_enter(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_compute_enter) {
-      cb = CkCallback (CkIndex_CommBlock::q_compute_enter(),
+    } else if (              phase == phase_output_exit) {
+      cb = CkCallback (CkIndex_CommBlock::p_output_exit(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_compute_exit) {
-      cb = CkCallback (CkIndex_CommBlock::q_compute_exit(),
+    } else if (              phase == phase_compute_enter) {
+      cb = CkCallback (CkIndex_CommBlock::p_compute_enter(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_stopping_enter) {
-      cb = CkCallback (CkIndex_CommBlock::q_stopping_enter(),
+    } else if (              phase == phase_compute_exit) {
+      cb = CkCallback (CkIndex_CommBlock::p_compute_exit(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_stopping_exit) {
-      cb = CkCallback (CkIndex_CommBlock::q_stopping_exit(),
+    } else if (              phase == phase_stopping_enter) {
+      cb = CkCallback (CkIndex_CommBlock::p_stopping_enter(),
 		       thisProxy[thisIndex]);
-    } else if (phase == sync_exit) {
-      cb = CkCallback (CkIndex_CommBlock::q_exit(),
+    } else if (              phase == phase_stopping_exit) {
+      cb = CkCallback (CkIndex_CommBlock::p_stopping_exit(),
+		       thisProxy[thisIndex]);
+    } else if (              phase == phase_exit) {
+      cb = CkCallback (CkIndex_CommBlock::p_exit(),
 		       thisProxy[thisIndex]);
     } else {
       ERROR2 ("CommBlock::control_sync()",  
 	      "Unknown phase: phase %s sync type %s", 
-	      phase_string[phase],sync.c_str());    
+	      phase_name[phase],sync.c_str());    
     }
 
     CkStartQD (cb);
@@ -314,38 +352,40 @@ void CommBlock::control_sync(int phase, std::string sync)
      // Quiescence detection through the Main chare
 
     if (index_.is_root()) {
-      if (phase == sync_adapt_enter) {
-	CkStartQD(CkCallback(CkIndex_Main::q_adapt_enter(), proxy_main));
-      } else if (phase == sync_adapt_next) {
-	CkStartQD(CkCallback(CkIndex_Main::q_adapt_next(), proxy_main));
-      } else if (phase == sync_adapt_called) {
-	CkStartQD(CkCallback(CkIndex_Main::q_adapt_called(), proxy_main));
-      } else if (phase == sync_adapt_end) {
-	CkStartQD(CkCallback(CkIndex_Main::q_adapt_end(), proxy_main));
-      } else if (phase == sync_adapt_exit) {
-	CkStartQD(CkCallback(CkIndex_Main::q_adapt_exit(), proxy_main));
-      } else if (phase == sync_refresh_enter) {
-	CkStartQD(CkCallback(CkIndex_Main::q_refresh_enter(), proxy_main));
-      } else if (phase == sync_refresh_exit) {
-	CkStartQD(CkCallback(CkIndex_Main::q_refresh_exit(), proxy_main));
-      } else if (phase == sync_output_enter) {
-	CkStartQD(CkCallback(CkIndex_Main::q_output_enter(), proxy_main));
-      } else if (phase == sync_output_exit) {
-	CkStartQD(CkCallback(CkIndex_Main::q_output_exit(), proxy_main));
-      } else if (phase == sync_compute_enter) {
-	CkStartQD(CkCallback(CkIndex_Main::q_compute_enter(), proxy_main));
-      } else if (phase == sync_compute_exit) {
-	CkStartQD(CkCallback(CkIndex_Main::q_compute_exit(), proxy_main));
-      } else if (phase == sync_stopping_enter) {
-	CkStartQD(CkCallback(CkIndex_Main::q_stopping_enter(), proxy_main));
-      } else if (phase == sync_stopping_exit) {
-	CkStartQD(CkCallback(CkIndex_Main::q_stopping_exit(), proxy_main));
-      } else if (phase == sync_exit) {
-	CkStartQD(CkCallback(CkIndex_Main::q_exit(), proxy_main));
+      if (                    phase == phase_initial_exit) {
+	CkStartQD(CkCallback(CkIndex_Main::p_initial_exit(), proxy_main));
+      } else if (             phase == phase_adapt_enter) {
+	CkStartQD(CkCallback(CkIndex_Main::p_adapt_enter(), proxy_main));
+      } else if (             phase == phase_adapt_next) {
+	CkStartQD(CkCallback(CkIndex_Main::p_adapt_next(), proxy_main));
+      } else if (             phase == phase_adapt_called) {
+	CkStartQD(CkCallback(CkIndex_Main::p_adapt_called(), proxy_main));
+      } else if (             phase == phase_adapt_end) {
+	CkStartQD(CkCallback(CkIndex_Main::p_adapt_end(), proxy_main));
+      } else if (             phase == phase_adapt_exit) {
+	CkStartQD(CkCallback(CkIndex_Main::p_adapt_exit(), proxy_main));
+      } else if (             phase == phase_refresh_enter) {
+	CkStartQD(CkCallback(CkIndex_Main::p_refresh_enter(), proxy_main));
+      } else if (             phase == phase_refresh_exit) {
+	CkStartQD(CkCallback(CkIndex_Main::p_refresh_exit(), proxy_main));
+      } else if (             phase == phase_output_enter) {
+	CkStartQD(CkCallback(CkIndex_Main::p_output_enter(), proxy_main));
+      } else if (             phase == phase_output_exit) {
+	CkStartQD(CkCallback(CkIndex_Main::p_output_exit(), proxy_main));
+      } else if (             phase == phase_compute_enter) {
+	CkStartQD(CkCallback(CkIndex_Main::p_compute_enter(), proxy_main));
+      } else if (             phase == phase_compute_exit) {
+	CkStartQD(CkCallback(CkIndex_Main::p_compute_exit(), proxy_main));
+      } else if (             phase == phase_stopping_enter) {
+	CkStartQD(CkCallback(CkIndex_Main::p_stopping_enter(), proxy_main));
+      } else if (             phase == phase_stopping_exit) {
+	CkStartQD(CkCallback(CkIndex_Main::p_stopping_exit(), proxy_main));
+      } else if (             phase == phase_exit) {
+	CkStartQD(CkCallback(CkIndex_Main::p_exit(), proxy_main));
       } else {
 	ERROR2 ("CommBlock::control_sync()",  
 		"Unknown phase: phase %s sync type %s", 
-		phase_string[phase],sync.c_str());    
+		phase_name[phase],sync.c_str());    
       }
 
     }
@@ -356,38 +396,40 @@ void CommBlock::control_sync(int phase, std::string sync)
 
   } else if (sync == "array") {
 
-    if (phase == sync_adapt_enter) {
+    if (                  phase == phase_initial_exit) {
+      if (index().is_root()) thisProxy.p_initial_exit();
+    } else if (           phase == phase_adapt_enter) {
       if (index().is_root()) thisProxy.p_adapt_enter();
-    } else if (phase == sync_adapt_next) {
+    } else if (           phase == phase_adapt_next) {
       if (index().is_root()) thisProxy.p_adapt_next();
-    } else if (phase == sync_adapt_called) {
+    } else if (           phase == phase_adapt_called) {
       if (index().is_root()) thisProxy.p_adapt_called();
-    } else if (phase == sync_adapt_end) {
+    } else if (           phase == phase_adapt_end) {
       if (index().is_root()) thisProxy.p_adapt_end();
-    } else if (phase == sync_adapt_exit) {
+    } else if (           phase == phase_adapt_exit) {
       if (index().is_root()) thisProxy.p_adapt_exit();
-    } else if (phase == sync_refresh_enter) {
+    } else if (           phase == phase_refresh_enter) {
       if (index().is_root()) thisProxy.p_refresh_enter();
-    } else if (phase == sync_refresh_exit) {
+    } else if (           phase == phase_refresh_exit) {
       if (index().is_root()) thisProxy.p_refresh_exit();
-    } else if (phase == sync_output_enter) {
+    } else if (           phase == phase_output_enter) {
       if (index().is_root()) thisProxy.p_output_enter();
-    } else if (phase == sync_output_exit) {
+    } else if (           phase == phase_output_exit) {
       if (index().is_root()) thisProxy.p_output_exit();
-    } else if (phase == sync_compute_enter) {
+    } else if (           phase == phase_compute_enter) {
       if (index().is_root()) thisProxy.p_compute_enter();
-    } else if (phase == sync_compute_exit) {
+    } else if (           phase == phase_compute_exit) {
       if (index().is_root()) thisProxy.p_compute_exit();
-    } else if (phase == sync_stopping_enter) {
+    } else if (           phase == phase_stopping_enter) {
       if (index().is_root()) thisProxy.p_stopping_enter();
-    } else if (phase == sync_stopping_exit) {
+    } else if (           phase == phase_stopping_exit) {
       if (index().is_root()) thisProxy.p_stopping_exit();
-    } else if (phase == sync_exit) {
+    } else if (           phase == phase_exit) {
       if (index().is_root()) thisProxy.p_exit();
     } else {
       ERROR2 ("CommBlock::control_sync()",  
 	      "Unknown phase: phase %s sync type %s", 
-	      phase_string[phase],sync.c_str());    
+	      phase_name[phase],sync.c_str());    
     }
 
   } else if (sync == "none") {
@@ -397,7 +439,7 @@ void CommBlock::control_sync(int phase, std::string sync)
   } else {
     ERROR2 ("CommBlock::control_sync()",  
 	    "Unknown sync type: phase %s sync type %s", 
-	    phase_string[phase],sync.c_str());    
+	    phase_name[phase],sync.c_str());    
   }
 }
 
@@ -410,14 +452,14 @@ void CommBlock::control_sync_count_ (int phase, int count)
   ++count_sync_[phase];
 #ifdef CELLO_DEBUG
   fprintf (simulation()->fp_debug(),"%d %s counting %d/%d leaf %d %s\n",__LINE__,name_.c_str(),
-	   count_sync_[phase],max_sync_[phase],is_leaf(),phase_string[phase]);
+	   count_sync_[phase],max_sync_[phase],is_leaf(),phase_name[phase]);
 #endif
 
   if (0 < max_sync_[phase] && max_sync_[phase] <= count_sync_[phase]) {
     max_sync_[phase] = 0;
     count_sync_[phase] = 0;
 #ifdef CELLO_DEBUG
-  fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_string[phase]);
+    fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_name[phase]);
 #endif
     control_call_phase_(phase);
   }
@@ -430,7 +472,7 @@ void CommBlock::control_sync_neighbor_(int phase)
   if (!is_leaf()) {
 
 #ifdef CELLO_DEBUG
-  fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_string[phase]);
+  fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_name[phase]);
 #endif
     control_call_phase_ (phase);
 
@@ -438,7 +480,6 @@ void CommBlock::control_sync_neighbor_(int phase)
 
     const int level        = this->level();
     const int rank = this->rank();
-    const int rank_refresh = simulation()->config()->field_refresh_rank;
 
     ItFace it_face = this->it_face();
 
@@ -461,7 +502,7 @@ void CommBlock::control_sync_neighbor_(int phase)
 
 #ifdef CELLO_DEBUG
 	  fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
-	    __LINE__,name_.c_str(), phase_string[phase], is_leaf(),index_neighbor.bit_string(-1,2).c_str());
+	    __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_neighbor.bit_string(-1,2).c_str());
 #endif
 	thisProxy[index_neighbor].p_control_sync_count(phase,0);
 
@@ -487,7 +528,7 @@ void CommBlock::control_sync_neighbor_(int phase)
 
 #ifdef CELLO_DEBUG
 	  fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
-	    __LINE__,name_.c_str(), phase_string[phase], is_leaf(),index_uncle.bit_string(-1,2).c_str());
+	    __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_uncle.bit_string(-1,2).c_str());
 #endif
 	  thisProxy[index_uncle].p_control_sync_count(phase,0);
 
@@ -507,7 +548,7 @@ void CommBlock::control_sync_neighbor_(int phase)
 
 #ifdef CELLO_DEBUG
 	  fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
-	    __LINE__,name_.c_str(), phase_string[phase], is_leaf(),index_nibling.bit_string(-1,2).c_str());
+	    __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_nibling.bit_string(-1,2).c_str());
 #endif
 	  thisProxy[index_nibling].p_control_sync_count(phase,0);
 
@@ -531,41 +572,44 @@ void CommBlock::control_sync_neighbor_(int phase)
 
 void CommBlock::control_call_phase_ (int phase)
 {
+
 #ifdef CELLO_DEBUG
-  fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_string[phase]);
+  fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_name[phase]);
 #endif
-  if (phase == sync_adapt_called) {
-    adapt_called_() ;
-  } else if (phase == sync_adapt_enter) {
-    adapt_enter_() ;
-  } else if (phase == sync_adapt_next) {
-    adapt_next_() ;
-  } else if (phase == sync_adapt_end) {
-    adapt_end_() ;
-  } else if (phase == sync_adapt_exit) {
-    adapt_exit_() ;
-  } else if (phase == sync_refresh_enter) {
-    refresh_enter_() ;
-  } else if (phase == sync_refresh_exit) {
-    refresh_exit_();
-  } else if (phase == sync_output_enter) {
-    output_enter_() ;
-  } else if (phase == sync_output_exit) {
-    output_exit_();
-  } else if (phase == sync_compute_enter) {
-    compute_enter_() ;
-  } else if (phase == sync_compute_exit) {
-    compute_exit_();
-  } else if (phase == sync_stopping_enter) {
-    stopping_enter_() ;
-  } else if (phase == sync_stopping_exit) {
-    stopping_exit_();
-  } else if (phase == sync_exit) {
-    exit_();
+  if        (phase == phase_initial_exit) {
+    /**/                    initial_exit_() ;
+  } else if (phase == phase_adapt_called) {
+    /**/                    adapt_called_() ;
+  } else if (phase == phase_adapt_enter) {
+    /**/                    adapt_enter_() ;
+  } else if (phase == phase_adapt_next) {
+    /**/                    adapt_next_() ;
+  } else if (phase == phase_adapt_end) {
+    /**/                    adapt_end_() ;
+  } else if (phase == phase_adapt_exit) {
+    /**/                    adapt_exit_() ;
+  } else if (phase == phase_refresh_enter) {
+    /**/                    refresh_enter_() ;
+  } else if (phase == phase_refresh_exit) {
+    /**/                    refresh_exit_();
+  } else if (phase == phase_output_enter) {
+    /**/                    output_enter_() ;
+  } else if (phase == phase_output_exit) {
+    /**/                    output_exit_();
+  } else if (phase == phase_compute_enter) {
+    /**/                    compute_enter_() ;
+  } else if (phase == phase_compute_exit) {
+    /**/                    compute_exit_();
+  } else if (phase == phase_stopping_enter) {
+    /**/                    stopping_enter_() ;
+  } else if (phase == phase_stopping_exit) {
+    /**/                    stopping_exit_();
+  } else if (phase == phase_exit) {
+    /**/                    exit_();
   } else {
     ERROR1 ("CommBlock::control_call_phase_()",  
 	    "Unknown phase: phase %s", 
-	    phase_string[phase]);    
+	    phase_name[phase]);    
   }
 }
 //======================================================================

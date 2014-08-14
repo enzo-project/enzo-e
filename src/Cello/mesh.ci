@@ -49,15 +49,21 @@ module mesh {
     entry CommBlock();	 // [CB0]
 
     //--------------------------------------------------
+    // *** INITIAL ***
+    //--------------------------------------------------
+
+    entry void p_initial_exit();   // [CB5]
+    entry void r_initial_exit(CkReductionMsg *);   // [CB22]
+
+    //--------------------------------------------------
     // *** OUTPUT ***
     //--------------------------------------------------
 
     entry void p_output_enter();
-    entry void q_output_enter();
     entry void r_output_enter(CkReductionMsg *);
 
+    entry void p_output_end();
     entry void p_output_exit();
-    entry void q_output_exit();
     entry void r_output_exit(CkReductionMsg *);
 
     entry void p_output_write (int index_output); // [CB1]
@@ -68,11 +74,9 @@ module mesh {
     //--------------------------------------------------
 
     entry void p_compute_enter();
-    entry void q_compute_enter();
     entry void r_compute_enter(CkReductionMsg *);
 
     entry void p_compute_exit();
-    entry void q_compute_exit();
     entry void r_compute_exit(CkReductionMsg *);
 
     //--------------------------------------------------
@@ -82,15 +86,12 @@ module mesh {
     entry void r_stopping_compute_timestep (CkReductionMsg * msg); // [CB4]
 
     entry void p_stopping_enter();
-    entry void q_stopping_enter();
     entry void r_stopping_enter(CkReductionMsg *);
 
     entry void p_stopping_exit();
-    entry void q_stopping_exit();
     entry void r_stopping_exit(CkReductionMsg *);
 
     entry void p_exit();
-    entry void q_exit();
     entry void r_exit(CkReductionMsg *);
 
     //--------------------------------------------------
@@ -104,23 +105,18 @@ module mesh {
     //--------------------------------------------------
 
     entry void p_adapt_enter();   // [CB5]
-    entry void q_adapt_enter();
     entry void r_adapt_enter(CkReductionMsg *);   // [CB22]
 
     entry void p_adapt_end();    // [CB13]
-    entry void q_adapt_end();    // [CB13]
     entry void r_adapt_end(CkReductionMsg *);
 
     entry void p_adapt_next();    // [CB12]
-    entry void q_adapt_next();    // [CB12]
     entry void r_adapt_next(CkReductionMsg *);
 
     entry void p_adapt_called();
-    entry void q_adapt_called();
     entry void r_adapt_called(CkReductionMsg *);
 
     entry void p_adapt_exit();   // [CB5]
-    entry void q_adapt_exit();
     entry void r_adapt_exit(CkReductionMsg *);   // [CB22]
 
     entry void p_adapt_delete();  // [CB11]
@@ -137,11 +133,9 @@ module mesh {
     //--------------------------------------------------
 
     entry void p_refresh_enter();         // [CB14]
-    entry void q_refresh_enter();
     entry void r_refresh_enter(CkReductionMsg *);
 
     entry void p_refresh_exit();
-    entry void q_refresh_exit();          // [CB15]
     entry void r_refresh_exit(CkReductionMsg *);
 
     entry [expedited] void x_refresh_face // [CB21]

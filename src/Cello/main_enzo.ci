@@ -22,20 +22,21 @@ mainmodule main_enzo {
 
      entry void p_checkpoint(int count, std::string dir);
 
-     entry void q_adapt_enter();
-     entry void q_adapt_called();
-     entry void q_adapt_end();
-     entry void q_adapt_next();
-     entry void q_adapt_exit();
-     entry void q_compute_enter();
-     entry void q_compute_exit();
-     entry void q_output_enter ();
-     entry void q_output_exit();
-     entry void q_refresh_enter();
-     entry void q_refresh_exit();
-     entry void q_stopping_enter();
-     entry void q_stopping_exit();
-     entry void q_exit();
+     entry void p_initial_exit();
+     entry void p_adapt_enter();
+     entry void p_adapt_called();
+     entry void p_adapt_end();
+     entry void p_adapt_next();
+     entry void p_adapt_exit();
+     entry void p_compute_enter();
+     entry void p_compute_exit();
+     entry void p_output_enter ();
+     entry void p_output_exit();
+     entry void p_refresh_enter();
+     entry void p_refresh_exit();
+     entry void p_stopping_enter();
+     entry void p_stopping_exit();
+     entry void p_exit();
 
   };
 

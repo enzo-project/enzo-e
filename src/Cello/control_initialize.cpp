@@ -64,9 +64,8 @@ void SimulationCharm::r_initialize_hierarchy(CkReductionMsg * msg)
     // ENTRY: #3 SimulationCharm::r_initialize_hierarchy() -> CommBlock::p_adapt_mesh()
     // ENTRY: Block Array if Simulation is_root()
     // --------------------------------------------------
-    (*hierarchy()->block_array() ).p_adapt_enter();
+    (*hierarchy()->block_array() ).p_initial_exit();
     // --------------------------------------------------
   }
 }
 
-//----------------------------------------------------------------------

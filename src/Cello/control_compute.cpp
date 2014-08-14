@@ -55,7 +55,9 @@ void CommBlock::compute_begin_ ()
 
   TRACE ("END   PHASE COMPUTE");
 
-  control_sync (sync_compute_exit,"none");
+  //  control_sync (phase_compute_exit,"none",true,__FILE__,__LINE__);
+  control_next();
+
 }
 
 //----------------------------------------------------------------------

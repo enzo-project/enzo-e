@@ -60,6 +60,7 @@ void BoundaryValue::enforce
       block->field_cells(x,y,z,gx,gy,gz);
 
       void * array = field_block->values(index_field);
+
       precision_type precision = field_descr->precision(index_field);
 
       int ix0=0 ,iy0=0,iz0=0;
@@ -80,32 +81,74 @@ void BoundaryValue::enforce
 
       int i0=ix0 + ndx*(iy0 + ndy*iz0);
 
+      bool * mask = 0;
+
+      if (mask_) mask = new bool [nx*ny*nz];
+
       switch (precision) {
       case precision_single:
-	value_->evaluate((float *)array+i0, t, 
-			 ndx,nx,x+ix0, 
-			 ndy,ny,y+iy0,
-			 ndz,nz,z+iz0);
+	{
+	  float * temp = 0;
+	  if (mask_) {
+	    temp = (float *)array;
+	    array = new float [ndx*ndy*ndz];
+	  }
+	  
+	  value_->evaluate((float *)array+i0, t, 
+			   ndx,nx,x+ix0, 
+			   ndy,ny,y+iy0,
+			   ndz,nz,z+iz0);
+	  if (mask_) {
+	    for (int i=0; i<ndx*ndy*ndz; i++) ((float *)temp)[i]=((float *)array)[i];
+	    delete [] array;
+	    array = temp;
+	  }
+	}
        	break;
       case precision_double:
-	value_->evaluate((double *)array+i0, t, 
-			 ndx,nx,x+ix0, 
-			 ndy,ny,y+iy0,
-			 ndz,nz,z+iz0);
+	{
+	  double * temp = 0;
+	  if (mask_) {
+	    temp = (double *)array;
+	    array = new double [ndx*ndy*ndz];
+	  }
+	  value_->evaluate((double *)array+i0, t, 
+			   ndx,nx,x+ix0, 
+			   ndy,ny,y+iy0,
+			   ndz,nz,z+iz0);
+	  if (mask_) {
+	    for (int i=0; i<ndx*ndy*ndz; i++) ((double *)temp)[i]=((double *)array)[i];
+	    delete [] array;
+	    array = temp;
+	  }
+	}
        	break;
       case precision_extended80:
       case precision_extended96:
       case precision_quadruple:
-	value_->evaluate((long double *)array+i0, t, 
-			 ndx,nx,x+ix0, 
-			 ndy,ny,y+iy0,
-			 ndz,nz,z+iz0);
+	{
+	  long double * temp = 0;
+	  if (mask_) {
+	    temp = (long double *)array;
+	    array = new long double [ndx*ndy*ndz];
+	  }
+	  value_->evaluate((long double *)array+i0, t, 
+			   ndx,nx,x+ix0, 
+			   ndy,ny,y+iy0,
+			   ndz,nz,z+iz0);
+	  if (mask_) {
+	    for (int i=0; i<ndx*ndy*ndz; i++) ((long double *)temp)[i]=((long double *)array)[i];
+	    delete [] array;
+	    array = temp;
+	  }
+	}
        	break;
       }
 
       delete [] x;
       delete [] y;
       delete [] z;
+      delete [] mask;
     }
   }
 }

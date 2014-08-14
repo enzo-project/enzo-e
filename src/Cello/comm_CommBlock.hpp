@@ -219,19 +219,25 @@ public: // interface
 		 const int * if3=0) throw();
 
   //--------------------------------------------------
+  // INITIAL
+  //--------------------------------------------------
+
+  void initial_exit_();
+  void p_initial_exit()
+  {      initial_exit_(); }
+  void r_initial_exit(CkReductionMsg * msg)
+  {      initial_exit_(); delete msg; }
+
+  //--------------------------------------------------
   // COMPUTE
   //--------------------------------------------------
 
   void p_compute_enter()
   {      compute_enter_(); }
-  void q_compute_enter()
-  {      compute_enter_(); }
   void r_compute_enter(CkReductionMsg * msg)
   {      compute_enter_(); delete msg; }
 
   void p_compute_exit()
-  {      compute_exit_(); }
-  void q_compute_exit()
   {      compute_exit_(); }
   void r_compute_exit(CkReductionMsg * msg)
   {      compute_exit_(); delete msg; }
@@ -257,14 +263,12 @@ public:
 
   void p_output_enter()
   {      output_enter_(); }
-  void q_output_enter()
-  {      output_enter_(); }
   void r_output_enter(CkReductionMsg * msg)
   {      output_enter_(); delete msg;}
 
+  void p_output_end();
+
   void p_output_exit()
-  {      output_exit_(); }
-  void q_output_exit()
   {      output_exit_(); }
   void r_output_exit(CkReductionMsg * msg)
   {      output_exit_(); delete msg; }
@@ -288,35 +292,25 @@ public:
 
   void p_adapt_enter() 
   {      adapt_enter_(); }
-  void q_adapt_enter() 
-  {      adapt_enter_(); }
   void r_adapt_enter(CkReductionMsg * msg) 
   {      adapt_enter_(); delete msg;}
 
   void p_adapt_next ()
-  {      adapt_next_(); }
-  void q_adapt_next ()
   {      adapt_next_(); }
   void r_adapt_next (CkReductionMsg * msg)
   {      adapt_next_(); delete msg; }
 
   void p_adapt_called() 
   {      adapt_called_(); }
-  void q_adapt_called() 
-  {      adapt_called_(); }
   void r_adapt_called(CkReductionMsg * msg) 
   {      adapt_called_(); delete msg; }
 
   void p_adapt_end ()  
   {      adapt_end_(); }
-  void q_adapt_end ()  
-  {      adapt_end_(); }
   void r_adapt_end (CkReductionMsg * msg)  
   {      adapt_end_(); delete msg;}
 
   void p_adapt_exit() 
-  {      adapt_exit_(); }
-  void q_adapt_exit() 
   {      adapt_exit_(); }
   void r_adapt_exit(CkReductionMsg * msg) 
   {      adapt_exit_(); delete msg;}
@@ -358,7 +352,10 @@ public:
   //--------------------------------------------------
 
   /// Syncronize before continuing with next phase
-  void control_sync(int phase, std::string sync);
+  void control_next();
+
+  /// Syncronize before continuing with next phase
+  void control_sync(int phase, std::string sync, bool next_phase, const char * name, int line);
 
   /// synchronize with count other chares
   void p_control_sync_count(int phase, int count) 
@@ -377,15 +374,11 @@ public:
   /// Refresh ghost zones and apply boundary conditions
   void p_refresh_enter()  
   {      refresh_enter_(); }
-  void q_refresh_enter()  
-  {      refresh_enter_(); }
   void r_refresh_enter(CkReductionMsg * msg)  
   {      refresh_enter_(); delete msg; }
 
   /// Exit the refresh phase after QD
   void p_refresh_exit () 
-  {      refresh_exit_(); }
-  void q_refresh_exit () 
   {      refresh_exit_(); }
   void r_refresh_exit (CkReductionMsg * msg) 
   {      refresh_exit_(); delete msg;  }
@@ -421,15 +414,11 @@ public:
   /// Enter the stopping phase
   void p_stopping_enter () 
   {      stopping_enter_(); }
-  void q_stopping_enter () 
-  {      stopping_enter_(); }
   void r_stopping_enter (CkReductionMsg * msg) 
   {      stopping_enter_(); delete msg;  }
 
   /// Enter the stopping phase
   void p_stopping_exit () 
-  {      stopping_exit_(); }
-  void q_stopping_exit () 
   {      stopping_exit_(); }
   void r_stopping_exit (CkReductionMsg * msg) 
   {      stopping_exit_(); delete msg;  }
@@ -443,8 +432,6 @@ public:
 
   /// Exit the stopping phase to exit
   void p_exit () 
-  {      exit_(); }
-  void q_exit () 
   {      exit_(); }
   void r_exit (CkReductionMsg * msg) 
   {      exit_(); delete msg;  }
@@ -649,8 +636,8 @@ protected: // attributes
   Sync sync_coarsen_;
 
   /// Synchronization counter for p_control_sync
-  int  count_sync_[SYNC_SIZE];
-  int  max_sync_[SYNC_SIZE];
+  int  count_sync_[PHASE_COUNT];
+  int  max_sync_[PHASE_COUNT];
 
   /// current level of neighbors along each face
   std::vector<int> face_level_curr_;
@@ -675,6 +662,9 @@ protected: // attributes
 
   /// Phase to call after refresh
   int next_phase_;
+
+  /// Current phase of the cycle
+  int index_cycle_phase_;
 
   /// whether CommBlock has been coarsened and should be deleted
   bool coarsened_;

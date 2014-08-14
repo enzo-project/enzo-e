@@ -38,16 +38,33 @@
 enum phase_type {
   phase_unknown,
   phase_initial,
+  phase_initial_enter = phase_initial,
+  phase_initial_exit,
   phase_adapt,
+  phase_adapt_enter = phase_adapt,
+  phase_adapt_called,
+  phase_adapt_next,
+  phase_adapt_end,
+  phase_adapt_exit,
   phase_compute,
+  phase_compute_enter = phase_compute,
+  phase_compute_exit,
   phase_refresh,
+  phase_refresh_enter = phase_refresh,
+  phase_refresh_exit,
   phase_stopping,
+  phase_stopping_enter = phase_stopping,
+  phase_stopping_exit,
   phase_output,
+  phase_output_enter = phase_output,
+  phase_output_exit,
   phase_restart,
-  phase_balance
+  phase_balance,
+  phase_exit
 };
 
-extern const char * phase_name[9];
+#define PHASE_COUNT (phase_exit + 1)
+extern const char * phase_name[];
 
 enum array_type {
   op_array_unknown,
@@ -55,27 +72,6 @@ enum array_type {
   op_array_restrict,
   op_array_prolong
 };
-
-/// @enum     sync_type
-/// @brief    adapt phase for p_join()
-enum sync_type {
-  sync_unknown,
-  sync_adapt_enter,
-  sync_adapt_called,
-  sync_adapt_next,
-  sync_adapt_end,
-  sync_adapt_exit,
-  sync_compute_enter,
-  sync_compute_exit,
-  sync_output_enter,
-  sync_output_exit,
-  sync_refresh_enter,
-  sync_refresh_exit,
-  sync_stopping_enter,
-  sync_stopping_exit,
-  sync_exit,
-};
-#define SYNC_SIZE 15
 
 //----------------------------------------------------------------------
 // System includes

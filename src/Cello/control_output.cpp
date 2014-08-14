@@ -54,7 +54,8 @@ void CommBlock::output_begin_ ()
 
   } else {
 
-    output_exit_();
+    // control_sync (phase_output_exit,"none",true,__FILE__,__LINE__);
+    control_next();
 
   }
 }
@@ -281,9 +282,16 @@ void SimulationCharm::output_exit()
 
   TRACE_LOCAL("SimulationCharm::output_exit()");
   if (hierarchy()->group_process()->is_root()) 
-    hierarchy()->block_array()->p_output_exit();
+    hierarchy()->block_array()->p_output_end();
 }
 
+//----------------------------------------------------------------------
+
+void CommBlock::p_output_end()
+{
+  //  control_sync (phase_output_exit,"none",true,__FILE__,__LINE__);
+  control_next();
+}
 //======================================================================
 
 
