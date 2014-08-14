@@ -42,7 +42,7 @@
 
  Field {
      alignment = 8;
-     courant = 0.800;
+     courant = 0.5;
      gamma = 1.001;
      ghosts = 4;
      list = [ "density", 
@@ -74,8 +74,8 @@
           schedule {
              type = "interval";
              var =  "cycle";
-             start = 100;
-             step = 100;
+             start = 50;
+             step = 50;
          };
      };
 
