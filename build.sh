@@ -43,13 +43,13 @@ if ($#argv >= 1) then
       # assume enzo-p
       set k_switch = ""
       set target = $argv[1]
-      rm $target
+      rm -f $target
    endif
 else
    # assume enzo-p
    set k_switch = ""
    set target = "bin/enzo-p"
-   rm $target
+   rm -f $target
 endif
 
 set d = `date +"%Y-%m-%d %H:%M:%S"`

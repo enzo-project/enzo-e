@@ -31,6 +31,8 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
+  delete classname;
+
   unit_finalize();
 
   exit_();

@@ -56,6 +56,7 @@ env.RunSerial('test_FieldBlock.unit',bin_path + '/test_FieldBlock')
 env.RunSerial('test_FieldDescr.unit',bin_path + '/test_FieldDescr')
 env.RunSerial('test_FieldFace.unit', bin_path + '/test_FieldFace')
 env.RunSerial('test_ItField.unit',   bin_path + '/test_ItField')
+env.RunSerial('test_Grouping.unit',  bin_path + '/test_Grouping')
 #----------------------------------------------------------------------
 # IO COMPONENT        
 #----------------------------------------------------------------------
@@ -113,6 +114,7 @@ Clean(env_mv_test.RunSerial
 #----------------------------------------------------------------------
 # PARTICLE COMPONENT
 #----------------------------------------------------------------------
+env.RunSerial('test_Particle.unit',      bin_path + '/test_Particle')
 #----------------------------------------------------------------------
 # PERFORMANCE COMPONENT   
 #----------------------------------------------------------------------

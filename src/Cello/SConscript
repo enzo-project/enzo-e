@@ -127,6 +127,7 @@ sources_memory =      [Glob('memory*cpp')]
 sources_mesh =        [Glob('mesh*cpp')]
 sources_monitor =     [Glob('monitor*cpp')]
 sources_parallel =    [Glob('parallel*cpp')]
+sources_particle =    [Glob('particle*cpp')]
 sources_parameters =  [Glob('parameters*cpp'),'parse.tab.c','lex.yy.c']
 sources_performance = [Glob('performance*cpp')]
 sources_problem =     [Glob("problem*cpp")]
@@ -223,11 +224,16 @@ test_error        = env.Program ('test_Error.cpp',      LIBS=[libs_error, libs_t
 test_colormap    = env.Program (['test_Colormap.cpp', objs_io],
                                  LIBS=[libs_io,    libs_test]) 
 
+test_particle  = env.Program (['test_Particle.cpp', objs_particle],    
+                                 LIBS=[libs_particle, libs_test])
+
 test_field_block  = env.Program (['test_FieldBlock.cpp', objs_field],
                                  LIBS=[libs_field, libs_test])
 test_field_descr  = env.Program (['test_FieldDescr.cpp', objs_field], 
                                  LIBS=[libs_field, libs_test])
 test_field_face   = env.Program (['test_FieldFace.cpp', objs_field],  
+                                 LIBS=[libs_field, libs_test])
+test_grouping  = env.Program (['test_Grouping.cpp', objs_field], 
                                  LIBS=[libs_field, libs_test])
 test_it_field     = env.Program (['test_ItField.cpp', objs_field],    
                                  LIBS=[libs_field, libs_test])
@@ -305,8 +311,10 @@ binaries_disk  = [test_FileHdf5,
 binaries_error = [test_error]
 binaries_field = [test_field_block,
                   test_field_descr,
+                  test_grouping,
                   test_field_face,
                   test_it_field]
+binaries_particle = [test_particle]
 binaries_problem = [test_mask,test_value]
 binaries_io    = [test_it_reduce, test_colormap]
 binaries_memory  = [test_memory]
@@ -350,6 +358,7 @@ env.Alias('install-bin',env.Install (bin_path,binaries_field))
 env.Alias('install-inc',env.Install (inc_path,includes_field))
 env.Alias('install-lib',env.Install (lib_path,libraries_field))
 
+env.Alias('install-bin',env.Install (bin_path,binaries_particle))
 env.Alias('install-inc',env.Install (inc_path,includes_particle))
 env.Alias('install-lib',env.Install (lib_path,libraries_particle))
 

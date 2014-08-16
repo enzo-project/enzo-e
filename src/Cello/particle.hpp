@@ -10,6 +10,8 @@
 
 #include "cello.hpp"
 
+#include "_error.hpp"
+
 #include "_particle.hpp"
 
 #endif /* PARTICLE_HPP */

@@ -580,8 +580,10 @@ test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
 	     array("test_FileHdf5","test_FileIfrit"),'test'); 
 test_summary("Error",array(    "Error"),
 	     array("test_Error"),'test'); 
-test_summary("Field",array("FieldBlock","FieldDescr","FieldFace","ItField"),
-	     array("test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField"),'test'); 
+test_summary("Field",
+	     array(     "FieldBlock",     "FieldDescr",     "FieldFace",     "ItField",      "Grouping"),
+	     array("test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField", "test_Grouping"),
+	     'test'); 
 test_summary("Io",array("ItReduce"),
 	     array("test_ItReduce"),'test'); 
 test_summary("Memory",array("Memory"),
@@ -607,10 +609,14 @@ test_summary("Mesh",
 		   "test_ItNode"),'test'); 
 test_summary("Monitor",array("Monitor"),
 	     array("test_Monitor"),'test'); 
-test_summary("Parallel",array("GroupProcess","Layout"),
+test_summary("Parallel",
+	     array("GroupProcess","Layout"),
 	     array("test_GroupProcess","test_Layout"),'test'); 
-test_summary("Parameters",array("Parameters"),
+test_summary("Parameters",
+	     array("Parameters"),
 	     array("test_Parameters"),'test'); 
+test_summary("Particle",array("Particle"),
+	     array("test_Particle"),'test'); 
 test_summary("Performance",array("Papi", "Performance","Timer"),
 	     array("test_Papi","test_Performance","test_Timer"),'test'); 
 test_summary("Problem",array("Mask","Value"),
@@ -929,6 +935,7 @@ tests("Cello","test_FieldDescr","test_FieldDescr","","");
 tests("Cello","test_FieldBlock","test_FieldBlock","","");
 tests("Cello","test_FieldFace","test_FieldFace","","");
 tests("Cello","test_ItField","test_ItField","","");
+tests("Cello","test_Grouping","test_Grouping","","");
 
 //----------------------------------------------------------------------
 
@@ -990,6 +997,11 @@ test_group("Parameters");
 
 tests("Cello","test_Parameters","test_Parameters","","");
 
+//----------------------------------------------------------------------
+
+test_group("Particle");
+
+tests("Cello","test_Particle","test_Particle","","");
 //----------------------------------------------------------------------
 
 test_group("Performance");
