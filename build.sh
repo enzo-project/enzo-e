@@ -28,7 +28,7 @@ if ($#argv >= 1) then
          rm -rf lib >& /dev/null
       end
       rm -rf include >& /dev/null
-      rm -f test/COMPILING
+      rm -f test/STATUS
       rm -f input/*.in.out >& /dev/null
       rm -rf build
       printf "done\n"
@@ -65,7 +65,7 @@ rm -f "test/*/running.$arch.$prec"
 set configure = $arch-$prec
 set configure_print = `printf "%s %s %s" $arch $prec`
 
-printf "$configure" > test/COMPILING
+echo "Compiling" > test/STATUS
 
 # make output directory for compilation and tests
 
@@ -145,7 +145,7 @@ if ($CELLO_ARCH == "ncsa-bw") then
 
 endif
 
-rm -f test/COMPILING
+rm -f test/STATUS
 
 cp test/out.scons out.scons.$arch-$prec
 

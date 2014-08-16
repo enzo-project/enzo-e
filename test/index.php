@@ -4,7 +4,7 @@
 <link href="cello.css" rel="stylesheet" type="text/css">
 
    <?php
-   if (file_exists("COMPILING")) {
+   if (file_exists("STATUS")) {
      echo "<meta http-equiv=\"refresh\" content=20>";
    }
    ?>
@@ -491,10 +491,10 @@ function swf_movie ($filename, $last_image, $image_size)
 printf ("<center><table>\n");
 printf ("<tr>\n");
 
-if (file_exists("COMPILING"))  {
-  printf ( "<th class=compiling>");
-  printf ("<strong> COMPILING </strong>\n");
-  printf ("</th>");
+if (file_exists("STATUS"))  {
+  printf ( "<th class=compiling><strong>Running<br>");
+  system ("awk '{i=index($1,\"test_\"); print substr($1,i+5,length($1)-i-9)}' STATUS");
+  printf ("</strong></th>");
 } else { 
   printf ("<th></th>\n"); 
 }

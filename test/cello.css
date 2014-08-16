@@ -6,7 +6,8 @@
 
 BODY {
 /*  background-image: url("cello-bg.png");   */
-background-color: grey;
+    background-color: grey;
+    font-family: Sans-Serif;
 }
 
 /* header { background: #fff url(cello-hr.png) no-repeat;

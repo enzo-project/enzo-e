@@ -10,7 +10,7 @@ Import('test_path')
 # defines
 #----------------------------------------------------------------------
 
-date_cmd = 'echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
+date_cmd = 'echo $TARGET > test/STATUS; echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
 
 # run_balance_greedy_comm = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer GreedyCommLB > $TARGET 2>&1; $COPY")
 # env.Append(BUILDERS = { 'RunBalanceGreedyComm' : run_balance_greedy_comm } )
