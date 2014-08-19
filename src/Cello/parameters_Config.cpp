@@ -78,6 +78,7 @@ void Config::pup (PUP::er &p)
   PUParray(p,mesh_min_refine2,MAX_MESH_GROUPS);
   PUParray(p,mesh_max_coarsen2,MAX_MESH_GROUPS);
   PUParray(p,mesh_level_exponent,MAX_MESH_GROUPS);
+  PUParray(p,mesh_refine_output,MAX_MESH_GROUPS);
 
   // Method
 
@@ -139,6 +140,7 @@ void Config::pup (PUP::er &p)
 
   p | testing_cycle_final;
   p | testing_time_final;
+  p | testing_time_tolerance;
 
 }
 
@@ -475,19 +477,24 @@ void Config::read_mesh_ (Parameters * p) throw()
   mesh_root_size[2] = p->list_value_integer(2,"Mesh:root_size",1);
 
   //--------------------------------------------------
+  // Adapt
+  //--------------------------------------------------
 
-  mesh_max_level = p->value_integer("Mesh:max_level",0);
+  mesh_adapt_interval = p->value ("Adapt:interval",1);
 
+  //--------------------------------------------------
 
-  mesh_adapt_interval = p->value ("Mesh:adapt_interval",1);
+  mesh_max_level = p->value_integer("Adapt:max_level",0);
 
-  num_mesh = p->list_length("Mesh:list");
+  //--------------------------------------------------
+
+  num_mesh = p->list_length("Adapt:list");
 
   for (int ia=0; ia<num_mesh; ia++) {
 
-    mesh_list[ia] = p->list_value_string (ia,"Mesh:list","unknown");
+    mesh_list[ia] = p->list_value_string (ia,"Adapt:list","unknown");
 
-    std::string prefix = "Mesh:" + mesh_list[ia] + ":";
+    std::string prefix = "Adapt:" + mesh_list[ia] + ":";
 
     mesh_type[ia] = p->value_string(prefix+"type","unknown");
 
@@ -529,6 +536,9 @@ void Config::read_mesh_ (Parameters * p) throw()
     }
 
     mesh_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
+
+
+    mesh_refine_output[ia] = p->value_string (prefix + "output","");
 
   }
 
@@ -753,6 +763,7 @@ void Config::read_testing_ (Parameters * p) throw()
 {
   testing_cycle_final = p->value_integer("Testing:cycle_final",0);
   testing_time_final  = p->value_float  ("Testing:time_final", 0.0);
+  testing_time_tolerance = p->value_float  ("Testing:time_tolerance", 1e-6);
 }
 
 //======================================================================

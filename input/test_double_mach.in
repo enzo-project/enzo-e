@@ -77,12 +77,13 @@
       root_rank = 2;
       root_size = [96,24];
       root_blocks = [4,1];
+   }
+   Adapt {
       max_level = 5; 
-      balance = true;
       list = ["SLOPE"];
       SLOPE {
          type = "slope";
-          field_list = ["density"];
+         field_list = ["density"];
          min_refine  = 5.0;
          max_coarsen = 2.0;
       }

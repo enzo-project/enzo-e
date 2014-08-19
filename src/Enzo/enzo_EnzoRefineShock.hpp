@@ -24,10 +24,11 @@ public: // interface
    double pressure_max_coarsen,
    double energy_ratio_min_refine,
    double energy_ratio_max_coarsen,
-   double gamma) throw();
+   double gamma,
+   std::string output) throw();
 
   /// default constructor
-  EnzoRefineShock () throw() : Refine() {};
+  // EnzoRefineShock () throw() : Refine() {};
 
   PUPable_decl(EnzoRefineShock);
 
@@ -59,6 +60,7 @@ private: // functions
 			const T * te,
 			const T * de,
 			const T * p,
+			T * output,
 			int ndx, int ndy, int ndz,
 			int nx, int ny, int nz,
 			int gx, int gy, int gz,

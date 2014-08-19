@@ -1,10 +1,9 @@
 # File:    adapt_slope.incl
 
-Mesh {
+Adapt {
    max_level = 3; 
-   balance = true;
-   list = ["SLOPE"];
-   SLOPE {
+   list = ["slope"];
+   slope {
       type = "slope";
       field_list = ["density"];
       min_refine = 10.0;

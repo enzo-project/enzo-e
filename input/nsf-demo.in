@@ -15,11 +15,10 @@ Mesh {
    root_rank   = 2;
    root_size   = [ 128,128 ];
    root_blocks = [   4,  4 ];
-   max_level = 5;
-
 }
 
-Mesh {
+Adapt {
+   max_level = 5;
    list = ["slope"];
    slope {
        type = "slope";
@@ -84,7 +83,7 @@ Stopping {
 
 Testing {
    cycle_final = 50;
-   time_final  = 0.0291477502323687;
+   time_final  = 0.0291477504083241;
 }
 
 # Output image dumps every 10 cycles

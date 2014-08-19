@@ -1,9 +1,10 @@
 include "input/method_turbulence.incl"
 
 Mesh {
-     max_level = 1;
      root_blocks = [ 2, 2, 2 ];
      root_size = [ 64, 64, 64 ];
 }
+
+Adapt {  max_level = 1; }
 
  Stopping { cycle = 10000; }

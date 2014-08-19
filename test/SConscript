@@ -494,12 +494,12 @@ Clean(env_mv_out.RunParallel ('test_output-stride-2.unit',
        'test_output-stride-2.unit',
        '#/input/output-stride-2.in.out'])
 
-Clean(env_mv_out.RunParallel ('test_output-stride-3.unit',
+Clean(env_mv_out.RunParallel ('test_output-stride-4.unit',
 		bin_path + '/enzo-p', 
-		ARGS='input/output-stride-3.in'),
-      [Glob('#/' + test_path + '/output-stride-3.png'),
-       'test_output-stride-3.unit',
-       '#/input/output-stride-3.in.out'])
+		ARGS='input/output-stride-4.in'),
+      [Glob('#/' + test_path + '/output-stride-4.png'),
+       'test_output-stride-4.unit',
+       '#/input/output-stride-4.in.out'])
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
 

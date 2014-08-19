@@ -31,11 +31,15 @@ if ($#argv >= 1) then
       rm -f test/STATUS
       rm -f input/*.in.out >& /dev/null
       rm -rf build
+      rm -rf test/*.h5
+      rm -rf `find test -name "*.png"`
+      rm -rf `find test -name "*.h5"`
       printf "done\n"
       exit
    else if ($argv[1] == "compile") then
       set target = install-bin
    else if ($argv[1] == "test") then
+      ./build.sh
       set target = "test"
       set proc = 1
       set k_switch = "-k"

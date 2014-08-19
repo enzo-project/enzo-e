@@ -20,11 +20,11 @@ Stopping { cycle = 1000; }
   Mesh {
      root_size   = [512,256];
      root_blocks = [32,16];
-     max_level = 3;
   }
 
 
-Mesh {
+Adapt {
+   max_level = 3;
    list = ["slope"];
    slope {
        type = "slope";

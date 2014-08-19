@@ -568,7 +568,7 @@ test_summary("Initial",
 	     array("enzo-p"),'test');
 
 test_summary("Output", 
-	     array("output-stride-1","output-stride-2","output-stride-3"),
+	     array("output-stride-1","output-stride-2","output-stride-4"),
 	     array("enzo-p","enzo-p","enzo-p"),'test');
 
 //----------------------------------------------------------------------
@@ -910,8 +910,8 @@ test_table_blocks ("output-stride-2",  array("00","10","20"), $types);
 
 echo "<h3>Stride 3</h3>";
 
-tests("Enzo","enzo-p","test_output-stride-3","","");
-test_table_blocks ("output-stride-3",  array("00","10","20"), $types);
+tests("Enzo","enzo-p","test_output-stride-4","","");
+test_table_blocks ("output-stride-4",  array("00","10","20"), $types);
 
 //======================================================================
 

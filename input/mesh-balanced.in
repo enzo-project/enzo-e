@@ -9,10 +9,10 @@ Mesh
    root_rank = 2;
    root_size   = [32,32];
    root_blocks = [ 2, 2]; 
-   max_level   = 5; 
 }
 
-Mesh {
+Adapt {
+   max_level   = 5; 
    list = ["slope"];
    slope {
        type = "slope";

@@ -1,7 +1,6 @@
 include "input/method_turbulence.incl"
 
  Mesh {
-     max_level = 0;
-     root_size = [ 128, 128, 128 ];
+      root_size = [ 128, 128, 128 ];
      root_blocks = [ 4, 4, 4 ];
  }

@@ -26,6 +26,9 @@
       root_rank = 2;
       root_size = [48,48];
       root_blocks = [2,2];
+   }
+
+   Adapt {
       max_level = 4;
       list = ["SLOPE"];
       SLOPE {

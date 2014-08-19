@@ -21,6 +21,9 @@ Mesh {
    root_rank = 2;
    root_size = [64,64];
    root_blocks = [2,2];
+}
+
+Adapt {
    max_level = 5;
    list = ["rotate"];
    rotate {

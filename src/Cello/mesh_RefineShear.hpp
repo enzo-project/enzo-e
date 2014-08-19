@@ -20,10 +20,11 @@ public: // interface
   /// Constructor
   RefineShear(const FieldDescr * field_descr,
 	      double shear_min_refine,
-	      double shear_max_coarsen) throw();
+	      double shear_max_coarsen,
+	      std::string output) throw();
 
   /// default constructor
-  RefineShear () throw() : Refine() {};
+  // RefineShear () throw() : Refine() {};
 
   PUPable_decl(RefineShear);
 
@@ -35,8 +36,6 @@ public: // interface
     TRACEPUP;
     // NOTE: change this function whenever attributes change
     Refine::pup(p);
-    p | shear_min_refine_;
-    p | shear_max_coarsen_;
   }
 
   /// Evaluate the refinement criteria, updating the refinement field
@@ -48,7 +47,10 @@ public: // interface
 private: // functions
 
   template <class T>
-  void evaluate_block_(const T * u, const T * v, const T * w,
+  void evaluate_block_(const T * u,
+		       const T * v,
+		       const T * w,
+		       T * output,
 		       int ndx, int ndy, int ndz,
 		       int nx, int ny, int nz,
 		       int gx, int gy, int gz,
@@ -56,13 +58,6 @@ private: // functions
 		       bool * all_coarsen, 
 		       int rank);
 
-private: // attributes
-
-  /// Minimum allowed shear before refinement kicks in
-  double shear_min_refine_;
-
-  /// Maximum allowed shear before coarsening is allowed
-  double shear_max_coarsen_;
 };
 
 #endif /* MESH_REFINE_SHEAR_HPP */

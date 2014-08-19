@@ -1,4 +1,4 @@
-# Problem: 2D Implosion problem
+# Problem: Output stride test
 # Author:  James Bordner (jobordner@ucsd.edu)
 
 include "input/ppm.incl"
@@ -11,8 +11,8 @@ Output {
 
     stride {
        type = "data";
-       stride = 3;
-       name = ["output-stride-3-p%1d-%02d.h5","proc","cycle"];
+       stride = 1;
+       name = ["output-stride-1-p%1d-%02d.h5","proc","cycle"];
        field_list = ["density"];
        include "input/schedule_cycle_10.incl"
     }
@@ -21,7 +21,7 @@ Output {
 
 Stopping {  cycle = 20; }
 Testing {   cycle_final = 20; }
-Testing {  time_final  = 0.0506399683654308; }
+Testing {  time_final  = 0.0506399682687848;}
 
 # Output { density      { name = ["method_ppm-8-%06d.png", "cycle"]; } }
 # Output { data { name = ["method_ppm-8-%02d-%06d.h5", "proc","cycle"]; } }

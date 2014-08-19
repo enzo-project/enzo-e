@@ -8,12 +8,15 @@ Balance { interval = 1; }
 Stopping { cycle = 20; }
 
 Testing { cycle_final = 20;
-          time_final = 0.00135310094366044;
+          time_final = 0.00135310056888331;
         }
 
 Mesh    { 
    root_size   = [16,16];
    root_blocks = [4,4];
+}
+
+Adapt {
    max_level   = 7; 
 }
 
@@ -50,7 +53,8 @@ Output {
        };
 
 }
-Mesh {
+Adapt {
+   list = ["slope"];
    slope {
       max_coarsen = 5.0;
       min_refine  = 20.0;

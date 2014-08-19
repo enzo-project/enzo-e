@@ -21,10 +21,11 @@ public: // interface
   RefineMass(double min_refine,
 	     double max_coarsen,
 	     double level_exponent,
-	     double root_cell_volume) throw();
+	     double root_cell_volume,
+	     std::string store) throw();
 
   /// default constructor
-  RefineMass () throw() : Refine() {};
+  // RefineMass () throw() : Refine() {};
 
   PUPable_decl(RefineMass);
 
@@ -36,8 +37,6 @@ public: // interface
     TRACEPUP;
     // NOTE: change this function whenever attributes change
     Refine::pup(p);
-    p | min_refine_;
-    p | max_coarsen_;
     p | level_exponent_;
   }
 
@@ -48,12 +47,6 @@ public: // interface
   virtual std::string name () const { return "mass"; };
 
 private:
-
-  /// Minimum allowed mass before refinement kicks in
-  double min_refine_;
-
-  /// Minimum allowed mass before refinement kicks in
-  double max_coarsen_;
 
   double level_exponent_;
 

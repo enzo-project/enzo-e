@@ -141,7 +141,8 @@ Refine * EnzoProblem::create_refine_
        config->mesh_max_coarsen[index],
        config->mesh_min_refine2[index],
        config->mesh_max_coarsen2[index],
-       enzo_config->field_gamma);
+       enzo_config->field_gamma,
+       config->mesh_refine_output[index]);
   } else {
     return Problem::create_refine_(type,config,parameters,field_descr,index);
   }

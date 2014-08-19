@@ -3,8 +3,7 @@ include "input/ppm.incl"
 include "input/sedov-amr.incl"
 include "input/sedov-output.incl"
 
-Mesh    {  max_level = 0; }
-Initial {  max_level = 0; }
+Adapt    {  max_level = 0; }
 
 Mesh { root_size      = [512,512]; }
 Mesh { root_blocks    = [2,2]; }

@@ -119,7 +119,7 @@ public: // attributes
   double                     mesh_min_refine2[MAX_MESH_GROUPS];
   double                     mesh_max_coarsen2[MAX_MESH_GROUPS];
   double                     mesh_level_exponent[MAX_MESH_GROUPS];
-
+  std::string                mesh_refine_output[MAX_MESH_GROUPS];
 
   // Method
 
@@ -181,6 +181,7 @@ public: // attributes
 
   int                        testing_cycle_final;
   double                     testing_time_final;
+  double                     testing_time_tolerance;
 
 protected: // functions
 

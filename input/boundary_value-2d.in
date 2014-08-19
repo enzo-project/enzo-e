@@ -1,12 +1,12 @@
 include "input/dots.incl"
 
 Mesh { 
-   max_level   = 3; 
    root_size   = [32, 32];
    root_blocks = [4,4];
 }
 
 Adapt {
+   max_level   = 3; 
    list = ["slope"];
    slope {
        type = "slope";

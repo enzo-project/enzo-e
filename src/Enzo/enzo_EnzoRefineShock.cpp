@@ -10,12 +10,14 @@
 //----------------------------------------------------------------------
 
 EnzoRefineShock::EnzoRefineShock(const FieldDescr * field_descr,
-			 double pressure_min_refine,
-			 double pressure_max_coarsen,
-			 double energy_ratio_min_refine,
-			 double energy_ratio_max_coarsen,
-			 double gamma) throw ()
-  : pressure_min_refine_ (pressure_min_refine),
+				 double pressure_min_refine,
+				 double pressure_max_coarsen,
+				 double energy_ratio_min_refine,
+				 double energy_ratio_max_coarsen,
+				 double gamma,
+				 std::string output) throw ()
+  : Refine (0.0, 0.0, output),
+    pressure_min_refine_ (pressure_min_refine),
     pressure_max_coarsen_(pressure_max_coarsen),
     energy_ratio_min_refine_ (energy_ratio_min_refine),
     energy_ratio_max_coarsen_(energy_ratio_max_coarsen),
@@ -75,12 +77,15 @@ int EnzoRefineShock::apply
 
   precision_type precision = field_descr->precision(id_velocity);
 
+  void * output = initialize_output_(field_block);
+
   switch (precision) {
   case precision_single:
     evaluate_block_((const float**) v3,
 		    (const float*)  te,
 		    (const float*)  de,
 		    (const float*)  p,
+		    (float*) output,
 		    nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
 		    &any_refine,&all_coarsen, rank);
     break;
@@ -89,6 +94,7 @@ int EnzoRefineShock::apply
 		    (const double*)  te,
 		    (const double*)  de,
 		    (const double*)  p,
+		    (double*) output,
 		    nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
 		    &any_refine,&all_coarsen, rank);
     break;
@@ -115,6 +121,7 @@ void EnzoRefineShock::evaluate_block_
  const T * te,
  const T * de,
  const T * p,
+ T * output,
  int ndx, int ndy, int ndz,
  int nx, int ny, int nz,
  int gx, int gy, int gz,
@@ -133,26 +140,34 @@ void EnzoRefineShock::evaluate_block_
 	  int i = ix + ndx*(iy + ndy*iz);
 	  int id = d3[axis];
 
-	  double dp = fabs    (p[i+id] - p[i-id]) 
+	  T dp = fabs    (p[i+id] - p[i-id]) 
 	    / (std::min(p[i+id] , p[i-id])) ;
 
-	  double dv = v3[axis][i+id] - v3[axis][i-id];
+	  T dv = v3[axis][i+id] - v3[axis][i-id];
 
-	  double e = p[i]/(gamma_ - 1.0);
+	  T e = p[i]/(gamma_ - 1.0);
 
-	  double ep = te[i+id]*de[i+id];
-	  double e0 = te[i]   *de[i];
-	  double em = te[i-id]*de[i-id];
+	  T ep = te[i+id]*de[i+id];
+	  T e0 = te[i]   *de[i];
+	  T em = te[i-id]*de[i-id];
 
-	  double er = e / std::max (std::max(em,e0),ep);
+	  T er = e / std::max (std::max(em,e0),ep);
 
-	  if ((dv < 0.0) && 
-	      (dp > pressure_min_refine_) &&
-	      (er > energy_ratio_min_refine_))  *any_refine = true;
+	  bool l_refine = (dv < 0.0) && 
+	    (dp > pressure_min_refine_) &&
+	    (er > energy_ratio_min_refine_);
 
-	  if ((dv < 0.0) &&
-	      (dp > pressure_max_coarsen_) &&
-	      (er > energy_ratio_max_coarsen_)) *all_coarsen = false;
+	  bool l_same = (dv < 0.0) &&
+	    (dp > pressure_max_coarsen_) &&
+	    (er > energy_ratio_max_coarsen_);
+
+	  if (l_refine)  *any_refine = true;
+	  if (l_same)    *all_coarsen = false;
+
+	  if (output) {
+	    if (l_same)   output[i] =  0;
+	    if (l_refine) output[i] = +1;
+	  }
 	}
       }
     }

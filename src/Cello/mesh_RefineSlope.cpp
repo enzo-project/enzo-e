@@ -10,11 +10,11 @@
 //----------------------------------------------------------------------
 
 RefineSlope::RefineSlope(const FieldDescr * field_descr,
-			 double slope_min_refine,
-			 double slope_max_coarsen,
-			 std::vector<std::string> field_name_list) throw ()
-  : slope_min_refine_ (slope_min_refine),
-    slope_max_coarsen_(slope_max_coarsen)
+			 double min_refine,
+			 double max_coarsen,
+			 std::vector<std::string> field_name_list,
+			 std::string output) throw ()
+  : Refine (min_refine, max_coarsen, output)
 {
   if (field_name_list.size() != 0) {
     field_id_list_.resize(field_name_list.size());
@@ -57,6 +57,8 @@ int RefineSlope::apply
   field_block->cell_width(xm[1],xp[1],&h3[1]);
   field_block->cell_width(xm[2],xp[2],&h3[2]);
 
+  void * output = initialize_output_(field_block);
+
   for (size_t k=0; k<field_id_list_.size(); k++) {
 
     int id_field = field_id_list_[k];
@@ -70,16 +72,26 @@ int RefineSlope::apply
 
     precision_type precision = field_descr->precision(id_field);
 
-    void * void_array = field_block->values(id_field);
+    void * array = field_block->values(id_field);
    
     // count number of times slope refine and coarsen conditions are satisified
     switch (precision) {
     case precision_single:
-      evaluate_block_((float*)void_array, nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
+      evaluate_block_((float*) array,
+		      (float*) output, 
+		      nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
 		      &any_refine,&all_coarsen, rank,h3);
       break;
     case precision_double:
-      evaluate_block_((double*)void_array, nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
+      evaluate_block_((double*) array,
+		      (double*) output,
+		      nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
+		      &any_refine,&all_coarsen, rank,h3);
+      break;
+    case precision_quadruple:
+      evaluate_block_((long double*) array,
+		      (long double*) output,
+		      nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
 		      &any_refine,&all_coarsen, rank,h3);
       break;
     default:
@@ -100,14 +112,14 @@ int RefineSlope::apply
 //----------------------------------------------------------------------
 
 template <class T>
-void RefineSlope::evaluate_block_(T * array, 
+void RefineSlope::evaluate_block_(T * array, T * output ,
 				  int ndx, int ndy, int ndz,
 				  int nx, int ny, int nz,
 				  int gx, int gy, int gz,
 				  bool *any_refine,
 				  bool * all_coarsen, 
 				  int rank, 
-				  double * h3)
+				  double * h3 )
 {
   // TEMPORARY: evaluate effect of including (some) ghost zones
   T slope;
@@ -120,8 +132,12 @@ void RefineSlope::evaluate_block_(T * array,
 	  int i = (gx+ix) + (ndx)*((gy+iy) + (ndy)*(gz+iz));
 	  slope = fabs((array[i+d] - array[i-d]) / (2.0*h3[axis]*array[i]));
 	  
-	  if (slope > slope_min_refine_)  *any_refine  = true;
-	  if (slope > slope_max_coarsen_) *all_coarsen = false;
+	  if (slope > min_refine_)  *any_refine  = true;
+	  if (slope > max_coarsen_) *all_coarsen = false;
+	  if (output) {
+	    if (slope > max_coarsen_) output[i] =  0;
+	    if (slope > min_refine_)  output[i] = +1;
+	  }
 	}
       }
     }

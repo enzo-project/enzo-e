@@ -6,6 +6,9 @@ Stopping { cycle = 1000; }
 Mesh    { 
    root_size   = [64,32];
    root_blocks = [4,2];
+}
+
+Adapt {
    max_level   = 6; 
 }
 
@@ -46,8 +49,7 @@ Initial {
  }
 # File:    adapt_slope.incl
 
-Mesh {
-   balance = true;
+Adapt {
    list = ["slope"];
    slope {
       type = "slope";

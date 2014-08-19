@@ -5,10 +5,7 @@ include "input/adapt.incl"
 
 Mesh    {
    root_size   = [1024,1024];
-   max_level   = 0; 
 }
-
-Initial {  max_level = 0; }
 
 Output {
       de { name = ["adapt-L0-P1-de-%f.png", "time"]; };

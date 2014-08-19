@@ -6,8 +6,8 @@ include "input/output-stride.incl"
 Output {
 
     stride {
-       stride = 1;
-       name = ["output-stride-1-p%1d-%02d.h5","proc","cycle"];
+       stride = 4;
+       name = ["output-stride-4-p%1d-%02d.h5","proc","cycle"];
     }
 
 }

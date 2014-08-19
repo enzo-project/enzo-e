@@ -10,10 +10,10 @@
 //----------------------------------------------------------------------
 
 RefineShear::RefineShear(const FieldDescr * field_descr,
-			 double shear_min_refine,
-			 double shear_max_coarsen) throw ()
-  : shear_min_refine_ (shear_min_refine),
-    shear_max_coarsen_(shear_max_coarsen)
+			 double min_refine,
+			 double max_coarsen,
+			 std::string output) throw ()
+  : Refine (min_refine_, max_coarsen, output)
 {
 }
 
@@ -62,20 +62,24 @@ int RefineShear::apply
   if (rank < 2) gy = 0;
   if (rank < 3) gz = 0;
 
+  void * output = initialize_output_(field_block);
+
   precision_type precision = field_descr->precision(id_velocity);
 
   switch (precision) {
   case precision_single:
-    evaluate_block_((float*)velocity_x,
-		    (float*)velocity_y,
-		    (float*)velocity_z,
+    evaluate_block_((const float*)velocity_x,
+		    (const float*)velocity_y,
+		    (const float*)velocity_z,
+		    (float*)output,
 		    nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
 		    &any_refine,&all_coarsen, rank);
     break;
   case precision_double:
-    evaluate_block_((double*)velocity_x,
-		    (double*)velocity_y,
-		    (double*)velocity_z,
+    evaluate_block_((const double*)velocity_x,
+		    (const double*)velocity_y,
+		    (const double*)velocity_z,
+		    (double*)output,
 		    nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
 		    &any_refine,&all_coarsen, rank);
     break;
@@ -99,6 +103,7 @@ template <class T>
 void RefineShear::evaluate_block_(const T * u,
 				  const T * v,
 				  const T * w,
+				  T * output,
 				  int ndx, int ndy, int ndz,
 				  int nx, int ny, int nz,
 				  int gx, int gy, int gz,
@@ -131,8 +136,12 @@ void RefineShear::evaluate_block_(const T * u,
 	  wy = w[i+ky] - w[i-ky]; wy *= wy;
 	}
 	shear = uy + uz + vx + vz + wx + wy;
-	if (shear > shear_min_refine_)  *any_refine  = true;
-	if (shear > shear_max_coarsen_) *all_coarsen = false;
+	if (shear > min_refine_)  *any_refine  = true;
+	if (shear > max_coarsen_) *all_coarsen = false;
+	if (output) {
+	  if (shear > max_coarsen_) output[i] =  0;
+	  if (shear > min_refine_)  output[i] = +1;
+	}
       }
     }
   }

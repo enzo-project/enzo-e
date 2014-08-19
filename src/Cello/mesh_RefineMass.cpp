@@ -14,9 +14,9 @@ RefineMass::RefineMass
  double min_refine,
  double max_coarsen,
  double level_exponent,
- double root_cell_volume) throw ()
-  : min_refine_(min_refine),
-    max_coarsen_(max_coarsen),
+ double root_cell_volume,
+ std::string output) throw ()
+  : Refine(min_refine,max_coarsen,output),
     level_exponent_(level_exponent)
   // ENZO non-cosmology
 
@@ -71,7 +71,8 @@ int RefineMass::apply
 
   precision_type precision = field_descr->precision(0);
 
-  void * void_array = field_block->values(0);
+  void * void_array  = field_block->values(0);
+  void * void_output = initialize_output_(field_block);
 
   //  int num_fields = field_descr->field_count();
 
@@ -83,7 +84,8 @@ int RefineMass::apply
   switch (precision) {
   case precision_single:
     {
-      float * array = (float*)void_array;
+      float * array  = (float*)void_array;
+      float * output = (float*)void_output;
       float mass;
       for (int axis=0; axis<3; axis++) {
 	int d = d3[axis];
@@ -94,6 +96,10 @@ int RefineMass::apply
 	      mass = (array[i]) ? (array[i+d] - array[i-d]) / array[i] : 0.0;
 	      if (mass > mass_min_refine)  any_refine  = true;
 	      if (mass > mass_max_coarsen) all_coarsen = false;
+	      if (output) {
+		if (mass > mass_max_coarsen) output[i] =  0;
+		if (mass > mass_min_refine)  output[i] = +1;
+	      }
 	    }
 	  }
 	}
@@ -102,7 +108,8 @@ int RefineMass::apply
     break;
   case precision_double:
     {
-      double * array = (double*)void_array;
+      double * array  = (double*)void_array;
+      double * output = (double*)void_output;
       double mass;
 
       for (int axis=0; axis<3; axis++) {
@@ -114,6 +121,10 @@ int RefineMass::apply
 	      mass = (array[i]) ? (array[i+d] - array[i-d]) / array[i] : 0.0;
 	      if (mass > mass_min_refine)  any_refine  = true;
 	      if (mass > mass_max_coarsen) all_coarsen = false;
+	      if (output) {
+		if (mass > mass_max_coarsen) output[i] =  0;
+		if (mass > mass_min_refine)  output[i] = +1;
+	      }
 	    }
 	  }
 	}

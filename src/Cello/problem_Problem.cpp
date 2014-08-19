@@ -445,20 +445,25 @@ Refine * Problem::create_refine_
       (field_descr,
        config->mesh_min_refine[index],
        config->mesh_max_coarsen[index],
-       config->mesh_field_list[index]);
+       config->mesh_field_list[index],
+       config->mesh_refine_output[index]);
 
   } else if (type == "shear") {
 
     return new RefineShear 
       (field_descr,
        config->mesh_min_refine[index],
-       config->mesh_max_coarsen[index]);
+       config->mesh_max_coarsen[index],
+       config->mesh_refine_output[index]);
 
   } else if (type == "mask") {
 
     std::string param_str = "Mesh:" + config->mesh_list[index] + ":value";
 
-    return new RefineMask (parameters, param_str);
+    return new RefineMask 
+      (parameters,
+       param_str,
+       config->mesh_refine_output[index]);
 
   } else if (type == "mass") {
 
@@ -475,7 +480,8 @@ Refine * Problem::create_refine_
     return new RefineMass (config->mesh_min_refine[index],
 			   config->mesh_max_coarsen[index],
 			   config->mesh_level_exponent[index],
-			   root_cell_volume);
+			   root_cell_volume,
+			   config->mesh_refine_output[index]);
   }
   return NULL;
 }

@@ -22,10 +22,11 @@ public: // interface
 
   /// Constructor
   RefineMask(Parameters * parameters,
-	     const std::string parameter_name) throw();
+	     const std::string parameter_name,
+	     std::string output) throw();
 
   /// default constructor
-  RefineMask () throw() : Refine() {};
+  // RefineMask () throw() : Refine() {};
 
   PUPable_decl(RefineMask);
 

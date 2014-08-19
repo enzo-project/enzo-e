@@ -5,10 +5,6 @@ include "input/mesh-balanced.in"
 
 
 
-Mesh {
-   balanced = false;
-} 
-
 Output {
       de   { name = ["mesh-unbalanced-de.%03d.png","cycle"];  };
       te   { name = ["mesh-unbalanced-te.%03d.png","cycle"];  };

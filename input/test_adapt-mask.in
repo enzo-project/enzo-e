@@ -7,6 +7,9 @@ include "input/adapt_mask.incl"
 
 Mesh    { 
    root_size   = [32,32];
+}
+
+Adapt {
    max_level   = 5; 
 }
 

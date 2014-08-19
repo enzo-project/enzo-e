@@ -3,11 +3,12 @@
      upper = [ 1.0, 1.0, 1.0 ];
  }
 
- Mesh {
+Mesh { root_rank = 3; }
+
+ Adapt {
      list = [ "shock", "shear" ];
-     shock { type = "shock"; };
-     shear { type = "shear"; };
-     root_rank = 3;
+     shock { type = "shock"; store = "refine_shock"; };
+     shear { type = "shear"; store = "refine_shear";  };
  }
 
  Initial {
@@ -55,7 +56,9 @@
               "total_energy",
               "internal_energy",
               "temperature",
-              "pressure" ];
+              "pressure",
+              "refine_shock",
+              "refine_shear" ];
      padding = 0;
  }
 
@@ -66,7 +69,7 @@
 
      list = [ "checkpoint", "de_png" , 
               "vx_png", "vy_png", "vz_png",
-              "p_png", "te_png", "mesh"  ];
+              "p_png", "te_png", "mesh", "refine_shock", "refine_shear"  ];
 
      checkpoint {
           dir   = ["turbulence-checkpoint-%d","count"];
@@ -146,6 +149,28 @@
          image_specify_bounds = true;
          image_type = "mesh";
          name = [ "turbulence-mesh-%04d.png", "count" ];
+         include "input/schedule_cycle_25.incl"
+         type = "image";
+     };
+     refine_shock {
+         colormap = [0.0, 1.0, 0.0,   # green coarsen,
+                     0.0, 0.0, 0.0,   # white same
+                     1.0, 0.0, 0.0];  # red refine
+         image_size = [ 1024, 1024 ];
+         field_list = [ "refine_shock" ];
+         name = [ "turbulence-refine_shock-%04d.png", "count" ];
+         include "input/schedule_cycle_25.incl"
+         type = "image";
+     };
+     refine_shear {
+         colormap = [0.0, 1.0, 0.0,   # green coarsen,
+                     0.0, 0.0, 0.0,   # white same
+                     1.0, 0.0, 0.0];  # red refine
+
+         include "input/colormap_rainbow.incl"
+         image_size = [ 1024, 1024 ];
+         field_list = [ "refine_shear" ];
+         name = [ "turbulence-refine_shear-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
      };

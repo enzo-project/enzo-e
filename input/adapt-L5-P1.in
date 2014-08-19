@@ -5,13 +5,12 @@ include "input/adapt.incl"
 
 Mesh    { 
    root_size   = [32,32];
-   max_level   = 5; 
 }
 
 # include "input/initial_star.incl"
 include "input/initial_square.incl"
 
-Initial {  max_level = 5; }
+Adapt {  max_level = 5; }
 
 Output {
      list = ["de","dl","te","vx","vy","mesh"];

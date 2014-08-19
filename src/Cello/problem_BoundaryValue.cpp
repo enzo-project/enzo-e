@@ -100,7 +100,7 @@ void BoundaryValue::enforce
 			   ndz,nz,z+iz0);
 	  if (mask_) {
 	    for (int i=0; i<ndx*ndy*ndz; i++) ((float *)temp)[i]=((float *)array)[i];
-	    delete [] array;
+	    delete [] ((float*)array);
 	    array = temp;
 	  }
 	}
@@ -118,7 +118,7 @@ void BoundaryValue::enforce
 			   ndz,nz,z+iz0);
 	  if (mask_) {
 	    for (int i=0; i<ndx*ndy*ndz; i++) ((double *)temp)[i]=((double *)array)[i];
-	    delete [] array;
+	    delete [] ((double *)array);
 	    array = temp;
 	  }
 	}

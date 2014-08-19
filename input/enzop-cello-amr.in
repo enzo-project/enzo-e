@@ -5,8 +5,8 @@ include "input/adapt.incl"
 Stopping { cycle = 2000; }
 Mesh    { 
    root_size   = [16,16];
-   max_level   = 7; 
 }
+Adapt {  max_level   = 7;  }
 
 Initial {
     density       { value = [ 1.0+x, "input/enzop-cello-full.png",  0.125 ]; };
@@ -36,8 +36,10 @@ Output {
        };
 
 }
-Mesh {
+Adapt {
+   list = ["slope"];
    slope {
+      type = "slope";
       max_coarsen = 5.0;
       min_refine  = 20.0;
    }

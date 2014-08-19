@@ -24,14 +24,13 @@ BEGIN{
    file=$4; p=0;
    n=split(file,s,"/");
    shortfile = s[n];
-   print "** TODO [/]",shortfile;
 }
 /^\-\-\-/ {p=0}
 /^\+\+\+/ {p=0}
 /@@/ {
     line=$3;
     line=substr(line,2,index(line,",")-2);
-    print "*** TODO [[file:" file"::"line"]["shortfile ":" line "]]"};
+    print "** TODO [[file:" file"::"line"]["shortfile ":" line "]]"};
 {
     if (p==1)
 	print;

@@ -19,7 +19,13 @@ class Refine : public PUP::able
 public: // interface
 
   /// Constructor
-  Refine() throw() {};
+  Refine(double min_refine,
+	 double max_coarsen,
+	 std::string output) throw()
+    : min_refine_(min_refine),
+      max_coarsen_(max_coarsen),
+      output_(output)
+  {};
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(Refine);
@@ -34,6 +40,9 @@ public: // interface
     TRACEPUP;
     PUP::able::pup(p);
     // NOTE: change this function whenever attributes change
+    p | min_refine_;
+    p | max_coarsen_;
+    p | output_;
   }
   
   /// Evaluate the refinement criteria, updating the refinement field
@@ -47,6 +56,19 @@ public: // interface
 
   virtual std::string name () const { return "unknown"; }
 
+  void * initialize_output_(FieldBlock * field_block);
+
+protected:
+
+  /// Minimum allowed value before refinement kicks in
+  double min_refine_;
+
+  /// Maximum allowed value before coarsening is allowed
+  double max_coarsen_;
+
+  /// Field name to write refinement field to (-1 coarsen 0 same +1 refine)
+  std::string output_;
+  
 };
 
 #endif /* MESH_REFINE_HPP */
