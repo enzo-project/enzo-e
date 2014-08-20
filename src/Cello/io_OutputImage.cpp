@@ -173,9 +173,11 @@ void OutputImage::open () throw()
 {
   TRACE("OutputImage::open()");
   // Open file if writing a single block
-  std::string file_name = expand_file_name_ (&file_name_,&file_args_);
 
   if (is_writer()) {
+
+    std::string file_name = expand_file_name_ (&file_name_,&file_args_);
+
     // Create png object
     Monitor::instance()->print ("Output","writing image file %s", 
 				file_name.c_str());

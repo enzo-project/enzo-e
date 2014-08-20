@@ -15,7 +15,7 @@ env['COPY'] = ''
 # Define a test for running unit tests
 
 date_cmd = 'echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
-hdf5_to_png  = Builder(action = 'test/cello-h5topng.sh $ARGS');
+hdf5_to_png  = Builder(action = 'test/cello-h5topng.sh $ARGS; mv *.png test');
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_serial   = Builder(action = "echo $TARGET > test/STATUS;" + date_cmd + serial_run   +  "$SOURCE $ARGS> $TARGET 2>&1; $COPY")
 run_parallel = Builder(action = "echo $TARGET > test/STATUS;" + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $COPY")
@@ -463,12 +463,12 @@ output_stride_1_RUN = env.RunParallel (
    bin_path + '/enzo-p', 
    ARGS='input/output-stride-1.in')
 
-output_stride_1_C00 = env.Hdf5ToPng (
+output_stride_1_C00 = env_mv_out.Hdf5ToPng (
    'test_output-stride-1-C00.unit',
    'test_output-stride-1.unit',
    ARGS='output-stride-1 00');
 
-output_stride_1_C10 = env.Hdf5ToPng (
+output_stride_1_C10 = env_mv_out.Hdf5ToPng (
    'test_output-stride-1-C10.unit',
    'test_output-stride-1-C00.unit',
    ARGS='output-stride-1 10');
@@ -487,26 +487,69 @@ Clean(output_stride_1,
        'test_output-stride-1.unit',
        '#/input/output-stride-1.in.out'])
 
-Clean(env_mv_out.RunParallel ('test_output-stride-2.unit',
-		bin_path + '/enzo-p', 
-		ARGS='input/output-stride-2.in'),
-      [Glob('#/' + test_path + '/output-stride-2.png'),
+#----------------------------------------------------------------------
+
+output_stride_2_RUN = env.RunParallel (
+   'test_output-stride-2.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/output-stride-2.in')
+
+output_stride_2_C00 = env_mv_out.Hdf5ToPng (
+   'test_output-stride-2-C00.unit',
+   'test_output-stride-2.unit',
+   ARGS='output-stride-2 00');
+
+output_stride_2_C10 = env_mv_out.Hdf5ToPng (
+   'test_output-stride-2-C10.unit',
+   'test_output-stride-2-C00.unit',
+   ARGS='output-stride-2 10');
+
+output_stride_2 = env_mv_out.Hdf5ToPng (
+   'test_output-stride-2-H5.unit',
+   'test_output-stride-2-C10.unit',
+   ARGS='output-stride-2 20');
+
+env.Requires(output_stride_2,    output_stride_2_C10)
+env.Requires(output_stride_2_C10,output_stride_2_C00)
+env.Requires(output_stride_2_C00,output_stride_2_RUN)
+
+Clean(output_stride_2,
+      [Glob('#/' + test_path + '/output-stride-2*.png'),
        'test_output-stride-2.unit',
        '#/input/output-stride-2.in.out'])
 
-Clean(env_mv_out.RunParallel ('test_output-stride-4.unit',
-		bin_path + '/enzo-p', 
-		ARGS='input/output-stride-4.in'),
-      [Glob('#/' + test_path + '/output-stride-4.png'),
+#----------------------------------------------------------------------
+
+output_stride_4_RUN = env.RunParallel (
+   'test_output-stride-4.unit',
+   bin_path + '/enzo-p', 
+   ARGS='input/output-stride-4.in')
+
+output_stride_4_C00 = env_mv_out.Hdf5ToPng (
+   'test_output-stride-4-C00.unit',
+   'test_output-stride-4.unit',
+   ARGS='output-stride-4 00');
+
+output_stride_4_C10 = env_mv_out.Hdf5ToPng (
+   'test_output-stride-4-C10.unit',
+   'test_output-stride-4-C00.unit',
+   ARGS='output-stride-4 10');
+
+output_stride_4 = env_mv_out.Hdf5ToPng (
+   'test_output-stride-4-H5.unit',
+   'test_output-stride-4-C10.unit',
+   ARGS='output-stride-4 20');
+
+env.Requires(output_stride_4,    output_stride_4_C10)
+env.Requires(output_stride_4_C10,output_stride_4_C00)
+env.Requires(output_stride_4_C00,output_stride_4_RUN)
+
+Clean(output_stride_4,
+      [Glob('#/' + test_path + '/output-stride-4*.png'),
        'test_output-stride-4.unit',
        '#/input/output-stride-4.in.out'])
 
-# env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
-
-# env.RunParallel('test_affinity.unit',   bin_path + '/test_Affinity')
-
-	# env.RunParallel('test_mpi.unit',        bin_path + '/test_Mpi')
-# env.RunParallel('test_jacobi.unit',        bin_path + '/test_jacobi')
+#----------------------------------------------------------------------
 
 # Prevent concurrent running of parallel jobs
 

@@ -3,13 +3,13 @@
 /// @file     control_output.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-01
-/// @brief    Functions implementing CHARM++ output-related functions
 /// @ingroup  Control
+/// @brief    Functions implementing CHARM++ output-related functions
 
 /* #define TRACE_OUTPUT */
 
 #ifdef TRACE_OUTPUT
-#  define TRACE_LOCAL(M) printf ("TRACE Output %s:%d" M "\n", __FILE__,__LINE__); fflush(stdout);
+#  define TRACE_LOCAL(M) printf ("TRACE Output %s:%d %d" M "\n", __FILE__,__LINE__,CkMyPe()); fflush(stdout);
 #else
 #  define TRACE_LOCAL(M) /*  */
 #endif
@@ -25,36 +25,35 @@
 
 void CommBlock::output_begin_ ()
 {
+  TRACE_LOCAL("CommBlock::output_begin_()");
+
+  // Determine if there is any output this cycle
 
   simulation()->set_phase(phase_output);
-
-  TRACE_LOCAL("CommBlock::output_begin_()");
 
   int cycle   = simulation()->cycle();
   double time = simulation()->time();
 
   Output * output;
 
-  // skip over unscheduled outputs
-
   int index_output = -1;
 
   do {
+
     output = simulation()->problem()->output(++index_output);
 
   } while (output && ! output->is_scheduled(cycle, time));
 
-  // invariant: (output == NULL) || output->is_scheduled()
-
-  TRACE2("output_begin %d %p",index_output,output);
-
   if (output != NULL) {
+
+    // Start output if any...
 
     ((SimulationCharm * )simulation()) -> begin_output();
 
   } else {
 
-    // control_sync (phase_output_exit,"none",true,__FILE__,__LINE__);
+    // ...otherwise continue with next phase
+
     control_next();
 
   }
@@ -67,19 +66,16 @@ void SimulationCharm::begin_output ()
 
   TRACE_LOCAL("CommBlock::output_begin()");
 
-#ifdef CONFIG_USE_MEMORY
-  trace_mem_ = Memory::instance()->bytes() - trace_mem_;
-#endif
-
-  performance()->switch_region(perf_output,__FILE__,__LINE__);
+  // Switching from CommBlock to Simulation: wait for last CommBlock
 
   if (sync_output_begin_.next()) {
 
+    performance()->switch_region(perf_output,__FILE__,__LINE__);
+
+    // Barrier
+
+    // --------------------------------------------------
     CkCallback callback (CkIndex_SimulationCharm::r_output(NULL), thisProxy);
-    // --------------------------------------------------
-    // ENTRY: #1 SimulationCharm::output()-> SimulationCharm::r_output()
-    // ENTRY: contribute() if sync_output_begin_.next()
-    // --------------------------------------------------
     contribute(0,0,CkReduction::concat,callback);
     // --------------------------------------------------
   }
@@ -94,6 +90,8 @@ void SimulationCharm::r_output(CkReductionMsg * msg)
 
   delete msg;
 
+  // start first output
+
   problem()->output_reset();
   problem()->output_next(this);
 }
@@ -103,16 +101,16 @@ void SimulationCharm::r_output(CkReductionMsg * msg)
 void Problem::output_next(Simulation * simulation) throw()
 {
 
-  simulation->set_phase(phase_output);
-
   TRACE_LOCAL("Problem::output_next()");
+
+  simulation->set_phase(phase_output);
 
   int cycle   = simulation->cycle();
   double time = simulation->time();
 
   Output * output;
 
-  // skip over unscheduled outputs
+  // Find next schedule output
 
   do {
 
@@ -120,9 +118,9 @@ void Problem::output_next(Simulation * simulation) throw()
 
   } while (output && ! output->is_scheduled(cycle, time));
 
-  // output if any scheduled, else proceed with refresh
-
   if (output != NULL) {
+
+    // Perform output if any...
 
     output->init();
     output->open();
@@ -130,6 +128,8 @@ void Problem::output_next(Simulation * simulation) throw()
     output->next();
 
   } else {
+
+    // ...otherwise exit output phase
 
     ((SimulationCharm *)simulation)->output_exit();
 
@@ -141,6 +141,7 @@ void Problem::output_next(Simulation * simulation) throw()
 void CommBlock::p_output_write (int index_output)
 {
   TRACE_LOCAL("CommBlock::p_output_write()");
+
   FieldDescr * field_descr = simulation()->field_descr();
   Output * output = simulation()->problem()->output(index_output);
 
@@ -156,12 +157,8 @@ void SimulationCharm::write_()
   TRACE_LOCAL("SimulationCharm::write_()");
   if (sync_output_write_.next()) {
 
+    // --------------------------------------------------
     CkCallback callback (CkIndex_SimulationCharm::r_write(NULL), thisProxy);
-
-    // --------------------------------------------------
-    // ENTRY: #2 SimulationCharm::write_()-> SimulationCharm::r_write()
-    // ENTRY: contribute() if sync_output_write_.next()
-    // --------------------------------------------------
     contribute(0,0,CkReduction::concat,callback);
     // --------------------------------------------------
 
@@ -199,9 +196,6 @@ void Problem::output_wait(Simulation * simulation) throw()
   if (ip == ip_writer) {
 
     // --------------------------------------------------
-    // ENTRY: #3 Problem::output_wait()-> SimulationCharm::p_output_write()
-    // ENTRY: writer Simulation if is writer
-    // --------------------------------------------------
     proxy_simulation[ip].p_output_write(0,0);
     // --------------------------------------------------
 
@@ -213,25 +207,13 @@ void Problem::output_wait(Simulation * simulation) throw()
     output->prepare_remote(&n,&buffer);
 
     // Remote call to receive data
-
-    // --------------------------------------------------
-    // ENTRY: #4 Problem::output_wait()-> SimulationCharm::p_output_write()
-    // ENTRY: writer Simulation if not writer
     // --------------------------------------------------
     proxy_simulation[ip_writer].p_output_write (n, buffer);
     // --------------------------------------------------
 
-    // Close up file
-
     output->close();
-
-    // Deallocate from prepare_remote()
     output->cleanup_remote(&n,&buffer);
-
-    // Prepare for next output
     output->finalize();
-
-    // Continue with next output object if any
     output_next(simulation);
 
   }
@@ -255,6 +237,7 @@ void Problem::output_write
 ) throw()
 {
   TRACE_LOCAL("Problem::output_write()");
+
   Output * output = this->output(index_output_);
 
   if (n != 0) {
@@ -262,11 +245,8 @@ void Problem::output_write
   }
 
   if (output->sync_write()->next()) {
-
     output->close();
-
     output->finalize();
-
     output_next(simulation);
   }
 
@@ -276,11 +256,12 @@ void Problem::output_write
 
 void SimulationCharm::output_exit()
 {
+  TRACE_LOCAL("SimulationCharm::output_exit()");
+
   // reset debug output files to limit file size
   debug_close();
   debug_open();
 
-  TRACE_LOCAL("SimulationCharm::output_exit()");
   if (hierarchy()->group_process()->is_root()) 
     hierarchy()->block_array()->p_output_end();
 }
@@ -289,7 +270,6 @@ void SimulationCharm::output_exit()
 
 void CommBlock::p_output_end()
 {
-  //  control_sync (phase_output_exit,"none",true,__FILE__,__LINE__);
   control_next();
 }
 //======================================================================

@@ -23,7 +23,7 @@ OutputData::OutputData
   int stride = config->output_stride[index_];
 
   process_stride_ = stride == 0 ? 1 : stride;
-
+  set_process_stride(process_stride_);
 }
 
 //----------------------------------------------------------------------
@@ -51,16 +51,19 @@ void OutputData::pup (PUP::er &p)
 
 void OutputData::open () throw()
 {
-  std::string file_name = expand_file_name_(&file_name_,&file_args_);
+  //  if (is_writer()) {
 
-  Monitor::instance()->print 
-    ("Output","writing data file %s", file_name.c_str());
+    std::string file_name = expand_file_name_(&file_name_,&file_args_);
 
-  close();
+    Monitor::instance()->print 
+      ("Output","writing data file %s", file_name.c_str());
 
-  file_ = new FileHdf5 (".",file_name);
+    close();
 
-  file_->file_create();
+    file_ = new FileHdf5 (".",file_name);
+
+    file_->file_create();
+    //  }
 }
 
 //----------------------------------------------------------------------
