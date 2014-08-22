@@ -249,7 +249,6 @@ void Problem::initialize_output
     // Scheduling parameters
     //--------------------------------------------------
 
-
     output->set_schedule
       (Schedule::create( config->output_schedule_var[index],
 			 config->output_schedule_type[index],

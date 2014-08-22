@@ -14,8 +14,10 @@
 Schedule::Schedule () throw()
   : active_(false),
     type_(schedule_type_unknown),
-    last_(-1)
+    last_(-1),
+    timer_()
 {
+  timer_.start();
 }
 
 //======================================================================
@@ -29,15 +31,13 @@ Schedule * Schedule::create
  double step,
  std::vector<double> list)
 {
-  bool var_cycle,var_time;
 
-  var_cycle = (var == "cycle");
-  var_time  = (var == "time");
+  const bool var_cycle = (var == "cycle");
+  const bool var_time  = (var == "time");
+  const bool var_seconds  = (var == "seconds");
 
-  bool type_interval,type_list;
-
-  type_interval = type == "interval";
-  type_list     = type == "list";
+  const bool type_interval = (type == "interval");
+  const bool type_list     = (type == "list");
     
   Schedule * schedule = 0;
 
@@ -52,6 +52,11 @@ Schedule * Schedule::create
     } else if (var_time) {
 
       ((ScheduleInterval * )schedule)->set_time_interval(start,step,stop);
+
+    } else if (var_seconds) {
+
+      ((ScheduleInterval * )schedule)->set_seconds_interval(start,step,stop);
+
     }
 
   } else if (type_list) {
@@ -66,11 +71,16 @@ Schedule * Schedule::create
       for (int i=0; i<size; i++) {
 	list_int[i] = (int) list[i];
       }
+
       ((ScheduleList * )schedule)->set_cycle_list(list_int);
 
     } else if (var_time) {
 
       ((ScheduleList * )schedule)->set_time_list(list);
+
+    } else if (var_seconds) {
+
+      ((ScheduleList * )schedule)->set_seconds_list(list);
 
     }
 
@@ -78,6 +88,7 @@ Schedule * Schedule::create
 
   if (var_cycle) schedule->set_type(schedule_type_cycle);
   if (var_time)  schedule->set_type(schedule_type_time);
+  if (var_seconds)  schedule->set_type(schedule_type_seconds);
 
   return schedule;
 

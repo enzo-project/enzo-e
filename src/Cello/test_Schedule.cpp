@@ -39,6 +39,7 @@ PARALLEL_MAIN_BEGIN
 
     unit_func("write_this_cycle");
     schedule->set_time_interval(10.0,2.0,20.0);
+
     unit_assert(schedule->write_this_cycle (0,  8.0) == false);
     unit_assert(schedule->write_this_cycle (0, 10.0) == true);
     unit_assert(schedule->write_this_cycle (0, 12.0) == false);
@@ -97,6 +98,52 @@ PARALLEL_MAIN_BEGIN
     unit_assert (unit_incomplete);
     unit_func("set_skip_time ");
     unit_assert (unit_incomplete);
+
+    delete schedule;
+  }
+
+
+  {
+    ScheduleInterval * schedule = new ScheduleInterval;
+
+    unit_assert (schedule != NULL);
+
+    //--------------------------------------------------
+
+
+    schedule->set_active(true);
+    unit_assert(schedule->is_active());
+
+    schedule->set_active(false);
+    unit_assert(! schedule->is_active());
+
+    schedule->set_active(true);
+    unit_assert(schedule->is_active());
+
+
+    unit_func("write_this_cycle");
+    schedule->set_seconds_interval(1.0,3.0,5.0);
+
+    unit_assert(schedule->write_this_cycle (0,  0.0) == false);
+    unit_assert(schedule->write_this_cycle (0,  0.0) == false);
+    unit_assert(schedule->write_this_cycle (0,  0.0) == false);
+
+    int err;
+    err = system("sleep 2");
+
+    unit_assert(schedule->write_this_cycle (0,  0.0) == true);
+    unit_assert(schedule->write_this_cycle (0,  0.0) == true);
+    schedule->next();
+    unit_assert(schedule->write_this_cycle (0,  0.0) == false);
+    unit_assert(schedule->write_this_cycle (0,  0.0) == false);
+
+    err = system("sleep 2");
+
+    unit_assert(schedule->write_this_cycle (0,  0.0) == true);
+    unit_assert(schedule->write_this_cycle (0,  0.0) == true);
+    schedule->next();
+    unit_assert(schedule->write_this_cycle (0,  0.0) == false);
+    unit_assert(schedule->write_this_cycle (0,  0.0) == false);
 
   }
   //--------------------------------------------------

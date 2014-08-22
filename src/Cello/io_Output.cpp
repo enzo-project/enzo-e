@@ -91,7 +91,7 @@ void Output::set_schedule (Schedule * schedule) throw()
 
 //----------------------------------------------------------------------
 
-bool Output::is_scheduled (int cycle, double time)
+bool Output::is_scheduled (int cycle, double time) throw()
 {
   cycle_ = cycle;
   time_  = time;

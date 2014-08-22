@@ -244,6 +244,7 @@ void Problem::output_write
     output->update_remote(n, buffer);
   }
 
+  // ERROR HERE ON RESTART WITH DIFFERENT +p
   if (output->sync_write()->next()) {
     output->close();
     output->finalize();

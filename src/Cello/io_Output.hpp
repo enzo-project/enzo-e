@@ -81,7 +81,7 @@ public: // functions
   };
 
   /// Return whether output is scheduled for this cycle
-  bool is_scheduled (int cycle, double time);
+  bool is_scheduled (int cycle, double time) throw();
 
   /// Return whether this process is a writer
   bool is_writer () const throw () 

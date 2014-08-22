@@ -58,6 +58,25 @@ void ScheduleList::set_time_list (std::vector<double> time_list) throw()
 
 //----------------------------------------------------------------------
 
+void ScheduleList::set_seconds_list (std::vector<double> seconds_list) throw()
+{
+
+  if (type_ != schedule_type_unknown) {
+    WARNING ("ScheduleList::set_seconds_list",
+	     "Resetting Output scheduling");
+  }
+
+  type_ = schedule_type_seconds;
+
+  seconds_list_.clear();
+
+  seconds_list_ = seconds_list;
+
+  active_ = true;
+}
+
+//----------------------------------------------------------------------
+
 bool ScheduleList::write_this_cycle ( int cycle, double time ) throw()
 {
   bool result = false;

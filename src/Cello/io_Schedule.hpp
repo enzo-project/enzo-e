@@ -15,7 +15,8 @@
 enum schedule_enum {
   schedule_type_unknown,
   schedule_type_cycle,
-  schedule_type_time
+  schedule_type_time,
+  schedule_type_seconds
 };
 
 typedef int schedule_type;
@@ -25,6 +26,14 @@ class Schedule : public PUP::able {
   /// @class    Schedule
   /// @ingroup  Io
   /// @brief    [\ref Io] define interface for various types of output
+
+public: // static functions
+
+  static Schedule * create 
+  (std::string var,
+   std::string type,
+   double start,double stop,double step,
+   std::vector<double> list);
 
 public: // functions
 
@@ -43,6 +52,7 @@ public: // functions
     p | active_;
     p | type_;
     p | last_;
+    p | timer_;
   }
 
   /// Set whether the Schedule object is active or not
@@ -68,18 +78,16 @@ public: // functions
 public: // virtual functions
 
   /// Reduce timestep if next write time is between time and time + dt
-  virtual double update_timestep(double time, double dt) const throw() = 0;
+  virtual double update_timestep(double time, double dt)  const throw() = 0;
 
   /// Whether to perform IO this cycle
-  virtual bool write_this_cycle ( int cycle, double time ) throw() = 0;
+  virtual bool write_this_cycle ( int cycle, double time) throw() = 0;
 
+  /// Return the next scheduled time
   virtual double time_next() const throw() = 0;
 
-public: // static functions
-
-  static Schedule * create (std::string var, std::string type,
-			    double start,double stop,double step,
-			    std::vector<double> list);
+  /// Return the next scheduled seconds time
+  virtual double seconds_next() const throw() = 0;
 
 protected: // attributes
 
@@ -89,6 +97,9 @@ protected: // attributes
   schedule_type type_;
 
   int last_;
+
+  /// Timer for seconds scheduling
+  Timer timer_;
 };
 
 #endif /* IO_SCHEDULE_HPP */

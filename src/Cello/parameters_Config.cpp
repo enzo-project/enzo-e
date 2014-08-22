@@ -783,6 +783,7 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 
   if      (output_schedule_var[index] == "cycle") var_is_int = true;
   else if (output_schedule_var[index] == "time")  var_is_int = false;
+  else if (output_schedule_var[index] == "seconds")  var_is_int = false;
   else {
     ERROR2 ("Config::read",
 	    "Schedule variable %s is not recognized for parameter group %s",

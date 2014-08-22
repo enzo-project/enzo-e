@@ -48,8 +48,24 @@ void ScheduleInterval::set_time_interval
 
 //----------------------------------------------------------------------
 
-bool ScheduleInterval::write_this_cycle ( int cycle, double time ) throw()
+void ScheduleInterval::set_seconds_interval
+  (double seconds_start, double seconds_step, double seconds_stop) throw()
 {
+  active_ = true;
+  type_ = schedule_type_seconds;
+
+  seconds_start_ = seconds_start;
+  seconds_step_  = seconds_step;
+  seconds_stop_  = seconds_stop;
+}
+
+//----------------------------------------------------------------------
+
+bool ScheduleInterval::write_this_cycle ( int cycle, double time) throw()
+{
+
+  double seconds = timer_.value();
+
   bool result = false;
 
   if (! active_) return false;
@@ -60,9 +76,8 @@ bool ScheduleInterval::write_this_cycle ( int cycle, double time ) throw()
 
   case schedule_type_time:
     {
-      bool in_range = (time_start_ <= time && time <= time_stop_);
-
-      bool below_tol = (cello::err_abs(time_next(), time) < tol);
+      const bool in_range  = (time_start_ <= time && time <= time_stop_);
+      const bool below_tol = (cello::err_abs(time_next(), time) < tol);
 
       result = in_range && below_tol;
 
@@ -70,10 +85,23 @@ bool ScheduleInterval::write_this_cycle ( int cycle, double time ) throw()
 
     break;
 
+  case schedule_type_seconds:
+    {
+      const bool in_range  = (seconds_start_ <= seconds && seconds <= seconds_stop_);
+      const bool past_next = (seconds > seconds_next());
+
+      result = in_range && past_next;
+
+    }
+
+    break;
+
   case schedule_type_cycle:
     {
-      bool in_range = (cycle_start_ <= cycle && cycle <= cycle_stop_);
-      result = in_range && ( ((cycle-cycle_start_) % cycle_step_) == 0);
+      const bool in_range = (cycle_start_ <= cycle && cycle <= cycle_stop_);
+      const bool write_cycle = ( ((cycle-cycle_start_) % cycle_step_) == 0);
+
+      result = in_range && write_cycle;
 
     }
     break;
@@ -87,7 +115,8 @@ bool ScheduleInterval::write_this_cycle ( int cycle, double time ) throw()
 
 //----------------------------------------------------------------------
 
-double ScheduleInterval::update_timestep ( double time, double dt) const throw()
+double ScheduleInterval::update_timestep ( double time, double dt)
+  const throw()
 {
   if (! active_) return dt;
 
