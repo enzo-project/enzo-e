@@ -75,7 +75,6 @@ public: // functions
   void set_process_stride (int stride) throw () 
   {
     process_stride_ = stride; 
-    printf ("%s:%d %d DEBUG setting write sync %d\n",__FILE__,__LINE__,CkMyPe(),stride);
     fflush(stdout);
     sync_write_.set_stop(process_stride_);
   };
