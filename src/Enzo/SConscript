@@ -86,7 +86,8 @@ sources  = [Glob('enzo_*cpp'),
 	    'xeuler_sweep.F',
 	    'yeuler_sweep.F',
 	    'zeuler_sweep.F',
-	    'turboinit.F']
+	    'turboinit.F',
+	    'turboinit2d.F']
 
 
 # Enzo3

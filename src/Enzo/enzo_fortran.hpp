@@ -22,6 +22,12 @@ extern "C" void FORTRAN_NAME(turboinit)
    int *in, int *jn, int *kn,
    int *ig, int *jg, int *kg);
 
+extern "C" void FORTRAN_NAME(turboinit2d)
+  (int *rank, int *nbox,
+   enzo_float *u, enzo_float *v,
+   int *in, int *jn,
+   int *ig, int *jg);
+
 // extern "C" void FORTRAN_NAME(calc_dt_30)(
 //                   int *rank, int *idim, int *jdim, int *kdim,
 //                   int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,

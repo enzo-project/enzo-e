@@ -11,6 +11,8 @@
 
 #include "enzo.decl.h"
 
+#define GMAX 16 /* size of global array of global values to track */
+
 //----------------------------------------------------------------------
 
 EnzoMethodTurbulence::EnzoMethodTurbulence 
@@ -90,9 +92,9 @@ void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
   const int n = sizeof(enzo_block->method_turbulence_data)/sizeof(double);
   double * g = enzo_block->method_turbulence_data;
   
-  ASSERT1 ("EnzoMethodTurbulence::compute()",
-	   "Size of EnzoBlock::method_turbulence_data array %d must be at least 9",
-	   n, n >= 9);
+  ASSERT2 ("EnzoMethodTurbulence::compute()",
+	   "Size of EnzoBlock::method_turbulence_data array %d must be at least %d",
+	   n, GMAX, n >= GMAX);
 
   for (int i=0; i<7; i++) g[i] = 0.0;
   g[7] = std::numeric_limits<double>::max();
@@ -138,7 +140,7 @@ extern CkReduction::reducerType r_method_turbulence_type;
 
 void EnzoBlock::method_turbulence_begin()
 {
-  const int n = 9 * sizeof(double);
+  const int n = GMAX * sizeof(double);
   double * g = method_turbulence_data;
   CkCallback cb (CkIndex_EnzoBlock::p_method_turbulence_end(NULL),thisProxy);
   contribute(n,g,r_method_turbulence_type,cb);
@@ -168,7 +170,7 @@ void EnzoMethodTurbulence::compute_resume
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 
   double * g = enzo_block->method_turbulence_data;
-  for (int i=0; i<9; i++) {
+  for (int i=0; i<GMAX; i++) {
     g[i] = ((double *)msg->getData())[i];
   }
 

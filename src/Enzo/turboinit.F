@@ -1,7 +1,6 @@
 c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
-
 c=======================================================================
 c/////////////////////////  SUBROUTINE TURBOINIT \\\\\\\\\\\\\\\\\\\\\\\
 c
@@ -137,7 +136,11 @@ c
 
 c      write(6,*) 'TURBOINIT: ig =',ig,  ' jg =',jg,  ' kg =',kg
 
+c   this is for large-scale force 1<k<2
       aa    = 2.0*pi/nbox
+
+c   this is for the force  8<k<16
+c      aa    = 8.0*2.0*pi/nbox
 c
 c fill-in the velocity arrays
 c
@@ -191,11 +194,11 @@ c
      &                               amp(imo,3)*cos(aa*k1 + phaz(imo))
                enddo
 c
-c normalize to get rms 3D Mach = 3.0
+c normalize to get rms 3D Mach = 1.0
 c
-	       u(i,j,k) = u(i,j,k)/2.84832*3.0
-               v(i,j,k) = v(i,j,k)/2.84832*3.0
-               w(i,j,k) = w(i,j,k)/2.84832*3.0
+	       u(i,j,k) = u(i,j,k)/2.84832
+               v(i,j,k) = v(i,j,k)/2.84832
+               w(i,j,k) = w(i,j,k)/2.84832
             enddo
          enddo
       enddo

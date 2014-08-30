@@ -119,9 +119,9 @@ void EnzoInitialTurbulence::enforce_block
   int gx,gy,gz;
   field_descr->ghosts(0,&gx,&gy,&gz);
 
-  int ndx = nx + 2*gx;
-  int ndy = ny + 2*gy;
-  int ndz = nz + 2*gz;
+  int ndx = (rank >= 1) ? nx + 2*gx : nx;
+  int ndy = (rank >= 1) ? ny + 2*gy : ny;
+  int ndz = (rank >= 1) ? nz + 2*gz : nz;
 
   // initialize driving fields using turboinit
 
@@ -165,23 +165,34 @@ void EnzoInitialTurbulence::enforce_block
     mask = mask >> 1;
   }
 
-  FORTRAN_NAME(turboinit)
-    (&rank, &Nx, 
-     (enzo_float *)v3[0],
-     (enzo_float *)v3[1],
-     (enzo_float *)v3[2],
-     &ndx,&ndy,&ndz,
-     &o3[0],&o3[1],&o3[2]);
+  if ( rank == 2 ) {
 
-  for (int i=0; i<ndx*ndy*ndz; i++) {
-    a3[0][i] = v3[0][i];
-    a3[1][i] = v3[1][i];
-    a3[2][i] = v3[2][i];
+    FORTRAN_NAME(turboinit2d)
+      (&rank, &Nx, 
+       (enzo_float *)v3[0],
+       (enzo_float *)v3[1],
+       &ndx,&ndy,
+       &o3[0],&o3[1]);
+
+  } else if ( rank == 3) {
+
+    FORTRAN_NAME(turboinit)
+      (&rank, &Nx, 
+       (enzo_float *)v3[0],
+       (enzo_float *)v3[1],
+       (enzo_float *)v3[2],
+       &ndx,&ndy,&ndz,
+       &o3[0],&o3[1],&o3[2]);
   }
 
-  for (int iz=0; iz<nz+2*gz; iz++) {
-    for (int iy=0; iy<ny+2*gy; iy++) {
-      for (int ix=0; ix<nx+2*gx; ix++) {
+  if (rank >= 1) for (int i=0; i<ndx*ndy*ndz; i++) a3[0][i] = v3[0][i];
+  if (rank >= 2) for (int i=0; i<ndx*ndy*ndz; i++) a3[1][i] = v3[1][i];
+  if (rank >= 3) for (int i=0; i<ndx*ndy*ndz; i++) a3[2][i] = v3[2][i];
+
+
+  for (int iz=0; iz<ndz; iz++) {
+    for (int iy=0; iy<ndy; iy++) {
+      for (int ix=0; ix<ndx; ix++) {
 	int i = ix + ndx*(iy + ndy*iz);
 	d[i]  = density_initial_;
 	if (pressure_initial_) {
