@@ -35,6 +35,32 @@
 
 //----------------------------------------------------------------------
 
+#define INDEX_TURBULENCE_VAD   0
+#define INDEX_TURBULENCE_AAD   1
+#define INDEX_TURBULENCE_VVDoT 2
+#define INDEX_TURBULENCE_VVoT  3
+#define INDEX_TURBULENCE_VVD   4
+#define INDEX_TURBULENCE_VV    5
+#define INDEX_TURBULENCE_DD    6
+
+#define INDEX_TURBULENCE_DAx   7
+#define INDEX_TURBULENCE_DAy   8
+#define INDEX_TURBULENCE_DAz   9
+
+#define INDEX_TURBULENCE_DVx   10
+#define INDEX_TURBULENCE_DVy   11
+#define INDEX_TURBULENCE_DVz   12
+
+#define INDEX_TURBULENCE_DlnD  13
+
+/* minD and maxD must be the last two */
+#define INDEX_TURBULENCE_minD  14
+#define INDEX_TURBULENCE_maxD  15
+
+#define MAX_TURBULENCE_ARRAY 16 /* size of global array of global values to track */
+
+//----------------------------------------------------------------------
+
 // #include "macros_and_parameters.h"
 #include "enzo_defines.hpp"
 #include "enzo_typedefs.hpp"

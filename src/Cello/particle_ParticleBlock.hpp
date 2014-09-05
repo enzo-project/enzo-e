@@ -18,23 +18,13 @@ class ParticleBlock {
 public: // interface
 
   /// Constructor
-  ParticleBlock(ParticleDescr * pd,  
-		double xm, double xp,
-		double ym = 0.0, double yp = 0.0,
-		double zm = 0.0, double zp = 0.0)
+  ParticleBlock(ParticleDescr * pd)
     : count_(),
-      data_(),
-      block_()
+      data_()
   {
     data_.resize(pd->num_types());
     count_.resize(pd->num_types());
     for (int i=0; i<pd->num_types(); i++) count_[i]=0;
-    block_[0] = xm;
-    block_[1] = xp;
-    block_[2] = ym;
-    block_[3] = yp;
-    block_[4] = zm;
-    block_[5] = zp;
   };
 
   /// CHARM++ Pack / Unpack function
@@ -44,7 +34,6 @@ public: // interface
     // NOTE: change this function whenever attributes change
     p | count_;
     p | data_;
-    PUParray(p,block_,6);
   }
 
   void create (ParticleDescr * pd,
@@ -72,7 +61,7 @@ public: // interface
 
   /// Set local coordinates of given particle type using the (integer) values
   /// in the array 0 <= a[axis][value] < max(unsigned) such that 0
-  /// is at the bottom of the block and and max(unsigned) + 1 is at
+  /// is at the bottom of the containing block and max(unsigned) + 1 is at
   /// the top
 
 //----------------------------------------------------------------------
@@ -83,7 +72,7 @@ public: // interface
 			    const T ** a);
 
   /// Set global coordinates of given particle type to the (long double) values
-  /// in the array block.lower(axis) <= a[axis][value] < block.upper(axis)
+  /// in the array: block.lower(axis) <= a[axis][value] < block.upper(axis)
 
   template <class T>
   void set_global_positions (ParticleDescr * pd,
@@ -118,10 +107,6 @@ private: // attributes
 
   /// Packed data for each type
   std::vector< std::vector<char> > data_;
-  
-  /// Bounds on the box containing the particles face + 2*axis
-  double block_[6];
-
 };
 
 //----------------------------------------------------------------------

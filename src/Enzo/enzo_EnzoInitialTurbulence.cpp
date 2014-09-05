@@ -1,6 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoInitialTurbulence.cpp
+/// @author   Alexei Kritsuk (kritsuk@gmail.com)
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Jul 23 00:30:49 UTC 2014
 /// @brief    Implementation of Enzo 2D Implosion problem initialization
@@ -195,21 +196,43 @@ void EnzoInitialTurbulence::enforce_block
       for (int ix=0; ix<ndx; ix++) {
 	int i = ix + ndx*(iy + ndy*iz);
 	d[i]  = density_initial_;
-	if (pressure_initial_) {
-	  p[i] = pressure_initial_;
-	  te[i] = pressure_initial_ / (gamma_ - 1) / d[i];
-	}
-	if (temperature_initial_) {
-	  te[i] = temperature_initial_ / (gamma_ - 1);
-	}
-	for (int id=0; id<rank; id++) {
-	  te[i] += 0.5*v3[id][i]*v3[id][i];
-	}
       }
     }
   }
-  if (temperature_initial_) {
+
+  const bool pressure_defined = (pressure_initial_ != 0.0);
+  const bool temperature_defined = (temperature_initial_ != 0.0);
+
+  if (pressure_defined) {
+    for (int iz=0; iz<ndz; iz++) {
+      for (int iy=0; iy<ndy; iy++) {
+	for (int ix=0; ix<ndx; ix++) {
+	  int i = ix + ndx*(iy + ndy*iz);
+	  p[i] = pressure_initial_;
+	}
+      }
+    }
+  } else {
     EnzoMethodPressure method_pressure(gamma_);
     method_pressure.compute(comm_block);
   }
+
+  if (temperature_defined) {
+    for (int iz=0; iz<ndz; iz++) {
+      for (int iy=0; iy<ndy; iy++) {
+	for (int ix=0; ix<ndx; ix++) {
+	  int i = ix + ndx*(iy + ndy*iz);
+	  te[i] = temperature_initial_;
+	  for (int id=0; id<rank; id++) {
+	    te[i] += 0.5*v3[id][i]*v3[id][i];
+	  }
+	}
+      }
+    }
+  } else {
+    ERROR("EnzoInitialTurbulence",
+	  "Temperature computation with undefined pressure "
+	  "not implemented yet");
+  }
+
 }

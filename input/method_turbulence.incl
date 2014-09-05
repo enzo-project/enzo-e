@@ -77,8 +77,8 @@ Mesh { root_rank = 3; }
           schedule {
              type = "interval";
              var =  "seconds";
-             start = 60.0;
-             step = 60.0;
+             start = 600.0;
+             step = 600.0;
          };
      };
 

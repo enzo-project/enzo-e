@@ -1,12 +1,15 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoMethodTurbulence.hpp
+/// @author   Alexei Kritsuk (kritsuk@gmail.com)
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Wed Jul 23 00:31:13 UTC 2014
 /// @brief    [\ref Enzo] Implementation of Enzo TURBULENCE hydro method
 
 #ifndef ENZO_ENZO_METHOD_TURBULENCE_HPP
 #define ENZO_ENZO_METHOD_TURBULENCE_HPP
+
+//----------------------------------------------------------------------
 
 class EnzoMethodTurbulence : public Method {
 
@@ -17,8 +20,9 @@ class EnzoMethodTurbulence : public Method {
 public: // interface
 
   /// Create a new EnzoMethodTurbulence object
-  EnzoMethodTurbulence(double density_initial,
-		       double edot,
+  EnzoMethodTurbulence(double edot,
+		       double density_initial,
+		       double temperature_initial,
 		       double mach_number);
 
   /// Charm++ PUP::able declarations
@@ -46,6 +50,9 @@ private: // attributes
 
   // Initial density
   double density_initial_;
+
+  // Initial temperature
+  double temperature_initial_;
 
   // Corresponds to Enzo "RandomForcingEdot" parameter
   double edot_;

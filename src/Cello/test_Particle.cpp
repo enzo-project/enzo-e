@@ -94,10 +94,7 @@ PARALLEL_MAIN_BEGIN
 
   const double lower[3] = {-0.5,0.0,-1.0};
   const double upper[3] = { 0.5,2.0, 0.0};
-  ParticleBlock pb(&pd,
-		   lower[0], upper[0], 
-		   lower[1], upper[1], 
-		   lower[2], upper[2]);
+  ParticleBlock pb(&pd);
 
   // Create actual particles of each type
 

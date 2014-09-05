@@ -9,6 +9,10 @@ enzop-%:
 doc:
 	$(MAKE) -C src doc
 
+.PHONY: diff
+diff:
+	hg diff > out.diff
+	./util/parse_diff.sh out.diff > diff.org
 .PHONY: clean
 clean:
 	python scons.py -c

@@ -1,6 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoInitialTurbulence.hpp
+/// @author   Alexei Kritsuk (kritsuk@gmail.com)
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Jul 23 00:30:57 UTC 2014
 /// @brief    [\ref Enzo] Initialization routine for 2D implosion problem

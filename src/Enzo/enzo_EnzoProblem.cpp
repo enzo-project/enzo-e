@@ -185,6 +185,7 @@ Method * EnzoProblem::create_method_
     method = new EnzoMethodTurbulence 
       (enzo_config->method_turbulence_edot,
        enzo_config->initial_turbulence_density,
+       enzo_config->initial_turbulence_temperature,
        enzo_config->method_turbulence_mach_number);
   } else if (type == "pressure") {
     method = new EnzoMethodPressure (enzo_config->field_gamma);

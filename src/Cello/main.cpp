@@ -9,6 +9,8 @@
 #include "test.hpp"
 #include "parallel.hpp"
 #include "monitor.hpp"
+// (for MAX_TURBULENCE_ARRAY defines)
+#include "enzo.hpp"
 
 #include "main.hpp"
 
@@ -231,23 +233,21 @@ void Main::p_refresh_exit()
 // SEE enzo_EnzoMethodTurbulence.cpp for context
 CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
 {
-  double accum[9] = { 0.0 };
-  accum[7] = std::numeric_limits<double>::max();
-  accum[8] = std::numeric_limits<double>::min();
+  double accum[MAX_TURBULENCE_ARRAY] = { 0.0 };
+  accum[INDEX_TURBULENCE_minD] = std::numeric_limits<double>::max();
+  accum[INDEX_TURBULENCE_maxD] = std::numeric_limits<double>::min();
 
   for (int i=0; i<n; i++) {
     double * values = (double *) msgs[i]->getData();
-    accum [0] += values[0];
-    accum [1] += values[1];
-    accum [2] += values[2];
-    accum [3] += values[3];
-    accum [4] += values[4];
-    accum [5] += values[5];
-    accum [6] += values[6];
-    accum [7] = std::min(accum[7],values[7]);
-    accum [8] = std::max(accum[8],values[8]);
+    for (int ig=0; ig<MAX_TURBULENCE_ARRAY-2; ig++) {
+      accum [ig] += values[ig];
+    }
+    accum [INDEX_TURBULENCE_minD] = 
+      std::min(accum[INDEX_TURBULENCE_minD],values[INDEX_TURBULENCE_minD]);
+    accum [INDEX_TURBULENCE_maxD] = 
+      std::max(accum[INDEX_TURBULENCE_maxD],values[INDEX_TURBULENCE_maxD]);
   }
-  return CkReductionMsg::buildNew(9*sizeof(double),accum);
+  return CkReductionMsg::buildNew(MAX_TURBULENCE_ARRAY*sizeof(double),accum);
 }
 
 //----------------------------------------------------------------------

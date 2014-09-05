@@ -175,14 +175,20 @@ void EnzoConfig::read(Parameters * p) throw()
 
   if (uses_turbulence) {
     ASSERT ("EnzoConfig::read",
-	    "Either Initial:turbulence:pressure or Initial:turbulence:temperature must be defined",
-	    ! ((initial_turbulence_pressure == 0.0) &&
-	       (initial_turbulence_temperature == 0.0)));
+  	    "Either initial turbulence pressure or temperature must be defined",
+  	    ! ((initial_turbulence_pressure == 0.0) &&
+  	       (initial_turbulence_temperature == 0.0)));
     ASSERT ("EnzoConfig::read",
-	    "Initial:turbulence:pressure and Initial:turbulence:temperature cannot both be defined",
-	    ! ((initial_turbulence_pressure != 0.0) &&
-	       (initial_turbulence_temperature != 0.0)));
+  	    "Initial turbulence pressure and temperature cannot "
+	    "both be defined",
+  	    ! ((initial_turbulence_pressure != 0.0) &&
+  	       (initial_turbulence_temperature != 0.0)));
   }
+
+  method_turbulence_edot = p->value_float
+    ("Method:turbulence:edot",-1.0);
+  method_turbulence_mach_number = p->value_float 
+    ("Method:turbulence:mach_number",0.0);
 
   interpolation_method = p->value_string 
     ("Field:interpolation_method","SecondOrderA");
@@ -192,11 +198,6 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_null_dt = p->value_float 
     ("Method:null:dt",0.0);
-
-  method_turbulence_edot = p->value_float
-    ("Method:turbulence:edot",-1.0);
-  method_turbulence_mach_number = p->value_float 
-    ("Method:turbulence:mach_number",0.0);
 
   //======================================================================
 
@@ -247,7 +248,8 @@ void EnzoConfig::read(Parameters * p) throw()
        method_grackle_chemistry.with_radiative_cooling);
 
     method_grackle_chemistry.primordial_chemistry = p->value_logical
-      ("Method:grackle:multi_species",method_grackle_chemistry.primordial_chemistry);
+      ("Method:grackle:multi_species",
+       method_grackle_chemistry.primordial_chemistry);
 
     method_grackle_chemistry.metal_cooling = p->value_logical
       ("Method:grackle:metal_cooling",method_grackle_chemistry.metal_cooling);
@@ -256,7 +258,8 @@ void EnzoConfig::read(Parameters * p) throw()
       ("Method:grackle:h2_on_dust",method_grackle_chemistry.h2_on_dust);
 
     method_grackle_chemistry.cmb_temperature_floor = p->value_logical
-      ("Method:grackle:cmb_temperature_floor",method_grackle_chemistry.cmb_temperature_floor);
+      ("Method:grackle:cmb_temperature_floor",
+       method_grackle_chemistry.cmb_temperature_floor);
 
     method_grackle_chemistry.grackle_data_file 
       = strdup(p->value_string
@@ -267,13 +270,16 @@ void EnzoConfig::read(Parameters * p) throw()
       ("Method:grackle:cie_cooling",method_grackle_chemistry.cie_cooling);
 
     method_grackle_chemistry.h2_optical_depth_approximation = p->value_integer
-      ("Method:grackle:h2_optical_depth_approximation",method_grackle_chemistry.h2_optical_depth_approximation);
+      ("Method:grackle:h2_optical_depth_approximation",m
+       ethod_grackle_chemistry.h2_optical_depth_approximation);
 
     method_grackle_chemistry.photoelectric_heating = p->value_integer
-      ("Method:grackle:photoelectric_heating",method_grackle_chemistry.photoelectric_heating);
+      ("Method:grackle:photoelectric_heating",
+       method_grackle_chemistry.photoelectric_heating);
 
     method_grackle_chemistry.photoelectric_heating_rate = p->value_float
-      ("Method:grackle:photoelectric_heating_rate",method_grackle_chemistry.photoelectric_heating_rate);
+      ("Method:grackle:photoelectric_heating_rate",
+       method_grackle_chemistry.photoelectric_heating_rate);
 
     method_grackle_chemistry.UVbackground = p->value_integer
       ("Method:grackle:UVbackground",method_grackle_chemistry.UVbackground);

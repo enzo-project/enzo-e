@@ -347,7 +347,7 @@ public: // attributes (YIKES!)
   enzo_float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; 
 
   /// Data for turbulence reductions
-  double method_turbulence_data [9];
+  double method_turbulence_data [MAX_TURBULENCE_ARRAY];
   
 
 };
