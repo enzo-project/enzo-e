@@ -177,24 +177,6 @@ public: // interface
   int bytes_per_element(int id_field) const throw()
   { return field_descr_->bytes_per_element(id_field); }
 
-  /// minimum value for the field
-  double minimum_value(int id_field) const throw(std::out_of_range)
-  { return field_descr_->minimum_value(id_field); }
-
-  /// minimum action for the field
-  field_action_type minimum_action(int id_field) const
-    throw(std::out_of_range)
-  { return field_descr_->minimum_action(id_field); }
-
-  /// maximum value for the field
-  double maximum_value(int id_field) const  throw(std::out_of_range)
-  { return field_descr_->maximum_value(id_field); }
-
-  /// maximum action for the field
-  field_action_type maximum_action(int id_field) const 
-    throw(std::out_of_range)
-  { return field_descr_->maximum_action(id_field); }
-
   //--------------------------------------------------
 private: // functions
   //--------------------------------------------------
@@ -257,16 +239,6 @@ private: // functions
 
   /// Set precision for a field
   void set_precision(int id_field, precision_type precision) 
-    throw(std::out_of_range);
-
-  /// Set minimum bound and action
-  void set_minimum (int id_field, double min_value,
-		    field_action_type min_action) 
-    throw(std::out_of_range);
-
-  /// Set maximum bound and action
-  void set_maximum (int id_field, double max_value, 
-		    field_action_type max_action) 
     throw(std::out_of_range);
 
   /// Insert a new field

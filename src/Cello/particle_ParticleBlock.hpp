@@ -68,32 +68,28 @@ public: // interface
 
   template <class T>
   void set_local_positions (ParticleDescr * pd,
-			    int index_type,
-			    const T ** a);
+			    int index_type,  const T ** a);
 
   /// Set global coordinates of given particle type to the (long double) values
   /// in the array: block.lower(axis) <= a[axis][value] < block.upper(axis)
 
   template <class T>
   void set_global_positions (ParticleDescr * pd,
-			     int index_type,
-			     const T ** a);
+			     int index_type,  const T ** a);
 
   /// Return local coordinates of particles of the given type using integer
   /// values relative to the block
 
   template <class T>
   void local_positions (ParticleDescr * pd,
-			int index_type,
-			T ** a);
+			int index_type, T ** a);
 
   /// Return global coordinates of particles of the given type using
   /// long double values 
 
   template <class T>
   void global_positions (ParticleDescr * pd,
-			 int index_type,
-			 T ** a);
+			 int index_type, T ** a);
 
 private: // functions
 

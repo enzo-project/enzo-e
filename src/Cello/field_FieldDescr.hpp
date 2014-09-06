@@ -8,18 +8,6 @@
 #ifndef FIELD_FIELD_DESCR_HPP
 #define FIELD_FIELD_DESCR_HPP
 
-enum field_action_enum {
-  field_action_unknown,  // Uninitialized action
-  field_action_none,     // Do nothing if range exceeded
-  field_action_assign,   // Assign field values to min / max if range exceeded
-  field_action_warning,  // Issue warning if range exceeded
-  field_action_error,    // Issue error if range exceeded
-  field_action_timestep, // Retry with reduced timestep if range exceeded
-  field_action_method    // Retry with alternate method if range exceeded
-};
-
-typedef int field_action_type;
-
 class FieldDescr 
 {
 
@@ -68,10 +56,6 @@ public: // functions
       if (up) ghosts_[i] = new int[3];
       PUParray(p,ghosts_[i],3);
     }
-    p | min_value_;
-    p | max_value_;
-    p | min_action_;
-    p | max_action_;
   }
 
    // /// Set membership of a field in a group
@@ -97,16 +81,6 @@ public: // functions
 
   /// Set precision for a field
   void set_precision(int id_field, precision_type precision) 
-    throw(std::out_of_range);
-
-  /// Set minimum bound and action
-  void set_minimum (int id_field, double min_value,
-		    field_action_type min_action) 
-    throw(std::out_of_range);
-
-  /// Set maximum bound and action
-  void set_maximum (int id_field, double max_value, 
-		    field_action_type max_action) 
     throw(std::out_of_range);
 
   /// Insert a new field
@@ -154,20 +128,6 @@ public: // functions
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();
 
-  /// minimum value for the field
-  double minimum_value(int id_field) const throw(std::out_of_range);
-
-  /// minimum action for the field
-  field_action_type minimum_action(int id_field) const
-    throw(std::out_of_range);
-
-  /// maximum value for the field
-  double maximum_value(int id_field) const  throw(std::out_of_range);
-
-  /// maximum action for the field
-  field_action_type maximum_action(int id_field) const 
-    throw(std::out_of_range);
-
 private: // functions
 
   void copy_(const FieldDescr & field_descr) throw();
@@ -200,18 +160,6 @@ private: // attributes
 
   /// Ghost depth of each field
   std::vector<int *> ghosts_;
-
-  /// minimum allowed value for each field
-  std::vector<double> min_value_;
-
-  /// maximum allowed value for each field
-  std::vector<double> max_value_;
-
-  /// what to do if a field violates its minimum value
-  std::vector<field_action_type> min_action_;
-
-  /// what to do if a field violates its maximum value
-  std::vector<field_action_type> max_action_;
 
 };
 
