@@ -186,40 +186,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(info.gx==0 && info.gy==0 && info.gz==1);
 
 
-  // Minimum value and action
-
-  field_descr->set_minimum (info.field_density,    1.0, field_action_error);
-  field_descr->set_minimum (info.field_velocity_x, -100.0, field_action_warning);
-  field_descr->set_minimum (info.field_velocity_y, -200.0, field_action_method);
-  field_descr->set_minimum (info.field_velocity_z, -300.0, field_action_timestep);
-
-  field_descr->set_maximum (info.field_density,    2.0, field_action_error);
-  field_descr->set_maximum (info.field_velocity_x, 100.0, field_action_warning);
-  field_descr->set_maximum (info.field_velocity_y, 200.0, field_action_method);
-  field_descr->set_maximum (info.field_velocity_z, 300.0, field_action_timestep);
-
-  unit_func("min_value");
-
-  unit_assert(field_descr->minimum_value  (info.field_density)    == 1.0);
-  unit_assert(field_descr->minimum_action (info.field_density)    == field_action_error);
-  unit_assert(field_descr->minimum_value  (info.field_velocity_x) == -100.0);
-  unit_assert(field_descr->minimum_action (info.field_velocity_x) == field_action_warning);
-  unit_assert(field_descr->minimum_value  (info.field_velocity_y) == -200.0);
-  unit_assert(field_descr->minimum_action (info.field_velocity_y) == field_action_method);
-  unit_assert(field_descr->minimum_value  (info.field_velocity_z) == -300.0);
-  unit_assert(field_descr->minimum_action (info.field_velocity_z) == field_action_timestep);
-
-  unit_func("max_value");
-
-  unit_assert(field_descr->maximum_value  (info.field_density)    == 2.0);
-  unit_assert(field_descr->maximum_action (info.field_density)    == field_action_error);
-  unit_assert(field_descr->maximum_value  (info.field_velocity_x) == 100.0);
-  unit_assert(field_descr->maximum_action (info.field_velocity_x) == field_action_warning);
-  unit_assert(field_descr->maximum_value  (info.field_velocity_y) == 200.0);
-  unit_assert(field_descr->maximum_action (info.field_velocity_y) == field_action_method);
-  unit_assert(field_descr->maximum_value  (info.field_velocity_z) == 300.0);
-  unit_assert(field_descr->maximum_action (info.field_velocity_z) == field_action_timestep);
-
   //======================================================================
   // BIG THREE
   //======================================================================
@@ -300,25 +266,6 @@ PARALLEL_MAIN_BEGIN
   field_descr_assign.ghosts(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==0 && info.gy==0 && info.gz==1);
 
-  unit_func("assign:minimum");
-  unit_assert(field_descr_assign.minimum_value  (info.field_density)    == 1.0);
-  unit_assert(field_descr_assign.minimum_action (info.field_density)    == field_action_error);
-  unit_assert(field_descr_assign.minimum_value  (info.field_velocity_x) == -100.0);
-  unit_assert(field_descr_assign.minimum_action (info.field_velocity_x) == field_action_warning);
-  unit_assert(field_descr_assign.minimum_value  (info.field_velocity_y) == -200.0);
-  unit_assert(field_descr_assign.minimum_action (info.field_velocity_y) == field_action_method);
-  unit_assert(field_descr_assign.minimum_value  (info.field_velocity_z) == -300.0);
-  unit_assert(field_descr_assign.minimum_action (info.field_velocity_z) == field_action_timestep);
-
-  unit_func("assign:maximum");
-  unit_assert(field_descr_assign.maximum_value  (info.field_density)    == 2.0);
-  unit_assert(field_descr_assign.maximum_action (info.field_density)    == field_action_error);
-  unit_assert(field_descr_assign.maximum_value  (info.field_velocity_x) == 100.0);
-  unit_assert(field_descr_assign.maximum_action (info.field_velocity_x) == field_action_warning);
-  unit_assert(field_descr_assign.maximum_value  (info.field_velocity_y) == 200.0);
-  unit_assert(field_descr_assign.maximum_action (info.field_velocity_y) == field_action_method);
-  unit_assert(field_descr_assign.maximum_value  (info.field_velocity_z) == 300.0);
-  unit_assert(field_descr_assign.maximum_action (info.field_velocity_z) == field_action_timestep);
 
   unit_func("copy:FieldDescr(FieldDescr)");
   unit_assert(field_descr_copy.field_count()==5);
@@ -378,25 +325,6 @@ PARALLEL_MAIN_BEGIN
   field_descr_copy.ghosts(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==0 && info.gy==0 && info.gz==1);
 
-  unit_func("copy:minimum");
-  unit_assert(field_descr_copy.minimum_value  (info.field_density)    == 1.0);
-  unit_assert(field_descr_copy.minimum_action (info.field_density)    == field_action_error);
-  unit_assert(field_descr_copy.minimum_value  (info.field_velocity_x) == -100.0);
-  unit_assert(field_descr_copy.minimum_action (info.field_velocity_x) == field_action_warning);
-  unit_assert(field_descr_copy.minimum_value  (info.field_velocity_y) == -200.0);
-  unit_assert(field_descr_copy.minimum_action (info.field_velocity_y) == field_action_method);
-  unit_assert(field_descr_copy.minimum_value  (info.field_velocity_z) == -300.0);
-  unit_assert(field_descr_copy.minimum_action (info.field_velocity_z) == field_action_timestep);
-
-  unit_func("copy:maximum");
-  unit_assert(field_descr_copy.maximum_value  (info.field_density)    == 2.0);
-  unit_assert(field_descr_copy.maximum_action (info.field_density)    == field_action_error);
-  unit_assert(field_descr_copy.maximum_value  (info.field_velocity_x) == 100.0);
-  unit_assert(field_descr_copy.maximum_action (info.field_velocity_x) == field_action_warning);
-  unit_assert(field_descr_copy.maximum_value  (info.field_velocity_y) == 200.0);
-  unit_assert(field_descr_copy.maximum_action (info.field_velocity_y) == field_action_method);
-  unit_assert(field_descr_copy.maximum_value  (info.field_velocity_z) == 300.0);
-  unit_assert(field_descr_copy.maximum_action (info.field_velocity_z) == field_action_timestep);
 
   //----------------------------------------------------------------------
   unit_finalize();
