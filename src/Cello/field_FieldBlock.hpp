@@ -209,15 +209,6 @@ private: // functions
    int gx, int gy ,int gz,
    int nxd,int nyd) const;
 
-  template<class T>
-  void mul_ (T * field_1, T * field_2);
-
-  template<class T>
-  void div_ (T * field_1, T * field_2);
-
-  template<class T>
-  void scale_ (T * field, double value);
-
   //----------------------------------------------------------------------
 
   /// Set alignment

@@ -13,8 +13,8 @@
 
 FieldDescr::FieldDescr () 
   throw ()
-  : field_name_(),
-    field_id_(),
+  : name_(),
+    id_(),
     groups_(),
     alignment_(1),
     padding_(0),
@@ -62,7 +62,7 @@ FieldDescr & FieldDescr::operator= (const FieldDescr & field_descr)
 int FieldDescr::field_count() const 
   throw()
 {
-  return field_name_.size();
+  return name_.size();
 }
 
 //----------------------------------------------------------------------
@@ -70,7 +70,7 @@ int FieldDescr::field_count() const
 std::string FieldDescr::field_name(size_t id_field) const 
   throw(std::out_of_range)
 { 
-  return field_name_.at(id_field);
+  return name_.at(id_field);
 }
 
 //----------------------------------------------------------------------
@@ -78,7 +78,7 @@ std::string FieldDescr::field_name(size_t id_field) const
 bool FieldDescr::is_field(const std::string & name) const 
   throw()
 { 
-  return (field_id_.find(name) != field_id_.end());
+  return (id_.find(name) != id_.end());
 }
 
 //----------------------------------------------------------------------
@@ -86,10 +86,10 @@ bool FieldDescr::is_field(const std::string & name) const
 int FieldDescr::field_id(const std::string & name) const
   throw()
 {
-  //  return field_id_[name]; // ERROR IN PGI ON GORDON 11.9-0 64-bit
+  //  return id_[name]; // ERROR IN PGI ON GORDON 11.9-0 64-bit
   std::map<const std::string,int>::const_iterator it;
-  it=field_id_.find(name);
-  return (it != field_id_.end()) ? it->second : -1;
+  it=id_.find(name);
+  return (it != id_.end()) ? it->second : -1;
 }
 
 //----------------------------------------------------------------------
@@ -161,7 +161,7 @@ int FieldDescr::insert_field(const std::string & field_name) throw()
   // Check if field has already been inserted
 
   for (int i=0; i<id; i++) {
-    if (field_name_[i] == field_name) {
+    if (name_[i] == field_name) {
       char buffer [ ERROR_LENGTH ];
       sprintf (buffer,
 	       "Insert field called multiple times with same field %s",
@@ -172,9 +172,9 @@ int FieldDescr::insert_field(const std::string & field_name) throw()
   }
   // Insert field name and id
 
-  field_name_.push_back(field_name);
+  name_.push_back(field_name);
 
-  field_id_[field_name] = id;
+  id_[field_name] = id;
 
   // Initialize attributes with default values
 
@@ -267,13 +267,13 @@ void FieldDescr::set_ghosts(int id_field, int gx, int gy, int gz)
 
 void FieldDescr::copy_(const FieldDescr & field_descr) throw()
 {
-  alignment_      = field_descr.alignment_;
-  padding_        = field_descr.padding_;
-  courant_        = field_descr.courant_;
-  field_name_     = field_descr.field_name_;
-  field_id_       = field_descr.field_id_;
-  groups_         = field_descr.groups_;
-  precision_      = field_descr.precision_;
+  alignment_ = field_descr.alignment_;
+  padding_   = field_descr.padding_;
+  courant_   = field_descr.courant_;
+  name_      = field_descr.name_;
+  id_        = field_descr.id_;
+  groups_    = field_descr.groups_;
+  precision_ = field_descr.precision_;
   centering_.clear();
   for (size_t i=0; i<field_descr.centering_.size(); i++) {
     centering_.push_back(new bool[3]);

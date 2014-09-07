@@ -38,14 +38,14 @@ public: // functions
     bool up = p.isUnpacking();
 
     // NOTE: change this function whenever attributes change
-    p | field_name_;
-    p | field_id_;
+    p | name_;
+    p | id_;
     p | groups_;
     p | alignment_;
     p | padding_;
     p | courant_;
     p | precision_;
-    int num_fields = field_name_.size();
+    int num_fields = name_.size();
     if (up) centering_.resize(num_fields);
     for (int i=0; i<num_fields; i++) {
       if (up) centering_[i] = new bool[3];
@@ -135,10 +135,10 @@ private: // functions
 private: // attributes
 
   /// String identifying each field
-  std::vector<std::string> field_name_;
+  std::vector<std::string> name_;
 
-  /// Index of each field in field_name_
-  std::map<std::string,int> field_id_;
+  /// Index of each field in name_
+  std::map<std::string,int> id_;
 
   /// String identifying each group
   Grouping groups_;
