@@ -231,6 +231,8 @@ test_field_block  = env.Program (['test_FieldBlock.cpp', objs_field],
                                  LIBS=[libs_field, libs_test])
 test_field_descr  = env.Program (['test_FieldDescr.cpp', objs_field], 
                                  LIBS=[libs_field, libs_test])
+test_field        = env.Program (['test_Field.cpp', objs_field],
+                                 LIBS=[libs_field, libs_test])
 test_field_face   = env.Program (['test_FieldFace.cpp', objs_field],  
                                  LIBS=[libs_field, libs_test])
 test_grouping  = env.Program (['test_Grouping.cpp', objs_field], 
@@ -311,6 +313,7 @@ binaries_disk  = [test_FileHdf5,
 binaries_error = [test_error]
 binaries_field = [test_field_block,
                   test_field_descr,
+                  test_field,
                   test_grouping,
                   test_field_face,
                   test_it_field]

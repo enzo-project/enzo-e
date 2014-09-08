@@ -581,8 +581,8 @@ test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
 test_summary("Error",array(    "Error"),
 	     array("test_Error"),'test'); 
 test_summary("Field",
-	     array(     "FieldBlock",     "FieldDescr",     "FieldFace",     "ItField",      "Grouping"),
-	     array("test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField", "test_Grouping"),
+	     array(     "Field",      "FieldBlock",     "FieldDescr",     "FieldFace",     "ItField",      "Grouping"),
+	     array("test_Field", "test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField", "test_Grouping"),
 	     'test'); 
 test_summary("Io",array("ItReduce"),
 	     array("test_ItReduce"),'test'); 
@@ -931,6 +931,7 @@ tests("Cello","test_Error","test_Error","","");
 
 test_group("Field");
 
+tests("Cello","test_Field","test_Field","","");
 tests("Cello","test_FieldDescr","test_FieldDescr","","");
 tests("Cello","test_FieldBlock","test_FieldBlock","","");
 tests("Cello","test_FieldFace","test_FieldFace","","");

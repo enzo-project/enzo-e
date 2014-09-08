@@ -203,12 +203,6 @@ PARALLEL_MAIN_BEGIN
   delete field_descr;
   field_descr = 0;
 
-  int * fill_heap = new int [sizeof(FieldDescr)];
-  for (size_t i=0; i<sizeof(FieldDescr); i++) {
-    fill_heap[i] = 0;
-  }
-
-
   unit_func("assign:field_count");
   unit_assert(field_descr_assign.field_count()==5);
 

@@ -108,14 +108,6 @@ public: // interface
   /// number of bytes n
   int field_size (int id_field, int *nx=0, int *ny=0, int *nz=0) const throw();
 
-  /// Multiply FieldBlock 1 by FieldBlock 2
-  void mul (int id_1, int id_2);
-  /// Divide FieldBlock 1 by FieldBlock 2
-  void div (int id_1, int id_2);
-  /// Multiply FieldBlock by a constant
-  void scale (int id_1, double scale);
-
-
   const FieldDescr * field_descr() { return field_descr_; }
 
   //----------------------------------------------------------------------

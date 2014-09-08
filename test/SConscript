@@ -54,6 +54,7 @@ env.RunSerial('test_Error.unit',       bin_path + '/test_Error')
 #----------------------------------------------------------------------
 env.RunSerial('test_FieldBlock.unit',bin_path + '/test_FieldBlock')
 env.RunSerial('test_FieldDescr.unit',bin_path + '/test_FieldDescr')
+env.RunSerial('test_Field.unit',     bin_path + '/test_Field')
 env.RunSerial('test_FieldFace.unit', bin_path + '/test_FieldFace')
 env.RunSerial('test_ItField.unit',   bin_path + '/test_ItField')
 env.RunSerial('test_Grouping.unit',  bin_path + '/test_Grouping')

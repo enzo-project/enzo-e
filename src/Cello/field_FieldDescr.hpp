@@ -58,10 +58,6 @@ public: // functions
     }
   }
 
-   // /// Set membership of a field in a group
-   // void set_field_in_group(int id_field, int id_group) 
-   //   throw(std::out_of_range);
-
   /// Set alignment
   void set_alignment(int alignment) throw();
 
