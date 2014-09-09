@@ -10,24 +10,23 @@
 //----------------------------------------------------------------------
 
 void BoundaryValue::enforce 
-(const FieldDescr * field_descr,
- CommBlock * comm_block, face_enum face, axis_enum axis) const throw()
+(CommBlock * comm_block, face_enum face, axis_enum axis) const throw()
 {
   if ( ! applies_(axis,face)) return;
 
   if (face == face_all) {
-    enforce(field_descr,comm_block,face_lower,axis);
-    enforce(field_descr,comm_block,face_upper,axis);
+    enforce(comm_block,face_lower,axis);
+    enforce(comm_block,face_upper,axis);
   } else if (axis == axis_all) {
-    enforce(field_descr,comm_block,face,axis_x);
-    enforce(field_descr,comm_block,face,axis_y);
-    enforce(field_descr,comm_block,face,axis_z);
+    enforce(comm_block,face,axis_x);
+    enforce(comm_block,face,axis_y);
+    enforce(comm_block,face,axis_z);
   } else {
 
     Block * block = comm_block->block();
-    FieldBlock * field_block = block->field_block();
+    Field field = block->field();
 
-    if ( ! field_block->ghosts_allocated() ) {
+    if ( ! field.ghosts_allocated() ) {
       ERROR("EnzoBoundary::enforce",
 	    "Function called with ghosts not allocated");
     }
@@ -42,11 +41,11 @@ void BoundaryValue::enforce
     for (size_t index = 0; index < field_list_.size(); index++) {
 
       int nx,ny,nz;
-      field_block->size(&nx,&ny,&nz);
+      field.size(&nx,&ny,&nz);
 
-      int index_field = field_descr->field_id(field_list_[index]);
+      int index_field = field.field_id(field_list_[index]);
       int gx,gy,gz;
-      field_descr->ghosts(index_field,&gx,&gy,&gz);
+      field.ghosts(index_field,&gx,&gy,&gz);
 
 
       int ndx=nx+2*gx;
@@ -59,9 +58,9 @@ void BoundaryValue::enforce
 
       block->field_cells(x,y,z,gx,gy,gz);
 
-      void * array = field_block->values(index_field);
+      void * array = field.values(index_field);
 
-      precision_type precision = field_descr->precision(index_field);
+      precision_type precision = field.precision(index_field);
 
       int ix0=0 ,iy0=0,iz0=0;
 

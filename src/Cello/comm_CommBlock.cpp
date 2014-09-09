@@ -532,12 +532,12 @@ void CommBlock::update_boundary_ ()
 
   while ((boundary = problem->boundary(index++))) {
     // Update boundaries
-    if ( fxm ) boundary->enforce(field_descr,this,face_lower,axis_x);
-    if ( fxp ) boundary->enforce(field_descr,this,face_upper,axis_x);
-    if ( fym ) boundary->enforce(field_descr,this,face_lower,axis_y);
-    if ( fyp ) boundary->enforce(field_descr,this,face_upper,axis_y);
-    if ( fzm ) boundary->enforce(field_descr,this,face_lower,axis_z);
-    if ( fzp ) boundary->enforce(field_descr,this,face_upper,axis_z);
+    if ( fxm ) boundary->enforce(this,face_lower,axis_x);
+    if ( fxp ) boundary->enforce(this,face_upper,axis_x);
+    if ( fym ) boundary->enforce(this,face_lower,axis_y);
+    if ( fyp ) boundary->enforce(this,face_upper,axis_y);
+    if ( fzm ) boundary->enforce(this,face_lower,axis_z);
+    if ( fzp ) boundary->enforce(this,face_upper,axis_z);
   }
 }
 

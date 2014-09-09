@@ -34,13 +34,13 @@ int EnzoRefineShock::apply
  ) throw ()
 {
 
-  FieldBlock * field_block = comm_block->block()->field_block();
+  Field field = comm_block->block()->field();
 
   bool all_coarsen = true;
   bool any_refine = false;
 
   int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
 
   int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
 
@@ -53,19 +53,19 @@ int EnzoRefineShock::apply
   block->lower(&xm[0],&xm[1],&xm[2]);
   block->upper(&xp[0],&xp[1],&xp[2]);
 
-  int id_velocity = field_descr->field_id("velocity_x");
+  int id_velocity = field.field_id("velocity_x");
 
   void * v3[3] = {
-    field_block->values("velocity_x"),
-    field_block->values("velocity_y"),
-    field_block->values("velocity_z") };
+    field.values("velocity_x"),
+    field.values("velocity_y"),
+    field.values("velocity_z") };
 
-  void * te = field_block->values("total_energy");
-  void * de = field_block->values("density");
-  void * p = field_block->values("pressure");
+  void * te = field.values("total_energy");
+  void * de = field.values("density");
+  void * p  = field.values("pressure");
    
   int gx,gy,gz;
-  field_descr->ghosts(id_velocity, &gx,&gy,&gz);
+  field.ghosts(id_velocity, &gx,&gy,&gz);
 
   int nxd = nx + 2*gx;
   int nyd = ny + 2*gy;
@@ -75,9 +75,9 @@ int EnzoRefineShock::apply
   if (rank < 2) gy = 0;
   if (rank < 3) gz = 0;
 
-  precision_type precision = field_descr->precision(id_velocity);
+  precision_type precision = field.precision(id_velocity);
 
-  void * output = initialize_output_(field_block);
+  void * output = initialize_output_(field.field_block());
 
   switch (precision) {
   case precision_single:

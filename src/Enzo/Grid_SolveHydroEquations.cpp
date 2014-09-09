@@ -24,8 +24,7 @@ int EnzoBlock::SolveHydroEquations
   int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num;
   enzo_float a = 1, dadt;
 
-  const FieldDescr * field_descr = block()->field_descr();
-  FieldBlock *       field_block = block()->field_block();
+  Field field = block()->field();
 
   //------------------------------
   // Prepare colour field parameters
@@ -33,21 +32,21 @@ int EnzoBlock::SolveHydroEquations
 
   // ncolour: number of colour fields
 
-  int    ncolour  = field_descr->groups()->size("colour");
+  int    ncolour  = field.groups()->size("colour");
 
   // colourpt: the color 'array' (contains all color fields)
-  enzo_float * colourpt = (enzo_float *) field_block->array();
+  enzo_float * colourpt = (enzo_float *) field.array();
 
   // coloff: offsets into the color array (for each color field)
   int * coloff   = new int [ncolour];
   int index_colour = 0;
   for (int index_field = 0;
-       index_field < field_descr->field_count();
+       index_field < field.field_count();
        index_field++) {
-    std::string field = field_descr->field_name(index_field);
-    if (field_descr->groups()->is_in(field,"colour")) {
+    std::string name = field.field_name(index_field);
+    if (field.groups()->is_in(name,"colour")) {
       coloff[index_colour++] 
-	= (enzo_float *)(field_block->values(index_field)) - colourpt;
+	= (enzo_float *)(field.values(index_field)) - colourpt;
     }
 
   }
@@ -73,7 +72,7 @@ int EnzoBlock::SolveHydroEquations
 
   //  enzo_float *density     = BaryonField[DensNum];
 
-  enzo_float * density = (enzo_float*) field_block->values("density");
+  enzo_float * density = (enzo_float*) field.values("density");
   enzo_float *totalenergy = BaryonField[TENum];
   enzo_float *gasenergy   = BaryonField[GENum];
 

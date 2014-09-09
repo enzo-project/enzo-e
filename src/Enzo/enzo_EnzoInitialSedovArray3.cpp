@@ -61,22 +61,22 @@ void EnzoInitialSedovArray3::enforce_block
 	 "CommBlock does not exist",
 	 comm_block != NULL);
 
-  FieldBlock * field_block = comm_block->block()->field_block();
+  Field field = comm_block->block()->field();
 
   ASSERT("EnzoInitialSedovArray3",
 	 "Insufficient number of fields",
-	 field_descr->field_count() >= 4);
+	 field.field_count() >= 4);
 
-  enzo_float *  d = (enzo_float *) field_block->values
-    (field_descr->field_id("density"));
+  enzo_float *  d = (enzo_float *) field.values
+    (field.field_id("density"));
   
   enzo_float * te = 0;
 
-  te = (enzo_float *) field_block->values
-    (field_descr->field_id("total_energy"));
+  te = (enzo_float *) field.values
+    (field.field_id("total_energy"));
 
   int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
 
   double xbm,ybm,zbm;
   comm_block->block()->lower(&xbm,&ybm,&zbm);
@@ -85,7 +85,7 @@ void EnzoInitialSedovArray3::enforce_block
   comm_block->block()->upper(&xbp,&ybp,&zbp);
 
   double hx,hy,hz;
-  field_block->cell_width(xbm,xbp,&hx,
+  field.cell_width(xbm,xbp,&hx,
 			  ybm,ybp,&hy,
 			  zbm,zbp,&hz);
 
@@ -100,7 +100,7 @@ void EnzoInitialSedovArray3::enforce_block
     pressure_out_ / ((EnzoBlock::Gamma - 1.0) * density_);
 
   int gx,gy,gz;
-  field_descr->ghosts(0,&gx,&gy,&gz);
+  field.ghosts(0,&gx,&gy,&gz);
 
   int ndx = nx + 2*gx;
   int ndy = ny + 2*gy;
@@ -108,15 +108,15 @@ void EnzoInitialSedovArray3::enforce_block
 
   // clear all fields
 
-  for (int iv=0; iv<field_descr->field_count(); iv++) {
+  for (int iv=0; iv<field.field_count(); iv++) {
 
-    enzo_float * field = (enzo_float *) field_block->values (iv);
+    enzo_float * array = (enzo_float *) field.values (iv);
 
     for (int iz=0; iz<ndz; iz++) {
       for (int iy=0; iy<ndy; iy++) {
 	for (int ix=0; ix<ndx; ix++) {
 	  int i = INDEX(ix,iy,iz,ndx,ndy);
-	  field[i] = 0.0;
+	  array[i] = 0.0;
 	}
       }
     }

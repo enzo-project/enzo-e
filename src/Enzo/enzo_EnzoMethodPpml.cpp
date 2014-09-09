@@ -105,14 +105,15 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) throw()
 
     /* Call fortran routine to do calculation. */
  
-    FieldBlock * field_block = enzo_comm_block->block()->field_block();
-    enzo_float * d  = (enzo_float *) field_block->values("density");
-    enzo_float * vx = (enzo_float *) field_block->values("velox");
-    enzo_float * vy = (enzo_float *) field_block->values("veloy");
-    enzo_float * vz = (enzo_float *) field_block->values("veloz");
-    enzo_float * bx = (enzo_float *) field_block->values("bfieldx");
-    enzo_float * by = (enzo_float *) field_block->values("bfieldy");
-    enzo_float * bz = (enzo_float *) field_block->values("bfieldz");
+    Field field = enzo_comm_block->block()->field();
+
+    enzo_float * d  = (enzo_float *) field.values("density");
+    enzo_float * vx = (enzo_float *) field.values("velox");
+    enzo_float * vy = (enzo_float *) field.values("veloy");
+    enzo_float * vz = (enzo_float *) field.values("veloz");
+    enzo_float * bx = (enzo_float *) field.values("bfieldx");
+    enzo_float * by = (enzo_float *) field.values("bfieldy");
+    enzo_float * bz = (enzo_float *) field.values("bfieldz");
 
     FORTRAN_NAME(calc_dt_ppml)
       (enzo_comm_block->GridDimension, 

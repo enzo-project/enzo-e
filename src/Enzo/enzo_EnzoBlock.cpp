@@ -90,8 +90,8 @@ int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 // STATIC
 void EnzoBlock::initialize(EnzoConfig * enzo_config,
 			   FieldDescr * field_descr)
-
 {
+
   for (int i=0; i<NUM_FIELDS; i++) {
     field_index_[i] = field_undefined;
   }
@@ -416,8 +416,8 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,CellWidth,MAX_DIMENSION);
 
   if (p.isUnpacking()) {
-    for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-      BaryonField[field] = (enzo_float *)block_->field_block(0)->values(field);
+    for (int index = 0; index < EnzoBlock::NumberOfBaryonFields; index++) {
+      BaryonField[index] = (enzo_float *)block()->field().values(index);
     }
   }
 
@@ -732,7 +732,7 @@ void EnzoBlock::initialize () throw()
 
   double xm,ym,zm;
 
-  block_->lower(&xm,&ym,&zm);
+  block()->lower(&xm,&ym,&zm);
 
   GridLeftEdge[0]  = xm;
   GridLeftEdge[1]  = ym;
@@ -740,8 +740,10 @@ void EnzoBlock::initialize () throw()
 
   // Grid dimensions
 
+  Field field = block()->field();
+
   int nx,ny,nz;
-  block_->field_block(0) -> size (&nx,&ny,&nz);
+  field.size (&nx,&ny,&nz);
 
   int gx,gy,gz;
 
@@ -766,9 +768,9 @@ void EnzoBlock::initialize () throw()
   // Initialize CellWidth
 
   double xp,yp,zp;
-  block_->upper(&xp,&yp,&zp);
+  block()->upper(&xp,&yp,&zp);
   double hx,hy,hz;
-  block_->field_block(0)->cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
+  field.cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
 
   CellWidth[0] = hx;
   CellWidth[1] = hy;
@@ -776,11 +778,9 @@ void EnzoBlock::initialize () throw()
 
   // Initialize BaryonField[] pointers
 
-  for (int field = 0; field < EnzoBlock::NumberOfBaryonFields; field++) {
-    BaryonField[field] = (enzo_float *)block_->field_block(0)->values(field);
+  for (int index = 0; index < EnzoBlock::NumberOfBaryonFields; index++) {
+    BaryonField[index] = (enzo_float *)field.values(index);
   }
-
-  
 
   TRACE ("Exit  EnzoBlock::initialize()\n");
 }

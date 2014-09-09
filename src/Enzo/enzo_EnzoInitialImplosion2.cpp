@@ -42,23 +42,23 @@ void EnzoInitialImplosion2::enforce_block
 	 "CommBlock does not exist",
 	 comm_block != NULL);
 
-  FieldBlock * field_block = comm_block->block()->field_block();
+  Field field = comm_block->block()->field();
 
   ASSERT("EnzoInitialImplosion2::enforce_block",
 	 "Insufficient number of fields",
-	 field_descr->field_count() >= 4);
+	 field.field_count() >= 4);
 
   WARNING("EnzoInitialImplosion2::enforce_block",
 	  "hard-coded field index ordering");
 
-  enzo_float *  d = (enzo_float *) field_block->values("density");
-  enzo_float * vx = (enzo_float *) field_block->values("velocity_x");
-  enzo_float * vy = (enzo_float *) field_block->values("velocity_y");
-  enzo_float * te = (enzo_float *) field_block->values("total_energy");
+  enzo_float *  d = (enzo_float *) field.values("density");
+  enzo_float * vx = (enzo_float *) field.values("velocity_x");
+  enzo_float * vy = (enzo_float *) field.values("velocity_y");
+  enzo_float * te = (enzo_float *) field.values("total_energy");
 
   // Block size (excluding ghosts)
   int nx,ny;
-  field_block->size(&nx,&ny);
+  field.size(&nx,&ny);
 
   // Cell widths
   double xm,ym;
@@ -68,11 +68,11 @@ void EnzoInitialImplosion2::enforce_block
   comm_block->block()->upper(&xp,&yp);
 
   double hx,hy;
-  field_block->cell_width(xm,xp,&hx,ym,yp,&hy);
+  field.cell_width(xm,xp,&hx,ym,yp,&hy);
 
   // Ghost depths
   int gx,gy;
-  field_descr->ghosts(0,&gx,&gy);
+  field.ghosts(0,&gx,&gy);
 
   // WARNING("EnzoInitialImplosion2",
   // 		  "Assumes same ghost zone depth for all fields");

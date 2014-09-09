@@ -53,22 +53,22 @@ void EnzoMethodPressure::compute_(CommBlock * comm_block)
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 
-  FieldBlock * field_block = enzo_block->block()->field_block();
+  Field field = enzo_block->block()->field();
 
-  T * p = (T*) field_block->values("pressure");
-  T * d = (T*) field_block->values("density");
+  T * p = (T*) field.values("pressure");
+  T * d = (T*) field.values("density");
   T * v3[3] = 
-    { (T*)field_block->values("velocity_x"),
-      (T*)field_block->values("velocity_y"),
-      (T*)field_block->values("velocity_z")  };
+    { (T*) field.values("velocity_x"),
+      (T*) field.values("velocity_y"),
+      (T*) field.values("velocity_z")  };
 
-  T * te = (T*)field_block->values("total_energy");
+  T * te = (T*) field.values("total_energy");
 
   int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
 
   int gx,gy,gz;
-  field_block->ghosts (0,&gx,&gy,&gz);
+  field.ghosts (0,&gx,&gy,&gz);
   const int rank = this->rank();
   if (rank < 1) gx = 0;
   if (rank < 2) gy = 0;

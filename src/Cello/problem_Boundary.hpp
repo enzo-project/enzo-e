@@ -68,8 +68,7 @@ public: // virtual functions
 
   /// Enforce boundary conditions
 
-  virtual void enforce (const FieldDescr * field_descr,
-			CommBlock * block,
+  virtual void enforce (CommBlock * block,
 			face_enum face = face_all,
 			axis_enum axis = axis_all) const throw() = 0;
 

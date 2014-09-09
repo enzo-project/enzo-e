@@ -282,7 +282,7 @@ public: // interface
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
   int SolveMHDEquations(const FieldDescr *,  enzo_float dt);
 
-  /// Return the Cello FieldBlock index for the given field type
+  /// Return the Cello FieldBlock` index for the given field type
   int index (enum field_type type) const
   { return field_index_[type];}
 

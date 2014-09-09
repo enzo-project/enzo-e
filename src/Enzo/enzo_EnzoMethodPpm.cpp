@@ -45,12 +45,12 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
 {
 
   EnzoBlock * enzo_comm_block = static_cast<EnzoBlock*> (comm_block);
-  FieldBlock * field_block = enzo_comm_block->block()->field_block();
+  Field field = enzo_comm_block->block()->field();
 
-  enzo_float * density    = (enzo_float *)field_block->values("density");
-  enzo_float * velocity_x = (enzo_float *)field_block->values("velocity_x");
-  enzo_float * velocity_y = (enzo_float *)field_block->values("velocity_y");
-  enzo_float * velocity_z = (enzo_float *)field_block->values("velocity_z");
+  enzo_float * density    = (enzo_float *)field.values("density");
+  enzo_float * velocity_x = (enzo_float *)field.values("velocity_x");
+  enzo_float * velocity_y = (enzo_float *)field.values("velocity_y");
+  enzo_float * velocity_z = (enzo_float *)field.values("velocity_z");
 
   enzo_float a = 1, dadt;
   
@@ -66,7 +66,7 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
   EnzoMethodPressure method_pressure (EnzoBlock::Gamma);
   method_pressure.compute(enzo_comm_block);
 
-  enzo_float * pressure = (enzo_float *) field_block->values("pressure");
+  enzo_float * pressure = (enzo_float *) field.values("pressure");
 
  
   /* 2) Calculate dt from particles. */
@@ -106,11 +106,6 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
   dtBaryons *= EnzoBlock::CourantSafetyNumber;
 
   double dt = dtBaryons;
-
-  if (dt<=0.0) {
-    FieldBlock * field_block = comm_block->block()->field_block();
-    field_block->print(comm_block->name().c_str(),true);
-  }
 
   return dt;
 }

@@ -54,59 +54,59 @@ void EnzoInitialGrackleTest::enforce_block
 	 "CommBlock does not exist",
 	 comm_block != NULL);
 
-  FieldBlock * field_block = comm_block->block()->field_block();
+  Field field = comm_block->block()->field();
 
 
   gr_float * density 
-    = (gr_float *) field_block->values("density");
+    = (gr_float *) field.values("density");
   gr_float * internal_energy  
-    = (gr_float *) field_block->values("internal_energy");
+    = (gr_float *) field.values("internal_energy");
   gr_float * total_energy  
-    = (gr_float *) field_block->values("total_energy");
+    = (gr_float *) field.values("total_energy");
   gr_float * velocity_x
-    = (gr_float *) field_block->values("velocity_x");
+    = (gr_float *) field.values("velocity_x");
   gr_float * velocity_y
-    = (gr_float *) field_block->values("velocity_y");
+    = (gr_float *) field.values("velocity_y");
   gr_float * velocity_z
-    = (gr_float *) field_block->values("velocity_z");
+    = (gr_float *) field.values("velocity_z");
   gr_float * HI_density 
-    = (gr_float *) field_block->values("HI_density");
+    = (gr_float *) field.values("HI_density");
   gr_float * HII_density 
-    = (gr_float *) field_block->values("HII_density");
+    = (gr_float *) field.values("HII_density");
   gr_float * HM_density 
-    = (gr_float *) field_block->values("HM_density");
+    = (gr_float *) field.values("HM_density");
   gr_float * HeI_density 
-    = (gr_float *) field_block->values("HeI_density");
+    = (gr_float *) field.values("HeI_density");
   gr_float * HeII_density 
-    = (gr_float *) field_block->values("HeII_density");
+    = (gr_float *) field.values("HeII_density");
   gr_float * HeIII_density 
-    = (gr_float *) field_block->values("HeIII_density");
+    = (gr_float *) field.values("HeIII_density");
   gr_float * H2I_density 
-    = (gr_float *) field_block->values("H2I_density");
+    = (gr_float *) field.values("H2I_density");
   gr_float * H2II_density 
-    = (gr_float *) field_block->values("H2II_density");
+    = (gr_float *) field.values("H2II_density");
   gr_float * DI_density 
-    = (gr_float *) field_block->values("DI_density");
+    = (gr_float *) field.values("DI_density");
   gr_float * DII_density 
-    = (gr_float *) field_block->values("DII_density");
+    = (gr_float *) field.values("DII_density");
   gr_float * HDI_density 
-    = (gr_float *) field_block->values("HDI_density");
+    = (gr_float *) field.values("HDI_density");
   gr_float * e_density 
-    = (gr_float *) field_block->values("e_density");
+    = (gr_float *) field.values("e_density");
   gr_float * metal_density 
-    = (gr_float *) field_block->values("metal_density");
+    = (gr_float *) field.values("metal_density");
   gr_float * cooling_time 
-    = (gr_float *) field_block->values("cooling_time");
+    = (gr_float *) field.values("cooling_time");
   gr_float * temperature 
-    = (gr_float *) field_block->values("temperature");
+    = (gr_float *) field.values("temperature");
   gr_float * pressure 
-    = (gr_float *) field_block->values("pressure");
+    = (gr_float *) field.values("pressure");
   gr_float * gamma 
-    = (gr_float *) field_block->values("gamma");
+    = (gr_float *) field.values("gamma");
 
   // Block size (excluding ghosts)
   int nx,ny;
-  field_block->size(&nx,&ny);
+  field.size(&nx,&ny);
 
   // Cell widths
   double xm,ym;
@@ -116,11 +116,11 @@ void EnzoInitialGrackleTest::enforce_block
   comm_block->block()->upper(&xp,&yp);
 
   double hx,hy;
-  field_block->cell_width(xm,xp,&hx,ym,yp,&hy);
+  field.cell_width(xm,xp,&hx,ym,yp,&hy);
 
   // Ghost depths
   int gx,gy;
-  field_descr->ghosts(0,&gx,&gy);
+  field.ghosts(0,&gx,&gy);
 
   // WARNING("EnzoInitialGrackleTest",
   // 		  "Assumes same ghost zone depth for all fields");

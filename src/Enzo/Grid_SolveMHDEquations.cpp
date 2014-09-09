@@ -52,66 +52,66 @@ int EnzoBlock::SolveMHDEquations
     /* Get easy to handle pointers for each variable. */
 
 
-    FieldBlock * field_block = block()->field_block();
+    Field field = block()->field();
 
     int index = this->index(field_density);
-    enzo_float *density    = (enzo_float *) field_block->values (index);
+    enzo_float *density    = (enzo_float *) field.values (index);
     index = this->index(field_velox);
-    enzo_float *velox      = (enzo_float *) field_block->values (index);
+    enzo_float *velox      = (enzo_float *) field.values (index);
     index = this->index(field_veloy);
-    enzo_float *veloy      = (enzo_float *) field_block->values (index);
+    enzo_float *veloy      = (enzo_float *) field.values (index);
     index = this->index(field_veloz);
-    enzo_float *veloz      = (enzo_float *) field_block->values (index);
+    enzo_float *veloz      = (enzo_float *) field.values (index);
     index = this->index(field_bfieldx);
-    enzo_float *bfieldx    = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldx    = (enzo_float *) field.values (index);
     index = this->index(field_bfieldy);
-    enzo_float *bfieldy    = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldy    = (enzo_float *) field.values (index);
     index = this->index(field_bfieldz);
-    enzo_float *bfieldz    = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldz    = (enzo_float *) field.values (index);
     index = this->index(field_dens_rx);
-    enzo_float *dens_rx    = (enzo_float *) field_block->values (index);
+    enzo_float *dens_rx    = (enzo_float *) field.values (index);
     index = this->index(field_velox_rx);
-    enzo_float *velox_rx   = (enzo_float *) field_block->values (index);
+    enzo_float *velox_rx   = (enzo_float *) field.values (index);
     index = this->index(field_veloy_rx);
-    enzo_float *veloy_rx   = (enzo_float *) field_block->values (index);
+    enzo_float *veloy_rx   = (enzo_float *) field.values (index);
     index = this->index(field_veloz_rx);
-    enzo_float *veloz_rx   = (enzo_float *) field_block->values (index);
+    enzo_float *veloz_rx   = (enzo_float *) field.values (index);
     index = this->index(field_bfieldx_rx);
-    enzo_float *bfieldx_rx = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldx_rx = (enzo_float *) field.values (index);
     index = this->index(field_bfieldy_rx);
-    enzo_float *bfieldy_rx = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldy_rx = (enzo_float *) field.values (index);
     index = this->index(field_bfieldz_rx);
-    enzo_float *bfieldz_rx = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldz_rx = (enzo_float *) field.values (index);
 
     index = this->index(field_dens_ry);
-    enzo_float *dens_ry    = (enzo_float *) field_block->values (index);
+    enzo_float *dens_ry    = (enzo_float *) field.values (index);
     index = this->index(field_velox_ry);
-    enzo_float *velox_ry   = (enzo_float *) field_block->values (index);
+    enzo_float *velox_ry   = (enzo_float *) field.values (index);
     index = this->index(field_veloy_ry);
-    enzo_float *veloy_ry   = (enzo_float *) field_block->values (index);
+    enzo_float *veloy_ry   = (enzo_float *) field.values (index);
     index = this->index(field_veloz_ry);
-    enzo_float *veloz_ry   = (enzo_float *) field_block->values (index);
+    enzo_float *veloz_ry   = (enzo_float *) field.values (index);
     index = this->index(field_bfieldx_ry);
-    enzo_float *bfieldx_ry = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldx_ry = (enzo_float *) field.values (index);
     index = this->index(field_bfieldy_ry);
-    enzo_float *bfieldy_ry = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldy_ry = (enzo_float *) field.values (index);
     index = this->index(field_bfieldz_ry);
-    enzo_float *bfieldz_ry = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldz_ry = (enzo_float *) field.values (index);
 
     index = this->index(field_dens_rz);
-    enzo_float *dens_rz    = (enzo_float *) field_block->values (index);
+    enzo_float *dens_rz    = (enzo_float *) field.values (index);
     index = this->index(field_velox_rz);
-    enzo_float *velox_rz   = (enzo_float *) field_block->values (index);
+    enzo_float *velox_rz   = (enzo_float *) field.values (index);
     index = this->index(field_veloy_rz);
-    enzo_float *veloy_rz   = (enzo_float *) field_block->values (index);
+    enzo_float *veloy_rz   = (enzo_float *) field.values (index);
     index = this->index(field_veloz_rz);
-    enzo_float *veloz_rz   = (enzo_float *) field_block->values (index);
+    enzo_float *veloz_rz   = (enzo_float *) field.values (index);
     index = this->index(field_bfieldx_rz);
-    enzo_float *bfieldx_rz = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldx_rz = (enzo_float *) field.values (index);
     index = this->index(field_bfieldy_rz);
-    enzo_float *bfieldy_rz = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldy_rz = (enzo_float *) field.values (index);
     index = this->index(field_bfieldz_rz);
-    enzo_float *bfieldz_rz = (enzo_float *) field_block->values (index);
+    enzo_float *bfieldz_rz = (enzo_float *) field.values (index);
 
 
     // enzo_float *density    = BaryonField[ 0];

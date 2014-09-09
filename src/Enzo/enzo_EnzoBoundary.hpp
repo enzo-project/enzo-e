@@ -45,8 +45,7 @@ public: // interface
 public: // virtual functions
 
   /// Enforce boundary conditions on block for a subet of faces
-  virtual void enforce ( const FieldDescr * field_descr,
-			 CommBlock * block,
+  virtual void enforce ( CommBlock * block,
 			 face_enum face = face_all,
 			 axis_enum axis = axis_all) const throw(); 
 
@@ -58,11 +57,10 @@ protected: // functions
 
   /// Enforce reflecting boundary conditions on a boundary face
   void enforce_reflecting_
-  ( const FieldDescr * field_descr,
-    FieldBlock       * field_block,
-    CommBlock        * comm_block,
-    face_enum face, 
-    axis_enum axis) const throw();
+  ( Field       field,
+    CommBlock * comm_block,
+    face_enum   face, 
+    axis_enum   axis) const throw();
 
   /// Template for reflecting boundary conditions on different precisions
   template<class T>
@@ -82,11 +80,10 @@ protected: // functions
 
   /// Enforce outflow boundary conditions on a boundary face
   void enforce_outflow_
-  ( const FieldDescr * field_descr,
-    FieldBlock       * field_block, 
-    CommBlock        * comm_block,
-    face_enum face, 
-    axis_enum axis) const throw();
+  ( Field       field, 
+    CommBlock * comm_block,
+    face_enum   face, 
+    axis_enum   axis) const throw();
 
   /// Template for outflow boundary conditions on different precisions
   template<class T>
@@ -105,11 +102,10 @@ protected: // functions
 
   /// Enforce inflow boundary conditions on a boundary face
   void enforce_inflow_
-  ( const FieldDescr * field_descr,
-    FieldBlock       * field_block, 
-    CommBlock        * comm_block,
-    face_enum face, 
-    axis_enum axis) const throw();
+  ( Field       field, 
+    CommBlock * comm_block,
+    face_enum   face, 
+    axis_enum   axis) const throw();
 
 protected: // attributes
 

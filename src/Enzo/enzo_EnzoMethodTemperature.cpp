@@ -62,23 +62,23 @@ void EnzoMethodTemperature::compute_(CommBlock * comm_block)
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 
-  FieldBlock * field_block = enzo_block->block()->field_block();
+  Field field = enzo_block->block()->field();
 
   EnzoMethodPressure method_pressure(EnzoBlock::Gamma);
 
   method_pressure.compute(comm_block);
 
-  T * t = (T*) field_block->values("temperature");
-  T * d = (T*) field_block->values("density");
-  T * p = (T*) field_block->values("pressure");
+  T * t = (T*) field.values("temperature");
+  T * d = (T*) field.values("density");
+  T * p = (T*) field.values("pressure");
 
   const int rank = this->rank();
 
   int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
 
   int gx,gy,gz;
-  field_block->ghosts (0,&gx,&gy,&gz);
+  field.ghosts (0,&gx,&gy,&gz);
   if (rank < 1) gx = 0;
   if (rank < 2) gy = 0;
   if (rank < 3) gz = 0;

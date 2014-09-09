@@ -38,7 +38,6 @@ void EnzoBoundary::pup (PUP::er &p)
 
 void EnzoBoundary::enforce 
 (
- const FieldDescr * field_descr,
  CommBlock * comm_block,
  face_enum     face,
  axis_enum     axis 
@@ -49,28 +48,29 @@ void EnzoBoundary::enforce
   }
 
   if (face == face_all) {
-    enforce(field_descr,comm_block,face_lower,axis);
-    enforce(field_descr,comm_block,face_upper,axis);
+    enforce(comm_block,face_lower,axis);
+    enforce(comm_block,face_upper,axis);
   } else if (axis == axis_all) {
-    enforce(field_descr,comm_block,face,axis_x);
-    enforce(field_descr,comm_block,face,axis_y);
-    enforce(field_descr,comm_block,face,axis_z);
+    enforce(comm_block,face,axis_x);
+    enforce(comm_block,face,axis_y);
+    enforce(comm_block,face,axis_z);
   } else {
 
     Block * block = comm_block->block();
 
-    FieldBlock * field_block = block->field_block();
-    if ( ! field_block->ghosts_allocated() ) {
+    Field field = block->field();
+
+    if ( ! field.ghosts_allocated() ) {
       ERROR("EnzoBoundary::enforce",
 	    "Function called with ghosts not allocated");
     }
 
     switch (boundary_type_) {
     case boundary_type_reflecting:
-      enforce_reflecting_(field_descr, field_block,comm_block,face,axis);
+      enforce_reflecting_(field,comm_block,face,axis);
       break;
     case boundary_type_outflow:
-      enforce_outflow_   (field_descr, field_block,comm_block,face,axis);
+      enforce_outflow_   (field,comm_block,face,axis);
       break;
     default:
       ERROR("EnzoBoundary::enforce",
@@ -84,8 +84,7 @@ void EnzoBoundary::enforce
 
 void EnzoBoundary::enforce_reflecting_
 (
- const FieldDescr * field_descr,
- FieldBlock       * field_block,
+ Field              field,
  CommBlock        * comm_block,
  face_enum face,
  axis_enum axis
@@ -95,7 +94,7 @@ void EnzoBoundary::enforce_reflecting_
   Block * block = comm_block->block();
 
   int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
 
   double * x = new double [nx];
   double * y = new double [ny];
@@ -110,14 +109,14 @@ void EnzoBoundary::enforce_reflecting_
 
   double t = comm_block->time();
 
-  for (int field = 0; field < field_descr->field_count(); field++) {
+  for (int index = 0; index < field.field_count(); index++) {
     int gx,gy,gz;
-    field_descr->ghosts(field,&gx,&gy,&gz);
-    void * array = field_block->values(field);
-    bool vx =      (field_descr->field_name(field) == "velocity_x");
-    bool vy =      (field_descr->field_name(field) == "velocity_y");
-    bool vz =      (field_descr->field_name(field) == "velocity_z");
-    precision_type precision = field_descr->precision(field);
+    field.ghosts(index,&gx,&gy,&gz);
+    void * array = field.values(index);
+    bool vx =      (field.field_name(index) == "velocity_x");
+    bool vy =      (field.field_name(index) == "velocity_y");
+    bool vz =      (field.field_name(index) == "velocity_z");
+    precision_type precision = field.precision(index);
     switch (precision) {
     case precision_single:
       enforce_reflecting_precision_(face,axis, (float *)array,
@@ -274,8 +273,7 @@ void EnzoBoundary::enforce_reflecting_precision_
 
 void EnzoBoundary::enforce_outflow_
 (
- const FieldDescr * field_descr,
- FieldBlock       * field_block,
+ Field              field,
  CommBlock        * comm_block,
  face_enum face,
  axis_enum axis
@@ -285,7 +283,7 @@ void EnzoBoundary::enforce_outflow_
   Block * block = comm_block->block();
 
   int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
 
   double * x = new double [nx];
   double * y = new double [ny];
@@ -300,11 +298,11 @@ void EnzoBoundary::enforce_outflow_
 
   double t = comm_block->time();
 
-  for (int field = 0; field < field_descr->field_count(); field++) {
+  for (int index = 0; index < field.field_count(); index++) {
     int gx,gy,gz;
-    field_descr->ghosts(field,&gx,&gy,&gz);
-    void * array = field_block->values(field);
-    precision_type precision = field_descr->precision(field);
+    field.ghosts(index,&gx,&gy,&gz);
+    void * array = field.values(index);
+    precision_type precision = field.precision(index);
     switch (precision) {
     case precision_single:
       enforce_outflow_precision_(face,axis, (float *)array,

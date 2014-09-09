@@ -61,19 +61,19 @@ void EnzoInitialTurbulence::enforce_block
 	 "CommBlock does not exist",
 	 comm_block != NULL);
 
-  FieldBlock * field_block = comm_block->block()->field_block();
+  Field field = comm_block->block()->field();
 
-  enzo_float *  d = (enzo_float *) field_block->values("density");
-  enzo_float *  p = (enzo_float *) field_block->values("pressure");
-  enzo_float *  t = (enzo_float *) field_block->values("temperature");
-  enzo_float * a3[3] = { (enzo_float *) field_block->values("driving_x"),
-			 (enzo_float *) field_block->values("driving_y"),
-			 (enzo_float *) field_block->values("driving_z") };
-  enzo_float * v3[3] = { (enzo_float *) field_block->values("velocity_x"),
-			 (enzo_float *) field_block->values("velocity_y"),
-			 (enzo_float *) field_block->values("velocity_z") };
+  enzo_float *  d = (enzo_float *) field.values("density");
+  enzo_float *  p = (enzo_float *) field.values("pressure");
+  enzo_float *  t = (enzo_float *) field.values("temperature");
+  enzo_float * a3[3] = { (enzo_float *) field.values("driving_x"),
+			 (enzo_float *) field.values("driving_y"),
+			 (enzo_float *) field.values("driving_z") };
+  enzo_float * v3[3] = { (enzo_float *) field.values("velocity_x"),
+			 (enzo_float *) field.values("velocity_y"),
+			 (enzo_float *) field.values("velocity_z") };
 
-  enzo_float * te = (enzo_float *) field_block->values("total_energy");
+  enzo_float * te = (enzo_float *) field.values("total_energy");
 
   int rank = comm_block->simulation()->rank();
 
@@ -111,14 +111,14 @@ void EnzoInitialTurbulence::enforce_block
   comm_block->block()->upper(&xp,&yp,&zp);
 
   double hx,hy,hz;
-  field_block->cell_width(xm,xp,&hx,
+  field.cell_width(xm,xp,&hx,
 			  ym,yp,&hy,
 			  zm,zp,&hz);
 
   int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
   int gx,gy,gz;
-  field_descr->ghosts(0,&gx,&gy,&gz);
+  field.ghosts(0,&gx,&gy,&gz);
 
   int ndx = (rank >= 1) ? nx + 2*gx : nx;
   int ndy = (rank >= 1) ? ny + 2*gy : ny;
