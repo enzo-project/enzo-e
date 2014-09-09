@@ -53,10 +53,10 @@ public: // interface
   };
   
   /// Return the field descriptor for this field
-  const FieldDescr * field_descr() { return field_descr_; }
+  FieldDescr * field_descr() { return field_descr_; }
 
   /// Return the field block for this field
-  const FieldBlock * field_block() { return field_block_; }
+  FieldBlock * field_block() { return field_block_; }
 
   //==================================================
   // FieldDescr

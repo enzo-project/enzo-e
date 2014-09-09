@@ -75,6 +75,11 @@ public: // interface
   const FieldDescr * field_descr (int i=0) const throw()
   { return field_block_.at(i)->field_descr(); }
 
+  /// Return the ith Field
+  Field field (int i=0) throw()
+  { return Field((FieldDescr *)(field_block_.at(i)->field_descr()),
+		 field_block_.at(i)); }
+
   /// Return the x,y,z,t coordinates of field cell centers
   void field_cells (double * x, double * y, double * z,
 		    int gx = 0, int gy = 0, int gz = 0) const;

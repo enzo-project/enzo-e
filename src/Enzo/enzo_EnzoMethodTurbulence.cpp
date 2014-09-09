@@ -61,7 +61,8 @@ void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 
-  FieldBlock * field_block = comm_block->block()->field_block();
+  
+  Field field = comm_block->block()->field();
 
   const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
     (enzo_block->simulation()->config());
@@ -73,21 +74,21 @@ void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
 
   method_temperature.compute(enzo_block);
 
-  enzo_float *  density = (enzo_float *) field_block->values("density");
+  enzo_float *  density = (enzo_float *) field.values("density");
   enzo_float *  velocity[3] = {
-    (enzo_float *) field_block->values("velocity_x"),
-    (enzo_float *) field_block->values("velocity_y"),
-    (enzo_float *) field_block->values("velocity_z") };
+    (enzo_float *) field.values("velocity_x"),
+    (enzo_float *) field.values("velocity_y"),
+    (enzo_float *) field.values("velocity_z") };
   enzo_float * driving[3] = {
-    (enzo_float *) field_block->values("driving_x"),
-    (enzo_float *) field_block->values("driving_y"),
-    (enzo_float *) field_block->values("driving_z") };
-  enzo_float * temperature = (enzo_float *) field_block->values("temperature");
+    (enzo_float *) field.values("driving_x"),
+    (enzo_float *) field.values("driving_y"),
+    (enzo_float *) field.values("driving_z") };
+  enzo_float * temperature = (enzo_float *) field.values("temperature");
 
   int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
   int gx,gy,gz;
-  field_block->ghosts(0,&gx,&gy,&gz);
+  field.ghosts(0,&gx,&gy,&gz);
   int ndx = nx + 2*gx;
   int ndy = ny + 2*gy;
 
@@ -352,20 +353,20 @@ void EnzoMethodTurbulence::compute_resume_
 
   const int rank = this->rank();
 
-  FieldBlock * field_block = enzo_block->block()->field_block();
+  Field field = enzo_block->block()->field();
 
-  T * te = (T*) field_block->values ("total_energy");
-  T * v3[3] = { (T*) field_block->values ("velocity_x"),
-		(T*) field_block->values ("velocity_y"),
-		(T*) field_block->values ("velocity_z") };
-  T * a3[3] = { (T*) field_block->values ("driving_x"),
-		(T*) field_block->values ("driving_y"),
-		(T*) field_block->values ("driving_z") };
+  T * te = (T*) field.values ("total_energy");
+  T * v3[3] = { (T*) field.values ("velocity_x"),
+		(T*) field.values ("velocity_y"),
+		(T*) field.values ("velocity_z") };
+  T * a3[3] = { (T*) field.values ("driving_x"),
+		(T*) field.values ("driving_y"),
+		(T*) field.values ("driving_z") };
 
   int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
   int gx,gy,gz;
-  field_block->ghosts(0,&gx,&gy,&gz);
+  field.ghosts(0,&gx,&gy,&gz);
   int nbx = nx + 2*gx;
   int nby = ny + 2*gy;
 
