@@ -14,58 +14,24 @@ Memory Memory::instance_; // (singleton design pattern)
 #endif
 
 //======================================================================
-// FUNCTIONS
-//======================================================================
- 
-Memory::~Memory() throw ()
-{
-  // for (int i=0; i<max_group_id_ +1; i++) {
-  //   free (group_names_[i]);
-  //   group_names_[i] = 0;
-  // }
-}
-
-//======================================================================
 
 void Memory::initialize_() throw ()
 {
 #ifdef CONFIG_USE_MEMORY
 
-  curr_group_.push(0);
+  is_active_ = false;
 
-  max_group_id_ = 0;
+  index_group_ = 0;
+
+  if (group_name_.size() == 0) {
+    new_group ("Cello");
+  }
+
+  fill_new_    = 0xaa;
+  fill_delete_ = 0xdd;
 
   is_active_ = true;
 
-  do_allocate_fill_    = true; 
-  allocate_fill_value_ = 0xaa;
-
-  do_deallocate_fill_    = true; 
-  deallocate_fill_value_ = 0xdd;
-
-  for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
-    group_names_ [i] = "";
-    limit_       [i] = 0;
-    bytes_       [i] = 0;
-    bytes_high_  [i] = 0;
-    bytes_highest_  [i] = 0;
-    new_calls_   [i] = 0;
-    delete_calls_[i] = 0;
-  }
-  group_names_[0] = "";
-  group_names_[1] = "memory";
-
-#endif
-}
-
-//----------------------------------------------------------------------
-
-void Memory::finalize_() throw ()
-{
-  // WARNING: not called by end of program
-
-#ifdef CONFIG_USE_MEMORY
-  // 
 #endif
 }
 
@@ -87,24 +53,24 @@ void * Memory::allocate ( size_t bytes ) throw ()
 
     buffer[0] = bytes;
 
-    buffer[1] = curr_group_.top();
+    buffer[1] = index_group_;
 
-    if (do_allocate_fill_) {
-      memset (&buffer[2],allocate_fill_value_,bytes);
+    if (fill_new_) {
+      memset (&buffer[2],fill_new_,bytes);
     }
 
     ++ new_calls_[0] ;
-    bytes_[0] += bytes;
-    bytes_high_[0]    = MAX(bytes_high_[0],   bytes_[0]);
-    bytes_highest_[0] = MAX(bytes_highest_[0],bytes_[0]);
+    bytes_curr_[0] += bytes;
+    bytes_high_[0]    = MAX(bytes_high_[0],   bytes_curr_[0]);
+    bytes_highest_[0] = MAX(bytes_highest_[0],bytes_curr_[0]);
 
-    memory_group_handle current = curr_group_.top();
-
-    if (current != 0) {
-      ++ new_calls_[current] ;
-      bytes_[current] += bytes;
-      bytes_high_[current]    = MAX(bytes_high_[current],   bytes_[current]);
-      bytes_highest_[current] = MAX(bytes_highest_[current],bytes_[current]);
+    if (index_group_ != 0) {
+      ++ new_calls_[index_group_] ;
+      bytes_curr_[index_group_] += bytes;
+      bytes_high_[index_group_]    = MAX(bytes_high_[index_group_],
+					 bytes_curr_[index_group_]);
+      bytes_highest_[index_group_] = MAX(bytes_highest_[index_group_],
+					 bytes_curr_[index_group_]);
     }
 
   } else {
@@ -131,17 +97,17 @@ void Memory::deallocate ( void * pointer ) throw()
     int bytes = buffer[0];
 
     ++ delete_calls_[0] ;
-    bytes_[0] -= bytes;
+    bytes_curr_[0] -= bytes;
 
-    memory_group_handle current = buffer[1];
+    int index_group = buffer[1];
 
-    if (current != 0) {
-      ++ delete_calls_[current] ;
-      bytes_[current] -= bytes;
+    if (index_group != 0) {
+      ++ delete_calls_[index_group] ;
+      bytes_curr_[index_group] -= bytes;
     }
 
-    if (do_deallocate_fill_) {
-      memset (&buffer[2],deallocate_fill_value_,bytes);
+    if (fill_delete_) {
+      memset (&buffer[2],fill_delete_,bytes);
     }
 
   }
@@ -153,118 +119,29 @@ void Memory::deallocate ( void * pointer ) throw()
 
 //----------------------------------------------------------------------
 
-void Memory::new_group ( memory_group_handle group_id, const char * group_name ) throw ()
-/// @param  group_id    non-zero ID of the group
+void Memory::new_group ( std::string group_name ) throw ()
+/// @param  index_group    non-zero ID of the group
 /// @param  group_name  Name of the group
 {
 #ifdef CONFIG_USE_MEMORY
 
-  ASSERT ("Memory::new_group()","group_id out of range",
-	  1 <= group_id && group_id <= MEMORY_MAX_NUM_GROUPS);
-
-  group_names_[group_id] = group_name;
-
-  max_group_id_  = MAX(max_group_id_, group_id);
-
+  group_name_.push_back(group_name);
+  bytes_limit_  .push_back(0);
+  bytes_curr_   .push_back(0);
+  bytes_high_   .push_back(0);
+  bytes_highest_.push_back(0);
+  new_calls_    .push_back(0);
+  delete_calls_ .push_back(0);
+  
 #endif
 }
 
 //----------------------------------------------------------------------
 
-void  Memory::begin_group ( memory_group_handle group_id ) throw ()
-/// @param  group_id ID of the group
-///
-/// If number of groups exceeds MEMORY_MAX_NUM_GROUPS_, issue a
-/// warning and fall back to "general" group
+long long Memory::bytes ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  // check for whether we have already called begin_group before
-
-  bool in_range = (group_id <= max_group_id_);
-
-  if ( in_range ) {
-
-    curr_group_.push(group_id);
-
-  } else { // curr_group_ out of range
-
-    WARNING2("Memory::begin_group()",
-	     "Group %d is out of range [1,%d]\n",
-	     group_id, max_group_id_);
-
-  }
-#endif
-}
-
-//----------------------------------------------------------------------
-
-void Memory::end_group ( memory_group_handle group_id ) throw ()
-{
-#ifdef CONFIG_USE_MEMORY
-
-  bool in_range = (group_id <= max_group_id_);
-
-  if ( in_range ) {
-
-    if (curr_group_.size() > 0) {
-
-      if (curr_group_.top() != group_id) {
-
-	WARNING2("Memory::end_group",
-		"Mismatch between end_group(%d) and group stack top %d\n",
-		 group_id,curr_group_.top());
-      }
-
-      curr_group_.pop();
-
-    } else {
-
-      WARNING1("Memory::end_group",
-	       "end_group(%d) called with empty group stack\n",
-	       group_id);
-      
-    }
-
-  } else { // curr_group_ out of range
-
-    WARNING2("Memory::end_group",
-	     "Group %d is out of range [1,%d]\n",
-	     group_id, max_group_id_);
-  }
-#endif
-}
-
-//----------------------------------------------------------------------
-
-memory_group_handle Memory::current_group (const char ** group_name) throw ()
-{
-#ifdef CONFIG_USE_MEMORY
-
-  // Create "null" group name if needed
-
-  memory_group_handle current = curr_group_.top();
-
-  //  if (group_names_[current].size() == 0) {
-  //    group_names_[current] = "";
-  //  }
-
-  *group_name = group_names_[current].c_str();
-  return current;
-
-#else
-
-  *group_name = 0;
-  return 0;
-
-#endif
-}
-
-//----------------------------------------------------------------------
-
-long long Memory::bytes ( memory_group_handle group_handle ) throw ()
-{
-#ifdef CONFIG_USE_MEMORY
-  return bytes_[group_handle];
+  return bytes_curr_[index_group(group_name)];
 #else
   return 0;
 #endif
@@ -272,11 +149,12 @@ long long Memory::bytes ( memory_group_handle group_handle ) throw ()
 
 //----------------------------------------------------------------------
 
-long long Memory::available ( memory_group_handle group_handle ) throw ()
+long long Memory::bytes_available ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  if (limit_[group_handle] != 0) {
-    return limit_[group_handle] - bytes_[group_handle];
+  int index_group = this->index_group(group_name);
+  if (bytes_limit_[index_group] != 0) {
+    return bytes_limit_[index_group] - bytes_curr_[index_group];
   } else {
     return 0;
   }
@@ -287,12 +165,14 @@ long long Memory::available ( memory_group_handle group_handle ) throw ()
 
 //----------------------------------------------------------------------
 
-float Memory::efficiency ( memory_group_handle group_handle ) throw ()
+float Memory::efficiency ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-
-  if (limit_[group_handle] != 0) {
-    return (float) bytes_[group_handle] / limit_[group_handle];
+  int index_group = this->index_group(group_name);
+  printf ("bytes_limit_[%d] = %lld\n",index_group,bytes_limit_[index_group]);
+  printf ("bytes_curr_[%d] = %lld\n",index_group,bytes_curr_[index_group]);
+  if (bytes_limit_[index_group] != 0) {
+    return (float) bytes_curr_[index_group] / bytes_limit_[index_group];
   } else {
     return 0.0;
   }
@@ -304,11 +184,12 @@ float Memory::efficiency ( memory_group_handle group_handle ) throw ()
 
 //----------------------------------------------------------------------
 
-long long Memory::bytes_high ( memory_group_handle group_handle ) throw ()
+long long Memory::bytes_high ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  TRACE1("bytes_high = %lld",bytes_high_[group_handle]);
-  return bytes_high_[group_handle];
+  int index_group = this->index_group(group_name);
+  TRACE1("bytes_high = %lld",bytes_high_[index_group]);
+  return bytes_high_[index_group];
 #else
   return 0;
 #endif
@@ -316,11 +197,12 @@ long long Memory::bytes_high ( memory_group_handle group_handle ) throw ()
 
 //----------------------------------------------------------------------
 
-long long Memory::bytes_highest ( memory_group_handle group_handle ) throw ()
+long long Memory::bytes_highest ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  TRACE1("bytes_highest = %lld",bytes_highest_[group_handle]);
-  return bytes_highest_[group_handle];
+  int index_group = this->index_group(group_name);
+  TRACE1("bytes_highest = %lld",bytes_highest_[index_group]);
+  return bytes_highest_[index_group];
 #else
   return 0;
 #endif
@@ -328,20 +210,21 @@ long long Memory::bytes_highest ( memory_group_handle group_handle ) throw ()
 
 //----------------------------------------------------------------------
 
-void Memory::set_limit ( long long size, memory_group_handle group_handle )
+void Memory::set_bytes_limit ( long long size, std::string group_name )
   throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  limit_[group_handle] = size;
+  int index_group = this->index_group(group_name);
+  bytes_limit_[index_group] = size;
 #endif
 }
 
 //----------------------------------------------------------------------
 
-long long Memory::limit ( memory_group_handle group_handle ) throw ()
+long long Memory::bytes_limit ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  return limit_[group_handle];
+  return bytes_limit_[index_group(group_name)];
 #else
   return 0;
 #endif
@@ -349,10 +232,10 @@ long long Memory::limit ( memory_group_handle group_handle ) throw ()
 
 //----------------------------------------------------------------------
 
-int Memory::num_new ( memory_group_handle group_handle ) throw ()
+int Memory::num_new ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  return new_calls_[group_handle];
+  return new_calls_[index_group(group_name)];
 #else
   return 0;
 #endif
@@ -360,10 +243,10 @@ int Memory::num_new ( memory_group_handle group_handle ) throw ()
 
 //----------------------------------------------------------------------
 
-int Memory::num_delete ( memory_group_handle group_handle ) throw ()
+int Memory::num_delete ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  return delete_calls_[group_handle];
+  return delete_calls_[index_group(group_name)];
 #else
   return 0;
 #endif
@@ -374,14 +257,14 @@ int Memory::num_delete ( memory_group_handle group_handle ) throw ()
 void Memory::print () throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  for (memory_group_handle i=0; i<= max_group_id_; i++) {
+  for (int i=0; i< group_name_.size(); i++) {
     Monitor * monitor = Monitor::instance();
-    if (i == 0 || group_names_[i] != "") {
-      monitor->print ("Memory","Group %s",i ? group_names_[i].c_str(): "Total");
-      monitor->print ("Memory","  limit         = %ld",long(limit_[i]));
-      monitor->print ("Memory","  bytes         = %ld",long(bytes_[i]));
+    if (i == 0 || group_name_[i] != "") {
+      monitor->print ("Memory","Group %s",i ? group_name_[i].c_str(): "Total");
+      monitor->print ("Memory","  bytes         = %ld",long(bytes_curr_[i]));
       monitor->print ("Memory","  bytes_high    = %ld",long(bytes_high_[i]));
       monitor->print ("Memory","  bytes_highest = %ld",long(bytes_highest_[i]));
+      monitor->print ("Memory","  bytes_limit   = %ld",long(bytes_limit_[i]));
       monitor->print ("Memory","  new_calls     = %ld",long(new_calls_[i]));
       monitor->print ("Memory","  delete_calls  = %ld",long(delete_calls_[i]));
     }
@@ -394,16 +277,14 @@ void Memory::print () throw ()
 void Memory::reset() throw()
 {
 #ifdef CONFIG_USE_MEMORY
-  while (! curr_group_.empty()) curr_group_.pop();
+  index_group_ = 0;
 
-  curr_group_.push(0);
-
-  for (int i=0; i<max_group_id_ + 1; i++) {
-    bytes_       [i] = 0;
-    bytes_high_  [i] = 0;
-    bytes_highest_  [i] = 0;
-    new_calls_   [i] = 0;
-    delete_calls_[i] = 0;
+  for (int i=0; i<bytes_curr_.size(); i++) {
+    bytes_curr_    [i] = 0;
+    bytes_high_    [i] = 0;
+    bytes_highest_ [i] = 0;
+    new_calls_     [i] = 0;
+    delete_calls_  [i] = 0;
   }
 #endif
 }
@@ -414,21 +295,9 @@ void Memory::reset_high() throw()
 {
 #ifdef CONFIG_USE_MEMORY
   TRACE("reset_high");
-  for (int i=0; i<max_group_id_ + 1; i++) {
-    bytes_high_ [i] = bytes_[i];
+  for (int i=0; i<bytes_high_.size(); i++) {
+    bytes_high_ [i] = bytes_curr_[i];
   }
-#endif
-}
-
-//----------------------------------------------------------------------
-
-void Memory::check_handle_(memory_group_handle group_handle) throw ()
-{  
-#ifdef CONFIG_USE_MEMORY
-  ASSERT2 ("Memory::check_handle_",
-	   "group_handle %d is out of range [0:%d]",
-	   int(group_handle), max_group_id_,
-	   0 <= group_handle && group_handle <= max_group_id_);
 #endif
 }
 
@@ -439,9 +308,6 @@ void Memory::check_handle_(memory_group_handle group_handle) throw ()
 void *operator new (size_t bytes) throw (std::bad_alloc)
 {
   size_t p = (size_t) Memory::instance()->allocate(bytes);
-
-  // Return pointer to new storage
-
   return (void *) p;
 }
 
@@ -454,11 +320,7 @@ void *operator new (size_t bytes) throw (std::bad_alloc)
 void *operator new [] (size_t bytes) throw (std::bad_alloc)
 {
   size_t p = (size_t) Memory::instance()->allocate(bytes);
-
-  // Return pointer to new storage
-
   return (void *)(p);
-
 }
 
 #endif /* CONFIG_USE_MEMORY */
@@ -470,9 +332,7 @@ void *operator new [] (size_t bytes) throw (std::bad_alloc)
 void operator delete (void *p) throw ()
 {
   if (p==0) return;
-
   Memory::instance()->deallocate(p);
-
 }
 
 #endif /* CONFIG_USE_MEMORY */
@@ -484,7 +344,6 @@ void operator delete (void *p) throw ()
 void operator delete [] (void *p) throw ()
 {
   if (p==0) return;
-
   Memory::instance()->deallocate(p);
 }
 

@@ -9,14 +9,6 @@
 #ifndef MEMORY_MEMORY_HPP
 #define MEMORY_MEMORY_HPP
 
-/// @def      MEMORY_MAX_NUM_GROUPS
-/// @brief    Maximum number of groups for memory allocation tracking
-#define MEMORY_MAX_NUM_GROUPS 20
-
-/// @var      typedef int memory_group_handle
-/// @brief    Type for opaque group handles
-typedef int memory_group_handle;
-
 class Memory {
 
   /// @class    Memory
@@ -50,7 +42,8 @@ private: // interface
   Memory & operator = (const Memory & memory);
 
   /// Delete the Memory object
-  ~Memory() throw ();
+  ~Memory() throw ()
+  {}
 
 public: // interface
 
@@ -58,21 +51,16 @@ public: // interface
   {
     TRACEPUP;
     p | is_active_;
-    p | do_allocate_fill_; 
-    p | allocate_fill_value_;
-    p | do_deallocate_fill_; 
-    p | deallocate_fill_value_;
-    p | max_group_id_;
-    WARNING ("Memory::pup()","Skipping curr_group_");
-    //    p | curr_group_;
-    //    WARNING ("Memory::pup()","Skipping group_names_");
-    PUParray(p,group_names_ ,MEMORY_MAX_NUM_GROUPS + 1);
-    PUParray(p,limit_,MEMORY_MAX_NUM_GROUPS + 1);
-    PUParray(p,bytes_,MEMORY_MAX_NUM_GROUPS + 1);
-    PUParray(p,bytes_high_,MEMORY_MAX_NUM_GROUPS + 1);
-    PUParray(p,bytes_highest_,MEMORY_MAX_NUM_GROUPS + 1);
-    PUParray(p,new_calls_,MEMORY_MAX_NUM_GROUPS + 1);
-    PUParray(p,delete_calls_,MEMORY_MAX_NUM_GROUPS + 1);
+    p | fill_new_;
+    p | fill_delete_;
+    WARNING ("Memory::pup()","Skipping index_group_");
+    p | group_name_;
+    p | bytes_limit_;
+
+    if (p.isUnpacking()) {
+      WARNING ("Memory::pup()","Calling Memory::reset()");
+      reset();
+    }
   }
 
   /// Allocate memory
@@ -81,47 +69,54 @@ public: // interface
   /// De-allocate memory
   void deallocate ( void * pointer ) throw ();
 
-  /// Assign a name to a group
-  void new_group ( memory_group_handle group_id, 
-		   const char *        group_name ) throw ();
+  /// Define a new group
+  void new_group ( std::string group_name ) throw ();
 
-  /// Begin allocating memory associated with the specified group
-  void begin_group ( memory_group_handle group_id ) throw ();
+  int index_group(std::string group_name = "") const throw()
+  {
+    int index_group = 0;
+    for (int index=0; index<group_name_.size(); index++) {
+      if (group_name_.at(index) == group_name) index_group = index;
+    }
+    return index_group;
+  }
 
-  /// End allocating memory associated with the specified group
-  void end_group ( memory_group_handle group_id ) throw ();
+  /// Begin allocating/deallocating memory associated with the given group
+  void set_group ( std::string group_name ) throw ()
+  {
+    index_group_ = this->index_group(group_name);
+  }
 
-  /// Return handle and name of the current group
-  memory_group_handle current_group (const char ** ) throw ();
+  std::string group () const throw ()
+  { return group_name_[index_group_]; }
 
   /// Current number of bytes allocated
-  long long bytes ( memory_group_handle group_handle = 0 ) throw ();
+  long long bytes ( std::string group = "" ) throw ();
   
   /// Estimate of used / available memory
-  float efficiency ( memory_group_handle group_handle = 0 ) throw ();
+  float efficiency ( std::string group = "" ) throw ();
 
   /// Maximum number of bytes allocated within an interval
-  long long bytes_high ( memory_group_handle group_handle = 0 ) throw ();
+  long long bytes_high ( std::string group = "" ) throw ();
 
   /// Maximum number of bytes allocated during run
-  long long bytes_highest ( memory_group_handle group_handle = 0 ) throw ();
+  long long bytes_highest ( std::string group = "" ) throw ();
 
   /// Specify the maximum number of bytes to use
-  void set_limit ( long long           size, 
-		   memory_group_handle group_handle = 0) throw ();
+  void set_bytes_limit ( long long size, 
+			 std::string group = "") throw ();
 
-  /// Return the maximum number of bytes to use
-  long long limit ( memory_group_handle group_handle = 0) throw ();
+  /// Return the limit on number of bytes to use
+  long long bytes_limit ( std::string group = "") throw ();
 
   /// Query the maximum number of bytes left to use, 0 if unknown
-  long long available ( memory_group_handle group_handle = 0 ) throw ();
-
+  long long bytes_available ( std::string group = "" ) throw ();
 
   /// Return the number of calls to allocate for the group
-  int num_new ( memory_group_handle group_handle = 0 ) throw ();
+  int num_new ( std::string group = "" ) throw ();
 
   /// Return the number of calls to deallocate for the group
-  int num_delete ( memory_group_handle group_handle = 0 ) throw ();
+  int num_delete ( std::string group = "" ) throw ();
 
   /// Print memory summary
   void print () throw ();
@@ -150,33 +145,29 @@ public: // interface
   }
 
   /// Set whether to fill memory with a value after allocating
-  void set_allocate_fill (bool do_fill, char fill_value = 0)
+  void set_fill_new (char value = 0)
   {
 #ifdef CONFIG_USE_MEMORY
-    do_allocate_fill_    = do_fill;
-    allocate_fill_value_ = fill_value;
+    fill_new_ = value;
 #endif
   };
 
   /// Set whether to fill memory with a value before deallocating
-  void set_deallocate_fill (bool do_fill, char fill_value = 0)
+  void set_fill_delete (char value = 0)
   {
 #ifdef CONFIG_USE_MEMORY
-    do_deallocate_fill_    = do_fill;
-    deallocate_fill_value_ = fill_value;
+    fill_delete_ = value;
 #endif
   };
+
+  //======================================================================
 
 private: // functions
 
   /// Initialize the memory component
   void initialize_() throw ();
 
-  /// Finalize the memory component
-  void finalize_() throw ();
-
-  ///  Check the group handle
-  void check_handle_(memory_group_handle group_handle) throw ();
+  //======================================================================
 
 private: // attributes
 
@@ -190,44 +181,35 @@ private: // attributes
   /// Whether keeping track of memory statistics is active or not
   bool is_active_;
 
-  /// Whether to fill memory after allocation
-  bool do_allocate_fill_; 
-
   /// allocate clear value
-  char allocate_fill_value_;
-
-  /// Whether to clear memory before deallocate
-  bool do_deallocate_fill_; 
+  char fill_new_;
 
   /// deallocate clear value
-  char deallocate_fill_value_;
-
-  /// The highest active group index
-  int max_group_id_;
+  char fill_delete_;
 
   /// The current group index, or 0 if none
-  std::stack<memory_group_handle> curr_group_;
+  int index_group_;
 
-  /// Array of known group names
-  std::string group_names_ [MEMORY_MAX_NUM_GROUPS + 1];
+  /// Names of groups
+  std::vector<std::string> group_name_;
 
   /// Limit on number of bytes to allocate.  Currently not checked.
-  long long limit_   [MEMORY_MAX_NUM_GROUPS + 1];
+  std::vector<long long> bytes_limit_;
 
   /// Current bytes allocated for different groups
-  long long bytes_       [MEMORY_MAX_NUM_GROUPS + 1];
+  std::vector<long long> bytes_curr_;
 
   /// Intervaled high-water bytes allocated for different groups
-  long long bytes_high_  [MEMORY_MAX_NUM_GROUPS + 1];
+  std::vector<long long> bytes_high_;
 
   /// High-water bytes allocated for different groups
-  long long bytes_highest_  [MEMORY_MAX_NUM_GROUPS + 1];
+  std::vector<long long> bytes_highest_;
 
   /// Number of calls to new for different groups
-  long long new_calls_   [MEMORY_MAX_NUM_GROUPS + 1];
+  std::vector<long long> new_calls_;
 
   /// Number of calls to delete for different groups
-  long long delete_calls_[MEMORY_MAX_NUM_GROUPS + 1];
+  std::vector<long long> delete_calls_;
 
 #endif
 

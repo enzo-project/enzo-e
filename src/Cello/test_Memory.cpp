@@ -41,15 +41,19 @@ PARALLEL_MAIN_BEGIN
   int del_count = 0;
 
 #define NEW(VAR,TYPE,SIZE,COUNT) \
+  memory->set_active(true); \
   VAR = new TYPE[SIZE]; \
   COUNT += sizeof(TYPE[SIZE]); \
   for (i=0; i<SIZE; i++) VAR[i] = 17; \
-  new_count++;
+  new_count++; \
+  memory->set_active(false);
 
 #define DEL(VAR,TYPE,SIZE,COUNT) \
+  memory->set_active(true); \
   delete [] VAR; \
   COUNT -= sizeof(TYPE[SIZE]); \
-  del_count++;
+  del_count++; \
+  memory->set_active(false);
 
 #define NEW_F1(SIZE) NEW(f1,double,10,SIZE);
 #define NEW_F2(SIZE) NEW(f2,float, 17,SIZE);
@@ -58,13 +62,13 @@ PARALLEL_MAIN_BEGIN
 #define DEL_F2(SIZE) DEL(f2,float, 17,SIZE);
 #define DEL_F3(SIZE) DEL(f3,int,   25,SIZE);
 
-  unsigned size = 0;
+  unsigned bytes = 0;
 
-  NEW_F1(size);
-  NEW_F2(size);
-  NEW_F3(size);
+  NEW_F1(bytes);
+  NEW_F2(bytes);
+  NEW_F3(bytes);
 
-  unit_assert (memory->bytes() == size);
+  unit_assert (memory->bytes() == bytes);
   
   //----------------------------------------------------------------------
   // deallocate()
@@ -72,31 +76,35 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("deallocate");
 
-  DEL_F1(size);
-  DEL_F3(size);
+  DEL_F1(bytes);
+  DEL_F3(bytes);
 
-  unit_assert (memory->bytes() == size);
+  unit_assert (memory->bytes() == bytes);
 
-  DEL_F2(size);
-  NEW_F1(size);
-  NEW_F2(size);
-  DEL_F1(size);
-  DEL_F2(size);
-  NEW_F3(size);
-  NEW_F2(size);
-  DEL_F3(size);
-  DEL_F2(size);
+  DEL_F2(bytes);
+  NEW_F1(bytes);
+  NEW_F2(bytes);
+  DEL_F1(bytes);
+  DEL_F2(bytes);
+  NEW_F3(bytes);
+  NEW_F2(bytes);
+  DEL_F3(bytes);
+  DEL_F2(bytes);
 
-  unit_assert (memory->bytes() == size);
+  unit_assert (memory->bytes() == bytes);
 
   Timer timer;
   timer.start();
   const int num_alloc = 10000;
   const int size_alloc = 1000;
   for (int j=0; j<num_alloc; j++) {
+    memory->set_active(true);
     f1 = new double[size_alloc];
+    memory->set_active(false);
     new_count++;
+    memory->set_active(true);
     delete [] f1;
+    memory->set_active(false);
     del_count++;
   }
   timer.stop();
@@ -112,10 +120,10 @@ PARALLEL_MAIN_BEGIN
   timer.stop();
   PARALLEL_PRINTF ("malloc/free per sec = %g\n",num_alloc/timer.value());
 
-  unit_assert (memory->bytes() == size);
+  unit_assert (memory->bytes() == bytes);
 
   //----------------------------------------------------------------------
-  // begin_group(), end_group()
+  // set_group()
   //----------------------------------------------------------------------
 
   unsigned size_test_1 = 0;
@@ -123,100 +131,92 @@ PARALLEL_MAIN_BEGIN
 
   // Group 1
 
-  unsigned group_test_1 = 1;
-  unsigned group_test_2 = 2;
+  memory->new_group ("Test_1");
+  memory->new_group ("Test_2");
 
-  memory->new_group (group_test_1,"Test_1");
-  memory->new_group (group_test_2,"Test_2");
+  memory->set_group("Test_1");
 
-  memory->begin_group(group_test_1);
+  std::string name_1 = memory->group();
 
-  const char * name_1;
-  int handle_1 = memory->current_group(&name_1);
-
-  unit_assert (strcmp(name_1,"Test_1") == 0);
+  unit_assert (name_1 == "Test_1");
 
   NEW_F1(size_test_1);
   NEW_F3(size_test_1);
 
-  unit_assert (memory->bytes(handle_1) == size_test_1);
-  printf ("%lld %d\n",memory->bytes()         , size_test_1 + size);
-  unit_assert (memory->bytes()         == size_test_1 + size);
+  long long bytes_1;
+  bytes_1 = memory->bytes("Test_1");
+  unit_assert (bytes_1 == size_test_1);
+  unit_assert (memory->bytes()         == size_test_1 + bytes);
   
   DEL_F1(size_test_1);
   DEL_F3(size_test_1);
 
-  unit_assert (memory->bytes(handle_1) == size_test_1);
-  unit_assert (memory->bytes()         == size_test_1 + size);
+  unit_assert (memory->bytes("Test_1") == size_test_1);
+  unit_assert (memory->bytes()         == size_test_1 + bytes);
 
-  memory->end_group(group_test_1);
+  memory->set_group("Test_2");
 
-  // Group 1
+  std::string name_2 = memory->group();
 
-  memory->begin_group(group_test_2);
-
-  const char * name_2;
-  int handle_2 = memory->current_group(&name_2);
-
-  unit_assert (strcmp(name_2,"Test_2") == 0);
+  unit_assert (name_2 == "Test_2");
 
   NEW_F2(size_test_2);
   NEW_F3(size_test_2);
 
-  unit_assert (memory->bytes(handle_1) == size_test_1);
-  unit_assert (memory->bytes(handle_2) ==               size_test_2);
-  unit_assert (memory->bytes()         == size_test_1 + size_test_2 + size);
+  unit_assert (memory->bytes("Test_1") == size_test_1);
+  unit_assert (memory->bytes("Test_2") ==               size_test_2);
+  unit_assert (memory->bytes()         == size_test_1 + size_test_2 + bytes);
   
-  memory->end_group(group_test_2);
-
-  const char * name_0;
-  int handle_0 = memory->current_group(&name_0);
-
-  unit_assert (strcmp(name_0,"\0") == 0);
-  unit_assert (handle_0 == 0);
-
   DEL_F2(size_test_2);
   DEL_F3(size_test_2);
 
-  unit_assert (memory->bytes(handle_1) == size_test_1);
-  unit_assert (memory->bytes(handle_2) ==               size_test_2);
-  unit_assert (memory->bytes()         == size_test_1 + size_test_2 + size);
+  unit_assert (memory->bytes("Test_1") == size_test_1);
+  unit_assert (memory->bytes("Test_2") ==               size_test_2);
+  unit_assert (memory->bytes()         == size_test_1 + size_test_2 + bytes);
 
   // available()
 
-  memory->set_limit(1000000);
-  memory->set_limit(10000,1);
+  memory->set_bytes_limit(1000000);
+  memory->set_bytes_limit(10000,"Test_1");
 
-  unit_func ("set_limit()");
-  unit_assert(memory->limit()  == 1000000);
-  unit_func ("limit()");
-  unit_assert(memory->limit(1) == 10000);
+  unit_func ("set_bytes_limit()");
+  unit_assert(memory->bytes_limit()  == 1000000);
+  unit_func ("bytes_limit()");
+  unit_assert(memory->bytes_limit("Test_1") == 10000);
 
   // efficiency()
 
   
   unit_func ("efficiency()");
 
+  memory->set_active(true);
   char * temp_0 = new char [10000];
+  memory->set_active(false);
+
   new_count++;
   unit_assert (fabs(memory->efficiency() - 0.01) < 1e-7);
+  memory->set_active(true);
   delete [] temp_0;
+  memory->set_active(false);
   del_count++;
 
-  memory->begin_group(1);
+  memory->set_group("Test_1");
+  memory->set_active(true);
   char * temp_1 = new char [1000];
+  memory->set_active(false);
   new_count++;
-  unit_assert (fabs(memory->efficiency(1) - 0.1) < 1e-7);
-  memory->end_group(1);
+  unit_assert (fabs(memory->efficiency("Test_1") - 0.1) < 1e-7);
 
+  memory->set_active(true);
   delete [] temp_1;
+  memory->set_active(false);
   del_count++;
 
   // bytes_high()
   unit_func ("bytes_high()");
 
   unit_assert(memory->bytes_high() == 10000);
-  unit_assert(memory->bytes_high(1) == 1000);
+  unit_assert(memory->bytes_high("Test_1") == 1000);
 
   // num_new()
   unit_func ("num_new()");

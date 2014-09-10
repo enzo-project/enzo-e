@@ -133,8 +133,8 @@ public: // interface
   void set_phase(int phase) const throw() 
   { phase_ = phase; };
 
-  /// Output Performance information to stdout (root process data only)
-  virtual void performance_output();
+  // /// Output Performance information to stdout (root process data only)
+  // virtual void performance_output();
 
   /// Write performance information to disk (all process data)
   void performance_write();

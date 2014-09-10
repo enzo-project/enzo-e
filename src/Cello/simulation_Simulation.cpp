@@ -276,7 +276,6 @@ void Simulation::initialize_performance_() throw()
 }
 
 //----------------------------------------------------------------------
-//----------------------------------------------------------------------
 
 void Simulation::initialize_config_() throw()
 {
@@ -476,63 +475,63 @@ void Simulation::update_state(int cycle, double time, double dt, double stop)
 
 //----------------------------------------------------------------------
 
-void Simulation::performance_output()
-{
-  TRACE("Simulation::performance_output()");
+// void Simulation::performance_output()
+// {
+  // TRACE("Simulation::performance_output()");
 
-  int num_regions  = performance_->num_regions();
-  int num_counters =  performance_->num_counters();
-  long long * counters = new long long [num_counters];
+  // int num_regions  = performance_->num_regions();
+  // int num_counters =  performance_->num_counters();
+  // long long * counters = new long long [num_counters];
 
-  for (int ic = 0; ic < num_counters; ic++) {
+  // for (int ic = 0; ic < num_counters; ic++) {
     
-    for (int ir = 0; ir < num_regions; ir++) {
+  //   for (int ir = 0; ir < num_regions; ir++) {
 
-      performance_->region_counters(ir,counters);
-      monitor_->print("Performance","%s %s %lld",
-		      performance_->region_name(ir).c_str(),
-		      performance_->counter_name(ic).c_str(),
-		      counters[ic]);  
-    }
-  }
+  //     performance_->region_counters(ir,counters);
+  //     monitor_->print("Performance","%s %s %lld",
+  // 		      performance_->region_name(ir).c_str(),
+  // 		      performance_->counter_name(ic).c_str(),
+  // 		      counters[ic]);  
+  //   }
+  // }
 
-  delete [] counters;
+  // delete [] counters;
 
-}
+// }
 
 //----------------------------------------------------------------------
 
 void Simulation::performance_write()
 {
-  TRACE("Simulation::performance_write()");
+  // TRACE("Simulation::performance_write()");
 
-  if (performance_name_ != "" && (group_process_->rank() % performance_stride_) == 0) {
+  // if (performance_name_ != "" && (group_process_->rank() % performance_stride_) == 0) {
 
-    char filename[30];
-    sprintf (filename,performance_name_.c_str(),group_process_->rank());
-    FILE * fp = fopen(filename,"w");
+  //   char filename[30];
+  //   sprintf (filename,performance_name_.c_str(),group_process_->rank());
+  //   FILE * fp = fopen(filename,"w");
 
-    int num_regions  = performance_->num_regions();
-    int num_counters =  performance_->num_counters();
-    long long * counters = new long long [num_counters];
+  //   int num_regions  = performance_->num_regions();
+  //   int num_counters =  performance_->num_counters();
+  //   long long * counters = new long long [num_counters];
 
-    for (int ir = 0; ir < num_regions; ir++) {
+  //   for (int ir = 0; ir < num_regions; ir++) {
 
-      performance_->region_counters(ir,counters);
+  //     performance_->region_counters(ir,counters);
 
-      for (int ic = 0; ic < num_counters; ic++) {
+  //     for (int ic = 0; ic < num_counters; ic++) {
     
-	fprintf (fp,"%s %s %lld\n",
-		 performance_->region_name(ir).c_str(),
-		 performance_->counter_name(ic).c_str(),
-		 counters[ic]);  
-      }
-    }
+  // 	fprintf (fp,"%s %s %lld\n",
+  // 		 performance_->region_name(ir).c_str(),
+  // 		 performance_->counter_name(ic).c_str(),
+  // 		 counters[ic]);  
+  //     }
+  //   }
 
-    delete [] counters;
-    fclose(fp);
+  //   delete [] counters;
+  //   fclose(fp);
     
-  }
+  // }
 
 }
 
