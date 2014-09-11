@@ -86,13 +86,13 @@ protected: // functions
     if (nbz) (*nbz) = nbz_;
   }
 
-  /// Number of cells along each dimension of the root-level of the domain 
+  /// Number of cells along each dimension of the root-level of the
+  /// domain (excluding ghost zones)
   void domain_size (int *ndx, int *ndy, int *ndz) const {
     if (ndx) (*ndx) = ndx_;
     if (ndy) (*ndy) = ndy_;
     if (ndz) (*ndz) = ndz_;
   }
-
 
   void ghost_depth (int id, int *gx, int *gy, int *gz) const {
     ASSERT2 ("Method::ghost_depth()",

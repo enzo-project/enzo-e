@@ -36,7 +36,7 @@ Mesh { root_rank = 3; }
          steepening = true;
      };
      turbulence {
-         mach_number = 10.0;
+         mach_number = 1.0;
          e_dot       = -1.0;
      }
  }

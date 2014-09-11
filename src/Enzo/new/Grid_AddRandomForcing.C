@@ -73,6 +73,11 @@ int grid::AddRandomForcing(float * norm, float * bulkMomentum, float dtTopGrid)
 	  (BaryonField[Vel1Num+dim][i]*
 	   //	  RandomForcingField[dim][i])*levelNorm;
   	  (RandomForcingField[dim][i]-bulkMomentum[dim]))*levelNorm;
+
+  // m = d*a
+  // et += (v*(a-m))*n
+  //     = (v*(a-d*a))*n
+
  
   /* add velocity perturbation to the velocity fields;
      keep the center-of-mass velocity zero. */

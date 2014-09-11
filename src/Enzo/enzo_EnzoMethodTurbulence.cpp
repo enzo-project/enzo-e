@@ -256,9 +256,12 @@ void EnzoMethodTurbulence::compute_resume
     //   if (gv0 < 1e-30 && gv0 > -1e-30 && MetaData->TopGridRank == 2) *norm = 0.0001;
     //     else    *norm = 1.25*dt*RandomForcingEdot*numberOfGridZones/gv0;
 
-    const bool small_g0 = (std::abs(g[0]) < 1e-30);
+    
+    double vad = g[INDEX_TURBULENCE_VAD];
 
-    norm = small_g0 ? 0.0001 : 1.25*dt*edot_*n/g[0];
+    const bool small_g0 = std::abs(vad < 1e-30);
+
+    norm = small_g0 ? 0.0001 : 1.25*dt*edot_*n/vad;
       
       // OLD COMPUTATION:
       //
@@ -322,7 +325,6 @@ void EnzoMethodTurbulence::compute_resume
     compute_resume_<double> (comm_block,msg);
   else if (p == precision_quadruple) 
     compute_resume_<long double> (comm_block,msg);
-
 }
 
 template <class T>
@@ -370,13 +372,25 @@ void EnzoMethodTurbulence::compute_resume_
   int nbx = nx + 2*gx;
   int nby = ny + 2*gy;
 
+  // compute bulk momentum
+  const T bm[3] = 
+    { g[INDEX_TURBULENCE_DAx]/nd,
+      g[INDEX_TURBULENCE_DAy]/nd,
+      g[INDEX_TURBULENCE_DAz]/nd};
+
+  //  for (int dim = 0; dim <  MetaData->TopGridRank; dim++)
+  //	bulkMomentum[dim] = GlobVal[7+dim]/numberOfGridZones;
+
   for (int iz=gz; iz<gz+nz; iz++) {
     for (int iy=gy; iy<gy+ny; iy++) {
       for (int ix=gx; ix<gx+nx; ix++) {
 	int i = ix + nbx*(iy + nby*iz);
 	for (int id=0; id<rank; id++) {
-	  te[i] += v3[id][i]*a3[id][i]*norm + 0.5*a3[id][i]*norm*a3[id][i]*norm;
-	  v3[id][i] += a3[id][i]*norm;
+	  //	  	  te[i] += v3[id][i]*a3[id][i]*norm + 0.5*a3[id][i]*norm*a3[id][i]*norm;
+	  //	  	  v3[id][i] += a3[id][i]*norm;
+	  te[i] += (v3[id][i]*(a3[id][i]-bm[id]))*norm;
+	  v3[id][i] += (a3[id][i]-bm[id])*norm;
+		    
 	}
       }
     }

@@ -75,7 +75,7 @@ public: // interface
   int index_group(std::string group_name = "") const throw()
   {
     int index_group = 0;
-    for (int index=0; index<group_name_.size(); index++) {
+    for (size_t index=0; index<group_name_.size(); index++) {
       if (group_name_.at(index) == group_name) index_group = index;
     }
     return index_group;
