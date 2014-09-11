@@ -72,7 +72,7 @@ Mesh { root_rank = 3; }
               "p_png", "te_png", "mesh", "refine_shock", "refine_shear"  ];
 
      checkpoint {
-          dir   = ["turbulence-checkpoint-%d","count"];
+          dir   = ["turbulence3d-checkpoint-%d","count"];
           type = "checkpoint";
           schedule {
              type = "interval";
@@ -83,7 +83,7 @@ Mesh { root_rank = 3; }
      };
 
      hdf5 {
-         name = [ "turbulence-p%02d-c%04d.h5", "proc", "count" ];
+         name = [ "turbulence3d-p%02d-c%04d.h5", "proc", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "data";
      };
@@ -91,7 +91,7 @@ Mesh { root_rank = 3; }
          include "input/colormap_rainbow.incl"
          field_list = [ "density" ];
          image_size = [ 1024, 1024 ];
-         name = [ "turbulence-de-%04d.png", "count" ];
+         name = [ "turbulence3d-de-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
      };
@@ -99,7 +99,7 @@ Mesh { root_rank = 3; }
          include "input/colormap_rainbow.incl"
          field_list = [ "velocity_x" ];
          image_size = [ 1024, 1024 ];
-         name = [ "turbulence-vx-%04d.png", "count" ];
+         name = [ "turbulence3d-vx-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
      };
@@ -107,7 +107,7 @@ Mesh { root_rank = 3; }
          include "input/colormap_rainbow.incl"
          field_list = [ "velocity_y" ];
          image_size = [ 1024, 1024 ];
-         name = [ "turbulence-vy-%04d.png", "count" ];
+         name = [ "turbulence3d-vy-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
      };
@@ -115,7 +115,7 @@ Mesh { root_rank = 3; }
          include "input/colormap_rainbow.incl"
          field_list = [ "velocity_z" ];
          image_size = [ 1024, 1024 ];
-         name = [ "turbulence-vz-%04d.png", "count" ];
+         name = [ "turbulence3d-vz-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
      };
@@ -123,7 +123,7 @@ Mesh { root_rank = 3; }
          include "input/colormap_rainbow.incl"
          field_list = [ "pressure" ];
          image_size = [ 1024, 1024 ];
-         name = [ "turbulence-p-%04d.png", "count" ];
+         name = [ "turbulence3d-p-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
      };
@@ -131,7 +131,7 @@ Mesh { root_rank = 3; }
          include "input/colormap_rainbow.incl"
          field_list = [ "total_energy" ];
          image_size = [ 1024, 1024 ];
-         name = [ "turbulence-te-%04d.png", "count" ];
+         name = [ "turbulence3d-te-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
      };
@@ -148,7 +148,7 @@ Mesh { root_rank = 3; }
          image_size = [ 1025, 1025 ];
          image_specify_bounds = true;
          image_type = "mesh";
-         name = [ "turbulence-mesh-%04d.png", "count" ];
+         name = [ "turbulence3d-mesh-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
      };
@@ -158,7 +158,7 @@ Mesh { root_rank = 3; }
                      1.0, 0.0, 0.0];  # red refine
          image_size = [ 1024, 1024 ];
          field_list = [ "refine_shock" ];
-         name = [ "turbulence-refine_shock-%04d.png", "count" ];
+         name = [ "turbulence3d-refine_shock-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
      };
@@ -170,7 +170,7 @@ Mesh { root_rank = 3; }
          include "input/colormap_rainbow.incl"
          image_size = [ 1024, 1024 ];
          field_list = [ "refine_shear" ];
-         name = [ "turbulence-refine_shear-%04d.png", "count" ];
+         name = [ "turbulence3d-refine_shear-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
      };

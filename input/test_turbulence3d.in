@@ -1,4 +1,4 @@
-include "input/method_turbulence.incl"
+include "input/method_turbulence3d.incl"
 
  Mesh {
      root_blocks = [ 4, 4, 4 ];
