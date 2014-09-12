@@ -193,12 +193,15 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   field_id = field_descr->field_id("density");
   field_index_[field_density]  = field_id;
   FieldType[field_id] = Density;
+
   field_id = field_descr->field_id("velocity_x");
   field_index_[field_velocity_x] = field_id;
   FieldType[field_id] = Velocity1;
+
   field_id = field_descr->field_id("velocity_y");
   field_index_[field_velocity_y] = field_id;
   FieldType[field_id] = Velocity2;
+
   field_id = field_descr->field_id("velocity_z");
   field_index_[field_velocity_z] = field_id;
   FieldType[field_id] = Velocity3;

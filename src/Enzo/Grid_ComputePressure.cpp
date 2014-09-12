@@ -28,8 +28,6 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
 
   /* declarations */
  
-  enzo_float density, gas_energy;
-  enzo_float total_energy, velocity1, velocity2 = 0, velocity3 = 0;
   int i, size = 1;
  
   /* Error Check */
@@ -57,12 +55,15 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
  
   /* Find fields: density, total energy, velocity1-3. */
  
-  int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
-  if (IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
-					 Vel3Num, TENum) == ENZO_FAIL) {
-    fprintf(stderr, "Error in IdentifyPhysicalQuantities.\n");
-    return ENZO_FAIL;
-  }
+  Field field = block()->field();
+
+  
+  enzo_float * density      = (enzo_float *) field.values("density");
+  enzo_float * total_energy = (enzo_float *) field.values("total_energy");
+  enzo_float * energy       = (enzo_float *) field.values("internal_energy");
+  enzo_float * velocity_x   = (enzo_float *) field.values("velocity_x");
+  enzo_float * velocity_y   = (enzo_float *) field.values("velocity_y");
+  enzo_float * velocity_z   = (enzo_float *) field.values("velocity_z");
 
   /* Loop over the grid, compute the thermal energy, then the pressure,
      the timestep and finally the implied timestep. */
@@ -74,24 +75,17 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
 
     for (i = 0; i < size; i++) {
  
-      total_energy  = BaryonField[TENum][i];
-      
-      //      if (i==0) printf ("%s:%d total_energy %f\n",__FILE__,__LINE__,total_energy);
+      enzo_float te = total_energy[i];
+      enzo_float d  = density[i];
+      enzo_float vx = velocity_x[i];
+      enzo_float vy = (rank() >= 2) ? velocity_y[i] : 0.0;
+      enzo_float vz = (rank() >= 3) ? velocity_z[i] : 0.0;
 
-      density       = BaryonField[DensNum][i];
-      velocity1     = BaryonField[Vel1Num][i];
-      if (GridRank > 1)
-	velocity2   = BaryonField[Vel2Num][i];
-      if (GridRank > 2)
-	velocity3   = BaryonField[Vel3Num][i];
- 
       /* gas energy = E - 1/2 v^2. */
  
-      gas_energy    = total_energy - 0.5*(velocity1*velocity1 +
-					  velocity2*velocity2 +
-					  velocity3*velocity3);
+      energy[i] = te - 0.5*(vx*vx + vy*vy + vz*vz);
 
-      pressure[i] = (Gamma - 1.0)*density*gas_energy;
+      pressure[i] = (Gamma - 1.0)*d*energy[i];
 
       if (pressure[i] < pressure_floor)
 	pressure[i] = pressure_floor;
@@ -100,39 +94,39 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
  
   else
 
-    //    WARNING("EnzoBlock::ComputePressure()",
-    //	    "Accessing OldBaryonField");
+    ERROR("EnzoBlock::ComputePressure()",
+	    "Accessing OldBaryonField");
 	    
     /* general case: */
  
-    for (i = 0; i < size; i++) {
+    // for (i = 0; i < size; i++) {
  
-      total_energy  = coef   *   BaryonField[TENum][i] +
-	              coefold*OldBaryonField[TENum][i];
-      density       = coef   *   BaryonField[DensNum][i] +
-                      coefold*OldBaryonField[DensNum][i];
-      velocity1     = coef   *   BaryonField[Vel1Num][i] +
-                      coefold*OldBaryonField[Vel1Num][i];
+    //   enzo_float te = coef * te  BaryonField[TENum][i] +
+    // 	              coefold*OldBaryonField[TENum][i];
+    //   density       = coef   *   BaryonField[DensNum][i] +
+    //                   coefold*OldBaryonField[DensNum][i];
+    //   vx     = coef   *   BaryonField[Vel1Num][i] +
+    //                   coefold*OldBaryonField[Vel1Num][i];
  
-      if (GridRank > 1)
-	velocity2   = coef   *   BaryonField[Vel2Num][i] +
-	              coefold*OldBaryonField[Vel2Num][i];
-      if (GridRank > 2)
-	velocity3   = coef   *   BaryonField[Vel3Num][i] +
-	              coefold*OldBaryonField[Vel3Num][i];
+    //   if (GridRank > 1)
+    // 	vy   = coef   *   BaryonField[Vel2Num][i] +
+    // 	              coefold*OldBaryonField[Vel2Num][i];
+    //   if (GridRank > 2)
+    // 	vz   = coef   *   BaryonField[Vel3Num][i] +
+    // 	              coefold*OldBaryonField[Vel3Num][i];
  
-      /* gas energy = E - 1/2 v^2. */
+    //   /* gas energy = E - 1/2 v^2. */
  
-      gas_energy    = total_energy - 0.5*(velocity1*velocity1 +
-					  velocity2*velocity2 +
-					  velocity3*velocity3);
+    //   gas_energy    = total_energy - 0.5*(vx*vx +
+    // 					  vy*vy +
+    // 					  vz*vz);
  
-      pressure[i] = (Gamma - 1.0)*density*gas_energy;
+    //   pressure[i] = (Gamma - 1.0)*density*gas_energy;
  
-      if (pressure[i] < pressure_floor)
-	pressure[i] = pressure_floor;
+    //   if (pressure[i] < pressure_floor)
+    // 	pressure[i] = pressure_floor;
  
-    }
+    // }
  
   /* Correct for Gamma from H2. */
  
@@ -205,12 +199,10 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
   /* To emulate the opacity limit in turbulent star formation 
      simulations */
   
-  // @@@ HOW TO PARAMETERIZE? jb @@@
-
   enzo_float Gamma1 = Gamma;
   if ((ProblemType == 60 || ProblemType == 61) && GravityOn == TRUE)
     for (i=0; i<size; i++) {
-      Gamma1 = MIN(Gamma + (log10(BaryonField[DensNum][i])-8.0)*0.3999/2.5, 1.4);
+      Gamma1 = MIN(Gamma + (log10(density[i])-8.0)*0.3999/2.5, 1.4);
       pressure[i] *= (Gamma1 - 1.0)/(Gamma - 1.0);
     }
 
