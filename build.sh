@@ -90,8 +90,8 @@ setenv CELLO_PREC $prec
 python scons.py install-inc    >&  $dir/out.scons
 python scons.py $k_switch -j $proc -Q $target |& tee $dir/out.scons
 
-util/parse_error.awk   < $dir/out.scons >  errors.org
-util/parse_warning.awk < $dir/out.scons >> errors.org
+./tools/parse_error.awk   < $dir/out.scons >  errors.org
+./tools/parse_warning.awk < $dir/out.scons >> errors.org
 
 if (-e $target) then
    echo "Success"

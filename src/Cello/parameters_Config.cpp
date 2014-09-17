@@ -150,6 +150,7 @@ void Config::read(Parameters * p) throw()
 {
   TRACE("BEGIN Config::read()");
 
+  read_adapt_(p);
   read_balance_(p);
   read_boundary_(p);
   read_domain_(p);
@@ -476,6 +477,12 @@ void Config::read_mesh_ (Parameters * p) throw()
   mesh_root_size[1] = p->list_value_integer(1,"Mesh:root_size",1);
   mesh_root_size[2] = p->list_value_integer(2,"Mesh:root_size",1);
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_mesh_ (Parameters * p) throw()
+{
   //--------------------------------------------------
   // Adapt
   //--------------------------------------------------
@@ -528,20 +535,18 @@ void Config::read_mesh_ (Parameters * p) throw()
 
       mesh_min_refine[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
       mesh_max_coarsen[ia] = p->list_value_float (0,prefix + "max_coarsen",
-					    0.5*mesh_min_refine[ia]);
+						  0.5*mesh_min_refine[ia]);
 
       mesh_min_refine2[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
       mesh_max_coarsen2[ia] = p->list_value_float (1,prefix + "max_coarsen",
-					     0.5*mesh_min_refine2[ia]);
+						   0.5*mesh_min_refine2[ia]);
     }
 
     mesh_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
 
-
     mesh_refine_output[ia] = p->value_string (prefix + "output","");
 
   }
-
 }
 
 //----------------------------------------------------------------------

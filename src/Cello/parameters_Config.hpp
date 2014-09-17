@@ -186,6 +186,7 @@ public: // attributes
 protected: // functions
 
   /// Read boundary-related values from the Parameters object
+  void read_adapt_       (Parameters * parameters) throw();
   void read_balance_     (Parameters * parameters) throw();
   void read_boundary_    (Parameters * parameters) throw();
   void read_domain_      (Parameters * parameters) throw();
