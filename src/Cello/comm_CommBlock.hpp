@@ -384,9 +384,9 @@ public:
   {      refresh_exit_(); delete msg;  }
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
-  void x_refresh_face
+  void x_refresh_send_face
   (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]) 
-  {      refresh_face_(n,buffer,type_refresh,if3,ic3); }
+  {      refresh_store_face_(n,buffer,type_refresh,if3,ic3); }
 
   /// Get restricted data from child when it is deleted
   void x_refresh_child (int n, char buffer[],int ic3[3]);
@@ -398,10 +398,11 @@ public:
 protected:
   void refresh_enter_();
   void refresh_begin_();
-  void refresh_exit_ ();
-  void refresh_face_
+  void refresh_load_face_
+  (int type_refresh, Index index, int if3[3], int ic3[3]);
+  void refresh_store_face_
   (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]);
-  void refresh_face (int type_refresh, Index index, int if3[3], int ic3[3]);
+  void refresh_exit_ ();
 public:
 
   //--------------------------------------------------
@@ -577,6 +578,24 @@ protected: // functions
   /// Update boundary conditions
   void update_boundary_ ();
 
+  /// Boundary is a boundary face
+  bool is_boundary_face_(int of3[3],
+			 bool boundary[3][2],
+			 bool periodic[3][2],
+			 bool update[3][2]) const 
+  {
+
+    bool skip = false;
+    for (int axis=0; axis<3; axis++) {
+      if (of3[axis] != 0) {
+	int face=(of3[axis]+1)/2;
+	if ( (! periodic[axis][face]) && 
+	     update[axis][face] &&
+	     boundary[axis][face]) skip = true;
+      }
+    }
+    return skip;
+  }
   void loop_limits_nibling_ (int ic3m[3], int ic3p[3], const int if3[3]) const throw();
 
   FieldFace * load_face_(int * n, char ** a,

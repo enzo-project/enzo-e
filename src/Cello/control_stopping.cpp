@@ -43,8 +43,6 @@ void CommBlock::stopping_begin_()
 
   simulation->set_phase(phase_stopping);
 
-  update_boundary_();
-
   int stopping_interval = simulation->config()->stopping_interval;
 
   bool stopping_reduce = stopping_interval ? 

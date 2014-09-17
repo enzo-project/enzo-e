@@ -19,7 +19,6 @@
 
 void CommBlock::refresh_begin_() 
 {
-
   if (is_leaf() && children_.size() != 0) {
     WARNING2("CommBlock::refresh_begin_()",
 	     "%s: is_leaf() && children_.size() == %d: setting is_leaf_ = false",
@@ -39,9 +38,6 @@ void CommBlock::refresh_begin_()
 	     name_.c_str());
     return;
   }
-
-  bool periodic[3][2];
-  periodicity(periodic);
 
   if (is_leaf()) {
 
@@ -68,13 +64,13 @@ void CommBlock::refresh_begin_()
 	int ip3[3];
 	parent_face_(ip3,if3,ic3);
 
-	refresh_face
+	refresh_load_face_
 	  (refresh_coarse,index_neighbor.index_parent(),ip3,ic3);
 
       } else if (face_level(if3) == level) {    // SAME
 
 	int ic3[3] = {0,0,0};
-	refresh_face (refresh_same,index_neighbor,if3,ic3);
+	refresh_load_face_ (refresh_same,index_neighbor,if3,ic3);
 
       } else if (face_level(if3) == level+1) {  // FINE
 	    
@@ -92,7 +88,7 @@ void CommBlock::refresh_begin_()
 	      Index index_nibling = 
 		index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
 		  
-	      refresh_face (refresh_fine,index_nibling, if3,ic3);
+	      refresh_load_face_ (refresh_fine,index_nibling, if3,ic3);
 	    }
 	  }
 	}
@@ -115,13 +111,12 @@ void CommBlock::refresh_begin_()
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_face
+void CommBlock::refresh_load_face_
 ( int type_refresh,
   Index index_neighbor,
   int iface[3],
   int ichild[3] )
 {
-
   int n; 
   char * array;
 
@@ -138,19 +133,26 @@ void CommBlock::refresh_face
     index_.child(level,ichild,ichild+1,ichild+2);
 
     type_op_array = op_array_restrict;
+
     break;
+
   case refresh_same:
 
     type_op_array = op_array_copy;
+
     break;
+
   case refresh_fine:
+
     type_op_array = op_array_prolong;
+
     break;
+
   default:
+    type_op_array = op_array_unknown;
     ERROR1("CommBlock::refresh_face()",
 	   "Unknown type_refresh %d",
 	   type_refresh);
-    type_op_array = op_array_unknown;
 
   }
 
@@ -160,13 +162,8 @@ void CommBlock::refresh_face
 
   int jface[3] = {-iface[0], -iface[1], -iface[2]};
 
-  // --------------------------------------------------
-  // ENTRY: #2 CommBlock::refresh_face()-> CommBlock::x_refresh_face()
-  // ENTRY: neighbor
-  // --------------------------------------------------
-  thisProxy[index_neighbor].x_refresh_face
+  thisProxy[index_neighbor].x_refresh_send_face
     (n,array, type_refresh, jface, ichild);
-  // --------------------------------------------------
 
   loop_refresh_.add_stop();
   delete field_face;
@@ -174,8 +171,9 @@ void CommBlock::refresh_face
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_face_ (int n, char * buffer, int type_refresh,
-			       int iface[3], int ichild[3])
+void CommBlock::refresh_store_face_
+(int n, char * buffer, int type_refresh,
+ int iface[3], int ichild[3])
 {
   if (type_refresh == refresh_coarse) { // coarse
 

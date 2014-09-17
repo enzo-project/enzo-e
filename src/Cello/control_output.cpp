@@ -6,7 +6,7 @@
 /// @ingroup  Control
 /// @brief    Functions implementing CHARM++ output-related functions
 
-/* #define TRACE_OUTPUT */
+// #define TRACE_OUTPUT
 
 #ifdef TRACE_OUTPUT
 #  define TRACE_LOCAL(M) printf ("TRACE Output %s:%d %d" M "\n", __FILE__,__LINE__,CkMyPe()); fflush(stdout);
@@ -28,6 +28,8 @@ void CommBlock::output_begin_ ()
   TRACE_LOCAL("CommBlock::output_begin_()");
 
   // Determine if there is any output this cycle
+
+  update_boundary_();
 
   simulation()->set_phase(phase_output);
 

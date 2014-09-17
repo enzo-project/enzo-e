@@ -138,7 +138,7 @@ module mesh {
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
 
-    entry [expedited] void x_refresh_face // [CB21]
+    entry [expedited] void x_refresh_send_face // [CB21]
       (int n, char buffer[n],  char rtype, int iface[3], int ichild[3]);
 
     entry void x_refresh_child            // [CB19]

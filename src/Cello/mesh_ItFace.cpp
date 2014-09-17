@@ -184,7 +184,12 @@ bool ItFace::valid_() const
   }
 
   // TEMPORARY
-  // WARNING("ItFace::is_valid()", "Setting l_periodic to true for testing");
+  static bool warning_displayed = false;
+  if (! warning_displayed) {  
+    WARNING("ItFace::is_valid()", "Setting l_periodic to true for testing");
+    warning_displayed = true;
+  }
+
   l_periodic = true;
 
   return (l_face && l_range && l_parent && l_periodic);

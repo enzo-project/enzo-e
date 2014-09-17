@@ -45,7 +45,7 @@ const char * cycle_sync[] = {
   "array",      // phase_adapt_enter
   "quiescence", // phase_adapt_exit
   "array",      // phase_refresh_enter
-  "contribute", // phase_refresh_exit
+  "neighbor", // phase_refresh_exit
   "array",      // phase_output_enter
   "none",       // phase_output_exit
   "none",       // phase_stopping_enter
@@ -53,7 +53,7 @@ const char * cycle_sync[] = {
   "none",       // phase_compute_enter
   "none",       // phase_compute_exit
   "array",      // phase_refresh_enter
-  "contribute"  // phase_refresh_exit
+  "neighbor"  // phase_refresh_exit
 };
 
 #define CYCLE_PHASE_COUNT (sizeof(cycle_phase) / sizeof(cycle_phase[0]))
@@ -557,9 +557,13 @@ void CommBlock::control_sync_neighbor_(int phase)
 
       } else {
 	std::string bit_str = index_.bit_string(-1,2);
-	WARNING4 ("CommBlock::control_sync_neighbor_()",
-		  "phase %d %s level %d and face level %d differ by more than 1",
-		  phase,bit_str.c_str(),level,level_face);
+	WARNING7 ("CommBlock::control_sync_neighbor_()",
+		  "phase %d name %s level %d and face (%d %d %d) level %d differ by more than 1",
+		  phase,
+		  name().c_str(),
+		  level,
+		  of3[0],of3[1],of3[2],
+		  level_face);
       }
 
     }

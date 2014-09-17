@@ -376,9 +376,12 @@ Boundary * Problem::create_boundary_
  ) throw ()
 {
   if (type == "inflow") {
+
     std::string param_str = 
       "Boundary:" + config->boundary_list[index] + ":value";
+
     int param_type = parameters->type(param_str);
+
     if (! (param_type == parameter_list ||
 	   param_type == parameter_float ||
 	   param_type == parameter_float_expr)) {
@@ -386,14 +389,22 @@ Boundary * Problem::create_boundary_
 	     "Parameter %s is of incorrect type %d",
 	     param_str.c_str(),param_type);
     }
+
     Value * value = new Value (parameters, param_str);
+
     axis_enum axis = (axis_enum) config->boundary_axis[index];
     face_enum face = (face_enum) config->boundary_face[index];
 
     return new BoundaryValue (axis,face,value,
 			      config->boundary_field_list[index]);
+
   } else if (type == "periodic") {
-    return new BoundaryPeriodic;
+
+    axis_enum axis = (axis_enum) config->boundary_axis[index];
+    face_enum face = (face_enum) config->boundary_face[index];
+
+    return new BoundaryPeriodic(axis,face);
+
   }
   return NULL;
 }

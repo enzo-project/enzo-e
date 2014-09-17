@@ -355,18 +355,12 @@ void CommBlock::adapt_send_level()
 
     Index index_neighbor = neighbor_(of3);
 
-    // sprintf (buffer,"adapt_send_levels %d %d\n",
-    // 	     index_.level(), level);
-    // index_.print(buffer,-1,2,false,simulation());
-    // index_neighbor.print("neighbor",-1,2,false,simulation());
-
     const int level_face = face_level (of3);
 
     if (level_face == level) {
 
       // SEND-SAME: Face and level are sent to unique
       // neighboring block in the same level
-
    
       PUT_LEVEL (index_,index_neighbor,ic3,of3,level,level_next_,"send");
 

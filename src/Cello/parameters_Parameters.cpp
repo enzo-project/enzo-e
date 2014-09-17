@@ -315,12 +315,6 @@ bool Parameters::value_logical
 {
   Param * param = this->param(parameter);
 
-  if (! param) {
-    WARNING1("Parameters::value_logical","Param %s is null",
-	  parameter.c_str());
-    return deflt;
-  }
-
   ASSERT2 ("Parameters::value_logical",
 	   "Parameter %s is type %d not a logical",
 	   parameter.c_str(),param->type(),

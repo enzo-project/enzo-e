@@ -18,14 +18,28 @@ class BoundaryPeriodic : public Boundary
 public: // interface
 
   /// Create a new BoundaryPeriodic
-  BoundaryPeriodic() throw() 
+  BoundaryPeriodic(int axis = axis_all,
+		   int face = face_all) throw() 
   {
-    for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
+    if (axis==axis_all && face==face_all) {
+      for (axis=0; axis<3; axis++) {
+	for (face=0; face<2; face++) {
+	  periodicity_[axis][face] = true;
+	}
+      }
+    } else if (axis==axis_all) {
+      for (axis=0; axis<3; axis++) {
 	periodicity_[axis][face] = true;
       }
+    } else if (face==face_all) {
+      for (face=0; face<2; face++) {
+	periodicity_[axis][face] = true;
+      }
+    } else {
+      periodicity_[axis][face] = true;
     }
   }
+
 
   /// Destructor
   virtual ~BoundaryPeriodic() throw() {}
