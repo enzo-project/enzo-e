@@ -481,7 +481,7 @@ void Config::read_mesh_ (Parameters * p) throw()
 
 //----------------------------------------------------------------------
 
-void Config::read_mesh_ (Parameters * p) throw()
+void Config::read_adapt_ (Parameters * p) throw()
 {
   //--------------------------------------------------
   // Adapt
