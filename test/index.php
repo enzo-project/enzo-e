@@ -12,7 +12,7 @@
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
 
-   <h2><center><?php system ("hg branch") ?> branch </center> </h2>
+   <h2><center><?php system ("hg branch") ?> branch: revision <?php system ("hg id -n") ?> </center> </</h2>
 
  <?php
 
