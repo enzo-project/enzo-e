@@ -417,7 +417,7 @@ void EnzoBlock::write(FILE * fp) throw ()
   fprintf (fp,"EnzoBlock: BoundaryDimension %d %d %d\n",
 	   BoundaryDimension[0],BoundaryDimension[1],BoundaryDimension[2]);
 
-  for (i=0; i<NumberOfBaryonFields; i++) {
+  for (int i=0; i<NumberOfBaryonFields; i++) {
 
     fprintf (fp,"EnzoBlock: BoundaryFieldType[%d] %d\n", 
 	     i, BoundaryFieldType[i]);
