@@ -25,9 +25,6 @@
 int EnzoBlock::ComputeGammaField(enzo_float *GammaField)
 {
  
-  int DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum, HMNum, H2INum, H2IINum,
-      DINum, DIINum, HDINum;
- 
   /* Compute the size of the fields. */
  
   int i, size = 1;
@@ -44,16 +41,24 @@ int EnzoBlock::ComputeGammaField(enzo_float *GammaField)
  
   else {
  
-    /* Find Multi-species fields. */
- 
-    if (IdentifySpeciesFields(DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum,
-		      HMNum, H2INum, H2IINum, DINum, DIINum, HDINum) == ENZO_FAIL) {
-      fprintf(stderr, "Error in grid->IdentifySpeciesFields.\n");
-      return ENZO_FAIL;
-    }
- 
+
+    Field field = block()->field();
+   
+    enzo_float * species_De    = (enzo_float *) field.values("species_De");
+    enzo_float * species_HI    = (enzo_float *) field.values("species_HI");
+    enzo_float * species_HII   = (enzo_float *) field.values("species_HII");
+    enzo_float * species_HeI   = (enzo_float *) field.values("species_HeI");
+    enzo_float * species_HeII  = (enzo_float *) field.values("species_HeII");
+    enzo_float * species_HeIII = (enzo_float *) field.values("species_HeIII");
+    enzo_float * species_HM    = (enzo_float *) field.values("species_HM");
+    enzo_float * species_H2I   = (enzo_float *) field.values("species_H2I");
+    enzo_float * species_H2II  = (enzo_float *) field.values("species_H2II");
+    enzo_float * species_DI    = (enzo_float *) field.values("species_DI");
+    enzo_float * species_DII   = (enzo_float *) field.values("species_DII");
+    enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
+
     /* Compute the temperature. */
- 
+
     ComputeTemperatureField(GammaField);
  
     /* Compute Gamma with molecular Hydrogen formula from Omukau \& Nishi
@@ -65,12 +70,12 @@ int EnzoBlock::ComputeGammaField(enzo_float *GammaField)
       /* Compute relative number abundence of molecular hydrogen. */
  
       number_density =
-	0.25*(BaryonField[HeINum][i]  + BaryonField[HeIINum][i] +
-	      BaryonField[HeIIINum][i]                        ) +
-              BaryonField[HINum][i]   + BaryonField[HIINum][i]  +
-              BaryonField[DeNum][i];
+	0.25*(species_HeI[i]  + species_HeII[i] +
+	      species_HeIII[i]                        ) +
+              species_HI[i]   + species_HII[i]  +
+              species_De[i];
  
-      nH2 = 0.5*(BaryonField[H2INum][i]  + BaryonField[H2IINum][i]);
+      nH2 = 0.5*(species_H2I[i]  + species_H2II[i]);
  
       /* Only do full computation if there is a reasonable amount of H2.
          The second term in GammaH2Inverse accounts for the vibrational

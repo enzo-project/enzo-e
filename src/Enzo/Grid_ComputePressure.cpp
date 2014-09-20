@@ -56,14 +56,13 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
   /* Find fields: density, total energy, velocity1-3. */
  
   Field field = block()->field();
-
   
-  enzo_float * density      = (enzo_float *) field.values("density");
-  enzo_float * total_energy = (enzo_float *) field.values("total_energy");
-  enzo_float * energy       = (enzo_float *) field.values("internal_energy");
-  enzo_float * velocity_x   = (enzo_float *) field.values("velocity_x");
-  enzo_float * velocity_y   = (enzo_float *) field.values("velocity_y");
-  enzo_float * velocity_z   = (enzo_float *) field.values("velocity_z");
+  enzo_float * density         = (enzo_float *) field.values("density");
+  enzo_float * total_energy    = (enzo_float *) field.values("total_energy");
+  enzo_float * internal_energy = (enzo_float *) field.values("internal_energy");
+  enzo_float * velocity_x      = (enzo_float *) field.values("velocity_x");
+  enzo_float * velocity_y      = (enzo_float *) field.values("velocity_y");
+  enzo_float * velocity_z      = (enzo_float *) field.values("velocity_z");
 
   /* Loop over the grid, compute the thermal energy, then the pressure,
      the timestep and finally the implied timestep. */
@@ -83,9 +82,9 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
 
       /* gas energy = E - 1/2 v^2. */
  
-      energy[i] = te - 0.5*(vx*vx + vy*vy + vz*vz);
+      internal_energy[i] = te - 0.5*(vx*vx + vy*vy + vz*vz);
 
-      pressure[i] = (Gamma - 1.0)*d*energy[i];
+      pressure[i] = (Gamma - 1.0)*d*internal_energy[i];
 
       if (pressure[i] < pressure_floor)
 	pressure[i] = pressure_floor;
@@ -137,15 +136,21 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
     enzo_float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
  
     /* Find Multi-species fields. */
- 
-    int DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum, HMNum, H2INum,
-        H2IINum, DINum, DIINum, HDINum;
-    if (IdentifySpeciesFields(DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum,
-		      HMNum, H2INum, H2IINum, DINum, DIINum, HDINum) == ENZO_FAIL) {
-      fprintf(stderr, "Error in grid->IdentifySpeciesFields.\n");
-      return ENZO_FAIL;
-    }
- 
+
+   
+    enzo_float * species_De    = (enzo_float *) field.values("species_De");
+    enzo_float * species_HI    = (enzo_float *) field.values("species_HI");
+    enzo_float * species_HII   = (enzo_float *) field.values("species_HII");
+    enzo_float * species_HeI   = (enzo_float *) field.values("species_HeI");
+    enzo_float * species_HeII  = (enzo_float *) field.values("species_HeII");
+    enzo_float * species_HeIII = (enzo_float *) field.values("species_HeIII");
+    enzo_float * species_HM    = (enzo_float *) field.values("species_HM");
+    enzo_float * species_H2I   = (enzo_float *) field.values("species_H2I");
+    enzo_float * species_H2II  = (enzo_float *) field.values("species_H2II");
+    enzo_float * species_DI    = (enzo_float *) field.values("species_DI");
+    enzo_float * species_DII   = (enzo_float *) field.values("species_DII");
+    enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
+
     /* Find the temperature units if we are using comoving coordinates. */
  
     if (ComovingCoordinates)
@@ -158,14 +163,14 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
     for (i = 0; i < size; i++) {
  
       number_density =
-	0.25*(BaryonField[HeINum][i] + 
-	      BaryonField[HeIINum][i] +
-	      BaryonField[HeIIINum][i]) +
-	BaryonField[HINum][i] + 
-	BaryonField[HIINum][i] +
-	BaryonField[DeNum][i];
+	0.25*(species_HeI[i] + 
+	      species_HeII[i] + 
+	      species_HeIII[i]) 
+	+    (species_HI[i] +
+	      species_HII[i] + 
+	      species_De[i]);
  
-      nH2 = 0.5*(BaryonField[H2INum][i] + BaryonField[H2IINum][i]);
+      nH2 = 0.5*(species_H2I[i] + species_H2II[i]);
  
       /* First, approximate temperature. */
  

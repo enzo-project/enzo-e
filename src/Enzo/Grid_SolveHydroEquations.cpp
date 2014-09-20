@@ -62,40 +62,37 @@ int EnzoBlock::SolveHydroEquations
 
   /* Find fields: density, total energy, velocity1-3. */
 
-  if (IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
-				 Vel3Num, TENum) == ENZO_FAIL) {
-    fprintf(stderr, "Error in IdentifyPhysicalQuantities.\n");
-    return ENZO_FAIL;
-  }
+  enzo_float * species_De    = (enzo_float *) field.values("species_De");
+  enzo_float * species_HI    = (enzo_float *) field.values("species_HI");
+  enzo_float * species_HII   = (enzo_float *) field.values("species_HII");
+  enzo_float * species_HeI   = (enzo_float *) field.values("species_HeI");
+  enzo_float * species_HeII  = (enzo_float *) field.values("species_HeII");
+  enzo_float * species_HeIII = (enzo_float *) field.values("species_HeIII");
+  enzo_float * species_HM    = (enzo_float *) field.values("species_HM");
+  enzo_float * species_H2I   = (enzo_float *) field.values("species_H2I");
+  enzo_float * species_H2II  = (enzo_float *) field.values("species_H2II");
+  enzo_float * species_DI    = (enzo_float *) field.values("species_DI");
+  enzo_float * species_DII   = (enzo_float *) field.values("species_DII");
+  enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
 
-  /* Initialize field pointers */
 
-  //  enzo_float *density     = BaryonField[DensNum];
+  enzo_float * density         = (enzo_float*) field.values("density");
+  enzo_float * total_energy    = (enzo_float *)field.values("total_energy");
+  enzo_float * internal_energy = (enzo_float *)field.values("internal_energy");
+  enzo_float * velocity_x      = (enzo_float*) field.values("velocity_x");
+  enzo_float * velocity_y      = (enzo_float*) field.values("velocity_y");
+  enzo_float * velocity_z      = (enzo_float*) field.values("velocity_z");
 
-  enzo_float * density = (enzo_float*) field.values("density");
-  enzo_float *totalenergy = BaryonField[TENum];
-  enzo_float *gasenergy   = BaryonField[GENum];
-
-  /* Velocity1 must exist, but if 2 & 3 aren't present, then create blank
+  /* velocity_x must exist, but if y & z aren't present, then create blank
      buffers for them (since the solver needs to advect something). */
 
-  enzo_float *velocity1, *velocity2, *velocity3;
-  velocity1 = BaryonField[Vel1Num];
-
-  if (GridRank > 1)
-    velocity2 = BaryonField[Vel2Num];
-  else {
-    velocity2 = new enzo_float[size];
-    for (i = 0; i < size; i++)
-      velocity2[i] = 0.0;
+  if (GridRank < 2) {
+    velocity_y = new enzo_float[size];
+    for (int i=0; i<size; i++) velocity_y[i] = 0.0;
   }
-
-  if (GridRank > 2)
-    velocity3 = BaryonField[Vel3Num];
-  else {
-    velocity3 = new enzo_float[size];
-    for (i = 0; i < size; i++)
-      velocity3[i] = 0.0;
+  if (GridRank < 3) {
+    velocity_z = new enzo_float[size];
+    for (int i=0; i<size; i++) velocity_z[i] = 0.0;
   }
 
   /* Determine if Gamma should be a scalar or a field. */
@@ -243,8 +240,8 @@ int EnzoBlock::SolveHydroEquations
   //     AccelerationField[2] = density;
   FORTRAN_NAME(ppm_de)
     (
-     density, totalenergy, velocity1, velocity2, velocity3,
-     gasenergy,
+     density, total_energy, velocity_x, velocity_y, velocity_z,
+     internal_energy,
      &GravityOn, AccelerationField[0],
      AccelerationField[1],
      AccelerationField[2],
@@ -267,8 +264,8 @@ int EnzoBlock::SolveHydroEquations
   /* deallocate temporary space for solver */
 
   delete [] temp;
-  if (GridRank < 3) delete [] velocity3;
-  if (GridRank < 2) delete [] velocity2;
+  if (GridRank < 2) delete [] velocity_y;
+  if (GridRank < 3) delete [] velocity_z;
 
   delete [] leftface;
   delete [] GammaField;

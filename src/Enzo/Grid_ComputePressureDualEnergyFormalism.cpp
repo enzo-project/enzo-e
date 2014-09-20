@@ -20,7 +20,6 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
   /* declarations */
  
-  enzo_float density, gas_energy;
   int i, size = 1;
  
   /* Error Check */
@@ -45,49 +44,48 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
   for (int dim = 0; dim < GridRank; dim++)
     size *= GridDimension[dim];
  
-  /* Find fields: density, total energy, velocity1-3. */
- 
-  int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
-  if (IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
-					 Vel3Num, TENum) == ENZO_FAIL) {
-    fprintf(stderr, "Error in IdentifyPhysicalQuantities.\n");
-    return ENZO_FAIL;
-  }
- 
+  Field field = block()->field();
+
+  enzo_float * density         = (enzo_float *) field.values("density");
+  enzo_float * internal_energy = (enzo_float *) field.values("internal_energy");
+
   /* Loop over the grid, compute the thermal energy, then the pressure,
      the timestep and finally the implied timestep. */
  
   /* special loop for no interpolate. */
  
-  if (time == Time())
+  if (time == Time()) {
  
     for (i = 0; i < size; i++) {
-      pressure[i] = (Gamma - 1.0) * BaryonField[DensNum][i] *
-                                    BaryonField[GENum][i];
+      pressure[i] = (Gamma - 1.0) * density[i] *
+                                    internal_energy[i];
  
       if (pressure[i] < pressure_floor)
 	pressure[i] = pressure_floor;
- 
     }
  
-  else
+  } else {
  
     /* general case: */
+
+    ERROR("EnzoBlock::ComputePressure()",
+	    "Accessing OldBaryonField");
+
+    // for (i = 0; i < size; i++) {
  
-    for (i = 0; i < size; i++) {
+    //   gas_energy    = coef   *   internal_energy[i] +
+    // 	coefold*OldBaryonField[GENum][i];
+    //   density       = coef   *   density[i] +
+    // 	coefold*OldBaryonField[DensNum][i][i];
  
-      gas_energy    = coef   *   BaryonField[GENum][i] +
-	              coefold*OldBaryonField[GENum][i];
-      density       = coef   *   BaryonField[DensNum][i] +
-                      coefold*OldBaryonField[DensNum][i];
+    //   pressure[i] = (Gamma - 1.0)*density*gas_energy;
  
-      pressure[i] = (Gamma - 1.0)*density*gas_energy;
+    //   if (pressure[i] < pressure_floor)
+    // 	pressure[i] = pressure_floor;
  
-      if (pressure[i] < pressure_floor)
-	pressure[i] = pressure_floor;
- 
-    }
- 
+    // }
+  }
+
   /* Correct for Gamma from H2. */
  
   if (MultiSpecies > 1) {
@@ -96,15 +94,18 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
       GammaInverse = 1.0/(Gamma-1.0), x, Gamma1, temp;
     enzo_float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
  
-    /* Find Multi-species fields. */
- 
-    int DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum, HMNum, H2INum,
-        H2IINum, DINum, DIINum, HDINum;
-    if (IdentifySpeciesFields(DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum,
-		      HMNum, H2INum, H2IINum, DINum, DIINum, HDINum) == ENZO_FAIL) {
-      fprintf(stderr, "Error in grid->IdentifySpeciesFields.\n");
-      return ENZO_FAIL;
-    }
+    enzo_float * species_De    = (enzo_float *) field.values("species_De");
+    enzo_float * species_HI    = (enzo_float *) field.values("species_HI");
+    enzo_float * species_HII   = (enzo_float *) field.values("species_HII");
+    enzo_float * species_HeI   = (enzo_float *) field.values("species_HeI");
+    enzo_float * species_HeII  = (enzo_float *) field.values("species_HeII");
+    enzo_float * species_HeIII = (enzo_float *) field.values("species_HeIII");
+    enzo_float * species_HM    = (enzo_float *) field.values("species_HM");
+    enzo_float * species_H2I   = (enzo_float *) field.values("species_H2I");
+    enzo_float * species_H2II  = (enzo_float *) field.values("species_H2II");
+    enzo_float * species_DI    = (enzo_float *) field.values("species_DI");
+    enzo_float * species_DII   = (enzo_float *) field.values("species_DII");
+    enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
  
     /* Find the temperature units if we are using comoving coordinates. */
  
@@ -118,12 +119,14 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
     for (i = 0; i < size; i++) {
  
       number_density =
-	  0.25*(BaryonField[HeINum][i]  + BaryonField[HeIINum][i] +
-		BaryonField[HeIIINum][i]                        ) +
-	        BaryonField[HINum][i]   + BaryonField[HIINum][i]  +
-                BaryonField[DeNum][i];
+	  0.25 * (species_HeI[i]  + 
+		  species_HeII[i] +
+		  species_HeIII[i] )
+	+        (species_HI[i]   + 
+		  species_HII[i]  +
+		  species_De[i]);
  
-      nH2 = 0.5*(BaryonField[H2INum][i]  + BaryonField[H2IINum][i]);
+      nH2 = 0.5*(species_H2I[i]  + species_H2II[i]);
  
       /* First, approximate temperature. */
  

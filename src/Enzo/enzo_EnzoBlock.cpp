@@ -74,8 +74,6 @@ enzo_float EnzoBlock::DomainRightEdge[MAX_DIMENSION];
 
 // PPM
 
-int EnzoBlock::field_index_[NUM_FIELDS];
-
 int EnzoBlock::GridRank;
 
 int EnzoBlock::ghost_depth[MAX_DIMENSION];
@@ -83,7 +81,6 @@ int EnzoBlock::ghost_depth[MAX_DIMENSION];
 // Fields
 
 int EnzoBlock::NumberOfBaryonFields;
-int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
 //----------------------------------------------------------------------
 
@@ -91,10 +88,6 @@ int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 void EnzoBlock::initialize(EnzoConfig * enzo_config,
 			   FieldDescr * field_descr)
 {
-
-  for (int i=0; i<NUM_FIELDS; i++) {
-    field_index_[i] = field_undefined;
-  }
 
   GridRank = 0;
   NumberOfBaryonFields = 0;
@@ -113,10 +106,6 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 	BoundaryValue[j][i][k]= 0;
       }
     }
-  }
-
-  for (j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
-    FieldType[j] = 0;
   }
 
   ComovingCoordinates = enzo_config->physics_cosmology;
@@ -188,119 +177,6 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 	    MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields );
   }
 
-  int field_id;
-
-  field_id = field_descr->field_id("density");
-  field_index_[field_density]  = field_id;
-  FieldType[field_id] = Density;
-
-  field_id = field_descr->field_id("velocity_x");
-  field_index_[field_velocity_x] = field_id;
-  FieldType[field_id] = Velocity1;
-
-  field_id = field_descr->field_id("velocity_y");
-  field_index_[field_velocity_y] = field_id;
-  FieldType[field_id] = Velocity2;
-
-  field_id = field_descr->field_id("velocity_z");
-  field_index_[field_velocity_z] = field_id;
-  FieldType[field_id] = Velocity3;
-  field_id = field_descr->field_id("total_energy");
-  field_index_[field_total_energy] = field_id;
-  FieldType[field_id] = TotalEnergy;
-  field_id = field_descr->field_id("internal_energy");
-  field_index_[field_internal_energy]  = field_id;
-  FieldType[field_id] = InternalEnergy;
-  field_id = field_descr->field_id("electron_density");
-  field_index_[field_colour]  = field_id;
-  FieldType[field_id] = ElectronDensity;
-
-  field_id = field_descr->field_id("velox");
-  field_index_[field_velox]  = field_id;
-  FieldType[field_id] = Velocity1;
-  field_id = field_descr->field_id("veloy");
-  field_index_[field_veloy] = field_id;
-  FieldType[field_id] = Velocity2;
-  field_id = field_descr->field_id("veloz");
-  field_index_[field_veloz] = field_id;
-  FieldType[field_id] = Velocity3;
-  field_id = field_descr->field_id("bfieldx");
-  field_index_[field_bfieldx] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("bfieldy");
-  field_index_[field_bfieldy] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("bfieldz");
-  field_index_[field_bfieldz] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("dens_rx");
-  field_index_[field_dens_rx] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("velox_rx");
-  field_index_[field_velox_rx] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("veloy_rx");
-  field_index_[field_veloy_rx] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("veloz_rx");
-  field_index_[field_veloz_rx] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("bfieldx_rx");
-  field_index_[field_bfieldx_rx] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("bfieldy_rx");
-  field_index_[field_bfieldy_rx] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("bfieldz_rx");
-  field_index_[field_bfieldz_rx] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("dens_ry");
-  field_index_[field_dens_ry] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("velox_ry");
-  field_index_[field_velox_ry] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("veloy_ry");
-  field_index_[field_veloy_ry] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("veloz_ry");
-  field_index_[field_veloz_ry] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("bfieldx_ry");
-  field_index_[field_bfieldx_ry] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("bfieldy_ry");
-  field_index_[field_bfieldy_ry] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("bfieldz_ry");
-  field_index_[field_bfieldz_ry] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("dens_rz");
-  field_index_[field_dens_rz] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("velox_rz");
-  field_index_[field_velox_rz] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("veloy_rz");
-  field_index_[field_veloy_rz] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("veloz_rz");
-  field_index_[field_veloz_rz] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("bfieldx_rz");
-  field_index_[field_bfieldx_rz] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("bfieldy_rz");
-  field_index_[field_bfieldy_rz] = field_id;
-  FieldType[field_id] = 0;
-  field_id = field_descr->field_id("bfieldz_rz");
-  field_index_[field_bfieldz_rz] = field_id;
-  FieldType[field_id] = 0;
-
-  // BoundaryDimension[0] = nx + 2*ghost_depth[0];
-  // BoundaryDimension[1] = ny + 2*ghost_depth[1];
-  // BoundaryDimension[2] = nz + 2*ghost_depth[2];
-
   DomainLeftEdge [0] = enzo_config->domain_lower[0];
   DomainLeftEdge [1] = enzo_config->domain_lower[1];
   DomainLeftEdge [2] = enzo_config->domain_lower[2];
@@ -354,10 +230,6 @@ EnzoBlock::EnzoBlock
 
 void EnzoBlock::initialize_enzo_()
 {
-  // set_cycle(simulation()->cycle());
-  // set_time (simulation()->time());
-  // set_dt   (simulation()->dt());
-
   for (int i=0; i<MAX_DIMENSION; i++) {
     AccelerationField[i] = 0;
     GridLeftEdge[i] = 0;
@@ -367,10 +239,6 @@ void EnzoBlock::initialize_enzo_()
     CellWidth[i] = 0;
   }
 
-  for (int j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
-    BaryonField[j] = 0;
-    OldBaryonField[j] = 0;
-  }
 }
 
 //----------------------------------------------------------------------
@@ -417,12 +285,6 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,GridStartIndex,MAX_DIMENSION); 
   PUParray(p,GridEndIndex,MAX_DIMENSION); 
   PUParray(p,CellWidth,MAX_DIMENSION);
-
-  if (p.isUnpacking()) {
-    for (int index = 0; index < EnzoBlock::NumberOfBaryonFields; index++) {
-      BaryonField[index] = (enzo_float *)block()->field().values(index);
-    }
-  }
 
   static bool warn3 = true;
   if (warn3) {
@@ -529,79 +391,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   // Fields
 
-  if (field_index_[field_density] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_density %d\n", field_index_[field_density]);
-  if (field_index_[field_total_energy] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_total_energy %d\n", field_index_[field_total_energy]);
-  if (field_index_[field_internal_energy] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_internal_energy %d\n", field_index_[field_internal_energy]);
-  if (field_index_[field_velocity_x] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_velocity_x %d\n", field_index_[field_velocity_x]);
-  if (field_index_[field_velocity_y] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_velocity_y %d\n", field_index_[field_velocity_y]);
-  if (field_index_[field_velocity_z] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_velocity_z %d\n", field_index_[field_velocity_z]);
-  if (field_index_[field_colour] != field_undefined) 
-    fprintf (fp,"EnzoBlock: field_colour %d\n", field_index_[field_colour]);
-
-  if (field_index_[field_velox] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_velox %d\n", field_index_[field_velox]);
-  if (field_index_[field_veloy] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloy %d\n", field_index_[field_veloy]);
-  if (field_index_[field_veloz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloz %d\n", field_index_[field_veloz]);
-  if (field_index_[field_bfieldx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldx %d\n", field_index_[field_bfieldx]);
-  if (field_index_[field_bfieldy] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldy %d\n", field_index_[field_bfieldy]);
-  if (field_index_[field_bfieldz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldz %d\n", field_index_[field_bfieldz]);
-
-  if (field_index_[field_dens_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_dens_rx %d\n", field_index_[field_dens_rx]);
-  if (field_index_[field_velox_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_velox_rx %d\n", field_index_[field_velox_rx]);
-  if (field_index_[field_veloy_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloy_rx %d\n", field_index_[field_veloy_rx]);
-  if (field_index_[field_veloz_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloz_rx %d\n", field_index_[field_veloz_rx]);
-  if (field_index_[field_bfieldx_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldx_rx %d\n", field_index_[field_bfieldx_rx]);
-  if (field_index_[field_bfieldy_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldy_rx %d\n", field_index_[field_bfieldy_rx]);
-  if (field_index_[field_bfieldz_rx] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldz_rx %d\n", field_index_[field_bfieldz_rx]);
-
-  if (field_index_[field_dens_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_dens_ry %d\n", field_index_[field_dens_ry]);
-  if (field_index_[field_velox_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_velox_ry %d\n", field_index_[field_velox_ry]);
-  if (field_index_[field_veloy_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloy_ry %d\n", field_index_[field_veloy_ry]);
-  if (field_index_[field_veloz_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloz_ry %d\n", field_index_[field_veloz_ry]);
-  if (field_index_[field_bfieldx_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldx_ry %d\n", field_index_[field_bfieldx_ry]);
-  if (field_index_[field_bfieldy_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldy_ry %d\n", field_index_[field_bfieldy_ry]);
-  if (field_index_[field_bfieldz_ry] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldz_ry %d\n", field_index_[field_bfieldz_ry]);
-
-  if (field_index_[field_dens_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_dens_rz %d\n", field_index_[field_dens_rz]);
-  if (field_index_[field_velox_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_velox_rz %d\n", field_index_[field_velox_rz]);
-  if (field_index_[field_veloy_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloy_rz %d\n", field_index_[field_veloy_rz]);
-  if (field_index_[field_veloz_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_veloz_rz %d\n", field_index_[field_veloz_rz]);
-  if (field_index_[field_bfieldx_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldx_rz %d\n", field_index_[field_bfieldx_rz]);
-  if (field_index_[field_bfieldy_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldy_rz %d\n", field_index_[field_bfieldy_rz]);
-  if (field_index_[field_bfieldz_rz] != field_undefined)
-    fprintf (fp,"EnzoBlock: field_bfieldz_rz %d\n", field_index_[field_bfieldz_rz]);
-
   // Grid
 
   fprintf (fp,"EnzoBlock: GridRank %d\n",    GridRank);
@@ -623,23 +412,10 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   fprintf (fp,"EnzoBlock: NumberOfBaryonFields %d\n",
 	   NumberOfBaryonFields);
-  int i;
-  for (i=0; i<NumberOfBaryonFields; i++) {
-    fprintf (fp,"EnzoBlock: BaryonField[%d] %p\n",
-	     i, BaryonField[i]);
-    fprintf (fp,"EnzoBlock: OldBaryonField[%d] %p\n",
-	     i, OldBaryonField[i]);
-    fprintf (fp,"EnzoBlock: FieldType[%d] %d\n",
-	     i, FieldType[i]);
-  }
 
   fprintf (fp,"EnzoBlock: BoundaryRank %d\n", BoundaryRank);
   fprintf (fp,"EnzoBlock: BoundaryDimension %d %d %d\n",
 	   BoundaryDimension[0],BoundaryDimension[1],BoundaryDimension[2]);
-
-  // unknown, reflecting, outflow, inflow, periodic
-  //  const char * bc_string[] = 
-  //    {"unknown", "reflecting", "outflow", "inflow", "periodic"};
 
   for (i=0; i<NumberOfBaryonFields; i++) {
 
@@ -779,264 +555,8 @@ void EnzoBlock::initialize () throw()
   CellWidth[1] = hy;
   CellWidth[2] = hz;
 
-  // Initialize BaryonField[] pointers
-
-  for (int index = 0; index < EnzoBlock::NumberOfBaryonFields; index++) {
-    BaryonField[index] = (enzo_float *)field.values(index);
-  }
-
   TRACE ("Exit  EnzoBlock::initialize()\n");
 }
-
-//----------------------------------------------------------------------
-//
-// Given a pointer to a field and its field type, find the equivalent
-//   field type in the list of boundary's and apply that boundary value/type.
-//   Returns: 0 on failure
-//
-// int EnzoBlock::SetExternalBoundary
-// (
-//  int FieldRank, 
-//  int GridDims[],
-//  int GridOffset[],
-//  int StartIndex[], 
-//  int EndIndex[],
-//  enzo_float *Field, 
-//  int FieldType )
-// {
- 
-//   /* declarations */
- 
-//   int i, j, k, dim, Sign, bindex;
-//   enzo_float *index;
- 
-//   /* error check: grid ranks */
- 
-//   if (FieldRank != BoundaryRank) {
-//     fprintf(stderr, "FieldRank(%"ISYM") != BoundaryRank(%"ISYM").\n",
-//             FieldRank, BoundaryRank);
-//     return ENZO_FAIL;
-//   }
- 
-//   /* find requested field type */
-
-
-//   int field;
-//   for (field = 0; field < NumberOfBaryonFields; field++)
-//     if (FieldType == BoundaryFieldType[field]) break;
-//   if (field == NumberOfBaryonFields) {
-//     fprintf(stderr, "Field type (%"ISYM") not found in Boundary.\n", FieldType);
-//     return ENZO_FAIL;
-//   }
- 
-//   /* error check: make sure the boundary type array exists */
- 
-//   for (dim = 0; dim < BoundaryRank; dim++)
-//     if (BoundaryDimension[dim] != 1) {
-//       if (BoundaryType[field][dim][0] == NULL) {
-// 	fprintf(stderr, "BoundaryType not yet declared.\n");
-// 	return ENZO_FAIL;
-//       }
-//     }
- 
-//   /* set Boundary conditions */
- 
-//   Sign = 1;
-//   if (FieldType == Velocity1) Sign = -1;
- 
-//   if (BoundaryDimension[0] > 1 && GridOffset[0] == 0) {
- 
-//     /* set x inner (left) face */
- 
-//     for (i = 0; i < StartIndex[0]; i++)
-//       for (j = 0; j < GridDims[1]; j++)
-// 	for (k = 0; k < GridDims[2]; k++) {
-// 	  index = Field + i + j*GridDims[0] + k*GridDims[1]*GridDims[0];
-// 	  bindex = j+GridOffset[1] + (k+GridOffset[2])*BoundaryDimension[1];
-// 	  switch (BoundaryType[field][0][0][bindex]) {
-// 	  case bc_reflecting:
-// 	    *index = Sign*(*(index + (2*StartIndex[0] - 1 - 2*i)));
-// 	    break;
-// 	  case bc_outflow:
-// 	    *index =       *(index + (  StartIndex[0]     -   i)) ;
-// 	    break;
-// 	  case bc_inflow:
-// 	    *index = BoundaryValue[field][0][0][bindex];
-// 	    break;
-// 	  case bc_periodic:
-// 	    *index = *(index + (EndIndex[0] - StartIndex[0] + 1));
-// 	    break;
-// 	  case bc_unknown:
-// 	  default:
-// 	    fprintf(stderr, "BoundaryType not recognized (x-left).\n");
-// 	    return ENZO_FAIL;
-// 	  }
-// 	}
-//   }
- 
-//   if (BoundaryDimension[0] > 1 && GridOffset[0]+GridDims[0] == BoundaryDimension[0]) {
- 
-//     /* set x outer (right) face */
-
-    
-//     for (i = 0; i < GridDims[0]-EndIndex[0]-1; i++)
-//       for (j = 0; j < GridDims[1]; j++)
-// 	for (k = 0; k < GridDims[2]; k++) {
-// 	  index = Field + i + EndIndex[0]+1 +
-// 	    j*GridDims[0] + k*GridDims[1]*GridDims[0];
-// 	  bindex = j+GridOffset[1] + (k+GridOffset[2])*BoundaryDimension[1];
-// 	  switch (BoundaryType[field][0][1][bindex]) {
-// 	  case bc_reflecting:
-// 	    *index = Sign*(*(index - (2*i + 1)));
-// 	    break;
-// 	  case bc_outflow:
-// 	    *index =       *(index + (-1 - i)) ;
-// 	    break;
-// 	  case bc_inflow:
-// 	    *index = BoundaryValue[field][0][1][bindex];
-// 	    break;
-// 	  case bc_periodic:
-// 	    *index = *(index - (EndIndex[0] - StartIndex[0] + 1));
-// 	    break;
-// 	  case bc_unknown:
-// 	  default:
-// 	    fprintf(stderr, "BoundaryType not recognized (x-right).\n");
-// 	    return ENZO_FAIL;
-// 	  }
-// 	}							
-//   }
- 
-//   /* set y inner (left) face */
- 
-//   Sign = 1;
-//   if (FieldType == Velocity2) Sign = -1;
- 
-//   if (BoundaryDimension[1] > 1 && GridOffset[1] == 0) {
- 
-//     for (j = 0; j < StartIndex[1]; j++)
-//       for (i = 0; i < GridDims[0]; i++)
-// 	for (k = 0; k < GridDims[2]; k++) {
-// 	  index = Field + i + j*GridDims[0] + k*GridDims[1]*GridDims[0];
-// 	  bindex = i+GridOffset[0] + (k+GridOffset[2])*BoundaryDimension[0];
-// 	  switch (BoundaryType[field][1][0][bindex]) {
-// 	  case bc_reflecting:
-// 	    *index = Sign*(*(index + (2*StartIndex[1] - 1 - 2*j)*GridDims[0]));
-// 	    break;
-// 	  case bc_outflow:
-// 	    *index =       *(index + (  StartIndex[1]     - j)*GridDims[0]) ;
-// 	    break;
-// 	  case bc_inflow:
-// 	    *index = BoundaryValue[field][1][0][bindex];
-// 	     break;
-// 	  case bc_periodic:
-// 	    *index = *(index + (EndIndex[1] - StartIndex[1] + 1)*GridDims[0]);
-// 	     break;
-// 	  case bc_unknown:
-// 	  default:
-// 	    fprintf(stderr, "BoundaryType not recognized (y-left).\n");
-// 	    return ENZO_FAIL;
-// 	  }
-// 	}
-//   }
- 
-//   if (BoundaryDimension[1] > 1 && GridOffset[1]+GridDims[1] == BoundaryDimension[1]) {
- 
-//     /* set y outer (right) face */
- 
-//     for (j = 0; j < GridDims[1]-EndIndex[1]-1; j++)
-//       for (i = 0; i < GridDims[0]; i++)
-// 	for (k = 0; k < GridDims[2]; k++) {
-// 	  index = Field + i + (j + EndIndex[1]+1)*GridDims[0] +
-// 	    k*GridDims[1]*GridDims[0];
-// 	  bindex = i+GridOffset[0] + (k+GridOffset[2])*BoundaryDimension[0];
-// 	  switch (BoundaryType[field][1][1][bindex]) {
-// 	  case bc_reflecting:
-// 	    *index = Sign*(*(index - (2*j + 1)*GridDims[0]));
-// 	    break;
-// 	  case bc_outflow:
-// 	    *index =       *(index + (-1 - j)*GridDims[0]) ;
-// 	    break;
-// 	  case bc_inflow:
-// 	    *index = BoundaryValue[field][1][1][bindex];
-// 	    break;
-// 	  case bc_periodic:
-// 	    *index = *(index - (EndIndex[1] - StartIndex[1] + 1)*GridDims[0]);
-// 	    break;
-// 	  case bc_unknown:
-// 	  default:
-// 	    fprintf(stderr, "BoundaryType not recognized (y-right).\n");
-// 	    return ENZO_FAIL;
-// 	  }
-// 	}							
-//   }
- 
-//   /* set z inner (left) face */
- 
-//   Sign = 1;
-//   if (FieldType == Velocity3) Sign = -1;
- 
-//   if (BoundaryDimension[2] > 1 && GridOffset[2] == 0) {
- 
-//     for (k = 0; k < StartIndex[2]; k++)
-//       for (i = 0; i < GridDims[0]; i++)
-// 	for (j = 0; j < GridDims[1]; j++) {
-// 	  index = Field + i + j*GridDims[0] + k*GridDims[1]*GridDims[0];
-// 	  bindex = i+GridOffset[0] + (j+GridOffset[1])*BoundaryDimension[0];
-// 	  switch (BoundaryType[field][2][0][bindex]) {
-// 	  case bc_reflecting:
-// 	    *index = Sign*(*(index + (2*StartIndex[2]-1 - 2*k)*GridDims[0]*GridDims[1]));
-// 	    break;
-// 	  case bc_outflow:
-// 	    *index =       *(index + (  StartIndex[2]   - k)*GridDims[0]*GridDims[1]) ;
-// 	    break;
-// 	  case bc_inflow:
-// 	    *index = BoundaryValue[field][2][0][bindex];
-// 	    break;
-// 	  case bc_periodic:
-// 	    *index = *(index + (EndIndex[2]-StartIndex[2]+1)*GridDims[0]*GridDims[1]);
-// 	    break;
-// 	  case bc_unknown:
-// 	  default:
-// 	    fprintf(stderr, "BoundaryType not recognized (z-left).\n");
-// 	    return ENZO_FAIL;
-// 	  }
-// 	}
-//   }
- 
-//   if (BoundaryDimension[2] > 1 && GridOffset[2]+GridDims[2] == BoundaryDimension[2]) {
- 
-//     /* set z outer (right) face */
- 
-//     for (k = 0; k < GridDims[2]-EndIndex[2]-1; k++)
-//       for (i = 0; i < GridDims[0]; i++)
-// 	for (j = 0; j < GridDims[1]; j++) {
-// 	  index = Field + i + j*GridDims[0] +
-// 	    (k + EndIndex[2]+1)*GridDims[1]*GridDims[0];
-// 	  bindex = i+GridOffset[0] + (j+GridOffset[1])*BoundaryDimension[0];
-// 	  switch (BoundaryType[field][2][1][bindex]) {
-// 	  case bc_reflecting:
-// 	    *index = Sign*(*(index - (2*k + 1)*GridDims[0]*GridDims[1]));
-// 	    break;
-// 	  case bc_outflow:
-// 	    *index =       *(index + (-1 - k)*GridDims[0]*GridDims[1]) ;
-// 	    break;
-// 	  case bc_inflow:
-// 	    *index = BoundaryValue[field][2][1][bindex];
-// 	    break;
-// 	  case bc_periodic:
-// 	    *index = *(index - (EndIndex[2]-StartIndex[2]+1)*GridDims[0]*GridDims[1]);
-// 	    break;
-// 	  case bc_unknown:
-// 	  default:
-// 	    fprintf(stderr, "BoundaryType not recognized (z-right).\n");
-// 	    return ENZO_FAIL;
-// 	  }
-// 	}							
-//   }
- 
-//   return ENZO_SUCCESS;
- 
-// }
 
 //----------------------------------------------------------------------
 

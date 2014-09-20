@@ -147,8 +147,6 @@ public:
 
   // PPM
 
-  static int field_index_[NUM_FIELDS];
-
   static int GridRank;
 
   static int ghost_depth[MAX_DIMENSION];
@@ -156,7 +154,6 @@ public:
   // Fields
 
   static int NumberOfBaryonFields;      // active baryon fields
-  static int FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
 public: // interface
 
@@ -239,37 +236,6 @@ public: // interface
     enzo_float *VelocityUnits, 
     enzo_float Time);
 
-  /// Find field type field in array field_type, returning the index
-  /// into the field array or -1 if it is not there
-  int FindField(int field, int farray[], int numfields);
-
-  /// Identify certain commonly used variables from the list
-  int IdentifyPhysicalQuantities
-  ( int &DensNum, 
-    int &GENum, 
-    int &Vel1Num, 
-    int &Vel2Num, 
-    int &Vel3Num, 
-    int &TENum);
-
-  /// Identify the multi-species fields
-  int IdentifySpeciesFields
-  ( int &DeNum, 
-    int &HINum, 
-    int &HIINum, 
-    int &HeINum, 
-    int &HeIINum, 
-    int &HeIIINum, 
-    int &HMNum, 
-    int &H2INum, 
-    int &H2IINum, 
-    int &DINum, 
-    int &DIINum, 
-    int &HDINum);
-
-  /// Copy the current baryon fields to the old baryon fields
-  //  int SetExternalBoundaryValues();
-
   /// Set the energy to provide minimal pressure support
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient);
 
@@ -281,10 +247,6 @@ public: // interface
 
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
   int SolveMHDEquations(const FieldDescr *,  enzo_float dt);
-
-  /// Return the Cello FieldBlock` index for the given field type
-  int index (enum field_type type) const
-  { return field_index_[type];}
 
   /// Set EnzoBlock's cycle
   virtual void set_cycle (int cycle) throw();
@@ -341,10 +303,6 @@ public: // attributes (YIKES!)
   /// stoping index of the active region
   int GridEndIndex[MAX_DIMENSION]; 
   enzo_float CellWidth[MAX_DIMENSION];
-  /// pointers to arrays
-  enzo_float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; 
-  /// pointers to old arrays
-  enzo_float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; 
 
   /// Data for turbulence reductions
   double method_turbulence_data [MAX_TURBULENCE_ARRAY];

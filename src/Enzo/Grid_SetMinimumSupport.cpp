@@ -33,16 +33,15 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient)
     for (dim = 0; dim < GridRank; dim++)
       size *= GridDimension[dim];
  
-    /* Find the density, gas energy, velocities & total energy
-       (where appropriate). */
- 
-    int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
-    if (IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
-					 Vel3Num, TENum) == ENZO_FAIL) {
-      fprintf(stderr, "Error in IdentifyPhysicalQuantities.\n");
-      return ENZO_FAIL;
-    }
- 
+    Field field = block()->field();
+
+    enzo_float * density         = (enzo_float*) field.values("density");
+    enzo_float * total_energy    = (enzo_float *)field.values("total_energy");
+    enzo_float * internal_energy = (enzo_float *)field.values("internal_energy");
+    enzo_float * velocity_x      = (enzo_float*) field.values("velocity_x");
+    enzo_float * velocity_y      = (enzo_float*) field.values("velocity_y");
+    enzo_float * velocity_z      = (enzo_float*) field.values("velocity_z");
+
     /* Set minimum GE. */
  
     MinimumSupportEnergyCoefficient =
@@ -55,17 +54,17 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient)
  
     if (DualEnergyFormalism == TRUE) {
       for (i = 0; i < size; i++)
-	BaryonField[GENum][i] = MAX(BaryonField[GENum][i],
-				    MinimumSupportEnergyCoefficient *
-				    BaryonField[DensNum][i]);
+	internal_energy[i] = MAX(internal_energy[i],
+				 MinimumSupportEnergyCoefficient*density[i]);
       if (GridRank != 3) return ENZO_FAIL;
       for (i = 0; i < size; i++)
-	BaryonField[TENum][i] = 
-	  MAX((enzo_float)(BaryonField[GENum][i] + 0.5*
-	      (BaryonField[Vel1Num][i]*BaryonField[Vel1Num][i] +
-	       BaryonField[Vel2Num][i]*BaryonField[Vel2Num][i] +
-	       BaryonField[Vel3Num][i]*BaryonField[Vel3Num][i])),
-	      BaryonField[TENum][i]);
+	total_energy[i] = 
+	  MAX((enzo_float)
+	      (  internal_energy[i] +
+		 0.5*(velocity_x[i]*velocity_x[i] +
+		      velocity_y[i]*velocity_y[i] +
+		      velocity_z[i]*velocity_z[i])),
+	      total_energy[i]);
 								
     }
     else {

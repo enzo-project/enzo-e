@@ -42,11 +42,9 @@ module enzo {
   readonly enzo_float EnzoBlock::InitialTimeInCodeUnits;
   readonly enzo_float EnzoBlock::DomainLeftEdge [MAX_DIMENSION];
   readonly enzo_float EnzoBlock::DomainRightEdge[MAX_DIMENSION];
-  readonly int EnzoBlock::field_index_[NUM_FIELDS];
   readonly int EnzoBlock::GridRank;
   readonly int EnzoBlock::ghost_depth[MAX_DIMENSION];
   readonly int EnzoBlock::NumberOfBaryonFields;      // active baryon fields
-  readonly int EnzoBlock::FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
   PUPable EnzoBoundary;
   PUPable EnzoConfig;
