@@ -786,8 +786,9 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 
   bool var_is_int = true;
 
-  if      (output_schedule_var[index] == "cycle") var_is_int = true;
-  else if (output_schedule_var[index] == "time")  var_is_int = false;
+  // Get variable associated with the schedule 
+  if      (output_schedule_var[index] == "cycle")    var_is_int = true;
+  else if (output_schedule_var[index] == "time")     var_is_int = false;
   else if (output_schedule_var[index] == "seconds")  var_is_int = false;
   else {
     ERROR2 ("Config::read",
@@ -795,12 +796,33 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 	    output_schedule_var[index].c_str(),group.c_str());
   }
 
+  // Determine the schedule type (interval or list)
+
+  const bool type_is_interval = 
+    ( (p->type("start") != parameter_unknown) ||
+      (p->type("step") != parameter_unknown) ||
+      (p->type("stop") != parameter_unknown));
+  
+  const bool type_is_list = (p->type("list") != parameter_unknown);
+
+  if (type_is_interval && type_is_list) {
+      ERROR1 ("Config::read",
+	      "Schedule %s seems to be both an interval and a list",
+	      (group).c_str());
+  }
+
+  if (!type_is_interval && !type_is_list) {
+      ERROR1 ("Config::read",
+	      "Schedule %s seems to be neither an interval nor a list",
+	      (group).c_str());
+  }
+
   output_schedule_type[index] = p->value_string("type","none");
 
   const int    max_int    = std::numeric_limits<int>::max();
   const double max_double = std::numeric_limits<double>::max();
 
-  if (output_schedule_type[index] == "interval") {
+  if (type_is_interval) {
     if (var_is_int) {
       output_schedule_start[index] = p->value("start",0);
       output_schedule_step[index]  = p->value("step",1);
@@ -810,7 +832,7 @@ int Config::read_schedule_(Parameters * p, const std::string group)
       output_schedule_step[index]  = p->value("step",1.0);
       output_schedule_stop[index]  = p->value("stop",max_double);
     }
-  } else if (output_schedule_type[index] == "list") {
+  } else if (type_is_list) {
     int n = p->list_length("value");
     if (n == 0) {
       ERROR1 ("Config::read",
