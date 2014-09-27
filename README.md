@@ -11,7 +11,7 @@
    numerical simulations to address current scientific questions in
    astrophysics and cosmology, including star formation, molecular
    cloud turbulence, interstellar medium, galaxy formation,
-   integlactic medium, formation of the first stars and galaxies,
+   interglactic medium, formation of the first stars and galaxies,
    galaxy clusters, and cosmic reionization.  The Cello AMR framework
    can be used independently of Enzo-P, thus enabling researchers in
    other scientific fields to develop AMR applications capable of
@@ -20,7 +20,7 @@
    Enzo-P/Cello is currently in V1.0beta.  It still has several known 
    issues that need to be addressed before it can be used for scientific
    research, though it is still usable as a hydrodynamics solver, 
-   especcially in an educational setting.
+   especially in an educational setting.
 
 ### How do I get set up? ###
 
