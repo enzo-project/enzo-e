@@ -803,7 +803,7 @@ int Config::read_schedule_(Parameters * p, const std::string group)
       (p->type("step") != parameter_unknown) ||
       (p->type("stop") != parameter_unknown));
   
-  const bool type_is_list = (p->type("list") != parameter_unknown);
+  const bool type_is_list = (p->type("value") != parameter_unknown);
 
   if (type_is_interval && type_is_list) {
       ERROR1 ("Config::read",
