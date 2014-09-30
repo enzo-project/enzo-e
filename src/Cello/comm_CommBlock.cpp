@@ -55,7 +55,6 @@ CommBlock::CommBlock
   stop_(0),
   index_initial_(0),
   children_(),
-  loop_refresh_(),
   sync_coarsen_(),
   count_sync_(),
   max_sync_(),
@@ -66,7 +65,6 @@ CommBlock::CommBlock
   count_coarsen_(0),
   adapt_step_(num_adapt_steps),
   adapt_(adapt_unknown),
-  next_phase_(phase_stopping_enter),
   index_cycle_phase_(0),
   coarsened_(false),
   delete_(false),
@@ -244,7 +242,6 @@ void CommBlock::pup(PUP::er &p)
   p | stop_;
   p | index_initial_;
   p | children_;
-  p | loop_refresh_;
   p | sync_coarsen_;
   PUParray(p,count_sync_, PHASE_COUNT);
   PUParray(p,max_sync_,   PHASE_COUNT);
@@ -255,7 +252,6 @@ void CommBlock::pup(PUP::er &p)
   p | count_coarsen_;
   p | adapt_step_;
   p | adapt_;
-  p | next_phase_;
   p | index_cycle_phase_;
   p | coarsened_;
   p | delete_;
@@ -607,7 +603,6 @@ void CommBlock::copy_(const CommBlock & comm_block) throw()
   stop_       = comm_block.stop_;
   adapt_step_ = comm_block.adapt_step_;
   adapt_      = comm_block.adapt_;
-  next_phase_ = comm_block.next_phase_;
   index_cycle_phase_ = comm_block.index_cycle_phase_;
   coarsened_  = comm_block.coarsened_;
   delete_     = comm_block.delete_;

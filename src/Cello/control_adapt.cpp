@@ -174,8 +174,6 @@ void CommBlock::adapt_end_()
 
   }
 
-  next_phase_ = phase_stopping;
-
   const int initial_cycle = simulation()->config()->initial_cycle;
   const bool is_first_cycle = (initial_cycle == cycle());
   const int level_maximum = simulation()->config()->mesh_max_level;

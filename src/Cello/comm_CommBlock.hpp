@@ -648,10 +648,7 @@ protected: // attributes
   /// list of child nodes
   std::vector<Index> children_;
 
-  /// Synchronization counter for ghost refresh
-  Sync loop_refresh_;
-
-  /// Synchronization counter for ghost refresh
+  /// Synchronization counter for coarsening
   Sync sync_coarsen_;
 
   /// Synchronization counter for p_control_sync
@@ -678,9 +675,6 @@ protected: // attributes
 
   /// Current adapt value for the block
   int adapt_;
-
-  /// Phase to call after refresh
-  int next_phase_;
 
   /// Current phase of the cycle
   int index_cycle_phase_;

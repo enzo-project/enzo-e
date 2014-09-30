@@ -44,8 +44,6 @@ void CommBlock::refresh_begin_()
     int n3[3];
     size_forest(&n3[0],&n3[1],&n3[2]);
 
-    loop_refresh_.set_stop(0);
-
     ItFace it_face = this->it_face();
     int if3[3];
 
@@ -96,9 +94,9 @@ void CommBlock::refresh_begin_()
 
 	index_.print("ERROR Refresh",-1,2,false,simulation());
 	debug_faces_("refresh");
-	ERROR8("CommBlock::refresh_begin_()",
-	       "%s: REFRESH ERROR: face (%d %d %d) level %d face_level %d phase %d is_leaf %d",
-	       name_.c_str(),if3[0],if3[1],if3[2],level,face_level(if3),next_phase_,is_leaf());
+	ERROR7("CommBlock::refresh_begin_()",
+	       "%s: REFRESH ERROR: face (%d %d %d) level %d face_level %d is_leaf %d",
+	       name_.c_str(),if3[0],if3[1],if3[2],level,face_level(if3),is_leaf());
       }
 
     }
@@ -165,7 +163,6 @@ void CommBlock::refresh_load_face_
   thisProxy[index_neighbor].x_refresh_send_face
     (n,array, type_refresh, jface, ichild);
 
-  loop_refresh_.add_stop();
   delete field_face;
 }
 

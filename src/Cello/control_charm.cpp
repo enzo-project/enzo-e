@@ -120,21 +120,7 @@ void CommBlock::refresh_exit_()
 
   VERBOSE("refresh_exit");
 
-  if (next_phase_ == phase_stopping) {
-
-    //    control_sync(phase_output_enter,"array",true,__FILE__,__LINE__);
-    control_next();
-
-  }  else if (next_phase_ == phase_adapt) {
-
-    // control_sync (phase_adapt_enter,"array",true,__FILE__,__LINE__);
-    control_next();
-
-  } else {
-
-    ERROR1 ("CommBlock::refresh_exit()", 
-	    "Unknown next_phase %d", next_phase_);
-  }
+  control_next();
 }
 
 //----------------------------------------------------------------------
@@ -154,8 +140,6 @@ void CommBlock::compute_exit_ ()
 {
 
   VERBOSE("compute_exit");
-
-  next_phase_ = phase_adapt;
 
   // control_sync(phase_refresh_enter,"array",true,__FILE__,__LINE__);  
   control_next();

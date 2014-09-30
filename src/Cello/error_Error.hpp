@@ -58,6 +58,8 @@
   { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5); t_(); }
 #define ERROR6(F,M,A1,A2,A3,A4,A5,A6)					\
   { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6); t_(); }
+#define ERROR7(F,M,A1,A2,A3,A4,A5,A6,A7)				\
+  { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7); t_(); }
 #define ERROR8(F,M,A1,A2,A3,A4,A5,A6,A7,A8)				\
   { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7,A8); t_(); }
 
