@@ -76,7 +76,7 @@ Adapt {
    Boundary { type = "reflecting" }
 
    Stopping {
-      cycle = 1;
+      cycle = 1000;
    }
 
    Output { 
