@@ -3,18 +3,31 @@
     ###    Date: 2011-10-27
     ###  Author: James Bordner (jobordner@ucsd.edu)
 
-#include "input/domain-2d-01.incl"
+Domain { 
+   lower = [0.0, 0.0];
+   upper = [1.0, 1.0];
+} 
 
+Adapt {
+   max_level = 4; 
+   list = ["slope"];
+   slope {
+      type = "slope";
+      field_list = ["density"];
+      min_refine = 10.0;
+      max_coarsen = 2.0;
+   }
+}
 
    Mesh {
       root_rank   = 2;
       root_size   = [160, 160];
-      root_blocks = [  1,   1 ];
+      root_blocks = [  4,   4 ];
    }
 
    Field {
 
-      ghosts  = 3;
+      ghosts  = 4;
       courant = 0.8;
       gamma = 1.4;
 
@@ -33,6 +46,7 @@
 
       list = ["ppm"];
 
+     ppm {
          diffusion   = true;
          flattening  = 3;
          steepening  = true;
@@ -60,21 +74,54 @@
    Boundary { type = "reflecting" }
 
    Stopping {
-      cycle = 500;
+      cycle = 1000;
    }
 
    Output { 
 
-      list = ["cycle_step"];
+      list = ["density", "mesh"];
 
-      cycle_step {
+      density {
+
+         type       = "image";
+         name       = ["hello-de-%04d.png","cycle"];
+	 image_type = "data";
          field_list = ["density"];
-         type     = "image";
-         name       = ["E-%03d.png","cycle"];
-         include "input/schedule_cycle_10.incl"
-         colormap = [0.00, 0.00, 1.00,
-                     0.00, 1.00, 0.00,
+	 image_size = [640,640];
+
+         schedule {
+             type = "interval";
+             var =  "cycle";
+             step = 10;
+         };
+
+         colormap = [0.00, 0.00, 0.00,
+                     1.00, 0.00, 0.00,
                      1.00, 1.00, 0.00,
-                     1.00, 0.00, 0.00];
+                     1.00, 1.00, 1.00];
+      };
+
+      mesh {
+         type       = "image";
+         name       = ["hello-mesh-%04d.png","cycle"];
+	 image_type = "mesh";
+	 image_mesh_color = "age";
+	 image_size = [641,641];
+
+         schedule {
+             type = "interval";
+             var =  "cycle";
+             step = 10;
+         };
+
+         colormap = [0.00, 0.00, 0.00,
+                     1.00, 0.00, 0.00,
+                     1.00, 1.00, 0.00,
+                     1.00, 1.00, 1.00];
+
+         image_specify_bounds = true;
+         image_min = 0.0;
+	 image_max = 1.0;
+         
       }
    }
