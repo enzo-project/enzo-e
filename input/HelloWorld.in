@@ -3,21 +3,23 @@
     ###    Date: 2011-10-27
     ###  Author: James Bordner (jobordner@ucsd.edu)
 
-Domain { 
-   lower = [0.0, 0.0];
-   upper = [1.0, 1.0];
-} 
 
-Adapt {
-   max_level = 4; 
-   list = ["slope"];
-   slope {
-      type = "slope";
-      field_list = ["density"];
-      min_refine = 10.0;
-      max_coarsen = 2.0;
+   Domain { 
+      lower = [0.0, 0.0];
+      upper = [1.0, 1.0];
+   } 
+
+   Adapt {
+      max_level = 4; 
+      list = ["slope"];
+      slope {
+         type = "slope";
+         field_list = ["density"];
+         min_refine = 10.0;
+         max_coarsen = 2.0;
+      }
    }
-}
+
 
    Mesh {
       root_rank   = 2;
@@ -44,7 +46,7 @@ Adapt {
 
    Method {
 
-      list = ["ppm"];
+     list = ["ppm"];
 
      ppm {
          diffusion   = true;
@@ -76,54 +78,60 @@ Adapt {
    Boundary { type = "reflecting" }
 
    Stopping {
-      cycle = 1000;
+      time = 0.1;
    }
 
    Output { 
 
-      list = ["density", "mesh"];
+      list = ["density","mesh_age","mesh_level"];
 
       density {
 
+         name       = ["hello-de-%04d.png","count"];
          type       = "image";
-         name       = ["hello-de-%04d.png","cycle"];
-	 image_type = "data";
          field_list = ["density"];
+
+	 image_type = "data";
 	 image_size = [640,640];
 
-         schedule {
-             type = "interval";
-             var =  "cycle";
-             step = 10;
-         };
+         include "input/schedule_cycle_10.incl"
 
-         colormap = [0.00, 0.00, 0.00,
-                     1.00, 0.00, 0.00,
-                     1.00, 1.00, 0.00,
-                     1.00, 1.00, 1.00];
+         include "input/colormap_rainbow.incl"
+
       };
 
-      mesh {
+      mesh_age {
+
+         name       = ["hello-mesh-age-%04d.png","count"];
          type       = "image";
-         name       = ["hello-mesh-%04d.png","cycle"];
+
 	 image_type = "mesh";
 	 image_mesh_color = "age";
 	 image_size = [641,641];
-
-         schedule {
-             type = "interval";
-             var =  "cycle";
-             step = 10;
-         };
-
-         colormap = [0.00, 0.00, 0.00,
-                     1.00, 0.00, 0.00,
-                     1.00, 1.00, 0.00,
-                     1.00, 1.00, 1.00];
-
          image_specify_bounds = true;
          image_min = 0.0;
 	 image_max = 1.0;
+
+         include "input/schedule_cycle_10.incl"
+
+         include "input/colormap_blackbody.incl"
+
+         
+      };
+
+      mesh_level {
+
+         name       = ["hello-mesh-level-%04d.png","count"];
+         type       = "image";
+
+	 image_type = "mesh";
+	 image_mesh_color = "level";
+	 image_size = [641,641];
+
+         include "input/schedule_cycle_10.incl"
+
+         include "input/colormap_rainbow.incl"
+
          
       }
    }
