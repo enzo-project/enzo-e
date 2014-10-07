@@ -66,6 +66,7 @@ c  locals
 c
       integer i, i1, j, j1, k, k1, pstart1, pstart2, pstart3, 
      &        pdim1, pdim2, pdim3
+      integer ic,jc,kc
       real    chi1, chi2, chi3, 
      &        delf0, delf1, delf1new, delf2, delf2new, delf3, delf3new,
      &        fbar, frac, fx(ijkn), fy(ijkn), fz(ijkn), s, sprime, one
@@ -79,6 +80,14 @@ c=======================================================================
 c
 c     Error check
 c
+      print*, '------------------------'
+      print*, 'dim',dim1,dim2,dim3
+      print*, 'start',start1,start2,start3
+      print*, 'end',end1,end2,end3
+      print*, 'refine',refine1,refine2,refine3
+      print*, 'gdim',gdim1,gdim2,gdim3
+      print*, 'gstart',gstart1,gstart2,gstart3
+      print*, 'wdim',wdim1,wdim2,wdim3
       if (refine1 .gt. MAX_REFINE .or. refine2 .gt. MAX_REFINE .or.
      &    refine2 .gt. MAX_REFINE) then
          write (6,*) "interp3d: Error: refine1,2 or 3 > MAX_REFINE"
@@ -294,12 +303,14 @@ c
 c              And interpolate to the subgrid.
 c
             do k1 = 0, refine3-1
+               kc = gstart3+(k-1)*refine3+k1
                do j1 = 0, refine2-1
+                  jc = gstart2+(j-1)*refine2+j1
                   do i1 = 0, refine1-1
                      do i = 1, pdim1
-                        grid(gstart1+(i-1)*refine1+i1,
-     &                       gstart2+(j-1)*refine2+j1,
-     &                       gstart3+(k-1)*refine3+k1) = (fbar_save(i) +
+                        print*, fbar_save(i)
+                        ic = gstart1+(i-1)*refine1+i1
+                        grid(ic,jc,kc) = (fbar_save(i) +
      &                       (real(i1) + 0.5d0 - 
      &                       0.5d0*real(refine1))/real(refine1)*fx(i) +
      &                       (real(j1) + 0.5d0 - 

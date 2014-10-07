@@ -22,6 +22,7 @@ EnzoProlong::EnzoProlong(std::string type) throw()
 	  "Unrecognized interpolation method %s",
 	   type.c_str());
   }
+  printf ("%s:%d %s %d\n",__FILE__,__LINE__,type.c_str(),method_);
 }
 //----------------------------------------------------------------------
 

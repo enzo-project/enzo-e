@@ -16,16 +16,16 @@
 
 #define CLEAR -1111.0
 
-void print_grid(double * grid, int nd3[3])
+void print_grid(const char * name, double * grid, int nd3[3])
 {
-  PARALLEL_PRINTF("FINE\n");
+  PARALLEL_PRINTF("%s\n",name);
   for (int iy=0; iy<nd3[1]; iy++) {
     for (int ix=0; ix<nd3[0]; ix++) {
       int i = ix + nd3[0]*iy;
       if (grid[i] == CLEAR)
 	PARALLEL_PRINTF ("  -  ");
       else
-	PARALLEL_PRINTF ("%4.1f ",grid[i]);
+	PARALLEL_PRINTF ("%4.1e ",grid[i]);
     }
     PARALLEL_PRINTF("\n");
   }
@@ -53,36 +53,50 @@ PARALLEL_MAIN_BEGIN
 
   int nf3[3] = {8,8,8};
   int nc3[3] = {4,4,4};
-  int g3[3] = {3,3,3};
-  int nd3[3] = {nf3[0]+2*g3[0],
-		nf3[1]+2*g3[1],
-		nf3[2]+2*g3[2]};
 
-  double * grid_fine = new double [nd3[0]*nd3[1]];
-  double * grid_coarse = new double [nd3[0]*nd3[1]];
+  double * af   = new double [nf3[0]*nf3[1]*nf3[2]];
+  double * ac = new double [nc3[0]*nc3[1]*nc3[2]];
 
-  set_grid  (grid_coarse,nd3,1,1,2);     // 1 + 1*ix + 2* iy
-  print_grid(grid_coarse,nd3);
+  set_grid  (ac,nc3,1,1,2);    // 1 + 1*ix + 2* iy
+  print_grid("coarse",ac,nc3);
+  set_grid  (af,nf3,CLEAR,0,0); // CLEAR + 0*ix + 0*iy
+  print_grid("fine 0",ac,nc3);
 
-  set_grid  (grid_fine,nd3,CLEAR,0,0); // = CLEAR
-  print_grid(grid_fine,nd3);
 
-  // FORTRAN_NAME(interpolate)(&ndim, grid_coarse, nd3, pstart, pend,
-  // 			    refine,
-  // 			    grid_fine, nd3, gstart, work, &imethod,
-  // 			    &iposflag, &error);
+  int dim[3] = {4,4,4};
+  int start[3] = {3,3,3};
+  int end[3] = {6,6,6};
+  int refine[3] = {2,2,2};
+  int gdim[3] = {4,4,4};
+  int gstart[3] = {1,1,1};
+  int wdim[3] = {3,3,3};
+  double * w = new double[7*7*7];
+  int ierror = 0;
+
+  FORTRAN_NAME(interp3d)(ac,w,
+			 &dim[0],&dim[1],&dim[2],
+			 &start[0],&start[1],&start[2],
+			 &end[0],&end[1],&end[2],
+			 &refine[0],&refine[1],&refine[2],
+			 af,
+			 &gdim[0],&gdim[1],&gdim[2],
+			 &gstart[0],&gstart[1],&gstart[2],
+			 &wdim[0],&wdim[1],&wdim[2],
+			 &ierror);
+
+  print_grid("fine 2",af,nf3);
 
   ProlongLinear prolong_linear;
   int im3[3] = {0,0,0};
   prolong_linear.apply(precision_double,
-		       grid_fine,   nd3, im3,nf3,
-		       grid_coarse, nd3, im3,nc3);
+		       af, nf3, im3,nf3,
+		       ac, nc3, im3,nc3);
 
-  print_grid(grid_fine,nd3);
+  print_grid("fine 2",af,nf3);
 		       
 		       
   //======================================================================
-  exit_();
+  //  exit_();
   //======================================================================
 
   {
@@ -187,7 +201,7 @@ PARALLEL_MAIN_BEGIN
 
     unit_finalize();
 
-    exit_();
+    //    exit_();
   }
 }
 
