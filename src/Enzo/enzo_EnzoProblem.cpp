@@ -194,6 +194,10 @@ Method * EnzoProblem::create_method_
       (enzo_config->ppm_density_floor,
        enzo_config->ppm_temperature_floor,
        enzo_config->ppm_mol_weight);
+  } else if (type == "gravity_cg") {
+    method = new EnzoMethodGravityCg
+      (enzo_config->method_gravity_cg_iter_max,
+       enzo_config->method_gravity_cg_res_tol);
   } else {
     method = Problem::create_method_ (type,config, field_descr);
   }

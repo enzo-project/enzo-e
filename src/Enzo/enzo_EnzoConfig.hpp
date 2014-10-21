@@ -102,6 +102,10 @@ public: // attributes
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
 
+  // EnzoMethodGravityCg
+  int                        method_gravity_cg_iter_max;
+  double                     method_gravity_cg_res_tol;
+
 #ifdef CONFIG_USE_GRACKLE
 
   // EnzoMethodGrackle

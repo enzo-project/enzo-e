@@ -67,6 +67,7 @@ module enzo {
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodPressure;
   PUPable EnzoMethodTemperature;
+  PUPable EnzoMethodGravityCg;
 
   PUPable EnzoProblem;
   PUPable EnzoProlong;

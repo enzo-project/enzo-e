@@ -292,7 +292,7 @@ void EnzoBlock::pup(PUP::er &p)
     WARNING("EnzoBlock::pup()", "skipping OldBaryonField[] [not used]");
   }
 
-  PUParray(p,method_turbulence_data,9);
+  PUParray(p,method_turbulence_data,MAX_TURBULENCE_ARRAY);
 
   TRACE ("END EnzoBlock::pup()");
 
