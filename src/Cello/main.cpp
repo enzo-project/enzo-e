@@ -35,6 +35,28 @@ void register_method_turbulence(void)
   r_method_turbulence_type = CkReduction::addReducer(r_method_turbulence); 
 }
 
+//--------------------------------------------------
+
+// SEE enzo_EnzoMethodTurbulence.cpp for context
+CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
+{
+  double accum[MAX_TURBULENCE_ARRAY] = { 0.0 };
+  accum[INDEX_TURBULENCE_minD] = std::numeric_limits<double>::max();
+  accum[INDEX_TURBULENCE_maxD] = std::numeric_limits<double>::min();
+
+  for (int i=0; i<n; i++) {
+    double * values = (double *) msgs[i]->getData();
+    for (int ig=0; ig<MAX_TURBULENCE_ARRAY-2; ig++) {
+      accum [ig] += values[ig];
+    }
+    accum [INDEX_TURBULENCE_minD] = 
+      std::min(accum[INDEX_TURBULENCE_minD],values[INDEX_TURBULENCE_minD]);
+    accum [INDEX_TURBULENCE_maxD] = 
+      std::max(accum[INDEX_TURBULENCE_maxD],values[INDEX_TURBULENCE_maxD]);
+  }
+  return CkReductionMsg::buildNew(MAX_TURBULENCE_ARRAY*sizeof(double),accum);
+}
+
 //----------------------------------------------------------------------
 
 void Main::p_exit(int count)
@@ -55,11 +77,15 @@ void Main::exit_()
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  enzo_finalize(simulation);
+  if (simulation) {
+    enzo_finalize(simulation);
+  }
 
 #endif
 
-  Monitor::instance()->print ("","END CELLO");
+  if (Monitor::instance()) {
+    Monitor::instance()->print ("","END CELLO");
+  }
   //    unit_finalize();
   // Fake unit_init() for index.php (test.hpp is not included since
   // enzo.ci and test.ci conflict)
@@ -226,28 +252,6 @@ void Main::p_refresh_exit()
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_refresh_exit();
 #endif
-}
-
-//----------------------------------------------------------------------
-
-// SEE enzo_EnzoMethodTurbulence.cpp for context
-CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
-{
-  double accum[MAX_TURBULENCE_ARRAY] = { 0.0 };
-  accum[INDEX_TURBULENCE_minD] = std::numeric_limits<double>::max();
-  accum[INDEX_TURBULENCE_maxD] = std::numeric_limits<double>::min();
-
-  for (int i=0; i<n; i++) {
-    double * values = (double *) msgs[i]->getData();
-    for (int ig=0; ig<MAX_TURBULENCE_ARRAY-2; ig++) {
-      accum [ig] += values[ig];
-    }
-    accum [INDEX_TURBULENCE_minD] = 
-      std::min(accum[INDEX_TURBULENCE_minD],values[INDEX_TURBULENCE_minD]);
-    accum [INDEX_TURBULENCE_maxD] = 
-      std::max(accum[INDEX_TURBULENCE_maxD],values[INDEX_TURBULENCE_maxD]);
-  }
-  return CkReductionMsg::buildNew(MAX_TURBULENCE_ARRAY*sizeof(double),accum);
 }
 
 //----------------------------------------------------------------------
