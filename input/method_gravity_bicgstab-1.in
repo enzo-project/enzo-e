@@ -13,8 +13,8 @@ Mesh {
 }
 
 Method {
-    list = ["gravity_cg"]; 
-    gravity_cg {
+    list = ["gravity_bicgstab"]; 
+    gravity_bicgstab {
        iter_max = 100;
        res_tol  = 1e-6;
     }
@@ -40,14 +40,14 @@ Output {
    list = ["potential", "density"];
    potential {
      type = "image";
-     name = ["method_gravity_cg-potential-%06d.png", "cycle"];   
+     name = ["method_gravity_bicgstab-potential-%06d.png", "cycle"];   
      field_list = ["potential"];
      include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
    };
    density {
      type = "image";
-     name = ["method_gravity_cg-density-%06d.png", "cycle"];   
+     name = ["method_gravity_bicgstab-density-%06d.png", "cycle"];   
      field_list = ["density"];
      include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
