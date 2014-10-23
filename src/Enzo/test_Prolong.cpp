@@ -18,26 +18,29 @@
 
 void print_grid(const char * name, double * grid, int nd3[3])
 {
-  PARALLEL_PRINTF("%s\n",name);
   for (int iy=0; iy<nd3[1]; iy++) {
-    for (int ix=0; ix<nd3[0]; ix++) {
-      int i = ix + nd3[0]*iy;
-      if (grid[i] == CLEAR)
-	PARALLEL_PRINTF ("  -  ");
-      else
-	PARALLEL_PRINTF ("%4.1e ",grid[i]);
+    for (int iz=0; iz<nd3[2]; iz++) {
+      for (int ix=0; ix<nd3[0]; ix++) {
+	int i = ix + nd3[0]*(iy + nd3[1]*iz);
+	if (grid[i] == CLEAR)
+	  PARALLEL_PRINTF ("  -  ");
+	else
+	  PARALLEL_PRINTF ("%s %d %d %d %10.5f ",name,ix,iy,iz,grid[i]);
+	PARALLEL_PRINTF("\n");
+      }
     }
-    PARALLEL_PRINTF("\n");
   }
 }
 
 void set_grid(double * grid, int nd3[3], 
-	      double c, double x, double y)
+	      double c, double x, double y, double z)
 {
-  for (int iy=0; iy<nd3[1]; iy++) {
-    for (int ix=0; ix<nd3[0]; ix++) {
-      int i = ix + nd3[0]*iy;
-      grid[i] = c + ix*x + iy*y;
+  for (int iz=0; iz<nd3[2]; iz++) {
+    for (int iy=0; iy<nd3[1]; iy++) {
+      for (int ix=0; ix<nd3[0]; ix++) {
+	int i = ix + nd3[0]*(iy + nd3[1]*iz);
+	grid[i] = c + ix*x + iy*y + iz*z;
+      }
     }
   }
 }
@@ -51,26 +54,32 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  int nf3[3] = {8,8,8};
-  int nc3[3] = {4,4,4};
+  const int g=3;
+  int nc3[3] = {8,8,8};
+  int nf3[3] = {12,12,12};
+  int mf3[3] = {12,12,12};
 
-  double * af   = new double [nf3[0]*nf3[1]*nf3[2]];
   double * ac = new double [nc3[0]*nc3[1]*nc3[2]];
+  double * af = new double [mf3[0]*mf3[1]*mf3[2]];
 
-  set_grid  (ac,nc3,1,1,2);    // 1 + 1*ix + 2* iy
-  print_grid("coarse",ac,nc3);
-  set_grid  (af,nf3,CLEAR,0,0); // CLEAR + 0*ix + 0*iy
-  print_grid("fine 0",ac,nc3);
+  int dc = g + nc3[0]*(g + nc3[1]*g);
+  int df = g + mf3[0]*(g + mf3[1]*g);
+
+  set_grid  (ac,nc3,1,10,100,1);    // 1 + 1*ix + 2* iy + 3*iz
+  print_grid("coarse before interp3d",ac,nc3);
+  set_grid  (af,mf3,CLEAR,0,0,0); // CLEAR + 0*ix + 0*iy + 0*iz
 
 
-  int dim[3] = {4,4,4};
+  int dim[3]   = {nc3[0],nc3[1],nc3[2]};
   int start[3] = {3,3,3};
-  int end[3] = {6,6,6};
+  int end[3]   = {2+2*(nc3[0]-2),
+		  2+2*(nc3[1]-2),
+		  2+2*(nc3[2]-2)};
   int refine[3] = {2,2,2};
-  int gdim[3] = {4,4,4};
+  int gdim[3] = {end[0]-2,end[1]-2,end[2]-2};
   int gstart[3] = {1,1,1};
-  int wdim[3] = {3,3,3};
-  double * w = new double[7*7*7];
+  int wdim[3] = {dim[0]-1,dim[1]-1,dim[2]-1};
+  double * w = new double[wdim[0]*wdim[1]*wdim[2]];
   int ierror = 0;
 
   FORTRAN_NAME(interp3d)(ac,w,
@@ -84,19 +93,28 @@ PARALLEL_MAIN_BEGIN
 			 &wdim[0],&wdim[1],&wdim[2],
 			 &ierror);
 
-  print_grid("fine 2",af,nf3);
+  print_grid("fine after interp3d",af,mf3);
 
+  //======================================================================
+  unit_finalize();
+  PARALLEL_EXIT;
+  //======================================================================
+
+
+  set_grid  (af,nf3,CLEAR,0,0,0); // CLEAR + 0*ix + 0*iy + 0*iz
+  
   ProlongLinear prolong_linear;
   int im3[3] = {0,0,0};
   prolong_linear.apply(precision_double,
 		       af, nf3, im3,nf3,
 		       ac, nc3, im3,nc3);
 
-  print_grid("fine 2",af,nf3);
+  //  print_grid("fine after ProlongLinear",af,mf3);
 		       
 		       
   //======================================================================
-  //  exit_();
+  unit_finalize();
+  PARALLEL_EXIT;
   //======================================================================
 
   {

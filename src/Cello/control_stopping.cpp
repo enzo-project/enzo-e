@@ -196,7 +196,8 @@ void CommBlock::exit_()
 {
   if (index_.is_root()) {
 
-    simulation()->performance_write();
+    if (simulation())
+      simulation()->performance_write();
 
     proxy_main.p_exit(1);
   }
