@@ -151,6 +151,7 @@ struct fluxes
 #include "enzo_EnzoMethodTurbulence.hpp"
 #include "enzo_EnzoMethodPressure.hpp"
 #include "enzo_EnzoMethodTemperature.hpp"
+#include "enzo_EnzoMethodGravityCg.hpp"
 #include "enzo_EnzoMethodGravityBiCGStab.hpp"
 
 #include "enzo_EnzoProlong.hpp"

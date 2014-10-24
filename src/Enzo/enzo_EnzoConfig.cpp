@@ -73,6 +73,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_null_dt;
   p | method_turbulence_edot;
 
+  p | method_gravity_cg_iter_max;
+  p | method_gravity_cg_res_tol;
   p | method_gravity_bicgstab_iter_max;
   p | method_gravity_bicgstab_res_tol;
 
@@ -202,6 +204,12 @@ void EnzoConfig::read(Parameters * p) throw()
   method_null_dt = p->value_float 
     ("Method:null:dt",0.0);
 
+
+  method_gravity_cg_iter_max = p->value_integer
+    ("Method:gravity_cg:iter_max",100);
+
+  method_gravity_cg_res_tol = p->value_float
+    ("Method:gravity_cg:res_tol",1e-6);
 
   method_gravity_bicgstab_iter_max = p->value_integer
     ("Method:gravity_bicgstab:iter_max",100);

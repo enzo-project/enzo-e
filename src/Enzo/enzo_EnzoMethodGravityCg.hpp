@@ -1,38 +1,38 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodGravityBiCGStab.hpp
+/// @file     enzo_EnzoMethodGravityCg.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     2014-10-23 16:19:06
-/// @brief    [\ref Enzo] Declaration of EnzoMethodGravityBiCGStab
+/// @date     2014-10-21 17:25:40
+/// @brief    [\ref Enzo] Declaration of EnzoMethodGravityCg
 ///
-/// Bicongugate gradient stabalized method (BiCGStab) for solving for
+/// Bicongugate gradient stabalized method (Cg) for solving for
 /// self-gravity on field data.
 
-#ifndef ENZO_ENZO_METHOD_GRAVITY_BICGSTAB_HPP
-#define ENZO_ENZO_METHOD_GRAVITY_BICGSTAB_HPP
+#ifndef ENZO_ENZO_METHOD_GRAVITY_CG_HPP
+#define ENZO_ENZO_METHOD_GRAVITY_CG_HPP
 
-class EnzoMethodGravityBiCGStab : public Method {
+class EnzoMethodGravityCg : public Method {
 
-  /// @class    EnzoMethodGravityBiCGStab
+  /// @class    EnzoMethodGravityCg
   /// @ingroup  Enzo
   ///
   /// @brief [\ref Enzo] Demonstration method to solve self-gravity
-  /// using the BiCGStab method.  This is more applicable to smaller problems
+  /// using the Cg method.  This is more applicable to smaller problems
   /// since the method doesn't scale as well as some other methods
   /// (FFT, MG, etc.) for larger problems.
 
 public: // interface
 
-  /// Create a new EnzoMethodGravityBiCGStab object
-  EnzoMethodGravityBiCGStab(int iter_max, double res_tol);
+  /// Create a new EnzoMethodGravityCg object
+  EnzoMethodGravityCg(int iter_max, double res_tol);
 
-  EnzoMethodGravityBiCGStab() {};
+  EnzoMethodGravityCg() {};
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodGravityBiCGStab);
+  PUPable_decl(EnzoMethodGravityCg);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodGravityBiCGStab (CkMigrateMessage *m) {}
+  EnzoMethodGravityCg (CkMigrateMessage *m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) ;
@@ -48,7 +48,7 @@ protected: // methods
 
 protected: // attributes
 
-  /// Maximum number of BiCGStab iterations
+  /// Maximum number of Cg iterations
   int iter_max_;
 
   /// Convergence tolerance on the residual 
@@ -56,4 +56,4 @@ protected: // attributes
 
 };
 
-#endif /* ENZO_ENZO_METHOD_GRAVITY_BICGSTAB_HPP */
+#endif /* ENZO_ENZO_METHOD_GRAVITY_CG_HPP */

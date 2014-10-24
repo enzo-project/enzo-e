@@ -102,6 +102,10 @@ public: // attributes
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
 
+  // EnzoMethodGravityCg
+  int                        method_gravity_cg_iter_max;
+  double                     method_gravity_cg_res_tol;
+
   // EnzoMethodGravityBiCGStab
   int                        method_gravity_bicgstab_iter_max;
   double                     method_gravity_bicgstab_res_tol;
