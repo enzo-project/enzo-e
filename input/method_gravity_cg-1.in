@@ -1,0 +1,58 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+Domain {
+   lower = [ 0.0, 0.0 ];
+   upper = [ 1.0, 1.0 ];
+}
+
+Mesh { 
+   root_rank = 2;
+   root_size = [512,512];
+   root_blocks = [4,4];
+}
+
+Method {
+    list = ["gravity_cg"]; 
+    gravity_cg {
+       iter_max = 100;
+       res_tol  = 1e-6;
+    }
+}
+
+Field {
+   
+   list = ["density", "potential"];
+}
+
+Initial {
+   density  { 
+      value = [ 1.0, (x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) < 0.05,
+                0.0 ];
+   }
+}
+
+Boundary {
+   type = "periodic";
+} 
+
+Output {
+   list = ["potential", "density"];
+   potential {
+     type = "image";
+     name = ["method_gravity_cg-potential-%06d.png", "cycle"];   
+     field_list = ["potential"];
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   density {
+     type = "image";
+     name = ["method_gravity_cg-density-%06d.png", "cycle"];   
+     field_list = ["density"];
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   }
+}
+
+Stopping { cycle = 1; }
+
