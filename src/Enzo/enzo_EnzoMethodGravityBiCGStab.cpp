@@ -102,6 +102,159 @@
 ///   end
 /// 
 /// % END bicgstab.m
+///
+/// ======================================================================
+///
+/// BiCGStab partitioned along parallel communication / synchronization steps
+///
+/// --------------------
+/// bicgstab_begin()
+/// --------------------
+///
+///    return_ = return_unknown;
+/// 
+///    B = <right-hand side>
+///    X = <initial solution X0>
+///
+///    bnorm_ = NORM( B ) ==> bicgstab_start_1
+///
+/// --------------------
+/// bicgstab_start_1()
+/// --------------------
+///
+///   if ( bnorm_ == 0.0 ) bnorm_ = 1.0;
+/// 
+///   R = MATVEC(A,x) ==> bicgstab_start_2
+//
+/// --------------------
+/// bicgstab_start_2()
+/// --------------------
+///
+///   R = B - R;
+///   rnorm_ = NORM( R ) ==> bicgstab_start_3
+///
+/// --------------------
+/// bicgstab_start_3()
+/// --------------------
+///
+///   error = rnorm_ / bnorm_;
+///   if ( error < tol ) {
+///      ==> bicgstab_loop_end(return_converged_)
+///   }
+/// 
+///   R_hat = R;
+/// 
+///   iter = 1
+/// 
+///   ==> bicgstab_loop_begin()
+///
+/// ==================================================
+///
+/// --------------------
+/// bicgstab_loop_begin()
+/// --------------------
+///
+///    if (iter >= max_it) {
+///       ==> bicgstab_loop_end(return_error_not_converged_);
+///    }
+/// 
+///    rho_ = DOT(R_hat, R) ==> bicgstab_loop_1
+/// 
+/// --------------------
+/// bicgstab_loop_1()
+/// --------------------
+///  
+///    if ( rho_ == 0.0 ) {
+///       bicgstab_loop_end(return_error_rho_eq_0)
+///    }
+/// 
+///    if ( iter_ > 1 ) {
+///       beta  = ( rho_/rho_prev_ )*( alpha_/omega_ );
+///       P = R + beta*( P - omega_*v );
+///    } else {
+///       P = R;
+///    }
+///  
+///    Y = SOLVE (M, P) ==> bicgstab_loop_2
+/// 
+/// --------------------
+/// bicgstab_loop_2()
+/// --------------------
+///
+///    V = MATVEC (A,Y) ==> bicgstab_loop_3
+///
+/// --------------------
+/// bicgstab_loop_3()
+/// --------------------
+///
+///    V = A * Y;
+///    rhdv_ = DOT (R_hat,V) ==> bicgstab_loop_4
+///
+/// --------------------
+/// bicgstab_loop_4()
+/// --------------------
+
+///    alpha_ = rho / ( rhdv_ );
+///    S = R - alpha_*V;
+///    Z = SOLVE(M , S) ==> bicgstab_loop_5
+///
+/// --------------------
+/// bicgstab_loop_5()
+/// --------------------
+///
+///    T = MATVEC(A,Z) ==> bicgstab_loop_6
+/// 
+/// --------------------
+/// bicgstab_loop_6()
+/// --------------------
+///    tds_ = DOT(T,S), tdt_ = DOT(T,T) ==> bicgstab_loop_7
+///
+/// --------------------
+/// bicgstab_loop_7()
+/// --------------------
+///
+///    omega_ = ( tds_) / ( tdt_ );
+///    if ( omega_ == 0.0 ) {
+///       bicgstab_loop_end(return_error_omega_eq_0);
+///    }
+///    X = X + alpha_*Y + omega_*Z;             % update approximation
+///    R = S - omega_*T;
+///    rnorm_ = NORM(R) ==> bicgstab_loop_8()
+///
+/// --------------------
+/// bicgstab_loop_7()
+/// --------------------
+///
+///    error = rnorm_ / bnorm_;                     % check convergence
+///    if ( error <= tol ) {
+///       bicgstab_loop_end(return_converged_);
+///    }
+/// 
+///    rho_prev = rho;
+///
+///    iter = iter + 1
+///
+///    ==> bicgstab_loop_begin()
+///
+/// ==================================================
+///
+/// --------------------
+/// bicgstab_loop_end(return_)
+/// --------------------
+///
+/// if (return_ == return_converged) {
+///    NEXT()
+/// } else if (return_ == return_error_omega_eq_0) {
+///    ERROR
+/// } else if (return_ == return_error_rho_eq_0) {
+///    ERROR
+/// } else if (return_ == return_error_not_converged) {
+///    ERROR
+/// } else {
+///    ERROR
+/// }
+/// --------------------------------------------------
+
 
 
 #include "cello.hpp"
