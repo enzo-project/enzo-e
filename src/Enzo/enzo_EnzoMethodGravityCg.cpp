@@ -4,7 +4,78 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2014-10-21 17:25:09
 /// @brief    Implements the EnzoMethodGravityCg class
-
+///
+/// function [x] = conjgrad(A,b,x)
+///     r=b-A*x;
+///     p=r;
+///     rsold=r'*r;
+///  
+///     for i=1:1e6
+///         Ap=A*p;
+///         alpha=rsold/(p'*Ap);
+///         x=x+alpha*p;
+///         r=r-alpha*Ap;
+///         rsnew=r'*r;
+///         if sqrt(rsnew)<1e-10
+///               break;
+///         end
+///         p=r+rsnew/rsold*p;
+///         rsold=rsnew;
+///     end
+/// end
+/// nabla ^ 2 (potential) = 4 pi G density
+///
+///======================================================================
+///
+/// nabla ^ 2 (potential) = 4 pi G density
+///
+/// cg_begin:
+///
+///    B = 4 * PI * G * density
+///
+///    R = MATVEC (A,X) ==> cg_begin_1
+///
+/// cg_begin_1:
+///
+///    R = B - R;
+///    P = R
+///    iter_ = 0
+///    rnorm_ = DOT(R,R) ==> cg_loop_1
+///
+/// cg_loop_1:
+///
+///    if (iter_ > iter_max_) ==> cg_end (return_error_max_iter_reached)
+///    AP = MATVEC (A,P) ==> cg_loop_2
+///
+/// cg_loop_2:
+///
+///    pap_ = DOT(P, AP) ==> cg_loop_3
+///
+/// cg_loop_3:
+///
+///    alpha_ = rnorm_ / pap_
+///    X = X + alpha_ * P;
+///    R = R - alpha_ * AP;
+///    rnorm_new_ = DOT(R,R) ==> cg_loop_4
+///
+/// cg_loop_4:
+///
+///    if (sqrt(rsnew) < resid_tol) ==> cg_end(return_converged)
+///
+///    P = R + rnorm_new_ / rnorm_ * P;
+/// 
+///    rnorm_ = rnorm_new_
+///    iter = iter + 1
+///    ==> cg_loop_1()
+///
+/// cg_end (return):
+///
+///    if (return == return_converged) {
+///       potential = X
+///       NEXT()
+///    } else {
+///       ERROR (return-)
+///    }
 
 #include "cello.hpp"
 
@@ -86,26 +157,6 @@ template <class T>
 void EnzoMethodGravityCg::compute_ 
 (T * density,   int md3[3], int nd3[3],
  T * potential, int mp3[3], int np3[3]) const throw()
-// function [x] = conjgrad(A,b,x)
-//     r=b-A*x;
-//     p=r;
-//     rsold=r'*r;
-//  
-//     for i=1:1e6
-//         Ap=A*p;
-//         alpha=rsold/(p'*Ap);
-//         x=x+alpha*p;
-//         r=r-alpha*Ap;
-//         rsnew=r'*r;
-//         if sqrt(rsnew)<1e-10
-//               break;
-//         end
-//         p=r+rsnew/rsold*p;
-//         rsold=rsnew;
-//     end
-// end
-// nabla ^ 2 (potential) = 4 pi G density
-// 
 {
 
   printf ("potential size %d %d %d  dim %d %d %d\n",

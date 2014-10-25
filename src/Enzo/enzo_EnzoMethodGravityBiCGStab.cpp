@@ -244,14 +244,8 @@
 ///
 /// if (return_ == return_converged) {
 ///    NEXT()
-/// } else if (return_ == return_error_omega_eq_0) {
-///    ERROR
-/// } else if (return_ == return_error_rho_eq_0) {
-///    ERROR
-/// } else if (return_ == return_error_not_converged) {
-///    ERROR
 /// } else {
-///    ERROR
+///    ERROR (return_)
 /// }
 /// --------------------------------------------------
 
@@ -337,26 +331,6 @@ template <class T>
 void EnzoMethodGravityBiCGStab::compute_ 
 (T * density,   int md3[3], int nd3[3],
  T * potential, int mp3[3], int np3[3]) const throw()
-// function [x] = conjgrad(A,b,x)
-//     r=b-A*x;
-//     p=r;
-//     rsold=r'*r;
-//  
-//     for i=1:1e6
-//         Ap=A*p;
-//         alpha=rsold/(p'*Ap);
-//         x=x+alpha*p;
-//         r=r-alpha*Ap;
-//         rsnew=r'*r;
-//         if sqrt(rsnew)<1e-10
-//               break;
-//         end
-//         p=r+rsnew/rsold*p;
-//         rsold=rsnew;
-//     end
-// end
-// nabla ^ 2 (potential) = 4 pi G density
-// 
 {
 
   printf ("potential size %d %d %d  dim %d %d %d\n",
