@@ -40,7 +40,7 @@
 ///    R = B - R;
 ///    P = R
 ///    iter_ = 0
-///    rnorm_ = DOT(R,R) ==> cg_loop_1
+///    rr_ = DOT(R,R) ==> cg_loop_1
 ///
 /// cg_loop_1:
 ///
@@ -53,18 +53,18 @@
 ///
 /// cg_loop_3:
 ///
-///    alpha_ = rnorm_ / pap_
+///    alpha_ = rr_ / pap_
 ///    X = X + alpha_ * P;
 ///    R = R - alpha_ * AP;
-///    rnorm_new_ = DOT(R,R) ==> cg_loop_4
+///    rr_new_ = DOT(R,R) ==> cg_loop_4
 ///
 /// cg_loop_4:
 ///
-///    if (sqrt(rsnew) < resid_tol) ==> cg_end(return_converged)
+///    if (rr_new_ < resid_tol*resid_tol) ==> cg_end(return_converged)
 ///
-///    P = R + rnorm_new_ / rnorm_ * P;
+///    P = R + rr_new_ / rr_ * P;
 /// 
-///    rnorm_ = rnorm_new_
+///    rr_ = rr_new_
 ///    iter = iter + 1
 ///    ==> cg_loop_1()
 ///
