@@ -32,22 +32,6 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
  
   /* Error Check */
 
-  TRACE3 ("time: %20.14g %20.14g %20.14g\n",OldTime,time,Time());
-  if (time < OldTime || time > Time()) {
-    fprintf(stderr, "requested time is outside available range.\n");
-    return ENZO_FAIL;
-  }
- 
-  /* Compute interpolation coefficients. */
- 
-  enzo_float coef, coefold;
-  if (Time() - OldTime > 0)
-    coef    = (time - OldTime)/(Time() - OldTime);
-  else
-    coef    = 1;
- 
-  coefold = 1 - coef;
- 
   /* Compute the size of the grid. */
  
   for (int dim = 0; dim < GridRank; dim++)
@@ -70,7 +54,7 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
   /* special loop for no interpolate. */
 
   // WARNING: floating point comparison
-  if (time == Time())
+  if (time == this->time())
 
     for (i = 0; i < size; i++) {
  
@@ -155,7 +139,7 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
  
     if (ComovingCoordinates)
       if (CosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
-			    &TimeUnits, &VelocityUnits, Time()) == ENZO_FAIL) {
+			    &TimeUnits, &VelocityUnits, this->time()) == ENZO_FAIL) {
 	fprintf(stderr, "Error in CosmologyGetUnits.\n");
 	return ENZO_FAIL;
       }

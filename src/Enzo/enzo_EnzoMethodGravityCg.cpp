@@ -168,3 +168,53 @@ void EnzoMethodGravityCg::compute_
 	  md3[0],md3[1],md3[2]);
 
 }
+
+/// nabla ^ 2 (potential) = 4 pi G density
+///
+/// cg_begin:
+///
+///    B = 4 * PI * G * density
+///
+///    R = MATVEC (A,X) ==> cg_begin_1
+///
+/// cg_begin_1:
+///
+///    R = B - R;
+///    P = R
+///    iter_ = 0
+///    rr_ = DOT(R,R) ==> cg_loop_1
+///
+/// cg_loop_1:
+///
+///    if (iter_ > iter_max_) ==> cg_end (return_error_max_iter_reached)
+///    AP = MATVEC (A,P) ==> cg_loop_2
+///
+/// cg_loop_2:
+///
+///    pap_ = DOT(P, AP) ==> cg_loop_3
+///
+/// cg_loop_3:
+///
+///    alpha_ = rr_ / pap_
+///    X = X + alpha_ * P;
+///    R = R - alpha_ * AP;
+///    rr_new_ = DOT(R,R) ==> cg_loop_4
+///
+/// cg_loop_4:
+///
+///    if (rr_new_ < resid_tol*resid_tol) ==> cg_end(return_converged)
+///
+///    P = R + rr_new_ / rr_ * P;
+/// 
+///    rr_ = rr_new_
+///    iter = iter + 1
+///    ==> cg_loop_1()
+///
+/// cg_end (return):
+///
+///    if (return == return_converged) {
+///       potential = X
+///       NEXT()
+///    } else {
+///       ERROR (return-)
+///    }

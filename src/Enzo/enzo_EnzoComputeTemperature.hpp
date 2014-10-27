@@ -1,37 +1,37 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodTemperature.hpp
+/// @file     enzo_EnzoComputeTemperature.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     Wed Jul 23 15:53:28 PDT 2014
+/// @date     2014-10-27 22:37:41
 /// @brief    [\ref Enzo] Implementation of Enzo's ComputeTemperature functions
 
-#ifndef ENZO_ENZO_METHOD_TEMPERATURE_HPP
-#define ENZO_ENZO_METHOD_TEMPERATURE_HPP
+#ifndef ENZO_ENZO_COMPUTE_TEMPERATURE_HPP
+#define ENZO_ENZO_COMPUTE_TEMPERATURE_HPP
 
-class EnzoMethodTemperature : public Method {
+class EnzoComputeTemperature : public Compute {
 
-  /// @class    EnzoMethodTemperature
+  /// @class    EnzoComputeTemperature
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulate Enzo's ComputeTemperature functions
 
 public: // interface
 
-  /// Create a new EnzoMethodTemperature object
-  EnzoMethodTemperature 
+  /// Create a new EnzoComputeTemperature object
+  EnzoComputeTemperature 
   (double density_floor,
    double temperature_floor,
    double mol_weight);
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodTemperature);
+  PUPable_decl(EnzoComputeTemperature);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodTemperature (CkMigrateMessage *m) {}
+  EnzoComputeTemperature (CkMigrateMessage *m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
   
-  /// Apply the method to advance a block one timestep 
+  /// Perform the computation on the block
   virtual void compute( CommBlock * comm_block) throw();
 
 private: // functions
@@ -52,4 +52,4 @@ private: // attributes
 
 };
 
-#endif /* ENZO_ENZO_METHOD_TEMPERATURE_HPP */
+#endif /* ENZO_ENZO_COMPUTE_TEMPERATURE_HPP */

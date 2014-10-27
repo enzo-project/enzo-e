@@ -467,13 +467,6 @@ void FieldFace::store_loop_limits_
       if ( restrict_ ) {
 	n3[axis] /= 2;
 	im3[axis] += child_[axis] * n3[axis];
-	if (ghost_[axis]) {
-	  // correct centering for interpolating full coarse block to fine
-	  //im3[axis] += child_[axis] * n3[axis];
-	  //UNTESTD
-	  // im3[axis] += (1-2*child_[axis]) * ng3[axis]/2 ;
-	  // n3[axis] += ng3[axis];
-	}
       }
 
      

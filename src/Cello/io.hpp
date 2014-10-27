@@ -19,6 +19,7 @@
 #include "_mesh.hpp"
 #include "_comm.hpp"
 #include "_disk.hpp"
+#include "_compute.hpp"
 #include "_problem.hpp"
 #include "_simulation.hpp"
 

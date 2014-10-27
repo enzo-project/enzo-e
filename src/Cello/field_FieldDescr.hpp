@@ -48,7 +48,7 @@ public: // functions
     int num_fields = name_.size();
     if (up) centering_.resize(num_fields);
     for (int i=0; i<num_fields; i++) {
-      if (up) centering_[i] = new bool[3];
+      if (up) centering_[i] = new int[3];
       PUParray(p,centering_[i],3);
     }
     if (up) ghosts_.resize(num_fields);
@@ -68,7 +68,7 @@ public: // functions
   void set_courant(double courant) throw();
 
   /// Set centering for a field
-  void set_centering(int id_field, bool cx, bool cy=true, bool cz=true) 
+  void set_centering(int id_field, int cx, int cy=0, int cz=0) 
     throw(std::out_of_range);
 
   /// Set ghosts for a field
@@ -111,7 +111,7 @@ public: // functions
   double courant() const throw();
 
   /// centering of given field
-  void centering(int id_field, bool * cx, bool * cy = 0, bool * cz = 0) const 
+  void centering(int id_field, int * cx, int * cy = 0, int * cz = 0) const 
     throw(std::out_of_range);
 
   /// depth of ghost zones of given field
@@ -152,7 +152,7 @@ private: // attributes
   std::vector<int> precision_;
 
   /// cell centering for each field
-  std::vector<bool *> centering_;
+  std::vector<int *> centering_;
 
   /// Ghost depth of each field
   std::vector<int *> ghosts_;

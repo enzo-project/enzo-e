@@ -36,7 +36,7 @@ void EnzoMethodPpm::compute ( CommBlock * comm_block) throw()
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 
   enzo_block->SolveHydroEquations 
-    ( comm_block->cycle(), comm_block->time(), comm_block->dt() );
+    ( comm_block->time(), comm_block->dt() );
 }
 
 //----------------------------------------------------------------------
@@ -56,15 +56,15 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
   
   if (EnzoBlock::ComovingCoordinates)
     enzo_block->CosmologyComputeExpansionFactor
-      (enzo_block->Time(), &a, &dadt);
+      (enzo_block->time(), &a, &dadt);
 
   enzo_float dtBaryons      = ENZO_HUGE_VAL;
   enzo_float dtExpansion    = ENZO_HUGE_VAL;
 
   /* Compute the pressure. */
 
-  EnzoMethodPressure method_pressure (EnzoBlock::Gamma);
-  method_pressure.compute(enzo_block);
+  EnzoComputePressure compute_pressure (EnzoBlock::Gamma);
+  compute_pressure.compute(enzo_block);
 
   enzo_float * pressure = (enzo_float *) field.values("pressure");
 
@@ -74,7 +74,7 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
   /* 3) Find dt from expansion. */
  
   if (EnzoBlock::ComovingCoordinates)
-    if (enzo_block->CosmologyComputeExpansionTimestep(enzo_block->Time(), &dtExpansion) == ENZO_FAIL) {
+    if (enzo_block->CosmologyComputeExpansionTimestep(comm_block->time(), &dtExpansion) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
       exit(ENZO_FAIL);
     }

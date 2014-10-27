@@ -213,8 +213,8 @@ void EnzoInitialTurbulence::enforce_block
       }
     }
   } else {
-    EnzoMethodPressure method_pressure(gamma_);
-    method_pressure.compute(comm_block);
+    EnzoComputePressure compute_pressure(gamma_);
+    compute_pressure.compute(comm_block);
   }
 
   if (temperature_defined) {

@@ -38,7 +38,7 @@ void EnzoMethodPpm3::compute ( CommBlock * comm_block) throw()
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 
   enzo_block->SolveHydroEquations3
-    ( comm_block->cycle(), comm_block->time(), comm_block->dt() );
+    ( comm_block->time(), comm_block->dt() );
 
 }
 

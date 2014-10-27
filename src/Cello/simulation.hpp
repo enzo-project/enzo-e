@@ -23,6 +23,7 @@
 #include "_comm.hpp"
 #include "_parameters.hpp"
 #include "_io.hpp"
+#include "_compute.hpp"
 #include "_problem.hpp"
 
 #include "_simulation.hpp"

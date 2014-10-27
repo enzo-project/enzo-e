@@ -41,6 +41,9 @@ public: // interface
 
   void pup(PUP::er &p) ;
 
+  /// Return dimensions of fields on the block, assuming centered
+  void dimensions(int id_field,int * mx, int * my = 0, int * mz = 0) const throw();
+
   /// Return size of fields on the block, assuming centered
   void size(int * nx, int * ny = 0, int * nz = 0) const throw();
 
@@ -152,7 +155,7 @@ public: // interface
   { return field_descr_->courant(); }
 
   /// centering of given field
-  void centering(int id_field, bool * cx, bool * cy = 0, bool * cz = 0) const 
+  void centering(int id_field, int * cx, int * cy = 0, int * cz = 0) const 
     throw(std::out_of_range)
   { return field_descr_->centering(id_field,cx,cy,cz); }
 
@@ -213,7 +216,7 @@ private: // functions
   void set_courant(double courant) throw();
 
   /// Set centering for a field
-  void set_centering(int id_field, bool cx, bool cy=true, bool cz=true) 
+  void set_centering(int id_field, int cx, int cy=0, int cz=0) 
     throw(std::out_of_range);
 
   /// Set ghosts for a field

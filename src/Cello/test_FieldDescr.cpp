@@ -21,7 +21,7 @@ struct field_info_type {
   int group_vector;
 
   int gx, gy, gz;
-  bool cx, cy, cz;
+  int cx, cy, cz;
 };
 
 PARALLEL_MAIN_BEGIN
@@ -150,22 +150,22 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("centering");
 
-  field_descr->set_centering(info.field_velocity_x, false, true, true);
-  field_descr->set_centering(info.field_velocity_y, true, false, true);
-  field_descr->set_centering(info.field_velocity_z, true,  true, false);
+  field_descr->set_centering(info.field_velocity_x, 1, 0, 0);
+  field_descr->set_centering(info.field_velocity_y, 0, 1, 0);
+  field_descr->set_centering(info.field_velocity_z, 0, 0, 1);
 
 
   field_descr->centering(info.field_density, &info.cx, &info.cy, &info.cz);
-  unit_assert(info.cx && info.cy && info.cz);
+  unit_assert(info.cx==0 && info.cy==0 && info.cz==0);
 
   field_descr->centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
-  unit_assert(! info.cx &&   info.cy &&   info.cz);
+  unit_assert(info.cx==1 && info.cy==0 && info.cz==0);
 
   field_descr->centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
-  unit_assert(  info.cx && ! info.cy &&   info.cz);
+  unit_assert(info.cx==0 && info.cy==1 && info.cz==0);
 
   field_descr->centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
-  unit_assert(  info.cx &&   info.cy && ! info.cz);
+  unit_assert(info.cx==0 && info.cy==0 && info.cz==1);
   
   // Ghost zone depth
 
@@ -238,16 +238,16 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("assign:centering");
   field_descr_assign.centering(info.field_density, &info.cx, &info.cy, &info.cz);
-  unit_assert(info.cx && info.cy && info.cz);
+  unit_assert(info.cx==0 && info.cy==0 && info.cz==0);
 
   field_descr_assign.centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
-  unit_assert(! info.cx &&   info.cy &&   info.cz);
+  unit_assert(info.cx==1 && info.cy==0 && info.cz==0);
 
   field_descr_assign.centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
-  unit_assert(  info.cx && ! info.cy &&   info.cz);
+  unit_assert(info.cx==0 && info.cy==1 && info.cz==0);
 
   field_descr_assign.centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
-  unit_assert(  info.cx &&   info.cy && ! info.cz);
+  unit_assert(info.cx==0 && info.cy==0 && info.cz==1);
 
   unit_func("assign:ghosts");
 
@@ -297,16 +297,16 @@ PARALLEL_MAIN_BEGIN
   unit_func("copy:centering");
 
   field_descr_copy.centering(info.field_density, &info.cx, &info.cy, &info.cz);
-  unit_assert(info.cx && info.cy && info.cz);
+  unit_assert(info.cx==0 && info.cy==0 && info.cz==0);
 
   field_descr_copy.centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
-  unit_assert(! info.cx &&   info.cy &&   info.cz);
+  unit_assert(info.cx==1 && info.cy==0 && info.cz==0);
 
   field_descr_copy.centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
-  unit_assert(  info.cx && ! info.cy &&   info.cz);
+  unit_assert(info.cx==0 && info.cy==1 && info.cz==0);
 
   field_descr_copy.centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
-  unit_assert(  info.cx &&   info.cy && ! info.cz);
+  unit_assert(info.cx==0 && info.cy==0 && info.cz==1);
 
   unit_func("copy:ghosts");
 

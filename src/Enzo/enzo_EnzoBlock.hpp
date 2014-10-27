@@ -194,13 +194,6 @@ public: // interface
   void write(FILE *fp=stdout) throw ();
 
   //----------------------------------------------------------------------
-  // Enzo attribute access functions
-  //----------------------------------------------------------------------
-
-  /// When Enzo accesses Time, refresh Cello time_ to Time_
-  double Time() { Time_ = time_; return Time_; };
-
-  //----------------------------------------------------------------------
   // Original Enzo functions
   //----------------------------------------------------------------------
 
@@ -240,19 +233,13 @@ public: // interface
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient);
 
   /// Solve the hydro equations using PPM
-  int SolveHydroEquations ( int CycleNumber, enzo_float time, enzo_float dt);
+  int SolveHydroEquations ( enzo_float time, enzo_float dt);
 
   /// Solve the hydro equations using Enzo 3.0 PPM
-  int SolveHydroEquations3 ( int CycleNumber, enzo_float time, enzo_float dt);
+  int SolveHydroEquations3 ( enzo_float time, enzo_float dt);
 
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
   int SolveMHDEquations(const FieldDescr *,  enzo_float dt);
-
-  /// Set EnzoBlock's cycle
-  virtual void set_cycle (int cycle) throw();
-
-  /// Set EnzoBlock's time
-  virtual void set_time (double time) throw();
 
   /// Set EnzoBlock's dt
   virtual void set_dt (double dt) throw();
@@ -274,15 +261,8 @@ public: /// entry methods
   // Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
-private: // attributes
-
-  enzo_float Time_;
-
 public: // attributes (YIKES!)
 
-  int CycleNumber;
-
-  enzo_float OldTime;
   union {
     enzo_float dt;
     enzo_float dtFixed;

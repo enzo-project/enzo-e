@@ -216,9 +216,6 @@ EnzoBlock::EnzoBlock
      narray,  array, op_array,
      num_face_level, face_level,
      testing),
-    Time_(time),
-    CycleNumber(cycle),
-    OldTime(0),
     dt(dt),
     SubgridFluxes(0)
 {
@@ -257,17 +254,12 @@ void EnzoBlock::pup(PUP::er &p)
 
   CommBlock::pup(p);
 
-  p | Time_;
-
-  p | CycleNumber;
-  p | OldTime;
   p | dt;
   static bool warn0 = true;
   if (warn0) {
     WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
     warn0=false;
   }
-  p | Time_;
 
   static bool warn1 = true;
   if (warn1) {
@@ -377,10 +369,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 	   InitialRedshift);
   fprintf (fp,"EnzoBlock: InitialTimeInCodeUnits %g\n",
 	   InitialTimeInCodeUnits);
-  fprintf (fp,"EnzoBlock: Time %g\n",
-	   Time());
-  fprintf (fp,"EnzoBlock: OldTime %g\n",
-	   OldTime);
 
   // Domain
 
@@ -441,50 +429,12 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   // problem
 
-  fprintf (fp,"EnzoBlock: CycleNumber %d\n",   CycleNumber);
   fprintf (fp,"EnzoBlock: dt %g\n", dt);
 
   // fluxes
 
   fprintf (fp,"EnzoBlock: SubgridFluxes %p\n", SubgridFluxes);
   
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::set_cycle (int cycle_start) throw ()
-{
-  CommBlock::set_cycle (cycle_start);
-  TRACE2("%p EnzoBlock::set_cycle(%d)",this,cycle_start);
-
-  CycleNumber = cycle_start;
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::set_time (double time) throw ()
-{
-  CommBlock::set_time (time);
-
-  //  if (cycle_ > 460) {
-  //    char buffer[255];
-  //    sprintf (buffer,"set_time %15.12f %15.12f",Time_,time);
-  //    index_.print(buffer,-1,2,false,simulation());
-  //  }
-
-  //  if (! (Time_ == 0 || Time_ < time)) {
-  if (! (Time_ == 0 || Time_ < time)) {
-    index_.print("ERROR",-1,2,false,simulation());
-    ASSERT2("EnzoBlock::set_time()",
-   	    "set_time() may be called more than once or dt = 0.0\n"
-   	    "Time_ = %15.8f time = %15.8f",
-   	    Time_,time,
-   	    Time_ == 0 || Time_ < time);
-  }
-
-  OldTime   = Time_;
-  Time_     = time;
-
 }
 
 //----------------------------------------------------------------------

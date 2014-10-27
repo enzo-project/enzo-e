@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodPressure.cpp
+/// @file     enzo_EnzoComputePressure.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Fri Apr  2 17:05:23 PDT 2010
-/// @brief    Implements the EnzoMethodPressure class
+/// @date     2014-10-27 22:37:41
+/// @brief    Implements the EnzoComputePressure class
 
 #include "cello.hpp"
 
@@ -11,21 +11,21 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPressure::EnzoMethodPressure (double gamma) :
-  Method(),gamma_(gamma)
+EnzoComputePressure::EnzoComputePressure (double gamma) :
+  Compute(),gamma_(gamma)
 {
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPressure::pup (PUP::er &p)
+void EnzoComputePressure::pup (PUP::er &p)
 {
 
   // NOTE: change this function whenever attributes change
 
   TRACEPUP;
 
-  Method::pup(p);
+  Compute::pup(p);
 
   p | gamma_;
 
@@ -33,13 +33,12 @@ void EnzoMethodPressure::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPressure::compute ( CommBlock * comm_block) throw()
+void EnzoComputePressure::compute ( CommBlock * comm_block) throw()
 {
-  initialize_(comm_block);
-
-  if (field_precision(0) == precision_single) {
+  Field field = comm_block->block()->field();
+  if (field.precision(0) == precision_single) {
     compute_<float>(comm_block);
-  } else if (field_precision(0) == precision_double) {
+  } else if (field.precision(0) == precision_double) {
     compute_<double>(comm_block);
   }
 }
@@ -47,7 +46,7 @@ void EnzoMethodPressure::compute ( CommBlock * comm_block) throw()
 //----------------------------------------------------------------------
 
 template <typename T>
-void EnzoMethodPressure::compute_(CommBlock * comm_block)
+void EnzoComputePressure::compute_(CommBlock * comm_block)
 {
   if (!comm_block->is_leaf()) return;
 
@@ -69,7 +68,7 @@ void EnzoMethodPressure::compute_(CommBlock * comm_block)
 
   int gx,gy,gz;
   field.ghosts (0,&gx,&gy,&gz);
-  const int rank = this->rank();
+  const int rank = comm_block->rank();
   if (rank < 1) gx = 0;
   if (rank < 2) gy = 0;
   if (rank < 3) gz = 0;

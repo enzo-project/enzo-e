@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodTemperature.cpp
+/// @file     enzo_EnzoComputeTemperature.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Fri Apr  2 17:05:23 PDT 2010
-/// @brief    Implements the EnzoMethodTemperature class
+/// @date     2014-10-27 22:37:41
+/// @brief    Implements the EnzoComputeTemperature class
 
 #include "cello.hpp"
 
@@ -11,11 +11,11 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodTemperature::EnzoMethodTemperature 
+EnzoComputeTemperature::EnzoComputeTemperature 
 (double density_floor,
  double temperature_floor,
  double mol_weight) :
-  Method(),
+  Compute(),
   density_floor_(density_floor),
   temperature_floor_(temperature_floor),
   mol_weight_(mol_weight)
@@ -24,14 +24,14 @@ EnzoMethodTemperature::EnzoMethodTemperature
 
 //----------------------------------------------------------------------
 
-void EnzoMethodTemperature::pup (PUP::er &p)
+void EnzoComputeTemperature::pup (PUP::er &p)
 {
 
   // NOTE: change this function whenever attributes change
 
   TRACEPUP;
 
-  Method::pup(p);
+  Compute::pup(p);
 
   p | density_floor_;
   p | temperature_floor_;
@@ -41,16 +41,16 @@ void EnzoMethodTemperature::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodTemperature::compute ( CommBlock * comm_block) throw()
+void EnzoComputeTemperature::compute ( CommBlock * comm_block) throw()
 {
 
   if (!comm_block->is_leaf()) return;
 
-  initialize_(comm_block);
+  Field field = comm_block->block()->field();
 
-  if (field_precision(0) == precision_single) {
+  if (field.precision(0) == precision_single) {
     compute_<float>(comm_block);
-  } else if (field_precision(0) == precision_double) {
+  } else if (field.precision(0) == precision_double) {
     compute_<double>(comm_block);
   }
 }
@@ -58,21 +58,21 @@ void EnzoMethodTemperature::compute ( CommBlock * comm_block) throw()
 //----------------------------------------------------------------------
 
 template <typename T>
-void EnzoMethodTemperature::compute_(CommBlock * comm_block)
+void EnzoComputeTemperature::compute_(CommBlock * comm_block)
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 
   Field field = enzo_block->block()->field();
 
-  EnzoMethodPressure method_pressure(EnzoBlock::Gamma);
+  EnzoComputePressure compute_pressure(EnzoBlock::Gamma);
 
-  method_pressure.compute(comm_block);
+  compute_pressure.compute(comm_block);
 
   T * t = (T*) field.values("temperature");
   T * d = (T*) field.values("density");
   T * p = (T*) field.values("pressure");
 
-  const int rank = this->rank();
+  const int rank = comm_block->rank();
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);

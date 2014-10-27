@@ -44,9 +44,9 @@ int EnzoRefineShock::apply
 
   int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
 
-  // compute pressure using the EnzoMethodPressure class
-  EnzoMethodPressure method_pressure (EnzoBlock::Gamma);
-  method_pressure.compute(comm_block);
+  // compute pressure using the EnzoComputePressure class
+  EnzoComputePressure compute_pressure (EnzoBlock::Gamma);
+  compute_pressure.compute(comm_block);
 
   Block * block = comm_block->block();
   double xm[3],xp[3];

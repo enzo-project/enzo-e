@@ -1,34 +1,34 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodPressure.hpp
+/// @file     enzo_EnzoComputePressure.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     Wed Jul 23 15:53:28 PDT 2014
+/// @date     2014-10-27 22:37:41
 /// @brief    [\ref Enzo] Implementation of Enzo's ComputePressure functions
 
-#ifndef ENZO_ENZO_METHOD_PRESSURE_HPP
-#define ENZO_ENZO_METHOD_PRESSURE_HPP
+#ifndef ENZO_ENZO_COMPUTE_PRESSURE_HPP
+#define ENZO_ENZO_COMPUTE_PRESSURE_HPP
 
-class EnzoMethodPressure : public Method {
+class EnzoComputePressure : public Compute {
 
-  /// @class    EnzoMethodPressure
+  /// @class    EnzoComputePressure
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulate Enzo's ComputePressure functions
 
 public: // interface
 
-  /// Create a new EnzoMethodPressure object
-  EnzoMethodPressure(double gamma);
+  /// Create a new EnzoComputePressure object
+  EnzoComputePressure(double gamma);
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodPressure);
+  PUPable_decl(EnzoComputePressure);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodPressure (CkMigrateMessage *m) {}
+  EnzoComputePressure (CkMigrateMessage *m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
   
-  /// Apply the method to advance a block one timestep 
+  /// Perform the computation on the block
   virtual void compute( CommBlock * comm_block) throw();
 
 private: // functions
@@ -42,4 +42,4 @@ private: // attributes
 
 };
 
-#endif /* ENZO_ENZO_METHOD_PRESSURE_HPP */
+#endif /* ENZO_ENZO_COMPUTE_PRESSURE_HPP */

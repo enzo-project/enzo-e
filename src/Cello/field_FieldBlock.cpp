@@ -75,6 +75,22 @@ void FieldBlock::pup(PUP::er &p)
 
 //----------------------------------------------------------------------
 
+void FieldBlock::dimensions( int id_field, int * mx, int * my, int * mz ) const throw()
+{
+  int nx,ny,nz;
+  int gx,gy,gz;
+  int cx,cy,cz;
+  size      (&nx,&ny,&nz);
+  ghosts    (id_field,&gx,&gy,&gz);
+  centering (id_field,&cx,&cy,&cz);
+
+  if (mx) (*mx) = (nx > 1) ? (nx + 2*gx + cx) : 1;
+  if (my) (*my) = (ny > 1) ? (ny + 2*gy + cy) : 1;
+  if (mz) (*mz) = (nz > 1) ? (nz + 2*gz + cz) : 1;
+}
+
+//----------------------------------------------------------------------
+
 void FieldBlock::size( int * nx, int * ny, int * nz ) const throw()
 {
   if (nx) (*nx) = size_[0];
@@ -126,22 +142,15 @@ char * FieldBlock::unknowns ( int id_field  )
     if ( ghosts_allocated() ) {
 
       int gx,gy,gz;
-      field_descr_->ghosts(id_field,&gx,&gy,&gz);
+      int mx,my;
 
-      bool cx,cy,cz;
-      field_descr_->centering(id_field,&cx,&cy,&cz);
+      ghosts    (id_field,&gx,&gy,&gz);
+      dimensions(id_field,&mx,&my);
 
-      int nx,ny,nz;
-      size(&nx,&ny,&nz);
-
-      nx += 2*gx + (cx?0:1);
-      ny += 2*gy + (cy?0:1);
-      nz += 2*gz + (cz?0:1);
-
-      precision_type precision = field_descr_->precision(id_field);
+      precision_type precision = this->precision(id_field);
       int bytes_per_element = cello::sizeof_precision (precision);
 
-      unknowns += bytes_per_element * (gx + nx*(gy + ny*gz));
+      unknowns += bytes_per_element * (gx + mx*(gy + my*gz));
     } 
   }
   return unknowns;
@@ -178,7 +187,7 @@ void FieldBlock::clear
   if ( array_allocated() ) {
     if (id_field_first == -1) {
       id_field_first = 0;
-      id_field_last  = field_descr_->field_count() - 1;
+      id_field_last  = field_count() - 1;
     } else if (id_field_last == -1) {
       id_field_last  = id_field_first;
     }
@@ -187,7 +196,7 @@ void FieldBlock::clear
 	 id_field++) {
       int nx,ny,nz;
       field_size(id_field,&nx,&ny,&nz);
-      precision_type precision = field_descr_->precision(id_field);
+      precision_type precision = this->precision(id_field);
       char * array = &array_[0] + offsets_[id_field];
       switch (precision) {
       case precision_single:
@@ -440,14 +449,14 @@ int FieldBlock::field_size
 
   // Adjust memory usage due to field centering if needed
 
-  bool cx,cy,cz;
+  int cx,cy,cz;
   field_descr_->centering(id_field,&cx,&cy,&cz);
 
   // Compute array size
 
-  if (nx) (*nx) = size_[0] + (1-cx) + 2*gx;
-  if (ny) (*ny) = size_[1] + (1-cy) + 2*gy;
-  if (nz) (*nz) = size_[2] + (1-cz) + 2*gz;
+  if (nx) (*nx) = size_[0] + 2*gx + cx;
+  if (ny) (*ny) = size_[1] + 2*gy + cy;
+  if (nz) (*nz) = size_[2] + 2*gz + cz;
 
   // Return array size in bytes
 

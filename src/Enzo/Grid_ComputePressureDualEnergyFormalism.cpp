@@ -22,23 +22,6 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
   int i, size = 1;
  
-  /* Error Check */
- 
-  if (time < OldTime || time > Time()) {
-    fprintf(stderr, "requested time is outside available range.\n");
-    return ENZO_FAIL;
-  }
- 
-  /* Compute interpolation coefficients. */
- 
-  enzo_float coef, coefold;
-  if (Time() - OldTime > 0)
-    coef    = (time - OldTime)/(Time() - OldTime);
-  else
-    coef    = 1;
- 
-  coefold = 1 - coef;
- 
   /* Compute the size of the grid. */
  
   for (int dim = 0; dim < GridRank; dim++)
@@ -54,7 +37,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
   /* special loop for no interpolate. */
  
-  if (time == Time()) {
+  if (time == this->time()) {
  
     for (i = 0; i < size; i++) {
       pressure[i] = (Gamma - 1.0) * density[i] *
@@ -111,7 +94,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
     if (ComovingCoordinates)
       if (CosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
-			    &TimeUnits, &VelocityUnits, Time()) == ENZO_FAIL) {
+			    &TimeUnits, &VelocityUnits, this->time()) == ENZO_FAIL) {
 	fprintf(stderr, "Error in CosmologyGetUnits.\n");
 	return ENZO_FAIL;
       }

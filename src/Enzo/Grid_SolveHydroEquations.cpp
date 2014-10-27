@@ -11,7 +11,6 @@
 
 int EnzoBlock::SolveHydroEquations 
 (
- int        CycleNumber,
  enzo_float time,
  enzo_float dt
  )
@@ -245,7 +244,7 @@ int EnzoBlock::SolveHydroEquations
      &GravityOn, AccelerationField[0],
      AccelerationField[1],
      AccelerationField[2],
-     &Gamma, &dt, &CycleNumber,
+     &Gamma, &dt, &cycle_,
      &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
      &GridRank, &GridDimension[0], &GridDimension[1],
      &GridDimension[2], GridStartIndex, GridEndIndex,

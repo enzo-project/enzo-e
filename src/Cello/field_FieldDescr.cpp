@@ -118,9 +118,9 @@ double FieldDescr::courant() const throw()
 void FieldDescr::centering
 (
  int id_field,
- bool * cx, 
- bool * cy, 
- bool * cz
+ int * cx, 
+ int * cy, 
+ int * cz
  ) const throw(std::out_of_range)
 {
   if (cx) (*cx) = centering_.at(id_field)[0];
@@ -180,10 +180,10 @@ int FieldDescr::insert_field(const std::string & field_name) throw()
 
   precision_type precision = default_precision;
 
-  bool * centered = new bool[3];
-  centered[0] = true;
-  centered[1] = true;
-  centered[2] = true;
+  int * centered = new int[3];
+  centered[0] = 0;
+  centered[1] = 0;
+  centered[2] = 0;
 
   int * ghosts = new int [3];
   ghosts[0] = 1;
@@ -245,7 +245,7 @@ int FieldDescr::bytes_per_element(int id_field) const throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_centering(int id_field, bool cx, bool cy, bool cz) 
+void FieldDescr::set_centering(int id_field, int cx, int cy, int cz) 
   throw(std::out_of_range)
 {
   centering_.at(id_field)[0] = cx;
@@ -276,7 +276,7 @@ void FieldDescr::copy_(const FieldDescr & field_descr) throw()
   precision_ = field_descr.precision_;
   centering_.clear();
   for (size_t i=0; i<field_descr.centering_.size(); i++) {
-    centering_.push_back(new bool[3]);
+    centering_.push_back(new int[3]);
     centering_.at(i)[0] = field_descr.centering_.at(i)[0];
     centering_.at(i)[1] = field_descr.centering_.at(i)[1];
     centering_.at(i)[2] = field_descr.centering_.at(i)[2];

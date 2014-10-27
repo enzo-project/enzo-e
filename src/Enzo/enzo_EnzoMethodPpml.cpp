@@ -70,7 +70,7 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) throw()
   enzo_float a = 1, dadt;
   if (EnzoBlock::ComovingCoordinates)
     enzo_comm_block->CosmologyComputeExpansionFactor
-      (enzo_comm_block->Time(), &a, &dadt);
+      (enzo_comm_block->time(), &a, &dadt);
   //  float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */
@@ -182,7 +182,7 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) throw()
  
   // if (EnzoBlock::ComovingCoordinates)
   //   if (enzo_comm_block->CosmologyComputeExpansionTimestep
-  // 	(enzo_comm_block->Time(), &dtExpansion) == ENZO_FAIL) {
+  // 	(enzo_comm_block->time(), &dtExpansion) == ENZO_FAIL) {
   //     fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
   //     exit(EXIT_FAILURE);
   //   }

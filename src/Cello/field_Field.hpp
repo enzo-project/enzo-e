@@ -75,7 +75,7 @@ public: // interface
   { field_descr_->set_courant(courant); }
 
   /// Set centering for a field
-  void set_centering(int id, bool cx, bool cy=true, bool cz=true) 
+  void set_centering(int id, int cx, int cy=0, int cz=0) 
     throw(std::out_of_range)
   { field_descr_->set_centering(id,cx,cy,cz); }
 
@@ -133,7 +133,7 @@ public: // interface
   { return field_descr_->courant() ;}
 
   /// centering of given field
-  void centering(int id, bool * cx, bool * cy = 0, bool * cz = 0) const 
+  void centering(int id, int * cx, int * cy = 0, int * cz = 0) const 
     throw(std::out_of_range)
   { return field_descr_->centering(id,cx,cy,cz); }
 

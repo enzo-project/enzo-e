@@ -187,13 +187,6 @@ Method * EnzoProblem::create_method_
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_temperature,
        enzo_config->method_turbulence_mach_number);
-  } else if (type == "pressure") {
-    method = new EnzoMethodPressure (enzo_config->field_gamma);
-  } else if (type == "temperature") {
-    method = new EnzoMethodTemperature 
-      (enzo_config->ppm_density_floor,
-       enzo_config->ppm_temperature_floor,
-       enzo_config->ppm_mol_weight);
   } else if (type == "gravity_cg") {
     method = new EnzoMethodGravityCg
       (enzo_config->method_gravity_cg_iter_max,

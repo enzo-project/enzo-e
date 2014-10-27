@@ -22,7 +22,7 @@ struct field_info_type {
   int group_vector;
 
   int gx, gy, gz;
-  bool cx, cy, cz;
+  int cx, cy, cz;
 };
 
 PARALLEL_MAIN_BEGIN
@@ -88,9 +88,9 @@ PARALLEL_MAIN_BEGIN
 
     // set centering
 
-    field->set_centering(i2, false, true,  true);
-    field->set_centering(i3, true,  false, true);
-    field->set_centering(i4, true,  true,  false);
+    field->set_centering(i2, 1, 0, 0);
+    field->set_centering(i3, 0, 1, 0);
+    field->set_centering(i4, 0, 0, 1);
 
     double xpm,ypm,zpm;
     xpm = -1.0;  ypm = -2.0, zpm = -3.0;
@@ -669,22 +669,22 @@ PARALLEL_MAIN_BEGIN
 
     unit_func("centering");
 
-    field->set_centering(info.field_velocity_x, false, true, true);
-    field->set_centering(info.field_velocity_y, true, false, true);
-    field->set_centering(info.field_velocity_z, true,  true, false);
+    field->set_centering(info.field_velocity_x, 1, 0, 0);
+    field->set_centering(info.field_velocity_y, 0, 1, 0);
+    field->set_centering(info.field_velocity_z, 0, 0, 1);
 
 
     field->centering(info.field_density, &info.cx, &info.cy, &info.cz);
-    unit_assert(info.cx && info.cy && info.cz);
+    unit_assert(info.cx == 0 && info.cy == 0 && info.cz == 0);
 
     field->centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
-    unit_assert(! info.cx &&   info.cy &&   info.cz);
+    unit_assert(info.cx == 1 && info.cy == 0 && info.cz == 0);
 
     field->centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
-    unit_assert(  info.cx && ! info.cy &&   info.cz);
+    unit_assert(info.cx == 0 && info.cy == 1 && info.cz == 0);
 
     field->centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
-    unit_assert(  info.cx &&   info.cy && ! info.cz);
+    unit_assert(info.cx == 0 && info.cy == 0 && info.cz == 1);
   
     // Ghost zone depth
 

@@ -319,9 +319,9 @@ void Config::read_field_ (Parameters * p) throw()
 
     param = std::string("Field:") + field_list[index_field] + ":centering";
 
-    field_centering[0][index_field] = p->list_value_logical(0,param,true);
-    field_centering[1][index_field] = p->list_value_logical(1,param,true);
-    field_centering[2][index_field] = p->list_value_logical(2,param,true);
+    field_centering[0][index_field] = p->list_value_logical(0,param,true) ? 0 : 1;
+    field_centering[1][index_field] = p->list_value_logical(1,param,true) ? 0 : 1;
+    field_centering[2][index_field] = p->list_value_logical(2,param,true) ? 0 : 1;
 
   }
 

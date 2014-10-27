@@ -38,6 +38,7 @@
 #include "_simulation.hpp"
 #include "_disk.hpp"
 #include "_io.hpp"
+#include "_compute.hpp"
 #include "_problem.hpp"
 
 //----------------------------------------------------------------------

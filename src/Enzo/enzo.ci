@@ -58,6 +58,9 @@ module enzo {
 
   PUPable EnzoRefineShock;
 
+  PUPable EnzoComputePressure;
+  PUPable EnzoComputeTemperature;
+
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
@@ -65,8 +68,6 @@ module enzo {
   PUPable EnzoMethodPpm3;
 //  PUPable EnzoMethodGrackle;
   PUPable EnzoMethodTurbulence;
-  PUPable EnzoMethodPressure;
-  PUPable EnzoMethodTemperature;
   PUPable EnzoMethodGravityCg;
   PUPable EnzoMethodGravityBiCGStab;
 

@@ -65,9 +65,9 @@ PARALLEL_MAIN_BEGIN
 
   // set centering
 
-  field_descr->set_centering(i2, false, true,  true);
-  field_descr->set_centering(i3, true,  false, true);
-  field_descr->set_centering(i4, true,  true,  false);
+  field_descr->set_centering(i2, 1, 0, 0);
+  field_descr->set_centering(i3, 0, 1, 0);
+  field_descr->set_centering(i4, 0, 0, 1);
 
   int nx,ny,nz;
   nx=4; ny=5; nz=6;

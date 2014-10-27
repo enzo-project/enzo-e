@@ -67,12 +67,12 @@ void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
   const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
     (enzo_block->simulation()->config());
 
-  EnzoMethodTemperature method_temperature
+  EnzoComputeTemperature compute_temperature
     (enzo_config->ppm_density_floor,
      enzo_config->ppm_temperature_floor,
      enzo_config->ppm_mol_weight);
 
-  method_temperature.compute(enzo_block);
+  compute_temperature.compute(enzo_block);
 
   enzo_float *  density = (enzo_float *) field.values("density");
   enzo_float *  velocity[3] = {
