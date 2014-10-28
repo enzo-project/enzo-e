@@ -163,6 +163,8 @@ private: // attributes
   /// Prolongation operation if any
   Prolong * prolong_;
 
+  /// List of fields (default all)
+  std::vector<int> field_list_;
 };
 
 #endif /* FIELD_FIELD_FACE_HPP */

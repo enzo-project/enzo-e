@@ -21,7 +21,8 @@ FieldFace::FieldFace() throw()
   : field_block_(0),
     array_(),
     restrict_(0),
-    prolong_(0)
+    prolong_(0),
+    field_list_()
 {
   for (int i=0; i<3; i++) {
     ghost_[i] = false;
@@ -88,6 +89,7 @@ void FieldFace::copy_(const FieldFace & field_face)
   }
   prolong_  =  field_face.prolong_;
   restrict_ =  field_face.restrict_;
+  field_list_ = field_face.field_list_;
 }
 //----------------------------------------------------------------------
 
@@ -108,6 +110,7 @@ void FieldFace::pup (PUP::er &p)
   PUParray(p,child_,3);
   p | *restrict_;  // PUPable
   p | *prolong_;  // PUPable
+  p | field_list_;
 }
 
 //======================================================================
@@ -120,7 +123,16 @@ void FieldFace::load ( int * n, char ** array) throw()
 
   size_t index_array = 0;
 
-  for (size_t index_field=0; index_field < num_fields; index_field++) {
+  if (field_list_.size() == 0) {
+    field_list_.resize(num_fields);
+    for (size_t i=0; i<num_fields; i++) field_list_[i] = i;
+  }
+
+  for (size_t index_field_list=0;
+       index_field_list < field_list_.size();
+       index_field_list++) {
+
+    size_t index_field = field_list_[index_field_list];
   
     precision_type precision = field_block_->precision(index_field);
 
