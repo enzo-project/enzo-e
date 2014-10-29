@@ -158,6 +158,10 @@ public: // interface
   void size(int * nx, int * ny = 0, int * nz = 0) const throw()
   { field_block_->size(nx,ny,nz); }
 
+  /// Return dimensions of fields on the block, assuming centered
+  void dimensions(int id_field,int * mx, int * my = 0, int * mz = 0) const throw()
+  { field_block_->dimensions(id_field, mx,my,mz); }
+
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
   char * values (int id) throw (std::out_of_range)

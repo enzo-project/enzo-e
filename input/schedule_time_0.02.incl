@@ -1,7 +1,6 @@
 # File:    schedule_time_0.02.incl
 
 schedule {
-    type = "interval";
     var  = "time";
     step = 0.02;
 };

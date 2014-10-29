@@ -99,7 +99,7 @@
      check {
         type  = "checkpoint";
         dir   = ["method_grackle-1-%06d","cycle"];
-        schedule { var = "cycle"; type ="interval"; step = 1000; }
+        schedule { var = "cycle"; step = 1000; }
      };
 
 
@@ -107,7 +107,6 @@
          field_list = [ "density" ];
          name = [ "method_grackle-1-%02d-%06d.h5", "proc", "cycle" ];
          schedule {
-             type = "interval";
              var = "time";
              step = 0.1;
          };
@@ -120,7 +119,6 @@
           ];
          name = [ "method_grackle-1-%06d.png", "cycle" ];
          schedule {
-             type = "interval";
              var = "time";
              step = 0.1;
          };

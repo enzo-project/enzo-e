@@ -75,7 +75,6 @@
                      1.0,1.0,1.0];
          name     = ["implosion-d-%03d.png","count"];
          schedule {
-            type = "interval";
             var =  "cycle";
             step = 10;
          };
@@ -94,7 +93,6 @@
          name     = ["implosion-mesh-%03d.png","count"];
 	 image_size = [513,513];
          schedule {
-            type = "interval";
             var =  "cycle";
             step = 10;
          };

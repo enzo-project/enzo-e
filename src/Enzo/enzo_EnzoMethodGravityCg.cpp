@@ -72,10 +72,16 @@
 ///
 ///    if (return == return_converged) {
 ///       potential = X
-///       NEXT()
+///       ==> cg_exit()
 ///    } else {
 ///       ERROR (return-)
 ///    }
+///
+/// cg_exit()
+///
+///    deallocate
+///    NEXT()
+
 
 #include "cello.hpp"
 
@@ -84,7 +90,29 @@
 //----------------------------------------------------------------------
 
 EnzoMethodGravityCg::EnzoMethodGravityCg (int iter_max, double res_tol) 
-  : Method(), iter_max_(iter_max), res_tol_(res_tol)
+  : Method(), 
+    iter_max_(iter_max), 
+    res_tol_(res_tol),
+    precision_(precision_unknown),
+    /// Input / output vectors
+    density_(0),
+    potential_(0),
+    /// CG temporary vectors
+    B_(0),
+    X_(0),
+    R_(0),
+    P_(0),
+    W_(0),
+    AP_(0),
+    /// vector attributes
+    nx_(0),ny_(0),nz_(0),
+    mx_(0),my_(0),mz_(0),
+    gx_(0),gy_(0),gz_(0),
+    /// CG scalars
+    alpha_(0),
+    pap_(0),
+    rr_(0),
+    rr_new_(0)
 {
 }
 
@@ -102,6 +130,8 @@ void EnzoMethodGravityCg::pup (PUP::er &p)
   p | iter_max_;
   p | res_tol_;
 
+  WARNING("EnzoMethodGravityCg::pup()", "skipping transient attributes");
+
 }
 
 //----------------------------------------------------------------------
@@ -112,61 +142,65 @@ void EnzoMethodGravityCg::compute ( CommBlock * comm_block) throw()
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
   Field field = enzo_block->block()->field();
 
-  // density field
-
   const int id = field.field_id("density");
-  int gd3[3];
-  field.ghosts(id,&gd3[0],&gd3[1],&gd3[2]);
-  int nd3[3];
-  field.size(&nd3[0],&nd3[1],&nd3[2]);
-  int md3[3] = {nd3[0] > 1 ? nd3[0]+2*gd3[0] : 1,
-		nd3[1] > 1 ? nd3[1]+2*gd3[1] : 1,
-		nd3[2] > 1 ? nd3[2]+2*gd3[2] : 1};
-  void * density = field.values(id);
-
-  // gravitational potential field
+  density_ = field.values(id);
   const int ip = field.field_id("potential");
-  int gp3[3];
-  field.ghosts(ip,&gp3[0],&gp3[1],&gp3[2]);
-  int np3[3];
-  field.size(&np3[0],&np3[1],&np3[2]);
-  int mp3[3] = {np3[0] > 1 ? np3[0]+2*gp3[0] : 1,
-		np3[1] > 1 ? np3[1]+2*gp3[1] : 1,
-		np3[2] > 1 ? np3[2]+2*gp3[2] : 1};
   void * potential = field.values(ip);
 
-  // precision
-  const int p = field.precision(id);
+  // ASSUME density AND potential FIELD ATTRIBUTES THE SAME
 
-  if      (p == precision_single)
-    compute_  ((float*)  density,   md3,nd3,
-	       (float*)  potential, mp3,np3);
-  else if (p == precision_double)
-    compute_ ((double*)  density,   md3,nd3,
-	      (double*)  potential, mp3,np3);
-  else if (p == precision_quadruple)
-    compute_ ((long double*)  density,   md3,nd3,
-	      (long double*)  potential, mp3,np3);
+  field.ghosts    (id,&gx_,&gy_,&gz_);
+  field.size         (&nx_,&ny_,&nz_);
+  field.dimensions(id,&mx_,&my_,&mz_);
+
+  // store precision
+  precision_ = field.precision(id);
+
+  if      (precision_ == precision_single)    compute_<float>();
+  else if (precision_ == precision_double)    compute_<double>();
+  else if (precision_ == precision_quadruple) compute_<long double>();
   else 
-    ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", p);
+    ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision_);
 }
 
 //======================================================================
 
 template <class T>
-void EnzoMethodGravityCg::compute_ 
-(T * density,   int md3[3], int nd3[3],
- T * potential, int mp3[3], int np3[3]) const throw()
+void EnzoMethodGravityCg::compute_ () throw()
 {
 
   printf ("potential size %d %d %d  dim %d %d %d\n",
-	  np3[0],np3[1],np3[2],
-	  mp3[0],mp3[1],mp3[2]);
+	  nx_,ny_,nz_,
+	  mx_,my_,mz_);
 
-  printf ("density size %d %d %d  dim %d %d %d\n",
-	  nd3[0],nd3[1],nd3[2],
-	  md3[0],md3[1],md3[2]);
+  // local 
+  T * density   = (T *) density_;
+  T * potential = (T *) potential_;
+  T * B         = (T *) B_;
+  T * X         = (T *) X_;
+  T * R         = (T *) R_;
+  T * P         = (T *) P_;
+  T * W         = (T *) W_;
+  T * AP        = (T *) AP_;
 
+  /// Allocate vectors
+  B =  new T[nx_*ny_*nz_];
+  X =  new T[nx_*ny_*nz_];
+  R =  new T[nx_*ny_*nz_];
+  P =  new T[nx_*ny_*nz_];
+  W =  new T[nx_*ny_*nz_];
+  AP = new T[nx_*ny_*nz_];
+
+  for (int iz=0; iz<nz_; iz++) {
+    for (int iy=0; iy<ny_; iy++) {
+      for (int ix=0; ix<nx_; ix++) {
+	int i = ix + mx_*(iy + my_*iz); // Fields
+	int j = ix + nx_*(iy + ny_*iz); // allocated vectors
+	B[j] = density[i];
+      }
+    }
+  }
+  cg_exit_<T>();
 }
 
 /// nabla ^ 2 (potential) = 4 pi G density
@@ -211,10 +245,24 @@ void EnzoMethodGravityCg::compute_
 ///    ==> cg_loop_1()
 ///
 /// cg_end (return):
-///
 ///    if (return == return_converged) {
 ///       potential = X
-///       NEXT()
+///       ==> cg_exit()
 ///    } else {
 ///       ERROR (return-)
 ///    }
+///
+template <class T>
+void EnzoMethodGravityCg::cg_exit_() throw()
+{
+  /// deallocate vectors
+
+  delete [] (T *) B_;
+  delete [] (T *) X_;
+  delete [] (T *) R_;
+  delete [] (T *) P_;
+  delete [] (T *) W_;
+  delete [] (T *) AP_;
+  
+}
+

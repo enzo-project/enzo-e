@@ -817,7 +817,8 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 	      (group).c_str());
   }
 
-  output_schedule_type[index] = p->value_string("type","none");
+  if (type_is_interval) output_schedule_type[index] = "interval";
+  if (type_is_list)     output_schedule_type[index] = "list";
 
   const int    max_int    = std::numeric_limits<int>::max();
   const double max_double = std::numeric_limits<double>::max();

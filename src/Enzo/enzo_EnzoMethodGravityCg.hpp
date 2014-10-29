@@ -43,8 +43,10 @@ public: // interface
 protected: // methods
 
   template <class T>
-  void compute_ (T * density,   int md3[3], int nd3[3],
-		 T * potential, int mp3[3], int np3[3]) const throw();
+  void compute_ () throw();
+
+  template <class T>
+  void cg_exit_() throw();
 
 protected: // attributes
 
@@ -54,6 +56,34 @@ protected: // attributes
   /// Convergence tolerance on the residual 
   double res_tol_;
 
+  /// Precision
+  int precision_;
+
+  /// Density and potential
+
+  void * density_;
+  void * potential_;
+
+  /// CG vectors
+  void * B_;
+  void * X_;
+  void * R_;
+  void * P_;
+  void * W_;
+  void * AP_;
+
+  /// vector attributes
+  int nx_,ny_,nz_;
+  int mx_,my_,mz_;
+  int gx_,gy_,gz_;
+
+  /// CG scalars
+  double alpha_;
+  double pap_;
+  double rr_;
+  double rr_new_;
+
+  
 };
 
 #endif /* ENZO_ENZO_METHOD_GRAVITY_CG_HPP */

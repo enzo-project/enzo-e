@@ -1,7 +1,6 @@
 # File:    schedule_cycle_100.incl
 
 schedule {
-    type = "interval";
     var =  "cycle";
     step = 100;
 };

@@ -75,7 +75,6 @@ Mesh { root_rank = 3; }
           dir   = ["turbulence3d-checkpoint-%d","count"];
           type = "checkpoint";
           schedule {
-             type = "interval";
              var =  "seconds";
              start = 600.0;
              step = 600.0;

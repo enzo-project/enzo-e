@@ -23,6 +23,7 @@ Method {
 Field {
    
    list = ["density", "potential"];
+   ghosts = [1,1,1];
 }
 
 Initial {

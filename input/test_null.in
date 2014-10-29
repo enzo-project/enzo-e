@@ -48,7 +48,6 @@ Output {
       type = "image";
       name = ["null-mesh-%03d.png","cycle"];
       schedule {
-         type = "interval";
          var  = "cycle";
          step = 10;
       };
