@@ -100,6 +100,7 @@ module enzo {
     entry EnzoBlock();
 
     entry void p_method_turbulence_end(CkReductionMsg *msg);
+    entry void r_method_gravity_cg_1(CkReductionMsg *msg);
 
   };
 

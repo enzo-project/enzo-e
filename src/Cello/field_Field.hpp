@@ -91,8 +91,8 @@ public: // interface
   { field_descr_->set_precision(id,precision); }
 
   /// Insert a new field
-  int insert_field(const std::string & name) throw()
-  { return field_descr_->insert_field(name); }
+  int insert_permanent(const std::string & name) throw()
+  { return field_descr_->insert_permanent(name); }
 
   /// Return the number of fields
   int field_count() const throw()
@@ -150,6 +150,14 @@ public: // interface
   int bytes_per_element(int id) const throw()
   { return field_descr_->bytes_per_element(id); }
 
+  /// Whether the field is permanent or temporary
+  bool is_permanent (int id_field) const throw()
+  { return field_descr_->is_permanent(id_field); }
+
+  /// Return the number of permanent fields
+  int num_permanent() const throw()
+  { return field_descr_->num_permanent(); }
+
   //==================================================
   // FieldBlock
   //==================================================
@@ -195,8 +203,8 @@ public: // interface
   /// Return raw pointer to the array of all fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
   /// padding and alignment
-  const char * array ()  const throw () 
-  { return field_block_->array(); }
+  const char * permanent ()  const throw () 
+  { return field_block_->permanent(); }
 
   /// Return width of cells along each dimension
   void cell_width(double xm,   double xp,   double * hx,
@@ -213,25 +221,25 @@ public: // interface
   { field_block_->clear (value,id_first,id_last); }
  
   /// Return whether array is allocated or not
-  bool array_allocated() const throw()
-  { return field_block_->array_allocated(); }
+  bool permanent_allocated() const throw()
+  { return field_block_->permanent_allocated(); }
 
   /// Return whether array is allocated or not
-  size_t array_size() const throw()
-  { return field_block_->array_size(); }
+  size_t permanent_size() const throw()
+  { return field_block_->permanent_size(); }
 
   /// Allocate storage for the field block
-  void allocate_array(bool ghosts_allocated = false) throw()
-  { field_block_->allocate_array(ghosts_allocated); }
+  void allocate_permanent(bool ghosts_allocated = false) throw()
+  { field_block_->allocate_permanent(ghosts_allocated); }
 
   /// Reallocate storage for the field block, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
-  void reallocate_array(bool ghosts_allocated = false) throw()
-  { field_block_->reallocate_array(ghosts_allocated); }
+  void reallocate_permanent(bool ghosts_allocated = false) throw()
+  { field_block_->reallocate_permanent(ghosts_allocated); }
 
   /// Deallocate storage for the field block
-  void deallocate_array() throw()
-  { field_block_->deallocate_array(); }
+  void deallocate_permanent() throw()
+  { field_block_->deallocate_permanent(); }
 
   /// Return whether ghost cells are allocated or not.  
   bool ghosts_allocated() const throw ()

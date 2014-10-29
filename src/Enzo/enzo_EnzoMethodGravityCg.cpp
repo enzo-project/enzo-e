@@ -87,6 +87,8 @@
 
 #include "enzo.hpp"
 
+#include "enzo.decl.h"
+
 //----------------------------------------------------------------------
 
 EnzoMethodGravityCg::EnzoMethodGravityCg (int iter_max, double res_tol) 
@@ -95,6 +97,7 @@ EnzoMethodGravityCg::EnzoMethodGravityCg (int iter_max, double res_tol)
     res_tol_(res_tol),
     precision_(precision_unknown),
     /// Input / output vectors
+    enzo_block_(0),
     density_(0),
     potential_(0),
     /// CG temporary vectors
@@ -109,6 +112,7 @@ EnzoMethodGravityCg::EnzoMethodGravityCg (int iter_max, double res_tol)
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
     /// CG scalars
+    iter_(0),
     alpha_(0),
     pap_(0),
     rr_(0),
@@ -139,8 +143,8 @@ void EnzoMethodGravityCg::pup (PUP::er &p)
 void EnzoMethodGravityCg::compute ( CommBlock * comm_block) throw()
 {
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
-  Field field = enzo_block->block()->field();
+  enzo_block_ = static_cast<EnzoBlock*> (comm_block);
+  Field field = enzo_block_->block()->field();
 
   const int id = field.field_id("density");
   density_ = field.values(id);
@@ -167,9 +171,16 @@ void EnzoMethodGravityCg::compute ( CommBlock * comm_block) throw()
 
 template <class T>
 void EnzoMethodGravityCg::compute_ () throw()
+/// cg_begin:
+///
+///    B = 4 * PI * G * density
+///
+///    R = MATVEC (A,X) ==> cg_begin_1
+///
 {
 
-  printf ("potential size %d %d %d  dim %d %d %d\n",
+  printf ("%s:%d potential size %d %d %d  dim %d %d %d\n",
+	  __FILE__,__LINE__,
 	  nx_,ny_,nz_,
 	  mx_,my_,mz_);
 
@@ -184,32 +195,74 @@ void EnzoMethodGravityCg::compute_ () throw()
   T * AP        = (T *) AP_;
 
   /// Allocate vectors
-  B =  new T[nx_*ny_*nz_];
-  X =  new T[nx_*ny_*nz_];
-  R =  new T[nx_*ny_*nz_];
-  P =  new T[nx_*ny_*nz_];
-  W =  new T[nx_*ny_*nz_];
-  AP = new T[nx_*ny_*nz_];
+  /// ERROR: these should be associated with CommBlock blocks not Simulation Method
+  B =  new T[mx_*my_*mz_];
+  X =  new T[mx_*my_*mz_];
+  R =  new T[mx_*my_*mz_];
+  P =  new T[mx_*my_*mz_];
+  W =  new T[mx_*my_*mz_];
+  AP = new T[mx_*my_*mz_];
 
-  for (int iz=0; iz<nz_; iz++) {
-    for (int iy=0; iy<ny_; iy++) {
-      for (int ix=0; ix<nx_; ix++) {
-	int i = ix + mx_*(iy + my_*iz); // Fields
-	int j = ix + nx_*(iy + ny_*iz); // allocated vectors
-	B[j] = density[i];
+  for (int iz=0; iz<mz_; iz++) {
+    for (int iy=0; iy<my_; iy++) {
+      for (int ix=0; ix<mx_; ix++) {
+	int i = ix + mx_*(iy + my_*iz);
+	X[i] = 0.0;
+	B[i] = 4.0 * (cello::pi) * (cello::G_cgs) * density[i];
+	P[i] = R[i] = B[i];
       }
     }
   }
-  cg_exit_<T>();
+
+  // rr_ = DOT(R,R)
+
+  // local contribution
+  double b_sum = 0.0;
+  double r_sum = 0.0;
+  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+  double rr = 0.0;
+  for (int iz=0; iz<nz_; iz++) {
+    for (int iy=0; iy<ny_; iy++) {
+      for (int ix=0; ix<nx_; ix++) {
+	int i = i0 + ix + mx_*(iy + my_*iz);
+	b_sum += B[i];
+	r_sum += R[i];
+	rr += R[i]*R[i];
+      }
+    }
+  }
+  printf ("%s:%d b_sum = %g\n",__FILE__,__LINE__,b_sum);
+  printf ("%s:%d r_sum = %g\n",__FILE__,__LINE__,r_sum);
+
+  iter_ = 0;
+
+  CkCallback callback(CkIndex_EnzoBlock::r_method_gravity_cg_1(NULL),
+		      enzo_block_->proxy_array());
+  printf ("%s:%d rr local = %g\n",__FILE__,__LINE__,rr);
+  enzo_block_->contribute (sizeof(double), &rr, CkReduction::sum_double, callback);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::r_method_gravity_cg_1 (CkReductionMsg * msg)
+{
+  double rr = ((double*)msg->getData())[0];
+  delete msg;
+  printf ("%s:%d rr global = %g\n",__FILE__,__LINE__,rr);
+  EnzoMethodGravityCg * method_cg = static_cast<EnzoMethodGravityCg*> (this->method());
+  method_cg->cg_loop_1(rr);
+}
+
+void EnzoMethodGravityCg::cg_loop_1 (double rr) throw()
+{
+  rr_ = rr;
+  printf ("%s:%d rr_ global = %g\n",__FILE__,__LINE__,rr_);
+  if (precision_ == precision_single)    cg_exit_<float>();
+  if (precision_ == precision_double)    cg_exit_<double>();
+  if (precision_ == precision_quadruple) cg_exit_<long double>();
 }
 
 /// nabla ^ 2 (potential) = 4 pi G density
-///
-/// cg_begin:
-///
-///    B = 4 * PI * G * density
-///
-///    R = MATVEC (A,X) ==> cg_begin_1
 ///
 /// cg_begin_1:
 ///
@@ -257,12 +310,12 @@ void EnzoMethodGravityCg::cg_exit_() throw()
 {
   /// deallocate vectors
 
-  delete [] (T *) B_;
-  delete [] (T *) X_;
-  delete [] (T *) R_;
-  delete [] (T *) P_;
-  delete [] (T *) W_;
-  delete [] (T *) AP_;
+  delete [] (T *) B_;  B_ = 0;
+  delete [] (T *) X_;  X_ = 0;
+  delete [] (T *) R_;  R_ = 0;
+  delete [] (T *) P_;  P_ = 0;
+  delete [] (T *) W_;  W_ = 0;
+  delete [] (T *) AP_; AP_ = 0;
   
 }
 

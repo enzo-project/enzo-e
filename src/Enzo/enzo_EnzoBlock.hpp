@@ -261,6 +261,8 @@ public: /// entry methods
   // Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
+  void r_method_gravity_cg_1 (CkReductionMsg * msg) ;
+
 public: // attributes (YIKES!)
 
   union {

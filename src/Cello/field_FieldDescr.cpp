@@ -14,6 +14,7 @@
 FieldDescr::FieldDescr () 
   throw ()
   : name_(),
+    num_permanent_(0),
     id_(),
     groups_(),
     alignment_(1),
@@ -153,9 +154,27 @@ precision_type FieldDescr::precision(int id_field) const
 
 //----------------------------------------------------------------------
 
-int FieldDescr::insert_field(const std::string & field_name) throw()
+int FieldDescr::insert_permanent(const std::string & field_name) throw()
 {
 
+  int id = insert_(field_name);
+
+  num_permanent_ = id+1;
+
+  return id;
+}
+
+//----------------------------------------------------------------------
+
+int FieldDescr::insert_temporary(const std::string & field_name) throw()
+{
+  return insert_(field_name);
+}
+
+//----------------------------------------------------------------------
+
+int FieldDescr::insert_(const std::string & field_name) throw()
+{
   int id = field_count();
 
   // Check if field has already been inserted
@@ -166,7 +185,7 @@ int FieldDescr::insert_field(const std::string & field_name) throw()
       sprintf (buffer,
 	       "Insert field called multiple times with same field %s",
 	       field_name.c_str());
-      WARNING("FieldDescr::insert_field", buffer);
+      WARNING("FieldDescr::insert_permanent", buffer);
       return i;
     }
   }
@@ -271,6 +290,7 @@ void FieldDescr::copy_(const FieldDescr & field_descr) throw()
   padding_   = field_descr.padding_;
   courant_   = field_descr.courant_;
   name_      = field_descr.name_;
+  num_permanent_ = field_descr.num_permanent_;
   id_        = field_descr.id_;
   groups_    = field_descr.groups_;
   precision_ = field_descr.precision_;

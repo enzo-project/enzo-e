@@ -14,6 +14,13 @@ class FieldDescr
   /// @class    FieldDescr
   /// @ingroup  Field
   /// @brief    [\ref Field] Interface for the FieldDescr class
+  ///
+  /// This class is used to store information about Fields in general,
+  /// including field names, how they are centered (cell-centered,
+  /// face-centered, on corners, etc), number of ghost zones, padding,
+  /// alignment, and precision.  There is one FieldDescr object per
+  /// Simulation object.  Actual Field data are stored in FieldBlock
+  /// objects, which are each associated with a unique Block of data.
 
 public: // functions
 
@@ -39,6 +46,7 @@ public: // functions
 
     // NOTE: change this function whenever attributes change
     p | name_;
+    p | num_permanent_;
     p | id_;
     p | groups_;
     p | alignment_;
@@ -79,8 +87,11 @@ public: // functions
   void set_precision(int id_field, precision_type precision) 
     throw(std::out_of_range);
 
-  /// Insert a new field
-  int insert_field(const std::string & name_field) throw();
+  /// Insert a new permanent field
+  int insert_permanent(const std::string & name_field) throw();
+
+  /// Insert a new temporary field
+  int insert_temporary(const std::string & name_field) throw();
 
   /// Return the number of fields
   int field_count() const throw();
@@ -124,14 +135,27 @@ public: // functions
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();
 
+  /// Whether the field is permanent or temporary
+  bool is_permanent (int id_field) const throw()
+  { return (id_field < num_permanent_); }
+
+  /// Return the number of permanent fields
+  int num_permanent() const throw()
+  { return num_permanent_; }
+
 private: // functions
 
   void copy_(const FieldDescr & field_descr) throw();
+
+  int insert_(const std::string & name_field) throw();
 
 private: // attributes
 
   /// String identifying each field
   std::vector<std::string> name_;
+
+  /// Number of permanent fields; remaining are temporary
+  int num_permanent_;
 
   /// Index of each field in name_
   std::map<std::string,int> id_;

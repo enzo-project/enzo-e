@@ -18,9 +18,14 @@ class FieldBlock {
   /// @brief [\ref Field] Interface between field arrays and low-level
   /// (C/fortran) routines.
   /// 
-  /// Defines up to a 4-D fortran-like array for storing 1 or more 3D
-  /// arrays.  Axes can be permuted, including the index selecting the
-  /// array for storing interleaved arrays.
+  /// A FieldBlock stores up to a 4D fortran-like array for
+  /// permanently storing 1 or more 3D arrays.  Axes can be permuted,
+  /// including the index selecting the array for storing interleaved
+  /// arrays.  Temporary fields can be allocated and deallocated as
+  /// well, and are stored in a vector of pointers to 3D arrays.  Descriptive
+  /// information, such as number of ghost zones, padding, centering, etc.,
+  /// are stored in a separate FieldDescr object, for which there is
+  /// one per Simulation object (i.e. one per process)
 
   friend class FieldFace;
 
@@ -69,11 +74,11 @@ public: // interface
   const char * unknowns (std::string name) const throw (std::out_of_range)
   { return unknowns (field_descr_->field_id(name)); }
 
-  /// Return raw pointer to the array of all fields.  Const since
+  /// Return raw pointer to the array of all permanent fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
   /// padding and alignment
-  const char * array ()  const throw () 
-  { return array_allocated() ? &array_[0] : NULL; };
+  const char * permanent ()  const throw () 
+  { return permanent_allocated() ? &array_permanent_[0] : NULL; };
 
   /// Return width of cells along each dimension
   void cell_width(double xm,   double xp,   double * hx,
@@ -86,22 +91,22 @@ public: // interface
 	       int id_field_last  = -1) throw();
  
   /// Return whether array is allocated or not
-  bool array_allocated() const throw()
-  { return array_.size() > 0; }
+  bool permanent_allocated() const throw()
+  { return array_permanent_.size() > 0; }
 
   /// Return whether array is allocated or not
-  size_t array_size() const throw()
-  { return array_.size(); }
+  size_t permanent_size() const throw()
+  { return array_permanent_.size(); }
 
-  /// Allocate storage for the field block
-  void allocate_array(bool ghosts_allocated = false) throw();
+  /// Allocate storage for the permanent fields
+  void allocate_permanent(bool ghosts_allocated = false) throw();
 
   /// Reallocate storage for the field block, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
-  void reallocate_array(bool ghosts_allocated = false) throw();
+  void reallocate_permanent(bool ghosts_allocated = false) throw();
 
-  /// Deallocate storage for the field block
-  void deallocate_array() throw();
+  /// Deallocate storage for the permanent fields
+  void deallocate_permanent() throw();
 
   /// Return whether ghost cells are allocated or not.  
   bool ghosts_allocated() const throw ()
@@ -172,6 +177,14 @@ public: // interface
   int bytes_per_element(int id_field) const throw()
   { return field_descr_->bytes_per_element(id_field); }
 
+  /// Whether the field is permanent or temporary
+  bool is_permanent (int id_field) const throw()
+  { return field_descr_->is_permanent(id_field); }
+
+  /// Return the number of permanent fields
+  int num_permanent() const throw()
+  { return field_descr_->num_permanent(); }
+
   //--------------------------------------------------
 private: // functions
   //--------------------------------------------------
@@ -186,9 +199,9 @@ private: // functions
   /// aligned
   int align_padding_ (int alignment) const throw();
 
-  /// Move (not copy) array to array_ and offsets to
+  /// Move (not copy) array to array_permanent_ and offsets to
   /// offsets_
-  void restore_array_ ( const char       * array_from,
+  void restore_permanent_ ( const char       * array_from,
 			std::vector<int> & offsets_from )
     throw (std::out_of_range);
 
@@ -204,32 +217,6 @@ private: // functions
    int gx, int gy ,int gz,
    int nxd,int nyd) const;
 
-  //----------------------------------------------------------------------
-
-  /// Set alignment
-  void set_alignment(int alignment) throw();
-
-  /// Set padding
-  void set_padding(int padding) throw();
-
-  /// Set courant
-  void set_courant(double courant) throw();
-
-  /// Set centering for a field
-  void set_centering(int id_field, int cx, int cy=0, int cz=0) 
-    throw(std::out_of_range);
-
-  /// Set ghosts for a field
-  void set_ghosts(int id_field, int gx, int gy=0, int gz=0) 
-    throw(std::out_of_range);
-
-  /// Set precision for a field
-  void set_precision(int id_field, precision_type precision) 
-    throw(std::out_of_range);
-
-  /// Insert a new field
-  int insert_field(const std::string & name_field) throw();
-
 private: // attributes
 
   /// Pointer to the associated field descriptor
@@ -238,14 +225,18 @@ private: // attributes
   /// Size of fields on the block, assuming centered
   int size_[3];
 
-  /// Allocated array of field values
-  std::vector<char> array_;
+  /// Single array of permanent fields
+  std::vector<char> array_permanent_;
+
+  /// Array of temporary fields
+  std::vector<char *> array_temporary_;
 
   /// Offsets into values_ of the first element of each field
   std::vector<int> offsets_;
 
   /// Whether ghost values are allocated or not 
   bool ghosts_allocated_;
+
 
 };   
 

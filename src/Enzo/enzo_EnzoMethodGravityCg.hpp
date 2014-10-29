@@ -40,10 +40,16 @@ public: // interface
   /// Solve for the gravitational potential
   virtual void compute( CommBlock * comm_block) throw();
 
+  /// Continuation after global reduction
+  void cg_loop_1(double rr) throw();
+
 protected: // methods
 
   template <class T>
   void compute_ () throw();
+
+  template <class T>
+  void cg_begin_1_() throw();
 
   template <class T>
   void cg_exit_() throw();
@@ -58,6 +64,9 @@ protected: // attributes
 
   /// Precision
   int precision_;
+
+  /// Associated EnzoBlock
+  EnzoBlock * enzo_block_;
 
   /// Density and potential
 
@@ -77,7 +86,8 @@ protected: // attributes
   int mx_,my_,mz_;
   int gx_,gy_,gz_;
 
-  /// CG scalars
+  /// CG variables
+  int iter_;
   double alpha_;
   double pap_;
   double rr_;

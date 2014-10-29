@@ -34,7 +34,7 @@ int EnzoBlock::SolveHydroEquations
   int    ncolour  = field.groups()->size("colour");
 
   // colourpt: the color 'array' (contains all color fields)
-  enzo_float * colourpt = (enzo_float *) field.array();
+  enzo_float * colourpt = (enzo_float *) field.permanent();
 
   // coloff: offsets into the color array (for each color field)
   int * coloff   = new int [ncolour];

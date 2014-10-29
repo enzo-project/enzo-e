@@ -47,11 +47,11 @@ PARALLEL_MAIN_BEGIN
 
     Field * field = new Field(field_descr,field_block);
   
-    int i1 = field->insert_field("f1");
-    int i2 = field->insert_field("f2");
-    int i3 = field->insert_field("f3");
-    int i4 = field->insert_field("f4");
-    int i5 = field->insert_field("f5");
+    int i1 = field->insert_permanent("f1");
+    int i2 = field->insert_permanent("f2");
+    int i3 = field->insert_permanent("f3");
+    int i4 = field->insert_permanent("f4");
+    int i5 = field->insert_permanent("f5");
 
     // set precision
 
@@ -117,56 +117,56 @@ PARALLEL_MAIN_BEGIN
     //----------------------------------------------------------------------
 
     unit_func("array_allocated");
-    unit_assert( ! field->array_allocated());
+    unit_assert( ! field->permanent_allocated());
 
     // Allocate
 
-    unit_func("allocate_array");
+    unit_func("allocate_permanent");
 
-    field->allocate_array(false);
+    field->allocate_permanent(false);
 
-    size_t array_size_without_ghosts = field->array_size();
+    size_t array_size_without_ghosts = field->permanent_size();
 
-    unit_assert(field->array() != 0);
-    unit_assert(field->array_allocated());
-    unit_assert(field->array_size() > 0);
+    unit_assert(field->permanent() != 0);
+    unit_assert(field->permanent_allocated());
+    unit_assert(field->permanent_size() > 0);
 
     // Reallocate
 
-    unit_func("reallocate_array");
+    unit_func("reallocate_permanent");
 
-    field->reallocate_array(true);
+    field->reallocate_permanent(true);
 
-    size_t array_size_with_ghosts = field->array_size();
+    size_t array_size_with_ghosts = field->permanent_size();
 
-    unit_assert(field->array() != 0);
-    unit_assert(field->array_allocated());
-    unit_assert(field->array_size() > 0);
+    unit_assert(field->permanent() != 0);
+    unit_assert(field->permanent_allocated());
+    unit_assert(field->permanent_size() > 0);
     unit_assert(array_size_with_ghosts > array_size_without_ghosts);
 
     // Deallocate
 
-    unit_func("deallocate_array");
+    unit_func("deallocate_permanent");
 
-    field->deallocate_array();
+    field->deallocate_permanent();
 
-    unit_assert(field->array() == 0);
-    unit_assert( ! field->array_allocated());
-    unit_assert(field->array_size() == 0);
+    unit_assert(field->permanent() == 0);
+    unit_assert( ! field->permanent_allocated());
+    unit_assert(field->permanent_size() == 0);
 
     // Allocate
 
-    unit_func("allocate_array");
+    unit_func("allocate_permanent");
 
-    field->allocate_array(true);
+    field->allocate_permanent(true);
 
-    unit_assert(field->array() != 0);
-    unit_assert(field->array_allocated());
-    unit_assert(field->array_size() == array_size_with_ghosts);
+    unit_assert(field->permanent() != 0);
+    unit_assert(field->permanent_allocated());
+    unit_assert(field->permanent_size() == array_size_with_ghosts);
 
   
     //----------------------------------------------------------------------
-    field->reallocate_array(false);
+    field->reallocate_permanent(false);
 
 
     float       *v1,*u1;
@@ -245,7 +245,7 @@ PARALLEL_MAIN_BEGIN
 
     // with ghosts
 
-    field->reallocate_array(true);
+    field->reallocate_permanent(true);
 
     v1 =  (float *)      field->values(i1);
     v2 = (double *)      field->values(i2);
@@ -523,7 +523,7 @@ PARALLEL_MAIN_BEGIN
     //----------------------------------------------------------------------
     unit_func("reallocate_ghosts");
 
-    field->reallocate_array(false);
+    field->reallocate_permanent(false);
 
     v1    = 
       (float *) field->values(i1);
@@ -569,19 +569,19 @@ PARALLEL_MAIN_BEGIN
 
     // Fields
 
-    unit_func("insert_field");
+    unit_func("insert_permanent");
     unit_assert(field->field_count()==0);
-    field->insert_field("density");
+    field->insert_permanent("density");
     unit_assert(field->field_count()==1);
-    field->insert_field("velocity_x");
+    field->insert_permanent("velocity_x");
     unit_assert(field->field_count()==2);
-    field->insert_field("velocity_y");
+    field->insert_permanent("velocity_y");
     unit_assert(field->field_count()==3);
-    field->insert_field("velocity_z");
+    field->insert_permanent("velocity_z");
     unit_assert(field->field_count()==4);
-    field->insert_field("total_energy");
+    field->insert_permanent("total_energy");
     unit_assert(field->field_count()==5);
-    field->insert_field("total_energy");
+    field->insert_permanent("total_energy");
     unit_assert(field->field_count()==5);
 
     unit_func("field_count");

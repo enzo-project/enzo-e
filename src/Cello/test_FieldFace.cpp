@@ -178,7 +178,7 @@ void init_fields
 
 	// Allocate field blocks including ghosts
 
-	block->allocate_array(true);
+	block->allocate_permanent(true);
 
 	// Initialize fields
 
@@ -274,9 +274,9 @@ PARALLEL_MAIN_BEGIN
 
   // insert fields
 
-  field_descr->insert_field("field_1");
-  field_descr->insert_field("field_2");
-  field_descr->insert_field("field_3");
+  field_descr->insert_permanent("field_1");
+  field_descr->insert_permanent("field_2");
+  field_descr->insert_permanent("field_3");
 
   // initialize field precisions
 

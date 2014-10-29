@@ -24,11 +24,11 @@ PARALLEL_MAIN_BEGIN
   FieldDescr * field_descr = new FieldDescr;
 
 
-  int i1 = field_descr->insert_field("f1");
-  int i2 = field_descr->insert_field("f2");
-  int i3 = field_descr->insert_field("f3");
-  int i4 = field_descr->insert_field("f4");
-  int i5 = field_descr->insert_field("f5");
+  int i1 = field_descr->insert_permanent("f1");
+  int i2 = field_descr->insert_permanent("f2");
+  int i3 = field_descr->insert_permanent("f3");
+  int i4 = field_descr->insert_permanent("f4");
+  int i5 = field_descr->insert_permanent("f5");
 
   // set precision
 
@@ -95,57 +95,57 @@ PARALLEL_MAIN_BEGIN
   // allocate / deallocate
   //----------------------------------------------------------------------
 
-  unit_func("array_allocated");
-  unit_assert( ! field_block->array_allocated());
+  unit_func("permanent_allocated");
+  unit_assert( ! field_block->permanent_allocated());
 
   // Allocate
 
-  unit_func("allocate_array");
+  unit_func("allocate_permanent");
 
-  field_block->allocate_array(false);
+  field_block->allocate_permanent(false);
 
-  size_t array_size_without_ghosts = field_block->array_size();
+  size_t array_size_without_ghosts = field_block->permanent_size();
 
-  unit_assert(field_block->array() != 0);
-  unit_assert(field_block->array_allocated());
-  unit_assert(field_block->array_size() > 0);
+  unit_assert(field_block->permanent() != 0);
+  unit_assert(field_block->permanent_allocated());
+  unit_assert(field_block->permanent_size() > 0);
 
   // Reallocate
 
-  unit_func("reallocate_array");
+  unit_func("reallocate_permanent");
 
-  field_block->reallocate_array(true);
+  field_block->reallocate_permanent(true);
 
-  size_t array_size_with_ghosts = field_block->array_size();
+  size_t array_size_with_ghosts = field_block->permanent_size();
 
-  unit_assert(field_block->array() != 0);
-  unit_assert(field_block->array_allocated());
-  unit_assert(field_block->array_size() > 0);
+  unit_assert(field_block->permanent() != 0);
+  unit_assert(field_block->permanent_allocated());
+  unit_assert(field_block->permanent_size() > 0);
   unit_assert(array_size_with_ghosts > array_size_without_ghosts);
 
   // Deallocate
 
-  unit_func("deallocate_array");
+  unit_func("deallocate_permanent");
 
-  field_block->deallocate_array();
+  field_block->deallocate_permanent();
 
-  unit_assert(field_block->array() == 0);
-  unit_assert( ! field_block->array_allocated());
-  unit_assert(field_block->array_size() == 0);
+  unit_assert(field_block->permanent() == 0);
+  unit_assert( ! field_block->permanent_allocated());
+  unit_assert(field_block->permanent_size() == 0);
 
   // Allocate
 
-  unit_func("allocate_array");
+  unit_func("allocate_permanent");
 
-  field_block->allocate_array(true);
+  field_block->allocate_permanent(true);
 
-  unit_assert(field_block->array() != 0);
-  unit_assert(field_block->array_allocated());
-  unit_assert(field_block->array_size() == array_size_with_ghosts);
+  unit_assert(field_block->permanent() != 0);
+  unit_assert(field_block->permanent_allocated());
+  unit_assert(field_block->permanent_size() == array_size_with_ghosts);
 
   
   //----------------------------------------------------------------------
-  field_block->reallocate_array(false);
+  field_block->reallocate_permanent(false);
 
 
   float       *v1,*u1;
@@ -161,6 +161,12 @@ PARALLEL_MAIN_BEGIN
   v3 = (double *)      field_block->values(i3);
   v4 = (double *)      field_block->values(i4);
   v5 = (long double *) field_block->values(i5);
+
+  printf ("%s:%d v1 = %p\n",v1);
+  printf ("%s:%d v2 = %p\n",v2);
+  printf ("%s:%d v3 = %p\n",v3);
+  printf ("%s:%d v4 = %p\n",v4);
+  printf ("%s:%d v5 = %p\n",v5);
   
   // field sizes without ghosts
 
@@ -182,9 +188,9 @@ PARALLEL_MAIN_BEGIN
   size_t nb4 = (char *) v5 - (char *) v4;
 
   unit_assert (nb1 == sizeof (float) * nu1);
-  TRACE2("nb2,nu2 = %d %d",nb2,sizeof(double)*nu2);
+  printf("nb2,nu2 = %d %d",nb2,sizeof(double)*nu2);
   unit_assert (nb2 == sizeof (double)* nu2);
-  TRACE2("nb3,nu3 = %d %d",nb3,sizeof(double)*nu3);
+  printf("nb3,nu3 = %d %d",nb3,sizeof(double)*nu3);
   unit_assert (nb3 == sizeof (double)* nu3);
   unit_assert (nb4 == sizeof (double)* nu4);
 
@@ -224,7 +230,7 @@ PARALLEL_MAIN_BEGIN
 
   // with ghosts
 
-  field_block->reallocate_array(true);
+  field_block->reallocate_permanent(true);
 
   v1 =  (float *)      field_block->values(i1);
   v2 = (double *)      field_block->values(i2);
@@ -502,7 +508,7 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
   unit_func("reallocate_ghosts");
 
-  field_block->reallocate_array(false);
+  field_block->reallocate_permanent(false);
 
   v1    = 
     (float *) field_block->values(i1);

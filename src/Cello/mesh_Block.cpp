@@ -71,7 +71,7 @@ Block & Block::operator= (const Block & block) throw ()
 void Block::allocate (const FieldDescr * field_descr) throw()
 {
   for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i]->allocate_array(true);
+    field_block_[i]->allocate_permanent(true);
   }
 }
 

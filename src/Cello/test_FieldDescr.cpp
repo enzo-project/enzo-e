@@ -50,23 +50,43 @@ PARALLEL_MAIN_BEGIN
 
   // Fields
 
-  unit_func("insert_field");
-  unit_assert(field_descr->field_count()==0);
-  field_descr->insert_field("density");
-  unit_assert(field_descr->field_count()==1);
-  field_descr->insert_field("velocity_x");
-  unit_assert(field_descr->field_count()==2);
-  field_descr->insert_field("velocity_y");
-  unit_assert(field_descr->field_count()==3);
-  field_descr->insert_field("velocity_z");
-  unit_assert(field_descr->field_count()==4);
-  field_descr->insert_field("total_energy");
-  unit_assert(field_descr->field_count()==5);
-  field_descr->insert_field("total_energy");
-  unit_assert(field_descr->field_count()==5);
+  unit_func("insert_permanent");
 
+  int id;
+
+  unit_assert(field_descr->field_count()==0);
+
+  id = field_descr->insert_permanent("density");
+  unit_func("field_count");
+  unit_assert(field_descr->field_count()==1);
+  field_descr->insert_permanent("velocity_x");
+  unit_func("field_count");
+  unit_assert(field_descr->field_count()==2);
+  field_descr->insert_permanent("velocity_y");
+  unit_func("field_count");
+  unit_assert(field_descr->field_count()==3);
+  field_descr->insert_permanent("velocity_z");
+  unit_func("field_count");
+  unit_assert(field_descr->field_count()==4);
+
+  unit_func("is_permanent");
+  id = field_descr->insert_permanent("total_energy");
+  unit_assert(field_descr->is_permanent(id));
   unit_func("field_count");
   unit_assert(field_descr->field_count()==5);
+
+  unit_func("is_permanent");
+  id = field_descr->insert_temporary("temporary_1");
+  unit_assert(! field_descr->is_permanent(id));
+  unit_func("field_count");
+  unit_assert(field_descr->field_count()==6);
+  id = field_descr->insert_temporary("temporary_2");
+  unit_assert(! field_descr->is_permanent(id));
+  unit_func("field_count");
+  unit_assert(field_descr->field_count()==7);
+
+  
+
 
   unit_func("field_id");
 
@@ -204,7 +224,7 @@ PARALLEL_MAIN_BEGIN
   field_descr = 0;
 
   unit_func("assign:field_count");
-  unit_assert(field_descr_assign.field_count()==5);
+  unit_assert(field_descr_assign.field_count()==7);
 
   unit_func("assign:field_id");
   unit_assert(field_descr_assign.field_id("density")      == info.field_density);
@@ -262,7 +282,9 @@ PARALLEL_MAIN_BEGIN
 
 
   unit_func("copy:FieldDescr(FieldDescr)");
-  unit_assert(field_descr_copy.field_count()==5);
+  unit_assert(field_descr_copy.field_count()==7);
+  printf ("%s:%d num_permanent = %d",__FILE__,__LINE__,field_descr_copy.num_permanent());
+  unit_assert(field_descr_copy.num_permanent()==5);
 
   unit_func("copy:field_id");
   unit_assert(field_descr_copy.field_id("density")      == info.field_density);

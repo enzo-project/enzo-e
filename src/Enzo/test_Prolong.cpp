@@ -120,8 +120,8 @@ PARALLEL_MAIN_BEGIN
   {
     FieldDescr field_descr;
 
-    int i_d = field_descr.insert_field("density");
-    int i_v = field_descr.insert_field("velocity_x");
+    int i_d = field_descr.insert_permanent("density");
+    int i_v = field_descr.insert_permanent("velocity_x");
 
     field_descr.set_precision(i_d,precision_double);
     field_descr.set_precision(i_v,precision_single);

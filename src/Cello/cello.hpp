@@ -116,9 +116,15 @@ typedef int precision_type;
 #   error Multiple CONFIG_PRECISION_<SIZE> defined
 #endif
 
-/// Namespace for global functions
+/// Namespace for global constants and functions
 namespace cello {
   
+  // Constants
+
+  const double pi = 3.14159265358979324;
+  const double G_cgs  = 6.67384e-8;
+
+  // Functions
   int sizeof_precision       (precision_type);
   int is_precision_supported (precision_type);
   double machine_epsilon     (precision_type);

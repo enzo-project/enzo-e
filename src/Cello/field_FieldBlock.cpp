@@ -16,7 +16,8 @@ FieldBlock::FieldBlock
  int nx, int ny, int nz 
  ) throw()
   : field_descr_(field_descr),
-    array_(),
+    array_permanent_(),
+    array_temporary_(),
     offsets_(),
     ghosts_allocated_(true)
 {
@@ -35,7 +36,7 @@ FieldBlock::FieldBlock
 
 FieldBlock::~FieldBlock() throw()
 {  
-  deallocate_array();
+  deallocate_permanent();
 }
 
 //----------------------------------------------------------------------
@@ -67,7 +68,10 @@ void FieldBlock::pup(PUP::er &p)
 
   PUParray(p,size_,3);
 
-  p | array_;
+  p | array_permanent_;
+  //  p | array_temporary_;
+  WARNING("FieldBlock::pup()",
+	  "Skipping array_temporary_");
   p | offsets_;
   p | ghosts_allocated_;
 }
@@ -113,8 +117,22 @@ char * FieldBlock::values ( int id_field )
   throw (std::out_of_range)
 {
   char * values = 0;
-  if (0 <= id_field && id_field < field_count()) {
-    values = &array_[0] + offsets_[id_field];
+  if (is_permanent(id_field)) {
+
+    // permanent field
+
+    if (0 <= id_field && id_field < field_count()) {
+      values = &array_permanent_[0] + offsets_[id_field];
+    }
+  } else {
+
+    // temporary field
+
+    int id_temporary = id_field - num_permanent();
+
+    if (0 <= id_temporary && id_temporary < array_temporary_.size()) {
+      values = array_temporary_[id_temporary];
+    }
   }
   return values;
 }
@@ -133,26 +151,21 @@ const char * FieldBlock::unknowns ( int id_field ) const
 char * FieldBlock::unknowns ( int id_field  )
   throw (std::out_of_range)
 {
-  char * unknowns = 0;
+  char * unknowns = values(id_field);
 
-  if (0 <= id_field && id_field < field_count()) {
+  if ( ghosts_allocated() && unknowns ) {
 
-    unknowns = &array_[0] + offsets_[id_field];
+    int gx,gy,gz;
+    int mx,my;
 
-    if ( ghosts_allocated() ) {
+    ghosts    (id_field,&gx,&gy,&gz);
+    dimensions(id_field,&mx,&my);
 
-      int gx,gy,gz;
-      int mx,my;
+    precision_type precision = this->precision(id_field);
+    int bytes_per_element = cello::sizeof_precision (precision);
 
-      ghosts    (id_field,&gx,&gy,&gz);
-      dimensions(id_field,&mx,&my);
-
-      precision_type precision = this->precision(id_field);
-      int bytes_per_element = cello::sizeof_precision (precision);
-
-      unknowns += bytes_per_element * (gx + mx*(gy + my*gz));
-    } 
-  }
+    unknowns += bytes_per_element * (gx + mx*(gy + my*gz));
+  } 
   return unknowns;
 }
 
@@ -184,7 +197,7 @@ void FieldBlock::clear
     return;
   }
 
-  if ( array_allocated() ) {
+  if ( permanent_allocated() ) {
     if (id_field_first == -1) {
       id_field_first = 0;
       id_field_last  = field_count() - 1;
@@ -197,7 +210,7 @@ void FieldBlock::clear
       int nx,ny,nz;
       field_size(id_field,&nx,&ny,&nz);
       precision_type precision = this->precision(id_field);
-      char * array = &array_[0] + offsets_[id_field];
+      char * array = &array_permanent_[0] + offsets_[id_field];
       switch (precision) {
       case precision_single:
 	for (int i=0; i<nx*ny*nz; i++) {
@@ -230,7 +243,7 @@ void FieldBlock::clear
 
 //----------------------------------------------------------------------
 
-void FieldBlock::allocate_array ( bool ghosts_allocated ) throw()
+void FieldBlock::allocate_permanent ( bool ghosts_allocated ) throw()
 {
 
   // Error check size
@@ -238,15 +251,15 @@ void FieldBlock::allocate_array ( bool ghosts_allocated ) throw()
   if (! (size_[0] > 0 &&
 	 size_[1] > 0 &&
 	 size_[2] > 0) ) {
-    ERROR ("FieldBlock::allocate_array",
+    ERROR ("FieldBlock::allocate_permanent",
 		   "Allocate called with zero field size");
   }
 
   // Warning check array already allocated
-  if (array_allocated() ) {
-    WARNING ("FieldBlock::allocate_array",
+  if (permanent_allocated() ) {
+    WARNING ("FieldBlock::allocate_permanent",
 	     "Array already allocated: calling reallocate()");
-    reallocate_array(ghosts_allocated);
+    reallocate_permanent(ghosts_allocated);
     return;
   }
 
@@ -276,7 +289,7 @@ void FieldBlock::allocate_array ( bool ghosts_allocated ) throw()
 
   // Allocate the array
 
-  array_.resize(array_size);
+  array_permanent_.resize(array_size);
 
   // Initialize field_begin
 
@@ -302,7 +315,7 @@ void FieldBlock::allocate_array ( bool ghosts_allocated ) throw()
 
   if ( ! ( 0 <= (array_size - field_offset)
 	   &&   (array_size - field_offset) < alignment)) {
-    ERROR ("FieldBlock::allocate_array",
+    ERROR ("FieldBlock::allocate_permanent",
 	   "Code error: array size was computed incorrectly");
   };
 
@@ -310,41 +323,41 @@ void FieldBlock::allocate_array ( bool ghosts_allocated ) throw()
 
 //----------------------------------------------------------------------
 
-void FieldBlock::reallocate_array
+void FieldBlock::reallocate_permanent
 (
  bool               ghosts_allocated
  ) throw()
 {
-  if (! array_allocated() ) {
-    WARNING ("FieldBlock::reallocate_array",
+  if (! permanent_allocated() ) {
+    WARNING ("FieldBlock::reallocate_permanent",
 	     "Array not allocated yet: calling allocate()");
-    allocate_array(ghosts_allocated);
+    allocate_permanent(ghosts_allocated);
     return;
   }
   
   std::vector<int>  old_offsets;
   std::vector<char> old_array;
 
-  old_array = array_;
+  old_array = array_permanent_;
   old_offsets = offsets_;
 
-  array_.clear();
+  array_permanent_.clear();
   offsets_.clear();
 
   ghosts_allocated_ = ghosts_allocated;
 
-  allocate_array(ghosts_allocated_);
+  allocate_permanent(ghosts_allocated_);
 
-  restore_array_ (&old_array[0], old_offsets);
+  restore_permanent_ (&old_array[0], old_offsets);
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlock::deallocate_array () throw()
+void FieldBlock::deallocate_permanent () throw()
 {
-  if ( array_allocated() ) {
+  if ( permanent_allocated() ) {
 
-    array_.clear();
+    array_permanent_.clear();
     offsets_.clear();
   }
   // if (field_faces_ != 0) {
@@ -375,7 +388,7 @@ void FieldBlock::deallocate_array () throw()
 //     std::vector<int> old_offsets;
 //     std::vector<char> old_array;
 
-//     old_array = array_;
+//     old_array = array_permanent_;
 
 //     backup_array_ (field_descr,old_offsets);
 
@@ -415,7 +428,7 @@ int FieldBlock::adjust_alignment_
 
 int FieldBlock::align_padding_ (int alignment) const throw()
 { 
-  long unsigned start_long = reinterpret_cast<long unsigned>(&array_[0]);
+  long unsigned start_long = reinterpret_cast<long unsigned>(&array_permanent_[0]);
   return ( alignment - (start_long % alignment) ) % alignment; 
 }
 
@@ -497,7 +510,7 @@ void FieldBlock::print
 
    ASSERT("FieldBlock::print",
 	  "FieldBlocks not allocated",
-	  array_allocated());
+	  permanent_allocated());
 
    int field_count = field_descr_->field_count();
    for (int index_field=0; index_field<field_count; index_field++) {
@@ -545,7 +558,7 @@ void FieldBlock::print
      // hy = (upper[1]-lower[1])/(nyd-2*gy);
      // hz = (upper[2]-lower[2])/(nzd-2*gz);
 
-     const char * array_offset = &array_[0]+offsets_[index_field];
+     const char * array_offset = &array_permanent_[0]+offsets_[index_field];
      switch (field_descr_->precision(index_field)) {
      case precision_single:
        print_((const float * ) array_offset,
@@ -639,7 +652,7 @@ void FieldBlock::print_
 
 //----------------------------------------------------------------------
 
-void FieldBlock::restore_array_ 
+void FieldBlock::restore_permanent_ 
 ( const char * array_from,
   std::vector<int> & offsets_from) throw (std::out_of_range)
 {
@@ -687,8 +700,8 @@ void FieldBlock::restore_array_
 
     // determine array start
 
-    const char * array1 = array_from + offsets_from.at(id_field) + offset1;
-    char       * array2 = &array_[0] + offsets_.at(id_field)     + offset2;
+    const char * array1 = offset1 + offsets_from.at(id_field) + array_from;
+    char       * array2 = offset2 + offsets_.at    (id_field) + &array_permanent_[0];
 
     // copy values (use memcopy?)
 
