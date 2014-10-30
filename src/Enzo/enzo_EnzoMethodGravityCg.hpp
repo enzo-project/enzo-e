@@ -24,7 +24,8 @@ class EnzoMethodGravityCg : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGravityCg object
-  EnzoMethodGravityCg(int iter_max, double res_tol);
+  EnzoMethodGravityCg(const FieldDescr * field_descr,
+		      int iter_max, double res_tol);
 
   EnzoMethodGravityCg() {};
 
@@ -46,7 +47,7 @@ public: // interface
 protected: // methods
 
   template <class T>
-  void compute_ () throw();
+  void compute_ (EnzoBlock * enzo_block) throw();
 
   template <class T>
   void cg_begin_1_() throw();
@@ -65,21 +66,18 @@ protected: // attributes
   /// Precision
   int precision_;
 
-  /// Associated EnzoBlock
-  EnzoBlock * enzo_block_;
+  /// Density and potential field id's
 
-  /// Density and potential
+  int idensity_;
+  int ipotential_;
 
-  void * density_;
-  void * potential_;
-
-  /// CG vectors
-  void * B_;
-  void * X_;
-  void * R_;
-  void * P_;
-  void * W_;
-  void * AP_;
+  /// CG temporary field id's
+  int ib_;
+  int ix_;
+  int ir_;
+  int ip_;
+  int iw_;
+  int iap_;
 
   /// vector attributes
   int nx_,ny_,nz_;

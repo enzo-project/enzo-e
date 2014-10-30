@@ -22,7 +22,8 @@ Method {
 
 Field {
    
-   list = ["density", "potential"];
+   list = ["density", "potential",
+           "B","X","R","P","W","AP"];
    ghosts = [1,1,1];
 }
 

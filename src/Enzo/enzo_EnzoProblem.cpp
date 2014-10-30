@@ -189,11 +189,13 @@ Method * EnzoProblem::create_method_
        enzo_config->method_turbulence_mach_number);
   } else if (type == "gravity_cg") {
     method = new EnzoMethodGravityCg
-      (enzo_config->method_gravity_cg_iter_max,
+      (field_descr,
+       enzo_config->method_gravity_cg_iter_max,
        enzo_config->method_gravity_cg_res_tol);
   } else if (type == "gravity_bicgstab") {
     method = new EnzoMethodGravityBiCGStab
-      (enzo_config->method_gravity_bicgstab_iter_max,
+      (field_descr,
+       enzo_config->method_gravity_bicgstab_iter_max,
        enzo_config->method_gravity_bicgstab_res_tol);
   } else {
     method = Problem::create_method_ (type,config, field_descr);

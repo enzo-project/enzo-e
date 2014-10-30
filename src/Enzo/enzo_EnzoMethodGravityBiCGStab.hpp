@@ -24,7 +24,8 @@ class EnzoMethodGravityBiCGStab : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGravityBiCGStab object
-  EnzoMethodGravityBiCGStab(int iter_max, double res_tol);
+  EnzoMethodGravityBiCGStab(const FieldDescr * field_descr,
+			    int iter_max, double res_tol);
 
   EnzoMethodGravityBiCGStab() {};
 

@@ -101,12 +101,18 @@ public: // interface
   /// Allocate storage for the permanent fields
   void allocate_permanent(bool ghosts_allocated = false) throw();
 
+  /// Allocate storage for the temporary fields
+  void allocate_temporary(int id) throw (std::out_of_range);
+
   /// Reallocate storage for the field block, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
   void reallocate_permanent(bool ghosts_allocated = false) throw();
 
   /// Deallocate storage for the permanent fields
   void deallocate_permanent() throw();
+
+  /// Deallocate storage for the temporary fields
+  void deallocate_temporary(int id) throw (std::out_of_range);
 
   /// Return whether ghost cells are allocated or not.  
   bool ghosts_allocated() const throw ()

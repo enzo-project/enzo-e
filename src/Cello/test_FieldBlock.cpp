@@ -30,6 +30,10 @@ PARALLEL_MAIN_BEGIN
   int i4 = field_descr->insert_permanent("f4");
   int i5 = field_descr->insert_permanent("f5");
 
+  int it1 = field_descr->insert_temporary("t1");
+  int it2 = field_descr->insert_temporary("t2");
+  int it3 = field_descr->insert_temporary("t3");
+
   // set precision
 
   field_descr->set_precision(i1, precision_single);
@@ -37,6 +41,9 @@ PARALLEL_MAIN_BEGIN
   field_descr->set_precision(i3, precision_double);
   field_descr->set_precision(i4, precision_double);
   field_descr->set_precision(i5, precision_quadruple);
+  field_descr->set_precision(it1, precision_single);
+  field_descr->set_precision(it2, precision_double);
+  field_descr->set_precision(it3, precision_double);
 
   unit_class ("Cello");
 
@@ -56,18 +63,28 @@ PARALLEL_MAIN_BEGIN
   int g3[3] = {1,0,2};
   int g4[3] = {0,0,0};
   int g5[3] = {3,3,3};
+  int t1[3] = {1,1,1};
+  int t2[3] = {2,2,2};
+  int t3[3] = {1,0,2};
 
   field_descr->set_ghosts(i1, g1[0],g1[1],g1[2]);
   field_descr->set_ghosts(i2, g2[0],g2[1],g2[2]);
   field_descr->set_ghosts(i3, g3[0],g3[1],g3[2]);
   field_descr->set_ghosts(i4, g4[0],g4[1],g4[2]);
   field_descr->set_ghosts(i5, g5[0],g5[1],g5[2]);
+  field_descr->set_ghosts(it1, g1[0],g1[1],g1[2]);
+  field_descr->set_ghosts(it2, g2[0],g2[1],g2[2]);
+  field_descr->set_ghosts(it3, g3[0],g3[1],g3[2]);
 
   // set centering
 
   field_descr->set_centering(i2, 1, 0, 0);
   field_descr->set_centering(i3, 0, 1, 0);
   field_descr->set_centering(i4, 0, 0, 1);
+
+  field_descr->set_centering(it1, 1, 0, 0);
+  field_descr->set_centering(it2, 0, 1, 0);
+  field_descr->set_centering(it3, 0, 0, 1);
 
   int nx,ny,nz;
   nx=4; ny=5; nz=6;
@@ -153,6 +170,9 @@ PARALLEL_MAIN_BEGIN
   double      *v3,*u3;
   double      *v4,*u4;
   long double *v5,*u5;
+  float       *vt1,*ut1;
+  double      *vt2,*ut2;
+  double      *vt3,*ut3;
 
   unit_func("values");  // without ghosts
   
@@ -162,12 +182,39 @@ PARALLEL_MAIN_BEGIN
   v4 = (double *)      field_block->values(i4);
   v5 = (long double *) field_block->values(i5);
 
-  printf ("%s:%d v1 = %p\n",v1);
-  printf ("%s:%d v2 = %p\n",v2);
-  printf ("%s:%d v3 = %p\n",v3);
-  printf ("%s:%d v4 = %p\n",v4);
-  printf ("%s:%d v5 = %p\n",v5);
+  printf ("%s:%d v1 = %p\n",__FILE__,__LINE__,v1);
+  printf ("%s:%d v2 = %p\n",__FILE__,__LINE__,v2);
+  printf ("%s:%d v3 = %p\n",__FILE__,__LINE__,v3);
+  printf ("%s:%d v4 = %p\n",__FILE__,__LINE__,v4);
+  printf ("%s:%d v5 = %p\n",__FILE__,__LINE__,v5);
   
+  unit_func("temporary values");
+
+  vt1 = (float *)   field_block->values(it1);
+  vt2 = (double *)  field_block->values(it2);
+  vt3 = (double *)  field_block->values(it3);
+  unit_assert (vt1 == 0);
+  unit_assert (vt2 == 0);
+  unit_assert (vt3 == 0);
+  field_block->allocate_temporary(it1);
+  field_block->allocate_temporary(it2);
+  field_block->allocate_temporary(it3);
+  vt1 = (float *)   field_block->values(it1);
+  vt2 = (double *)  field_block->values(it2);
+  vt3 = (double *)  field_block->values(it3);
+  unit_assert (vt1 != 0);
+  unit_assert (vt2 != 0);
+  unit_assert (vt3 != 0);
+  field_block->deallocate_temporary(it1);
+  field_block->deallocate_temporary(it2);
+  field_block->deallocate_temporary(it3);
+  vt1 = (float *)   field_block->values(it1);
+  vt2 = (double *)  field_block->values(it2);
+  vt3 = (double *)  field_block->values(it3);
+  unit_assert (vt1 == 0);
+  unit_assert (vt2 == 0);
+  unit_assert (vt3 == 0);
+
   // field sizes without ghosts
 
   int nu1 = (nx)   * (ny)   * (nz);

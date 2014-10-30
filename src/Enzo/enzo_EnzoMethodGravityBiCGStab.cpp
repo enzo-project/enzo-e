@@ -257,7 +257,9 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab (int iter_max, double res_tol) 
+EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab 
+(const FieldDescr * field_descr,
+ int iter_max, double res_tol) 
   : Method(), iter_max_(iter_max), res_tol_(res_tol)
 {
 }

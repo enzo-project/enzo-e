@@ -323,6 +323,55 @@ void FieldBlock::allocate_permanent ( bool ghosts_allocated ) throw()
 
 //----------------------------------------------------------------------
 
+void FieldBlock::allocate_temporary (int id_field) throw (std::out_of_range)
+
+{
+  int index_field = id_field - num_permanent();
+
+  if (! (index_field < array_temporary_.size())) {
+    array_temporary_.resize(index_field+1, 0);
+  }
+    
+  if (array_temporary_[index_field] == 0) {
+    int mx,my,mz;
+    dimensions(id_field,&mx,&my,&mz);
+    int m = mx*my*mz;
+    precision_type precision = this->precision(id_field);
+    if (precision == precision_single)    
+      array_temporary_[index_field] = (char*) new float [m];
+    if (precision == precision_double)    
+      array_temporary_[index_field] = (char*) new double [m];
+    if (precision == precision_quadruple) 
+      array_temporary_[index_field] = (char*) new long double [m];
+  } else {
+    WARNING("FieldBlock::allocate_temporary",
+	    "Calling allocate_temporary() on already-allocated Field");
+  }
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlock::deallocate_temporary (int id_field) throw(std::out_of_range)
+{
+  int index_field = id_field - num_permanent();
+
+  if (! (index_field < array_temporary_.size())) {
+    array_temporary_.resize(index_field+1, 0);
+  }
+  if (array_temporary_[index_field] != 0) {
+    precision_type precision = this->precision(id_field);
+    if (precision == precision_single)    
+      delete [] (float *)       array_temporary_[index_field];
+    if (precision == precision_double)    
+      delete [] (double *)      array_temporary_[index_field];
+    if (precision == precision_quadruple) 
+      delete [] (long double *) array_temporary_[index_field];
+  }
+  array_temporary_[index_field] = 0;
+
+}
+//----------------------------------------------------------------------
+
 void FieldBlock::reallocate_permanent
 (
  bool               ghosts_allocated
