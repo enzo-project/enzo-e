@@ -11,6 +11,12 @@
 #ifndef ENZO_ENZO_METHOD_GRAVITY_CG_HPP
 #define ENZO_ENZO_METHOD_GRAVITY_CG_HPP
 
+enum return_enum {
+  return_unknown,
+  return_converged,
+  return_error_max_iter_reached
+};
+
 class EnzoMethodGravityCg : public Method {
 
   /// @class    EnzoMethodGravityCg
@@ -42,7 +48,26 @@ public: // interface
   virtual void compute( CommBlock * comm_block) throw();
 
   /// Continuation after global reduction
-  void cg_loop_1(double rr) throw();
+  template <class T>
+  void cg_loop_1(EnzoBlock * enzo_block,double rr) throw();
+
+  /// Continuation after global reduction
+  template <class T>
+  void cg_loop_2(EnzoBlock * enzo_block) throw();
+
+  /// Continuation after global reduction
+  template <class T>
+  void cg_loop_3(EnzoBlock * enzo_block,double pap) throw();
+
+  /// Continuation after global reduction
+  template <class T>
+  void cg_loop_4(EnzoBlock * enzo_block,double rr) throw();
+
+  void cg_end (int retval) throw();
+
+  /// Return the precision of the fields, used for calling templated methods
+  int precision() const throw()
+  { return precision_; }
 
 protected: // methods
 
@@ -52,8 +77,19 @@ protected: // methods
   template <class T>
   void cg_begin_1_() throw();
 
-  template <class T>
   void cg_exit_() throw();
+
+  /// Compute local contribution to inner-product X*Y
+  template <class T>
+  T dot_ (const T * X, const T * Y) const throw();
+
+  template <class T>
+  void zaxpy_ (T * Z, double a, const T * X, const T * Y) const throw();
+  
+  /// Compute local matrix-vector product Y = A*X
+  template <class T>
+  void matvec_ (T * Y, const T * X) const throw();
+   
 
 protected: // attributes
 
@@ -76,7 +112,6 @@ protected: // attributes
   int ix_;
   int ir_;
   int ip_;
-  int iw_;
   int iap_;
 
   /// vector attributes
@@ -87,7 +122,6 @@ protected: // attributes
   /// CG variables
   int iter_;
   double alpha_;
-  double pap_;
   double rr_;
   double rr_new_;
 

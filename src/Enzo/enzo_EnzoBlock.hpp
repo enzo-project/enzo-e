@@ -189,6 +189,16 @@ public: // interface
   /// Destructor
   virtual ~EnzoBlock() throw();
 
+  //--------------------------------------------------
+  // Charm++ virtual 
+  //--------------------------------------------------
+
+  virtual const CProxy_CommBlock proxy_array() const 
+  { return thisProxy; }
+
+  virtual const CProxyElement_CommBlock proxy_element() const 
+  { return thisProxy[thisIndex]; }
+
 
   /// Write attributes, e.g. to stdout for debugging
   void write(FILE *fp=stdout) throw ();
@@ -252,16 +262,27 @@ public: // interface
 
 public: /// entry methods
 
-  // Compute sum, min, and max of g values for EnzoMethodTurbulence
+  /// Compute sum, min, and max of g values for EnzoMethodTurbulence
   void method_turbulence_begin();
 
-  // Perform the necessary reductions
+  /// Perform the necessary reductions
   CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs);
 
-  // Compute sum, min, and max of g values for EnzoMethodTurbulence
+  /// Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
-  void r_method_gravity_cg_1 (CkReductionMsg * msg) ;
+  /// EnzoMethodGravityCg synchronization entry method: DOT(R,R)
+  template <class T>
+  void r_cg_loop_1 (CkReductionMsg * msg) ;
+  /// EnzoMethodGravityCg synchronization entry method: MATVEC (A,P)
+  template <class T>
+  void r_cg_loop_2 (CkReductionMsg * msg) ;
+  /// EnzoMethodGravityCg synchronization entry method: DOT(P,AP)
+  template <class T>
+  void r_cg_loop_3 (CkReductionMsg * msg) ;
+  /// EnzoMethodGravityCg synchronization entry method: DOT(R,R)
+  template <class T>
+  void r_cg_loop_4 (CkReductionMsg * msg) ;
 
 public: // attributes (YIKES!)
 

@@ -219,13 +219,13 @@ public: // interface
 		 const int * if3=0) throw();
 
   //--------------------------------------------------
-  // Charm++
+  // Charm++ virtual
   //--------------------------------------------------
 
-  const CProxy_CommBlock proxy_array() const 
+  virtual const CProxy_CommBlock proxy_array() const 
   { return thisProxy; }
 
-  const CProxyElement_CommBlock proxy_element() const 
+  virtual const CProxyElement_CommBlock proxy_element() const 
   { return thisProxy[thisIndex]; }
 
   //--------------------------------------------------

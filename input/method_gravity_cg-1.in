@@ -9,7 +9,7 @@ Domain {
 Mesh { 
    root_rank = 2;
    root_size = [512,512];
-   root_blocks = [4,4];
+   root_blocks = [1,1];
 }
 
 Method {
@@ -23,7 +23,7 @@ Method {
 Field {
    
    list = ["density", "potential",
-           "B","X","R","P","W","AP"];
+           "B","X","R","P","AP"];
    ghosts = [1,1,1];
 }
 

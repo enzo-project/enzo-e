@@ -4,7 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Feb 28 13:22:26 PST 2011
 /// @brief    Implementation of the CommBlock object
-/// @todo     Remove hierarchy dependency via Initial--only need domain bounds
 
 #include "cello.hpp"
 
