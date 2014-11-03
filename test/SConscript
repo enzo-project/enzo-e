@@ -182,6 +182,31 @@ env.MakeMovie ("method_ppm-8.swf", "test_method_ppm-8.unit", \
                 ARGS= test_path + "/method_ppm-8-*.png");
 
 #----------------------------------------------------------------------
+# MethodGravity tests
+#----------------------------------------------------------------------
+
+# serial
+Clean(env_mv_out.RunSerial ('test_method_gravity_cg-1.unit',bin_path + '/enzo-p', 
+		ARGS='input/method_gravity_cg-1.in'),
+      [Glob('#/' + test_path + '/method_gravity_cg-1*.png'),
+       Glob('#/' + test_path + '/method_gravity_cg-1*.h5'),
+        '#/input/method_gravity_cg-1.in.out'])
+
+env.MakeMovie ("method_gravity_cg-1.swf", "test_method_gravity_cg-1.unit", \
+                ARGS= test_path + "/method_gravity_cg-1*.png");
+
+# parallel
+
+Clean(env_mv_out.RunParallel ('test_method_gravity_cg-8.unit',bin_path + '/enzo-p', 
+		ARGS='input/method_gravity_cg-8.in'),
+      [Glob('#/' + test_path + '/method_gravity_cg-8*.png'),
+      Glob('#/' + test_path + '/method_gravity_cg-8*.h5'),
+      '#/input/method_gravity_cg-8.in.out'])
+
+env.MakeMovie ("method_gravity_cg-8.swf", "test_method_gravity_cg-8.unit", \
+                ARGS= test_path + "/method_gravity_cg-8-*.png");
+
+#----------------------------------------------------------------------
 # MethodHeat tests
 #----------------------------------------------------------------------
 

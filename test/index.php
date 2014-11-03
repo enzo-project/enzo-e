@@ -530,6 +530,11 @@ test_summary("Method-heat",
 		   "method_heat-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
+test_summary("Method-gravity",
+	     array("method_gravity_cg-1",
+		   "method_gravity_cg-8"),
+	     array("enzo-p",  "enzo-p"),'test');
+
 test_summary("Checkpoint",
 	     array("checkpoint_ppm-1",
 		   "checkpoint_ppm-8"),
@@ -730,6 +735,38 @@ tests("Enzo","enzo-p","test_method_heat-8","HEAT 8 block","");
 
 test_table ("method_heat-8",
 	    array("000000","000200","000400"), $types);
+
+//======================================================================
+
+test_group("Method-gravity");
+
+?>
+
+Method-gravity tests serve to test basic functionality of the "gravity_cg" method
+in Enzo-P.
+
+</p>
+
+<?php
+
+
+echo "<h3>GRAVITY (serial) </h3>";
+
+tests("Enzo","enzo-p","test_method_gravity_cg-1","GRAVITY_CG 1 block","");
+
+test_table ("method_gravity_cg-1",
+	    array("density-000000","density-000001"), $types);
+test_table ("method_gravity_cg-1",
+	    array("potential-000000","potential-000001"), $types);
+
+echo "<h3>GRAVITY (parallel) </h3>";
+
+tests("Enzo","enzo-p","test_method_gravity_cg-8","GRAVITY_CG 8 block","");
+
+test_table ("method_gravity_cg-8",
+	    array("density-000000","density-000001"), $types);
+test_table ("method_gravity_cg-8",
+	    array("potential-000000","potential-000001"), $types);
 
 //======================================================================
 

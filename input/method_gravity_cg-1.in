@@ -15,8 +15,8 @@ Mesh {
 Method {
     list = ["gravity_cg"]; 
     gravity_cg {
-       iter_max = 100;
-       res_tol  = 1e-6;
+       iter_max = 1000;
+       res_tol  = 1e-3;
     }
 }
 
@@ -39,20 +39,33 @@ Boundary {
 } 
 
 Output {
-   list = ["potential", "density"];
-   potential {
+   list = ["potential_png", "density_png",
+           "potential_h5", "density_h5"];
+   potential_png {
      type = "image";
-     name = ["method_gravity_cg-potential-%06d.png", "cycle"];   
+     name = ["method_gravity_cg-1-potential-%06d.png", "cycle"];   
      field_list = ["potential"];
      include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
    };
-   density {
+   density_png {
      type = "image";
-     name = ["method_gravity_cg-density-%06d.png", "cycle"];   
+     name = ["method_gravity_cg-1-density-%06d.png", "cycle"];   
      field_list = ["density"];
      include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
+   };
+   potential_h5 {
+     type = "data";
+     name = ["method_gravity_cg-1-potential-%06d.h5", "cycle"];   
+     field_list = ["potential"];
+     include "input/schedule_cycle_1.incl"
+   };
+   density_h5 {
+     type = "data";
+     name = ["method_gravity_cg-1-density-%06d.h5", "cycle"];   
+     field_list = ["density"];
+     include "input/schedule_cycle_1.incl"
    }
 }
 

@@ -40,7 +40,7 @@
 ///    R = B - R;
 ///    P = R
 ///    iter_ = 0
-///    rr_ = DOT(R,R) ==> cg_loop_1
+///    rr0_ = rr_ = DOT(R,R) ==> cg_loop_1
 ///
 /// cg_loop_1:
 ///
@@ -56,15 +56,15 @@
 ///    alpha_ = rr_ / pap
 ///    X = X + alpha_ * P;
 ///    R = R - alpha_ * AP;
-///    rr_new_ = DOT(R,R) ==> cg_loop_4
+///    rr_new = DOT(R,R) ==> cg_loop_4
 ///
 /// cg_loop_4:
 ///
-///    if (rr_new_ < resid_tol*resid_tol) ==> cg_end(return_converged)
+///    if (rr_new < resid_tol*resid_tol) ==> cg_end(return_converged)
 ///
-///    P = R + rr_new_ / rr_ * P;
+///    P = R + rr_new / rr_ * P;
 /// 
-///    rr_ = rr_new_
+///    rr_ = rr_new
 ///    iter = iter + 1
 ///    ==> cg_loop_1()
 ///
@@ -101,7 +101,6 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
   : Method(), 
     iter_max_(iter_max), 
     res_tol_(res_tol),
-    precision_(precision_unknown),
     /// Input / output vectors
     idensity_(0),
     ipotential_(0),
@@ -118,8 +117,8 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     /// CG scalars
     iter_(0),
     alpha_(0),
-    rr_(0),
-    rr_new_(0)
+    rr0_(0),
+    rr_(0)
 {
   idensity_   = field_descr->field_id("density");
   ipotential_ = field_descr->field_id("potential");
@@ -133,7 +132,6 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
 	   "Assuming same ghost depth and precision for all fields");
 
   field_descr->ghosts    (idensity_,&gx_,&gy_,&gz_);
-  precision_ = field_descr->precision(idensity_);
 
 }
 
@@ -150,7 +148,6 @@ void EnzoMethodGravityCg::pup (PUP::er &p)
 
   p | iter_max_;
   p | res_tol_;
-  p | precision_;
 
   p | idensity_;
   p | ipotential_;
@@ -173,7 +170,7 @@ void EnzoMethodGravityCg::pup (PUP::er &p)
   p | gz_;
 
   WARNING("EnzoMethodGravityCg::pup()", 
-	  "skipping transient attributes: iter_,alpha_,rr_,rr_new_");
+	  "skipping transient attributes: iter_,alpha_,rr_,rr_new");
 
 }
 
@@ -190,11 +187,13 @@ void EnzoMethodGravityCg::compute ( CommBlock * comm_block) throw()
   field.size                (&nx_,&ny_,&nz_);
   field.dimensions(idensity_,&mx_,&my_,&mz_);
 
-  if      (precision_ == precision_single)    compute_<float>(enzo_block);
-  else if (precision_ == precision_double)    compute_<double>(enzo_block);
-  else if (precision_ == precision_quadruple) compute_<long double>(enzo_block);
+  int precision = field.precision(idensity_);
+
+  if      (precision == precision_single)    compute_<float>(enzo_block);
+  else if (precision == precision_double)    compute_<double>(enzo_block);
+  else if (precision == precision_quadruple) compute_<long double>(enzo_block);
   else 
-    ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision_);
+    ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
 }
 
 //======================================================================
@@ -210,6 +209,14 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 
   Field field = enzo_block->block()->field();
 
+  double xm,ym,zm;
+  double xp,yp,zp;
+  double hx,hy,hz;
+  enzo_block->block()->lower(&xm,&ym,&zm);
+  enzo_block->block()->upper(&xp,&yp,&zp);
+  field.cell_width(xm,xp,&hx,
+		   ym,yp,&hy,
+		   zm,zp,&hz);
   T * density = (T*) field.values(idensity_);
 
   T * B = (T*) field.values(ib_);
@@ -227,7 +234,7 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 	int i = ix + mx_*(iy + my_*iz);
 	X[i] = 0.0;
 	P[i] = R[i] = B[i] = 
-	  - 4.0 * (cello::pi) * (cello::G_cgs) * density[i];
+	  - hx*hx*4.0 * (cello::pi) * (cello::G_cgs) * density[i];
       }
     }
   }
@@ -268,22 +275,28 @@ void EnzoMethodGravityCg::cg_loop_1 (EnzoBlock * enzo_block,double rr) throw()
 /// - if (maximum iteration reached) ==> cg_end (return_error_max_iter_reached)
 /// - AP = MATVEC (A,P) ==> cg_loop_2
 {
+  if (iter_ == 0)  rr0_ = rr;
+
   rr_ = rr;
 
-  if (iter_ > iter_max_) cg_end(return_error_max_iter_reached);
+  if (iter_ > iter_max_)  {
 
-  Field field = enzo_block->block()->field();
+    cg_end<T>(enzo_block,return_error_max_iter_reached);
 
-  T * P  = (T*) field.values(ip_);
-  T * AP = (T*) field.values(iap_);
+  } else {
 
-  matvec_(AP,P);
+    Field field = enzo_block->block()->field();
 
-  CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_2<T>(NULL), 
-		      enzo_block->proxy_array());
+    T * P  = (T*) field.values(ip_);
+    T * AP = (T*) field.values(iap_);
 
-  enzo_block->contribute (cb);
+    matvec_(AP,P);
 
+    CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_2<T>(NULL), 
+		  enzo_block->proxy_array());
+
+    enzo_block->contribute (cb);
+  }
   // ==> cg_loop_2()
 
 }
@@ -353,7 +366,7 @@ void EnzoMethodGravityCg::cg_loop_3 (EnzoBlock * enzo_block,double pap) throw ()
 /// - alpha_ = rr_ / pap_
 /// - X = X + alpha_ * P;
 /// - R = R - alpha_ * AP;
-/// - rr_new_ = DOT(R,R) ==> cg_loop_4
+/// - rr_new = DOT(R,R) ==> cg_loop_4
 ///
 {
 
@@ -365,8 +378,8 @@ void EnzoMethodGravityCg::cg_loop_3 (EnzoBlock * enzo_block,double pap) throw ()
   T * AP = (T*) field.values(iap_);
 
   alpha_ = rr_ / pap;
-  zaxpy_ (X,alpha_,P,X);
-  zaxpy_ (R,alpha_,AP,R);
+  zaxpy_ (X,   alpha_,P,X);
+  zaxpy_ (R, - alpha_,AP,R);
 
   double rr_new = dot_(R,R);
 
@@ -388,7 +401,6 @@ void EnzoBlock::r_cg_loop_4 (CkReductionMsg * msg)
 /// ==> cg_loop_1
 {
   double rr_new = ((double*)msg->getData())[0];
-  printf ("%s:%d TRACE r_cg_loop_4 rr_new = %g\n",__FILE__,__LINE__,rr_new);
   delete msg;
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
@@ -402,30 +414,41 @@ void EnzoBlock::r_cg_loop_4 (CkReductionMsg * msg)
 template <class T>
 void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block,double rr_new) throw ()
 ///
-///    if (rr_new_ < resid_tol*resid_tol) ==> cg_end(return_converged)
+///    if (rr_new < resid_tol*resid_tol) ==> cg_end(return_converged)
 ///
-///    P = R + rr_new_ / rr_ * P;
+///    P = R + rr_new / rr_ * P;
 /// 
-///    rr_ = rr_new_
+///    rr_ = rr_new
 ///    iter = iter + 1
 ///    ==> cg_loop_1()
 {
-  Field field = enzo_block->block()->field();
 
-  T * P  = (T*) field.values(ip_);
-  T * R  = (T*) field.values(ir_);
+  if (rr_new / rr0_ < res_tol_) {
 
-  T a = rr_new / rr_;
-  zaxpy_ (P,a,P,R);
+    rr_ = rr_new;
+    cg_end<T> (enzo_block,return_converged);
 
-  ++ iter_;
+  } else {
 
-  cg_loop_1<T>(enzo_block,rr_new);
+    Field field = enzo_block->block()->field();
+
+    T * P  = (T*) field.values(ip_);
+    T * R  = (T*) field.values(ir_);
+
+    T a = rr_new / rr_;
+    zaxpy_ (P,a,P,R);
+
+    ++ iter_;
+
+    cg_loop_1<T>(enzo_block,rr_new);
+  }
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityCg::cg_end (int retval) throw ()
+
+template <class T>
+void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 ///    if (return == return_converged) {
 ///       potential = X
 ///       ==> cg_exit()
@@ -433,6 +456,16 @@ void EnzoMethodGravityCg::cg_end (int retval) throw ()
 ///       ERROR (return-)
 ///    }
 {
+  Field field = enzo_block->block()->field();
+
+  T * X         = (T*) field.values(ix_);
+  T * potential = (T*) field.values(ipotential_);
+  
+  copy_(potential,X);
+
+  printf ("%s:%d cg_end retval %d  iter %d  rr/rr0 = %g\n",
+	  __FILE__,__LINE__,retval,iter_,rr_/rr0_);
+
 }
 
 //----------------------------------------------------------------------
@@ -441,6 +474,22 @@ void EnzoMethodGravityCg::cg_exit_() throw()
 /// deallocate temporary vectors
 {
 
+}
+
+//======================================================================
+
+template <class T>
+void EnzoMethodGravityCg::copy_ (T * X, const T * Y) const throw()
+{
+  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+  for (int iz=0; iz<nz_; iz++) {
+    for (int iy=0; iy<ny_; iy++) {
+      for (int ix=0; ix<nx_; ix++) {
+	int i = i0 + ix + mx_*(iy + my_*iz);
+	X[i] = Y[i];
+      }
+    }
+  }
 }
 
 //======================================================================

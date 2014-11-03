@@ -63,11 +63,8 @@ public: // interface
   template <class T>
   void cg_loop_4(EnzoBlock * enzo_block,double rr) throw();
 
-  void cg_end (int retval) throw();
-
-  /// Return the precision of the fields, used for calling templated methods
-  int precision() const throw()
-  { return precision_; }
+  template <class T>
+  void cg_end (EnzoBlock * enzo_block, int retval) throw();
 
 protected: // methods
 
@@ -78,6 +75,10 @@ protected: // methods
   void cg_begin_1_() throw();
 
   void cg_exit_() throw();
+
+  /// Perform vector copy X <- Y
+  template <class T>
+  void copy_ (T * X, const T * Y) const throw();
 
   /// Compute local contribution to inner-product X*Y
   template <class T>
@@ -96,11 +97,11 @@ protected: // attributes
   /// Maximum number of Cg iterations
   int iter_max_;
 
-  /// Convergence tolerance on the residual 
+  /// Convergence tolerance on the residual reduction rr_ / rr0_
   double res_tol_;
 
-  /// Precision
-  int precision_;
+  /// Initial residual
+  double rr0_;
 
   /// Density and potential field id's
 
@@ -123,7 +124,6 @@ protected: // attributes
   int iter_;
   double alpha_;
   double rr_;
-  double rr_new_;
 
   
 };
