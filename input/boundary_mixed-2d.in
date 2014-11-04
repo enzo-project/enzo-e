@@ -1,0 +1,18 @@
+include "input/dots.incl"
+
+Boundary { 
+   list = ["periodic","reflecting"];
+   periodic {
+       type = "periodic";
+       axis = "x";
+   };
+   reflecting {
+       type = "reflecting";
+       axis = "y";
+   };
+}
+Output { 
+   cycle_step {  
+      name = ["boundary_mixed-2d-%04d.png","cycle"]; 
+   } 
+}
