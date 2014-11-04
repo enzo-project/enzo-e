@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------
 #
-# usage: parse_diff.sh < <"hg diff" output > diff.org
+# usage: org-mode-diff.sh < <"hg diff" output > diff.org
 #
 # Generates org-mode file "diff.org" containing list of warnings
 # with links that can be opened with C-c C-e in emacs with org-mode
