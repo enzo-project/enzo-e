@@ -1,0 +1,81 @@
+#----------------------------------------------------------------------
+# Problem: 2D include file for EnzoMethodGravityCg test
+# Author:  James Bordner (jobordner@ucsd.edu)
+#----------------------------------------------------------------------
+#
+# This file initializes all but the following parameters, which must be initialized by
+# the parameter file including this one:
+#
+#    Mesh : root_blocks
+#    Output : phi_png : name
+#    Output : rho_png   : name
+#    Output : phi_h5  : name
+#    Output : rho_h5    : name
+#
+#----------------------------------------------------------------------
+
+Domain {
+   lower = [ 0.0, 0.0 ];
+   upper = [ 1.0, 1.0 ];
+}
+
+Mesh { 
+   root_rank = 2;
+   root_size = [512,512];
+}
+
+Method {
+    list = ["gravity_cg"]; 
+    gravity_cg {
+       iter_max = 1000;
+       res_tol  = 1e-3;
+    }
+}
+
+Field {
+   
+   list = ["density", "potential",
+           "B","X","R","P","AP"];
+   ghosts = [1,1,1];
+}
+
+Initial {
+   density  { 
+      value = [ 1.0, (x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) < 0.05,
+                0.0 ];
+   }
+}
+
+Boundary {
+   type = "periodic";
+} 
+
+Output {
+   list = ["phi_png", "rho_png",
+           "phi_h5", "rho_h5"];
+   phi_png {
+     type = "image";
+     field_list = ["potential"];
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   rho_png {
+     type = "image";
+     field_list = ["density"];
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   phi_h5 {
+     type = "data";
+     field_list = ["potential"];
+     include "input/schedule_cycle_1.incl"
+   };
+   rho_h5 {
+     type = "data";
+     field_list = ["density"];
+     include "input/schedule_cycle_1.incl"
+   }
+}
+
+Stopping { cycle = 1; }
+

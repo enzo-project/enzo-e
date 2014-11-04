@@ -1,0 +1,15 @@
+# Problem: 2D test of EnzoMethodGravityCg  P=2
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/method_gravity_cg.incl"
+Mesh { 
+   root_blocks = [2,1];
+}
+
+Output {
+
+  phi_png { name = ["method_gravity_cg-2-phi-%06d.png", "cycle"]; };
+  rho_png { name = ["method_gravity_cg-2-rho-%06d.png", "cycle"]; };
+  phi_h5  { name = ["method_gravity_cg-2-phi-%06d.h5",  "cycle"]; };
+  rho_h5  { name = ["method_gravity_cg-2-rho-%06d.h5",  "cycle"]; };
+}
