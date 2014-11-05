@@ -71,7 +71,8 @@ CommBlock::CommBlock
   age_(0),
   face_level_last_(),
   name_(name()),
-  method_(0)
+  method_(0),
+  control_(0)
 {
   // Enable Charm++ AtSync() dynamic load balancing
   usesAtSync = CmiTrue;
@@ -258,6 +259,7 @@ void CommBlock::pup(PUP::er &p)
   p | age_;
   p | face_level_last_;
   p | name_;
+  p | control_; // PUP::able
 
   // SKIP method_: initialized when needed
 

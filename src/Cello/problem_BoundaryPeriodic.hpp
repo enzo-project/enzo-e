@@ -51,8 +51,10 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
-  { TRACEPUP; 
-    PUP::able::pup(p); 
+  { 
+  // NOTE: change this function whenever attributes change
+    Boundary::pup(p); 
+    TRACEPUP; 
   };
 
 public: // virtual functions

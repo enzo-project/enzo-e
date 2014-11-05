@@ -114,6 +114,18 @@ module enzo {
 
   };
 
+  array[Index] EnzoArrayMethodGravityCg {
+    entry EnzoArrayMethodGravityCg();
+    template <class T>
+    entry void r_cg_loop_1(CkReductionMsg *msg);
+    template <class T>
+    entry void r_cg_loop_2(CkReductionMsg *msg);
+    template <class T>
+    entry void r_cg_loop_3(CkReductionMsg *msg);
+    template <class T>
+    entry void r_cg_loop_4(CkReductionMsg *msg);
+  }
+
 };
 
 module template_defs {

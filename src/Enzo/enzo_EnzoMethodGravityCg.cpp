@@ -101,6 +101,7 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
   : Method(), 
     iter_max_(iter_max), 
     res_tol_(res_tol),
+    rr0_(0),
     /// Input / output vectors
     idensity_(0),
     ipotential_(0),
@@ -117,7 +118,6 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     /// CG scalars
     iter_(0),
     alpha_(0),
-    rr0_(0),
     rr_(0)
 {
   idensity_   = field_descr->field_id("density");

@@ -37,9 +37,12 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
-    TRACEPUP;
     // NOTE: change this function whenever attributes change
+
     Refine::pup(p);
+
+    TRACEPUP;
+
     p | pressure_min_refine_;
     p | pressure_max_coarsen_;
     p | energy_ratio_min_refine_;

@@ -35,9 +35,9 @@ void EnzoInitialSedovArray2::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
 
-  TRACEPUP;
-
   Initial::pup(p);
+
+  TRACEPUP;
 
   PUParray(p,array_,2);
   p | radius_relative_;

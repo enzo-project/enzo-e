@@ -38,8 +38,11 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
-  { TRACEPUP; 
-    PUP::able::pup(p); 
+  {
+    // NOTE: change this function whenever attributes change
+    Boundary::pup(p); 
+    TRACEPUP; 
+
     p | *value_;
     p | field_list_;
   };

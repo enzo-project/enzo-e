@@ -9,6 +9,7 @@
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
+#include "control.hpp"
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
@@ -63,7 +64,12 @@ const char * cycle_sync[] = {
 
 void CommBlock::initial_exit_()
 {
-  //  control_sync(phase_adapt_enter,"array",true,__FILE__,__LINE__);
+  // CkCallback cb = CkCallback (CkIndex_CommBlock::r_adapt_enter(NULL),
+  // 				thisProxy);
+  // Control next_phase ("initial_exit_()", "adapt_enter",
+  // 		      phase_adapt_enter, "array", cb, NULL);
+  // next_phase.print();
+  // control_next(&next_phase);
   control_next();
 }
 
@@ -84,7 +90,6 @@ void CommBlock::adapt_enter_()
     
   } else {
 
-    // control_sync(phase_adapt_exit,"none",true,__FILE__,__LINE__);
     control_next();
 
   }
@@ -97,15 +102,18 @@ void CommBlock::adapt_exit_()
 
   VERBOSE("adapt_exit");
 
-  // control_sync (phase_refresh_enter,"array",true,__FILE__,__LINE__);
   control_next();
 
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_enter_() 
+void CommBlock::refresh_enter_(Control * control) 
 {
+  control_ = control;
+
+  if (control) control->print();
+
   VERBOSE("refresh_enter");
 
   performance_switch_(perf_refresh,__FILE__,__LINE__);
@@ -120,7 +128,7 @@ void CommBlock::refresh_exit_()
 
   VERBOSE("refresh_exit");
 
-  control_next();
+  control_next(control_);
 }
 
 //----------------------------------------------------------------------
@@ -210,11 +218,24 @@ void CommBlock::stopping_exit_()
 
 //======================================================================
 
-void CommBlock::control_next()
+void CommBlock::control_next(Control * control)
 {
-  int phase          = cycle_phase[index_cycle_phase_];
-  std::string sync   = cycle_sync[index_cycle_phase_];
-  index_cycle_phase_ = (index_cycle_phase_ + 1) % CYCLE_PHASE_COUNT;
+  int phase;
+  std::string sync;
+
+  if (control) {
+
+    printf ("%s:%d DEBUG Control != NULL\n",__FILE__,__LINE__);
+    phase = control->phase();
+    sync = control->sync();
+
+  } else {
+
+    phase = cycle_phase[index_cycle_phase_];
+    sync  = cycle_sync[index_cycle_phase_];
+
+    index_cycle_phase_ = (index_cycle_phase_ + 1) % CYCLE_PHASE_COUNT;
+  }
 
   control_sync(phase,sync,false,__FILE__,__LINE__);
 }
@@ -298,10 +319,10 @@ void CommBlock::control_sync(int phase, std::string sync, bool next_phase, const
 		       thisProxy[thisIndex]);
     } else if (              phase == phase_refresh_enter) {
       cb = CkCallback (CkIndex_CommBlock::p_refresh_enter(),
-		       thisProxy[thisIndex]);
+    		       thisProxy[thisIndex]);
     } else if (              phase == phase_refresh_exit) {
       cb = CkCallback (CkIndex_CommBlock::p_refresh_exit(),
-		       thisProxy[thisIndex]);
+    		       thisProxy[thisIndex]);
     } else if (              phase == phase_output_enter) {
       cb = CkCallback (CkIndex_CommBlock::p_output_enter(),
 		       thisProxy[thisIndex]);
@@ -349,9 +370,9 @@ void CommBlock::control_sync(int phase, std::string sync, bool next_phase, const
       } else if (             phase == phase_adapt_exit) {
 	CkStartQD(CkCallback(CkIndex_Main::p_adapt_exit(), proxy_main));
       } else if (             phase == phase_refresh_enter) {
-	CkStartQD(CkCallback(CkIndex_Main::p_refresh_enter(), proxy_main));
+      	CkStartQD(CkCallback(CkIndex_Main::p_refresh_enter(), proxy_main));
       } else if (             phase == phase_refresh_exit) {
-	CkStartQD(CkCallback(CkIndex_Main::p_refresh_exit(), proxy_main));
+      	CkStartQD(CkCallback(CkIndex_Main::p_refresh_exit(), proxy_main));
       } else if (             phase == phase_output_enter) {
 	CkStartQD(CkCallback(CkIndex_Main::p_output_enter(), proxy_main));
       } else if (             phase == phase_output_exit) {

@@ -29,6 +29,7 @@ class Output;
 class Parameters;
 class Prolong;
 class Refine;
+class Refresh;
 class Restrict;
 class Simulation;
 class Stopping;
@@ -152,7 +153,6 @@ public: // interface
 
   /// Initialize the restrict objects
   void initialize_restrict(Config * config) throw();
-
 
 protected: // functions
 

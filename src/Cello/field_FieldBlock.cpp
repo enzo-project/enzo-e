@@ -70,8 +70,12 @@ void FieldBlock::pup(PUP::er &p)
 
   p | array_permanent_;
   //  p | array_temporary_;
-  WARNING("FieldBlock::pup()",
-	  "Skipping array_temporary_");
+  static bool warn = false;
+  if (! warn) {
+    WARNING("FieldBlock::pup()",
+	    "Skipping array_temporary_");
+    warn = true;
+  }
   p | offsets_;
   p | ghosts_allocated_;
 }

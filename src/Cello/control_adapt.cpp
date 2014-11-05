@@ -62,6 +62,7 @@ thisProxy[INDEX_RECV].p_adapt_recv_level (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
+#include "control.hpp"
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"

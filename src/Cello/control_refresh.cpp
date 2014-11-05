@@ -9,6 +9,7 @@
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
+#include "control.hpp"
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
@@ -30,6 +31,7 @@ void CommBlock::refresh_begin_()
 	     name_.c_str());
     is_leaf_ = true;
   }
+
   simulation()->set_phase(phase_refresh);
 
   if (delete_) {

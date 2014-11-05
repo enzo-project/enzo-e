@@ -43,6 +43,6 @@
 #include "problem_ProlongLinear.hpp"
 #include "problem_Restrict.hpp"
 #include "problem_RestrictLinear.hpp"
-
+#include "problem_Refresh.hpp"
 
 #endif /* _PROBLEM_HPP */

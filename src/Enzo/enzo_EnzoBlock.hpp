@@ -49,6 +49,8 @@ enum field_type {
 
 //----------------------------------------------------------------------
 
+#include "enzo.decl.h"
+
 class EnzoBlock : public CommBlock
 
 {

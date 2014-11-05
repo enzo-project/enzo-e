@@ -18,6 +18,7 @@
 #endif
 
 class Block;
+class Control;
 class Factory;
 class FieldDescr;
 class FieldFace;
@@ -362,7 +363,7 @@ public:
   //--------------------------------------------------
 
   /// Syncronize before continuing with next phase
-  void control_next();
+  void control_next(Control * control = 0);
 
   /// Syncronize before continuing with next phase
   void control_sync(int phase, std::string sync, bool next_phase, const char * name, int line);
@@ -381,13 +382,13 @@ public:
   // REFRESH
   //--------------------------------------------------
 
-  /// Refresh ghost zones and apply boundary conditions
+  // Refresh ghost zones and apply boundary conditions
   void p_refresh_enter()  
   {      refresh_enter_(); }
   void r_refresh_enter(CkReductionMsg * msg)  
   {      refresh_enter_(); delete msg; }
 
-  /// Exit the refresh phase after QD
+  // Exit the refresh phase after QD
   void p_refresh_exit () 
   {      refresh_exit_(); }
   void r_refresh_exit (CkReductionMsg * msg) 
@@ -406,7 +407,7 @@ public:
   bool do_refresh(int if3[3]) const;
 
 protected:
-  void refresh_enter_();
+  void refresh_enter_(Control * = 0);
   void refresh_begin_();
   void refresh_load_face_
   (int type_refresh, Index index, int if3[3], int ic3[3]);
@@ -711,6 +712,8 @@ protected: // attributes
   /// Currently-active Method
   Method * method_;
 
+  /// Control object for next phase
+  Control * control_;
 };
 
 #endif /* COMM_COMMBLOCK_HPP */

@@ -20,7 +20,6 @@ void EnzoRestrict::pup (PUP::er &p)
   TRACEPUP;
 
   Restrict::pup(p);
-
 }
 
 //----------------------------------------------------------------------

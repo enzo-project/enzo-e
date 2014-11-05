@@ -95,7 +95,7 @@ libs_mesh   = libs_all
 
 includes_cello =       [Glob('cello*hpp')]
 includes_charm =       [Glob('charm*hpp')]
-includes_control =     [Glob('control*hpp')]
+includes_control =     [Glob('*control*hpp')]
 includes_comm =        [Glob('*comm*hpp')]
 includes_disk =        [Glob('*disk*hpp')]
 includes_error =       [Glob('*error*hpp')]
@@ -268,7 +268,9 @@ test_index        = env.Program (['test_Index.cpp',objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_schedule     = env.Program (['test_Schedule.cpp', objs_io],
                                  LIBS=[libs_io,    libs_test]) 
-test_mask        = env.Program (['test_Mask.cpp', objs_mesh],
+test_refresh      = env.Program (['test_Refresh.cpp', objs_mesh],
+                                 LIBS=[libs_mesh, libs_test])
+test_mask         = env.Program (['test_Mask.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_value        = env.Program (['test_Value.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
@@ -322,7 +324,7 @@ binaries_field = [test_field_block,
                   test_field_face,
                   test_it_field]
 binaries_particle = [test_particle]
-binaries_problem = [test_mask,test_value]
+binaries_problem = [test_mask,test_value,test_refresh]
 binaries_io    = [test_it_reduce, test_colormap]
 binaries_memory  = [test_memory]
 binaries_mesh = [ test_block,test_hierarchy,test_tree,test_tree_density,test_node,test_node_trace,test_it_node,test_index,test_schedule,test_it_face,test_it_child]
@@ -348,6 +350,7 @@ env.Alias('install-lib',env.Install (lib_path,lib_cello))
 env.Alias('install-inc',env.Install (inc_path,includes_charm))
 env.Alias('install-lib',env.Install (lib_path,libraries_charm))
 
+env.Alias('install-inc',env.Install (inc_path,includes_control))
 env.Alias('install-lib',env.Install (lib_path,libraries_control))
 
 env.Alias('install-inc',env.Install (inc_path,includes_comm))

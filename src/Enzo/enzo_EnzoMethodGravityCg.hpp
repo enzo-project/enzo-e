@@ -11,6 +11,8 @@
 #ifndef ENZO_ENZO_METHOD_GRAVITY_CG_HPP
 #define ENZO_ENZO_METHOD_GRAVITY_CG_HPP
 
+class CProxy_ArrayMethodGravityCg;
+
 enum return_enum {
   return_unknown,
   return_converged,
@@ -126,6 +128,30 @@ protected: // attributes
   double rr_;
 
   
+};
+
+//----------------------------------------------------------------------
+
+class EnzoArrayMethodGravityCg : public CBase_EnzoArrayMethodGravityCg {
+
+public:
+
+  EnzoArrayMethodGravityCg () {};
+  EnzoArrayMethodGravityCg (CkMigrateMessage*) {}; 
+
+  /// EnzoMethodGravityCg synchronization entry method: DOT(R,R)
+  template <class T>
+  void r_cg_loop_1 (CkReductionMsg * msg) ;
+  /// EnzoMethodGravityCg synchronization entry method: MATVEC (A,P)
+  template <class T>
+  void r_cg_loop_2 (CkReductionMsg * msg) ;
+  /// EnzoMethodGravityCg synchronization entry method: DOT(P,AP)
+  template <class T>
+  void r_cg_loop_3 (CkReductionMsg * msg) ;
+  /// EnzoMethodGravityCg synchronization entry method: DOT(R,R)
+  template <class T>
+  void r_cg_loop_4 (CkReductionMsg * msg) ;
+
 };
 
 #endif /* ENZO_ENZO_METHOD_GRAVITY_CG_HPP */

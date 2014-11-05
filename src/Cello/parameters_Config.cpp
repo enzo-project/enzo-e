@@ -14,9 +14,9 @@ void Config::pup (PUP::er &p)
 {
   // REVIEW: rev 3505
 
-  TRACEPUP;
-
   // NOTE: change this function whenever attributes change
+  PUP::able::pup(p);
+  TRACEPUP;
 
   // Balance
 
@@ -111,6 +111,7 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_stride,MAX_OUTPUT_GROUPS);
   PUParray (p,output_name,MAX_OUTPUT_GROUPS);
   PUParray (p,output_dir,MAX_OUTPUT_GROUPS);
+
   p | index_schedule_;
   PUParray (p,output_schedule_type,MAX_OUTPUT_GROUPS);
   PUParray (p,output_schedule_var,MAX_OUTPUT_GROUPS);
@@ -651,10 +652,11 @@ void Config::read_output_ (Parameters * p) throw()
 	output_field_list[index][i] = p->list_value_string(i,"field_list","");
       }
     }
+
+    // Read schedule for the Output object
       
     p->group_push("schedule");
-    output_schedule_index[index] = 
-      read_schedule_(p, output_list[index]);
+    output_schedule_index[index] = read_schedule_(p, output_list[index]);
     p->group_pop();
 
     // Image 
@@ -851,7 +853,7 @@ int Config::read_schedule_(Parameters * p, const std::string group)
       }
     }
   } else {
-    ERROR2 ("Config::read",
+    ERROR2 ("Config::read_schedule_",
 	    "Schedule type %s is not recognized for parameter group %s",
 	    output_schedule_type[index].c_str(),group.c_str());
   }

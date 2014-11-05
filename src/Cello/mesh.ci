@@ -10,6 +10,7 @@ module mesh {
   PUPable BoundaryPeriodic;
   PUPable BoundaryValue;
   PUPable Config;
+  PUPable Control;
   PUPable ColormapRGB;
   PUPable Factory;
   PUPable Initial;
@@ -30,6 +31,7 @@ module mesh {
   PUPable RefineMass;
   PUPable RefineSlope;
   PUPable RefineShear;
+  PUPable Refresh;
   PUPable RestrictLinear;
   PUPable ScheduleList;
   PUPable ScheduleInterval;

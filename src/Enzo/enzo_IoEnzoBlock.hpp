@@ -25,10 +25,8 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     // NOTE: change this function whenever attributes change
-
-    TRACEPUP;
-
     IoBlock::pup(p);
+    TRACEPUP;
 
     p | meta_count_enzo_;
 

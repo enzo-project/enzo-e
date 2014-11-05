@@ -18,6 +18,7 @@
 #include "_memory.hpp"
 #include "_disk.hpp"
 #include "_parameters.hpp"
+#include "_control.hpp"
 #include "_io.hpp"
 #include "_compute.hpp"
 #include "_problem.hpp"

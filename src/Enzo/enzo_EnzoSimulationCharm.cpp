@@ -41,9 +41,12 @@ EnzoSimulationCharm::~EnzoSimulationCharm() throw()
 
 void EnzoSimulationCharm::pup (PUP::er &p)
 {
-  TRACEPUP;
   // NOTE: change this function whenever attributes change
+
   SimulationCharm::pup(p);
+
+  TRACEPUP;
+
   if (p.isUnpacking()) {
     EnzoBlock::initialize(static_cast<EnzoConfig*>(config_),
 			  field_descr());

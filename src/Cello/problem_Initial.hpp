@@ -17,7 +17,7 @@ class Initial : public PUP::able
 
 public: // interface
 
- /// empty constructor for charm++ pup()
+  /// empty constructor for charm++ pup()
   Initial() throw() {}
 
   /// Create a new Initial

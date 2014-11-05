@@ -36,9 +36,9 @@ void InitialFile::pup (PUP::er &p)
 {
   TRACEPUP;
 
-  bool up = p.isUnpacking();
-
   Initial::pup(p);
+
+  bool up = p.isUnpacking();
 
   if (up) parameters_ = new Parameters;
   p | *parameters_;

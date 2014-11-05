@@ -131,8 +131,9 @@ env.RunSerial('test_Timer.unit',       bin_path + '/test_Timer')
 # PROBLEM COMPONENT        
 #----------------------------------------------------------------------
 
-env.RunSerial('test_Mask.unit', bin_path + '/test_Mask')
-env.RunSerial('test_Value.unit', bin_path + '/test_Value')
+env.RunSerial('test_Refresh.unit', bin_path + '/test_Refresh')
+env.RunSerial('test_Mask.unit',    bin_path + '/test_Mask')
+env.RunSerial('test_Value.unit',   bin_path + '/test_Value')
 
 #----------------------------------------------------------------------
 # SIMULATION COMPONENT    

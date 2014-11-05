@@ -624,8 +624,8 @@ test_summary("Particle",array("Particle"),
 	     array("test_Particle"),'test'); 
 test_summary("Performance",array("Papi", "Performance","Timer"),
 	     array("test_Papi","test_Performance","test_Timer"),'test'); 
-test_summary("Problem",array("Mask","Value"),
-	     array("test_Mask","test_Value"),'test'); 
+test_summary("Problem",array("Mask","Refresh","Value"),
+	     array("test_Mask","test_Refresh","test_Value"),'test'); 
 test_summary("Schedule",array("Schedule"),
 	     array("test_Schedule"),'test'); 
 test_summary("Colormap",array("Colormap"),
@@ -755,18 +755,18 @@ echo "<h3>GRAVITY (serial) </h3>";
 tests("Enzo","enzo-p","test_method_gravity_cg-1","GRAVITY_CG 1 block","");
 
 test_table ("method_gravity_cg-1",
-	    array("density-000000","density-000001"), $types);
+	    array("rho-000000","rho-000001"), $types);
 test_table ("method_gravity_cg-1",
-	    array("potential-000000","potential-000001"), $types);
+	    array("phi-000000","phi-000001"), $types);
 
 echo "<h3>GRAVITY (parallel) </h3>";
 
 tests("Enzo","enzo-p","test_method_gravity_cg-8","GRAVITY_CG 8 block","");
 
 test_table ("method_gravity_cg-8",
-	    array("density-000000","density-000001"), $types);
+	    array("rho-000000","rho-000001"), $types);
 test_table ("method_gravity_cg-8",
-	    array("potential-000000","potential-000001"), $types);
+	    array("phi-000000","phi-000001"), $types);
 
 //======================================================================
 
@@ -1052,8 +1052,9 @@ tests("Cello","test_Timer",       "test_Timer","","");
 
 test_group("Problem");
 
-tests("Cello","test_Mask","test_Mask","","");
-tests("Cello","test_Value","test_Value","","");
+tests("Cello","test_Mask",   "test_Mask","","");
+tests("Cello","test_Refresh","test_Refresh","","");
+tests("Cello","test_Value",   "test_Value","","");
 
 //----------------------------------------------------------------------
 

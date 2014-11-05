@@ -48,9 +48,9 @@ void EnzoMethodGrackle::pup (PUP::er &p)
 
   // NOTE: change this function whenever attributes change
 
-  TRACEPUP;
-
 #ifdef CONFIG_USE_GRACKLE
+
+  TRACEPUP;
 
   Method::pup(p);
 

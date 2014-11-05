@@ -27,8 +27,7 @@
 
 class Parameters;
 
-class Config : public PUP::able 
-{
+class Config : public PUP::able {
 
   /// @class    Config
   /// @ingroup  Parameters
@@ -152,6 +151,7 @@ public: // attributes
   int                        output_stride         [MAX_OUTPUT_GROUPS];
   std::vector<std::string>   output_field_list     [MAX_OUTPUT_GROUPS];
   std::vector<std::string>   output_name           [MAX_OUTPUT_GROUPS];
+
   int                        index_schedule_;
   std::string                output_schedule_type  [MAX_SCHEDULE];
   std::string                output_schedule_var   [MAX_SCHEDULE];

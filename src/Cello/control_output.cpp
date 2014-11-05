@@ -17,6 +17,7 @@
 #include "simulation.hpp"
 #include "mesh.hpp"
 #include "comm.hpp"
+#include "control.hpp"
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"

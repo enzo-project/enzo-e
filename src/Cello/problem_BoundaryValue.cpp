@@ -136,8 +136,9 @@ void BoundaryValue::enforce
 			   ndy,ny,y+iy0,
 			   ndz,nz,z+iz0);
 	  if (mask_) {
-	    for (int i=0; i<ndx*ndy*ndz; i++) ((long double *)temp)[i]=((long double *)array)[i];
-	    delete [] array;
+	    for (int i=0; i<ndx*ndy*ndz; i++) 
+	      ((long double *)temp)[i]=((long double *)array)[i];
+	    delete [] ((long double *)array);
 	    array = temp;
 	  }
 	}

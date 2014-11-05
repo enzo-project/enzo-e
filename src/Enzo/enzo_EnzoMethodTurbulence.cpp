@@ -374,9 +374,9 @@ void EnzoMethodTurbulence::compute_resume_
 
   // compute bulk momentum
   const T bm[3] = 
-    { g[INDEX_TURBULENCE_DAx]/nd,
-      g[INDEX_TURBULENCE_DAy]/nd,
-      g[INDEX_TURBULENCE_DAz]/nd};
+    { T(g[INDEX_TURBULENCE_DAx]/nd),
+      T(g[INDEX_TURBULENCE_DAy]/nd),
+      T(g[INDEX_TURBULENCE_DAz]/nd)};
 
   //  for (int dim = 0; dim <  MetaData->TopGridRank; dim++)
   //	bulkMomentum[dim] = GlobVal[7+dim]/numberOfGridZones;
