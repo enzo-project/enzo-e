@@ -178,11 +178,55 @@ public: // virtual functions
 #endif
   }
   
-  // void set_projections_tracing( bool tracing)
-  // { projections_tracing_ = tracing; }
-  
-  // bool projections_tracing() const
-  // { return projections_tracing_; }
+  // /// Run the simulation
+  // virtual void run() throw();
+
+  /// Add a new CommBlock to this local branch
+  void insert_block() ;
+
+  /// Remove a CommBlock from this local branch
+  void delete_block() ;
+
+  /// Wait for all Hierarchy to be initialized before creating any CommBlocks
+  void r_initialize_forest(CkReductionMsg * msg);
+
+  /// Wait for all local patches to be created before calling run
+  void r_initialize_hierarchy(CkReductionMsg * msg);
+
+  /// Call output on Problem list of Output objects
+  void p_begin_output()
+  { begin_output(); }
+  void begin_output ();
+  void output_exit();
+  void r_output(CkReductionMsg * msg);
+
+  //  void r_output (CkReductionMsg * msg);
+
+  /// Reduce output, using p_output_write to send data to writing processes
+  void s_write() { write_(); };
+  void write_();
+
+  /// Continue on to Problem::output_wait()
+  void r_write(CkReductionMsg * msg);
+
+  /// Continue on to Problem::output_wait() from checkpoint
+  void r_write_checkpoint();
+
+  /// Receive data from non-writing process, write to disk, close, and
+  /// proceed with next output
+  void p_output_write (int n, char * buffer);
+
+  void compute ();
+
+  void p_monitor();
+
+  void p_monitor_performance()
+  { monitor_performance(); };
+
+  virtual void monitor_performance();
+
+  /// Reduction for performance data
+  void r_monitor_performance (CkReductionMsg * msg);
 
 protected: // functions
 
@@ -303,6 +347,9 @@ protected: // attributes
   
   /// Field descriptor
   FieldDescr * field_descr_;
+
+  Sync sync_output_begin_;
+  Sync sync_output_write_;
 
 };
 

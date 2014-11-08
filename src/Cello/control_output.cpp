@@ -51,7 +51,7 @@ void CommBlock::output_begin_ ()
 
     // Start output if any...
 
-    ((SimulationCharm * )simulation()) -> begin_output();
+    simulation() -> begin_output();
 
   } else {
 
@@ -64,7 +64,7 @@ void CommBlock::output_begin_ ()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::begin_output ()
+void Simulation::begin_output ()
 {
 
   TRACE_LOCAL("CommBlock::output_begin()");
@@ -78,7 +78,7 @@ void SimulationCharm::begin_output ()
     // Barrier
 
     // --------------------------------------------------
-    CkCallback callback (CkIndex_SimulationCharm::r_output(NULL), thisProxy);
+    CkCallback callback (CkIndex_Simulation::r_output(NULL), thisProxy);
     contribute(0,0,CkReduction::concat,callback);
     // --------------------------------------------------
   }
@@ -86,10 +86,10 @@ void SimulationCharm::begin_output ()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::r_output(CkReductionMsg * msg)
+void Simulation::r_output(CkReductionMsg * msg)
 {
  
-  TRACE_LOCAL("SimulationCharm::r_output()");
+  TRACE_LOCAL("Simulation::r_output()");
 
   delete msg;
 
@@ -134,7 +134,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
     // ...otherwise exit output phase
 
-    ((SimulationCharm *)simulation)->output_exit();
+    simulation->output_exit();
 
   }
 }
@@ -150,18 +150,18 @@ void CommBlock::p_output_write (int index_output)
 
   output->write_block(this,field_descr);
 
-  ((SimulationCharm *) simulation())->write_();
+  simulation())->write_();
 }
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::write_()
+void Simulation::write_()
 {
-  TRACE_LOCAL("SimulationCharm::write_()");
+  TRACE_LOCAL("Simulation::write_()");
   if (sync_output_write_.next()) {
 
     // --------------------------------------------------
-    CkCallback callback (CkIndex_SimulationCharm::r_write(NULL), thisProxy);
+    CkCallback callback (CkIndex_Simulation::r_write(NULL), thisProxy);
     contribute(0,0,CkReduction::concat,callback);
     // --------------------------------------------------
 
@@ -170,9 +170,9 @@ void SimulationCharm::write_()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::r_write(CkReductionMsg * msg)
+void Simulation::r_write(CkReductionMsg * msg)
 {
-  TRACE_LOCAL("SimulationCharm::r_write()");
+  TRACE_LOCAL("Simulation::r_write()");
   delete msg;
 
   problem()->output_wait(this);
@@ -180,7 +180,7 @@ void SimulationCharm::r_write(CkReductionMsg * msg)
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::r_write_checkpoint()
+void Simulation::r_write_checkpoint()
 {
   problem()->output_wait(this);
 }
@@ -225,9 +225,9 @@ void Problem::output_wait(Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::p_output_write (int n, char * buffer)
+void Simulation::p_output_write (int n, char * buffer)
 {
-  TRACE_LOCAL("SimulationCharm::p_output_write()");
+  TRACE_LOCAL("Simulation::p_output_write()");
   problem()->output_write(this,n,buffer); 
 }
 
@@ -258,9 +258,9 @@ void Problem::output_write
 
 //----------------------------------------------------------------------
 
-void SimulationCharm::output_exit()
+void Simulation::output_exit()
 {
-  TRACE_LOCAL("SimulationCharm::output_exit()");
+  TRACE_LOCAL("Simulation::output_exit()");
 
   // reset debug output files to limit file size
   debug_close();

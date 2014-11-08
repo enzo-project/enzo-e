@@ -2,10 +2,8 @@
 
 /// @file     mesh_Tree.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
-/// @brief    
-///
-/// 
+/// @date     2012-01-26 15:30:58
+/// @brief    Implementation of the Tree class for r^d trees
 
 #include "mesh.hpp"
 

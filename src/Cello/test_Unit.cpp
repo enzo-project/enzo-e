@@ -2,10 +2,8 @@
 
 /// @file     test_Unit.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
+/// @date     2012-01-26 15:30:58
 /// @brief    
-///
-/// 
 
 #include "test.hpp"
 

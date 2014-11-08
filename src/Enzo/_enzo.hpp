@@ -122,8 +122,7 @@ struct fluxes
 
 #include "enzo_EnzoFactory.hpp"
 
-#include "enzo_EnzoSimulationMpi.hpp"
-#include "enzo_EnzoSimulationCharm.hpp"
+#include "enzo_EnzoSimulation.hpp"
 
 #include "enzo_EnzoProblem.hpp"
 

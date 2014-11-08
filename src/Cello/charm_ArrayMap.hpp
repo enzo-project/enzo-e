@@ -15,6 +15,9 @@ class ArrayMap: public CBase_ArrayMap {
   /// @class    ArrayMap
   /// @ingroup  Charm
   /// @brief    [\ref Parallel] Class for mapping CommBlock's to processors
+  ///
+  /// This class defines how to map a 3D array of Charm++ chares to
+  /// processes
 
 public:
   int *mapping;

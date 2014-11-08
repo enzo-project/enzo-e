@@ -2,9 +2,8 @@
 
 /// @file     enzo_EnzoProblem.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
+/// @date     2012-03-03 14:43:11
 /// @brief    [\ref Enzo] Declaration of the EnzoProblem class
-///
 
 #ifndef ENZO_ENZO_PROBLEM_HPP
 #define ENZO_ENZO_PROBLEM_HPP

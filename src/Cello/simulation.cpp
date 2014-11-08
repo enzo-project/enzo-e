@@ -1,6 +1,6 @@
 #include "simulation.hpp"
 
 //----------------------------------------------------------------------
-CProxy_SimulationCharm  proxy_simulation;
+CProxy_Simulation  proxy_simulation;
 //----------------------------------------------------------------------
 

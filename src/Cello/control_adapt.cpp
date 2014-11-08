@@ -171,7 +171,7 @@ void CommBlock::adapt_end_()
 
     const int rank = this->rank();
     sync_coarsen_.set_stop(NC(rank));
-    sync_coarsen_.clear();
+    sync_coarsen_.reset();
 
   }
 

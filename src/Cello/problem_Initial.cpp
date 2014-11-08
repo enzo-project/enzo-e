@@ -13,7 +13,7 @@
 
 //----------------------------------------------------------------------
 
-extern CProxy_SimulationCharm  proxy_simulation;
+extern CProxy_Simulation  proxy_simulation;
 
 //----------------------------------------------------------------------
 

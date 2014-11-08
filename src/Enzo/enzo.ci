@@ -79,8 +79,8 @@ module enzo {
 
   extern module mesh;
 
-  group [migratable] EnzoSimulationCharm : SimulationCharm {
-    entry EnzoSimulationCharm // [ESC0]
+  group [migratable] EnzoSimulation : Simulation {
+    entry EnzoSimulation // [ESC0]
       (const char filename[n], int n);
 
   }

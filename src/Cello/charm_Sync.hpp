@@ -69,28 +69,33 @@ class Sync {
     }
   }
 
+  /// Return whether the Sync counter has reached the stopping value
   inline bool is_done () const throw()
-  {
-    return (index_curr_ == index_stop_);
-  }
+  { return (index_curr_ == index_stop_);  }
 
-  inline int operator = (int value) { index_stop_ = value; return index_stop_; }
-  inline int operator -= (int value) { index_stop_ -= value; return index_stop_; }
-  inline int operator += (int value) { index_stop_ += value; return index_stop_; }
-  inline int operator -- () { --index_stop_; return index_stop_; }
-  inline int operator ++ () { ++index_stop_; return index_stop_; }
+  /// Set the stopping value for the counter
+  inline void set_stop (int stop) throw ()
+  { index_stop_ = stop; }
 
-  /// Return the current CHARM++ parallel "sync" index
-  inline int index() const throw() { return index_curr_; }
-  /// Set the current index
-  void set_index(int value) { index_curr_ = value; }
-  void add_index(int value) { index_curr_ += value; }
-  /// Return the upper-limit on the CHARM++ parallel "sync"
-  inline int stop() const throw()  { return index_stop_; }
-  /// Access to the upper-limit on the CHARM++ parallel "sync"
-  inline void set_stop (int stop) throw ()    { index_stop_ = stop; }
-  inline void add_stop (int inc = 1) throw () { index_stop_ += inc; }
-  inline void clear () throw () { index_curr_ = 0; }
+  /// Reset the counter to 0
+  inline void reset () throw () 
+  { index_curr_ = 0; }
+
+  /// Decrement the stopping value by value
+  inline int operator -= (int value) 
+  { index_stop_ -= value; return index_stop_; }
+
+  /// Increment the stopping value by value
+  inline int operator += (int value) 
+  { index_stop_ += value; return index_stop_; }
+
+  /// Decrement the stopping value by 
+  inline int operator -- () 
+  { --index_stop_; return index_stop_; }
+
+  /// Increment the stopping value by one
+  inline int operator ++ () 
+  { ++index_stop_; return index_stop_; }
 
 private:
 

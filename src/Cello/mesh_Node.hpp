@@ -2,9 +2,8 @@
 
 /// @file     mesh_Node.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
+/// @date     2012-01-26 15:30:58
 /// @brief    [\ref Mesh] Declaration of the Node class
-///
 
 #ifndef MESH_NODE_HPP
 #define MESH_NODE_HPP

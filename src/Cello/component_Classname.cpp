@@ -4,8 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     yyyy-mm-dd
 /// @brief    
-///
-/// 
 
 #include "component.hpp"
 

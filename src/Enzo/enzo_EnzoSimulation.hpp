@@ -1,38 +1,38 @@
 // See LICENSE_CELLO file for license and copyright information
 
 
-/// @file     enzo_EnzoSimulationCharm.hpp
+/// @file     enzo_EnzoSimulation.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-03-17
-/// @brief    [\ref Enzo] Declaration of the EnzoSimulationCharm class
+/// @brief    [\ref Enzo] Declaration of the EnzoSimulation class
 
 #ifndef ENZO_ENZO_SIMULATION_CHARM_HPP
 #define ENZO_ENZO_SIMULATION_CHARM_HPP
 
-class EnzoSimulationCharm : public SimulationCharm
+class EnzoSimulation : public Simulation
 			    
 {
 
-  /// @class    EnzoSimulationCharm
+  /// @class    EnzoSimulation
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Simulation class for CHARM++ Enzo-P
 
 public: // functions
 
   /// CHARM++ Constructor
-  EnzoSimulationCharm
+  EnzoSimulation
   ( const char parameter_file[], int n) throw();
 
   /// CHARM++ Constructor
-  EnzoSimulationCharm() {}
+  EnzoSimulation() {}
 
   /// CHARM++ Migration constructor
-  EnzoSimulationCharm(CkMigrateMessage * m) : SimulationCharm(m)  
+  EnzoSimulation(CkMigrateMessage * m) : Simulation(m)  
   {
   };
 
   /// Destructor
-  ~EnzoSimulationCharm() throw();
+  ~EnzoSimulation() throw();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

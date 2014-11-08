@@ -85,6 +85,7 @@ enum array_type {
 #include <limits>
 
 #include "parallel.def"
+#include "mesh_Index.hpp"
 #include "mesh.decl.h"
 #include "pup_stl.h"
 

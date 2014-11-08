@@ -4,83 +4,83 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2014-10-21 17:25:09
 /// @brief    Implements the EnzoMethodGravityCg class
-///
-/// function [x] = conjgrad(A,b,x)
-///     r=b-A*x;
-///     p=r;
-///     rsold=r'*r;
-///  
-///     for i=1:1e6
-///         Ap=A*p;
-///         alpha=rsold/(p'*Ap);
-///         x=x+alpha*p;
-///         r=r-alpha*Ap;
-///         rsnew=r'*r;
-///         if sqrt(rsnew)<1e-10
-///               break;
-///         end
-///         p=r+rsnew/rsold*p;
-///         rsold=rsnew;
-///     end
-/// end
-/// nabla ^ 2 (potential) = 4 pi G density
-///
-///======================================================================
-///
-/// nabla ^ 2 (potential) = 4 pi G density
-///
-/// cg_begin:
-///
-///    B = 4 * PI * G * density
-///
-///    R = MATVEC (A,X) ==> cg_begin_1
-///
-/// cg_begin_1:
-///
-///    R = B - R;
-///    P = R
-///    iter_ = 0
-///    rr0_ = rr_ = DOT(R,R) ==> cg_loop_1
-///
-/// cg_loop_1:
-///
-///    if (maximum iteration reached) ==> cg_end (return_error_max_iter_reached)
-///    AP = MATVEC (A,P) ==> cg_loop_2
-///
-/// cg_loop_2:
-///
-///    pap = DOT(P, AP) ==> cg_loop_3
-///
-/// cg_loop_3:
-///
-///    alpha_ = rr_ / pap
-///    X = X + alpha_ * P;
-///    R = R - alpha_ * AP;
-///    rr_new = DOT(R,R) ==> cg_loop_4
-///
-/// cg_loop_4:
-///
-///    if (rr_new < resid_tol*resid_tol) ==> cg_end(return_converged)
-///
-///    P = R + rr_new / rr_ * P;
-/// 
-///    rr_ = rr_new
-///    iter = iter + 1
-///    ==> cg_loop_1()
-///
-/// cg_end (return):
-///
-///    if (return == return_converged) {
-///       potential = X
-///       ==> cg_exit()
-///    } else {
-///       ERROR (return-)
-///    }
-///
-/// cg_exit()
-///
-///    deallocate
-///    NEXT()
+//
+// function [x] = conjgrad(A,b,x)
+//     r=b-A*x;
+//     p=r;
+//     rsold=r'*r;
+//  
+//     for i=1:1e6
+//         Ap=A*p;
+//         alpha=rsold/(p'*Ap);
+//         x=x+alpha*p;
+//         r=r-alpha*Ap;
+//         rsnew=r'*r;
+//         if sqrt(rsnew)<1e-10
+//               break;
+//         end
+//         p=r+rsnew/rsold*p;
+//         rsold=rsnew;
+//     end
+// end
+// nabla ^ 2 (potential) = 4 pi G density
+//
+//======================================================================
+//
+// nabla ^ 2 (potential) = 4 pi G density
+//
+// cg_begin:
+//
+//    B = 4 * PI * G * density
+//
+//    R = MATVEC (A,X) ==> cg_begin_1
+//
+// cg_begin_1:
+//
+//    R = B - R;
+//    P = R
+//    iter_ = 0
+//    rr0_ = rr_ = DOT(R,R) ==> cg_loop_1
+//
+// cg_loop_1:
+//
+//    if (maximum iteration reached) ==> cg_end (return_error_max_iter_reached)
+//    AP = MATVEC (A,P) ==> cg_loop_2
+//
+// cg_loop_2:
+//
+//    pap = DOT(P, AP) ==> cg_loop_3
+//
+// cg_loop_3:
+//
+//    alpha_ = rr_ / pap
+//    X = X + alpha_ * P;
+//    R = R - alpha_ * AP;
+//    rr_new = DOT(R,R) ==> cg_loop_4
+//
+// cg_loop_4:
+//
+//    if (rr_new < resid_tol*resid_tol) ==> cg_end(return_converged)
+//
+//    P = R + rr_new / rr_ * P;
+// 
+//    rr_ = rr_new
+//    iter = iter + 1
+//    ==> cg_loop_1()
+//
+// cg_end (return):
+//
+//    if (return == return_converged) {
+//       potential = X
+//       ==> cg_exit()
+//    } else {
+//       ERROR (return-)
+//    }
+//
+// cg_exit()
+//
+//    deallocate
+//    NEXT()
 
 
 #include "cello.hpp"

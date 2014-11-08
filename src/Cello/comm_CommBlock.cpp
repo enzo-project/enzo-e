@@ -114,7 +114,7 @@ CommBlock::CommBlock
   const int rank = this->rank();
   
   sync_coarsen_.set_stop(NC(rank));
-  sync_coarsen_.clear();
+  sync_coarsen_.reset();
 
   for (int i=0; i<3; i++) {
     count_sync_[i] = 0;
@@ -191,7 +191,7 @@ CommBlock::CommBlock
 
   }
 
-  if (! testing) ((SimulationCharm *)simulation())->insert_block();
+  if (! testing) simulation()->insert_block();
 
   int initial_cycle = simulation()->config()->initial_cycle;
   bool is_first_cycle = (initial_cycle == cycle);
@@ -348,7 +348,7 @@ CommBlock::~CommBlock() throw ()
   if (child_block_) delete child_block_;
   child_block_ = 0;
 
-  ((SimulationCharm *)simulation())->delete_block();
+  simulation()->delete_block();
 
   thisProxy.doneInserting();
 
@@ -358,7 +358,7 @@ CommBlock::~CommBlock() throw ()
 
 CommBlock::CommBlock (CkMigrateMessage *m) : CBase_CommBlock(m)
 { 
-  ((SimulationCharm *)simulation())->insert_block();
+  simulation()->insert_block();
 };
 
 //----------------------------------------------------------------------

@@ -2,10 +2,8 @@
 
 /// @file     problem_Value.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
+/// @date     2014-04-01 17:10:11
 /// @brief    
-///
-/// 
 
 #include "problem.hpp"
 

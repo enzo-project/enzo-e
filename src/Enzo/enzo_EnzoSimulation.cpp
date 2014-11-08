@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoSimulationCharm.cpp
+/// @file     enzo_EnzoSimulation.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-03-17
-/// @brief    Implementation of EnzoSimulationCharm user-dependent class member functions
+/// @brief    Implementation of EnzoSimulation user-dependent class member functions
 
 #include "cello.hpp"
 
@@ -17,14 +17,14 @@
 
 //----------------------------------------------------------------------
 
-EnzoSimulationCharm::EnzoSimulationCharm
+EnzoSimulation::EnzoSimulation
 (
  const char         parameter_file[],
  int                n) throw ()
-  : SimulationCharm(parameter_file, n)
+  : Simulation(parameter_file, n)
 {
 
-  TRACE("EnzoSimulationCharm::EnzoSimulationCharm()");
+  TRACE("EnzoSimulation::EnzoSimulation()");
 
   problem_ = new EnzoProblem;
 
@@ -33,17 +33,17 @@ EnzoSimulationCharm::EnzoSimulationCharm
 
 //----------------------------------------------------------------------
 
-EnzoSimulationCharm::~EnzoSimulationCharm() throw()
+EnzoSimulation::~EnzoSimulation() throw()
 {
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationCharm::pup (PUP::er &p)
+void EnzoSimulation::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
 
-  SimulationCharm::pup(p);
+  Simulation::pup(p);
 
   TRACEPUP;
 
@@ -55,19 +55,19 @@ void EnzoSimulationCharm::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationCharm::initialize() throw()
+void EnzoSimulation::initialize() throw()
 {
   
   initialize_config_();
 
-  SimulationCharm::initialize();
+  Simulation::initialize();
   EnzoBlock::initialize(static_cast<EnzoConfig*>(config_),
 			field_descr());
 }
 
 //----------------------------------------------------------------------
 
-const Factory * EnzoSimulationCharm::factory() const throw()
+const Factory * EnzoSimulation::factory() const throw()
 { 
   if (! factory_) factory_ = new EnzoFactory;
   return factory_;
@@ -75,7 +75,7 @@ const Factory * EnzoSimulationCharm::factory() const throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationCharm::initialize_config_() throw()
+void EnzoSimulation::initialize_config_() throw()
 {
   if (config_ == NULL) config_ = new EnzoConfig;
 

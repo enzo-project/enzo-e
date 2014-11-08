@@ -4,7 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     yyyy-mm-dd
 /// @brief    [\ref Component] Declaration of the Classname class
-///
 
 #ifndef COMPONENT_CLASSNAME_HPP
 #define COMPONENT_CLASSNAME_HPP

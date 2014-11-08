@@ -122,6 +122,12 @@ void Simulation::pup (PUP::er &p)
   if (up && (phase_ == phase_restart)) {
     monitor_->print ("Simulation","restarting");
   }
+
+  p | sync_output_begin_;
+  p | sync_output_write_;
+
+  if (up) sync_output_begin_.set_stop(0);
+  if (up) sync_output_write_.set_stop(0);
 }
 
 //----------------------------------------------------------------------
@@ -135,39 +141,6 @@ Simulation::Simulation (CkMigrateMessage *m)
 Simulation::~Simulation() throw()
 {
   deallocate_();
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::initialize() throw()
-{
-  TRACE("Simulation::initialize calling Simulation::initialize_config_()");
-  initialize_config_();
-  parameters_->set_monitor(false);
-
-  initialize_monitor_();
-  initialize_memory_();
-  initialize_performance_();
-  initialize_simulation_();
-
-  initialize_data_descr_();
-
-  problem_->initialize_boundary(config_,parameters_);
-  problem_->initialize_initial (config_,parameters_,field_descr_,
-				group_process_);
-  problem_->initialize_refine  (config_,parameters_,field_descr_);
-  problem_->initialize_stopping(config_);
-  problem_->initialize_output  (config_,field_descr_,group_process_,factory());
-  problem_->initialize_method  (config_,field_descr_);
-  problem_->initialize_prolong (config_);
-  problem_->initialize_restrict (config_);
-
-  initialize_hierarchy_();
-
-  // For Charm++ initialize_forest_ is called in charm_initialize
-  // using QD to ensure that initialize_hierarchy() is called
-  // on all processors before CommBlocks are created
-
 }
 
 //----------------------------------------------------------------------
@@ -473,66 +446,113 @@ void Simulation::update_state(int cycle, double time, double dt, double stop)
   stop_  = stop != 0;
 }
 
-//----------------------------------------------------------------------
+//======================================================================
 
-// void Simulation::performance_output()
-// {
-  // TRACE("Simulation::performance_output()");
-
-  // int num_regions  = performance_->num_regions();
-  // int num_counters =  performance_->num_counters();
-  // long long * counters = new long long [num_counters];
-
-  // for (int ic = 0; ic < num_counters; ic++) {
-    
-  //   for (int ir = 0; ir < num_regions; ir++) {
-
-  //     performance_->region_counters(ir,counters);
-  //     monitor_->print("Performance","%s %s %lld",
-  // 		      performance_->region_name(ir).c_str(),
-  // 		      performance_->counter_name(ic).c_str(),
-  // 		      counters[ic]);  
-  //   }
-  // }
-
-  // delete [] counters;
-
-// }
-
-//----------------------------------------------------------------------
-
-void Simulation::performance_write()
+void Simulation::insert_block() 
 {
-  // TRACE("Simulation::performance_write()");
+ 
+#ifdef CELLO_DEBUG
+  PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %d\n",
+		   CkMyPe(),sync_output_begin_.stop(),hierarchy()->num_blocks());
+#endif
+  hierarchy()->increment_block_count(1);
+  ++sync_output_begin_;
+  ++sync_output_write_;
+}
 
-  // if (performance_name_ != "" && (group_process_->rank() % performance_stride_) == 0) {
+//----------------------------------------------------------------------
 
-  //   char filename[30];
-  //   sprintf (filename,performance_name_.c_str(),group_process_->rank());
-  //   FILE * fp = fopen(filename,"w");
+void Simulation::delete_block() 
+{
+#ifdef CELLO_DEBUG
+  PARALLEL_PRINTF ("%d: --block_sync_ %d %d\n",
+		   CkMyPe(),sync_output_begin_.stop(),
+		   hierarchy()->num_blocks());
+#endif
+  hierarchy()->increment_block_count(-1);
+  --sync_output_begin_;
+  --sync_output_write_;
+}
 
-  //   int num_regions  = performance_->num_regions();
-  //   int num_counters =  performance_->num_counters();
-  //   long long * counters = new long long [num_counters];
+//----------------------------------------------------------------------
 
-  //   for (int ir = 0; ir < num_regions; ir++) {
+void Simulation::p_monitor()
+{
+  monitor()-> print("", "-------------------------------------");
+  monitor()-> print("Simulation", "cycle %04d", cycle_);
+  monitor()-> print("Simulation", "time-sim %15.12f",time_);
+  monitor()-> print("Simulation", "dt %15.12g", dt_);
+  proxy_simulation.p_monitor_performance();
+}
 
-  //     performance_->region_counters(ir,counters);
+//----------------------------------------------------------------------
 
-  //     for (int ic = 0; ic < num_counters; ic++) {
-    
-  // 	fprintf (fp,"%s %s %lld\n",
-  // 		 performance_->region_name(ir).c_str(),
-  // 		 performance_->counter_name(ic).c_str(),
-  // 		 counters[ic]);  
-  //     }
-  //   }
+void Simulation::monitor_performance()
+{
+  int nr  = performance_->num_regions();
+  int nc =  performance_->num_counters();
 
-  //   delete [] counters;
-  //   fclose(fp);
-    
-  // }
+  int n = nr * nc + 1;
+
+  long long * counters_long_long = new long long [nc];
+  long *      counters_long = new long [n];
+
+  for (int ir = 0; ir < nr; ir++) {
+    performance_->region_counters(ir,counters_long_long);
+    for (int ic = 0; ic < nc; ic++) {
+      int index_counter = ir+nr*ic;
+      counters_long[index_counter] = 
+	(long) counters_long_long[ic];
+    }
+  }
+
+  counters_long[n-1] = hierarchy()->num_blocks(); // number of CommBlocks
+
+  // --------------------------------------------------
+  CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
+		       thisProxy);
+  contribute (n*sizeof(long), counters_long,CkReduction::sum_long,callback);
+  // --------------------------------------------------
+
+  delete [] counters_long;
+  delete [] counters_long_long;
 
 }
 
-//======================================================================
+//----------------------------------------------------------------------
+
+void Simulation::r_monitor_performance(CkReductionMsg * msg)
+{
+  int nr  = performance_->num_regions();
+  int nc =  performance_->num_counters();
+
+  int n = nr * nc + 1;
+
+  long *      counters_long = (long * )msg->getData();
+
+  int index_region_cycle = performance_->region_index("cycle");
+
+  for (int ir = 0; ir < nr; ir++) {
+    for (int ic = 0; ic < nc; ic++) {
+      int index_counter = ir+nr*ic;
+      bool do_print = 
+	(performance_->counter_type(ic) != counter_type_abs) ||
+	(ir == index_region_cycle);
+      if (do_print) {
+	monitor()->print("Performance","%s %s %ld",
+			performance_->region_name(ir).c_str(),
+			performance_->counter_name(ic).c_str(),
+			counters_long[index_counter]);
+      }
+    }
+  }
+
+  monitor()->print("Performance","simulation num-blocks %d",
+		  counters_long[n-1]);
+
+  Memory::instance()->reset_high();
+
+  delete msg;
+
+}
+

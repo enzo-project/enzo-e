@@ -39,7 +39,7 @@
 
 //----------------------------------------------------------------------
 
-extern CProxy_SimulationCharm proxy_simulation;
+extern CProxy_Simulation proxy_simulation;
 
 //----------------------------------------------------------------------
 PARALLEL_MAIN_BEGIN
@@ -92,10 +92,10 @@ PARALLEL_MAIN_BEGIN
   proxy_main     = thishandle;
 
   // --------------------------------------------------
-  // ENTRY: #1 Main::Main() -> EnzoSimulationCharm::EnzoSimulationCharm()
+  // ENTRY: #1 Main::Main() -> EnzoSimulation::EnzoSimulation()
   // ENTRY: create
   // --------------------------------------------------
-  proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
+  proxy_simulation = CProxy_EnzoSimulation::ckNew
     (parameter_file, strlen(parameter_file)+1);
   // --------------------------------------------------
 

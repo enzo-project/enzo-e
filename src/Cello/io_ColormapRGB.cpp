@@ -2,10 +2,8 @@
 
 /// @file     io_ColormapRGB.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
-/// @brief    
-///
-/// 
+/// @date     2014-06-12 14:42:37
+/// @brief    Implementation of an RGB color map
 
 #include "io.hpp"
 

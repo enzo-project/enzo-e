@@ -21,8 +21,6 @@
 //----------------------------------------------------------------------
 
 #include "simulation_Simulation.hpp"
-#include "simulation_SimulationMpi.hpp"
-#include "simulation_SimulationCharm.hpp"
 
 #endif /* _SIMULATION_HPP */
 

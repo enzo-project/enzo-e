@@ -7,6 +7,13 @@
 /// @author  James Bordner (jobordner@ucsd.edu)
 /// @date    Thu Nov 11 17:08:38 PST 2010
 /// @brief   Include Cello global configuration settings
+///
+/// This file includes system includes; defines global template functions
+/// such as MIN(), MAX(), and INDEX(); and global enumerated types.
+/// It also initializes precision-related defines, including default_precision
+/// Some global functions and constants are define with cello namespace,
+/// sich as cello:pi and cello::err_rel(), etc.
+
 
 //----------------------------------------------------------------------
 // SYSTEM INCLUDES

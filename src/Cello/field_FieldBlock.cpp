@@ -8,6 +8,8 @@
 #include "cello.hpp"
 #include "field.hpp"
 
+#include "charm_simulation.hpp"
+
 //----------------------------------------------------------------------
 
 FieldBlock::FieldBlock 

@@ -171,13 +171,13 @@ void CommBlock::stopping_balance_()
   int balance_interval =  simulation()->config()->balance_interval;
   
   if (balance_interval && ((cycle_ % balance_interval) == 0)) {
+
     VERBOSE("balance_enter");
     simulation()->set_phase (phase_balance);
     AtSync();
+
   } else {
     
-    //    control_sync(phase_stopping_exit,"none",true,__FILE__,__LINE__);
-    //    stopping_exit_();
     control_next();
   }
 }
@@ -187,7 +187,7 @@ void CommBlock::stopping_balance_()
 void CommBlock::ResumeFromSync()
 {
   VERBOSE("balance_exit");
-  //  control_sync(phase_stopping_exit,"none",true,__FILE__,__LINE__);
+
   control_next();
 }
 
@@ -196,10 +196,6 @@ void CommBlock::ResumeFromSync()
 void CommBlock::exit_()
 {
   if (index_.is_root()) {
-
-    if (simulation())
-      simulation()->performance_write();
-
     proxy_main.p_exit(1);
   }
 }

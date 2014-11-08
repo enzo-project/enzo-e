@@ -61,8 +61,7 @@ class EnzoBlock : public CommBlock
 
   friend class IoEnzoBlock;
 
-  friend class EnzoSimulationCharm;
-  friend class EnzoSimulationMpi;
+  friend class EnzoSimulation;
   friend class EnzoTimestep;
   friend class EnzoTimestepPpm;
   friend class EnzoTimestepPpml;

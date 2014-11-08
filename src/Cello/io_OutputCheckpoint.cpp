@@ -8,7 +8,7 @@
 #include "io.hpp"
 #include "main.hpp"
 
-extern CProxy_SimulationCharm  proxy_simulation;
+extern CProxy_Simulation  proxy_simulation;
 
 //----------------------------------------------------------------------
 

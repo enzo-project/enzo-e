@@ -2,9 +2,8 @@
 
 /// @file     particle_ParticleBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     yyyy-mm-dd
+/// @date     2014-08-16 14:57:21
 /// @brief    [\ref Particle] Declaration of the ParticleBlock class
-///
 
 #ifndef PARTICLE_PARTICLE_BLOCK_HPP
 #define PARTICLE_PARTICLE_BLOCK_HPP
