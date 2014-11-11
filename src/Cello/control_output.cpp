@@ -150,7 +150,7 @@ void CommBlock::p_output_write (int index_output)
 
   output->write_block(this,field_descr);
 
-  simulation())->write_();
+  simulation()->write_();
 }
 
 //----------------------------------------------------------------------
