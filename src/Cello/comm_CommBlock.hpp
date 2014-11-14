@@ -4,6 +4,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @brief    [\ref Comm] Declaration of the CommBlock class
+/// @todo     Move Enzo Gravity to EnzoBlock
 
 #ifndef COMM_COMMBLOCK_HPP
 #define COMM_COMMBLOCK_HPP
@@ -18,7 +19,7 @@
 #endif
 
 class Block;
-class Control;
+// class Control;
 class Factory;
 class FieldDescr;
 class FieldFace;
@@ -248,6 +249,11 @@ public: // interface
   void r_compute_enter(CkReductionMsg * msg)
   {      compute_enter_(); delete msg; }
 
+  void p_compute_continue()
+  {      compute_continue_(); }
+  void r_compute_continue(CkReductionMsg * msg)
+  {      compute_continue_(); delete msg; }
+
   void p_compute_exit()
   {      compute_exit_(); }
   void r_compute_exit(CkReductionMsg * msg)
@@ -264,9 +270,28 @@ public: // interface
 
 protected:
   void compute_enter_();
+  void compute_continue_();
   void compute_begin_();
   void compute_exit_();
 public:
+
+  //--------------------------------------------------
+  // ENZO GRAVITY CG: MOVE TO ENZO
+  //--------------------------------------------------
+
+  void p_enzo_matvec()
+  {      enzo_matvec_(); }
+  void r_enzo_matvec(CkReductionMsg * msg)
+  {      enzo_matvec_(); delete msg; }
+
+protected:
+  void enzo_matvec_() 
+  {
+    printf ("%s:%d enzo_matvec_\n",__FILE__,__LINE__);
+  }
+
+public:
+
 
   //--------------------------------------------------
   // OUTPUT
@@ -363,7 +388,7 @@ public:
   //--------------------------------------------------
 
   /// Syncronize before continuing with next phase
-  void control_next(Control * control = 0);
+  void control_next(int phase = phase_unknown, std::string sync = "");
 
   /// Syncronize before continuing with next phase
   void control_sync(int phase, std::string sync, bool next_phase, const char * name, int line);
@@ -383,16 +408,18 @@ public:
   //--------------------------------------------------
 
   // Refresh ghost zones and apply boundary conditions
-  void p_refresh_enter()  
-  {      refresh_enter_(); }
-  void r_refresh_enter(CkReductionMsg * msg)  
-  {      refresh_enter_(); delete msg; }
+  void p_control_refresh_enter()  
+  {      control_refresh_enter_(); }
+  void r_control_refresh_enter(CkReductionMsg * msg)  
+  {      control_refresh_enter_(); delete msg; }
+  void control_refresh_enter_();
 
   // Exit the refresh phase after QD
-  void p_refresh_exit () 
-  {      refresh_exit_(); }
-  void r_refresh_exit (CkReductionMsg * msg) 
-  {      refresh_exit_(); delete msg;  }
+  void p_control_refresh_exit () 
+  {      control_refresh_exit_(); }
+  void r_control_refresh_exit (CkReductionMsg * msg) 
+  {      control_refresh_exit_(); delete msg;  }
+  void control_refresh_exit_ ();
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
   void x_refresh_send_face
@@ -407,13 +434,11 @@ public:
   bool do_refresh(int if3[3]) const;
 
 protected:
-  void refresh_enter_(Control * = 0);
   void refresh_begin_();
   void refresh_load_face_
   (int type_refresh, Index index, int if3[3], int ic3[3]);
   void refresh_store_face_
   (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]);
-  void refresh_exit_ ();
 public:
 
   //--------------------------------------------------
@@ -662,7 +687,7 @@ protected: // attributes
   /// Synchronization counter for coarsening
   Sync sync_coarsen_;
 
-  /// Synchronization counter for p_control_sync
+  /// Synchronization counters for p_control_sync
   int  count_sync_[PHASE_COUNT];
   int  max_sync_[PHASE_COUNT];
 
@@ -697,7 +722,7 @@ protected: // attributes
   bool delete_;
 
   /// Whether CommBlock is a leaf node during adapt phase (stored not
-  /// computed to avoid race condition bug #30
+  /// computed to avoid race condition bug #30)
   bool is_leaf_;
 
   /// Age of the CommBlock in cycles (for OutputImage)
@@ -706,14 +731,18 @@ protected: // attributes
   /// Last face level received from given face
   std::vector<int> face_level_last_;
 
-  /// String for storing bit ID
+  /// String for storing bit ID name
   std::string name_;
 
   /// Currently-active Method
   Method * method_;
 
-  /// Control object for next phase
-  Control * control_;
+  /// Phase after current refresh
+  int refresh_phase_;
+
+  /// Synchronization after current refresh
+  std::string refresh_sync_;
+
 };
 
 #endif /* COMM_COMMBLOCK_HPP */

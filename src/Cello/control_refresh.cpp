@@ -18,6 +18,7 @@
 
 //----------------------------------------------------------------------
 
+
 void CommBlock::refresh_begin_() 
 {
   if (is_leaf() && children_.size() != 0) {
@@ -104,9 +105,7 @@ void CommBlock::refresh_begin_()
     }
   }
 
-  //  control_sync (phase_refresh_exit,"contribute",true,__FILE__,__LINE__);
-  control_next();
-
+  control_next (phase_refresh_exit,"contribute");
 }
 
 //----------------------------------------------------------------------

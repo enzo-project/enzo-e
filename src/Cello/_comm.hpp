@@ -48,6 +48,7 @@ enum phase_type {
   phase_adapt_exit,
   phase_compute,
   phase_compute_enter = phase_compute,
+  phase_compute_continue,
   phase_compute_exit,
   phase_refresh,
   phase_refresh_enter = phase_refresh,
@@ -60,6 +61,7 @@ enum phase_type {
   phase_output_exit,
   phase_restart,
   phase_balance,
+  phase_enzo_matvec,
   phase_exit
 };
 

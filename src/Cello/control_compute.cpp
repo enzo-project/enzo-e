@@ -18,6 +18,19 @@
 
 void CommBlock::compute_begin_ ()
 {
+  // REFRESH HERE WITH control_
+
+  refresh_phase_ = phase_compute_continue;
+  refresh_sync_  = "contribute";
+
+  control_next(phase_refresh_enter,"neighbor");
+
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::compute_continue_ ()
+{
 
 #ifdef CONFIG_USE_PROJECTIONS
   //  double time_start = CmiWallTimer();
@@ -41,13 +54,6 @@ void CommBlock::compute_begin_ ()
 #ifdef CONFIG_USE_PROJECTIONS
   //  traceUserBracketEvent(10,time_start, CmiWallTimer());
 #endif
-
-  // Update CommBlock cycle and time to Simulation time and cycle
-  // if (cycle_>460) {
-  //   char buffer[80];
-  //   sprintf (buffer,"time %f dt %f cycle %d\n",time_,dt_,cycle_);
-  //   index_.print(buffer,-1,2,false,simulation());
-  // }
 
   set_cycle (cycle_ + 1);
   set_time  (time_  + dt_);

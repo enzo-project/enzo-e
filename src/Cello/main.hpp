@@ -90,13 +90,15 @@ public:
   void p_adapt_next();
   void p_adapt_exit();
   void p_compute_enter();
+  void p_compute_continue();
   void p_compute_exit();
   void p_output_enter ();
   void p_output_exit();
-  void p_refresh_enter();
-  void p_refresh_exit();
+  void p_control_refresh_enter();
+  void p_control_refresh_exit();
   void p_stopping_enter();
   void p_stopping_exit();
+  void p_enzo_matvec();
   void p_exit();
 
   /// Finalize the simulation

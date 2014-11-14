@@ -109,6 +109,15 @@ void Main::p_compute_enter()
 
 //----------------------------------------------------------------------
 
+void Main::p_compute_continue()
+{
+#ifdef CHARM_ENZO
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_compute_continue();
+#endif
+}
+
+//----------------------------------------------------------------------
+
 void Main::p_compute_exit()
 {
 #ifdef CHARM_ENZO
@@ -131,6 +140,15 @@ void Main::p_stopping_exit()
 {
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_stopping_exit();
+#endif
+}
+
+//----------------------------------------------------------------------
+
+void Main::p_enzo_matvec()
+{
+#ifdef CHARM_ENZO
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_enzo_matvec();
 #endif
 }
 
@@ -199,19 +217,19 @@ void Main::p_adapt_exit()
 
 //----------------------------------------------------------------------
 
-void Main::p_refresh_enter()
+void Main::p_control_refresh_enter()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_refresh_enter();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_control_refresh_enter();
 #endif
 }
 
 //----------------------------------------------------------------------
 
-void Main::p_refresh_exit()
+void Main::p_control_refresh_exit()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_refresh_exit();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_control_refresh_exit();
 #endif
 }
 

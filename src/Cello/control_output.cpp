@@ -30,8 +30,6 @@ void CommBlock::output_begin_ ()
 
   // Determine if there is any output this cycle
 
-  update_boundary_();
-
   simulation()->set_phase(phase_output);
 
   int cycle   = simulation()->cycle();

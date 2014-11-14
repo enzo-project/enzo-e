@@ -24,6 +24,7 @@ const char * phase_name[] = {
   "adapt_end",
   "adapt_exit",
   "compute_enter",
+  "compute_continue",
   "compute_exit",
   "refresh_enter",
   "refresh_exit",
@@ -33,6 +34,7 @@ const char * phase_name[] = {
   "output_exit",
   "restart",
   "balance",
+  "enzo_matvec",
   "exit"
 };
 
@@ -71,8 +73,9 @@ CommBlock::CommBlock
   age_(0),
   face_level_last_(),
   name_(name()),
-  method_(0),
-  control_(0)
+  refresh_sync_(""),
+  refresh_phase_(phase_unknown),
+  method_(0)
 {
   // Enable Charm++ AtSync() dynamic load balancing
   usesAtSync = CmiTrue;
@@ -259,7 +262,8 @@ void CommBlock::pup(PUP::er &p)
   p | age_;
   p | face_level_last_;
   p | name_;
-  p | control_; // PUP::able
+  p | refresh_phase_;
+  p | refresh_sync_;
 
   // SKIP method_: initialized when needed
 

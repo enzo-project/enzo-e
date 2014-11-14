@@ -10,7 +10,6 @@ module mesh {
   PUPable BoundaryPeriodic;
   PUPable BoundaryValue;
   PUPable Config;
-  PUPable Control;
   PUPable ColormapRGB;
   PUPable Factory;
   PUPable Initial;
@@ -78,8 +77,14 @@ module mesh {
     entry void p_compute_enter();
     entry void r_compute_enter(CkReductionMsg *);
 
+    entry void p_compute_continue();
+    entry void r_compute_continue(CkReductionMsg *);
+
     entry void p_compute_exit();
     entry void r_compute_exit(CkReductionMsg *);
+
+    entry void p_enzo_matvec();
+    entry void r_enzo_matvec(CkReductionMsg *);
 
     //--------------------------------------------------
     // *** STOPPING ***
@@ -134,11 +139,11 @@ module mesh {
     // *** REFRESH
     //--------------------------------------------------
 
-    entry void p_refresh_enter();         // [CB14]
-    entry void r_refresh_enter(CkReductionMsg *);
+    entry void p_control_refresh_enter();         // [CB14]
+    entry void r_control_refresh_enter(CkReductionMsg *);
 
-    entry void p_refresh_exit();
-    entry void r_refresh_exit(CkReductionMsg *);
+    entry void p_control_refresh_exit();
+    entry void r_control_refresh_exit(CkReductionMsg *);
 
     entry [expedited] void x_refresh_send_face // [CB21]
       (int n, char buffer[n],  char rtype, int iface[3], int ichild[3]);
