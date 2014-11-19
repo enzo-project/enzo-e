@@ -104,26 +104,31 @@ module enzo {
 
     // EnzoMethodGravityCg synchronization entry methods
     template <class T>
-    entry void r_cg_loop_1(CkReductionMsg *msg);
+    entry void r_cg_loop_0a(CkReductionMsg *msg);
     template <class T>
-    entry void r_cg_loop_2(CkReductionMsg *msg);
+    entry void r_cg_loop_0b(CkReductionMsg *msg);
+    template <class T>
+    entry void r_cg_loop_1(CkReductionMsg *msg);
     template <class T>
     entry void r_cg_loop_3(CkReductionMsg *msg);
     template <class T>
-    entry void r_cg_loop_4(CkReductionMsg *msg);
+    entry void r_cg_loop_5(CkReductionMsg *msg);
+
+//    entry void p_enzo_matvec();
+//    entry void r_enzo_matvec(CkReductionMsg *);
 
   };
 
   array[Index] EnzoArrayMethodGravityCg {
     entry EnzoArrayMethodGravityCg();
     template <class T>
-    entry void r_cg_loop_1(CkReductionMsg *msg);
+    entry void r_cg_loop_0(CkReductionMsg *msg);
     template <class T>
-    entry void r_cg_loop_2(CkReductionMsg *msg);
+    entry void r_cg_loop_1(CkReductionMsg *msg);
     template <class T>
     entry void r_cg_loop_3(CkReductionMsg *msg);
     template <class T>
-    entry void r_cg_loop_4(CkReductionMsg *msg);
+    entry void r_cg_loop_5(CkReductionMsg *msg);
   }
 
 };
@@ -131,20 +136,24 @@ module enzo {
 module template_defs {
    extern module enzo;
 
+   extern entry void EnzoBlock r_cg_loop_0a<float>(CkReductionMsg *msg);
+   extern entry void EnzoBlock r_cg_loop_0a<double>(CkReductionMsg *msg);
+   extern entry void EnzoBlock r_cg_loop_0a<long double>(CkReductionMsg *msg);
+
+   extern entry void EnzoBlock r_cg_loop_0b<float>(CkReductionMsg *msg);
+   extern entry void EnzoBlock r_cg_loop_0b<double>(CkReductionMsg *msg);
+   extern entry void EnzoBlock r_cg_loop_0b<long double>(CkReductionMsg *msg);
+
    extern entry void EnzoBlock r_cg_loop_1<float>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_cg_loop_1<double>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_cg_loop_1<long double>(CkReductionMsg *msg);
-
-   extern entry void EnzoBlock r_cg_loop_2<float>(CkReductionMsg *msg);
-   extern entry void EnzoBlock r_cg_loop_2<double>(CkReductionMsg *msg);
-   extern entry void EnzoBlock r_cg_loop_2<long double>(CkReductionMsg *msg);
 
    extern entry void EnzoBlock r_cg_loop_3<float>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_cg_loop_3<double>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_cg_loop_3<long double>(CkReductionMsg *msg);
 
-   extern entry void EnzoBlock r_cg_loop_4<float>(CkReductionMsg *msg);
-   extern entry void EnzoBlock r_cg_loop_4<double>(CkReductionMsg *msg);
-   extern entry void EnzoBlock r_cg_loop_4<long double>(CkReductionMsg *msg);
+   extern entry void EnzoBlock r_cg_loop_5<float>(CkReductionMsg *msg);
+   extern entry void EnzoBlock r_cg_loop_5<double>(CkReductionMsg *msg);
+   extern entry void EnzoBlock r_cg_loop_5<long double>(CkReductionMsg *msg);
    
 };

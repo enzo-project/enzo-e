@@ -477,7 +477,8 @@ void CommBlock::control_sync_neighbor_(int phase)
     const int level        = this->level();
     const int rank = this->rank();
 
-    ItFace it_face = this->it_face();
+    const int min_face_rank = 0;
+    ItFace it_face = this->it_face(min_face_rank);
 
     int of3[3];
 

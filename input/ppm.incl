@@ -20,8 +20,6 @@
 
       ghosts = 3;
 
-      refresh { rank = 0;  }; # refresh edges not corners
-
       list = [
 	"density",	
 	"velocity_x",
@@ -50,12 +48,22 @@
 
          # method-specific parameters
 
+         refresh = "ppm_refresh";
+
          diffusion   = true;
          flattening  = 3;
          steepening  = true;
 
          dual_energy = false;
      }
+   }
+
+   Refresh {
+      list = ["ppm_refresh"];
+      ppm_refresh { 
+         field_face_rank = 0;
+         field_list = [];
+      }
    }
 
    Initial {

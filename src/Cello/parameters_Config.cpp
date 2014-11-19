@@ -47,7 +47,6 @@ void Config::pup (PUP::er &p)
   PUParray(p,field_ghosts,3);
   p | field_padding;
   p | field_precision;
-  p | field_refresh_rank;
   p | field_prolong_type;
   p | field_restrict_type;
   p | field_group_list;
@@ -82,7 +81,9 @@ void Config::pup (PUP::er &p)
 
   // Method
 
+  p | num_method;
   p | method_list;
+  PUParray(p,method_refresh,MAX_METHOD_GROUPS);
 
   // Monitor
 
@@ -127,6 +128,14 @@ void Config::pup (PUP::er &p)
   p | performance_stride;
   p | performance_warnings;
 
+  // Refresh
+
+  p | num_refresh;
+  p | refresh_list;
+  PUParray(p,refresh_field_list,      MAX_REFRESH_GROUPS);
+  PUParray(p,refresh_field_face_rank, MAX_REFRESH_GROUPS);
+  PUParray(p,refresh_field_ghosts,    MAX_REFRESH_GROUPS);
+
   // Restart
 
   p | restart_file;
@@ -163,6 +172,7 @@ void Config::read(Parameters * p) throw()
   read_monitor_(p);
   read_output_(p);
   read_performance_(p);
+  read_refresh_(p);
   read_restart_(p);
   read_stopping_(p);
   read_testing_(p);
@@ -398,17 +408,6 @@ void Config::read_field_ (Parameters * p) throw()
     ERROR1 ("Config::read()", "Unknown precision %s",
 	    precision_str.c_str());
   }
-  // face_rank = rank - ( |ix| + |iy| + |iz| )
-  //
-  // face_rank               0     1     2         0      1
-  //                    3D corner edge  face  2D corner edge
-  // refresh_rank == 0:      x     x     x         x      x  >= 0D faces
-  // refresh_rank == 1             x     x                x  >= 1D faces
-  // refresh_rank == 2                   x                   >= 2D faces
-  //
-  // refresh if (face_rank >= rank)
-
-  field_refresh_rank = p->value_integer ("Field:refresh:rank",0);
 
   field_prolong_type   = p->value_string ("Field:prolong","linear");
 
@@ -560,12 +559,42 @@ void Config::read_method_ (Parameters * p) throw()
  
   TRACE("Parameters: Method");
 
-  int size = p->list_length("Method:list");
-  method_list.resize(size);
-  for (int i=0; i<size; i++) {
-    method_list[i] = p->list_value_string(i,"Method:list");
+  num_method = p->list_length("Method:list");
+
+  method_list.resize(num_method);
+  for (int index_method=0; index_method<num_method; index_method++) {
+
+    method_list[index_method] = p->list_value_string(index_method,"Method:list");
+    std::string refresh_str = "Method:" + method_list[index_method] + ":refresh";
+
+    int type = p->type(refresh_str);
+    if ( type == parameter_list) {
+      const int num_refresh = p->list_length(refresh_str);
+      method_refresh[index_method].resize(num_refresh);
+      for (int index_refresh=0; index_refresh<num_refresh; index_refresh++) {
+	method_refresh[index_method][index_refresh] = p->list_value_string(index_refresh,refresh_str,"unknown");
+      }
+    } else if (type == parameter_string) {
+      method_refresh[index_method].resize(1);
+      method_refresh[index_method][0] = p->value_string(refresh_str,"unknown");
+    } else if (type == parameter_unknown) {
+      // If no Method : <method> : refresh, then set to null list
+      method_refresh[index_method].clear();
+    } else {
+      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
+	      type,refresh_str.c_str());
+    }
   }
 
+  printf ("%s:%d\n",__FILE__,__LINE__);
+  printf ("METHOD num_method = %d\n",num_method);
+  for (int i=0; i<num_method; i++) {
+    printf ("METHOD method %s \n",method_list[i].c_str());
+    for (int j=0; j<method_refresh[i].size(); j++) {
+      printf ("METHOD   refresh %s \n",method_refresh[i][j].c_str());
+    }
+  }
+ 
 }
 
 //----------------------------------------------------------------------
@@ -600,121 +629,121 @@ void Config::read_output_ (Parameters * p) throw()
 
   output_list.resize(num_output);
 
-  for (int index=0; index<num_output; index++) {
+  for (int index_output=0; index_output<num_output; index_output++) {
 
-    TRACE1 ("index = %d",index);
+    TRACE1 ("index = %d",index_output);
 
-    output_list[index] = 
-      p->list_value_string (index,"Output:list","unknown");
+    output_list[index_output] = 
+      p->list_value_string (index_output,"Output:list","unknown");
 
-    p->group_set(1,output_list[index]);
+    p->group_set(1,output_list[index_output]);
 
-    output_type[index] = p->value_string("type","unknown");
+    output_type[index_output] = p->value_string("type","unknown");
 
-    if (output_type[index] == "unknown") {
+    if (output_type[index_output] == "unknown") {
       ERROR1("Config::read",
 	     "Output:%s:type parameter is undefined",
-	     output_list[index].c_str());
+	     output_list[index_output].c_str());
     }
 
-    output_stride[index] = p->value_integer("stride",0);
+    output_stride[index_output] = p->value_integer("stride",0);
 
     if (p->type("dir") == parameter_string) {
-      output_dir[index].resize(1);
-      output_dir[index][0] = p->value_string("dir","");
+      output_dir[index_output].resize(1);
+      output_dir[index_output][0] = p->value_string("dir","");
     } else if (p->type("dir") == parameter_list) {
       int size = p->list_length("dir");
-      if (size > 0) output_dir[index].resize(size);
+      if (size > 0) output_dir[index_output].resize(size);
       for (int i=0; i<size; i++) {
-	output_dir[index][i] = p->list_value_string(i,"dir","");
-	TRACE3("output_dir[%d][%d] = %s",index,i,output_dir[index][i].c_str());
+	output_dir[index_output][i] = p->list_value_string(i,"dir","");
+	TRACE3("output_dir[%d][%d] = %s",index_output,i,output_dir[index_output][i].c_str());
       }
     }
 
-    TRACE1("index = %d",index);
+    TRACE1("index_output = %d",index_output);
     if (p->type("name") == parameter_string) {
       TRACE0;
-      output_name[index].resize(1);
-      output_name[index][0] = p->value_string("name","");
+      output_name[index_output].resize(1);
+      output_name[index_output][0] = p->value_string("name","");
     } else if (p->type("name") == parameter_list) {
       int size = p->list_length("name");
       TRACE1("size = %d",size);
-      if (size > 0) output_name[index].resize(size);
+      if (size > 0) output_name[index_output].resize(size);
       for (int i=0; i<size; i++) {
-	output_name[index][i] = p->list_value_string(i,"name","");
+	output_name[index_output][i] = p->list_value_string(i,"name","");
       }
     }
 
     if (p->type("field_list") == parameter_list) {
       int length = p->list_length("field_list");
-      output_field_list[index].resize(length);
+      output_field_list[index_output].resize(length);
       for (int i=0; i<length; i++) {
-	output_field_list[index][i] = p->list_value_string(i,"field_list","");
+	output_field_list[index_output][i] = p->list_value_string(i,"field_list","");
       }
     }
 
     // Read schedule for the Output object
       
     p->group_push("schedule");
-    output_schedule_index[index] = read_schedule_(p, output_list[index]);
+    output_schedule_index[index_output] = read_schedule_(p, output_list[index_output]);
     p->group_pop();
 
     // Image 
 
-    TRACE2 ("output_type[%d] = %s",index,output_type[index].c_str());
+    TRACE2 ("output_type[%d] = %s",index,output_type[index_output].c_str());
 
-    if (output_type[index] == "image") {
+    if (output_type[index_output] == "image") {
 
       WARNING1 ("Config::read()",
-		"output_image_axis[%d] set to z",index);
+		"output_image_axis[%d] set to z",index_output);
 
-      output_image_axis[index] = "z";
+      output_image_axis[index_output] = "z";
 
       if (p->type("axis") != parameter_unknown) {
 	std::string axis = p->value_string("axis");
 	ASSERT2("Problem::initialize_output",
 		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
-		output_list[index].c_str(), axis.c_str(),
+		output_list[index_output].c_str(), axis.c_str(),
 		axis=="x" || axis=="y" || axis=="z");
       } 
 
-      output_image_block_size[index] = 
+      output_image_block_size[index_output] = 
 	p->value_integer("image_block_size",1);
 
-      output_image_type[index] = p->value_string("image_type","data");
+      output_image_type[index_output] = p->value_string("image_type","data");
 
-      output_image_log[index] = p->value_logical("image_log",false);
+      output_image_log[index_output] = p->value_logical("image_log",false);
 
-      output_image_mesh_color[index] = 
+      output_image_mesh_color[index_output] = 
 	p->value_string("image_mesh_color","level");
 
-      output_image_size[index].resize(2);
-      output_image_size[index][0] = 
+      output_image_size[index_output].resize(2);
+      output_image_size[index_output][0] = 
 	p->list_value_integer(0,"image_size",0);
-      output_image_size[index][1] = 
+      output_image_size[index_output][1] = 
 	p->list_value_integer(1,"image_size",0);
 
-      output_image_reduce_type[index] = 
+      output_image_reduce_type[index_output] = 
 	p->value_string("image_reduce_type","sum");
 
-      output_image_face_rank[index] = 
+      output_image_face_rank[index_output] = 
 	p->value_integer("image_face_rank",3);
 
-      output_image_ghost[index] = 
+      output_image_ghost[index_output] = 
 	p->value_logical("image_ghost",false);
 
-      output_image_specify_bounds[index] =
+      output_image_specify_bounds[index_output] =
 	p->value_logical("image_specify_bounds",false);
-      output_image_min[index] =
+      output_image_min[index_output] =
 	p->value_float("image_min",0.0);
-      output_image_max[index] =
+      output_image_max[index_output] =
 	p->value_float("image_max",0.0);
 
       if (p->type("colormap") == parameter_list) {
 	int size = p->list_length("colormap");
-	output_image_colormap[index].resize(size);
+	output_image_colormap[index_output].resize(size);
 	for (int i=0; i<size; i++) {
-	  output_image_colormap[index][i] = 
+	  output_image_colormap[index_output][i] = 
 	    p->list_value_float(i,"colormap",0.0);
 	}
       }
@@ -743,6 +772,70 @@ void Config::read_performance_ (Parameters * p) throw()
   performance_stride   = p->value_integer("Performance:stride",1);
   performance_warnings = p->value_logical("Performance:warnings",true);
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_refresh_ (Parameters * p) throw()
+{
+
+  // Refresh : list
+
+  num_refresh = p->list_length("Refresh:list");
+
+  refresh_list.resize(num_refresh);
+
+  for (int index_refresh=0; index_refresh<num_refresh; index_refresh++) {
+
+    refresh_list[index_refresh] = p->list_value_string(index_refresh,"Refresh:list");
+
+    std::string refresh_group = "Refresh:"+refresh_list[index_refresh];
+
+    // Refresh : <REFRESH_GROUP> : field_face_rank
+
+    refresh_field_face_rank[index_refresh] =
+      p->value(refresh_group + ":field_face_rank",0);
+
+  // Refresh : <REFRESH_GROUP> : field_ghosts
+
+    refresh_field_ghosts[index_refresh] =
+      p->value(refresh_group + ":field_ghosts",0);
+
+  // Refresh : <REFRESH_GROUP> : field_list
+
+    std::string param = refresh_group+":field_list";
+    int field_list_type = p->type(param);
+    if ( field_list_type == parameter_list) {
+      const int num_fields = p->list_length(param);
+      refresh_field_list[index_refresh].resize(num_fields);
+      for (int index_field=0; index_field<num_fields; index_field++) {
+	refresh_field_list[index_refresh][index_field] =
+	  p->value(index_refresh,param,"default");
+      }
+    } else if (field_list_type == parameter_string) {
+      refresh_field_list[index_refresh].resize(1);
+      refresh_field_list[index_refresh][0] = p->value(param,"default");
+    } else if (field_list_type == parameter_unknown) {
+      // default [] == all fields
+      refresh_field_list[index_refresh].clear();
+    } else {
+      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
+	      field_list_type,param.c_str());
+    }
+
+  }
+
+  printf ("%s:%d\n",__FILE__,__LINE__);
+  printf ("REFRESH num_refresh = %d\n",num_refresh);
+  for (int i=0; i<num_refresh; i++) {
+    printf ("REFRESH refresh %s \n",refresh_list[i].c_str());
+    printf ("REFRESH   field_face_rank %d\n",refresh_field_face_rank[i]);
+    printf ("REFRESH   field_ghosts %d \n",refresh_field_ghosts[i]);
+    for (int j=0; j<refresh_field_list[i].size(); j++) {
+      printf ("REFRESH   field_list %s \n",refresh_field_list[i][j].c_str());
+    }
+  }
+  
 }
 
 //----------------------------------------------------------------------

@@ -51,22 +51,30 @@ public: // interface
 
   /// Continuation after global reduction
   template <class T>
-  void cg_loop_1(EnzoBlock * enzo_block,double rr) throw();
-
-  /// Continuation after global reduction
-  template <class T>
   void cg_loop_2(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
   template <class T>
-  void cg_loop_3(EnzoBlock * enzo_block,double pap) throw();
+  void cg_loop_4(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
   template <class T>
-  void cg_loop_4(EnzoBlock * enzo_block,double rr) throw();
+  void cg_loop_6(EnzoBlock * enzo_block) throw();
 
   template <class T>
   void cg_end (EnzoBlock * enzo_block, int retval) throw();
+
+  /// Set rr_ by EnzoBlock after reduction
+  void set_rr(double rr) throw()  { rr_ = rr;  }
+
+  /// Set rs_ by EnzoBlock after reduction
+  void set_rs(double rs) throw()  { rs_ = rs;  }
+
+  /// Set pap_ by EnzoBlock after reduction
+  void set_pap(double pap) throw()  { pap_ = pap;}
+
+  /// Set rr_new_ by EnzoBlock after reduction
+  void set_rr_new(double rr_new) throw()  { rr_new_ = rr_new; ;}
 
 protected: // methods
 
@@ -88,6 +96,14 @@ protected: // methods
 
   template <class T>
   void zaxpy_ (T * Z, double a, const T * X, const T * Y) const throw();
+  
+  /// Compute local sum of vector elements X_i
+  template <class T>
+  T sum_ (const T * X) const throw();
+
+  /// scale the vector by the given scalar Y = a*X
+  template <class T>
+  void scale_ (T * Y, T a, const T * X) const throw();
   
   /// Compute local matrix-vector product Y = A*X
   template <class T>
@@ -125,7 +141,14 @@ protected: // attributes
   /// CG variables
   int iter_;
   double alpha_;
+  // inner product R*R
   double rr_;
+  // sum of elements R(i)
+  double rs_;
+  // inner product P*(A*P)
+  double pap_;
+  // newest inner product R*R
+  double rr_new_;
 
   
 };

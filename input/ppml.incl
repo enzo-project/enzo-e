@@ -19,8 +19,6 @@
 
    Field {
 
-      refresh { rank = 1;  }; # refresh faces and edges not corners
-
       ghosts = 3;
 
       list = [

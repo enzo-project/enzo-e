@@ -24,9 +24,6 @@ Adapt {
 
 Field {
    ghosts = 4;
-   refresh {
-     rank = 0;
-   }
 }
 Initial {
    max_level = 5;

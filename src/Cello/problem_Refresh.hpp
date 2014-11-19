@@ -20,6 +20,17 @@ public: // interface
   /// empty constructor for charm++ pup()
   Refresh() throw() {}
 
+  /// Create a Refresh object
+  Refresh(std::string name,
+	  int field_ghosts,
+	  int field_face_rank) throw()
+    : name_(name),
+      field_ghosts_(field_ghosts),
+      field_face_rank_(field_face_rank),
+      field_list_()
+  {
+  }
+
   /// CHARM++ PUP::able declaration
   PUPable_decl(Refresh);
 
@@ -29,30 +40,26 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
-  { PUP::able::pup(p);
-    TRACEPUP;
-    p | field_set_;
-    p | ghost_depth_;
-  }
-
-  /// Add an item to a group
-  void add_field(int index_field)
-    throw(std::out_of_range)
   {
-    field_set_.insert(index_field);
+    PUP::able::pup(p);
+    p | field_ghosts_;
+    p | field_list_;
+    p | field_face_rank_;
+    p | name_;
   }
 
-  /// Return list of Field's to Refresh
-  const bool field(int index_field) const
-  { return (field_set_.find(index_field) != field_set_.end()); }
+  /// Add the given field to the list
+  void insert_field(int id_field) {
+    field_list_.push_back(id_field);
+  }
 
-  /// Set the ghost zone depth
-  void set_ghost_depth(int ghost_depth)
-  { ghost_depth_ = ghost_depth; }
-
-  /// Return ghost zone depth
-  int ghost_depth() const
-  { return ghost_depth_; }
+  /// Set all fields
+  void all_fields(int num_fields) {
+    field_list_.clear();
+    for (int i=0; i<num_fields; i++) {
+      field_list_.push_back(i);
+    }
+  }
 
 private: // functions
 
@@ -61,9 +68,17 @@ private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  std::set<int> field_set_;
+  /// Ghost zone depth
+  int field_ghosts_;
 
-  int ghost_depth_;
+  /// Indicies of fields to include
+  std::vector <int> field_list_;
+
+  /// minimum face field rank to refresh (0 = corners, 1 = edges, etc.)
+  int field_face_rank_;
+
+  /// Name of this Refresh object
+  std::string name_;
 
 };
 

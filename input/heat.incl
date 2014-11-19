@@ -20,8 +20,6 @@
 
       ghosts = 3;
 
-      refresh { rank = 1;  }; # refresh edges not corners
-
       list = ["temperature"];
 
       # courant condition for fields

@@ -19,9 +19,6 @@ Adapt {
 Field {
     ghosts = 4; # must be even for ProlongLinear
     prolong = "linear";
-    refresh {
-       rank = 0;
-    }
 }
 
 Stopping { cycle = 2000; }

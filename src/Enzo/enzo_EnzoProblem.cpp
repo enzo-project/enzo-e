@@ -153,6 +153,7 @@ Refine * EnzoProblem::create_refine_
 
 Method * EnzoProblem::create_method_ 
 ( std::string  type,  
+  int index,
   Config * config,
   const FieldDescr * field_descr) throw ()
 /// @param type   Type of the method to create
@@ -198,7 +199,7 @@ Method * EnzoProblem::create_method_
        enzo_config->method_gravity_bicgstab_iter_max,
        enzo_config->method_gravity_bicgstab_res_tol);
   } else {
-    method = Problem::create_method_ (type,config, field_descr);
+    method = Problem::create_method_ (type,index,config, field_descr);
   }
 
   return method;

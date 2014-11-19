@@ -12,6 +12,7 @@
 ///    Initial:     Initial conditions
 ///    Refine:      Refinement criteria
 ///    Method:      List of numerical methods
+///    Refresh:     List of ghost zone refresh objects
 ///    Output:      List of output functions
 ///    Refinement:  How the mesh hierarchy is to be refined
 ///    Stopping:    Stopping criteria
@@ -28,8 +29,8 @@ class Method;
 class Output;
 class Parameters;
 class Prolong;
-class Refine;
 class Refresh;
+class Refine;
 class Restrict;
 class Simulation;
 class Stopping;
@@ -88,6 +89,10 @@ public: // interface
   /// Return the ith method object
   Method * method(size_t i) const throw() 
   { return (0 <= i && i < method_list_.size()) ? method_list_[i] : NULL; }
+
+  /// Return the ith refresh object
+  Refresh * refresh(size_t i) const throw() 
+  { return (0 <= i && i < refresh_list_.size()) ? refresh_list_[i] : NULL; }
 
   /// Return the prolong object
   Prolong * prolong() const throw()  { return prolong_; }
@@ -148,6 +153,10 @@ public: // interface
   void initialize_method(Config * config, 
 			 const FieldDescr * field_descr) throw();
 
+  /// Initialize the refresh objects
+  void initialize_refresh(Config * config, 
+			 const FieldDescr * field_descr) throw();
+
   /// Initialize the prolong objects
   void initialize_prolong(Config * config) throw();
 
@@ -186,6 +195,14 @@ protected: // functions
   /// Create named method object
   virtual Method *   create_method_
   (std::string type, 
+   int index,
+   Config * config, 
+   const FieldDescr * field_descr) throw ();
+
+  /// Create named refresh object
+  virtual Refresh *   create_refresh_
+  (std::string type, 
+   int index,
    Config * config, 
    const FieldDescr * field_descr) throw ();
 
@@ -230,6 +247,9 @@ private: // attributes
 
   /// List of method objects
   std::vector<Method *> method_list_;
+
+  /// List of refresh objects
+  std::vector<Refresh *> refresh_list_;
 
   /// Output objects
   std::vector<Output *> output_list_;

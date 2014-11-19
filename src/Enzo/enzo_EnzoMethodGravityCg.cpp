@@ -83,6 +83,7 @@
 //    NEXT()
 
 
+
 #include "cello.hpp"
 
 #include "enzo.hpp"
@@ -117,9 +118,12 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     gx_(0),gy_(0),gz_(0),
     /// CG scalars
     iter_(0),
+    rr_(0),
     alpha_(0),
-    rr_(0)
+    rr_new_(0),
+    pap_(0)
 {
+  TRACE("EnzoMethodGravity()");
   idensity_   = field_descr->field_id("density");
   ipotential_ = field_descr->field_id("potential");
   ib_  = field_descr->field_id("B");
@@ -170,7 +174,7 @@ void EnzoMethodGravityCg::pup (PUP::er &p)
   p | gz_;
 
   WARNING("EnzoMethodGravityCg::pup()", 
-	  "skipping transient attributes: iter_,alpha_,rr_,rr_new");
+	  "skipping transient attributes: iter_,alpha_,rr_,rr_new, pap, etc.");
 
 }
 
@@ -179,6 +183,7 @@ void EnzoMethodGravityCg::pup (PUP::er &p)
 void EnzoMethodGravityCg::compute ( CommBlock * comm_block) throw()
 {
 
+  TRACE("compute");
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
   Field field = enzo_block->block()->field();
 
@@ -204,9 +209,10 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 ///   - B = 4 * PI * G * density
 ///   - R = P = B ( residual with X = 0)
 ///   - iter_ = 0
-///   - rr_ = DOT(R,R) ==> cg_loop_1
+///   - rr_ = DOT(R,R) ==> cg_loop_0
 {
 
+  TRACE("compute_");
   Field field = enzo_block->block()->field();
 
   double xm,ym,zm;
@@ -243,12 +249,14 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 
   iter_ = 0;
 
-  double rr = dot_(R,R);
-  
-  CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_1<T>(NULL), 
+  double rr_rs[2];
+  rr_rs[0] = dot_(R,R);
+  rr_rs[1] = sum_(R);
+
+  CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_0a<T>(NULL), 
 		      enzo_block->proxy_array());
 
-  enzo_block->contribute (sizeof(double), &rr, 
+  enzo_block->contribute (2*sizeof(double), &rr_rs, 
 			  CkReduction::sum_double, 
 			  cb);
 }
@@ -256,28 +264,87 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoBlock::r_cg_loop_1 (CkReductionMsg * msg)
+void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
-/// ==> cg_loop_1
+/// ==> refresh P for AP = MATVEC (A,P)
 {
-  double rr = ((double*)msg->getData())[0];
-  delete msg;
+  TRACE("r_cg_loop_0a");
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
 
-  method->cg_loop_1<T>(this,rr);
+  double rr = ((double*)msg->getData())[0];
+  double rs = ((double*)msg->getData())[1];
+  method->set_rr(rr);
+  // rs = rs / (512.0*512.0);
+  // printf ("%s:%d rs = %g\n",__FILE__,__LINE__,rs);
+  // method->set_rs(rs);
+  delete msg;
+
+  refresh_sync_  = "contribute";
+  refresh_phase_ = phase_enzo_matvec;
+
+  control_next(phase_refresh_enter,"neighbor");
+  
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoMethodGravityCg::cg_loop_1 (EnzoBlock * enzo_block,double rr) throw()
-/// - if (maximum iteration reached) ==> cg_end (return_error_max_iter_reached)
-/// - AP = MATVEC (A,P) ==> cg_loop_2
+void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
+/// ==> refresh P for AP = MATVEC (A,P)
 {
-  if (iter_ == 0)  rr0_ = rr;
+  TRACE("r_cg_loop_0b");
+  delete msg;
+  EnzoMethodGravityCg * method = 
+    static_cast<EnzoMethodGravityCg*> (this->method());
 
-  rr_ = rr;
+  control_next(phase_refresh_enter,"neighbor");
+  
+}
+
+//----------------------------------------------------------------------
+
+// SEE comm_CommBlock.cpp for definition
+
+void CommBlock::enzo_matvec_()
+{
+  TRACE("enzo_matvec_");
+  EnzoMethodGravityCg * method = 
+    static_cast<EnzoMethodGravityCg*> (this->method());
+
+  int precision = precision_double;
+
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (this);
+
+  if      (precision == precision_single)    
+    method->cg_loop_2<float>(enzo_block);
+  else if (precision == precision_double)    
+    method->cg_loop_2<double>(enzo_block);
+  else if (precision == precision_quadruple) 
+    method->cg_loop_2<long double>(enzo_block);
+  else 
+    ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
+/// - if (maximum iteration reached) ==> cg_end (return_error_max_iter_reached)
+///   pap = DOT(P, AP) ==> r_cg_loop_3
+{
+  TRACE("cg_loop_2");
+  if (iter_ == 0)  {
+    rr0_ = rr_;
+    Field field = enzo_block->block()->field();
+    T * P  = (T*) field.values(ip_);
+    T * R  = (T*) field.values(ir_);
+    T * B  = (T*) field.values(ib_);
+    // scale_ (P,T(-rs_),P);
+    // scale_ (R,T(-rs_),R);
+    // scale_ (B,T(-rs_),B);
+  }
+
 
   if (iter_ > iter_max_)  {
 
@@ -292,52 +359,15 @@ void EnzoMethodGravityCg::cg_loop_1 (EnzoBlock * enzo_block,double rr) throw()
 
     matvec_(AP,P);
 
-    CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_2<T>(NULL), 
+    double pap = dot_(P,AP);
+
+    CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_3<T>(NULL), 
 		  enzo_block->proxy_array());
 
-    enzo_block->contribute (cb);
+    enzo_block->contribute (sizeof(double), &pap, 
+			    CkReduction::sum_double, 
+			    cb);
   }
-  // ==> cg_loop_2()
-
-}
-
-//----------------------------------------------------------------------
-
-template <class T>
-void EnzoBlock::r_cg_loop_2 (CkReductionMsg * msg)
-/// - EnzoBlock accumulate global contribution to DOT(R,R)
-/// ==> cg_loop_1
-{
-  delete msg;
-  EnzoMethodGravityCg * method = 
-    static_cast<EnzoMethodGravityCg*> (this->method());
-
-  method -> cg_loop_2<T>(this);
-}
-
-//----------------------------------------------------------------------
-
-template <class T>
-void EnzoMethodGravityCg::cg_loop_2(EnzoBlock * enzo_block) throw ()
-///
-///    pap = DOT(P, AP) ==> cg_loop_3
-///
-{
-
-  Field field = enzo_block->block()->field();
-
-  T * AP = (T*) field.values(iap_);
-  T * P  = (T*) field.values(ip_);
-
-  double pap = dot_(P,AP);
-
-  CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_3<T>(NULL), 
-		      enzo_block->proxy_array());
-
-  enzo_block->contribute (sizeof(double), &pap, 
-			  CkReduction::sum_double, 
-			  cb);
-
 }
 
 //----------------------------------------------------------------------
@@ -345,23 +375,26 @@ void EnzoMethodGravityCg::cg_loop_2(EnzoBlock * enzo_block) throw ()
 template <class T>
 void EnzoBlock::r_cg_loop_3 (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
-/// ==> cg_loop_1
+/// ==> cg_loop_4
 //
 /// @todo implement local pap = A * P
 {
-  double pap = ((double*)msg->getData())[0];
-  delete msg;
+  TRACE("r_cg_loop_3");
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
 
-  method -> cg_loop_3<T>(this,pap);
+  double pap = ((double*)msg->getData())[0];
+  method->set_pap(pap);
+  delete msg;
+
+  method -> cg_loop_4<T>(this);
 
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoMethodGravityCg::cg_loop_3 (EnzoBlock * enzo_block,double pap) throw ()
+void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
 ///
 /// - alpha_ = rr_ / pap_
 /// - X = X + alpha_ * P;
@@ -370,6 +403,7 @@ void EnzoMethodGravityCg::cg_loop_3 (EnzoBlock * enzo_block,double pap) throw ()
 ///
 {
 
+  TRACE("cg_loop_4");
   Field field = enzo_block->block()->field();
 
   T * X  = (T*) field.values(ix_);
@@ -377,55 +411,62 @@ void EnzoMethodGravityCg::cg_loop_3 (EnzoBlock * enzo_block,double pap) throw ()
   T * R  = (T*) field.values(ir_);
   T * AP = (T*) field.values(iap_);
 
-  alpha_ = rr_ / pap;
+  alpha_ = rr_ / pap_;
   zaxpy_ (X,   alpha_,P,X);
   zaxpy_ (R, - alpha_,AP,R);
 
-  double rr_new = dot_(R,R);
+  double rr_rs[2];
+  rr_rs[0] = dot_(R,R);
+  rr_rs[1] = sum_(R);
 
-  CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_4<T>(NULL), 
+  CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_5<T>(NULL), 
 		      enzo_block->proxy_array());
 
-  enzo_block->contribute (sizeof(double), &rr_new, 
+  enzo_block->contribute (2*sizeof(double), &rr_rs, 
 			  CkReduction::sum_double, 
 			  cb);
-
-
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoBlock::r_cg_loop_4 (CkReductionMsg * msg)
+void EnzoBlock::r_cg_loop_5 (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
-/// ==> cg_loop_1
+/// ==> cg_loop_6
 {
-  double rr_new = ((double*)msg->getData())[0];
-  delete msg;
+  TRACE("r_cg_loop_5");
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
 
-  method -> cg_loop_4<T>(this,rr_new);
+  double rr = ((double*)msg->getData())[0];
+  double rs = ((double*)msg->getData())[1];
+
+  method->set_rr_new(rr);
+  delete msg;
+
+  method -> cg_loop_6<T>(this);
 
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block,double rr_new) throw ()
+void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 ///
-///    if (rr_new < resid_tol*resid_tol) ==> cg_end(return_converged)
+///    if (rr_new_ < resid_tol*resid_tol) ==> cg_end(return_converged)
 ///
-///    P = R + rr_new / rr_ * P;
+///    P = R + rr_new_ / rr_ * P;
 /// 
-///    rr_ = rr_new
+///    rr_ = rr_new_
 ///    iter = iter + 1
 ///    ==> cg_loop_1()
 {
 
-  if (rr_new / rr0_ < res_tol_) {
+  TRACE("cg_loop_6");
 
-    rr_ = rr_new;
+  if (rr_new_ / rr0_ < res_tol_) {
+
+    rr_ = rr_new_;
     cg_end<T> (enzo_block,return_converged);
 
   } else {
@@ -435,12 +476,20 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block,double rr_new) throw
     T * P  = (T*) field.values(ip_);
     T * R  = (T*) field.values(ir_);
 
-    T a = rr_new / rr_;
+    // subtract off the null space of R for periodic problems
+
+    T a = rr_new_ / rr_;
     zaxpy_ (P,a,P,R);
 
-    ++ iter_;
+    printf ("%s:%d iter = %d %g %g %g\n",__FILE__,__LINE__,iter_,rr_,pap_,rr_new_);
 
-    cg_loop_1<T>(enzo_block,rr_new);
+    ++ iter_;
+    rr_ = rr_new_;
+
+    CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_0b<T>(NULL), 
+		  enzo_block->proxy_array());
+
+    enzo_block->contribute (cb);
   }
 }
 
@@ -456,6 +505,9 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 ///       ERROR (return-)
 ///    }
 {
+  TRACE("cg_end");
+  enzo_block->clear_refresh();
+
   Field field = enzo_block->block()->field();
 
   T * X         = (T*) field.values(ix_);
@@ -465,7 +517,6 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 
   printf ("%s:%d cg_end retval %d  iter %d  rr/rr0 = %g\n",
 	  __FILE__,__LINE__,retval,iter_,rr_/rr0_);
-
 }
 
 //----------------------------------------------------------------------
@@ -473,6 +524,7 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 void EnzoMethodGravityCg::cg_exit_() throw()
 /// deallocate temporary vectors
 {
+  TRACE("cg_exit");
 
 }
 
@@ -481,6 +533,7 @@ void EnzoMethodGravityCg::cg_exit_() throw()
 template <class T>
 void EnzoMethodGravityCg::copy_ (T * X, const T * Y) const throw()
 {
+  TRACE("copy");
   const int i0 = gx_ + mx_*(gy_ + my_*gz_);
   for (int iz=0; iz<nz_; iz++) {
     for (int iy=0; iy<ny_; iy++) {
@@ -497,17 +550,18 @@ void EnzoMethodGravityCg::copy_ (T * X, const T * Y) const throw()
 template <class T>
 T EnzoMethodGravityCg::dot_ (const T * X, const T * Y) const throw()
 {
+  TRACE("dot");
   const int i0 = gx_ + mx_*(gy_ + my_*gz_);
-  long double rr = 0.0;
+  long double value = 0.0;
   for (int iz=0; iz<nz_; iz++) {
     for (int iy=0; iy<ny_; iy++) {
       for (int ix=0; ix<nx_; ix++) {
 	int i = i0 + ix + mx_*(iy + my_*iz);
-	rr += X[i]*Y[i];
+	value += X[i]*Y[i];
       }
     }
   }
-  return rr;
+  return value;
 }
 
 //----------------------------------------------------------------------
@@ -515,6 +569,7 @@ T EnzoMethodGravityCg::dot_ (const T * X, const T * Y) const throw()
 template <class T>
 void EnzoMethodGravityCg::zaxpy_ (T * Z, double a, const T * X, const T * Y) const throw()
 {
+  TRACE("zaxpy");
   const int i0 = gx_ + mx_*(gy_ + my_*gz_);
   for (int iz=0; iz<nz_; iz++) {
     for (int iy=0; iy<ny_; iy++) {
@@ -529,9 +584,46 @@ void EnzoMethodGravityCg::zaxpy_ (T * Z, double a, const T * X, const T * Y) con
 //----------------------------------------------------------------------
 
 template <class T>
+T EnzoMethodGravityCg::sum_ (const T * X) const throw()
+{
+  TRACE("sum");
+  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+  long double value = 0.0;
+  for (int iz=0; iz<nz_; iz++) {
+    for (int iy=0; iy<ny_; iy++) {
+      for (int ix=0; ix<nx_; ix++) {
+	int i = i0 + ix + mx_*(iy + my_*iz);
+	value += X[i];
+      }
+    }
+  }
+  return value;
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoMethodGravityCg::scale_ (T * Y, T a, const T * X) const throw()
+{
+  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+  for (int iz=0; iz<nz_; iz++) {
+    for (int iy=0; iy<ny_; iy++) {
+      for (int ix=0; ix<nx_; ix++) {
+	int i = i0 + ix + mx_*(iy + my_*iz);
+	Y[i] = a * X[i];
+      }
+    }
+  }
+  
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
 void EnzoMethodGravityCg::matvec_ (T * Y, const T * X) const throw()
 /// Compute y = A*x, where A is the discrete Laplacian times (- h^2)
 {
+  TRACE("matvec");
   const int idx = 1;
   const int idy = mx_;
   const int idz = mx_*my_;

@@ -75,6 +75,7 @@ CommBlock::CommBlock
   name_(name()),
   refresh_sync_(""),
   refresh_phase_(phase_unknown),
+  refresh_index_(-1),
   method_(0)
 {
   // Enable Charm++ AtSync() dynamic load balancing
@@ -264,6 +265,7 @@ void CommBlock::pup(PUP::er &p)
   p | name_;
   p | refresh_phase_;
   p | refresh_sync_;
+  p | refresh_index_;
 
   // SKIP method_: initialized when needed
 
@@ -277,17 +279,16 @@ const FieldDescr * CommBlock::field_descr() throw()
 
 //----------------------------------------------------------------------
 
-ItFace CommBlock::it_face(const int * ic3,
+ItFace CommBlock::it_face(int min_face_rank,
+			  const int * ic3,
 			  const int * if3) throw()
 {
-  const Config * config = simulation()->config();
   int rank = this->rank();
-  int refresh_rank = config->field_refresh_rank;
   int n3[3];
   size_forest(&n3[0],&n3[1],&n3[2]);
   bool periodic[3][2];
   periodicity(periodic);
-  return ItFace (rank,refresh_rank,periodic,n3,index_,ic3,if3);
+  return ItFace (rank,min_face_rank,periodic,n3,index_,ic3,if3);
 }
 
 //======================================================================

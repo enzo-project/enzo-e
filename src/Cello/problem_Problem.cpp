@@ -76,6 +76,13 @@ void Problem::pup (PUP::er &p)
     p | method_list_[i]; // PUP::able
   }
 
+  if (pk) n=refresh_list_.size();
+  p | n;
+  if (up) refresh_list_.resize(n);
+  for (int i=0; i<n; i++) {
+    p | refresh_list_[i]; // PUP::able
+  }
+
   if (pk) n=output_list_.size();
   p | n;
   if (up) output_list_.resize(n);
@@ -322,11 +329,11 @@ void Problem::initialize_method
  const FieldDescr * field_descr
  ) throw()
 {
-  for (size_t i=0; i<config->method_list.size(); i++) {
+  for (size_t index=0; index<config->method_list.size(); index++) {
 
-    std::string name = config->method_list[i];
+    std::string name = config->method_list[index];
 
-    Method * method = create_method_(name, config, field_descr);
+    Method * method = create_method_(name, index, config, field_descr);
 
     if (method) {
 
@@ -335,6 +342,34 @@ void Problem::initialize_method
     } else {
       ERROR1("Problem::initialize_method",
 	     "Unknown Method %s",name.c_str());
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Problem::initialize_refresh
+(
+ Config * config,
+ const FieldDescr * field_descr
+ ) throw()
+{
+  WARNING ("Problem::initialize_refresh()",
+	   "NOT IMPLEMENTED");
+
+  for (size_t index=0; index<config->refresh_list.size(); index++) {
+
+    std::string name = config->refresh_list[index];
+
+    Refresh * refresh = create_refresh_(name, index, config, field_descr);
+
+    if (refresh) {
+
+      refresh_list_.push_back(refresh); 
+
+    } else {
+      ERROR1("Problem::initialize_refresh",
+	     "Unknown Refresh %s",name.c_str());
     }
   }
 }
@@ -362,6 +397,9 @@ void Problem::deallocate_() throw()
   }
   for (size_t i=0; i<method_list_.size(); i++) {
     delete method_list_[i];    method_list_[i] = 0;
+  }
+  for (size_t i=0; i<refresh_list_.size(); i++) {
+    delete refresh_list_[i];    refresh_list_[i] = 0;
   }
 }
 
@@ -526,6 +564,7 @@ Stopping * Problem::create_stopping_
 
 Method * Problem::create_method_ 
 ( std::string  name,
+  int index,
   Config * config,
   const FieldDescr * field_descr) throw ()
 {
@@ -534,6 +573,38 @@ Method * Problem::create_method_
   return NULL;
 }
 
+//----------------------------------------------------------------------
+
+Refresh * Problem::create_refresh_ 
+( std::string  name,
+  int index,
+  Config * config,
+  const FieldDescr * field_descr) throw ()
+{
+  TRACE1("Problem::create_refresh %s",name.c_str());
+  Refresh * refresh = new Refresh (name,
+				   config->refresh_field_ghosts[index],
+				   config->refresh_field_face_rank[index]);
+  if (config->refresh_field_list[index].size() == 0) {
+
+    refresh->all_fields (config->num_fields);
+
+  } else {
+
+    for (int index_field=0; index_field<config->refresh_field_list[index].size(); index_field++) {
+      std::string field_name = config->refresh_field_list[index][index_field];
+      if (field_descr->is_field (field_name)) {
+	refresh->insert_field(field_descr->field_id(field_name));
+      } else {
+	ERROR3 ("Problem::create_refresh_()",
+		"Unknown field in Refresh group %s field_list[%d] = %s",
+		name.c_str(),index_field,field_name.c_str());
+      }
+    }
+
+  }
+  return NULL;
+}
 
 //----------------------------------------------------------------------
 

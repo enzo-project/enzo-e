@@ -47,7 +47,8 @@ void CommBlock::refresh_begin_()
     int n3[3];
     size_forest(&n3[0],&n3[1],&n3[2]);
 
-    ItFace it_face = this->it_face();
+    const int min_face_rank = 0;
+    ItFace it_face = this->it_face(min_face_rank);
     int if3[3];
 
     const int level = this->level();

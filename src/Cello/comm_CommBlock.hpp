@@ -217,7 +217,8 @@ public: // interface
 
   /// Return an iterator over faces
 
-  ItFace it_face(const int * ic3=0,
+  ItFace it_face(int min_face_rank,
+		 const int * ic3=0,
 		 const int * if3=0) throw();
 
   //--------------------------------------------------
@@ -285,10 +286,7 @@ public:
   {      enzo_matvec_(); delete msg; }
 
 protected:
-  void enzo_matvec_() 
-  {
-    printf ("%s:%d enzo_matvec_\n",__FILE__,__LINE__);
-  }
+  void enzo_matvec_() ;
 
 public:
 
@@ -432,6 +430,13 @@ public:
   /// Whether the given face should be refreshed 
   /// (false if boundary and not periodic)
   bool do_refresh(int if3[3]) const;
+
+  void clear_refresh() throw()
+  {
+    refresh_sync_  = "";
+    refresh_phase_ = phase_unknown;
+    refresh_index_ = -1;
+  }
 
 protected:
   void refresh_begin_();
@@ -742,6 +747,9 @@ protected: // attributes
 
   /// Synchronization after current refresh
   std::string refresh_sync_;
+
+  /// Index of current refresh
+  int refresh_index_;
 
 };
 

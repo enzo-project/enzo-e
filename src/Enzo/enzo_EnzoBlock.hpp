@@ -272,18 +272,33 @@ public: /// entry methods
   /// Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
-  /// EnzoMethodGravityCg synchronization entry method: DOT(R,R)
+  /// EnzoMethodGravityCg synchronization entry method
+  template <class T>
+  void r_cg_loop_0a (CkReductionMsg * msg) ;  // DOT ==> refresh P
+
+  template <class T>
+  void r_cg_loop_0b (CkReductionMsg * msg) ;  // ==> refresh P
+
+  /// EnzoMethodGravityCg synchronization entry method: refresh P for MATVEC
   template <class T>
   void r_cg_loop_1 (CkReductionMsg * msg) ;
-  /// EnzoMethodGravityCg synchronization entry method: MATVEC (A,P)
-  template <class T>
-  void r_cg_loop_2 (CkReductionMsg * msg) ;
+
   /// EnzoMethodGravityCg synchronization entry method: DOT(P,AP)
   template <class T>
   void r_cg_loop_3 (CkReductionMsg * msg) ;
+
   /// EnzoMethodGravityCg synchronization entry method: DOT(R,R)
   template <class T>
-  void r_cg_loop_4 (CkReductionMsg * msg) ;
+  void r_cg_loop_5 (CkReductionMsg * msg) ;
+
+
+  void p_enzo_matvec()
+  {      enzo_matvec_(); }
+  void r_enzo_matvec(CkReductionMsg * msg)
+  {      enzo_matvec_(); delete msg; }
+
+protected:
+  void enzo_matvec_() ;
 
 public: // attributes (YIKES!)
 

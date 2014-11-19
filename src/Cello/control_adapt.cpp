@@ -345,7 +345,8 @@ void CommBlock::adapt_send_level()
   const int level        = this->level();
   const int rank         = this->rank();
 
-  ItFace it_face = this->it_face();
+  const int min_face_rank = 0;
+  ItFace it_face = this->it_face(min_face_rank);
   int of3[3];
 
   while (it_face.next(of3)) {
@@ -573,7 +574,8 @@ void CommBlock::adapt_recv_same(const int of3[3],int level_face_new)
 
     int jf3[3];
 
-    ItFace it_face = this->it_face(jc3,of3);
+    const int min_face_rank = 0;
+    ItFace it_face = this->it_face(min_face_rank,jc3,of3);
 
     while (it_face.next(jf3)) {
       set_child_face_level_next(jc3,jf3,level_face_new);
@@ -592,7 +594,8 @@ void CommBlock::adapt_recv_coarse(const int of3[3], const int ic3[3], int level_
 
   const int rank = this->rank();
 
-  ItFace it_face = this->it_face(ic3,of3);
+  const int min_face_rank = 0;
+  ItFace it_face = this->it_face(min_face_rank,ic3,of3);
 
   int jf3[3];
   while (it_face.next(jf3)) {
@@ -605,7 +608,7 @@ void CommBlock::adapt_recv_coarse(const int of3[3], const int ic3[3], int level_
 
       int kf3[3];
 
-      ItFace it_face = this->it_face(jc3,jf3);
+      ItFace it_face = this->it_face(min_face_rank,jc3,jf3);
 
       while (it_face.next(kf3)) {
 	set_child_face_level_next(jc3,kf3,level_face_new);
@@ -639,7 +642,8 @@ void CommBlock::adapt_recv_fine(const int of3[3], const int ic3[3],int level_fac
     Index index_child = index_.index_child(jc3);
 
     int jf3[3];
-    ItFace it_face = this->it_face(jc3,of3);
+    const int min_face_rank = 0;
+    ItFace it_face = this->it_face(min_face_rank,jc3,of3);
 
     while (it_face.next(jf3)) {
 
@@ -744,7 +748,8 @@ void CommBlock::p_adapt_recv_child
   store_face_(na,array, iface, ic3, lghost, op_array_restrict);
 
   // copy child face level and face level
-  ItFace it_face = this->it_face();
+  const int min_face_rank = 0;
+  ItFace it_face = this->it_face(min_face_rank);
   int of3[3];
   while (it_face.next(of3)) {
     int level_child = child_face_level_curr[IF3(of3)];
@@ -792,11 +797,12 @@ void CommBlock::initialize_child_face_levels_()
   while (it_child.next(ic3)) {
 
     Index index_child = index_.index_child(ic3);
-    int if3[3];
-    ItFace it_face = this->it_face();
+    const int min_face_rank = 0;
+    ItFace it_face = this->it_face(min_face_rank);
 
     // For each child face
 
+    int if3[3];
     while (it_face.next(if3)) {
 
       int ip3[3];

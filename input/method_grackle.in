@@ -38,9 +38,6 @@
      ];
 
      padding = 0;
-     refresh {
-         rank = 0;
-     };
  }
 
  Group {

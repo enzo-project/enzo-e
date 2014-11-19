@@ -27,11 +27,7 @@ include "input/initial_square.incl"
 Field {
     ghosts = 4; # must be even for ProlongLinear
     prolong = "linear";
-    refresh {
-       rank = 0;
-    }
 }
-
 
 Output {
 

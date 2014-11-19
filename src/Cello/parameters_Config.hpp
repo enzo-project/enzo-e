@@ -12,8 +12,14 @@
 /* Maximum number of fields in any field list in the configuration file */
 #define MAX_FIELDS      30
 
+/* Maximum number of method groups in the configuration file */
+#define MAX_METHOD_GROUPS  10
+
 /* Maximum number of output file groups specified in the configuration file */
 #define MAX_OUTPUT_GROUPS 10
+
+/* Maximum number of refresh file groups specified in the configuration file */
+#define MAX_REFRESH_GROUPS 10
 
 /* Maximum number of schedules */
 #define MAX_SCHEDULE 10
@@ -87,7 +93,6 @@ public: // attributes
   int                        field_ghosts[3];
   int                        field_padding;
   int                        field_precision;
-  int                        field_refresh_rank;
   std::string                field_prolong_type;
   std::string                field_restrict_type;
   std::vector< std::vector<std::string> >  field_group_list;
@@ -122,11 +127,20 @@ public: // attributes
 
   // Method
 
+  int                        num_method;
   std::vector<std::string>   method_list;
+  std::vector<std::string>   method_refresh [MAX_METHOD_GROUPS];
 
   // Monitor
 
   bool                       monitor_debug;
+
+  // Refresh
+  int                        num_refresh;
+  std::vector<std::string>   refresh_list;
+  std::vector<std::string>   refresh_field_list [MAX_REFRESH_GROUPS];
+  int                        refresh_field_face_rank [MAX_REFRESH_GROUPS];
+  int                        refresh_field_ghosts [MAX_REFRESH_GROUPS];
 
   // Output
 
@@ -198,6 +212,7 @@ protected: // functions
   void read_monitor_     (Parameters * parameters) throw();
   void read_output_      (Parameters * parameters) throw();
   void read_performance_ (Parameters * parameters) throw();
+  void read_refresh_     (Parameters * parameters) throw();
   void read_restart_     (Parameters * parameters) throw();
   void read_stopping_    (Parameters * parameters) throw();
   void read_testing_     (Parameters * parameters) throw();
