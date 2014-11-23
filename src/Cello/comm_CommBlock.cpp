@@ -73,8 +73,8 @@ CommBlock::CommBlock
   age_(0),
   face_level_last_(),
   name_(name()),
-  refresh_sync_(""),
   refresh_phase_(phase_unknown),
+  refresh_sync_(""),
   refresh_index_(-1),
   method_(0)
 {
@@ -575,6 +575,63 @@ void CommBlock::loop_limits_nibling_
   ic3p[2] = (if3[2] == 0) ? 1 : (if3[2]+1)/2;
   if (rank < 2) ic3m[1] = ic3p[1] = 0;
   if (rank < 3) ic3m[2] = ic3p[2] = 0;
+}
+
+//----------------------------------------------------------------------
+
+FieldFace * CommBlock::load_face_
+(
+ int *   n, char ** a,
+ int if3[3], int ic3[3], bool lg3[3],
+ int op_array_type
+ )
+{
+  FieldFace * field_face = create_face_ (if3,ic3,lg3, op_array_type);
+  field_face->load(n, a);
+  return field_face;
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::store_face_
+(
+ int n, char * a, 
+ int if3[3], int ic3[3], bool lg3[3],
+ int op_array_type
+ )
+{
+  FieldFace * field_face = create_face_ (if3,ic3,lg3, op_array_type);
+
+  field_face->store(n, a);
+  delete field_face;
+}
+
+//----------------------------------------------------------------------
+
+FieldFace * CommBlock::create_face_
+(int if3[3], int ic3[3], bool lg3[3],
+ int op_array_type
+ )
+{
+  Problem * problem        = simulation()->problem();
+  FieldBlock * field_block = block_->field_block();
+
+  FieldFace * field_face = new FieldFace (field_block);
+
+  if (op_array_type == op_array_restrict) {
+
+    field_face->set_restrict(problem->restrict(),ic3[0],ic3[1],ic3[2]);
+
+  } else if (op_array_type == op_array_prolong) {
+
+    field_face->set_prolong(problem->prolong(),  ic3[0],ic3[1],ic3[2]);
+
+  }
+
+  field_face->set_face (if3[0],if3[1],if3[2]);
+  field_face->set_ghost(lg3[0],lg3[1],lg3[2]);
+
+  return field_face;
 }
 
 //----------------------------------------------------------------------

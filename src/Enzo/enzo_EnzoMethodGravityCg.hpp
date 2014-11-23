@@ -142,13 +142,13 @@ protected: // attributes
   int iter_;
   double alpha_;
   // inner product R*R
-  double rr_;
-  // sum of elements R(i)
-  double rs_;
   // inner product P*(A*P)
   double pap_;
+  double rr_;
   // newest inner product R*R
   double rr_new_;
+  // sum of elements R(i)
+  double rs_;
 
   
 };

@@ -103,25 +103,13 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     iter_max_(iter_max), 
     res_tol_(res_tol),
     rr0_(0),
-    /// Input / output vectors
-    idensity_(0),
-    ipotential_(0),
-    /// CG temporary vectors
-    ib_(0),
-    ix_(0),
-    ir_(0),
-    ip_(0),
-    iap_(0),
-    /// vector attributes
+    idensity_(0),  ipotential_(0),
+    ib_(0), ix_(0), ir_(0), ip_(0), iap_(0),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
-    /// CG scalars
     iter_(0),
-    rr_(0),
-    alpha_(0),
-    rr_new_(0),
-    pap_(0)
+    alpha_(0), pap_(0), rr_(0), rr_new_(0)
 {
   TRACE("EnzoMethodGravity()");
   idensity_   = field_descr->field_id("density");
@@ -273,8 +261,8 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
     static_cast<EnzoMethodGravityCg*> (this->method());
 
   double rr = ((double*)msg->getData())[0];
-  double rs = ((double*)msg->getData())[1];
   method->set_rr(rr);
+  // double rs = ((double*)msg->getData())[1];
   // rs = rs / (512.0*512.0);
   // printf ("%s:%d rs = %g\n",__FILE__,__LINE__,rs);
   // method->set_rs(rs);
@@ -295,8 +283,6 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 {
   TRACE("r_cg_loop_0b");
   delete msg;
-  EnzoMethodGravityCg * method = 
-    static_cast<EnzoMethodGravityCg*> (this->method());
 
   control_next(phase_refresh_enter,"neighbor");
   
@@ -337,9 +323,9 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
   if (iter_ == 0)  {
     rr0_ = rr_;
     Field field = enzo_block->block()->field();
-    T * P  = (T*) field.values(ip_);
-    T * R  = (T*) field.values(ir_);
-    T * B  = (T*) field.values(ib_);
+    // T * P  = (T*) field.values(ip_);
+    // T * R  = (T*) field.values(ir_);
+    // T * B  = (T*) field.values(ib_);
     // scale_ (P,T(-rs_),P);
     // scale_ (R,T(-rs_),R);
     // scale_ (B,T(-rs_),B);

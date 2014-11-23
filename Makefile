@@ -1,9 +1,8 @@
 .PHONY: default
-default: enzop-8
+default: bin/enzo-p
 
-.PHONY: enzop-%
-enzop-%:
-	python scons.py -j$* bin/enzo-p
+bin/enzo-p:
+	./build.sh bin/enzo-p
 
 .PHONY: doc
 doc:

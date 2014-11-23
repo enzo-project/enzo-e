@@ -83,12 +83,12 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
     enzo_float * species_HeI   = (enzo_float *) field.values("species_HeI");
     enzo_float * species_HeII  = (enzo_float *) field.values("species_HeII");
     enzo_float * species_HeIII = (enzo_float *) field.values("species_HeIII");
-    enzo_float * species_HM    = (enzo_float *) field.values("species_HM");
+    // enzo_float * species_HM    = (enzo_float *) field.values("species_HM");
     enzo_float * species_H2I   = (enzo_float *) field.values("species_H2I");
     enzo_float * species_H2II  = (enzo_float *) field.values("species_H2II");
-    enzo_float * species_DI    = (enzo_float *) field.values("species_DI");
-    enzo_float * species_DII   = (enzo_float *) field.values("species_DII");
-    enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
+    // enzo_float * species_DI    = (enzo_float *) field.values("species_DI");
+    // enzo_float * species_DII   = (enzo_float *) field.values("species_DII");
+    // enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
  
     /* Find the temperature units if we are using comoving coordinates. */
  

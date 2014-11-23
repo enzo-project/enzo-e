@@ -25,9 +25,9 @@ public: // interface
 	  int field_ghosts,
 	  int field_face_rank) throw()
     : name_(name),
+      field_list_(),
       field_ghosts_(field_ghosts),
-      field_face_rank_(field_face_rank),
-      field_list_()
+      field_face_rank_(field_face_rank)
   {
   }
 
@@ -41,11 +41,13 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
+
     PUP::able::pup(p);
-    p | field_ghosts_;
-    p | field_list_;
-    p | field_face_rank_;
+
     p | name_;
+    p | field_list_;
+    p | field_ghosts_;
+    p | field_face_rank_;
   }
 
   /// Add the given field to the list
@@ -68,17 +70,17 @@ private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  /// Ghost zone depth
-  int field_ghosts_;
+  /// Name of this Refresh object
+  std::string name_;
 
   /// Indicies of fields to include
   std::vector <int> field_list_;
 
+  /// Ghost zone depth
+  int field_ghosts_;
+
   /// minimum face field rank to refresh (0 = corners, 1 = edges, etc.)
   int field_face_rank_;
-
-  /// Name of this Refresh object
-  std::string name_;
 
 };
 

@@ -20,7 +20,6 @@ int EnzoBlock::SolveHydroEquations
   /* initialize */
 
   int dim, i,j,  size;
-  int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num;
   enzo_float a = 1, dadt;
 
   Field field = block()->field();
@@ -61,18 +60,18 @@ int EnzoBlock::SolveHydroEquations
 
   /* Find fields: density, total energy, velocity1-3. */
 
-  enzo_float * species_De    = (enzo_float *) field.values("species_De");
-  enzo_float * species_HI    = (enzo_float *) field.values("species_HI");
-  enzo_float * species_HII   = (enzo_float *) field.values("species_HII");
-  enzo_float * species_HeI   = (enzo_float *) field.values("species_HeI");
-  enzo_float * species_HeII  = (enzo_float *) field.values("species_HeII");
-  enzo_float * species_HeIII = (enzo_float *) field.values("species_HeIII");
-  enzo_float * species_HM    = (enzo_float *) field.values("species_HM");
-  enzo_float * species_H2I   = (enzo_float *) field.values("species_H2I");
-  enzo_float * species_H2II  = (enzo_float *) field.values("species_H2II");
-  enzo_float * species_DI    = (enzo_float *) field.values("species_DI");
-  enzo_float * species_DII   = (enzo_float *) field.values("species_DII");
-  enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
+  // enzo_float * species_De    = (enzo_float *) field.values("species_De");
+  // enzo_float * species_HI    = (enzo_float *) field.values("species_HI");
+  // enzo_float * species_HII   = (enzo_float *) field.values("species_HII");
+  // enzo_float * species_HeI   = (enzo_float *) field.values("species_HeI");
+  // enzo_float * species_HeII  = (enzo_float *) field.values("species_HeII");
+  // enzo_float * species_HeIII = (enzo_float *) field.values("species_HeIII");
+  // enzo_float * species_HM    = (enzo_float *) field.values("species_HM");
+  // enzo_float * species_H2I   = (enzo_float *) field.values("species_H2I");
+  // enzo_float * species_H2II  = (enzo_float *) field.values("species_H2II");
+  // enzo_float * species_DI    = (enzo_float *) field.values("species_DI");
+  // enzo_float * species_DII   = (enzo_float *) field.values("species_DII");
+  // enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
 
 
   enzo_float * density         = (enzo_float*) field.values("density");

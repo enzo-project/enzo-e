@@ -75,6 +75,9 @@ public: // interface
   /// Create an array with the field's face data
   void load(int * n, char ** array) throw();
 
+  /// Copy the input array data to the field's ghost zones
+  void store(int n, char * array) throw();
+
   /// Interpolate the data using the given prolongation operator
   void set_prolong(Prolong * prolong, int icx, int icy=0, int icz=0) throw()
   { prolong_ = prolong; 
@@ -85,8 +88,8 @@ public: // interface
   { restrict_ = restrict; 
     set_child_(icx,icy,icz);  }
 
-  /// Copy the input array data to the field's ghost zones
-  void store(int n, char * array) throw();
+  void set_field_list (std::vector<int> const & field_list)
+  { field_list_ = field_list; }
 
   /// Allocate array_ storage
   char * allocate() throw();
@@ -165,6 +168,7 @@ private: // attributes
 
   /// List of fields (default all)
   std::vector<int> field_list_;
+
 };
 
 #endif /* FIELD_FIELD_FACE_HPP */
