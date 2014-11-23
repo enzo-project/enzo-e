@@ -96,7 +96,7 @@
      check {
         type  = "checkpoint";
         dir   = ["method_grackle-1-%06d","cycle"];
-        schedule { var = "cycle"; step = 1000; }
+        schedule { var = "cycle"; start = 1000; step = 1000; }
      };
 
 

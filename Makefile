@@ -11,8 +11,7 @@ doc:
 
 .PHONY: diff
 diff:
-	hg diff > out.diff
-	./tools/parse_diff.sh out.diff > diff.org
+	./tools/org-diff.sh > diff.org
 .PHONY: clean
 clean:
 	python scons.py -c

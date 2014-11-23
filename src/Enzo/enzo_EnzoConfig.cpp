@@ -291,8 +291,8 @@ void EnzoConfig::read(Parameters * p) throw()
       ("Method:grackle:cie_cooling",method_grackle_chemistry.cie_cooling);
 
     method_grackle_chemistry.h2_optical_depth_approximation = p->value_integer
-      ("Method:grackle:h2_optical_depth_approximation",m
-       ethod_grackle_chemistry.h2_optical_depth_approximation);
+      ("Method:grackle:h2_optical_depth_approximation",
+       method_grackle_chemistry.h2_optical_depth_approximation);
 
     method_grackle_chemistry.photoelectric_heating = p->value_integer
       ("Method:grackle:photoelectric_heating",

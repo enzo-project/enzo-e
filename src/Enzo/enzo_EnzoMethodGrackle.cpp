@@ -88,7 +88,7 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
   ghost_depth (0,&gx,&gy,&gz);
 
   int nx,ny,nz;
-  array_size (&nx,&ny,&nz);
+  block_size (&nx,&ny,&nz);
 
   gr_int grid_start[3] = {gx,      gy,      gz};
   gr_int grid_end[3]   = {gx+nx-1, gy+ny-1, gz+nz-1} ;
