@@ -159,12 +159,12 @@ public: // virtual functions
   
   int & perf_counter(int perf_region) {return perf_count_[perf_region]; }
 
-#ifdef CELLO_DEBUG
+#if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
   FILE * fp_debug() { return fp_debug_; }
 #endif
 
   void debug_open() {
-#ifdef CELLO_DEBUG
+#if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
     char buffer[40];
     sprintf(buffer,"out.debug.%03d-%03d",CkMyPe(),cycle_);
     fp_debug_ = fopen (buffer,"w");
@@ -172,12 +172,12 @@ public: // virtual functions
   }
 
   void debug_close() {
-#ifdef CELLO_DEBUG
+#if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
     fclose(fp_debug_);
     fp_debug_ = 0;
 #endif
   }
-  
+
   // /// Run the simulation
   // virtual void run() throw();
 
@@ -267,7 +267,7 @@ protected: // functions
 
 protected: // attributes
 
-#ifdef CELLO_DEBUG  
+#if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
   FILE * fp_debug_;
 #endif
 

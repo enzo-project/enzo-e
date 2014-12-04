@@ -603,7 +603,7 @@ Refresh * Problem::create_refresh_
     }
 
   }
-  return NULL;
+  return refresh;
 }
 
 //----------------------------------------------------------------------

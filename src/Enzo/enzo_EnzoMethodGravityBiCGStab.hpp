@@ -44,7 +44,8 @@ public: // interface
 protected: // methods
 
   template <class T>
-  void compute_ (T * density,   int md3[3], int nd3[3],
+  void compute_ (CommBlock * comm_block,
+		 T * density,   int md3[3], int nd3[3],
 		 T * potential, int mp3[3], int np3[3]) const throw();
 
 protected: // attributes

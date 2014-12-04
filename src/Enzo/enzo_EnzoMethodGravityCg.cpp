@@ -244,9 +244,11 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
   CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_0a<T>(NULL), 
 		      enzo_block->proxy_array());
 
+  TRACE("Calling contribute r_cg_loop_0a()");
   enzo_block->contribute (2*sizeof(double), &rr_rs, 
 			  CkReduction::sum_double, 
 			  cb);
+  TRACE("Called contribute r_cg_loop_0a()");
 }
 
 //----------------------------------------------------------------------
@@ -256,7 +258,7 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
 /// ==> refresh P for AP = MATVEC (A,P)
 {
-  TRACE("r_cg_loop_0a");
+  TRACE1("r_cg_loop_0a index_method = %d",index_method_);
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
 
@@ -503,6 +505,8 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 
   printf ("%s:%d cg_end retval %d  iter %d  rr/rr0 = %g\n",
 	  __FILE__,__LINE__,retval,iter_,rr_/rr0_);
+
+  enzo_block->compute_stop();
 }
 
 //----------------------------------------------------------------------

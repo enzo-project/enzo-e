@@ -76,7 +76,7 @@ CommBlock::CommBlock
   refresh_phase_(phase_unknown),
   refresh_sync_(""),
   refresh_index_(-1),
-  method_(0)
+  index_method_(-1)
 {
   // Enable Charm++ AtSync() dynamic load balancing
   usesAtSync = CmiTrue;
@@ -266,7 +266,7 @@ void CommBlock::pup(PUP::er &p)
   p | refresh_phase_;
   p | refresh_sync_;
   p | refresh_index_;
-
+  p | index_method_;
   // SKIP method_: initialized when needed
 
   if (up) debug_faces_("PUP");
@@ -289,6 +289,15 @@ ItFace CommBlock::it_face(int min_face_rank,
   bool periodic[3][2];
   periodicity(periodic);
   return ItFace (rank,min_face_rank,periodic,n3,index_,ic3,if3);
+}
+
+//----------------------------------------------------------------------
+
+Method * CommBlock::method () throw ()
+{
+  Problem * problem = simulation()->problem();
+  Method * method = problem->method(index_method_);
+  return method;
 }
 
 //======================================================================

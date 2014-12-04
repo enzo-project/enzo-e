@@ -42,7 +42,7 @@ public: // interface
 protected: // methods
 
   template <class T>
-  void compute_ (T * Unew ) const throw();
+  void compute_ (CommBlock * comm_block, T * Unew ) const throw();
 
 protected: // attributes
 

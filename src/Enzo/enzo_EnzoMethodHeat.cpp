@@ -45,9 +45,9 @@ void EnzoMethodHeat::compute ( CommBlock * comm_block) throw()
   void *     t = field_array (id);
   const int  p = field_precision (id);
 
-  if      (p == precision_single)    compute_ ((float*)  t);
-  else if (p == precision_double)    compute_ ((double*) t);
-  else if (p == precision_quadruple) compute_ ((long double*) t);
+  if      (p == precision_single)    compute_ (comm_block,(float *)t);
+  else if (p == precision_double)    compute_ (comm_block,(double*)t);
+  else if (p == precision_quadruple) compute_ (comm_block,(long double*) t);
   else 
     ERROR1("EnzoMethodHeat()", "precision %d not recognized", p);
 }
@@ -74,7 +74,7 @@ double EnzoMethodHeat::timestep ( CommBlock * comm_block ) throw()
 //======================================================================
 
 template <class T>
-void EnzoMethodHeat::compute_ (T * Unew) const throw()
+void EnzoMethodHeat::compute_ (CommBlock * comm_block,T * Unew) const throw()
 {
 
   const int id = field_id ("temperature");
@@ -154,6 +154,11 @@ void EnzoMethodHeat::compute_ (T * Unew) const throw()
       }
     }
   }
+
   delete [] U;
+
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+
+  enzo_block->compute_stop();
 
 }

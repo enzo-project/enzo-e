@@ -262,19 +262,32 @@ public: // interface
 
   /// Set the currently-active Method.  Used to resume a Method's
   /// computation after a reduction
-  void set_method (Method * method) throw()
-  { method_ = method; }
+  void set_method_index (int index_method) throw()
+  { index_method_ = index_method; }
+  int index_method() const throw()
+  { return index_method_; }
 
   /// Return the currently-active Method
-  Method * method () throw()
-  { return method_; }
+  Method * method () throw();
 
 protected:
+  /// Enter control compute phase
   void compute_enter_();
-  void compute_continue_();
+  /// Initiate computing the sequence of Methods
   void compute_begin_();
+  /// Initiate computing the next Method in the sequence
+  void compute_next_();
+  /// Return after performing any Refresh operations
+  void compute_continue_();
+  /// Cleanup after all Methods have been applied
+  void compute_end_();
+  /// Exit control compute phase
   void compute_exit_();
 public:
+
+  /// Prepare to call compute_next_() after computing (used to synchronize between methods)
+  /// Must be called at end of Method
+  void compute_stop();
 
   //--------------------------------------------------
   // ENZO GRAVITY CG: MOVE TO ENZO
@@ -739,8 +752,8 @@ protected: // attributes
   /// String for storing bit ID name
   std::string name_;
 
-  /// Currently-active Method
-  Method * method_;
+  /// Index of currently-active Method
+  int index_method_;
 
   /// Phase after current refresh
   int refresh_phase_;

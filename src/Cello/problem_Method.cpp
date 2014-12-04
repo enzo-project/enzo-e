@@ -60,5 +60,6 @@ void Method::initialize_ ( CommBlock * comm_block) throw()
   comm_block->cell_width (&hx_,&hy_,&hz_);
 
 }
+
 //======================================================================
 

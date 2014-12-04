@@ -50,6 +50,7 @@ void EnzoMethodTurbulence::pup (PUP::er &p)
 
 void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
 {
+
   // MUST PROCEED EVEN IF NOT A LEAF NODE SINCE REDUCTION IS ON ALL
   // CommBlock's
   //  if (!comm_block->is_leaf()) return;
@@ -60,7 +61,6 @@ void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
   //  INCOMPLETE("EnzoMethodTurbulence::compute()");
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
-
   
   Field field = comm_block->block()->field();
 
@@ -327,6 +327,8 @@ void EnzoMethodTurbulence::compute_resume
     compute_resume_<long double> (comm_block,msg);
 }
 
+//----------------------------------------------------------------------
+
 template <class T>
 void EnzoMethodTurbulence::compute_resume_ 
 (CommBlock * comm_block,
@@ -395,4 +397,7 @@ void EnzoMethodTurbulence::compute_resume_
       }
     }
   }
+
+  enzo_block->compute_stop();
+  
 }

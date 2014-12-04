@@ -215,6 +215,10 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
 
 #endif /* CONFIG_USE_GRACKLE */
 
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+
+  enzo_block->compute_stop();
+
 }
 
 //----------------------------------------------------------------------

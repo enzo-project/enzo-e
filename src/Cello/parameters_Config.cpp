@@ -689,8 +689,9 @@ void Config::read_output_ (Parameters * p) throw()
     p->group_pop();
 
     // Image 
-
-    TRACE2 ("output_type[%d] = %s",index,output_type[index_output].c_str());
+    
+    TRACE2 ("output_type[%d] = %s",
+	    index_output,output_type[index_output].c_str());
 
     if (output_type[index_output] == "image") {
 

@@ -18,13 +18,35 @@
 
 void CommBlock::compute_begin_ ()
 {
-  // REFRESH HERE WITH control_
+  TRACE("CommBlock::compute_begin()");
+  simulation()->set_phase(phase_compute);
 
   refresh_phase_ = phase_compute_continue;
   refresh_sync_  = "contribute";
 
-  control_next(phase_refresh_enter,"neighbor");
+  index_method_ = 0;
 
+  compute_next_();
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::compute_next_ ()
+{
+ Method * method = simulation()->problem()->method(index_method_);
+
+  TRACE2 ("CommBlock::compute_next() method = %d %p\n",
+	  index_method_,method);
+
+  if (method) {
+
+    control_next(phase_refresh_enter,"neighbor");
+
+  } else {
+
+    compute_end_();
+
+  }
 }
 
 //----------------------------------------------------------------------
@@ -36,20 +58,35 @@ void CommBlock::compute_continue_ ()
   //  double time_start = CmiWallTimer();
 #endif
 
-  simulation()->set_phase(phase_compute);
+  Method * method = simulation()->problem()->method(index_method_);
 
-  const Problem * problem = simulation()->problem();
-  int index_method = 0;
-  Method * method;
-  while ((method = problem->method(index_method++) )) {
+  TRACE2 ("CommBlock::compute_continue() method = %d %p\n",
+	  index_method_,method);
+    
+  // Apply the method to the CommBlock
+  method -> compute (this);
 
-    // Remember currently active Method to returne from reductions
-    set_method (method);
+}
 
-    // Apply the method to the CommBlock
-    method -> compute (this);
+//----------------------------------------------------------------------
 
-  }
+void CommBlock::compute_stop ()
+{
+
+  index_method_++;
+
+  compute_next_();
+
+  //  control_sync (phase_compute_exit,"none",true,__FILE__,__LINE__);
+
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::compute_end_ ()
+{
+  TRACE1 ("CommBlock::compute_end() method = %d\n",
+	  index_method_);
 
 #ifdef CONFIG_USE_PROJECTIONS
   //  traceUserBracketEvent(10,time_start, CmiWallTimer());
@@ -60,13 +97,11 @@ void CommBlock::compute_continue_ ()
   simulation()->set_cycle(cycle_);
   simulation()->set_time(time_);
 
-  TRACE ("END   PHASE COMPUTE");
-
-  //  control_sync (phase_compute_exit,"none",true,__FILE__,__LINE__);
   control_next();
-
+  TRACE ("END   PHASE COMPUTE");
 }
 
 //----------------------------------------------------------------------
+
 
 

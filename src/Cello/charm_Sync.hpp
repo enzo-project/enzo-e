@@ -77,6 +77,10 @@ class Sync {
   inline void set_stop (int stop) throw ()
   { index_stop_ = stop; }
 
+  /// Return the currently-set stopping value for the counter
+  inline int stop () const throw ()
+  { return index_stop_; }
+
   /// Reset the counter to 0
   inline void reset () throw () 
   { index_curr_ = 0; }

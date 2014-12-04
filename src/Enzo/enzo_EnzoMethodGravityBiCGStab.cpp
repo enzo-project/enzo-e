@@ -315,14 +315,20 @@ void EnzoMethodGravityBiCGStab::compute ( CommBlock * comm_block) throw()
   const int p = field.precision(id);
 
   if      (p == precision_single)
-    compute_  ((float*)  density,   md3,nd3,
-	       (float*)  potential, mp3,np3);
+    compute_
+      ( comm_block, 
+	(float*) density, md3,nd3, 
+	(float*) potential, mp3,np3);
   else if (p == precision_double)
-    compute_ ((double*)  density,   md3,nd3,
-	      (double*)  potential, mp3,np3);
+    compute_
+      ( comm_block, 
+	(double*) density, md3,nd3, 
+	(double*) potential, mp3,np3);
   else if (p == precision_quadruple)
-    compute_ ((long double*)  density,   md3,nd3,
-	      (long double*)  potential, mp3,np3);
+    compute_
+      ( comm_block, 
+	(long double*) density, md3,nd3, 
+	(long double*) potential, mp3,np3);
   else 
     ERROR1("EnzoMethodGravityBiCGStab()", "precision %d not recognized", p);
 }
@@ -331,9 +337,12 @@ void EnzoMethodGravityBiCGStab::compute ( CommBlock * comm_block) throw()
 
 template <class T>
 void EnzoMethodGravityBiCGStab::compute_ 
-(T * density,   int md3[3], int nd3[3],
+(CommBlock * comm_block,
+ T * density,   int md3[3], int nd3[3],
  T * potential, int mp3[3], int np3[3]) const throw()
 {
+
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 
   printf ("potential size %d %d %d  dim %d %d %d\n",
 	  np3[0],np3[1],np3[2],
@@ -342,5 +351,7 @@ void EnzoMethodGravityBiCGStab::compute_
   printf ("density size %d %d %d  dim %d %d %d\n",
 	  nd3[0],nd3[1],nd3[2],
 	  md3[0],md3[1],md3[2]);
+
+  enzo_block->compute_stop();
 
 }
