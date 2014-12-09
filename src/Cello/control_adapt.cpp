@@ -270,6 +270,8 @@ void CommBlock::adapt_refine_()
   int nx,ny,nz;
   block()->field_block()->size(&nx,&ny,&nz);
 
+  std::vector<int> field_list;
+
   // For each new child
 
   int ic3[3];
@@ -290,7 +292,8 @@ void CommBlock::adapt_refine_()
       bool lghost[3] = {true,true,true};
       
       FieldFace * field_face = 
-	load_face_ (&narray,&array, iface,ic3,lghost, op_array_prolong);
+	load_face_ (&narray,&array, iface,ic3,lghost, op_array_prolong,
+		    field_list);
 
       int num_field_blocks = 1;
       bool testing = false;
@@ -712,10 +715,11 @@ void CommBlock::adapt_coarsen_()
     int narray; 
     char * array;
     int iface[3] = {0,0,0};
-    //    bool lghost[3] = {true,true,true};
     bool lghost[3] = {false,false,false};
+    std::vector<int> field_list;
     FieldFace * field_face = 
-      load_face_(&narray,&array, iface, ic3, lghost, op_array_restrict);
+      load_face_(&narray,&array, iface, ic3, lghost, op_array_restrict,
+		 field_list);
 
     // copy face levels
     int nf = face_level_curr_.size();
@@ -745,7 +749,10 @@ void CommBlock::p_adapt_recv_child
   // copy array
   int iface[3] = {0,0,0};
   bool lghost[3] = {false,false,false};
-  store_face_(na,array, iface, ic3, lghost, op_array_restrict);
+  
+  std::vector<int> field_list;
+  store_face_(na,array, iface, ic3, lghost, op_array_restrict,
+	      field_list);
 
   // copy child face level and face level
   const int min_face_rank = 0;

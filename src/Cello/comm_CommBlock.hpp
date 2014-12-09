@@ -19,14 +19,14 @@
 #endif
 
 class Block;
-// class Control;
 class Factory;
 class FieldDescr;
 class FieldFace;
-class ItFace;
 class GroupProcess;
 class Hierarchy;
+class ItFace;
 class Method;
+class Refresh;
 class Simulation;
 
 //----------------------------------------------------------------------
@@ -260,15 +260,29 @@ public: // interface
   void r_compute_exit(CkReductionMsg * msg)
   {      compute_exit_(); delete msg; }
 
-  /// Set the currently-active Method.  Used to resume a Method's
+  /// Set the currently active Method.  Used to resume a Method's
   /// computation after a reduction
   void set_method_index (int index_method) throw()
   { index_method_ = index_method; }
+
+  /// Return the currently active Method
   int index_method() const throw()
   { return index_method_; }
 
   /// Return the currently-active Method
   Method * method () throw();
+
+  /// Set the currently-active Refresh.  Used to resume a Refresh's
+  /// computation after a reduction
+  void set_refresh_index (int index_refresh) throw()
+  { index_refresh_ = index_refresh; }
+
+  /// Return the currently active Refresh
+  int index_refresh() const throw()
+  { return index_refresh_; }
+
+  /// Return the currently-active Refresh
+  Refresh * refresh () throw();
 
 protected:
   /// Enter control compute phase
@@ -652,14 +666,20 @@ protected: // functions
   }
   void loop_limits_nibling_ (int ic3m[3], int ic3p[3], const int if3[3]) const throw();
 
-  FieldFace * load_face_(int * n, char ** a,
-			 int if3[3], int ic3[3], bool lg3[3],
-			 int op_array);
-  void store_face_(int n, char * a,
-		   int if3[3], int ic3[3], bool lg3[3],
-		   int op_array);
-  FieldFace * create_face_(int if3[3], int ic3[3],  bool lg3[3],
-			   int op_array);
+  FieldFace * load_face_
+  (int * n, char ** a,
+   int if3[3], int ic3[3], bool lg3[3],
+   int op_array,
+   std::vector<int> & field_list);
+  void store_face_
+  (int n, char * a,
+   int if3[3], int ic3[3], bool lg3[3],
+   int op_array,
+   std::vector<int> & field_list);
+  FieldFace * create_face_
+  (int if3[3], int ic3[3], bool lg3[3],
+   int op_array,
+   std::vector<int> & field_list);
 
 protected: // attributes
 
@@ -754,6 +774,9 @@ protected: // attributes
 
   /// Index of currently-active Method
   int index_method_;
+
+  /// Index of currently-active Refresh
+  int index_refresh_;
 
   /// Phase after current refresh
   int refresh_phase_;

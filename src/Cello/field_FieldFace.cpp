@@ -119,6 +119,10 @@ void FieldFace::load ( int * n, char ** array) throw()
 {
   if (array_.size() == 0)  allocate ();
 
+  ASSERT("FieldFace::load()",
+	 "array_.size() must be > 0",
+	 array_.size() > 0);
+
   const size_t num_fields = field_block_->field_count();
 
   size_t index_array = 0;
@@ -127,6 +131,10 @@ void FieldFace::load ( int * n, char ** array) throw()
     field_list_.resize(num_fields);
     for (size_t i=0; i<num_fields; i++) field_list_[i] = i;
   }
+
+  ASSERT("FieldFace::load()",
+	 "field_list.size() must be > 0",
+	 field_list_.size() > 0);
 
   for (size_t index_field_list=0;
        index_field_list < field_list_.size();
@@ -194,7 +202,11 @@ void FieldFace::load ( int * n, char ** array) throw()
   }
 
   *n = array_.size();
+  ASSERT("FieldFace::load()",
+	 "array size must be > 0",
+	 *n > 0);
   *array = &array_[0];
+
 }
 
 //----------------------------------------------------------------------
@@ -282,6 +294,10 @@ char * FieldFace::allocate () throw()
 {
   size_t num_fields = field_block_->field_count();
 
+  ASSERT("FieldFace::allocate()",
+	 "num_fields must be > 0",
+	 num_fields > 0);
+  
   int array_size = 0;
 
   for (size_t index_field = 0; index_field < num_fields; index_field++) {
@@ -395,8 +411,8 @@ void FieldFace::load_loop_limits_
 
       if (ghost_[axis]) {
 
-	im3[axis] =  0;
-	n3[axis] = nd3[axis];
+	im3[axis] = 0;
+	n3[axis]  = nd3[axis];
 
       } else {
 
@@ -416,7 +432,6 @@ void FieldFace::load_loop_limits_
 	} else  {
 	  n3[axis] += ng3[axis]/2;
 	  im3[axis] -= child_[axis]*ng3[axis]/2;
-
 	}
 
       }

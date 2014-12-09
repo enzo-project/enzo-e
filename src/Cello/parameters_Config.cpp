@@ -556,7 +556,7 @@ void Config::read_method_ (Parameters * p) throw()
   //--------------------------------------------------
   // Method
   //--------------------------------------------------
- 
+
   TRACE("Parameters: Method");
 
   num_method = p->list_length("Method:list");

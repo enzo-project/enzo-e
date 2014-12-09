@@ -88,6 +88,7 @@ public: // interface
   { restrict_ = restrict; 
     set_child_(icx,icy,icz);  }
 
+  /// Set the list of fields
   void set_field_list (std::vector<int> const & field_list)
   { field_list_ = field_list; }
 
@@ -135,13 +136,13 @@ private: // functions
   /// the field_face array; returns number of bytes copied
   template<class T>
   size_t load_ (T * array_face,  const T * field_face,
-			  int nd3[3], int nf3[3], int im3[3]) throw();
+		int nd3[3], int nf3[3], int im3[3]) throw();
 
   /// Precision-agnostic function for copying the field_face array into
   /// the field block ghosts; returns number of bytes copied
   template<class T>
   size_t store_ (T * field_ghosts,  const T * array_ghosts, 
-			   int nd3[3], int nf3[3], int im3[3]) throw();
+		 int nd3[3], int nf3[3], int im3[3]) throw();
 
 private: // attributes
 

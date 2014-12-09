@@ -59,6 +59,21 @@ public: // virtual functions
   virtual double timestep (CommBlock * comm_block) throw() 
   { return std::numeric_limits<double>::max(); }
 
+  /// Append a Refresh index to the list of indices
+  void add_index_refresh (int index) {
+    index_refresh_.push_back(index);
+  }
+
+  /// Return the ith refresh index in 'index', and return whether i is in range
+  int index_refresh (size_t i) const
+  { const bool in_range = (i < index_refresh_.size());
+    return in_range ? index_refresh_[i] : -1;
+  }
+
+  int num_refresh() const {
+    return index_refresh_.size();
+  }
+
 protected: // functions
 
   /// Get CommBlock attributes that typical methods will need
@@ -237,6 +252,9 @@ protected: // functions
 
   /// Precision for each CommBlock field variables
   std::vector<int> field_precision_;
+
+  /// Indices of Refresh objects associated with this method
+  std::vector<int> index_refresh_;
 
 };
 

@@ -25,6 +25,7 @@ void CommBlock::compute_begin_ ()
   refresh_sync_  = "contribute";
 
   index_method_ = 0;
+  index_refresh_ = method()->index_refresh(0);
 
   compute_next_();
 }
@@ -33,7 +34,7 @@ void CommBlock::compute_begin_ ()
 
 void CommBlock::compute_next_ ()
 {
- Method * method = simulation()->problem()->method(index_method_);
+  Method * method = simulation()->problem()->method(index_method_);
 
   TRACE2 ("CommBlock::compute_next() method = %d %p\n",
 	  index_method_,method);

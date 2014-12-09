@@ -329,11 +329,22 @@ void Problem::initialize_method
  const FieldDescr * field_descr
  ) throw()
 {
-  for (size_t index=0; index<config->method_list.size(); index++) {
+  for (size_t index_method=0; index_method<config->method_list.size(); index_method++) {
 
-    std::string name = config->method_list[index];
+    std::string name = config->method_list[index_method];
 
-    Method * method = create_method_(name, index, config, field_descr);
+    Method * method = create_method_(name, index_method, config, field_descr);
+
+    for (int imr = 0; imr < config->method_refresh[index_method].size(); imr++) {
+      std::string refresh_str = config->method_refresh[index_method][imr];
+      bool found = false;
+      for (int ir = 0; ir < config->refresh_list.size(); ir++) {
+	if (config->refresh_list[ir] == refresh_str) {
+	  found = true;
+	  method->add_index_refresh(ir);
+	}
+      }
+    }
 
     if (method) {
 

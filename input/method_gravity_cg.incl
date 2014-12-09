@@ -27,11 +27,18 @@ Mesh {
 Method {
     list = ["gravity_cg"]; 
     gravity_cg {
+       refresh = "refresh_gravity";
        iter_max = 1000;
        res_tol  = 1e-3;
     }
 }
 
+Refresh {
+   list = ["refresh_gravity"];
+   refresh_gravity {
+      field_list = [];
+   }
+}
 Field {
    
    list = ["density", "potential",

@@ -21,6 +21,8 @@
 
 void CommBlock::refresh_begin_() 
 {
+  Refresh * refresh = simulation()->problem()->refresh(index_refresh_);
+
   if (is_leaf() && children_.size() != 0) {
     WARNING2("CommBlock::refresh_begin_()",
 	     "%s: is_leaf() && children_.size() == %d: setting is_leaf_ = false",
@@ -42,13 +44,12 @@ void CommBlock::refresh_begin_()
     return;
   }
 
-  if (is_leaf()) {
+  if (refresh && is_leaf()) {
 
     int n3[3];
     size_forest(&n3[0],&n3[1],&n3[2]);
 
-    const int min_face_rank = 0;
-    ItFace it_face = this->it_face(min_face_rank);
+    ItFace it_face = this->it_face( refresh->field_face_rank() );
     int if3[3];
 
     const int level = this->level();
@@ -117,11 +118,6 @@ void CommBlock::refresh_load_face_
   int iface[3],
   int ichild[3] )
 {
-  int n; 
-  char * array;
-
-  bool lghost[3] = {false,false,false};
-
   FieldFace * field_face;
 
   int type_op_array;
@@ -156,9 +152,15 @@ void CommBlock::refresh_load_face_
 
   }
 
+  int n; 
+  char * array;
+  bool lghost[3] = {false,false,false};
+
+  std::vector<int> field_list;
   field_face = load_face_ (&n, &array,
 			   iface, ichild, lghost,
-			   type_op_array);
+			   type_op_array,
+			   field_list);
 
   int jface[3] = {-iface[0], -iface[1], -iface[2]};
 
@@ -174,44 +176,34 @@ void CommBlock::refresh_store_face_
 (int n, char * buffer, int type_refresh,
  int iface[3], int ichild[3])
 {
-  if (type_refresh == refresh_coarse) { // coarse
+  bool lghost[3] = {false,false,false};
 
-    bool lghost[3] = {false};
+  std::vector<int> field_list = refresh()->field_list();
+
+  if (type_refresh == refresh_coarse) { // coarse
 
     store_face_(n,buffer,
 		iface, ichild, lghost,
-		op_array_restrict);
+		op_array_restrict,
+		field_list);
 
   } else if (type_refresh == refresh_same) { // same
 
     if ( n != 0) {
-      bool lghost[3] = {false,false,false};
+
       store_face_(n,buffer,
 		  iface,ichild,lghost,
-		  op_array_copy);
+		  op_array_copy,
+		  field_list);
     }
 
   } else if (type_refresh == refresh_fine) {
 
-    bool lghost[3] = {false};
     store_face_(n,buffer,
 		iface, ichild, lghost,
-		op_array_prolong);
+		op_array_prolong,
+		field_list);
   }
-}
-
-//----------------------------------------------------------------------
-
-void CommBlock::x_refresh_child 
-(
- int    n, 
- char * buffer, 
- int    ic3[3]
- )
-{
-  int  iface[3]  = {0,0,0};
-  bool lghost[3] = {true,true,true};
-  store_face_(n,buffer, iface, ic3, lghost, op_array_restrict);
 }
 
 //----------------------------------------------------------------------

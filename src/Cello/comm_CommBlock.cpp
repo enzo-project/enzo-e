@@ -170,6 +170,7 @@ CommBlock::CommBlock
 
     //    set "face" to full FieldBlock
     field_face.set_face(0,0,0);
+
     field_face.set_ghost(true,true,true);
 
     //    set array operation if any
@@ -300,6 +301,15 @@ Method * CommBlock::method () throw ()
   return method;
 }
 
+//----------------------------------------------------------------------
+
+Refresh * CommBlock::refresh () throw ()
+{
+  Problem * problem = simulation()->problem();
+  Refresh * refresh = problem->refresh(index_refresh_);
+  return refresh;
+}
+
 //======================================================================
 
 void CommBlock::apply_initial_() throw ()
@@ -342,9 +352,10 @@ CommBlock::~CommBlock() throw ()
     char * array;
     int iface[3]={0,0,0};
     bool lghost[3]={true,true,true};
-
+    
+    std::vector<int> field_list;
     FieldFace * field_face = 
-      load_face_(&n,&array,iface,ichild,lghost,op_array_restrict);
+      load_face_(&n,&array,iface,ichild,lghost,op_array_restrict,field_list);
 
     const Index index_parent = index_.index_parent();
 
@@ -366,6 +377,21 @@ CommBlock::~CommBlock() throw ()
 
   thisProxy.doneInserting();
 
+}
+
+//----------------------------------------------------------------------
+
+void CommBlock::x_refresh_child 
+(
+ int    n, 
+ char * buffer, 
+ int    ic3[3]
+ )
+{
+  int  iface[3]  = {0,0,0};
+  bool lghost[3] = {true,true,true};
+  std::vector<int> field_list;
+  store_face_(n,buffer, iface, ic3, lghost, op_array_restrict,field_list);
 }
 
 //----------------------------------------------------------------------
@@ -592,10 +618,12 @@ FieldFace * CommBlock::load_face_
 (
  int *   n, char ** a,
  int if3[3], int ic3[3], bool lg3[3],
- int op_array_type
+ int op_array_type,
+ std::vector<int> & field_list 
  )
 {
-  FieldFace * field_face = create_face_ (if3,ic3,lg3, op_array_type);
+  FieldFace * field_face = create_face_ 
+    (if3,ic3,lg3, op_array_type,field_list);
   field_face->load(n, a);
   return field_face;
 }
@@ -606,10 +634,11 @@ void CommBlock::store_face_
 (
  int n, char * a, 
  int if3[3], int ic3[3], bool lg3[3],
- int op_array_type
+ int op_array_type,
+ std::vector<int> & field_list
  )
 {
-  FieldFace * field_face = create_face_ (if3,ic3,lg3, op_array_type);
+  FieldFace * field_face = create_face_ (if3,ic3,lg3, op_array_type,field_list);
 
   field_face->store(n, a);
   delete field_face;
@@ -619,7 +648,8 @@ void CommBlock::store_face_
 
 FieldFace * CommBlock::create_face_
 (int if3[3], int ic3[3], bool lg3[3],
- int op_array_type
+ int op_array_type,
+ std::vector<int> & field_list
  )
 {
   Problem * problem        = simulation()->problem();
@@ -639,7 +669,13 @@ FieldFace * CommBlock::create_face_
 
   field_face->set_face (if3[0],if3[1],if3[2]);
   field_face->set_ghost(lg3[0],lg3[1],lg3[2]);
-
+  const FieldDescr * field_descr = simulation()->field_descr();
+  if (field_list.size() == 0) {
+    int n = field_descr->field_count();
+    field_list.resize(n);
+    for (int i=0; i<n; i++) field_list[i] = i;
+  }
+  field_face->set_field_list(field_list);
   return field_face;
 }
 

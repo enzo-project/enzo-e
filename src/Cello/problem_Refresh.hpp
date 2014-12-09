@@ -63,6 +63,39 @@ public: // interface
     }
   }
 
+  std::vector<int> & field_list() {
+    return field_list_;
+  }
+
+  /// Return the current minimum rank (dimension) of faces to refresh
+  /// e.g. 0: everything, 1: omit corners, 2: omit corners and edges
+  int field_face_rank() const 
+  { return field_face_rank_; }
+
+  /// Return the ghost zone depth
+  int field_ghosts() const
+  { return field_ghosts_; }
+
+  /// Return the ith field index, or false if i is out of range
+  bool get_field_index (size_t i, int * index_field)
+  {
+    const bool in_range = (i < field_list_.size());
+    if (in_range) (*index_field) = field_list_[i];
+    return in_range;
+  }
+  void print () const {
+    printf ("%s:%d\n",__FILE__,__LINE__);
+    printf ("name_ %s\n",name_.c_str());
+    printf ("field_list:");
+    for (size_t i=0; i<field_list_.size(); i++) {
+      printf (" %d",field_list_[i]);
+    }
+    printf ("\n");
+    printf ("field_ghosts: %d\n",field_ghosts_);
+    printf ("field_face_rank: %d\n",field_face_rank_);
+
+  }
+
 private: // functions
 
 

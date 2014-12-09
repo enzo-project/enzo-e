@@ -235,6 +235,7 @@ bool test_fields
 	test_result = test_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
 	result = result && test_result;
+	printf ("gx,gy,gz = %d %d %d\n",gx,gy,gz);
 
 	// field 1
 	field_descr->ghosts(1, &gx, &gy, &gz);
