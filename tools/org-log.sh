@@ -28,5 +28,5 @@ BEGIN{
 		    }
 		    printf ("\n");
 		}
-	} else print
+	} else { print ":   ",$0; }
 }

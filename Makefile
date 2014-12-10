@@ -25,5 +25,9 @@ clean:
 .PHONY: diff
 diff:
 	./tools/org-diff.sh > diff.org
+#----------------------------------------------------------------------
+.PHONY: log
+log:
+	hg log | ./tools/org-log.sh > log.org
 
 
