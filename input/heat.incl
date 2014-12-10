@@ -1,79 +1,75 @@
-# File:    heat.incl
-# Problem: 2D Implosion problem
-# Author:  James Bordner (jobordner@ucsd.edu)
 
-   # Domain is the two dimensional box 0 < x,y < 1.0
+ Boundary {
+     temperature {
+         type = "inflow";
+         value = 0.0000000000000;
+     };
+     type = "reflecting";
+ }
 
-   include "input/domain-2d-01.incl"
+ Domain {
+     lower = [ 0.0000000000000, 0.0000000000000 ];
+     upper = [ 1.0000000000000, 1.0000000000000 ];
+ }
 
-   # The computational mesh is a single uniform grid
+ Field {
+     alignment = 8;
+     courant = 0.50000000000000;
+     gamma = 1.4000000000000;
+     ghosts = 3;
+     list = [ "temperature" ];
+     padding = 0;
+ }
 
-   Mesh { 
-      root_rank = 2;
-      root_size = [80,80];
-   }
+ Initial {
+     temperature {
+         value = [ 100.00000000000, ((( x  -  0.50000000000000 ) * ( x  -  0.50000000000000 )) + (( y  -  0.50000000000000 ) * ( y  -  0.50000000000000 ))) <  0.050000000000000 , 10.000000000000 ];
+     };
+ }
 
-   # Field parameters include those concerning fields as a group, as
-   # well as individual fields
-   
-   Field {
+ Mesh {
+     root_blocks = [ 2, 4 ];
+     root_rank = 2;
+     root_size = [ 80, 80 ];
+ }
 
-      ghosts = 3;
+ Method {
+     list = [ "heat" ];
+     heat {
+         alpha = 1.0000000000000;
+         refresh = "refresh";
+     };
+ }
 
-      list = ["temperature"];
+ Refresh {
+    list = ["refresh"];
 
-      # courant condition for fields
+    refresh {
+       field_face_rank = 0;
+       field_list = [];
+       field_ghosts = 4;
+    }
+ }
 
-      courant   = 0.5;
+ Output {
+     list = [ "temperature" ];
+     temperature {
+         colormap = [ 0.0000000000000, 0.0000000000000, 0.0000000000000, 1.0000000000000, 0.0000000000000, 0.0000000000000, 1.0000000000000, 1.0000000000000, 0.0000000000000, 1.0000000000000, 1.0000000000000, 1.0000000000000 ];
+         field_list = [ "temperature" ];
+         name = [ "method_heat-8-%06d.png", "cycle" ];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+ }
 
-      gamma = 1.4;
-      padding   = 0;
-      alignment = 8;    
-   }
+ Stopping {
+     cycle = 1000;
+ }
 
-   Method {
-
-      # list of methods to apply and in what order
- 
-      list = ["ppm"];
-
-      ppm {
-
-         # method-specific parameters
-
-         diffusion   = true;
-         flattening  = 3;
-         steepening  = true;
-
-         dual_energy = false;
-     }
-   }
-
-   Initial {
-       temperature  {
-            value = [ 0.125, x + y < 0.5,  1.0 ]; };
-   }
-
-   Boundary { type = "reflecting" }
-
-   Stopping {        cycle = 400;   } 
-   Testing {   cycle_final = 400; }
-
-# OLD TIME
-#   Testing {  time_final  = 1.03693807162344;  } 
-# TIME FOR UPDATED InitialDefault
-   Testing {  time_final  = 1.04044035635889; }
-
-   Output { 
-
-      list = ["temperature"];
-
-      temperature {
-        field_list = ["temperature"];
-	type     = "image";
-        include "input/schedule_cycle_10.incl"
-        include "input/colormap_blackbody.incl";
-      };
-
-
-   }
+ Testing {
+     cycle_final = 1000;
+     time_final = 0.039062499999999;
+ }
