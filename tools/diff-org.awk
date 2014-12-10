@@ -21,7 +21,7 @@ BEGIN{
     print "* TODO [/] [C-u C-c # to update stats]"
 }
 /diff -r/ {
-   file=$4; p=0;
+   file=$NF; p=0;
    n=split(file,s,"/");
    shortfile = s[n];
 }
