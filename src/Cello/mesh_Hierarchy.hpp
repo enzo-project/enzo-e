@@ -137,15 +137,6 @@ public: // interface
   const Factory * factory () const throw()
   { return factory_; }
 
-  /// Return the layout of the patch, describing processes and blocking
-  Layout * layout () throw();
-
-  /// Return the layout of the patch, describing processes and blocking
-  const Layout * layout () const throw();
-
-  const GroupProcess * group_process()  const throw()
-  { return group_process_; };
-
 protected: // attributes
 
   /// Factory for creating Simulations, Hierarchies, Patches and Blocks
@@ -173,12 +164,6 @@ protected: // attributes
 
   /// Upper extent of the hierarchy
   double upper_[3];
-
-  /// Parallel Group for distributing the Mesh across processors
-  GroupProcess * group_process_;
-
-  /// Layout: describes blocking, processor range, and processor mapping 
-  Layout * layout_;
 
   /// How the Forest is distributed into CommBlocks
   int blocking_[3];

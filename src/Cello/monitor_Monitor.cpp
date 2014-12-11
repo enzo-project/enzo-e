@@ -75,9 +75,7 @@ void Monitor::header () const
 
   // Print all recognized configuration settings
 
-  GroupProcess * group_process = GroupProcess::create();
-  print ("Define","Simulation processors %d",group_process->size());
-  delete group_process;
+  print ("Define","Simulation processors %d",CkNumPes());
 
   // Parallel type defines
 

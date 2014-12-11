@@ -278,7 +278,6 @@ test_value        = env.Program (['test_Value.cpp', objs_mesh],
 test_memory       = env.Program ('test_Memory.cpp',     LIBS=[libs_memory, libs_test])
 test_monitor      = env.Program ('test_Monitor.cpp',    LIBS=[libs_monitor,libs_test])
 test_group_process = env.Program ('test_GroupProcess.cpp', LIBS=[libs_parallel,libs_test])
-test_layout       = env.Program ('test_Layout.cpp',       LIBS=[libs_parallel,libs_test])
 
 test_parameters   = env.Program ('test_Parameters.cpp',  LIBS=[libs_parameters,libs_test])
 test_parse        = env.Program ('test_Parse.cpp',       LIBS=[libs_parameters,libs_test])
@@ -329,7 +328,7 @@ binaries_io    = [test_it_reduce, test_colormap]
 binaries_memory  = [test_memory]
 binaries_mesh = [ test_block,test_hierarchy,test_tree,test_tree_density,test_node,test_node_trace,test_it_node,test_index,test_schedule,test_it_face,test_it_child]
 binaries_monitor = [test_monitor]
-binaries_parallel = [test_group_process,test_layout]
+binaries_parallel = [test_group_process]
 
 objs_parallel.append(["main.cpp"])
 

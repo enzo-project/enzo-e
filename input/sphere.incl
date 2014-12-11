@@ -36,11 +36,21 @@
       list = ["ppm"];
 
       ppm {
+         refresh = "ppm_refresh";
          diffusion   = true;
          flattening  = 3;
          steepening  = true;
          dual_energy = false;
      }
+   }
+
+   Refresh {
+      list = ["ppm_refresh"];
+      ppm_refresh {
+         field_face_rank = 0;
+         field_list = [];
+         field_ghosts = 4;
+      }
    }
 
    Initial {

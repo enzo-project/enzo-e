@@ -8,7 +8,6 @@
 #ifndef MESH_FACTORY_HPP
 #define MESH_FACTORY_HPP
 
-class GroupProcess;
 class Hierarchy;
 class IoBlock;
 class IoFieldBlock;

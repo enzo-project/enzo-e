@@ -29,9 +29,7 @@ Output::Output (int index, const Factory * factory) throw()
 
 {
 
-  const GroupProcess * group_process = GroupProcess::create();
-  process_  = group_process->rank();
-  delete group_process;
+  process_  = CkMyPe();
 
   io_block_       = factory->create_io_block();
   io_field_block_ = factory->create_io_field_block();
@@ -235,7 +233,7 @@ void Output::write_hierarchy_
  ) throw()
 {
 
-  if (hierarchy->group_process()->is_root()) {
+  if (CkMyPe() == 0) {
 
     // --------------------------------------------------
     // ENTRY: #1 Output::write_hierarchy_()-> CommBlock::p_output_write()

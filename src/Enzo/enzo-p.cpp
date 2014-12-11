@@ -49,19 +49,16 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-  // Create global parallel process group object
-  const GroupProcess * group_process = GroupProcess::create();
-
   // initialize unit testing
 
-  int ip = group_process->rank();
-  int np = group_process->size();
+  int ip = CkMyPe();
+  int np = CkNumPes();
 
   unit_init(ip,np);
 
   monitor_ = Monitor::instance();
 
-  monitor_->set_active (group_process->is_root());
+  monitor_->set_active (ip == 0);
   monitor_->header();
   monitor_->print ("","BEGIN ENZO-P");
 

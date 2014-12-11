@@ -9,34 +9,6 @@
 #define _PARALLEL_HPP
 
 //----------------------------------------------------------------------
-// Enumerations
-//----------------------------------------------------------------------
-
-/// @enum enum_reduce_op
-/// @brief type of reduction operation
-enum enum_reduce_op {
-  reduce_op_unknown,
-  reduce_op_min,
-  reduce_op_max,
-  reduce_op_sum,
-  reduce_op_land
-};
-
-/// @enum enum_reduce_type
-/// @brief data type to reduce
-enum enum_reduce_type {
-  reduce_type_int,
-  reduce_type_double
-};
-
-enum parallel_enum {
-  parallel_serial,
-  parallel_mpi
-};
-
-#define PROCESS_NULL -1
-
-//----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
 
@@ -58,27 +30,6 @@ enum parallel_enum {
 //----------------------------------------------------------------------
 
 #include "parallel.def"
-#include "parallel_Mpi.hpp"
-
-
-#include "parallel_GroupProcess.hpp"
-#include "parallel_GroupProcessMpi.hpp"
-#include "parallel_GroupProcessCharm.hpp"
-#include "parallel_GroupProcessSerial.hpp"
-
-//#include "parallel_GroupThread.hpp"
-
-#include "parallel_Reduce.hpp"
-#include "parallel_ReduceSerial.hpp"
-#include "parallel_ReduceMpi.hpp"
-#include "parallel_ReduceCharm.hpp"
-
-// #include "parallel_Parallel.hpp"
-
-#include "parallel_Layout.hpp"
-
-
-//#include "parallel_ParallelAffinity.hpp"
 
 #endif /* _PARALLEL_HPP */
 

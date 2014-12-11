@@ -11,7 +11,7 @@
 /// @def      MAX_PARAMETER_FILE_WIDTH
 /// @brief    Maximum allowed width of a line in a parameter file
 #define MAX_PARAMETER_FILE_WIDTH 255
-
+class Monitor;
 class Parameters {
 
   /// @class    Parameters
@@ -40,24 +40,8 @@ public: // interface
   ~Parameters();
 
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    WARNING("Parameters::pup",
-	    "skipping Parameters::pup(): Config used for parameters instead");
-    return;
-
-    p | current_group_depth_;
-    WARNING("Parameters::pup","skipping current_group_ (array of char *: change to std::string)");
-    //    PUParray(p,current_group_,MAX_GROUP_DEPTH);
-    WARNING("Parameters::pup","skipping parameter_map_ (map <std::string,Param *>)");
-    //    p | parameter_map_;
-    p | *parameter_tree_;
-    p | *monitor_; 
-    p | lmonitor_;
-
-  }
-
+  void pup (PUP::er &p);
+  
   /// Read in parameters from a file
   void read (const char * file_name);
   /// Write parameters to a file

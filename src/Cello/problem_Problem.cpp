@@ -122,12 +122,11 @@ void Problem::initialize_boundary(Config * config,
 
 void Problem::initialize_initial(Config * config,
 				 Parameters * parameters,
-				 const FieldDescr * field_descr,
-				 const GroupProcess * group_process) throw()
+				 const FieldDescr * field_descr) throw()
 {
 
   Initial * initial = create_initial_
-    (config->initial_type,config,parameters,field_descr,group_process);
+    (config->initial_type,config,parameters,field_descr);
 
   initial_list_.push_back( initial );
 
@@ -200,7 +199,6 @@ void Problem::initialize_restrict(Config * config) throw()
 void Problem::initialize_output
 (Config * config,
  const FieldDescr * field_descr,
- const GroupProcess * group_process,
  const Factory * factory) throw()
 {
 
@@ -209,7 +207,7 @@ void Problem::initialize_output
     std::string type       = config->output_type[index];
 
     Output * output = create_output_ 
-      (type,index, config,field_descr,group_process,factory);
+      (type,index, config,field_descr,factory);
 
     if (output == NULL) {
       ERROR2("Problem::initialize_output",
@@ -465,8 +463,7 @@ Initial * Problem::create_initial_
  std::string  type,
  Config * config,
  Parameters * parameters,
- const FieldDescr * field_descr,
- const GroupProcess * group_process
+ const FieldDescr * field_descr
  ) throw ()
 { 
   //--------------------------------------------------
@@ -475,7 +472,7 @@ Initial * Problem::create_initial_
   //--------------------------------------------------
 
   if (type == "file") {
-    return new InitialFile   (parameters,group_process,
+    return new InitialFile   (parameters,
 			      config->initial_cycle,
 			      config->initial_time);;
   } else if (type == "value") {
@@ -625,14 +622,12 @@ Output * Problem::create_output_
  int index,
  Config *  config,
  const FieldDescr * field_descr,
- const GroupProcess * group_process,
  const Factory * factory
  ) throw ()
 /// @param name           Name of Output object to create
 /// @param index          Index of output object in Object list
 /// @param config         Configuration parameter object
 /// @param field_descr    Field descriptor 
-/// @param group_process  Group process for group size
 /// @param factory        Factory object for creating Io objects of correct type
 { 
 
@@ -671,7 +666,7 @@ Output * Problem::create_output_
     double      image_max = config->output_image_max[index];
 
     output = new OutputImage (field_descr,
-			      index,factory,group_process->size(),
+			      index,factory,CkNumPes(),
 			      nx,ny,nz, 
 			      nbx,nby,nbz, 
 			      max_level,
@@ -692,7 +687,7 @@ Output * Problem::create_output_
 
   } else if (name == "checkpoint") {
 
-    output = new OutputCheckpoint (index,factory,config,group_process->size());
+    output = new OutputCheckpoint (index,factory,config,CkNumPes());
 
   }
 

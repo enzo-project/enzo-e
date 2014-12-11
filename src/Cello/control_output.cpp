@@ -264,8 +264,7 @@ void Simulation::output_exit()
   debug_close();
   debug_open();
 
-  if (hierarchy()->group_process()->is_root()) 
-    hierarchy()->block_array()->p_output_end();
+  if (CkMyPe() == 0) hierarchy()->block_array()->p_output_end();
 }
 
 //----------------------------------------------------------------------

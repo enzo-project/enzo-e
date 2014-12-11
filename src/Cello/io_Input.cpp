@@ -25,9 +25,7 @@ Input::Input (const Factory * factory) throw()
     process_stride_(1) // default one file per process
 {
 
-  const GroupProcess * group_process = GroupProcess::create();
-  process_  = group_process->rank();
-  delete group_process;
+  process_  = CkMyPe();
 
   io_block_       = factory->create_io_block();
   io_field_block_ = factory->create_io_field_block();
@@ -101,7 +99,7 @@ void Input::read_hierarchy
 ) throw()
 {
 
-  if (hierarchy->group_process()->is_root())
+  if (CkMyPe() == 0)
 
     // --------------------------------------------------
     // ENTRY: #1 Input::read_hierarchy()-> CommBlock::p_output_read()

@@ -43,7 +43,7 @@ const char * cycle_sync[] = {
   "quiescence", // phase_adapt_exit
   "array",      // phase_output_enter
   "none",       // phase_output_exit
-  "none",       // phase_stopping_enter
+  "contribute", // phase_stopping_enter
   "none",       // phase_stopping_exit
   "none",       // phase_compute_enter
   "none"        // phase_compute_exit

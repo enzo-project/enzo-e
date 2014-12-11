@@ -28,9 +28,7 @@ PARALLEL_MAIN_BEGIN
   printf ("%4ld sizeof(FieldDescr)\n",sizeof(FieldDescr));
   printf ("%4ld sizeof(FieldFace)\n",sizeof(FieldFace));
   printf ("%4ld sizeof(FileHdf5)\n",sizeof(FileHdf5));
-  printf ("%4ld sizeof(GroupProcess)\n",sizeof(GroupProcess));
   printf ("%4ld sizeof(Hierarchy)\n",sizeof(Hierarchy));
-  printf ("%4ld sizeof(Layout)\n",sizeof(Layout));
   printf ("%4ld sizeof(Method)\n",sizeof(Method));
   printf ("%4ld sizeof(Node)\n",sizeof(Node));
   printf ("%4ld sizeof(Parameters)\n",sizeof(Parameters));

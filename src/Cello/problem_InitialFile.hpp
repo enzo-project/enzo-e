@@ -27,7 +27,6 @@ public: // interface
 
   /// Constructor
   InitialFile(Parameters * parameters, 
-	      const GroupProcess * group_process,
 	      int cycle, double time) throw();
 
   /// Destructor
@@ -61,9 +60,6 @@ private: // attributes
 
   /// Parameters object
   Parameters * parameters_;
-
-  /// Parallel GroupProcess object for creating Patches
-  GroupProcess * group_process_;
 
   /// Associated Input object
   Input * input_;

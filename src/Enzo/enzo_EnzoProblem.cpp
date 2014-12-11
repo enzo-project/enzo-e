@@ -76,8 +76,7 @@ Initial * EnzoProblem::create_initial_
  std::string  type,
  Config * config,
  Parameters * parameters,
- const FieldDescr * field_descr,
- const GroupProcess * group_process
+ const FieldDescr * field_descr
  ) throw ()
 {
   
@@ -112,7 +111,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->field_gamma);
   } else {
     initial = Problem::create_initial_
-      (type,config,parameters,field_descr,group_process);
+      (type,config,parameters,field_descr);
   }
 
   return initial;

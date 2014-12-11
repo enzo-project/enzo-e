@@ -10,6 +10,7 @@
 
 #include "_error.hpp"
 #include "_parallel.hpp"
+#include "_monitor.hpp"
 
 #include "_memory.hpp"
 

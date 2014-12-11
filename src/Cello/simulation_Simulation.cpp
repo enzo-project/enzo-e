@@ -15,15 +15,12 @@
 Simulation::Simulation
 (
  const char *   parameter_file,
- int            n,
- const GroupProcess * group_process
+ int            n
  ) throw()
 /// Initialize the Simulation object
 : factory_(0),
   parameters_(0),
   parameter_file_(parameter_file),
-  group_process_((GroupProcess *)group_process),
-  is_group_process_new_(false),
   rank_(0),
   cycle_(0),
   time_(0.0),
@@ -43,16 +40,11 @@ Simulation::Simulation
 {
   debug_open();
 
-  if (!group_process_) {
-    group_process_ = GroupProcess::create();
-    is_group_process_new_ = true;
-  }
-
   monitor_ = Monitor::instance();
 #ifdef CELLO_DEBUG
   monitor_->set_active(true);
 #else
-  monitor_->set_active(group_process_->is_root());
+  monitor_->set_active(CkMyPe() == 0);
 #endif
 
   monitor_->print("test","testing");
@@ -85,9 +77,6 @@ void Simulation::pup (PUP::er &p)
 
   p | parameter_file_;
 
-  if (up) group_process_ = GroupProcess::create();
-
-  p | is_group_process_new_;
   p | rank_; 
   p | cycle_;
   p | time_;
@@ -227,7 +216,7 @@ void Simulation::initialize_config_() throw()
     TRACE("Simulation::initialize_config_ calling Config::read()");
     config_->read(parameters_);
   }
-  if (group_process()->is_root()) {
+  if (CkMyPe() == 0) {
     parameters_->write("parameters.out");
   }
   TRACE("END   Simulation::initialize_config_");
@@ -332,7 +321,7 @@ void Simulation::initialize_hierarchy_() throw()
 
   const int refinement = 2;
   hierarchy_ = factory()->create_hierarchy 
-    (rank_,refinement, 0, group_process_->size());
+    (rank_,refinement, 0, CkNumPes());
 
   // Domain extents
 
@@ -369,7 +358,7 @@ void Simulation::initialize_hierarchy_() throw()
 void Simulation::initialize_forest_() throw()
 {
 
-  bool allocate_blocks = (group_process()->is_root());
+  bool allocate_blocks = (CkMyPe() == 0);
 
   // Don't allocate blocks if reading data from files
 
@@ -389,8 +378,6 @@ void Simulation::deallocate_() throw()
 {
   delete factory_;       factory_     = 0;
   delete parameters_;    parameters_  = 0;
-  if (is_group_process_new_)
-    { delete group_process_; group_process_ = 0; }
   delete hierarchy_;     hierarchy_ = 0;
   delete field_descr_;   field_descr_ = 0;
   delete performance_;   performance_ = 0;

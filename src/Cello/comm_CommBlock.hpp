@@ -22,7 +22,6 @@ class Block;
 class Factory;
 class FieldDescr;
 class FieldFace;
-class GroupProcess;
 class Hierarchy;
 class ItFace;
 class Method;

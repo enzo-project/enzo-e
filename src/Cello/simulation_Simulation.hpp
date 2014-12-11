@@ -10,7 +10,6 @@
 
 class Factory;
 class FieldDescr;
-class GroupProcess;
 class Hierarchy;
 class Monitor;
 class Parameters;
@@ -38,8 +37,7 @@ public: // interface
 
   Simulation
   ( const char *       parameter_file,
-    int                n,
-    const GroupProcess * group_process = 0
+    int                n
     ) throw();
 
   //==================================================
@@ -91,10 +89,6 @@ public: // interface
   /// Return the performance object associated with each cycle
   Performance * performance() throw()
   { return performance_; }
-
-  /// Return the group process object
-  const GroupProcess * group_process() const throw()
-  { return group_process_; }
 
   /// Return the monitor object
   Monitor * monitor() const throw()
@@ -283,12 +277,6 @@ protected: // attributes
 
   /// Parameter file name
   std::string parameter_file_;
-
-  /// Parallel group for the simulation
-  GroupProcess * group_process_;
-
-  /// Whether the group_process_ object was allocated inside Simulation
-  bool is_group_process_new_;
 
   /// Rank of the simulation
   int  rank_; 

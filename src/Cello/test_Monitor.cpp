@@ -15,11 +15,9 @@ PARALLEL_MAIN_BEGIN
   
   PARALLEL_INIT;
 
-  const GroupProcess * group_process = GroupProcess::create();
-
   Monitor * monitor  = Monitor::instance();
 
-  unit_init(group_process->rank(),group_process->size());
+  unit_init(CkMyPe(),CkNumPes());
 
   unit_class("Monitor");
 

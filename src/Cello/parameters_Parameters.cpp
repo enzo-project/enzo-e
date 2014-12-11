@@ -62,6 +62,26 @@ Parameters::~Parameters()
 
 //----------------------------------------------------------------------
 
+void Parameters::pup (PUP::er &p)
+{
+  TRACEPUP;
+  WARNING("Parameters::pup",
+	  "skipping Parameters::pup(): Config used for parameters instead");
+  return;
+
+  p | current_group_depth_;
+  WARNING("Parameters::pup","skipping current_group_ (array of char *: change to std::string)");
+  //    PUParray(p,current_group_,MAX_GROUP_DEPTH);
+  WARNING("Parameters::pup","skipping parameter_map_ (map <std::string,Param *>)");
+  //    p | parameter_map_;
+  p | *parameter_tree_;
+  p | *monitor_; 
+  p | lmonitor_;
+
+}
+
+//----------------------------------------------------------------------
+
 void Parameters::read ( const char * file_name )
 /// @param    file_name An opened input parameter file or stdin
 {

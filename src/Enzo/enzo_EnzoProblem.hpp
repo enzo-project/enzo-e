@@ -46,8 +46,7 @@ private: // functions
   (std::string type, 
    Config * config,
    Parameters * parameters,
-   const FieldDescr *,
-   const GroupProcess * group_process) throw ();
+   const FieldDescr *) throw ();
 
   /// Create named refine object
   virtual Refine * create_refine_ 

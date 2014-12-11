@@ -130,8 +130,7 @@ public: // interface
   /// Initialize the initial conditions object
   void initialize_initial(Config * config,
 			  Parameters * parameters,
-			  const FieldDescr * field_descr,
-			  const GroupProcess * group_process) throw();
+			  const FieldDescr * field_descr) throw();
 
   /// Initialize the refine object
   void initialize_refine(Config * config,
@@ -147,7 +146,6 @@ public: // interface
   /// Initialize the output objects
   void initialize_output(Config * config,
 			 const FieldDescr * field_descr,
-			 const GroupProcess * group_process,
 			 const Factory * factory) throw();
 
   /// Initialize the method objects
@@ -182,8 +180,7 @@ protected: // functions
   (std::string type, 
    Config * config,
    Parameters * parameters,
-   const FieldDescr *,
-   const GroupProcess * = 0) throw ();
+   const FieldDescr *) throw ();
 
   /// Create named refine object
   virtual Refine * create_refine_ 
@@ -210,8 +207,7 @@ protected: // functions
   /// Create named output object
   virtual Output *   create_output_  
   (std::string type, int index, Config * config,
-   const FieldDescr * field_descr,
-   const GroupProcess *, const Factory * ) throw ();
+   const FieldDescr * field_descr, const Factory * ) throw ();
 
   /// Create named stopping object
   virtual Stopping * create_stopping_ 

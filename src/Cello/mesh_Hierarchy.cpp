@@ -26,9 +26,7 @@ Hierarchy::Hierarchy
   num_blocks_(0),
   block_array_(NULL),
   block_exists_(false),
-  block_sync_(),
-  group_process_(GroupProcess::create(process_first,process_last_plus)),
-  layout_(0)
+  block_sync_()
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
@@ -45,7 +43,6 @@ Hierarchy::Hierarchy
 Hierarchy::~Hierarchy() throw()
 {
   deallocate_blocks();
-  delete group_process_; group_process_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -86,9 +83,6 @@ void Hierarchy::pup (PUP::er &p)
   PUParray(p,lower_,3);
   PUParray(p,upper_,3);
 
-  if (up) group_process_ = GroupProcess::create();
-  if (up) layout_ = new Layout;
-  p | *layout_;
   PUParray(p,blocking_,3);
 
 }
@@ -132,11 +126,6 @@ void Hierarchy::set_blocking(int nx, int ny, int nz) throw ()
   blocking_[0] = nx;
   blocking_[1] = ny;
   blocking_[2] = nz;
-  if (!layout_) {
-    layout_ = new Layout (blocking_[0],blocking_[1],blocking_[2]);
-    layout_->set_process_range(0,group_process_->size());
-  }
-
 
 }
 
@@ -208,20 +197,6 @@ void Hierarchy::deallocate_blocks() throw()
 
 //----------------------------------------------------------------------
 
-Layout * Hierarchy::layout () throw()
-{
-  return layout_;
-}
-
-//----------------------------------------------------------------------
-
-const Layout * Hierarchy::layout () const throw()
-{
-  return layout_;
-}
-
-//----------------------------------------------------------------------
-
 void Hierarchy::create_forest
 (
  FieldDescr   * field_descr,
@@ -229,28 +204,21 @@ void Hierarchy::create_forest
  bool testing,
  int process_first, int process_last_plus) throw()
 {
-
-
-    // Get number of blocks in the forest
-
-    int nbx,nby,nbz;
-    layout_->block_count (&nbx, &nby, &nbz);
-
     // determine block size
-    int mbx = root_size_[0] / nbx;
-    int mby = root_size_[1] / nby;
-    int mbz = root_size_[2] / nbz;
+    int mbx = root_size_[0] / blocking_[0];
+    int mby = root_size_[1] / blocking_[1];
+    int mbz = root_size_[2] / blocking_[2];
 
     // Check that blocks evenly subdivide forest
-    if (! ((nbx*mbx == root_size_[0]) &&
-	   (nby*mby == root_size_[1]) &&
-	   (nbz*mbz == root_size_[2]))) {
+    if (! ((blocking_[0]*mbx == root_size_[0]) &&
+	   (blocking_[1]*mby == root_size_[1]) &&
+	   (blocking_[2]*mbz == root_size_[2]))) {
 
       ERROR6("Forest::allocate_array_()",  
 	     "CommBlocks must evenly subdivide forest: "
 	     "forest size = (%d %d %d)  block count = (%d %d %d)",
 	     root_size_[0],root_size_[1],root_size_[2],
-	     nbx,nby,nbz);
+	     blocking_[0],blocking_[1],blocking_[2]);
       
     }
 
@@ -263,13 +231,13 @@ void Hierarchy::create_forest
     block_array_ = new CProxy_CommBlock;
 
     (*block_array_) = factory_->create_block_array
-      (nbx,nby,nbz,
+      (blocking_[0],blocking_[1],blocking_[2],
        mbx,mby,mbz,
        num_field_blocks,
        testing);
     
     block_exists_ = allocate_data;
-    block_sync_.set_stop(nbx*nby*nbz);
+    block_sync_.set_stop(blocking_[0]*blocking_[1]*blocking_[2]);
 
 }
 

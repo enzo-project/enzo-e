@@ -33,7 +33,6 @@ enum meta_type {
 
 #include "io_Io.hpp"
 #include "io_IoHierarchy.hpp"
-#include "io_IoLayout.hpp"
 #include "io_IoBlock.hpp"
 #include "io_IoFieldBlock.hpp"
 

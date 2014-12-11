@@ -13,11 +13,9 @@
 
 InitialFile::InitialFile
 (Parameters * parameters,
- const GroupProcess * group_process,
  int cycle, double time) throw ()
   : Initial (cycle,time),
     parameters_(parameters),
-    group_process_((GroupProcess * )group_process),
     input_(0),
     block_sync_(0)
 {
@@ -42,8 +40,6 @@ void InitialFile::pup (PUP::er &p)
 
   if (up) parameters_ = new Parameters;
   p | *parameters_;
-
-  if (up) group_process_ = GroupProcess::create();
 
   p | input_; // PUP::able
 
