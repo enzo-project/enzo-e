@@ -44,16 +44,17 @@ if ($#argv >= 1) then
       set proc = 1
       set k_switch = "-k"
    else
-      # assume enzo-p
       set k_switch = ""
       set target = $argv[1]
-      rm -f $target
+#      rm -f $target
+	echo "Remove $target 1"
    endif
 else
    # assume enzo-p
    set k_switch = ""
    set target = "bin/enzo-p"
-   rm -f $target
+#   rm -f $target
+    echo "Remove $target 2"
 endif
 
 set d = `date +"%Y-%m-%d %H:%M:%S"`

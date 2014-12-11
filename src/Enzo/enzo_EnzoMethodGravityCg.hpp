@@ -70,6 +70,9 @@ public: // interface
   /// Set rs_ by EnzoBlock after reduction
   void set_rs(double rs) throw()  { rs_ = rs;  }
 
+  /// Set rc_ by EnzoBlock after reduction
+  void set_rc(double rc) throw()  { rc_ = rc;  }
+
   /// Set pap_ by EnzoBlock after reduction
   void set_pap(double pap) throw()  { pap_ = pap;}
 
@@ -104,7 +107,16 @@ protected: // methods
   /// scale the vector by the given scalar Y = a*X
   template <class T>
   void scale_ (T * Y, T a, const T * X) const throw();
+
+  /// return the number of elements of the vector X
+  template <class T>
+  T count_ (T * X) const throw();
   
+  /// Shift the vector X by a scalar multiple of Y
+  /// NOTE includes ghost zones since performed after ghost refresh
+  template <class T>
+  void shift_ (T * X, const T a, const T * Y) const throw();
+
   /// Compute local matrix-vector product Y = A*X
   template <class T>
   void matvec_ (T * Y, const T * X) const throw();
@@ -149,6 +161,8 @@ protected: // attributes
   double rr_new_;
   // sum of elements R(i)
   double rs_;
+  // count of elements R(i)
+  double rc_;
 
   
 };
