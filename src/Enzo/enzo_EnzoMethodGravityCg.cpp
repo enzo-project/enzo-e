@@ -237,15 +237,16 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 
   iter_ = 0;
 
-  double rr_rs[2];
-  rr_rs[0] = dot_(R,R);
-  rr_rs[1] = sum_(R);
+  double r_rsc[3];
+  r_rsc[0] = dot_(R,R);
+  r_rsc[1] = sum_(R);
+  r_rsc[2] = count_(R);
 
   CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_0a<T>(NULL), 
 		      enzo_block->proxy_array());
 
   TRACE("Calling contribute r_cg_loop_0a()");
-  enzo_block->contribute (2*sizeof(double), &rr_rs, 
+  enzo_block->contribute (3*sizeof(double), &r_rsc, 
 			  CkReduction::sum_double, 
 			  cb);
   TRACE("Called contribute r_cg_loop_0a()");
@@ -263,11 +264,11 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
     static_cast<EnzoMethodGravityCg*> (this->method());
 
   double rr = ((double*)msg->getData())[0];
+  double rs = ((double*)msg->getData())[1];
+  double rc = ((double*)msg->getData())[2];
   method->set_rr(rr);
-  // double rs = ((double*)msg->getData())[1];
-  // rs = rs / (512.0*512.0);
-  // printf ("%s:%d rs = %g\n",__FILE__,__LINE__,rs);
-  // method->set_rs(rs);
+  method->set_rs(rs);
+  method->set_rc(rc);
   delete msg;
 
   refresh_sync_  = "contribute";
@@ -325,12 +326,13 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
   if (iter_ == 0)  {
     rr0_ = rr_;
     Field field = enzo_block->block()->field();
-    // T * P  = (T*) field.values(ip_);
-    // T * R  = (T*) field.values(ir_);
-    // T * B  = (T*) field.values(ib_);
-    // scale_ (P,T(-rs_),P);
-    // scale_ (R,T(-rs_),R);
-    // scale_ (B,T(-rs_),B);
+    T * P  = (T*) field.values(ip_);
+    T * R  = (T*) field.values(ir_);
+    T * B  = (T*) field.values(ib_);
+    T shift = T(-rs_/rc_);
+    shift_ (P,shift,P);
+    shift_ (R,shift,R);
+    shift_ (B,shift,B);
   }
 
 
@@ -345,7 +347,7 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
     T * P  = (T*) field.values(ip_);
     T * AP = (T*) field.values(iap_);
 
-    matvec_(AP,P);
+    matvec_(AP,P); // AP = A * P (assumes P ghosts refreshed)
 
     double pap = dot_(P,AP);
 
@@ -403,14 +405,18 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
   zaxpy_ (X,   alpha_,P,X);
   zaxpy_ (R, - alpha_,AP,R);
 
-  double rr_rs[2];
-  rr_rs[0] = dot_(R,R);
-  rr_rs[1] = sum_(R);
+  double r_rsc[3];
+  r_rsc[0] = dot_(R,R);
+  r_rsc[1] = sum_(R);
+  r_rsc[2] = count_(R);
+
+  printf ("%d local rr = %e  rs = %e  rc = %e\n",
+	  iter_,r_rsc[0],r_rsc[1],r_rsc[2]);
 
   CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_5<T>(NULL), 
 		      enzo_block->proxy_array());
 
-  enzo_block->contribute (2*sizeof(double), &rr_rs, 
+  enzo_block->contribute (3*sizeof(double), &r_rsc, 
 			  CkReduction::sum_double, 
 			  cb);
 }
@@ -428,8 +434,12 @@ void EnzoBlock::r_cg_loop_5 (CkReductionMsg * msg)
 
   double rr = ((double*)msg->getData())[0];
   double rs = ((double*)msg->getData())[1];
+  double rc = ((double*)msg->getData())[2];
 
   method->set_rr_new(rr);
+  method->set_rs(rs);
+  method->set_rc(rc);
+
   delete msg;
 
   method -> cg_loop_6<T>(this);
@@ -593,6 +603,23 @@ T EnzoMethodGravityCg::sum_ (const T * X) const throw()
 //----------------------------------------------------------------------
 
 template <class T>
+void EnzoMethodGravityCg::shift_ (T * X, const T a, const T * Y) const throw()
+{
+  TRACE("shift");
+  long double value = 0.0;
+  for (int iz=0; iz<mz_; iz++) {
+    for (int iy=0; iy<my_; iy++) {
+      for (int ix=0; ix<mx_; ix++) {
+	int i = ix + mx_*(iy + my_*iz);
+	X[i] = a + Y[i];
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
 void EnzoMethodGravityCg::scale_ (T * Y, T a, const T * X) const throw()
 {
   const int i0 = gx_ + mx_*(gy_ + my_*gz_);
@@ -605,6 +632,24 @@ void EnzoMethodGravityCg::scale_ (T * Y, T a, const T * X) const throw()
     }
   }
   
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+T EnzoMethodGravityCg::count_ (T * X) const throw()
+{
+  T count = 0.0;
+  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+  for (int iz=0; iz<nz_; iz++) {
+    for (int iy=0; iy<ny_; iy++) {
+      for (int ix=0; ix<nx_; ix++) {
+	int i = i0 + ix + mx_*(iy + my_*iz);
+	++count;
+      }
+    }
+  }
+  return count;
 }
 
 //----------------------------------------------------------------------
