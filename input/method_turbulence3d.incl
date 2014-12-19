@@ -34,11 +34,21 @@ Mesh { root_rank = 3; }
          dual_energy = false;
          flattening = 3;
          steepening = true;
+         refresh = "ppm_refresh";
      };
      turbulence {
          mach_number = 1.0;
          e_dot       = -1.0;
      }
+ }
+
+ Refresh {
+    list = ["ppm_refresh"];
+    ppm_refresh { 
+       field_face_rank = 0;
+       field_list = [];
+       field_ghosts = 4;
+    }
  }
 
  Field {

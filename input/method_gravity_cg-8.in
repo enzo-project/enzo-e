@@ -3,7 +3,7 @@
 
 include "input/method_gravity_cg.incl"
 Mesh { 
-   root_blocks = [2,4];
+   root_blocks = [4,4];
 }
 
 Output {

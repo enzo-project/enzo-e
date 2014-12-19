@@ -37,7 +37,7 @@
       list = ["ppm"];
 
       ppm {
-         refresh = "ppm_refresh";
+         refresh     = "ppm_refresh";
          diffusion   = true;
          flattening  = 3;
          steepening  = true;

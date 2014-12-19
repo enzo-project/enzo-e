@@ -74,10 +74,13 @@ public: // interface
   void set_rc(double rc) throw()  { rc_ = rc;  }
 
   /// Set pap_ by EnzoBlock after reduction
-  void set_pap(double pap) throw()  { pap_ = pap;}
+  void set_pap(double pap) throw()  { pap_ = pap; }
+
+  /// Set iter_ by EnzoBlock after reduction
+  void set_iter(int iter) throw()  { iter_ = iter; }
 
   /// Set rr_new_ by EnzoBlock after reduction
-  void set_rr_new(double rr_new) throw()  { rr_new_ = rr_new; ;}
+  void set_rr_new(double rr_new) throw()  { rr_new_ = rr_new; }
 
 protected: // methods
 
@@ -95,14 +98,14 @@ protected: // methods
 
   /// Compute local contribution to inner-product X*Y
   template <class T>
-  T dot_ (const T * X, const T * Y) const throw();
+  long double dot_ (const T * X, const T * Y) const throw();
 
   template <class T>
   void zaxpy_ (T * Z, double a, const T * X, const T * Y) const throw();
   
   /// Compute local sum of vector elements X_i
   template <class T>
-  T sum_ (const T * X) const throw();
+  long double sum_ (const T * X) const throw();
 
   /// scale the vector by the given scalar Y = a*X
   template <class T>
@@ -150,20 +153,28 @@ protected: // attributes
   int mx_,my_,mz_;
   int gx_,gy_,gz_;
 
-  /// CG variables
+  /// Current CG iteration
   int iter_;
+
   double alpha_;
-  // inner product R*R
-  // inner product P*(A*P)
+
+  /// inner product R*R
+  /// inner product P*(A*P)
   double pap_;
   double rr_;
-  // newest inner product R*R
+
+  /// newest inner product R*R
   double rr_new_;
-  // sum of elements R(i)
+
+  /// sum of elements R(i)
   double rs_;
-  // count of elements R(i)
+
+  /// count of elements R(i)
   double rc_;
 
+  /// block counter for operations that must be done once per processor, 
+  /// e.g. increment iter_
+  int block_count_;
   
 };
 

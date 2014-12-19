@@ -37,7 +37,7 @@ CProxy_CommBlock EnzoFactory::create_block_array
  bool testing
  ) const throw()
 {
-  TRACE7("EnzoFactory::create_block_array(na(%d %d %d) n(%d %d %d num_field_blocks %d",	 nbx,nby,nbz,nx,ny,nz,num_field_blocks);
+  TRACE7("EnzoFactory::create_block_array(na(%d %d %d) n(%d %d %d) num_field_blocks %d",	 nbx,nby,nbz,nx,ny,nz,num_field_blocks);
 
   CProxy_EnzoBlock enzo_block_array;
 
@@ -112,7 +112,7 @@ CommBlock * EnzoFactory::create_block
  ) const throw()
 {
   TRACE3("EnzoFactory::create_block(%d %d %d)",nx,ny,nz);
-  TRACE2("EnzoFactory::create_block(num_field_blocks %d  count_adapt %d",
+  TRACE2("EnzoFactory::create_block() num_field_blocks %d  count_adapt %d",
 	 num_field_blocks,count_adapt);
 
 
