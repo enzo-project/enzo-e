@@ -1,6 +1,6 @@
    Output { 
 
- file_groups = ["de","te","mesh"];
+    list = ["de","te","mesh"];
 
     mesh {
 #        image_face_rank = 0;
@@ -11,7 +11,7 @@
 	image_block_size  = 5;
 #	image_size = [513,513];
 #	image_size = [1201,1201];
-	schedule = ["cycle","interval", 100];
+        schedule { var = "cycle"; step = 100; };
         colormap = [1.00, 1.00, 1.00,  
                     0.00, 1.00, 0.00, 
                     1.00, 0.00, 0.00, 
@@ -25,9 +25,9 @@
         field_list = ["density"];
 #	image_ghost = true;
 #	image_size = [1200,1200];
-	schedule = ["cycle","interval", 100];
+        schedule { var = "cycle"; step = 100; };
         colormap = [0.0, 0.0, 0.0,  
-                    0.0, 1.0, 0.0, 
+                    1.0, 0.0, 0.0, 
                     1.0, 1.0, 0.0, 
                     1.0, 1.0, 1.0];
         
@@ -40,7 +40,7 @@
         name     = ["sedov-te-%03d.png","cycle"];
         field_list = ["total_energy"];
 #	image_ghost = true;
-	schedule = ["cycle","interval", 100];
+        schedule { var = "cycle"; step = 100; };
 #	image_size = [1200,1200];
 #	image_size = [512,512];
         colormap = [0.0, 0.0, 0.0,  
@@ -53,7 +53,7 @@
       data {
         name = ["sedov-de-%03d-%03d.h5","cycle","proc"];
 	type     = "data";
-	schedule = ["cycle","interval", 100];
+        schedule { var = "cycle"; step = 100; };
       };
 
    }

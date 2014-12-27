@@ -121,7 +121,7 @@
          flattening  = 3;
          steepening  = true;
          dual_energy = false;
-	 refresh = ppm_refresh;
+	 refresh = "ppm_refresh";
      }
    }
 

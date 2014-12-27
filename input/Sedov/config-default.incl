@@ -1,10 +1,12 @@
 # FILE: config-default
 
-Mesh {
-   adapt {
-      type = ["slope"];
-      fields = ["total_energy"];
-      balance = true;
+Adapt {
+   list = ["te_slope"];
+
+   te_slope {
+      type = "slope";
+      field_list = ["total_energy"];
+      min_refine = 1e3;
    };
 }
 
@@ -23,11 +25,9 @@ Field {
 #^^^
       # list of methods to apply and in what order
  
-      sequence = ["ppm"];
+      list = ["ppm"];
 
    }
-
-   Timestep { type = "ppm"; }
 
    Enzo {
 
@@ -40,19 +40,42 @@ Field {
          steepening  = true;
 
          dual_energy = false;
+         refresh = "ppm_refresh";
      }
    }
 
+   Refresh {
+      list = ["ppm_refresh"];
+      ppm_refresh { 
+         field_face_rank = 0;
+         field_list = [];
+         field_ghosts = 4;
+      }
+   }
+   
    Boundary { type = "periodic" }
  Enzo { sedov { radius_relative = 0.1; } }
 
    Output { 
 
+   list = ["mesh","de","te","h5_de", "h5_te"];
+
+    h5_de {
+       type = "data";
+       name = ["sedov-de-%03d.h5", "cycle"]; 
+       field_list = ["density"];
+    };
+    h5_te {
+       type = "data";
+       name = ["sedov-te-%03d.h5", "cycle"]; 
+       field_list = ["total_energy"];
+    };
+
+
     mesh {
          name = ["sedov-mesh-%03d.png", "cycle"]; 
          type     = "image";
          image_type  = "mesh";
-         image_reduce_type = "max";
 	 image_block_size  = 5;
 #	image_size = [513,513];
 #	image_size = [1201,1201];
@@ -66,9 +89,10 @@ Field {
         axis = "z";    
 	type     = "image";
         name     = ["sedov-de-%03d.png","cycle"];
+         image_reduce_type = "avg";
         field_list = ["density"];
         colormap = [0.0, 0.0, 0.0,  
-                    0.0, 1.0, 0.0, 
+                    1.0, 0.0, 0.0, 
                     1.0, 1.0, 0.0, 
                     1.0, 1.0, 1.0];
         
@@ -76,6 +100,7 @@ Field {
 
       te {
     
+       image_log = true;
         axis = "z";    
 	type     = "image";
         name     = ["sedov-te-%03d.png","cycle"];

@@ -21,12 +21,13 @@
 
       ghosts = 4;
 
-      fields = [
+      list = [
 	"density",	
 	"velocity_x",
 	"velocity_y",
 	"total_energy",
-	"internal_energy"
+	"internal_energy",
+	"pressure"
       ] ;
 
       # courant condition for fields
@@ -35,30 +36,6 @@
 
       padding   = 0;
       alignment = 8;    
-   }
-
-   Method {
-
-      # list of methods to apply and in what order
- 
-      sequence = ["ppm"];
-
-   }
-
-   Timestep { type = "ppm"; }
-
-   Enzo {
-
-      gamma = 1.4;
-
-      ppm {
-
-         diffusion   = true;
-         flattening  = 3;
-         steepening  = true;
-
-         dual_energy = false;
-     }
    }
 
    Initial { type = "sedov_array_2d"; }

@@ -14,15 +14,18 @@ Mesh {
 
 Field {
 
-   fields = [
+   list = [
         "density",	
 	"velocity_x",
 	"velocity_y",
 	"velocity_z",
 	"total_energy",
-	"internal_energy"
+	"internal_energy",
+        "pressure"
       ] ;
 }
 
-Initial { type = "sedov_array_3d"; }
+Initial {
+   type = "sedov_array_3d"; 
+}
 
