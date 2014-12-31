@@ -1,0 +1,119 @@
+# Problem: 3D test of EnzoMethodGravityCg using a truncated isothermal sphere
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+Domain {
+   lower = [ -1.0, -1.0];
+   upper = [  1.0,  1.0];
+}
+
+Mesh { 
+   root_rank = 2;
+   root_size = [32,32];
+}
+
+Method {
+    list = ["gravity_cg"]; 
+    gravity_cg {
+       refresh = ["refresh_null","refresh_cg"];
+       iter_max = 1000;
+       res_tol  = 1e-3;
+    }
+}
+
+Refresh {
+    list = ["refresh_null","refresh_cg"];
+    refresh_null {
+         field_face_rank = 0;
+         field_list = [];
+         field_ghosts = 3;
+    };
+    refresh_cg {
+         field_face_rank = 0;
+         field_list = [];
+         field_ghosts = 3;
+    }
+}
+
+Field {
+   
+   list = ["density", "potential",
+           "B","X","R","P","AP"];
+
+   ghosts = 4;
+
+}
+
+Adapt {
+   max_level = 5; 
+   list = ["slope"];
+   slope {
+      type = "slope";
+      field_list = ["density"];
+      min_refine =  2.0;
+      max_coarsen = 0.01;
+   }
+}
+
+Field { ghosts = 4; }
+Initial {
+   density  { 
+      value = [ 1.0 / (x*x + y*y + 0.00001), x*x + y*y < 0.1,
+                10.0 ];
+   }
+}
+
+Boundary {
+   type = "reflecting";
+} 
+
+Output {
+   list = ["phi_png", "rho_png", "mesh"];
+    mesh {
+	type     = "image";
+	image_type  = "mesh";
+	image_reduce_type = "max";
+        include "input/schedule_cycle_1.incl"
+	image_min = 0.0;
+	image_max = 6.0;
+        include "input/colormap_rainbow.incl"
+   };
+   phi_png {
+     type = "image";
+     field_list = ["potential"];
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   rho_png {
+     type = "image";
+     field_list = ["density"];
+     image_log = true;
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   phi_h5 {
+     type = "data";
+     field_list = ["potential"];
+     include "input/schedule_cycle_1.incl"
+   };
+   rho_h5 {
+     type = "data";
+     field_list = ["density"];
+     include "input/schedule_cycle_1.incl"
+   }
+}
+
+Stopping { cycle = 1; }
+
+
+Mesh { 
+   root_blocks = [2,2];
+}
+
+Output {
+
+  mesh    { name = ["tis2-mesh-%02d.png", "cycle"]; };
+  phi_png { name = ["tis2-phi-%02d.png",  "cycle"]; };
+  rho_png { name = ["tis2-rho-%02d.png",  "cycle"]; };
+  phi_h5  { name = ["tis2-phi-%02d.h5",   "cycle"]; };
+  rho_h5  { name = ["tis2-rho-%02d.h5",   "cycle"]; };
+}
