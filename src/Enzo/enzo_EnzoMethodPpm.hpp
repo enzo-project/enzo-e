@@ -17,7 +17,7 @@ class EnzoMethodPpm : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPpm object
-  EnzoMethodPpm();
+  EnzoMethodPpm(EnzoConfig * enzo_config);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPpm);
@@ -34,6 +34,9 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( CommBlock * comm_block) throw();
 
+protected: // interface
+
+  int comoving_coordinates_;
 };
 
 #endif /* ENZO_ENZO_METHOD_PPM_HPP */

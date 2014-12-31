@@ -13,7 +13,9 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpml::EnzoMethodPpml() : Method()
+EnzoMethodPpml::EnzoMethodPpml(EnzoConfig * enzo_config) 
+  : Method(),
+    comoving_coordinates_(enzo_config->physics_cosmology)
 {
 }
 
@@ -26,6 +28,7 @@ void EnzoMethodPpml::pup (PUP::er &p)
   TRACEPUP;
 
   Method::pup(p);
+  p | comoving_coordinates_;
 }
 
 //----------------------------------------------------------------------
@@ -71,7 +74,8 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) throw()
      set it to one. */
  
   enzo_float a = 1, dadt;
-  if (EnzoBlock::ComovingCoordinates)
+  
+  if (comoving_coordinates_)
     enzo_comm_block->CosmologyComputeExpansionFactor
       (enzo_comm_block->time(), &a, &dadt);
   //  float afloat = float(a);
@@ -135,74 +139,11 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) throw()
        vx, vy, vz,
        bx, by, bz,
        &dtBaryons);
-//     else
-//       FORTRAN_NAME(calc_dt)(&GridRank, GridDimension, GridDimension+1,
-//                                GridDimension+2,
-// //                        Zero, TempInt, Zero+1, TempInt+1, Zero+2, TempInt+2,
-//                           GridStartIndex, GridEndIndex,
-//                                GridStartIndex+1, GridEndIndex+1,
-//                                GridStartIndex+2, GridEndIndex+2,
-// 			       &HydroMethod, &ZEUSQuadraticArtificialViscosity,
-//                           CellWidth[0], CellWidth[1], CellWidth[2],
-//                                GridVelocity, GridVelocity+1, GridVelocity+2,
-//                                &Gamma, &PressureFree, &afloat,
-//                           BaryonField[DensNum], pressure,
-//                                BaryonField[Vel1Num], BaryonField[Vel2Num],
-//                                BaryonField[Vel3Num], &dtBaryons, &dtViscous);
- 
-    /* Clean up */
- 
-    // if (HydroMethod != PPML_Isothermal3D)
-    //   delete pressure;
- 
     /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
  
     dtBaryons *= EnzoBlock::CourantSafetyNumber;
     
   }
- 
-  /* 2) Calculate dt from particles. */
- 
-  // if (NumberOfParticles > 0) {
- 
-  //   /* Compute dt constraint from particle velocities. */
- 
-  //   for (dim = 0; dim < GridRank; dim++) {
-  //     float dCell = CellWidth[dim][0]*a;
-  //     for (i = 0; i < NumberOfParticles; i++) {
-  //       dtTemp = dCell/max(fabs(ParticleVelocity[dim][i]), tiny_number);
-  // 	dtParticles = min(dtParticles, dtTemp);
-  //     }
-  //   }
- 
-  //   /* Multiply resulting dt by ParticleCourantSafetyNumber. */
- 
-  //   dtParticles *= ParticleCourantSafetyNumber;
- 
-  // }
- 
-  /* 3) Find dt from expansion. */
- 
-  // if (EnzoBlock::ComovingCoordinates)
-  //   if (enzo_comm_block->CosmologyComputeExpansionTimestep
-  // 	(enzo_comm_block->time(), &dtExpansion) == ENZO_FAIL) {
-  //     fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
-  //     exit(EXIT_FAILURE);
-  //   }
- 
-  /* 4) Calculate minimum dt due to acceleration field (if present). */
- 
-  // if (SelfGravity) {
-  //   for (dim = 0; dim < GridRank; dim++)
-  //     if (AccelerationField[dim])
-  // 	for (i = 0; i < size; i++) {
-  // 	  dtTemp = sqrt(CellWidth[dim][0]/
-  // 			fabs(AccelerationField[dim][i])+tiny_number);
-  // 	  dtAcceleration = min(dtAcceleration, dtTemp);
-  // 	}
-  //   if (dtAcceleration != huge_number)
-  //     dtAcceleration *= 0.5;
-  // }
  
   /* 5) calculate minimum timestep */
 
@@ -210,28 +151,6 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) throw()
 
   dt = MIN(dt, dtBaryons);
 
-  // dt = MIN(dt, dtParticles);
-  // dt = min(dt, dtViscous);
-  // dt = min(dt, dtAcceleration);
-  // dt = min(dt, dtExpansion);
- 
-  /* Debugging info. */
- 
-  // if (debug1) {
-  //   printf("ComputeTimeStep = %"FSYM" (", dt);
-  //   if (NumberOfBaryonFields > 0)
-  //     printf("Bar = %"FSYM" ", dtBaryons);
-  //   if (HydroMethod == Zeus_Hydro)
-  //     printf("Vis = %"FSYM" ", dtViscous);
-  //   if (ComovingCoordinates)
-  //     printf("Exp = %"FSYM" ", dtExpansion);
-  //   if (dtAcceleration != huge_number)
-  //     printf("Acc = %"FSYM" ", dtAcceleration);
-  //   if (NumberOfParticles)
-  //     printf("Part = %"FSYM" ", dtParticles);
-  //   printf(")\n");
-  // }
- 
 
   return dt;
 }

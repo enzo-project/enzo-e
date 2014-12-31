@@ -23,9 +23,10 @@
  
 //----------------------------------------------------------------------
  
-int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
+int EnzoBlock::ComputePressure(enzo_float time, 
+			       enzo_float *pressure,
+			       int comoving_coordinates)
 {
-
   /* declarations */
  
   int i, size = 1;
@@ -137,7 +138,7 @@ int EnzoBlock::ComputePressure(enzo_float time, enzo_float *pressure)
 
     /* Find the temperature units if we are using comoving coordinates. */
  
-    if (ComovingCoordinates)
+    if (comoving_coordinates)
       if (CosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
 			    &TimeUnits, &VelocityUnits, this->time()) == ENZO_FAIL) {
 	fprintf(stderr, "Error in CosmologyGetUnits.\n");

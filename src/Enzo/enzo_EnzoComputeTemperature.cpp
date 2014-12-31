@@ -14,11 +14,13 @@
 EnzoComputeTemperature::EnzoComputeTemperature 
 (double density_floor,
  double temperature_floor,
- double mol_weight) :
-  Compute(),
-  density_floor_(density_floor),
-  temperature_floor_(temperature_floor),
-  mol_weight_(mol_weight)
+ double mol_weight,
+ int comoving_coordinates ) 
+  : Compute(),
+    density_floor_(density_floor),
+    temperature_floor_(temperature_floor),
+    mol_weight_(mol_weight),
+    comoving_coordinates_(comoving_coordinates)
 {
 }
 
@@ -36,6 +38,7 @@ void EnzoComputeTemperature::pup (PUP::er &p)
   p | density_floor_;
   p | temperature_floor_;
   p | mol_weight_;
+  p | comoving_coordinates_;
 
 }
 
@@ -64,7 +67,8 @@ void EnzoComputeTemperature::compute_(CommBlock * comm_block)
 
   Field field = enzo_block->block()->field();
 
-  EnzoComputePressure compute_pressure(EnzoBlock::Gamma);
+  EnzoComputePressure compute_pressure(EnzoBlock::Gamma,
+				       comoving_coordinates_);
 
   compute_pressure.compute(comm_block);
 

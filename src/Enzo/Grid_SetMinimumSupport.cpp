@@ -11,7 +11,8 @@
  
 //----------------------------------------------------------------------
  
-int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient)
+int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
+				 int comoving_coordinates)
 {
   if (NumberOfBaryonFields > 0) {
  
@@ -20,7 +21,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient)
     /* Compute cosmology factors. */
  
     enzo_float a = 1, dadt;
-    if (ComovingCoordinates)
+    if (comoving_coordinates)
       if (CosmologyComputeExpansionFactor(time(), &a, &dadt) == ENZO_FAIL) {
 	fprintf(stderr, "Error in CosmologyComputeExpansionFactor.\n");
 	return ENZO_FAIL;

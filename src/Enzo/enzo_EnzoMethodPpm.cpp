@@ -11,7 +11,9 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpm::EnzoMethodPpm () : Method()
+EnzoMethodPpm::EnzoMethodPpm (EnzoConfig * enzo_config) 
+  : Method(),
+    comoving_coordinates_(enzo_config->physics_cosmology)
 {
   // PPM parameters initialized in EnzoBlock::initialize()
 }
@@ -25,6 +27,8 @@ void EnzoMethodPpm::pup (PUP::er &p)
   TRACEPUP;
 
   Method::pup(p);
+
+  p | comoving_coordinates_;
 }
 
 //----------------------------------------------------------------------
@@ -36,7 +40,7 @@ void EnzoMethodPpm::compute ( CommBlock * comm_block) throw()
   if (comm_block->is_leaf()) {
 
     enzo_block->SolveHydroEquations 
-      ( comm_block->time(), comm_block->dt() );
+      ( comm_block->time(), comm_block->dt(), comoving_coordinates_ );
 
   }
 
@@ -59,7 +63,7 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
 
   enzo_float a = 1, dadt;
   
-  if (EnzoBlock::ComovingCoordinates)
+  if (comoving_coordinates_)
     enzo_block->CosmologyComputeExpansionFactor
       (enzo_block->time(), &a, &dadt);
 
@@ -68,7 +72,8 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
 
   /* Compute the pressure. */
 
-  EnzoComputePressure compute_pressure (EnzoBlock::Gamma);
+  EnzoComputePressure compute_pressure (EnzoBlock::Gamma,
+					comoving_coordinates_);
   compute_pressure.compute(enzo_block);
 
   enzo_float * pressure = (enzo_float *) field.values("pressure");
@@ -78,7 +83,7 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) throw()
  
   /* 3) Find dt from expansion. */
  
-  if (EnzoBlock::ComovingCoordinates)
+  if (comoving_coordinates_)
     if (enzo_block->CosmologyComputeExpansionTimestep(comm_block->time(), &dtExpansion) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
       exit(ENZO_FAIL);

@@ -22,7 +22,11 @@
  
 /* function prototypes */
 
-int EnzoBlock::ComputeGammaField(enzo_float *GammaField)
+int EnzoBlock::ComputeGammaField
+(
+ enzo_float *GammaField,
+ int comoving_coordinates
+)
 {
  
   /* Compute the size of the fields. */
@@ -59,7 +63,7 @@ int EnzoBlock::ComputeGammaField(enzo_float *GammaField)
 
     /* Compute the temperature. */
 
-    ComputeTemperatureField(GammaField);
+    ComputeTemperatureField(GammaField, comoving_coordinates);
  
     /* Compute Gamma with molecular Hydrogen formula from Omukau \& Nishi
        astro-ph/9811308. */

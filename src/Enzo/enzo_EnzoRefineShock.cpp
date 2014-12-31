@@ -15,13 +15,15 @@ EnzoRefineShock::EnzoRefineShock(const FieldDescr * field_descr,
 				 double energy_ratio_min_refine,
 				 double energy_ratio_max_coarsen,
 				 double gamma,
+				 int comoving_coordinates,
 				 std::string output) throw ()
   : Refine (0.0, 0.0, output),
     pressure_min_refine_ (pressure_min_refine),
     pressure_max_coarsen_(pressure_max_coarsen),
     energy_ratio_min_refine_ (energy_ratio_min_refine),
     energy_ratio_max_coarsen_(energy_ratio_max_coarsen),
-    gamma_(gamma)
+    gamma_(gamma),
+    comoving_coordinates_(comoving_coordinates)
 {
 }
 
@@ -45,7 +47,8 @@ int EnzoRefineShock::apply
   int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
 
   // compute pressure using the EnzoComputePressure class
-  EnzoComputePressure compute_pressure (EnzoBlock::Gamma);
+  EnzoComputePressure compute_pressure (EnzoBlock::Gamma,
+					comoving_coordinates_);
   compute_pressure.compute(comm_block);
 
   Block * block = comm_block->block();

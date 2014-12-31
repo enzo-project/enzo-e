@@ -213,7 +213,8 @@ void EnzoInitialTurbulence::enforce_block
       }
     }
   } else {
-    EnzoComputePressure compute_pressure(gamma_);
+    bool comoving_coordinates = false;
+    EnzoComputePressure compute_pressure(gamma_,comoving_coordinates);
     compute_pressure.compute(comm_block);
   }
 

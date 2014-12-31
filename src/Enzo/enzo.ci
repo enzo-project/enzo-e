@@ -7,13 +7,6 @@
 
 module enzo {
 
-  readonly int  EnzoBlock::BoundaryRank;
-  readonly int  EnzoBlock::BoundaryDimension[MAX_DIMENSION];
-  readonly int  EnzoBlock::BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-  //  readonly bc_enum *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
-  // readonly enzo_float 
-  //   *EnzoBlock::BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2]; 
-  readonly int EnzoBlock::ComovingCoordinates;
   readonly int EnzoBlock::UseMinimumPressureSupport;
   readonly enzo_float EnzoBlock::MinimumPressureSupportParameter;
   readonly enzo_float EnzoBlock::ComovingBoxSize;

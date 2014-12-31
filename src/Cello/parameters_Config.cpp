@@ -695,10 +695,6 @@ void Config::read_output_ (Parameters * p) throw()
 
     if (output_type[index_output] == "image") {
 
-      WARNING1 ("Config::read()",
-		"output_image_axis[%d] set to z",index_output);
-
-      output_image_axis[index_output] = "z";
 
       if (p->type("axis") != parameter_unknown) {
 	std::string axis = p->value_string("axis");
@@ -706,7 +702,13 @@ void Config::read_output_ (Parameters * p) throw()
 		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
 		output_list[index_output].c_str(), axis.c_str(),
 		axis=="x" || axis=="y" || axis=="z");
-      } 
+      }  else {
+	WARNING1 ("Config::read()",
+		  "output_image_axis[%d] set to z",index_output);
+
+	output_image_axis[index_output] = "z";
+      }
+
 
       output_image_block_size[index_output] = 
 	p->value_integer("image_block_size",1);

@@ -514,7 +514,7 @@ Refine * Problem::create_refine_
 
   } else if (type == "mask") {
 
-    std::string param_str = "Mesh:" + config->mesh_list[index] + ":value";
+    std::string param_str = "Adapt:" + config->mesh_list[index] + ":value";
 
     return new RefineMask 
       (parameters,

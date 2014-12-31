@@ -92,6 +92,7 @@ int RestrictLinear::apply_
 	    values_f[i_f + dx     ] +
 	    values_f[i_f +      dy] + 
 	    values_f[i_f + dx + dy] );
+
 	// if (values_c[i_c] < 0.0) {
 	//   printf ("RestrictLinear %d %d\n",ix_c,iy_c);
 	//   printf ("RestrictLinear %f   =   %f %f %f %f\n",

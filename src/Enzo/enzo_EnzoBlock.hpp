@@ -10,43 +10,6 @@
 
 class CProxy_EnzoBlock;
 
-enum field_type {
-  field_bfieldx,
-  field_bfieldx_rx,
-  field_bfieldx_ry,
-  field_bfieldx_rz,
-  field_bfieldy,
-  field_bfieldy_rx,
-  field_bfieldy_ry,
-  field_bfieldy_rz,
-  field_bfieldz,
-  field_bfieldz_rx,
-  field_bfieldz_ry,
-  field_bfieldz_rz,
-  field_colour,
-  field_density,
-  field_dens_rx,
-  field_dens_ry,
-  field_dens_rz,
-  field_internal_energy,
-  field_total_energy,
-  field_velocity_x,
-  field_velocity_y,
-  field_velocity_z,
-  field_velox,
-  field_velox_rx,
-  field_velox_ry,
-  field_velox_rz,
-  field_veloy,
-  field_veloy_rx,
-  field_veloy_ry,
-  field_veloy_rz,
-  field_veloz,
-  field_veloz_rx,
-  field_veloz_ry,
-  field_veloz_rz
-};
-
 //----------------------------------------------------------------------
 
 #include "enzo.decl.h"
@@ -79,17 +42,8 @@ class EnzoBlock : public CommBlock
 
 public:
 
-  /// Boundary
-
-  static int  BoundaryRank;
-  static int  BoundaryDimension[MAX_DIMENSION];
-  static int  BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-  static bc_enum *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
-  static enzo_float *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2]; 
-
   /// Cosmology
 
-  static int ComovingCoordinates;
   static int UseMinimumPressureSupport;
   static enzo_float MinimumPressureSupportParameter;
   static enzo_float ComovingBoxSize;
@@ -211,17 +165,22 @@ public: // interface
   //  enzo_float ComputeTimeStep();
 
   /// Compute the ratio of specific heats
-  int ComputeGammaField(enzo_float *GammaField);
+  int ComputeGammaField(enzo_float *GammaField,
+			int comoving_coordinates);
 
   /// Compute the pressure field at the given time) - dual energy
   int ComputePressureDualEnergyFormalism
-  ( enzo_float time, enzo_float *pressure );
+  ( enzo_float time, 
+    enzo_float *pressure,
+    int comoving_coordinates);
 
   /// Compute the pressure field at the given time
-  int ComputePressure(enzo_float time, enzo_float *pressure);
+  int ComputePressure(enzo_float time, enzo_float *pressure, 
+		      int comoving_coordinates);
 
   /// Compute the temperature field
-  int ComputeTemperatureField(enzo_float *temperature);
+  int ComputeTemperatureField (enzo_float *temperature, 
+			       int comoving_coordinates);
 
   /// Computes the expansion factors (a & dadt) at the requested time
   int CosmologyComputeExpansionFactor
@@ -241,10 +200,13 @@ public: // interface
     enzo_float Time);
 
   /// Set the energy to provide minimal pressure support
-  int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient);
+  int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
+			int comoving_coordinates);
 
   /// Solve the hydro equations using PPM
-  int SolveHydroEquations ( enzo_float time, enzo_float dt);
+  int SolveHydroEquations ( enzo_float time, 
+			    enzo_float dt,
+			    int comoving_coordinates);
 
   /// Solve the hydro equations using Enzo 3.0 PPM
   int SolveHydroEquations3 ( enzo_float time, enzo_float dt);

@@ -141,6 +141,7 @@ Refine * EnzoProblem::create_refine_
        config->mesh_min_refine2[index],
        config->mesh_max_coarsen2[index],
        enzo_config->field_gamma,
+       enzo_config->physics_cosmology,
        config->mesh_refine_output[index]);
   } else {
     return Problem::create_refine_(type,config,parameters,field_descr,index);
@@ -165,11 +166,11 @@ Method * EnzoProblem::create_method_
 
   TRACE1("EnzoProblem::create_method %s",type.c_str());
   if (type == "ppm") {
-    method = new EnzoMethodPpm;
+    method = new EnzoMethodPpm (enzo_config);
   } else if (type == "ppm3") {
     method = new EnzoMethodPpm3;
   } else if (type == "ppml") {
-    method = new EnzoMethodPpml;
+    method = new EnzoMethodPpml(enzo_config);
   } else if (type == "heat") {
     method = new EnzoMethodHeat
       (enzo_config->method_heat_alpha,
@@ -186,7 +187,8 @@ Method * EnzoProblem::create_method_
       (enzo_config->method_turbulence_edot,
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_temperature,
-       enzo_config->method_turbulence_mach_number);
+       enzo_config->method_turbulence_mach_number,
+       enzo_config->physics_cosmology);
   } else if (type == "gravity_cg") {
     method = new EnzoMethodGravityCg
       (field_descr,

@@ -11,15 +11,6 @@
 
 //======================================================================
 
-/// Boundary
-
-int  EnzoBlock::BoundaryRank;
-int  EnzoBlock::BoundaryDimension[MAX_DIMENSION];
-int  EnzoBlock::BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-bc_enum *EnzoBlock::BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
-enzo_float *EnzoBlock::BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
-
-int EnzoBlock::ComovingCoordinates;
 int EnzoBlock::UseMinimumPressureSupport;
 enzo_float EnzoBlock::MinimumPressureSupportParameter;
 enzo_float EnzoBlock::ComovingBoxSize;
@@ -98,22 +89,11 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
     DomainLeftEdge [i] = 0;
     DomainRightEdge[i] = 0;
     ghost_depth[i] = 0;
-    for (j=0; j<MAX_NUMBER_OF_BARYON_FIELDS; j++) {
-      for (k=0; k<2; k++) {
-	BoundaryDimension[i]=0;
-	BoundaryFieldType[j] = 0;
-	BoundaryType[j][i][k] = 0;
-	BoundaryValue[j][i][k]= 0;
-      }
-    }
   }
 
-  ComovingCoordinates = enzo_config->physics_cosmology;
   Gamma               = enzo_config->field_gamma;
 
   GridRank            = enzo_config->mesh_root_rank;
-
-  BoundaryRank = GridRank;
 
   // Chemistry parameters
 
@@ -170,7 +150,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
   if (NumberOfBaryonFields == 0) {
     ERROR ("EnzoBlock::initialize",
-	   "List parameter 'Field fields' must have length greater than zero");
+	   "Field list parameter 'Field:list' must have length greater than zero");
   } else if (NumberOfBaryonFields > MAX_NUMBER_OF_BARYON_FIELDS) {
     ERROR2 ("EnzoBlock::initialize",
 	    "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
@@ -294,8 +274,6 @@ void EnzoBlock::pup(PUP::er &p)
 
 void EnzoBlock::write(FILE * fp) throw ()
 {
-  fprintf (fp,"EnzoBlock: ComovingCoordinates %d\n",
-	   ComovingCoordinates);
   fprintf (fp,"EnzoBlock: UseMinimumPressureSupport %d\n",
 	   UseMinimumPressureSupport);
   fprintf (fp,"EnzoBlock: MinimumPressureSupportParameter %g\n",
@@ -400,32 +378,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   fprintf (fp,"EnzoBlock: NumberOfBaryonFields %d\n",
 	   NumberOfBaryonFields);
-
-  fprintf (fp,"EnzoBlock: BoundaryRank %d\n", BoundaryRank);
-  fprintf (fp,"EnzoBlock: BoundaryDimension %d %d %d\n",
-	   BoundaryDimension[0],BoundaryDimension[1],BoundaryDimension[2]);
-
-  for (int i=0; i<NumberOfBaryonFields; i++) {
-
-    fprintf (fp,"EnzoBlock: BoundaryFieldType[%d] %d\n", 
-	     i, BoundaryFieldType[i]);
-
-    fprintf (fp,"EnzoBlock: BoundaryType[%d] %p %p %p %p %p %p\n", i, 
-	     BoundaryType[i][0][0],
-	     BoundaryType[i][0][1],
-	     BoundaryType[i][1][0],
-	     BoundaryType[i][1][1],
-	     BoundaryType[i][2][0],
-	     BoundaryType[i][2][1]);
-
-    fprintf (fp,"EnzoBlock: BoundaryValue[%d] %p %p %p %p %p %p\n",i,
-	     BoundaryValue[i][0][0],
-	     BoundaryValue[i][0][1],
-	     BoundaryValue[i][1][0],
-	     BoundaryValue[i][1][1],
-	     BoundaryValue[i][2][0],
-	     BoundaryValue[i][2][1]);  
-  }
 
   // problem
 

@@ -31,7 +31,11 @@
  
 //---------------------------------------------------------------------- 
  
-int EnzoBlock::ComputeTemperatureField(enzo_float *temperature)
+int EnzoBlock::ComputeTemperatureField
+(
+ enzo_float *temperature,
+ int comoving_coordinates
+ )
 {
  
   int result;
@@ -57,9 +61,11 @@ int EnzoBlock::ComputeTemperatureField(enzo_float *temperature)
   /* Compute the pressure first. */
  
   if (DualEnergyFormalism)
-    result = ComputePressureDualEnergyFormalism(time(), temperature);
+    result = ComputePressureDualEnergyFormalism(time(), 
+						temperature,
+						comoving_coordinates);
   else
-    result = ComputePressure(time(), temperature);
+    result = ComputePressure(time(), temperature, comoving_coordinates);
  
   if (result == ENZO_FAIL) {
     fprintf(stderr, "Error in grid->ComputePressure.\n");
@@ -90,7 +96,7 @@ int EnzoBlock::ComputeTemperatureField(enzo_float *temperature)
  
   /* Find the temperature units if we are using comoving coordinates. */
  
-  if (ComovingCoordinates)
+  if (comoving_coordinates)
     if (CosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
 			  &TimeUnits, &VelocityUnits, time()) == ENZO_FAIL) {
       fprintf(stderr, "Error in CosmologyGetUnits.\n");

@@ -11,8 +11,11 @@
 
 //----------------------------------------------------------------------
 
-EnzoComputePressure::EnzoComputePressure (double gamma) :
-  Compute(),gamma_(gamma)
+EnzoComputePressure::EnzoComputePressure (double gamma,
+					  int comoving_coordinates)
+  : Compute(),
+    gamma_(gamma),
+    comoving_coordinates_(comoving_coordinates)
 {
 }
 
@@ -28,6 +31,7 @@ void EnzoComputePressure::pup (PUP::er &p)
   Compute::pup(p);
 
   p | gamma_;
+  p | comoving_coordinates_;
 
 }
 
@@ -48,6 +52,7 @@ void EnzoComputePressure::compute ( CommBlock * comm_block) throw()
 template <typename T>
 void EnzoComputePressure::compute_(CommBlock * comm_block)
 {
+
   if (!comm_block->is_leaf()) return;
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);

@@ -25,6 +25,7 @@ public: // interface
    double energy_ratio_min_refine,
    double energy_ratio_max_coarsen,
    double gamma,
+   int comoving_coordinates,
    std::string output) throw();
 
   /// default constructor
@@ -48,6 +49,7 @@ public: // interface
     p | energy_ratio_min_refine_;
     p | energy_ratio_max_coarsen_;
     p | gamma_;
+    p | comoving_coordinates_;
   }
 
   /// Evaluate the refinement criteria, updating the refinement field
@@ -87,6 +89,9 @@ private: // attributes
 
   /// Gamma
   double gamma_;
+
+  /// Comoving coordinates
+  int comoving_coordinates_;
 };
 
 #endif /* ENZO_ENZO_REFINE_SHOCK_HPP */

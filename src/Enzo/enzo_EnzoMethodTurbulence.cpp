@@ -18,12 +18,14 @@ EnzoMethodTurbulence::EnzoMethodTurbulence
 (double edot,
  double density_initial,
  double temperature_initial,
- double mach_number)
+ double mach_number,
+ int comoving_coordinates)
   : Method(),
     density_initial_(density_initial),
     temperature_initial_(temperature_initial),
     edot_(edot),
-    mach_number_(mach_number)
+    mach_number_(mach_number),
+    comoving_coordinates_(comoving_coordinates)
 {
    // TURBULENCE parameters initialized in EnzoBlock::initialize()
 }
@@ -43,6 +45,7 @@ void EnzoMethodTurbulence::pup (PUP::er &p)
   p | density_initial_;
   p | temperature_initial_;
   p | mach_number_;
+  p | comoving_coordinates_;
 
 }
 
@@ -70,7 +73,8 @@ void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
   EnzoComputeTemperature compute_temperature
     (enzo_config->ppm_density_floor,
      enzo_config->ppm_temperature_floor,
-     enzo_config->ppm_mol_weight);
+     enzo_config->ppm_mol_weight,
+     comoving_coordinates_);
 
   compute_temperature.compute(enzo_block);
 

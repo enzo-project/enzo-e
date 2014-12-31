@@ -12,7 +12,8 @@
 int EnzoBlock::SolveHydroEquations 
 (
  enzo_float time,
- enzo_float dt
+ enzo_float dt,
+ int comoving_coordinates
  )
 {
   int NumberOfSubgrids = 0;
@@ -103,7 +104,8 @@ int EnzoBlock::SolveHydroEquations
 
   enzo_float MinimumSupportEnergyCoefficient = 0;
   if (UseMinimumPressureSupport == TRUE)
-    if (SetMinimumSupport(MinimumSupportEnergyCoefficient) == ENZO_FAIL) {
+    if (SetMinimumSupport(MinimumSupportEnergyCoefficient,
+			  comoving_coordinates) == ENZO_FAIL) {
       fprintf(stderr, "Error in grid->SetMinimumSupport,\n");
       return ENZO_FAIL;
     }
@@ -209,7 +211,7 @@ int EnzoBlock::SolveHydroEquations
      in comoving form (except for the expansion terms which are taken
      care of elsewhere). */
 
-  if (ComovingCoordinates)
+  if (comoving_coordinates)
     if (CosmologyComputeExpansionFactor(time+0.5*dt, &a, &dadt)
 	== ENZO_FAIL) {
       fprintf(stderr, "Error in CsomologyComputeExpansionFactors.\n");

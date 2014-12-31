@@ -35,7 +35,6 @@ int RefineMask::apply
  const FieldDescr * field_descr
  ) throw ()
 {
-
   Block * block = comm_block->block();
   FieldBlock * field_block = block->field_block();
 
@@ -58,19 +57,27 @@ int RefineMask::apply
 
   double level = 0.0;
 
-  void * output = initialize_output_(field_block);
-  float  * output_float  = (float*) output;
-  double * output_double = (double*)output;
-    
-  precision_type precision = field_block->precision
-    (field_block->field_id(output_));
-
+  // determine level
   for (int ix=0; ix<nx; ix++) {
     for (int iy=0; iy<ny; iy++) {
       for (int iz=0; iz<nz; iz++) {
 	int i=ix + nx*(iy + ny*iz);
 	level = std::max(level,v[i]);
-	if (output) {
+      }
+    }
+  }
+
+  if (output_ != "") {
+    void * output = initialize_output_(field_block);
+    float  * output_float  = (float*) output;
+    double * output_double = (double*)output;
+
+    precision_type precision = field_block->precision
+      (field_block->field_id(output_));
+    for (int ix=0; ix<nx; ix++) {
+      for (int iy=0; iy<ny; iy++) {
+	for (int iz=0; iz<nz; iz++) {
+	  int i=ix + nx*(iy + ny*iz);
 	  if (precision == precision_single) {
 	    if (v[i] <  comm_block->level()) output_float[i] = -1;
 	    if (v[i] == comm_block->level()) output_float[i] =  0;

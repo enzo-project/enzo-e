@@ -171,11 +171,17 @@ void EnzoMethodGravityCg::pup (PUP::er &p)
 void EnzoMethodGravityCg::compute ( CommBlock * comm_block) throw()
 {
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
-  Field field = enzo_block->block()->field();
+  Field field = comm_block->block()->field();
 
-  WARNING ("EnzoMethodGravityCg::EnzoMethodGravityCg()",
-	   "Assuming same ghost depth and dimensions for all fields");
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+
+  static bool display_warning = true;
+  if (display_warning) {
+    WARNING ("EnzoMethodGravityCg::EnzoMethodGravityCg()",
+	     "Assuming same ghost depth and dimensions for all fields");
+    display_warning = false;
+  }
+
   field.size                (&nx_,&ny_,&nz_);
   field.dimensions(idensity_,&mx_,&my_,&mz_);
 
@@ -489,8 +495,10 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 
     int iter = (CkMyPe() == 0 && block_count_++ == 0) ? iter_ + 1 : 0;
 
-    printf ("%s:%d iter = %d %g %g %g\n",
-	    __FILE__,__LINE__,iter_,rr_,pap_,rr_new_);
+    if (enzo_block->index().is_root()) {
+      printf ("%s:%d iter = %d %g %g %g\n",
+	      __FILE__,__LINE__,iter_,rr_,pap_,rr_new_);
+    }
 
     enzo_block->contribute (sizeof(int), &iter, 
 			    CkReduction::sum_int, 
@@ -516,9 +524,11 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 
   T * X         = (T*) field.values(ix_);
   T * potential = (T*) field.values(ipotential_);
-  
-  printf ("%s:%d cg_end retval %d  iter %d  rr/rr0 = %g\n",
-	  __FILE__,__LINE__,retval,iter_,rr_/rr0_);
+
+  if (enzo_block->index().is_root()) {
+    printf ("%s:%d cg_end retval %d  iter %d  rr/rr0 = %g\n",
+	    __FILE__,__LINE__,retval,iter_,rr_/rr0_);
+  }
 
   copy_(potential,X);
 

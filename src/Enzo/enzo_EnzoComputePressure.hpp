@@ -17,7 +17,8 @@ class EnzoComputePressure : public Compute {
 public: // interface
 
   /// Create a new EnzoComputePressure object
-  EnzoComputePressure(double gamma);
+  EnzoComputePressure(double gamma,
+		      int comoving_coordinates);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputePressure);
@@ -31,14 +32,15 @@ public: // interface
   /// Perform the computation on the block
   virtual void compute( CommBlock * comm_block) throw();
 
-private: // functions
+protected: // functions
 
   template <typename T>
   void compute_(CommBlock * comm_block);
 
-private: // attributes
+protected: // attributes
 
   double gamma_;
+  int comoving_coordinates_;
 
 };
 

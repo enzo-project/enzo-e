@@ -163,7 +163,7 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_sedov_pressure_in = 
     p->value_float("Initial:sedov:pressure_in",1.0);
   initial_sedov_pressure_out = 
-    p->value_float("Initial:sedov:pressure_in",1e-5);
+    p->value_float("Initial:sedov:pressure_out",1e-5);
   initial_sedov_density = 
     p->value_float("Initial:sedov:density",1.0);
 

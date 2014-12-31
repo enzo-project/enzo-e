@@ -6,7 +6,6 @@
 /// @brief    Implementation of the OutputImage class
 
 #include "cello.hpp"
-
 #include "io.hpp"
 
 //----------------------------------------------------------------------
@@ -226,6 +225,8 @@ void OutputImage::write_block
   int ix,iy,iz;
   comm_block->index_forest(&ix,&iy,&iz);
 
+  const int level = comm_block->level();
+
   // Index of (single) field to write
 
   it_field_->first();
@@ -266,6 +267,8 @@ void OutputImage::write_block
 
   if (type_is_data() && comm_block->is_leaf()) {
 
+    const double factor = (nbz <= 1) ? 1.0 : 1.0 / pow(2.0,1.0*level);
+
     int mx = ghost_ ? ndx : nbx;
     int my = ghost_ ? ndy : nby;
     int mz = ghost_ ? ndz : nbz;
@@ -283,11 +286,11 @@ void OutputImage::write_block
 	  switch (field_descr->precision(index_field)) {
 
 	  case precision_single:
-	    reduce_cube_(image_data_,jxm,jxp,jym,jyp, (((float*)field)[i]));
+	    reduce_cube_(image_data_,jxm,jxp,jym,jyp, ((float*)field)[i]*factor);
 	    break;
 
 	  case precision_double:
-	    reduce_cube_(image_data_,jxm,jxp,jym,jyp,(((double *)field)[i]));
+	    reduce_cube_(image_data_,jxm,jxp,jym,jyp,((double *)field)[i]*factor);
 	    break;
 	  }
 	}
@@ -299,7 +302,7 @@ void OutputImage::write_block
 
     // value for mesh
     double value = 0;
-    value = mesh_color_(comm_block->level(),comm_block->age());
+    value = mesh_color_(level,comm_block->age());
 					     
     reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value);
     reduce_type reduce_save = op_reduce_;
@@ -445,8 +448,8 @@ void OutputImage::update_remote  ( int n, char * buffer) throw()
     for (int k=0; k<nx*ny; k++) image_data_[k] += *p.d++;
     for (int k=0; k<nx*ny; k++) image_mesh_[k] += *p.d++;
   } else if (op_reduce_ == reduce_avg) {
-    for (int k=0; k<nx*ny; k++) image_data_[k]  += *p.d++;
-    for (int k=0; k<nx*ny; k++) image_mesh_[k]  += *p.d++;
+    for (int k=0; k<nx*ny; k++) image_data_[k] += *p.d++;
+    for (int k=0; k<nx*ny; k++) image_mesh_[k] += *p.d++;
   } else if (op_reduce_ == reduce_set) {
     for (int k=0; k<nx*ny; k++) image_data_[k]  = *p.d++;
     for (int k=0; k<nx*ny; k++) image_mesh_[k]  = *p.d++;
