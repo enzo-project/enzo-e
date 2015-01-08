@@ -3,7 +3,7 @@
 /// @file     enzo_EnzoInitialSedovArray3.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Jan  4 19:26:38 PST 2011
-/// @brief    [\ref Enzo] Initialization routine for 2D implosion problem
+/// @brief    [\ref Enzo] 3D array of Sedov Blasts initial conditions
 
 #ifndef ENZO_ENZO_INITIAL_SEDOV_ARRAY3_HPP
 #define ENZO_ENZO_INITIAL_SEDOV_ARRAY3_HPP
@@ -12,7 +12,7 @@ class EnzoInitialSedovArray3 : public Initial {
 
   /// @class    EnzoInitialSedovArray3
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Initialization routine for 2D implosion problem
+  /// @brief    [\ref Enzo] initial conditions for 3D array of Sedov Blasts 
 
 public: // interface
 

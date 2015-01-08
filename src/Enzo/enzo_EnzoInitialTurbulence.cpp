@@ -4,7 +4,7 @@
 /// @author   Alexei Kritsuk (kritsuk@gmail.com)
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Jul 23 00:30:49 UTC 2014
-/// @brief    Implementation of Enzo 2D Implosion problem initialization
+/// @brief    [\ref Enzo] Initial conditions for turbulence simulations
 
 #include "cello.hpp"
 

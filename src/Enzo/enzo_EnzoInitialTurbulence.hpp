@@ -4,7 +4,7 @@
 /// @author   Alexei Kritsuk (kritsuk@gmail.com)
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Jul 23 00:30:57 UTC 2014
-/// @brief    [\ref Enzo] Initialization routine for 2D implosion problem
+/// @brief    [\ref Enzo] Initial conditions for turbulence simulations
 
 #ifndef ENZO_ENZO_INITIAL_TURBULENCE_HPP
 #define ENZO_ENZO_INITIAL_TURBULENCE_HPP
@@ -13,7 +13,7 @@ class EnzoInitialTurbulence : public Initial {
 
   /// @class    EnzoInitialTurbulence
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Initialization routine for 2D implosion problem
+  /// @brief    [\ref Enzo] Initialization routine for turbulence simulations
 
 public: // interface
 
