@@ -107,7 +107,10 @@ void CommBlock::refresh_begin_()
     }
   }
 
-  control_next (phase_refresh_exit,"contribute");
+  //  control_next (phase_refresh_exit,"contribute");
+  // WARNING("CommBlock::refresh_begin_",
+  // 	  "refresh synchronization changed from contribute to neighbor (bug 44)");
+  control_next (phase_refresh_exit,"neighbor");
 }
 
 //----------------------------------------------------------------------

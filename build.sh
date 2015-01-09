@@ -43,6 +43,16 @@ if ($#argv >= 1) then
       set target = "test"
       set proc = 1
       set k_switch = "-k"
+   else if ($argv[1] == "help") then
+      echo
+      echo "Usage: $0 [clean|compile|test]"
+      echo
+      echo "       $0 bin/enzo-p"
+      echo
+      echo "       $0 bin/test_Foo"
+      echo
+      echo "       $0 test/test_Foo.unit"
+      exit
    else
       set k_switch = ""
       set target = $argv[1]

@@ -16,6 +16,10 @@ date_cmd = 'echo $TARGET > test/STATUS; echo "-------------------"; date +"%Y-%m
 # env.Append(BUILDERS = { 'RunBalanceGreedyComm' : run_balance_greedy_comm } )
 # env_mv_greedy_comm  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/GreedyComm; mv `ls *.png *.h5` ' + test_path + '/Balance/GreedyComm')
 
+run_balance_none = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS > $TARGET 2>&1; $COPY")
+env.Append(BUILDERS = { 'RunBalanceNone' : run_balance_none } )
+env_mv_none  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/None; mv `ls *.png *.h5` ' + test_path + '/Balance/None')
+
 run_balance_greedy = Builder(action = date_cmd + parallel_run + " $SOURCE $ARGS +balancer GreedyLB > $TARGET 2>&1; $COPY")
 env.Append(BUILDERS = { 'RunBalanceGreedy' : run_balance_greedy } )
 env_mv_greedy  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Greedy; mv `ls *.png *.h5` ' + test_path + '/Balance/Greedy')
