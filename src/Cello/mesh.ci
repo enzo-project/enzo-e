@@ -83,9 +83,6 @@ module mesh {
     entry void p_compute_exit();
     entry void r_compute_exit(CkReductionMsg *);
 
-    entry void p_enzo_matvec();
-    entry void r_enzo_matvec(CkReductionMsg *);
-
     //--------------------------------------------------
     // *** STOPPING ***
     //--------------------------------------------------

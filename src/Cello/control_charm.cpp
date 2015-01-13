@@ -217,7 +217,6 @@ void CommBlock::control_next(int phase, std::string sync)
 
 void CommBlock::control_sync(int phase, std::string sync, bool next_phase, const char * file, int line)
 {
-
   if (next_phase) {
     phase = cycle_phase[index_cycle_phase_];
     sync  = cycle_sync[index_cycle_phase_];
@@ -258,8 +257,6 @@ void CommBlock::control_sync(int phase, std::string sync, bool next_phase, const
       cb = CkCallback (CkIndex_CommBlock::r_stopping_enter(NULL), thisProxy);
     } else if (              phase == phase_stopping_exit) {
       cb = CkCallback (CkIndex_CommBlock::r_stopping_exit(NULL), thisProxy);
-    } else if (              phase == phase_enzo_matvec) {
-      cb = CkCallback (CkIndex_CommBlock::r_enzo_matvec(NULL), thisProxy);
     } else if (              phase == phase_exit) {
       cb = CkCallback (CkIndex_CommBlock::r_exit(NULL), thisProxy);
     } else {
@@ -319,9 +316,6 @@ void CommBlock::control_sync(int phase, std::string sync, bool next_phase, const
   //   } else if (              phase == phase_stopping_exit) {
   //     cb = CkCallback (CkIndex_CommBlock::p_stopping_exit(),
   // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_enzo_matvec) {
-  //     cb = CkCallback (CkIndex_CommBlock::p_enzo_matvec(),
-  // 		       thisProxy[thisIndex]);
   //   } else if (              phase == phase_exit) {
   //     cb = CkCallback (CkIndex_CommBlock::p_exit(),
   // 		       thisProxy[thisIndex]);
@@ -333,9 +327,9 @@ void CommBlock::control_sync(int phase, std::string sync, bool next_phase, const
 
   //   CkStartQD (cb);
 
-   } else if (sync == "quiescence") {
+  } else if (sync == "quiescence") {
 
-     // Quiescence detection through the Main chare
+    // Quiescence detection through the Main chare
 
     if (index_.is_root()) {
       if (                    phase == phase_initial_exit) {
@@ -368,8 +362,6 @@ void CommBlock::control_sync(int phase, std::string sync, bool next_phase, const
 	CkStartQD(CkCallback(CkIndex_Main::p_stopping_enter(), proxy_main));
       } else if (             phase == phase_stopping_exit) {
 	CkStartQD(CkCallback(CkIndex_Main::p_stopping_exit(), proxy_main));
-      } else if (             phase == phase_enzo_matvec) {
-	CkStartQD(CkCallback(CkIndex_Main::p_enzo_matvec(), proxy_main));
       } else if (             phase == phase_exit) {
 	CkStartQD(CkCallback(CkIndex_Main::p_exit(), proxy_main));
       } else {
@@ -416,8 +408,6 @@ void CommBlock::control_sync(int phase, std::string sync, bool next_phase, const
       if (index().is_root()) thisProxy.p_stopping_enter();
     } else if (           phase == phase_stopping_exit) {
       if (index().is_root()) thisProxy.p_stopping_exit();
-    } else if (           phase == phase_enzo_matvec) {
-      if (index().is_root()) thisProxy.p_enzo_matvec();
     } else if (           phase == phase_exit) {
       if (index().is_root()) thisProxy.p_exit();
     } else {
@@ -466,7 +456,7 @@ void CommBlock::control_sync_neighbor_(int phase)
   if (!is_leaf()) {
 
 #ifdef CELLO_DEBUG
-  fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_name[phase]);
+    fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_name[phase]);
 #endif
     control_call_phase_ (phase);
 
@@ -496,8 +486,8 @@ void CommBlock::control_sync_neighbor_(int phase)
 	// neighboring block in the same level
 
 #ifdef CELLO_DEBUG
-	  fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
-	    __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_neighbor.bit_string(-1,2).c_str());
+	fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
+		 __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_neighbor.bit_string(-1,2).c_str());
 #endif
 	thisProxy[index_neighbor].p_control_sync_count(phase,0);
 
@@ -523,7 +513,7 @@ void CommBlock::control_sync_neighbor_(int phase)
 
 #ifdef CELLO_DEBUG
 	  fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
-	    __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_uncle.bit_string(-1,2).c_str());
+		   __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_uncle.bit_string(-1,2).c_str());
 #endif
 	  thisProxy[index_uncle].p_control_sync_count(phase,0);
 
@@ -543,7 +533,7 @@ void CommBlock::control_sync_neighbor_(int phase)
 
 #ifdef CELLO_DEBUG
 	  fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
-	    __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_nibling.bit_string(-1,2).c_str());
+		   __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_nibling.bit_string(-1,2).c_str());
 #endif
 	  thisProxy[index_nibling].p_control_sync_count(phase,0);
 
@@ -605,8 +595,6 @@ void CommBlock::control_call_phase_ (int phase)
     /**/                    stopping_enter_() ;
   } else if (phase == phase_stopping_exit) {
     /**/                    stopping_exit_();
-  } else if (phase == phase_enzo_matvec) {
-    /**/                    enzo_matvec_();
   } else if (phase == phase_exit) {
     /**/                    exit_();
   } else {

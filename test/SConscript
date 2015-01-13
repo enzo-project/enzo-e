@@ -103,10 +103,6 @@ env.RunSerial('test_ItNode.unit',    bin_path + '/test_ItNode')
 #----------------------------------------------------------------------
 env.RunSerial('test_Monitor.unit',      bin_path + '/test_Monitor')
 #----------------------------------------------------------------------
-# PARALLEL COMPONENT      
-#----------------------------------------------------------------------
-env.RunSerial('test_Layout.unit',      bin_path + '/test_Layout')
-#----------------------------------------------------------------------
 # PARAMETERS COMPONENT    
 #----------------------------------------------------------------------
 Clean(env_mv_test.RunSerial

@@ -61,8 +61,8 @@ enum phase_type {
   phase_output_exit,
   phase_restart,
   phase_balance,
-  phase_enzo_matvec,
-  phase_exit
+  phase_exit,
+  phase_last
 };
 
 #define PHASE_COUNT (phase_exit + 1)

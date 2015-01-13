@@ -33,6 +33,11 @@ Output {
 
     list = ["de", "dm", "mesh", "te", "vx", "vy"];
 
+    hdf {
+       field_list = ["density"];
+       type     = "data";
+       include "input/schedule_time_0.02.incl"
+    };
     de {
        field_list = ["density"];
        type     = "image";

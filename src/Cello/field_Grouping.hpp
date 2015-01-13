@@ -61,9 +61,6 @@ public: // interface
     return groups_.find(value) != groups_.end();
   }
 
-  /// Return the number of groups
-  int size() const { return groups_.size(); }
-
   /// Return the number of items in the group
   int size(std::string item) const
   {

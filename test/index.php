@@ -614,9 +614,6 @@ test_summary("Mesh",
 		   "test_ItNode"),'test'); 
 test_summary("Monitor",array("Monitor"),
 	     array("test_Monitor"),'test'); 
-test_summary("Parallel",
-	     array("GroupProcess","Layout"),
-	     array("test_GroupProcess","test_Layout"),'test'); 
 test_summary("Parameters",
 	     array("Parameters"),
 	     array("test_Parameters"),'test'); 
@@ -1021,13 +1018,6 @@ tests("Cello","test_ItNode","test_ItNode","","");
 test_group("Monitor");
 
 tests("Cello","test_Monitor","test_Monitor","","");
-
-//----------------------------------------------------------------------
-
-test_group("Parallel");
-
-tests("Cello","test_GroupProcess","test_GroupProcess","","");
-tests("Cello","test_Layout","test_Layout","","");
 
 //----------------------------------------------------------------------
 

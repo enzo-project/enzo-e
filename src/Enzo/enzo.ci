@@ -107,8 +107,8 @@ module enzo {
     template <class T>
     entry void r_cg_loop_5(CkReductionMsg *msg);
 
-//    entry void p_enzo_matvec();
-//    entry void r_enzo_matvec(CkReductionMsg *);
+    entry void p_enzo_matvec();
+    entry void r_enzo_matvec(CkReductionMsg *);
 
   };
 

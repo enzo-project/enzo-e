@@ -25,14 +25,8 @@ PARALLEL_MAIN_BEGIN
   unit_func("Grouping::size(group)");
   unit_assert(grouping->size("group_1")==0);
 
-  unit_func("Grouping::size()");
-  unit_assert(grouping->size()==0);
-
   unit_func("Grouping::add()");
   grouping->add("density",   "group_1");
-
-  unit_func("Grouping::size()");
-  unit_assert(grouping->size()==1);
 
   unit_func("Grouping::add()");
   grouping->add("velocity_x","group_2");
@@ -43,9 +37,6 @@ PARALLEL_MAIN_BEGIN
   unit_func("Grouping::add()");
   grouping->add("velocity_z","group_2");
 
-  unit_func("Grouping::size()");
-  unit_assert(grouping->size()==2);
-
   unit_func("Grouping::add()");
   grouping->add("density",   "group_3");
   unit_func("Grouping::add()");
@@ -55,10 +46,8 @@ PARALLEL_MAIN_BEGIN
   unit_func("Grouping::add()");
   grouping->add("velocity_z","group_3");
 
-  unit_func("Grouping::size()");
-  unit_assert(grouping->size()==3);
-
   unit_func("Grouping::size(group)");
+  unit_assert(grouping->size("group_x")==0);
   unit_assert(grouping->size("group_1")==1);
   unit_assert(grouping->size("group_2")==3);
   unit_assert(grouping->size("group_3")==4);

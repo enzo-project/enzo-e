@@ -79,16 +79,27 @@ enum bc_enum
 
 //----------------------------------------------------------------------
 
-enum hydro_type {
-  hydro_unknown,
-  hydro_ppm,
-  hydro_ppm3,
-  hydro_ppml
-};
+enum hydro_type 
+  {
+    hydro_unknown,
+    hydro_ppm,
+    hydro_ppm3,
+    hydro_ppml
+  };
+
+//----------------------------------------------------------------------
+// WARNING 100 must be larger than number of phases in
+// src/Cello/_comm.hpp phase_type
+
+enum enzo_phase_type 
+  {
+    phase_enzo_first = 100,
+    phase_enzo_matvec = phase_enzo_first
+  };
 
 //----------------------------------------------------------------------
 
-  const int field_undefined = -1;
+const int field_undefined = -1;
 
 //----------------------------------------------------------------------
 

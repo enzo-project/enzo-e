@@ -158,6 +158,14 @@ public: // interface
   /// Write attributes, e.g. to stdout for debugging
   void write(FILE *fp=stdout) throw ();
 
+  /// Syncronize before continuing with next phase
+  virtual void control_sync
+  (int phase, std::string sync, bool next_phase, const char * name, int line);
+
+protected:
+  virtual void control_call_phase_ (int phase);
+public:
+
   //----------------------------------------------------------------------
   // Original Enzo functions
   //----------------------------------------------------------------------

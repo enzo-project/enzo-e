@@ -250,6 +250,9 @@ void OutputImage::write_block
     field_block->values(index_field) :
     field_block->unknowns(index_field);
 
+  float * field_float = (float*)field;
+  double * field_double = (double*)field;
+
   // pixel extents of box
   int ixm,iym,izm; 
   int ixp,iyp,izp;
@@ -265,6 +268,8 @@ void OutputImage::write_block
   if (nbz > 1) v *= (zp-zm);
   TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),(zp-zm),v);
 
+  const int precision = field_descr->precision(index_field);
+
   if (type_is_data() && comm_block->is_leaf()) {
 
     const double factor = (nbz <= 1) ? 1.0 : 1.0 / pow(2.0,1.0*level);
@@ -279,20 +284,17 @@ void OutputImage::write_block
 	int jym = iym +  iy   *(iyp-iym)/my;
 	int jyp = iym + (iy+1)*(iyp-iym)/my-1;
 	for (int iz=0; iz<mz; iz++) {
-	  // int jzm = izm + iz    *(izp-izm)/mz;
-	  // int jzp = izm + (iz+1)*(izp-izm)/mz-1;
+	  int jzm = izm + iz    *(izp-izm)/mz;
+	  int jzp = izm + (iz+1)*(izp-izm)/mz-1;
 	  int i=ix + ndx*(iy + ndy*iz);
-
-	  switch (field_descr->precision(index_field)) {
-
-	  case precision_single:
-	    reduce_cube_(image_data_,jxm,jxp,jym,jyp, ((float*)field)[i]*factor);
-	    break;
-
-	  case precision_double:
-	    reduce_cube_(image_data_,jxm,jxp,jym,jyp,((double *)field)[i]*factor);
-	    break;
+	  double value = 0.0;
+	  if (precision == precision_single) {
+	    value = field_float[i];
+	  } else if (precision == precision_double) {
+	    value = field_double[i];
 	  }
+
+	  reduce_cube_(image_data_,jxm,jxp,jym,jyp, (value*factor));
 	}
       }
     }

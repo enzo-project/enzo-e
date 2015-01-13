@@ -55,6 +55,13 @@ public: // interface
     field_list_.push_back(id_field);
   }
 
+  /// Return whether specific field is included in refresh list
+  bool field (int id_field) const {
+    for (size_t i=0; i<field_list_.size(); i++) {
+      if (field_list_.at(i) == id_field) return true;
+    }
+    return false;
+  }
   /// Set all fields
   void all_fields(int num_fields) {
     field_list_.clear();

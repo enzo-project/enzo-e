@@ -4,7 +4,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @brief    [\ref Comm] Declaration of the CommBlock class
-/// @todo     Move Enzo Gravity to EnzoBlock
 
 #ifndef COMM_COMMBLOCK_HPP
 #define COMM_COMMBLOCK_HPP
@@ -302,20 +301,6 @@ public:
   /// Must be called at end of Method
   void compute_stop();
 
-  //--------------------------------------------------
-  // ENZO GRAVITY CG: MOVE TO ENZO
-  //--------------------------------------------------
-
-  void p_enzo_matvec()
-  {      enzo_matvec_(); }
-  void r_enzo_matvec(CkReductionMsg * msg)
-  {      enzo_matvec_(); delete msg; }
-
-protected:
-  void enzo_matvec_() ;
-
-public:
-
 
   //--------------------------------------------------
   // OUTPUT
@@ -415,7 +400,8 @@ public:
   void control_next(int phase = phase_unknown, std::string sync = "");
 
   /// Syncronize before continuing with next phase
-  void control_sync(int phase, std::string sync, bool next_phase, const char * name, int line);
+  virtual void control_sync
+  (int phase, std::string sync, bool next_phase, const char * name, int line);
 
   /// synchronize with count other chares
   void p_control_sync_count(int phase, int count) 
@@ -424,7 +410,7 @@ public:
 protected:
   void control_sync_neighbor_(int phase);
   void control_sync_count_(int phase, int count);
-  void control_call_phase_ (int phase);
+  virtual void control_call_phase_ (int phase);
 public:
 
   //--------------------------------------------------

@@ -308,7 +308,7 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 
 // SEE comm_CommBlock.cpp for definition
 
-void CommBlock::enzo_matvec_()
+void EnzoBlock::enzo_matvec_()
 {
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
