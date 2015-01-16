@@ -27,7 +27,7 @@ class FieldBlock {
   /// are stored in a separate FieldDescr object, for which there is
   /// one per Simulation object (i.e. one per process)
 
-  friend class FieldFace;
+  friend class FieldFace; // required for adjust_alignment_()
 
 public: // interface
 

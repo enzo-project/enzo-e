@@ -602,12 +602,21 @@ void CommBlock::loop_limits_nibling_
 {
   const int rank = this->rank();
 
+  //           ic3m   ic3p
+  //       -1   0      0
+  // if3    0   0      1      
+  //        1   1      1
+
   ic3m[0] = (if3[0] == 0) ? 0 : (if3[0]+1)/2;
-  ic3p[0] = (if3[0] == 0) ? 1 : (if3[0]+1)/2;
   ic3m[1] = (if3[1] == 0) ? 0 : (if3[1]+1)/2;
-  ic3p[1] = (if3[1] == 0) ? 1 : (if3[1]+1)/2;
   ic3m[2] = (if3[2] == 0) ? 0 : (if3[2]+1)/2;
+
+  ic3p[0] = (if3[0] == 0) ? 1 : (if3[0]+1)/2;
+  ic3p[1] = (if3[1] == 0) ? 1 : (if3[1]+1)/2;
   ic3p[2] = (if3[2] == 0) ? 1 : (if3[2]+1)/2;
+
+  // Adjust for 1D and 2D
+
   if (rank < 2) ic3m[1] = ic3p[1] = 0;
   if (rank < 3) ic3m[2] = ic3p[2] = 0;
 }

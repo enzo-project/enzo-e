@@ -24,6 +24,7 @@ module mesh {
   PUPable OutputData;
   PUPable OutputImage;
   PUPable Problem;
+  PUPable ProlongElliptic;
   PUPable ProlongLinear;
   PUPable Refine;
   PUPable RefineMask;
