@@ -30,7 +30,7 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-  /// Prolong comm_block_Ht values to the child block given by (icx,icy,icz)
+  /// Prolong fine Field values in the child block (icx,icy,icz) to parent
 
   virtual int apply 
   ( precision_type precision,

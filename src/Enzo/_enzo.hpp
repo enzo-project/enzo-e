@@ -167,6 +167,7 @@ struct fluxes
 
 #include "enzo_EnzoProlong.hpp"
 #include "enzo_EnzoProlongMC1.hpp"
+#include "enzo_EnzoProlongPoisson.hpp"
 #include "enzo_EnzoRestrict.hpp"
 
 #include "enzo3_EnzoMethodPpm3.hpp"

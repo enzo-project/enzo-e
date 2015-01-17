@@ -31,7 +31,8 @@ public: // interface
   void pup (PUP::er &p) 
   { TRACEPUP; PUP::able::pup(p); }
 
-  /// Restrict comm_block_f child values given by (icx,icy,icz) to the parent
+  /// Restrict coarse Field values to the child block (icx,icy,icz)
+
   virtual int apply 
   ( precision_type precision,
     void *       values_c, int nd3_c[3], int im3_c[3], int n3_c[3],

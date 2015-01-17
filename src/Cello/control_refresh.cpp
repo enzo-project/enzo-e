@@ -45,7 +45,7 @@ void CommBlock::refresh_begin_()
 
   simulation()->set_phase(phase_refresh);
 
-  // Refresh if Refresh object exists and CommBlock is a leaf()
+  // Refresh if Refresh object exists and have data
 
   if (refresh && is_leaf()) {
 

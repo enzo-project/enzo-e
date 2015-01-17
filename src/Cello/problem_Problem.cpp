@@ -706,10 +706,6 @@ Prolong * Problem::create_prolong_ ( std::string  name ,
 
     prolong = new ProlongLinear;
 
-  } else if (name == "elliptic") {
-
-    prolong = new ProlongElliptic;
-
   } else {
     
     ERROR1("Problem::create_prolong_",

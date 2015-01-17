@@ -31,7 +31,8 @@ public: // interface
   void pup (PUP::er &p) 
   { TRACEPUP; Prolong::pup(p); }
 
-  /// Prolong comm_block_Ht values to the child block given by (icx,icy,icz)
+  /// Prolong fine Field values in the child block (icx,icy,icz) to parent
+
   virtual int apply
   ( precision_type precision,
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],

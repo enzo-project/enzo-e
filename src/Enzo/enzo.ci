@@ -67,6 +67,7 @@ module enzo {
   PUPable EnzoProblem;
   PUPable EnzoProlong;
   PUPable EnzoProlongMC1;
+  PUPable EnzoProlongPoisson;
 
   PUPable EnzoRestrict;
 

@@ -225,6 +225,10 @@ Prolong * EnzoProblem::create_prolong_
     prolong = new EnzoProlongMC1
       (static_cast<EnzoConfig *>(config)->interpolation_method);
 
+  } else if (type == "poisson") {
+    
+    prolong = new EnzoProlongPoisson;
+
   } else {
 
     prolong = Problem::create_prolong_(type,config);
