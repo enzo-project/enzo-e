@@ -36,12 +36,6 @@ enum meta_type {
 #include "io_IoBlock.hpp"
 #include "io_IoFieldBlock.hpp"
 
-#include "io_ItReduce.hpp"
-#include "io_ItReduceAvg.hpp"
-#include "io_ItReduceSum.hpp"
-#include "io_ItReduceMin.hpp"
-#include "io_ItReduceMax.hpp"
-
 #include "io_Input.hpp"
 #include "io_InputData.hpp"
 

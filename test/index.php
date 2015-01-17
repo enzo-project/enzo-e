@@ -589,8 +589,6 @@ test_summary("Field",
 	     array(     "Field",      "FieldBlock",     "FieldDescr",     "FieldFace",     "ItField",      "Grouping"),
 	     array("test_Field", "test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField", "test_Grouping"),
 	     'test'); 
-test_summary("Io",array("ItReduce"),
-	     array("test_ItReduce"),'test'); 
 test_summary("Memory",array("Memory"),
 	     array("test_Memory"),'test'); 
 test_summary("Mesh",
@@ -971,12 +969,6 @@ tests("Cello","test_FieldBlock","test_FieldBlock","","");
 tests("Cello","test_FieldFace","test_FieldFace","","");
 tests("Cello","test_ItField","test_ItField","","");
 tests("Cello","test_Grouping","test_Grouping","","");
-
-//----------------------------------------------------------------------
-
-test_group("Io");
-
-tests("Cello","test_ItReduce", "test_ItReduce","","");
 
 //----------------------------------------------------------------------
 
