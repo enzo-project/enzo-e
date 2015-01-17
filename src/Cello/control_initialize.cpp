@@ -47,6 +47,8 @@ void Simulation::initialize() throw()
   // using QD to ensure that initialize_hierarchy() is called
   // on all processors before CommBlocks are created
 
+  // Barrier (why?)
+
   CkCallback callback 
     (CkIndex_Simulation::r_initialize_forest(NULL), thisProxy);
 

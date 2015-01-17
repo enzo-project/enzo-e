@@ -57,10 +57,15 @@ void EnzoSimulation::pup (PUP::er &p)
 
 void EnzoSimulation::initialize() throw()
 {
-  
+
+  // Initialize EnzoConfig parameters
+
   initialize_config_();
 
+  // Call initialize() on base Simulation class
   Simulation::initialize();
+
+  // Initialize EnzoBlock static variables
   EnzoBlock::initialize(static_cast<EnzoConfig*>(config_),
 			field_descr());
 }

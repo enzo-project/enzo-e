@@ -47,7 +47,8 @@ Simulation::Simulation
   monitor_->set_active(CkMyPe() == 0);
 #endif
 
-  monitor_->print("test","testing");
+  // Read in parameters
+
   parameters_ = new Parameters(parameter_file,monitor_);
 
 }

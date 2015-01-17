@@ -45,19 +45,31 @@ extern CProxy_Simulation proxy_simulation;
 PARALLEL_MAIN_BEGIN
 {
 
-  // initialize parallelization
+  // Initialize parallelization
 
   PARALLEL_INIT;
 
-  // initialize unit testing
+  // Initialize unit testing
 
-  int ip = CkMyPe();
-  int np = CkNumPes();
+  const int ip = CkMyPe();
+  const int np = CkNumPes();
 
   unit_init(ip,np);
 
-  monitor_ = Monitor::instance();
+  // Check parameter file
 
+  if (PARALLEL_ARGC != 2) {
+    // Print usage if wrong number of arguments
+    char buffer [ERROR_LENGTH];
+    sprintf (buffer, "\nUsage: %s %s <parameter-file>\n\n", 
+	     PARALLEL_RUN,PARALLEL_ARGV[0]);
+    ERROR("Main()",buffer);
+  }
+  const char * parameter_file = PARALLEL_ARGV[1];
+
+  // Initialize Monitor
+
+  monitor_ = Monitor::instance();
   monitor_->set_active (ip == 0);
   monitor_->header();
   monitor_->print ("","BEGIN ENZO-P");
@@ -67,22 +79,6 @@ PARALLEL_MAIN_BEGIN
   Memory * memory = Memory::instance();
   monitor_->print("Memory","bytes %lld bytes_high %lld",
 		  memory->bytes(), memory->bytes_high());
-
-
-  // open parameter file, displaying usage if invalid
-
-  if (PARALLEL_ARGC != 2) {
-    // Print usage if wrong number of arguments
-    char buffer [ERROR_LENGTH];
-    sprintf (buffer, "\nUsage: %s %s <parameter-file>\n\n", 
-	     PARALLEL_RUN,PARALLEL_ARGV[0]);
-    for (int i=0; i<PARALLEL_ARGC; i++) {
-      PARALLEL_PRINTF("%d %s\n",i,PARALLEL_ARGV[i]);
-    }
-    ERROR("Main()",buffer);
-  }
-
-  const char * parameter_file = PARALLEL_ARGV[1];
 
   //--------------------------------------------------
 

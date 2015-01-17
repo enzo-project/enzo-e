@@ -53,7 +53,7 @@ Field {
            "B","X","R","P","AP"];
 
    ghosts = [1,1,1];
-   prolong = "elliptic";
+   prolong = "poisson";
 }
 
 Initial {
