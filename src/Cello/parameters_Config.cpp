@@ -813,7 +813,7 @@ void Config::read_refresh_ (Parameters * p) throw()
       refresh_field_list[index_refresh].resize(num_fields);
       for (int index_field=0; index_field<num_fields; index_field++) {
 	refresh_field_list[index_refresh][index_field] =
-	  p->value(index_refresh,param,"default");
+	  p->value(index_field,param,"default");
       }
     } else if (field_list_type == parameter_string) {
       refresh_field_list[index_refresh].resize(1);
