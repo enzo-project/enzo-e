@@ -48,7 +48,7 @@ void EnzoMethodPpml::compute ( CommBlock * comm_block ) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPpml::timestep (CommBlock * comm_block) throw()
+double EnzoMethodPpml::timestep (CommBlock * comm_block) const throw()
 {
  
   EnzoBlock * enzo_comm_block = static_cast<EnzoBlock*> (comm_block);

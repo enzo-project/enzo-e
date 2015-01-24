@@ -223,7 +223,7 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodGrackle::timestep ( CommBlock * comm_block ) throw()
+double EnzoMethodGrackle::timestep ( CommBlock * comm_block ) const throw()
 {
 #ifdef CONFIG_USE_GRACKLE
   initialize_(comm_block);

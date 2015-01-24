@@ -38,7 +38,7 @@ public: // interface
   { return; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( CommBlock * comm_block) throw()
+  virtual double timestep ( CommBlock * comm_block) const throw()
   { return dt_; }
 
 protected: // attributes

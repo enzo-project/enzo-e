@@ -12,7 +12,9 @@
 //----------------------------------------------------------------------
 
 EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant) 
-  : Method(), alpha_(alpha), courant_(courant)
+  : Method(),
+    alpha_(alpha),
+    courant_(courant)
 {
 }
 
@@ -29,7 +31,6 @@ void EnzoMethodHeat::pup (PUP::er &p)
 
   p | alpha_;
   p | courant_;
-
 }
 
 //----------------------------------------------------------------------
@@ -39,11 +40,12 @@ void EnzoMethodHeat::compute ( CommBlock * comm_block) throw()
 
   if (!comm_block->is_leaf()) return;
 
-  initialize_(comm_block);
+  Field field = comm_block->block()->field();
 
-  const int id = field_id ("temperature");
-  void *     t = field_array (id);
-  const int  p = field_precision (id);
+  const int id_temp = field.field_id ("temperature");
+
+  void *     t = field.values (id_temp);
+  const int  p = field.precision (id_temp);
 
   if      (p == precision_single)    compute_ (comm_block,(float *)t);
   else if (p == precision_double)    compute_ (comm_block,(double*)t);
@@ -54,14 +56,27 @@ void EnzoMethodHeat::compute ( CommBlock * comm_block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodHeat::timestep ( CommBlock * comm_block ) throw()
+double EnzoMethodHeat::timestep ( CommBlock * comm_block ) const throw()
 {
-  initialize_(comm_block);
+  // initialize_(comm_block);
 
-  const int rank = this->rank();
+  Block * block = comm_block->block();
+  Field field = block->field();
 
+  const int id_temp = field.field_id ("temperature");
+
+  int mx,my,mz;
+  field.dimensions (id_temp,&mx,&my,&mz);
+  const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
+
+  double xm,ym,zm;
+  block->lower(&xm,&ym,&zm);
+  double xp,yp,zp;
+  block->upper(&xp,&yp,&zp);
   double hx,hy,hz;
-  cell_width (&hx,&hy,&hz);
+  field.cell_width(xm,xp,&hx,
+		   ym,yp,&hy,
+		   zm,zp,&hz);
 
   double h_min = std::numeric_limits<double>::max();
   if (rank >= 1) h_min = std::min(h_min,hx);
@@ -76,35 +91,45 @@ double EnzoMethodHeat::timestep ( CommBlock * comm_block ) throw()
 template <class T>
 void EnzoMethodHeat::compute_ (CommBlock * comm_block,T * Unew) const throw()
 {
+  Block * block = comm_block->block();
+  Field field   =      block->field();
 
-  const int id = field_id ("temperature");
+  const int id_temp_ = field.field_id ("temperature");
 
   int gx,gy,gz;
-  ghost_depth (id,&gx,&gy,&gz);
+  field.ghosts (id_temp_,&gx,&gy,&gz);
 
   int mx,my,mz;
-  array_dimension (id,&mx,&my,&mz);
+  field.dimensions (id_temp_,&mx,&my,&mz);
 
   int nx,ny,nz;
-  block_size (&nx,&ny,&nz);
+  field.size (&nx,&ny,&nz);
 
   // Initialize array increments
   const int idx = 1;
   const int idy = mx;
   const int idz = mx*my;
 
-  // Precompute ratios
+  // Precompute ratios dxi,dyi,dzi
+
+  double xm,ym,zm;
+  block->lower(&xm,&ym,&zm);
+  double xp,yp,zp;
+  block->upper(&xp,&yp,&zp);
   double hx,hy,hz;
-  cell_width (&hx,&hy,&hz);
+  field.cell_width(xm,xp,&hx,
+		   ym,yp,&hy,
+		   zm,zp,&hz);
+
   double dxi = 1.0/(hx*hx);
   double dyi = 1.0/(hy*hy);
   double dzi = 1.0/(hz*hz);
 
   const int m = mx*my*mz;
 
-  const int rank = this->rank();
+  const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
 
-  const double dt = time_step();
+  const double dt = timestep(comm_block);
 
   T * U = new T [m];
   for (int i=0; i<m; i++) U[i]=Unew[i];

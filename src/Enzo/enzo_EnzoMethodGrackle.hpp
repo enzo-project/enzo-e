@@ -44,7 +44,7 @@ public: // interface
   virtual void compute( CommBlock * comm_block) throw();
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( CommBlock * comm_block) throw();
+  virtual double timestep ( CommBlock * comm_block) const throw();
 
 protected: // methods
 

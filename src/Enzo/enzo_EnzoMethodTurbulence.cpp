@@ -54,15 +54,6 @@ void EnzoMethodTurbulence::pup (PUP::er &p)
 void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
 {
 
-  // MUST PROCEED EVEN IF NOT A LEAF NODE SINCE REDUCTION IS ON ALL
-  // CommBlock's
-  //  if (!comm_block->is_leaf()) return;
-
-  // Initialize Method parameters: used for domain extents
-  initialize_(comm_block);
-
-  //  INCOMPLETE("EnzoMethodTurbulence::compute()");
-
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
   
   Field field = comm_block->block()->field();
@@ -110,7 +101,9 @@ void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
   g[INDEX_TURBULENCE_minD] = std::numeric_limits<double>::max();
   g[INDEX_TURBULENCE_maxD] = std::numeric_limits<double>::min();
 
-  const int rank = this->rank();
+  int mx,my,mz;
+  field.dimensions (0,&mx,&my,&mz);
+  const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
 
   if (comm_block->is_leaf()) {
 
@@ -193,18 +186,24 @@ void EnzoMethodTurbulence::compute_resume
     g[i] = ((double *)msg->getData())[i];
   }
 
+  Block * block = comm_block->block();
+  Field field = block->field();
+  
+
   int nx,ny,nz;
-  domain_size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
   int n = nx*ny*nz;
 
   double dt = comm_block->dt();
 
-  const int rank = this->rank();
+  int mx,my,mz;
+  field.dimensions (0,&mx,&my,&mz);
+  const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
 
   double xdm,ydm,zdm;
-  lower_domain(&xdm,&ydm,&zdm);
+  block->lower(&xdm,&ydm,&zdm);
   double xdp,ydp,zdp;
-  upper_domain(&xdp,&ydp,&zdp);
+  block->upper(&xdp,&ydp,&zdp);
 
   // compute edot (TurbulenceSimulationInitialize.C)
 
@@ -321,7 +320,7 @@ void EnzoMethodTurbulence::compute_resume
 
   if (!comm_block->is_leaf()) return;
 
-  const int p = field_precision (0);
+  const int p = field.precision (0);
 
   if      (p == precision_single)    
     compute_resume_<float> (comm_block,msg);
@@ -343,8 +342,10 @@ void EnzoMethodTurbulence::compute_resume_
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
 
+  Field field = comm_block->block()->field();
+
   int ndx,ndy,ndz;
-  domain_size(&ndx,&ndy,&ndz);
+  field.size(&ndx,&ndy,&ndz);
   int nd = ndx*ndy*ndz;
 
   double * g = enzo_block->method_turbulence_data;
@@ -359,9 +360,9 @@ void EnzoMethodTurbulence::compute_resume_
   double dt0 = dt;
   norm = (dt/dt0)*norm;
 
-  const int rank = this->rank();
-
-  Field field = enzo_block->block()->field();
+  int mx,my,mz;
+  field.dimensions (0,&mx,&my,&mz);
+  const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
 
   T * te = (T*) field.values ("total_energy");
   T * v3[3] = { (T*) field.values ("velocity_x"),

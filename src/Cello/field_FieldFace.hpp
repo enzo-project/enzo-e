@@ -112,17 +112,17 @@ private: // functions
 
   /// Compute loop limits for store_
   void store_loop_limits_
-  (int im3[3], int n3[3], int nd3[3], int ng3[3]);
+  (int im3[3], int n3[3], const int nd3[3], const int ng3[3]);
 
   /// Compute loop limits for load_
   void load_loop_limits_
-  (int im3[3], int n3[3], int nd3[3], int ng3[3]);
+  (int im3[3], int n3[3], const int nd3[3], const int ng3[3]);
 
   /// Compute loop limits for load_
   void new_loop_limits_
-  (int im3[3], int n3[3], int nd3[3], int ng3[3], int op_type);
+  (int im3[3], int n3[3], const int nd3[3], const int ng3[3], int op_type);
 
-  void check_new_( int im3[3],int n3[3], int nd3[3], int ng3[3],int op_type);
+  void check_new_( int im3[3],int n3[3], const int nd3[3], const int ng3[3],int op_type);
 
   /// Set child indices if prolongation or restriction is required
   inline void set_child_ (int icx, int icy = 0, int icz = 0)

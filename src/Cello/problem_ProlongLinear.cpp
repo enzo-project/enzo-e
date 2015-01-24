@@ -67,7 +67,7 @@ int ProlongLinear::apply_
 {
   int dx_c = 1;
   int dy_c = nd3_c[0];
-  int dz_c = nd3_c[1];
+  int dz_c = nd3_c[0]*nd3_c[1];
 
   const double c1[4] = { 5.0*0.25, 3.0*0.25, 1.0*0.25, -1.0*0.25};
   const double c2[4] = {-1.0*0.25, 1.0*0.25, 3.0*0.25,  5.0*0.25};
@@ -181,6 +181,7 @@ int ProlongLinear::apply_
                     c1[icx]*c2[icy]*c2[icz]*values_c[i_c     +dy_c+dz_c] +
                     c2[icx]*c2[icy]*c2[icz]*values_c[i_c+dx_c+dy_c+dz_c]);
                 if (positive_ && (values_f[i_f] < 0)) {
+		  WARNING("ProlongLinear::apply_()", "Reverting to linear");
                   // revert to linear
                   int icc = i_c + (icx/2)*dx_c + (icy/2)*dy_c + (icz/2)*dz_c;
                   values_f[i_f] = values_c[icc];          

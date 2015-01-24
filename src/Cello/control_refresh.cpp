@@ -190,7 +190,8 @@ void CommBlock::refresh_load_face_
   char * array;
   bool lghost[3] = {false,false,false};
 
-  std::vector<int> field_list;
+  std::vector<int> field_list = refresh()->field_list();
+
   field_face = load_face_ (&n, &array,
 			   iface, ichild, lghost,
 			   type_op_array,

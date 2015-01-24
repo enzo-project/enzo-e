@@ -15,6 +15,7 @@ enum enum_op {
   op_load,
   op_store
 };
+
 //----------------------------------------------------------------------
 
 FieldFace::FieldFace() throw()
@@ -243,7 +244,7 @@ void FieldFace::store (int n, char * array) throw()
 	     "Odd ghost zones not implemented yet: prolong needs padding",
 	     ! need_padding);
 
-      int nc3[3] = { (n3[0]+1)/2, (n3[1]+1)/2,(n3[2]+1)/2 };
+      int nc3[3] = { (n3[0]+1)/2, (n3[1]+1)/2, (n3[2]+1)/2 };
 
       int im3_array[3] = {0,0,0};
 
@@ -399,7 +400,7 @@ template<class T> size_t FieldFace::store_
 //----------------------------------------------------------------------
 
 void FieldFace::load_loop_limits_
-( int im3[3],int n3[3], int nd3[3], int ng3[3])
+( int im3[3],int n3[3], const int nd3[3], const int ng3[3])
 {
   // NOTES: 4:p12
 
@@ -430,8 +431,8 @@ void FieldFace::load_loop_limits_
 	  // correct centering for interpolating full coarse block to fine
 	  im3[axis] += (1-2*child_[axis]) * ng3[axis]/2 ;
 	} else  {
-	  n3[axis] += ng3[axis]/2;
-	  im3[axis] -= child_[axis]*ng3[axis]/2;
+	  //	  n3[axis] += ng3[axis]/2; // should be += ng3[axis]?
+	  //	  im3[axis] -= child_[axis]*ng3[axis]/2;
 	}
 
       }
@@ -457,16 +458,19 @@ void FieldFace::load_loop_limits_
       }
     }
   }
+
   // Adjust n3 for axes > rank
   if (nd3[0] == 1) n3[0] = 1;
   if (nd3[1] == 1) n3[1] = 1;
   if (nd3[2] == 1) n3[2] = 1;
+
+  check_new_(im3,n3,nd3,ng3,op_load);
 }
 
 //----------------------------------------------------------------------
 
 void FieldFace::store_loop_limits_
-( int im3[3],int n3[3], int nd3[3], int ng3[3])
+( int im3[3],int n3[3], const int nd3[3], const int ng3[3])
 {
   // NOTES: 4:p12
 
@@ -485,10 +489,9 @@ void FieldFace::store_loop_limits_
 	n3[axis]  = nd3[axis] - 2*ng3[axis];
 
 	if ( prolong_ ) {
-	  n3[axis] += ng3[axis];
-	  im3[axis] -= child_[axis]*ng3[axis];
+	  //	  n3[axis] += ng3[axis]; // BUG #64
+	  //	  im3[axis] -= child_[axis]*ng3[axis];
 	}
-
       }
 
       if ( restrict_ ) {
@@ -513,30 +516,18 @@ void FieldFace::store_loop_limits_
   n3[1] = std::max(n3[1],1);
   n3[2] = std::max(n3[2],1);
 
-  //  check_new_(im3,n3,nd3,ng3,op_store);
+  check_new_(im3,n3,nd3,ng3,op_store);
 }
 
-void FieldFace::check_new_( int im3[3],int n3[3], int nd3[3], int ng3[3],int op_type)
+//----------------------------------------------------------------------
+
+void FieldFace::check_new_( int im3[3], int n3[3], const int nd3[3], const int ng3[3],int op_type)
 {
   int IM3[3]={im3[0],im3[1],im3[2]};
   int N3[3] ={ n3[0], n3[1], n3[2]};
   int ND3[3]={nd3[0],nd3[1],nd3[2]};
   int NG3[3]={ng3[0],ng3[1],ng3[2]};
   new_loop_limits_ (IM3,N3,ND3,NG3,op_type);
-
-  im3[0] = IM3[0];
-  im3[1] = IM3[1];
-  im3[2] = IM3[2];
-  n3[0] = N3[0];
-  n3[1] = N3[1];
-  n3[2] = N3[2];
-  nd3[0] = ND3[0];
-  nd3[1] = ND3[1];
-  nd3[2] = ND3[2];
-  ng3[0] = NG3[0];
-  ng3[1] = NG3[1];
-  ng3[2] = NG3[2];
-  return;
 
   bool l_im = ((im3[0]==IM3[0])&&(im3[1]==IM3[1])&&(im3[2]==IM3[2]));
   bool l_n  = (( n3[0]==N3[0] )&&( n3[1]==N3[1] )&&( n3[2]==N3[2]));
@@ -563,7 +554,7 @@ void FieldFace::check_new_( int im3[3],int n3[3], int nd3[3], int ng3[3],int op_
 //----------------------------------------------------------------------
 
 void FieldFace::new_loop_limits_
-( int im3[3],int n3[3], int nd3[3], int ng3[3], int op_type)
+( int im3[3],int n3[3], const int nd3[3], const int ng3[3], int op_type)
 {
   im3[0]=0;
   im3[1]=0;
@@ -571,110 +562,108 @@ void FieldFace::new_loop_limits_
   n3[0]=0;
   n3[1]=0;
   n3[2]=0;
-  if (!prolong_ && !restrict_) {
-    for (int axis=0; axis<3; axis++) {
-      if (face_[axis] == 0) {
-	if ( ! ghost_[axis] ) {
-	  im3[axis] = ng3[axis];
-	  n3[axis]  = nd3[axis] - 2*ng3[axis];
-	} else {
-	  im3[axis] = 0;
-	  n3 [axis] = nd3[axis];
-	}
-      } else if (face_[axis] == -1) {
-	if (op_type == op_load) {
-	  im3[axis] = ng3[axis];
-	  n3 [axis] = ng3[axis];
-	} else {
-	  im3[axis] = 0;
-	  n3 [axis] = ng3[axis];
-	}      
-      } else if (face_[axis] == +1) {
-	if (op_type == op_load) {
-	  im3[axis] = nd3[axis]-2*ng3[axis];
-	  n3 [axis] = ng3[axis];
-	} else {
-	  im3[axis] = nd3[axis]-ng3[axis];
-	  n3 [axis] = ng3[axis];
-	}      
+
+  const bool lcopy = ( ! prolong_ && ! restrict_ );
+
+  for (int axis=0; axis<3; axis++) {
+
+    // child offset
+    int co = child_[axis]*(nd3[axis]-2*ng3[axis])/2;
+
+    if (lcopy) {
+      if (face_[axis] == 0 && ! ghost_[axis]) {
+	im3[axis] = ng3[axis];
+	n3[axis]  = nd3[axis] - 2*ng3[axis];
+      }
+      if (face_[axis] == 0 && ghost_[axis]) {
+	im3[axis] = 0;
+	n3 [axis] = nd3[axis];
+      }
+      if (face_[axis] == -1 && op_type == op_load) {
+	im3[axis] = ng3[axis];
+	n3 [axis] = ng3[axis];
+      }
+      if (face_[axis] == -1 && op_type == op_store) {
+	im3[axis] = 0;
+	n3 [axis] = ng3[axis];
+      }      
+      if (face_[axis] == +1 && op_type == op_load) {
+	im3[axis] = nd3[axis]-2*ng3[axis];
+	n3 [axis] = ng3[axis];
+      }
+      if (face_[axis] == +1 && op_type == op_store) {
+	im3[axis] = nd3[axis]-ng3[axis];
+	n3 [axis] = ng3[axis];
       }
     }
-  } else if (prolong_) {
-    for (int axis=0; axis<3; axis++) {
-      int co = child_[axis]*(nd3[axis]-2*ng3[axis])/2;
-      if (face_[axis] == 0) {
-	if ( ! ghost_[axis] ) {
-	  if (op_type == op_load) {
-	    im3[axis] = ng3[axis] + co;
-	    n3[axis] = (nd3[axis]-2*ng3[axis])/2;
-	  } else {
-	    im3[axis] = ng3[axis];
-	    n3[axis]  = nd3[axis]-2*ng3[axis];
-	  }
-	} else {
-	  if (op_type == op_load) {
-	    im3[axis] = ng3[axis]/2 + co;
-	    n3[axis] = nd3[axis]/2;
-	  } else {
-	    im3[axis] = 0;
-	    n3[axis]  = nd3[axis];
-	  }
-	}
-      } else if (face_[axis] == -1) {
-	if (op_type == op_load) {
-	  im3[axis] = ng3[axis];
-	  n3[axis]  = ng3[axis]/2;
-	} else {
-	  im3[axis] = 0;
-	  n3[axis]  = ng3[axis];
-	}
-      } else if (face_[axis] == +1) {
-	if (op_type == op_load) {
-	  im3[axis] = nd3[axis]-3*ng3[axis]/2;
- 	  n3[axis]  = ng3[axis]/2;
-	} else {
-	  im3[axis] = nd3[axis]-ng3[axis];
- 	  n3[axis]  = ng3[axis];
-	}
+
+    if (prolong_) {
+      if (face_[axis] == 0 && ! ghost_[axis] && op_type == op_load) {
+	im3[axis] = ng3[axis] + co;
+	n3[axis] = (nd3[axis]-2*ng3[axis])/2;
+      }
+      if (face_[axis] == 0 && ! ghost_[axis] && op_type == op_store) {
+	im3[axis] = ng3[axis];
+	n3[axis]  = nd3[axis]-2*ng3[axis];
+      }	  
+      if (face_[axis] == 0 && ghost_[axis] && op_type == op_load) {
+	im3[axis] = ng3[axis]/2 + co;
+	n3[axis] = nd3[axis]/2;
+      }
+      if (face_[axis] == 0 && ghost_[axis] && op_type == op_store) {
+	im3[axis] = 0;
+	n3[axis]  = nd3[axis];
+      }
+      if (face_[axis] == -1 && op_type == op_load) {
+	im3[axis] = ng3[axis];
+	n3[axis]  = ng3[axis]/2;
+      }
+      if (face_[axis] == -1 && op_type == op_store) {
+	im3[axis] = 0;
+	n3[axis]  = ng3[axis];
+      }
+      if (face_[axis] == +1 && op_type == op_load) {
+	im3[axis] = nd3[axis]-3*ng3[axis]/2;
+	n3[axis]  = ng3[axis]/2;
+      }
+      if (face_[axis] == +1 && op_type == op_store) {
+	im3[axis] = nd3[axis]-ng3[axis];
+	n3[axis]  = ng3[axis];
       }
     }
-  } else if (restrict_) {
-    for (int axis=0; axis<3; axis++) {
-      int co = child_[axis]*(nd3[axis]-2*ng3[axis])/2;
-      if (face_[axis] == 0) {
-	if ( ! ghost_[axis] ) {
-	  if (op_type == op_load) {
-	    im3[axis] = ng3[axis];
-	    n3[axis]  = nd3[axis]-2*ng3[axis];
-	  } else {
-	    im3[axis] = ng3[axis] + co;
-	    n3[axis] = (nd3[axis]-2*ng3[axis])/2;
-	  }
-	} else {
-	  if (op_type == op_load) {
-	    im3[axis] = 0;
-	    n3[axis]  = nd3[axis];
-	  } else {
-	    im3[axis] = ng3[axis]/2 + co;
-	    n3[axis] = nd3[axis]/2;
-	  }
-	}
-      } else if (face_[axis] == -1) {
-	if (op_type == op_load) {
-	  im3[axis] = ng3[axis];
-	  n3[axis]  = 2*ng3[axis];
-	} else {
-	  im3[axis] = 0;
-	  n3[axis]  = ng3[axis];
-	}
-      } else if (face_[axis] == +1) {
-	if (op_type == op_load) {
-	  im3[axis] = nd3[axis]-3*ng3[axis];
- 	  n3[axis]  = 2*ng3[axis];
-	} else {
-	  im3[axis] = nd3[axis]-ng3[axis];
- 	  n3[axis]  = ng3[axis];
-	}
+
+    if (restrict_) {
+      if (face_[axis] == 0 && !ghost_[axis] && op_type == op_load) {
+	im3[axis] = ng3[axis];
+	n3[axis]  = nd3[axis]-2*ng3[axis];
+      }
+      if (face_[axis] == 0 && !ghost_[axis] && op_type == op_store) {
+	im3[axis] = ng3[axis] + co;
+	n3[axis] = (nd3[axis]-2*ng3[axis])/2;
+      }
+      if (face_[axis] == 0 && ghost_[axis] && op_type == op_load) {
+	im3[axis] = 0;
+	n3[axis]  = nd3[axis];
+      }
+      if (face_[axis] == 0 && ghost_[axis] && op_type == op_store) {
+	im3[axis] = ng3[axis]/2 + co;
+	n3[axis] = nd3[axis]/2;
+      }
+      if (face_[axis] == -1 && op_type == op_load) {
+	im3[axis] = ng3[axis];
+	n3[axis]  = 2*ng3[axis];
+      }
+      if (face_[axis] == -1 && op_type == op_store) {
+	im3[axis] = 0;
+	n3[axis]  = ng3[axis];
+      }
+      if (face_[axis] == +1 && op_type == op_load) {
+	im3[axis] = nd3[axis]-3*ng3[axis];
+	n3[axis]  = 2*ng3[axis];
+      }
+      if (face_[axis] == +1 && op_type == op_store) {
+	im3[axis] = nd3[axis]-ng3[axis];
+	n3[axis]  = ng3[axis];
       }
     }
   }

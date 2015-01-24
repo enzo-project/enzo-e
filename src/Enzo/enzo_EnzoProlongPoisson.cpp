@@ -31,7 +31,6 @@
 EnzoProlongPoisson::EnzoProlongPoisson() throw()
   : Prolong ()
 {
-  printf ("EnzoProlongPoisson\n");
   TRACE("EnzoProlongPoisson::EnzoProlongPoisson");
 }
 
@@ -87,7 +86,7 @@ int EnzoProlongPoisson::apply_
 {
   int dx_c = 1;
   int dy_c = nd3_c[0];
-  int dz_c = nd3_c[1];
+  int dz_c = nd3_c[0]*nd3_c[1];
 
   const double c1[4] = { 5.0*0.25, 3.0*0.25, 1.0*0.25, -1.0*0.25};
   const double c2[4] = {-1.0*0.25, 1.0*0.25, 3.0*0.25,  5.0*0.25};
@@ -97,8 +96,7 @@ int EnzoProlongPoisson::apply_
   for (int i=0; i<rank; i++) {
     const char * xyz = "xyz";
     ASSERT3 ("EnzoProlongPoisson::apply_",
-	     "fine array %c-axis %d must be twice the size of the coarse axis %d",
-	     xyz[i],n3_c[i],n3_f[i],
+	     "fine array %c-axis %d must be twice the size of the coarse axis %d",	     xyz[i],n3_f[i],n3_c[i],
 	     n3_f[i]==n3_c[i]*2);
 
     ASSERT2 ("EnzoProlongPoisson::apply_",
@@ -191,7 +189,7 @@ int EnzoProlongPoisson::apply_
 		  (       (im3_f[1]+if_y) + nd3_f[1]*
 			  (im3_f[2]+if_z));
 
-		values_f[i_f] = 
+	      values_f[i_f] = 
 		  ( c1[icx]*c1[icy]*c1[icz]*values_c[i_c] +
 		    c2[icx]*c1[icy]*c1[icz]*values_c[i_c+dx_c] +
 		    c1[icx]*c2[icy]*c1[icz]*values_c[i_c     +dy_c] +
@@ -200,11 +198,7 @@ int EnzoProlongPoisson::apply_
 		    c2[icx]*c1[icy]*c2[icz]*values_c[i_c+dx_c     +dz_c] +
 		    c1[icx]*c2[icy]*c2[icz]*values_c[i_c     +dy_c+dz_c] +
 		    c2[icx]*c2[icy]*c2[icz]*values_c[i_c+dx_c+dy_c+dz_c]);
-		if (positive_ && (values_f[i_f] < 0)) {
-		  // revert to poisson
-		  int icc = i_c + (icx/2)*dx_c + (icy/2)*dy_c + (icz/2)*dz_c;
-		  values_f[i_f] = values_c[icc];	  
-		}
+
 	      }
 	    }
 	  }
@@ -212,6 +206,7 @@ int EnzoProlongPoisson::apply_
       }
     }
   }
+
   return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
 
 }

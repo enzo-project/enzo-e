@@ -123,9 +123,15 @@ protected: // methods
   /// Compute local matrix-vector product Y = A*X
   template <class T>
   void matvec_ (T * Y, const T * X) const throw();
-   
+
+  /// Set whether current Block is a leaf--if not don't touch data
+  void set_leaf(CommBlock * comm_block) throw()
+  { is_leaf_ = comm_block->is_leaf(); }
 
 protected: // attributes
+
+  /// Whether current block is a leaf
+  bool is_leaf_;
 
   /// Maximum number of Cg iterations
   int iter_max_;
@@ -135,6 +141,9 @@ protected: // attributes
 
   /// Initial residual
   double rr0_;
+
+  /// Mesh spacing for current CommBlock
+  double hx_, hy_, hz_;
 
   /// Density and potential field id's
 
