@@ -190,10 +190,14 @@ Method * EnzoProblem::create_method_
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
   } else if (type == "gravity_cg") {
+    WARNING("EnzoProblem::create_method_()",
+	    "Assuming problem is singular for EnzoMethodGravityCg");
+    bool is_singular = true;
     method = new EnzoMethodGravityCg
       (field_descr,
        enzo_config->method_gravity_cg_iter_max,
-       enzo_config->method_gravity_cg_res_tol);
+       enzo_config->method_gravity_cg_res_tol,
+       is_singular);
   } else if (type == "gravity_bicgstab") {
     method = new EnzoMethodGravityBiCGStab
       (field_descr,

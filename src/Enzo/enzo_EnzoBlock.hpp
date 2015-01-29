@@ -261,6 +261,8 @@ public: /// entry methods
   template <class T>
   void r_cg_loop_5 (CkReductionMsg * msg) ;
 
+  /// Perform the necessary reductions for shift
+  CkReductionMsg * r_method_gravity_cg(int n, CkReductionMsg ** msgs);
 
   void p_enzo_matvec()
   {      enzo_matvec_(); }

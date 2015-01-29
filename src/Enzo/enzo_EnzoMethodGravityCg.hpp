@@ -33,7 +33,8 @@ public: // interface
 
   /// Create a new EnzoMethodGravityCg object
   EnzoMethodGravityCg(const FieldDescr * field_descr,
-		      int iter_max, double res_tol);
+		      int iter_max, double res_tol,
+		      bool is_singular);
 
   EnzoMethodGravityCg() {};
 
@@ -65,13 +66,13 @@ public: // interface
   void cg_end (EnzoBlock * enzo_block, int retval) throw();
 
   /// Set rr_ by EnzoBlock after reduction
-  void set_rr(double rr) throw()  { rr_ = rr;  }
+  void set_rr(long double rr) throw()  { rr_ = rr;  }
 
-  /// Set rs_ by EnzoBlock after reduction
-  void set_rs(double rs) throw()  { rs_ = rs;  }
+  /// Set bs_ by EnzoBlock after reduction
+  void set_bs(long double bs) throw()  { bs_ = bs;  }
 
-  /// Set rc_ by EnzoBlock after reduction
-  void set_rc(double rc) throw()  { rc_ = rc;  }
+  /// Set bc_ by EnzoBlock after reduction
+  void set_bc(long double bc) throw()  { bc_ = bc;  }
 
   /// Set pap_ by EnzoBlock after reduction
   void set_pap(double pap) throw()  { pap_ = pap; }
@@ -130,6 +131,10 @@ protected: // methods
 
 protected: // attributes
 
+  /// Whether you need to subtract of the nullspace of A from b, e.g. fully
+  /// periodic or Neumann problems
+  bool is_singular_;
+
   /// Whether current block is a leaf
   bool is_leaf_;
 
@@ -167,19 +172,20 @@ protected: // attributes
 
   double alpha_;
 
-  /// inner product R*R
   /// inner product P*(A*P)
   double pap_;
-  double rr_;
+
+  /// inner product R*R
+  long double rr_;
 
   /// newest inner product R*R
   double rr_new_;
 
-  /// sum of elements R(i)
-  double rs_;
+  /// sum of elements B(i) for singular systems
+  long double bs_;
 
-  /// count of elements R(i)
-  double rc_;
+  /// count of elements B(i) for singular systems
+  long double bc_;
 
   /// block counter for operations that must be done once per processor, 
   /// e.g. increment iter_

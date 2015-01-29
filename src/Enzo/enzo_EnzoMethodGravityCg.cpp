@@ -98,7 +98,8 @@
 
 EnzoMethodGravityCg::EnzoMethodGravityCg 
 (const FieldDescr * field_descr,
- int iter_max, double res_tol) 
+ int iter_max, double res_tol,
+ bool is_singular) 
   : Method(), 
     is_leaf_(false),
     iter_max_(iter_max), 
@@ -112,7 +113,8 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     gx_(0),gy_(0),gz_(0),
     iter_(0),
     alpha_(0), pap_(0), rr_(0), rr_new_(0),
-    block_count_(0)
+    block_count_(0),
+    is_singular_(is_singular)
 {
   idensity_   = field_descr->field_id("density");
   ipotential_ = field_descr->field_id("potential");
@@ -144,6 +146,7 @@ void EnzoMethodGravityCg::pup (PUP::er &p)
 
   Method::pup(p);
 
+  p | is_singular_;
   p | is_leaf_;
 
   p | iter_max_;
@@ -203,6 +206,8 @@ void EnzoMethodGravityCg::compute ( CommBlock * comm_block) throw()
 
 //======================================================================
 
+extern CkReduction::reducerType r_method_gravity_cg_type;
+
 template <class T>
 void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 ///   - X = 0
@@ -212,7 +217,7 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 ///   - rr_ = DOT(R,R) ==> cg_loop_0
 {
 
-  double r_rsc[3];
+  long double r_rsc[3];
 
   iter_ = 0;
 
@@ -252,16 +257,18 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
   }
 
   r_rsc[0] = dot_(R,R);
-  r_rsc[1] = sum_(R);
-  r_rsc[2] = count_(R);
+  r_rsc[1] = sum_(B);
+  r_rsc[2] = count_(B);
 
   CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_0a<T>(NULL), 
 		      enzo_block->proxy_array());
 
-  enzo_block->contribute (3*sizeof(double), &r_rsc, 
-			  CkReduction::sum_double, 
+  enzo_block->contribute (3*sizeof(long double), &r_rsc, 
+			  r_method_gravity_cg_type, 
 			  cb);
 }
+
+//----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
 
@@ -273,13 +280,13 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
 
-  double rr = ((double*)msg->getData())[0];
-  double rs = ((double*)msg->getData())[1];
-  double rc = ((double*)msg->getData())[2];
+  long double rr = ((long double*)msg->getData())[0];
+  long double bs = ((long double*)msg->getData())[1];
+  long double bc = ((long double*)msg->getData())[2];
 
   method->set_rr(rr);
-  method->set_rs(rs);
-  method->set_rc(rc);
+  method->set_bs(bs);
+  method->set_bc(bc);
   delete msg;
 
   refresh_sync_  = "contribute";
@@ -339,19 +346,25 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
   set_leaf(enzo_block);
 
   if (iter_ == 0)  {
+      if (is_singular_) {
+	// shift rhs B by projection of B onto e: B~ <== B - (e*eT)/(eT*e) b
+	// eT*e == n === zone count (bc)
+	// eT*b == sum_i=1,n B[i]
+	Field field = enzo_block->block()->field();
+	T * P  = (T*) field.values(ip_);
+	T * R  = (T*) field.values(ir_);
+	T * B  = (T*) field.values(ib_);
+	T shift = T(-bs_/bc_);
+	// printf ("shift = %e\n",shift);
+	shift_ (R,shift,R);
+	shift_ (B,shift,B);
+	shift_ (P,shift,P);
+	rr_ = fabs(1 - shift) * rr_;
+      }
       rr0_ = rr_;
-      Field field = enzo_block->block()->field();
-      T * P  = (T*) field.values(ip_);
-      T * R  = (T*) field.values(ir_);
-      T * B  = (T*) field.values(ib_);
-      T shift = T(-rs_/rc_);
-      shift_ (R,shift,R);
-      shift_ (B,shift,B);
-      shift_ (P,shift,P);
   } else {
     rr_ = rr_new_;
   }
-
 
   if (iter_ >= iter_max_)  {
 
@@ -459,12 +472,12 @@ void EnzoBlock::r_cg_loop_5 (CkReductionMsg * msg)
     static_cast<EnzoMethodGravityCg*> (this->method());
 
   double rr = ((double*)msg->getData())[0];
-  double rs = ((double*)msg->getData())[1];
-  double rc = ((double*)msg->getData())[2];
+  double bs = ((double*)msg->getData())[1];
+  double bc = ((double*)msg->getData())[2];
 
   method->set_rr_new(rr);
-  method->set_rs(rs);
-  method->set_rc(rc);
+  method->set_bs(bs);
+  method->set_bc(bc);
 
   delete msg;
 
@@ -509,8 +522,11 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
     int iter = (CkMyPe() == 0 && block_count_++ == 0) ? iter_ + 1 : 0;
 
     if (enzo_block->index().is_root()) {
-      printf ("%s:%d iter = %d %g %g %g\n",
-	      __FILE__,__LINE__,iter_,rr_,pap_,rr_new_);
+      printf ("%s:%d\n",__FILE__,__LINE__);
+      printf ("iter  = %d\n",iter_);
+      printf ("rr = %Le\n",rr_);
+      printf ("bs = %Le\n",bs_);
+      printf ("bc = %Le\n",bc_);
     }
 
     enzo_block->contribute (sizeof(int), &iter, 
@@ -592,6 +608,7 @@ long double EnzoMethodGravityCg::dot_ (const T * X, const T * Y) const throw()
       }
     }
   }
+
   return value;
 }
 
@@ -630,6 +647,7 @@ long double EnzoMethodGravityCg::sum_ (const T * X) const throw()
       }
     }
   }
+
   return value;
 }
 
@@ -640,7 +658,6 @@ void EnzoMethodGravityCg::shift_ (T * X, const T a, const T * Y) const throw()
 {
   if (! is_leaf_ ) return;
 
-  long double value = 0.0;
   for (int iz=0; iz<mz_; iz++) {
     for (int iy=0; iy<my_; iy++) {
       for (int ix=0; ix<mx_; ix++) {
