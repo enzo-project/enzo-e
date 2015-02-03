@@ -1,4 +1,3 @@
-
  Boundary {
      temperature {
          type = "inflow";
@@ -16,7 +15,7 @@
      alignment = 8;
      courant = 0.50000000000000;
      gamma = 1.4000000000000;
-     ghosts = 3;
+     ghosts = 4;
      list = [ "temperature" ];
      padding = 0;
  }
@@ -28,10 +27,22 @@
  }
 
  Mesh {
-     root_blocks = [ 2, 4 ];
+     root_blocks = [ 2, 2 ];
      root_rank = 2;
      root_size = [ 80, 80 ];
  }
+
+Adapt {
+   max_level = 3; 
+   list = ["slope"];
+   slope {
+      type = "slope";
+      field_list = ["temperature"];
+      min_refine = 10.0;
+      max_coarsen = 2.0;
+   }
+}
+
 
  Method {
      list = [ "heat" ];
@@ -52,8 +63,8 @@
  }
 
  Output {
-     list = [ "temperature" ];
-     temperature {
+     list = [ "temp", "mesh" ];
+     temp {
          colormap = [ 0.0000000000000, 0.0000000000000, 0.0000000000000, 1.0000000000000, 0.0000000000000, 0.0000000000000, 1.0000000000000, 1.0000000000000, 0.0000000000000, 1.0000000000000, 1.0000000000000, 1.0000000000000 ];
          field_list = [ "temperature" ];
          name = [ "method_heat-8-%06d.png", "cycle" ];
@@ -63,6 +74,18 @@
          };
          type = "image";
      };
+    mesh {
+	type     = "image";
+	image_type  = "mesh";
+	image_reduce_type = "max";
+#	image_block_size  = 5;
+	image_size = [641,641];
+        include "input/schedule_cycle_10.incl"
+        image_specify_bounds = true;
+	image_min = 0.0;
+	image_max = 4.0;
+        include "input/colormap_rainbow.incl"
+      }
  }
 
  Stopping {

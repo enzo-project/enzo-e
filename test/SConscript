@@ -210,23 +210,23 @@ env.MakeMovie ("method_gravity_cg-8.swf", "test_method_gravity_cg-8.unit", \
 # serial
 Clean(env_mv_out.RunSerial ('test_method_heat-1.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_heat-1.in'),
-      [Glob('#/' + test_path + '/method_heat-1*.png'),
-       Glob('#/' + test_path + '/method_heat-1*.h5'),
+      [Glob('#/' + test_path + '/method_heat*-1*.png'),
+       Glob('#/' + test_path + '/method_heat*-1*.h5'),
         '#/input/method_heat-1.in.out'])
 
 env.MakeMovie ("method_heat-1.swf", "test_method_heat-1.unit", \
-                ARGS= test_path + "/method_heat-1*.png");
+                ARGS= test_path + "/method_heat*-1*.png");
 
 # parallel
 
 Clean(env_mv_out.RunParallel ('test_method_heat-8.unit',bin_path + '/enzo-p', 
 		ARGS='input/method_heat-8.in'),
-      [Glob('#/' + test_path + '/method_heat-8*.png'),
-      Glob('#/' + test_path + '/method_heat-8*.h5'),
+      [Glob('#/' + test_path + '/method_heat*-8*.png'),
+       Glob('#/' + test_path + '/method_heat*-8*.h5'),
       '#/input/method_heat-8.in.out'])
 
 env.MakeMovie ("method_heat-8.swf", "test_method_heat-8.unit", \
-                ARGS= test_path + "/method_heat-8-*.png");
+                ARGS= test_path + "/method_heat*-8-*.png");
 
 
 #----------------------------------------------------------------------

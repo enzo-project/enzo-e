@@ -3,6 +3,9 @@
 
 include "input/heat.incl"
 
-Mesh { root_blocks    = [2,4]; }
+Mesh { root_blocks    = [4,4]; }
 
-Output { temperature { name = ["method_heat-8-%06d.png", "cycle"]; } }
+Output {
+   temp { name = ["method_heat-temp-8-%06d.png", "cycle"]; };
+   mesh { name = ["method_heat-mesh-8-%06d.png", "cycle"]; };
+}

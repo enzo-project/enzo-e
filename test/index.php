@@ -721,14 +721,18 @@ echo "<h3>HEAT (serial) </h3>";
 
 tests("Enzo","enzo-p","test_method_heat-1","HEAT 1 block","");
 
-test_table ("method_heat-1",
+test_table ("method_heat-temp-1",
+	    array("000000","000200","000400"), $types);
+test_table ("method_heat-mesh-1",
 	    array("000000","000200","000400"), $types);
 
 echo "<h3>HEAT (parallel) </h3>";
 
 tests("Enzo","enzo-p","test_method_heat-8","HEAT 8 block","");
 
-test_table ("method_heat-8",
+test_table ("method_heat-temp-8",
+	    array("000000","000200","000400"), $types);
+test_table ("method_heat-mesh-8",
 	    array("000000","000200","000400"), $types);
 
 //======================================================================

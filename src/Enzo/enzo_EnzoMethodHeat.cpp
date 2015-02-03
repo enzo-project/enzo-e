@@ -38,7 +38,7 @@ void EnzoMethodHeat::pup (PUP::er &p)
 void EnzoMethodHeat::compute ( CommBlock * comm_block) throw()
 {
 
-  if (!comm_block->is_leaf()) return;
+  if (comm_block->is_leaf()) {
 
   Field field = comm_block->block()->field();
 
@@ -52,6 +52,9 @@ void EnzoMethodHeat::compute ( CommBlock * comm_block) throw()
   else if (p == precision_quadruple) compute_ (comm_block,(long double*) t);
   else 
     ERROR1("EnzoMethodHeat()", "precision %d not recognized", p);
+  }
+  comm_block->compute_stop();
+  
 }
 
 //----------------------------------------------------------------------
@@ -183,7 +186,5 @@ void EnzoMethodHeat::compute_ (CommBlock * comm_block,T * Unew) const throw()
   delete [] U;
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
-
-  enzo_block->compute_stop();
 
 }
