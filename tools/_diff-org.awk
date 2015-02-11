@@ -4,15 +4,6 @@
 #
 # usage: org-mode-diff.sh < <"hg diff" output > diff.org
 #
-# Generates org-mode file "diff.org" containing list of warnings
-# with links that can be opened with C-c C-e in emacs with org-mode
-# installed.
-#
-# KNOWN ISSUES:
-#
-# * include/ files generating warnings cannot be traced back to source
-#   code directory, so it assumes src/Cello, which may be incorrect.
-# * duplicate code with parse_error.sh
 #----------------------------------------------------------------------
 
 
