@@ -534,7 +534,9 @@ void FieldFace::check_new_( int im3[3], int n3[3], const int nd3[3], const int n
   bool l_nd = ((nd3[0]==ND3[0])&&(nd3[1]==ND3[1])&&(nd3[2]==ND3[2]));
   bool l_ng = ((ng3[0]==NG3[0])&&(ng3[1]==NG3[1])&&(ng3[2]==NG3[2]));
 
-  if (! (l_im && l_n && l_nd && l_ng)) {
+  static int warning_count = 0;
+  const int warning_limit = 100;
+  if (warning_count <= warning_limit && ! (l_im && l_n && l_nd && l_ng)) {
     printf ("MISMATCH type %s\n",op_type == op_load ? "load" : "store");
     printf ("MISMATCH im %d %d %d  IM %d %d %d\n",
 	    im3[0],im3[1],im3[2],  IM3[0],IM3[1],IM3[2]);
@@ -549,6 +551,11 @@ void FieldFace::check_new_( int im3[3], int n3[3], const int nd3[3], const int n
     printf ("MISMATCH ghost %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
     printf ("MISMATCH  face %d %d %d\n",face_[0],face_[1],face_[2]);
     printf ("MISMATCH\n");
+    ++warning_count;
+    if (warning_count == warning_limit) {
+      printf ("MISMATCH warning count reached limit of %d\n",
+	      warning_count);
+    }
   }
 }
 //----------------------------------------------------------------------

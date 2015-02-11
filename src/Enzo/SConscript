@@ -39,7 +39,7 @@ if (use_grackle):  libraries.append('grackle')
 # SOURCE
 #------------------------------
 
-includes = [Glob('*enzo*hpp'),'fortran.h','enzo3_fortran_types.h']
+includes = [Glob('*enzo*hpp'),'fortran.h']
 
 sources  = [Glob('enzo_*cpp'),
     	    'calcdiss.F',
@@ -79,10 +79,6 @@ sources  = [Glob('enzo_*cpp'),
 	    'turboinit.F',
 	    'turboinit2d.F']
 
-
-# Enzo3
-
-sources.append([Glob('enzo3_*cpp'),Glob('enzo3_*F')])
 
 charm_main = []
 includes.append(['enzo.decl.h','enzo.def.h'])

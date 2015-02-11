@@ -58,7 +58,6 @@ module enzo {
   PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
-  PUPable EnzoMethodPpm3;
 //  PUPable EnzoMethodGrackle;
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodGravityCg;

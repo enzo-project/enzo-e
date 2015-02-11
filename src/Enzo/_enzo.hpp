@@ -83,7 +83,6 @@ enum hydro_type
   {
     hydro_unknown,
     hydro_ppm,
-    hydro_ppm3,
     hydro_ppml
   };
 
@@ -169,8 +168,6 @@ struct fluxes
 #include "enzo_EnzoProlongMC1.hpp"
 #include "enzo_EnzoProlongPoisson.hpp"
 #include "enzo_EnzoRestrict.hpp"
-
-#include "enzo3_EnzoMethodPpm3.hpp"
 
 #endif /* ENZO_PRIVATE_HPP */
 
