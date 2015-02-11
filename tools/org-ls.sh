@@ -2,5 +2,5 @@
 
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-ls $1 | $dir/_ls-org.awk > ls.org
+ls $1 | $dir/awk/ls-org.awk > ls.org
 
